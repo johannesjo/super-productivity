@@ -47,7 +47,7 @@ export class GoogleApiService {
   }
 
   login(): Promise<any> {
-    console.log('GOOGLE_LOGIN', this._session);
+    console.log('GOOGLE_LOGIN', this._session, this.isLoggedIn, IS_ELECTRON);
 
     if (IS_ELECTRON) {
       if (this.isLoggedIn) {
@@ -65,7 +65,7 @@ export class GoogleApiService {
           });
           this._snackIt('SUCCESS', 'GoogleApi: Login successful');
 
-          resolve();
+          resolve(data);
           // TODO remove
           // mainWindow.webContents.removeListener('did-finish-load', handler);
         });

@@ -19,7 +19,7 @@
   ],
   "scripts": {
     "ng": "ng",
-    "start": "NODE_ENV=DEV npm run electron:serve",
+    "start": "npm run electron:build && NODE_ENV=DEV electron .",
     "startFrontend": "ng serve",
     "buildFrontend": "ng build",
     "buildFrontendElectron": "ng build --base-href .",
@@ -27,6 +27,7 @@
     "test": "ng test",
     "lint": "ng lint",
     "e2e": "ng e2e",
+    "electron": "NODE_ENV=PROD electron .",
     "electron:build": "tsc -p tsconfig-electron.json",
     "electron:watch": "tsc -p tsconfig-electron.json --watch",
     "electronBuilderOnly": "electron-builder",
