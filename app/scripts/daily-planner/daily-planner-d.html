@@ -10,8 +10,6 @@
         <input class="text-input"
                autofocus
                ng-model="vm.newTask">
-
-        <button type="submit">Submit</button>
       </form>
 
       <div class="done">
@@ -31,10 +29,18 @@
           <div dnd-handle
                class="handle">::::
           </div>
+
           <div class="title">
             <input type="text"
                    ng-model="task.title">
           </div>
+
+          <div class="notes"
+               ng-show="vm.showNotes[$index]===true">
+            <textarea ng-model="task.notes"></textarea>
+          </div>
+
+          <button ng-click="vm.showNotes[$index]=!vm.showNotes[$index]">Show</button>
           <button ng-click="vm.tasks.splice($index, 1)">X</button>
         </li>
       </ul>
@@ -59,6 +65,13 @@
             <input type="text"
                    ng-model="task.title">
           </div>
+
+          <div class="notes"
+               ng-show="vm.showNotesBacklog[$index]===true">
+            <textarea ng-model="task.notes"></textarea>
+          </div>
+
+          <button ng-click="vm.showNotesBacklog[$index]=!vm.showNotesBacklog[$index]">Show</button>
           <button ng-click="vm.tasks.splice($index, 1)">X</button>
         </li>
       </ul>
