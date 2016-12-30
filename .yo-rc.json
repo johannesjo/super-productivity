@@ -1,0 +1,66 @@
+{
+  "generator-moda": {
+    "testSuffix": ".spec",
+    "testPassOnDefault": true,
+    "alwaysSkipDialog": false,
+    "stylePrefix": "_",
+    "editorCommand": "idea",
+    "uiRouter": true,
+    "pathOutputStyle": "dasherize",
+    "routesFile": "app/scripts/routes.js",
+    "fileExt": {
+      "script": ".js",
+      "tpl": ".html",
+      "style": ".scss"
+    },
+    "dirs": {
+      "app": "app",
+      "appModules": "scripts",
+      "globalComponents": "main",
+      "routes": "routes"
+    },
+    "subGenerators": {
+      "directive": {
+        "suffix": "-d",
+        "globalDir": "",
+        "createDirectory": true
+      },
+      "controller": {
+        "suffix": "-c",
+        "nameSuffix": "Ctrl",
+        "globalDir": "",
+        "createDirectory": true
+      },
+      "component": {
+        "suffix": "-cp",
+        "globalDir": "",
+        "createDirectory": true
+      },
+      "service": {
+        "suffix": "-s",
+        "globalDir": "main/global-services"
+      },
+      "factory": {
+        "suffix": "-f",
+        "globalDir": "main/global-services"
+      },
+      "filter": {
+        "suffix": "-filter",
+        "globalDir": "main/global-filters"
+      },
+      "provider": {
+        "suffix": "-p",
+        "globalDir": "main/global-services"
+      },
+      "decorator": {
+        "suffix": "-decorator",
+        "nameSuffix": "Decorator",
+        "globalDir": "main/global-services"
+      },
+      "mod": {
+        "prefix": "_",
+        "createDirectory": true
+      }
+    }
+  }
+}

@@ -1,0 +1,35 @@
+form {
+
+}
+
+fieldset {
+
+}
+
+input {
+    &[type="text"],
+    &[type="password"],
+    &[type="email"] {
+
+    }
+
+    &[type="radio"] {
+
+    }
+
+    &[type="checkbox"] {
+
+    }
+
+    &[type="number"] {
+
+    }
+}
+
+select {
+
+}
+
+textarea {
+
+}

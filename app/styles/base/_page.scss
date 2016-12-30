@@ -1,0 +1,26 @@
+* {
+    // global reset and border-box
+    &,
+    &:after,
+    &:before {
+        -webkit-box-sizing: border-box;
+        -moz-box-sizing:    border-box;
+        box-sizing:         border-box;
+    }
+}
+
+body,
+html {
+    // prevent overflow
+    width:      100%;
+    max-width:  100%;
+    overflow-x: hidden;
+}
+
+main {
+
+}
+
+article {
+
+}
