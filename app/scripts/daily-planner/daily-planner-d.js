@@ -5,7 +5,7 @@
  * # dailyPlanner
  */
 
-(function () {
+(function() {
   'use strict';
 
   angular
@@ -52,16 +52,16 @@
 
     $scope.models = {
       selected: null,
-      lists: { "A": [], "B": [] }
+      lists: {'A': [], 'B': []}
     };
 
     // Generate initial model
     for (var i = 1; i <= 3; ++i) {
-      $scope.models.lists.A.push({ label: "Item A" + i });
-      $scope.models.lists.B.push({ label: "Item B" + i });
+      $scope.models.lists.A.push({label: 'Item A' + i});
+      $scope.models.lists.B.push({label: 'Item B' + i});
     }
 
-    vm.addTask = function () {
+    vm.addTask = function() {
       vm.tasks.push({
         title: vm.newTask,
         id: Math.random().toString(36).substr(2, 10)
