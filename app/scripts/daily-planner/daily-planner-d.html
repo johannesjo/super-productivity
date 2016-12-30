@@ -1,6 +1,49 @@
-<div class ="daily-planner">
-  <div ng-if="!step || step ===0">
+<div class="daily-planner">
+  <div ng-if="!vm.step || vm.step ===0">
+    <div class="input">
+      <div class="info">What do you want to do today?</div>
+      <form ng-submit="vm.addTask()">
+        <input class="text-input"
+               ng-model="vm.newTask">
 
+        <button type="submit">Submit</button>
+      </form>
 
+      <h2>Tasks for today</h2>
+
+      <ul class="task-list"
+          dnd-list="vm.listModel.lists.today">
+        <li class="task"
+            dnd-draggable="task"
+            dnd-effect-allowed="move"
+            dnd-moved="vm.listModel.lists.today.splice($index, 1);"
+            ng-class="{'is-selected': vm.listModel.selected === task}"
+            ng-repeat="task in vm.listModel.lists.today">
+          {{ task.title }}
+        </li>
+      </ul>
+
+      <div class="info">
+        If you're done, you should spend some time prioritizing your tasks, by ordering them via drag and drop.
+      </div>
+
+      <h2>Tasks Backlog (for some other time)</h2>
+      <ul class="task-list task-list__backlog"
+          dnd-list="vm.listModel.lists.backlog">
+        <li class="task"
+            dnd-draggable="task"
+            dnd-effect-allowed="move"
+            dnd-moved="vm.listModel.lists.backlog.splice($index, 1);"
+            ng-class="{'is-selected': vm.listModel.selected === task}"
+            ng-repeat="task in vm.listModel.lists.backlog | limitTo:vm.limitBacklogTo">
+          {{ task.title }}
+        </li>
+      </ul>
+
+      <button ng-click="vm.limitBacklogTo = false"
+              ng-hide="vm.limitBacklogTo === false || vm.listModel.lists.backlog.length ===0">Show All {{ vm.listModel.lists.backlog.length }} items
+      </button>
+    </div>
   </div>
+
 </div>

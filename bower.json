@@ -20,7 +20,9 @@
     "angular-aria": "^1.5.0",
     "angular-resource": "^1.5.0",
     "angular-ui-router": "latest",
-    "angular-local-storage": "^0.5.2"
+    "angular-local-storage": "^0.5.2",
+    "angular-drag-and-drop-lists": "^2.0.0",
+    "ngstorage": "^0.3.11"
   },
   "devDependencies": {
     "angular-mocks": "^1.5.0"

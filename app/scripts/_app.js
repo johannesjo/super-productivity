@@ -7,7 +7,7 @@
  * Main module of the application.
  */
 
-(function () {
+(function() {
   'use strict';
 
   angular
@@ -16,12 +16,7 @@
       'ngAria',
       'ngResource',
       'ui.router',
-      'LocalStorageModule'
-    ])
-    .config(initLocalStorage);
-
-  function initLocalStorage(localStorageServiceProvider) {
-    localStorageServiceProvider
-      .setPrefix('superProductivity');
-  }
+      'ngStorage',
+      'dndLists'
+    ]);
 })();

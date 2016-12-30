@@ -1,3 +1,38 @@
 daily-planner {
+  display: block;
 
+  .task-list {
+    min-height: 100px;
+    list-style: none;
+
+    // add a little padding to top and bottom, to make drag dropping easier
+    padding: 20px 0;
+
+    .dndDraggingSource {
+      display: none;
+    }
+    .dndPlaceholder {
+      background-color: #ddd;
+      display: block;
+      min-height: 42px;
+    }
+    &__backlog {
+      border: 1px dashed gray;
+    }
+  }
+
+  .task {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-top-right-radius: 4px;
+    border-top-left-radius: 4px;
+    display: block;
+    padding: 10px 15px;
+    margin-bottom: -1px;
+
+    &.is-selected {
+      background-color: #dff0d8;
+      color: #3c763d;
+    }
+  }
 }
