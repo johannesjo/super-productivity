@@ -1,8 +1,8 @@
 /**
  * @ngdoc overview
- * @name superProductvity
+ * @name superProductivity
  * @description
- * # superProductvity
+ * # superProductivity
  *
  * Main module of the application.
  */
@@ -11,10 +11,17 @@
   'use strict';
 
   angular
-    .module('superProductvity', [
+    .module('superProductivity', [
       'ngAnimate',
       'ngAria',
       'ngResource',
-      'ui.router'
-    ]);
+      'ui.router',
+      'LocalStorageModule'
+    ])
+    .config(initLocalStorage);
+
+  function initLocalStorage(localStorageServiceProvider) {
+    localStorageServiceProvider
+      .setPrefix('superProductivity');
+  }
 })();

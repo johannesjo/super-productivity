@@ -1,4 +1,4 @@
-# superProductvity
+# superProductivity
 
 This project was generated with [yo angular modular generator](https://github.com/johannesjo/generator-modular-angular)
 version 1.2.4.

@@ -1,8 +1,7 @@
 {
-  "name": "superProductvity",
+  "name": "superProductivity",
   "version": "0.0.0",
-  "authors": [
-  ],
+  "authors": [],
   "license": "none",
   "private": true,
   "ignore": [
@@ -20,12 +19,13 @@
     "angular-animate": "^1.5.0",
     "angular-aria": "^1.5.0",
     "angular-resource": "^1.5.0",
-    "angular-ui-router": "latest"
-},
+    "angular-ui-router": "latest",
+    "angular-local-storage": "^0.5.2"
+  },
   "devDependencies": {
     "angular-mocks": "^1.5.0"
   },
-  "scripts":{
+  "scripts": {
     "postinstall": "gulp wiredep"
   }
 }

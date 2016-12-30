@@ -1,9 +1,9 @@
-describe('superProductvity', function () {
+describe('superProductivity', function() {
   'use strict';
 
-  beforeEach(module('superProductvity'));
+  beforeEach(module('superProductivity'));
 
-  it('should always work', function () {
+  it('should always work', function() {
     expect(true)
       .toBe(true);
   });

@@ -1,9 +1,9 @@
-describe('superProductvity.routes', function () {
+describe('superProductivity.routes', function() {
   'use strict';
 
-  beforeEach(module('superProductvity'));
+  beforeEach(module('superProductivity'));
 
-  it('should be defined', function () {
+  it('should be defined', function() {
     expect(true).toBe(true);
   });
 });
