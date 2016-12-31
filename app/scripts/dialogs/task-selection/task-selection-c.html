@@ -1,3 +1,34 @@
-<div class="dialog-task-selection">
-  <p>This is the TaskSelection view</p>
-</div>
+<md-dialog aria-label="Time estimation dialog"
+           class="dialog-task-selection">
+  <md-dialog-content layout-padding>
+    <form ng-submit="vm.submit()">
+      <p>Select a task to start with or just press enter to start with</p><p><strong>{{ vm.tasks[0].title }}</strong></p>
+
+      <md-autocomplete
+        md-selected-item="vm.currentTask.title"
+        md-search-text="vm.searchText"
+        md-items="task in vm.tasks"
+        md-item-text="task.title"
+        md-min-length="0"
+        md-autofocus
+        placeholder="Select a task to start with">
+        <md-item-template>
+          <span md-highlight-text="vm.searchText"
+                md-highlight-flags="^i">{{task.title}}</span>
+        </md-item-template>
+        <md-not-found>
+          No states matching "{{vm.searchText}}" were found.
+          <a ng-click="vm.newState(vm.searchText)">Create a new one!</a>
+        </md-not-found>
+      </md-autocomplete>
+
+    </form>
+  </md-dialog-content>
+
+  <md-dialog-actions>
+    <md-button ng-click="vm.submit(vm.timeEstimate)"
+               class="md-primary md-raised">
+      Go go go!
+    </md-button>
+  </md-dialog-actions>
+</md-dialog>

@@ -61,10 +61,11 @@
 
     vm.estimateTime = (task) => {
       Dialogs('TIME_ESTIMATE', { task });
+
     };
 
     vm.done = () => {
-
+      Dialogs('TASK_SELECTION', { tasks: vm.tasks });
     };
   }
 

@@ -6,15 +6,30 @@
  * Controller of the superProductivity
  */
 
-(function() {
+(function () {
   'use strict';
 
   angular
-      .module('superProductivity')
-      .controller('TaskSelectionCtrl', TaskSelectionCtrl);
+    .module('superProductivity')
+    .controller('TaskSelectionCtrl', TaskSelectionCtrl);
 
   /* @ngInject */
-  function TaskSelectionCtrl() {
-    var vm = this;
+  function TaskSelectionCtrl($mdDialog, $localStorage, tasks) {
+    let vm = this;
+
+    $localStorage.$default({
+      currentTask: null
+    });
+
+    vm.currentTask = $localStorage.currentTask;
+    vm.tasks = tasks;
+
+    vm.submit = (task) => {
+      if (!task) {
+        task = vm.tasks[0];
+      }
+      vm.currentTask = $localStorage.currentTask = task;
+      $mdDialog.hide();
+    };
   }
 })();

@@ -4,7 +4,9 @@
   <div ng-if="!vm.step || vm.step ===0">
     <div class="input">
       <div class="info">
-        <p>If you're done, you should spend some time <strong>prioritizing</strong> your tasks, by ordering them via drag and drop. You can also make a rough time estimation.</p>
+        <p>If you're done, you should spend some time
+          <strong>prioritizing</strong> your tasks, by ordering them via drag and drop. You can also make a rough time estimation.
+        </p>
 
       </div>
       <form ng-submit="vm.addTask()">
@@ -24,6 +26,7 @@
       </form>
 
       <div class="done"
+           ng-show="vm.tasks.length >0"
            layout="row"
            layout-sm="column"
            layout-align="center center">
