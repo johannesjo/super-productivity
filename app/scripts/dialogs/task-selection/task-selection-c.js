@@ -21,7 +21,6 @@
       currentTask: null
     });
 
-    vm.currentTask = $localStorage.currentTask
     vm.undoneTasks = _.filter(tasks, (task) => {
       return task && !task.isDone;
     });
