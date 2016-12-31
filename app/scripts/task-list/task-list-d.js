@@ -27,8 +27,12 @@
   }
 
   /* @ngInject */
-  function TaskListCtrl() {
+  function TaskListCtrl(Dialogs) {
     let vm = this;
+
+    vm.estimateTime = (task) => {
+      Dialogs('TIME_ESTIMATE', {task});
+    };
   }
 
 })();
