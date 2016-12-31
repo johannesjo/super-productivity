@@ -30,7 +30,7 @@
   }
 
   /* @ngInject */
-  function DailyPlannerCtrl($localStorage) {
+  function DailyPlannerCtrl($localStorage, $mdDialog) {
     let vm = this;
 
     $localStorage.$default({
@@ -57,6 +57,24 @@
       });
 
       vm.newTask = '';
+    };
+
+    vm.estimateTime = (task) => {
+      $mdDialog.show({
+        template: `
+<form            layout="row"
+            layout-align="center center"
+            ng-submit="submit()"><md-input-container><input type="text" ng-model="task.timeEstimate" md-auto-focus></md-input-container></form>
+`,
+        clickOutsideToClose: true
+      })
+        .then(function(answer) {
+          console.log(answer);
+
+        }, function() {
+          console.log('asd');
+
+        });
     };
 
     vm.done = () => {

@@ -4,15 +4,14 @@
   <div ng-if="!vm.step || vm.step ===0">
     <div class="input">
       <div class="info">
-        <p>If you're done, you should spend some time prioritizing your tasks, by ordering them via drag and drop.</p>
+        <p>If you're done, you should spend some time <strong>prioritizing</strong> your tasks, by ordering them via drag and drop. You can also make a rough time estimation.</p>
 
       </div>
       <form ng-submit="vm.addTask()">
         <md-input-container md-no-float
                             class="md-block"
                             layout="row">
-          <ng-md-icon size="24"
-                      icon="mode_edit"></ng-md-icon>
+          <ng-md-icon icon="mode_edit"></ng-md-icon>
 
           <input class="text-input"
                  md-auto-focus
@@ -29,11 +28,11 @@
            layout-sm="column"
            layout-align="center center">
         <md-button class="md-raised md-primary"
-                   ng-click="vm.done()">All done!
+                   ng-click="vm.done()">All done! Let's get to work!
         </md-button>
       </div>
 
-      <h2 class="md-title">Tasks for today</h2>
+      <h2 class="md-title">Tasks for today (estimated: {{ vm.totaleEstimate|date:'hh:mm' }} )</h2>
 
       <ul class="task-list"
           dnd-list="vm.tasks">
@@ -45,8 +44,7 @@
             dnd-moved="vm.tasks.splice($index, 1);"
             ng-class="{'is-selected': vm.listModel.selected === task}"
             ng-repeat="task in vm.tasks">
-          <ng-md-icon size="24"
-                      class="handle"
+          <ng-md-icon class="handle"
                       flex="none"
                       icon="drag_handle"></ng-md-icon>
 
@@ -68,16 +66,28 @@
                       md-select-on-focus></textarea>
           </div>
 
+          <div class="time-estimate"
+               data-ng-show="task.timeEstimate">
+            {{ task.timeEstimate }}
+          </div>
+
           <md-button class="md-icon-button"
+                     aria-label="time estimation"
+                     ng-click="vm.estimateTime(task)">
+            <ng-md-icon icon="access_time"
+                        aria-label="time estimation"></ng-md-icon>
+          </md-button>
+
+          <md-button class="md-icon-button"
+                     aria-label="notes"
                      ng-click="task.showNotes=!task.showNotes">
-            <ng-md-icon size="24"
-                        icon="mode_comment"
+            <ng-md-icon icon="mode_comment"
                         aria-label="notes"></ng-md-icon>
           </md-button>
           <md-button class="md-icon-button"
+                     aria-label="delete"
                      ng-click="vm.tasks.splice($index, 1)">
-            <ng-md-icon size="24"
-                        icon="delete_forever"
+            <ng-md-icon icon="delete_forever"
                         aria-label="delete"
                         style="fill: red;"></ng-md-icon>
           </md-button>
@@ -86,17 +96,16 @@
 
       <h2 class="md-title">Tasks Backlog (for some other time)</h2>
       <ul class="task-list task-list__backlog"
-          dnd-list="vm.listModel.lists.backlog">
+          dnd-list="vm.backlogTasks">
         <li class="task"
             layout="row"
             layout-align="center center"
             dnd-draggable="task"
             dnd-effect-allowed="move"
-            dnd-moved="vm.tasks.splice($index, 1);"
+            dnd-moved="vm.backlogTasks.splice($index, 1);"
             ng-class="{'is-selected': vm.listModel.selected === task}"
             ng-repeat="task in vm.backlogTasks|limitTo:vm.limitBacklogTo">
-          <ng-md-icon size="24"
-                      class="handle"
+          <ng-md-icon class="handle"
                       flex="none"
                       icon="drag_handle"></ng-md-icon>
 
@@ -118,16 +127,25 @@
                       md-select-on-focus></textarea>
           </div>
 
+          <div class="time-estimate"
+               data-ng-show="task.timeEstimate">
+            {{ task.timeEstimate }}
+          </div>
+
+          <md-button class="md-icon-button"
+                     ng-click="vm.estimateTime(task)">
+            <ng-md-icon icon="access_time"
+                        aria-label="notes"></ng-md-icon>
+          </md-button>
+
           <md-button class="md-icon-button"
                      ng-click="task.showNotes=!task.showNotes">
-            <ng-md-icon size="24"
-                        icon="mode_comment"
+            <ng-md-icon icon="mode_comment"
                         aria-label="notes"></ng-md-icon>
           </md-button>
           <md-button class="md-icon-button"
                      ng-click="vm.backlogTasks.splice($index, 1)">
-            <ng-md-icon size="24"
-                        icon="delete_forever"
+            <ng-md-icon icon="delete_forever"
                         aria-label="delete"
                         style="fill: red;"></ng-md-icon>
           </md-button>
@@ -137,7 +155,7 @@
 
       <md-button class="md-primary"
                  ng-click="vm.limitBacklogTo = false"
-                 ng-hide="vm.limitBacklogTo === false || vm.backlogTasks.length <=vm.limitBacklogTo ||vm.backlogTasks.length ===0">Show All {{ vm.listModel.lists.backlog.length }} items in Backlog
+                 ng-hide="vm.limitBacklogTo === false || vm.backlogTasks.length <=vm.limitBacklogTo ||vm.backlogTasks.length ===0">Show All {{ vm.backlogTasks.length }} items in Backlog
       </md-button>
     </div>
   </div>
