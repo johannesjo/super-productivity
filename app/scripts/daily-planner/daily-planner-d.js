@@ -30,7 +30,7 @@
   }
 
   /* @ngInject */
-  function DailyPlannerCtrl($localStorage, $scope) {
+  function DailyPlannerCtrl($localStorage) {
     let vm = this;
 
     $localStorage.$default({
@@ -50,25 +50,17 @@
       }
     };
 
-    $scope.models = {
-      selected: null,
-      lists: {'A': [], 'B': []}
-    };
-
-    // Generate initial model
-    for (var i = 1; i <= 3; ++i) {
-      $scope.models.lists.A.push({label: 'Item A' + i});
-      $scope.models.lists.B.push({label: 'Item B' + i});
-    }
-
-    vm.addTask = function() {
+    vm.addTask = () => {
       vm.tasks.push({
         title: vm.newTask,
         id: Math.random().toString(36).substr(2, 10)
       });
-      console.log('I am here!', vm.tasks);
 
       vm.newTask = '';
+    };
+
+    vm.done = () => {
+
     };
   }
 

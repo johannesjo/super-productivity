@@ -29,7 +29,7 @@
            layout-sm="column"
            layout-align="center center">
         <md-button class="md-raised md-primary"
-                   ng-click="done()">All done!
+                   ng-click="vm.done()">All done!
         </md-button>
       </div>
 
@@ -137,7 +137,7 @@
 
       <md-button class="md-primary"
                  ng-click="vm.limitBacklogTo = false"
-                 ng-hide="vm.limitBacklogTo === false || vm.listModel.lists.backlog.length ===0">Show All {{ vm.listModel.lists.backlog.length }} items in Backlog
+                 ng-hide="vm.limitBacklogTo === false || vm.backlogTasks.length <=vm.limitBacklogTo ||vm.backlogTasks.length ===0">Show All {{ vm.listModel.lists.backlog.length }} items in Backlog
       </md-button>
     </div>
   </div>
