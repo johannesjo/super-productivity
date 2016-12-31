@@ -21,7 +21,8 @@
       controllerAs: 'vm',
       restrict: 'E',
       scope: {
-        tasks: '='
+        tasks: '=',
+        limitTo:'@'
       }
     };
   }

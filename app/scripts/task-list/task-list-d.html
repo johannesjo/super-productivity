@@ -7,7 +7,7 @@
       dnd-effect-allowed="move"
       dnd-moved="vm.tasks.splice($index, 1);"
       ng-class="{'is-current': vm.currentTask === task, 'is-done':task.isDone}"
-      ng-repeat="task in vm.tasks">
+      ng-repeat="task in vm.tasks|limitTo:vm.limitTo">
     <ng-md-icon class="handle"
                 flex="none"
                 icon="drag_handle"></ng-md-icon>

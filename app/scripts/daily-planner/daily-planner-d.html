@@ -39,7 +39,8 @@
       <task-list tasks="vm.tasks"></task-list>
 
       <h2 class="md-title">Tasks Backlog (for some other time)</h2>
-      <task-list tasks="vm.backlogTasks"></task-list>
+      <task-list tasks="vm.backlogTasks"
+                 limit-to="{{vm.limitBacklogTo}}"></task-list>
 
 
       <md-button class="md-primary"
