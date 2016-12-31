@@ -49,9 +49,13 @@ daily-planner {
       padding: 4px 10px;
     }
 
+    .notes,
+    .time-estimate {
+      margin-left: 10px;
+    }
+
     .notes {
       width: 100%;
-      margin-left: 10px;
       textarea {
         min-height: 100px;
       }

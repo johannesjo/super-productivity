@@ -1,0 +1,36 @@
+<md-dialog aria-label="Time estimation dialog"
+           class="dialog-time-estimate">
+  <md-toolbar class="demo-toolbar md-primary _md _md-toolbar-transitions">
+    Make an estimate
+  </md-toolbar>
+  <md-dialog-content layout-padding>
+    <form layout="row"
+          layout-align="center center"
+          ng-submit="vm.submit(vm.timeEstimate)">
+      <md-input-container>
+        <label>Estimation</label>
+        <input type="text"
+               ng-model="vm.timeEstimate"
+               md-auto-focus>
+      </md-input-container>
+    </form>
+
+    <div class="side-info">
+      Examples:<br>
+      30m => 30 minutes<br>
+      2h => 2 hours<br>
+      2h 30m => 2 hours and 30 minutes
+    </div>
+
+  </md-dialog-content>
+  <md-dialog-actions>
+    <md-button ng-click="vm.submit(vm.timeEstimate)"
+               class="md-primary">
+      Save
+    </md-button>
+    <md-button ng-click="vm.close()"
+               class="md-primary">
+      Cancel
+    </md-button>
+  </md-dialog-actions>
+</md-dialog>

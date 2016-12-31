@@ -5,7 +5,7 @@
  * # dailyPlanner
  */
 
-(function() {
+(function () {
   'use strict';
 
   angular
@@ -30,7 +30,7 @@
   }
 
   /* @ngInject */
-  function DailyPlannerCtrl($localStorage, $mdDialog) {
+  function DailyPlannerCtrl($localStorage, Dialogs) {
     let vm = this;
 
     $localStorage.$default({
@@ -60,21 +60,7 @@
     };
 
     vm.estimateTime = (task) => {
-      $mdDialog.show({
-        template: `
-<form            layout="row"
-            layout-align="center center"
-            ng-submit="submit()"><md-input-container><input type="text" ng-model="task.timeEstimate" md-auto-focus></md-input-container></form>
-`,
-        clickOutsideToClose: true
-      })
-        .then(function(answer) {
-          console.log(answer);
-
-        }, function() {
-          console.log('asd');
-
-        });
+      Dialogs('TIME_ESTIMATE', { task });
     };
 
     vm.done = () => {
