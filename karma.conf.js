@@ -25,6 +25,7 @@ module.exports = function(config) {
             'app/bower_components/angular-messages/angular-messages.js',
             'app/bower_components/angular-material/angular-material.js',
             'app/bower_components/angular-material-icons/angular-material-icons.min.js',
+            'app/bower_components/lodash/lodash.js',
             'app/bower_components/angular-mocks/angular-mocks.js',
             // endbower
 

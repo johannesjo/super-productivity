@@ -2,12 +2,12 @@
            class="dialog-task-selection">
   <md-dialog-content layout-padding>
     <form ng-submit="vm.submit()">
-      <p>Select a task to start with or just press enter to start with</p><p><strong>{{ vm.tasks[0].title }}</strong></p>
+      <p>Select a task to start with or just press enter to start with</p><p><strong>{{ vm.undoneTasks[0].title }}</strong></p>
 
       <md-autocomplete
         md-selected-item="vm.currentTask.title"
         md-search-text="vm.searchText"
-        md-items="task in vm.tasks"
+        md-items="task in vm.undoneTasks"
         md-item-text="task.title"
         md-min-length="0"
         md-autofocus

@@ -25,4 +25,5 @@
 
   function checkIfStartedTodayAndInit($localStorage) {
   }
+
 })();

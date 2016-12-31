@@ -5,7 +5,7 @@
  * # taskList
  */
 
-(function () {
+(function() {
   'use strict';
 
   angular

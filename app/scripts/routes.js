@@ -20,9 +20,13 @@
     $urlRouterProvider.otherwise('/');
 
     $stateProvider
-      .state('home', {
+      .state('daily-planner', {
         url: '/',
         template: '<daily-planner></daily-planner>'
+      })
+      .state('work-view', {
+        url: '/work-view',
+        template: '<work-view></work-view>'
       })
     /* STATES-NEEDLE - DO NOT REMOVE THIS */;
   }

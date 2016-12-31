@@ -1,0 +1,39 @@
+<div class="work-view-current-task">
+  <p>You're current working on: <strong>{{ vm.currentTask.title }}</strong></p>
+</div>
+
+<table class="work-view-table">
+  <thead>
+    <tr>
+      <th></th>
+      <th>Title</th>
+      <th>Estimated</th>
+      <th>Currently Worked</th>
+      <th>Done</th>
+    </tr>
+  </thead>
+
+  <tbody dnd-list="vm.tasks">
+    <tr ng-repeat="task in vm.tasks"
+        dnd-draggable="task"
+        dnd-effect-allowed="move"
+        dnd-moved="vm.tasks.splice($index, 1);"
+        ng-class="{'is-current': vm.currentTask === task, 'is-done':task.isDone}">
+      <td>
+        <ng-md-icon class="handle"
+                    flex="none"
+                    icon="drag_handle"></ng-md-icon>
+      </td>
+      <td ng-click="task.isCurrent = true;">{{ task.title }}</td>
+      <td>{{ task.timeEstimate}}</td>
+      <td>{{ task.timeWorked}}</td>
+      <td>
+        <input type="checkbox"
+               ng-model="task.isDone">
+      </td>
+    </tr>
+  </tbody>
+</table>
+<md-button ui-sref="daily-planner"
+           class="md-primary md-raised">Add new Tasks
+</md-button>

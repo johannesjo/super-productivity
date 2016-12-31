@@ -21,12 +21,14 @@
       currentTask: null
     });
 
-    vm.currentTask = $localStorage.currentTask;
-    vm.tasks = tasks;
+    vm.currentTask = $localStorage.currentTask
+    vm.undoneTasks = _.filter(tasks, (task) => {
+      return task && !task.isDone;
+    });
 
     vm.submit = (task) => {
       if (!task) {
-        task = vm.tasks[0];
+        task = vm.undoneTasks[0];
       }
       vm.currentTask = $localStorage.currentTask = task;
       $mdDialog.hide();

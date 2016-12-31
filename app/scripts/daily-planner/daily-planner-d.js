@@ -30,7 +30,7 @@
   }
 
   /* @ngInject */
-  function DailyPlannerCtrl($localStorage, Dialogs) {
+  function DailyPlannerCtrl($localStorage, Dialogs, $state) {
     let vm = this;
 
     $localStorage.$default({
@@ -65,7 +65,10 @@
     };
 
     vm.done = () => {
-      Dialogs('TASK_SELECTION', {tasks: vm.tasks});
+      Dialogs('TASK_SELECTION', {tasks: vm.tasks})
+        .then(() => {
+          $state.go('work-view');
+        });
     };
   }
 

@@ -24,7 +24,8 @@
     "angular-drag-and-drop-lists": "^2.0.0",
     "ngstorage": "^0.3.11",
     "angular-material": "^1.1.1",
-    "angular-material-icons": "^0.7.1"
+    "angular-material-icons": "^0.7.1",
+    "lodash": "^4.17.3"
   },
   "devDependencies": {
     "angular-mocks": "^1.5.0"
