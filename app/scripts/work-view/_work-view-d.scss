@@ -1,14 +1,3 @@
 work-view {
 
 }
-
-.work-view-table {
-  tr {
-    &.is-done {
-      text-decoration: line-through;
-    }
-    &.is-current {
-      border: 1px solid red;
-    }
-  }
-}

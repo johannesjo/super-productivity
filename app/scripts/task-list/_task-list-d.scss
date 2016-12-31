@@ -1,3 +1,74 @@
 task-list {
 
 }
+
+.task-list {
+  min-height: 100px;
+  list-style: none;
+
+  // add a little padding to top and bottom, to make drag dropping easier
+  padding: 5px 0;
+  margin: 0;
+
+  .dndDraggingSource {
+    display: none;
+  }
+  .dndPlaceholder {
+    background-color: #ddd;
+    display: block;
+    min-height: 42px;
+  }
+  &__backlog {
+  }
+}
+
+.task {
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-top-right-radius: 4px;
+  border-top-left-radius: 4px;
+  padding: 10px 15px;
+  margin-bottom: -1px;
+  &.is-selected {
+    background-color: #dff0d8;
+    color: #3c763d;
+  }
+  &.is-done {
+    text-decoration: line-through;
+  }
+  &.is-current {
+    border: 1px solid red;
+  }
+
+  .handle {
+    margin-right: 10px;
+  }
+
+  .title {
+    text-align: left;
+  }
+
+  form {
+    width: 100%;
+  }
+  textarea,
+  input {
+    width: 100%;
+    display: block;
+    box-shadow: inset 1px 3px 7px -6px;
+    height: 30px;
+    padding: 4px 10px;
+  }
+
+  .notes,
+  .time-estimate {
+    margin-left: 10px;
+  }
+
+  .notes {
+    width: 100%;
+    textarea {
+      min-height: 100px;
+    }
+  }
+}

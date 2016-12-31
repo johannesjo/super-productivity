@@ -6,7 +6,7 @@
       dnd-draggable="task"
       dnd-effect-allowed="move"
       dnd-moved="vm.tasks.splice($index, 1);"
-      ng-class="{'is-selected': vm.listModel.selected === task}"
+      ng-class="{'is-current': vm.currentTask === task, 'is-done':task.isDone}"
       ng-repeat="task in vm.tasks">
     <ng-md-icon class="handle"
                 flex="none"
@@ -16,8 +16,18 @@
          flex="auto"
          layout="row"
          layout-align="center center">
-      <input type="text"
-             ng-model="task.title">
+
+      <form ng-show="task.showEdit && !task.isDone"
+            ng-submit="task.showEdit=false;">
+        <input type="text"
+               ng-disabled="task.isDone"
+               ng-model="task.title"
+               ng-blur="task.showEdit=false;"
+               md-auto-focus
+               md-autofocus>
+      </form>
+      <span ng-show="!task.showEdit || task.isDone"
+            ng-click="task.showEdit = true;">{{ task.title }}</span>
     </div>
 
     <div class="notes"
@@ -54,6 +64,18 @@
       <ng-md-icon icon="delete_forever"
                   aria-label="delete"
                   style="fill: red;"></ng-md-icon>
+    </md-button>
+
+    <md-button class="md-icon-button"
+               aria-label="mark as done"
+               ng-click="task.isDone=!task.isDone">
+      <ng-md-icon icon="check"
+                  ng-show="task.isDone"
+                  aria-label="mark as done"
+                  style="fill: green;"></ng-md-icon>
+      <ng-md-icon icon="sentiment_neutral"
+                  ng-show="!task.isDone"
+                  aria-label="mark as done"></ng-md-icon>
     </md-button>
   </li>
 </ul>

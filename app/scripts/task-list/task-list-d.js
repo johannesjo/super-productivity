@@ -27,8 +27,10 @@
   }
 
   /* @ngInject */
-  function TaskListCtrl(Dialogs) {
+  function TaskListCtrl(Dialogs, $localStorage) {
     let vm = this;
+
+    vm.currentTask = $localStorage.currentTask;
 
     vm.estimateTime = (task) => {
       Dialogs('TIME_ESTIMATE', {task});
