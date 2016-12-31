@@ -5,7 +5,7 @@
  * # dailyPlanner
  */
 
-(function () {
+(function() {
   'use strict';
 
   angular
@@ -60,12 +60,12 @@
     };
 
     vm.estimateTime = (task) => {
-      Dialogs('TIME_ESTIMATE', { task });
+      Dialogs('TIME_ESTIMATE', {task});
 
     };
 
     vm.done = () => {
-      Dialogs('TASK_SELECTION', { tasks: vm.tasks });
+      Dialogs('TASK_SELECTION', {tasks: vm.tasks});
     };
   }
 

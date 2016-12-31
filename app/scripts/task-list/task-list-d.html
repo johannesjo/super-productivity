@@ -1,0 +1,59 @@
+<ul class="task-list"
+    dnd-list="vm.tasks">
+  <li class="task"
+      layout="row"
+      layout-align="center center"
+      dnd-draggable="task"
+      dnd-effect-allowed="move"
+      dnd-moved="vm.tasks.splice($index, 1);"
+      ng-class="{'is-selected': vm.listModel.selected === task}"
+      ng-repeat="task in vm.tasks">
+    <ng-md-icon class="handle"
+                flex="none"
+                icon="drag_handle"></ng-md-icon>
+
+    <div class="title"
+         flex="auto"
+         layout="row"
+         layout-align="center center">
+      <input type="text"
+             ng-model="task.title">
+    </div>
+
+    <div class="notes"
+         flex="100"
+         ng-show="task.showNotes===true">
+      <label>Notes</label>
+      <textarea ng-model="task.notes"
+                rows="5"
+                md-auto-focus
+                md-select-on-focus></textarea>
+    </div>
+
+    <div class="time-estimate"
+         data-ng-show="task.timeEstimate">
+      {{ task.timeEstimate }}
+    </div>
+
+    <md-button class="md-icon-button"
+               aria-label="time estimation"
+               ng-click="vm.estimateTime(task)">
+      <ng-md-icon icon="access_time"
+                  aria-label="time estimation"></ng-md-icon>
+    </md-button>
+
+    <md-button class="md-icon-button"
+               aria-label="notes"
+               ng-click="task.showNotes=!task.showNotes">
+      <ng-md-icon icon="mode_comment"
+                  aria-label="notes"></ng-md-icon>
+    </md-button>
+    <md-button class="md-icon-button"
+               aria-label="delete"
+               ng-click="vm.tasks.splice($index, 1)">
+      <ng-md-icon icon="delete_forever"
+                  aria-label="delete"
+                  style="fill: red;"></ng-md-icon>
+    </md-button>
+  </li>
+</ul>

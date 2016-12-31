@@ -6,7 +6,7 @@
  * Controller of the superProductivity
  */
 
-(function () {
+(function() {
   'use strict';
 
   angular
