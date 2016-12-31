@@ -17,6 +17,12 @@
       'ngResource',
       'ui.router',
       'ngStorage',
-      'dndLists'
-    ]);
+      'dndLists',
+      'ngMaterial',
+      'ngMdIcons'
+    ])
+    .run(checkIfStartedTodayAndInit);
+
+  function checkIfStartedTodayAndInit($localStorage) {
+  }
 })();

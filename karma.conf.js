@@ -22,6 +22,9 @@ module.exports = function(config) {
             'app/bower_components/angular-local-storage/dist/angular-local-storage.js',
             'app/bower_components/angular-drag-and-drop-lists/angular-drag-and-drop-lists.js',
             'app/bower_components/ngstorage/ngStorage.js',
+            'app/bower_components/angular-messages/angular-messages.js',
+            'app/bower_components/angular-material/angular-material.js',
+            'app/bower_components/angular-material-icons/angular-material-icons.min.js',
             'app/bower_components/angular-mocks/angular-mocks.js',
             // endbower
 

@@ -1,84 +1,144 @@
 <div class="daily-planner">
+  <h1 class="md-headline">Plan your day!</h1>
+
   <div ng-if="!vm.step || vm.step ===0">
     <div class="input">
       <div class="info">
-        <p>What do you want to do today?</p>
         <p>If you're done, you should spend some time prioritizing your tasks, by ordering them via drag and drop.</p>
 
       </div>
       <form ng-submit="vm.addTask()">
-        <input class="text-input"
-               autofocus
-               ng-model="vm.newTask">
+        <md-input-container md-no-float
+                            class="md-block"
+                            layout="row">
+          <ng-md-icon size="24"
+                      icon="mode_edit"></ng-md-icon>
+
+          <input class="text-input"
+                 md-auto-focus
+                 md-autofocus
+                 ng-model="vm.newTask"
+                 placeholder="Enter a task and press enter to add">
+
+        </md-input-container>
+
       </form>
 
-      <div class="done">
-        <button ng-click="done()">All done!</button>
+      <div class="done"
+           layout="row"
+           layout-sm="column"
+           layout-align="center center">
+        <md-button class="md-raised md-primary"
+                   ng-click="done()">All done!
+        </md-button>
       </div>
 
-      <h2>Tasks for today</h2>
+      <h2 class="md-title">Tasks for today</h2>
 
       <ul class="task-list"
           dnd-list="vm.tasks">
         <li class="task"
+            layout="row"
+            layout-align="center center"
             dnd-draggable="task"
             dnd-effect-allowed="move"
             dnd-moved="vm.tasks.splice($index, 1);"
             ng-class="{'is-selected': vm.listModel.selected === task}"
             ng-repeat="task in vm.tasks">
-          <div dnd-handle
-               class="handle">::::
-          </div>
+          <ng-md-icon size="24"
+                      class="handle"
+                      flex="none"
+                      icon="drag_handle"></ng-md-icon>
 
-          <div class="title">
+          <div class="title"
+               flex="auto"
+               layout="row"
+               layout-align="center center">
             <input type="text"
                    ng-model="task.title">
           </div>
 
           <div class="notes"
-               ng-show="vm.showNotes[$index]===true">
-            <textarea ng-model="task.notes"></textarea>
+               flex="100"
+               ng-show="task.showNotes===true">
+            <label>Notes</label>
+            <textarea ng-model="task.notes"
+                      rows="5"
+                      md-auto-focus
+                      md-select-on-focus></textarea>
           </div>
 
-          <button ng-click="vm.showNotes[$index]=!vm.showNotes[$index]">Show</button>
-          <button ng-click="vm.tasks.splice($index, 1)">X</button>
+          <md-button class="md-icon-button"
+                     ng-click="task.showNotes=!task.showNotes">
+            <ng-md-icon size="24"
+                        icon="mode_comment"
+                        aria-label="notes"></ng-md-icon>
+          </md-button>
+          <md-button class="md-icon-button"
+                     ng-click="vm.tasks.splice($index, 1)">
+            <ng-md-icon size="24"
+                        icon="delete_forever"
+                        aria-label="delete"
+                        style="fill: red;"></ng-md-icon>
+          </md-button>
         </li>
       </ul>
 
-      <div class="info">
-
-      </div>
-
-      <h2>Tasks Backlog (for some other time)</h2>
+      <h2 class="md-title">Tasks Backlog (for some other time)</h2>
       <ul class="task-list task-list__backlog"
           dnd-list="vm.listModel.lists.backlog">
         <li class="task"
+            layout="row"
+            layout-align="center center"
             dnd-draggable="task"
             dnd-effect-allowed="move"
-            dnd-moved="vm.listModel.lists.backlog.splice($index, 1);"
+            dnd-moved="vm.tasks.splice($index, 1);"
             ng-class="{'is-selected': vm.listModel.selected === task}"
-            ng-repeat="task in vm.listModel.lists.backlog | limitTo:vm.limitBacklogTo">
-          <div dnd-handle
-               class="handle">::::
-          </div>
-          <div class="title">
+            ng-repeat="task in vm.backlogTasks|limitTo:vm.limitBacklogTo">
+          <ng-md-icon size="24"
+                      class="handle"
+                      flex="none"
+                      icon="drag_handle"></ng-md-icon>
+
+          <div class="title"
+               flex="auto"
+               layout="row"
+               layout-align="center center">
             <input type="text"
                    ng-model="task.title">
           </div>
 
           <div class="notes"
-               ng-show="vm.showNotesBacklog[$index]===true">
-            <textarea ng-model="task.notes"></textarea>
+               flex="100"
+               ng-show="task.showNotes===true">
+            <label>Notes</label>
+            <textarea ng-model="task.notes"
+                      rows="5"
+                      md-auto-focus
+                      md-select-on-focus></textarea>
           </div>
 
-          <button ng-click="vm.showNotesBacklog[$index]=!vm.showNotesBacklog[$index]">Show</button>
-          <button ng-click="vm.tasks.splice($index, 1)">X</button>
+          <md-button class="md-icon-button"
+                     ng-click="task.showNotes=!task.showNotes">
+            <ng-md-icon size="24"
+                        icon="mode_comment"
+                        aria-label="notes"></ng-md-icon>
+          </md-button>
+          <md-button class="md-icon-button"
+                     ng-click="vm.backlogTasks.splice($index, 1)">
+            <ng-md-icon size="24"
+                        icon="delete_forever"
+                        aria-label="delete"
+                        style="fill: red;"></ng-md-icon>
+          </md-button>
+
         </li>
       </ul>
 
-      <button ng-click="vm.limitBacklogTo = false"
-              ng-hide="vm.limitBacklogTo === false || vm.listModel.lists.backlog.length ===0">Show All {{ vm.listModel.lists.backlog.length }} items
-      </button>
+      <md-button class="md-primary"
+                 ng-click="vm.limitBacklogTo = false"
+                 ng-hide="vm.limitBacklogTo === false || vm.listModel.lists.backlog.length ===0">Show All {{ vm.listModel.lists.backlog.length }} items in Backlog
+      </md-button>
     </div>
   </div>
 
