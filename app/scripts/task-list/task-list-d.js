@@ -5,7 +5,7 @@
  * # taskList
  */
 
-(function () {
+(function() {
   'use strict';
 
   angular
@@ -24,7 +24,7 @@
         tasks: '=',
         limitTo: '@',
         filter: '=',
-        allowTaskSelection:'@'
+        allowTaskSelection: '@'
       }
     };
   }
@@ -36,7 +36,7 @@
     vm.currentTask = $localStorage.currentTask;
 
     vm.estimateTime = (task) => {
-      Dialogs('TIME_ESTIMATE', { task });
+      Dialogs('TIME_ESTIMATE', {task});
     };
 
     vm.toggleDone = (task) => {
@@ -45,7 +45,7 @@
       // open task selection if current task is done
       if (task.isDone) {
         if (vm.currentTask.id === task.id) {
-          Dialogs('TASK_SELECTION', { tasks: vm.tasks })
+          Dialogs('TASK_SELECTION', {tasks: vm.tasks})
             .then(() => {
               vm.currentTask = $localStorage.currentTask;
             });

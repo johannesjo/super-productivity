@@ -1,0 +1,82 @@
+md-autocomplete button ng-md-icon {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  -webkit-transform: translate3d(-50%, -50%, 0) scale(0.9);
+  transform: translate3d(-50%, -50%, 0) scale(0.9);
+}
+
+md-autocomplete button ng-md-icon path {
+  stroke-width: 0;
+}
+
+.md-button.ng-md-icon {
+  padding: 0;
+  background: none;
+}
+
+.md-button.md-fab ng-md-icon {
+  margin-top: 0;
+}
+
+md-checkbox .ng-md-icon {
+  transition: 240ms;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 18px;
+  height: 18px;
+  border: 2px solid;
+  border-radius: 2px;
+}
+
+md-checkbox.md-checked .ng-md-icon {
+  border: none;
+}
+
+.md-chips .md-chip .md-chip-remove ng-md-icon {
+  height: 1.8rem;
+  width: 1.8rem;
+}
+
+ng-md-icon {
+  margin: auto;
+  background-repeat: no-repeat no-repeat;
+  display: inline-block;
+  vertical-align: middle;
+  fill: currentcolor;
+  height: 24px;
+  width: 24px;
+}
+
+ng-md-icon svg {
+  pointer-events: none;
+}
+
+md-input-container > ng-md-icon {
+  position: absolute;
+  top: 5px;
+  left: 2px;
+}
+
+md-input-container > ng-md-icon + input {
+  margin-left: 56px;
+}
+
+md-input-container.md-default-theme > ng-md-icon {
+  fill: #fff;
+}
+
+md-tabs-wrapper md-prev-button ng-md-icon,
+md-tabs-wrapper md-next-button ng-md-icon {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  -webkit-transform: translate3d(-50%, -50%, 0);
+  transform: translate3d(-50%, -50%, 0);
+}
+
+md-tabs-wrapper md-next-button ng-md-icon {
+  -webkit-transform: translate3d(-50%, -50%, 0) rotate(180deg);
+  transform: translate3d(-50%, -50%, 0) rotate(180deg);
+}
