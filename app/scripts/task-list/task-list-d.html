@@ -3,6 +3,7 @@
   <li class="task"
       dnd-draggable="task"
       dnd-effect-allowed="move"
+      dnd-disable-if="vm.disableDropInto"
       dnd-moved="vm.tasks.splice($index, 1);"
       ng-class="{'is-current': vm.currentTask.id === task.id, 'is-done':task.isDone}"
       ng-repeat="task in vm.tasks|limitTo:vm.limitTo|filter:vm.filter">
