@@ -19,11 +19,13 @@
       'ngStorage',
       'dndLists',
       'ngMaterial',
-      'ngMdIcons'
+      'ngMdIcons',
+      'angularMoment'
     ])
     .run(checkIfStartedTodayAndInit);
 
-  function checkIfStartedTodayAndInit($localStorage) {
+  function checkIfStartedTodayAndInit($localStorage, Dialogs) {
+    Dialogs('TIME_ESTIMATE', {task: {}});
   }
 
 })();

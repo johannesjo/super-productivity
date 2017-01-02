@@ -25,7 +25,9 @@
     "ngstorage": "^0.3.11",
     "angular-material": "^1.1.1",
     "angular-material-icons": "^0.7.1",
-    "lodash": "^4.17.3"
+    "lodash": "^4.17.3",
+    "moment": "^2.17.1",
+    "angular-moment": "^1.0.1"
   },
   "devDependencies": {
     "angular-mocks": "^1.5.0"

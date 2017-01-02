@@ -8,12 +8,16 @@
           layout-align="center center"
           ng-submit="vm.submit(vm.timeEstimate)">
       <md-input-container>
-        <ng-md-icon icon="access_time"></ng-md-icon>
+        <ng-md-icon icon="access_time"
+                    aria-label="Estimated Durations"></ng-md-icon>
         <input type="text"
+               input-duration
                ng-model="vm.timeEstimate"
-               md-auto-focus>
+               md-auto-focus
+               aria-label="Estimated Durations">
       </md-input-container>
     </form>
+
 
     <div class="side-info">
       Examples:<br>

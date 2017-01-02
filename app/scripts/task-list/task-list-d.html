@@ -40,7 +40,7 @@
 
     <div class="time-estimate"
          data-ng-show="task.timeEstimate">
-      {{ task.timeEstimate }}
+      {{ task.timeEstimate |amDurationFormat }}
     </div>
 
     <md-button class="md-icon-button"
