@@ -13,7 +13,7 @@
     .directive('inputDuration', inputDuration);
 
   /* @ngInject */
-  function inputDuration() {
+  function inputDuration($window) {
     return {
       bindToController: true,
       controllerAs: 'vm',
@@ -59,7 +59,7 @@
         ngModelCtrl.$setValidity('inputDuration', !!isValid);
 
         if (isValid) {
-          momentVal = moment.duration({
+          momentVal = $window.moment.duration({
             days: days,
             hours: hours,
             minutes: minutes,

@@ -19,18 +19,13 @@
       bindToController: true,
       controller: DailyPlannerCtrl,
       controllerAs: 'vm',
-      link: linkFn,
       restrict: 'E',
       scope: {}
     };
-
-    function linkFn(scope, element, attrs) {
-
-    }
   }
 
   /* @ngInject */
-  function DailyPlannerCtrl($scope, $localStorage, Dialogs, $state) {
+  function DailyPlannerCtrl($scope, $localStorage, Dialogs, $state, $window) {
     let vm = this;
 
     $localStorage.$default({
@@ -68,11 +63,11 @@
 
     $scope.$watch('vm.tasks', function (mVal) {
       if (angular.isArray(mVal)) {
-        vm.totaleEstimate = moment.duration();
+        vm.totaleEstimate = $window.moment.duration();
 
         for (let i = 0; i < mVal.length; i++) {
           let task = mVal[i];
-          vm.totaleEstimate.add(task.timeEstimate)
+          vm.totaleEstimate.add(task.timeEstimate);
         }
       }
     }, true);

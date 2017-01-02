@@ -14,14 +14,14 @@
     .controller('TaskSelectionCtrl', TaskSelectionCtrl);
 
   /* @ngInject */
-  function TaskSelectionCtrl($mdDialog, $localStorage, tasks) {
+  function TaskSelectionCtrl($mdDialog, $localStorage, $window, tasks) {
     let vm = this;
 
     $localStorage.$default({
       currentTask: null
     });
 
-    vm.undoneTasks = _.filter(tasks, (task) => {
+    vm.undoneTasks = $window._.filter(tasks, (task) => {
       return task && !task.isDone;
     });
 

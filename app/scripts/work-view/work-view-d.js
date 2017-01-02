@@ -5,7 +5,7 @@
  * # workView
  */
 
-(function() {
+(function () {
   'use strict';
 
   angular
@@ -25,7 +25,7 @@
   }
 
   /* @ngInject */
-  function WorkViewCtrl($localStorage, $scope, $state) {
+  function WorkViewCtrl($localStorage, $scope, $state, $window) {
     let vm = this;
 
     vm.tasks = $localStorage.tasks;
@@ -33,7 +33,7 @@
 
     $scope.$watch('vm.currentTask', (mVal) => {
       if (mVal && mVal.isDone) {
-        let undoneTasks = _.filter(vm.tasks, (task) => {
+        let undoneTasks = $window._.filter(vm.tasks, (task) => {
           return task && !task.isDone;
         });
 

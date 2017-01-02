@@ -6,7 +6,7 @@
  * Service in the superProductivity.
  */
 
-(function() {
+(function () {
   'use strict';
 
   angular
@@ -16,10 +16,10 @@
   /* @ngInject */
   function Dialogs($mdDialog, DIALOGS) {
 
-    return function(dialogName, locals) {
+    return function (dialogName, locals) {
 
       // copy and extend defaults for dialog
-      let defaults = angular.copy(DIALOGS['DEFAULTS']);
+      let defaults = angular.copy(DIALOGS.DEFAULTS);
       let dialog = angular.extend(defaults, DIALOGS[dialogName]);
 
       // add passed variables
