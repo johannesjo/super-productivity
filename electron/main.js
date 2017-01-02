@@ -3,7 +3,8 @@
 const electron = require('electron');
 const powerSaveBlocker = require('electron').powerSaveBlocker;
 const moment = require('moment');
-
+const idle = require('./idle');
+const CONFIG = require('./CONFIG');
 powerSaveBlocker.start('prevent-app-suspension');
 
 // Module to control application life.
@@ -13,12 +14,12 @@ const BrowserWindow = electron.BrowserWindow;
 
 const path = require('path');
 const url = require('url');
-const PING_INTERVAL = 1000;
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let mainWindow;
 let lsData;
+let lastIdleTime;
 
 function createWindow() {
   // Create the browser window.
@@ -110,7 +111,7 @@ app.on('activate', function () {
 });
 
 app.on('ready', () => {
-  setInterval(trackTimeFn, PING_INTERVAL);
+  setInterval(trackTimeFn, CONFIG.PING_INTERVAL);
 });
 
 electron.ipcMain.on('LS_UPDATE', (ev, lsDataArg) => {
@@ -118,10 +119,18 @@ electron.ipcMain.on('LS_UPDATE', (ev, lsDataArg) => {
 });
 
 function trackTimeFn() {
-  //let timeSpend = moment.duration({ milliseconds: PING_INTERVAL });
+  //let timeSpend = moment.duration({ milliseconds: CONFIG.PING_INTERVAL });
 
-  if (lsData && lsData.currentTask) {
-    mainWindow.webContents.send('UPDATE_TIME_SPEND', PING_INTERVAL);
-  }
+  idle((stdout) => {
+    let idleTime = parseInt(stdout, 10);
+    if (lastIdleTime > CONFIG.MIN_IDLE_TIME && lastIdleTime > idleTime) {
+      mainWindow.webContents.send('WAS_IDLE', lastIdleTime - CONFIG.MIN_IDLE_TIME);
+    } else {
+      mainWindow.webContents.send('UPDATE_TIME_SPEND', CONFIG.PING_INTERVAL);
+    }
+
+    lastIdleTime = idleTime;
+  });
+
 }
 

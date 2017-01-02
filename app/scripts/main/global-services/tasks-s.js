@@ -14,8 +14,9 @@
     .service('Tasks', Tasks);
 
   /* @ngInject */
-  function Tasks($localStorage, $q, $window, $rootScope) {
+  function Tasks($localStorage, $q, $window, $rootScope, Dialogs) {
     const IPC_EVENT_UPDATE = 'LS_UPDATE';
+    const IPC_EVENT_IDLE = 'WAS_IDLE';
     const IPC_EVENT_UPDATE_TIME_SPEND_FOR_CURRENT = 'UPDATE_TIME_SPEND';
 
     $localStorage.$default({
@@ -24,7 +25,7 @@
       backlogTasks: []
     });
 
-    // UTILITY
+    // SETUP HANDLERS FOR ELECTRON EVENTS
 
     if (angular.isDefined(window.ipcRenderer)) {
       window.ipcRenderer.on(IPC_EVENT_UPDATE_TIME_SPEND_FOR_CURRENT, (ev, timeSpend) => {
@@ -44,6 +45,10 @@
         // we need to manually call apply as this is an outside event
         $rootScope.$apply();
 
+      });
+
+      window.ipcRenderer.on(IPC_EVENT_IDLE, (ev, idleTime) => {
+        Dialogs('WAS_IDLE', { idleTime: idleTime });
       });
     }
 
@@ -68,6 +73,14 @@
 
     this.getToday = () => {
       return $q.when($localStorage.tasks);
+    };
+
+    this.getUndoneToday = () => {
+      let tasks = $window._.filter($localStorage.tasks, (task) => {
+        return task && !task.isDone;
+      });
+
+      return $q.when(tasks);
     };
 
     // UPDATE DATA

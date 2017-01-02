@@ -22,6 +22,10 @@
         textContent: 'You run out of tasks. Go on and create some new ones if you like.',
         ok: 'Got it!'
       },
+      WAS_IDLE: {
+        controller: 'WasIdleCtrl',
+        templateUrl: 'scripts/dialogs/was-idle/was-idle-c.html'
+      },
       TASK_SELECTION: {
         controller: 'TaskSelectionCtrl',
         templateUrl: 'scripts/dialogs/task-selection/task-selection-c.html'

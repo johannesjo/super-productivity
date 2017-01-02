@@ -6,7 +6,7 @@
  * Controller of the superProductivity
  */
 
-(function() {
+(function () {
   'use strict';
 
   angular
@@ -14,11 +14,11 @@
     .controller('TaskSelectionCtrl', TaskSelectionCtrl);
 
   /* @ngInject */
-  function TaskSelectionCtrl($mdDialog, Tasks, $window, tasks) {
+  function TaskSelectionCtrl($mdDialog, Tasks) {
     let vm = this;
 
-    vm.undoneTasks = $window._.filter(tasks, (task) => {
-      return task && !task.isDone;
+    Tasks.getUndoneToday().then((tasks) => {
+      vm.undoneTasks = tasks;
     });
 
     vm.submit = (task) => {
