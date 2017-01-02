@@ -56,6 +56,7 @@
   },
   "dependencies": {
     "electron": "^1.4.1",
+    "electron-config": "^0.2.1",
     "electron-inspector": "^0.1.4"
   }
 }

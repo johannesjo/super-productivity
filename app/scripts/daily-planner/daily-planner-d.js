@@ -25,32 +25,24 @@
   }
 
   /* @ngInject */
-  function DailyPlannerCtrl($scope, $localStorage, Dialogs, $state, $window) {
+  function DailyPlannerCtrl($scope, Tasks, Dialogs, $state, $window) {
     let vm = this;
 
-    $localStorage.$default({
-      tasks: [],
-      backlogTasks: []
+    vm.limitBacklogTo = 3;
+
+    Tasks.getToday().then((tasks) => {
+      vm.tasks = tasks;
     });
 
-    vm.limitBacklogTo = 3;
-    vm.tasks = $localStorage.tasks;
-    vm.backlogTasks = $localStorage.backlogTasks;
-
-    vm.listModel = {
-      selected: null,
-      lists: {
-        today: vm.tasks,
-        backlog: vm.backlogTasks
-      }
-    };
+    Tasks.getBacklog().then((tasks) => {
+      vm.backlogTasks = tasks;
+    });
 
     vm.addTask = () => {
       vm.tasks.push({
         title: vm.newTask,
         id: Math.random().toString(36).substr(2, 10)
       });
-
       vm.newTask = '';
     };
 
@@ -61,7 +53,7 @@
         });
     };
 
-    $scope.$watch('vm.tasks', function (mVal) {
+    $scope.$watch('vm.tasks', (mVal) => {
       if (angular.isArray(mVal)) {
         vm.totaleEstimate = $window.moment.duration();
 
@@ -70,6 +62,12 @@
           vm.totaleEstimate.add(task.timeEstimate);
         }
       }
+
+      Tasks.updateToday(mVal);
+    }, true);
+
+    $scope.$watch('vm.backlogTasks', (mVal) => {
+      Tasks.updateBacklog(mVal);
     }, true);
   }
 

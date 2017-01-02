@@ -25,11 +25,16 @@
   }
 
   /* @ngInject */
-  function WorkViewCtrl($localStorage, $scope, $state, $window) {
+  function WorkViewCtrl(Tasks, $scope, $state, $window) {
     let vm = this;
 
-    vm.tasks = $localStorage.tasks;
-    vm.currentTask = $localStorage.currentTask;
+    Tasks.getToday().then((tasks) => {
+      vm.tasks = tasks;
+    });
+
+    Tasks.getCurrent().then((task) => {
+      vm.currentTask = task;
+    });
 
     $scope.$watch('vm.currentTask', (mVal) => {
       if (mVal && mVal.isDone) {
@@ -44,6 +49,12 @@
           vm.currentTask = undoneTasks[0];
         }
       }
+
+      Tasks.updateCurrent(vm.currentTask);
+    }, true);
+
+    $scope.$watch('vm.tasks', () => {
+      Tasks.updateToday(vm.tasks);
     }, true);
   }
 
