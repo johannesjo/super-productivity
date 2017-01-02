@@ -53,6 +53,7 @@
 
       <md-button class="md-icon-button"
                  aria-label="notes"
+                 ng-class="{'is-active':task.showNotes}"
                  ng-click="task.showNotes=!task.showNotes">
         <ng-md-icon icon="mode_comment"
                     aria-label="notes"></ng-md-icon>

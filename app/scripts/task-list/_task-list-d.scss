@@ -74,4 +74,17 @@ task-list {
       min-height: 100px;
     }
   }
+
+  ng-md-icon {
+    fill: gray;
+  }
+
+  button {
+    &:hover,
+    &.is-active {
+      > ng-md-icon {
+        fill: #000;
+      }
+    }
+  }
 }
