@@ -6,7 +6,7 @@
  * Constant in the superProductivity.
  */
 
-(function() {
+(function () {
   'use strict';
 
   angular
@@ -16,6 +16,11 @@
         clickOutsideToClose: true,
         controllerAs: 'vm',
         bindToController: true
+      },
+      CREATE_TASK: {
+        title: 'Out of undone tasks',
+        textContent: 'You run out of tasks. Go on and create some new ones if you like.',
+        ok: 'Got it!'
       },
       TASK_SELECTION: {
         controller: 'TaskSelectionCtrl',
