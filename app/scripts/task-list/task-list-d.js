@@ -50,7 +50,7 @@
       // open task selection if current task is done
       if (task.isDone) {
         if (vm.currentTask && vm.currentTask.id === task.id) {
-          Dialogs('TASK_SELECTION', { tasks: vm.tasks })
+          Dialogs('TASK_SELECTION')
             .then(() => {
               vm.currentTask = $localStorage.currentTask;
             });

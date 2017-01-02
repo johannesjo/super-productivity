@@ -5,7 +5,7 @@
       <p>Select the task you want to work on next or just press enter to work on</p><p><strong>{{ vm.undoneTasks[0].title }}</strong></p>
 
       <md-autocomplete
-        md-selected-item="vm.currentTask.title"
+        md-selected-item="vm.currentTask"
         md-search-text="vm.searchText"
         md-items="task in vm.undoneTasks"
         md-item-text="task.title"

@@ -21,12 +21,11 @@
       vm.undoneTasks = tasks;
     });
 
-    vm.submit = (task) => {
-      if (!task) {
-        task = vm.undoneTasks[0];
+    vm.submit = () => {
+      if (!vm.selectedTask) {
+        vm.selectedTask = vm.undoneTasks[0];
       }
-      vm.currentTask = task;
-      Tasks.updateCurrent(vm.currentTask);
+      Tasks.updateCurrent(vm.selectedTask);
       $mdDialog.hide();
     };
   }
