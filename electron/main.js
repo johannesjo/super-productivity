@@ -1,6 +1,9 @@
 'use strict';
 
-const electron = require('electron')
+const electron = require('electron');
+const powerSaveBlocker = require('electron').powerSaveBlocker;
+powerSaveBlocker.start('prevent-app-suspension');
+
 // Module to control application life.
 const app = electron.app;
 // Module to create native browser window.
@@ -11,7 +14,7 @@ const url = require('url');
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
-let mainWindow
+let mainWindow;
 
 function createWindow() {
   // Create the browser window.
@@ -27,13 +30,18 @@ function createWindow() {
   // Open the DevTools.
   mainWindow.webContents.openDevTools();
 
-  // Emitted when the window is closed.
-  mainWindow.on('closed', function () {
-    // Dereference the window object, usually you would store windows
-    // in an array if your app supports multi windows, this is the time
-    // when you should delete the corresponding element.
-    mainWindow = null;
-  })
+  mainWindow.on('close', function (event) {
+    if (!app.isQuiting) {
+      event.preventDefault();
+      mainWindow.hide();
+    }
+    return false;
+  });
+
+  mainWindow.on('minimize', function (event) {
+    event.preventDefault();
+    mainWindow.hide();
+  });
 }
 
 // This method will be called when Electron has finished
@@ -52,27 +60,24 @@ app.on('window-all-closed', function () {
 
 let appIcon = null;
 app.on('ready', () => {
-  console.log(electron.dialog.showOpenDialog({ properties: ['openFile', 'openDirectory', 'multiSelections'] }));
-  appIcon = new electron.Tray('ico.png');
+  appIcon = new electron.Tray('electron/ico.png');
   let contextMenu = electron.Menu.buildFromTemplate([
-    { label: 'Item1', type: 'radio' },
-    { label: 'Item2', type: 'radio' },
-    { label: 'Item3', type: 'radio', clicked: true },
-    { label: 'Item4', type: 'radio' },
+
+    {
+      label: 'Show App', click: () => {
+      mainWindow.show();
+    }
+    },
+    {
+      label: 'Quit', click: () => {
+      app.isQuiting = true;
+      app.quit();
+    }
+    }
   ]);
-  appIcon.setToolTip('This is my application.');
   appIcon.setContextMenu(contextMenu);
+  appIcon.setToolTip('This is my application.');
   appIcon.setTitle('test');
-
-  console.log(appIcon.setTitle);
-
-  appIcon.displayBalloon({
-    icon: 'ico.png',
-    title: 'TIIITLE',
-    content: 'COOOOnten'
-  });
-  // Make a change to the context menu
-  contextMenu.items[1].checked = false
 
   // Call this again for Linux because we modified the context menu
   appIcon.setContextMenu(contextMenu)
@@ -80,16 +85,13 @@ app.on('ready', () => {
 
 app.on('ready', () => {
   // Register a 'CommandOrControl+X' shortcut listener.
-  const ret = electron.globalShortcut.register('CommandOrControl+X', () => {
-    console.log('CommandOrControl+X is pressed');
+  const ret = electron.globalShortcut.register('CommandOrControl+Shift+X', () => {
+    mainWindow.show();
   });
 
   if (!ret) {
     console.log('registration failed');
   }
-
-  // Check whether a shortcut is registered.
-  console.log(electron.globalShortcut.isRegistered('CommandOrControl+X'));
 });
 
 app.on('activate', function () {
@@ -100,5 +102,21 @@ app.on('activate', function () {
   }
 });
 
-// In this file you can include the rest of your app's specific main process
-// code. You can also put them in separate files and require them here.
+app.on('ready', () => {
+  console.log('I am here!');
+  console.log(mainWindow);
+
+  setInterval(trackTimeFn, 1000);
+});
+
+function trackTimeFn() {
+  //let currentTask = localStorage.get('currentTask');
+  //let timeSpend = 2000;
+  //
+  //currentTask.timeSpend = timeSpend;
+  //
+  //localStorage.setItem('currentTask', currentTask);
+  //
+  //console.log(currentTask);
+
+}

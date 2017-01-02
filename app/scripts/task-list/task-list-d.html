@@ -40,6 +40,11 @@
               ng-click="task.showEdit = true;">{{ task.title }}</span>
       </div>
 
+      <div class="time-spend"
+           data-ng-show="task.timeSpend">
+        {{ task.timeSpend }}#{{ task.timeSpend |amDurationFormat:'minute' }}
+      </div>
+
       <div class="time-estimate"
            data-ng-show="task.timeEstimate">
         {{ task.timeEstimate |amDurationFormat:'minute' }}
