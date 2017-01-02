@@ -1,53 +1,51 @@
 <div class="daily-planner">
   <h1 class="md-headline">Plan your day!</h1>
 
-  <div ng-if="!vm.step || vm.step ===0">
-    <div class="input">
-      <div class="info">
-        <p>If you're done, you should spend some time
-          <strong>prioritizing</strong> your tasks, by ordering them via drag and drop. You can also make a rough time estimation.
-        </p>
+  <div class="input">
+    <div class="info">
+      <p>If you're done, you should spend some time
+        <strong>prioritizing</strong> your tasks, by ordering them via drag and drop. You can also make a rough time estimation.
+      </p>
 
-      </div>
-      <form ng-submit="vm.addTask()">
-        <md-input-container md-no-float
-                            class="md-block"
-                            layout="row">
-          <ng-md-icon icon="mode_edit"></ng-md-icon>
+    </div>
+    <form ng-submit="vm.addTask()">
+      <md-input-container md-no-float
+                          class="md-block"
+                          layout="row">
+        <ng-md-icon icon="mode_edit"></ng-md-icon>
 
-          <input class="text-input"
-                 md-autofocus
-                 ng-model="vm.newTask"
-                 placeholder="Enter a task and press enter to add">
+        <input class="text-input"
+               md-autofocus
+               ng-model="vm.newTask"
+               placeholder="Enter a task and press enter to add">
 
-        </md-input-container>
+      </md-input-container>
 
-      </form>
+    </form>
 
-      <div class="done"
-           ng-show="vm.tasks.length >0"
-           layout="row"
-           layout-sm="column"
-           layout-align="center center">
-        <md-button class="md-raised md-primary"
-                   ng-click="vm.done()">All done! Let's get to work!
-        </md-button>
-      </div>
-
-      <h2 class="md-title">Tasks for today (estimated: ~{{ vm.totaleEstimate|amDurationFormat:'minutes'}} )</h2>
-
-      <task-list tasks="vm.tasks"></task-list>
-
-      <h2 class="md-title">Tasks Backlog (for some other time)</h2>
-      <task-list tasks="vm.backlogTasks"
-                 limit-to="{{vm.limitBacklogTo}}"></task-list>
-
-
-      <md-button class="md-primary"
-                 ng-click="vm.limitBacklogTo = false"
-                 ng-hide="vm.limitBacklogTo === false || vm.backlogTasks.length <=vm.limitBacklogTo ||vm.backlogTasks.length ===0">Show All {{ vm.backlogTasks.length }} items in Backlog
+    <div class="done"
+         ng-show="vm.tasks.length >0"
+         layout="row"
+         layout-sm="column"
+         layout-align="center center">
+      <md-button class="md-raised md-primary"
+                 ng-click="vm.done()">All done! Let's get to work!
       </md-button>
     </div>
-  </div>
 
+    <h2 class="md-title">Tasks for today (estimated: ~{{ vm.totaleEstimate|amDurationFormat:'minutes'}} )</h2>
+
+    <task-list tasks="vm.tasks"></task-list>
+
+    <h2 class="md-title">Tasks Backlog (for some other time)</h2>
+    <task-list tasks="vm.backlogTasks"
+               limit-to="{{vm.limitBacklogTo}}"></task-list>
+
+
+    <md-button class="md-primary"
+               ng-click="vm.limitBacklogTo = false"
+               ng-hide="vm.limitBacklogTo === false || vm.backlogTasks.length <=vm.limitBacklogTo ||vm.backlogTasks.length ===0">Show All {{ vm.backlogTasks.length }} items in Backlog
+    </md-button>
+  </div>
 </div>
+

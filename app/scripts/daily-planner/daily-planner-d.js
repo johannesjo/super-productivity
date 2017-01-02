@@ -39,11 +39,19 @@
     });
 
     vm.addTask = () => {
-      vm.tasks.push({
-        title: vm.newTask,
-        id: Math.random().toString(36).substr(2, 10)
-      });
-      vm.newTask = '';
+      if (vm.newTask) {
+        vm.tasks.push({
+          title: vm.newTask,
+          id: Math.random().toString(36).substr(2, 10)
+        });
+        vm.newTask = '';
+      }
+
+      // if we have already defined enough tasks and the
+      // new task field is empty go to work view
+      else if (vm.tasks.length > 0) {
+        vm.done();
+      }
     };
 
     vm.done = () => {
