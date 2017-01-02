@@ -79,6 +79,22 @@ task-list {
     fill: gray;
   }
 
+  md-checkbox {
+    margin-bottom: 0;
+    margin-left: 10px;
+  }
+  button,
+  md-checkbox {
+    transition: 300ms;
+    &:hover {
+      transform: scale(1.4);
+    }
+  }
+
+  .md-icon-button {
+    margin: 0;
+  }
+
   button {
     &:hover,
     &.is-active {
