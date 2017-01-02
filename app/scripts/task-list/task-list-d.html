@@ -68,13 +68,10 @@
       <md-button class="md-icon-button"
                  aria-label="mark as done"
                  ng-click="vm.toggleDone(task)">
-        <ng-md-icon icon="check"
-                    ng-show="task.isDone"
-                    aria-label="unmark as done"
-                    style="fill: green;"></ng-md-icon>
-        <ng-md-icon icon="ac_unit"
-                    ng-show="!task.isDone"
-                    aria-label="unmark as done"></ng-md-icon>
+        <md-checkbox
+          ng-model="task.isDone"
+          aria-label="un-/mark as done">
+        </md-checkbox>
       </md-button>
     </div>
 
