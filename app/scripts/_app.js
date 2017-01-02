@@ -24,8 +24,7 @@
     ])
     .run(checkIfStartedTodayAndInit);
 
-  function checkIfStartedTodayAndInit($localStorage, Dialogs) {
-    Dialogs('TIME_ESTIMATE', {task: {}});
+  function checkIfStartedTodayAndInit($localStorage) {
   }
 
 })();

@@ -5,7 +5,7 @@
  * # dailyPlanner
  */
 
-(function() {
+(function () {
   'use strict';
 
   angular
@@ -30,7 +30,7 @@
   }
 
   /* @ngInject */
-  function DailyPlannerCtrl($localStorage, Dialogs, $state) {
+  function DailyPlannerCtrl($scope, $localStorage, Dialogs, $state) {
     let vm = this;
 
     $localStorage.$default({
@@ -60,11 +60,22 @@
     };
 
     vm.done = () => {
-      Dialogs('TASK_SELECTION', {tasks: vm.tasks})
+      Dialogs('TASK_SELECTION', { tasks: vm.tasks })
         .then(() => {
           $state.go('work-view');
         });
     };
+
+    $scope.$watch('vm.tasks', function (mVal) {
+      if (angular.isArray(mVal)) {
+        vm.totaleEstimate = moment.duration();
+
+        for (let i = 0; i < mVal.length; i++) {
+          let task = mVal[i];
+          vm.totaleEstimate.add(task.timeEstimate)
+        }
+      }
+    }, true);
   }
 
 })();
