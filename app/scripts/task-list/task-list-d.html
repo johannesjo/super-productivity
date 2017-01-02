@@ -1,81 +1,82 @@
 <ul class="task-list"
     dnd-list="vm.tasks">
   <li class="task"
-      layout="row"
-      layout-align="center center"
       dnd-draggable="task"
       dnd-effect-allowed="move"
       dnd-moved="vm.tasks.splice($index, 1);"
       ng-class="{'is-current': vm.currentTask.id === task.id, 'is-done':task.isDone}"
       ng-repeat="task in vm.tasks|limitTo:vm.limitTo|filter:vm.filter">
-    <ng-md-icon class="handle"
-                flex="none"
-                icon="drag_handle"></ng-md-icon>
-
-    <md-button class="md-icon-button"
-               aria-label="mark as current"
-               ng-click="vm.currentTask=task"
-               ng-show="vm.allowTaskSelection">
-      <ng-md-icon icon="play_circle_outline"
-                  aria-label="mark as current"></ng-md-icon>
-    </md-button>
-
-    <div class="title"
-         flex="auto"
+    <div class="first-line"
          layout="row"
          layout-align="center center">
+      <ng-md-icon class="handle"
+                  flex="none"
+                  icon="drag_handle"></ng-md-icon>
 
-      <form ng-show="task.showEdit && !task.isDone"
-            ng-submit="task.showEdit=false;">
-        <input type="text"
-               ng-disabled="task.isDone"
-               ng-model="task.title"
-               ng-blur="task.showEdit=false;"
-               md-auto-focus
-               md-autofocus>
-      </form>
-      <span ng-show="!task.showEdit || task.isDone"
-            ng-click="task.showEdit = true;">{{ task.title }}</span>
+      <md-button class="md-icon-button"
+                 aria-label="mark as current"
+                 ng-click="vm.currentTask=task"
+                 ng-show="vm.allowTaskSelection">
+        <ng-md-icon icon="play_circle_outline"
+                    aria-label="mark as current"></ng-md-icon>
+      </md-button>
+
+      <div class="title"
+           flex="auto"
+           layout="row"
+           layout-align="center center">
+
+        <form ng-show="task.showEdit && !task.isDone"
+              ng-submit="task.showEdit=false;">
+          <input type="text"
+                 ng-disabled="task.isDone"
+                 ng-model="task.title"
+                 ng-blur="task.showEdit=false;"
+                 md-auto-focus
+                 md-autofocus>
+        </form>
+        <span ng-show="!task.showEdit || task.isDone"
+              ng-click="task.showEdit = true;">{{ task.title }}</span>
+      </div>
+
+      <div class="time-estimate"
+           data-ng-show="task.timeEstimate">
+        {{ task.timeEstimate |amDurationFormat:'minute' }}
+      </div>
+
+      <md-button class="md-icon-button"
+                 aria-label="time estimation"
+                 ng-click="vm.estimateTime(task)">
+        <ng-md-icon icon="access_time"
+                    aria-label="time estimation"></ng-md-icon>
+      </md-button>
+
+      <md-button class="md-icon-button"
+                 aria-label="notes"
+                 ng-click="task.showNotes=!task.showNotes">
+        <ng-md-icon icon="mode_comment"
+                    aria-label="notes"></ng-md-icon>
+      </md-button>
+      <md-button class="md-icon-button"
+                 aria-label="delete"
+                 ng-click="vm.tasks.splice($index, 1)">
+        <ng-md-icon icon="delete_forever"
+                    aria-label="delete"
+                    style="fill: red;"></ng-md-icon>
+      </md-button>
+
+      <md-button class="md-icon-button"
+                 aria-label="mark as done"
+                 ng-click="vm.toggleDone(task)">
+        <ng-md-icon icon="check"
+                    ng-show="task.isDone"
+                    aria-label="unmark as done"
+                    style="fill: green;"></ng-md-icon>
+        <ng-md-icon icon="ac_unit"
+                    ng-show="!task.isDone"
+                    aria-label="unmark as done"></ng-md-icon>
+      </md-button>
     </div>
-
-    <div class="time-estimate"
-         data-ng-show="task.timeEstimate">
-      {{ task.timeEstimate |amDurationFormat:'minute' }}
-    </div>
-
-    <md-button class="md-icon-button"
-               aria-label="time estimation"
-               ng-click="vm.estimateTime(task)">
-      <ng-md-icon icon="access_time"
-                  aria-label="time estimation"></ng-md-icon>
-    </md-button>
-
-    <md-button class="md-icon-button"
-               aria-label="notes"
-               ng-click="task.showNotes=!task.showNotes">
-      <ng-md-icon icon="mode_comment"
-                  aria-label="notes"></ng-md-icon>
-    </md-button>
-    <md-button class="md-icon-button"
-               aria-label="delete"
-               ng-click="vm.tasks.splice($index, 1)">
-      <ng-md-icon icon="delete_forever"
-                  aria-label="delete"
-                  style="fill: red;"></ng-md-icon>
-    </md-button>
-
-    <md-button class="md-icon-button"
-               aria-label="mark as done"
-               ng-click="vm.toggleDone(task)">
-      <ng-md-icon icon="check"
-                  ng-show="task.isDone"
-                  aria-label="unmark as done"
-                  style="fill: green;"></ng-md-icon>
-      <ng-md-icon icon="ac_unit"
-                  ng-show="!task.isDone"
-                  aria-label="unmark as done"></ng-md-icon>
-    </md-button>
-
 
     <div class="notes"
          flex="100"

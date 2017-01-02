@@ -29,6 +29,11 @@ task-list {
   margin-bottom: -1px;
   flex-wrap: wrap;
 
+  .first-line {
+    display: flex;
+    flex-wrap: nowrap;
+  }
+
   &.is-done {
     text-decoration: line-through;
   }
