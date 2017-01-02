@@ -46,6 +46,13 @@ TODO configure more restrictive Content-Security-Policy
 <![endif]-->
 
 
+<script>
+  if (typeof require !== 'undefined') {
+    const { ipcRenderer } = require('electron');
+    window.ipcRenderer = ipcRenderer;
+  }
+</script>
+
 <!-- build:js({.tmp,app}) scripts/oldieshim.js -->
 <!--[if lt IE 9]>
 <script src="bower_components/es5-shim/es5-shim.js"></script>

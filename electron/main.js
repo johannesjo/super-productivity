@@ -2,6 +2,8 @@
 
 const electron = require('electron');
 const powerSaveBlocker = require('electron').powerSaveBlocker;
+const moment = require('moment');
+
 powerSaveBlocker.start('prevent-app-suspension');
 
 // Module to control application life.
@@ -11,10 +13,12 @@ const BrowserWindow = electron.BrowserWindow;
 
 const path = require('path');
 const url = require('url');
+const PING_INTERVAL = 1000;
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let mainWindow;
+let lsData;
 
 function createWindow() {
   // Create the browser window.
@@ -42,6 +46,7 @@ function createWindow() {
     event.preventDefault();
     mainWindow.hide();
   });
+
 }
 
 // This method will be called when Electron has finished
@@ -62,7 +67,6 @@ let appIcon = null;
 app.on('ready', () => {
   appIcon = new electron.Tray('electron/ico.png');
   let contextMenu = electron.Menu.buildFromTemplate([
-
     {
       label: 'Show App', click: () => {
       mainWindow.show();
@@ -95,6 +99,9 @@ app.on('ready', () => {
 });
 
 app.on('activate', function () {
+  global.tasksData = {};
+  global.test = { 'TEST': 'AAAA' };
+
   // On OS X it's common to re-create a window in the app when the
   // dock icon is clicked and there are no other windows open.
   if (mainWindow === null) {
@@ -103,20 +110,18 @@ app.on('activate', function () {
 });
 
 app.on('ready', () => {
-  console.log('I am here!');
-  console.log(mainWindow);
+  setInterval(trackTimeFn, PING_INTERVAL);
+});
 
-  setInterval(trackTimeFn, 1000);
+electron.ipcMain.on('LS_UPDATE', (ev, lsDataArg) => {
+  lsData = lsDataArg;
 });
 
 function trackTimeFn() {
-  //let currentTask = localStorage.get('currentTask');
-  //let timeSpend = 2000;
-  //
-  //currentTask.timeSpend = timeSpend;
-  //
-  //localStorage.setItem('currentTask', currentTask);
-  //
-  //console.log(currentTask);
+  //let timeSpend = moment.duration({ milliseconds: PING_INTERVAL });
 
+  if (lsData && lsData.currentTask) {
+    mainWindow.webContents.send('UPDATE_TIME_SPEND', PING_INTERVAL);
+  }
 }
+
