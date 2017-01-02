@@ -3,8 +3,17 @@
 </div>
 
 
-<div class="work-view-tasks">
-  <task-list tasks="vm.tasks"></task-list>
+<div class="work-view-tasks work-view-tasks--undone">
+  <task-list tasks="vm.tasks"
+             allow-task-selection="true"
+             filter="{isDone:'!true'}"></task-list>
+</div>
+
+<h2 class="md-title">Done Tasks</h2>
+
+<div class="work-view-tasks work-view-tasks--done">
+  <task-list tasks="vm.tasks"
+             filter="{isDone:true}"></task-list>
 </div>
 
 
