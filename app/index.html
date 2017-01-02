@@ -1,35 +1,40 @@
 <!doctype html>
 <html class="no-js">
 <head>
-    <title>Super productivity</title>
-    <meta charset="utf-8">
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1, user-scalable=no">
-    <meta http-equiv="X-UA-Compatible"
-          content="IE=edge">
-    <meta name="description"
-          content="">
-    <meta name="keywords"
-          content="">
+  <title>Super productivity</title>
+  <meta charset="utf-8">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1, user-scalable=no">
+  <meta http-equiv="X-UA-Compatible"
+        content="IE=edge">
+  <meta name="description"
+        content="">
+  <meta name="keywords"
+        content="">
 
-    <!-- Enable all requests and inline styles for painless development.
+  <!-- Enable all requests and inline styles for painless development.
 TODO configure more restrictive Content-Security-Policy
 @see http://content-security-policy.com/
 @see http://www.html5rocks.com/en/tutorials/security/content-security-policy/ -->
-    <meta http-equiv="Content-Security-Policy"
-          content="default-src *; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' 'unsafe-eval'">
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src *;
+          img-src * data:;
+          style-src * 'unsafe-inline';
+          script-src * 'unsafe-inline'">
 
-    <!-- build:css({.tmp,app}) styles/vendor.css -->
-    <!-- bower:css -->
-    <link rel="stylesheet" href="bower_components/angular-material/angular-material.css" />
-    <link rel="stylesheet" href="bower_components/angular-material-icons/angular-material-icons.css" />
-    <!-- endbower -->
-    <!-- endbuild -->
+  <!-- build:css({.tmp,app}) styles/vendor.css -->
+  <!-- bower:css -->
+  <link rel="stylesheet"
+        href="bower_components/angular-material/angular-material.css"/>
+  <link rel="stylesheet"
+        href="bower_components/angular-material-icons/angular-material-icons.css"/>
+  <!-- endbower -->
+  <!-- endbuild -->
 
-    <!-- build:css({.tmp,app}) styles/main.css -->
-    <link rel="stylesheet"
-          href="styles/main.css"/>
-    <!-- endbuild -->
+  <!-- build:css({.tmp,app}) styles/main.css -->
+  <link rel="stylesheet"
+        href="styles/main.css"/>
+  <!-- endbuild -->
 </head>
 
 <body ng-app="superProductivity">
@@ -39,7 +44,7 @@ TODO configure more restrictive Content-Security-Policy
 
 <!--[if lt IE 7]>
 <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade
-    your browser</a> to improve your experience.</p>
+  your browser</a> to improve your experience.</p>
 <![endif]-->
 
 
