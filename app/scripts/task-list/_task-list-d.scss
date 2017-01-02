@@ -24,21 +24,17 @@ task-list {
 .task {
   background-color: #fff;
   border: 1px solid #ddd;
-  border-top-right-radius: 4px;
-  border-top-left-radius: 4px;
+  border-radius: 4px;
   padding: 10px 15px;
   margin-bottom: -1px;
   flex-wrap: wrap;
 
-  &.is-selected {
-    background-color: #dff0d8;
-    color: #3c763d;
-  }
   &.is-done {
     text-decoration: line-through;
   }
   &.is-current {
-    border: 1px solid red;
+    border: 3px solid #333;
+    background: #a9ed9f;
   }
 
   .handle {
