@@ -4,9 +4,9 @@
       dnd-draggable="task"
       dnd-effect-allowed="move"
       dnd-disable-if="vm.disableDropInto"
-      dnd-moved="vm.tasks.splice($index, 1);"
+      dnd-moved="vm.deleteTask(task.id);"
       ng-class="{'is-current': vm.currentTask.id === task.id, 'is-done':task.isDone}"
-      ng-repeat="task in vm.tasks|limitTo:vm.limitTo|filter:vm.filter">
+      ng-repeat="task in vm.tasks|limitTo:vm.limitTo|filter:vm.filter ">
     <div class="first-line"
          layout="row"
          layout-align="center center">
@@ -62,7 +62,7 @@
       </md-button>
       <md-button class="md-icon-button"
                  aria-label="delete"
-                 ng-click="vm.tasks.splice($index, 1)">
+                 ng-click="vm.deleteTask(task.id)">
         <ng-md-icon icon="delete_forever"
                     aria-label="delete"
                     style="fill: red;"></ng-md-icon>

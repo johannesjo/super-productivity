@@ -31,13 +31,19 @@
   }
 
   /* @ngInject */
-  function TaskListCtrl(Dialogs, $localStorage) {
+  function TaskListCtrl(Dialogs, $localStorage, $window) {
     let vm = this;
 
     vm.currentTask = $localStorage.currentTask;
 
     vm.estimateTime = (task) => {
       Dialogs('TIME_ESTIMATE', { task });
+    };
+
+    vm.deleteTask = (taskId) => {
+      $window._.remove(vm.tasks, {
+        id: taskId
+      });
     };
 
     vm.onTaskDoneChanged = (task) => {
