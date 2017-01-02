@@ -36,7 +36,8 @@
                  md-auto-focus
                  md-autofocus>
         </form>
-        <span ng-show="!task.showEdit || task.isDone"
+        <span class="text"
+              ng-show="!task.showEdit || task.isDone"
               ng-click="task.showEdit = true;">{{ task.title }}</span>
       </div>
 

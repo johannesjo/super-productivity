@@ -48,6 +48,12 @@ task-list {
 
   .title {
     text-align: left;
+    cursor: pointer;
+
+    .text {
+      display: block;
+      width: 100%;
+    }
   }
 
   form {
