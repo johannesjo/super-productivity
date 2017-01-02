@@ -22,7 +22,7 @@
       restrict: 'E',
       scope: {
         tasks: '=',
-        limitTo:'@'
+        limitTo: '@'
       }
     };
   }

@@ -30,16 +30,6 @@
             ng-click="task.showEdit = true;">{{ task.title }}</span>
     </div>
 
-    <div class="notes"
-         flex="100"
-         ng-show="task.showNotes===true">
-      <label>Notes</label>
-      <textarea ng-model="task.notes"
-                rows="5"
-                md-auto-focus
-                md-select-on-focus></textarea>
-    </div>
-
     <div class="time-estimate"
          data-ng-show="task.timeEstimate">
       {{ task.timeEstimate }}
@@ -77,5 +67,15 @@
                   ng-show="!task.isDone"
                   aria-label="unmark as done"></ng-md-icon>
     </md-button>
+
+    <div class="notes"
+         flex="100"
+         ng-show="task.showNotes===true">
+      <label>Notes</label>
+      <textarea ng-model="task.notes"
+                rows="5"
+                md-auto-focus
+                md-select-on-focus></textarea>
+    </div>
   </li>
 </ul>
