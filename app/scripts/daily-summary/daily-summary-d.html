@@ -1,0 +1,37 @@
+<h1 class="md-headline">You're done for today! Take a moment to celebrate!</h1>
+
+
+<h2 class="md-title">These are the tasks you worked on today ({{vm.doneTasks.length}}/{{ vm.todaysTasks.length }})</h2>
+
+<ul class="summary-task-list">
+  <li ng-repeat="task in vm.todaysTasks"
+      ng-class="{'is-done': task.isDone}">
+    {{ task.title }}
+
+    <ng-md-icon icon="check"
+                ng-show="task.isDone"
+                aria-label="checkmark"></ng-md-icon>
+  </li>
+</ul>
+<p>Total Time Spent: {{ vm.totalTimeSpend }} TODO</p>
+
+<md-button class="md-raised md-primary">clear done tasks</md-button>
+
+
+<h2 class="md-title">Make a note for your tomorrows self</h2>
+<p>This is meant to be some takeaway to be even more productive/happy tomorrow. E.g.: What did you learn today? What do you want to do better/smarter tomorrow? What do you want to achieve and why?</p>
+<p>Think a second and reflect on the day.</p>
+
+<form ng-submit="vm.saveTomorrowsNote(vm.tomorrowsNote)">
+  <md-input-container class="md-block"
+                      flex-gt-sm>
+    <label>Your personal tomorrows note</label>
+    <textarea ng-model="vm.tomorrowsNote"
+              md-auto-focus
+              rows="4"></textarea>
+  </md-input-container>
+</form>
+
+<md-button type="submit"
+           class="md-raised md-primary">Save and go home
+</md-button>

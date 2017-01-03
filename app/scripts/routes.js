@@ -7,7 +7,7 @@
  * Routes module. All app states are defined here.
  */
 
-(function() {
+(function () {
   'use strict';
 
   angular
@@ -28,12 +28,16 @@
         url: '/work-view',
         template: '<work-view></work-view>'
       })
-    .state('settings', {
-                url: '/settings',
-                controller: 'SettingsCtrl',
-                controllerAs: 'vm',
-                templateUrl: 'scripts/routes/settings/settings-c.html'
-              })
+      .state('settings', {
+        url: '/settings',
+        controller: 'SettingsCtrl',
+        controllerAs: 'vm',
+        templateUrl: 'scripts/routes/settings/settings-c.html'
+      })
+      .state('daily-summary', {
+        url: '/daily-summary',
+        template: '<daily-summary></daily-summary>'
+      })
     /* STATES-NEEDLE - DO NOT REMOVE THIS */;
   }
 })();
