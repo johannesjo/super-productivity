@@ -28,6 +28,12 @@
         url: '/work-view',
         template: '<work-view></work-view>'
       })
+    .state('settings', {
+                url: '/settings',
+                controller: 'SettingsCtrl',
+                controllerAs: 'vm',
+                templateUrl: 'scripts/routes/settings/settings-c.html'
+              })
     /* STATES-NEEDLE - DO NOT REMOVE THIS */;
   }
 })();

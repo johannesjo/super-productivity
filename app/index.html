@@ -35,7 +35,31 @@ TODO configure more restrictive Content-Security-Policy
   <!-- endbuild -->
 </head>
 
-<body ng-app="superProductivity">
+<body ng-app="superProductivity"
+      layout="column"
+      flex
+      layout-fill
+      ng-cloak>
+
+<md-toolbar class="md-hue-2">
+  <div class="md-toolbar-tools">
+    <ng-md-icon icon="cloud"
+                aria-label="cloud"></ng-md-icon>
+    <h2>
+      <span ui-sref="daily-planner">SuperProductivity</span>
+    </h2>
+    <span flex></span>
+
+    <md-button class="md-icon-button"
+               aria-label="Settings"
+               ui-sref="settings">
+      <ng-md-icon icon="settings"
+                  aria-label="settings"></ng-md-icon>
+    </md-button>
+  </div>
+</md-toolbar>
+
+
 <main ui-view></main>
 
 
@@ -91,6 +115,7 @@ TODO configure more restrictive Content-Security-Policy
 <script src="scripts/input-duration/input-duration-d.js"></script>
 <script src="scripts/main/global-services/tasks-s.js"></script>
 <script src="scripts/routes.js"></script>
+<script src="scripts/routes/settings/settings-c.js"></script>
 <script src="scripts/task-list/task-list-d.js"></script>
 <script src="scripts/work-view/work-view-d.js"></script>
 <!-- endinject -->
