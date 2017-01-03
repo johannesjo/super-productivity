@@ -43,8 +43,8 @@
 
       <div class="time"
            data-ng-show="task.timeEstimate || task.timeSpend">
-        {{ task.timeSpend |amDurationFormat:'minute' }} <span ng-show="task.timeEstimate">/</span>
-        {{ task.timeEstimate |amDurationFormat:'minute' }}
+        {{ task.timeSpend |duration }} <span ng-show="task.timeEstimate">/</span>
+        {{ task.timeEstimate |duration }}
       </div>
 
       <md-button class="md-icon-button"

@@ -6,7 +6,7 @@
  * Service in the superProductivity.
  */
 
-(function () {
+(function() {
   'use strict';
 
   angular
@@ -36,7 +36,7 @@
 
           if ($rootScope.r.currentTask.timeSpend) {
             timeSpendCalculated = $window.moment.duration($rootScope.r.currentTask.timeSpend);
-            timeSpendCalculated.add($window.moment.duration({ milliseconds: timeSpend }));
+            timeSpendCalculated.add($window.moment.duration({milliseconds: timeSpend}));
           } else {
             timeSpendCalculated = $window.moment.duration(timeSpend);
           }
@@ -49,7 +49,7 @@
       });
 
       window.ipcRenderer.on(IPC_EVENT_IDLE, (ev, idleTime) => {
-        Dialogs('WAS_IDLE', { idleTime: idleTime });
+        Dialogs('WAS_IDLE', {idleTime: idleTime});
       });
     }
 
@@ -67,7 +67,7 @@
     this.getCurrent = () => {
       let currentTask;
       if ($localStorage.currentTask) {
-        currentTask = $window._.find($localStorage.tasks, { id: $localStorage.currentTask.id });
+        currentTask = $window._.find($localStorage.tasks, {id: $localStorage.currentTask.id});
         $localStorage.currentTask = $rootScope.r.currentTask = currentTask;
       }
       return $q.when($rootScope.r.currentTask);

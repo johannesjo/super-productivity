@@ -2,7 +2,7 @@
            class="was-idle-dialog">
   <md-dialog-content layout-padding>
     <form ng-submit="vm.trackIdleToTask()">
-      <p>You have been idle for <strong>{{ vm.idleTime|amDurationFormat:'minute' }}</strong>.</p>
+      <p>You have been idle for <strong>{{ vm.idleTime|duration:true }}</strong>.</p>
       <p>Select the task you want to track the time to, or just press cancel if you don't want to track the time.</p>
       <pre>{{ vm.currentTask|json }}</pre>
 
