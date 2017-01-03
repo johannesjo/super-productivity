@@ -6,7 +6,7 @@
  * Constant in the superProductivity.
  */
 
-(function() {
+(function () {
   'use strict';
 
   angular

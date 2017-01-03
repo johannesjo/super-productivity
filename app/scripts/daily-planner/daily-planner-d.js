@@ -38,7 +38,8 @@
       if (vm.newTask) {
         vm.tasks.push({
           title: vm.newTask,
-          id: Math.random().toString(36).substr(2, 10)
+          id: Math.random().toString(36).substr(2, 10),
+          created: $window.moment()
         });
         vm.newTask = '';
       }
@@ -51,7 +52,7 @@
     };
 
     vm.done = () => {
-      Dialogs('TASK_SELECTION', {tasks: vm.tasks})
+      Dialogs('TASK_SELECTION', { tasks: vm.tasks })
         .then(() => {
           $state.go('work-view');
         });
