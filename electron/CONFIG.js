@@ -1,4 +1,4 @@
 module.exports = {
-  PING_INTERVAL: 1000,
-  MIN_IDLE_TIME: 2000
+  PING_INTERVAL: 5000,
+  MIN_IDLE_TIME: 600 * 1000 // 10 minutes
 };
