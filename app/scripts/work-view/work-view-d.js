@@ -42,13 +42,9 @@
         if (!undoneTasks || undoneTasks.length === 0) {
           $state.go('daily-planner');
         } else {
-          console.log('I am here!');
-
           vm.currentTask = undoneTasks[0];
         }
       }
-
-      console.log('UPDATE WORKVIEW,', vm.currentTask);
 
       Tasks.updateCurrent(vm.currentTask);
 

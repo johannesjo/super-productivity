@@ -34,8 +34,6 @@
     vm.backlogTasks = $rootScope.r.backlogTasks;
     vm.currentTask = $rootScope.r.currentTask;
 
-    console.log(vm.currentTask);
-
     vm.addTask = () => {
       if (vm.newTask) {
         vm.tasks.push({

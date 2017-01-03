@@ -29,7 +29,6 @@
 
     if (angular.isDefined(window.ipcRenderer)) {
       window.ipcRenderer.on(IPC_EVENT_UPDATE_TIME_SPEND_FOR_CURRENT, (ev, timeSpend) => {
-        console.log('UPDATE TIME SPEND');
 
         // only track if there is a task
         if ($rootScope.r.currentTask) {
@@ -92,7 +91,6 @@
 
     // UPDATE DATA
     this.updateCurrent = (task) => {
-      console.log(task);
 
       // fix for when data messes up
       if (angular.isArray(task) && task[0]) {
