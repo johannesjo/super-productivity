@@ -46,19 +46,42 @@
     };
 
     vm.dragControlListeners = {
-      accept: function (sourceItemHandleScope, destSortableScope) {
+      accept: () => {
         return !vm.disableDropInto;
-      },
-      ////override to determine drag is allowed or not. default is true.
-      //itemMoved: function (event) {
-      //  //Do what you want},
-      //},
-      //orderChanged: function (event) {
-      //  //Do what you want,
-      //},
-      //containment: '#board', //optional param.
-      //clone: true, //optional param for clone feature.
-      //allowDuplicates: false //optional param allows duplicates to be dropped.
+      }
+    };
+
+    vm.handleKeyPress = ($event, task) => {
+      //console.log(task.title, $event);
+      //console.log($event.keyCode);
+
+      if ($event.keyCode) {
+        // t
+        if ($event.keyCode === 84) {
+          vm.estimateTime(task);
+        }
+        // n
+        if ($event.keyCode === 78) {
+          task.showNotes = true;
+        }
+        // d
+        if ($event.keyCode === 68) {
+          task.isDone = !task.isDone;
+        }
+        // entf
+        if ($event.keyCode === 46) {
+          vm.deleteTask(task.id);
+        }
+        // enter
+        if ($event.keyCode === 13) {
+          task.showEdit = true;
+        }
+        // escape
+        if ($event.keyCode === 27) {
+          task.showEdit = false;
+          task.showNotes = false;
+        }
+      }
     };
 
     vm.onTaskDoneChanged = (task) => {

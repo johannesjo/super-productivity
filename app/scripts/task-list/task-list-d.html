@@ -4,7 +4,10 @@
   <li class="task"
       as-sortable-item
       ng-class="{'is-current': vm.currentTask.id === task.id, 'is-done':task.isDone}"
-      ng-repeat="task in vm.tasks|limitTo:vm.limitTo|filter:vm.filter track by task.id">
+      ng-repeat="task in vm.tasks|limitTo:vm.limitTo|filter:vm.filter track by task.id"
+      tabindex="0"
+      ng-keydown="vm.handleKeyPress($event, task)"
+  >
     <div class="first-line"
          layout="row"
          as-sortable-item-handle
@@ -36,6 +39,7 @@
                  md-autofocus>
         </form>
         <span class="text"
+              tabindex="2"
               ng-show="!task.showEdit || task.isDone"
               ng-click="task.showEdit = true;">{{ task.title }}</span>
       </div>
@@ -47,6 +51,7 @@
       </div>
 
       <md-button class="md-icon-button"
+                 tabindex="2"
                  aria-label="time estimation"
                  ng-click="vm.estimateTime(task)">
         <ng-md-icon icon="access_time"
@@ -55,6 +60,7 @@
 
       <md-button class="md-icon-button"
                  aria-label="notes"
+                 tabindex="2"
                  ng-class="{'is-active':task.showNotes}"
                  ng-click="task.showNotes=!task.showNotes">
         <ng-md-icon icon="mode_comment"
@@ -62,6 +68,7 @@
       </md-button>
       <md-button class="md-icon-button"
                  aria-label="delete"
+                 tabindex="2"
                  ng-click="vm.deleteTask(task.id)">
         <ng-md-icon icon="delete_forever"
                     aria-label="delete"
@@ -69,6 +76,7 @@
       </md-button>
 
       <md-checkbox ng-model="task.isDone"
+                   tabindex="2"
                    ng-change="vm.onTaskDoneChanged(task)"
                    aria-label="un-/mark as done">
       </md-checkbox>
