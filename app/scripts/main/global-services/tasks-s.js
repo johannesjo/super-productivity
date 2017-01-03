@@ -78,6 +78,10 @@
       return $q.when($localStorage.backlogTasks);
     };
 
+    this.getDoneBacklog = () => {
+      return $q.when($localStorage.doneBacklogTasks);
+    };
+
     this.getToday = () => {
       return $q.when($localStorage.tasks);
     };
@@ -122,6 +126,16 @@
 
       // update global pointer
       $rootScope.r.backlogTasks = $localStorage.backlogTasks;
+
+      this.updateElectronStorage();
+      return $q.when({});
+    };
+
+    this.updateDoneBacklog = (tasks) => {
+      $localStorage.doneBacklogTasks = tasks;
+
+      // update global pointer
+      $rootScope.r.doneBacklogTasks = $localStorage.doneBacklogTasks;
 
       this.updateElectronStorage();
       return $q.when({});

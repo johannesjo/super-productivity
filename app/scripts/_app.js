@@ -39,6 +39,10 @@
     Tasks.getCurrent().then((task) => {
       $rootScope.r.currentTask = task;
     });
+
+    Tasks.getDoneBacklog().then((task) => {
+      $rootScope.r.doneBacklogTasks = task;
+    });
   }
 
   function checkIfStartedTodayAndInit() {
