@@ -58,7 +58,7 @@
     };
 
     $scope.$watch('vm.tasks', (mVal) => {
-      if (angular.isArray(mVal)) {
+      if (angular.isArray(mVal) && vm.tasks.length > 0) {
         vm.totaleEstimate = $window.moment.duration();
 
         for (let i = 0; i < mVal.length; i++) {
