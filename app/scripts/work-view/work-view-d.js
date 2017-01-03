@@ -25,16 +25,12 @@
   }
 
   /* @ngInject */
-  function WorkViewCtrl(Tasks, $scope, $state, $window) {
+  function WorkViewCtrl(Tasks, $rootScope, $scope, $state, $window) {
     let vm = this;
 
-    Tasks.getToday().then((tasks) => {
-      vm.tasks = tasks;
-    });
-
-    Tasks.getCurrent().then((task) => {
-      vm.currentTask = task;
-    });
+    vm.tasks = $rootScope.r.tasks;
+    vm.backlogTasks = $rootScope.r.backlogTasks;
+    vm.currentTask = $rootScope.r.currentTask;
 
     $scope.$watch('vm.currentTask', (mVal) => {
       if (mVal && mVal.isDone) {
@@ -51,6 +47,7 @@
       }
 
       Tasks.updateCurrent(vm.currentTask);
+
     }, true);
 
     $scope.$watch('vm.tasks', () => {

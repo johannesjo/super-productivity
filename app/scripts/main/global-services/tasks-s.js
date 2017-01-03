@@ -6,7 +6,7 @@
  * Service in the superProductivity.
  */
 
-(function () {
+(function() {
   'use strict';
 
   angular
@@ -29,26 +29,30 @@
 
     if (angular.isDefined(window.ipcRenderer)) {
       window.ipcRenderer.on(IPC_EVENT_UPDATE_TIME_SPEND_FOR_CURRENT, (ev, timeSpend) => {
-        let timeSpendCalculated;
-        let currentInAllTasks = $window._.find($localStorage.tasks, { id: $localStorage.currentTask.id });
+        // only track if there is a task
+        if ($localStorage.currentTask) {
+          let timeSpendCalculated;
+          let currentInAllTasks = $window._.find($localStorage.tasks, {id: $localStorage.currentTask.id});
 
-        if ($localStorage.currentTask.timeSpend) {
-          timeSpendCalculated = $window.moment.duration($localStorage.currentTask.timeSpend);
-          timeSpendCalculated.add($window.moment.duration({ milliseconds: timeSpend }));
-        } else {
-          timeSpendCalculated = $window.moment.duration(timeSpend);
+          if ($localStorage.currentTask.timeSpend) {
+            timeSpendCalculated = $window.moment.duration($localStorage.currentTask.timeSpend);
+            timeSpendCalculated.add($window.moment.duration({milliseconds: timeSpend}));
+          } else {
+            timeSpendCalculated = $window.moment.duration(timeSpend);
+          }
+
+          currentInAllTasks.timeSpend = timeSpendCalculated;
+
+          // update current task just to be save
+          $localStorage.currentTask = currentInAllTasks;
+
+          // we need to manually call apply as this is an outside event
+          $rootScope.$apply();
         }
-
-        currentInAllTasks.timeSpend = timeSpendCalculated;
-        $localStorage.currentTask.timeSpend = timeSpendCalculated;
-
-        // we need to manually call apply as this is an outside event
-        $rootScope.$apply();
-
       });
 
       window.ipcRenderer.on(IPC_EVENT_IDLE, (ev, idleTime) => {
-        Dialogs('WAS_IDLE', { idleTime: idleTime });
+        Dialogs('WAS_IDLE', {idleTime: idleTime});
       });
     }
 
@@ -64,6 +68,11 @@
 
     // GET DATA
     this.getCurrent = () => {
+      //let currentTask;
+      //if ($localStorage.currentTask) {
+      //  currentTask = $window._.find($localStorage.tasks, { id: $localStorage.currentTask.id });
+      //}
+
       return $q.when($localStorage.currentTask);
     };
 
@@ -85,19 +94,38 @@
 
     // UPDATE DATA
     this.updateCurrent = (task) => {
-      $localStorage.currentTask = task;
+      console.log(task);
+
+      // fix for when data messes up
+      if (angular.isArray(task) && task[0]) {
+        $localStorage.currentTask = task[0];
+      } else {
+        $localStorage.currentTask = task;
+      }
+
+      // update global pointer
+      $rootScope.r.currentTask = $localStorage.currentTask;
+
       this.updateElectronStorage();
       return $q.when({});
     };
 
     this.updateToday = (tasks) => {
       $localStorage.tasks = tasks;
+
+      // update global pointer
+      $rootScope.r.currentTask = $localStorage.tasks;
+
       this.updateElectronStorage();
       return $q.when({});
     };
 
     this.updateBacklog = (tasks) => {
       $localStorage.backlogTasks = tasks;
+
+      // update global pointer
+      $rootScope.r.backlogTasks = $localStorage.backlogTasks;
+
       this.updateElectronStorage();
       return $q.when({});
     };

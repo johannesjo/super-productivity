@@ -5,6 +5,7 @@
 
 <div class="work-view-tasks work-view-tasks--undone">
   <task-list tasks="vm.tasks"
+             current-task="vm.currentTask"
              allow-task-selection="true"
              filter="{isDone:'!true'}"></task-list>
 </div>
@@ -14,6 +15,7 @@
 <div class="work-view-tasks work-view-tasks--done">
   <task-list tasks="vm.tasks"
              disable-drop-into="true"
+             current-task="vm.currentTask"
              filter="{isDone:true}"></task-list>
 </div>
 

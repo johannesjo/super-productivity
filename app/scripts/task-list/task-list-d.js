@@ -5,7 +5,7 @@
  * # taskList
  */
 
-(function () {
+(function() {
   'use strict';
 
   angular
@@ -22,6 +22,7 @@
       restrict: 'E',
       scope: {
         tasks: '=',
+        currentTask: '=',
         limitTo: '@',
         filter: '=',
         allowTaskSelection: '@',
@@ -31,13 +32,11 @@
   }
 
   /* @ngInject */
-  function TaskListCtrl(Dialogs, $localStorage, $window) {
+  function TaskListCtrl(Dialogs, $rootScope, $window) {
     let vm = this;
 
-    vm.currentTask = $localStorage.currentTask;
-
     vm.estimateTime = (task) => {
-      Dialogs('TIME_ESTIMATE', { task });
+      Dialogs('TIME_ESTIMATE', {task});
     };
 
     vm.deleteTask = (taskId) => {
@@ -52,7 +51,7 @@
         if (vm.currentTask && vm.currentTask.id === task.id) {
           Dialogs('TASK_SELECTION')
             .then(() => {
-              vm.currentTask = $localStorage.currentTask;
+              vm.currentTask = $rootScope.r.currentTask;
             });
         }
       }

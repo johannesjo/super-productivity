@@ -5,7 +5,7 @@
  * # downloadBackup
  */
 
-(function () {
+(function() {
   'use strict';
 
   angular

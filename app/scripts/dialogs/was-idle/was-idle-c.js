@@ -14,13 +14,14 @@
     .controller('WasIdleCtrl', WasIdleCtrl);
 
   /* @ngInject */
-  function WasIdleCtrl($mdDialog, Tasks, idleTime, $window) {
+  function WasIdleCtrl($mdDialog, $rootScope, Tasks, $window, idleTime) {
     let vm = this;
 
     vm.idleTime = $window.moment.duration({ milliseconds: idleTime });
 
     Tasks.getUndoneToday().then((tasks) => {
       vm.undoneTasks = tasks;
+      vm.selectedTask = $rootScope.r.currentTask;
     });
 
     vm.trackIdleToTask = () => {
@@ -28,6 +29,8 @@
       timeSpendCalculated.add(vm.idleTime);
       vm.selectedTask.timeSpend = timeSpendCalculated;
 
+      // set current task to the selected one
+      Tasks.updateCurrent(vm.selectedTask);
       $mdDialog.hide();
     };
 

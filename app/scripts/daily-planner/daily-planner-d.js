@@ -5,7 +5,7 @@
  * # dailyPlanner
  */
 
-(function () {
+(function() {
   'use strict';
 
   angular
@@ -25,18 +25,14 @@
   }
 
   /* @ngInject */
-  function DailyPlannerCtrl($scope, Tasks, Dialogs, $state, $window) {
+  function DailyPlannerCtrl($scope, $rootScope, Tasks, Dialogs, $state, $window) {
     let vm = this;
 
     vm.limitBacklogTo = 3;
 
-    Tasks.getToday().then((tasks) => {
-      vm.tasks = tasks;
-    });
-
-    Tasks.getBacklog().then((tasks) => {
-      vm.backlogTasks = tasks;
-    });
+    vm.tasks = $rootScope.r.tasks;
+    vm.backlogTasks = $rootScope.r.backlogTasks;
+    vm.currentTask = $rootScope.r.currentTask;
 
     vm.addTask = () => {
       if (vm.newTask) {
@@ -55,7 +51,7 @@
     };
 
     vm.done = () => {
-      Dialogs('TASK_SELECTION', { tasks: vm.tasks })
+      Dialogs('TASK_SELECTION', {tasks: vm.tasks})
         .then(() => {
           $state.go('work-view');
         });
