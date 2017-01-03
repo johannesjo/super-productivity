@@ -52,10 +52,15 @@
     };
 
     vm.done = () => {
-      Dialogs('TASK_SELECTION', { tasks: vm.tasks })
-        .then(() => {
-          $state.go('work-view');
-        });
+      // only open if there is no current task already selected
+      if (!vm.currentTask) {
+        Dialogs('TASK_SELECTION', { tasks: vm.tasks })
+          .then(() => {
+            $state.go('work-view');
+          });
+      } else {
+        $state.go('work-view');
+      }
     };
 
     $scope.$watch('vm.tasks', (mVal) => {
