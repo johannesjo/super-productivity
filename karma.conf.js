@@ -28,6 +28,7 @@ module.exports = function(config) {
             'app/bower_components/lodash/lodash.js',
             'app/bower_components/moment/moment.js',
             'app/bower_components/angular-moment/angular-moment.js',
+            'app/bower_components/ng-sortable/dist/ng-sortable.js',
             'app/bower_components/angular-mocks/angular-mocks.js',
             // endbower
 

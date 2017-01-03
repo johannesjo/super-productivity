@@ -1,14 +1,13 @@
 <ul class="task-list"
-    dnd-list="vm.tasks">
+    as-sortable="vm.dragControlListeners"
+    ng-model="vm.tasks">
   <li class="task"
-      dnd-draggable="task"
-      dnd-effect-allowed="move"
-      dnd-disable-if="vm.disableDropInto"
-      dnd-moved="vm.deleteTask(task.id);"
+      as-sortable-item
       ng-class="{'is-current': vm.currentTask.id === task.id, 'is-done':task.isDone}"
-      ng-repeat="task in vm.tasks|limitTo:vm.limitTo|filter:vm.filter ">
+      ng-repeat="task in vm.tasks|limitTo:vm.limitTo|filter:vm.filter track by task.id">
     <div class="first-line"
          layout="row"
+         as-sortable-item-handle
          layout-align="center center">
       <ng-md-icon class="handle"
                   flex="none"
@@ -78,7 +77,7 @@
 
     <div class="notes"
          flex="100"
-         ng-show="task.showNotes===true">
+         ng-if="task.showNotes===true">
       <label>Notes</label>
       <textarea ng-model="task.notes"
                 rows="5"

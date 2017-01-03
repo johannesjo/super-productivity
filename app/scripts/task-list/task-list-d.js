@@ -5,7 +5,7 @@
  * # taskList
  */
 
-(function() {
+(function () {
   'use strict';
 
   angular
@@ -36,13 +36,29 @@
     let vm = this;
 
     vm.estimateTime = (task) => {
-      Dialogs('TIME_ESTIMATE', {task});
+      Dialogs('TIME_ESTIMATE', { task });
     };
 
     vm.deleteTask = (taskId) => {
       $window._.remove(vm.tasks, {
         id: taskId
       });
+    };
+
+    vm.dragControlListeners = {
+      accept: function (sourceItemHandleScope, destSortableScope) {
+        return !vm.disableDropInto;
+      },
+      ////override to determine drag is allowed or not. default is true.
+      //itemMoved: function (event) {
+      //  //Do what you want},
+      //},
+      //orderChanged: function (event) {
+      //  //Do what you want,
+      //},
+      //containment: '#board', //optional param.
+      //clone: true, //optional param for clone feature.
+      //allowDuplicates: false //optional param allows duplicates to be dropped.
     };
 
     vm.onTaskDoneChanged = (task) => {

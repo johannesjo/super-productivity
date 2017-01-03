@@ -17,9 +17,9 @@
       'ngResource',
       'ui.router',
       'ngStorage',
-      'dndLists',
       'ngMaterial',
       'ngMdIcons',
+      'as.sortable',
       'angularMoment'
     ])
     .run(initGlobalTaskModel)

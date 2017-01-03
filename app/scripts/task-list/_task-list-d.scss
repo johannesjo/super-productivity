@@ -8,12 +8,13 @@ task-list {
   // add a little padding to top and bottom, to make drag dropping easier
   padding: 5px 0;
   margin: 0;
+  display: block;
 
-  .dndDraggingSource {
-    display: none;
-  }
+  .as-sortable-placeholder,
   .dndPlaceholder {
     background-color: #ddd;
+    margin: 1px 2px 5px 1px;
+    border-radius: 10px;
     display: block;
     min-height: 62px;
   }
@@ -26,8 +27,7 @@ task-list {
   border: 1px solid #ddd;
   border-radius: 4px;
   padding: 10px 15px;
-  margin-bottom: -1px;
-  flex-wrap: wrap;
+  display: block;
 
   .first-line {
     display: flex;
