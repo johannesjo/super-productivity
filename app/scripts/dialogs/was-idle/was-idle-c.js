@@ -22,6 +22,7 @@
     Tasks.getUndoneToday().then((tasks) => {
       vm.undoneTasks = tasks;
       vm.selectedTask = $rootScope.r.currentTask;
+      console.log('WAS_IDLE_CTRL', vm.selectedTask);
     });
 
     vm.trackIdleToTask = () => {

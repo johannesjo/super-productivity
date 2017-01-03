@@ -5,7 +5,7 @@
  * # dailyPlanner
  */
 
-(function() {
+(function () {
   'use strict';
 
   angular
@@ -34,6 +34,8 @@
     vm.backlogTasks = $rootScope.r.backlogTasks;
     vm.currentTask = $rootScope.r.currentTask;
 
+    console.log(vm.currentTask);
+
     vm.addTask = () => {
       if (vm.newTask) {
         vm.tasks.push({
@@ -51,7 +53,7 @@
     };
 
     vm.done = () => {
-      Dialogs('TASK_SELECTION', {tasks: vm.tasks})
+      Dialogs('TASK_SELECTION', { tasks: vm.tasks })
         .then(() => {
           $state.go('work-view');
         });

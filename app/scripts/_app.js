@@ -7,7 +7,7 @@
  * Main module of the application.
  */
 
-(function() {
+(function () {
   'use strict';
 
   angular
