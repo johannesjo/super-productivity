@@ -32,7 +32,7 @@
   }
 
   /* @ngInject */
-  function TaskListCtrl(Dialogs, $rootScope, $window) {
+  function TaskListCtrl(Dialogs, $rootScope, $window, $mdDialog) {
     let vm = this;
 
     vm.estimateTime = (task) => {
@@ -40,8 +40,16 @@
     };
 
     vm.deleteTask = (taskId) => {
-      $window._.remove(vm.tasks, {
-        id: taskId
+      $mdDialog.show(
+        $mdDialog.confirm()
+          .title('Do you really want to delete this task?')
+          .ariaLabel('Delete Task')
+          .ok('Please do it!')
+          .cancel('Better not!')
+      ).then(function () {
+        $window._.remove(vm.tasks, {
+          id: taskId
+        });
       });
     };
 
