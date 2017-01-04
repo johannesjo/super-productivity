@@ -62,6 +62,14 @@ task-list {
     }
   }
 
+  .md-bar {
+    background-color: #3f8445 !important;
+  }
+  md-progress-linear.md-default-theme .md-container,
+  md-progress-linear .md-container {
+    background: none;
+  }
+
   form {
     width: 100%;
   }

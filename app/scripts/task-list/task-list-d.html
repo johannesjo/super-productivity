@@ -7,6 +7,7 @@
       ng-repeat="task in vm.tasks|limitTo:vm.limitTo|filter:vm.filter track by task.id"
       tabindex="1"
       ng-keydown="vm.handleKeyPress($event, task)">
+
     <div class="first-line"
          layout="row"
          as-sortable-item-handle
@@ -76,6 +77,11 @@
       </md-checkbox>
 
     </div>
+
+
+    <md-progress-linear md-mode="determinate"
+                        ng-show="task.progress"
+                        value="{{task.progress}}"></md-progress-linear>
 
     <div class="notes"
          flex="100"

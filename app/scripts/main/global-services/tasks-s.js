@@ -26,6 +26,7 @@
 
     // SETUP HANDLERS FOR ELECTRON EVENTS
     if (angular.isDefined(window.ipcRenderer)) {
+      let that = this;
 
       // handler for time spend tracking
       window.ipcRenderer.on(IPC_EVENT_UPDATE_TIME_SPEND_FOR_CURRENT, (ev, timeSpend) => {
@@ -62,6 +63,8 @@
           $rootScope.r.currentTask.timeSpendOnDay[todayStr] = timeSpendCalculatedOnDay;
 
           $rootScope.r.currentTask.lastWorkedOn = $window.moment();
+
+          that.updateCurrent($rootScope.r.currentTask);
 
           // we need to manually call apply as this is an outside event
           $rootScope.$apply();
@@ -144,6 +147,16 @@
 
     // UPDATE DATA
     this.updateCurrent = (task) => {
+      // calc progress
+      if (task && task.timeSpend && task.timeEstimate) {
+        if ($window.moment.duration().format && angular.isFunction($window.moment.duration().format)) {
+          task.progress = parseInt(
+            $window.moment.duration(task.timeSpend).format('ss')
+            / $window.moment.duration(task.timeEstimate).format('ss')
+            * 100, 10
+          );
+        }
+      }
       $localStorage.currentTask = task;
       // update global pointer
       $rootScope.r.currentTask = $localStorage.currentTask;
