@@ -53,7 +53,11 @@
                  tabindex="2"
                  ng-class="{'is-active':task.showNotes}"
                  ng-click="task.showNotes=!task.showNotes">
+        <ng-md-icon icon="insert_comment"
+                    ng-if="task.notes"
+                    aria-label="notes"></ng-md-icon>
         <ng-md-icon icon="mode_comment"
+                    ng-if="!task.notes"
                     aria-label="notes"></ng-md-icon>
       </md-button>
       <md-button class="md-icon-button"
