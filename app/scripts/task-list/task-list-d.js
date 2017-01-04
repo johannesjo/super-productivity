@@ -82,7 +82,7 @@
         }
         // enter
         if ($event.keyCode === 13) {
-          task.showEdit = true;
+          task.showEdit = [true];
         }
         // escape
         if ($event.keyCode === 27) {

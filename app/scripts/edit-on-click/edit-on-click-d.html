@@ -1,0 +1,15 @@
+<form ng-show="vm.showEdit"
+      ng-submit="vm.showEdit=false;">
+  <input type="text"
+         ng-disabled="vm.isDone"
+         ng-model="vm.editOnClick"
+         ng-blur="vm.showEdit=false;"
+         md-auto-focus
+         tabindex="2"
+         md-autofocus>
+</form>
+<span class="text"
+      tabindex="2"
+      ng-keypress="vm.toggleShowEdit()"
+      ng-click="vm.toggleShowEdit()"
+      ng-show="!vm.showEdit">{{ vm.editOnClick }}</span>

@@ -28,19 +28,10 @@
            layout="row"
            layout-align="center center">
 
-        <form ng-show="task.showEdit && !task.isDone"
-              ng-submit="task.showEdit=false;">
-          <input type="text"
-                 ng-disabled="task.isDone"
-                 ng-model="task.title"
-                 ng-blur="task.showEdit=false;"
-                 md-auto-focus
-                 md-autofocus>
-        </form>
         <span class="text"
               tabindex="2"
-              ng-show="!task.showEdit || task.isDone"
-              ng-click="task.showEdit = true;">{{ task.title }}</span>
+              edit-on-click-toggle="task.showEdit"
+              edit-on-click="task.title">{{ task.title }}</span>
       </div>
 
       <div class="time"
