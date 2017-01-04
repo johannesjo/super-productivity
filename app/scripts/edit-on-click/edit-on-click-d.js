@@ -44,6 +44,10 @@
         vm.toggleShowEdit();
         mVal[0] = false;
       }
+
+      if (mVal === false) {
+        vm.showEdit = false;
+      }
     });
   }
 
