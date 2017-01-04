@@ -23,6 +23,7 @@
       'angularMoment'
     ])
     .run(initGlobalTaskModel)
+    .run(initGlobalShortcuts)
     .run(showNoteForToday);
 
   function initGlobalTaskModel(Tasks, $rootScope, $localStorage) {
@@ -50,4 +51,16 @@
       );
     }
   }
+
+  function initGlobalShortcuts($document, Dialogs) {
+    // we just use this single one as this usually does mess
+    // up with the default browser shortcuts
+    // better to use the global electron shortcuts here
+    $document.bind('keypress', (ev) => {
+      if (ev.key === '*') {
+        Dialogs('ADD_TASK');
+      }
+    });
+  }
+
 })();
