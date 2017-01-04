@@ -1,3 +1,8 @@
 main-header {
+  .md-button {
 
+    &.is-active {
+      outline: 2px solid #fff;
+    }
+  }
 }
