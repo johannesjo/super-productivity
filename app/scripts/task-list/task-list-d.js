@@ -60,9 +60,6 @@
     };
 
     vm.handleKeyPress = ($event, task) => {
-      console.log(task.title, $event);
-      console.log($event.keyCode);
-
       if ($event.keyCode) {
         // t
         if ($event.keyCode === 84) {
