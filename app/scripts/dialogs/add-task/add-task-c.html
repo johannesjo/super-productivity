@@ -1,7 +1,7 @@
-<md-dialog aria-label="Was Idle Dialog"
-           class="was-idle-dialog">
-  <md-dialog-content layout-padding>
-    <form ng-submit="vm.addTask()">
+<form ng-submit="vm.addTask()">
+  <md-dialog aria-label="Was Idle Dialog"
+             class="was-idle-dialog">
+    <md-dialog-content layout-padding>
       <h2 class="md-title">Create a new task</h2>
 
       <md-input-container class="md-block">
@@ -30,18 +30,19 @@
         <textarea ng-model="vm.task.notes"
                   aria-label="Notes"></textarea>
       </md-input-container>
-    </form>
-  </md-dialog-content>
+    </md-dialog-content>
 
-  <md-dialog-actions>
-    <md-button ng-click="vm.addTask()"
-               class="md-primary md-raised">
-      Save
-    </md-button>
+    <md-dialog-actions>
+      <md-button type="submit"
+                 class="md-primary md-raised">
+        Save
+      </md-button>
 
-    <md-button ng-click="vm.cancel()"
-               class="md-primary md-raised">
-      Dismiss
-    </md-button>
-  </md-dialog-actions>
-</md-dialog>
+      <md-button ng-click="vm.cancel()"
+                 type="button"
+                 class="md-primary md-raised">
+        Dismiss
+      </md-button>
+    </md-dialog-actions>
+  </md-dialog>
+</form>
