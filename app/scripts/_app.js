@@ -28,28 +28,18 @@
   function initGlobalTaskModel(Tasks, $rootScope, $localStorage) {
     $rootScope.r = {};
 
-    Tasks.getToday().then((tasks) => {
-      $rootScope.r.tasks = tasks;
-    });
+    $rootScope.r.tasks = Tasks.getToday();
 
-    Tasks.getBacklog().then((tasks) => {
-      $rootScope.r.backlogTasks = tasks;
-    });
+    $rootScope.r.backlogTasks = Tasks.getBacklog();
 
-    Tasks.getCurrent().then((task) => {
-      $rootScope.r.currentTask = task;
-    });
+    $rootScope.r.currentTask = Tasks.getCurrent();
 
-    Tasks.getDoneBacklog().then((task) => {
-      $rootScope.r.doneBacklogTasks = task;
-    });
+    $rootScope.r.doneBacklogTasks = Tasks.getDoneBacklog();
 
     $rootScope.r.noteForToday = $localStorage.tomorrowsNote;
   }
 
   function showNoteForToday($rootScope, $mdToast) {
-    console.log('I am here!', $rootScope.r.noteForToday);
-
     if ($rootScope.r.noteForToday) {
       $mdToast.show(
         $mdToast.simple()

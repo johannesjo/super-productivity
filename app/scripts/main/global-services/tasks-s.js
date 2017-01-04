@@ -74,7 +74,6 @@
       });
     }
 
-
     // GET DATA
     this.getCurrent = () => {
       let currentTask;
@@ -82,43 +81,33 @@
         currentTask = $window._.find($localStorage.tasks, { id: $localStorage.currentTask.id });
         $localStorage.currentTask = $rootScope.r.currentTask = currentTask;
       }
-      return $q.when($rootScope.r.currentTask);
+      return $rootScope.r.currentTask;
     };
 
     this.getBacklog = () => {
-      return $q.when($localStorage.backlogTasks);
+      return $localStorage.backlogTasks;
     };
 
     this.getDoneBacklog = () => {
-      return $q.when($localStorage.doneBacklogTasks);
+      return $localStorage.doneBacklogTasks;
     };
 
     this.getToday = () => {
-      return $q.when($localStorage.tasks);
+      return $localStorage.tasks;
     };
 
     this.getUndoneToday = () => {
-      let tasks = $window._.filter($localStorage.tasks, (task) => {
+      return $window._.filter($localStorage.tasks, (task) => {
         return task && !task.isDone;
       });
-
-      return $q.when(tasks);
     };
 
     // UPDATE DATA
     this.updateCurrent = (task) => {
-
-      // fix for when data messes up
-      if (angular.isArray(task) && task[0]) {
-        $localStorage.currentTask = task[0];
-      } else {
-        $localStorage.currentTask = task;
-      }
+      $localStorage.currentTask = task;
 
       // update global pointer
       $rootScope.r.currentTask = $localStorage.currentTask;
-
-      return $q.when({});
     };
 
     this.updateToday = (tasks) => {
@@ -126,8 +115,6 @@
 
       // update global pointer
       $rootScope.r.tasks = $localStorage.tasks;
-
-      return $q.when({});
     };
 
     this.updateBacklog = (tasks) => {
@@ -135,8 +122,6 @@
 
       // update global pointer
       $rootScope.r.backlogTasks = $localStorage.backlogTasks;
-
-      return $q.when({});
     };
 
     this.addTasksToTopOfBacklog = (tasks) => {
@@ -144,8 +129,6 @@
 
       // update global pointer
       $rootScope.r.backlogTasks = $localStorage.backlogTasks;
-
-      return $q.when({});
     };
 
     this.updateDoneBacklog = (tasks) => {
@@ -153,8 +136,6 @@
 
       // update global pointer
       $rootScope.r.doneBacklogTasks = $localStorage.doneBacklogTasks;
-
-      return $q.when({});
     };
 
     this.addDoneTasksToDoneBacklog = (tasks) => {
@@ -166,8 +147,6 @@
 
       // update global pointer
       $rootScope.r.doneBacklogTasks = $localStorage.doneBacklogTasks;
-
-      return $q.when({});
     };
 
     this.finishDay = (clearDoneTasks, moveUnfinishedToBacklog) => {

@@ -25,7 +25,7 @@
   }
 
   /* @ngInject */
-  function WorkViewCtrl(Tasks, $rootScope, $scope, $state, $window) {
+  function WorkViewCtrl(Tasks, $rootScope, $scope, $state) {
     let vm = this;
 
     vm.tasks = $rootScope.r.tasks;
@@ -34,9 +34,7 @@
 
     $scope.$watch('vm.currentTask', (mVal) => {
       if (mVal && mVal.isDone) {
-        let undoneTasks = $window._.filter(vm.tasks, (task) => {
-          return task && !task.isDone;
-        });
+        let undoneTasks = Tasks.getUndoneToday();
 
         // go to daily planner if there are no undone tasks left
         if (!undoneTasks || undoneTasks.length === 0) {
@@ -48,10 +46,6 @@
 
       Tasks.updateCurrent(vm.currentTask);
 
-    }, true);
-
-    $scope.$watch('vm.tasks', () => {
-      Tasks.updateToday(vm.tasks);
     }, true);
   }
 
