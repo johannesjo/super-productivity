@@ -56,6 +56,10 @@
 
         isValid = seconds || minutes || hours || days;
 
+        if (attrs.inputDuration === 'optional' && strValue.trim().length <= 1) {
+          isValid = true;
+        }
+
         ngModelCtrl.$setValidity('inputDuration', !!isValid);
 
         if (isValid) {
