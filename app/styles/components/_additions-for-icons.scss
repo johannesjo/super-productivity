@@ -80,3 +80,11 @@ md-tabs-wrapper md-next-button ng-md-icon {
   -webkit-transform: translate3d(-50%, -50%, 0) rotate(180deg);
   transform: translate3d(-50%, -50%, 0) rotate(180deg);
 }
+
+
+md-input-container > ng-md-icon {
+  position: absolute;
+  top: 5px;
+  left: 2px; }
+md-input-container > ng-md-icon + input {
+  margin-left: 56px; }

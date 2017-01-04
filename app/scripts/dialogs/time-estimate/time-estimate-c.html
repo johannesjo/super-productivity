@@ -1,40 +1,52 @@
-<md-dialog aria-label="Time estimation dialog"
-           class="dialog-time-estimate">
-  <md-toolbar class="demo-toolbar md-primary _md _md-toolbar-transitions">
-    Make an estimate
-  </md-toolbar>
-  <md-dialog-content layout-padding>
-    <form layout="row"
-          layout-align="center center"
-          ng-submit="vm.submit(vm.timeEstimate)">
-      <md-input-container>
+<form ng-submit="vm.submit(vm.timeEstimate, vm.timeSpend)">
+
+  <md-dialog aria-label="Time estimation dialog"
+             class="dialog-time-estimate">
+
+    <md-dialog-content layout-padding
+                       class="md-no-momentum">
+      <h2 class="md-title">Make an estimate</h2>
+
+      <md-input-container class="md-icon-float md-block">
         <ng-md-icon icon="access_time"
                     aria-label="Estimated Durations"></ng-md-icon>
+        <label>Estimated Duration</label>
+
         <input type="text"
                input-duration
                ng-model="vm.timeEstimate"
                md-auto-focus
                aria-label="Estimated Durations">
       </md-input-container>
-    </form>
+      <md-input-container class="md-icon-float md-block">
+        <ng-md-icon icon="access_time"
+                    aria-label="Time Spend"></ng-md-icon>
+        <label>Time Spend total</label>
+        <input type="text"
+               input-duration="optional"
+               ng-model="vm.timeSpend"
+               aria-label="Time Spend">
+      </md-input-container>
 
+      <!--<button type="submit">SUB</button>-->
 
-    <div class="side-info">
-      Examples:<br>
-      30m => 30 minutes<br>
-      2h => 2 hours<br>
-      2h 30m => 2 hours and 30 minutes
-    </div>
-
-  </md-dialog-content>
-  <md-dialog-actions>
-    <md-button ng-click="vm.submit(vm.timeEstimate)"
-               class="md-primary">
-      Save
-    </md-button>
-    <md-button ng-click="vm.close()"
-               class="md-primary">
-      Cancel
-    </md-button>
-  </md-dialog-actions>
-</md-dialog>
+      <div class="side-info">
+        Examples:<br>
+        30m => 30 minutes<br>
+        2h => 2 hours<br>
+        2h 30m => 2 hours and 30 minutes
+      </div>
+    </md-dialog-content>
+    <md-dialog-actions>
+      <md-button ng-click="vm.submit(vm.timeEstimate, vm.timeSpend)"
+                 type="submit"
+                 class="md-primary">
+        Save
+      </md-button>
+      <md-button ng-click="vm.close()"
+                 class="md-primary">
+        Cancel
+      </md-button>
+    </md-dialog-actions>
+  </md-dialog>
+</form>

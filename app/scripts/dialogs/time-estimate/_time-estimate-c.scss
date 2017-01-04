@@ -1,5 +1,10 @@
 .dialog-time-estimate {
   md-input-container {
-    overflow: hidden;
+    margin-left: 30px;
+  }
+  ng-md-icon {
+    position: absolute;
+    left: -30px !important;
+    top: 6px !important;
   }
 }
