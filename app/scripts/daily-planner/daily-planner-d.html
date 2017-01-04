@@ -9,19 +9,16 @@
 
     </div>
     <form ng-submit="vm.addTask()">
-      <md-input-container md-no-float
-                          class="md-block"
-                          layout="row">
+      <md-input-container class="md-block md-icon-float">
         <ng-md-icon icon="mode_edit"></ng-md-icon>
 
+        <label>Enter a task and press enter to add</label>
         <input class="text-input"
-               md-autofocus
                tabindex="1"
-               ng-model="vm.newTask"
-               placeholder="Enter a task and press enter to add">
+               autofocus
+               ng-model="vm.newTask">
 
       </md-input-container>
-
     </form>
 
     <div class="done"
