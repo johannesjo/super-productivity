@@ -26,7 +26,7 @@
   }
 
   /* @ngInject */
-  function DailySummaryCtrl($rootScope, $window, $localStorage, Tasks, $mdDialog) {
+  function DailySummaryCtrl($rootScope, $window, $localStorage, Tasks, $mdDialog, $state) {
     const IPC_EVENT_SHUTDOWN = 'SHUTDOWN';
 
     let vm = this;

@@ -25,7 +25,7 @@
   }
 
   /* @ngInject */
-  function DailyPlannerCtrl($scope, $rootScope, Tasks, Dialogs, $state, $window) {
+  function DailyPlannerCtrl($scope, $rootScope, Tasks, Dialogs, $state) {
     let vm = this;
 
     vm.limitBacklogTo = 3;
