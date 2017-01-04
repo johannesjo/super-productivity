@@ -41,6 +41,24 @@
             rows="4"></textarea>
 </md-input-container>
 
+<div layout-wrap
+     layout-gt-sm="row">
+  <div flex-gt-sm="50">
+    <md-checkbox ng-init="vm.clearDoneTasks = true;"
+                 ng-model="vm.clearDoneTasks"
+                 aria-label="Clear done tasks">
+      Clear done tasks
+    </md-checkbox>
+  </div>
+  <div flex-gt-sm="50">
+    <md-checkbox ng-model="vm.moveUnfinishedToBacklog"
+                 aria-label="Move unfinished tasks to backlog">
+      Move unfinished tasks to backlog
+    </md-checkbox>
+  </div>
+</div>
+
+
 <md-button class="md-raised md-primary"
            ng-click="vm.finishDay()">Clear done tasks, save and go home
 </md-button>

@@ -152,6 +152,16 @@
       return $q.when({});
     };
 
+    this.addTasksToTopOfBacklog = (tasks) => {
+      $localStorage.backlogTasks = tasks.concat($localStorage.backlogTasks);
+
+      // update global pointer
+      $rootScope.r.backlogTasks = $localStorage.backlogTasks;
+
+      this.updateElectronStorage();
+      return $q.when({});
+    };
+
     this.updateDoneBacklog = (tasks) => {
       $localStorage.doneBacklogTasks = tasks;
 
@@ -162,7 +172,54 @@
       return $q.when({});
     };
 
-    // AngularJS will instantiate a singleton by calling "new" on this function
+    this.addDoneTasksToDoneBacklog = (tasks) => {
+      let doneTasks = $window._.filter($localStorage.tasks, (task) => {
+        return task.isDone === true;
+      });
+
+      $localStorage.doneBacklogTasks = doneTasks.concat($localStorage.doneBacklogTasks);
+
+      // update global pointer
+      $rootScope.r.doneBacklogTasks = $localStorage.doneBacklogTasks;
+
+      this.updateElectronStorage();
+      return $q.when({});
+    };
+
+    this.finishDay = (clearDoneTasks, moveUnfinishedToBacklog) => {
+      if (clearDoneTasks) {
+
+        // move to done backlog
+        this.addTasksToDoneBacklog(vm.doneTasks).then(() => {
+
+          //move unfinished to backlog
+          if (moveUnfinishedToBacklog) {
+            // move tasks to top of backlog
+            this.addTasksToTopOfBacklog(vm.undoneTasks).then(() => {
+              // empty today
+              this.updateToday([]).then(() => {
+                // finally
+              });
+            });
+
+          } else {
+            // update todays task to only contain unfinished tasks
+            this.updateToday(vm.undoneTasks).then(() => {
+              // finally
+
+            });
+          }
+
+        });
+      } else {
+        //move unfinished to backlog
+        if (moveUnfinishedToBacklog) {
+          this.updateToday(vm.doneTasks).then(() => {
+            // finally
+          });
+        }
+      }
+    };
   }
 
 })();
