@@ -21,7 +21,10 @@
       controllerAs: 'vm',
       restrict: 'E',
       transclude: true,
-      scope: {},
+      scope: {
+        title: '@',
+        subTitle:'@'
+      },
       replace: true
     };
   }

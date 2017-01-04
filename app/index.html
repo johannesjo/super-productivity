@@ -24,9 +24,9 @@ TODO configure more restrictive Content-Security-Policy
 
   <!-- build:css({.tmp,app}) styles/vendor.css -->
   <!-- bower:css -->
-  <link rel="stylesheet" href="bower_components/angular-material/angular-material.css" />
-  <link rel="stylesheet" href="bower_components/angular-material-icons/angular-material-icons.css" />
-  <link rel="stylesheet" href="bower_components/ng-sortable/dist/ng-sortable.css" />
+  <link rel="stylesheet" href="bower_components/angular-material/angular-material.css"/>
+  <link rel="stylesheet" href="bower_components/angular-material-icons/angular-material-icons.css"/>
+  <link rel="stylesheet" href="bower_components/ng-sortable/dist/ng-sortable.css"/>
   <!-- endbower -->
   <!-- endbuild -->
 
@@ -45,6 +45,25 @@ TODO configure more restrictive Content-Security-Policy
 <md-content md-scroll-y
             layout="column"
             flex>
+
+  <div layout="row">
+    <div flex-xs
+         flex-gt-xs="50">
+      <hint ng-if="r.noteForToday"
+            title="Your yesterdays note for today">
+        <p>{{ r.noteForToday }}</p>
+      </hint>
+    </div>
+    <div flex-xs
+         flex-gt-xs="50">
+      <hint ng-if="r.productivityTip"
+            sub-title="{{ r.productivityTip.subTitle }}"
+            title="{{ r.productivityTip.title }}">
+        <p>{{ r.productivityTip.content}}</p>
+      </hint>
+    </div>
+  </div>
+
   <main ui-view></main>
 </md-content>
 
