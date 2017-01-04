@@ -60,7 +60,19 @@
     };
 
     vm.handleKeyPress = ($event, task) => {
-      if ($event.keyCode) {
+      // only trigger if target is li
+
+      let taskEl = $event.currentTarget || $event.srcElement || $event.originalTarget;
+
+      // escape
+      if ($event.keyCode === 27) {
+        task.showEdit = false;
+        task.showNotes = false;
+
+        taskEl.focus();
+      }
+
+      if ($event.target.tagName !== 'INPUT' && $event.target.tagName !== 'TEXTAREA') {
         // t
         if ($event.keyCode === 84) {
           vm.estimateTime(task);
@@ -81,11 +93,6 @@
         if ($event.keyCode === 13) {
           task.showEdit = [true];
         }
-        // escape
-        if ($event.keyCode === 27) {
-          task.showEdit = false;
-          task.showNotes = false;
-        }
 
         // moving items via shift+ctrl+keyUp/keyDown
         if ($event.shiftKey === true && $event.ctrlKey === true) {
@@ -97,8 +104,7 @@
           if ($event.keyCode === 38) {
             if (taskIndex > 0) {
               vm.moveItem(vm.tasks, taskIndex, taskIndex - 1);
-              // we need to manually re-add focus
-              let taskEl = $event.target;
+              // we need to manually re-add focus after timeout
               $timeout(() => {
                 taskEl.focus();
               });
