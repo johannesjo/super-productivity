@@ -45,8 +45,13 @@
       }
 
       Tasks.updateCurrent(vm.currentTask);
-
     }, true);
+
+    // watch for total time spent today
+    $scope.$watch('vm.tasks', () => {
+      vm.totalTimeWorkedToday = Tasks.getTimeWorkedToday();
+    }, true);
+
   }
 
 })();

@@ -35,7 +35,7 @@
           let timeSpendCalculatedOnDay;
 
           // use mysql date as it is sortable
-          let todayStr = $window.moment().format('YYYY-MM-DD');
+          let todayStr = this.getTodayStr();
 
           // track total time spend
           if ($rootScope.r.currentTask.timeSpend) {
@@ -74,6 +74,11 @@
       });
     }
 
+    // UTILITY
+    this.getTodayStr = () => {
+      return $window.moment().format('YYYY-MM-DD');
+    };
+
     // GET DATA
     this.getCurrent = () => {
       let currentTask;
@@ -106,6 +111,22 @@
       return $window._.filter($localStorage.tasks, (task) => {
         return task && task.isDone;
       });
+    };
+
+    this.getTimeWorkedToday = () => {
+      let tasks = this.getToday();
+      let todayStr = this.getTodayStr();
+      let totalTimeWorkedToday;
+      if (tasks.length > 0) {
+        totalTimeWorkedToday = $window.moment.duration();
+        for (let i = 0; i < tasks.length; i++) {
+          let task = tasks[i];
+          if (task.timeSpendOnDay && task.timeSpendOnDay[todayStr]) {
+            totalTimeWorkedToday.add(task.timeSpendOnDay[todayStr]);
+          }
+        }
+      }
+      return totalTimeWorkedToday;
     };
 
     // UPDATE DATA
