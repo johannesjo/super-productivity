@@ -17,11 +17,12 @@
   function duration($window) {
     return function (input, longWords) {
       let output = '';
-      input = $window.moment.duration(input);
+      input = angular.copy($window.moment.duration(input));
 
       if (!longWords) {
         if (input._data.days) {
-          output = input._data.days + 'd ';
+          //output = input._data.days + 'd ';
+          input._data.hours = input._data.hours + (input._data.days * 24);
         }
         if (input._data.hours) {
           output += input._data.hours + 'h ';
@@ -34,7 +35,8 @@
         }
       } else {
         if (input._data.days) {
-          output = input._data.days + ' days ';
+          //output = input._data.days + ' days ';
+          input._data.hours = input._data.hours + (input._data.days * 24);
         }
         if (input._data.hours) {
           output += input._data.hours + ' hours ';
