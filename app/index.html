@@ -39,11 +39,14 @@ TODO configure more restrictive Content-Security-Policy
 <body ng-app="superProductivity"
       layout="column"
       flex
-      layout-fill
       ng-cloak>
 
-<main-header></main-header>
-<main ui-view></main>
+<main-header class="md-whiteframe-glow-z1"></main-header>
+<md-content md-scroll-y
+            layout="column"
+            flex>
+  <main ui-view></main>
+</md-content>
 
 
 <!--[if lt IE 7]>
