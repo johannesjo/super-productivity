@@ -102,84 +102,64 @@
       });
     };
 
+    this.getDoneToday = () => {
+      return $window._.filter($localStorage.tasks, (task) => {
+        return task && task.isDone;
+      });
+    };
+
     // UPDATE DATA
     this.updateCurrent = (task) => {
       $localStorage.currentTask = task;
-
       // update global pointer
       $rootScope.r.currentTask = $localStorage.currentTask;
     };
 
     this.updateToday = (tasks) => {
       $localStorage.tasks = tasks;
-
       // update global pointer
       $rootScope.r.tasks = $localStorage.tasks;
     };
 
     this.updateBacklog = (tasks) => {
       $localStorage.backlogTasks = tasks;
-
       // update global pointer
       $rootScope.r.backlogTasks = $localStorage.backlogTasks;
     };
 
     this.addTasksToTopOfBacklog = (tasks) => {
       $localStorage.backlogTasks = tasks.concat($localStorage.backlogTasks);
-
       // update global pointer
       $rootScope.r.backlogTasks = $localStorage.backlogTasks;
     };
 
     this.updateDoneBacklog = (tasks) => {
       $localStorage.doneBacklogTasks = tasks;
-
       // update global pointer
       $rootScope.r.doneBacklogTasks = $localStorage.doneBacklogTasks;
     };
 
-    this.addDoneTasksToDoneBacklog = (tasks) => {
-      let doneTasks = $window._.filter($localStorage.tasks, (task) => {
-        return task.isDone === true;
-      });
-
+    this.addDoneTasksToDoneBacklog = () => {
+      let doneTasks = this.getDoneToday().slice(0);
       $localStorage.doneBacklogTasks = doneTasks.concat($localStorage.doneBacklogTasks);
-
       // update global pointer
       $rootScope.r.doneBacklogTasks = $localStorage.doneBacklogTasks;
     };
 
     this.finishDay = (clearDoneTasks, moveUnfinishedToBacklog) => {
       if (clearDoneTasks) {
+        // add tasks to done backlog
+        this.addDoneTasksToDoneBacklog();
+        // remove done tasks from today
+        this.updateToday(this.getUndoneToday());
+      }
 
-        // move to done backlog
-        this.addTasksToDoneBacklog(vm.doneTasks).then(() => {
-
-          //move unfinished to backlog
-          if (moveUnfinishedToBacklog) {
-            // move tasks to top of backlog
-            this.addTasksToTopOfBacklog(vm.undoneTasks).then(() => {
-              // empty today
-              this.updateToday([]).then(() => {
-                // finally
-              });
-            });
-
-          } else {
-            // update todays task to only contain unfinished tasks
-            this.updateToday(vm.undoneTasks).then(() => {
-              // finally
-
-            });
-          }
-
-        });
-      } else {
-        //move unfinished to backlog
-        if (moveUnfinishedToBacklog) {
-          this.updateToday(vm.doneTasks).then(() => {
-            // finally
-          });
+      if (moveUnfinishedToBacklog) {
+        this.addTasksToTopOfBacklog(this.getUndoneToday());
+        if (clearDoneTasks) {
+          this.updateToday([]);
+        } else {
+          this.updateToday(this.getDoneToday());
         }
       }
     };

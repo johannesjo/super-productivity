@@ -58,9 +58,17 @@
     vm.finishDay = () => {
       $localStorage.tomorrowsNote = vm.tomorrowsNote;
 
-      Tasks.finishDay().then(() => {
+      Tasks.finishDay(vm.clearDoneTasks, vm.moveUnfinishedToBacklog);
 
+      // update just for fun
+      vm.todaysTasks = $rootScope.r.tasks;
+
+      vm.backlogTasks = $rootScope.r.backlogTasks;
+
+      vm.doneTasks = $window._.filter($rootScope.r.tasks, (task) => {
+        return task.isDone === true;
       });
+
     };
   }
 
