@@ -136,6 +136,23 @@
       $rootScope.r.currentTask = $localStorage.currentTask;
     };
 
+    this.addToday = (task) => {
+      if (task && task.title) {
+        $localStorage.tasks.push({
+          title: task.title,
+          id: Math.random().toString(36).substr(2, 10),
+          created: $window.moment(),
+          notes: task.notes,
+          timeEstimate: task.timeEstimate
+        });
+
+        // update global pointer for today tasks
+        $rootScope.r.tasks = $localStorage.tasks;
+
+        return true;
+      }
+    };
+
     this.updateToday = (tasks) => {
       $localStorage.tasks = tasks;
       // update global pointer

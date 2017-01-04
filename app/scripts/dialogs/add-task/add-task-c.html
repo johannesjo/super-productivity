@@ -1,0 +1,47 @@
+<md-dialog aria-label="Was Idle Dialog"
+           class="was-idle-dialog">
+  <md-dialog-content layout-padding>
+    <form ng-submit="vm.addTask()">
+      <h2 class="md-title">Create a new task</h2>
+
+      <md-input-container class="md-block">
+        <label>Task Name</label>
+        <input type="text"
+               ng-model="vm.task.title"
+               md-auto-focus
+               required
+               aria-label="Title">
+      </md-input-container>
+
+      <md-input-container class="md-icon-float md-block">
+        <ng-md-icon icon="access_time"
+                    aria-label="Estimated Durations"></ng-md-icon>
+        <label>Estimated Duration</label>
+
+        <input type="text"
+               input-duration="optional"
+               ng-model="vm.task.timeEstimate"
+               aria-label="Estimated Durations">
+      </md-input-container>
+
+      <md-input-container class="md-block">
+        <label>Notes</label>
+
+        <textarea ng-model="vm.task.notes"
+                  aria-label="Notes"></textarea>
+      </md-input-container>
+    </form>
+  </md-dialog-content>
+
+  <md-dialog-actions>
+    <md-button ng-click="vm.addTask()"
+               class="md-primary md-raised">
+      Save
+    </md-button>
+
+    <md-button ng-click="vm.cancel()"
+               class="md-primary md-raised">
+      Dismiss
+    </md-button>
+  </md-dialog-actions>
+</md-dialog>

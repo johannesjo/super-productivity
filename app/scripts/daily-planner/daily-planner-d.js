@@ -37,10 +37,8 @@
 
     vm.addTask = () => {
       if (vm.newTask) {
-        vm.tasks.push({
-          title: vm.newTask,
-          id: Math.random().toString(36).substr(2, 10),
-          created: $window.moment()
+        Tasks.addToday({
+          title: vm.newTask
         });
         vm.newTask = '';
       }

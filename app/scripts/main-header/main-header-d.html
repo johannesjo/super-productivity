@@ -8,10 +8,15 @@
     <span flex></span>
 
     <md-button class="md-icon-button"
+               aria-label="Add Task"
+               ng-click="vm.openAddTask()">
+      <ng-md-icon icon="add"></ng-md-icon>
+    </md-button>
+
+    <md-button class="md-icon-button"
                aria-label="Settings"
                ui-sref="settings">
-      <ng-md-icon icon="settings"
-                  aria-label="settings"></ng-md-icon>
+      <ng-md-icon icon="settings"></ng-md-icon>
     </md-button>
   </div>
 </md-toolbar>

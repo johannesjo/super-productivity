@@ -25,8 +25,12 @@
   }
 
   /* @ngInject */
-  function MainHeaderCtrl() {
+  function MainHeaderCtrl(Dialogs) {
     let vm = this;
+
+    vm.openAddTask = () => {
+      Dialogs('ADD_TASK');
+    };
   }
 
 })();

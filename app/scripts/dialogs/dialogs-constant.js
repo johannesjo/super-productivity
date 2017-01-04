@@ -26,6 +26,10 @@
         controller: 'WasIdleCtrl',
         templateUrl: 'scripts/dialogs/was-idle/was-idle-c.html'
       },
+      ADD_TASK:{
+        controller: 'AddTaskCtrl',
+        templateUrl: 'scripts/dialogs/add-task/add-task-c.html'
+      },
       TASK_SELECTION: {
         controller: 'TaskSelectionCtrl',
         templateUrl: 'scripts/dialogs/task-selection/task-selection-c.html'

@@ -25,12 +25,16 @@
   }
 
   /* @ngInject */
-  function WorkViewCtrl(Tasks, $rootScope, $scope, $state) {
+  function WorkViewCtrl(Tasks, $rootScope, $scope, $state, Dialogs) {
     let vm = this;
 
     vm.tasks = $rootScope.r.tasks;
     vm.backlogTasks = $rootScope.r.backlogTasks;
     vm.currentTask = $rootScope.r.currentTask;
+
+    vm.openAddTask = () => {
+      Dialogs('ADD_TASK');
+    };
 
     $scope.$watch('vm.currentTask', (mVal) => {
       if (mVal && mVal.isDone) {
