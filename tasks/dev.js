@@ -38,7 +38,7 @@ gulp.task('default', function(cb) {
         //'ngConfig',
         'wiredep',
         'lint',
-        'beautify',
+        //'beautify',
         'injectAll',
         'buildStyles',
         'browserSync',
@@ -59,7 +59,7 @@ gulp.task('injectAll', function(callback) {
         'wiredep',
         'injectScripts',
         'injectStyles',
-        'beautify',
+        //'beautify',
         callback
     );
 });
