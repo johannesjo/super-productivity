@@ -23,9 +23,9 @@
       'angularMoment'
     ])
     .run(initGlobalTaskModel)
-    .run(checkIfStartedTodayAndInit);
+    .run(showNoteForToday);
 
-  function initGlobalTaskModel(Tasks, $rootScope) {
+  function initGlobalTaskModel(Tasks, $rootScope, $localStorage) {
     $rootScope.r = {};
 
     Tasks.getToday().then((tasks) => {
@@ -43,9 +43,21 @@
     Tasks.getDoneBacklog().then((task) => {
       $rootScope.r.doneBacklogTasks = task;
     });
+
+    $rootScope.r.noteForToday = $localStorage.tomorrowsNote;
   }
 
-  function checkIfStartedTodayAndInit() {
-  }
+  function showNoteForToday($rootScope, $mdToast) {
+    console.log('I am here!', $rootScope.r.noteForToday);
 
+    if ($rootScope.r.noteForToday) {
+      $mdToast.show(
+        $mdToast.simple()
+          .textContent('Your Note for Today: ' + $rootScope.r.noteForToday)
+          .position('top left')
+          .hideDelay(15000)
+          .highlightAction(true)
+      );
+    }
+  }
 })();

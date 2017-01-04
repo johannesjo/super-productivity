@@ -33,6 +33,10 @@ IMPORTANT NOTE:
 
 @import 'base/_typography.scss';
 
+@import 'components/_additions-for-icons.scss';
+
+@import 'components/_fix-md-toast.scss';
+
 @import '../scripts/daily-planner/_daily-planner-d.scss';
 
 @import '../scripts/daily-summary/_daily-summary-d.scss';

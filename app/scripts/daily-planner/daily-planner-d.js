@@ -33,6 +33,7 @@
     vm.tasks = $rootScope.r.tasks;
     vm.backlogTasks = $rootScope.r.backlogTasks;
     vm.currentTask = $rootScope.r.currentTask;
+    vm.noteForToday = $rootScope.r.noteForToday;
 
     vm.addTask = () => {
       if (vm.newTask) {

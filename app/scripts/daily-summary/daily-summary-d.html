@@ -33,16 +33,14 @@
 <p>This is meant to be some takeaway to be even more productive/happy tomorrow. E.g.: What did you learn today? What do you want to do better/smarter tomorrow? What do you want to achieve and why?</p>
 <p>Think a second and reflect on the day.</p>
 
-<form ng-submit="vm.saveTomorrowsNote(vm.tomorrowsNote)">
-  <md-input-container class="md-block"
-                      flex-gt-sm>
-    <label>Your personal tomorrows note</label>
-    <textarea ng-model="vm.tomorrowsNote"
-              md-auto-focus
-              rows="4"></textarea>
-  </md-input-container>
-</form>
+<md-input-container class="md-block"
+                    flex-gt-sm>
+  <label>Your personal tomorrows note</label>
+  <textarea ng-model="vm.tomorrowsNote"
+            md-auto-focus
+            rows="4"></textarea>
+</md-input-container>
 
-<md-button type="submit"
-           class="md-raised md-primary">Clear done tasks, save and go home
+<md-button class="md-raised md-primary"
+           ng-click="vm.finishDay()">Clear done tasks, save and go home
 </md-button>

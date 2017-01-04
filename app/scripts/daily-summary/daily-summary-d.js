@@ -26,7 +26,7 @@
   }
 
   /* @ngInject */
-  function DailySummaryCtrl($rootScope, $window) {
+  function DailySummaryCtrl($rootScope, $window, $localStorage) {
     let vm = this;
 
     vm.todaysTasks = $rootScope.r.tasks;
@@ -52,6 +52,12 @@
         vm.totalTimeSpendToday.add(task.timeSpendOnDay[todayStr]);
       }
     }
+
+    vm.finishDay = () => {
+      $localStorage.tomorrowsNote = vm.tomorrowsNote;
+
+
+    };
   }
 
 })();
