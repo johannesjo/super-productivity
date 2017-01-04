@@ -16,7 +16,7 @@ task-list {
     margin: 1px 2px 5px 1px;
     border-radius: 10px;
     display: block;
-    min-height: 62px;
+    min-height: 22px;
   }
   &__backlog {
   }
@@ -24,10 +24,16 @@ task-list {
 
 .task {
   background-color: #fff;
-  border: 1px solid #ddd;
   border-radius: 4px;
-  padding: 10px 15px;
+  padding: 4px 15px;
   display: block;
+  margin-bottom: 3px;
+  box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+
+  &.as-sortable-dragging,
+  &:focus {
+    background: #eee;
+  }
 
   .first-line {
     display: flex;
@@ -70,6 +76,7 @@ task-list {
 
   .time {
     white-space: nowrap;
+    font-size: 14px;
   }
   .notes,
   .time {
