@@ -79,6 +79,19 @@
       return $window.moment().format('YYYY-MM-DD');
     };
 
+    this.calcTotalEstimate = (tasks) => {
+      let totaleEstimate;
+      if (angular.isArray(tasks) && tasks.length > 0) {
+        totaleEstimate = $window.moment.duration();
+
+        for (let i = 0; i < tasks.length; i++) {
+          let task = tasks[i];
+          totaleEstimate.add(task.timeEstimate);
+        }
+      }
+      return totaleEstimate;
+    };
+
     // GET DATA
     this.getCurrent = () => {
       let currentTask;

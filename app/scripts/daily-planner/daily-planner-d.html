@@ -36,7 +36,7 @@
     <task-list tasks="vm.tasks"
                current-task="vm.currentTask"></task-list>
 
-    <h2 class="md-title">Tasks Backlog (for some other time)</h2>
+    <h2 class="md-title">Tasks Backlog (for some other time; estimated: ~{{ vm.totaleEstimateBacklog|duration}} )</h2>
     <task-list tasks="vm.backlogTasks"
                limit-to="{{vm.limitBacklogTo}}"></task-list>
 

@@ -63,19 +63,12 @@
     };
 
     $scope.$watch('vm.tasks', (mVal) => {
-      if (angular.isArray(mVal) && vm.tasks.length > 0) {
-        vm.totaleEstimate = $window.moment.duration();
-
-        for (let i = 0; i < mVal.length; i++) {
-          let task = mVal[i];
-          vm.totaleEstimate.add(task.timeEstimate);
-        }
-      }
-
+      vm.totaleEstimate = Tasks.calcTotalEstimate(mVal);
       Tasks.updateToday(mVal);
     }, true);
 
     $scope.$watch('vm.backlogTasks', (mVal) => {
+      vm.totaleEstimateBacklog = Tasks.calcTotalEstimate(mVal);
       Tasks.updateBacklog(mVal);
     }, true);
   }
