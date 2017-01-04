@@ -1,3 +1,23 @@
 daily-summary {
 
 }
+
+.task-summary-table {
+  background: #fff;
+  tr {
+    &.is-done {
+      text-decoration: line-through;
+    }
+  }
+
+  th,
+  td {
+    border: 1px solid gray;
+    padding: 5px;
+  }
+
+  td:nth-child(2),
+  td:nth-child(3) {
+    text-align: right;
+  }
+}

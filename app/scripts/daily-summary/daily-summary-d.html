@@ -1,21 +1,32 @@
 <h1 class="md-headline">You're done for today! Take a moment to celebrate!</h1>
+<p>Tasks completed: <strong>{{vm.doneTasks.length}}/{{ vm.todaysTasks.length }}</strong></p>
+<p>Total time spent total on todays task: <strong>{{ vm.totalTimeSpendTasks|duration }}</strong></p>
+<p>Total time spent today: <strong>{{ vm.totalTimeSpendToday|duration }}</strong></p>
 
+<h2 class="md-title">These are the tasks you worked on today</h2>
 
-<h2 class="md-title">These are the tasks you worked on today ({{vm.doneTasks.length}}/{{ vm.todaysTasks.length }})</h2>
+<table class="task-summary-table">
+  <tr>
+    <th>Title</th>
+    <th>Time spend</th>
+    <th>Time estimated</th>
+    <th></th>
+  </tr>
 
-<ul class="summary-task-list">
-  <li ng-repeat="task in vm.todaysTasks"
+  <tr ng-repeat="task in vm.todaysTasks"
       ng-class="{'is-done': task.isDone}">
-    {{ task.title }}
-
-    <ng-md-icon icon="check"
-                ng-show="task.isDone"
-                aria-label="checkmark"></ng-md-icon>
-  </li>
-</ul>
-<p>Total Time Spent: {{ vm.totalTimeSpend }} TODO</p>
-
-<md-button class="md-raised md-primary">clear done tasks</md-button>
+    <td>{{ task.title }}</td>
+    <td>
+      {{ task.timeSpend |duration }}
+    </td>
+    <td>{{ task.timeEstimate |duration }}</td>
+    <td>
+      <ng-md-icon icon="check"
+                  ng-show="task.isDone"
+                  aria-label="checkmark"></ng-md-icon>
+    </td>
+  </tr>
+</table>
 
 
 <h2 class="md-title">Make a note for your tomorrows self</h2>
@@ -33,5 +44,5 @@
 </form>
 
 <md-button type="submit"
-           class="md-raised md-primary">Save and go home
+           class="md-raised md-primary">Clear done tasks, save and go home
 </md-button>

@@ -26,22 +26,42 @@
     });
 
     // SETUP HANDLERS FOR ELECTRON EVENTS
-
     if (angular.isDefined(window.ipcRenderer)) {
-      window.ipcRenderer.on(IPC_EVENT_UPDATE_TIME_SPEND_FOR_CURRENT, (ev, timeSpend) => {
 
+      // handler for time spend tracking
+      window.ipcRenderer.on(IPC_EVENT_UPDATE_TIME_SPEND_FOR_CURRENT, (ev, timeSpend) => {
         // only track if there is a task
         if ($rootScope.r.currentTask) {
-          let timeSpendCalculated;
+          let timeSpendCalculatedTotal;
+          let timeSpendCalculatedOnDay;
 
+          // use mysql date as it is sortable
+          let todayStr = $window.moment().format('YYYY-MM-DD');
+
+          // track total time spend
           if ($rootScope.r.currentTask.timeSpend) {
-            timeSpendCalculated = $window.moment.duration($rootScope.r.currentTask.timeSpend);
-            timeSpendCalculated.add($window.moment.duration({ milliseconds: timeSpend }));
+            timeSpendCalculatedTotal = $window.moment.duration($rootScope.r.currentTask.timeSpend);
+            timeSpendCalculatedTotal.add($window.moment.duration({ milliseconds: timeSpend }));
           } else {
-            timeSpendCalculated = $window.moment.duration(timeSpend);
+            timeSpendCalculatedTotal = $window.moment.duration(timeSpend);
           }
 
-          $rootScope.r.currentTask.timeSpend = timeSpendCalculated;
+          // track time spend on days
+          if (!$rootScope.r.currentTask.timeSpendOnDay) {
+            $rootScope.r.currentTask.timeSpendOnDay = {};
+          }
+
+          if ($rootScope.r.currentTask.timeSpendOnDay[todayStr]) {
+            timeSpendCalculatedOnDay = $window.moment.duration($rootScope.r.currentTask.timeSpendOnDay[todayStr]);
+            timeSpendCalculatedOnDay.add($window.moment.duration({ milliseconds: timeSpend }));
+          } else {
+            timeSpendCalculatedOnDay = $window.moment.duration(timeSpend);
+          }
+
+          // assign values
+          $rootScope.r.currentTask.timeSpend = timeSpendCalculatedTotal;
+          $rootScope.r.currentTask.timeSpendOnDay[todayStr] = timeSpendCalculatedOnDay;
+
           $rootScope.r.currentTask.lastWorkedOn = $window.moment();
 
           // we need to manually call apply as this is an outside event
@@ -49,6 +69,7 @@
         }
       });
 
+      // handler for idle event
       window.ipcRenderer.on(IPC_EVENT_IDLE, (ev, idleTime) => {
         Dialogs('WAS_IDLE', { idleTime: idleTime });
       });

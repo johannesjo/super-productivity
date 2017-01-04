@@ -29,12 +29,29 @@
   function DailySummaryCtrl($rootScope, $window) {
     let vm = this;
 
+    vm.todaysTasks = $rootScope.r.tasks;
+
     vm.doneTasks = $window._.filter($rootScope.r.tasks, (task) => {
       return task.isDone === true;
     });
 
-    vm.todaysTasks = $rootScope.r.tasks;
+    // calc total time spend on todays tasks
+    vm.totalTimeSpendTasks = $window.moment.duration();
+    for (let i = 0; i < vm.todaysTasks.length; i++) {
+      let task = vm.todaysTasks[i];
+      vm.totalTimeSpendTasks.add(task.timeSpend);
+    }
 
+    // calc time spend on todays tasks today
+    // use mysql date as it is sortable
+    let todayStr = $window.moment().format('YYYY-MM-DD');
+    vm.totalTimeSpendToday = $window.moment.duration();
+    for (let i = 0; i < vm.todaysTasks.length; i++) {
+      let task = vm.todaysTasks[i];
+      if (task.timeSpendOnDay && task.timeSpendOnDay[todayStr]) {
+        vm.totalTimeSpendToday.add(task.timeSpendOnDay[todayStr]);
+      }
+    }
   }
 
 })();
