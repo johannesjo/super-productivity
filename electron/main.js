@@ -58,9 +58,9 @@ app.on('ready', createWindow);
 app.on('window-all-closed', function () {
   // On OS X it is common for applications and their menu bar
   // to stay active until the user quits explicitly with Cmd + Q
-  if (process.platform !== 'darwin') {
-    app.quit();
-  }
+  //if (process.platform !== 'darwin') {
+  app.quit();
+  //}
 });
 
 let appIcon = null;
@@ -94,14 +94,11 @@ app.on('ready', () => {
   });
 
   if (!ret) {
-    console.log('registration failed');
+    console.log('key registration failed');
   }
 });
 
 app.on('activate', function () {
-  global.tasksData = {};
-  global.test = { 'TEST': 'AAAA' };
-
   // On OS X it's common to re-create a window in the app when the
   // dock icon is clicked and there are no other windows open.
   if (mainWindow === null) {
@@ -113,6 +110,10 @@ app.on('ready', () => {
   setInterval(trackTimeFn, CONFIG.PING_INTERVAL);
 });
 
+electron.ipcMain.on('SHUTDOWN', () => {
+  app.isQuiting = true;
+  app.quit();
+});
 
 function trackTimeFn() {
   //let timeSpend = moment.duration({ milliseconds: CONFIG.PING_INTERVAL });

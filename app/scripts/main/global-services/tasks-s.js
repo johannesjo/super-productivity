@@ -162,6 +162,9 @@
           this.updateToday(this.getDoneToday());
         }
       }
+
+      // also remove the current task to prevent time tracking
+      this.updateCurrent(null);
     };
   }
 

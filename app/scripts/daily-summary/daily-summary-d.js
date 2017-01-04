@@ -26,16 +26,14 @@
   }
 
   /* @ngInject */
-  function DailySummaryCtrl($rootScope, $window, $localStorage, Tasks) {
+  function DailySummaryCtrl($rootScope, $window, $localStorage, Tasks, $mdDialog) {
+    const IPC_EVENT_SHUTDOWN = 'SHUTDOWN';
+
     let vm = this;
 
     vm.todaysTasks = $rootScope.r.tasks;
-
     vm.backlogTasks = $rootScope.r.backlogTasks;
-
-    vm.doneTasks = $window._.filter($rootScope.r.tasks, (task) => {
-      return task.isDone === true;
-    });
+    vm.doneTasks = Tasks.getDoneToday();
 
     // calc total time spend on todays tasks
     vm.totalTimeSpendTasks = $window.moment.duration();
@@ -62,13 +60,24 @@
 
       // update just for fun
       vm.todaysTasks = $rootScope.r.tasks;
-
       vm.backlogTasks = $rootScope.r.backlogTasks;
+      vm.doneTasks = Tasks.getDoneToday();
 
-      vm.doneTasks = $window._.filter($rootScope.r.tasks, (task) => {
-        return task.isDone === true;
-      });
-
+      $mdDialog.show(
+        $mdDialog.alert()
+          .clickOutsideToClose(false)
+          .title('All Done! Shutting down now..')
+          .textContent('You work is done. Time to go home!')
+          .ariaLabel('Alert Shutdown')
+          .ok('Aye aye!')
+      )
+        .then(() => {
+          if (angular.isDefined(window.ipcRenderer)) {
+            window.ipcRenderer.send(IPC_EVENT_SHUTDOWN);
+          } else {
+            $state.go('daily-planner');
+          }
+        });
     };
   }
 
