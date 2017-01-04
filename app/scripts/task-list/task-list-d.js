@@ -32,7 +32,7 @@
   }
 
   /* @ngInject */
-  function TaskListCtrl(Dialogs, $rootScope, $window, $mdDialog) {
+  function TaskListCtrl(Dialogs, $rootScope, $window, $mdDialog, $timeout) {
     let vm = this;
 
     vm.estimateTime = (task) => {
@@ -60,8 +60,8 @@
     };
 
     vm.handleKeyPress = ($event, task) => {
-      //console.log(task.title, $event);
-      //console.log($event.keyCode);
+      console.log(task.title, $event);
+      console.log($event.keyCode);
 
       if ($event.keyCode) {
         // t
@@ -89,7 +89,44 @@
           task.showEdit = false;
           task.showNotes = false;
         }
+
+        // moving items via shift+ctrl+keyUp/keyDown
+        if ($event.shiftKey === true && $event.ctrlKey === true) {
+          let taskIndex = _.findIndex(vm.tasks, (cTask) => {
+            return cTask.id === task.id;
+          });
+
+          // move up
+          if ($event.keyCode === 38) {
+            if (taskIndex > 0) {
+              vm.moveItem(vm.tasks, taskIndex, taskIndex - 1);
+              // we need to manually re-add focus
+              let taskEl = $event.target;
+              $timeout(() => {
+                taskEl.focus();
+              });
+            }
+
+          }
+          // move down
+          if ($event.keyCode === 40) {
+            if (taskIndex < vm.tasks.length - 1) {
+              vm.moveItem(vm.tasks, taskIndex, taskIndex + 1);
+            }
+          }
+        }
       }
+    };
+
+    vm.moveItem = (array, oldIndex, newIndex) => {
+      if (newIndex >= array.length) {
+        let k = newIndex - array.length;
+        while ((k--) + 1) {
+          array.push(undefined);
+        }
+      }
+      array.splice(newIndex, 0, array.splice(oldIndex, 1)[0]);
+      return array; // for testing purposes
     };
 
     vm.onTaskDoneChanged = (task) => {
