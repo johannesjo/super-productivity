@@ -18,7 +18,6 @@ const url = require('url');
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let mainWindow;
-let lsData;
 let lastIdleTime;
 
 function createWindow() {
@@ -114,9 +113,6 @@ app.on('ready', () => {
   setInterval(trackTimeFn, CONFIG.PING_INTERVAL);
 });
 
-electron.ipcMain.on('LS_UPDATE', (ev, lsDataArg) => {
-  lsData = lsDataArg;
-});
 
 function trackTimeFn() {
   //let timeSpend = moment.duration({ milliseconds: CONFIG.PING_INTERVAL });

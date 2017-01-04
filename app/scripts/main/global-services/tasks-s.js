@@ -15,7 +15,6 @@
 
   /* @ngInject */
   function Tasks($localStorage, $q, $window, $rootScope, Dialogs) {
-    const IPC_EVENT_UPDATE = 'LS_UPDATE';
     const IPC_EVENT_IDLE = 'WAS_IDLE';
     const IPC_EVENT_UPDATE_TIME_SPEND_FOR_CURRENT = 'UPDATE_TIME_SPEND';
 
@@ -75,15 +74,6 @@
       });
     }
 
-    this.updateElectronStorage = () => {
-      if (angular.isDefined(window.ipcRenderer)) {
-        window.ipcRenderer.send(IPC_EVENT_UPDATE, {
-          currentTask: $localStorage.currentTask,
-          tasks: $localStorage.tasks,
-          backlogTasks: $localStorage.backlogTasks
-        });
-      }
-    };
 
     // GET DATA
     this.getCurrent = () => {
@@ -128,7 +118,6 @@
       // update global pointer
       $rootScope.r.currentTask = $localStorage.currentTask;
 
-      this.updateElectronStorage();
       return $q.when({});
     };
 
@@ -138,7 +127,6 @@
       // update global pointer
       $rootScope.r.tasks = $localStorage.tasks;
 
-      this.updateElectronStorage();
       return $q.when({});
     };
 
@@ -148,7 +136,6 @@
       // update global pointer
       $rootScope.r.backlogTasks = $localStorage.backlogTasks;
 
-      this.updateElectronStorage();
       return $q.when({});
     };
 
@@ -158,7 +145,6 @@
       // update global pointer
       $rootScope.r.backlogTasks = $localStorage.backlogTasks;
 
-      this.updateElectronStorage();
       return $q.when({});
     };
 
@@ -168,7 +154,6 @@
       // update global pointer
       $rootScope.r.doneBacklogTasks = $localStorage.doneBacklogTasks;
 
-      this.updateElectronStorage();
       return $q.when({});
     };
 
@@ -182,7 +167,6 @@
       // update global pointer
       $rootScope.r.doneBacklogTasks = $localStorage.doneBacklogTasks;
 
-      this.updateElectronStorage();
       return $q.when({});
     };
 
