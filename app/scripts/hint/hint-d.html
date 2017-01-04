@@ -1,0 +1,18 @@
+<md-card class="hint">
+  <md-card-title>
+    <md-card-title-text ng-transclude>
+      <span class="md-headline">Card with image</span>
+      <span class="md-subhead">Large</span>
+    </md-card-title-text>
+    <md-card-title-media>
+      <div class="md-media-lg card-media">
+        <img src="http://placekitten.com/g/200/200"
+             alt="kitten">
+      </div>
+    </md-card-title-media>
+  </md-card-title>
+  <md-card-actions layout="row"
+                   layout-align="end center">
+    <md-button ng-click="vm.removeHint()">Dismiss</md-button>
+  </md-card-actions>
+</md-card>
