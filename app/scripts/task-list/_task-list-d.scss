@@ -46,6 +46,17 @@ task-list {
   &.is-current {
     border: 3px solid #333;
     background: #a9ed9f;
+    .md-bar {
+      background-color: #4fa758 !important;
+    }
+  }
+  .md-bar {
+    background-color: #ccc !important;
+  }
+
+  md-progress-linear.md-default-theme .md-container,
+  md-progress-linear .md-container {
+    background: none;
   }
 
   .handle {
@@ -60,14 +71,6 @@ task-list {
       display: block;
       width: 100%;
     }
-  }
-
-  .md-bar {
-    background-color: #3f8445 !important;
-  }
-  md-progress-linear.md-default-theme .md-container,
-  md-progress-linear .md-container {
-    background: none;
   }
 
   form {
