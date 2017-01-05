@@ -53,8 +53,15 @@
     <md-input-container class="md-block"
                         flex-gt-sm>
       <label>Password</label>
-      <input type="text"
+      <input type="password"
              ng-model="vm.jiraSettings.password">
+    </md-input-container>
+    <md-input-container class="md-block"
+                        flex-gt-sm>
+      <label>JQL Query for Tasks</label>
+      <input type="text"
+             ng-model="vm.jiraSettings.jqlQuery">
+      <div class="hint">e.g.: assignee = "{{ vm.jiraSettings.userName }}" AND resolution = Unresolved ORDER BY updatedDate DESC</div>
     </md-input-container>
 
 

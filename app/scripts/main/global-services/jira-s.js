@@ -37,9 +37,7 @@
       let testRequest = {
         config: $localStorage.jiraSettings,
         apiMethod: 'searchJira',
-        //arguments: [$localStorage.jiraSettings.userName, true],
-        //arguments: ['assignee = "'+$localStorage.jiraSettings.userName+'" AND resolution = Unresolved ORDER BY updatedDate DESC',false],
-        arguments: ['assignee = "joschka.decuveland" AND resolution = Unresolved ORDER BY updatedDate DESC', false],
+        arguments: [$localStorage.jiraSettings.jqlQuery, false],
         requestId: Math.random().toString(36).substr(2, 10)
       };
 
@@ -47,7 +45,6 @@
     };
 
     this.transformIssues = (response) => {
-
       let res = response.response;
       let tasks = [];
 
@@ -83,8 +80,8 @@
       }
     };
 
+    // TODO safer auth
     this.auth = () => {
-
     };
   }
 

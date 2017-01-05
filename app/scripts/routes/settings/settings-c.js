@@ -25,12 +25,10 @@
       $rootScope.r.backlogTasks = $localStorage.backlogTasks = settings.backlogTasks;
     };
 
-    vm.jiraSettings = $rootScope.r.jiraSettings;
-    console.log(vm.jiraSettings);
+    vm.jiraSettings = angular.copy($rootScope.r.jiraSettings);
+
 
     vm.saveJiraSettings = (settings) => {
-      console.log('I am here!', settings);
-
       $rootScope.r.jiraSettings = $localStorage.jiraSettings = settings;
     };
   }
