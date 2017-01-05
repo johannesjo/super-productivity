@@ -56,13 +56,6 @@ TODO configure more restrictive Content-Security-Policy
 <![endif]-->
 
 
-<script>
-  if (typeof require !== 'undefined') {
-    const { ipcRenderer } = require('electron');
-    window.ipcRenderer = ipcRenderer;
-  }
-</script>
-
 <!-- build:js({.tmp,app}) scripts/oldieshim.js -->
 <!--[if lt IE 9]>
 <script src="bower_components/es5-shim/es5-shim.js"></script>
@@ -89,6 +82,21 @@ TODO configure more restrictive Content-Security-Policy
 <script src="bower_components/moment-duration-format/lib/moment-duration-format.js"></script>
 <!-- endbower -->
 <!-- endbuild -->
+
+<script>
+  // require ipcRenderer if available
+  if (typeof require === 'function') {
+    const { ipcRenderer } = require('electron');
+    window.ipcRenderer = ipcRenderer;
+
+    // fix to use the
+    try {
+      window.moment = require('moment');
+    }
+    catch (e) {
+    }
+  }
+</script>
 
 <!-- build:js({.tmp,app}) scripts/scripts.js defer -->
 <!-- inject:js -->
