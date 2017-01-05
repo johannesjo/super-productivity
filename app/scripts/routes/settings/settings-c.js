@@ -15,7 +15,7 @@
 
   /* @ngInject */
   function SettingsCtrl($localStorage, $rootScope) {
-    var vm = this;
+    let vm = this;
 
     vm.importSettings = (uploadSettingsTextarea) => {
       let settings = JSON.parse(uploadSettingsTextarea);
@@ -23,6 +23,15 @@
       $rootScope.r.currentTask = $localStorage.currentTask = settings.currentTask;
       $rootScope.r.tasks = $localStorage.tasks = settings.tasks;
       $rootScope.r.backlogTasks = $localStorage.backlogTasks = settings.backlogTasks;
+    };
+
+    vm.jiraSettings = $rootScope.r.jiraSettings;
+    console.log(vm.jiraSettings);
+
+    vm.saveJiraSettings = (settings) => {
+      console.log('I am here!', settings);
+
+      $rootScope.r.jiraSettings = $localStorage.jiraSettings = settings;
     };
   }
 })();

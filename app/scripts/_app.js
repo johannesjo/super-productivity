@@ -22,10 +22,20 @@
       'as.sortable',
       'angularMoment'
     ])
+    .config(configHttp)
     .config(configMdTheme)
-    .run(initGlobalTaskModel)
+    .run(initGlobalModels)
     .run(initGlobalShortcuts)
     .run(showHintsForToday);
+
+  function configHttp($httpProvider) {
+    //delete $httpProvider.defaults.headers.common['X-Requested-With'];
+
+    $httpProvider.defaults.headers.common = {};
+    $httpProvider.defaults.headers.post = {};
+    $httpProvider.defaults.headers.put = {};
+    $httpProvider.defaults.headers.patch = {};
+  }
 
   function configMdTheme($mdThemingProvider) {
     $mdThemingProvider.theme('dark-grey').backgroundPalette('grey').dark();
@@ -34,12 +44,14 @@
     $mdThemingProvider.theme('dark-blue').backgroundPalette('blue').dark();
   }
 
-  function initGlobalTaskModel(Tasks, $rootScope) {
+  function initGlobalModels(Tasks, $rootScope, $localStorage) {
     $rootScope.r = {};
     $rootScope.r.tasks = Tasks.getToday();
     $rootScope.r.backlogTasks = Tasks.getBacklog();
     $rootScope.r.currentTask = Tasks.getCurrent();
     $rootScope.r.doneBacklogTasks = Tasks.getDoneBacklog();
+
+    $rootScope.r.jiraSettings = $localStorage.jiraSettings;
   }
 
   function showHintsForToday($rootScope, $localStorage, ProductivityTips) {

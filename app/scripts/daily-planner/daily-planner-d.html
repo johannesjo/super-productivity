@@ -8,16 +8,34 @@
 
     </div>
     <form ng-submit="vm.addTask()">
-      <md-input-container class="md-block md-icon-float">
-        <ng-md-icon icon="mode_edit"></ng-md-icon>
+      <!--<md-input-container class="md-block md-icon-float">-->
+        <!--<ng-md-icon icon="mode_edit"></ng-md-icon>-->
 
-        <label>Enter a task and press enter to add</label>
-        <input class="text-input"
-               tabindex="1"
-               autofocus
-               ng-model="vm.newTask">
+        <!--<label>Enter a task and press enter to add</label>-->
+        <!--<input class="text-input"-->
+               <!--tabindex="1"-->
+               <!--autofocus-->
+               <!--ng-model="vm.newTask">-->
 
-      </md-input-container>
+      <!--</md-input-container>-->
+      <!---->
+      <md-autocomplete
+        md-selected-item="vm.newTask"
+        md-search-text="vm.searchText"
+        md-items="task in vm.taskSuggestions"
+        md-item-text="task.title"
+        md-min-length="0"
+        md-autofocus
+        placeholder="Select a task to start with">
+        <md-item-template>
+          <span md-highlight-text="vm.searchText"
+                md-highlight-flags="^i">{{task.title}}</span>
+        </md-item-template>
+        <md-not-found>
+          No states matching "{{vm.searchText}}" were found.
+          <a ng-click="vm.newState(vm.searchText)">Create a new one!</a>
+        </md-not-found>
+      </md-autocomplete>
     </form>
 
     <div class="done"

@@ -5,6 +5,8 @@ const powerSaveBlocker = require('electron').powerSaveBlocker;
 const moment = require('moment');
 const idle = require('./idle');
 const CONFIG = require('./CONFIG');
+const jira = require('./jira');
+
 powerSaveBlocker.start('prevent-app-suspension');
 
 // Module to control application life.
@@ -113,6 +115,10 @@ app.on('ready', () => {
 electron.ipcMain.on('SHUTDOWN', () => {
   app.isQuiting = true;
   app.quit();
+});
+
+electron.ipcMain.on('JIRA', (ev, request) => {
+  jira(mainWindow, request);
 });
 
 function trackTimeFn() {

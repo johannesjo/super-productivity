@@ -1,4 +1,7 @@
 <div class="page-settings">
+
+
+  <h2 class="md-title">Make/Restore Backup</h2>
   <a class="md-raised md-button md-ink-ripple"
      type="button"
      download-backup>
@@ -8,7 +11,6 @@
     Download your tasks and settings
     <div class="md-ripple-container"></div>
   </a>
-
   <md-button
     class="md-raised"
     ng-click="vm.showUploadForm=!vm.showUploadForm;">
@@ -32,4 +34,33 @@
     </md-button>
   </form>
   <md-divider></md-divider>
+
+
+  <h2 class="md-title">Jira-Setup for Task Suggestion</h2>
+  <form ng-submit="vm.saveJiraSettings(vm.jiraSettings)">
+    <md-input-container class="md-block"
+                        flex-gt-sm>
+      <label>Host</label>
+      <input type="text"
+             ng-model="vm.jiraSettings.host">
+    </md-input-container>
+    <md-input-container class="md-block"
+                        flex-gt-sm>
+      <label>Username</label>
+      <input type="text"
+             ng-model="vm.jiraSettings.userName">
+    </md-input-container>
+    <md-input-container class="md-block"
+                        flex-gt-sm>
+      <label>Password</label>
+      <input type="text"
+             ng-model="vm.jiraSettings.password">
+    </md-input-container>
+
+
+    <md-button type="submit"
+               class="md-raised md-primary">Save Config
+    </md-button>
+  </form>
+
 </div>

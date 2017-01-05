@@ -25,7 +25,7 @@
   }
 
   /* @ngInject */
-  function DailyPlannerCtrl($scope, $rootScope, Tasks, Dialogs, $state) {
+  function DailyPlannerCtrl($scope, $rootScope, Tasks, Dialogs, $state, Jira) {
     let vm = this;
 
     vm.limitBacklogTo = 3;
@@ -34,13 +34,21 @@
     vm.backlogTasks = $rootScope.r.backlogTasks;
     vm.currentTask = $rootScope.r.currentTask;
     vm.noteForToday = $rootScope.r.noteForToday;
+    vm.taskSuggestions = [];
+
+    Jira.getSuggestions().then((res) => {
+      console.log(res);
+      vm.taskSuggestions = Jira.transformIssues(res);
+    });
 
     vm.addTask = () => {
       if (vm.newTask) {
-        Tasks.addToday({
-          title: vm.newTask
-        });
-        vm.newTask = '';
+        //Tasks.addToday({
+        //  title: vm.newTask
+        //});
+        Tasks.addToday( vm.newTask);
+
+        vm.newTask = undefined;
       }
 
       // if we have already defined enough tasks and the
