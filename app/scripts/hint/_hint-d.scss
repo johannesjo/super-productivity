@@ -1,7 +1,18 @@
 .hint {
-
+  min-width: 160px;
 
   md-card-title-media {
     margin-left: 10px;
   }
+
+  md-card-content {
+    min-height: 36px;
+    max-height: 36px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    &.is-expanded {
+      max-height: none;
+    }
+  }
+
 }

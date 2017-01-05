@@ -45,25 +45,7 @@ TODO configure more restrictive Content-Security-Policy
 <md-content md-scroll-y
             layout="column"
             flex>
-
-  <div layout="row">
-    <div flex-xs
-         flex-gt-xs="50">
-      <hint ng-if="r.noteForToday"
-            title="Your yesterdays note for today">
-        <p>{{ r.noteForToday }}</p>
-      </hint>
-    </div>
-    <div flex-xs
-         flex-gt-xs="50">
-      <hint ng-if="r.productivityTip"
-            sub-title="{{ r.productivityTip.subTitle }}"
-            title="{{ r.productivityTip.title }}">
-        <p>{{ r.productivityTip.content}}</p>
-      </hint>
-    </div>
-  </div>
-
+  <hints></hints>
   <main ui-view></main>
 </md-content>
 
@@ -122,6 +104,7 @@ TODO configure more restrictive Content-Security-Policy
 <script src="scripts/download-backup/download-backup-d.js"></script>
 <script src="scripts/edit-on-click/edit-on-click-d.js"></script>
 <script src="scripts/hint/hint-d.js"></script>
+<script src="scripts/hints/hints-d.js"></script>
 <script src="scripts/input-duration/input-duration-d.js"></script>
 <script src="scripts/main/global-filters/duration-filter.js"></script>
 <script src="scripts/main/global-services/productivity-tips-s.js"></script>
