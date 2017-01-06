@@ -55,6 +55,10 @@
     for (let index = 0; index < themes.length; ++index) {
       $mdThemingProvider.theme(themes[index] + '-theme')
         .primaryPalette(themes[index]);
+
+      $mdThemingProvider.theme(themes[index] + '-dark')
+        .primaryPalette(themes[index])
+        .dark();
     }
 
     $mdThemingProvider.alwaysWatchTheme(true);

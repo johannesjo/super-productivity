@@ -12,7 +12,7 @@ task-list {
 
   .as-sortable-placeholder,
   .dndPlaceholder {
-    background-color: #ddd;
+    background-color: #444;
     margin: 1px 2px 5px 1px;
     border-radius: 10px;
     display: block;
@@ -23,7 +23,9 @@ task-list {
 }
 
 .task {
-  background-color: #fff;
+  //background-color: #fff;
+  //color: #333;
+  border: 1px solid #444;
   border-radius: 4px;
   padding: 4px 15px;
   display: block;

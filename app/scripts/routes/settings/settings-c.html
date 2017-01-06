@@ -77,5 +77,11 @@
     <md-option ng-repeat="themeName in vm.themes">{{ themeName }}
     </md-option>
   </md-select>
+  <div flex-gt-sm="50">
+    <md-checkbox ng-model="vm.isDarkTheme"
+                 aria-label="Use dark theme">
+      Use dark theme
+    </md-checkbox>
+  </div>
 
 </div>

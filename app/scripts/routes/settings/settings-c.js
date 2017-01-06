@@ -19,7 +19,6 @@
 
     vm.r = $rootScope.r;
 
-
     // import/export stuff
     vm.importSettings = (uploadSettingsTextarea) => {
       let settings = JSON.parse(uploadSettingsTextarea);
@@ -28,7 +27,6 @@
       $rootScope.r.tasks = $localStorage.tasks = settings.tasks;
       $rootScope.r.backlogTasks = $localStorage.backlogTasks = settings.backlogTasks;
     };
-
 
     // jira stuff
     vm.jiraSettings = angular.copy($rootScope.r.jiraSettings);
@@ -60,11 +58,22 @@
       'blue-grey'
     ];
 
-    $scope.$watch('vm.selectedTheme', function(value) {
+    $scope.$watch('vm.selectedTheme', function (value) {
       if (value) {
-        $rootScope.r.theme = $localStorage.theme = value + '-theme';
+        if (vm.isDarkTheme) {
+          $rootScope.r.theme = $localStorage.theme = value + '-dark';
+        } else {
+          $rootScope.r.theme = $localStorage.theme = value + '-theme';
+        }
       }
     });
 
+    $scope.$watch('vm.isDarkTheme', function (value) {
+      if (value) {
+        $rootScope.r.theme = $localStorage.theme = $rootScope.r.theme.replace('-theme', '-dark');
+      } else {
+        $rootScope.r.theme = $localStorage.theme = $rootScope.r.theme.replace('-dark', '-theme');
+      }
+    });
   }
 })();
