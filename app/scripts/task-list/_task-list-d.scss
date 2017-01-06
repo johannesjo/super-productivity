@@ -73,8 +73,11 @@ task-list {
   }
 
   &.is-done {
-    text-decoration: line-through;
+    .title {
+      text-decoration: line-through;
+    }
   }
+
   &.is-current {
     border: 3px solid #333;
     background: #a9ed9f;
