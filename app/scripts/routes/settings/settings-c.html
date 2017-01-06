@@ -70,4 +70,12 @@
     </md-button>
   </form>
 
+
+  <h2 class="md-title">Switch theme</h2>
+  <md-select ng-model="vm.selectedTheme"
+             placeholder="Select a theme">
+    <md-option ng-repeat="themeName in vm.themes">{{ themeName }}
+    </md-option>
+  </md-select>
+
 </div>

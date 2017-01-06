@@ -14,9 +14,13 @@
     .controller('SettingsCtrl', SettingsCtrl);
 
   /* @ngInject */
-  function SettingsCtrl($localStorage, $rootScope) {
+  function SettingsCtrl($localStorage, $rootScope, $scope) {
     let vm = this;
 
+    vm.r = $rootScope.r;
+
+
+    // import/export stuff
     vm.importSettings = (uploadSettingsTextarea) => {
       let settings = JSON.parse(uploadSettingsTextarea);
       console.log(settings);
@@ -25,11 +29,42 @@
       $rootScope.r.backlogTasks = $localStorage.backlogTasks = settings.backlogTasks;
     };
 
-    vm.jiraSettings = angular.copy($rootScope.r.jiraSettings);
 
+    // jira stuff
+    vm.jiraSettings = angular.copy($rootScope.r.jiraSettings);
 
     vm.saveJiraSettings = (settings) => {
       $rootScope.r.jiraSettings = $localStorage.jiraSettings = settings;
     };
+
+    // theme stuff
+    vm.themes = [
+      'red',
+      'pink',
+      'purple',
+      'deep-purple',
+      'indigo',
+      'blue',
+      'light-blue',
+      'cyan',
+      'teal',
+      'green',
+      'light-green',
+      'lime',
+      'yellow',
+      'amber',
+      'orange',
+      'deep-orange',
+      'brown',
+      'grey',
+      'blue-grey'
+    ];
+
+    $scope.$watch('vm.selectedTheme', function(value) {
+      if (value) {
+        $rootScope.r.theme = $localStorage.theme = value + '-theme';
+      }
+    });
+
   }
 })();

@@ -27,10 +27,37 @@
     .run(initGlobalShortcuts);
 
   function configMdTheme($mdThemingProvider) {
-    $mdThemingProvider.theme('dark-grey').backgroundPalette('grey').dark();
-    $mdThemingProvider.theme('dark-orange').backgroundPalette('orange').dark();
-    $mdThemingProvider.theme('dark-purple').backgroundPalette('deep-purple').dark();
-    $mdThemingProvider.theme('dark-blue').backgroundPalette('blue').dark();
+    $mdThemingProvider.theme('default')
+      .primaryPalette('blue');
+    //.dark();
+
+    let themes = [
+      'red',
+      'pink',
+      'purple',
+      'deep-purple',
+      'indigo',
+      'blue',
+      'light-blue',
+      'cyan',
+      'teal',
+      'green',
+      'light-green',
+      'lime',
+      'yellow',
+      'amber',
+      'orange',
+      'deep-orange',
+      'brown',
+      'grey',
+      'blue-grey'
+    ];
+    for (let index = 0; index < themes.length; ++index) {
+      $mdThemingProvider.theme(themes[index] + '-theme')
+        .primaryPalette(themes[index]);
+    }
+
+    $mdThemingProvider.alwaysWatchTheme(true);
   }
 
   function initGlobalModels($rootScope, Tasks, $localStorage, ProductivityTips) {
@@ -41,8 +68,11 @@
     $rootScope.r.doneBacklogTasks = Tasks.getDoneBacklog();
 
     $rootScope.r.jiraSettings = $localStorage.jiraSettings;
+
     $rootScope.r.noteForToday = $localStorage.tomorrowsNote;
     $rootScope.r.productivityTip = ProductivityTips.getRandom();
+
+    $rootScope.r.theme = $localStorage.theme || 'teal-theme';
   }
 
   function initGlobalShortcuts($document, Dialogs) {
