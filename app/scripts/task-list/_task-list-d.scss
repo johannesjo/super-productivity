@@ -42,6 +42,34 @@ task-list {
 
   .controls {
     white-space: nowrap;
+    ng-md-icon {
+      fill: gray;
+    }
+
+    md-checkbox {
+      margin-bottom: 0;
+      margin-left: 10px;
+    }
+    .md-button,
+    md-checkbox {
+      transition: 300ms;
+      &:hover {
+        transform: scale(1.4);
+      }
+    }
+
+    .md-icon-button {
+      margin: 0;
+    }
+
+    .md-button {
+      &:hover,
+      &.is-active {
+        > ng-md-icon {
+          fill: #000;
+        }
+      }
+    }
   }
 
   &.is-done {
@@ -103,35 +131,6 @@ task-list {
     flex: 0 1 100%;
     textarea {
       min-height: 100px;
-    }
-  }
-
-  ng-md-icon {
-    fill: gray;
-  }
-
-  md-checkbox {
-    margin-bottom: 0;
-    margin-left: 10px;
-  }
-  button,
-  md-checkbox {
-    transition: 300ms;
-    &:hover {
-      transform: scale(1.4);
-    }
-  }
-
-  .md-icon-button {
-    margin: 0;
-  }
-
-  button {
-    &:hover,
-    &.is-active {
-      > ng-md-icon {
-        fill: #000;
-      }
     }
   }
 }

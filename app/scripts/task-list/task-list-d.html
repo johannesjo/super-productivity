@@ -50,7 +50,6 @@
           <ng-md-icon icon="access_time"
                       aria-label="time estimation"></ng-md-icon>
         </md-button>
-
         <md-button class="md-icon-button"
                    aria-label="notes"
                    tabindex="2"
@@ -64,15 +63,6 @@
                       aria-label="notes"></ng-md-icon>
         </md-button>
         <md-button class="md-icon-button"
-                   aria-label="delete"
-                   tabindex="2"
-                   ng-click="vm.deleteTask(task.id)">
-          <ng-md-icon icon="delete_forever"
-                      aria-label="delete"
-                      style="fill: #dc2d3d;"></ng-md-icon>
-        </md-button>
-
-        <md-button class="md-icon-button"
                    aria-label="link"
                    tabindex="2"
                    target="_blank"
@@ -81,7 +71,14 @@
           <ng-md-icon icon="link"
                       aria-label="link"></ng-md-icon>
         </md-button>
-
+        <md-button class="md-icon-button"
+                   aria-label="delete"
+                   tabindex="2"
+                   ng-click="vm.deleteTask(task.id)">
+          <ng-md-icon icon="delete_forever"
+                      aria-label="delete"
+                      style="fill: #dc2d3d;"></ng-md-icon>
+        </md-button>
         <md-checkbox ng-model="task.isDone"
                      tabindex="2"
                      ng-change="vm.onTaskDoneChanged(task)"
