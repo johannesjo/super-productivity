@@ -53,9 +53,9 @@
           let issue = res.issues[i];
           tasks.push({
             title: issue.key + ' ' + issue.fields.summary,
-            note: issue.fields.description,
+            notes: issue.fields.description,
             originalKey: issue.key,
-            originalLink: issue.self
+            originalLink: 'https://' + $localStorage.jiraSettings.host + '/browse/' + issue.key
           });
         }
 

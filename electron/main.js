@@ -3,8 +3,9 @@
 const electron = require('electron');
 const powerSaveBlocker = require('electron').powerSaveBlocker;
 const moment = require('moment');
-const idle = require('./idle');
+const open = require('open');
 const CONFIG = require('./CONFIG');
+const idle = require('./idle');
 const jira = require('./jira');
 
 powerSaveBlocker.start('prevent-app-suspension');
@@ -35,6 +36,12 @@ function createWindow() {
 
   // Open the DevTools.
   mainWindow.webContents.openDevTools();
+
+  // open new window links in browser
+  mainWindow.webContents.on('new-window', function (event, url) {
+    event.preventDefault();
+    open(url);
+  });
 
   mainWindow.on('close', function (event) {
     if (!app.isQuiting) {

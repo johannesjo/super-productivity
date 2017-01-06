@@ -169,7 +169,9 @@
           id: Math.random().toString(36).substr(2, 10),
           created: $window.moment(),
           notes: task.notes,
-          timeEstimate: task.timeEstimate
+          timeEstimate: task.timeEstimate,
+          originalKey: task.originalKey,
+          originalLink: task.originalLink
         });
 
         // update global pointer for today tasks
