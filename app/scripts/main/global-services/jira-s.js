@@ -45,20 +45,22 @@
     };
 
     this.transformIssues = (response) => {
-      let res = response.response;
-      let tasks = [];
+      if (response) {
+        let res = response.response;
+        let tasks = [];
 
-      for (let i = 0; i < res.issues.length; i++) {
-        let issue = res.issues[i];
-        tasks.push({
-          title: issue.key + ' ' + issue.fields.summary,
-          note: issue.fields.description,
-          originalKey: issue.key,
-          originalLink: issue.self
-        });
+        for (let i = 0; i < res.issues.length; i++) {
+          let issue = res.issues[i];
+          tasks.push({
+            title: issue.key + ' ' + issue.fields.summary,
+            note: issue.fields.description,
+            originalKey: issue.key,
+            originalLink: issue.self
+          });
+        }
+
+        return tasks;
       }
-
-      return tasks;
     };
 
     this.sendRequest = (request) => {

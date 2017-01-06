@@ -37,18 +37,21 @@
     vm.taskSuggestions = [];
 
     Jira.getSuggestions().then((res) => {
-      console.log(res);
-      vm.taskSuggestions = Jira.transformIssues(res);
+      vm.taskSuggestions = Jira.transformIssues(res) || [];
     });
 
     vm.addTask = () => {
-      if (vm.newTask) {
-        //Tasks.addToday({
-        //  title: vm.newTask
-        //});
-        Tasks.addToday( vm.newTask);
+      console.log(vm.newTask, vm.newTaskTitle);
 
+      if (vm.newTask) {
+        Tasks.addToday(vm.newTask);
         vm.newTask = undefined;
+        vm.newTaskTitle = undefined;
+      } else if (vm.newTaskTitle) {
+        Tasks.addToday({
+          title: vm.newTaskTitle
+        });
+        vm.newTaskTitle = undefined;
       }
 
       // if we have already defined enough tasks and the
