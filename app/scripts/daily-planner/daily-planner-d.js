@@ -40,7 +40,7 @@
     vm.taskSuggestions = [];
 
     vm.getFilteredTaskSuggestions = (searchText) => {
-      return searchText ? $filter('filter')(vm.taskSuggestions, searchText, false, 'title') : svm.taskSuggestions;
+      return searchText ? $filter('filter')(vm.taskSuggestions, searchText, false, 'title') : vm.taskSuggestions;
     };
 
     Jira.getSuggestions().then((res) => {

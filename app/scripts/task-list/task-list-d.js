@@ -34,7 +34,7 @@
   }
 
   /* @ngInject */
-  function TaskListCtrl(Dialogs, $mdToast, $timeout) {
+  function TaskListCtrl(Dialogs, $mdToast, $timeout, $window) {
     let vm = this;
 
     vm.estimateTime = (task) => {
@@ -115,7 +115,7 @@
 
         // moving items via shift+ctrl+keyUp/keyDown
         if ($event.shiftKey === true && $event.ctrlKey === true) {
-          let taskIndex = _.findIndex(vm.tasks, (cTask) => {
+          let taskIndex = $window._.findIndex(vm.tasks, (cTask) => {
             return cTask.id === task.id;
           });
 

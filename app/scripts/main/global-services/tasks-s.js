@@ -150,11 +150,8 @@
       // calc progress
       if (task && task.timeSpend && task.timeEstimate) {
         if ($window.moment.duration().format && angular.isFunction($window.moment.duration().format)) {
-          task.progress = parseInt(
-            $window.moment.duration(task.timeSpend).format('ss')
-            / $window.moment.duration(task.timeEstimate).format('ss')
-            * 100, 10
-          );
+          task.progress = parseInt($window.moment.duration(task.timeSpend)
+              .format('ss') / $window.moment.duration(task.timeEstimate).format('ss') * 100, 10);
         }
       }
       $localStorage.currentTask = task;
