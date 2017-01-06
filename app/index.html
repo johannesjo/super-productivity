@@ -46,7 +46,10 @@ TODO configure more restrictive Content-Security-Policy
 <md-content md-scroll-y
             layout="column"
             flex>
-  <hints></hints>
+  <hint ng-if="r.noteForToday"
+        title="Your yesterdays note for today">
+    <p>{{ r.noteForToday }}</p>
+  </hint>
   <main ui-view></main>
 </md-content>
 
@@ -114,11 +117,9 @@ TODO configure more restrictive Content-Security-Policy
 <script src="scripts/download-backup/download-backup-d.js"></script>
 <script src="scripts/edit-on-click/edit-on-click-d.js"></script>
 <script src="scripts/hint/hint-d.js"></script>
-<script src="scripts/hints/hints-d.js"></script>
 <script src="scripts/input-duration/input-duration-d.js"></script>
 <script src="scripts/main/global-filters/duration-filter.js"></script>
 <script src="scripts/main/global-services/jira-s.js"></script>
-<script src="scripts/main/global-services/productivity-tips-s.js"></script>
 <script src="scripts/main/global-services/tasks-s.js"></script>
 <script src="scripts/main-header/main-header-d.js"></script>
 <script src="scripts/routes.js"></script>

@@ -60,7 +60,7 @@
     $mdThemingProvider.alwaysWatchTheme(true);
   }
 
-  function initGlobalModels($rootScope, Tasks, $localStorage, ProductivityTips) {
+  function initGlobalModels($rootScope, Tasks, $localStorage) {
     $rootScope.r = {};
     $rootScope.r.tasks = Tasks.getToday();
     $rootScope.r.backlogTasks = Tasks.getBacklog();
@@ -70,7 +70,6 @@
     $rootScope.r.jiraSettings = $localStorage.jiraSettings;
 
     $rootScope.r.noteForToday = $localStorage.tomorrowsNote;
-    $rootScope.r.productivityTip = ProductivityTips.getRandom();
 
     $rootScope.r.theme = $localStorage.theme || 'teal-theme';
   }
