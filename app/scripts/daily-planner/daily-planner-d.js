@@ -25,7 +25,7 @@
   }
 
   /* @ngInject */
-  function DailyPlannerCtrl($scope, $rootScope, Tasks, Dialogs, $state, Jira) {
+  function DailyPlannerCtrl($scope, $rootScope, Tasks, Dialogs, $state, Jira, $filter) {
     let vm = this;
 
     vm.limitBacklogTo = 3;
@@ -39,8 +39,12 @@
 
     vm.taskSuggestions = [];
 
+    vm.getFilteredTaskSuggestions = (searchText) => {
+      return searchText ? $filter('filter')(vm.taskSuggestions, searchText, false, 'title') : svm.taskSuggestions;
+    };
+
     Jira.getSuggestions().then((res) => {
-      vm.taskSuggestions = Jira.transformIssues(res) || [];
+      vm.taskSuggestions = Jira.transformIssues(res) || vm.r.tasks;
     });
 
     vm.addTask = () => {

@@ -11,7 +11,7 @@
       <md-autocomplete
         md-selected-item="vm.newTask"
         md-search-text="vm.newTaskTitle"
-        md-items="task in vm.taskSuggestions"
+        md-items="task in vm.getFilteredTaskSuggestions(vm.newTaskTitle)"
         md-item-text="task.title"
         md-autofocus
         md-require-match="false"
