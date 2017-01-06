@@ -40,6 +40,10 @@ task-list {
     flex-wrap: nowrap;
   }
 
+  .controls {
+    white-space: nowrap;
+  }
+
   &.is-done {
     text-decoration: line-through;
   }
