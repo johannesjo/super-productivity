@@ -16,11 +16,11 @@
                   flex="none"
                   icon="drag_handle"></ng-md-icon>
 
-      <md-button class="md-icon-button"
+      <md-button class="md-icon-button play-btn"
                  aria-label="mark as current"
-                 ng-click="vm.currentTask=task"
+                 ng-click="(vm.currentTask.id === task.id) ? vm.currentTask=null :vm.currentTask=task"
                  ng-show="vm.allowTaskSelection">
-        <ng-md-icon icon="play_circle_outline"
+        <ng-md-icon icon="{{vm.currentTask.id === task.id ? 'pause_circle_filled':'play_circle_fill'}}"
                     aria-label="mark as current"></ng-md-icon>
       </md-button>
 
@@ -55,11 +55,7 @@
                    tabindex="2"
                    ng-class="{'is-active':task.showNotes}"
                    ng-click="task.showNotes=!task.showNotes">
-          <ng-md-icon icon="insert_comment"
-                      ng-if="task.notes"
-                      aria-label="notes"></ng-md-icon>
-          <ng-md-icon icon="mode_comment"
-                      ng-if="!task.notes"
+          <ng-md-icon icon="{{task.notes ?'insert_comment': 'mode_comment'}}"
                       aria-label="notes"></ng-md-icon>
         </md-button>
         <md-button class="md-icon-button"

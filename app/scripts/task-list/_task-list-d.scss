@@ -38,14 +38,11 @@ task-list {
   .first-line {
     display: flex;
     flex-wrap: nowrap;
-  }
 
-  .controls {
-    white-space: nowrap;
+    // Button Stuff
     ng-md-icon {
       fill: gray;
     }
-
     md-checkbox {
       margin-bottom: 0;
       margin-left: 10px;
@@ -61,7 +58,6 @@ task-list {
     .md-icon-button {
       margin: 0;
     }
-
     .md-button {
       &:hover,
       &.is-active {
@@ -72,6 +68,10 @@ task-list {
     }
   }
 
+  .controls {
+    white-space: nowrap;
+  }
+
   &.is-done {
     .title {
       text-decoration: line-through;
@@ -79,10 +79,15 @@ task-list {
   }
 
   &.is-current {
-    border: 3px solid #333;
+    border-bottom: 1px solid #333;
     background: #a9ed9f;
     .md-bar {
       background-color: #4fa758 !important;
+    }
+    .play-btn {
+      ng-md-icon {
+        fill: #000 !important;
+      }
     }
   }
   .md-bar {
