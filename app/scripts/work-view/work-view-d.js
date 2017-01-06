@@ -30,9 +30,13 @@
 
     vm.r = $rootScope.r;
 
-    //vm.tasks = $rootScope.r.tasks;
-    //vm.backlogTasks = $rootScope.r.backlogTasks;
-    //vm.currentTask = $rootScope.r.currentTask;
+    function mergeDoneAndUndone() {
+      // we need to re-merge because of splitting up the tasks into two
+      if (vm.tasksUndone && vm.tasksDone) {
+        let newTaskList = vm.tasksDone.concat(vm.tasksUndone);
+        Tasks.updateToday(newTaskList);
+      }
+    }
 
     vm.openAddTask = () => {
       Dialogs('ADD_TASK');
@@ -53,6 +57,9 @@
         task.isDone = false;
       }
     };
+
+    $scope.$watch('vm.tasksDone', mergeDoneAndUndone, true);
+    $scope.$watch('vm.tasksUndone', mergeDoneAndUndone, true);
 
     $scope.$watch('vm.r.tasks', () => {
       vm.tasksUndone = Tasks.getUndoneToday();
