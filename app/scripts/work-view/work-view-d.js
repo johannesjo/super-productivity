@@ -20,7 +20,7 @@
       controller: WorkViewCtrl,
       controllerAs: 'vm',
       restrict: 'E',
-      scope:{}
+      scope: {}
     };
   }
 
@@ -37,6 +37,27 @@
     vm.openAddTask = () => {
       Dialogs('ADD_TASK');
     };
+
+    vm.onItemMovedUndone = () => {
+      // mark all items in list to done
+      for (let i = 0; i < vm.tasksDone.length; i++) {
+        let task = vm.tasksDone[i];
+        task.isDone = true;
+      }
+
+    };
+    vm.onItemMovedDone = () => {
+      // mark all items in list to undone
+      for (let i = 0; i < vm.tasksUndone.length; i++) {
+        let task = vm.tasksUndone[i];
+        task.isDone = false;
+      }
+    };
+
+    $scope.$watch('vm.r.tasks', () => {
+      vm.tasksUndone = Tasks.getUndoneToday();
+      vm.tasksDone = Tasks.getDoneToday();
+    }, true);
 
     $scope.$watch('vm.r.currentTask', (mVal) => {
       if (mVal && mVal.isDone) {

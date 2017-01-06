@@ -26,13 +26,15 @@
         limitTo: '@',
         filter: '=',
         allowTaskSelection: '@',
-        disableDropInto: '@'
+        disableDropInto: '@',
+        onItemMoved: '&',
+        onOrderChanged: '&',
       }
     };
   }
 
   /* @ngInject */
-  function TaskListCtrl(Dialogs, $rootScope, $mdToast, $timeout) {
+  function TaskListCtrl(Dialogs, $mdToast, $timeout) {
     let vm = this;
 
     vm.estimateTime = (task) => {
@@ -62,7 +64,18 @@
     vm.dragControlListeners = {
       accept: () => {
         return !vm.disableDropInto;
-      }
+      },
+      itemMoved: function (event) {
+        if (angular.isFunction(vm.onItemMoved)) {
+          vm.onItemMoved({ $event: event });
+        }
+      },
+      orderChanged: function (event) {
+        if (angular.isFunction(vm.onOrderChanged)) {
+          vm.onOrderChanged({ $event: event });
+        }
+      },
+      containment: '#board'
     };
 
     vm.handleKeyPress = ($event, task) => {
@@ -136,18 +149,6 @@
       }
       array.splice(newIndex, 0, array.splice(oldIndex, 1)[0]);
       return array; // for testing purposes
-    };
-
-    vm.onTaskDoneChanged = (task) => {
-      // open task selection if current task is done
-      if (task.isDone) {
-        if (vm.currentTask && vm.currentTask.id === task.id) {
-          Dialogs('TASK_SELECTION')
-            .then(() => {
-              vm.currentTask = $rootScope.r.currentTask;
-            });
-        }
-      }
     };
   }
 
