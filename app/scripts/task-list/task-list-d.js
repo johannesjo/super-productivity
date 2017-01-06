@@ -32,24 +32,30 @@
   }
 
   /* @ngInject */
-  function TaskListCtrl(Dialogs, $rootScope, $window, $mdDialog, $timeout) {
+  function TaskListCtrl(Dialogs, $rootScope, $mdToast, $timeout) {
     let vm = this;
 
     vm.estimateTime = (task) => {
       Dialogs('TIME_ESTIMATE', { task });
     };
 
-    vm.deleteTask = (taskId) => {
-      $mdDialog.show(
-        $mdDialog.confirm()
-          .title('Do you really want to delete this task?')
-          .ariaLabel('Delete Task')
-          .ok('Please do it!')
-          .cancel('Better not!')
-      ).then(function () {
-        $window._.remove(vm.tasks, {
-          id: taskId
-        });
+    vm.deleteTask = (task, $index) => {
+      // create copy for undo
+      let taskCopy = angular.copy(task);
+      // delete
+      vm.tasks.splice($index, 1);
+
+      // show toast for undo
+      let toast = $mdToast.simple()
+        .textContent('You deleted "' + task.title + '"')
+        .action('UNDO')
+        .highlightAction(true)// Accent is used by default, this just demonstrates the usage.
+        .position('bottom');
+      $mdToast.show(toast).then(function (response) {
+        if (response === 'ok') {
+          // re-add task on undo
+          vm.tasks.splice($index, 0, taskCopy);
+        }
       });
     };
 
