@@ -4,6 +4,8 @@ daily-summary {
 
 .task-summary-table {
   background: #fff;
+  border-collapse: collapse;
+
   tr {
     &.is-done {
       text-decoration: line-through;
@@ -12,8 +14,8 @@ daily-summary {
 
   th,
   td {
-    border: 1px solid gray;
-    padding: 5px;
+    border: 1px solid #ddd;
+    padding: 4px 8px;
   }
 
   td:nth-child(2),

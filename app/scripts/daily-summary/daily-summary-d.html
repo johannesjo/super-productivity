@@ -5,11 +5,12 @@
 
 <h2 class="md-title">These are the tasks you worked on today</h2>
 
-<table class="task-summary-table">
+<table class="task-summary-table"
+       md-whiteframe="2">
   <tr>
     <th>Title</th>
     <th>Time spend</th>
-    <th>Time estimated</th>
+    <th>Time esti.</th>
     <th></th>
   </tr>
 
@@ -23,11 +24,11 @@
     <td>
       <ng-md-icon icon="check"
                   ng-show="task.isDone"
+                  style="fill:green;"
                   aria-label="checkmark"></ng-md-icon>
     </td>
   </tr>
 </table>
-
 
 <h2 class="md-title">Make a note for your tomorrows self</h2>
 <p>This is meant to be some takeaway to be even more productive/happy tomorrow. E.g.: What did you learn today? What do you want to do better/smarter tomorrow? What do you want to achieve and why?</p>
