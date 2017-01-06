@@ -28,15 +28,9 @@
   function DailyPlannerCtrl($scope, $rootScope, Tasks, Dialogs, $state, Jira, $filter) {
     let vm = this;
 
-    vm.limitBacklogTo = 3;
-
     vm.r = $rootScope.r;
 
-    //vm.tasks = $rootScope.r.tasks;
-    //vm.backlogTasks = $rootScope.r.backlogTasks;
-    //vm.currentTask = $rootScope.r.currentTask;
-    //vm.noteForToday = $rootScope.r.noteForToday;
-
+    vm.limitBacklogTo = 3;
     vm.taskSuggestions = [];
 
     vm.getFilteredTaskSuggestions = (searchText) => {
