@@ -51,6 +51,7 @@
 
         for (let i = 0; i < res.issues.length; i++) {
           let issue = res.issues[i];
+          // TODO try to get estimated as well
           tasks.push({
             title: issue.key + ' ' + issue.fields.summary,
             notes: issue.fields.description,
