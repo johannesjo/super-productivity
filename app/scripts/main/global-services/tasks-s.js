@@ -14,7 +14,7 @@
     .service('Tasks', Tasks);
 
   /* @ngInject */
-  function Tasks($localStorage, $q, $window, $rootScope, Dialogs) {
+  function Tasks($localStorage, $window, $rootScope, Dialogs) {
     const IPC_EVENT_IDLE = 'WAS_IDLE';
     const IPC_EVENT_UPDATE_TIME_SPEND_FOR_CURRENT = 'UPDATE_TIME_SPEND';
 
