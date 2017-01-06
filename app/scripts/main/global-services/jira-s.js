@@ -14,7 +14,7 @@
     .service('Jira', Jira);
 
   /* @ngInject */
-  function Jira($q, $localStorage) {
+  function Jira($q, $localStorage, $window) {
     const IPC_JIRA_CB_EVENT = 'JIRA_RESPONSE';
     const IPC_JIRA_MAKE_REQUEST_EVENT = 'JIRA';
 
@@ -22,8 +22,6 @@
 
     if (angular.isDefined(window.ipcRenderer)) {
       window.ipcRenderer.on(IPC_JIRA_CB_EVENT, (ev, res) => {
-        console.log('RES', res);
-
         if (res.requestId) {
           // resolve saved promise
           this.requestsLog[res.requestId].resolve(res);
@@ -34,14 +32,23 @@
     }
 
     this.getSuggestions = () => {
-      let testRequest = {
+      let options = {
+        maxResults: 100,
+        fields: [
+          'summary',
+          'description',
+          'timeestimate',
+          'timespent'
+        ]
+      };
+      let request = {
         config: $localStorage.jiraSettings,
         apiMethod: 'searchJira',
-        arguments: [$localStorage.jiraSettings.jqlQuery, false],
+        arguments: [$localStorage.jiraSettings.jqlQuery, options],
         requestId: Math.random().toString(36).substr(2, 10)
       };
 
-      return this.sendRequest(testRequest);
+      return this.sendRequest(request);
     };
 
     this.transformIssues = (response) => {
@@ -51,13 +58,20 @@
 
         for (let i = 0; i < res.issues.length; i++) {
           let issue = res.issues[i];
-          // TODO try to get estimated as well
-          tasks.push({
+          let newTask = {
             title: issue.key + ' ' + issue.fields.summary,
             notes: issue.fields.description,
             originalKey: issue.key,
-            originalLink: 'https://' + $localStorage.jiraSettings.host + '/browse/' + issue.key
-          });
+            originalLink: 'https://' + $localStorage.jiraSettings.host + '/browse/' + issue.key,
+            originalEstimate: issue.fields.timeestimate && $window.moment.duration({
+              seconds: issue.fields.timeestimate
+            }),
+            originalTimeSpent: issue.fields.timespent && $window.moment.duration({
+              seconds: issue.fields.timespent
+            }),
+          };
+
+          tasks.push(newTask);
         }
 
         return tasks;

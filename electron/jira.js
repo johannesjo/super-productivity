@@ -1,12 +1,5 @@
 const JiraApi = require('jira').JiraApi;
 
-//request = {
-//  config: {},
-//  apiMethod: 'findIssue',
-//  argument: 'BNGP-1283',
-//  requestId: Math.random().toString(36).substr(2, 10)
-//};
-
 module.exports = (mainWindow, request) => {
   console.log(request);
 
