@@ -1,12 +1,12 @@
 <div class="work-view-current-task">
   <p>You spent <strong>{{ vm.totalTimeWorkedToday|duration }}</strong> working today, your current task is:
-    <strong>{{ vm.currentTask.title }}</strong>.</p>
+    <strong>{{ vm.r.currentTask.title }}</strong>.</p>
 </div>
 
 
 <div class="work-view-tasks work-view-tasks--undone">
-  <task-list tasks="vm.tasks"
-             current-task="vm.currentTask"
+  <task-list tasks="vm.r.tasks"
+             current-task="vm.r.currentTask"
              allow-task-selection="true"
              filter="{isDone:'!true'}"></task-list>
 </div>
@@ -14,9 +14,9 @@
 <h2 class="md-title">Done Tasks</h2>
 
 <div class="work-view-tasks work-view-tasks--done">
-  <task-list tasks="vm.tasks"
+  <task-list tasks="vm.r.tasks"
              disable-drop-into="true"
-             current-task="vm.currentTask"
+             current-task="vm.r.currentTask"
              filter="{isDone:true}"></task-list>
 </div>
 

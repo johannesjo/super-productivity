@@ -20,7 +20,7 @@
       controller: WorkViewCtrl,
       controllerAs: 'vm',
       restrict: 'E',
-      scope: {}
+      scope:{}
     };
   }
 
@@ -28,15 +28,17 @@
   function WorkViewCtrl(Tasks, $rootScope, $scope, $state, Dialogs) {
     let vm = this;
 
-    vm.tasks = $rootScope.r.tasks;
-    vm.backlogTasks = $rootScope.r.backlogTasks;
-    vm.currentTask = $rootScope.r.currentTask;
+    vm.r = $rootScope.r;
+
+    //vm.tasks = $rootScope.r.tasks;
+    //vm.backlogTasks = $rootScope.r.backlogTasks;
+    //vm.currentTask = $rootScope.r.currentTask;
 
     vm.openAddTask = () => {
       Dialogs('ADD_TASK');
     };
 
-    $scope.$watch('vm.currentTask', (mVal) => {
+    $scope.$watch('vm.r.currentTask', (mVal) => {
       if (mVal && mVal.isDone) {
         let undoneTasks = Tasks.getUndoneToday();
 
@@ -44,15 +46,15 @@
         if (!undoneTasks || undoneTasks.length === 0) {
           $state.go('daily-planner');
         } else {
-          vm.currentTask = undoneTasks[0];
+          vm.r.currentTask = undoneTasks[0];
         }
       }
 
-      Tasks.updateCurrent(vm.currentTask);
+      Tasks.updateCurrent(vm.r.currentTask);
     }, true);
 
     // watch for total time spent today
-    $scope.$watch('vm.tasks', () => {
+    $scope.$watch('vm.r.tasks', () => {
       vm.totalTimeWorkedToday = Tasks.getTimeWorkedToday();
     }, true);
 

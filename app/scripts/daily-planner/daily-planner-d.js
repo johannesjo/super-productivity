@@ -30,10 +30,13 @@
 
     vm.limitBacklogTo = 3;
 
-    vm.tasks = $rootScope.r.tasks;
-    vm.backlogTasks = $rootScope.r.backlogTasks;
-    vm.currentTask = $rootScope.r.currentTask;
-    vm.noteForToday = $rootScope.r.noteForToday;
+    vm.r = $rootScope.r;
+
+    //vm.tasks = $rootScope.r.tasks;
+    //vm.backlogTasks = $rootScope.r.backlogTasks;
+    //vm.currentTask = $rootScope.r.currentTask;
+    //vm.noteForToday = $rootScope.r.noteForToday;
+
     vm.taskSuggestions = [];
 
     Jira.getSuggestions().then((res) => {
@@ -41,8 +44,6 @@
     });
 
     vm.addTask = () => {
-      console.log(vm.newTask, vm.newTaskTitle);
-
       if (vm.newTask) {
         Tasks.addToday(vm.newTask);
         vm.newTask = undefined;
@@ -56,7 +57,7 @@
 
       // if we have already defined enough tasks and the
       // new task field is empty go to work view
-      else if (vm.tasks.length > 0) {
+      else if (vm.r.tasks.length > 0) {
         vm.done();
       }
     };
@@ -64,7 +65,7 @@
     vm.done = () => {
       // only open if there is no current task already selected
       if (!vm.currentTask) {
-        Dialogs('TASK_SELECTION', { tasks: vm.tasks })
+        Dialogs('TASK_SELECTION', { tasks: vm.r.tasks })
           .then(() => {
             $state.go('work-view');
           });
@@ -73,12 +74,12 @@
       }
     };
 
-    $scope.$watch('vm.tasks', (mVal) => {
+    $scope.$watch('vm.r.tasks', (mVal) => {
       vm.totaleEstimate = Tasks.calcTotalEstimate(mVal);
       Tasks.updateToday(mVal);
     }, true);
 
-    $scope.$watch('vm.backlogTasks', (mVal) => {
+    $scope.$watch('vm.r.backlogTasks', (mVal) => {
       vm.totaleEstimateBacklog = Tasks.calcTotalEstimate(mVal);
       Tasks.updateBacklog(mVal);
     }, true);

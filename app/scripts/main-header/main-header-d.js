@@ -19,17 +19,32 @@
       bindToController: true,
       controller: MainHeaderCtrl,
       controllerAs: 'vm',
-      restrict: 'E',
-      scope: {}
+      restrict: 'E'
     };
   }
 
   /* @ngInject */
-  function MainHeaderCtrl(Dialogs) {
+  function MainHeaderCtrl(Dialogs, $rootScope, Tasks) {
     let vm = this;
+    let lastCurrentTask;
 
     vm.openAddTask = () => {
       Dialogs('ADD_TASK');
+    };
+
+    vm.toggleBreak = () => {
+      if (!lastCurrentTask && !$rootScope.r.currentTask) {
+        return;
+      }
+
+      vm.isOnBreak = !vm.isOnBreak;
+
+      if (vm.isOnBreak) {
+        lastCurrentTask = $rootScope.r.currentTask;
+        Tasks.updateCurrent(null);
+      } else {
+        Tasks.updateCurrent(lastCurrentTask);
+      }
     };
   }
 
