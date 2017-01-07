@@ -47,6 +47,10 @@
                ng-click="vm.limitBacklogTo = false"
                ng-hide="vm.limitBacklogTo === false || vm.r.backlogTasks.length <=vm.limitBacklogTo ||vm.r.backlogTasks.length ===0">Show All {{ vm.r.backlogTasks.length }} items in Backlog
     </md-button>
+
+    <md-button class="md-primary"
+               ui-sref="done-tasks-backlog">Go To Done Backlog
+    </md-button>
   </div>
 </div>
 

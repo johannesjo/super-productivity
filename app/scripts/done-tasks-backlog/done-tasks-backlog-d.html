@@ -1,0 +1,27 @@
+<h2 class="md-title">Done Tasks Backlog</h2>
+<p> This is just here to admire yourself.</p>
+<p>You spend <strong>{{ vm.totalTimeSpend|duration }}</strong> on all those tasks.</p>
+<table class="task-summary-table"
+       md-whiteframe="2">
+  <tr>
+    <th>Title</th>
+    <th>Time spend</th>
+    <th>Time esti.</th>
+    <th></th>
+  </tr>
+
+  <tr ng-repeat="task in vm.r.doneBacklogTasks"
+      ng-class="{'is-done': task.isDone}">
+    <td>{{ task.title }}</td>
+    <td>
+      {{ task.timeSpend |duration }}
+    </td>
+    <td>{{ task.timeEstimate |duration }}</td>
+    <td>
+      <ng-md-icon icon="check"
+                  ng-show="task.isDone"
+                  style="fill:green;"
+                  aria-label="checkmark"></ng-md-icon>
+    </td>
+  </tr>
+</table>

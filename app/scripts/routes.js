@@ -38,6 +38,10 @@
         url: '/daily-summary',
         template: '<daily-summary></daily-summary>'
       })
+      .state('done-tasks-backlog', {
+        url: '/done-tasks-backlog',
+        template: '<done-tasks-backlog></done-tasks-backlog>'
+      })
     /* STATES-NEEDLE - DO NOT REMOVE THIS */;
   }
 })();

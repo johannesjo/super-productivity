@@ -77,16 +77,31 @@
     };
 
     this.calcTotalEstimate = (tasks) => {
-      let totaleEstimate;
+      let totalEstimate;
       if (angular.isArray(tasks) && tasks.length > 0) {
-        totaleEstimate = $window.moment.duration();
+        totalEstimate = $window.moment.duration();
 
         for (let i = 0; i < tasks.length; i++) {
           let task = tasks[i];
-          totaleEstimate.add(task.timeEstimate);
+          totalEstimate.add(task.timeEstimate);
         }
       }
-      return totaleEstimate;
+      return totalEstimate;
+    };
+
+    this.calcTotalTimeSpend = (tasks) => {
+      let totalTimeSpend;
+      if (angular.isArray(tasks) && tasks.length > 0) {
+        totalTimeSpend = $window.moment.duration();
+
+        for (let i = 0; i < tasks.length; i++) {
+          let task = tasks[i];
+          if (task && task.timeSpend) {
+            totalTimeSpend.add(task.timeSpend);
+          }
+        }
+      }
+      return totalTimeSpend;
     };
 
     // GET DATA
