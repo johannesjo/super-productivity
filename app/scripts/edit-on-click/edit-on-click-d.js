@@ -22,7 +22,8 @@
       restrict: 'A',
       scope: {
         editOnClick: '=',
-        editOnClickToggle: '='
+        editOnClickToggle: '=',
+        editOnClickType: '@'
       }
     };
   }
@@ -30,11 +31,11 @@
   /* @ngInject */
   function EditOnClickCtrl($element, $scope, $timeout) {
     let vm = this;
-    let inputEl = $element.find('input');
 
     vm.toggleShowEdit = () => {
       vm.showEdit = true;
       $timeout(function () {
+        let inputEl = $element.find('input');
         inputEl[0].focus();
       });
     };

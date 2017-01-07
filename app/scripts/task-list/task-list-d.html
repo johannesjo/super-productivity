@@ -37,8 +37,13 @@
 
       <div class="time"
            data-ng-show="task.timeEstimate || task.timeSpend">
-        {{ task.timeSpend |duration }} <span ng-show="task.timeEstimate">/</span>
-        {{ task.timeEstimate |duration }}
+        <span edit-on-click-toggle="task.showEdit"
+              edit-on-click-type="DURATION"
+              edit-on-click="task.timeSpend"></span>
+        <span ng-show="task.timeEstimate">/</span>
+        <span edit-on-click-toggle="task.showEdit"
+              edit-on-click-type="DURATION"
+              edit-on-click="task.timeEstimate"></span>
       </div>
 
 

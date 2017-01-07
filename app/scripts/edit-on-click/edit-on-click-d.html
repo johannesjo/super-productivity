@@ -1,6 +1,20 @@
-<form ng-show="vm.showEdit"
-      ng-submit="vm.showEdit=false;">
+<form ng-if="vm.showEdit"
+      class="edit-on-click-form"
+      ng-submit="vm.showEdit=false;"
+      ng-class="{'is-duration-form':vm.editOnClickType==='DURATION'}">
   <input type="text"
+         ng-if="!vm.editOnClickType"
+         ng-disabled="vm.isDone"
+         ng-model="vm.editOnClick"
+         ng-blur="vm.showEdit=false;"
+         md-auto-focus
+         tabindex="2"
+         md-autofocus>
+
+  <input type="text"
+         ng-if="vm.editOnClickType==='DURATION'"
+         input-duration
+         class="edit-on-click-duration-input"
          ng-disabled="vm.isDone"
          ng-model="vm.editOnClick"
          ng-blur="vm.showEdit=false;"
@@ -10,6 +24,14 @@
 </form>
 <span class="text"
       tabindex="2"
+      ng-if="!vm.editOnClickType"
       ng-keypress="vm.toggleShowEdit()"
       ng-click="vm.toggleShowEdit()"
       ng-show="!vm.showEdit">{{ vm.editOnClick }}</span>
+
+<span class="text"
+      tabindex="2"
+      ng-if="vm.editOnClickType==='DURATION'"
+      ng-keypress="vm.toggleShowEdit()"
+      ng-click="vm.toggleShowEdit()"
+      ng-show="!vm.showEdit">{{ vm.editOnClick |duration }}</span>

@@ -1,3 +1,19 @@
-edit-on-click {
+[edit-on-click] {
+  cursor: pointer;
+}
 
+.edit-on-click-form {
+  display: inline-block;
+  &.is-duration-form {
+    width: auto;
+  }
+
+  input {
+    display: inline-block;
+  }
+  input.edit-on-click-duration-input {
+    width: 70px;
+    padding-left: 2px;
+    padding-right: 2px;
+  }
 }
