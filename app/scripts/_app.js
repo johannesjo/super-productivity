@@ -10,6 +10,16 @@
 (function () {
   'use strict';
 
+  // Electron stuff
+  // require ipcRenderer if available
+  if (typeof require === 'function') {
+    window.isElectron = true;
+
+    const { ipcRenderer } = require('electron');
+    window.ipcRenderer = ipcRenderer;
+  }
+
+  // app initialization
   angular
     .module('superProductivity', [
       'ngAnimate',
@@ -95,6 +105,11 @@
     $document.bind('keypress', (ev) => {
       if (ev.key === '*') {
         Dialogs('ADD_TASK');
+      }
+      if (window.isElectron) {
+        if (ev.keyCode === 10 && ev.ctrlKey === true && ev.shiftKey === true) {
+          ipcRenderer.send('TOGGLE_DEV_TOOLS');
+        }
       }
     });
   }

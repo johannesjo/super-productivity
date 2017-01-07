@@ -126,6 +126,10 @@ electron.ipcMain.on('SHUTDOWN', () => {
   app.quit();
 });
 
+electron.ipcMain.on('TOGGLE_DEV_TOOLS', () => {
+  mainWindow.webContents.openDevTools();
+});
+
 electron.ipcMain.on('JIRA', (ev, request) => {
   jira(mainWindow, request);
 });

@@ -24,9 +24,12 @@ TODO configure more restrictive Content-Security-Policy
 
   <!-- build:css({.tmp,app}) styles/vendor.css -->
   <!-- bower:css -->
-  <link rel="stylesheet" href="bower_components/angular-material/angular-material.css" />
-  <link rel="stylesheet" href="bower_components/angular-material-icons/angular-material-icons.css" />
-  <link rel="stylesheet" href="bower_components/ng-sortable/dist/ng-sortable.css" />
+  <link rel="stylesheet"
+        href="bower_components/angular-material/angular-material.css"/>
+  <link rel="stylesheet"
+        href="bower_components/angular-material-icons/angular-material-icons.css"/>
+  <link rel="stylesheet"
+        href="bower_components/ng-sortable/dist/ng-sortable.css"/>
   <!-- endbower -->
   <!-- endbuild -->
 
@@ -90,18 +93,14 @@ TODO configure more restrictive Content-Security-Policy
 <!-- endbuild -->
 
 <script>
-  // require ipcRenderer if available
-  if (typeof require === 'function') {
-    const { ipcRenderer } = require('electron');
-    window.ipcRenderer = ipcRenderer;
-
-    // fix to use the
-    try {
-      window.moment = require('moment');
-    }
-    catch (e) {
-    }
+  //// fix to use the moment from require as
+  //// there is a bug with moment.format.duration
+  try {
+    window.moment = require('moment');
   }
+  catch (e) {
+  }
+
 </script>
 
 <!-- build:js({.tmp,app}) scripts/scripts.js defer -->
