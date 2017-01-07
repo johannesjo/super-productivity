@@ -9,4 +9,6 @@ app/styles/**/*.css.map
 .sass-cache
 bower_components
 app/bower_components
+dist
+build
 *.log

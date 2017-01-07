@@ -5,6 +5,8 @@ const powerSaveBlocker = require('electron').powerSaveBlocker;
 const moment = require('moment');
 const open = require('open');
 const CONFIG = require('./CONFIG');
+const IMAGE_FOLDER = __dirname + '/assets/img/';
+
 const idle = require('./idle');
 const jira = require('./jira');
 
@@ -74,7 +76,7 @@ app.on('window-all-closed', function () {
 
 let appIcon = null;
 app.on('ready', () => {
-  appIcon = new electron.Tray('electron/ico.png');
+  appIcon = new electron.Tray(IMAGE_FOLDER + 'ico.png');
   let contextMenu = electron.Menu.buildFromTemplate([
     {
       label: 'Show App', click: () => {
@@ -118,7 +120,6 @@ app.on('activate', function () {
 app.on('ready', () => {
   setInterval(trackTimeFn, CONFIG.PING_INTERVAL);
 });
-
 
 // listen to events from frontend
 electron.ipcMain.on('SHUTDOWN', () => {

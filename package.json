@@ -1,16 +1,31 @@
 {
   "name": "superProductivity",
   "version": "0.0.0",
-  "description": "",
-  "main": "gulpfile.js",
+  "description": "Personal Task Management App to help you with your daily struggle with JIRA etc.",
+  "main": "./electron/main.js",
   "repository": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "electron ./electron/main.js"
+    "start": "electron ./electron/main.js",
+    "pack": "build --dir",
+    "dist": "build"
   },
-  "author": "",
+  "author": "Johannes Millan <contact@super-productivity.com> (http://super-productivity.com)",
   "license": "none",
+  "build": {
+    "appId": "superProductivity",
+    "mac": {
+      "category": "task management"
+    },
+    "win": {
+      "iconUrl": "windowsicon"
+    },
+    "linux": {
+    }
+  },
   "devDependencies": {
+    "electron": "^1.4.1",
+    "electron-inspector": "^0.1.4",
     "browser-sync": "latest",
     "del": "latest",
     "ecstatic": "latest",
@@ -55,8 +70,6 @@
     "yargs": "latest"
   },
   "dependencies": {
-    "electron": "^1.4.1",
-    "electron-inspector": "^0.1.4",
     "jira": "^0.9.2",
     "moment": "^2.17.1",
     "open": "0.0.5"

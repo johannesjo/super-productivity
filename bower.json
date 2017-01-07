@@ -1,7 +1,9 @@
 {
   "name": "superProductivity",
   "version": "0.0.0",
-  "authors": [],
+  "authors": [
+    "Johannes Millan <contact@super-productivity.com> (http://super-productivity.com)"
+  ],
   "license": "none",
   "private": true,
   "ignore": [
