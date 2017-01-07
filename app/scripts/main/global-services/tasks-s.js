@@ -14,7 +14,7 @@
     .service('Tasks', Tasks);
 
   /* @ngInject */
-  function Tasks($localStorage, $window, $rootScope, Dialogs) {
+  function Tasks($localStorage, $window, $rootScope, Dialogs, Jira) {
     const IPC_EVENT_IDLE = 'WAS_IDLE';
     const IPC_EVENT_UPDATE_TIME_SPEND_FOR_CURRENT = 'UPDATE_TIME_SPEND';
 
@@ -58,7 +58,7 @@
 
           $rootScope.r.currentTask.lastWorkedOn = $window.moment();
 
-          that.updateCurrent($rootScope.r.currentTask);
+          that.updateCurrent($rootScope.r.currentTask, true);
 
           // we need to manually call apply as this is an outside event
           $rootScope.$apply();
@@ -155,7 +155,7 @@
     };
 
     // UPDATE DATA
-    this.updateCurrent = (task) => {
+    this.updateCurrent = (task, isCallFromTimeTracking) => {
       // calc progress
       if (task && task.timeSpend && task.timeEstimate) {
         if ($window.moment.duration().format && angular.isFunction($window.moment.duration().format)) {
@@ -163,6 +163,14 @@
               .format('ss') / $window.moment.duration(task.timeEstimate).format('ss') * 100, 10);
         }
       }
+
+      // check if jira support is available
+      if (window.isElectron && !isCallFromTimeTracking) {
+        if (task && task.originalKey) {
+          Jira.markAsInProgress(task);
+        }
+      }
+
       $localStorage.currentTask = task;
       // update global pointer
       $rootScope.r.currentTask = $localStorage.currentTask;
@@ -177,9 +185,11 @@
           notes: task.notes,
           timeEstimate: task.timeEstimate || task.originalEstimate,
           timeSpend: task.timeSpend || task.originalTimeSpent,
+          originalId: task.originalId,
           originalKey: task.originalKey,
           originalType: task.originalType,
           originalLink: task.originalLink,
+          originalStatus: task.originalStatus,
           originalEstimate: task.originalEstimate,
           originalTimeSpent: task.originalTimeSpent
         });

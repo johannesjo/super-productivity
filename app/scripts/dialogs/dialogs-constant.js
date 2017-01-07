@@ -26,7 +26,7 @@
         controller: 'WasIdleCtrl',
         templateUrl: 'scripts/dialogs/was-idle/was-idle-c.html'
       },
-      ADD_TASK:{
+      ADD_TASK: {
         controller: 'AddTaskCtrl',
         templateUrl: 'scripts/dialogs/add-task/add-task-c.html'
       },
@@ -37,6 +37,10 @@
       TIME_ESTIMATE: {
         controller: 'TimeEstimateCtrl',
         templateUrl: 'scripts/dialogs/time-estimate/time-estimate-c.html'
+      },
+      JIRA_SET_IN_PROGRESS: {
+        controller: 'JiraSetInProgressCtrl',
+        templateUrl: 'scripts/dialogs/jira-set-in-progress/jira-set-in-progress-c.html'
       }
     });
 })();

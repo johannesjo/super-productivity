@@ -1,0 +1,27 @@
+<md-dialog aria-label="Jira Set In Progress Dialog">
+  <form ng-submit="vm.updateTask(vm.chosenTransitionIndex)">
+    <md-dialog-content layout-padding>
+      <p>Do you want to update the task '<strong>{{ vm.task.title }}</strong>' on jira?</p>
+
+      <p>Move to:</p>
+      <md-radio-group ng-model="vm.chosenTransitionIndex">
+        <md-radio-button ng-repeat="transition in vm.transitions"
+                         value="{{$index}}"
+                         class="md-primary">{{ transition.name }}
+        </md-radio-button>
+      </md-radio-group>
+    </md-dialog-content>
+
+    <md-dialog-actions>
+      <md-button ng-click="vm.cancel()"
+                 type="button"
+                 class="md-primary md-raised">
+        Cancel
+      </md-button>
+      <md-button type="submit"
+                 class="md-raised">
+        Update Task on Jira
+      </md-button>
+    </md-dialog-actions>
+  </form>
+</md-dialog>
