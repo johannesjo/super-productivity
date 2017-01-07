@@ -65,6 +65,7 @@
           let newTask = {
             title: issue.key + ' ' + issue.fields.summary,
             notes: issue.fields.description,
+            originalType: 'JIRA',
             originalKey: issue.key,
             originalLink: 'https://' + $localStorage.jiraSettings.host + '/browse/' + issue.key,
             originalEstimate: issue.fields.timeestimate && $window.moment.duration({

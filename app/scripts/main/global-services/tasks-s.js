@@ -178,6 +178,7 @@
           timeEstimate: task.timeEstimate || task.originalEstimate,
           timeSpend: task.timeSpend || task.originalTimeSpent,
           originalKey: task.originalKey,
+          originalType: task.originalType,
           originalLink: task.originalLink,
           originalEstimate: task.originalEstimate,
           originalTimeSpent: task.originalTimeSpent
