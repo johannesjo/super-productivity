@@ -41,14 +41,18 @@
           'timespent'
         ]
       };
-      let request = {
-        config: $localStorage.jiraSettings,
-        apiMethod: 'searchJira',
-        arguments: [$localStorage.jiraSettings.jqlQuery, options],
-        requestId: Math.random().toString(36).substr(2, 10)
-      };
 
-      return this.sendRequest(request);
+      if ($localStorage.jiraSettings && $localStorage.jiraSettings.userName && $localStorage.jiraSettings.password && $localStorage.jiraSettings.password && $localStorage.jiraSettings.jqlQuery) {
+        let request = {
+          config: $localStorage.jiraSettings,
+          apiMethod: 'searchJira',
+          arguments: [$localStorage.jiraSettings.jqlQuery, options],
+          requestId: Math.random().toString(36).substr(2, 10)
+        };
+        return this.sendRequest(request);
+      } else {
+        return $q.reject('Insufficient settings');
+      }
     };
 
     this.transformIssues = (response) => {

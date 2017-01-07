@@ -69,7 +69,8 @@
       currentTask: null,
       tasks: [],
       backlogTasks: [],
-      distractions: []
+      distractions: [],
+      jiraSettings: {}
     });
 
     $rootScope.r = {};
