@@ -35,6 +35,7 @@ task-list {
   &.as-sortable-dragging,
   &:focus {
     background: #eee;
+    color: #000;
   }
 
   .first-line {
@@ -83,6 +84,8 @@ task-list {
   &.is-current {
     border-bottom: 1px solid #333;
     background: #a9ed9f;
+    color: #000;
+
     .md-bar {
       background-color: #4fa758 !important;
     }
