@@ -160,6 +160,7 @@ gulp.task('sass', function() {
         }))
         .pipe(sourcemaps.write('.'))
         .pipe(gulp.dest(config.tmp))
+        .pipe(gulp.dest(config.styles))
         .pipe(outputFolder)
         .pipe(browserSync.stream());
 });
