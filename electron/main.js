@@ -35,7 +35,7 @@ function createWindow() {
   }));
 
   // Open the DevTools.
-  mainWindow.webContents.openDevTools();
+  //mainWindow.webContents.openDevTools();
 
   // open new window links in browser
   mainWindow.webContents.on('new-window', function (event, url) {
