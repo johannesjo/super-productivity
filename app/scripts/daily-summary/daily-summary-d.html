@@ -30,6 +30,18 @@
   </tr>
 </table>
 
+
+<section class="distractions"
+         ng-if="vm.r.distractions.length > 0">
+  <h2 class="md-title">Your distractions for today</h2>
+  <ul>
+    <li ng-repeat="distraction in vm.r.distractions">{{ distraction }}</li>
+  </ul>
+  <md-button class="md-raised"
+             ng-click="vm.r.distractions=[]">Delete distractions
+  </md-button>
+</section>
+
 <h2 class="md-title">Make a note for your tomorrows self</h2>
 <p>This is meant to be some takeaway to be even more productive/happy tomorrow. E.g.: What did you learn today? What do you want to do better/smarter tomorrow? What do you want to achieve and why?</p>
 <p>Think a second and reflect on the day.</p>

@@ -31,6 +31,9 @@
 
     let vm = this;
 
+    vm.r = $rootScope.r;
+
+    // TODO rewrite this
     vm.todaysTasks = $rootScope.r.tasks;
     vm.backlogTasks = $rootScope.r.backlogTasks;
     vm.doneTasks = Tasks.getDoneToday();
