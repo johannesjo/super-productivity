@@ -39,11 +39,11 @@
     };
 
     vm.onKeydown = (ev) => {
-      if (ev.ctrlKey && ev.keyCode == 13) {
+      if (ev.ctrlKey && ev.keyCode === 13) {
         // Ctrl-Enter pressed
         vm.saveDistraction();
       }
-      if (ev.ctrlKey && ev.keyCode == 27) {
+      if (ev.ctrlKey && ev.keyCode === 27) {
         // escape is pressed
         vm.close();
       }
