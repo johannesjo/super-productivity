@@ -80,7 +80,11 @@
       tasks: [],
       backlogTasks: [],
       distractions: [],
-      jiraSettings: {}
+      jiraSettings: {
+        isFirstLogin: true,
+        defaultTransitionInProgress: undefined,
+        defaultTransitionDone: undefined,
+      }
     });
 
     $rootScope.r = {};
