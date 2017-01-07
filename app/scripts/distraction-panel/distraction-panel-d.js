@@ -43,14 +43,16 @@
         // Ctrl-Enter pressed
         vm.saveDistraction();
       }
-      if (ev.ctrlKey && ev.keyCode === 27) {
+      if (ev.keyCode === 27) {
         // escape is pressed
         vm.close();
       }
     };
 
     vm.saveDistraction = () => {
-      $rootScope.r.distractions.push(vm.newDistraction);
+      if (vm.newDistraction.length > 0) {
+        $rootScope.r.distractions.push(vm.newDistraction);
+      }
       vm.close();
     };
 

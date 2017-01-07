@@ -1,4 +1,5 @@
 <div class="panel"
+     ng-keydown="vm.onKeydown($event)"
      ng-class="{'is-open':vm.isOpen}">
   </md-button>
   <md-content layout-gt-sm="row"
@@ -12,7 +13,6 @@
     <form ng-submit="vm.saveDistraction()">
       <md-input-container class="md-block">
         <textarea ng-model="vm.newDistraction"
-                  ng-keydown="vm.onKeydown($event)"
                   md-autofocus
                   minlength="2"
                   aria-label="What is distracting you? Write it down to save it for later!"
