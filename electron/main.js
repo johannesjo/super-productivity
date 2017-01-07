@@ -119,6 +119,8 @@ app.on('ready', () => {
   setInterval(trackTimeFn, CONFIG.PING_INTERVAL);
 });
 
+
+// listen to events from frontend
 electron.ipcMain.on('SHUTDOWN', () => {
   app.isQuiting = true;
   app.quit();
