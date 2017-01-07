@@ -1,0 +1,39 @@
+<div class="panel"
+     ng-class="{'is-open':vm.isOpen}">
+  </md-button>
+  <md-content layout-gt-sm="row"
+              layout-padding
+              class="panel-inner"
+              md-whiteframe="8"
+              ng-show="vm.isOpen">
+
+
+    <h2 class="md-title">What is distracting you? Write it down to save it for later?</h2>
+    <form ng-submit="vm.saveDistraction()">
+      <md-input-container class="md-block">
+        <textarea ng-model="vm.newDistraction"
+                  ng-keydown="vm.onKeydown($event)"
+                  md-autofocus
+                  minlength="2"
+                  aria-label="What is distracting you? Write it down to save it for later!"
+                  autofocus></textarea>
+      </md-input-container>
+
+      <md-button type="button"
+                 ng-click="vm.close();"
+                 class="md-raised">
+        Nevermind
+      </md-button>
+      <md-button type="submit"
+                 class="md-raised md-primary">
+        Save it for later
+      </md-button>
+    </form>
+  </md-content>
+
+  <md-button aria-label="menu"
+             class="md-fab "
+             ng-if="!vm.isOpen"
+             ng-click="vm.isOpen=!vm.isOpen;">
+    <ng-md-icon icon="redeem"></ng-md-icon>
+</div>

@@ -65,11 +65,20 @@
   }
 
   function initGlobalModels($rootScope, Tasks, $localStorage) {
+    $localStorage.$default({
+      currentTask: null,
+      tasks: [],
+      backlogTasks: [],
+      distractions: []
+    });
+
     $rootScope.r = {};
     $rootScope.r.tasks = Tasks.getToday();
     $rootScope.r.backlogTasks = Tasks.getBacklog();
     $rootScope.r.currentTask = Tasks.getCurrent();
     $rootScope.r.doneBacklogTasks = Tasks.getDoneBacklog();
+
+    $rootScope.r.distractions = $localStorage.distractions;
 
     $rootScope.r.jiraSettings = $localStorage.jiraSettings;
 

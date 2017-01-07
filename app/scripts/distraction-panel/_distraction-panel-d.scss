@@ -1,0 +1,22 @@
+distraction-panel {
+
+  display: block;
+
+  .panel {
+    position: fixed;
+    z-index: 20;
+    right: 0;
+    bottom: 0;
+    md-input-container,
+    h2 {
+      margin-top: 0;
+      margin-bottom: 0;
+    }
+
+    &.is-open {
+    }
+  }
+  .panel-inner {
+  }
+
+}

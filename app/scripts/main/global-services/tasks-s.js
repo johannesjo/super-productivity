@@ -18,12 +18,6 @@
     const IPC_EVENT_IDLE = 'WAS_IDLE';
     const IPC_EVENT_UPDATE_TIME_SPEND_FOR_CURRENT = 'UPDATE_TIME_SPEND';
 
-    $localStorage.$default({
-      currentTask: null,
-      tasks: [],
-      backlogTasks: []
-    });
-
     // SETUP HANDLERS FOR ELECTRON EVENTS
     if (angular.isDefined(window.ipcRenderer)) {
       let that = this;
