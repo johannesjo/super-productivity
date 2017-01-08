@@ -76,7 +76,7 @@ app.on('window-all-closed', function () {
 });
 
 if (process.platform === 'linux') {
-  pyGtkIndicator.init();
+  //pyGtkIndicator.init();
 } else {
   let appIcon = null;
   app.on('ready', () => {
@@ -135,6 +135,7 @@ electron.ipcMain.on('JIRA', (ev, request) => {
   jira(mainWindow, request);
 });
 
+let saveLastTitle;
 electron.ipcMain.on('CHANGED_CURRENT_TASK', (ev, task) => {
   //appIcon.setToolTip();
   if (task && task.title) {
@@ -144,10 +145,14 @@ electron.ipcMain.on('CHANGED_CURRENT_TASK', (ev, task) => {
     }
 
     if (process.platform === 'linux') {
-      pyGtkIndicator.setCurrentTitle(title);
+      if (saveLastTitle && saveLastTitle !== task.title) {
+        pyGtkIndicator.setCurrentTitle(title, app, mainWindow);
+      }
     } else {
       appIcon.setTitle(title);
     }
+
+    saveLastTitle = task.title;
   }
   // Call this again for Linux because we modified the context menu
   //appIcon.setContextMenu(contextMenu)

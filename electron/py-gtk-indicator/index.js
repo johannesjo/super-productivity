@@ -1,13 +1,25 @@
 const spawn = require('child_process').spawn;
 let py;
 
-function init() {
+module.exports = {
+  init: init,
+  setCurrentTitle: setCurrentTitle
+};
+
+function init(app, mainWindow) {
   py = spawn('python', [__dirname + '/py-gtk-indicator.py'], {
     stdio: [null, null, null, 'ipc']
   });
 
   py.stdout.on('data', (data) => {
     console.log(`stdout: ${data}`);
+    let strData = data.toString('utf8').trim();
+    if (strData === 'QUIT') {
+      app.isQuiting = true;
+      app.quit();
+    } else if (strData === 'SHOW_APP') {
+      mainWindow.show();
+    }
   });
 
   py.stderr.on('data', (data) => {
@@ -24,26 +36,15 @@ function init() {
     console.log('Received message...');
     console.log(message);
   });
-
-  //py.stdin.write('DDDSDx');
-  //py.stdin.end();
-
-
-  //setTimeout(function () {
-  //  console.log('timeoutDone');
-  //  console.log('WRITE');
-
-  //py.stdin.write('DDDSD\n');
-  //py.stdin.end();
-  //}, 1000);
-
 }
-init();
 
-module.exports = {
-  init: init,
-  setCurrentTitle: (title) => {
-    py.stdin.write('\n' + title);
+function setCurrentTitle(title, app, mainWindow) {
+  if (py) {
+    py.kill('SIGHUP');
   }
-};
+  init(app, mainWindow);
+  py.stdin.write(title);
+  py.stdin.end();
+}
+
 
