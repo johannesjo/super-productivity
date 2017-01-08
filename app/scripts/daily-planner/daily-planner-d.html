@@ -13,8 +13,8 @@
         md-search-text="vm.newTaskTitle"
         md-items="task in vm.getFilteredTaskSuggestions(vm.newTaskTitle)"
         md-item-text="task.title"
-        md-autofocus
         md-require-match="false"
+        autofocus-autocomplete
         placeholder="Select or create a task">
         <md-item-template>
           <span md-highlight-text="vm.newTaskTitle"
