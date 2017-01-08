@@ -3,9 +3,12 @@ daily-summary {
 }
 
 .task-summary-table {
-  //background: #fff;
+  background: #fff;
   border-collapse: collapse;
-
+  body.dark-theme & {
+    background: $dark-theme-bg-lighter;
+    color: #fff;
+  }
   tr {
     &.is-done {
       text-decoration: line-through;

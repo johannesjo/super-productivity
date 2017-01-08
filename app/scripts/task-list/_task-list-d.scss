@@ -12,30 +12,38 @@ task-list {
 
   .as-sortable-placeholder,
   .dndPlaceholder {
-    background-color: #444;
     margin: 1px 2px 5px 1px;
-    border-radius: 10px;
     display: block;
     min-height: 22px;
+    background-color: #ddd;
+    body.dark-theme & {
+      background-color: $dark-theme-bg-darker;
+    }
   }
   &__backlog {
   }
 }
 
 .task {
-  //background-color: #fff;
-  //color: #333;
-  border: 1px solid #999;
-  border-radius: 4px;
   padding: 4px 15px;
   display: block;
-  margin-bottom: 3px;
-  box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+  margin-bottom: 4px;
+
+  background-color: #fff;
+  color: #333;
+  body.dark-theme & {
+    background-color: $dark-theme-bg-lighter;
+    color: #fff;
+  }
 
   &.as-sortable-dragging,
   &:focus {
     background: #eee;
     color: #000;
+    body.dark-theme & {
+      background-color: $dark-theme-bg-darker;
+      color: #fff;
+    }
   }
 
   .first-line {
@@ -53,6 +61,9 @@ task-list {
     .md-button,
     md-checkbox {
       transition: 300ms;
+      padding: 4px;
+      // always reserve space for buttons
+      min-width: 40px;
       &:hover {
         transform: scale(1.4);
       }
@@ -66,6 +77,9 @@ task-list {
       &.is-active {
         > ng-md-icon {
           fill: #000;
+          body.dark-theme & {
+            fill: #fff;
+          }
         }
       }
     }
@@ -82,9 +96,13 @@ task-list {
   }
 
   &.is-current {
-    border-bottom: 1px solid #333;
     background: #a9ed9f;
     color: #000;
+
+    body.dark-theme & {
+      background-color: #30412d;
+      color: #fff;
+    }
 
     .md-bar {
       background-color: #4fa758 !important;
@@ -92,6 +110,9 @@ task-list {
     .play-btn {
       ng-md-icon {
         fill: #000 !important;
+        body.dark-theme & {
+          fill: #fff !important;
+        }
       }
     }
   }

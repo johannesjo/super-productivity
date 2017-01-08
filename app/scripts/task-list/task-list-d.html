@@ -6,6 +6,7 @@
       ng-class="{'is-current': vm.currentTask.id === task.id, 'is-done':task.isDone}"
       ng-repeat="task in vm.tasks|limitTo:vm.limitTo|filter:vm.filter track by task.id"
       tabindex="1"
+      md-whiteframe="1"
       ng-keydown="vm.handleKeyPress($event, task)">
 
     <div class="first-line"

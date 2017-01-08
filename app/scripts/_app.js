@@ -100,6 +100,10 @@
     $rootScope.r.noteForToday = $localStorage.tomorrowsNote;
 
     $rootScope.r.theme = $localStorage.theme || 'teal-theme';
+
+    if ($rootScope.r.theme.indexOf('dark') > -1) {
+      $rootScope.r.bodyClass = 'dark-theme';
+    }
   }
 
   function initGlobalShortcuts($document, Dialogs) {
