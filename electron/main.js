@@ -140,9 +140,9 @@ function trackTimeFn() {
 
   idle((stdout) => {
     let idleTime = parseInt(stdout, 10);
-    if (lastIdleTime > CONFIG.MIN_IDLE_TIME && lastIdleTime > idleTime) {
+    if (idleTime > 0 && lastIdleTime > CONFIG.MIN_IDLE_TIME && lastIdleTime > idleTime) {
       mainWindow.show();
-      mainWindow.webContents.send('WAS_IDLE', lastIdleTime - CONFIG.MIN_IDLE_TIME);
+      mainWindow.webContents.send('WAS_IDLE', (lastIdleTime - CONFIG.MIN_IDLE_TIME + CONFIG.PING_INTERVAL));
     } else {
       mainWindow.webContents.send('UPDATE_TIME_SPEND', CONFIG.PING_INTERVAL);
     }

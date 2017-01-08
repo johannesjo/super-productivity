@@ -17,7 +17,8 @@
   function WasIdleCtrl($mdDialog, $rootScope, Tasks, $window, idleTime) {
     let vm = this;
 
-    vm.idleTime = $window.moment.duration({ milliseconds: idleTime });
+    vm.idleTime = $window.moment.duration(idleTime, 'milliseconds');
+    console.log(vm.idleTime);
 
     vm.undoneTasks = Tasks.getUndoneToday();
     vm.selectedTask = $rootScope.r.currentTask;
