@@ -9,6 +9,7 @@ const IMAGE_FOLDER = __dirname + '/assets/img/';
 
 const idle = require('./idle');
 const jira = require('./jira');
+const pyGtkIndicator = require('./py-gtk-indicator');
 
 powerSaveBlocker.start('prevent-app-suspension');
 
@@ -74,25 +75,28 @@ app.on('window-all-closed', function () {
   //}
 });
 
-let appIcon = null;
-app.on('ready', () => {
-  appIcon = new electron.Tray(IMAGE_FOLDER + 'ico.png');
-  let contextMenu = electron.Menu.buildFromTemplate([
-    {
-      label: 'Show App', click: () => {
-      mainWindow.show();
-    }
-    },
-    {
-      label: 'Quit', click: () => {
-      app.isQuiting = true;
-      app.quit();
-    }
-    }
-  ]);
-  appIcon.setContextMenu(contextMenu);
-
-});
+if (process.platform === 'linux') {
+  pyGtkIndicator.init();
+} else {
+  let appIcon = null;
+  app.on('ready', () => {
+    appIcon = new electron.Tray(IMAGE_FOLDER + 'ico.png');
+    let contextMenu = electron.Menu.buildFromTemplate([
+      {
+        label: 'Show App', click: () => {
+        mainWindow.show();
+      }
+      },
+      {
+        label: 'Quit', click: () => {
+        app.isQuiting = true;
+        app.quit();
+      }
+      }
+    ]);
+    appIcon.setContextMenu(contextMenu);
+  });
+}
 
 app.on('ready', () => {
   // Register a 'CommandOrControl+X' shortcut listener.
@@ -139,7 +143,11 @@ electron.ipcMain.on('CHANGED_CURRENT_TASK', (ev, task) => {
       title = title.substring(0, 47) + "...";
     }
 
-    appIcon.setTitle(title);
+    if (process.platform === 'linux') {
+      pyGtkIndicator.setCurrentTitle(title);
+    } else {
+      appIcon.setTitle(title);
+    }
   }
   // Call this again for Linux because we modified the context menu
   //appIcon.setContextMenu(contextMenu)
