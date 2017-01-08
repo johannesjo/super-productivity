@@ -91,11 +91,7 @@ app.on('ready', () => {
     }
   ]);
   appIcon.setContextMenu(contextMenu);
-  appIcon.setToolTip('This is my application.');
-  appIcon.setTitle('test');
 
-  // Call this again for Linux because we modified the context menu
-  appIcon.setContextMenu(contextMenu)
 });
 
 app.on('ready', () => {
@@ -133,6 +129,20 @@ electron.ipcMain.on('TOGGLE_DEV_TOOLS', () => {
 
 electron.ipcMain.on('JIRA', (ev, request) => {
   jira(mainWindow, request);
+});
+
+electron.ipcMain.on('CHANGED_CURRENT_TASK', (ev, task) => {
+  //appIcon.setToolTip();
+  if (task && task.title) {
+    let title = task.title;
+    if (title.length > 50) {
+      title = title.substring(0, 47) + "...";
+    }
+
+    appIcon.setTitle(title);
+  }
+  // Call this again for Linux because we modified the context menu
+  //appIcon.setContextMenu(contextMenu)
 });
 
 function trackTimeFn() {

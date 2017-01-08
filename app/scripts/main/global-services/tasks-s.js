@@ -17,6 +17,7 @@
   function Tasks($localStorage, $window, $rootScope, Dialogs, Jira) {
     const IPC_EVENT_IDLE = 'WAS_IDLE';
     const IPC_EVENT_UPDATE_TIME_SPEND_FOR_CURRENT = 'UPDATE_TIME_SPEND';
+    const IPC_EVENT_CURRENT_TASK_UPDATED = 'CHANGED_CURRENT_TASK';
 
     // SETUP HANDLERS FOR ELECTRON EVENTS
     if (angular.isDefined(window.ipcRenderer)) {
@@ -164,12 +165,19 @@
         }
       }
 
-      // check if jira support is available
-      if (window.isElectron && !isCallFromTimeTracking) {
-        if (task && task.originalKey) {
-          Jira.markAsInProgress(task);
+      // check if in electron context
+      if (window.isElectron) {
+        if (!isCallFromTimeTracking) {
+          if (task && task.originalKey) {
+            Jira.markAsInProgress(task);
+          }
+        }
+
+        if (task && task.title) {
+          window.ipcRenderer.send(IPC_EVENT_CURRENT_TASK_UPDATED, task);
         }
       }
+
 
       $localStorage.currentTask = task;
       // update global pointer
