@@ -14,7 +14,7 @@
     .service('Tasks', Tasks);
 
   /* @ngInject */
-  function Tasks($localStorage, $window, $rootScope, Dialogs, Jira) {
+  function Tasks($localStorage, Uid, $window, $rootScope, Dialogs, Jira) {
     const IPC_EVENT_IDLE = 'WAS_IDLE';
     const IPC_EVENT_UPDATE_TIME_SPEND_FOR_CURRENT = 'UPDATE_TIME_SPEND';
     const IPC_EVENT_CURRENT_TASK_UPDATED = 'CHANGED_CURRENT_TASK';
@@ -188,7 +188,7 @@
       if (task && task.title) {
         $localStorage.tasks.push({
           title: task.title,
-          id: Math.random().toString(36).substr(2, 10),
+          id: Uid(),
           created: $window.moment(),
           notes: task.notes,
           timeEstimate: task.timeEstimate || task.originalEstimate,

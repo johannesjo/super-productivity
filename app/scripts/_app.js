@@ -74,7 +74,7 @@
     $mdThemingProvider.alwaysWatchTheme(true);
   }
 
-  function initGlobalModels($rootScope, Tasks, $localStorage) {
+  function initGlobalModels($rootScope, Tasks, $localStorage, Uid) {
     $localStorage.$default({
       currentTask: null,
       tasks: [],

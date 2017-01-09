@@ -14,7 +14,7 @@
     .service('Jira', Jira);
 
   /* @ngInject */
-  function Jira($q, $localStorage, $window, Dialogs) {
+  function Jira(Uid, $q, $localStorage, $window, Dialogs) {
     const IPC_JIRA_CB_EVENT = 'JIRA_RESPONSE';
     const IPC_JIRA_MAKE_REQUEST_EVENT = 'JIRA';
 
@@ -45,10 +45,6 @@
           delete this.requestsLog[res.requestId];
         }
       });
-    }
-
-    function createRequestId() {
-      return Math.random().toString(36).substr(2, 10);
     }
 
     this.updateStatus = (task) => {
@@ -101,7 +97,7 @@
           config: $localStorage.jiraSettings,
           apiMethod: 'listTransitions',
           arguments: [task.originalKey],
-          requestId: createRequestId()
+          requestId: Uid()
         };
         return this.sendRequest(request);
       } else {
@@ -118,7 +114,7 @@
             id: transitionObj.id
           }
         }],
-        requestId: createRequestId()
+        requestId: Uid()
       };
       return this.sendRequest(request);
     };
@@ -134,7 +130,7 @@
           config: $localStorage.jiraSettings,
           apiMethod: 'searchJira',
           arguments: [$localStorage.jiraSettings.jqlQuery, options],
-          requestId: createRequestId()
+          requestId: Uid()
         };
         return this.sendRequest(request);
       } else {
