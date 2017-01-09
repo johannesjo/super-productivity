@@ -75,28 +75,24 @@ app.on('window-all-closed', function () {
   //}
 });
 
-if (process.platform === 'linux') {
-  //pyGtkIndicator.init();
-} else {
-  let appIcon = null;
-  app.on('ready', () => {
-    appIcon = new electron.Tray(IMAGE_FOLDER + 'ico.png');
-    let contextMenu = electron.Menu.buildFromTemplate([
-      {
-        label: 'Show App', click: () => {
-        mainWindow.show();
-      }
-      },
-      {
-        label: 'Quit', click: () => {
-        app.isQuiting = true;
-        app.quit();
-      }
-      }
-    ]);
-    appIcon.setContextMenu(contextMenu);
-  });
-}
+let appIcon = null;
+app.on('ready', () => {
+  appIcon = new electron.Tray(IMAGE_FOLDER + 'ico.png');
+  let contextMenu = electron.Menu.buildFromTemplate([
+    {
+      label: 'Show App', click: () => {
+      mainWindow.show();
+    }
+    },
+    {
+      label: 'Quit', click: () => {
+      app.isQuiting = true;
+      app.quit();
+    }
+    }
+  ]);
+  appIcon.setContextMenu(contextMenu);
+});
 
 app.on('ready', () => {
   // Register a 'CommandOrControl+X' shortcut listener.
@@ -137,20 +133,13 @@ electron.ipcMain.on('JIRA', (ev, request) => {
 
 let saveLastTitle;
 electron.ipcMain.on('CHANGED_CURRENT_TASK', (ev, task) => {
-  //appIcon.setToolTip();
   if (task && task.title) {
     let title = task.title;
     if (title.length > 50) {
       title = title.substring(0, 47) + "...";
     }
 
-    if (process.platform === 'linux') {
-      if (saveLastTitle && saveLastTitle !== task.title) {
-        pyGtkIndicator.setCurrentTitle(title, app, mainWindow);
-      }
-    } else {
-      appIcon.setTitle(title);
-    }
+    appIcon.setTitle(title);
 
     saveLastTitle = task.title;
   }
