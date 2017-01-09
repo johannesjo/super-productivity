@@ -124,7 +124,9 @@ app.on('ready', () => {
 });
 
 app.on('before-quit', () => {
-  appIcon.destroy();
+  if (appIcon) {
+    appIcon.destroy();
+  }
 });
 
 // listen to events from frontend
@@ -149,7 +151,9 @@ electron.ipcMain.on('CHANGED_CURRENT_TASK', (ev, task) => {
       title = title.substring(0, 47) + "...";
     }
 
-    appIcon.setTitle(title);
+    if (appIcon) {
+      appIcon.setTitle(title);
+    }
 
     saveLastTitle = task.title;
   }
