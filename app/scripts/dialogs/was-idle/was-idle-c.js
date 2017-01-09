@@ -24,9 +24,9 @@
     vm.selectedTask = $rootScope.r.currentTask;
 
     vm.trackIdleToTask = () => {
-      let timeSpendCalculated = $window.moment.duration(vm.selectedTask.timeSpend);
-      timeSpendCalculated.add(vm.idleTime);
-      vm.selectedTask.timeSpend = timeSpendCalculated;
+      let timeSpentCalculated = $window.moment.duration(vm.selectedTask.timeSpent);
+      timeSpentCalculated.add(vm.idleTime);
+      vm.selectedTask.timeSpent = timeSpentCalculated;
 
       // set current task to the selected one
       Tasks.updateCurrent(vm.selectedTask);

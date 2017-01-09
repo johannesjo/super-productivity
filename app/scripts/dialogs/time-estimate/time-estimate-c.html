@@ -1,4 +1,4 @@
-<form ng-submit="vm.submit(vm.timeEstimate, vm.timeSpend)">
+<form ng-submit="vm.submit(vm.timeEstimate, vm.timeSpent)">
 
   <md-dialog aria-label="Time estimation dialog"
              class="dialog-time-estimate">
@@ -24,7 +24,7 @@
         <label>Time Spend total</label>
         <input type="text"
                input-duration="optional"
-               ng-model="vm.timeSpend"
+               ng-model="vm.timeSpent"
                aria-label="Time Spend">
       </md-input-container>
 
@@ -36,7 +36,7 @@
       </div>
     </md-dialog-content>
     <md-dialog-actions>
-      <md-button ng-click="vm.submit(vm.timeEstimate, vm.timeSpend)"
+      <md-button ng-click="vm.submit(vm.timeEstimate, vm.timeSpent)"
                  type="submit"
                  class="md-primary">
         Save

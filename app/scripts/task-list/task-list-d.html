@@ -37,11 +37,11 @@
       </div>
 
       <div class="time"
-           data-ng-show="task.timeEstimate || task.timeSpend">
+           data-ng-show="task.timeEstimate || task.timeSpent">
         <span edit-on-click-toggle="task.showEdit"
-              edit-on-click-on-change="vm.onChangeTimeSpend(task, $value)"
+              edit-on-click-on-change="vm.onChangeTimeSpent(task, $value)"
               edit-on-click-type="DURATION"
-              edit-on-click="task.timeSpend"></span>
+              edit-on-click="task.timeSpent"></span>
         <span ng-show="task.timeEstimate">/</span>
         <span edit-on-click-toggle="task.showEdit"
               edit-on-click-type="DURATION"

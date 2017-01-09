@@ -1,7 +1,7 @@
 <h1 class="md-headline">You're done for today! Take a moment to celebrate!</h1>
 <p>Tasks completed: <strong>{{vm.doneTasks.length}}/{{ vm.todaysTasks.length }}</strong></p>
-<p>Total time spent total on todays task: <strong>{{ vm.totalTimeSpendTasks|duration }}</strong></p>
-<p>Total time spent today: <strong>{{ vm.totalTimeSpendToday|duration }}</strong></p>
+<p>Total time spent total on todays task: <strong>{{ vm.totalTimeSpentTasks|duration }}</strong></p>
+<p>Total time spent today: <strong>{{ vm.totalTimeSpentToday|duration }}</strong></p>
 
 <h2 class="md-title">These are the tasks you worked on today</h2>
 
@@ -9,7 +9,7 @@
        md-whiteframe="2">
   <tr>
     <th>Title</th>
-    <th>Time spend</th>
+    <th>Time spent</th>
     <th>Time esti.</th>
     <th></th>
   </tr>
@@ -18,7 +18,7 @@
       ng-class="{'is-done': task.isDone}">
     <td>{{ task.title }}</td>
     <td>
-      {{ task.timeSpend |duration }}
+      {{ task.timeSpent |duration }}
     </td>
     <td>{{ task.timeEstimate |duration }}</td>
     <td>

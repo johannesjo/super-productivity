@@ -19,15 +19,15 @@
 
     vm.task = task;
     vm.timeEstimate = task.timeEstimate;
-    vm.timeSpend = task.timeSpend;
+    vm.timeSpent = task.timeSpent;
 
-    vm.submit = (estimate, timeSpend) => {
+    vm.submit = (estimate, timeSpent) => {
       task.timeEstimate = estimate;
 
-      task.timeSpend = timeSpend;
+      task.timeSpent = timeSpent;
 
       if (isTasksForToday) {
-        Tasks.updateTimeSpendToday(task, timeSpend);
+        Tasks.updateTimeSpentToday(task, timeSpent);
       }
 
       $mdDialog.hide();

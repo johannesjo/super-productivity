@@ -23,39 +23,39 @@
     if (angular.isDefined(window.ipcRenderer)) {
       let that = this;
 
-      // handler for time spend tracking
-      window.ipcRenderer.on(IPC_EVENT_UPDATE_TIME_SPEND_FOR_CURRENT, (ev, timeSpend) => {
+      // handler for time spent tracking
+      window.ipcRenderer.on(IPC_EVENT_UPDATE_TIME_SPEND_FOR_CURRENT, (ev, timeSpent) => {
         // only track if there is a task
         if ($rootScope.r.currentTask) {
-          let timeSpendCalculatedTotal;
-          let timeSpendCalculatedOnDay;
+          let timeSpentCalculatedTotal;
+          let timeSpentCalculatedOnDay;
 
           // use mysql date as it is sortable
           let todayStr = this.getTodayStr();
 
-          // track total time spend
-          if ($rootScope.r.currentTask.timeSpend) {
-            timeSpendCalculatedTotal = $window.moment.duration($rootScope.r.currentTask.timeSpend);
-            timeSpendCalculatedTotal.add($window.moment.duration({ milliseconds: timeSpend }));
+          // track total time spent
+          if ($rootScope.r.currentTask.timeSpent) {
+            timeSpentCalculatedTotal = $window.moment.duration($rootScope.r.currentTask.timeSpent);
+            timeSpentCalculatedTotal.add($window.moment.duration({ milliseconds: timeSpent }));
           } else {
-            timeSpendCalculatedTotal = $window.moment.duration(timeSpend);
+            timeSpentCalculatedTotal = $window.moment.duration(timeSpent);
           }
 
-          // track time spend on days
-          if (!$rootScope.r.currentTask.timeSpendOnDay) {
-            $rootScope.r.currentTask.timeSpendOnDay = {};
+          // track time spent on days
+          if (!$rootScope.r.currentTask.timeSpentOnDay) {
+            $rootScope.r.currentTask.timeSpentOnDay = {};
           }
 
-          if ($rootScope.r.currentTask.timeSpendOnDay[todayStr]) {
-            timeSpendCalculatedOnDay = $window.moment.duration($rootScope.r.currentTask.timeSpendOnDay[todayStr]);
-            timeSpendCalculatedOnDay.add($window.moment.duration({ milliseconds: timeSpend }));
+          if ($rootScope.r.currentTask.timeSpentOnDay[todayStr]) {
+            timeSpentCalculatedOnDay = $window.moment.duration($rootScope.r.currentTask.timeSpentOnDay[todayStr]);
+            timeSpentCalculatedOnDay.add($window.moment.duration({ milliseconds: timeSpent }));
           } else {
-            timeSpendCalculatedOnDay = $window.moment.duration(timeSpend);
+            timeSpentCalculatedOnDay = $window.moment.duration(timeSpent);
           }
 
           // assign values
-          $rootScope.r.currentTask.timeSpend = timeSpendCalculatedTotal;
-          $rootScope.r.currentTask.timeSpendOnDay[todayStr] = timeSpendCalculatedOnDay;
+          $rootScope.r.currentTask.timeSpent = timeSpentCalculatedTotal;
+          $rootScope.r.currentTask.timeSpentOnDay[todayStr] = timeSpentCalculatedOnDay;
 
           $rootScope.r.currentTask.lastWorkedOn = $window.moment();
 
@@ -90,19 +90,19 @@
       return totalEstimate;
     };
 
-    this.calcTotalTimeSpend = (tasks) => {
-      let totalTimeSpend;
+    this.calcTotalTimeSpent = (tasks) => {
+      let totalTimeSpent;
       if (angular.isArray(tasks) && tasks.length > 0) {
-        totalTimeSpend = $window.moment.duration();
+        totalTimeSpent = $window.moment.duration();
 
         for (let i = 0; i < tasks.length; i++) {
           let task = tasks[i];
-          if (task && task.timeSpend) {
-            totalTimeSpend.add(task.timeSpend);
+          if (task && task.timeSpent) {
+            totalTimeSpent.add(task.timeSpent);
           }
         }
       }
-      return totalTimeSpend;
+      return totalTimeSpent;
     };
 
     // GET DATA
@@ -147,8 +147,8 @@
         totalTimeWorkedToday = $window.moment.duration();
         for (let i = 0; i < tasks.length; i++) {
           let task = tasks[i];
-          if (task.timeSpendOnDay && task.timeSpendOnDay[todayStr]) {
-            totalTimeWorkedToday.add(task.timeSpendOnDay[todayStr]);
+          if (task.timeSpentOnDay && task.timeSpentOnDay[todayStr]) {
+            totalTimeWorkedToday.add(task.timeSpentOnDay[todayStr]);
           }
         }
       }
@@ -158,9 +158,9 @@
     // UPDATE DATA
     this.updateCurrent = (task, isCallFromTimeTracking) => {
       // calc progress
-      if (task && task.timeSpend && task.timeEstimate) {
+      if (task && task.timeSpent && task.timeEstimate) {
         if ($window.moment.duration().format && angular.isFunction($window.moment.duration().format)) {
-          task.progress = parseInt($window.moment.duration(task.timeSpend)
+          task.progress = parseInt($window.moment.duration(task.timeSpent)
               .format('ss') / $window.moment.duration(task.timeEstimate).format('ss') * 100, 10);
         }
       }
@@ -183,22 +183,21 @@
       $rootScope.r.currentTask = $localStorage.currentTask;
     };
 
-    this.updateTimeSpendToday = (task, val) => {
-      let todayStr = getTodayStr();
-
+    this.updateTimeSpentToday = (task, val) => {
       // add when set and not equal to current value
       if (val) {
+        let todayStr = getTodayStr();
         task.lastWorkedOn = $window.moment();
-        task.timeSpendOnDay = {};
-        task.timeSpendOnDay[todayStr] = val;
+        task.timeSpentOnDay = {};
+        task.timeSpentOnDay[todayStr] = val;
       } else {
         // remove when unset
-        task.timeSpendOnDay = {};
+        task.timeSpentOnDay = {};
         if (task.lastWorkedOn) {
           delete task.lastWorkedOn;
         }
-        if (task.timeSpendOnDay) {
-          delete task.timeSpendOnDay;
+        if (task.timeSpentOnDay) {
+          delete task.timeSpentOnDay;
         }
       }
     };
@@ -211,7 +210,7 @@
           created: $window.moment(),
           notes: task.notes,
           timeEstimate: task.timeEstimate || task.originalEstimate,
-          timeSpend: task.timeSpend || task.originalTimeSpent,
+          timeSpent: task.timeSpent || task.originalTimeSpent,
           originalId: task.originalId,
           originalKey: task.originalKey,
           originalType: task.originalType,

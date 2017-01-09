@@ -30,7 +30,7 @@
     vm.r = $rootScope.r;
 
     $scope.$watch('vm.r.doneBacklogTasks', (mVal) => {
-      vm.totalTimeSpend = Tasks.calcTotalTimeSpend(mVal);
+      vm.totalTimeSpent = Tasks.calcTotalTimeSpent(mVal);
     }, true);
   }
 

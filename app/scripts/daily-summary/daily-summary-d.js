@@ -38,21 +38,21 @@
     vm.backlogTasks = $rootScope.r.backlogTasks;
     vm.doneTasks = Tasks.getDoneToday();
 
-    // calc total time spend on todays tasks
-    vm.totalTimeSpendTasks = $window.moment.duration();
+    // calc total time spent on todays tasks
+    vm.totalTimeSpentTasks = $window.moment.duration();
     for (let i = 0; i < vm.todaysTasks.length; i++) {
       let task = vm.todaysTasks[i];
-      vm.totalTimeSpendTasks.add(task.timeSpend);
+      vm.totalTimeSpentTasks.add(task.timeSpent);
     }
 
-    // calc time spend on todays tasks today
+    // calc time spent on todays tasks today
     // use mysql date as it is sortable
     let todayStr = $window.moment().format('YYYY-MM-DD');
-    vm.totalTimeSpendToday = $window.moment.duration();
+    vm.totalTimeSpentToday = $window.moment.duration();
     for (let i = 0; i < vm.todaysTasks.length; i++) {
       let task = vm.todaysTasks[i];
-      if (task.timeSpendOnDay && task.timeSpendOnDay[todayStr]) {
-        vm.totalTimeSpendToday.add(task.timeSpendOnDay[todayStr]);
+      if (task.timeSpentOnDay && task.timeSpentOnDay[todayStr]) {
+        vm.totalTimeSpentToday.add(task.timeSpentOnDay[todayStr]);
       }
     }
 

@@ -79,11 +79,9 @@
       containment: '#board'
     };
 
-    vm.onChangeTimeSpend = (task, val) => {
-      console.log('HHHHHHHEEHHEHE');
-
+    vm.onChangeTimeSpent = (task, val) => {
       if (vm.isTasksForToday) {
-        Tasks.updateTimeSpendToday(task, val);
+        Tasks.updateTimeSpentToday(task, val);
       }
     };
 
