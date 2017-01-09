@@ -94,8 +94,6 @@ app.on('ready', () => {
   appIcon.setContextMenu(contextMenu);
 
   appIcon.on('click', () => {
-    console.log('I am here!');
-
     mainWindow.show();
   });
 });
