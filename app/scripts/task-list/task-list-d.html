@@ -39,6 +39,7 @@
       <div class="time"
            data-ng-show="task.timeEstimate || task.timeSpend">
         <span edit-on-click-toggle="task.showEdit"
+              edit-on-click-on-change="vm.onChangeTimeSpend(task, $value)"
               edit-on-click-type="DURATION"
               edit-on-click="task.timeSpend"></span>
         <span ng-show="task.timeEstimate">/</span>

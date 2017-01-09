@@ -23,7 +23,8 @@
       scope: {
         editOnClick: '=',
         editOnClickToggle: '=',
-        editOnClickType: '@'
+        editOnClickType: '@',
+        editOnClickOnChange: '&'
       }
     };
   }
@@ -38,6 +39,12 @@
         let inputEl = $element.find('input');
         inputEl[0].focus();
       });
+    };
+
+    vm.change = (mVal) => {
+      if (angular.isFunction(vm.editOnClickOnChange)) {
+        vm.editOnClickOnChange({ $value: mVal });
+      }
     };
 
     $scope.$watch('vm.editOnClickToggle', (mVal) => {

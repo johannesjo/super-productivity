@@ -14,10 +14,8 @@
     .controller('TimeEstimateCtrl', TimeEstimateCtrl);
 
   /* @ngInject */
-  function TimeEstimateCtrl($mdDialog, task, $window) {
+  function TimeEstimateCtrl($mdDialog, task, isTasksForToday, Tasks) {
     let vm = this;
-
-    let todayStr = $window.moment().format('YYYY-MM-DD');
 
     vm.task = task;
     vm.timeEstimate = task.timeEstimate;
@@ -26,11 +24,10 @@
     vm.submit = (estimate, timeSpend) => {
       task.timeEstimate = estimate;
 
-      if (timeSpend && timeSpend !== task.timeSpend) {
-        task.timeSpend = timeSpend;
-        task.lastWorkedOn = $window.moment();
-        task.timeSpendOnDay = {};
-        task.timeSpendOnDay[todayStr] = timeSpend;
+      task.timeSpend = timeSpend;
+
+      if (isTasksForToday) {
+        Tasks.updateTimeSpendToday(task, timeSpend);
       }
 
       $mdDialog.hide();

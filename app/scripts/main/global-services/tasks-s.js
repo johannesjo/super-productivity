@@ -73,7 +73,7 @@
     }
 
     // UTILITY
-    this.getTodayStr = () => {
+    const getTodayStr = () => {
       return $window.moment().format('YYYY-MM-DD');
     };
 
@@ -141,7 +141,7 @@
 
     this.getTimeWorkedToday = () => {
       let tasks = this.getToday();
-      let todayStr = this.getTodayStr();
+      let todayStr = getTodayStr();
       let totalTimeWorkedToday;
       if (tasks.length > 0) {
         totalTimeWorkedToday = $window.moment.duration();
@@ -178,10 +178,29 @@
         }
       }
 
-
       $localStorage.currentTask = task;
       // update global pointer
       $rootScope.r.currentTask = $localStorage.currentTask;
+    };
+
+    this.updateTimeSpendToday = (task, val) => {
+      let todayStr = getTodayStr();
+
+      // add when set and not equal to current value
+      if (val) {
+        task.lastWorkedOn = $window.moment();
+        task.timeSpendOnDay = {};
+        task.timeSpendOnDay[todayStr] = val;
+      } else {
+        // remove when unset
+        task.timeSpendOnDay = {};
+        if (task.lastWorkedOn) {
+          delete task.lastWorkedOn;
+        }
+        if (task.timeSpendOnDay) {
+          delete task.timeSpendOnDay;
+        }
+      }
     };
 
     this.addToday = (task) => {

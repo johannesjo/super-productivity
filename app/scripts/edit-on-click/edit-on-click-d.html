@@ -7,9 +7,8 @@
          ng-disabled="vm.isDone"
          ng-model="vm.editOnClick"
          ng-blur="vm.showEdit=false;"
-         md-auto-focus
-         tabindex="2"
-         md-autofocus>
+         ng-change="vm.change(vm.editOnClick)"
+         tabindex="2">
 
   <input type="text"
          ng-if="vm.editOnClickType==='DURATION'"
@@ -18,9 +17,8 @@
          ng-disabled="vm.isDone"
          ng-model="vm.editOnClick"
          ng-blur="vm.showEdit=false;"
-         md-auto-focus
-         tabindex="2"
-         md-autofocus>
+         ng-change="vm.change(vm.editOnClick)"
+         tabindex="2">
 </form>
 <span class="text"
       tabindex="2"

@@ -25,6 +25,7 @@
         currentTask: '=',
         limitTo: '@',
         filter: '=',
+        isTasksForToday: '@',
         allowTaskSelection: '@',
         disableDropInto: '@',
         onItemMoved: '&',
@@ -34,11 +35,11 @@
   }
 
   /* @ngInject */
-  function TaskListCtrl(Dialogs, $mdToast, $timeout, $window) {
+  function TaskListCtrl(Dialogs, $mdToast, $timeout, $window, Tasks) {
     let vm = this;
 
     vm.estimateTime = (task) => {
-      Dialogs('TIME_ESTIMATE', { task });
+      Dialogs('TIME_ESTIMATE', { task, isTasksForToday: vm.isTasksForToday });
     };
 
     vm.deleteTask = (task, $index) => {
@@ -76,6 +77,14 @@
         }
       },
       containment: '#board'
+    };
+
+    vm.onChangeTimeSpend = (task, val) => {
+      console.log('HHHHHHHEEHHEHE');
+
+      if (vm.isTasksForToday) {
+        Tasks.updateTimeSpendToday(task, val);
+      }
     };
 
     vm.handleKeyPress = ($event, task) => {
