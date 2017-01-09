@@ -5,7 +5,7 @@ const powerSaveBlocker = require('electron').powerSaveBlocker;
 const moment = require('moment');
 const open = require('open');
 const CONFIG = require('./CONFIG');
-const IMAGE_FOLDER = __dirname + '/assets/img/';
+const ICONS_FOLDER = __dirname + '/assets/icons/';
 
 const idle = require('./idle');
 const jira = require('./jira');
@@ -77,7 +77,7 @@ app.on('window-all-closed', function () {
 
 let appIcon = null;
 app.on('ready', () => {
-  appIcon = new electron.Tray(IMAGE_FOLDER + 'ico.png');
+  appIcon = new electron.Tray(ICONS_FOLDER + 'tray-ico.png');
   let contextMenu = electron.Menu.buildFromTemplate([
     {
       label: 'Show App', click: () => {
@@ -92,6 +92,12 @@ app.on('ready', () => {
     }
   ]);
   appIcon.setContextMenu(contextMenu);
+
+  appIcon.on('click', () => {
+    console.log('I am here!');
+
+    mainWindow.show();
+  });
 });
 
 app.on('ready', () => {
@@ -115,6 +121,10 @@ app.on('activate', function () {
 
 app.on('ready', () => {
   setInterval(trackTimeFn, CONFIG.PING_INTERVAL);
+});
+
+app.on('before-quit', () => {
+  appIcon.destroy();
 });
 
 // listen to events from frontend
