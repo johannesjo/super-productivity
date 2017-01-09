@@ -23,16 +23,12 @@
 
     function linkFn(scope, element) {
       element.on('click', () => {
-        let storageObj = {
-          currentTask: $localStorage.currentTask,
-          tasks: $localStorage.tasks,
-          backlogTasks: $localStorage.backlogTasks,
-          doneTasks: $localStorage.doneTasks,
-          distractions: $localStorage.distractions,
-          jiraSettings: $localStorage.jiraSettings,
-          noteForToday: $localStorage.noteForToday,
-          theme: $localStorage.theme,
-        };
+        let storageObj = {};
+        angular.forEach($localStorage, (val, key) => {
+          if (!angular.isFunction(val)) {
+            storageObj[key] = val;
+          }
+        });
 
         let dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(storageObj));
 

@@ -22,19 +22,10 @@
     // import/export stuff
     vm.importSettings = (uploadSettingsTextarea) => {
       let settings = JSON.parse(uploadSettingsTextarea);
-      console.log(settings);
-      $rootScope.r.currentTask = $localStorage.currentTask = settings.currentTask;
-      $rootScope.r.tasks = $localStorage.tasks = settings.tasks;
-      $rootScope.r.backlogTasks = $localStorage.backlogTasks = settings.backlogTasks;
-      $rootScope.r.doneTasks = $localStorage.doneTasks = settings.doneTasks;
 
-      $rootScope.r.distractions = $localStorage.distractions = settings.distractions;
-
-      $rootScope.r.jiraSettings = $localStorage.jiraSettings = settings.jiraSettings;
-
-      $rootScope.r.noteForToday = $localStorage.noteForToday = settings.noteForToday;
-
-      $rootScope.r.theme = $localStorage.theme = settings.theme;
+      angular.forEach(settings, (val, key) => {
+        $rootScope.r[key] = $localStorage[key] = val;
+      });
     };
 
     // jira stuff
