@@ -103,6 +103,8 @@
 
     if ($rootScope.r.theme.indexOf('dark') > -1) {
       $rootScope.r.bodyClass = 'dark-theme';
+    } else {
+      $rootScope.r.bodyClass = '';
     }
   }
 
