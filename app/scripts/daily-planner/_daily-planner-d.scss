@@ -1,4 +1,10 @@
 daily-planner {
   display: block;
 
+  .search {
+    margin-bottom: 0;
+    .md-errors-spacer {
+      display: none;
+    }
+  }
 }

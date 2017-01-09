@@ -34,7 +34,7 @@
     };
 
     vm.cancel = () => {
-      $mdDialog.hide();
+      $mdDialog.cancel();
     };
   }
 })();

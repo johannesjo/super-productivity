@@ -39,7 +39,16 @@
                current-task="vm.r.currentTask"></task-list>
 
     <h2 class="md-title">Tasks Backlog (for some other time; estimated: ~{{ vm.totaleEstimateBacklog|duration}} )</h2>
+
+    <md-input-container class="md-block search"
+                        flex-gt-sm>
+      <label>Search Backlog</label>
+      <input type="text"
+             ng-model="vm.search">
+    </md-input-container>
+
     <task-list tasks="vm.r.backlogTasks"
+               filter="vm.search"
                limit-to="{{vm.limitBacklogTo}}"></task-list>
 
 
