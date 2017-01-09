@@ -169,7 +169,7 @@
       if (window.isElectron) {
         if (!isCallFromTimeTracking) {
           if (task && task.originalKey) {
-            Jira.markAsInProgress(task);
+            //Jira.markAsInProgress(task);
           }
         }
 
