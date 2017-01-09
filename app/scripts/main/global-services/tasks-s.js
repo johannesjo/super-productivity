@@ -31,7 +31,7 @@
           let timeSpentCalculatedOnDay;
 
           // use mysql date as it is sortable
-          let todayStr = this.getTodayStr();
+          let todayStr = getTodayStr();
 
           // track total time spent
           if ($rootScope.r.currentTask.timeSpent) {
@@ -185,6 +185,8 @@
 
     this.updateTimeSpentToday = (task, val) => {
       // add when set and not equal to current value
+      console.log('asdas');
+
       if (val) {
         let todayStr = getTodayStr();
         task.lastWorkedOn = $window.moment();
