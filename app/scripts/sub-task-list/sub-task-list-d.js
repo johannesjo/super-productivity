@@ -43,6 +43,14 @@
         }
       }
     }, true);
+
+    $scope.$on('$destroy', () => {
+      // re-init original values (e.g. when sub task was clicked accidentally
+      if (!vm.task.subTasks || vm.task.subTasks.length === 0) {
+        vm.task.timeEstimate = vm.task.mainTaskTimeEstimate;
+        vm.task.timeSpent = vm.task.mainTaskTimeSpent;
+      }
+    });
   }
 
 })();

@@ -153,6 +153,9 @@
     vm.addSubTask = (task) => {
       if (!task.subTasks) {
         task.subTasks = [];
+        // save original values for potential later re-initialization
+        task.mainTaskTimeEstimate = task.timeEstimate;
+        task.mainTaskTimeSpent = task.timeSpent;
       }
       let subTask = Tasks.createTask({
         title: 'empty'
