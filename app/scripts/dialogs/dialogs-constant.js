@@ -38,6 +38,10 @@
         controller: 'TimeEstimateCtrl',
         templateUrl: 'scripts/dialogs/time-estimate/time-estimate-c.html'
       },
+      CREATE_PROJECT: {
+        controller: 'CreateProjectCtrl',
+        templateUrl: 'scripts/dialogs/create-project/create-project-c.html'
+      },
       JIRA_SET_IN_PROGRESS: {
         controller: 'JiraSetInProgressCtrl',
         templateUrl: 'scripts/dialogs/jira-set-in-progress/jira-set-in-progress-c.html'

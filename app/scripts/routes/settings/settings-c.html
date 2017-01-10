@@ -1,87 +1,139 @@
 <div class="page-settings">
 
+  <section>
+    <h2 class="md-title">Project</h2>
 
-  <h2 class="md-title">Make/Restore Backup</h2>
-  <a class="md-raised md-button md-ink-ripple"
-     type="button"
-     download-backup>
-    <ng-md-icon icon="file_download"
-                aria-label="download settings"
-                download-backup></ng-md-icon>
-    Download your tasks and settings
-    <div class="md-ripple-container"></div>
-  </a>
-  <md-button
-    class="md-raised"
-    ng-click="vm.showUploadForm=!vm.showUploadForm;">
-    <ng-md-icon icon="file_upload"
-                aria-label="import settings"
-                download-backup></ng-md-icon>
-    Import Settings
-  </md-button>
+    <div ng-if="vm.allProjects.length > 0">
+      <md-input-container class="md-block"
+                          flex-gt-sm>
+        <label>Choose current project</label>
+        <md-select ng-model="vm.r.currentProject"
+                   arial-label="Select Project"
+                   ng-change="vm.switchCurrentProject()">
+          <md-option ng-repeat="project in vm.allProjects"
+                     arial-label="Select Project"
+                     ng-value="project">
+            {{project.title}}
+          </md-option>
+        </md-select>
+      </md-input-container>
 
-  <form ng-if="vm.showUploadForm"
-        ng-submit="vm.importSettings(vm.uploadSettingsTextarea)">
-    <md-input-container class="md-block"
-                        flex-gt-sm>
-      <label>Copy and paste the contents of the download json file here</label>
-      <textarea ng-model="vm.uploadSettingsTextarea"
-                md-auto-focus
-                rows="3"></textarea>
-    </md-input-container>
-    <md-button type="submit"
-               class="md-raised md-primary">Import settings
+      <md-button type="button"
+                 class="md-raised md-primary">Edit current project
+      </md-button>
+      <md-button type="button"
+                 ng-click="vm.createNewProject()"
+                 class="md-raised md-primary">Create new project
+      </md-button>
+    </div>
+
+    <div ng-if="!vm.allProjects.length">
+      <p>You can manage multiple different Todos with SuperProductivity. To do so you need to give your current ToDo a title and save it.</p>
+
+      <form ng-submit="vm.createNewProjectFromCurrent(vm.projectTitle)">
+        <md-input-container class="md-block"
+                            flex-gt-sm>
+          <label>Project Title</label>
+          <input type="text"
+                 ng-model="vm.projectTitle">
+        </md-input-container>
+        <md-button type="submit"
+                   class="md-raised md-primary">Save current Todo as Project
+        </md-button>
+      </form>
+    </div>
+
+    <md-divider></md-divider>
+  </section>
+
+  <section>
+    <h2 class="md-title">Make/Restore Backup</h2>
+    <a class="md-raised md-button md-ink-ripple"
+       type="button"
+       download-backup>
+      <ng-md-icon icon="file_download"
+                  aria-label="download settings"
+                  download-backup></ng-md-icon>
+      Download your tasks and settings
+      <div class="md-ripple-container"></div>
+    </a>
+    <md-button
+      class="md-raised"
+      ng-click="vm.showUploadForm=!vm.showUploadForm;">
+      <ng-md-icon icon="file_upload"
+                  aria-label="import settings"
+                  download-backup></ng-md-icon>
+      Import Settings
     </md-button>
-  </form>
-  <md-divider></md-divider>
+
+    <form ng-if="vm.showUploadForm"
+          ng-submit="vm.importSettings(vm.uploadSettingsTextarea)">
+      <md-input-container class="md-block"
+                          flex-gt-sm>
+        <label>Copy and paste the contents of the download json file here</label>
+        <textarea ng-model="vm.uploadSettingsTextarea"
+                  md-auto-focus
+                  rows="3"></textarea>
+      </md-input-container>
+      <md-button type="submit"
+                 class="md-raised md-primary">Import settings
+      </md-button>
+    </form>
+
+    <md-divider></md-divider>
+  </section>
+
+  <section>
+    <h2 class="md-title">Jira-Setup for Task Suggestion</h2>
+    <form ng-submit="vm.saveJiraSettings(vm.jiraSettings)">
+      <md-input-container class="md-block"
+                          flex-gt-sm>
+        <label>Host</label>
+        <input type="text"
+               ng-model="vm.jiraSettings.host">
+      </md-input-container>
+      <md-input-container class="md-block"
+                          flex-gt-sm>
+        <label>Username</label>
+        <input type="text"
+               ng-model="vm.jiraSettings.userName">
+      </md-input-container>
+      <md-input-container class="md-block"
+                          flex-gt-sm>
+        <label>Password</label>
+        <input type="password"
+               ng-model="vm.jiraSettings.password">
+      </md-input-container>
+      <md-input-container class="md-block"
+                          flex-gt-sm>
+        <label>JQL Query for Tasks</label>
+        <input type="text"
+               ng-model="vm.jiraSettings.jqlQuery">
+        <div class="hint">e.g.: assignee = "{{ vm.jiraSettings.userName }}" AND resolution = Unresolved ORDER BY updatedDate DESC</div>
+      </md-input-container>
 
 
-  <h2 class="md-title">Jira-Setup for Task Suggestion</h2>
-  <form ng-submit="vm.saveJiraSettings(vm.jiraSettings)">
-    <md-input-container class="md-block"
-                        flex-gt-sm>
-      <label>Host</label>
-      <input type="text"
-             ng-model="vm.jiraSettings.host">
-    </md-input-container>
-    <md-input-container class="md-block"
-                        flex-gt-sm>
-      <label>Username</label>
-      <input type="text"
-             ng-model="vm.jiraSettings.userName">
-    </md-input-container>
-    <md-input-container class="md-block"
-                        flex-gt-sm>
-      <label>Password</label>
-      <input type="password"
-             ng-model="vm.jiraSettings.password">
-    </md-input-container>
-    <md-input-container class="md-block"
-                        flex-gt-sm>
-      <label>JQL Query for Tasks</label>
-      <input type="text"
-             ng-model="vm.jiraSettings.jqlQuery">
-      <div class="hint">e.g.: assignee = "{{ vm.jiraSettings.userName }}" AND resolution = Unresolved ORDER BY updatedDate DESC</div>
-    </md-input-container>
+      <md-button type="submit"
+                 class="md-raised md-primary">Save Config
+      </md-button>
+    </form>
+
+    <md-divider></md-divider>
+  </section>
 
 
-    <md-button type="submit"
-               class="md-raised md-primary">Save Config
-    </md-button>
-  </form>
-
-
-  <h2 class="md-title">Switch theme</h2>
-  <md-select ng-model="vm.selectedTheme"
-             placeholder="Select a theme">
-    <md-option ng-repeat="themeName in vm.themes">{{ themeName }}
-    </md-option>
-  </md-select>
-  <div flex-gt-sm="50">
-    <md-checkbox ng-model="vm.isDarkTheme"
-                 aria-label="Use dark theme">
-      Use dark theme
-    </md-checkbox>
-  </div>
-
+  <section>
+    <h2 class="md-title">Switch theme</h2>
+    <md-select ng-model="vm.selectedTheme"
+               placeholder="Select a theme">
+      <md-option ng-repeat="themeName in vm.themes">{{ themeName }}
+      </md-option>
+    </md-select>
+    <div flex-gt-sm="50">
+      <md-checkbox ng-model="vm.isDarkTheme"
+                   aria-label="Use dark theme">
+        Use dark theme
+      </md-checkbox>
+    </div>
+  </section>
 </div>

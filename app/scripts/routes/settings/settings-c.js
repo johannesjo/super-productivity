@@ -14,10 +14,23 @@
     .controller('SettingsCtrl', SettingsCtrl);
 
   /* @ngInject */
-  function SettingsCtrl($localStorage, $rootScope, $scope) {
+  function SettingsCtrl($localStorage, $rootScope, $scope, Projects, Dialogs) {
     let vm = this;
 
     vm.r = $rootScope.r;
+
+    // save project stuff
+    vm.allProjects = Projects.getList();
+    vm.createNewProjectFromCurrent = (projectTitle) => {
+      Projects.createNewFromCurrent(projectTitle);
+    };
+
+    vm.createNewProject = () => {
+      Dialogs('CREATE_PROJECT');
+    };
+    vm.switchCurrentProject = () => {
+      Projects.switch();
+    };
 
     // import/export stuff
     vm.importSettings = (uploadSettingsTextarea) => {

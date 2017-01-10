@@ -1,6 +1,9 @@
 main-header {
-  .md-button {
 
+  .app-icon{
+    margin-right: 10px;
+  }
+  .md-button {
     &.is-active {
       outline: 2px solid #fff;
     }

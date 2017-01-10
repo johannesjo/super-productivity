@@ -32,6 +32,19 @@
       'as.sortable',
       'angularMoment'
     ])
+    .constant('LS_DEFAULTS', {
+      currentTask: undefined,
+      currentProject: undefined,
+      tasks: [],
+      backlogTasks: [],
+      distractions: [],
+      projects: [],
+      jiraSettings: {
+        isFirstLogin: true,
+        defaultTransitionInProgress: undefined,
+        defaultTransitionDone: undefined,
+      }
+    })
     .config(configMdTheme)
     .run(initGlobalModels)
     .run(initGlobalShortcuts);
@@ -74,20 +87,14 @@
     $mdThemingProvider.alwaysWatchTheme(true);
   }
 
-  function initGlobalModels($rootScope, Tasks, $localStorage, Uid) {
-    $localStorage.$default({
-      currentTask: null,
-      tasks: [],
-      backlogTasks: [],
-      distractions: [],
-      jiraSettings: {
-        isFirstLogin: true,
-        defaultTransitionInProgress: undefined,
-        defaultTransitionDone: undefined,
-      }
-    });
+  function initGlobalModels(LS_DEFAULTS, $rootScope, Tasks, $localStorage, Projects) {
+    $localStorage.$default(LS_DEFAULTS);
 
     $rootScope.r = {};
+
+    $rootScope.r.currentProject = Projects.getCurrent();
+    $rootScope.r.projects = Projects.getList();
+
     $rootScope.r.tasks = Tasks.getToday();
     $rootScope.r.backlogTasks = Tasks.getBacklog();
     $rootScope.r.currentTask = Tasks.getCurrent();

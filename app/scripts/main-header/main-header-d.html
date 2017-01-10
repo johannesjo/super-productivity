@@ -1,10 +1,30 @@
 <md-toolbar>
   <div class="md-toolbar-tools">
-    <ng-md-icon icon="cloud"
-                aria-label="cloud"></ng-md-icon>
-    <h2>
+    <md-button class="md-icon-button"
+               aria-label="Home"
+               ui-sref="daily-planner">
+      <ng-md-icon icon="cloud"
+                  class="app-icon"
+                  aria-label="cloud"></ng-md-icon>
+    </md-button>
+
+
+    <md-select ng-model="ctrl.userState"
+               arial-label="Select Project">
+      <md-option><em>None</em></md-option>
+      <md-option ng-repeat="state in ctrl.states"
+
+                 arial-label="Select Project"
+                 ng-value="state.abbrev"
+                 ng-disabled="$index === 1">
+        {{state.abbrev}}
+      </md-option>
+    </md-select>
+
+    <h2 ng-if="!vm.r.currentProject">
       <a ui-sref="daily-planner">SuperProductivity</a>
     </h2>
+
     <span flex></span>
 
     <md-button class="md-icon-button"

@@ -39,7 +39,8 @@
 
     Jira.getSuggestions().then((res) => {
       vm.taskSuggestions = Jira.transformIssues(res) || [];
-    });
+    })
+      .catch();
 
     vm.addTask = () => {
       if (vm.newTask) {
