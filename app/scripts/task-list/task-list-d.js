@@ -99,6 +99,9 @@
       }
 
       if ($event.target.tagName !== 'INPUT' && $event.target.tagName !== 'TEXTAREA') {
+        $event.preventDefault();
+        $event.stopPropagation();
+
         // t
         if ($event.keyCode === 84) {
           vm.estimateTime(task);
