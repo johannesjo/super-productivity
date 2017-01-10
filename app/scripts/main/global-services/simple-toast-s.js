@@ -16,9 +16,11 @@
   /* @ngInject */
   function SimpleToast($mdToast) {
 
-    return (textContent) => {
+    return (textContent, hideDelay) => {
       return $mdToast.show($mdToast.simple()
         .textContent(textContent)
+        .capsule(false)
+        .hideDelay(hideDelay || 3000)
         .position('bottom'));
     };
     // AngularJS will instantiate a singleton by calling "new" on this function

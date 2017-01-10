@@ -14,7 +14,7 @@
     .service('Tasks', Tasks);
 
   /* @ngInject */
-  function Tasks($localStorage, Uid, $window, $rootScope, Dialogs, IS_ELECTRON) {
+  function Tasks($localStorage, Uid, $window, $rootScope, Dialogs, IS_ELECTRON, SimpleToast) {
     const IPC_EVENT_IDLE = 'WAS_IDLE';
     const IPC_EVENT_UPDATE_TIME_SPEND_FOR_CURRENT = 'UPDATE_TIME_SPEND';
     const IPC_EVENT_CURRENT_TASK_UPDATED = 'CHANGED_CURRENT_TASK';
@@ -76,6 +76,21 @@
     // UTILITY
     const getTodayStr = () => {
       return moment().format('YYYY-MM-DD');
+    };
+
+    const checkDupes = (tasksArray) => {
+      let valueArr = tasksArray.map(function (item) {
+        return item.id
+      });
+      let dupeIds = [];
+      let hasDupe = valueArr.some(function (item, idx) {
+        valueArr.indexOf(item) != idx && dupeIds.push(item);
+        return valueArr.indexOf(item) != idx
+      });
+      if (dupeIds.length) {
+        SimpleToast('!!! Dupes detected in data for the ids: ' + dupeIds.join(', ') + ' !!!', 60000);
+      }
+      return hasDupe;
     };
 
     this.calcTotalEstimate = (tasks) => {
@@ -141,14 +156,17 @@
     };
 
     this.getBacklog = () => {
+      checkDupes($localStorage.backlogTasks);
       return $localStorage.backlogTasks;
     };
 
     this.getDoneBacklog = () => {
+      checkDupes($localStorage.doneBacklogTasks);
       return $localStorage.doneBacklogTasks;
     };
 
     this.getToday = () => {
+      checkDupes($localStorage.tasks);
       return $localStorage.tasks;
     };
 
