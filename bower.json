@@ -17,10 +17,10 @@
     "json3": "latest",
     "es5-shim": "latest",
     "animate.css-scss": "latest",
-    "angular": "^1.6.1",
-    "angular-animate": "^1.6.1",
-    "angular-aria": "^1.6.1",
-    "angular-resource": "^1.6.1",
+    "angular": "1.5.8",
+    "angular-animate": "1.5.8",
+    "angular-aria": "1.5.8",
+    "angular-resource": "1.5.8",
     "angular-ui-router": "latest",
     "angular-local-storage": "^0.5.2",
     "ngstorage": "^0.3.11",
@@ -34,9 +34,12 @@
     "svg-morpheus": "^0.3.2"
   },
   "devDependencies": {
-    "angular-mocks": "^1.6.1"
+    "angular-mocks": "1.5.8"
   },
   "scripts": {
     "postinstall": "gulp wiredep"
+  },
+  "resolutions": {
+    "angular": "1.5.8"
   }
 }
