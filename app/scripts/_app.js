@@ -50,36 +50,39 @@
         defaultTransitionDone: undefined,
       }
     })
+    .constant('IS_ELECTRON', (typeof window.ipcRenderer !== 'undefined'))
+    .constant('THEMES', [
+        'red',
+        'pink',
+        'purple',
+        'deep-purple',
+        'indigo',
+        'blue',
+        'light-blue',
+        'cyan',
+        'teal',
+        'green',
+        'light-green',
+        'lime',
+        'yellow',
+        'amber',
+        'orange',
+        'deep-orange',
+        'brown',
+        'grey',
+        'blue-grey'
+      ]
+    )
     .config(configMdTheme)
     .run(initGlobalModels)
     .run(initGlobalShortcuts);
 
-  function configMdTheme($mdThemingProvider) {
+  function configMdTheme($mdThemingProvider, THEMES) {
     $mdThemingProvider.theme('default')
       .primaryPalette('blue');
     //.dark();
 
-    let themes = [
-      'red',
-      'pink',
-      'purple',
-      'deep-purple',
-      'indigo',
-      'blue',
-      'light-blue',
-      'cyan',
-      'teal',
-      'green',
-      'light-green',
-      'lime',
-      'yellow',
-      'amber',
-      'orange',
-      'deep-orange',
-      'brown',
-      'grey',
-      'blue-grey'
-    ];
+    let themes = THEMES;
     for (let index = 0; index < themes.length; ++index) {
       $mdThemingProvider.theme(themes[index] + '-theme')
         .primaryPalette(themes[index]);

@@ -14,13 +14,13 @@
     .service('Tasks', Tasks);
 
   /* @ngInject */
-  function Tasks($localStorage, Uid, $window, $rootScope, Dialogs, Jira) {
+  function Tasks($localStorage, Uid, $window, $rootScope, Dialogs, IS_ELECTRON) {
     const IPC_EVENT_IDLE = 'WAS_IDLE';
     const IPC_EVENT_UPDATE_TIME_SPEND_FOR_CURRENT = 'UPDATE_TIME_SPEND';
     const IPC_EVENT_CURRENT_TASK_UPDATED = 'CHANGED_CURRENT_TASK';
 
     // SETUP HANDLERS FOR ELECTRON EVENTS
-    if (angular.isDefined(window.ipcRenderer)) {
+    if (IS_ELECTRON) {
       let that = this;
 
       // handler for time spent tracking

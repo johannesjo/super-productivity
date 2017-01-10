@@ -14,7 +14,7 @@
     .controller('SettingsCtrl', SettingsCtrl);
 
   /* @ngInject */
-  function SettingsCtrl($localStorage, $rootScope, $scope, Projects, Dialogs, DEFAULT_THEME, SimpleToast) {
+  function SettingsCtrl($localStorage, $rootScope, $scope, Projects, Dialogs, DEFAULT_THEME, THEMES, SimpleToast) {
     let vm = this;
 
     function init() {
@@ -71,27 +71,7 @@
     };
 
     // theme stuff
-    vm.themes = [
-      'red',
-      'pink',
-      'purple',
-      'deep-purple',
-      'indigo',
-      'blue',
-      'light-blue',
-      'cyan',
-      'teal',
-      'green',
-      'light-green',
-      'lime',
-      'yellow',
-      'amber',
-      'orange',
-      'deep-orange',
-      'brown',
-      'grey',
-      'blue-grey'
-    ];
+    vm.themes = THEMES;
 
     // update on global model changes
     $rootScope.$watch('r', () => {

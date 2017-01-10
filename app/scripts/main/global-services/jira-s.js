@@ -14,7 +14,7 @@
     .service('Jira', Jira);
 
   /* @ngInject */
-  function Jira(Uid, $q, $localStorage, $window, Dialogs) {
+  function Jira(Uid, $q, $localStorage, $window, Dialogs, IS_ELECTRON) {
     const IPC_JIRA_CB_EVENT = 'JIRA_RESPONSE';
     const IPC_JIRA_MAKE_REQUEST_EVENT = 'JIRA';
 
@@ -31,7 +31,7 @@
     this.requestsLog = {};
 
     // set up callback listener for electron
-    if (angular.isDefined(window.ipcRenderer)) {
+    if (IS_ELECTRON) {
       window.ipcRenderer.on(IPC_JIRA_CB_EVENT, (ev, res) => {
         if (res.requestId) {
           // resolve saved promise
@@ -144,7 +144,7 @@
         return;
       }
 
-      if (angular.isDefined(window.ipcRenderer)) {
+      if (IS_ELECTRON) {
         let defer = $q.defer();
         // save to request log
         this.requestsLog[request.requestId] = defer;

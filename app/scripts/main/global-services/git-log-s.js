@@ -14,7 +14,7 @@
     .service('GitLog', GitLog);
 
   /* @ngInject */
-  function GitLog($q, Uid, $localStorage) {
+  function GitLog($q, Uid, $localStorage, IS_ELECTRON) {
 
     // AngularJS will instantiate a singleton by calling "new" on this function const IPC_JIRA_CB_EVENT = 'JIRA_RESPONSE';
     const IPC_GIT_LOG_EVENT = 'GIT_LOG';
@@ -23,7 +23,7 @@
     this.requestsLog = {};
 
     // set up callback listener for electron
-    if (angular.isDefined(window.ipcRenderer)) {
+    if (IS_ELECTRON) {
       window.ipcRenderer.on(IPC_GIT_LOG_CB, (ev, res) => {
         if (res.requestId) {
           // resolve saved promise
@@ -39,7 +39,7 @@
     }
 
     this.get = (cwd) => {
-      if (angular.isDefined(window.ipcRenderer) && $localStorage.git && $localStorage.git.projectDir) {
+      if (IS_ELECTRON && $localStorage.git && $localStorage.git.projectDir) {
         let uid = Uid();
         let defer = $q.defer();
         // save to request log
