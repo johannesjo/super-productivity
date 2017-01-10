@@ -94,7 +94,6 @@
 
     $rootScope.r = {};
 
-    $rootScope.r.currentProject = Projects.getCurrent();
     $rootScope.r.projects = Projects.getList();
 
     $rootScope.r.tasks = Tasks.getToday();
@@ -115,6 +114,9 @@
     } else {
       $rootScope.r.bodyClass = '';
     }
+
+    // needs to be last for the updates from current data via the watcher!!!
+    $rootScope.r.currentProject = Projects.getAndUpdateCurrent();
   }
 
   function initGlobalShortcuts($document, Dialogs) {

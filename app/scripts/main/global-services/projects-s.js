@@ -21,13 +21,12 @@
       return $localStorage.projects;
     };
 
-    this.getCurrent = () => {
+    this.getAndUpdateCurrent = () => {
       let currentProject;
       if (!$localStorage.currentProject && $localStorage.projects.length > 0) {
         $localStorage.currentProject = $localStorage.projects[0];
       }
 
-      // TODO this is a little hacky somehow
       // we need to use this, to establish an relationship between array entry and current
       if ($localStorage.currentProject) {
         currentProject = $window._.find($localStorage.projects, (project) => {
@@ -45,6 +44,7 @@
       let projectToUpdate = $window._.find(projects, (project) => {
         return project.id == projectToUpdateId;
       });
+
       // add default values to project
       // prevent circular data structure via omit
       angular.extend(projectToUpdate.data, $window._.omit(data, OMITTED_LS_FIELDS));
@@ -61,7 +61,6 @@
 
     this.createNew = (projectTitle, data) => {
       if (projectTitle && angular.isObject(data)) {
-
         // save new project
         let newProject = {
           title: projectTitle,
@@ -95,8 +94,8 @@
       if (newCurrentProject && newCurrentProject.id) {
         // when there is an old current project existing
         if (oldCurrentProject && oldCurrentProject.id) {
-          // save old project data in $localStorage.projects
-          this.updateProjectData(oldCurrentProject.id, oldCurrentProject.data);
+          // save all current project data in $localStorage.projects[oldProject]
+          this.updateProjectData(oldCurrentProject.id, $localStorage);
         }
         // update with new model fields, if we change the model
         this.updateNewFields(newCurrentProject);
