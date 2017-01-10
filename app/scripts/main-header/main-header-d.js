@@ -24,7 +24,7 @@
   }
 
   /* @ngInject */
-  function MainHeaderCtrl(Dialogs, $rootScope, Tasks, Projects) {
+  function MainHeaderCtrl(Dialogs, $rootScope, Tasks, Projects, SimpleToast) {
     let vm = this;
     let lastCurrentTask;
 
@@ -32,8 +32,7 @@
 
     vm.allProjects = Projects.getList();
 
-
-    this.openMenu = function($mdOpenMenu, ev) {
+    this.openMenu = function ($mdOpenMenu, ev) {
       $mdOpenMenu(ev);
     };
 
@@ -51,8 +50,10 @@
       if (vm.isOnBreak) {
         lastCurrentTask = $rootScope.r.currentTask;
         Tasks.updateCurrent(null);
+        SimpleToast('On break!');
       } else {
         Tasks.updateCurrent(lastCurrentTask);
+        SimpleToast('Off break!');
       }
     };
   }

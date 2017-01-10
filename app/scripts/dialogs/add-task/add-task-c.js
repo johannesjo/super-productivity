@@ -14,7 +14,7 @@
     .controller('AddTaskCtrl', AddTaskCtrl);
 
   /* @ngInject */
-  function AddTaskCtrl($mdDialog, Tasks) {
+  function AddTaskCtrl($mdDialog, Tasks, SimpleToast) {
     let vm = this;
     vm.task = {};
 
@@ -22,6 +22,7 @@
       let success = Tasks.addToday(vm.task);
 
       if (success) {
+        SimpleToast('Created task "' + vm.task.title + '"');
         $mdDialog.hide();
       }
     };

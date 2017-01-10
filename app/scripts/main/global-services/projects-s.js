@@ -14,7 +14,7 @@
     .service('Projects', Projects);
 
   /* @ngInject */
-  function Projects(LS_DEFAULTS, $localStorage, $rootScope, Uid, $window, $log) {
+  function Projects(LS_DEFAULTS, $localStorage, $rootScope, Uid, $window, SimpleToast) {
     const OMITTED_LS_FIELDS = ['currentProject', 'projects', '$$hashKey', '$$mdSelectId'];
 
     this.getList = () => {
@@ -51,8 +51,8 @@
     };
 
     this.createNewFromCurrent = (projectTitle) => {
-      if ($localStorage.projects.length !== 0) {
-        $log.error('there is already a project');
+      if ($localStorage.projects.length > 0) {
+        SimpleToast('ERROR: There is already a project');
         return;
       }
 

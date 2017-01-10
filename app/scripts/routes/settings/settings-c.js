@@ -14,7 +14,7 @@
     .controller('SettingsCtrl', SettingsCtrl);
 
   /* @ngInject */
-  function SettingsCtrl($localStorage, $rootScope, $scope, Projects, Dialogs, DEFAULT_THEME, $mdToast) {
+  function SettingsCtrl($localStorage, $rootScope, $scope, Projects, Dialogs, DEFAULT_THEME, SimpleToast) {
     let vm = this;
 
     function init() {
@@ -33,9 +33,7 @@
     vm.createNewProjectFromCurrent = (projectTitle) => {
       Projects.createNewFromCurrent(projectTitle);
 
-      $mdToast.show($mdToast.simple()
-        .textContent('Project "' + projectTitle + '" successfully saved')
-        .position('bottom'));
+      SimpleToast('Project "' + projectTitle + '" successfully saved');
     };
 
     vm.createNewProject = () => {
@@ -58,9 +56,7 @@
         $localStorage.projects = $rootScope.r.projects = [];
       }
 
-      $mdToast.show($mdToast.simple()
-        .textContent('Settings successfully imported')
-        .position('bottom'));
+      SimpleToast('Settings successfully imported');
     };
 
     // jira stuff
@@ -71,9 +67,7 @@
         $rootScope.r.currentProject.data.jiraSettings = settings;
       }
 
-      $mdToast.show($mdToast.simple()
-        .textContent('Jira settigns saved')
-        .position('bottom'));
+      SimpleToast('Jira settigns saved');
     };
 
     // theme stuff
