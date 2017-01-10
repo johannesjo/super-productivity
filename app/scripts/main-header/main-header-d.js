@@ -32,6 +32,11 @@
 
     vm.allProjects = Projects.getList();
 
+
+    this.openMenu = function($mdOpenMenu, ev) {
+      $mdOpenMenu(ev);
+    };
+
     vm.openAddTask = () => {
       Dialogs('ADD_TASK');
     };

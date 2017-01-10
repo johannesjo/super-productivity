@@ -50,6 +50,14 @@
         $rootScope.r[key] = $localStorage[key] = val;
       });
 
+      // delete projects and current project if there are non yet
+      if (!settings.currentProject) {
+        $localStorage.currentProject = $rootScope.r.currentProject = undefined;
+      }
+      if (!settings.projects) {
+        $localStorage.projects = $rootScope.r.projects = [];
+      }
+
       $mdToast.show($mdToast.simple()
         .textContent('Settings successfully imported')
         .position('bottom'));

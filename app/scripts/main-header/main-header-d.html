@@ -8,15 +8,19 @@
                   aria-label="cloud"></ng-md-icon>
     </md-button>
 
-
-    <md-select ng-model="vm.r.currentProject"
-               arial-label="Select Project">
-      <md-option ng-repeat="project in vm.allProjects"
-                 arial-label="Select Project"
-                 ng-value="project">
-        {{project.title}}
-      </md-option>
-    </md-select>
+    <md-menu ng-if="vm.r.currentProject">
+      <md-button aria-label="Open phone interactions menu"
+                 ng-click="vm.openMenu($mdOpenMenu, $event)">
+        {{ vm.r.currentProject.title }}
+      </md-button>
+      <md-menu-content width="4">
+        <md-menu-item ng-repeat="project in vm.allProjects">
+          <md-button ng-click="vm.r.currentProject = project">
+            {{project.title}}
+          </md-button>
+        </md-menu-item>
+      </md-menu-content>
+    </md-menu>
 
     <h2 ng-if="!vm.r.currentProject">
       <a ui-sref="daily-planner">SuperProductivity</a>
