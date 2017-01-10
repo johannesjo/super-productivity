@@ -9,15 +9,12 @@
     </md-button>
 
 
-    <md-select ng-model="ctrl.userState"
+    <md-select ng-model="vm.r.currentProject"
                arial-label="Select Project">
-      <md-option><em>None</em></md-option>
-      <md-option ng-repeat="state in ctrl.states"
-
+      <md-option ng-repeat="project in vm.allProjects"
                  arial-label="Select Project"
-                 ng-value="state.abbrev"
-                 ng-disabled="$index === 1">
-        {{state.abbrev}}
+                 ng-value="project">
+        {{project.title}}
       </md-option>
     </md-select>
 

@@ -24,9 +24,13 @@
   }
 
   /* @ngInject */
-  function MainHeaderCtrl(Dialogs, $rootScope, Tasks) {
+  function MainHeaderCtrl(Dialogs, $rootScope, Tasks, Projects) {
     let vm = this;
     let lastCurrentTask;
+
+    vm.r = $rootScope.r;
+
+    vm.allProjects = Projects.getList();
 
     vm.openAddTask = () => {
       Dialogs('ADD_TASK');
