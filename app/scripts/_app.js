@@ -41,6 +41,9 @@
       backlogTasks: [],
       distractions: [],
       projects: [],
+      git: {
+        projectDir: undefined
+      },
       jiraSettings: {
         isFirstLogin: true,
         defaultTransitionInProgress: undefined,
@@ -105,7 +108,7 @@
 
     $rootScope.r.jiraSettings = $localStorage.jiraSettings;
 
-    $rootScope.r.noteForToday = $localStorage.tomorrowsNote;
+    $rootScope.r.git = $localStorage.git;
 
     $rootScope.r.theme = $localStorage.theme || DEFAULT_THEME;
 
@@ -119,7 +122,7 @@
     $rootScope.r.currentProject = Projects.getAndUpdateCurrent();
   }
 
-  function initGlobalShortcuts($document, Dialogs) {
+  function initGlobalShortcuts($document, Dialogs, GitLog) {
     // we just use this single one as this usually does mess
     // up with the default browser shortcuts
     // better to use the global electron shortcuts here

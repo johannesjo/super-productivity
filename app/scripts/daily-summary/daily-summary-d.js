@@ -26,7 +26,7 @@
   }
 
   /* @ngInject */
-  function DailySummaryCtrl($rootScope, $window, $localStorage, Tasks, $mdDialog, $state) {
+  function DailySummaryCtrl($rootScope, $window, $localStorage, Tasks, $mdDialog, $state, GitLog) {
     const IPC_EVENT_SHUTDOWN = 'SHUTDOWN';
 
     let vm = this;
@@ -55,6 +55,10 @@
         vm.totalTimeSpentToday.add(task.timeSpentOnDay[todayStr]);
       }
     }
+
+    GitLog.get('/home/johannes/www/super-productivity').then(function (res) {
+      vm.commitLog = res;
+    });
 
     vm.finishDay = () => {
       $localStorage.tomorrowsNote = vm.tomorrowsNote;

@@ -9,6 +9,7 @@ const ICONS_FOLDER = __dirname + '/assets/icons/';
 
 const idle = require('./idle');
 const jira = require('./jira');
+const gitLog = require('./git-log');
 const pyGtkIndicator = require('./py-gtk-indicator');
 
 powerSaveBlocker.start('prevent-app-suspension');
@@ -38,7 +39,7 @@ function createWindow() {
   }));
 
   // Open the DevTools.
-  //mainWindow.webContents.openDevTools();
+  mainWindow.webContents.openDevTools();
 
   // open new window links in browser
   mainWindow.webContents.on('new-window', function (event, url) {
@@ -139,6 +140,10 @@ electron.ipcMain.on('TOGGLE_DEV_TOOLS', () => {
 
 electron.ipcMain.on('JIRA', (ev, request) => {
   jira(mainWindow, request);
+});
+
+electron.ipcMain.on('GIT_LOG', (ev, cwd) => {
+  gitLog(cwd, mainWindow);
 });
 
 let saveLastTitle;
