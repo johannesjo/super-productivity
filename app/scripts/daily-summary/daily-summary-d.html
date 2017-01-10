@@ -9,6 +9,7 @@
        md-whiteframe="2">
   <tr>
     <th>Title</th>
+    <th>Sub-Tasks</th>
     <th>Time spent</th>
     <th>Time esti.</th>
     <th></th>
@@ -17,6 +18,7 @@
   <tr ng-repeat="task in vm.todaysTasks"
       ng-class="{'is-done': task.isDone}">
     <td>{{ task.title }}</td>
+    <td><span ng-repeat="task in task.subTasks">{{ task.title }}: {{ task.timeSpent|duration }}<br></span></td>
     <td>
       {{ task.timeSpent |duration }}
     </td>

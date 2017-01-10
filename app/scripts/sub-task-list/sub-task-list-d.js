@@ -22,7 +22,9 @@
       controllerAs: 'vm',
       restrict: 'E',
       scope: {
-        task: '='
+        task: '=',
+        currentTask: '=',
+        isTasksForToday: '@'
       }
     };
   }
@@ -35,6 +37,9 @@
       if (angular.isArray(tasks)) {
         vm.task.timeEstimate = Tasks.calcTotalEstimate(tasks);
         vm.task.timeSpent = Tasks.calcTotalTimeSpent(tasks);
+        if (vm.isTasksForToday) {
+          Tasks.updateTimeSpentToday(vm.task, vm.task.timeSpent);
+        }
       }
     }, true);
   }

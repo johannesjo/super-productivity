@@ -1,10 +1,12 @@
 <h2 class="md-title">Done Tasks Backlog</h2>
 <p> This is just here to admire yourself.</p>
 <p>You spent <strong>{{ vm.totalTimeSpent|duration }}</strong> on all those tasks.</p>
+
 <table class="task-summary-table"
        md-whiteframe="2">
   <tr>
     <th>Title</th>
+    <th>Sub-Tasks</th>
     <th>Time spent</th>
     <th>Time esti.</th>
     <th></th>
@@ -13,6 +15,7 @@
   <tr ng-repeat="task in vm.r.doneBacklogTasks"
       ng-class="{'is-done': task.isDone}">
     <td>{{ task.title }}</td>
+    <td><span ng-repeat="task in task.subTasks">{{ task.title }}: {{ task.timeSpent|duration }}<br></span></td>
     <td>
       {{ task.timeSpent |duration }}
     </td>

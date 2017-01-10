@@ -19,9 +19,8 @@
 
       <md-button class="md-icon-button play-btn"
                  aria-label="mark as current"
-                 ng-disabled="task.subTasks.length>0"
-                 ng-click="(vm.currentTask.id === task.id) ? vm.currentTask=null :vm.currentTask=task"
-                 ng-show="vm.allowTaskSelection">
+                 ng-click="(vm.currentTask.id === task.id) ? vm.currentTask=undefined :vm.currentTask=task"
+                 ng-show="vm.allowTaskSelection && !task.subTasks.length">
         <ng-md-icon icon="{{vm.currentTask.id === task.id ? 'pause_circle_filled':'play_circle_fill'}}"
                     aria-label="mark as current"></ng-md-icon>
       </md-button>
@@ -67,7 +66,6 @@
         <md-button class="md-icon-button"
                    aria-label="add sub task"
                    ng-if="!vm.isSubTasksDisabled"
-                   ng-class="{'is-active':task.subTasks.length>0}"
                    tabindex="2"
                    ng-click="vm.addSubTask(task);">
           <ng-md-icon icon="playlist_add"
@@ -121,7 +119,7 @@
     </div>
 
     <sub-task-list ng-if="task.subTasks.length > 0"
-                   is-current-sub-task="vm.isCurrentSubTask"
+                   is-tasks-for-today="{{vm.isTasksForToday}}"
                    current-task="vm.currentTask"
                    task="task"></sub-task-list>
   </li>
