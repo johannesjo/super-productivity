@@ -32,7 +32,9 @@
       'as.sortable',
       'angularMoment'
     ])
+    .constant('DEFAULT_THEME', 'teal-theme')
     .constant('LS_DEFAULTS', {
+      theme: undefined,
       currentTask: undefined,
       currentProject: undefined,
       tasks: [],
@@ -87,7 +89,7 @@
     $mdThemingProvider.alwaysWatchTheme(true);
   }
 
-  function initGlobalModels(LS_DEFAULTS, $rootScope, Tasks, $localStorage, Projects) {
+  function initGlobalModels(LS_DEFAULTS, DEFAULT_THEME, $rootScope, Tasks, $localStorage, Projects) {
     $localStorage.$default(LS_DEFAULTS);
 
     $rootScope.r = {};
@@ -106,7 +108,7 @@
 
     $rootScope.r.noteForToday = $localStorage.tomorrowsNote;
 
-    $rootScope.r.theme = $localStorage.theme || 'teal-theme';
+    $rootScope.r.theme = $localStorage.theme || DEFAULT_THEME;
 
     if ($rootScope.r.theme.indexOf('dark') > -1) {
       $rootScope.r.bodyClass = 'dark-theme';

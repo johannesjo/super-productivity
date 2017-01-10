@@ -8,8 +8,7 @@
                           flex-gt-sm>
         <label>Choose current project</label>
         <md-select ng-model="vm.r.currentProject"
-                   arial-label="Select Project"
-                   ng-change="vm.switchCurrentProject()">
+                   arial-label="Select Project">
           <md-option ng-repeat="project in vm.allProjects"
                      arial-label="Select Project"
                      ng-value="project">
@@ -46,42 +45,6 @@
     <md-divider></md-divider>
   </section>
 
-  <section>
-    <h2 class="md-title">Make/Restore Backup</h2>
-    <a class="md-raised md-button md-ink-ripple"
-       type="button"
-       download-backup>
-      <ng-md-icon icon="file_download"
-                  aria-label="download settings"
-                  download-backup></ng-md-icon>
-      Download your tasks and settings
-      <div class="md-ripple-container"></div>
-    </a>
-    <md-button
-      class="md-raised"
-      ng-click="vm.showUploadForm=!vm.showUploadForm;">
-      <ng-md-icon icon="file_upload"
-                  aria-label="import settings"
-                  download-backup></ng-md-icon>
-      Import Settings
-    </md-button>
-
-    <form ng-if="vm.showUploadForm"
-          ng-submit="vm.importSettings(vm.uploadSettingsTextarea)">
-      <md-input-container class="md-block"
-                          flex-gt-sm>
-        <label>Copy and paste the contents of the download json file here</label>
-        <textarea ng-model="vm.uploadSettingsTextarea"
-                  md-auto-focus
-                  rows="3"></textarea>
-      </md-input-container>
-      <md-button type="submit"
-                 class="md-raised md-primary">Import settings
-      </md-button>
-    </form>
-
-    <md-divider></md-divider>
-  </section>
 
   <section>
     <h2 class="md-title">Jira-Setup for Task Suggestion</h2>
@@ -126,7 +89,8 @@
     <h2 class="md-title">Switch theme</h2>
     <md-select ng-model="vm.selectedTheme"
                placeholder="Select a theme">
-      <md-option ng-repeat="themeName in vm.themes">{{ themeName }}
+      <md-option ng-repeat="themeName in vm.themes"
+                 ng-value="themeName">{{ themeName }}
       </md-option>
     </md-select>
     <div flex-gt-sm="50">
@@ -135,5 +99,43 @@
         Use dark theme
       </md-checkbox>
     </div>
+  </section>
+
+
+  <section>
+    <h2 class="md-title">Make/Restore Backup</h2>
+    <a class="md-raised md-button md-ink-ripple"
+       type="button"
+       download-backup>
+      <ng-md-icon icon="file_download"
+                  aria-label="download settings"
+                  download-backup></ng-md-icon>
+      Download your tasks and settings
+      <div class="md-ripple-container"></div>
+    </a>
+    <md-button
+      class="md-raised"
+      ng-click="vm.showUploadForm=!vm.showUploadForm;">
+      <ng-md-icon icon="file_upload"
+                  aria-label="import settings"
+                  download-backup></ng-md-icon>
+      Import Settings
+    </md-button>
+
+    <form ng-if="vm.showUploadForm"
+          ng-submit="vm.importSettings(vm.uploadSettingsTextarea)">
+      <md-input-container class="md-block"
+                          flex-gt-sm>
+        <label>Copy and paste the contents of the download json file here</label>
+        <textarea ng-model="vm.uploadSettingsTextarea"
+                  md-auto-focus
+                  rows="3"></textarea>
+      </md-input-container>
+      <md-button type="submit"
+                 class="md-raised md-primary">Import settings
+      </md-button>
+    </form>
+
+    <md-divider></md-divider>
   </section>
 </div>

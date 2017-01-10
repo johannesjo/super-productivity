@@ -45,7 +45,8 @@
       let projectToUpdate = $window._.find(projects, (project) => {
         return project.id == projectToUpdateId;
       });
-      // prevent circular data structure
+      // add default values to project
+      // prevent circular data structure via omit
       angular.extend(projectToUpdate.data, $window._.omit(data, OMITTED_LS_FIELDS));
     };
 
@@ -76,14 +77,18 @@
 
         // switch to new project
         $rootScope.r.currentProject = $localStorage.currentProject = newProject
-
-        console.log(newProject.data);
-
       }
     };
 
-    this.switch = (newCurrentProject) => {
-
+    // we need to do this add new fields
+    this.updateNewFields = (project) => {
+      if (project) {
+        for (let property in LS_DEFAULTS) {
+          if (LS_DEFAULTS.hasOwnProperty(property) && !project.data.hasOwnProperty(property) && OMITTED_LS_FIELDS.indexOf(property) === -1) {
+            project.data[property] = LS_DEFAULTS[property];
+          }
+        }
+      }
     };
 
     $rootScope.$watch('r.currentProject', (newCurrentProject, oldCurrentProject) => {
@@ -93,6 +98,9 @@
           // save old project data in $localStorage.projects
           this.updateProjectData(oldCurrentProject.id, oldCurrentProject.data);
         }
+        // update with new model fields, if we change the model
+        this.updateNewFields(newCurrentProject);
+
         // update $rootScope data and ls for current project
         $rootScope.r.currentProject = $localStorage.currentProject = newCurrentProject;
 
@@ -103,6 +111,12 @@
           }
         }
       }
+      //if (newCurrentProject && newCurrentProject.data.theme) {
+      //  console.log(newCurrentProject.data.theme);
+      //}
+      //if (oldCurrentProject && oldCurrentProject.data.theme) {
+      //  console.log(oldCurrentProject.data.theme);
+      //}
     });
 
   }
