@@ -14,8 +14,10 @@
     .controller('SettingsCtrl', SettingsCtrl);
 
   /* @ngInject */
-  function SettingsCtrl($localStorage, $rootScope, $scope, Projects, Dialogs, DEFAULT_THEME, THEMES, SimpleToast) {
+  function SettingsCtrl($localStorage, $rootScope, $scope, Projects, Dialogs, DEFAULT_THEME, THEMES, IS_ELECTRON, SimpleToast) {
     let vm = this;
+
+    vm.IS_ELECTRON = IS_ELECTRON;
 
     function init() {
       vm.r = $rootScope.r;

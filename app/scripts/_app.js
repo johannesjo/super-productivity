@@ -95,7 +95,7 @@
     $mdThemingProvider.alwaysWatchTheme(true);
   }
 
-  function initGlobalModels(LS_DEFAULTS, DEFAULT_THEME, $rootScope, Tasks, $localStorage, Projects) {
+  function initGlobalModels(LS_DEFAULTS, DEFAULT_THEME, $rootScope, Tasks, $localStorage, Projects, IS_ELECTRON) {
     $localStorage.$default(LS_DEFAULTS);
 
     $rootScope.r = {};

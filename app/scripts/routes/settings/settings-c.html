@@ -46,7 +46,7 @@
   </section>
 
 
-  <section>
+  <section ng-if="vm.IS_ELECTRON">
     <h2 class="md-title">Jira-Setup for Task Suggestion</h2>
     <form ng-submit="vm.saveJiraSettings(vm.jiraSettings)">
       <md-input-container class="md-block"
@@ -102,7 +102,7 @@
   </section>
 
 
-  <section>
+  <section ng-if="vm.IS_ELECTRON">
     <h2 class="md-title">Git integration</h2>
     <p>Set project directory to show the days commits at summary.</p>
     <md-input-container class="md-block"
