@@ -14,7 +14,7 @@
     .controller('SettingsCtrl', SettingsCtrl);
 
   /* @ngInject */
-  function SettingsCtrl($localStorage, $rootScope, $scope, Projects, Dialogs, DEFAULT_THEME, THEMES, IS_ELECTRON, SimpleToast) {
+  function SettingsCtrl($localStorage, $rootScope, $scope, Projects, Dialogs, DEFAULT_THEME, THEMES, IS_ELECTRON, SimpleToast, $mdDialog) {
     let vm = this;
 
     vm.IS_ELECTRON = IS_ELECTRON;
@@ -40,6 +40,24 @@
 
     vm.createNewProject = () => {
       Dialogs('CREATE_PROJECT');
+    };
+
+    vm.deleteProject = (project, $index) => {
+      if (project.id === $rootScope.r.currentProject.id) {
+        SimpleToast('Cannot delete ' + project.title + ' as it is the current project!');
+      } else {
+        let confirm = $mdDialog.confirm()
+          .title('Would you like to delete ' + project.title + '?')
+          .textContent('All tasks and settings will be lost forever.')
+          .ariaLabel('Delete Project')
+          .ok('Please do it!')
+          .cancel('Better not');
+
+        $mdDialog.show(confirm).then(function () {
+          vm.allProjects.splice($index, 1);
+          SimpleToast(project.title + ' deleted!');
+        });
+      }
     };
 
     // import/export stuff

@@ -17,13 +17,39 @@
         </md-select>
       </md-input-container>
 
-      <md-button type="button"
-                 class="md-raised md-primary">Edit current project
-      </md-button>
+      <div class="project-overview"
+           ng-show="vm.showAllProjects">
+        <h3 class="md-title">Overview of all Projects</h3>
+
+        <md-list-item ng-repeat="project in vm.allProjects">
+          <p>
+            <ng-md-icon icon="edit"
+                        aria-label="edit"></ng-md-icon>
+            <span edit-on-click="project.title"></span>
+          </p>
+
+          <md-button class="md-icon-button"
+                     aria-label="delete"
+                     tabindex="2"
+                     ng-click="vm.deleteProject(project,$index)">
+            <ng-md-icon icon="delete_forever"
+                        aria-label="delete"
+                        style="fill: #dc2d3d;"></ng-md-icon>
+          </md-button>
+        </md-list-item>
+      </div>
+
       <md-button type="button"
                  ng-click="vm.createNewProject()"
                  class="md-raised md-primary">Create new project
       </md-button>
+      <md-button type="button"
+                 ng-hide="vm.showAllProjects"
+                 ng-click="vm.showAllProjects = true;"
+                 class="md-raised md-primary">Manage Projects
+      </md-button>
+
+
     </div>
 
     <div ng-if="!vm.allProjects.length">
