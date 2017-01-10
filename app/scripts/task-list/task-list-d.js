@@ -154,10 +154,16 @@
       if (!task.subTasks) {
         task.subTasks = [];
       }
-      task.subTasks.push(Tasks.createTask({
+      let subTask = Tasks.createTask({
         title: 'empty'
-      }));
+      });
 
+      task.subTasks.push(subTask);
+
+      // if parent was current task, mark sub task as current now
+      if (vm.currentTask && vm.currentTask.id && vm.currentTask.id === task.id) {
+        vm.currentTask = subTask;
+      }
     };
 
     vm.moveItem = (array, oldIndex, newIndex) => {
