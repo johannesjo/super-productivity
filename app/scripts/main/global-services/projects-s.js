@@ -23,6 +23,10 @@
 
     this.getCurrent = () => {
       let currentProject;
+      if (!$localStorage.currentProject && $localStorage.projects.length > 0) {
+        $localStorage.currentProject = $localStorage.projects[0];
+      }
+
       // TODO this is a little hacky somehow
       // we need to use this, to establish an relationship between array entry and current
       if ($localStorage.currentProject) {
@@ -42,7 +46,7 @@
         return project.id == projectToUpdateId;
       });
       // prevent circular data structure
-      projectToUpdate.data = $window._.omit(data, OMITTED_LS_FIELDS);
+      angular.extend(projectToUpdate.data, $window._.omit(data, OMITTED_LS_FIELDS));
     };
 
     this.createNewFromCurrent = (projectTitle) => {
@@ -69,32 +73,36 @@
 
         // update data for current new project from current ls data
         this.updateProjectData(newProject.id, data);
-        console.log(newProject);
 
         // switch to new project
-        this.switch(newProject);
+        $rootScope.r.currentProject = $localStorage.currentProject = newProject
+
+        console.log(newProject.data);
+
       }
     };
 
     this.switch = (newCurrentProject) => {
-      // when there is an old current project existing
-      if ($rootScope.r.currentProject && $rootScope.r.currentProject.id) {
-        // save old project data in $localStorage.projects
-        this.updateProjectData($rootScope.r.currentProject.id, $rootScope.r.currentProject.data);
-      }
-      // update $rootScope data and ls for current project
-      $rootScope.r.currentProject = $localStorage.currentProject = newCurrentProject;
 
-      // switch to new project if operation is successfull
-      for (let property in newCurrentProject.data) {
-        if (newCurrentProject.data.hasOwnProperty(property)) {
-          $rootScope.r[property] = $localStorage[property] = newCurrentProject.data[property];
-        }
-      }
     };
 
-    $rootScope.$watch('r.currentProject', (newVal, oldVal) => {
+    $rootScope.$watch('r.currentProject', (newCurrentProject, oldCurrentProject) => {
+      if (newCurrentProject && newCurrentProject.id) {
+        // when there is an old current project existing
+        if (oldCurrentProject && oldCurrentProject.id) {
+          // save old project data in $localStorage.projects
+          this.updateProjectData(oldCurrentProject.id, oldCurrentProject.data);
+        }
+        // update $rootScope data and ls for current project
+        $rootScope.r.currentProject = $localStorage.currentProject = newCurrentProject;
 
+        // switch to new project if operation is successfull
+        for (let property in newCurrentProject.data) {
+          if (newCurrentProject.data.hasOwnProperty(property)) {
+            $rootScope.r[property] = $localStorage[property] = newCurrentProject.data[property];
+          }
+        }
+      }
     });
 
   }

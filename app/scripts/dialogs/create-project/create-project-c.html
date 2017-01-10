@@ -1,34 +1,16 @@
-<form ng-submit="vm.createProject()">
-  <md-dialog aria-label="Was Idle Dialog"
+<form ng-submit="vm.createProject(vm.project)">
+  <md-dialog aria-label="Create a new project"
              class="was-idle-dialog">
     <md-dialog-content layout-padding>
-      <h2 class="md-title">Create a new task</h2>
+      <h2 class="md-title">Create a new project</h2>
 
       <md-input-container class="md-block">
-        <label>Task Name</label>
+        <label>Project Title</label>
         <input type="text"
-               ng-model="vm.task.title"
+               ng-model="vm.project.title"
                md-auto-focus
                required
                aria-label="Title">
-      </md-input-container>
-
-      <md-input-container class="md-icon-float md-block">
-        <ng-md-icon icon="access_time"
-                    aria-label="Estimated Durations"></ng-md-icon>
-        <label>Estimated Duration</label>
-
-        <input type="text"
-               input-duration="optional"
-               ng-model="vm.task.timeEstimate"
-               aria-label="Estimated Durations">
-      </md-input-container>
-
-      <md-input-container class="md-block">
-        <label>Notes</label>
-
-        <textarea ng-model="vm.task.notes"
-                  aria-label="Notes"></textarea>
       </md-input-container>
     </md-dialog-content>
 

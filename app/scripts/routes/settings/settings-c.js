@@ -29,7 +29,6 @@
       Dialogs('CREATE_PROJECT');
     };
     vm.switchCurrentProject = () => {
-      Projects.switch();
     };
 
     // import/export stuff
