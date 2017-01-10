@@ -147,6 +147,7 @@ task-list {
   input {
     width: 100%;
     display: block;
+    box-sizing: border-box;
     box-shadow: inset 1px 3px 7px -6px;
     height: 30px;
     padding: 4px 10px;
@@ -155,15 +156,13 @@ task-list {
   .time {
     white-space: nowrap;
     font-size: 14px;
-  }
-  .notes,
-  .time {
     margin-left: 10px;
   }
 
   .notes {
     width: 100%;
     flex: 0 1 100%;
+    padding-bottom: 10px;
     textarea {
       min-height: 100px;
     }
