@@ -24,7 +24,8 @@
       scope: {
         task: '=',
         currentTask: '=',
-        isTasksForToday: '@'
+        isTasksForToday: '@',
+        allowTaskSelection: '@'
       }
     };
   }
