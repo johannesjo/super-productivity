@@ -169,11 +169,17 @@ function trackTimeFn() {
 
   idle((stdout) => {
     let idleTime = parseInt(stdout, 10);
-    if (idleTime > 0 && lastIdleTime > CONFIG.MIN_IDLE_TIME && lastIdleTime > idleTime) {
-      // TODO this seem to open a new instance find out why
-      //mainWindow.show();
-      mainWindow.webContents.send('WAS_IDLE', (lastIdleTime - CONFIG.MIN_IDLE_TIME + CONFIG.PING_INTERVAL));
-    } else {
+    // don' track regularly when idle
+    if (lastIdleTime > CONFIG.MIN_IDLE_TIME) {
+      // show idle dialog once not idle any more
+      if (lastIdleTime > idleTime) {
+        // TODO this seem to open a new instance find out why
+        //mainWindow.show();
+        mainWindow.webContents.send('WAS_IDLE', (lastIdleTime - CONFIG.MIN_IDLE_TIME + CONFIG.PING_INTERVAL));
+      }
+    }
+    // account for inconsistencies in idle time
+    else {
       mainWindow.webContents.send('UPDATE_TIME_SPEND', CONFIG.PING_INTERVAL);
     }
 
