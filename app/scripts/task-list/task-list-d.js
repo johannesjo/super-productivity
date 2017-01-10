@@ -26,6 +26,7 @@
         limitTo: '@',
         filter: '=',
         isTasksForToday: '@',
+        isSubTasksDisabled: '@',
         allowTaskSelection: '@',
         disableDropInto: '@',
         onItemMoved: '&',
@@ -52,7 +53,6 @@
       let toast = $mdToast.simple()
         .textContent('You deleted "' + task.title + '"')
         .action('UNDO')
-        .highlightAction(true)// Accent is used by default, this just demonstrates the usage.
         .position('bottom');
       $mdToast.show(toast).then(function (response) {
         if (response === 'ok') {
@@ -145,6 +145,16 @@
           }
         }
       }
+    };
+
+    vm.addSubTask = (task) => {
+      if (!task.subTasks) {
+        task.subTasks = [];
+      }
+      task.subTasks.push(Tasks.createTask({
+        title: 'empty'
+      }));
+
     };
 
     vm.moveItem = (array, oldIndex, newIndex) => {

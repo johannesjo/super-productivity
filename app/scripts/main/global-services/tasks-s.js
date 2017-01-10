@@ -185,8 +185,6 @@
 
     this.updateTimeSpentToday = (task, val) => {
       // add when set and not equal to current value
-      console.log('asdas');
-
       if (val) {
         let todayStr = getTodayStr();
         task.lastWorkedOn = $window.moment();
@@ -206,27 +204,31 @@
 
     this.addToday = (task) => {
       if (task && task.title) {
-        $localStorage.tasks.push({
-          title: task.title,
-          id: Uid(),
-          created: $window.moment(),
-          notes: task.notes,
-          timeEstimate: task.timeEstimate || task.originalEstimate,
-          timeSpent: task.timeSpent || task.originalTimeSpent,
-          originalId: task.originalId,
-          originalKey: task.originalKey,
-          originalType: task.originalType,
-          originalLink: task.originalLink,
-          originalStatus: task.originalStatus,
-          originalEstimate: task.originalEstimate,
-          originalTimeSpent: task.originalTimeSpent
-        });
+        $localStorage.tasks.push(this.createTask(task));
 
         // update global pointer for today tasks
         $rootScope.r.tasks = $localStorage.tasks;
 
         return true;
       }
+    };
+
+    this.createTask = (task) => {
+      return {
+        title: task.title,
+        id: Uid(),
+        created: $window.moment(),
+        notes: task.notes,
+        timeEstimate: task.timeEstimate || task.originalEstimate,
+        timeSpent: task.timeSpent || task.originalTimeSpent,
+        originalId: task.originalId,
+        originalKey: task.originalKey,
+        originalType: task.originalType,
+        originalLink: task.originalLink,
+        originalStatus: task.originalStatus,
+        originalEstimate: task.originalEstimate,
+        originalTimeSpent: task.originalTimeSpent
+      };
     };
 
     this.updateToday = (tasks) => {

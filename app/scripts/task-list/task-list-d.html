@@ -19,6 +19,7 @@
 
       <md-button class="md-icon-button play-btn"
                  aria-label="mark as current"
+                 ng-disabled="task.subTasks.length>0"
                  ng-click="(vm.currentTask.id === task.id) ? vm.currentTask=null :vm.currentTask=task"
                  ng-show="vm.allowTaskSelection">
         <ng-md-icon icon="{{vm.currentTask.id === task.id ? 'pause_circle_filled':'play_circle_fill'}}"
@@ -38,6 +39,7 @@
 
       <div class="time"
            data-ng-show="task.timeEstimate || task.timeSpent">
+        <span ng-if="!task.subTasks.length">
         <span edit-on-click-toggle="task.showEdit"
               edit-on-click-on-change="vm.onChangeTimeSpent(task, $value)"
               edit-on-click-type="DURATION"
@@ -46,16 +48,30 @@
         <span edit-on-click-toggle="task.showEdit"
               edit-on-click-type="DURATION"
               edit-on-click="task.timeEstimate"></span>
+          </span>
+        <span ng-if="task.subTasks.length>0">
+          ∑ {{ task.timeSpent |duration}} <span ng-show="task.timeEstimate">/</span> {{ task.timeEstimate |duration}}
+        </span>
       </div>
 
 
       <div class="controls">
         <md-button class="md-icon-button"
                    tabindex="2"
+                   ng-disabled="task.subTasks.length>0"
                    aria-label="time estimation"
                    ng-click="vm.estimateTime(task)">
           <ng-md-icon icon="access_time"
                       aria-label="time estimation"></ng-md-icon>
+        </md-button>
+        <md-button class="md-icon-button"
+                   aria-label="add sub task"
+                   ng-if="!vm.isSubTasksDisabled"
+                   ng-class="{'is-active':task.subTasks.length>0}"
+                   tabindex="2"
+                   ng-click="vm.addSubTask(task);">
+          <ng-md-icon icon="playlist_add"
+                      aria-label="add sub task"></ng-md-icon>
         </md-button>
         <md-button class="md-icon-button"
                    aria-label="notes"
@@ -103,5 +119,10 @@
                 md-auto-focus
                 md-select-on-focus></textarea>
     </div>
+
+    <sub-task-list ng-if="task.subTasks.length > 0"
+                   is-current-sub-task="vm.isCurrentSubTask"
+                   current-task="vm.currentTask"
+                   task="task"></sub-task-list>
   </li>
 </ul>
