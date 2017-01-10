@@ -18,6 +18,7 @@
     const IPC_EVENT_IDLE = 'WAS_IDLE';
     const IPC_EVENT_UPDATE_TIME_SPEND_FOR_CURRENT = 'UPDATE_TIME_SPEND';
     const IPC_EVENT_CURRENT_TASK_UPDATED = 'CHANGED_CURRENT_TASK';
+    const moment = $window.moment;
 
     // SETUP HANDLERS FOR ELECTRON EVENTS
     if (IS_ELECTRON) {
@@ -35,10 +36,10 @@
 
           // track total time spent
           if ($rootScope.r.currentTask.timeSpent) {
-            timeSpentCalculatedTotal = $window.moment.duration($rootScope.r.currentTask.timeSpent);
-            timeSpentCalculatedTotal.add($window.moment.duration({ milliseconds: timeSpent }));
+            timeSpentCalculatedTotal = moment.duration($rootScope.r.currentTask.timeSpent);
+            timeSpentCalculatedTotal.add(moment.duration({ milliseconds: timeSpent }));
           } else {
-            timeSpentCalculatedTotal = $window.moment.duration(timeSpent);
+            timeSpentCalculatedTotal = moment.duration(timeSpent);
           }
 
           // track time spent on days
@@ -47,17 +48,17 @@
           }
 
           if ($rootScope.r.currentTask.timeSpentOnDay[todayStr]) {
-            timeSpentCalculatedOnDay = $window.moment.duration($rootScope.r.currentTask.timeSpentOnDay[todayStr]);
-            timeSpentCalculatedOnDay.add($window.moment.duration({ milliseconds: timeSpent }));
+            timeSpentCalculatedOnDay = moment.duration($rootScope.r.currentTask.timeSpentOnDay[todayStr]);
+            timeSpentCalculatedOnDay.add(moment.duration({ milliseconds: timeSpent }));
           } else {
-            timeSpentCalculatedOnDay = $window.moment.duration(timeSpent);
+            timeSpentCalculatedOnDay = moment.duration(timeSpent);
           }
 
           // assign values
           $rootScope.r.currentTask.timeSpent = timeSpentCalculatedTotal;
           $rootScope.r.currentTask.timeSpentOnDay[todayStr] = timeSpentCalculatedOnDay;
 
-          $rootScope.r.currentTask.lastWorkedOn = $window.moment();
+          $rootScope.r.currentTask.lastWorkedOn = moment();
 
           that.updateCurrent($rootScope.r.currentTask, true);
 
@@ -74,13 +75,13 @@
 
     // UTILITY
     const getTodayStr = () => {
-      return $window.moment().format('YYYY-MM-DD');
+      return moment().format('YYYY-MM-DD');
     };
 
     this.calcTotalEstimate = (tasks) => {
       let totalEstimate;
       if (angular.isArray(tasks) && tasks.length > 0) {
-        totalEstimate = $window.moment.duration();
+        totalEstimate = moment.duration();
 
         for (let i = 0; i < tasks.length; i++) {
           let task = tasks[i];
@@ -93,7 +94,7 @@
     this.calcTotalTimeSpent = (tasks) => {
       let totalTimeSpent;
       if (angular.isArray(tasks) && tasks.length > 0) {
-        totalTimeSpent = $window.moment.duration();
+        totalTimeSpent = moment.duration();
 
         for (let i = 0; i < tasks.length; i++) {
           let task = tasks[i];
@@ -103,6 +104,30 @@
         }
       }
       return totalTimeSpent;
+    };
+
+    this.calcRemainingTime = (tasks) => {
+      let totalRemaining;
+      if (angular.isArray(tasks) && tasks.length > 0) {
+        totalRemaining = moment.duration();
+
+        for (let i = 0; i < tasks.length; i++) {
+          let task = tasks[i];
+          if (task) {
+            if (task.timeSpent && task.timeEstimate) {
+              let timeSpentMilliseconds = moment.duration(task.timeSpent).asMilliseconds();
+              let timeEstimateMilliseconds = moment.duration(task.timeEstimate).asMilliseconds();
+              if (timeSpentMilliseconds < timeEstimateMilliseconds) {
+                totalRemaining.add(moment.duration({ milliseconds: timeEstimateMilliseconds - timeSpentMilliseconds }));
+              }
+            } else if (task.timeEstimate) {
+              totalRemaining.add(task.timeEstimate);
+            }
+          }
+        }
+      }
+      return totalRemaining;
+
     };
 
     // GET DATA
@@ -144,7 +169,7 @@
       let todayStr = getTodayStr();
       let totalTimeWorkedToday;
       if (tasks.length > 0) {
-        totalTimeWorkedToday = $window.moment.duration();
+        totalTimeWorkedToday = moment.duration();
         for (let i = 0; i < tasks.length; i++) {
           let task = tasks[i];
           if (task.timeSpentOnDay && task.timeSpentOnDay[todayStr]) {
@@ -159,9 +184,9 @@
     this.updateCurrent = (task, isCallFromTimeTracking) => {
       // calc progress
       if (task && task.timeSpent && task.timeEstimate) {
-        if ($window.moment.duration().format && angular.isFunction($window.moment.duration().format)) {
-          task.progress = parseInt($window.moment.duration(task.timeSpent)
-              .format('ss') / $window.moment.duration(task.timeEstimate).format('ss') * 100, 10);
+        if (moment.duration().format && angular.isFunction(moment.duration().format)) {
+          task.progress = parseInt(moment.duration(task.timeSpent)
+              .format('ss') / moment.duration(task.timeEstimate).format('ss') * 100, 10);
         }
       }
 
@@ -187,7 +212,7 @@
       // add when set and not equal to current value
       if (val) {
         let todayStr = getTodayStr();
-        task.lastWorkedOn = $window.moment();
+        task.lastWorkedOn = moment();
         task.timeSpentOnDay = {};
         task.timeSpentOnDay[todayStr] = val;
       } else {
@@ -217,7 +242,7 @@
       return {
         title: task.title,
         id: Uid(),
-        created: $window.moment(),
+        created: moment(),
         notes: task.notes,
         timeEstimate: task.timeEstimate || task.originalEstimate,
         timeSpent: task.timeSpent || task.originalTimeSpent,
