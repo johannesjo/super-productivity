@@ -81,7 +81,6 @@
     .config(configMdTheme)
     .run(initGlobalModels)
     .run(handleCurrentTaskUpdates)
-    .run(handleCurrentTaskUpdates)
     .run(initGlobalShortcuts);
 
   function configMdTheme($mdThemingProvider, THEMES) {
@@ -148,7 +147,7 @@
     });
   }
 
-  function handleCurrentTaskUpdates($rootScope, $q, Jira, Tasks, IS_ELECTRON, $state, Notifier) {
+  function handleCurrentTaskUpdates($rootScope, $q, Jira, Tasks, IS_ELECTRON, $state, Notifier, $interval) {
     function doAsyncSeries(arr) {
       return arr.reduce(function (promise, item) {
         return promise.then(function () {
@@ -158,47 +157,59 @@
     }
 
     // handle updates that need to be made on jira
-    $rootScope.$watch('vm.r.currentTask', (mVal, oldVal) => {
+    $rootScope.$watch('r.currentTask', (newCurrent, prevCurrent) => {
+
+      // Jira Stuff
+      // ----------
       // check if jira support is available
       if (IS_ELECTRON) {
-        let dialogsAndRequests = [];
+        let dialogsAndRequestsForStatusUpdate = [];
 
         // handle old current first
-        // task (id) changed or no previous task
-        if (!mVal || (mVal !== oldVal) && (mVal.id !== (oldVal && oldVal.id))) {
-          // previous was jira task
-          if (oldVal && oldVal.originalKey) {
-            // and has not been worked on
-            if (!oldVal.timeSpent) {
-              // only execute after previous request/dialog if set
-              dialogsAndRequests.push({ val: oldVal, type: 'OPEN' });
+        // if task (id) changed or no previous task
+        if (!newCurrent || (newCurrent.id !== (prevCurrent && prevCurrent.id))) {
+          // check if previous was jira task
+          if (prevCurrent && prevCurrent.originalKey) {
+            // and has not been worked on => OPEN
+            // TODO this probably never happens due to autotracking
+            if (!prevCurrent.timeSpent) {
+              dialogsAndRequestsForStatusUpdate.push({ val: prevCurrent, type: 'OPEN' });
             }
-            // or has been done
-            if (oldVal.isDone) {
-              // only execute after previous request/dialog if set
-              dialogsAndRequests.push({ val: oldVal, type: 'DONE' });
+            // or has been done => DONE
+            if (prevCurrent.isDone) {
+              dialogsAndRequestsForStatusUpdate.push({ val: prevCurrent, type: 'DONE' });
             }
           }
         }
 
         // handle new current
         // is jira task
-        if (mVal && mVal.originalKey) {
+        if (newCurrent && newCurrent.originalKey) {
           // current task (id) changed
-          if (mVal && (mVal.id !== (oldVal && oldVal.id))) {
-            dialogsAndRequests.push({ val: mVal, type: 'IN_PROGRESS' });
+          if (newCurrent.id !== (prevCurrent && prevCurrent.id)) {
+            dialogsAndRequestsForStatusUpdate.push({ val: newCurrent, type: 'IN_PROGRESS' });
           }
         }
 
-        // TODO handle reopened
-        if (dialogsAndRequests.length > 0) {
-          doAsyncSeries(dialogsAndRequests);
+        if (dialogsAndRequestsForStatusUpdate.length > 0) {
+          // execute all
+          doAsyncSeries(dialogsAndRequestsForStatusUpdate).then(() => {
+            // finally handle updated content
+            if (newCurrent && newCurrent.originalKey) {
+              // current task (id) changed
+              if (newCurrent.id !== (prevCurrent && prevCurrent.id)) {
+                Jira.checkUpdatesForTicket(newCurrent);
+              }
+            }
+          });
         }
       }
 
-      if (mVal && mVal.isDone) {
-        let undoneTasks = Tasks.getUndoneToday();
 
+      // Non Jira stuff
+      // --------------
+      if (newCurrent && newCurrent.isDone) {
+        let undoneTasks = Tasks.getUndoneToday();
         // go to daily planner if there are no undone tasks left
         if (!undoneTasks || undoneTasks.length === 0) {
           $state.go('daily-planner');
@@ -215,6 +226,11 @@
     //  sound: true, // Only Notification Center or Windows Toasters
     //  wait: true // Wait with call
     //});
+
+    //$interval(()=>{
+    //
+    //});
+
   }
 
 })();

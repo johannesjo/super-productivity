@@ -103,9 +103,16 @@
           if ($localStorage.jiraSettings.transitions[type] === 'DO_NOT') {
             return $q.reject('DO_NOT chosen');
           } else {
-            return this.transitionIssue(task.originalId, {
-              id: $localStorage.jiraSettings.transitions[type]
-            });
+            if (task.status !== type) {
+              return this.transitionIssue(task.originalId, {
+                id: $localStorage.jiraSettings.transitions[type]
+              }).then(() => {
+                // update
+                task.status = type;
+              });
+            } else {
+              return $q.resolve('NO NEED TO UPDATE');
+            }
           }
         } else {
           // TODO the promise handling and setting up should be better
