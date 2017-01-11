@@ -42,6 +42,7 @@
     <h2 class="md-title">Tasks Backlog (for some other time; estimated: ~{{ vm.totaleEstimateBacklog|duration}} )</h2>
 
     <md-input-container class="md-block search"
+                        ng-show="vm.r.backlogTasks.length > 1"
                         flex-gt-sm>
       <label>Search Backlog</label>
       <input type="text"
