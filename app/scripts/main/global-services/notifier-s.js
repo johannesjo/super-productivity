@@ -22,7 +22,7 @@
         // send to electron
         window.ipcRenderer.send(IPC_NOTIFIER_EV, notification);
       }
-    }
+    };
 
   }
 

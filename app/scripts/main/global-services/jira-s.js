@@ -39,7 +39,7 @@
         if (res.requestId) {
           // resolve saved promise
           if (!res || res.error) {
-            console.log(res)
+            console.log(res);
             SimpleToast('Jira Request failed: ' + (res && res.error));
             this.requestsLog[res.requestId].reject(res);
           } else {
