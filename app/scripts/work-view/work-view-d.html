@@ -1,12 +1,12 @@
 <div class="work-view-current-task">
   <p>You spent <strong>{{ vm.totalTimeWorkedToday|duration }}</strong> working today and ~<strong>{{ vm.totalEstimationRemaining|duration }}</strong> estimated left, your current task is:
-    <strong>{{ vm.r.currentTask.title }}</strong>.</p>
+    <strong>{{ r.currentTask.title }}</strong>.</p>
 </div>
 
 
 <div class="work-view-tasks work-view-tasks--undone">
   <task-list tasks="vm.tasksUndone"
-             current-task="vm.r.currentTask"
+             current-task="r.currentTask"
              on-item-moved="vm.onItemMovedUndone($event)"
              is-tasks-for-today="true"
              allow-task-selection="true"></task-list>
@@ -18,7 +18,7 @@
   <task-list tasks="vm.tasksDone"
              on-item-moved="vm.onItemMovedDone($event)"
              is-tasks-for-today="true"
-             current-task="vm.r.currentTask"></task-list>
+             current-task="r.currentTask"></task-list>
 </div>
 
 <md-button ng-click="vm.openAddTask()"

@@ -20,15 +20,13 @@
       controller: WorkViewCtrl,
       controllerAs: 'vm',
       restrict: 'E',
-      scope: {}
+      scope: true
     };
   }
 
   /* @ngInject */
   function WorkViewCtrl(Tasks, $rootScope, $scope, Dialogs) {
     let vm = this;
-
-    vm.r = $rootScope.r;
 
     function mergeDoneAndUndone() {
       // we need to re-merge because of splitting up the tasks into two
@@ -61,13 +59,13 @@
     $scope.$watch('vm.tasksDone', mergeDoneAndUndone, true);
     $scope.$watch('vm.tasksUndone', mergeDoneAndUndone, true);
 
-    $scope.$watch('vm.r.tasks', () => {
+    $scope.$watch('r.tasks', () => {
       vm.tasksUndone = Tasks.getUndoneToday();
       vm.tasksDone = Tasks.getDoneToday();
     }, true);
 
     // watch for total time spent today
-    $scope.$watch('vm.r.tasks', () => {
+    $scope.$watch('r.tasks', () => {
       vm.totalTimeWorkedToday = Tasks.getTimeWorkedToday();
       vm.totalEstimationRemaining = Tasks.calcRemainingTime(vm.tasksUndone);
     }, true);
