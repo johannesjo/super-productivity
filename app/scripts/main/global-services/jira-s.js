@@ -27,7 +27,8 @@
       'timespent',
       'status',
       'attachment',
-      'comment'
+      'comment',
+      'updated'
     ];
 
     this.requestsLog = {};
@@ -71,6 +72,7 @@
         originalKey: issue.key,
         originalComments: mapComments(issue),
         originalId: issue.id,
+        originalUpdated: issue.fields.updated,
         originalStatus: issue.fields.status,
         originalAttachment: mapAttachments(issue),
         originalLink: 'https://' + $localStorage.jiraSettings.host + '/browse/' + issue.key,
@@ -138,9 +140,17 @@
           arguments: [task.originalKey]
         };
         this.sendRequest(request).then((res) => {
-          console.log(res);
-
-        });
+            let issue = res.response;
+            if (issue.fields.updated === task.originalUpdated) {
+              defer.resolve(false);
+            } else {
+              // extend task with new values
+              angular.extend(task, mapIssue(issue));
+              defer.resolve(true);
+              task.isUpdated = true;
+            }
+          }, defer.reject
+        );
 
         return defer.promise;
       } else {

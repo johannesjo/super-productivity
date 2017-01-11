@@ -281,7 +281,8 @@
         originalEstimate: task.originalEstimate,
         originalTimeSpent: task.originalTimeSpent,
         originalAttachment: task.originalAttachment,
-        originalComments: task.originalComments
+        originalComments: task.originalComments,
+        originalUpdated: task.originalUpdated
       };
     };
 

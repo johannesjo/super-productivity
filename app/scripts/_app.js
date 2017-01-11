@@ -147,7 +147,7 @@
     });
   }
 
-  function handleCurrentTaskUpdates($rootScope, $q, Jira, Tasks, IS_ELECTRON, $state, Notifier, $interval) {
+  function handleCurrentTaskUpdates($rootScope, $q, Jira, Tasks, IS_ELECTRON, $state, Notifier, $interval, SimpleToast) {
     function doAsyncSeries(arr) {
       return arr.reduce(function (promise, item) {
         return promise.then(function () {
@@ -155,6 +155,9 @@
         });
       }, $q.when('NOT_YET'));
     }
+
+    // every five minutes
+    const JIRA_UPDATE_POLL_INTERVALL = 60 * 1000 * 5;
 
     // handle updates that need to be made on jira
     $rootScope.$watch('r.currentTask', (newCurrent, prevCurrent) => {
@@ -198,13 +201,22 @@
             if (newCurrent && newCurrent.originalKey) {
               // current task (id) changed
               if (newCurrent.id !== (prevCurrent && prevCurrent.id)) {
-                Jira.checkUpdatesForTicket(newCurrent);
+                Jira.checkUpdatesForTicket(newCurrent).then((isUpdated) => {
+                  if (isUpdated) {
+                    Notifier({
+                      title: 'Jira Update',
+                      message: 'The task "' + newCurrent.title + '" has been updated as it was updated on Jira.',
+                      sound: true,
+                      wait: true
+                    });
+                    SimpleToast('The task "' + $rootScope.currentTask.title + '" has been updated as it was updated on Jira.');
+                  }
+                });
               }
             }
           });
         }
       }
-
 
       // Non Jira stuff
       // --------------
@@ -220,16 +232,22 @@
     }, true);
 
     // handle updates that need to be made locally
-    //Notifier({
-    //  title: 'My awesome title',
-    //  message: 'Hello from node, Mr. User!',
-    //  sound: true, // Only Notification Center or Windows Toasters
-    //  wait: true // Wait with call
-    //});
 
-    //$interval(()=>{
-    //
-    //});
+    $interval(() => {
+      if ($rootScope.currentTask) {
+        Jira.checkUpdatesForTicket($rootScope.currentTask).then((isUpdated) => {
+          if (isUpdated) {
+            Notifier({
+              title: 'Jira Update',
+              message: 'The task "' + $rootScope.currentTask.title + '" has been updated as it was updated on Jira.',
+              sound: true,
+              wait: true
+            });
+            SimpleToast('The task "' + $rootScope.currentTask.title + '" has been updated as it was updated on Jira.');
+          }
+        });
+      }
+    }, JIRA_UPDATE_POLL_INTERVALL);
 
   }
 
