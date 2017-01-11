@@ -62,14 +62,9 @@
     $scope.$watch('r.tasks', () => {
       vm.tasksUndone = Tasks.getUndoneToday();
       vm.tasksDone = Tasks.getDoneToday();
-    }, true);
-
-    // watch for total time spent today
-    $scope.$watch('r.tasks', () => {
       vm.totalTimeWorkedToday = Tasks.getTimeWorkedToday();
       vm.totalEstimationRemaining = Tasks.calcRemainingTime(vm.tasksUndone);
     }, true);
-
   }
 
 })();
