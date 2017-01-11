@@ -31,7 +31,7 @@
         disableDropInto: '@',
         onItemMoved: '&',
         onOrderChanged: '&',
-
+        parentTask: '='
       }
     };
   }
@@ -73,10 +73,17 @@
     };
 
     vm.dragControlListeners = {
-      accept: () => {
+      accept: (sourceItemHandleScope, destSortableScope) => {
         if (vm.disableDropInto) {
           return false;
         } else {
+          let draggedTask = sourceItemHandleScope.itemScope.task;
+          if (draggedTask.subTasks && draggedTask.subTasks.length > 0 && destSortableScope.$parent.vm.parentTask) {
+            return false;
+          } else {
+            return true;
+          }
+
           // check for dupes
           //let draggedTask = sourceItemHandleScope.itemScope.task;
           //let targetTasks = destSortableScope.modelValue;
@@ -85,10 +92,19 @@
           //});
           //
           //return !possibleDuplicates || possibleDuplicates.length === 0;
-          return true;
         }
       },
       itemMoved: function (event) {
+        let currentTask = event.dest.sortableScope.modelValue[event.dest.index];
+        let parentTask = event.dest.sortableScope.$parent.vm.parentTask;
+        if (parentTask) {
+          currentTask.parentId = parentTask.id;
+        } else {
+          if (!angular.isUndefined(currentTask.parentId)) {
+            delete currentTask.parentId;
+          }
+        }
+
         if (angular.isFunction(vm.onItemMoved)) {
           vm.onItemMoved({ $event: event });
         }
@@ -199,7 +215,8 @@
         task.mainTaskTimeSpent = task.timeSpent;
       }
       let subTask = Tasks.createTask({
-        title: ''
+        title: '',
+        parentId: task.id
       });
       // edit title right away
       task.subTasks.push(subTask);

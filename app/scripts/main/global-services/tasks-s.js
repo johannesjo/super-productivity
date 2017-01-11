@@ -271,6 +271,7 @@
         id: Uid(),
         created: moment(),
         notes: task.notes,
+        parentId: task.parentId,
         timeEstimate: task.timeEstimate || task.originalEstimate,
         timeSpent: task.timeSpent || task.originalTimeSpent,
         originalId: task.originalId,
@@ -308,6 +309,10 @@
       $localStorage.doneBacklogTasks = tasks;
       // update global pointer
       $rootScope.r.doneBacklogTasks = $localStorage.doneBacklogTasks;
+    };
+
+    this.getTaskById = (taskId) => {
+
     };
 
     this.addDoneTasksToDoneBacklog = () => {
