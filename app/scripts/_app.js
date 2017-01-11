@@ -55,6 +55,7 @@
         }
       }
     })
+    .constant('JIRA_UPDATE_POLL_INTERVAL', 60 * 1000 * 5)
     .constant('IS_ELECTRON', (typeof window.ipcRenderer !== 'undefined'))
     .constant('THEMES', [
         'red',
@@ -147,7 +148,7 @@
     });
   }
 
-  function handleCurrentTaskUpdates($rootScope, $q, Jira, Tasks, IS_ELECTRON, $state, Notifier, $interval, SimpleToast) {
+  function handleCurrentTaskUpdates($rootScope, $q, Jira, Tasks, IS_ELECTRON, $state, Notifier, $interval, SimpleToast, JIRA_UPDATE_POLL_INTERVAL) {
     function doAsyncSeries(arr) {
       return arr.reduce(function (promise, item) {
         return promise.then(function () {
@@ -155,9 +156,6 @@
         });
       }, $q.when('NOT_YET'));
     }
-
-    // every five minutes
-    const JIRA_UPDATE_POLL_INTERVALL = 60 * 1000 * 5;
 
     // handle updates that need to be made on jira
     $rootScope.$watch('r.currentTask', (newCurrent, prevCurrent) => {
@@ -209,7 +207,7 @@
                       sound: true,
                       wait: true
                     });
-                    SimpleToast('The task "' + $rootScope.currentTask.title + '" has been updated as it was updated on Jira.');
+                    SimpleToast('The task "' + newCurrent.title + '" has been updated as it was updated on Jira.');
                   }
                 });
               }
@@ -234,20 +232,20 @@
     // handle updates that need to be made locally
     if (IS_ELECTRON) {
       $interval(() => {
-        if ($rootScope.currentTask) {
-          Jira.checkUpdatesForTicket($rootScope.currentTask).then((isUpdated) => {
+        if ($rootScope.r.currentTask) {
+          Jira.checkUpdatesForTicket($rootScope.r.currentTask).then((isUpdated) => {
             if (isUpdated) {
               Notifier({
                 title: 'Jira Update',
-                message: 'The task "' + $rootScope.currentTask.title + '" has been updated as it was updated on Jira.',
+                message: 'The task "' + $rootScope.r.currentTask.title + '" has been updated as it was updated on Jira.',
                 sound: true,
                 wait: true
               });
-              SimpleToast('The task "' + $rootScope.currentTask.title + '" has been updated as it was updated on Jira.');
+              SimpleToast('The task "' + $rootScope.r.currentTask.title + '" has been updated as it was updated on Jira.');
             }
           });
         }
-      }, JIRA_UPDATE_POLL_INTERVALL);
+      }, JIRA_UPDATE_POLL_INTERVAL);
     }
   }
 
