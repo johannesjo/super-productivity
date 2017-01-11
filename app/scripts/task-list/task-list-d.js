@@ -109,16 +109,6 @@
     };
 
     vm.handleKeyPress = ($event, task) => {
-      const USED_KEYS = [
-        84,
-        78,
-        68,
-        46,
-        13,
-        38,
-        40
-      ];
-
       let taskEl = $event.currentTarget || $event.srcElement || $event.originalTarget;
       lastFocusedTaskEl = taskEl;
 
@@ -127,13 +117,20 @@
         task.showEdit = false;
         task.showNotes = false;
         taskEl.focus();
+        // don't propagate to parent task element
         $event.preventDefault();
         $event.stopPropagation();
       }
 
       // only trigger if target is li
       if ($event.target.tagName !== 'INPUT' && $event.target.tagName !== 'TEXTAREA') {
-
+        const USED_KEYS = [
+          84,
+          78,
+          68,
+          46,
+          13
+        ];
         if (USED_KEYS.indexOf($event.keyCode) > -1) {
           // don't propagate to parent task element
           $event.preventDefault();
@@ -175,14 +172,20 @@
               $timeout(() => {
                 taskEl.focus();
               });
-            }
 
+              // don't propagate to parent task element
+              $event.preventDefault();
+              $event.stopPropagation();
+            }
           }
           // move down
           if ($event.keyCode === 40) {
             if (taskIndex < vm.tasks.length - 1) {
               vm.moveItem(vm.tasks, taskIndex, taskIndex + 1);
             }
+            // don't propagate to parent task element
+            $event.preventDefault();
+            $event.stopPropagation();
           }
         }
       }
