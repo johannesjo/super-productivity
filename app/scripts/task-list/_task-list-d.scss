@@ -69,6 +69,12 @@ task-list {
       }
     }
 
+    .update-icon {
+      fill: #000;
+      body.dark-theme & {
+        fill: #fff;
+      }
+    }
     .md-icon-button {
       margin: 0;
     }

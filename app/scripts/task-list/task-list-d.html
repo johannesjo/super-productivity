@@ -13,11 +13,11 @@
          layout="row"
          as-sortable-item-handle
          layout-align="center center">
-      <md-button class="md-icon-button play-btn"
-                 aria-label="mark as current"
-                 ng-click="vm.showUpdates()"
+      <md-button class="md-icon-button "
+                 aria-label="is updated"
+                 ng-click="task.showNotes = true; task.isUpdated=false;"
                  ng-if="task.isUpdated">
-        <ng-md-icon class="update"
+        <ng-md-icon class="update update-icon"
                     flex="none"
                     icon="update"></ng-md-icon>
       </md-button>
