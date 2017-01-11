@@ -10,6 +10,7 @@
 
   angular
     .module('superProductivity')
+    .constant('EDIT_ON_CLICK_TOGGLE_EV', 'EDIT_ON_CLICK_TOGGLE_EV')
     .directive('editOnClick', editOnClick);
 
   /* @ngInject */
@@ -30,7 +31,7 @@
   }
 
   /* @ngInject */
-  function EditOnClickCtrl($element, $scope, $timeout) {
+  function EditOnClickCtrl($element, $scope, $timeout, EDIT_ON_CLICK_TOGGLE_EV) {
     let vm = this;
 
     vm.toggleShowEdit = () => {
@@ -47,14 +48,16 @@
       }
     };
 
-    $scope.$watch('vm.editOnClickToggle', (mVal) => {
-      if (mVal && mVal[0]) {
-        vm.toggleShowEdit();
-        mVal[0] = false;
-      }
+    $scope.$on(EDIT_ON_CLICK_TOGGLE_EV, (ev, data) => {
+      console.log(data);
 
-      if (mVal === false) {
-        vm.showEdit = false;
+      // for some weird reason we have to wait for vm.editOnClick to be ready
+      if (!angular.isUndefined(vm.editOnClick)) {
+        if (ev.defaultPrevented) {
+          return;
+        }
+        ev.preventDefault();
+        vm.toggleShowEdit();
       }
     });
   }

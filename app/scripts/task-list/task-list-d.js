@@ -37,7 +37,7 @@
   }
 
   /* @ngInject */
-  function TaskListCtrl(Dialogs, $mdToast, $timeout, $window, Tasks) {
+  function TaskListCtrl(Dialogs, $mdToast, $timeout, $window, Tasks, EDIT_ON_CLICK_TOGGLE_EV) {
     let vm = this;
 
     vm.estimateTime = (task) => {
@@ -100,7 +100,15 @@
     };
 
     vm.handleKeyPress = ($event, task) => {
-      // only trigger if target is li
+      const USED_KEYS = [
+        84,
+        78,
+        68,
+        46,
+        13,
+        38,
+        40
+      ];
 
       let taskEl = $event.currentTarget || $event.srcElement || $event.originalTarget;
 
@@ -108,13 +116,17 @@
       if ($event.keyCode === 27) {
         task.showEdit = false;
         task.showNotes = false;
-
         taskEl.focus();
       }
 
+      // only trigger if target is li
       if ($event.target.tagName !== 'INPUT' && $event.target.tagName !== 'TEXTAREA') {
-        $event.preventDefault();
-        $event.stopPropagation();
+
+        if (USED_KEYS.indexOf($event.keyCode) > -1) {
+          // don't propagate to parent task element
+          $event.preventDefault();
+          $event.stopPropagation();
+        }
 
         // t
         if ($event.keyCode === 84) {
@@ -134,7 +146,8 @@
         }
         // enter
         if ($event.keyCode === 13) {
-          task.showEdit = [true];
+          let taskScope = angular.element($event.target).scope();
+          taskScope.$broadcast(EDIT_ON_CLICK_TOGGLE_EV);
         }
 
         // moving items via shift+ctrl+keyUp/keyDown
@@ -164,7 +177,7 @@
       }
     };
 
-    vm.addSubTask = (task) => {
+    vm.addSubTask = (task, $event) => {
       if (!task.subTasks) {
         task.subTasks = [];
         // save original values for potential later re-initialization
@@ -175,9 +188,19 @@
         title: ''
       });
       // edit title right away
-      subTask.showEdit = [true];
-
       task.subTasks.push(subTask);
+
+      // super complicated way of focusing the new element to edit it right away
+      // TODO fix this super complication by using the task id instead and passing it to edit-on-click
+      $timeout(() => {
+        let buttonEl = $event.currentTarget || $event.srcElement || $event.originalTarget;
+        buttonEl = angular.element(buttonEl);
+        let taskEl = buttonEl.parent().parent().parent().parent();
+        let subTaskEls = taskEl.find('li');
+        let lastSubTasksEl = subTaskEls[subTaskEls.length - 1];
+        let subTaskScope = angular.element(lastSubTasksEl).scope();
+        subTaskScope.$broadcast(EDIT_ON_CLICK_TOGGLE_EV);
+      });
 
       // if parent was current task, mark sub task as current now
       if (vm.currentTask && vm.currentTask.id && vm.currentTask.id === task.id) {
