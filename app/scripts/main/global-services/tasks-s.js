@@ -79,18 +79,25 @@
     };
 
     const checkDupes = (tasksArray) => {
-      let valueArr = tasksArray.map(function (item) {
-        return item.id
-      });
-      let dupeIds = [];
-      let hasDupe = valueArr.some(function (item, idx) {
-        valueArr.indexOf(item) != idx && dupeIds.push(item);
-        return valueArr.indexOf(item) != idx
-      });
-      if (dupeIds.length) {
-        SimpleToast('!!! Dupes detected in data for the ids: ' + dupeIds.join(', ') + ' !!!', 60000);
+      if (tasksArray) {
+        let valueArr = tasksArray.map(function (item) {
+          return item.id
+        });
+        let dupeIds = [];
+        let hasDupe = valueArr.some(function (item, idx) {
+          valueArr.indexOf(item) != idx && dupeIds.push(item);
+          return valueArr.indexOf(item) != idx
+        });
+        if (dupeIds.length) {
+          let firstDupe = $window._.find(tasksArray, (task) => {
+            return dupeIds.indexOf(task.id) > -1;
+          });
+          console.log(firstDupe);
+
+          SimpleToast('!!! Dupes detected in data for the ids: ' + dupeIds.join(', ') + '. First task title is "' + firstDupe.title + '" !!!', 60000);
+        }
+        return hasDupe;
       }
-      return hasDupe;
     };
 
     this.calcTotalEstimate = (tasks) => {
