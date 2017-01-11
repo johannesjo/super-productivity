@@ -19,7 +19,7 @@
       restrict: 'A'
     };
 
-    function linkFn(scope, element, attrs) {
+    function linkFn(scope, element) {
       const FOCUS_DELAY = 30;
       let focusDelayTimeout = $timeout(() => {
         let inputEl = element.find('input');

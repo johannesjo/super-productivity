@@ -53,7 +53,7 @@
       } else {
         return $q.when(null);
       }
-    }
+    };
   }
 
 })();

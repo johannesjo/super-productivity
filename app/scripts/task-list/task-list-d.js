@@ -37,7 +37,7 @@
   }
 
   /* @ngInject */
-  function TaskListCtrl(Dialogs, $mdToast, $timeout, $window, Tasks, Jira) {
+  function TaskListCtrl(Dialogs, $mdToast, $timeout, $window, Tasks) {
     let vm = this;
 
     vm.estimateTime = (task) => {

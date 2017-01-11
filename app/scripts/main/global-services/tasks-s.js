@@ -74,19 +74,21 @@
     }
 
     // UTILITY
-    const getTodayStr = () => {
+    function getTodayStr() {
       return moment().format('YYYY-MM-DD');
-    };
+    }
 
-    const checkDupes = (tasksArray) => {
+    function checkDupes(tasksArray) {
       if (tasksArray) {
         let valueArr = tasksArray.map(function (item) {
-          return item.id
+          return item.id;
         });
         let dupeIds = [];
         let hasDupe = valueArr.some(function (item, idx) {
-          valueArr.indexOf(item) != idx && dupeIds.push(item);
-          return valueArr.indexOf(item) != idx
+          if (valueArr.indexOf(item) !== idx) {
+            dupeIds.push(item);
+          }
+          return valueArr.indexOf(item) !== idx;
         });
         if (dupeIds.length) {
           let firstDupe = $window._.find(tasksArray, (task) => {
@@ -98,7 +100,7 @@
         }
         return hasDupe;
       }
-    };
+    }
 
     this.calcTotalEstimate = (tasks) => {
       let totalEstimate;

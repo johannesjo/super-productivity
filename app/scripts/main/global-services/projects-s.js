@@ -34,7 +34,8 @@
         });
         $rootScope.r.currentProject = $localStorage.currentProject = currentProject;
       } else {
-        return $rootScope.r.currentProject = $localStorage.currentProject;
+        $rootScope.r.currentProject = $localStorage.currentProject;
+        return $rootScope.r.currentProject;
       }
       return currentProject;
     };
@@ -42,7 +43,7 @@
     this.updateProjectData = (projectToUpdateId, data) => {
       let projects = this.getList();
       let projectToUpdate = $window._.find(projects, (project) => {
-        return project.id == projectToUpdateId;
+        return project.id === projectToUpdateId;
       });
 
       // add default values to project
@@ -75,7 +76,7 @@
         this.updateProjectData(newProject.id, data);
 
         // switch to new project
-        $rootScope.r.currentProject = $localStorage.currentProject = newProject
+        $rootScope.r.currentProject = $localStorage.currentProject = newProject;
       }
     };
 

@@ -101,7 +101,7 @@
     $mdThemingProvider.alwaysWatchTheme(true);
   }
 
-  function initGlobalModels(LS_DEFAULTS, DEFAULT_THEME, $rootScope, Tasks, $localStorage, Projects, IS_ELECTRON) {
+  function initGlobalModels(LS_DEFAULTS, DEFAULT_THEME, $rootScope, Tasks, $localStorage, Projects) {
     $localStorage.$default(LS_DEFAULTS);
 
     $rootScope.r = {};
@@ -131,7 +131,7 @@
     $rootScope.r.currentProject = Projects.getAndUpdateCurrent();
   }
 
-  function initGlobalShortcuts($document, Dialogs, GitLog) {
+  function initGlobalShortcuts($document, Dialogs) {
     // we just use this single one as this usually does mess
     // up with the default browser shortcuts
     // better to use the global electron shortcuts here
@@ -141,7 +141,7 @@
       }
       if (window.isElectron) {
         if (ev.keyCode === 10 && ev.ctrlKey === true && ev.shiftKey === true) {
-          ipcRenderer.send('TOGGLE_DEV_TOOLS');
+          window.ipcRenderer.send('TOGGLE_DEV_TOOLS');
         }
       }
     });

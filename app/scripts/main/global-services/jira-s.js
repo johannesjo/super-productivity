@@ -82,8 +82,6 @@
 
         for (let i = 0; i < res.issues.length; i++) {
           let issue = res.issues[i];
-          issue.fields.attachment && console.log(issue.fields.attachment);
-
           let newTask = {
             title: issue.key + ' ' + issue.fields.summary,
             notes: issue.fields.description,
