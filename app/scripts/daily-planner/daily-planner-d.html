@@ -24,7 +24,7 @@
     </form>
 
     <div class="done"
-         ng-show="vm.r.tasks.length >0"
+         ng-show="r.tasks.length >0"
          layout="row"
          layout-sm="column"
          layout-align="center center">
@@ -35,21 +35,21 @@
 
     <h2 class="md-title">Tasks for today (estimated: ~{{ vm.totaleEstimate|duration}} )</h2>
 
-    <task-list tasks="vm.r.tasks"
+    <task-list tasks="r.tasks"
                is-tasks-for-today="true"
-               current-task="vm.r.currentTask"></task-list>
+               current-task="r.currentTask"></task-list>
 
     <h2 class="md-title">Tasks Backlog (for some other time; estimated: ~{{ vm.totaleEstimateBacklog|duration}} )</h2>
 
     <md-input-container class="md-block search"
-                        ng-show="vm.r.backlogTasks.length > 1"
+                        ng-show="r.backlogTasks.length > 1"
                         flex-gt-sm>
       <label>Search Backlog</label>
       <input type="text"
              ng-model="vm.search">
     </md-input-container>
 
-    <task-list tasks="vm.r.backlogTasks"
+    <task-list tasks="r.backlogTasks"
                filter="vm.search"
                is-tasks-for-today="false"
                limit-to="{{vm.limitBacklogTo}}"></task-list>
@@ -57,7 +57,7 @@
 
     <md-button class="md-primary"
                ng-click="vm.limitBacklogTo = false"
-               ng-hide="vm.limitBacklogTo === false || vm.r.backlogTasks.length <=vm.limitBacklogTo ||vm.r.backlogTasks.length ===0">Show All {{ vm.r.backlogTasks.length }} items in Backlog
+               ng-hide="vm.limitBacklogTo === false || r.backlogTasks.length <=vm.limitBacklogTo ||r.backlogTasks.length ===0">Show All {{ r.backlogTasks.length }} items in Backlog
     </md-button>
 
     <md-button class="md-primary"

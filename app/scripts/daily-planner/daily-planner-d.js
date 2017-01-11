@@ -20,15 +20,13 @@
       controller: DailyPlannerCtrl,
       controllerAs: 'vm',
       restrict: 'E',
-      scope: {}
+      scope: true
     };
   }
 
   /* @ngInject */
-  function DailyPlannerCtrl($scope, $rootScope, Tasks, Dialogs, $state, Jira, $filter) {
+  function DailyPlannerCtrl($rootScope, Tasks, Dialogs, $state, Jira, $filter) {
     let vm = this;
-
-    vm.r = $rootScope.r;
 
     vm.limitBacklogTo = 3;
     vm.taskSuggestions = [];
@@ -56,7 +54,7 @@
 
       // if we have already defined enough tasks and the
       // new task field is empty go to work view
-      else if (vm.r.tasks.length > 0) {
+      else if ($rootScope.tasks.length > 0) {
         vm.done();
       }
     };
@@ -64,7 +62,7 @@
     vm.done = () => {
       // only open if there is no current task already selected
       if (!vm.currentTask) {
-        Dialogs('TASK_SELECTION', { tasks: vm.r.tasks })
+        Dialogs('TASK_SELECTION', { tasks: r.tasks })
           .then(() => {
             $state.go('work-view');
           });
@@ -73,12 +71,12 @@
       }
     };
 
-    $scope.$watch('vm.r.tasks', (mVal) => {
+    $rootScope.$watch('r.tasks', (mVal) => {
       vm.totaleEstimate = Tasks.calcTotalEstimate(mVal);
       Tasks.updateToday(mVal);
     }, true);
 
-    $scope.$watch('vm.r.backlogTasks', (mVal) => {
+    $rootScope.$watch('r.backlogTasks', (mVal) => {
       vm.totaleEstimateBacklog = Tasks.calcTotalEstimate(mVal);
       Tasks.updateBacklog(mVal);
     }, true);
