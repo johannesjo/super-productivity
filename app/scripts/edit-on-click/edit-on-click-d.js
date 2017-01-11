@@ -22,8 +22,8 @@
       controllerAs: 'vm',
       restrict: 'A',
       scope: {
+        editOnClickEvId: '@',
         editOnClick: '=',
-        editOnClickToggle: '=',
         editOnClickType: '@',
         editOnClickOnChange: '&'
       }
@@ -48,15 +48,8 @@
       }
     };
 
-    $scope.$on(EDIT_ON_CLICK_TOGGLE_EV, (ev, data) => {
-      console.log(data);
-
-      // for some weird reason we have to wait for vm.editOnClick to be ready
-      if (!angular.isUndefined(vm.editOnClick)) {
-        if (ev.defaultPrevented) {
-          return;
-        }
-        ev.preventDefault();
+    $scope.$on(EDIT_ON_CLICK_TOGGLE_EV, (ev, eventId) => {
+      if (eventId === vm.editOnClickEvId) {
         vm.toggleShowEdit();
       }
     });
