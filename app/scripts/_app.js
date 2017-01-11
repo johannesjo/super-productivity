@@ -232,23 +232,23 @@
     }, true);
 
     // handle updates that need to be made locally
-
-    $interval(() => {
-      if ($rootScope.currentTask) {
-        Jira.checkUpdatesForTicket($rootScope.currentTask).then((isUpdated) => {
-          if (isUpdated) {
-            Notifier({
-              title: 'Jira Update',
-              message: 'The task "' + $rootScope.currentTask.title + '" has been updated as it was updated on Jira.',
-              sound: true,
-              wait: true
-            });
-            SimpleToast('The task "' + $rootScope.currentTask.title + '" has been updated as it was updated on Jira.');
-          }
-        });
-      }
-    }, JIRA_UPDATE_POLL_INTERVALL);
-
+    if (IS_ELECTRON) {
+      $interval(() => {
+        if ($rootScope.currentTask) {
+          Jira.checkUpdatesForTicket($rootScope.currentTask).then((isUpdated) => {
+            if (isUpdated) {
+              Notifier({
+                title: 'Jira Update',
+                message: 'The task "' + $rootScope.currentTask.title + '" has been updated as it was updated on Jira.',
+                sound: true,
+                wait: true
+              });
+              SimpleToast('The task "' + $rootScope.currentTask.title + '" has been updated as it was updated on Jira.');
+            }
+          });
+        }
+      }, JIRA_UPDATE_POLL_INTERVALL);
+    }
   }
 
 })();
