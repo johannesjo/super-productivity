@@ -55,7 +55,7 @@
         }
       }
     })
-    .constant('JIRA_UPDATE_POLL_INTERVAL', 60 * 1000 * 5)
+    .constant('JIRA_UPDATE_POLL_INTERVAL', 1000 * 5)
     .constant('IS_ELECTRON', (typeof window.ipcRenderer !== 'undefined'))
     .constant('THEMES', [
         'red',
@@ -148,7 +148,8 @@
     });
   }
 
-  function handleCurrentTaskUpdates($rootScope, $q, Jira, Tasks, IS_ELECTRON, $state, Notifier, $interval, SimpleToast, JIRA_UPDATE_POLL_INTERVAL) {
+  function handleCurrentTaskUpdates($rootScope, $q, Jira, Tasks, IS_ELECTRON, $state, Notifier, $interval, SimpleToast, JIRA_UPDATE_POLL_INTERVAL, $localStorage) {
+
     function doAsyncSeries(arr) {
       return arr.reduce(function (promise, item) {
         return promise.then(function () {
@@ -157,8 +158,31 @@
       }, $q.when('NOT_YET'));
     }
 
+    function checkJiraUpdatesForTask(task) {
+      if (!task.originalKey && task.parentId) {
+        let parentTask = Tasks.getById(task.parentId);
+        if (parentTask.originalKey) {
+          // set task to parent task
+          task = parentTask;
+        }
+      }
+
+      Jira.checkUpdatesForTicket(task).then((isUpdated) => {
+        if (isUpdated) {
+          Notifier({
+            title: 'Jira Update',
+            message: 'The task "' + task.title + '" has been updated as it was updated on Jira.',
+            sound: true,
+            wait: true
+          });
+          SimpleToast('The task "' + task.title + '" has been updated as it was updated on Jira.');
+        }
+      });
+    }
+
     // handle updates that need to be made on jira
     $rootScope.$watch('r.currentTask', (newCurrent, prevCurrent) => {
+      $localStorage.currentTask = newCurrent;
 
       // Jira Stuff
       // ----------
@@ -195,22 +219,9 @@
         if (dialogsAndRequestsForStatusUpdate.length > 0) {
           // execute all
           doAsyncSeries(dialogsAndRequestsForStatusUpdate).then(() => {
-            // finally handle updated content
-            if (newCurrent && newCurrent.originalKey) {
-              // current task (id) changed
-              if (newCurrent.id !== (prevCurrent && prevCurrent.id)) {
-                Jira.checkUpdatesForTicket(newCurrent).then((isUpdated) => {
-                  if (isUpdated) {
-                    Notifier({
-                      title: 'Jira Update',
-                      message: 'The task "' + newCurrent.title + '" has been updated as it was updated on Jira.',
-                      sound: true,
-                      wait: true
-                    });
-                    SimpleToast('The task "' + newCurrent.title + '" has been updated as it was updated on Jira.');
-                  }
-                });
-              }
+            // current task (id) changed
+            if (newCurrent.id !== (prevCurrent && prevCurrent.id)) {
+              checkJiraUpdatesForTask(newCurrent);
             }
           });
         }
@@ -233,17 +244,7 @@
     if (IS_ELECTRON) {
       $interval(() => {
         if ($rootScope.r.currentTask) {
-          Jira.checkUpdatesForTicket($rootScope.r.currentTask).then((isUpdated) => {
-            if (isUpdated) {
-              Notifier({
-                title: 'Jira Update',
-                message: 'The task "' + $rootScope.r.currentTask.title + '" has been updated as it was updated on Jira.',
-                sound: true,
-                wait: true
-              });
-              SimpleToast('The task "' + $rootScope.r.currentTask.title + '" has been updated as it was updated on Jira.');
-            }
-          });
+          checkJiraUpdatesForTask($rootScope.r.currentTask);
         }
       }, JIRA_UPDATE_POLL_INTERVAL);
     }

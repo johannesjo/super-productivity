@@ -164,6 +164,10 @@
       return $rootScope.r.currentTask;
     };
 
+    this.getById = (taskId) => {
+      return $window._.find($rootScope.r.tasks, ['id', taskId]) || $window._.find($rootScope.r.backlogTasks, ['id', taskId]) || $window._.find($rootScope.r.doneBacklogTasks, ['id', taskId]);
+    };
+
     this.getBacklog = () => {
       checkDupes($localStorage.backlogTasks);
       return $localStorage.backlogTasks;
@@ -309,10 +313,6 @@
       $localStorage.doneBacklogTasks = tasks;
       // update global pointer
       $rootScope.r.doneBacklogTasks = $localStorage.doneBacklogTasks;
-    };
-
-    this.getTaskById = (taskId) => {
-
     };
 
     this.addDoneTasksToDoneBacklog = () => {
