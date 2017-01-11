@@ -146,7 +146,7 @@
         }
         // n
         if ($event.keyCode === 78) {
-          task.showNotes = true;
+          task.showNotes = !task.showNotes;
         }
         // d
         if ($event.keyCode === 68) {
