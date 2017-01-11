@@ -126,8 +126,7 @@
         let request = {
           config: $localStorage.jiraSettings,
           apiMethod: 'listTransitions',
-          arguments: [task.originalKey],
-          requestId: Uid()
+          arguments: [task.originalKey]
         };
         return this.sendRequest(request);
       } else {
@@ -143,8 +142,7 @@
           transition: {
             id: transitionObj.id
           }
-        }],
-        requestId: Uid()
+        }]
       };
       return this.sendRequest(request);
     };
@@ -159,8 +157,7 @@
         let request = {
           config: $localStorage.jiraSettings,
           apiMethod: 'searchJira',
-          arguments: [$localStorage.jiraSettings.jqlQuery, options],
-          requestId: Uid()
+          arguments: [$localStorage.jiraSettings.jqlQuery, options]
         };
         return this.sendRequest(request);
       } else {
@@ -175,6 +172,8 @@
       }
 
       if (IS_ELECTRON) {
+        // assign uuid to request to know which responsive belongs to which promise
+        request.requestId = Uid();
         let defer = $q.defer();
         // save to request log
         this.requestsLog[request.requestId] = defer;
