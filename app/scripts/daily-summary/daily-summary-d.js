@@ -56,9 +56,11 @@
       }
     }
 
-    GitLog.get('/home/johannes/www/super-productivity').then(function (res) {
-      vm.commitLog = res;
-    });
+    if (vm.r.git && vm.r.git.projectDir) {
+      GitLog.get(vm.r.git.projectDir).then(function (res) {
+        vm.commitLog = res;
+      });
+    }
 
     vm.finishDay = () => {
       $localStorage.tomorrowsNote = vm.tomorrowsNote;
