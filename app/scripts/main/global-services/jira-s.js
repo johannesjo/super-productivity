@@ -52,7 +52,7 @@
     // function map comments
     function mapComments(issue) {
       return issue.fields.comment && issue.fields.comment.comments && issue.fields.comment.comments.map((comment) => {
-          return comment.author.name + ': ' + comment.body;
+          return '[' + comment.author.name + ']: ' + comment.body;
         });
     }
 
@@ -60,6 +60,26 @@
       return issue.fields.attachment && issue.fields.attachment.map((attachment) => {
           return attachment.content;
         });
+    }
+
+    function mapIssue(issue) {
+      return {
+        title: issue.key + ' ' + issue.fields.summary,
+        notes: issue.fields.description,
+        originalType: ISSUE_TYPE,
+        originalKey: issue.key,
+        originalComments: mapComments(issue),
+        originalId: issue.id,
+        originalStatus: issue.fields.status,
+        originalAttachment: mapAttachments(issue),
+        originalLink: 'https://' + $localStorage.jiraSettings.host + '/browse/' + issue.key,
+        originalEstimate: issue.fields.timeestimate && $window.moment.duration({
+          seconds: issue.fields.timeestimate
+        }),
+        originalTimeSpent: issue.fields.timespent && $window.moment.duration({
+          seconds: issue.fields.timespent
+        }),
+      };
     }
 
     this.updateStatus = (task, type) => {
@@ -94,25 +114,7 @@
 
         for (let i = 0; i < res.issues.length; i++) {
           let issue = res.issues[i];
-          let newTask = {
-            title: issue.key + ' ' + issue.fields.summary,
-            notes: issue.fields.description,
-            originalType: ISSUE_TYPE,
-            originalKey: issue.key,
-            originalComments: mapComments(issue),
-            originalId: issue.id,
-            originalStatus: issue.fields.status,
-            originalAttachment: mapAttachments(issue),
-            originalLink: 'https://' + $localStorage.jiraSettings.host + '/browse/' + issue.key,
-            originalEstimate: issue.fields.timeestimate && $window.moment.duration({
-              seconds: issue.fields.timeestimate
-            }),
-            originalTimeSpent: issue.fields.timespent && $window.moment.duration({
-              seconds: issue.fields.timespent
-            }),
-          };
-
-          tasks.push(newTask);
+          tasks.push(mapIssue(issue));
         }
 
         return tasks;
