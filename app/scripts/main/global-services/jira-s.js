@@ -26,7 +26,8 @@
       'timeestimate',
       'timespent',
       'status',
-      'attachment'
+      'attachment',
+      'comment'
     ];
 
     this.requestsLog = {};
@@ -48,14 +49,19 @@
       });
     }
 
+    // function map comments
+    function mapComments(issue) {
+      return issue.fields.comment && issue.fields.comment.comments && issue.fields.comment.comments.map((comment) => {
+          return comment.author.name + ': ' + comment.body;
+        });
+    }
+
     this.updateStatus = (task, type) => {
       if (task.originalKey && task.originalType === ISSUE_TYPE) {
         if ($localStorage.jiraSettings.transitions && $localStorage.jiraSettings.transitions[type]) {
           if ($localStorage.jiraSettings.transitions[type] === 'DO_NOT') {
             return $q.reject('DO_NOT chosen');
           } else {
-            console.log($localStorage.jiraSettings.transitions[type]);
-
             return this.transitionIssue(task.originalId, {
               id: $localStorage.jiraSettings.transitions[type]
             });
@@ -82,11 +88,14 @@
 
         for (let i = 0; i < res.issues.length; i++) {
           let issue = res.issues[i];
+          console.log(mapComments(issue));
+
           let newTask = {
             title: issue.key + ' ' + issue.fields.summary,
             notes: issue.fields.description,
             originalType: ISSUE_TYPE,
             originalKey: issue.key,
+            originalComments: mapComments(issue),
             originalId: issue.id,
             originalStatus: issue.fields.status,
             originalAttachment: issue.fields.attachment,

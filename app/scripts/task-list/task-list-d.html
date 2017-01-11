@@ -129,6 +129,14 @@
           </li>
         </ul>
       </div>
+      <div ng-if="task.originalComments.length > 0">
+        <div class="md-caption">Comments</div>
+        <ul class="comments">
+          <li ng-repeat="comment in task.originalComments"
+              class="comment">{{ comment }}
+          </li>
+        </ul>
+      </div>
     </div>
 
     <sub-task-list ng-if="task.subTasks.length > 0"

@@ -168,17 +168,16 @@ task-list {
     }
   }
 
+  .comments,
   .attachments {
     overflow: hidden;
     text-overflow: ellipsis;
     padding: 0;
     margin: 0 0 10px;
     li {
-      margin-bottom: 3px;
       padding: 0;
-    }
-    a {
       font-size: 14px;
+      margin-top: 5px;
     }
   }
 }
