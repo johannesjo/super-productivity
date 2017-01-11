@@ -157,9 +157,21 @@
     // GET DATA
     this.getCurrent = () => {
       let currentTask;
+      let subTaskMatch;
+
+      // TODO check if this is even required
       if ($localStorage.currentTask) {
-        currentTask = $window._.find($localStorage.tasks, { id: $localStorage.currentTask.id });
-        $localStorage.currentTask = $rootScope.r.currentTask = currentTask;
+        currentTask = $window._.find($localStorage.tasks, (task) => {
+          if (task.subTasks) {
+            let subTaskMatchTmp = $window._.find(task.subTasks, { id: $localStorage.currentTask.id });
+            if (subTaskMatchTmp) {
+              subTaskMatch = subTaskMatchTmp;
+            }
+          }
+          return task.id === $localStorage.currentTask.id;
+        });
+
+        $localStorage.currentTask = $rootScope.r.currentTask = currentTask || subTaskMatch;
       }
       return $rootScope.r.currentTask;
     };

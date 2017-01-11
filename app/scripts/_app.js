@@ -55,7 +55,7 @@
         }
       }
     })
-    .constant('JIRA_UPDATE_POLL_INTERVAL', 1000 * 5)
+    .constant('JIRA_UPDATE_POLL_INTERVAL', 60 * 1000 * 5)
     .constant('IS_ELECTRON', (typeof window.ipcRenderer !== 'undefined'))
     .constant('THEMES', [
         'red',
@@ -182,7 +182,8 @@
 
     // handle updates that need to be made on jira
     $rootScope.$watch('r.currentTask', (newCurrent, prevCurrent) => {
-      $localStorage.currentTask = newCurrent;
+      //console.log(newCurrent && newCurrent.title, $localStorage.currentTask && $localStorage.currentTask.title);
+      Tasks.updateCurrent(newCurrent);
 
       // Jira Stuff
       // ----------
