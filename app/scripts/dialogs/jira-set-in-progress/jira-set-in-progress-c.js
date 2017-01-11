@@ -31,7 +31,7 @@
         if (!$localStorage.jiraSettings.transitions) {
           $localStorage.jiraSettings.transitions = {};
         }
-        $localStorage.jiraSettings.transitions[type] = transition;
+        $localStorage.jiraSettings.transitions[type] = transition.id;
         $localStorage.jiraSettings.allTransitions = transitions;
       }
 

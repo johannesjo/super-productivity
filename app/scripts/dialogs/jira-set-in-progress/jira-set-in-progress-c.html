@@ -3,7 +3,8 @@
     <md-dialog-content layout-padding>
       <p><strong ng-if="vm.type==='OPEN'">Open</strong>
         <strong ng-if="vm.type==='IN_PROGRESS'">In progress</strong>
-        <strong ng-if="vm.type==='DONE'">Done</strong>: Do you want to update the task '<strong>{{ vm.task.title }}</strong>' on jira?</p>
+        <strong ng-if="vm.type==='DONE'">Done</strong>: Do you want to update the task '<strong>{{ vm.task.title }}</strong>' on jira?
+      </p>
 
       <p>Move to:</p>
       <md-radio-group ng-model="vm.chosenTransitionIndex">
@@ -23,7 +24,7 @@
         This will be set then always, when a task is changed to
         <strong ng-if="vm.type==='OPEN'">open</strong>
         <strong ng-if="vm.type==='IN_PROGRESS'">in progress</strong>
-        <strong ng-if="vm.type==='DONE'">done</strong>.
+        <strong ng-if="vm.type==='DONE'">done</strong>. You can change that later in the project settings.
       </md-checkbox>
     </md-dialog-content>
 

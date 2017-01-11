@@ -14,7 +14,7 @@
     .controller('SettingsCtrl', SettingsCtrl);
 
   /* @ngInject */
-  function SettingsCtrl($localStorage, $rootScope, $scope, Projects, Dialogs, DEFAULT_THEME, THEMES, IS_ELECTRON, SimpleToast, $mdDialog) {
+  function SettingsCtrl($localStorage, $rootScope, $scope, Projects, Dialogs, DEFAULT_THEME, THEMES, IS_ELECTRON, SimpleToast, $mdDialog, $window) {
     let vm = this;
 
     vm.IS_ELECTRON = IS_ELECTRON;
@@ -22,7 +22,6 @@
     function init() {
       vm.r = $rootScope.r;
       vm.allProjects = Projects.getList();
-      vm.jiraSettings = angular.copy($rootScope.r.jiraSettings);
 
       $rootScope.r.theme = $localStorage.theme || DEFAULT_THEME;
       vm.isDarkTheme = $rootScope.r.theme && $rootScope.r.theme.indexOf('dark') > -1;
@@ -93,6 +92,7 @@
     // theme stuff
     vm.themes = THEMES;
 
+    // TODO that's kind of bad
     // update on global model changes
     $rootScope.$watch('r', () => {
       init();

@@ -50,14 +50,26 @@
     this.updateStatus = (task, type) => {
       if (task.originalKey && task.originalType === ISSUE_TYPE) {
         if ($localStorage.jiraSettings.transitions && $localStorage.jiraSettings.transitions[type]) {
-          return this.transitionIssue(task.originalId, $localStorage.jiraSettings.transitions[type]);
+          if ($localStorage.jiraSettings.transitions[type] === 'DO_NOT') {
+            return $q.reject('DO_NOT chosen');
+          } else {
+            console.log($localStorage.jiraSettings.transitions[type]);
+
+            return this.transitionIssue(task.originalId, {
+              id: $localStorage.jiraSettings.transitions[type]
+            });
+          }
         } else {
+          // TODO the promise handling and setting up should be better
+          let defer = $q.defer();
           this.getTransitionsForIssue(task).then((response) => {
             let transitions = response.response.transitions;
             return Dialogs('JIRA_SET_IN_PROGRESS', { transitions, task, type }).then((transition) => {
+              defer.resolve(transition);
               this.transitionIssue(task.originalId, transition);
             });
           });
+          return defer.promise;
         }
       }
     };
