@@ -14,7 +14,7 @@
     .service('Jira', Jira);
 
   /* @ngInject */
-  function Jira(Uid, $q, $localStorage, $window, Dialogs, IS_ELECTRON) {
+  function Jira(Uid, $q, $localStorage, $window, Dialogs, IS_ELECTRON, SimpleToast) {
     const IPC_JIRA_CB_EVENT = 'JIRA_RESPONSE';
     const IPC_JIRA_MAKE_REQUEST_EVENT = 'JIRA';
 
@@ -38,7 +38,8 @@
         if (res.requestId) {
           // resolve saved promise
           if (!res || res.error) {
-            console.log(res);
+            console.log(res)
+            SimpleToast('Jira Request failed: ' + (res && res.error));
             this.requestsLog[res.requestId].reject(res);
           } else {
             this.requestsLog[res.requestId].resolve(res);
@@ -82,6 +83,20 @@
       };
     }
 
+    this.transformIssues = (response) => {
+      if (response) {
+        let res = response.response;
+        let tasks = [];
+
+        for (let i = 0; i < res.issues.length; i++) {
+          let issue = res.issues[i];
+          tasks.push(mapIssue(issue));
+        }
+
+        return tasks;
+      }
+    };
+
     this.updateStatus = (task, type) => {
       if (task.originalKey && task.originalType === ISSUE_TYPE) {
         if ($localStorage.jiraSettings.transitions && $localStorage.jiraSettings.transitions[type]) {
@@ -107,17 +122,23 @@
       }
     };
 
-    this.transformIssues = (response) => {
-      if (response) {
-        let res = response.response;
-        let tasks = [];
+    this.checkUpdatesForTicket = (task) => {
+      let defer = $q.defer();
+      if (task && task.originalKey) {
+        let request = {
+          config: $localStorage.jiraSettings,
+          apiMethod: 'findIssue',
+          arguments: [task.originalKey]
+        };
+        this.sendRequest(request).then((res) => {
+          console.log(res);
 
-        for (let i = 0; i < res.issues.length; i++) {
-          let issue = res.issues[i];
-          tasks.push(mapIssue(issue));
-        }
+        });
 
-        return tasks;
+        return defer.promise;
+      } else {
+        SimpleToast('Jira Request failed: Not a real ' + ISSUE_TYPE + ' issue.');
+        return $q.reject('Not a real ' + ISSUE_TYPE + ' issue.');
       }
     };
 
@@ -130,6 +151,7 @@
         };
         return this.sendRequest(request);
       } else {
+        SimpleToast('Jira Request failed: Not a real ' + ISSUE_TYPE + ' issue.');
         return $q.reject('Not a real ' + ISSUE_TYPE + ' issue.');
       }
     };
