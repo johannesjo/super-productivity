@@ -25,7 +25,8 @@
       'description',
       'timeestimate',
       'timespent',
-      'status'
+      'status',
+      'attachment'
     ];
 
     this.requestsLog = {};
@@ -81,6 +82,8 @@
 
         for (let i = 0; i < res.issues.length; i++) {
           let issue = res.issues[i];
+          issue.fields.attachment && console.log(issue.fields.attachment);
+
           let newTask = {
             title: issue.key + ' ' + issue.fields.summary,
             notes: issue.fields.description,
@@ -88,6 +91,7 @@
             originalKey: issue.key,
             originalId: issue.id,
             originalStatus: issue.fields.status,
+            originalAttachment: issue.fields.attachment,
             originalLink: 'https://' + $localStorage.jiraSettings.host + '/browse/' + issue.key,
             originalEstimate: issue.fields.timeestimate && $window.moment.duration({
               seconds: issue.fields.timeestimate

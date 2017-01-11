@@ -162,9 +162,23 @@ task-list {
   .notes {
     width: 100%;
     flex: 0 1 100%;
-    padding-bottom: 10px;
     textarea {
       min-height: 100px;
+      margin-bottom: 10px;
+    }
+  }
+
+  .attachments {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding: 0;
+    margin: 0 0 10px;
+    li {
+      margin-bottom: 3px;
+      padding: 0;
+    }
+    a {
+      font-size: 14px;
     }
   }
 }

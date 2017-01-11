@@ -112,11 +112,23 @@
     <div class="notes"
          flex="100"
          ng-if="task.showNotes===true">
-      <label>Notes</label>
+      <label class="md-caption">Notes</label>
       <textarea ng-model="task.notes"
                 rows="5"
                 md-auto-focus
                 md-select-on-focus></textarea>
+
+      <div ng-if="task.originalAttachment.length > 0">
+        <div class="md-caption">Attachments</div>
+        <ul class="attachments">
+          <li ng-repeat="attachment in task.originalAttachment">
+            <a href="{{ attachment.content }}"
+               download="{{ attachment.content }}"
+               target="_blank"
+               class="md-accent">{{ attachment.content }}</a>
+          </li>
+        </ul>
+      </div>
     </div>
 
     <sub-task-list ng-if="task.subTasks.length > 0"

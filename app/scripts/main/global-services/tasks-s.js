@@ -277,7 +277,8 @@
         originalLink: task.originalLink,
         originalStatus: task.originalStatus,
         originalEstimate: task.originalEstimate,
-        originalTimeSpent: task.originalTimeSpent
+        originalTimeSpent: task.originalTimeSpent,
+        originalAttachment: task.originalAttachment
       };
     };
 
