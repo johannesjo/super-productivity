@@ -172,8 +172,10 @@
         task.mainTaskTimeSpent = task.timeSpent;
       }
       let subTask = Tasks.createTask({
-        title: 'empty'
+        title: ''
       });
+      // edit title right away
+      subTask.showEdit = [true];
 
       task.subTasks.push(subTask);
 
