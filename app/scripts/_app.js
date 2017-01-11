@@ -81,6 +81,7 @@
     .config(configMdTheme)
     .run(initGlobalModels)
     .run(handleCurrentTaskUpdates)
+    .run(handleCurrentTaskUpdates)
     .run(initGlobalShortcuts);
 
   function configMdTheme($mdThemingProvider, THEMES) {
@@ -147,7 +148,7 @@
     });
   }
 
-  function handleCurrentTaskUpdates($rootScope, $q, Jira, Tasks, IS_ELECTRON, $state) {
+  function handleCurrentTaskUpdates($rootScope, $q, Jira, Tasks, IS_ELECTRON, $state, Notifier) {
     function doAsyncSeries(arr) {
       return arr.reduce(function (promise, item) {
         return promise.then(function () {
@@ -156,6 +157,7 @@
       }, $q.when('NOT_YET'));
     }
 
+    // handle updates that need to be made on jira
     $rootScope.$watch('vm.r.currentTask', (mVal, oldVal) => {
       // check if jira support is available
       if (IS_ELECTRON) {
@@ -205,6 +207,14 @@
         }
       }
     }, true);
+
+    // handle updates that need to be made locally
+    //Notifier({
+    //  title: 'My awesome title',
+    //  message: 'Hello from node, Mr. User!',
+    //  sound: true, // Only Notification Center or Windows Toasters
+    //  wait: true // Wait with call
+    //});
   }
 
 })();

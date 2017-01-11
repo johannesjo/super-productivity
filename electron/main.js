@@ -3,6 +3,7 @@
 const electron = require('electron');
 const powerSaveBlocker = require('electron').powerSaveBlocker;
 const moment = require('moment');
+const notifier = require('node-notifier');
 const open = require('open');
 const CONFIG = require('./CONFIG');
 const ICONS_FOLDER = __dirname + '/assets/icons/';
@@ -144,6 +145,10 @@ electron.ipcMain.on('JIRA', (ev, request) => {
 
 electron.ipcMain.on('GIT_LOG', (ev, cwd) => {
   gitLog(cwd, mainWindow);
+});
+
+electron.ipcMain.on('NOTIFY', (ev, notification) => {
+  notifier.notify(notification);
 });
 
 let saveLastTitle;
