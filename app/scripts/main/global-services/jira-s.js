@@ -56,6 +56,12 @@
         });
     }
 
+    function mapAttachments(issue) {
+      return issue.fields.attachment && issue.fields.attachment.map((attachment) => {
+          return attachment.content;
+        });
+    }
+
     this.updateStatus = (task, type) => {
       if (task.originalKey && task.originalType === ISSUE_TYPE) {
         if ($localStorage.jiraSettings.transitions && $localStorage.jiraSettings.transitions[type]) {
@@ -88,8 +94,6 @@
 
         for (let i = 0; i < res.issues.length; i++) {
           let issue = res.issues[i];
-          console.log(mapComments(issue));
-
           let newTask = {
             title: issue.key + ' ' + issue.fields.summary,
             notes: issue.fields.description,
@@ -98,7 +102,7 @@
             originalComments: mapComments(issue),
             originalId: issue.id,
             originalStatus: issue.fields.status,
-            originalAttachment: issue.fields.attachment,
+            originalAttachment: mapAttachments(issue),
             originalLink: 'https://' + $localStorage.jiraSettings.host + '/browse/' + issue.key,
             originalEstimate: issue.fields.timeestimate && $window.moment.duration({
               seconds: issue.fields.timeestimate
