@@ -31,6 +31,7 @@
         disableDropInto: '@',
         onItemMoved: '&',
         onOrderChanged: '&',
+
       }
     };
   }
@@ -64,7 +65,19 @@
 
     vm.dragControlListeners = {
       accept: () => {
-        return !vm.disableDropInto;
+        if (vm.disableDropInto) {
+          return false;
+        } else {
+          // check for dupes
+          //let draggedTask = sourceItemHandleScope.itemScope.task;
+          //let targetTasks = destSortableScope.modelValue;
+          //let possibleDuplicates = $window._.find(targetTasks, (task) => {
+          //  return task.id == draggedTask.id;
+          //});
+          //
+          //return !possibleDuplicates || possibleDuplicates.length === 0;
+          return true;
+        }
       },
       itemMoved: function (event) {
         if (angular.isFunction(vm.onItemMoved)) {
@@ -76,6 +89,7 @@
           vm.onOrderChanged({ $event: event });
         }
       },
+      allowDuplicates: false,
       containment: '#board'
     };
 
