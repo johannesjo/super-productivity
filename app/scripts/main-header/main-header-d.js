@@ -19,7 +19,8 @@
       bindToController: true,
       controller: MainHeaderCtrl,
       controllerAs: 'vm',
-      restrict: 'E'
+      restrict: 'E',
+      scope: true
     };
   }
 
