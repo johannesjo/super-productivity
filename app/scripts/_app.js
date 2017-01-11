@@ -148,7 +148,7 @@
     });
   }
 
-  function handleCurrentTaskUpdates($rootScope, $q, Jira, Tasks, IS_ELECTRON, $state, Notifier, $interval, SimpleToast, JIRA_UPDATE_POLL_INTERVAL, $localStorage) {
+  function handleCurrentTaskUpdates($rootScope, $q, Jira, Tasks, IS_ELECTRON, $state, Notifier, $interval, SimpleToast, JIRA_UPDATE_POLL_INTERVAL) {
 
     function doAsyncSeries(arr) {
       return arr.reduce(function (promise, item) {
