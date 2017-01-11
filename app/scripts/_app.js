@@ -48,6 +48,11 @@
         isFirstLogin: true,
         defaultTransitionInProgress: undefined,
         defaultTransitionDone: undefined,
+        transitions: {
+          OPEN: undefined,
+          IN_PROGRESS: undefined,
+          DONE: undefined
+        }
       }
     })
     .constant('IS_ELECTRON', (typeof window.ipcRenderer !== 'undefined'))
@@ -75,6 +80,7 @@
     )
     .config(configMdTheme)
     .run(initGlobalModels)
+    .run(handleCurrentTaskUpdates)
     .run(initGlobalShortcuts);
 
   function configMdTheme($mdThemingProvider, THEMES) {
@@ -139,6 +145,66 @@
         }
       }
     });
+  }
+
+  function handleCurrentTaskUpdates($rootScope, $q, Jira, Tasks, IS_ELECTRON, $state) {
+    function doAsyncSeries(arr) {
+      return arr.reduce(function (promise, item) {
+        return promise.then(function () {
+          return Jira.updateStatus(item.val, item.type);
+        });
+      }, $q.when('NOT_YET'));
+    }
+
+    $rootScope.$watch('vm.r.currentTask', (mVal, oldVal) => {
+      // check if jira support is available
+      if (IS_ELECTRON) {
+        let dialogsAndRequests = [];
+
+        // handle old current first
+        // task (id) changed or no previous task
+        if (!mVal || (mVal !== oldVal) && (mVal.id !== (oldVal && oldVal.id))) {
+          // previous was jira task
+          if (oldVal && oldVal.originalKey) {
+            // and has not been worked on
+            if (!oldVal.timeSpent) {
+              // only execute after previous request/dialog if set
+              dialogsAndRequests.push({ val: oldVal, type: 'OPEN' });
+            }
+            // or has been done
+            if (oldVal.isDone) {
+              // only execute after previous request/dialog if set
+              dialogsAndRequests.push({ val: oldVal, type: 'DONE' });
+            }
+          }
+        }
+
+        // handle new current
+        // is jira task
+        if (mVal && mVal.originalKey) {
+          // current task (id) changed
+          if (mVal && (mVal.id !== (oldVal && oldVal.id))) {
+            dialogsAndRequests.push({ val: mVal, type: 'IN_PROGRESS' });
+          }
+        }
+
+        // TODO handle reopened
+        if (dialogsAndRequests.length > 0) {
+          doAsyncSeries(dialogsAndRequests);
+        }
+      }
+
+      if (mVal && mVal.isDone) {
+        let undoneTasks = Tasks.getUndoneToday();
+
+        // go to daily planner if there are no undone tasks left
+        if (!undoneTasks || undoneTasks.length === 0) {
+          $state.go('daily-planner');
+        } else {
+          Tasks.updateCurrent(undoneTasks[0]);
+        }
+      }
+    }, true);
   }
 
 })();

@@ -1,7 +1,9 @@
 <md-dialog aria-label="Jira Set In Progress Dialog">
   <form ng-submit="vm.updateTask(vm.chosenTransitionIndex)">
     <md-dialog-content layout-padding>
-      <p>Do you want to update the task '<strong>{{ vm.task.title }}</strong>' on jira?</p>
+      <p><strong ng-if="vm.type==='OPEN'">Open</strong>
+        <strong ng-if="vm.type==='IN_PROGRESS'">In progress</strong>
+        <strong ng-if="vm.type==='DONE'">Done</strong>: Do you want to update the task '<strong>{{ vm.task.title }}</strong>' on jira?</p>
 
       <p>Move to:</p>
       <md-radio-group ng-model="vm.chosenTransitionIndex">
@@ -10,7 +12,21 @@
                          class="md-primary">{{ transition.name }}
         </md-radio-button>
       </md-radio-group>
+
+      <md-checkbox md-no-ink
+                   ng-model="vm.saveAsDefaultAction"
+                   aria-label="save as default action">
+        Mark this as a default action for setting a task to
+        <strong ng-if="vm.type==='OPEN'">open</strong>
+        <strong ng-if="vm.type==='IN_PROGRESS'">in progress</strong>
+        <strong ng-if="vm.type==='DONE'">done</strong>.
+        This will be set then always, when a task is changed to
+        <strong ng-if="vm.type==='OPEN'">open</strong>
+        <strong ng-if="vm.type==='IN_PROGRESS'">in progress</strong>
+        <strong ng-if="vm.type==='DONE'">done</strong>.
+      </md-checkbox>
     </md-dialog-content>
+
 
     <md-dialog-actions>
       <md-button ng-click="vm.cancel()"

@@ -47,17 +47,18 @@
       });
     }
 
-    this.updateStatus = (task) => {
+    this.updateStatus = (task, type) => {
       if (task.originalKey && task.originalType === ISSUE_TYPE) {
-        //if ($localStorage.jiraSettings.defaultTransitionInProgress) {
-        //} else {
-        this.getTransitionsForIssue(task).then((response) => {
-          let transitions = response.response.transitions;
-          Dialogs('JIRA_SET_IN_PROGRESS', { transitions, task }).then((transition) => {
-            this.transitionIssue(task.originalId, transition);
+        if ($localStorage.jiraSettings.transitions && $localStorage.jiraSettings.transitions[type]) {
+          return this.transitionIssue(task.originalId, $localStorage.jiraSettings.transitions[type]);
+        } else {
+          this.getTransitionsForIssue(task).then((response) => {
+            let transitions = response.response.transitions;
+            return Dialogs('JIRA_SET_IN_PROGRESS', { transitions, task, type }).then((transition) => {
+              this.transitionIssue(task.originalId, transition);
+            });
           });
-        });
-        //}
+        }
       }
     };
 
