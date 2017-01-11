@@ -40,8 +40,17 @@
   function TaskListCtrl(Dialogs, $mdToast, $timeout, $window, Tasks, EDIT_ON_CLICK_TOGGLE_EV, $scope) {
     let vm = this;
 
+    let lastFocusedTaskEl;
+
+    vm.focusLastFocusedTaskEl = () => {
+      if (lastFocusedTaskEl) {
+        lastFocusedTaskEl.focus();
+      }
+    };
+
     vm.estimateTime = (task) => {
-      Dialogs('TIME_ESTIMATE', { task, isTasksForToday: vm.isTasksForToday });
+      Dialogs('TIME_ESTIMATE', { task, isTasksForToday: vm.isTasksForToday })
+        .finally(vm.focusLastFocusedTaskEl);
     };
 
     vm.deleteTask = (task, $index) => {
@@ -111,12 +120,15 @@
       ];
 
       let taskEl = $event.currentTarget || $event.srcElement || $event.originalTarget;
+      lastFocusedTaskEl = taskEl;
 
       // escape
       if ($event.keyCode === 27) {
         task.showEdit = false;
         task.showNotes = false;
         taskEl.focus();
+        $event.preventDefault();
+        $event.stopPropagation();
       }
 
       // only trigger if target is li

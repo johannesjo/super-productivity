@@ -25,7 +25,8 @@
         editOnClickEvId: '@',
         editOnClick: '=',
         editOnClickType: '@',
-        editOnClickOnChange: '&'
+        editOnClickOnChange: '&',
+        editOnClickOnEditFinished: '&'
       }
     };
   }
@@ -33,6 +34,13 @@
   /* @ngInject */
   function EditOnClickCtrl($element, $scope, $timeout, EDIT_ON_CLICK_TOGGLE_EV) {
     let vm = this;
+
+    vm.finishEdit = () => {
+      vm.showEdit = false;
+      if (angular.isFunction(vm.editOnClickOnEditFinished)) {
+        vm.editOnClickOnEditFinished();
+      }
+    };
 
     vm.toggleShowEdit = () => {
       vm.showEdit = true;

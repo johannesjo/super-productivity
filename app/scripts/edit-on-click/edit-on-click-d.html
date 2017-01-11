@@ -1,12 +1,12 @@
 <form ng-if="vm.showEdit"
       class="edit-on-click-form"
-      ng-submit="vm.showEdit=false;"
+      ng-submit="vm.finishEdit();"
       ng-class="{'is-duration-form':vm.editOnClickType==='DURATION'}">
   <input type="text"
          ng-if="!vm.editOnClickType"
          ng-disabled="vm.isDone"
          ng-model="vm.editOnClick"
-         ng-blur="vm.showEdit=false;"
+         ng-blur="vm.finishEdit();"
          ng-change="vm.change(vm.editOnClick)"
          tabindex="2">
 
@@ -16,7 +16,7 @@
          class="edit-on-click-duration-input"
          ng-disabled="vm.isDone"
          ng-model="vm.editOnClick"
-         ng-blur="vm.showEdit=false;"
+         ng-blur="vm.finishEdit();"
          ng-change="vm.change(vm.editOnClick)"
          tabindex="2">
 </form>
