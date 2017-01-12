@@ -45,6 +45,9 @@
       git: {
         projectDir: undefined
       },
+      config: {
+        isShortSyntaxEnabled: true
+      },
       jiraSettings: {
         isFirstLogin: true,
         defaultTransitionInProgress: undefined,

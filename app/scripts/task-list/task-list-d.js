@@ -37,7 +37,7 @@
   }
 
   /* @ngInject */
-  function TaskListCtrl(Dialogs, $mdToast, $timeout, $window, Tasks, EDIT_ON_CLICK_TOGGLE_EV, $scope) {
+  function TaskListCtrl(Dialogs, $mdToast, $timeout, $window, Tasks, EDIT_ON_CLICK_TOGGLE_EV, $scope, ShortSyntax) {
     let vm = this;
 
     let lastFocusedTaskEl;
@@ -122,6 +122,10 @@
       if (vm.isTasksForToday) {
         Tasks.updateTimeSpentToday(task, val);
       }
+    };
+
+    vm.onChangeTitle = (task) => {
+      ShortSyntax(task);
     };
 
     vm.handleKeyPress = ($event, task, $index) => {

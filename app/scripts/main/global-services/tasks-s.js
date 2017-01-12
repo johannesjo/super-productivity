@@ -14,7 +14,7 @@
     .service('Tasks', Tasks);
 
   /* @ngInject */
-  function Tasks($localStorage, Uid, $window, $rootScope, Dialogs, IS_ELECTRON, SimpleToast) {
+  function Tasks($localStorage, Uid, $window, $rootScope, Dialogs, IS_ELECTRON, SimpleToast, ShortSyntax) {
     const IPC_EVENT_IDLE = 'WAS_IDLE';
     const IPC_EVENT_UPDATE_TIME_SPEND_FOR_CURRENT = 'UPDATE_TIME_SPEND';
     const IPC_EVENT_CURRENT_TASK_UPDATED = 'CHANGED_CURRENT_TASK';
@@ -282,7 +282,7 @@
     };
 
     this.createTask = (task) => {
-      return {
+      let transformedTask = {
         title: task.title,
         id: Uid(),
         created: moment(),
@@ -301,6 +301,7 @@
         originalComments: task.originalComments,
         originalUpdated: task.originalUpdated
       };
+      return ShortSyntax(transformedTask);
     };
 
     this.updateToday = (tasks) => {
