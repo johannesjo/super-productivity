@@ -1,0 +1,18 @@
+<div class="markdown-wrapper">
+
+<textarea ng-model="vm.ngModel"
+          ng-show="vm.showEdit"
+          ng-blur="vm.untoggleShowEdit()"
+          class="md-body-1 markdown-unparsed"
+          rows="5"
+          ng-style="{height:vm.height}"
+          md-auto-focus
+          md-select-on-focus></textarea>
+
+  <div marked="vm.ngModel"
+       ng-show="!vm.showEdit"
+       ng-style="{height:vm.height}"
+       ng-click="vm.toggleShowEdit()"
+       ng-focus="vm.toggleShowEdit()"
+       class="md-body-1 markdown-parsed"></div>
+</div>

@@ -30,6 +30,8 @@ module.exports = function(config) {
             'app/bower_components/ng-sortable/dist/ng-sortable.js',
             'app/bower_components/moment-duration-format/lib/moment-duration-format.js',
             'app/bower_components/svg-morpheus/compile/minified/svg-morpheus.js',
+            'app/bower_components/marked/lib/marked.js',
+            'app/bower_components/angular-marked/dist/angular-marked.js',
             'app/bower_components/angular-mocks/angular-mocks.js',
             // endbower
 

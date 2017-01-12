@@ -152,8 +152,7 @@ task-list {
   input {
     outline: none;
   }
-  textarea,
-  input {
+    input {
     width: 100%;
     display: block;
     box-sizing: border-box;
@@ -171,11 +170,6 @@ task-list {
   .notes {
     width: 100%;
     flex: 0 1 100%;
-    textarea {
-      padding: 10px 14px;
-      min-height: 100px;
-      margin-bottom: 20px;
-    }
 
     section {
       margin-top: 10px;

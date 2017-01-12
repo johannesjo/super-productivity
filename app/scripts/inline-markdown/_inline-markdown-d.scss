@@ -1,0 +1,38 @@
+inline-markdown {
+  display: block;
+}
+
+.markdown-wrapper {
+  min-height: 100px;
+  margin-bottom: 20px;
+  display: block;
+  box-sizing: border-box;
+  height: 30px;
+  border: none;
+  resize: both;
+  overflow: auto;
+}
+
+.markdown-unparsed,
+.markdown-parsed {
+  padding: 10px 14px;
+  margin: 0;
+  width: 100%;
+  display: block;
+  border: none;
+  resize: none;
+  overflow: auto;
+  height: 100%;
+  box-sizing: border-box;
+  background: #fff;
+  body.dark-theme & {
+    background-color: $dark-theme-bg;
+    color: #fff;
+  }
+}
+
+.markdown-parsed {
+  p:first-child {
+    margin-top: 0;
+  }
+}

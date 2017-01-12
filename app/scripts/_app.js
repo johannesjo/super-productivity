@@ -30,7 +30,8 @@
       'ngMaterial',
       'ngMdIcons',
       'as.sortable',
-      'angularMoment'
+      'angularMoment',
+      'hc.marked'
     ])
     .constant('DEFAULT_THEME', 'teal-theme')
     .constant('LS_DEFAULTS', {
