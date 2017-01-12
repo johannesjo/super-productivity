@@ -137,9 +137,15 @@
     // up with the default browser shortcuts
     // better to use the global electron shortcuts here
     $document.bind('keypress', (ev) => {
-      if (ev.key === '*') {
-        Dialogs('ADD_TASK');
+
+      // only trigger if not in typing mode
+      if (ev.target.tagName !== 'INPUT' && ev.target.tagName !== 'TEXTAREA') {
+        // on star
+        if (ev.key === '*') {
+          Dialogs('ADD_TASK');
+        }
       }
+
       if (window.isElectron) {
         if (ev.keyCode === 10 && ev.ctrlKey === true && ev.shiftKey === true) {
           window.ipcRenderer.send('TOGGLE_DEV_TOOLS');
