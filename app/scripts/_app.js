@@ -241,11 +241,12 @@
           }
         }
 
+        // finally execute
         if (dialogsAndRequestsForStatusUpdate.length > 0) {
           // execute all
           doAsyncSeries(dialogsAndRequestsForStatusUpdate).then(() => {
             // current task (id) changed
-            if (newCurrent.id !== (prevCurrent && prevCurrent.id)) {
+            if (newCurrent && newCurrent.originalKey && newCurrent.id !== (prevCurrent && prevCurrent.id)) {
               checkJiraUpdatesForTask(newCurrent);
             }
           });
