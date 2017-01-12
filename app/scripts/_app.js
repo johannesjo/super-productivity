@@ -88,15 +88,29 @@
     $mdThemingProvider.theme('default')
       .primaryPalette('blue');
     //.dark();
+    //$mdThemingProvider.enableBrowserColor({
+    //  theme: 'default', // Default is 'default'
+    //  palette: 'accent', // Default is 'primary', any basic material palette and extended palettes are available
+    //  hue: '200' // Default is '800'
+    //});
 
     let themes = THEMES;
     for (let index = 0; index < themes.length; ++index) {
       $mdThemingProvider.theme(themes[index] + '-theme')
         .primaryPalette(themes[index]);
-
+      $mdThemingProvider.enableBrowserColor({
+        theme: themes[index] + '-theme', // Default is 'default'
+        palette: 'accent', // Default is 'primary', any basic material palette and extended palettes are available
+        hue: '400' // Default is '800'
+      });
       $mdThemingProvider.theme(themes[index] + '-dark')
         .primaryPalette(themes[index])
         .dark();
+      $mdThemingProvider.enableBrowserColor({
+        theme: themes[index] + '-dark', // Default is 'default'
+        palette: 'accent', // Default is 'primary', any basic material palette and extended palettes are available
+        hue: '400' // Default is '800'
+      });
     }
 
     $mdThemingProvider.alwaysWatchTheme(true);
