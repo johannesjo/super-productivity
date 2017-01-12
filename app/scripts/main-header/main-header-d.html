@@ -9,8 +9,11 @@
     </md-button>
 
     <md-menu ng-if="r.currentProject">
-      <md-button aria-label="Open phone interactions menu"
+      <md-button aria-label="Switch project"
                  ng-click="vm.openMenu($mdOpenMenu, $event)">
+        <md-tooltip md-direction="bottom">
+          Switch project
+        </md-tooltip>
         {{ r.currentProject.title }}
       </md-button>
       <md-menu-content width="4">
@@ -31,6 +34,9 @@
     <md-button class="md-icon-button"
                aria-label="Add Task"
                ng-click="vm.openAddTask()">
+      <md-tooltip md-direction="bottom">
+        Add Task
+      </md-tooltip>
       <ng-md-icon icon="add"></ng-md-icon>
     </md-button>
 
@@ -38,6 +44,9 @@
                aria-label="Make a break"
                ng-click="vm.toggleBreak()"
                ng-class="{'is-active':vm.isOnBreak}">
+      <md-tooltip md-direction="bottom">
+        Toggle break mode
+      </md-tooltip>
       <ng-md-icon icon="free_breakfast"></ng-md-icon>
     </md-button>
 
@@ -45,6 +54,9 @@
                aria-label="Daily Planner"
                ui-sref-active="is-active"
                ui-sref="daily-planner">
+      <md-tooltip md-direction="bottom">
+        Go to daily planer
+      </md-tooltip>
       <ng-md-icon icon="border_color"></ng-md-icon>
     </md-button>
 
@@ -52,6 +64,9 @@
                aria-label="Work View"
                ui-sref-active="is-active"
                ui-sref="work-view">
+      <md-tooltip md-direction="bottom">
+        Go to work view
+      </md-tooltip>
       <ng-md-icon icon="format_list_bulleted"></ng-md-icon>
     </md-button>
 
@@ -59,6 +74,9 @@
                aria-label="Daily Summary"
                ui-sref-active="is-active"
                ui-sref="daily-summary">
+      <md-tooltip md-direction="bottom">
+        Finish your day / Go to summary
+      </md-tooltip>
       <ng-md-icon icon="done_all"></ng-md-icon>
     </md-button>
 
@@ -66,6 +84,9 @@
                aria-label="Settings"
                ui-sref-active="is-active"
                ui-sref="settings">
+      <md-tooltip md-direction="bottom">
+        Go to settings
+      </md-tooltip>
       <ng-md-icon icon="settings"></ng-md-icon>
     </md-button>
   </div>
