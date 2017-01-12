@@ -123,17 +123,20 @@
     <div class="notes"
          flex="100"
          ng-if="task.showNotes===true">
-      <label class="md-caption">Notes</label>
-      <div md-whiteframe="4">
+      <section>
+        <label class="md-caption">Notes</label>
+        <div md-whiteframe="4">
       <textarea ng-model="task.notes"
                 class="md-body-1"
                 rows="5"
                 md-auto-focus
                 md-select-on-focus></textarea>
-      </div>
+        </div>
+      </section>
 
-      <div ng-if="task.originalAttachment.length > 0">
+      <section ng-if="task.originalAttachment.length > 0">
         <div class="md-caption">Attachments</div>
+        <md-divider></md-divider>
         <ul class="attachments">
           <li ng-repeat="attachment in task.originalAttachment">
             <a href="{{ attachment}}"
@@ -148,26 +151,29 @@
             </a>
           </li>
         </ul>
-      </div>
-      <div ng-if="task.originalComments.length > 0">
+      </section>
+
+      <section ng-if="task.originalComments.length > 0">
         <div class="md-caption">Comments</div>
+        <md-divider></md-divider>
         <ul class="comments">
           <li ng-repeat="comment in task.originalComments"
               class="comment">{{ comment }}
           </li>
         </ul>
-      </div>
+      </section>
 
-      <div ng-if="task.status || task.originalStatus"
+      <section ng-if="task.status || task.originalStatus"
            class="status">
         <div class="md-caption">Status</div>
+        <md-divider></md-divider>
         <div class="md-body-1">
           {{ task.originalStatus.name }}
           <ng-md-icon icon="arrow_forward"
                       aria-label="arrow forward"></ng-md-icon>
           {{ task.status }}
         </div>
-      </div>
+      </section>
 
     </div>
 

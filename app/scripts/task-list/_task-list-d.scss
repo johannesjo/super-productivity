@@ -27,8 +27,7 @@ task-list {
 .task {
   padding: 4px 15px;
   display: block;
-  margin-bottom: 4px;
-
+  margin-bottom: 6px;
   background-color: #fff;
   color: #333;
   body.dark-theme & {
@@ -175,7 +174,11 @@ task-list {
     textarea {
       padding: 10px 14px;
       min-height: 100px;
-      margin-bottom: 10px;
+      margin-bottom: 20px;
+    }
+
+    section {
+      margin-top: 10px;
     }
   }
 
