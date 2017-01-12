@@ -128,8 +128,8 @@
             Delete Task
           </md-tooltip>
           <ng-md-icon icon="delete_forever"
-                      aria-label="delete"
-                      style="fill: #dc2d3d;"></ng-md-icon>
+                      class="delete-icon"
+                      aria-label="delete"></ng-md-icon>
         </md-button>
         <md-checkbox ng-model="task.isDone"
                      tabindex="2"
@@ -147,7 +147,7 @@
          flex="100"
          ng-if="task.showNotes===true">
       <section>
-        <label class="md-caption">Notes</label>
+        <div class="md-caption">Notes</div>
         <div md-whiteframe="4">
             <inline-markdown ng-model="task.notes"></inline-markdown>
         </div>

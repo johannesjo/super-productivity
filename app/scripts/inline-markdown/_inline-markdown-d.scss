@@ -3,7 +3,7 @@ inline-markdown {
 }
 
 .markdown-wrapper {
-  min-height: 100px;
+  min-height: 160px;
   margin-bottom: 20px;
   display: block;
   box-sizing: border-box;
@@ -24,15 +24,18 @@ inline-markdown {
   overflow: auto;
   height: 100%;
   box-sizing: border-box;
-  background: #fff;
+  background: #fbfbfb;
   body.dark-theme & {
     background-color: $dark-theme-bg;
-    color: #fff;
+    color: #eee;
   }
 }
 
 .markdown-parsed {
   p:first-child {
     margin-top: 0;
+  }
+  ul {
+    padding-left: 18px;
   }
 }

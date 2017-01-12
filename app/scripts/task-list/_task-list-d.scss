@@ -101,17 +101,24 @@ task-list {
     }
   }
 
+  ng-md-icon.delete-icon {
+    fill: $red !important;
+    body.dark-theme & {
+      fill: $red !important;
+    }
+  }
+
   &.is-current {
-    background: #a9ed9f;
+    background: $light-green;
     color: #000;
 
     body.dark-theme & {
-      background-color: #30412d;
+      background-color: $dark-green;
       color: #fff;
     }
 
     .md-bar {
-      background-color: #4fa758 !important;
+      background-color: $green !important;
     }
     .play-btn {
       ng-md-icon {
@@ -125,6 +132,13 @@ task-list {
   .md-bar {
     background-color: #ccc !important;
   }
+
+  //md-checkbox.md-checked .md-icon {
+  //  background-color: $green;
+  //  body.dark-theme & {
+  //    background-color: $green;
+  //  }
+  //}
 
   md-progress-linear.md-default-theme .md-container,
   md-progress-linear .md-container {
@@ -153,7 +167,7 @@ task-list {
   input {
     outline: none;
   }
-    input {
+  input {
     width: 100%;
     display: block;
     box-sizing: border-box;
@@ -174,6 +188,11 @@ task-list {
 
     section {
       margin-top: 10px;
+    }
+
+    .md-caption {
+      font-weight: bold;
+      margin-bottom: 6px;
     }
   }
 
