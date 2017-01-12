@@ -138,8 +138,9 @@ task-list {
   .title {
     text-align: left;
     cursor: pointer;
-
+    outline: none;
     .text {
+      outline: none;
       display: block;
       width: 100%;
       min-height: 14px;
@@ -149,14 +150,17 @@ task-list {
   form {
     width: 100%;
   }
+  input {
+    outline: none;
+  }
   textarea,
   input {
     width: 100%;
     display: block;
     box-sizing: border-box;
-    box-shadow: inset 1px 3px 7px -6px;
     height: 30px;
     padding: 4px 10px;
+    border: none;
   }
 
   .time {
@@ -169,6 +173,7 @@ task-list {
     width: 100%;
     flex: 0 1 100%;
     textarea {
+      padding: 10px 14px;
       min-height: 100px;
       margin-bottom: 10px;
     }

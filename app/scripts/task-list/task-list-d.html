@@ -124,11 +124,13 @@
          flex="100"
          ng-if="task.showNotes===true">
       <label class="md-caption">Notes</label>
+      <div md-whiteframe="4">
       <textarea ng-model="task.notes"
                 class="md-body-1"
                 rows="5"
                 md-auto-focus
                 md-select-on-focus></textarea>
+      </div>
 
       <div ng-if="task.originalAttachment.length > 0">
         <div class="md-caption">Attachments</div>
