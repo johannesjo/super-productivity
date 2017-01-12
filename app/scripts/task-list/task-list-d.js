@@ -245,28 +245,31 @@
         task = vm.parentTask;
       }
 
-      if (!task.subTasks) {
-        task.subTasks = [];
-        // save original values for potential later re-initialization
-        task.mainTaskTimeEstimate = task.timeEstimate;
-        task.mainTaskTimeSpent = task.timeSpent;
-      }
-      let subTask = Tasks.createTask({
-        title: '',
-        parentId: task.id
-      });
-      // edit title right away
-      task.subTasks.push(subTask);
+      // only allow if task is not done
+      if (!task.isDone) {
+        if (!task.subTasks) {
+          task.subTasks = [];
+          // save original values for potential later re-initialization
+          task.mainTaskTimeEstimate = task.timeEstimate;
+          task.mainTaskTimeSpent = task.timeSpent;
+        }
+        let subTask = Tasks.createTask({
+          title: '',
+          parentId: task.id
+        });
+        // edit title right away
+        task.subTasks.push(subTask);
 
-      // focus the new element to edit it right away
-      // timeout is needed to wait for dom to update
-      $timeout(() => {
-        $scope.$broadcast(EDIT_ON_CLICK_TOGGLE_EV, subTask.id);
-      });
+        // focus the new element to edit it right away
+        // timeout is needed to wait for dom to update
+        $timeout(() => {
+          $scope.$broadcast(EDIT_ON_CLICK_TOGGLE_EV, subTask.id);
+        });
 
-      // if parent was current task, mark sub task as current now
-      if (vm.currentTask && vm.currentTask.id && vm.currentTask.id === task.id) {
-        vm.currentTask = subTask;
+        // if parent was current task, mark sub task as current now
+        if (vm.currentTask && vm.currentTask.id && vm.currentTask.id === task.id) {
+          vm.currentTask = subTask;
+        }
       }
     };
 

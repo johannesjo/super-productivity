@@ -87,7 +87,7 @@
         </md-button>
         <md-button class="md-icon-button"
                    aria-label="add sub task"
-                   ng-if="!vm.isSubTasksDisabled"
+                   ng-show="!vm.isSubTasksDisabled&&!task.isDone"
                    tabindex="2"
                    ng-click="vm.addSubTask(task, $event);">
           <md-tooltip md-direction="top">
