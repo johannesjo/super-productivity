@@ -14,21 +14,21 @@
     .service('ShortSyntax', ShortSyntax);
 
   /* @ngInject */
-  function ShortSyntax(ParseDuration) {
+  function ShortSyntax(ParseDuration, $rootScope) {
 
     const timeEstimateRegExp = / t[0-9]+(m|h|d)$/i;
 
     return (task) => {
-      if (!task.originalKey && !task.timeEstimate && !task.subTasks) {
-        let matches = timeEstimateRegExp.exec(task.title);
-        if (matches) {
-          task.timeEstimate = ParseDuration.fromString(matches[0].replace(' t', ''));
-          task.title = task.title.replace(matches[0], '');
+      if ($rootScope.r.config.isShortSyntaxEnabled) {
+        if (!task.originalKey && !task.timeEstimate && !task.subTasks) {
+          let matches = timeEstimateRegExp.exec(task.title);
+          if (matches) {
+            task.timeEstimate = ParseDuration.fromString(matches[0].replace(' t', ''));
+            task.title = task.title.replace(matches[0], '');
+          }
         }
       }
       return task;
     };
   }
-
-})
-();
+})();
