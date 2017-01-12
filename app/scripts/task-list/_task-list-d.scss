@@ -62,7 +62,8 @@ task-list {
       transition: 300ms;
       padding: 4px;
       // always reserve space for buttons
-      min-width: 40px;
+      min-width: 32px;
+      width: 32px;
       &:hover {
         transform: scale(1.4);
       }
