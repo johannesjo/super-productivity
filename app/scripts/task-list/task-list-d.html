@@ -87,7 +87,7 @@
                    tabindex="2"
                    ng-class="{'is-active':task.showNotes}"
                    ng-click="task.showNotes=!task.showNotes">
-          <ng-md-icon icon="{{task.notes ?'insert_comment': 'mode_comment'}}"
+          <ng-md-icon icon="{{(task.notes||task.originalKey) ?'insert_comment': 'mode_comment'}}"
                       aria-label="notes"></ng-md-icon>
         </md-button>
         <md-button class="md-icon-button"
@@ -148,6 +148,18 @@
           </li>
         </ul>
       </div>
+
+      <div ng-if="task.status || task.originalStatus"
+           class="status">
+        <div class="md-caption">Status</div>
+        <div class="md-body-1">
+          {{ task.originalStatus.name }}
+          <ng-md-icon icon="arrow_forward"
+                      aria-label="arrow forward"></ng-md-icon>
+          {{ task.status }}
+        </div>
+      </div>
+
     </div>
 
     <sub-task-list ng-if="task.subTasks.length > 0"
