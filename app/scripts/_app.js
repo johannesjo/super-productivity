@@ -172,7 +172,7 @@
     });
   }
 
-  function handleCurrentTaskUpdates($rootScope, $q, Jira, Tasks, IS_ELECTRON, $state, Notifier, $interval, SimpleToast, JIRA_UPDATE_POLL_INTERVAL) {
+  function handleCurrentTaskUpdates($rootScope, $window, $q, Jira, Tasks, IS_ELECTRON, $state, Notifier, $interval, SimpleToast, JIRA_UPDATE_POLL_INTERVAL) {
 
     function doAsyncSeries(arr) {
       return arr.reduce(function (promise, item) {
@@ -252,15 +252,33 @@
         }
       }
 
-      // Non Jira stuff
-      // --------------
+      // Non Jira stuff: Select next undone
+      // ----------------------------------
       if (newCurrent && newCurrent.isDone) {
-        let undoneTasks = Tasks.getUndoneToday();
-        // go to daily planner if there are no undone tasks left
-        if (!undoneTasks || undoneTasks.length === 0) {
-          $state.go('daily-planner');
+        if (newCurrent.parentId) {
+          let parentTask = Tasks.getById(newCurrent.parentId);
+          if (parentTask.subTasks && parentTask.subTasks.length) {
+            // if there is one it will be the next current otherwise it will be no task
+            Tasks.updateCurrent($window._.find(parentTask.subTasks, (task) => {
+              return task && !task.isDone;
+            }));
+            // otherwise do nothing as it isn't obvious what to do next
+          }
         } else {
-          Tasks.updateCurrent(undoneTasks[0]);
+          let undoneTasks = Tasks.getUndoneToday();
+          // go to daily planner if there are no undone tasks left
+          if (!undoneTasks || undoneTasks.length === 0) {
+            $state.go('daily-planner');
+          } else {
+            if (undoneTasks[0].subTasks) {
+              // if there is one it will be the next current otherwise it will be no task
+              Tasks.updateCurrent($window._.find(undoneTasks[0].subTasks, (task) => {
+                return task && !task.isDone;
+              }));
+            } else {
+              Tasks.updateCurrent(undoneTasks[0]);
+            }
+          }
         }
       }
     }, true);
