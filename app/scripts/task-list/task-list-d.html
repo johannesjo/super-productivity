@@ -7,7 +7,7 @@
       ng-repeat="task in vm.tasks|limitTo:vm.limitTo|filter:vm.filter track by task.id"
       tabindex="1"
       md-whiteframe="1"
-      ng-keydown="vm.handleKeyPress($event, task)">
+      ng-keydown="vm.handleKeyPress($event, task, $index)">
 
     <div class="first-line"
          layout="row"
@@ -164,7 +164,7 @@
       </section>
 
       <section ng-if="task.status || task.originalStatus"
-           class="status">
+               class="status">
         <div class="md-caption">Status</div>
         <md-divider></md-divider>
         <div class="md-body-1">

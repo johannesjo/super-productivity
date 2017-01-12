@@ -124,7 +124,7 @@
       }
     };
 
-    vm.handleKeyPress = ($event, task) => {
+    vm.handleKeyPress = ($event, task, $index) => {
       let taskEl = $event.currentTarget || $event.srcElement || $event.originalTarget;
       lastFocusedTaskEl = taskEl;
 
@@ -145,7 +145,9 @@
           78,
           68,
           46,
-          13
+          13,
+          187,
+          65
         ];
         if (USED_KEYS.indexOf($event.keyCode) > -1) {
           // don't propagate to parent task element
@@ -153,6 +155,10 @@
           $event.stopPropagation();
         }
 
+        // + or a
+        if ($event.keyCode === 187 || $event.keyCode === 65) {
+          vm.addSubTask(task);
+        }
         // t
         if ($event.keyCode === 84) {
           vm.estimateTime(task);
@@ -167,7 +173,7 @@
         }
         // entf
         if ($event.keyCode === 46) {
-          vm.deleteTask(task.id);
+          vm.deleteTask(task, $index);
         }
         // enter
         if ($event.keyCode === 13) {
@@ -208,6 +214,11 @@
     };
 
     vm.addSubTask = (task) => {
+      // use parent task if the current task is a sub task itself
+      if (vm.parentTask) {
+        task = vm.parentTask;
+      }
+
       if (!task.subTasks) {
         task.subTasks = [];
         // save original values for potential later re-initialization
