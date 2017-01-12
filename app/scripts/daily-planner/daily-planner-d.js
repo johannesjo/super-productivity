@@ -54,7 +54,7 @@
 
       // if we have already defined enough tasks and the
       // new task field is empty go to work view
-      else if ($rootScope.tasks.length > 0) {
+      else if ($rootScope.r.tasks.length > 0) {
         vm.done();
       }
     };

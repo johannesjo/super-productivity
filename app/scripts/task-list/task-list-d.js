@@ -37,10 +37,31 @@
   }
 
   /* @ngInject */
-  function TaskListCtrl(Dialogs, $mdToast, $timeout, $window, Tasks, EDIT_ON_CLICK_TOGGLE_EV, $scope, ShortSyntax) {
+  function TaskListCtrl(Dialogs, $mdToast, $timeout, $window, Tasks, EDIT_ON_CLICK_TOGGLE_EV, $scope, ShortSyntax, $element) {
     let vm = this;
 
     let lastFocusedTaskEl;
+
+    function focusPreviousInListOrParent($index) {
+      let taskEls = angular.element($element.children().children());
+      let focusTaskEl;
+
+      // NOTE!!! element has not yet been removed from the dom
+      if (taskEls.length > 1) {
+        // if is last
+        if (taskEls.length === $index + 1) {
+          focusTaskEl = angular.element(taskEls[$index - 1]);
+        } else {
+          focusTaskEl = angular.element(taskEls[$index + 1]);
+        }
+      } else if (vm.parentTask) {
+        focusTaskEl = angular.element($element.parent()).parent();
+      }
+
+      if (focusTaskEl) {
+        focusTaskEl.focus();
+      }
+    }
 
     vm.focusLastFocusedTaskEl = () => {
       if (lastFocusedTaskEl) {
@@ -58,6 +79,7 @@
       let taskCopy = angular.copy(task);
       // delete
       vm.tasks.splice($index, 1);
+      focusPreviousInListOrParent($index);
 
       // show toast for undo
       let toast = $mdToast.simple()
