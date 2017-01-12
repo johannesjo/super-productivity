@@ -134,9 +134,15 @@
         <ul class="attachments">
           <li ng-repeat="attachment in task.originalAttachment">
             <a href="{{ attachment}}"
-               download="{{ attachment}}"
+               external-link
                target="_blank"
                class="md-accent">{{ attachment}}</a>
+            <a href="{{ attachment}}"
+               download="{{ attachment}}"
+               class="md-accent">
+              <ng-md-icon icon="file_download"
+                          aria-label="download file directly"></ng-md-icon>
+            </a>
           </li>
         </ul>
       </div>
