@@ -1,0 +1,32 @@
+.ui-view-container {
+  position: relative;
+  height: 65px;
+}
+
+//[ui-view].ng-leave,
+[ui-view].ng-enter {
+  position: absolute;
+  left: 0;
+  right: 0;
+  transition: all .3s ease-in-out;
+}
+
+[ui-view].ng-enter {
+  opacity: 0;
+  //transform: translate3d(0, -100%, 0);
+}
+
+[ui-view].ng-enter-active {
+  opacity: 1;
+  //transform: translate3d(0, 0, 0);
+}
+
+[ui-view].ng-leave {
+  //opacity: 1;
+  //transform: translate3d(0, 0, 0);
+}
+
+[ui-view].ng-leave-active {
+  //opacity: 0;
+  //transform: translate3d(100%, 0, 0);
+}

@@ -50,7 +50,9 @@ TODO configure more restrictive Content-Security-Policy
         title="Your yesterdays note for today">
     <p>{{ r.tomorrowsNote }}</p>
   </hint>
-  <main ui-view></main>
+  <div class="ui-view-container">
+    <main ui-view></main>
+  </div>
   <distraction-panel distractions="r.distractions"></distraction-panel>
 </md-content>
 
