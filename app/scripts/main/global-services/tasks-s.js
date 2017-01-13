@@ -25,41 +25,11 @@
       let that = this;
 
       // handler for time spent tracking
-      window.ipcRenderer.on(IPC_EVENT_UPDATE_TIME_SPEND_FOR_CURRENT, (ev, timeSpent) => {
+      window.ipcRenderer.on(IPC_EVENT_UPDATE_TIME_SPEND_FOR_CURRENT, (ev, timeSpentInMs) => {
         // only track if there is a task
         if ($rootScope.r.currentTask) {
-          let timeSpentCalculatedTotal;
-          let timeSpentCalculatedOnDay;
 
-          // use mysql date as it is sortable
-          let todayStr = getTodayStr();
-
-          // track total time spent
-          if ($rootScope.r.currentTask.timeSpent) {
-            timeSpentCalculatedTotal = moment.duration($rootScope.r.currentTask.timeSpent);
-            timeSpentCalculatedTotal.add(moment.duration({ milliseconds: timeSpent }));
-          } else {
-            timeSpentCalculatedTotal = moment.duration(timeSpent);
-          }
-
-          // track time spent on days
-          if (!$rootScope.r.currentTask.timeSpentOnDay) {
-            $rootScope.r.currentTask.timeSpentOnDay = {};
-          }
-
-          if ($rootScope.r.currentTask.timeSpentOnDay[todayStr]) {
-            timeSpentCalculatedOnDay = moment.duration($rootScope.r.currentTask.timeSpentOnDay[todayStr]);
-            timeSpentCalculatedOnDay.add(moment.duration({ milliseconds: timeSpent }));
-          } else {
-            timeSpentCalculatedOnDay = moment.duration(timeSpent);
-          }
-
-          // assign values
-          $rootScope.r.currentTask.timeSpent = timeSpentCalculatedTotal;
-          $rootScope.r.currentTask.timeSpentOnDay[todayStr] = timeSpentCalculatedOnDay;
-
-          $rootScope.r.currentTask.lastWorkedOn = moment();
-
+          that.updateTimeSpent($rootScope.r.currentTask, timeSpentInMs);
           that.updateCurrent($rootScope.r.currentTask, true);
 
           // we need to manually call apply as this is an outside event
@@ -72,6 +42,46 @@
         Dialogs('WAS_IDLE', { idleTime: idleTime });
       });
     }
+
+    this.updateTimeSpent = (task, timeSpentInMs) => {
+      let timeSpentCalculatedTotal;
+      let timeSpentCalculatedOnDay;
+
+      // use mysql date as it is sortable
+      let todayStr = getTodayStr();
+
+      // if not set set started pointer
+      if (!task.started) {
+        task.started = moment();
+      }
+
+      // track total time spent
+      if (task.timeSpent) {
+        timeSpentCalculatedTotal = moment.duration(task.timeSpent);
+        timeSpentCalculatedTotal.add(moment.duration({ milliseconds: timeSpentInMs }));
+      } else {
+        timeSpentCalculatedTotal = moment.duration(timeSpentInMs);
+      }
+
+      // track time spent on days
+      if (!task.timeSpentOnDay) {
+        task.timeSpentOnDay = {};
+      }
+      if (task.timeSpentOnDay[todayStr]) {
+        timeSpentCalculatedOnDay = moment.duration(task.timeSpentOnDay[todayStr]);
+        timeSpentCalculatedOnDay.add(moment.duration({ milliseconds: timeSpentInMs }));
+      } else {
+        timeSpentCalculatedOnDay = moment.duration(timeSpentInMs);
+      }
+
+      // assign values
+      task.timeSpent = timeSpentCalculatedTotal;
+      task.timeSpentOnDay[todayStr] = timeSpentCalculatedOnDay;
+
+      task.lastWorkedOn = moment();
+
+      return task;
+    };
 
     // UTILITY
     function getTodayStr() {
