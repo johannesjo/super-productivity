@@ -247,9 +247,6 @@
           // execute all
           doAsyncSeries(dialogsAndRequestsForStatusUpdate).then(() => {
             // is jira task
-            alert('here');
-            console.log(newCurrent && newCurrent.originalKey);
-
             if (newCurrent && newCurrent.originalKey) {
               // current task (id) changed
               if (newCurrent.id !== (prevCurrent && prevCurrent.id)) {
