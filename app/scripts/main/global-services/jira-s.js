@@ -14,7 +14,7 @@
     .service('Jira', Jira);
 
   /* @ngInject */
-  function Jira(Uid, $q, $localStorage, $window, Dialogs, IS_ELECTRON, SimpleToast) {
+  function Jira(Uid, $q, $localStorage, $window, Dialogs, IS_ELECTRON, SimpleToast, Tasks) {
     const IPC_JIRA_CB_EVENT = 'JIRA_RESPONSE';
     const IPC_JIRA_MAKE_REQUEST_EVENT = 'JIRA';
 
@@ -166,25 +166,50 @@
       }
     };
 
-    this.addWorklog = (task) => {
+    this.addWorklog = (originalTask) => {
+      // WE'RE always copying the task for add work log
+      // so no data should be added back by this call!
+      let task = angular.copy(originalTask);
+      let comment;
 
-      if (task.originalKey && task.originalType === ISSUE_TYPE) {
-        if ($localStorage.jiraSettings.isWorklogEnabled) {
+      if ($localStorage.jiraSettings.isWorklogEnabled) {
+
+        // use parent task if enabled
+        if ($localStorage.jiraSettings.isAddWorklogOnSubTaskDone && task.parentId) {
+          let parentTaskCopy = angular.copy(Tasks.getById(task.parentId));
+          if (parentTaskCopy && parentTaskCopy.originalKey && parentTaskCopy.originalType === ISSUE_TYPE) {
+
+            comment = task.title;
+
+            parentTaskCopy.title = parentTaskCopy.originalKey + ': ' + task.title;
+            parentTaskCopy.timeSpent = task.timeSpent;
+            parentTaskCopy.started = task.started;
+
+            // finally set worklog task to parent
+            task = parentTaskCopy;
+          }
+        }
+
+        if (task.originalKey && task.originalType === ISSUE_TYPE) {
           if ($localStorage.jiraSettings.isAutoWorklog) {
             return this._addWorklog(task.originalKey, task.started, task.timeSpent);
           } else {
 
             let defer = $q.defer();
-
-            Dialogs('JIRA_ADD_WORKLOG', { task })
+            Dialogs('JIRA_ADD_WORKLOG', { task, comment })
               .then((taskCopy) => {
                 this._addWorklog(taskCopy.originalKey, taskCopy.started, taskCopy.timeSpent, taskCopy.comment)
-                  .then(defer.resolve, defer.reject);
+                  .then((res) => {
+                    SimpleToast('Jira: Updated worklog for ' + taskCopy.originalKey + ' by ' + parseInt(taskCopy.timeSpent.asMinutes()) + 'm.');
+                    defer.resolve(res);
+                  }, defer.reject);
               }, defer.reject);
 
             return defer.promise;
           }
         }
+      } else {
+        return $q.reject('Jira: Task or Parent Task are no Jira Tasks.');
       }
     };
 
@@ -196,8 +221,7 @@
           arguments: [originalKey, {
             started: started.format(JIRA_DATE_FORMAT),
             timeSpentSeconds: timeSpent.asSeconds(),
-            comment: comment,
-            //timeSpentSeconds: 12000
+            comment: comment
           }]
         };
         return this.sendRequest(request);

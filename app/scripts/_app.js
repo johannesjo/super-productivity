@@ -52,6 +52,7 @@
         isFirstLogin: true,
         isWorklogEnabled: true,
         isAutoWorklog: false,
+        isAddWorklogOnSubTaskDone: true,
         defaultTransitionInProgress: undefined,
         defaultTransitionDone: undefined,
         transitions: {
@@ -243,6 +244,7 @@
         }
 
         // finally execute
+
         if (dialogsAndRequestsForStatusUpdate.length > 0) {
           // execute all
           doAsyncSeries(dialogsAndRequestsForStatusUpdate).then(() => {
@@ -252,11 +254,18 @@
               if (newCurrent.id !== (prevCurrent && prevCurrent.id)) {
                 checkJiraUpdatesForTask(newCurrent);
               }
-              if (newCurrent.isDone) {
-                Jira.updateWorklog(newCurrent);
-              }
             }
           });
+        }
+        // we need to execute also if there were no other updates
+        else {
+          // is jira task
+          if (newCurrent && newCurrent.originalKey) {
+            // current task (id) changed
+            if (newCurrent.id !== (prevCurrent && prevCurrent.id)) {
+              checkJiraUpdatesForTask(newCurrent);
+            }
+          }
         }
       }
 

@@ -4,8 +4,7 @@
     <h2 class="md-title">Project</h2>
 
     <div ng-if="vm.allProjects.length > 0">
-      <md-input-container class="md-block"
-                          flex-gt-sm>
+      <md-input-container class="md-block">
         <label>Choose current project</label>
         <md-select ng-model="vm.r.currentProject"
                    arial-label="Select Project">
@@ -56,8 +55,7 @@
       <p>You can manage multiple different Todos with SuperProductivity. To do so you need to give your current ToDo a title and save it.</p>
 
       <form ng-submit="vm.createNewProjectFromCurrent(vm.projectTitle)">
-        <md-input-container class="md-block"
-                            flex-gt-sm>
+        <md-input-container class="md-block">
           <label>Project Title</label>
           <input type="text"
                  ng-model="vm.projectTitle">
@@ -75,26 +73,22 @@
   <section ng-if="vm.IS_ELECTRON">
     <h2 class="md-title">Jira-Setup</h2>
     <form>
-      <md-input-container class="md-block"
-                          flex-gt-sm>
+      <md-input-container class="md-block">
         <label>Host</label>
         <input type="text"
                ng-model="vm.r.jiraSettings.host">
       </md-input-container>
-      <md-input-container class="md-block"
-                          flex-gt-sm>
+      <md-input-container class="md-block">
         <label>Username</label>
         <input type="text"
                ng-model="vm.r.jiraSettings.userName">
       </md-input-container>
-      <md-input-container class="md-block"
-                          flex-gt-sm>
+      <md-input-container class="md-block">
         <label>Password</label>
         <input type="password"
                ng-model="vm.r.jiraSettings.password">
       </md-input-container>
-      <md-input-container class="md-block"
-                          flex-gt-sm>
+      <md-input-container class="md-block">
         <label>JQL Query for Tasks</label>
         <input type="text"
                ng-model="vm.r.jiraSettings.jqlQuery">
@@ -102,32 +96,44 @@
       </md-input-container>
 
 
-      <md-input-container class="md-block"
-                          flex-gt-sm>
-        <div flex-gt-sm="50">
-          <md-switch ng-model="vm.r.jiraSettings.isWorklogEnabled"
+      <section>
+        <h3 class="md-subtitle">Worklog</h3>
+
+        <md-input-container class="md-block">
+          <div flex-gt-sm="50">
+            <md-switch ng-model="vm.r.jiraSettings.isWorklogEnabled"
                        aria-label="open dialog for adding a worklog to jira when task is done">
-            Open dialog for adding a worklog to jira when task is done
-          </md-switch>
-        </div>
-      </md-input-container>
-      <md-input-container class="md-block"
-                          flex-gt-sm>
-        <div flex-gt-sm="50">
-          <md-switch ng-model="vm.r.jiraSettings.isAutoWorklog"
+              Open worklog dialog for adding a worklog to jira when task is done
+            </md-switch>
+          </div>
+        </md-input-container>
+
+        <md-input-container class="md-block">
+          <div flex-gt-sm="50">
+            <md-switch ng-model="vm.r.jiraSettings.isAddWorklogOnSubTaskDone"
+                       ng-disabled="!vm.r.jiraSettings.isWorklogEnabled"
+                       aria-label="Add worklog when sub task is done">
+              Open worklog dialog when sub task is done
+            </md-switch>
+          </div>
+        </md-input-container>
+
+        <md-input-container class="md-block">
+          <div flex-gt-sm="50">
+            <md-switch ng-model="vm.r.jiraSettings.isAutoWorklog"
                        ng-disabled="!vm.r.jiraSettings.isWorklogEnabled"
                        aria-label="(not recommended) send updates to worklog automatically when task is done">
-            (not recommended) send updates to worklog automatically when task is done
-          </md-switch>
-        </div>
-      </md-input-container>
+              (not recommended) send updates to worklog automatically when task is done
+            </md-switch>
+          </div>
+        </md-input-container>
+      </section>
 
 
       <section ng-if="vm.r.jiraSettings.allTransitions">
         <h3 class="md-subtitle">Default Transitions</h3>
         <p>Jira enables a wide configuration of transitions usually coming into action as different columns on your jira agile board. That's why we can't make assumptions about where and when to transition your tasks and you need to set it manually.</p>
-        <md-input-container class="md-block"
-                            flex-gt-sm>
+        <md-input-container class="md-block">
           <label>Default transition for OPEN</label>
           <md-select ng-model="vm.r.jiraSettings.transitions.OPEN"
                      arial-label="Select default transition for OPEN">
@@ -139,8 +145,7 @@
             </md-option>
           </md-select>
         </md-input-container>
-        <md-input-container class="md-block"
-                            flex-gt-sm>
+        <md-input-container class="md-block">
           <label>Default transition for IN_PROGRESS</label>
           <md-select ng-model="vm.r.jiraSettings.transitions.IN_PROGRESS"
                      arial-label="Select default transition for IN_PROGRESS">
@@ -152,8 +157,7 @@
             </md-option>
           </md-select>
         </md-input-container>
-        <md-input-container class="md-block"
-                            flex-gt-sm>
+        <md-input-container class="md-block">
           <label>Default transition for DONE</label>
           <md-select ng-model="vm.r.jiraSettings.transitions.DONE"
                      arial-label="Select default transition for DONE">
@@ -182,7 +186,7 @@
     </md-select>
     <div flex-gt-sm="50">
       <md-switch ng-model="vm.isDarkTheme"
-                   aria-label="Use dark theme">
+                 aria-label="Use dark theme">
         Use dark theme
       </md-switch>
     </div>
@@ -224,11 +228,10 @@
 
     <section>
       <h2 class="md-title">Misc</h2>
-      <md-input-container class="md-block"
-                          flex-gt-sm>
+      <md-input-container class="md-block">
         <div flex-gt-sm="50">
           <md-switch ng-model="vm.r.config.isShortSyntaxEnabled"
-                       aria-label="Use short syntax (e.g. 'TaskTitleBla e:30m')">
+                     aria-label="Use short syntax (e.g. 'TaskTitleBla e:30m')">
             Use short syntax (e.g. 'TaskTitleBla e:30m') for task creation
           </md-switch>
         </div>
