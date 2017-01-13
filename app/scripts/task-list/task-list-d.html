@@ -35,7 +35,7 @@
                  aria-label="mark as current"
                  tabindex="2"
                  ng-click="(vm.currentTask.id === task.id) ? vm.currentTask=undefined :vm.currentTask=task"
-                 ng-show="vm.allowTaskSelection && (!task.subTasks.length ||task.subTasks.length===0) ">
+                 ng-show="!task.isDone && vm.allowTaskSelection && (!task.subTasks.length ||task.subTasks.length===0) ">
         <md-tooltip md-direction="top">
           Start working on task
         </md-tooltip>
