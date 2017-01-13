@@ -215,4 +215,36 @@ task-list {
       margin-top: 5px;
     }
   }
+
+  // animations
+  transition: 0.3s;
+
+  &.ng-enter {
+    opacity: 0;
+    transform: scaleY(0);
+  }
+  &.ng-enter-active {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  &.ng-leave {
+    display: block;
+    opacity: 1;
+    transform: scale(1);
+  }
+  &.ng-leave-active {
+    display: block;
+    opacity: 0;
+    transform: scaleX(0);
+  }
+  //&.ng-move {
+  //  transition: 0.1s;
+  //  opacity: 0;
+  //  transform: scale(0);
+  //}
+  //&.ng-move-active {
+  //  opacity: 1;
+  //  transform: scale(1);
+  //}
 }
