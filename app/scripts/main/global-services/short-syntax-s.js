@@ -19,7 +19,7 @@
     const timeEstimateRegExp = / t[0-9]+(m|h|d)$/i;
 
     return (task) => {
-      if ($rootScope.r.config.isShortSyntaxEnabled) {
+      if ($rootScope.r.config && $rootScope.r.config.isShortSyntaxEnabled) {
         if (!task.originalKey && !task.timeEstimate && !task.subTasks) {
           let matches = timeEstimateRegExp.exec(task.title);
           if (matches) {
