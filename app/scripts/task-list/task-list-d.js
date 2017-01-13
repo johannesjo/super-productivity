@@ -37,7 +37,7 @@
   }
 
   /* @ngInject */
-  function TaskListCtrl(Dialogs, $mdToast, $timeout, $window, Tasks, EDIT_ON_CLICK_TOGGLE_EV, $scope, ShortSyntax, $element) {
+  function TaskListCtrl(Dialogs, $mdToast, $timeout, $window, Tasks, EDIT_ON_CLICK_TOGGLE_EV, $scope, ShortSyntax, $element, Jira) {
     let vm = this;
 
     let lastFocusedTaskEl;
@@ -148,6 +148,12 @@
 
     vm.onChangeTitle = (task) => {
       ShortSyntax(task);
+    };
+
+    vm.onTaskDone = (task) => {
+      if (task.isDone) {
+        Jira.addWorklog(task);
+      }
     };
 
     vm.handleKeyPress = ($event, task, $index) => {

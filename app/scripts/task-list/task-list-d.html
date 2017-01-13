@@ -133,6 +133,7 @@
         </md-button>
         <md-checkbox ng-model="task.isDone"
                      tabindex="2"
+                     ng-change="vm.onTaskDone(task)"
                      aria-label="un-/mark as done">
         </md-checkbox>
       </div>
