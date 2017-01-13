@@ -18,6 +18,9 @@
     const IPC_JIRA_CB_EVENT = 'JIRA_RESPONSE';
     const IPC_JIRA_MAKE_REQUEST_EVENT = 'JIRA';
 
+    // it's weird!!
+    const JIRA_DATE_FORMAT = 'YYYY-MM-DDTHH:mm:ss.SSZZ';
+
     const MAX_RESULTS = 100;
     const ISSUE_TYPE = 'JIRA';
     const FIELDS_TO_GET = [
@@ -156,6 +159,25 @@
       } else {
         SimpleToast('Jira Request failed: Not a real ' + ISSUE_TYPE + ' issue.');
         return $q.reject('Not a real ' + ISSUE_TYPE + ' issue.');
+      }
+    };
+
+    this.updateWorklog = (originalKey, started, timeSpent, comment) => {
+      if (originalKey && started && started.toISOString && timeSpent && timeSpent.asSeconds) {
+        let request = {
+          config: $localStorage.jiraSettings,
+          apiMethod: 'addWorklog',
+          arguments: [originalKey, {
+            started: started.format(JIRA_DATE_FORMAT),
+            timeSpentSeconds: timeSpent.asSeconds(),
+            comment: comment,
+            //timeSpentSeconds: 12000
+          }]
+        };
+        return this.sendRequest(request);
+      } else {
+        SimpleToast('Jira: Not enough parameters for worklog.');
+        return $q.reject('Jira: Not enough parameters for worklog.');
       }
     };
 
