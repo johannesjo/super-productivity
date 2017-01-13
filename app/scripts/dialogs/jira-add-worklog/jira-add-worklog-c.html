@@ -4,6 +4,7 @@
       <h2>Submit worklog to jira for "{{ vm.taskCopy.originalKey }}"</h2>
       <span flex></span>
       <md-button class="md-icon-button"
+                 aria-label="Cancel"
                  ng-click="vm.cancel()">
         <ng-md-icon icon="close"></ng-md-icon>
       </md-button>
@@ -17,7 +18,7 @@
     <md-dialog-content>
       <div class="md-dialog-content">
         <p>Submit a worklog for "{{ vm.taskCopy.title }}".</p>
-        <p>The current logged work amount is <strong>{{ vm.taskCopy.originalTimeSpent }}</strong>.</p>
+        <p>The current logged work amount on Jira is <strong>{{ vm.taskCopy.originalTimeSpent|duration }}</strong>.</p>
 
 
         <!--<md-input-container class="md-block">-->
@@ -71,7 +72,7 @@
                  placeholder="Time spent"
                  input-duration
                  ng-model="vm.taskCopy.timeSpent">
-          <div class="hint">Current values is {{ vm.taskCopy.originalTimeSpent }}</div>
+          <div class="hint">Current jira values is {{ vm.taskCopy.originalTimeSpent|duration }}</div>
           <div class="validation-messages"
                ng-messages="worklogForm.timeSpent.$error">
             <div ng-message="required">This is required!</div>
@@ -94,10 +95,12 @@
     <md-dialog-actions>
       <md-button ng-click="vm.cancel()"
                  type="button"
+                 aria-label="Camcel"
                  class="md-primary md-raised">
         Cancel
       </md-button>
       <md-button type="submit"
+                 aria-label="Submit"
                  class="md-raised">
         Add worklog on Jira
       </md-button>

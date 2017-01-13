@@ -171,11 +171,9 @@
 
   function handleCurrentTaskUpdates($rootScope, $window, $q, Jira, Tasks, IS_ELECTRON, $state, Notifier, $interval, SimpleToast, JIRA_UPDATE_POLL_INTERVAL, Dialogs, $timeout) {
 
-    $timeout(() => {
-      Dialogs('JIRA_ADD_WORKLOG', { task: $rootScope.r.currentTask })
-      $rootScope.r.currentTask.started = $window.moment().subtract('days', 1);
-      Jira.addWorklog($rootScope.r.currentTask);
-    }, 10);
+    //$timeout(() => {
+    //  Jira.addWorklog($rootScope.r.currentTask);
+    //}, 10);
 
     function doAsyncSeries(arr) {
       return arr.reduce(function (promise, item) {

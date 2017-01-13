@@ -167,7 +167,6 @@
     };
 
     this.addWorklog = (task) => {
-      console.log(task);
 
       if (task.originalKey && task.originalType === ISSUE_TYPE) {
         if ($localStorage.jiraSettings.isWorklogEnabled) {
@@ -178,8 +177,8 @@
             let defer = $q.defer();
 
             Dialogs('JIRA_ADD_WORKLOG', { task })
-              .then((originalKey, started, timeSpent, comment) => {
-                this._addWorklog(originalKey, started, timeSpent, comment)
+              .then((taskCopy) => {
+                this._addWorklog(taskCopy.originalKey, taskCopy.started, taskCopy.timeSpent, taskCopy.comment)
                   .then(defer.resolve, defer.reject);
               }, defer.reject);
 
