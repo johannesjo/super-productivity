@@ -42,14 +42,13 @@ TODO configure more restrictive Content-Security-Policy
       ng-cloak
       ng-class="r.bodyClass"
       md-theme="{{r.theme}}">
-
 <main-header class="md-whiteframe-glow-z1"></main-header>
 <md-content md-scroll-y
             layout="column"
             flex>
-  <hint ng-if="r.noteForToday"
+  <hint ng-if="r.tomorrowsNote"
         title="Your yesterdays note for today">
-    <p>{{ r.noteForToday }}</p>
+    <p>{{ r.tomorrowsNote }}</p>
   </hint>
   <main ui-view></main>
   <distraction-panel distractions="r.distractions"></distraction-panel>

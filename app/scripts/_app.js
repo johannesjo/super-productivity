@@ -134,6 +134,8 @@
 
     $rootScope.r.jiraSettings = $localStorage.jiraSettings;
 
+    $rootScope.r.tomorrowsNote = $localStorage.tomorrowsNote;
+
     $rootScope.r.git = $localStorage.git;
 
     $rootScope.r.theme = $localStorage.theme || DEFAULT_THEME;
