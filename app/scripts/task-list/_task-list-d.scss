@@ -185,6 +185,7 @@ task-list {
   .notes {
     width: 100%;
     flex: 0 1 100%;
+    overflow: hidden;
 
     section {
       margin-top: 10px;
