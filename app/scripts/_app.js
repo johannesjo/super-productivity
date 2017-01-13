@@ -50,6 +50,8 @@
       },
       jiraSettings: {
         isFirstLogin: true,
+        isWorklogEnabled: true,
+        isAutoWorklog: false,
         defaultTransitionInProgress: undefined,
         defaultTransitionDone: undefined,
         transitions: {
@@ -195,14 +197,15 @@
         if (isUpdated) {
           Notifier({
             title: 'Jira Update',
-            message: 'The task "' + task.title + '" has been updated as it was updated on Jira.',
+            message: '"' + task.title + '" => has been updated as it was updated on Jira.',
             sound: true,
             wait: true
           });
-          SimpleToast('The task "' + task.title + '" has been updated as it was updated on Jira.');
+          SimpleToast('"' + task.title + '" => has been updated as it was updated on Jira.');
         }
       });
     }
+
 
     // handle updates that need to be made on jira
     $rootScope.$watch('r.currentTask', (newCurrent, prevCurrent) => {
@@ -245,9 +248,15 @@
         if (dialogsAndRequestsForStatusUpdate.length > 0) {
           // execute all
           doAsyncSeries(dialogsAndRequestsForStatusUpdate).then(() => {
-            // current task (id) changed
-            if (newCurrent && newCurrent.originalKey && newCurrent.id !== (prevCurrent && prevCurrent.id)) {
-              checkJiraUpdatesForTask(newCurrent);
+            // is jira task
+            if (newCurrent && newCurrent.originalKey) {
+              // current task (id) changed
+              if (newCurrent.id !== (prevCurrent && prevCurrent.id)) {
+                checkJiraUpdatesForTask(newCurrent);
+              }
+              if (newCurrent.isDone) {
+                Jira.updateWorklog(newCurrent);
+              }
             }
           });
         }

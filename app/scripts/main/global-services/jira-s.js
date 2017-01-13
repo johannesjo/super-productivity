@@ -111,24 +111,30 @@
             if (task.status !== type) {
               return this.transitionIssue(task.originalId, {
                 id: $localStorage.jiraSettings.transitions[type]
-              }).then(() => {
-                // update
-                task.status = type;
-              });
+              })
+                .then(() => {
+                  // update
+                  task.status = type;
+                });
             } else {
               return $q.resolve('NO NEED TO UPDATE');
             }
           }
         } else {
-          // TODO the promise handling and setting up should be better
+
+          // TODO think about if promise should be resolved or rejected when dialog is canceled
+
           let defer = $q.defer();
-          this.getTransitionsForIssue(task).then((response) => {
-            let transitions = response.response.transitions;
-            return Dialogs('JIRA_SET_IN_PROGRESS', { transitions, task, type }).then((transition) => {
-              defer.resolve(transition);
-              this.transitionIssue(task.originalId, transition);
-            });
-          });
+          this.getTransitionsForIssue(task)
+            .then((response) => {
+              let transitions = response.response.transitions;
+              Dialogs('JIRA_SET_IN_PROGRESS', { transitions, task, type })
+                .then((transition) => {
+                  defer.resolve(transition);
+                  this.transitionIssue(task.originalId, transition)
+                    .then(defer.resolve, defer.reject);
+                }, defer.reject);
+            }, defer.reject);
           return defer.promise;
         }
       }
@@ -142,18 +148,19 @@
           apiMethod: 'findIssue',
           arguments: [task.originalKey]
         };
-        this.sendRequest(request).then((res) => {
-            let issue = res.response;
-            if (issue.fields.updated === task.originalUpdated) {
-              defer.resolve(false);
-            } else {
-              // extend task with new values
-              angular.extend(task, mapIssue(issue));
-              defer.resolve(true);
-              task.isUpdated = true;
-            }
-          }, defer.reject
-        );
+        this.sendRequest(request)
+          .then((res) => {
+              let issue = res.response;
+              if (issue.fields.updated === task.originalUpdated) {
+                defer.resolve(false);
+              } else {
+                // extend task with new values
+                angular.extend(task, mapIssue(issue));
+                defer.resolve(true);
+                task.isUpdated = true;
+              }
+            }, defer.reject
+          );
 
         return defer.promise;
       } else {
@@ -162,7 +169,30 @@
       }
     };
 
-    this.updateWorklog = (originalKey, started, timeSpent, comment) => {
+    this.updateWorklog = (task) => {
+      if (task.originalKey && task.originalType === ISSUE_TYPE) {
+        if ($localStorage.jiraSettings.isWorklogEnabled) {
+          if ($localStorage.jiraSettings.isAutoWorklog) {
+            return this._updateWorklog(task.originalKey, task.started, task.timeSpent);
+          } else {
+
+            // TODO think about if promise should be resolved or rejected when dialog is canceled
+
+            let defer = $q.defer();
+
+            Dialogs('JIRA_ADD_WORKLOG', { task })
+              .then((originalKey, started, timeSpent, comment) => {
+                this._updateWorklog(originalKey, started, timeSpent, comment)
+                  .then(defer.resolve, defer.reject);
+              }, defer.reject);
+
+            return defer.promise;
+          }
+        }
+      }
+    };
+
+    this._updateWorklog = (originalKey, started, timeSpent, comment) => {
       if (originalKey && started && started.toISOString && timeSpent && timeSpent.asSeconds) {
         let request = {
           config: $localStorage.jiraSettings,

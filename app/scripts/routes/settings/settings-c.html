@@ -73,7 +73,7 @@
 
 
   <section ng-if="vm.IS_ELECTRON">
-    <h2 class="md-title">Jira-Setup for Task Suggestion</h2>
+    <h2 class="md-title">Jira-Setup</h2>
     <form>
       <md-input-container class="md-block"
                           flex-gt-sm>
@@ -99,6 +99,27 @@
         <input type="text"
                ng-model="vm.r.jiraSettings.jqlQuery">
         <div class="hint">e.g.: assignee = "{{ vm.r.jiraSettings.userName }}" AND resolution = Unresolved ORDER BY updatedDate DESC</div>
+      </md-input-container>
+
+
+      <md-input-container class="md-block"
+                          flex-gt-sm>
+        <div flex-gt-sm="50">
+          <md-switch ng-model="vm.r.jiraSettings.isWorklogEnabled"
+                       aria-label="open dialog for adding a worklog to jira when task is done">
+            Open dialog for adding a worklog to jira when task is done
+          </md-switch>
+        </div>
+      </md-input-container>
+      <md-input-container class="md-block"
+                          flex-gt-sm>
+        <div flex-gt-sm="50">
+          <md-switch ng-model="vm.r.jiraSettings.isAutoWorklog"
+                       ng-disabled="!vm.r.jiraSettings.isWorklogEnabled"
+                       aria-label="(not recommended) send updates to worklog automatically when task is done">
+            (not recommended) send updates to worklog automatically when task is done
+          </md-switch>
+        </div>
       </md-input-container>
 
 
@@ -160,10 +181,10 @@
       </md-option>
     </md-select>
     <div flex-gt-sm="50">
-      <md-checkbox ng-model="vm.isDarkTheme"
+      <md-switch ng-model="vm.isDarkTheme"
                    aria-label="Use dark theme">
         Use dark theme
-      </md-checkbox>
+      </md-switch>
     </div>
   </section>
 
@@ -206,10 +227,10 @@
       <md-input-container class="md-block"
                           flex-gt-sm>
         <div flex-gt-sm="50">
-          <md-checkbox ng-model="vm.r.config.isShortSyntaxEnabled"
+          <md-switch ng-model="vm.r.config.isShortSyntaxEnabled"
                        aria-label="Use short syntax (e.g. 'TaskTitleBla e:30m')">
             Use short syntax (e.g. 'TaskTitleBla e:30m') for task creation
-          </md-checkbox>
+          </md-switch>
         </div>
       </md-input-container>
     </section>
