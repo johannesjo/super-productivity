@@ -1,40 +1,57 @@
 <md-dialog aria-label="Was Idle Dialog"
            class="was-idle-dialog">
-  <md-dialog-content layout-padding>
-    <form ng-submit="vm.trackIdleToTask()">
-      <p>You have been idle for <strong>{{ vm.idleTime|duration:true }}</strong>.</p>
-      <p>Select the task you want to track the time to, or just press cancel if you don't want to track the time.</p>
-      <pre>{{ vm.currentTask|json }}</pre>
+  <md-toolbar>
+    <div class="md-toolbar-tools">
+      <h2>Glad you're back!</h2>
+      <span flex></span>
+      <md-button class="md-icon-button"
+                 aria-label="Cancel"
+                 ng-click="vm.cancel()">
+        <ng-md-icon icon="close"></ng-md-icon>
+      </md-button>
+    </div>
+  </md-toolbar>
 
-      <md-autocomplete
-        md-selected-item="vm.selectedTask"
-        md-search-text="vm.searchText"
-        md-items="task in vm.undoneTasks"
-        md-item-text="task.title"
-        md-min-length="0"
-        placeholder="Select a task to track the time">
-        <md-item-template>
+  <form ng-submit="vm.trackIdleToTask()">
+    <md-dialog-content>
+      <div class="md-dialog-content">
+
+        <p>You have been idle for <strong>{{ vm.idleTime|duration:true }}</strong>.</p>
+        <p>Select the task you want to track the time to, or just press cancel if you don't want to track the time.</p>
+        <pre>{{ vm.currentTask|json }}</pre>
+
+        <md-autocomplete
+          md-selected-item="vm.selectedTask"
+          md-search-text="vm.searchText"
+          md-items="task in vm.undoneTasks"
+          md-item-text="task.title"
+          md-min-length="0"
+          placeholder="Select a task to track the time">
+          <md-item-template>
           <span md-highlight-text="vm.searchText"
                 md-highlight-flags="^i">{{task.title}}</span>
-        </md-item-template>
-        <md-not-found>
-          No states matching "{{vm.searchText}}" were found.
-          <a ng-click="vm.newState(vm.searchText)">Create a new one!</a>
-        </md-not-found>
-      </md-autocomplete>
+          </md-item-template>
+          <md-not-found>
+            No states matching "{{vm.searchText}}" were found.
+            <a ng-click="vm.newState(vm.searchText)">Create a new one!</a>
+          </md-not-found>
+        </md-autocomplete>
 
-    </form>
-  </md-dialog-content>
+      </div>
+    </md-dialog-content>
 
-  <md-dialog-actions>
-    <md-button ng-click="vm.trackIdleToTask()"
-               class="md-primary md-raised">
-      Track
-    </md-button>
+    <md-dialog-actions>
+      <md-button type="submit"
+                 class="md-primary md-raised">
+        Track
+      </md-button>
 
-    <md-button ng-click="vm.cancel()"
-               class="md-primary md-raised">
-      Don't track
-    </md-button>
-  </md-dialog-actions>
+      <md-button ng-click="vm.cancel()"
+                 type="button"
+                 class="md-raised">
+        Don't track
+      </md-button>
+    </md-dialog-actions>
+  </form>
+
 </md-dialog>

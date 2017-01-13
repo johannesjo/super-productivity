@@ -33,7 +33,7 @@
       $mdDialog.hide();
     };
 
-    vm.close = () => {
+    vm.cancel = () => {
       $mdDialog.hide();
     };
   }

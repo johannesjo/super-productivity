@@ -1,50 +1,64 @@
-<form ng-submit="vm.submit(vm.timeEstimate, vm.timeSpent)">
+<md-dialog aria-label="Time estimation dialog"
+           class="dialog-time-estimate">
+  <md-toolbar>
+    <div class="md-toolbar-tools">
+      <h2>Make an estimate / adjust time spent</h2>
+      <span flex></span>
+      <md-button class="md-icon-button"
+                 aria-label="Cancel"
+                 ng-click="vm.cancel()">
+        <ng-md-icon icon="close"></ng-md-icon>
+      </md-button>
+    </div>
+  </md-toolbar>
 
-  <md-dialog aria-label="Time estimation dialog"
-             class="dialog-time-estimate">
+  <form ng-submit="vm.submit(vm.timeEstimate, vm.timeSpent)">
+    <md-dialog-content>
+      <div class="md-dialog-content">
 
-    <md-dialog-content layout-padding
-                       class="md-no-momentum">
-      <h2 class="md-title">Make an estimate</h2>
+        <md-input-container class="md-icon-float md-block">
+          <ng-md-icon icon="timer"
+                      aria-label="Estimated Durations"></ng-md-icon>
+          <label>Estimated Duration</label>
 
-      <md-input-container class="md-icon-float md-block">
-        <ng-md-icon icon="access_time"
-                    aria-label="Estimated Durations"></ng-md-icon>
-        <label>Estimated Duration</label>
+          <input type="text"
+                 input-duration
+                 ng-model="vm.timeEstimate"
+                 md-auto-focus
+                 aria-label="Estimated Durations">
+        </md-input-container>
 
-        <input type="text"
-               input-duration
-               ng-model="vm.timeEstimate"
-               md-auto-focus
-               aria-label="Estimated Durations">
-      </md-input-container>
-      <md-input-container class="md-icon-float md-block">
-        <ng-md-icon icon="access_time"
-                    aria-label="Time Spend"></ng-md-icon>
-        <label>Time Spend total</label>
-        <input type="text"
-               input-duration="optional"
-               ng-model="vm.timeSpent"
-               aria-label="Time Spend">
-      </md-input-container>
+        <md-input-container class="md-icon-float md-block">
+          <ng-md-icon icon="timer"
+                      aria-label="Time Spend"></ng-md-icon>
+          <label>Time Spend total</label>
+          <input type="text"
+                 input-duration="optional"
+                 ng-model="vm.timeSpent"
+                 aria-label="Time Spend">
+        </md-input-container>
 
-      <div class="side-info">
-        Examples:<br>
-        30m => 30 minutes<br>
-        2h => 2 hours<br>
-        2h 30m => 2 hours and 30 minutes
+        <div class="side-info">
+          Examples:<br>
+          30m => 30 minutes<br>
+          2h => 2 hours<br>
+          2h 30m => 2 hours and 30 minutes
+        </div>
+
       </div>
     </md-dialog-content>
+
+
     <md-dialog-actions>
-      <md-button ng-click="vm.submit(vm.timeEstimate, vm.timeSpent)"
-                 type="submit"
-                 class="md-primary">
+      <md-button type="submit"
+                 class="md-primary md-raised">
         Save
       </md-button>
-      <md-button ng-click="vm.close()"
-                 class="md-primary">
+      <md-button ng-click="vm.cancel()"
+                 type="button"
+                 class="md-raised">
         Cancel
       </md-button>
     </md-dialog-actions>
-  </md-dialog>
-</form>
+  </form>
+</md-dialog>
