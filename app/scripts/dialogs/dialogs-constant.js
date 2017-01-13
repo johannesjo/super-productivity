@@ -45,6 +45,10 @@
       JIRA_SET_IN_PROGRESS: {
         controller: 'JiraSetInProgressCtrl',
         templateUrl: 'scripts/dialogs/jira-set-in-progress/jira-set-in-progress-c.html'
+      },
+      JIRA_ADD_WORKLOG: {
+        controller: 'JiraAddWorklogCtrl',
+        templateUrl: 'scripts/dialogs/jira-add-worklog/jira-add-worklog-c.html'
       }
     });
 })();

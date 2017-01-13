@@ -94,11 +94,6 @@
     $mdThemingProvider.theme('default')
       .primaryPalette('blue');
     //.dark();
-    //$mdThemingProvider.enableBrowserColor({
-    //  theme: 'default', // Default is 'default'
-    //  palette: 'accent', // Default is 'primary', any basic material palette and extended palettes are available
-    //  hue: '200' // Default is '800'
-    //});
 
     let themes = THEMES;
     for (let index = 0; index < themes.length; ++index) {
@@ -174,7 +169,13 @@
     });
   }
 
-  function handleCurrentTaskUpdates($rootScope, $window, $q, Jira, Tasks, IS_ELECTRON, $state, Notifier, $interval, SimpleToast, JIRA_UPDATE_POLL_INTERVAL) {
+  function handleCurrentTaskUpdates($rootScope, $window, $q, Jira, Tasks, IS_ELECTRON, $state, Notifier, $interval, SimpleToast, JIRA_UPDATE_POLL_INTERVAL, Dialogs, $timeout) {
+
+    $timeout(() => {
+      Dialogs('JIRA_ADD_WORKLOG', { task: $rootScope.r.currentTask })
+      $rootScope.r.currentTask.started = $window.moment().subtract('days', 1);
+      Jira.addWorklog($rootScope.r.currentTask);
+    }, 10);
 
     function doAsyncSeries(arr) {
       return arr.reduce(function (promise, item) {
@@ -205,7 +206,6 @@
         }
       });
     }
-
 
     // handle updates that need to be made on jira
     $rootScope.$watch('r.currentTask', (newCurrent, prevCurrent) => {

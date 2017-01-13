@@ -121,9 +121,6 @@
             }
           }
         } else {
-
-          // TODO think about if promise should be resolved or rejected when dialog is canceled
-
           let defer = $q.defer();
           this.getTransitionsForIssue(task)
             .then((response) => {
@@ -169,20 +166,20 @@
       }
     };
 
-    this.updateWorklog = (task) => {
+    this.addWorklog = (task) => {
+      console.log(task);
+
       if (task.originalKey && task.originalType === ISSUE_TYPE) {
         if ($localStorage.jiraSettings.isWorklogEnabled) {
           if ($localStorage.jiraSettings.isAutoWorklog) {
-            return this._updateWorklog(task.originalKey, task.started, task.timeSpent);
+            return this._addWorklog(task.originalKey, task.started, task.timeSpent);
           } else {
-
-            // TODO think about if promise should be resolved or rejected when dialog is canceled
 
             let defer = $q.defer();
 
             Dialogs('JIRA_ADD_WORKLOG', { task })
               .then((originalKey, started, timeSpent, comment) => {
-                this._updateWorklog(originalKey, started, timeSpent, comment)
+                this._addWorklog(originalKey, started, timeSpent, comment)
                   .then(defer.resolve, defer.reject);
               }, defer.reject);
 
@@ -192,7 +189,7 @@
       }
     };
 
-    this._updateWorklog = (originalKey, started, timeSpent, comment) => {
+    this._addWorklog = (originalKey, started, timeSpent, comment) => {
       if (originalKey && started && started.toISOString && timeSpent && timeSpent.asSeconds) {
         let request = {
           config: $localStorage.jiraSettings,

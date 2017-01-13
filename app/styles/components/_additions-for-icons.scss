@@ -53,20 +53,6 @@ ng-md-icon svg {
   pointer-events: none;
 }
 
-md-input-container > ng-md-icon {
-  position: absolute;
-  top: 5px;
-  left: 2px;
-}
-
-md-input-container > ng-md-icon + input {
-  margin-left: 56px;
-}
-
-md-input-container.md-default-theme > ng-md-icon {
-  fill: #fff;
-}
-
 md-tabs-wrapper md-prev-button ng-md-icon,
 md-tabs-wrapper md-next-button ng-md-icon {
   position: absolute;
@@ -81,23 +67,41 @@ md-tabs-wrapper md-next-button ng-md-icon {
   transform: translate3d(-50%, -50%, 0) rotate(180deg);
 }
 
-md-input-container > ng-md-icon {
-  position: absolute;
-  top: 5px;
-  left: 2px;
-}
-
-md-input-container > ng-md-icon + input {
-  margin-left: 56px;
-}
-
 md-input-container {
+
+  > ng-md-icon{
+    position: relative;
+    top: auto;
+    left: auto;
+  }
+
+  &.md-default-theme > ng-md-icon {
+    fill: #fff;
+  }
+
+  $this-float-ml: 32px;
   &.md-icon-float {
-    margin-left: 30px;
+    display: block;
+    padding-left: $this-float-ml;
+    label {
+      margin-left: $this-float-ml;
+      width: calc(100% - #{$this-float-ml}) !important;
+    }
+    .hint{
+      margin-left: $this-float-ml;
+      width: calc(100% - #{$this-float-ml}) !important;
+    }
+    > ng-md-icon {
+      position: absolute;
+      top: 5px;
+      left: 0;
+      vertical-align: middle;
+      + input {
+        margin-left: 0;
+        //width: calc(100% - #{$this-float-ml});
+      }
+    }
   }
-  ng-md-icon {
-    position: absolute;
-    left: -30px !important;
-    top: 6px !important;
-  }
+
+
 }
