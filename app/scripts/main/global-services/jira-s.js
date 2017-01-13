@@ -174,19 +174,25 @@
 
       if ($localStorage.jiraSettings.isWorklogEnabled) {
 
-        // use parent task if enabled
-        if ($localStorage.jiraSettings.isAddWorklogOnSubTaskDone && task.parentId) {
-          let parentTaskCopy = angular.copy(Tasks.getById(task.parentId));
-          if (parentTaskCopy && parentTaskCopy.originalKey && parentTaskCopy.originalType === ISSUE_TYPE) {
+        // use parent task option if enabled
+        if ($localStorage.jiraSettings.isAddWorklogOnSubTaskDone) {
+          if (task.parentId) {
+            let parentTaskCopy = angular.copy(Tasks.getById(task.parentId));
+            if (parentTaskCopy && parentTaskCopy.originalKey && parentTaskCopy.originalType === ISSUE_TYPE) {
 
-            comment = task.title;
+              comment = task.title;
 
-            parentTaskCopy.title = parentTaskCopy.originalKey + ': ' + task.title;
-            parentTaskCopy.timeSpent = task.timeSpent;
-            parentTaskCopy.started = task.started;
+              parentTaskCopy.title = parentTaskCopy.originalKey + ': ' + task.title;
+              parentTaskCopy.timeSpent = task.timeSpent;
+              parentTaskCopy.started = task.started;
 
-            // finally set worklog task to parent
-            task = parentTaskCopy;
+              // finally set worklog task to parent
+              task = parentTaskCopy;
+            }
+          }
+          // don't execute for tasks with sub tasks in this mode
+          else if (task.subTasks && task.subTasks.length > 0) {
+            return;
           }
         }
 

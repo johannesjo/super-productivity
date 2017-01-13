@@ -113,7 +113,7 @@
             <md-switch ng-model="vm.r.jiraSettings.isAddWorklogOnSubTaskDone"
                        ng-disabled="!vm.r.jiraSettings.isWorklogEnabled"
                        aria-label="Add worklog when sub task is done">
-              Open worklog dialog when sub task is done
+              Open worklog dialog when sub task is done and not for tasks with sub tasks themselves
             </md-switch>
           </div>
         </md-input-container>
@@ -121,9 +121,9 @@
         <md-input-container class="md-block">
           <div flex-gt-sm="50">
             <md-switch ng-model="vm.r.jiraSettings.isAutoWorklog"
-                       ng-disabled="!vm.r.jiraSettings.isWorklogEnabled"
+                       ng-disabled="!vm.r.jiraSettings.isAutoWorklog"
                        aria-label="(not recommended) send updates to worklog automatically when task is done">
-              (not recommended) send updates to worklog automatically when task is done
+              (not recommended!) Send updates to worklog automatically when task is done
             </md-switch>
           </div>
         </md-input-container>
