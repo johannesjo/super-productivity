@@ -1,18 +1,33 @@
-<form ng-submit="vm.createProject(vm.project)">
-  <md-dialog aria-label="Create a new project"
-             class="was-idle-dialog">
-    <md-dialog-content layout-padding>
-      <h2 class="md-title">Create a new project</h2>
+<md-dialog aria-label="Create a new project"
+           class="was-idle-dialog">
 
-      <md-input-container class="md-block">
-        <label>Project Title</label>
-        <input type="text"
-               ng-model="vm.project.title"
-               md-auto-focus
-               required
-               aria-label="Title">
-      </md-input-container>
+  <md-toolbar>
+    <div class="md-toolbar-tools">
+      <h2>Create a new project</h2>
+      <span flex></span>
+      <md-button class="md-icon-button"
+                 aria-label="Cancel"
+                 ng-click="vm.cancel()">
+        <ng-md-icon icon="close"></ng-md-icon>
+      </md-button>
+    </div>
+  </md-toolbar>
+
+  <form ng-submit="vm.createProject(vm.project)">
+
+    <md-dialog-content>
+      <div class="md-dialog-content">
+        <md-input-container class="md-block">
+          <label>Project Title</label>
+          <input type="text"
+                 ng-model="vm.project.title"
+                 md-auto-focus
+                 required
+                 aria-label="Title">
+        </md-input-container>
+      </div>
     </md-dialog-content>
+
 
     <md-dialog-actions>
       <md-button type="submit"
@@ -22,9 +37,10 @@
 
       <md-button ng-click="vm.cancel()"
                  type="button"
-                 class="md-primary md-raised">
-        Dismiss
+                 class="md-raised">
+        Cancel
       </md-button>
     </md-dialog-actions>
-  </md-dialog>
-</form>
+  </form>
+
+</md-dialog>

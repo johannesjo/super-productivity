@@ -1,36 +1,49 @@
-<form ng-submit="vm.addTask()">
-  <md-dialog aria-label="Was Idle Dialog"
-             class="was-idle-dialog">
-    <md-dialog-content layout-padding>
-      <h2 class="md-title">Create a new task</h2>
+<md-dialog aria-label="Was Idle Dialog"
+           class="was-idle-dialog">
+  <md-toolbar>
+    <div class="md-toolbar-tools">
+      <h2>Create a new task</h2>
+      <span flex></span>
+      <md-button class="md-icon-button"
+                 aria-label="Cancel"
+                 ng-click="vm.cancel()">
+        <ng-md-icon icon="close"></ng-md-icon>
+      </md-button>
+    </div>
+  </md-toolbar>
 
-      <md-input-container class="md-block">
-        <label>Task Name</label>
-        <input type="text"
-               ng-model="vm.task.title"
-               md-auto-focus
-               required
-               aria-label="Title">
-      </md-input-container>
+  <form ng-submit="vm.addTask()">
+    <md-dialog-content>
+      <div class="md-dialog-content">
+        <md-input-container class="md-block">
+          <label>Task Name</label>
+          <input type="text"
+                 ng-model="vm.task.title"
+                 md-auto-focus
+                 required
+                 aria-label="Title">
+        </md-input-container>
 
-      <md-input-container class="md-icon-float md-block">
-        <ng-md-icon icon="access_time"
-                    aria-label="Estimated Durations"></ng-md-icon>
-        <label>Estimated Duration</label>
+        <md-input-container class="md-icon-float md-block">
+          <ng-md-icon icon="access_time"
+                      aria-label="Estimated Durations"></ng-md-icon>
+          <label>Estimated Duration</label>
 
-        <input type="text"
-               input-duration="optional"
-               ng-model="vm.task.timeEstimate"
-               aria-label="Estimated Durations">
-      </md-input-container>
+          <input type="text"
+                 input-duration="optional"
+                 ng-model="vm.task.timeEstimate"
+                 aria-label="Estimated Durations">
+        </md-input-container>
 
-      <md-input-container class="md-block">
-        <label>Notes</label>
+        <md-input-container class="md-block">
+          <label>Notes</label>
 
-        <textarea ng-model="vm.task.notes"
-                  aria-label="Notes"></textarea>
-      </md-input-container>
+          <textarea ng-model="vm.task.notes"
+                    aria-label="Notes"></textarea>
+        </md-input-container>
+      </div>
     </md-dialog-content>
+
 
     <md-dialog-actions>
       <md-button type="submit"
@@ -40,9 +53,9 @@
 
       <md-button ng-click="vm.cancel()"
                  type="button"
-                 class="md-primary md-raised">
-        Dismiss
+                 class="md-raised">
+        Cancel
       </md-button>
     </md-dialog-actions>
-  </md-dialog>
-</form>
+  </form>
+</md-dialog>
