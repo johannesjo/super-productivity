@@ -20,7 +20,7 @@
       controller: DailySummaryCtrl,
       controllerAs: 'vm',
       restrict: 'E',
-      scope: {}
+      scope: true
     };
 
   }
@@ -31,17 +31,12 @@
 
     let vm = this;
 
-    vm.r = $rootScope.r;
-
-    // TODO rewrite this
-    vm.todaysTasks = $rootScope.r.tasks;
-    vm.backlogTasks = $rootScope.r.backlogTasks;
     vm.doneTasks = Tasks.getDoneToday();
 
     // calc total time spent on todays tasks
     vm.totalTimeSpentTasks = $window.moment.duration();
-    for (let i = 0; i < vm.todaysTasks.length; i++) {
-      let task = vm.todaysTasks[i];
+    for (let i = 0; i < $rootScope.r.tasks.length; i++) {
+      let task = $rootScope.r.tasks[i];
       vm.totalTimeSpentTasks.add(task.timeSpent);
     }
 
@@ -49,15 +44,15 @@
     // use mysql date as it is sortable
     let todayStr = $window.moment().format('YYYY-MM-DD');
     vm.totalTimeSpentToday = $window.moment.duration();
-    for (let i = 0; i < vm.todaysTasks.length; i++) {
-      let task = vm.todaysTasks[i];
+    for (let i = 0; i < $rootScope.r.tasks.length; i++) {
+      let task = $rootScope.r.tasks[i];
       if (task.timeSpentOnDay && task.timeSpentOnDay[todayStr]) {
         vm.totalTimeSpentToday.add(task.timeSpentOnDay[todayStr]);
       }
     }
 
-    if (vm.r.git && vm.r.git.projectDir) {
-      GitLog.get(vm.r.git.projectDir).then(function (res) {
+    if ($rootScope.r.git && $rootScope.r.git.projectDir) {
+      GitLog.get($rootScope.r.git.projectDir).then(function (res) {
         vm.commitLog = res;
       });
     }
@@ -68,8 +63,6 @@
       Tasks.finishDay(vm.clearDoneTasks, vm.moveUnfinishedToBacklog);
 
       // update just for fun
-      vm.todaysTasks = $rootScope.r.tasks;
-      vm.backlogTasks = $rootScope.r.backlogTasks;
       vm.doneTasks = Tasks.getDoneToday();
 
       $mdDialog.show(
