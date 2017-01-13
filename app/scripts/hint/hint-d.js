@@ -24,17 +24,19 @@
       scope: {
         title: '@',
         subTitle:'@'
-      },
-      replace: true
+      }
     };
   }
 
   /* @ngInject */
-  function HintCtrl($element) {
+  function HintCtrl() {
     let vm = this;
 
+    vm.hide = false;
+
     vm.removeHint = () => {
-      $element.remove();
+      vm.hide = true;
+      //$element.remove();
     };
   }
 

@@ -1,6 +1,12 @@
 .hint {
   min-width: 160px;
   display: block;
+  animation: 500ms hint-pop-in;
+  margin-left: 20px;
+  margin-right: 20px;
+  margin-top: 20px;
+  @media(min-width: 600px) {
+  }
 
   md-card-title-media {
     margin-left: 10px;
@@ -16,4 +22,33 @@
     }
   }
 
+  &.ng-hide.ng-hide-add {
+    transform: translateZ(0);
+    transform-origin: right;
+    transition: all 0.5s ease-in-out;
+  }
+
+  &.ng-hide.ng-hide-add.ng-hide-add-active {
+    transform: scale(0);
+    margin-top: -50%;
+  }
+}
+
+hint {
+  display: block;
+  // animation
+  transition: 3.3s !important;
+
+}
+
+@keyframes hint-pop-in {
+  0% {
+    transform: scale(0);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
