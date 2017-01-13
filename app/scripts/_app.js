@@ -170,11 +170,7 @@
     });
   }
 
-  function handleCurrentTaskUpdates($rootScope, $window, $q, Jira, Tasks, IS_ELECTRON, $state, Notifier, $interval, SimpleToast, JIRA_UPDATE_POLL_INTERVAL, Dialogs, $timeout) {
-
-    //$timeout(() => {
-    //  Jira.addWorklog($rootScope.r.currentTask);
-    //}, 10);
+  function handleCurrentTaskUpdates($rootScope, $window, $q, Jira, Tasks, IS_ELECTRON, $state, Notifier, $interval, SimpleToast, JIRA_UPDATE_POLL_INTERVAL) {
 
     function doAsyncSeries(arr) {
       return arr.reduce(function (promise, item) {
@@ -193,17 +189,19 @@
         }
       }
 
-      Jira.checkUpdatesForTicket(task).then((isUpdated) => {
-        if (isUpdated) {
-          Notifier({
-            title: 'Jira Update',
-            message: '"' + task.title + '" => has been updated as it was updated on Jira.',
-            sound: true,
-            wait: true
-          });
-          SimpleToast('"' + task.title + '" => has been updated as it was updated on Jira.');
-        }
-      });
+      if (task && task.originalKey) {
+        Jira.checkUpdatesForTicket(task).then((isUpdated) => {
+          if (isUpdated) {
+            Notifier({
+              title: 'Jira Update',
+              message: '"' + task.title + '" => has been updated as it was updated on Jira.',
+              sound: true,
+              wait: true
+            });
+            SimpleToast('"' + task.title + '" => has been updated as it was updated on Jira.');
+          }
+        });
+      }
     }
 
     // handle updates that need to be made on jira
@@ -249,6 +247,9 @@
           // execute all
           doAsyncSeries(dialogsAndRequestsForStatusUpdate).then(() => {
             // is jira task
+            alert('here');
+            console.log(newCurrent && newCurrent.originalKey);
+
             if (newCurrent && newCurrent.originalKey) {
               // current task (id) changed
               if (newCurrent.id !== (prevCurrent && prevCurrent.id)) {
