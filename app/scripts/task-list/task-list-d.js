@@ -42,6 +42,15 @@
 
     let lastFocusedTaskEl;
 
+    // only allow after short delay
+    let animationReadyTimeout = $timeout(() => {
+      $element.addClass('is-animation-ready');
+    }, 300);
+
+    $scope.$on('$destroy', () => {
+      $timeout.cancel(animationReadyTimeout);
+    });
+
     function focusPreviousInListOrParent($index) {
       let taskEls = angular.element($element.children().children());
       let focusTaskEl;
