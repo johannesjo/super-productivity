@@ -95,10 +95,17 @@
       return moment().format('YYYY-MM-DD');
     }
 
+    function deleteNullValueTasks(tasksArray) {
+      return tasksArray.filter(function (item) {
+        return !!item;
+      });
+    }
+
     function checkDupes(tasksArray) {
       if (tasksArray) {
+        deleteNullValueTasks(tasksArray);
         let valueArr = tasksArray.map(function (item) {
-          return item.id;
+          return item && item.id;
         });
         let dupeIds = [];
         let hasDupe = valueArr.some(function (item, idx) {
