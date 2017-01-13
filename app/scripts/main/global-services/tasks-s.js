@@ -54,6 +54,13 @@
       if (!task.started) {
         task.started = moment();
       }
+      // also set parent task to started if there is one
+      if (task.parentId) {
+        let parentTask = this.getById(task.parentId);
+        if (!parentTask.started) {
+          parentTask.started = moment();
+        }
+      }
 
       // track total time spent
       if (task.timeSpent) {
