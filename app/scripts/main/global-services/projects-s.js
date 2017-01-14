@@ -15,7 +15,7 @@
 
   /* @ngInject */
   function Projects(LS_DEFAULTS, $localStorage, $rootScope, Uid, $window, SimpleToast) {
-    const OMITTED_LS_FIELDS = ['currentProject', 'projects', '$$hashKey', '$$mdSelectId'];
+    const OMITTED_LS_FIELDS = ['currentProject', 'projects', '$$hashKey', '$$mdSelectId', 'bodyClass'];
 
     this.getList = () => {
       return $localStorage.projects;
@@ -91,6 +91,16 @@
       }
     };
 
+    this.removeOmittedFields = (newCurrentProject) => {
+      if (newCurrentProject) {
+        for (let property in newCurrentProject.data) {
+          if (newCurrentProject.data.hasOwnProperty(property) && OMITTED_LS_FIELDS.indexOf(property) > -1) {
+            delete newCurrentProject.data[property];
+          }
+        }
+      }
+    };
+
     $rootScope.$watch('r.currentProject', (newCurrentProject, oldCurrentProject) => {
       if (newCurrentProject && newCurrentProject.id) {
         // when there is an old current project existing
@@ -100,6 +110,8 @@
         }
         // update with new model fields, if we change the model
         this.updateNewFields(newCurrentProject);
+        // remove omitted fields if we saved them for some reason
+        this.removeOmittedFields(newCurrentProject);
 
         // update $rootScope data and ls for current project
         $rootScope.r.currentProject = $localStorage.currentProject = newCurrentProject;
