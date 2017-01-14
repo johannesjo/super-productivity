@@ -23,7 +23,7 @@
 
     const MAX_RESULTS = 100;
     const ISSUE_TYPE = 'JIRA';
-    const FIELDS_TO_GET = [
+    const SUGGESTION_FIELDS_TO_GET = [
       'summary',
       'description',
       'timeestimate',
@@ -33,6 +33,8 @@
       'comment',
       'updated'
     ];
+
+    const moment = $window.moment;
 
     this.requestsLog = {};
 
@@ -67,6 +69,35 @@
         });
     }
 
+    function mapAndAddChangelogToTask(task, issue) {
+      let transformedChangelog;
+
+      if (issue && issue.changelog) {
+        transformedChangelog = [];
+        let changelog = issue.changelog;
+        if (changelog.histories) {
+          // we also add 2 seconds because of the millisecond difference
+          // for issue updated and historyEntry.created
+          let lastUpdate = task.originalUpdated && moment(task.originalUpdated).add(2, 'second');
+          for (let i = 0; i < changelog.histories.length; i++) {
+            let history = changelog.histories[i];
+            let historyCreated = moment(history.created);
+
+            // add if newer than the last update
+            if (lastUpdate && historyCreated.isAfter(lastUpdate)) {
+              transformedChangelog.push({
+                author: history.author.displayName,
+                items: history.items,
+                created: historyCreated
+              });
+            }
+          }
+        }
+      }
+      task.originalChangelog = transformedChangelog;
+      return transformedChangelog;
+    }
+
     function mapIssue(issue) {
       return {
         title: issue.key + ' ' + issue.fields.summary,
@@ -79,10 +110,10 @@
         originalStatus: issue.fields.status,
         originalAttachment: mapAttachments(issue),
         originalLink: 'https://' + $localStorage.jiraSettings.host + '/browse/' + issue.key,
-        originalEstimate: issue.fields.timeestimate && $window.moment.duration({
+        originalEstimate: issue.fields.timeestimate && moment.duration({
           seconds: issue.fields.timeestimate
         }),
-        originalTimeSpent: issue.fields.timespent && $window.moment.duration({
+        originalTimeSpent: issue.fields.timespent && moment.duration({
           seconds: issue.fields.timespent
         }),
       };
@@ -143,7 +174,7 @@
         let request = {
           config: $localStorage.jiraSettings,
           apiMethod: 'findIssue',
-          arguments: [task.originalKey]
+          arguments: [task.originalKey, 'changelog']
         };
         this.sendRequest(request)
           .then((res) => {
@@ -151,6 +182,9 @@
               if (issue.fields.updated === task.originalUpdated) {
                 defer.resolve(false);
               } else {
+                // add changelog entries
+                mapAndAddChangelogToTask(task, issue);
+
                 // extend task with new values
                 angular.extend(task, mapIssue(issue));
                 defer.resolve(true);
@@ -267,7 +301,7 @@
     this.getSuggestions = () => {
       let options = {
         maxResults: MAX_RESULTS,
-        fields: FIELDS_TO_GET
+        fields: SUGGESTION_FIELDS_TO_GET
       };
 
       if ($localStorage.jiraSettings && $localStorage.jiraSettings.userName && $localStorage.jiraSettings.password && $localStorage.jiraSettings.password && $localStorage.jiraSettings.jqlQuery) {

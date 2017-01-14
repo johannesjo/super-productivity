@@ -147,10 +147,31 @@
     <div class="notes"
          flex="100"
          ng-if="task.showNotes===true">
+
+      <section ng-if="task.isUpdated;">
+        <div class="md-caption">
+          Changes since last update
+        </div>
+
+        <ul class="changelog">
+          <li ng-repeat="changelogEntry in task.originalChangelog">
+            <div><em>[{{ changelogEntry.author }}] {{ changelogEntry.created| amDateFormat:'Y.MM.DD HH:mm'}}: </em></div>
+            <div ng-repeat="change in changelogEntry.items">
+              <strong>"{{ change.field }}" changed to:</strong> {{ change.toString }}
+            </div>
+          </li>
+        </ul>
+        <md-button class="md-raised"
+                   ng-click="task.isUpdated=false;task.originalChangelog=undefined;">
+          <ng-md-icon icon="delete"></ng-md-icon>
+            Hide changes
+        </md-button>
+      </section>
+
       <section>
         <div class="md-caption">Notes</div>
         <div md-whiteframe="4">
-            <inline-markdown ng-model="task.notes"></inline-markdown>
+          <inline-markdown ng-model="task.notes"></inline-markdown>
         </div>
       </section>
 
