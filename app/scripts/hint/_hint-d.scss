@@ -1,20 +1,15 @@
 .hint {
-  min-width: 160px;
   display: block;
   animation: 500ms hint-pop-in;
   margin-left: 20px;
   margin-right: 20px;
   margin-top: 20px;
-  @media(min-width: 600px) {
-  }
 
   md-card-title-media {
     margin-left: 10px;
   }
 
   md-card-content {
-    min-height: 36px;
-    max-height: 36px;
     overflow: hidden;
     text-overflow: ellipsis;
     &.is-expanded {
