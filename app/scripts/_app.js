@@ -57,6 +57,7 @@
         isFirstLogin: true,
         isWorklogEnabled: true,
         isAutoWorklog: false,
+        isUpdateIssueFromLocal: false,
         isAddWorklogOnSubTaskDone: true,
         defaultTransitionInProgress: undefined,
         defaultTransitionDone: undefined,

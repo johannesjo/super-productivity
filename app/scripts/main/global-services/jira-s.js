@@ -168,6 +168,30 @@
       }
     };
 
+    this.updateIssueDescription = (task) => {
+      if (!$localStorage.jiraSettings.isUpdateIssueFromLocal) {
+        return $q.reject('Jira: jiraSettings.isUpdateIssueFromLocal is deactivated');
+      }
+
+      if (task.originalKey && task.notes) {
+        let request = {
+          config: $localStorage.jiraSettings,
+          apiMethod: 'updateIssue',
+          arguments: [task.originalKey, {
+            fields: {
+              description: task.notes
+            }
+          }]
+        };
+        return this.sendRequest(request).then(() => {
+          SimpleToast('Jira: Description updated for ' + task.originalKey);
+        });
+      } else {
+        SimpleToast('Jira: Not enough parameters for updateIssueDescription.');
+        return $q.reject('Jira: Not enough parameters for updateIssueDescription.');
+      }
+    };
+
     this.checkUpdatesForTicket = (task) => {
       let defer = $q.defer();
       if (task && task.originalKey) {

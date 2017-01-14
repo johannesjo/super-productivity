@@ -159,6 +159,10 @@
       ShortSyntax(task);
     };
 
+    vm.onTaskNotesChanged = (task) => {
+      Jira.updateIssueDescription(task);
+    };
+
     vm.onTaskDone = (task) => {
       if (task.isDone) {
         Jira.addWorklog(task);

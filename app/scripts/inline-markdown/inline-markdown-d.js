@@ -21,7 +21,8 @@
       controllerAs: 'vm',
       restrict: 'E',
       scope: {
-        ngModel: '='
+        ngModel: '=',
+        onChanged: '&'
       }
     };
   }
@@ -50,6 +51,9 @@
       //previewEl.css('height', textareaEl[0].offsetHeight);
       //previewEl[0].height = textareaEl[0].offsetHeight;
       vm.showEdit = false;
+      if (angular.isFunction(vm.onChanged)) {
+        vm.onChanged();
+      }
     };
   }
 

@@ -171,7 +171,7 @@
       <section>
         <div class="md-caption">Notes</div>
         <div md-whiteframe="4">
-          <inline-markdown ng-model="task.notes"></inline-markdown>
+          <inline-markdown ng-model="task.notes" on-changed="vm.onTaskNotesChanged(task)"></inline-markdown>
         </div>
       </section>
 
