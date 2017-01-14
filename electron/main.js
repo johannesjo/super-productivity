@@ -179,7 +179,9 @@ function trackTimeFn() {
       // show idle dialog once not idle any more
       if (lastIdleTime > idleTime) {
         // TODO this seem to open a new instance find out why
-        mainWindow.show();
+        //mainWindow.show();
+
+        setTimeout(mainWindow.show, 50);
         console.log(lastIdleTime, CONFIG.MIN_IDLE_TIME, CONFIG.PING_INTERVAL);
         console.log(mainWindow);
 
