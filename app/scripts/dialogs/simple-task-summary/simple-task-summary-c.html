@@ -1,0 +1,75 @@
+<md-dialog aria-label="Time estimation dialog"
+           class="dialog-time-estimate"
+           flex-gt-xs="80"
+           flex-gt-sm="50">
+  <md-toolbar>
+    <div class="md-toolbar-tools">
+      <h2>Simple task list for today</h2>
+      <span flex></span>
+      <md-button class="md-icon-button"
+                 aria-label="Cancel"
+                 ng-click="vm.cancel()">
+        <ng-md-icon icon="close"></ng-md-icon>
+      </md-button>
+    </div>
+  </md-toolbar>
+
+  <form ng-submit="vm.copyToClippboard()">
+    <md-dialog-content>
+      <div class="md-dialog-content">
+
+        <md-input-container class="md-icon-float md-block">
+          <label>Tasks Text</label>
+          <textarea ng-model="vm.tasksTxt"></textarea>
+        </md-input-container>
+
+
+        <section class="options">
+          <md-input-container class="md-block">
+            <label>Separate tasks by</label>
+            <input type="text"
+                   ng-model="vm.options.separateBy">
+          </md-input-container>
+        </section>
+
+        <div>
+          <md-switch ng-model="vm.options.isUseNewLine"
+                     aria-label="Add new line">
+            Add new line
+          </md-switch>
+        </div>
+        <div>
+          <md-switch ng-model="vm.options.isListSubTasks"
+                     aria-label="List sub tasks">
+            List sub tasks
+          </md-switch>
+        </div>
+        <div>
+          <md-switch ng-model="vm.options.isWorkedOnTodayOnly"
+                     aria-label="List worked on today tasks only">
+            List worked on today tasks only
+          </md-switch>
+        </div>
+        <div>
+          <md-switch ng-model="vm.options.isListDoneOnly"
+                     aria-label="List done tasks only">
+            List done tasks only
+          </md-switch>
+        </div>
+      </div>
+    </md-dialog-content>
+
+
+    <md-dialog-actions>
+      <!--<md-button type="submit"-->
+      <!--class="md-primary md-raised">-->
+      <!--Copy to clippboard-->
+      <!--</md-button>-->
+      <md-button ng-click="vm.cancel()"
+                 type="button"
+                 class="md-raised">
+        Close
+      </md-button>
+    </md-dialog-actions>
+  </form>
+</md-dialog>

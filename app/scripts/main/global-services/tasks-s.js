@@ -287,6 +287,11 @@
       });
     };
 
+    this.isWorkedOnToday = (task) => {
+      let todayStr = getTodayStr();
+      return task && task.timeSpentOnDay && task.timeSpentOnDay[todayStr];
+    };
+
     this.getTimeWorkedToday = () => {
       let tasks = this.getToday();
       let todayStr = getTodayStr();

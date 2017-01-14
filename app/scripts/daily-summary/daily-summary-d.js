@@ -26,7 +26,7 @@
   }
 
   /* @ngInject */
-  function DailySummaryCtrl($rootScope, $window, $localStorage, Tasks, $mdDialog, $state, GitLog) {
+  function DailySummaryCtrl($rootScope, $window, $localStorage, Tasks, $mdDialog, Dialogs, $state, GitLog) {
     const IPC_EVENT_SHUTDOWN = 'SHUTDOWN';
 
     let vm = this;
@@ -56,6 +56,10 @@
         vm.commitLog = res;
       });
     }
+
+    vm.showExportModal = () => {
+      Dialogs('SIMPLE_TASK_SUMMARY');
+    };
 
     vm.finishDay = () => {
       $localStorage.tomorrowsNote = vm.tomorrowsNote;
