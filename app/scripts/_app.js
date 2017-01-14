@@ -255,23 +255,17 @@
         if (dialogsAndRequestsForStatusUpdate.length > 0) {
           // execute all
           doAsyncSeries(dialogsAndRequestsForStatusUpdate).then(() => {
-            // is jira task
-            if (newCurrent && newCurrent.originalKey) {
-              // current task (id) changed
-              if (newCurrent.id !== (prevCurrent && prevCurrent.id)) {
-                checkJiraUpdatesForTask(newCurrent);
-              }
+            // current task (id) changed
+            if (newCurrent && newCurrent.id !== (prevCurrent && prevCurrent.id)) {
+              checkJiraUpdatesForTask(newCurrent);
             }
           });
         }
         // we need to execute also if there were no other updates
         else {
-          // is jira task
-          if (newCurrent && newCurrent.originalKey) {
-            // current task (id) changed
-            if (newCurrent.id !== (prevCurrent && prevCurrent.id)) {
-              checkJiraUpdatesForTask(newCurrent);
-            }
+          // current task (id) changed
+          if (newCurrent && newCurrent.id !== (prevCurrent && prevCurrent.id)) {
+            checkJiraUpdatesForTask(newCurrent);
           }
         }
       }
