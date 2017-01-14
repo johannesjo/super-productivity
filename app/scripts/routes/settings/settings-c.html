@@ -237,4 +237,24 @@
         </div>
       </md-input-container>
     </section>
+
+    <md-input-container class="md-block">
+      <div flex-gt-sm="50">
+        <md-switch ng-model="vm.r.config.isTakeABreakEnabled"
+                   aria-label="Enable take a break reminder">
+          Enable take a break reminder
+        </md-switch>
+      </div>
+    </md-input-container>
+    <md-input-container class="md-block md-icon-float"
+                        ng-hide="!vm.r.config.isTakeABreakEnabled">
+      <label>Remind when I worked longer than X without a break</label>
+      <ng-md-icon icon="timer"
+                  aria-label="timer"></ng-md-icon>
+      <input type="text"
+             input-duration
+             ng-model="vm.r.config.takeABreakMinWorkingTime">
+    </md-input-container>
+
+  </section>
 </div>

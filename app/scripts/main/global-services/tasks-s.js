@@ -14,11 +14,13 @@
     .service('Tasks', Tasks);
 
   /* @ngInject */
-  function Tasks($localStorage, Uid, $window, $rootScope, Dialogs, IS_ELECTRON, SimpleToast, ShortSyntax) {
+  function Tasks($localStorage, Uid, $window, $rootScope, Dialogs, IS_ELECTRON, $mdToast, SimpleToast, Notifier, ShortSyntax, ParseDuration) {
     const IPC_EVENT_IDLE = 'WAS_IDLE';
     const IPC_EVENT_UPDATE_TIME_SPEND_FOR_CURRENT = 'UPDATE_TIME_SPEND';
     const IPC_EVENT_CURRENT_TASK_UPDATED = 'CHANGED_CURRENT_TASK';
     const moment = $window.moment;
+
+    let isShowTakeBreakNotification = true;
 
     // SETUP HANDLERS FOR ELECTRON EVENTS
     if (IS_ELECTRON) {
@@ -31,6 +33,7 @@
 
           that.updateTimeSpent($rootScope.r.currentTask, timeSpentInMs);
           that.updateCurrent($rootScope.r.currentTask, true);
+          that.checkTakeToTakeABreak(timeSpentInMs);
 
           // we need to manually call apply as this is an outside event
           $rootScope.$apply();
@@ -39,9 +42,62 @@
 
       // handler for idle event
       window.ipcRenderer.on(IPC_EVENT_IDLE, (ev, idleTime) => {
-        Dialogs('WAS_IDLE', { idleTime: idleTime });
+        // do not show as long as the user hasn't decided
+        isShowTakeBreakNotification = false;
+
+        Dialogs('WAS_IDLE', { idleTime: idleTime })
+          .then(() => {
+            // if tracked
+            this.checkTakeToTakeABreak(idleTime);
+            isShowTakeBreakNotification = true;
+          }, () => {
+            // if not tracked
+            // unset currentSession.timeWorkedWithoutBreak
+            $rootScope.r.currentSession.timeWorkedWithoutBreak = undefined;
+            isShowTakeBreakNotification = true;
+          });
       });
     }
+
+    this.checkTakeToTakeABreak = (timeSpentInMs) => {
+      if ($rootScope.r.config.isTakeABreakEnabled) {
+        if (!$rootScope.r.currentSession) {
+          $rootScope.r.currentSession = {};
+        }
+        // add or create moment duration for timeWorkedWithoutBreak
+        if ($rootScope.r.currentSession.timeWorkedWithoutBreak) {
+          // convert to moment to be save
+          $rootScope.r.currentSession.timeWorkedWithoutBreak = moment.duration($rootScope.r.currentSession.timeWorkedWithoutBreak);
+          $rootScope.r.currentSession.timeWorkedWithoutBreak.add(moment.duration({ milliseconds: timeSpentInMs }));
+        } else {
+          $rootScope.r.currentSession.timeWorkedWithoutBreak = moment.duration(timeSpentInMs);
+        }
+
+        if (moment.duration($rootScope.r.config.takeABreakMinWorkingTime)
+            .asSeconds() < $rootScope.r.currentSession.timeWorkedWithoutBreak.asSeconds()) {
+
+          if (isShowTakeBreakNotification) {
+            let toast = $mdToast.simple()
+              .textContent('Take a break! You have been working for ' + ParseDuration.toString($rootScope.r.currentSession.timeWorkedWithoutBreak) + ' without one. Go away from the computer! Makes you more productive in the long run!')
+              .action('I already did!')
+              .position('bottom');
+            $mdToast.show(toast).then(function (response) {
+              if (response === 'ok') {
+                // re-add task on undo
+                $rootScope.r.currentSession.timeWorkedWithoutBreak = undefined;
+              }
+            });
+
+            Notifier({
+              title: 'Take a break!',
+              message: 'Take a break! You have been working for ' + ParseDuration.toString($rootScope.r.currentSession.timeWorkedWithoutBreak) + ' without one. Go away from the computer! Makes you more productive in the long run!',
+              sound: true,
+              wait: true
+            });
+          }
+        }
+      }
+    };
 
     this.updateTimeSpent = (task, timeSpentInMs) => {
       let timeSpentCalculatedTotal;

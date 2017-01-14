@@ -38,6 +38,9 @@
       theme: undefined,
       currentTask: undefined,
       currentProject: undefined,
+      currentSession: {
+        timeWorkedWithoutBreak: undefined
+      },
       tasks: [],
       backlogTasks: [],
       distractions: [],
@@ -46,6 +49,8 @@
         projectDir: undefined
       },
       config: {
+        isTakeABreakEnabled: false,
+        takeABreakMinWorkingTime: undefined,
         isShortSyntaxEnabled: true
       },
       jiraSettings: {
@@ -129,6 +134,8 @@
     $rootScope.r.backlogTasks = Tasks.getBacklog();
     $rootScope.r.currentTask = Tasks.getCurrent();
     $rootScope.r.doneBacklogTasks = Tasks.getDoneBacklog();
+
+    $rootScope.r.currentSession = $localStorage.currentSession;
 
     $rootScope.r.distractions = $localStorage.distractions;
 
