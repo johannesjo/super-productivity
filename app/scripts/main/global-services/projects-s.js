@@ -15,7 +15,7 @@
 
   /* @ngInject */
   function Projects(LS_DEFAULTS, $localStorage, $rootScope, Uid, $window, SimpleToast) {
-    const OMITTED_LS_FIELDS = ['currentProject', 'projects', '$$hashKey', '$$mdSelectId', 'bodyClass'];
+    const OMITTED_LS_FIELDS = ['currentProject', 'tomorrowsNote', 'projects', '$$hashKey', '$$mdSelectId', 'bodyClass'];
 
     this.getList = () => {
       return $localStorage.projects;
