@@ -31,7 +31,8 @@
       'ngMdIcons',
       'as.sortable',
       'angularMoment',
-      'hc.marked'
+      'hc.marked',
+      'mwl.calendar'
     ])
     .constant('DEFAULT_THEME', 'teal-theme')
     .constant('LS_DEFAULTS', {
