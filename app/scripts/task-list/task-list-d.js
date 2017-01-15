@@ -160,7 +160,9 @@
     };
 
     vm.onTaskNotesChanged = (task) => {
-      Jira.updateIssueDescription(task);
+      if (task.originalKey) {
+        Jira.updateIssueDescription(task);
+      }
     };
 
     vm.onTaskDone = (task) => {
