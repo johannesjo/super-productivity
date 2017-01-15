@@ -5,28 +5,12 @@
       ng-class="{'is-duration-form':vm.editOnClickType==='DURATION'}">
   <input type="text"
          ng-if="!vm.editOnClickType"
-         ng-disabled="vm.isDone"
-         ng-model="vm.editOnClick"
-         ng-blur="vm.finishEdit();"
-         tabindex="2">
-
-  <input type="text"
-         ng-if="vm.editOnClickType==='DURATION'"
-         input-duration
-         class="edit-on-click-duration-input"
-         ng-disabled="vm.isDone"
          ng-model="vm.editOnClick"
          ng-blur="vm.finishEdit();"
          tabindex="2">
 </form>
 <span class="text"
       tabindex="2"
-      ng-if="!vm.editOnClickType && !vm.showEdit"
+      ng-if="!vm.showEdit"
       ng-keypress="vm.toggleShowEdit()"
       ng-click="vm.toggleShowEdit()">{{ vm.editOnClick }}</span>
-
-<span class="text"
-      tabindex="2"
-      ng-if="vm.editOnClickType==='DURATION' && !vm.showEdit"
-      ng-keypress="vm.toggleShowEdit()"
-      ng-click="vm.toggleShowEdit()">{{ vm.editOnClick |duration }}</span>

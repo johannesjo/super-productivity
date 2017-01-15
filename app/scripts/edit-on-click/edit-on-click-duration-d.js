@@ -1,8 +1,8 @@
 /**
  * @ngdoc directive
- * @name superProductivity.directive:editOnClick
+ * @name superProductivity.directive:editOnClickDuration
  * @description
- * # editOnClick
+ * # editOnClickDuration
  */
 
 (function () {
@@ -11,32 +11,32 @@
   angular
     .module('superProductivity')
     .constant('EDIT_ON_CLICK_TOGGLE_EV', 'EDIT_ON_CLICK_TOGGLE_EV')
-    .directive('editOnClick', editOnClick);
+    .directive('editOnClickDuration', editOnClickDuration);
 
   /* @ngInject */
-  function editOnClick() {
+  function editOnClickDuration() {
     return {
-      templateUrl: 'scripts/edit-on-click/edit-on-click-d.html',
+      templateUrl: 'scripts/edit-on-click/edit-on-click-duration-d.html',
       bindToController: true,
-      controller: EditOnClickCtrl,
+      controller: EditOnClickDurationCtrl,
       controllerAs: 'vm',
       restrict: 'A',
       scope: {
-        editOnClickEvId: '@',
-        editOnClick: '=',
-        editOnClickOnEditFinished: '&'
+        editOnClickDurationEvId: '@',
+        editOnClickDuration: '=',
+        editOnClickDurationOnEditFinished: '&'
       }
     };
   }
 
   /* @ngInject */
-  function EditOnClickCtrl($element, $scope, $timeout, EDIT_ON_CLICK_TOGGLE_EV) {
+  function EditOnClickDurationCtrl($element, $scope, $timeout, EDIT_ON_CLICK_TOGGLE_EV) {
     let vm = this;
 
     vm.finishEdit = () => {
       vm.showEdit = false;
-      if (angular.isFunction(vm.editOnClickOnEditFinished)) {
-        vm.editOnClickOnEditFinished();
+      if (angular.isFunction(vm.editOnClickDurationOnEditFinished)) {
+        vm.editOnClickDurationOnEditFinished();
       }
     };
 
@@ -50,7 +50,7 @@
 
 
     $scope.$on(EDIT_ON_CLICK_TOGGLE_EV, (ev, eventId) => {
-      if (eventId === vm.editOnClickEvId) {
+      if (eventId === vm.editOnClickDurationEvId) {
         vm.toggleShowEdit();
       }
     });

@@ -1,10 +1,11 @@
+[edit-on-click-duration],
 [edit-on-click] {
   cursor: pointer;
 }
 
 .edit-on-click-form {
   display: inline-block;
-  &.is-duration-form {
+  &.duration-form {
     width: auto;
   }
 
