@@ -1,2 +1,19 @@
-This is the dailyAgenda directive.
+<h2 class="md-title">Your todays agenda</h2>
+
+<input ng-model="vm.dayStarts">
+<input ng-model="vm.dayEnds">
+
+<mwl-calendar
+  events="vm.events"
+  view="vm.calendarView"
+  view-date="vm.viewDate"
+  cell-is-open="vm.cellIsOpen"
+  cell-auto-open-disabled="true"
+  day-view-start="{{ vm.dayStarts }}"
+  day-view-end="{{ vm.dayEnds }}"
+  day-view-event-width="320"
+  on-timespan-click="vm.timespanClicked(calendarDate, calendarCell)"
+  day-view-split="15"
+  on-event-times-changed="calendarEvent.startsAt = calendarNewEventStart; calendarEvent.endsAt = calendarNewEventEnd; vm.eventTimesChanged(calendarEvent)">
+</mwl-calendar>
 
