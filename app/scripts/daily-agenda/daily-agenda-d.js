@@ -34,14 +34,12 @@
     vm.dayStarts = moment().subtract(0, 'h').minutes(0).seconds(0).format('HH:mm');
     vm.dayEnds = '23:00';
 
-    console.log(vm.dayStarts, vm.dayEnds);
     vm.calendarView = 'day';
     vm.viewDate = moment().toDate();
     vm.cellIsOpen = true;
 
-    vm.eventTimesChanged = function (event) {
-      vm.viewDate = event.startsAt;
-      alert.show('Dragged and dropped', event);
+    vm.toggleSubTasks = () => {
+      mapTasksToEvents($rootScope.r.tasks);
     };
 
     function calcEndsEnd(task, startsAtParameter) {
@@ -92,11 +90,25 @@
       let events = [];
       let prevEvent = false;
       for (let i = 0; i < tasks.length; i++) {
-        let event = mapTaskToEvent(tasks[i], prevEvent);
-        if (event) {
-          events.push(event);
-          prevEvent = event;
+        let task = tasks[i];
+
+        if (vm.showSubTasks && task.subTasks) {
+          for (let i = 0; i < task.subTasks.length; i++) {
+            let subTask = task.subTasks[i];
+            let event = mapTaskToEvent(subTask, prevEvent);
+            if (event) {
+              events.push(event);
+              prevEvent = event;
+            }
+          }
+        } else {
+          let event = mapTaskToEvent(task, prevEvent);
+          if (event) {
+            events.push(event);
+            prevEvent = event;
+          }
         }
+
       }
       vm.events = events;
     }

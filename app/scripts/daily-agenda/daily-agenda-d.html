@@ -67,7 +67,7 @@
 <h2 class="md-title">Your agenda for your undone tasks today</h2>
 <p>Nothing to click, nothing to do. This is just here to give you a vague idea, how your day might look like.</p>
 
-<md-switch ng-model="vm.showSubTasks">Show Sub Tasks</md-switch>
+<md-switch ng-model="vm.showSubTasks" ng-change="vm.toggleSubTasks(vm.showSubTasks)">Show Sub Tasks</md-switch>
 
 <mwl-calendar
   events="vm.events"
