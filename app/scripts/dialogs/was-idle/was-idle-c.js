@@ -25,7 +25,6 @@
 
     vm.trackIdleToTask = () => {
       Tasks.updateTimeSpentToday(vm.selectedTask, vm.idleTime);
-      vm.selectedTask.timeSpent = timeSpentCalculated;
       // set current task to the selected one
       Tasks.updateCurrent(vm.selectedTask);
       $mdDialog.hide();

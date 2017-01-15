@@ -26,8 +26,9 @@
   }
 
   /* @ngInject */
-  function DailyAgendaCtrl($rootScope) {
+  function DailyAgendaCtrl($rootScope, $window) {
     let vm = this;
+    const moment = $window.moment;
 
     const MIN_DURATION_LEFT_IN_MIN_FOR_UNDONE = 15;
 
