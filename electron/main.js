@@ -181,11 +181,12 @@ function trackTimeFn() {
         // TODO this seem to open a new instance find out why
         //mainWindow.show();
 
-        setTimeout(mainWindow.show, 50);
-        console.log(lastIdleTime, CONFIG.MIN_IDLE_TIME, CONFIG.PING_INTERVAL);
-        console.log(mainWindow);
-
-        mainWindow.webContents.send('WAS_IDLE', (lastIdleTime - CONFIG.MIN_IDLE_TIME + CONFIG.PING_INTERVAL));
+        // we try using a timeout to prevent multiple windows from opening
+        setTimeout(() => {
+          // first show, then send again
+          mainWindow.show();
+          mainWindow.webContents.send('WAS_IDLE', (lastIdleTime - CONFIG.MIN_IDLE_TIME + CONFIG.PING_INTERVAL));
+        }, 50);
       }
     }
     // account for inconsistencies in idle time
