@@ -24,10 +24,8 @@
     vm.selectedTask = $rootScope.r.currentTask;
 
     vm.trackIdleToTask = () => {
-      let timeSpentCalculated = $window.moment.duration(vm.selectedTask.timeSpent);
-      timeSpentCalculated.add(vm.idleTime);
+      Tasks.updateTimeSpentToday(vm.selectedTask, vm.idleTime);
       vm.selectedTask.timeSpent = timeSpentCalculated;
-
       // set current task to the selected one
       Tasks.updateCurrent(vm.selectedTask);
       $mdDialog.hide();
