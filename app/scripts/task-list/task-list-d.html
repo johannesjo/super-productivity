@@ -36,9 +36,7 @@
                  tabindex="2"
                  ng-click="(vm.currentTask.id === task.id) ? vm.currentTask=undefined :vm.currentTask=task"
                  ng-show="!task.isDone && vm.allowTaskSelection && (!task.subTasks.length ||task.subTasks.length===0) ">
-        <md-tooltip md-direction="top">
-          Start working on task
-        </md-tooltip>
+
         <ng-md-icon icon="{{vm.currentTask.id === task.id ? 'pause_circle_filled':'play_circle_fill'}}"
                     aria-label="mark as current"></ng-md-icon>
       </md-button>
@@ -77,9 +75,7 @@
                    ng-disabled="task.subTasks.length>0"
                    aria-label="time estimation"
                    ng-click="vm.estimateTime(task)">
-          <md-tooltip md-direction="top">
-            Edit estimate / time spent
-          </md-tooltip>
+
           <ng-md-icon icon="access_time"
                       aria-label="time estimation"></ng-md-icon>
         </md-button>
@@ -88,9 +84,7 @@
                    ng-show="!vm.isSubTasksDisabled&&!task.isDone"
                    tabindex="2"
                    ng-click="vm.addSubTask(task, $event);">
-          <md-tooltip md-direction="top">
-            Add sub task
-          </md-tooltip>
+
           <ng-md-icon icon="playlist_add"
                       aria-label="add sub task"></ng-md-icon>
         </md-button>
@@ -99,9 +93,7 @@
                    tabindex="2"
                    ng-class="{'is-active':task.showNotes}"
                    ng-click="task.showNotes=!task.showNotes">
-          <md-tooltip md-direction="top">
-            Show notes for task
-          </md-tooltip>
+
           <ng-md-icon icon="{{(task.notes||task.originalKey) ?'insert_comment': 'mode_comment'}}"
                       aria-label="notes"></ng-md-icon>
         </md-button>
@@ -112,9 +104,7 @@
                    external-link
                    ng-show="task.originalLink"
                    ng-href="{{ task.originalLink }}">
-          <md-tooltip md-direction="top">
-            Go to issue on Jira
-          </md-tooltip>
+
           <ng-md-icon icon="link"
                       aria-label="link"></ng-md-icon>
         </md-button>
@@ -122,9 +112,7 @@
                    aria-label="delete"
                    tabindex="2"
                    ng-click="vm.deleteTask(task, $index)">
-          <md-tooltip md-direction="top">
-            Delete Task
-          </md-tooltip>
+
           <ng-md-icon icon="delete_forever"
                       class="delete-icon"
                       aria-label="delete"></ng-md-icon>
