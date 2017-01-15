@@ -137,6 +137,8 @@
     $rootScope.r.doneBacklogTasks = Tasks.getDoneBacklog();
 
     $rootScope.r.currentSession = $localStorage.currentSession;
+    // reset after for every start
+    $rootScope.r.currentSession.timeWorkedWithoutBreak = undefined;
 
     $rootScope.r.distractions = $localStorage.distractions;
 
@@ -145,6 +147,7 @@
     $rootScope.r.tomorrowsNote = $localStorage.tomorrowsNote;
 
     $rootScope.r.git = $localStorage.git;
+
 
     $rootScope.r.theme = $localStorage.theme || DEFAULT_THEME;
 
