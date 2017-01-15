@@ -42,6 +42,11 @@
     };
 
     vm.toggleBreak = () => {
+      // reset time worked without break on break mode toggle
+      if ($rootScope.r.currentSession) {
+        $rootScope.r.currentSession.timeWorkedWithoutBreak = undefined;
+      }
+
       if (!lastCurrentTask && !$rootScope.r.currentTask) {
         return;
       }
