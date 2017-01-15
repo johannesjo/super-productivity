@@ -25,7 +25,6 @@
         editOnClickEvId: '@',
         editOnClick: '=',
         editOnClickType: '@',
-        editOnClickOnChange: '&',
         editOnClickOnEditFinished: '&'
       }
     };
@@ -50,11 +49,6 @@
       });
     };
 
-    vm.change = (mVal) => {
-      if (angular.isFunction(vm.editOnClickOnChange)) {
-        vm.editOnClickOnChange({ $value: mVal });
-      }
-    };
 
     $scope.$on(EDIT_ON_CLICK_TOGGLE_EV, (ev, eventId) => {
       if (eventId === vm.editOnClickEvId) {

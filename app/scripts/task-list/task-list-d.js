@@ -149,7 +149,7 @@
       containment: '#board'
     };
 
-    vm.onChangeTimeSpent = (task, val) => {
+    vm.onChangedTimeSpent = (task, val) => {
       if (vm.isTasksForToday) {
         Tasks.updateTimeSpentToday(task, val);
       }
@@ -177,7 +177,6 @@
 
       // escape
       if ($event.keyCode === 27) {
-        task.showEdit = false;
         task.showNotes = false;
         taskEl.focus();
         // don't propagate to parent task element

@@ -58,13 +58,11 @@
       <div class="time"
            data-ng-show="task.timeEstimate || task.timeSpent">
         <span ng-if="!task.subTasks.length">
-        <span edit-on-click-toggle="task.showEdit"
-              edit-on-click-on-change="vm.onChangeTimeSpent(task, $value)"
+        <span edit-on-click-on-edit-finished="vm.onChangedTimeSpent(task, $value)"
               edit-on-click-type="DURATION"
               edit-on-click="task.timeSpent"></span>
         <span ng-show="task.timeEstimate">/</span>
-        <span edit-on-click-toggle="task.showEdit"
-              edit-on-click-type="DURATION"
+        <span edit-on-click-type="DURATION"
               edit-on-click="task.timeEstimate"></span>
           </span>
         <span ng-if="task.subTasks.length>0">

@@ -8,7 +8,6 @@
          ng-disabled="vm.isDone"
          ng-model="vm.editOnClick"
          ng-blur="vm.finishEdit();"
-         ng-change="vm.change(vm.editOnClick)"
          tabindex="2">
 
   <input type="text"
@@ -18,19 +17,16 @@
          ng-disabled="vm.isDone"
          ng-model="vm.editOnClick"
          ng-blur="vm.finishEdit();"
-         ng-change="vm.change(vm.editOnClick)"
          tabindex="2">
 </form>
 <span class="text"
       tabindex="2"
-      ng-if="!vm.editOnClickType"
+      ng-if="!vm.editOnClickType && !vm.showEdit"
       ng-keypress="vm.toggleShowEdit()"
-      ng-click="vm.toggleShowEdit()"
-      ng-show="!vm.showEdit">{{ vm.editOnClick }}</span>
+      ng-click="vm.toggleShowEdit()">{{ vm.editOnClick }}</span>
 
 <span class="text"
       tabindex="2"
-      ng-if="vm.editOnClickType==='DURATION'"
+      ng-if="vm.editOnClickType==='DURATION' && !vm.showEdit"
       ng-keypress="vm.toggleShowEdit()"
-      ng-click="vm.toggleShowEdit()"
-      ng-show="!vm.showEdit">{{ vm.editOnClick |duration }}</span>
+      ng-click="vm.toggleShowEdit()">{{ vm.editOnClick |duration }}</span>
