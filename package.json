@@ -4,6 +4,7 @@
   "description": "Personal Task Management App to help you with your daily struggle with JIRA etc.",
   "main": "./electron/main.js",
   "repository": {},
+  "homepage": "http://super-productivity.com",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "electron ./electron/main.js",
@@ -20,7 +21,12 @@
     "win": {
       "iconUrl": "windowsicon"
     },
-    "linux": {}
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ]
+    }
   },
   "devDependencies": {
     "electron": "^1.4.1",
