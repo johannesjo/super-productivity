@@ -40,7 +40,8 @@ npm start
 * [superProductivity_0.9.0_amd64.deb](http://super-productivity.com/downloads/superProductivity_0.9.0_amd64.deb)
 
 ### MacOS
-(not yet compiled)
+* [superProductivity-0.9.0.dmg](http://super-productivity.com/downloads/superProductivity-0.9.0.dmg)
+
 ### Windows
 (not yet compiled)
 
