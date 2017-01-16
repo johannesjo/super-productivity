@@ -163,7 +163,7 @@ electron.ipcMain.on('CHANGED_CURRENT_TASK', (ev, task) => {
 
     if (task.timeSpent && task.timeSpent._data) {
       task.timeSpent = moment.duration(task.timeSpent._data);
-      timeStr += task.timeSpent.asMinutes().toString() + 'm';
+      timeStr += parseInt(task.timeSpent.asMinutes()).toString() + 'm';
     }
     if (task.timeEstimate) {
       timeStr += '/' + moment.duration(task.timeEstimate).asMinutes() + 'm ';
