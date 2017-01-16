@@ -30,21 +30,25 @@
   /* @ngInject */
   function InlineMarkdownCtrl($timeout, $element) {
     let vm = this;
-    let prevModel
+    let prevModel;
     let textareaEl = angular.element($element.find('textarea'));
     //let previewEl = angular.element($element.find('div'));
 
-    vm.toggleShowEdit = () => {
+    vm.toggleShowEdit = ($event) => {
+
       //console.log('set text', previewEl[0].offsetHeight);
       //
       ////textareaEl.css('height', previewEl[0].offsetHeight);
       //textareaEl[0].height = previewEl[0].offsetHeight;
 
-      vm.showEdit = true;
-      prevModel = vm.ngModel;
-      $timeout(function () {
-        textareaEl[0].focus();
-      });
+      // check if anchor link was clicked
+      if ($event.target.tagName !== 'A') {
+        vm.showEdit = true;
+        prevModel = vm.ngModel;
+        $timeout(function () {
+          textareaEl[0].focus();
+        });
+      }
     };
 
     vm.untoggleShowEdit = () => {
