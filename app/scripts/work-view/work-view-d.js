@@ -59,7 +59,7 @@
     $scope.$watch('vm.tasksDone', mergeDoneAndUndone, true);
     $scope.$watch('vm.tasksUndone', mergeDoneAndUndone, true);
 
-    $scope.$watch('r.tasks', () => {
+    $rootScope.$watch('r.tasks', () => {
       vm.tasksUndone = Tasks.getUndoneToday();
       vm.tasksDone = Tasks.getDoneToday();
       vm.totalTimeWorkedToday = Tasks.getTimeWorkedToday();

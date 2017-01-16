@@ -34,22 +34,11 @@
     vm.doneTasks = Tasks.getDoneToday();
 
     // calc total time spent on todays tasks
-    vm.totalTimeSpentTasks = $window.moment.duration();
-    for (let i = 0; i < $rootScope.r.tasks.length; i++) {
-      let task = $rootScope.r.tasks[i];
-      vm.totalTimeSpentTasks.add(task.timeSpent);
-    }
+    vm.totalTimeSpentTasks = Tasks.getTotalTimeWorkedOnTasksToday();
 
     // calc time spent on todays tasks today
     // use mysql date as it is sortable
-    let todayStr = $window.moment().format('YYYY-MM-DD');
-    vm.totalTimeSpentToday = $window.moment.duration();
-    for (let i = 0; i < $rootScope.r.tasks.length; i++) {
-      let task = $rootScope.r.tasks[i];
-      if (task.timeSpentOnDay && task.timeSpentOnDay[todayStr]) {
-        vm.totalTimeSpentToday.add(task.timeSpentOnDay[todayStr]);
-      }
-    }
+    vm.totalTimeSpentToday = Tasks.getTimeWorkedToday($rootScope.r.tasks);
 
     if ($rootScope.r.git && $rootScope.r.git.projectDir) {
       GitLog.get($rootScope.r.git.projectDir).then(function (res) {

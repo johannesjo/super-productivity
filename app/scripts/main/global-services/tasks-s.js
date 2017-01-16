@@ -292,6 +292,18 @@
       return task && task.timeSpentOnDay && task.timeSpentOnDay[todayStr];
     };
 
+    this.getTotalTimeWorkedOnTasksToday = () => {
+      let tasks = this.getToday();
+      let totalTimeSpentTasks = $window.moment.duration();
+      if (tasks) {
+        for (let i = 0; i < tasks.length; i++) {
+          let task = tasks[i];
+          totalTimeSpentTasks.add(task.timeSpent);
+        }
+      }
+      return totalTimeSpentTasks;
+    };
+
     this.getTimeWorkedToday = () => {
       let tasks = this.getToday();
       let todayStr = getTodayStr();
@@ -300,8 +312,18 @@
         totalTimeWorkedToday = moment.duration();
         for (let i = 0; i < tasks.length; i++) {
           let task = tasks[i];
-          if (task.timeSpentOnDay && task.timeSpentOnDay[todayStr]) {
-            totalTimeWorkedToday.add(task.timeSpentOnDay[todayStr]);
+
+          if (task.subTasks && task.subTasks.length) {
+            for (let j = 0; j < task.subTasks.length; j++) {
+              let subTask = task.subTasks[j];
+              if (subTask.timeSpentOnDay && subTask.timeSpentOnDay[todayStr]) {
+                totalTimeWorkedToday.add(subTask.timeSpentOnDay[todayStr]);
+              }
+            }
+          } else {
+            if (task.timeSpentOnDay && task.timeSpentOnDay[todayStr]) {
+              totalTimeWorkedToday.add(task.timeSpentOnDay[todayStr]);
+            }
           }
         }
       }
