@@ -102,7 +102,7 @@
   function configMarked(markedProvider) {
     markedProvider.setRenderer({
       link: function (href, title, text) {
-        return '<a href="' + href + '"' + (title ? ' title="' + title + '"' : ' ') + 'target="_blank" external-link>' + text + '</a>';
+        return '<a href="' + href + '"' + (title ? ' title="' + title + '"' : ' ') + 'target="_blank" external-link class="md-accent">' + text + '</a>';
       }
     });
   }
