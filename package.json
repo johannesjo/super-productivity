@@ -29,11 +29,11 @@
     }
   },
   "devDependencies": {
-    "electron": "^1.4.1",
-    "electron-inspector": "^0.1.4",
     "browser-sync": "latest",
     "del": "latest",
     "ecstatic": "latest",
+    "electron": "^1.4.1",
+    "electron-prebuilt": "^1.4.13",
     "gulp": "latest",
     "gulp-autoprefixer": "latest",
     "gulp-clean-css": "latest",
