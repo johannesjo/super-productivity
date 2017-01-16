@@ -45,7 +45,7 @@
         // do not show as long as the user hasn't decided
         isShowTakeBreakNotification = false;
 
-        Dialogs('WAS_IDLE', {idleTime: idleTime})
+        Dialogs('WAS_IDLE', { idleTime: idleTime })
           .then(() => {
             // if tracked
             this.checkTakeToTakeABreak(idleTime);
@@ -68,7 +68,7 @@
         if ($rootScope.r.currentSession.timeWorkedWithoutBreak) {
           // convert to moment to be save
           $rootScope.r.currentSession.timeWorkedWithoutBreak = moment.duration($rootScope.r.currentSession.timeWorkedWithoutBreak);
-          $rootScope.r.currentSession.timeWorkedWithoutBreak.add(moment.duration({milliseconds: timeSpentInMs}));
+          $rootScope.r.currentSession.timeWorkedWithoutBreak.add(moment.duration({ milliseconds: timeSpentInMs }));
         } else {
           $rootScope.r.currentSession.timeWorkedWithoutBreak = moment.duration(timeSpentInMs);
         }
@@ -121,7 +121,7 @@
       // track total time spent
       if (task.timeSpent) {
         timeSpentCalculatedTotal = moment.duration(task.timeSpent);
-        timeSpentCalculatedTotal.add(moment.duration({milliseconds: timeSpentInMs}));
+        timeSpentCalculatedTotal.add(moment.duration({ milliseconds: timeSpentInMs }));
       } else {
         timeSpentCalculatedTotal = moment.duration(timeSpentInMs);
       }
@@ -132,7 +132,7 @@
       }
       if (task.timeSpentOnDay[todayStr]) {
         timeSpentCalculatedOnDay = moment.duration(task.timeSpentOnDay[todayStr]);
-        timeSpentCalculatedOnDay.add(moment.duration({milliseconds: timeSpentInMs}));
+        timeSpentCalculatedOnDay.add(moment.duration({ milliseconds: timeSpentInMs }));
       } else {
         timeSpentCalculatedOnDay = moment.duration(timeSpentInMs);
       }
@@ -197,7 +197,6 @@
       return totalEstimate;
     };
 
-
     this.calcTotalTimeSpent = (tasks) => {
       let totalTimeSpent;
       if (angular.isArray(tasks) && tasks.length > 0) {
@@ -215,15 +214,17 @@
 
     this.calcTotalTimeSpentOnTask = (task) => {
       let totalTimeSpent = moment.duration();
-      for (let key in task.timeSpentOnDay) {
-        if (task.timeSpentOnDay[key]) {
-          totalTimeSpent.add(moment.duration(task.timeSpentOnDay[key]).asSeconds(), 's');
+      if (task) {
+        for (let key in task.timeSpentOnDay) {
+          if (task.timeSpentOnDay[key]) {
+            totalTimeSpent.add(moment.duration(task.timeSpentOnDay[key]).asSeconds(), 's');
+          }
         }
-      }
-      if (totalTimeSpent.asMinutes() > 0) {
-        return totalTimeSpent;
-      } else {
-        return undefined;
+        if (totalTimeSpent.asMinutes() > 0) {
+          return totalTimeSpent;
+        } else {
+          return undefined;
+        }
       }
     };
 
@@ -239,7 +240,7 @@
               let timeSpentMilliseconds = moment.duration(task.timeSpent).asMilliseconds();
               let timeEstimateMilliseconds = moment.duration(task.timeEstimate).asMilliseconds();
               if (timeSpentMilliseconds < timeEstimateMilliseconds) {
-                totalRemaining.add(moment.duration({milliseconds: timeEstimateMilliseconds - timeSpentMilliseconds}));
+                totalRemaining.add(moment.duration({ milliseconds: timeEstimateMilliseconds - timeSpentMilliseconds }));
               }
             } else if (task.timeEstimate) {
               totalRemaining.add(task.timeEstimate);
@@ -260,7 +261,7 @@
       if ($localStorage.currentTask) {
         currentTask = $window._.find($localStorage.tasks, (task) => {
           if (task.subTasks) {
-            let subTaskMatchTmp = $window._.find(task.subTasks, {id: $localStorage.currentTask.id});
+            let subTaskMatchTmp = $window._.find(task.subTasks, { id: $localStorage.currentTask.id });
             if (subTaskMatchTmp) {
               subTaskMatch = subTaskMatchTmp;
             }
@@ -358,7 +359,9 @@
       }
 
       // update totalTimeSpent for buggy macos
-      task.timeSpent = this.calcTotalTimeSpentOnTask(task);
+      if (task) {
+        task.timeSpent = this.calcTotalTimeSpentOnTask(task);
+      }
 
       // check if in electron context
       if (window.isElectron) {
