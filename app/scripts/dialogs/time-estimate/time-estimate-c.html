@@ -24,19 +24,46 @@
           <input type="text"
                  input-duration
                  ng-model="vm.timeEstimate"
-                 md-auto-focus
                  aria-label="Estimated Durations">
         </md-input-container>
 
+        <h3 class="md-caption">Time Spent</h3>
+
         <md-input-container class="md-icon-float md-block">
           <ng-md-icon icon="timer"
-                      aria-label="Time Spend"></ng-md-icon>
-          <label>Time Spend total</label>
+                      aria-label="Time Spent Today"></ng-md-icon>
+          <label>Time Spent Today</label>
           <input type="text"
+                 md-auto-focus
                  input-duration="optional"
-                 ng-model="vm.timeSpent"
-                 aria-label="Time Spend">
+                 ng-model="vm.timeSpentOnDayCopy[vm.todayStr]"
+                 aria-label="Time Spent Today">
         </md-input-container>
+
+
+        <div layout="row"
+             ng-repeat="(strDate,timeSpent) in vm.timeSpentOnDayCopy"
+             ng-if="vm.todayStr !== strDate">
+          <div flex>
+            <md-input-container class="md-icon-float md-block">
+              <ng-md-icon icon="timer"
+                          aria-label="Time Spent"></ng-md-icon>
+              <label>Time Spent on {{ strDate }}</label>
+              <input type="text"
+                     input-duration="optional"
+                     ng-model="timeSpent"
+                     aria-label="Time Spent">
+            </md-input-container>
+          </div>
+          <div flex="20">
+            <md-button class="md-raised md-icon-button md-accent"
+                       aria-label="Delete"
+                       ng-click="vm.deleteValue(strDate)">
+              <ng-md-icon icon="delete_forever"></ng-md-icon>
+            </md-button>
+          </div>
+        </div>
+
 
         <div class="side-info">
           Examples:<br>

@@ -151,6 +151,8 @@
       return moment().format('YYYY-MM-DD');
     }
 
+    this.getTodayStr = getTodayStr;
+
     function deleteNullValueTasks(tasksArray) {
       return tasksArray.filter(function (item) {
         return !!item;

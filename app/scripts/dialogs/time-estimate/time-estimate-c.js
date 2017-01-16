@@ -14,27 +14,57 @@
     .controller('TimeEstimateCtrl', TimeEstimateCtrl);
 
   /* @ngInject */
-  function TimeEstimateCtrl($mdDialog, task, isTasksForToday, Tasks) {
+  function TimeEstimateCtrl($mdDialog, task, Tasks) {
     let vm = this;
-
+    // TODO refactor and add to Tasks.service
+    vm.todayStr = Tasks.getTodayStr();
     vm.task = task;
     vm.timeEstimate = task.timeEstimate;
-    vm.timeSpent = task.timeSpent;
 
-    vm.submit = (estimate, timeSpent) => {
-      task.timeEstimate = estimate;
+    if (!task.timeSpentOnDay) {
+      task.timeSpentOnDay = {};
+    }
 
-      task.timeSpent = timeSpent;
+    // create copy in case nothing is save
+    vm.timeSpentOnDayCopy = angular.copy(task.timeSpentOnDay);
+    console.log(vm.timeSpentOnDayCopy);
 
-      if (isTasksForToday) {
-        Tasks.updateTimeSpentToday(task, timeSpent);
+    // clean empty
+    for (let key in vm.timeSpentOnDay) {
+      // if no real value
+      if (!task.timeSpentOnDay[key]) {
+        delete task.timeSpentOnDay[key];
       }
+    }
+
+    // assign a key for today
+    if (!vm.timeSpentOnDayCopy[vm.todayStr]) {
+      vm.timeSpentOnDayCopy[vm.todayStr] = null;
+    }
+
+    vm.deleteValue = (strDate) => {
+      delete vm.timeSpentOnDayCopy[strDate];
+    };
+
+    vm.submit = (estimate) => {
+
+      let totalTimeSpent = moment.duration();
+      for (let key in vm.timeSpentOnDayCopy) {
+        if (vm.timeSpentOnDayCopy[key]) {
+          totalTimeSpent.add(moment.duration(vm.timeSpentOnDayCopy[key]));
+        }
+      }
+
+      // finally assign back to task
+      task.timeEstimate = estimate;
+      task.timeSpent = totalTimeSpent;
+      task.timeSpentOnDay = vm.timeSpentOnDayCopy;
 
       $mdDialog.hide();
     };
 
     vm.cancel = () => {
-      $mdDialog.hide();
+      $mdDialog.cancel();
     };
   }
 })();
