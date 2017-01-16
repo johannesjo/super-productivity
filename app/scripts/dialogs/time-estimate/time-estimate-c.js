@@ -14,8 +14,10 @@
     .controller('TimeEstimateCtrl', TimeEstimateCtrl);
 
   /* @ngInject */
-  function TimeEstimateCtrl($mdDialog, task, Tasks) {
+  function TimeEstimateCtrl($mdDialog, task, Tasks, $window) {
     let vm = this;
+    const moment = $window.moment;
+
     // TODO refactor and add to Tasks.service
     vm.todayStr = Tasks.getTodayStr();
     vm.task = task;
@@ -27,7 +29,6 @@
 
     // create copy in case nothing is save
     vm.timeSpentOnDayCopy = angular.copy(task.timeSpentOnDay);
-    console.log(vm.timeSpentOnDayCopy);
 
     // clean empty
     for (let key in vm.timeSpentOnDay) {
