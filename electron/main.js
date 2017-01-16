@@ -169,9 +169,13 @@ electron.ipcMain.on('CHANGED_CURRENT_TASK', (ev, task) => {
   //appIcon.setContextMenu(contextMenu)
 });
 
+function showIdleDialog(lastIdleTime) {
+  // first show, then send again
+  mainWindow.webContents.send('WAS_IDLE', (lastIdleTime - CONFIG.MIN_IDLE_TIME + CONFIG.PING_INTERVAL));
+}
+
 function trackTimeFn() {
   //let timeSpend = moment.duration({ milliseconds: CONFIG.PING_INTERVAL });
-
   idle((stdout) => {
     let idleTime = parseInt(stdout, 10);
     // don' track regularly when idle
@@ -179,14 +183,11 @@ function trackTimeFn() {
       // show idle dialog once not idle any more
       if (lastIdleTime > idleTime) {
         // TODO this seem to open a new instance find out why
-        //mainWindow.show();
-
+        showIdleDialog(lastIdleTime);
         // we try using a timeout to prevent multiple windows from opening
         setTimeout(() => {
-          // first show, then send again
           mainWindow.show();
-          mainWindow.webContents.send('WAS_IDLE', (lastIdleTime - CONFIG.MIN_IDLE_TIME + CONFIG.PING_INTERVAL));
-        }, 50);
+        }, 10);
       }
     }
     // account for inconsistencies in idle time
