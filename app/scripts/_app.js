@@ -94,9 +94,18 @@
       ]
     )
     .config(configMdTheme)
+    .config(configMarked)
     .run(initGlobalModels)
     .run(handleCurrentTaskUpdates)
     .run(initGlobalShortcuts);
+
+  function configMarked(markedProvider) {
+    markedProvider.setRenderer({
+      link: function (href, title, text) {
+        return '<a href="' + href + '"' + (title ? ' title="' + title + '"' : ' ') + 'target="_blank" external-link>' + text + '</a>';
+      }
+    });
+  }
 
   function configMdTheme($mdThemingProvider, THEMES) {
     $mdThemingProvider.theme('default')
@@ -148,7 +157,6 @@
     $rootScope.r.tomorrowsNote = $localStorage.tomorrowsNote;
 
     $rootScope.r.git = $localStorage.git;
-
 
     $rootScope.r.theme = $localStorage.theme || DEFAULT_THEME;
 
