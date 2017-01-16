@@ -30,7 +30,7 @@ let lastIdleTime;
 
 function createWindow() {
   // Create the browser window.
-  mainWindow = new BrowserWindow({ width: 800, height: 600 });
+  mainWindow = new BrowserWindow({width: 800, height: 600});
 
   // and load the index.html of the app.
   mainWindow.loadURL(url.format({
@@ -155,12 +155,21 @@ let saveLastTitle;
 electron.ipcMain.on('CHANGED_CURRENT_TASK', (ev, task) => {
   if (task && task.title) {
     let title = task.title;
+    let timeStr = '';
+
     if (title.length > 50) {
       title = title.substring(0, 47) + "...";
     }
 
+    if (task.timeSpent && task.timeSpent._data) {
+      task.timeSpent = moment.duration(task.timeSpent._data);
+      timeStr += task.timeSpent.asMinutes().toString() + 'm';
+    }
+    if (task.timeEstimate) {
+      timeStr += '/' + moment.duration(task.timeEstimate).asMinutes() + 'm ';
+    }
     if (appIcon) {
-      appIcon.setTitle(title);
+      appIcon.setTitle(title + ' ' + timeStr);
     }
 
     saveLastTitle = task.title;
