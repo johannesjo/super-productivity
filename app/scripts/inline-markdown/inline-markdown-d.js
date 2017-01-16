@@ -30,6 +30,7 @@
   /* @ngInject */
   function InlineMarkdownCtrl($timeout, $element) {
     let vm = this;
+    let prevModel
     let textareaEl = angular.element($element.find('textarea'));
     //let previewEl = angular.element($element.find('div'));
 
@@ -40,6 +41,7 @@
       //textareaEl[0].height = previewEl[0].offsetHeight;
 
       vm.showEdit = true;
+      prevModel = vm.ngModel;
       $timeout(function () {
         textareaEl[0].focus();
       });
@@ -52,7 +54,9 @@
       //previewEl[0].height = textareaEl[0].offsetHeight;
       vm.showEdit = false;
       if (angular.isFunction(vm.onChanged)) {
-        vm.onChanged();
+        if (prevModel !== vm.ngModel) {
+          vm.onChanged();
+        }
       }
     };
   }
