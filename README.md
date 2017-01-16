@@ -34,4 +34,14 @@ npm start
 ```
 
 ## Binaries
-Not yet compiled
+### Linux
+* [superProductivity-0.9.0-x86_64.AppImage](http://super-productivity.com/downloads/superProductivity-0.9.0-x86_64.AppImage)
+* [superProductivity_0.9.0_amd64.deb](http://super-productivity.com/downloads/superProductivity_0.9.0_amd64.deb)
+
+### MacOS
+(not yet compiled)
+### Windows
+(not yet compiled)
+
+## Web Version
+There is also a [web-version](http://super-productivity.com) but it is much more limited (no Jira integration, no time tracking).
