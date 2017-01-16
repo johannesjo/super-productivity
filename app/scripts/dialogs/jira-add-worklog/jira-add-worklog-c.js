@@ -16,16 +16,18 @@
   /* @ngInject */
   function JiraAddWorklogCtrl($mdDialog, task, $window, comment) {
     let vm = this;
+    const moment = $window.moment;
+
     vm.taskCopy = angular.copy(task);
-    vm.taskCopy.started = new Date(task.started);
+    vm.taskCopy.started = moment(task.started).milliseconds(0).seconds(0).toDate();
     vm.isUpdateLocalTaskSettings = false;
     vm.comment = comment;
 
     vm.addWorklog = () => {
       $mdDialog.hide({
         originalKey: vm.taskCopy.originalKey,
-        started: $window.moment(vm.taskCopy.started),
-        timeSpent: $window.moment.duration(vm.taskCopy.timeSpent),
+        started: moment(vm.taskCopy.started),
+        timeSpent: moment.duration(vm.taskCopy.timeSpent),
         comment: vm.comment
       });
     };
