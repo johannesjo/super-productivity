@@ -19,6 +19,7 @@ Build with the awesome [electron](http://electron.atom.io/).
 * Daily Summary
 * Full Keyboard Support
 * (Anti-) Distraction Pad
+* Different Themes!
 
 And much more!
 
