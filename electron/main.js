@@ -30,7 +30,7 @@ let lastIdleTime;
 
 function createWindow() {
   // Create the browser window.
-  mainWindow = new BrowserWindow({width: 800, height: 600});
+  mainWindow = new BrowserWindow({ width: 800, height: 600 });
 
   // and load the index.html of the app.
   mainWindow.loadURL(url.format({
@@ -77,9 +77,16 @@ app.on('window-all-closed', function () {
   //}
 });
 
-let appIcon = null;
+let tray = null;
 app.on('ready', () => {
-  appIcon = new electron.Tray(ICONS_FOLDER + 'tray-ico.png');
+  let trayIcoFile;
+  if (process.platform === 'darwin') {
+    trayIcoFile = 'tray-ico-dark.png'
+  } else {
+    trayIcoFile = 'tray-ico.png'
+  }
+
+  tray = new electron.Tray(ICONS_FOLDER + trayIcoFile);
   let contextMenu = electron.Menu.buildFromTemplate([
     {
       label: 'Show App', click: () => {
@@ -93,9 +100,11 @@ app.on('ready', () => {
     }
     }
   ]);
-  appIcon.setContextMenu(contextMenu);
+  // mac os only
+  tray.setHighlightMode('always');
+  tray.setContextMenu(contextMenu);
 
-  appIcon.on('click', () => {
+  tray.on('click', () => {
     mainWindow.show();
   });
 });
@@ -124,8 +133,8 @@ app.on('ready', () => {
 });
 
 app.on('before-quit', () => {
-  if (appIcon) {
-    appIcon.destroy();
+  if (tray) {
+    tray.destroy();
   }
 });
 
@@ -168,14 +177,14 @@ electron.ipcMain.on('CHANGED_CURRENT_TASK', (ev, task) => {
     if (task.timeEstimate) {
       timeStr += '/' + moment.duration(task.timeEstimate).asMinutes() + 'm ';
     }
-    if (appIcon) {
-      appIcon.setTitle(title + ' ' + timeStr);
+    if (tray) {
+      tray.setTitle(title + ' ' + timeStr);
     }
 
     saveLastTitle = task.title;
   }
   // Call this again for Linux because we modified the context menu
-  //appIcon.setContextMenu(contextMenu)
+  //tray.setContextMenu(contextMenu)
 });
 
 function showIdleDialog(lastIdleTime) {
