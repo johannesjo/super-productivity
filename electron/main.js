@@ -192,27 +192,39 @@ function showIdleDialog(lastIdleTime) {
   mainWindow.webContents.send('WAS_IDLE', (lastIdleTime - CONFIG.MIN_IDLE_TIME + CONFIG.PING_INTERVAL));
 }
 
+let currentIdleStart;
+
 function trackTimeFn() {
-  //let timeSpend = moment.duration({ milliseconds: CONFIG.PING_INTERVAL });
   idle((stdout) => {
     let idleTime = parseInt(stdout, 10);
-    // don' track regularly when idle
-    if (lastIdleTime > CONFIG.MIN_IDLE_TIME) {
+    // go to 'idle mode' when th
+    if (idleTime > CONFIG.MIN_IDLE_TIME || lastIdleTime > CONFIG.MIN_IDLE_TIME) {
+      if (!currentIdleStart) {
+        currentIdleStart = moment();
+      }
+
       // show idle dialog once not idle any more
       if (lastIdleTime > idleTime) {
+        let now = moment();
+        let realIdleTime = moment.duration(now.diff(currentIdleStart)).asMilliseconds();
+
         // TODO this seem to open a new instance find out why
-        showIdleDialog(lastIdleTime);
+        showIdleDialog(realIdleTime);
         // we try using a timeout to prevent multiple windows from opening
         setTimeout(() => {
           mainWindow.show();
-        }, 10);
+        }, 20);
+
+        // unset currentIdleStart
+        currentIdleStart = undefined;
       }
     }
-    // account for inconsistencies in idle time
+    // track regularly
     else {
       mainWindow.webContents.send('UPDATE_TIME_SPEND', CONFIG.PING_INTERVAL);
     }
 
+    // save last idle time
     lastIdleTime = idleTime;
   });
 
