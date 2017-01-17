@@ -101,7 +101,6 @@ app.on('ready', () => {
     }
   ]);
   // mac os only
-  tray.setHighlightMode('always');
   tray.setContextMenu(contextMenu);
 
   tray.on('click', () => {
