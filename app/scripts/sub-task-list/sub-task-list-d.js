@@ -39,7 +39,7 @@
         vm.task.timeEstimate = Tasks.calcTotalEstimate(tasks);
         vm.task.timeSpent = Tasks.calcTotalTimeSpent(tasks);
         if (vm.isTasksForToday) {
-          Tasks.updateTimeSpentToday(vm.task, vm.task.timeSpent);
+          Tasks.setTimeSpentToday(vm.task, vm.task.timeSpent);
         }
       }
     }, true);

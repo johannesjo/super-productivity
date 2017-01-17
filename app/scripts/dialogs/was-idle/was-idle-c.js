@@ -18,13 +18,13 @@
     let vm = this;
 
     vm.idleTime = $window.moment.duration(idleTime, 'milliseconds');
-    console.log(vm.idleTime);
 
     vm.undoneTasks = Tasks.getUndoneToday();
     vm.selectedTask = $rootScope.r.currentTask;
 
     vm.trackIdleToTask = () => {
-      Tasks.updateTimeSpentToday(vm.selectedTask, vm.idleTime);
+      // add the idle time in milliseconds
+      Tasks.addTimeSpent(vm.selectedTask, idleTime);
       // set current task to the selected one
       Tasks.updateCurrent(vm.selectedTask);
       $mdDialog.hide();

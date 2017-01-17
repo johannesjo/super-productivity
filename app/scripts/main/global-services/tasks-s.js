@@ -31,7 +31,7 @@
         // only track if there is a task
         if ($rootScope.r.currentTask) {
 
-          that.updateTimeSpent($rootScope.r.currentTask, timeSpentInMs);
+          that.addTimeSpent($rootScope.r.currentTask, timeSpentInMs);
           that.updateCurrent($rootScope.r.currentTask, true);
           that.checkTakeToTakeABreak(timeSpentInMs);
 
@@ -99,9 +99,16 @@
       }
     };
 
-    this.updateTimeSpent = (task, timeSpentInMs) => {
+    this.addTimeSpent = (task, timeSpentInMsOrMomentDuration) => {
       let timeSpentCalculatedTotal;
       let timeSpentCalculatedOnDay;
+      let timeSpentInMs;
+
+      if (timeSpentInMsOrMomentDuration.asMilliseconds) {
+        timeSpentInMs = timeSpentInMsOrMomentDuration.asMilliseconds();
+      } else {
+        timeSpentInMs = timeSpentInMsOrMomentDuration;
+      }
 
       // use mysql date as it is sortable
       let todayStr = getTodayStr();
@@ -381,13 +388,15 @@
       $rootScope.r.currentTask = $localStorage.currentTask;
     };
 
-    this.updateTimeSpentToday = (task, val) => {
+    this.setTimeSpentToday = (task, val) => {
       // add when set and not equal to current value
       if (val) {
         let todayStr = getTodayStr();
         task.lastWorkedOn = moment();
         task.timeSpentOnDay = {};
-        task.timeSpentOnDay[todayStr] = val;
+        if (!task.timeSpentOnDay[todayStr]) {
+          task.timeSpentOnDay[todayStr] = val;
+        }
       } else {
         // remove when unset
         task.timeSpentOnDay = {};

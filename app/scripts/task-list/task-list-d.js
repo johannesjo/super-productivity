@@ -149,12 +149,6 @@
       containment: '#board'
     };
 
-    vm.onChangedTimeSpent = (task, val) => {
-      if (vm.isTasksForToday) {
-        Tasks.updateTimeSpentToday(task, val);
-      }
-    };
-
     vm.onChangeTitle = (task) => {
       ShortSyntax(task);
     };
