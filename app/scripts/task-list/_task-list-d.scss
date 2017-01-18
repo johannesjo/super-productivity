@@ -69,6 +69,10 @@ task-list {
       }
     }
 
+    ng-md-icon {
+      min-width: 24px;
+    }
+
     .update-icon {
       fill: #000;
       body.dark-theme & {
