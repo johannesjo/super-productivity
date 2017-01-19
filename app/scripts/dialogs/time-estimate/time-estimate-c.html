@@ -1,4 +1,4 @@
-<md-dialog aria-label="Time estimation dialog"
+<md-dialog aria-label="Time estimation and time spent dialog"
            class="dialog-time-estimate">
   <md-toolbar>
     <div class="md-toolbar-tools">
@@ -22,11 +22,11 @@
           <label>Estimated Duration</label>
 
           <input type="text"
+                 md-auto-focus
                  input-duration
                  ng-model="vm.timeEstimate"
                  aria-label="Estimated Durations">
         </md-input-container>
-
         <h3 class="md-caption">Time Spent</h3>
 
         <md-input-container class="md-icon-float md-block">
@@ -34,7 +34,6 @@
                       aria-label="Time Spent Today"></ng-md-icon>
           <label>Time Spent Today</label>
           <input type="text"
-                 md-auto-focus
                  input-duration="optional"
                  ng-model="vm.timeSpentOnDayCopy[vm.todayStr]"
                  aria-label="Time Spent Today">
