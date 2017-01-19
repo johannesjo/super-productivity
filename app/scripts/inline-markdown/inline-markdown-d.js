@@ -28,19 +28,36 @@
   }
 
   /* @ngInject */
-  function InlineMarkdownCtrl($timeout, $element) {
+  function InlineMarkdownCtrl($timeout, $element, IS_ELECTRON, $scope) {
     let vm = this;
     let prevModel;
     let textareaEl = angular.element($element.find('textarea'));
-    //let previewEl = angular.element($element.find('div'));
+    let waitForMarkedTimeOut;
+
+    function makeLinksWorkForElectron() {
+      if (IS_ELECTRON) {
+        const shell = require('electron').shell;
+        const links = $element.find('a');
+
+        links.on('click', (event) => {
+          let url = angular.element(event.target).attr('href');
+
+          if (!/^https?:\/\//i.test(url)) {
+            url = 'http://' + url;
+          }
+          event.preventDefault();
+          shell.openExternal(url);
+        });
+      }
+    }
+
+    if (IS_ELECTRON) {
+      waitForMarkedTimeOut = $timeout(() => {
+        makeLinksWorkForElectron();
+      });
+    }
 
     vm.toggleShowEdit = ($event) => {
-
-      //console.log('set text', previewEl[0].offsetHeight);
-      //
-      ////textareaEl.css('height', previewEl[0].offsetHeight);
-      //textareaEl[0].height = previewEl[0].offsetHeight;
-
       // check if anchor link was clicked
       if ($event.target.tagName !== 'A') {
         vm.showEdit = true;
@@ -52,17 +69,20 @@
     };
 
     vm.untoggleShowEdit = () => {
-      //console.log('set preview', textareaEl[0].offsetHeight);
-
-      //previewEl.css('height', textareaEl[0].offsetHeight);
-      //previewEl[0].height = textareaEl[0].offsetHeight;
       vm.showEdit = false;
+      makeLinksWorkForElectron();
       if (angular.isFunction(vm.onChanged)) {
         if (prevModel !== vm.ngModel) {
           vm.onChanged();
         }
       }
     };
+
+    $scope.$on('$destroy', () => {
+      if (waitForMarkedTimeOut) {
+        $timeout.cancel(waitForMarkedTimeOut);
+      }
+    });
   }
 
 })();
