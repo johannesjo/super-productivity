@@ -187,9 +187,9 @@ electron.ipcMain.on('CHANGED_CURRENT_TASK', (ev, task) => {
   //tray.setContextMenu(contextMenu)
 });
 
-function showIdleDialog(lastIdleTime) {
+function showIdleDialog(realIdleTime) {
   // first show, then send again
-  mainWindow.webContents.send('WAS_IDLE', (lastIdleTime - CONFIG.MIN_IDLE_TIME + CONFIG.PING_INTERVAL));
+  mainWindow.webContents.send('WAS_IDLE', (realIdleTime));
 }
 
 let currentIdleStart;
@@ -221,7 +221,10 @@ function trackTimeFn() {
     }
     // track regularly
     else {
-      mainWindow.webContents.send('UPDATE_TIME_SPEND', CONFIG.PING_INTERVAL);
+      mainWindow.webContents.send('UPDATE_TIME_SPEND', {
+        timeSpentInMs: CONFIG.PING_INTERVAL,
+        idleTimeInMs: idleTime
+      });
     }
 
     // save last idle time

@@ -27,13 +27,16 @@
       let that = this;
 
       // handler for time spent tracking
-      window.ipcRenderer.on(IPC_EVENT_UPDATE_TIME_SPEND_FOR_CURRENT, (ev, timeSpentInMs) => {
+      window.ipcRenderer.on(IPC_EVENT_UPDATE_TIME_SPEND_FOR_CURRENT, (ev, evData) => {
+        let timeSpentInMs = evData.timeSpentInMs;
+        let idleTimeInMs = evData.idleTimeInMs
+
         // only track if there is a task
         if ($rootScope.r.currentTask) {
 
           that.addTimeSpent($rootScope.r.currentTask, timeSpentInMs);
           that.updateCurrent($rootScope.r.currentTask, true);
-          that.checkTakeToTakeABreak(timeSpentInMs);
+          that.checkTakeToTakeABreak(timeSpentInMs, idleTimeInMs);
 
           // we need to manually call apply as this is an outside event
           $rootScope.$apply();
@@ -59,7 +62,9 @@
       });
     }
 
-    this.checkTakeToTakeABreak = (timeSpentInMs) => {
+    this.checkTakeToTakeABreak = (timeSpentInMs, idleTimeInMs) => {
+      const MIN_IDLE_VAL_TO_TAKE_A_BREAK_FROM_TAKE_A_BREAK = 9999;
+
       if ($rootScope.r.config && $rootScope.r.config.isTakeABreakEnabled) {
         if (!$rootScope.r.currentSession) {
           $rootScope.r.currentSession = {};
@@ -76,10 +81,15 @@
         if (moment.duration($rootScope.r.config.takeABreakMinWorkingTime)
             .asSeconds() < $rootScope.r.currentSession.timeWorkedWithoutBreak.asSeconds()) {
 
+          if (idleTimeInMs > MIN_IDLE_VAL_TO_TAKE_A_BREAK_FROM_TAKE_A_BREAK) {
+            return;
+          }
+
           if (isShowTakeBreakNotification) {
             let toast = $mdToast.simple()
               .textContent('Take a break! You have been working for ' + ParseDuration.toString($rootScope.r.currentSession.timeWorkedWithoutBreak) + ' without one. Go away from the computer! Makes you more productive in the long run!')
               .action('I already did!')
+              .hideDelay(20000)
               .position('bottom');
             $mdToast.show(toast).then(function (response) {
               if (response === 'ok') {
