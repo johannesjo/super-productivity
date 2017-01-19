@@ -25,7 +25,7 @@ task-list {
 }
 
 .task {
-  padding: 4px 15px;
+  padding: 4px 12px;
   display: block;
   margin-bottom: 6px;
   background-color: #fff;
@@ -53,20 +53,30 @@ task-list {
     ng-md-icon {
       fill: gray;
     }
-    md-checkbox {
-      margin-bottom: 0;
-      margin-left: 10px;
-    }
     .md-button,
     md-checkbox {
       transition: 300ms;
-      padding: 4px;
+      padding: 6px 2px;
       // always reserve space for buttons
-      min-width: 32px;
+      min-width: 28px;
       width: 32px;
+      margin: 0;
+
       &:hover {
         transform: scale(1.4);
       }
+    }
+    .play-btn {
+      padding-left: 0;
+      margin-left: -2px;
+    }
+
+    md-checkbox {
+      margin-left: 6px;
+      min-width: 16px;
+      // dirty fix
+      margin-top: 4px;
+      margin-bottom: 4px;
     }
 
     ng-md-icon {
@@ -78,9 +88,6 @@ task-list {
       body.dark-theme & {
         fill: #fff;
       }
-    }
-    .md-icon-button {
-      margin: 0;
     }
     .md-button {
       &:hover,
@@ -150,7 +157,7 @@ task-list {
   }
 
   .handle {
-    margin-right: 10px;
+    margin-right: 4px;
   }
 
   .title {

@@ -1,7 +1,17 @@
 $dark-theme-bg-darker: rgb(39, 39, 39);
 $dark-theme-bg-lighter: rgb(70, 70, 70);
-$dark-theme-bg: rgb(48,48,48);
+$dark-theme-bg: rgb(48, 48, 48);
 $dark-green: #30412d;
 $green: #4fa758;
 $light-green: #a9ed9f;
 $red: #e15d63;
+
+//$layout-xs: 600px;
+$layout-gt-xs: 600px;
+//$layout-sm: 960px;
+$layout-gt-sm: 960px;
+//$layout-md: 1280px;
+$layout-gt-md: 1280px;
+//$layout-lg: 1920px;
+$layout-gt-lg: 1920px;
+//$layout-xl: 1920px;

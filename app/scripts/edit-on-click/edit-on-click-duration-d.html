@@ -1,3 +1,8 @@
+<span class="text"
+      tabindex="2"
+      ng-if="!vm.showEdit"
+      ng-keypress="vm.toggleShowEdit()"
+      ng-click="vm.toggleShowEdit()">{{ vm.editOnClickDuration |duration }}</span>
 <form ng-if="vm.showEdit"
       class="edit-on-click-form duration-form"
       ng-submit="vm.finishEdit();"
@@ -9,9 +14,3 @@
          ng-blur="vm.finishEdit();"
          tabindex="2">
 </form>
-
-<span class="text"
-      tabindex="2"
-      ng-if="!vm.showEdit"
-      ng-keypress="vm.toggleShowEdit()"
-      ng-click="vm.toggleShowEdit()">{{ vm.editOnClickDuration |duration }}</span>
