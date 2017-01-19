@@ -60,16 +60,6 @@
     </md-button>
 
     <md-button class="md-icon-button"
-               aria-label="Daily Agenda"
-               ui-sref-active="md-raised"
-               ui-sref="daily-agenda">
-      <md-tooltip md-direction="bottom">
-        Go to daily agenda
-      </md-tooltip>
-      <ng-md-icon icon="event"></ng-md-icon>
-    </md-button>
-
-    <md-button class="md-icon-button"
                aria-label="Work View"
                ui-sref-active="md-raised"
                ng-if="$state.current.name!=='daily-summary'"
@@ -89,6 +79,16 @@
         Finish your day / Go to summary
       </md-tooltip>
       <ng-md-icon icon="done_all"></ng-md-icon>
+    </md-button>
+
+    <md-button class="md-icon-button"
+               aria-label="Daily Agenda / Tracking History"
+               ui-sref-active="md-raised"
+               ui-sref="agenda-and-history">
+      <md-tooltip md-direction="bottom">
+        Go to daily agenda / Tracking history
+      </md-tooltip>
+      <ng-md-icon icon="today"></ng-md-icon>
     </md-button>
 
     <md-button class="md-icon-button"

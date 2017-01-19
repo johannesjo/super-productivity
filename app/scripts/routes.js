@@ -42,9 +42,9 @@
         url: '/done-tasks-backlog',
         template: '<done-tasks-backlog></done-tasks-backlog>'
       })
-      .state('daily-agenda', {
-        url: '/daily-agenda',
-        template: '<daily-agenda></daily-agenda>'
+      .state('agenda-and-history', {
+        url: '/agenda-and-history',
+        template: '<agenda-and-history></agenda-and-history>'
       })
     /* STATES-NEEDLE - DO NOT REMOVE THIS */;
   }

@@ -17,6 +17,12 @@ IMPORTANT NOTE:
 
 @import '_variables.scss';
 
+@import '../scripts/agenda-and-history/_agenda-and-history-d.scss';
+
+@import '../scripts/agenda-and-history/daily-agenda/_daily-agenda-d.scss';
+
+@import '../scripts/agenda-and-history/time-tracking-history/_time-tracking-history-d.scss';
+
 @import 'base/_buttons.scss';
 
 @import 'base/_fonts.scss';
@@ -44,8 +50,6 @@ IMPORTANT NOTE:
 @import 'components/_side-info.scss';
 
 @import 'components/_ui-view.scss';
-
-@import '../scripts/daily-agenda/_daily-agenda-d.scss';
 
 @import '../scripts/daily-planner/_daily-planner-d.scss';
 

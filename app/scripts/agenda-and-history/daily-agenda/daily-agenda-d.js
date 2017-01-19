@@ -15,7 +15,7 @@
   /* @ngInject */
   function dailyAgenda() {
     return {
-      templateUrl: 'scripts/daily-agenda/daily-agenda-d.html',
+      templateUrl: 'scripts/agenda-and-history/daily-agenda/daily-agenda-d.html',
       bindToController: true,
       controller: DailyAgendaCtrl,
       controllerAs: 'vm',
