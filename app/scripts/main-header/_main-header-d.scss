@@ -1,11 +1,11 @@
 main-header {
 
-  .app-icon{
-    margin-right: 10px;
-  }
-  .md-button {
+  .md-button.md-icon-button {
+    margin: 0 3px;
     &.is-active {
-      outline: 2px solid #fff;
+      //ng-md-icon {
+      border: 1px solid #fff;
+      //}
     }
   }
 }
