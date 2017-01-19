@@ -1,4 +1,4 @@
-<md-toolbar>
+<md-toolbar md-whiteframe="3">
   <div class="md-toolbar-tools">
     <md-button class="md-icon-button"
                aria-label="Home"
@@ -72,6 +72,7 @@
     <md-button class="md-icon-button"
                aria-label="Work View"
                ui-sref-active="md-raised"
+               ng-if="$state.current.name!=='daily-summary'"
                ui-sref="work-view">
       <md-tooltip md-direction="bottom">
         Go to work view
@@ -81,6 +82,7 @@
 
     <md-button class="md-icon-button"
                aria-label="Daily Summary"
+               ng-if="$state.current.name==='daily-summary'"
                ui-sref-active="md-raised"
                ui-sref="daily-summary">
       <md-tooltip md-direction="bottom">

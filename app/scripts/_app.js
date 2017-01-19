@@ -76,8 +76,12 @@
     $mdThemingProvider.alwaysWatchTheme(true);
   }
 
-  function initGlobalModels(LS_DEFAULTS, DEFAULT_THEME, $rootScope, Tasks, $localStorage, Projects) {
+  function initGlobalModels(LS_DEFAULTS, DEFAULT_THEME, $rootScope, Tasks, $localStorage, Projects, $state) {
     $localStorage.$default(LS_DEFAULTS);
+
+    // we don't use r.$state because it looks more like something special
+    // this way
+    $rootScope.$state = $state;
 
     $rootScope.r = {};
 

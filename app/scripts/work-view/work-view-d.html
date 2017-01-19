@@ -12,6 +12,20 @@
              allow-task-selection="true"></task-list>
 </div>
 
+<md-button ng-click="vm.openAddTask()"
+           class="md-primary md-raised">
+  <ng-md-icon icon="add"></ng-md-icon>
+  Add new Task
+</md-button>
+
+
+<md-button ui-sref="daily-summary"
+           class="md-primary md-raised">
+  <ng-md-icon icon="done_all"></ng-md-icon>
+  Finish your work day
+</md-button>
+
+
 <h2 class="md-title">Done Tasks</h2>
 
 <div class="work-view-tasks work-view-tasks--done">
@@ -21,11 +35,4 @@
              current-task="r.currentTask"></task-list>
 </div>
 
-<md-button ng-click="vm.openAddTask()"
-           class="md-primary md-raised">Add new Task
-</md-button>
 
-
-<md-button ui-sref="daily-summary"
-           class="md-primary md-raised">Finish your work day
-</md-button>

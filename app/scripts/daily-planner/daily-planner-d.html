@@ -26,7 +26,9 @@
        layout-sm="column"
        layout-align="center center">
     <md-button class="md-raised md-primary"
-               ng-click="vm.done()">All done! Let's get to work!
+               ng-click="vm.done()">
+      <ng-md-icon icon="playlist_play"></ng-md-icon>
+      All done! Let's get to work!
     </md-button>
   </div>
 
@@ -54,11 +56,15 @@
 
   <md-button class="md-primary"
              ng-click="vm.limitBacklogTo = false"
-             ng-hide="vm.limitBacklogTo === false || r.backlogTasks.length <=vm.limitBacklogTo ||r.backlogTasks.length ===0">Show All {{ r.backlogTasks.length }} items in Backlog
+             ng-hide="vm.limitBacklogTo === false || r.backlogTasks.length <=vm.limitBacklogTo ||r.backlogTasks.length ===0">
+    <ng-md-icon icon="remove_red_eye"></ng-md-icon>
+    Show All {{ r.backlogTasks.length }} items in Backlog
   </md-button>
 
   <md-button class="md-primary"
-             ui-sref="done-tasks-backlog">Go To Done Backlog
+             ui-sref="done-tasks-backlog">
+    <ng-md-icon icon="list"></ng-md-icon>
+    Go To Done Backlog
   </md-button>
 </div>
 
