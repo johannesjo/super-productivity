@@ -19,7 +19,7 @@
 
     vm.idleTime = $window.moment.duration(idleTime, 'milliseconds');
 
-    vm.undoneTasks = Tasks.getUndoneToday();
+    vm.undoneTasks = Tasks.getUndoneToday(true);
     vm.selectedTask = $rootScope.r.currentTask;
 
     vm.trackIdleToTask = () => {

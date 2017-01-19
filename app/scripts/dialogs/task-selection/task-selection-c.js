@@ -17,7 +17,7 @@
   function TaskSelectionCtrl($mdDialog, Tasks) {
     let vm = this;
 
-    vm.undoneTasks = Tasks.getUndoneToday();
+    vm.undoneTasks = Tasks.getUndoneToday(true);
 
     vm.submit = () => {
       if (!vm.selectedTask) {

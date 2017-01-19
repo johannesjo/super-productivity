@@ -19,6 +19,7 @@
     const IPC_EVENT_UPDATE_TIME_SPEND_FOR_CURRENT = 'UPDATE_TIME_SPEND';
     const IPC_EVENT_CURRENT_TASK_UPDATED = 'CHANGED_CURRENT_TASK';
     const moment = $window.moment;
+    const _ = $window._;
 
     let isShowTakeBreakNotification = true;
 
@@ -29,7 +30,7 @@
       // handler for time spent tracking
       window.ipcRenderer.on(IPC_EVENT_UPDATE_TIME_SPEND_FOR_CURRENT, (ev, evData) => {
         let timeSpentInMs = evData.timeSpentInMs;
-        let idleTimeInMs = evData.idleTimeInMs
+        let idleTimeInMs = evData.idleTimeInMs;
 
         // only track if there is a task
         if ($rootScope.r.currentTask) {
@@ -190,7 +191,7 @@
           return valueArr.indexOf(item) !== idx;
         });
         if (dupeIds.length) {
-          let firstDupe = $window._.find(tasksArray, (task) => {
+          let firstDupe = _.find(tasksArray, (task) => {
             return dupeIds.indexOf(task.id) > -1;
           });
           console.log(firstDupe);
@@ -276,9 +277,9 @@
 
       // TODO check if this is even required
       if ($localStorage.currentTask) {
-        currentTask = $window._.find($localStorage.tasks, (task) => {
+        currentTask = _.find($localStorage.tasks, (task) => {
           if (task.subTasks) {
-            let subTaskMatchTmp = $window._.find(task.subTasks, { id: $localStorage.currentTask.id });
+            let subTaskMatchTmp = _.find(task.subTasks, { id: $localStorage.currentTask.id });
             if (subTaskMatchTmp) {
               subTaskMatch = subTaskMatchTmp;
             }
@@ -292,7 +293,7 @@
     };
 
     this.getById = (taskId) => {
-      return $window._.find($rootScope.r.tasks, ['id', taskId]) || $window._.find($rootScope.r.backlogTasks, ['id', taskId]) || $window._.find($rootScope.r.doneBacklogTasks, ['id', taskId]);
+      return _.find($rootScope.r.tasks, ['id', taskId]) || _.find($rootScope.r.backlogTasks, ['id', taskId]) || _.find($rootScope.r.doneBacklogTasks, ['id', taskId]);
     };
 
     this.getBacklog = () => {
@@ -310,14 +311,42 @@
       return $localStorage.tasks;
     };
 
-    this.getUndoneToday = () => {
-      return $window._.filter($localStorage.tasks, (task) => {
-        return task && !task.isDone;
-      });
+    this.getUndoneToday = (isSubTasksInsteadOfParent) => {
+      let undoneTasks;
+
+      // get flattened result of all undone tasks including subtasks
+      if (isSubTasksInsteadOfParent) {
+        undoneTasks = [];
+        let allParentTasks = _.filter($localStorage.tasks, (task) => {
+          return task && !task.isDone;
+        });
+        for (let i = 0; i < allParentTasks.length; i++) {
+          let parentTask = allParentTasks[i];
+          if (parentTask.subTasks && parentTask.subTasks.length > 0) {
+            for (let j = 0; j < parentTask.subTasks.length; j++) {
+              let subTask = parentTask.subTasks[j];
+              if (!subTask.isDone) {
+                undoneTasks.push(subTask);
+              }
+            }
+          } else {
+            undoneTasks.push(parentTask);
+          }
+        }
+      }
+
+      // just get parent undone tasks
+      else {
+        undoneTasks = _.filter($localStorage.tasks, (task) => {
+          return task && !task.isDone;
+        });
+      }
+
+      return undoneTasks;
     };
 
     this.getDoneToday = () => {
-      return $window._.filter($localStorage.tasks, (task) => {
+      return _.filter($localStorage.tasks, (task) => {
         return task && task.isDone;
       });
     };
