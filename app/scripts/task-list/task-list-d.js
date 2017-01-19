@@ -108,12 +108,9 @@
         if (vm.disableDropInto) {
           return false;
         } else {
+          // disallow parent tasks to be dropped into parent tasks
           let draggedTask = sourceItemHandleScope.itemScope.task;
-          if (draggedTask.subTasks && draggedTask.subTasks.length > 0 && destSortableScope.$parent.vm.parentTask) {
-            return false;
-          } else {
-            return true;
-          }
+          return !(draggedTask.subTasks && draggedTask.subTasks.length > 0 && destSortableScope.$parent.vm.parentTask);
 
           // check for dupes
           //let draggedTask = sourceItemHandleScope.itemScope.task;
