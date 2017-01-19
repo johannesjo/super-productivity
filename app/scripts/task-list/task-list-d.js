@@ -45,7 +45,7 @@
     // only allow after short delay
     let animationReadyTimeout = $timeout(() => {
       $element.addClass('is-animation-ready');
-    }, 300);
+    }, 400);
 
     $scope.$on('$destroy', () => {
       $timeout.cancel(animationReadyTimeout);

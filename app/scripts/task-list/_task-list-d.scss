@@ -55,7 +55,6 @@ task-list {
     }
     .md-button,
     md-checkbox {
-      transition: 300ms;
       padding: 6px 2px;
       // always reserve space for buttons
       min-width: 28px;
@@ -233,6 +232,13 @@ task-list {
 
 // animations
 .is-animation-ready {
+  .first-line {
+    .md-button,
+    md-checkbox {
+      transition: 300ms;
+    }
+  }
+
   .task {
     transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
     &.ng-enter {
