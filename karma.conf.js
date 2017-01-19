@@ -33,6 +33,7 @@ module.exports = function(config) {
             'app/bower_components/marked/lib/marked.js',
             'app/bower_components/angular-marked/dist/angular-marked.js',
             'app/bower_components/angular-bootstrap-calendar/dist/js/angular-bootstrap-calendar-tpls.js',
+            'app/bower_components/hamsterjs/hamster.js',
             'app/bower_components/angular-mocks/angular-mocks.js',
             // endbower
 

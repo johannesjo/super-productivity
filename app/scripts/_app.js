@@ -38,6 +38,7 @@
     .config(configMarked)
     .run(initGlobalModels)
     .run(handleCurrentTaskUpdates)
+    .run(initMousewheelZoomForElectron)
     .run(initGlobalShortcuts);
 
   function configMarked(markedProvider) {
@@ -262,6 +263,23 @@
           checkJiraUpdatesForTask($rootScope.r.currentTask);
         }
       }, JIRA_UPDATE_POLL_INTERVAL);
+    }
+  }
+
+  function initMousewheelZoomForElectron($document, IS_ELECTRON) {
+    if (IS_ELECTRON) {
+      const { webFrame } = require('electron');
+
+      Hamster($document[0]).wheel(function (event, delta, deltaX, deltaY) {
+        if (event.originalEvent && event.originalEvent.ctrlKey) {
+          const zoomFactor = webFrame.getZoomFactor();
+          if (deltaY === 1) {
+            webFrame.setZoomFactor(zoomFactor + 0.05)
+          } else if (deltaY === -1) {
+            webFrame.setZoomFactor(zoomFactor - 0.05)
+          }
+        }
+      });
     }
   }
 
