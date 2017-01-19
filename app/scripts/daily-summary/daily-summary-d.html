@@ -46,6 +46,7 @@
   </tr>
 </table>
 <md-button class="md-raised md-primary"
+           style="margin-top: 15px;"
            ng-click="vm.showExportModal()">
   <ng-md-icon icon="call_made"></ng-md-icon>
   Export Simple Task List for today
@@ -100,8 +101,12 @@
 </div>
 
 
-<md-button class="md-raised md-primary"
-           ng-click="vm.finishDay()">
-  <ng-md-icon icon="wb_sunny"></ng-md-icon>
-  Clear done tasks, save and go home
-</md-button>
+<div layout="row"
+     layout-sm="column"
+     layout-align="center center">
+  <md-button class="md-raised md-primary"
+             ng-click="vm.finishDay()">
+    <ng-md-icon icon="wb_sunny"></ng-md-icon>
+    Clear done tasks, save and go home
+  </md-button>
+</div>
