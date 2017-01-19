@@ -27,10 +27,11 @@ const url = require('url');
 // be closed automatically when the JavaScript object is garbage collected.
 let mainWindow;
 let lastIdleTime;
+let darwinForceQuit = false;
 
 function createWindow() {
   // Create the browser window.
-  mainWindow = new BrowserWindow({ width: 800, height: 600 });
+  mainWindow = new BrowserWindow({width: 800, height: 600});
 
   // and load the index.html of the app.
   mainWindow.loadURL(url.format({
@@ -49,11 +50,18 @@ function createWindow() {
   });
 
   mainWindow.on('close', function (event) {
-    if (!app.isQuiting) {
-      event.preventDefault();
-      mainWindow.hide();
+    // handle darwin
+    if (process.platform === 'darwin') {
+      if (!darwinForceQuit) {
+        event.preventDefault();
+        mainWindow.hide();
+      }
+    } else {
+      if (!app.isQuiting) {
+        event.preventDefault();
+        mainWindow.hide();
+      }
     }
-    return false;
   });
 
   mainWindow.on('minimize', function (event) {
@@ -68,14 +76,6 @@ function createWindow() {
 // Some APIs can only be used after this event occurs.
 app.on('ready', createWindow);
 
-// Quit when all windows are closed.
-app.on('window-all-closed', function () {
-  // On OS X it is common for applications and their menu bar
-  // to stay active until the user quits explicitly with Cmd + Q
-  //if (process.platform !== 'darwin') {
-  app.quit();
-  //}
-});
 
 let tray = null;
 app.on('ready', () => {
@@ -101,7 +101,6 @@ app.on('ready', () => {
     }
   ]);
   // mac os only
-  tray.setHighlightMode('always');
   tray.setContextMenu(contextMenu);
 
   tray.on('click', () => {
@@ -125,7 +124,10 @@ app.on('activate', function () {
   // dock icon is clicked and there are no other windows open.
   if (mainWindow === null) {
     createWindow();
+  } else {
+    mainWindow.show();
   }
+
 });
 
 app.on('ready', () => {
@@ -135,6 +137,11 @@ app.on('ready', () => {
 app.on('before-quit', () => {
   if (tray) {
     tray.destroy();
+  }
+
+  // handle darwin
+  if (process.platform === 'darwin') {
+    darwinForceQuit = true;
   }
 });
 
