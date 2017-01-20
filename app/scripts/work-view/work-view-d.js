@@ -79,33 +79,24 @@
       }
     };
 
-    vm.onItemMovedUndone = (currentlyMovedTask, parentTask) => {
-      console.log('MOVE_UN_DONE', currentlyMovedTask, parentTask);
-
-      if (!parentTask) {
-        currentlyMovedTask.isDone = true;
-      } else {
-        currentlyMovedTask.isDone = parentTask.isDone;
-      }
-    };
-
-    vm.onItemMovedDone = (currentlyMovedTask, parentTask) => {
-      console.log('MOVE_DONE', currentlyMovedTask, parentTask);
-
-      if (!parentTask) {
-        currentlyMovedTask.isDone = false;
-      } else {
-        currentlyMovedTask.isDone = parentTask.isDone;
-      }
-    };
-
     // WATCHER & EVENTS
     // ----------------
     $rootScope.$watch('r.tasks', updateTimeTotals, true);
 
-    // we wan't to save to the LS in case the app crashes
-    $scope.$watch('vm.tasksDone', updateTasksLsOnly, true);
-    $scope.$watch('vm.tasksUndone', updateTasksLsOnly, true);
+    $scope.$watch('vm.tasksDone', () => {
+      for (let i = 0; i < vm.tasksDone.length; i++) {
+        vm.tasksDone[i].isDone = true;
+      }
+      // we wan't to save to the LS in case the app crashes
+      updateTasksLsOnly();
+    }, true);
+    $scope.$watch('vm.tasksUndone', () => {
+      for (let j = 0; j < vm.tasksUndone.length; j++) {
+        vm.tasksUndone[j].isDone = false;
+      }
+      // we wan't to save to the LS in case the app crashes
+      updateTasksLsOnly();
+    }, true);
 
     // otherwise we update on view change
     $scope.$on('$destroy', () => {

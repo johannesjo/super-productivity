@@ -136,9 +136,9 @@
 
         if (angular.isFunction(vm.onItemMoved)) {
           vm.onItemMoved({
-            $event: event,
             currentlyMovedTask,
-            parentTask
+            parentTask,
+            $event: event
           });
         }
       },
