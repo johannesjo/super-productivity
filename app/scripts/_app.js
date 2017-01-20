@@ -271,17 +271,17 @@
     }
   }
 
-  function initMousewheelZoomForElectron($document, IS_ELECTRON) {
+  function initMousewheelZoomForElectron($document, $window, IS_ELECTRON) {
     if (IS_ELECTRON) {
       const { webFrame } = require('electron');
 
-      Hamster($document[0]).wheel(function (event, delta, deltaX, deltaY) {
+      $window.Hamster($document[0]).wheel(function (event, delta, deltaX, deltaY) {
         if (event.originalEvent && event.originalEvent.ctrlKey) {
           const zoomFactor = webFrame.getZoomFactor();
           if (deltaY === 1) {
-            webFrame.setZoomFactor(zoomFactor + 0.05)
+            webFrame.setZoomFactor(zoomFactor + 0.05);
           } else if (deltaY === -1) {
-            webFrame.setZoomFactor(zoomFactor - 0.05)
+            webFrame.setZoomFactor(zoomFactor - 0.05);
           }
         }
       });

@@ -26,7 +26,7 @@
 
   /* @ngInject */
   function AgendaAndHistoryCtrl() {
-    let vm = this;
+    //let vm = this;
   }
 
 })();

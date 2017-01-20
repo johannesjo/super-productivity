@@ -342,7 +342,7 @@
       const backlogT = this.getBacklog();
       const doneBacklogT = this.getDoneBacklog();
 
-      return _.concat(todaysT, backlogT, doneBacklogT)
+      return _.concat(todaysT, backlogT, doneBacklogT);
     };
 
     this.flattenTasks = (tasks, checkFnParent, checkFnSub) => {
