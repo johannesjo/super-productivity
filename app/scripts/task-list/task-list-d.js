@@ -123,18 +123,18 @@
         }
       },
       itemMoved: function (event) {
-        let currentTask = event.dest.sortableScope.modelValue[event.dest.index];
+        let currentlyMovedTask = event.dest.sortableScope.modelValue[event.dest.index];
         let parentTask = event.dest.sortableScope.$parent.vm.parentTask;
         if (parentTask) {
-          currentTask.parentId = parentTask.id;
+          currentlyMovedTask.parentId = parentTask.id;
         } else {
-          if (!angular.isUndefined(currentTask.parentId)) {
-            delete currentTask.parentId;
+          if (!angular.isUndefined(currentlyMovedTask.parentId)) {
+            delete currentlyMovedTask.parentId;
           }
         }
 
         if (angular.isFunction(vm.onItemMoved)) {
-          vm.onItemMoved({ $event: event });
+          vm.onItemMoved({ $event: event , currentlyMovedTask, parentTask});
         }
       },
       orderChanged: function (event) {
