@@ -1,6 +1,26 @@
-<div ng-repeat="(strDate,logEntryForDay) in vm.worklog track by logEntryForDay.id">
-  <div><strong>{{ strDate }}:</strong> {{ logEntryForDay.timeSpent|duration }}</div>
+<div ng-repeat="logEntryForDay in vm.worklog| orderObjectBy:'dateStr' track by logEntryForDay.id">
+
+  <div>
+    <strong>{{ logEntryForDay.dateStr|amDateFormat:'DD-MM-YYYY, dddd' }}:</strong> {{ logEntryForDay.timeSpent|duration }}
+  </div>
+
+
   <div ng-repeat="logEntry in logEntryForDay.entries track by logEntry.task.id">
-    {{ logEntry.task.timeSpentOnDay[strDate] |duration}} --- {{ logEntry.task.title }}
+    {{ logEntry.task.timeSpentOnDay[logEntryForDay.dateStr] |duration}} --- {{ logEntry.task.title }}
   </div>
 </div>
+
+<!-- HOW TO DO IT : split up date string into years > month > days
+e.g.:
+{
+  '2015':{
+    '12':{
+      '24' :'christmas'
+    }
+  }
+}
+
+Also search google how to sort dates into month
+
+And use virtual repeat for everything because otherwise it might suck at some point
+-->

@@ -396,6 +396,7 @@
                 worklog[dateStr] = {
                   timeSpent: moment.duration(),
                   entries: [],
+                  dateStr: dateStr,
                   id: Uid()
                 };
               }
