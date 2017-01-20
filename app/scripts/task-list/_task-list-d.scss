@@ -105,8 +105,13 @@ task-list {
     white-space: nowrap;
   }
 
+  .title {
+
+  }
+
   &.is-done {
-    .title {
+    > .title,
+    > .first-line > .title {
       text-decoration: line-through;
     }
   }

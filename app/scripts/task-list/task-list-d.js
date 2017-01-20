@@ -31,6 +31,7 @@
         disableDropInto: '@',
         onItemMoved: '&',
         onOrderChanged: '&',
+        onTaskDoneChangedCallback: '&onTaskDoneChanged',
         parentTask: '='
       }
     };
@@ -134,7 +135,11 @@
         }
 
         if (angular.isFunction(vm.onItemMoved)) {
-          vm.onItemMoved({ $event: event , currentlyMovedTask, parentTask});
+          vm.onItemMoved({
+            $event: event,
+            currentlyMovedTask,
+            parentTask
+          });
         }
       },
       orderChanged: function (event) {
@@ -156,10 +161,14 @@
       }
     };
 
-    vm.onTaskDone = (task) => {
+    vm.onTaskDoneChanged = (task) => {
       if (task.isDone) {
         task.doneDate = $window.moment();
         Jira.addWorklog(task);
+      }
+
+      if (angular.isFunction(vm.onTaskDoneChangedCallback)) {
+        vm.onTaskDoneChangedCallback({ task, taskList: vm.tasks });
       }
     };
 

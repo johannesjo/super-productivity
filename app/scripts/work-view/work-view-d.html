@@ -7,7 +7,8 @@
 <div class="work-view-tasks work-view-tasks--undone">
   <task-list tasks="vm.tasksUndone"
              current-task="r.currentTask"
-             on-item-moved="vm.onItemMovedUndone($event)"
+             on-item-moved="vm.onItemMovedUndone(currentlyMovedTask,parentTask)"
+             on-task-done-changed="vm.onTaskDoneChangedUndoneList(task)"
              is-tasks-for-today="true"
              allow-task-selection="true"></task-list>
 </div>
@@ -30,7 +31,8 @@
 
 <div class="work-view-tasks work-view-tasks--done">
   <task-list tasks="vm.tasksDone"
-             on-item-moved="vm.onItemMovedDone($event)"
+             on-item-moved="vm.onItemMovedDone(currentlyMovedTask,parentTask)"
+             on-task-done-changed="vm.onTaskDoneChangedDoneList(task)"
              is-tasks-for-today="true"
              current-task="r.currentTask"></task-list>
 </div>
