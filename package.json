@@ -32,7 +32,7 @@
     "browser-sync": "latest",
     "del": "latest",
     "ecstatic": "latest",
-    "electron": "^1.4.1",
+    "electron": "^1.4.15",
     "electron-prebuilt": "^1.4.13",
     "gulp": "latest",
     "gulp-autoprefixer": "latest",
