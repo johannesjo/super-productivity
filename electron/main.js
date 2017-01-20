@@ -25,57 +25,66 @@ const url = require('url');
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
-let mainWindow;
+let mainWin;
 let lastIdleTime;
 let darwinForceQuit = false;
 
 function createWindow() {
   // Create the browser window.
-  mainWindow = new BrowserWindow({width: 800, height: 600});
+  mainWin = new BrowserWindow({ width: 800, height: 600 });
 
   // and load the index.html of the app.
-  mainWindow.loadURL(url.format({
+  mainWin.loadURL(url.format({
     pathname: path.join(__dirname, '../app/index.html'),
     protocol: 'file:',
-    slashes: true
+    slashes: true,
+    webPreferences: {
+      scrollBounce: true
+    }
   }));
 
   // Open the DevTools.
-  //mainWindow.webContents.openDevTools();
+  //mainWin.webContents.openDevTools();
 
   // open new window links in browser
-  mainWindow.webContents.on('new-window', function (event, url) {
+  mainWin.webContents.on('new-window', function (event, url) {
     event.preventDefault();
     open(url);
   });
 
-  mainWindow.on('close', function (event) {
+  mainWin.on('close', function (event) {
     // handle darwin
     if (process.platform === 'darwin') {
       if (!darwinForceQuit) {
         event.preventDefault();
-        mainWindow.hide();
+        mainWin.hide();
       }
     } else {
       if (!app.isQuiting) {
         event.preventDefault();
-        mainWindow.hide();
+        mainWin.hide();
       }
     }
   });
 
-  mainWindow.on('minimize', function (event) {
+  mainWin.on('minimize', function (event) {
     event.preventDefault();
-    mainWindow.hide();
+    mainWin.hide();
   });
+}
 
+function showOrFocus(win) {
+  if (win.isVisible()) {
+    win.focus();
+  } else {
+    win.show();
+  }
 }
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.on('ready', createWindow);
-
 
 let tray = null;
 app.on('ready', () => {
@@ -90,7 +99,7 @@ app.on('ready', () => {
   let contextMenu = electron.Menu.buildFromTemplate([
     {
       label: 'Show App', click: () => {
-      mainWindow.show();
+      mainWin.show();
     }
     },
     {
@@ -104,14 +113,18 @@ app.on('ready', () => {
   tray.setContextMenu(contextMenu);
 
   tray.on('click', () => {
-    mainWindow.show();
+    mainWin.show();
   });
 });
 
 app.on('ready', () => {
   // Register a 'CommandOrControl+X' shortcut listener.
   const ret = electron.globalShortcut.register('CommandOrControl+Shift+X', () => {
-    mainWindow.show();
+    if (mainWin.isFocused()) {
+      mainWin.hide();
+    } else {
+      showOrFocus(mainWin);
+    }
   });
 
   if (!ret) {
@@ -122,10 +135,10 @@ app.on('ready', () => {
 app.on('activate', function () {
   // On OS X it's common to re-create a window in the app when the
   // dock icon is clicked and there are no other windows open.
-  if (mainWindow === null) {
+  if (mainWin === null) {
     createWindow();
   } else {
-    mainWindow.show();
+    mainWin.show();
   }
 
 });
@@ -152,15 +165,15 @@ electron.ipcMain.on('SHUTDOWN', () => {
 });
 
 electron.ipcMain.on('TOGGLE_DEV_TOOLS', () => {
-  mainWindow.webContents.openDevTools();
+  mainWin.webContents.openDevTools();
 });
 
 electron.ipcMain.on('JIRA', (ev, request) => {
-  jira(mainWindow, request);
+  jira(mainWin, request);
 });
 
 electron.ipcMain.on('GIT_LOG', (ev, cwd) => {
-  gitLog(cwd, mainWindow);
+  gitLog(cwd, mainWin);
 });
 
 electron.ipcMain.on('NOTIFY', (ev, notification) => {
@@ -196,7 +209,7 @@ electron.ipcMain.on('CHANGED_CURRENT_TASK', (ev, task) => {
 
 function showIdleDialog(realIdleTime) {
   // first show, then send again
-  mainWindow.webContents.send('WAS_IDLE', (realIdleTime));
+  mainWin.webContents.send('WAS_IDLE', (realIdleTime));
 }
 
 let currentIdleStart;
@@ -215,12 +228,9 @@ function trackTimeFn() {
         let now = moment();
         let realIdleTime = moment.duration(now.diff(currentIdleStart)).asMilliseconds();
 
+        showOrFocus(mainWin);
         // TODO this seem to open a new instance find out why
         showIdleDialog(realIdleTime);
-        // we try using a timeout to prevent multiple windows from opening
-        setTimeout(() => {
-          mainWindow.show();
-        }, 20);
 
         // unset currentIdleStart
         currentIdleStart = undefined;
@@ -228,7 +238,7 @@ function trackTimeFn() {
     }
     // track regularly
     else {
-      mainWindow.webContents.send('UPDATE_TIME_SPEND', {
+      mainWin.webContents.send('UPDATE_TIME_SPEND', {
         timeSpentInMs: CONFIG.PING_INTERVAL,
         idleTimeInMs: idleTime
       });
