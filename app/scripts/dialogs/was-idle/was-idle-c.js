@@ -23,11 +23,13 @@
     vm.selectedTask = $rootScope.r.currentTask;
 
     vm.trackIdleToTask = () => {
-      // add the idle time in milliseconds
-      Tasks.addTimeSpent(vm.selectedTask, idleTime);
-      // set current task to the selected one
-      Tasks.updateCurrent(vm.selectedTask);
-      $mdDialog.hide();
+      if (vm.selectedTask) {
+        // add the idle time in milliseconds
+        Tasks.addTimeSpent(vm.selectedTask, idleTime);
+        // set current task to the selected one
+        Tasks.updateCurrent(vm.selectedTask);
+        $mdDialog.hide();
+      }
     };
 
     vm.cancel = () => {
