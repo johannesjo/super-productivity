@@ -42,7 +42,7 @@
     <md-button class="md-icon-button"
                aria-label="Make a break"
                ng-click="vm.toggleBreak()"
-               ng-class="{'md-raised':vm.isOnBreak,'md-accent':vm.isOnBreak}">
+               ng-class="{'md-raised':!r.currentTask,'md-accent':!r.currentTask}">
       <md-tooltip md-direction="bottom">
         Toggle break mode
       </md-tooltip>

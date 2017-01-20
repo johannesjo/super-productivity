@@ -25,9 +25,9 @@
   }
 
   /* @ngInject */
-  function MainHeaderCtrl(Dialogs, $rootScope, Tasks, Projects, SimpleToast) {
+  function MainHeaderCtrl(Dialogs, $rootScope, Tasks, Projects, SimpleToast, $state) {
     let vm = this;
-    let lastCurrentTask;
+    vm.lastCurrentTask = undefined;
 
     vm.r = $rootScope.r;
 
@@ -46,19 +46,23 @@
       if ($rootScope.r.currentSession) {
         $rootScope.r.currentSession.timeWorkedWithoutBreak = undefined;
       }
+      const isGoOnBreak = !!$rootScope.r.currentTask;
 
-      if (!lastCurrentTask && !$rootScope.r.currentTask) {
-        return;
-      }
-
-      vm.isOnBreak = !vm.isOnBreak;
-
-      if (vm.isOnBreak) {
-        lastCurrentTask = $rootScope.r.currentTask;
+      if (isGoOnBreak) {
+        vm.lastCurrentTask = $rootScope.r.currentTask;
         Tasks.updateCurrent(null);
         SimpleToast('On break!');
       } else {
-        Tasks.updateCurrent(lastCurrentTask);
+        if (vm.lastCurrentTask) {
+          Tasks.updateCurrent(vm.lastCurrentTask);
+        } else {
+          Dialogs('TASK_SELECTION', { tasks: $rootScope.r.tasks })
+            .then(() => {
+              $state.go('work-view');
+            });
+        }
+
+        vm.lastCurrentTask = undefined;
         SimpleToast('Off break!');
       }
     };
