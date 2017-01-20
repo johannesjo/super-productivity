@@ -25,8 +25,13 @@
   }
 
   /* @ngInject */
-  function TimeTrackingHistoryCtrl() {
+  function TimeTrackingHistoryCtrl(Tasks) {
     let vm = this;
+
+    vm.worklog = Tasks.getCompleteWorkLog();
+    console.log(vm.worklog);
+
+
   }
 
 })();

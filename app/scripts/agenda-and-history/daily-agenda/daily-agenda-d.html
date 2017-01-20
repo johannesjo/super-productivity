@@ -49,13 +49,11 @@
           <span ng-bind-html="vm.calendarEventTitle.dayView(dayEvent.event) | calendarTrustAsHtml"></span>
         </span>
 
-        <a
-          href="javascript:;"
-          class="event-item-action"
-          ng-repeat="action in dayEvent.event.actions track by $index"
-          ng-class="action.cssClass"
-          ng-bind-html="action.label | calendarTrustAsHtml"
-          ng-click="action.onClick({calendarEvent: dayEvent.event})">
+        <a class="event-item-action"
+           ng-repeat="action in dayEvent.event.actions track by $index"
+           ng-class="action.cssClass"
+           ng-bind-html="action.label | calendarTrustAsHtml"
+           ng-click="action.onClick({calendarEvent: dayEvent.event})">
         </a>
 
       </div>

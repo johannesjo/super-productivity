@@ -22,6 +22,7 @@
     vm.todayStr = Tasks.getTodayStr();
     vm.task = task;
     vm.timeEstimate = task.timeEstimate;
+    vm.showAddForAnotherDayForm = false;
 
     if (!task.timeSpentOnDay) {
       task.timeSpentOnDay = {};
@@ -45,6 +46,16 @@
 
     vm.deleteValue = (strDate) => {
       delete vm.timeSpentOnDayCopy[strDate];
+    };
+
+    vm.addNewEntry = (newEntry) => {
+      let strDate = Tasks.formatToWorklogDateStr(newEntry.date);
+      vm.timeSpentOnDayCopy[strDate] = angular.copy(newEntry.timeSpent);
+
+      // unset afterwards
+      newEntry.timeSpent = undefined;
+      newEntry.date = undefined;
+      vm.showAddForAnotherDayForm = false;
     };
 
     vm.submit = (estimate) => {

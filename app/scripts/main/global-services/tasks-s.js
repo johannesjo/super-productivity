@@ -18,6 +18,11 @@
     const IPC_EVENT_IDLE = 'WAS_IDLE';
     const IPC_EVENT_UPDATE_TIME_SPEND_FOR_CURRENT = 'UPDATE_TIME_SPEND';
     const IPC_EVENT_CURRENT_TASK_UPDATED = 'CHANGED_CURRENT_TASK';
+    const WORKLOG_DATE_STR_FORMAT = 'YYYY-MM-DD';
+
+    // export
+    this.WORKLOG_DATE_STR_FORMAT = WORKLOG_DATE_STR_FORMAT;
+
     const moment = $window.moment;
     const _ = $window._;
 
@@ -114,6 +119,7 @@
       let timeSpentCalculatedTotal;
       let timeSpentCalculatedOnDay;
       let timeSpentInMs;
+      let parentTask;
 
       if (timeSpentInMsOrMomentDuration.asMilliseconds) {
         timeSpentInMs = timeSpentInMsOrMomentDuration.asMilliseconds();
@@ -127,13 +133,6 @@
       // if not set set started pointer
       if (!task.started) {
         task.started = moment();
-      }
-      // also set parent task to started if there is one
-      if (task.parentId) {
-        let parentTask = this.getById(task.parentId);
-        if (!parentTask.started) {
-          parentTask.started = moment();
-        }
       }
 
       // track total time spent
@@ -161,15 +160,42 @@
 
       task.lastWorkedOn = moment();
 
+      // do the same for the parent, in case the sub tasks are deleted
+      if (task.parentId) {
+        let timeSpentCalculatedOnDayForParent;
+        parentTask = this.getById(task.parentId);
+        // also set parent task to started if there is one
+        if (!parentTask.started) {
+          parentTask.started = moment();
+        }
+
+        // also track time spent on day for parent task
+        if (parentTask.timeSpentOnDay[todayStr]) {
+          timeSpentCalculatedOnDayForParent = moment.duration(parentTask.timeSpentOnDay[todayStr]);
+          timeSpentCalculatedOnDayForParent.add(moment.duration({ milliseconds: timeSpentInMs }));
+        } else {
+          timeSpentCalculatedOnDayForParent = moment.duration(timeSpentInMs);
+        }
+
+        parentTask.timeSpentOnDay[todayStr] = timeSpentCalculatedOnDayForParent;
+        parentTask.lastWorkedOn = moment();
+      }
+
       return task;
     };
 
     // UTILITY
     function getTodayStr() {
-      return moment().format('YYYY-MM-DD');
+      return moment().format(WORKLOG_DATE_STR_FORMAT);
     }
 
     this.getTodayStr = getTodayStr;
+
+    this.formatToWorklogDateStr = (date) => {
+      if (date) {
+        return moment(date).format(WORKLOG_DATE_STR_FORMAT);
+      }
+    };
 
     function deleteNullValueTasks(tasksArray) {
       return tasksArray.filter(function (item) {
@@ -311,28 +337,91 @@
       return $localStorage.tasks;
     };
 
+    this.getAllTasks = () => {
+      const todaysT = this.getToday();
+      const backlogT = this.getBacklog();
+      const doneBacklogT = this.getDoneBacklog();
+
+      return _.concat(todaysT, backlogT, doneBacklogT)
+    };
+
+    this.flattenTasks = (tasks, checkFnParent, checkFnSub) => {
+      const flattenedTasks = [];
+      for (let i = 0; i < tasks.length; i++) {
+        let parentTask = tasks[i];
+
+        if (parentTask) {
+          if (parentTask.subTasks && parentTask.subTasks.length > 0) {
+            for (let j = 0; j < parentTask.subTasks.length; j++) {
+              let subTask = parentTask.subTasks[j];
+
+              // execute check fn if there is one
+              if (angular.isFunction(checkFnSub)) {
+                if (checkFnSub(subTask)) {
+                  flattenedTasks.push(subTask);
+                }
+              }
+              // otherwise just add
+              else {
+                flattenedTasks.push(subTask);
+              }
+            }
+          } else {
+            // execute check fn if there is one
+            if (angular.isFunction(checkFnParent)) {
+              if (checkFnParent(parentTask)) {
+                flattenedTasks.push(parentTask);
+              }
+            }
+            // otherwise just add
+            else {
+              flattenedTasks.push(parentTask);
+            }
+          }
+        }
+      }
+
+      return flattenedTasks;
+    };
+
+    this.getCompleteWorkLog = () => {
+      const allTasks = this.flattenTasks(this.getAllTasks());
+      const worklog = {};
+      for (let i = 0; i < allTasks.length; i++) {
+        let task = allTasks[i];
+        if (task.timeSpentOnDay) {
+          for (let dateStr in task.timeSpentOnDay) {
+            if (task.timeSpentOnDay[dateStr]) {
+              if (!worklog[dateStr]) {
+                worklog[dateStr] = {
+                  timeSpent: moment.duration(),
+                  entries: [],
+                  id: Uid()
+                };
+              }
+              worklog[dateStr].timeSpent = worklog[dateStr].timeSpent.add(task.timeSpentOnDay[dateStr]);
+              worklog[dateStr].entries.push({
+                task: task,
+                timeSpent: moment.duration(task.timeSpentOnDay[dateStr])
+              });
+            }
+          }
+        }
+      }
+      return worklog;
+    };
+
     this.getUndoneToday = (isSubTasksInsteadOfParent) => {
       let undoneTasks;
 
       // get flattened result of all undone tasks including subtasks
       if (isSubTasksInsteadOfParent) {
-        undoneTasks = [];
-        let allParentTasks = _.filter($localStorage.tasks, (task) => {
-          return task && !task.isDone;
+        // get all undone tasks tasks
+        undoneTasks = this.flattenTasks($localStorage.tasks, (parentTask) => {
+          return parentTask && !parentTask.isDone;
+        }, (subTask) => {
+          return !subTask.isDone;
         });
-        for (let i = 0; i < allParentTasks.length; i++) {
-          let parentTask = allParentTasks[i];
-          if (parentTask.subTasks && parentTask.subTasks.length > 0) {
-            for (let j = 0; j < parentTask.subTasks.length; j++) {
-              let subTask = parentTask.subTasks[j];
-              if (!subTask.isDone) {
-                undoneTasks.push(subTask);
-              }
-            }
-          } else {
-            undoneTasks.push(parentTask);
-          }
-        }
       }
 
       // just get parent undone tasks

@@ -158,6 +158,7 @@
 
     vm.onTaskDone = (task) => {
       if (task.isDone) {
+        task.doneDate = $window.moment();
         Jira.addWorklog(task);
       }
     };

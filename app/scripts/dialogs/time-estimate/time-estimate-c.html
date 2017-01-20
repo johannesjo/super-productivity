@@ -12,10 +12,11 @@
     </div>
   </md-toolbar>
 
-  <form ng-submit="vm.submit(vm.timeEstimate, vm.timeSpent)">
-    <md-dialog-content>
-      <div class="md-dialog-content">
+  <md-dialog-content>
+    <div class="md-dialog-content">
 
+
+      <form ng-submit="vm.submit(vm.timeEstimate, vm.timeSpent)">
         <md-input-container class="md-icon-float md-block">
           <ng-md-icon icon="timer"
                       aria-label="Estimated Durations"></ng-md-icon>
@@ -63,28 +64,72 @@
           </div>
         </div>
 
+        <md-button type="button"
+                   aria-label="add for another day"
+                   ng-hide="vm.showAddForAnotherDayForm"
+                   ng-click="vm.showAddForAnotherDayForm = true;">
+          <ng-md-icon icon="add"></ng-md-icon>
+          add for another day
+        </md-button>
+      </form>
 
-        <div class="side-info">
-          Examples:<br>
-          30m => 30 minutes<br>
-          2h => 2 hours<br>
-          2h 30m => 2 hours and 30 minutes
-        </div>
 
+      <form name="addForAnotherDayForm"
+            ng-if="vm.showAddForAnotherDayForm"
+            ng-submit="vm.addNewEntry(vm.newEntry)">
+        <h3 class="md-caption">Add new entry {{ vm.newEntry.date|amDateFormat:'DD-MM-YYYY'}}</h3>
+        <md-input-container class="md-block">
+          <ng-md-icon icon="event"></ng-md-icon>
+          <input type="date"
+                 ng-model="vm.newEntry.date"
+                 required
+                 name="date"
+                 placeholder="Date for new entry">
+          <div class="validation-messages"
+               ng-messages="addForAnotherDayForm.date.$error">
+            <div ng-message="valid">The entered value is not a date!</div>
+            <div ng-message="required">This date is required!</div>
+          </div>
+        </md-input-container>
+        <md-input-container class="md-icon-float md-block">
+          <ng-md-icon icon="timer"
+                      aria-label="Time Spent on new entry"></ng-md-icon>
+          <label>Time Spent on {{ vm.newEntry.date|amDateFormat:'DD-MM-YYYY'}}</label>
+          <input type="text"
+                 input-duration="optional"
+                 ng-model="vm.newEntry.timeSpent"
+                 aria-label="Time Spent for new entry">
+        </md-input-container>
+
+        <md-button class="md-raised"
+                   type="submit">
+          <ng-md-icon icon="add"></ng-md-icon>
+          Add
+        </md-button>
+      </form>
+
+
+      <div class="side-info">
+        Examples:<br>
+        30m => 30 minutes<br>
+        2h => 2 hours<br>
+        2h 30m => 2 hours and 30 minutes
       </div>
-    </md-dialog-content>
+
+    </div>
+  </md-dialog-content>
 
 
-    <md-dialog-actions>
-      <md-button type="submit"
-                 class="md-primary md-raised">
-        Save
-      </md-button>
-      <md-button ng-click="vm.cancel()"
-                 type="button"
-                 class="md-raised">
-        Cancel
-      </md-button>
-    </md-dialog-actions>
-  </form>
+  <md-dialog-actions>
+    <md-button type="submit"
+               ng-click="vm.submit(vm.timeEstimate, vm.timeSpent)"
+               class="md-primary md-raised">
+      Save
+    </md-button>
+    <md-button ng-click="vm.cancel()"
+               type="button"
+               class="md-raised">
+      Cancel
+    </md-button>
+  </md-dialog-actions>
 </md-dialog>

@@ -1,2 +1,6 @@
-This is the timeTrackingHistory directive.
-
+<div ng-repeat="(strDate,logEntryForDay) in vm.worklog track by logEntryForDay.id">
+  <div><strong>{{ strDate }}:</strong> {{ logEntryForDay.timeSpent|duration }}</div>
+  <div ng-repeat="logEntry in logEntryForDay.entries track by logEntry.task.id">
+    {{ logEntry.task.timeSpentOnDay[strDate] |duration}} --- {{ logEntry.task.title }}
+  </div>
+</div>
