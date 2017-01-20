@@ -30,7 +30,6 @@
   /* @ngInject */
   function InlineMarkdownCtrl($timeout, $element, IS_ELECTRON, $scope) {
     let vm = this;
-    let prevModel;
     let textareaEl = angular.element($element.find('textarea'));
     let waitForMarkedTimeOut;
 
@@ -61,7 +60,7 @@
       // check if anchor link was clicked
       if ($event.target.tagName !== 'A') {
         vm.showEdit = true;
-        prevModel = vm.ngModel;
+        vm.ngModelCopy = vm.ngModel;
         $timeout(function () {
           textareaEl[0].focus();
         });
@@ -71,8 +70,9 @@
     vm.untoggleShowEdit = () => {
       vm.showEdit = false;
       makeLinksWorkForElectron();
-      if (angular.isFunction(vm.onChanged)) {
-        if (prevModel !== vm.ngModel) {
+      if (vm.ngModelCopy !== vm.ngModel) {
+        vm.ngModel = vm.ngModelCopy;
+        if (angular.isFunction(vm.onChanged)) {
           vm.onChanged();
         }
       }
