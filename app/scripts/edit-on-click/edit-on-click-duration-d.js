@@ -35,6 +35,11 @@
 
     vm.finishEdit = () => {
       vm.showEdit = false;
+      if (vm.editOnClickDuration !== vm.modelCopy) {
+        // update if changes were made
+        vm.editOnClickDuration = vm.modelCopy;
+      }
+
       if (angular.isFunction(vm.editOnClickDurationOnEditFinished)) {
         vm.editOnClickDurationOnEditFinished();
       }
@@ -42,12 +47,12 @@
 
     vm.toggleShowEdit = () => {
       vm.showEdit = true;
+      vm.modelCopy = vm.editOnClickDuration;
       $timeout(function () {
         let inputEl = $element.find('input');
         inputEl[0].focus();
       });
     };
-
 
     $scope.$on(EDIT_ON_CLICK_TOGGLE_EV, (ev, eventId) => {
       if (eventId === vm.editOnClickDurationEvId) {

@@ -5,7 +5,7 @@
       ng-class="{'is-duration-form':vm.editOnClickType==='DURATION'}">
   <input type="text"
          ng-if="!vm.editOnClickType"
-         ng-model="vm.editOnClick"
+         ng-model="vm.modelCopy"
          ng-blur="vm.finishEdit();"
          tabindex="2">
 </form>
