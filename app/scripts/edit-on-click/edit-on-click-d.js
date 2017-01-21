@@ -51,7 +51,7 @@
 
     vm.toggleShowEdit = () => {
       vm.showEdit = true;
-      vm.modelCopy = vm.editOnClick;
+      vm.modelCopy = angular.copy(vm.editOnClick);
       $timeout(function () {
         let inputEl = $element.find('input');
         inputEl[0].focus();

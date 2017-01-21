@@ -151,8 +151,10 @@
       containment: '#board'
     };
 
-    vm.onChangeTitle = (task) => {
-      ShortSyntax(task);
+    vm.onChangeTitle = (task, isChanged) => {
+      if (isChanged) {
+        ShortSyntax(task);
+      }
     };
 
     vm.onTaskNotesChanged = (task) => {

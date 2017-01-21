@@ -1,8 +1,7 @@
 <form ng-if="vm.showEdit"
       class="edit-on-click-form"
       ng-submit="vm.finishEdit();"
-      md-whiteframe="3"
-      ng-class="{'is-duration-form':vm.editOnClickType==='DURATION'}">
+      md-whiteframe="3">
   <input type="text"
          ng-if="!vm.editOnClickType"
          ng-model="vm.modelCopy"
