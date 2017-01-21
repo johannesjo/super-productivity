@@ -185,6 +185,33 @@
     };
 
     // UTILITY
+    function convertDurationStringsToMomentForList(tasks) {
+      for (let i = 0; i < tasks.length; i++) {
+        let task = tasks[i];
+        convertDurationStringsToMoment(task);
+        if (task.subTasks && task.subTasks.length) {
+          for (let j = 0; j < task.subTasks.length; j++) {
+            let subTask = task.subTasks[j];
+            convertDurationStringsToMoment(subTask);
+          }
+        }
+      }
+    }
+
+    function convertDurationStringsToMoment(task) {
+      if (task.timeSpent) {
+        task.timeSpent = moment.duration(task.timeSpent);
+      }
+      if (task.timeEstimate) {
+        task.timeEstimate = moment.duration(task.timeEstimate);
+      }
+      if (task.timeSpentOnDay) {
+        for (let strDate in task.timeSpentOnDay) {
+          task.timeSpentOnDay[strDate] = moment.duration(task.timeSpentOnDay[strDate]);
+        }
+      }
+    }
+
     function getTodayStr() {
       return moment().format(WORKLOG_DATE_STR_FORMAT);
     }
@@ -324,16 +351,19 @@
 
     this.getBacklog = () => {
       checkDupes($localStorage.backlogTasks);
+      convertDurationStringsToMomentForList($localStorage.backlogTasks);
       return $localStorage.backlogTasks;
     };
 
     this.getDoneBacklog = () => {
       checkDupes($localStorage.doneBacklogTasks);
+      convertDurationStringsToMomentForList($localStorage.doneBacklogTasks);
       return $localStorage.doneBacklogTasks;
     };
 
     this.getToday = () => {
       checkDupes($localStorage.tasks);
+      convertDurationStringsToMomentForList($localStorage.tasks);
       return $localStorage.tasks;
     };
 
