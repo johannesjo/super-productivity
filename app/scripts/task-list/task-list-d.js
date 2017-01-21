@@ -151,8 +151,10 @@
       containment: '#board'
     };
 
-    vm.onChangeTitle = (task, isChanged) => {
-      if (isChanged) {
+    vm.onChangeTitle = (task, isChanged, newVal) => {
+      if (isChanged && newVal) {
+        // we need to do this, as the pointer might not have been updated yet
+        task.title = newVal;
         ShortSyntax(task);
       }
     };
