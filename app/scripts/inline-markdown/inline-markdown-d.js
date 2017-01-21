@@ -30,7 +30,6 @@
   /* @ngInject */
   function InlineMarkdownCtrl($timeout, $element, IS_ELECTRON, $scope) {
     let vm = this;
-    let textareaEl = angular.element($element.find('textarea'));
     let waitForMarkedTimeOut;
 
     function makeLinksWorkForElectron() {
@@ -60,9 +59,16 @@
       // check if anchor link was clicked
       if ($event.target.tagName !== 'A') {
         vm.showEdit = true;
-        vm.ngModelCopy = vm.ngModel;
+        vm.ngModelCopy = angular.copy(vm.ngModel);
+
         $timeout(function () {
+          const textareaEl = angular.element($element.find('textarea'));
           textareaEl[0].focus();
+          textareaEl.on('keypress', keypressHandler);
+
+          textareaEl.on('$destroy', () => {
+            textareaEl.off('keypress', keypressHandler);
+          });
         });
       }
     };
@@ -75,6 +81,12 @@
         if (angular.isFunction(vm.onChanged)) {
           vm.onChanged();
         }
+      }
+    };
+
+    const keypressHandler = ($event) => {
+      if ($event.keyCode === 10 && $event.ctrlKey) {
+        vm.untoggleShowEdit();
       }
     };
 
