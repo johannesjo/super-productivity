@@ -34,14 +34,18 @@
     let vm = this;
 
     vm.finishEdit = () => {
-      vm.showEdit = false;
-      if (vm.editOnClickDuration !== vm.modelCopy) {
-        // update if changes were made
-        vm.editOnClickDuration = vm.modelCopy;
+      let isChanged = (vm.editOnClickDuration !== vm.modelCopy);
+
+      // check for show edit to only trigger once
+      if (vm.showEdit && angular.isFunction(vm.editOnClickDurationOnEditFinished)) {
+        vm.editOnClickDurationOnEditFinished({ isChanged });
       }
 
-      if (angular.isFunction(vm.editOnClickDurationOnEditFinished)) {
-        vm.editOnClickDurationOnEditFinished();
+      vm.showEdit = false;
+
+      if (isChanged) {
+        // update if changes were made
+        vm.editOnClickDuration = vm.modelCopy;
       }
     };
 
