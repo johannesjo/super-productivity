@@ -1,26 +1,29 @@
-<div ng-repeat="logEntryForDay in vm.worklog| orderObjectBy:'dateStr' track by logEntryForDay.id">
+<div ng-repeat="(yearKey, yearVal) in vm.worklog"
+     class="year">
+  <div class="year-title md-display-2">{{ yearKey }}</div>
+  <div class="year-time-spent">Time spent: <strong>{{ yearVal.timeSpent|duration }}</strong></div>
 
-  <div>
-    <strong>{{ logEntryForDay.dateStr|amDateFormat:'DD-MM-YYYY, dddd' }}:</strong> {{ logEntryForDay.timeSpent|duration }}
-  </div>
+  <div ng-repeat="(monthKey, monthVal) in yearVal.entries"
+       class="month">
+    <div class="month-title md-title">{{ monthKey|numberToMonth }}</div>
+    <div class="month-time-spent">Time spent: <strong>{{ yearVal.timeSpent|duration }}</strong></div>
 
 
-  <div ng-repeat="logEntry in logEntryForDay.entries track by logEntry.task.id">
-    {{ logEntry.task.timeSpentOnDay[logEntryForDay.dateStr] |duration}} --- {{ logEntry.task.title }}
+    <div ng-repeat="(dayKey, worklogForDay) in monthVal.entries"
+         class="day">
+
+      <div class="day-title">
+        <strong>{{ worklogForDay.dateStr|amDateFormat:'DD-MM-YYYY, dddd' }}:</strong> {{ worklogForDay.timeSpent|duration }}
+      </div>
+
+      <table class="task-summary-table">
+        <tr ng-repeat="logEntry in worklogForDay.entries track by logEntry.task.id">
+          <td>{{ logEntry.task.title }}</td>
+          <td>{{ logEntry.task.timeSpentOnDay[worklogForDay.dateStr] |duration}}</td>
+        </tr>
+        <tr></tr>
+      </table>
+    </div>
   </div>
 </div>
 
-<!-- HOW TO DO IT : split up date string into years > month > days
-e.g.:
-{
-  '2015':{
-    '12':{
-      '24' :'christmas'
-    }
-  }
-}
-
-Also search google how to sort dates into month
-
-And use virtual repeat for everything because otherwise it might suck at some point
--->

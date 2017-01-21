@@ -392,16 +392,34 @@
         if (task.timeSpentOnDay) {
           for (let dateStr in task.timeSpentOnDay) {
             if (task.timeSpentOnDay[dateStr]) {
-              if (!worklog[dateStr]) {
-                worklog[dateStr] = {
+              const split = dateStr.split('-');
+              const year = parseInt(split[0], 10);
+              const month = parseInt(split[1], 10);
+              const day = parseInt(split[2], 10);
+
+              if (!worklog[year]) {
+                worklog[year] = {
+                  timeSpent: moment.duration(),
+                  entries: {}
+                };
+              }
+              if (!worklog[year].entries[month]) {
+                worklog[year].entries[month] = {
+                  timeSpent: moment.duration(),
+                  entries: {}
+                };
+              }
+              if (!worklog[year].entries[month].entries[day]) {
+                worklog[year].entries[month].entries[day] = {
                   timeSpent: moment.duration(),
                   entries: [],
                   dateStr: dateStr,
                   id: Uid()
                 };
               }
-              worklog[dateStr].timeSpent = worklog[dateStr].timeSpent.add(task.timeSpentOnDay[dateStr]);
-              worklog[dateStr].entries.push({
+
+              worklog[year].entries[month].entries[day].timeSpent = worklog[year].entries[month].entries[day].timeSpent.add(task.timeSpentOnDay[dateStr]);
+              worklog[year].entries[month].entries[day].entries.push({
                 task: task,
                 timeSpent: moment.duration(task.timeSpentOnDay[dateStr])
               });
@@ -409,6 +427,20 @@
           }
         }
       }
+
+      // calculate time spent totals once too
+      for (let key in worklog) {
+        let year = worklog[key];
+        for (let key in year.entries) {
+          let month = year.entries[key];
+          for (let key in month.entries) {
+            let day = month.entries[key];
+            month.timeSpent = month.timeSpent.add(day.timeSpent);
+          }
+          year.timeSpent = year.timeSpent.add(month.timeSpent);
+        }
+      }
+
       return worklog;
     };
 
