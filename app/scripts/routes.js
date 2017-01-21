@@ -46,6 +46,16 @@
         url: '/agenda-and-history',
         template: '<agenda-and-history></agenda-and-history>'
       })
+      .state('time-tracking-history', {
+        parent: 'agenda-and-history',
+        url: '/time-tracking-history',
+        template: '<time-tracking-history></time-tracking-history>'
+      })
+      .state('daily-agenda', {
+        parent: 'agenda-and-history',
+        url: '/daily-agenda',
+        template: '<daily-agenda></daily-agenda>'
+      })
     /* STATES-NEEDLE - DO NOT REMOVE THIS */;
   }
 })();

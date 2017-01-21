@@ -4,8 +4,20 @@ agenda-and-history {
   margin-right: -20px;
   display: block;
 
-  md-tab-content {
+  .content {
     padding-left: 20px;
     padding-right: 20px;
+  }
+
+  md-toolbar {
+    height: 36px;
+    min-height: 36px;
+    .md-button{
+      //border-top: 5px solid transparent;
+      //border-bottom: 5px solid transparent;
+    }
+    .is-active {
+      //border-bottom: 5px solid rgb(197,17,98);
+    }
   }
 }
