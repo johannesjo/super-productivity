@@ -279,6 +279,7 @@
           // save original values for potential later re-initialization
           task.mainTaskTimeEstimate = task.timeEstimate;
           task.mainTaskTimeSpent = task.timeSpent;
+          task.mainTaskTimeSpentOnDay = task.timeSpentOnDay;
         }
         let subTask = Tasks.createTask({
           title: '',

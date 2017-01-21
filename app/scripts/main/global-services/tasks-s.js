@@ -283,6 +283,25 @@
       return totalTimeSpent;
     };
 
+    this.calcTotalTimeSpentOnDay = (tasks) => {
+      let totalTimeSpentOnDay = {};
+      if (angular.isArray(tasks) && tasks.length > 0) {
+        for (let i = 0; i < tasks.length; i++) {
+          let task = tasks[i];
+          if (task && task.timeSpentOnDay) {
+            for (let dateStr in task.timeSpentOnDay) {
+              if (!totalTimeSpentOnDay[dateStr]) {
+                totalTimeSpentOnDay[dateStr] = moment.duration();
+              }
+              totalTimeSpentOnDay[dateStr].add(task.timeSpentOnDay[dateStr]);
+            }
+          }
+        }
+      }
+
+      return totalTimeSpentOnDay;
+    };
+
     this.calcTotalTimeSpentOnTask = (task) => {
       let totalTimeSpent = moment.duration();
       if (task) {
@@ -577,27 +596,6 @@
       $localStorage.currentTask = task;
       // update global pointer
       $rootScope.r.currentTask = $localStorage.currentTask;
-    };
-
-    this.setTimeSpentToday = (task, val) => {
-      // add when set and not equal to current value
-      if (val) {
-        let todayStr = getTodayStr();
-        task.lastWorkedOn = moment();
-        task.timeSpentOnDay = {};
-        if (!task.timeSpentOnDay[todayStr]) {
-          task.timeSpentOnDay[todayStr] = val;
-        }
-      } else {
-        // remove when unset
-        task.timeSpentOnDay = {};
-        if (task.lastWorkedOn) {
-          delete task.lastWorkedOn;
-        }
-        if (task.timeSpentOnDay) {
-          delete task.timeSpentOnDay;
-        }
-      }
     };
 
     this.addToday = (task) => {

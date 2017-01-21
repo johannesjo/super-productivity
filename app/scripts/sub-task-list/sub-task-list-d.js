@@ -38,9 +38,7 @@
       if (angular.isArray(tasks)) {
         vm.task.timeEstimate = Tasks.calcTotalEstimate(tasks);
         vm.task.timeSpent = Tasks.calcTotalTimeSpent(tasks);
-        if (vm.isTasksForToday) {
-          Tasks.setTimeSpentToday(vm.task, vm.task.timeSpent);
-        }
+        vm.task.timeSpentOnDay = Tasks.calcTotalTimeSpentOnDay(tasks);
       }
     }, true);
 
@@ -49,6 +47,7 @@
       if (!vm.task.subTasks || vm.task.subTasks.length === 0) {
         vm.task.timeEstimate = vm.task.mainTaskTimeEstimate;
         vm.task.timeSpent = vm.task.mainTaskTimeSpent;
+        vm.task.timeSpentOnDay = vm.task.mainTaskTimeSpentOnDay;
       }
     });
   }

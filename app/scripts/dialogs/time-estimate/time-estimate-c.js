@@ -21,7 +21,7 @@
     // TODO refactor and add to Tasks.service
     vm.todayStr = Tasks.getTodayStr();
     vm.task = task;
-    vm.timeEstimate = task.timeEstimate;
+    vm.timeEstimate = task.timeEstimate && moment.duration(task.timeEstimate);
     vm.showAddForAnotherDayForm = false;
 
     if (!task.timeSpentOnDay) {

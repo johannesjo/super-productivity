@@ -24,7 +24,8 @@
   <tr>
     <th>Title</th>
     <th>Sub-Tasks</th>
-    <th>Time spent</th>
+    <th>Time spent today</th>
+    <th>Time spent total</th>
     <th>Time esti.</th>
     <th></th>
   </tr>
@@ -32,7 +33,12 @@
   <tr ng-repeat="task in r.tasks"
       ng-class="{'is-done': task.isDone}">
     <td>{{ task.title }}</td>
-    <td><span ng-repeat="task in task.subTasks">{{ task.title }}: {{ task.timeSpent|duration }}<br></span></td>
+    <td>
+      <span ng-repeat="task in task.subTasks">{{ task.title }}: {{ task.timeSpentOnDay[vm.todayStr]|duration }}<br></span>
+    </td>
+    <td>
+      {{ task.timeSpentOnDay[vm.todayStr] |duration }}
+    </td>
     <td>
       {{ task.timeSpent |duration }}
     </td>
