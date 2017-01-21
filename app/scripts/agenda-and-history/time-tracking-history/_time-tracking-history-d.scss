@@ -1,3 +1,27 @@
 time-tracking-history {
 
+  .year {
+    &-title {
+      margin-top: 30px;
+    }
+    &-time-spent {
+      font-size: 21px;
+    }
+  }
+
+  .month {
+    &-title {
+      margin-top: 30px;
+    }
+    &-time-spent {
+      font-size: 18px;
+    }
+  }
+
+  .day {
+    &-title {
+      margin-top: 20px;
+      margin-bottom: 10px;
+    }
+  }
 }
