@@ -188,34 +188,36 @@
       // only trigger if target is li
       if ($event.target.tagName !== 'INPUT' && $event.target.tagName !== 'TEXTAREA') {
         const USED_KEYS = [
-          84,
-          78,
-          68,
-          46,
-          13,
-          187,
-          65
+          '+',
+          'a',
+          't',
+          'n',
+          'd'
         ];
-        if (USED_KEYS.indexOf($event.keyCode) > -1) {
+        const USED_KEY_CODES = [
+          46,
+          13
+        ];
+        if (USED_KEY_CODES.indexOf($event.keyCode) > -1 || USED_KEYS.indexOf($event.key) > -1) {
           // don't propagate to parent task element
           $event.preventDefault();
           $event.stopPropagation();
         }
 
         // + or a
-        if ($event.keyCode === 187 || $event.keyCode === 65) {
+        if ($event.key === '+' || $event.key === 'a') {
           vm.addSubTask(task);
         }
         // t
-        if ($event.keyCode === 84) {
+        if ($event.key === 't') {
           vm.estimateTime(task);
         }
         // n
-        if ($event.keyCode === 78) {
+        if ($event.key === 'n') {
           task.showNotes = !task.showNotes;
         }
         // d
-        if ($event.keyCode === 68) {
+        if ($event.key === 'd') {
           task.isDone = !task.isDone;
         }
         // entf
