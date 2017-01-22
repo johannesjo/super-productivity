@@ -9,4 +9,5 @@ app/styles/**/*.css.map
 bower_components
 app/bower_components
 dist
+release-builds
 *.log

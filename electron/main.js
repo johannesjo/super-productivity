@@ -40,7 +40,8 @@ function createWindow() {
     slashes: true,
     webPreferences: {
       scrollBounce: true
-    }
+    },
+    icon: ICONS_FOLDER+ '/app-icons/icon_256x256.png'
   }));
 
   // Open the DevTools.
