@@ -176,96 +176,98 @@
       }
     };
 
-    vm.handleKeyPress = ($event, task, $index) => {
+    vm.onFocus = ($event) => {
       let taskEl = $event.currentTarget || $event.srcElement || $event.originalTarget;
+      taskEl = angular.element(taskEl);
       lastFocusedTaskEl = taskEl;
+      taskEl.on('keydown', handleKeyPress);
+    };
+
+    vm.onBlur = ($event) => {
+      let taskEl = $event.currentTarget || $event.srcElement || $event.originalTarget;
+      taskEl = angular.element(taskEl);
+      taskEl.off('keydown', handleKeyPress);
+    };
+
+    function handleKeyPress($event) {
+      let taskEl = $event.currentTarget || $event.srcElement || $event.originalTarget;
+      taskEl = angular.element(taskEl);
+      const task = lastFocusedTaskEl.scope().modelValue;
 
       // escape
-      if ($event.keyCode === 27) {
-        task.showNotes = false;
-        taskEl.focus();
-        // don't propagate to parent task element
-        $event.preventDefault();
-        $event.stopPropagation();
-      }
+      //if ($event.keyCode === 27) {
+      //  task.showNotes = false;
+      //  taskEl.focus();
+      //}
 
       // only trigger if target is li
-      if ($event.target.tagName !== 'INPUT' && $event.target.tagName !== 'TEXTAREA') {
-        const USED_KEYS = [
-          '+',
-          'a',
-          't',
-          'n',
-          'd'
-        ];
-        const USED_KEY_CODES = [
-          46,
-          13
-        ];
+      const USED_KEYS = [
+        '+',
+        'a',
+        't',
+        'n',
+        'd'
+      ];
+      const USED_KEY_CODES = [
+        46,
+        13
+      ];
 
-        if (USED_KEY_CODES.indexOf($event.keyCode) > -1 || USED_KEYS.indexOf($event.key) > -1) {
-          // don't propagate to parent task element
-          $event.preventDefault();
-          $event.stopPropagation();
+      if (USED_KEY_CODES.indexOf($event.keyCode) > -1 || USED_KEYS.indexOf($event.key) > -1) {
+        // + or a
+        if ($event.key === '+' || $event.key === 'a') {
+          vm.addSubTask(task);
+        }
+        // t
+        if ($event.key === 't') {
+          vm.estimateTime(task);
+        }
+        // n
+        if ($event.key === 'n') {
+          task.showNotes = !task.showNotes;
+        }
+        // d
+        if ($event.key === 'd') {
+          task.isDone = !task.isDone;
+        }
+        // entf
+        if ($event.keyCode === 46) {
+          vm.deleteTask(task, $index);
+        }
+        // enter
+        if ($event.keyCode === 13) {
+          $scope.$broadcast(EDIT_ON_CLICK_TOGGLE_EV, task.id);
+        }
+        $scope.$apply();
+      }
 
-          // + or a
-          if ($event.key === '+' || $event.key === 'a') {
-            vm.addSubTask(task);
-          }
-          // t
-          if ($event.key === 't') {
-            vm.estimateTime(task);
-          }
-          // n
-          if ($event.key === 'n') {
-            task.showNotes = !task.showNotes;
-          }
-          // d
-          if ($event.key === 'd') {
-            task.isDone = !task.isDone;
-          }
-          // entf
-          if ($event.keyCode === 46) {
-            vm.deleteTask(task, $index);
-          }
-          // enter
-          if ($event.keyCode === 13) {
-            $scope.$broadcast(EDIT_ON_CLICK_TOGGLE_EV, task.id);
+      // moving items via shift+ctrl+keyUp/keyDown
+      if ($event.shiftKey === true && $event.ctrlKey === true) {
+        let taskIndex = $window._.findIndex(vm.tasks, (cTask) => {
+          return cTask.id === task.id;
+        });
+
+        // move up
+        if ($event.keyCode === 38) {
+          if (taskIndex > 0) {
+            vm.moveItem(vm.tasks, taskIndex, taskIndex - 1);
+            $scope.$apply();
+
+            // we need to manually re-add focus after timeout
+            $timeout(() => {
+              taskEl.focus();
+            });
           }
         }
-
-        // moving items via shift+ctrl+keyUp/keyDown
-        if ($event.shiftKey === true && $event.ctrlKey === true) {
-          let taskIndex = $window._.findIndex(vm.tasks, (cTask) => {
-            return cTask.id === task.id;
-          });
-
-          // move up
-          if ($event.keyCode === 38) {
-            if (taskIndex > 0) {
-              vm.moveItem(vm.tasks, taskIndex, taskIndex - 1);
-              // we need to manually re-add focus after timeout
-              $timeout(() => {
-                taskEl.focus();
-              });
-
-              // don't propagate to parent task element
-              $event.preventDefault();
-              $event.stopPropagation();
-            }
-          }
-          // move down
-          if ($event.keyCode === 40) {
-            if (taskIndex < vm.tasks.length - 1) {
-              vm.moveItem(vm.tasks, taskIndex, taskIndex + 1);
-            }
-            // don't propagate to parent task element
-            $event.preventDefault();
-            $event.stopPropagation();
+        // move down
+        if ($event.keyCode === 40) {
+          if (taskIndex < vm.tasks.length - 1) {
+            vm.moveItem(vm.tasks, taskIndex, taskIndex + 1);
+            $scope.$apply();
           }
         }
       }
-    };
+    }
 
     vm.addSubTask = (task) => {
       // use parent task if the current task is a sub task itself

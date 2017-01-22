@@ -7,7 +7,8 @@
       ng-repeat="task in vm.tasks|limitTo:vm.limitTo|filter:vm.filter track by task.id"
       tabindex="1"
       md-whiteframe="1"
-      ng-keydown="vm.handleKeyPress($event, task, $index)">
+      ng-focus="vm.onFocus($event)"
+      ng-blur="vm.onBlur($event)">
 
     <div class="first-line"
          layout="row"
