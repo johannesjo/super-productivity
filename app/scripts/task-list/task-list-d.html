@@ -3,7 +3,7 @@
     ng-model="vm.tasks">
   <li class="task"
       as-sortable-item
-      ng-class="{'is-current': vm.currentTask.id === task.id, 'is-done':task.isDone}"
+      ng-class="{'is-current': vm.currentTaskId === task.id, 'is-done':task.isDone}"
       ng-repeat="task in vm.tasks|limitTo:vm.limitTo|filter:vm.filter track by task.id"
       tabindex="1"
       md-whiteframe="1"
@@ -34,10 +34,10 @@
       <md-button class="md-icon-button play-btn"
                  aria-label="mark as current"
                  tabindex="2"
-                 ng-click="(vm.currentTask.id === task.id) ? vm.currentTask=undefined :vm.currentTask=task"
+                 ng-click="vm.togglePlay(task)"
                  ng-show="!task.isDone && vm.allowTaskSelection && (!task.subTasks.length ||task.subTasks.length===0) ">
 
-        <ng-md-icon icon="{{vm.currentTask.id === task.id ? 'pause_circle_filled':'play_circle_fill'}}"
+        <ng-md-icon icon="{{vm.currentTaskId === task.id ? 'pause_circle_filled':'play_circle_fill'}}"
                     aria-label="mark as current"></ng-md-icon>
       </md-button>
 
@@ -204,7 +204,7 @@
     <sub-task-list ng-if="task.subTasks.length > 0"
                    allow-task-selection="{{vm.allowTaskSelection}}"
                    is-tasks-for-today="{{vm.isTasksForToday}}"
-                   current-task="vm.currentTask"
+                   current-task-id="vm.currentTaskId"
                    task="task"></sub-task-list>
   </li>
 </ul>

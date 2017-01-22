@@ -23,7 +23,7 @@
       restrict: 'E',
       scope: {
         task: '=',
-        currentTask: '=',
+        currentTaskId: '<',
         isTasksForToday: '@',
         allowTaskSelection: '@'
       }

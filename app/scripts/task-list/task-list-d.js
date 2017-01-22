@@ -22,7 +22,7 @@
       restrict: 'E',
       scope: {
         tasks: '=',
-        currentTask: '=',
+        currentTaskId: '<',
         limitTo: '@',
         filter: '=',
         isTasksForToday: '@',
@@ -293,11 +293,18 @@
         $timeout(() => {
           $scope.$broadcast(EDIT_ON_CLICK_TOGGLE_EV, subTask.id);
         });
-
         // if parent was current task, mark sub task as current now
-        if (vm.currentTask && vm.currentTask.id && vm.currentTask.id === task.id) {
-          vm.currentTask = subTask;
+        if (vm.currentTaskId === task.id) {
+          Tasks.updateCurrent(subTask);
         }
+      }
+    };
+
+    vm.togglePlay = (task) => {
+      if (vm.currentTaskId === task.id) {
+        Tasks.updateCurrent(undefined);
+      } else {
+        Tasks.updateCurrent(task);
       }
     };
 
