@@ -39,6 +39,7 @@
   /* @ngInject */
   function TaskListCtrl(Dialogs, $mdToast, $timeout, $window, Tasks, EDIT_ON_CLICK_TOGGLE_EV, $scope, ShortSyntax, $element, Jira) {
     let vm = this;
+    const _ = $window._;
 
     let lastFocusedTaskEl;
 
@@ -86,7 +87,14 @@
     vm.deleteTask = (task, $index) => {
       // create copy for undo
       let taskCopy = angular.copy(task);
-      // delete
+
+      if (!$index && $index !== 0) {
+        $index = _.findIndex(vm.tasks, (taskFromAllTasks) => {
+          return taskFromAllTasks.id === task.id;
+        });
+      }
+
+       //delete
       vm.tasks.splice($index, 1);
       focusPreviousInListOrParent($index);
 
@@ -94,6 +102,7 @@
       let toast = $mdToast.simple()
         .textContent('You deleted "' + task.title + '"')
         .action('UNDO')
+        .hideDelay(15000)
         .position('bottom');
       $mdToast.show(toast).then(function (response) {
         if (response === 'ok') {
@@ -231,7 +240,10 @@
         }
         // entf
         if ($event.keyCode === 46) {
-          vm.deleteTask(task, $index);
+          vm.deleteTask(task);
+          // don't propagate to next focused element
+          $event.preventDefault();
+          $event.stopPropagation();
         }
         // enter
         if ($event.keyCode === 13) {
