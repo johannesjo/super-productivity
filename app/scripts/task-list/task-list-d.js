@@ -24,7 +24,7 @@
         tasks: '=',
         currentTaskId: '<',
         limitTo: '@',
-        filter: '=',
+        filter: '<',
         isTasksForToday: '@',
         isSubTasksDisabled: '@',
         allowTaskSelection: '@',
@@ -181,6 +181,8 @@
       lastFocusedTaskEl = taskEl;
 
       // escape
+      console.log($event.keyCode === 27);
+
       if ($event.keyCode === 27) {
         task.showNotes = false;
         taskEl.focus();
@@ -202,35 +204,36 @@
           46,
           13
         ];
+
         if (USED_KEY_CODES.indexOf($event.keyCode) > -1 || USED_KEYS.indexOf($event.key) > -1) {
           // don't propagate to parent task element
           $event.preventDefault();
           $event.stopPropagation();
-        }
 
-        // + or a
-        if ($event.key === '+' || $event.key === 'a') {
-          vm.addSubTask(task);
-        }
-        // t
-        if ($event.key === 't') {
-          vm.estimateTime(task);
-        }
-        // n
-        if ($event.key === 'n') {
-          task.showNotes = !task.showNotes;
-        }
-        // d
-        if ($event.key === 'd') {
-          task.isDone = !task.isDone;
-        }
-        // entf
-        if ($event.keyCode === 46) {
-          vm.deleteTask(task, $index);
-        }
-        // enter
-        if ($event.keyCode === 13) {
-          $scope.$broadcast(EDIT_ON_CLICK_TOGGLE_EV, task.id);
+          // + or a
+          if ($event.key === '+' || $event.key === 'a') {
+            vm.addSubTask(task);
+          }
+          // t
+          if ($event.key === 't') {
+            vm.estimateTime(task);
+          }
+          // n
+          if ($event.key === 'n') {
+            task.showNotes = !task.showNotes;
+          }
+          // d
+          if ($event.key === 'd') {
+            task.isDone = !task.isDone;
+          }
+          // entf
+          if ($event.keyCode === 46) {
+            vm.deleteTask(task, $index);
+          }
+          // enter
+          if ($event.keyCode === 13) {
+            $scope.$broadcast(EDIT_ON_CLICK_TOGGLE_EV, task.id);
+          }
         }
 
         // moving items via shift+ctrl+keyUp/keyDown
