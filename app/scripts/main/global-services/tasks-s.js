@@ -54,7 +54,7 @@
         // do not show as long as the user hasn't decided
         isShowTakeBreakNotification = false;
 
-        Dialogs('WAS_IDLE', { idleTime: idleTime })
+        Dialogs('WAS_IDLE', {idleTime: idleTime})
           .then(() => {
             // if tracked
             this.checkTakeToTakeABreak(idleTime);
@@ -79,7 +79,7 @@
         if ($rootScope.r.currentSession.timeWorkedWithoutBreak) {
           // convert to moment to be save
           $rootScope.r.currentSession.timeWorkedWithoutBreak = moment.duration($rootScope.r.currentSession.timeWorkedWithoutBreak);
-          $rootScope.r.currentSession.timeWorkedWithoutBreak.add(moment.duration({ milliseconds: timeSpentInMs }));
+          $rootScope.r.currentSession.timeWorkedWithoutBreak.add(moment.duration({milliseconds: timeSpentInMs}));
         } else {
           $rootScope.r.currentSession.timeWorkedWithoutBreak = moment.duration(timeSpentInMs);
         }
@@ -138,7 +138,7 @@
       // track total time spent
       if (task.timeSpent) {
         timeSpentCalculatedTotal = moment.duration(task.timeSpent);
-        timeSpentCalculatedTotal.add(moment.duration({ milliseconds: timeSpentInMs }));
+        timeSpentCalculatedTotal.add(moment.duration({milliseconds: timeSpentInMs}));
       } else {
         timeSpentCalculatedTotal = moment.duration(timeSpentInMs);
       }
@@ -149,7 +149,7 @@
       }
       if (task.timeSpentOnDay[todayStr]) {
         timeSpentCalculatedOnDay = moment.duration(task.timeSpentOnDay[todayStr]);
-        timeSpentCalculatedOnDay.add(moment.duration({ milliseconds: timeSpentInMs }));
+        timeSpentCalculatedOnDay.add(moment.duration({milliseconds: timeSpentInMs}));
       } else {
         timeSpentCalculatedOnDay = moment.duration(timeSpentInMs);
       }
@@ -172,7 +172,7 @@
         // also track time spent on day for parent task
         if (parentTask.timeSpentOnDay[todayStr]) {
           timeSpentCalculatedOnDayForParent = moment.duration(parentTask.timeSpentOnDay[todayStr]);
-          timeSpentCalculatedOnDayForParent.add(moment.duration({ milliseconds: timeSpentInMs }));
+          timeSpentCalculatedOnDayForParent.add(moment.duration({milliseconds: timeSpentInMs}));
         } else {
           timeSpentCalculatedOnDayForParent = moment.duration(timeSpentInMs);
         }
@@ -186,13 +186,15 @@
 
     // UTILITY
     function convertDurationStringsToMomentForList(tasks) {
-      for (let i = 0; i < tasks.length; i++) {
-        let task = tasks[i];
-        convertDurationStringsToMoment(task);
-        if (task.subTasks && task.subTasks.length) {
-          for (let j = 0; j < task.subTasks.length; j++) {
-            let subTask = task.subTasks[j];
-            convertDurationStringsToMoment(subTask);
+      if (tasks) {
+        for (let i = 0; i < tasks.length; i++) {
+          let task = tasks[i];
+          convertDurationStringsToMoment(task);
+          if (task.subTasks && task.subTasks.length) {
+            for (let j = 0; j < task.subTasks.length; j++) {
+              let subTask = task.subTasks[j];
+              convertDurationStringsToMoment(subTask);
+            }
           }
         }
       }
@@ -330,7 +332,7 @@
               let timeSpentMilliseconds = moment.duration(task.timeSpent).asMilliseconds();
               let timeEstimateMilliseconds = moment.duration(task.timeEstimate).asMilliseconds();
               if (timeSpentMilliseconds < timeEstimateMilliseconds) {
-                totalRemaining.add(moment.duration({ milliseconds: timeEstimateMilliseconds - timeSpentMilliseconds }));
+                totalRemaining.add(moment.duration({milliseconds: timeEstimateMilliseconds - timeSpentMilliseconds}));
               }
             } else if (task.timeEstimate) {
               totalRemaining.add(task.timeEstimate);
@@ -351,7 +353,7 @@
       if ($localStorage.currentTask) {
         currentTask = _.find($localStorage.tasks, (task) => {
           if (task.subTasks) {
-            let subTaskMatchTmp = _.find(task.subTasks, { id: $localStorage.currentTask.id });
+            let subTaskMatchTmp = _.find(task.subTasks, {id: $localStorage.currentTask.id});
             if (subTaskMatchTmp) {
               subTaskMatch = subTaskMatchTmp;
             }
