@@ -42,7 +42,7 @@
     vm.deleteHint = () => {
       vm.hide = true;
       console.log($localStorage.tomorrowsNote);
-      
+
       if ($localStorage.tomorrowsNote) {
         delete $localStorage.tomorrowsNote;
       }

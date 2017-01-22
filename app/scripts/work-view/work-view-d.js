@@ -27,6 +27,7 @@
   /* @ngInject */
   function WorkViewCtrl(Tasks, $window, $rootScope, $scope, Dialogs, $localStorage) {
     let vm = this;
+    const _ = $window._;
 
     // PRIVATE FUNCTIONS
     // -----------------
@@ -57,7 +58,7 @@
 
     vm.onTaskDoneChangedUndoneList = (task) => {
       if (task.isDone) {
-        const taskIndex = $window._.findIndex(vm.tasksUndone, function (taskInArray) {
+        const taskIndex = _.findIndex(vm.tasksUndone, function (taskInArray) {
           return taskInArray.id === task.id;
         });
         // add to the end of the done task list
@@ -69,7 +70,7 @@
 
     vm.onTaskDoneChangedDoneList = (task) => {
       if (!task.isDone) {
-        const taskIndex = $window._.findIndex(vm.tasksDone, function (taskInArray) {
+        const taskIndex = _.findIndex(vm.tasksDone, function (taskInArray) {
           return taskInArray.id === task.id;
         });
         // add to the start of the undone task list
@@ -84,16 +85,16 @@
     $rootScope.$watch('r.tasks', updateTimeTotals, true);
 
     $scope.$watchCollection('vm.tasksDone', () => {
-      for (let i = 0; i < vm.tasksDone.length; i++) {
-        vm.tasksDone[i].isDone = true;
-      }
+      _.each(vm.tasksDone, (task) => {
+        task.isDone = true;
+      });
       // we wan't to save to the LS in case the app crashes
       updateTasksLsOnly();
     });
     $scope.$watchCollection('vm.tasksUndone', () => {
-      for (let j = 0; j < vm.tasksUndone.length; j++) {
-        vm.tasksUndone[j].isDone = false;
-      }
+      _.each(vm.tasksUndone, (task) => {
+        task.isDone = false;
+      });
       // we wan't to save to the LS in case the app crashes
       updateTasksLsOnly();
     });

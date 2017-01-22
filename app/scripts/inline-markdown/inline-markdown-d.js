@@ -32,6 +32,12 @@
     let vm = this;
     let waitForMarkedTimeOut;
 
+    const keypressHandler = ($event) => {
+      if ($event.keyCode === 10 && $event.ctrlKey) {
+        vm.untoggleShowEdit();
+      }
+    };
+
     function makeLinksWorkForElectron() {
       if (IS_ELECTRON) {
         const shell = require('electron').shell;
@@ -81,12 +87,6 @@
         if (angular.isFunction(vm.onChanged)) {
           vm.onChanged();
         }
-      }
-    };
-
-    const keypressHandler = ($event) => {
-      if ($event.keyCode === 10 && $event.ctrlKey) {
-        vm.untoggleShowEdit();
       }
     };
 

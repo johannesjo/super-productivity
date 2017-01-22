@@ -29,6 +29,7 @@
   function DailyAgendaCtrl($rootScope, $window) {
     let vm = this;
     const moment = $window.moment;
+    const _ = $window._;
 
     const MIN_DURATION_LEFT_IN_MIN_FOR_UNDONE = 15;
 
@@ -90,18 +91,15 @@
     function mapTasksToEvents(tasks) {
       let events = [];
       let prevEvent = false;
-      for (let i = 0; i < tasks.length; i++) {
-        let task = tasks[i];
-
+      _.each(tasks, (task) => {
         if (vm.showSubTasks && task.subTasks) {
-          for (let i = 0; i < task.subTasks.length; i++) {
-            let subTask = task.subTasks[i];
+          _.each(task.subTasks, (subTask) => {
             let event = mapTaskToEvent(subTask, prevEvent);
             if (event) {
               events.push(event);
               prevEvent = event;
             }
-          }
+          });
         } else {
           let event = mapTaskToEvent(task, prevEvent);
           if (event) {
@@ -109,8 +107,7 @@
             prevEvent = event;
           }
         }
-
-      }
+      });
       vm.events = events;
     }
 

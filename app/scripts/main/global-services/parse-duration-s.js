@@ -17,6 +17,7 @@
   function ParseDuration($window) {
 
     const moment = $window.moment;
+    const _ = $window._;
 
     this.fromString = (strValue) => {
       let days;
@@ -27,8 +28,7 @@
       let isValid;
       let arrValue = strValue.split(' ');
 
-      for (let i = 0; i < arrValue.length; i++) {
-        let val = arrValue[i];
+      _.each(arrValue, (val) => {
         if (val.length > 0) {
           let lastChar = val.slice(-1);
           let amount = parseInt(val.slice(0, val.length - 1));
@@ -46,8 +46,8 @@
             days = amount;
           }
         }
-      }
-      isValid = seconds || minutes || hours || days;
+      });
+      isValid = seconds || minutes || hours || days || false;
 
       if (isValid) {
         momentVal = moment.duration({

@@ -189,8 +189,9 @@
       if (tasks) {
         _.each(tasks, (task) => {
           convertDurationStringsToMoment(task);
-          if (task.subTasks)
-            _.each(tasks, convertDurationStringsToMoment);
+          if (task.subTasks) {
+            _.each(task.subTasks, convertDurationStringsToMoment);
+          }
         });
       }
     }
@@ -389,8 +390,7 @@
 
     this.flattenTasks = (tasks, checkFnParent, checkFnSub) => {
       const flattenedTasks = [];
-      for (let i = 0; i < tasks.length; i++) {
-        let parentTask = tasks[i];
+      _.each(tasks, (parentTask) => {
 
         if (parentTask) {
           if (parentTask.subTasks && parentTask.subTasks.length > 0) {
@@ -419,7 +419,7 @@
             }
           }
         }
-      }
+      });
 
       return flattenedTasks;
     };

@@ -32,6 +32,6 @@
   function numberToMonth() {
     return (number) => {
       return MAP[parseInt(number, 10) - 1];
-    }
+    };
   }
 })();
