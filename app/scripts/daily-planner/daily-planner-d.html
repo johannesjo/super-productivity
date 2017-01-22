@@ -35,7 +35,6 @@
   <h2 class="md-title">Tasks for today (estimated: ~{{ vm.totaleEstimate|duration}} )</h2>
 
   <task-list tasks="r.tasks"
-             is-tasks-for-today="true"
              current-task-id="r.currentTask.id"></task-list>
 
   <h2 class="md-title">Tasks Backlog (for some other time; estimated: ~{{ vm.totaleEstimateBacklog|duration}} )</h2>
@@ -50,7 +49,6 @@
 
   <task-list tasks="r.backlogTasks"
              filter="vm.search"
-             is-tasks-for-today="false"
              limit-to="{{vm.limitBacklogTo}}"></task-list>
 
 

@@ -36,7 +36,7 @@
                  aria-label="mark as current"
                  tabindex="2"
                  ng-click="vm.togglePlay(task)"
-                 ng-show="!task.isDone && vm.allowTaskSelection && (!task.subTasks.length ||task.subTasks.length===0) ">
+                 ng-show="!task.isDone && vm.allowTaskSelection && !task.subTasks.length">
 
         <ng-md-icon icon="{{vm.currentTaskId === task.id ? 'pause_circle_filled':'play_circle_fill'}}"
                     aria-label="mark as current"></ng-md-icon>
@@ -54,18 +54,10 @@
               edit-on-click="task.title">{{ task.title }}</span>
       </div>
 
-      <div class="time"
-           data-ng-show="task.timeEstimate || task.timeSpent">
-        <span ng-if="!task.subTasks.length">
-          <span ng-click="vm.estimateTime(task)">{{ task.timeSpent|duration }}</span>
-          <span ng-show="task.timeEstimate">/</span>
-          <span edit-on-click-duration="task.timeEstimate"></span>
-        </span>
-        <span ng-if="task.subTasks.length>0">
-          ∑ {{ task.timeSpent |duration}} <span ng-show="task.timeEstimate">/</span> {{ task.timeEstimate |duration}}
-        </span>
+      <div class="time">
+        <span ng-if="task.subTasks.length>0">∑</span>
+        {{ task.timeSpent|duration}} / {{ task.timeEstimate|duration}}
       </div>
-
 
       <div class="controls">
         <md-button class="md-icon-button"
@@ -100,7 +92,7 @@
                    tabindex="2"
                    target="_blank"
                    external-link
-                   ng-show="task.originalLink"
+                   ng-if="task.originalLink"
                    ng-href="{{ task.originalLink }}">
 
           <ng-md-icon icon="link"
@@ -123,9 +115,7 @@
       </div>
     </div>
 
-
     <md-progress-linear md-mode="determinate"
-                        ng-show="task.progress"
                         value="{{task.progress}}"></md-progress-linear>
 
     <div class="notes"
@@ -139,7 +129,8 @@
 
         <ul class="changelog">
           <li ng-repeat="changelogEntry in task.originalChangelog">
-            <div><em>[{{ changelogEntry.author }}] {{ changelogEntry.created| amDateFormat:'Y.MM.DD HH:mm'}}: </em></div>
+            <div><em>[{{ changelogEntry.author }}] {{ changelogEntry.created| amDateFormat:'Y.MM.DD HH:mm'}}: </em>
+            </div>
             <div ng-repeat="change in changelogEntry.items">
               <strong>"{{ change.field }}" changed to:</strong> {{ change.toString }}
             </div>
@@ -148,14 +139,15 @@
         <md-button class="md-raised"
                    ng-click="task.isUpdated=false;task.originalChangelog=undefined;">
           <ng-md-icon icon="delete"></ng-md-icon>
-            Hide changes
+          Hide changes
         </md-button>
       </section>
 
       <section>
         <div class="md-caption">Notes</div>
         <div md-whiteframe="4">
-          <inline-markdown ng-model="task.notes" on-changed="vm.onTaskNotesChanged(task)"></inline-markdown>
+          <inline-markdown ng-model="task.notes"
+                           on-changed="vm.onTaskNotesChanged(task)"></inline-markdown>
         </div>
       </section>
 
@@ -204,7 +196,6 @@
 
     <sub-task-list ng-if="task.subTasks.length > 0"
                    allow-task-selection="{{vm.allowTaskSelection}}"
-                   is-tasks-for-today="{{vm.isTasksForToday}}"
                    current-task-id="vm.currentTaskId"
                    task="task"></sub-task-list>
   </li>

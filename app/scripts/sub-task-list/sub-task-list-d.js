@@ -24,7 +24,6 @@
       scope: {
         task: '=',
         currentTaskId: '<',
-        isTasksForToday: '@',
         allowTaskSelection: '@'
       }
     };

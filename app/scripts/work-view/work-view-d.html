@@ -8,7 +8,6 @@
              current-task-id="r.currentTask.id"
              current-task-id=""
              on-task-done-changed="vm.onTaskDoneChangedUndoneList(task)"
-             is-tasks-for-today="true"
              allow-task-selection="true"></task-list>
 </div>
 
@@ -31,7 +30,6 @@
 <div class="work-view-tasks work-view-tasks--done">
   <task-list tasks="vm.tasksDone"
              on-task-done-changed="vm.onTaskDoneChangedDoneList(task)"
-             is-tasks-for-today="true"
              current-task-id="r.currentTask.id"></task-list>
 </div>
 

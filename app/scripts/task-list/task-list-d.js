@@ -25,7 +25,6 @@
         currentTaskId: '<',
         limitTo: '@',
         filter: '<',
-        isTasksForToday: '@',
         isSubTasksDisabled: '@',
         allowTaskSelection: '@',
         disableDropInto: '@',
@@ -80,7 +79,7 @@
     };
 
     vm.estimateTime = (task) => {
-      Dialogs('TIME_ESTIMATE', { task, isTasksForToday: vm.isTasksForToday })
+      Dialogs('TIME_ESTIMATE', { task })
         .finally(vm.focusLastFocusedTaskEl);
     };
 
