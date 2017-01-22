@@ -43,7 +43,7 @@
 
       // check for show edit to only trigger once
       if (vm.showEdit && angular.isFunction(vm.editOnClickDurationOnEditFinished)) {
-        vm.editOnClickOnEditFinished({ isChanged, newVal: vm.editOnClickDuration });
+        vm.editOnClickDurationOnEditFinished({ isChanged, newVal: vm.editOnClickDuration });
       }
 
       vm.showEdit = false;
