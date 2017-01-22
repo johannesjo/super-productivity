@@ -203,9 +203,9 @@
         task.timeEstimate = moment.duration(task.timeEstimate);
       }
       if (task.timeSpentOnDay) {
-        for (let strDate in task.timeSpentOnDay) {
+        _.forOwn(task.timeSpentOnDay, (val, strDate) => {
           task.timeSpentOnDay[strDate] = moment.duration(task.timeSpentOnDay[strDate]);
-        }
+        });
       }
     }
 
@@ -282,12 +282,12 @@
       if (angular.isArray(tasks) && tasks.length > 0) {
         _.each(tasks, (task) => {
           if (task && task.timeSpentOnDay) {
-            for (let dateStr in task.timeSpentOnDay) {
-              if (!totalTimeSpentOnDay[dateStr]) {
-                totalTimeSpentOnDay[dateStr] = moment.duration();
+            _.forOwn(task.timeSpentOnDay, (val, strDate) => {
+              if (!totalTimeSpentOnDay[strDate]) {
+                totalTimeSpentOnDay[strDate] = moment.duration();
               }
-              totalTimeSpentOnDay[dateStr].add(task.timeSpentOnDay[dateStr]);
-            }
+              totalTimeSpentOnDay[strDate].add(task.timeSpentOnDay[strDate]);
+            });
           }
         });
       }
@@ -298,11 +298,12 @@
     this.calcTotalTimeSpentOnTask = (task) => {
       let totalTimeSpent = moment.duration();
       if (task) {
-        for (let key in task.timeSpentOnDay) {
-          if (task.timeSpentOnDay[key]) {
-            totalTimeSpent.add(moment.duration(task.timeSpentOnDay[key]).asSeconds(), 's');
+        _.forOwn(task.timeSpentOnDay, (val, strDate) => {
+          if (task.timeSpentOnDay[strDate]) {
+            totalTimeSpent.add(moment.duration(task.timeSpentOnDay[strDate]).asSeconds(), 's');
           }
-        }
+        });
+
         if (totalTimeSpent.asMinutes() > 0) {
           return totalTimeSpent;
         } else {
@@ -426,9 +427,9 @@
     this.getCompleteWorkLog = () => {
       const allTasks = this.flattenTasks(this.getAllTasks());
       const worklog = {};
-      _.each(tasks, (task) => {
+      _.each(allTasks, (task) => {
         if (task.timeSpentOnDay) {
-          for (let dateStr in task.timeSpentOnDay) {
+          _.forOwn(task.timeSpentOnDay, (val, dateStr) => {
             if (task.timeSpentOnDay[dateStr]) {
               const split = dateStr.split('-');
               const year = parseInt(split[0], 10);
@@ -462,22 +463,23 @@
                 timeSpent: moment.duration(task.timeSpentOnDay[dateStr])
               });
             }
-          }
+          });
         }
       });
 
       // calculate time spent totals once too
-      for (let key in worklog) {
+      _.forOwn(worklog, (val, key) => {
         let year = worklog[key];
-        for (let key in year.entries) {
+        _.forOwn(year.entries, (val, key) => {
           let month = year.entries[key];
-          for (let key in month.entries) {
+          _.forOwn(month.entries, (val, key) => {
             let day = month.entries[key];
             month.timeSpent = month.timeSpent.add(day.timeSpent);
-          }
+          });
+
           year.timeSpent = year.timeSpent.add(month.timeSpent);
-        }
-      }
+        });
+      });
 
       return worklog;
     };
