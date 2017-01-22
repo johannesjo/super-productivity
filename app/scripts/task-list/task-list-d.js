@@ -181,8 +181,6 @@
       lastFocusedTaskEl = taskEl;
 
       // escape
-      console.log($event.keyCode === 27);
-
       if ($event.keyCode === 27) {
         task.showNotes = false;
         taskEl.focus();
