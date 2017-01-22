@@ -54,7 +54,7 @@
         // do not show as long as the user hasn't decided
         isShowTakeBreakNotification = false;
 
-        Dialogs('WAS_IDLE', {idleTime: idleTime})
+        Dialogs('WAS_IDLE', { idleTime: idleTime })
           .then(() => {
             // if tracked
             this.checkTakeToTakeABreak(idleTime);
@@ -79,7 +79,7 @@
         if ($rootScope.r.currentSession.timeWorkedWithoutBreak) {
           // convert to moment to be save
           $rootScope.r.currentSession.timeWorkedWithoutBreak = moment.duration($rootScope.r.currentSession.timeWorkedWithoutBreak);
-          $rootScope.r.currentSession.timeWorkedWithoutBreak.add(moment.duration({milliseconds: timeSpentInMs}));
+          $rootScope.r.currentSession.timeWorkedWithoutBreak.add(moment.duration({ milliseconds: timeSpentInMs }));
         } else {
           $rootScope.r.currentSession.timeWorkedWithoutBreak = moment.duration(timeSpentInMs);
         }
@@ -138,7 +138,7 @@
       // track total time spent
       if (task.timeSpent) {
         timeSpentCalculatedTotal = moment.duration(task.timeSpent);
-        timeSpentCalculatedTotal.add(moment.duration({milliseconds: timeSpentInMs}));
+        timeSpentCalculatedTotal.add(moment.duration({ milliseconds: timeSpentInMs }));
       } else {
         timeSpentCalculatedTotal = moment.duration(timeSpentInMs);
       }
@@ -149,7 +149,7 @@
       }
       if (task.timeSpentOnDay[todayStr]) {
         timeSpentCalculatedOnDay = moment.duration(task.timeSpentOnDay[todayStr]);
-        timeSpentCalculatedOnDay.add(moment.duration({milliseconds: timeSpentInMs}));
+        timeSpentCalculatedOnDay.add(moment.duration({ milliseconds: timeSpentInMs }));
       } else {
         timeSpentCalculatedOnDay = moment.duration(timeSpentInMs);
       }
@@ -172,7 +172,7 @@
         // also track time spent on day for parent task
         if (parentTask.timeSpentOnDay[todayStr]) {
           timeSpentCalculatedOnDayForParent = moment.duration(parentTask.timeSpentOnDay[todayStr]);
-          timeSpentCalculatedOnDayForParent.add(moment.duration({milliseconds: timeSpentInMs}));
+          timeSpentCalculatedOnDayForParent.add(moment.duration({ milliseconds: timeSpentInMs }));
         } else {
           timeSpentCalculatedOnDayForParent = moment.duration(timeSpentInMs);
         }
@@ -187,16 +187,11 @@
     // UTILITY
     function convertDurationStringsToMomentForList(tasks) {
       if (tasks) {
-        for (let i = 0; i < tasks.length; i++) {
-          let task = tasks[i];
+        _.each(tasks, (task) => {
           convertDurationStringsToMoment(task);
-          if (task.subTasks && task.subTasks.length) {
-            for (let j = 0; j < task.subTasks.length; j++) {
-              let subTask = task.subTasks[j];
-              convertDurationStringsToMoment(subTask);
-            }
-          }
-        }
+          if (task.subTasks)
+            _.each(tasks, convertDurationStringsToMoment);
+        });
       }
     }
 
@@ -261,11 +256,9 @@
       let totalEstimate;
       if (angular.isArray(tasks) && tasks.length > 0) {
         totalEstimate = moment.duration();
-
-        for (let i = 0; i < tasks.length; i++) {
-          let task = tasks[i];
+        _.each(tasks, (task) => {
           totalEstimate.add(task.timeEstimate);
-        }
+        });
       }
       return totalEstimate;
     };
@@ -275,12 +268,11 @@
       if (angular.isArray(tasks) && tasks.length > 0) {
         totalTimeSpent = moment.duration();
 
-        for (let i = 0; i < tasks.length; i++) {
-          let task = tasks[i];
+        _.each(tasks, (task) => {
           if (task && task.timeSpent) {
             totalTimeSpent.add(task.timeSpent);
           }
-        }
+        });
       }
       return totalTimeSpent;
     };
@@ -288,8 +280,7 @@
     this.calcTotalTimeSpentOnDay = (tasks) => {
       let totalTimeSpentOnDay = {};
       if (angular.isArray(tasks) && tasks.length > 0) {
-        for (let i = 0; i < tasks.length; i++) {
-          let task = tasks[i];
+        _.each(tasks, (task) => {
           if (task && task.timeSpentOnDay) {
             for (let dateStr in task.timeSpentOnDay) {
               if (!totalTimeSpentOnDay[dateStr]) {
@@ -298,7 +289,7 @@
               totalTimeSpentOnDay[dateStr].add(task.timeSpentOnDay[dateStr]);
             }
           }
-        }
+        });
       }
 
       return totalTimeSpentOnDay;
@@ -325,20 +316,19 @@
       if (angular.isArray(tasks) && tasks.length > 0) {
         totalRemaining = moment.duration();
 
-        for (let i = 0; i < tasks.length; i++) {
-          let task = tasks[i];
+        _.each(tasks, (task) => {
           if (task) {
             if (task.timeSpent && task.timeEstimate) {
               let timeSpentMilliseconds = moment.duration(task.timeSpent).asMilliseconds();
               let timeEstimateMilliseconds = moment.duration(task.timeEstimate).asMilliseconds();
               if (timeSpentMilliseconds < timeEstimateMilliseconds) {
-                totalRemaining.add(moment.duration({milliseconds: timeEstimateMilliseconds - timeSpentMilliseconds}));
+                totalRemaining.add(moment.duration({ milliseconds: timeEstimateMilliseconds - timeSpentMilliseconds }));
               }
             } else if (task.timeEstimate) {
               totalRemaining.add(task.timeEstimate);
             }
           }
-        }
+        });
       }
       return totalRemaining;
 
@@ -353,7 +343,7 @@
       if ($localStorage.currentTask) {
         currentTask = _.find($localStorage.tasks, (task) => {
           if (task.subTasks) {
-            let subTaskMatchTmp = _.find(task.subTasks, {id: $localStorage.currentTask.id});
+            let subTaskMatchTmp = _.find(task.subTasks, { id: $localStorage.currentTask.id });
             if (subTaskMatchTmp) {
               subTaskMatch = subTaskMatchTmp;
             }
@@ -403,9 +393,7 @@
 
         if (parentTask) {
           if (parentTask.subTasks && parentTask.subTasks.length > 0) {
-            for (let j = 0; j < parentTask.subTasks.length; j++) {
-              let subTask = parentTask.subTasks[j];
-
+            _.each(parentTask.subTasks, (subTask) => {
               // execute check fn if there is one
               if (angular.isFunction(checkFnSub)) {
                 if (checkFnSub(subTask)) {
@@ -416,7 +404,7 @@
               else {
                 flattenedTasks.push(subTask);
               }
-            }
+            });
           } else {
             // execute check fn if there is one
             if (angular.isFunction(checkFnParent)) {
@@ -438,8 +426,7 @@
     this.getCompleteWorkLog = () => {
       const allTasks = this.flattenTasks(this.getAllTasks());
       const worklog = {};
-      for (let i = 0; i < allTasks.length; i++) {
-        let task = allTasks[i];
+      _.each(tasks, (task) => {
         if (task.timeSpentOnDay) {
           for (let dateStr in task.timeSpentOnDay) {
             if (task.timeSpentOnDay[dateStr]) {
@@ -477,7 +464,7 @@
             }
           }
         }
-      }
+      });
 
       // calculate time spent totals once too
       for (let key in worklog) {
@@ -533,10 +520,9 @@
       let tasks = this.getToday();
       let totalTimeSpentTasks = $window.moment.duration();
       if (tasks) {
-        for (let i = 0; i < tasks.length; i++) {
-          let task = tasks[i];
+        _.each(tasks, (task) => {
           totalTimeSpentTasks.add(task.timeSpent);
-        }
+        });
       }
       return totalTimeSpentTasks;
     };
@@ -547,22 +533,19 @@
       let totalTimeWorkedToday;
       if (tasks.length > 0) {
         totalTimeWorkedToday = moment.duration();
-        for (let i = 0; i < tasks.length; i++) {
-          let task = tasks[i];
-
+        _.each(tasks, (task) => {
           if (task.subTasks && task.subTasks.length) {
-            for (let j = 0; j < task.subTasks.length; j++) {
-              let subTask = task.subTasks[j];
+            _.each(tasks, (subTask) => {
               if (subTask.timeSpentOnDay && subTask.timeSpentOnDay[todayStr]) {
                 totalTimeWorkedToday.add(subTask.timeSpentOnDay[todayStr]);
               }
-            }
+            });
           } else {
             if (task.timeSpentOnDay && task.timeSpentOnDay[todayStr]) {
               totalTimeWorkedToday.add(task.timeSpentOnDay[todayStr]);
             }
           }
-        }
+        });
       }
       return totalTimeWorkedToday;
     };
