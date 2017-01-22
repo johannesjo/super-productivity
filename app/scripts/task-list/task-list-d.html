@@ -36,7 +36,7 @@
                  aria-label="mark as current"
                  tabindex="2"
                  ng-click="vm.togglePlay(task)"
-                 ng-show="!task.isDone && vm.allowTaskSelection && !task.subTasks.length">
+                 ng-if="!task.isDone && vm.allowTaskSelection && !task.subTasks.length">
 
         <ng-md-icon icon="{{vm.currentTaskId === task.id ? 'pause_circle_filled':'play_circle_fill'}}"
                     aria-label="mark as current"></ng-md-icon>
@@ -71,7 +71,7 @@
         </md-button>
         <md-button class="md-icon-button"
                    aria-label="add sub task"
-                   ng-show="!vm.isSubTasksDisabled&&!task.isDone"
+                   ng-if="!vm.isSubTasksDisabled&&!task.isDone"
                    tabindex="2"
                    ng-click="vm.addSubTask(task, $event);">
 
