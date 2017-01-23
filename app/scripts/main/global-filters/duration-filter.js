@@ -15,7 +15,13 @@
     .filter('duration', duration);
 
   function duration($window) {
+    const DEFAULT_RETURN_VAL = '-';
+
     return function (input, longWords) {
+      if (!input) {
+        return DEFAULT_RETURN_VAL;
+      }
+
       let output = '';
       let dayHours = 0;
 
@@ -37,7 +43,7 @@
           output += input._data.minutes + 'm ';
         }
         if (output.length === 0) {
-          output = '-';
+          output = DEFAULT_RETURN_VAL;
         }
       } else {
         if (input._data.days) {
@@ -51,7 +57,7 @@
           output += input._data.minutes + ' minutes ';
         }
         if (output.length === 0) {
-          output = '-';
+          output = DEFAULT_RETURN_VAL;
         }
       }
 
