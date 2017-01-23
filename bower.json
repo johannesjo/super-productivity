@@ -31,7 +31,6 @@
     "angular-moment": "^1.0.1",
     "ng-sortable": "^1.3.7",
     "moment-duration-format": "^1.3.0",
-    "svg-morpheus": "^0.3.2",
     "angular-marked": "^1.2.2",
     "angular-bootstrap-calendar": "^0.27.5",
     "hamsterjs": "^1.1.2",
