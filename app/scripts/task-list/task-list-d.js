@@ -94,7 +94,7 @@
         });
       }
 
-       //delete
+      //delete
       vm.tasks.splice($index, 1);
       focusPreviousInListOrParent($index);
 

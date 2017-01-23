@@ -62,11 +62,13 @@
       });
     };
 
-    $scope.$on(EDIT_ON_CLICK_TOGGLE_EV, (ev, eventId) => {
+    function clickToggleEvHandler(ev, eventId) {
       if (eventId === vm.editOnClickEvId) {
         vm.toggleShowEdit();
       }
-    });
+    }
+
+    $scope.$on(EDIT_ON_CLICK_TOGGLE_EV, clickToggleEvHandler);
   }
 
 })();
