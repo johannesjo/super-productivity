@@ -33,7 +33,7 @@
   function EditOnClickCtrl($element, $scope, $timeout, EDIT_ON_CLICK_TOGGLE_EV) {
     let vm = this;
     //const formEl = $element.find('form');
-    const textEl = angular.element($element.find('span'));
+    const textEl = angular.element($element.find('div'));
 
     vm.finishEdit = () => {
       let isChanged = (vm.editOnClick !== vm.modelCopy);
@@ -49,7 +49,7 @@
       }
 
       vm.showEdit = false;
-      textEl.css('display', 'inline');
+      textEl.css('display', 'block');
     };
 
     vm.toggleShowEdit = () => {
