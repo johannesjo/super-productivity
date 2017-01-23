@@ -25,7 +25,7 @@
   }
 
   /* @ngInject */
-  function WorkViewCtrl(Tasks, $window, $rootScope, $scope, Dialogs, $localStorage) {
+  function WorkViewCtrl(Tasks, $window, $scope, Dialogs, $localStorage) {
     let vm = this;
     const _ = $window._;
 
@@ -82,32 +82,38 @@
 
     // WATCHER & EVENTS
     // ----------------
-    $rootScope.$watch('r.tasks', updateTimeTotals, true);
+    const watchers = [];
+    watchers.push($scope.$watch('r.tasks', updateTimeTotals, true));
 
-    $scope.$watchCollection('vm.tasksDone', () => {
+    watchers.push($scope.$watchCollection('vm.tasksDone', () => {
       _.each(vm.tasksDone, (task) => {
         task.isDone = true;
       });
       // we wan't to save to the LS in case the app crashes
       updateTasksLsOnly();
-    });
-    $scope.$watchCollection('vm.tasksUndone', () => {
+    }));
+    watchers.push($scope.$watchCollection('vm.tasksUndone', () => {
       _.each(vm.tasksUndone, (task) => {
         task.isDone = false;
       });
       // we wan't to save to the LS in case the app crashes
       updateTasksLsOnly();
-    });
+    }));
+
+    // update initially or when the global tasks array changes for some outside reason
+    watchers.push($scope.$watch('r.tasks', () => {
+      vm.tasksUndone = Tasks.getUndoneToday();
+      vm.tasksDone = Tasks.getDoneToday();
+    }));
 
     // otherwise we update on view change
     $scope.$on('$destroy', () => {
       updateGlobalTaskModel();
-    });
 
-    // update initially or when the global tasks array changes for some outside reason
-    $rootScope.$watch('r.tasks', () => {
-      vm.tasksUndone = Tasks.getUndoneToday();
-      vm.tasksDone = Tasks.getDoneToday();
+      // remove watchers manually
+      _.each(watchers, (watcher) => {
+        watcher();
+      })
     });
 
   }

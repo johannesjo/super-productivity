@@ -26,7 +26,7 @@
   }
 
   /* @ngInject */
-  function DailyAgendaCtrl($rootScope, $window) {
+  function DailyAgendaCtrl($rootScope, $scope, $window) {
     let vm = this;
     const moment = $window.moment;
     const _ = $window._;
@@ -111,10 +111,14 @@
       vm.events = events;
     }
 
-    $rootScope.$watch('r.tasks', (tasks) => {
+    const watcher = $rootScope.$watch('r.tasks', (tasks) => {
       mapTasksToEvents(tasks);
     });
 
+    $scope.$on('$destroy', () => {
+      // manually unbind
+      watcher();
+    });
   }
 
 })();

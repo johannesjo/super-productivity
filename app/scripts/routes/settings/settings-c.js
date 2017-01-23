@@ -14,8 +14,9 @@
     .controller('SettingsCtrl', SettingsCtrl);
 
   /* @ngInject */
-  function SettingsCtrl($localStorage, $rootScope, $scope, Projects, Dialogs, DEFAULT_THEME, THEMES, IS_ELECTRON, SimpleToast, $mdDialog) {
+  function SettingsCtrl($localStorage, $window, $rootScope, $scope, Projects, Dialogs, DEFAULT_THEME, THEMES, IS_ELECTRON, SimpleToast, $mdDialog) {
     let vm = this;
+    const _ = $window._;
 
     vm.IS_ELECTRON = IS_ELECTRON;
 
@@ -86,19 +87,23 @@
         $rootScope.r.currentProject.data.jiraSettings = settings;
       }
 
-      SimpleToast('Jira settigns saved');
+      SimpleToast('Jira settings saved');
     };
 
     // theme stuff
     vm.themes = THEMES;
 
+    // WATCHER & EVENTS
+    // ----------------
+    const watchers = [];
+
     // TODO that's kind of bad
     // update on global model changes
-    $rootScope.$watch('r', () => {
+    watchers.push($scope.$watch('r', () => {
       init();
-    }, true);
+    }, true));
 
-    $scope.$watch('vm.selectedTheme', function (value) {
+    watchers.push($scope.$watch('vm.selectedTheme', function (value) {
       if (value) {
         if (vm.isDarkTheme) {
           $rootScope.r.theme = $localStorage.theme = value + '-dark';
@@ -106,9 +111,9 @@
           $rootScope.r.theme = $localStorage.theme = value + '-theme';
         }
       }
-    });
+    }));
 
-    $scope.$watch('vm.isDarkTheme', function (value) {
+    watchers.push($scope.$watch('vm.isDarkTheme', function (value) {
       if (value) {
         $rootScope.r.theme = $localStorage.theme = $rootScope.r.theme.replace('-theme', '-dark');
         $rootScope.r.bodyClass = 'dark-theme';
@@ -120,6 +125,14 @@
       if ($rootScope.r.currentProject && $rootScope.r.currentProject.data) {
         $rootScope.r.currentProject.data.theme = $rootScope.r.theme;
       }
+    }));
+
+    // otherwise we update on view change
+    $scope.$on('$destroy', () => {
+      // remove watchers manually
+      _.each(watchers, (watcher) => {
+        watcher();
+      })
     });
   }
 })();
