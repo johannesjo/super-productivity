@@ -50,7 +50,7 @@
         <span class="text"
               tabindex="2"
               edit-on-click-on-edit-finished="vm.focusLastFocusedTaskEl(); vm.onChangeTitle(task, isChanged, newVal);"
-              edit-on-click-ev-id="{{ task.id }}"
+              edit-on-click-ev-id="{{ ::task.id }}"
               edit-on-click="task.title">{{ task.title }}</span>
       </div>
 
@@ -92,7 +92,7 @@
                    tabindex="2"
                    target="_blank"
                    external-link
-                   ng-if="task.originalLink"
+                   ng-if="::task.originalLink"
                    ng-href="{{ ::task.originalLink }}">
 
           <ng-md-icon icon="link"
@@ -129,10 +129,10 @@
 
         <ul class="changelog">
           <li ng-repeat="changelogEntry in task.originalChangelog">
-            <div><em>[{{ changelogEntry.author }}] {{ changelogEntry.created| amDateFormat:'Y.MM.DD HH:mm'}}: </em>
+            <div><em>[{{ ::changelogEntry.author }}] {{ ::changelogEntry.created| amDateFormat:'Y.MM.DD HH:mm'}}: </em>
             </div>
             <div ng-repeat="change in changelogEntry.items">
-              <strong>"{{ change.field }}" changed to:</strong> {{ change.toString }}
+              <strong>"{{ ::change.field }}" changed to:</strong> {{ ::change.toString }}
             </div>
           </li>
         </ul>
@@ -156,12 +156,12 @@
         <md-divider></md-divider>
         <ul class="attachments">
           <li ng-repeat="attachment in task.originalAttachment">
-            <a href="{{ attachment}}"
+            <a href="{{ ::attachment}}"
                external-link
                target="_blank"
-               class="md-accent">{{ attachment}}</a>
-            <a href="{{ attachment}}"
-               download="{{ attachment}}"
+               class="md-accent">{{ ::attachment}}</a>
+            <a href="{{ ::attachment}}"
+               download="{{ ::attachment}}"
                class="md-accent">
               <ng-md-icon icon="file_download"
                           aria-label="download file directly"></ng-md-icon>
@@ -175,7 +175,7 @@
         <md-divider></md-divider>
         <ul class="comments">
           <li ng-repeat="comment in task.originalComments"
-              class="comment">{{ comment }}
+              class="comment">{{ ::comment }}
           </li>
         </ul>
       </section>
