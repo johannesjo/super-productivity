@@ -90,7 +90,7 @@
       // remove watchers manually
       _.each(watchers, (watcher) => {
         watcher();
-      })
+      });
     });
   }
 
