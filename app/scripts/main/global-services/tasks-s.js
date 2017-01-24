@@ -537,7 +537,7 @@
         totalTimeWorkedToday = moment.duration();
         _.each(tasks, (task) => {
           if (task.subTasks && task.subTasks.length) {
-            _.each(tasks, (subTask) => {
+            _.each(task.subTasks, (subTask) => {
               if (subTask.timeSpentOnDay && subTask.timeSpentOnDay[todayStr]) {
                 totalTimeWorkedToday.add(subTask.timeSpentOnDay[todayStr]);
               }

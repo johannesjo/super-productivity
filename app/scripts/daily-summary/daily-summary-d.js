@@ -39,7 +39,7 @@
 
     // calc time spent on todays tasks today
     // use mysql date as it is sortable
-    vm.totalTimeSpentToday = Tasks.getTimeWorkedToday($rootScope.r.tasks);
+    vm.totalTimeSpentToday = Tasks.getTimeWorkedToday();
 
     if ($rootScope.r.git && $rootScope.r.git.projectDir) {
       GitLog.get($rootScope.r.git.projectDir).then(function (res) {
