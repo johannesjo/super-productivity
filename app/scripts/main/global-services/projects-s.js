@@ -100,37 +100,6 @@
         }
       }
     };
-
-    $rootScope.$watch('r.currentProject', (newCurrentProject, oldCurrentProject) => {
-      if (newCurrentProject && newCurrentProject.id) {
-        // when there is an old current project existing
-        if (oldCurrentProject && oldCurrentProject.id) {
-          // save all current project data in $localStorage.projects[oldProject]
-          this.updateProjectData(oldCurrentProject.id, $localStorage);
-        }
-        // update with new model fields, if we change the model
-        this.updateNewFields(newCurrentProject);
-        // remove omitted fields if we saved them for some reason
-        this.removeOmittedFields(newCurrentProject);
-
-        // update $rootScope data and ls for current project
-        $rootScope.r.currentProject = $localStorage.currentProject = newCurrentProject;
-
-        // switch to new project if operation is successfull
-        for (let property in newCurrentProject.data) {
-          if (newCurrentProject.data.hasOwnProperty(property)) {
-            $rootScope.r[property] = $localStorage[property] = newCurrentProject.data[property];
-          }
-        }
-      }
-      //if (newCurrentProject && newCurrentProject.data.theme) {
-      //  console.log(newCurrentProject.data.theme);
-      //}
-      //if (oldCurrentProject && oldCurrentProject.data.theme) {
-      //  console.log(oldCurrentProject.data.theme);
-      //}
-    });
-
   }
 
 })();
