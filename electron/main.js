@@ -222,9 +222,12 @@ electron.ipcMain.on('CHANGED_CURRENT_TASK', (ev, task) => {
   //tray.setContextMenu(contextMenu)
 });
 
-function showIdleDialog(realIdleTime) {
+function showIdleDialog(realIdleTimeInMs) {
   // first show, then send again
-  mainWin.webContents.send('WAS_IDLE', (realIdleTime));
+  mainWin.webContents.send('WAS_IDLE', ({
+    realIdleTimeInMs,
+    minIdleTimeInMs: CONFIG.MIN_IDLE_TIME
+  }));
 }
 
 let currentIdleStart;
@@ -244,7 +247,6 @@ function trackTimeFn() {
         let realIdleTime = moment.duration(now.diff(currentIdleStart)).asMilliseconds();
 
         showOrFocus(mainWin);
-        // TODO this seem to open a new instance find out why
         showIdleDialog(realIdleTime);
 
         // unset currentIdleStart
