@@ -37,7 +37,7 @@
       if (angular.isArray(tasks)) {
         vm.task.timeEstimate = Tasks.calcTotalEstimate(tasks);
         vm.task.timeSpent = Tasks.calcTotalTimeSpent(tasks);
-        vm.task.timeSpentOnDay = Tasks.calcTotalTimeSpentOnDay(tasks);
+        vm.task.timeSpentOnDay = Tasks.mergeTotalTimeSpentOnDayFrom(tasks);
       }
     }, true);
 
