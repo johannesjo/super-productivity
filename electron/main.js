@@ -41,7 +41,7 @@ function createWindow() {
     webPreferences: {
       scrollBounce: true
     },
-    icon: ICONS_FOLDER+ '/app-icons/icon_256x256.png'
+    icon: ICONS_FOLDER + '/app-icons/icon_256x256.png'
   }));
 
   // Open the DevTools.
@@ -80,6 +80,20 @@ function showOrFocus(win) {
   } else {
     win.show();
   }
+}
+
+// Make it a single instance
+let shouldQuitBecauseAppIsAnotherInstance = app.makeSingleInstance(() => {
+  if (mainWin) {
+    if (mainWin.isMinimized()) {
+      mainWin.restore();
+    }
+    mainWin.focus();
+  }
+});
+if (shouldQuitBecauseAppIsAnotherInstance) {
+  app.quit();
+  return;
 }
 
 // This method will be called when Electron has finished
