@@ -56,8 +56,15 @@
           minutes: minutes,
           seconds: seconds,
         });
+
+        if (momentVal.asSeconds() > 0) {
+          return momentVal;
+        } else {
+          return undefined;
+        }
+      } else {
+        return undefined;
       }
-      return momentVal;
     };
 
     this.toString = (value) => {
