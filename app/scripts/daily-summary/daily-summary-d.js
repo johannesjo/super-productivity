@@ -26,12 +26,12 @@
   }
 
   /* @ngInject */
-  function DailySummaryCtrl($rootScope, $localStorage, Tasks, $mdDialog, Dialogs, $state, GitLog) {
+  function DailySummaryCtrl($rootScope, $localStorage, Tasks, TasksUtil, $mdDialog, Dialogs, $state, GitLog) {
     const IPC_EVENT_SHUTDOWN = 'SHUTDOWN';
 
     let vm = this;
 
-    vm.todayStr = Tasks.constructor.getTodayStr();
+    vm.todayStr = TasksUtil.getTodayStr();
     vm.doneTasks = Tasks.getDoneToday();
 
     // calc total time spent on todays tasks

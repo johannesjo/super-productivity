@@ -30,14 +30,14 @@
   }
 
   /* @ngInject */
-  function SubTaskListCtrl($scope, Tasks) {
+  function SubTaskListCtrl($scope, Tasks, TasksUtil) {
     let vm = this;
 
     $scope.$watch('vm.task.subTasks', (tasks) => {
       if (angular.isArray(tasks)) {
-        vm.task.timeEstimate = Tasks.calcTotalEstimate(tasks);
-        vm.task.timeSpent = Tasks.calcTotalTimeSpent(tasks);
-        vm.task.timeSpentOnDay = Tasks.mergeTotalTimeSpentOnDayFrom(tasks);
+        vm.task.timeEstimate = TasksUtil.calcTotalEstimate(tasks);
+        vm.task.timeSpent = TasksUtil.calcTotalTimeSpent(tasks);
+        vm.task.timeSpentOnDay = TasksUtil.mergeTotalTimeSpentOnDayFrom(tasks);
       }
     }, true);
 

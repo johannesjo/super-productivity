@@ -14,12 +14,12 @@
     .controller('TimeEstimateCtrl', TimeEstimateCtrl);
 
   /* @ngInject */
-  function TimeEstimateCtrl($mdDialog, task, Tasks, $window) {
+  function TimeEstimateCtrl($mdDialog, task, Tasks, TasksUtil, $window) {
     let vm = this;
     const moment = $window.moment;
 
     // TODO refactor and add to Tasks.service
-    vm.todayStr = Tasks.constructor.getTodayStr();
+    vm.todayStr = TasksUtil.getTodayStr();
     vm.task = task;
     vm.timeEstimate = task.timeEstimate && moment.duration(task.timeEstimate);
     vm.showAddForAnotherDayForm = false;

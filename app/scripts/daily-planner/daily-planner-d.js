@@ -25,7 +25,7 @@
   }
 
   /* @ngInject */
-  function DailyPlannerCtrl($rootScope, $window, $scope, Tasks, Dialogs, $state, Jira, $filter) {
+  function DailyPlannerCtrl($rootScope, $window, $scope, Tasks, TasksUtil, Dialogs, $state, Jira, $filter) {
     let vm = this;
     const _ = $window._;
 
@@ -76,12 +76,12 @@
     // ----------------
     const watchers = [];
     watchers.push($scope.$watch('r.tasks', (mVal) => {
-      vm.totaleEstimate = Tasks.calcTotalEstimate(mVal);
+      vm.totaleEstimate = TasksUtil.calcTotalEstimate(mVal);
       Tasks.updateToday(mVal);
     }, true));
 
     watchers.push($scope.$watch('r.backlogTasks', (mVal) => {
-      vm.totaleEstimateBacklog = Tasks.calcTotalEstimate(mVal);
+      vm.totaleEstimateBacklog = TasksUtil.calcTotalEstimate(mVal);
       Tasks.updateBacklog(mVal);
     }, true));
 

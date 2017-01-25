@@ -25,7 +25,7 @@
   }
 
   /* @ngInject */
-  function WorkViewCtrl(Tasks, $window, $scope, Dialogs, $localStorage) {
+  function WorkViewCtrl(Tasks, $window, $scope, Dialogs, $localStorage, TasksUtil) {
     let vm = this;
     const _ = $window._;
 
@@ -47,7 +47,7 @@
 
     function updateTimeTotals() {
       vm.totalTimeWorkedToday = Tasks.getTimeWorkedToday();
-      vm.totalEstimationRemaining = Tasks.calcRemainingTime(vm.tasksUndone);
+      vm.totalEstimationRemaining = TasksUtil.calcRemainingTime(vm.tasksUndone);
     }
 
     // DIRECTIVE METHODS

@@ -14,7 +14,7 @@
     .controller('SimpleTaskSummaryCtrl', SimpleTaskSummaryCtrl);
 
   /* @ngInject */
-  function SimpleTaskSummaryCtrl($mdDialog, Tasks, $scope) {
+  function SimpleTaskSummaryCtrl($mdDialog, Tasks, TasksUtil, $scope) {
     let vm = this;
     vm.options = {
       separateBy: ', ',
@@ -32,7 +32,7 @@
       if (tasks) {
         for (let i = 0; i < tasks.length; i++) {
           let task = tasks[i];
-          if ((!vm.options.isListDoneOnly || task.isDone) && (!vm.options.isWorkedOnTodayOnly || Tasks.isWorkedOnToday(task))) {
+          if ((!vm.options.isListDoneOnly || task.isDone) && (!vm.options.isWorkedOnTodayOnly || TasksUtil.isWorkedOnToday(task))) {
             tasksTxt += task.title + vm.options.separateBy;
             if (vm.options.isUseNewLine) {
               tasksTxt += newLineSeparator;
@@ -42,7 +42,7 @@
           if (vm.options.isListSubTasks && task.subTasks) {
             for (let j = 0; j < task.subTasks.length; j++) {
               let subTask = task.subTasks[j];
-              if ((!vm.options.isListDoneOnly || subTask.isDone) && (!vm.options.isWorkedOnTodayOnly || Tasks.isWorkedOnToday(subTask))) {
+              if ((!vm.options.isListDoneOnly || subTask.isDone) && (!vm.options.isWorkedOnTodayOnly || TasksUtil.isWorkedOnToday(subTask))) {
                 tasksTxt += subTask.title + vm.options.separateBy;
                 if (vm.options.isUseNewLine) {
                   tasksTxt += newLineSeparator;

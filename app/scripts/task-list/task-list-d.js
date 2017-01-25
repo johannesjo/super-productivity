@@ -107,6 +107,7 @@
     }
 
     deleteTask(task, $index) {
+      const that = this;
       // create copy for undo
       let taskCopy = angular.copy(task);
 
@@ -126,10 +127,11 @@
         .action('UNDO')
         .hideDelay(15000)
         .position('bottom');
+
       this.$mdToast.show(toast).then(function (response) {
         if (response === 'ok') {
           // re-add task on undo
-          this.tasks.splice($index, 0, taskCopy);
+          that.tasks.splice($index, 0, taskCopy);
         }
       });
     }

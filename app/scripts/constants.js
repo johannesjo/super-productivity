@@ -46,6 +46,7 @@
         }
       }
     })
+    .constant('WORKLOG_DATE_STR_FORMAT', 'YYYY-MM-DD')
     .constant('JIRA_UPDATE_POLL_INTERVAL', 60 * 1000 * 5)
     .constant('IS_ELECTRON', (typeof window.ipcRenderer !== 'undefined'))
     .constant('THEMES', [

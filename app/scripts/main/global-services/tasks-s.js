@@ -12,21 +12,20 @@
   const IPC_EVENT_IDLE = 'WAS_IDLE';
   const IPC_EVENT_UPDATE_TIME_SPEND_FOR_CURRENT = 'UPDATE_TIME_SPEND';
   const IPC_EVENT_CURRENT_TASK_UPDATED = 'CHANGED_CURRENT_TASK';
-  const WORKLOG_DATE_STR_FORMAT = 'YYYY-MM-DD';
 
   /* @ngInject */
   class Tasks {
 
-    constructor($localStorage, Uid, $rootScope, Dialogs, IS_ELECTRON, $mdToast, SimpleToast, Notifier, ShortSyntax, ParseDuration) {
+    constructor($localStorage, Uid, $rootScope, Dialogs, IS_ELECTRON, $mdToast, Notifier, ShortSyntax, ParseDuration, TasksUtil) {
       this.$localStorage = $localStorage;
       this.Uid = Uid;
       this.$rootScope = $rootScope;
       this.Dialogs = Dialogs;
       this.$mdToast = $mdToast;
-      this.SimpleToast = SimpleToast;
       this.Notifier = Notifier;
       this.ShortSyntax = ShortSyntax;
       this.ParseDuration = ParseDuration;
+      this.TasksUtil = TasksUtil;
 
       this.isShowTakeBreakNotification = true;
 
@@ -130,7 +129,7 @@
     }
 
     removeTimeSpent(task, timeSpentToRemoveAsMoment) {
-      const TODAY_STR = this.constructor.getTodayStr();
+      const TODAY_STR = this.TasksUtil.getTodayStr();
       let timeSpentToRemoveInMs;
       let timeSpentCalculatedOnDay;
       let parentTask;
@@ -163,14 +162,14 @@
       }
 
       // track total time spent
-      task.timeSpent = this.calcTotalTimeSpentOnTask(task);
+      task.timeSpent = this.TasksUtil.calcTotalTimeSpentOnTask(task);
 
       return task;
     }
 
     addTimeSpent(task, timeSpentInMsOrMomentDuration) {
       // use mysql date as it is sortable
-      const TODAY_STR = this.constructor.getTodayStr();
+      const TODAY_STR = this.TasksUtil.getTodayStr();
       let timeSpentCalculatedOnDay;
       let timeSpentInMs;
       let parentTask;
@@ -215,172 +214,9 @@
       }
 
       // track total time spent
-      task.timeSpent = this.calcTotalTimeSpentOnTask(task);
+      task.timeSpent = this.TasksUtil.calcTotalTimeSpentOnTask(task);
 
       return task;
-    }
-
-    // UTILITY
-    convertDurationStringsToMomentForList(tasks) {
-      if (tasks) {
-        _.each(tasks, (task) => {
-          this.constructor.convertDurationStringsToMoment(task);
-          if (task.subTasks) {
-            _.each(task.subTasks, this.constructor.convertDurationStringsToMoment);
-          }
-        });
-      }
-    }
-
-    static convertDurationStringsToMoment(task) {
-      if (task.timeSpent) {
-        task.timeSpent = moment.duration(task.timeSpent);
-      }
-      if (task.timeEstimate) {
-        task.timeEstimate = moment.duration(task.timeEstimate);
-      }
-      if (task.timeSpentOnDay) {
-        _.forOwn(task.timeSpentOnDay, (val, strDate) => {
-          task.timeSpentOnDay[strDate] = moment.duration(task.timeSpentOnDay[strDate]);
-        });
-      }
-    }
-
-    static getTodayStr() {
-      return moment().format(WORKLOG_DATE_STR_FORMAT);
-    }
-
-    static formatToWorklogDateStr(date) {
-      if (date) {
-        return moment(date).format(WORKLOG_DATE_STR_FORMAT);
-      }
-    }
-
-    static deleteNullValueTasks(tasksArray) {
-      return tasksArray.filter(function (item) {
-        return !!item;
-      });
-    }
-
-    checkDupes(tasksArray) {
-      if (tasksArray) {
-        this.constructor.deleteNullValueTasks(tasksArray);
-        let valueArr = tasksArray.map(function (item) {
-          return item && item.id;
-        });
-        let dupeIds = [];
-        let hasDupe = valueArr.some(function (item, idx) {
-          if (valueArr.indexOf(item) !== idx) {
-            dupeIds.push(item);
-          }
-          return valueArr.indexOf(item) !== idx;
-        });
-        if (dupeIds.length) {
-          let firstDupe = _.find(tasksArray, (task) => {
-            return dupeIds.indexOf(task.id) > -1;
-          });
-          console.log(firstDupe);
-
-          this.SimpleToast('!!! Dupes detected in data for the ids: ' + dupeIds.join(', ') + '. First task title is "' + firstDupe.title + '" !!!', 60000);
-        }
-        return hasDupe;
-      }
-    }
-
-    calcTotalEstimate(tasks) {
-      let totalEstimate;
-      if (angular.isArray(tasks) && tasks.length > 0) {
-        totalEstimate = moment.duration();
-        _.each(tasks, (task) => {
-          totalEstimate.add(task.timeEstimate);
-        });
-      }
-      return totalEstimate;
-    }
-
-    calcTotalTimeSpent(tasks) {
-      let totalTimeSpent;
-      if (angular.isArray(tasks) && tasks.length > 0) {
-        totalTimeSpent = moment.duration();
-
-        _.each(tasks, (task) => {
-          if (task && task.timeSpent) {
-            totalTimeSpent.add(task.timeSpent);
-          }
-        });
-      }
-      return totalTimeSpent;
-    }
-
-    calcTotalTimeSpentOnDay(tasks, dayStr) {
-      let totalTimeSpentOnDay;
-      if (angular.isArray(tasks) && tasks.length > 0) {
-        totalTimeSpentOnDay = moment.duration();
-
-        _.each(tasks, (task) => {
-          if (task && task.timeSpentOnDay && task.timeSpentOnDay[dayStr]) {
-            totalTimeSpentOnDay.add(task.timeSpentOnDay[dayStr]);
-          }
-        });
-      }
-      return totalTimeSpentOnDay;
-    }
-
-    mergeTotalTimeSpentOnDayFrom(tasks) {
-      let totalTimeSpentOnDay = {};
-      if (angular.isArray(tasks) && tasks.length > 0) {
-        _.each(tasks, (task) => {
-          if (task && task.timeSpentOnDay) {
-            _.forOwn(task.timeSpentOnDay, (val, strDate) => {
-              if (!totalTimeSpentOnDay[strDate]) {
-                totalTimeSpentOnDay[strDate] = moment.duration();
-              }
-              totalTimeSpentOnDay[strDate].add(task.timeSpentOnDay[strDate]);
-            });
-          }
-        });
-      }
-      return totalTimeSpentOnDay;
-    }
-
-    calcTotalTimeSpentOnTask(task) {
-      let totalTimeSpent = moment.duration();
-      if (task) {
-        _.forOwn(task.timeSpentOnDay, (val, strDate) => {
-          if (task.timeSpentOnDay[strDate]) {
-            totalTimeSpent.add(moment.duration(task.timeSpentOnDay[strDate]).asSeconds(), 's');
-          }
-        });
-
-        if (totalTimeSpent.asMinutes() > 0) {
-          return totalTimeSpent;
-        } else {
-          return undefined;
-        }
-      }
-    }
-
-    calcRemainingTime(tasks) {
-      let totalRemaining;
-      if (angular.isArray(tasks) && tasks.length > 0) {
-        totalRemaining = moment.duration();
-
-        _.each(tasks, (task) => {
-          if (task) {
-            if (task.timeSpent && task.timeEstimate) {
-              let timeSpentMilliseconds = moment.duration(task.timeSpent).asMilliseconds();
-              let timeEstimateMilliseconds = moment.duration(task.timeEstimate).asMilliseconds();
-              if (timeSpentMilliseconds < timeEstimateMilliseconds) {
-                totalRemaining.add(moment.duration({ milliseconds: timeEstimateMilliseconds - timeSpentMilliseconds }));
-              }
-            } else if (task.timeEstimate) {
-              totalRemaining.add(task.timeEstimate);
-            }
-          }
-        });
-      }
-      return totalRemaining;
-
     }
 
     // GET DATA
@@ -411,20 +247,20 @@
     }
 
     getBacklog() {
-      this.checkDupes(this.$localStorage.backlogTasks);
-      this.convertDurationStringsToMomentForList(this.$localStorage.backlogTasks);
+      this.TasksUtil.checkDupes(this.$localStorage.backlogTasks);
+      this.TasksUtil.convertDurationStringsToMomentForList(this.$localStorage.backlogTasks);
       return this.$localStorage.backlogTasks;
     }
 
     getDoneBacklog() {
-      this.checkDupes(this.$localStorage.doneBacklogTasks);
-      this.convertDurationStringsToMomentForList(this.$localStorage.doneBacklogTasks);
+      this.TasksUtil.checkDupes(this.$localStorage.doneBacklogTasks);
+      this.TasksUtil.convertDurationStringsToMomentForList(this.$localStorage.doneBacklogTasks);
       return this.$localStorage.doneBacklogTasks;
     }
 
     getToday() {
-      this.checkDupes(this.$localStorage.tasks);
-      this.convertDurationStringsToMomentForList(this.$localStorage.tasks);
+      this.TasksUtil.checkDupes(this.$localStorage.tasks);
+      this.TasksUtil.convertDurationStringsToMomentForList(this.$localStorage.tasks);
       return this.$localStorage.tasks;
     }
 
@@ -436,44 +272,8 @@
       return _.concat(todaysT, backlogT, doneBacklogT);
     }
 
-    flattenTasks(tasks, checkFnParent, checkFnSub) {
-      const flattenedTasks = [];
-      _.each(tasks, (parentTask) => {
-
-        if (parentTask) {
-          if (parentTask.subTasks && parentTask.subTasks.length > 0) {
-            _.each(parentTask.subTasks, (subTask) => {
-              // execute check fn if there is one
-              if (angular.isFunction(checkFnSub)) {
-                if (checkFnSub(subTask)) {
-                  flattenedTasks.push(subTask);
-                }
-              }
-              // otherwise just add
-              else {
-                flattenedTasks.push(subTask);
-              }
-            });
-          } else {
-            // execute check fn if there is one
-            if (angular.isFunction(checkFnParent)) {
-              if (checkFnParent(parentTask)) {
-                flattenedTasks.push(parentTask);
-              }
-            }
-            // otherwise just add
-            else {
-              flattenedTasks.push(parentTask);
-            }
-          }
-        }
-      });
-
-      return flattenedTasks;
-    }
-
     getCompleteWorkLog() {
-      const allTasks = this.flattenTasks(this.getAllTasks());
+      const allTasks = this.TasksUtil.flattenTasks(this.getAllTasks());
       const worklog = {};
       _.each(allTasks, (task) => {
         if (task.timeSpentOnDay) {
@@ -538,7 +338,7 @@
       // get flattened result of all undone tasks including subtasks
       if (isSubTasksInsteadOfParent) {
         // get all undone tasks tasks
-        undoneTasks = this.flattenTasks(this.$localStorage.tasks, (parentTask) => {
+        undoneTasks = this.TasksUtil.flattenTasks(this.$localStorage.tasks, (parentTask) => {
           return parentTask && !parentTask.isDone;
         }, (subTask) => {
           return !subTask.isDone;
@@ -561,11 +361,6 @@
       });
     }
 
-    isWorkedOnToday(task) {
-      let todayStr = this.constructor.getTodayStr();
-      return task && task.timeSpentOnDay && task.timeSpentOnDay[todayStr];
-    }
-
     getTotalTimeWorkedOnTasksToday() {
       let tasks = this.getToday();
       let totalTimeSpentTasks = moment.duration();
@@ -579,7 +374,7 @@
 
     getTimeWorkedToday() {
       let tasks = this.getToday();
-      let todayStr = this.constructor.getTodayStr();
+      let todayStr = this.TasksUtil.getTodayStr();
       let totalTimeWorkedToday;
       if (tasks.length > 0) {
         totalTimeWorkedToday = moment.duration();
@@ -612,7 +407,7 @@
 
       // update totalTimeSpent for buggy macos
       if (task) {
-        task.timeSpent = this.calcTotalTimeSpentOnTask(task);
+        task.timeSpent = this.TasksUtil.calcTotalTimeSpentOnTask(task);
       }
 
       // check if in electron context
@@ -636,10 +431,8 @@
     addToday(task) {
       if (task && task.title) {
         this.$localStorage.tasks.push(this.createTask(task));
-
         // update global pointer for today tasks
         this.$rootScope.r.tasks = this.$localStorage.tasks;
-
         return true;
       }
     }
