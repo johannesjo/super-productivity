@@ -159,6 +159,14 @@
         }
       }
 
+      function isJiraTask(task) {
+        return task && task.orginalKey;
+      }
+
+      function isDone(task) {
+        return task && task.isDone;
+      }
+
       if (task && task.originalKey) {
         Jira.checkUpdatesForTicket(task).then((isUpdated) => {
           if (isUpdated) {
@@ -179,56 +187,47 @@
       //console.log(newCurrent && newCurrent.title, $localStorage.currentTask && $localStorage.currentTask.title);
       Tasks.updateCurrent(newCurrent);
 
+      const isCurrentTaskChanged = ((newCurrent && newCurrent.id) !== (prevCurrent && prevCurrent.id));
+
       // Jira Stuff
       // ----------
-      // check if jira support is available
-      if (IS_ELECTRON) {
+      // check if in electron context (--> jira support is available)
+      if (IS_ELECTRON && isCurrentTaskChanged) {
         let dialogsAndRequestsForStatusUpdate = [];
-
         // handle old current first
-        // if task (id) changed or no previous task
-        if (!newCurrent || (newCurrent.id !== (prevCurrent && prevCurrent.id))) {
-          // check if previous was jira task
-          if (prevCurrent && prevCurrent.originalKey) {
-            // or has been done => DONE
-            if (prevCurrent.isDone) {
-              dialogsAndRequestsForStatusUpdate.push({ val: prevCurrent, type: 'DONE' });
-            }
+        // check if previous was jira task
+        if (isJiraTask(prevCurrent)) {
+          // or has been done => DONE
+          if (isDone(prevCurrent)) {
+            dialogsAndRequestsForStatusUpdate.push({ val: prevCurrent, type: 'DONE' });
           }
         }
 
         // handle new current
         // is jira task
-        if (newCurrent && newCurrent.originalKey) {
-          // current task (id) changed
-          if (newCurrent.id !== (prevCurrent && prevCurrent.id)) {
-            dialogsAndRequestsForStatusUpdate.push({ val: newCurrent, type: 'IN_PROGRESS' });
-          }
+        if (isJiraTask(newCurrent)) {
+          dialogsAndRequestsForStatusUpdate.push({ val: newCurrent, type: 'IN_PROGRESS' });
         }
 
         // finally execute
-
         if (dialogsAndRequestsForStatusUpdate.length > 0) {
           // execute all
           doAsyncSeries(dialogsAndRequestsForStatusUpdate).then(() => {
             // current task (id) changed
-            if (newCurrent && newCurrent.id !== (prevCurrent && prevCurrent.id)) {
-              checkJiraUpdatesForTask(newCurrent);
-            }
+            checkJiraUpdatesForTask(newCurrent);
           });
         }
         // we need to execute also if there were no other updates
         else {
           // current task (id) changed
-          if (newCurrent && newCurrent.id !== (prevCurrent && prevCurrent.id)) {
-            checkJiraUpdatesForTask(newCurrent);
-          }
+          checkJiraUpdatesForTask(newCurrent);
         }
       }
 
       // Non Jira stuff: Select next undone
       // ----------------------------------
       if (newCurrent && newCurrent.isDone) {
+        // if sub task try to select the next undone sub task of the same parent
         if (newCurrent.parentId) {
           let parentTask = Tasks.getById(newCurrent.parentId);
           if (parentTask.subTasks && parentTask.subTasks.length) {
@@ -237,6 +236,7 @@
               return task && !task.isDone;
             }));
             // otherwise do nothing as it isn't obvious what to do next
+            // TODO maybe open toast asking if the parent task should also be marked as done
           }
         } else {
           let undoneTasks = Tasks.getUndoneToday();
