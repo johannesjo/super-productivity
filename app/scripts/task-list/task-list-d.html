@@ -1,14 +1,14 @@
 <ul class="task-list"
-    as-sortable="vm.dragControlListeners"
-    ng-model="vm.tasks">
+    as-sortable="$ctrl.dragControlListeners"
+    ng-model="$ctrl.tasks">
   <li class="task"
       as-sortable-item
-      ng-class="{'is-current': vm.currentTaskId === task.id, 'is-done':task.isDone}"
-      ng-repeat="task in vm.tasks|limitTo:vm.limitTo|filter:vm.filter track by task.id"
+      ng-class="{'is-current': $ctrl.currentTaskId === task.id, 'is-done':task.isDone}"
+      ng-repeat="task in $ctrl.tasks|limitTo:$ctrl.limitTo|filter:$ctrl.filter track by task.id"
       tabindex="1"
       md-whiteframe="1"
-      ng-focus="vm.onFocus($event)"
-      ng-blur="vm.onBlur($event)">
+      ng-focus="$ctrl.onFocus($event)"
+      ng-blur="$ctrl.onBlur($event)">
 
     <div class="first-line"
          layout="row"
@@ -35,10 +35,10 @@
       <md-button class="md-icon-button play-btn"
                  aria-label="mark as current"
                  tabindex="2"
-                 ng-click="vm.togglePlay(task)"
-                 ng-if="!task.isDone && vm.allowTaskSelection && !task.subTasks.length">
+                 ng-click="$ctrl.togglePlay(task)"
+                 ng-if="!task.isDone && $ctrl.allowTaskSelection && !task.subTasks.length">
 
-        <ng-md-icon icon="{{vm.currentTaskId === task.id ? 'pause_circle_filled':'play_circle_fill'}}"
+        <ng-md-icon icon="{{$ctrl.currentTaskId === task.id ? 'pause_circle_filled':'play_circle_fill'}}"
                     aria-label="mark as current"></ng-md-icon>
       </md-button>
 
@@ -49,7 +49,7 @@
 
         <span class="text"
               tabindex="2"
-              edit-on-click-on-edit-finished="vm.focusLastFocusedTaskEl(); vm.onChangeTitle(task, isChanged, newVal);"
+              edit-on-click-on-edit-finished="$ctrl.focusLastFocusedTaskEl(); $ctrl.onChangeTitle(task, isChanged, newVal);"
               edit-on-click-ev-id="{{ ::task.id }}"
               edit-on-click="task.title"></span>
       </div>
@@ -64,16 +64,16 @@
                    tabindex="2"
                    ng-disabled="task.subTasks.length>0"
                    aria-label="time estimation"
-                   ng-click="vm.estimateTime(task)">
+                   ng-click="$ctrl.estimateTime(task)">
 
           <ng-md-icon icon="access_time"
                       aria-label="time estimation"></ng-md-icon>
         </md-button>
         <md-button class="md-icon-button"
                    aria-label="add sub task"
-                   ng-if="!vm.isSubTasksDisabled&&!task.isDone"
+                   ng-if="!$ctrl.isSubTasksDisabled&&!task.isDone"
                    tabindex="2"
-                   ng-click="vm.addSubTask(task, $event);">
+                   ng-click="$ctrl.addSubTask(task, $event);">
 
           <ng-md-icon icon="playlist_add"
                       aria-label="add sub task"></ng-md-icon>
@@ -101,7 +101,7 @@
         <md-button class="md-icon-button"
                    aria-label="delete"
                    tabindex="2"
-                   ng-click="vm.deleteTask(task, $index)">
+                   ng-click="$ctrl.deleteTask(task, $index)">
 
           <ng-md-icon icon="delete_forever"
                       class="delete-icon"
@@ -109,7 +109,7 @@
         </md-button>
         <md-checkbox ng-model="task.isDone"
                      tabindex="2"
-                     ng-change="vm.onTaskDoneChanged(task)"
+                     ng-change="$ctrl.onTaskDoneChanged(task)"
                      aria-label="un-/mark as done">
         </md-checkbox>
       </div>
@@ -147,7 +147,7 @@
         <div class="md-caption">Notes</div>
         <div md-whiteframe="4">
           <inline-markdown ng-model="task.notes"
-                           on-changed="vm.onTaskNotesChanged(task)"></inline-markdown>
+                           on-changed="$ctrl.onTaskNotesChanged(task)"></inline-markdown>
         </div>
       </section>
 
@@ -195,8 +195,8 @@
     </div>
 
     <sub-task-list ng-if="task.subTasks.length > 0"
-                   allow-task-selection="{{vm.allowTaskSelection}}"
-                   current-task-id="vm.currentTaskId"
+                   allow-task-selection="{{$ctrl.allowTaskSelection}}"
+                   current-task-id="$ctrl.currentTaskId"
                    task="task"></sub-task-list>
   </li>
 </ul>

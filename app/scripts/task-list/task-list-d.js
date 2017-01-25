@@ -1,5 +1,5 @@
 /**
- * @ngdoc directive
+ * @ngdoc component
  * @name superProductivity.directive:taskList
  * @description
  * # taskList
@@ -8,46 +8,74 @@
 (function () {
   'use strict';
 
-  angular
-    .module('superProductivity')
-    .component('taskList', {
-      templateUrl: 'scripts/task-list/task-list-d.html',
-      bindToController: true,
-      controller: TaskListCtrl,
-      controllerAs: 'vm',
-      bindings: {
-        tasks: '=',
-        currentTaskId: '<',
-        limitTo: '@',
-        filter: '<',
-        isSubTasksDisabled: '@',
-        allowTaskSelection: '@',
-        disableDropInto: '@',
-        onItemMoved: '&',
-        onOrderChanged: '&',
-        onTaskDoneChangedCallback: '&onTaskDoneChanged',
-        parentTask: '='
-      }
-    });
+  class TaskListCtrl {
+    /* @ngInject */
+    constructor(Dialogs, $mdToast, $timeout, Tasks, EDIT_ON_CLICK_TOGGLE_EV, $scope, ShortSyntax, $element, Jira) {
+      this.Dialogs = Dialogs;
+      this.$mdToast = $mdToast;
+      this.$timeout = $timeout;
+      this.Tasks = Tasks;
+      this.EDIT_ON_CLICK_TOGGLE_EV = EDIT_ON_CLICK_TOGGLE_EV;
+      this.$scope = $scope;
+      this.ShortSyntax = ShortSyntax;
+      this.$element = $element;
+      this.Jira = Jira;
+      this.lastFocusedTaskEl = undefined;
 
-  /* @ngInject */
-  function TaskListCtrl(Dialogs, $mdToast, $timeout, $window, Tasks, EDIT_ON_CLICK_TOGGLE_EV, $scope, ShortSyntax, $element, Jira) {
-    let vm = this;
-    const _ = $window._;
+      this.boundHandleKeyPress = this.handleKeyPress.bind(this);
+    }
 
-    let lastFocusedTaskEl;
+    $onDestroy() {
+      this.$timeout.cancel(this.animationReadyTimeout);
+    }
 
-    // only allow after short delay
-    let animationReadyTimeout = $timeout(() => {
-      $element.addClass('is-animation-ready');
-    }, 400);
+    $onInit() {
+      // only allow after short delay
+      this.animationReadyTimeout = this.$timeout(() => {
+        this.$element.addClass('is-animation-ready');
+      }, 400);
 
-    $scope.$on('$destroy', () => {
-      $timeout.cancel(animationReadyTimeout);
-    });
+      this.dragControlListeners = {
+        accept: (sourceItemHandleScope, destSortableScope) => {
+          if (this.disableDropInto) {
+            return false;
+          } else {
+            // disallow parent tasks to be dropped into parent tasks
+            let draggedTask = sourceItemHandleScope.itemScope.task;
+            return !(draggedTask.subTasks && draggedTask.subTasks.length > 0 && destSortableScope.$parent.parentTask);
+          }
+        },
+        itemMoved: function (event) {
+          let currentlyMovedTask = event.dest.sortableScope.modelValue[event.dest.index];
+          let parentTask = event.dest.sortableScope.$parent.parentTask;
+          if (parentTask) {
+            currentlyMovedTask.parentId = parentTask.id;
+          } else {
+            if (!angular.isUndefined(currentlyMovedTask.parentId)) {
+              delete currentlyMovedTask.parentId;
+            }
+          }
 
-    function focusPreviousInListOrParent($index) {
-      let taskEls = angular.element($element.children().children());
+          if (angular.isFunction(this.onItemMoved)) {
+            this.onItemMoved({
+              currentlyMovedTask,
+              parentTask,
+              $event: event
+            });
+          }
+        },
+        orderChanged: function (event) {
+          if (angular.isFunction(this.onOrderChanged)) {
+            this.onOrderChanged({ $event: event });
+          }
+        },
+        allowDuplicates: false,
+        containment: '#board'
+      };
+    }
+
+    focusPreviousInListOrParent($index) {
+      let taskEls = angular.element(this.$element.children().children());
       let focusTaskEl;
 
       // NOTE!!! element has not yet been removed from the dom
@@ -58,8 +86,8 @@
         } else {
           focusTaskEl = angular.element(taskEls[$index + 1]);
         }
-      } else if (vm.parentTask) {
-        focusTaskEl = angular.element($element.parent()).parent();
+      } else if (this.parentTask) {
+        focusTaskEl = angular.element(this.$element.parent()).parent();
       }
 
       if (focusTaskEl) {
@@ -67,140 +95,87 @@
       }
     }
 
-    vm.focusLastFocusedTaskEl = () => {
-      if (lastFocusedTaskEl) {
-        lastFocusedTaskEl.focus();
+    focusLastFocusedTaskEl() {
+      if (this.lastFocusedTaskEl) {
+        this.lastFocusedTaskEl.focus();
       }
-    };
+    }
 
-    vm.estimateTime = (task) => {
-      Dialogs('TIME_ESTIMATE', { task })
-        .finally(vm.focusLastFocusedTaskEl);
-    };
+    estimateTime(task) {
+      this.Dialogs('TIME_ESTIMATE', { task })
+        .finally(this.focusLastFocusedTaskEl);
+    }
 
-    vm.deleteTask = (task, $index) => {
+    deleteTask(task, $index) {
       // create copy for undo
       let taskCopy = angular.copy(task);
 
       if (!$index && $index !== 0) {
-        $index = _.findIndex(vm.tasks, (taskFromAllTasks) => {
+        $index = _.findIndex(this.tasks, (taskFromAllTasks) => {
           return taskFromAllTasks.id === task.id;
         });
       }
 
       //delete
-      vm.tasks.splice($index, 1);
-      focusPreviousInListOrParent($index);
+      this.tasks.splice($index, 1);
+      this.focusPreviousInListOrParent($index);
 
       // show toast for undo
-      let toast = $mdToast.simple()
+      let toast = this.$mdToast.simple()
         .textContent('You deleted "' + task.title + '"')
         .action('UNDO')
         .hideDelay(15000)
         .position('bottom');
-      $mdToast.show(toast).then(function (response) {
+      this.$mdToast.show(toast).then(function (response) {
         if (response === 'ok') {
           // re-add task on undo
-          vm.tasks.splice($index, 0, taskCopy);
+          this.tasks.splice($index, 0, taskCopy);
         }
       });
-    };
+    }
 
-    vm.dragControlListeners = {
-      accept: (sourceItemHandleScope, destSortableScope) => {
-        if (vm.disableDropInto) {
-          return false;
-        } else {
-          // disallow parent tasks to be dropped into parent tasks
-          let draggedTask = sourceItemHandleScope.itemScope.task;
-          return !(draggedTask.subTasks && draggedTask.subTasks.length > 0 && destSortableScope.$parent.vm.parentTask);
-
-          // check for dupes
-          //let draggedTask = sourceItemHandleScope.itemScope.task;
-          //let targetTasks = destSortableScope.modelValue;
-          //let possibleDuplicates = $window._.find(targetTasks, (task) => {
-          //  return task.id == draggedTask.id;
-          //});
-          //
-          //return !possibleDuplicates || possibleDuplicates.length === 0;
-        }
-      },
-      itemMoved: function (event) {
-        let currentlyMovedTask = event.dest.sortableScope.modelValue[event.dest.index];
-        let parentTask = event.dest.sortableScope.$parent.vm.parentTask;
-        if (parentTask) {
-          currentlyMovedTask.parentId = parentTask.id;
-        } else {
-          if (!angular.isUndefined(currentlyMovedTask.parentId)) {
-            delete currentlyMovedTask.parentId;
-          }
-        }
-
-        if (angular.isFunction(vm.onItemMoved)) {
-          vm.onItemMoved({
-            currentlyMovedTask,
-            parentTask,
-            $event: event
-          });
-        }
-      },
-      orderChanged: function (event) {
-        if (angular.isFunction(vm.onOrderChanged)) {
-          vm.onOrderChanged({ $event: event });
-        }
-      },
-      allowDuplicates: false,
-      containment: '#board'
-    };
-
-    vm.onChangeTitle = (task, isChanged, newVal) => {
+    onChangeTitle(task, isChanged, newVal) {
       if (isChanged && newVal) {
         // we need to do this, as the pointer might not have been updated yet
         task.title = newVal;
-        ShortSyntax(task);
+        this.ShortSyntax(task);
       }
-    };
+    }
 
-    vm.onTaskNotesChanged = (task) => {
+    onTaskNotesChanged(task) {
       if (task.originalKey) {
-        Jira.updateIssueDescription(task);
+        this.Jira.updateIssueDescription(task);
       }
-    };
+    }
 
-    vm.onTaskDoneChanged = (task) => {
+    onTaskDoneChanged(task) {
       if (task.isDone) {
-        task.doneDate = $window.moment();
-        Jira.addWorklog(task);
+        task.doneDate = moment();
+        this.Jira.addWorklog(task);
       }
 
-      if (angular.isFunction(vm.onTaskDoneChangedCallback)) {
-        vm.onTaskDoneChangedCallback({ task, taskList: vm.tasks });
+      if (angular.isFunction(this.onTaskDoneChangedCallback)) {
+        this.onTaskDoneChangedCallback({ task, taskList: this.tasks });
       }
-    };
+    }
 
-    vm.onFocus = ($event) => {
+    onFocus($event) {
       let taskEl = $event.currentTarget || $event.srcElement || $event.originalTarget;
       taskEl = angular.element(taskEl);
-      lastFocusedTaskEl = taskEl;
-      taskEl.on('keydown', handleKeyPress);
-    };
+      this.lastFocusedTaskEl = taskEl;
+      taskEl.on('keydown', this.boundHandleKeyPress);
+    }
 
-    vm.onBlur = ($event) => {
+    onBlur($event) {
       let taskEl = $event.currentTarget || $event.srcElement || $event.originalTarget;
       taskEl = angular.element(taskEl);
-      taskEl.off('keydown', handleKeyPress);
-    };
+      taskEl.off('keydown', this.boundHandleKeyPress);
+    }
 
-    function handleKeyPress($event) {
+    handleKeyPress($event) {
       let taskEl = $event.currentTarget || $event.srcElement || $event.originalTarget;
       taskEl = angular.element(taskEl);
-      const task = lastFocusedTaskEl.scope().modelValue;
-
-      // escape
-      //if ($event.keyCode === 27) {
-      //  task.showNotes = false;
-      //  taskEl.focus();
-      //}
+      const task = this.lastFocusedTaskEl.scope().modelValue;
 
       // only trigger if target is li
       const USED_KEYS = [
@@ -218,11 +193,11 @@
       if (USED_KEY_CODES.indexOf($event.keyCode) > -1 || USED_KEYS.indexOf($event.key) > -1) {
         // + or a
         if ($event.key === '+' || $event.key === 'a') {
-          vm.addSubTask(task);
+          this.addSubTask(task);
         }
         // t
         if ($event.key === 't') {
-          vm.estimateTime(task);
+          this.estimateTime(task);
         }
         // n
         if ($event.key === 'n') {
@@ -234,50 +209,50 @@
         }
         // entf
         if ($event.keyCode === 46) {
-          vm.deleteTask(task);
+          this.deleteTask(task);
           // don't propagate to next focused element
           $event.preventDefault();
           $event.stopPropagation();
         }
         // enter
         if ($event.keyCode === 13) {
-          $scope.$broadcast(EDIT_ON_CLICK_TOGGLE_EV, task.id);
+          this.$scope.$broadcast(this.EDIT_ON_CLICK_TOGGLE_EV, task.id);
         }
-        $scope.$apply();
+        this.$scope.$apply();
       }
 
       // moving items via shift+ctrl+keyUp/keyDown
       if ($event.shiftKey === true && $event.ctrlKey === true) {
-        let taskIndex = $window._.findIndex(vm.tasks, (cTask) => {
+        let taskIndex = _.findIndex(this.tasks, (cTask) => {
           return cTask.id === task.id;
         });
 
         // move up
         if ($event.keyCode === 38) {
           if (taskIndex > 0) {
-            vm.moveItem(vm.tasks, taskIndex, taskIndex - 1);
-            $scope.$apply();
+            TaskListCtrl.moveItem(this.tasks, taskIndex, taskIndex - 1);
+            this.$scope.$apply();
 
             // we need to manually re-add focus after timeout
-            $timeout(() => {
+            this.$timeout(() => {
               taskEl.focus();
             });
           }
         }
         // move down
         if ($event.keyCode === 40) {
-          if (taskIndex < vm.tasks.length - 1) {
-            vm.moveItem(vm.tasks, taskIndex, taskIndex + 1);
-            $scope.$apply();
+          if (taskIndex < this.tasks.length - 1) {
+            TaskListCtrl.moveItem(this.tasks, taskIndex, taskIndex + 1);
+            this.$scope.$apply();
           }
         }
       }
     }
 
-    vm.addSubTask = (task) => {
+    addSubTask(task) {
       // use parent task if the current task is a sub task itself
-      if (vm.parentTask) {
-        task = vm.parentTask;
+      if (this.parentTask) {
+        task = this.parentTask;
       }
 
       // only allow if task is not done
@@ -289,7 +264,7 @@
           task.mainTaskTimeSpent = task.timeSpent;
           task.mainTaskTimeSpentOnDay = task.timeSpentOnDay;
         }
-        let subTask = Tasks.createTask({
+        let subTask = this.Tasks.createTask({
           title: '',
           parentId: task.id
         });
@@ -298,25 +273,25 @@
 
         // focus the new element to edit it right away
         // timeout is needed to wait for dom to update
-        $timeout(() => {
-          $scope.$broadcast(EDIT_ON_CLICK_TOGGLE_EV, subTask.id);
+        this.$timeout(() => {
+          this.$scope.$broadcast(this.EDIT_ON_CLICK_TOGGLE_EV, subTask.id);
         });
         // if parent was current task, mark sub task as current now
-        if (vm.currentTaskId === task.id) {
-          Tasks.updateCurrent(subTask);
+        if (this.currentTaskId === task.id) {
+          this.Tasks.updateCurrent(subTask);
         }
       }
-    };
+    }
 
-    vm.togglePlay = (task) => {
-      if (vm.currentTaskId === task.id) {
-        Tasks.updateCurrent(undefined);
+    togglePlay(task) {
+      if (this.currentTaskId === task.id) {
+        this.Tasks.updateCurrent(undefined);
       } else {
-        Tasks.updateCurrent(task);
+        this.Tasks.updateCurrent(task);
       }
-    };
+    }
 
-    vm.moveItem = (array, oldIndex, newIndex) => {
+    static moveItem(array, oldIndex, newIndex) {
       if (newIndex >= array.length) {
         let k = newIndex - array.length;
         while ((k--) + 1) {
@@ -325,7 +300,28 @@
       }
       array.splice(newIndex, 0, array.splice(oldIndex, 1)[0]);
       return array; // for testing purposes
-    };
+    }
   }
 
+  angular
+    .module('superProductivity')
+    .component('taskList', {
+      templateUrl: 'scripts/task-list/task-list-d.html',
+      bindToController: true,
+      controller: TaskListCtrl,
+      controllerAs: '$ctrl',
+      bindings: {
+        tasks: '=',
+        currentTaskId: '<',
+        limitTo: '@',
+        filter: '<',
+        isSubTasksDisabled: '@',
+        allowTaskSelection: '@',
+        disableDropInto: '@',
+        onItemMoved: '&',
+        onOrderChanged: '&',
+        onTaskDoneChangedCallback: '&onTaskDoneChanged',
+        parentTask: '='
+      }
+    });
 })();
