@@ -104,6 +104,7 @@
     watchers.push($scope.$watch('r.tasks', () => {
       vm.tasksUndone = Tasks.getUndoneToday();
       vm.tasksDone = Tasks.getDoneToday();
+      updateTimeTotals();
     }));
 
     // otherwise we update on view change
