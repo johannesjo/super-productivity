@@ -10,17 +10,12 @@
 
   angular
     .module('superProductivity')
-    .directive('taskList', taskList);
-
-  /* @ngInject */
-  function taskList() {
-    return {
+    .component('taskList', {
       templateUrl: 'scripts/task-list/task-list-d.html',
       bindToController: true,
       controller: TaskListCtrl,
       controllerAs: 'vm',
-      restrict: 'E',
-      scope: {
+      bindings: {
         tasks: '=',
         currentTaskId: '<',
         limitTo: '@',
@@ -33,8 +28,7 @@
         onTaskDoneChangedCallback: '&onTaskDoneChanged',
         parentTask: '='
       }
-    };
-  }
+    });
 
   /* @ngInject */
   function TaskListCtrl(Dialogs, $mdToast, $timeout, $window, Tasks, EDIT_ON_CLICK_TOGGLE_EV, $scope, ShortSyntax, $element, Jira) {
