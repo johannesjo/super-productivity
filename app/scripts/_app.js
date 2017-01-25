@@ -158,15 +158,6 @@
           task = parentTask;
         }
       }
-
-      function isJiraTask(task) {
-        return task && task.orginalKey;
-      }
-
-      function isDone(task) {
-        return task && task.isDone;
-      }
-
       if (task && task.originalKey) {
         Jira.checkUpdatesForTicket(task).then((isUpdated) => {
           if (isUpdated) {
@@ -180,6 +171,14 @@
           }
         });
       }
+    }
+
+    function isJiraTask(task) {
+      return task && task.orginalKey;
+    }
+
+    function isDone(task) {
+      return task && task.isDone;
     }
 
     // handle updates that need to be made on jira
