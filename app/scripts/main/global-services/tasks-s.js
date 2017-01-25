@@ -32,42 +32,50 @@
     if (IS_ELECTRON) {
       let that = this;
 
+      let isIdleDialogOpen = false;
       // handler for time spent tracking
       window.ipcRenderer.on(IPC_EVENT_UPDATE_TIME_SPEND_FOR_CURRENT, (ev, evData) => {
-        let timeSpentInMs = evData.timeSpentInMs;
-        let idleTimeInMs = evData.idleTimeInMs;
+        if (!isIdleDialogOpen) {
+          let timeSpentInMs = evData.timeSpentInMs;
+          let idleTimeInMs = evData.idleTimeInMs;
 
-        // only track if there is a task
-        if ($rootScope.r.currentTask) {
+          // only track if there is a task
+          if ($rootScope.r.currentTask) {
 
-          that.addTimeSpent($rootScope.r.currentTask, timeSpentInMs);
-          that.updateCurrent($rootScope.r.currentTask, true);
-          that.checkTakeToTakeABreak(timeSpentInMs, idleTimeInMs);
+            that.addTimeSpent($rootScope.r.currentTask, timeSpentInMs);
+            that.updateCurrent($rootScope.r.currentTask, true);
+            that.checkTakeToTakeABreak(timeSpentInMs, idleTimeInMs);
 
-          // we need to manually call apply as this is an outside event
-          $rootScope.$apply();
+            // we need to manually call apply as this is an outside event
+            $rootScope.$apply();
+          }
         }
       });
 
       // handler for idle event
       window.ipcRenderer.on(IPC_EVENT_IDLE, (ev, params) => {
-        const idleTime = params.realIdleTimeInMs;
+        const idleTime = params.idleTimeInMs;
         const minIdleTimeInMs = params.minIdleTimeInMs;
 
         // do not show as long as the user hasn't decided
         isShowTakeBreakNotification = false;
 
-        Dialogs('WAS_IDLE', { idleTime, minIdleTimeInMs })
-          .then(() => {
-            // if tracked
-            this.checkTakeToTakeABreak(idleTime);
-            isShowTakeBreakNotification = true;
-          }, () => {
-            // if not tracked
-            // unset currentSession.timeWorkedWithoutBreak
-            $rootScope.r.currentSession.timeWorkedWithoutBreak = undefined;
-            isShowTakeBreakNotification = true;
-          });
+        if (!isIdleDialogOpen) {
+          isIdleDialogOpen = true;
+          Dialogs('WAS_IDLE', { idleTime, minIdleTimeInMs })
+            .then(() => {
+              // if tracked
+              this.checkTakeToTakeABreak(idleTime);
+              isShowTakeBreakNotification = true;
+              isIdleDialogOpen = false;
+            }, () => {
+              // if not tracked
+              // unset currentSession.timeWorkedWithoutBreak
+              $rootScope.r.currentSession.timeWorkedWithoutBreak = undefined;
+              isShowTakeBreakNotification = true;
+              isIdleDialogOpen = false;
+            });
+        }
       });
     }
 
@@ -120,9 +128,15 @@
 
     this.removeTimeSpent = (task, timeSpentToRemoveAsMoment) => {
       const TODAY_STR = getTodayStr();
-      const timeSpentToRemoveInMs = timeSpentToRemoveAsMoment.asMilliseconds();
+      let timeSpentToRemoveInMs;
       let timeSpentCalculatedOnDay;
       let parentTask;
+
+      if (timeSpentToRemoveAsMoment.asMilliseconds) {
+        timeSpentToRemoveInMs = timeSpentToRemoveAsMoment.asMilliseconds();
+      } else {
+        timeSpentToRemoveInMs = timeSpentToRemoveAsMoment;
+      }
 
       // track time spent on days
       if (!task.timeSpentOnDay) {

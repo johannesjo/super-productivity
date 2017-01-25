@@ -222,10 +222,10 @@ electron.ipcMain.on('CHANGED_CURRENT_TASK', (ev, task) => {
   //tray.setContextMenu(contextMenu)
 });
 
-function showIdleDialog(realIdleTimeInMs) {
+function showIdleDialog(idleTimeInMs) {
   // first show, then send again
   mainWin.webContents.send('WAS_IDLE', ({
-    realIdleTimeInMs,
+    idleTimeInMs: idleTimeInMs,
     minIdleTimeInMs: CONFIG.MIN_IDLE_TIME
   }));
 }

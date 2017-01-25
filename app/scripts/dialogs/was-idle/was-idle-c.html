@@ -16,9 +16,9 @@
     <md-dialog-content>
       <div class="md-dialog-content">
 
-        <p>You have been idle for <strong>{{ vm.idleTime|duration:true }}</strong>.</p>
+        <p>You have been idle for <strong>{{ vm.idleTime }}</strong>.
+        </p>
         <p>Select the task you want to track the time to, or just press cancel if you don't want to track the time.</p>
-        <pre>{{ vm.currentTask|json }}</pre>
 
         <md-autocomplete
           md-selected-item="vm.selectedTask"
