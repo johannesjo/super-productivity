@@ -31,8 +31,8 @@
 
     let vm = this;
 
+    vm.todayStr = Tasks.constructor.getTodayStr();
     vm.doneTasks = Tasks.getDoneToday();
-    vm.todayStr = Tasks.getTodayStr();
 
     // calc total time spent on todays tasks
     vm.totalTimeSpentTasks = Tasks.getTotalTimeWorkedOnTasksToday();

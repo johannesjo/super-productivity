@@ -9,125 +9,128 @@
 (function () {
   'use strict';
 
-  angular
-    .module('superProductivity')
-    .service('Tasks', Tasks);
+  const IPC_EVENT_IDLE = 'WAS_IDLE';
+  const IPC_EVENT_UPDATE_TIME_SPEND_FOR_CURRENT = 'UPDATE_TIME_SPEND';
+  const IPC_EVENT_CURRENT_TASK_UPDATED = 'CHANGED_CURRENT_TASK';
+  const WORKLOG_DATE_STR_FORMAT = 'YYYY-MM-DD';
 
   /* @ngInject */
-  function Tasks($localStorage, Uid, $window, $rootScope, Dialogs, IS_ELECTRON, $mdToast, SimpleToast, Notifier, ShortSyntax, ParseDuration) {
-    const IPC_EVENT_IDLE = 'WAS_IDLE';
-    const IPC_EVENT_UPDATE_TIME_SPEND_FOR_CURRENT = 'UPDATE_TIME_SPEND';
-    const IPC_EVENT_CURRENT_TASK_UPDATED = 'CHANGED_CURRENT_TASK';
-    const WORKLOG_DATE_STR_FORMAT = 'YYYY-MM-DD';
+  class Tasks {
 
-    // export
-    this.WORKLOG_DATE_STR_FORMAT = WORKLOG_DATE_STR_FORMAT;
+    constructor($localStorage, Uid, $rootScope, Dialogs, IS_ELECTRON, $mdToast, SimpleToast, Notifier, ShortSyntax, ParseDuration) {
+      this.$localStorage = $localStorage;
+      this.Uid = Uid;
+      this.$rootScope = $rootScope;
+      this.Dialogs = Dialogs;
+      this.$mdToast = $mdToast;
+      this.SimpleToast = SimpleToast;
+      this.Notifier = Notifier;
+      this.ShortSyntax = ShortSyntax;
+      this.ParseDuration = ParseDuration;
 
-    const moment = $window.moment;
-    const _ = $window._;
+      this.isShowTakeBreakNotification = true;
 
-    let isShowTakeBreakNotification = true;
+      // SETUP HANDLERS FOR ELECTRON EVENTS
+      if (IS_ELECTRON) {
+        let that = this;
 
-    // SETUP HANDLERS FOR ELECTRON EVENTS
-    if (IS_ELECTRON) {
-      let that = this;
+        let isIdleDialogOpen = false;
+        // handler for time spent tracking
+        window.ipcRenderer.on(IPC_EVENT_UPDATE_TIME_SPEND_FOR_CURRENT, (ev, evData) => {
+          if (!isIdleDialogOpen) {
+            let timeSpentInMs = evData.timeSpentInMs;
+            let idleTimeInMs = evData.idleTimeInMs;
 
-      let isIdleDialogOpen = false;
-      // handler for time spent tracking
-      window.ipcRenderer.on(IPC_EVENT_UPDATE_TIME_SPEND_FOR_CURRENT, (ev, evData) => {
-        if (!isIdleDialogOpen) {
-          let timeSpentInMs = evData.timeSpentInMs;
-          let idleTimeInMs = evData.idleTimeInMs;
+            // only track if there is a task
+            if (this.$rootScope.r.currentTask) {
 
-          // only track if there is a task
-          if ($rootScope.r.currentTask) {
+              that.addTimeSpent(this.$rootScope.r.currentTask, timeSpentInMs);
+              that.updateCurrent(this.$rootScope.r.currentTask, true);
+              that.checkTakeToTakeABreak(timeSpentInMs, idleTimeInMs);
 
-            that.addTimeSpent($rootScope.r.currentTask, timeSpentInMs);
-            that.updateCurrent($rootScope.r.currentTask, true);
-            that.checkTakeToTakeABreak(timeSpentInMs, idleTimeInMs);
-
-            // we need to manually call apply as this is an outside event
-            $rootScope.$apply();
+              // we need to manually call apply as this is an outside event
+              this.$rootScope.$apply();
+            }
           }
-        }
-      });
+        });
 
-      // handler for idle event
-      window.ipcRenderer.on(IPC_EVENT_IDLE, (ev, params) => {
-        const idleTime = params.idleTimeInMs;
-        const minIdleTimeInMs = params.minIdleTimeInMs;
+        // handler for idle event
+        window.ipcRenderer.on(IPC_EVENT_IDLE, (ev, params) => {
+          const idleTime = params.idleTimeInMs;
+          const minIdleTimeInMs = params.minIdleTimeInMs;
 
-        // do not show as long as the user hasn't decided
-        isShowTakeBreakNotification = false;
+          // do not show as long as the user hasn't decided
+          this.isShowTakeBreakNotification = false;
 
-        if (!isIdleDialogOpen) {
-          isIdleDialogOpen = true;
-          Dialogs('WAS_IDLE', { idleTime, minIdleTimeInMs })
-            .then(() => {
-              // if tracked
-              this.checkTakeToTakeABreak(idleTime);
-              isShowTakeBreakNotification = true;
-              isIdleDialogOpen = false;
-            }, () => {
-              // if not tracked
-              // unset currentSession.timeWorkedWithoutBreak
-              $rootScope.r.currentSession.timeWorkedWithoutBreak = undefined;
-              isShowTakeBreakNotification = true;
-              isIdleDialogOpen = false;
-            });
-        }
-      });
+          if (!isIdleDialogOpen) {
+            isIdleDialogOpen = true;
+            this.Dialogs('WAS_IDLE', { idleTime, minIdleTimeInMs })
+              .then(() => {
+                // if tracked
+                this.checkTakeToTakeABreak(idleTime);
+                this.isShowTakeBreakNotification = true;
+                isIdleDialogOpen = false;
+              }, () => {
+                // if not tracked
+                // unset currentSession.timeWorkedWithoutBreak
+                this.$rootScope.r.currentSession.timeWorkedWithoutBreak = undefined;
+                this.isShowTakeBreakNotification = true;
+                isIdleDialogOpen = false;
+              });
+          }
+        });
+      }
     }
 
-    this.checkTakeToTakeABreak = (timeSpentInMs, idleTimeInMs) => {
+    checkTakeToTakeABreak(timeSpentInMs, idleTimeInMs) {
       const MIN_IDLE_VAL_TO_TAKE_A_BREAK_FROM_TAKE_A_BREAK = 9999;
 
-      if ($rootScope.r.config && $rootScope.r.config.isTakeABreakEnabled) {
-        if (!$rootScope.r.currentSession) {
-          $rootScope.r.currentSession = {};
+      if (this.$rootScope.r.config && this.$rootScope.r.config.isTakeABreakEnabled) {
+        if (!this.$rootScope.r.currentSession) {
+          this.$rootScope.r.currentSession = {};
         }
         // add or create moment duration for timeWorkedWithoutBreak
-        if ($rootScope.r.currentSession.timeWorkedWithoutBreak) {
+        if (this.$rootScope.r.currentSession.timeWorkedWithoutBreak) {
           // convert to moment to be save
-          $rootScope.r.currentSession.timeWorkedWithoutBreak = moment.duration($rootScope.r.currentSession.timeWorkedWithoutBreak);
-          $rootScope.r.currentSession.timeWorkedWithoutBreak.add(moment.duration({ milliseconds: timeSpentInMs }));
+          this.$rootScope.r.currentSession.timeWorkedWithoutBreak = moment.duration(this.$rootScope.r.currentSession.timeWorkedWithoutBreak);
+          this.$rootScope.r.currentSession.timeWorkedWithoutBreak.add(moment.duration({ milliseconds: timeSpentInMs }));
         } else {
-          $rootScope.r.currentSession.timeWorkedWithoutBreak = moment.duration(timeSpentInMs);
+          this.$rootScope.r.currentSession.timeWorkedWithoutBreak = moment.duration(timeSpentInMs);
         }
 
-        if (moment.duration($rootScope.r.config.takeABreakMinWorkingTime)
-            .asSeconds() < $rootScope.r.currentSession.timeWorkedWithoutBreak.asSeconds()) {
+        if (moment.duration(this.$rootScope.r.config.takeABreakMinWorkingTime)
+            .asSeconds() < this.$rootScope.r.currentSession.timeWorkedWithoutBreak.asSeconds()) {
 
           if (idleTimeInMs > MIN_IDLE_VAL_TO_TAKE_A_BREAK_FROM_TAKE_A_BREAK) {
             return;
           }
 
-          if (isShowTakeBreakNotification) {
-            let toast = $mdToast.simple()
-              .textContent('Take a break! You have been working for ' + ParseDuration.toString($rootScope.r.currentSession.timeWorkedWithoutBreak) + ' without one. Go away from the computer! Makes you more productive in the long run!')
+          if (this.isShowTakeBreakNotification) {
+            let toast = this.$mdToast.simple()
+              .textContent('Take a break! You have been working for ' + this.ParseDuration.toString(this.$rootScope.r.currentSession.timeWorkedWithoutBreak) + ' without one. Go away from the computer! Makes you more productive in the long run!')
               .action('I already did!')
               .hideDelay(20000)
               .position('bottom');
-            $mdToast.show(toast).then(function (response) {
+            this.$mdToast.show(toast).then(function (response) {
               if (response === 'ok') {
                 // re-add task on undo
-                $rootScope.r.currentSession.timeWorkedWithoutBreak = undefined;
+                this.$rootScope.r.currentSession.timeWorkedWithoutBreak = undefined;
               }
             });
 
-            Notifier({
+            this.Notifier({
               title: 'Take a break!',
-              message: 'Take a break! You have been working for ' + ParseDuration.toString($rootScope.r.currentSession.timeWorkedWithoutBreak) + ' without one. Go away from the computer! Makes you more productive in the long run!',
+              message: 'Take a break! You have been working for ' + this.ParseDuration.toString(this.$rootScope.r.currentSession.timeWorkedWithoutBreak) + ' without one. Go away from the computer! Makes you more productive in the long run!',
               sound: true,
               wait: true
             });
           }
         }
       }
-    };
+    }
 
-    this.removeTimeSpent = (task, timeSpentToRemoveAsMoment) => {
-      const TODAY_STR = getTodayStr();
+    removeTimeSpent(task, timeSpentToRemoveAsMoment) {
+      const TODAY_STR = this.constructor.getTodayStr();
       let timeSpentToRemoveInMs;
       let timeSpentCalculatedOnDay;
       let parentTask;
@@ -163,12 +166,11 @@
       task.timeSpent = this.calcTotalTimeSpentOnTask(task);
 
       return task;
+    }
 
-    };
-
-    this.addTimeSpent = (task, timeSpentInMsOrMomentDuration) => {
+    addTimeSpent(task, timeSpentInMsOrMomentDuration) {
       // use mysql date as it is sortable
-      const TODAY_STR = getTodayStr();
+      const TODAY_STR = this.constructor.getTodayStr();
       let timeSpentCalculatedOnDay;
       let timeSpentInMs;
       let parentTask;
@@ -216,21 +218,21 @@
       task.timeSpent = this.calcTotalTimeSpentOnTask(task);
 
       return task;
-    };
+    }
 
     // UTILITY
-    function convertDurationStringsToMomentForList(tasks) {
+    convertDurationStringsToMomentForList(tasks) {
       if (tasks) {
         _.each(tasks, (task) => {
-          convertDurationStringsToMoment(task);
+          this.constructor.convertDurationStringsToMoment(task);
           if (task.subTasks) {
-            _.each(task.subTasks, convertDurationStringsToMoment);
+            _.each(task.subTasks, this.constructor.convertDurationStringsToMoment);
           }
         });
       }
     }
 
-    function convertDurationStringsToMoment(task) {
+    static convertDurationStringsToMoment(task) {
       if (task.timeSpent) {
         task.timeSpent = moment.duration(task.timeSpent);
       }
@@ -244,27 +246,25 @@
       }
     }
 
-    function getTodayStr() {
+    static getTodayStr() {
       return moment().format(WORKLOG_DATE_STR_FORMAT);
     }
 
-    this.getTodayStr = getTodayStr;
-
-    this.formatToWorklogDateStr = (date) => {
+    static formatToWorklogDateStr(date) {
       if (date) {
         return moment(date).format(WORKLOG_DATE_STR_FORMAT);
       }
-    };
+    }
 
-    function deleteNullValueTasks(tasksArray) {
+    static deleteNullValueTasks(tasksArray) {
       return tasksArray.filter(function (item) {
         return !!item;
       });
     }
 
-    function checkDupes(tasksArray) {
+    checkDupes(tasksArray) {
       if (tasksArray) {
-        deleteNullValueTasks(tasksArray);
+        this.constructor.deleteNullValueTasks(tasksArray);
         let valueArr = tasksArray.map(function (item) {
           return item && item.id;
         });
@@ -281,13 +281,13 @@
           });
           console.log(firstDupe);
 
-          SimpleToast('!!! Dupes detected in data for the ids: ' + dupeIds.join(', ') + '. First task title is "' + firstDupe.title + '" !!!', 60000);
+          this.SimpleToast('!!! Dupes detected in data for the ids: ' + dupeIds.join(', ') + '. First task title is "' + firstDupe.title + '" !!!', 60000);
         }
         return hasDupe;
       }
     }
 
-    this.calcTotalEstimate = (tasks) => {
+    calcTotalEstimate(tasks) {
       let totalEstimate;
       if (angular.isArray(tasks) && tasks.length > 0) {
         totalEstimate = moment.duration();
@@ -296,9 +296,9 @@
         });
       }
       return totalEstimate;
-    };
+    }
 
-    this.calcTotalTimeSpent = (tasks) => {
+    calcTotalTimeSpent(tasks) {
       let totalTimeSpent;
       if (angular.isArray(tasks) && tasks.length > 0) {
         totalTimeSpent = moment.duration();
@@ -310,9 +310,9 @@
         });
       }
       return totalTimeSpent;
-    };
+    }
 
-    this.calcTotalTimeSpentOnDay = (tasks, dayStr) => {
+    calcTotalTimeSpentOnDay(tasks, dayStr) {
       let totalTimeSpentOnDay;
       if (angular.isArray(tasks) && tasks.length > 0) {
         totalTimeSpentOnDay = moment.duration();
@@ -324,9 +324,9 @@
         });
       }
       return totalTimeSpentOnDay;
-    };
+    }
 
-    this.mergeTotalTimeSpentOnDayFrom = (tasks) => {
+    mergeTotalTimeSpentOnDayFrom(tasks) {
       let totalTimeSpentOnDay = {};
       if (angular.isArray(tasks) && tasks.length > 0) {
         _.each(tasks, (task) => {
@@ -341,9 +341,9 @@
         });
       }
       return totalTimeSpentOnDay;
-    };
+    }
 
-    this.calcTotalTimeSpentOnTask = (task) => {
+    calcTotalTimeSpentOnTask(task) {
       let totalTimeSpent = moment.duration();
       if (task) {
         _.forOwn(task.timeSpentOnDay, (val, strDate) => {
@@ -358,9 +358,9 @@
           return undefined;
         }
       }
-    };
+    }
 
-    this.calcRemainingTime = (tasks) => {
+    calcRemainingTime(tasks) {
       let totalRemaining;
       if (angular.isArray(tasks) && tasks.length > 0) {
         totalRemaining = moment.duration();
@@ -381,62 +381,62 @@
       }
       return totalRemaining;
 
-    };
+    }
 
     // GET DATA
-    this.getCurrent = () => {
+    getCurrent() {
       let currentTask;
       let subTaskMatch;
 
-      // we want to sync the ls current task with the $rootScope current task
+      // we want to sync the ls current task with the this.$rootScope current task
       // that's why we load the current task from the ls directly
-      if ($localStorage.currentTask) {
-        currentTask = _.find($localStorage.tasks, (task) => {
+      if (this.$localStorage.currentTask) {
+        currentTask = _.find(this.$localStorage.tasks, (task) => {
           if (task.subTasks) {
-            let subTaskMatchTmp = _.find(task.subTasks, { id: $localStorage.currentTask.id });
+            let subTaskMatchTmp = _.find(task.subTasks, { id: this.$localStorage.currentTask.id });
             if (subTaskMatchTmp) {
               subTaskMatch = subTaskMatchTmp;
             }
           }
-          return task.id === $localStorage.currentTask.id;
+          return task.id === this.$localStorage.currentTask.id;
         });
 
-        $localStorage.currentTask = $rootScope.r.currentTask = currentTask || subTaskMatch;
+        this.$localStorage.currentTask = this.$rootScope.r.currentTask = currentTask || subTaskMatch;
       }
-      return $rootScope.r.currentTask;
-    };
+      return this.$rootScope.r.currentTask;
+    }
 
-    this.getById = (taskId) => {
-      return _.find($rootScope.r.tasks, ['id', taskId]) || _.find($rootScope.r.backlogTasks, ['id', taskId]) || _.find($rootScope.r.doneBacklogTasks, ['id', taskId]);
-    };
+    getById(taskId) {
+      return _.find(this.$rootScope.r.tasks, ['id', taskId]) || _.find(this.$rootScope.r.backlogTasks, ['id', taskId]) || _.find(this.$rootScope.r.doneBacklogTasks, ['id', taskId]);
+    }
 
-    this.getBacklog = () => {
-      checkDupes($localStorage.backlogTasks);
-      convertDurationStringsToMomentForList($localStorage.backlogTasks);
-      return $localStorage.backlogTasks;
-    };
+    getBacklog() {
+      this.checkDupes(this.$localStorage.backlogTasks);
+      this.convertDurationStringsToMomentForList(this.$localStorage.backlogTasks);
+      return this.$localStorage.backlogTasks;
+    }
 
-    this.getDoneBacklog = () => {
-      checkDupes($localStorage.doneBacklogTasks);
-      convertDurationStringsToMomentForList($localStorage.doneBacklogTasks);
-      return $localStorage.doneBacklogTasks;
-    };
+    getDoneBacklog() {
+      this.checkDupes(this.$localStorage.doneBacklogTasks);
+      this.convertDurationStringsToMomentForList(this.$localStorage.doneBacklogTasks);
+      return this.$localStorage.doneBacklogTasks;
+    }
 
-    this.getToday = () => {
-      checkDupes($localStorage.tasks);
-      convertDurationStringsToMomentForList($localStorage.tasks);
-      return $localStorage.tasks;
-    };
+    getToday() {
+      this.checkDupes(this.$localStorage.tasks);
+      this.convertDurationStringsToMomentForList(this.$localStorage.tasks);
+      return this.$localStorage.tasks;
+    }
 
-    this.getAllTasks = () => {
+    getAllTasks() {
       const todaysT = this.getToday();
       const backlogT = this.getBacklog();
       const doneBacklogT = this.getDoneBacklog();
 
       return _.concat(todaysT, backlogT, doneBacklogT);
-    };
+    }
 
-    this.flattenTasks = (tasks, checkFnParent, checkFnSub) => {
+    flattenTasks(tasks, checkFnParent, checkFnSub) {
       const flattenedTasks = [];
       _.each(tasks, (parentTask) => {
 
@@ -470,9 +470,9 @@
       });
 
       return flattenedTasks;
-    };
+    }
 
-    this.getCompleteWorkLog = () => {
+    getCompleteWorkLog() {
       const allTasks = this.flattenTasks(this.getAllTasks());
       const worklog = {};
       _.each(allTasks, (task) => {
@@ -501,7 +501,7 @@
                   timeSpent: moment.duration(),
                   entries: [],
                   dateStr: dateStr,
-                  id: Uid()
+                  id: this.Uid()
                 };
               }
 
@@ -530,15 +530,15 @@
       });
 
       return worklog;
-    };
+    }
 
-    this.getUndoneToday = (isSubTasksInsteadOfParent) => {
+    getUndoneToday(isSubTasksInsteadOfParent) {
       let undoneTasks;
 
       // get flattened result of all undone tasks including subtasks
       if (isSubTasksInsteadOfParent) {
         // get all undone tasks tasks
-        undoneTasks = this.flattenTasks($localStorage.tasks, (parentTask) => {
+        undoneTasks = this.flattenTasks(this.$localStorage.tasks, (parentTask) => {
           return parentTask && !parentTask.isDone;
         }, (subTask) => {
           return !subTask.isDone;
@@ -547,39 +547,39 @@
 
       // just get parent undone tasks
       else {
-        undoneTasks = _.filter($localStorage.tasks, (task) => {
+        undoneTasks = _.filter(this.$localStorage.tasks, (task) => {
           return task && !task.isDone;
         });
       }
 
       return undoneTasks;
-    };
+    }
 
-    this.getDoneToday = () => {
-      return _.filter($localStorage.tasks, (task) => {
+    getDoneToday() {
+      return _.filter(this.$localStorage.tasks, (task) => {
         return task && task.isDone;
       });
-    };
+    }
 
-    this.isWorkedOnToday = (task) => {
-      let todayStr = getTodayStr();
+    isWorkedOnToday(task) {
+      let todayStr = this.constructor.getTodayStr();
       return task && task.timeSpentOnDay && task.timeSpentOnDay[todayStr];
-    };
+    }
 
-    this.getTotalTimeWorkedOnTasksToday = () => {
+    getTotalTimeWorkedOnTasksToday() {
       let tasks = this.getToday();
-      let totalTimeSpentTasks = $window.moment.duration();
+      let totalTimeSpentTasks = moment.duration();
       if (tasks) {
         _.each(tasks, (task) => {
           totalTimeSpentTasks.add(task.timeSpent);
         });
       }
       return totalTimeSpentTasks;
-    };
+    }
 
-    this.getTimeWorkedToday = () => {
+    getTimeWorkedToday() {
       let tasks = this.getToday();
-      let todayStr = getTodayStr();
+      let todayStr = this.constructor.getTodayStr();
       let totalTimeWorkedToday;
       if (tasks.length > 0) {
         totalTimeWorkedToday = moment.duration();
@@ -598,10 +598,10 @@
         });
       }
       return totalTimeWorkedToday;
-    };
+    }
 
     // UPDATE DATA
-    this.updateCurrent = (task, isCallFromTimeTracking) => {
+    updateCurrent(task, isCallFromTimeTracking) {
       // calc progress
       if (task && task.timeSpent && task.timeEstimate) {
         if (moment.duration().format && angular.isFunction(moment.duration().format)) {
@@ -628,26 +628,26 @@
         }
       }
 
-      $localStorage.currentTask = task;
+      this.$localStorage.currentTask = task;
       // update global pointer
-      $rootScope.r.currentTask = $localStorage.currentTask;
-    };
+      this.$rootScope.r.currentTask = this.$localStorage.currentTask;
+    }
 
-    this.addToday = (task) => {
+    addToday(task) {
       if (task && task.title) {
-        $localStorage.tasks.push(this.createTask(task));
+        this.$localStorage.tasks.push(this.createTask(task));
 
         // update global pointer for today tasks
-        $rootScope.r.tasks = $localStorage.tasks;
+        this.$rootScope.r.tasks = this.$localStorage.tasks;
 
         return true;
       }
-    };
+    }
 
-    this.createTask = (task) => {
+    createTask(task) {
       let transformedTask = {
         title: task.title,
-        id: Uid(),
+        id: this.Uid(),
         created: moment(),
         notes: task.notes,
         parentId: task.parentId,
@@ -664,41 +664,41 @@
         originalComments: task.originalComments,
         originalUpdated: task.originalUpdated
       };
-      return ShortSyntax(transformedTask);
-    };
+      return this.ShortSyntax(transformedTask);
+    }
 
-    this.updateToday = (tasks) => {
-      $localStorage.tasks = tasks;
+    updateToday(tasks) {
+      this.$localStorage.tasks = tasks;
       // update global pointer
-      $rootScope.r.tasks = $localStorage.tasks;
-    };
+      this.$rootScope.r.tasks = this.$localStorage.tasks;
+    }
 
-    this.updateBacklog = (tasks) => {
-      $localStorage.backlogTasks = tasks;
+    updateBacklog(tasks) {
+      this.$localStorage.backlogTasks = tasks;
       // update global pointer
-      $rootScope.r.backlogTasks = $localStorage.backlogTasks;
-    };
+      this.$rootScope.r.backlogTasks = this.$localStorage.backlogTasks;
+    }
 
-    this.addTasksToTopOfBacklog = (tasks) => {
-      $localStorage.backlogTasks = tasks.concat($localStorage.backlogTasks);
+    addTasksToTopOfBacklog(tasks) {
+      this.$localStorage.backlogTasks = tasks.concat(this.$localStorage.backlogTasks);
       // update global pointer
-      $rootScope.r.backlogTasks = $localStorage.backlogTasks;
-    };
+      this.$rootScope.r.backlogTasks = this.$localStorage.backlogTasks;
+    }
 
-    this.updateDoneBacklog = (tasks) => {
-      $localStorage.doneBacklogTasks = tasks;
+    updateDoneBacklog(tasks) {
+      this.$localStorage.doneBacklogTasks = tasks;
       // update global pointer
-      $rootScope.r.doneBacklogTasks = $localStorage.doneBacklogTasks;
-    };
+      this.$rootScope.r.doneBacklogTasks = this.$localStorage.doneBacklogTasks;
+    }
 
-    this.addDoneTasksToDoneBacklog = () => {
+    addDoneTasksToDoneBacklog() {
       let doneTasks = this.getDoneToday().slice(0);
-      $localStorage.doneBacklogTasks = doneTasks.concat($localStorage.doneBacklogTasks);
+      this.$localStorage.doneBacklogTasks = doneTasks.concat(this.$localStorage.doneBacklogTasks);
       // update global pointer
-      $rootScope.r.doneBacklogTasks = $localStorage.doneBacklogTasks;
-    };
+      this.$rootScope.r.doneBacklogTasks = this.$localStorage.doneBacklogTasks;
+    }
 
-    this.finishDay = (clearDoneTasks, moveUnfinishedToBacklog) => {
+    finishDay(clearDoneTasks, moveUnfinishedToBacklog) {
       if (clearDoneTasks) {
         // add tasks to done backlog
         this.addDoneTasksToDoneBacklog();
@@ -717,7 +717,11 @@
 
       // also remove the current task to prevent time tracking
       this.updateCurrent(null);
-    };
+    }
   }
+
+  angular
+    .module('superProductivity')
+    .service('Tasks', Tasks);
 
 })();

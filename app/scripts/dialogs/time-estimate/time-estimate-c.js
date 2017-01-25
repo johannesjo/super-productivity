@@ -19,7 +19,7 @@
     const moment = $window.moment;
 
     // TODO refactor and add to Tasks.service
-    vm.todayStr = Tasks.getTodayStr();
+    vm.todayStr = Tasks.constructor.getTodayStr();
     vm.task = task;
     vm.timeEstimate = task.timeEstimate && moment.duration(task.timeEstimate);
     vm.showAddForAnotherDayForm = false;
