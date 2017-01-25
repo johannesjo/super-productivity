@@ -388,7 +388,8 @@
       let currentTask;
       let subTaskMatch;
 
-      // TODO check if this is even required
+      // we want to sync the ls current task with the $rootScope current task
+      // that's why we load the current task from the ls directly
       if ($localStorage.currentTask) {
         currentTask = _.find($localStorage.tasks, (task) => {
           if (task.subTasks) {
