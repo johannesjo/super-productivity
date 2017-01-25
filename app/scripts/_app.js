@@ -190,11 +190,6 @@
         if (!newCurrent || (newCurrent.id !== (prevCurrent && prevCurrent.id))) {
           // check if previous was jira task
           if (prevCurrent && prevCurrent.originalKey) {
-            // and has not been worked on => OPEN
-            // TODO this probably never happens due to autotracking
-            if (!prevCurrent.timeSpent) {
-              dialogsAndRequestsForStatusUpdate.push({ val: prevCurrent, type: 'OPEN' });
-            }
             // or has been done => DONE
             if (prevCurrent.isDone) {
               dialogsAndRequestsForStatusUpdate.push({ val: prevCurrent, type: 'DONE' });
