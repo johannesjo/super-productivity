@@ -155,25 +155,39 @@
       }
     }
 
+    function calcRemainingTimeForTask(task) {
+      let totalRemaining = moment.duration();
+
+      if (task) {
+        if (task.timeSpent && task.timeEstimate) {
+          let timeSpentMilliseconds = moment.duration(task.timeSpent).asMilliseconds();
+          let timeEstimateMilliseconds = moment.duration(task.timeEstimate).asMilliseconds();
+          if (timeSpentMilliseconds < timeEstimateMilliseconds) {
+            totalRemaining.add(moment.duration({ milliseconds: timeEstimateMilliseconds - timeSpentMilliseconds }));
+          }
+        } else if (task.timeEstimate) {
+          totalRemaining.add(task.timeEstimate);
+        }
+      }
+
+      return totalRemaining;
+    }
+
     function calcRemainingTime(tasks) {
       let totalRemaining;
       if (angular.isArray(tasks) && tasks.length > 0) {
         totalRemaining = moment.duration();
-
         _.each(tasks, (task) => {
-          if (task) {
-            if (task.timeSpent && task.timeEstimate) {
-              let timeSpentMilliseconds = moment.duration(task.timeSpent).asMilliseconds();
-              let timeEstimateMilliseconds = moment.duration(task.timeEstimate).asMilliseconds();
-              if (timeSpentMilliseconds < timeEstimateMilliseconds) {
-                totalRemaining.add(moment.duration({ milliseconds: timeEstimateMilliseconds - timeSpentMilliseconds }));
-              }
-            } else if (task.timeEstimate) {
-              totalRemaining.add(task.timeEstimate);
-            }
+          if (task.subTasks && task.subTasks.length > 0) {
+            _.each(task.subTasks, (subTask) => {
+              totalRemaining.add(calcRemainingTimeForTask(subTask));
+            });
+          } else {
+            totalRemaining.add(calcRemainingTimeForTask(task));
           }
         });
       }
+      
       return totalRemaining;
     }
 
@@ -227,6 +241,7 @@
       mergeTotalTimeSpentOnDayFrom: mergeTotalTimeSpentOnDayFrom,
       calcTotalTimeSpentOnTask: calcTotalTimeSpentOnTask,
       calcRemainingTime: calcRemainingTime,
+      calcRemainingTimeForTask: calcRemainingTimeForTask,
       getTodayStr: getTodayStr,
       flattenTasks: flattenTasks,
       isWorkedOnToday: isWorkedOnToday,
