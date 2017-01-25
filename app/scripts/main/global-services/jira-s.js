@@ -14,7 +14,7 @@
     .service('Jira', Jira);
 
   /* @ngInject */
-  function Jira(Uid, $q, $localStorage, $window, Dialogs, IS_ELECTRON, SimpleToast, Tasks) {
+  function Jira(Uid, $q, $localStorage, $window, Dialogs, IS_ELECTRON, SimpleToast, $injector) {
     const IPC_JIRA_CB_EVENT = 'JIRA_RESPONSE';
     const IPC_JIRA_MAKE_REQUEST_EVENT = 'JIRA';
 
@@ -225,6 +225,8 @@
     };
 
     this.addWorklog = (originalTask) => {
+      const Tasks = $injector.get('Tasks');
+
       // WE'RE always copying the task for add work log
       // so no data should be added back by this call!
       let task = angular.copy(originalTask);
