@@ -37,6 +37,13 @@
         this.$element.addClass('is-animation-ready');
       }, 400);
 
+      // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      // NOTE: Take good care not to update the dom (scope) structure
+      // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      function getParenTaskFromDestScope(destSortableScope) {
+        return destSortableScope.$parent[CONTROLLER_AS].parentTask;
+      }
+
       this.dragControlListeners = {
         accept: (sourceItemHandleScope, destSortableScope) => {
           if (this.disableDropInto) {
@@ -44,12 +51,12 @@
           } else {
             // disallow parent tasks to be dropped into parent tasks
             let draggedTask = sourceItemHandleScope.itemScope.task;
-            return !(draggedTask.subTasks && draggedTask.subTasks.length > 0 && destSortableScope.$parent.parentTask);
+            return !(draggedTask.subTasks && draggedTask.subTasks.length > 0 && getParenTaskFromDestScope(destSortableScope));
           }
         },
         itemMoved: function (event) {
           let currentlyMovedTask = event.dest.sortableScope.modelValue[event.dest.index];
-          let parentTask = event.dest.sortableScope.$parent[CONTROLLER_AS].parentTask;
+          let parentTask = getParenTaskFromDestScope(event.dest.sortableScope);
 
           if (parentTask) {
             currentlyMovedTask.parentId = parentTask.id;
