@@ -233,7 +233,7 @@
     }
 
     function isJiraTask(task) {
-      return task && task.orginalKey;
+      return task && task.originalKey;
     }
 
     function calcProgress(task) {

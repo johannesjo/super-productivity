@@ -16,7 +16,7 @@
   /* @ngInject */
   class Tasks {
 
-    constructor($localStorage, Uid, $rootScope, Dialogs, IS_ELECTRON, $mdToast, Notifier, ShortSyntax, ParseDuration, TasksUtil) {
+    constructor($localStorage, Uid, $rootScope, Dialogs, IS_ELECTRON, $mdToast, Notifier, ShortSyntax, ParseDuration, TasksUtil, Jira) {
       this.$localStorage = $localStorage;
       this.Uid = Uid;
       this.$rootScope = $rootScope;
@@ -26,6 +26,8 @@
       this.ShortSyntax = ShortSyntax;
       this.ParseDuration = ParseDuration;
       this.TasksUtil = TasksUtil;
+      this.IS_ELECTRON = IS_ELECTRON;
+      this.Jira = Jira;
 
       this.isShowTakeBreakNotification = true;
 
@@ -340,27 +342,35 @@
     }
 
     markAsDone(task) {
+      const parentTask = task.parentId && this.getById(task.parentId);
+
       task.isDone = true;
       task.doneDate = moment();
-      this.Jira.addWorklog(task);
 
-      if (this.TasksUtil.isJiraTask(task)) {
-        this.Jira.updateStatus(task, 'DONE');
+      if (this.IS_ELECTRON) {
+        if (this.TasksUtil.isJiraTask(task)) {
+          this.Jira.updateStatus(task, 'DONE');
+        }
+        if (this.TasksUtil.isJiraTask(task) || this.TasksUtil.isJiraTask(parentTask)) {
+          this.Jira.addWorklog(task);
+        }
       }
     }
 
     updateCurrent(task, isCallFromTimeTracking) {
+      //const isCurrentTaskChanged = ((task && task.id) !== ($rootScope.currentTask && $rootScope.currentTask.id)) && !(!task && !$rootScope.currentTask);
+
       // update totalTimeSpent for buggy macos
       if (task) {
         task.timeSpent = this.TasksUtil.calcTotalTimeSpentOnTask(task);
       }
 
       // check if in electron context
-      if (window.isElectron) {
+      if (this.IS_ELECTRON) {
         if (!isCallFromTimeTracking) {
-          if (task && task.originalKey) {
-            //Jira.markAsInProgress(task);
-          }
+          // check for updates
+          // NOTE: if checks for isJiraTicket are made in function
+          this.Jira.checkUpdatesForTaskOrParent(task);
         }
 
         if (task && task.title) {
@@ -371,6 +381,7 @@
       this.$localStorage.currentTask = task;
       // update global pointer
       this.$rootScope.r.currentTask = this.$localStorage.currentTask;
+
     }
 
     removeTimeSpent(task, timeSpentToRemoveAsMoment) {
@@ -458,7 +469,7 @@
 
         // also track time spent on day for parent task
         // TODO calc parent task timeSpent
-        parentTask.timeSpentOnDay = this.mergeTotalTimeSpentOnDayFrom(parentTask.subTasks);
+        parentTask.timeSpentOnDay = this.TasksUtil.mergeTotalTimeSpentOnDayFrom(parentTask.subTasks);
         parentTask.lastWorkedOn = moment();
         parentTask.progress = this.TasksUtil.calcProgress(parentTask);
       }

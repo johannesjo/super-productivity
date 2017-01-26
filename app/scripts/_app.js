@@ -140,7 +140,7 @@
     });
   }
 
-  function handleCurrentTaskUpdates($rootScope, $window, $q, Jira, Tasks, IS_ELECTRON, $state, Notifier, $interval, SimpleToast, JIRA_UPDATE_POLL_INTERVAL) {
+  function handleCurrentTaskUpdates($rootScope, $window, $q, Jira, Tasks, IS_ELECTRON, $state, $interval, JIRA_UPDATE_POLL_INTERVAL) {
 
     function doAsyncSeries(arr) {
       return arr.reduce(function (promise, item) {
@@ -150,54 +150,8 @@
       }, $q.when('NOT_YET'));
     }
 
-    function checkJiraUpdatesForTask(task) {
-      if (!task.originalKey && task.parentId) {
-        let parentTask = Tasks.getById(task.parentId);
-        if (parentTask.originalKey) {
-          // set task to parent task
-          task = parentTask;
-        }
-      }
-      if (task && task.originalKey) {
-        Jira.checkUpdatesForTicket(task).then((isUpdated) => {
-          if (isUpdated) {
-            Notifier({
-              title: 'Jira Update',
-              message: '"' + task.title + '" => has been updated as it was updated on Jira.',
-              sound: true,
-              wait: true
-            });
-            SimpleToast('"' + task.title + '" => has been updated as it was updated on Jira.');
-          }
-        });
-      }
-    }
-
-    function isJiraTask(task) {
-      return task && task.orginalKey;
-    }
-
-    function isDone(task) {
-      return task && task.isDone;
-    }
-
     // handle updates that need to be made on jira
-    $rootScope.$watch('r.currentTask', (newCurrent, prevCurrent) => {
-      //console.log(newCurrent && newCurrent.title, $localStorage.currentTask && $localStorage.currentTask.title);
-      Tasks.updateCurrent(newCurrent);
-
-      const isCurrentTaskChanged = ((newCurrent && newCurrent.id) !== (prevCurrent && prevCurrent.id));
-
-      // Jira Stuff
-      // ----------
-      // check if in electron context (--> jira support is available)
-      if (IS_ELECTRON && isCurrentTaskChanged) {
-        // current task (id) changed
-        checkJiraUpdatesForTask(newCurrent);
-      }
-
-      // COPY TO TASK UTILS!!!
-
+    $rootScope.$watch('r.currentTask', (newCurrent) => {
       // Non Jira stuff: Select next undone
       // ----------------------------------
       if (newCurrent && newCurrent.isDone) {
@@ -235,7 +189,7 @@
     if (IS_ELECTRON) {
       $interval(() => {
         if ($rootScope.r.currentTask) {
-          checkJiraUpdatesForTask($rootScope.r.currentTask);
+          Jira.checkUpdatesForTaskOrParent($rootScope.r.currentTask);
         }
       }, JIRA_UPDATE_POLL_INTERVAL);
     }

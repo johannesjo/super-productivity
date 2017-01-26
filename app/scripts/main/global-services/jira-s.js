@@ -14,7 +14,7 @@
     .service('Jira', Jira);
 
   /* @ngInject */
-  function Jira(Uid, $q, $localStorage, $window, Dialogs, IS_ELECTRON, SimpleToast, $injector) {
+  function Jira(Uid, $q, $localStorage, $window, Dialogs, IS_ELECTRON, SimpleToast, Notifier, $injector) {
     const IPC_JIRA_CB_EVENT = 'JIRA_RESPONSE';
     const IPC_JIRA_MAKE_REQUEST_EVENT = 'JIRA';
 
@@ -360,6 +360,32 @@
         return defer.promise;
       } else {
         return $q.when(null);
+      }
+    };
+
+    this.checkUpdatesForTaskOrParent = (task) => {
+      const Tasks = $injector.get('Tasks');
+      if (task) {
+        if (!task.originalKey && task.parentId) {
+          let parentTask = Tasks.getById(task.parentId);
+          if (parentTask.originalKey) {
+            // set task to parent task
+            task = parentTask;
+          }
+        }
+        if (task && task.originalKey) {
+          this.checkUpdatesForTicket(task).then((isUpdated) => {
+            if (isUpdated) {
+              Notifier({
+                title: 'Jira Update',
+                message: '"' + task.title + '" => has been updated as it was updated on Jira.',
+                sound: true,
+                wait: true
+              });
+              SimpleToast('"' + task.title + '" => has been updated as it was updated on Jira.');
+            }
+          });
+        }
       }
     };
 
