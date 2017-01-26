@@ -8,6 +8,8 @@
 (function () {
   'use strict';
 
+  const CONTROLLER_AS = '$ctrl';
+
   class TaskListCtrl {
     /* @ngInject */
     constructor(Dialogs, $mdToast, $timeout, Tasks, EDIT_ON_CLICK_TOGGLE_EV, $scope, ShortSyntax, $element, Jira) {
@@ -47,7 +49,8 @@
         },
         itemMoved: function (event) {
           let currentlyMovedTask = event.dest.sortableScope.modelValue[event.dest.index];
-          let parentTask = event.dest.sortableScope.$parent.parentTask;
+          let parentTask = event.dest.sortableScope.$parent[CONTROLLER_AS].parentTask;
+
           if (parentTask) {
             currentlyMovedTask.parentId = parentTask.id;
           } else {
@@ -310,7 +313,7 @@
       templateUrl: 'scripts/task-list/task-list-d.html',
       bindToController: true,
       controller: TaskListCtrl,
-      controllerAs: '$ctrl',
+      controllerAs: CONTROLLER_AS,
       bindings: {
         tasks: '=',
         currentTaskId: '<',
