@@ -152,8 +152,7 @@
 
     onTaskDoneChanged(task) {
       if (task.isDone) {
-        task.doneDate = moment();
-        this.Jira.addWorklog(task);
+        this.Tasks.markAsDone(task);
       }
 
       if (angular.isFunction(this.onTaskDoneChangedCallback)) {

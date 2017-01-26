@@ -192,36 +192,11 @@
       // ----------
       // check if in electron context (--> jira support is available)
       if (IS_ELECTRON && isCurrentTaskChanged) {
-        let dialogsAndRequestsForStatusUpdate = [];
-        // handle old current first
-        // check if previous was jira task
-        if (isJiraTask(prevCurrent)) {
-          // or has been done => DONE
-          if (isDone(prevCurrent)) {
-            dialogsAndRequestsForStatusUpdate.push({ val: prevCurrent, type: 'DONE' });
-          }
-        }
-
-        // handle new current
-        // is jira task
-        if (isJiraTask(newCurrent)) {
-          dialogsAndRequestsForStatusUpdate.push({ val: newCurrent, type: 'IN_PROGRESS' });
-        }
-
-        // finally execute
-        if (dialogsAndRequestsForStatusUpdate.length > 0) {
-          // execute all
-          doAsyncSeries(dialogsAndRequestsForStatusUpdate).then(() => {
-            // current task (id) changed
-            checkJiraUpdatesForTask(newCurrent);
-          });
-        }
-        // we need to execute also if there were no other updates
-        else {
-          // current task (id) changed
-          checkJiraUpdatesForTask(newCurrent);
-        }
+        // current task (id) changed
+        checkJiraUpdatesForTask(newCurrent);
       }
+
+      // COPY TO TASK UTILS!!!
 
       // Non Jira stuff: Select next undone
       // ----------------------------------

@@ -128,97 +128,6 @@
       }
     }
 
-    removeTimeSpent(task, timeSpentToRemoveAsMoment) {
-      const TODAY_STR = this.TasksUtil.getTodayStr();
-      let timeSpentToRemoveInMs;
-      let timeSpentCalculatedOnDay;
-      let parentTask;
-
-      if (timeSpentToRemoveAsMoment.asMilliseconds) {
-        timeSpentToRemoveInMs = timeSpentToRemoveAsMoment.asMilliseconds();
-      } else {
-        timeSpentToRemoveInMs = timeSpentToRemoveAsMoment;
-      }
-
-      // track time spent on days
-      if (!task.timeSpentOnDay) {
-        task.timeSpentOnDay = {};
-      }
-      if (task.timeSpentOnDay[TODAY_STR]) {
-        // convert to moment again in case it messed up
-        timeSpentCalculatedOnDay = moment.duration(task.timeSpentOnDay[TODAY_STR]);
-        timeSpentCalculatedOnDay.subtract(timeSpentToRemoveInMs, 'milliseconds');
-        if (timeSpentCalculatedOnDay.asSeconds() > 0) {
-          task.timeSpentOnDay[TODAY_STR] = timeSpentCalculatedOnDay;
-        } else {
-          delete task.timeSpentOnDay[TODAY_STR];
-        }
-      }
-
-      // do the same for the parent, in case the sub tasks are deleted
-      if (task.parentId) {
-        parentTask = this.getById(task.parentId);
-        parentTask.timeSpentOnDay = this.mergeTotalTimeSpentOnDayFrom(parentTask.subTasks);
-      }
-
-      // track total time spent
-      task.timeSpent = this.TasksUtil.calcTotalTimeSpentOnTask(task);
-
-      return task;
-    }
-
-    addTimeSpent(task, timeSpentInMsOrMomentDuration) {
-      // use mysql date as it is sortable
-      const TODAY_STR = this.TasksUtil.getTodayStr();
-      let timeSpentCalculatedOnDay;
-      let timeSpentInMs;
-      let parentTask;
-
-      if (timeSpentInMsOrMomentDuration.asMilliseconds) {
-        timeSpentInMs = timeSpentInMsOrMomentDuration.asMilliseconds();
-      } else {
-        timeSpentInMs = timeSpentInMsOrMomentDuration;
-      }
-
-      // if not set set started pointer
-      if (!task.started) {
-        task.started = moment();
-      }
-
-      // track time spent on days
-      if (!task.timeSpentOnDay) {
-        task.timeSpentOnDay = {};
-      }
-      if (task.timeSpentOnDay[TODAY_STR]) {
-        timeSpentCalculatedOnDay = moment.duration(task.timeSpentOnDay[TODAY_STR]);
-        timeSpentCalculatedOnDay.add(moment.duration({ milliseconds: timeSpentInMs }));
-      } else {
-        timeSpentCalculatedOnDay = moment.duration({ milliseconds: timeSpentInMs });
-      }
-
-      // assign values
-      task.timeSpentOnDay[TODAY_STR] = timeSpentCalculatedOnDay;
-      task.lastWorkedOn = moment();
-
-      // do the same for the parent, in case the sub tasks are deleted
-      if (task.parentId) {
-        parentTask = this.getById(task.parentId);
-        // also set parent task to started if there is one
-        if (!parentTask.started) {
-          parentTask.started = moment();
-        }
-
-        // also track time spent on day for parent task
-        parentTask.timeSpentOnDay = this.mergeTotalTimeSpentOnDayFrom(parentTask.subTasks);
-        parentTask.lastWorkedOn = moment();
-      }
-
-      // track total time spent
-      task.timeSpent = this.TasksUtil.calcTotalTimeSpentOnTask(task);
-
-      return task;
-    }
-
     // GET DATA
     getCurrent() {
       let currentTask;
@@ -396,38 +305,6 @@
     }
 
     // UPDATE DATA
-    updateCurrent(task, isCallFromTimeTracking) {
-      // calc progress
-      if (task && task.timeSpent && task.timeEstimate) {
-        if (moment.duration().format && angular.isFunction(moment.duration().format)) {
-          task.progress = parseInt(moment.duration(task.timeSpent)
-              .format('ss') / moment.duration(task.timeEstimate).format('ss') * 100, 10);
-        }
-      }
-
-      // update totalTimeSpent for buggy macos
-      if (task) {
-        task.timeSpent = this.TasksUtil.calcTotalTimeSpentOnTask(task);
-      }
-
-      // check if in electron context
-      if (window.isElectron) {
-        if (!isCallFromTimeTracking) {
-          if (task && task.originalKey) {
-            //Jira.markAsInProgress(task);
-          }
-        }
-
-        if (task && task.title) {
-          window.ipcRenderer.send(IPC_EVENT_CURRENT_TASK_UPDATED, task);
-        }
-      }
-
-      this.$localStorage.currentTask = task;
-      // update global pointer
-      this.$rootScope.r.currentTask = this.$localStorage.currentTask;
-    }
-
     addToday(task) {
       if (task && task.title) {
         this.$localStorage.tasks.push(this.createTask(task));
@@ -457,7 +334,180 @@
         originalComments: task.originalComments,
         originalUpdated: task.originalUpdated
       };
+
+      task.progress = this.TasksUtil.calcProgress(task);
       return this.ShortSyntax(transformedTask);
+    }
+
+    markAsDone(task) {
+      task.isDone = true;
+      task.doneDate = moment();
+      this.Jira.addWorklog(task);
+
+      if (this.TasksUtil.isJiraTask(task)) {
+        this.Jira.updateStatus(task, 'DONE');
+      }
+    }
+
+    updateCurrent(task, isCallFromTimeTracking) {
+      // update totalTimeSpent for buggy macos
+      if (task) {
+        task.timeSpent = this.TasksUtil.calcTotalTimeSpentOnTask(task);
+      }
+
+      // check if in electron context
+      if (window.isElectron) {
+        if (!isCallFromTimeTracking) {
+          if (task && task.originalKey) {
+            //Jira.markAsInProgress(task);
+          }
+        }
+
+        if (task && task.title) {
+          window.ipcRenderer.send(IPC_EVENT_CURRENT_TASK_UPDATED, task);
+        }
+      }
+
+      this.$localStorage.currentTask = task;
+      // update global pointer
+      this.$rootScope.r.currentTask = this.$localStorage.currentTask;
+    }
+
+    removeTimeSpent(task, timeSpentToRemoveAsMoment) {
+      const TODAY_STR = this.TasksUtil.getTodayStr();
+      let timeSpentToRemoveInMs;
+      let timeSpentCalculatedOnDay;
+      let parentTask;
+
+      if (timeSpentToRemoveAsMoment.asMilliseconds) {
+        timeSpentToRemoveInMs = timeSpentToRemoveAsMoment.asMilliseconds();
+      } else {
+        timeSpentToRemoveInMs = timeSpentToRemoveAsMoment;
+      }
+
+      // track time spent on days
+      if (!task.timeSpentOnDay) {
+        task.timeSpentOnDay = {};
+      }
+      if (task.timeSpentOnDay[TODAY_STR]) {
+        // convert to moment again in case it messed up
+        timeSpentCalculatedOnDay = moment.duration(task.timeSpentOnDay[TODAY_STR]);
+        timeSpentCalculatedOnDay.subtract(timeSpentToRemoveInMs, 'milliseconds');
+        if (timeSpentCalculatedOnDay.asSeconds() > 0) {
+          task.timeSpentOnDay[TODAY_STR] = timeSpentCalculatedOnDay;
+        } else {
+          delete task.timeSpentOnDay[TODAY_STR];
+        }
+      }
+
+      // do the same for the parent, in case the sub tasks are deleted
+      if (task.parentId) {
+        // TODO calc parent task timeSpent
+        parentTask = this.getById(task.parentId);
+        parentTask.timeSpentOnDay = this.mergeTotalTimeSpentOnDayFrom(parentTask.subTasks);
+        parentTask.progress = this.TasksUtil.calcProgress(parentTask);
+      }
+
+      // track total time spent
+      task.timeSpent = this.TasksUtil.calcTotalTimeSpentOnTask(task);
+      task.progress = this.TasksUtil.calcProgress(task);
+
+      return task;
+    }
+
+    addTimeSpent(task, timeSpentInMsOrMomentDuration) {
+      // use mysql date as it is sortable
+      const TODAY_STR = this.TasksUtil.getTodayStr();
+      let timeSpentCalculatedOnDay;
+      let timeSpentInMs;
+      let parentTask;
+
+      if (timeSpentInMsOrMomentDuration.asMilliseconds) {
+        timeSpentInMs = timeSpentInMsOrMomentDuration.asMilliseconds();
+      } else {
+        timeSpentInMs = timeSpentInMsOrMomentDuration;
+      }
+
+      // if not set set started pointer
+      if (!task.started) {
+        task.started = moment();
+      }
+
+      // track time spent on days
+      if (!task.timeSpentOnDay) {
+        task.timeSpentOnDay = {};
+      }
+      if (task.timeSpentOnDay[TODAY_STR]) {
+        timeSpentCalculatedOnDay = moment.duration(task.timeSpentOnDay[TODAY_STR]);
+        timeSpentCalculatedOnDay.add(moment.duration({ milliseconds: timeSpentInMs }));
+      } else {
+        timeSpentCalculatedOnDay = moment.duration({ milliseconds: timeSpentInMs });
+      }
+
+      // assign values
+      task.timeSpentOnDay[TODAY_STR] = timeSpentCalculatedOnDay;
+      task.lastWorkedOn = moment();
+
+      // do the same for the parent, in case the sub tasks are deleted
+      if (task.parentId) {
+        parentTask = this.getById(task.parentId);
+        // also set parent task to started if there is one
+        if (!parentTask.started) {
+          parentTask.started = moment();
+        }
+
+        // also track time spent on day for parent task
+        // TODO calc parent task timeSpent
+        parentTask.timeSpentOnDay = this.mergeTotalTimeSpentOnDayFrom(parentTask.subTasks);
+        parentTask.lastWorkedOn = moment();
+        parentTask.progress = this.TasksUtil.calcProgress(parentTask);
+      }
+
+      // track total time spent
+      task.timeSpent = this.TasksUtil.calcTotalTimeSpentOnTask(task);
+      task.progress = this.TasksUtil.calcProgress(task);
+
+      return task;
+    }
+
+    updateEstimate(task, estimate) {
+      task.timeEstimate = estimate;
+      task.progress = this.TasksUtil.calcProgress(task);
+      if (task.parentId) {
+        let parentTask = this.getById(task.parentId);
+        parentTask.progress = this.TasksUtil.calcProgress(parentTask);
+      }
+    }
+
+    updateTimeSpentOnDay(task, timeSpentOnDay) {
+      if (!angular.isObject(timeSpentOnDay)) {
+        throw 'timeSpentOnDay should be an object';
+      }
+
+      let totalTimeSpent = moment.duration();
+      _.forOwn(timeSpentOnDay, (val, dateStr) => {
+        if (timeSpentOnDay[dateStr]) {
+          let momentVal = moment.duration(timeSpentOnDay[dateStr]);
+          if (momentVal.asSeconds() < 1) {
+            delete timeSpentOnDay[dateStr];
+          } else {
+            totalTimeSpent.add(momentVal);
+          }
+        } else {
+          // clean empty
+          delete timeSpentOnDay[dateStr];
+        }
+      });
+      task.timeSpentOnDay = timeSpentOnDay;
+      task.timeSpent = totalTimeSpent;
+      task.progress = this.TasksUtil.calcProgress(task);
+
+      // TODO this is not clear and probably buggy
+      //if (task.parentId) {
+      //  const parentTask = this.getById(task.parentId);
+      //  // also track time spent on day for parent task
+      //  parentTask.progress = this.TasksUtil.calcProgress(parentTask);
+      //}
     }
 
     updateToday(tasks) {

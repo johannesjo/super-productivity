@@ -15,7 +15,6 @@
   <md-dialog-content>
     <div class="md-dialog-content">
 
-
       <form ng-submit="vm.submit(vm.timeEstimate, vm.timeSpent)">
         <md-input-container class="md-icon-float md-block">
           <ng-md-icon icon="timer"
@@ -51,7 +50,7 @@
               <label>Time Spent on {{ strDate }}</label>
               <input type="text"
                      input-duration="optional"
-                     ng-model="timeSpent"
+                     ng-model="vm.timeSpentOnDayCopy[strDate]"
                      aria-label="Time Spent">
             </md-input-container>
           </div>

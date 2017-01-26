@@ -187,7 +187,7 @@
           }
         });
       }
-      
+
       return totalRemaining;
     }
 
@@ -232,8 +232,26 @@
       return task && task.timeSpentOnDay && task.timeSpentOnDay[todayStr];
     }
 
+    function isJiraTask(task) {
+      return task && task.orginalKey;
+    }
+
+    function calcProgress(task) {
+      let progress;
+      // calc progress
+      if (task && task.timeSpent && task.timeEstimate) {
+        if (moment.duration().format && angular.isFunction(moment.duration().format)) {
+          progress = parseInt(moment.duration(task.timeSpent)
+              .format('ss') / moment.duration(task.timeEstimate).format('ss') * 100, 10);
+        }
+      }
+      return progress;
+    }
+
     // ACTUAL DEFINITION
     return {
+      calcProgress: calcProgress,
+      isJiraTask: isJiraTask,
       checkDupes: checkDupes,
       calcTotalEstimate: calcTotalEstimate,
       calcTotalTimeSpent: calcTotalTimeSpent,

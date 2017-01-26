@@ -31,25 +31,23 @@
     // create copy in case nothing is save
     vm.timeSpentOnDayCopy = angular.copy(task.timeSpentOnDay);
 
-    // clean empty
-    for (let key in vm.timeSpentOnDay) {
-      // if no real value
-      if (!task.timeSpentOnDay[key]) {
-        delete task.timeSpentOnDay[key];
-      }
-    }
-
     // assign a key for today
     if (!vm.timeSpentOnDayCopy[vm.todayStr]) {
-      vm.timeSpentOnDayCopy[vm.todayStr] = null;
+      vm.timeSpentOnDayCopy[vm.todayStr] = undefined;
     }
+    //else if (vm.timeSpentOnDayCopy[vm.todayStr].asSeconds && vm.timeSpentOnDayCopy[vm.todayStr].asSeconds() < 1) {
+    //  // get rid of P0D
+    //  vm.timeSpentOnDayCopy[vm.todayStr] = undefined;
+    //}
+    console.log( vm.timeSpentOnDayCopy[vm.todayStr] );
+
 
     vm.deleteValue = (strDate) => {
       delete vm.timeSpentOnDayCopy[strDate];
     };
 
     vm.addNewEntry = (newEntry) => {
-      let strDate = Tasks.formatToWorklogDateStr(newEntry.date);
+      let strDate = TasksUtil.formatToWorklogDateStr(newEntry.date);
       vm.timeSpentOnDayCopy[strDate] = angular.copy(newEntry.timeSpent);
 
       // unset afterwards
@@ -59,19 +57,9 @@
     };
 
     vm.submit = (estimate) => {
-
-      let totalTimeSpent = moment.duration();
-      for (let key in vm.timeSpentOnDayCopy) {
-        if (vm.timeSpentOnDayCopy[key]) {
-          totalTimeSpent.add(moment.duration(vm.timeSpentOnDayCopy[key]));
-        }
-      }
-
       // finally assign back to task
-      task.timeEstimate = estimate;
-      task.timeSpent = totalTimeSpent;
-      task.timeSpentOnDay = vm.timeSpentOnDayCopy;
-
+      Tasks.updateEstimate(task, estimate);
+      Tasks.updateTimeSpentOnDay(task, vm.timeSpentOnDayCopy);
       $mdDialog.hide();
     };
 
