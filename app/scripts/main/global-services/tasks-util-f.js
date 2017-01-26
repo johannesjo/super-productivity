@@ -252,8 +252,31 @@
       return ((task && task.id) !== (oldTask && oldTask.id)) && !(!task && !oldTask);
     }
 
+    function getNextUndone(tasks) {
+      let foundTask;
+      _.each(tasks, (task) => {
+        if (foundTask) {
+          return false;
+        }
+        if (task.subTasks && task.subTasks.length) {
+          _.each(task.subTasks, (subTask) => {
+            if (!subTask.isDone) {
+              foundTask = subTask;
+              return false;
+            }
+          });
+        } else if (!task.isDone) {
+          foundTask = task;
+          return false;
+        }
+      });
+
+      return foundTask;
+    }
+
     // ACTUAL DEFINITION
     return {
+      getNextUndone: getNextUndone,
       isTaskChanged: isTaskChanged,
       calcProgress: calcProgress,
       isJiraTask: isJiraTask,

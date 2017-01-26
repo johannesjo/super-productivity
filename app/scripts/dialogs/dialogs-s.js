@@ -15,8 +15,17 @@
 
   /* @ngInject */
   function Dialogs($mdDialog, DIALOGS) {
+    //function doAsyncSeries(arr) {
+    //  return arr.reduce(function (promise, item) {
+    //    return promise.then(function () {
+    //      return Jira.updateStatus(item.val, item.type);
+    //    });
+    //  }, $q.when('NOT_YET'));
+    //}
 
     return function (dialogName, locals) {
+
+
 
       // copy and extend defaults for dialog
       let defaults = angular.copy(DIALOGS.DEFAULTS);

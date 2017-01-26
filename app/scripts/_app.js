@@ -38,7 +38,7 @@
     .config(configMdTheme)
     .config(configMarked)
     .run(initGlobalModels)
-    .run(handleCurrentTaskUpdates)
+    .run(initPollCurrentTaskUpdates)
     .run(handleProjectChange)
     .run(initMousewheelZoomForElectron)
     .run(initGlobalShortcuts);
@@ -140,51 +140,7 @@
     });
   }
 
-  function handleCurrentTaskUpdates($rootScope, $window, $q, Jira, Tasks, IS_ELECTRON, $state, $interval, JIRA_UPDATE_POLL_INTERVAL) {
-
-    function doAsyncSeries(arr) {
-      return arr.reduce(function (promise, item) {
-        return promise.then(function () {
-          return Jira.updateStatus(item.val, item.type);
-        });
-      }, $q.when('NOT_YET'));
-    }
-
-    // handle updates that need to be made on jira
-    $rootScope.$watch('r.currentTask', (newCurrent) => {
-      // Non Jira stuff: Select next undone
-      // ----------------------------------
-      if (newCurrent && newCurrent.isDone) {
-        // if sub task try to select the next undone sub task of the same parent
-        if (newCurrent.parentId) {
-          let parentTask = Tasks.getById(newCurrent.parentId);
-          if (parentTask.subTasks && parentTask.subTasks.length) {
-            // if there is one it will be the next current otherwise it will be no task
-            Tasks.updateCurrent($window._.find(parentTask.subTasks, (task) => {
-              return task && !task.isDone;
-            }));
-            // otherwise do nothing as it isn't obvious what to do next
-            // TODO maybe open toast asking if the parent task should also be marked as done
-          }
-        } else {
-          let undoneTasks = Tasks.getUndoneToday();
-          // go to daily planner if there are no undone tasks left
-          if (!undoneTasks || undoneTasks.length === 0) {
-            $state.go('daily-planner');
-          } else {
-            if (undoneTasks[0].subTasks) {
-              // if there is one it will be the next current otherwise it will be no task
-              Tasks.updateCurrent($window._.find(undoneTasks[0].subTasks, (task) => {
-                return task && !task.isDone;
-              }));
-            } else {
-              Tasks.updateCurrent(undoneTasks[0]);
-            }
-          }
-        }
-      }
-    }, true);
-
+  function initPollCurrentTaskUpdates($rootScope, Jira, IS_ELECTRON, $interval, JIRA_UPDATE_POLL_INTERVAL) {
     // handle updates that need to be made locally
     if (IS_ELECTRON) {
       $interval(() => {
@@ -196,6 +152,7 @@
   }
 
   function handleProjectChange($rootScope, $localStorage, Projects) {
+    // TODO refactor
     $rootScope.$watch('r.currentProject', (newCurrentProject, oldCurrentProject) => {
       if (newCurrentProject && newCurrentProject.id) {
         // when there is an old current project existing

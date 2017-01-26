@@ -347,6 +347,8 @@
       task.isDone = true;
       task.doneDate = moment();
 
+      this.selectNextTask(task);
+
       if (this.IS_ELECTRON) {
         if (this.TasksUtil.isJiraTask(task)) {
           this.Jira.updateStatus(task, 'DONE');
@@ -565,6 +567,8 @@
       this.$rootScope.r.doneBacklogTasks = this.$localStorage.doneBacklogTasks;
     }
 
+    // SPECIAL METHODS
+    // -----------------------------------
     finishDay(clearDoneTasks, moveUnfinishedToBacklog) {
       if (clearDoneTasks) {
         // add tasks to done backlog
@@ -584,6 +588,29 @@
 
       // also remove the current task to prevent time tracking
       this.updateCurrent(null);
+    }
+
+    selectNextTask(finishedCurrentTask) {
+      if (finishedCurrentTask && finishedCurrentTask.isDone) {
+        // if sub task try to select the next undone sub task of the same parent
+        if (finishedCurrentTask.parentId) {
+          let parentTask = this.getById(finishedCurrentTask.parentId);
+          if (parentTask.subTasks && parentTask.subTasks.length) {
+            // if there is one it will be the next current otherwise it will be no task
+            this.updateCurrent(_.find(parentTask.subTasks, ['isDone', false]));
+            // otherwise do nothing as it isn't obvious what to do next
+            // TODO maybe open toast asking if the parent task should also be marked as done
+          }
+        } else {
+          let undoneTasks = this.getUndoneToday();
+          // go to daily planner if there are no undone tasks left
+          if (!undoneTasks || undoneTasks.length === 0) {
+            // $state.go('daily-planner');
+          } else {
+            this.updateCurrent(this.TasksUtil.getNextUndone(undoneTasks));
+          }
+        }
+      }
     }
   }
 
