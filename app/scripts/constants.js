@@ -40,9 +40,9 @@
         defaultTransitionInProgress: undefined,
         defaultTransitionDone: undefined,
         transitions: {
-          OPEN: undefined,
-          IN_PROGRESS: undefined,
-          DONE: undefined
+          OPEN: 'ALWAYS_ASK',
+          IN_PROGRESS: 'ALWAYS_ASK',
+          DONE: 'ALWAYS_ASK'
         }
       }
     })

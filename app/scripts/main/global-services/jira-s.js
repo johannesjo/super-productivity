@@ -134,38 +134,45 @@
     };
 
     this.updateStatus = (task, type) => {
+      const defer = $q.defer();
+      const that = this;
+
+      function transitionSuccess(res) {
+        that.checkUpdatesForTaskOrParent(task, true);
+
+        // update
+        task.status = type;
+        defer.resolve(res);
+      }
+
       if (task.originalKey && task.originalType === ISSUE_TYPE) {
-        if ($localStorage.jiraSettings.transitions && $localStorage.jiraSettings.transitions[type]) {
+        if ($localStorage.jiraSettings.transitions && $localStorage.jiraSettings.transitions[type] && $localStorage.jiraSettings.transitions[type] !== 'ALWAYS_ASK') {
           if ($localStorage.jiraSettings.transitions[type] === 'DO_NOT') {
-            return $q.reject('DO_NOT chosen');
+            defer.reject('DO_NOT chosen');
           } else {
             if (task.status !== type) {
-              return this.transitionIssue(task.originalId, {
+              this.transitionIssue(task.originalId, {
                 id: $localStorage.jiraSettings.transitions[type]
               })
-                .then(() => {
-                  // update
-                  task.status = type;
-                });
+                .then(transitionSuccess, defer.reject);
             } else {
-              return $q.resolve('NO NEED TO UPDATE');
+              defer.resolve('NO NEED TO UPDATE');
             }
           }
         } else {
-          let defer = $q.defer();
           this.getTransitionsForIssue(task)
             .then((response) => {
               let transitions = response.response.transitions;
               Dialogs('JIRA_SET_IN_PROGRESS', { transitions, task, type })
                 .then((transition) => {
-                  defer.resolve(transition);
                   this.transitionIssue(task.originalId, transition)
-                    .then(defer.resolve, defer.reject);
+                    .then(transitionSuccess, defer.reject);
                 }, defer.reject);
             }, defer.reject);
-          return defer.promise;
         }
       }
+
+      return defer.promise;
     };
 
     this.updateIssueDescription = (task) => {
@@ -192,7 +199,7 @@
       }
     };
 
-    this.checkUpdatesForTicket = (task) => {
+    this.checkUpdatesForTicket = (task, isNoNotify) => {
       let defer = $q.defer();
       if (task && task.originalKey) {
         let request = {
@@ -206,13 +213,15 @@
               if (issue.fields.updated === task.originalUpdated) {
                 defer.resolve(false);
               } else {
-                // add changelog entries
-                mapAndAddChangelogToTask(task, issue);
-
+                if (!isNoNotify) {
+                  // add changelog entries
+                  mapAndAddChangelogToTask(task, issue);
+                  task.isUpdated = true;
+                }
                 // extend task with new values
                 angular.extend(task, mapIssue(issue));
+
                 defer.resolve(true);
-                task.isUpdated = true;
               }
             }, defer.reject
           );
@@ -363,7 +372,7 @@
       }
     };
 
-    this.checkUpdatesForTaskOrParent = (task) => {
+    this.checkUpdatesForTaskOrParent = (task, isNoNotify) => {
       const Tasks = $injector.get('Tasks');
       if (task) {
         if (!task.originalKey && task.parentId) {
@@ -374,8 +383,8 @@
           }
         }
         if (task && task.originalKey) {
-          this.checkUpdatesForTicket(task).then((isUpdated) => {
-            if (isUpdated) {
+          this.checkUpdatesForTicket(task, isNoNotify).then((isUpdated) => {
+            if (isUpdated && !isNoNotify) {
               Notifier({
                 title: 'Jira Update',
                 message: '"' + task.title + '" => has been updated as it was updated on Jira.',

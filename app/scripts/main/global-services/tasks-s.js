@@ -347,8 +347,6 @@
       task.isDone = true;
       task.doneDate = moment();
 
-      this.selectNextTask(task);
-
       if (this.IS_ELECTRON) {
         if (this.TasksUtil.isJiraTask(task)) {
           this.Jira.updateStatus(task, 'DONE');
@@ -357,6 +355,7 @@
           this.Jira.addWorklog(task);
         }
       }
+      this.selectNextTask(task);
     }
 
     updateCurrent(task, isCallFromTimeTracking) {
