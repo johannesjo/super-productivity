@@ -151,10 +151,10 @@
     }
   }
 
-  function handleProjectChange($rootScope, $localStorage, Projects) {
+  function handleProjectChange($rootScope, $localStorage, Projects, $state) {
     // TODO refactor
     $rootScope.$watch('r.currentProject', (newCurrentProject, oldCurrentProject) => {
-      if (newCurrentProject && newCurrentProject.id) {
+      if (newCurrentProject && newCurrentProject.id && oldCurrentProject && oldCurrentProject.id !== newCurrentProject.id) {
         // when there is an old current project existing
         if (oldCurrentProject && oldCurrentProject.id) {
           // save all current project data in $localStorage.projects[oldProject]
@@ -174,6 +174,8 @@
             $rootScope.r[property] = $localStorage[property] = newCurrentProject.data[property];
           }
         }
+
+        $state.reload();
       }
     });
   }
