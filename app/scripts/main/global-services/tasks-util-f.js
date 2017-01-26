@@ -248,8 +248,13 @@
       return progress;
     }
 
+    function isTaskChanged(task, oldTask) {
+      return ((task && task.id) !== (oldTask && oldTask.id)) && !(!task && !oldTask);
+    }
+
     // ACTUAL DEFINITION
     return {
+      isTaskChanged: isTaskChanged,
       calcProgress: calcProgress,
       isJiraTask: isJiraTask,
       checkDupes: checkDupes,

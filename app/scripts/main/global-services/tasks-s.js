@@ -358,7 +358,7 @@
     }
 
     updateCurrent(task, isCallFromTimeTracking) {
-      //const isCurrentTaskChanged = ((task && task.id) !== ($rootScope.currentTask && $rootScope.currentTask.id)) && !(!task && !$rootScope.currentTask);
+      const isCurrentTaskChanged = this.TasksUtil.isTaskChanged(task, this.$rootScope.currentTask);
 
       // update totalTimeSpent for buggy macos
       if (task) {
@@ -370,7 +370,20 @@
         if (!isCallFromTimeTracking) {
           // check for updates
           // NOTE: if checks for isJiraTicket are made in function
+          // TODO should be refactored maybe
           this.Jira.checkUpdatesForTaskOrParent(task);
+
+          if (isCurrentTaskChanged) {
+            const parentTask = task.parentId && this.getById(task.parentId);
+
+            if (this.TasksUtil.isJiraTask(task)) {
+              this.Jira.updateStatus(task, 'IN_PROGRESS');
+            }
+
+            if (this.TasksUtil.isJiraTask(parentTask)) {
+              this.Jira.updateStatus(parentTask, 'IN_PROGRESS');
+            }
+          }
         }
 
         if (task && task.title) {
