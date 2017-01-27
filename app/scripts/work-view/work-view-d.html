@@ -1,5 +1,7 @@
 <div class="work-view-current-task">
-  <p>Working today: <strong>{{ vm.totalTimeWorkedToday|duration }}</strong> –
+  <p>
+    <ng-md-icon icon="playlist_play"></ng-md-icon>
+    Working today: <strong>{{ vm.totalTimeWorkedToday|duration }}</strong> –
     Estimate remaining: ~<strong>{{ vm.totalEstimationRemaining|duration }}</strong></p>
 </div>
 
@@ -25,7 +27,10 @@
 </md-button>
 
 
-<h2 class="md-title">Done Tasks</h2>
+<h2 class="md-title">
+  <ng-md-icon icon="playlist_add_check"></ng-md-icon>
+  Done Tasks
+</h2>
 
 <div class="work-view-tasks work-view-tasks--done">
   <task-list tasks="vm.tasksDone"

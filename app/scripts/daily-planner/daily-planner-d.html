@@ -1,5 +1,8 @@
 <div class="daily-planner">
-  <h2 class="md-headline">Plan your day!</h2>
+  <h2 class="md-headline">
+    <ng-md-icon icon="border_color"></ng-md-icon>
+    Plan your day!
+  </h2>
   <p>If you're done, you should spent some time
     <strong>prioritizing</strong> your tasks, by ordering them via drag and drop. You can also make a rough time estimation.
   </p>
@@ -32,12 +35,18 @@
     </md-button>
   </div>
 
-  <h2 class="md-title">Tasks for today (estimated: ~{{ vm.totaleEstimate|duration}} )</h2>
+  <h2 class="md-title">
+    <ng-md-icon icon="playlist_play"></ng-md-icon>
+    Tasks for today (estimated: ~{{ vm.totaleEstimate|duration}} )
+  </h2>
 
   <task-list tasks="r.tasks"
              current-task-id="r.currentTask.id"></task-list>
 
-  <h2 class="md-title">Tasks Backlog (for some other time; estimated: ~{{ vm.totaleEstimateBacklog|duration}} )</h2>
+  <h2 class="md-title">
+    <ng-md-icon icon="my_library_books"></ng-md-icon>
+    Tasks Backlog (for some other time; estimated: ~{{ vm.totaleEstimateBacklog|duration}} )
+  </h2>
 
   <md-input-container class="md-block search"
                       ng-show="r.backlogTasks.length > 1"
