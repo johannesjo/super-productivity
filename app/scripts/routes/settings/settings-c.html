@@ -6,8 +6,9 @@
     <div ng-if="vm.allProjects.length > 0">
       <md-input-container class="md-block">
         <label>Choose current project</label>
-        <md-select ng-model="vm.r.currentProject"
-                   arial-label="Select Project">
+        <md-select ng-model="vm.selectedCurrentProject"
+                   arial-label="Select Project"
+                   ng-change="vm.changeProject(vm.selectedCurrentProject)">
           <md-option ng-repeat="project in vm.allProjects"
                      arial-label="Select Project"
                      ng-value="project">
@@ -76,25 +77,25 @@
       <md-input-container class="md-block">
         <label>Host</label>
         <input type="text"
-               ng-model="vm.r.jiraSettings.host">
+               ng-model="r.jiraSettings.host">
       </md-input-container>
       <md-input-container class="md-block">
         <label>Username</label>
         <input type="text"
-               ng-model="vm.r.jiraSettings.userName">
+               ng-model="r.jiraSettings.userName">
       </md-input-container>
       <md-input-container class="md-block">
         <label>Password</label>
         <input type="password"
-               ng-model="vm.r.jiraSettings.password">
+               ng-model="r.jiraSettings.password">
       </md-input-container>
       <md-input-container class="md-block">
         <label>JQL Query for Tasks</label>
         <input type="text"
-               ng-model="vm.r.jiraSettings.jqlQuery">
-        <div class="hint">e.g.: assignee = "{{ vm.r.jiraSettings.userName }}" AND resolution = Unresolved ORDER BY updatedDate DESC</div>
+               ng-model="r.jiraSettings.jqlQuery">
+        <div class="hint">e.g.: assignee = "{{ r.jiraSettings.userName }}" AND resolution = Unresolved ORDER BY updatedDate DESC</div>
       </md-input-container>
-      <md-switch ng-model="vm.r.jiraSettings.isUpdateIssueFromLocal"
+      <md-switch ng-model="r.jiraSettings.isUpdateIssueFromLocal"
                  aria-label="Update issue description on jira if task notes are updated">
         Update issue description on jira if task notes are updated
       </md-switch>
@@ -104,7 +105,7 @@
 
         <md-input-container class="md-block">
           <div flex-gt-sm="50">
-            <md-switch ng-model="vm.r.jiraSettings.isWorklogEnabled"
+            <md-switch ng-model="r.jiraSettings.isWorklogEnabled"
                        aria-label="open dialog for adding a worklog to jira when task is done">
               Open worklog dialog for adding a worklog to jira when task is done
             </md-switch>
@@ -113,8 +114,8 @@
 
         <md-input-container class="md-block">
           <div flex-gt-sm="50">
-            <md-switch ng-model="vm.r.jiraSettings.isAddWorklogOnSubTaskDone"
-                       ng-disabled="!vm.r.jiraSettings.isWorklogEnabled"
+            <md-switch ng-model="r.jiraSettings.isAddWorklogOnSubTaskDone"
+                       ng-disabled="!r.jiraSettings.isWorklogEnabled"
                        aria-label="Add worklog when sub task is done">
               Open worklog dialog when sub task is done and not for tasks with sub tasks themselves
             </md-switch>
@@ -123,8 +124,8 @@
 
         <md-input-container class="md-block">
           <div flex-gt-sm="50">
-            <md-switch ng-model="vm.r.jiraSettings.isAutoWorklog"
-                       ng-disabled="!vm.r.jiraSettings.isAutoWorklog"
+            <md-switch ng-model="r.jiraSettings.isAutoWorklog"
+                       ng-disabled="!r.jiraSettings.isAutoWorklog"
                        aria-label="(not recommended) send updates to worklog automatically when task is done">
               (not recommended!) Send updates to worklog automatically when task is done
             </md-switch>
@@ -133,16 +134,16 @@
       </section>
 
 
-      <section ng-if="vm.r.jiraSettings.allTransitions">
+      <section ng-if="r.jiraSettings.allTransitions">
         <h3 class="md-subtitle">Default Transitions</h3>
         <p>Jira enables a wide configuration of transitions usually coming into action as different columns on your jira agile board. That's why we can't make assumptions about where and when to transition your tasks and you need to set it manually.</p>
         <md-input-container class="md-block">
           <label>Default transition for OPEN</label>
-          <md-select ng-model="vm.r.jiraSettings.transitions.OPEN"
+          <md-select ng-model="r.jiraSettings.transitions.OPEN"
                      arial-label="Select default transition for OPEN">
             <md-option ng-value="'ALWAYS_ASK'"><em>Always ask</em></md-option>
             <md-option ng-value="'DO_NOT'"><em>Don't transition</em></md-option>
-            <md-option ng-repeat="jiraTransition in vm.r.jiraSettings.allTransitions"
+            <md-option ng-repeat="jiraTransition in r.jiraSettings.allTransitions"
                        ng-value="jiraTransition.id">
               {{jiraTransition.id}} - {{jiraTransition.name}}
             </md-option>
@@ -150,11 +151,11 @@
         </md-input-container>
         <md-input-container class="md-block">
           <label>Default transition for IN_PROGRESS</label>
-          <md-select ng-model="vm.r.jiraSettings.transitions.IN_PROGRESS"
+          <md-select ng-model="r.jiraSettings.transitions.IN_PROGRESS"
                      arial-label="Select default transition for IN_PROGRESS">
             <md-option ng-value="'ALWAYS_ASK'"><em>Always ask</em></md-option>
             <md-option ng-value="'DO_NOT'"><em>Don't transition</em></md-option>
-            <md-option ng-repeat="jiraTransition in vm.r.jiraSettings.allTransitions"
+            <md-option ng-repeat="jiraTransition in r.jiraSettings.allTransitions"
                        ng-value="jiraTransition.id">
               {{jiraTransition.id}} - {{jiraTransition.name}}
             </md-option>
@@ -162,11 +163,11 @@
         </md-input-container>
         <md-input-container class="md-block">
           <label>Default transition for DONE</label>
-          <md-select ng-model="vm.r.jiraSettings.transitions.DONE"
+          <md-select ng-model="r.jiraSettings.transitions.DONE"
                      arial-label="Select default transition for DONE">
             <md-option ng-value="'ALWAYS_ASK'"><em>Always ask</em></md-option>
             <md-option ng-value="'DO_NOT'"><em>Don't transition</em></md-option>
-            <md-option ng-repeat="jiraTransition in vm.r.jiraSettings.allTransitions"
+            <md-option ng-repeat="jiraTransition in r.jiraSettings.allTransitions"
                        ng-value="jiraTransition.id">
               {{jiraTransition.id}} - {{jiraTransition.name}}
             </md-option>
@@ -203,7 +204,7 @@
                         flex-gt-sm>
       <label>Project path (where .git resides)</label>
       <input type="text"
-             ng-model="vm.r.git.projectDir">
+             ng-model="r.git.projectDir">
     </md-input-container>
   </section>
 
@@ -251,7 +252,7 @@
     <h2 class="md-title">Misc</h2>
     <md-input-container class="md-block">
       <div flex-gt-sm="50">
-        <md-switch ng-model="vm.r.config.isShortSyntaxEnabled"
+        <md-switch ng-model="r.config.isShortSyntaxEnabled"
                    aria-label="Use short syntax (e.g. 'TaskTitleBla e:30m')">
           Use short syntax (e.g. 'TaskTitleBla e:30m') for task creation
         </md-switch>
@@ -260,20 +261,20 @@
 
     <md-input-container class="md-block">
       <div flex-gt-sm="50">
-        <md-switch ng-model="vm.r.config.isTakeABreakEnabled"
+        <md-switch ng-model="r.config.isTakeABreakEnabled"
                    aria-label="Enable take a break reminder">
           Enable take a break reminder
         </md-switch>
       </div>
     </md-input-container>
     <md-input-container class="md-block md-icon-float"
-                        ng-hide="!vm.r.config.isTakeABreakEnabled">
+                        ng-hide="!r.config.isTakeABreakEnabled">
       <label>Remind when I worked longer than X without a break</label>
       <ng-md-icon icon="timer"
                   aria-label="timer"></ng-md-icon>
       <input type="text"
              input-duration
-             ng-model="vm.r.config.takeABreakMinWorkingTime">
+             ng-model="r.config.takeABreakMinWorkingTime">
     </md-input-container>
 
   </section>

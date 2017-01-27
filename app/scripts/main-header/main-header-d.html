@@ -17,7 +17,7 @@
       </md-button>
       <md-menu-content width="4">
         <md-menu-item ng-repeat="project in vm.allProjects">
-          <md-button ng-click="r.currentProject = project">
+          <md-button ng-click="vm.changeProject(project)">
             {{project.title}}
           </md-button>
         </md-menu-item>

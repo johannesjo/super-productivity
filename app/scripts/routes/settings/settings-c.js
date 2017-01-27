@@ -21,8 +21,8 @@
     vm.IS_ELECTRON = IS_ELECTRON;
 
     function init() {
-      vm.r = $rootScope.r;
       vm.allProjects = Projects.getList();
+      vm.selectedCurrentProject = $rootScope.r.currentProject;
 
       $rootScope.r.theme = $localStorage.theme || DEFAULT_THEME;
       vm.isDarkTheme = $rootScope.r.theme && $rootScope.r.theme.indexOf('dark') > -1;
@@ -60,11 +60,15 @@
       }
     };
 
+    vm.changeProject = (project) => {
+      Projects.changeCurrent(project);
+    };
+
     // import/export stuff
     vm.importSettings = (uploadSettingsTextarea) => {
       let settings = JSON.parse(uploadSettingsTextarea);
 
-      angular.forEach(settings, (val, key) => {
+      _.forOwn(settings, (val, key) => {
         $rootScope.r[key] = $localStorage[key] = val;
       });
 
@@ -97,7 +101,7 @@
     // ----------------
     const watchers = [];
 
-    // TODO that's kind of bad
+    // TODO that's kind of really bad
     // update on global model changes
     watchers.push($scope.$watch('r', () => {
       init();

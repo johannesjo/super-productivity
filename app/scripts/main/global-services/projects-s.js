@@ -14,7 +14,7 @@
     .service('Projects', Projects);
 
   /* @ngInject */
-  function Projects(LS_DEFAULTS, $localStorage, $rootScope, Uid, $window, SimpleToast) {
+  function Projects(LS_DEFAULTS, $localStorage, $rootScope, Uid, $window, SimpleToast, $state) {
     const OMITTED_LS_FIELDS = ['currentProject', 'tomorrowsNote', 'projects', '$$hashKey', '$$mdSelectId', 'bodyClass'];
 
     this.getList = () => {
@@ -98,6 +98,34 @@
             delete newCurrentProject.data[property];
           }
         }
+      }
+    };
+
+    this.changeCurrent = (newCurrentProject) => {
+      const oldCurrentProject = $rootScope.r.currentProject;
+
+      if (newCurrentProject && newCurrentProject.id && oldCurrentProject && oldCurrentProject.id !== newCurrentProject.id) {
+        // when there is an old current project existing
+        if (oldCurrentProject && oldCurrentProject.id) {
+          // save all current project data in $localStorage.projects[oldProject]
+          this.updateProjectData(oldCurrentProject.id, $localStorage);
+        }
+        // update with new model fields, if we change the model
+        this.updateNewFields(newCurrentProject);
+        // remove omitted fields if we saved them for some reason
+        this.removeOmittedFields(newCurrentProject);
+
+        // update $rootScope data and ls for current project
+        $rootScope.r.currentProject = $localStorage.currentProject = newCurrentProject;
+
+        // load all other data from new project to $rootScope if operation is successfull
+        _.forOwn(newCurrentProject.data, (val, property) => {
+          if (newCurrentProject.data.hasOwnProperty(property)) {
+            $rootScope.r[property] = $localStorage[property] = newCurrentProject.data[property];
+          }
+        });
+
+        $state.reload();
       }
     };
   }

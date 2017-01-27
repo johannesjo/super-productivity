@@ -39,7 +39,6 @@
     .config(configMarked)
     .run(initGlobalModels)
     .run(initPollCurrentTaskUpdates)
-    .run(handleProjectChange)
     .run(initMousewheelZoomForElectron)
     .run(initGlobalShortcuts);
 
@@ -149,35 +148,6 @@
         }
       }, JIRA_UPDATE_POLL_INTERVAL);
     }
-  }
-
-  function handleProjectChange($rootScope, $localStorage, Projects, $state) {
-    // TODO refactor
-    $rootScope.$watch('r.currentProject', (newCurrentProject, oldCurrentProject) => {
-      if (newCurrentProject && newCurrentProject.id && oldCurrentProject && oldCurrentProject.id !== newCurrentProject.id) {
-        // when there is an old current project existing
-        if (oldCurrentProject && oldCurrentProject.id) {
-          // save all current project data in $localStorage.projects[oldProject]
-          Projects.updateProjectData(oldCurrentProject.id, $localStorage);
-        }
-        // update with new model fields, if we change the model
-        Projects.updateNewFields(newCurrentProject);
-        // remove omitted fields if we saved them for some reason
-        Projects.removeOmittedFields(newCurrentProject);
-
-        // update $rootScope data and ls for current project
-        $rootScope.r.currentProject = $localStorage.currentProject = newCurrentProject;
-
-        // switch to new project if operation is successfull
-        for (let property in newCurrentProject.data) {
-          if (newCurrentProject.data.hasOwnProperty(property)) {
-            $rootScope.r[property] = $localStorage[property] = newCurrentProject.data[property];
-          }
-        }
-
-        $state.reload();
-      }
-    });
   }
 
   function initMousewheelZoomForElectron($document, $window, IS_ELECTRON) {

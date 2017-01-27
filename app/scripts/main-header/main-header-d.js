@@ -41,6 +41,10 @@
       Dialogs('ADD_TASK');
     };
 
+    vm.changeProject = (project) => {
+      Projects.changeCurrent(project);
+    };
+
     vm.toggleBreak = () => {
       // reset time worked without break on break mode toggle
       if ($rootScope.r.currentSession) {
