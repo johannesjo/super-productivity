@@ -77,12 +77,10 @@
     const watchers = [];
     watchers.push($scope.$watch('r.tasks', (mVal) => {
       vm.totaleEstimate = TasksUtil.calcTotalEstimate(mVal);
-      Tasks.updateToday(mVal);
     }, true));
 
     watchers.push($scope.$watch('r.backlogTasks', (mVal) => {
       vm.totaleEstimateBacklog = TasksUtil.calcTotalEstimate(mVal);
-      Tasks.updateBacklog(mVal);
     }, true));
 
     // otherwise we update on view change
