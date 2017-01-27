@@ -14,7 +14,7 @@
     .service('Projects', Projects);
 
   /* @ngInject */
-  function Projects(LS_DEFAULTS, $localStorage, $rootScope, Uid, $window, SimpleToast, $state) {
+  function Projects(LS_DEFAULTS, $localStorage, $rootScope, Uid, $window, SimpleToast, $state, $timeout) {
     const OMITTED_LS_FIELDS = ['currentProject', 'tomorrowsNote', 'projects', '$$hashKey', '$$mdSelectId', 'bodyClass'];
 
     this.getList = () => {
@@ -40,15 +40,19 @@
       return currentProject;
     };
 
+    this.getById = (projectId) => {
+      let projects = this.getList();
+      return _.find(projects, ['id', projectId]);
+    };
+
     this.updateProjectData = (projectToUpdateId, data) => {
       let projects = this.getList();
       let projectToUpdate = $window._.find(projects, (project) => {
         return project.id === projectToUpdateId;
       });
 
-      // add default values to project
       // prevent circular data structure via omit
-      angular.extend(projectToUpdate.data, $window._.omit(data, OMITTED_LS_FIELDS));
+      projectToUpdate.data = $window._.omit(data, OMITTED_LS_FIELDS);
     };
 
     this.createNewFromCurrent = (projectTitle) => {
@@ -101,14 +105,15 @@
       }
     };
 
-    this.changeCurrent = (newCurrentProject) => {
+    this.changeCurrent = (newCurrentProjectParam) => {
       const oldCurrentProject = $rootScope.r.currentProject;
+      const newCurrentProject = this.getById(newCurrentProjectParam.id);
 
       if (newCurrentProject && newCurrentProject.id && oldCurrentProject && oldCurrentProject.id !== newCurrentProject.id) {
         // when there is an old current project existing
         if (oldCurrentProject && oldCurrentProject.id) {
           // save all current project data in $localStorage.projects[oldProject]
-          this.updateProjectData(oldCurrentProject.id, $localStorage);
+          this.updateProjectData(oldCurrentProject.id, $rootScope.r);
         }
         // update with new model fields, if we change the model
         this.updateNewFields(newCurrentProject);
@@ -125,7 +130,12 @@
           }
         });
 
-        $state.reload();
+        // TODO fix theme update here
+
+        // TODO this causes a lot of trouble
+        $timeout(() => {
+          $state.reload();
+        }, 60);
       }
     };
   }
