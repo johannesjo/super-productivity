@@ -29,6 +29,11 @@
     let vm = this;
     const _ = $window._;
 
+    // INIT
+    vm.tasksUndone = Tasks.getUndoneToday();
+    vm.tasksDone = Tasks.getDoneToday();
+    updateTimeTotals();
+
     // PRIVATE FUNCTIONS
     // -----------------
     function updateGlobalTaskModel() {
@@ -83,7 +88,15 @@
     // WATCHER & EVENTS
     // ----------------
     const watchers = [];
-    watchers.push($scope.$watch('r.tasks', updateTimeTotals, true));
+    watchers.push($scope.$watch('r.tasks', (newTasks, oldTasks) => {
+      updateTimeTotals();
+
+      // update when the global tasks array changes for some outside reason (e.g. task is added)
+      if (newTasks && (newTasks.length !== (oldTasks && oldTasks.length))) {
+        vm.tasksUndone = Tasks.getUndoneToday();
+        vm.tasksDone = Tasks.getDoneToday();
+      }
+    }, true));
 
     watchers.push($scope.$watchCollection('vm.tasksDone', () => {
       _.each(vm.tasksDone, (task) => {
@@ -98,13 +111,6 @@
       });
       // we wan't to save to the LS in case the app crashes
       updateTasksLsOnly();
-    }));
-
-    // update initially or when the global tasks array changes for some outside reason
-    watchers.push($scope.$watch('r.tasks', () => {
-      vm.tasksUndone = Tasks.getUndoneToday();
-      vm.tasksDone = Tasks.getDoneToday();
-      updateTimeTotals();
     }));
 
     // otherwise we update on view change
