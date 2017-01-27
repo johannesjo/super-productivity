@@ -53,7 +53,7 @@
     // DIRECTIVE METHODS
     // -----------------
     vm.openAddTask = () => {
-      Dialogs('ADD_TASK');
+      Dialogs('ADD_TASK', undefined, true);
     };
 
     vm.onTaskDoneChangedUndoneList = (task) => {

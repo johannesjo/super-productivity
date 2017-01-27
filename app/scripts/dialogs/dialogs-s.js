@@ -29,10 +29,11 @@
       return dialog;
     }
 
-    function addToQueue(dialogObj, wrapperPromise) {
+    function addToQueue(dialogObj, wrapperPromise, isNoQueue) {
       dialogQueue.push({
         obj: dialogObj,
-        wrapperPromise
+        wrapperPromise,
+        isNoQueue
       });
     }
 
@@ -44,24 +45,36 @@
       let nextDialog = dialogQueue[0];
 
       if (nextDialog) {
-        $mdDialog.show(nextDialog.obj)
-          .then((res) => {
-            nextDialog.wrapperPromise.resolve(res);
-            removeLastResolvedFromQueue();
-            openNextInQueue();
-          }, (err) => {
-            nextDialog.wrapperPromise.reject(err);
-            removeLastResolvedFromQueue();
-            openNextInQueue();
-          });
+        // if isNoQueue is set directly remove and open next one
+        if (nextDialog.isNoQueue) {
+          removeLastResolvedFromQueue();
+          openNextInQueue();
+          $mdDialog.show(nextDialog.obj)
+            .then((res) => {
+              nextDialog.wrapperPromise.resolve(res);
+            }, (err) => {
+              nextDialog.wrapperPromise.reject(err);
+            });
+        } else {
+          $mdDialog.show(nextDialog.obj)
+            .then((res) => {
+              nextDialog.wrapperPromise.resolve(res);
+              removeLastResolvedFromQueue();
+              openNextInQueue();
+            }, (err) => {
+              nextDialog.wrapperPromise.reject(err);
+              removeLastResolvedFromQueue();
+              openNextInQueue();
+            });
+        }
       }
     }
 
     // actual method to call
-    return function (dialogName, locals) {
+    return function (dialogName, locals, isNoQueue) {
       let wrapperPromise = $q.defer();
       const dialogObj = createDialogObject(dialogName, locals);
-      addToQueue(dialogObj, wrapperPromise);
+      addToQueue(dialogObj, wrapperPromise, isNoQueue);
 
       // when there are currently no other open dialogs
       if (dialogQueue.length === 1) {

@@ -128,7 +128,7 @@
       if (ev.target.tagName !== 'INPUT' && ev.target.tagName !== 'TEXTAREA') {
         // on star
         if (ev.key === '*') {
-          Dialogs('ADD_TASK');
+          Dialogs('ADD_TASK', undefined, true);
         }
       }
 
