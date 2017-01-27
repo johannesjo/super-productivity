@@ -14,7 +14,7 @@
     .service('Jira', Jira);
 
   /* @ngInject */
-  function Jira(Uid, $q, $localStorage, $window, Dialogs, IS_ELECTRON, SimpleToast, Notifier, $injector) {
+  function Jira(Uid, $q, $localStorage, $window, Dialogs, IS_ELECTRON, SimpleToast, Notifier, $injector, $timeout, REQUEST_TIMEOUT) {
     const IPC_JIRA_CB_EVENT = 'JIRA_RESPONSE';
     const IPC_JIRA_MAKE_REQUEST_EVENT = 'JIRA';
 
@@ -48,7 +48,7 @@
             console.log('FRONTEND_REQUEST', this.requestsLog[res.requestId]);
             console.log('RESPONSE', res);
             SimpleToast('Jira Request failed: '
-              + this.requestsLog[res.requestId].apiMethod
+              + this.requestsLog[res.requestId].clientRequest.apiMethod
               + ' – '
               + (res && res.error));
             this.requestsLog[res.requestId].defer.reject(res);
@@ -370,12 +370,17 @@
         this.requestsLog[request.requestId] = {
           defer,
           requestMethod: request.apiMethod,
-          request: request
+          clientRequest: request
         };
-        console.log(this.requestsLog);
 
         // send to electron
         window.ipcRenderer.send(IPC_JIRA_MAKE_REQUEST_EVENT, request);
+
+        $timeout(() => {
+          SimpleToast('Jira Request timed out for ' + request.apiMethod);
+          // delete entry for promise
+          delete this.requestsLog[request.requestId];
+        }, REQUEST_TIMEOUT);
 
         return defer.promise;
       } else {
