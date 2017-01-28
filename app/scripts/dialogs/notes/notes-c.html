@@ -16,9 +16,13 @@
                      style="position: relative;"
                      flex>
     <!--<inline-markdown ng-model="vm.r.note"></inline-markdown>-->
+    <md-input-container class="md-block">
+
     <textarea ng-model="vm.r.note"
               id="notes-textarea"
+              md-autofocus
               autofocus></textarea>
+    </md-input-container>
   </md-dialog-content>
 
 </md-dialog>

@@ -14,13 +14,7 @@
     .controller('NotesCtrl', NotesCtrl);
 
   /* @ngInject */
-  function NotesCtrl($mdDialog, $localStorage, $timeout) {
-    // hacky but good enough for now
-    $timeout(() => {
-      const textareaEl = document.getElementById('notes-textarea');
-      textareaEl.focus();
-    });
-
+  function NotesCtrl($mdDialog, $localStorage) {
     if (!$localStorage.note) {
       $localStorage.note = 'write some note';
     }
