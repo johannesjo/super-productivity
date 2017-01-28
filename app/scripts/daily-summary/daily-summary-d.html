@@ -63,7 +63,7 @@
          ng-if="r.distractions.length > 0">
   <h2 class="md-title">Your distractions for today</h2>
   <ul>
-    <li ng-repeat="distraction in r.distractions">{{ distraction }}</li>
+    <li ng-repeat="distraction in r.distractions track by $index">{{ distraction }}</li>
   </ul>
   <md-button class="md-raised"
              ng-click="r.distractions=[]">Delete distractions
