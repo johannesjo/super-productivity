@@ -13,9 +13,15 @@
 </div>
 <h1 class="md-headline">You're done for today! Take a moment to celebrate!</h1>
 
-<p>Tasks completed: <strong>{{vm.doneTasks.length}}/{{ r.tasks.length }}</strong></p>
-<p>Total time spent total on todays task: <strong>{{ vm.totalTimeSpentTasks|duration }}</strong></p>
-<p>Total time spent today: <strong>{{ vm.totalTimeSpentToday|duration }}</strong></p>
+<p>
+  <ng-md-icon icon="check"></ng-md-icon>
+  Tasks completed: <strong>{{vm.doneTasks.length}}/{{ r.tasks.length }}</strong></p>
+<p>
+  <ng-md-icon icon="timer"></ng-md-icon>
+  Total time spent total on todays task: <strong>{{ vm.totalTimeSpentTasks|duration }}</strong></p>
+<p>
+  <ng-md-icon icon="timer"></ng-md-icon>
+  Total time spent today: <strong>{{ vm.totalTimeSpentToday|duration }}</strong></p>
 
 <h2 class="md-title">These are the tasks you worked on today</h2>
 
@@ -61,12 +67,17 @@
 
 <section class="distractions"
          ng-if="r.distractions.length > 0">
-  <h2 class="md-title">Your distractions for today</h2>
+  <h2 class="md-title">
+    <ng-md-icon icon="flash_on"></ng-md-icon>
+    Your distractions for today
+  </h2>
   <ul>
     <li ng-repeat="distraction in r.distractions track by $index">{{ distraction }}</li>
   </ul>
   <md-button class="md-raised"
-             ng-click="r.distractions=[]">Delete distractions
+             ng-click="r.distractions=[]">
+    <ng-md-icon icon="delete"></ng-md-icon>
+    Delete distractions
   </md-button>
 </section>
 
@@ -77,7 +88,10 @@
   <pre><code>{{ vm.commitLog }}</code></pre>
 </section>
 
-<h2 class="md-title">Make a note for your tomorrows self</h2>
+<h2 class="md-title">
+  <ng-md-icon icon="speaker_notes"></ng-md-icon>
+  Make a note for your tomorrows self
+</h2>
 <p>This is meant to be some takeaway to be even more productive/happy tomorrow. E.g.: What did you learn today? What do you want to do better/smarter tomorrow? What do you want to achieve and why?</p>
 <p>Think a second and reflect on the day.</p>
 
