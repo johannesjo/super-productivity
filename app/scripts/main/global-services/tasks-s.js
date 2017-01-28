@@ -43,10 +43,10 @@
             let idleTimeInMs = evData.idleTimeInMs;
 
             // only track if there is a task
-            if (this.$rootScope.r.currentTask) {
+            if (this.$localStorage.currentTask) {
 
-              that.addTimeSpent(this.$rootScope.r.currentTask, timeSpentInMs);
-              that.updateCurrent(this.$rootScope.r.currentTask, true);
+              that.addTimeSpent(this.$localStorage.currentTask, timeSpentInMs);
+              that.updateCurrent(this.$localStorage.currentTask, true);
               that.checkTakeToTakeABreak(timeSpentInMs, idleTimeInMs);
 
               // we need to manually call apply as this is an outside event
@@ -74,7 +74,7 @@
               }, () => {
                 // if not tracked
                 // unset currentSession.timeWorkedWithoutBreak
-                this.$rootScope.r.currentSession.timeWorkedWithoutBreak = undefined;
+                this.$localStorage.currentSession.timeWorkedWithoutBreak = undefined;
                 this.isShowTakeBreakNotification = true;
                 isIdleDialogOpen = false;
               });
@@ -86,21 +86,21 @@
     checkTakeToTakeABreak(timeSpentInMs, idleTimeInMs) {
       const MIN_IDLE_VAL_TO_TAKE_A_BREAK_FROM_TAKE_A_BREAK = 9999;
 
-      if (this.$rootScope.r.config && this.$rootScope.r.config.isTakeABreakEnabled) {
-        if (!this.$rootScope.r.currentSession) {
-          this.$rootScope.r.currentSession = {};
+      if (this.$localStorage.config && this.$localStorage.config.isTakeABreakEnabled) {
+        if (!this.$localStorage.currentSession) {
+          this.$localStorage.currentSession = {};
         }
         // add or create moment duration for timeWorkedWithoutBreak
-        if (this.$rootScope.r.currentSession.timeWorkedWithoutBreak) {
+        if (this.$localStorage.currentSession.timeWorkedWithoutBreak) {
           // convert to moment to be save
-          this.$rootScope.r.currentSession.timeWorkedWithoutBreak = moment.duration(this.$rootScope.r.currentSession.timeWorkedWithoutBreak);
-          this.$rootScope.r.currentSession.timeWorkedWithoutBreak.add(moment.duration({ milliseconds: timeSpentInMs }));
+          this.$localStorage.currentSession.timeWorkedWithoutBreak = moment.duration(this.$localStorage.currentSession.timeWorkedWithoutBreak);
+          this.$localStorage.currentSession.timeWorkedWithoutBreak.add(moment.duration({ milliseconds: timeSpentInMs }));
         } else {
-          this.$rootScope.r.currentSession.timeWorkedWithoutBreak = moment.duration(timeSpentInMs);
+          this.$localStorage.currentSession.timeWorkedWithoutBreak = moment.duration(timeSpentInMs);
         }
 
-        if (moment.duration(this.$rootScope.r.config.takeABreakMinWorkingTime)
-            .asSeconds() < this.$rootScope.r.currentSession.timeWorkedWithoutBreak.asSeconds()) {
+        if (moment.duration(this.$localStorage.config.takeABreakMinWorkingTime)
+            .asSeconds() < this.$localStorage.currentSession.timeWorkedWithoutBreak.asSeconds()) {
 
           if (idleTimeInMs > MIN_IDLE_VAL_TO_TAKE_A_BREAK_FROM_TAKE_A_BREAK) {
             return;
@@ -108,20 +108,20 @@
 
           if (this.isShowTakeBreakNotification) {
             let toast = this.$mdToast.simple()
-              .textContent('Take a break! You have been working for ' + this.ParseDuration.toString(this.$rootScope.r.currentSession.timeWorkedWithoutBreak) + ' without one. Go away from the computer! Makes you more productive in the long run!')
+              .textContent('Take a break! You have been working for ' + this.ParseDuration.toString(this.$localStorage.currentSession.timeWorkedWithoutBreak) + ' without one. Go away from the computer! Makes you more productive in the long run!')
               .action('I already did!')
               .hideDelay(20000)
               .position('bottom');
             this.$mdToast.show(toast).then(function (response) {
               if (response === 'ok') {
                 // re-add task on undo
-                this.$rootScope.r.currentSession.timeWorkedWithoutBreak = undefined;
+                this.$localStorage.currentSession.timeWorkedWithoutBreak = undefined;
               }
             });
 
             this.Notifier({
               title: 'Take a break!',
-              message: 'Take a break! You have been working for ' + this.ParseDuration.toString(this.$rootScope.r.currentSession.timeWorkedWithoutBreak) + ' without one. Go away from the computer! Makes you more productive in the long run!',
+              message: 'Take a break! You have been working for ' + this.ParseDuration.toString(this.$localStorage.currentSession.timeWorkedWithoutBreak) + ' without one. Go away from the computer! Makes you more productive in the long run!',
               sound: true,
               wait: true
             });
@@ -148,13 +148,13 @@
           return task.id === this.$localStorage.currentTask.id;
         });
 
-        this.$localStorage.currentTask = this.$rootScope.r.currentTask = currentTask || subTaskMatch;
+        this.$localStorage.currentTask = currentTask || subTaskMatch;
       }
-      return this.$rootScope.r.currentTask;
+      return this.$localStorage.currentTask;
     }
 
     getById(taskId) {
-      return _.find(this.$rootScope.r.tasks, ['id', taskId]) || _.find(this.$rootScope.r.backlogTasks, ['id', taskId]) || _.find(this.$rootScope.r.doneBacklogTasks, ['id', taskId]);
+      return _.find(this.$localStorage.tasks, ['id', taskId]) || _.find(this.$localStorage.backlogTasks, ['id', taskId]) || _.find(this.$localStorage.doneBacklogTasks, ['id', taskId]);
     }
 
     getBacklog() {
@@ -311,7 +311,6 @@
       if (task && task.title) {
         this.$localStorage.tasks.push(this.createTask(task));
         // update global pointer for today tasks
-        this.$rootScope.r.tasks = this.$localStorage.tasks;
         return true;
       }
     }
@@ -359,7 +358,7 @@
     }
 
     updateCurrent(task, isCallFromTimeTracking) {
-      const isCurrentTaskChanged = this.TasksUtil.isTaskChanged(task, this.$rootScope.currentTask);
+      const isCurrentTaskChanged = this.TasksUtil.isTaskChanged(task, this.$localStorage.currentTask);
 
       // update totalTimeSpent for buggy macos
       if (task) {
@@ -393,9 +392,6 @@
       }
 
       this.$localStorage.currentTask = task;
-      // update global pointer
-      this.$rootScope.r.currentTask = this.$localStorage.currentTask;
-
     }
 
     removeTimeSpent(task, timeSpentToRemoveAsMoment) {
@@ -537,33 +533,23 @@
 
     updateToday(tasks) {
       this.$localStorage.tasks = tasks;
-      // update global pointer
-      this.$rootScope.r.tasks = this.$localStorage.tasks;
     }
 
     updateBacklog(tasks) {
       this.$localStorage.backlogTasks = tasks;
-      // update global pointer
-      this.$rootScope.r.backlogTasks = this.$localStorage.backlogTasks;
     }
 
     addTasksToTopOfBacklog(tasks) {
       this.$localStorage.backlogTasks = tasks.concat(this.$localStorage.backlogTasks);
-      // update global pointer
-      this.$rootScope.r.backlogTasks = this.$localStorage.backlogTasks;
     }
 
     updateDoneBacklog(tasks) {
       this.$localStorage.doneBacklogTasks = tasks;
-      // update global pointer
-      this.$rootScope.r.doneBacklogTasks = this.$localStorage.doneBacklogTasks;
     }
 
     addDoneTasksToDoneBacklog() {
       let doneTasks = this.getDoneToday().slice(0);
       this.$localStorage.doneBacklogTasks = doneTasks.concat(this.$localStorage.doneBacklogTasks);
-      // update global pointer
-      this.$rootScope.r.doneBacklogTasks = this.$localStorage.doneBacklogTasks;
     }
 
     // SPECIAL METHODS

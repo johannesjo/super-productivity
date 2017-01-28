@@ -14,7 +14,7 @@
     .service('Projects', Projects);
 
   /* @ngInject */
-  function Projects(LS_DEFAULTS, $localStorage, $rootScope, Uid, $window, SimpleToast, $injector) {
+  function Projects(LS_DEFAULTS, $localStorage, Uid, $window, SimpleToast, $injector) {
     const OMITTED_LS_FIELDS = ['currentProject', 'tomorrowsNote', 'projects', '$$hashKey', '$$mdSelectId', 'bodyClass'];
 
     this.getList = () => {
@@ -61,7 +61,7 @@
         return;
       }
 
-      this.createNew(projectTitle, $rootScope.r);
+      this.createNew(projectTitle, $localStorage);
     };
 
     this.createNew = (projectTitle, data) => {
@@ -80,7 +80,7 @@
         this.updateProjectData(newProject.id, data);
 
         // switch to new project
-        $rootScope.r.currentProject = $localStorage.currentProject = newProject;
+        $localStorage.currentProject = newProject;
       }
     };
 

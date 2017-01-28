@@ -25,7 +25,7 @@
   }
 
   /* @ngInject */
-  function DailyPlannerCtrl($rootScope, $window, $scope, Tasks, TasksUtil, Dialogs, $state, Jira, $filter) {
+  function DailyPlannerCtrl($localStorage, $window, $scope, Tasks, TasksUtil, Dialogs, $state, Jira, $filter) {
     let vm = this;
     const _ = $window._;
 
@@ -55,7 +55,7 @@
 
       // if we have already defined enough tasks and the
       // new task field is empty go to work view
-      else if ($rootScope.r.tasks.length > 0) {
+      else if ($localStorage.tasks.length > 0) {
         vm.done();
       }
     };
@@ -63,7 +63,7 @@
     vm.done = () => {
       // only open if there is no current task already selected
       if (!vm.currentTask) {
-        Dialogs('TASK_SELECTION', { tasks: $rootScope.r.tasks })
+        Dialogs('TASK_SELECTION', { tasks: $localStorage.tasks })
           .then(() => {
             $state.go('work-view');
           });

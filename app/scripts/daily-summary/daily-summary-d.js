@@ -26,7 +26,7 @@
   }
 
   /* @ngInject */
-  function DailySummaryCtrl($rootScope, $localStorage, Tasks, TasksUtil, $mdDialog, Dialogs, $state, GitLog) {
+  function DailySummaryCtrl($localStorage, Tasks, TasksUtil, $mdDialog, Dialogs, $state, GitLog) {
     const IPC_EVENT_SHUTDOWN = 'SHUTDOWN';
 
     let vm = this;
@@ -41,8 +41,8 @@
     // use mysql date as it is sortable
     vm.totalTimeSpentToday = Tasks.getTimeWorkedToday();
 
-    if ($rootScope.r.git && $rootScope.r.git.projectDir) {
-      GitLog.get($rootScope.r.git.projectDir).then(function (res) {
+    if ($localStorage.git && $localStorage.git.projectDir) {
+      GitLog.get($localStorage.git.projectDir).then(function (res) {
         vm.commitLog = res;
       });
     }

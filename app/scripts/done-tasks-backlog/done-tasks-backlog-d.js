@@ -20,14 +20,13 @@
       controller: DoneTasksBacklogCtrl,
       controllerAs: 'vm',
       restrict: 'E',
-      scope: {}
+      scope: true
     };
   }
 
   /* @ngInject */
-  function DoneTasksBacklogCtrl($rootScope, $scope, TasksUtil) {
+  function DoneTasksBacklogCtrl($scope, TasksUtil) {
     let vm = this;
-    vm.r = $rootScope.r;
 
     $scope.$watch('vm.r.doneBacklogTasks', (mVal) => {
       vm.totalTimeSpent = TasksUtil.calcTotalTimeSpent(mVal);

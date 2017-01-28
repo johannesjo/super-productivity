@@ -25,11 +25,9 @@
   }
 
   /* @ngInject */
-  function MainHeaderCtrl(Dialogs, $rootScope, Tasks, Projects, SimpleToast, $state) {
+  function MainHeaderCtrl(Dialogs, $localStorage, Tasks, Projects, SimpleToast, $state) {
     let vm = this;
     vm.lastCurrentTask = undefined;
-
-    vm.r = $rootScope.r;
 
     vm.allProjects = Projects.getList();
 
@@ -47,20 +45,20 @@
 
     vm.toggleBreak = () => {
       // reset time worked without break on break mode toggle
-      if ($rootScope.r.currentSession) {
-        $rootScope.r.currentSession.timeWorkedWithoutBreak = undefined;
+      if ($localStorage.currentSession) {
+        $localStorage.currentSession.timeWorkedWithoutBreak = undefined;
       }
-      const isGoOnBreak = !!$rootScope.r.currentTask;
+      const isGoOnBreak = !!$localStorage.currentTask;
 
       if (isGoOnBreak) {
-        vm.lastCurrentTask = $rootScope.r.currentTask;
+        vm.lastCurrentTask = $localStorage.currentTask;
         Tasks.updateCurrent(null);
         SimpleToast('On break!');
       } else {
         if (vm.lastCurrentTask) {
           Tasks.updateCurrent(vm.lastCurrentTask);
         } else {
-          Dialogs('TASK_SELECTION', { tasks: $rootScope.r.tasks })
+          Dialogs('TASK_SELECTION', { tasks: $localStorage.tasks })
             .then(() => {
               $state.go('work-view');
             });

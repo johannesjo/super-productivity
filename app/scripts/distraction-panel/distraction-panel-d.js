@@ -28,9 +28,9 @@
   }
 
   /* @ngInject */
-  function DistractionPanelCtrl($rootScope) {
+  function DistractionPanelCtrl($localStorage) {
     let vm = this;
-    vm.r = $rootScope.r;
+    vm.r = $localStorage;
     vm.isOpen = false;
 
     vm.close = () => {
@@ -51,7 +51,7 @@
 
     vm.saveDistraction = () => {
       if (vm.newDistraction.length > 0) {
-        $rootScope.r.distractions.push(vm.newDistraction);
+        $localStorage.distractions.push(vm.newDistraction);
       }
       vm.close();
     };

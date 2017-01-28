@@ -14,7 +14,7 @@
     .controller('SettingsCtrl', SettingsCtrl);
 
   /* @ngInject */
-  function SettingsCtrl($localStorage, $window, $rootScope, $scope, Projects, Dialogs, DEFAULT_THEME, THEMES, IS_ELECTRON, SimpleToast, $mdDialog) {
+  function SettingsCtrl($localStorage, $window, $scope, Projects, Dialogs, DEFAULT_THEME, THEMES, IS_ELECTRON, SimpleToast, $mdDialog) {
     let vm = this;
     const _ = $window._;
 
@@ -22,11 +22,11 @@
 
     function init() {
       vm.allProjects = Projects.getList();
-      vm.selectedCurrentProject = $rootScope.r.currentProject;
+      vm.selectedCurrentProject = $localStorage.currentProject;
 
-      $rootScope.r.theme = $localStorage.theme || DEFAULT_THEME;
-      vm.isDarkTheme = $rootScope.r.theme && $rootScope.r.theme.indexOf('dark') > -1;
-      vm.selectedTheme = $rootScope.r.theme && $rootScope.r.theme
+      $localStorage.theme = $localStorage.theme || DEFAULT_THEME;
+      vm.isDarkTheme = $localStorage.theme && $localStorage.theme.indexOf('dark') > -1;
+      vm.selectedTheme = $localStorage.theme && $localStorage.theme
           .replace('-theme', '')
           .replace('-dark', '');
     }
@@ -43,7 +43,7 @@
     };
 
     vm.deleteProject = (project, $index) => {
-      if (project.id === $rootScope.r.currentProject.id) {
+      if (project.id === $localStorage.currentProject.id) {
         SimpleToast('Cannot delete ' + project.title + ' as it is the current project!');
       } else {
         let confirm = $mdDialog.confirm()
@@ -78,10 +78,10 @@
 
     // jira stuff
     vm.saveJiraSettings = (settings) => {
-      $rootScope.r.jiraSettings = $localStorage.jiraSettings = settings;
+      $localStorage.jiraSettings = $localStorage.jiraSettings = settings;
       // for some reason project needs to be updated directly
-      if ($rootScope.r.currentProject && $rootScope.r.currentProject.data) {
-        $rootScope.r.currentProject.data.jiraSettings = settings;
+      if ($localStorage.currentProject && $localStorage.currentProject.data) {
+        $localStorage.currentProject.data.jiraSettings = settings;
       }
 
       SimpleToast('Jira settings saved');
@@ -103,24 +103,24 @@
     watchers.push($scope.$watch('vm.selectedTheme', function (value) {
       if (value) {
         if (vm.isDarkTheme) {
-          $rootScope.r.theme = $localStorage.theme = value + '-dark';
+          $localStorage.theme = value + '-dark';
         } else {
-          $rootScope.r.theme = $localStorage.theme = value + '-theme';
+          $localStorage.theme = value + '-theme';
         }
       }
     }));
 
     watchers.push($scope.$watch('vm.isDarkTheme', function (value) {
       if (value) {
-        $rootScope.r.theme = $localStorage.theme = $rootScope.r.theme.replace('-theme', '-dark');
-        $rootScope.r.bodyClass = 'dark-theme';
+        $localStorage.theme = $localStorage.theme.replace('-theme', '-dark');
+        $localStorage.bodyClass = 'dark-theme';
       } else {
-        $rootScope.r.theme = $localStorage.theme = $rootScope.r.theme.replace('-dark', '-theme');
-        $rootScope.r.bodyClass = '';
+        $localStorage.theme = $localStorage.theme.replace('-dark', '-theme');
+        $localStorage.bodyClass = '';
       }
       // for some reason project needs to be updated directly
-      if ($rootScope.r.currentProject && $rootScope.r.currentProject.data) {
-        $rootScope.r.currentProject.data.theme = $rootScope.r.theme;
+      if ($localStorage.currentProject && $localStorage.currentProject.data) {
+        $localStorage.currentProject.data.theme = $localStorage.theme;
       }
     }));
 
