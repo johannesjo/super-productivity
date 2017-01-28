@@ -69,18 +69,11 @@
       let settings = JSON.parse(uploadSettingsTextarea);
 
       _.forOwn(settings, (val, key) => {
-        $rootScope.r[key] = $localStorage[key] = val;
+        $localStorage[key] = val;
       });
 
-      // delete projects and current project if there are non yet
-      if (!settings.currentProject) {
-        $localStorage.currentProject = $rootScope.r.currentProject = undefined;
-      }
-      if (!settings.projects) {
-        $localStorage.projects = $rootScope.r.projects = [];
-      }
-
-      SimpleToast('Settings successfully imported');
+      // reload page completely afterwards
+      window.location.reload(true);
     };
 
     // jira stuff
