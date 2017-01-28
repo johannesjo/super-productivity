@@ -310,25 +310,25 @@
       // update totalTimeSpent for buggy macos
       if (task) {
         task.timeSpent = this.TasksUtil.calcTotalTimeSpentOnTask(task);
-      }
 
-      // check if in electron context
-      if (this.IS_ELECTRON) {
-        if (!isCallFromTimeTracking) {
-          // check for updates
-          // NOTE: if checks for isJiraTicket are made in function
-          // TODO should be refactored maybe
-          this.Jira.checkUpdatesForTaskOrParent(task);
+        // check if in electron context
+        if (this.IS_ELECTRON) {
+          if (!isCallFromTimeTracking) {
+            // check for updates
+            // NOTE: if checks for isJiraTicket are made in function
+            // TODO should be refactored maybe
+            this.Jira.checkUpdatesForTaskOrParent(task);
 
-          if (isCurrentTaskChanged) {
-            const parentTask = task.parentId && this.getById(task.parentId);
+            if (isCurrentTaskChanged) {
+              const parentTask = task.parentId && this.getById(task.parentId);
 
-            if (this.TasksUtil.isJiraTask(task)) {
-              this.Jira.updateStatus(task, 'IN_PROGRESS');
-            }
+              if (this.TasksUtil.isJiraTask(task)) {
+                this.Jira.updateStatus(task, 'IN_PROGRESS');
+              }
 
-            if (this.TasksUtil.isJiraTask(parentTask)) {
-              this.Jira.updateStatus(parentTask, 'IN_PROGRESS');
+              if (this.TasksUtil.isJiraTask(parentTask)) {
+                this.Jira.updateStatus(parentTask, 'IN_PROGRESS');
+              }
             }
           }
         }
