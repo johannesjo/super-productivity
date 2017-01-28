@@ -16,20 +16,15 @@
   /* @ngInject */
   class Tasks {
 
-    constructor($localStorage, Uid, $rootScope, Dialogs, IS_ELECTRON, $mdToast, Notifier, ShortSyntax, ParseDuration, TasksUtil, Jira) {
+    constructor($localStorage, Uid, $rootScope, Dialogs, IS_ELECTRON, ShortSyntax, TasksUtil, Jira, TakeABreakReminder) {
       this.$localStorage = $localStorage;
       this.Uid = Uid;
       this.$rootScope = $rootScope;
       this.Dialogs = Dialogs;
-      this.$mdToast = $mdToast;
-      this.Notifier = Notifier;
       this.ShortSyntax = ShortSyntax;
-      this.ParseDuration = ParseDuration;
       this.TasksUtil = TasksUtil;
       this.IS_ELECTRON = IS_ELECTRON;
       this.Jira = Jira;
-
-      this.isShowTakeBreakNotification = true;
 
       // SETUP HANDLERS FOR ELECTRON EVENTS
       if (IS_ELECTRON) {
@@ -47,7 +42,7 @@
 
               that.addTimeSpent(this.$localStorage.currentTask, timeSpentInMs);
               that.updateCurrent(this.$localStorage.currentTask, true);
-              that.checkTakeToTakeABreak(timeSpentInMs, idleTimeInMs);
+              TakeABreakReminder.check(timeSpentInMs, idleTimeInMs);
 
               // we need to manually call apply as this is an outside event
               this.$rootScope.$apply();
@@ -61,72 +56,24 @@
           const minIdleTimeInMs = params.minIdleTimeInMs;
 
           // do not show as long as the user hasn't decided
-          this.isShowTakeBreakNotification = false;
+          TakeABreakReminder.isShown = false;
 
           if (!isIdleDialogOpen) {
             isIdleDialogOpen = true;
             this.Dialogs('WAS_IDLE', { idleTime, minIdleTimeInMs })
               .then(() => {
                 // if tracked
-                this.checkTakeToTakeABreak(idleTime);
-                this.isShowTakeBreakNotification = true;
+                TakeABreakReminder.isShown = true;
                 isIdleDialogOpen = false;
               }, () => {
                 // if not tracked
                 // unset currentSession.timeWorkedWithoutBreak
                 this.$localStorage.currentSession.timeWorkedWithoutBreak = undefined;
-                this.isShowTakeBreakNotification = true;
+                TakeABreakReminder.isShown = true;
                 isIdleDialogOpen = false;
               });
           }
         });
-      }
-    }
-
-    checkTakeToTakeABreak(timeSpentInMs, idleTimeInMs) {
-      const MIN_IDLE_VAL_TO_TAKE_A_BREAK_FROM_TAKE_A_BREAK = 9999;
-
-      if (this.$localStorage.config && this.$localStorage.config.isTakeABreakEnabled) {
-        if (!this.$localStorage.currentSession) {
-          this.$localStorage.currentSession = {};
-        }
-        // add or create moment duration for timeWorkedWithoutBreak
-        if (this.$localStorage.currentSession.timeWorkedWithoutBreak) {
-          // convert to moment to be save
-          this.$localStorage.currentSession.timeWorkedWithoutBreak = moment.duration(this.$localStorage.currentSession.timeWorkedWithoutBreak);
-          this.$localStorage.currentSession.timeWorkedWithoutBreak.add(moment.duration({ milliseconds: timeSpentInMs }));
-        } else {
-          this.$localStorage.currentSession.timeWorkedWithoutBreak = moment.duration(timeSpentInMs);
-        }
-
-        if (moment.duration(this.$localStorage.config.takeABreakMinWorkingTime)
-            .asSeconds() < this.$localStorage.currentSession.timeWorkedWithoutBreak.asSeconds()) {
-
-          if (idleTimeInMs > MIN_IDLE_VAL_TO_TAKE_A_BREAK_FROM_TAKE_A_BREAK) {
-            return;
-          }
-
-          if (this.isShowTakeBreakNotification) {
-            let toast = this.$mdToast.simple()
-              .textContent('Take a break! You have been working for ' + this.ParseDuration.toString(this.$localStorage.currentSession.timeWorkedWithoutBreak) + ' without one. Go away from the computer! Makes you more productive in the long run!')
-              .action('I already did!')
-              .hideDelay(20000)
-              .position('bottom');
-            this.$mdToast.show(toast).then(function (response) {
-              if (response === 'ok') {
-                // re-add task on undo
-                this.$localStorage.currentSession.timeWorkedWithoutBreak = undefined;
-              }
-            });
-
-            this.Notifier({
-              title: 'Take a break!',
-              message: 'Take a break! You have been working for ' + this.ParseDuration.toString(this.$localStorage.currentSession.timeWorkedWithoutBreak) + ' without one. Go away from the computer! Makes you more productive in the long run!',
-              sound: true,
-              wait: true
-            });
-          }
-        }
       }
     }
 
