@@ -26,7 +26,7 @@
     vm.idleTime = $window.moment.duration(realIdleTime, 'milliseconds').format('hh:mm:ss');
 
     vm.undoneTasks = Tasks.getUndoneToday(true);
-    vm.selectedTask = $localStorage.currentTask;
+    vm.selectedTask = $localStorage.currentTask || undefined;
 
     vm.trackIdleToTask = () => {
       if (vm.selectedTask) {

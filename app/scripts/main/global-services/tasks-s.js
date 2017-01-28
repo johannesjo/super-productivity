@@ -372,7 +372,7 @@
       if (task.parentId) {
         // TODO calc parent task timeSpent
         parentTask = this.getById(task.parentId);
-        parentTask.timeSpentOnDay = this.mergeTotalTimeSpentOnDayFrom(parentTask.subTasks);
+        parentTask.timeSpentOnDay = this.TasksUtil.mergeTotalTimeSpentOnDayFrom(parentTask.subTasks);
         parentTask.progress = this.TasksUtil.calcProgress(parentTask);
       }
 
