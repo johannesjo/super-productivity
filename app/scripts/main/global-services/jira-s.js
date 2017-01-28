@@ -47,10 +47,7 @@
           if (!res || res.error) {
             console.log('FRONTEND_REQUEST', this.requestsLog[res.requestId]);
             console.log('RESPONSE', res);
-            SimpleToast('Jira Request failed: '
-              + this.requestsLog[res.requestId].clientRequest.apiMethod
-              + ' – '
-              + (res && res.error));
+            SimpleToast('Jira Request failed: ' + this.requestsLog[res.requestId].clientRequest.apiMethod + ' – ' + (res && res.error));
             this.requestsLog[res.requestId].defer.reject(res);
           } else {
             this.requestsLog[res.requestId].defer.resolve(res);
