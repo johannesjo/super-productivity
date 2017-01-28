@@ -32,7 +32,7 @@
       } else {
         $rootScope.r.bodyClass = '';
       }
-    }
+    };
   }
 
 })();
