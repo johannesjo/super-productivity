@@ -39,6 +39,8 @@ IMPORTANT NOTE:
 
 @import 'base/_typography.scss';
 
+@import 'components/_additions-for-dialogs.scss';
+
 @import 'components/_additions-for-forms.scss';
 
 @import 'components/_additions-for-icons.scss';
@@ -62,6 +64,8 @@ IMPORTANT NOTE:
 @import '../scripts/dialogs/jira-add-worklog/_jira-add-worklog-c.scss';
 
 @import '../scripts/dialogs/jira-set-in-progress/_jira-set-in-progress-c.scss';
+
+@import '../scripts/dialogs/notes/_notes-c.scss';
 
 @import '../scripts/dialogs/simple-task-summary/_simple-task-summary.scss';
 

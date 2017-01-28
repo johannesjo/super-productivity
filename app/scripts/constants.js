@@ -13,6 +13,7 @@
     .module('superProductivity')
     .constant('DEFAULT_THEME', 'teal-theme')
     .constant('LS_DEFAULTS', {
+      note: undefined,
       theme: undefined,
       currentTask: undefined,
       currentProject: undefined,

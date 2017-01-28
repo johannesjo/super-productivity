@@ -25,9 +25,14 @@
   }
 
   /* @ngInject */
-  function QuickAccessMenuCtrl() {
+  function QuickAccessMenuCtrl(Dialogs) {
     this.isOpen = false;
     this.selectedMode = 'md-fling';
+
+    this.openNotepad = () => {
+      Dialogs('NOTES');
+      this.isOpen = false;
+    };
   }
 
 })();

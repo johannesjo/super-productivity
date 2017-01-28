@@ -1,0 +1,19 @@
+.notes {
+  .markdown-wrapper {
+    div,
+    textarea {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+    }
+  }
+
+  textarea {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border: none;
+    padding: 10px;
+  }
+}
+

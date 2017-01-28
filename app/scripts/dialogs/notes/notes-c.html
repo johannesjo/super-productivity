@@ -1,0 +1,24 @@
+<md-dialog aria-label="Notes"
+           class="notes fullscreen-dialog">
+  <md-toolbar>
+    <div class="md-toolbar-tools">
+      <h2>Notes for project</h2>
+      <span flex></span>
+      <md-button class="md-icon-button"
+                 aria-label="Cancel"
+                 ng-click="vm.cancel()">
+        <ng-md-icon icon="close"></ng-md-icon>
+      </md-button>
+    </div>
+  </md-toolbar>
+  <md-dialog-content md-scroll-y
+                     layout="column"
+                     style="position: relative;"
+                     flex>
+    <!--<inline-markdown ng-model="vm.r.note"></inline-markdown>-->
+    <textarea ng-model="vm.r.note"
+              id="notes-textarea"
+              autofocus></textarea>
+  </md-dialog-content>
+
+</md-dialog>

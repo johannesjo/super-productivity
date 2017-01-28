@@ -42,6 +42,10 @@
         controller: 'CreateProjectCtrl',
         templateUrl: 'scripts/dialogs/create-project/create-project-c.html'
       },
+      NOTES: {
+        controller: 'NotesCtrl',
+        templateUrl: 'scripts/dialogs/notes/notes-c.html'
+      },
       SIMPLE_TASK_SUMMARY: {
         controller: 'SimpleTaskSummaryCtrl',
         templateUrl: 'scripts/dialogs/simple-task-summary/simple-task-summary-c.html'
