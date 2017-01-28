@@ -46,6 +46,10 @@
         controller: 'NotesCtrl',
         templateUrl: 'scripts/dialogs/notes/notes-c.html'
       },
+      DISTRACTIONS: {
+        controller: 'DistractionsCtrl',
+        templateUrl: 'scripts/dialogs/distractions/distractions-c.html'
+      },
       SIMPLE_TASK_SUMMARY: {
         controller: 'SimpleTaskSummaryCtrl',
         templateUrl: 'scripts/dialogs/simple-task-summary/simple-task-summary-c.html'

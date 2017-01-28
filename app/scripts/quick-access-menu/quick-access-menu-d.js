@@ -33,6 +33,11 @@
       Dialogs('NOTES');
       this.isOpen = false;
     };
+
+    this.openDistractionPanel = () => {
+      Dialogs('DISTRACTIONS');
+      this.isOpen = false;
+    };
   }
 
 })();

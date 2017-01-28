@@ -61,6 +61,8 @@ IMPORTANT NOTE:
 
 @import '../scripts/dialogs/create-project/_create-project-c.scss';
 
+@import '../scripts/dialogs/distractions/_distractions-c.scss';
+
 @import '../scripts/dialogs/jira-add-worklog/_jira-add-worklog-c.scss';
 
 @import '../scripts/dialogs/jira-set-in-progress/_jira-set-in-progress-c.scss';
@@ -74,8 +76,6 @@ IMPORTANT NOTE:
 @import '../scripts/dialogs/time-estimate/_time-estimate-c.scss';
 
 @import '../scripts/dialogs/was-idle/_was-idle-c.scss';
-
-@import '../scripts/distraction-panel/_distraction-panel-d.scss';
 
 @import '../scripts/done-tasks-backlog/_done-tasks-backlog-d.scss';
 

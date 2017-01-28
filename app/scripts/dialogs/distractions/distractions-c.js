@@ -1,8 +1,9 @@
 /**
- * @ngdoc directive
- * @name superProductivity.directive:distractionPanel
+ * @ngdoc function
+ * @name superProductivity.controller:DistractionsCtrl
  * @description
- * # distractionPanel
+ * # DistractionsCtrl
+ * Controller of the superProductivity
  */
 
 (function () {
@@ -10,25 +11,10 @@
 
   angular
     .module('superProductivity')
-    .directive('distractionPanel', distractionPanel);
+    .controller('DistractionsCtrl', DistractionsCtrl);
 
   /* @ngInject */
-  function distractionPanel() {
-    return {
-      templateUrl: 'scripts/distraction-panel/distraction-panel-d.html',
-      bindToController: true,
-      controller: DistractionPanelCtrl,
-      controllerAs: 'vm',
-      restrict: 'E',
-      scope: {
-        distractions: '='
-      }
-    };
-
-  }
-
-  /* @ngInject */
-  function DistractionPanelCtrl($localStorage) {
+  function DistractionsCtrl($mdDialog, $localStorage, SimpleToast) {
     let vm = this;
     vm.r = $localStorage;
     vm.isOpen = false;
@@ -53,9 +39,12 @@
       if (vm.newDistraction.length > 0) {
         $localStorage.distractions.push(vm.newDistraction);
       }
-      vm.close();
+      SimpleToast('Distraction saved for later');
+      $mdDialog.hide();
     };
 
+    this.cancel = () => {
+      $mdDialog.cancel();
+    };
   }
-
 })();
