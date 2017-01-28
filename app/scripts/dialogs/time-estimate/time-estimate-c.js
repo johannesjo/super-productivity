@@ -35,12 +35,6 @@
     if (!vm.timeSpentOnDayCopy[vm.todayStr]) {
       vm.timeSpentOnDayCopy[vm.todayStr] = undefined;
     }
-    //else if (vm.timeSpentOnDayCopy[vm.todayStr].asSeconds && vm.timeSpentOnDayCopy[vm.todayStr].asSeconds() < 1) {
-    //  // get rid of P0D
-    //  vm.timeSpentOnDayCopy[vm.todayStr] = undefined;
-    //}
-    console.log( vm.timeSpentOnDayCopy[vm.todayStr] );
-
 
     vm.deleteValue = (strDate) => {
       delete vm.timeSpentOnDayCopy[strDate];
