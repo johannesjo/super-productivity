@@ -77,7 +77,8 @@
     $mdThemingProvider.alwaysWatchTheme(true);
   }
 
-  function initGlobalModels(InitGlobalModels) {
+  function initGlobalModels(InitGlobalModels, $localStorage, LS_DEFAULTS) {
+    $localStorage.$default(LS_DEFAULTS);
     InitGlobalModels();
   }
 

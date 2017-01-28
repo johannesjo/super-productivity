@@ -14,7 +14,7 @@
     .service('Projects', Projects);
 
   /* @ngInject */
-  function Projects(LS_DEFAULTS, $localStorage, $rootScope, Uid, $window, SimpleToast, $state, $timeout) {
+  function Projects(LS_DEFAULTS, $localStorage, $rootScope, Uid, $window, SimpleToast, $injector) {
     const OMITTED_LS_FIELDS = ['currentProject', 'tomorrowsNote', 'projects', '$$hashKey', '$$mdSelectId', 'bodyClass'];
 
     this.getList = () => {
@@ -32,11 +32,11 @@
         currentProject = $window._.find($localStorage.projects, (project) => {
           return $localStorage.currentProject.id === project.id;
         });
-        $rootScope.r.currentProject = $localStorage.currentProject = currentProject;
+        $localStorage.currentProject = currentProject;
       } else {
-        $rootScope.r.currentProject = $localStorage.currentProject;
-        return $rootScope.r.currentProject;
+        return $localStorage.currentProject;
       }
+
       return currentProject;
     };
 
@@ -106,36 +106,33 @@
     };
 
     this.changeCurrent = (newCurrentProjectParam) => {
-      const oldCurrentProject = $rootScope.r.currentProject;
+      const InitGlobalModels = $injector.get('InitGlobalModels');
+      const oldCurrentProject = angular.copy($localStorage.currentProject);
       const newCurrentProject = this.getById(newCurrentProjectParam.id);
 
       if (newCurrentProject && newCurrentProject.id && oldCurrentProject && oldCurrentProject.id !== newCurrentProject.id) {
         // when there is an old current project existing
         if (oldCurrentProject && oldCurrentProject.id) {
           // save all current project data in $localStorage.projects[oldProject]
-          this.updateProjectData(oldCurrentProject.id, $rootScope.r);
+          this.updateProjectData(oldCurrentProject.id, $localStorage);
         }
         // update with new model fields, if we change the model
         this.updateNewFields(newCurrentProject);
         // remove omitted fields if we saved them for some reason
         this.removeOmittedFields(newCurrentProject);
 
-        // update $rootScope data and ls for current project
-        $rootScope.r.currentProject = $localStorage.currentProject = newCurrentProject;
-
-        // load all other data from new project to $rootScope if operation is successfull
+        // load all other data from new project to $localStorage
         _.forOwn(newCurrentProject.data, (val, property) => {
           if (newCurrentProject.data.hasOwnProperty(property)) {
-            $rootScope.r[property] = $localStorage[property] = newCurrentProject.data[property];
+            $localStorage[property] = newCurrentProject.data[property];
           }
         });
 
-        // TODO fix theme update here
+        // update ls $localStorage current project
+        $localStorage.currentProject = newCurrentProject;
 
-        // TODO this causes a lot of trouble
-        $timeout(() => {
-          $state.reload();
-        }, 60);
+        // re-init all global models
+        InitGlobalModels();
       }
     };
   }

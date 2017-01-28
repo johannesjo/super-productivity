@@ -14,9 +14,8 @@
     .service('InitGlobalModels', InitGlobalModels);
 
   /* @ngInject */
-  function InitGlobalModels(LS_DEFAULTS, DEFAULT_THEME, $rootScope, Tasks, $localStorage, Projects, $state) {
+  function InitGlobalModels(DEFAULT_THEME, $rootScope, Tasks, $localStorage, Projects, $state) {
     return () => {
-      $localStorage.$default(LS_DEFAULTS);
 
       // we don't use r.$state because it looks more like something special
       // this way
