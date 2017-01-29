@@ -32,7 +32,28 @@ task-list {
   color: #333;
   body.dark-theme & {
     background-color: $dark-theme-bg-lighter;
-    color: #fff;
+    color: #ddd;
+
+    &.is-done {
+      .time,
+      > .title,
+      > .first-line > .title {
+        color: #777;
+      }
+    }
+  }
+
+  &.is-done {
+    .time,
+    > .title,
+    > .first-line > .title {
+      color: #aaa;
+    }
+
+    > .title,
+    > .first-line > .title {
+      text-decoration: line-through;
+    }
   }
 
   &.as-sortable-dragging,
@@ -41,7 +62,7 @@ task-list {
     color: #000;
     body.dark-theme & {
       background-color: $dark-theme-bg-darker;
-      color: #fff;
+      color: #ddd;
     }
   }
 
@@ -107,13 +128,6 @@ task-list {
 
   .title {
 
-  }
-
-  &.is-done {
-    > .title,
-    > .first-line > .title {
-      text-decoration: line-through;
-    }
   }
 
   ng-md-icon.delete-icon {
