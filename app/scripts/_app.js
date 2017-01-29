@@ -32,8 +32,7 @@
       'as.sortable',
       'angularMoment',
       'hc.marked',
-      'mwl.calendar',
-      'ngOrderObjectBy'
+      'mwl.calendar'
     ])
     .config(configMdTheme)
     .config(configMarked)
