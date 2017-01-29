@@ -87,7 +87,13 @@
       if (angular.isArray(tasks) && tasks.length > 0) {
         totalEstimate = moment.duration();
         _.each(tasks, (task) => {
-          totalEstimate.add(task.timeEstimate);
+          if (task.subTasks && task.subTasks.length > 0) {
+            _.each(task.subTasks, (subTask) => {
+              totalEstimate.add(subTask.timeEstimate);
+            });
+          } else {
+            totalEstimate.add(task.timeEstimate);
+          }
         });
       }
       return totalEstimate;
