@@ -76,11 +76,11 @@
         // update $localStorage.projects
         $localStorage.projects.push(newProject);
 
-        // update data for current new project from current ls data
+        // update data for current new project from current data
         this.updateProjectData(newProject.id, data);
 
         // switch to new project
-        $localStorage.currentProject = newProject;
+        this.changeCurrent(newProject);
       }
     };
 
