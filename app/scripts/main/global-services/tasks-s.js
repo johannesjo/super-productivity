@@ -29,8 +29,8 @@
       // SETUP HANDLERS FOR ELECTRON EVENTS
       if (IS_ELECTRON) {
         let that = this;
-
         let isIdleDialogOpen = false;
+
         // handler for time spent tracking
         window.ipcRenderer.on(IPC_EVENT_UPDATE_TIME_SPEND_FOR_CURRENT, (ev, evData) => {
           if (!isIdleDialogOpen) {
@@ -316,7 +316,6 @@
           if (!isCallFromTimeTracking) {
             // check for updates
             // NOTE: if checks for isJiraTicket are made in function
-            // TODO should be refactored maybe
             this.Jira.checkUpdatesForTaskOrParent(task);
 
             if (isCurrentTaskChanged) {
@@ -331,9 +330,7 @@
               }
             }
           }
-        }
 
-        if (task && task.title) {
           window.ipcRenderer.send(IPC_EVENT_CURRENT_TASK_UPDATED, task);
         }
       }
@@ -519,7 +516,7 @@
       }
 
       // also remove the current task to prevent time tracking
-      this.updateCurrent(null);
+      this.updateCurrent(undefined);
     }
 
     selectNextTask(finishedCurrentTask) {
