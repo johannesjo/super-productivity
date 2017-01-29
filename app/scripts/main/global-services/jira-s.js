@@ -149,7 +149,7 @@
 
       function transitionSuccess(res) {
         that.checkUpdatesForTaskOrParent(task, true);
-
+        SimpleToast('Jira: Updated task status to \'' + task.originalStatus.name + '\'');
         // update
         task.status = type;
         defer.resolve(res);
