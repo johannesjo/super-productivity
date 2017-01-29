@@ -41,7 +41,7 @@
           });
           console.log(firstDupe);
 
-          SimpleToast('!!! Dupes detected in data for the ids: ' + dupeIds.join(', ') + '. First task title is "' + firstDupe.title + '" !!!', 60000);
+          SimpleToast('ERROR', '!!! Dupes detected in data for the ids: ' + dupeIds.join(', ') + '. First task title is "' + firstDupe.title + '" !!!', 60000);
         }
         return hasDupe;
       }

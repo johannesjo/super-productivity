@@ -39,7 +39,7 @@
       if (vm.newDistraction.length > 0) {
         $localStorage.distractions.push(vm.newDistraction);
       }
-      SimpleToast('Distraction saved for later');
+      SimpleToast('SUCCESS', 'Distraction saved for later');
       $mdDialog.hide();
     };
 

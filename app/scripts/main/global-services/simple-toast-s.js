@@ -15,15 +15,49 @@
 
   /* @ngInject */
   function SimpleToast($mdToast) {
+    return (textContent, type, hideDelay) => {
+      if (!type) {
+        return $mdToast.show($mdToast.simple()
+          .textContent(textContent)
+          .capsule(false)
+          .hideDelay(hideDelay || 4000)
+          .position('bottom'));
+      } else {
+        let icon;
+        let iconColor;
 
-    return (textContent, hideDelay) => {
-      return $mdToast.show($mdToast.simple()
-        .textContent(textContent)
-        .capsule(false)
-        .hideDelay(hideDelay || 3000)
-        .position('bottom'));
+        if ([
+            'SUCCESS',
+            'ERROR'
+          ].indexOf(textContent) > -1) {
+          const tmpType = textContent;
+          textContent = type;
+          type = tmpType;
+        }
+
+        if (type === 'SUCCESS') {
+          icon = 'check_circle';
+          iconColor = '#4fa758';
+        }
+        else if (type === 'ERROR') {
+          icon = 'error';
+          iconColor = '#e15d63';
+        }
+
+        return $mdToast.show({
+          template: `
+<md-toast>
+<div class="md-toast-content">
+<div><ng-md-icon icon="${icon}" ${iconColor && 'style="fill:' + iconColor + '"'}></ng-md-icon>
+${textContent} 
+</div>
+</div>          
+</md-toast>
+          `,
+          hideDelay: hideDelay || 4000
+        });
+      }
     };
-    // AngularJS will instantiate a singleton by calling "new" on this function
   }
 
 })();

@@ -16,7 +16,7 @@
   /* @ngInject */
   class Tasks {
 
-    constructor($localStorage, Uid, $rootScope, Dialogs, IS_ELECTRON, ShortSyntax, TasksUtil, Jira, TakeABreakReminder) {
+    constructor($localStorage, Uid, $rootScope, Dialogs, IS_ELECTRON, ShortSyntax, TasksUtil, Jira, TakeABreakReminder, SimpleToast) {
       this.$localStorage = $localStorage;
       this.Uid = Uid;
       this.$rootScope = $rootScope;
@@ -24,6 +24,7 @@
       this.ShortSyntax = ShortSyntax;
       this.TasksUtil = TasksUtil;
       this.IS_ELECTRON = IS_ELECTRON;
+      this.SimpleToast = SimpleToast;
       this.Jira = Jira;
 
       // SETUP HANDLERS FOR ELECTRON EVENTS
@@ -257,7 +258,7 @@
     addToday(task) {
       if (task && task.title) {
         this.$localStorage.tasks.push(this.createTask(task));
-        // update global pointer for today tasks
+        this.SimpleToast('SUCCESS', 'Task "' + task.title + '" created.');
         return true;
       }
     }
@@ -292,7 +293,6 @@
 
       // unset current task first
       this.updateCurrent(undefined);
-
 
       task.isDone = true;
       task.doneDate = moment();

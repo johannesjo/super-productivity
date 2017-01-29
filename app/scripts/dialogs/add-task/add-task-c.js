@@ -22,7 +22,7 @@
       let success = Tasks.addToday(vm.task);
 
       if (success) {
-        SimpleToast('Created task "' + vm.task.title + '"');
+        SimpleToast('SUCCESS', 'Created task "' + vm.task.title + '"');
         $mdDialog.hide();
       }
     };

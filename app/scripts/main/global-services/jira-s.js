@@ -51,7 +51,7 @@
           if (!res || res.error) {
             $log.log('FRONTEND_REQUEST', currentRequest);
             $log.log('RESPONSE', res);
-            SimpleToast('Jira Request failed: ' + currentRequest.clientRequest.apiMethod + ' – ' + (res && res.error));
+            SimpleToast('ERROR', 'Jira Request failed: ' + currentRequest.clientRequest.apiMethod + ' – ' + (res && res.error), 'ERROR');
             currentRequest.defer.reject(res);
           } else {
             currentRequest.defer.resolve(res);
@@ -192,10 +192,10 @@
           }]
         };
         return this.sendRequest(request).then(() => {
-          SimpleToast('Jira: Description updated for ' + task.originalKey);
+          SimpleToast('SUCCESS', 'Jira: Description updated for ' + task.originalKey);
         });
       } else {
-        SimpleToast('Jira: Not enough parameters for updateIssueDescription.');
+        SimpleToast('ERROR', 'Jira: Not enough parameters for updateIssueDescription.');
         return $q.reject('Jira: Not enough parameters for updateIssueDescription.');
       }
     };
@@ -233,7 +233,7 @@
 
         return defer.promise;
       } else {
-        SimpleToast('Jira Request failed: Not a real ' + ISSUE_TYPE + ' issue.');
+        SimpleToast('ERROR', 'Jira Request failed: Not a real ' + ISSUE_TYPE + ' issue.');
         return $q.reject('Not a real ' + ISSUE_TYPE + ' issue.');
       }
     };
@@ -249,7 +249,7 @@
       let comment;
 
       function successHandler(res) {
-        SimpleToast('Jira: Updated worklog for ' + task.originalKey + ' by ' + parseInt(outerTimeSpent.asMinutes()) + 'm.');
+        SimpleToast('SUCCESS', 'Jira: Updated worklog for ' + task.originalKey + ' by ' + parseInt(outerTimeSpent.asMinutes()) + 'm.');
 
         // set original update to now to prevent showing this as task update
         task.originalUpdated = moment().format(JIRA_DATE_FORMAT);
@@ -318,7 +318,7 @@
         };
         return this.sendRequest(request);
       } else {
-        SimpleToast('Jira: Not enough parameters for worklog.');
+        SimpleToast('ERROR', 'Jira: Not enough parameters for worklog.');
         return $q.reject('Jira: Not enough parameters for worklog.');
       }
     };
@@ -332,7 +332,7 @@
         };
         return this.sendRequest(request);
       } else {
-        SimpleToast('Jira Request failed: Not a real ' + ISSUE_TYPE + ' issue.');
+        SimpleToast('ERROR', 'Jira Request failed: Not a real ' + ISSUE_TYPE + ' issue.');
         return $q.reject('Not a real ' + ISSUE_TYPE + ' issue.');
       }
     };
@@ -348,7 +348,7 @@
         // set original update to now to prevent showing this as task update
         task.originalUpdated = moment().format(JIRA_DATE_FORMAT);
 
-        SimpleToast('Jira: Updated task status to \'' + (transitionObj.name || localType) + '\'');
+        SimpleToast('SUCCESS', 'Jira: Updated task status to \'' + (transitionObj.name || localType) + '\'');
         defer.resolve(res);
       }
 
@@ -404,7 +404,7 @@
           requestMethod: request.apiMethod,
           clientRequest: request,
           timeout: $timeout(() => {
-            SimpleToast('Jira Request timed out for ' + request.apiMethod);
+            SimpleToast('ERROR', 'Jira Request timed out for ' + request.apiMethod);
             // delete entry for promise
             delete this.requestsLog[request.requestId];
           }, REQUEST_TIMEOUT)

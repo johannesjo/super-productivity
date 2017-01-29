@@ -39,7 +39,7 @@
     if (IS_ELECTRON) {
       Jira.getSuggestions().then((res) => {
         vm.taskSuggestions = Jira.transformIssues(res) || [];
-      })
+      });
     } else {
       vm.taskSuggestions = [];
     }

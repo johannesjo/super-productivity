@@ -35,7 +35,7 @@
     vm.createNewProjectFromCurrent = (projectTitle) => {
       Projects.createNewFromCurrent(projectTitle);
 
-      SimpleToast('Project "' + projectTitle + '" successfully saved');
+      SimpleToast('SUCCESS', 'Project "' + projectTitle + '" successfully saved');
     };
 
     vm.createNewProject = () => {
@@ -44,7 +44,7 @@
 
     vm.deleteProject = (project, $index) => {
       if (project.id === $localStorage.currentProject.id) {
-        SimpleToast('Cannot delete ' + project.title + ' as it is the current project!');
+        SimpleToast('ERROR', 'Cannot delete ' + project.title + ' as it is the current project!');
       } else {
         let confirm = $mdDialog.confirm()
           .title('Would you like to delete ' + project.title + '?')
@@ -55,7 +55,7 @@
 
         $mdDialog.show(confirm).then(function () {
           vm.allProjects.splice($index, 1);
-          SimpleToast(project.title + ' deleted!');
+          SimpleToast('SUCCESS', project.title + ' deleted!');
         });
       }
     };
@@ -84,7 +84,7 @@
         $localStorage.currentProject.data.jiraSettings = settings;
       }
 
-      SimpleToast('Jira settings saved');
+      SimpleToast('SUCCESS', 'Jira settings saved');
     };
 
     // theme stuff

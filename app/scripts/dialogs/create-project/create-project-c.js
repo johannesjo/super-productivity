@@ -14,18 +14,13 @@
     .controller('CreateProjectCtrl', CreateProjectCtrl);
 
   /* @ngInject */
-  function CreateProjectCtrl($mdDialog, Projects, $mdToast) {
+  function CreateProjectCtrl($mdDialog, Projects, SimpleToast) {
     let vm = this;
     vm.task = {};
 
     vm.createProject = (project) => {
       Projects.createNew(project.title, {});
-
-      let toast = $mdToast.simple()
-        .textContent('You created the project "' + project.title + '"')
-        .position('bottom');
-      $mdToast.show(toast);
-
+      SimpleToast('SUCCESS', 'You created the project "' + project.title + '"');
       $mdDialog.hide();
     };
 

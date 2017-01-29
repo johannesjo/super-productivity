@@ -57,7 +57,7 @@
 
     this.createNewFromCurrent = (projectTitle) => {
       if ($localStorage.projects.length > 0) {
-        SimpleToast('ERROR: There is already a project');
+        SimpleToast('ERROR', 'ERROR: There is already a project');
         return;
       }
 
