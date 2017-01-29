@@ -15,9 +15,19 @@
   <form ng-submit="vm.updateTask(vm.chosenTransitionIndex)">
     <md-dialog-content>
       <div class="md-dialog-content">
-        <p><strong ng-if="vm.type==='OPEN'">Open</strong>
-          <strong ng-if="vm.type==='IN_PROGRESS'">In progress</strong>
-          <strong ng-if="vm.type==='DONE'">Done</strong>: Do you want to update the task '<strong>{{ vm.task.title }}</strong>' on jira?
+        <p>
+          <span ng-if="vm.type==='OPEN'">
+            <strong>Open</strong>: You stopped working on a task.
+          </span>
+          <span ng-if="vm.type==='IN_PROGRESS'">
+            <strong>In progress</strong>: You started to work on a task.
+          </span>
+          <span ng-if="vm.type==='DONE'">
+            <strong>Done</strong>: You completed a task.
+          </span>
+        </p>
+        <p>
+          Do you want to update the task '<strong>{{ vm.task.title }}</strong>' on jira?
         </p>
 
         <p>Move to:</p>
