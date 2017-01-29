@@ -34,18 +34,18 @@
         // handler for time spent tracking
         window.ipcRenderer.on(IPC_EVENT_UPDATE_TIME_SPEND_FOR_CURRENT, (ev, evData) => {
           if (!isIdleDialogOpen) {
-            let timeSpentInMs = evData.timeSpentInMs;
-            let idleTimeInMs = evData.idleTimeInMs;
-
             // only track if there is a task
-            if (this.$localStorage.currentTask) {
+            if (that.$localStorage.currentTask) {
+              let timeSpentInMs = evData.timeSpentInMs;
+              let idleTimeInMs = evData.idleTimeInMs;
 
-              that.addTimeSpent(this.$localStorage.currentTask, timeSpentInMs);
-              that.updateCurrent(this.$localStorage.currentTask, true);
               TakeABreakReminder.check(timeSpentInMs, idleTimeInMs);
 
-              // we need to manually call apply as this is an outside event
-              this.$rootScope.$apply();
+              // track
+              this.addTimeSpent(this.$localStorage.currentTask, timeSpentInMs);
+
+              // we need to manually call apply as that is an outside event
+              that.$rootScope.$apply();
             }
           }
         });

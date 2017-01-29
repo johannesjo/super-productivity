@@ -39,6 +39,7 @@
     .config(configMarked)
     .run(initGlobalModels)
     .run(initPollCurrentTaskUpdates)
+    .run(initPollForSimpleTimeTracking)
     .run(initMousewheelZoomForElectron)
     .run(initGlobalShortcuts);
 
@@ -104,12 +105,29 @@
     });
   }
 
-  function initPollCurrentTaskUpdates($rootScope, Jira, IS_ELECTRON, $interval, JIRA_UPDATE_POLL_INTERVAL) {
+  function initPollForSimpleTimeTracking($localStorage, IS_ELECTRON, $interval, SIMPLE_TIME_TRACKING_INTERVAL, Tasks) {
+    // if NOT in electron context
+    if (!IS_ELECTRON) {
+      let currentTrackingStart;
+      $interval(() => {
+        if ($localStorage.currentTask) {
+          if (currentTrackingStart) {
+            let now = moment();
+            let realIdleTime = moment.duration(now.diff(currentTrackingStart)).asMilliseconds();
+            Tasks.addTimeSpent($localStorage.currentTask, realIdleTime);
+          }
+          currentTrackingStart = moment();
+        }
+      }, SIMPLE_TIME_TRACKING_INTERVAL);
+    }
+  }
+
+  function initPollCurrentTaskUpdates($localStorage, Jira, IS_ELECTRON, $interval, JIRA_UPDATE_POLL_INTERVAL) {
     // handle updates that need to be made locally
     if (IS_ELECTRON) {
       $interval(() => {
-        if ($rootScope.r.currentTask) {
-          Jira.checkUpdatesForTaskOrParent($rootScope.r.currentTask);
+        if ($localStorage.currentTask) {
+          Jira.checkUpdatesForTaskOrParent($localStorage.currentTask);
         }
       }, JIRA_UPDATE_POLL_INTERVAL);
     }

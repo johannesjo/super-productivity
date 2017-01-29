@@ -50,6 +50,7 @@
     .constant('REQUEST_TIMEOUT', 15000)
     .constant('WORKLOG_DATE_STR_FORMAT', 'YYYY-MM-DD')
     .constant('JIRA_UPDATE_POLL_INTERVAL', 60 * 1000 * 5)
+    .constant('SIMPLE_TIME_TRACKING_INTERVAL', 1000 * 5)
     .constant('IS_ELECTRON', (typeof window.ipcRenderer !== 'undefined'))
     .constant('THEMES', [
         'red',
