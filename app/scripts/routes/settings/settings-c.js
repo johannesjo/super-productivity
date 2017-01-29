@@ -14,7 +14,7 @@
     .controller('SettingsCtrl', SettingsCtrl);
 
   /* @ngInject */
-  function SettingsCtrl($localStorage, $window, $scope, Projects, Dialogs, DEFAULT_THEME, THEMES, IS_ELECTRON, SimpleToast, $mdDialog) {
+  function SettingsCtrl($localStorage, $window, $scope, Projects, Dialogs, DEFAULT_THEME, THEMES, IS_ELECTRON, SimpleToast, $mdDialog, Jira) {
     let vm = this;
     const _ = $window._;
 
@@ -77,14 +77,10 @@
     };
 
     // jira stuff
-    vm.saveJiraSettings = (settings) => {
-      $localStorage.jiraSettings = $localStorage.jiraSettings = settings;
-      // for some reason project needs to be updated directly
-      if ($localStorage.currentProject && $localStorage.currentProject.data) {
-        $localStorage.currentProject.data.jiraSettings = settings;
-      }
-
-      SimpleToast('SUCCESS', 'Jira settings saved');
+    vm.testJiraCredentials = () => {
+      Jira.getSuggestions().then(() => {
+        SimpleToast('SUCCESS', 'Connection successful!');
+      });
     };
 
     // theme stuff

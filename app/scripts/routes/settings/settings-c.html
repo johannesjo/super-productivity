@@ -99,7 +99,12 @@
                  aria-label="Update issue description on jira if task notes are updated">
         Update issue description on jira if task notes are updated
       </md-switch>
-
+      <md-button aria-label="Test credentials"
+                 class="md-primary md-raised"
+                 ng-click="vm.testJiraCredentials()">
+        <ng-md-icon icon="import_export"></ng-md-icon>
+        Test credentials
+      </md-button>
       <section>
         <h3 class="md-subtitle">Worklog</h3>
 

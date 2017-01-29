@@ -51,7 +51,7 @@
           if (!res || res.error) {
             $log.log('FRONTEND_REQUEST', currentRequest);
             $log.log('RESPONSE', res);
-            SimpleToast('ERROR', 'Jira Request failed: ' + currentRequest.clientRequest.apiMethod + ' – ' + (res && res.error), 'ERROR');
+            SimpleToast('ERROR', 'Jira Request failed: ' + currentRequest.clientRequest.apiMethod + ' – ' + (res && res.error));
             currentRequest.defer.reject(res);
           } else {
             currentRequest.defer.resolve(res);

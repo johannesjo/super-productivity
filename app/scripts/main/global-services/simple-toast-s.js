@@ -15,12 +15,15 @@
 
   /* @ngInject */
   function SimpleToast($mdToast) {
+    const DEFAULT_HIDE_DELAY = 4000;
+
     return (textContent, type, hideDelay) => {
+
       if (!type) {
         return $mdToast.show($mdToast.simple()
           .textContent(textContent)
           .capsule(false)
-          .hideDelay(hideDelay || 4000)
+          .hideDelay(hideDelay || DEFAULT_HIDE_DELAY)
           .position('bottom'));
       } else {
         let icon;
@@ -54,7 +57,7 @@ ${textContent}
 </div>          
 </md-toast>
           `,
-          hideDelay: hideDelay || 4000
+          hideDelay: hideDelay || DEFAULT_HIDE_DELAY
         });
       }
     };
