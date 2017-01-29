@@ -14,17 +14,18 @@
     .controller('AddTaskCtrl', AddTaskCtrl);
 
   /* @ngInject */
-  function AddTaskCtrl($mdDialog, Tasks, SimpleToast) {
+  function AddTaskCtrl($mdDialog, Tasks) {
     let vm = this;
     vm.task = {};
 
     vm.addTask = () => {
-      let success = Tasks.addToday(vm.task);
-
-      if (success) {
-        SimpleToast('SUCCESS', 'Created task "' + vm.task.title + '"');
-        $mdDialog.hide();
+      if (vm.isAddToBacklog) {
+        Tasks.addNewToTopOfBacklog(vm.task);
+      } else {
+        Tasks.addToday(vm.task);
       }
+
+      $mdDialog.hide();
     };
 
     vm.cancel = () => {

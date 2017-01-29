@@ -259,7 +259,6 @@
       if (task && task.title) {
         this.$localStorage.tasks.push(this.createTask(task));
         this.SimpleToast('SUCCESS', 'Task "' + task.title + '" created.');
-        return true;
       }
     }
 
@@ -485,6 +484,13 @@
 
     updateBacklog(tasks) {
       this.$localStorage.backlogTasks = tasks;
+    }
+
+    addNewToTopOfBacklog(task) {
+      if (task && task.title) {
+        this.$localStorage.backlogTasks.unshift(this.createTask(task));
+        this.SimpleToast('SUCCESS', 'Task "' + task.title + '" created and added to backlog.');
+      }
     }
 
     addTasksToTopOfBacklog(tasks) {

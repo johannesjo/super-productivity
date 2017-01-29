@@ -41,6 +41,10 @@
           <textarea ng-model="vm.task.notes"
                     aria-label="Notes"></textarea>
         </md-input-container>
+        <md-switch ng-model="vm.isAddToBacklog"
+                   aria-label="Add task to backlog">
+          Add task to backlog instead of todays list
+        </md-switch>
       </div>
     </md-dialog-content>
 
