@@ -240,11 +240,22 @@
 
     this.addWorklog = (originalTask) => {
       const Tasks = $injector.get('Tasks');
+      let defer = $q.defer();
+      let outerTimeSpent;
 
       // WE'RE always copying the task for add work log
       // so no data should be added back by this call!
       let task = angular.copy(originalTask);
       let comment;
+
+      function successHandler(res) {
+        SimpleToast('Jira: Updated worklog for ' + task.originalKey + ' by ' + parseInt(outerTimeSpent.asMinutes()) + 'm.');
+
+        // set original update to now to prevent showing this as task update
+        task.originalUpdated = moment().format(JIRA_DATE_FORMAT);
+
+        defer.resolve(res);
+      }
 
       if ($localStorage.jiraSettings.isWorklogEnabled) {
 
@@ -271,26 +282,27 @@
         }
 
         if (task.originalKey && task.originalType === ISSUE_TYPE) {
-          if ($localStorage.jiraSettings.isAutoWorklog) {
-            return this._addWorklog(task.originalKey, task.started, task.timeSpent);
-          } else {
-
-            let defer = $q.defer();
-            Dialogs('JIRA_ADD_WORKLOG', { task, comment })
-              .then((taskCopy) => {
-                this._addWorklog(taskCopy.originalKey, taskCopy.started, taskCopy.timeSpent, taskCopy.comment)
-                  .then((res) => {
-                    SimpleToast('Jira: Updated worklog for ' + taskCopy.originalKey + ' by ' + parseInt(taskCopy.timeSpent.asMinutes()) + 'm.');
-                    defer.resolve(res);
+          this.checkUpdatesForTicket(task)
+            .then(() => {
+              if ($localStorage.jiraSettings.isAutoWorklog) {
+                outerTimeSpent = task.timeSpent;
+                this._addWorklog(task.originalKey, moment(task.started), task.timeSpent)
+                  .then(successHandler, defer.reject);
+              } else {
+                Dialogs('JIRA_ADD_WORKLOG', { task, comment })
+                  .then((dialogTaskCopy) => {
+                    outerTimeSpent = dialogTaskCopy.timeSpent;
+                    this._addWorklog(dialogTaskCopy.originalKey, dialogTaskCopy.started, dialogTaskCopy.timeSpent, dialogTaskCopy.comment)
+                      .then(successHandler, defer.reject);
                   }, defer.reject);
-              }, defer.reject);
-
-            return defer.promise;
-          }
+              }
+            }, defer.reject);
         }
       } else {
-        return $q.reject('Jira: Task or Parent Task are no Jira Tasks.');
+        defer.reject('Jira: Task or Parent Task are no Jira Tasks.');
       }
+
+      return defer.promise;
     };
 
     this._addWorklog = (originalKey, started, timeSpent, comment) => {

@@ -125,9 +125,9 @@
         <md-input-container class="md-block">
           <div flex-gt-sm="50">
             <md-switch ng-model="r.jiraSettings.isAutoWorklog"
-                       ng-disabled="!r.jiraSettings.isAutoWorklog"
+                       ng-disabled="!r.jiraSettings.isWorklogEnabled"
                        aria-label="(not recommended) send updates to worklog automatically when task is done">
-              (not recommended!) Send updates to worklog automatically when task is done
+              (not recommended!) Send updates to worklog automatically without dialog
             </md-switch>
           </div>
         </md-input-container>
