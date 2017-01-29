@@ -170,6 +170,12 @@ task-list {
   //  }
   //}
 
+  md-progress-linear {
+    margin-left: -12px;
+    margin-right: -12px;
+    width: auto;
+  }
+
   md-progress-linear.md-default-theme .md-container,
   md-progress-linear .md-container {
     background: none;
