@@ -42,7 +42,7 @@
               TakeABreakReminder.check(timeSpentInMs, idleTimeInMs);
 
               // track
-              this.addTimeSpent(this.$localStorage.currentTask, timeSpentInMs);
+              this.addTimeSpent(that.$localStorage.currentTask, timeSpentInMs);
 
               // we need to manually call apply as that is an outside event
               that.$rootScope.$apply();
