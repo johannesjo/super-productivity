@@ -40,6 +40,10 @@
         isAddWorklogOnSubTaskDone: true,
         defaultTransitionInProgress: undefined,
         defaultTransitionDone: undefined,
+        jqlQuery: 'resolution = Unresolved ORDER BY updatedDate DESC',
+        userName: undefined,
+        password: undefined,
+        host: undefined,
         transitions: {
           OPEN: 'ALWAYS_ASK',
           IN_PROGRESS: 'ALWAYS_ASK',

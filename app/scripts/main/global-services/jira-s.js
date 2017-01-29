@@ -14,7 +14,7 @@
     .service('Jira', Jira);
 
   /* @ngInject */
-  function Jira(Uid, $q, $localStorage, $window, Dialogs, IS_ELECTRON, SimpleToast, Notifier, $injector, $timeout, REQUEST_TIMEOUT) {
+  function Jira(Uid, $q, $localStorage, $window, Dialogs, IS_ELECTRON, SimpleToast, Notifier, $injector, $timeout, REQUEST_TIMEOUT, $log) {
     const IPC_JIRA_CB_EVENT = 'JIRA_RESPONSE';
     const IPC_JIRA_MAKE_REQUEST_EVENT = 'JIRA';
 
@@ -45,8 +45,8 @@
         if (res.requestId && this.requestsLog[res.requestId]) {
           // resolve saved promise
           if (!res || res.error) {
-            console.log('FRONTEND_REQUEST', this.requestsLog[res.requestId]);
-            console.log('RESPONSE', res);
+            $log.log('FRONTEND_REQUEST', this.requestsLog[res.requestId]);
+            $log.log('RESPONSE', res);
             SimpleToast('Jira Request failed: ' + this.requestsLog[res.requestId].clientRequest.apiMethod + ' – ' + (res && res.error));
             this.requestsLog[res.requestId].defer.reject(res);
           } else {
@@ -119,6 +119,10 @@
           seconds: issue.fields.timespent
         }),
       };
+    }
+
+    function isSufficientJiraSettings() {
+      return $localStorage.jiraSettings && $localStorage.jiraSettings.host && $localStorage.jiraSettings.userName && $localStorage.jiraSettings.password && $localStorage.jiraSettings.password;
     }
 
     this.transformIssues = (response) => {
@@ -341,7 +345,7 @@
         fields: SUGGESTION_FIELDS_TO_GET
       };
 
-      if ($localStorage.jiraSettings && $localStorage.jiraSettings.userName && $localStorage.jiraSettings.password && $localStorage.jiraSettings.password && $localStorage.jiraSettings.jqlQuery) {
+      if (isSufficientJiraSettings() && $localStorage.jiraSettings.jqlQuery) {
         let request = {
           config: $localStorage.jiraSettings,
           apiMethod: 'searchJira',
@@ -355,7 +359,7 @@
 
     this.sendRequest = (request) => {
       if (!$localStorage.jiraSettings) {
-        console.log('NO SETTINGS DEFINED');
+        $log.log('NO SETTINGS DEFINED');
         return;
       }
 
