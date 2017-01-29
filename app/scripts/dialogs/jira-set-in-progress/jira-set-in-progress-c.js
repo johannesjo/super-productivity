@@ -14,11 +14,11 @@
     .controller('JiraSetInProgressCtrl', JiraSetInProgressCtrl);
 
   /* @ngInject */
-  function JiraSetInProgressCtrl($mdDialog, task, transitions, type, $window, $localStorage) {
+  function JiraSetInProgressCtrl($mdDialog, task, transitions, localType, $window, $localStorage) {
     let vm = this;
     vm.transitions = transitions;
     vm.task = task;
-    vm.type = type;
+    vm.localType = localType;
 
     vm.chosenTransitionIndex = $window._.findIndex(vm.transitions, (transition) => {
       return transition.name === (vm.task.originalStatus && vm.task.originalStatus.name);
@@ -31,7 +31,7 @@
         if (!$localStorage.jiraSettings.transitions) {
           $localStorage.jiraSettings.transitions = {};
         }
-        $localStorage.jiraSettings.transitions[type] = transition.id;
+        $localStorage.jiraSettings.transitions[localType] = transition.id;
         $localStorage.jiraSettings.allTransitions = transitions;
       }
 

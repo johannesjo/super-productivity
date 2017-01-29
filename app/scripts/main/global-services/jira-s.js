@@ -82,9 +82,9 @@
         transformedChangelog = [];
         let changelog = issue.changelog;
         if (changelog.histories) {
-          // we also add 2 seconds because of the millisecond difference
+          // we also add 0.5 seconds because of the millisecond difference
           // for issue updated and historyEntry.created
-          let lastUpdate = task.originalUpdated && moment(task.originalUpdated).add(2, 'second');
+          let lastUpdate = task.originalUpdated && moment(task.originalUpdated).add(0.5, 'second');
           for (let i = 0; i < changelog.histories.length; i++) {
             let history = changelog.histories[i];
             let historyCreated = moment(history.created);
@@ -143,28 +143,19 @@
       }
     };
 
-    this.updateStatus = (task, type) => {
+    this.updateStatus = (task, localType) => {
       const defer = $q.defer();
-      const that = this;
-
-      function transitionSuccess(res) {
-        that.checkUpdatesForTaskOrParent(task, true);
-        SimpleToast('Jira: Updated task status to \'' + task.originalStatus.name + '\'');
-        // update
-        task.status = type;
-        defer.resolve(res);
-      }
 
       if (task.originalKey && task.originalType === ISSUE_TYPE) {
-        if ($localStorage.jiraSettings.transitions && $localStorage.jiraSettings.transitions[type] && $localStorage.jiraSettings.transitions[type] !== 'ALWAYS_ASK') {
-          if ($localStorage.jiraSettings.transitions[type] === 'DO_NOT') {
+        if ($localStorage.jiraSettings.transitions && $localStorage.jiraSettings.transitions[localType] && $localStorage.jiraSettings.transitions[localType] !== 'ALWAYS_ASK') {
+          if ($localStorage.jiraSettings.transitions[localType] === 'DO_NOT') {
             defer.reject('DO_NOT chosen');
           } else {
-            if (task.status !== type) {
-              this.transitionIssue(task.originalId, {
-                id: $localStorage.jiraSettings.transitions[type]
-              })
-                .then(transitionSuccess, defer.reject);
+            if (task.status !== localType) {
+              this.transitionIssue(task, {
+                id: $localStorage.jiraSettings.transitions[localType]
+              }, localType)
+                .then(defer.resolve, defer.reject);
             } else {
               defer.resolve('NO NEED TO UPDATE');
             }
@@ -173,10 +164,10 @@
           this.getTransitionsForIssue(task)
             .then((response) => {
               let transitions = response.response.transitions;
-              Dialogs('JIRA_SET_IN_PROGRESS', { transitions, task, type })
+              Dialogs('JIRA_SET_IN_PROGRESS', { transitions, task, localType })
                 .then((transition) => {
-                  this.transitionIssue(task.originalId, transition)
-                    .then(transitionSuccess, defer.reject);
+                  this.transitionIssue(task, transition, localType)
+                    .then(defer.resolve, defer.reject);
                 }, defer.reject);
             }, defer.reject);
         }
@@ -220,9 +211,11 @@
         this.sendRequest(request)
           .then((res) => {
               let issue = res.response;
-              if (issue.fields.updated === task.originalUpdated) {
-                defer.resolve(false);
-              } else {
+              // TODO maybe this is not necessary
+              // we also add 0.5 seconds because of the millisecond difference
+              // for issue updated and historyEntry.created
+              let lastUpdate = task.originalUpdated && moment(task.originalUpdated).add(0.5, 'second');
+              if (lastUpdate && moment(issue.fields.updated).isAfter(lastUpdate)) {
                 if (!isNoNotify) {
                   // add changelog entries
                   mapAndAddChangelogToTask(task, issue);
@@ -232,6 +225,8 @@
                 angular.extend(task, mapIssue(issue));
 
                 defer.resolve(true);
+              } else {
+                defer.resolve(false);
               }
             }, defer.reject
           );
@@ -330,17 +325,37 @@
       }
     };
 
-    this.transitionIssue = (issueId, transitionObj) => {
-      let request = {
-        config: $localStorage.jiraSettings,
-        apiMethod: 'transitionIssue',
-        arguments: [issueId, {
-          transition: {
-            id: transitionObj.id
-          }
-        }]
-      };
-      return this.sendRequest(request);
+    this.transitionIssue = (task, transitionObj, localType) => {
+      let defer = $q.defer();
+
+      function transitionSuccess(res) {
+        // update
+        task.status = localType;
+        task.originalStatus = transitionObj;
+
+        // set original update to now to prevent showing this as task update
+        task.originalUpdated = moment().format(JIRA_DATE_FORMAT);
+
+        SimpleToast('Jira: Updated task status to \'' + (transitionObj.name || localType) + '\'');
+        defer.resolve(res);
+      }
+
+      this.checkUpdatesForTicket(task)
+        .then(() => {
+          let request = {
+            config: $localStorage.jiraSettings,
+            apiMethod: 'transitionIssue',
+            arguments: [task.originalId, {
+              transition: {
+                id: transitionObj.id
+              }
+            }]
+          };
+          this.sendRequest(request)
+            .then(transitionSuccess, defer.reject);
+        });
+
+      return defer.promise;
     };
 
     this.getSuggestions = () => {

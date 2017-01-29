@@ -16,13 +16,13 @@
     <md-dialog-content>
       <div class="md-dialog-content">
         <p>
-          <span ng-if="vm.type==='OPEN'">
+          <span ng-if="vm.localType==='OPEN'">
             <strong>Open</strong>: You stopped working on a task.
           </span>
-          <span ng-if="vm.type==='IN_PROGRESS'">
+          <span ng-if="vm.localType==='IN_PROGRESS'">
             <strong>In progress</strong>: You started to work on a task.
           </span>
-          <span ng-if="vm.type==='DONE'">
+          <span ng-if="vm.localType==='DONE'">
             <strong>Done</strong>: You completed a task.
           </span>
         </p>
@@ -42,13 +42,13 @@
                      ng-model="vm.saveAsDefaultAction"
                      aria-label="save as default action">
           Mark this as a default action for setting a task to
-          <strong ng-if="vm.type==='OPEN'">open</strong>
-          <strong ng-if="vm.type==='IN_PROGRESS'">in progress</strong>
-          <strong ng-if="vm.type==='DONE'">done</strong>.
+          <strong ng-if="vm.localType==='OPEN'">open</strong>
+          <strong ng-if="vm.localType==='IN_PROGRESS'">in progress</strong>
+          <strong ng-if="vm.localType==='DONE'">done</strong>.
           This will be set then always, when a task is changed to
-          <strong ng-if="vm.type==='OPEN'">open</strong>
-          <strong ng-if="vm.type==='IN_PROGRESS'">in progress</strong>
-          <strong ng-if="vm.type==='DONE'">done</strong>. You can change that later in the project settings.
+          <strong ng-if="vm.localType==='OPEN'">open</strong>
+          <strong ng-if="vm.localType==='IN_PROGRESS'">in progress</strong>
+          <strong ng-if="vm.localType==='DONE'">done</strong>. You can change that later in the project settings.
         </md-checkbox>
       </div>
     </md-dialog-content>
