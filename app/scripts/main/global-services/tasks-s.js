@@ -290,6 +290,10 @@
     markAsDone(task) {
       const parentTask = task.parentId && this.getById(task.parentId);
 
+      // unset current task first
+      this.updateCurrent(undefined);
+
+
       task.isDone = true;
       task.doneDate = moment();
 
