@@ -25,7 +25,7 @@
   }
 
   /* @ngInject */
-  function DailyPlannerCtrl($localStorage, $window, $scope, Tasks, TasksUtil, Dialogs, $state, Jira, $filter) {
+  function DailyPlannerCtrl($localStorage, $window, $scope, Tasks, TasksUtil, Dialogs, $state, Jira, $filter, IS_ELECTRON) {
     let vm = this;
     const _ = $window._;
 
@@ -36,10 +36,13 @@
       return searchText ? $filter('filter')(vm.taskSuggestions, searchText, false, 'title') : vm.taskSuggestions;
     };
 
-    Jira.getSuggestions().then((res) => {
-      vm.taskSuggestions = Jira.transformIssues(res) || [];
-    })
-      .catch();
+    if (IS_ELECTRON) {
+      Jira.getSuggestions().then((res) => {
+        vm.taskSuggestions = Jira.transformIssues(res) || [];
+      })
+    } else {
+      vm.taskSuggestions = [];
+    }
 
     vm.addTask = () => {
       if (vm.newTask) {
