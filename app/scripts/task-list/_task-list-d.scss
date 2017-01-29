@@ -25,7 +25,8 @@ task-list {
 }
 
 .task {
-  padding: 4px 12px;
+  font-size: 14px;
+  padding: 3px 12px 0;
   display: block;
   margin-bottom: 6px;
   background-color: #fff;
@@ -76,10 +77,11 @@ task-list {
     }
     .md-button,
     md-checkbox {
-      padding: 6px 2px;
+      padding: 4px 2px;
       // always reserve space for buttons
       min-width: 28px;
       width: 32px;
+      height: 32px;
       margin: 0;
 
       &:hover {
@@ -94,9 +96,8 @@ task-list {
     md-checkbox {
       margin-left: 6px;
       min-width: 16px;
-      // dirty fix
-      margin-top: 4px;
-      margin-bottom: 4px;
+      width: 32px;
+      height: 32px;
     }
 
     ng-md-icon {
@@ -176,6 +177,8 @@ task-list {
 
   .handle {
     margin-right: 4px;
+    margin-top: 0;
+    margin-bottom: 0;
   }
 
   .title {
@@ -207,7 +210,7 @@ task-list {
 
   .time {
     white-space: nowrap;
-    font-size: 14px;
+    font-size: 13px;
     margin-left: 10px;
   }
 
