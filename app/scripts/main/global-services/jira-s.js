@@ -43,14 +43,18 @@
       window.ipcRenderer.on(IPC_JIRA_CB_EVENT, (ev, res) => {
         // check if proper id is given in callback and if exists in requestLog
         if (res.requestId && this.requestsLog[res.requestId]) {
+          let currentRequest = this.requestsLog[res.requestId];
+          // cancel timeout for request
+          $timeout.cancel(currentRequest.timeout);
+
           // resolve saved promise
           if (!res || res.error) {
-            $log.log('FRONTEND_REQUEST', this.requestsLog[res.requestId]);
+            $log.log('FRONTEND_REQUEST', currentRequest);
             $log.log('RESPONSE', res);
-            SimpleToast('Jira Request failed: ' + this.requestsLog[res.requestId].clientRequest.apiMethod + ' – ' + (res && res.error));
-            this.requestsLog[res.requestId].defer.reject(res);
+            SimpleToast('Jira Request failed: ' + currentRequest.clientRequest.apiMethod + ' – ' + (res && res.error));
+            currentRequest.defer.reject(res);
           } else {
-            this.requestsLog[res.requestId].defer.resolve(res);
+            currentRequest.defer.resolve(res);
           }
           // delete entry for promise afterwards
           delete this.requestsLog[res.requestId];
@@ -371,17 +375,16 @@
         this.requestsLog[request.requestId] = {
           defer,
           requestMethod: request.apiMethod,
-          clientRequest: request
+          clientRequest: request,
+          timeout: $timeout(() => {
+            SimpleToast('Jira Request timed out for ' + request.apiMethod);
+            // delete entry for promise
+            delete this.requestsLog[request.requestId];
+          }, REQUEST_TIMEOUT)
         };
 
         // send to electron
         window.ipcRenderer.send(IPC_JIRA_MAKE_REQUEST_EVENT, request);
-
-        $timeout(() => {
-          SimpleToast('Jira Request timed out for ' + request.apiMethod);
-          // delete entry for promise
-          delete this.requestsLog[request.requestId];
-        }, REQUEST_TIMEOUT);
 
         return defer.promise;
       } else {
