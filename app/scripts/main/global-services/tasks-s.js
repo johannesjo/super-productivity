@@ -257,7 +257,7 @@
     // UPDATE DATA
     addToday(task) {
       if (task && task.title) {
-        this.$localStorage.tasks.push(this.createTask(task));
+        this.$localStorage.tasks.unshift(this.createTask(task));
         this.SimpleToast('SUCCESS', 'Task "' + task.title + '" created.');
       }
     }
