@@ -143,10 +143,14 @@
       }
     };
 
+    this.isJiraTask = (task) => {
+      return task && task.originalType === ISSUE_TYPE;
+    };
+
     this.updateStatus = (task, localType) => {
       const defer = $q.defer();
 
-      if (task.originalKey && task.originalType === ISSUE_TYPE) {
+      if (this.isJiraTask(task)) {
         if ($localStorage.jiraSettings.transitions && $localStorage.jiraSettings.transitions[localType] && $localStorage.jiraSettings.transitions[localType] !== 'ALWAYS_ASK') {
           if ($localStorage.jiraSettings.transitions[localType] === 'DO_NOT') {
             defer.reject('DO_NOT chosen');
@@ -181,7 +185,7 @@
         return $q.reject('Jira: jiraSettings.isUpdateIssueFromLocal is deactivated');
       }
 
-      if (task.originalKey && task.notes) {
+      if (this.isJiraTask(task) && task.notes) {
         let request = {
           config: $localStorage.jiraSettings,
           apiMethod: 'updateIssue',
@@ -202,7 +206,7 @@
 
     this.checkUpdatesForTicket = (task, isNoNotify) => {
       let defer = $q.defer();
-      if (task && task.originalKey) {
+      if (this.isJiraTask(task)) {
         let request = {
           config: $localStorage.jiraSettings,
           apiMethod: 'findIssue',
@@ -224,7 +228,7 @@
                 // extend task with new values
                 angular.extend(task, mapIssue(issue));
 
-                defer.resolve(true);
+                defer.resolve(task);
               } else {
                 defer.resolve(false);
               }
@@ -263,7 +267,7 @@
         if ($localStorage.jiraSettings.isAddWorklogOnSubTaskDone) {
           if (task.parentId) {
             let parentTaskCopy = angular.copy(Tasks.getById(task.parentId));
-            if (parentTaskCopy && parentTaskCopy.originalKey && parentTaskCopy.originalType === ISSUE_TYPE) {
+            if (this.isJiraTask(parentTaskCopy)) {
 
               comment = task.title;
 
@@ -281,7 +285,7 @@
           }
         }
 
-        if (task.originalKey && task.originalType === ISSUE_TYPE) {
+        if (this.isJiraTask(task)) {
           this.checkUpdatesForTicket(task)
             .then(() => {
               if ($localStorage.jiraSettings.isAutoWorklog) {
@@ -324,7 +328,7 @@
     };
 
     this.getTransitionsForIssue = (task) => {
-      if (task && task.originalKey) {
+      if (this.isJiraTask(task)) {
         let request = {
           config: $localStorage.jiraSettings,
           apiMethod: 'listTransitions',
@@ -419,6 +423,41 @@
       }
     };
 
+    this.checkForUpdates = (tasks) => {
+      const TasksUtil = $injector.get('TasksUtil');
+      const defer = $q.defer();
+
+      let tasksToPoll = TasksUtil.flattenTasks(tasks, this.isJiraTask, this.isJiraTask);
+      // execute requests sequentially to have a little more time
+      let pollPromise = tasksToPoll.reduce((promise, task) =>
+        promise.then(() =>
+          this.checkUpdatesForTicket(task)
+            .then((isUpdated) => {
+              taskIsUpdatedHandler(isUpdated, task);
+            }, defer.reject)
+        ), Promise.resolve()
+      );
+
+      pollPromise
+        .then(() => {
+          defer.resolve();
+        });
+
+      return defer.promise;
+    };
+
+    function taskIsUpdatedHandler(updatedTask) {
+      if (updatedTask) {
+        Notifier({
+          title: 'Jira Update',
+          message: '"' + updatedTask.title + '" => has been updated as it was updated on Jira.',
+          sound: true,
+          wait: true
+        });
+        SimpleToast('"' + updatedTask.title + '" => has been updated as it was updated on Jira.');
+      }
+    }
+
     this.checkUpdatesForTaskOrParent = (task, isNoNotify) => {
       const Tasks = $injector.get('Tasks');
       if (task) {
@@ -429,17 +468,9 @@
             task = parentTask;
           }
         }
-        if (task && task.originalKey) {
-          this.checkUpdatesForTicket(task, isNoNotify).then((isUpdated) => {
-            if (isUpdated && !isNoNotify) {
-              Notifier({
-                title: 'Jira Update',
-                message: '"' + task.title + '" => has been updated as it was updated on Jira.',
-                sound: true,
-                wait: true
-              });
-              SimpleToast('"' + task.title + '" => has been updated as it was updated on Jira.');
-            }
+        if (this.isJiraTask(task)) {
+          this.checkUpdatesForTicket(task, isNoNotify).then((updatedTask) => {
+            taskIsUpdatedHandler(updatedTask);
           });
         }
       }

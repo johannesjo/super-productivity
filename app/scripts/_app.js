@@ -37,7 +37,7 @@
     .config(configMdTheme)
     .config(configMarked)
     .run(initGlobalModels)
-    .run(initPollCurrentTaskUpdates)
+    .run(initPollJiraTaskUpdates)
     .run(initPollForSimpleTimeTracking)
     .run(initMousewheelZoomForElectron)
     .run(initGlobalShortcuts);
@@ -121,12 +121,15 @@
     }
   }
 
-  function initPollCurrentTaskUpdates($localStorage, Jira, IS_ELECTRON, $interval, JIRA_UPDATE_POLL_INTERVAL) {
+  function initPollJiraTaskUpdates($localStorage, Jira, IS_ELECTRON, $interval, JIRA_UPDATE_POLL_INTERVAL) {
     // handle updates that need to be made locally
     if (IS_ELECTRON) {
+      // one initial
+      Jira.checkForUpdates($localStorage.tasks);
+
       $interval(() => {
         if ($localStorage.currentTask) {
-          Jira.checkUpdatesForTaskOrParent($localStorage.currentTask);
+          Jira.checkForUpdates($localStorage.tasks);
         }
       }, JIRA_UPDATE_POLL_INTERVAL);
     }
