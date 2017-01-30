@@ -30,32 +30,41 @@
             <input type="text"
                    ng-model="vm.options.separateBy">
           </md-input-container>
-        </section>
+          <md-input-container class="md-block">
+            <label>Regular Expression to remove</label>
+            <input type="text"
+                   ng-model="vm.options.regExToRemove"
+                   ng-model-options="{ debounce: 50 }">
+            <div class="validation-messages">
+              <div ng-if="vm.isInvalidRegEx" class="error">Invalid Regular Expression</div>
+            </div>
+          </md-input-container>
 
-        <div>
-          <md-switch ng-model="vm.options.isUseNewLine"
-                     aria-label="Add new line">
-            Add new line
-          </md-switch>
-        </div>
-        <div>
-          <md-switch ng-model="vm.options.isListSubTasks"
-                     aria-label="List sub tasks">
-            List sub tasks
-          </md-switch>
-        </div>
-        <div>
-          <md-switch ng-model="vm.options.isWorkedOnTodayOnly"
-                     aria-label="List worked on today tasks only">
-            List worked on today tasks only
-          </md-switch>
-        </div>
-        <div>
-          <md-switch ng-model="vm.options.isListDoneOnly"
-                     aria-label="List done tasks only">
-            List done tasks only
-          </md-switch>
-        </div>
+          <div>
+            <md-switch ng-model="vm.options.isUseNewLine"
+                       aria-label="Add new line">
+              Add new line
+            </md-switch>
+          </div>
+          <div>
+            <md-switch ng-model="vm.options.isListSubTasks"
+                       aria-label="List sub tasks">
+              List sub tasks
+            </md-switch>
+          </div>
+          <div>
+            <md-switch ng-model="vm.options.isWorkedOnTodayOnly"
+                       aria-label="List worked on today tasks only">
+              List worked on today tasks only
+            </md-switch>
+          </div>
+          <div>
+            <md-switch ng-model="vm.options.isListDoneOnly"
+                       aria-label="List done tasks only">
+              List done tasks only
+            </md-switch>
+          </div>
+        </section>
       </div>
     </md-dialog-content>
 

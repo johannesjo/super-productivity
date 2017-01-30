@@ -14,15 +14,16 @@
     .controller('SimpleTaskSummaryCtrl', SimpleTaskSummaryCtrl);
 
   /* @ngInject */
-  function SimpleTaskSummaryCtrl($mdDialog, Tasks, TasksUtil, $scope) {
+  function SimpleTaskSummaryCtrl($mdDialog, Tasks, TasksUtil, $scope, $localStorage) {
     let vm = this;
-    vm.options = {
-      separateBy: ', ',
-      isUseNewLine: false,
-      isListSubTasks: true,
-      isListDoneOnly: false,
-      isWorkedOnTodayOnly: true
-    };
+
+    if (!$localStorage.uiHelper.dailyTaskExportSettings) {
+      // should normally not happen, but in case it does, at least
+      // assign an object save the chosen values
+      $localStorage.uiHelper.dailyTaskExportSettings = {};
+    }
+
+    vm.options = $localStorage.uiHelper.dailyTaskExportSettings;
 
     function createTasksText() {
       let tasksTxt = '';
@@ -57,6 +58,17 @@
       if (vm.options.isUseNewLine) {
         tasksTxt = tasksTxt.substring(0, tasksTxt.length - newLineSeparator.length);
       }
+
+      if (vm.options.regExToRemove) {
+        vm.isInvalidRegEx = false;
+        try {
+          const regEx = new RegExp(vm.options.regExToRemove, 'g');
+          tasksTxt = tasksTxt.replace(regEx, '');
+        } catch (e) {
+          vm.isInvalidRegEx = true;
+        }
+      }
+
       return tasksTxt;
     }
 

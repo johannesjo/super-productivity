@@ -32,6 +32,16 @@
         takeABreakMinWorkingTime: undefined,
         isShortSyntaxEnabled: true
       },
+      // non setting variables which are simply saved where they are entered
+      uiHelper: {
+        dailyTaskExportSettings: {
+          separateBy: ', ',
+          isUseNewLine: false,
+          isListSubTasks: true,
+          isListDoneOnly: false,
+          isWorkedOnTodayOnly: true
+        }
+      },
       jiraSettings: {
         isFirstLogin: true,
         isWorklogEnabled: true,
