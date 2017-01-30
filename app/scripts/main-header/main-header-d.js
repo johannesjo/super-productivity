@@ -42,32 +42,6 @@
     vm.changeProject = (project) => {
       Projects.changeCurrent(project);
     };
-
-    vm.toggleBreak = () => {
-      // reset time worked without break on break mode toggle
-      if ($localStorage.currentSession) {
-        $localStorage.currentSession.timeWorkedWithoutBreak = undefined;
-      }
-      const isGoOnBreak = !!$localStorage.currentTask;
-
-      if (isGoOnBreak) {
-        vm.lastCurrentTask = $localStorage.currentTask;
-        Tasks.updateCurrent(null);
-        SimpleToast('On break!');
-      } else {
-        if (vm.lastCurrentTask) {
-          Tasks.updateCurrent(vm.lastCurrentTask);
-        } else {
-          Dialogs('TASK_SELECTION', { tasks: $localStorage.tasks })
-            .then(() => {
-              $state.go('work-view');
-            });
-        }
-
-        vm.lastCurrentTask = undefined;
-        SimpleToast('Off break!');
-      }
-    };
   }
 
 })();
