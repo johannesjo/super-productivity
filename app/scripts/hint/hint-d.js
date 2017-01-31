@@ -20,11 +20,7 @@
       controller: HintCtrl,
       controllerAs: 'vm',
       restrict: 'E',
-      transclude: true,
-      scope: {
-        title: '@',
-        subTitle: '@'
-      }
+      scope: true
     };
   }
 
@@ -32,17 +28,7 @@
   function HintCtrl($localStorage) {
     let vm = this;
 
-    vm.hide = false;
-
-    vm.removeHint = () => {
-      vm.hide = true;
-      //$element.remove();
-    };
-
     vm.deleteHint = () => {
-      vm.hide = true;
-      console.log($localStorage.tomorrowsNote);
-
       if ($localStorage.tomorrowsNote) {
         delete $localStorage.tomorrowsNote;
       }

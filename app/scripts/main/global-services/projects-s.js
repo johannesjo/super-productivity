@@ -15,7 +15,18 @@
 
   /* @ngInject */
   function Projects(LS_DEFAULTS, $localStorage, Uid, $window, SimpleToast, $injector) {
-    const OMITTED_LS_FIELDS = ['currentProject', 'tomorrowsNote', 'projects', '$$hashKey', '$$mdSelectId', 'bodyClass'];
+    const GLOBAL_LS_FIELDS = [
+      'currentProject',
+      'projects'
+    ];
+
+    const TMP_FIELDS = [
+      '$$hashKey',
+      '$$mdSelectId',
+      'bodyClass',
+    ];
+
+    const OMITTED_LS_FIELDS = GLOBAL_LS_FIELDS.concat(TMP_FIELDS);
 
     this.getList = () => {
       return $localStorage.projects;
@@ -120,6 +131,13 @@
         this.updateNewFields(newCurrentProject);
         // remove omitted fields if we saved them for some reason
         this.removeOmittedFields(newCurrentProject);
+
+        // clean up $localStorage
+        _.forOwn($localStorage, (val, property) => {
+          if (!angular.isFunction(val) && GLOBAL_LS_FIELDS.indexOf(property) === -1) {
+            $localStorage[property] = undefined;
+          }
+        });
 
         // load all other data from new project to $localStorage
         _.forOwn(newCurrentProject.data, (val, property) => {
