@@ -25,7 +25,7 @@
   }
 
   /* @ngInject */
-  function MainHeaderCtrl(Dialogs, $localStorage, Tasks, Projects, SimpleToast, $state) {
+  function MainHeaderCtrl(Dialogs, Projects) {
     let vm = this;
     vm.lastCurrentTask = undefined;
 
