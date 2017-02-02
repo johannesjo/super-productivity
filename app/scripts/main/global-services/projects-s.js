@@ -17,7 +17,8 @@
   function Projects(LS_DEFAULTS, $localStorage, Uid, $window, SimpleToast, $injector) {
     const GLOBAL_LS_FIELDS = [
       'currentProject',
-      'projects'
+      'projects',
+      'keys'
     ];
 
     const TMP_FIELDS = [
