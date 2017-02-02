@@ -52,6 +52,9 @@
           isListSubTasks: true,
           isListDoneOnly: false,
           isWorkedOnTodayOnly: true
+        },
+        dailyAgenda: {
+          showSubTasks: true
         }
       },
       jiraSettings: {
