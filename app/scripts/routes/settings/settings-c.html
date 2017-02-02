@@ -205,8 +205,7 @@
   <section ng-if="vm.IS_ELECTRON">
     <h2 class="md-title">Git integration</h2>
     <p>Set project directory to show the days commits at summary.</p>
-    <md-input-container class="md-block"
-                        flex-gt-sm>
+    <md-input-container class="md-block">
       <label>Project path (where .git resides)</label>
       <input type="text"
              ng-model="r.git.projectDir">
@@ -252,6 +251,51 @@
     <md-divider></md-divider>
   </section>
 
+
+  <section>
+    <h2 class="md-title">Keyboard Shortcuts</h2>
+
+    <h3 class="md-caption">Global Shortcuts</h3>
+    <md-input-container class="md-block">
+      <label>Show/Hide Super Productivity</label>
+      <input type="text"
+             ng-model="r.keys.globalShowHide">
+    </md-input-container>
+
+    <h3 class="md-caption">Tasks</h3>
+    <p>The following shortcuts apply for the currently selected task (via tab or mouse).</p>
+    <md-input-container class="md-block">
+      <label>Edit title</label>
+      <input type="text"
+             ng-model="r.keys.taskEditTitle">
+    </md-input-container>
+    <md-input-container class="md-block">
+      <label>Show/Hide Notes</label>
+      <input type="text"
+             ng-model="r.keys.taskToggleNotes">
+    </md-input-container>
+    <md-input-container class="md-block">
+      <label>Edit estimation / time spent</label>
+      <input type="text"
+             ng-model="r.keys.taskOpenEstimationDialog">
+    </md-input-container>
+    <md-input-container class="md-block">
+      <label>Toggle Done</label>
+      <input type="text"
+             ng-model="r.keys.taskToggleDone">
+    </md-input-container>
+    <md-input-container class="md-block">
+      <label>Add sub task</label>
+      <input type="text"
+             ng-model="r.keys.taskAddSubTask">
+    </md-input-container>
+    <md-input-container class="md-block">
+      <label>Delete Task</label>
+      <input type="text"
+             ng-model="r.keys.taskDelete">
+    </md-input-container>
+
+  </section>
 
   <section>
     <h2 class="md-title">Misc</h2>

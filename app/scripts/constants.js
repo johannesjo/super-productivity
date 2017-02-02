@@ -27,6 +27,15 @@
       git: {
         projectDir: undefined
       },
+      keys: {
+        globalShowHide: 'Ctrl+Shift+X',
+        taskToggleDone: 'd',
+        taskToggleNotes: 'n',
+        taskOpenEstimationDialog: 't',
+        taskAddSubTask: '+',
+        taskDelete: 'entf',
+        taskEditTitle: 'enter'
+      },
       config: {
         isTakeABreakEnabled: false,
         takeABreakMinWorkingTime: undefined,
