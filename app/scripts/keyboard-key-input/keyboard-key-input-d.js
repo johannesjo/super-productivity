@@ -26,12 +26,20 @@
       let prevVal = modelGetter(scope);
 
       element.on('keydown', ($event) => {
+        // the tab key should continue to behave normally
+        if ($event.keyCode === 9 || $event.key === 'Tab') {
+            return;
+        }
+
         $event.preventDefault();
         $event.stopPropagation();
 
         // focus out on escape
         if ($event.keyCode === 27 || $event.key === 'Escape') {
           modelSetter(scope, prevVal);
+          element.blur();
+        }
+        else if ($event.keyCode === 13 || $event.key === 'Enter') {
           element.blur();
         }
         // don't update if event is for ctrl alt or shift down itself

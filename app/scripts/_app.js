@@ -94,6 +94,12 @@
         if (ev.key === $localStorage.keys.addNewTask) {
           Dialogs('ADD_TASK', undefined, true);
         }
+        if (ev.key === $localStorage.keys.openProjectNotes) {
+          Dialogs('NOTES', undefined, true);
+        }
+        if (ev.key === $localStorage.keys.openDistractionPanel) {
+          Dialogs('DISTRACTIONS', undefined, true);
+        }
       }
 
       if (IS_ELECTRON) {
@@ -103,8 +109,8 @@
       }
     });
 
+    // Register electron shortcut(s)
     const IPC_REGISTER_GLOBAL_SHORTCUT_EVENT = 'REGISTER_GLOBAL_SHORTCUT';
-
     if (IS_ELECTRON && $localStorage.keys && $localStorage.keys.globalShowHide) {
       window.ipcRenderer.send(IPC_REGISTER_GLOBAL_SHORTCUT_EVENT, $localStorage.keys.globalShowHide);
     }

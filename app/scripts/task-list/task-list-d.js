@@ -190,7 +190,7 @@
       taskEl = angular.element(taskEl);
       const task = this.lastFocusedTaskEl.scope().modelValue;
 
-      if ($event.key === this.$localStorage.keys.taskEditTitle) {
+      if ($event.key === this.$localStorage.keys.taskEditTitle || $event.key === 'Enter') {
         this.$scope.$broadcast(this.EDIT_ON_CLICK_TOGGLE_EV, task.id);
       }
       if ($event.key === this.$localStorage.keys.taskToggleNotes) {

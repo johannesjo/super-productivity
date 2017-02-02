@@ -30,7 +30,9 @@
       keys: {
         globalShowHide: 'Ctrl+Shift+X',
         addNewTask: '*',
-        taskEditTitle: 'Enter',
+        openProjectNotes: 'N',
+        openDistractionPanel: 'D',
+        taskEditTitle: 'e',
         taskToggleNotes: 'n',
         taskOpenEstimationDialog: 't',
         taskToggleDone: 'd',
