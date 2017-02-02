@@ -17,7 +17,7 @@
   function SettingsCtrl($localStorage, $window, $scope, Projects, Dialogs, DEFAULT_THEME, THEMES, IS_ELECTRON, SimpleToast, $mdDialog, Jira) {
     let vm = this;
     const _ = $window._;
-
+    const IPC_REGISTER_GLOBAL_SHORTCUT_EVENT = 'REGISTER_GLOBAL_SHORTCUT';
     vm.IS_ELECTRON = IS_ELECTRON;
 
     function init() {
@@ -81,6 +81,14 @@
       Jira.getSuggestions().then(() => {
         SimpleToast('SUCCESS', 'Connection successful!');
       });
+    };
+
+    // shorcuts
+    vm.registerGlobalShortcut = (globalShowHide) => {
+      if (IS_ELECTRON) {
+        // send to electron
+        window.ipcRenderer.send(IPC_REGISTER_GLOBAL_SHORTCUT_EVENT, globalShowHide);
+      }
     };
 
     // theme stuff

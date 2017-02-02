@@ -82,7 +82,7 @@
     InitGlobalModels();
   }
 
-  function initGlobalShortcuts($document, Dialogs, $localStorage) {
+  function initGlobalShortcuts($document, Dialogs, $localStorage, IS_ELECTRON) {
     // we just use this single one as this usually does mess
     // up with the default browser shortcuts
     // better to use the global electron shortcuts here
@@ -96,12 +96,18 @@
         }
       }
 
-      if (window.isElectron) {
+      if (IS_ELECTRON) {
         if (ev.keyCode === 10 && ev.ctrlKey === true && ev.shiftKey === true) {
           window.ipcRenderer.send('TOGGLE_DEV_TOOLS');
         }
       }
     });
+
+    const IPC_REGISTER_GLOBAL_SHORTCUT_EVENT = 'REGISTER_GLOBAL_SHORTCUT';
+
+    if (IS_ELECTRON && $localStorage.keys && $localStorage.keys.globalShowHide) {
+      window.ipcRenderer.send(IPC_REGISTER_GLOBAL_SHORTCUT_EVENT, $localStorage.keys.globalShowHide);
+    }
   }
 
   function initPollForSimpleTimeTracking($localStorage, IS_ELECTRON, $interval, SIMPLE_TIME_TRACKING_INTERVAL, Tasks) {

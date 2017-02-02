@@ -132,21 +132,6 @@ app.on('ready', () => {
   });
 });
 
-app.on('ready', () => {
-  // Register a 'CommandOrControl+X' shortcut listener.
-  const ret = electron.globalShortcut.register('CommandOrControl+Shift+X', () => {
-    if (mainWin.isFocused()) {
-      mainWin.hide();
-    } else {
-      showOrFocus(mainWin);
-    }
-  });
-
-  if (!ret) {
-    console.log('key registration failed');
-  }
-});
-
 app.on('activate', function () {
   // On OS X it's common to re-create a window in the app when the
   // dock icon is clicked and there are no other windows open.
@@ -171,12 +156,35 @@ app.on('before-quit', () => {
   if (process.platform === 'darwin') {
     darwinForceQuit = true;
   }
+
+  // Unregister all shortcuts.
+  electron.globalShortcut.unregisterAll();
 });
 
 // listen to events from frontend
 electron.ipcMain.on('SHUTDOWN', () => {
   app.isQuiting = true;
   app.quit();
+});
+
+electron.ipcMain.on('REGISTER_GLOBAL_SHORTCUT', (ev, shortcutPassed) => {
+  if (shortcutPassed) {
+    // unregister all previous
+    electron.globalShortcut.unregisterAll();
+
+    // Register a shortcut listener.
+    const ret = electron.globalShortcut.register(shortcutPassed, () => {
+      if (mainWin.isFocused()) {
+        mainWin.hide();
+      } else {
+        showOrFocus(mainWin);
+      }
+    });
+
+    if (!ret) {
+      console.log('key registration failed');
+    }
+  }
 });
 
 electron.ipcMain.on('TOGGLE_DEV_TOOLS', () => {

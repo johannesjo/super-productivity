@@ -28,14 +28,15 @@
       element.on('keydown', ($event) => {
         $event.preventDefault();
         $event.stopPropagation();
-        //console.log($event);
-        //console.log(ngModelCtrl.$modelValue);
-        //console.log(attrs);
 
         // focus out on escape
         if ($event.keyCode === 27 || $event.key === 'Escape') {
           modelSetter(scope, prevVal);
           element.blur();
+        }
+        // don't update if event is for ctrl alt or shift down itself
+        else if ($event.keyCode === 16 || $event.keyCode === 17 || $event.keyCode === 18) {
+          return;
         }
         else {
           if (attrs.keyboardKeyInputControlKeys) {
@@ -49,6 +50,7 @@
             if ($event.shiftKey) {
               val += 'Shift+';
             }
+
             modelSetter(scope, val + $event.key);
           }
           else {

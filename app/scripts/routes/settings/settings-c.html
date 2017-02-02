@@ -260,6 +260,7 @@
       <md-input-container class="md-block">
         <label>Show/Hide Super Productivity</label>
         <input type="text"
+               ng-blur="vm.registerGlobalShortcut(r.keys.globalShowHide)"
                keyboard-key-input
                keyboard-key-input-control-keys="true"
                ng-model="r.keys.globalShowHide">
