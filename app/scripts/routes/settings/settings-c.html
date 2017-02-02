@@ -255,43 +255,61 @@
   <section>
     <h2 class="md-title">Keyboard Shortcuts</h2>
 
-    <h3 class="md-caption">Global Shortcuts</h3>
+    <section ng-if="vm.IS_ELECTRON">
+      <h3 class="md-caption">Global Shortcuts (system wide)</h3>
+      <md-input-container class="md-block">
+        <label>Show/Hide Super Productivity</label>
+        <input type="text"
+               keyboard-key-input
+               keyboard-key-input-control-keys="true"
+               ng-model="r.keys.globalShowHide">
+      </md-input-container>
+    </section>
+
+    <h3 class="md-caption">Global Shortcuts (application wide)</h3>
     <md-input-container class="md-block">
-      <label>Show/Hide Super Productivity</label>
+      <label>Add new task</label>
       <input type="text"
-             ng-model="r.keys.globalShowHide">
+             keyboard-key-input
+             ng-model="r.keys.addNewTask">
     </md-input-container>
 
     <h3 class="md-caption">Tasks</h3>
-    <p>The following shortcuts apply for the currently selected task (via tab or mouse).</p>
+    <p>The following shortcuts apply for the currently selected task (selected via tab or mouse).</p>
     <md-input-container class="md-block">
       <label>Edit title</label>
       <input type="text"
+             keyboard-key-input
              ng-model="r.keys.taskEditTitle">
     </md-input-container>
     <md-input-container class="md-block">
       <label>Show/Hide Notes</label>
       <input type="text"
+             keyboard-key-input
              ng-model="r.keys.taskToggleNotes">
     </md-input-container>
     <md-input-container class="md-block">
       <label>Edit estimation / time spent</label>
       <input type="text"
+             keyboard-key-input
              ng-model="r.keys.taskOpenEstimationDialog">
     </md-input-container>
     <md-input-container class="md-block">
       <label>Toggle Done</label>
       <input type="text"
+             keyboard-key-input
              ng-model="r.keys.taskToggleDone">
     </md-input-container>
     <md-input-container class="md-block">
       <label>Add sub task</label>
       <input type="text"
+             keyboard-key-input
              ng-model="r.keys.taskAddSubTask">
     </md-input-container>
     <md-input-container class="md-block">
       <label>Delete Task</label>
       <input type="text"
+             keyboard-key-input
              ng-model="r.keys.taskDelete">
     </md-input-container>
 
@@ -303,28 +321,29 @@
       <div flex-gt-sm="50">
         <md-switch ng-model="r.config.isShortSyntaxEnabled"
                    aria-label="Use short syntax (e.g. 'TaskTitleBla e:30m')">
-          Use short syntax (e.g. 'TaskTitleBla e:30m') for task creation
+          Use short syntax (e.g. 'TaskTitleBla t:30m') for task creation
         </md-switch>
       </div>
     </md-input-container>
 
-    <md-input-container class="md-block">
-      <div flex-gt-sm="50">
-        <md-switch ng-model="r.config.isTakeABreakEnabled"
-                   aria-label="Enable take a break reminder">
-          Enable take a break reminder
-        </md-switch>
-      </div>
-    </md-input-container>
-    <md-input-container class="md-block md-icon-float"
-                        ng-hide="!r.config.isTakeABreakEnabled">
-      <label>Remind when I worked longer than X without a break</label>
-      <ng-md-icon icon="timer"
-                  aria-label="timer"></ng-md-icon>
-      <input type="text"
-             input-duration
-             ng-model="r.config.takeABreakMinWorkingTime">
-    </md-input-container>
-
+    <section ng-if="vm.IS_ELECTRON">
+      <md-input-container class="md-block">
+        <div flex-gt-sm="50">
+          <md-switch ng-model="r.config.isTakeABreakEnabled"
+                     aria-label="Enable take a break reminder">
+            Enable take a break reminder
+          </md-switch>
+        </div>
+      </md-input-container>
+      <md-input-container class="md-block md-icon-float"
+                          ng-hide="!r.config.isTakeABreakEnabled">
+        <label>Remind when I worked longer than X without a break</label>
+        <ng-md-icon icon="timer"
+                    aria-label="timer"></ng-md-icon>
+        <input type="text"
+               input-duration
+               ng-model="r.config.takeABreakMinWorkingTime">
+      </md-input-container>
+    </section>
   </section>
 </div>

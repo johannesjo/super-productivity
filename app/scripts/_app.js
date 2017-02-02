@@ -82,7 +82,7 @@
     InitGlobalModels();
   }
 
-  function initGlobalShortcuts($document, Dialogs) {
+  function initGlobalShortcuts($document, Dialogs, $localStorage) {
     // we just use this single one as this usually does mess
     // up with the default browser shortcuts
     // better to use the global electron shortcuts here
@@ -91,7 +91,7 @@
       // only trigger if not in typing mode
       if (ev.target.tagName !== 'INPUT' && ev.target.tagName !== 'TEXTAREA') {
         // on star
-        if (ev.key === '*') {
+        if (ev.key === $localStorage.keys.addNewTask) {
           Dialogs('ADD_TASK', undefined, true);
         }
       }

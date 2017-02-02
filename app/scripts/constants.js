@@ -29,12 +29,13 @@
       },
       keys: {
         globalShowHide: 'Ctrl+Shift+X',
-        taskToggleDone: 'd',
+        addNewTask: '*',
+        taskEditTitle: 'Enter',
         taskToggleNotes: 'n',
         taskOpenEstimationDialog: 't',
+        taskToggleDone: 'd',
         taskAddSubTask: '+',
-        taskDelete: 'entf',
-        taskEditTitle: 'enter'
+        taskDelete: 'Delete'
       },
       config: {
         isTakeABreakEnabled: false,

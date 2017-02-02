@@ -12,7 +12,7 @@
 
   class TaskListCtrl {
     /* @ngInject */
-    constructor(Dialogs, $mdToast, $timeout, Tasks, EDIT_ON_CLICK_TOGGLE_EV, $scope, ShortSyntax, $element, Jira) {
+    constructor(Dialogs, $localStorage, $mdToast, $timeout, Tasks, EDIT_ON_CLICK_TOGGLE_EV, $scope, ShortSyntax, $element, Jira) {
       this.Dialogs = Dialogs;
       this.$mdToast = $mdToast;
       this.$timeout = $timeout;
@@ -22,9 +22,11 @@
       this.ShortSyntax = ShortSyntax;
       this.$element = $element;
       this.Jira = Jira;
+      this.$localStorage = $localStorage;
       this.lastFocusedTaskEl = undefined;
 
       this.boundHandleKeyPress = this.handleKeyPress.bind(this);
+      this.boundFocusLastTaskEl = this.focusLastFocusedTaskEl.bind(this);
     }
 
     $onDestroy() {
@@ -113,7 +115,7 @@
 
     estimateTime(task) {
       this.Dialogs('TIME_ESTIMATE', { task })
-        .then(this.focusLastFocusedTaskEl, this.focusLastFocusedTaskEl);
+        .then(this.boundFocusLastTaskEl, this.boundFocusLastTaskEl);
     }
 
     deleteTask(task, $index) {
@@ -188,48 +190,27 @@
       taskEl = angular.element(taskEl);
       const task = this.lastFocusedTaskEl.scope().modelValue;
 
-      // only trigger if target is li
-      const USED_KEYS = [
-        '+',
-        'a',
-        't',
-        'n',
-        'd'
-      ];
-      const USED_KEY_CODES = [
-        46,
-        13
-      ];
+      if ($event.key === this.$localStorage.keys.taskEditTitle) {
+        this.$scope.$broadcast(this.EDIT_ON_CLICK_TOGGLE_EV, task.id);
+      }
+      if ($event.key === this.$localStorage.keys.taskToggleNotes) {
+        task.showNotes = !task.showNotes;
+      }
+      if ($event.key === this.$localStorage.keys.taskOpenEstimationDialog) {
+        this.estimateTime(task);
+      }
+      if ($event.key === this.$localStorage.keys.taskToggleDone) {
+        task.isDone = !task.isDone;
+      }
+      if ($event.key === this.$localStorage.keys.taskAddSubTask) {
+        this.addSubTask(task);
+      }
 
-      if (USED_KEY_CODES.indexOf($event.keyCode) > -1 || USED_KEYS.indexOf($event.key) > -1) {
-        // + or a
-        if ($event.key === '+' || $event.key === 'a') {
-          this.addSubTask(task);
-        }
-        // t
-        if ($event.key === 't') {
-          this.estimateTime(task);
-        }
-        // n
-        if ($event.key === 'n') {
-          task.showNotes = !task.showNotes;
-        }
-        // d
-        if ($event.key === 'd') {
-          task.isDone = !task.isDone;
-        }
-        // entf
-        if ($event.keyCode === 46) {
-          this.deleteTask(task);
-          // don't propagate to next focused element
-          $event.preventDefault();
-          $event.stopPropagation();
-        }
-        // enter
-        if ($event.keyCode === 13) {
-          this.$scope.$broadcast(this.EDIT_ON_CLICK_TOGGLE_EV, task.id);
-        }
-        this.$scope.$apply();
+      if ($event.key === this.$localStorage.keys.taskDelete) {
+        this.deleteTask(task);
+        // don't propagate to next focused element
+        $event.preventDefault();
+        $event.stopPropagation();
       }
 
       // moving items via shift+ctrl+keyUp/keyDown
@@ -242,7 +223,6 @@
         if ($event.keyCode === 38) {
           if (taskIndex > 0) {
             TaskListCtrl.moveItem(this.tasks, taskIndex, taskIndex - 1);
-            this.$scope.$apply();
 
             // we need to manually re-add focus after timeout
             this.$timeout(() => {
@@ -254,10 +234,12 @@
         if ($event.keyCode === 40) {
           if (taskIndex < this.tasks.length - 1) {
             TaskListCtrl.moveItem(this.tasks, taskIndex, taskIndex + 1);
-            this.$scope.$apply();
           }
         }
       }
+
+      // finally apply
+      this.$scope.$apply();
     }
 
     addSubTask(task) {
