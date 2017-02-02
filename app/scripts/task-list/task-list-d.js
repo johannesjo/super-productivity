@@ -113,7 +113,7 @@
 
     estimateTime(task) {
       this.Dialogs('TIME_ESTIMATE', { task })
-        .finally(this.focusLastFocusedTaskEl);
+        .then(this.focusLastFocusedTaskEl, this.focusLastFocusedTaskEl);
     }
 
     deleteTask(task, $index) {
