@@ -1,0 +1,16 @@
+.simple-textarea {
+  padding: 10px 14px;
+  margin: 0;
+  width: 100%;
+  display: block;
+  border: none;
+  resize: both;
+  overflow: auto;
+  height: 40vh;
+  box-sizing: border-box;
+  background: #fbfbfb;
+  body.dark-theme & {
+    background-color: $dark-theme-bg;
+    color: #eee;
+  }
+}

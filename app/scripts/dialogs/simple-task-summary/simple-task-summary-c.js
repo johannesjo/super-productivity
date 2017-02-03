@@ -14,20 +14,23 @@
     .controller('SimpleTaskSummaryCtrl', SimpleTaskSummaryCtrl);
 
   /* @ngInject */
-  function SimpleTaskSummaryCtrl($mdDialog, Tasks, TasksUtil, $scope, $localStorage) {
+  function SimpleTaskSummaryCtrl($mdDialog, tasks, settings, TasksUtil, $scope) {
     let vm = this;
 
-    if (!$localStorage.uiHelper.dailyTaskExportSettings) {
-      // should normally not happen, but in case it does, at least
-      // assign an object save the chosen values
-      $localStorage.uiHelper.dailyTaskExportSettings = {};
+    vm.options = settings;
+
+    if (!vm.options.separateBy) {
+      vm.options.separateBy = '';
+    }
+    if (!vm.options.separateFieldsBy) {
+      vm.options.separateFieldsBy = '';
     }
 
-    vm.options = $localStorage.uiHelper.dailyTaskExportSettings;
+    function formatLine() {
+    }
 
-    function createTasksText() {
+    function createTasksText(tasks) {
       let tasksTxt = '';
-      let tasks = Tasks.getToday();
       let newLineSeparator = '\n';
 
       if (tasks) {
@@ -72,10 +75,10 @@
       return tasksTxt;
     }
 
-    vm.tasksTxt = createTasksText();
+    vm.tasksTxt = createTasksText(tasks);
 
     $scope.$watch('vm.options', () => {
-      vm.tasksTxt = createTasksText();
+      vm.tasksTxt = createTasksText(tasks);
     }, true);
 
     vm.submit = () => {

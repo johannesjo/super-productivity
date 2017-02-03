@@ -5,10 +5,15 @@
 
   <div ng-repeat="(monthKey, monthVal) in yearVal.entries"
        class="month">
-    <div class="month-title md-headline">{{ monthKey|numberToMonth }}</div>
-    <div class="month-time-spent">Time spent total: <strong>{{ monthVal.timeSpent|duration }}</strong></div>
-
-
+    <div class="month-title md-headline">{{ monthKey|numberToMonth }}
+      <md-button class="md-raised md-primary md-icon-button"
+                 aria-label="export data"
+                 ng-click="vm.exportData('MONTH',monthVal)">
+        <ng-md-icon icon="call_made"></ng-md-icon>
+      </md-button>
+    </div>
+    <div class="month-time-spent">Time spent total: <strong>{{ monthVal.timeSpent|duration }}</strong>
+    </div>
     <div ng-repeat="(dayKey, worklogForDay) in monthVal.entries"
          class="day">
 

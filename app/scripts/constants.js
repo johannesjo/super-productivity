@@ -51,7 +51,34 @@
           isUseNewLine: false,
           isListSubTasks: true,
           isListDoneOnly: false,
-          isWorkedOnTodayOnly: true
+          isWorkedOnTodayOnly: true,
+          showTitle: true,
+          showTime: false,
+          showDate: false
+        },
+        timeTrackingHistoryExportSettings: {
+          separateBy: '',
+          separateFieldsBy: ';',
+          isUseNewLine: true,
+          isListSubTasks: true,
+          isListDoneOnly: false,
+          isWorkedOnTodayOnly: true,
+          showTitle: true,
+          showTimeSpent: true,
+          isTimeSpentAsMilliseconds: true,
+          showDate: false
+        },
+        csvExportSettings: {
+          separateBy: '',
+          separateFieldsBy: ';',
+          isUseNewLine: true,
+          isListSubTasks: true,
+          isListDoneOnly: false,
+          isWorkedOnTodayOnly: true,
+          showTitle: true,
+          showTimeSpent: true,
+          isTimeSpentAsMilliseconds: true,
+          showDate: false
         },
         dailyAgenda: {
           showSubTasks: true

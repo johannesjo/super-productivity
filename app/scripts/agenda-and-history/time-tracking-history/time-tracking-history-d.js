@@ -25,9 +25,44 @@
   }
 
   /* @ngInject */
-  function TimeTrackingHistoryCtrl(Tasks) {
+  function TimeTrackingHistoryCtrl(Tasks, Dialogs, $localStorage) {
     let vm = this;
     vm.worklog = Tasks.getCompleteWorkLog();
+
+    vm.createTasksForDay = (data) => {
+      let tasks = [];
+      const dayData = angular.copy(data);
+
+      _.each(dayData.entries, (entry) => {
+        let task = entry.task;
+        task.timeSpent = entry.timeSpent;
+        task.dateStr = dayData.dateStr;
+        tasks.push(task);
+      });
+
+      return tasks;
+    };
+
+    vm.createTasksForMonth = (data) => {
+      let tasks = [];
+      const monthData = angular.copy(data);
+      _.each(monthData.entries, (entry) => {
+        tasks = tasks.concat(vm.createTasksForDay(entry));
+      });
+      return tasks;
+    };
+
+    vm.exportData = (type, data) => {
+      if (type === 'MONTH') {
+        const tasks = vm.createTasksForMonth(data);
+
+        Dialogs('SIMPLE_TASK_SUMMARY', {
+          settings: $localStorage.uiHelper.timeTrackingHistoryExportSettings,
+          tasks: tasks
+        }, true);
+      }
+
+    };
   }
 
 })();

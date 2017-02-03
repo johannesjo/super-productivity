@@ -1,10 +1,8 @@
-<md-dialog aria-label="Time estimation dialog"
-           class="dialog-time-estimate"
-           flex-gt-xs="80"
-           flex-gt-sm="50">
+<md-dialog aria-label="Task list export"
+           class="dialog-simple-task-summary">
   <md-toolbar>
     <div class="md-toolbar-tools">
-      <h2>Simple task list for today</h2>
+      <h2>Task List Export</h2>
       <span flex></span>
       <md-button class="md-icon-button"
                  aria-label="Cancel"
@@ -18,51 +16,57 @@
     <md-dialog-content>
       <div class="md-dialog-content">
 
-        <md-input-container class="md-icon-float md-block">
-          <label>Tasks Text</label>
-          <textarea ng-model="vm.tasksTxt"></textarea>
-        </md-input-container>
+        <textarea ng-model="vm.tasksTxt"
+                  rows="10"
+                  md-whiteframe="2"
+                  class="simple-textarea"></textarea>
 
 
-        <section class="options">
-          <md-input-container class="md-block">
-            <label>Separate tasks by</label>
-            <input type="text"
-                   ng-model="vm.options.separateBy">
-          </md-input-container>
-          <md-input-container class="md-block">
-            <label>Regular Expression to remove</label>
-            <input type="text"
-                   ng-model="vm.options.regExToRemove"
-                   ng-model-options="{ debounce: 50 }">
-            <div class="validation-messages">
-              <div ng-if="vm.isInvalidRegEx" class="error">Invalid Regular Expression</div>
+        <section class="options"
+                 layout-gt-xs="row">
+          <div flex-gt-xs="50">
+            <div>
+              <md-switch ng-model="vm.options.isUseNewLine"
+                         aria-label="Add new line">
+                Add new line
+              </md-switch>
             </div>
-          </md-input-container>
-
-          <div>
-            <md-switch ng-model="vm.options.isUseNewLine"
-                       aria-label="Add new line">
-              Add new line
-            </md-switch>
+            <div>
+              <md-switch ng-model="vm.options.isListSubTasks"
+                         aria-label="List sub tasks">
+                List sub tasks
+              </md-switch>
+            </div>
+            <div>
+              <md-switch ng-model="vm.options.isWorkedOnTodayOnly"
+                         aria-label="List worked on today tasks only">
+                List worked on today tasks only
+              </md-switch>
+            </div>
+            <div>
+              <md-switch ng-model="vm.options.isListDoneOnly"
+                         aria-label="List done tasks only">
+                List done tasks only
+              </md-switch>
+            </div>
           </div>
-          <div>
-            <md-switch ng-model="vm.options.isListSubTasks"
-                       aria-label="List sub tasks">
-              List sub tasks
-            </md-switch>
-          </div>
-          <div>
-            <md-switch ng-model="vm.options.isWorkedOnTodayOnly"
-                       aria-label="List worked on today tasks only">
-              List worked on today tasks only
-            </md-switch>
-          </div>
-          <div>
-            <md-switch ng-model="vm.options.isListDoneOnly"
-                       aria-label="List done tasks only">
-              List done tasks only
-            </md-switch>
+          <div flex-gt-xs="50">
+            <md-input-container class="md-block">
+              <label>Separate tasks by</label>
+              <input type="text"
+                     ng-model="vm.options.separateBy">
+            </md-input-container>
+            <md-input-container class="md-block">
+              <label>Regular Expression to remove</label>
+              <input type="text"
+                     ng-model="vm.options.regExToRemove"
+                     ng-model-options="{ debounce: 50 }">
+              <div class="validation-messages">
+                <div ng-if="vm.isInvalidRegEx"
+                     class="error">Invalid Regular Expression
+                </div>
+              </div>
+            </md-input-container>
           </div>
         </section>
       </div>

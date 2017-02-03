@@ -32,6 +32,18 @@
       } else {
         $rootScope.r.bodyClass = '';
       }
+
+      // all of these should normally not happen, but in case it does, at least
+      // assign an object save the chosen values
+      if (!$localStorage.uiHelper.dailyTaskExportSettings) {
+        $localStorage.uiHelper.dailyTaskExportSettings = {};
+      }
+      if (!$localStorage.uiHelper.timeTrackingHistoryExportSettings) {
+        $localStorage.uiHelper.timeTrackingHistoryExportSettings = {};
+      }
+      if (!$localStorage.uiHelper.csvExportSettings) {
+        $localStorage.uiHelper.csvExportSettings = {};
+      }
     };
   }
 
