@@ -48,6 +48,7 @@
       uiHelper: {
         dailyTaskExportSettings: {
           separateBy: ', ',
+          separateFieldsBy: '',
           isUseNewLine: false,
           isListSubTasks: true,
           isListDoneOnly: false,
