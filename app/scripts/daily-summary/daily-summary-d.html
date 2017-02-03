@@ -109,13 +109,13 @@
     <md-checkbox ng-init="vm.clearDoneTasks = true;"
                  ng-model="vm.clearDoneTasks"
                  aria-label="Clear done tasks">
-      Clear done tasks
+      Clear done tasks (Move to Done-Backlog)
     </md-checkbox>
   </div>
   <div flex-gt-sm="50">
     <md-checkbox ng-model="vm.moveUnfinishedToBacklog"
                  aria-label="Move unfinished tasks to backlog">
-      Move unfinished tasks to backlog
+      Move unfinished tasks back to backlog
     </md-checkbox>
   </div>
 </div>
@@ -127,6 +127,7 @@
   <md-button class="md-raised md-primary"
              ng-click="vm.finishDay()">
     <ng-md-icon icon="wb_sunny"></ng-md-icon>
-    Clear done tasks, save and go home
+    <span ng-show="vm.clearDoneTasks">Clear done tasks, save and go home</span>
+    <span ng-show="!vm.clearDoneTasks">Save and go home</span>
   </md-button>
 </div>
