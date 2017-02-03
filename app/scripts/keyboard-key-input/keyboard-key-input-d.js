@@ -20,7 +20,7 @@
     };
 
     function linkFn(scope, element, attrs) {
-      const modelGetter = $parse(attrs['ngModel']);
+      const modelGetter = $parse(attrs.ngModel);
       const modelSetter = modelGetter.assign;
 
       let prevVal = modelGetter(scope);
