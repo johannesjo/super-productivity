@@ -11,7 +11,7 @@
 
   angular
     .module('superProductivity')
-    .constant('DEFAULT_THEME', 'teal-theme')
+    .constant('DEFAULT_THEME', 'blue-theme')
     .constant('LS_DEFAULTS', {
       note: undefined,
       theme: undefined,
