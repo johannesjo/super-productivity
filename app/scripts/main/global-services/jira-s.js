@@ -126,7 +126,7 @@
     }
 
     function isSufficientJiraSettings() {
-      return $localStorage.jiraSettings && $localStorage.jiraSettings.host && $localStorage.jiraSettings.userName && $localStorage.jiraSettings.password && $localStorage.jiraSettings.password;
+      return $localStorage.jiraSettings && $localStorage.jiraSettings.isJiraEnabled && $localStorage.jiraSettings.host && $localStorage.jiraSettings.userName && $localStorage.jiraSettings.password && $localStorage.jiraSettings.password;
     }
 
     this.transformIssues = (response) => {

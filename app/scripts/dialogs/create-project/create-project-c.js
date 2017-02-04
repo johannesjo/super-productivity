@@ -14,8 +14,9 @@
     .controller('CreateProjectCtrl', CreateProjectCtrl);
 
   /* @ngInject */
-  function CreateProjectCtrl($mdDialog, Projects, SimpleToast) {
+  function CreateProjectCtrl($mdDialog, Projects, SimpleToast, IS_ELECTRON) {
     let vm = this;
+    vm.IS_ELECTRON = IS_ELECTRON;
     vm.task = {};
     vm.projectSettings = {};
 

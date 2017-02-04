@@ -1,112 +1,119 @@
 <section>
-  <h2 class="md-title">Jira-Setup</h2>
-  <form>
-    <md-input-container class="md-block">
-      <label>Host</label>
-      <input type="text"
-             ng-model="vm.settings.host">
-    </md-input-container>
-    <md-input-container class="md-block">
-      <label>Username</label>
-      <input type="text"
-             ng-model="vm.settings.userName">
-    </md-input-container>
-    <md-input-container class="md-block">
-      <label>Password</label>
-      <input type="password"
-             ng-model="vm.settings.password">
-    </md-input-container>
-    <md-input-container class="md-block">
-      <label>JQL Query for Tasks</label>
-      <input type="text"
-             ng-model="vm.settings.jqlQuery">
-      <div class="hint">e.g.: assignee = "{{ vm.settings.userName }}" AND resolution = Unresolved ORDER BY updatedDate DESC</div>
-    </md-input-container>
-    <md-switch ng-model="vm.settings.isUpdateIssueFromLocal"
-               aria-label="Update issue description on jira if task notes are updated">
-      Update issue description on jira if task notes are updated
-    </md-switch>
-    <md-button aria-label="Test credentials"
-               class="md-primary md-raised"
-               ng-click="vm.testJiraCredentials()">
-      <ng-md-icon icon="import_export"></ng-md-icon>
-      Test credentials
-    </md-button>
-    <section>
-      <h3 class="md-subtitle">Worklog</h3>
+  <md-switch ng-model="vm.settings.isJiraEnabled"
+             aria-label="Enable Jira Integration">
+    Enable Jira Integration
+  </md-switch>
 
+  <div ng-show="vm.settings.isJiraEnabled">
+    <h2 class="md-title">Jira-Integration</h2>
+    <form>
       <md-input-container class="md-block">
-        <div flex-gt-sm="50">
-          <md-switch ng-model="vm.settings.isWorklogEnabled"
-                     aria-label="open dialog for adding a worklog to jira when task is done">
-            Open worklog dialog for adding a worklog to jira when task is done
-          </md-switch>
-        </div>
-      </md-input-container>
-
-      <md-input-container class="md-block">
-        <div flex-gt-sm="50">
-          <md-switch ng-model="vm.settings.isAddWorklogOnSubTaskDone"
-                     ng-disabled="!vm.settings.isWorklogEnabled"
-                     aria-label="Add worklog when sub task is done">
-            Open worklog dialog when sub task is done and not for tasks with sub tasks themselves
-          </md-switch>
-        </div>
-      </md-input-container>
-
-      <md-input-container class="md-block">
-        <div flex-gt-sm="50">
-          <md-switch ng-model="vm.settings.isAutoWorklog"
-                     ng-disabled="!vm.settings.isWorklogEnabled"
-                     aria-label="(not recommended) send updates to worklog automatically when task is done">
-            (not recommended!) Send updates to worklog automatically without dialog
-          </md-switch>
-        </div>
-      </md-input-container>
-    </section>
-
-
-    <section ng-if="vm.settings.allTransitions">
-      <h3 class="md-subtitle">Default Transitions</h3>
-      <p>Jira enables a wide configuration of transitions usually coming into action as different columns on your jira agile board. That's why we can't make assumptions about where and when to transition your tasks and you need to set it manually.</p>
-      <md-input-container class="md-block">
-        <label>Default transition for OPEN</label>
-        <md-select ng-model="vm.settings.transitions.OPEN"
-                   arial-label="Select default transition for OPEN">
-          <md-option ng-value="'ALWAYS_ASK'"><em>Always ask</em></md-option>
-          <md-option ng-value="'DO_NOT'"><em>Don't transition</em></md-option>
-          <md-option ng-repeat="jiraTransition in vm.settings.allTransitions"
-                     ng-value="jiraTransition.id">
-            {{jiraTransition.id}} - {{jiraTransition.name}}
-          </md-option>
-        </md-select>
+        <label>Host</label>
+        <input type="text"
+               ng-model="vm.settings.host">
       </md-input-container>
       <md-input-container class="md-block">
-        <label>Default transition for IN_PROGRESS</label>
-        <md-select ng-model="vm.settings.transitions.IN_PROGRESS"
-                   arial-label="Select default transition for IN_PROGRESS">
-          <md-option ng-value="'ALWAYS_ASK'"><em>Always ask</em></md-option>
-          <md-option ng-value="'DO_NOT'"><em>Don't transition</em></md-option>
-          <md-option ng-repeat="jiraTransition in vm.settings.allTransitions"
-                     ng-value="jiraTransition.id">
-            {{jiraTransition.id}} - {{jiraTransition.name}}
-          </md-option>
-        </md-select>
+        <label>Username</label>
+        <input type="text"
+               ng-model="vm.settings.userName">
       </md-input-container>
       <md-input-container class="md-block">
-        <label>Default transition for DONE</label>
-        <md-select ng-model="vm.settings.transitions.DONE"
-                   arial-label="Select default transition for DONE">
-          <md-option ng-value="'ALWAYS_ASK'"><em>Always ask</em></md-option>
-          <md-option ng-value="'DO_NOT'"><em>Don't transition</em></md-option>
-          <md-option ng-repeat="jiraTransition in vm.settings.allTransitions"
-                     ng-value="jiraTransition.id">
-            {{jiraTransition.id}} - {{jiraTransition.name}}
-          </md-option>
-        </md-select>
+        <label>Password</label>
+        <input type="password"
+               ng-model="vm.settings.password">
       </md-input-container>
-    </section>
-  </form>
+      <md-input-container class="md-block">
+        <label>JQL Query for Tasks</label>
+        <input type="text"
+               ng-model="vm.settings.jqlQuery">
+        <div class="hint">e.g.: assignee = "{{ vm.settings.userName }}" AND resolution = Unresolved ORDER BY updatedDate DESC</div>
+      </md-input-container>
+      <md-switch ng-model="vm.settings.isUpdateIssueFromLocal"
+                 aria-label="Update issue description on jira if task notes are updated">
+        Update issue description on jira if task notes are updated
+      </md-switch>
+      <md-button aria-label="Test credentials"
+                 class="md-primary md-raised"
+                 ng-click="vm.testJiraCredentials()">
+        <ng-md-icon icon="import_export"></ng-md-icon>
+        Test credentials
+      </md-button>
+      <section>
+        <h3 class="md-subtitle">Worklog</h3>
 
-  <md-divider></md-divider>
+        <md-input-container class="md-block">
+          <div flex-gt-sm="50">
+            <md-switch ng-model="vm.settings.isWorklogEnabled"
+                       aria-label="open dialog for adding a worklog to jira when task is done">
+              Open worklog dialog for adding a worklog to jira when task is done
+            </md-switch>
+          </div>
+        </md-input-container>
+
+        <md-input-container class="md-block">
+          <div flex-gt-sm="50">
+            <md-switch ng-model="vm.settings.isAddWorklogOnSubTaskDone"
+                       ng-disabled="!vm.settings.isWorklogEnabled"
+                       aria-label="Add worklog when sub task is done">
+              Open worklog dialog when sub task is done and not for tasks with sub tasks themselves
+            </md-switch>
+          </div>
+        </md-input-container>
+
+        <md-input-container class="md-block">
+          <div flex-gt-sm="50">
+            <md-switch ng-model="vm.settings.isAutoWorklog"
+                       ng-disabled="!vm.settings.isWorklogEnabled"
+                       aria-label="(not recommended) send updates to worklog automatically when task is done">
+              (not recommended!) Send updates to worklog automatically without dialog
+            </md-switch>
+          </div>
+        </md-input-container>
+      </section>
+
+
+      <section ng-if="vm.settings.allTransitions">
+        <h3 class="md-subtitle">Default Transitions</h3>
+        <p>Jira enables a wide configuration of transitions usually coming into action as different columns on your jira agile board. That's why we can't make assumptions about where and when to transition your tasks and you need to set it manually.</p>
+        <md-input-container class="md-block">
+          <label>Default transition for OPEN</label>
+          <md-select ng-model="vm.settings.transitions.OPEN"
+                     arial-label="Select default transition for OPEN">
+            <md-option ng-value="'ALWAYS_ASK'"><em>Always ask</em></md-option>
+            <md-option ng-value="'DO_NOT'"><em>Don't transition</em></md-option>
+            <md-option ng-repeat="jiraTransition in vm.settings.allTransitions"
+                       ng-value="jiraTransition.id">
+              {{jiraTransition.id}} - {{jiraTransition.name}}
+            </md-option>
+          </md-select>
+        </md-input-container>
+        <md-input-container class="md-block">
+          <label>Default transition for IN_PROGRESS</label>
+          <md-select ng-model="vm.settings.transitions.IN_PROGRESS"
+                     arial-label="Select default transition for IN_PROGRESS">
+            <md-option ng-value="'ALWAYS_ASK'"><em>Always ask</em></md-option>
+            <md-option ng-value="'DO_NOT'"><em>Don't transition</em></md-option>
+            <md-option ng-repeat="jiraTransition in vm.settings.allTransitions"
+                       ng-value="jiraTransition.id">
+              {{jiraTransition.id}} - {{jiraTransition.name}}
+            </md-option>
+          </md-select>
+        </md-input-container>
+        <md-input-container class="md-block">
+          <label>Default transition for DONE</label>
+          <md-select ng-model="vm.settings.transitions.DONE"
+                     arial-label="Select default transition for DONE">
+            <md-option ng-value="'ALWAYS_ASK'"><em>Always ask</em></md-option>
+            <md-option ng-value="'DO_NOT'"><em>Don't transition</em></md-option>
+            <md-option ng-repeat="jiraTransition in vm.settings.allTransitions"
+                       ng-value="jiraTransition.id">
+              {{jiraTransition.id}} - {{jiraTransition.name}}
+            </md-option>
+          </md-select>
+        </md-input-container>
+      </section>
+    </form>
+
+    <md-divider></md-divider>
+  </div>
 </section>

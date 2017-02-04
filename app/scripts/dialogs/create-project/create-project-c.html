@@ -1,5 +1,5 @@
 <md-dialog aria-label="Create a new project"
-           class="was-idle-dialog">
+           class="create-project-dialog">
 
   <md-toolbar>
     <div class="md-toolbar-tools">
@@ -25,6 +25,11 @@
                  required
                  aria-label="Title">
         </md-input-container>
+
+        <jira-settings settings="vm.projectSettings.jiraSettings"
+                       ng-if="vm.IS_ELECTRON"></jira-settings>
+
+        <misc-settings settings="vm.projectSettings.config"></misc-settings>
       </div>
     </md-dialog-content>
 

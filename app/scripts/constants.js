@@ -86,6 +86,7 @@
         }
       },
       jiraSettings: {
+        isJiraEnabled: false,
         isFirstLogin: true,
         isWorklogEnabled: true,
         isAutoWorklog: false,
