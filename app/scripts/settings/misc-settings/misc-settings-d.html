@@ -1,0 +1,31 @@
+<section>
+  <h2 class="md-title">Misc</h2>
+  <md-input-container class="md-block">
+    <div flex-gt-sm="50">
+      <md-switch ng-model="vm.settings.isShortSyntaxEnabled"
+                 aria-label="Use short syntax (e.g. 'TaskTitleBla e:30m')">
+        Use short syntax (e.g. 'TaskTitleBla t:30m') for task creation
+      </md-switch>
+    </div>
+  </md-input-container>
+
+  <section ng-if="vm.IS_ELECTRON">
+    <md-input-container class="md-block">
+      <div flex-gt-sm="50">
+        <md-switch ng-model="vm.settings.isTakeABreakEnabled"
+                   aria-label="Enable take a break reminder">
+          Enable take a break reminder
+        </md-switch>
+      </div>
+    </md-input-container>
+    <md-input-container class="md-block md-icon-float"
+                        ng-hide="!vm.settings.isTakeABreakEnabled">
+      <label>Remind when I worked longer than X without a break</label>
+      <ng-md-icon icon="timer"
+                  aria-label="timer"></ng-md-icon>
+      <input type="text"
+             input-duration
+             ng-model="vm.settings.takeABreakMinWorkingTime">
+    </md-input-container>
+  </section>
+</section>

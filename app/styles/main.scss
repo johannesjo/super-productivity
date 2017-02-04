@@ -95,6 +95,16 @@ IMPORTANT NOTE:
 
 @import '../scripts/routes/settings/_settings-c.scss';
 
+@import '../scripts/settings/backup-settings/_backup-settings-d.scss';
+
+@import '../scripts/settings/jira-settings/_jira-settings-d.scss';
+
+@import '../scripts/settings/keyboard-settings/_keyboard-settings-d.scss';
+
+@import '../scripts/settings/misc-settings/_misc-settings-d.scss';
+
+@import '../scripts/settings/project-settings/_project-settings-d.scss';
+
 @import '../scripts/sub-task-list/_sub-task-list-d.scss';
 
 @import '../scripts/task-list/_task-list-d.scss';

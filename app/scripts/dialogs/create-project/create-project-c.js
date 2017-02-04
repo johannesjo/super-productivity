@@ -17,9 +17,10 @@
   function CreateProjectCtrl($mdDialog, Projects, SimpleToast) {
     let vm = this;
     vm.task = {};
+    vm.projectSettings = {};
 
     vm.createProject = (project) => {
-      Projects.createNew(project.title, {});
+      Projects.createNew(project.title, vm.projectSettings);
       SimpleToast('SUCCESS', 'You created the project "' + project.title + '"');
       $mdDialog.hide();
     };
