@@ -65,19 +65,19 @@
               </div>
               <div>
                 <md-switch ng-model="vm.options.showTitle"
-                             aria-label="Title">
+                           aria-label="Title">
                   Title
                 </md-switch>
               </div>
               <div>
                 <md-switch ng-model="vm.options.showDate"
-                             aria-label="Date">
+                           aria-label="Date">
                   Date
                 </md-switch>
               </div>
               <div>
                 <md-switch ng-model="vm.options.showTimeSpent"
-                             aria-label="Time Spent">
+                           aria-label="Time Spent">
                   Time Spent
                 </md-switch>
               </div>
@@ -115,13 +115,15 @@
 
 
     <md-dialog-actions>
-      <!--<md-button type="submit"-->
-      <!--class="md-primary md-raised">-->
-      <!--Copy to clippboard-->
-      <!--</md-button>-->
+      <a class="md-button md-primary md-raised"
+         text-to-file-download="vm.tasksTxt">
+        <ng-md-icon icon="file_download"></ng-md-icon>
+        Save to file
+      </a>
       <md-button ng-click="vm.cancel()"
                  type="button"
                  class="md-raised">
+        <ng-md-icon icon="close"></ng-md-icon>
         Close
       </md-button>
     </md-dialog-actions>
