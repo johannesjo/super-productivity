@@ -43,7 +43,7 @@
               TakeABreakReminder.check(timeSpentInMs, idleTimeInMs);
 
               // track
-              this.addTimeSpent(that.$localStorage.currentTask, timeSpentInMs);
+              that.addTimeSpent(that.$localStorage.currentTask, timeSpentInMs);
 
               // we need to manually call apply as that is an outside event
               that.$rootScope.$apply();
@@ -61,7 +61,7 @@
 
           if (!isIdleDialogOpen) {
             isIdleDialogOpen = true;
-            this.Dialogs('WAS_IDLE', { idleTime, minIdleTimeInMs })
+            that.Dialogs('WAS_IDLE', { idleTime, minIdleTimeInMs })
               .then(() => {
                 // if tracked
                 TakeABreakReminder.isShown = true;
@@ -69,7 +69,7 @@
               }, () => {
                 // if not tracked
                 // unset currentSession.timeWorkedWithoutBreak
-                this.$localStorage.currentSession.timeWorkedWithoutBreak = undefined;
+                that.$localStorage.currentSession.timeWorkedWithoutBreak = undefined;
                 TakeABreakReminder.isShown = true;
                 isIdleDialogOpen = false;
               });
@@ -395,6 +395,7 @@
       } else {
         timeSpentInMs = timeSpentInMsOrMomentDuration;
       }
+
 
       // if not set set started pointer
       if (!task.started) {
