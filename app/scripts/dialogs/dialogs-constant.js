@@ -17,10 +17,9 @@
         controllerAs: 'vm',
         bindToController: true
       },
-      CREATE_TASK: {
-        title: 'Out of undone tasks',
-        textContent: 'You run out of tasks. Go on and create some new ones if you like.',
-        ok: 'Got it!'
+      WELCOME: {
+        controller: 'WelcomeCtrl',
+        templateUrl: 'scripts/dialogs/welcome/welcome-c.html'
       },
       WAS_IDLE: {
         controller: 'WasIdleCtrl',

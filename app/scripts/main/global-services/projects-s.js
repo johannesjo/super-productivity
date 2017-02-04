@@ -14,13 +14,7 @@
     .service('Projects', Projects);
 
   /* @ngInject */
-  function Projects(LS_DEFAULTS, $localStorage, Uid, $window, SimpleToast, $injector) {
-    const GLOBAL_LS_FIELDS = [
-      'currentProject',
-      'projects',
-      'keys'
-    ];
-
+  function Projects(LS_DEFAULTS, $localStorage, Uid, $window, SimpleToast, $injector, GLOBAL_LS_FIELDS) {
     const TMP_FIELDS = [
       '$$hashKey',
       '$$mdSelectId',

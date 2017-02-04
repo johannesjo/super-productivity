@@ -12,7 +12,14 @@
   angular
     .module('superProductivity')
     .constant('DEFAULT_THEME', 'blue-theme')
+    .constant('GLOBAL_LS_FIELDS', [
+      'currentProject',
+      'projects',
+      'keys',
+      'isShowWelcomeDialog'
+    ])
     .constant('LS_DEFAULTS', {
+      isShowWelcomeDialog: true,
       note: undefined,
       theme: undefined,
       currentTask: undefined,

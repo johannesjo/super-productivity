@@ -40,7 +40,8 @@
     .run(initPollJiraTaskUpdates)
     .run(initPollForSimpleTimeTracking)
     .run(initMousewheelZoomForElectron)
-    .run(initGlobalShortcuts);
+    .run(initGlobalShortcuts)
+    .run(showWelcomeDialog);
 
   function configMarked(markedProvider) {
     markedProvider.setRenderer({
@@ -144,6 +145,12 @@
           Jira.checkForUpdates($localStorage.tasks);
         }
       }, JIRA_UPDATE_POLL_INTERVAL);
+    }
+  }
+
+  function showWelcomeDialog($localStorage, Dialogs) {
+    if ($localStorage.isShowWelcomeDialog) {
+      Dialogs('WELCOME', undefined, true);
     }
   }
 
