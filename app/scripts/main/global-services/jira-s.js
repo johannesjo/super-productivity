@@ -125,8 +125,13 @@
       };
     }
 
-    function isSufficientJiraSettings() {
-      return $localStorage.jiraSettings && $localStorage.jiraSettings.isJiraEnabled && $localStorage.jiraSettings.host && $localStorage.jiraSettings.userName && $localStorage.jiraSettings.password && $localStorage.jiraSettings.password;
+    this.isSufficientJiraSettings = isSufficientJiraSettings;
+
+    function isSufficientJiraSettings(settingsToTest) {
+      if (!settingsToTest) {
+        settingsToTest = $localStorage.jiraSettings;
+      }
+      return settingsToTest && settingsToTest.isJiraEnabled && settingsToTest.host && settingsToTest.userName && settingsToTest.password && settingsToTest.password;
     }
 
     this.transformIssues = (response) => {

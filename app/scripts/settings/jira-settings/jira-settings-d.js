@@ -27,12 +27,30 @@
   }
 
   /* @ngInject */
-  function JiraSettingsCtrl(Jira, SimpleToast) {
+  function JiraSettingsCtrl(Jira, SimpleToast, $timeout, $scope) {
     let vm = this;
 
     vm.testJiraCredentials = () => {
-      Jira.getSuggestions().then(() => {
-        SimpleToast('SUCCESS', 'Connection successful!');
+      let errorMsgTimeout;
+
+      if (Jira.isSufficientJiraSettings(vm.settings)) {
+        Jira.getSuggestions().then(() => {
+            SimpleToast('SUCCESS', 'Connection successful!');
+          }, () => {
+            // give other error time to display
+            errorMsgTimeout = $timeout(() => {
+              SimpleToast('ERROR', 'Connection failed!');
+            }, 3000);
+          }
+        );
+      } else {
+        SimpleToast('ERROR', 'Insuffcient settings!');
+      }
+
+      $scope.$on('$destroy', () => {
+        if (errorMsgTimeout) {
+          $timeout.cancel(errorMsgTimeout);
+        }
       });
     };
   }
