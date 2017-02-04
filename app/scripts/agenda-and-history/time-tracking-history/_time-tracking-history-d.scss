@@ -9,9 +9,22 @@ time-tracking-history {
     }
   }
 
+  .task-summary-table {
+    width: 100%;
+  }
+
   .month {
+    .md-icon-button {
+      width: 30px;
+      height: 30px;
+      line-height: 30px;
+      min-height: 30px;
+      padding: 0;
+    }
+
     &-title {
       margin-top: 30px;
+      margin-bottom: 8px;
     }
     &-time-spent {
       font-size: 18px;

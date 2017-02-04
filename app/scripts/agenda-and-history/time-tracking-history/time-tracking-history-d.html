@@ -18,10 +18,16 @@
          class="day">
 
       <div class="day-title">
-        <strong>{{ worklogForDay.dateStr|amDateFormat:'DD-MM-YYYY, dddd' }}:</strong> {{ worklogForDay.timeSpent|duration }}
+        <md-button class="md-raised md-icon-button"
+                   aria-label="export data"
+                   ng-click="worklogForDay.isVisible=!worklogForDay.isVisible;">
+          <ng-md-icon icon="list"></ng-md-icon>
+        </md-button>
+        {{ worklogForDay.dateStr|amDateFormat:'DD-MM-YYYY, dddd' }}: <strong>{{ worklogForDay.timeSpent|duration }}</strong>
       </div>
 
-      <table class="task-summary-table">
+      <table class="task-summary-table"
+             ng-if="worklogForDay.isVisible">
         <tr ng-repeat="logEntry in worklogForDay.entries track by logEntry.task.id">
           <td>{{ logEntry.task.title }}</td>
           <td>{{ logEntry.task.timeSpentOnDay[worklogForDay.dateStr] |duration}}</td>
