@@ -36,11 +36,11 @@ npm start
 
 ## Binaries
 ### Linux
-* [superProductivity-0.9.0-x86_64.AppImage](http://super-productivity.com/downloads/superProductivity-0.9.0-x86_64.AppImage)
-* [superProductivity_0.9.0_amd64.deb](http://super-productivity.com/downloads/superProductivity_0.9.0_amd64.deb)
+* [superProductivity-1.0.0-x86_64.AppImage](http://super-productivity.com/downloads/superProductivity-1.0.0-x86_64.AppImage)
+* [superProductivity_1.0.0_amd64.deb](http://super-productivity.com/downloads/superProductivity_1.0.0_amd64.deb)
 
 ### MacOS
-* [superProductivity-0.9.0.dmg](http://super-productivity.com/downloads/superProductivity-0.9.0.dmg)
+* [superProductivity-1.0.0.dmg](http://super-productivity.com/downloads/superProductivity-1.0.0.dmg)
 
 ### Windows
 (not yet compiled)
