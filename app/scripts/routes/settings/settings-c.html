@@ -3,11 +3,11 @@
   <project-settings all-projects="vm.allProjects"
                     selected-current-project="vm.selectedCurrentProject"></project-settings>
 
-  <jira-settings settings="r.jiraSettings"
-                 ng-if="vm.IS_ELECTRON"></jira-settings>
-
   <section>
-    <h2 class="md-title">Switch theme</h2>
+    <h2 class="md-title">
+      <ng-md-icon icon="color_lens"></ng-md-icon>
+      Switch theme
+    </h2>
     <md-select ng-model="vm.selectedTheme"
                placeholder="Select a theme">
       <md-option ng-repeat="themeName in vm.themes"
@@ -21,6 +21,9 @@
       </md-switch>
     </div>
   </section>
+
+  <jira-settings settings="r.jiraSettings"
+                 ng-if="vm.IS_ELECTRON"></jira-settings>
 
   <section ng-if="vm.IS_ELECTRON">
     <h2 class="md-title">Git integration</h2>
