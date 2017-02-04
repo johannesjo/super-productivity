@@ -2,25 +2,8 @@
 
   <project-settings all-projects="vm.allProjects"
                     selected-current-project="vm.selectedCurrentProject"></project-settings>
-
-  <section>
-    <h2 class="md-title">
-      <ng-md-icon icon="color_lens"></ng-md-icon>
-      Switch theme
-    </h2>
-    <md-select ng-model="vm.selectedTheme"
-               placeholder="Select a theme">
-      <md-option ng-repeat="themeName in vm.themes"
-                 ng-value="themeName">{{ themeName }}
-      </md-option>
-    </md-select>
-    <div flex-gt-sm="50">
-      <md-switch ng-model="vm.isDarkTheme"
-                 aria-label="Use dark theme">
-        Use dark theme
-      </md-switch>
-    </div>
-  </section>
+  <theme-settings current-theme="r.theme"
+                  is-current-project-theme="true"></theme-settings>
 
   <jira-settings settings="r.jiraSettings"
                  ng-if="vm.IS_ELECTRON"></jira-settings>
