@@ -19,6 +19,8 @@
       $localStorage.note = 'write some note';
     }
     this.r = $localStorage;
+    console.log(this.r);
+
 
     this.cancel = () => {
       $mdDialog.hide();

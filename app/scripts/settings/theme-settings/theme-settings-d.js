@@ -31,7 +31,6 @@
   function ThemeSettingsCtrl($scope, THEMES, DEFAULT_THEME, $localStorage) {
     let vm = this;
     vm.themes = THEMES;
-    console.log(vm.currentTheme);
 
     vm.currentTheme = vm.currentTheme || DEFAULT_THEME;
 

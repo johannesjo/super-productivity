@@ -7,3 +7,13 @@
     }
   }
 }
+
+.gt-md-2-col {
+  @media (min-width: $layout-gt-md) {
+    overflow: hidden;
+    > * {
+      float: left;
+      @include row-machine(2, 2%);
+    }
+  }
+}

@@ -1,16 +1,13 @@
 .page-settings {
-  .md-title {
-    margin-top: 50px;
-  }
-  > *:first-child {
+  .config-section {
+    padding: 15px;
+    margin-bottom: 10px;
+    background: #ffffff;
+    body.dark-theme & {
+      background-color: $dark-theme-bg-lighter;
+    }
     .md-title {
       margin-top: 0;
     }
-  }
-
-  md-divider {
-    margin-top: 20px;
-    margin-bottom: 20px;
-    border-top-width: 5px;
   }
 }

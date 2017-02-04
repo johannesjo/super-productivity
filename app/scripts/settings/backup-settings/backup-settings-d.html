@@ -1,38 +1,36 @@
-<section>
-  <h2 class="md-title">
-    <ng-md-icon icon="swap_vert"></ng-md-icon>
-    Make/Restore Backup
-  </h2>
-  <a class="md-raised md-button md-ink-ripple"
-     type="button"
-     download-backup>
-    <ng-md-icon icon="file_download"
-                aria-label="download settings"></ng-md-icon>
-    Download your tasks and settings
-    <div class="md-ripple-container"></div>
-  </a>
-  <md-button
-    class="md-raised"
-    ng-click="vm.showUploadForm=!vm.showUploadForm;">
-    <ng-md-icon icon="file_upload"
-                aria-label="import settings"></ng-md-icon>
-    Import Settings
+<h2 class="md-title">
+  <ng-md-icon icon="swap_vert"></ng-md-icon>
+  Make/Restore Backup
+</h2>
+<a class="md-raised md-button md-ink-ripple"
+   type="button"
+   download-backup>
+  <ng-md-icon icon="file_download"
+              aria-label="download settings"></ng-md-icon>
+  Download your tasks and settings
+  <div class="md-ripple-container"></div>
+</a>
+<md-button
+  class="md-raised"
+  ng-click="vm.showUploadForm=!vm.showUploadForm;">
+  <ng-md-icon icon="file_upload"
+              aria-label="import settings"></ng-md-icon>
+  Import Settings
+</md-button>
+
+
+<form ng-if="vm.showUploadForm"
+      ng-submit="vm.importSettings(vm.uploadSettingsTextarea)">
+  <md-input-container class="md-block"
+                      flex-gt-sm>
+    <label>Copy and paste the contents of the download json file here</label>
+    <textarea ng-model="vm.uploadSettingsTextarea"
+              md-auto-focus
+              rows="3"></textarea>
+  </md-input-container>
+  <md-button type="submit"
+             class="md-raised md-primary">Import settings
   </md-button>
+</form>
 
-
-  <form ng-if="vm.showUploadForm"
-        ng-submit="vm.importSettings(vm.uploadSettingsTextarea)">
-    <md-input-container class="md-block"
-                        flex-gt-sm>
-      <label>Copy and paste the contents of the download json file here</label>
-      <textarea ng-model="vm.uploadSettingsTextarea"
-                md-auto-focus
-                rows="3"></textarea>
-    </md-input-container>
-    <md-button type="submit"
-               class="md-raised md-primary">Import settings
-    </md-button>
-  </form>
-
-  <md-divider></md-divider>
-</section>
+<md-divider></md-divider>
