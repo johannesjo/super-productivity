@@ -2,6 +2,11 @@
   .md-title {
     margin-top: 50px;
   }
+  > *:first-child {
+    .md-title {
+      margin-top: 0;
+    }
+  }
 
   md-divider {
     margin-top: 20px;

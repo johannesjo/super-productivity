@@ -11,6 +11,8 @@ IMPORTANT NOTE:
 
 @import '_functions/_some-function.scss';
 
+@import '_mixins/_row-machine.scss';
+
 @import '_mixins/_some-mixin.scss';
 
 @import '_placeholders/_some-placeholder.scss';
@@ -50,6 +52,8 @@ IMPORTANT NOTE:
 @import 'components/_resytle-autocomplete.scss';
 
 @import 'components/_side-info.scss';
+
+@import 'components/_simple-grid.scss';
 
 @import 'components/_simple-textarea.scss';
 

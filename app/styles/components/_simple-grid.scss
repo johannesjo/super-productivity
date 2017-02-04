@@ -1,0 +1,9 @@
+.gt-xs-2-col {
+  @media (min-width: $layout-gt-xs) {
+    overflow: hidden;
+    > * {
+      float: left;
+      @include row-machine(2, 2%);
+    }
+  }
+}
