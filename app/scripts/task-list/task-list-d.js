@@ -133,6 +133,11 @@
       this.tasks.splice($index, 1);
       this.focusPreviousInListOrParent($index);
 
+      // check if current task was deleted and unset current task if so
+      if (this.$localStorage.currentTask && this.$localStorage.currentTask.id === task.id) {
+        this.Tasks.updateCurrent(undefined);
+      }
+
       // show toast for undo
       let toast = this.$mdToast.simple()
         .textContent('You deleted "' + task.title + '"')
