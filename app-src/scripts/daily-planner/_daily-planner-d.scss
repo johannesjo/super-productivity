@@ -2,9 +2,7 @@ daily-planner {
   display: block;
 
   .md-headline {
-    @media(min-width: $layout-gt-md) {
-      text-align: center;
-    }
+    text-align: center;
   }
 
   .search {
@@ -25,6 +23,7 @@ daily-planner {
       height: 32px;
     }
   }
+
   .highlight-add-task-icon {
     margin-right: 10px;
   }
