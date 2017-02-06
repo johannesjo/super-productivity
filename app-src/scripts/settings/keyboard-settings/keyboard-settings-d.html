@@ -1,0 +1,80 @@
+<h2 class="md-title">
+  <ng-md-icon icon="keyboard"></ng-md-icon>
+  Keyboard Shortcuts
+</h2>
+
+<section ng-if="vm.IS_ELECTRON">
+  <h3 class="md-caption">Global Shortcuts (system wide)</h3>
+  <md-input-container class="md-block">
+    <label>Show/Hide Super Productivity</label>
+    <input type="text"
+           ng-blur="vm.registerGlobalShortcut(vm.keys.globalShowHide)"
+           keyboard-key-input
+           keyboard-key-input-control-keys="true"
+           ng-model="vm.keys.globalShowHide">
+  </md-input-container>
+</section>
+
+<h3 class="md-caption">Global Shortcuts (application wide)</h3>
+
+<div class="gt-xs-2-col">
+  <md-input-container class="md-block">
+    <label>Add new task</label>
+    <input type="text"
+           keyboard-key-input
+           ng-model="vm.keys.addNewTask">
+  </md-input-container>
+  <md-input-container class="md-block">
+    <label>Open project notes</label>
+    <input type="text"
+           keyboard-key-input
+           ng-model="vm.keys.openProjectNotes">
+  </md-input-container>
+  <md-input-container class="md-block">
+    <label>Open distraction panel</label>
+    <input type="text"
+           keyboard-key-input
+           ng-model="vm.keys.openDistractionPanel">
+  </md-input-container>
+</div>
+
+<h3 class="md-caption">Tasks</h3>
+<p>The following shortcuts apply for the currently selected task (selected via tab or mouse).</p>
+<div class="gt-xs-2-col">
+  <md-input-container class="md-block">
+    <label>Edit title</label>
+    <input type="text"
+           keyboard-key-input
+           ng-model="vm.keys.taskEditTitle">
+  </md-input-container>
+  <md-input-container class="md-block">
+    <label>Show/Hide Notes</label>
+    <input type="text"
+           keyboard-key-input
+           ng-model="vm.keys.taskToggleNotes">
+  </md-input-container>
+  <md-input-container class="md-block">
+    <label>Edit estimation / time spent</label>
+    <input type="text"
+           keyboard-key-input
+           ng-model="vm.keys.taskOpenEstimationDialog">
+  </md-input-container>
+  <md-input-container class="md-block">
+    <label>Toggle Done</label>
+    <input type="text"
+           keyboard-key-input
+           ng-model="vm.keys.taskToggleDone">
+  </md-input-container>
+  <md-input-container class="md-block">
+    <label>Add sub task</label>
+    <input type="text"
+           keyboard-key-input
+           ng-model="vm.keys.taskAddSubTask">
+  </md-input-container>
+  <md-input-container class="md-block">
+    <label>Delete Task</label>
+    <input type="text"
+           keyboard-key-input
+           ng-model="vm.keys.taskDelete">
+  </md-input-container>
+</div>

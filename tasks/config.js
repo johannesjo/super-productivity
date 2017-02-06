@@ -2,7 +2,7 @@ module.exports = (function () {
   'use strict';
 
   // config vars
-  const base = './app';
+  const base = './app-src';
   const scripts = base + '/scripts';
   const sass = base + '/styles';
 
@@ -50,7 +50,7 @@ module.exports = (function () {
     fonts: base + '/fonts/',
     fontsF: base + '/fonts/**/*.*',
     tmp: './.tmp',
-    dist: 'www',
+    dist: 'app',
     wwwDestination: '',
     karmaConf: './karma.conf.js',
     karmaConfE2E: './karma-e2e.conf.js'

@@ -35,15 +35,13 @@ gulp.task('build', function (callback) {
 
     'cleanDist',
     'wiredepBuild',
-    //  'injectAll',
+    'injectAll',
     //  'testSingle',
     'lint',
     //  'sass',
     'minFiles',
     'copy',
 
-    // reset config
-    //'ngConfig',
     callback);
 });
 
@@ -86,12 +84,12 @@ gulp.task('copy', function () {
 
 gulp.task('minFiles', function () {
   return gulp.src(config.mainFile)
-  //.pipe(useref({}))
-    .pipe(useref({}, lazypipe()
-      .pipe(sourcemaps.init, { loadMaps: true })))
+    .pipe(useref({}))
+    //.pipe(useref({}, lazypipe()
+    //  .pipe(sourcemaps.init, { loadMaps: true })))
     .pipe(gulpif(/scripts\.js/, babel()))
     .pipe(gulpif(/\.js$/, uglify({ preserveComments: 'license' })))
     .pipe(gulpif(/\.css$/, cleanCSS()))
-    .pipe(sourcemaps.write('maps'))
+    //.pipe(sourcemaps.write('maps'))
     .pipe(gulp.dest(config.dist));
 });

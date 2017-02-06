@@ -1,0 +1,97 @@
+<div class="daily-planner">
+  <h2 class="md-headline">
+    <ng-md-icon icon="border_color"></ng-md-icon>
+    Plan your day!
+  </h2>
+
+  <form ng-submit="vm.addTask()"
+        layout="row"
+        class="add-task-form">
+    <ng-md-icon icon="playlist_add"
+                size="32"
+                class="highlight-add-task-icon"></ng-md-icon>
+
+    <md-autocomplete
+      md-whiteframe="2"
+      flex="100"
+      tabindex="1"
+      md-selected-item="vm.newTask"
+      md-search-text="vm.newTaskTitle"
+      md-items="task in vm.getFilteredTaskSuggestions(vm.newTaskTitle)"
+      md-item-text="task.title"
+      md-require-match="false"
+      autofocus-autocomplete
+      placeholder="Select or create a task">
+      <md-item-template>
+          <span md-highlight-text="vm.newTaskTitle"
+                md-highlight-flags="^i">{{task.title}}</span>
+      </md-item-template>
+    </md-autocomplete>
+  </form>
+
+  <div class="done"
+       ng-show="r.tasks.length >0"
+       layout="row"
+       layout-sm="column"
+       layout-align="center center">
+    <md-button class="md-raised md-primary"
+               ng-click="vm.done()">
+      <ng-md-icon icon="playlist_play"></ng-md-icon>
+      All done! Let's get to work!
+    </md-button>
+  </div>
+
+  <div class="gt-md-2-col">
+    <section>
+      <h2 class="md-title">
+        <ng-md-icon icon="playlist_play"></ng-md-icon>
+        Tasks for today (estimated: ~{{ vm.totaleEstimate|duration}} )
+      </h2>
+
+      <p ng-if="!r.tasks.length">
+        You have currently no tasks. Create one!
+      </p>
+      <task-list tasks="r.tasks"
+                 current-task-id="r.currentTask.id"></task-list>
+    </section>
+
+
+    <section>
+      <h2 class="md-title">
+        <ng-md-icon icon="my_library_books"></ng-md-icon>
+        Tasks Backlog (for some other time; estimated: ~{{ vm.totaleEstimateBacklog|duration}} )
+      </h2>
+
+      <p ng-if="!r.backlogTasks.length">
+        You have currently no tasks in the backlog.
+      </p>
+
+      <md-input-container class="md-block search"
+                          ng-show="r.backlogTasks.length > 1"
+                          flex-gt-sm>
+        <label>Search Backlog</label>
+        <input type="text"
+               ng-model="vm.search">
+      </md-input-container>
+
+      <task-list tasks="r.backlogTasks"
+                 filter="vm.search"
+                 limit-to="{{vm.limitBacklogTo}}"></task-list>
+
+
+      <md-button class="md-primary"
+                 ng-click="vm.limitBacklogTo = false"
+                 ng-hide="vm.limitBacklogTo === false || r.backlogTasks.length <=vm.limitBacklogTo ||r.backlogTasks.length ===0">
+        <ng-md-icon icon="remove_red_eye"></ng-md-icon>
+        Show All {{ r.backlogTasks.length }} items in Backlog
+      </md-button>
+
+      <md-button class="md-primary"
+                 ui-sref="done-tasks-backlog">
+        <ng-md-icon icon="list"></ng-md-icon>
+        Go To Done Backlog
+      </md-button>
+    </section>
+  </div>
+</div>
+

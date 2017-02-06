@@ -1,0 +1,17 @@
+<md-card class="hint"
+         ng-show="r.tomorrowsNote">
+  <md-card-title>
+    <md-card-title-text>
+      <span class="md-title">Your yesterdays note for today</span>
+    </md-card-title-text>
+  </md-card-title>
+  <md-card-content>
+    <p>
+      {{ r.tomorrowsNote }}
+    </p>
+  </md-card-content>
+  <md-card-actions layout="row"
+                   layout-align="end center">
+    <md-button ng-click="vm.deleteHint()">Remove</md-button>
+  </md-card-actions>
+</md-card>

@@ -1,0 +1,86 @@
+<script type="text/ng-template"
+        id="calendarDayView">
+  <div class="cal-day-box">
+    <div class="cal-day-panel clearfix"
+         ng-style="{height: vm.dayViewHeight + 'px', minWidth: vm.viewWidth + 'px'}">
+      <mwl-calendar-hour-list
+        day-view-start="vm.dayViewStart"
+        day-view-end="vm.dayViewEnd"
+        day-view-split="vm.dayViewSplit"
+        on-timespan-click="vm.onTimespanClick"
+        on-date-range-select="vm.onDateRangeSelect"
+        on-event-times-changed="vm.onEventTimesChanged"
+        view-date="vm.viewDate"
+        custom-template-urls="vm.customTemplateUrls"
+        template-scope="vm.templateScope"
+        cell-modifier="vm.cellModifier">
+      </mwl-calendar-hour-list>
+
+      <div class="pull-left day-event day-highlight"
+           ng-repeat="dayEvent in vm.nonAllDayEvents track by dayEvent.event.calendarEventId"
+           ng-class="dayEvent.event.cssClass"
+           ng-style="{
+        top: dayEvent.top - 1 + 'px',
+        left: dayEvent.left + 60 + 'px',
+        height: dayEvent.height + 'px',
+        width: dayEvent.width + 'px',
+        backgroundColor: dayEvent.event.color.secondary,
+        borderColor: dayEvent.event.color.primary
+      }"
+           mwl-draggable="dayEvent.event.draggable === true"
+           axis="'xy'"
+           snap-grid="{y: vm.dayViewEventChunkSize || 30, x: 50}"
+           on-drag="vm.eventDragged(dayEvent.event, y / 30)"
+           on-drag-end="vm.eventDragComplete(dayEvent.event, y / 30)"
+           mwl-resizable="dayEvent.event.resizable === true && dayEvent.event.endsAt"
+           resize-edges="{top: true, bottom: true}"
+           on-resize="vm.eventResized(dayEvent.event, edge, y / 30)"
+           on-resize-end="vm.eventResizeComplete(dayEvent.event, edge, y / 30)"
+           uib-tooltip-html="vm.calendarEventTitle.dayViewTooltip(dayEvent.event) | calendarTrustAsHtml"
+           tooltip-append-to-body="true">
+
+      <span class="cal-hours">
+        <span ng-show="dayEvent.top == 0"><span ng-bind="(dayEvent.event.tempStartsAt || dayEvent.event.startsAt) | calendarDate:'day':true"></span>, </span>
+        <span ng-bind="(dayEvent.event.tempStartsAt || dayEvent.event.startsAt) | calendarDate:'time':true"></span>
+      </span>
+        <span class="event-item md-caption">
+          <!--<span class="event-item"-->
+          <!--ng-click="vm.onEventClick({calendarEvent: dayEvent.event})">-->
+          <span ng-bind-html="vm.calendarEventTitle.dayView(dayEvent.event) | calendarTrustAsHtml"></span>
+        </span>
+
+        <a class="event-item-action"
+           ng-repeat="action in dayEvent.event.actions track by $index"
+           ng-class="action.cssClass"
+           ng-bind-html="action.label | calendarTrustAsHtml"
+           ng-click="action.onClick({calendarEvent: dayEvent.event})">
+        </a>
+
+      </div>
+
+    </div>
+  </div>
+</script>
+
+<h2 class="md-title">Your agenda for your undone tasks today</h2>
+<p>Nothing to click, nothing to do. This is just here to give you a vague idea, how your day might look like.</p>
+
+<md-switch ng-model="r.uiHelper.dailyAgenda.showSubTasks"
+           ng-change="vm.toggleSubTasks(vm.showSubTasks)">Show Sub Tasks
+</md-switch>
+
+<mwl-calendar
+  events="vm.events"
+  view="vm.calendarView"
+  view-date="vm.viewDate"
+  cell-is-open="vm.cellIsOpen"
+  cell-auto-open-disabled="true"
+  day-view-start="{{ vm.dayStarts }}"
+  day-view-end="{{ vm.dayEnds }}"
+  day-view-event-width="320"
+  custom-template-urls="{calendarDayView: 'calendarDayView'}"
+  on-timespan-click="vm.timespanClicked(calendarDate, calendarCell)"
+  day-view-split="15"
+  on-event-times-changed="calendarEvent.startsAt = calendarNewEventStart; calendarEvent.endsAt = calendarNewEventEnd; vm.eventTimesChanged(calendarEvent)">
+</mwl-calendar>
+

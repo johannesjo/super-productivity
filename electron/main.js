@@ -30,12 +30,20 @@ let lastIdleTime;
 let darwinForceQuit = false;
 
 function createWindow() {
+  let frontendDir;
+
+  if (process.env.NODE_ENV === 'DEV') {
+    frontendDir = 'app-src';
+  } else {
+    frontendDir = 'app';
+  }
+
   // Create the browser window.
   mainWin = new BrowserWindow({ width: 800, height: 600 });
 
   // and load the index.html of the app.
   mainWin.loadURL(url.format({
-    pathname: path.join(__dirname, '../app/index.html'),
+    pathname: path.join(__dirname, '../' + frontendDir + '/index.html'),
     protocol: 'file:',
     slashes: true,
     webPreferences: {
@@ -45,7 +53,7 @@ function createWindow() {
   }));
 
   // Open the DevTools.
-  //mainWin.webContents.openDevTools();
+  // mainWin.webContents.openDevTools();
 
   // open new window links in browser
   mainWin.webContents.on('new-window', function (event, url) {

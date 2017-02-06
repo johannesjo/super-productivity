@@ -1,0 +1,49 @@
+<div class="work-view-current-task">
+  <p>
+    <ng-md-icon icon="playlist_play"></ng-md-icon>
+    Working today: <strong>{{ vm.totalTimeWorkedToday|duration }}</strong>
+    <ng-md-icon icon="timer"></ng-md-icon>
+    –
+    Estimate remaining: ~<strong>{{ vm.totalEstimationRemaining|duration }}</strong>
+    <ng-md-icon icon="timer"></ng-md-icon>
+  </p>
+</div>
+
+<div class="work-view-tasks work-view-tasks--undone">
+  <p ng-if="!vm.tasksUndone.length">You have currently no undone tasks.</p>
+
+  <task-list tasks="vm.tasksUndone"
+             current-task-id="r.currentTask.id"
+             current-task-id=""
+             on-task-done-changed="vm.onTaskDoneChangedUndoneList(task)"
+             allow-task-selection="true"></task-list>
+</div>
+
+<md-button ng-click="vm.openAddTask()"
+           class="md-primary md-raised">
+  <ng-md-icon icon="add"></ng-md-icon>
+  Add new Task
+</md-button>
+
+
+<md-button ui-sref="daily-summary"
+           class="md-primary md-raised">
+  <ng-md-icon icon="done_all"></ng-md-icon>
+  Finish your work day
+</md-button>
+
+
+<h2 class="md-title">
+  <ng-md-icon icon="playlist_add_check"></ng-md-icon>
+  Done Tasks
+</h2>
+
+<div class="work-view-tasks work-view-tasks--done">
+  <p ng-if="!vm.tasksDone.length">You have currently no done tasks.</p>
+
+  <task-list tasks="vm.tasksDone"
+             on-task-done-changed="vm.onTaskDoneChangedDoneList(task)"
+             current-task-id="r.currentTask.id"></task-list>
+</div>
+
+

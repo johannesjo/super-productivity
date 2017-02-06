@@ -1,0 +1,704 @@
+/*
+IMPORTANT NOTE:
+ This file SHOULD NOT BE EDITED MANUALLY, as its purpose
+ is to be the point where all your stylesheet-files will
+ be imported
+*/
+agenda-and-history {
+  margin-top: -20px;
+  margin-left: -20px;
+  margin-right: -20px;
+  display: block; }
+  agenda-and-history .content {
+    padding-left: 20px;
+    padding-right: 20px; }
+  agenda-and-history md-toolbar {
+    height: 36px;
+    min-height: 36px; }
+
+daily-agenda .day-event {
+  width: calc(100% - 80px) !important;
+  background: #fff;
+  border: 1px solid #666 !important; }
+  body.dark-theme daily-agenda .day-event {
+    background-color: #464646;
+    color: #fff;
+    border: 1px solid #666 !important; }
+  daily-agenda .day-event:hover {
+    background: #fff; }
+  daily-agenda .day-event:first-of-type {
+    overflow: visible; }
+    daily-agenda .day-event:first-of-type:before {
+      position: absolute;
+      content: '';
+      left: -60px;
+      top: -2px;
+      width: calc(100% + 80px);
+      border-top: 2px dashed black; }
+
+daily-agenda .cal-day-hour {
+  background: transparent !important; }
+
+daily-agenda .cal-day-box .cal-day-hour-part {
+  background: transparent !important; }
+  daily-agenda .cal-day-box .cal-day-hour-part:focus {
+    outline: none; }
+  daily-agenda .cal-day-box .cal-day-hour-part:hover {
+    background: transparent; }
+
+body.dark-theme .day-event:first-of-type:before {
+  border-top: 2px dashed #fff; }
+
+time-tracking-history .year-title {
+  margin-top: 30px; }
+
+time-tracking-history .year-time-spent {
+  font-size: 21px; }
+
+time-tracking-history .task-summary-table {
+  width: 100%; }
+
+time-tracking-history .month .md-icon-button {
+  width: 30px;
+  height: 30px;
+  line-height: 30px;
+  min-height: 30px;
+  padding: 0; }
+
+time-tracking-history .month-title {
+  margin-top: 30px;
+  margin-bottom: 8px; }
+
+time-tracking-history .month-time-spent {
+  font-size: 18px; }
+
+time-tracking-history .day-title {
+  margin-top: 20px;
+  margin-bottom: 10px; }
+
+button {
+  text-align: center; }
+
+[class^="icon-"], [class*=" icon-"] {
+  font-family: 'icon-font';
+  speak: none;
+  font-style: normal;
+  font-weight: normal;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1;
+  /* Better Font Rendering =========== */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale; }
+
+*, *:after, *:before {
+  box-sizing: border-box; }
+
+body,
+html {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+  font-family: sans-serif; }
+
+main {
+  padding: 20px 20px 50px; }
+
+body {
+  font-size: 14px; }
+
+pre {
+  font-size: 13px;
+  white-space: pre;
+  white-space: pre-wrap;
+  white-space: -moz-pre-wrap;
+  white-space: -o-pre-wrap; }
+
+code {
+  font-family: Monaco, Consolas, "Andale Mono", "DejaVu Sans Mono", monospace;
+  white-space: pre;
+  white-space: pre-wrap;
+  white-space: -moz-pre-wrap;
+  white-space: -o-pre-wrap; }
+
+md-dialog.fullscreen-dialog {
+  max-width: 100%;
+  max-height: 100%;
+  width: 100%;
+  height: 100%;
+  border-radius: 0; }
+
+md-input-container .hint {
+  /* Position the hint */
+  position: absolute;
+  left: 2px;
+  right: auto;
+  bottom: 7px;
+  /* Copy styles from ng-messages */
+  font-size: 12px;
+  line-height: 14px;
+  -webkit-transition: all 0.3s cubic-bezier(0.55, 0, 0.55, 0.2);
+  transition: all 0.3s cubic-bezier(0.55, 0, 0.55, 0.2);
+  /* Set our own color */
+  color: grey; }
+
+md-autocomplete button ng-md-icon {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  -webkit-transform: translate3d(-50%, -50%, 0) scale(0.9);
+  transform: translate3d(-50%, -50%, 0) scale(0.9); }
+
+md-autocomplete button ng-md-icon path {
+  stroke-width: 0; }
+
+.md-button.ng-md-icon {
+  padding: 0;
+  background: none; }
+
+.md-button.md-fab ng-md-icon {
+  margin-top: 0; }
+
+md-checkbox .ng-md-icon {
+  -webkit-transition: 240ms;
+  transition: 240ms;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 18px;
+  height: 18px;
+  border: 2px solid;
+  border-radius: 2px; }
+
+md-checkbox.md-checked .ng-md-icon {
+  border: none; }
+
+.md-chips .md-chip .md-chip-remove ng-md-icon {
+  height: 1.8rem;
+  width: 1.8rem; }
+
+ng-md-icon {
+  margin: auto;
+  background-repeat: no-repeat no-repeat;
+  display: inline-block;
+  vertical-align: middle;
+  fill: currentcolor;
+  height: 24px;
+  width: 24px; }
+
+ng-md-icon svg {
+  pointer-events: none; }
+
+md-tabs-wrapper md-prev-button ng-md-icon,
+md-tabs-wrapper md-next-button ng-md-icon {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  -webkit-transform: translate3d(-50%, -50%, 0);
+  transform: translate3d(-50%, -50%, 0); }
+
+md-tabs-wrapper md-next-button ng-md-icon {
+  -webkit-transform: translate3d(-50%, -50%, 0) rotate(180deg);
+  transform: translate3d(-50%, -50%, 0) rotate(180deg); }
+
+md-input-container > ng-md-icon {
+  position: relative;
+  top: auto;
+  left: auto; }
+
+md-input-container.md-default-theme > ng-md-icon {
+  fill: #fff; }
+
+md-input-container.md-icon-float {
+  display: block;
+  padding-left: 32px; }
+  md-input-container.md-icon-float label {
+    margin-left: 32px;
+    width: calc(100% - 32px) !important; }
+  md-input-container.md-icon-float .hint {
+    margin-left: 32px;
+    width: calc(100% - 32px) !important; }
+  md-input-container.md-icon-float > ng-md-icon {
+    position: absolute;
+    top: 5px;
+    left: 0;
+    vertical-align: middle; }
+    md-input-container.md-icon-float > ng-md-icon + input {
+      margin-left: 0; }
+
+md-toast {
+  position: fixed !important; }
+
+.md-autocomplete-suggestions li {
+  line-height: 24px;
+  height: 24px; }
+  .md-autocomplete-suggestions li .highlight {
+    color: #222 !important;
+    font-weight: bold !important; }
+
+.side-info {
+  font-size: 12px; }
+
+@media (min-width: 600px) {
+  .gt-xs-2-col {
+    overflow: hidden; }
+    .gt-xs-2-col > * {
+      float: left;
+      width: 49%; }
+      .gt-xs-2-col > *:nth-child(n) {
+        margin-right: 2%; }
+      .gt-xs-2-col > *:nth-child(2n) {
+        margin-right: 0; } }
+
+@media (min-width: 1280px) {
+  .gt-md-2-col {
+    overflow: hidden; }
+    .gt-md-2-col > * {
+      float: left;
+      width: 49%; }
+      .gt-md-2-col > *:nth-child(n) {
+        margin-right: 2%; }
+      .gt-md-2-col > *:nth-child(2n) {
+        margin-right: 0; } }
+
+.simple-textarea {
+  padding: 10px 14px;
+  margin: 0;
+  width: 100%;
+  display: block;
+  border: none;
+  resize: both;
+  overflow: auto;
+  box-sizing: border-box;
+  background: #fbfbfb; }
+  body.dark-theme .simple-textarea {
+    background-color: #303030;
+    color: #eee; }
+
+.ui-view-container {
+  position: relative;
+  height: 65px; }
+
+[ui-view].ng-enter {
+  position: absolute;
+  left: 0;
+  right: 0;
+  -webkit-transition: all .3s ease-in-out;
+  transition: all .3s ease-in-out; }
+
+[ui-view].ng-enter {
+  opacity: 0; }
+
+[ui-view].ng-enter-active {
+  opacity: 1; }
+
+daily-planner {
+  display: block; }
+  daily-planner .search {
+    margin-bottom: 0; }
+    daily-planner .search .md-errors-spacer {
+      display: none; }
+  daily-planner .add-task-form {
+    margin: 20px auto;
+    max-width: 900px; }
+    daily-planner .add-task-form md-autocomplete-wrap {
+      box-shadow: none; }
+    daily-planner .add-task-form ng-md-icon {
+      width: 32px;
+      height: 32px; }
+  daily-planner .highlight-add-task-icon {
+    margin-right: 10px; }
+
+.task-summary-table {
+  background: #fff;
+  border-collapse: collapse; }
+  body.dark-theme .task-summary-table {
+    background: #464646;
+    color: #fff; }
+  .task-summary-table tr.is-done {
+    text-decoration: line-through; }
+  .task-summary-table th,
+  .task-summary-table td {
+    border: 1px solid #ddd;
+    padding: 4px 8px; }
+  .task-summary-table td:nth-child(2),
+  .task-summary-table td:nth-child(3),
+  .task-summary-table td:nth-child(4),
+  .task-summary-table td:nth-child(5) {
+    text-align: right; }
+
+.notes-dialog .markdown-wrapper div,
+.notes-dialog .markdown-wrapper textarea {
+  position: absolute;
+  width: 100%;
+  height: 100%; }
+
+.notes-dialog textarea {
+  position: absolute;
+  width: 100%;
+  height: 100% !important;
+  border: none;
+  padding: 10px; }
+
+.notes-dialog .md-resize-wrapper,
+.notes-dialog md-input-container {
+  height: 100% !important;
+  margin: 0 !important; }
+
+.dialog-simple-task-summary {
+  min-width: 90vw; }
+
+[edit-on-click-duration],
+[edit-on-click] {
+  cursor: pointer; }
+
+.edit-on-click-form {
+  display: inline-block; }
+  .edit-on-click-form.duration-form {
+    width: auto; }
+  .edit-on-click-form input {
+    display: inline-block; }
+  .edit-on-click-form input.edit-on-click-duration-input {
+    width: 70px;
+    padding-left: 2px;
+    padding-right: 2px; }
+
+.edit-on-click-text {
+  display: inline-block; }
+
+[external-link] {
+  cursor: pointer; }
+
+.hint {
+  display: block;
+  -webkit-animation: 500ms hint-pop-in;
+          animation: 500ms hint-pop-in;
+  margin-left: 20px;
+  margin-right: 20px;
+  margin-top: 20px; }
+  .hint md-card-title-media {
+    margin-left: 10px; }
+  .hint md-card-content {
+    overflow: hidden;
+    text-overflow: ellipsis; }
+    .hint md-card-content.is-expanded {
+      max-height: none; }
+  .hint.ng-hide.ng-hide-add {
+    -webkit-transform: translateZ(0);
+            transform: translateZ(0);
+    -webkit-transform-origin: right;
+        -ms-transform-origin: right;
+            transform-origin: right;
+    -webkit-transition: all 0.5s ease-in-out;
+    transition: all 0.5s ease-in-out; }
+  .hint.ng-hide.ng-hide-add.ng-hide-add-active {
+    -webkit-transform: scale(0);
+        -ms-transform: scale(0);
+            transform: scale(0);
+    margin-top: -50%; }
+
+hint {
+  display: block;
+  -webkit-transition: 3.3s !important;
+  transition: 3.3s !important; }
+
+@-webkit-keyframes hint-pop-in {
+  0% {
+    -webkit-transform: scale(0);
+            transform: scale(0); }
+  50% {
+    -webkit-transform: scale(1.1);
+            transform: scale(1.1); }
+  100% {
+    -webkit-transform: scale(1);
+            transform: scale(1); } }
+
+@keyframes hint-pop-in {
+  0% {
+    -webkit-transform: scale(0);
+            transform: scale(0); }
+  50% {
+    -webkit-transform: scale(1.1);
+            transform: scale(1.1); }
+  100% {
+    -webkit-transform: scale(1);
+            transform: scale(1); } }
+
+inline-markdown {
+  display: block; }
+
+.markdown-wrapper {
+  min-height: 160px;
+  margin-bottom: 20px;
+  display: block;
+  box-sizing: border-box;
+  height: 30px;
+  border: none;
+  resize: both;
+  overflow: auto; }
+
+.markdown-unparsed,
+.markdown-parsed {
+  padding: 10px 14px;
+  margin: 0;
+  width: 100%;
+  display: block;
+  border: none;
+  resize: none;
+  overflow: auto;
+  height: 100%;
+  box-sizing: border-box;
+  background: #fbfbfb; }
+  body.dark-theme .markdown-unparsed, body.dark-theme
+  .markdown-parsed {
+    background-color: #303030;
+    color: #eee; }
+
+.markdown-parsed p:first-child {
+  margin-top: 0; }
+
+.markdown-parsed ul {
+  padding-left: 18px; }
+
+main-header .md-button.md-icon-button {
+  margin: 0 3px; }
+  main-header .md-button.md-icon-button.is-active {
+    border: 1px solid #fff; }
+
+quick-access-menu {
+  position: fixed;
+  z-index: 20;
+  right: 0;
+  bottom: 0; }
+
+.page-settings .config-section {
+  padding: 15px;
+  margin-bottom: 10px;
+  background: #ffffff; }
+  body.dark-theme .page-settings .config-section {
+    background-color: #464646; }
+  .page-settings .config-section .md-title {
+    margin-top: 0; }
+
+.task-list {
+  min-height: 50px;
+  list-style: none;
+  padding: 5px 0;
+  margin: 0;
+  display: block; }
+  .task-list .as-sortable-placeholder,
+  .task-list .dndPlaceholder {
+    margin: 1px 2px 5px 1px;
+    display: block;
+    min-height: 22px;
+    background-color: #ddd; }
+    body.dark-theme .task-list .as-sortable-placeholder, body.dark-theme
+    .task-list .dndPlaceholder {
+      background-color: #272727; }
+
+.task {
+  padding: 3px 12px 0;
+  display: block;
+  margin-bottom: 6px;
+  background-color: #fff;
+  color: #333; }
+  body.dark-theme .task {
+    background-color: #464646;
+    color: #ddd; }
+    body.dark-theme .task.is-done .time,
+    body.dark-theme .task.is-done > .title,
+    body.dark-theme .task.is-done > .first-line > .title {
+      color: #777; }
+  .task.is-done .time,
+  .task.is-done > .title,
+  .task.is-done > .first-line > .title {
+    color: #aaa; }
+  .task.is-done > .title,
+  .task.is-done > .first-line > .title {
+    text-decoration: line-through; }
+  .task.as-sortable-dragging, .task:focus {
+    background: #eee;
+    color: #000; }
+    body.dark-theme .task.as-sortable-dragging, body.dark-theme .task:focus {
+      background-color: #272727;
+      color: #ddd; }
+  .task .first-line {
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-flex-wrap: nowrap;
+        -ms-flex-wrap: nowrap;
+            flex-wrap: nowrap; }
+    .task .first-line ng-md-icon {
+      fill: gray; }
+    .task .first-line .md-button,
+    .task .first-line md-checkbox {
+      padding: 4px 2px;
+      min-width: 28px;
+      width: 32px;
+      height: 32px;
+      margin: 0; }
+      .task .first-line .md-button:hover,
+      .task .first-line md-checkbox:hover {
+        -webkit-transform: scale(1.4);
+            -ms-transform: scale(1.4);
+                transform: scale(1.4); }
+    .task .first-line .play-btn {
+      padding-left: 0;
+      margin-left: -2px; }
+    .task .first-line md-checkbox {
+      margin-left: 6px;
+      min-width: 16px;
+      width: 32px;
+      height: 32px; }
+    .task .first-line ng-md-icon {
+      min-width: 24px; }
+    .task .first-line .update-icon {
+      fill: #000; }
+      body.dark-theme .task .first-line .update-icon {
+        fill: #fff; }
+    .task .first-line .md-button:hover > ng-md-icon, .task .first-line .md-button.is-active > ng-md-icon {
+      fill: #000; }
+      body.dark-theme .task .first-line .md-button:hover > ng-md-icon, body.dark-theme .task .first-line .md-button.is-active > ng-md-icon {
+        fill: #fff; }
+  .task .controls {
+    white-space: nowrap; }
+  .task ng-md-icon.delete-icon {
+    fill: #e15d63 !important; }
+    body.dark-theme .task ng-md-icon.delete-icon {
+      fill: #e15d63 !important; }
+  .task.is-current {
+    background: #a9ed9f;
+    color: #000; }
+    body.dark-theme .task.is-current {
+      background-color: #30412d;
+      color: #fff; }
+    .task.is-current .md-bar {
+      background-color: #4fa758 !important; }
+    .task.is-current .play-btn ng-md-icon {
+      fill: #000 !important; }
+      body.dark-theme .task.is-current .play-btn ng-md-icon {
+        fill: #fff !important; }
+  .task .md-bar {
+    background-color: #ccc !important; }
+  .task md-progress-linear {
+    margin-left: -12px;
+    margin-right: -12px;
+    width: auto; }
+  .task md-progress-linear.md-default-theme .md-container,
+  .task md-progress-linear .md-container {
+    background: none; }
+  .task .handle {
+    margin-right: 4px;
+    margin-top: 0;
+    margin-bottom: 0; }
+  .task .title {
+    text-align: left;
+    cursor: pointer;
+    outline: none; }
+    .task .title .text {
+      outline: none;
+      display: block;
+      width: 100%;
+      min-height: 14px; }
+  .task form {
+    width: 100%; }
+  .task input {
+    outline: none; }
+  .task input {
+    width: 100%;
+    display: block;
+    box-sizing: border-box;
+    height: 30px;
+    padding: 4px 10px;
+    border: none; }
+  .task .time {
+    white-space: nowrap;
+    margin-left: 10px; }
+  .task .notes {
+    width: 100%;
+    -webkit-box-flex: 0;
+    -webkit-flex: 0 1 100%;
+        -ms-flex: 0 1 100%;
+            flex: 0 1 100%;
+    overflow: hidden; }
+    .task .notes section {
+      margin-top: 10px; }
+    .task .notes .md-caption {
+      font-weight: bold;
+      margin-bottom: 6px; }
+  .task a {
+    cursor: pointer; }
+  .task .status {
+    margin-bottom: 10px; }
+  .task .changelog,
+  .task .comments,
+  .task .attachments {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding: 0;
+    margin: 0 0 10px; }
+    .task .changelog li,
+    .task .comments li,
+    .task .attachments li {
+      padding: 0;
+      font-size: 14px;
+      margin-top: 5px; }
+
+.is-animation-ready .first-line .md-button,
+.is-animation-ready .first-line md-checkbox {
+  -webkit-transition: 300ms;
+  transition: 300ms; }
+
+.is-animation-ready .task {
+  -webkit-transition: opacity 0.3s ease-in-out, -webkit-transform 0.3s ease-in-out;
+  transition: opacity 0.3s ease-in-out, -webkit-transform 0.3s ease-in-out;
+  transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+  transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out, -webkit-transform 0.3s ease-in-out; }
+  .is-animation-ready .task.ng-enter {
+    -webkit-transform: scaleY(0);
+        -ms-transform: scaleY(0);
+            transform: scaleY(0); }
+  .is-animation-ready .task.ng-enter-active {
+    -webkit-transform: scale(1);
+        -ms-transform: scale(1);
+            transform: scale(1); }
+  .is-animation-ready .task.ng-leave {
+    -webkit-transition: opacity 0.3s ease-in-out, -webkit-transform 0.3s ease-in-out;
+    transition: opacity 0.3s ease-in-out, -webkit-transform 0.3s ease-in-out;
+    transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+    transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out, -webkit-transform 0.3s ease-in-out;
+    display: block;
+    opacity: 1;
+    -webkit-transform: scale(1);
+        -ms-transform: scale(1);
+            transform: scale(1); }
+  .is-animation-ready .task.ng-leave-active {
+    display: block;
+    opacity: 0;
+    -webkit-transform: scale(0);
+        -ms-transform: scale(0);
+            transform: scale(0); }
+
+.is-animation-ready .notes.ng-enter, .is-animation-ready .notes.ng-leave {
+  -webkit-transition: all 0.3s ease-in-out;
+  transition: all 0.3s ease-in-out; }
+
+.is-animation-ready .notes.ng-enter {
+  opacity: 0;
+  max-height: 0; }
+
+.is-animation-ready .notes.ng-enter.ng-enter-active {
+  opacity: 1;
+  max-height: 400px; }
+
+.is-animation-ready .notes.ng-leave {
+  opacity: 1;
+  max-height: 200px; }
+
+.is-animation-ready .notes.ng-leave.ng-leave-active {
+  max-height: 0;
+  opacity: 1; }
+
+/*# sourceMappingURL=main.css.map */

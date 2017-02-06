@@ -1,0 +1,68 @@
+<h2 class="md-title">
+  <ng-md-icon icon="account_balance"></ng-md-icon>
+  Project
+</h2>
+
+<div ng-if="vm.allProjects.length > 0">
+  <md-input-container class="md-block">
+    <label>Choose current project</label>
+    <md-select ng-model="vm.selectedCurrentProject"
+               arial-label="Select Project"
+               ng-change="vm.changeProject(vm.selectedCurrentProject)">
+      <md-option ng-repeat="project in vm.allProjects"
+                 arial-label="Select Project"
+                 ng-value="project">
+        {{project.title}}
+      </md-option>
+    </md-select>
+  </md-input-container>
+
+  <div class="project-overview"
+       ng-show="vm.showAllProjects">
+    <h3 class="md-title">Overview of all Projects</h3>
+
+    <md-list-item ng-repeat="project in vm.allProjects">
+      <p>
+        <ng-md-icon icon="edit"
+                    aria-label="edit"></ng-md-icon>
+        <span edit-on-click="project.title"></span>
+      </p>
+
+      <md-button class="md-icon-button"
+                 aria-label="delete"
+                 tabindex="2"
+                 ng-click="vm.deleteProject(project,$index)">
+        <ng-md-icon icon="delete_forever"
+                    aria-label="delete"
+                    style="fill: #dc2d3d;"></ng-md-icon>
+      </md-button>
+    </md-list-item>
+  </div>
+
+  <md-button type="button"
+             ng-click="vm.createNewProject()"
+             class="md-raised md-primary">Create new project
+  </md-button>
+  <md-button type="button"
+             ng-hide="vm.showAllProjects"
+             ng-click="vm.showAllProjects = true;"
+             class="md-raised md-primary">Manage Projects
+  </md-button>
+
+
+</div>
+
+<div ng-if="!vm.allProjects.length">
+  <p>You can manage multiple different Todos with SuperProductivity. To do so you need to give your current ToDo a title and save it.</p>
+
+  <form ng-submit="vm.createNewProjectFromCurrent(vm.projectTitle)">
+    <md-input-container class="md-block">
+      <label>Project Title</label>
+      <input type="text"
+             ng-model="vm.projectTitle">
+    </md-input-container>
+    <md-button type="submit"
+               class="md-raised md-primary">Save current Todo as Project
+    </md-button>
+  </form>
+</div>

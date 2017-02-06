@@ -1,0 +1,158 @@
+<!doctype html>
+<html class="no-js">
+<head>
+  <title>Super Productivity</title>
+  <meta charset="utf-8">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1, user-scalable=no">
+  <meta http-equiv="X-UA-Compatible"
+        content="IE=edge">
+  <meta name="description"
+        content="">
+  <meta name="keywords"
+        content="">
+
+  <!-- Enable all requests and inline styles for painless development.
+TODO configure more restrictive Content-Security-Policy
+@see http://content-security-policy.com/
+@see http://www.html5rocks.com/en/tutorials/security/content-security-policy/ -->
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src *;
+          img-src * data:;
+          style-src * 'unsafe-inline';
+          script-src * 'unsafe-inline'">
+
+  <link rel="icon"
+        type="image/png"
+        href="img/favicon.png" />
+
+  <!-- build:css({.tmp,app-src}) styles/vendor.css -->
+  <!-- bower:css -->
+  <link rel="stylesheet" href="bower_components/angular-material/angular-material.css" />
+  <link rel="stylesheet" href="bower_components/angular-material-icons/angular-material-icons.css" />
+  <link rel="stylesheet" href="bower_components/ng-sortable/dist/ng-sortable.css" />
+  <link rel="stylesheet" href="bower_components/angular-bootstrap-calendar/dist/css/angular-bootstrap-calendar.css" />
+  <!-- endbower -->
+  <!-- endbuild -->
+
+  <!-- build:css({.tmp,app-src}) styles/main.css -->
+  <link rel="stylesheet" href="styles/main.css"/>
+  <!-- endbuild -->
+</head>
+
+<body ng-app="superProductivity"
+      layout="column"
+      flex
+      ng-cloak
+      ng-class="r.bodyClass"
+      md-theme="{{r.theme}}">
+<main-header class="md-whiteframe-glow-z1"></main-header>
+<md-content md-scroll-y
+            layout="column"
+            flex>
+  <hint></hint>
+  <div class="ui-view-container">
+    <main ui-view></main>
+  </div>
+  <quick-access-menu></quick-access-menu>
+</md-content>
+
+<!-- build:js({.tmp,app-src}) scripts/vendor.js defer -->
+<!-- bower:js -->
+<script src="bower_components/angular/angular.js"></script>
+<script src="bower_components/angular-animate/angular-animate.js"></script>
+<script src="bower_components/angular-aria/angular-aria.js"></script>
+<script src="bower_components/angular-resource/angular-resource.js"></script>
+<script src="bower_components/angular-ui-router/release/angular-ui-router.js"></script>
+<script src="bower_components/ngstorage/ngStorage.js"></script>
+<script src="bower_components/angular-messages/angular-messages.js"></script>
+<script src="bower_components/angular-material/angular-material.js"></script>
+<script src="bower_components/angular-material-icons/angular-material-icons.min.js"></script>
+<script src="bower_components/lodash/lodash.js"></script>
+<script src="bower_components/moment/moment.js"></script>
+<script src="bower_components/angular-moment/angular-moment.js"></script>
+<script src="bower_components/ng-sortable/dist/ng-sortable.js"></script>
+<script src="bower_components/moment-duration-format/lib/moment-duration-format.js"></script>
+<script src="bower_components/marked/lib/marked.js"></script>
+<script src="bower_components/angular-marked/dist/angular-marked.js"></script>
+<script src="bower_components/angular-bootstrap-calendar/dist/js/angular-bootstrap-calendar-tpls.js"></script>
+<script src="bower_components/hamsterjs/hamster.js"></script>
+<!-- endbower -->
+<!-- endbuild -->
+
+<script>
+  //// fix to use the moment from require as
+  //// there is a bug with moment.format.duration
+  try {
+    window.moment = require('moment');
+  }
+  catch (e) {
+  }
+
+</script>
+
+<!-- build:js({.tmp,app-src}) scripts/scripts.js defer -->
+<!-- inject:js -->
+<script src="scripts/_app.js"></script>
+<script src="scripts/agenda-and-history/agenda-and-history-d.js"></script>
+<script src="scripts/agenda-and-history/daily-agenda/daily-agenda-d.js"></script>
+<script src="scripts/agenda-and-history/time-tracking-history/time-tracking-history-d.js"></script>
+<script src="scripts/autofocus-autocomplete/autofocus-autocomplete-d.js"></script>
+<script src="scripts/constants.js"></script>
+<script src="scripts/daily-planner/daily-planner-d.js"></script>
+<script src="scripts/daily-summary/daily-summary-d.js"></script>
+<script src="scripts/dialogs/add-task/add-task-c.js"></script>
+<script src="scripts/dialogs/create-project/create-project-c.js"></script>
+<script src="scripts/dialogs/dialogs-constant.js"></script>
+<script src="scripts/dialogs/dialogs-s.js"></script>
+<script src="scripts/dialogs/distractions/distractions-c.js"></script>
+<script src="scripts/dialogs/jira-add-worklog/jira-add-worklog-c.js"></script>
+<script src="scripts/dialogs/jira-set-in-progress/jira-set-in-progress-c.js"></script>
+<script src="scripts/dialogs/notes/notes-c.js"></script>
+<script src="scripts/dialogs/simple-task-summary/simple-task-summary-c.js"></script>
+<script src="scripts/dialogs/task-selection/task-selection-c.js"></script>
+<script src="scripts/dialogs/time-estimate/time-estimate-c.js"></script>
+<script src="scripts/dialogs/was-idle/was-idle-c.js"></script>
+<script src="scripts/dialogs/welcome/welcome-c.js"></script>
+<script src="scripts/done-tasks-backlog/done-tasks-backlog-d.js"></script>
+<script src="scripts/download-backup/download-backup-d.js"></script>
+<script src="scripts/edit-on-click/edit-on-click-d.js"></script>
+<script src="scripts/external-link/external-link-d.js"></script>
+<script src="scripts/hint/hint-d.js"></script>
+<script src="scripts/inline-markdown/inline-markdown-d.js"></script>
+<script src="scripts/input-duration/input-duration-d.js"></script>
+<script src="scripts/keyboard-key-input/keyboard-key-input-d.js"></script>
+<script src="scripts/main/global-filters/duration-filter.js"></script>
+<script src="scripts/main/global-filters/number-to-month-filter.js"></script>
+<script src="scripts/main/global-services/git-log-s.js"></script>
+<script src="scripts/main/global-services/init-global-models-s.js"></script>
+<script src="scripts/main/global-services/jira-s.js"></script>
+<script src="scripts/main/global-services/notifier-s.js"></script>
+<script src="scripts/main/global-services/parse-duration-s.js"></script>
+<script src="scripts/main/global-services/projects-s.js"></script>
+<script src="scripts/main/global-services/short-syntax-s.js"></script>
+<script src="scripts/main/global-services/simple-toast-s.js"></script>
+<script src="scripts/main/global-services/take-a-break-reminder-s.js"></script>
+<script src="scripts/main/global-services/tasks-s.js"></script>
+<script src="scripts/main/global-services/tasks-util-f.js"></script>
+<script src="scripts/main/global-services/uid-s.js"></script>
+<script src="scripts/main-header/main-header-d.js"></script>
+<script src="scripts/quick-access-menu/quick-access-menu-d.js"></script>
+<script src="scripts/routes.js"></script>
+<script src="scripts/routes/settings/settings-c.js"></script>
+<script src="scripts/settings/backup-settings/backup-settings-d.js"></script>
+<script src="scripts/settings/jira-settings/jira-settings-d.js"></script>
+<script src="scripts/settings/keyboard-settings/keyboard-settings-d.js"></script>
+<script src="scripts/settings/misc-settings/misc-settings-d.js"></script>
+<script src="scripts/settings/project-settings/project-settings-d.js"></script>
+<script src="scripts/settings/theme-settings/theme-settings-d.js"></script>
+<script src="scripts/sub-task-list/sub-task-list-d.js"></script>
+<script src="scripts/task-list/task-list-d.js"></script>
+<script src="scripts/text-to-file-download/text-to-file-download-d.js"></script>
+<script src="scripts/work-view/work-view-d.js"></script>
+<!-- endinject -->
+<!-- endbuild -->
+</body>
+</html>
+
+
