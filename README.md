@@ -51,6 +51,7 @@ npm start
 There is also a [web-version](http://super-productivity.com) but it is much more limited (no Jira integration, no time tracking).
 
 ## More Screenshots
+![submit-worklog](screens/submit-worklog.png)
 ![agenda](screens/agenda.png)
 ![daily-summary](screens/daily-summary.png)
 ![plan](screens/plan.png)
