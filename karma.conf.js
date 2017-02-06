@@ -60,17 +60,26 @@ module.exports = function (config) {
       'karma-jasmine',
       //'karma-coverage',
       'karma-phantomjs-launcher',
-      'karma-ng-html2js-preprocessor'
+      'karma-ng-html2js-preprocessor',
+      'karma-babel-preprocessor'
     ],
 
     preprocessors: {
       //'**/app/scripts/**/!(*spec).js': 'coverage',
+      '**/app/scripts/**/*.js': ['babel'],
       '**/app/scripts/**/*.html': 'ng-html2js'
     },
 
     ngHtml2JsPreprocessor: {
       moduleName: 'templates',
       stripPrefix: 'app/'
+    },
+
+    babelPreprocessor: {
+      options: {
+        presets: ['latest'],
+        sourceMap: 'inline'
+      }
     },
 
     // enable / disable watching file and executing tests whenever any file changes
