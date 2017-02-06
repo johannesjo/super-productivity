@@ -83,17 +83,15 @@ gulp.task('copy', function () {
 
   return merge(html, fonts, images);
 });
-var debug = require('gulp-debug');
+
 gulp.task('minFiles', function () {
   return gulp.src(config.mainFile)
   //.pipe(useref({}))
     .pipe(useref({}, lazypipe()
       .pipe(sourcemaps.init, { loadMaps: true })))
-    .pipe(debug({ title: 'unicorn_BEFORE:' }))
     .pipe(gulpif(/scripts\.js/, babel()))
-    .pipe(debug({ title: 'unicorn_AFTER:' }))
-    //.pipe(gulpif(/vendor/, uglify({ preserveComments: 'license' })))
+    .pipe(gulpif(/\.js$/, uglify({ preserveComments: 'license' })))
     .pipe(gulpif(/\.css$/, cleanCSS()))
-    //.pipe(sourcemaps.write('maps'))
+    .pipe(sourcemaps.write('maps'))
     .pipe(gulp.dest(config.dist));
 });
