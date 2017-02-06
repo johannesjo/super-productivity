@@ -4,8 +4,8 @@ app
 platforms
 release
 .tmp
-app/styles/**/*.css
-app/styles/**/*.css.map
+app-src/styles/**/*.css
+app-src/styles/**/*.css.map
 .sass-cache
 bower_components
 app/bower_components
