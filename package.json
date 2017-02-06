@@ -32,6 +32,9 @@
     }
   },
   "devDependencies": {
+    "babel-cli": "^6.22.2",
+    "babel-plugin-angularjs-annotate": "^0.7.0",
+    "babel-preset-latest": "^6.22.0",
     "browser-sync": "latest",
     "del": "latest",
     "ecstatic": "latest",
@@ -39,6 +42,7 @@
     "electron-prebuilt": "^1.4.13",
     "gulp": "latest",
     "gulp-autoprefixer": "latest",
+    "gulp-babel": "^6.1.2",
     "gulp-clean-css": "latest",
     "gulp-if": "latest",
     "gulp-imagemin": "latest",
@@ -70,8 +74,8 @@
     "lazypipe": "latest",
     "merge-stream": "latest",
     "node-sass": "latest",
-    "protractor": "latest",
     "phantomjs-prebuilt": "latest",
+    "protractor": "latest",
     "require-dir": "latest",
     "run-sequence": "latest",
     "wiredep": "latest",

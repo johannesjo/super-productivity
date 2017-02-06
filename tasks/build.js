@@ -14,7 +14,6 @@ var minifyHtml = require('gulp-minify-html');
 var cleanCSS = require('gulp-clean-css');
 var useref = require('gulp-useref');
 var sourcemaps = require('gulp-sourcemaps');
-var ngAnnotate = require('gulp-ng-annotate');
 var uglify = require('gulp-uglify');
 var imagemin = require('gulp-imagemin');
 var runSequence = require('run-sequence')
@@ -23,6 +22,7 @@ var wiredep = require('wiredep').stream;
 
 var merge = require('merge-stream');
 var lazypipe = require('lazypipe');
+var babel = require('gulp-babel');
 
 // main task
 gulp.task('build', function (callback) {
@@ -33,14 +33,14 @@ gulp.task('build', function (callback) {
     'injectAll',
     'buildStyles',
 
-    //'cleanDist',
-    //  'wiredepBuild',
+    'cleanDist',
+    'wiredepBuild',
     //  'injectAll',
     //  'testSingle',
-    //  'lint',
+    'lint',
     //  'sass',
-    //  'minFiles',
-    //  'copy',
+    'minFiles',
+    'copy',
 
     // reset config
     //'ngConfig',
@@ -90,7 +90,7 @@ gulp.task('minFiles', function () {
   return gulp.src(config.mainFile)
     .pipe(useref({}, lazypipe()
       .pipe(sourcemaps.init, { loadMaps: true })))
-    .pipe(gulpif('*.js', ngAnnotate()))
+    .pipe(gulpif('*.js', babel()))
     .pipe(gulpif('*.js', uglify({ preserveComments: 'license' })))
     .pipe(gulpif('*.css', cleanCSS()))
     .pipe(gulp.dest(config.dist));

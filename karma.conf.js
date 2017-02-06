@@ -14,6 +14,8 @@ module.exports = function(config) {
         // list of files / patterns to load in the browser
         files: [
             // bower:js
+            'app/bower_components/json3/lib/json3.js',
+            'app/bower_components/es5-shim/es5-shim.js',
             'app/bower_components/angular/angular.js',
             'app/bower_components/angular-animate/angular-animate.js',
             'app/bower_components/angular-aria/angular-aria.js',
@@ -31,9 +33,10 @@ module.exports = function(config) {
             'app/bower_components/moment-duration-format/lib/moment-duration-format.js',
             'app/bower_components/marked/lib/marked.js',
             'app/bower_components/angular-marked/dist/angular-marked.js',
+            'app/bower_components/jquery/dist/jquery.js',
+            'app/bower_components/bootstrap/dist/js/bootstrap.js',
             'app/bower_components/angular-bootstrap-calendar/dist/js/angular-bootstrap-calendar-tpls.js',
             'app/bower_components/hamsterjs/hamster.js',
-            'app/bower_components/angular-mocks/angular-mocks.js',
             // endbower
 
             // modules first

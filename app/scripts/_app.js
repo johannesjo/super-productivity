@@ -43,6 +43,7 @@
     .run(initGlobalShortcuts)
     .run(showWelcomeDialog);
 
+  /* @ngInject */
   function configMarked(markedProvider) {
     markedProvider.setRenderer({
       link: function (href, title, text) {
@@ -51,6 +52,7 @@
     });
   }
 
+  /* @ngInject */
   function configMdTheme($mdThemingProvider, THEMES) {
     $mdThemingProvider.theme('default')
       .primaryPalette('blue');
@@ -78,11 +80,13 @@
     $mdThemingProvider.alwaysWatchTheme(true);
   }
 
+  /* @ngInject */
   function initGlobalModels(InitGlobalModels, $localStorage, LS_DEFAULTS) {
     $localStorage.$default(LS_DEFAULTS);
     InitGlobalModels();
   }
 
+  /* @ngInject */
   function initGlobalShortcuts($document, Dialogs, $localStorage, IS_ELECTRON) {
     // we just use this single one as this usually does mess
     // up with the default browser shortcuts
@@ -117,6 +121,7 @@
     }
   }
 
+  /* @ngInject */
   function initPollForSimpleTimeTracking($localStorage, IS_ELECTRON, $interval, SIMPLE_TIME_TRACKING_INTERVAL, Tasks) {
     // if NOT in electron context
     if (!IS_ELECTRON) {
@@ -134,6 +139,7 @@
     }
   }
 
+  /* @ngInject */
   function initPollJiraTaskUpdates($localStorage, Jira, IS_ELECTRON, $interval, JIRA_UPDATE_POLL_INTERVAL) {
     // handle updates that need to be made locally
     if (IS_ELECTRON) {
@@ -148,12 +154,14 @@
     }
   }
 
+  /* @ngInject */
   function showWelcomeDialog($localStorage, Dialogs) {
     if ($localStorage.isShowWelcomeDialog) {
       Dialogs('WELCOME', undefined, true);
     }
   }
 
+  /* @ngInject */
   function initMousewheelZoomForElectron($document, $window, IS_ELECTRON) {
     if (IS_ELECTRON) {
       const { webFrame } = require('electron');

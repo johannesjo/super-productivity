@@ -1,0 +1,8 @@
+{
+  "presets": [
+    "latest"
+  ],
+  "plugins": [
+    "angularjs-annotate"
+  ]
+}
