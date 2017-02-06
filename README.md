@@ -1,4 +1,4 @@
-# superProductivity
+# Super Productivity
 
 This is a ToDo List / Time Tracker / Personal Jira Task Manager for Linux, MacOS and Windows to make you work super productively. 
 
