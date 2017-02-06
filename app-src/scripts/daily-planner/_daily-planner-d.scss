@@ -1,6 +1,12 @@
 daily-planner {
   display: block;
 
+  .md-headline {
+    @media(min-width: $layout-gt-md) {
+      text-align: center;
+    }
+  }
+
   .search {
     margin-bottom: 0;
     .md-errors-spacer {
