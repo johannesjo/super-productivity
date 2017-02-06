@@ -18,7 +18,6 @@ module.exports = function (config) {
       'app/bower_components/angular-aria/angular-aria.js',
       'app/bower_components/angular-resource/angular-resource.js',
       'app/bower_components/angular-ui-router/release/angular-ui-router.js',
-      'app/bower_components/angular-local-storage/dist/angular-local-storage.js',
       'app/bower_components/ngstorage/ngStorage.js',
       'app/bower_components/angular-messages/angular-messages.js',
       'app/bower_components/angular-material/angular-material.js',
@@ -32,7 +31,6 @@ module.exports = function (config) {
       'app/bower_components/angular-marked/dist/angular-marked.js',
       'app/bower_components/angular-bootstrap-calendar/dist/js/angular-bootstrap-calendar-tpls.js',
       'app/bower_components/hamsterjs/hamster.js',
-      'app/bower_components/angular-mocks/angular-mocks.js',
       // endbower
 
       // modules first

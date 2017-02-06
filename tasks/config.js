@@ -14,7 +14,9 @@ module.exports = (function () {
       'es5-shim',
       'json3',
       'jquery',
-      'bower_components/bootstrap/dist/js/bootstrap.js'
+      'bower_components/jquery/dist/jquery.js',
+      'bower_components/bootstrap/dist/js/bootstrap.js',
+      'bower_components/bootstrap',
     ],
     base: base,
     mainFile: base + '/index.html',
@@ -43,8 +45,8 @@ module.exports = (function () {
     htmlF: [
       base + '/scripts/**/*.html'
     ],
-    images: base + '/images/',
-    imagesF: base + '/images/**/*.*',
+    images: base + '/img/',
+    imagesF: base + '/img/**/*.*',
     fonts: base + '/fonts/',
     fontsF: base + '/fonts/**/*.*',
     tmp: './.tmp',

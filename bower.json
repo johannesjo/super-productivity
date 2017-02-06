@@ -14,15 +14,12 @@
     "tests"
   ],
   "dependencies": {
-    "json3": "latest",
-    "es5-shim": "latest",
     "animate.css-scss": "latest",
     "angular": "1.5.8",
     "angular-animate": "1.5.8",
     "angular-aria": "1.5.8",
     "angular-resource": "1.5.8",
     "angular-ui-router": "latest",
-    "angular-local-storage": "^0.5.2",
     "ngstorage": "^0.3.11",
     "angular-material": "^1.1.1",
     "angular-material-icons": "^0.7.1",

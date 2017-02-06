@@ -50,9 +50,7 @@ gulp.task('build', function (callback) {
 gulp.task('wiredepBuild', function () {
   return gulp.src([config.karmaConf, config.mainFile], { base: './' })
     .pipe(wiredep({
-      exclude: [
-        // TODO inject excluded
-      ],
+      exclude: config.excludedBowerComponents,
       devDependencies: false
     }))
     .pipe(gulp.dest('./'));
@@ -85,13 +83,17 @@ gulp.task('copy', function () {
 
   return merge(html, fonts, images);
 });
-
+var debug = require('gulp-debug');
 gulp.task('minFiles', function () {
   return gulp.src(config.mainFile)
+  //.pipe(useref({}))
     .pipe(useref({}, lazypipe()
       .pipe(sourcemaps.init, { loadMaps: true })))
-    .pipe(gulpif('*.js', babel()))
-    .pipe(gulpif('*.js', uglify({ preserveComments: 'license' })))
-    .pipe(gulpif('*.css', cleanCSS()))
+    .pipe(debug({ title: 'unicorn_BEFORE:' }))
+    .pipe(gulpif(/scripts\.js/, babel()))
+    .pipe(debug({ title: 'unicorn_AFTER:' }))
+    //.pipe(gulpif(/vendor/, uglify({ preserveComments: 'license' })))
+    .pipe(gulpif(/\.css$/, cleanCSS()))
+    //.pipe(sourcemaps.write('maps'))
     .pipe(gulp.dest(config.dist));
 });
