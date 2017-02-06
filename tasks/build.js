@@ -1,5 +1,5 @@
-var config = require('./config');
-var gulp = require('gulp');
+const config = require('./config');
+const gulp = require('gulp');
 
 /**
  * Build-Task Files
@@ -8,21 +8,21 @@ var gulp = require('gulp');
  */
 
 
-var del = require('del');
-var gulpif = require('gulp-if');
-var minifyHtml = require('gulp-minify-html');
-var cleanCSS = require('gulp-clean-css');
-var useref = require('gulp-useref');
-var sourcemaps = require('gulp-sourcemaps');
-var uglify = require('gulp-uglify');
-var imagemin = require('gulp-imagemin');
-var runSequence = require('run-sequence')
+const del = require('del');
+const gulpif = require('gulp-if');
+const minifyHtml = require('gulp-minify-html');
+const cleanCSS = require('gulp-clean-css');
+const useref = require('gulp-useref');
+const sourcemaps = require('gulp-sourcemaps');
+const uglify = require('gulp-uglify');
+const imagemin = require('gulp-imagemin');
+const runSequence = require('run-sequence')
   .use(gulp);
-var wiredep = require('wiredep').stream;
+const wiredep = require('wiredep').stream;
 
-var merge = require('merge-stream');
-var lazypipe = require('lazypipe');
-var babel = require('gulp-babel');
+const merge = require('merge-stream');
+const lazypipe = require('lazypipe');
+const babel = require('gulp-babel');
 
 // main task
 gulp.task('build', function (callback) {
@@ -63,7 +63,7 @@ gulp.task('cleanDist', function () {
 });
 
 gulp.task('copy', function () {
-  var html = gulp.src(config.htmlF, { base: config.base })
+  const html = gulp.src(config.htmlF, { base: config.base })
     .pipe(minifyHtml({
       conditionals: true,
       loose: true,
@@ -72,11 +72,11 @@ gulp.task('copy', function () {
     }))
     .pipe(gulp.dest(config.dist));
 
-  var fonts = gulp.src(config.fontsF, { base: config.base })
+  const fonts = gulp.src(config.fontsF, { base: config.base })
     .pipe(gulp.dest(config.dist));
 
   // TODO this ain't perfect
-  var images = gulp.src(config.imagesF, { base: config.base })
+  const images = gulp.src(config.imagesF, { base: config.base })
     .pipe(imagemin({
       progressive: true,
       svgoPlugins: [{ removeViewBox: false }]

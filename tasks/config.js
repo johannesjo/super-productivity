@@ -2,11 +2,11 @@ module.exports = (function () {
   'use strict';
 
   // config vars
-  var base = './app';
-  var scripts = base + '/scripts';
-  var sass = base + '/styles';
+  const base = './app';
+  const scripts = base + '/scripts';
+  const sass = base + '/styles';
 
-  var data = {
+  const data = {
     browserSyncPort: 3000,
     cordovaPath: 'cordova',
     defaultPlatform: 'ios',
