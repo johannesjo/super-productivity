@@ -3,12 +3,18 @@
     <ng-md-icon icon="border_color"></ng-md-icon>
     Plan your day!
   </h2>
-  <p>If you're done, you should spent some time
-    <strong>prioritizing</strong> your tasks, by ordering them via drag and drop. You can also make a rough time estimation.
-  </p>
 
-  <form ng-submit="vm.addTask()">
+  <form ng-submit="vm.addTask()"
+        layout="row"
+        class="add-task-form">
+    <ng-md-icon icon="playlist_add"
+                size="32"
+                class="highlight-add-task-icon"></ng-md-icon>
+
     <md-autocomplete
+      md-whiteframe="2"
+      flex="100"
+      tabindex="1"
       md-selected-item="vm.newTask"
       md-search-text="vm.newTaskTitle"
       md-items="task in vm.getFilteredTaskSuggestions(vm.newTaskTitle)"

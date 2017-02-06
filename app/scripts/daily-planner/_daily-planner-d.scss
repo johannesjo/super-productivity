@@ -7,4 +7,19 @@ daily-planner {
       display: none;
     }
   }
+
+  .add-task-form {
+    margin: 20px auto;
+    max-width: $component-max-width;
+    md-autocomplete-wrap {
+      box-shadow: none;
+    }
+    ng-md-icon {
+      width: 32px;
+      height: 32px;
+    }
+  }
+  .highlight-add-task-icon {
+    margin-right: 10px;
+  }
 }
