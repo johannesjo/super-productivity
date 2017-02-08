@@ -14,7 +14,7 @@
     .service('InitGlobalModels', InitGlobalModels);
 
   /* @ngInject */
-  function InitGlobalModels(DEFAULT_THEME, $rootScope, $localStorage, $state) {
+  function InitGlobalModels(DEFAULT_THEME, $rootScope, $localStorage, $state, Tasks) {
     return () => {
 
       // we don't use r.$state because it looks more like something special
@@ -22,6 +22,10 @@
       $rootScope.$state = $state;
 
       $rootScope.r = $localStorage;
+
+      // we want the current task to be a reference to the tasks array
+      // that's why we need to reassign
+      $rootScope.r.currentTask = $localStorage.currenTask = Tasks.getCurrent();
 
       // reset session
       $localStorage.currentSession = {};

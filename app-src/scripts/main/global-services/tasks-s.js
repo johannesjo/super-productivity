@@ -83,8 +83,7 @@
       let currentTask;
       let subTaskMatch;
 
-      // we want to sync the ls current task with the this.$rootScope current task
-      // that's why we load the current task from the ls directly
+      // we want the current task to be a reference to the tasks array
       if (this.$localStorage.currentTask) {
         currentTask = _.find(this.$localStorage.tasks, (task) => {
           if (task.subTasks) {
