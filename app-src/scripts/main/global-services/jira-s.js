@@ -155,6 +155,10 @@
     this.updateStatus = (task, localType) => {
       const defer = $q.defer();
 
+      if (!this.isSufficientJiraSettings()) {
+        return $q.reject('Jira: Insufficient settings.');
+      }
+
       if (this.isJiraTask(task)) {
         if ($localStorage.jiraSettings.transitions && $localStorage.jiraSettings.transitions[localType] && $localStorage.jiraSettings.transitions[localType] !== 'ALWAYS_ASK') {
           if ($localStorage.jiraSettings.transitions[localType] === 'DO_NOT') {
@@ -186,6 +190,10 @@
     };
 
     this.updateIssueDescription = (task) => {
+      if (!this.isSufficientJiraSettings()) {
+        return $q.reject('Jira: Insufficient settings.');
+      }
+
       if (!$localStorage.jiraSettings.isUpdateIssueFromLocal) {
         return $q.reject('Jira: jiraSettings.isUpdateIssueFromLocal is deactivated');
       }
@@ -211,6 +219,10 @@
 
     this.checkUpdatesForTicket = (task, isNoNotify) => {
       let defer = $q.defer();
+      if (!this.isSufficientJiraSettings()) {
+        return $q.reject('Jira: Insufficient settings.');
+      }
+
       if (this.isJiraTask(task)) {
         let request = {
           config: $localStorage.jiraSettings,
@@ -248,6 +260,10 @@
     };
 
     this.addWorklog = (originalTask) => {
+      if (!this.isSufficientJiraSettings()) {
+        return $q.reject('Jira: Insufficient settings.');
+      }
+
       const Tasks = $injector.get('Tasks');
       let defer = $q.defer();
       let outerTimeSpent;
@@ -306,9 +322,9 @@
                   }, defer.reject);
               }
             }, defer.reject);
+        } else {
+          defer.reject('Jira: Task or Parent Task are no Jira Tasks.');
         }
-      } else {
-        defer.reject('Jira: Task or Parent Task are no Jira Tasks.');
       }
 
       return defer.promise;
@@ -333,6 +349,10 @@
     };
 
     this.getTransitionsForIssue = (task) => {
+      if (!this.isSufficientJiraSettings()) {
+        return $q.reject('Jira: Insufficient settings.');
+      }
+
       if (this.isJiraTask(task)) {
         let request = {
           config: $localStorage.jiraSettings,
@@ -348,6 +368,9 @@
 
     this.transitionIssue = (task, transitionObj, localType) => {
       let defer = $q.defer();
+      if (!this.isSufficientJiraSettings()) {
+        return $q.reject('Jira: Insufficient settings.');
+      }
 
       function transitionSuccess(res) {
         // update
@@ -393,7 +416,8 @@
         };
         return this.sendRequest(request);
       } else {
-        return $q.reject('Insufficient settings');
+        SimpleToast('ERROR', 'Jira: Insufficient settings. Please define a jqlQuery');
+        return $q.reject('Jira: Insufficient settings');
       }
     };
 
