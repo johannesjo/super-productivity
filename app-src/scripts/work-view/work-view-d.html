@@ -1,4 +1,4 @@
-<div class="work-view-current-task">
+<header class="work-view-header">
   <p>
     <ng-md-icon icon="playlist_play"></ng-md-icon>
     Working today: <strong>{{ vm.totalTimeWorkedToday|duration }}</strong>
@@ -7,9 +7,9 @@
     Estimate remaining: ~<strong>{{ vm.totalEstimationRemaining|duration }}</strong>
     <ng-md-icon icon="timer"></ng-md-icon>
   </p>
-</div>
+</header>
 
-<div class="work-view-tasks work-view-tasks--undone">
+<section class="work-view-tasks work-view-tasks--undone">
   <p ng-if="!vm.tasksUndone.length">You have currently no undone tasks.</p>
 
   <task-list tasks="vm.tasksUndone"
@@ -17,7 +17,7 @@
              current-task-id=""
              on-task-done-changed="vm.onTaskDoneChangedUndoneList(task)"
              allow-task-selection="true"></task-list>
-</div>
+</section>
 
 <md-button ng-click="vm.openAddTask()"
            class="md-primary md-raised">
@@ -38,12 +38,12 @@
   Done Tasks
 </h2>
 
-<div class="work-view-tasks work-view-tasks--done">
+<section class="work-view-tasks work-view-tasks--done">
   <p ng-if="!vm.tasksDone.length">You have currently no done tasks.</p>
 
   <task-list tasks="vm.tasksDone"
              on-task-done-changed="vm.onTaskDoneChangedDoneList(task)"
              current-task-id="r.currentTask.id"></task-list>
-</div>
+</section>
 
 
