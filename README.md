@@ -33,7 +33,7 @@ cd super-productivity
 npm install -g electron node-gyp gulp bower
 npm install && bower install
 gulp build # or for dev run 'gulp'/'gulp serve' in a separate tab
-npm start
+npm start # on windows use "set NODE_ENV=DEV electron ./electron/main.js" instead
 ```
 
 ## Binaries
