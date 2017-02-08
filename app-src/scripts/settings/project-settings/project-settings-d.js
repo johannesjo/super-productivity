@@ -35,6 +35,7 @@
     vm.createNewProjectFromCurrent = (projectTitle) => {
       Projects.createNewFromCurrent(projectTitle);
       SimpleToast('SUCCESS', 'Project "' + projectTitle + '" successfully saved');
+      Projects.getAndUpdateCurrent();
     };
 
     vm.createNewProject = () => {

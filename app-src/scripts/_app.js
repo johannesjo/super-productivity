@@ -81,8 +81,11 @@
   }
 
   /* @ngInject */
-  function initGlobalModels(InitGlobalModels, $localStorage, LS_DEFAULTS) {
+  function initGlobalModels(Projects, InitGlobalModels, $localStorage, LS_DEFAULTS) {
     $localStorage.$default(LS_DEFAULTS);
+
+    Projects.getAndUpdateCurrent();
+
     InitGlobalModels();
   }
 
