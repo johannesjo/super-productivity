@@ -313,6 +313,10 @@
       if (task) {
         task.timeSpent = this.TasksUtil.calcTotalTimeSpentOnTask(task);
 
+        if (isCurrentTaskChanged) {
+          this.SimpleToast('CUSTOM', 'Started task "' + task.title + '"', 'play_circle_outline');
+        }
+
         // check if in electron context
         if (this.IS_ELECTRON) {
           if (!isCallFromTimeTracking) {
@@ -394,7 +398,6 @@
       } else {
         timeSpentInMs = timeSpentInMsOrMomentDuration;
       }
-
 
       // if not set set started pointer
       if (!task.started) {
@@ -536,7 +539,11 @@
           let parentTask = this.getById(finishedCurrentTask.parentId);
           if (parentTask.subTasks && parentTask.subTasks.length) {
             // if there is one it will be the next current otherwise it will be no task
-            this.updateCurrent(_.find(parentTask.subTasks, ['isDone', false]));
+            this.updateCurrent(_.find(parentTask.subTasks, (task) => {
+              // NOTE: we don't use the short syntax here, as we also want to account
+              // for the property not being set yet
+              return !task.isDone;
+            }));
             // otherwise do nothing as it isn't obvious what to do next
             // TODO maybe open toast asking if the parent task should also be marked as done
           }

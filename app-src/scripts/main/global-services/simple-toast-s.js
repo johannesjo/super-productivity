@@ -17,7 +17,12 @@
   function SimpleToast($mdToast) {
     const DEFAULT_HIDE_DELAY = 4000;
 
-    return (textContent, type, hideDelay) => {
+    return (textContent, type, hideDelay, icon) => {
+      // allow to omit hideDelay when specifying an icon
+      if (angular.isString(hideDelay)) {
+        icon = hideDelay;
+        hideDelay = DEFAULT_HIDE_DELAY;
+      }
 
       if (!type) {
         return $mdToast.show($mdToast.simple()
@@ -26,12 +31,13 @@
           .hideDelay(hideDelay || DEFAULT_HIDE_DELAY)
           .position('bottom'));
       } else {
-        let icon;
         let iconColor;
 
+        // allow for type to be first
         if ([
             'SUCCESS',
-            'ERROR'
+            'ERROR',
+            'CUSTOM'
           ].indexOf(textContent) > -1) {
           const tmpType = textContent;
           textContent = type;
@@ -39,11 +45,11 @@
         }
 
         if (type === 'SUCCESS') {
-          icon = 'check_circle';
+          icon = icon || 'check_circle';
           iconColor = '#4fa758';
         }
         else if (type === 'ERROR') {
-          icon = 'error';
+          icon = icon || 'error';
           iconColor = '#e15d63';
         }
 
