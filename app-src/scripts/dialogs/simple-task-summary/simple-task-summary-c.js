@@ -71,7 +71,7 @@
             for (let j = 0; j < task.subTasks.length; j++) {
               let subTask = task.subTasks[j];
               if ((!vm.options.isListDoneOnly || subTask.isDone) && (!vm.options.isWorkedOnTodayOnly || TasksUtil.isWorkedOnToday(subTask))) {
-                tasksTxt += formatTask(task);
+                tasksTxt += formatTask(subTask);
                 if (vm.options.isUseNewLine) {
                   tasksTxt += newLineSeparator;
                 }
