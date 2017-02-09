@@ -15,10 +15,10 @@
   ],
   "dependencies": {
     "animate.css-scss": "latest",
-    "angular": "1.5.8",
-    "angular-animate": "1.5.8",
-    "angular-aria": "1.5.8",
-    "angular-resource": "1.5.8",
+    "angular": "1.6.1",
+    "angular-animate": "1.6.1",
+    "angular-aria": "1.6.1",
+    "angular-resource": "1.6.1",
     "angular-ui-router": "latest",
     "ngstorage": "^0.3.11",
     "angular-material": "^1.1.1",
@@ -33,12 +33,12 @@
     "hamsterjs": "^1.1.2"
   },
   "devDependencies": {
-    "angular-mocks": "1.5.8"
+    "angular-mocks": "1.6.1"
   },
   "scripts": {
     "postinstall": "gulp wiredep"
   },
   "resolutions": {
-    "angular": "1.5.8"
+    "angular": "1.6.1"
   }
 }
