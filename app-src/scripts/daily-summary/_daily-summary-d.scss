@@ -1,13 +1,14 @@
 daily-summary {
-
+  @extend %centered-component;
 }
 
 .task-summary-table {
-  background: #fff;
+  background: #ffffff;
+  margin: auto;
   border-collapse: collapse;
   body.dark-theme & {
     background: $dark-theme-bg-lighter;
-    color: #fff;
+    color: #ffffff;
   }
   tr {
     &.is-done {
@@ -17,7 +18,7 @@ daily-summary {
 
   th,
   td {
-    border: 1px solid #ddd;
+    border: 1px solid #dddddd;
     padding: 4px 8px;
   }
 

@@ -48,7 +48,8 @@
         Tasks for today (estimated: ~{{ vm.totaleEstimate|duration}} )
       </h2>
 
-      <p ng-if="!r.tasks.length">
+      <p ng-if="!r.tasks.length"
+         class="no-tasks-info">
         You have currently no tasks. Create one!
       </p>
       <task-list tasks="r.tasks"
@@ -62,7 +63,8 @@
         Tasks Backlog (for some other time; estimated: ~{{ vm.totaleEstimateBacklog|duration}} )
       </h2>
 
-      <p ng-if="!r.backlogTasks.length">
+      <p ng-if="!r.backlogTasks.length"
+         class="no-tasks-info">
         You have currently no tasks in the backlog.
       </p>
 
@@ -79,18 +81,20 @@
                  limit-to="{{vm.limitBacklogTo}}"></task-list>
 
 
-      <md-button class="md-primary"
-                 ng-click="vm.limitBacklogTo = false"
-                 ng-hide="vm.limitBacklogTo === false || r.backlogTasks.length <=vm.limitBacklogTo ||r.backlogTasks.length ===0">
-        <ng-md-icon icon="remove_red_eye"></ng-md-icon>
-        Show All {{ r.backlogTasks.length }} items in Backlog
-      </md-button>
+      <div class="backlog-buttons">
+        <md-button class="md-primary"
+                   ng-click="vm.limitBacklogTo = false"
+                   ng-hide="vm.limitBacklogTo === false || r.backlogTasks.length <=vm.limitBacklogTo ||r.backlogTasks.length ===0">
+          <ng-md-icon icon="remove_red_eye"></ng-md-icon>
+          Show All {{ r.backlogTasks.length }} items in Backlog
+        </md-button>
 
-      <md-button class="md-primary"
-                 ui-sref="done-tasks-backlog">
-        <ng-md-icon icon="list"></ng-md-icon>
-        Go To Done Backlog
-      </md-button>
+        <md-button class="md-primary"
+                   ui-sref="done-tasks-backlog">
+          <ng-md-icon icon="list"></ng-md-icon>
+          Go To Done Backlog
+        </md-button>
+      </div>
     </section>
   </div>
 </div>

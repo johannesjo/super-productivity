@@ -1,4 +1,21 @@
 .page-settings {
+  text-align: left;
+
+  @media(min-width: $layout-gt-sm) {
+    column-count: 2;
+    section {
+      display: inline-block;
+      width: 100%;
+      overflow: hidden;
+      break-inside: avoid-column;
+      -webkit-column-break-inside: avoid;
+    }
+  }
+
+  @media(min-width: $layout-gt-lg) {
+    column-count: 3;
+  }
+
   .config-section {
     padding: 15px;
     margin-bottom: 10px;
