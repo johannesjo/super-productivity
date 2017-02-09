@@ -2,7 +2,12 @@ daily-summary {
   @extend %centered-component;
 }
 
+md-input-container {
+  text-align: left;
+}
+
 .task-summary-table {
+  width: 100%;
   background: #ffffff;
   margin: auto;
   border-collapse: collapse;
@@ -14,12 +19,32 @@ daily-summary {
     &.is-done {
       text-decoration: line-through;
     }
+
+    &:first-child {
+      td,
+      th {
+        border-top: 0;
+      }
+    }
+    &:last-child {
+      td,
+      th {
+        border-bottom: 0;
+      }
+    }
   }
 
   th,
   td {
     border: 1px solid #dddddd;
     padding: 4px 8px;
+
+    &:first-child {
+      border-left: 0;
+    }
+    &:last-child {
+      border-right: 0;
+    }
   }
 
   td:nth-child(2),
