@@ -145,12 +145,16 @@
         .hideDelay(15000)
         .position('bottom');
 
-      this.$mdToast.show(toast).then(function (response) {
-        if (response === 'ok') {
-          // re-add task on undo
-          that.tasks.splice($index, 0, taskCopy);
-        }
-      });
+      this.$mdToast.show(toast)
+        .then(function (response) {
+          if (response === 'ok') {
+            // re-add task on undo
+            that.tasks.splice($index, 0, taskCopy);
+          }
+        })
+        // we need an empty catch to prevent the unhandled rejection error
+        .catch(() => {
+        });
     }
 
     onChangeTitle(task, isChanged, newVal) {
