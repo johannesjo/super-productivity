@@ -335,11 +335,14 @@
         let request = {
           config: $localStorage.jiraSettings,
           apiMethod: 'addWorklog',
-          arguments: [originalKey, {
-            started: started.format(JIRA_DATE_FORMAT),
-            timeSpentSeconds: timeSpent.asSeconds(),
-            comment: comment
-          }]
+          arguments: [
+            originalKey,
+            {
+              started: started.format(JIRA_DATE_FORMAT),
+              timeSpentSeconds: timeSpent.asSeconds(),
+              comment: comment,
+            }
+          ]
         };
         return this.sendRequest(request);
       } else {

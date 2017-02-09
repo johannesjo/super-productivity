@@ -1,4 +1,4 @@
-const JiraApi = require('jira').JiraApi;
+const JiraApi = require('jira-client');
 
 module.exports = (mainWindow, request) => {
   let config = request.config;
@@ -15,16 +15,29 @@ module.exports = (mainWindow, request) => {
     config.port = parseInt(match[0].replace(':', ''), 10);
   }
 
-  let jira = new JiraApi('https', config.host, config.port, config.userName, config.password, 'latest');
-
-  jira[apiMethod](...arguments, (error, res) => {
-    //console.log('JIRA_RESPONSE', error, res);
-
-    mainWindow.webContents.send('JIRA_RESPONSE', {
-      error: error,
-      response: res,
-      requestId: requestId
-    });
+  let jira = new JiraApi({
+    protocol: 'https',
+    host: config.host,
+    port: config.port,
+    username: config.userName,
+    password: config.password,
+    apiVersion: 'latest',
+    strictSSL: true
   });
+
+  jira[apiMethod](...arguments)
+    .then(res => {
+      //console.log('JIRA_RESPONSE', error, res);
+      mainWindow.webContents.send('JIRA_RESPONSE', {
+        response: res,
+        requestId: requestId
+      });
+    })
+    .catch(err => {
+      mainWindow.webContents.send('JIRA_RESPONSE', {
+        error: err,
+        requestId: requestId
+      });
+    });
 
 };
