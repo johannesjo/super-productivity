@@ -14,7 +14,7 @@
     .factory('TasksUtil', TasksUtil);
 
   /* @ngInject */
-  function TasksUtil(SimpleToast, WORKLOG_DATE_STR_FORMAT) {
+  function TasksUtil(SimpleToast, WORKLOG_DATE_STR_FORMAT, $log) {
 
     function deleteNullValueTasks(tasksArray) {
       return tasksArray.filter(function (item) {
@@ -39,7 +39,7 @@
           let firstDupe = _.find(tasksArray, (task) => {
             return dupeIds.indexOf(task.id) > -1;
           });
-          console.log(firstDupe);
+          $log.info('DUPE', firstDupe);
 
           SimpleToast('ERROR', '!!! Dupes detected in data for the ids: ' + dupeIds.join(', ') + '. First task title is "' + firstDupe.title + '" !!!', 60000);
         }
