@@ -18,6 +18,7 @@
 
         <textarea ng-model="vm.tasksTxt"
                   rows="10"
+                  id="task-textarea"
                   md-whiteframe="2"
                   class="simple-textarea"></textarea>
 
@@ -116,8 +117,9 @@
 
     <md-dialog-actions>
       <md-button class="md-primary md-raised"
-                 clipboard
-                 text="vm.tasksTxt">
+                 id="clipboard-btn"
+                 data-clipboard-action="copy"
+                 data-clipboard-target="#task-textarea">
         <ng-md-icon icon="content_paste"></ng-md-icon>
         Copy to clipboard
       </md-button>

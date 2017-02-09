@@ -32,8 +32,7 @@
       'as.sortable',
       'angularMoment',
       'hc.marked',
-      'mwl.calendar',
-      'angular-clipboard'
+      'mwl.calendar'
     ])
     .config(configMdTheme)
     .config(configMarked)

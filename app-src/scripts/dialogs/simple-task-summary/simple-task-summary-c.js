@@ -14,8 +14,15 @@
     .controller('SimpleTaskSummaryCtrl', SimpleTaskSummaryCtrl);
 
   /* @ngInject */
-  function SimpleTaskSummaryCtrl($mdDialog, tasks, settings, TasksUtil, $scope, ParseDuration) {
+  function SimpleTaskSummaryCtrl($mdDialog, tasks, settings, TasksUtil, $scope, ParseDuration, SimpleToast) {
     let vm = this;
+    const clipboard = new Clipboard('#clipboard-btn');
+
+    clipboard.on('success', function (e) {
+      SimpleToast('SUCCESS', 'Copied to clipboard');
+      e.clearSelection();
+    });
+
 
     vm.options = settings;
 
