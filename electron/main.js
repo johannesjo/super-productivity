@@ -53,7 +53,7 @@ function createWindow() {
   }));
 
   // Open the DevTools.
-  mainWin.webContents.openDevTools();
+  //mainWin.webContents.openDevTools();
 
   // Create application menu to enable copy & pasting on MacOS
   var menuTpl = [{
