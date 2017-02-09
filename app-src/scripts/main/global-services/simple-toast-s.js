@@ -25,7 +25,7 @@
       }
 
       if (!type) {
-        return $mdToast.show($mdToast.simple()
+        $mdToast.show($mdToast.simple()
           .textContent(textContent)
           .capsule(false)
           .hideDelay(hideDelay || DEFAULT_HIDE_DELAY)
@@ -53,7 +53,7 @@
           iconColor = '#e15d63';
         }
 
-        return $mdToast.show({
+        $mdToast.show({
           template: `
 <md-toast>
 <div class="md-toast-content">
