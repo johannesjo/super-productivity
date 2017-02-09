@@ -12,3 +12,4 @@ app/bower_components
 dist
 release-builds
 *.log
+deploy.sh
