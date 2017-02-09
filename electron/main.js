@@ -39,7 +39,7 @@ function createWindow() {
   }
 
   // Create the browser window.
-  mainWin = new BrowserWindow({ width: 800, height: 600 });
+  mainWin = new BrowserWindow({width: 800, height: 600});
 
   // and load the index.html of the app.
   mainWin.loadURL(url.format({
@@ -53,7 +53,37 @@ function createWindow() {
   }));
 
   // Open the DevTools.
-  // mainWin.webContents.openDevTools();
+  mainWin.webContents.openDevTools();
+
+  // Create application menu to enable copy & pasting on MacOS
+  var menuTpl = [{
+    label: 'Application',
+    submenu: [
+      {label: 'About Application', selector: 'orderFrontStandardAboutPanel:'},
+      {type: 'separator'},
+      {
+        label: 'Quit', click: function () {
+        app.quit();
+      }
+      }
+    ]
+  }, {
+    label: 'Edit',
+    submenu: [
+      {label: 'Undo', accelerator: 'CmdOrCtrl+Z', selector: 'undo:'},
+      {label: 'Redo', accelerator: 'Shift+CmdOrCtrl+Z', selector: 'redo:'},
+      {type: 'separator'},
+      {label: 'Cut', accelerator: 'CmdOrCtrl+X', selector: 'cut:'},
+      {label: 'Copy', accelerator: 'CmdOrCtrl+C', selector: 'copy:'},
+      {label: 'Paste', accelerator: 'CmdOrCtrl+V', selector: 'paste:'},
+      {label: 'Select All', accelerator: 'CmdOrCtrl+A', selector: 'selectAll:'}
+    ]
+  }
+  ];
+
+  // we need to set a menu to get copy & paste working for mac os x
+  electron.Menu.setApplicationMenu(electron.Menu.buildFromTemplate(menuTpl));
+
 
   // open new window links in browser
   mainWin.webContents.on('new-window', function (event, url) {
@@ -101,7 +131,6 @@ let shouldQuitBecauseAppIsAnotherInstance = app.makeSingleInstance(() => {
 });
 if (shouldQuitBecauseAppIsAnotherInstance) {
   app.quit();
-  return;
 }
 
 // This method will be called when Electron has finished
@@ -218,7 +247,7 @@ electron.ipcMain.on('CHANGED_CURRENT_TASK', (ev, task) => {
     let timeStr = '';
 
     if (title.length > 50) {
-      title = title.substring(0, 47) + "...";
+      title = title.substring(0, 47) + '...';
     }
 
     if (task.timeSpent && task.timeSpent._data) {
