@@ -301,12 +301,16 @@
     }
   }
 
+  // hacky fix for ff
+  TaskListCtrl.$$ngIsClass = true;
+
   angular
     .module('superProductivity')
+    .controller('TaskListCtrl', TaskListCtrl)
     .component('taskList', {
       templateUrl: 'scripts/task-list/task-list-d.html',
       bindToController: true,
-      controller: TaskListCtrl,
+      controller: 'TaskListCtrl',
       controllerAs: CONTROLLER_AS,
       bindings: {
         tasks: '=',

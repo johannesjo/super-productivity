@@ -560,6 +560,9 @@
     }
   }
 
+  // hacky fix for ff
+  Tasks.$$ngIsClass = true;
+
   angular
     .module('superProductivity')
     .service('Tasks', Tasks);
