@@ -47,6 +47,8 @@
         taskDelete: 'Delete',
         selectPreviousTask: 'k',
         selectNextTask: 'j',
+        moveToBacklog: '',
+        moveToTodaysTasks: ''
       },
       config: {
         isTakeABreakEnabled: false,

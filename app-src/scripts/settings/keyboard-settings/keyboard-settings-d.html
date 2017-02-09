@@ -89,4 +89,16 @@
            keyboard-key-input
            ng-model="vm.keys.selectPreviousTask">
   </md-input-container>
+  <md-input-container class="md-block">
+    <label>Move task to task backlog</label>
+    <input type="text"
+           keyboard-key-input
+           ng-model="vm.keys.moveToBacklog">
+  </md-input-container>
+  <md-input-container class="md-block">
+    <label>Move task to task todays task list</label>
+    <input type="text"
+           keyboard-key-input
+           ng-model="vm.keys.moveToTodaysTasks">
+  </md-input-container>
 </div>

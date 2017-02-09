@@ -229,6 +229,12 @@
       if ($event.key === this.$localStorage.keys.taskAddSubTask) {
         this.addSubTask(task);
       }
+      if ($event.key === this.$localStorage.keys.moveToBacklog) {
+        this.Tasks.moveTaskFromTodayToBackLog(task);
+      }
+      if ($event.key === this.$localStorage.keys.moveToTodaysTasks) {
+        this.Tasks.moveTaskFromBackLogToToday(task);
+      }
 
       if ($event.key === this.$localStorage.keys.taskDelete) {
         this.deleteTask(task);

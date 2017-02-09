@@ -496,6 +496,22 @@
       }
     }
 
+    moveTask(task, fromArray, toArray) {
+      const index = _.findIndex(fromArray, ['id', task.id]);
+      if (index >= 0) {
+        fromArray.splice(index, 1);
+        toArray.unshift(task);
+      }
+    }
+
+    moveTaskFromBackLogToToday(task) {
+      this.moveTask(task, this.$localStorage.backlogTasks, this.$localStorage.tasks);
+    }
+
+    moveTaskFromTodayToBackLog(task) {
+      this.moveTask(task, this.$localStorage.tasks, this.$localStorage.backlogTasks);
+    }
+
     addTasksToTopOfBacklog(tasks) {
       this.$localStorage.backlogTasks = tasks.concat(this.$localStorage.backlogTasks);
     }
