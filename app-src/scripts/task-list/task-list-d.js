@@ -224,6 +224,7 @@
       }
       if ($event.key === this.$localStorage.keys.taskToggleDone) {
         task.isDone = !task.isDone;
+        this.onTaskDoneChanged(task);
       }
       if ($event.key === this.$localStorage.keys.taskAddSubTask) {
         this.addSubTask(task);
