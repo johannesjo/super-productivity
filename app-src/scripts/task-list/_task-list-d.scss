@@ -3,6 +3,7 @@ task-list {
 }
 
 .task-list {
+  text-align: left;
   min-height: 50px;
   list-style: none;
   // add a little padding to top and bottom, to make drag dropping easier
@@ -15,7 +16,7 @@ task-list {
     margin: 1px 2px 5px 1px;
     display: block;
     min-height: 22px;
-    background-color: #ddd;
+    background-color: #dddddd;
     body.dark-theme & {
       background-color: $dark-theme-bg-darker;
     }
@@ -28,17 +29,17 @@ task-list {
   padding: 3px 12px 0;
   display: block;
   margin-bottom: 6px;
-  background-color: #fff;
-  color: #333;
+  background-color: #ffffff;
+  color: #333333;
   body.dark-theme & {
     background-color: $dark-theme-bg-lighter;
-    color: #ddd;
+    color: #dddddd;
 
     &.is-done {
       .time,
       > .title,
       > .first-line > .title {
-        color: #777;
+        color: #777777;
       }
     }
   }
@@ -47,7 +48,7 @@ task-list {
     .time,
     > .title,
     > .first-line > .title {
-      color: #aaa;
+      color: #aaaaaa;
     }
 
     > .title,
@@ -58,11 +59,11 @@ task-list {
 
   &.as-sortable-dragging,
   &:focus {
-    background: #eee;
-    color: #000;
+    background: #eeeeee;
+    color: #000000;
     body.dark-theme & {
       background-color: $dark-theme-bg-darker;
-      color: #ddd;
+      color: #dddddd;
     }
   }
 
@@ -104,18 +105,18 @@ task-list {
     }
 
     .update-icon {
-      fill: #000;
+      fill: #000000;
       body.dark-theme & {
-        fill: #fff;
+        fill: #ffffff;
       }
     }
     .md-button {
       &:hover,
       &.is-active {
         > ng-md-icon {
-          fill: #000;
+          fill: #000000;
           body.dark-theme & {
-            fill: #fff;
+            fill: #ffffff;
           }
         }
       }
@@ -139,11 +140,11 @@ task-list {
 
   &.is-current {
     background: $light-green;
-    color: #000;
+    color: #000000;
 
     body.dark-theme & {
       background-color: $dark-green;
-      color: #fff;
+      color: #ffffff;
     }
 
     .md-bar {
@@ -151,15 +152,15 @@ task-list {
     }
     .play-btn {
       ng-md-icon {
-        fill: #000 !important;
+        fill: #000000 !important;
         body.dark-theme & {
-          fill: #fff !important;
+          fill: #ffffff !important;
         }
       }
     }
   }
   .md-bar {
-    background-color: #ccc !important;
+    background-color: #cccccc !important;
   }
 
   //md-checkbox.md-checked .md-icon {
