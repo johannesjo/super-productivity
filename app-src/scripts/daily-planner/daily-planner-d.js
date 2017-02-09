@@ -36,12 +36,10 @@
       return searchText ? $filter('filter')(vm.taskSuggestions, searchText, false, 'title') : vm.taskSuggestions;
     };
 
-    if (IS_ELECTRON) {
+    if (IS_ELECTRON && Jira.isSufficientJiraSettings) {
       Jira.getSuggestions().then((res) => {
         vm.taskSuggestions = Jira.transformIssues(res) || [];
       });
-    } else {
-      vm.taskSuggestions = [];
     }
 
     vm.addTask = () => {
