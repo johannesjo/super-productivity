@@ -44,7 +44,9 @@
         taskOpenEstimationDialog: 't',
         taskToggleDone: 'd',
         taskAddSubTask: '+',
-        taskDelete: 'Delete'
+        taskDelete: 'Delete',
+        selectPreviousTask: 'k',
+        selectNextTask: 'j',
       },
       config: {
         isTakeABreakEnabled: false,

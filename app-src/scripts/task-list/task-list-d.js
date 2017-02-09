@@ -177,6 +177,20 @@
       }
     }
 
+    focusPrevTask(currentTaskEl) {
+      const taskEls = document.querySelectorAll('.task');
+      const index = Array.prototype.indexOf.call(taskEls, currentTaskEl[0]);
+      const nextEl = taskEls[index - 1] || taskEls[0];
+      nextEl.focus();
+    }
+
+    focusNextTask(currentTaskEl) {
+      const taskEls = document.querySelectorAll('.task');
+      const index = Array.prototype.indexOf.call(taskEls, currentTaskEl[0]);
+      const nextEl = taskEls[index + 1] || currentTaskEl[0];
+      nextEl.focus();
+    }
+
     onFocus($event) {
       let taskEl = $event.currentTarget || $event.srcElement || $event.originalTarget;
       taskEl = angular.element(taskEl);
@@ -216,6 +230,17 @@
         // don't propagate to next focused element
         $event.preventDefault();
         $event.stopPropagation();
+      }
+
+      if ($event.shiftKey === false && $event.ctrlKey === false) {
+        // move up
+        if ($event.keyCode === 38 || $event.key === this.$localStorage.keys.selectPreviousTask) {
+          this.focusPrevTask(taskEl);
+        }
+        // move down
+        if ($event.keyCode === 40 || $event.key === this.$localStorage.keys.selectNextTask) {
+          this.focusNextTask(taskEl);
+        }
       }
 
       // moving items via shift+ctrl+keyUp/keyDown
