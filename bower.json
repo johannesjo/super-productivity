@@ -1,5 +1,5 @@
 {
-  "name": "superProductivity",
+  "name": "super-productivity",
   "version": "1.0.0",
   "authors": [
     "Johannes Millan <contact@super-productivity.com> (http://super-productivity.com)"
@@ -30,7 +30,8 @@
     "moment-duration-format": "^1.3.0",
     "angular-marked": "^1.2.2",
     "angular-bootstrap-calendar": "^0.27.5",
-    "hamsterjs": "^1.1.2"
+    "hamsterjs": "^1.1.2",
+    "angular-clipboard": "^1.5.0"
   },
   "devDependencies": {
     "angular-mocks": "1.6.1"

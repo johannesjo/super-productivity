@@ -1,5 +1,5 @@
 {
-  "name": "superProductivity",
+  "name": "super-productivity",
   "version": "1.0.0",
   "description": "Personal Task Management App to help you with your daily struggle with JIRA etc.",
   "main": "./electron/main.js",
