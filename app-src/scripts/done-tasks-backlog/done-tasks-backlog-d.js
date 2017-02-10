@@ -28,9 +28,11 @@
   function DoneTasksBacklogCtrl($scope, TasksUtil) {
     let vm = this;
 
-    $scope.$watch('vm.r.doneBacklogTasks', (mVal) => {
+    const watcher = $scope.$watch('r.doneBacklogTasks', (mVal) => {
       vm.totalTimeSpent = TasksUtil.calcTotalTimeSpent(mVal);
     }, true);
+
+    $scope.$on('$destroy', watcher);
   }
 
 })();

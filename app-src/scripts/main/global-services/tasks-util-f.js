@@ -106,10 +106,11 @@
 
         _.each(tasks, (task) => {
           if (task && task.timeSpent) {
-            totalTimeSpent.add(task.timeSpent);
+            totalTimeSpent.add(moment.duration(task.timeSpent));
           }
         });
       }
+
       return totalTimeSpent;
     }
 
