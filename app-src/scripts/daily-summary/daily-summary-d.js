@@ -26,7 +26,7 @@
   }
 
   /* @ngInject */
-  function DailySummaryCtrl($localStorage, Tasks, TasksUtil, $mdDialog, Dialogs, $state, GitLog) {
+  function DailySummaryCtrl($localStorage, Tasks, TasksUtil, $mdDialog, Dialogs, $state, GitLog, IS_ELECTRON) {
     const IPC_EVENT_SHUTDOWN = 'SHUTDOWN';
 
     let vm = this;
@@ -59,24 +59,25 @@
 
       Tasks.finishDay(vm.clearDoneTasks, vm.moveUnfinishedToBacklog);
 
-      // update just for fun
-      vm.doneTasks = Tasks.getDoneToday();
-
-      $mdDialog.show(
-        $mdDialog.alert()
-          .clickOutsideToClose(false)
-          .title('All Done! Shutting down now..')
-          .textContent('You work is done. Time to go home!')
-          .ariaLabel('Alert Shutdown')
-          .ok('Aye aye!')
-      )
-        .then(() => {
-          if (angular.isDefined(window.ipcRenderer)) {
-            window.ipcRenderer.send(IPC_EVENT_SHUTDOWN);
-          } else {
-            $state.go('daily-planner');
-          }
-        });
+      if (IS_ELECTRON) {
+        $mdDialog.show(
+          $mdDialog.confirm()
+            .clickOutsideToClose(false)
+            .title('All Done! Shutting down now..')
+            .textContent('You work is done. Time to go home!')
+            .ariaLabel('Alert Shutdown')
+            .ok('Aye aye! Shutdown!')
+            .cancel('No, just clear the tasks')
+        )
+          .then(() => {
+              window.ipcRenderer.send(IPC_EVENT_SHUTDOWN);
+            },
+            () => {
+              $state.go('daily-planner');
+            });
+      } else {
+        $state.go('daily-planner');
+      }
     };
   }
 
