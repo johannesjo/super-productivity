@@ -246,10 +246,8 @@
       let progress;
       // calc progress
       if (task && task.timeSpent && task.timeEstimate) {
-        if (moment.duration().format && angular.isFunction(moment.duration().format)) {
-          progress = parseInt(moment.duration(task.timeSpent)
-              .format('ss') / moment.duration(task.timeEstimate).format('ss') * 100, 10);
-        }
+        progress = parseInt(moment.duration(task.timeSpent)
+            .format('ss') / moment.duration(task.timeEstimate).format('ss') * 100, 10);
       }
       return progress;
     }

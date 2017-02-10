@@ -437,6 +437,7 @@
       // track total time spent
       task.timeSpent = this.TasksUtil.calcTotalTimeSpentOnTask(task);
       task.progress = this.TasksUtil.calcProgress(task);
+      console.log(task.progress);
 
       return task;
     }
