@@ -36,6 +36,7 @@
     ])
     .config(configMdTheme)
     .config(configMarked)
+    .config(fixUnhandledRejectionError)
     .run(initGlobalModels)
     .run(initPollJiraTaskUpdates)
     .run(initPollForSimpleTimeTracking)
@@ -78,6 +79,10 @@
     }
 
     $mdThemingProvider.alwaysWatchTheme(true);
+  }
+
+  function fixUnhandledRejectionError($qProvider) {
+    $qProvider.errorOnUnhandledRejections(false);
   }
 
   /* @ngInject */
