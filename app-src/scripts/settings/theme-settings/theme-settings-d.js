@@ -32,12 +32,14 @@
     let vm = this;
     vm.themes = THEMES;
 
-    vm.currentTheme = vm.currentTheme || DEFAULT_THEME;
-
-    vm.isDarkTheme = vm.currentTheme && vm.currentTheme.indexOf('dark') > -1;
-    vm.selectedTheme = vm.currentTheme && vm.currentTheme
-        .replace('-theme', '')
-        .replace('-dark', '');
+    // wait for var to be there
+    $scope.$evalAsync(() => {
+      vm.currentTheme = vm.currentTheme || DEFAULT_THEME;
+      vm.isDarkTheme = vm.currentTheme && vm.currentTheme.indexOf('dark') > -1;
+      vm.selectedTheme = vm.currentTheme && vm.currentTheme
+          .replace('-theme', '')
+          .replace('-dark', '');
+    });
 
     // WATCHER & EVENTS
     // ----------------
