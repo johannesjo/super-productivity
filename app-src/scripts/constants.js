@@ -37,6 +37,7 @@
       keys: {
         globalShowHide: 'Ctrl+Shift+X',
         addNewTask: '*',
+        showHelp: '?',
         openProjectNotes: 'N',
         openDistractionPanel: 'D',
         taskEditTitle: 'e',

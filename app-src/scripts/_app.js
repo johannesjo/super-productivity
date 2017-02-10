@@ -113,6 +113,9 @@
         if (ev.key === $localStorage.keys.openDistractionPanel) {
           Dialogs('DISTRACTIONS', undefined, true);
         }
+        if (ev.key === $localStorage.keys.showHelp) {
+          Dialogs('HELP', { template: 'PAGE' }, true);
+        }
       }
 
       if (IS_ELECTRON) {
