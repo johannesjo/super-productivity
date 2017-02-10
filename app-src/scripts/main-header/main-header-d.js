@@ -39,6 +39,10 @@
       Dialogs('ADD_TASK');
     };
 
+    vm.openHelp = () => {
+      Dialogs('HELP', { template: 'PAGE' });
+    };
+
     vm.changeProject = (project) => {
       Projects.changeCurrent(project);
     };

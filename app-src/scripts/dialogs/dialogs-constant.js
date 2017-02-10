@@ -53,6 +53,10 @@
         controller: 'SimpleTaskSummaryCtrl',
         templateUrl: 'scripts/dialogs/simple-task-summary/simple-task-summary-c.html'
       },
+      HELP: {
+        controller: 'HelpCtrl',
+        templateUrl: 'scripts/dialogs/help/help-c.html'
+      },
       JIRA_SET_IN_PROGRESS: {
         controller: 'JiraSetInProgressCtrl',
         templateUrl: 'scripts/dialogs/jira-set-in-progress/jira-set-in-progress-c.html'
