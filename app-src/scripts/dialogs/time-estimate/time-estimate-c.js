@@ -14,8 +14,10 @@
     .controller('TimeEstimateCtrl', TimeEstimateCtrl);
 
   /* @ngInject */
-  function TimeEstimateCtrl($mdDialog, task, Tasks, TasksUtil, $window) {
+  function TimeEstimateCtrl($mdDialog, task, Tasks, TasksUtil, $window, theme) {
     let vm = this;
+    vm.theme = theme;
+
     const moment = $window.moment;
 
     // TODO refactor and add to Tasks.service

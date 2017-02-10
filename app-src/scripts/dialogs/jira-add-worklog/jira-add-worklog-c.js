@@ -14,10 +14,11 @@
     .controller('JiraAddWorklogCtrl', JiraAddWorklogCtrl);
 
   /* @ngInject */
-  function JiraAddWorklogCtrl($mdDialog, task, $window, comment) {
+  function JiraAddWorklogCtrl($mdDialog, task, $window, comment, theme) {
     let vm = this;
     const moment = $window.moment;
 
+    vm.theme = theme;
     vm.taskCopy = angular.copy(task);
     vm.taskCopy.started = moment(task.started).milliseconds(0).seconds(0).toDate();
     vm.isUpdateLocalTaskSettings = false;

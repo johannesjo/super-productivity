@@ -14,11 +14,12 @@
     .controller('NotesCtrl', NotesCtrl);
 
   /* @ngInject */
-  function NotesCtrl($mdDialog, $localStorage) {
+  function NotesCtrl($mdDialog, $localStorage, theme) {
     if (!$localStorage.note) {
       $localStorage.note = 'write some note';
     }
     this.r = $localStorage;
+    this.theme = theme;
 
     this.cancel = () => {
       $mdDialog.hide();

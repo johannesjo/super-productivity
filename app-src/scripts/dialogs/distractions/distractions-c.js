@@ -14,9 +14,10 @@
     .controller('DistractionsCtrl', DistractionsCtrl);
 
   /* @ngInject */
-  function DistractionsCtrl($mdDialog, $localStorage, SimpleToast) {
+  function DistractionsCtrl($mdDialog, $localStorage, SimpleToast, theme) {
     let vm = this;
     vm.r = $localStorage;
+    vm.theme = theme;
     vm.isOpen = false;
 
     vm.close = () => {

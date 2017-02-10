@@ -14,9 +14,10 @@
     .controller('AddTaskCtrl', AddTaskCtrl);
 
   /* @ngInject */
-  function AddTaskCtrl($mdDialog, Tasks) {
+  function AddTaskCtrl($mdDialog, Tasks, theme) {
     let vm = this;
     vm.task = {};
+    vm.theme = theme;
 
     vm.addTask = () => {
       if (vm.isAddToBacklog) {

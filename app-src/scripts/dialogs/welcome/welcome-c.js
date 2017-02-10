@@ -14,8 +14,9 @@
     .controller('WelcomeCtrl', WelcomeCtrl);
 
   /* @ngInject */
-  function WelcomeCtrl($mdDialog, $localStorage, IS_ELECTRON) {
+  function WelcomeCtrl($mdDialog, $localStorage, IS_ELECTRON, theme) {
     let vm = this;
+    vm.theme = theme;
 
     vm.IS_ELECTRON = IS_ELECTRON;
 

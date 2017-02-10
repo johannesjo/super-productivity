@@ -14,8 +14,9 @@
     .controller('TaskSelectionCtrl', TaskSelectionCtrl);
 
   /* @ngInject */
-  function TaskSelectionCtrl($mdDialog, Tasks) {
+  function TaskSelectionCtrl($mdDialog, Tasks, theme) {
     let vm = this;
+    vm.theme = theme;
 
     vm.undoneTasks = Tasks.getUndoneToday(true);
 

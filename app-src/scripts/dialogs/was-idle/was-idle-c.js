@@ -14,8 +14,9 @@
     .controller('WasIdleCtrl', WasIdleCtrl);
 
   /* @ngInject */
-  function WasIdleCtrl($mdDialog, $localStorage, $scope, Tasks, $window, idleTime, minIdleTimeInMs) {
+  function WasIdleCtrl($mdDialog, $localStorage, $scope, Tasks, $window, idleTime, minIdleTimeInMs, theme) {
     let vm = this;
+    vm.theme = theme;
     const IPC_EVENT_IDLE = 'WAS_IDLE';
     const IPC_EVENT_UPDATE_TIME_SPEND_FOR_CURRENT = 'UPDATE_TIME_SPEND';
 

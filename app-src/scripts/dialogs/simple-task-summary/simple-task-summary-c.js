@@ -14,8 +14,9 @@
     .controller('SimpleTaskSummaryCtrl', SimpleTaskSummaryCtrl);
 
   /* @ngInject */
-  function SimpleTaskSummaryCtrl($mdDialog, tasks, settings, TasksUtil, $scope, ParseDuration, SimpleToast) {
+  function SimpleTaskSummaryCtrl($mdDialog, tasks, settings, TasksUtil, $scope, ParseDuration, SimpleToast, theme) {
     let vm = this;
+    vm.theme = theme;
 
     // init clipboard button
     // dirty but good enough for now

@@ -21,7 +21,7 @@
     "angular-resource": "1.6.2",
     "angular-ui-router": "latest",
     "ngstorage": "^0.3.11",
-    "angular-material": "^1.1.1",
+    "angular-material": "^1.1.3",
     "angular-material-icons": "^0.7.1",
     "lodash": "^4.17.3",
     "moment": "^2.17.1",

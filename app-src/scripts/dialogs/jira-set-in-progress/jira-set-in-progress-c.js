@@ -14,8 +14,9 @@
     .controller('JiraSetInProgressCtrl', JiraSetInProgressCtrl);
 
   /* @ngInject */
-  function JiraSetInProgressCtrl($mdDialog, task, transitions, localType, $window, $localStorage) {
+  function JiraSetInProgressCtrl($mdDialog, task, transitions, localType, $window, $localStorage, theme) {
     let vm = this;
+    vm.theme = theme;
     vm.transitions = transitions;
     vm.task = task;
     vm.localType = localType;

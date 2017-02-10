@@ -14,7 +14,7 @@
     .service('Dialogs', Dialogs);
 
   /* @ngInject */
-  function Dialogs($mdDialog, DIALOGS, $q) {
+  function Dialogs($mdDialog, DIALOGS, $q, $document, $localStorage) {
     const dialogQueue = [];
 
     function createDialogObject(dialogName, locals) {
@@ -22,9 +22,19 @@
       const defaults = angular.copy(DIALOGS.DEFAULTS);
       let dialog = angular.extend(defaults, DIALOGS[dialogName]);
 
+      if (!locals) {
+        locals = {};
+      }
+
+      // pass default theme
+      locals = angular.extend(locals, {
+        theme: $localStorage.theme
+      });
+
       // add passed variables
       dialog = angular.extend(dialog, {
-        locals: locals
+        locals: locals,
+        parent: angular.element($document[0].body)
       });
       return dialog;
     }
@@ -54,6 +64,9 @@
               nextDialog.wrapperPromise.resolve(res);
             }, (err) => {
               nextDialog.wrapperPromise.reject(err);
+            })
+            .catch((err) => {
+              nextDialog.wrapperPromise.reject(err);
             });
         } else {
           $mdDialog.show(nextDialog.obj)
@@ -62,6 +75,11 @@
               removeLastResolvedFromQueue();
               openNextInQueue();
             }, (err) => {
+              nextDialog.wrapperPromise.reject(err);
+              removeLastResolvedFromQueue();
+              openNextInQueue();
+            })
+            .catch((err) => {
               nextDialog.wrapperPromise.reject(err);
               removeLastResolvedFromQueue();
               openNextInQueue();
