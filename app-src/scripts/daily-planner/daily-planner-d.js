@@ -25,7 +25,7 @@
   }
 
   /* @ngInject */
-  function DailyPlannerCtrl($localStorage, $window, $scope, Tasks, TasksUtil, Dialogs, $state, Jira, $filter, IS_ELECTRON) {
+  function DailyPlannerCtrl($localStorage, $window, $scope, Tasks, TasksUtil, Dialogs, $state, Jira, $filter, IS_ELECTRON, Git) {
     let vm = this;
     const _ = $window._;
 
@@ -38,8 +38,16 @@
 
     if (IS_ELECTRON && Jira.isSufficientJiraSettings()) {
       Jira.getSuggestions().then((res) => {
-        vm.taskSuggestions = Jira.transformIssues(res) || [];
+        vm.taskSuggestions = vm.taskSuggestions.concat(Jira.transformIssues(res));
       });
+    }
+
+    if ($localStorage.git.isShowIssuesFromGit) {
+      Git.getIssueList()
+        .$promise
+        .then((issues) => {
+          vm.taskSuggestions = vm.taskSuggestions.concat(issues);
+        });
     }
 
     vm.addTask = () => {

@@ -32,7 +32,10 @@
       distractions: [],
       projects: [],
       git: {
-        projectDir: undefined
+        isShowIssuesFromGit: false,
+        repo: undefined,
+        projectDir: undefined,
+        prPrefix: 'Check PR: '
       },
       keys: {
         globalShowHide: 'Ctrl+Shift+X',

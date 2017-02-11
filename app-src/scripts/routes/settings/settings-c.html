@@ -21,15 +21,8 @@
 
 
   <section class="config-section"
-           md-whiteframe="2"
-           ng-if="vm.IS_ELECTRON">
-    <h2 class="md-title">Git integration</h2>
-    <p>Set project directory to show the days commits at summary.</p>
-    <md-input-container class="md-block">
-      <label>Project path (where .git resides)</label>
-      <input type="text"
-             ng-model="r.git.projectDir">
-    </md-input-container>
+           md-whiteframe="2">
+    <git-settings settings="r.git"></git-settings>
   </section>
 
   <section class="config-section"
