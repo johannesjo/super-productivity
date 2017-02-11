@@ -96,11 +96,7 @@
 
   /* @ngInject */
   function initGlobalShortcuts($document, Dialogs, $localStorage, CheckShortcutKeyCombo, IS_ELECTRON) {
-    // we just use this single one as this usually does mess
-    // up with the default browser shortcuts
-    // better to use the global electron shortcuts here
     $document.bind('keypress', (ev) => {
-
       // only trigger if not in typing mode
       if (ev.target.tagName !== 'INPUT' && ev.target.tagName !== 'TEXTAREA') {
         // on star
