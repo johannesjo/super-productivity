@@ -4,6 +4,7 @@ inline-markdown {
 
 .markdown-wrapper {
   min-height: 160px;
+  max-height: 600px;
   margin-bottom: 20px;
   display: block;
   box-sizing: border-box;
@@ -11,6 +12,13 @@ inline-markdown {
   border: none;
   resize: both;
   overflow: auto;
+  position: relative;
+  .resize-to-fit {
+    position: absolute;
+    right: 14px;
+    top: 0;
+    cursor: pointer;
+  }
 }
 
 .markdown-unparsed,
@@ -18,7 +26,7 @@ inline-markdown {
   padding: 10px 14px;
   margin: 0;
   width: 100%;
-  word-wrap:break-word;
+  word-wrap: break-word;
   display: block;
   border: none;
   resize: none;
@@ -28,7 +36,7 @@ inline-markdown {
   background: #fbfbfb;
   body.dark-theme & {
     background-color: $dark-theme-bg;
-    color: #eee;
+    color: #eeeeee;
   }
 }
 

@@ -82,6 +82,8 @@
     vm.untoggleShowEdit = () => {
       vm.showEdit = false;
       makeLinksWorkForElectron();
+      vm.resizeToFit();
+
       if (vm.ngModelCopy !== vm.ngModel) {
         vm.ngModel = vm.ngModelCopy;
         if (angular.isFunction(vm.onChanged)) {
@@ -89,6 +91,19 @@
         }
       }
     };
+
+    vm.resizeToFit = () => {
+      $timeout(() => {
+        const previewEl = angular.element($element.find('marked-preview'));
+        const wrapperEl = angular.element($element.find('div')[0]);
+
+        previewEl.css('height', 'auto');
+        wrapperEl.css('height', previewEl[0].offsetHeight + 'px');
+        previewEl.css('height', '');
+      });
+    };
+
+    vm.resizeToFit();
 
     $scope.$on('$destroy', () => {
       if (waitForMarkedTimeOut) {
