@@ -2,6 +2,17 @@
   <ng-md-icon icon="settings"></ng-md-icon>
   Misc Settings
 </h2>
+
+<help-section>
+  <div class="md-caption">Use short syntax</div>
+  <p>The short syntax can be enabled to quickly create tasks with an estimation already set. If you enter 'TaskTitleBla t:30m' a task with the name 'TaskTitleBla' will be created with the estimation set to 30 minutes.</p>
+
+  <div ng-if="vm.IS_ELECTRON">
+    <div class="md-caption">Enable take a break reminder</div>
+    <p>Allows you to configure a reoccurring reminder when you have worked for a specified amount of time without taking a break.</p>
+  </div>
+</help-section>
+
 <div>
   <md-switch ng-model="vm.settings.isShortSyntaxEnabled"
              aria-label="Use short syntax (e.g. 'TaskTitleBla e:30m')">

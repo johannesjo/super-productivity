@@ -1,0 +1,25 @@
+help-section {
+  display: block;
+
+  .help-text {
+    margin-bottom: 40px;
+    border-bottom: 2px solid $c-accent;
+    border-top: 2px solid $c-accent;
+  }
+
+  .help-btn {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+  }
+
+  .help-icon-wrapper {
+    margin-top: 8px;
+    margin-bottom: 8px;
+    color: $c-accent;
+    text-align: center;
+  }
+
+  body.dark-theme & {
+  }
+}

@@ -2,6 +2,13 @@
   <ng-md-icon icon="swap_vert"></ng-md-icon>
   Make/Restore Backup
 </h2>
+
+<help-section>
+  <p>Here you can download all your data as <strong>JSON</strong> export for backups, but also to use it in a different context (e.g. you might want to export your projects in the browser and import them into the desktop version).</p>
+  <p>The import expects valid json to be copied into the text area.
+    <strong>NOTE: Once you hit the import button all your current settings and data will be overwritten!</strong></p>
+</help-section>
+
 <a class="md-raised md-button md-ink-ripple"
    type="button"
    download-backup>
@@ -28,6 +35,10 @@
               md-auto-focus
               rows="3"></textarea>
   </md-input-container>
+
+  <div><strong>NOTE: Once you hit the import button all your current settings and data will be overwritten!</strong>
+  </div>
+
   <md-button type="submit"
              class="md-raised md-primary">Import settings
   </md-button>
