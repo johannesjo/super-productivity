@@ -49,7 +49,7 @@
       return newIssues;
     }
 
-    return $resource(`https://api.github.com/repos/:user/:repo/:apiMethod`, {
+    return $resource(`https://api.github.com/:reposMethod/:user/:repo/:apiMethod`, {
       state: 'open',
       // we use functions here because we want dynamic parameters which change when settings change
       user: () => {
@@ -57,6 +57,13 @@
       },
       repo: () => {
         return settings.repo.split('/')[1];
+      },
+      reposMethod: () => {
+        if (settings.repo.split('/')[1]) {
+          return 'repos';
+        } else {
+          return undefined;
+        }
       }
     }, {
       getIssueList: {
