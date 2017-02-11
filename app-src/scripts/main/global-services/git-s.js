@@ -14,8 +14,9 @@
     .service('Git', Git);
 
   /* @ngInject */
-  function Git($resource, $localStorage) {
+  function Git($http, $localStorage) {
     const TYPE = 'GITHUB';
+    const BASE_URL = 'https://api.github.com/';
     const settings = $localStorage.git;
 
     function mapIssue(issue) {
@@ -49,32 +50,33 @@
       return newIssues;
     }
 
-    return $resource(`https://api.github.com/:reposMethod/:user/:repo/:apiMethod`, {
-      state: 'open',
-      // we use functions here because we want dynamic parameters which change when settings change
-      user: () => {
-        return settings.repo.split('/')[0];
-      },
-      repo: () => {
-        return settings.repo.split('/')[1];
-      },
-      reposMethod: () => {
-        if (settings.repo.split('/')[1]) {
-          return 'repos';
-        } else {
-          return undefined;
-        }
+    this.getIssueList = () => {
+      return $http.get(BASE_URL + 'repos/' + settings.repo + '/issues', {
+        transformResponse: [transformIssueList]
+      });
+    };
+
+    function transformComments(comments) {
+      if (typeof comments === 'string') {
+        comments = angular.fromJson(comments);
       }
-    }, {
-      getIssueList: {
-        transformResponse: transformIssueList,
-        isArray: true,
-        method: 'GET',
-        params: {
-          apiMethod: 'issues'
-        }
-      }
-    });
+      const newComments = [];
+      comments.forEach((comment) => {
+        newComments.push({
+          author: comment.user.login,
+          body: comment.body,
+          created: comment.created_at
+        });
+      });
+      return newComments;
+    }
+
+    this.getCommentListForIssue = (issueNumber) => {
+      return $http.get(BASE_URL + 'repos/' + settings.repo + '/issues/' + issueNumber + '/comments', {
+        transformResponse: [transformComments]
+      });
+    };
+
   }
 
 })();

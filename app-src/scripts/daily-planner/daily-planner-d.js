@@ -44,17 +44,27 @@
 
     if ($localStorage.git.isShowIssuesFromGit) {
       Git.getIssueList()
-        .$promise
-        .then((issues) => {
-          vm.taskSuggestions = vm.taskSuggestions.concat(issues);
+        .then((res) => {
+          vm.taskSuggestions = vm.taskSuggestions.concat(res.data);
         });
     }
 
     vm.addTask = () => {
       if (vm.newTask) {
-        Tasks.addToday(vm.newTask);
-        vm.newTask = undefined;
-        vm.newTaskTitle = undefined;
+        if (vm.newTask.originalType && vm.newTask.originalType === 'GITHUB' && $localStorage.git.isShowIssuesFromGit) {
+          Git.getCommentListForIssue(vm.newTask.originalId)
+            .then(res => {
+              vm.newTask.originalComments = res.data;
+              Tasks.addToday(vm.newTask);
+              vm.newTask = undefined;
+              vm.newTaskTitle = undefined;
+            });
+        } else {
+          Tasks.addToday(vm.newTask);
+          vm.newTask = undefined;
+          vm.newTaskTitle = undefined;
+        }
+
       } else if (vm.newTaskTitle) {
         Tasks.addToday({
           title: vm.newTaskTitle
