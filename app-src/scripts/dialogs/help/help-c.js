@@ -39,8 +39,13 @@
       showNotes: true,
       isUpdated: true,
       originalComments: [
-        '[admin]: yes comments from Jira are shown too <3',
-        '[user]: really? that could be useful!'
+        {
+          author: 'admin',
+          body: 'yes comments from Jira are shown too <3'
+        }, {
+          author: 'admin',
+          body: 'really? that could be useful!'
+        }
       ],
       originalChangelog: [
         {

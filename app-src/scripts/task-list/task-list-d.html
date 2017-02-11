@@ -175,7 +175,9 @@
         <md-divider></md-divider>
         <ul class="comments">
           <li ng-repeat="comment in task.originalComments"
-              class="comment">{{ ::comment }}
+              class="comment">
+            <strong>[{{ ::comment.author }}]: </strong>
+            <span marked="comment.body"></span>
           </li>
         </ul>
       </section>

@@ -65,7 +65,10 @@
     // function map comments
     function mapComments(issue) {
       return issue.fields.comment && issue.fields.comment.comments && issue.fields.comment.comments.map((comment) => {
-          return '[' + comment.author.name + ']: ' + comment.body;
+          return {
+            author: comment.author.name,
+            body: comment.body
+          };
         });
     }
 
