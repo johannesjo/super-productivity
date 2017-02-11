@@ -4,6 +4,7 @@
   "authors": [
     "Johannes Millan <contact@super-productivity.com> (http://super-productivity.com)"
   ],
+  "appPath": "app-src",
   "license": "none",
   "private": true,
   "ignore": [

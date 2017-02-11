@@ -7,14 +7,14 @@
     "editorCommand": "idea",
     "uiRouter": true,
     "pathOutputStyle": "dasherize",
-    "routesFile": "app/scripts/routes.js",
+    "routesFile": "app-src/scripts/routes.js",
     "fileExt": {
       "script": ".js",
       "tpl": ".html",
       "style": ".scss"
     },
     "dirs": {
-      "app": "app",
+      "app": "app-src",
       "appModules": "scripts",
       "globalComponents": "main",
       "routes": "routes"
