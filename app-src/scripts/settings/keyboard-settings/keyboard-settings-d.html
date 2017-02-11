@@ -10,7 +10,6 @@
     <input type="text"
            ng-blur="vm.registerGlobalShortcut(vm.keys.globalShowHide)"
            keyboard-key-input
-           keyboard-key-input-control-keys="true"
            ng-model="vm.keys.globalShowHide">
   </md-input-container>
 </section>
@@ -94,6 +93,18 @@
     <input type="text"
            keyboard-key-input
            ng-model="vm.keys.selectPreviousTask">
+  </md-input-container>
+  <md-input-container class="md-block">
+    <label>Move task up in list</label>
+    <input type="text"
+           keyboard-key-input
+           ng-model="vm.keys.moveTaskUp">
+  </md-input-container>
+  <md-input-container class="md-block">
+    <label>Move task down in list</label>
+    <input type="text"
+           keyboard-key-input
+           ng-model="vm.keys.moveTaskDown">
   </md-input-container>
   <md-input-container class="md-block">
     <label>Move task to task backlog</label>

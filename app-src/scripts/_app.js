@@ -95,7 +95,7 @@
   }
 
   /* @ngInject */
-  function initGlobalShortcuts($document, Dialogs, $localStorage, IS_ELECTRON) {
+  function initGlobalShortcuts($document, Dialogs, $localStorage, CheckShortcutKeyCombo, IS_ELECTRON) {
     // we just use this single one as this usually does mess
     // up with the default browser shortcuts
     // better to use the global electron shortcuts here
@@ -104,20 +104,21 @@
       // only trigger if not in typing mode
       if (ev.target.tagName !== 'INPUT' && ev.target.tagName !== 'TEXTAREA') {
         // on star
-        if (ev.key === $localStorage.keys.addNewTask) {
+        if (CheckShortcutKeyCombo(ev, $localStorage.keys.addNewTask)) {
           Dialogs('ADD_TASK', undefined, true);
         }
-        if (ev.key === $localStorage.keys.openProjectNotes) {
+        if (CheckShortcutKeyCombo(ev, $localStorage.keys.openProjectNotes)) {
           Dialogs('NOTES', undefined, true);
         }
-        if (ev.key === $localStorage.keys.openDistractionPanel) {
+        if (CheckShortcutKeyCombo(ev, $localStorage.keys.openDistractionPanel)) {
           Dialogs('DISTRACTIONS', undefined, true);
         }
-        if (ev.key === $localStorage.keys.showHelp) {
+        if (CheckShortcutKeyCombo(ev, $localStorage.keys.showHelp)) {
           Dialogs('HELP', { template: 'PAGE' }, true);
         }
       }
 
+      // special hidden dev tools combo to use them for production
       if (IS_ELECTRON) {
         if (ev.keyCode === 10 && ev.ctrlKey === true && ev.shiftKey === true) {
           window.ipcRenderer.send('TOGGLE_DEV_TOOLS');

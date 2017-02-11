@@ -48,6 +48,8 @@
         taskDelete: 'Delete',
         selectPreviousTask: 'k',
         selectNextTask: 'j',
+        moveTaskUp: 'Ctrl+Shift+ArrowUp',
+        moveTaskDown: 'Ctrl+Shift+ArrowDown',
         moveToBacklog: '',
         moveToTodaysTasks: ''
       },

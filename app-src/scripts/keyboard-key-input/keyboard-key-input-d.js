@@ -28,7 +28,7 @@
       element.on('keydown', ($event) => {
         // the tab key should continue to behave normally
         if ($event.keyCode === 9 || $event.key === 'Tab') {
-            return;
+          return;
         }
 
         $event.preventDefault();
@@ -47,7 +47,10 @@
           return;
         }
         else {
-          if (attrs.keyboardKeyInputControlKeys) {
+          if (attrs.omitKeyboardKeyInputControlKeys) {
+            modelSetter(scope, $event.key);
+          }
+          else {
             let val = '';
             if ($event.ctrlKey) {
               val += 'Ctrl+';
@@ -60,9 +63,6 @@
             }
 
             modelSetter(scope, val + $event.key);
-          }
-          else {
-            modelSetter(scope, $event.key);
           }
         }
         scope.$apply();

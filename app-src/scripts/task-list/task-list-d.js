@@ -12,7 +12,7 @@
 
   class TaskListCtrl {
     /* @ngInject */
-    constructor(Dialogs, $localStorage, $mdToast, $timeout, Tasks, EDIT_ON_CLICK_TOGGLE_EV, $scope, ShortSyntax, $element, Jira) {
+    constructor(Dialogs, $localStorage, $mdToast, $timeout, Tasks, EDIT_ON_CLICK_TOGGLE_EV, $scope, ShortSyntax, $element, Jira, CheckShortcutKeyCombo) {
       this.Dialogs = Dialogs;
       this.$mdToast = $mdToast;
       this.$timeout = $timeout;
@@ -24,6 +24,7 @@
       this.Jira = Jira;
       this.$localStorage = $localStorage;
       this.lastFocusedTaskEl = undefined;
+      this.CheckShortcutKeyCombo = CheckShortcutKeyCombo;
 
       this.boundHandleKeyPress = this.handleKeyPress.bind(this);
       this.boundFocusLastTaskEl = this.focusLastFocusedTaskEl.bind(this);
@@ -213,69 +214,65 @@
       taskEl = angular.element(taskEl);
       const task = this.lastFocusedTaskEl.scope().modelValue;
 
-      if ($event.key === this.$localStorage.keys.taskEditTitle || $event.key === 'Enter') {
+      if (this.CheckShortcutKeyCombo($event, this.$localStorage.keys.taskEditTitle) || $event.key === 'Enter') {
         this.$scope.$broadcast(this.EDIT_ON_CLICK_TOGGLE_EV, task.id);
       }
-      if ($event.key === this.$localStorage.keys.taskToggleNotes) {
+      if (this.CheckShortcutKeyCombo($event, this.$localStorage.keys.taskToggleNotes)) {
         task.showNotes = !task.showNotes;
       }
-      if ($event.key === this.$localStorage.keys.taskOpenEstimationDialog) {
+      if (this.CheckShortcutKeyCombo($event, this.$localStorage.keys.taskOpenEstimationDialog)) {
         this.estimateTime(task);
       }
-      if ($event.key === this.$localStorage.keys.taskToggleDone) {
+      if (this.CheckShortcutKeyCombo($event, this.$localStorage.keys.taskToggleDone)) {
         task.isDone = !task.isDone;
         this.onTaskDoneChanged(task);
       }
-      if ($event.key === this.$localStorage.keys.taskAddSubTask) {
+      if (this.CheckShortcutKeyCombo($event, this.$localStorage.keys.taskAddSubTask)) {
         this.addSubTask(task);
       }
-      if ($event.key === this.$localStorage.keys.moveToBacklog) {
+      if (this.CheckShortcutKeyCombo($event, this.$localStorage.keys.moveToBacklog)) {
         this.Tasks.moveTaskFromTodayToBackLog(task);
       }
-      if ($event.key === this.$localStorage.keys.moveToTodaysTasks) {
+      if (this.CheckShortcutKeyCombo($event, this.$localStorage.keys.moveToTodaysTasks)) {
         this.Tasks.moveTaskFromBackLogToToday(task);
       }
 
-      if ($event.key === this.$localStorage.keys.taskDelete) {
+      if (this.CheckShortcutKeyCombo($event, this.$localStorage.keys.taskDelete)) {
         this.deleteTask(task);
         // don't propagate to next focused element
         $event.preventDefault();
         $event.stopPropagation();
       }
 
-      if ($event.shiftKey === false && $event.ctrlKey === false) {
-        // move up
-        if ($event.keyCode === 38 || $event.key === this.$localStorage.keys.selectPreviousTask) {
-          this.focusPrevTask(taskEl);
-        }
-        // move down
-        if ($event.keyCode === 40 || $event.key === this.$localStorage.keys.selectNextTask) {
-          this.focusNextTask(taskEl);
-        }
+      // move up
+      if (($event.shiftKey === false && $event.ctrlKey === false && $event.keyCode === 38) || this.CheckShortcutKeyCombo($event, this.$localStorage.keys.selectPreviousTask)) {
+        this.focusPrevTask(taskEl);
+      }
+      // move down
+      if (($event.shiftKey === false && $event.ctrlKey === false && $event.keyCode === 40) || this.CheckShortcutKeyCombo($event, this.$localStorage.keys.selectNextTask)) {
+        this.focusNextTask(taskEl);
       }
 
-      // moving items via shift+ctrl+keyUp/keyDown
-      if ($event.shiftKey === true && $event.ctrlKey === true) {
-        let taskIndex = _.findIndex(this.tasks, (cTask) => {
-          return cTask.id === task.id;
-        });
+      // moving items
+      let taskIndex = _.findIndex(this.tasks, (cTask) => {
+        return cTask.id === task.id;
+      });
 
-        // move up
-        if ($event.keyCode === 38) {
-          if (taskIndex > 0) {
-            TaskListCtrl.moveItem(this.tasks, taskIndex, taskIndex - 1);
+      // move up
+      if (this.CheckShortcutKeyCombo($event, this.$localStorage.keys.moveTaskUp)) {
+        if (taskIndex > 0) {
+          TaskListCtrl.moveItem(this.tasks, taskIndex, taskIndex - 1);
 
-            // we need to manually re-add focus after timeout
-            this.$timeout(() => {
-              taskEl.focus();
-            });
-          }
+          // we need to manually re-add focus after timeout
+          this.$timeout(() => {
+            taskEl.focus();
+          });
         }
-        // move down
-        if ($event.keyCode === 40) {
-          if (taskIndex < this.tasks.length - 1) {
-            TaskListCtrl.moveItem(this.tasks, taskIndex, taskIndex + 1);
-          }
+      }
+      // move down
+      if (this.CheckShortcutKeyCombo($event, this.$localStorage.keys.moveTaskDown)) {
+        if (taskIndex < this.tasks.length - 1) {
+          TaskListCtrl.moveItem(this.tasks, taskIndex, taskIndex + 1);
         }
       }
 
