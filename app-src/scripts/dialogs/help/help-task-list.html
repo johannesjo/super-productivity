@@ -183,55 +183,47 @@
         </div>
       </section>
 
-      <section ng-if="vm.exampleTask.originalAttachment.length > 0">
-        <div class="md-caption">Attachments</div>
-        <md-divider></md-divider>
-        <ul class="attachments">
-          <li ng-repeat="attachment in vm.exampleTask.originalAttachment">
-            <md-tooltip>
-              Attachment loaded from jira
-            </md-tooltip>
-            <a href="{{ ::attachment}}"
-               external-link
-               target="_blank"
-               class="md-accent">{{ ::attachment}}</a>
-            <a href="{{ ::attachment}}"
-               download="{{ ::attachment}}"
-               class="md-accent">
-
-              <ng-md-icon icon="file_download"
-                          aria-label="download file directly"></ng-md-icon>
-            </a>
-          </li>
-        </ul>
-      </section>
-
-      <section ng-if="vm.exampleTask.originalComments.length > 0">
-        <div class="md-caption">Comments</div>
-        <md-divider></md-divider>
-        <ul class="comments">
-          <li ng-repeat="comment in vm.exampleTask.originalComments"
-              class="comment">
-            <strong>[{{ ::comment.author }}]: </strong>
-            <span marked="comment.body"></span>
-          </li>
-        </ul>
-      </section>
-
       <section ng-if="vm.exampleTask.status || vm.exampleTask.originalStatus"
                class="status">
-        <div class="md-caption">Status</div>
-        <md-divider></md-divider>
-        <div class="md-body-1">
-          <md-tooltip>
-            Shows Jira Status => Local Status. They usually should match.
-          </md-tooltip>
-          {{ vm.exampleTask.originalStatus.name }}
+        <div class="md-caption">Status: {{ vm.exampleTask.originalStatus.name }}
           <ng-md-icon icon="arrow_forward"
                       aria-label="arrow forward"></ng-md-icon>
           {{ vm.exampleTask.status }}
         </div>
       </section>
+
+      <section ng-if="vm.exampleTask.originalAttachment.length > 0">
+        <collapsible title="Attachments ({{ ::vm.exampleTask.originalAttachment.length }})">
+          <ul class="attachments">
+            <li ng-repeat="attachment in vm.exampleTask.originalAttachment">
+              <a href="{{ ::attachment}}"
+                 external-link
+                 target="_blank"
+                 class="md-accent">{{ ::attachment}}</a>
+              <a href="{{ ::attachment}}"
+                 download="{{ ::attachment}}"
+                 class="md-accent">
+                <ng-md-icon icon="file_download"
+                            aria-label="download file directly"></ng-md-icon>
+              </a>
+            </li>
+          </ul>
+        </collapsible>
+      </section>
+
+      <section ng-if="vm.exampleTask.originalComments.length > 0">
+        <collapsible title="Comments ({{:: vm.exampleTask.originalComments.length }})">
+          <md-divider></md-divider>
+          <ul class="comments">
+            <li ng-repeat="comment in vm.exampleTask.originalComments"
+                class="comment">
+              <strong class="author">[{{ ::comment.author }}]: </strong>
+              <span marked="comment.body"></span>
+            </li>
+          </ul>
+        </collapsible>
+      </section>
+
 
     </div>
 

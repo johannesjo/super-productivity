@@ -118,6 +118,7 @@
     <md-progress-linear md-mode="determinate"
                         value="{{task.progress}}"></md-progress-linear>
 
+
     <div class="notes"
          flex="100"
          ng-if="task.showNotes===true">
@@ -151,47 +152,45 @@
         </div>
       </section>
 
-      <section ng-if="task.originalAttachment.length > 0">
-        <div class="md-caption">Attachments</div>
-        <md-divider></md-divider>
-        <ul class="attachments">
-          <li ng-repeat="attachment in task.originalAttachment">
-            <a href="{{ ::attachment}}"
-               external-link
-               target="_blank"
-               class="md-accent">{{ ::attachment}}</a>
-            <a href="{{ ::attachment}}"
-               download="{{ ::attachment}}"
-               class="md-accent">
-              <ng-md-icon icon="file_download"
-                          aria-label="download file directly"></ng-md-icon>
-            </a>
-          </li>
-        </ul>
-      </section>
-
-      <section ng-if="task.originalComments.length > 0">
-        <div class="md-caption">Comments</div>
-        <md-divider></md-divider>
-        <ul class="comments">
-          <li ng-repeat="comment in task.originalComments"
-              class="comment">
-            <strong>[{{ ::comment.author }}]: </strong>
-            <span marked="comment.body"></span>
-          </li>
-        </ul>
-      </section>
-
       <section ng-if="task.status || task.originalStatus"
                class="status">
-        <div class="md-caption">Status</div>
-        <md-divider></md-divider>
-        <div class="md-body-1">
-          {{ task.originalStatus.name }}
+        <div class="md-caption">Status: {{ task.originalStatus.name }}
           <ng-md-icon icon="arrow_forward"
                       aria-label="arrow forward"></ng-md-icon>
           {{ task.status }}
         </div>
+      </section>
+
+      <section ng-if="task.originalAttachment.length > 0">
+        <collapsible title="Attachments ({{ ::task.originalAttachment.length }})">
+          <ul class="attachments">
+            <li ng-repeat="attachment in task.originalAttachment">
+              <a href="{{ ::attachment}}"
+                 external-link
+                 target="_blank"
+                 class="md-accent">{{ ::attachment}}</a>
+              <a href="{{ ::attachment}}"
+                 download="{{ ::attachment}}"
+                 class="md-accent">
+                <ng-md-icon icon="file_download"
+                            aria-label="download file directly"></ng-md-icon>
+              </a>
+            </li>
+          </ul>
+        </collapsible>
+      </section>
+
+      <section ng-if="task.originalComments.length > 0">
+        <collapsible title="Comments ({{:: task.originalComments.length }})">
+          <md-divider></md-divider>
+          <ul class="comments">
+            <li ng-repeat="comment in task.originalComments"
+                class="comment">
+              <strong class="author">[{{ ::comment.author }}]: </strong>
+              <span marked="comment.body"></span>
+            </li>
+          </ul>
+        </collapsible>
       </section>
 
     </div>

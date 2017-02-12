@@ -248,10 +248,31 @@ task-list {
     text-overflow: ellipsis;
     padding: 0;
     margin: 0 0 10px;
+    list-style-type: none;
     li {
       padding: 0;
       font-size: 14px;
       margin-top: 5px;
+    }
+  }
+
+  .comments {
+    li {
+      position: relative;
+      margin-top: 16px;
+      &:first-child {
+        margin-top: 8px;
+        &:before {
+          display: none;
+        }
+      }
+    }
+    p:first-child {
+      display: inline;
+    }
+    p {
+      margin-bottom: 8px;
+      margin-top: 8px;
     }
   }
 
@@ -294,7 +315,7 @@ task-list {
     // animation
     &.ng-enter,
     &.ng-leave {
-      transition: all 0.3s ease-in-out;
+      transition: all 0.3s $ease-in-out-quint;
     }
 
     &.ng-enter {

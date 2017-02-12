@@ -70,6 +70,7 @@
       
       * supports markdown
       * list item
+      * click to edit
       `
     };
     vm.exampleTasks = [
