@@ -83,6 +83,30 @@
       }
     }
 
+    function createSimpleChangeLogForTask(updatedTask, oldTask) {
+      const changeLog = [];
+
+      if (updatedTask.title !== oldTask.title) {
+        changeLog.push(createChangelogEntry('title', updatedTask.title));
+      }
+      if (updatedTask.notes !== oldTask.notes) {
+        changeLog.push(createChangelogEntry('description', updatedTask.notes));
+      }
+
+      return changeLog;
+    }
+
+    function createChangelogEntry(changedField, changeToVal, author, date) {
+      return {
+        author: author,
+        items: [{
+          field: changedField,
+          toString: changeToVal
+        }],
+        created: date
+      };
+    }
+
     // HELPER METHODS
     // --------------
     this.isGitTask = (task) => {
@@ -125,14 +149,30 @@
               const issue = res.data;
               const lastUpdate = moment(task.originalUpdated);
               if (lastUpdate && moment(issue.originalUpdated).isAfter(lastUpdate)) {
+                // add simple changelog
+                if (!task.originalChangelog) {
+                  task.originalChangelog = [];
+                }
+
+                task.originalChangelog = createSimpleChangeLogForTask(issue, task);
+
                 // extend task with new values
                 angular.extend(task, issue);
+                task.isUpdated = true;
                 taskIsUpdatedHandler(issue, task);
 
                 // also update comment list in the next step
                 this.getCommentListForIssue(task.originalId)
                   .then((res) => {
-                    task.originalComments = res.data;
+                    const comments = res.data;
+                    if (comments.length !== task.originalComments.length) {
+                      if (!task.originalChangelog) {
+                        task.originalChangelog = [];
+                      }
+
+                      task.originalChangelog.push(createChangelogEntry('new comment added'));
+                    }
+                    task.originalComments = comments;
                   });
               }
             }, defer.reject)

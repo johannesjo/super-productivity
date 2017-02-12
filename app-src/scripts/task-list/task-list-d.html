@@ -130,10 +130,11 @@
 
         <ul class="changelog">
           <li ng-repeat="changelogEntry in task.originalChangelog">
-            <div><em>[{{ ::changelogEntry.author }}] {{ ::changelogEntry.created| amDateFormat:'Y.MM.DD HH:mm'}}: </em>
+            <div ng-if="changelogEntry.author">
+              <em>[{{ ::changelogEntry.author }}] {{ ::changelogEntry.created| amDateFormat:'Y.MM.DD HH:mm'}}: </em>
             </div>
             <div ng-repeat="change in changelogEntry.items">
-              <strong>"{{ ::change.field }}" changed to:</strong> {{ ::change.toString }}
+              <strong>{{ ::change.field }}</strong> <span ng-if="change.toString.length"><em>changed to:</em> {{ ::change.toString }}</span>
             </div>
           </li>
         </ul>
