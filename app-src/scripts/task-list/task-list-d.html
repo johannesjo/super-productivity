@@ -152,10 +152,11 @@
         </div>
       </section>
 
-      <section ng-if="task.status || task.originalStatus"
+      <section ng-if="task.status.length > 0 || task.originalStatus.length > 0"
                class="status">
-        <div class="md-caption">Status: {{ task.originalStatus.name }}
+        <div class="md-caption">Status: {{ task.originalStatus.name || task.originalStatus }}
           <ng-md-icon icon="arrow_forward"
+                      ng-if="task.status.length > 0 "
                       aria-label="arrow forward"></ng-md-icon>
           {{ task.status }}
         </div>
