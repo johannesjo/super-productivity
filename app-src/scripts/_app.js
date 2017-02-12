@@ -167,7 +167,9 @@
   /* @ngInject */
   function initPollGitTaskUpdates($localStorage, Git, $interval, GIT_UPDATE_POLL_INTERVAL) {
     // one initial
-    Git.checkAndUpdateTasks($localStorage.tasks);
+    if ($localStorage.git.projectDir && $localStorage.git.repo) {
+      Git.checkAndUpdateTasks($localStorage.tasks);
+    }
 
     $interval(() => {
       if ($localStorage.git.projectDir && $localStorage.git.repo) {
@@ -178,7 +180,7 @@
 
   /* @ngInject */
   function showWelcomeDialog($localStorage, Dialogs) {
-    if ($localStorage.isShowWelcomeDialog) {
+    if ($localStorage.uiHelper.isShowWelcomeDialog) {
       Dialogs('WELCOME', undefined, true);
     }
   }

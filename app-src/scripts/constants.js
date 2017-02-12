@@ -19,7 +19,6 @@
       'isShowWelcomeDialog'
     ])
     .constant('LS_DEFAULTS', {
-      isShowWelcomeDialog: true,
       note: undefined,
       theme: undefined,
       currentTask: undefined,
@@ -64,6 +63,7 @@
       },
       // non setting variables which are simply saved where they are entered
       uiHelper: {
+        isShowWelcomeDialog: true,
         dailyTaskExportSettings: {
           separateBy: ', ',
           separateFieldsBy: '',
