@@ -39,6 +39,7 @@
     .config(fixUnhandledRejectionError)
     .run(initGlobalModels)
     .run(initPollJiraTaskUpdates)
+    .run(initPollGitTaskUpdates)
     .run(initPollForSimpleTimeTracking)
     .run(initMousewheelZoomForElectron)
     .run(initGlobalShortcuts)
@@ -149,17 +150,30 @@
 
   /* @ngInject */
   function initPollJiraTaskUpdates($localStorage, Jira, IS_ELECTRON, $interval, JIRA_UPDATE_POLL_INTERVAL) {
-    // handle updates that need to be made locally
     if (IS_ELECTRON) {
-      // one initial
-      Jira.checkForUpdates($localStorage.tasks);
+      // one initial call
+      if (Jira.isSufficientJiraSettings()) {
+        Jira.checkForUpdates($localStorage.tasks);
+      }
 
       $interval(() => {
-        if ($localStorage.currentTask) {
+        if (Jira.isSufficientJiraSettings()) {
           Jira.checkForUpdates($localStorage.tasks);
         }
       }, JIRA_UPDATE_POLL_INTERVAL);
     }
+  }
+
+  /* @ngInject */
+  function initPollGitTaskUpdates($localStorage, Git, $interval, GIT_UPDATE_POLL_INTERVAL) {
+    // one initial
+    Git.checkAndUpdateTasks($localStorage.tasks);
+
+    $interval(() => {
+      if ($localStorage.git.projectDir && $localStorage.git.repo) {
+        Git.checkAndUpdateTasks($localStorage.tasks);
+      }
+    }, GIT_UPDATE_POLL_INTERVAL);
   }
 
   /* @ngInject */

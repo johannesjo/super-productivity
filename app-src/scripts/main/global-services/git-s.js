@@ -14,13 +14,19 @@
     .service('Git', Git);
 
   /* @ngInject */
-  function Git($http, $localStorage) {
+  function Git($http, $localStorage, TasksUtil, $injector, $q, Notifier, SimpleToast) {
     const TYPE = 'GITHUB';
     const BASE_URL = 'https://api.github.com/';
     const settings = $localStorage.git;
 
-    function mapIssue(issue) {
+    // PRIVATE HELPER FUNCTIONS
+    // ------------------------
+    function transformIssue(issue) {
       let title;
+
+      if (typeof issue === 'string') {
+        issue = angular.fromJson(issue);
+      }
 
       if (issue.pull_request) {
         title = `${settings.prPrefix} #${issue.number}: ${issue.title}`;
@@ -45,16 +51,10 @@
       }
       const newIssues = [];
       issues.forEach((issue) => {
-        newIssues.push(mapIssue(issue));
+        newIssues.push(transformIssue(issue));
       });
       return newIssues;
     }
-
-    this.getIssueList = () => {
-      return $http.get(BASE_URL + 'repos/' + settings.repo + '/issues', {
-        transformResponse: [transformIssueList]
-      });
-    };
 
     function transformComments(comments) {
       if (typeof comments === 'string') {
@@ -71,12 +71,81 @@
       return newComments;
     }
 
+    function taskIsUpdatedHandler(updatedTask) {
+      if (updatedTask) {
+        Notifier({
+          title: 'Git Update',
+          message: '"' + updatedTask.title + '" => has been updated as it was updated on Git.',
+          sound: true,
+          wait: true
+        });
+        SimpleToast('"' + updatedTask.title + '" => has been updated as it was updated on Git.');
+      }
+    }
+
+    // HELPER METHODS
+    // --------------
+    this.isGitTask = (task) => {
+      return task && task.originalId && task.originalType === TYPE;
+    };
+
+    // API METHODS
+    // -----------
+    this.getIssueList = () => {
+      return $http.get(BASE_URL + 'repos/' + settings.repo + '/issues', {
+        transformResponse: [transformIssueList]
+      });
+    };
+
     this.getCommentListForIssue = (issueNumber) => {
       return $http.get(BASE_URL + 'repos/' + settings.repo + '/issues/' + issueNumber + '/comments', {
         transformResponse: [transformComments]
       });
     };
 
+    this.getIssueById = (issueNumber) => {
+      return $http.get(BASE_URL + 'repos/' + settings.repo + '/issues/' + issueNumber, {
+        transformResponse: [transformIssue]
+      });
+    };
+
+    // COMPLEXER WRAPPER METHODS
+    // -------------------------
+    this.checkAndUpdateTasks = (tasks) => {
+      const TasksUtil = $injector.get('TasksUtil');
+      const defer = $q.defer();
+
+      const tasksToPoll = TasksUtil.flattenTasks(tasks, this.isGitTask, this.isGitTask);
+
+      // execute requests sequentially to have a little more time
+      const pollPromise = tasksToPoll.reduce((promise, task) =>
+        promise.then(() =>
+          this.getIssueById(task.originalId)
+            .then((res) => {
+              const issue = res.data;
+              const lastUpdate = moment(task.originalUpdated);
+              if (lastUpdate && moment(issue.originalUpdated).isAfter(lastUpdate)) {
+                // extend task with new values
+                angular.extend(task, issue);
+                taskIsUpdatedHandler(issue, task);
+
+                // also update comment list in the next step
+                this.getCommentListForIssue(task.originalId)
+                  .then((res) => {
+                    task.originalComments = res.data;
+                  });
+              }
+            }, defer.reject)
+        ), Promise.resolve()
+      );
+
+      pollPromise
+        .then(() => {
+          defer.resolve();
+        });
+
+      return defer.promise;
+    };
   }
 
 })();
