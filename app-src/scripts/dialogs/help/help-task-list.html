@@ -34,7 +34,7 @@
                  ng-if="vm.exampleTask.isUpdated"
                  ng-click="vm.exampleTask.showNotes = true;">
         <md-tooltip>
-          If shown, it means that the task was updated on Jira
+          If shown, it means that the task was updated on Jira or Github
         </md-tooltip>
         <ng-md-icon class="update update-icon"
                     flex="none"
@@ -103,7 +103,7 @@
                    ng-class="{'is-active':vm.exampleTask.showNotes}"
                    ng-click="vm.exampleTask.showNotes=!vm.exampleTask.showNotes">
           <md-tooltip>
-            Opens a note section for the task. Jira comments are also shown here.
+            Opens a note section for the task. Jira or Github comments are also shown here.
           </md-tooltip>
           <ng-md-icon icon="{{(vm.exampleTask.notes||vm.exampleTask.originalKey) ?'insert_comment': 'mode_comment'}}"
                       aria-label="notes"></ng-md-icon>
@@ -112,7 +112,7 @@
                    aria-label="link"
                    tabindex="2">
           <md-tooltip>
-            Link to the original issue on Jira. Only shown for Jira tasks.
+            Link to the original issue on Jira or Github. Only shown for Jira or Github tasks.
           </md-tooltip>
           <ng-md-icon icon="link"
                       aria-label="link"></ng-md-icon>
@@ -150,7 +150,7 @@
 
       <section ng-if="vm.exampleTask.isUpdated;">
         <md-tooltip>
-          Shows remote changes made on Jira, when there have been made some.
+          Shows remote changes made on Jira or Github, when there have been made some.
         </md-tooltip>
         <div class="md-caption">
           Changes since last update
