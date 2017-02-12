@@ -10,6 +10,7 @@
   <div ng-if="vm.IS_ELECTRON">
     <div class="md-caption">Enable take a break reminder</div>
     <p>Allows you to configure a reoccurring reminder when you have worked for a specified amount of time without taking a break.</p>
+    <p>You can modify the message displayed. ${duration} will be replaced with the time spent without a break.</p>
   </div>
 </help-section>
 
@@ -35,5 +36,11 @@
     <input type="text"
            input-duration
            ng-model="vm.settings.takeABreakMinWorkingTime">
+  </md-input-container>
+
+  <md-input-container class="md-block">
+    <label>Take a break message</label>
+    <textarea ng-model="vm.settings.takeABreakMessage"
+              rows="3"></textarea>
   </md-input-container>
 </section>

@@ -41,8 +41,11 @@
           }
 
           if (this.isShown) {
+            const durationStr = ParseDuration.toString($localStorage.currentSession.timeWorkedWithoutBreak);
+            const message = $localStorage.config && $localStorage.config.takeABreakMessage && $localStorage.config.takeABreakMessage.replace(/\$\{duration\}/gi, durationStr);
+
             let toast = $mdToast.simple()
-              .textContent('Take a break! You have been working for ' + ParseDuration.toString($localStorage.currentSession.timeWorkedWithoutBreak) + ' without one. Go away from the computer! Makes you more productive in the long run!')
+              .textContent(message)
               .action('I already did!')
               .hideDelay(20000)
               .position('bottom');
@@ -55,7 +58,7 @@
 
             Notifier({
               title: 'Take a break!',
-              message: 'Take a break! You have been working for ' + ParseDuration.toString($localStorage.currentSession.timeWorkedWithoutBreak) + ' without one. Go away from the computer! Makes you more productive in the long run!',
+              message: message,
               sound: true,
               wait: true
             });
