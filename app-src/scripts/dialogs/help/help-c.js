@@ -77,6 +77,6 @@
       {
         title: 'Example task'
       }
-    ]
+    ];
   }
 })();

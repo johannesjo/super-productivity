@@ -27,7 +27,6 @@
 
   /* @ngInject */
   function HelpSectionCtrl() {
-    const vm = this;
   }
 
 })();

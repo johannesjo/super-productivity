@@ -22,6 +22,7 @@
     // PRIVATE HELPER FUNCTIONS
     // ------------------------
     function transformIssue(issue) {
+      /*jshint camelcase: false */
       let title;
 
       if (typeof issue === 'string') {
@@ -43,6 +44,7 @@
         title: title,
         notes: issue.body
       };
+      /*jshint camelcase: true */
     }
 
     function transformIssueList(issues) {
@@ -62,11 +64,13 @@
       }
       const newComments = [];
       comments.forEach((comment) => {
+        /*jshint camelcase: false */
         newComments.push({
           author: comment.user.login,
           body: comment.body,
           created: comment.created_at
         });
+        /*jshint camelcase: true */
       });
       return newComments;
     }
