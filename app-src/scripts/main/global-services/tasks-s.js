@@ -271,7 +271,7 @@
         title: task.title,
         id: this.Uid(),
         created: moment(),
-        notes: task.notes,
+        notes: angular.isString(task.notes) && task.notes.trim().length > 0 && task.notes,
         parentId: task.parentId,
         timeEstimate: task.timeEstimate || task.originalEstimate,
         timeSpent: task.timeSpent || task.originalTimeSpent,
