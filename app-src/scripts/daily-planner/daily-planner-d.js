@@ -37,6 +37,8 @@
     };
 
     if (IS_ELECTRON && Jira.isSufficientJiraSettings()) {
+      Jira.checkForNewAndAddToBacklog();
+
       Jira.getSuggestions().then((res) => {
         vm.taskSuggestions = vm.taskSuggestions.concat(Jira.transformIssues(res));
       });

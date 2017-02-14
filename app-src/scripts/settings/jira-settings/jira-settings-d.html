@@ -9,6 +9,7 @@
     <a class="md-accent"
        href="https://confluence.atlassian.com/jirasoftwarecloud/advanced-searching-764478330.html"
        external-link="">https://confluence.atlassian.com/jirasoftwarecloud/advanced-searching-764478330.html</a>.</p>
+<p>You can also configure, if you want to automatically (e.g. every time you visit the planning view), to add all new tasks specified by a custom JQL query to the backlog.</p>
 
   <div class="md-caption">Worklog settings</div>
   <p>There are several options to determine when and how you want to submit a worklog. Enabling
@@ -44,11 +45,27 @@
              ng-model="vm.settings.password">
     </md-input-container>
     <md-input-container class="md-block">
-      <label>JQL Query for Tasks</label>
+      <label>JQL Query for Searching Tasks</label>
       <input type="text"
              ng-model="vm.settings.jqlQuery">
       <div class="hint">e.g.: assignee = "{{ vm.settings.userName }}" AND resolution = Unresolved ORDER BY updatedDate DESC</div>
     </md-input-container>
+    <md-input-container class="md-block">
+      <div>
+        <md-switch ng-model="vm.settings.isEnabledAutoAdd"
+                   aria-label="Add worklog when sub task is done">
+          Auto add issues from Jira to backlog
+        </md-switch>
+      </div>
+    </md-input-container>
+    <md-input-container class="md-block">
+      <label>JQL Query for Auto Adding Tasks to Backlog</label>
+      <input type="text"
+             ng-disabled="!vm.settings.isEnabledAutoAdd"
+             ng-model="vm.settings.jqlQueryAutoAdd">
+      <div class="hint">e.g.: assignee = currentUser() AND resolution = Unresolved ORDER BY updatedDate DESC</div>
+    </md-input-container>
+
     <md-switch ng-model="vm.settings.isUpdateIssueFromLocal"
                aria-label="Update issue description on jira if task notes are updated">
       Update issue description on jira if task notes are updated

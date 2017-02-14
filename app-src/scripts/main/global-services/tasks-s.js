@@ -104,6 +104,11 @@
       return _.find(this.$localStorage.tasks, ['id', taskId]) || _.find(this.$localStorage.backlogTasks, ['id', taskId]) || _.find(this.$localStorage.doneBacklogTasks, ['id', taskId]);
     }
 
+    isTaskWithOriginalIdExistant(originalId) {
+      const allTasks = this.TasksUtil.flattenTasks(this.getAllTasks());
+      return !!_.find(allTasks, ['originalId', originalId]);
+    }
+
     getBacklog() {
       this.TasksUtil.checkDupes(this.$localStorage.backlogTasks);
       this.TasksUtil.convertDurationStringsToMomentForList(this.$localStorage.backlogTasks);

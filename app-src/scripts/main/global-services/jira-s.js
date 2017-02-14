@@ -427,6 +427,32 @@
       }
     };
 
+    this.getAutoAddedIssues = () => {
+      let defer = $q.defer();
+
+      let options = {
+        maxResults: MAX_RESULTS,
+        fields: SUGGESTION_FIELDS_TO_GET
+      };
+
+      if (isSufficientJiraSettings() && $localStorage.jiraSettings.jqlQueryAutoAdd) {
+        let request = {
+          config: $localStorage.jiraSettings,
+          apiMethod: 'searchJira',
+          arguments: [$localStorage.jiraSettings.jqlQueryAutoAdd, options]
+        };
+        this.sendRequest(request)
+          .then((res) => {
+            defer.resolve(this.transformIssues(res));
+          }, defer.reject);
+      } else {
+        SimpleToast('ERROR', 'Jira: Insufficient settings. Please define a jqlQuery');
+        defer.reject('Jira: Insufficient settings');
+      }
+
+      return defer.promise;
+    };
+
     this.sendRequest = (request) => {
       if (!$localStorage.jiraSettings) {
         $log.log('NO SETTINGS DEFINED');
@@ -455,6 +481,22 @@
         return defer.promise;
       } else {
         return $q.when(null);
+      }
+    };
+
+    this.checkForNewAndAddToBacklog = () => {
+      const Tasks = $injector.get('Tasks');
+
+      if (this.isSufficientJiraSettings()) {
+        this.getAutoAddedIssues()
+          .then((issues) => {
+            _.each(issues, (issue) => {
+              if (!Tasks.isTaskWithOriginalIdExistant(issue.originalId)) {
+                const task = Tasks.createTask(issue);
+                Tasks.addNewToTopOfBacklog(task);
+              }
+            });
+          });
       }
     };
 
