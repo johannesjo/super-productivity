@@ -446,7 +446,7 @@
             defer.resolve(this.transformIssues(res));
           }, defer.reject);
       } else {
-        SimpleToast('ERROR', 'Jira: Insufficient settings. Please define a jqlQuery');
+        SimpleToast('ERROR', 'Jira: Insufficient settings. Please define a jqlQuery for auto adding issues');
         defer.reject('Jira: Insufficient settings');
       }
 
@@ -487,7 +487,7 @@
     this.checkForNewAndAddToBacklog = () => {
       const Tasks = $injector.get('Tasks');
 
-      if (this.isSufficientJiraSettings()) {
+      if (this.isSufficientJiraSettings() && this.$localStorage.jiraSettings.isEnabledAutoAdd) {
         this.getAutoAddedIssues()
           .then((issues) => {
             _.each(issues, (issue) => {
