@@ -23,6 +23,12 @@
     },
     "win": {
       "iconUrl": "windowsicon"
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ]
     }
   },
   "devDependencies": {
