@@ -1,7 +1,4 @@
-<md-switch ng-model="vm.settings.isJiraEnabled"
-           aria-label="Enable Jira Integration">
-  Enable Jira Integration
-</md-switch>
+<h2 class="md-title">Jira-Integration</h2>
 
 <help-section>
   <div class="md-caption">Basic configuration</div>
@@ -26,8 +23,12 @@
   <p>Here you can reconfigure your default transitions. Because Jira enables a wide configuration of transitions usually coming into action as different columns on your jira agile board we can't make assumptions about where and when to transition your tasks and you need to set it manually.</p>
 </help-section>
 
+<md-switch ng-model="vm.settings.isJiraEnabled"
+           aria-label="Enable Jira Integration">
+  Enable Jira Integration
+</md-switch>
+
 <div ng-show="vm.settings.isJiraEnabled">
-  <h2 class="md-title">Jira-Integration</h2>
   <form>
     <md-input-container class="md-block">
       <label>Host / Base URL</label>
