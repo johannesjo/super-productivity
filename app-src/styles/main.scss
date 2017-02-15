@@ -11,11 +11,15 @@ IMPORTANT NOTE:
 
 @import '_functions/_some-function.scss';
 
+@import '_mixins/_clearfix.scss';
+
 @import '_mixins/_row-machine.scss';
 
 @import '_mixins/_some-mixin.scss';
 
 @import '_placeholders/_centered-component.scss';
+
+@import '_placeholders/_clearfix.scss';
 
 @import '_placeholders/_some-placeholder.scss';
 

@@ -26,7 +26,8 @@ task-list {
 }
 
 .task {
-  padding: 3px 12px 0;
+  $this-inner-padding-left-right: 12px;
+  padding: 3px $this-inner-padding-left-right 0;
   display: block;
   margin-bottom: 6px;
   background-color: #ffffff;
@@ -220,9 +221,12 @@ task-list {
   }
 
   .notes {
-    width: 100%;
-    flex: 0 1 100%;
+    display: block;
+    margin-left: -$this-inner-padding-left-right;
+    margin-right: -$this-inner-padding-left-right;
     overflow: hidden;
+    padding-left: $this-inner-padding-left-right;
+    padding-right: $this-inner-padding-left-right;
 
     section {
       margin-top: 10px;
