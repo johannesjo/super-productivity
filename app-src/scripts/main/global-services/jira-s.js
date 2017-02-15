@@ -487,7 +487,7 @@
     this.checkForNewAndAddToBacklog = () => {
       const Tasks = $injector.get('Tasks');
 
-      if (this.isSufficientJiraSettings() && this.$localStorage.jiraSettings.isEnabledAutoAdd) {
+      if (this.isSufficientJiraSettings() && $localStorage.jiraSettings.isEnabledAutoAdd) {
         this.getAutoAddedIssues()
           .then((issues) => {
             _.each(issues, (issue) => {
