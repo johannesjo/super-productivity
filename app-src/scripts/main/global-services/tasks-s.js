@@ -494,10 +494,15 @@
       this.$localStorage.backlogTasks = tasks;
     }
 
-    addNewToTopOfBacklog(task) {
+    addNewToTopOfBacklog(task, isRemoteUpdate) {
       if (task && task.title) {
         this.$localStorage.backlogTasks.unshift(this.createTask(task));
-        this.SimpleToast('SUCCESS', 'Task "' + task.title + '" created and added to backlog.');
+
+        if (isRemoteUpdate) {
+          this.SimpleToast('CUSTOM', 'Task "' + task.title + '" imported and added to backlog.', 'import_export');
+        } else {
+          this.SimpleToast('SUCCESS', 'Task "' + task.title + '" created and added to backlog.');
+        }
       }
     }
 

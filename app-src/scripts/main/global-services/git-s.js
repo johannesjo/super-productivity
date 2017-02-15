@@ -201,7 +201,8 @@
             _.each(issues, (issue) => {
               if (!Tasks.isTaskWithOriginalIdExistant(issue.originalId)) {
                 const task = Tasks.createTask(issue);
-                Tasks.addNewToTopOfBacklog(task);
+                // the second param is the updateFromRemote flag
+                Tasks.addNewToTopOfBacklog(task, true);
               }
             });
           });
