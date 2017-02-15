@@ -14,7 +14,7 @@
     .service('Git', Git);
 
   /* @ngInject */
-  function Git($http, $localStorage, TasksUtil, $injector, $q, Notifier, SimpleToast) {
+  function Git($http, $localStorage, $injector, $q, Notifier, SimpleToast) {
     const TYPE = 'GITHUB';
     const BASE_URL = 'https://api.github.com/';
     const settings = $localStorage.git;
@@ -189,6 +189,23 @@
         });
 
       return defer.promise;
+    };
+
+    this.checkForNewAndAddToBacklog = () => {
+      const Tasks = $injector.get('Tasks');
+
+      if ($localStorage.git && $localStorage.git.isAutoImportToBacklog) {
+        this.getIssueList()
+          .then((res) => {
+            const issues = res.data;
+            _.each(issues, (issue) => {
+              if (!Tasks.isTaskWithOriginalIdExistant(issue.originalId)) {
+                const task = Tasks.createTask(issue);
+                Tasks.addNewToTopOfBacklog(task);
+              }
+            });
+          });
+      }
     };
   }
 

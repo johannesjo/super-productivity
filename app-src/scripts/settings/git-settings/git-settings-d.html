@@ -1,9 +1,19 @@
 <h2 class="md-title">Git integration</h2>
 <help-section>
-  <p>Here you can configure to list open github issues for a specific repository inside the task creation panel. They will be listed as suggestion and will provide a link to issue as well as several other information about it.</p>
-  <p>Pull requests will also be shown as task suggestion, you can add a custom prefix to distinguish them easier from other issues.</p>
+  <p>Here you can configure to list open github issues for a specific repository in the task creation panel on the daily planning view. They will be listed as suggestion and will provide a link to issue as well as several other information about it.</p>
+  <p>In addition you can automatically add and sync ALL open issues to your task backlog.</p>
+  <p>Pull requests will also be treated as a task, you can add a custom prefix to distinguish them easier from other issues.</p>
+  <p></p>
   <p ng-if="vm.IS_ELECTRON">You can also configure the path to your projects .git directory to show you a summary of commits at the end of the day.</p>
 </help-section>
+
+<section>
+  <md-input-container class="md-block">
+    <label>Git repository to track for importing tasks (e.g.: johannesjo/super-productivity)</label>
+    <input type="text"
+           ng-model="vm.settings.repo">
+  </md-input-container>
+</section>
 
 <md-input-container class="md-block">
   <div>
@@ -14,15 +24,16 @@
   </div>
 </md-input-container>
 
-<section ng-show="vm.settings.isShowIssuesFromGit">
-  <md-input-container class="md-block">
-    <label>Git repository to track for adding tasks (e.g.: johannesjo/super-productivity)</label>
-    <input type="text"
-           ng-model="vm.settings.repo">
-  </md-input-container>
-</section>
+<md-input-container class="md-block">
+  <div>
+    <md-switch ng-model="vm.settings.isAutoImportToBacklog"
+               aria-label="Auto-import all issues to backlog">
+      Auto-import all issues to backlog
+    </md-switch>
+  </div>
+</md-input-container>
 
-<section ng-show="vm.settings.isShowIssuesFromGit">
+<section>
   <md-input-container class="md-block">
     <label>Prefix for pull request issues</label>
     <input type="text"

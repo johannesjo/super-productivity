@@ -32,6 +32,7 @@
       projects: [],
       git: {
         isShowIssuesFromGit: false,
+        isAutoImportToBacklog: false,
         repo: undefined,
         projectDir: undefined,
         prPrefix: 'Check PR: '

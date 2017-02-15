@@ -44,6 +44,9 @@
       });
     }
 
+    // add new git tasks
+    Git.checkForNewAndAddToBacklog();
+
     if ($localStorage.git.isShowIssuesFromGit) {
       Git.getIssueList()
         .then((res) => {
