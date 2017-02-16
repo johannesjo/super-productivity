@@ -71,6 +71,8 @@
       }
     }
 
+    // Helper functions
+    // ----------------
     // function map comments
     mapComments(issue) {
       return issue.fields.comment && issue.fields.comment.comments && issue.fields.comment.comments.map((comment) => {
@@ -162,6 +164,75 @@
       return task && task.originalType === ISSUE_TYPE;
     }
 
+    // Simple API Mappings
+    // -------------------
+    _addWorklog(originalKey, started, timeSpent, comment) {
+      if (originalKey && started && started.toISOString && timeSpent && timeSpent.asSeconds) {
+        let request = {
+          config: this.$localStorage.jiraSettings,
+          apiMethod: 'addWorklog',
+          arguments: [
+            originalKey,
+            {
+              started: started.format(JIRA_DATE_FORMAT),
+              timeSpentSeconds: timeSpent.asSeconds(),
+              comment: comment,
+            }
+          ]
+        };
+        return this.sendRequest(request);
+      } else {
+        this.SimpleToast('ERROR', 'Jira: Not enough parameters for worklog.');
+        return this.$q.reject('Jira: Not enough parameters for worklog.');
+      }
+    }
+
+    getTransitionsForIssue(task) {
+      if (!this.isSufficientJiraSettings()) {
+        return this.$q.reject('Jira: Insufficient settings.');
+      }
+
+      if (this.isJiraTask(task)) {
+        let request = {
+          config: this.$localStorage.jiraSettings,
+          apiMethod: 'listTransitions',
+          arguments: [task.originalKey]
+        };
+        return this.sendRequest(request);
+      } else {
+        this.SimpleToast('ERROR', 'Jira Request failed: Not a real ' + ISSUE_TYPE + ' issue.');
+        return this.$q.reject('Not a real ' + ISSUE_TYPE + ' issue.');
+      }
+    }
+
+    getAutoAddedIssues() {
+      let defer = this.$q.defer();
+
+      let options = {
+        maxResults: MAX_RESULTS,
+        fields: SUGGESTION_FIELDS_TO_GET
+      };
+
+      if (this.isSufficientJiraSettings() && this.$localStorage.jiraSettings.jqlQueryAutoAdd) {
+        let request = {
+          config: this.$localStorage.jiraSettings,
+          apiMethod: 'searchJira',
+          arguments: [this.$localStorage.jiraSettings.jqlQueryAutoAdd, options]
+        };
+        this.sendRequest(request)
+          .then((res) => {
+            defer.resolve(this.transformIssues(res));
+          }, defer.reject);
+      } else {
+        this.SimpleToast('ERROR', 'Jira: Insufficient settings. Please define a jqlQuery for auto adding issues');
+        defer.reject('Jira: Insufficient settings');
+      }
+
+      return defer.promise;
+    }
+
+    // Complex Functions
+    // -----------------
     updateStatus(task, localType) {
       const defer = this.$q.defer();
 
@@ -342,45 +413,6 @@
       return defer.promise;
     }
 
-    _addWorklog(originalKey, started, timeSpent, comment) {
-      if (originalKey && started && started.toISOString && timeSpent && timeSpent.asSeconds) {
-        let request = {
-          config: this.$localStorage.jiraSettings,
-          apiMethod: 'addWorklog',
-          arguments: [
-            originalKey,
-            {
-              started: started.format(JIRA_DATE_FORMAT),
-              timeSpentSeconds: timeSpent.asSeconds(),
-              comment: comment,
-            }
-          ]
-        };
-        return this.sendRequest(request);
-      } else {
-        this.SimpleToast('ERROR', 'Jira: Not enough parameters for worklog.');
-        return this.$q.reject('Jira: Not enough parameters for worklog.');
-      }
-    }
-
-    getTransitionsForIssue(task) {
-      if (!this.isSufficientJiraSettings()) {
-        return this.$q.reject('Jira: Insufficient settings.');
-      }
-
-      if (this.isJiraTask(task)) {
-        let request = {
-          config: this.$localStorage.jiraSettings,
-          apiMethod: 'listTransitions',
-          arguments: [task.originalKey]
-        };
-        return this.sendRequest(request);
-      } else {
-        this.SimpleToast('ERROR', 'Jira Request failed: Not a real ' + ISSUE_TYPE + ' issue.');
-        return this.$q.reject('Not a real ' + ISSUE_TYPE + ' issue.');
-      }
-    }
-
     transitionIssue(task, transitionObj, localType) {
       let defer = this.$q.defer();
       const that = this;
@@ -438,31 +470,7 @@
       }
     }
 
-    getAutoAddedIssues() {
-      let defer = this.$q.defer();
 
-      let options = {
-        maxResults: MAX_RESULTS,
-        fields: SUGGESTION_FIELDS_TO_GET
-      };
-
-      if (this.isSufficientJiraSettings() && this.$localStorage.jiraSettings.jqlQueryAutoAdd) {
-        let request = {
-          config: this.$localStorage.jiraSettings,
-          apiMethod: 'searchJira',
-          arguments: [this.$localStorage.jiraSettings.jqlQueryAutoAdd, options]
-        };
-        this.sendRequest(request)
-          .then((res) => {
-            defer.resolve(this.transformIssues(res));
-          }, defer.reject);
-      } else {
-        this.SimpleToast('ERROR', 'Jira: Insufficient settings. Please define a jqlQuery for auto adding issues');
-        defer.reject('Jira: Insufficient settings');
-      }
-
-      return defer.promise;
-    }
 
     sendRequest(request) {
       if (!this.$localStorage.jiraSettings) {
