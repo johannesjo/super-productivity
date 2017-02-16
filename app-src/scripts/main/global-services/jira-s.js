@@ -532,7 +532,7 @@
           sound: true,
           wait: true
         });
-        SimpleToast('"' + updatedTask.title + '" => has been updated as it was updated on Jira.');
+        SimpleToast('CUSTOM', '"' + updatedTask.title + '" => has been updated as it was updated on Jira.','update');
       }
     }
 
