@@ -73,7 +73,28 @@
 
     // Helper functions
     // ----------------
-    // function map comments
+    sendRequest(request) {
+      // assign uuid to request to know which responsive belongs to which promise
+      request.requestId = this.Uid();
+      const defer = this.$q.defer();
+      // save to request log
+      this.requestsLog[request.requestId] = {
+        defer,
+        requestMethod: request.apiMethod,
+        clientRequest: request,
+        timeout: this.$timeout(() => {
+          this.SimpleToast('ERROR', 'Jira Request timed out for ' + request.apiMethod);
+          // delete entry for promise
+          delete this.requestsLog[request.requestId];
+        }, this.REQUEST_TIMEOUT)
+      };
+
+      // send to electron
+      window.ipcRenderer.send(IPC_JIRA_MAKE_REQUEST_EVENT, request);
+
+      return defer.promise;
+    }
+
     mapComments(issue) {
       return issue.fields.comment && issue.fields.comment.comments && issue.fields.comment.comments.map((comment) => {
           return {
@@ -164,11 +185,24 @@
       return task && task.originalType === ISSUE_TYPE;
     }
 
+    preCheck(task) {
+      if (!this.IS_ELECTRON) {
+        return this.$q.reject('Jira: Not a in electron context');
+      } else if (!this.isSufficientJiraSettings()) {
+        return this.$q.reject('Jira: Insufficient settings.');
+      } else if (task && !this.isJiraTask(task)) {
+        this.SimpleToast('ERROR', 'Jira Request failed: Not a real ' + ISSUE_TYPE + ' issue.');
+        return this.$q.reject('Jira: Not a real ' + ISSUE_TYPE + ' issue.');
+      } else {
+        return false;
+      }
+    }
+
     // Simple API Mappings
     // -------------------
     _addWorklog(originalKey, started, timeSpent, comment) {
       if (originalKey && started && started.toISOString && timeSpent && timeSpent.asSeconds) {
-        let request = {
+        const request = {
           config: this.$localStorage.jiraSettings,
           apiMethod: 'addWorklog',
           arguments: [
@@ -188,33 +222,29 @@
     }
 
     getTransitionsForIssue(task) {
-      if (!this.isSufficientJiraSettings()) {
-        return this.$q.reject('Jira: Insufficient settings.');
+      const isFailedPreCheck = this.preCheck(task);
+      if (!isFailedPreCheck) {
+        return isFailedPreCheck;
       }
 
-      if (this.isJiraTask(task)) {
-        let request = {
-          config: this.$localStorage.jiraSettings,
-          apiMethod: 'listTransitions',
-          arguments: [task.originalKey]
-        };
-        return this.sendRequest(request);
-      } else {
-        this.SimpleToast('ERROR', 'Jira Request failed: Not a real ' + ISSUE_TYPE + ' issue.');
-        return this.$q.reject('Not a real ' + ISSUE_TYPE + ' issue.');
-      }
+      const request = {
+        config: this.$localStorage.jiraSettings,
+        apiMethod: 'listTransitions',
+        arguments: [task.originalKey]
+      };
+      return this.sendRequest(request);
     }
 
     getAutoAddedIssues() {
-      let defer = this.$q.defer();
+      const defer = this.$q.defer();
 
-      let options = {
+      const options = {
         maxResults: MAX_RESULTS,
         fields: SUGGESTION_FIELDS_TO_GET
       };
 
       if (this.isSufficientJiraSettings() && this.$localStorage.jiraSettings.jqlQueryAutoAdd) {
-        let request = {
+        const request = {
           config: this.$localStorage.jiraSettings,
           apiMethod: 'searchJira',
           arguments: [this.$localStorage.jiraSettings.jqlQueryAutoAdd, options]
@@ -234,53 +264,59 @@
     // Complex Functions
     // -----------------
     updateStatus(task, localType) {
-      const defer = this.$q.defer();
-
-      if (!this.isSufficientJiraSettings()) {
-        return this.$q.reject('Jira: Insufficient settings.');
+      const isFailedPreCheck = this.preCheck(task);
+      if (!isFailedPreCheck) {
+        return isFailedPreCheck;
       }
 
-      if (this.isJiraTask(task)) {
-        if (this.$localStorage.jiraSettings.transitions && this.$localStorage.jiraSettings.transitions[localType] && this.$localStorage.jiraSettings.transitions[localType] !== 'ALWAYS_ASK') {
-          if (this.$localStorage.jiraSettings.transitions[localType] === 'DO_NOT') {
-            defer.reject('DO_NOT chosen');
-          } else {
-            if (task.status !== localType) {
-              this.transitionIssue(task, {
-                id: this.$localStorage.jiraSettings.transitions[localType]
-              }, localType)
-                .then(defer.resolve, defer.reject);
-            } else {
-              defer.resolve('NO NEED TO UPDATE');
-            }
-          }
+      const defer = this.$q.defer();
+
+      const isAutoTransitionAndGotTransitions = this.$localStorage.jiraSettings.transitions && this.$localStorage.jiraSettings.transitions[localType] && this.$localStorage.jiraSettings.transitions[localType] !== 'ALWAYS_ASK';
+
+      if (isAutoTransitionAndGotTransitions) {
+        const isNoUpdateTransition = this.$localStorage.jiraSettings.transitions[localType] === 'DO_NOT';
+        if (isNoUpdateTransition) {
+          defer.reject('DO_NOT chosen');
         } else {
-          this.getTransitionsForIssue(task)
-            .then((response) => {
-              let transitions = response.response.transitions;
-              this.Dialogs('JIRA_SET_IN_PROGRESS', { transitions, task, localType })
-                .then((transition) => {
-                  this.transitionIssue(task, transition, localType)
-                    .then(defer.resolve, defer.reject);
-                }, defer.reject);
-            }, defer.reject);
+
+          // check if status needs an update
+          if (task.status !== localType) {
+            this.transitionIssue(task, {
+              id: this.$localStorage.jiraSettings.transitions[localType]
+            }, localType)
+              .then(defer.resolve, defer.reject);
+          } else {
+            defer.resolve('NO NEED TO UPDATE');
+          }
         }
+      } else {
+        this.getTransitionsForIssue(task)
+          .then((response) => {
+            let transitions = response.response.transitions;
+            this.Dialogs('JIRA_SET_IN_PROGRESS', { transitions, task, localType })
+              .then((transition) => {
+                this.transitionIssue(task, transition, localType)
+                  .then(defer.resolve, defer.reject);
+              }, defer.reject);
+          }, defer.reject);
       }
 
       return defer.promise;
     }
 
     updateIssueDescription(task) {
-      if (!this.isSufficientJiraSettings()) {
-        return this.$q.reject('Jira: Insufficient settings.');
+      const isFailedPreCheck = this.preCheck(task);
+      if (!isFailedPreCheck) {
+        return isFailedPreCheck;
       }
-
-      if (!this.$localStorage.jiraSettings.isUpdateIssueFromLocal) {
+      else if (!this.$localStorage.jiraSettings.isUpdateIssueFromLocal) {
         return this.$q.reject('Jira: jiraSettings.isUpdateIssueFromLocal is deactivated');
       }
-
-      if (this.isJiraTask(task) && task.notes) {
-        let request = {
+      else if (!task.notes) {
+        this.SimpleToast('ERROR', 'Jira: Not enough parameters for updateIssueDescription.');
+        return this.$q.reject('Jira: Not enough parameters for updateIssueDescription.');
+      } else {
+        const request = {
           config: this.$localStorage.jiraSettings,
           apiMethod: 'updateIssue',
           arguments: [task.originalKey, {
@@ -292,63 +328,55 @@
         return this.sendRequest(request).then(() => {
           this.SimpleToast('SUCCESS', 'Jira: Description updated for ' + task.originalKey);
         });
-      } else {
-        this.SimpleToast('ERROR', 'Jira: Not enough parameters for updateIssueDescription.');
-        return this.$q.reject('Jira: Not enough parameters for updateIssueDescription.');
       }
     }
 
     checkUpdatesForTicket(task, isNoNotify) {
-      let defer = this.$q.defer();
-      if (!this.isSufficientJiraSettings()) {
-        return this.$q.reject('Jira: Insufficient settings.');
+      const isFailedPreCheck = this.preCheck(task);
+      if (!isFailedPreCheck) {
+        return isFailedPreCheck;
       }
 
-      if (this.isJiraTask(task)) {
-        let request = {
-          config: this.$localStorage.jiraSettings,
-          apiMethod: 'findIssue',
-          arguments: [task.originalKey, 'changelog']
-        };
-        this.sendRequest(request)
-          .then((res) => {
-              let issue = res.response;
-              // TODO maybe this is not necessary
-              // we also add 0.5 seconds because of the millisecond difference
-              // for issue updated and historyEntry.created
-              let lastUpdate = task.originalUpdated && moment(task.originalUpdated).add(0.5, 'second');
-              if (lastUpdate && moment(issue.fields.updated).isAfter(lastUpdate)) {
-                if (!isNoNotify) {
-                  // add changelog entries
-                  this.mapAndAddChangelogToTask(task, issue);
-                  task.isUpdated = true;
-                }
-                // extend task with new values
-                angular.extend(task, this.mapIssue(issue));
-
-                defer.resolve(task);
-              } else {
-                defer.resolve(false);
+      const defer = this.$q.defer();
+      const request = {
+        config: this.$localStorage.jiraSettings,
+        apiMethod: 'findIssue',
+        arguments: [task.originalKey, 'changelog']
+      };
+      this.sendRequest(request)
+        .then((res) => {
+            let issue = res.response;
+            // we also add 0.5 seconds because of the millisecond difference
+            // for issue updated and historyEntry.created
+            let lastUpdate = task.originalUpdated && moment(task.originalUpdated).add(0.5, 'second');
+            if (lastUpdate && moment(issue.fields.updated).isAfter(lastUpdate)) {
+              if (!isNoNotify) {
+                // add changelog entries
+                this.mapAndAddChangelogToTask(task, issue);
+                task.isUpdated = true;
               }
-            }, defer.reject
-          );
+              // extend task with new values
+              angular.extend(task, this.mapIssue(issue));
 
-        return defer.promise;
-      } else {
-        this.SimpleToast('ERROR', 'Jira Request failed: Not a real ' + ISSUE_TYPE + ' issue.');
-        return this.$q.reject('Not a real ' + ISSUE_TYPE + ' issue.');
-      }
+              defer.resolve(task);
+            } else {
+              defer.resolve(false);
+            }
+          }, defer.reject
+        );
+
+      return defer.promise;
     }
 
     addWorklog(originalTask) {
-      const that = this;
-
-      if (!this.isSufficientJiraSettings()) {
-        return this.$q.reject('Jira: Insufficient settings.');
+      const isFailedPreCheck = this.preCheck();
+      if (!isFailedPreCheck) {
+        return isFailedPreCheck;
       }
 
+      const that = this;
       const Tasks = this.$injector.get('Tasks');
-      let defer = this.$q.defer();
+      const defer = this.$q.defer();
       let outerTimeSpent;
 
       // WE'RE always copying the task for add work log
@@ -414,12 +442,13 @@
     }
 
     transitionIssue(task, transitionObj, localType) {
-      let defer = this.$q.defer();
-      const that = this;
-
-      if (!this.isSufficientJiraSettings()) {
-        return this.$q.reject('Jira: Insufficient settings.');
+      const isFailedPreCheck = this.preCheck();
+      if (!isFailedPreCheck) {
+        return isFailedPreCheck;
       }
+
+      const defer = this.$q.defer();
+      const that = this;
 
       function transitionSuccess(res) {
         // update
@@ -435,7 +464,7 @@
 
       this.checkUpdatesForTicket(task)
         .then(() => {
-          let request = {
+          const request = {
             config: this.$localStorage.jiraSettings,
             apiMethod: 'transitionIssue',
             arguments: [task.originalId, {
@@ -452,13 +481,18 @@
     }
 
     getSuggestions() {
-      let options = {
+      const isFailedPreCheck = this.preCheck();
+      if (!isFailedPreCheck) {
+        return isFailedPreCheck;
+      }
+
+      const options = {
         maxResults: MAX_RESULTS,
         fields: SUGGESTION_FIELDS_TO_GET
       };
 
-      if (this.isSufficientJiraSettings() && this.$localStorage.jiraSettings.jqlQuery) {
-        let request = {
+      if (this.$localStorage.jiraSettings.jqlQuery) {
+        const request = {
           config: this.$localStorage.jiraSettings,
           apiMethod: 'searchJira',
           arguments: [this.$localStorage.jiraSettings.jqlQuery, options]
@@ -466,40 +500,7 @@
         return this.sendRequest(request);
       } else {
         this.SimpleToast('ERROR', 'Jira: Insufficient settings. Please define a jqlQuery');
-        return this.$q.reject('Jira: Insufficient settings');
-      }
-    }
-
-
-
-    sendRequest(request) {
-      if (!this.$localStorage.jiraSettings) {
-        this.$log.log('NO SETTINGS DEFINED');
-        return;
-      }
-
-      if (this.IS_ELECTRON) {
-        // assign uuid to request to know which responsive belongs to which promise
-        request.requestId = this.Uid();
-        let defer = this.$q.defer();
-        // save to request log
-        this.requestsLog[request.requestId] = {
-          defer,
-          requestMethod: request.apiMethod,
-          clientRequest: request,
-          timeout: this.$timeout(() => {
-            this.SimpleToast('ERROR', 'Jira Request timed out for ' + request.apiMethod);
-            // delete entry for promise
-            delete this.requestsLog[request.requestId];
-          }, this.REQUEST_TIMEOUT)
-        };
-
-        // send to electron
-        window.ipcRenderer.send(IPC_JIRA_MAKE_REQUEST_EVENT, request);
-
-        return defer.promise;
-      } else {
-        return this.$q.when(null);
+        return this.$q.reject('Jira: Insufficient jqlQuery');
       }
     }
 
