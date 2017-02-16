@@ -223,7 +223,7 @@
 
     getTransitionsForIssue(task) {
       const isFailedPreCheck = this.preCheck(task);
-      if (!isFailedPreCheck) {
+      if (isFailedPreCheck) {
         return isFailedPreCheck;
       }
 
@@ -265,7 +265,7 @@
     // -----------------
     updateStatus(task, localType) {
       const isFailedPreCheck = this.preCheck(task);
-      if (!isFailedPreCheck) {
+      if (isFailedPreCheck) {
         return isFailedPreCheck;
       }
 
@@ -306,7 +306,7 @@
 
     updateIssueDescription(task) {
       const isFailedPreCheck = this.preCheck(task);
-      if (!isFailedPreCheck) {
+      if (isFailedPreCheck) {
         return isFailedPreCheck;
       }
       else if (!this.$localStorage.jiraSettings.isUpdateIssueFromLocal) {
@@ -333,7 +333,8 @@
 
     checkUpdatesForTicket(task, isNoNotify) {
       const isFailedPreCheck = this.preCheck(task);
-      if (!isFailedPreCheck) {
+
+      if (isFailedPreCheck) {
         return isFailedPreCheck;
       }
 
@@ -370,7 +371,7 @@
 
     addWorklog(originalTask) {
       const isFailedPreCheck = this.preCheck();
-      if (!isFailedPreCheck) {
+      if (isFailedPreCheck) {
         return isFailedPreCheck;
       }
 
@@ -443,7 +444,7 @@
 
     transitionIssue(task, transitionObj, localType) {
       const isFailedPreCheck = this.preCheck();
-      if (!isFailedPreCheck) {
+      if (isFailedPreCheck) {
         return isFailedPreCheck;
       }
 
@@ -482,7 +483,7 @@
 
     getSuggestions() {
       const isFailedPreCheck = this.preCheck();
-      if (!isFailedPreCheck) {
+      if (isFailedPreCheck) {
         return isFailedPreCheck;
       }
 
