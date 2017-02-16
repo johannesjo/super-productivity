@@ -95,7 +95,7 @@
       return defer.promise;
     }
 
-    mapComments(issue) {
+    static mapComments(issue) {
       return issue.fields.comment && issue.fields.comment.comments && issue.fields.comment.comments.map((comment) => {
           return {
             author: comment.author.name,
@@ -104,22 +104,22 @@
         });
     }
 
-    mapAttachments(issue) {
+    static mapAttachments(issue) {
       return issue.fields.attachment && issue.fields.attachment.map((attachment) => {
           return attachment.content;
         });
     }
 
-    mapAndAddChangelogToTask(task, issue) {
+    static mapAndAddChangelogToTask(task, issue) {
       let transformedChangelog;
 
       if (issue && issue.changelog) {
         transformedChangelog = [];
         let changelog = issue.changelog;
         if (changelog.histories) {
-          // we also add 0.5 seconds because of the millisecond difference
+          // we also add 1 seconds because of the millisecond difference
           // for issue updated and historyEntry.created
-          let lastUpdate = task.originalUpdated && moment(task.originalUpdated).add(0.5, 'second');
+          let lastUpdate = task.originalUpdated && moment(task.originalUpdated).add(1, 'second');
           for (let i = 0; i < changelog.histories.length; i++) {
             let history = changelog.histories[i];
             let historyCreated = moment(history.created);
@@ -139,17 +139,21 @@
       return transformedChangelog;
     }
 
+    static isJiraTask(task) {
+      return task && task.originalType === ISSUE_TYPE;
+    }
+
     mapIssue(issue) {
       return {
         title: issue.key + ' ' + issue.fields.summary,
         notes: issue.fields.description,
         originalType: ISSUE_TYPE,
         originalKey: issue.key,
-        originalComments: this.mapComments(issue),
+        originalComments: Jira.mapComments(issue),
         originalId: issue.id,
         originalUpdated: issue.fields.updated,
         originalStatus: issue.fields.status,
-        originalAttachment: this.mapAttachments(issue),
+        originalAttachment: Jira.mapAttachments(issue),
         originalLink: 'https://' + this.$localStorage.jiraSettings.host + '/browse/' + issue.key,
         originalEstimate: issue.fields.timeestimate && moment.duration({
           seconds: issue.fields.timeestimate
@@ -181,16 +185,12 @@
       }
     }
 
-    isJiraTask(task) {
-      return task && task.originalType === ISSUE_TYPE;
-    }
-
     preCheck(task) {
       if (!this.IS_ELECTRON) {
         return this.$q.reject('Jira: Not a in electron context');
       } else if (!this.isSufficientJiraSettings()) {
         return this.$q.reject('Jira: Insufficient settings.');
-      } else if (task && !this.isJiraTask(task)) {
+      } else if (task && !Jira.isJiraTask(task)) {
         this.SimpleToast('ERROR', 'Jira Request failed: Not a real ' + ISSUE_TYPE + ' issue.');
         return this.$q.reject('Jira: Not a real ' + ISSUE_TYPE + ' issue.');
       } else {
@@ -347,13 +347,12 @@
       this.sendRequest(request)
         .then((res) => {
             let issue = res.response;
-            // we also add 0.5 seconds because of the millisecond difference
-            // for issue updated and historyEntry.created
-            let lastUpdate = task.originalUpdated && moment(task.originalUpdated).add(0.5, 'second');
+            // we also add 1 seconds because of the slight delay when updating the database
+            let lastUpdate = task.originalUpdated && moment(task.originalUpdated).add(1, 'second');
             if (lastUpdate && moment(issue.fields.updated).isAfter(lastUpdate)) {
               if (!isNoNotify) {
                 // add changelog entries
-                this.mapAndAddChangelogToTask(task, issue);
+                Jira.mapAndAddChangelogToTask(task, issue);
                 task.isUpdated = true;
               }
               // extend task with new values
@@ -400,7 +399,7 @@
         if (this.$localStorage.jiraSettings.isAddWorklogOnSubTaskDone) {
           if (task.parentId) {
             let parentTaskCopy = angular.copy(Tasks.getById(task.parentId));
-            if (this.isJiraTask(parentTaskCopy)) {
+            if (Jira.isJiraTask(parentTaskCopy)) {
 
               comment = task.title;
 
@@ -418,7 +417,7 @@
           }
         }
 
-        if (this.isJiraTask(task)) {
+        if (Jira.isJiraTask(task)) {
           this.checkUpdatesForTicket(task)
             .then(() => {
               if (this.$localStorage.jiraSettings.isAutoWorklog) {
@@ -452,6 +451,12 @@
       const that = this;
 
       function transitionSuccess(res) {
+        // add name as our transitionObject may only contain the id
+        if (!transitionObj.name) {
+          transitionObj = _.find(that.$localStorage.jiraSettings.allTransitions, (currentTransObj) => {
+            return currentTransObj.id === transitionObj.id;
+          });
+        }
         // update
         task.status = localType;
         task.originalStatus = transitionObj;
@@ -459,7 +464,7 @@
         // set original update to now to prevent showing this as task update
         task.originalUpdated = moment().format(JIRA_DATE_FORMAT);
 
-        that.SimpleToast('SUCCESS', `Jira: Updated task status to "${(transitionObj.name || localType)}"`);
+        that.SimpleToast('SUCCESS', `Jira: Updated task status to "${transitionObj.name}"`);
         defer.resolve(res);
       }
 
@@ -526,7 +531,7 @@
       const TasksUtil = this.$injector.get('TasksUtil');
       const defer = this.$q.defer();
 
-      let tasksToPoll = TasksUtil.flattenTasks(tasks, this.isJiraTask, this.isJiraTask);
+      let tasksToPoll = TasksUtil.flattenTasks(tasks, Jira.isJiraTask, Jira.isJiraTask);
       // execute requests sequentially to have a little more time
       let pollPromise = tasksToPoll.reduce((promise, task) =>
         promise.then(() =>
@@ -567,7 +572,7 @@
             task = parentTask;
           }
         }
-        if (this.isJiraTask(task)) {
+        if (Jira.isJiraTask(task)) {
           this.checkUpdatesForTicket(task, isNoNotify).then((updatedTask) => {
             this.taskIsUpdatedHandler(updatedTask);
           });
