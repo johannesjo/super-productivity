@@ -17,10 +17,10 @@
       <md-button class="md-icon-button "
                  aria-label="is updated"
                  tabindex="2"
-                 ng-click="task.showNotes = true;"
+                 ng-click="task.showNotes = !task.showNotes;"
                  ng-if="task.isUpdated">
         <md-tooltip>
-          Click to hide
+          Click to show updates
         </md-tooltip>
         <ng-md-icon class="update update-icon"
                     flex="none"
