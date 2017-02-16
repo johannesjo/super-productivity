@@ -71,6 +71,7 @@
                  name="timeSpent"
                  placeholder="Time spent"
                  input-duration
+                 min-duration="1m"
                  ng-model="vm.taskCopy.timeSpent">
           <div class="hint">Current jira values is {{ vm.taskCopy.originalTimeSpent|duration }}</div>
           <div class="validation-messages"

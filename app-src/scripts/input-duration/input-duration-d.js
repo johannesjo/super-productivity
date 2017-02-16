@@ -37,6 +37,13 @@
           momentVal = undefined;
         }
 
+        if (momentVal && attrs.minDuration) {
+          const minDuration = ParseDuration.fromString(attrs.minDuration);
+          const isValidMinDuration = momentVal.asMilliseconds() >= minDuration.asMilliseconds();
+          ngModelCtrl.$setValidity('inputDurationMin', isValidMinDuration);
+          isValid = isValidMinDuration;
+        }
+
         return isValid ? momentVal : undefined;
       });
 
