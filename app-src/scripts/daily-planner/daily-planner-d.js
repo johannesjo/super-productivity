@@ -25,7 +25,7 @@
   }
 
   /* @ngInject */
-  function DailyPlannerCtrl($localStorage, $window, $scope, Tasks, TasksUtil, Dialogs, $state, Jira, $filter, IS_ELECTRON, Git) {
+  function DailyPlannerCtrl($localStorage, $window, $scope, Tasks, TasksUtil, Dialogs, $state, Jira, $filter, IS_ELECTRON, Git, $mdDialog) {
     let vm = this;
     const _ = $window._;
 
@@ -94,6 +94,19 @@
       } else {
         $state.go('work-view');
       }
+    };
+
+    vm.deleteBacklog = () => {
+      const confirm = $mdDialog.confirm()
+        .title('Would you like to delete all backlog tasks?')
+        .textContent('All tasks will be deleted locally. Remote tasks can be re-imported but local tasks will be lost forever.')
+        .ariaLabel('Delete Backlog')
+        .ok('Please do it!')
+        .cancel('Better not');
+
+      $mdDialog.show(confirm).then(function () {
+        Tasks.clearBacklog();
+      });
     };
 
     // WATCHER & EVENTS

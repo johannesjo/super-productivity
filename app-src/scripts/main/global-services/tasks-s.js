@@ -535,6 +535,13 @@
       this.$localStorage.doneBacklogTasks = tasks;
     }
 
+    clearBacklog() {
+      // we want to keep the original reference intact so we use length
+      // @see: http://stackoverflow.com/questions/1232040/how-do-i-empty-an-array-in-javascript
+      this.$localStorage.backlogTasks.length = 0;
+      this.SimpleToast('SUCCESS', 'Backlog deleted!');
+    }
+
     addDoneTasksToDoneBacklog() {
       let doneTasks = this.getDoneToday().slice(0);
       this.$localStorage.doneBacklogTasks = doneTasks.concat(this.$localStorage.doneBacklogTasks);
