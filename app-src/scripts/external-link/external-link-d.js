@@ -13,7 +13,7 @@
     .directive('externalLink', externalLink);
 
   /* @ngInject */
-  function externalLink(IS_ELECTRON) {
+  function externalLink(Util, IS_ELECTRON) {
     return {
       link: linkFn,
       restrict: 'A',
@@ -22,10 +22,9 @@
 
     function linkFn(scope, element) {
       if (IS_ELECTRON) {
-        const shell = require('electron').shell;
         element.on('click', (event) => {
           event.preventDefault();
-          shell.openExternal(element.attr('href'));
+          Util.openExternalUrl(element.attr('href'));
         });
       }
     }

@@ -12,7 +12,7 @@
 
   class TaskListCtrl {
     /* @ngInject */
-    constructor(Dialogs, $localStorage, $mdToast, $timeout, Tasks, EDIT_ON_CLICK_TOGGLE_EV, $scope, ShortSyntax, $element, Jira, CheckShortcutKeyCombo) {
+    constructor(Dialogs, $localStorage, $mdToast, $timeout, Tasks, EDIT_ON_CLICK_TOGGLE_EV, $scope, ShortSyntax, $element, Jira, CheckShortcutKeyCombo, Util) {
       this.Dialogs = Dialogs;
       this.$mdToast = $mdToast;
       this.$timeout = $timeout;
@@ -25,6 +25,7 @@
       this.$localStorage = $localStorage;
       this.lastFocusedTaskEl = undefined;
       this.CheckShortcutKeyCombo = CheckShortcutKeyCombo;
+      this.Util = Util;
 
       this.boundHandleKeyPress = this.handleKeyPress.bind(this);
       this.boundFocusLastTaskEl = this.focusLastFocusedTaskEl.bind(this);
@@ -233,8 +234,8 @@
       if (this.CheckShortcutKeyCombo($event, this.$localStorage.keys.moveToBacklog)) {
         this.Tasks.moveTaskFromTodayToBackLog(task);
       }
-      if (this.CheckShortcutKeyCombo($event, this.$localStorage.keys.moveToTodaysTasks)) {
-        this.Tasks.moveTaskFromBackLogToToday(task);
+      if (this.CheckShortcutKeyCombo($event, this.$localStorage.keys.taskOpenOriginalLink)) {
+        this.Util.openExternalUrl(task.originalLink);
       }
 
       if (this.CheckShortcutKeyCombo($event, this.$localStorage.keys.taskDelete)) {
@@ -242,6 +243,9 @@
         // don't propagate to next focused element
         $event.preventDefault();
         $event.stopPropagation();
+      }
+      if (this.CheckShortcutKeyCombo($event, this.$localStorage.keys.moveToTodaysTasks)) {
+        this.Tasks.moveTaskFromBackLogToToday(task);
       }
 
       // move up

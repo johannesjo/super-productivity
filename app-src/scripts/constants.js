@@ -49,6 +49,7 @@
         taskToggleDone: 'd',
         taskAddSubTask: '+',
         taskDelete: 'Delete',
+        taskOpenOriginalLink: 'o',
         selectPreviousTask: 'k',
         selectNextTask: 'j',
         moveTaskUp: 'Ctrl+Shift+ArrowUp',
