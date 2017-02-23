@@ -301,11 +301,16 @@
       task.doneDate = moment();
 
       if (this.IS_ELECTRON) {
-        if (this.TasksUtil.isJiraTask(task)) {
-          this.Jira.updateStatus(task, 'DONE');
-        }
+        // add worklog before marking the task as done
         if (this.TasksUtil.isJiraTask(task) || this.TasksUtil.isJiraTask(parentTask)) {
-          this.Jira.addWorklog(task);
+          this.Jira.addWorklog(task).then(() => {
+            this.Jira.updateStatus(task, 'DONE');
+          }, () => {
+            this.Jira.updateStatus(task, 'DONE');
+          });
+        }
+        else if (this.TasksUtil.isJiraTask(task)) {
+          this.Jira.updateStatus(task, 'DONE');
         }
       }
       this.selectNextTask(task);
