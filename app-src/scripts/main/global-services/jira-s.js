@@ -30,7 +30,7 @@
 
   /* @ngInject */
   class Jira {
-    constructor(IS_ELECTRON, SimpleToast, Uid, $q, $localStorage, Dialogs, Notifier, $injector, $timeout, REQUEST_TIMEOUT, $log) {
+    constructor(IS_ELECTRON, SimpleToast, Uid, $q, $localStorage, Dialogs, Notifier, $injector, $timeout, REQUEST_TIMEOUT, $log, $window) {
       this.requestsLog = {};
 
       this.IS_ELECTRON = IS_ELECTRON;
@@ -44,6 +44,7 @@
       this.REQUEST_TIMEOUT = REQUEST_TIMEOUT;
       this.$log = $log;
       this.SimpleToast = SimpleToast;
+      this.$window = $window;
 
       // set up callback listener for electron
       if (IS_ELECTRON) {
@@ -193,6 +194,9 @@
       } else if (task && !Jira.isJiraTask(task)) {
         this.SimpleToast('ERROR', 'Jira Request failed: Not a real ' + ISSUE_TYPE + ' issue.');
         return this.$q.reject('Jira: Not a real ' + ISSUE_TYPE + ' issue.');
+      } else if (!this.$window.navigator.onLine) {
+        this.SimpleToast('ERROR', 'Not connected to the Internet.');
+        return this.$q.reject('Not connected to the Internet.');
       } else {
         return false;
       }
