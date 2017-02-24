@@ -31,6 +31,7 @@ const KarmaServer = require('karma').Server;
 const merge = require('merge-stream');
 const plumber = require('gulp-plumber');
 const sort = require('gulp-natural-sort');
+const notify = require('gulp-notify');
 
 // main task
 gulp.task('default', function (cb) {
@@ -217,13 +218,27 @@ gulp.task('testSingle', function (done) {
 });
 
 gulp.task('lint', function () {
+  const notifyHandler = function (file) {
+    if (file.jshint.success) {
+      // Don't show something if success
+      return false;
+    }
+    const errors = file.jshint.results.map(function (data) {
+      if (data.error) {
+        return '(' + data.error.line + ':' + data.error.character + ') ' + data.error.reason;
+      }
+    }).join('\n');
+    return file.relative + ' (' + file.jshint.results.length + ' errors)\n' + errors;
+  };
+
   return gulp.src([
     config.scriptsAllF,
     './karma-e2e.conf.js',
     './karma.conf.js',
     './gulpfile.js'
   ], { base: './' })
-    .pipe(jshint())
+    .pipe(jshint('.jshintrc', { fail: true }))
+    .pipe(notify(notifyHandler))
     .pipe(jshint.reporter('jshint-stylish'))
     .pipe(jscs());
 });
@@ -238,5 +253,4 @@ gulp.task('beautify', function () {
     .pipe(jscs({ fix: true }))
     .pipe(gulp.dest('./'));
 });
-
 

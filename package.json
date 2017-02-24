@@ -55,6 +55,7 @@
     "gulp-natural-sort": "latest",
     "gulp-ng-annotate": "latest",
     "gulp-ng-config": "latest",
+    "gulp-notify": "^3.0.0",
     "gulp-plumber": "latest",
     "gulp-protractor": "latest",
     "gulp-sass": "latest",
