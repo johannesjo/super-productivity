@@ -84,12 +84,16 @@
       makeLinksWorkForElectron();
       vm.resizeToFit();
 
-      if (vm.ngModelCopy !== vm.ngModel) {
-        vm.ngModel = vm.ngModelCopy;
-        if (angular.isFunction(vm.onChanged)) {
-          vm.onChanged();
+      // we wrap this into evalAsync because the data might not be ready, because how
+      // the marked directive works
+      $scope.$evalAsync(() => {
+        if (vm.ngModelCopy !== vm.ngModel) {
+          vm.ngModel = vm.ngModelCopy;
+          if (angular.isFunction(vm.onChanged)) {
+            vm.onChanged();
+          }
         }
-      }
+      });
     };
 
     vm.resizeToFit = () => {
