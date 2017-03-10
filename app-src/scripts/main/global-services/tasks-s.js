@@ -278,6 +278,7 @@
         originalId: task.originalId,
         originalKey: task.originalKey,
         originalType: task.originalType,
+        originalAssigneeKey: task.originalAssigneeKey,
         originalLink: task.originalLink,
         originalStatus: task.originalStatus,
         originalEstimate: task.originalEstimate,
@@ -318,6 +319,19 @@
 
     updateCurrent(task, isCallFromTimeTracking) {
       const isCurrentTaskChanged = this.TasksUtil.isTaskChanged(task, this.$localStorage.currentTask);
+      const that = this;
+
+      function moveInProgress(task, parentTask) {
+        if (isCurrentTaskChanged) {
+          if (that.TasksUtil.isJiraTask(task)) {
+            that.Jira.updateStatus(task, 'IN_PROGRESS');
+          }
+
+          if (that.TasksUtil.isJiraTask(parentTask)) {
+            that.Jira.updateStatus(parentTask, 'IN_PROGRESS');
+          }
+        }
+      }
 
       // update totalTimeSpent for buggy macos
       if (task) {
@@ -330,20 +344,25 @@
         // check if in electron context
         if (this.IS_ELECTRON) {
           if (!isCallFromTimeTracking) {
-            // check for updates
-            // NOTE: if checks for isJiraTicket are made in function
-            this.Jira.checkUpdatesForTaskOrParent(task);
+            const parentTask = task.parentId && this.getById(task.parentId);
 
-            if (isCurrentTaskChanged) {
-              const parentTask = task.parentId && this.getById(task.parentId);
-
-              if (this.TasksUtil.isJiraTask(task)) {
-                this.Jira.updateStatus(task, 'IN_PROGRESS');
-              }
-
-              if (this.TasksUtil.isJiraTask(parentTask)) {
-                this.Jira.updateStatus(parentTask, 'IN_PROGRESS');
-              }
+            // check for updates first
+            if (this.TasksUtil.isJiraTask(task) || this.TasksUtil.isJiraTask(parentTask)) {
+              this.Jira.checkUpdatesForTaskOrParent(task)
+                .then(() => {
+                  if (!task.originalAssigneeKey || task.originalAssigneeKey !== this.$localStorage.jiraSettings.userName) {
+                    // ask if to assign to yourself or just ignore it
+                    this.Dialogs('JIRA_ASSIGN_TICKET', { task })
+                      .then(() => {
+                        moveInProgress(task, parentTask);
+                      }, () => {
+                        this.updateCurrent(undefined);
+                      });
+                  } else {
+                    // just move in progress
+                    moveInProgress(task, parentTask);
+                  }
+                });
             }
           }
 

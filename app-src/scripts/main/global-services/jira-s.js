@@ -18,6 +18,7 @@
   const MAX_RESULTS = 100;
   const ISSUE_TYPE = 'JIRA';
   const SUGGESTION_FIELDS_TO_GET = [
+    'assignee',
     'summary',
     'description',
     'timeestimate',
@@ -144,12 +145,21 @@
       return task && task.originalType === ISSUE_TYPE;
     }
 
+    updateTaskWithIssue(task, issue) {
+      const mappedIssue = this.mapIssue(issue);
+
+      _.forOwn(mappedIssue, (val, property) => {
+        task[property] = val;
+      });
+    }
+
     mapIssue(issue) {
       return {
         title: issue.key + ' ' + issue.fields.summary,
         notes: issue.fields.description,
         originalType: ISSUE_TYPE,
         originalKey: issue.key,
+        originalAssigneeKey: issue.fields.assignee && issue.fields.assignee.key,
         originalComments: Jira.mapComments(issue),
         originalId: issue.id,
         originalUpdated: issue.fields.updated,
@@ -169,7 +179,7 @@
       if (!settingsToTest) {
         settingsToTest = this.$localStorage.jiraSettings;
       }
-      return settingsToTest && settingsToTest.isJiraEnabled && settingsToTest.host && settingsToTest.userName && settingsToTest.password && settingsToTest.password;
+      return settingsToTest && settingsToTest.isJiraEnabled && !!settingsToTest.host && !!settingsToTest.userName && !!settingsToTest.password;
     }
 
     transformIssues(response) {
@@ -337,7 +347,6 @@
 
     checkUpdatesForTicket(task, isNoNotify) {
       const isFailedPreCheck = this.preCheck(task);
-
       if (isFailedPreCheck) {
         return isFailedPreCheck;
       }
@@ -353,14 +362,16 @@
             let issue = res.response;
             // we also add 1 seconds because of the slight delay when updating the database
             let lastUpdate = task.originalUpdated && moment(task.originalUpdated).add(1, 'second');
+
             if (lastUpdate && moment(issue.fields.updated).isAfter(lastUpdate)) {
               if (!isNoNotify) {
                 // add changelog entries
                 Jira.mapAndAddChangelogToTask(task, issue);
                 task.isUpdated = true;
               }
-              // extend task with new values
-              angular.extend(task, this.mapIssue(issue));
+
+              // update task with new values
+              this.updateTaskWithIssue(task, issue);
 
               defer.resolve(task);
             } else {
@@ -567,7 +578,9 @@
     }
 
     checkUpdatesForTaskOrParent(task, isNoNotify) {
+      let isCallMade = false;
       const Tasks = this.$injector.get('Tasks');
+      const defer = this.$q.defer();
       if (task) {
         if (!task.originalKey && task.parentId) {
           let parentTask = Tasks.getById(task.parentId);
@@ -578,10 +591,27 @@
         }
         if (Jira.isJiraTask(task)) {
           this.checkUpdatesForTicket(task, isNoNotify).then((updatedTask) => {
-            this.taskIsUpdatedHandler(updatedTask);
+            this.taskIsUpdatedHandler();
+            if (updatedTask) {
+              defer.resolve(updatedTask);
+            } else {
+              defer.resolve(task);
+            }
+          }, () => {
+            // just resolve original
+            defer.resolve(task);
           });
+
+          isCallMade = true;
         }
       }
+
+      if (!isCallMade) {
+        // just resolve original
+        defer.resolve(task);
+      }
+
+      return defer.promise;
     }
   }
 

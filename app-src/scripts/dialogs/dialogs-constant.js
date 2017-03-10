@@ -64,6 +64,10 @@
       JIRA_ADD_WORKLOG: {
         controller: 'JiraAddWorklogCtrl',
         templateUrl: 'scripts/dialogs/jira-add-worklog/jira-add-worklog-c.html'
+      },
+      JIRA_ASSIGN_TICKET: {
+        controller: 'JiraAssignTicketCtrl',
+        templateUrl: 'scripts/dialogs/jira-assign-ticket/jira-assign-ticket-c.html'
       }
     });
 })();
