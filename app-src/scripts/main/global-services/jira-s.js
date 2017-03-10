@@ -345,6 +345,32 @@
       }
     }
 
+    updateAssignee(task, assignee) {
+      const isFailedPreCheck = this.preCheck(task);
+      if (isFailedPreCheck) {
+        return isFailedPreCheck;
+      }
+      else if (!assignee) {
+        this.SimpleToast('ERROR', 'Jira: Not enough parameters for updateAssignee.');
+        return this.$q.reject('Jira: Not enough parameters for updateAssignee.');
+      } else {
+        const request = {
+          config: this.$localStorage.jiraSettings,
+          apiMethod: 'updateIssue',
+          arguments: [task.originalKey, {
+            fields: {
+              assignee: {
+                name: assignee
+              }
+            }
+          }]
+        };
+        return this.sendRequest(request).then(() => {
+          this.SimpleToast('SUCCESS', 'Jira: Assignee set to ' + assignee + ' updated for ' + task.originalKey);
+        });
+      }
+    }
+
     checkUpdatesForTicket(task, isNoNotify) {
       const isFailedPreCheck = this.preCheck(task);
       if (isFailedPreCheck) {
