@@ -167,8 +167,10 @@
       }
     }
 
-    onTaskNotesChanged(task) {
+    onTaskNotesChanged(newNoteVal, task) {
       if (task.originalKey) {
+        // for some reason, this isn't updated for the task, so we do it here once more
+        task.notes = newNoteVal;
         this.Jira.updateIssueDescription(task);
       }
     }

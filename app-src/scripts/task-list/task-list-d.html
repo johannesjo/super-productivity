@@ -148,7 +148,7 @@
         <div class="md-caption">{{ task.originalId ? 'Description': 'Notes' }}</div>
         <div md-whiteframe="4">
           <inline-markdown ng-model="task.notes"
-                           on-changed="$ctrl.onTaskNotesChanged(task)"></inline-markdown>
+                           on-changed="$ctrl.onTaskNotesChanged(newVal, task)"></inline-markdown>
         </div>
       </section>
 
