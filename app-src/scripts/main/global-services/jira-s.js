@@ -147,9 +147,12 @@
 
     updateTaskWithIssue(task, issue) {
       const mappedIssue = this.mapIssue(issue);
-
       _.forOwn(mappedIssue, (val, property) => {
-        task[property] = val;
+        if (val === null && task.hasOwnProperty(property)) {
+          delete task[property];
+        } else {
+          task[property] = val;
+        }
       });
     }
 
@@ -159,7 +162,7 @@
         notes: issue.fields.description,
         originalType: ISSUE_TYPE,
         originalKey: issue.key,
-        originalAssigneeKey: issue.fields.assignee && issue.fields.assignee.key,
+        originalAssigneeKey: issue.fields.assignee && issue.fields.assignee.key.toString(),
         originalComments: Jira.mapComments(issue),
         originalId: issue.id,
         originalUpdated: issue.fields.updated,
@@ -326,7 +329,7 @@
       else if (!this.$localStorage.jiraSettings.isUpdateIssueFromLocal) {
         return this.$q.reject('Jira: jiraSettings.isUpdateIssueFromLocal is deactivated');
       }
-      else if (!task.notes) {
+      else if (!angular.isString(task.notes)) {
         this.SimpleToast('ERROR', 'Jira: Not enough parameters for updateIssueDescription.');
         return this.$q.reject('Jira: Not enough parameters for updateIssueDescription.');
       } else {
@@ -591,15 +594,32 @@
       return defer.promise;
     }
 
-    taskIsUpdatedHandler(updatedTask) {
-      if (updatedTask) {
+    taskIsUpdatedHandler(updatedTask, originalTask) {
+      if (!originalTask) {
+        originalTask = updatedTask;
+      }
+
+      // check if the user assigned matches the current user
+      if (originalTask && originalTask.originalAssigneeKey && originalTask.originalAssigneeKey !== this.$localStorage.jiraSettings.userName) {
+        const msg = '"' + originalTask.originalKey + '" is assigned to "' + originalTask.originalAssigneeKey + '".';
         this.Notifier({
-          title: 'Jira Update',
-          message: '"' + updatedTask.title + '" => has been updated as it was updated on Jira.',
+          title: 'Jira issue ' + originalTask.originalKey + ' is assigned to another user',
+          message: msg,
           sound: true,
           wait: true
         });
-        this.SimpleToast('CUSTOM', '"' + updatedTask.title + '" => has been updated as it was updated on Jira.', 'update');
+        this.SimpleToast('WARNING', msg);
+      }
+
+      if (updatedTask) {
+        const msg = '"' + originalTask.originalKey + '" => has been updated as it was updated on Jira.';
+        this.Notifier({
+          title: 'Jira Update',
+          message: msg,
+          sound: true,
+          wait: true
+        });
+        this.SimpleToast('CUSTOM', msg, 'update');
       }
     }
 
@@ -616,17 +636,18 @@
           }
         }
         if (Jira.isJiraTask(task)) {
-          this.checkUpdatesForTicket(task, isNoNotify).then((updatedTask) => {
-            this.taskIsUpdatedHandler();
-            if (updatedTask) {
-              defer.resolve(updatedTask);
-            } else {
+          this.checkUpdatesForTicket(task, isNoNotify)
+            .then((updatedTask) => {
+              this.taskIsUpdatedHandler(updatedTask, task);
+              if (updatedTask) {
+                defer.resolve(updatedTask);
+              } else {
+                defer.resolve(task);
+              }
+            }, () => {
+              // just resolve original
               defer.resolve(task);
-            }
-          }, () => {
-            // just resolve original
-            defer.resolve(task);
-          });
+            });
 
           isCallMade = true;
         }

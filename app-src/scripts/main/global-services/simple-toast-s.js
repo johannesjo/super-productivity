@@ -37,6 +37,7 @@
         if ([
             'SUCCESS',
             'ERROR',
+            'WARNING',
             'CUSTOM'
           ].indexOf(textContent) > -1) {
           const tmpType = textContent;
@@ -47,6 +48,10 @@
         if (type === 'SUCCESS') {
           icon = icon || 'check_circle';
           iconColor = '#4fa758';
+        }
+        else if (type === 'WARNING') {
+          icon = icon || 'warning';
+          iconColor = '#e1e048';
         }
         else if (type === 'ERROR') {
           icon = icon || 'error';
