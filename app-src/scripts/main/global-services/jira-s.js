@@ -238,6 +238,21 @@
       }
     }
 
+    searchUsers(userNameQuery) {
+      const isFailedPreCheck = this.preCheck();
+      if (isFailedPreCheck) {
+        return isFailedPreCheck;
+      }
+
+      const request = {
+        config: this.$localStorage.jiraSettings,
+        apiMethod: 'searchUsers',
+        arguments: [{ username: userNameQuery }]
+      };
+
+      return this.sendRequest(request);
+    }
+
     getTransitionsForIssue(task) {
       const isFailedPreCheck = this.preCheck(task);
       if (isFailedPreCheck) {

@@ -124,7 +124,8 @@
           OPEN: 'ALWAYS_ASK',
           IN_PROGRESS: 'ALWAYS_ASK',
           DONE: 'ALWAYS_ASK'
-        }
+        },
+        userToAssignOnDone: undefined
       }
     })
     .constant('REQUEST_TIMEOUT', 15000)

@@ -6,7 +6,7 @@
     <a class="md-accent"
        href="https://confluence.atlassian.com/jirasoftwarecloud/advanced-searching-764478330.html"
        external-link="">https://confluence.atlassian.com/jirasoftwarecloud/advanced-searching-764478330.html</a>.</p>
-<p>You can also configure, if you want to automatically (e.g. every time you visit the planning view), to add all new tasks specified by a custom JQL query to the backlog.</p>
+  <p>You can also configure, if you want to automatically (e.g. every time you visit the planning view), to add all new tasks specified by a custom JQL query to the backlog.</p>
 
   <div class="md-caption">Worklog settings</div>
   <p>There are several options to determine when and how you want to submit a worklog. Enabling
@@ -150,6 +150,16 @@
           </md-option>
         </md-select>
       </md-input-container>
+      <div>
+        <label class="md-caption">User to assign issue to on DONE</label>
+        <md-autocomplete md-selected-item="vm.settings.userToAssignOnDone"
+                         md-search-text="vm.userSearchText"
+                         md-items="userKey in vm.userQuery(vm.userSearchText)">
+          <md-item-template>
+            <span md-highlight-text="vm.userSearchText">{{userKey}}</span>
+          </md-item-template>
+        </md-autocomplete>
+      </div>
     </section>
   </form>
 
