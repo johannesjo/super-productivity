@@ -1,17 +1,17 @@
 'use strict';
 
-describe('Controller: JiraSetInProgressCtrl', function () {
+describe('Controller: JiraSetStatusCtrl', function () {
 
   // load the controller's module
   beforeEach(module('superProductivity'));
 
-  var JiraSetInProgressCtrl;
+  var JiraSetStatusCtrl;
   var scope;
 
   // Initialize the controller and a mock scope
   beforeEach(inject(function ($controller, $rootScope) {
     scope = $rootScope.$new();
-    JiraSetInProgressCtrl = $controller('JiraSetInProgressCtrl', {
+    JiraSetStatusCtrl = $controller('JiraSetStatusCtrl', {
       $scope: scope
       // place mocked dependencies here
     });

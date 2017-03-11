@@ -325,7 +325,7 @@
         this.getTransitionsForIssue(task)
           .then((response) => {
             let transitions = response.response.transitions;
-            this.Dialogs('JIRA_SET_IN_PROGRESS', { transitions, task, localType })
+            this.Dialogs('JIRA_SET_STATUS', { transitions, task, localType })
               .then((transition) => {
                 this.transitionIssue(task, transition, localType)
                   .then(defer.resolve, defer.reject);

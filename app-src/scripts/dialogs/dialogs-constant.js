@@ -57,9 +57,9 @@
         controller: 'HelpCtrl',
         templateUrl: 'scripts/dialogs/help/help-c.html'
       },
-      JIRA_SET_IN_PROGRESS: {
-        controller: 'JiraSetInProgressCtrl',
-        templateUrl: 'scripts/dialogs/jira-set-in-progress/jira-set-in-progress-c.html'
+      JIRA_SET_STATUS: {
+        controller: 'JiraSetStatusCtrl',
+        templateUrl: 'scripts/dialogs/jira-set-status/jira-set-status-c.html'
       },
       JIRA_ADD_WORKLOG: {
         controller: 'JiraAddWorklogCtrl',

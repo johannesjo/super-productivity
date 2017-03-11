@@ -1,8 +1,8 @@
 /**
  * @ngdoc function
- * @name superProductivity.controller:JiraSetInProgressCtrl
+ * @name superProductivity.controller:JiraSetStatusCtrl
  * @description
- * # JiraSetInProgressCtrl
+ * # JiraSetStatusCtrl
  * Controller of the superProductivity
  */
 
@@ -11,10 +11,10 @@
 
   angular
     .module('superProductivity')
-    .controller('JiraSetInProgressCtrl', JiraSetInProgressCtrl);
+    .controller('JiraSetStatusCtrl', JiraSetStatusCtrl);
 
   /* @ngInject */
-  function JiraSetInProgressCtrl($mdDialog, task, transitions, localType, $window, $localStorage, theme) {
+  function JiraSetStatusCtrl($mdDialog, task, transitions, localType, $window, $localStorage, theme) {
     let vm = this;
     vm.theme = theme;
     vm.transitions = transitions;
