@@ -51,6 +51,17 @@
           <strong ng-if="vm.localType==='IN_PROGRESS'">in progress</strong>
           <strong ng-if="vm.localType==='DONE'">done</strong>. You can change that later in the project settings.
         </md-checkbox>
+
+        <div>
+          <label class="md-caption">Assign issue to another user, (leave empty to leave it assigned to current user)</label>
+          <md-autocomplete md-selected-item="vm.userToAssign"
+                           md-search-text="vm.userSearchText"
+                           md-items="userKey in vm.userQuery(vm.userSearchText)">
+            <md-item-template>
+              <span md-highlight-text="vm.userSearchText">{{userKey}}</span>
+            </md-item-template>
+          </md-autocomplete>
+        </div>
       </div>
     </md-dialog-content>
 

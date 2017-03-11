@@ -384,7 +384,7 @@
           }]
         };
         return this.sendRequest(request).then(() => {
-          this.SimpleToast('SUCCESS', 'Jira: Assignee set to ' + assignee + ' updated for ' + task.originalKey);
+          this.SimpleToast('SUCCESS', 'Jira: Assignee set to "' + assignee + '" updated for ' + task.originalKey);
         });
       }
     }

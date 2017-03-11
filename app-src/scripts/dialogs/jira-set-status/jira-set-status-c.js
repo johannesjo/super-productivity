@@ -14,7 +14,7 @@
     .controller('JiraSetStatusCtrl', JiraSetStatusCtrl);
 
   /* @ngInject */
-  function JiraSetStatusCtrl($mdDialog, task, transitions, localType, $window, $localStorage, theme) {
+  function JiraSetStatusCtrl($mdDialog, task, transitions, localType, $window, $localStorage, theme, Jira) {
     let vm = this;
     vm.theme = theme;
     vm.transitions = transitions;
@@ -24,6 +24,15 @@
     vm.chosenTransitionIndex = $window._.findIndex(vm.transitions, (transition) => {
       return transition.name === (vm.task.originalStatus && vm.task.originalStatus.name);
     });
+
+    vm.userQuery = (searchText) => {
+      return Jira.searchUsers(searchText)
+        .then((res) => {
+          const userKeys = [];
+          _.each(res.response, user => userKeys.push(user.key));
+          return userKeys;
+        });
+    };
 
     vm.updateTask = (chosenTransitionIndex) => {
       let transition = vm.transitions[chosenTransitionIndex];
@@ -35,8 +44,15 @@
         $localStorage.jiraSettings.transitions[localType] = transition.id;
         $localStorage.jiraSettings.allTransitions = transitions;
       }
+      console.log(vm.userToAssign);
 
-      $mdDialog.hide(transition);
+      if (vm.userToAssign) {
+        Jira.updateAssignee(task, vm.userToAssign)
+          .then($mdDialog.hide);
+        $mdDialog.hide();
+      } else {
+        $mdDialog.hide(transition);
+      }
     };
 
     vm.cancel = () => {

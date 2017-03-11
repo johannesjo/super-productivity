@@ -30,17 +30,6 @@
   function JiraSettingsCtrl(Jira, SimpleToast, $timeout, $scope) {
     let vm = this;
 
-    vm.userQuery = (searchText) => {
-      return Jira.searchUsers(searchText)
-        .then((res) => {
-          const userKeys = [];
-          _.each(res.response, user => userKeys.push(user.key));
-          console.log(userKeys);
-
-          return userKeys;
-        });
-    };
-
     vm.testJiraCredentials = () => {
       let errorMsgTimeout;
 
