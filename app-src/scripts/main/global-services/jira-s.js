@@ -215,6 +215,10 @@
       }
     }
 
+    setUpdatedToNow(task) {
+      task.originalUpdated = moment().format(JIRA_DATE_FORMAT);
+    }
+
     // Simple API Mappings
     // -------------------
     _addWorklog(originalKey, started, timeSpent, comment) {
@@ -358,6 +362,8 @@
           }]
         };
         return this.sendRequest(request).then(() => {
+          // set original update to now to prevent showing this as task update
+          this.setUpdatedToNow(task);
           this.SimpleToast('SUCCESS', 'Jira: Description updated for ' + task.originalKey);
         });
       }
@@ -447,7 +453,7 @@
         that.SimpleToast('SUCCESS', 'Jira: Updated worklog for ' + task.originalKey + ' by ' + parseInt(outerTimeSpent.asMinutes(), 10) + 'm.');
 
         // set original update to now to prevent showing this as task update
-        task.originalUpdated = moment().format(JIRA_DATE_FORMAT);
+        that.setUpdatedToNow(task);
 
         defer.resolve(res);
       }
@@ -521,7 +527,7 @@
         task.originalStatus = transitionObj;
 
         // set original update to now to prevent showing this as task update
-        task.originalUpdated = moment().format(JIRA_DATE_FORMAT);
+        that.setUpdatedToNow(task);
 
         that.SimpleToast('SUCCESS', `Jira: Updated task status to "${transitionObj.name}"`);
         defer.resolve(res);
