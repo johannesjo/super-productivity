@@ -20,10 +20,10 @@
 
     vm.IS_ELECTRON = IS_ELECTRON;
 
-    vm.isShowDialogAgain = $localStorage.isShowWelcomeDialog;
+    vm.isShowDialogAgain = $localStorage.uiHelper.isShowWelcomeDialog;
 
     vm.hideDialogChange = (isHide) => {
-      $localStorage.isShowWelcomeDialog = !isHide;
+      $localStorage.uiHelper.isShowWelcomeDialog = !isHide;
     };
 
     vm.cancel = () => {
