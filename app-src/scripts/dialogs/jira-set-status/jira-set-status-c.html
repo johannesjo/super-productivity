@@ -55,6 +55,7 @@
         <div>
           <label class="md-caption">Assign issue to another user, (leave empty to leave it assigned to current user)</label>
           <md-autocomplete md-selected-item="vm.userToAssign"
+                           md-require-match="true"
                            md-search-text="vm.userSearchText"
                            md-items="userKey in vm.userQuery(vm.userSearchText)">
             <md-item-template>
