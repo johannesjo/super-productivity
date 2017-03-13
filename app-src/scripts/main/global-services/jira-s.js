@@ -390,6 +390,8 @@
           }]
         };
         return this.sendRequest(request).then(() => {
+          // update local marker
+          task.originalAssigneeKey = assignee;
           this.SimpleToast('SUCCESS', 'Jira: Assignee set to "' + assignee + '" for ' + task.originalKey);
         });
       }
