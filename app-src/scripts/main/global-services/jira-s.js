@@ -623,7 +623,7 @@
       }
 
       // check if the user assigned matches the current user
-      if (originalTask && originalTask.originalAssigneeKey && originalTask.originalAssigneeKey !== this.$localStorage.jiraSettings.userName) {
+      if (originalTask && originalTask.originalAssigneeKey && originalTask.originalAssigneeKey !== this.$localStorage.jiraSettings.userName && !originalTask.isDone) {
         const msg = '"' + originalTask.originalKey + '" is assigned to "' + originalTask.originalAssigneeKey + '".';
         this.Notifier({
           title: 'Jira issue ' + originalTask.originalKey + ' is assigned to another user',
