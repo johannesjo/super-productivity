@@ -162,6 +162,11 @@
         </div>
       </section>
 
+      <section ng-if="task.originalAssigneeKey"
+               class="assignee">
+        <div class="md-caption">Assignee: {{ task.originalAssigneeKey}} </div>
+      </section>
+
       <section ng-if="task.originalAttachment.length > 0">
         <collapsible title="Attachments ({{ ::task.originalAttachment.length }})">
           <ul class="attachments">
