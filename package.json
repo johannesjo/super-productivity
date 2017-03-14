@@ -9,6 +9,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "NODE_ENV=DEV electron ./electron/main.js",
     "pack": "build --dir",
+    "localInstall": "sudo echo 'HIHI' && rm -Rf ./dist/ && gulp build && build && sudo dpkg -i dist/superProductivity*.deb",
     "dist": "gulp build && build",
     "package-mac": "electron-packager . --overwrite --platform=darwin --arch=x64 --icon=assets/icons/mac/icon.icns --prune=true --out=release-builds",
     "package-win": "electron-packager . --overwrite --asar=true --platform=win32 --arch=ia32 --icon=assets/icons/win/icon.ico --prune=true --out=release-builds --version-string.CompanyName=CE --version-string.FileDescription=CE --version-string.ProductName=\"Electron Tutorial App\"",
