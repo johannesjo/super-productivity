@@ -18,9 +18,9 @@
 
     <md-dialog-content>
       <div class="md-dialog-content">
-        <p>The ticket is currently <strong ng-if="!task.originalAssigneeKey">unassigned</strong>
-          <span ng-if="task.originalAssigneeKey"> assigned to
-          <strong>{{ task.originalAssigneeKey }}</strong></span>. Do you want to assign it to yourself?</p>
+        <p>The ticket is currently <strong ng-if="!vm.task.originalAssigneeKey">unassigned</strong>
+          <span ng-if="vm.task.originalAssigneeKey"> assigned to
+          <strong>{{ vm.task.originalAssigneeKey }}</strong></span>. Do you want to assign it to yourself?</p>
       </div>
     </md-dialog-content>
 

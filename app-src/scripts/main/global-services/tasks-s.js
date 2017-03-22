@@ -321,14 +321,10 @@
       const isCurrentTaskChanged = this.TasksUtil.isTaskChanged(task, this.$localStorage.currentTask);
       const that = this;
 
-      function moveInProgress(task, parentTask) {
+      function moveInProgress(task) {
         if (isCurrentTaskChanged) {
           if (that.TasksUtil.isJiraTask(task)) {
             that.Jira.updateStatus(task, 'IN_PROGRESS');
-          }
-
-          if (that.TasksUtil.isJiraTask(parentTask)) {
-            that.Jira.updateStatus(parentTask, 'IN_PROGRESS');
           }
         }
       }
@@ -348,19 +344,25 @@
 
             // check for updates first
             if (this.TasksUtil.isJiraTask(task) || this.TasksUtil.isJiraTask(parentTask)) {
+              // find out if current or parent is the task we want to handle
+              let jiraTaskToHandle = task;
+              if (!this.TasksUtil.isJiraTask(task) && this.TasksUtil.isJiraTask(parentTask)) {
+                jiraTaskToHandle = parentTask;
+              }
+
               this.Jira.checkUpdatesForTaskOrParent(task)
                 .then(() => {
-                  if (!task.originalAssigneeKey || task.originalAssigneeKey !== this.$localStorage.jiraSettings.userName) {
+                  if (!jiraTaskToHandle.originalAssigneeKey || jiraTaskToHandle.originalAssigneeKey !== this.$localStorage.jiraSettings.userName) {
                     // ask if to assign to yourself or just ignore it
-                    this.Dialogs('JIRA_ASSIGN_TICKET', { task })
+                    this.Dialogs('JIRA_ASSIGN_TICKET', { task: jiraTaskToHandle })
                       .then(() => {
-                        moveInProgress(task, parentTask);
+                        moveInProgress(jiraTaskToHandle);
                       }, () => {
                         this.updateCurrent(undefined);
                       });
                   } else {
                     // just move in progress
-                    moveInProgress(task, parentTask);
+                    moveInProgress(jiraTaskToHandle);
                   }
                 });
             }
