@@ -480,7 +480,7 @@
           }
           // don't execute for tasks with sub tasks in this mode
           else if (task.subTasks && task.subTasks.length > 0) {
-            return;
+            return this.$q.when('Jira Add Worklog: No Update require because we use sub tasks.');
           }
         }
 

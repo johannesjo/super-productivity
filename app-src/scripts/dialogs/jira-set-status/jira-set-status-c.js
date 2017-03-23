@@ -44,7 +44,6 @@
         $localStorage.jiraSettings.transitions[localType] = transition.id;
         $localStorage.jiraSettings.allTransitions = transitions;
       }
-      console.log(vm.userToAssign);
 
       if (vm.userToAssign) {
         Jira.updateAssignee(task, vm.userToAssign)

@@ -303,15 +303,17 @@
 
       if (this.IS_ELECTRON) {
         // add worklog before marking the task as done
-        if (this.TasksUtil.isJiraTask(task) || this.TasksUtil.isJiraTask(parentTask)) {
+        if (this.TasksUtil.isJiraTask(task)) {
           this.Jira.addWorklog(task).then(() => {
             this.Jira.updateStatus(task, 'DONE');
           }, () => {
             this.Jira.updateStatus(task, 'DONE');
           });
         }
-        else if (this.TasksUtil.isJiraTask(task)) {
-          this.Jira.updateStatus(task, 'DONE');
+        // when we have a child task of a jira ticket, we just want to add a worklog
+        // we pass the child task for that, as we might want to use its data for the worklog
+        else if (this.TasksUtil.isJiraTask(parentTask)) {
+          this.Jira.addWorklog(task);
         }
       }
       this.selectNextTask(task);
