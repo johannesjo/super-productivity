@@ -22,7 +22,7 @@
       controllerAs: 'vm',
       restrict: 'A',
       scope: {
-        editOnClickEvId: '@',
+        editOnClickEvId: '<',
         editOnClick: '=',
         editOnClickOnEditFinished: '&'
       }

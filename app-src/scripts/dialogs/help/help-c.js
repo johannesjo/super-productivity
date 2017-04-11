@@ -43,7 +43,7 @@
           author: 'admin',
           body: 'yes comments from Jira are shown too <3'
         }, {
-          author: 'admin',
+          author: 'otherguy',
           body: 'really? that could be useful!'
         }
       ],

@@ -47,7 +47,7 @@
         <ng-md-icon icon="playlist_play"></ng-md-icon>
         Tasks for today
         <span ng-show="vm.totaleEstimate.asSeconds()> 0">
-          ~{{ vm.totaleEstimate|duration}}
+          ~<span ng-bind="vm.totaleEstimate|duration"></span>
         </span>
       </h2>
 
@@ -65,7 +65,7 @@
         <ng-md-icon icon="my_library_books"></ng-md-icon>
         Tasks Backlog
         <span ng-show="vm.totaleEstimateBacklog.asSeconds()> 0">
-          ~{{ vm.totaleEstimateBacklog|duration}}
+          ~<span ng-bind="vm.totaleEstimateBacklog|duration"></span>
         </span>
       </h2>
 
@@ -92,7 +92,7 @@
                    ng-click="vm.limitBacklogTo = false"
                    ng-hide="vm.limitBacklogTo === false || r.backlogTasks.length <=vm.limitBacklogTo ||r.backlogTasks.length ===0">
           <ng-md-icon icon="remove_red_eye"></ng-md-icon>
-          Show All {{ r.backlogTasks.length }} items in Backlog
+          Show All <span ng-bind="r.backlogTasks.length"></span> items in Backlog
         </md-button>
 
         <md-button class="md-primary"

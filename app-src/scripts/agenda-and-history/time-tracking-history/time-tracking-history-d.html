@@ -1,18 +1,20 @@
 <div ng-repeat="(yearKey, yearVal) in vm.worklog"
      class="year">
-  <div class="year-title md-display-2">{{ ::yearKey }}</div>
-  <div class="year-time-spent">Time spent total: <strong>{{ ::yearVal.timeSpent|duration }}</strong></div>
+  <div class="year-title md-display-2"
+       ng-bind="::yearKey"></div>
+  <div class="year-time-spent">Time spent total: <strong ng-bind="::yearVal.timeSpent|duration"></strong></div>
 
   <div ng-repeat="(monthKey, monthVal) in yearVal.entries"
        class="month">
-    <div class="month-title md-headline">{{ ::monthKey|numberToMonth }}
+    <div class="month-title md-headline">
+      <span ng-bind="::monthKey|numberToMonth"></span>
       <md-button class="md-raised md-primary md-icon-button"
                  aria-label="export data"
                  ng-click="vm.exportData('MONTH',monthVal)">
         <ng-md-icon icon="call_made"></ng-md-icon>
       </md-button>
     </div>
-    <div class="month-time-spent">Time spent total: <strong>{{ ::monthVal.timeSpent|duration }}</strong>
+    <div class="month-time-spent">Time spent total: <strong ng-bind="::monthVal.timeSpent|duration"></strong>
     </div>
     <div ng-repeat="(dayKey, worklogForDay) in monthVal.entries"
          class="day">
@@ -23,15 +25,15 @@
                    ng-click="worklogForDay.isVisible=!worklogForDay.isVisible;">
           <ng-md-icon icon="list"></ng-md-icon>
         </md-button>
-        {{ ::worklogForDay.dateStr|amDateFormat:'DD-MM-YYYY, dddd' }}:
-        <strong>{{ ::worklogForDay.timeSpent|duration }}</strong>
+        <span ng-bind="::worklogForDay.dateStr|amDateFormat:'DD-MM-YYYY, dddd'"></span>:
+        <strong ng-bind="::worklogForDay.timeSpent|duration"></strong>
       </div>
 
       <table class="task-summary-table"
              ng-if="worklogForDay.isVisible">
         <tr ng-repeat="logEntry in worklogForDay.entries track by logEntry.task.id">
-          <td>{{ ::logEntry.task.title }}</td>
-          <td>{{ ::logEntry.task.timeSpentOnDay[worklogForDay.dateStr] |duration}}</td>
+          <td ng-bind="::logEntry.task.title"></td>
+          <td ng-bind="::logEntry.task.timeSpentOnDay[worklogForDay.dateStr] |duration"></td>
         </tr>
       </table>
     </div>

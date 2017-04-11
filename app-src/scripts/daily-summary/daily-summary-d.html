@@ -15,13 +15,13 @@
 
 <p>
   <ng-md-icon icon="check"></ng-md-icon>
-  Tasks completed: <strong>{{vm.doneTasks.length}}/{{ r.tasks.length }}</strong></p>
+  Tasks completed: <strong><span ng-bind="vm.doneTasks.length"></span>/<span ng-bind="r.tasks.length"></span></strong></p>
 <p>
   <ng-md-icon icon="timer"></ng-md-icon>
-  Total time spent total on todays task: <strong>{{ vm.totalTimeSpentTasks|duration }}</strong></p>
+  Total time spent total on todays task: <strong ng-bind="vm.totalTimeSpentTasks|duration"></strong></p>
 <p>
   <ng-md-icon icon="timer"></ng-md-icon>
-  Total time spent today: <strong>{{ vm.totalTimeSpentToday|duration }}</strong></p>
+  Total time spent today: <strong ng-bind="vm.totalTimeSpentToday|duration"></strong></p>
 
 <h2 class="md-title">These are the tasks you worked on today</h2>
 
@@ -37,17 +37,13 @@
 
   <tr ng-repeat="task in r.tasks"
       ng-class="{'is-done': task.isDone}">
-    <td>{{ task.title }}</td>
+    <td ng-bind="task.title"></td>
     <td>
-      <span ng-repeat="task in task.subTasks">{{ task.title }}: {{ task.timeSpentOnDay[vm.todayStr]|duration }}<br></span>
+      <span ng-repeat="task in task.subTasks"><span ng-bind="task.title"></span>: <span ng-bind="task.timeSpentOnDay[vm.todayStr]|duration"></span><br></span>
     </td>
-    <td>
-      {{ task.timeSpentOnDay[vm.todayStr] |duration }}
-    </td>
-    <td>
-      {{ task.timeSpent |duration }}
-    </td>
-    <td>{{ task.timeEstimate |duration }}</td>
+    <td ng-bind="task.timeSpentOnDay[vm.todayStr] |duration"></td>
+    <td ng-bind="task.timeSpent |duration"></td>
+    <td ng-bind="task.timeEstimate |duration"></td>
     <td>
       <ng-md-icon icon="check"
                   ng-show="task.isDone"
@@ -71,7 +67,7 @@
     Your distractions for today
   </h2>
   <ul>
-    <li ng-repeat="distraction in r.distractions track by $index">{{ distraction }}</li>
+    <li ng-repeat="distraction in r.distractions track by $index" ng-bind="distraction"></li>
   </ul>
   <md-button class="md-raised"
              ng-click="r.distractions=[]">
@@ -84,7 +80,7 @@
 <section class="commits"
          ng-if="vm.commitLog">
   <h2 class="md-title">Todays commits</h2>
-  <pre><code>{{ vm.commitLog }}</code></pre>
+  <pre><code ng-bind="::vm.commitLog"></code></pre>
 </section>
 
 <h2 class="md-title">

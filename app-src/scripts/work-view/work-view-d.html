@@ -1,10 +1,10 @@
 <header class="work-view-header">
   <p>
     <ng-md-icon icon="playlist_play"></ng-md-icon>
-    Working today: <strong>{{ vm.totalTimeWorkedToday|duration }}</strong>
+    Working today: <strong ng-bind="vm.totalTimeWorkedToday|duration"></strong>
     <ng-md-icon icon="timer"></ng-md-icon>
     –
-    Estimate remaining: ~<strong>{{ vm.totalEstimationRemaining|duration }}</strong>
+    Estimate remaining: ~<strong ng-bind="vm.totalEstimationRemaining|duration"></strong>
     <ng-md-icon icon="timer"></ng-md-icon>
   </p>
 </header>
@@ -14,7 +14,6 @@
 
   <task-list tasks="vm.tasksUndone"
              current-task-id="r.currentTask.id"
-             current-task-id=""
              on-task-done-changed="vm.onTaskDoneChangedUndoneList(task)"
              allow-task-selection="true"></task-list>
 </section>

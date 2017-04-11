@@ -1,6 +1,6 @@
 <div class="collapsible-title md-caption"
       ng-class="{'is-expanded':vm.isExpanded}"
-      ng-click="vm.toggleExpand();"><ng-md-icon icon="expand_more"></ng-md-icon><span>{{ :: vm.title}}</span></div>
+      ng-click="vm.toggleExpand();"><ng-md-icon icon="expand_more"></ng-md-icon><span ng-bind=":: vm.title"></span></div>
 <div class="collapsible-panel"
      ng-if="vm.isExpanded"
      ng-transclude></div>
