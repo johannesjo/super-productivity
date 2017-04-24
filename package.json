@@ -3,7 +3,10 @@
   "version": "1.0.0",
   "description": "Personal Task Management App to help you with your daily struggle with JIRA etc.",
   "main": "./electron/main.js",
-  "repository": {},
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/johannesjo/super-productivity.git"
+  },
   "homepage": "http://super-productivity.com",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
