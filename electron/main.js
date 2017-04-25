@@ -7,6 +7,8 @@ const notifier = require('node-notifier');
 const open = require('open');
 const CONFIG = require('./CONFIG');
 const ICONS_FOLDER = __dirname + '/assets/icons/';
+const IS_MAC = process.platform === 'darwin';
+const IS_DEV = process.env.NODE_ENV === 'DEV';
 
 const idle = require('./idle');
 const jira = require('./jira');
@@ -32,14 +34,14 @@ let darwinForceQuit = false;
 function createWindow() {
   let frontendDir;
 
-  if (process.env.NODE_ENV === 'DEV') {
+  if (IS_DEV) {
     frontendDir = 'app-src';
   } else {
     frontendDir = 'app';
   }
 
   // Create the browser window.
-  mainWin = new BrowserWindow({width: 800, height: 600});
+  mainWin = new BrowserWindow({ width: 800, height: 600 });
 
   // and load the index.html of the app.
   mainWin.loadURL(url.format({
@@ -55,35 +57,36 @@ function createWindow() {
   // Open the DevTools.
   //mainWin.webContents.openDevTools();
 
-  // Create application menu to enable copy & pasting on MacOS
-  var menuTpl = [{
-    label: 'Application',
-    submenu: [
-      {label: 'About Application', selector: 'orderFrontStandardAboutPanel:'},
-      {type: 'separator'},
-      {
-        label: 'Quit', click: function () {
-        app.quit();
-      }
-      }
-    ]
-  }, {
-    label: 'Edit',
-    submenu: [
-      {label: 'Undo', accelerator: 'CmdOrCtrl+Z', selector: 'undo:'},
-      {label: 'Redo', accelerator: 'Shift+CmdOrCtrl+Z', selector: 'redo:'},
-      {type: 'separator'},
-      {label: 'Cut', accelerator: 'CmdOrCtrl+X', selector: 'cut:'},
-      {label: 'Copy', accelerator: 'CmdOrCtrl+C', selector: 'copy:'},
-      {label: 'Paste', accelerator: 'CmdOrCtrl+V', selector: 'paste:'},
-      {label: 'Select All', accelerator: 'CmdOrCtrl+A', selector: 'selectAll:'}
-    ]
+  if (IS_MAC) {
+    // Create application menu to enable copy & pasting on MacOS
+    const menuTpl = [{
+      label: 'Application',
+      submenu: [
+        { label: 'About Application', selector: 'orderFrontStandardAboutPanel:' },
+        { type: 'separator' },
+        {
+          label: 'Quit', click: function () {
+          app.quit();
+        }
+        }
+      ]
+    }, {
+      label: 'Edit',
+      submenu: [
+        { label: 'Undo', accelerator: 'CmdOrCtrl+Z', selector: 'undo:' },
+        { label: 'Redo', accelerator: 'Shift+CmdOrCtrl+Z', selector: 'redo:' },
+        { type: 'separator' },
+        { label: 'Cut', accelerator: 'CmdOrCtrl+X', selector: 'cut:' },
+        { label: 'Copy', accelerator: 'CmdOrCtrl+C', selector: 'copy:' },
+        { label: 'Paste', accelerator: 'CmdOrCtrl+V', selector: 'paste:' },
+        { label: 'Select All', accelerator: 'CmdOrCtrl+A', selector: 'selectAll:' }
+      ]
+    }
+    ];
+
+    // we need to set a menu to get copy & paste working for mac os x
+    electron.Menu.setApplicationMenu(electron.Menu.buildFromTemplate(menuTpl));
   }
-  ];
-
-  // we need to set a menu to get copy & paste working for mac os x
-  electron.Menu.setApplicationMenu(electron.Menu.buildFromTemplate(menuTpl));
-
 
   // open new window links in browser
   mainWin.webContents.on('new-window', function (event, url) {
@@ -93,7 +96,7 @@ function createWindow() {
 
   mainWin.on('close', function (event) {
     // handle darwin
-    if (process.platform === 'darwin') {
+    if (IS_MAC) {
       if (!darwinForceQuit) {
         event.preventDefault();
         mainWin.hide();
@@ -141,7 +144,7 @@ app.on('ready', createWindow);
 let tray = null;
 app.on('ready', () => {
   let trayIcoFile;
-  if (process.platform === 'darwin') {
+  if (IS_MAC) {
     trayIcoFile = 'tray-ico-dark.png'
   } else {
     trayIcoFile = 'tray-ico.png'
@@ -190,7 +193,7 @@ app.on('before-quit', () => {
   }
 
   // handle darwin
-  if (process.platform === 'darwin') {
+  if (IS_MAC) {
     darwinForceQuit = true;
   }
 
