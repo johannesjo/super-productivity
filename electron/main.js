@@ -5,11 +5,17 @@ const powerSaveBlocker = require('electron').powerSaveBlocker;
 const moment = require('moment');
 const notifier = require('node-notifier');
 const open = require('open');
+const fs = require('fs');
 const CONFIG = require('./CONFIG');
 const ICONS_FOLDER = __dirname + '/assets/icons/';
 const IS_MAC = process.platform === 'darwin';
+const IS_LINUX = process.platform === 'linux';
 const IS_DEV = process.env.NODE_ENV === 'DEV';
 
+const DESKTOP_ENV = process.env.DESKTOP_SESSION;
+const IS_GNOME = (DESKTOP_ENV === 'gnome');
+
+const dbus = require('./dbus');
 const idle = require('./idle');
 const jira = require('./jira');
 const gitLog = require('./git-log');
@@ -31,6 +37,15 @@ let mainWin;
 let lastIdleTime;
 let darwinForceQuit = false;
 
+// check if shell extension is installed
+let isGnomeShellExtInstalled = false;
+if (IS_LINUX && IS_GNOME) {
+  const HOME_DIR = process.env[(process.platform === 'win32') ? 'USERPROFILE' : 'HOME'];
+  if (fs.existsSync(HOME_DIR + '/.local/share/gnome-shell/extensions/indicator@johannes.super-productivity.com')) {
+    isGnomeShellExtInstalled = true;
+  }
+}
+
 function createWindow() {
   let frontendDir;
 
@@ -42,6 +57,10 @@ function createWindow() {
 
   // Create the browser window.
   mainWin = new BrowserWindow({ width: 800, height: 600 });
+
+  if (isGnomeShellExtInstalled) {
+    dbus.setMainWindow(mainWin);
+  }
 
   // and load the index.html of the app.
   mainWin.loadURL(url.format({
@@ -65,9 +84,7 @@ function createWindow() {
         { label: 'About Application', selector: 'orderFrontStandardAboutPanel:' },
         { type: 'separator' },
         {
-          label: 'Quit', click: function () {
-          app.quit();
-        }
+          label: 'Quit', click: quitApp
         }
       ]
     }, {
@@ -115,6 +132,14 @@ function createWindow() {
   });
 }
 
+function showApp() {
+  mainWin.show();
+}
+function quitApp() {
+  app.isQuiting = true;
+  app.quit();
+}
+
 function showOrFocus(win) {
   if (win.isVisible()) {
     win.focus();
@@ -133,7 +158,7 @@ let shouldQuitBecauseAppIsAnotherInstance = app.makeSingleInstance(() => {
   }
 });
 if (shouldQuitBecauseAppIsAnotherInstance) {
-  app.quit();
+  quitApp();
 }
 
 // This method will be called when Electron has finished
@@ -144,6 +169,12 @@ app.on('ready', createWindow);
 let tray = null;
 app.on('ready', () => {
   let trayIcoFile;
+
+  if (isGnomeShellExtInstalled) {
+
+    return;
+  }
+
   if (IS_MAC) {
     trayIcoFile = 'tray-ico-dark.png'
   } else {
@@ -153,22 +184,17 @@ app.on('ready', () => {
   tray = new electron.Tray(ICONS_FOLDER + trayIcoFile);
   let contextMenu = electron.Menu.buildFromTemplate([
     {
-      label: 'Show App', click: () => {
-      mainWin.show();
-    }
+      label: 'Show App', click: showApp
     },
     {
-      label: 'Quit', click: () => {
-      app.isQuiting = true;
-      app.quit();
-    }
+      label: 'Quit', click: quitApp
     }
   ]);
   // mac os only
   tray.setContextMenu(contextMenu);
 
   tray.on('click', () => {
-    mainWin.show();
+    showApp();
   });
 });
 
@@ -178,7 +204,7 @@ app.on('activate', function () {
   if (mainWin === null) {
     createWindow();
   } else {
-    mainWin.show();
+    showApp();
   }
 
 });
@@ -202,10 +228,7 @@ app.on('before-quit', () => {
 });
 
 // listen to events from frontend
-electron.ipcMain.on('SHUTDOWN', () => {
-  app.isQuiting = true;
-  app.quit();
-});
+electron.ipcMain.on('SHUTDOWN', quitApp);
 
 electron.ipcMain.on('REGISTER_GLOBAL_SHORTCUT', (ev, shortcutPassed) => {
   if (shortcutPassed) {
@@ -263,8 +286,15 @@ electron.ipcMain.on('CHANGED_CURRENT_TASK', (ev, task) => {
     if (tray) {
       tray.setTitle(title + ' ' + timeStr);
     }
+    if (isGnomeShellExtInstalled) {
+      dbus.setTask(title + ' ' + timeStr);
+    }
 
     saveLastTitle = task.title;
+  } else {
+    if (isGnomeShellExtInstalled) {
+      dbus.setTask('NONE');
+    }
   }
   // Call this again for Linux because we modified the context menu
   //tray.setContextMenu(contextMenu)

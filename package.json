@@ -43,8 +43,6 @@
     "browser-sync": "latest",
     "del": "latest",
     "ecstatic": "latest",
-    "electron": "^1.4.15",
-    "electron-prebuilt": "^1.4.13",
     "gulp": "latest",
     "gulp-autoprefixer": "latest",
     "gulp-babel": "^6.1.2",
@@ -89,6 +87,8 @@
     "yargs": "latest"
   },
   "dependencies": {
+    "dbus-native": "^0.2.0",
+    "electron": "^1.6.6",
     "jira-client": "git+https://github.com/johannesjo/node-jira-client.git",
     "moment": "^2.17.1",
     "moment-duration-format": "^1.3.0",
