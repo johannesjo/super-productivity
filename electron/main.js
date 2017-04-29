@@ -287,13 +287,13 @@ electron.ipcMain.on('CHANGED_CURRENT_TASK', (ev, task) => {
       tray.setTitle(title + ' ' + timeStr);
     }
     if (isGnomeShellExtInstalled) {
-      dbus.setTask(title + ' ' + timeStr);
+      dbus.setTask(task.id, title + ' ' + timeStr);
     }
 
     saveLastTitle = task.title;
   } else {
     if (isGnomeShellExtInstalled) {
-      dbus.setTask('NONE');
+      dbus.setTask(null, 'NONE');
     }
   }
   // Call this again for Linux because we modified the context menu

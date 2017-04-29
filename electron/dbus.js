@@ -115,12 +115,12 @@ module.exports = {
   setMainWindow: (mainWindowPassed) => {
     mainWindow = mainWindowPassed;
   },
-  setTask: (taskText) => {
+  setTask: (taskId, taskText) => {
     if (!iface) {
       console.error('interface not ready yet');
       return;
     }
 
-    iface.emit('taskChanged', taskText)
+    iface.emit('taskChanged', taskId, taskText)
   }
 };
