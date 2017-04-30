@@ -45,6 +45,9 @@
               // track
               that.addTimeSpent(that.$localStorage.currentTask, timeSpentInMs);
 
+              // update indicator
+              window.ipcRenderer.send(IPC_EVENT_CURRENT_TASK_UPDATED, that.$localStorage.currentTask);
+
               // we need to manually call apply as that is an outside event
               that.$rootScope.$apply();
             }

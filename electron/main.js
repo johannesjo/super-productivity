@@ -58,10 +58,6 @@ function createWindow() {
   // Create the browser window.
   mainWin = new BrowserWindow({ width: 800, height: 600 });
 
-  if (isGnomeShellExtInstalled) {
-    dbus.setMainWindow(mainWin);
-  }
-
   // and load the index.html of the app.
   mainWin.loadURL(url.format({
     pathname: path.join(__dirname, '../' + frontendDir + '/index.html'),
@@ -171,7 +167,12 @@ app.on('ready', () => {
   let trayIcoFile;
 
   if (isGnomeShellExtInstalled) {
-
+    dbus.init({
+      mainWin,
+      quitApp,
+      showApp,
+    });
+    dbus.setMainWindow(mainWin);
     return;
   }
 
@@ -267,6 +268,7 @@ electron.ipcMain.on('NOTIFY', (ev, notification) => {
 });
 
 let saveLastTitle;
+// TODO change this to include the last current task as well
 electron.ipcMain.on('CHANGED_CURRENT_TASK', (ev, task) => {
   if (task && task.title) {
     let title = task.title;
@@ -278,16 +280,21 @@ electron.ipcMain.on('CHANGED_CURRENT_TASK', (ev, task) => {
 
     if (task.timeSpent && task.timeSpent._data) {
       task.timeSpent = moment.duration(task.timeSpent._data);
-      timeStr += parseInt(task.timeSpent.asMinutes()).toString() + 'm';
+      timeStr += parseInt(task.timeSpent.asMinutes()).toString();
     }
-    if (task.timeEstimate) {
-      timeStr += '/' + moment.duration(task.timeEstimate).asMinutes() + 'm ';
+    task.timeEstimate = task.timeEstimate && moment.duration(task.timeEstimate._data);
+    const timeEstimateAsMin = moment.duration(task.timeEstimate).asMinutes();
+    if (task.timeEstimate && timeEstimateAsMin > 0) {
+      timeStr += '/' + timeEstimateAsMin;
     }
+
+    const msg = title + ' | ' + timeStr + 'm ';
+
     if (tray) {
-      tray.setTitle(title + ' ' + timeStr);
+      tray.setTitle(msg);
     }
     if (isGnomeShellExtInstalled) {
-      dbus.setTask(task.id, title + ' ' + timeStr);
+      dbus.setTask(task.id, msg);
     }
 
     saveLastTitle = task.title;
