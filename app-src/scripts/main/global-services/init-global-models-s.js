@@ -26,6 +26,9 @@
       // we want the current task to be a reference to the tasks array
       // that's why we need to reassign
       $rootScope.r.currentTask = $localStorage.currenTask = Tasks.getCurrent();
+      if ($localStorage.currenTask) {
+        Tasks.updateCurrent($localStorage.currenTask);
+      }
 
       // reset session
       $localStorage.currentSession = {};
