@@ -267,12 +267,11 @@ electron.ipcMain.on('NOTIFY', (ev, notification) => {
   notifier.notify(notification);
 });
 
-let saveLastTitle;
-// TODO change this to include the last current task as well
-electron.ipcMain.on('CHANGED_CURRENT_TASK', (ev, task) => {
+function createIndicatorStr(task) {
   if (task && task.title) {
     let title = task.title;
     let timeStr = '';
+    let msg;
 
     if (title.length > 50) {
       title = title.substring(0, 47) + '...';
@@ -288,23 +287,32 @@ electron.ipcMain.on('CHANGED_CURRENT_TASK', (ev, task) => {
       timeStr += '/' + timeEstimateAsMin;
     }
 
-    const msg = title + ' | ' + timeStr + 'm ';
+    msg = title + ' | ' + timeStr + 'm ';
+    return msg;
+  }
+}
+electron.ipcMain.on('CHANGED_CURRENT_TASK', (ev, params) => {
+  const currentTask = params.current;
+  const lastCurrentTask = params.lastCurrent;
+
+  if (currentTask && currentTask.title) {
+    const msg = createIndicatorStr(currentTask);
 
     if (tray) {
       tray.setTitle(msg);
     }
-    if (isGnomeShellExtInstalled) {
-      dbus.setTask(task.id, msg);
-    }
 
-    saveLastTitle = task.title;
+    if (isGnomeShellExtInstalled) {
+      dbus.setTask(currentTask.id, msg);
+    }
+  } else if (isGnomeShellExtInstalled && !currentTask && lastCurrentTask && !lastCurrentTask.isDone) {
+    const msg = createIndicatorStr(lastCurrentTask);
+    dbus.setTask('PAUSED', msg);
   } else {
     if (isGnomeShellExtInstalled) {
-      dbus.setTask(null, 'NONE');
+      dbus.setTask('NONE', 'NONE');
     }
   }
-  // Call this again for Linux because we modified the context menu
-  //tray.setContextMenu(contextMenu)
 });
 
 function showIdleDialog(idleTimeInMs) {

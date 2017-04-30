@@ -12,6 +12,9 @@
   const IPC_EVENT_IDLE = 'WAS_IDLE';
   const IPC_EVENT_UPDATE_TIME_SPEND_FOR_CURRENT = 'UPDATE_TIME_SPEND';
   const IPC_EVENT_CURRENT_TASK_UPDATED = 'CHANGED_CURRENT_TASK';
+  const IPC_EVENT_TASK_MARK_AS_DONE = 'TASK_MARK_AS_DONE';
+  const IPC_EVENT_TASK_START = 'TASK_START';
+  const IPC_EVENT_TASK_PAUSE = 'TASK_PAUSE';
 
   /* @ngInject */
   class Tasks {
@@ -46,7 +49,10 @@
               that.addTimeSpent(that.$localStorage.currentTask, timeSpentInMs);
 
               // update indicator
-              window.ipcRenderer.send(IPC_EVENT_CURRENT_TASK_UPDATED, that.$localStorage.currentTask);
+              window.ipcRenderer.send(IPC_EVENT_CURRENT_TASK_UPDATED, {
+                current: that.$localStorage.currentTask,
+                lastCurrent: that.lastCurrentTask
+              });
 
               // we need to manually call apply as that is an outside event
               that.$rootScope.$apply();
@@ -76,6 +82,31 @@
                 TakeABreakReminder.isShown = true;
                 isIdleDialogOpen = false;
               });
+          }
+        });
+
+        // handlers for dbus events
+        window.ipcRenderer.on(IPC_EVENT_TASK_MARK_AS_DONE, () => {
+          if (that.$localStorage.currentTask) {
+            that.markAsDone(that.$localStorage.currentTask);
+            that.$rootScope.$apply();
+          } else if (that.lastCurrentTask) {
+            that.markAsDone(that.lastCurrentTask);
+            that.$rootScope.$apply();
+          }
+        });
+        window.ipcRenderer.on(IPC_EVENT_TASK_START, () => {
+          if (!that.$localStorage.currentTask && that.lastCurrentTask) {
+            that.updateCurrent(that.lastCurrentTask);
+            that.$rootScope.$apply();
+          } else {
+
+          }
+        });
+        window.ipcRenderer.on(IPC_EVENT_TASK_PAUSE, () => {
+          if (that.$localStorage.currentTask) {
+            that.updateCurrent(undefined);
+            that.$rootScope.$apply();
           }
         });
       }
@@ -297,6 +328,7 @@
 
     markAsDone(task) {
       const parentTask = task.parentId && this.getById(task.parentId);
+      console.log('markAsDone');
 
       // unset current task first
       this.updateCurrent(undefined);
@@ -325,6 +357,7 @@
     updateCurrent(task, isCallFromTimeTracking) {
       const isCurrentTaskChanged = this.TasksUtil.isTaskChanged(task, this.$localStorage.currentTask);
       const that = this;
+      this.lastCurrentTask = this.$localStorage.currentTask;
 
       function moveInProgress(task) {
         if (isCurrentTaskChanged) {
@@ -372,9 +405,14 @@
                 });
             }
           }
-
-          window.ipcRenderer.send(IPC_EVENT_CURRENT_TASK_UPDATED, task);
         }
+      }
+
+      if (this.IS_ELECTRON) {
+        window.ipcRenderer.send(IPC_EVENT_CURRENT_TASK_UPDATED, {
+          current: task,
+          lastCurrent: this.lastCurrentTask
+        });
       }
 
       this.$localStorage.currentTask = task;

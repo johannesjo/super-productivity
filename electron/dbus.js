@@ -66,31 +66,27 @@ function init(params) {
           console.error('mainWindow not ready');
         }
         console.log('markAsDone');
-
+        mainWindow.webContents.send('TASK_MARK_AS_DONE');
       },
      startTask: function () {
         if (!mainWindow) {
           console.error('mainWindow not ready');
         }
        console.log('startTask');
+       mainWindow.webContents.send('TASK_START');
      },
       pauseTask: function () {
         if (!mainWindow) {
           console.error('mainWindow not ready');
         }
         console.log('pauseTask');
+        mainWindow.webContents.send('TASK_PAUSE');
       },
       showApp: function () {
-        if (!mainWindow) {
-          console.error('mainWindow not ready');
-        }
         console.log('show app');
         params.showApp();
       },
       quitApp: function () {
-        if (!mainWindow) {
-          console.error('mainWindow not ready');
-        }
         params.quitApp();
         console.log('quit app');
       },
