@@ -2,7 +2,6 @@
 
 const electron = require('electron');
 const powerSaveBlocker = require('electron').powerSaveBlocker;
-const moment = require('moment');
 const notifier = require('node-notifier');
 const open = require('open');
 const fs = require('fs');
@@ -10,16 +9,15 @@ const CONFIG = require('./CONFIG');
 const ICONS_FOLDER = __dirname + '/assets/icons/';
 const IS_MAC = process.platform === 'darwin';
 const IS_LINUX = process.platform === 'linux';
-const IS_DEV = process.env.NODE_ENV === 'DEV';
-
 const DESKTOP_ENV = process.env.DESKTOP_SESSION;
 const IS_GNOME = (DESKTOP_ENV === 'gnome');
+const IS_DEV = process.env.NODE_ENV === 'DEV';
 
-const dbus = require('./dbus');
+const indicator = require('./indicator');
+
 const idle = require('./idle');
 const jira = require('./jira');
 const gitLog = require('./git-log');
-const pyGtkIndicator = require('./py-gtk-indicator');
 
 powerSaveBlocker.start('prevent-app-suspension');
 
@@ -36,15 +34,6 @@ const url = require('url');
 let mainWin;
 let lastIdleTime;
 let darwinForceQuit = false;
-
-// check if shell extension is installed
-let isGnomeShellExtInstalled = false;
-if (IS_LINUX && IS_GNOME) {
-  const HOME_DIR = process.env[(process.platform === 'win32') ? 'USERPROFILE' : 'HOME'];
-  if (fs.existsSync(HOME_DIR + '/.local/share/gnome-shell/extensions/indicator@johannes.super-productivity.com')) {
-    isGnomeShellExtInstalled = true;
-  }
-}
 
 function createWindow() {
   let frontendDir;
@@ -166,40 +155,16 @@ if (shouldQuitBecauseAppIsAnotherInstance) {
 // Some APIs can only be used after this event occurs.
 app.on('ready', createWindow);
 
-let tray = null;
 app.on('ready', () => {
-  let trayIcoFile;
-
-  if (isGnomeShellExtInstalled) {
-    dbus.init({
-      mainWin,
-      quitApp,
-      showApp,
-    });
-    dbus.setMainWindow(mainWin);
-    return;
-  }
-
-  if (IS_MAC) {
-    trayIcoFile = 'tray-ico-dark.png'
-  } else {
-    trayIcoFile = 'tray-ico.png'
-  }
-
-  tray = new electron.Tray(ICONS_FOLDER + trayIcoFile);
-  let contextMenu = electron.Menu.buildFromTemplate([
-    {
-      label: 'Show App', click: showApp
-    },
-    {
-      label: 'Quit', click: quitApp
-    }
-  ]);
-  // mac os only
-  tray.setContextMenu(contextMenu);
-
-  tray.on('click', () => {
-    showApp();
+  indicator.init({
+    app,
+    mainWin,
+    showApp,
+    quitApp,
+    IS_MAC,
+    IS_LINUX,
+    IS_GNOME,
+    ICONS_FOLDER,
   });
 });
 
@@ -219,10 +184,6 @@ app.on('ready', () => {
 });
 
 app.on('before-quit', () => {
-  if (tray) {
-    tray.destroy();
-  }
-
   // handle darwin
   if (IS_MAC) {
     darwinForceQuit = true;
@@ -269,54 +230,6 @@ electron.ipcMain.on('GIT_LOG', (ev, cwd) => {
 
 electron.ipcMain.on('NOTIFY', (ev, notification) => {
   notifier.notify(notification);
-});
-
-function createIndicatorStr(task) {
-  if (task && task.title) {
-    let title = task.title;
-    let timeStr = '';
-    let msg;
-
-    if (title.length > 50) {
-      title = title.substring(0, 47) + '...';
-    }
-
-    if (task.timeSpent && task.timeSpent._data) {
-      task.timeSpent = moment.duration(task.timeSpent._data);
-      timeStr += parseInt(task.timeSpent.asMinutes()).toString();
-    }
-    task.timeEstimate = task.timeEstimate && moment.duration(task.timeEstimate._data);
-    const timeEstimateAsMin = moment.duration(task.timeEstimate).asMinutes();
-    if (task.timeEstimate && timeEstimateAsMin > 0) {
-      timeStr += '/' + timeEstimateAsMin;
-    }
-
-    msg = title + ' | ' + timeStr + 'm ';
-    return msg;
-  }
-}
-electron.ipcMain.on('CHANGED_CURRENT_TASK', (ev, params) => {
-  const currentTask = params.current;
-  const lastCurrentTask = params.lastCurrent;
-
-  if (currentTask && currentTask.title) {
-    const msg = createIndicatorStr(currentTask);
-
-    if (tray) {
-      tray.setTitle(msg);
-    }
-
-    if (isGnomeShellExtInstalled) {
-      dbus.setTask(currentTask.id, msg);
-    }
-  } else if (isGnomeShellExtInstalled && !currentTask && lastCurrentTask && !lastCurrentTask.isDone) {
-    const msg = createIndicatorStr(lastCurrentTask);
-    dbus.setTask('PAUSED', msg);
-  } else {
-    if (isGnomeShellExtInstalled) {
-      dbus.setTask('NONE', 'NONE');
-    }
-  }
 });
 
 function showIdleDialog(idleTimeInMs) {
