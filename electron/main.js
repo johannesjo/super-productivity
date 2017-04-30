@@ -3,7 +3,6 @@
 const electron = require('electron');
 const powerSaveBlocker = require('electron').powerSaveBlocker;
 const notifier = require('node-notifier');
-const open = require('open');
 const fs = require('fs');
 const CONFIG = require('./CONFIG');
 const ICONS_FOLDER = __dirname + '/assets/icons/';
@@ -13,108 +12,139 @@ const DESKTOP_ENV = process.env.DESKTOP_SESSION;
 const IS_GNOME = (DESKTOP_ENV === 'gnome');
 const IS_DEV = process.env.NODE_ENV === 'DEV';
 
-const indicator = require('./indicator');
+const indicatorMod = require('./indicator');
+const mainWinMod = require('./main-window');
 
 const idle = require('./idle');
 const jira = require('./jira');
 const gitLog = require('./git-log');
 
-powerSaveBlocker.start('prevent-app-suspension');
-
-// Module to control application life.
 const app = electron.app;
-// Module to create native browser window.
-const BrowserWindow = electron.BrowserWindow;
 
-const path = require('path');
-const url = require('url');
-
-// Keep a global reference of the window object, if you don't, the window will
-// be closed automatically when the JavaScript object is garbage collected.
 let mainWin;
 let lastIdleTime;
+let currentIdleStart;
 let darwinForceQuit = false;
 
-function createWindow() {
-  let frontendDir;
+// keep app active to keep time tracking running
+powerSaveBlocker.start('prevent-app-suspension');
 
-  if (IS_DEV) {
-    frontendDir = 'app-src';
+// make it a single instance by closing other instances
+let shouldQuitBecauseAppIsAnotherInstance = app.makeSingleInstance(() => {
+  if (mainWin) {
+    if (mainWin.isMinimized()) {
+      mainWin.restore();
+    }
+    mainWin.focus();
+  }
+});
+if (shouldQuitBecauseAppIsAnotherInstance) {
+  quitApp();
+}
+
+// APP EVENT LISTENERS
+// -------------------
+app.on('ready', createMainWin);
+app.on('ready', createIndicator);
+
+app.on('activate', function () {
+  // On OS X it's common to re-create a window in the app when the
+  // dock icon is clicked and there are no other windows open.
+  if (mainWin === null) {
+    createMainWin();
   } else {
-    frontendDir = 'app';
+    showApp();
   }
+});
 
-  // Create the browser window.
-  mainWin = new BrowserWindow({ width: 800, height: 600 });
+app.on('ready', () => {
+  setInterval(trackTimeFn, CONFIG.PING_INTERVAL);
+});
 
-  // and load the index.html of the app.
-  mainWin.loadURL(url.format({
-    pathname: path.join(__dirname, '../' + frontendDir + '/index.html'),
-    protocol: 'file:',
-    slashes: true,
-    webPreferences: {
-      scrollBounce: true
-    },
-    icon: ICONS_FOLDER + '/app-icons/icon_256x256.png'
-  }));
-
-  // Open the DevTools.
-  //mainWin.webContents.openDevTools();
-
+app.on('before-quit', () => {
+  // handle darwin
   if (IS_MAC) {
-    // Create application menu to enable copy & pasting on MacOS
-    const menuTpl = [{
-      label: 'Application',
-      submenu: [
-        { label: 'About Application', selector: 'orderFrontStandardAboutPanel:' },
-        { type: 'separator' },
-        {
-          label: 'Quit', click: quitApp
-        }
-      ]
-    }, {
-      label: 'Edit',
-      submenu: [
-        { label: 'Undo', accelerator: 'CmdOrCtrl+Z', selector: 'undo:' },
-        { label: 'Redo', accelerator: 'Shift+CmdOrCtrl+Z', selector: 'redo:' },
-        { type: 'separator' },
-        { label: 'Cut', accelerator: 'CmdOrCtrl+X', selector: 'cut:' },
-        { label: 'Copy', accelerator: 'CmdOrCtrl+C', selector: 'copy:' },
-        { label: 'Paste', accelerator: 'CmdOrCtrl+V', selector: 'paste:' },
-        { label: 'Select All', accelerator: 'CmdOrCtrl+A', selector: 'selectAll:' }
-      ]
-    }
-    ];
-
-    // we need to set a menu to get copy & paste working for mac os x
-    electron.Menu.setApplicationMenu(electron.Menu.buildFromTemplate(menuTpl));
+    darwinForceQuit = true;
   }
 
-  // open new window links in browser
-  mainWin.webContents.on('new-window', function (event, url) {
-    event.preventDefault();
-    open(url);
-  });
+  // un-register all shortcuts.
+  electron.globalShortcut.unregisterAll();
+});
 
-  mainWin.on('close', function (event) {
-    // handle darwin
-    if (IS_MAC) {
-      if (!darwinForceQuit) {
-        event.preventDefault();
+// FRONTEND EVENTS
+// ---------------
+electron.ipcMain.on('SHUTDOWN', quitApp);
+
+electron.ipcMain.on('REGISTER_GLOBAL_SHORTCUT', (ev, shortcutPassed) => {
+  registerShowAppShortCut(shortcutPassed);
+});
+
+electron.ipcMain.on('TOGGLE_DEV_TOOLS', () => {
+  mainWin.webContents.openDevTools();
+});
+
+electron.ipcMain.on('JIRA', (ev, request) => {
+  jira(mainWin, request);
+});
+
+electron.ipcMain.on('GIT_LOG', (ev, cwd) => {
+  gitLog(cwd, mainWin);
+});
+
+electron.ipcMain.on('NOTIFY', (ev, notification) => {
+  notifier.notify(notification);
+});
+
+// HELPER FUNCTIONS
+// ----------------
+function createIndicator() {
+  indicatorMod.init({
+    app,
+    mainWin,
+    showApp,
+    quitApp,
+    IS_MAC,
+    IS_LINUX,
+    IS_GNOME,
+    ICONS_FOLDER,
+  });
+}
+function createMainWin() {
+  mainWin = mainWinMod.createWindow({
+    app,
+    IS_DEV,
+    ICONS_FOLDER,
+    IS_MAC,
+    quitApp,
+  });
+}
+
+function registerShowAppShortCut(shortcutPassed) {
+  if (shortcutPassed) {
+    // unregister all previous
+    electron.globalShortcut.unregisterAll();
+
+    // Register a shortcut listener.
+    const ret = electron.globalShortcut.register(shortcutPassed, () => {
+      if (mainWin.isFocused()) {
         mainWin.hide();
+      } else {
+        showOrFocus(mainWin);
       }
-    } else {
-      if (!app.isQuiting) {
-        event.preventDefault();
-        mainWin.hide();
-      }
+    });
+
+    if (!ret) {
+      console.log('key registration failed');
     }
-  });
+  }
+}
 
-  mainWin.on('minimize', function (event) {
-    event.preventDefault();
-    mainWin.hide();
-  });
+function showIdleDialog(idleTimeInMs) {
+  // first show, then send again
+  mainWin.webContents.send('WAS_IDLE', ({
+    idleTimeInMs: idleTimeInMs,
+    minIdleTimeInMs: CONFIG.MIN_IDLE_TIME
+  }));
 }
 
 function showApp() {
@@ -136,111 +166,6 @@ function showOrFocus(win) {
     win.focus();
   }, 60);
 }
-
-// Make it a single instance
-let shouldQuitBecauseAppIsAnotherInstance = app.makeSingleInstance(() => {
-  if (mainWin) {
-    if (mainWin.isMinimized()) {
-      mainWin.restore();
-    }
-    mainWin.focus();
-  }
-});
-if (shouldQuitBecauseAppIsAnotherInstance) {
-  quitApp();
-}
-
-// This method will be called when Electron has finished
-// initialization and is ready to create browser windows.
-// Some APIs can only be used after this event occurs.
-app.on('ready', createWindow);
-
-app.on('ready', () => {
-  indicator.init({
-    app,
-    mainWin,
-    showApp,
-    quitApp,
-    IS_MAC,
-    IS_LINUX,
-    IS_GNOME,
-    ICONS_FOLDER,
-  });
-});
-
-app.on('activate', function () {
-  // On OS X it's common to re-create a window in the app when the
-  // dock icon is clicked and there are no other windows open.
-  if (mainWin === null) {
-    createWindow();
-  } else {
-    showApp();
-  }
-
-});
-
-app.on('ready', () => {
-  setInterval(trackTimeFn, CONFIG.PING_INTERVAL);
-});
-
-app.on('before-quit', () => {
-  // handle darwin
-  if (IS_MAC) {
-    darwinForceQuit = true;
-  }
-
-  // Unregister all shortcuts.
-  electron.globalShortcut.unregisterAll();
-});
-
-// listen to events from frontend
-electron.ipcMain.on('SHUTDOWN', quitApp);
-
-electron.ipcMain.on('REGISTER_GLOBAL_SHORTCUT', (ev, shortcutPassed) => {
-  if (shortcutPassed) {
-    // unregister all previous
-    electron.globalShortcut.unregisterAll();
-
-    // Register a shortcut listener.
-    const ret = electron.globalShortcut.register(shortcutPassed, () => {
-      if (mainWin.isFocused()) {
-        mainWin.hide();
-      } else {
-        showOrFocus(mainWin);
-      }
-    });
-
-    if (!ret) {
-      console.log('key registration failed');
-    }
-  }
-});
-
-electron.ipcMain.on('TOGGLE_DEV_TOOLS', () => {
-  mainWin.webContents.openDevTools();
-});
-
-electron.ipcMain.on('JIRA', (ev, request) => {
-  jira(mainWin, request);
-});
-
-electron.ipcMain.on('GIT_LOG', (ev, cwd) => {
-  gitLog(cwd, mainWin);
-});
-
-electron.ipcMain.on('NOTIFY', (ev, notification) => {
-  notifier.notify(notification);
-});
-
-function showIdleDialog(idleTimeInMs) {
-  // first show, then send again
-  mainWin.webContents.send('WAS_IDLE', ({
-    idleTimeInMs: idleTimeInMs,
-    minIdleTimeInMs: CONFIG.MIN_IDLE_TIME
-  }));
-}
-
-let currentIdleStart;
 
 function trackTimeFn() {
   idle((stdout) => {
