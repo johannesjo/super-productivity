@@ -129,7 +129,7 @@ function createWindow() {
 }
 
 function showApp() {
-  mainWin.show();
+  showOrFocus(mainWin);
 }
 function quitApp() {
   app.isQuiting = true;
@@ -142,6 +142,10 @@ function showOrFocus(win) {
   } else {
     win.show();
   }
+
+  setTimeout(() => {
+    win.focus();
+  }, 60);
 }
 
 // Make it a single instance
