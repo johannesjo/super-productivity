@@ -65,7 +65,7 @@
       // check if anchor link was clicked
       if ($event.target.tagName !== 'A') {
         vm.showEdit = true;
-        vm.ngModelCopy = angular.copy(vm.ngModel);
+        vm.ngModelCopy = angular.copy(vm.ngModel) || '';
 
         $timeout(function () {
           const textareaEl = angular.element($element.find('textarea'));
