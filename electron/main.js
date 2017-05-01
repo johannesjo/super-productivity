@@ -4,6 +4,7 @@ const electron = require('electron');
 const powerSaveBlocker = require('electron').powerSaveBlocker;
 const notifier = require('node-notifier');
 const fs = require('fs');
+const moment = require('moment');
 const CONFIG = require('./CONFIG');
 const ICONS_FOLDER = __dirname + '/assets/icons/';
 const IS_MAC = process.platform === 'darwin';
