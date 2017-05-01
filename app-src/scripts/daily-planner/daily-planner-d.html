@@ -24,7 +24,8 @@
       placeholder="Select or create a task">
       <md-item-template>
           <span md-highlight-text="vm.newTaskTitle"
-                md-highlight-flags="^i">{{task.title}}</span>
+                md-highlight-flags="^i"
+                ng-bind="task.title"></span>
       </md-item-template>
     </md-autocomplete>
   </form>

@@ -49,7 +49,7 @@
       <label>JQL Query for Searching Tasks</label>
       <input type="text"
              ng-model="vm.settings.jqlQuery">
-      <div class="hint">e.g.: assignee = "{{ vm.settings.userName }}" AND resolution = Unresolved ORDER BY updatedDate DESC</div>
+      <div class="hint">e.g.: assignee = "<span ng-bind="vm.settings.userName"></span>" AND resolution = Unresolved ORDER BY updatedDate DESC</div>
     </md-input-container>
     <md-input-container class="md-block">
       <div>
@@ -122,7 +122,8 @@
           <md-option ng-value="'DO_NOT'"><em>Don't transition</em></md-option>
           <md-option ng-repeat="jiraTransition in vm.settings.allTransitions"
                      ng-value="jiraTransition.id">
-            {{jiraTransition.id}} - {{jiraTransition.name}}
+            <span ng-bind="jiraTransition.id"></span> -
+            <span ng-bind="jiraTransition.name"></span>
           </md-option>
         </md-select>
       </md-input-container>
@@ -134,7 +135,8 @@
           <md-option ng-value="'DO_NOT'"><em>Don't transition</em></md-option>
           <md-option ng-repeat="jiraTransition in vm.settings.allTransitions"
                      ng-value="jiraTransition.id">
-            {{jiraTransition.id}} - {{jiraTransition.name}}
+            <span ng-bind="jiraTransition.id"></span> -
+            <span ng-bind="jiraTransition.name"></span>
           </md-option>
         </md-select>
       </md-input-container>
@@ -146,7 +148,8 @@
           <md-option ng-value="'DO_NOT'"><em>Don't transition</em></md-option>
           <md-option ng-repeat="jiraTransition in vm.settings.allTransitions"
                      ng-value="jiraTransition.id">
-            {{jiraTransition.id}} - {{jiraTransition.name}}
+            <span ng-bind="jiraTransition.id"></span> -
+            <span ng-bind="jiraTransition.name"></span>
           </md-option>
         </md-select>
       </md-input-container>

@@ -48,7 +48,7 @@
             <md-input-container class="md-icon-float md-block">
               <ng-md-icon icon="timer"
                           aria-label="Time Spent"></ng-md-icon>
-              <label>Time Spent on {{ strDate }}</label>
+              <label>Time Spent on <span ng-bind="strDate"></span></label>
               <input type="text"
                      input-duration="optional"
                      ng-model="vm.timeSpentOnDayCopy[strDate]"
@@ -80,7 +80,7 @@
       <form name="addForAnotherDayForm"
             ng-if="vm.showAddForAnotherDayForm"
             ng-submit="vm.addNewEntry(vm.newEntry)">
-        <h3 class="md-caption">Add new entry {{ vm.newEntry.date|amDateFormat:'DD-MM-YYYY'}}</h3>
+        <h3 class="md-caption">Add new entry <span ng-bind="vm.newEntry.date|amDateFormat:'DD-MM-YYYY'"></span></h3>
         <md-input-container class="md-block">
           <ng-md-icon icon="event"></ng-md-icon>
           <input type="date"
@@ -97,7 +97,7 @@
         <md-input-container class="md-icon-float md-block">
           <ng-md-icon icon="timer"
                       aria-label="Time Spent on new entry"></ng-md-icon>
-          <label>Time Spent on {{ vm.newEntry.date|amDateFormat:'DD-MM-YYYY'}}</label>
+          <label>Time Spent on <span ng-bind="vm.newEntry.date|amDateFormat:'DD-MM-YYYY'"></span></label>
           <input type="text"
                  input-duration="optional"
                  ng-model="vm.newEntry.timeSpent"

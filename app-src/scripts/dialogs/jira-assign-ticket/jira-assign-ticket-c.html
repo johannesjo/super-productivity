@@ -2,7 +2,7 @@
            md-theme="vm.theme">
   <md-toolbar>
     <div class="md-toolbar-tools">
-      <h2>Assign task "{{ vm.task.originalKey }}"</h2>
+      <h2>Assign task "<span ng-bind="vm.task.originalKey"></span>"</h2>
       <span flex></span>
       <md-button class="md-icon-button"
                  aria-label="Cancel"
@@ -20,7 +20,7 @@
       <div class="md-dialog-content">
         <p>The ticket is currently <strong ng-if="!vm.task.originalAssigneeKey">unassigned</strong>
           <span ng-if="vm.task.originalAssigneeKey"> assigned to
-          <strong>{{ vm.task.originalAssigneeKey }}</strong></span>. Do you want to assign it to yourself?</p>
+          <strong ng-bind="vm.task.originalAssigneeKey"></strong></span>. Do you want to assign it to yourself?</p>
       </div>
     </md-dialog-content>
 

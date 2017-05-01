@@ -17,7 +17,7 @@
     <md-dialog-content>
       <div class="md-dialog-content">
 
-        <p>You have been idle for <strong>{{ vm.idleTime }}</strong>.
+        <p>You have been idle for <strong ng-bind="vm.idleTime"></strong>.
         </p>
         <p>Select the task you want to track the time to, or just press cancel if you don't want to track the time.</p>
 
@@ -31,10 +31,11 @@
           placeholder="Select a task to track the time">
           <md-item-template>
           <span md-highlight-text="vm.searchText"
-                md-highlight-flags="^i">{{task.title}}</span>
+                md-highlight-flags="^i"
+          ng-bind="task.title"></span>
           </md-item-template>
           <md-not-found>
-            No states matching "{{vm.searchText}}" were found.
+            No states matching "<span ng-bind="vm.searchText"></span>" were found.
             <a ng-click="vm.newState(vm.searchText)">Create a new one!</a>
           </md-not-found>
         </md-autocomplete>

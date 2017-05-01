@@ -2,9 +2,9 @@
 <p>The task list will be your main tool to organize yourself. You start a task and time tracking for it by clicking on the play icon. There can only be one task tracked at a time.</p>
 <p>You can <strong>order the tasks</strong> via drag and drop or move them up or down by pressing
   <ng-md-icon icon="keyboard"></ng-md-icon>
-  <em>{{ ::vm.keys.moveTaskUp }}</em> or
+  <em ng-bind="::vm.keys.moveTaskUp"></em> or
   <ng-md-icon icon="keyboard"></ng-md-icon>
-  <em>{{ ::vm.keys.moveTaskDown }}</em>
+  <em ng-bind="::vm.keys.moveTaskDown "></em>
 </p>
 
 <p>There are also several other <strong>keyboard shortcuts</strong> available. Check them out in the
@@ -70,7 +70,8 @@
       </div>
 
       <div class="time">
-        {{ vm.exampleTask.timeSpent|duration}} / {{ vm.exampleTask.timeEstimate|duration}}
+        <span ng-bind="vm.exampleTask.timeSpent|duration"></span> /
+        <span ng-bind="vm.exampleTask.timeEstimate|duration"></span>
         <md-tooltip>
           Time spent / time estimated
         </md-tooltip>
@@ -158,10 +159,12 @@
 
         <ul class="changelog">
           <li ng-repeat="changelogEntry in vm.exampleTask.originalChangelog">
-            <div><em>[{{ ::changelogEntry.author }}] {{ ::changelogEntry.created| amDateFormat:'Y.MM.DD HH:mm'}}: </em>
+            <div><em>[<span ng-bind="::changelogEntry.author"></span>]
+              <span ng-bind="::changelogEntry.created| amDateFormat:'Y.MM.DD HH:mm'"></span>: </em>
             </div>
             <div ng-repeat="change in changelogEntry.items">
-              <strong>"{{ ::change.field }}" changed to:</strong> {{ ::change.toString }}
+              <strong>"<span ng-bind="::change.field"></span>" changed to:</strong>
+              <span ng-bind="::change.toString"></span>
             </div>
           </li>
         </ul>
@@ -185,10 +188,10 @@
 
       <section ng-if="vm.exampleTask.status || vm.exampleTask.originalStatus"
                class="status">
-        <div class="md-caption">Status: {{ vm.exampleTask.originalStatus.name }}
+        <div class="md-caption">Status: <span ng-bind="vm.exampleTask.originalStatus.name"></span>
           <ng-md-icon icon="arrow_forward"
                       aria-label="arrow forward"></ng-md-icon>
-          {{ vm.exampleTask.status }}
+          <span ng-bind="vm.exampleTask.status"></span>
         </div>
       </section>
 
@@ -199,7 +202,8 @@
               <a href="{{ ::attachment}}"
                  external-link
                  target="_blank"
-                 class="md-accent">{{ ::attachment}}</a>
+                 class="md-accent"
+                 ng-bind="::attachment"></a>
               <a href="{{ ::attachment}}"
                  download="{{ ::attachment}}"
                  class="md-accent">
@@ -217,7 +221,7 @@
           <ul class="comments">
             <li ng-repeat="comment in vm.exampleTask.originalComments"
                 class="comment">
-              <strong class="author">[{{ ::comment.author }}]: </strong>
+              <strong class="author">[<span ng-bind="::comment.author"></span>]: </strong>
               <span marked="comment.body"></span>
             </li>
           </ul>

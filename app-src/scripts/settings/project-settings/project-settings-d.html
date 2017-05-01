@@ -15,8 +15,8 @@
                ng-change="vm.changeProject(vm.selectedCurrentProject)">
       <md-option ng-repeat="project in vm.allProjects"
                  arial-label="Select Project"
-                 ng-value="project">
-        {{project.title}}
+                 ng-value="project"
+                 ng-bind="project.title">
       </md-option>
     </md-select>
   </md-input-container>

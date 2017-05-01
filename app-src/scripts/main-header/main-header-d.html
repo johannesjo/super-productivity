@@ -13,12 +13,12 @@
         <md-tooltip md-direction="bottom">
           Switch project
         </md-tooltip>
-        {{ r.currentProject.title }}
+        <span ng-bind="r.currentProject.title"></span>
       </md-button>
       <md-menu-content width="4">
         <md-menu-item ng-repeat="project in vm.allProjects">
-          <md-button ng-click="vm.changeProject(project)">
-            {{project.title}}
+          <md-button ng-click="vm.changeProject(project)"
+          ng-bind="project.title">
           </md-button>
         </md-menu-item>
       </md-menu-content>

@@ -3,7 +3,7 @@
            md-theme="vm.theme">
   <md-toolbar>
     <div class="md-toolbar-tools">
-      <h2>Notes for {{ vm.r.currentProject.title || 'Project' }}</h2>
+      <h2>Notes for <span ng-bind="vm.r.currentProject.title || 'Project'"></span></h2>
       <span flex></span>
       <md-button class="md-icon-button"
                  aria-label="Cancel"

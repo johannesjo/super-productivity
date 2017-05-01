@@ -3,7 +3,7 @@
 
   <md-toolbar>
     <div class="md-toolbar-tools">
-      <h2>Update Jira status for {{ vm.task.originalKey }}</h2>
+      <h2>Update Jira status for <span ng-bind="vm.task.originalKey"></span></h2>
       <span flex></span>
       <md-button class="md-icon-button"
                  aria-label="Cancel"
@@ -28,14 +28,15 @@
           </span>
         </p>
         <p>
-          Do you want to update the task '<strong>{{ vm.task.title }}</strong>' on jira?
+          Do you want to update the task '<strong ng-bind="vm.task.title"></strong>' on jira?
         </p>
 
         <p>Move to:</p>
         <md-radio-group ng-model="vm.chosenTransitionIndex">
           <md-radio-button ng-repeat="transition in vm.transitions"
                            value="{{$index}}"
-                           class="md-primary">{{ transition.name }}
+                           class="md-primary"
+                           ng-bind="transition.name">
           </md-radio-button>
         </md-radio-group>
 
@@ -59,7 +60,8 @@
                            md-search-text="vm.userSearchText"
                            md-items="userKey in vm.userQuery(vm.userSearchText)">
             <md-item-template>
-              <span md-highlight-text="vm.userSearchText">{{userKey}}</span>
+              <span md-highlight-text="vm.userSearchText"
+                    ng-bind="userKey"></span>
             </md-item-template>
           </md-autocomplete>
         </div>

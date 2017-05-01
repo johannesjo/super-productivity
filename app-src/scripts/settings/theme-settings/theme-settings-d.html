@@ -10,7 +10,8 @@
 <md-select ng-model="vm.selectedTheme"
            placeholder="Select a theme">
   <md-option ng-repeat="themeName in vm.themes"
-             ng-value="themeName">{{ themeName }}
+             ng-value="themeName"
+             ng-bind="themeName">
   </md-option>
 </md-select>
 <div>

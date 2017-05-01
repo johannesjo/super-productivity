@@ -7,7 +7,7 @@
       <div class="md-dialog-content">
 
         <p>Select the task you want to work on next or just press enter to work on</p><p>
-        <strong>{{ vm.undoneTasks[0].title }}</strong></p>
+        <strong ng-bind="vm.undoneTasks[0].title"></strong></p>
 
         <md-autocomplete
           md-selected-item="vm.selectedTask"
@@ -19,10 +19,11 @@
           placeholder="Select a task to start with">
           <md-item-template>
           <span md-highlight-text="vm.searchText"
-                md-highlight-flags="^i">{{task.title}}</span>
+                md-highlight-flags="^i"
+                ng-bind="task.title"></span>
           </md-item-template>
           <md-not-found>
-            No states matching "{{vm.searchText}}" were found.
+            No states matching "<span ng-bind="vm.searchText"></span>" were found.
             <a ng-click="vm.newState(vm.searchText)">Create a new one!</a>
           </md-not-found>
         </md-autocomplete>
