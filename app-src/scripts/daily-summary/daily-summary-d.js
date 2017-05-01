@@ -52,6 +52,7 @@
     vm.showExportModal = () => {
       Dialogs('SIMPLE_TASK_SUMMARY', {
         settings: $localStorage.uiHelper.dailyTaskExportSettings,
+        finishDayFn: vm.finishDay,
         tasks: Tasks.getToday()
       }, true);
     };

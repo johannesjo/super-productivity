@@ -58,7 +58,8 @@
 
         Dialogs('SIMPLE_TASK_SUMMARY', {
           settings: $localStorage.uiHelper.timeTrackingHistoryExportSettings,
-          tasks: tasks
+          tasks: tasks,
+          finishDayFn: false
         }, true);
       }
 

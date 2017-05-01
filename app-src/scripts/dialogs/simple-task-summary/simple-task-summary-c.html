@@ -117,6 +117,12 @@
 
 
     <md-dialog-actions>
+      <md-button class="md-raised md-primary"
+                 ng-show="vm.finishDayFn"
+                 ng-click="vm.cancel();vm.finishDayFn()">
+        <ng-md-icon icon="wb_sunny"></ng-md-icon>
+        Clear Done and go home
+      </md-button>
       <md-button class="md-primary md-raised"
                  id="clipboard-btn"
                  data-clipboard-action="copy"

@@ -14,7 +14,7 @@
     .controller('SimpleTaskSummaryCtrl', SimpleTaskSummaryCtrl);
 
   /* @ngInject */
-  function SimpleTaskSummaryCtrl($mdDialog, tasks, settings, TasksUtil, $scope, ParseDuration, SimpleToast, theme) {
+  function SimpleTaskSummaryCtrl($mdDialog, tasks, settings, TasksUtil, $scope, ParseDuration, SimpleToast, theme, finishDayFn) {
     let vm = this;
     vm.theme = theme;
 
@@ -27,6 +27,7 @@
     });
 
     vm.options = settings;
+    vm.finishDayFn = finishDayFn;
 
     if (!vm.options.separateBy) {
       vm.options.separateBy = '';
