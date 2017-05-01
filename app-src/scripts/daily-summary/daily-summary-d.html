@@ -15,7 +15,8 @@
 
 <p>
   <ng-md-icon icon="check"></ng-md-icon>
-  Tasks completed: <strong><span ng-bind="vm.doneTasks.length"></span>/<span ng-bind="r.tasks.length"></span></strong></p>
+  Tasks completed: <strong><span ng-bind="vm.doneTasks.length"></span>/<span ng-bind="r.tasks.length"></span></strong>
+</p>
 <p>
   <ng-md-icon icon="timer"></ng-md-icon>
   Total time spent total on todays task: <strong ng-bind="vm.totalTimeSpentTasks|duration"></strong></p>
@@ -67,7 +68,8 @@
     Your distractions for today
   </h2>
   <ul>
-    <li ng-repeat="distraction in r.distractions track by $index" ng-bind="distraction"></li>
+    <li ng-repeat="distraction in r.distractions track by $index"
+        ng-bind="distraction"></li>
   </ul>
   <md-button class="md-raised"
              ng-click="r.distractions=[]">
@@ -125,4 +127,9 @@
     <span ng-show="vm.clearDoneTasks">Clear done tasks, save and go home</span>
     <span ng-show="!vm.clearDoneTasks">Save and go home</span>
   </md-button>
+</div>
+
+<div class="success-animation-wrapper"
+     ng-show="vm.showSuccessAnimation">
+  <ng-md-icon icon="wb_sunny"></ng-md-icon>
 </div>

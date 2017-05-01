@@ -54,3 +54,42 @@ md-input-container {
     text-align: right;
   }
 }
+
+.success-animation-wrapper {
+  $this-ico-size: 64px;
+  clear: both;
+  display: block;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  margin-left: $this-ico-size/-2;
+  margin-top: $this-ico-size/2;
+  animation: success-animation 0.6s ease-out infinite;
+  transform: scale(20);
+
+  ng-md-icon {
+    width: $this-ico-size;
+    height: $this-ico-size;
+    display: block;
+    fill: $yellow !important;
+    font-size: 30px;
+    svg {
+      width: $this-ico-size;
+      height: $this-ico-size;
+    }
+  }
+}
+
+@keyframes success-animation {
+  0% {
+    transform: scale(0.1);
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(20);
+    opacity: 0;
+  }
+}

@@ -26,9 +26,11 @@
   }
 
   /* @ngInject */
-  function DailySummaryCtrl($localStorage, Tasks, TasksUtil, $mdDialog, Dialogs, $state, GitLog, IS_ELECTRON) {
+  function DailySummaryCtrl($localStorage, Tasks, TasksUtil, $mdDialog, Dialogs, $state, GitLog, IS_ELECTRON, $timeout, $scope) {
     const IPC_EVENT_SHUTDOWN = 'SHUTDOWN';
+    const SUCCESS_ANIMATION_DURATION = 500;
 
+    let successAnimationTimeout;
     let vm = this;
 
     vm.todayStr = TasksUtil.getTodayStr();
@@ -70,15 +72,37 @@
             .cancel('No, just clear the tasks')
         )
           .then(() => {
-              window.ipcRenderer.send(IPC_EVENT_SHUTDOWN);
+              initSuccessAnimation(() => {
+                window.ipcRenderer.send(IPC_EVENT_SHUTDOWN);
+              });
             },
             () => {
-              $state.go('daily-planner');
+              initSuccessAnimation(() => {
+                $state.go('daily-planner');
+              });
             });
       } else {
-        $state.go('daily-planner');
+        initSuccessAnimation(() => {
+          $state.go('daily-planner');
+        });
       }
     };
+
+    $scope.$on('$destroy', () => {
+      if (successAnimationTimeout) {
+        $timeout.cancel(successAnimationTimeout);
+      }
+    });
+
+    function initSuccessAnimation(cb) {
+      vm.showSuccessAnimation = true;
+      successAnimationTimeout = $timeout(() => {
+        if (cb) {
+          cb();
+        }
+      }, SUCCESS_ANIMATION_DURATION);
+
+    }
   }
 
 })();
