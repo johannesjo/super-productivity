@@ -41,6 +41,17 @@
         <ng-md-icon icon="{{$ctrl.currentTaskId === task.id ? 'pause_circle_filled':'play_circle_fill'}}"
                     aria-label="mark as current"></ng-md-icon>
       </md-button>
+      <md-button class="md-icon-button original-link-btn"
+                 aria-label="link"
+                 tabindex="2"
+                 target="_blank"
+                 external-link
+                 ng-if="::task.originalLink"
+                 ng-href="{{ ::task.originalLink }}">
+
+        <ng-md-icon icon="link"
+                    aria-label="link"></ng-md-icon>
+      </md-button>
 
       <div class="title"
            flex="auto"
@@ -86,17 +97,6 @@
 
           <ng-md-icon icon="{{(task.notes||task.originalKey) ?'insert_comment': 'mode_comment'}}"
                       aria-label="notes"></ng-md-icon>
-        </md-button>
-        <md-button class="md-icon-button"
-                   aria-label="link"
-                   tabindex="2"
-                   target="_blank"
-                   external-link
-                   ng-if="::task.originalLink"
-                   ng-href="{{ ::task.originalLink }}">
-
-          <ng-md-icon icon="link"
-                      aria-label="link"></ng-md-icon>
         </md-button>
         <md-button class="md-icon-button"
                    aria-label="delete"
