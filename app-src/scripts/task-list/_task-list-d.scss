@@ -92,9 +92,19 @@ task-list {
     .play-btn {
       padding-left: 0;
       margin-left: -2px;
+
+      // move over original link btn
+      position: relative;
+      z-index: 1;
     }
+
     .original-link-btn {
+      margin-left: -2px;
       margin-right: 10px;
+      ng-md-icon {
+        // hacky align icon inside link with the one inside the play button
+        margin-top: 2px;
+      }
     }
 
     md-checkbox {

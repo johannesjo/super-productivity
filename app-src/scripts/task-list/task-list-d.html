@@ -50,6 +50,10 @@
                  ng-href="{{ ::task.originalLink }}">
 
         <ng-md-icon icon="link"
+                    ng-if="::task.originalType !=='GITHUB'"
+                    aria-label="link"></ng-md-icon>
+        <ng-md-icon icon="github-circle"
+                    ng-if="::task.originalType ==='GITHUB'"
                     aria-label="link"></ng-md-icon>
       </md-button>
 
@@ -130,10 +134,12 @@
         <ul class="changelog">
           <li ng-repeat="changelogEntry in task.originalChangelog">
             <div ng-if="::changelogEntry.author">
-              <em>[<span ng-bind="::changelogEntry.author"></span>] <span ng-bind="::changelogEntry.created| amDateFormat:'Y.MM.DD HH:mm'"></span></em>
+              <em>[<span ng-bind="::changelogEntry.author"></span>]
+                <span ng-bind="::changelogEntry.created| amDateFormat:'Y.MM.DD HH:mm'"></span></em>
             </div>
             <div ng-repeat="change in changelogEntry.items">
-              <strong ng-bind="::change.field"></strong> <span ng-if="change.toString.length"><em>changed to:</em> <span ng-bind="::change.toString"></span></span></span>
+              <strong ng-bind="::change.field"></strong>
+              <span ng-if="change.toString.length"><em>changed to:</em> <span ng-bind="::change.toString"></span></span></span>
             </div>
           </li>
         </ul>
@@ -145,7 +151,8 @@
       </section>
 
       <section>
-        <div class="md-caption" ng-bind="task.originalId ? 'Description': 'Notes'"></div>
+        <div class="md-caption"
+             ng-bind="task.originalId ? 'Description': 'Notes'"></div>
         <div md-whiteframe="4">
           <inline-markdown ng-model="task.notes"
                            on-changed="$ctrl.onTaskNotesChanged(newVal, task)"></inline-markdown>
@@ -164,7 +171,7 @@
 
       <section ng-if="task.originalAssigneeKey"
                class="assignee">
-        <div class="md-caption">Assignee: <span ng-bind="task.originalAssigneeKey"></span> </div>
+        <div class="md-caption">Assignee: <span ng-bind="task.originalAssigneeKey"></span></div>
       </section>
 
       <section ng-if="task.originalAttachment.length > 0">
