@@ -117,7 +117,7 @@
       vm.totaleEstimate = TasksUtil.calcTotalEstimate(mVal);
     }, true));
 
-    watchers.push($scope.$watch('r.backlogTasks', (mVal) => {
+    watchers.push($scope.$watch('vm.backlogTasks', (mVal) => {
       vm.totaleEstimateBacklog = TasksUtil.calcTotalEstimate(mVal);
     }, true));
 
