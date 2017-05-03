@@ -1,12 +1,13 @@
 <div class="markdown-wrapper">
   <textarea ng-model="vm.ngModelCopy"
-            ng-show="vm.showEdit"
+            ng-if="vm.showEdit"
+            ng-model-options="{ debounce: 30 }"
             ng-blur="vm.untoggleShowEdit()"
             class="md-body-1 markdown-unparsed"
             rows="5"></textarea>
 
   <marked-preview marked="vm.ngModel"
-                  ng-show="!vm.showEdit"
+                  ng-if="!vm.showEdit"
                   ng-click="vm.toggleShowEdit($event)"
                   ng-focus="vm.toggleShowEdit($event)"
                   class="md-body-1 markdown-parsed"></marked-preview>
