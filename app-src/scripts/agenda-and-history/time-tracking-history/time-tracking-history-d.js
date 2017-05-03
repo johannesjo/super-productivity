@@ -25,7 +25,7 @@
   }
 
   /* @ngInject */
-  function TimeTrackingHistoryCtrl(Tasks, Dialogs, $localStorage) {
+  function TimeTrackingHistoryCtrl(Tasks, Dialogs, $localStorage, $scope, EV_PROJECT_CHANGED) {
     let vm = this;
     vm.worklog = Tasks.getCompleteWorkLog();
 
@@ -62,8 +62,11 @@
           finishDayFn: false
         }, true);
       }
-
     };
+
+    $scope.$on(EV_PROJECT_CHANGED, () => {
+      vm.worklog = Tasks.getCompleteWorkLog();
+    });
   }
 
 })();
