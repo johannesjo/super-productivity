@@ -12,7 +12,7 @@
     <th></th>
   </tr>
 
-  <tr ng-repeat="task in r.doneBacklogTasks"
+  <tr ng-repeat="task in vm.doneBacklogTasks"
       ng-class="{'is-done': task.isDone}">
     <td ng-bind="task.title"></td>
     <td><span ng-repeat="task in task.subTasks"><span ng-bind="task.title"></span>: <span ng-bind="task.timeSpent|duration"></span><br></span></td>

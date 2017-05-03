@@ -25,8 +25,10 @@
   }
 
   /* @ngInject */
-  function DoneTasksBacklogCtrl($scope, TasksUtil) {
+  function DoneTasksBacklogCtrl($scope, TasksUtil, Tasks) {
     let vm = this;
+
+    vm.doneBacklogTasks = Tasks.getDoneBacklog();
 
     const watcher = $scope.$watch('r.doneBacklogTasks', (mVal) => {
       vm.totalTimeSpent = TasksUtil.calcTotalTimeSpent(mVal);
