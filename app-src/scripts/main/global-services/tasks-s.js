@@ -296,6 +296,7 @@
     addToday(task) {
       if (task && task.title) {
         this.$localStorage.tasks.unshift(this.createTask(task));
+        this.updateTodayVm();
         this.SimpleToast('SUCCESS', 'Task "' + task.title + '" created.', 200);
       }
     }
@@ -557,6 +558,10 @@
 
     updateToday(tasks) {
       this.$localStorage.tasks = tasks;
+    }
+
+    updateTodayVm() {
+      this.$rootScope.r.tasks = this.$localStorage.tasks;
     }
 
     updateBacklog(tasks) {
