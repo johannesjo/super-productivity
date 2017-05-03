@@ -14,7 +14,7 @@
     .controller('SettingsCtrl', SettingsCtrl);
 
   /* @ngInject */
-  function SettingsCtrl($localStorage, $window, $scope, Projects, IS_ELECTRON) {
+  function SettingsCtrl($localStorage, $window, $scope, Projects, IS_ELECTRON, EV_PROJECT_CHANGED) {
     let vm = this;
     const _ = $window._;
     vm.IS_ELECTRON = IS_ELECTRON;
@@ -24,15 +24,15 @@
       vm.selectedCurrentProject = $localStorage.currentProject;
     }
 
+    init();
+
     // WATCHER & EVENTS
     // ----------------
     const watchers = [];
 
-    // TODO that's kind of really bad
-    // update on global model changes
-    watchers.push($scope.$watch('r', () => {
+    $scope.$on(EV_PROJECT_CHANGED, () => {
       init();
-    }, true));
+    });
 
     $scope.$on('$destroy', () => {
       // remove watchers manually
