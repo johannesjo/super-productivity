@@ -18,6 +18,13 @@
       'keys',
       'isShowWelcomeDialog'
     ])
+    .constant('ON_DEMAND_LS_FIELDS',[
+      'doneBacklogTasks'
+    ])
+    .constant('ON_DEMAND_LS_FIELDS_FOR_PROJECT',[
+      'doneBacklogTasks',
+      'data',
+    ])
     .constant('LS_DEFAULTS', {
       note: undefined,
       theme: undefined,
