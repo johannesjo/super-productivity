@@ -32,15 +32,19 @@
   /* @ngInject */
   function EditOnClickCtrl($element, $scope, $timeout, EDIT_ON_CLICK_TOGGLE_EV) {
     let vm = this;
+    let inputEl;
+    let modelCopy;
+
     //const formEl = $element.find('form');
     const textEl = angular.element($element.find('div'));
 
     vm.finishEdit = () => {
-      let isChanged = (vm.editOnClick !== vm.modelCopy);
+      modelCopy = inputEl[0].value;
+      let isChanged = (vm.editOnClick !== modelCopy);
 
       if (isChanged) {
         // update if changes were made
-        vm.editOnClick = vm.modelCopy;
+        vm.editOnClick = modelCopy;
       }
 
       // check for show edit to only trigger once
@@ -55,10 +59,11 @@
     vm.toggleShowEdit = () => {
       textEl.css('display', 'none');
       vm.showEdit = true;
-      vm.modelCopy = angular.copy(vm.editOnClick);
+      modelCopy = vm.editOnClick;
       $timeout(function () {
-        let inputEl = $element.find('input');
+        inputEl = $element.find('input');
         inputEl[0].focus();
+        inputEl[0].value = modelCopy;
       });
     };
 
