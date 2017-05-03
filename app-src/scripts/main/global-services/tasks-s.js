@@ -416,7 +416,7 @@
         });
       }
 
-      this.$localStorage.currentTask = task;
+      this.$rootScope.r.currentTask = this.$localStorage.currentTask = task;
     }
 
     removeTimeSpent(task, timeSpentToRemoveAsMoment) {
