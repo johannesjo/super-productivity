@@ -25,35 +25,38 @@
   }
 
   /* @ngInject */
-  function DailyPlannerCtrl($localStorage, $window, $scope, Tasks, TasksUtil, Dialogs, $state, Jira, $filter, IS_ELECTRON, Git, $mdDialog) {
+  function DailyPlannerCtrl($localStorage, $window, $scope, Tasks, TasksUtil, Dialogs, $state, Jira, $filter, IS_ELECTRON, Git, $mdDialog, EV_PROJECT_CHANGED) {
     let vm = this;
     const _ = $window._;
 
-    vm.limitBacklogTo = 3;
-    vm.taskSuggestions = [];
-    vm.backlogTasks = Tasks.getBacklog();
+    vm.init = () => {
+      vm.limitBacklogTo = 3;
+      vm.taskSuggestions = [];
+      vm.backlogTasks = Tasks.getBacklog();
 
-    vm.getFilteredTaskSuggestions = (searchText) => {
-      return searchText ? $filter('filter')(vm.taskSuggestions, searchText, false, 'title') : vm.taskSuggestions;
-    };
+      vm.getFilteredTaskSuggestions = (searchText) => {
+        return searchText ? $filter('filter')(vm.taskSuggestions, searchText, false, 'title') : vm.taskSuggestions;
+      };
 
-    if (IS_ELECTRON && Jira.isSufficientJiraSettings()) {
-      Jira.checkForNewAndAddToBacklog();
+      if (IS_ELECTRON && Jira.isSufficientJiraSettings()) {
+        Jira.checkForNewAndAddToBacklog();
 
-      Jira.getSuggestions().then((res) => {
-        vm.taskSuggestions = vm.taskSuggestions.concat(Jira.transformIssues(res));
-      });
-    }
-
-    // add new git tasks
-    Git.checkForNewAndAddToBacklog();
-
-    if ($localStorage.git.isShowIssuesFromGit) {
-      Git.getIssueList()
-        .then((res) => {
-          vm.taskSuggestions = vm.taskSuggestions.concat(res.data);
+        Jira.getSuggestions().then((res) => {
+          vm.taskSuggestions = vm.taskSuggestions.concat(Jira.transformIssues(res));
         });
-    }
+      }
+
+      // add new git tasks
+      Git.checkForNewAndAddToBacklog();
+
+      if ($localStorage.git.isShowIssuesFromGit) {
+        Git.getIssueList()
+          .then((res) => {
+            vm.taskSuggestions = vm.taskSuggestions.concat(res.data);
+          });
+      }
+    };
+    vm.init();
 
     vm.addTask = () => {
       if (vm.newTask) {
@@ -128,6 +131,9 @@
         watcher();
       });
     });
-  }
 
+    $scope.$on(EV_PROJECT_CHANGED, () => {
+      vm.init();
+    });
+  }
 })();

@@ -14,7 +14,7 @@
     .service('Projects', Projects);
 
   /* @ngInject */
-  function Projects(LS_DEFAULTS, $localStorage, Uid, $window, SimpleToast, $injector, GLOBAL_LS_FIELDS) {
+  function Projects(LS_DEFAULTS, $localStorage, Uid, $window, SimpleToast, $injector, GLOBAL_LS_FIELDS, $rootScope, EV_PROJECT_CHANGED) {
     const TMP_FIELDS = [
       '$$hashKey',
       '$$mdSelectId',
@@ -143,7 +143,7 @@
 
         // update ls $localStorage current project
         $localStorage.currentProject = newCurrentProject;
-
+        $rootScope.$broadcast(EV_PROJECT_CHANGED);
         // re-init all global models
         InitGlobalModels();
       }
