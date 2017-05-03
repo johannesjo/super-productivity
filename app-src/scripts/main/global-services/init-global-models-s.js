@@ -45,7 +45,6 @@
 
       //$rootScope.r = $localStorage;
       $rootScope.r = getLsData($localStorage);
-      console.log($rootScope.r);
 
       // we want the current task to be a reference to the tasks array
       // that's why we need to reassign

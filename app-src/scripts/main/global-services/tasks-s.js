@@ -329,7 +329,6 @@
 
     markAsDone(task) {
       const parentTask = task.parentId && this.getById(task.parentId);
-      console.log('markAsDone');
 
       // unset current task first
       this.updateCurrent(undefined);
