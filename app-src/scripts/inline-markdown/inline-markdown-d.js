@@ -31,6 +31,8 @@
   function InlineMarkdownCtrl($timeout, $element, IS_ELECTRON, $scope) {
     let vm = this;
     let waitForMarkedTimeOut;
+    let textareaEl;
+    let ngModelCopy;
 
     const keypressHandler = ($event) => {
       if ($event.keyCode === 10 && $event.ctrlKey) {
@@ -65,10 +67,11 @@
       // check if anchor link was clicked
       if ($event.target.tagName !== 'A') {
         vm.showEdit = true;
-        vm.ngModelCopy = angular.copy(vm.ngModel) || '';
+        ngModelCopy = vm.ngModel || '';
 
         $timeout(function () {
-          const textareaEl = angular.element($element.find('textarea'));
+          textareaEl = angular.element($element.find('textarea'));
+          textareaEl[0].value = ngModelCopy;
           textareaEl[0].focus();
           textareaEl.on('keypress', keypressHandler);
 
@@ -80,16 +83,17 @@
     };
 
     vm.untoggleShowEdit = () => {
+      ngModelCopy = textareaEl[0].value;
       vm.showEdit = false;
       makeLinksWorkForElectron();
       vm.resizeToFit();
 
-      if (vm.ngModelCopy !== vm.ngModel) {
-        vm.ngModel = vm.ngModelCopy;
+      if (ngModelCopy !== vm.ngModel) {
+        vm.ngModel = ngModelCopy;
 
         if (angular.isFunction(vm.onChanged)) {
           vm.onChanged({
-            newVal: vm.ngModelCopy
+            newVal: ngModelCopy
           });
         }
       }

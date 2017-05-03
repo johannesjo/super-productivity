@@ -1,6 +1,5 @@
 <div class="markdown-wrapper">
-  <textarea ng-model="vm.ngModelCopy"
-            ng-if="vm.showEdit"
+  <textarea ng-if="vm.showEdit"
             ng-model-options="{ debounce: 30 }"
             ng-blur="vm.untoggleShowEdit()"
             class="md-body-1 markdown-unparsed"
