@@ -19,10 +19,10 @@
       'isShowWelcomeDialog'
     ])
     .constant('ON_DEMAND_LS_FIELDS',[
-      'doneBacklogTasks'
+      'doneBacklogTasks',
+      'backlogTasks',
     ])
     .constant('ON_DEMAND_LS_FIELDS_FOR_PROJECT',[
-      'doneBacklogTasks',
       'data',
     ])
     .constant('LS_DEFAULTS', {

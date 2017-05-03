@@ -31,6 +31,7 @@
 
     vm.limitBacklogTo = 3;
     vm.taskSuggestions = [];
+    vm.backlogTasks = Tasks.getBacklog();
 
     vm.getFilteredTaskSuggestions = (searchText) => {
       return searchText ? $filter('filter')(vm.taskSuggestions, searchText, false, 'title') : vm.taskSuggestions;
