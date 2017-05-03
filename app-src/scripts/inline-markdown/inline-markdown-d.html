@@ -6,7 +6,7 @@
             rows="5"></textarea>
 
   <marked-preview marked="vm.ngModel"
-                  ng-if="!vm.showEdit"
+                  ng-show="!vm.showEdit"
                   ng-click="vm.toggleShowEdit($event)"
                   ng-focus="vm.toggleShowEdit($event)"
                   class="md-body-1 markdown-parsed"></marked-preview>
