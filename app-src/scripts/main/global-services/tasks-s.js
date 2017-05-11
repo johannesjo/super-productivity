@@ -557,6 +557,7 @@
 
     updateToday(tasks) {
       this.$localStorage.tasks = tasks;
+      this.updateTodayVm();
     }
 
     updateTodayVm() {
@@ -565,6 +566,11 @@
 
     updateBacklog(tasks) {
       this.$localStorage.backlogTasks = tasks;
+      this.updateBacklogVm();
+    }
+
+    updateBacklogVm() {
+      this.$rootScope.r.backlogTasks = this.$localStorage.backlogTasks;
     }
 
     addNewToTopOfBacklog(task, isRemoteUpdate) {
