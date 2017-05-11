@@ -64,7 +64,7 @@ md-input-container {
   left: 50%;
   margin-left: $this-ico-size/-2;
   margin-top: $this-ico-size/2;
-  animation: success-animation 0.6s ease-out infinite;
+  animation: success-animation 1s ease-out infinite;
   transform: scale(20);
 
   ng-md-icon {
