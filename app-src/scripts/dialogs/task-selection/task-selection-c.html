@@ -19,8 +19,7 @@
           placeholder="Select a task to start with">
           <md-item-template>
           <span md-highlight-text="vm.searchText"
-                md-highlight-flags="^i"
-                ng-bind="task.title"></span>
+                md-highlight-flags="^i">{{ task.title }}</span>
           </md-item-template>
           <md-not-found>
             No states matching "<span ng-bind="vm.searchText"></span>" were found.
