@@ -7,7 +7,7 @@
  * Main module of the application.
  */
 
-(function () {
+(function() {
   'use strict';
 
   // Electron stuff
@@ -43,12 +43,13 @@
     .run(initPollForSimpleTimeTracking)
     .run(initMousewheelZoomForElectron)
     .run(initGlobalShortcuts)
-    .run(showWelcomeDialog);
+    .run(showWelcomeDialog)
+    .run(goToWorkViewIfTasks);
 
   /* @ngInject */
   function configMarked(markedProvider) {
     markedProvider.setRenderer({
-      link: function (href, title, text) {
+      link: function(href, title, text) {
         return '<a href="' + href + '"' + (title ? ' title="' + title + '"' : ' ') + 'target="_blank" external-link class="md-accent">' + text + '</a>';
       }
     });
@@ -186,11 +187,19 @@
   }
 
   /* @ngInject */
+  function goToWorkViewIfTasks($state, Tasks) {
+    const todaysTasks = Tasks.getUndoneToday();
+    if (todaysTasks && todaysTasks.length > 0) {
+      $state.go('work-view');
+    }
+  }
+
+  /* @ngInject */
   function initMousewheelZoomForElectron($document, $window, IS_ELECTRON) {
     if (IS_ELECTRON) {
       const { webFrame } = require('electron');
 
-      $window.Hamster($document[0]).wheel(function (event, delta, deltaX, deltaY) {
+      $window.Hamster($document[0]).wheel(function(event, delta, deltaX, deltaY) {
         if (event.originalEvent && event.originalEvent.ctrlKey) {
           const zoomFactor = webFrame.getZoomFactor();
           if (deltaY === 1) {
