@@ -5,12 +5,14 @@ const url = require('url');
 const open = require('open');
 let mainWin;
 
+
 function createWindow(params) {
   const IS_DEV = params.IS_DEV;
   const ICONS_FOLDER = params.ICONS_FOLDER;
   const IS_MAC = params.IS_MAC;
   const quitApp = params.quitApp;
   const app = params.app;
+  const nestedWinParams = params.nestedWinParams;
 
   let frontendDir;
 
@@ -37,7 +39,7 @@ function createWindow(params) {
   // Open the DevTools.
   //mainWin.webContents.openDevTools();
 
-  initWinEventListeners(app, IS_MAC);
+  initWinEventListeners(app, IS_MAC, nestedWinParams);
 
   if (IS_MAC) {
     createMenu(quitApp);
@@ -46,7 +48,7 @@ function createWindow(params) {
   return mainWin;
 }
 
-function initWinEventListeners(app, IS_MAC) {
+function initWinEventListeners(app, IS_MAC, nestedWinParams) {
   // open new window links in browser
   mainWin.webContents.on('new-window', function (event, url) {
     event.preventDefault();
@@ -56,7 +58,7 @@ function initWinEventListeners(app, IS_MAC) {
   mainWin.on('close', function (event) {
     // handle darwin
     if (IS_MAC) {
-      if (!darwinForceQuit) {
+      if (!nestedWinParams.isDarwinForceQuit) {
         event.preventDefault();
         mainWin.hide();
       }

@@ -25,7 +25,7 @@ const app = electron.app;
 let mainWin;
 let lastIdleTime;
 let currentIdleStart;
-let darwinForceQuit = false;
+let nestedWinParams = { isDarwinForceQuit: false };
 
 // keep app active to keep time tracking running
 powerSaveBlocker.start('prevent-app-suspension');
@@ -48,7 +48,7 @@ if (shouldQuitBecauseAppIsAnotherInstance) {
 app.on('ready', createMainWin);
 app.on('ready', createIndicator);
 
-app.on('activate', function () {
+app.on('activate', function() {
   // On OS X it's common to re-create a window in the app when the
   // dock icon is clicked and there are no other windows open.
   if (mainWin === null) {
@@ -65,7 +65,7 @@ app.on('ready', () => {
 app.on('before-quit', () => {
   // handle darwin
   if (IS_MAC) {
-    darwinForceQuit = true;
+    nestedWinParams.isDarwinForceQuit = true;
   }
 
   // un-register all shortcuts.
@@ -110,6 +110,7 @@ function createIndicator() {
     ICONS_FOLDER,
   });
 }
+
 function createMainWin() {
   mainWin = mainWinMod.createWindow({
     app,
@@ -117,6 +118,7 @@ function createMainWin() {
     ICONS_FOLDER,
     IS_MAC,
     quitApp,
+    nestedWinParams
   });
 }
 
@@ -151,6 +153,7 @@ function showIdleDialog(idleTimeInMs) {
 function showApp() {
   showOrFocus(mainWin);
 }
+
 function quitApp() {
   app.isQuiting = true;
   app.quit();
