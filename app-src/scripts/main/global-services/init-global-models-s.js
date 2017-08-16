@@ -6,7 +6,7 @@
  * Service in the superProductivity.
  */
 
-(function () {
+(function() {
   'use strict';
 
   angular
@@ -55,9 +55,9 @@
 
       // reset session
       $localStorage.currentSession = {};
-      $localStorage.theme = $localStorage.theme || DEFAULT_THEME;
+      $rootScope.r.theme = $localStorage.theme = $localStorage.theme || DEFAULT_THEME;
 
-      if ($rootScope.r.theme.indexOf('dark') > -1) {
+      if ($rootScope.r.theme && $rootScope.r.theme.indexOf('dark') > -1) {
         $rootScope.r.bodyClass = 'dark-theme';
       } else {
         $rootScope.r.bodyClass = '';
