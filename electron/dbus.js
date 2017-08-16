@@ -1,17 +1,29 @@
 'use strict';
-const dbus = require('dbus-native');
+
+// only optionally require dbus
+let isDBusError = false;
+let dbus;
+try {
+  dbus = require('dbus-native');
+} catch (e) {
+  console.log('NOTE: Continuing without DBUS');
+  console.error(e);
+  isDBusError = true;
+}
 
 const CONFIG = require('./CONFIG');
 const serviceName = CONFIG.D_BUS_ID;
 
 const interfaceName = serviceName;
 const objectPath = '/' + serviceName.replace(/\./g, '/');
-const sessionBus = dbus.sessionBus();
+
+let sessionBus;
 let mainWindow;
 let ifaceDesc;
 let iface;
 
 function init(params) {
+  sessionBus = dbus.sessionBus();
 
 // Check the connection was successful
   if (!sessionBus) {
@@ -61,36 +73,36 @@ function init(params) {
 
     // Then we need to create the interface implementation (with actual functions)
     iface = {
-      markAsDone: function () {
+      markAsDone: function() {
         if (!mainWindow) {
           console.error('mainWindow not ready');
         }
         console.log('markAsDone');
         mainWindow.webContents.send('TASK_MARK_AS_DONE');
       },
-     startTask: function () {
+      startTask: function() {
         if (!mainWindow) {
           console.error('mainWindow not ready');
         }
-       console.log('startTask');
-       mainWindow.webContents.send('TASK_START');
-     },
-      pauseTask: function () {
+        console.log('startTask');
+        mainWindow.webContents.send('TASK_START');
+      },
+      pauseTask: function() {
         if (!mainWindow) {
           console.error('mainWindow not ready');
         }
         console.log('pauseTask');
         mainWindow.webContents.send('TASK_PAUSE');
       },
-      showApp: function () {
+      showApp: function() {
         console.log('show app');
         params.showApp();
       },
-      quitApp: function () {
+      quitApp: function() {
         params.quitApp();
         console.log('quit app');
       },
-      emit: function () {
+      emit: function() {
         // no nothing, as usual
       }
     };
@@ -103,17 +115,28 @@ function init(params) {
   }
 }
 
-module.exports = {
-  init: init,
-  setMainWindow: (mainWindowPassed) => {
-    mainWindow = mainWindowPassed;
-  },
-  setTask: (taskId, taskText) => {
-    if (!iface) {
-      console.error('interface not ready yet');
-      return;
-    }
+if (!isDBusError) {
+  module.exports = {
+    init: init,
+    setMainWindow: (mainWindowPassed) => {
+      mainWindow = mainWindowPassed;
+    },
+    setTask: (taskId, taskText) => {
+      if (!iface) {
+        console.error('interface not ready yet');
+        return;
+      }
 
-    iface.emit('taskChanged', taskId + '', taskText + '')
-  }
-};
+      iface.emit('taskChanged', taskId + '', taskText + '')
+    }
+  };
+} else {
+  module.exports = {
+    init: () => {
+    },
+    setMainWindow: () => {
+    },
+    setTask: () => {
+    }
+  };
+}
