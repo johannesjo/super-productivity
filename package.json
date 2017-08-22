@@ -27,7 +27,7 @@
       "category": "productivity"
     },
     "win": {
-      "iconUrl": "windowsicon"
+      "icon": "windowsicon"
     },
     "linux": {
       "category": "Utility",
@@ -45,7 +45,8 @@
     "browser-sync": "latest",
     "del": "latest",
     "ecstatic": "latest",
-    "electron-rebuild": "^1.5.7",
+    "electron": "git+ssh://git@github.com/johannesjo/electron-prebuilt.git",
+    "electron-builder": "^19.24.1",
     "gulp": "latest",
     "gulp-autoprefixer": "latest",
     "gulp-babel": "^6.1.2",
@@ -87,8 +88,7 @@
     "require-dir": "latest",
     "run-sequence": "latest",
     "wiredep": "latest",
-    "yargs": "latest",
-    "electron": "git+ssh://git@github.com/johannesjo/electron-prebuilt.git"
+    "yargs": "latest"
   },
   "dependencies": {
     "dbus-native": "^0.2.0",
