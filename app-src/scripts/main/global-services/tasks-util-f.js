@@ -6,7 +6,7 @@
  * Factory in the superProductivity.
  */
 
-(function () {
+(function() {
   'use strict';
 
   angular
@@ -17,19 +17,22 @@
   function TasksUtil(SimpleToast, WORKLOG_DATE_STR_FORMAT, $log) {
 
     function deleteNullValueTasks(tasksArray) {
-      return tasksArray.filter(function (item) {
-        return !!item;
-      });
+      let i = tasksArray.length;
+      while (i--) {
+        if (!tasksArray[i]) {
+          tasksArray.splice(i, 1);
+        }
+      }
     }
 
     function checkDupes(tasksArray) {
       if (tasksArray) {
         deleteNullValueTasks(tasksArray);
-        let valueArr = tasksArray.map(function (item) {
+        let valueArr = tasksArray.map(function(item) {
           return item && item.id;
         });
         let dupeIds = [];
-        let hasDupe = valueArr.some(function (item, idx) {
+        let hasDupe = valueArr.some(function(item, idx) {
           if (valueArr.indexOf(item) !== idx) {
             dupeIds.push(item);
           }
@@ -248,7 +251,7 @@
       // calc progress
       if (task && task.timeSpent && task.timeEstimate) {
         progress = parseInt(moment.duration(task.timeSpent)
-            .format('ss') / moment.duration(task.timeEstimate).format('ss') * 100, 10);
+          .format('ss') / moment.duration(task.timeEstimate).format('ss') * 100, 10);
       }
       return progress;
     }
