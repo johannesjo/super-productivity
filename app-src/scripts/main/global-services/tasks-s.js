@@ -6,7 +6,7 @@
  * Service in the superProductivity.
  */
 
-(function () {
+(function() {
   'use strict';
 
   const IPC_EVENT_IDLE = 'WAS_IDLE';
@@ -323,7 +323,17 @@
         originalUpdated: task.originalUpdated
       };
 
-      task.progress = this.TasksUtil.calcProgress(task);
+      // check if new task on parent to copy over time tracking data
+      if (!transformedTask.title || transformedTask.title.trim() === '' && transformedTask.parentId) {
+        const parentTask = this.getById(transformedTask.parentId);
+        if ((!parentTask.subTasks || parentTask.subTasks.length === 0)) {
+          transformedTask.timeSpent = parentTask.timeSpent;
+          transformedTask.timeSpentOnDay = parentTask.timeSpentOnDay;
+          transformedTask.timeEstimate = parentTask.timeEstimate;
+        }
+      }
+
+      transformedTask.progress = this.TasksUtil.calcProgress(task);
       return this.ShortSyntax(transformedTask);
     }
 
