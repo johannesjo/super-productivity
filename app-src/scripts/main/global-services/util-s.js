@@ -6,7 +6,7 @@
  * Service in the superProductivity.
  */
 
-(function () {
+(function() {
   'use strict';
 
   /* @ngInject */
@@ -16,9 +16,15 @@
       this.$window = $window;
     }
 
-    openExternalUrl(url) {
+    openExternalUrl(rawUrl) {
+      // try to account for jira(?) adding a second http to the url
+      const url = rawUrl
+        .replace('https://https://', 'https://')
+        .replace('http://http://', 'http://');
+
       if (this.IS_ELECTRON) {
         const shell = require('electron').shell;
+
         shell.openExternal(url);
       } else {
         const win = this.$window.open(url, '_blank');
