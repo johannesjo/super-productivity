@@ -1,4 +1,15 @@
+<md-button ng-click="vm.task.isHideSubTasks=!vm.task.isHideSubTasks"
+           class="md-icon-button collapse-sub-tasks-btn"
+           md-whiteframe="1">
+  <ng-md-icon icon="add"
+              aria-label="show sub tasks"
+              ng-show="vm.task.isHideSubTasks"></ng-md-icon>
+  <ng-md-icon icon="remove"
+              aria-label="hide sub tasks"
+              ng-show="!vm.task.isHideSubTasks"></ng-md-icon>
+</md-button>
 <task-list tasks="vm.task.subTasks"
+           ng-if="!vm.task.isHideSubTasks"
            allow-task-selection="{{vm.allowTaskSelection}}"
            current-task-id="vm.currentTaskId"
            is-sub-tasks-disabled="true"

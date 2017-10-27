@@ -291,6 +291,7 @@
       if (this.parentTask) {
         task = this.parentTask;
       }
+      task.isHideSubTasks = false;
 
       // only allow if task is not done
       if (!task.isDone) {

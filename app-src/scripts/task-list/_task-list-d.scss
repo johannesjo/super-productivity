@@ -32,6 +32,7 @@ task-list {
   margin-bottom: 6px;
   background-color: #ffffff;
   color: #333333;
+  position: relative;
   body.dark-theme & {
     background-color: $dark-theme-bg-lighter;
     color: #dddddd;
