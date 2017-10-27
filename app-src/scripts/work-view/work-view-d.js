@@ -5,7 +5,7 @@
  * # workView
  */
 
-(function () {
+(function() {
   'use strict';
 
   angular
@@ -61,9 +61,14 @@
       Dialogs('ADD_TASK', undefined, true);
     };
 
+    vm.collapseNotes = () => {
+      Tasks.collapseNotes(vm.tasksDone);
+      Tasks.collapseNotes(vm.tasksUndone);
+    };
+
     vm.onTaskDoneChangedUndoneList = (task) => {
       if (task.isDone) {
-        const taskIndex = _.findIndex(vm.tasksUndone, function (taskInArray) {
+        const taskIndex = _.findIndex(vm.tasksUndone, function(taskInArray) {
           return taskInArray.id === task.id;
         });
         // add to the end of the done task list
@@ -75,7 +80,7 @@
 
     vm.onTaskDoneChangedDoneList = (task) => {
       if (!task.isDone) {
-        const taskIndex = _.findIndex(vm.tasksDone, function (taskInArray) {
+        const taskIndex = _.findIndex(vm.tasksDone, function(taskInArray) {
           return taskInArray.id === task.id;
         });
         // add to the start of the undone task list

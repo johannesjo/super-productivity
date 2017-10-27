@@ -680,6 +680,12 @@
         }
       }
     }
+
+    collapseNotes(tasks) {
+      tasks.forEach((task) => {
+        delete task.showNotes;
+      });
+    }
   }
 
   // hacky fix for ff
