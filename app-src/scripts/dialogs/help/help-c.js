@@ -71,7 +71,14 @@
       * supports markdown
       * list item
       * click to edit
-      `
+      `,
+      localAttachments:[
+        {
+          title: 'Some link attached by you via drag and drop',
+          path: 'http://external.url',
+          type: 'LINK'
+        }
+      ]
     };
     vm.exampleTasks = [
       {
