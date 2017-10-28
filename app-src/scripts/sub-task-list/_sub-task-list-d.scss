@@ -2,7 +2,7 @@ sub-task-list task-list {
   // animation
   &.ng-enter,
   &.ng-leave {
-    transition: all 0.3s $ease-in-out-quint;
+    transition: all 0.2s $ease-in-out-quint;
   }
 
   &.ng-enter {
