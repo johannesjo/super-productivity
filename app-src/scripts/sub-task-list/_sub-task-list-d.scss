@@ -1,4 +1,6 @@
 sub-task-list task-list {
+  overflow: hidden;
+
   // animation
   &.ng-enter,
   &.ng-leave {
@@ -17,11 +19,6 @@ sub-task-list task-list {
   &.ng-leave {
     opacity: 1;
     max-height: 200px;
-
-    // make sure icons won't be displayed outside the box
-    ng-md-icon {
-      visibility: hidden;
-    }
   }
 
   &.ng-leave.ng-leave-active {
