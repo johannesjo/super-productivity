@@ -12,8 +12,7 @@
 
   class GlobalLinkListCtrl {
     /* @ngInject */
-    constructor(GlobalLinkList, $document, $scope, $localStorage, Dialogs) {
-      this.globalLinkList = GlobalLinkList;
+    constructor(GlobalLinkList, $document, $scope, Dialogs) {
       this.dialogs = Dialogs;
 
       $document[0].ondragover = $document[0].ondrop = (ev) => {
@@ -21,16 +20,11 @@
       };
 
       $document[0].body.ondrop = (ev) => {
-        console.log($localStorage.globalLinks);
-
-        console.log(ev);
         const text = ev.dataTransfer.getData('text');
 
         if (text) {
-          console.log(text);
           GlobalLinkList.addText(text);
         } else if (ev.dataTransfer) {
-          console.log(ev.dataTransfer);
           GlobalLinkList.addFiles(ev.dataTransfer);
         }
         ev.preventDefault();

@@ -9,7 +9,7 @@
 (function() {
   'use strict';
 
-  const MAX_TITLE_LENGTH = 20;
+  // const MAX_TITLE_LENGTH = 20;
   const TYPES = {
     FILE: 'FILE',
     LINK: 'LINK',
@@ -22,8 +22,6 @@
     }
 
     static baseName(passedStr) {
-      console.log(passedStr);
-
       const str = passedStr.trim();
       let base;
       if (str[str.length - 1] === '/') {
