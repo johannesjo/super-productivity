@@ -693,8 +693,8 @@
           if (!this.$localStorage.currentTask || !(task.subTasks.find((task) => this.$localStorage.currentTask.id === task.id))) {
             task.isHideSubTasks = true;
           }
-        } else {
-          task.isHideSubTasks && delete task.isHideSubTasks;
+        } else if (task.isHideSubTasks) {
+          delete task.isHideSubTasks;
         }
       });
     }
