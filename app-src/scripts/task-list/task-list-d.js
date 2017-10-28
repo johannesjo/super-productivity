@@ -226,6 +226,10 @@
         return cTask.id === task.id;
       });
 
+      // stop propagation to prevent from occurring twice
+      $event.preventDefault();
+      $event.stopPropagation();
+
       if (this.checkKeyCombo($event, lsKeys.taskEditTitle) || $event.key === 'Enter') {
         this.$scope.$broadcast(this.EDIT_ON_CLICK_TOGGLE_EV, task.id);
       }
@@ -277,7 +281,12 @@
 
       // collapse sub tasks
       if (($event.keyCode === KEY_LEFT) || this.checkKeyCombo($event, lsKeys.collapseSubTasks)) {
-        this.collapseSubTasks(task);
+        if (task.subTasks) {
+          this.collapseSubTasks(task);
+        }
+        if (this.parentTask) {
+          this.focusPrevTask(taskEl);
+        }
       }
 
       // move task up
