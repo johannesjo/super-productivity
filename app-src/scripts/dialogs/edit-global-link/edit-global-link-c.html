@@ -39,19 +39,24 @@
           </md-option>
         </md-select>
 
-        <md-autocomplete flex="100"
-                         tabindex="1"
-                         md-selected-item="vm.linkCopy.customIcon"
-                         md-search-text="vm.searchIconTxt"
-                         md-items="icon in vm.getFilteredIconSuggestions(vm.searchIconTxt)"
-                         md-item-text="icon"
-                         md-require-match="true"
-                         placeholder="Select custom icon">
-          <md-item-template>
-          <span md-highlight-text="vm.searchIconTxt"
-                md-highlight-flags="i">{{icon}}</span>
-          </md-item-template>
-        </md-autocomplete>
+
+        <div class="custom-icon-wrapper">
+          <md-autocomplete tabindex="1"
+                           md-selected-item="vm.linkCopy.customIcon"
+                           md-search-text="vm.searchIconTxt"
+                           md-items="icon in vm.getFilteredIconSuggestions(vm.searchIconTxt)"
+                           md-item-text="icon"
+                           md-require-match="true"
+                           placeholder="Select custom icon">
+            <md-item-template>
+              <ng-md-icon icon="{{icon}}"></ng-md-icon>
+              <span md-highlight-text="vm.searchIconTxt"
+                    md-highlight-flags="i">{{icon}}</span>
+            </md-item-template>
+          </md-autocomplete>
+          <ng-md-icon ng-if="vm.linkCopy.customIcon"
+                      icon="{{vm.linkCopy.customIcon}}"></ng-md-icon>
+        </div>
       </div>
     </md-dialog-content>
 
