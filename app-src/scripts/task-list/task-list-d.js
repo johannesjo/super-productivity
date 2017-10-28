@@ -319,7 +319,11 @@
 
     collapseSubTasks(task) {
       if (task.subTasks) {
-        task.isHideSubTasks = true;
+        const hasCurrentTaskAsSubTask = !!(task.subTasks.find((task) => this.currentTaskId === task.id));
+
+        if (!hasCurrentTaskAsSubTask) {
+          task.isHideSubTasks = true;
+        }
       }
     }
 
