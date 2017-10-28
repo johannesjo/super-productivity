@@ -5,7 +5,7 @@
  * # themeSettings
  */
 
-(function () {
+(function() {
   'use strict';
 
   angular
@@ -28,7 +28,7 @@
   }
 
   /* @ngInject */
-  function ThemeSettingsCtrl($scope, THEMES, DEFAULT_THEME, $localStorage) {
+  function ThemeSettingsCtrl($scope, THEMES, DEFAULT_THEME, $localStorage, $rootScope) {
     let vm = this;
     vm.themes = THEMES;
 
@@ -37,25 +37,26 @@
       vm.currentTheme = vm.currentTheme || DEFAULT_THEME;
       vm.isDarkTheme = vm.currentTheme && vm.currentTheme.indexOf('dark') > -1;
       vm.selectedTheme = vm.currentTheme && vm.currentTheme
-          .replace('-theme', '')
-          .replace('-dark', '');
+        .replace('-theme', '')
+        .replace('-dark', '');
     });
 
     // WATCHER & EVENTS
     // ----------------
     const watchers = [];
 
-    watchers.push($scope.$watch('vm.selectedTheme', function (value) {
+    watchers.push($scope.$watch('vm.selectedTheme', function(value) {
       if (value) {
         if (vm.isDarkTheme) {
           vm.currentTheme = value + '-dark';
         } else {
           vm.currentTheme = value + '-theme';
         }
+        $localStorage.theme = vm.currentTheme;
       }
     }));
 
-    watchers.push($scope.$watch('vm.isDarkTheme', function (value) {
+    watchers.push($scope.$watch('vm.isDarkTheme', function(value) {
       if (vm.currentTheme) {
         if (value) {
           vm.currentTheme = vm.currentTheme.replace('-theme', '-dark');
@@ -74,6 +75,10 @@
             vm.currentTheme.currentProject.data.theme = vm.currentTheme;
           }
         }
+
+        // primitive string val for rootScope and ls need to be updated directly
+        $rootScope.r.bodyClass = $localStorage.bodyClass;
+        $localStorage.theme = vm.currentTheme;
       }
     }));
 
