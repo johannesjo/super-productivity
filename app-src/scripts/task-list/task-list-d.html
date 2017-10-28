@@ -175,7 +175,7 @@
       </section>
 
       <section ng-if="task.originalAttachment.length > 0">
-        <collapsible title="Attachments ({{ ::task.originalAttachment.length }})">
+        <collapsible collapsible-title="Attachments ({{ ::task.originalAttachment.length }})">
           <ul class="attachments">
             <li ng-repeat="attachment in task.originalAttachment">
               <a href="{{ ::attachment}}"
@@ -194,7 +194,7 @@
       </section>
 
       <section ng-if="task.originalComments.length > 0">
-        <collapsible title="Comments ({{:: task.originalComments.length }})">
+        <collapsible collapsible-title="Comments ({{:: task.originalComments.length }})">
           <md-divider></md-divider>
           <ul class="comments">
             <li ng-repeat="comment in task.originalComments"
@@ -206,6 +206,12 @@
         </collapsible>
       </section>
 
+      <section ng-if="task.localAttachments">
+        <collapsible collapsible-title="Local attachments and links"
+                     is-initially-expanded="'true'">
+          <task-local-links local-links="task.localAttachments"></task-local-links>
+        </collapsible>
+      </section>
     </div>
 
     <sub-task-list ng-if="task.subTasks.length > 0"

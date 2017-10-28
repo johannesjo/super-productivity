@@ -1,0 +1,19 @@
+task-local-links {
+
+  li {
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: row;
+  }
+
+  .md-button.md-icon-button {
+    padding: 0;
+    margin-left: 20px;
+    width: 24px;
+    height: 24px;
+    min-height: 0;
+
+    ng-md-icon {
+    }
+  }
+}

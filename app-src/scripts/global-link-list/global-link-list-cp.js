@@ -12,7 +12,7 @@
 
   class GlobalLinkListCtrl {
     /* @ngInject */
-    constructor(GlobalLinkList, $document, $scope, Dialogs) {
+    constructor(GlobalLinkList, $document, $scope, Dialogs, Tasks) {
       this.dialogs = Dialogs;
 
       $document[0].ondragover = $document[0].ondrop = (ev) => {
@@ -20,13 +20,17 @@
       };
 
       $document[0].body.ondrop = (ev) => {
-        const text = ev.dataTransfer.getData('text');
+        const taskEl = ev.target.closest('.task');
+        const link = GlobalLinkList.createLink(ev);
 
-        if (text) {
-          GlobalLinkList.addText(text);
-        } else if (ev.dataTransfer) {
-          GlobalLinkList.addFiles(ev.dataTransfer);
+        if (taskEl) {
+          const $taskEl = angular.element(taskEl);
+          const task = $taskEl.scope().modelValue;
+          Tasks.addLocalAttachment(task, link);
+        } else {
+          GlobalLinkList.addItem(link);
         }
+
         ev.preventDefault();
         ev.stopPropagation();
         $scope.$apply();

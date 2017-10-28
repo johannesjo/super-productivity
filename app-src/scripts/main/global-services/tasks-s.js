@@ -698,6 +698,14 @@
         }
       });
     }
+
+    addLocalAttachment(task, attachment) {
+      if (!task.localAttachments) {
+        task.localAttachments = [];
+      }
+
+      task.localAttachments.push(attachment);
+    }
   }
 
   // hacky fix for ff

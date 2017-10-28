@@ -37,7 +37,16 @@
       return base;
     }
 
-    addText(text) {
+    createLink(ev) {
+      const text = ev.dataTransfer.getData('text');
+      if (text) {
+        return this.createTextLink(text);
+      } else if (ev.dataTransfer) {
+        return this.createFileLink(ev.dataTransfer);
+      }
+    }
+
+    createTextLink(text) {
       if (text) {
         if (text.match(/\n/)) {
           //this.addItem({
@@ -49,29 +58,30 @@
           if (!path.match(/^http/)) {
             path = '//' + path;
           }
-          this.addItem({
+          return {
             title: this.constructor.baseName(text),
             path: path,
             type: TYPES.LINK
-          });
+          };
         }
       }
     }
 
-    addFiles(dataTransfer) {
+    createFileLink(dataTransfer) {
       const path = dataTransfer.files[0].path;
-
       if (path) {
-        this.addItem({
+        return {
           title: this.constructor.baseName(path),
           path: path,
           type: TYPES.FILE
-        });
+        };
       }
     }
 
     addItem(item) {
-      this.ls.globalLinks.push(item);
+      if (item) {
+        this.ls.globalLinks.push(item);
+      }
     }
   }
 
