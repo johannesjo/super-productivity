@@ -30,6 +30,7 @@
       this.lastFocusedTaskEl = undefined;
       this.checkKeyCombo = CheckShortcutKeyCombo;
       this.Util = Util;
+      // this.selectCurrentTaskTimeout;
 
       this.boundHandleKeyPress = this.handleKeyPress.bind(this);
       this.boundFocusLastTaskEl = this.focusLastFocusedTaskEl.bind(this);
@@ -37,6 +38,7 @@
 
     $onDestroy() {
       this.$timeout.cancel(this.animationReadyTimeout);
+      this.$timeout.cancel(this.selectCurrentTaskTimeout);
     }
 
     $onInit() {
@@ -117,6 +119,16 @@
       if (this.lastFocusedTaskEl) {
         this.lastFocusedTaskEl.focus();
       }
+    }
+
+    focusCurrentTask() {
+      if (this.selectCurrentTaskTimeout) {
+        this.$timeout.cancel(this.selectCurrentTaskTimeout);
+      }
+
+      this.selectCurrentTaskTimeout = this.$timeout(() => {
+        document.querySelectorAll('.task.is-current')[0].focus();
+      });
     }
 
     estimateTime(task) {
@@ -216,74 +228,74 @@
       taskEl.off('keydown', this.boundHandleKeyPress);
     }
 
-    handleKeyPress($event) {
-      let taskEl = $event.currentTarget || $event.srcElement || $event.originalTarget;
+    handleKeyPress($ev) {
+      let taskEl = $ev.currentTarget || $ev.srcElement || $ev.originalTarget;
       taskEl = angular.element(taskEl);
       const task = this.lastFocusedTaskEl.scope().modelValue;
       const lsKeys = this.$localStorage.keys;
-      const isShiftOrCtrlPressed = ($event.shiftKey === false && $event.ctrlKey === false);
+      const isShiftOrCtrlPressed = ($ev.shiftKey === false && $ev.ctrlKey === false);
       const taskIndex = _.findIndex(this.tasks, (cTask) => {
         return cTask.id === task.id;
       });
 
       // stop propagation to prevent from occurring twice
-      $event.preventDefault();
-      $event.stopPropagation();
+      $ev.preventDefault();
+      $ev.stopPropagation();
 
-      if (this.checkKeyCombo($event, lsKeys.taskEditTitle) || $event.key === 'Enter') {
+      if (this.checkKeyCombo($ev, lsKeys.taskEditTitle) || $ev.key === 'Enter') {
         this.$scope.$broadcast(this.EDIT_ON_CLICK_TOGGLE_EV, task.id);
       }
-      if (this.checkKeyCombo($event, lsKeys.taskToggleNotes)) {
+      if (this.checkKeyCombo($ev, lsKeys.taskToggleNotes)) {
         task.showNotes = !task.showNotes;
       }
-      if (this.checkKeyCombo($event, lsKeys.taskOpenEstimationDialog)) {
+      if (this.checkKeyCombo($ev, lsKeys.taskOpenEstimationDialog)) {
         this.estimateTime(task);
       }
-      if (this.checkKeyCombo($event, lsKeys.taskToggleDone)) {
+      if (this.checkKeyCombo($ev, lsKeys.taskToggleDone)) {
         task.isDone = !task.isDone;
         this.onTaskDoneChanged(task);
       }
-      if (this.checkKeyCombo($event, lsKeys.taskAddSubTask)) {
+      if (this.checkKeyCombo($ev, lsKeys.taskAddSubTask)) {
         this.addSubTask(task);
       }
-      if (this.checkKeyCombo($event, lsKeys.moveToBacklog)) {
+      if (this.checkKeyCombo($ev, lsKeys.moveToBacklog)) {
         this.Tasks.moveTaskFromTodayToBackLog(task);
       }
-      if (this.checkKeyCombo($event, lsKeys.taskOpenOriginalLink)) {
+      if (this.checkKeyCombo($ev, lsKeys.taskOpenOriginalLink)) {
         this.Util.openExternalUrl(task.originalLink);
       }
 
-      if (this.checkKeyCombo($event, lsKeys.togglePlay)) {
-        this.togglePlay(task);
+      if (this.checkKeyCombo($ev, lsKeys.togglePlay)) {
         this.expandSubTasks(task);
+        this.togglePlay(task);
       }
 
-      if (this.checkKeyCombo($event, lsKeys.taskDelete)) {
+      if (this.checkKeyCombo($ev, lsKeys.taskDelete)) {
         this.deleteTask(task);
         // don't propagate to next focused element
-        $event.preventDefault();
-        $event.stopPropagation();
+        $ev.preventDefault();
+        $ev.stopPropagation();
       }
-      if (this.checkKeyCombo($event, lsKeys.moveToTodaysTasks)) {
+      if (this.checkKeyCombo($ev, lsKeys.moveToTodaysTasks)) {
         this.Tasks.moveTaskFromBackLogToToday(task);
       }
 
       // move focus up
-      if ((isShiftOrCtrlPressed && $event.keyCode === KEY_UP) || this.checkKeyCombo($event, lsKeys.selectPreviousTask)) {
+      if ((isShiftOrCtrlPressed && $ev.keyCode === KEY_UP) || this.checkKeyCombo($ev, lsKeys.selectPreviousTask)) {
         this.focusPrevTask(taskEl);
       }
       // move focus down
-      if ((isShiftOrCtrlPressed && $event.keyCode === KEY_DOWN) || this.checkKeyCombo($event, lsKeys.selectNextTask)) {
+      if ((isShiftOrCtrlPressed && $ev.keyCode === KEY_DOWN) || this.checkKeyCombo($ev, lsKeys.selectNextTask)) {
         this.focusNextTask(taskEl);
       }
 
       // expand sub tasks
-      if (($event.keyCode === KEY_RIGHT) || this.checkKeyCombo($event, lsKeys.expandSubTasks)) {
+      if (($ev.keyCode === KEY_RIGHT) || this.checkKeyCombo($ev, lsKeys.expandSubTasks)) {
         this.expandSubTasks(task);
       }
 
       // collapse sub tasks
-      if (($event.keyCode === KEY_LEFT) || this.checkKeyCombo($event, lsKeys.collapseSubTasks)) {
+      if (($ev.keyCode === KEY_LEFT) || this.checkKeyCombo($ev, lsKeys.collapseSubTasks)) {
         if (task.subTasks) {
           this.collapseSubTasks(task);
         }
@@ -294,7 +306,7 @@
 
       // moving items
       // move task up
-      if (this.checkKeyCombo($event, lsKeys.moveTaskUp)) {
+      if (this.checkKeyCombo($ev, lsKeys.moveTaskUp)) {
         if (taskIndex > 0) {
           TaskListCtrl.moveItem(this.tasks, taskIndex, taskIndex - 1);
 
@@ -305,7 +317,7 @@
         }
       }
       // move task down
-      if (this.checkKeyCombo($event, lsKeys.moveTaskDown)) {
+      if (this.checkKeyCombo($ev, lsKeys.moveTaskDown)) {
         if (taskIndex < this.tasks.length - 1) {
           TaskListCtrl.moveItem(this.tasks, taskIndex, taskIndex + 1);
         }
@@ -378,6 +390,10 @@
         } else {
           this.Tasks.updateCurrent(task);
         }
+      }
+
+      if (this.currentTaskId) {
+        this.focusCurrentTask();
       }
     }
 
