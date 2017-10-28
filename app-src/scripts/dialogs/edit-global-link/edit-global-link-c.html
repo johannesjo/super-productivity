@@ -39,19 +39,17 @@
           </md-option>
         </md-select>
 
-        <md-autocomplete
-          md-whiteframe="2"
-          flex="100"
-          tabindex="1"
-          md-selected-item="vm.linkCopy.customIcon"
-          md-search-text="vm.searchIconTxt"
-          md-items="icon in vm.customIcons"
-          md-item-text="icon"
-          md-require-match="true"
-          placeholder="Select custom icon">
+        <md-autocomplete flex="100"
+                         tabindex="1"
+                         md-selected-item="vm.linkCopy.customIcon"
+                         md-search-text="vm.searchIconTxt"
+                         md-items="icon in vm.getFilteredIconSuggestions(vm.searchIconTxt)"
+                         md-item-text="icon"
+                         md-require-match="true"
+                         placeholder="Select custom icon">
           <md-item-template>
           <span md-highlight-text="vm.searchIconTxt"
-                md-highlight-flags="^i">{{icon}}</span>
+                md-highlight-flags="i">{{icon}}</span>
           </md-item-template>
         </md-autocomplete>
       </div>
