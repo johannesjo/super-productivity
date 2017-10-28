@@ -686,6 +686,18 @@
         delete task.showNotes;
       });
     }
+
+    collapseSubTasks(tasks) {
+      tasks.forEach((task) => {
+        if (task.subTasks) {
+          if (!this.$localStorage.currentTask || !(task.subTasks.find((task) => this.$localStorage.currentTask.id === task.id))) {
+            task.isHideSubTasks = true;
+          }
+        } else {
+          task.isHideSubTasks && delete task.isHideSubTasks;
+        }
+      });
+    }
   }
 
   // hacky fix for ff

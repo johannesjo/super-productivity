@@ -61,9 +61,12 @@
       Dialogs('ADD_TASK', undefined, true);
     };
 
-    vm.collapseNotes = () => {
+    vm.collapseAllNotesAndSubTasks = () => {
       Tasks.collapseNotes(vm.tasksDone);
       Tasks.collapseNotes(vm.tasksUndone);
+
+      Tasks.collapseSubTasks(vm.tasksDone);
+      Tasks.collapseSubTasks(vm.tasksUndone);
     };
 
     vm.onTaskDoneChangedUndoneList = (task) => {
