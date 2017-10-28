@@ -1,0 +1,8 @@
+<div class="global-link"
+     ng-repeat="link in $ctrl.globalLinks">
+  <a external-link
+     href="{{link.path}}"
+     type="{{link.type}}"
+     ng-bind="link.name"></a>
+</div>
+

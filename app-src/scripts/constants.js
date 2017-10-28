@@ -38,6 +38,7 @@
       backlogTasks: [],
       distractions: [],
       projects: [],
+      globalLinks: [],
       git: {
         isShowIssuesFromGit: false,
         isAutoImportToBacklog: false,
