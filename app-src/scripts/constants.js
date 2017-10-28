@@ -66,6 +66,7 @@
         moveToTodaysTasks: '',
         expandSubTasks: '',
         collapseSubTasks: '',
+        togglePlay: 'y'
       },
       config: {
         isTakeABreakEnabled: false,

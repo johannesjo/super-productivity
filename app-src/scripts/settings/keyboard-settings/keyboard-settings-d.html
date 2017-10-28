@@ -136,6 +136,12 @@
            ng-model="vm.keys.collapseSubTasks">
   </md-input-container>
   <md-input-container class="md-block">
+    <label>Start/stop task</label>
+    <input type="text"
+           keyboard-key-input
+           ng-model="vm.keys.togglePlay">
+  </md-input-container>
+  <md-input-container class="md-block">
     <label>Move task to task backlog</label>
     <input type="text"
            keyboard-key-input

@@ -253,6 +253,11 @@
         this.Util.openExternalUrl(task.originalLink);
       }
 
+      if (this.checkKeyCombo($event, lsKeys.togglePlay)) {
+        this.togglePlay(task);
+        this.expandSubTasks(task);
+      }
+
       if (this.checkKeyCombo($event, lsKeys.taskDelete)) {
         this.deleteTask(task);
         // don't propagate to next focused element
@@ -272,8 +277,6 @@
         this.focusNextTask(taskEl);
       }
 
-      // moving items
-
       // expand sub tasks
       if (($event.keyCode === KEY_RIGHT) || this.checkKeyCombo($event, lsKeys.expandSubTasks)) {
         this.expandSubTasks(task);
@@ -289,6 +292,7 @@
         }
       }
 
+      // moving items
       // move task up
       if (this.checkKeyCombo($event, lsKeys.moveTaskUp)) {
         if (taskIndex > 0) {
@@ -366,7 +370,14 @@
       if (this.currentTaskId === task.id) {
         this.Tasks.updateCurrent(undefined);
       } else {
-        this.Tasks.updateCurrent(task);
+        if (task.subTasks) {
+          const firstUndone = task.subTasks.find((cTask) => !cTask.isDone);
+          if (firstUndone) {
+            this.Tasks.updateCurrent(firstUndone);
+          }
+        } else {
+          this.Tasks.updateCurrent(task);
+        }
       }
     }
 
