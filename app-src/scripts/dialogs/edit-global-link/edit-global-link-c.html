@@ -1,0 +1,58 @@
+<md-dialog aria-label="Edit global link"
+           md-theme="vm.theme"
+           class="edit-global-link-dialog">
+  <md-toolbar>
+    <div class="md-toolbar-tools">
+      <h2>Edit global link</h2>
+      <span flex></span>
+      <md-button class="md-icon-button"
+                 aria-label="Cancel"
+                 ng-click="vm.cancel()">
+        <ng-md-icon icon="close"></ng-md-icon>
+      </md-button>
+    </div>
+  </md-toolbar>
+
+  <form ng-submit="vm.saveGlobalLink()">
+    <md-dialog-content>
+      <div class="md-dialog-content">
+        <md-input-container class="md-block">
+          <label>Title</label>
+          <input type="text"
+                 ng-model="vm.linkCopy.title"
+                 md-auto-focus
+                 aria-label="Title">
+        </md-input-container>
+        <md-input-container class="md-block">
+          <label>Url/Path</label>
+          <input type="text"
+                 ng-model="vm.linkCopy.path"
+                 required
+                 aria-label="Path/Url">
+        </md-input-container>
+        <md-select ng-model="vm.linkCopy.type"
+                   required="true"
+                   placeholder="Select a type">
+          <md-option ng-repeat="type in vm.types"
+                     ng-value="type"
+                     ng-bind="type">
+          </md-option>
+        </md-select>
+      </div>
+    </md-dialog-content>
+
+
+    <md-dialog-actions>
+      <md-button type="submit"
+                 class="md-primary md-raised">
+        Save
+      </md-button>
+
+      <md-button ng-click="vm.cancel()"
+                 type="button"
+                 class="md-raised">
+        Cancel
+      </md-button>
+    </md-dialog-actions>
+  </form>
+</md-dialog>

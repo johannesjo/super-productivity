@@ -4,6 +4,10 @@ agenda-and-history {
   margin-right: -20px;
   display: block;
 
+  global-link-list + .ui-view-container > main & {
+    margin-top: 0;
+  }
+
   .content {
     padding-left: 20px;
     padding-right: 20px;

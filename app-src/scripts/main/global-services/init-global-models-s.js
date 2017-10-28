@@ -63,6 +63,8 @@
         $rootScope.r.bodyClass = '';
       }
 
+      $rootScope.r.globalLinks = $localStorage.globalLinks;
+
       // all of these should normally not happen, but in case it does, at least
       // assign an object save the chosen values
       if (!$localStorage.uiHelper.dailyTaskExportSettings) {

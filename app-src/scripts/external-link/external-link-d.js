@@ -5,7 +5,7 @@
  * # externalLink
  */
 
-(function () {
+(function() {
   'use strict';
 
   angular
@@ -20,11 +20,16 @@
       scope: {}
     };
 
-    function linkFn(scope, element) {
+    function linkFn(scope, element, attrs) {
       if (IS_ELECTRON) {
         element.on('click', (event) => {
           event.preventDefault();
-          Util.openExternalUrl(element.attr('href'));
+          if (!attrs.type || attrs.type === 'LINK') {
+            Util.openExternalUrl(element.attr('href'));
+          } else if (attrs.type === 'FILE') {
+            const shell = require('electron').shell;
+            shell.openItem(attrs.href);
+          }
         });
       }
     }

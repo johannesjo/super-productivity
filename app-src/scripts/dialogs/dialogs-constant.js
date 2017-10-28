@@ -68,6 +68,10 @@
       JIRA_ASSIGN_TICKET: {
         controller: 'JiraAssignTicketCtrl',
         templateUrl: 'scripts/dialogs/jira-assign-ticket/jira-assign-ticket-c.html'
+      },
+      EDIT_GLOBAL_LINK: {
+        controller: 'EditGlobalLinkCtrl',
+        templateUrl: 'scripts/dialogs/edit-global-link/edit-global-link-c.html'
       }
     });
 })();

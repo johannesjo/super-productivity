@@ -1,0 +1,51 @@
+<div class="global-link">
+  <md-button class="md-raised md-icon-button md-primary md-hue-3"
+             md-whiteframe="1"
+             ng-click="$ctrl.addLink()"
+             tabindex="1">
+    <ng-md-icon icon="add"
+                aria-label="add global link"></ng-md-icon>
+  </md-button>
+</div>
+
+<div class="global-link"
+     ng-repeat="link in $ctrl.globalLinks"
+     draggable="false">
+  <md-button external-link
+             class="md-raised md-primary md-hue-2"
+             href="{{link.path}}"
+             type="{{link.type}}"
+             md-whiteframe="1"
+             target="_blank"
+             tabindex="1"
+             draggable="false"
+             aria-label="open global link">
+    <div>
+      <ng-md-icon icon="link"
+                  ng-if="link.type === 'LINK'"
+                  aria-label="Open link"></ng-md-icon>
+      <ng-md-icon icon="short_text"
+                  ng-if="link.type === 'TEXT'"
+                  aria-label="Open text"></ng-md-icon>
+      <ng-md-icon icon="insert_drive_file"
+                  ng-if="link.type === 'FILE'"
+                  aria-label="Open file"></ng-md-icon>
+
+      <span ng-bind="link.title"></span>
+    </div>
+  </md-button>
+
+  <div class="controls">
+    <md-button class="md-icon-button md-raised md-primary md-hue-3 edit-button"
+               ng-click="$ctrl.edit(link)">
+      <ng-md-icon icon="edit"
+                  aria-label="edit link"></ng-md-icon>
+    </md-button>
+    <md-button class="md-icon-button md-raised md-warn trash-button"
+               ng-click="$ctrl.remove($index)"
+               aria-label="remove link">
+      <ng-md-icon icon="delete_forever"></ng-md-icon>
+    </md-button>
+  </div>
+</div>
+
