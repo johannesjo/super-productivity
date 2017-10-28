@@ -1,17 +1,21 @@
 global-link-list {
   display: flex;
   flex-flow: row;
-  justify-content: center;
+  justify-content: space-between;
   flex-wrap: wrap;
   padding-bottom: 10px;
 
   .global-link {
     flex: 1 1 auto;
-    margin: 5px 5px 0;
+    margin: 6px 3px 0;
     position: relative;
 
+    > .md-button:focus + .controls,
+    &.focus .controls,
     &:hover .controls {
-      display: flex;
+      visibility: visible;
+      opacity: 1;
+      transform: translate(-50%, 0);
     }
 
     &:first-child {
@@ -27,24 +31,30 @@ global-link-list {
     flex-direction: row;
     justify-content: center;
     color: #000000;
-    flex: 1 1 auto;
     text-transform: none;
     margin: 0;
+    max-height: 36px;
   }
 
   .controls {
     position: absolute;
-    top: 90%;
+    top: 100%;
+    margin-top: -10px;
     left: 50%;
-    transform: translateX(-50%);
+    transform: translate(-50%, 30px);
     z-index: 5;
-    display: none;
-    //display: flex;
+    visibility: hidden;
+    display: flex;
     flex-direction: row;
     padding: 0 10px;
+    transition: 0.2s all linear;
+    opacity: 0;
 
     .md-button {
+      padding: 0;
       margin: 3px;
+      width: 34px;
+      height: 34px;
     }
   }
 
