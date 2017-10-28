@@ -5,3 +5,23 @@ md-dialog.fullscreen-dialog {
   height: 100%;
   border-radius: 0;
 }
+
+$swift-ease-out-duration: 0;
+$swift-ease-out-timing-function: cubic-bezier(0.25, 0.8, 0.25, 1);
+$swift-ease-out: all $swift-ease-out-duration $swift-ease-out-timing-function;
+
+md-dialog {
+
+  &.md-transition-in {
+    opacity: 1;
+    // transition: $swift-ease-out;
+    transition: none;
+    transform: translate(0, 0) scale(1.0);
+  }
+  &.md-transition-out {
+    opacity: 0;
+    // transition: $swift-ease-out;
+    transition: none;
+    transform: translate(0, 100%) scale(0.2);
+  }
+}
