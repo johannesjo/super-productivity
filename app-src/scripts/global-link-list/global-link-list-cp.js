@@ -26,7 +26,8 @@
         const text = ev.dataTransfer.getData('text');
 
         if (text) {
-
+          console.log(text);
+          GlobalLinkList.addText(text);
         } else if (ev.dataTransfer) {
           console.log(ev.dataTransfer);
           GlobalLinkList.addFiles(ev.dataTransfer);
