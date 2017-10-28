@@ -43,7 +43,7 @@
       if (text) {
         if (text.match(/\n/)) {
           //this.addItem({
-          //  name: text.substr(0, MAX_TITLE_LENGTH),
+          //  title: text.substr(0, MAX_TITLE_LENGTH),
           //  type: TYPES.TEXT
           //});
         } else {
@@ -52,7 +52,7 @@
             path = '//' + path;
           }
           this.addItem({
-            name: this.constructor.baseName(text),
+            title: this.constructor.baseName(text),
             path: path,
             type: TYPES.LINK
           });
@@ -65,7 +65,7 @@
 
       if (path) {
         this.addItem({
-          name: this.constructor.baseName(path),
+          title: this.constructor.baseName(path),
           path: path,
           type: TYPES.FILE
         });
