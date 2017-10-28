@@ -9,7 +9,7 @@
 
     <md-menu ng-if="r.currentProject">
       <md-button aria-label="Switch project"
-                 ng-click="vm.openMenu($mdOpenMenu, $event)">
+                 ng-click="vm.openMenu($mdMenu.open, $event)">
         <md-tooltip md-direction="bottom">
           Switch project
         </md-tooltip>
@@ -18,7 +18,8 @@
       <md-menu-content width="4">
         <md-menu-item ng-repeat="project in vm.allProjects">
           <md-button ng-click="vm.changeProject(project)"
-          ng-bind="project.title">
+                     aria-label="Change project"
+                     ng-bind="project.title">
           </md-button>
         </md-menu-item>
       </md-menu-content>
