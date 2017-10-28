@@ -42,10 +42,10 @@
     addText(text) {
       if (text) {
         if (text.match(/\n/)) {
-          this.addItem({
-            name: text.substr(0, MAX_TITLE_LENGTH),
-            type: TYPES.TEXT
-          });
+          //this.addItem({
+          //  name: text.substr(0, MAX_TITLE_LENGTH),
+          //  type: TYPES.TEXT
+          //});
         } else {
           let path = text;
           if (!path.match(/^http/)) {
