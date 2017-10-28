@@ -45,7 +45,7 @@
     "browser-sync": "latest",
     "del": "latest",
     "ecstatic": "latest",
-    "electron": "git+ssh://git@github.com/johannesjo/electron-prebuilt.git",
+    "electron": "^1.7.9",
     "electron-builder": "^19.24.1",
     "gulp": "latest",
     "gulp-autoprefixer": "latest",
