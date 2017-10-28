@@ -38,6 +38,13 @@
       };
     }
 
+    edit(link) {
+
+    }
+
+    remove($index) {
+      this.globalLinks.splice($index, 1);
+    }
   }
 
   angular

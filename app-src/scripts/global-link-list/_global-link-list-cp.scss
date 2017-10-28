@@ -1,3 +1,55 @@
 global-link-list {
+  display: flex;
+  flex-flow: row;
+  justify-content: center;
+  flex-wrap: wrap;
+  padding-bottom: 10px;
 
+  .global-link {
+    flex: 1 1 auto;
+    margin: 5px 5px 0;
+    position: relative;
+
+    &:hover .controls {
+      display: flex;
+    }
+
+    &:first-child {
+      flex: 0 0 auto;
+    }
+  }
+
+  .global-link > .md-button {
+    border-radius: 0;
+    text-decoration: none;
+    display: flex;
+    align-items: flex-start;
+    flex-direction: row;
+    justify-content: center;
+    color: #000000;
+    flex: 1 1 auto;
+    text-transform: none;
+    margin: 0;
+  }
+
+  .controls {
+    position: absolute;
+    top: 90%;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 5;
+    display: none;
+    //display: flex;
+    flex-direction: row;
+    padding: 0 10px;
+
+    .md-button {
+      margin: 3px;
+    }
+  }
+
+  .edit-button {
+    &:hover {
+    }
+  }
 }

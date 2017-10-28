@@ -22,6 +22,10 @@ main {
   padding: 20px 20px 50px;
 }
 
+global-link-list + .ui-view-container > main {
+  padding-top: 0;
+}
+
 article {
 
 }
