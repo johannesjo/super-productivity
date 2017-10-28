@@ -238,10 +238,6 @@
         return cTask.id === task.id;
       });
 
-      // stop propagation to prevent from occurring twice
-      $ev.preventDefault();
-      $ev.stopPropagation();
-
       if (this.checkKeyCombo($ev, lsKeys.taskEditTitle) || $ev.key === 'Enter') {
         this.$scope.$broadcast(this.EDIT_ON_CLICK_TOGGLE_EV, task.id);
       }
@@ -272,7 +268,7 @@
 
       if (this.checkKeyCombo($ev, lsKeys.taskDelete)) {
         this.deleteTask(task);
-        // don't propagate to next focused element
+        // don't propagate to next focused element (important to allow global keyboard shortcuts)
         $ev.preventDefault();
         $ev.stopPropagation();
       }
@@ -283,14 +279,31 @@
       // move focus up
       if ((isShiftOrCtrlPressed && $ev.keyCode === KEY_UP) || this.checkKeyCombo($ev, lsKeys.selectPreviousTask)) {
         this.focusPrevTask(taskEl);
+
+        // stop propagation to prevent from occurring twice (important to allow global keyboard shortcuts)
+        $ev.preventDefault();
+        $ev.stopPropagation();
       }
       // move focus down
       if ((isShiftOrCtrlPressed && $ev.keyCode === KEY_DOWN) || this.checkKeyCombo($ev, lsKeys.selectNextTask)) {
         this.focusNextTask(taskEl);
+
+        // stop propagation to prevent from occurring twice (important to allow global keyboard shortcuts)
+        $ev.preventDefault();
+        $ev.stopPropagation();
       }
 
       // expand sub tasks
       if (($ev.keyCode === KEY_RIGHT) || this.checkKeyCombo($ev, lsKeys.expandSubTasks)) {
+        // if already opened or is sub task select next task
+        if ((task.subTasks && task.subTasks.length > 0 && task.isHideSubTasks === false) || this.parentTask) {
+          this.focusNextTask(taskEl);
+
+          // stop propagation to prevent from occurring twice (important to allow global keyboard shortcuts)
+          $ev.preventDefault();
+          $ev.stopPropagation();
+        }
+
         this.expandSubTasks(task);
       }
 
