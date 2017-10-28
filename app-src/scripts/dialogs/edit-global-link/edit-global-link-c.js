@@ -30,7 +30,7 @@
     vm.theme = theme;
     vm.linkCopy = angular.copy(link) || {};
 
-    if (vm.linkCopy.type) {
+    if (!vm.linkCopy.type) {
       vm.linkCopy.type = vm.types[0];
     }
 
