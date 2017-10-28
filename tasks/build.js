@@ -14,6 +14,7 @@ const minifyHtml = require('gulp-minify-html');
 const cleanCSS = require('gulp-clean-css');
 const useref = require('gulp-useref');
 const sourcemaps = require('gulp-sourcemaps');
+const saveLicense = require('uglify-save-license');
 const uglify = require('gulp-uglify');
 const imagemin = require('gulp-imagemin');
 const runSequence = require('run-sequence')
@@ -25,7 +26,7 @@ const lazypipe = require('lazypipe');
 const babel = require('gulp-babel');
 
 // main task
-gulp.task('build', function (callback) {
+gulp.task('build', function(callback) {
   runSequence(
     'wiredep',
     'lint',
@@ -45,7 +46,7 @@ gulp.task('build', function (callback) {
     callback);
 });
 
-gulp.task('wiredepBuild', function () {
+gulp.task('wiredepBuild', function() {
   return gulp.src([config.karmaConf, config.mainFile], { base: './' })
     .pipe(wiredep({
       exclude: config.excludedBowerComponents,
@@ -54,11 +55,11 @@ gulp.task('wiredepBuild', function () {
     .pipe(gulp.dest('./'));
 });
 
-gulp.task('cleanDist', function () {
+gulp.task('cleanDist', function() {
   return del.sync(config.dist);
 });
 
-gulp.task('copy', function () {
+gulp.task('copy', function() {
   const html = gulp.src(config.htmlF, { base: config.base })
     .pipe(minifyHtml({
       conditionals: true,
@@ -82,13 +83,17 @@ gulp.task('copy', function () {
   return merge(html, fonts, images);
 });
 
-gulp.task('minFiles', function () {
+gulp.task('minFiles', function() {
   return gulp.src(config.mainFile)
     .pipe(useref({}))
     //.pipe(useref({}, lazypipe()
     //  .pipe(sourcemaps.init, { loadMaps: true })))
     .pipe(gulpif(/scripts\.js/, babel()))
-    .pipe(gulpif(/\.js$/, uglify({ preserveComments: 'license' })))
+    .pipe(gulpif(/\.js$/, uglify({
+      output: {
+        comments: saveLicense
+      }
+    })))
     .pipe(gulpif(/\.css$/, cleanCSS()))
     //.pipe(sourcemaps.write('maps'))
     .pipe(gulp.dest(config.dist));

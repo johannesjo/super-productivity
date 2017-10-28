@@ -87,6 +87,7 @@
     "protractor": "latest",
     "require-dir": "latest",
     "run-sequence": "latest",
+    "uglify-save-license": "^0.4.1",
     "wiredep": "latest",
     "yargs": "latest"
   },
