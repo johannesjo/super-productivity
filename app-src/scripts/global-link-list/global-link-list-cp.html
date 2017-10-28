@@ -1,6 +1,7 @@
 <div class="global-link">
   <md-button class="md-raised md-icon-button md-primary md-hue-3"
              md-whiteframe="1"
+             ng-click="$ctrl.addLink()"
              tabindex="1">
     <ng-md-icon icon="add"
                 aria-label="add global link"></ng-md-icon>
@@ -26,7 +27,7 @@
       <ng-md-icon icon="short_text"
                   ng-if="link.type === 'TEXT'"
                   aria-label="Open text"></ng-md-icon>
-      <ng-md-icon icon="atach_file"
+      <ng-md-icon icon="insert_drive_file"
                   ng-if="link.type === 'FILE'"
                   aria-label="Open file"></ng-md-icon>
 
@@ -35,7 +36,7 @@
   </md-button>
 
   <div class="controls">
-    <md-button class="md-icon-button md-raised md-primary md-hue-2 edit-button"
+    <md-button class="md-icon-button md-raised md-primary md-hue-3 edit-button"
                ng-click="$ctrl.edit(link)">
       <ng-md-icon icon="edit"
                   aria-label="edit link"></ng-md-icon>

@@ -12,8 +12,9 @@
 
   class GlobalLinkListCtrl {
     /* @ngInject */
-    constructor(GlobalLinkList, $document, $scope, $localStorage) {
+    constructor(GlobalLinkList, $document, $scope, $localStorage, Dialogs) {
       this.globalLinkList = GlobalLinkList;
+      this.dialogs = Dialogs;
 
       $document[0].ondragover = $document[0].ondrop = (ev) => {
         ev.preventDefault();
@@ -39,7 +40,11 @@
     }
 
     edit(link) {
+      this.dialogs('EDIT_GLOBAL_LINK', { link }, true);
+    }
 
+    addLink() {
+      this.edit();
     }
 
     remove($index) {
