@@ -5,10 +5,14 @@
  * # taskList
  */
 
-(function () {
+(function() {
   'use strict';
 
   const CONTROLLER_AS = '$ctrl';
+  const KEY_LEFT = 37;
+  const KEY_UP = 38;
+  const KEY_RIGHT = 39;
+  const KEY_DOWN = 40;
 
   class TaskListCtrl {
     /* @ngInject */
@@ -24,7 +28,7 @@
       this.Jira = Jira;
       this.$localStorage = $localStorage;
       this.lastFocusedTaskEl = undefined;
-      this.CheckShortcutKeyCombo = CheckShortcutKeyCombo;
+      this.checkKeyCombo = CheckShortcutKeyCombo;
       this.Util = Util;
 
       this.boundHandleKeyPress = this.handleKeyPress.bind(this);
@@ -58,7 +62,7 @@
             return !(draggedTask.subTasks && draggedTask.subTasks.length > 0 && getParenTaskFromDestScope(destSortableScope));
           }
         },
-        itemMoved: function (event) {
+        itemMoved: function(event) {
           let currentlyMovedTask = event.dest.sortableScope.modelValue[event.dest.index];
           let parentTask = getParenTaskFromDestScope(event.dest.sortableScope);
 
@@ -78,7 +82,7 @@
             });
           }
         },
-        orderChanged: function (event) {
+        orderChanged: function(event) {
           if (angular.isFunction(this.onOrderChanged)) {
             this.onOrderChanged({ $event: event });
           }
@@ -148,7 +152,7 @@
         .position('bottom');
 
       this.$mdToast.show(toast)
-        .then(function (response) {
+        .then(function(response) {
           if (response === 'ok') {
             // re-add task on undo
             that.tasks.splice($index, 0, taskCopy);
@@ -216,56 +220,68 @@
       let taskEl = $event.currentTarget || $event.srcElement || $event.originalTarget;
       taskEl = angular.element(taskEl);
       const task = this.lastFocusedTaskEl.scope().modelValue;
+      const lsKeys = this.$localStorage.keys;
+      const isShiftOrCtrlPressed = ($event.shiftKey === false && $event.ctrlKey === false);
+      const taskIndex = _.findIndex(this.tasks, (cTask) => {
+        return cTask.id === task.id;
+      });
 
-      if (this.CheckShortcutKeyCombo($event, this.$localStorage.keys.taskEditTitle) || $event.key === 'Enter') {
+      if (this.checkKeyCombo($event, lsKeys.taskEditTitle) || $event.key === 'Enter') {
         this.$scope.$broadcast(this.EDIT_ON_CLICK_TOGGLE_EV, task.id);
       }
-      if (this.CheckShortcutKeyCombo($event, this.$localStorage.keys.taskToggleNotes)) {
+      if (this.checkKeyCombo($event, lsKeys.taskToggleNotes)) {
         task.showNotes = !task.showNotes;
       }
-      if (this.CheckShortcutKeyCombo($event, this.$localStorage.keys.taskOpenEstimationDialog)) {
+      if (this.checkKeyCombo($event, lsKeys.taskOpenEstimationDialog)) {
         this.estimateTime(task);
       }
-      if (this.CheckShortcutKeyCombo($event, this.$localStorage.keys.taskToggleDone)) {
+      if (this.checkKeyCombo($event, lsKeys.taskToggleDone)) {
         task.isDone = !task.isDone;
         this.onTaskDoneChanged(task);
       }
-      if (this.CheckShortcutKeyCombo($event, this.$localStorage.keys.taskAddSubTask)) {
+      if (this.checkKeyCombo($event, lsKeys.taskAddSubTask)) {
         this.addSubTask(task);
       }
-      if (this.CheckShortcutKeyCombo($event, this.$localStorage.keys.moveToBacklog)) {
+      if (this.checkKeyCombo($event, lsKeys.moveToBacklog)) {
         this.Tasks.moveTaskFromTodayToBackLog(task);
       }
-      if (this.CheckShortcutKeyCombo($event, this.$localStorage.keys.taskOpenOriginalLink)) {
+      if (this.checkKeyCombo($event, lsKeys.taskOpenOriginalLink)) {
         this.Util.openExternalUrl(task.originalLink);
       }
 
-      if (this.CheckShortcutKeyCombo($event, this.$localStorage.keys.taskDelete)) {
+      if (this.checkKeyCombo($event, lsKeys.taskDelete)) {
         this.deleteTask(task);
         // don't propagate to next focused element
         $event.preventDefault();
         $event.stopPropagation();
       }
-      if (this.CheckShortcutKeyCombo($event, this.$localStorage.keys.moveToTodaysTasks)) {
+      if (this.checkKeyCombo($event, lsKeys.moveToTodaysTasks)) {
         this.Tasks.moveTaskFromBackLogToToday(task);
       }
 
-      // move up
-      if (($event.shiftKey === false && $event.ctrlKey === false && $event.keyCode === 38) || this.CheckShortcutKeyCombo($event, this.$localStorage.keys.selectPreviousTask)) {
+      // move focus up
+      if ((isShiftOrCtrlPressed && $event.keyCode === KEY_UP) || this.checkKeyCombo($event, lsKeys.selectPreviousTask)) {
         this.focusPrevTask(taskEl);
       }
-      // move down
-      if (($event.shiftKey === false && $event.ctrlKey === false && $event.keyCode === 40) || this.CheckShortcutKeyCombo($event, this.$localStorage.keys.selectNextTask)) {
+      // move focus down
+      if ((isShiftOrCtrlPressed && $event.keyCode === KEY_DOWN) || this.checkKeyCombo($event, lsKeys.selectNextTask)) {
         this.focusNextTask(taskEl);
       }
 
       // moving items
-      let taskIndex = _.findIndex(this.tasks, (cTask) => {
-        return cTask.id === task.id;
-      });
 
-      // move up
-      if (this.CheckShortcutKeyCombo($event, this.$localStorage.keys.moveTaskUp)) {
+      // expand sub tasks
+      if (($event.keyCode === KEY_RIGHT) || this.checkKeyCombo($event, lsKeys.expandSubTasks)) {
+        this.expandSubTasks(task);
+      }
+
+      // collapse sub tasks
+      if (($event.keyCode === KEY_LEFT) || this.checkKeyCombo($event, lsKeys.collapseSubTasks)) {
+        this.collapseSubTasks(task);
+      }
+
+      // move task up
+      if (this.checkKeyCombo($event, lsKeys.moveTaskUp)) {
         if (taskIndex > 0) {
           TaskListCtrl.moveItem(this.tasks, taskIndex, taskIndex - 1);
 
@@ -275,8 +291,8 @@
           });
         }
       }
-      // move down
-      if (this.CheckShortcutKeyCombo($event, this.$localStorage.keys.moveTaskDown)) {
+      // move task down
+      if (this.checkKeyCombo($event, lsKeys.moveTaskDown)) {
         if (taskIndex < this.tasks.length - 1) {
           TaskListCtrl.moveItem(this.tasks, taskIndex, taskIndex + 1);
         }
@@ -286,12 +302,24 @@
       this.$scope.$apply();
     }
 
+    expandSubTasks(task) {
+      if (task.subTasks) {
+        task.isHideSubTasks = false;
+      }
+    }
+
+    collapseSubTasks(task) {
+      if (task.subTasks) {
+        task.isHideSubTasks = true;
+      }
+    }
+
     addSubTask(task) {
       // use parent task if the current task is a sub task itself
       if (this.parentTask) {
         task = this.parentTask;
       }
-      task.isHideSubTasks = false;
+      this.expandSubTasks(task);
 
       // only allow if task is not done
       if (!task.isDone) {

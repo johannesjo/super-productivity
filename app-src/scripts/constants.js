@@ -63,7 +63,9 @@
         moveTaskUp: 'Ctrl+Shift+ArrowUp',
         moveTaskDown: 'Ctrl+Shift+ArrowDown',
         moveToBacklog: '',
-        moveToTodaysTasks: ''
+        moveToTodaysTasks: '',
+        expandSubTasks: '',
+        collapseSubTasks: '',
       },
       config: {
         isTakeABreakEnabled: false,

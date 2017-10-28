@@ -124,6 +124,18 @@
            ng-model="vm.keys.moveTaskDown">
   </md-input-container>
   <md-input-container class="md-block">
+    <label>Expand sub tasks</label>
+    <input type="text"
+           keyboard-key-input
+           ng-model="vm.keys.expandSubTasks">
+  </md-input-container>
+  <md-input-container class="md-block">
+    <label>Collapse sub tasks</label>
+    <input type="text"
+           keyboard-key-input
+           ng-model="vm.keys.collapseSubTasks">
+  </md-input-container>
+  <md-input-container class="md-block">
     <label>Move task to task backlog</label>
     <input type="text"
            keyboard-key-input
