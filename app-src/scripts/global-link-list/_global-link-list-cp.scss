@@ -34,12 +34,13 @@ global-link-list {
     text-transform: none;
     margin: 0;
     max-height: 36px;
+    min-width: 0px;
   }
 
   .controls {
     position: absolute;
     top: 100%;
-    margin-top: -5px;
+    margin-top: -2px;
     left: 50%;
     transform: translate(-50%, 30px);
     z-index: 5;
@@ -52,7 +53,7 @@ global-link-list {
 
     .md-button {
       padding: 0;
-      margin: 3px;
+      margin: 2px;
       width: 32px;
       height: 32px;
       min-height: 0;
