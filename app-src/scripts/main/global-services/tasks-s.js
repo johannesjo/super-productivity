@@ -705,6 +705,7 @@
       }
 
       task.localAttachments.push(attachment);
+      this.SimpleToast('SUCCESS', '"' + attachment.title + '" added to "' + task.title + '"');
     }
   }
 

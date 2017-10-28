@@ -206,7 +206,7 @@
         </collapsible>
       </section>
 
-      <section ng-if="task.localAttachments">
+      <section ng-if="task.localAttachments && task.localAttachments.length">
         <collapsible collapsible-title="Local attachments and links"
                      is-initially-expanded="'true'">
           <task-local-links local-links="task.localAttachments"></task-local-links>

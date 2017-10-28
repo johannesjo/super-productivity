@@ -17,8 +17,9 @@
   };
 
   class GlobalLinkList {
-    constructor($localStorage) {
+    constructor($localStorage, SimpleToast) {
       this.ls = $localStorage;
+      this.SimpleToast = SimpleToast;
     }
 
     static baseName(passedStr) {
@@ -81,6 +82,7 @@
     addItem(item) {
       if (item) {
         this.ls.globalLinks.push(item);
+        this.SimpleToast('SUCCESS', '"' + item.title + '" added to global link dashboard');
       }
     }
   }
