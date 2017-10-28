@@ -39,7 +39,7 @@ global-link-list {
   .controls {
     position: absolute;
     top: 100%;
-    margin-top: -10px;
+    margin-top: -5px;
     left: 50%;
     transform: translate(-50%, 30px);
     z-index: 5;
@@ -53,8 +53,9 @@ global-link-list {
     .md-button {
       padding: 0;
       margin: 3px;
-      width: 34px;
-      height: 34px;
+      width: 32px;
+      height: 32px;
+      min-height: 0;
     }
   }
 
