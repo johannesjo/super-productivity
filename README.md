@@ -4,7 +4,7 @@ This is a ToDo List / Time Tracker / Personal Jira Task Manager for Linux, MacOS
 
 Build with the awesome [electron](http://electron.atom.io/).
 
-![Daily Planner](screens/daily-planner.png)
+![Work View with global links](screens/global-links.png)
 
 ## Features
 * Configurable and automatable Jira integration for: 
@@ -51,6 +51,7 @@ npm start # on windows use "set NODE_ENV=DEV electron ./electron/main.js" instea
 There is also a [web-version](http://super-productivity.com) but it is much more limited (no Jira integration, no time tracking).
 
 ## More Screenshots
+![Daily Planner](screens/daily-planner.png)
 ![submit-worklog](screens/submit-worklog.png)
 ![agenda](screens/agenda.png)
 ![daily-summary](screens/daily-summary.png)
