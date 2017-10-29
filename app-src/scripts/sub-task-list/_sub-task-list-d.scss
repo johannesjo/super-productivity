@@ -1,30 +1,7 @@
 sub-task-list task-list {
   overflow: hidden;
 
-  // animation
-  &.ng-enter,
-  &.ng-leave {
-    transition: all 0.2s $ease-in-out-quint;
-  }
-
-  &.ng-enter {
-    opacity: 0;
-    max-height: 0;
-  }
-
-  &.ng-enter.ng-enter-active {
-    opacity: 1;
-    max-height: 400px;
-  }
-  &.ng-leave {
-    opacity: 1;
-    max-height: 200px;
-  }
-
-  &.ng-leave.ng-leave-active {
-    max-height: 0;
-    opacity: 1;
-  }
+  @include ng-slide-down-up;
 }
 
 .md-button.collapse-sub-tasks-btn {
