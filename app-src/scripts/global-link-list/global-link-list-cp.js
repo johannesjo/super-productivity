@@ -13,32 +13,39 @@
   class GlobalLinkListCtrl {
     /* @ngInject */
     constructor(GlobalLinkList, $document, $scope, Dialogs, Tasks) {
-      this.dialogs = Dialogs;
+      this.Dialogs = Dialogs;
+      this.GlobalLinkList = GlobalLinkList;
+      this.Tasks = Tasks;
+      this.$scope = $scope;
 
       $document[0].ondragover = $document[0].ondrop = (ev) => {
         ev.preventDefault();
       };
 
       $document[0].body.ondrop = (ev) => {
-        const taskEl = ev.target.closest('.task');
-        const link = GlobalLinkList.createLink(ev);
-
-        if (taskEl) {
-          const $taskEl = angular.element(taskEl);
-          const task = $taskEl.scope().modelValue;
-          Tasks.addLocalAttachment(task, link);
-        } else {
-          GlobalLinkList.addItem(link);
-        }
-
-        ev.preventDefault();
-        ev.stopPropagation();
-        $scope.$apply();
+        this.handleDrag(ev);
       };
     }
 
+    handleDrag(ev) {
+      const taskEl = ev.target.closest('.task');
+      const link = this.GlobalLinkList.createLink(ev);
+
+      if (taskEl) {
+        const $taskEl = angular.element(taskEl);
+        const task = $taskEl.scope().modelValue;
+        this.Tasks.addLocalAttachment(task, link);
+      } else {
+        this.GlobalLinkList.addItem(link);
+      }
+
+      ev.preventDefault();
+      ev.stopPropagation();
+      this.$scope.$apply();
+    }
+
     edit(link) {
-      this.dialogs('EDIT_GLOBAL_LINK', { link }, true);
+      this.Dialogs('EDIT_GLOBAL_LINK', { link }, true);
     }
 
     addLink() {
