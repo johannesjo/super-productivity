@@ -98,7 +98,7 @@
 
   /* @ngInject */
   function initGlobalShortcuts($document, Dialogs, $localStorage, CheckShortcutKeyCombo, IS_ELECTRON, $state) {
-    $document.bind('keypress', (ev) => {
+    $document.bind('keydown', (ev) => {
       // only trigger if not in typing mode
       if (ev.target.tagName !== 'INPUT' && ev.target.tagName !== 'TEXTAREA') {
         if (CheckShortcutKeyCombo(ev, $localStorage.keys.addNewTask)) {
