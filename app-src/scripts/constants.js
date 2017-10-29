@@ -6,7 +6,7 @@
  * Constant in the superProductivity.
  */
 
-(function () {
+(function() {
   'use strict';
 
   angular
@@ -48,6 +48,10 @@
       },
       keys: {
         globalShowHide: 'Ctrl+Shift+X',
+        goToDailyPlanner: 'q',
+        goToWorkView: 'w',
+        goToDailyAgenda: 'e',
+        goToSettings: 'r',
         addNewTask: '*',
         showHelp: '?',
         openProjectNotes: 'N',
@@ -67,7 +71,7 @@
         moveToTodaysTasks: '',
         expandSubTasks: '',
         collapseSubTasks: '',
-        togglePlay: 'y'
+        togglePlay: 'y',
       },
       config: {
         isTakeABreakEnabled: false,

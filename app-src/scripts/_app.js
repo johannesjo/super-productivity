@@ -97,11 +97,10 @@
   }
 
   /* @ngInject */
-  function initGlobalShortcuts($document, Dialogs, $localStorage, CheckShortcutKeyCombo, IS_ELECTRON) {
+  function initGlobalShortcuts($document, Dialogs, $localStorage, CheckShortcutKeyCombo, IS_ELECTRON, $state) {
     $document.bind('keypress', (ev) => {
       // only trigger if not in typing mode
       if (ev.target.tagName !== 'INPUT' && ev.target.tagName !== 'TEXTAREA') {
-        // on star
         if (CheckShortcutKeyCombo(ev, $localStorage.keys.addNewTask)) {
           Dialogs('ADD_TASK', undefined, true);
         }
@@ -113,6 +112,19 @@
         }
         if (CheckShortcutKeyCombo(ev, $localStorage.keys.showHelp)) {
           Dialogs('HELP', { template: 'PAGE' }, true);
+        }
+
+        if (CheckShortcutKeyCombo(ev, $localStorage.keys.goToDailyPlanner)) {
+          $state.go('daily-planner');
+        }
+        if (CheckShortcutKeyCombo(ev, $localStorage.keys.goToWorkView)) {
+          $state.go('work-view');
+        }
+        if (CheckShortcutKeyCombo(ev, $localStorage.keys.goToDailyAgenda)) {
+          $state.go('daily-agenda');
+        }
+        if (CheckShortcutKeyCombo(ev, $localStorage.keys.goToSettings)) {
+          $state.go('settings');
         }
       }
 
