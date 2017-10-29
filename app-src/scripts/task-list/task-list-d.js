@@ -243,6 +243,12 @@
       }
       if (this.checkKeyCombo($ev, lsKeys.taskToggleNotes)) {
         task.showNotes = !task.showNotes;
+
+        if (task.showNotes) {
+          this.$timeout(() => {
+            taskEl.find('marked-preview').focus();
+          });
+        }
       }
       if (this.checkKeyCombo($ev, lsKeys.taskOpenEstimationDialog)) {
         this.estimateTime(task);

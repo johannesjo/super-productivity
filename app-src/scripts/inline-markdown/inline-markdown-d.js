@@ -5,7 +5,7 @@
  * # inlineMarkdown
  */
 
-(function () {
+(function() {
   'use strict';
 
   angular
@@ -33,6 +33,7 @@
     let waitForMarkedTimeOut;
     let textareaEl;
     let ngModelCopy;
+    let textareaTimeout;
 
     const keypressHandler = ($event) => {
       if ($event.keyCode === 10 && $event.ctrlKey) {
@@ -69,7 +70,7 @@
         vm.showEdit = true;
         ngModelCopy = vm.ngModel || '';
 
-        $timeout(function () {
+        textareaTimeout = $timeout(function() {
           textareaEl = angular.element($element.find('textarea'));
           textareaEl[0].value = ngModelCopy;
           textareaEl[0].focus();
@@ -115,6 +116,9 @@
     $scope.$on('$destroy', () => {
       if (waitForMarkedTimeOut) {
         $timeout.cancel(waitForMarkedTimeOut);
+      }
+      if (textareaTimeout) {
+        $timeout.cancel(textareaTimeout);
       }
     });
   }
