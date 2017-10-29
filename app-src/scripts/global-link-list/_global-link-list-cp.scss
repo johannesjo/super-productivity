@@ -57,7 +57,7 @@ global-link-list {
     transform: translate(-50%, 0);
 
     .md-button {
-      transition: 0.2s all linear;
+      transition: 0.2s all cubic-bezier(0.25, 0.8, 0.25, 1);
       border-radius: 0;
       margin: 0;
       padding: 0;
