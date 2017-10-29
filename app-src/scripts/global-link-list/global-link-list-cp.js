@@ -12,7 +12,7 @@
 
   class GlobalLinkListCtrl {
     /* @ngInject */
-    constructor(GlobalLinkList, $document, $scope, Dialogs, Tasks, $element) {
+    constructor(GlobalLinkList, $document, $scope, Dialogs, Tasks) {
       this.Dialogs = Dialogs;
       this.GlobalLinkList = GlobalLinkList;
       this.Tasks = Tasks;
@@ -21,14 +21,6 @@
       // required otherwise the page would be reloaded
       $document[0].ondragover = $document[0].ondrop = (ev) => {
         ev.preventDefault();
-      };
-
-      // add classes
-      $element[0].ondragenter = () => {
-        $element.addClass('drag-over');
-      };
-      $element[0].ondragleave = () => {
-        $element.removeClass('drag-over')
       };
 
       // handle drop
@@ -58,12 +50,7 @@
         const task = $taskEl.scope().modelValue;
         this.openEditDialog(link, true, task);
       } else {
-        const linkList = ev.target.closest('global-link-list');
-        if (linkList) {
-          this.GlobalLinkList.addItem(link);
-        } else {
-          this.openEditDialog(link, true);
-        }
+        this.openEditDialog(link, true);
       }
 
       ev.preventDefault();

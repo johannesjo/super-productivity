@@ -5,19 +5,6 @@ global-link-list {
   flex-wrap: wrap;
   padding-bottom: 10px;
 
-  &.drag-over {
-    background-color: #ccc;
-
-    body.dark-theme & {
-      background-color: $dark-theme-bg-darker;
-    }
-
-    // required prevent event from occurring when hovering child elements
-    * {
-      pointer-events: none;
-    }
-  }
-
   .global-link {
     flex: 1 1 auto;
     margin: 6px 3px 0;
