@@ -29,6 +29,8 @@
     &:first-child {
       flex: 0 0 auto;
     }
+
+    @include ng-pop-in-popout;
   }
 
   .global-link > .md-button {
