@@ -127,7 +127,10 @@
       }
 
       this.selectCurrentTaskTimeout = this.$timeout(() => {
-        document.querySelectorAll('.task.is-current')[0].focus();
+        const currentTask = document.querySelectorAll('.task.is-current');
+        if (currentTask && currentTask[0]) {
+          currentTask[0].focus();
+        }
       });
     }
 
