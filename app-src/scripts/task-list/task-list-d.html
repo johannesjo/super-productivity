@@ -155,7 +155,7 @@
              ng-bind="task.originalId ? 'Description': 'Notes'"></div>
         <div md-whiteframe="4">
           <inline-markdown ng-model="task.notes"
-                           on-changed="$ctrl.onTaskNotesChanged(newVal, task)"></inline-markdown>
+                           on-edit-finished="$ctrl.onTaskNotesEditFinished(newVal, isChanged, task)"></inline-markdown>
         </div>
       </section>
 

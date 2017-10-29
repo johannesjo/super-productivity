@@ -183,12 +183,14 @@
       }
     }
 
-    onTaskNotesChanged(newNoteVal, task) {
-      if (task.originalKey) {
+    onTaskNotesEditFinished(newNoteVal, isChanged, task) {
+      if (task.originalKey && isChanged) {
         // for some reason, this isn't updated for the task, so we do it here once more
         task.notes = newNoteVal;
         this.Jira.updateIssueDescription(task);
       }
+
+      this.focusLastFocusedTaskEl();
     }
 
     onTaskDoneChanged(task) {

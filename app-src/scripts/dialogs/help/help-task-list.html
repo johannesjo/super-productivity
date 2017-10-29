@@ -48,11 +48,11 @@
       <md-button class="md-icon-button play-btn"
                  aria-label="mark as current"
                  tabindex="2"
-                 ng-click="$ctrl.isCurrent= !$ctrl.isCurrent">
+                 ng-click="vm.isCurrent= !vm.isCurrent">
         <md-tooltip>
           Starts time tracking for the task and marks it as current task. Will only appear on the work view.
         </md-tooltip>
-        <ng-md-icon icon="{{$ctrl.isCurrent? 'pause_circle_filled':'play_circle_fill'}}"
+        <ng-md-icon icon="{{vm.isCurrent? 'pause_circle_filled':'play_circle_fill'}}"
                     aria-label="start task"></ng-md-icon>
       </md-button>
 
@@ -81,8 +81,7 @@
         <md-button class="md-icon-button"
                    tabindex="2"
                    ng-disabled="vm.exampleTask.subTasks.length>0"
-                   aria-label="time estimation"
-                   ng-click="$ctrl.estimateTime(task)">
+                   aria-label="time estimation">
           <md-tooltip>
             Opens a dialog for you to specify time spend and time estimated for the task
           </md-tooltip>
@@ -135,7 +134,6 @@
           </md-tooltip>
           <md-checkbox ng-model="vm.exampleTask.isDone"
                        tabindex="2"
-                       ng-change="$ctrl.onTaskDoneChanged(task)"
                        aria-label="un-/mark as done">
           </md-checkbox>
         </span>
@@ -181,8 +179,7 @@
           <md-tooltip>
             Notes section. Click to edit.
           </md-tooltip>
-          <inline-markdown ng-model="vm.exampleTask.notes"
-                           on-changed="$ctrl.onTaskNotesChanged(task)"></inline-markdown>
+          <inline-markdown ng-model="vm.exampleTask.notes"></inline-markdown>
         </div>
       </section>
 

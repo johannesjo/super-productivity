@@ -22,7 +22,7 @@
       restrict: 'E',
       scope: {
         ngModel: '=',
-        onChanged: '&'
+        onEditFinished: '&'
       }
     };
   }
@@ -88,15 +88,17 @@
       vm.showEdit = false;
       makeLinksWorkForElectron();
       vm.resizeToFit();
+      const isChanged = (ngModelCopy !== vm.ngModel);
 
-      if (ngModelCopy !== vm.ngModel) {
+      if (isChanged) {
         vm.ngModel = ngModelCopy;
+      }
 
-        if (angular.isFunction(vm.onChanged)) {
-          vm.onChanged({
-            newVal: ngModelCopy
-          });
-        }
+      if (angular.isFunction(vm.onEditFinished)) {
+        vm.onEditFinished({
+          newVal: vm.ngModel,
+          isChanged: isChanged
+        });
       }
     };
 
