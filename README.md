@@ -15,7 +15,7 @@ Build with the awesome [electron](http://electron.atom.io/).
   * Automatic notifications once your (current) task has changed or been commented on jira => no messy email notifications required any more
 * Time Tracking 
 * Sub Tasks
-* Task Backlog
+* Sexy global pinboard to add quick links and project related files 
 * 'Take a break' reminder
 * Daily Schedule
 * Daily Summary
