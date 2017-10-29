@@ -20,7 +20,9 @@
     let vm = this;
 
     vm.editOrAddStr = isNew ? 'Add' : 'Edit';
-    vm.globalOrTaskStr = task ? 'link to task' : 'global link';
+    vm.getGlobalOrTaskStr = () => vm.selectedTask ? `link to task "${vm.selectedTask.title}"` : 'global link';
+
+    vm.isNew = isNew;
 
     vm.customIcons = CUSTOM_ICONS;
 
@@ -28,9 +30,10 @@
       'LINK',
       'FILE'
     ];
-    vm.task = {};
+    vm.selectedTask = task;
     vm.theme = theme;
     vm.linkCopy = angular.copy(link) || {};
+    vm.tasks = Tasks.getTodayAndBacklog();
 
     if (!vm.linkCopy.type) {
       vm.linkCopy.type = vm.types[0];
@@ -38,8 +41,8 @@
 
     vm.saveGlobalLink = () => {
       if (isNew) {
-        if (task) {
-          Tasks.addLocalAttachment(task, link);
+        if (vm.selectedTask) {
+          Tasks.addLocalAttachment(vm.selectedTask, link);
         } else {
           GlobalLinkList.addItem(vm.linkCopy);
         }
@@ -56,6 +59,10 @@
 
     vm.getFilteredIconSuggestions = (searchText) => {
       return searchText ? $filter('filter')(vm.customIcons, searchText, false) : vm.customIcons;
+    };
+
+    vm.getFilteredTasks = (searchText) => {
+      return searchText ? $filter('filter')(vm.tasks, searchText, false) : vm.tasks;
     };
   }
 })();

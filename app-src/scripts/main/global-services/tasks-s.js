@@ -161,6 +161,13 @@
       return this.$localStorage.tasks;
     }
 
+    getTodayAndBacklog() {
+      const todaysT = this.getToday();
+      const backlogT = this.getBacklog();
+
+      return _.concat(todaysT, backlogT);
+    }
+
     getAllTasks() {
       const todaysT = this.getToday();
       const backlogT = this.getBacklog();

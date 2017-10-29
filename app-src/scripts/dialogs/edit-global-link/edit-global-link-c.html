@@ -1,9 +1,9 @@
-<md-dialog aria-label="{{vm.editOrAddStr}} {{vm.globalOrTaskStr}}"
+<md-dialog aria-label="{{vm.editOrAddStr}} {{vm.getGlobalOrTaskStr()}}"
            md-theme="vm.theme"
            class="edit-global-link-dialog">
   <md-toolbar>
     <div class="md-toolbar-tools">
-      <h2>{{vm.editOrAddStr}} {{vm.globalOrTaskStr}}</h2>
+      <h2>{{vm.editOrAddStr}} {{vm.getGlobalOrTaskStr()}}</h2>
       <span flex></span>
       <md-button class="md-icon-button"
                  aria-label="Cancel"
@@ -41,6 +41,8 @@
 
 
         <div class="custom-icon-wrapper">
+          <ng-md-icon ng-if="vm.linkCopy.customIcon"
+                      icon="{{vm.linkCopy.customIcon}}"></ng-md-icon>
           <md-autocomplete tabindex="1"
                            md-selected-item="vm.linkCopy.customIcon"
                            md-search-text="vm.searchIconTxt"
@@ -53,9 +55,29 @@
               <span md-highlight-text="vm.searchIconTxt"
                     md-highlight-flags="i">{{icon}}</span>
             </md-item-template>
+            <md-not-found>
+              No icon found
+            </md-not-found>
           </md-autocomplete>
-          <ng-md-icon ng-if="vm.linkCopy.customIcon"
-                      icon="{{vm.linkCopy.customIcon}}"></ng-md-icon>
+        </div>
+
+        <div ng-if="vm.isNew">
+          <p>Select task to add to (or leave empty to add it to the global link list).</p>
+          <md-autocomplete
+            md-selected-item="vm.selectedTask"
+            md-search-text="vm.searchTaskText"
+            md-items="task in vm.getFilteredTasks(searchTaskText)"
+            md-item-text="task.title"
+            md-min-length="0"
+            placeholder="Select task">
+            <md-item-template>
+          <span md-highlight-text="vm.searchTaskText"
+                md-highlight-flags="^i">{{ task.title }}</span>
+            </md-item-template>
+            <md-not-found>
+              Mo task found
+            </md-not-found>
+          </md-autocomplete>
         </div>
       </div>
     </md-dialog-content>

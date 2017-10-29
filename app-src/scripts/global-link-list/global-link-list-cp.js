@@ -30,43 +30,8 @@
       $document[0].onpaste = (ev) => {
         const link = this.GlobalLinkList.createLinkFromPaste(ev);
         this.handleLinkinput(link, ev);
-
-        //const log = console.log;
-        //const e = ev;
-        //log('event.clipboardData');
-        //if (e.clipboardData.types) {
-        //  log('event.clipboardData.types');
-        //
-        //  // Look for a types property that is undefined
-        //  if (!Array.isArray(e.clipboardData.types)) {
-        //    log('event.clipboardData.types is undefined');
-        //  }
-        //
-        //  // Loop the data store in type and display it
-        //  var i = 0;
-        //  while (i < e.clipboardData.types.length) {
-        //    var key = e.clipboardData.types[i];
-        //    var val = e.clipboardData.getData(key);
-        //    log((i + 1) + ': ' + key + ' - ' + val);
-        //    i++;
-        //  }
-        //
-        //} else {
-        //  // Look for access to data if types array is missing
-        //  console.log('I am here!');
-        //
-        //  var text = e.clipboardData.getData('text/plain');
-        //  var url = e.clipboardData.getData('text/uri-list');
-        //  var html = e.clipboardData.getData('text/html');
-        //  log('text/plain - ' + text);
-        //  if (url !== undefined) {
-        //    log('text/uri-list - ' + url);
-        //  }
-        //  if (html !== undefined) {
-        //    log('text/html - ' + html);
-        //  }
-        //}
-      }
+        //  const html = e.clipboardData.getData('text/html');
+      };
     }
 
     handleLinkinput(link, ev) {
