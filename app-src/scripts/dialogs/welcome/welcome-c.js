@@ -6,7 +6,7 @@
  * Controller of the superProductivity
  */
 
-(function () {
+(function() {
   'use strict';
 
   angular
@@ -14,7 +14,7 @@
     .controller('WelcomeCtrl', WelcomeCtrl);
 
   /* @ngInject */
-  function WelcomeCtrl($mdDialog, $localStorage, IS_ELECTRON, theme) {
+  function WelcomeCtrl($mdDialog, $localStorage, IS_ELECTRON, theme, Dialogs) {
     let vm = this;
     vm.theme = theme;
 
@@ -29,5 +29,11 @@
     vm.cancel = () => {
       $mdDialog.cancel();
     };
+
+    vm.openHelp = (ev) => {
+      ev.preventDefault();
+      $mdDialog.cancel();
+      Dialogs('HELP', { template: 'PAGE' });
+    }
   }
 })();
