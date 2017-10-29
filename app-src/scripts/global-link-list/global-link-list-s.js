@@ -38,12 +38,20 @@
       return base;
     }
 
-    createLink(ev) {
+    createLinkFromDrop(ev) {
       const text = ev.dataTransfer.getData('text');
       if (text) {
         return this.createTextLink(text);
       } else if (ev.dataTransfer) {
         return this.createFileLink(ev.dataTransfer);
+      }
+    }
+
+
+    createLinkFromPaste(ev) {
+      const text = ev.clipboardData.getData('text/plain');
+      if (text) {
+        return this.createTextLink(text);
       }
     }
 

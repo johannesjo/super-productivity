@@ -16,9 +16,10 @@
     .controller('EditGlobalLinkCtrl', EditGlobalLinkCtrl);
 
   /* @ngInject */
-  function EditGlobalLinkCtrl($mdDialog, theme, link, GlobalLinkList, $filter) {
+  function EditGlobalLinkCtrl($mdDialog, theme, link, isNew, GlobalLinkList, $filter) {
     let vm = this;
-    const isNew = !link;
+
+    vm.editOrAddStr = isNew ? 'Add' : 'Edit';
 
     vm.customIcons = CUSTOM_ICONS;
 
