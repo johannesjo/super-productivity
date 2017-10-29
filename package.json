@@ -13,7 +13,9 @@
     "start": "NODE_ENV=DEV electron ./electron/main.js",
     "pack": "build --dir",
     "localInstall": "sudo echo 'Starting local install' && rm -Rf ./dist/ && gulp build && build && sudo dpkg -i dist/superProductivity*.deb",
-    "dist": "gulp build && build"
+    "dist": "gulp build && build",
+    "newMinorRelease": "npm version minor && npm publish && git push --tags && git checkout master && git merge develop && git push && git checkout develop && ./deploy.sh",
+    "newPathRelease": "npm version patch && npm publish && git push --tags && git checkout master && git merge develop && git push && git checkout develop && ./deploy.sh"
   },
   "author": "Johannes Millan <contact@super-productivity.com> (http://super-productivity.com)",
   "license": "MIT",
