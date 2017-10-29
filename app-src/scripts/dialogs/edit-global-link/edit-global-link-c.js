@@ -16,7 +16,7 @@
     .controller('EditGlobalLinkCtrl', EditGlobalLinkCtrl);
 
   /* @ngInject */
-  function EditGlobalLinkCtrl($mdDialog, theme, link, isNew, task, Tasks, GlobalLinkList, $filter, IS_ELECTRON, $timeout) {
+  function EditGlobalLinkCtrl($mdDialog, theme, link, isNew, task, Tasks, GlobalLinkList, $filter, IS_ELECTRON) {
     let vm = this;
 
     vm.editOrAddStr = isNew ? 'Add' : 'Edit';
