@@ -1,16 +1,24 @@
+<h3 class="md-title">The global link lists</h3>
+<p>The global link list right under the navigation offers to possibility to add links to your project. This can be done by clicking on the '+'-button in the top left, via drag and drop or via pasting a previously copied link while the application has focus.</p>
+<p>Links can be edited and deleted via the buttons that appear when hovering a link.</p>
+<p ng-if="vm.IS_ELECTRON">Files can also be linked as can custom commands (be careful with this!).</p>
+<p>Hover the example to see what everything does.</p>
+
 <div class="global-link-list-inner">
   <div class="global-link">
     <md-button class="md-raised md-icon-button md-primary md-hue-3"
                md-whiteframe="1"
-               ng-click="$ctrl.addLink()"
                tabindex="1">
+      <md-tooltip>
+        Click here to add a new one
+      </md-tooltip>
       <ng-md-icon icon="add"
                   aria-label="add global link"></ng-md-icon>
     </md-button>
   </div>
 
   <div class="global-link"
-       ng-repeat="link in $ctrl.globalLinks"
+       ng-repeat="link in vm.globalLinks"
        draggable="false">
     <md-button external-link
                class="md-raised md-primary md-hue-2"
@@ -37,18 +45,25 @@
 
         <span ng-bind="link.title"></span>
       </div>
+      <md-tooltip>
+        Click to open link
+      </md-tooltip>
     </md-button>
 
     <div class="controls">
-      <md-button class="md-icon-button md-raised md-primary md-hue-3 edit-button"
-                 ng-click="$ctrl.openEditDialog(link)">
+      <md-button class="md-icon-button md-raised md-primary md-hue-3 edit-button">
         <ng-md-icon icon="edit"
                     aria-label="edit link"></ng-md-icon>
+        <md-tooltip>
+          Click here to edit
+        </md-tooltip>
       </md-button>
       <md-button class="md-icon-button md-raised md-warn md-hue-3 trash-button"
-                 ng-click="$ctrl.remove($index)"
                  aria-label="remove link">
         <ng-md-icon icon="delete_forever"></ng-md-icon>
+        <md-tooltip>
+          Click here to delete
+        </md-tooltip>
       </md-button>
     </div>
   </div>

@@ -6,7 +6,7 @@
  * Controller of the superProductivity
  */
 
-(function () {
+(function() {
   'use strict';
 
   angular
@@ -72,7 +72,7 @@
       * list item
       * click to edit
       `,
-      localAttachments:[
+      localAttachments: [
         {
           title: 'Some link attached by you via drag and drop',
           path: 'http://external.url',
@@ -85,5 +85,14 @@
         title: 'Example task'
       }
     ];
+
+    vm.globalLinks = [
+      { type: 'LINK', title: 'Some link' },
+      { type: 'LINK', title: 'Interesting google stuff', path: 'http://google.com/' },
+    ];
+    if (IS_ELECTRON) {
+      vm.globalLinks.push({ type: 'FILE', title: 'Some file opened in default system application' });
+      vm.globalLinks.push({ type: 'COMMAND', title: 'Even custom commands can be executed' });
+    }
   }
 })();
