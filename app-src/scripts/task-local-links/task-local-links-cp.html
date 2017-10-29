@@ -1,5 +1,5 @@
 <ul class="attachments">
-  <li ng-repeat="link in $ctrl.localLinks">
+  <li ng-repeat="link in $ctrl.localLinks track by $index">
     <a external-link
        class="md-accent"
        href="{{::link.path}}"

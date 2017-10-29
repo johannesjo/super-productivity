@@ -23,14 +23,13 @@
       };
 
       $document[0].body.ondrop = (ev) => {
-        this.handleDrop(ev);
+        const link = this.GlobalLinkList.createLinkFromDrop(ev);
+        this.handleLinkinput(link, ev);
       };
 
       $document[0].onpaste = (ev) => {
-        if (ev.target.tagName !== 'INPUT' && ev.target.tagName !== 'TEXTAREA') {
-          const link = this.GlobalLinkList.createLinkFromPaste(ev);
-          this.openEditDialog(link, true);
-        }
+        const link = this.GlobalLinkList.createLinkFromPaste(ev);
+        this.handleLinkinput(link, ev);
 
         //const log = console.log;
         //const e = ev;
@@ -70,16 +69,25 @@
       }
     }
 
-    handleDrop(ev) {
+    handleLinkinput(link, ev) {
+      // don't intervene with text inputs
+      if (ev.target.tagName === 'INPUT' || ev.target.tagName === 'TEXTAREA') {
+        return;
+      }
+
       const taskEl = ev.target.closest('.task');
-      const link = this.GlobalLinkList.createLinkFromDrop(ev);
 
       if (taskEl) {
         const $taskEl = angular.element(taskEl);
         const task = $taskEl.scope().modelValue;
-        this.Tasks.addLocalAttachment(task, link);
+        this.openEditDialog(link, true, task);
       } else {
-        this.GlobalLinkList.addItem(link);
+        const linkList = ev.target.closest('global-link-list');
+        if (linkList) {
+          this.GlobalLinkList.addItem(link);
+        } else {
+          this.openEditDialog(link, true);
+        }
       }
 
       ev.preventDefault();
@@ -87,8 +95,8 @@
       this.$scope.$apply();
     }
 
-    openEditDialog(link, isNew) {
-      this.Dialogs('EDIT_GLOBAL_LINK', { link, isNew }, true);
+    openEditDialog(link, isNew, task) {
+      this.Dialogs('EDIT_GLOBAL_LINK', { link, isNew, task }, true);
     }
 
     addLink() {

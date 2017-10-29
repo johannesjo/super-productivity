@@ -16,10 +16,11 @@
     .controller('EditGlobalLinkCtrl', EditGlobalLinkCtrl);
 
   /* @ngInject */
-  function EditGlobalLinkCtrl($mdDialog, theme, link, isNew, GlobalLinkList, $filter) {
+  function EditGlobalLinkCtrl($mdDialog, theme, link, isNew, task, Tasks, GlobalLinkList, $filter) {
     let vm = this;
 
     vm.editOrAddStr = isNew ? 'Add' : 'Edit';
+    vm.globalOrTaskStr = task ? 'link to task' : 'global link';
 
     vm.customIcons = CUSTOM_ICONS;
 
@@ -37,7 +38,11 @@
 
     vm.saveGlobalLink = () => {
       if (isNew) {
-        GlobalLinkList.addItem(vm.linkCopy);
+        if (task) {
+          Tasks.addLocalAttachment(task, link);
+        } else {
+          GlobalLinkList.addItem(vm.linkCopy);
+        }
       } else {
         angular.extend(link, vm.linkCopy);
       }
