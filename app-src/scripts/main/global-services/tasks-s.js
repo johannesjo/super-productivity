@@ -610,6 +610,12 @@
       }
     }
 
+    moveTaskFromDoneBackLogToToday(task) {
+      task.isDone = false;
+      this.moveTask(task, this.$localStorage.doneBacklogTasks, this.$localStorage.tasks);
+      this.SimpleToast('SUCCESS', 'Restored task "' + task.title + '" from done backlog.');
+    }
+
     moveTaskFromBackLogToToday(task) {
       this.moveTask(task, this.$localStorage.backlogTasks, this.$localStorage.tasks);
     }

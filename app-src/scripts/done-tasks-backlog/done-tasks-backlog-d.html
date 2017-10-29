@@ -15,10 +15,18 @@
   <tr ng-repeat="task in vm.doneBacklogTasks"
       ng-class="{'is-done': task.isDone}">
     <td ng-bind="task.title"></td>
-    <td><span ng-repeat="task in task.subTasks"><span ng-bind="task.title"></span>: <span ng-bind="task.timeSpent|duration"></span><br></span></td>
+    <td>
+      <span ng-repeat="task in task.subTasks"><span ng-bind="task.title"></span>: <span ng-bind="task.timeSpent|duration"></span><br></span>
+    </td>
     <td ng-bind="task.timeSpent |duration"></td>
     <td ng-bind="task.timeEstimate |duration"></td>
     <td>
+      <md-button class="md-icon-button"
+                 aria-label="Copy back to todays tasks"
+                 title="Copy back to todays tasks"
+                 ng-click="vm.restoreTask(task)">
+        <ng-md-icon icon="settings_backup_restore"></ng-md-icon>
+      </md-button>
       <ng-md-icon icon="check"
                   ng-show="task.isDone"
                   style="fill:green;"

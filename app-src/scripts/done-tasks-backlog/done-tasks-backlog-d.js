@@ -5,7 +5,7 @@
  * # doneTasksBacklog
  */
 
-(function () {
+(function() {
   'use strict';
 
   angular
@@ -39,6 +39,10 @@
     $scope.$on(EV_PROJECT_CHANGED, () => {
       vm.doneBacklogTasks = Tasks.getDoneBacklog();
     });
+
+    vm.restoreTask = (task) => {
+      Tasks.moveTaskFromDoneBackLogToToday(task);
+    };
   }
 
 })();
