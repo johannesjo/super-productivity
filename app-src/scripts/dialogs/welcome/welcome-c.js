@@ -34,6 +34,6 @@
       ev.preventDefault();
       $mdDialog.cancel();
       Dialogs('HELP', { template: 'PAGE' });
-    }
+    };
   }
 })();
