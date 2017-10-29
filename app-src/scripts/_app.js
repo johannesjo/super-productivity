@@ -44,7 +44,8 @@
     .run(initMousewheelZoomForElectron)
     .run(initGlobalShortcuts)
     .run(showWelcomeDialog)
-    .run(goToWorkViewIfTasks);
+    .run(goToWorkViewIfTasks)
+    .run(initPollAutomaticBackups);
 
   /* @ngInject */
   function configMarked(markedProvider) {
@@ -224,4 +225,12 @@
     }
   }
 
+  /* @ngInject */
+  function initPollAutomaticBackups(BACKUP_POLL_INTERVAL, $interval, IS_ELECTRON) {
+    if (IS_ELECTRON) {
+      //$interval(() => {
+      //
+      //}, BACKUP_POLL_INTERVAL)
+    }
+  }
 })();
