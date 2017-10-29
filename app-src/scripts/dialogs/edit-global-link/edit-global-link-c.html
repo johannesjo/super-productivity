@@ -34,8 +34,8 @@
                    required="true"
                    placeholder="Select a type">
           <md-option ng-repeat="type in vm.types"
-                     ng-value="type"
-                     ng-bind="type">
+                     ng-value="type.type"
+                     ng-bind="type.title">
           </md-option>
         </md-select>
 

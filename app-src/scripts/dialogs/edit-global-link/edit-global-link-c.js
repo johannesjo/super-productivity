@@ -27,8 +27,8 @@
     vm.customIcons = CUSTOM_ICONS;
 
     vm.types = [
-      'LINK',
-      'FILE'
+      { type: 'LINK', title: 'Link (opens in browser)' },
+      { type: 'FILE', title: 'File (opened by default system app)' },
     ];
     vm.selectedTask = task;
     vm.theme = theme;
