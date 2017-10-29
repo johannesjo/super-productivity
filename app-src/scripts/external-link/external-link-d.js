@@ -13,7 +13,7 @@
     .directive('externalLink', externalLink);
 
   /* @ngInject */
-  function externalLink(Util, IS_ELECTRON) {
+  function externalLink(Util, IS_ELECTRON, SimpleToast) {
     return {
       link: linkFn,
       restrict: 'A',
@@ -29,6 +29,16 @@
           } else if (attrs.type === 'FILE') {
             const shell = require('electron').shell;
             shell.openItem(attrs.href);
+          } else if (attrs.type === 'COMMAND') {
+            const exec = require('child_process').exec;
+
+            SimpleToast('CUSTOM', `Running "${attrs.href}".`, 'laptop_windows');
+
+            exec(attrs.href, (error) => {
+              if (error) {
+                SimpleToast('ERROR', `"${attrs.href}: ${error}`);
+              }
+            });
           }
         });
       }

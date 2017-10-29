@@ -16,27 +16,33 @@
     .controller('EditGlobalLinkCtrl', EditGlobalLinkCtrl);
 
   /* @ngInject */
-  function EditGlobalLinkCtrl($mdDialog, theme, link, isNew, task, Tasks, GlobalLinkList, $filter) {
+  function EditGlobalLinkCtrl($mdDialog, theme, link, isNew, task, Tasks, GlobalLinkList, $filter, IS_ELECTRON) {
     let vm = this;
 
     vm.editOrAddStr = isNew ? 'Add' : 'Edit';
     vm.getGlobalOrTaskStr = () => vm.selectedTask ? `link to task "${vm.selectedTask.title}"` : 'global link';
 
     vm.isNew = isNew;
-
+    vm.IS_ELECTRON = IS_ELECTRON;
     vm.customIcons = CUSTOM_ICONS;
-
-    vm.types = [
-      { type: 'LINK', title: 'Link (opens in browser)' },
-      { type: 'FILE', title: 'File (opened by default system app)' },
-    ];
     vm.selectedTask = task;
     vm.theme = theme;
     vm.linkCopy = angular.copy(link) || {};
     vm.tasks = Tasks.getTodayAndBacklog();
 
-    if (!vm.linkCopy.type) {
-      vm.linkCopy.type = vm.types[0];
+    vm.types = [
+      { type: 'LINK', title: 'Link (opens in browser)' },
+    ];
+    if (IS_ELECTRON) {
+      vm.types.push({ type: 'FILE', title: 'File (opened by default system app)' });
+      vm.types.push({ type: 'COMMAND', title: 'Command (custom shell command)' });
+
+      if (!vm.linkCopy.type) {
+        vm.linkCopy.type = 'LINK';
+      }
+
+    } else {
+      vm.linkCopy.type = 'LINK';
     }
 
     vm.saveGlobalLink = () => {

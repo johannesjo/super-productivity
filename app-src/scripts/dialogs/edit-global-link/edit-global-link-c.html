@@ -24,13 +24,18 @@
                  aria-label="Title">
         </md-input-container>
         <md-input-container class="md-block">
-          <label>Url/Path</label>
+          <label>
+            <span ng-if="vm.linkCopy.type ==='LINK' || !vm.linkCopy.type">Url</span>
+            <span ng-if="vm.linkCopy.type ==='FILE'">File Path</span>
+            <span ng-if="vm.linkCopy.type ==='COMMAND'">Command</span>
+          </label>
           <input type="text"
                  ng-model="vm.linkCopy.path"
                  required
                  aria-label="Path/Url">
         </md-input-container>
-        <md-select ng-model="vm.linkCopy.type"
+        <md-select ng-if="vm.IS_ELECTRON"
+                   ng-model="vm.linkCopy.type"
                    required="true"
                    placeholder="Select a type">
           <md-option ng-repeat="type in vm.types"
@@ -41,6 +46,7 @@
 
 
         <div class="custom-icon-wrapper">
+          <p>Select custom icon (optional)</p>
           <ng-md-icon ng-if="vm.linkCopy.customIcon"
                       icon="{{vm.linkCopy.customIcon}}"></ng-md-icon>
           <md-autocomplete tabindex="1"
