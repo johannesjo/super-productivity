@@ -16,7 +16,7 @@
     .controller('EditGlobalLinkCtrl', EditGlobalLinkCtrl);
 
   /* @ngInject */
-  function EditGlobalLinkCtrl($mdDialog, theme, link, isNew, task, Tasks, GlobalLinkList, $filter, IS_ELECTRON) {
+  function EditGlobalLinkCtrl($mdDialog, theme, link, isNew, task, Tasks, GlobalLinkList, $filter, IS_ELECTRON, $timeout) {
     let vm = this;
 
     vm.editOrAddStr = isNew ? 'Add' : 'Edit';
@@ -25,7 +25,6 @@
     vm.isNew = isNew;
     vm.IS_ELECTRON = IS_ELECTRON;
     vm.customIcons = CUSTOM_ICONS;
-    vm.selectedTask = task;
     vm.theme = theme;
     vm.linkCopy = angular.copy(link) || {};
     vm.tasks = Tasks.getTodayAndBacklog();
@@ -45,7 +44,15 @@
       vm.linkCopy.type = 'LINK';
     }
 
+    // displaying [Object object] not fixable at the moment
+    // @see: https://github.com/angular/material/issues/2462
+    if (task) {
+      vm.selectedTask = task;
+    }
+
     vm.saveGlobalLink = () => {
+      console.log(vm.selectedTask, vm.searchTaskText);
+
       if (isNew) {
         if (vm.selectedTask) {
           Tasks.addLocalAttachment(vm.selectedTask, link);
