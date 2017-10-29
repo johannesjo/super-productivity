@@ -4,7 +4,7 @@ This is a ToDo List / Time Tracker / Personal Jira Task Manager for Linux, MacOS
 
 Build with the awesome [electron](http://electron.atom.io/).
 
-Check out the more limited [web-version](http://super-productivity.com) to get a quick idea!
+Check out the more limited [web-version](http://super-productivity.com/app) to get a quick idea!
 
 ![Work View with global links](screens/global-links.png)
 
