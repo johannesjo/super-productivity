@@ -12,21 +12,32 @@
 
   class GlobalLinkListCtrl {
     /* @ngInject */
-    constructor(GlobalLinkList, $document, $scope, Dialogs, Tasks) {
+    constructor(GlobalLinkList, $document, $scope, Dialogs, Tasks, $element) {
       this.Dialogs = Dialogs;
       this.GlobalLinkList = GlobalLinkList;
       this.Tasks = Tasks;
       this.$scope = $scope;
 
+      // required otherwise the page would be reloaded
       $document[0].ondragover = $document[0].ondrop = (ev) => {
         ev.preventDefault();
       };
 
-      $document[0].body.ondrop = (ev) => {
+      // add classes
+      $element[0].ondragenter = () => {
+        $element.addClass('drag-over');
+      };
+      $element[0].ondragleave = () => {
+        $element.removeClass('drag-over')
+      };
+
+      // handle drop
+      $document[0].ondrop = (ev) => {
         const link = this.GlobalLinkList.createLinkFromDrop(ev);
         this.handleLinkinput(link, ev);
       };
 
+      // handle paste
       $document[0].onpaste = (ev) => {
         const link = this.GlobalLinkList.createLinkFromPaste(ev);
         this.handleLinkinput(link, ev);
