@@ -14,8 +14,8 @@
     "pack": "build --dir",
     "localInstall": "sudo echo 'Starting local install' && rm -Rf ./dist/ && gulp build && build && sudo dpkg -i dist/superProductivity*.deb",
     "dist": "gulp build && build",
-    "newMinorRelease": "npm version minor && git push --tags && git checkout master && git merge develop && git push && git checkout develop && ./deploy.sh",
-    "newPathRelease": "npm version patch && git push --tags && git checkout master && git merge develop && git push && git checkout develop && ./deploy.sh"
+    "newMinorRelease": "npm version minor && git push --tags && git push && git checkout master && git merge develop && git push && git checkout develop && ./deploy.sh",
+    "newPathRelease": "npm version patch && git push --tags && git push && git checkout master && git merge develop && git push && git checkout develop && ./deploy.sh"
   },
   "author": "Johannes Millan <contact@super-productivity.com> (http://super-productivity.com)",
   "license": "MIT",
