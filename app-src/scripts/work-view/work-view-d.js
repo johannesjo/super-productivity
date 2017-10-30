@@ -25,7 +25,7 @@
   }
 
   /* @ngInject */
-  function WorkViewCtrl(Tasks, $window, $scope, Dialogs, $localStorage, TasksUtil) {
+  function WorkViewCtrl(Tasks, $window, $scope, Dialogs, $localStorage, TasksUtil, $timeout) {
     let vm = this;
     const _ = $window._;
 
@@ -33,9 +33,17 @@
     vm.tasksUndone = Tasks.getUndoneToday();
     vm.tasksDone = Tasks.getDoneToday();
     updateTimeTotals();
+    focusFirstTask();
 
     // PRIVATE FUNCTIONS
     // -----------------
+    function focusFirstTask() {
+      $timeout(() => {
+        const allTasks = document.querySelectorAll('.task');
+        allTasks && allTasks[0] && allTasks[0].focus();
+      });
+    }
+
     function updateGlobalTaskModel() {
       // we need to re-merge because of splitting up the tasks into two
       if (vm.tasksUndone && vm.tasksDone) {
