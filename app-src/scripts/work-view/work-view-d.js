@@ -40,7 +40,9 @@
     function focusFirstTask() {
       $timeout(() => {
         const allTasks = document.querySelectorAll('.task');
-        allTasks && allTasks[0] && allTasks[0].focus();
+        if (allTasks && allTasks[0]) {
+          allTasks[0].focus();
+        }
       });
     }
 
