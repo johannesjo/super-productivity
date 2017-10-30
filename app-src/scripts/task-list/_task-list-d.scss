@@ -17,7 +17,7 @@ task-list {
     display: block;
     min-height: 22px;
     background-color: #dddddd;
-    @include dark-theme{
+    @include dark-theme {
       background-color: $dark-theme-bg-darker;
     }
   }
@@ -27,13 +27,17 @@ task-list {
 
 .task {
   $this-inner-padding-left-right: 12px;
-  padding: 3px $this-inner-padding-left-right 0;
+  padding: 2px $this-inner-padding-left-right 0;
   display: block;
   margin-bottom: 6px;
   background-color: #ffffff;
   color: #333333;
   position: relative;
+  border: 1px solid #dddddd;
+  border-bottom-width: 0;
+
   @include dark-theme {
+    border-color: rgb(60, 60, 60);
     background-color: $dark-theme-bg-lighter;
     color: #dddddd;
 

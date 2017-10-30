@@ -29,3 +29,11 @@ global-link-list + .ui-view-container > main {
 article {
 
 }
+
+md-content {
+  background: rgb(244, 244, 244) !important;
+
+  @include dark-theme {
+    background: rgb(48, 48, 48) !important;
+  }
+}
