@@ -17,7 +17,7 @@ task-list {
     display: block;
     min-height: 22px;
     background-color: #dddddd;
-    body.dark-theme & {
+    @include dark-theme{
       background-color: $dark-theme-bg-darker;
     }
   }
@@ -33,7 +33,7 @@ task-list {
   background-color: #ffffff;
   color: #333333;
   position: relative;
-  body.dark-theme & {
+  @include dark-theme {
     background-color: $dark-theme-bg-lighter;
     color: #dddddd;
 
@@ -63,7 +63,7 @@ task-list {
   &:focus {
     background: #eeeeee;
     color: #000000;
-    body.dark-theme & {
+    @include dark-theme {
       background-color: $dark-theme-bg-darker;
       color: #dddddd;
     }
@@ -121,7 +121,7 @@ task-list {
 
     .update-icon {
       fill: #000000;
-      body.dark-theme & {
+      @include dark-theme {
         fill: #ffffff;
       }
     }
@@ -130,7 +130,7 @@ task-list {
       &.is-active {
         > ng-md-icon {
           fill: #000000;
-          body.dark-theme & {
+          @include dark-theme {
             fill: #ffffff;
           }
         }
@@ -148,7 +148,7 @@ task-list {
 
   ng-md-icon.delete-icon {
     fill: $red !important;
-    body.dark-theme & {
+    @include dark-theme {
       fill: $red !important;
     }
   }
@@ -157,7 +157,7 @@ task-list {
     background: $light-green;
     color: #000000;
 
-    body.dark-theme & {
+    @include dark-theme {
       background-color: $dark-green;
       color: #ffffff;
     }
@@ -168,7 +168,7 @@ task-list {
     .play-btn {
       ng-md-icon {
         fill: #000000 !important;
-        body.dark-theme & {
+        @include dark-theme {
           fill: #ffffff !important;
         }
       }
@@ -180,7 +180,7 @@ task-list {
 
   //md-checkbox.md-checked .md-icon {
   //  background-color: $green;
-  //  body.dark-theme & {
+  //  @include dark-theme {
   //    background-color: $green;
   //  }
   //}

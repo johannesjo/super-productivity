@@ -20,6 +20,6 @@ help-section {
     text-align: center;
   }
 
-  body.dark-theme & {
+  @include dark-theme {
   }
 }

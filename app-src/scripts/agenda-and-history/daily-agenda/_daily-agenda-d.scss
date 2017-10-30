@@ -5,7 +5,7 @@ daily-agenda {
     background: #fff;
     border: 1px solid #666 !important;
 
-    body.dark-theme & {
+    @include dark-theme {
       background-color: $dark-theme-bg-lighter;
       color: #fff;
       border: 1px solid #666 !important;

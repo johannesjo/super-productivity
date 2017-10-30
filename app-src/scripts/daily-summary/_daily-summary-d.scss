@@ -11,7 +11,7 @@ md-input-container {
   background: #ffffff;
   margin: auto;
   border-collapse: collapse;
-  body.dark-theme & {
+  @include dark-theme {
     background: $dark-theme-bg-lighter;
     color: #ffffff;
   }

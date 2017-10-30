@@ -17,7 +17,7 @@ sub-task-list task-list {
 
   // overwrite ripple transparency
   background: #ffffff !important;
-  body.dark-theme & {
+  @include dark-theme {
     background-color: $dark-theme-bg-lighter !important;
     color: #dddddd;
   }

@@ -22,7 +22,7 @@
     background: #ffffff;
     position: relative;
 
-    body.dark-theme & {
+    @include dark-theme {
       background-color: $dark-theme-bg-lighter;
     }
     .md-title {
