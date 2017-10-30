@@ -614,14 +614,19 @@
       task.isDone = false;
       this.moveTask(task, this.$localStorage.doneBacklogTasks, this.$localStorage.tasks);
       this.SimpleToast('SUCCESS', 'Restored task "' + task.title + '" from done backlog.');
+      this.updateTodayVm();
     }
 
     moveTaskFromBackLogToToday(task) {
       this.moveTask(task, this.$localStorage.backlogTasks, this.$localStorage.tasks);
+      this.updateTodayVm();
+      this.updateBacklogVm();
     }
 
     moveTaskFromTodayToBackLog(task) {
       this.moveTask(task, this.$localStorage.tasks, this.$localStorage.backlogTasks);
+      this.updateTodayVm();
+      this.updateBacklogVm();
     }
 
     addTasksToTopOfBacklog(tasks) {
