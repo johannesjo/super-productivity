@@ -131,7 +131,7 @@
 
       // special hidden dev tools combo to use them for production
       if (IS_ELECTRON) {
-        if (ev.keyCode === 10 && ev.ctrlKey === true && ev.shiftKey === true) {
+        if (CheckShortcutKeyCombo(ev, 'Ctrl+Shift+J')) {
           window.ipcRenderer.send('TOGGLE_DEV_TOOLS');
         }
       }
