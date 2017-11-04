@@ -11,9 +11,9 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "NODE_ENV=DEV electron ./electron/main.js",
-    "pack": "build --dir",
+    "pack": "electron-builder --dir",
     "localInstall": "sudo echo 'Starting local install' && rm -Rf ./dist/ && gulp build && build && sudo dpkg -i dist/superProductivity*.deb",
-    "dist": "gulp build && build",
+    "dist": "gulp build && electron-builder",
     "minorRelease": "npm version minor && git push --tags && git push && git checkout master && git merge develop && git push && git checkout develop && ./deploy.sh",
     "patchRelease": "npm version patch && git push --tags && git push && git checkout master && git merge develop && git push && git checkout develop && ./deploy.sh"
   },
