@@ -30,7 +30,7 @@
 
     vm.doneBacklogTasks = Tasks.getDoneBacklog();
 
-    const watcher = $scope.$watch('r.doneBacklogTasks', (mVal) => {
+    const watcher = $scope.$watch('vm.doneBacklogTasks', (mVal) => {
       vm.totalTimeSpent = TasksUtil.calcTotalTimeSpent(mVal);
     }, true);
 
@@ -44,5 +44,4 @@
       Tasks.moveTaskFromDoneBackLogToToday(task);
     };
   }
-
 })();
