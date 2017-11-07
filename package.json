@@ -12,8 +12,10 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "NODE_ENV=DEV electron ./electron/main.js",
     "pack": "electron-builder --dir",
+    "pack-win": "electron-builder --dir --win",
     "localInstall": "sudo echo 'Starting local install' && rm -Rf ./dist/ && gulp build && build && sudo dpkg -i dist/superProductivity*.deb",
     "dist": "gulp build && electron-builder",
+    "dist-win": "gulp build && electron-builder --win",
     "minorRelease": "npm version minor && git push --tags && git push && git checkout master && git merge develop && git push && git checkout develop && ./deploy.sh",
     "patchRelease": "npm version patch && git push --tags && git push && git checkout master && git merge develop && git push && git checkout develop && ./deploy.sh"
   },
@@ -29,7 +31,7 @@
       "category": "productivity"
     },
     "win": {
-      "icon": "windowsicon"
+      "icon": "electron/assets/icons/app-icons/icon-win"
     },
     "linux": {
       "category": "Utility",
