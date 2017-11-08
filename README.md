@@ -48,7 +48,7 @@ npm start # on windows use "set NODE_ENV=DEV electron ./electron/main.js" instea
 * [superProductivity-latest.dmg](http://super-productivity.com/downloads/superProductivity-latest.dmg)
 
 ### Windows
-(not yet compiled)
+* [superProductivity_Setup_latest.exe](http://super-productivity.com/downloads/superProductivity_Setup_latest.exe)
 
 ## Web Version
 There is also a [web-version](http://super-productivity.com) but it is much more limited (no Jira integration, no time tracking).
