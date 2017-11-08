@@ -42,7 +42,7 @@ npm start # on windows use "set NODE_ENV=DEV electron ./electron/main.js" instea
 ### Linux
 * [superProductivity-latest-x86_64.AppImage](http://super-productivity.com/downloads/superProductivity-latest-x86_64.AppImage)
 * [superProductivity_latest_amd64.deb](http://super-productivity.com/downloads/superProductivity_latest_amd64.deb)
-* [superProductivity_latest_amd64.snap](http://super-productivity.com/downloads/superProductivity_latest_amd64.snap)
+* [superproductivity_latest_amd64.snap](http://super-productivity.com/downloads/superproductivity_latest_amd64.snap)
 
 ### MacOS
 * [superProductivity-latest.dmg](http://super-productivity.com/downloads/superProductivity-latest.dmg)
