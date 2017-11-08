@@ -35,7 +35,9 @@ module.exports = (mainWindow, request) => {
     username: config.userName,
     password: config.password,
     apiVersion: 'latest',
-    strictSSL: true
+
+    // also allow unauthorized certificates
+    strictSSL: false
   });
 
   jira[apiMethod](...arguments)
