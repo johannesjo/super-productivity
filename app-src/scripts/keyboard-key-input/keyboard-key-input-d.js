@@ -61,8 +61,16 @@
             if ($event.shiftKey) {
               val += 'Shift+';
             }
+            if ($event.metaKey) {
+              val += 'Meta+';
+            }
 
-            modelSetter(scope, val + $event.key);
+            // fail safe for MacOsX crashing bug
+            if ($event.key === 'Meta') {
+              modelSetter(scope, '');
+            } else {
+              modelSetter(scope, val + $event.key);
+            }
           }
         }
         scope.$apply();

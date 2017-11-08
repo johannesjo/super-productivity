@@ -26,6 +26,7 @@
         isConditionMatched = isConditionMatched && ((specialKeys.indexOf('Ctrl') === -1) || ev.ctrlKey === true);
         isConditionMatched = isConditionMatched && ((specialKeys.indexOf('Alt') === -1) || ev.altKey === true);
         isConditionMatched = isConditionMatched && ((specialKeys.indexOf('Shift') === -1) || ev.shiftKey === true);
+        isConditionMatched = isConditionMatched && ((specialKeys.indexOf('Meta') === -1) || ev.metaKey === true);
         isConditionMatched = isConditionMatched && ev.key === standardKey;
 
         return isConditionMatched;
