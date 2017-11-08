@@ -4,8 +4,6 @@ This is a ToDo List / Time Tracker / Personal Jira Task Manager for Linux, MacOS
 
 Build with the awesome [electron](http://electron.atom.io/).
 
-Check out the more limited [web-version](http://super-productivity.com/app) to get a quick idea!
-
 ![Work View with global links](screens/global-links.png)
 
 ## Features
@@ -27,18 +25,10 @@ Check out the more limited [web-version](http://super-productivity.com/app) to g
 
 And much more!
 
-## Build and Run
-```
-git clone https://github.com/johannesjo/super-productivity.git
-cd super-productivity
-# install electron, gulp, bower and node gyp globally
-npm install -g electron node-gyp gulp bower
-npm install && bower install
-gulp build # or for dev run 'gulp'/'gulp serve' in a separate tab
-npm start # on windows use "set NODE_ENV=DEV electron ./electron/main.js" instead
-```
+## Web Version
+Check out the [web-version](http://super-productivity.com) to get a quick idea of the app. But keep in mind it is more limited (no Jira integration, time tracking only works if the app is open).
 
-## Binaries
+## Downloads
 ### Linux
 * [superProductivity-latest-x86_64.AppImage](http://super-productivity.com/downloads/superProductivity-latest-x86_64.AppImage)
 * [superProductivity_latest_amd64.deb](http://super-productivity.com/downloads/superProductivity_latest_amd64.deb)
@@ -50,8 +40,17 @@ npm start # on windows use "set NODE_ENV=DEV electron ./electron/main.js" instea
 ### Windows
 * [superProductivity_Setup_latest.exe](http://super-productivity.com/downloads/superProductivity_Setup_latest.exe)
 
-## Web Version
-There is also a [web-version](http://super-productivity.com) but it is much more limited (no Jira integration, no time tracking).
+
+## Build and run for yourself
+```
+git clone https://github.com/johannesjo/super-productivity.git
+cd super-productivity
+# install electron, gulp, bower and node gyp globally
+npm install -g electron node-gyp gulp bower
+npm install && bower install
+gulp build # or for dev run 'gulp'/'gulp serve' in a separate tab
+npm start # on windows use "set NODE_ENV=DEV electron ./electron/main.js" instead
+```
 
 ## More Screenshots
 ![Daily Planner](screens/daily-planner.png)
