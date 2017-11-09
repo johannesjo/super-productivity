@@ -4,7 +4,7 @@ summary: superProductivity
 description: Personal Task Management App to help you with your daily struggle with JIRA etc.
 confinement: strict
 grade: stable
-icon: snap/gui/icon.png
+icon: electron/assets/icons/app-icons/icon_256x256.png
 apps:
   superproductivity:
     command: env TMPDIR=$XDG_RUNTIME_DIR desktop-launch $SNAP/superproductivity
