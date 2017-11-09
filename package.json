@@ -16,9 +16,9 @@
     "pack": "electron-builder --dir",
     "pack-win": "electron-builder --dir --win",
     "localInstall": "sudo echo 'Starting local install' && rm -Rf ./dist/ && gulp build && build && sudo dpkg -i dist/superProductivity*.deb",
-    "dist": "gulp build && electron-builder && cp ./dist/linux-unpacked-snap/snap/snapcraft.yaml .",
+    "dist": "gulp build && electron-builder",
     "dist-win": "electron-builder --win",
-    "pub": "gulp build && electron-builder -p always -l -w && cp ./dist/linux-unpacked-snap/snap/snapcraft.yaml .",
+    "pub": "gulp build && electron-builder -p always -l -w",
     "pub-win": "electron-builder -p always -w ",
     "minorRelease": "npm version minor && git push --tags && git push && git checkout master && git merge develop && git push && git checkout develop && copy ./deploy.sh",
     "patchRelease": "npm version patch && git push --tags && git push && git checkout master && git merge develop && git push && git checkout develop && ./deploy.sh"
