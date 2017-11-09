@@ -1,0 +1,35 @@
+name: superproductivity
+version: 1.3.4
+summary: superProductivity
+description: Personal Task Management App to help you with your daily struggle with JIRA etc.
+confinement: strict
+grade: stable
+icon: snap/gui/icon.png
+apps:
+  superproductivity:
+    command: env TMPDIR=$XDG_RUNTIME_DIR desktop-launch $SNAP/superproductivity
+    plugs:
+      - home
+      - x11
+      - unity7
+      - browser-support
+      - network
+      - gsettings
+      - pulseaudio
+      - opengl
+parts:
+  app:
+    plugin: dump
+    stage-packages:
+      - libnotify4
+      - libappindicator1
+      - libxtst6
+      - libnss3
+      - libxss1
+      - fontconfig-config
+      - gconf2
+      - libasound2
+      - pulseaudio
+    source: /home/johannes/www/super-productivity/dist/linux-unpacked
+    after:
+      - desktop-glib-only
