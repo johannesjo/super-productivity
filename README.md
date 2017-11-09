@@ -2,8 +2,6 @@
 
 This is a ToDo List / Time Tracker / Personal Jira Task Manager for Linux, MacOS and Windows to make you work super productively. 
 
-Build with the awesome [electron](http://electron.atom.io/).
-
 ![Work View with global links](screens/global-links.png)
 
 ## Features
@@ -59,3 +57,6 @@ npm start # on windows use "set NODE_ENV=DEV electron ./electron/main.js" instea
 ![daily-summary](screens/daily-summary.png)
 ![plan](screens/plan.png)
 ![time-tracking-history](screens/time-tracking-history.png)
+
+
+Build with the awesome [electron](http://electron.atom.io/).
