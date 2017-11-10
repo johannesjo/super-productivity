@@ -9,6 +9,8 @@ matrix:
       env:
         - ELECTRON_CACHE=$HOME/.cache/electron
         - ELECTRON_BUILDER_CACHE=$HOME/.cache/electron-builder
+      install:
+        - 'brew install https://raw.githubusercontent.com/kadwanev/bigboybrew/master/Library/Formula/sshpass.rb'
     - os: linux
       dist: trusty
       language: generic
@@ -16,7 +18,9 @@ addons:
   ssh_known_hosts:
     - the-front-end.de
     - frs.sourceforge.net
-
+  apt:
+    packages:
+      - sshpass
 
 cache:
   directories:
@@ -48,9 +52,12 @@ after_script:
   - 'echo "DIST-RESULT:"'
   - 'ls -l ./dist'
   - 'echo "UPLOADING BINARIES:"'
-  - 'rename "s/[0-9]+\.[0-9]+\.[0-9]+/latest/" ./dist/superproductivity*'
-  - 'rename "s/\s+/_/g" ./dist/superProductivity*'
-  - 'rename "s/[0-9]+\.[0-9]+\.[0-9]+/latest/" ./dist/superproductivity*'
-#  - 'rsync -avz ./app/ $RSYNC_FRONTEND'
-#  - 'scp dist/superProductivity* $SCP_SOURCEFORGE'
-#  - 'scp dist/superProductivity* $SCP_FRONTEND'
+  - 'rename "s/[0-9]+\.[0-9]+\.[0-9]+/latest/" ./dist/super*'
+  - 'rename "s/\s+/_/g" ./dist/super*'
+  - 'echo "RENAMED-DIST-RESULT:"'
+  - 'ls -l ./dist'
+  - 'sshpass -p "$DEPLOY_PASS" rsync -avz ./app/ $DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH/app'
+  - 'sshpass -p "$DEPLOY_PASS" scp dist/super* $DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH/downloads'
+
+#  - 'sshpass -p "$SFG_DEPLOY_PASS" scp dist/superProductivity* $SFG_DEPLOY_USER@$SFG_DEPLOY_HOST:$SFG_DEPLOY_PATH/downloads'
+#  - 'sshpass -p "$SFG_DEPLOY_PASS" scp dist/superproductivity* $SFG_DEPLOY_USER@$SFG_DEPLOY_HOST:$SFG_DEPLOY_PATH/downloads'
