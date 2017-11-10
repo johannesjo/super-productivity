@@ -10,7 +10,8 @@ matrix:
         - ELECTRON_CACHE=$HOME/.cache/electron
         - ELECTRON_BUILDER_CACHE=$HOME/.cache/electron-builder
       install:
-        - 'brew install http://git.io/sshpass.rb'
+        - brew update
+        - brew install https://raw.githubusercontent.com/kadwanev/bigboybrew/master/Library/Formula/sshpass.rb
     - os: linux
       dist: trusty
       language: generic
