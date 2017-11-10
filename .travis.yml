@@ -11,52 +11,43 @@ matrix:
         - ELECTRON_BUILDER_CACHE=$HOME/.cache/electron-builder
     - os: linux
       dist: trusty
-      services: docker
       language: generic
-      install:
-        - sudo snap install core
 addons:
-  apt:
-    sources:
-      - sourceline: ppa:snappy-dev/tools
-    packages:
-      - libgnome-keyring-dev
-      - graphicsmagick
-      - icnsutils
-      - snapd
-      - snapcraft
   ssh_known_hosts:
     - the-front-end.de
     - frs.sourceforge.net
 
 
-#cache:
-#  directories:
-#  - node_modules
-#  - $HOME/.cache/electron
-#  - $HOME/.cache/electron-builder
+cache:
+  directories:
+  - node_modules
+  - $HOME/.cache/electron
+  - $HOME/.cache/electron-builder
 
 
 before_script:
-  - 'npm install -g bower'
+  - 'npm install -g bower gulp --quiet'
   - 'bower install'
 
 script:
-#  - 'npm install && npm run pub'
   - |
     if [ "$TRAVIS_OS_NAME" == "linux" ]; then
+      echo '____RUNNING DOCKER____'
       docker run --rm \
         --env-file <(env | grep -iE 'DEBUG|NODE_|ELECTRON_|YARN_|NPM_|CI|CIRCLE|TRAVIS|APPVEYOR_|CSC_|_TOKEN|_KEY|AWS_|STRIP|BUILD_') \
         -v ${PWD}:/project \
         -v ~/.cache/electron:/root/.cache/electron \
         -v ~/.cache/electron-builder:/root/.cache/electron-builder \
         electronuserland/builder:wine \
-        /bin/bash -c "npm install && npm rebuild && npm run pub"
+        /bin/bash -c "echo '____DOCKER_INNER_START____' && ls -l && yarn global add bower gulp && yarn --link-duplicates --pure-lockfile && yarn release --linux --win && ls -l ./dist"
     else
-      npm install && npm run pub
+      npm install --quiet && npm run pub
     fi
 
 after_script:
+  - 'echo "DIST-RESULT:"'
+  - 'ls -l ./dist'
+  - 'echo "UPLOADING BINARIES:"'
   - 'rename "s/[0-9]+\.[0-9]+\.[0-9]+/latest/" ./dist/superproductivity*'
   - 'rename "s/\s+/_/g" ./dist/superProductivity*'
   - 'rename "s/[0-9]+\.[0-9]+\.[0-9]+/latest/" ./dist/superproductivity*'
