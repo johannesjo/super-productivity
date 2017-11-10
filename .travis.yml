@@ -10,7 +10,7 @@ matrix:
         - ELECTRON_CACHE=$HOME/.cache/electron
         - ELECTRON_BUILDER_CACHE=$HOME/.cache/electron-builder
       install:
-        - 'brew install https://raw.githubusercontent.com/kadwanev/bigboybrew/master/Library/Formula/sshpass.rb'
+        - 'brew install http://git.io/sshpass.rb'
     - os: linux
       dist: trusty
       language: generic
@@ -35,29 +35,40 @@ before_script:
 
 script:
   - |
-    if [ "$TRAVIS_OS_NAME" == "linux" ]; then
-      echo '____RUNNING DOCKER____'
-      docker run --rm \
-        --env-file <(env | grep -iE 'DEBUG|NODE_|ELECTRON_|YARN_|NPM_|CI|CIRCLE|TRAVIS|APPVEYOR_|CSC_|_TOKEN|_KEY|AWS_|STRIP|BUILD_') \
-        -v ${PWD}:/project \
-        -v ~/.cache/electron:/root/.cache/electron \
-        -v ~/.cache/electron-builder:/root/.cache/electron-builder \
-        electronuserland/builder:wine \
-        /bin/bash -c "echo '____DOCKER_INNER_START____' && ls -l && yarn global add bower gulp && yarn --link-duplicates --pure-lockfile && yarn release --linux --win && ls -l ./dist"
+    if [ -n "$TRAVIS_TAG" ]; then
+      if [ "$TRAVIS_OS_NAME" == "linux" ]; then
+        echo '____RUNNING DOCKER____'
+        docker run --rm \
+          --env-file <(env | grep -iE 'DEBUG|NODE_|ELECTRON_|YARN_|NPM_|CI|CIRCLE|TRAVIS|APPVEYOR_|CSC_|_TOKEN|_KEY|AWS_|STRIP|BUILD_') \
+          -v ${PWD}:/project \
+          -v ~/.cache/electron:/root/.cache/electron \
+          -v ~/.cache/electron-builder:/root/.cache/electron-builder \
+          electronuserland/builder:wine \
+          /bin/bash -c "echo '____DOCKER_INNER_START____' && ls -l && yarn global add bower gulp && yarn --link-duplicates --pure-lockfile && yarn release --linux --win && ls -l ./dist"
+      else
+        npm install --quiet && npm run pub
+      fi
     else
-      npm install --quiet && npm run pub
+      npm install --quiet && gulp build
     fi
 
-after_script:
+after_success:
   - 'echo "DIST-RESULT:"'
   - 'ls -l ./dist'
-  - 'echo "UPLOADING BINARIES:"'
-  - 'rename "s/[0-9]+\.[0-9]+\.[0-9]+/latest/" ./dist/super*'
-  - 'rename "s/\s+/_/g" ./dist/super*'
-  - 'echo "RENAMED-DIST-RESULT:"'
-  - 'ls -l ./dist'
-  - 'sshpass -p "$DEPLOY_PASS" rsync -avz ./app/ $DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH/app'
-  - 'sshpass -p "$DEPLOY_PASS" scp dist/super* $DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH/downloads'
+  - |
+    if [ -n "$TRAVIS_TAG" && "$TRAVIS_OS_NAME" == "linux" ]; then
+      sshpass -p "$DEPLOY_PASS" rsync -avz ./app/ $DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH/app
+    fi
+  - |
+    if [ -n "$TRAVIS_TAG" ]; then
+      echo "UPLOADING BINARIES:"
+      rename "s/[0-9]+\.[0-9]+\.[0-9]+/latest/" ./dist/super*
+      rename "s/\s+/_/g" ./dist/super*
+      echo "RENAMED-DIST-RESULT:"
+      ls -l ./dist
+      sshpass -p "$DEPLOY_PASS" rsync -avz ./app/ $DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH/app
+      sshpass -p "$DEPLOY_PASS" scp dist/super* $DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH/downloads'
+    fi
 
 #  - 'sshpass -p "$SFG_DEPLOY_PASS" scp dist/superProductivity* $SFG_DEPLOY_USER@$SFG_DEPLOY_HOST:$SFG_DEPLOY_PATH/downloads'
 #  - 'sshpass -p "$SFG_DEPLOY_PASS" scp dist/superproductivity* $SFG_DEPLOY_USER@$SFG_DEPLOY_HOST:$SFG_DEPLOY_PATH/downloads'
