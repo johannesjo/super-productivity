@@ -37,7 +37,7 @@
       this.IS_ELECTRON = IS_ELECTRON;
       this.Uid = Uid;
       this.$q = $q;
-      this.$rootScope = $rootScope.r;
+      this.$rootScope = $rootScope;
       this.Dialogs = Dialogs;
       this.Notifier = Notifier;
       this.$injector = $injector;
