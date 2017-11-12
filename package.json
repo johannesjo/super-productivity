@@ -21,7 +21,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "NODE_ENV=DEV electron ./electron/main.js",
     "pack": "electron-builder --dir",
-    "localInstall": "sudo echo 'Starting local install' && rm -Rf ./dist/ && gulp build && build && sudo dpkg -i dist/superProductivity*.deb",
+    "localInstall": "sudo echo 'Starting local install' && rm -Rf ./dist/ && gulp build && electron-builder --linux && sudo dpkg -i dist/superProductivity*.deb",
     "dist": "gulp build && electron-builder",
     "pub": "gulp build && electron-builder -p always",
     "release": "gulp build && electron-builder",
