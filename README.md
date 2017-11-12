@@ -26,8 +26,9 @@ And much more!
 ## Web Version
 Check out the [web-version](http://super-productivity.com) to get a quick idea of the app. But keep in mind it is more limited (no Jira integration, time tracking only works if the app is open).
 
-## Downloads
+## Downloads & Install
 ### Linux
+Run `sudo snap install superproductivity` or install it manually from the downloads:
 * [superProductivity-latest-x86_64.AppImage](http://super-productivity.com/downloads/superProductivity-latest-x86_64.AppImage)
 * [superProductivity_latest_amd64.deb](http://super-productivity.com/downloads/superProductivity_latest_amd64.deb)
 * [superproductivity_latest_amd64.snap](http://super-productivity.com/downloads/superproductivity_latest_amd64.snap)

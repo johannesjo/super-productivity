@@ -10,6 +10,13 @@
     "type": "git",
     "url": "git://github.com/johannesjo/super-productivity.git"
   },
+  "keywords":[
+    "ToDo",
+    "Task Management",
+    "Jira",
+    "GitHub",
+    "Time Tracking"
+  ],
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "NODE_ENV=DEV electron ./electron/main.js",
