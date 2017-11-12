@@ -239,9 +239,11 @@
       const task = this.lastFocusedTaskEl.scope().modelValue;
       const lsKeys = this.$localStorage.keys;
       const isShiftOrCtrlPressed = ($ev.shiftKey === false && $ev.ctrlKey === false);
-      const taskIndex = _.findIndex(this.tasks, (cTask) => {
-        return cTask.id === task.id;
-      });
+      const getTaskIndex = () => {
+        return _.findIndex(this.tasks, (cTask) => {
+          return cTask.id === task.id;
+        });
+      };
 
       if (this.checkKeyCombo($ev, lsKeys.taskEditTitle) || $ev.key === 'Enter') {
         this.$scope.$broadcast(this.EDIT_ON_CLICK_TOGGLE_EV, task.id);
@@ -331,6 +333,7 @@
       // moving items
       // move task up
       if (this.checkKeyCombo($ev, lsKeys.moveTaskUp)) {
+        const taskIndex = getTaskIndex();
         if (taskIndex > 0) {
           TaskListCtrl.moveItem(this.tasks, taskIndex, taskIndex - 1);
 
@@ -342,6 +345,7 @@
       }
       // move task down
       if (this.checkKeyCombo($ev, lsKeys.moveTaskDown)) {
+        const taskIndex = getTaskIndex();
         if (taskIndex < this.tasks.length - 1) {
           TaskListCtrl.moveItem(this.tasks, taskIndex, taskIndex + 1);
         }
