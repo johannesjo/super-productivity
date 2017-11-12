@@ -24,11 +24,12 @@
     const OMITTED_LS_FIELDS = GLOBAL_LS_FIELDS.concat(TMP_FIELDS);
 
     this.getList = () => {
-      return $rootScope.r && $rootScope.r.projects;
+      return $rootScope.r.projects;
     };
 
     this.getAndUpdateCurrent = () => {
       let currentProject;
+
       if (!$rootScope.r.currentProject && $rootScope.r.projects.length > 0) {
         $rootScope.r.currentProject = $rootScope.r.projects[0];
       }

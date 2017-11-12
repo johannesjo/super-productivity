@@ -144,6 +144,7 @@
         userToAssignOnDone: undefined
       }
     })
+    .constant('SAVE_APP_STORAGE_POLL_INTERVAL', 1000)
     .constant('BACKUP_POLL_INTERVAL', 60 * 1000)
     .constant('REQUEST_TIMEOUT', 15000)
     .constant('WORKLOG_DATE_STR_FORMAT', 'YYYY-MM-DD')

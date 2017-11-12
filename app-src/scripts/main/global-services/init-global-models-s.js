@@ -43,9 +43,6 @@
       // this way
       $rootScope.$state = $state;
 
-      //$rootScope.r = $rootScope.r;
-      console.log(AppStorage.s);
-
       $rootScope.r = getLsData(AppStorage.s);
 
       // we want the current task to be a reference to the tasks array
