@@ -18,7 +18,6 @@ module.exports = function (config) {
       'app-src/bower_components/angular-aria/angular-aria.js',
       'app-src/bower_components/angular-resource/angular-resource.js',
       'app-src/bower_components/angular-ui-router/release/angular-ui-router.js',
-      'app-src/bower_components/ngstorage/ngStorage.js',
       'app-src/bower_components/angular-messages/angular-messages.js',
       'app-src/bower_components/angular-material/angular-material.js',
       'app-src/bower_components/angular-material-icons/angular-material-icons.min.js',
