@@ -25,12 +25,12 @@
   }
 
   /* @ngInject */
-  function HintCtrl($localStorage) {
+  function HintCtrl($rootScope) {
     let vm = this;
 
     vm.deleteHint = () => {
-      if ($localStorage.tomorrowsNote) {
-        delete $localStorage.tomorrowsNote;
+      if ($rootScope.r.tomorrowsNote) {
+        delete $rootScope.r.tomorrowsNote;
       }
     };
   }

@@ -14,12 +14,12 @@
     .service('ShortSyntax', ShortSyntax);
 
   /* @ngInject */
-  function ShortSyntax(ParseDuration, $localStorage) {
+  function ShortSyntax(ParseDuration, $rootScope) {
 
     const timeEstimateRegExp = / t[0-9]+(m|h|d)+ *$/i;
 
     return (task) => {
-      if ($localStorage.config && $localStorage.config.isShortSyntaxEnabled) {
+      if ($rootScope.r.config && $rootScope.r.config.isShortSyntaxEnabled) {
         if (!task.originalKey && !task.timeEstimate && !task.subTasks) {
           let matches = timeEstimateRegExp.exec(task.title);
 

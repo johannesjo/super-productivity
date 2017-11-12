@@ -14,7 +14,7 @@
     .service('Dialogs', Dialogs);
 
   /* @ngInject */
-  function Dialogs($mdDialog, DIALOGS, $q, $document, $localStorage) {
+  function Dialogs($mdDialog, DIALOGS, $q, $document, $rootScope) {
     const dialogQueue = [];
 
     function createDialogObject(dialogName, locals) {
@@ -28,7 +28,7 @@
 
       // pass default theme
       locals = angular.extend(locals, {
-        theme: $localStorage.theme
+        theme: $rootScope.r.theme
       });
 
       // add passed variables

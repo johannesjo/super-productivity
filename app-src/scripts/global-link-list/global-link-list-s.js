@@ -17,8 +17,8 @@
   };
 
   class GlobalLinkList {
-    constructor($localStorage, SimpleToast) {
-      this.ls = $localStorage;
+    constructor($rootScope, SimpleToast) {
+      this.ls = $rootScope.r;
       this.SimpleToast = SimpleToast;
     }
 

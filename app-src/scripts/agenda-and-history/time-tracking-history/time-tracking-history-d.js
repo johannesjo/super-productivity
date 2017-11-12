@@ -25,7 +25,7 @@
   }
 
   /* @ngInject */
-  function TimeTrackingHistoryCtrl(Tasks, Dialogs, $localStorage, $scope, EV_PROJECT_CHANGED) {
+  function TimeTrackingHistoryCtrl(Tasks, Dialogs, $rootScope, $scope, EV_PROJECT_CHANGED) {
     let vm = this;
     vm.worklog = Tasks.getCompleteWorkLog();
 
@@ -57,7 +57,7 @@
         const tasks = vm.createTasksForMonth(data);
 
         Dialogs('SIMPLE_TASK_SUMMARY', {
-          settings: $localStorage.uiHelper.timeTrackingHistoryExportSettings,
+          settings: $rootScope.r.uiHelper.timeTrackingHistoryExportSettings,
           tasks: tasks,
           finishDayFn: false
         }, true);

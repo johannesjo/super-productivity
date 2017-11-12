@@ -28,7 +28,7 @@
   }
 
   /* @ngInject */
-  function ProjectSettingsCtrl(Projects, Dialogs, SimpleToast, $mdDialog, $localStorage) {
+  function ProjectSettingsCtrl(Projects, Dialogs, SimpleToast, $mdDialog, $rootScope) {
     let vm = this;
 
     // save project stuff
@@ -43,7 +43,7 @@
     };
 
     vm.deleteProject = (project, $index) => {
-      if (project.id === $localStorage.currentProject.id) {
+      if (project.id === $rootScope.r.currentProject.id) {
         SimpleToast('ERROR', 'Cannot delete ' + project.title + ' as it is the current project!');
       } else {
         let confirm = $mdDialog.confirm()

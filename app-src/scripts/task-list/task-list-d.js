@@ -16,7 +16,7 @@
 
   class TaskListCtrl {
     /* @ngInject */
-    constructor(Dialogs, $localStorage, $mdToast, $timeout, Tasks, EDIT_ON_CLICK_TOGGLE_EV, $scope, ShortSyntax, $element, Jira, CheckShortcutKeyCombo, Util) {
+    constructor(Dialogs, $rootScope, $mdToast, $timeout, Tasks, EDIT_ON_CLICK_TOGGLE_EV, $scope, ShortSyntax, $element, Jira, CheckShortcutKeyCombo, Util) {
       this.Dialogs = Dialogs;
       this.$mdToast = $mdToast;
       this.$timeout = $timeout;
@@ -26,7 +26,7 @@
       this.ShortSyntax = ShortSyntax;
       this.$element = $element;
       this.Jira = Jira;
-      this.$localStorage = $localStorage;
+      this.$rootScope = $rootScope;
       this.lastFocusedTaskEl = undefined;
       this.checkKeyCombo = CheckShortcutKeyCombo;
       this.Util = Util;
@@ -155,7 +155,7 @@
       this.focusPreviousInListOrParent($index);
 
       // check if current task was deleted and unset current task if so
-      if (this.$localStorage.currentTask && this.$localStorage.currentTask.id === task.id) {
+      if (this.$rootScope.r.currentTask && this.$rootScope.r.currentTask.id === task.id) {
         this.Tasks.updateCurrent(undefined);
       }
 
@@ -237,7 +237,7 @@
       let taskEl = $ev.currentTarget || $ev.srcElement || $ev.originalTarget;
       taskEl = angular.element(taskEl);
       const task = this.lastFocusedTaskEl.scope().modelValue;
-      const lsKeys = this.$localStorage.keys;
+      const lsKeys = this.$rootScope.r.keys;
       const isShiftOrCtrlPressed = ($ev.shiftKey === false && $ev.ctrlKey === false);
       const getTaskIndex = () => {
         return _.findIndex(this.tasks, (cTask) => {

@@ -14,7 +14,7 @@
     .service('InitGlobalModels', InitGlobalModels);
 
   /* @ngInject */
-  function InitGlobalModels(DEFAULT_THEME, $rootScope, $localStorage, $state, Tasks, ON_DEMAND_LS_FIELDS, ON_DEMAND_LS_FIELDS_FOR_PROJECT) {
+  function InitGlobalModels(DEFAULT_THEME, AppStorage, $rootScope, $state, Tasks, ON_DEMAND_LS_FIELDS, ON_DEMAND_LS_FIELDS_FOR_PROJECT) {
 
     function getLsData(fromObj) {
       const toObj = {};
@@ -43,19 +43,18 @@
       // this way
       $rootScope.$state = $state;
 
-      //$rootScope.r = $localStorage;
-      $rootScope.r = getLsData($localStorage);
+      $rootScope.r = getLsData(AppStorage.s);
 
       // we want the current task to be a reference to the tasks array
       // that's why we need to reassign
-      $rootScope.r.currentTask = $localStorage.currenTask = Tasks.getCurrent();
-      if ($localStorage.currenTask) {
-        Tasks.updateCurrent($localStorage.currenTask);
+      $rootScope.r.currentTask = $rootScope.r.currenTask = Tasks.getCurrent();
+      if ($rootScope.r.currenTask) {
+        Tasks.updateCurrent($rootScope.r.currenTask);
       }
 
       // reset session
-      $localStorage.currentSession = {};
-      $rootScope.r.theme = $localStorage.theme = $localStorage.theme || DEFAULT_THEME;
+      $rootScope.r.currentSession = {};
+      $rootScope.r.theme = $rootScope.r.theme = $rootScope.r.theme || DEFAULT_THEME;
 
       if ($rootScope.r.theme && $rootScope.r.theme.indexOf('dark') > -1) {
         $rootScope.r.bodyClass = 'dark-theme';
@@ -63,18 +62,16 @@
         $rootScope.r.bodyClass = '';
       }
 
-      $rootScope.r.globalLinks = $localStorage.globalLinks;
-
       // all of these should normally not happen, but in case it does, at least
       // assign an object save the chosen values
-      if (!$localStorage.uiHelper.dailyTaskExportSettings) {
-        $localStorage.uiHelper.dailyTaskExportSettings = {};
+      if (!$rootScope.r.uiHelper.dailyTaskExportSettings) {
+        $rootScope.r.uiHelper.dailyTaskExportSettings = {};
       }
-      if (!$localStorage.uiHelper.timeTrackingHistoryExportSettings) {
-        $localStorage.uiHelper.timeTrackingHistoryExportSettings = {};
+      if (!$rootScope.r.uiHelper.timeTrackingHistoryExportSettings) {
+        $rootScope.r.uiHelper.timeTrackingHistoryExportSettings = {};
       }
-      if (!$localStorage.uiHelper.csvExportSettings) {
-        $localStorage.uiHelper.csvExportSettings = {};
+      if (!$rootScope.r.uiHelper.csvExportSettings) {
+        $rootScope.r.uiHelper.csvExportSettings = {};
       }
     };
   }

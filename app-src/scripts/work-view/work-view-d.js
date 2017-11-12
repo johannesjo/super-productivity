@@ -25,7 +25,7 @@
   }
 
   /* @ngInject */
-  function WorkViewCtrl(Tasks, $window, $scope, Dialogs, $localStorage, TasksUtil, $timeout) {
+  function WorkViewCtrl(Tasks, $window, $scope, Dialogs, $rootScope, TasksUtil, $timeout) {
     let vm = this;
     const _ = $window._;
 
@@ -56,7 +56,7 @@
 
     function updateTasksLsOnly() {
       if (vm.tasksUndone && vm.tasksDone) {
-        $localStorage.tasks = vm.tasksDone.concat(vm.tasksUndone);
+        $rootScope.r.tasks = vm.tasksDone.concat(vm.tasksUndone);
       }
     }
 

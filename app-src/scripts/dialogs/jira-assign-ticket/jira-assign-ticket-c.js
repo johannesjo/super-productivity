@@ -14,14 +14,14 @@
     .controller('JiraAssignTicketCtrl', JiraAssignTicketCtrl);
 
   /* @ngInject */
-  function JiraAssignTicketCtrl($mdDialog, task, theme, Jira, $localStorage) {
+  function JiraAssignTicketCtrl($mdDialog, task, theme, Jira, $rootScope) {
     let vm = this;
 
     vm.theme = theme;
     vm.task = task;
 
     vm.assignTicket = () => {
-      Jira.updateAssignee(task, $localStorage.jiraSettings.userName)
+      Jira.updateAssignee(task, $rootScope.r.jiraSettings.userName)
         .then($mdDialog.hide, $mdDialog.cancel);
       $mdDialog.hide();
     };
