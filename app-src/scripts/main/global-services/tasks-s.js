@@ -39,18 +39,18 @@
         window.ipcRenderer.on(IPC_EVENT_UPDATE_TIME_SPEND_FOR_CURRENT, (ev, evData) => {
           if (!isIdleDialogOpen) {
             // only track if there is a task
-            if (that.$localStorage.currentTask) {
+            if (that.$rootScope.r.currentTask) {
               let timeSpentInMs = evData.timeSpentInMs;
               let idleTimeInMs = evData.idleTimeInMs;
 
               TakeABreakReminder.check(timeSpentInMs, idleTimeInMs);
 
               // track
-              that.addTimeSpent(that.$localStorage.currentTask, timeSpentInMs);
+              that.addTimeSpent(that.$rootScope.r.currentTask, timeSpentInMs);
 
               // update indicator
               window.ipcRenderer.send(IPC_EVENT_CURRENT_TASK_UPDATED, {
-                current: that.$localStorage.currentTask,
+                current: that.$rootScope.r.currentTask,
                 lastCurrent: that.lastCurrentTask
               });
 
@@ -78,7 +78,7 @@
               }, () => {
                 // if not tracked
                 // unset currentSession.timeWorkedWithoutBreak
-                that.$localStorage.currentSession.timeWorkedWithoutBreak = undefined;
+                that.$rootScope.r.currentSession.timeWorkedWithoutBreak = undefined;
                 TakeABreakReminder.isShown = true;
                 isIdleDialogOpen = false;
               });
@@ -87,8 +87,8 @@
 
         // handlers for dbus events
         window.ipcRenderer.on(IPC_EVENT_TASK_MARK_AS_DONE, () => {
-          if (that.$localStorage.currentTask) {
-            that.markAsDone(that.$localStorage.currentTask);
+          if (that.$rootScope.r.currentTask) {
+            that.markAsDone(that.$rootScope.r.currentTask);
             that.$rootScope.$apply();
           } else if (that.lastCurrentTask) {
             that.markAsDone(that.lastCurrentTask);
@@ -96,7 +96,7 @@
           }
         });
         window.ipcRenderer.on(IPC_EVENT_TASK_START, () => {
-          if (!that.$localStorage.currentTask && that.lastCurrentTask) {
+          if (!that.$rootScope.r.currentTask && that.lastCurrentTask) {
             that.updateCurrent(that.lastCurrentTask);
             that.$rootScope.$apply();
           } else {
@@ -104,7 +104,7 @@
           }
         });
         window.ipcRenderer.on(IPC_EVENT_TASK_PAUSE, () => {
-          if (that.$localStorage.currentTask) {
+          if (that.$rootScope.r.currentTask) {
             that.updateCurrent(undefined);
             that.$rootScope.$apply();
           }
