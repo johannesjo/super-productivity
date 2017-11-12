@@ -1,16 +1,18 @@
 @mixin ng-pop-in-popout() {
-  transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+
+  &.ng-enter,
+  &.ng-leave {
+    transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+  }
+
   &.ng-enter {
-    //opacity: 0;
     transform: scaleY(0);
   }
   &.ng-enter-active {
-    //opacity: 1;
     transform: scale(1);
   }
 
   &.ng-leave {
-    transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
     display: block;
     opacity: 1;
     transform: scale(1);
