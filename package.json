@@ -50,14 +50,14 @@
       "category": "Utility",
       "target": [
         "AppImage",
-        "deb"
+        "deb",
+        "snap"
       ],
       "publish": [
         "github"
       ]
     },
     "snap": {
-      "confinement": "classic",
       "grade": "stable"
     }
   },
