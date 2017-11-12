@@ -26,7 +26,7 @@
   }
 
   /* @ngInject */
-  function DailySummaryCtrl($localStorage, Tasks, TasksUtil, $mdDialog, Dialogs, $state, GitLog, IS_ELECTRON, $timeout, $scope) {
+  function DailySummaryCtrl($rootScope, Tasks, TasksUtil, $mdDialog, Dialogs, $state, GitLog, IS_ELECTRON, $timeout, $scope) {
     const IPC_EVENT_SHUTDOWN = 'SHUTDOWN';
     const SUCCESS_ANIMATION_DURATION = 500;
 
@@ -43,22 +43,22 @@
     // use mysql date as it is sortable
     vm.totalTimeSpentToday = Tasks.getTimeWorkedToday();
 
-    if ($localStorage.git && $localStorage.git.projectDir) {
-      GitLog.get($localStorage.git.projectDir).then(function (res) {
+    if ($rootScope.r.git && $rootScope.r.git.projectDir) {
+      GitLog.get($rootScope.r.git.projectDir).then(function (res) {
         vm.commitLog = res;
       });
     }
 
     vm.showExportModal = () => {
       Dialogs('SIMPLE_TASK_SUMMARY', {
-        settings: $localStorage.uiHelper.dailyTaskExportSettings,
+        settings: $rootScope.r.uiHelper.dailyTaskExportSettings,
         finishDayFn: vm.finishDay,
         tasks: Tasks.getToday()
       }, true);
     };
 
     vm.finishDay = () => {
-      $localStorage.tomorrowsNote = vm.tomorrowsNote;
+      $rootScope.r.tomorrowsNote = vm.tomorrowsNote;
 
       Tasks.finishDay(vm.clearDoneTasks, vm.moveUnfinishedToBacklog);
 

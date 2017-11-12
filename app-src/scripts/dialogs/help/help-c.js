@@ -14,12 +14,12 @@
     .controller('HelpCtrl', HelpCtrl);
 
   /* @ngInject */
-  function HelpCtrl($mdDialog, theme, $state, IS_ELECTRON, template, $localStorage) {
+  function HelpCtrl($mdDialog, theme, $state, IS_ELECTRON, template, $rootScope) {
     let vm = this;
     vm.task = {};
     vm.theme = theme;
     vm.IS_ELECTRON = IS_ELECTRON;
-    vm.keys = $localStorage.keys;
+    vm.keys = $rootScope.r.keys;
 
     if (template === 'PAGE') {
       vm.helpTpl = 'scripts/dialogs/help/help-' + $state.current.name + '.html';

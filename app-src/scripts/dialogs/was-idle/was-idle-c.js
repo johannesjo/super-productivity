@@ -14,7 +14,7 @@
     .controller('WasIdleCtrl', WasIdleCtrl);
 
   /* @ngInject */
-  function WasIdleCtrl($mdDialog, $localStorage, $scope, Tasks, $window, idleTime, minIdleTimeInMs, theme) {
+  function WasIdleCtrl($mdDialog, $rootScope, $scope, Tasks, $window, idleTime, minIdleTimeInMs, theme) {
     let vm = this;
     vm.theme = theme;
     const IPC_EVENT_IDLE = 'WAS_IDLE';
@@ -27,13 +27,13 @@
     vm.idleTime = $window.moment.duration(realIdleTime, 'milliseconds').format('hh:mm:ss');
 
     vm.undoneTasks = Tasks.getUndoneToday(true);
-    vm.selectedTask = $localStorage.currentTask || undefined;
+    vm.selectedTask = $rootScope.r.currentTask || undefined;
 
     vm.trackIdleToTask = () => {
       if (vm.selectedTask) {
-        if ($localStorage.currentTask) {
+        if ($rootScope.r.currentTask) {
           // we need remove the possibly falsely tracked time from the previous current task
-          Tasks.removeTimeSpent($localStorage.currentTask, minIdleTimeInMs);
+          Tasks.removeTimeSpent($rootScope.r.currentTask, minIdleTimeInMs);
         }
 
         // add the idle time in milliseconds + the minIdleTime that was
@@ -48,8 +48,8 @@
 
     vm.cancel = () => {
       // remove min idle time when it was tracked before
-      if ($localStorage.currentTask) {
-        Tasks.removeTimeSpent($localStorage.currentTask, minIdleTimeInMs);
+      if ($rootScope.r.currentTask) {
+        Tasks.removeTimeSpent($rootScope.r.currentTask, minIdleTimeInMs);
       }
       $mdDialog.cancel();
     };

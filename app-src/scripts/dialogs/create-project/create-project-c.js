@@ -14,12 +14,12 @@
     .controller('CreateProjectCtrl', CreateProjectCtrl);
 
   /* @ngInject */
-  function CreateProjectCtrl($mdDialog, Projects, SimpleToast, IS_ELECTRON, $localStorage) {
+  function CreateProjectCtrl($mdDialog, Projects, SimpleToast, IS_ELECTRON, $rootScope) {
     let vm = this;
     vm.IS_ELECTRON = IS_ELECTRON;
     vm.task = {};
     vm.projectSettings = {};
-    vm.projectSettings.theme = $localStorage.theme;
+    vm.projectSettings.theme = $rootScope.r.theme;
 
     vm.createProject = (project) => {
       Projects.createNew(project.title, vm.projectSettings);

@@ -31,13 +31,13 @@
 
   /* @ngInject */
   class Jira {
-    constructor(IS_ELECTRON, SimpleToast, Uid, $q, $localStorage, Dialogs, Notifier, $injector, $timeout, REQUEST_TIMEOUT, $log, $window) {
+    constructor(IS_ELECTRON, SimpleToast, Uid, $q, $rootScope, Dialogs, Notifier, $injector, $timeout, REQUEST_TIMEOUT, $log, $window) {
       this.requestsLog = {};
 
       this.IS_ELECTRON = IS_ELECTRON;
       this.Uid = Uid;
       this.$q = $q;
-      this.$localStorage = $localStorage;
+      this.$rootScope = $rootScope.r;
       this.Dialogs = Dialogs;
       this.Notifier = Notifier;
       this.$injector = $injector;
@@ -168,7 +168,7 @@
         originalUpdated: issue.fields.updated,
         originalStatus: issue.fields.status,
         originalAttachment: Jira.mapAttachments(issue),
-        originalLink: 'https://' + this.$localStorage.jiraSettings.host + '/browse/' + issue.key,
+        originalLink: 'https://' + this.$rootScope.r.jiraSettings.host + '/browse/' + issue.key,
         originalEstimate: issue.fields.timeestimate && moment.duration({
           seconds: issue.fields.timeestimate
         }),
@@ -180,7 +180,7 @@
 
     isSufficientJiraSettings(settingsToTest) {
       if (!settingsToTest) {
-        settingsToTest = this.$localStorage.jiraSettings;
+        settingsToTest = this.$rootScope.r.jiraSettings;
       }
       return settingsToTest && settingsToTest.isJiraEnabled && !!settingsToTest.host && !!settingsToTest.userName && !!settingsToTest.password;
     }
@@ -224,7 +224,7 @@
     _addWorklog(originalKey, started, timeSpent, comment) {
       if (originalKey && started && started.toISOString && timeSpent && timeSpent.asSeconds) {
         const request = {
-          config: this.$localStorage.jiraSettings,
+          config: this.$rootScope.r.jiraSettings,
           apiMethod: 'addWorklog',
           arguments: [
             originalKey,
@@ -249,7 +249,7 @@
       }
 
       const request = {
-        config: this.$localStorage.jiraSettings,
+        config: this.$rootScope.r.jiraSettings,
         apiMethod: 'searchUsers',
         arguments: [{ username: userNameQuery }]
       };
@@ -264,7 +264,7 @@
       }
 
       const request = {
-        config: this.$localStorage.jiraSettings,
+        config: this.$rootScope.r.jiraSettings,
         apiMethod: 'listTransitions',
         arguments: [task.originalKey]
       };
@@ -279,11 +279,11 @@
         fields: SUGGESTION_FIELDS_TO_GET
       };
 
-      if (this.isSufficientJiraSettings() && this.$localStorage.jiraSettings.jqlQueryAutoAdd) {
+      if (this.isSufficientJiraSettings() && this.$rootScope.r.jiraSettings.jqlQueryAutoAdd) {
         const request = {
-          config: this.$localStorage.jiraSettings,
+          config: this.$rootScope.r.jiraSettings,
           apiMethod: 'searchJira',
-          arguments: [this.$localStorage.jiraSettings.jqlQueryAutoAdd, options]
+          arguments: [this.$rootScope.r.jiraSettings.jqlQueryAutoAdd, options]
         };
         this.sendRequest(request)
           .then((res) => {
@@ -307,10 +307,10 @@
 
       const defer = this.$q.defer();
 
-      const isAutoTransitionAndGotTransitions = this.$localStorage.jiraSettings.transitions && this.$localStorage.jiraSettings.transitions[localType] && this.$localStorage.jiraSettings.transitions[localType] !== 'ALWAYS_ASK';
+      const isAutoTransitionAndGotTransitions = this.$rootScope.r.jiraSettings.transitions && this.$rootScope.r.jiraSettings.transitions[localType] && this.$rootScope.r.jiraSettings.transitions[localType] !== 'ALWAYS_ASK';
 
       if (isAutoTransitionAndGotTransitions) {
-        const isNoUpdateTransition = this.$localStorage.jiraSettings.transitions[localType] === 'DO_NOT';
+        const isNoUpdateTransition = this.$rootScope.r.jiraSettings.transitions[localType] === 'DO_NOT';
         if (isNoUpdateTransition) {
           defer.reject('DO_NOT chosen');
         } else {
@@ -318,7 +318,7 @@
           // check if status needs an update
           if (task.status !== localType) {
             this.transitionIssue(task, {
-              id: this.$localStorage.jiraSettings.transitions[localType]
+              id: this.$rootScope.r.jiraSettings.transitions[localType]
             }, localType)
               .then(defer.resolve, defer.reject);
           } else {
@@ -345,7 +345,7 @@
       if (isFailedPreCheck) {
         return isFailedPreCheck;
       }
-      else if (!this.$localStorage.jiraSettings.isUpdateIssueFromLocal) {
+      else if (!this.$rootScope.r.jiraSettings.isUpdateIssueFromLocal) {
         return this.$q.reject('Jira: jiraSettings.isUpdateIssueFromLocal is deactivated');
       }
       else if (!angular.isString(task.notes)) {
@@ -353,7 +353,7 @@
         return this.$q.reject('Jira: Not enough parameters for updateIssueDescription.');
       } else {
         const request = {
-          config: this.$localStorage.jiraSettings,
+          config: this.$rootScope.r.jiraSettings,
           apiMethod: 'updateIssue',
           arguments: [task.originalKey, {
             fields: {
@@ -379,7 +379,7 @@
         return this.$q.reject('Jira: Not enough parameters for updateAssignee.');
       } else {
         const request = {
-          config: this.$localStorage.jiraSettings,
+          config: this.$rootScope.r.jiraSettings,
           apiMethod: 'updateIssue',
           arguments: [task.originalKey, {
             fields: {
@@ -405,7 +405,7 @@
 
       const defer = this.$q.defer();
       const request = {
-        config: this.$localStorage.jiraSettings,
+        config: this.$rootScope.r.jiraSettings,
         apiMethod: 'findIssue',
         arguments: [task.originalKey, 'changelog']
       };
@@ -460,10 +460,10 @@
         defer.resolve(res);
       }
 
-      if (this.$localStorage.jiraSettings.isWorklogEnabled) {
+      if (this.$rootScope.r.jiraSettings.isWorklogEnabled) {
 
         // use parent task option if enabled
-        if (this.$localStorage.jiraSettings.isAddWorklogOnSubTaskDone) {
+        if (this.$rootScope.r.jiraSettings.isAddWorklogOnSubTaskDone) {
           if (task.parentId) {
             let parentTaskCopy = angular.copy(Tasks.getById(task.parentId));
             if (Jira.isJiraTask(parentTaskCopy)) {
@@ -487,7 +487,7 @@
         if (Jira.isJiraTask(task)) {
           this.checkUpdatesForTicket(task)
             .then(() => {
-              if (this.$localStorage.jiraSettings.isAutoWorklog) {
+              if (this.$rootScope.r.jiraSettings.isAutoWorklog) {
                 outerTimeSpent = task.timeSpent;
                 this._addWorklog(task.originalKey, moment(task.started), task.timeSpent)
                   .then(successHandler, defer.reject);
@@ -520,7 +520,7 @@
       function transitionSuccess(res) {
         // add name as our transitionObject may only contain the id
         if (!transitionObj.name) {
-          transitionObj = _.find(that.$localStorage.jiraSettings.allTransitions, (currentTransObj) => {
+          transitionObj = _.find(that.$rootScope.r.jiraSettings.allTransitions, (currentTransObj) => {
             return currentTransObj.id === transitionObj.id;
           });
         }
@@ -538,7 +538,7 @@
       this.checkUpdatesForTicket(task)
         .then(() => {
           const request = {
-            config: this.$localStorage.jiraSettings,
+            config: this.$rootScope.r.jiraSettings,
             apiMethod: 'transitionIssue',
             arguments: [task.originalId, {
               transition: {
@@ -564,11 +564,11 @@
         fields: SUGGESTION_FIELDS_TO_GET
       };
 
-      if (this.$localStorage.jiraSettings.jqlQuery) {
+      if (this.$rootScope.r.jiraSettings.jqlQuery) {
         const request = {
-          config: this.$localStorage.jiraSettings,
+          config: this.$rootScope.r.jiraSettings,
           apiMethod: 'searchJira',
-          arguments: [this.$localStorage.jiraSettings.jqlQuery, options]
+          arguments: [this.$rootScope.r.jiraSettings.jqlQuery, options]
         };
         return this.sendRequest(request);
       } else {
@@ -580,7 +580,7 @@
     checkForNewAndAddToBacklog() {
       const Tasks = this.$injector.get('Tasks');
 
-      if (this.isSufficientJiraSettings() && this.$localStorage.jiraSettings.isEnabledAutoAdd) {
+      if (this.isSufficientJiraSettings() && this.$rootScope.r.jiraSettings.isEnabledAutoAdd) {
         this.getAutoAddedIssues()
           .then((issues) => {
             _.each(issues, (issue) => {
@@ -623,7 +623,7 @@
       }
 
       // check if the user assigned matches the current user
-      if (originalTask && originalTask.originalAssigneeKey && originalTask.originalAssigneeKey !== this.$localStorage.jiraSettings.userName && !originalTask.isDone) {
+      if (originalTask && originalTask.originalAssigneeKey && originalTask.originalAssigneeKey !== this.$rootScope.r.jiraSettings.userName && !originalTask.isDone) {
         const msg = '"' + originalTask.originalKey + '" is assigned to "' + originalTask.originalAssigneeKey + '".';
         this.Notifier({
           title: 'Jira issue ' + originalTask.originalKey + ' is assigned to another user',

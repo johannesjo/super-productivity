@@ -14,7 +14,7 @@
     .service('GitLog', GitLog);
 
   /* @ngInject */
-  function GitLog($q, Uid, $localStorage, IS_ELECTRON) {
+  function GitLog($q, Uid, $rootScope, IS_ELECTRON) {
 
     // AngularJS will instantiate a singleton by calling "new" on this function const IPC_JIRA_CB_EVENT = 'JIRA_RESPONSE';
     const IPC_GIT_LOG_EVENT = 'GIT_LOG';
@@ -39,7 +39,7 @@
     }
 
     this.get = (cwd) => {
-      if (IS_ELECTRON && $localStorage.git && $localStorage.git.projectDir) {
+      if (IS_ELECTRON && $rootScope.r.git && $rootScope.r.git.projectDir) {
         let uid = Uid();
         let defer = $q.defer();
         // save to request log

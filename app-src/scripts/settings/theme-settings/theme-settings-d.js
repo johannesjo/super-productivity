@@ -28,7 +28,7 @@
   }
 
   /* @ngInject */
-  function ThemeSettingsCtrl($scope, THEMES, DEFAULT_THEME, $localStorage, $rootScope) {
+  function ThemeSettingsCtrl($scope, THEMES, DEFAULT_THEME, $rootScope) {
     let vm = this;
     vm.themes = THEMES;
 
@@ -52,7 +52,7 @@
         } else {
           vm.currentTheme = value + '-theme';
         }
-        $localStorage.theme = vm.currentTheme;
+        $rootScope.r.theme = vm.currentTheme;
       }
     }));
 
@@ -61,12 +61,12 @@
         if (value) {
           vm.currentTheme = vm.currentTheme.replace('-theme', '-dark');
           if (vm.isCurrentProjectTheme) {
-            $localStorage.bodyClass = 'dark-theme';
+            $rootScope.r.bodyClass = 'dark-theme';
           }
         } else {
           vm.currentTheme = vm.currentTheme.replace('-dark', '-theme');
           if (vm.isCurrentProjectTheme) {
-            $localStorage.bodyClass = '';
+            $rootScope.r.bodyClass = '';
           }
         }
         // for some reason project needs to be updated directly
@@ -76,9 +76,7 @@
           }
         }
 
-        // primitive string val for rootScope and ls need to be updated directly
-        $rootScope.r.bodyClass = $localStorage.bodyClass;
-        $localStorage.theme = vm.currentTheme;
+        $rootScope.r.theme = vm.currentTheme;
       }
     }));
 

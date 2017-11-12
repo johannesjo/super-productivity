@@ -14,7 +14,7 @@
     .service('Projects', Projects);
 
   /* @ngInject */
-  function Projects(LS_DEFAULTS, $localStorage, Uid, $window, SimpleToast, $injector, GLOBAL_LS_FIELDS, $rootScope, EV_PROJECT_CHANGED) {
+  function Projects(LS_DEFAULTS, $rootScope, Uid, $window, SimpleToast, $injector, GLOBAL_LS_FIELDS, EV_PROJECT_CHANGED) {
     const TMP_FIELDS = [
       '$$hashKey',
       '$$mdSelectId',
@@ -24,23 +24,23 @@
     const OMITTED_LS_FIELDS = GLOBAL_LS_FIELDS.concat(TMP_FIELDS);
 
     this.getList = () => {
-      return $localStorage.projects;
+      return $rootScope.r && $rootScope.r.projects;
     };
 
     this.getAndUpdateCurrent = () => {
       let currentProject;
-      if (!$localStorage.currentProject && $localStorage.projects.length > 0) {
-        $localStorage.currentProject = $localStorage.projects[0];
+      if (!$rootScope.r.currentProject && $rootScope.r.projects.length > 0) {
+        $rootScope.r.currentProject = $rootScope.r.projects[0];
       }
 
       // we need to use this, to establish an relationship between array entry and current
-      if ($localStorage.currentProject) {
-        currentProject = $window._.find($localStorage.projects, (project) => {
-          return $localStorage.currentProject.id === project.id;
+      if ($rootScope.r.currentProject) {
+        currentProject = $window._.find($rootScope.r.projects, (project) => {
+          return $rootScope.r.currentProject.id === project.id;
         });
-        $localStorage.currentProject = currentProject;
+        $rootScope.r.currentProject = currentProject;
       } else {
-        return $localStorage.currentProject;
+        return $rootScope.r.currentProject;
       }
 
       return currentProject;
@@ -62,12 +62,12 @@
     };
 
     this.createNewFromCurrent = (projectTitle) => {
-      if ($localStorage.projects.length > 0) {
+      if ($rootScope.r.projects.length > 0) {
         SimpleToast('ERROR', 'ERROR: There is already a project');
         return;
       }
 
-      this.createNew(projectTitle, $localStorage);
+      this.createNew(projectTitle, $rootScope.r);
     };
 
     this.createNew = (projectTitle, data) => {
@@ -79,8 +79,8 @@
           data: $window._.omit(LS_DEFAULTS, OMITTED_LS_FIELDS)
         };
 
-        // update $localStorage.projects
-        $localStorage.projects.push(newProject);
+        // update $rootScope.r.projects
+        $rootScope.r.projects.push(newProject);
 
         // update data for current new project from current data
         this.updateProjectData(newProject.id, data);
@@ -113,36 +113,36 @@
 
     this.changeCurrent = (newCurrentProjectParam) => {
       const InitGlobalModels = $injector.get('InitGlobalModels');
-      const oldCurrentProject = angular.copy($localStorage.currentProject);
+      const oldCurrentProject = angular.copy($rootScope.r.currentProject);
       const newCurrentProject = this.getById(newCurrentProjectParam.id);
 
       if (newCurrentProject && newCurrentProject.id && oldCurrentProject && oldCurrentProject.id !== newCurrentProject.id) {
         // when there is an old current project existing
         if (oldCurrentProject && oldCurrentProject.id) {
-          // save all current project data in $localStorage.projects[oldProject]
-          this.updateProjectData(oldCurrentProject.id, $localStorage);
+          // save all current project data in $rootScope.r.projects[oldProject]
+          this.updateProjectData(oldCurrentProject.id, $rootScope.r);
         }
         // update with new model fields, if we change the model
         this.updateNewFields(newCurrentProject);
         // remove omitted fields if we saved them for some reason
         this.removeOmittedFields(newCurrentProject);
 
-        // clean up $localStorage
-        _.forOwn($localStorage, (val, property) => {
+        // clean up $rootScope.r
+        _.forOwn($rootScope, (val, property) => {
           if (!angular.isFunction(val) && GLOBAL_LS_FIELDS.indexOf(property) === -1) {
-            $localStorage[property] = undefined;
+            $rootScope.r[property] = undefined;
           }
         });
 
-        // load all other data from new project to $localStorage
+        // load all other data from new project to $rootScope.r
         _.forOwn(newCurrentProject.data, (val, property) => {
           if (newCurrentProject.data.hasOwnProperty(property)) {
-            $localStorage[property] = newCurrentProject.data[property];
+            $rootScope.r[property] = newCurrentProject.data[property];
           }
         });
 
-        // update ls $localStorage current project
-        $localStorage.currentProject = newCurrentProject;
+        // update ls $rootScope.r current project
+        $rootScope.r.currentProject = newCurrentProject;
         $rootScope.$broadcast(EV_PROJECT_CHANGED);
         // re-init all global models
         InitGlobalModels();

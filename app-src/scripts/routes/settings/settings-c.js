@@ -14,14 +14,14 @@
     .controller('SettingsCtrl', SettingsCtrl);
 
   /* @ngInject */
-  function SettingsCtrl($localStorage, $window, $scope, Projects, IS_ELECTRON, EV_PROJECT_CHANGED) {
+  function SettingsCtrl($rootScope, $window, $scope, Projects, IS_ELECTRON, EV_PROJECT_CHANGED) {
     let vm = this;
     const _ = $window._;
     vm.IS_ELECTRON = IS_ELECTRON;
 
     function init() {
       vm.allProjects = Projects.getList();
-      vm.selectedCurrentProject = $localStorage.currentProject;
+      vm.selectedCurrentProject = $rootScope.r.currentProject;
     }
 
     init();

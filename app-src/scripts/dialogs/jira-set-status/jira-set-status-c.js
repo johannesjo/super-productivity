@@ -14,7 +14,7 @@
     .controller('JiraSetStatusCtrl', JiraSetStatusCtrl);
 
   /* @ngInject */
-  function JiraSetStatusCtrl($mdDialog, task, transitions, localType, $window, $localStorage, theme, Jira) {
+  function JiraSetStatusCtrl($mdDialog, task, transitions, localType, $window, $rootScope, theme, Jira) {
     let vm = this;
     vm.theme = theme;
     vm.transitions = transitions;
@@ -38,11 +38,11 @@
       let transition = vm.transitions[chosenTransitionIndex];
 
       if (vm.saveAsDefaultAction) {
-        if (!$localStorage.jiraSettings.transitions) {
-          $localStorage.jiraSettings.transitions = {};
+        if (!$rootScope.r.jiraSettings.transitions) {
+          $rootScope.r.jiraSettings.transitions = {};
         }
-        $localStorage.jiraSettings.transitions[localType] = transition.id;
-        $localStorage.jiraSettings.allTransitions = transitions;
+        $rootScope.r.jiraSettings.transitions[localType] = transition.id;
+        $rootScope.r.jiraSettings.allTransitions = transitions;
       }
 
       if (vm.userToAssign) {

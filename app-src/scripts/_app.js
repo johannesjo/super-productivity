@@ -26,7 +26,6 @@
       'ngAria',
       'ngResource',
       'ui.router',
-      'ngStorage',
       'ngMaterial',
       'ngMdIcons',
       'as.sortable',
@@ -89,42 +88,43 @@
   }
 
   /* @ngInject */
-  function initGlobalModels(Projects, InitGlobalModels, $localStorage, LS_DEFAULTS) {
-    $localStorage.$default(LS_DEFAULTS);
-
+  function initGlobalModels(Projects, InitGlobalModels, AppStorage, $rootScope, LS_DEFAULTS) {
+    AppStorage.setDefaults(LS_DEFAULTS);
+    // sync initially
+    $rootScope.r = AppStorage.s;
     Projects.getAndUpdateCurrent();
 
     InitGlobalModels();
   }
 
   /* @ngInject */
-  function initGlobalShortcuts($document, Dialogs, $localStorage, CheckShortcutKeyCombo, IS_ELECTRON, $state) {
+  function initGlobalShortcuts($document, Dialogs, $rootScope, CheckShortcutKeyCombo, IS_ELECTRON, $state) {
     $document.bind('keydown', (ev) => {
       // only trigger if not in typing mode
       if (ev.target.tagName !== 'INPUT' && ev.target.tagName !== 'TEXTAREA') {
-        if (CheckShortcutKeyCombo(ev, $localStorage.keys.addNewTask)) {
+        if (CheckShortcutKeyCombo(ev, $rootScope.r.keys.addNewTask)) {
           Dialogs('ADD_TASK', undefined, true);
         }
-        if (CheckShortcutKeyCombo(ev, $localStorage.keys.openProjectNotes)) {
+        if (CheckShortcutKeyCombo(ev, $rootScope.r.keys.openProjectNotes)) {
           Dialogs('NOTES', undefined, true);
         }
-        if (CheckShortcutKeyCombo(ev, $localStorage.keys.openDistractionPanel)) {
+        if (CheckShortcutKeyCombo(ev, $rootScope.r.keys.openDistractionPanel)) {
           Dialogs('DISTRACTIONS', undefined, true);
         }
-        if (CheckShortcutKeyCombo(ev, $localStorage.keys.showHelp)) {
+        if (CheckShortcutKeyCombo(ev, $rootScope.r.keys.showHelp)) {
           Dialogs('HELP', { template: 'PAGE' }, true);
         }
 
-        if (CheckShortcutKeyCombo(ev, $localStorage.keys.goToDailyPlanner)) {
+        if (CheckShortcutKeyCombo(ev, $rootScope.r.keys.goToDailyPlanner)) {
           $state.go('daily-planner');
         }
-        if (CheckShortcutKeyCombo(ev, $localStorage.keys.goToWorkView)) {
+        if (CheckShortcutKeyCombo(ev, $rootScope.r.keys.goToWorkView)) {
           $state.go('work-view');
         }
-        if (CheckShortcutKeyCombo(ev, $localStorage.keys.goToDailyAgenda)) {
+        if (CheckShortcutKeyCombo(ev, $rootScope.r.keys.goToDailyAgenda)) {
           $state.go('daily-agenda');
         }
-        if (CheckShortcutKeyCombo(ev, $localStorage.keys.goToSettings)) {
+        if (CheckShortcutKeyCombo(ev, $rootScope.r.keys.goToSettings)) {
           $state.go('settings');
         }
       }
@@ -139,22 +139,22 @@
 
     // Register electron shortcut(s)
     const IPC_REGISTER_GLOBAL_SHORTCUT_EVENT = 'REGISTER_GLOBAL_SHORTCUT';
-    if (IS_ELECTRON && $localStorage.keys && $localStorage.keys.globalShowHide) {
-      window.ipcRenderer.send(IPC_REGISTER_GLOBAL_SHORTCUT_EVENT, $localStorage.keys.globalShowHide);
+    if (IS_ELECTRON && $rootScope.r.keys && $rootScope.r.keys.globalShowHide) {
+      window.ipcRenderer.send(IPC_REGISTER_GLOBAL_SHORTCUT_EVENT, $rootScope.r.keys.globalShowHide);
     }
   }
 
   /* @ngInject */
-  function initPollForSimpleTimeTracking($localStorage, IS_ELECTRON, $interval, SIMPLE_TIME_TRACKING_INTERVAL, Tasks) {
+  function initPollForSimpleTimeTracking($rootScope, IS_ELECTRON, $interval, SIMPLE_TIME_TRACKING_INTERVAL, Tasks) {
     // if NOT in electron context
     if (!IS_ELECTRON) {
       let currentTrackingStart;
       $interval(() => {
-        if ($localStorage.currentTask) {
+        if ($rootScope.r.currentTask) {
           if (currentTrackingStart) {
             let now = moment();
             let realIdleTime = moment.duration(now.diff(currentTrackingStart)).asMilliseconds();
-            Tasks.addTimeSpent($localStorage.currentTask, realIdleTime);
+            Tasks.addTimeSpent($rootScope.r.currentTask, realIdleTime);
           }
           currentTrackingStart = moment();
         }
@@ -163,38 +163,38 @@
   }
 
   /* @ngInject */
-  function initPollJiraTaskUpdates($localStorage, Jira, IS_ELECTRON, $interval, JIRA_UPDATE_POLL_INTERVAL) {
+  function initPollJiraTaskUpdates($rootScope, Jira, IS_ELECTRON, $interval, JIRA_UPDATE_POLL_INTERVAL) {
     if (IS_ELECTRON) {
       // one initial call
       if (Jira.isSufficientJiraSettings()) {
-        Jira.checkForUpdates($localStorage.tasks);
+        Jira.checkForUpdates($rootScope.r.tasks);
       }
 
       $interval(() => {
         if (Jira.isSufficientJiraSettings()) {
-          Jira.checkForUpdates($localStorage.tasks);
+          Jira.checkForUpdates($rootScope.r.tasks);
         }
       }, JIRA_UPDATE_POLL_INTERVAL);
     }
   }
 
   /* @ngInject */
-  function initPollGitTaskUpdates($localStorage, Git, $interval, GIT_UPDATE_POLL_INTERVAL) {
+  function initPollGitTaskUpdates($rootScope, Git, $interval, GIT_UPDATE_POLL_INTERVAL) {
     // one initial
-    if ($localStorage.git.projectDir && $localStorage.git.repo) {
-      Git.checkAndUpdateTasks($localStorage.tasks);
+    if ($rootScope.r.git.projectDir && $rootScope.r.git.repo) {
+      Git.checkAndUpdateTasks($rootScope.r.tasks);
     }
 
     $interval(() => {
-      if ($localStorage.git.projectDir && $localStorage.git.repo) {
-        Git.checkAndUpdateTasks($localStorage.tasks);
+      if ($rootScope.r.git.projectDir && $rootScope.r.git.repo) {
+        Git.checkAndUpdateTasks($rootScope.r.tasks);
       }
     }, GIT_UPDATE_POLL_INTERVAL);
   }
 
   /* @ngInject */
-  function showWelcomeDialog($localStorage, Dialogs) {
-    if ($localStorage.uiHelper.isShowWelcomeDialog) {
+  function showWelcomeDialog($rootScope, Dialogs) {
+    if ($rootScope.r.uiHelper.isShowWelcomeDialog) {
       Dialogs('WELCOME', undefined, true);
     }
   }

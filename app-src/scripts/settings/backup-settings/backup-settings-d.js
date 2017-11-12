@@ -25,7 +25,7 @@
   }
 
   /* @ngInject */
-  function BackupSettingsCtrl($localStorage) {
+  function BackupSettingsCtrl($rootScope) {
     let vm = this;
 
     // import/export stuff
@@ -33,7 +33,7 @@
       let settings = JSON.parse(uploadSettingsTextarea);
 
       _.forOwn(settings, (val, key) => {
-        $localStorage[key] = val;
+        $rootScope.r[key] = val;
       });
 
       // reload page completely afterwards

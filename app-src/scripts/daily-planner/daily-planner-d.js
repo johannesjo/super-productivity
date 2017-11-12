@@ -25,7 +25,7 @@
   }
 
   /* @ngInject */
-  function DailyPlannerCtrl($localStorage, $window, $scope, Tasks, TasksUtil, Dialogs, $state, Jira, $filter, IS_ELECTRON, Git, $mdDialog, EV_PROJECT_CHANGED) {
+  function DailyPlannerCtrl($rootScope, $window, $scope, Tasks, TasksUtil, Dialogs, $state, Jira, $filter, IS_ELECTRON, Git, $mdDialog, EV_PROJECT_CHANGED) {
     let vm = this;
     const _ = $window._;
 
@@ -49,7 +49,7 @@
       // add new git tasks
       Git.checkForNewAndAddToBacklog();
 
-      if ($localStorage.git.isShowIssuesFromGit) {
+      if ($rootScope.r.git.isShowIssuesFromGit) {
         Git.getIssueList()
           .then((res) => {
             vm.taskSuggestions = vm.taskSuggestions.concat(res.data);
@@ -60,7 +60,7 @@
 
     vm.addTask = () => {
       if (vm.newTask) {
-        if (vm.newTask.originalType && vm.newTask.originalType === 'GITHUB' && $localStorage.git.isShowIssuesFromGit) {
+        if (vm.newTask.originalType && vm.newTask.originalType === 'GITHUB' && $rootScope.r.git.isShowIssuesFromGit) {
           Git.getCommentListForIssue(vm.newTask.originalId)
             .then(res => {
               vm.newTask.originalComments = res.data;
@@ -83,7 +83,7 @@
 
       // if we have already defined enough tasks and the
       // new task field is empty go to work view
-      else if ($localStorage.tasks.length > 0) {
+      else if ($rootScope.r.tasks.length > 0) {
         vm.done();
       }
     };
@@ -91,7 +91,7 @@
     vm.done = () => {
       // only open if there is no current task already selected
       if (!vm.currentTask) {
-        Dialogs('TASK_SELECTION', { tasks: $localStorage.tasks })
+        Dialogs('TASK_SELECTION', { tasks: $rootScope.r.tasks })
           .then(() => {
             $state.go('work-view');
           });

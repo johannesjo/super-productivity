@@ -14,9 +14,9 @@
     .controller('DistractionsCtrl', DistractionsCtrl);
 
   /* @ngInject */
-  function DistractionsCtrl($mdDialog, $localStorage, SimpleToast, theme) {
+  function DistractionsCtrl($mdDialog, $rootScope, SimpleToast, theme) {
     let vm = this;
-    vm.r = $localStorage;
+    vm.r = $rootScope.r;
     vm.theme = theme;
     vm.isOpen = false;
 
@@ -38,7 +38,7 @@
 
     vm.saveDistraction = () => {
       if (vm.newDistraction.length > 0) {
-        $localStorage.distractions.push(vm.newDistraction);
+        $rootScope.r.distractions.push(vm.newDistraction);
       }
       SimpleToast('SUCCESS', 'Distraction saved for later');
       $mdDialog.hide();

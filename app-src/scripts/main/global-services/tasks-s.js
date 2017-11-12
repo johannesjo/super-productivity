@@ -19,8 +19,8 @@
   /* @ngInject */
   class Tasks {
 
-    constructor($localStorage, Uid, $rootScope, Dialogs, IS_ELECTRON, ShortSyntax, TasksUtil, Jira, TakeABreakReminder, SimpleToast) {
-      this.$localStorage = $localStorage;
+    constructor(Uid, $rootScope, Dialogs, IS_ELECTRON, ShortSyntax, TasksUtil, Jira, TakeABreakReminder, SimpleToast) {
+      this.$rootScope = $rootScope;
       this.Uid = Uid;
       this.$rootScope = $rootScope;
       this.Dialogs = Dialogs;
@@ -118,24 +118,24 @@
       let subTaskMatch;
 
       // we want the current task to be a reference to the tasks array
-      if (this.$localStorage.currentTask) {
-        currentTask = _.find(this.$localStorage.tasks, (task) => {
+      if (this.$rootScope.r.currentTask) {
+        currentTask = _.find(this.$rootScope.r.tasks, (task) => {
           if (task.subTasks) {
-            let subTaskMatchTmp = _.find(task.subTasks, { id: this.$localStorage.currentTask.id });
+            let subTaskMatchTmp = _.find(task.subTasks, { id: this.$rootScope.r.currentTask.id });
             if (subTaskMatchTmp) {
               subTaskMatch = subTaskMatchTmp;
             }
           }
-          return task.id === this.$localStorage.currentTask.id;
+          return task.id === this.$rootScope.r.currentTask.id;
         });
 
-        this.$localStorage.currentTask = currentTask || subTaskMatch;
+        this.$rootScope.r.currentTask = currentTask || subTaskMatch;
       }
-      return this.$localStorage.currentTask;
+      return this.$rootScope.r.currentTask;
     }
 
     getById(taskId) {
-      return _.find(this.$localStorage.tasks, ['id', taskId]) || _.find(this.$localStorage.backlogTasks, ['id', taskId]) || _.find(this.$localStorage.doneBacklogTasks, ['id', taskId]);
+      return _.find(this.$rootScope.r.tasks, ['id', taskId]) || _.find(this.$rootScope.r.backlogTasks, ['id', taskId]) || _.find(this.$rootScope.r.doneBacklogTasks, ['id', taskId]);
     }
 
     isTaskWithOriginalIdExistant(originalId) {
@@ -144,21 +144,21 @@
     }
 
     getBacklog() {
-      this.TasksUtil.checkDupes(this.$localStorage.backlogTasks);
-      this.TasksUtil.convertDurationStringsToMomentForList(this.$localStorage.backlogTasks);
-      return this.$localStorage.backlogTasks;
+      this.TasksUtil.checkDupes(this.$rootScope.r.backlogTasks);
+      this.TasksUtil.convertDurationStringsToMomentForList(this.$rootScope.r.backlogTasks);
+      return this.$rootScope.r.backlogTasks;
     }
 
     getDoneBacklog() {
-      this.TasksUtil.checkDupes(this.$localStorage.doneBacklogTasks);
-      this.TasksUtil.convertDurationStringsToMomentForList(this.$localStorage.doneBacklogTasks);
-      return this.$localStorage.doneBacklogTasks;
+      this.TasksUtil.checkDupes(this.$rootScope.r.doneBacklogTasks);
+      this.TasksUtil.convertDurationStringsToMomentForList(this.$rootScope.r.doneBacklogTasks);
+      return this.$rootScope.r.doneBacklogTasks;
     }
 
     getToday() {
-      this.TasksUtil.checkDupes(this.$localStorage.tasks);
-      this.TasksUtil.convertDurationStringsToMomentForList(this.$localStorage.tasks);
-      return this.$localStorage.tasks;
+      this.TasksUtil.checkDupes(this.$rootScope.r.tasks);
+      this.TasksUtil.convertDurationStringsToMomentForList(this.$rootScope.r.tasks);
+      return this.$rootScope.r.tasks;
     }
 
     getTodayAndBacklog() {
@@ -242,7 +242,7 @@
       // get flattened result of all undone tasks including subtasks
       if (isSubTasksInsteadOfParent) {
         // get all undone tasks tasks
-        undoneTasks = this.TasksUtil.flattenTasks(this.$localStorage.tasks, (parentTask) => {
+        undoneTasks = this.TasksUtil.flattenTasks(this.$rootScope.r.tasks, (parentTask) => {
           return parentTask && !parentTask.isDone;
         }, (subTask) => {
           return !subTask.isDone;
@@ -251,7 +251,7 @@
 
       // just get parent undone tasks
       else {
-        undoneTasks = _.filter(this.$localStorage.tasks, (task) => {
+        undoneTasks = _.filter(this.$rootScope.r.tasks, (task) => {
           return task && !task.isDone;
         });
       }
@@ -260,7 +260,7 @@
     }
 
     getDoneToday() {
-      return _.filter(this.$localStorage.tasks, (task) => {
+      return _.filter(this.$rootScope.r.tasks, (task) => {
         return task && task.isDone;
       });
     }
@@ -302,7 +302,7 @@
     // UPDATE DATA
     addToday(task) {
       if (task && task.title) {
-        this.$localStorage.tasks.unshift(this.createTask(task));
+        this.$rootScope.r.tasks.unshift(this.createTask(task));
         this.updateTodayVm();
         this.SimpleToast('SUCCESS', 'Task "' + task.title + '" created.', 200);
       }
@@ -372,9 +372,9 @@
     }
 
     updateCurrent(task, isCallFromTimeTracking) {
-      const isCurrentTaskChanged = this.TasksUtil.isTaskChanged(task, this.$localStorage.currentTask);
+      const isCurrentTaskChanged = this.TasksUtil.isTaskChanged(task, this.$rootScope.r.currentTask);
       const that = this;
-      this.lastCurrentTask = this.$localStorage.currentTask;
+      this.lastCurrentTask = this.$rootScope.r.currentTask;
 
       function moveInProgress(task) {
         if (isCurrentTaskChanged) {
@@ -407,7 +407,7 @@
 
               this.Jira.checkUpdatesForTaskOrParent(task)
                 .then(() => {
-                  if (!jiraTaskToHandle.originalAssigneeKey || jiraTaskToHandle.originalAssigneeKey !== this.$localStorage.jiraSettings.userName) {
+                  if (!jiraTaskToHandle.originalAssigneeKey || jiraTaskToHandle.originalAssigneeKey !== this.$rootScope.r.jiraSettings.userName) {
                     // ask if to assign to yourself or just ignore it
                     this.Dialogs('JIRA_ASSIGN_TICKET', { task: jiraTaskToHandle })
                       .then(() => {
@@ -432,7 +432,7 @@
         });
       }
 
-      this.$rootScope.r.currentTask = this.$localStorage.currentTask = task;
+      this.$rootScope.r.currentTask = this.$rootScope.r.currentTask = task;
     }
 
     removeTimeSpent(task, timeSpentToRemoveAsMoment) {
@@ -573,26 +573,26 @@
     }
 
     updateToday(tasks) {
-      this.$localStorage.tasks = tasks;
+      this.$rootScope.r.tasks = tasks;
       this.updateTodayVm();
     }
 
     updateTodayVm() {
-      this.$rootScope.r.tasks = this.$localStorage.tasks;
+      this.$rootScope.r.tasks = this.$rootScope.r.tasks;
     }
 
     updateBacklog(tasks) {
-      this.$localStorage.backlogTasks = tasks;
+      this.$rootScope.r.backlogTasks = tasks;
       this.updateBacklogVm();
     }
 
     updateBacklogVm() {
-      this.$rootScope.r.backlogTasks = this.$localStorage.backlogTasks;
+      this.$rootScope.r.backlogTasks = this.$rootScope.r.backlogTasks;
     }
 
     addNewToTopOfBacklog(task, isRemoteUpdate) {
       if (task && task.title) {
-        this.$localStorage.backlogTasks.unshift(this.createTask(task));
+        this.$rootScope.r.backlogTasks.unshift(this.createTask(task));
 
         if (isRemoteUpdate) {
           this.SimpleToast('CUSTOM', 'Task "' + task.title + '" imported and added to backlog.', 'import_export');
@@ -612,41 +612,41 @@
 
     moveTaskFromDoneBackLogToToday(task) {
       task.isDone = false;
-      this.moveTask(task, this.$localStorage.doneBacklogTasks, this.$localStorage.tasks);
+      this.moveTask(task, this.$rootScope.r.doneBacklogTasks, this.$rootScope.r.tasks);
       this.SimpleToast('SUCCESS', 'Restored task "' + task.title + '" from done backlog.');
       this.updateTodayVm();
     }
 
     moveTaskFromBackLogToToday(task) {
-      this.moveTask(task, this.$localStorage.backlogTasks, this.$localStorage.tasks);
+      this.moveTask(task, this.$rootScope.r.backlogTasks, this.$rootScope.r.tasks);
       this.updateTodayVm();
       this.updateBacklogVm();
     }
 
     moveTaskFromTodayToBackLog(task) {
-      this.moveTask(task, this.$localStorage.tasks, this.$localStorage.backlogTasks);
+      this.moveTask(task, this.$rootScope.r.tasks, this.$rootScope.r.backlogTasks);
       this.updateTodayVm();
       this.updateBacklogVm();
     }
 
     addTasksToTopOfBacklog(tasks) {
-      this.$localStorage.backlogTasks = tasks.concat(this.$localStorage.backlogTasks);
+      this.$rootScope.r.backlogTasks = tasks.concat(this.$rootScope.r.backlogTasks);
     }
 
     updateDoneBacklog(tasks) {
-      this.$localStorage.doneBacklogTasks = tasks;
+      this.$rootScope.r.doneBacklogTasks = tasks;
     }
 
     clearBacklog() {
       // we want to keep the original reference intact so we use length
       // @see: http://stackoverflow.com/questions/1232040/how-do-i-empty-an-array-in-javascript
-      this.$localStorage.backlogTasks.length = 0;
+      this.$rootScope.r.backlogTasks.length = 0;
       this.SimpleToast('SUCCESS', 'Backlog deleted!');
     }
 
     addDoneTasksToDoneBacklog() {
       let doneTasks = this.getDoneToday().slice(0);
-      this.$localStorage.doneBacklogTasks = doneTasks.concat(this.$localStorage.doneBacklogTasks);
+      this.$rootScope.r.doneBacklogTasks = doneTasks.concat(this.$rootScope.r.doneBacklogTasks);
     }
 
     // SPECIAL METHODS
@@ -708,7 +708,7 @@
     collapseSubTasks(tasks) {
       tasks.forEach((task) => {
         if (task.subTasks) {
-          if (!this.$localStorage.currentTask || !(task.subTasks.find((task) => this.$localStorage.currentTask.id === task.id))) {
+          if (!this.$rootScope.r.currentTask || !(task.subTasks.find((task) => this.$rootScope.r.currentTask.id === task.id))) {
             task.isHideSubTasks = true;
           }
         } else if (task.isHideSubTasks) {

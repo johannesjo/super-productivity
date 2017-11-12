@@ -14,16 +14,16 @@
     .controller('WelcomeCtrl', WelcomeCtrl);
 
   /* @ngInject */
-  function WelcomeCtrl($mdDialog, $localStorage, IS_ELECTRON, theme, Dialogs) {
+  function WelcomeCtrl($mdDialog, $rootScope, IS_ELECTRON, theme, Dialogs) {
     let vm = this;
     vm.theme = theme;
 
     vm.IS_ELECTRON = IS_ELECTRON;
 
-    vm.isShowDialogAgain = $localStorage.uiHelper.isShowWelcomeDialog;
+    vm.isShowDialogAgain = $rootScope.r.uiHelper.isShowWelcomeDialog;
 
     vm.hideDialogChange = (isHide) => {
-      $localStorage.uiHelper.isShowWelcomeDialog = !isHide;
+      $rootScope.r.uiHelper.isShowWelcomeDialog = !isHide;
     };
 
     vm.cancel = () => {

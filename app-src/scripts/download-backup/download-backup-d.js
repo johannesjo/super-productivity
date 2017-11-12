@@ -13,7 +13,7 @@
     .directive('downloadBackup', downloadBackup);
 
   /* @ngInject */
-  function downloadBackup($localStorage) {
+  function downloadBackup($rootScope) {
     return {
       bindToController: true,
       controllerAs: 'vm',
@@ -24,7 +24,7 @@
     function linkFn(scope, element) {
       element.on('click', () => {
         let storageObj = {};
-        angular.forEach($localStorage, (val, key) => {
+        angular.forEach($rootScope.r, (val, key) => {
           if (!angular.isFunction(val)) {
             storageObj[key] = val;
           }

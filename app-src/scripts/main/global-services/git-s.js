@@ -14,10 +14,10 @@
     .service('Git', Git);
 
   /* @ngInject */
-  function Git($http, $localStorage, $injector, $q, Notifier, SimpleToast) {
+  function Git($http, $rootScope, $injector, $q, Notifier, SimpleToast) {
     const TYPE = 'GITHUB';
     const BASE_URL = 'https://api.github.com/';
-    const settings = $localStorage.git;
+    const settings = $rootScope.r && $rootScope.r.git;
 
     // PRIVATE HELPER FUNCTIONS
     // ------------------------
@@ -194,7 +194,7 @@
     this.checkForNewAndAddToBacklog = () => {
       const Tasks = $injector.get('Tasks');
 
-      if ($localStorage.git && $localStorage.git.isAutoImportToBacklog) {
+      if ($rootScope.r.git && $rootScope.r.git.isAutoImportToBacklog) {
         this.getIssueList()
           .then((res) => {
             const issues = res.data;
