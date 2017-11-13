@@ -6,7 +6,7 @@
  * Service in the superProductivity.
  */
 
-(function () {
+(function() {
   'use strict';
 
   angular
@@ -14,12 +14,7 @@
     .service('Projects', Projects);
 
   /* @ngInject */
-  function Projects(LS_DEFAULTS, $rootScope, Uid, $window, SimpleToast, $injector, GLOBAL_LS_FIELDS, EV_PROJECT_CHANGED) {
-    const TMP_FIELDS = [
-      '$$hashKey',
-      '$$mdSelectId',
-      'bodyClass',
-    ];
+  function Projects(LS_DEFAULTS, $rootScope, Uid, $window, SimpleToast, $injector, GLOBAL_LS_FIELDS, EV_PROJECT_CHANGED, TMP_FIELDS) {
 
     const OMITTED_LS_FIELDS = GLOBAL_LS_FIELDS.concat(TMP_FIELDS);
 
@@ -142,9 +137,10 @@
           }
         });
 
-        // update ls $rootScope.r current project
+        // update ls current project
         $rootScope.r.currentProject = newCurrentProject;
         $rootScope.$broadcast(EV_PROJECT_CHANGED);
+
         // re-init all global models
         InitGlobalModels();
       }

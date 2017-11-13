@@ -19,17 +19,19 @@
     function getLsData(fromObj) {
       const toObj = {};
       _.forOwn(fromObj, (val, prop) => {
-        if (prop === 'projects') {
-          toObj.projects = [];
-          _.each(fromObj.projects, (project) => {
-            let copyProject = {};
-            _.forOwn(project, (val, prop) => {
-              if (!angular.isFunction(val) && ON_DEMAND_LS_FIELDS_FOR_PROJECT.indexOf(prop) === -1) {
-                copyProject[prop] = project[prop];
-              }
-            });
-          });
-        } else if (!angular.isFunction(val) && ON_DEMAND_LS_FIELDS.indexOf(prop) === -1) {
+        //if (prop === 'projects') {
+        //  toObj.projects = [];
+        //  _.each(fromObj.projects, (project) => {
+        //    let copyProject = {};
+        //    _.forOwn(project, (val, prop) => {
+        //      if (!angular.isFunction(val) && ON_DEMAND_LS_FIELDS_FOR_PROJECT.indexOf(prop) === -1) {
+        //        copyProject[prop] = project[prop];
+        //      }
+        //    });
+        //  });
+        //} else
+        //
+        if (!angular.isFunction(val) && ON_DEMAND_LS_FIELDS.indexOf(prop) === -1) {
           toObj[prop] = fromObj[prop];
         }
       });
@@ -43,13 +45,11 @@
       // this way
       $rootScope.$state = $state;
 
-      $rootScope.r = getLsData(AppStorage.s);
-
       // we want the current task to be a reference to the tasks array
       // that's why we need to reassign
-      $rootScope.r.currentTask = $rootScope.r.currenTask = Tasks.getCurrent();
-      if ($rootScope.r.currenTask) {
-        Tasks.updateCurrent($rootScope.r.currenTask);
+      $rootScope.r.currentTask = $rootScope.r.currentTask = Tasks.getCurrent();
+      if ($rootScope.r.currentTask) {
+        Tasks.updateCurrent($rootScope.r.currentTask);
       }
 
       // reset session

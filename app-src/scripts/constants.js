@@ -22,6 +22,29 @@
       'doneBacklogTasks',
       'backlogTasks',
     ])
+    .constant('TMP_FIELDS', [
+      '$$hashKey',
+      '$$mdSelectId',
+      'bodyClass',
+      '$$applyAsyncQueue',
+      '$$asyncQueue',
+      '$$childHead',
+      '$$childTail',
+      '$$destroyed',
+      '$$isolateBindings',
+      '$$listenerCount',
+      '$$listeners',
+      '$$nextSibling',
+      '$$phase',
+      '$$postDigestQueue',
+      '$$prevSibling',
+      '$$watchers',
+      '$$watchersCount',
+      '$id',
+      '$parent',
+      '$root',
+      '$state'
+    ])
     .constant('ON_DEMAND_LS_FIELDS_FOR_PROJECT', [
       'data',
     ])

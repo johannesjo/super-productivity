@@ -13,8 +13,9 @@
 
   class AppStorage {
     /* @ngInject */
-    constructor(LS_DEFAULTS, SAVE_APP_STORAGE_POLL_INTERVAL, $interval, $rootScope) {
+    constructor(LS_DEFAULTS, SAVE_APP_STORAGE_POLL_INTERVAL, TMP_FIELDS, $interval, $rootScope) {
       this.LS_DEFAULTS = LS_DEFAULTS;
+      this.TMP_FIELDS = TMP_FIELDS;
       this.SAVE_APP_STORAGE_POLL_INTERVAL = SAVE_APP_STORAGE_POLL_INTERVAL;
       this.$rootScope = $rootScope;
       this.$interval = $interval;
@@ -40,7 +41,8 @@
 
     saveToLs() {
       for (let key in this.$rootScope.r) {
-        if (this.$rootScope.r.hasOwnProperty(key)) {
+        const isNoTmpField = this.TMP_FIELDS.indexOf(key) === -1;
+        if (this.$rootScope.r.hasOwnProperty(key) && isNoTmpField) {
           const strToSave = this.$rootScope.r[key] ? this.serializer(this.$rootScope.r[key]) : '';
           window.localStorage.setItem(PREFIX + key, strToSave);
         }

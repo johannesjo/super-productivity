@@ -5,7 +5,7 @@
  * # backupSettings
  */
 
-(function () {
+(function() {
   'use strict';
 
   angular
@@ -25,7 +25,7 @@
   }
 
   /* @ngInject */
-  function BackupSettingsCtrl($rootScope) {
+  function BackupSettingsCtrl($rootScope, AppStorage) {
     let vm = this;
 
     // import/export stuff
@@ -35,6 +35,8 @@
       _.forOwn(settings, (val, key) => {
         $rootScope.r[key] = val;
       });
+
+      AppStorage.saveToLs();
 
       // reload page completely afterwards
       window.location.reload(true);
