@@ -75,7 +75,7 @@
             md-floating-label="Select task to add to (or leave empty to add to the global link list)."
             md-selected-item="vm.selectedTask"
             md-search-text="vm.searchTaskText"
-            md-items="task in vm.getFilteredTasks(searchTaskText)"
+            md-items="task in vm.getFilteredTasks(vm.searchTaskText)"
             md-item-text="task.title"
             tabindex="1"
             placeholder="Select task">

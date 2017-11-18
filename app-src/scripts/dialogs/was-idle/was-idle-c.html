@@ -25,7 +25,7 @@
           required
           md-selected-item="vm.selectedTask"
           md-search-text="vm.searchText"
-          md-items="task in vm.undoneTasks"
+          md-items="task in vm.getFilteredUndoneTasks(vm.searchText)"
           md-item-text="task.title"
           md-min-length="0"
           placeholder="Select a task to track the time">

@@ -6,7 +6,7 @@
  * Controller of the superProductivity
  */
 
-(function () {
+(function() {
   'use strict';
 
   angular
@@ -14,7 +14,7 @@
     .controller('WasIdleCtrl', WasIdleCtrl);
 
   /* @ngInject */
-  function WasIdleCtrl($mdDialog, $rootScope, $scope, Tasks, $window, idleTime, minIdleTimeInMs, theme) {
+  function WasIdleCtrl($mdDialog, $rootScope, $scope, Tasks, $window, idleTime, minIdleTimeInMs, theme, $filter) {
     let vm = this;
     vm.theme = theme;
     const IPC_EVENT_IDLE = 'WAS_IDLE';
@@ -44,6 +44,10 @@
 
         $mdDialog.hide();
       }
+    };
+
+    vm.getFilteredUndoneTasks = (searchText) => {
+      return searchText ? $filter('filter')(vm.undoneTasks, searchText, false) : vm.undoneTasks;
     };
 
     vm.cancel = () => {
