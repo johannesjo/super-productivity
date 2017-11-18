@@ -6,7 +6,7 @@
  * Controller of the superProductivity
  */
 
-(function () {
+(function() {
   'use strict';
 
   angular
@@ -14,7 +14,7 @@
     .controller('TaskSelectionCtrl', TaskSelectionCtrl);
 
   /* @ngInject */
-  function TaskSelectionCtrl($mdDialog, Tasks, theme) {
+  function TaskSelectionCtrl($mdDialog, Tasks, theme, $filter) {
     let vm = this;
     vm.theme = theme;
 
@@ -26,6 +26,10 @@
       }
       Tasks.updateCurrent(vm.selectedTask);
       $mdDialog.hide();
+    };
+
+    vm.getFilteredUndoneTasks = (searchText) => {
+      return searchText ? $filter('filter')(vm.undoneTasks, searchText, false) : vm.undoneTasks;
     };
   }
 })();
