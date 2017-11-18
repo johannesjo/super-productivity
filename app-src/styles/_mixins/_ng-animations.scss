@@ -29,6 +29,7 @@
   &.ng-enter,
   &.ng-leave {
     transition: all 0.2s $ease-in-out-quint;
+    overflow: hidden;
   }
 
   &.ng-enter {

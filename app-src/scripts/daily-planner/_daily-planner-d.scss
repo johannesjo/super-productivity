@@ -18,9 +18,8 @@ daily-planner {
   .add-task-form {
     margin: 20px auto;
     max-width: $component-max-width;
-    md-autocomplete-wrap {
-      box-shadow: none;
-    }
+    @include pulse(0.3s);
+
     ng-md-icon {
       width: 32px;
       height: 32px;
@@ -31,3 +30,4 @@ daily-planner {
     margin-right: 10px;
   }
 }
+

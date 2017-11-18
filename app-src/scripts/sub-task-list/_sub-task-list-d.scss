@@ -1,6 +1,4 @@
 sub-task-list task-list {
-  overflow: hidden;
-
   @include ng-slide-down-up;
 }
 

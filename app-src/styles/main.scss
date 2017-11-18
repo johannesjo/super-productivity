@@ -5,7 +5,19 @@ IMPORTANT NOTE:
  be imported
 */
 
-
+@import
+"../bower_components/animate.css-scss/_properties";
+@import
+"../bower_components/animate.css-scss/_attention/attention.scss";
+//"../bower_components/animate.css-scss/_bouncing-entrances/bouncing-entrances.scss",
+//"../bower_components/animate.css-scss/_bouncing-exits/bouncing-exits.scss",
+//"../bower_components/animate.css-scss/_fading-entrances/fading-entrances.scss",
+//"../bower_components/animate.css-scss/_fading-exits/fading-exits.scss",
+//"../bower_components/animate.css-scss/_flippers/flippers.scss",
+//"../bower_components/animate.css-scss/_lightspeed/lightspeed.scss",
+//"../bower_components/animate.css-scss/_rotating-entrances/rotating-entrances.scss",
+//"../bower_components/animate.css-scss/_rotating-exits/rotating-exits.scss",
+//"../bower_components/animate.css-scss/_specials/specials.scss";
 
 // inject:sass
 
