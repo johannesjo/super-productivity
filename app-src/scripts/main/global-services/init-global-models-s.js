@@ -14,31 +14,7 @@
     .service('InitGlobalModels', InitGlobalModels);
 
   /* @ngInject */
-  function InitGlobalModels(DEFAULT_THEME, AppStorage, $rootScope, $state, Tasks, ON_DEMAND_LS_FIELDS, ON_DEMAND_LS_FIELDS_FOR_PROJECT) {
-
-    function getLsData(fromObj) {
-      const toObj = {};
-      _.forOwn(fromObj, (val, prop) => {
-        //if (prop === 'projects') {
-        //  toObj.projects = [];
-        //  _.each(fromObj.projects, (project) => {
-        //    let copyProject = {};
-        //    _.forOwn(project, (val, prop) => {
-        //      if (!angular.isFunction(val) && ON_DEMAND_LS_FIELDS_FOR_PROJECT.indexOf(prop) === -1) {
-        //        copyProject[prop] = project[prop];
-        //      }
-        //    });
-        //  });
-        //} else
-        //
-        if (!angular.isFunction(val) && ON_DEMAND_LS_FIELDS.indexOf(prop) === -1) {
-          toObj[prop] = fromObj[prop];
-        }
-      });
-
-      return toObj;
-    }
-
+  function InitGlobalModels(DEFAULT_THEME, $rootScope, $state, Tasks) {
     return () => {
 
       // we don't use r.$state because it looks more like something special

@@ -14,12 +14,16 @@
     .service('Projects', Projects);
 
   /* @ngInject */
-  function Projects(LS_DEFAULTS, $rootScope, Uid, $window, SimpleToast, $injector, GLOBAL_LS_FIELDS, EV_PROJECT_CHANGED, TMP_FIELDS) {
+  function Projects(LS_DEFAULTS, $rootScope, Uid, $window, SimpleToast, $injector, GLOBAL_LS_FIELDS, EV_PROJECT_CHANGED, TMP_FIELDS, AppStorage) {
 
     const OMITTED_LS_FIELDS = GLOBAL_LS_FIELDS.concat(TMP_FIELDS);
 
     this.getList = () => {
       return $rootScope.r.projects;
+    };
+
+    this.getListWithLsData = () => {
+      return AppStorage.getProjects();
     };
 
     this.getAndUpdateCurrent = () => {
@@ -42,19 +46,25 @@
       return currentProject;
     };
 
+    this.getWithLsDataById = (projectId) => {
+      let projects = this.getListWithLsData();
+      return _.find(projects, ['id', projectId]);
+    };
+
     this.getById = (projectId) => {
-      let projects = this.getList();
+      let projects = this.getListWithLsData();
       return _.find(projects, ['id', projectId]);
     };
 
     this.updateProjectData = (projectToUpdateId, data) => {
-      let projects = this.getList();
+      let projects = this.getListWithLsData();
       let projectToUpdate = $window._.find(projects, (project) => {
         return project.id === projectToUpdateId;
       });
 
       // prevent circular data structure via omit
       projectToUpdate.data = $window._.omit(data, OMITTED_LS_FIELDS);
+      AppStorage.saveProjects(projects);
     };
 
     this.createNewFromCurrent = (projectTitle) => {
@@ -77,6 +87,11 @@
 
         // update $rootScope.r.projects
         $rootScope.r.projects.push(newProject);
+
+        // update ls
+        const projects = this.getListWithLsData();
+        projects.push(newProject);
+        AppStorage.saveProjects(projects);
 
         // update data for current new project from current data
         this.updateProjectData(newProject.id, data);
@@ -110,7 +125,7 @@
     this.changeCurrent = (newCurrentProjectParam) => {
       const InitGlobalModels = $injector.get('InitGlobalModels');
       const oldCurrentProject = angular.copy($rootScope.r.currentProject);
-      const newCurrentProject = this.getById(newCurrentProjectParam.id);
+      const newCurrentProject = this.getWithLsDataById(newCurrentProjectParam.id);
 
       if (newCurrentProject && newCurrentProject.id && oldCurrentProject && oldCurrentProject.id !== newCurrentProject.id) {
         // when there is an old current project existing
