@@ -5,7 +5,7 @@
  * # editOnClick
  */
 
-(function () {
+(function() {
   'use strict';
 
   angular
@@ -49,7 +49,11 @@
 
       // check for show edit to only trigger once
       if (vm.showEdit && angular.isFunction(vm.editOnClickOnEditFinished)) {
-        vm.editOnClickOnEditFinished({ isChanged, newVal: vm.editOnClick });
+        vm.editOnClickOnEditFinished({
+          isChanged,
+          newVal: vm.editOnClick,
+          $taskEl: $element[0].closest('.task')
+        });
       }
 
       vm.showEdit = false;
@@ -60,7 +64,7 @@
       textEl.css('display', 'none');
       vm.showEdit = true;
       modelCopy = vm.editOnClick;
-      $timeout(function () {
+      $timeout(function() {
         inputEl = $element.find('input');
         inputEl[0].focus();
         inputEl[0].value = modelCopy;

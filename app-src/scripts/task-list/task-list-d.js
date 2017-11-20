@@ -115,9 +115,15 @@
       }
     }
 
+    focusTaskEl(taskEl) {
+      if (taskEl) {
+        taskEl.focus();
+      }
+    }
+
     focusLastFocusedTaskEl() {
       if (this.lastFocusedTaskEl) {
-        this.lastFocusedTaskEl.focus();
+        this.focusTaskEl(this.lastFocusedTaskEl);
       }
     }
 
