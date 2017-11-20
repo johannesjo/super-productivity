@@ -39,6 +39,8 @@ Run `sudo snap install superproductivity` or install it manually from the downlo
 ### Windows
 * [superProductivity_Setup_latest.exe](http://super-productivity.com/downloads/superProductivity_Setup_latest.exe)
 
+## Gnome Shell Integration
+There is also an [extension which integrates the application into the status bar](https://github.com/johannesjo/gnome-shell-extension-super-productivity). It's at a very early stage, so use it at your own risk.
 
 ## Build and run for yourself
 ```
