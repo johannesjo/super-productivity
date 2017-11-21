@@ -7,6 +7,12 @@ let mainWin;
 let indicatorMod;
 
 function createWindow(params) {
+  // make sure the main window isn't already created
+  if (mainWin) {
+    console.error('Main window already exists');
+    return;
+  }
+
   const IS_DEV = params.IS_DEV;
   const ICONS_FOLDER = params.ICONS_FOLDER;
   const IS_MAC = params.IS_MAC;
