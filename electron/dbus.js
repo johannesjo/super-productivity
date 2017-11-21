@@ -27,12 +27,14 @@ function init(params) {
 
 // Check the connection was successful
   if (!sessionBus) {
+    isDBusError = true;
     throw new Error('Could not connect to the DBus session bus.')
   }
 
   sessionBus.requestName(serviceName, 0x4, (e, retCode) => {
     // If there was an error, warn user and fail
     if (e) {
+      isDBusError = true;
       throw new Error(`Could not request service name ${serviceName}, the error was: ${e}.`)
     }
 
@@ -46,6 +48,7 @@ function init(params) {
     information
     */
     else {
+      isDBusError = true;
       throw new Error(`Failed to request service name '${serviceName}'.Check what
         return code '${retCode}'
         means.`);
@@ -122,6 +125,10 @@ if (!isDBusError) {
       mainWindow = mainWindowPassed;
     },
     setTask: (taskId, taskText) => {
+      if(isDBusError){
+        return;
+      }
+
       if (!iface) {
         console.error('interface not ready yet');
         return;
