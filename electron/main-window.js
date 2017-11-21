@@ -4,7 +4,7 @@ const path = require('path');
 const url = require('url');
 const open = require('open');
 let mainWin;
-
+let indicatorMod;
 
 function createWindow(params) {
   const IS_DEV = params.IS_DEV;
@@ -13,6 +13,7 @@ function createWindow(params) {
   const quitApp = params.quitApp;
   const app = params.app;
   const nestedWinParams = params.nestedWinParams;
+  indicatorMod = params.indicatorMod;
 
   let frontendDir;
 
@@ -39,7 +40,7 @@ function createWindow(params) {
   // Open the DevTools.
   //mainWin.webContents.openDevTools();
 
-  initWinEventListeners(app, IS_MAC, nestedWinParams);
+  initWinEventListeners(app, IS_MAC, nestedWinParams, indicatorMod);
 
   if (IS_MAC) {
     createMenu(quitApp);
@@ -50,12 +51,12 @@ function createWindow(params) {
 
 function initWinEventListeners(app, IS_MAC, nestedWinParams) {
   // open new window links in browser
-  mainWin.webContents.on('new-window', function (event, url) {
+  mainWin.webContents.on('new-window', function(event, url) {
     event.preventDefault();
     open(url);
   });
 
-  mainWin.on('close', function (event) {
+  mainWin.on('close', function(event) {
     // handle darwin
     if (IS_MAC) {
       if (!nestedWinParams.isDarwinForceQuit) {
@@ -63,14 +64,14 @@ function initWinEventListeners(app, IS_MAC, nestedWinParams) {
         mainWin.hide();
       }
     } else {
-      if (!app.isQuiting) {
+      if (!app.isQuiting && indicatorMod.isRunning()) {
         event.preventDefault();
         mainWin.hide();
       }
     }
   });
 
-  mainWin.on('minimize', function (event) {
+  mainWin.on('minimize', function(event) {
     event.preventDefault();
     mainWin.hide();
   });

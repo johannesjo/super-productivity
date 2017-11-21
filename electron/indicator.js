@@ -4,10 +4,12 @@ const fs = require('fs');
 const moment = require('moment');
 
 let tray;
+let isIndicatorRunning = false;
+let isGnomeShellExtensionRunning = false;
 
 function init(params) {
-  const IS_LINUX = params.ICONS_FOLDER;
-  const IS_GNOME = params.ICONS_FOLDER;
+  const IS_LINUX = params.IS_LINUX;
+  const IS_GNOME = params.IS_GNOME;
   const mainWin = params.mainWin;
   const showApp = params.showApp;
   const quitApp = params.quitApp;
@@ -27,6 +29,13 @@ function init(params) {
       showApp,
     });
     dbus.setMainWindow(mainWin);
+    isGnomeShellExtensionRunning = true;
+    return;
+  }
+
+  // don't start anything on GNOME as the indicator might not be visible and
+  // the quiting behaviour confusing
+  else if (IS_GNOME) {
     return;
   }
 
@@ -47,18 +56,17 @@ function init(params) {
     tray.on('click', () => {
       showApp();
     });
+    isIndicatorRunning = true;
+    return tray;
   }
-
-  return tray;
-
 }
 
 function isGnomeShellInstalled(IS_LINUX, IS_GNOME) {
   // check if shell extension is installed
   let isGnomeShellExtInstalled = false;
   if (IS_LINUX && IS_GNOME) {
-    const HOME_DIR = process.env[(process.platform === 'win32') ? 'USERPROFILE' : 'HOME'];
-    if (fs.existsSync(HOME_DIR + '/.local/share/gnome-shell/extensions/indicator@johannes.super-productivity.com')) {
+    const LINUX_HOME_DIR = process.env['HOME'];
+    if (fs.existsSync(LINUX_HOME_DIR + '/.local/share/gnome-shell/extensions/indicator@johannes.super-productivity.com')) {
       isGnomeShellExtInstalled = true;
     }
   }
@@ -136,6 +144,11 @@ function createContextMenu(showApp, quitApp) {
   ]);
 }
 
+function isRunning() {
+  return isIndicatorRunning || isGnomeShellExtensionRunning;
+}
+
 module.exports = {
   init,
+  isRunning,
 };

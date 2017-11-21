@@ -10,7 +10,7 @@ const ICONS_FOLDER = __dirname + '/assets/icons/';
 const IS_MAC = process.platform === 'darwin';
 const IS_LINUX = process.platform === 'linux';
 const DESKTOP_ENV = process.env.DESKTOP_SESSION;
-const IS_GNOME = (DESKTOP_ENV === 'gnome');
+const IS_GNOME = (DESKTOP_ENV === 'gnome' || DESKTOP_ENV === 'gnome-xorg');
 const IS_DEV = process.env.NODE_ENV === 'DEV';
 
 const indicatorMod = require('./indicator');
@@ -33,9 +33,12 @@ powerSaveBlocker.start('prevent-app-suspension');
 // make it a single instance by closing other instances
 let shouldQuitBecauseAppIsAnotherInstance = app.makeSingleInstance(() => {
   if (mainWin) {
+    showApp();
+
     if (mainWin.isMinimized()) {
       mainWin.restore();
     }
+
     mainWin.focus();
   }
 });
@@ -118,7 +121,8 @@ function createMainWin() {
     ICONS_FOLDER,
     IS_MAC,
     quitApp,
-    nestedWinParams
+    nestedWinParams,
+    indicatorMod,
   });
 }
 
@@ -166,6 +170,7 @@ function showOrFocus(win) {
     win.show();
   }
 
+  // focus window afterwards always
   setTimeout(() => {
     win.focus();
   }, 60);
