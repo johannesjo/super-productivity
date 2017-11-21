@@ -303,7 +303,6 @@
     addToday(task) {
       if (task && task.title) {
         this.$rootScope.r.tasks.unshift(this.createTask(task));
-        this.updateTodayVm();
         this.SimpleToast('SUCCESS', 'Task "' + task.title + '" created.', 200);
       }
     }
@@ -574,20 +573,10 @@
 
     updateToday(tasks) {
       this.$rootScope.r.tasks = tasks;
-      this.updateTodayVm();
-    }
-
-    updateTodayVm() {
-      this.$rootScope.r.tasks = this.$rootScope.r.tasks;
     }
 
     updateBacklog(tasks) {
       this.$rootScope.r.backlogTasks = tasks;
-      this.updateBacklogVm();
-    }
-
-    updateBacklogVm() {
-      this.$rootScope.r.backlogTasks = this.$rootScope.r.backlogTasks;
     }
 
     addNewToTopOfBacklog(task, isRemoteUpdate) {
@@ -614,18 +603,14 @@
       task.isDone = false;
       this.moveTask(task, this.$rootScope.r.doneBacklogTasks, this.$rootScope.r.tasks);
       this.SimpleToast('SUCCESS', 'Restored task "' + task.title + '" from done backlog.');
-      this.updateTodayVm();
     }
 
     moveTaskFromBackLogToToday(task) {
       this.moveTask(task, this.$rootScope.r.backlogTasks, this.$rootScope.r.tasks);
-      this.updateTodayVm();
-      this.updateBacklogVm();
     }
 
     moveTaskFromTodayToBackLog(task) {
       this.moveTask(task, this.$rootScope.r.tasks, this.$rootScope.r.backlogTasks);
-      this.updateTodayVm();
       this.updateBacklogVm();
     }
 
