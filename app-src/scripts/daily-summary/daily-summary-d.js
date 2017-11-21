@@ -5,7 +5,7 @@
  * # dailySummary
  */
 
-(function () {
+(function() {
   'use strict';
 
   angular
@@ -26,7 +26,7 @@
   }
 
   /* @ngInject */
-  function DailySummaryCtrl($rootScope, Tasks, TasksUtil, $mdDialog, Dialogs, $state, GitLog, IS_ELECTRON, $timeout, $scope) {
+  function DailySummaryCtrl($rootScope, Tasks, TasksUtil, $mdDialog, Dialogs, $state, GitLog, IS_ELECTRON, $timeout, $scope, AppStorage) {
     const IPC_EVENT_SHUTDOWN = 'SHUTDOWN';
     const SUCCESS_ANIMATION_DURATION = 500;
 
@@ -44,7 +44,7 @@
     vm.totalTimeSpentToday = Tasks.getTimeWorkedToday();
 
     if ($rootScope.r.git && $rootScope.r.git.projectDir) {
-      GitLog.get($rootScope.r.git.projectDir).then(function (res) {
+      GitLog.get($rootScope.r.git.projectDir).then(function(res) {
         vm.commitLog = res;
       });
     }
@@ -61,6 +61,9 @@
       $rootScope.r.tomorrowsNote = vm.tomorrowsNote;
 
       Tasks.finishDay(vm.clearDoneTasks, vm.moveUnfinishedToBacklog);
+
+      // save everything
+      AppStorage.saveToLs();
 
       if (IS_ELECTRON) {
         $mdDialog.show(

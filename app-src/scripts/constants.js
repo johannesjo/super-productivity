@@ -51,6 +51,7 @@
     .constant('EV_PROJECT_CHANGED', 'EV_PROJECT_CHANGED')
     .constant('LS_DEFAULTS', {
       note: undefined,
+      tomorrowsNote: undefined,
       theme: undefined,
       currentTask: undefined,
       currentProject: undefined,
