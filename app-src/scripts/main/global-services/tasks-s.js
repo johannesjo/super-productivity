@@ -120,7 +120,7 @@
       // we want the current task to be a reference to the tasks array
       if (this.$rootScope.r.currentTask) {
         currentTask = _.find(this.$rootScope.r.tasks, (task) => {
-          if (task.subTasks) {
+          if (task.subTasks  && task.subTasks.length > 0) {
             let subTaskMatchTmp = _.find(task.subTasks, { id: this.$rootScope.r.currentTask.id });
             if (subTaskMatchTmp) {
               subTaskMatch = subTaskMatchTmp;
@@ -283,7 +283,7 @@
       if (tasks.length > 0) {
         totalTimeWorkedToday = moment.duration();
         _.each(tasks, (task) => {
-          if (task.subTasks && task.subTasks.length) {
+          if (task.subTasks && task.subTasks.length > 0) {
             _.each(task.subTasks, (subTask) => {
               if (subTask.timeSpentOnDay && subTask.timeSpentOnDay[todayStr]) {
                 totalTimeWorkedToday.add(subTask.timeSpentOnDay[todayStr]);
@@ -692,7 +692,7 @@
 
     collapseSubTasks(tasks) {
       tasks.forEach((task) => {
-        if (task.subTasks) {
+        if (task.subTasks && task.subTasks.length > 0) {
           if (!this.$rootScope.r.currentTask || !(task.subTasks.find((task) => this.$rootScope.r.currentTask.id === task.id))) {
             task.isHideSubTasks = true;
           }

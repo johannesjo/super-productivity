@@ -328,7 +328,7 @@
 
       // collapse sub tasks
       if (($ev.keyCode === KEY_LEFT) || this.checkKeyCombo($ev, lsKeys.collapseSubTasks)) {
-        if (task.subTasks) {
+        if (task.subTasks && task.subTasks.length > 0) {
           this.collapseSubTasks(task);
         }
         if (this.parentTask) {
@@ -362,13 +362,13 @@
     }
 
     expandSubTasks(task) {
-      if (task.subTasks) {
+      if (task.subTasks && task.subTasks.length > 0) {
         task.isHideSubTasks = false;
       }
     }
 
     collapseSubTasks(task) {
-      if (task.subTasks) {
+      if (task.subTasks && task.subTasks.length > 0) {
         const hasCurrentTaskAsSubTask = !!(task.subTasks.find((task) => this.currentTaskId === task.id));
 
         if (!hasCurrentTaskAsSubTask) {
@@ -416,7 +416,7 @@
       if (this.currentTaskId === task.id) {
         this.Tasks.updateCurrent(undefined);
       } else {
-        if (task.subTasks) {
+        if (task.subTasks && task.subTasks.length > 0) {
           const firstUndone = task.subTasks.find((cTask) => !cTask.isDone);
           if (firstUndone) {
             this.Tasks.updateCurrent(firstUndone);

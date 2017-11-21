@@ -64,7 +64,7 @@
       if (tasks) {
         _.each(tasks, (task) => {
           convertDurationStringsToMoment(task);
-          if (task.subTasks) {
+          if (task.subTasks && task.subTasks.length > 0) {
             _.each(task.subTasks, convertDurationStringsToMoment);
           }
         });

@@ -77,7 +77,7 @@
             }
           }
 
-          if (vm.options.isListSubTasks && task.subTasks) {
+          if (vm.options.isListSubTasks && task.subTasks && task.subTasks.length > 0) {
             for (let j = 0; j < task.subTasks.length; j++) {
               let subTask = task.subTasks[j];
               if ((!vm.options.isListDoneOnly || subTask.isDone) && (!vm.options.isWorkedOnTodayOnly || TasksUtil.isWorkedOnToday(subTask))) {
