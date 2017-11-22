@@ -3,7 +3,7 @@ Please search the issues before creating one. -->
 
 ## Your Environment
 <!--- Include as many relevant details about the environment you experienced the bug in -->
-* Version used:
+* Version used: <!-- version number and package type (snap, deb, etc.) -->
 * Operating System and version:
 * Desktop Environment: <!-- if on linux-->
 * Browser Name and version: <!-- if using the web version-->
