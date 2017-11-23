@@ -658,7 +658,7 @@
     }
 
     selectNextTask(finishedCurrentTask) {
-      if (finishedCurrentTask && finishedCurrentTask.isDone) {
+      if (this.$rootScope.r.config.isAutoStartNextTask && finishedCurrentTask && finishedCurrentTask.isDone) {
         // if sub task try to select the next undone sub task of the same parent
         if (finishedCurrentTask.parentId) {
           let parentTask = this.getById(finishedCurrentTask.parentId);
