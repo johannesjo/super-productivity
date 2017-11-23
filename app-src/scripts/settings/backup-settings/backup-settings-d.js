@@ -20,13 +20,16 @@
       controller: BackupSettingsCtrl,
       controllerAs: 'vm',
       restrict: 'E',
-      scope: {}
+      scope: {
+        settings: '='
+      }
     };
   }
 
   /* @ngInject */
-  function BackupSettingsCtrl($rootScope, AppStorage) {
+  function BackupSettingsCtrl($rootScope, AppStorage, IS_ELECTRON) {
     let vm = this;
+    vm.IS_ELECTRON = IS_ELECTRON;
 
     // import/export stuff
     vm.importSettings = (uploadSettingsTextarea) => {

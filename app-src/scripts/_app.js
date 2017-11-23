@@ -44,7 +44,7 @@
     .run(initGlobalShortcuts)
     .run(showWelcomeDialog)
     .run(goToWorkViewIfTasks)
-    .run(initPollAutomaticBackups);
+    .run(iniAutomaticBackupsIfEnabled);
 
   /* @ngInject */
   function configMarked(markedProvider) {
@@ -226,11 +226,9 @@
   }
 
   /* @ngInject */
-  function initPollAutomaticBackups(BACKUP_POLL_INTERVAL, $interval, IS_ELECTRON) {
+  function iniAutomaticBackupsIfEnabled(IS_ELECTRON, AppStorage) {
     if (IS_ELECTRON) {
-      //$interval(() => {
-      //
-      //}, BACKUP_POLL_INTERVAL)
+      AppStorage.initBackupsIfEnabled();
     }
   }
 })();

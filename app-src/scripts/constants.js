@@ -98,6 +98,11 @@
         togglePlay: 'y',
       },
       config: {
+        automaticBackups: {
+          isEnabled: false,
+          path: '~/backup-{date}.json',
+          intervalInSeconds: 6
+        },
         isTakeABreakEnabled: false,
         takeABreakMinWorkingTime: undefined,
         isAutoStartNextTask: true,

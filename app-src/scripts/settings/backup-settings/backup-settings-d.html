@@ -1,12 +1,20 @@
 <h2 class="md-title">
   <ng-md-icon icon="swap_vert"></ng-md-icon>
-  Make/Restore Backup
+  Backup and Sync
 </h2>
 
 <help-section>
-  <p>Here you can download all your data as <strong>JSON</strong> export for backups, but also to use it in a different context (e.g. you might want to export your projects in the browser and import them into the desktop version).</p>
+  <p>Here you can download all your data as
+    <strong>JSON</strong> export for backups, but also to use it in a different context (e.g. you might want to export your projects in the browser and import them into the desktop version).
+  </p>
   <p>The import expects valid json to be copied into the text area.
     <strong>NOTE: Once you hit the import button all your current settings and data will be overwritten!</strong></p>
+
+  <section ng-if="vm.IS_ELECTRON">
+    <p>There is also the option to do
+      <strong>automatic backups</strong>. You can choose an interval in seconds of how often the backup should occur and a custom destination to where the backup should be saved. You can use `{unix}` and `{date}` inside the path string to add output a unix timestamp or a date at this location of the string. E.g. `/mypath/{date}.json` will save your data to `/mypath/2017-12-12.json.
+    </p>
+  </section>
 </help-section>
 
 <a class="md-raised md-button md-ink-ripple"
@@ -43,3 +51,31 @@
              class="md-raised md-primary">Import settings
   </md-button>
 </form>
+
+
+<section ng-if="vm.IS_ELECTRON">
+  <h3 class="md-caption">Automatic Backups</h3>
+  <div>
+    <md-switch ng-model="vm.settings.isEnabled"
+               aria-label="Enable automatic backups">
+      Enable automatic backups
+    </md-switch>
+  </div>
+
+  <p><strong>NOTE:</strong> Changes to automated backup settings require you to restart the application to take effect.
+  </p>
+
+  <div ng-show="vm.settings.isEnabled">
+    <md-input-container class="md-block">
+      <label>Interval in seconds to make backups</label>
+      <input type="number"
+             ng-model="vm.settings.intervalInSeconds">
+    </md-input-container>
+    <md-input-container class="md-block">
+      <label>Path to backup (e.g. ~/backup-{date}.json)</label>
+      <input type="text"
+             ng-model="vm.settings.path">
+    </md-input-container>
+
+  </div>
+</section>
