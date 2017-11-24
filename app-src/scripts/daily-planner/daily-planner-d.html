@@ -101,6 +101,13 @@
           Go To Done Backlog
         </md-button>
 
+        <md-button class="md-primary"
+                   ng-if="vm.isRemoteTasks"
+                   ng-click="vm.refreshRemoteTasks()">
+          <ng-md-icon icon="refresh"></ng-md-icon>
+          Refresh
+        </md-button>
+
         <md-button class="md-primary md-warn"
                    ng-click="vm.deleteBacklog()">
           <ng-md-icon icon="delete"></ng-md-icon>
