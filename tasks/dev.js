@@ -163,6 +163,7 @@ gulp.task('sass', function () {
 gulp.task('browserSync', function () {
   browserSync({
     port: config.browserSyncPort,
+    reloadDebounce: 100,
     server: {
       baseDir: config.base,
       livereload: true
