@@ -43,8 +43,10 @@ function createWindow(params) {
     icon: ICONS_FOLDER + '/app-icons/icon_256x256.png'
   }));
 
-  // Open the DevTools.
-  //mainWin.webContents.openDevTools();
+  // Open the DevTools if starting with -- DEV
+  if (process.argv && process.argv.indexOf('DEV') > -1) {
+    mainWin.webContents.openDevTools();
+  }
 
   initWinEventListeners(app, IS_MAC, nestedWinParams, indicatorMod);
 
