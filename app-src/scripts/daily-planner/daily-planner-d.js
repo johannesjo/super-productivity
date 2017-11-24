@@ -30,6 +30,8 @@
     const _ = $window._;
 
     vm.refreshRemoteTasks = () => {
+      vm.taskSuggestions = [];
+
       if (IS_ELECTRON && Jira.isSufficientJiraSettings()) {
         Jira.checkForNewAndAddToBacklog();
 
@@ -49,19 +51,18 @@
       }
     };
 
+    vm.getFilteredTaskSuggestions = (searchText) => {
+      return searchText ? $filter('filter')(vm.taskSuggestions, searchText, false, 'title') : vm.taskSuggestions;
+    };
+
     vm.init = () => {
       vm.limitBacklogTo = 3;
-      vm.taskSuggestions = [];
       vm.backlogTasks = Tasks.getBacklog();
 
       vm.isRemoteTasks = (IS_ELECTRON && Jira.isSufficientJiraSettings() || $rootScope.r.git.isAutoImportToBacklog);
       vm.refreshRemoteTasks();
     };
     vm.init();
-
-    vm.getFilteredTaskSuggestions = (searchText) => {
-      return searchText ? $filter('filter')(vm.taskSuggestions, searchText, false, 'title') : vm.taskSuggestions;
-    };
 
     vm.addTask = () => {
       if (vm.newTask) {
