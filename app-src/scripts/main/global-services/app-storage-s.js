@@ -15,6 +15,7 @@
     /* @ngInject */
     constructor(LS_DEFAULTS, SAVE_APP_STORAGE_POLL_INTERVAL, TMP_FIELDS, $interval, $rootScope, ON_DEMAND_LS_FIELDS, ON_DEMAND_LS_FIELDS_FOR_PROJECT, IS_ELECTRON) {
       this.PROJECTS_KEY = 'projects';
+      this.BACKLOG_TASKS_KEY = 'doneBacklogTasks';
       this.LS_DEFAULTS = LS_DEFAULTS;
       this.TMP_FIELDS = TMP_FIELDS;
       this.SAVE_APP_STORAGE_POLL_INTERVAL = SAVE_APP_STORAGE_POLL_INTERVAL;
@@ -70,6 +71,8 @@
 
       // also add projects data
       data[this.PROJECTS_KEY] = this.getProjects();
+      // also add backlog tasks
+      data[this.BACKLOG_TASKS_KEY] = this.getDoneBacklogTasks();
 
       fs.writeFile(path, JSON.stringify(data), function(err) {
         if (err) {
@@ -90,12 +93,24 @@
     getCurrentAppState() {
       const currentState = {};
       for (let key in this.LS_DEFAULTS) {
-        const isNoTmpField = this.TMP_FIELDS.indexOf(key) === -1;
-        if (this.LS_DEFAULTS.hasOwnProperty(key) && isNoTmpField && key !== this.PROJECTS_KEY) {
+        const isNoTmpField = (this.TMP_FIELDS.indexOf(key) === -1);
+        const isNoOnDemand = (this.ON_DEMAND_LS_FIELDS.indexOf(key) === -1);
+        const isNotProjects = (key !== this.PROJECTS_KEY);
+        if (this.LS_DEFAULTS.hasOwnProperty(key) && isNoOnDemand && isNoTmpField && isNotProjects) {
           currentState[key] = this.$rootScope.r[key];
         }
       }
       return currentState;
+    }
+
+    getDoneBacklogTasks() {
+      return this.getLsItem(this.BACKLOG_TASKS_KEY);
+    }
+
+    saveDoneBacklogTasks(doneBacklogTasks) {
+      if (Array.isArray(doneBacklogTasks)) {
+        this.saveLsItem(doneBacklogTasks, this.BACKLOG_TASKS_KEY)
+      }
     }
 
     saveToLs() {

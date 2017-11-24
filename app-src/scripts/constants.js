@@ -20,7 +20,6 @@
     ])
     .constant('ON_DEMAND_LS_FIELDS', [
       'doneBacklogTasks',
-      'backlogTasks',
     ])
     .constant('TMP_FIELDS', [
       '$$hashKey',
@@ -60,6 +59,7 @@
       },
       tasks: [],
       backlogTasks: [],
+      doneBacklogTasks:[],
       distractions: [],
       projects: [],
       globalLinks: [],

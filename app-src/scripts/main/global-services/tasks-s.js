@@ -19,7 +19,7 @@
   /* @ngInject */
   class Tasks {
 
-    constructor(Uid, $rootScope, Dialogs, IS_ELECTRON, ShortSyntax, TasksUtil, Jira, TakeABreakReminder, SimpleToast) {
+    constructor(Uid, $rootScope, Dialogs, IS_ELECTRON, ShortSyntax, TasksUtil, Jira, TakeABreakReminder, SimpleToast, AppStorage) {
       this.$rootScope = $rootScope;
       this.Uid = Uid;
       this.$rootScope = $rootScope;
@@ -29,6 +29,7 @@
       this.IS_ELECTRON = IS_ELECTRON;
       this.SimpleToast = SimpleToast;
       this.Jira = Jira;
+      this.AppStorage = AppStorage;
 
       // SETUP HANDLERS FOR ELECTRON EVENTS
       if (IS_ELECTRON) {
@@ -120,7 +121,7 @@
       // we want the current task to be a reference to the tasks array
       if (this.$rootScope.r.currentTask) {
         currentTask = _.find(this.$rootScope.r.tasks, (task) => {
-          if (task.subTasks  && task.subTasks.length > 0) {
+          if (task.subTasks && task.subTasks.length > 0) {
             let subTaskMatchTmp = _.find(task.subTasks, { id: this.$rootScope.r.currentTask.id });
             if (subTaskMatchTmp) {
               subTaskMatch = subTaskMatchTmp;
@@ -134,8 +135,10 @@
       return this.$rootScope.r.currentTask;
     }
 
+    // NOTE: doneBacklogTasks can't be really updated when accessed withthis
     getById(taskId) {
-      return _.find(this.$rootScope.r.tasks, ['id', taskId]) || _.find(this.$rootScope.r.backlogTasks, ['id', taskId]) || _.find(this.$rootScope.r.doneBacklogTasks, ['id', taskId]);
+      const doneBacklogTasks = this.getDoneBacklog();
+      return _.find(this.$rootScope.r.tasks, ['id', taskId]) || _.find(this.$rootScope.r.backlogTasks, ['id', taskId]) || _.find(doneBacklogTasks, ['id', taskId]);
     }
 
     isTaskWithOriginalIdExistant(originalId) {
@@ -150,9 +153,10 @@
     }
 
     getDoneBacklog() {
-      this.TasksUtil.checkDupes(this.$rootScope.r.doneBacklogTasks);
-      this.TasksUtil.convertDurationStringsToMomentForList(this.$rootScope.r.doneBacklogTasks);
-      return this.$rootScope.r.doneBacklogTasks;
+      const doneBacklogTasks = this.AppStorage.getDoneBacklogTasks();
+      this.TasksUtil.checkDupes(doneBacklogTasks);
+      this.TasksUtil.convertDurationStringsToMomentForList(doneBacklogTasks);
+      return doneBacklogTasks;
     }
 
     getToday() {
@@ -601,7 +605,9 @@
 
     moveTaskFromDoneBackLogToToday(task) {
       task.isDone = false;
-      this.moveTask(task, this.$rootScope.r.doneBacklogTasks, this.$rootScope.r.tasks);
+      const doneBacklogTasks = this.getDoneBacklog();
+      this.moveTask(task, doneBacklogTasks, this.$rootScope.r.tasks);
+      this.AppStorage.saveDoneBacklogTasks(doneBacklogTasks);
       this.SimpleToast('SUCCESS', 'Restored task "' + task.title + '" from done backlog.');
     }
 
@@ -619,19 +625,19 @@
     }
 
     updateDoneBacklog(tasks) {
-      this.$rootScope.r.doneBacklogTasks = tasks;
+      this.AppStorage.saveDoneBacklogTasks(tasks);
     }
 
     clearBacklog() {
-      // we want to keep the original reference intact so we use length
-      // @see: http://stackoverflow.com/questions/1232040/how-do-i-empty-an-array-in-javascript
-      this.$rootScope.r.backlogTasks.length = 0;
+      this.AppStorage.saveDoneBacklogTasks([]);
       this.SimpleToast('SUCCESS', 'Backlog deleted!');
     }
 
     addDoneTasksToDoneBacklog() {
       let doneTasks = this.getDoneToday().slice(0);
-      this.$rootScope.r.doneBacklogTasks = doneTasks.concat(this.$rootScope.r.doneBacklogTasks);
+      const currentDoneBacklogTasks = this.getDoneBacklog();
+      const mewDoneBacklogTasks = doneTasks.concat(currentDoneBacklogTasks);
+      this.AppStorage.saveDoneBacklogTasks(mewDoneBacklogTasks);
     }
 
     // SPECIAL METHODS

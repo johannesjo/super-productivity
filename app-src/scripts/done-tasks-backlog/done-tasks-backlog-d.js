@@ -42,6 +42,7 @@
 
     vm.restoreTask = (task) => {
       Tasks.moveTaskFromDoneBackLogToToday(task);
+      vm.doneBacklogTasks = Tasks.getDoneBacklog();
     };
   }
 })();
