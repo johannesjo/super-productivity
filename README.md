@@ -28,13 +28,13 @@ Check out the [web-version](http://super-productivity.com) to get a quick idea o
 
 ## Downloads & Install
 ### Linux
-Run `sudo snap install superproductivity` or install it manually from the [releases page](/releases/latest).
+Run `sudo snap install superproductivity` or install it manually from the [releases page](https://github.com/johannesjo/super-productivity/releases).
 
 ### MacOS
-* Install [superProductivity-latest.dmg from the releases page](/releases/latest).
+* Install [superProductivity-latest.dmg from the releases page](https://github.com/johannesjo/super-productivity/releases).
 
 ### Windows
-* Install [superProductivity_Setup_latest.exe from the releases page](/releases/latest).
+* Install [superProductivity_Setup_latest.exe from the releases page](https://github.com/johannesjo/super-productivity/releases).
 
 ## Gnome Shell Integration
 There is also an [extension which integrates the application into the status bar](https://github.com/johannesjo/gnome-shell-extension-super-productivity). It's at a very early stage, so use it at your own risk.
