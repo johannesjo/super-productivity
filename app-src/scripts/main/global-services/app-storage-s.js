@@ -15,7 +15,7 @@
     /* @ngInject */
     constructor(LS_DEFAULTS, SAVE_APP_STORAGE_POLL_INTERVAL, TMP_FIELDS, $interval, $rootScope, ON_DEMAND_LS_FIELDS, ON_DEMAND_LS_FIELDS_FOR_PROJECT, IS_ELECTRON) {
       this.PROJECTS_KEY = 'projects';
-      this.BACKLOG_TASKS_KEY = 'doneBacklogTasks';
+      this.DONE_BACKLOG_TASKS_KEY = 'doneBacklogTasks';
       this.LS_DEFAULTS = LS_DEFAULTS;
       this.TMP_FIELDS = TMP_FIELDS;
       this.SAVE_APP_STORAGE_POLL_INTERVAL = SAVE_APP_STORAGE_POLL_INTERVAL;
@@ -72,7 +72,7 @@
       // also add projects data
       data[this.PROJECTS_KEY] = this.getProjects();
       // also add backlog tasks
-      data[this.BACKLOG_TASKS_KEY] = this.getDoneBacklogTasks();
+      data[this.DONE_BACKLOG_TASKS_KEY] = this.getDoneBacklogTasks();
 
       fs.writeFile(path, JSON.stringify(data), function(err) {
         if (err) {
@@ -104,12 +104,32 @@
     }
 
     getDoneBacklogTasks() {
-      return this.getLsItem(this.BACKLOG_TASKS_KEY);
+      const projects = this.getProjects();
+
+      if (projects && this.$rootScope.r.currentProject && this.$rootScope.r.currentProject.id) {
+        const currentProject = _.find(projects, ['id', this.$rootScope.r.currentProject.id]);
+        console.log(currentProject.data);
+
+        return currentProject.data[this.DONE_BACKLOG_TASKS_KEY];
+      } else {
+        return this.getLsItem(this.DONE_BACKLOG_TASKS_KEY);
+      }
     }
 
     saveDoneBacklogTasks(doneBacklogTasks) {
       if (Array.isArray(doneBacklogTasks)) {
-        this.saveLsItem(doneBacklogTasks, this.BACKLOG_TASKS_KEY);
+        const projects = this.getProjects();
+
+        // we also need to save the backlog tasks to the current project
+        if (projects && this.$rootScope.r.currentProject && this.$rootScope.r.currentProject.id) {
+          console.log(projects, this.$rootScope.r.currentProject.id);
+
+          const currentProject = _.find(projects, ['id', this.$rootScope.r.currentProject.id]);
+          currentProject.data[this.DONE_BACKLOG_TASKS_KEY] = doneBacklogTasks;
+          this.saveProjects(projects);
+        } else {
+          this.saveLsItem(doneBacklogTasks, this.DONE_BACKLOG_TASKS_KEY);
+        }
       }
     }
 
@@ -118,6 +138,17 @@
       for (let key in currentState) {
         this.saveLsItem(currentState[key], key);
       }
+    }
+
+    importData(data) {
+      _.forOwn(data, (val, key) => {
+        this.$rootScope.r[key] = val;
+      });
+
+      // update to ls (NOTE: order is important!)
+      this.saveToLs();
+      this.saveProjects(data[this.PROJECTS_KEY]);
+      this.saveDoneBacklogTasks(data[this.DONE_BACKLOG_TASKS_KEY]);
     }
 
     getProjects() {

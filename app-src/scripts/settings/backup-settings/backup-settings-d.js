@@ -27,19 +27,14 @@
   }
 
   /* @ngInject */
-  function BackupSettingsCtrl($rootScope, AppStorage, IS_ELECTRON) {
+  function BackupSettingsCtrl(AppStorage, IS_ELECTRON) {
     let vm = this;
     vm.IS_ELECTRON = IS_ELECTRON;
 
     // import/export stuff
     vm.importSettings = (uploadSettingsTextarea) => {
       let settings = JSON.parse(uploadSettingsTextarea);
-
-      _.forOwn(settings, (val, key) => {
-        $rootScope.r[key] = val;
-      });
-
-      AppStorage.saveToLs();
+      AppStorage.importData(settings);
 
       // reload page completely afterwards
       window.location.reload(true);
