@@ -51,7 +51,9 @@
     }
 
     vm.saveGlobalLink = () => {
-      console.log(vm.selectedTask, vm.searchTaskText);
+      if (vm.linkCopy.type === 'LINK' && !vm.linkCopy.path.match(/(https?|ftp|file):\/\//)) {
+        vm.linkCopy.path = 'http://' + vm.linkCopy.path;
+      }
 
       if (isNew) {
         if (vm.selectedTask) {
