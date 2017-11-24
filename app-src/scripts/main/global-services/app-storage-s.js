@@ -39,20 +39,20 @@
     }
 
     initBackupsIfEnabled() {
-      if (!this.IS_ELECTRON
-        || !this.$rootScope.r.config.automaticBackups
-        || !this.$rootScope.r.config.automaticBackups.isEnabled) {
+      if (!this.IS_ELECTRON ||
+        !this.$rootScope.r.config.automaticBackups ||
+        !this.$rootScope.r.config.automaticBackups.isEnabled) {
         return;
       }
       const fs = require('fs');
       const interval = parseInt(this.$rootScope.r.config.automaticBackups.intervalInSeconds, 10) * 1000;
 
       this.$interval(() => {
-        if (!this.$rootScope.r.config.automaticBackups
-          || !this.$rootScope.r.config.automaticBackups.isEnabled
-          || parseInt(this.$rootScope.r.config.automaticBackups.intervalInSeconds, 10) === 0
-          || !this.$rootScope.r.config.automaticBackups.path
-          || !this.$rootScope.r.config.automaticBackups.path.trim().length > 0
+        if (!this.$rootScope.r.config.automaticBackups ||
+          !this.$rootScope.r.config.automaticBackups.isEnabled ||
+          parseInt(this.$rootScope.r.config.automaticBackups.intervalInSeconds, 10) === 0 ||
+          !this.$rootScope.r.config.automaticBackups.path ||
+          this.$rootScope.r.config.automaticBackups.path.trim().length === 0
         ) {
           return;
         }
@@ -109,7 +109,7 @@
 
     saveDoneBacklogTasks(doneBacklogTasks) {
       if (Array.isArray(doneBacklogTasks)) {
-        this.saveLsItem(doneBacklogTasks, this.BACKLOG_TASKS_KEY)
+        this.saveLsItem(doneBacklogTasks, this.BACKLOG_TASKS_KEY);
       }
     }
 
