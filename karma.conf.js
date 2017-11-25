@@ -68,7 +68,7 @@ module.exports = function(config) {
       'karma-jasmine',
       'karma-sinon',
       //'karma-coverage',
-      'karma-phantomjs-launcher',
+      'karma-chrome-launcher',
       'karma-ng-html2js-preprocessor',
       'karma-babel-preprocessor'
     ],
@@ -96,8 +96,19 @@ module.exports = function(config) {
 
     // start these browsers
     // available browser launchers: https://npmjs.org/browse/keyword/karma-launcher
-    browsers: ['PhantomJS'],
-
+    browsers: ['ChromeHeadless'],
+    customLaunchers: {
+      ChromeHeadless: {
+        base: 'Chrome',
+        flags: [
+          '--headless',
+          '--disable-gpu',
+          '--no-sandbox',
+          // Without a remote debugging port, Google Chrome exits immediately.
+          '--remote-debugging-port=9222'
+        ]
+      }
+    },
     // Continuous Integration mode
     // if true, Karma captures browsers, runs the tests and exits
     singleRun: true

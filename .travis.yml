@@ -18,6 +18,7 @@ matrix:
       services:
        - docker
 addons:
+  chrome: stable
   ssh_known_hosts:
     - the-front-end.de
     - frs.sourceforge.net
