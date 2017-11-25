@@ -36,11 +36,11 @@ module.exports = function (config) {
       // endbower
 
       // modules first
-      'app/scripts/**/_*.js',
+      'app-src/scripts/**/_*.js',
       // all the rest of the files
-      'app/scripts/**/*.js',
+      'app-src/scripts/**/*.js',
       // load html as well as required for karma-ng-html2js-preprocessor
-      'app/scripts/**/*.html'
+      'app-src/scripts/**/*.html'
     ],
 
     // list of files to exclude
@@ -65,14 +65,14 @@ module.exports = function (config) {
     ],
 
     preprocessors: {
-      //'**/app/scripts/**/!(*spec).js': 'coverage',
-      '**/app/scripts/**/*.js': ['babel'],
-      '**/app/scripts/**/*.html': 'ng-html2js'
+      //'**/app-src/scripts/**/!(*spec).js': 'coverage',
+      '**/app-src/scripts/**/*.js': ['babel'],
+      '**/app-src/scripts/**/*.html': 'ng-html2js'
     },
 
     ngHtml2JsPreprocessor: {
       moduleName: 'templates',
-      stripPrefix: 'app/'
+      stripPrefix: 'app-src/'
     },
 
     babelPreprocessor: {
