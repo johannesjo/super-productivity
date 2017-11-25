@@ -1,14 +1,16 @@
 // Karma configuration
 'use strict';
 
-module.exports = function (config) {
+module.exports = function(config) {
   config.set({
     // base path that will be used to resolve all patterns (eg. files, exclude)
     basePath: '',
 
+    reportSlowerThan: 500,
+
     // frameworks to use
     // available frameworks: https://npmjs.org/browse/keyword/karma-adapter
-    frameworks: ['jasmine'],
+    frameworks: ['jasmine', 'sinon'],
 
     // list of files / patterns to load in the browser
     files: [
@@ -58,6 +60,7 @@ module.exports = function (config) {
 
     plugins: [
       'karma-jasmine',
+      'karma-sinon',
       //'karma-coverage',
       'karma-phantomjs-launcher',
       'karma-ng-html2js-preprocessor',

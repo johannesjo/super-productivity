@@ -111,6 +111,7 @@
     "karma-jasmine": "latest",
     "karma-ng-html2js-preprocessor": "latest",
     "karma-phantomjs-launcher": "latest",
+    "karma-sinon": "^1.0.5",
     "lazypipe": "latest",
     "merge-stream": "latest",
     "node-sass": "latest",
@@ -118,6 +119,7 @@
     "protractor": "latest",
     "require-dir": "latest",
     "run-sequence": "latest",
+    "sinon": "^4.1.2",
     "uglify-save-license": "^0.4.1",
     "wiredep": "latest",
     "yargs": "latest"
