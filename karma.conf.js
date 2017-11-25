@@ -7,6 +7,9 @@ module.exports = function(config) {
     basePath: '',
 
     reportSlowerThan: 500,
+    transports: ['polling'],
+    browserDisconnectTolerance: 2,
+    browserNoActivityTimeout: 50000,
 
     // frameworks to use
     // available frameworks: https://npmjs.org/browse/keyword/karma-adapter
@@ -42,7 +45,10 @@ module.exports = function(config) {
       // all the rest of the files
       'app-src/scripts/**/*.js',
       // load html as well as required for karma-ng-html2js-preprocessor
-      'app-src/scripts/**/*.html'
+      'app-src/scripts/**/*.html',
+
+      // exclude unit tests here
+      { pattern: 'app-src/scripts/**/*.spec.js', included: false }
     ],
 
     // list of files to exclude

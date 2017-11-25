@@ -3,8 +3,8 @@
     "latest"
   ],
   "ignore":[
-    "bower_components/**/*.js",
-    "/bower_components/"
+    "node_modules",
+    "app-src/bower_components"
   ],
   "plugins": [
     "angularjs-annotate"
