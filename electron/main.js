@@ -41,8 +41,10 @@ let shouldQuitBecauseAppIsAnotherInstance = app.makeSingleInstance(() => {
     mainWin.focus();
   }
 });
+
 if (shouldQuitBecauseAppIsAnotherInstance) {
   quitApp();
+  return;
 }
 
 // APP EVENT LISTENERS
