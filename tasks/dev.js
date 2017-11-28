@@ -215,7 +215,7 @@ gulp.task('testSingle', function (done) {
     action: 'run',
     autoWatch: false,
     singleRun: true
-  }, done()).start();
+  }, done).start();
 });
 
 gulp.task('lint', function () {
