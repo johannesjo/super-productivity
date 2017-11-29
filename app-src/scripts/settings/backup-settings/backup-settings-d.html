@@ -76,6 +76,24 @@
       <input type="text"
              ng-model="vm.settings.path">
     </md-input-container>
+  </div>
 
+  <h3 class="md-caption">Automatic Sync</h3>
+  <div>
+    <md-switch ng-model="vm.settings.isSyncEnabled"
+               aria-label="Enable automatic backups">
+      Enable auto sync
+    </md-switch>
+  </div>
+
+  <p><strong>NOTE:</strong> This is <strong>a highly experimental feature!!!</strong> Take care! Make a backup! Changes to the sync settings require you to restart the application to take effect.
+  </p>
+
+  <div ng-show="vm.settings.isSyncEnabled">
+    <md-input-container class="md-block">
+      <label>Path to sync file</label>
+      <input type="text"
+             ng-model="vm.settings.syncPath">
+    </md-input-container>
   </div>
 </section>

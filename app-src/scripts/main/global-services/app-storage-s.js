@@ -13,7 +13,7 @@
 
   class AppStorage {
     /* @ngInject */
-    constructor(LS_DEFAULTS, SAVE_APP_STORAGE_POLL_INTERVAL, TMP_FIELDS, $interval, $rootScope, ON_DEMAND_LS_FIELDS, ON_DEMAND_LS_FIELDS_FOR_PROJECT, IS_ELECTRON) {
+    constructor(LS_DEFAULTS, SAVE_APP_STORAGE_POLL_INTERVAL, TMP_FIELDS, $interval, $rootScope, ON_DEMAND_LS_FIELDS, ON_DEMAND_LS_FIELDS_FOR_PROJECT, IS_ELECTRON, SimpleToast) {
       this.PROJECTS_KEY = 'projects';
       this.DONE_BACKLOG_TASKS_KEY = 'doneBacklogTasks';
       this.LS_DEFAULTS = LS_DEFAULTS;
@@ -23,6 +23,7 @@
       this.ON_DEMAND_LS_FIELDS_FOR_PROJECT = ON_DEMAND_LS_FIELDS_FOR_PROJECT;
       this.IS_ELECTRON = IS_ELECTRON;
       this.$rootScope = $rootScope;
+      this.SimpleToast = SimpleToast;
       this.$interval = $interval;
       this.serializer = angular.toJson;
       this.deserializer = angular.fromJson;
@@ -66,7 +67,64 @@
       }, interval);
     }
 
-    saveToFileSystem(fs, path) {
+    initSyncIfEnabled() {
+      let lastSyncSaveChangedTime;
+      const SYNC_INTERVAL = 10000;
+      if (!this.IS_ELECTRON ||
+        !this.$rootScope.r.config.automaticBackups ||
+        !this.$rootScope.r.config.automaticBackups.isSyncEnabled) {
+        return;
+      }
+
+      const fs = require('fs');
+
+      // load once initially
+      const path = this.$rootScope.r.config.automaticBackups.syncPath;
+      this.loadFromFileSystem(fs, path);
+
+      // init load
+      fs.watchFile(this.$rootScope.r.config.automaticBackups.syncPath, (curr) => {
+        const newFileTime = curr && curr.ctime && moment(curr.ctime);
+        const isOutsideChange = newFileTime.isAfter(moment(lastSyncSaveChangedTime));
+
+        if (isOutsideChange) {
+          const path = this.$rootScope.r.config.automaticBackups.syncPath;
+          this.loadFromFileSystem(fs, path);
+
+          // TODO find a better way to do so
+          window.location.reload(true);
+        }
+      });
+
+      // init save
+      this.$interval(() => {
+        if (!this.$rootScope.r.config.automaticBackups ||
+          !this.$rootScope.r.config.automaticBackups.isSyncEnabled ||
+          parseInt(this.$rootScope.r.config.automaticBackups.intervalInSeconds, 10) === 0 ||
+          !this.$rootScope.r.config.automaticBackups.syncPath ||
+          this.$rootScope.r.config.automaticBackups.syncPath.trim().length === 0
+        ) {
+          return;
+        }
+
+        const path = this.$rootScope.r.config.automaticBackups.syncPath;
+
+        this.saveToFileSystem(fs, path, () => {
+          const stats = fs.statSync(path);
+          lastSyncSaveChangedTime = stats.ctime;
+        }, true);
+      }, SYNC_INTERVAL);
+    }
+
+    loadFromFileSystem(fs, path) {
+      if (fs.existsSync(path)) {
+        const data = JSON.parse(fs.readFileSync(path, 'utf-8'));
+        this.importData(data);
+        this.SimpleToast('CUSTOM', 'Data updated from the outside. Updating...', 'update');
+      }
+    }
+
+    saveToFileSystem(fs, path, cb, isSync) {
       const data = angular.copy(this.getCurrentAppState());
 
       // also add projects data
@@ -78,7 +136,15 @@
         if (err) {
           console.error(err);
         } else {
-          console.log('Backup to ' + path + ' completed');
+          if (isSync) {
+            console.log('Sync saved to ' + path + ' completed');
+          } else {
+            console.log('Backup to ' + path + ' completed');
+          }
+
+          if (cb) {
+            cb();
+          }
         }
       });
     }
@@ -108,8 +174,6 @@
 
       if (projects && this.$rootScope.r.currentProject && this.$rootScope.r.currentProject.id) {
         const currentProject = _.find(projects, ['id', this.$rootScope.r.currentProject.id]);
-        console.log(currentProject.data);
-
         return currentProject.data[this.DONE_BACKLOG_TASKS_KEY];
       } else {
         return this.getLsItem(this.DONE_BACKLOG_TASKS_KEY);
@@ -122,7 +186,6 @@
 
         // we also need to save the backlog tasks to the current project
         if (projects && this.$rootScope.r.currentProject && this.$rootScope.r.currentProject.id) {
-          console.log(projects, this.$rootScope.r.currentProject.id);
 
           const currentProject = _.find(projects, ['id', this.$rootScope.r.currentProject.id]);
           currentProject.data[this.DONE_BACKLOG_TASKS_KEY] = doneBacklogTasks;
@@ -144,6 +207,7 @@
       _.forOwn(data, (val, key) => {
         this.$rootScope.r[key] = val;
       });
+      this.$rootScope.$apply();
 
       // update to ls (NOTE: order is important!)
       this.saveToLs();
@@ -171,6 +235,18 @@
       window.localStorage.setItem(PREFIX + key, strToSave);
     }
 
+    makeProjectsSimple(projects) {
+      // remove on demand fields
+      _.each(projects, (project) => {
+        _.forOwn(project, (val, prop) => {
+          if (this.ON_DEMAND_LS_FIELDS_FOR_PROJECT.indexOf(prop) !== -1) {
+            delete project[prop];
+          }
+        });
+      });
+      return projects;
+    }
+
     getCurrentLs() {
       const keys = Object.keys(this.LS_DEFAULTS);
 
@@ -181,15 +257,7 @@
 
           if (key === this.PROJECTS_KEY) {
             const projects = this.s[key];
-
-            // remove on demand fields
-            _.each(projects, (project) => {
-              _.forOwn(project, (val, prop) => {
-                if (this.ON_DEMAND_LS_FIELDS_FOR_PROJECT.indexOf(prop) !== -1) {
-                  delete project[prop];
-                }
-              });
-            });
+            this.makeProjectsSimple(projects);
           }
         } else {
           this.s[key] = this.LS_DEFAULTS[key];

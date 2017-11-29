@@ -101,7 +101,9 @@
         automaticBackups: {
           isEnabled: false,
           path: '~/backup-{date}.json',
-          intervalInSeconds: 6
+          intervalInSeconds: 6,
+          isSyncEnabled: false,
+          syncPath: '~/sync.json',
         },
         isTakeABreakEnabled: false,
         takeABreakMinWorkingTime: undefined,
