@@ -42,9 +42,10 @@
     .run(initPollForSimpleTimeTracking)
     .run(initMousewheelZoomForElectron)
     .run(initGlobalShortcuts)
+    .run(initAutomaticSyncIfEnabled)
+    .run(initAutomaticBackupsIfEnabled)
     .run(showWelcomeDialog)
-    .run(goToWorkViewIfTasks)
-    .run(iniAutomaticBackupsIfEnabled);
+    .run(goToWorkViewIfTasks);
 
   /* @ngInject */
   function configMarked(markedProvider) {
@@ -226,9 +227,16 @@
   }
 
   /* @ngInject */
-  function iniAutomaticBackupsIfEnabled(IS_ELECTRON, AppStorage) {
+  function initAutomaticBackupsIfEnabled(IS_ELECTRON, AppStorage) {
     if (IS_ELECTRON) {
       AppStorage.initBackupsIfEnabled();
+    }
+  }
+
+  /* @ngInject */
+  function initAutomaticSyncIfEnabled(IS_ELECTRON, AppStorage) {
+    if (IS_ELECTRON) {
+      AppStorage.initSyncIfEnabled();
     }
   }
 })();
