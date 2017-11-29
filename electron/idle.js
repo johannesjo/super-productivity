@@ -13,9 +13,9 @@ if (process.platform === 'linux') {
 } else {
   // just don't execute
   module.exports = () => {
-  }
+  };
+  return;
 }
-
 
 module.exports = (cb) => {
   exec(cmd, function (error, stdout) {
