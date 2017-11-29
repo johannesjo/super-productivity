@@ -19,7 +19,7 @@
 </p>
 <p>
   <ng-md-icon icon="timer"></ng-md-icon>
-  Total time spent total on todays task: <strong ng-bind="vm.totalTimeSpentTasks|duration"></strong></p>
+  Total time spent on today's task: <strong ng-bind="vm.totalTimeSpentTasks|duration"></strong></p>
 <p>
   <ng-md-icon icon="timer"></ng-md-icon>
   Total time spent today: <strong ng-bind="vm.totalTimeSpentToday|duration"></strong></p>
@@ -57,7 +57,7 @@
            style="margin-top: 15px;"
            ng-click="vm.showExportModal()">
   <ng-md-icon icon="call_made"></ng-md-icon>
-  Export Task List for today
+  Export Task List for Today
 </md-button>
 
 
@@ -87,14 +87,14 @@
 
 <h2 class="md-title">
   <ng-md-icon icon="speaker_notes"></ng-md-icon>
-  Make a note for your tomorrows self
+  Make a note for your tomorrow's self
 </h2>
-<p>This is meant to be some takeaway to be even more productive/happy tomorrow. E.g.: What did you learn today? What do you want to do better/smarter tomorrow? What do you want to achieve and why?</p>
+<p>This is meant to be a takeaway to be even more productive and happy tomorrow. E.g.: What did you learn today? What do you want to do better/smarter tomorrow? What do you want to achieve and why?</p>
 <p>Think a second and reflect on the day.</p>
 
 <md-input-container class="md-block"
                     flex-gt-sm>
-  <label>Your personal tomorrows note</label>
+  <label>Your personal tomorrow's note</label>
   <textarea ng-model="vm.tomorrowsNote"
             md-auto-focus
             rows="4"></textarea>

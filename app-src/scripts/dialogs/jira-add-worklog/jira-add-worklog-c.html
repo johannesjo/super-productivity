@@ -2,7 +2,7 @@
            md-theme="vm.theme">
   <md-toolbar>
     <div class="md-toolbar-tools">
-      <h2>Submit worklog to jira for "<span ng-bind="vm.taskCopy.originalKey"></span>"</h2>
+      <h2>Submit worklog to Jira for "<span ng-bind="vm.taskCopy.originalKey"></span>"</h2>
       <span flex></span>
       <md-button class="md-icon-button"
                  aria-label="Cancel"
@@ -73,7 +73,7 @@
                  input-duration
                  min-duration="1m"
                  ng-model="vm.taskCopy.timeSpent">
-          <div class="hint">Current jira values is <span ng-bind="vm.taskCopy.originalTimeSpent|duration"></span></div>
+          <div class="hint">Current Jira values is <span ng-bind="vm.taskCopy.originalTimeSpent|duration"></span></div>
           <div class="validation-messages"
                ng-messages="worklogForm.timeSpent.$error">
             <div ng-message="required">This is required!</div>
