@@ -16,7 +16,7 @@
   /* @ngInject */
   function NotesCtrl($mdDialog, $rootScope, theme) {
     if (!$rootScope.r.note) {
-      $rootScope.r.note = 'write some note';
+      $rootScope.r.note = 'Write some notes';
     }
     this.r = $rootScope.r;
     this.theme = theme;

@@ -53,7 +53,7 @@
 
       <p ng-if="!r.tasks.length"
          class="no-tasks-info">
-        You have currently no tasks. Create one!
+        You currently have no tasks. Create one!
       </p>
       <task-list tasks="r.tasks"
                  current-task-id="r.currentTask.id"></task-list>
@@ -63,7 +63,7 @@
     <section>
       <h2 class="md-title">
         <ng-md-icon icon="my_library_books"></ng-md-icon>
-        Tasks Backlog
+        Task Backlog
         <span ng-show="vm.totaleEstimateBacklog.asSeconds()> 0">
           ~<span ng-bind="vm.totaleEstimateBacklog|duration"></span>
         </span>
@@ -92,13 +92,13 @@
                    ng-click="vm.limitBacklogTo = false"
                    ng-hide="vm.limitBacklogTo === false || vm.backlogTasks.length <=vm.limitBacklogTo ||vm.backlogTasks.length ===0">
           <ng-md-icon icon="remove_red_eye"></ng-md-icon>
-          Show All <span ng-bind="vm.backlogTasks.length"></span> items in Backlog
+          Show All <span ng-bind="vm.backlogTasks.length"></span> Items in Backlog
         </md-button>
 
         <md-button class="md-primary"
                    ui-sref="done-tasks-backlog">
           <ng-md-icon icon="list"></ng-md-icon>
-          Go To Done Backlog
+          Go to Done Backlog
         </md-button>
 
         <md-button class="md-primary"
@@ -111,7 +111,7 @@
         <md-button class="md-primary md-warn"
                    ng-click="vm.deleteBacklog()">
           <ng-md-icon icon="delete"></ng-md-icon>
-          Clear backlog
+          Clear Backlog
         </md-button>
       </div>
     </section>

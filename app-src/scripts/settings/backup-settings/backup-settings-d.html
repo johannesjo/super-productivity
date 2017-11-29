@@ -4,10 +4,10 @@
 </h2>
 
 <help-section>
-  <p>Here you can download all your data as
-    <strong>JSON</strong> export for backups, but also to use it in a different context (e.g. you might want to export your projects in the browser and import them into the desktop version).
+  <p>Here you can export all your data as a
+    <strong>JSON</strong> for backups, but also to use it in a different context (e.g. you might want to export your projects in the browser and import them into the desktop version).
   </p>
-  <p>The import expects valid json to be copied into the text area.
+  <p>The import expects valid JSON to be copied into the text area.
     <strong>NOTE: Once you hit the import button all your current settings and data will be overwritten!</strong></p>
 
   <section ng-if="vm.IS_ELECTRON">
@@ -22,7 +22,7 @@
    download-backup>
   <ng-md-icon icon="file_download"
               aria-label="download settings"></ng-md-icon>
-  Download your tasks and settings
+  Export your tasks and settings
   <div class="md-ripple-container"></div>
 </a>
 <md-button
@@ -38,7 +38,7 @@
       ng-submit="vm.importSettings(vm.uploadSettingsTextarea)">
   <md-input-container class="md-block"
                       flex-gt-sm>
-    <label>Copy and paste the contents of the download json file here</label>
+    <label>Copy and paste the contents of the saved JSON file here</label>
     <textarea ng-model="vm.uploadSettingsTextarea"
               md-auto-focus
               rows="3"></textarea>

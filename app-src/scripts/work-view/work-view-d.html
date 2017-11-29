@@ -15,7 +15,7 @@
 </header>
 
 <section class="work-view-tasks work-view-tasks--undone">
-  <p ng-if="!vm.tasksUndone.length">You have currently no undone tasks.</p>
+  <p ng-if="!vm.tasksUndone.length">You currently have no undone tasks.</p>
 
   <task-list tasks="vm.tasksUndone"
              current-task-id="r.currentTask.id"
@@ -43,7 +43,7 @@
 </h2>
 
 <section class="work-view-tasks work-view-tasks--done">
-  <p ng-if="!vm.tasksDone.length">You have currently no done tasks.</p>
+  <p ng-if="!vm.tasksDone.length">You currently have no done tasks.</p>
 
   <task-list tasks="vm.tasksDone"
              on-task-done-changed="vm.onTaskDoneChangedDoneList(task)"

@@ -15,7 +15,7 @@
 </p>
 
 <p>Each tasks can have a number of
-  <strong>sub tasks</strong>. When a task has sub tasks it cannot be started by itself or have tracked time directly to it. This because time spent/ time estimated are set by the sum of the sub tasks.
+  <strong>sub tasks</strong>. When a task has sub tasks it cannot be started by itself or have tracked time directly to it. This because time spent and time estimated are set by the sum of the sub tasks.
 </p>
 
 <h3 class="md-title">An interactive example task</h3>
@@ -34,7 +34,7 @@
                  ng-if="vm.exampleTask.isUpdated"
                  ng-click="vm.exampleTask.showNotes = true;">
         <md-tooltip>
-          If shown, it means that the task was updated on Jira or Github
+          If shown, it means that the task was updated on Jira or GitHub
         </md-tooltip>
         <ng-md-icon class="update update-icon"
                     flex="none"
@@ -50,7 +50,7 @@
                  tabindex="2"
                  ng-click="vm.isCurrent= !vm.isCurrent">
         <md-tooltip>
-          Starts time tracking for the task and marks it as current task. Will only appear on the work view.
+          Starts time tracking for the task and marks it as the current active task. Will only appear on the work view.
         </md-tooltip>
         <ng-md-icon icon="{{vm.isCurrent? 'pause_circle_filled':'play_circle_fill'}}"
                     aria-label="start task"></ng-md-icon>
@@ -83,7 +83,7 @@
                    ng-disabled="vm.exampleTask.subTasks.length>0"
                    aria-label="time estimation">
           <md-tooltip>
-            Opens a dialog for you to specify time spend and time estimated for the task
+            Opens a dialog for you to specify time spent and time estimated for the task
           </md-tooltip>
           <ng-md-icon icon="access_time"
                       aria-label="time estimation"></ng-md-icon>
@@ -103,7 +103,7 @@
                    ng-class="{'is-active':vm.exampleTask.showNotes}"
                    ng-click="vm.exampleTask.showNotes=!vm.exampleTask.showNotes">
           <md-tooltip>
-            Opens a note section for the task. Jira or Github comments are also shown here.
+            Opens a note section for the task. Jira or GitHub comments are also shown here.
           </md-tooltip>
           <ng-md-icon icon="{{(vm.exampleTask.notes||vm.exampleTask.originalKey) ?'insert_comment': 'mode_comment'}}"
                       aria-label="notes"></ng-md-icon>
@@ -112,7 +112,7 @@
                    aria-label="link"
                    tabindex="2">
           <md-tooltip>
-            Link to the original issue on Jira or Github. Only shown for Jira or Github tasks.
+            Link to the original issue on Jira or GitHub. Only shown for Jira or GitHub tasks.
           </md-tooltip>
           <ng-md-icon icon="link"
                       aria-label="link"></ng-md-icon>
@@ -149,7 +149,7 @@
 
       <section ng-if="vm.exampleTask.isUpdated;">
         <md-tooltip>
-          Shows remote changes made on Jira or Github, when there have been made some.
+          Shows remote changes made on Jira or Github, when there have been some made.
         </md-tooltip>
         <div class="md-caption">
           Changes since last update
