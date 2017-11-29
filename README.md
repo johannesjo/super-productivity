@@ -50,6 +50,15 @@ gulp build # or for dev run 'gulp'/'gulp serve' in a separate tab
 npm start # on windows use "set NODE_ENV=DEV electron ./electron/main.js" instead
 ```
 
+## Contributing
+There are several ways to help. Publishing a bug or a feature request is a good first step. Also making it more popular by posting it on social media etc. is great, because it means more users, which in turn leads to more people testing the app and also more people contributing code.
+
+**Pull requests** are of course also very welcome. Please make sure that you're following the [angular commit guidelines](https://github.com/angular/angular.js/blob/master/DEVELOPERS.md#commits) and to also include the issue number in your commit message, if you're fixing a particular issue (e.g.: `feat: add nice feature with the number #31`).
+
+### Packaging the app
+Packaging the app is done via [electron-builder](https://github.com/electron-userland/electron-builder). To start packaging run `npm run dist`. If you want to add new platforms and experiment with the build options the easiest way to do so is manipulating the `build` property in the [package.json](https://github.com/johannesjo/super-productivity/blob/develop/package.json), but you can also the [command line interface of electron builder](https://www.electron.build/cli).
+
+
 ## More Screenshots
 ![Daily Planner](screens/daily-planner.png)
 ![submit-worklog](screens/submit-worklog.png)
