@@ -1,0 +1,19 @@
+{
+    "arch": "x64",
+    "src": "dist/superProductivity-linux-x64/",
+    "dest": "dist/installers",
+    "options.baseVersion": "master",
+    "categories": [
+        "GNOME",
+        "Utility",
+        "Office"
+    ],
+    "icon": {
+        "16x16": "electron/assets/icons/app-icons/icon_16x16.png",
+        "32x32": "electron/assets/icons/app-icons/icon_32x32.png",
+        "128x128": "electron/assets/icons/app-icons/icon_128x128.png",
+        "256x256": "electron/assets/icons/app-icons/icon_256x256.png",
+        "512x512": "electron/assets/icons/app-icons/icon_512x512.png"
+    }
+}
+
