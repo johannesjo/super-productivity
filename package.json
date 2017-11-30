@@ -114,7 +114,6 @@
     "karma-babel-preprocessor": "^7.0.0",
     "karma-chrome-launcher": "^2.2.0",
     "karma-jasmine": "latest",
-    "karma-phantomjs-launcher": "^1.0.4",
     "karma-ng-html2js-preprocessor": "latest",
     "karma-sinon": "^1.0.5",
     "lazypipe": "latest",

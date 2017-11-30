@@ -68,8 +68,7 @@ module.exports = function(config) {
       'karma-jasmine',
       'karma-sinon',
       //'karma-coverage',
-      //'karma-chrome-launcher',
-      'karma-phantomjs-launcher',
+      'karma-chrome-launcher',
       'karma-ng-html2js-preprocessor',
       'karma-babel-preprocessor'
     ],
@@ -97,7 +96,7 @@ module.exports = function(config) {
 
     // start these browsers
     // available browser launchers: https://npmjs.org/browse/keyword/karma-launcher
-    browsers: ['PhantomJS'],
+    browsers: ['ChromeHeadless'],
     customLaunchers: {
       ChromeHeadless: {
         base: 'Chrome',
