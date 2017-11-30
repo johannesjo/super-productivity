@@ -75,6 +75,9 @@ function initWinEventListeners(app, IS_MAC, nestedWinParams) {
       if (!app.isQuiting && indicatorMod.isRunning()) {
         event.preventDefault();
         mainWin.hide();
+      } else {
+        // just quit (NOTE: normally this shouldn't be necessary)
+        app.quit();
       }
     }
   });

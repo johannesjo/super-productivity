@@ -22,7 +22,7 @@ function init(params) {
   initListeners(isGnomeShellExtensionInstalled);
 
   // if we have the gnome shell extension installed set up bus
-  if (isGnomeShellExtensionInstalled) {
+  if (IS_GNOME && isGnomeShellExtensionInstalled) {
     dbus.init({
       mainWin,
       quitApp,
