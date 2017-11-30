@@ -10,7 +10,7 @@ const CONFIG = require('./CONFIG');
 const indicatorMod = require('./indicator');
 const mainWinMod = require('./main-window');
 
-const idle = require('./idle');
+const getIdleTime = require('./get-idle-time');
 const jira = require('./jira');
 const gitLog = require('./git-log');
 
@@ -188,14 +188,13 @@ function showOrFocus(win) {
 }
 
 function trackTimeFn() {
-  idle((stdout) => {
+  getIdleTime((idleTime) => {
     // sometimes when starting a second instance we get here although we don't want to
     if (!mainWin) {
       console.log('special case occurred when trackTimeFn is called even though, this is a second instance of the app');
       return;
     }
 
-    let idleTime = parseInt(stdout, 10);
     // go to 'idle mode' when th
     if (idleTime > CONFIG.MIN_IDLE_TIME || lastIdleTime > CONFIG.MIN_IDLE_TIME) {
       if (!currentIdleStart) {

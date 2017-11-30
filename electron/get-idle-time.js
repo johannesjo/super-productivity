@@ -21,6 +21,7 @@ if (process.platform === 'linux') {
 module.exports = (cb) => {
   exec(cmd, function(error, stdout) {
     // command output is in stdout
-    cb(stdout);
+    const idleTime = parseInt(stdout, 10);
+    cb(idleTime);
   });
 };
