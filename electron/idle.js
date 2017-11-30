@@ -11,14 +11,15 @@ if (process.platform === 'linux') {
 } else if (process.platform === 'darwin') {
   cmd = "echo $((`ioreg -c IOHIDSystem | sed -e '/HIDIdleTime/ !{ d' -e 't' -e '}' -e 's/.* = //g' -e 'q'` / 1000000))";
 } else {
-  // just don't execute
-  module.exports = () => {
+  // directly execute cb, as we never want to be idle in those cases
+  module.exports = (cb) => {
+    cb(0);
   };
   return;
 }
 
 module.exports = (cb) => {
-  exec(cmd, function (error, stdout) {
+  exec(cmd, function(error, stdout) {
     // command output is in stdout
     cb(stdout);
   });
