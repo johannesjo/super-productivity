@@ -53,7 +53,7 @@ script:
           -v ~/.cache/electron:/root/.cache/electron \
           -v ~/.cache/electron-builder:/root/.cache/electron-builder \
           electronuserland/builder:wine \
-          /bin/bash -c "echo '____DOCKER_INNER_START____' && ls -l && yarn global add bower gulp && yarn --link-duplicates --pure-lockfile && yarn release --linux --win && npm run build && npm run flatpak64 && ls -l ./dist"
+          /bin/bash -c "echo '____DOCKER_INNER_START____' && ls -l && yarn global add bower gulp && yarn --link-duplicates --pure-lockfile && yarn release --linux --win && ls -l ./dist"
       else
         npm install --quiet && npm run pub
       fi
@@ -79,7 +79,6 @@ after_success:
       ls -l ./dist
       sshpass -p "$DEPLOY_PASS" rsync -avz ./app/ $DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH/app
       sshpass -p "$DEPLOY_PASS" scp dist/super* $DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH/downloads'
-      sshpass -p "$DEPLOY_PASS" scp dist/installers/super* $DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH/downloads'
     fi
 
 #  - 'sshpass -p "$SFG_DEPLOY_PASS" scp dist/superProductivity* $SFG_DEPLOY_USER@$SFG_DEPLOY_HOST:$SFG_DEPLOY_PATH/downloads'
