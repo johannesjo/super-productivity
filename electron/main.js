@@ -4,13 +4,8 @@ const electron = require('electron');
 const powerSaveBlocker = electron.powerSaveBlocker;
 const notifier = require('node-notifier');
 const moment = require('moment');
+
 const CONFIG = require('./CONFIG');
-const ICONS_FOLDER = __dirname + '/assets/icons/';
-const IS_MAC = process.platform === 'darwin';
-const IS_LINUX = process.platform === 'linux';
-const DESKTOP_ENV = process.env.DESKTOP_SESSION;
-const IS_GNOME = (DESKTOP_ENV === 'gnome' || DESKTOP_ENV === 'gnome-xorg');
-const IS_DEV = process.env.NODE_ENV === 'DEV';
 
 const indicatorMod = require('./indicator');
 const mainWinMod = require('./main-window');
@@ -18,6 +13,13 @@ const mainWinMod = require('./main-window');
 const idle = require('./idle');
 const jira = require('./jira');
 const gitLog = require('./git-log');
+
+const ICONS_FOLDER = __dirname + '/assets/icons/';
+const IS_MAC = process.platform === 'darwin';
+const IS_LINUX = process.platform === 'linux';
+const DESKTOP_ENV = process.env.DESKTOP_SESSION;
+const IS_GNOME = (DESKTOP_ENV === 'gnome' || DESKTOP_ENV === 'gnome-xorg');
+const IS_DEV = process.env.NODE_ENV === 'DEV';
 
 const app = electron.app;
 
