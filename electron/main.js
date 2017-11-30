@@ -31,6 +31,8 @@ powerSaveBlocker.start('prevent-app-suspension');
 
 // make it a single instance by closing other instances
 let shouldQuitBecauseAppIsAnotherInstance = app.makeSingleInstance(() => {
+  // the callback: only called only for first instance
+  // we want to show it, when the other starts to try another
   if (mainWin) {
     showApp();
 
@@ -165,6 +167,12 @@ function quitApp() {
 }
 
 function showOrFocus(win) {
+  // sometimes when starting a second instance we get here although we don't want to
+  if (!win) {
+    console.log('special case occurred when showOrFocus is called even though, this is a second instance of the app');
+    return;
+  }
+
   if (win.isVisible()) {
     win.focus();
   } else {
@@ -179,6 +187,12 @@ function showOrFocus(win) {
 
 function trackTimeFn() {
   idle((stdout) => {
+    // sometimes when starting a second instance we get here although we don't want to
+    if (!mainWin) {
+      console.log('special case occurred when trackTimeFn is called even though, this is a second instance of the app');
+      return;
+    }
+
     let idleTime = parseInt(stdout, 10);
     // go to 'idle mode' when th
     if (idleTime > CONFIG.MIN_IDLE_TIME || lastIdleTime > CONFIG.MIN_IDLE_TIME) {
