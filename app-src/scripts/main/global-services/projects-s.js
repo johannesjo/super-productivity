@@ -68,12 +68,34 @@
     };
 
     this.createNewFromCurrent = (projectTitle) => {
-      if ($rootScope.r.projects.length > 0) {
+      const projects = this.getListWithLsData();
+      if (projects) {
         SimpleToast('ERROR', 'ERROR: There is already a project');
         return;
       }
 
       this.createNew(projectTitle, $rootScope.r);
+    };
+
+    this.remove = (projectToRemove) => {
+      const projects = this.getListWithLsData();
+      const indexToDelete = projects.findIndex((lProj) => {
+        return lProj.id === projectToRemove.id;
+      });
+
+      projects.splice(indexToDelete, 1);
+      AppStorage.saveProjects(projects);
+
+      // project has been deleted so show message already here
+      // even if something below goes wrong
+      SimpleToast('SUCCESS', projectToRemove.title + ' deleted!');
+
+      // also delete from $rootScope
+      const indexToDeleteViewModel = $rootScope.r.projects.findIndex((lProj) => {
+        return lProj.id === projectToRemove.id;
+      });
+      $rootScope.r.projects.splice(indexToDeleteViewModel, 1);
+
     };
 
     this.createNew = (projectTitle, data) => {
@@ -89,7 +111,7 @@
         $rootScope.r.projects.push(newProject);
 
         // update ls
-        const projects = this.getListWithLsData();
+        const projects = this.getListWithLsData() || [];
         projects.push(newProject);
         AppStorage.saveProjects(projects);
 
@@ -158,6 +180,9 @@
 
         // re-init all global models
         InitGlobalModels();
+
+        // Show success message
+        SimpleToast('SUCCESS', `Switched to project "${newCurrentProject.title}"`);
       }
     };
   }

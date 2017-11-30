@@ -42,7 +42,7 @@
       Dialogs('CREATE_PROJECT');
     };
 
-    vm.deleteProject = (project, $index) => {
+    vm.deleteProject = (project) => {
       if (project.id === $rootScope.r.currentProject.id) {
         SimpleToast('ERROR', 'Cannot delete ' + project.title + ' as it is the current project!');
       } else {
@@ -54,8 +54,7 @@
           .cancel('Better not');
 
         $mdDialog.show(confirm).then(function () {
-          vm.allProjects.splice($index, 1);
-          SimpleToast('SUCCESS', project.title + ' deleted!');
+          Projects.remove(project);
         });
       }
     };
