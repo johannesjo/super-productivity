@@ -73,7 +73,7 @@
         SimpleToast('ERROR', 'ERROR: There is already a project');
         return;
       }
-
+      
       this.createNew(projectTitle, $rootScope.r);
     };
 
@@ -100,12 +100,21 @@
 
     this.createNew = (projectTitle, data) => {
       if (projectTitle && angular.isObject(data)) {
+        data = $window._.omit(data, OMITTED_LS_FIELDS);
+          
         // save new project
         let newProject = {
           title: projectTitle,
           id: Uid(),
-          data: $window._.omit(LS_DEFAULTS, OMITTED_LS_FIELDS)
+          data: {}
         };
+          
+        this.updateNewFields(newProject);
+          
+        // update data for current new project from current data
+        for (let field in data) {
+            newProject.data[field] = data[field];
+        }
 
         // update $rootScope.r.projects
         $rootScope.r.projects.push(newProject);
@@ -114,9 +123,6 @@
         const projects = this.getListWithLsData() || [];
         projects.push(newProject);
         AppStorage.saveProjects(projects);
-
-        // update data for current new project from current data
-        this.updateProjectData(newProject.id, data);
 
         // switch to new project
         this.changeCurrent(newProject);
@@ -161,9 +167,9 @@
         this.removeOmittedFields(newCurrentProject);
 
         // clean up $rootScope.r
-        _.forOwn($rootScope, (val, property) => {
+        _.forOwn($rootScope.r, (val, property) => {
           if (!angular.isFunction(val) && GLOBAL_LS_FIELDS.indexOf(property) === -1) {
-            $rootScope.r[property] = undefined;
+            delete $rootScope.r[property];
           }
         });
 
@@ -173,7 +179,7 @@
             $rootScope.r[property] = newCurrentProject.data[property];
           }
         });
-
+         
         // update ls current project
         $rootScope.r.currentProject = newCurrentProject;
         $rootScope.$broadcast(EV_PROJECT_CHANGED);
