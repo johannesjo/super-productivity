@@ -97,11 +97,11 @@ function initListeners(isGnomeShellExtInstalled) {
       if (isGnomeShellExtInstalled) {
         dbus.setTask(currentTask.id, msg);
       }
-    } else if (isGnomeShellExtInstalled && !currentTask && lastCurrentTask && !lastCurrentTask.isDone) {
-      const msg = createIndicatorStr(lastCurrentTask);
-      dbus.setTask('PAUSED', msg);
-    } else {
-      if (isGnomeShellExtInstalled) {
+    } else if (isGnomeShellExtInstalled) {
+      if (!currentTask && lastCurrentTask && !lastCurrentTask.isDone) {
+        const msg = createIndicatorStr(lastCurrentTask);
+        dbus.setTask('PAUSED', msg);
+      } else {
         dbus.setTask('NONE', 'NONE');
       }
     }
