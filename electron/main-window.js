@@ -81,11 +81,6 @@ function initWinEventListeners(app, IS_MAC, nestedWinParams) {
       }
     }
   });
-
-  mainWin.on('minimize', function(event) {
-    event.preventDefault();
-    mainWin.hide();
-  });
 }
 
 function createMenu(quitApp) {
