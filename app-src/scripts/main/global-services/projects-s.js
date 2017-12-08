@@ -29,6 +29,7 @@
     this.getAndUpdateCurrent = () => {
       let currentProject;
 
+      // set first to current if not set for some reason
       if (!$rootScope.r.currentProject && $rootScope.r.projects.length > 0) {
         $rootScope.r.currentProject = $rootScope.r.projects[0];
       }
@@ -73,7 +74,7 @@
         SimpleToast('ERROR', 'ERROR: There is already a project');
         return;
       }
-      
+
       this.createNew(projectTitle, $rootScope.r);
     };
 
@@ -101,16 +102,16 @@
     this.createNew = (projectTitle, data) => {
       if (projectTitle && angular.isObject(data)) {
         data = $window._.omit(data, OMITTED_LS_FIELDS);
-          
+
         // save new project
         let newProject = {
           title: projectTitle,
           id: Uid(),
           data: {}
         };
-          
+
         this.updateNewFields(newProject);
-          
+
         // update data for current new project from current data
         for (let field in data) {
             newProject.data[field] = data[field];
@@ -179,7 +180,7 @@
             $rootScope.r[property] = newCurrentProject.data[property];
           }
         });
-         
+
         // update ls current project
         $rootScope.r.currentProject = newCurrentProject;
         $rootScope.$broadcast(EV_PROJECT_CHANGED);
