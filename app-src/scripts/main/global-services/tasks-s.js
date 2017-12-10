@@ -629,6 +629,7 @@
     }
 
     clearBacklog() {
+      this.$rootScope.r.backlogTasks = [];
       this.AppStorage.saveDoneBacklogTasks([]);
       this.SimpleToast('SUCCESS', 'Backlog deleted!');
     }

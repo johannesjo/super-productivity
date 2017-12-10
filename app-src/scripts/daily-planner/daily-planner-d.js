@@ -116,6 +116,7 @@
 
       $mdDialog.show(confirm).then(function() {
         Tasks.clearBacklog();
+        vm.backlogTasks = Tasks.getBacklog();
       });
     };
 
