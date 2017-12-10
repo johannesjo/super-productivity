@@ -28,18 +28,24 @@
   }
 
   /* @ngInject */
-  function ThemeSettingsCtrl($scope, THEMES, DEFAULT_THEME, $rootScope) {
+  function ThemeSettingsCtrl($scope, THEMES, DEFAULT_THEME, $rootScope, EV_PROJECT_CHANGED) {
     let vm = this;
     vm.themes = THEMES;
 
-    // wait for var to be there
-    $scope.$evalAsync(() => {
-      vm.currentTheme = vm.currentTheme || DEFAULT_THEME;
-      vm.isDarkTheme = vm.currentTheme && vm.currentTheme.indexOf('dark') > -1;
-      vm.selectedTheme = vm.currentTheme && vm.currentTheme
-        .replace('-theme', '')
-        .replace('-dark', '');
-    });
+    // workarounds required to make data model work with theming engine of ng-material
+    function cleanupThemeVars() {
+      // wait for var to be there
+      $scope.$evalAsync(() => {
+
+        vm.currentTheme = vm.currentTheme || DEFAULT_THEME;
+        vm.isDarkTheme = vm.currentTheme && vm.currentTheme.indexOf('dark') > -1;
+        vm.selectedTheme = vm.currentTheme && vm.currentTheme
+          .replace('-theme', '')
+          .replace('-dark', '');
+      });
+    }
+
+    cleanupThemeVars();
 
     // WATCHER & EVENTS
     // ----------------
@@ -79,6 +85,13 @@
         $rootScope.r.theme = vm.currentTheme;
       }
     }));
+
+    $scope.$on(EV_PROJECT_CHANGED, () => {
+      // currentTheme is not updated right away, because it is a primitive,
+      // that's why we set it here from the rootScope
+      vm.currentTheme = $rootScope.r.theme;
+      cleanupThemeVars();
+    });
 
     $scope.$on('$destroy', () => {
       // remove watchers manually

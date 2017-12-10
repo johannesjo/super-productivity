@@ -21,7 +21,7 @@ describe('Service: Projects', () => {
           .returns('TEST');
 
         const result = Projects.getListWithLsData();
-        expect(result).toBe('TEST')
+        expect(result).toBe('TEST');
       }));
     });
 

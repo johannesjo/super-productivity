@@ -114,7 +114,7 @@
 
         // update data for current new project from current data
         for (let field in data) {
-            newProject.data[field] = data[field];
+          newProject.data[field] = data[field];
         }
 
         // update $rootScope.r.projects
@@ -183,13 +183,14 @@
 
         // update ls current project
         $rootScope.r.currentProject = newCurrentProject;
-        $rootScope.$broadcast(EV_PROJECT_CHANGED);
 
         // re-init all global models
         InitGlobalModels();
 
         // Show success message
         SimpleToast('SUCCESS', `Switched to project "${newCurrentProject.title}"`);
+
+        $rootScope.$broadcast(EV_PROJECT_CHANGED);
       }
     };
   }
