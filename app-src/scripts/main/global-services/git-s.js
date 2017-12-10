@@ -6,7 +6,7 @@
  * Service in the superProductivity.
  */
 
-(function () {
+(function() {
   'use strict';
 
   angular
@@ -191,10 +191,14 @@
       return defer.promise;
     };
 
+    this.isSufficientSettings = () => {
+      return $rootScope.r.git && $rootScope.r.git.repo;
+    };
+
     this.checkForNewAndAddToBacklog = () => {
       const Tasks = $injector.get('Tasks');
 
-      if ($rootScope.r.git && $rootScope.r.git.isAutoImportToBacklog) {
+      if (this.isSufficientSettings() && $rootScope.r.git.isAutoImportToBacklog) {
         this.getIssueList()
           .then((res) => {
             const issues = res.data;

@@ -43,7 +43,7 @@
       // add new git tasks
       Git.checkForNewAndAddToBacklog();
 
-      if ($rootScope.r.git.isShowIssuesFromGit) {
+      if (Git.isSufficientSettings() && $rootScope.r.git.isShowIssuesFromGit) {
         Git.getIssueList()
           .then((res) => {
             vm.taskSuggestions = vm.taskSuggestions.concat(res.data);
