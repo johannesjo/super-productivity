@@ -22,7 +22,8 @@
       restrict: 'E',
       scope: {
         currentTheme: '=',
-        isCurrentProjectTheme: '@'
+        isCurrentProjectTheme: '@',
+        isBoxed: '<'
       }
     };
   }
@@ -58,7 +59,10 @@
         } else {
           vm.currentTheme = value + '-theme';
         }
-        $rootScope.r.theme = vm.currentTheme;
+
+        if (!vm.isBoxed) {
+          $rootScope.r.theme = vm.currentTheme;
+        }
       }
     }));
 
@@ -67,12 +71,16 @@
         if (value) {
           vm.currentTheme = vm.currentTheme.replace('-theme', '-dark');
           if (vm.isCurrentProjectTheme) {
-            $rootScope.r.bodyClass = 'dark-theme';
+            if (!vm.isBoxed) {
+              $rootScope.r.bodyClass = 'dark-theme';
+            }
           }
         } else {
           vm.currentTheme = vm.currentTheme.replace('-dark', '-theme');
           if (vm.isCurrentProjectTheme) {
-            $rootScope.r.bodyClass = '';
+            if (!vm.isBoxed) {
+              $rootScope.r.bodyClass = '';
+            }
           }
         }
         // for some reason project needs to be updated directly
@@ -82,7 +90,9 @@
           }
         }
 
-        $rootScope.r.theme = vm.currentTheme;
+        if (!vm.isBoxed) {
+          $rootScope.r.theme = vm.currentTheme;
+        }
       }
     }));
 

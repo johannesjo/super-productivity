@@ -27,7 +27,7 @@
                  aria-label="Title">
         </md-input-container>
 
-        <theme-settings current-theme="vm.projectSettings.theme"></theme-settings>
+        <theme-settings current-theme="vm.projectSettings.theme" is-boxed="true"></theme-settings>
 
         <jira-settings settings="vm.projectSettings.jiraSettings"
                        ng-if="vm.IS_ELECTRON"></jira-settings>
