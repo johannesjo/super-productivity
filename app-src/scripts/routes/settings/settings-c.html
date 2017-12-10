@@ -6,24 +6,6 @@
                       selected-current-project="vm.selectedCurrentProject"></project-settings>
   </section>
 
-  <section class="config-section"
-           md-whiteframe="2">
-    <theme-settings current-theme="r.theme"
-                    is-current-project-theme="true"></theme-settings>
-  </section>
-
-
-  <section class="config-section"
-           md-whiteframe="2"
-           ng-if="vm.IS_ELECTRON">
-    <jira-settings settings="r.jiraSettings"></jira-settings>
-  </section>
-
-
-  <section class="config-section"
-           md-whiteframe="2">
-    <git-settings settings="r.git"></git-settings>
-  </section>
 
   <section class="config-section"
            md-whiteframe="2">
@@ -41,5 +23,29 @@
            md-whiteframe="2">
     <misc-settings settings="r.config"></misc-settings>
   </section>
+
+
+  <div class="keep-together">
+    <h1 class="md-title">Project Specific Settings</h1>
+
+    <section class="config-section"
+             md-whiteframe="2">
+      <theme-settings current-theme="r.theme"
+                      is-current-project-theme="true"></theme-settings>
+    </section>
+  </div>
+
+  <section class="config-section"
+           md-whiteframe="2"
+           ng-if="vm.IS_ELECTRON">
+    <jira-settings settings="r.jiraSettings"></jira-settings>
+  </section>
+
+
+  <section class="config-section"
+           md-whiteframe="2">
+    <git-settings settings="r.git"></git-settings>
+  </section>
+
 
 </div>

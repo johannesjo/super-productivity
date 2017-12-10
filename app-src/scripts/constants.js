@@ -16,7 +16,9 @@
       'currentProject',
       'projects',
       'keys',
-      'isShowWelcomeDialog'
+      'isShowWelcomeDialog',
+      'config',
+      'keys'
     ])
     .constant('ON_DEMAND_LS_FIELDS', [
       'doneBacklogTasks',
@@ -59,7 +61,7 @@
       },
       tasks: [],
       backlogTasks: [],
-      doneBacklogTasks:[],
+      doneBacklogTasks: [],
       distractions: [],
       projects: [],
       globalLinks: [],

@@ -1,19 +1,29 @@
 .page-settings {
   text-align: left;
 
+  h1 {
+    // NOTE: this is not working
+    break-after: avoid;
+  }
+
   @media(min-width: $layout-gt-sm) {
     column-count: 2;
     section {
       display: inline-block;
       width: 100%;
       overflow: hidden;
-      break-inside: avoid-column;
+      break-inside: avoid;
       -webkit-column-break-inside: avoid;
     }
   }
 
   @media(min-width: $layout-gt-lg) {
     column-count: 3;
+  }
+
+  .keep-together {
+    display: inline-block;
+    width: 100%;
   }
 
   .config-section {
