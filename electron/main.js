@@ -4,6 +4,8 @@ const electron = require('electron');
 const powerSaveBlocker = electron.powerSaveBlocker;
 const notifier = require('node-notifier');
 const moment = require('moment');
+const autoUpdater = require('electron-updater').autoUpdater;
+const log = require('electron-log');
 
 const CONFIG = require('./CONFIG');
 
@@ -67,6 +69,7 @@ app.on('activate', function() {
 });
 
 app.on('ready', () => {
+  // init time tracking interval
   setInterval(trackTimeFn, CONFIG.PING_INTERVAL);
 });
 
@@ -78,6 +81,27 @@ app.on('before-quit', () => {
 
   // un-register all shortcuts.
   electron.globalShortcut.unregisterAll();
+});
+
+// AUTO-UPDATER
+// ------------
+app.on('ready', () => {
+  // init auto-updates
+  log.info('INIT AUTO UPDATES');
+  // log.info(autoUpdater.getFeedURL());
+  autoUpdater.logger = log;
+  autoUpdater.logger.transports.file.level = 'info';
+  autoUpdater.checkForUpdatesAndNotify();
+});
+
+autoUpdater.on('update-downloaded', (ev, info) => {
+  console.log(ev);
+  // Wait 5 seconds, then quit and install
+  // In your application, you don't need to wait 5 seconds.
+  // You could call autoUpdater.quitAndInstall(); immediately
+  setTimeout(function() {
+    autoUpdater.quitAndInstall();
+  }, 5000)
 });
 
 // FRONTEND EVENTS
@@ -146,7 +170,7 @@ function registerShowAppShortCut(shortcutPassed) {
     });
 
     if (!ret) {
-      console.log('key registration failed');
+      log.error('key registration failed');
     }
   }
 }
@@ -171,7 +195,7 @@ function quitApp() {
 function showOrFocus(win) {
   // sometimes when starting a second instance we get here although we don't want to
   if (!win) {
-    console.log('special case occurred when showOrFocus is called even though, this is a second instance of the app');
+    log.info('special case occurred when showOrFocus is called even though, this is a second instance of the app');
     return;
   }
 
@@ -191,7 +215,7 @@ function trackTimeFn() {
   getIdleTime((idleTime) => {
     // sometimes when starting a second instance we get here although we don't want to
     if (!mainWin) {
-      console.log('special case occurred when trackTimeFn is called even though, this is a second instance of the app');
+      log.info('special case occurred when trackTimeFn is called even though, this is a second instance of the app');
       return;
     }
 
