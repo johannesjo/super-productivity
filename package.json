@@ -83,7 +83,7 @@
     "del": "latest",
     "ecstatic": "latest",
     "electron": "^1.7.9",
-    "electron-builder": "^19.45.2",
+    "electron-builder": "^19.49.0",
     "gulp": "latest",
     "gulp-autoprefixer": "latest",
     "gulp-babel": "^6.1.2",
