@@ -24,6 +24,7 @@
     "localInstall": "sudo echo 'Starting local install' && rm -Rf ./dist/ && gulp build && electron-builder --linux && sudo dpkg -i dist/superProductivity*.deb",
     "buildFrontend": "gulp build",
     "dist": "run-s buildFrontend && electron-builder",
+    "distLinuxAndWindows": "run-s buildFrontend && electron-builder --linux --win",
     "pub": "run-s buildFrontend && electron-builder -p always",
     "release": "run-s release.changelog dist",
     "release.changelog": "conventional-changelog -i CHANGELOG.md -s -p angular",
