@@ -55,7 +55,7 @@ script:
         electronuserland/builder:wine-chrome \
         /bin/bash -c "echo '____DOCKER_INNER_START____' && ls -l && yarn global add bower gulp && yarn --link-duplicates --pure-lockfile && yarn run distLinuxAndWindows && ls -l ./dist"
     else
-      npm install --quiet && npm run pub
+      npm install --quiet && npm install 7zip-bin-mac && npm run pub
     fi
 
 after_success:
