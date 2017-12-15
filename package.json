@@ -24,9 +24,11 @@
     "localInstall": "sudo echo 'Starting local install' && rm -Rf ./dist/ && gulp build && electron-builder --linux && sudo dpkg -i dist/superProductivity*.deb",
     "dist": "gulp build && electron-builder",
     "pub": "gulp build && electron-builder -p always",
-    "release": "gulp build && electron-builder",
+    "release": "npm run release.changelog && gulp build && electron-builder",
+    "release.changelog": "conventional-changelog -i CHANGELOG.md -s -p angular",
     "minorRelease": "npm version minor && git push --tags && git push && git checkout master && git merge develop && git push && git checkout develop && copy ./deploy.sh",
-    "patchRelease": "npm version patch && git push --tags && git push && git checkout master && git merge develop && git push && git checkout develop && ./deploy.sh"
+    "patchRelease": "npm version patch && git push --tags && git push && git checkout master && git merge develop && git push && git checkout develop && ./deploy.sh",
+    "version": "npm run release.changelog && git add CHANGELOG.md"
   },
   "publish": [
     {
@@ -78,6 +80,7 @@
     "babel-preset-es2015": "^6.22.0",
     "babel-preset-latest": "^6.22.0",
     "browser-sync": "latest",
+    "conventional-changelog-cli": "^1.3.5",
     "del": "latest",
     "ecstatic": "latest",
     "electron": "^1.7.9",
