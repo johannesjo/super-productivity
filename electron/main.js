@@ -4,7 +4,7 @@ const electron = require('electron');
 const powerSaveBlocker = electron.powerSaveBlocker;
 const notifier = require('node-notifier');
 const moment = require('moment');
-const autoUpdater = require('electron-updater').autoUpdater;
+//const autoUpdater = require('electron-updater').autoUpdater;
 const log = require('electron-log');
 
 const CONFIG = require('./CONFIG');
@@ -85,24 +85,24 @@ app.on('before-quit', () => {
 
 // AUTO-UPDATER
 // ------------
-app.on('ready', () => {
-  // init auto-updates
-  log.info('INIT AUTO UPDATES');
-  // log.info(autoUpdater.getFeedURL());
-  autoUpdater.logger = log;
-  autoUpdater.logger.transports.file.level = 'info';
-  autoUpdater.checkForUpdatesAndNotify();
-});
-
-autoUpdater.on('update-downloaded', (ev, info) => {
-  console.log(ev);
-  // Wait 5 seconds, then quit and install
-  // In your application, you don't need to wait 5 seconds.
-  // You could call autoUpdater.quitAndInstall(); immediately
-  setTimeout(function() {
-    autoUpdater.quitAndInstall();
-  }, 5000)
-});
+//app.on('ready', () => {
+//  // init auto-updates
+//  log.info('INIT AUTO UPDATES');
+//  // log.info(autoUpdater.getFeedURL());
+//  autoUpdater.logger = log;
+//  autoUpdater.logger.transports.file.level = 'info';
+//  autoUpdater.checkForUpdatesAndNotify();
+//});
+//
+//autoUpdater.on('update-downloaded', (ev, info) => {
+//  console.log(ev);
+//  // Wait 5 seconds, then quit and install
+//  // In your application, you don't need to wait 5 seconds.
+//  // You could call autoUpdater.quitAndInstall(); immediately
+//  setTimeout(function() {
+//    autoUpdater.quitAndInstall();
+//  }, 5000)
+//});
 
 // FRONTEND EVENTS
 // ---------------
