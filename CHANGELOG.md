@@ -1,3 +1,8 @@
+<a name="1.6.13"></a>
+## [1.6.13](https://github.com/johannesjo/super-productivity/compare/v1.6.12...v1.6.13) (2017-12-15)
+
+
+
 <a name="1.6.12"></a>
 ## [1.6.12](https://github.com/johannesjo/super-productivity/compare/v1.6.11...v1.6.12) (2017-12-10)
 
