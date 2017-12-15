@@ -22,13 +22,12 @@
     "start": "NODE_ENV=DEV electron ./electron/main.js",
     "pack": "electron-builder --dir",
     "localInstall": "sudo echo 'Starting local install' && rm -Rf ./dist/ && gulp build && electron-builder --linux && sudo dpkg -i dist/superProductivity*.deb",
-    "dist": "gulp build && electron-builder",
-    "pub": "gulp build && electron-builder -p always",
-    "release": "npm run release.changelog && gulp build && electron-builder",
+    "buildFrontend": "gulp build",
+    "dist": "run-s buildFrontend && electron-builder",
+    "pub": "run-s buildFrontend && electron-builder -p always",
+    "release": "run-s release.changelog dist",
     "release.changelog": "conventional-changelog -i CHANGELOG.md -s -p angular",
-    "minorRelease": "npm version minor && git push --tags && git push && git checkout master && git merge develop && git push && git checkout develop && copy ./deploy.sh",
-    "patchRelease": "npm version patch && git push --tags && git push && git checkout master && git merge develop && git push && git checkout develop && ./deploy.sh",
-    "version": "npm run release.changelog && git add CHANGELOG.md"
+    "version": "run-s release.changelog && git add CHANGELOG.md"
   },
   "publish": [
     {
@@ -122,6 +121,7 @@
     "lazypipe": "latest",
     "merge-stream": "latest",
     "node-sass": "latest",
+    "npm-run-all": "^4.1.2",
     "protractor": "latest",
     "require-dir": "latest",
     "run-sequence": "latest",
