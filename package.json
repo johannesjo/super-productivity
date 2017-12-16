@@ -72,7 +72,7 @@
           "provider": "bintray",
           "package": "super-productivity",
           "repo": "super-productivity",
-          "component": "super-productivity",
+          "component": "main",
           "owner": "johannesjo",
           "distribution": "stable"
         }
