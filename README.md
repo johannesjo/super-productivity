@@ -30,6 +30,19 @@ Check out the [web-version](http://super-productivity.com) to get a quick idea o
 ### Linux
 Run `sudo snap install superproductivity` or install it manually from the [releases page](https://github.com/johannesjo/super-productivity/releases).
 
+#### Ubuntu / Debian
+```
+#  add to sources
+echo "deb https://dl.bintray.com/johannesjo/super-productivity stable main" | sudo tee -a /etc/apt/sources.list
+
+# add bin tray key
+wget -O - https://bintray.com/user/downloadSubjectPublicKey\?username\=bintray | sudo apt-key add -
+
+# update sources and install
+sudo apt-get update
+sudo apt-get install super-productivity
+```
+
 ### MacOS
 * Install [superProductivity-latest.dmg from the releases page](https://github.com/johannesjo/super-productivity/releases).
 
