@@ -70,9 +70,9 @@
         "github",
         {
           "provider": "bintray",
-          "package": "super-productivity",
+          "package": "main",
           "repo": "super-productivity",
-          "component": "main",
+          "component": "super-productivity",
           "owner": "johannesjo",
           "distribution": "stable"
         }
