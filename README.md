@@ -33,14 +33,14 @@ Run `sudo snap install superproductivity` or install it manually from the [relea
 #### Ubuntu / Debian
 ```
 #  add to sources
-echo "deb https://dl.bintray.com/johannesjo/super-productivity stable main" | sudo tee -a /etc/apt/sources.list
+echo "deb https://dl.bintray.com/johannesjo/super-productivity stable super-productivity" | sudo tee -a /etc/apt/sources.list
 
 # add bin tray key
 wget -O - https://bintray.com/user/downloadSubjectPublicKey\?username\=bintray | sudo apt-key add -
 
 # update sources and install
 sudo apt-get update
-sudo apt-get install super-productivity
+sudo apt-get install superproductivity
 ```
 
 ### MacOS
