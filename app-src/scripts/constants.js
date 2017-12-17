@@ -57,7 +57,9 @@
       currentTask: undefined,
       currentProject: undefined,
       currentSession: {
-        timeWorkedWithoutBreak: undefined
+        timeWorkedWithoutBreak: undefined,
+        pomodoroIsOnBreak: false,
+        pomodoroCurrentCycle: 0,
       },
       tasks: [],
       backlogTasks: [],
@@ -106,6 +108,13 @@
           intervalInSeconds: 6,
           isSyncEnabled: false,
           syncPath: '~/sync.json',
+        },
+        pomodoro: {
+          duration: moment.duration(45, 'minutes'),
+          breakDuration: moment.duration(5, 'minutes'),
+          longerBreakDuration: moment.duration(15, 'minutes'),
+          cyclesBeforeLongerBreak: 4,
+          isShowDistractionsOnBreak: true,
         },
         isTakeABreakEnabled: false,
         takeABreakMinWorkingTime: undefined,

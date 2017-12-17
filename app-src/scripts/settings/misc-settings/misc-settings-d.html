@@ -15,6 +15,12 @@
     <p>Allows you to configure a reoccurring reminder when you have worked for a specified amount of time without taking a break.</p>
     <p>You can modify the message displayed. ${duration} will be replaced with the time spent without a break.</p>
   </div>
+
+  <div class="md-subhead">Pomodoro Settings</div>
+  <p>The pomodoro timer can be configured via 4 settings. The duration of every work session, the duration of normal breaks, the number of work sessions to run before a longer break is started and the duration of this longer break.</p>
+  <p>You can also set if you want to display your distractions during your pomodoro breaks.</p>
+
+
 </help-section>
 
 <div>
@@ -54,4 +60,51 @@
     <textarea ng-model="vm.settings.takeABreakMessage"
               rows="3"></textarea>
   </md-input-container>
+</section>
+
+<section>
+  <h3 class="md-subhead">
+    <ng-md-icon icon="add_alert"></ng-md-icon>
+    Pomodoro
+  </h3>
+
+  <md-input-container class="md-block md-icon-float">
+    <label>Work Session Duration</label>
+    <ng-md-icon icon="timer"
+                aria-label="timer"></ng-md-icon>
+    <input type="text"
+           input-duration
+           ng-model="vm.settings.pomodoro.duration">
+  </md-input-container>
+
+  <md-input-container class="md-block md-icon-float">
+    <label>Break Duration</label>
+    <ng-md-icon icon="timer"
+                aria-label="timer"></ng-md-icon>
+    <input type="text"
+           input-duration
+           ng-model="vm.settings.pomodoro.breakDuration">
+  </md-input-container>
+
+  <md-input-container class="md-block md-icon-float">
+    <label>Longer Break Duration</label>
+    <ng-md-icon icon="timer"
+                aria-label="timer"></ng-md-icon>
+    <input type="text"
+           input-duration
+           ng-model="vm.settings.pomodoro.longerBreakDuration">
+  </md-input-container>
+
+  <md-input-container class="md-block">
+    <label>Cycles for longer break</label>
+    <input type="text"
+           ng-model="vm.settings.pomodoro.cyclesBeforeLongerBreak">
+  </md-input-container>
+
+  <div>
+    <md-switch ng-model="vm.settings.pomodoro.isShowDistractionsOnBreak"
+               aria-label="Show distractions on break">
+      Show distractions on break
+    </md-switch>
+  </div>
 </section>

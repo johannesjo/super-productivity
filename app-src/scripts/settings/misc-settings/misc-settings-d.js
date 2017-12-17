@@ -30,6 +30,8 @@
   function MiscSettingsCtrl(IS_ELECTRON) {
     let vm = this;
     vm.IS_ELECTRON = IS_ELECTRON;
+    console.log(vm);
+
   }
 
 })();
