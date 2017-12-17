@@ -3,6 +3,7 @@
 
 const config = require('./config');
 const gulp = require('gulp');
+const fs = require('fs');
 
 /**
  * Dev Task File
@@ -34,7 +35,7 @@ const sort = require('gulp-natural-sort');
 const notify = require('gulp-notify');
 
 // main task
-gulp.task('default', function (cb) {
+gulp.task('default', function(cb) {
   runSequence(
     //'ngConfig',
     'wiredep',
@@ -44,7 +45,7 @@ gulp.task('default', function (cb) {
     'buildStyles',
     'browserSync',
     'watch',
-    function () {
+    function() {
       // run in parallel but afterwards
       gulp.start('test');
       cb();
@@ -54,7 +55,7 @@ gulp.task('default', function (cb) {
 gulp.task('serve', ['default']);
 gulp.task('server', ['default']);
 
-gulp.task('injectAll', function (callback) {
+gulp.task('injectAll', function(callback) {
   runSequence(
     'wiredep',
     'injectScripts',
@@ -64,20 +65,20 @@ gulp.task('injectAll', function (callback) {
   );
 });
 
-gulp.task('watch', function (cb) {
-  watch(config.stylesF, function () {
+gulp.task('watch', function(cb) {
+  watch(config.stylesF, function() {
     gulp.start('buildStyles')
       .on('end', cb);
   });
-  watch(config.scriptsF, function () {
+  watch(config.scriptsF, function() {
     gulp.start('injectScripts')
       .on('end', cb);
   });
-  watch(config.scriptsAllF, function () {
+  watch(config.scriptsAllF, function() {
     gulp.start('lint')
       .on('end', cb);
   });
-  watch(config.allHtmlF, function () {
+  watch(config.allHtmlF, function() {
     gulp.start('html')
       .on('end', cb);
   });
@@ -91,7 +92,17 @@ gulp.task('watch', function (cb) {
   //});
 });
 
-gulp.task('buildStyles', function (cb) {
+gulp.task('versionConst', (cb) => {
+  const pjson = require('../package.json');
+  const ver = pjson.version;
+  const versionJsStr = `angular
+  .module('superProductivity')
+  .constant('VERSION', '${ver}');
+  `;
+  fs.writeFile(config.scripts + '/version.js', versionJsStr, cb);
+});
+
+gulp.task('buildStyles', function(cb) {
   runSequence(
     'injectStyles',
     'sass',
@@ -99,7 +110,7 @@ gulp.task('buildStyles', function (cb) {
   );
 });
 
-gulp.task('injectStyles', function () {
+gulp.task('injectStyles', function() {
   const sources = gulp.src(config.stylesF, { read: false })
     .pipe(sort());
   const target = gulp.src(config.mainSassFile);
@@ -113,7 +124,7 @@ gulp.task('injectStyles', function () {
         ignorePath: [config.base.replace('./', ''), 'styles'],
         relative: true,
         addRootSlash: false,
-        transform: function (filepath) {
+        transform: function(filepath) {
           if (filepath) {
             return '@import \'' + filepath + '\';';
           }
@@ -123,7 +134,7 @@ gulp.task('injectStyles', function () {
     .pipe(outputFolder);
 });
 
-gulp.task('injectScripts', function () {
+gulp.task('injectScripts', function() {
   const sources = gulp.src(config.scriptsF, { read: true })
     .pipe(sort());
   const target = gulp.src(config.mainFile);
@@ -137,13 +148,13 @@ gulp.task('injectScripts', function () {
     .pipe(gulp.dest(config.base));
 });
 
-gulp.task('sass', function () {
+gulp.task('sass', function() {
   const sources = gulp.src(config.mainSassFile);
   const outputFolder = gulp.dest(config.styles);
 
   return sources
     .pipe(plumber({
-      handleError: function (err) {
+      handleError: function(err) {
         console.log(err);
         this.emit('end');
       }
@@ -160,7 +171,7 @@ gulp.task('sass', function () {
     .pipe(browserSync.stream());
 });
 
-gulp.task('browserSync', function () {
+gulp.task('browserSync', function() {
   browserSync({
     port: config.browserSyncPort,
     reloadDebounce: 100,
@@ -171,14 +182,14 @@ gulp.task('browserSync', function () {
   });
 });
 
-gulp.task('html', function () {
+gulp.task('html', function() {
   return gulp.src(config.allHtmlF)
     .pipe(reload({ stream: true }));
 });
 
 gulp.task('wiredep', ['wirdepKarma', 'wiredepIndex']);
 
-gulp.task('wirdepKarma', function () {
+gulp.task('wirdepKarma', function() {
   return gulp.src(config.karmaConf, { base: './' })
     .pipe(wiredep({
       devDependencies: true,
@@ -189,7 +200,7 @@ gulp.task('wirdepKarma', function () {
     .pipe(gulp.dest('./'));
 });
 
-gulp.task('wiredepIndex', function () {
+gulp.task('wiredepIndex', function() {
   return gulp.src(config.mainFile, { base: './' })
     .pipe(wiredep({
       devDependencies: false,
@@ -200,7 +211,7 @@ gulp.task('wiredepIndex', function () {
     .pipe(gulp.dest('./'));
 });
 
-gulp.task('test', function (done) {
+gulp.task('test', function(done) {
   new KarmaServer({
     configFile: __dirname + '/../karma.conf.js',
     action: 'watch',
@@ -209,7 +220,7 @@ gulp.task('test', function (done) {
   }, done).start();
 });
 
-gulp.task('testSingle', function (done) {
+gulp.task('testSingle', function(done) {
   new KarmaServer({
     configFile: __dirname + '/../karma.conf.js',
     action: 'run',
@@ -218,13 +229,13 @@ gulp.task('testSingle', function (done) {
   }, done).start();
 });
 
-gulp.task('lint', function () {
-  const notifyHandler = function (file) {
+gulp.task('lint', function() {
+  const notifyHandler = function(file) {
     if (file.jshint.success) {
       // Don't show something if success
       return false;
     }
-    const errors = file.jshint.results.map(function (data) {
+    const errors = file.jshint.results.map(function(data) {
       if (data.error) {
         return '(' + data.error.line + ':' + data.error.character + ') ' + data.error.reason;
       }
@@ -244,7 +255,7 @@ gulp.task('lint', function () {
     .pipe(jscs());
 });
 
-gulp.task('beautify', function () {
+gulp.task('beautify', function() {
   return gulp.src([
     config.scriptsAllF,
     './karma-e2e.conf.js',

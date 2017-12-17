@@ -28,7 +28,7 @@
     "pub": "run-s buildFrontend && electron-builder -p always",
     "release": "run-s release.changelog dist",
     "release.changelog": "conventional-changelog -i CHANGELOG.md -s -p angular",
-    "version": "run-s release.changelog && git add CHANGELOG.md"
+    "version": "run-s release.changelog && gulp versionConst && git add -A"
   },
   "publish": [
     {
