@@ -6,7 +6,6 @@ pomodoro-button {
   @include ng-pop-in-popout;
 
   .timer-btn {
-    font-size: 12px;
     text-align: center !important;
     padding-left: 5px !important;
     font-weight: bold;
@@ -17,6 +16,7 @@ pomodoro-button {
   }
 
   .timer-btn-text {
+    font-size: 14px;
     position: absolute;
     top: 50%;
     left: 50%;
