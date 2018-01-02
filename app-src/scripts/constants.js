@@ -58,8 +58,12 @@
       currentProject: undefined,
       currentSession: {
         timeWorkedWithoutBreak: undefined,
-        pomodoroIsOnBreak: false,
-        pomodoroCurrentCycle: 0,
+        pomodoro:{
+          status : undefined,
+          isOnBreak: false,
+          currentCycle: 0,
+          currentSessionTime: undefined,
+        }
       },
       tasks: [],
       backlogTasks: [],

@@ -3,10 +3,17 @@ pomodoro-button {
   display: inline-block;
   max-height: 40px;
 
+  .timer-btn {
+    font-size: 12px;
+    text-align: center !important;
+    padding-left: 5px !important;
+    font-weight: bold;
+  }
+
   md-fab-actions {
 
     .md-fab-action-item {
-      margin-top: 10px;
+      margin-top: 5px;
     }
   }
 }

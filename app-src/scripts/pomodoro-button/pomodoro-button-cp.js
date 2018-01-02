@@ -11,6 +11,22 @@
   class PomodoroButtonCtrl {
     /* @ngInject */
     constructor(PomodoroButton) {
+      this.svc = PomodoroButton;
+    }
+
+    play() {
+      this.svc.play();
+      this.isOpen = false
+    }
+
+    pause() {
+      this.svc.pause();
+      this.isOpen = false
+    }
+
+    stop() {
+      this.svc.stop();
+      this.isOpen = false
     }
   }
 

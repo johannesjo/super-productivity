@@ -4,29 +4,24 @@
                    ng-mouseenter="$ctrl.isOpen=true"
                    ng-mouseleave="$ctrl.isOpen=false">
   <md-fab-trigger>
-    <md-button class="md-icon-button md-accent md-raised">
-      <ng-md-icon icon="play_arrow"
-                  ng-if="$ctrl.status==='PLAY'"></ng-md-icon>
-      <ng-md-icon icon="pause"
-                  ng-if="$ctrl.status==='PAUSE'"></ng-md-icon>
-      <ng-md-icon icon="border_color"
-                  ng-if="$ctrl.status==='STOP'"></ng-md-icon>
+    <md-button class="md-icon-button md-accent md-raised timer-btn">
+      {{ $ctrl.svc.data.currentSessionTime | date:'mm:ss' }}
     </md-button>
   </md-fab-trigger>
   <md-fab-actions>
     <md-button class="md-fab md-raised md-mini"
-               ng-click="$ctrl.start()"
-               ng-if="$ctrl.status!=='PLAY'">
+               ng-click="$ctrl.play()"
+               ng-if="$ctrl.svc.data.status!=='PLAY'">
       <ng-md-icon icon="play_arrow"></ng-md-icon>
     </md-button>
     <md-button class="md-fab md-raised md-mini"
                ng-click="$ctrl.pause()"
-               ng-if="$ctrl.status!=='PAUSE'">
+               ng-if="$ctrl.svc.data.status==='PLAY'">
       <ng-md-icon icon="pause"></ng-md-icon>
     </md-button>
     <md-button class="md-fab md-raised md-mini"
                ng-click="$ctrl.stop()"
-               ng-if="$ctrl.status!=='STOP'">
+               ng-if="$ctrl.svc.data.status==='PLAY'">
       <ng-md-icon icon="stop"></ng-md-icon>
     </md-button>
   </md-fab-actions>
