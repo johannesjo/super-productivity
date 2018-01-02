@@ -5,7 +5,10 @@
                    ng-mouseleave="$ctrl.isOpen=false">
   <md-fab-trigger>
     <md-button class="md-icon-button md-accent md-raised timer-btn">
-      {{ $ctrl.svc.data.currentSessionTime | date:'mm:ss' }}
+      <ng-md-icon icon="pause"
+                  ng-if="$ctrl.svc.data.status==='PAUSE'"></ng-md-icon>
+      <span class="timer-btn-text"
+            ng-bind="$ctrl.svc.data.currentSessionTime | date:'mm:ss'"></span>
     </md-button>
   </md-fab-trigger>
   <md-fab-actions>
