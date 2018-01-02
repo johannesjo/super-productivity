@@ -1,0 +1,12 @@
+pomodoro-button {
+  align-items: center;
+  display: inline-block;
+  max-height: 40px;
+
+  md-fab-actions {
+
+    .md-fab-action-item {
+      margin-top: 10px;
+    }
+  }
+}
