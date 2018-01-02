@@ -68,43 +68,52 @@
     Pomodoro
   </h3>
 
-  <md-input-container class="md-block md-icon-float">
-    <label>Work Session Duration</label>
-    <ng-md-icon icon="timer"
-                aria-label="timer"></ng-md-icon>
-    <input type="text"
-           input-duration
-           ng-model="vm.settings.pomodoro.duration">
-  </md-input-container>
-
-  <md-input-container class="md-block md-icon-float">
-    <label>Break Duration</label>
-    <ng-md-icon icon="timer"
-                aria-label="timer"></ng-md-icon>
-    <input type="text"
-           input-duration
-           ng-model="vm.settings.pomodoro.breakDuration">
-  </md-input-container>
-
-  <md-input-container class="md-block md-icon-float">
-    <label>Longer Break Duration</label>
-    <ng-md-icon icon="timer"
-                aria-label="timer"></ng-md-icon>
-    <input type="text"
-           input-duration
-           ng-model="vm.settings.pomodoro.longerBreakDuration">
-  </md-input-container>
-
-  <md-input-container class="md-block">
-    <label>Cycles for longer break</label>
-    <input type="text"
-           ng-model="vm.settings.pomodoro.cyclesBeforeLongerBreak">
-  </md-input-container>
-
   <div>
-    <md-switch ng-model="vm.settings.pomodoro.isShowDistractionsOnBreak"
-               aria-label="Show distractions on break">
-      Show distractions on break
+    <md-switch ng-model="vm.settings.pomodoro.isEnabled"
+               aria-label="Enable Pomodoro Timer">
+      Enable Pomodoro Timer
     </md-switch>
+  </div>
+
+  <div ng-show="vm.settings.pomodoro.isEnabled">
+    <md-input-container class="md-block md-icon-float">
+      <label>Work Session Duration</label>
+      <ng-md-icon icon="timer"
+                  aria-label="timer"></ng-md-icon>
+      <input type="text"
+             input-duration
+             ng-model="vm.settings.pomodoro.duration">
+    </md-input-container>
+
+    <md-input-container class="md-block md-icon-float">
+      <label>Break Duration</label>
+      <ng-md-icon icon="timer"
+                  aria-label="timer"></ng-md-icon>
+      <input type="text"
+             input-duration
+             ng-model="vm.settings.pomodoro.breakDuration">
+    </md-input-container>
+
+    <md-input-container class="md-block md-icon-float">
+      <label>Longer Break Duration</label>
+      <ng-md-icon icon="timer"
+                  aria-label="timer"></ng-md-icon>
+      <input type="text"
+             input-duration
+             ng-model="vm.settings.pomodoro.longerBreakDuration">
+    </md-input-container>
+
+    <md-input-container class="md-block">
+      <label>Cycles for longer break</label>
+      <input type="text"
+             ng-model="vm.settings.pomodoro.cyclesBeforeLongerBreak">
+    </md-input-container>
+
+    <div>
+      <md-switch ng-model="vm.settings.pomodoro.isShowDistractionsOnBreak"
+                 aria-label="Show distractions on break">
+        Show distractions on break
+      </md-switch>
+    </div>
   </div>
 </section>

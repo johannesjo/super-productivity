@@ -3,6 +3,8 @@ pomodoro-button {
   display: inline-block;
   max-height: 40px;
 
+  @include ng-pop-in-popout;
+
   .timer-btn {
     font-size: 12px;
     text-align: center !important;

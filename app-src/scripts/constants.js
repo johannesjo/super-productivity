@@ -119,6 +119,7 @@
           longerBreakDuration: moment.duration(15, 'minutes'),
           cyclesBeforeLongerBreak: 4,
           isShowDistractionsOnBreak: true,
+          isEnabled: true,
         },
         isTakeABreakEnabled: false,
         takeABreakMinWorkingTime: undefined,
