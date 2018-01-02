@@ -16,17 +16,17 @@
 
     play() {
       this.svc.play();
-      this.isOpen = false
+      this.isOpen = false;
     }
 
     pause() {
       this.svc.pause();
-      this.isOpen = false
+      this.isOpen = false;
     }
 
     stop() {
       this.svc.stop();
-      this.isOpen = false
+      this.isOpen = false;
     }
   }
 

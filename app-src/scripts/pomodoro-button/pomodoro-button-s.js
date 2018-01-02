@@ -12,6 +12,7 @@
   const PLAY = 'PLAY';
   const PAUSE = 'PAUSE';
   const STOP = 'STOP';
+  const ON_BREAK = 'ON_BREAK';
   const TICK_INTERVAL = 1000;
 
   class PomodoroButton {
@@ -23,21 +24,58 @@
       this.data = this.$rootScope.r.currentSession.pomodoro || {};
       this.$rootScope.r.currentSession.pomodoro = this.data;
 
+      this.config = this.$rootScope.r.config.pomodoro;
+
       // DEFAULTS
       this.data.status = STOP;
       this.data.currentSessionTime = 0;
+      this.data.currentCycle = 1;
+      this.data.isOnBreak = false;
 
+      console.log(this.config);
+      console.log(moment.duration(this.config.longerBreakDuration).asMilliseconds());
+      console.log(moment.duration(this.config.duration).asMilliseconds());
       // TODO: INIT REMOTE INTERFACE
     }
 
     play() {
       this.data.status = PLAY;
+      this.initTimer();
+    }
 
-      if (this.data.currentSessionTime) {
-        this.continueTimer();
-      } else {
-        this.initTimer();
+    sessionDone() {
+      this.data.isOnBreak = !this.data.isOnBreak;
+      if (!this.data.isOnBreak) {
+        this.data.currentCycle++;
       }
+
+      this.initTimer();
+    }
+
+    initTimer() {
+      if (this.data.isOnBreak) {
+        // init break session timer
+        if (this.data.currentCycle % this.config.cyclesBeforeLongerBreak === 0) {
+          this.data.currentSessionTime = moment
+            .duration(this.config.longerBreakDuration)
+            .asMilliseconds();
+        } else {
+          this.data.currentSessionTime = moment
+            .duration(this.config.breakDuration)
+            .asMilliseconds();
+        }
+      } else {
+        // init work session timer
+        this.data.currentSessionTime = moment.duration(this.config.duration).asMilliseconds();
+      }
+
+      if (this.timer) {
+        this.$interval.cancel(this.timer);
+      }
+
+      this.timer = this.$interval(() => {
+        this.tick();
+      }, TICK_INTERVAL);
     }
 
     pause() {
@@ -48,23 +86,13 @@
     stop() {
       this.data.status = STOP;
       this.$interval.cancel(this.timer);
-      this.data.currentSessionTime = 0;
-    }
-
-    initTimer() {
-      this.data.currentSessionTime = 0;
-      this.continueTimer();
-    }
-
-    continueTimer() {
-      this.timer = this.$interval(() => {
-        this.tick();
-      }, TICK_INTERVAL);
     }
 
     tick() {
-      this.data.currentSessionTime += TICK_INTERVAL;
-      console.log('TICK', this.data.currentSessionTime);
+      this.data.currentSessionTime -= TICK_INTERVAL;
+      if (this.data.currentSessionTime <= 0) {
+        this.sessionDone();
+      }
     }
   }
 

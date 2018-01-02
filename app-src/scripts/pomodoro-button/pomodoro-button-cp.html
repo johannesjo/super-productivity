@@ -10,6 +10,8 @@
                   ng-if="$ctrl.svc.data.status==='PAUSE'"></ng-md-icon>
       <span class="timer-btn-text"
             ng-bind="$ctrl.svc.data.currentSessionTime | date:'mm:ss'"></span>
+      <span class="timer-btn-cycle"
+            ng-bind="$ctrl.svc.data.currentCycle"></span>
     </md-button>
   </md-fab-trigger>
   <md-fab-actions>

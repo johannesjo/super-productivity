@@ -21,7 +21,17 @@ pomodoro-button {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    text-shadow: 0 0 1px #000;
+    text-shadow: 0 0 1px #000000;
+  }
+
+  .timer-btn-cycle {
+    font-size: 15px;
+    margin-bottom: -5px;
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translate(-50%, 0);
+    text-shadow: 0 0 1px #000000;
   }
 
   md-fab-actions {
