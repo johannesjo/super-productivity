@@ -12,7 +12,6 @@
   const PLAY = 'PLAY';
   const PAUSE = 'PAUSE';
   const STOP = 'STOP';
-  const ON_BREAK = 'ON_BREAK';
   const TICK_INTERVAL = 1000;
 
   class PomodoroButton {
@@ -41,6 +40,24 @@
     play() {
       this.data.status = PLAY;
       this.initTimer();
+    }
+
+    toggle() {
+      if (this.data.status === PLAY) {
+        this.pause();
+      } else{
+        this.play();
+      }
+    }
+
+    pause() {
+      this.data.status = PAUSE;
+      this.$interval.cancel(this.timer);
+    }
+
+    stop() {
+      this.data.status = STOP;
+      this.$interval.cancel(this.timer);
     }
 
     sessionDone() {
@@ -76,16 +93,6 @@
       this.timer = this.$interval(() => {
         this.tick();
       }, TICK_INTERVAL);
-    }
-
-    pause() {
-      this.data.status = PAUSE;
-      this.$interval.cancel(this.timer);
-    }
-
-    stop() {
-      this.data.status = STOP;
-      this.$interval.cancel(this.timer);
     }
 
     tick() {

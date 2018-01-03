@@ -28,6 +28,11 @@
       this.svc.stop();
       this.isOpen = false;
     }
+
+    toggle() {
+      this.svc.toggle();
+      this.isOpen = false;
+    }
   }
 
   angular

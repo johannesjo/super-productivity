@@ -1,6 +1,7 @@
 <md-fab-speed-dial md-direction="down"
                    md-open="$ctrl.isOpen"
                    class="md-scale"
+                   ng-click="$ctrl.toggle($event)"
                    ng-mouseenter="$ctrl.isOpen=true"
                    ng-mouseleave="$ctrl.isOpen=false">
   <md-fab-trigger>
