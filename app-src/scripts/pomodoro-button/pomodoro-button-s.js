@@ -15,10 +15,11 @@
 
   class PomodoroButton {
     /* @ngInject */
-    constructor($rootScope, $interval, Dialogs) {
+    constructor($rootScope, $interval, Dialogs, Tasks) {
       this.$rootScope = $rootScope;
       this.$interval = $interval;
       this.Dialogs = Dialogs;
+      this.Tasks = Tasks;
 
       this.data = this.$rootScope.r.currentSession.pomodoro || {};
       this.$rootScope.r.currentSession.pomodoro = this.data;
@@ -41,18 +42,17 @@
 
     play() {
       // select task if none selected
-      if (!this.$rootScope.r.currentTask) {
-        this.Dialogs('TASK_SELECTION')
-          .then(() => {
-            this.initTimer();
-            // import that the status is set afterwards
-            this.data.status = PLAY;
-          });
-      } else {
-        this.initTimer();
-        // import that the status is set afterwards
-        this.data.status = PLAY;
+      this.selectTask(this.start);
+    }
+
+    start() {
+      if (this.data.status !== MANUAL_PAUSE) {
+        this.setSessionTimerTime();
       }
+
+      this.initTimer();
+      // import that the status is set afterwards
+      this.data.status = PLAY;
     }
 
     toggle() {
@@ -66,6 +66,9 @@
     pause() {
       this.data.status = MANUAL_PAUSE;
       this.$interval.cancel(this.timer);
+
+      this.lastCurrentTask = this.Tasks.getCurrent() || this.lastCurrentTask;
+      this.Tasks.updateCurrent(undefined);
     }
 
     stop() {
@@ -76,14 +79,18 @@
 
     sessionDone() {
       this.data.isOnBreak = !this.data.isOnBreak;
-      if (!this.data.isOnBreak) {
+      if (this.data.isOnBreak) {
+        this.lastCurrentTask = this.Tasks.getCurrent();
+        this.Tasks.updateCurrent(undefined);
+      } else {
         this.data.currentCycle++;
+        this.selectTask()
       }
 
-      this.initTimer();
+      this.setSessionTimerTime();
     }
 
-    setSessionTimerTime(){
+    setSessionTimerTime() {
       if (this.data.isOnBreak) {
         // init break session timer
         if (this.data.currentCycle % this.config.cyclesBeforeLongerBreak === 0) {
@@ -102,10 +109,6 @@
     }
 
     initTimer() {
-      if (this.data.status !== MANUAL_PAUSE) {
-        this.setSessionTimerTime();
-      }
-
       if (this.timer) {
         this.$interval.cancel(this.timer);
       }
@@ -119,6 +122,22 @@
       this.data.currentSessionTime -= TICK_INTERVAL;
       if (this.data.currentSessionTime <= 0) {
         this.sessionDone();
+      }
+    }
+
+    selectTask(cb) {
+      if (!this.Tasks.getCurrent()) {
+        if (this.lastCurrentTask) {
+          this.Tasks.updateCurrent(this.lastCurrentTask);
+          cb && cb.apply(this);
+        } else {
+          this.Dialogs('TASK_SELECTION')
+            .then(() => {
+              cb && cb.apply(this);
+            });
+        }
+      } else {
+        cb && cb.apply(this);
       }
     }
   }
