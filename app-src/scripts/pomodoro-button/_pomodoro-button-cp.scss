@@ -2,36 +2,40 @@ pomodoro-button {
   align-items: center;
   display: inline-block;
   max-height: 40px;
+  position: relative;
 
   @include ng-pop-in-popout;
 
   .timer-btn {
     text-align: center !important;
     padding-left: 5px !important;
-    font-weight: bold;
+    position: relative;
+    overflow: visible;
 
     ng-md-icon {
-      opacity: 0.5;
+      margin-top: -10px;
+
+      @include ng-pop-in;
     }
   }
 
-  .timer-btn-text {
-    font-size: 14px;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    text-shadow: 0 0 1px #000000;
+  md-fab-trigger {
+    position: relative;
   }
 
-  .timer-btn-cycle {
+  .timer-btn-text {
     font-size: 15px;
-    margin-bottom: -5px;
+    line-height: 1;
+    font-weight: bold;
     position: absolute;
     bottom: 0;
     left: 50%;
     transform: translate(-50%, 0);
-    text-shadow: 0 0 1px #000000;
+    color: #333333;
+    background: #ffffff;
+    margin-bottom: -4px;
+    padding: 1px 2px;
+    z-index: 10;
   }
 
   md-fab-actions {
