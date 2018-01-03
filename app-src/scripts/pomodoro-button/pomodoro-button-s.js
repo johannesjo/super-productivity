@@ -10,54 +10,68 @@
   'use strict';
 
   const PLAY = 'PLAY';
-  const PAUSE = 'PAUSE';
-  const STOP = 'STOP';
+  const MANUAL_PAUSE = 'MANUAL_PAUSE';
   const TICK_INTERVAL = 1000;
 
   class PomodoroButton {
     /* @ngInject */
-    constructor($rootScope, $interval) {
+    constructor($rootScope, $interval, Dialogs) {
       this.$rootScope = $rootScope;
       this.$interval = $interval;
+      this.Dialogs = Dialogs;
 
       this.data = this.$rootScope.r.currentSession.pomodoro || {};
       this.$rootScope.r.currentSession.pomodoro = this.data;
 
       this.config = this.$rootScope.r.config.pomodoro;
 
-      // DEFAULTS
-      this.data.status = STOP;
-      this.data.currentSessionTime = 0;
-      this.data.currentCycle = 1;
-      this.data.isOnBreak = false;
+      this.initSession();
 
-      console.log(this.config);
-      console.log(moment.duration(this.config.longerBreakDuration).asMilliseconds());
-      console.log(moment.duration(this.config.duration).asMilliseconds());
       // TODO: INIT REMOTE INTERFACE
     }
 
+    initSession() {
+      // DEFAULTS
+      this.data.status = MANUAL_PAUSE;
+      this.data.currentSessionTime = 0;
+      this.data.currentCycle = 1;
+      this.data.isOnBreak = false;
+      this.setSessionTimerTime();
+    }
+
     play() {
-      this.data.status = PLAY;
-      this.initTimer();
+      // select task if none selected
+      if (!this.$rootScope.r.currentTask) {
+        this.Dialogs('TASK_SELECTION')
+          .then(() => {
+            this.initTimer();
+            // import that the status is set afterwards
+            this.data.status = PLAY;
+          });
+      } else {
+        this.initTimer();
+        // import that the status is set afterwards
+        this.data.status = PLAY;
+      }
     }
 
     toggle() {
       if (this.data.status === PLAY) {
         this.pause();
-      } else{
+      } else {
         this.play();
       }
     }
 
     pause() {
-      this.data.status = PAUSE;
+      this.data.status = MANUAL_PAUSE;
       this.$interval.cancel(this.timer);
     }
 
     stop() {
-      this.data.status = STOP;
+      this.data.status = MANUAL_PAUSE;
       this.$interval.cancel(this.timer);
+      this.initSession();
     }
 
     sessionDone() {
@@ -69,7 +83,7 @@
       this.initTimer();
     }
 
-    initTimer() {
+    setSessionTimerTime(){
       if (this.data.isOnBreak) {
         // init break session timer
         if (this.data.currentCycle % this.config.cyclesBeforeLongerBreak === 0) {
@@ -84,6 +98,12 @@
       } else {
         // init work session timer
         this.data.currentSessionTime = moment.duration(this.config.duration).asMilliseconds();
+      }
+    }
+
+    initTimer() {
+      if (this.data.status !== MANUAL_PAUSE) {
+        this.setSessionTimerTime();
       }
 
       if (this.timer) {

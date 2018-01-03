@@ -97,7 +97,7 @@
     vm.done = () => {
       // only open if there is no current task already selected
       if (!vm.currentTask) {
-        Dialogs('TASK_SELECTION', { tasks: $rootScope.r.tasks })
+        Dialogs('TASK_SELECTION')
           .then(() => {
             $state.go('work-view');
           });
