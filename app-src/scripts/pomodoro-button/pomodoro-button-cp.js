@@ -14,22 +14,30 @@
       this.svc = PomodoroButton;
     }
 
-    play() {
+    play($ev) {
+      $ev.preventDefault();
+      $ev.stopPropagation();
       this.svc.play();
       this.isOpen = false;
     }
 
-    pause() {
+    pause($ev) {
+      $ev.preventDefault();
+      $ev.stopPropagation();
       this.svc.pause();
       this.isOpen = false;
     }
 
-    stop() {
+    stop($ev) {
+      $ev.preventDefault();
+      $ev.stopPropagation();
       this.svc.stop();
       this.isOpen = false;
     }
 
-    toggle() {
+    toggle($ev) {
+      $ev.preventDefault();
+      $ev.stopPropagation();
       this.svc.toggle();
       this.isOpen = false;
     }
