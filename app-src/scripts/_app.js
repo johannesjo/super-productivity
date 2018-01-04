@@ -45,7 +45,7 @@
     .run(initAutomaticSyncIfEnabled)
     .run(initAutomaticBackupsIfEnabled)
     .run(showWelcomeDialog)
-    //.run(goToWorkViewIfTasks);
+    .run(goToWorkViewIfTasks);
 
   /* @ngInject */
   function configMarked(markedProvider) {

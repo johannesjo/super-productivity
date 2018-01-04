@@ -66,6 +66,11 @@
     }
 
     initSession() {
+      // unset current task
+      // TODO // NOTE: this has side effects
+      this.lastCurrentTask = this.Tasks.getCurrent() || this.lastCurrentTask;
+      this.Tasks.updateCurrent(undefined);
+
       // DEFAULTS
       this.data.status = MANUAL_PAUSE;
       this.data.currentSessionTime = 0;
