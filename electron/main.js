@@ -128,6 +128,10 @@ electron.ipcMain.on('NOTIFY', (ev, notification) => {
   notifier.notify(notification);
 });
 
+electron.ipcMain.on('SHOW_OR_FOCUS', () => {
+  showOrFocus();
+});
+
 // HELPER FUNCTIONS
 // ----------------
 function createIndicator() {

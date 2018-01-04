@@ -14,11 +14,15 @@
     .controller('PomodoroBreakCtrl', PomodoroBreakCtrl);
 
   /* @ngInject */
-  function PomodoroBreakCtrl($mdDialog, $rootScope, theme, pomodoroData, pomodoroConfig, $scope, $timeout) {
+  function PomodoroBreakCtrl($mdDialog, $rootScope, theme, pomodoroData, pomodoroConfig, $scope, $timeout, IS_ELECTRON) {
     this.r = $rootScope.r;
     this.theme = theme;
     this.pomodoroData = pomodoroData;
     this.isShowDistractionsOnBreak = pomodoroConfig.isShowDistractionsOnBreak;
+
+    if (IS_ELECTRON) {
+      window.ipcRenderer.send('SHOW_OR_FOCUS');
+    }
 
     if (this.pomodoroData.currentSessionTime) {
       // close 500 ms earlier to prevent next session time from being displayed
@@ -38,7 +42,7 @@
       $mdDialog.hide();
     };
 
-    this.continue = ()=>{
+    this.continue = () => {
       $mdDialog.hide(true);
     };
 
