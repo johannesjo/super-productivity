@@ -34,6 +34,10 @@
 
       this.initListeners();
       this.initSession();
+      //this.dialog = this.Dialogs('POMODORO_BREAK', {
+      //  pomodoroData: this.data,
+      //  pomodoroConfig: this.config
+      //});
 
       //
 
@@ -110,6 +114,16 @@
     sessionDone() {
       this.data.isOnBreak = !this.data.isOnBreak;
       if (this.data.isOnBreak) {
+        this.dialog = this.Dialogs('POMODORO_BREAK', {
+          pomodoroData: this.data,
+          pomodoroConfig: this.config
+        })
+          .then((isSkipBreak) => {
+            if (isSkipBreak) {
+              this.sessionDone();
+            }
+          });
+
         if ((this.config.isStopTrackingOnBreak && this.isOnShortBreak()) ||
           (this.config.isStopTrackingOnLongBreak && this.isOnLongBreak())) {
           this.lastCurrentTask = this.Tasks.getCurrent();
@@ -117,7 +131,7 @@
         }
       } else {
         this.data.currentCycle++;
-        this.selectTask()
+        this.selectTask();
       }
 
       this.setSessionTimerTime();

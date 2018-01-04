@@ -63,19 +63,7 @@
 
 <section class="distractions"
          ng-if="r.distractions.length > 0">
-  <h2 class="md-title">
-    <ng-md-icon icon="flash_on"></ng-md-icon>
-    Your distractions for today
-  </h2>
-  <ul>
-    <li ng-repeat="distraction in r.distractions track by $index"
-        ng-bind="distraction"></li>
-  </ul>
-  <md-button class="md-raised"
-             ng-click="r.distractions=[]">
-    <ng-md-icon icon="delete"></ng-md-icon>
-    Delete distractions
-  </md-button>
+  <distraction-list></distraction-list>
 </section>
 
 

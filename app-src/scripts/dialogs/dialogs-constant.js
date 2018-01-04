@@ -72,6 +72,10 @@
       EDIT_GLOBAL_LINK: {
         controller: 'EditGlobalLinkCtrl',
         templateUrl: 'scripts/dialogs/edit-global-link/edit-global-link-c.html'
+      },
+      POMODORO_BREAK: {
+        controller: 'PomodoroBreakCtrl',
+        templateUrl: 'scripts/dialogs/pomodoro-break/pomodoro-break-c.html'
       }
     });
 })();
