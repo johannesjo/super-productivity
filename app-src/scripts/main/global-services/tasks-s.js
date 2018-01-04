@@ -19,7 +19,8 @@
   /* @ngInject */
   class Tasks {
 
-    constructor(Uid, $rootScope, Dialogs, IS_ELECTRON, ShortSyntax, TasksUtil, Jira, TakeABreakReminder, SimpleToast, AppStorage) {
+    constructor(Uid, $rootScope, Dialogs, IS_ELECTRON, ShortSyntax, TasksUtil, Jira, TakeABreakReminder, SimpleToast, AppStorage, EV) {
+      this.EV = EV;
       this.$rootScope = $rootScope;
       this.Uid = Uid;
       this.$rootScope = $rootScope;
@@ -435,7 +436,10 @@
         });
       }
 
-      this.$rootScope.r.currentTask = this.$rootScope.r.currentTask = task;
+      this.$rootScope.r.currentTask = task;
+
+      // broadcast event
+      this.$rootScope.$broadcast(this.EV.UPDATE_CURRENT_TASK, { task, isCallFromTimeTracking });
     }
 
     removeTimeSpent(task, timeSpentToRemoveAsMoment) {

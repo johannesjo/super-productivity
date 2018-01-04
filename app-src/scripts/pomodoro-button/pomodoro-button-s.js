@@ -15,10 +15,12 @@
 
   class PomodoroButton {
     /* @ngInject */
-    constructor($rootScope, $interval, Dialogs, Tasks, LS_DEFAULTS) {
+    constructor($rootScope, $interval, Dialogs, Tasks, SimpleToast, LS_DEFAULTS, EV) {
       this.$rootScope = $rootScope;
+      this.EV = EV;
       this.$interval = $interval;
       this.Dialogs = Dialogs;
+      this.SimpleToast = SimpleToast;
       this.Tasks = Tasks;
 
       this.data = this.$rootScope.r.currentSession.pomodoro || {};
@@ -30,9 +32,33 @@
 
       this.config = this.$rootScope.r.config.pomodoro;
 
+      this.initListeners();
       this.initSession();
 
+      //
+
       // TODO: INIT REMOTE INTERFACE
+    }
+
+    initListeners() {
+      this.$rootScope.$on(this.EV.UPDATE_CURRENT_TASK, (ev, args) => {
+        // don't update anything if on break
+        if (this.data.isOnBreak) {
+          if (args.task &&
+            (this.config.isStopTrackingOnBreak && this.isOnShortBreak() ||
+              (this.config.isStopTrackingOnLongBreak && this.isOnLongBreak()))) {
+            this.SimpleToast('WARNING', 'You\'re on (pomodoro) break, the task will be started afterwards.');
+            this.lastCurrentTask = args.task;
+            this.Tasks.updateCurrent(undefined);
+          }
+        } else {
+          if (args.task && this.data.status !== PLAY) {
+            this.play();
+          } else if (!args.task && this.data.status !== MANUAL_PAUSE) {
+            this.pause();
+          }
+        }
+      });
     }
 
     initSession() {

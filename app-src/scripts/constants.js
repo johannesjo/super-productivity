@@ -49,6 +49,9 @@
     .constant('ON_DEMAND_LS_FIELDS_FOR_PROJECT', [
       'data',
     ])
+    .constant('EV', {
+      UPDATE_CURRENT_TASK: 'UPDATE_CURRENT_TASK'
+    })
     .constant('EV_PROJECT_CHANGED', 'EV_PROJECT_CHANGED')
     .constant('LS_DEFAULTS', {
       note: undefined,
@@ -58,8 +61,8 @@
       currentProject: undefined,
       currentSession: {
         timeWorkedWithoutBreak: undefined,
-        pomodoro:{
-          status : undefined,
+        pomodoro: {
+          status: undefined,
           isOnBreak: false,
           currentCycle: 0,
           currentSessionTime: undefined,
@@ -121,7 +124,6 @@
           cyclesBeforeLongerBreak: 4,
           isStopTrackingOnBreak: true,
           isStopTrackingOnLongBreak: true,
-          isOnlyTrackPomodoroTime: false,
           isShowDistractionsOnBreak: true,
         },
         isTakeABreakEnabled: false,
