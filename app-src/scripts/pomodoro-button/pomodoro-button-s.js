@@ -15,7 +15,7 @@
 
   class PomodoroButton {
     /* @ngInject */
-    constructor($rootScope, $interval, Dialogs, Tasks) {
+    constructor($rootScope, $interval, Dialogs, Tasks, LS_DEFAULTS) {
       this.$rootScope = $rootScope;
       this.$interval = $interval;
       this.Dialogs = Dialogs;
@@ -23,6 +23,10 @@
 
       this.data = this.$rootScope.r.currentSession.pomodoro || {};
       this.$rootScope.r.currentSession.pomodoro = this.data;
+
+      if (!this.$rootScope.r.config.pomodoro) {
+        this.$rootScope.r.config.pomodoro = LS_DEFAULTS.config.pomodoro;
+      }
 
       this.config = this.$rootScope.r.config.pomodoro;
 
@@ -80,8 +84,11 @@
     sessionDone() {
       this.data.isOnBreak = !this.data.isOnBreak;
       if (this.data.isOnBreak) {
-        this.lastCurrentTask = this.Tasks.getCurrent();
-        this.Tasks.updateCurrent(undefined);
+        if ((this.config.isStopTrackingOnBreak && this.isOnShortBreak()) ||
+          (this.config.isStopTrackingOnLongBreak && this.isOnLongBreak())) {
+          this.lastCurrentTask = this.Tasks.getCurrent();
+          this.Tasks.updateCurrent(undefined);
+        }
       } else {
         this.data.currentCycle++;
         this.selectTask()
@@ -91,17 +98,14 @@
     }
 
     setSessionTimerTime() {
-      if (this.data.isOnBreak) {
-        // init break session timer
-        if (this.data.currentCycle % this.config.cyclesBeforeLongerBreak === 0) {
-          this.data.currentSessionTime = moment
-            .duration(this.config.longerBreakDuration)
-            .asMilliseconds();
-        } else {
-          this.data.currentSessionTime = moment
-            .duration(this.config.breakDuration)
-            .asMilliseconds();
-        }
+      if (this.isOnLongBreak()) {
+        this.data.currentSessionTime = moment
+          .duration(this.config.longerBreakDuration)
+          .asMilliseconds();
+      } else if (this.isOnShortBreak()) {
+        this.data.currentSessionTime = moment
+          .duration(this.config.breakDuration)
+          .asMilliseconds();
       } else {
         // init work session timer
         this.data.currentSessionTime = moment.duration(this.config.duration).asMilliseconds();
@@ -125,19 +129,31 @@
       }
     }
 
+    isOnLongBreak() {
+      return (this.data.isOnBreak && (this.data.currentCycle % this.config.cyclesBeforeLongerBreak === 0));
+    }
+
+    isOnShortBreak() {
+      return (this.data.isOnBreak && (this.data.currentCycle % this.config.cyclesBeforeLongerBreak !== 0));
+    }
+
     selectTask(cb) {
+      const execCbIfGiven = () => {
+        if (cb) {
+          cb.apply(this);
+        }
+      };
+
       if (!this.Tasks.getCurrent()) {
         if (this.lastCurrentTask) {
           this.Tasks.updateCurrent(this.lastCurrentTask);
-          cb && cb.apply(this);
+          execCbIfGiven();
         } else {
           this.Dialogs('TASK_SELECTION')
-            .then(() => {
-              cb && cb.apply(this);
-            });
+            .then(execCbIfGiven);
         }
       } else {
-        cb && cb.apply(this);
+        execCbIfGiven();
       }
     }
   }

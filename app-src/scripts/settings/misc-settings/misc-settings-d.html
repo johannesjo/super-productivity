@@ -19,7 +19,8 @@
   <div class="md-subhead">Pomodoro Settings</div>
   <p>The pomodoro timer can be configured via 4 settings. The duration of every work session, the duration of normal breaks, the number of work sessions to run before a longer break is started and the duration of this longer break.</p>
   <p>You can also set if you want to display your distractions during your pomodoro breaks.</p>
-
+  <p>Setting "Pause time tracking on pomodoro break" will also track your breaks as work time spent on a task. Setting "Pause time tracking on <strong>longer</strong> pomodoro break" will do the same for the longer breaks.</p>
+  <p>Enabling "Only track pomodoro time" will disable time tracking if you're not in an active pomodoro work session.</p>
 
 </help-section>
 
@@ -108,6 +109,27 @@
       <input type="text"
              ng-model="vm.settings.pomodoro.cyclesBeforeLongerBreak">
     </md-input-container>
+
+    <div>
+      <md-switch ng-model="vm.settings.pomodoro.isStopTrackingOnBreak"
+                 aria-label="Pause time tracking on pomodoro break">
+        Pause time tracking on pomodoro break
+      </md-switch>
+    </div>
+
+    <div>
+      <md-switch ng-model="vm.settings.pomodoro.isStopTrackingOnLongBreak"
+                 aria-label="Pause time tracking on longer pomodoro break">
+        Pause time tracking on <strong>longer</strong> pomodoro break
+      </md-switch>
+    </div>
+
+    <div>
+      <md-switch ng-model="vm.settings.pomodoro.isOnlyTrackPomodoroTime"
+                 aria-label="Only track pomodoro time">
+        Only track pomodoro time
+      </md-switch>
+    </div>
 
     <div>
       <md-switch ng-model="vm.settings.pomodoro.isShowDistractionsOnBreak"
