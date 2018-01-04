@@ -11,7 +11,6 @@
 
   const IPC_EVENT_CURRENT_TASK_UPDATED = 'CHANGED_CURRENT_TASK';
   const IPC_EVENT_IDLE_TIME = 'IDLE_TIME';
-  const IPC_EVENT_BUSY = 'IS_BUSY';
 
   class TimeTracking {
     /* @ngInject */
@@ -69,12 +68,8 @@
     }
 
     handleIdle() {
-      const TMP_MIN_IDLE = 3 * 1000;
-
       window.ipcRenderer.on(IPC_EVENT_IDLE_TIME, (ev, idleTime) => {
-        console.log(idleTime, TMP_MIN_IDLE, idleTime);
-
-        if (idleTime > TMP_MIN_IDLE) {
+        if (idleTime > this.$rootScope.r.config.minIdleTimeInMs) {
           this.isIdle = true;
           this.$rootScope.$broadcast(this.EV.IS_IDLE);
 
@@ -85,7 +80,7 @@
             this.isIdleDialogOpen = true;
             this.Dialogs('WAS_IDLE', {
               initialIdleTime: idleTime,
-              minIdleTimeInMs: TMP_MIN_IDLE,
+              minIdleTimeInMs: this.$rootScope.r.config.minIdleTimeInMs,
             })
               .then(() => {
                 // if tracked
