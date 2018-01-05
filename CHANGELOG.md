@@ -1,3 +1,43 @@
+<a name="1.7.0"></a>
+# [1.7.0](https://github.com/johannesjo/super-productivity/compare/v1.6.17...v1.7.0) (2018-01-05)
+
+
+### Features
+
+* **pomodoro:** add dialog for breaks and show distraction list on break [#32](https://github.com/johannesjo/super-productivity/issues/32) [#22](https://github.com/johannesjo/super-productivity/issues/22) ([d7f6a68](https://github.com/johannesjo/super-productivity/commit/d7f6a68))
+* show version string in app help ([f748a23](https://github.com/johannesjo/super-productivity/commit/f748a23))
+* **pomodoro:** add and improve notifications [#32](https://github.com/johannesjo/super-productivity/issues/32) ([67e301a](https://github.com/johannesjo/super-productivity/commit/67e301a))
+* **pomodoro:** add better integration with time tracking [#32](https://github.com/johannesjo/super-productivity/issues/32) ([ae33268](https://github.com/johannesjo/super-productivity/commit/ae33268))
+* **pomodoro:** add play/pause on button click [#32](https://github.com/johannesjo/super-productivity/issues/32) ([77b1ed0](https://github.com/johannesjo/super-productivity/commit/77b1ed0))
+* **pomodoro:** add reselection of last task after restart [#32](https://github.com/johannesjo/super-productivity/issues/32) ([47f30d6](https://github.com/johannesjo/super-productivity/commit/47f30d6))
+* **pomodoro:** add settings [#32](https://github.com/johannesjo/super-productivity/issues/32) ([47a20d1](https://github.com/johannesjo/super-productivity/commit/47a20d1))
+* **pomodoro:** add ui [#32](https://github.com/johannesjo/super-productivity/issues/32) ([791c422](https://github.com/johannesjo/super-productivity/commit/791c422))
+* **pomodoro:** fix initialization for older configurations [#32](https://github.com/johannesjo/super-productivity/issues/32) ([f780eff](https://github.com/johannesjo/super-productivity/commit/f780eff))
+* **pomodoro:** fix task selection [#32](https://github.com/johannesjo/super-productivity/issues/32) ([521a2fa](https://github.com/johannesjo/super-productivity/commit/521a2fa))
+* **pomodoro:** focus window on break [#32](https://github.com/johannesjo/super-productivity/issues/32) ([db06d1e](https://github.com/johannesjo/super-productivity/commit/db06d1e))
+* **pomodoro:** go to work view when starting session [#32](https://github.com/johannesjo/super-productivity/issues/32) ([76cfd2b](https://github.com/johannesjo/super-productivity/commit/76cfd2b))
+* **pomodoro:** improve activating and deactivating current task [#32](https://github.com/johannesjo/super-productivity/issues/32) ([c7bfa49](https://github.com/johannesjo/super-productivity/commit/c7bfa49))
+* **pomodoro:** improve messages [#32](https://github.com/johannesjo/super-productivity/issues/32) ([d267d70](https://github.com/johannesjo/super-productivity/commit/d267d70))
+* **pomodoro:** improve time tracking integration with task play/pause button ([78d009f](https://github.com/johannesjo/super-productivity/commit/78d009f))
+* **pomodoro:** improve ui [#32](https://github.com/johannesjo/super-productivity/issues/32) ([cd370d8](https://github.com/johannesjo/super-productivity/commit/cd370d8))
+* **pomodoro:** improve ui [#32](https://github.com/johannesjo/super-productivity/issues/32) ([4c9b927](https://github.com/johannesjo/super-productivity/commit/4c9b927))
+* **pomodoro:** improve ui [#32](https://github.com/johannesjo/super-productivity/issues/32) ([34d8767](https://github.com/johannesjo/super-productivity/commit/34d8767))
+* **pomodoro:** make cycles work [#32](https://github.com/johannesjo/super-productivity/issues/32) ([769dd4c](https://github.com/johannesjo/super-productivity/commit/769dd4c))
+* **pomodoro:** make pause and stop work properly [#32](https://github.com/johannesjo/super-productivity/issues/32) ([1e30a91](https://github.com/johannesjo/super-productivity/commit/1e30a91))
+* **pomodoro:** make restarting tasks work when quitting on break [#32](https://github.com/johannesjo/super-productivity/issues/32) ([4cd2c17](https://github.com/johannesjo/super-productivity/commit/4cd2c17))
+* **pomodoro:** make timer optional [#32](https://github.com/johannesjo/super-productivity/issues/32) ([d099e2b](https://github.com/johannesjo/super-productivity/commit/d099e2b))
+* **pomodoro:** outline basic interface [#32](https://github.com/johannesjo/super-productivity/issues/32) ([8a3704f](https://github.com/johannesjo/super-productivity/commit/8a3704f))
+* **pomodoro:** play optional sound on session done [#32](https://github.com/johannesjo/super-productivity/issues/32) ([ee1e686](https://github.com/johannesjo/super-productivity/commit/ee1e686))
+* **pomodoro:** prepare idle handling [#32](https://github.com/johannesjo/super-productivity/issues/32) ([c52b1f5](https://github.com/johannesjo/super-productivity/commit/c52b1f5))
+* **pomodoro:** prevent multiple actions from being triggered at the same time [#32](https://github.com/johannesjo/super-productivity/issues/32) ([21a870c](https://github.com/johannesjo/super-productivity/commit/21a870c))
+* **pomodoro:** prevent timer resetting itself on play [#32](https://github.com/johannesjo/super-productivity/issues/32) ([92147d0](https://github.com/johannesjo/super-productivity/commit/92147d0))
+* **pomodoro:** show current session cycle on break [#32](https://github.com/johannesjo/super-productivity/issues/32) ([e64ea90](https://github.com/johannesjo/super-productivity/commit/e64ea90))
+* **pomodoro:** show or focus window on break [#32](https://github.com/johannesjo/super-productivity/issues/32) ([31aefe0](https://github.com/johannesjo/super-productivity/commit/31aefe0))
+* **pomodoro:** unset current task on startup [#32](https://github.com/johannesjo/super-productivity/issues/32) ([fc632f4](https://github.com/johannesjo/super-productivity/commit/fc632f4))
+* **pomodoro:** unset lastCurrentTask on pomodoro stop [#32](https://github.com/johannesjo/super-productivity/issues/32) ([cf950a4](https://github.com/johannesjo/super-productivity/commit/cf950a4))
+
+
+
 <a name="1.6.17"></a>
 ## [1.6.17](https://github.com/johannesjo/super-productivity/compare/v1.6.16...v1.6.17) (2017-12-16)
 
