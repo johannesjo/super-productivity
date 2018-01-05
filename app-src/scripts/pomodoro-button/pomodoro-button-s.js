@@ -164,9 +164,10 @@
       } else {
         this.data.currentCycle++;
         this.selectTask()
-          .then(() => {
+          .then((task) => {
             this.Notifier({
-              title: 'Pomodoro session #' + this.data.currentCycle + ' started.',
+              title: 'Pomodoro session #' + this.data.currentCycle + ' started',
+              message: task && task.title,
             });
           });
       }
@@ -226,7 +227,7 @@
 
         if (lastCurrentTask) {
           this.Tasks.updateCurrent(lastCurrentTask);
-          defer.resolve();
+          defer.resolve(lastCurrentTask);
         } else {
           this.Dialogs('TASK_SELECTION')
             .then(defer.resolve)

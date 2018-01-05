@@ -25,7 +25,7 @@
         vm.selectedTask = vm.undoneTasks[0];
       }
       Tasks.updateCurrent(vm.selectedTask);
-      $mdDialog.hide();
+      $mdDialog.hide(vm.selectedTask);
     };
 
     vm.getFilteredUndoneTasks = (searchText) => {
