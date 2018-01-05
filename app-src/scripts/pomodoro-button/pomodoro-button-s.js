@@ -14,12 +14,15 @@
   const TICK_INTERVAL = 1000;
   const DEFAULT_SOUND = 'snd/positive.ogg';
 
+  //const IPC_EVENT_IS_IDLE = 'IS_IDLE';
+
   class PomodoroButton {
     /* @ngInject */
-    constructor($rootScope, $interval, $q, Dialogs, Tasks, SimpleToast, LS_DEFAULTS, EV) {
-      this.$rootScope = $rootScope;
-      this.EV = EV;
+    constructor($rootScope, $interval, $q, Dialogs, Tasks, SimpleToast, LS_DEFAULTS, EV, IS_ELECTRON) {
       this.LS_DEFAULTS = LS_DEFAULTS;
+      this.IS_ELECTRON = IS_ELECTRON;
+      this.EV = EV;
+      this.$rootScope = $rootScope;
       this.$interval = $interval;
       this.$q = $q;
       this.Dialogs = Dialogs;
@@ -44,6 +47,16 @@
     }
 
     initListeners() {
+      // listen for idle and stop pomodoro session
+      //if (this.IS_ELECTRON) {
+      //window.ipcRenderer.on(IPC_EVENT_IS_IDLE, () => {
+      //  if (this.data.status !== MANUAL_PAUSE) {
+      //    this.pause();
+      //  }
+      //});
+      //}
+
+      // listen for current task updates
       this.$rootScope.$on(this.EV.UPDATE_CURRENT_TASK, (ev, args) => {
         // if data is not ready, just return
         if (!this.data) {
@@ -70,8 +83,10 @@
 
     initSession() {
       // unset current task
-      // TODO // NOTE: this has side effects
-      this.Tasks.updateCurrent(undefined);
+      if (this.config.isEnabled) {
+        // NOTE: this has side effects
+        this.Tasks.updateCurrent(undefined);
+      }
 
       // DEFAULTS
       this.data.status = MANUAL_PAUSE;
@@ -128,7 +143,7 @@
         })
           .then((isSkipBreak) => {
             if (isSkipBreak) {
-              this.sessionDone();
+              this.skipBreak();
             }
           });
 
@@ -142,6 +157,10 @@
       }
 
       this.setSessionTimerTime();
+    }
+
+    skipBreak() {
+      this.sessionDone();
     }
 
     setSessionTimerTime() {
