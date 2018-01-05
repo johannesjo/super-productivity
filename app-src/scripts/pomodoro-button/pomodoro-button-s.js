@@ -19,6 +19,7 @@
     constructor($rootScope, $interval, $q, Dialogs, Tasks, SimpleToast, LS_DEFAULTS, EV) {
       this.$rootScope = $rootScope;
       this.EV = EV;
+      this.LS_DEFAULTS = LS_DEFAULTS;
       this.$interval = $interval;
       this.$q = $q;
       this.Dialogs = Dialogs;
@@ -33,6 +34,12 @@
     reInit() {
       this.data = this.$rootScope.r.currentSession.pomodoro;
       this.config = this.$rootScope.r.config.pomodoro;
+
+      if (!this.config) {
+        // if it hasn't been initialized (which is the case for older versions of SP)
+        this.config = this.$rootScope.r.config.pomodoro = angular.copy(this.LS_DEFAULTS.config.pomodoro);
+      }
+
       this.initSession();
     }
 
