@@ -127,6 +127,7 @@
           isStopTrackingOnLongBreak: true,
           isShowDistractionsOnBreak: true,
           isPlaySound: true,
+          isGoToWorkView: true,
         },
         isTakeABreakEnabled: false,
         takeABreakMinWorkingTime: undefined,

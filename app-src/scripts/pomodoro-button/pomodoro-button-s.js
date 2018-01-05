@@ -18,12 +18,13 @@
 
   class PomodoroButton {
     /* @ngInject */
-    constructor($rootScope, $interval, $q, Dialogs, Tasks, SimpleToast, LS_DEFAULTS, EV, IS_ELECTRON, Notifier) {
+    constructor($rootScope, $interval, $q, Dialogs, Tasks, SimpleToast, LS_DEFAULTS, EV, IS_ELECTRON, Notifier, $state) {
       this.LS_DEFAULTS = LS_DEFAULTS;
       this.IS_ELECTRON = IS_ELECTRON;
       this.EV = EV;
       this.$rootScope = $rootScope;
       this.$interval = $interval;
+      this.$state = $state;
       this.$q = $q;
       this.Dialogs = Dialogs;
       this.SimpleToast = SimpleToast;
@@ -102,6 +103,10 @@
       this.selectTask()
         .then(() => {
           this.start();
+
+          if (this.config.isGoToWorkView) {
+            this.$state.go('work-view');
+          }
         });
     }
 
