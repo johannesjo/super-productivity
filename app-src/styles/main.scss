@@ -105,6 +105,8 @@ IMPORTANT NOTE:
 
 @import '../scripts/dialogs/notes/_notes-c.scss';
 
+@import '../scripts/dialogs/pomodoro-break/_pomodoro-break-c.scss';
+
 @import '../scripts/dialogs/simple-task-summary/_simple-task-summary.scss';
 
 @import '../scripts/dialogs/task-selection/_task-selection-c.scss';
@@ -114,6 +116,8 @@ IMPORTANT NOTE:
 @import '../scripts/dialogs/was-idle/_was-idle-c.scss';
 
 @import '../scripts/dialogs/welcome/_welcome-c.scss';
+
+@import '../scripts/distraction-list/_distraction-list-cp.scss';
 
 @import '../scripts/done-tasks-backlog/_done-tasks-backlog-d.scss';
 
@@ -130,6 +134,8 @@ IMPORTANT NOTE:
 @import '../scripts/inline-markdown/_inline-markdown-d.scss';
 
 @import '../scripts/main-header/_main-header-d.scss';
+
+@import '../scripts/pomodoro-button/_pomodoro-button-cp.scss';
 
 @import '../scripts/quick-access-menu/_quick-access-menu-d.scss';
 

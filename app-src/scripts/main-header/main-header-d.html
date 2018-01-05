@@ -101,6 +101,8 @@
         </md-tooltip>
         <ng-md-icon icon="help_outline"></ng-md-icon>
       </md-button>
+
+      <pomodoro-button ng-if="r.config.pomodoro.isEnabled"></pomodoro-button>
     </nav>
   </div>
 </md-toolbar>

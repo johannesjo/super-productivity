@@ -19,7 +19,8 @@
   /* @ngInject */
   class Tasks {
 
-    constructor(Uid, $rootScope, Dialogs, IS_ELECTRON, ShortSyntax, TasksUtil, Jira, TakeABreakReminder, SimpleToast, AppStorage) {
+    constructor(Uid, $rootScope, Dialogs, IS_ELECTRON, ShortSyntax, TasksUtil, Jira, TakeABreakReminder, SimpleToast, AppStorage, EV) {
+      this.EV = EV;
       this.$rootScope = $rootScope;
       this.Uid = Uid;
       this.$rootScope = $rootScope;
@@ -133,6 +134,14 @@
         this.$rootScope.r.currentTask = currentTask || subTaskMatch;
       }
       return this.$rootScope.r.currentTask;
+    }
+
+    getLastCurrent() {
+      return this.$rootScope.r.lastCurrentTask;
+    }
+
+    setLastCurrent(task) {
+      this.$rootScope.r.lastCurrentTask = task;
     }
 
     // NOTE: doneBacklogTasks can't be really updated when accessed withthis
@@ -426,6 +435,11 @@
             }
           }
         }
+
+        // also save a reference to this task
+        if (task) {
+          this.$rootScope.r.lastCurrentTask = task;
+        }
       }
 
       if (this.IS_ELECTRON) {
@@ -435,7 +449,10 @@
         });
       }
 
-      this.$rootScope.r.currentTask = this.$rootScope.r.currentTask = task;
+      this.$rootScope.r.currentTask = task;
+
+      // broadcast event
+      this.$rootScope.$broadcast(this.EV.UPDATE_CURRENT_TASK, { task, isCallFromTimeTracking });
     }
 
     removeTimeSpent(task, timeSpentToRemoveAsMoment) {

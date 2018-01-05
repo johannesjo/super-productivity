@@ -51,3 +51,21 @@
     opacity: 1;
   }
 }
+
+@mixin ng-pop-in() {
+  &.ng-leave {
+    transition: none;
+  }
+
+  &.ng-enter {
+    transition: transform 0.3s ease-in-out;
+  }
+
+  &.ng-enter {
+    transform: scale(0);
+  }
+
+  &.ng-enter-active {
+    transform: scale(1);
+  }
+}

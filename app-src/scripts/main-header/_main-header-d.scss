@@ -1,16 +1,21 @@
 main-header {
 
-  .md-button.md-icon-button {
-    margin: 0 3px;
-    &.is-active {
-      //ng-md-icon {
-      border: 1px solid #ffffff;
-      //}
+  nav > .md-button {
+    // only use background color to speed up animation
+    transition-property: background-color !important;
+
+    &.md-icon-button {
+      margin: 0 3px;
+
+      &.is-active {
+        border: 1px solid #ffffff;
+      }
     }
   }
 
-  nav .md-button {
-    // only use background color to speed up animation
-    transition-property: background-color !important;
+  nav {
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 }

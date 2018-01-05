@@ -6,7 +6,7 @@
  * Service in the superProductivity.
  */
 
-(function () {
+(function() {
   'use strict';
 
   angular
@@ -21,18 +21,24 @@
       Notification.requestPermission();
     }
 
-    return function (notification) {
+    return function(notification) {
       if (IS_ELECTRON) {
         // send to electron
         window.ipcRenderer.send(IPC_NOTIFIER_EV, notification);
       } else if (Notification && Notification.permission === 'granted') {
-        new Notification(notification.title, {
+        const notificationInstance = new Notification(notification.title, {
           icon: notification.icon || 'img/icon_128x128-with-pad.png',
           body: notification.message
         });
+
+        notificationInstance.onclick = () => {
+          notificationInstance.close();
+        };
+
+        setTimeout(() => {
+          notificationInstance.close();
+        }, notification.time || 10000);
       }
     };
-
   }
-
 })();

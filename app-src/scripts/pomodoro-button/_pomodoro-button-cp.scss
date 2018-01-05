@@ -1,0 +1,47 @@
+pomodoro-button {
+  align-items: center;
+  display: inline-block;
+  max-height: 40px;
+  position: relative;
+
+  @include ng-pop-in-popout;
+
+  .timer-btn {
+    text-align: center !important;
+    padding-left: 5px !important;
+    position: relative;
+    overflow: visible;
+
+    ng-md-icon {
+      margin-top: -10px;
+
+      @include ng-pop-in;
+    }
+  }
+
+  md-fab-trigger {
+    position: relative;
+  }
+
+  .timer-btn-text {
+    font-size: 15px;
+    line-height: 1;
+    font-weight: bold;
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translate(-50%, 0);
+    color: #333333;
+    background: #ffffff;
+    margin-bottom: -4px;
+    padding: 1px 4px;
+    z-index: 10;
+  }
+
+  md-fab-actions {
+
+    .md-fab-action-item {
+      margin-top: 5px;
+    }
+  }
+}

@@ -128,6 +128,10 @@ electron.ipcMain.on('NOTIFY', (ev, notification) => {
   notifier.notify(notification);
 });
 
+electron.ipcMain.on('SHOW_OR_FOCUS', () => {
+  showOrFocus(mainWin);
+});
+
 // HELPER FUNCTIONS
 // ----------------
 function createIndicator() {
@@ -192,7 +196,10 @@ function quitApp() {
   app.quit();
 }
 
-function showOrFocus(win) {
+function showOrFocus(passedWin) {
+  // default to main win
+  const win = passedWin || mainWin;
+
   // sometimes when starting a second instance we get here although we don't want to
   if (!win) {
     log.info('special case occurred when showOrFocus is called even though, this is a second instance of the app');
