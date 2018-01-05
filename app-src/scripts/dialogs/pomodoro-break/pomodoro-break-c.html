@@ -20,7 +20,7 @@
                      style="position: relative;"
                      flex>
     <div class="md-dialog-content">
-      <p>Enjoy yourself, get yourself moving, come back in:</p>
+      <p>You successfully finished session <strong ng-bind="vm.pomodoroData.currentCycle"></strong>! Enjoy yourself, get yourself moving, come back in:</p>
       <div class="timer"
            ng-bind="(vm.pomodoroData.currentSessionTime | date:'mm:ss')"></div>
 
