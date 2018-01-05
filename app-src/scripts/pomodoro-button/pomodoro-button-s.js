@@ -16,10 +16,11 @@
 
   class PomodoroButton {
     /* @ngInject */
-    constructor($rootScope, $interval, Dialogs, Tasks, SimpleToast, LS_DEFAULTS, EV) {
+    constructor($rootScope, $interval, $q, Dialogs, Tasks, SimpleToast, LS_DEFAULTS, EV) {
       this.$rootScope = $rootScope;
       this.EV = EV;
       this.$interval = $interval;
+      this.$q = $q;
       this.Dialogs = Dialogs;
       this.SimpleToast = SimpleToast;
       this.Tasks = Tasks;
@@ -75,16 +76,14 @@
 
     play() {
       // select task if none selected
-      this.selectTask(this.start);
+      this.selectTask()
+        .then(() => {
+          this.start();
+        });
     }
 
     start() {
-      if (this.data.status !== MANUAL_PAUSE) {
-        this.setSessionTimerTime();
-      }
-
       this.initTimer();
-      // import that the status is set afterwards
       this.data.status = PLAY;
     }
 
@@ -175,26 +174,25 @@
       return (this.data.isOnBreak && (this.data.currentCycle % this.config.cyclesBeforeLongerBreak !== 0));
     }
 
-    selectTask(cb) {
-      const execCbIfGiven = () => {
-        if (cb) {
-          cb.apply(this);
-        }
-      };
+    selectTask() {
+      const defer = this.$q.defer();
 
       if (!this.Tasks.getCurrent()) {
         const lastCurrentTask = this.Tasks.getLastCurrent();
 
         if (lastCurrentTask) {
           this.Tasks.updateCurrent(lastCurrentTask);
-          execCbIfGiven();
+          defer.resolve();
         } else {
           this.Dialogs('TASK_SELECTION')
-            .then(execCbIfGiven);
+            .then(defer.resolve)
+            .catch(defer.reject);
         }
       } else {
-        execCbIfGiven();
+        defer.resolve();
       }
+
+      return defer.promise;
     }
 
     playSessionDoneSound() {
