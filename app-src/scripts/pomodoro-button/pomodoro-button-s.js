@@ -18,7 +18,7 @@
 
   class PomodoroButton {
     /* @ngInject */
-    constructor($rootScope, $interval, $q, Dialogs, Tasks, SimpleToast, LS_DEFAULTS, EV, IS_ELECTRON) {
+    constructor($rootScope, $interval, $q, Dialogs, Tasks, SimpleToast, LS_DEFAULTS, EV, IS_ELECTRON, Notifier) {
       this.LS_DEFAULTS = LS_DEFAULTS;
       this.IS_ELECTRON = IS_ELECTRON;
       this.EV = EV;
@@ -28,6 +28,7 @@
       this.Dialogs = Dialogs;
       this.SimpleToast = SimpleToast;
       this.Tasks = Tasks;
+      this.Notifier = Notifier;
 
       this.initListeners();
 
@@ -137,6 +138,10 @@
       this.playSessionDoneSound();
       this.data.isOnBreak = !this.data.isOnBreak;
       if (this.data.isOnBreak) {
+        this.Notifier({
+          title: 'Pomodoro break #' + this.data.currentCycle + ' started.',
+        });
+
         this.dialog = this.Dialogs('POMODORO_BREAK', {
           pomodoroData: this.data,
           pomodoroConfig: this.config
@@ -153,7 +158,12 @@
         }
       } else {
         this.data.currentCycle++;
-        this.selectTask();
+        this.selectTask()
+          .then(() => {
+            this.Notifier({
+              title: 'Pomodoro session #' + this.data.currentCycle + ' started.',
+            });
+          });
       }
 
       this.setSessionTimerTime();
