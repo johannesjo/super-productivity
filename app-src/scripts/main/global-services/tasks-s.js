@@ -140,6 +140,10 @@
       return this.$rootScope.r.lastCurrentTask;
     }
 
+    setLastCurrent(task) {
+      this.$rootScope.r.lastCurrentTask = task;
+    }
+
     // NOTE: doneBacklogTasks can't be really updated when accessed withthis
     getById(taskId) {
       const doneBacklogTasks = this.getDoneBacklog();

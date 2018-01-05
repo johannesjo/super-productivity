@@ -112,6 +112,9 @@
     stop() {
       this.data.status = MANUAL_PAUSE;
       this.$interval.cancel(this.timer);
+
+      // unset last focused task
+      this.Tasks.setLastCurrent(undefined);
       this.initSession();
     }
 
