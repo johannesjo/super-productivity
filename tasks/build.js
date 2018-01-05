@@ -72,6 +72,9 @@ gulp.task('copy', function() {
   const fonts = gulp.src(config.fontsF, { base: config.base })
     .pipe(gulp.dest(config.dist));
 
+  const sounds = gulp.src(config.soundsF, { base: config.base })
+    .pipe(gulp.dest(config.dist));
+
   // TODO this ain't perfect
   const images = gulp.src(config.imagesF, { base: config.base })
     .pipe(imagemin({
@@ -80,7 +83,7 @@ gulp.task('copy', function() {
     }))
     .pipe(gulp.dest(config.dist));
 
-  return merge(html, fonts, images);
+  return merge(html, fonts, images, sounds);
 });
 
 gulp.task('minFiles', function() {

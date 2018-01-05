@@ -12,6 +12,7 @@
   const PLAY = 'PLAY';
   const MANUAL_PAUSE = 'MANUAL_PAUSE';
   const TICK_INTERVAL = 1000;
+  const DEFAULT_SOUND = 'snd/positive.ogg';
 
   class PomodoroButton {
     /* @ngInject */
@@ -34,12 +35,6 @@
 
       this.initListeners();
       this.initSession();
-      //this.dialog = this.Dialogs('POMODORO_BREAK', {
-      //  pomodoroData: this.data,
-      //  pomodoroConfig: this.config
-      //});
-
-      //
 
       // TODO: INIT REMOTE INTERFACE
     }
@@ -117,6 +112,7 @@
     }
 
     sessionDone() {
+      this.playSessionDoneSound();
       this.data.isOnBreak = !this.data.isOnBreak;
       if (this.data.isOnBreak) {
         this.dialog = this.Dialogs('POMODORO_BREAK', {
@@ -199,6 +195,12 @@
         }
       } else {
         execCbIfGiven();
+      }
+    }
+
+    playSessionDoneSound() {
+      if (this.config.isPlaySound) {
+        new Audio(DEFAULT_SOUND).play();
       }
     }
   }

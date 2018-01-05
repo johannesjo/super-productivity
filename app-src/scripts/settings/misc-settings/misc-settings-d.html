@@ -17,7 +17,7 @@
   </div>
 
   <div class="md-subhead">Pomodoro Settings</div>
-  <p>The pomodoro timer can be configured via 4 settings. The duration of every work session, the duration of normal breaks, the number of work sessions to run before a longer break is started and the duration of this longer break.</p>
+  <p>The pomodoro timer can be configured via a couple of settings. The duration of every work session, the duration of normal breaks, the number of work sessions to run before a longer break is started and the duration of this longer break.</p>
   <p>You can also set if you want to display your distractions during your pomodoro breaks.</p>
   <p>Setting "Pause time tracking on pomodoro break" will also track your breaks as work time spent on a task. Setting "Pause time tracking on <strong>longer</strong> pomodoro break" will do the same for the longer breaks.</p>
   <p>Enabling "Pause pomodoro session when no active task" will also pause the pomodoro session, when you pause a task.</p>
@@ -121,6 +121,13 @@
       <md-switch ng-model="vm.settings.pomodoro.isStopTrackingOnLongBreak"
                  aria-label="Pause time tracking on longer pomodoro break">
         Pause time tracking on <strong>longer</strong> pomodoro break
+      </md-switch>
+    </div>
+
+    <div>
+      <md-switch ng-model="vm.settings.pomodoro.isPlaySound"
+                 aria-label="Play sound when session done">
+        Play sound when session done
       </md-switch>
     </div>
 
