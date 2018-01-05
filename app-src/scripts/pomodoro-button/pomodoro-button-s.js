@@ -24,30 +24,30 @@
       this.SimpleToast = SimpleToast;
       this.Tasks = Tasks;
 
-      this.data = this.$rootScope.r.currentSession.pomodoro || {};
-      this.$rootScope.r.currentSession.pomodoro = this.data;
-
-      if (!this.$rootScope.r.config.pomodoro) {
-        this.$rootScope.r.config.pomodoro = LS_DEFAULTS.config.pomodoro;
-      }
-
-      this.config = this.$rootScope.r.config.pomodoro;
-
       this.initListeners();
-      this.initSession();
 
       // TODO: INIT REMOTE INTERFACE
     }
 
+    reInit() {
+      this.data = this.$rootScope.r.currentSession.pomodoro;
+      this.config = this.$rootScope.r.config.pomodoro;
+      this.initSession();
+    }
+
     initListeners() {
       this.$rootScope.$on(this.EV.UPDATE_CURRENT_TASK, (ev, args) => {
+        // if data is not ready, just return
+        if (!this.data) {
+          return;
+        }
+
         // don't update anything if on break
         if (this.data.isOnBreak) {
           if (args.task &&
             (this.config.isStopTrackingOnBreak && this.isOnShortBreak() ||
               (this.config.isStopTrackingOnLongBreak && this.isOnLongBreak()))) {
             this.SimpleToast('WARNING', 'You\'re on (pomodoro) break, the task will be started afterwards.');
-            this.lastCurrentTask = args.task;
             this.Tasks.updateCurrent(undefined);
           }
         } else {
@@ -63,7 +63,6 @@
     initSession() {
       // unset current task
       // TODO // NOTE: this has side effects
-      this.lastCurrentTask = this.Tasks.getCurrent() || this.lastCurrentTask;
       this.Tasks.updateCurrent(undefined);
 
       // DEFAULTS
@@ -101,7 +100,6 @@
       this.data.status = MANUAL_PAUSE;
       this.$interval.cancel(this.timer);
 
-      this.lastCurrentTask = this.Tasks.getCurrent() || this.lastCurrentTask;
       this.Tasks.updateCurrent(undefined);
     }
 
@@ -127,7 +125,6 @@
 
         if ((this.config.isStopTrackingOnBreak && this.isOnShortBreak()) ||
           (this.config.isStopTrackingOnLongBreak && this.isOnLongBreak())) {
-          this.lastCurrentTask = this.Tasks.getCurrent();
           this.Tasks.updateCurrent(undefined);
         }
       } else {
@@ -186,8 +183,10 @@
       };
 
       if (!this.Tasks.getCurrent()) {
-        if (this.lastCurrentTask) {
-          this.Tasks.updateCurrent(this.lastCurrentTask);
+        const lastCurrentTask = this.Tasks.getLastCurrent();
+
+        if (lastCurrentTask) {
+          this.Tasks.updateCurrent(lastCurrentTask);
           execCbIfGiven();
         } else {
           this.Dialogs('TASK_SELECTION')

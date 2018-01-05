@@ -14,7 +14,7 @@
     .service('InitGlobalModels', InitGlobalModels);
 
   /* @ngInject */
-  function InitGlobalModels(DEFAULT_THEME, $rootScope, $state, Tasks) {
+  function InitGlobalModels(DEFAULT_THEME, $rootScope, $state, Tasks, PomodoroButton, LS_DEFAULTS) {
     return () => {
 
       // we don't use r.$state because it looks more like something special
@@ -29,7 +29,7 @@
       }
 
       // reset session
-      $rootScope.r.currentSession = {};
+      $rootScope.r.currentSession = angular.copy(LS_DEFAULTS.currentSession);
       $rootScope.r.theme = $rootScope.r.theme = $rootScope.r.theme || DEFAULT_THEME;
 
       if ($rootScope.r.theme && $rootScope.r.theme.indexOf('dark') > -1) {
@@ -49,6 +49,8 @@
       if (!$rootScope.r.uiHelper.csvExportSettings) {
         $rootScope.r.uiHelper.csvExportSettings = {};
       }
+
+      PomodoroButton.reInit();
     };
   }
 
