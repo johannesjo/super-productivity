@@ -58,6 +58,7 @@
       tomorrowsNote: undefined,
       theme: undefined,
       currentTask: undefined,
+      lastCurrentTask: undefined,
       currentProject: undefined,
       currentSession: {
         timeWorkedWithoutBreak: undefined,
