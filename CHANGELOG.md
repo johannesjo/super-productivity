@@ -1,3 +1,13 @@
+<a name="1.7.2"></a>
+## [1.7.2](https://github.com/johannesjo/super-productivity/compare/v1.7.1...v1.7.2) (2018-01-06)
+
+
+### Features
+
+* **pomodoro:** set going to work view initially to disabled [#46](https://github.com/johannesjo/super-productivity/issues/46) ([e47c603](https://github.com/johannesjo/super-productivity/commit/e47c603))
+
+
+
 <a name="1.7.1"></a>
 ## [1.7.1](https://github.com/johannesjo/super-productivity/compare/v1.7.0...v1.7.1) (2018-01-05)
 
