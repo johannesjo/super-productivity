@@ -101,29 +101,6 @@
         }
       });
     }
-
-    // handler for time spent tracking
-    //  if (!isIdleDialogOpen) {
-    //    // only track if there is a task
-    //    if (that.$rootScope.r.currentTask) {
-    //      let timeSpentInMs = evData.timeSpentInMs;
-    //      let idleTimeInMs = evData.idleTimeInMs;
-    //
-    //      TakeABreakReminder.check(timeSpentInMs, idleTimeInMs);
-    //
-    //      // track
-    //      that.addTimeSpent(that.$rootScope.r.currentTask, timeSpentInMs);
-    //
-    //      // update indicator
-    //      window.ipcRenderer.send(IPC_EVENT_CURRENT_TASK_UPDATED, {
-    //        current: that.$rootScope.r.currentTask,
-    //        lastCurrent: that.lastCurrentTask
-    //      });
-    //
-    //      // we need to manually call apply as that is an outside event
-    //      that.$rootScope.$apply();
-    //    }
-    //  }
   }
 
   angular

@@ -91,7 +91,7 @@
       this.$rootScope.r.lastCurrentTask = task;
     }
 
-    // NOTE: doneBacklogTasks can't be really updated when accessed withthis
+    // NOTE: doneBacklogTasks can't be really updated when accessed with this
     getById(taskId) {
       const doneBacklogTasks = this.getDoneBacklog();
       return _.find(this.$rootScope.r.tasks, ['id', taskId]) || _.find(this.$rootScope.r.backlogTasks, ['id', taskId]) || _.find(doneBacklogTasks, ['id', taskId]);
