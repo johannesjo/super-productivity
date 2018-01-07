@@ -18,7 +18,7 @@
 
   class PomodoroButton {
     /* @ngInject */
-    constructor($rootScope, $interval, $q, Dialogs, Tasks, SimpleToast, LS_DEFAULTS, EV, IS_ELECTRON, Notifier, $state) {
+    constructor($rootScope, $interval, $q, Dialogs, Tasks, SimpleToast, LS_DEFAULTS, EV, IS_ELECTRON, Notifier, $state, TakeABreakReminder) {
       this.LS_DEFAULTS = LS_DEFAULTS;
       this.IS_ELECTRON = IS_ELECTRON;
       this.EV = EV;
@@ -29,6 +29,7 @@
       this.Dialogs = Dialogs;
       this.SimpleToast = SimpleToast;
       this.Tasks = Tasks;
+      this.TakeABreakReminder = TakeABreakReminder;
       this.Notifier = Notifier;
 
       this.initListeners();
@@ -50,13 +51,13 @@
 
     initListeners() {
       // listen for idle and stop pomodoro session
-      //if (this.IS_ELECTRON) {
-      //window.ipcRenderer.on(IPC_EVENT_IS_IDLE, () => {
-      //  if (this.data.status !== MANUAL_PAUSE) {
-      //    this.pause();
-      //  }
-      //});
-      //}
+      if (this.IS_ELECTRON) {
+        this.$rootScope.$on(this.EV.IS_IDLE, () => {
+          if (this.data.status !== MANUAL_PAUSE) {
+            this.pause();
+          }
+        });
+      }
 
       // listen for current task updates
       this.$rootScope.$on(this.EV.UPDATE_CURRENT_TASK, (ev, args) => {
@@ -143,6 +144,7 @@
       this.playSessionDoneSound();
       this.data.isOnBreak = !this.data.isOnBreak;
       if (this.data.isOnBreak) {
+        this.TakeABreakReminder.resetCounter();
         this.Notifier({
           title: 'Pomodoro break #' + this.data.currentCycle + ' started.',
         });
@@ -177,6 +179,7 @@
 
     skipBreak() {
       this.sessionDone();
+      this.TakeABreakReminder.resetResetCounter();
     }
 
     setSessionTimerTime() {
