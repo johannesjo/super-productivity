@@ -50,7 +50,9 @@
       'data',
     ])
     .constant('EV', {
-      UPDATE_CURRENT_TASK: 'UPDATE_CURRENT_TASK'
+      UPDATE_CURRENT_TASK: 'UPDATE_CURRENT_TASK',
+      IS_IDLE: 'IS_IDLE',
+      IS_BUSY: 'IS_BUSY',
     })
     .constant('EV_PROJECT_CHANGED', 'EV_PROJECT_CHANGED')
     .constant('LS_DEFAULTS', {
@@ -132,6 +134,8 @@
         isTakeABreakEnabled: false,
         takeABreakMinWorkingTime: undefined,
         isAutoStartNextTask: true,
+        isEnableIdleTimeTracking: true,
+        minIdleTime: moment.duration(5, 'minutes'),
         isShortSyntaxEnabled: true,
         takeABreakMessage: 'Take a break! You have been working for ${duration} without one. Go away from the computer! Take a short walk! Makes you more productive in the long run!',
       },
@@ -206,7 +210,7 @@
     .constant('WORKLOG_DATE_STR_FORMAT', 'YYYY-MM-DD')
     .constant('JIRA_UPDATE_POLL_INTERVAL', 60 * 1000 * 5)
     .constant('GIT_UPDATE_POLL_INTERVAL', 60 * 1000 * 0.25)
-    .constant('SIMPLE_TIME_TRACKING_INTERVAL', 1000 * 5)
+    .constant('TRACKING_INTERVAL', 1000 * 1)
     .constant('IS_ELECTRON', (typeof window.ipcRenderer !== 'undefined'))
     .constant('THEMES', [
         'red',

@@ -9,8 +9,6 @@
 (function() {
   'use strict';
 
-  const IPC_EVENT_IDLE = 'WAS_IDLE';
-  const IPC_EVENT_UPDATE_TIME_SPEND_FOR_CURRENT = 'UPDATE_TIME_SPEND';
   const IPC_EVENT_CURRENT_TASK_UPDATED = 'CHANGED_CURRENT_TASK';
   const IPC_EVENT_TASK_MARK_AS_DONE = 'TASK_MARK_AS_DONE';
   const IPC_EVENT_TASK_START = 'TASK_START';
@@ -35,57 +33,6 @@
       // SETUP HANDLERS FOR ELECTRON EVENTS
       if (IS_ELECTRON) {
         let that = this;
-        let isIdleDialogOpen = false;
-
-        // handler for time spent tracking
-        window.ipcRenderer.on(IPC_EVENT_UPDATE_TIME_SPEND_FOR_CURRENT, (ev, evData) => {
-          if (!isIdleDialogOpen) {
-            // only track if there is a task
-            if (that.$rootScope.r.currentTask) {
-              let timeSpentInMs = evData.timeSpentInMs;
-              let idleTimeInMs = evData.idleTimeInMs;
-
-              TakeABreakReminder.check(timeSpentInMs, idleTimeInMs);
-
-              // track
-              that.addTimeSpent(that.$rootScope.r.currentTask, timeSpentInMs);
-
-              // update indicator
-              window.ipcRenderer.send(IPC_EVENT_CURRENT_TASK_UPDATED, {
-                current: that.$rootScope.r.currentTask,
-                lastCurrent: that.lastCurrentTask
-              });
-
-              // we need to manually call apply as that is an outside event
-              that.$rootScope.$apply();
-            }
-          }
-        });
-
-        // handler for idle event
-        window.ipcRenderer.on(IPC_EVENT_IDLE, (ev, params) => {
-          const idleTime = params.idleTimeInMs;
-          const minIdleTimeInMs = params.minIdleTimeInMs;
-
-          // do not show as long as the user hasn't decided
-          TakeABreakReminder.isShown = false;
-
-          if (!isIdleDialogOpen) {
-            isIdleDialogOpen = true;
-            that.Dialogs('WAS_IDLE', { idleTime, minIdleTimeInMs })
-              .then(() => {
-                // if tracked
-                TakeABreakReminder.isShown = true;
-                isIdleDialogOpen = false;
-              }, () => {
-                // if not tracked
-                // unset currentSession.timeWorkedWithoutBreak
-                that.$rootScope.r.currentSession.timeWorkedWithoutBreak = undefined;
-                TakeABreakReminder.isShown = true;
-                isIdleDialogOpen = false;
-              });
-          }
-        });
 
         // handlers for dbus events
         window.ipcRenderer.on(IPC_EVENT_TASK_MARK_AS_DONE, () => {
@@ -144,7 +91,7 @@
       this.$rootScope.r.lastCurrentTask = task;
     }
 
-    // NOTE: doneBacklogTasks can't be really updated when accessed withthis
+    // NOTE: doneBacklogTasks can't be really updated when accessed with this
     getById(taskId) {
       const doneBacklogTasks = this.getDoneBacklog();
       return _.find(this.$rootScope.r.tasks, ['id', taskId]) || _.find(this.$rootScope.r.backlogTasks, ['id', taskId]) || _.find(doneBacklogTasks, ['id', taskId]);

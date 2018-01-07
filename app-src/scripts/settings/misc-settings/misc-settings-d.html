@@ -11,6 +11,9 @@
   <p>The short syntax can be enabled to quickly create tasks with an estimation already set. If you enter 'TaskTitleBla t:30m' a task with the name 'TaskTitleBla' will be created with the estimation set to 30 minutes.</p>
 
   <div ng-if="vm.IS_ELECTRON">
+    <div class="md-caption">Enable idle time handling</div>
+    <p>Open a dialog after a specified amount of time to check if and on which task you want to track your time, when you have been idle.</p>
+
     <div class="md-caption">Enable take a break reminder</div>
     <p>Allows you to configure a reoccurring reminder when you have worked for a specified amount of time without taking a break.</p>
     <p>You can modify the message displayed. ${duration} will be replaced with the time spent without a break.</p>
@@ -19,7 +22,8 @@
   <div class="md-subhead">Pomodoro Settings</div>
   <p>The pomodoro timer can be configured via a couple of settings. The duration of every work session, the duration of normal breaks, the number of work sessions to run before a longer break is started and the duration of this longer break.</p>
   <p>You can also set if you want to display your distractions during your pomodoro breaks.</p>
-  <p>Setting "Pause time tracking on pomodoro break" will also track your breaks as work time spent on a task. Setting "Pause time tracking on <strong>longer</strong> pomodoro break" will do the same for the longer breaks.</p>
+  <p>Setting "Pause time tracking on pomodoro break" will also track your breaks as work time spent on a task. Setting "Pause time tracking on
+    <strong>longer</strong> pomodoro break" will do the same for the longer breaks.</p>
   <p>Enabling "Pause pomodoro session when no active task" will also pause the pomodoro session, when you pause a task.</p>
 
 </help-section>
@@ -40,6 +44,23 @@
 
 
 <section ng-if="vm.IS_ELECTRON">
+  <div>
+    <md-switch ng-model="vm.settings.isEnableIdleTimeTracking"
+               aria-label="Enable idle time tracking">
+      Enable idle time handling
+    </md-switch>
+  </div>
+
+  <md-input-container class="md-block md-icon-float"
+                      ng-if="vm.settings.isEnableIdleTimeTracking">
+    <label>Idle time minimum idle time</label>
+    <ng-md-icon icon="timer"
+                aria-label="timer"></ng-md-icon>
+    <input type="text"
+           input-duration
+           ng-model="vm.settings.minIdleTime">
+  </md-input-container>
+
   <div>
     <md-switch ng-model="vm.settings.isTakeABreakEnabled"
                aria-label="Enable take a break reminder">

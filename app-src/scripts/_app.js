@@ -39,7 +39,7 @@
     .run(initGlobalModels)
     .run(initPollJiraTaskUpdates)
     .run(initPollGitTaskUpdates)
-    .run(initPollForSimpleTimeTracking)
+    .run(initTimeTracking)
     .run(initMousewheelZoomForElectron)
     .run(initGlobalShortcuts)
     .run(initAutomaticSyncIfEnabled)
@@ -146,21 +146,8 @@
   }
 
   /* @ngInject */
-  function initPollForSimpleTimeTracking($rootScope, IS_ELECTRON, $interval, SIMPLE_TIME_TRACKING_INTERVAL, Tasks) {
-    // if NOT in electron context
-    if (!IS_ELECTRON) {
-      let currentTrackingStart;
-      $interval(() => {
-        if ($rootScope.r.currentTask) {
-          if (currentTrackingStart) {
-            let now = moment();
-            let realIdleTime = moment.duration(now.diff(currentTrackingStart)).asMilliseconds();
-            Tasks.addTimeSpent($rootScope.r.currentTask, realIdleTime);
-          }
-          currentTrackingStart = moment();
-        }
-      }, SIMPLE_TIME_TRACKING_INTERVAL);
-    }
+  function initTimeTracking(TimeTracking) {
+    TimeTracking.init();
   }
 
   /* @ngInject */

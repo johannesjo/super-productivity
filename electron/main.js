@@ -26,8 +26,6 @@ const IS_DEV = process.env.NODE_ENV === 'DEV';
 const app = electron.app;
 
 let mainWin;
-let lastIdleTime;
-let currentIdleStart;
 let nestedWinParams = { isDarwinForceQuit: false };
 
 // keep app active to keep time tracking running
@@ -70,7 +68,7 @@ app.on('activate', function() {
 
 app.on('ready', () => {
   // init time tracking interval
-  setInterval(trackTimeFn, CONFIG.PING_INTERVAL);
+  setInterval(idleChecker, CONFIG.IDLE_PING_INTERVAL);
 });
 
 app.on('before-quit', () => {
@@ -218,7 +216,7 @@ function showOrFocus(passedWin) {
   }, 60);
 }
 
-function trackTimeFn() {
+function idleChecker() {
   getIdleTime((idleTime) => {
     // sometimes when starting a second instance we get here although we don't want to
     if (!mainWin) {
@@ -226,35 +224,7 @@ function trackTimeFn() {
       return;
     }
 
-    // go to 'idle mode' when th
-    if (idleTime > CONFIG.MIN_IDLE_TIME || lastIdleTime > CONFIG.MIN_IDLE_TIME) {
-      if (!currentIdleStart) {
-        currentIdleStart = moment();
-      }
-
-      // show idle dialog once not idle any more
-      if (lastIdleTime > idleTime) {
-        let now = moment();
-        let realIdleTime = moment.duration(now.diff(currentIdleStart)).asMilliseconds();
-
-        showOrFocus(mainWin);
-        showIdleDialog(realIdleTime);
-
-        // unset currentIdleStart
-        currentIdleStart = undefined;
-      }
-    }
-    // track regularly
-    else {
-      mainWin.webContents.send('UPDATE_TIME_SPEND', {
-        timeSpentInMs: CONFIG.PING_INTERVAL,
-        idleTimeInMs: idleTime
-      });
-    }
-
-    // save last idle time
-    lastIdleTime = idleTime;
+    mainWin.webContents.send('IDLE_TIME', idleTime);
   });
-
 }
 

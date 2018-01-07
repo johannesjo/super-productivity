@@ -6,7 +6,7 @@
  * Service in the superProductivity.
  */
 
-(function () {
+(function() {
   'use strict';
 
   angular
@@ -14,12 +14,35 @@
     .service('TakeABreakReminder', TakeABreakReminder);
 
   /* @ngInject */
-  function TakeABreakReminder($rootScope, Notifier, $mdToast, ParseDuration) {
-    const MIN_IDLE_VAL_TO_TAKE_A_BREAK_FROM_TAKE_A_BREAK = 9999;
-
+  function TakeABreakReminder($rootScope, Notifier, $mdToast, ParseDuration, $timeout) {
     this.isShown = true;
 
-    this.check = (timeSpentInMs, idleTimeInMs) => {
+    const TOAST_DISPLAY_TIME = 30000;
+    let toast;
+
+    this.resetCounter = () => {
+      this.lastCounterValBeforeReset = this.$rootScope.r.currentSession.timeWorkedWithoutBreak;
+      $rootScope.r.currentSession.timeWorkedWithoutBreak = undefined;
+    };
+
+    this.resetResetCounter = () => {
+      $rootScope.r.currentSession.timeWorkedWithoutBreak = this.lastCounterValBeforeReset;
+      this.lastCounterValBeforeReset = undefined;
+    };
+
+    let timeoutRunning = false;
+    this.notificationTimeout = () => {
+      if (!timeoutRunning) {
+        timeoutRunning = true;
+        $timeout(() => {
+          timeoutRunning = false;
+        }, TOAST_DISPLAY_TIME);
+      }
+
+      return timeoutRunning;
+    };
+
+    this.update = (timeSpentInMs, isIdle) => {
       if ($rootScope.r.config && $rootScope.r.config.isTakeABreakEnabled) {
         if (!$rootScope.r.currentSession) {
           $rootScope.r.currentSession = {};
@@ -36,20 +59,21 @@
         if (moment.duration($rootScope.r.config.takeABreakMinWorkingTime)
             .asSeconds() < $rootScope.r.currentSession.timeWorkedWithoutBreak.asSeconds()) {
 
-          if (idleTimeInMs > MIN_IDLE_VAL_TO_TAKE_A_BREAK_FROM_TAKE_A_BREAK) {
+          if (isIdle) {
             return;
           }
 
-          if (this.isShown) {
+          if (this.isShown && !timeoutRunning) {
+            this.notificationTimeout();
             const durationStr = ParseDuration.toString($rootScope.r.currentSession.timeWorkedWithoutBreak);
             const message = $rootScope.r.config && $rootScope.r.config.takeABreakMessage && $rootScope.r.config.takeABreakMessage.replace(/\$\{duration\}/gi, durationStr);
 
-            let toast = $mdToast.simple()
+            toast = $mdToast.simple()
               .textContent(message)
               .action('I already did!')
-              .hideDelay(20000)
+              .hideDelay(TOAST_DISPLAY_TIME)
               .position('bottom');
-            $mdToast.show(toast).then(function (response) {
+            $mdToast.show(toast).then(function(response) {
               if (response === 'ok') {
                 // re-add task on undo
                 $rootScope.r.currentSession.timeWorkedWithoutBreak = undefined;
@@ -63,6 +87,7 @@
               wait: true
             });
           }
+
         }
       }
     };
