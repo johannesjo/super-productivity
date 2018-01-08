@@ -12,6 +12,7 @@ This is a ToDo List / Time Tracker / Personal Jira Task Manager for Linux, MacOS
   * Setting transitions aka setting tickets to in progress or done
   * Automatic notifications once your (current) task has changed or been commented on jira => no messy email notifications required any more
 * Time Tracking 
+* Customizable Pomodoro Timer
 * Sub Tasks
 * Sexy global pinboard to add quick links and project related files 
 * 'Take a break' reminder
