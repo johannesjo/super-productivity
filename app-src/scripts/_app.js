@@ -44,6 +44,7 @@
     .run(initGlobalShortcuts)
     .run(initAutomaticSyncIfEnabled)
     .run(initAutomaticBackupsIfEnabled)
+    .run(checkIfLatestVersion)
     .run(showWelcomeDialog)
     .run(goToWorkViewIfTasks);
 
@@ -225,5 +226,55 @@
     if (IS_ELECTRON) {
       AppStorage.initSyncIfEnabled();
     }
+  }
+
+  /* @ngInject */
+  function checkIfLatestVersion(IS_ELECTRON, $http, Git, VERSION, $mdToast, Util) {
+    if (!IS_ELECTRON) {
+      return;
+    }
+
+    const DOWNLOAD_URL = 'https://github.com/johannesjo/super-productivity/releases';
+
+    function compareVersion(a, b) {
+      let pa = a.split('.');
+      let pb = b.split('.');
+      for (let i = 0; i < 3; i++) {
+        let na = Number(pa[i]);
+        let nb = Number(pb[i]);
+        if (na > nb) return 1;
+        if (nb > na) return -1;
+        if (!isNaN(na) && isNaN(nb)) return 1;
+        if (isNaN(na) && !isNaN(nb)) return -1;
+      }
+      return 0;
+    }
+
+    Git.getLatestSpRelease().then((res) => {
+      const latestReleaseData = res && res.data;
+      const latestVersionStr = latestReleaseData && latestReleaseData.name;
+      if (latestVersionStr) {
+        const isNew = (compareVersion(latestVersionStr, VERSION) > 0);
+        if (isNew) {
+          // show toast for undo
+          const toast = $mdToast.simple()
+            .textContent('There is a new Version of Super Productivity available.')
+            .action('Download')
+            .hideDelay(20000)
+            .position('bottom');
+
+          $mdToast.show(toast)
+            .then(function(response) {
+              if (response === 'ok') {
+                // re-add task on undo
+                Util.openExternalUrl(DOWNLOAD_URL);
+              }
+            })
+            // we need an empty catch to prevent the unhandled rejection error
+            .catch(() => {
+            });
+        }
+      }
+    });
   }
 })();

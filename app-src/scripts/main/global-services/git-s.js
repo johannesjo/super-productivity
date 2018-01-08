@@ -119,6 +119,11 @@
 
     // API METHODS
     // -----------
+    this.getLatestSpRelease= () => {
+      const SP_REPO_STR = BASE_URL + 'repos/johannesjo/super-productivity/releases/latest';
+      return $http.get(SP_REPO_STR);
+    };
+
     this.getIssueList = () => {
       return $http.get(BASE_URL + 'repos/' + settings.repo + '/issues', {
         transformResponse: [transformIssueList]
