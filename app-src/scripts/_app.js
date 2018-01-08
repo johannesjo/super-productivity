@@ -256,7 +256,6 @@
       if (latestVersionStr) {
         const isNew = (compareVersion(latestVersionStr, VERSION) > 0);
         if (isNew) {
-          // show toast for undo
           const toast = $mdToast.simple()
             .textContent('There is a new Version of Super Productivity available.')
             .action('Download')
@@ -266,7 +265,6 @@
           $mdToast.show(toast)
             .then(function(response) {
               if (response === 'ok') {
-                // re-add task on undo
                 Util.openExternalUrl(DOWNLOAD_URL);
               }
             })
