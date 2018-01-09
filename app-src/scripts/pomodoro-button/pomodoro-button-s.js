@@ -101,7 +101,7 @@
 
     play() {
       // select task if none selected
-      this.selectTask()
+      this.Tasks.selectLastTaskOrOpenDialog()
         .then(() => {
           this.start();
 
@@ -220,27 +220,6 @@
 
     isOnShortBreak() {
       return (this.data.isOnBreak && (this.data.currentCycle % this.config.cyclesBeforeLongerBreak !== 0));
-    }
-
-    selectTask() {
-      const defer = this.$q.defer();
-
-      if (!this.Tasks.getCurrent()) {
-        const lastCurrentTask = this.Tasks.getLastCurrent();
-
-        if (lastCurrentTask) {
-          this.Tasks.updateCurrent(lastCurrentTask);
-          defer.resolve(lastCurrentTask);
-        } else {
-          this.Dialogs('TASK_SELECTION')
-            .then(defer.resolve)
-            .catch(defer.reject);
-        }
-      } else {
-        defer.resolve();
-      }
-
-      return defer.promise;
     }
 
     playSessionDoneSound() {

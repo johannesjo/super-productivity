@@ -17,9 +17,10 @@
   /* @ngInject */
   class Tasks {
 
-    constructor(Uid, $rootScope, Dialogs, IS_ELECTRON, ShortSyntax, TasksUtil, Jira, TakeABreakReminder, SimpleToast, AppStorage, EV) {
+    constructor(Uid, $rootScope, Dialogs, IS_ELECTRON, ShortSyntax, TasksUtil, Jira, TakeABreakReminder, SimpleToast, AppStorage, EV, $q) {
       this.EV = EV;
       this.$rootScope = $rootScope;
+      this.$q = $q;
       this.Uid = Uid;
       this.$rootScope = $rootScope;
       this.Dialogs = Dialogs;
@@ -83,8 +84,39 @@
       return this.$rootScope.r.currentTask;
     }
 
+    isInTodaysList(taskToCheck) {
+      let currentTask;
+      let subTaskMatch;
+
+      if (!taskToCheck || !taskToCheck.id) {
+        return false;
+      }
+
+      currentTask = _.find(this.$rootScope.r.tasks, (task) => {
+        if (task.subTasks && task.subTasks.length > 0) {
+          let subTaskMatchTmp = _.find(task.subTasks, { id: taskToCheck.id });
+          if (subTaskMatchTmp) {
+            subTaskMatch = subTaskMatchTmp;
+          }
+        }
+        return task.id === taskToCheck.id;
+      });
+      const match = currentTask || subTaskMatch;
+
+      return !!match;
+    }
+
     getLastCurrent() {
       return this.$rootScope.r.lastCurrentTask;
+    }
+
+    getLastCurrentIfInTodaysList() {
+      const lastCurrent = this.$rootScope.r.lastCurrentTask;
+      if (this.isInTodaysList(lastCurrent)) {
+        return lastCurrent;
+      } else {
+        return undefined;
+      }
     }
 
     setLastCurrent(task) {
@@ -264,6 +296,9 @@
       if (task && task.title) {
         this.$rootScope.r.tasks.unshift(this.createTask(task));
         this.SimpleToast('SUCCESS', 'Task "' + task.title + '" created.', 200);
+
+        // return correct reference in today's list
+        return this.$rootScope.r.tasks[0];
       }
     }
 
@@ -626,6 +661,27 @@
 
       // also remove the current task to prevent time tracking
       this.updateCurrent(undefined);
+    }
+
+    selectLastTaskOrOpenDialog() {
+      const defer = this.$q.defer();
+
+      if (!this.getCurrent()) {
+        const lastCurrentTask = this.getLastCurrentIfInTodaysList();
+
+        if (lastCurrentTask) {
+          this.updateCurrent(lastCurrentTask);
+          defer.resolve(lastCurrentTask);
+        } else {
+          this.Dialogs('TASK_SELECTION')
+            .then(defer.resolve)
+            .catch(defer.reject);
+        }
+      } else {
+        defer.resolve();
+      }
+
+      return defer.promise;
     }
 
     selectNextTask(finishedCurrentTask) {
