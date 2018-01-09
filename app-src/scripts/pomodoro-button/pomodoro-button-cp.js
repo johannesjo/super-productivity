@@ -41,6 +41,12 @@
       this.svc.toggle();
       this.isOpen = false;
     }
+
+    skipBreak($ev) {
+      $ev.preventDefault();
+      $ev.stopPropagation();
+      this.svc.skipBreak();
+    }
   }
 
   angular

@@ -36,6 +36,12 @@
                aria-label="Stop Pomodoro Session">
       <ng-md-icon icon="stop"></ng-md-icon>
     </md-button>
+    <md-button ng-if="$ctrl.svc.data.isOnBreak"
+               class="md-fab md-raised md-mini"
+               ng-click="$ctrl.skipBreak($event)"
+               aria-label="Stop Pomodoro Session">
+      <ng-md-icon icon="skip_next"></ng-md-icon>
+    </md-button>
   </md-fab-actions>
 </md-fab-speed-dial>
 
