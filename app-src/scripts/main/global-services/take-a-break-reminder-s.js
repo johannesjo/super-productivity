@@ -21,7 +21,7 @@
     let toast;
 
     this.resetCounter = () => {
-      this.lastCounterValBeforeReset = this.$rootScope.r.currentSession.timeWorkedWithoutBreak;
+      this.lastCounterValBeforeReset = $rootScope.r.currentSession.timeWorkedWithoutBreak;
       $rootScope.r.currentSession.timeWorkedWithoutBreak = undefined;
     };
 
