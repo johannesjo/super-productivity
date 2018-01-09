@@ -56,7 +56,7 @@
             // update indicator
             window.ipcRenderer.send(IPC_EVENT_CURRENT_TASK_UPDATED, {
               current: this.$rootScope.r.currentTask,
-              lastCurrent: this.Tasks.lastCurrentTask
+              lastActiveTask: this.Tasks.getLastActiveIfStartable()
             });
 
             if (!this.isIdle) {

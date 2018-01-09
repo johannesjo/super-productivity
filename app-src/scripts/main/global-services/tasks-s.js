@@ -37,20 +37,24 @@
 
         // handlers for dbus events
         window.ipcRenderer.on(IPC_EVENT_TASK_MARK_AS_DONE, () => {
+          const lastActiveTask = this.getLastActiveIfStartable();
+
           if (that.$rootScope.r.currentTask) {
             that.markAsDone(that.$rootScope.r.currentTask);
             that.$rootScope.$apply();
-          } else if (that.lastCurrentTask) {
-            that.markAsDone(that.lastCurrentTask);
+          } else if (lastActiveTask) {
+            that.markAsDone(lastActiveTask);
             that.$rootScope.$apply();
           }
         });
         window.ipcRenderer.on(IPC_EVENT_TASK_START, () => {
-          if (!that.$rootScope.r.currentTask && that.lastCurrentTask) {
-            that.updateCurrent(that.lastCurrentTask);
+          const lastActiveTask = this.getLastActiveIfStartable();
+
+          if (!that.$rootScope.r.currentTask && lastActiveTask) {
+            that.updateCurrent(lastActiveTask);
             that.$rootScope.$apply();
           } else {
-
+            that.startLastTaskOrOpenDialog();
           }
         });
         window.ipcRenderer.on(IPC_EVENT_TASK_PAUSE, () => {
@@ -107,20 +111,20 @@
     }
 
     getLastCurrent() {
-      return this.$rootScope.r.lastCurrentTask;
+      return this.$rootScope.r.lastActiveTaskTask;
     }
 
-    getLastCurrentIfInTodaysList() {
-      const lastCurrent = this.$rootScope.r.lastCurrentTask;
-      if (this.isInTodaysList(lastCurrent)) {
-        return lastCurrent;
+    getLastActiveIfStartable() {
+      const lastActiveTask = this.$rootScope.r.lastActiveTaskTask;
+      if (this.isInTodaysList(lastActiveTask) && !lastActiveTask.isDone) {
+        return lastActiveTask;
       } else {
         return undefined;
       }
     }
 
     setLastCurrent(task) {
-      this.$rootScope.r.lastCurrentTask = task;
+      this.$rootScope.r.lastActiveTaskTask = task;
     }
 
     // NOTE: doneBacklogTasks can't be really updated when accessed with this
@@ -368,7 +372,6 @@
     updateCurrent(task, isCallFromTimeTracking) {
       const isCurrentTaskChanged = this.TasksUtil.isTaskChanged(task, this.$rootScope.r.currentTask);
       const that = this;
-      this.lastCurrentTask = this.$rootScope.r.currentTask;
 
       function moveInProgress(task) {
         if (isCurrentTaskChanged) {
@@ -420,14 +423,14 @@
 
         // also save a reference to this task
         if (task) {
-          this.$rootScope.r.lastCurrentTask = task;
+          this.$rootScope.r.lastActiveTaskTask = task;
         }
       }
 
       if (this.IS_ELECTRON) {
         window.ipcRenderer.send(IPC_EVENT_CURRENT_TASK_UPDATED, {
           current: task,
-          lastCurrent: this.lastCurrentTask
+          lastActiveTask: this.$rootScope.r.lastActiveTaskTask
         });
       }
 
@@ -663,15 +666,15 @@
       this.updateCurrent(undefined);
     }
 
-    selectLastTaskOrOpenDialog() {
+    startLastTaskOrOpenDialog() {
       const defer = this.$q.defer();
 
       if (!this.getCurrent()) {
-        const lastCurrentTask = this.getLastCurrentIfInTodaysList();
+        const lastActiveTaskTask = this.getLastActiveIfStartable();
 
-        if (lastCurrentTask) {
-          this.updateCurrent(lastCurrentTask);
-          defer.resolve(lastCurrentTask);
+        if (lastActiveTaskTask) {
+          this.updateCurrent(lastActiveTaskTask);
+          defer.resolve(lastActiveTaskTask);
         } else {
           this.Dialogs('TASK_SELECTION')
             .then(defer.resolve)

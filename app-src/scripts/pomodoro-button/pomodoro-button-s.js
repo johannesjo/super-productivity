@@ -101,7 +101,7 @@
 
     play() {
       // select task if none selected
-      this.Tasks.selectLastTaskOrOpenDialog()
+      this.Tasks.startLastTaskOrOpenDialog()
         .then(() => {
           this.start();
 
@@ -165,7 +165,7 @@
         }
       } else {
         this.data.currentCycle++;
-        this.selectTask()
+        this.Tasks.startLastTaskOrOpenDialog()
           .then((task) => {
             this.Notifier({
               title: 'Pomodoro session #' + this.data.currentCycle + ' started',

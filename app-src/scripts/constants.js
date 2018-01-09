@@ -60,7 +60,7 @@
       tomorrowsNote: undefined,
       theme: undefined,
       currentTask: undefined,
-      lastCurrentTask: undefined,
+      lastActiveTaskTask: undefined,
       currentProject: undefined,
       currentSession: {
         timeWorkedWithoutBreak: undefined,

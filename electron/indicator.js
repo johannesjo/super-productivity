@@ -86,23 +86,30 @@ function initAppListeners(app) {
 function initListeners(isGnomeShellExtInstalled) {
   electron.ipcMain.on('CHANGED_CURRENT_TASK', (ev, params) => {
     const currentTask = params.current;
-    const lastCurrentTask = params.lastCurrent;
+    const lastActiveTaskTask = params.lastActiveTask;
 
-    if (currentTask && currentTask.title) {
-      const msg = createIndicatorStr(currentTask);
+    let msg;
 
-      if (tray) {
-        tray.setTitle(msg);
-      }
-      if (isGnomeShellExtInstalled) {
+    if (currentTask) {
+      msg = createIndicatorStr(currentTask);
+    }
+
+    if (isGnomeShellExtInstalled) {
+      // gnome indicator handling
+      if (currentTask && currentTask.title) {
         dbus.setTask(currentTask.id, msg);
-      }
-    } else if (isGnomeShellExtInstalled) {
-      if (!currentTask && lastCurrentTask && !lastCurrentTask.isDone) {
-        const msg = createIndicatorStr(lastCurrentTask);
+      } else if (!currentTask && lastActiveTaskTask && !lastActiveTaskTask.isDone) {
+        const msg = createIndicatorStr(lastActiveTaskTask);
         dbus.setTask('PAUSED', msg);
       } else {
         dbus.setTask('NONE', 'NONE');
+      }
+    } else if (tray) {
+      // tray handling
+      if (currentTask && currentTask.title) {
+        tray.setTitle(msg);
+      } else {
+        tray.setTitle('');
       }
     }
   });

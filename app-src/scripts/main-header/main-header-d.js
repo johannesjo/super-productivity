@@ -27,7 +27,7 @@
   /* @ngInject */
   function MainHeaderCtrl(Dialogs, Projects) {
     let vm = this;
-    vm.lastCurrentTask = undefined;
+    vm.lastActiveTaskTask = undefined;
 
     vm.allProjects = Projects.getList();
 
