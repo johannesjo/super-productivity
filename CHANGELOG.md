@@ -1,3 +1,23 @@
+<a name="1.7.3"></a>
+## [1.7.3](https://github.com/johannesjo/super-productivity/compare/v1.7.2...v1.7.3) (2018-01-09)
+
+
+### Bug Fixes
+
+* take a break not working as intended ([bbf188f](https://github.com/johannesjo/super-productivity/commit/bbf188f))
+* **pomodoro:** case when there is no task available and the error when the last task was deleted ([914149d](https://github.com/johannesjo/super-productivity/commit/914149d))
+
+
+### Features
+
+* **idleTimeTracking:** cleanup ([3cbeaa4](https://github.com/johannesjo/super-productivity/commit/3cbeaa4))
+* **idleTimeTracking:** make it optional and configurable ([333617c](https://github.com/johannesjo/super-productivity/commit/333617c))
+* **idleTimeTracking:** rework idleTimeTracking ([92868d0](https://github.com/johannesjo/super-productivity/commit/92868d0))
+* add notification when there is a new version of super productivity available ([38f6196](https://github.com/johannesjo/super-productivity/commit/38f6196))
+* **pomodoro:** add skip break button ([5bd2935](https://github.com/johannesjo/super-productivity/commit/5bd2935))
+
+
+
 <a name="1.7.2"></a>
 ## [1.7.2](https://github.com/johannesjo/super-productivity/compare/v1.7.1...v1.7.2) (2018-01-06)
 
