@@ -63,6 +63,9 @@
               this.TakeABreakReminder.update(realPeriodDuration, this.isIdle);
             }
           }
+        } else {
+          // reset currentTrackingStart
+          currentTrackingStart = moment();
         }
       }, this.TRACKING_INTERVAL);
     }
