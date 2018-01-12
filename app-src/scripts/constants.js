@@ -186,6 +186,7 @@
         isFirstLogin: true,
         isWorklogEnabled: true,
         isAutoWorklog: false,
+        isCheckToReAssignTicketOnTaskStart: true,
         isUpdateIssueFromLocal: false,
         isAddWorklogOnSubTaskDone: true,
         defaultTransitionInProgress: undefined,
@@ -210,7 +211,7 @@
     .constant('WORKLOG_DATE_STR_FORMAT', 'YYYY-MM-DD')
     .constant('JIRA_UPDATE_POLL_INTERVAL', 60 * 1000 * 5)
     .constant('GIT_UPDATE_POLL_INTERVAL', 60 * 1000 * 0.25)
-    .constant('TRACKING_INTERVAL', 1000 * 1)
+    .constant('TRACKING_INTERVAL', 1000)
     .constant('IS_ELECTRON', (typeof window.ipcRenderer !== 'undefined'))
     .constant('THEMES', [
         'red',

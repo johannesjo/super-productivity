@@ -369,6 +369,7 @@
       this.selectNextTask(task);
     }
 
+    // TODO isCallFromTimeTracking is possibly not needed any more
     updateCurrent(task, isCallFromTimeTracking) {
       const isCurrentTaskChanged = this.TasksUtil.isTaskChanged(task, this.$rootScope.r.currentTask);
       const that = this;
@@ -404,7 +405,8 @@
 
               this.Jira.checkUpdatesForTaskOrParent(task)
                 .then(() => {
-                  if (!jiraTaskToHandle.originalAssigneeKey || jiraTaskToHandle.originalAssigneeKey !== this.$rootScope.r.jiraSettings.userName) {
+                  if ((this.$rootScope.r.jiraSettings.isCheckToReAssignTicketOnTaskStart) &&
+                    (!jiraTaskToHandle.originalAssigneeKey || jiraTaskToHandle.originalAssigneeKey !== this.$rootScope.r.jiraSettings.userName)) {
                     // ask if to assign to yourself or just ignore it
                     this.Dialogs('JIRA_ASSIGN_TICKET', { task: jiraTaskToHandle })
                       .then(() => {

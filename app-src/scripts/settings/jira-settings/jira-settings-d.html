@@ -7,6 +7,8 @@
        href="https://confluence.atlassian.com/jirasoftwarecloud/advanced-searching-764478330.html"
        external-link="">https://confluence.atlassian.com/jirasoftwarecloud/advanced-searching-764478330.html</a>.</p>
   <p>You can also configure, if you want to automatically (e.g. every time you visit the planning view), to add all new tasks specified by a custom JQL query to the backlog.</p>
+  <p>Another option is "Check if current ticket is assigned to current user". If enabled and you're starting, a check will be made if you're currently assigned to that ticket on Jira, if not an Dialog appears in which you can chose to assign the ticket to yourself.</p>
+
 
   <div class="md-caption">Worklog settings</div>
   <p>There are several options to determine when and how you want to submit a worklog. Enabling
@@ -49,7 +51,8 @@
       <label>JQL Query for Searching Tasks</label>
       <input type="text"
              ng-model="vm.settings.jqlQuery">
-      <div class="hint">e.g.: assignee = "<span ng-bind="vm.settings.userName"></span>" AND resolution = Unresolved ORDER BY updatedDate DESC</div>
+      <div class="hint">e.g.: assignee = "<span ng-bind="vm.settings.userName"></span>" AND resolution = Unresolved ORDER BY updatedDate DESC
+      </div>
     </md-input-container>
     <md-input-container class="md-block">
       <div>
@@ -70,6 +73,10 @@
     <md-switch ng-model="vm.settings.isUpdateIssueFromLocal"
                aria-label="Update issue description on jira if task notes are updated">
       Update issue description on Jira if task notes are updated
+    </md-switch>
+    <md-switch ng-model="vm.settings.isCheckToReAssignTicketOnTaskStart"
+               aria-label="Check if current ticket is assigned to current user">
+      Check if current ticket is assigned to current user
     </md-switch>
     <md-button aria-label="Test credentials"
                class="md-primary md-raised"
