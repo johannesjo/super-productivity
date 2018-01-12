@@ -22,6 +22,9 @@ const IS_LINUX = process.platform === 'linux';
 const DESKTOP_ENV = process.env.DESKTOP_SESSION;
 const IS_GNOME = (DESKTOP_ENV === 'gnome' || DESKTOP_ENV === 'gnome-xorg');
 const IS_DEV = process.env.NODE_ENV === 'DEV';
+if (IS_DEV) {
+  console.log('Starting in DEV Mode!!!');
+}
 
 const app = electron.app;
 
