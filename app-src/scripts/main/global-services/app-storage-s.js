@@ -247,20 +247,55 @@
       return projects;
     }
 
+    getDefaultsForDeepObject(newConfigObj, originalConfigObj) {
+      if (!originalConfigObj) {
+        return newConfigObj;
+      }
+
+      const keys = Object.keys(originalConfigObj);
+      const newObj = {};
+
+      keys.forEach((key) => {
+        const item = newConfigObj[key];
+
+        // reassign to original value, but only when the item is undefined
+        if (item === undefined) {
+          newObj[key] = originalConfigObj[key];
+        } else {
+          if (item !== null && typeof item === 'object' && !Array.isArray(item)) {
+            newObj[key] = this.getDefaultsForDeepObject(item, originalConfigObj[key]);
+          } else {
+            newObj[key] = newConfigObj[key];
+          }
+
+        }
+      });
+
+      return newObj;
+    }
+
     getCurrentLs() {
       const keys = Object.keys(this.LS_DEFAULTS);
 
       keys.forEach((key) => {
         const item = this.getLsItem(key);
-        if (item) {
-          this.s[key] = item;
+
+        // reassign to original value, but only when the item is undefined
+        if (item === undefined) {
+          this.s[key] = this.LS_DEFAULTS[key];
+
+        } else {
+          // deep check object defaults
+          if (item !== null && typeof item === 'object' && !Array.isArray(item)) {
+            this.s[key] = this.getDefaultsForDeepObject(item, this.LS_DEFAULTS[key]);
+          } else {
+            this.s[key] = item;
+          }
 
           if (key === this.PROJECTS_KEY) {
             const projects = this.s[key];
             this.makeProjectsSimple(projects);
           }
-        } else {
-          this.s[key] = this.LS_DEFAULTS[key];
         }
       });
 
