@@ -195,6 +195,8 @@
         // init work session timer
         this.data.currentSessionTime = moment.duration(this.config.duration).asMilliseconds();
       }
+
+      this.data.currentSessionInitialTime = this.data.currentSessionTime;
     }
 
     initTimer() {
@@ -212,6 +214,10 @@
       if (this.data.currentSessionTime <= 0) {
         this.sessionDone();
       }
+
+      if (this.IS_ELECTRON) {
+        this.sendUpdateToRemoteInterface();
+      }
     }
 
     isOnLongBreak() {
@@ -225,6 +231,16 @@
     playSessionDoneSound() {
       if (this.config.isPlaySound) {
         new Audio(DEFAULT_SOUND).play();
+      }
+    }
+
+    sendUpdateToRemoteInterface() {
+      if (this.IS_ELECTRON) {
+        window.ipcRenderer.send(this.EV.IPC_EVENT_POMODORO_UPDATE, {
+          isOnBreak: this.data.isOnBreak,
+          currentSessionTime: this.data.currentSessionTime,
+          currentSessionInitialTime: this.data.currentSessionInitialTime
+        });
       }
     }
   }

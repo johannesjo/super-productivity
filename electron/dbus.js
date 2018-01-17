@@ -71,6 +71,7 @@ function init(params) {
       properties: {},
       signals: {
         taskChanged: ['ss', 'task_id', 'task_text'],
+        pomodoroUpdate: ['bxx', 'is_on_break', 'session_time_left', 'session_total_time'],
       },
     };
 
@@ -125,7 +126,7 @@ if (!isDBusError) {
       mainWindow = mainWindowPassed;
     },
     setTask: (taskId, taskText) => {
-      if(isDBusError){
+      if (isDBusError) {
         return;
       }
 
@@ -135,6 +136,9 @@ if (!isDBusError) {
       }
 
       iface.emit('taskChanged', taskId + '', taskText + '')
+    },
+    updatePomodoro: (isOnBreak, currentSessionTime, currentSessionInitialTime) => {
+      iface.emit('pomodoroUpdate', (isOnBreak ? 1 : 0), currentSessionTime, currentSessionInitialTime)
     }
   };
 } else {
@@ -144,6 +148,8 @@ if (!isDBusError) {
     setMainWindow: () => {
     },
     setTask: () => {
+    },
+    updatePomodoro: () => {
     }
   };
 }

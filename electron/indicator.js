@@ -113,6 +113,16 @@ function initListeners(isGnomeShellExtInstalled) {
       }
     }
   });
+
+  electron.ipcMain.on('IPC_EVENT_POMODORO_UPDATE', (ev, params) => {
+    const isOnBreak = params.isOnBreak;
+    const currentSessionTime = params.currentSessionTime;
+    const currentSessionInitialTime = params.currentSessionInitialTime;
+
+    if (isGnomeShellExtInstalled) {
+      dbus.updatePomodoro(isOnBreak, currentSessionTime, currentSessionInitialTime);
+    }
+  });
 }
 
 function createIndicatorStr(task) {
