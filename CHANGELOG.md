@@ -1,3 +1,21 @@
+<a name="1.7.4"></a>
+## [1.7.4](https://github.com/johannesjo/super-productivity/compare/v1.7.3...v1.7.4) (2018-01-26)
+
+
+### Bug Fixes
+
+* **timeTracking:** weird behavior when no active task is selected ([a420ad2](https://github.com/johannesjo/super-productivity/commit/a420ad2))
+
+
+### Features
+
+* always set default value for new config options in deep nested objects ([462ab2e](https://github.com/johannesjo/super-productivity/commit/462ab2e))
+* make checking if current ticket is assigned to current user optional [#47](https://github.com/johannesjo/super-productivity/issues/47) ([8be885a](https://github.com/johannesjo/super-productivity/commit/8be885a))
+* **pomodoro:** add interface to gnome shell indicator ([15e05c7](https://github.com/johannesjo/super-productivity/commit/15e05c7))
+* update electron and electron builder to latest version to fix security issue ([ce9f70c](https://github.com/johannesjo/super-productivity/commit/ce9f70c))
+
+
+
 <a name="1.7.3"></a>
 ## [1.7.3](https://github.com/johannesjo/super-productivity/compare/v1.7.2...v1.7.3) (2018-01-09)
 
