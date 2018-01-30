@@ -1,3 +1,13 @@
+<a name="1.7.5"></a>
+## [1.7.5](https://github.com/johannesjo/super-productivity/compare/v1.7.4...v1.7.5) (2018-01-30)
+
+
+### Bug Fixes
+
+* **pomodoro:** better handling for when pomodoro was disabled in the options again [#51](https://github.com/johannesjo/super-productivity/issues/51) ([49d7682](https://github.com/johannesjo/super-productivity/commit/49d7682))
+
+
+
 <a name="1.7.4"></a>
 ## [1.7.4](https://github.com/johannesjo/super-productivity/compare/v1.7.3...v1.7.4) (2018-01-26)
 
