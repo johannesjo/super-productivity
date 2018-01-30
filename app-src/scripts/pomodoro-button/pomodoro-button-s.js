@@ -53,6 +53,11 @@
       // listen for idle and stop pomodoro session
       if (this.IS_ELECTRON) {
         this.$rootScope.$on(this.EV.IS_IDLE, () => {
+          // if pomodoro is disabled just return
+          if (this.config && !this.config.isEnabled) {
+            return;
+          }
+
           if (this.data.status !== MANUAL_PAUSE) {
             this.pause();
           }
@@ -61,6 +66,11 @@
 
       // listen for current task updates
       this.$rootScope.$on(this.EV.UPDATE_CURRENT_TASK, (ev, args) => {
+        // if pomodoro is disabled just return
+        if (this.config && !this.config.isEnabled) {
+          return;
+        }
+
         // if data is not ready, just return
         if (!this.data) {
           return;
