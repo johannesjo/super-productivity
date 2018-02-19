@@ -237,8 +237,8 @@
     const DOWNLOAD_URL = 'https://github.com/johannesjo/super-productivity/releases';
 
     function compareVersion(a, b) {
-      let pa = a.split('.');
-      let pb = b.split('.');
+      const pa = a.split('.');
+      const pb = b.split('.');
       for (let i = 0; i < 3; i++) {
         let na = Number(pa[i]);
         let nb = Number(pb[i]);
@@ -262,7 +262,7 @@
         const isNew = (compareVersion(latestVersionStr, VERSION) > 0);
         if (isNew) {
           const toast = $mdToast.simple()
-            .textContent('There is a new Version of Super Productivity available.')
+            .textContent(`There is a new Version of Super Productivity (${latestVersionStr}) available.`)
             .action('Download')
             .hideDelay(20000)
             .position('bottom');
