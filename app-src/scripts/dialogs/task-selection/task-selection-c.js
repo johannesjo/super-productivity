@@ -41,6 +41,10 @@
       }
     };
 
+    vm.cancel = () => {
+      $mdDialog.cancel();
+    };
+
     vm.getFilteredUndoneTasks = (searchText) => {
       return searchText ? $filter('filter')(vm.undoneTasks, searchText, false) : vm.undoneTasks;
     };
