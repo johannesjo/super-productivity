@@ -1,3 +1,19 @@
+<a name="1.7.6"></a>
+## [1.7.6](https://github.com/johannesjo/super-productivity/compare/v1.7.5...v1.7.6) (2018-02-19)
+
+
+### Bug Fixes
+
+* missing binding for close button on task selection dialog [#53](https://github.com/johannesjo/super-productivity/issues/53) ([b3cc7f8](https://github.com/johannesjo/super-productivity/commit/b3cc7f8))
+* pulling from wrong repository by getting git settings each time [#55](https://github.com/johannesjo/super-productivity/issues/55) ([0c6227a](https://github.com/johannesjo/super-productivity/commit/0c6227a))
+
+
+### Features
+
+* add version string to update notification ([546f3e4](https://github.com/johannesjo/super-productivity/commit/546f3e4))
+
+
+
 <a name="1.7.5"></a>
 ## [1.7.5](https://github.com/johannesjo/super-productivity/compare/v1.7.4...v1.7.5) (2018-01-30)
 
