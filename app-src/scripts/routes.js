@@ -28,7 +28,7 @@
         url: '/work-view',
         template: '<work-view></work-view>'
       })
-      .state('settings', {
+      .state('xxxxxxxxxxxxxxxxxxxxx', {
         url: '/settings',
         controller: 'SettingsCtrl',
         controllerAs: 'vm',

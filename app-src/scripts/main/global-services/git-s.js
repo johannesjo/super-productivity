@@ -17,7 +17,7 @@
   function Git($http, $rootScope, $injector, $q, Notifier, SimpleToast) {
     const TYPE = 'GITHUB';
     const BASE_URL = 'https://api.github.com/';
-    const settings = $rootScope.r && $rootScope.r.git;
+    const that = this;
 
     // PRIVATE HELPER FUNCTIONS
     // ------------------------
@@ -30,7 +30,7 @@
       }
 
       if (issue.pull_request) {
-        title = `${settings.prPrefix} #${issue.number}: ${issue.title}`;
+        title = `${that.getSettings().prPrefix} #${issue.number}: ${issue.title}`;
       } else {
         title = `#${issue.number} ${issue.title}`;
       }
@@ -117,27 +117,48 @@
       return task && task.originalId && task.originalType === TYPE;
     };
 
+    this.isRepoConfigured = () => {
+      const settings = this.getSettings();
+      return settings && settings.repo && settings.repo.trim() !== '';
+    };
+
+    this.getSettings = () => {
+      return $rootScope.r && $rootScope.r.git;
+    };
+
     // API METHODS
     // -----------
-    this.getLatestSpRelease= () => {
+    this.getLatestSpRelease = () => {
       const SP_REPO_STR = BASE_URL + 'repos/johannesjo/super-productivity/releases/latest';
       return $http.get(SP_REPO_STR);
     };
 
     this.getIssueList = () => {
-      return $http.get(BASE_URL + 'repos/' + settings.repo + '/issues', {
+      if (!this.isRepoConfigured()) {
+        return $q.reject();
+      }
+
+      return $http.get(BASE_URL + 'repos/' + this.getSettings().repo + '/issues', {
         transformResponse: [transformIssueList]
       });
     };
 
     this.getCommentListForIssue = (issueNumber) => {
-      return $http.get(BASE_URL + 'repos/' + settings.repo + '/issues/' + issueNumber + '/comments', {
+      if (!this.isRepoConfigured()) {
+        return $q.reject();
+      }
+
+      return $http.get(BASE_URL + 'repos/' + this.getSettings().repo + '/issues/' + issueNumber + '/comments', {
         transformResponse: [transformComments]
       });
     };
 
     this.getIssueById = (issueNumber) => {
-      return $http.get(BASE_URL + 'repos/' + settings.repo + '/issues/' + issueNumber, {
+      if (!this.isRepoConfigured()) {
+        return $q.reject();
+      }
+
+      return $http.get(BASE_URL + 'repos/' + this.getSettings().repo + '/issues/' + issueNumber, {
         transformResponse: [transformIssue]
       });
     };
@@ -145,6 +166,10 @@
     // COMPLEXER WRAPPER METHODS
     // -------------------------
     this.checkAndUpdateTasks = (tasks) => {
+      if (!this.isRepoConfigured()) {
+        return $q.reject();
+      }
+
       const TasksUtil = $injector.get('TasksUtil');
       const defer = $q.defer();
 
@@ -196,14 +221,10 @@
       return defer.promise;
     };
 
-    this.isSufficientSettings = () => {
-      return $rootScope.r.git && $rootScope.r.git.repo;
-    };
-
     this.checkForNewAndAddToBacklog = () => {
       const Tasks = $injector.get('Tasks');
 
-      if (this.isSufficientSettings() && $rootScope.r.git.isAutoImportToBacklog) {
+      if (this.isRepoConfigured() && $rootScope.r.git.isAutoImportToBacklog) {
         this.getIssueList()
           .then((res) => {
             const issues = res.data;

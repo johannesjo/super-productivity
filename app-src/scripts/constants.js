@@ -81,7 +81,7 @@
       git: {
         isShowIssuesFromGit: false,
         isAutoImportToBacklog: false,
-        repo: undefined,
+        repo: '',
         projectDir: undefined,
         prPrefix: 'Check PR: '
       },
