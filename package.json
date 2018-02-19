@@ -63,8 +63,7 @@
       "category": "Utility",
       "target": [
         "AppImage",
-        "deb",
-        "snap"
+        "deb"
       ],
       "publish": [
         "github",
