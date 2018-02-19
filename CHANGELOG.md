@@ -1,3 +1,8 @@
+<a name="1.7.7"></a>
+## [1.7.7](https://github.com/johannesjo/super-productivity/compare/v1.7.6...v1.7.7) (2018-02-19)
+
+
+
 <a name="1.7.6"></a>
 ## [1.7.6](https://github.com/johannesjo/super-productivity/compare/v1.7.5...v1.7.6) (2018-02-19)
 
