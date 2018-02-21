@@ -20,7 +20,17 @@
                      style="position: relative;"
                      flex>
     <div class="md-dialog-content">
-      <p>You successfully finished session <strong ng-bind="vm.pomodoroData.currentCycle"></strong>! Enjoy yourself, get yourself moving, come back in:</p>
+      <div ng-if="!vm.isBreakDone">
+        <p>You successfully finished session
+          <strong ng-bind="vm.pomodoroData.currentCycle"></strong>! Enjoy yourself, get yourself moving, come back in:
+        </p>
+      </div>
+
+      <div ng-if="vm.isBreakDone">
+        <p>You're break is done!</p>
+      </div>
+
+
       <div class="timer"
            ng-bind="(vm.pomodoroData.currentSessionTime | date:'mm:ss')"></div>
 
@@ -34,7 +44,8 @@
     <md-dialog-actions>
       <md-button ng-click="vm.continue()"
                  class="md-primary md-raised">
-        But I want to work (skip break)!!
+        <span ng-if="!vm.isBreakDone">But I want to work (skip break)!!</span>
+        <span ng-if="vm.isBreakDone">Go back to work!</span>
       </md-button>
       <md-button class="md-raised"
                  ng-click="vm.cancel()">

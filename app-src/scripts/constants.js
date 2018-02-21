@@ -129,6 +129,7 @@
           isStopTrackingOnBreak: true,
           isStopTrackingOnLongBreak: true,
           isShowDistractionsOnBreak: true,
+          isManualContinue: false,
           isPlaySound: true,
           isGoToWorkView: false,
         },
