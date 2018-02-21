@@ -1,3 +1,13 @@
+<a name="1.7.9"></a>
+## [1.7.9](https://github.com/johannesjo/super-productivity/compare/v1.7.8...v1.7.9) (2018-02-21)
+
+
+### Features
+
+* add option to require the user to manually confirm starting the next session ([14a88f2](https://github.com/johannesjo/super-productivity/commit/14a88f2))
+
+
+
 <a name="1.7.8"></a>
 ## [1.7.8](https://github.com/johannesjo/super-productivity/compare/v1.7.7...v1.7.8) (2018-02-19)
 
