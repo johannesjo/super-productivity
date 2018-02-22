@@ -190,10 +190,14 @@
         _.each(tasks, (task) => {
           if (task.subTasks && task.subTasks.length > 0) {
             _.each(task.subTasks, (subTask) => {
-              totalRemaining.add(calcRemainingTimeForTask(subTask));
+              if (!subTask.isDone) {
+                totalRemaining.add(calcRemainingTimeForTask(subTask));
+              }
             });
           } else {
-            totalRemaining.add(calcRemainingTimeForTask(task));
+            if (!task.isDone) {
+              totalRemaining.add(calcRemainingTimeForTask(task));
+            }
           }
         });
       }
