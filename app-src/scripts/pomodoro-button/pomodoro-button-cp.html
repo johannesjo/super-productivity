@@ -1,11 +1,14 @@
 <md-fab-speed-dial md-direction="down"
                    md-open="$ctrl.isOpen"
                    class="md-scale"
+                   ng-class="$ctrl.svc.data.status"
                    ng-click="$ctrl.toggle($event)"
                    ng-mouseenter="$ctrl.isOpen=true"
                    ng-mouseleave="$ctrl.isOpen=false">
   <md-fab-trigger>
-    <md-button class="md-icon-button md-accent md-raised timer-btn"
+    <md-button class="md-icon-button md-raised timer-btn"
+               md-no-ink
+               ng-class="{'md-accent':$ctrl.svc.data.status=='PLAY'}"
                aria-label="Open Pomodoro Actions">
       <ng-md-icon icon="play_arrow"
                   ng-if="!$ctrl.svc.data.isOnBreak && $ctrl.svc.data.status==='PLAY'"></ng-md-icon>

@@ -7,15 +7,23 @@ pomodoro-button {
   @include ng-pop-in-popout;
 
   .timer-btn {
-    text-align: center !important;
-    padding-left: 5px !important;
     position: relative;
     overflow: visible;
+    transform: scale(1.2);
 
     ng-md-icon {
       margin-top: -10px;
 
       @include ng-pop-in;
+      &.ng-leave {
+        transition: none;
+        display: none !important;
+      }
+    }
+
+    // fix weird flickering
+    ng-md-icon + ng-md-icon {
+      display: none;
     }
   }
 
@@ -23,7 +31,12 @@ pomodoro-button {
     position: relative;
   }
 
+  .PLAY .timer-btn-text {
+    color: #ffffff;
+  }
+
   .timer-btn-text {
+    transition: all 0.2s $ease-in-out-quint;
     font-size: 15px;
     line-height: 1;
     font-weight: bold;
@@ -32,9 +45,9 @@ pomodoro-button {
     left: 50%;
     transform: translate(-50%, 0);
     color: #333333;
-    background: #ffffff;
+    background: inherit;
     margin-bottom: -4px;
-    padding: 1px 4px;
+    padding: 1px 3px;
     z-index: 10;
   }
 
