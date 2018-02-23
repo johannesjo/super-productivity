@@ -1,0 +1,39 @@
+<md-dialog aria-label="Task list export"
+           class="dialog-time-sheet-export fullscreen-dialog"
+           md-theme="vm.theme">
+  <md-toolbar>
+    <div class="md-toolbar-tools">
+      <h2>Time Sheet Export</h2>
+      <span flex></span>
+      <md-button class="md-icon-button"
+                 aria-label="Cancel"
+                 ng-click="vm.cancel()">
+        <ng-md-icon icon="close"></ng-md-icon>
+      </md-button>
+    </div>
+  </md-toolbar>
+
+  <form ng-submit="vm.export()">
+    <md-dialog-content>
+      <div class="md-dialog-content">
+
+      </div>
+    </md-dialog-content>
+
+
+    <md-dialog-actions>
+
+      <a class="md-button md-primary md-raised"
+         text-to-file-download="vm.tasksTxt">
+        <ng-md-icon icon="file_download"></ng-md-icon>
+        Save to file
+      </a>
+      <md-button ng-click="vm.cancel()"
+                 type="button"
+                 class="md-raised">
+        <ng-md-icon icon="close"></ng-md-icon>
+        Close
+      </md-button>
+    </md-dialog-actions>
+  </form>
+</md-dialog>

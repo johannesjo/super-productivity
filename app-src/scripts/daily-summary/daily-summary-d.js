@@ -57,6 +57,14 @@
       }, true);
     };
 
+    vm.showTimeSheetExportModal = () => {
+      Dialogs('TIME_SHEET_EXPORT', {
+        settings: $rootScope.r.uiHelper.dailyTaskExportSettings,
+        finishDayFn: vm.finishDay,
+        tasks: Tasks.getToday()
+      }, true);
+    };
+
     vm.finishDay = () => {
       $rootScope.r.tomorrowsNote = vm.tomorrowsNote;
 
