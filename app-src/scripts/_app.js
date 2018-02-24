@@ -31,7 +31,8 @@
       'as.sortable',
       'angularMoment',
       'hc.marked',
-      'mwl.calendar'
+      'mwl.calendar',
+      'angular-google-gapi'
     ])
     .config(configMdTheme)
     .config(configMarked)

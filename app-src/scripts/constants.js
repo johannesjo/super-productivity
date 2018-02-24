@@ -12,6 +12,10 @@
   angular
     .module('superProductivity')
     .constant('DEFAULT_THEME', 'blue-theme')
+    .constant('GOOGLE', {
+      CLIENT_ID: '37646582031-e281jj291amtk805td0hgfqss2jfkdcd.apps.googleusercontent.com',
+      API_KEY: 'S36BCrLhs0TAiQmlViS_88TQ',
+    })
     .constant('GLOBAL_LS_FIELDS', [
       'currentProject',
       'projects',
