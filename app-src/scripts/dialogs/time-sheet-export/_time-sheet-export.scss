@@ -1,2 +1,18 @@
 .dialog-time-sheet-export {
+
+  .collapsible-title {
+    font-size: 20px;
+    margin-bottom: 10px;
+  }
+
+  .export-input-table {
+    th {
+      font-weight: bold;
+    }
+
+    input {
+      width: 100%;
+      min-width: 40px;
+    }
+  }
 }

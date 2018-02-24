@@ -18,6 +18,12 @@
     let vm = this;
     vm.theme = theme;
 
+    vm.roundOptions = [
+      { id: 'QUARTER', title: 'full quarters' },
+      { id: 'HALF', title: 'full half hours' },
+      { id: 'HOUR', title: 'full hours' },
+    ];
+
     vm.submit = () => {
       $mdDialog.hide();
     };
@@ -29,6 +35,7 @@
     GoogleApi.login()
       .then(GoogleApi.getSpreadsheetHeadings.bind(GoogleApi))
       .then((headings) => {
+        vm.isLoggedIn = true;
         console.log(headings);
         vm.headings = headings;
       });

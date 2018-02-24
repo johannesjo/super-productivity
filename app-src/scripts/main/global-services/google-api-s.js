@@ -86,7 +86,9 @@
 
     login() {
       return this.initAllIfNotDone()
-        .then(() => gapi.auth2.getAuthInstance().signIn());
+        .then(() => gapi.auth2.getAuthInstance().signIn({
+          immediate: true
+        }));
     }
 
     logout() {

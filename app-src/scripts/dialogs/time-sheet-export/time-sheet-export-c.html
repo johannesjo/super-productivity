@@ -16,38 +16,108 @@
   <form ng-submit="vm.export()">
     <md-dialog-content>
       <div class="md-dialog-content">
-        <div class="info">Take care!</div>
+        <collapsible collapsible-title="What is this and how does it work?"
+                     is-initially-expanded="{{!(vm.opts.spreadsheetId)}}">
+          <div class="info">
+            Take care!
+          </div>
+
+          <dl class="possible properties">
+            <dt>{startTime}</dt>
+            <dd>AAa</dd>
+
+            <dt>{startTime|rounded}</dt>
+            <dd>AAa</dd>
+
+            <dt>{currentTime}</dt>
+            <dd>AAa</dd>
+
+            <dt>{currentTime|rounded}</dt>
+            <dd>AAa</dd>
+
+            <dt>{date}</dt>
+            <dd>AAa</dd>
+
+            <dt>{taskTitles}</dt>
+            <dd>AAa</dd>
+
+            <dt>{subTaskTitles}</dt>
+            <dd>AAa</dd>
+
+            <dt>{totalTimeWorkedToday}</dt>
+            <dd>AAa</dd>
+          </dl>
+        </collapsible>
 
         <div>
-          <md-button>Login</md-button>
-          <md-button>Read headings for spreadsheet</md-button>
-          <input type="text"
-                 ng-model="vm.spreadsheetId">
-          <md-switch>Auto-login and load data next time</md-switch>
+          <md-button class="md-raised md-primary"
+                     ng-show="!vm.isLoggedIn">Login
+          </md-button>
+          <md-button class="md-raised md-primary"
+                     ng-show="vm.isLoggedIn">Logout
+          </md-button>
+          <md-button class="md-raised md-primary">Read headings</md-button>
+          <md-button class="md-raised md-primary">Revoke permissions</md-button>
+          <md-button class="md-raised md-primary"
+                     ng-show="vm.isLoggedIn && vm.opts.spreadsheetId">Edit spreadsheet
+          </md-button>
         </div>
 
-        <table class="export-input-table">
-          <tr>
-            <td class="heading"
-                ng-repeat="heading in vm.headings track by $index"
-                ng-bind="heading"></td>
-          </tr>
-          <tr>
-            <td class="default"
-                ng-repeat="heading in vm.headings track by $index">
-              <input type="text"
-                     ng-model="defaultValues[$index]">
-            </td>
-          </tr>
-          <tr>
-            <td class="actual"
-                ng-repeat="heading in vm.headings track by $index">
-              <input type="text"
-                     ng-model="actualValues[$index]">
-            </td>
-          </tr>
-        </table>
+        <section ng-show="vm.isLoggedIn">
+          <md-input-container class="md-block">
+            <label>Spreadsheet ID</label>
+            <input type="text"
+                   ng-model="vm.opts.spreadsheetId">
+          </md-input-container>
 
+          <div>
+            <div>
+              <md-switch ng-model="vm.opts.isAutoLogin">Auto-login and load data next time</md-switch>
+              <md-switch ng-model="vm.opts.isAutoFocusEmpty">Auto-focus first empty field after loading table headings</md-switch>
+              <md-switch ng-model="vm.opts.isRoundUp">Always round up</md-switch>
+              <md-input-container>
+                <label>Round time worked to</label>
+                <md-select ng-model="vm.opts.roundTo">
+                  <md-option><em>don't round</em></md-option>
+                  <md-option ng-repeat="roundOption in vm.roundOptions"
+                             ng-value="roundOption.id">
+                    {{roundOption.title}}
+                  </md-option>
+                </md-select>
+              </md-input-container>
+            </div>
+          </div>
+
+          <table class="export-input-table"
+                 ng-show="vm.headings">
+            <tr>
+              <th></th>
+              <th class="heading"
+                  ng-repeat="heading in vm.headings track by $index"
+                  ng-bind="heading"></th>
+            </tr>
+            <tr>
+              <th>Last saved row</th>
+              <td ng-repeat="heading in vm.headings track by $index">{{heading}}</td>
+            </tr>
+            <tr>
+              <th>Default</th>
+              <td class="default"
+                  ng-repeat="heading in vm.headings track by $index">
+                <input type="text"
+                       ng-model="defaultValues[$index]">
+              </td>
+            </tr>
+            <tr>
+              <th>Actual</th>
+              <td class="actual"
+                  ng-repeat="heading in vm.headings track by $index">
+                <input type="text"
+                       ng-model="actualValues[$index]">
+              </td>
+            </tr>
+          </table>
+        </section>
       </div>
     </md-dialog-content>
 
