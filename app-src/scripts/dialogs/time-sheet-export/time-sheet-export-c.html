@@ -13,7 +13,7 @@
     </div>
   </md-toolbar>
 
-  <form ng-submit="vm.export()">
+  <form ng-submit="vm.save()">
     <md-dialog-content>
       <div class="md-dialog-content">
         <collapsible class="help-collapsible"
@@ -57,7 +57,7 @@
                      class="options-collapsible"
                      is-initially-expanded="{{(vm.opts.spreadsheetId ? '':'true')}}">
           <md-switch ng-model="vm.opts.isAutoLogin">Auto-login and load data next time</md-switch>
-          <md-switch ng-model="vm.opts.isAutoFocusEmpty">Auto-focus first empty field after loading table headings</md-switch>
+          <!--<md-switch ng-model="vm.opts.isAutoFocusEmpty">Auto-focus first empty field after loading table headings</md-switch>-->
           <md-switch ng-model="vm.opts.isRoundWorkTimeUp">Always round work time up</md-switch>
           <md-input-container>
             <label>Round start time to</label>
@@ -93,7 +93,6 @@
           </md-input-container>
         </collapsible>
 
-
         <div>
           <md-button class="md-raised md-primary"
                      ng-show="!vm.isLoggedIn"
@@ -115,7 +114,10 @@
                      href="https://myaccount.google.com/permissions">Revoke permissions
           </md-button>
           <md-button class="md-raised md-primary"
-                     ng-show="vm.isLoggedIn && vm.opts.spreadsheetId">Edit spreadsheet
+                     external-link
+                     target="_blank"
+                     ng-show="vm.isLoggedIn && vm.opts.spreadsheetId"
+                     ng-href="https://docs.google.com/spreadsheets/d/{{vm.opts.spreadsheetId}}">Edit spreadsheet
           </md-button>
         </div>
 
@@ -137,7 +139,7 @@
             </tr>
             <tr>
               <th>Last saved row</th>
-              <td ng-repeat="heading in vm.headings track by $index">{{heading}}</td>
+              <td ng-repeat="col in vm.lastRow track by $index">{{col}}</td>
             </tr>
             <tr>
               <th>Default</th>
@@ -157,9 +159,6 @@
               </td>
             </tr>
           </table>
-
-          {{vm.opts.defaultValues|json}}
-          {{vm.actualValues|json}}
         </section>
       </div>
     </md-dialog-content>
@@ -167,11 +166,13 @@
 
     <md-dialog-actions>
 
-      <a class="md-button md-primary md-raised"
-         text-to-file-download="vm.tasksTxt">
-        <ng-md-icon icon="file_download"></ng-md-icon>
-        Save
-      </a>
+      <md-button ng-click="vm.save()"
+                 ng-show="vm.actualValues.length > 0 && vm.isLoggedIn"
+                 type="button"
+                 class="md-raised md-primary">
+        <ng-md-icon icon="save"></ng-md-icon>
+        Save row
+      </md-button>
       <md-button ng-click="vm.cancel()"
                  type="button"
                  class="md-raised">

@@ -20,24 +20,18 @@
     vm.opts = $rootScope.r.uiHelper.timeSheetExportSettings;
     vm.actualValues = [];
 
-    console.log(vm.opts.defaultValues);
-
     vm.roundTimeOptions = [
       { id: 'QUARTER', title: 'full quarters' },
       { id: 'HALF', title: 'full half hours' },
       { id: 'HOUR', title: 'full hours' },
     ];
 
-    vm.submit = () => {
-      $mdDialog.hide();
-    };
-
     vm.cancel = () => {
       $mdDialog.hide();
     };
 
     vm.login = () => {
-      GoogleApi.login()
+      return GoogleApi.login()
         .then(() => {
           vm.isLoggedIn = true;
         });
@@ -45,9 +39,10 @@
 
     vm.readSpreadsheet = () => {
       vm.headings = undefined;
-      GoogleApi.getSpreadsheetHeadings(vm.opts.spreadsheetId)
-        .then((headings) => {
-          vm.headings = headings;
+      return GoogleApi.getSpreadsheetHeadingsAndLastRow(vm.opts.spreadsheetId)
+        .then((data) => {
+          vm.headings = data.headings;
+          vm.lastRow = data.lastRow;
           vm.updateDefaults();
         })
     };
@@ -57,6 +52,28 @@
         .then(() => {
           vm.isLoggedIn = false;
         });
+    };
+
+    vm.save = () => {
+      const arraysEqual = (arr1, arr2) => {
+        if (arr1.length !== arr2.length)
+          return false;
+        for (let i = arr1.length; i--;) {
+          if (arr1[i] !== arr2[i])
+            return false;
+        }
+        return true;
+      };
+
+      if (arraysEqual(vm.actualValues, vm.lastRow)) {
+        SimpleToast('CUSTOM', 'Current values and the last saved row have equal values, that is probably not what you want.');
+      } else {
+        GoogleApi.appendRow(vm.opts.spreadsheetId, vm.actualValues)
+          .then(() => {
+            SimpleToast('SUCCESS', 'Row successfully appended');
+            $mdDialog.hide();
+          });
+      }
     };
 
     vm.updateDefaults = () => {
@@ -86,17 +103,17 @@
     }
 
     function getStartTime() {
-      return $rootScope.r.startedTimeToday.format('H:mm');
+      return $rootScope.r.startedTimeToday.format('HH:mm');
     }
 
     function getCurrentTime() {
-      const currentTIme = window.moment().format('H:mm');
+      const currentTIme = window.moment().format('HH:mm');
       return currentTIme;
     }
 
     function getTotalTime() {
       const timeWorked = Tasks.getTimeWorkedToday();
-      return timeWorked.format('H:mm');
+      return timeWorked.format('HH:mm');
     }
 
     function getTaskTitles() {
@@ -112,8 +129,6 @@
       const tasks = Tasks.getToday();
       let titleStr = '';
       tasks.forEach((task) => {
-        console.log(task);
-
         if (task.subTasks) {
           task.subTasks.forEach((subTask) => {
             titleStr += subTask.title + ', ';
@@ -126,16 +141,13 @@
     }
 
     if (vm.opts.isAutoLogin) {
-      GoogleApi.login()
+      vm.login()
         .then(() => {
           if (vm.opts.spreadsheetId) {
-            return GoogleApi.getSpreadsheetHeadings(vm.opts.spreadsheetId);
+            vm.readSpreadsheet();
           }
         })
-        .then((headings) => {
-          vm.isLoggedIn = true;
-          console.log(headings);
-          vm.headings = headings;
+        .then(() => {
           vm.updateDefaults();
         });
     }

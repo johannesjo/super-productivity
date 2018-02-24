@@ -64,13 +64,11 @@
         discoveryDocs: DISCOVERY_DOCS,
         scope: SCOPES
       }).then(() => {
-        console.log('INIT DONE');
-        defer.resolve();
-
         // Listen for sign-in state changes.
         gapi.auth2.getAuthInstance().isSignedIn.listen(this.updateSigninStatus.bind(this));
         // Handle the initial sign-in state.
         this.updateSigninStatus.bind(this);
+        defer.resolve();
       });
     }
 
@@ -94,25 +92,37 @@
       return gapi.auth2.getAuthInstance().signOut();
     }
 
+    appendRow(spreadsheetId, row) {
+      return gapi.client.sheets.spreadsheets.values.append({
+        spreadsheetId: spreadsheetId,
+        range: 'A1:Z99',
+        valueInputOption: 'USER_ENTERED',
+        insertDataOption: 'INSERT_ROWS',
+        resource: {
+          values: [row]
+        }
+      }, row);
+    }
+
     getSpreadsheetData(spreadsheetId, range) {
-      console.log(this);
       return gapi.client.sheets.spreadsheets.values.get({
         spreadsheetId: spreadsheetId,
         range: range,
       });
     }
 
-    getSpreadsheetHeadings(spreadsheetId) {
-      console.log('getSpreadsheetHeadings');
-
+    getSpreadsheetHeadingsAndLastRow(spreadsheetId) {
       const defer = this.$q.defer();
 
-      this.getSpreadsheetData(spreadsheetId, 'A1:Z2')
+      this.getSpreadsheetData(spreadsheetId, 'A1:Z99')
         .then((response) => {
           const range = response.result;
 
           if (range.values && range.values[0]) {
-            defer.resolve(range.values[0]);
+            defer.resolve({
+              headings: range.values[0],
+              lastRow: range.values[range.values.length - 1],
+            });
           } else {
             console.log('No data found.');
             defer.reject('No data found');
