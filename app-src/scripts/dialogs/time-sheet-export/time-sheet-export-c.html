@@ -46,7 +46,7 @@
             <dt>{subTaskTitles}</dt>
             <dd>Comma separated sub task titles</dd>
 
-            <dt>{totalTimeWorkedToday}</dt>
+            <dt>{totalTime}</dt>
             <dd>The total time you spend working on your todays tasks.</dd>
           </dl>
 
@@ -142,20 +142,24 @@
             <tr>
               <th>Default</th>
               <td class="default"
-                  ng-repeat="heading in vm.headings track by $index">
+                  ng-repeat="(i,heading) in vm.headings track by $index">
                 <input type="text"
-                       ng-model="vm.opts.defaultValues[$index]">
+                       ng-change="vm.updateDefaults()"
+                       ng-model="vm.opts.defaultValues[i]">
               </td>
             </tr>
             <tr>
               <th>Actual</th>
               <td class="actual"
-                  ng-repeat="heading in vm.headings track by $index">
+                  ng-repeat="(i,heading) in vm.headings track by $index">
                 <input type="text"
-                       ng-model="vm.actualValues[$index]">
+                       ng-model="vm.actualValues[i]">
               </td>
             </tr>
           </table>
+
+          {{vm.opts.defaultValues|json}}
+          {{vm.actualValues|json}}
         </section>
       </div>
     </md-dialog-content>

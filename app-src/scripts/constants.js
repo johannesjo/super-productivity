@@ -166,7 +166,9 @@
           isRoundWorkTimeUp: undefined,
           roundEndTimeTo: undefined,
           roundWorkTimeTo: undefined,
-          defaultValues: []
+          defaultValues: [
+            'AASDAS'
+          ]
         },
         timeTrackingHistoryExportSettings: {
           separateBy: '',
