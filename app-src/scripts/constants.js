@@ -66,6 +66,7 @@
       theme: undefined,
       currentTask: undefined,
       lastActiveTaskTask: undefined,
+      startedTimeToday: undefined,
       currentProject: undefined,
       currentSession: {
         timeWorkedWithoutBreak: undefined,

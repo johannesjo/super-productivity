@@ -45,6 +45,7 @@
     .run(initAutomaticSyncIfEnabled)
     .run(initAutomaticBackupsIfEnabled)
     .run(preventMultipleInstances)
+    .run(setStartedTime)
     .run(checkIfLatestVersion)
     .run(showWelcomeDialog)
   //.run(goToWorkViewIfTasks);
@@ -278,6 +279,21 @@
             .catch(() => {
             });
         }
+      }
+    });
+  }
+
+  function setStartedTime($rootScope, $timeout) {
+    $timeout(() => {
+      const moment = window.moment;
+      const startedTime = $rootScope.r.startedTimeToday;
+
+      if (startedTime && moment(startedTime).isSame(moment(), 'day')) {
+        // refresh to moment object
+        $rootScope.r.startedTimeToday = moment(startedTime);
+      } else {
+        // set to now
+        $rootScope.r.startedTimeToday = moment();
       }
     });
   }

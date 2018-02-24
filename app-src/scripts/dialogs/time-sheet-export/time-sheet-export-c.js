@@ -14,7 +14,7 @@
     .controller('TimeSheetExportCtrl', TimeSheetExportCtrl);
 
   /* @ngInject */
-  function TimeSheetExportCtrl($mdDialog, tasks, settings, TasksUtil, $scope, ParseDuration, SimpleToast, theme, GoogleApi, $rootScope, AppStorage) {
+  function TimeSheetExportCtrl($mdDialog, tasks, settings, TasksUtil, $scope, ParseDuration, SimpleToast, theme, GoogleApi, $rootScope, Tasks) {
     let vm = this;
     vm.theme = theme;
     vm.opts = $rootScope.r.uiHelper.timeSheetExportSettings;
@@ -69,20 +69,60 @@
       const dVal = defaultVal.trim();
       switch (dVal) {
         case '{startTime}':
-          return 'BLA_START';
+          return getStartTime();
         case '{currentTime}':
-          return 'BLA_START1';
+          return getCurrentTime();
         case '{date}':
-          return 'BLA_START2';
+          return window.moment().format('DD/MM/YYYY');
         case '{taskTitles}':
-          return 'BLA_START3';
+          return getTaskTitles();
         case '{subTaskTitles}':
-          return 'BLA_START4';
+          return getSubTaskTitles();
         case '{totalTime}':
-          return 'BLA_START5';
+          return getTotalTime();
         default:
           return dVal;
       }
+    }
+
+    function getStartTime() {
+      return $rootScope.r.startedTimeToday.format('H:mm');
+    }
+
+    function getCurrentTime() {
+      const currentTIme = window.moment().format('H:mm');
+      return currentTIme;
+    }
+
+    function getTotalTime() {
+      const timeWorked = Tasks.getTimeWorkedToday();
+      return timeWorked.format('H:mm');
+    }
+
+    function getTaskTitles() {
+      const tasks = Tasks.getToday();
+      let titleStr = '';
+      tasks.forEach((task) => {
+        titleStr += task.title + ', '
+      });
+      return titleStr.substring(0, titleStr.length - 2);
+    }
+
+    function getSubTaskTitles() {
+      const tasks = Tasks.getToday();
+      let titleStr = '';
+      tasks.forEach((task) => {
+        console.log(task);
+
+        if (task.subTasks) {
+          task.subTasks.forEach((subTask) => {
+            titleStr += subTask.title + ', ';
+          });
+        } else {
+          titleStr += task.title + ', ';
+        }
+      });
+      return titleStr.substring(0, titleStr.length - 2);
     }
 
     if (vm.opts.isAutoLogin) {
@@ -96,6 +136,7 @@
           vm.isLoggedIn = true;
           console.log(headings);
           vm.headings = headings;
+          vm.updateDefaults();
         });
     }
   }
