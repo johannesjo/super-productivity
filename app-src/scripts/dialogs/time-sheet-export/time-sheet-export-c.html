@@ -16,6 +16,37 @@
   <form ng-submit="vm.export()">
     <md-dialog-content>
       <div class="md-dialog-content">
+        <div class="info">Take care!</div>
+
+        <div>
+          <md-button>Login</md-button>
+          <md-button>Read headings for spreadsheet</md-button>
+          <input type="text"
+                 ng-model="vm.spreadsheetId">
+          <md-switch>Auto-login and load data next time</md-switch>
+        </div>
+
+        <table class="export-input-table">
+          <tr>
+            <td class="heading"
+                ng-repeat="heading in vm.headings track by $index"
+                ng-bind="heading"></td>
+          </tr>
+          <tr>
+            <td class="default"
+                ng-repeat="heading in vm.headings track by $index">
+              <input type="text"
+                     ng-model="defaultValues[$index]">
+            </td>
+          </tr>
+          <tr>
+            <td class="actual"
+                ng-repeat="heading in vm.headings track by $index">
+              <input type="text"
+                     ng-model="actualValues[$index]">
+            </td>
+          </tr>
+        </table>
 
       </div>
     </md-dialog-content>
@@ -26,7 +57,7 @@
       <a class="md-button md-primary md-raised"
          text-to-file-download="vm.tasksTxt">
         <ng-md-icon icon="file_download"></ng-md-icon>
-        Save to file
+        Save
       </a>
       <md-button ng-click="vm.cancel()"
                  type="button"
