@@ -14,9 +14,10 @@
     .controller('TimeSheetExportCtrl', TimeSheetExportCtrl);
 
   /* @ngInject */
-  function TimeSheetExportCtrl($mdDialog, tasks, settings, TasksUtil, $scope, ParseDuration, SimpleToast, theme, GoogleApi) {
+  function TimeSheetExportCtrl($mdDialog, tasks, settings, TasksUtil, $scope, ParseDuration, SimpleToast, theme, GoogleApi, $rootScope) {
     let vm = this;
     vm.theme = theme;
+    vm.opts = $rootScope.r.uiHelper.timeSheetExportSettings;
 
     vm.roundTimeOptions = [
       { id: 'QUARTER', title: 'full quarters' },
@@ -41,7 +42,7 @@
 
     vm.readSpreadsheet = () => {
       vm.headings = undefined;
-      GoogleApi.getSpreadsheetHeadings()
+      GoogleApi.getSpreadsheetHeadings(vm.opts.spreadsheetId)
         .then((headings) => {
           vm.headings = headings;
         })
@@ -54,14 +55,18 @@
         });
     };
 
-    //if (true) {
-    //  GoogleApi.login()
-    //    .then(GoogleApi.getSpreadsheetHeadings.bind(GoogleApi))
-    //    .then((headings) => {
-    //      vm.isLoggedIn = true;
-    //      console.log(headings);
-    //      vm.headings = headings;
-    //    });
-    //}
+    if (vm.opts.isAutoLogin) {
+      GoogleApi.login()
+        .then(() => {
+          if (vm.opts.spreadsheetId) {
+            return GoogleApi.getSpreadsheetHeadings(vm.opts.spreadsheetId);
+          }
+        })
+        .then((headings) => {
+          vm.isLoggedIn = true;
+          console.log(headings);
+          vm.headings = headings;
+        });
+    }
   }
 })();

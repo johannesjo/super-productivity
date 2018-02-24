@@ -159,6 +159,15 @@
           showTime: false,
           showDate: false
         },
+        timeSheetExportSettings: {
+          spreadsheetId: undefined,
+          isAutoLogin: false,
+          isAutoFocusEmpty: false,
+          isRoundWorkTimeUp: undefined,
+          roundEndTimeTo: undefined,
+          roundWorkTimeTo: undefined,
+          defaultValues: []
+        },
         timeTrackingHistoryExportSettings: {
           separateBy: '',
           separateFieldsBy: ';',

@@ -65,7 +65,7 @@
       }, true);
     };
 
-    setTimeout(vm.showTimeSheetExportModal,1100);
+    setTimeout(vm.showTimeSheetExportModal,500);
 
 
     vm.finishDay = () => {

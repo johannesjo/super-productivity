@@ -9,7 +9,6 @@
   'use strict';
 
   // https://docs.google.com/spreadsheets/d/1l8SN-qcjhsCPZe7jn6U5N4NXyeVQVIT72ZS32QYllWM/edit?ouid=101280348348341717788&usp=sheets_home&ths=true
-  const SPREADSHEET_ID = '1l8SN-qcjhsCPZe7jn6U5N4NXyeVQVIT72ZS32QYllWM';
 
   class GoogleApi {
     /* @ngInject */
@@ -98,17 +97,17 @@
     getSpreadsheetData(spreadsheetId, range) {
       console.log(this);
       return gapi.client.sheets.spreadsheets.values.get({
-        spreadsheetId: SPREADSHEET_ID,
+        spreadsheetId: spreadsheetId,
         range: range,
       });
     }
 
-    getSpreadsheetHeadings() {
+    getSpreadsheetHeadings(spreadsheetId) {
       console.log('getSpreadsheetHeadings');
 
       const defer = this.$q.defer();
 
-      this.getSpreadsheetData(SPREADSHEET_ID, 'A1:Z2')
+      this.getSpreadsheetData(spreadsheetId, 'A1:Z2')
         .then((response) => {
           const range = response.result;
 

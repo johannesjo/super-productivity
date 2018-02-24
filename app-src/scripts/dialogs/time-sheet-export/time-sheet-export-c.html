@@ -18,7 +18,7 @@
       <div class="md-dialog-content">
         <collapsible class="help-collapsible"
                      collapsible-title="What is this and how does it work?"
-                     is-initially-expanded="{{!(vm.opts.spreadsheetId)}}">
+                     is-initially-expanded="{{(vm.opts.spreadsheetId ? '':'true')}}">
           <div class="info">
             <p>This view allows you to export your worked time to a google sheet. You need to allow for your Google Spreadsheets to be accessed by Super Productivity. You also need to create a spreadsheet with a headings in the first row nad specify it's ID in the input field (<a external-link
                                                                                                                                                                                                                                                                                          target="_blank"
@@ -55,10 +55,10 @@
 
         <collapsible collapsible-title="Options"
                      class="options-collapsible"
-                     is-initially-expanded="{{!(vm.opts.spreadsheetId)}}">
+                     is-initially-expanded="{{(vm.opts.spreadsheetId ? '':'true')}}">
           <md-switch ng-model="vm.opts.isAutoLogin">Auto-login and load data next time</md-switch>
           <md-switch ng-model="vm.opts.isAutoFocusEmpty">Auto-focus first empty field after loading table headings</md-switch>
-          <md-switch ng-model="vm.opts.isRoundUp">Always round work time up</md-switch>
+          <md-switch ng-model="vm.opts.isRoundWorkTimeUp">Always round work time up</md-switch>
           <md-input-container>
             <label>Round start time to</label>
             <md-select ng-model="vm.opts.roundStartTimeTo">
@@ -144,7 +144,7 @@
               <td class="default"
                   ng-repeat="heading in vm.headings track by $index">
                 <input type="text"
-                       ng-model="defaultValues[$index]">
+                       ng-model="vm.opts.defaultValues[$index]">
               </td>
             </tr>
             <tr>
@@ -152,7 +152,7 @@
               <td class="actual"
                   ng-repeat="heading in vm.headings track by $index">
                 <input type="text"
-                       ng-model="actualValues[$index]">
+                       ng-model="vm.actualValues[$index]">
               </td>
             </tr>
           </table>
