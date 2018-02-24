@@ -96,24 +96,64 @@
         case '{subTaskTitles}':
           return getSubTaskTitles();
         case '{totalTime}':
-          return getTotalTime();
+          return getTotalTimeWorked();
         default:
           return dVal;
       }
     }
 
+    function roundTime(value, roundTo, isRoundUp) {
+      let rounded;
+
+      switch (roundTo) {
+        case 'QUARTER':
+          rounded = Math.round(value.minute() / 15) * 15;
+          if (isRoundUp) {
+            rounded = Math.ceil(value.minute() / 15) * 15;
+          }
+          return value.minute(rounded).second(0);
+
+        case 'HALF':
+          rounded = Math.round(value.minute() / 30) * 30;
+          if (isRoundUp) {
+            rounded = Math.ceil(value.minute() / 30) * 30;
+          }
+          return value.minute(rounded).second(0);
+
+        case 'HOUR':
+          rounded = Math.round(value.minute() / 60) * 60;
+          if (isRoundUp) {
+            rounded = Math.ceil(value.minute() / 60) * 60;
+          }
+          return value.minute(rounded).second(0);
+
+        default:
+          return value;
+      }
+    }
+
     function getStartTime() {
-      return $rootScope.r.startedTimeToday.format('HH:mm');
+      const val = $rootScope.r.startedTimeToday;
+      const roundTo = vm.opts.roundStartTimeTo;
+      return roundTime(val, roundTo)
+        .format('HH:mm');
     }
 
     function getCurrentTime() {
-      const currentTIme = window.moment().format('HH:mm');
-      return currentTIme;
+      const val = window.moment();
+      const roundTo = vm.opts.roundEndTimeTo;
+
+      return roundTime(val, roundTo)
+        .format('HH:mm');
     }
 
-    function getTotalTime() {
-      const timeWorked = Tasks.getTimeWorkedToday();
-      return timeWorked.format('HH:mm');
+    function getTotalTimeWorked() {
+      let val = Tasks.getTimeWorkedToday();
+      // convert to moment time
+      val = window.moment().hours(val.asHours()).minutes(val.asMinutes());
+      const roundTo = vm.opts.roundWorkTimeTo;
+      return roundTime(val, roundTo, vm.opts.isRoundWorkTimeUp)
+        .format('HH:mm');
     }
 
     function getTaskTitles() {

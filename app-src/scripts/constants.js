@@ -165,6 +165,7 @@
           isAutoLogin: false,
           isAutoFocusEmpty: false,
           isRoundWorkTimeUp: undefined,
+          roundStartTimeTo: undefined,
           roundEndTimeTo: undefined,
           roundWorkTimeTo: undefined,
           defaultValues: [

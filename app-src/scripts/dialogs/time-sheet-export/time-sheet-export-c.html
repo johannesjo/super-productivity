@@ -22,7 +22,7 @@
           <div class="info">
             <p>This view allows you to export your worked time to a google sheet. You need to allow for your Google Spreadsheets to be accessed by Super Productivity. You also need to create a spreadsheet with a headings in the first row nad specify it's ID in the input field (<a external-link
                                                                                                                                                                                                                                                                                          target="_blank"
-                                                                                                                                                                                                                                                                                         href="https://stackoverflow.com/questions/36061433/how-to-do-i-locate-a-google-spreadsheet-id">Ho to find the id of a spreadsheet?).</a>
+                                                                                                                                                                                                                                                                                         href="https://stackoverflow.com/questions/36061433/how-to-do-i-locate-a-google-spreadsheet-id">Ho to find the id of a spreadsheet?</a>).
             </p>
             <p>After successfully loading your spreadsheet a table will show up with 4 rows. The first row shows the heading you specified in the spreadsheet itself.</p>
             <p>The second row is for informational purposes and shows the last row from the spreadsheet.</p>
@@ -58,10 +58,13 @@
                      is-initially-expanded="{{(vm.opts.spreadsheetId ? '':'true')}}">
           <md-switch ng-model="vm.opts.isAutoLogin">Auto-login and load data next time</md-switch>
           <!--<md-switch ng-model="vm.opts.isAutoFocusEmpty">Auto-focus first empty field after loading table headings</md-switch>-->
-          <md-switch ng-model="vm.opts.isRoundWorkTimeUp">Always round work time up</md-switch>
+          <md-switch ng-model="vm.opts.isRoundWorkTimeUp"
+                     ng-change="vm.updateDefaults()">Always round work time up
+          </md-switch>
           <md-input-container>
             <label>Round start time to</label>
-            <md-select ng-model="vm.opts.roundStartTimeTo">
+            <md-select ng-change="vm.updateDefaults()"
+                       ng-model="vm.opts.roundStartTimeTo">
               <md-option><em>don't round</em></md-option>
               <md-option ng-repeat="roundOption in vm.roundTimeOptions"
                          ng-value="roundOption.id">
@@ -72,7 +75,8 @@
 
           <md-input-container>
             <label>Round end time to</label>
-            <md-select ng-model="vm.opts.roundEndTimeTo">
+            <md-select ng-change="vm.updateDefaults()"
+                       ng-model="vm.opts.roundEndTimeTo">
               <md-option><em>don't round</em></md-option>
               <md-option ng-repeat="roundOption in vm.roundTimeOptions"
                          ng-value="roundOption.id">
@@ -83,7 +87,8 @@
 
           <md-input-container>
             <label>Round time worked to</label>
-            <md-select ng-model="vm.opts.roundWorkTimeTo">
+            <md-select ng-change="vm.updateDefaults()"
+                       ng-model="vm.opts.roundWorkTimeTo">
               <md-option><em>don't round</em></md-option>
               <md-option ng-repeat="roundOption in vm.roundTimeOptions"
                          ng-value="roundOption.id">
