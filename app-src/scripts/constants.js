@@ -14,7 +14,7 @@
     .constant('DEFAULT_THEME', 'blue-theme')
     .constant('GOOGLE', {
       CLIENT_ID: '37646582031-e281jj291amtk805td0hgfqss2jfkdcd.apps.googleusercontent.com',
-      API_KEY: 'S36BCrLhs0TAiQmlViS_88TQ',
+      API_KEY: 'AIzaSyBqr3r5B5QGb_drLTK8_q9HW7YUez83Bik',
     })
     .constant('GLOBAL_LS_FIELDS', [
       'currentProject',

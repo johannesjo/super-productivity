@@ -36,7 +36,6 @@ module.exports = function(config) {
       'app-src/bower_components/hamsterjs/hamster.js',
       'app-src/bower_components/clipboard/dist/clipboard.js',
       'app-src/bower_components/moment-duration-format/lib/moment-duration-format.js',
-      'app-src/bower_components/angular-google-gapi/dist/angular-google-gapi.min.js',
       'app-src/bower_components/angular-mocks/angular-mocks.js',
       'app-src/bower_components/Watch.JS/src/watch.js',
       // endbower

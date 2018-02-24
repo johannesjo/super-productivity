@@ -31,8 +31,7 @@
       'as.sortable',
       'angularMoment',
       'hc.marked',
-      'mwl.calendar',
-      'angular-google-gapi'
+      'mwl.calendar'
     ])
     .config(configMdTheme)
     .config(configMarked)
@@ -47,7 +46,7 @@
     .run(initAutomaticBackupsIfEnabled)
     .run(checkIfLatestVersion)
     .run(showWelcomeDialog)
-    .run(goToWorkViewIfTasks);
+    //.run(goToWorkViewIfTasks);
 
   /* @ngInject */
   function configMarked(markedProvider) {

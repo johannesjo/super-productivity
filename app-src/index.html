@@ -59,6 +59,8 @@ TODO configure more restrictive Content-Security-Policy
   <quick-access-menu></quick-access-menu>
 </md-content>
 
+<script async defer src="//apis.google.com/js/api.js"></script>
+
 <!-- build:js({.tmp,app-src}) scripts/vendor.js defer -->
 <!-- bower:js -->
 <script src="bower_components/angular/angular.js"></script>
@@ -79,7 +81,6 @@ TODO configure more restrictive Content-Security-Policy
 <script src="bower_components/hamsterjs/hamster.js"></script>
 <script src="bower_components/clipboard/dist/clipboard.js"></script>
 <script src="bower_components/moment-duration-format/lib/moment-duration-format.js"></script>
-<script src="bower_components/angular-google-gapi/dist/angular-google-gapi.min.js"></script>
 <!-- endbower -->
 <!-- endbuild -->
 
@@ -130,6 +131,7 @@ TODO configure more restrictive Content-Security-Policy
 <script src="scripts/main/global-services/check-shortcut-key-combo-s.js"></script>
 <script src="scripts/main/global-services/git-log-s.js"></script>
 <script src="scripts/main/global-services/git-s.js"></script>
+<script src="scripts/main/global-services/google-api-s.js"></script>
 <script src="scripts/main/global-services/init-global-models-s.js"></script>
 <script src="scripts/main/global-services/jira-s.js"></script>
 <script src="scripts/main/global-services/notifier-s.js"></script>

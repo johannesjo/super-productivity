@@ -31,8 +31,7 @@
     "angular-bootstrap-calendar": "^0.27.5",
     "hamsterjs": "^1.1.2",
     "clipboard": "^1.6.0",
-    "moment-duration-format": "https://github.com/johannesjo/moment-duration-format.git#master",
-    "angular-google-gapi": "^1.0.1"
+    "moment-duration-format": "https://github.com/johannesjo/moment-duration-format.git#master"
   },
   "devDependencies": {
     "angular-mocks": "1.6.5",
