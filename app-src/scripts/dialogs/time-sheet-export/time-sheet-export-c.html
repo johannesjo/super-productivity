@@ -16,52 +16,109 @@
   <form ng-submit="vm.export()">
     <md-dialog-content>
       <div class="md-dialog-content">
-        <collapsible collapsible-title="What is this and how does it work?"
+        <collapsible class="help-collapsible"
+                     collapsible-title="What is this and how does it work?"
                      is-initially-expanded="{{!(vm.opts.spreadsheetId)}}">
           <div class="info">
-            Take care!
+            <p>This view allows you to export your worked time to a google sheet. You need to allow for your Google Spreadsheets to be accessed by Super Productivity. You also need to create a spreadsheet with a headings in the first row nad specify it's ID in the input field (<a external-link
+                                                                                                                                                                                                                                                                                         target="_blank"
+                                                                                                                                                                                                                                                                                         href="https://stackoverflow.com/questions/36061433/how-to-do-i-locate-a-google-spreadsheet-id">Ho to find the id of a spreadsheet?).</a>
+            </p>
+            <p>After successfully loading your spreadsheet a table will show up with 4 rows. The first row shows the heading you specified in the spreadsheet itself.</p>
+            <p>The second row is for informational purposes and shows the last row from the spreadsheet.</p>
+            <p>The forth row is a list of values you can directly enter save to the spreadsheet.</p>
+            <p>The third row is there to automatically define some values for the forth row. There are several special strings you can enter into the cells:</p>
           </div>
 
-          <dl class="possible properties">
+          <dl class="possible-properties">
             <dt>{startTime}</dt>
-            <dd>AAa</dd>
-
-            <dt>{startTime|rounded}</dt>
-            <dd>AAa</dd>
+            <dd>The time when you first used this app today. It's possible to round this via the options.</dd>
 
             <dt>{currentTime}</dt>
-            <dd>AAa</dd>
-
-            <dt>{currentTime|rounded}</dt>
-            <dd>AAa</dd>
+            <dd>The current time. Could be used for the for the end time of todays working day It's possible to round this via the options.</dd>
 
             <dt>{date}</dt>
-            <dd>AAa</dd>
+            <dd>Todays date in standard format (dd/mm/yyyy)</dd>
 
             <dt>{taskTitles}</dt>
-            <dd>AAa</dd>
+            <dd>Comma separated (parent) task titles</dd>
 
             <dt>{subTaskTitles}</dt>
-            <dd>AAa</dd>
+            <dd>Comma separated sub task titles</dd>
 
             <dt>{totalTimeWorkedToday}</dt>
-            <dd>AAa</dd>
+            <dd>The total time you spend working on your todays tasks.</dd>
           </dl>
+
+          <p>In addition to this there are several options you can use to modify the calculation of those values.</p>
         </collapsible>
+
+        <collapsible collapsible-title="Options"
+                     class="options-collapsible"
+                     is-initially-expanded="{{!(vm.opts.spreadsheetId)}}">
+          <md-switch ng-model="vm.opts.isAutoLogin">Auto-login and load data next time</md-switch>
+          <md-switch ng-model="vm.opts.isAutoFocusEmpty">Auto-focus first empty field after loading table headings</md-switch>
+          <md-switch ng-model="vm.opts.isRoundUp">Always round work time up</md-switch>
+          <md-input-container>
+            <label>Round start time to</label>
+            <md-select ng-model="vm.opts.roundStartTimeTo">
+              <md-option><em>don't round</em></md-option>
+              <md-option ng-repeat="roundOption in vm.roundTimeOptions"
+                         ng-value="roundOption.id">
+                {{roundOption.title}}
+              </md-option>
+            </md-select>
+          </md-input-container>
+
+          <md-input-container>
+            <label>Round end time to</label>
+            <md-select ng-model="vm.opts.roundEndTimeTo">
+              <md-option><em>don't round</em></md-option>
+              <md-option ng-repeat="roundOption in vm.roundTimeOptions"
+                         ng-value="roundOption.id">
+                {{roundOption.title}}
+              </md-option>
+            </md-select>
+          </md-input-container>
+
+          <md-input-container>
+            <label>Round time worked to</label>
+            <md-select ng-model="vm.opts.roundWorkTimeTo">
+              <md-option><em>don't round</em></md-option>
+              <md-option ng-repeat="roundOption in vm.roundTimeOptions"
+                         ng-value="roundOption.id">
+                {{roundOption.title}}
+              </md-option>
+            </md-select>
+          </md-input-container>
+        </collapsible>
+
 
         <div>
           <md-button class="md-raised md-primary"
-                     ng-show="!vm.isLoggedIn">Login
+                     ng-show="!vm.isLoggedIn"
+                     ng-click="vm.login()">Login
           </md-button>
           <md-button class="md-raised md-primary"
-                     ng-show="vm.isLoggedIn">Logout
+                     ng-show="vm.isLoggedIn"
+                     ng-click="vm.logout()">Logout
           </md-button>
-          <md-button class="md-raised md-primary">Read headings</md-button>
-          <md-button class="md-raised md-primary">Revoke permissions</md-button>
+          <md-button class="md-raised md-primary"
+                     ng-disabled="!vm.opts.spreadsheetId"
+                     ng-show="vm.isLoggedIn"
+                     ng-click="vm.readSpreadsheet()">Read spreadsheet
+          </md-button>
+          <md-button class="md-raised md-primary"
+                     ng-show="vm.isLoggedIn"
+                     external-link
+                     target="_blank"
+                     href="https://myaccount.google.com/permissions">Revoke permissions
+          </md-button>
           <md-button class="md-raised md-primary"
                      ng-show="vm.isLoggedIn && vm.opts.spreadsheetId">Edit spreadsheet
           </md-button>
         </div>
+
 
         <section ng-show="vm.isLoggedIn">
           <md-input-container class="md-block">
@@ -69,24 +126,6 @@
             <input type="text"
                    ng-model="vm.opts.spreadsheetId">
           </md-input-container>
-
-          <div>
-            <div>
-              <md-switch ng-model="vm.opts.isAutoLogin">Auto-login and load data next time</md-switch>
-              <md-switch ng-model="vm.opts.isAutoFocusEmpty">Auto-focus first empty field after loading table headings</md-switch>
-              <md-switch ng-model="vm.opts.isRoundUp">Always round up</md-switch>
-              <md-input-container>
-                <label>Round time worked to</label>
-                <md-select ng-model="vm.opts.roundTo">
-                  <md-option><em>don't round</em></md-option>
-                  <md-option ng-repeat="roundOption in vm.roundOptions"
-                             ng-value="roundOption.id">
-                    {{roundOption.title}}
-                  </md-option>
-                </md-select>
-              </md-input-container>
-            </div>
-          </div>
 
           <table class="export-input-table"
                  ng-show="vm.headings">

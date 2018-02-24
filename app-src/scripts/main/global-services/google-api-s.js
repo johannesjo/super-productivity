@@ -96,6 +96,7 @@
     }
 
     getSpreadsheetData(spreadsheetId, range) {
+      console.log(this);
       return gapi.client.sheets.spreadsheets.values.get({
         spreadsheetId: SPREADSHEET_ID,
         range: range,

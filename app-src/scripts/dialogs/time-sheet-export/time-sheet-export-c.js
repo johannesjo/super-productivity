@@ -18,7 +18,7 @@
     let vm = this;
     vm.theme = theme;
 
-    vm.roundOptions = [
+    vm.roundTimeOptions = [
       { id: 'QUARTER', title: 'full quarters' },
       { id: 'HALF', title: 'full half hours' },
       { id: 'HOUR', title: 'full hours' },
@@ -32,12 +32,36 @@
       $mdDialog.hide();
     };
 
-    GoogleApi.login()
-      .then(GoogleApi.getSpreadsheetHeadings.bind(GoogleApi))
-      .then((headings) => {
-        vm.isLoggedIn = true;
-        console.log(headings);
-        vm.headings = headings;
-      });
+    vm.login = () => {
+      GoogleApi.login()
+        .then(() => {
+          vm.isLoggedIn = true;
+        });
+    };
+
+    vm.readSpreadsheet = () => {
+      vm.headings = undefined;
+      GoogleApi.getSpreadsheetHeadings()
+        .then((headings) => {
+          vm.headings = headings;
+        })
+    };
+
+    vm.logout = () => {
+      GoogleApi.logout()
+        .then(() => {
+          vm.isLoggedIn = false;
+        });
+    };
+
+    //if (true) {
+    //  GoogleApi.login()
+    //    .then(GoogleApi.getSpreadsheetHeadings.bind(GoogleApi))
+    //    .then((headings) => {
+    //      vm.isLoggedIn = true;
+    //      console.log(headings);
+    //      vm.headings = headings;
+    //    });
+    //}
   }
 })();
