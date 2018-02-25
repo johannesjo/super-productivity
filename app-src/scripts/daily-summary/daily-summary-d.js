@@ -65,8 +65,6 @@
       }, true);
     };
 
-    setTimeout(vm.showTimeSheetExportModal,500);
-
 
     vm.finishDay = () => {
       $rootScope.r.tomorrowsNote = vm.tomorrowsNote;
