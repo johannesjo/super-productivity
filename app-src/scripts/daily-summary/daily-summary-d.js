@@ -33,6 +33,7 @@
     let successAnimationTimeout;
     let vm = this;
 
+    vm.IS_ELECTRON = IS_ELECTRON;
     vm.todayStr = TasksUtil.getTodayStr();
     vm.doneTasks = Tasks.getDoneToday();
 
@@ -64,7 +65,6 @@
         tasks: Tasks.getToday()
       }, true);
     };
-
 
     vm.finishDay = () => {
       $rootScope.r.tomorrowsNote = vm.tomorrowsNote;
