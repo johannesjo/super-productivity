@@ -14,7 +14,8 @@ This is a ToDo List / Time Tracker / Personal Jira Task Manager for Linux, MacOS
 * Time Tracking 
 * Customizable Pomodoro Timer
 * Sub Tasks
-* Sexy global pinboard to add quick links and project related files 
+* Sexy global pinboard to add quick links and project related files
+* Export your time sheets to Google Sheets 
 * 'Take a break' reminder
 * Daily Schedule
 * Daily Summary
