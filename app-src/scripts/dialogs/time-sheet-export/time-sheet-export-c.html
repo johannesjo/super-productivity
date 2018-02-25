@@ -131,7 +131,7 @@
              class="loading-spinner"
              layout-sm="column"
              layout-align="space-around"
-             ng-show="vm.isLoading">
+             ng-show="vm.isLoading && !vm.isLoggedIn">
           <md-progress-circular md-mode="indeterminate"></md-progress-circular>
         </div>
 
@@ -141,6 +141,14 @@
             <input type="text"
                    ng-model="vm.opts.spreadsheetId">
           </md-input-container>
+
+          <div layout="row"
+               class="loading-spinner"
+               layout-sm="column"
+               layout-align="space-around"
+               ng-show="vm.isLoading && vm.isLoggedIn">
+            <md-progress-circular md-mode="indeterminate"></md-progress-circular>
+          </div>
 
           <table class="export-input-table"
                  ng-show="vm.headings">
