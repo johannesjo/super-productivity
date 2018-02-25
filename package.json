@@ -63,7 +63,8 @@
       "category": "Utility",
       "target": [
         "AppImage",
-        "deb"
+        "deb",
+        "snap"
       ],
       "publish": [
         "github",
@@ -91,7 +92,7 @@
     "del": "latest",
     "ecstatic": "latest",
     "electron": "^1.8.2",
-    "electron-builder": "^20.0.6",
+    "electron-builder": "^20.2.0",
     "gulp": "latest",
     "gulp-autoprefixer": "latest",
     "gulp-babel": "^6.1.2",
