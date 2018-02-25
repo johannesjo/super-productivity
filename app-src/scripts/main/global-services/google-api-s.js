@@ -21,7 +21,6 @@
 
     initClientLibraryIfNotDone() {
       const defer = this.$q.defer();
-
       this.loadLib(() => {
         window.gapi.load('client:auth2', () => {
 
@@ -39,6 +38,14 @@
       });
 
       return defer.promise;
+    }
+
+    updateSigninStatus() {
+      this.isSignedin = this.getSignedInStatus();
+    }
+
+    getSignedInStatus() {
+      return window.gapi.auth2.getAuthInstance().isSignedIn.get();
     }
 
     loadJs(url, cb) {
@@ -83,14 +90,6 @@
 
     }
 
-    updateSigninStatus() {
-      this.isSignedin = this.getSignedInStatus();
-    }
-
-    getSignedInStatus() {
-      return window.gapi.auth2.getAuthInstance().isSignedIn.get();
-    }
-
     login() {
       if (this.IS_ELECTRON) {
         window.ipcRenderer.send('TRIGGER_GOOGLE_AUTH');
@@ -105,7 +104,7 @@
       } else {
         return this.initClientLibraryIfNotDone()
           .then(() => window.gapi.auth2.getAuthInstance().signIn({
-            immediate: true
+            immediate: true,
           }))
           .then((res) => {
             this.accessToken = res.Zi.access_token;

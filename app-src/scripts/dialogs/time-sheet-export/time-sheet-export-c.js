@@ -31,30 +31,37 @@
     };
 
     vm.login = () => {
+      vm.isLoading = true;
       return GoogleApi.login()
         .then(() => {
           vm.isLoggedIn = true;
+          vm.isLoading = false;
         });
     };
 
     vm.readSpreadsheet = () => {
+      vm.isLoading = true;
       vm.headings = undefined;
       return GoogleApi.getSpreadsheetHeadingsAndLastRow(vm.opts.spreadsheetId)
         .then((data) => {
           vm.headings = data.headings;
           vm.lastRow = data.lastRow;
           vm.updateDefaults();
+          vm.isLoading = false;
         });
     };
 
     vm.logout = () => {
+      vm.isLoading = true;
       GoogleApi.logout()
         .then(() => {
           vm.isLoggedIn = false;
+          vm.isLoading = false;
         });
     };
 
     vm.save = () => {
+      vm.isLoading = true;
       const arraysEqual = (arr1, arr2) => {
         if (arr1.length !== arr2.length) {
           return false;
@@ -74,6 +81,7 @@
           .then(() => {
             SimpleToast('SUCCESS', 'Row successfully appended');
             $mdDialog.hide();
+            vm.isLoading = false;
           });
       }
     };

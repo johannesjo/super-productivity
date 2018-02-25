@@ -127,6 +127,14 @@
         </div>
 
 
+        <div layout="row"
+             class="loading-spinner"
+             layout-sm="column"
+             layout-align="space-around"
+             ng-show="vm.isLoading">
+          <md-progress-circular md-mode="indeterminate"></md-progress-circular>
+        </div>
+
         <section ng-show="vm.isLoggedIn">
           <md-input-container class="md-block">
             <label>Spreadsheet ID</label>
