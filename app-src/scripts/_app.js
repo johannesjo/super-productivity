@@ -44,6 +44,8 @@
     .run(initGlobalShortcuts)
     .run(initAutomaticSyncIfEnabled)
     .run(initAutomaticBackupsIfEnabled)
+    .run(preventMultipleInstances)
+    .run(setStartedTime)
     .run(checkIfLatestVersion)
     .run(showWelcomeDialog)
     .run(goToWorkViewIfTasks);
@@ -279,5 +281,59 @@
         }
       }
     });
+  }
+
+  function setStartedTime($rootScope, $timeout) {
+    $timeout(() => {
+      const moment = window.moment;
+      const startedTime = $rootScope.r.startedTimeToday;
+
+      if (startedTime && moment(startedTime).isSame(moment(), 'day')) {
+        // refresh to moment object
+        $rootScope.r.startedTimeToday = moment(startedTime);
+      } else {
+        // set to now
+        $rootScope.r.startedTimeToday = moment();
+      }
+    });
+  }
+
+  function preventMultipleInstances() {
+    const KEY = 'SP_MULTI_INSTANCE_KEY';
+    const SHUTDOWN_KEY = 'SP_MULTI_INSTANCE_SHUTDOWN_KEY';
+    if (window.addEventListener) { // IE9, FF, Chrome, Safari, Opera
+      window.addEventListener('storage', onStorageChanged, false);
+    }
+    else if (window.attachEvent) {
+      window.attachEvent('onstorage', onStorageChanged); // IE 8
+    }
+
+    function onStorageChanged(ev) {
+      let isClosing = false;
+
+      // we're the second instance so 'close' if not done already
+      if (ev.key === SHUTDOWN_KEY) {
+        if (!isClosing) {
+          isClosing = true;
+          //alert('You already have another instance open! This could lead to a lot of problems. Please close this tab asap!');
+          window.location.assign('https://github.com/johannesjo/super-productivity');
+        }
+      }
+
+      // means we're the original instance
+      else if (ev.key === KEY) {
+        // 'send' shutdown_key to shutdown other instance
+        localStorage.setItem(SHUTDOWN_KEY, 'Something');
+
+        // remove to allow this to work next time
+        setTimeout(() => {
+          localStorage.removeItem(SHUTDOWN_KEY);
+        }, 50);
+
+      }
+
+    }
+
+    localStorage.setItem(KEY, Date.now());
   }
 })();

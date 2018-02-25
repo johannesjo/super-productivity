@@ -1,16 +1,3 @@
-<div layout="row"
-     layout-sm="column"
-     layout-align="center center">
-  <md-button class="md-raised md-primary"
-             aria-label="Work View"
-             ui-sref="work-view">
-    <md-tooltip md-direction="bottom">
-      Go back to work view
-    </md-tooltip>
-    <ng-md-icon icon="playlist_play"></ng-md-icon>
-    Wait I forgot something!
-  </md-button>
-</div>
 <h1 class="md-headline">You're done for today! Take a moment to celebrate!</h1>
 
 <p>
@@ -23,6 +10,31 @@
 <p>
   <ng-md-icon icon="timer"></ng-md-icon>
   Total time spent today: <strong ng-bind="vm.totalTimeSpentToday|duration"></strong></p>
+
+
+<div layout-align="center center">
+  <md-button class="md-raised md-primary"
+             aria-label="Work View"
+             ui-sref="work-view">
+    <md-tooltip md-direction="bottom">
+      Go back to work view
+    </md-tooltip>
+    <ng-md-icon icon="playlist_play"></ng-md-icon>
+    Wait I forgot something!
+  </md-button>
+  <md-button class="md-raised md-primary"
+             ng-click="vm.showExportModal()">
+    <ng-md-icon icon="call_made"></ng-md-icon>
+    Export Task List for Today
+  </md-button>
+
+  <md-button class="md-raised md-primary"
+             ng-show="!vm.IS_ELECTRON"
+             ng-click="vm.showTimeSheetExportModal()">
+    <ng-md-icon icon="call_made"></ng-md-icon>
+    Export To Time Sheet
+  </md-button>
+</div>
 
 <h2 class="md-title">These are the tasks you worked on today</h2>
 
@@ -53,12 +65,6 @@
     </td>
   </tr>
 </table>
-<md-button class="md-raised md-primary"
-           style="margin-top: 15px;"
-           ng-click="vm.showExportModal()">
-  <ng-md-icon icon="call_made"></ng-md-icon>
-  Export Task List for Today
-</md-button>
 
 
 <section class="distractions"

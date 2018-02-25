@@ -250,7 +250,7 @@ gulp.task('lint', function() {
     './gulpfile.js'
   ], { base: './' })
     .pipe(jshint('.jshintrc', { fail: true }))
-    .pipe(notify(notifyHandler))
+    //.pipe(notify(notifyHandler))
     .pipe(jshint.reporter('jshint-stylish'))
     .pipe(jscs());
 });

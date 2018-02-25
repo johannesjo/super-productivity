@@ -33,6 +33,7 @@
     let successAnimationTimeout;
     let vm = this;
 
+    vm.IS_ELECTRON = IS_ELECTRON;
     vm.todayStr = TasksUtil.getTodayStr();
     vm.doneTasks = Tasks.getDoneToday();
 
@@ -51,6 +52,14 @@
 
     vm.showExportModal = () => {
       Dialogs('SIMPLE_TASK_SUMMARY', {
+        settings: $rootScope.r.uiHelper.dailyTaskExportSettings,
+        finishDayFn: vm.finishDay,
+        tasks: Tasks.getToday()
+      }, true);
+    };
+
+    vm.showTimeSheetExportModal = () => {
+      Dialogs('TIME_SHEET_EXPORT', {
         settings: $rootScope.r.uiHelper.dailyTaskExportSettings,
         finishDayFn: vm.finishDay,
         tasks: Tasks.getToday()

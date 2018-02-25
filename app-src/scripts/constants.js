@@ -12,6 +12,10 @@
   angular
     .module('superProductivity')
     .constant('DEFAULT_THEME', 'blue-theme')
+    .constant('GOOGLE', {
+      CLIENT_ID: '37646582031-e281jj291amtk805td0hgfqss2jfkdcd.apps.googleusercontent.com',
+      API_KEY: 'AIzaSyBqr3r5B5QGb_drLTK8_q9HW7YUez83Bik',
+    })
     .constant('GLOBAL_LS_FIELDS', [
       'currentProject',
       'projects',
@@ -62,6 +66,7 @@
       theme: undefined,
       currentTask: undefined,
       lastActiveTaskTask: undefined,
+      startedTimeToday: undefined,
       currentProject: undefined,
       currentSession: {
         timeWorkedWithoutBreak: undefined,
@@ -154,6 +159,18 @@
           showTitle: true,
           showTime: false,
           showDate: false
+        },
+        timeSheetExportSettings: {
+          spreadsheetId: undefined,
+          isAutoLogin: false,
+          isAutoFocusEmpty: false,
+          isRoundWorkTimeUp: undefined,
+          roundStartTimeTo: undefined,
+          roundEndTimeTo: undefined,
+          roundWorkTimeTo: undefined,
+          defaultValues: [
+            'AASDAS'
+          ]
         },
         timeTrackingHistoryExportSettings: {
           separateBy: '',

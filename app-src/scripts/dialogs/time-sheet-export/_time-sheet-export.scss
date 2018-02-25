@@ -1,0 +1,39 @@
+.dialog-time-sheet-export {
+
+  .help-collapsible {
+    .collapsible-title {
+      font-size: 20px;
+    }
+  }
+
+  .options-collapsible {
+    .collapsible-title {
+      font-size: 20px;
+      margin-top: 0;
+    }
+  }
+
+  .export-input-table {
+    th {
+      font-weight: bold;
+    }
+
+    input {
+      width: 100%;
+      min-width: 40px;
+    }
+  }
+
+  .possible-properties{
+    dt{
+      margin-bottom: 4px;
+    }
+    dd{
+      margin-bottom: 10px;
+    }
+  }
+
+  md-input-container{
+    min-width: 150px;
+  }
+}
