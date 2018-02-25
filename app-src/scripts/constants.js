@@ -77,6 +77,11 @@
           currentSessionTime: undefined,
         }
       },
+      googleTokens: {
+        accessToken: undefined,
+        refreshToken: undefined,
+        expiresAt: undefined
+      },
       tasks: [],
       backlogTasks: [],
       doneBacklogTasks: [],

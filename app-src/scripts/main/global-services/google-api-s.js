@@ -8,31 +8,31 @@
 (() => {
   'use strict';
 
-  // https://docs.google.com/spreadsheets/d/1l8SN-qcjhsCPZe7jn6U5N4NXyeVQVIT72ZS32QYllWM/edit?ouid=101280348348341717788&usp=sheets_home&ths=true
+  const DISCOVERY_DOCS = ['https://sheets.googleapis.com/$discovery/rest?version=v4'];
+  const SCOPES = '' +
+    'https://www.googleapis.com/auth/spreadsheets.readonly' +
+    ' https://www.googleapis.com/auth/drive';
 
   class GoogleApi {
     /* @ngInject */
-    constructor(GOOGLE, $q, IS_ELECTRON) {
+    constructor(GOOGLE, $q, IS_ELECTRON, $http, $rootScope) {
       this.$q = $q;
+      this.$http = $http;
+      this.$rootScope = $rootScope;
       this.GOOGLE = GOOGLE;
       this.IS_ELECTRON = IS_ELECTRON;
     }
 
-    initAllIfNotDone() {
+    initClientLibraryIfNotDone() {
       const defer = this.$q.defer();
-
       this.loadLib(() => {
         window.gapi.load('client:auth2', () => {
-
           this.initClient()
             .then(() => {
-              // Listen for sign-in state changes.
-              window.gapi.auth2.getAuthInstance().isSignedIn
-                .listen(this.updateSigninStatus.bind(this));
-              // Handle the initial sign-in state.
-              this.updateSigninStatus.bind(this);
-
-              defer.resolve();
+              const GoogleAuth = window.gapi.auth2.getAuthInstance();
+              // used to determine and handle if user is already signed in
+              const user = GoogleAuth.currentUser.get();
+              defer.resolve(user);
             });
         });
       });
@@ -66,13 +66,6 @@
     }
 
     initClient() {
-      // Array of API discovery doc URLs for APIs used by the quickstart
-      const DISCOVERY_DOCS = ['https://sheets.googleapis.com/$discovery/rest?version=v4'];
-      // Authorization scopes required by the API; multiple scopes can be
-      // included, separated by spaces.
-      const SCOPES = 'https://www.googleapis.com/auth/spreadsheets.readonly' +
-        ' https://www.googleapis.com/auth/drive';
-
       return window.gapi.client.init({
         apiKey: this.GOOGLE.API_KEY,
         clientId: this.GOOGLE.CLIENT_ID,
@@ -82,43 +75,113 @@
 
     }
 
-    updateSigninStatus() {
-      this.isSignedin = this.getSignedInStatus();
-      console.log(this.isSignedin);
-    }
-
-    getSignedInStatus() {
-      return window.gapi.auth2.getAuthInstance().isSignedIn.get();
-    }
-
     login() {
-      return this.initAllIfNotDone()
-        .then(() => window.gapi.auth2.getAuthInstance().signIn({
-          immediate: true
-        }));
+      /*jshint camelcase: false */
+      const EXPIRES_SAFETY_MARGIN = 30000;
+      const isExpired = (window.moment()
+        .valueOf() + EXPIRES_SAFETY_MARGIN > this.$rootScope.r.googleTokens.expiresAt);
+
+      if (this.$rootScope.r.googleTokens.accessToken && !isExpired) {
+        this.accessToken = this.$rootScope.r.googleTokens.accessToken;
+        return new Promise((resolve) => resolve());
+      }
+
+      if (this.IS_ELECTRON) {
+        window.ipcRenderer.send('TRIGGER_GOOGLE_AUTH');
+        return new Promise((resolve, reject) => {
+          window.ipcRenderer.on('GOOGLE_AUTH_TOKEN', (ev, data) => {
+            const token = data.access_token;
+            this.accessToken = token;
+            this.$rootScope.r.googleTokens.accessToken = this.accessToken;
+            //this.$rootScope.r.googleTokens.refreshToken = data.refresh_token;
+            resolve();
+            // TODO remove
+            // mainWindow.webContents.removeListener('did-finish-load', handler);
+          });
+          window.ipcRenderer.on('GOOGLE_AUTH_TOKEN_ERROR', reject);
+        });
+      } else {
+        return this.initClientLibraryIfNotDone()
+          .then((user) => {
+            if (user && user.Zi && user.Zi.access_token) {
+              this.saveToken(user);
+            } else {
+              return window.gapi.auth2.getAuthInstance().signIn()
+                .then((res) => {
+                  console.log(res);
+                  this.saveToken(res);
+                });
+            }
+          });
+      }
+      /*jshint camelcase: true */
+    }
+
+    saveToken(res) {
+      /*jshint camelcase: false */
+      this.accessToken = res.Zi.access_token;
+      this.$rootScope.r.googleTokens.accessToken = this.accessToken;
+      this.$rootScope.r.googleTokens.expiresAt = res.Zi.expires_at;
+      /*jshint camelcase: true */
     }
 
     logout() {
-      return window.gapi.auth2.getAuthInstance().signOut();
+      if (this.IS_ELECTRON) {
+        this.accessToken = undefined;
+        this.$rootScope.r.googleTokens.accessToken = undefined;
+        return new Promise((resolve) => {
+          resolve();
+        });
+      } else {
+        return window.gapi.auth2.getAuthInstance().signOut();
+      }
     }
 
     appendRow(spreadsheetId, row) {
-      return window.gapi.client.sheets.spreadsheets.values.append({
-        spreadsheetId: spreadsheetId,
-        range: 'A1:Z99',
-        valueInputOption: 'USER_ENTERED',
-        insertDataOption: 'INSERT_ROWS',
-        resource: {
-          values: [row]
-        }
-      }, row);
+      // @see: https://developers.google.com/sheets/api/reference/rest/
+      const range = 'A1:Z99';
+      return this.$http({
+        method: 'POST',
+        url: `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${range}:append`,
+        params: {
+          'key': this.GOOGLE.API_KEY,
+          insertDataOption: 'INSERT_ROWS',
+          valueInputOption: 'USER_ENTERED'
+        },
+        headers: {
+          'Authorization': `Bearer ${this.accessToken}`
+        },
+        data: { values: [row] }
+      });
+      // that's the way we would do it if we could use the gapi.client
+      // return window.gapi.client.sheets.spreadsheets.values.append({
+      //  spreadsheetId: spreadsheetId,
+      //  range: range,
+      //  valueInputOption: 'USER_ENTERED',
+      //  insertDataOption: 'INSERT_ROWS',
+      //  resource: {
+      //    values: [row]
+      //  }
+      // }, row);
     }
 
     getSpreadsheetData(spreadsheetId, range) {
-      return window.gapi.client.sheets.spreadsheets.values.get({
-        spreadsheetId: spreadsheetId,
-        range: range,
+      // @see: https://developers.google.com/sheets/api/reference/rest/
+      return this.$http({
+        method: 'GET',
+        url: `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${range}`,
+        params: {
+          'key': this.GOOGLE.API_KEY,
+        },
+        headers: {
+          'Authorization': `Bearer ${this.accessToken}`
+        }
       });
+      // that's the way we would do it if we could use the gapi.client
+      // return window.gapi.client.sheets.spreadsheets.values.get({
+      //  spreadsheetId: spreadsheetId,
+      //  range: range,
+      // });
     }
 
     getSpreadsheetHeadingsAndLastRow(spreadsheetId) {
@@ -126,7 +189,7 @@
 
       this.getSpreadsheetData(spreadsheetId, 'A1:Z99')
         .then((response) => {
-          const range = response.result;
+          const range = response.result || response.data;
 
           if (range.values && range.values[0]) {
             defer.resolve({

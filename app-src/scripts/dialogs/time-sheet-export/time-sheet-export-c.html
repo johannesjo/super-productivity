@@ -127,12 +127,28 @@
         </div>
 
 
+        <div layout="row"
+             class="loading-spinner"
+             layout-sm="column"
+             layout-align="space-around"
+             ng-show="vm.isLoading && !vm.isLoggedIn">
+          <md-progress-circular md-mode="indeterminate"></md-progress-circular>
+        </div>
+
         <section ng-show="vm.isLoggedIn">
           <md-input-container class="md-block">
             <label>Spreadsheet ID</label>
             <input type="text"
                    ng-model="vm.opts.spreadsheetId">
           </md-input-container>
+
+          <div layout="row"
+               class="loading-spinner"
+               layout-sm="column"
+               layout-align="space-around"
+               ng-show="vm.isLoading && vm.isLoggedIn">
+            <md-progress-circular md-mode="indeterminate"></md-progress-circular>
+          </div>
 
           <table class="export-input-table"
                  ng-show="vm.headings">

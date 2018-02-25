@@ -15,6 +15,7 @@ const mainWinMod = require('./main-window');
 const getIdleTime = require('./get-idle-time');
 const jira = require('./jira');
 const gitLog = require('./git-log');
+const googleAuth = require('./google-auth');
 
 const ICONS_FOLDER = __dirname + '/assets/icons/';
 const IS_MAC = process.platform === 'darwin';
@@ -158,6 +159,7 @@ function createMainWin() {
     nestedWinParams,
     indicatorMod,
   });
+  googleAuth(mainWin);
 }
 
 function registerShowAppShortCut(shortcutPassed) {
