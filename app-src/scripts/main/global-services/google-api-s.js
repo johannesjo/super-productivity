@@ -22,12 +22,13 @@
       const defer = this.$q.defer();
 
       this.loadLib(() => {
-        gapi.load('client:auth2', () => {
+        window.gapi.load('client:auth2', () => {
 
           this.initClient()
             .then(() => {
               // Listen for sign-in state changes.
-              gapi.auth2.getAuthInstance().isSignedIn.listen(this.updateSigninStatus.bind(this));
+              window.gapi.auth2.getAuthInstance().isSignedIn
+                .listen(this.updateSigninStatus.bind(this));
               // Handle the initial sign-in state.
               this.updateSigninStatus.bind(this);
 
@@ -47,13 +48,17 @@
 
       this.isScriptLoaded = false;
       const loadFunction = () => {
-        if (that.isScriptLoaded) return;
+        if (that.isScriptLoaded) {
+          return;
+        }
         that.isScriptLoaded = true;
-        cb && cb();
+        if (cb) {
+          cb();
+        }
       };
       script.onload = loadFunction.bind(that);
       script.onreadystatechange = loadFunction.bind(that);
-      document.getElementsByTagName("head")[0].appendChild(script);
+      document.getElementsByTagName('head')[0].appendChild(script);
     }
 
     loadLib(cb) {
@@ -68,7 +73,7 @@
       const SCOPES = 'https://www.googleapis.com/auth/spreadsheets.readonly' +
         ' https://www.googleapis.com/auth/drive';
 
-      return gapi.client.init({
+      return window.gapi.client.init({
         apiKey: this.GOOGLE.API_KEY,
         clientId: this.GOOGLE.CLIENT_ID,
         discoveryDocs: DISCOVERY_DOCS,
@@ -83,22 +88,22 @@
     }
 
     getSignedInStatus() {
-      return gapi.auth2.getAuthInstance().isSignedIn.get();
+      return window.gapi.auth2.getAuthInstance().isSignedIn.get();
     }
 
     login() {
       return this.initAllIfNotDone()
-        .then(() => gapi.auth2.getAuthInstance().signIn({
+        .then(() => window.gapi.auth2.getAuthInstance().signIn({
           immediate: true
         }));
     }
 
     logout() {
-      return gapi.auth2.getAuthInstance().signOut();
+      return window.gapi.auth2.getAuthInstance().signOut();
     }
 
     appendRow(spreadsheetId, row) {
-      return gapi.client.sheets.spreadsheets.values.append({
+      return window.gapi.client.sheets.spreadsheets.values.append({
         spreadsheetId: spreadsheetId,
         range: 'A1:Z99',
         valueInputOption: 'USER_ENTERED',
@@ -110,7 +115,7 @@
     }
 
     getSpreadsheetData(spreadsheetId, range) {
-      return gapi.client.sheets.spreadsheets.values.get({
+      return window.gapi.client.sheets.spreadsheets.values.get({
         spreadsheetId: spreadsheetId,
         range: range,
       });

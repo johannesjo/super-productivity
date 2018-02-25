@@ -44,7 +44,7 @@
           vm.headings = data.headings;
           vm.lastRow = data.lastRow;
           vm.updateDefaults();
-        })
+        });
     };
 
     vm.logout = () => {
@@ -56,11 +56,13 @@
 
     vm.save = () => {
       const arraysEqual = (arr1, arr2) => {
-        if (arr1.length !== arr2.length)
+        if (arr1.length !== arr2.length) {
           return false;
+        }
         for (let i = arr1.length; i--;) {
-          if (arr1[i] !== arr2[i])
+          if (arr1[i] !== arr2[i]) {
             return false;
+          }
         }
         return true;
       };
@@ -160,7 +162,7 @@
       const tasks = Tasks.getToday();
       let titleStr = '';
       tasks.forEach((task) => {
-        titleStr += task.title + ', '
+        titleStr += task.title + ', ';
       });
       return titleStr.substring(0, titleStr.length - 2);
     }
