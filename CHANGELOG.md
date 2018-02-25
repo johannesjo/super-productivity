@@ -1,3 +1,37 @@
+<a name="1.8.0"></a>
+# [1.8.0](https://github.com/johannesjo/super-productivity/compare/v1.7.9...v1.8.0) (2018-02-25)
+
+
+### Bug Fixes
+
+* don't use done tasks for total estimate remaining calculation ([39d4e61](https://github.com/johannesjo/super-productivity/commit/39d4e61))
+
+
+### Features
+
+* **sheetExport:** prepare value replacement ([eba5a52](https://github.com/johannesjo/super-productivity/commit/eba5a52))
+* improve pomodoro button states visibility ([4fe85d1](https://github.com/johannesjo/super-productivity/commit/4fe85d1))
+* **sheetExport:** add advanced formatting options ([4e0b0fb](https://github.com/johannesjo/super-productivity/commit/4e0b0fb))
+* **sheetExport:** add all formatters ([f3d3282](https://github.com/johannesjo/super-productivity/commit/f3d3282))
+* **sheetExport:** add complete help ([599eba7](https://github.com/johannesjo/super-productivity/commit/599eba7))
+* **sheetExport:** add google api login ([8bba9f1](https://github.com/johannesjo/super-productivity/commit/8bba9f1))
+* **sheetExport:** add loading spinner ([d3faaea](https://github.com/johannesjo/super-productivity/commit/d3faaea))
+* **sheetExport:** add saving rows ([30cd123](https://github.com/johannesjo/super-productivity/commit/30cd123))
+* **sheetExport:** cleanup ([5b73c2c](https://github.com/johannesjo/super-productivity/commit/5b73c2c))
+* **sheetExport:** fix lint ([0f8d116](https://github.com/johannesjo/super-productivity/commit/0f8d116))
+* **sheetExport:** further outline time sheet export ([fecee98](https://github.com/johannesjo/super-productivity/commit/fecee98))
+* **sheetExport:** keep the user logged in if possible ([a77bfbd](https://github.com/johannesjo/super-productivity/commit/a77bfbd))
+* **sheetExport:** make it all work with electron ([db1ae33](https://github.com/johannesjo/super-productivity/commit/db1ae33))
+* prepare time sheet export ([f875367](https://github.com/johannesjo/super-productivity/commit/f875367))
+* **sheetExport:** outline ui ([13db775](https://github.com/johannesjo/super-productivity/commit/13db775))
+* **sheetExport:** persist and implement options ([2cc463d](https://github.com/johannesjo/super-productivity/commit/2cc463d))
+* **sheetExport:** prepare google spreadsheet export ([40e4050](https://github.com/johannesjo/super-productivity/commit/40e4050))
+* **sheetExport:** refactor google api ([e6839fe](https://github.com/johannesjo/super-productivity/commit/e6839fe))
+* **sheetExport:** remove for electron version ([e5daf8b](https://github.com/johannesjo/super-productivity/commit/e5daf8b))
+* prevent multiple instances from being opened ([a4be335](https://github.com/johannesjo/super-productivity/commit/a4be335))
+
+
+
 <a name="1.7.9"></a>
 ## [1.7.9](https://github.com/johannesjo/super-productivity/compare/v1.7.8...v1.7.9) (2018-02-21)
 
