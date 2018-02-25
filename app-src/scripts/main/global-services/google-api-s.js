@@ -12,13 +12,14 @@
 
   class GoogleApi {
     /* @ngInject */
-    constructor(GOOGLE, $q, IS_ELECTRON) {
+    constructor(GOOGLE, $q, IS_ELECTRON, $http) {
       this.$q = $q;
+      this.$http = $http;
       this.GOOGLE = GOOGLE;
       this.IS_ELECTRON = IS_ELECTRON;
     }
 
-    initAllIfNotDone() {
+    initClientLibraryIfNotDone() {
       const defer = this.$q.defer();
 
       this.loadLib(() => {
@@ -84,7 +85,6 @@
 
     updateSigninStatus() {
       this.isSignedin = this.getSignedInStatus();
-      console.log(this.isSignedin);
     }
 
     getSignedInStatus() {
@@ -92,33 +92,83 @@
     }
 
     login() {
-      return this.initAllIfNotDone()
-        .then(() => window.gapi.auth2.getAuthInstance().signIn({
-          immediate: true
-        }));
+      if (this.IS_ELECTRON) {
+        window.ipcRenderer.send('TRIGGER_GOOGLE_AUTH');
+        return new Promise((resolve, reject) => {
+          window.ipcRenderer.on('GOOGLE_AUTH_TOKEN', (ev, data) => {
+            const token = data.access_token;
+            this.accessToken = token;
+            resolve(token);
+          });
+          window.ipcRenderer.on('GOOGLE_AUTH_TOKEN_ERROR', reject);
+        });
+      } else {
+        return this.initClientLibraryIfNotDone()
+          .then(() => window.gapi.auth2.getAuthInstance().signIn({
+            immediate: true
+          }))
+          .then((res) => {
+            this.accessToken = res.Zi.access_token;
+          });
+      }
     }
 
     logout() {
-      return window.gapi.auth2.getAuthInstance().signOut();
+      if (this.IS_ELECTRON) {
+        this.accessToken = undefined;
+        return new Promise((resolve) => {
+          resolve();
+        });
+      } else {
+        return window.gapi.auth2.getAuthInstance().signOut();
+      }
     }
 
     appendRow(spreadsheetId, row) {
-      return window.gapi.client.sheets.spreadsheets.values.append({
-        spreadsheetId: spreadsheetId,
-        range: 'A1:Z99',
-        valueInputOption: 'USER_ENTERED',
-        insertDataOption: 'INSERT_ROWS',
-        resource: {
-          values: [row]
-        }
-      }, row);
+      // @see: https://developers.google.com/sheets/api/reference/rest/
+      const range = 'A1:Z99';
+      return this.$http({
+        method: 'POST',
+        url: `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${range}:append`,
+        params: {
+          'key': this.GOOGLE.API_KEY,
+          insertDataOption: 'INSERT_ROWS',
+          valueInputOption: 'USER_ENTERED'
+        },
+        headers: {
+          'Authorization': `Bearer ${this.accessToken}`
+        },
+        data: { values: [row] }
+      });
+      // that's the way we would do it if we could use the gapi.client
+      // return window.gapi.client.sheets.spreadsheets.values.append({
+      //  spreadsheetId: spreadsheetId,
+      //  range: range,
+      //  valueInputOption: 'USER_ENTERED',
+      //  insertDataOption: 'INSERT_ROWS',
+      //  resource: {
+      //    values: [row]
+      //  }
+      // }, row);
     }
 
     getSpreadsheetData(spreadsheetId, range) {
-      return window.gapi.client.sheets.spreadsheets.values.get({
-        spreadsheetId: spreadsheetId,
-        range: range,
+      // @see: https://developers.google.com/sheets/api/reference/rest/
+      return this.$http({
+        method: 'GET',
+        url: `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${range}`,
+        params: {
+          'key': this.GOOGLE.API_KEY,
+        },
+        headers: {
+          'Authorization': `Bearer ${this.accessToken}`
+        }
       });
+      // that's the way we would do it if we could use the gapi.client
+      // return window.gapi.client.sheets.spreadsheets.values.get({
+      //  spreadsheetId: spreadsheetId,
+      //  range: range,
+      // });
     }
 
     getSpreadsheetHeadingsAndLastRow(spreadsheetId) {
@@ -126,7 +176,7 @@
 
       this.getSpreadsheetData(spreadsheetId, 'A1:Z99')
         .then((response) => {
-          const range = response.result;
+          const range = response.result || response.data;
 
           if (range.values && range.values[0]) {
             defer.resolve({
