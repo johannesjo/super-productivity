@@ -143,7 +143,7 @@
     "dbus-native": "^0.2.0",
     "electron-log": "^2.2.12",
     "electron-updater": "^2.18.2",
-    "jira-client": "git+https://github.com/johannesjo/node-jira-client.git",
+    "jira-client-fork": "latest",
     "moment": "^2.17.1",
     "moment-duration-format": "^1.3.0",
     "node-notifier": "^4.6.1",
