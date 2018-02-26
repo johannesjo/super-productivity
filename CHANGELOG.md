@@ -1,3 +1,18 @@
+<a name="1.8.1"></a>
+## [1.8.1](https://github.com/johannesjo/super-productivity/compare/v1.8.0...v1.8.1) (2018-02-26)
+
+
+### Bug Fixes
+
+* **dailySummary:** always show time sheet export modal button ([31a25b1](https://github.com/johannesjo/super-productivity/commit/31a25b1))
+
+
+### Features
+
+* **pomodoro:** focus window on and after break or show notification for web ([2f08642](https://github.com/johannesjo/super-productivity/commit/2f08642))
+
+
+
 <a name="1.8.0"></a>
 # [1.8.0](https://github.com/johannesjo/super-productivity/compare/v1.7.9...v1.8.0) (2018-02-25)
 
