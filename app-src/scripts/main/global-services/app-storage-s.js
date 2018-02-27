@@ -204,15 +204,14 @@
     }
 
     importData(data) {
-      _.forOwn(data, (val, key) => {
-        this.$rootScope.r[key] = val;
-      });
-      this.$rootScope.$apply();
+      this.SimpleToast('ERROR', 'If you can see this, something went wrong importing your data.');
 
-      // update to ls (NOTE: order is important!)
-      this.saveToLs();
-      this.saveProjects(data[this.PROJECTS_KEY]);
-      this.saveDoneBacklogTasks(data[this.DONE_BACKLOG_TASKS_KEY]);
+      _.forOwn(data, (val, key) => {
+        this.saveLsItem(val[key], key);
+      });
+
+      // reload page completely afterwards
+      window.location.reload(true);
     }
 
     getProjects() {

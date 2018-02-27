@@ -35,9 +35,6 @@
     vm.importSettings = (uploadSettingsTextarea) => {
       let settings = JSON.parse(uploadSettingsTextarea);
       AppStorage.importData(settings);
-
-      // reload page completely afterwards
-      window.location.reload(true);
     };
   }
 
