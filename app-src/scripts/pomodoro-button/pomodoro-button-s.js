@@ -179,7 +179,7 @@
           .then((task) => {
             this.Notifier({
               title: 'Pomodoro session #' + this.data.currentCycle + ' started',
-              message: task && task.title,
+              message: task && ('Working on: >> ' + task.title + ' <<'),
             });
           });
       }

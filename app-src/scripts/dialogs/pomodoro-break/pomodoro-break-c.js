@@ -23,12 +23,6 @@
 
     if (IS_ELECTRON) {
       window.ipcRenderer.send('SHOW_OR_FOCUS');
-    } else {
-      Notifier({
-        title: 'Pomodoro break started',
-        sound: true,
-        wait: true
-      });
     }
 
     if (this.pomodoroData.currentSessionTime) {
@@ -42,16 +36,16 @@
 
       this.timeout = $timeout(() => {
         this.isBreakDone = true;
-        if (IS_ELECTRON) {
-          window.ipcRenderer.send('SHOW_OR_FOCUS');
-        } else {
+        if (pomodoroConfig.isManualContinue) {
+          if (IS_ELECTRON) {
+            window.ipcRenderer.send('SHOW_OR_FOCUS');
+          }
           Notifier({
             title: 'Pomodoro break ended',
             sound: true,
             wait: true
           });
-        }
-        if (pomodoroConfig.isManualContinue) {
+
           this.pomodoroData.currentSessionTime = 0;
           PomodoroButton.pause();
         } else {
