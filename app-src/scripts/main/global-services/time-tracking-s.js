@@ -11,6 +11,7 @@
 
   const IPC_EVENT_CURRENT_TASK_UPDATED = 'CHANGED_CURRENT_TASK';
   const IPC_EVENT_IDLE_TIME = 'IDLE_TIME';
+  const MAX_TRACKING_PERIOD_VAL = 60000;
 
   class TimeTracking {
     /* @ngInject */
@@ -45,7 +46,8 @@
           let realPeriodDuration = moment.duration(now.diff(currentTrackingStart))
             .asMilliseconds();
 
-          if (!this.isIdle) {
+          // only track if not idle and interval is smaller than threshold
+          if (!this.isIdle && realPeriodDuration <= MAX_TRACKING_PERIOD_VAL) {
             this.Tasks.addTimeSpent(this.$rootScope.r.currentTask, realPeriodDuration);
           }
 
