@@ -141,6 +141,7 @@
   },
   "dependencies": {
     "dbus-native": "^0.2.0",
+    "electron-google-oauth": "^2.0.0",
     "electron-log": "^2.2.12",
     "electron-updater": "^2.18.2",
     "jira-client-fork": "latest",

@@ -1,4 +1,4 @@
-const JiraApi = require('jira-client');
+const JiraApi = require('jira-client-fork');
 
 module.exports = (mainWindow, request) => {
   let config = request.config;
