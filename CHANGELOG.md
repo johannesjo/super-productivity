@@ -1,3 +1,19 @@
+<a name="1.8.2"></a>
+## [1.8.2](https://github.com/johannesjo/super-productivity/compare/v1.8.1...v1.8.2) (2018-02-28)
+
+
+### Bug Fixes
+
+* bug when huge amount of time was wrongly tracked when application is idle for a long time (e.g. when being on lock screen over several hours) ([55ee266](https://github.com/johannesjo/super-productivity/commit/55ee266))
+* import data not working ([8959fde](https://github.com/johannesjo/super-productivity/commit/8959fde))
+
+
+### Features
+
+* improve pomodoro messaging ([99b1db9](https://github.com/johannesjo/super-productivity/commit/99b1db9))
+
+
+
 <a name="1.8.1"></a>
 ## [1.8.1](https://github.com/johannesjo/super-productivity/compare/v1.8.0...v1.8.1) (2018-02-26)
 
