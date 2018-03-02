@@ -73,8 +73,15 @@
     }
 
     handleIdle() {
-      window.ipcRenderer.on(IPC_EVENT_IDLE_TIME, (ev, idleTime) => {
-        if (idleTime > this.$rootScope.r.config.minIdleTimeInMs) {
+      window.ipcRenderer.on(IPC_EVENT_IDLE_TIME, (ev, idleTimeInMs) => {
+        // don't run if option is not enabled
+        if (!this.$rootScope.r.config.isEnableIdleTimeTracking) {
+          this.isIdle = false;
+          return;
+        }
+        const minIdleTimeInMs = moment.duration(this.$rootScope.r.config.minIdleTime).asMilliseconds();
+
+        if (idleTimeInMs > minIdleTimeInMs) {
           this.isIdle = true;
           this.$rootScope.$broadcast(this.EV.IS_IDLE);
 
@@ -84,8 +91,8 @@
           if (!this.isIdleDialogOpen) {
             this.isIdleDialogOpen = true;
             this.Dialogs('WAS_IDLE', {
-              initialIdleTime: idleTime,
-              minIdleTimeInMs: this.$rootScope.r.config.minIdleTimeInMs,
+              initialIdleTime: idleTimeInMs,
+              minIdleTimeInMs: minIdleTimeInMs,
             })
               .then(() => {
                 // if tracked
