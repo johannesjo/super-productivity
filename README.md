@@ -52,7 +52,9 @@ sudo apt-get install superproductivity
 * Install [superProductivity_Setup_latest.exe from the releases page](https://github.com/johannesjo/super-productivity/releases).
 
 ## Gnome Shell Integration
-There is also an [extension which integrates the application into the status bar](https://github.com/johannesjo/gnome-shell-extension-super-productivity). It's at a very early stage, so use it at your own risk.
+There is also an extension which integrates the application into the status bar.
+* [install most recent](https://github.com/johannesjo/gnome-shell-extension-super-productivity)
+* [install from extensions.gnome.org](https://extensions.gnome.org/extension/1348/super-productivity-indicator/)
 
 ## Build and run for yourself
 ```
