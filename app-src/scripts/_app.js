@@ -342,9 +342,10 @@
   function initElectronErrorHandling(SimpleToast, IS_ELECTRON) {
     const ERROR_EV = 'ELECTRON_ERROR';
     if (IS_ELECTRON) {
-      window.ipcRenderer.on(ERROR_EV, (ev, err) => {
-        SimpleToast('ERROR', 'Electron Error: ' + err);
-        console.error('Electron Error: ' + err);
+      window.ipcRenderer.on(ERROR_EV, (ev, errorData) => {
+        SimpleToast('ERROR', 'Electron Error: ' + errorData.error);
+        console.error('Electron Error: ' + errorData.error);
+        console.log('Stacktrace: ', errorData.stack);
       });
     }
   }
