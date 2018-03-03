@@ -1,4 +1,5 @@
 const electron = require('electron');
+const errorHandler = require('./error-handler');
 const BrowserWindow = electron.BrowserWindow;
 const path = require('path');
 const url = require('url');
@@ -6,10 +7,26 @@ const open = require('open');
 let mainWin;
 let indicatorMod;
 
+const mainWinModule = module.exports = {
+  createWindow,
+  getWin,
+  getIsAppReady,
+  win: undefined,
+  isAppReady: false
+};
+
+function getWin() {
+  return mainWinModule.win;
+}
+
+function getIsAppReady() {
+  return mainWinModule.isAppReady;
+}
+
 function createWindow(params) {
   // make sure the main window isn't already created
   if (mainWin) {
-    console.error('Main window already exists');
+    errorHandler('Main window already exists');
     return;
   }
 
@@ -53,6 +70,15 @@ function createWindow(params) {
   if (IS_MAC) {
     createMenu(quitApp);
   }
+
+  // update prop
+  mainWinModule.win = mainWin;
+
+  // listen for app ready
+  const APP_READY = 'APP_READY';
+  electron.ipcMain.on(APP_READY, () => {
+    mainWinModule.isAppReady = true;
+  });
 
   return mainWin;
 }
@@ -112,6 +138,3 @@ function createMenu(quitApp) {
   electron.Menu.setApplicationMenu(electron.Menu.buildFromTemplate(menuTpl));
 }
 
-module.exports = {
-  createWindow,
-};

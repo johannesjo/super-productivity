@@ -44,6 +44,8 @@
     .run(initGlobalShortcuts)
     .run(initAutomaticSyncIfEnabled)
     .run(initAutomaticBackupsIfEnabled)
+    .run(initElectronErrorHandling)
+    .run(sendAppReadyToElectron)
     .run(preventMultipleInstances)
     .run(setStartedTime)
     .run(checkIfLatestVersion)
@@ -336,4 +338,22 @@
 
     localStorage.setItem(KEY, Date.now());
   }
+
+  function initElectronErrorHandling(SimpleToast, IS_ELECTRON) {
+    const ERROR_EV = 'ELECTRON_ERROR';
+    if (IS_ELECTRON) {
+      window.ipcRenderer.on(ERROR_EV, (ev, err) => {
+        SimpleToast('ERROR', 'Electron Error: ' + err);
+        console.error('Electron Error: ' + err);
+      });
+    }
+  }
+
+  function sendAppReadyToElectron(IS_ELECTRON) {
+    const APP_READY = 'APP_READY';
+    if (IS_ELECTRON) {
+      window.ipcRenderer.send(APP_READY, {});
+    }
+  }
+
 })();

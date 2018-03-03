@@ -1,5 +1,5 @@
 'use strict';
-
+const errorHandler = require('./error-handler');
 const exec = require('child_process').exec;
 let cmd;
 
@@ -20,6 +20,10 @@ if (process.platform === 'linux') {
 
 module.exports = (cb) => {
   exec(cmd, function(error, stdout) {
+    if (error) {
+      errorHandler(error);
+    }
+
     // command output is in stdout
     const idleTime = parseInt(stdout, 10);
     cb(idleTime);

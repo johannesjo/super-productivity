@@ -3,7 +3,6 @@
 const electron = require('electron');
 const powerSaveBlocker = electron.powerSaveBlocker;
 const notifier = require('node-notifier');
-const moment = require('moment');
 //const autoUpdater = require('electron-updater').autoUpdater;
 const log = require('electron-log');
 
@@ -16,6 +15,7 @@ const getIdleTime = require('./get-idle-time');
 const jira = require('./jira');
 const gitLog = require('./git-log');
 const googleAuth = require('./google-auth');
+const errorHandler = require('./error-handler');
 
 const ICONS_FOLDER = __dirname + '/assets/icons/';
 const IS_MAC = process.platform === 'darwin';
@@ -177,7 +177,7 @@ function registerShowAppShortCut(shortcutPassed) {
     });
 
     if (!ret) {
-      log.error('key registration failed');
+      errorHandler('Key registration failed: ' + shortcutPassed, shortcutPassed)
     }
   }
 }

@@ -1,5 +1,7 @@
 'use strict';
 
+const errorHandler = require('./error-handler');
+
 // only optionally require dbus
 let isDBusError = false;
 let dbus;
@@ -28,14 +30,14 @@ function init(params) {
 // Check the connection was successful
   if (!sessionBus) {
     isDBusError = true;
-    throw new Error('Could not connect to the DBus session bus.')
+    errorHandler(`DBus: Could not connect to the DBus session bus.`);
   }
 
   sessionBus.requestName(serviceName, 0x4, (e, retCode) => {
     // If there was an error, warn user and fail
     if (e) {
       isDBusError = true;
-      throw new Error(`Could not request service name ${serviceName}, the error was: ${e}.`)
+      errorHandler(`DBus: Could not request service name ${serviceName}, the error was: ${e}.`);
     }
 
     // Return code 0x1 means we successfully had the name
@@ -49,9 +51,7 @@ function init(params) {
     */
     else {
       isDBusError = true;
-      throw new Error(`Failed to request service name '${serviceName}'.Check what
-        return code '${retCode}'
-        means.`);
+      errorHandler(`DBus: Failed to request service name '${serviceName}'.Check what return code '${retCode}' means.`);
     }
   });
 
@@ -79,21 +79,21 @@ function init(params) {
     iface = {
       markAsDone: function() {
         if (!mainWindow) {
-          console.error('mainWindow not ready');
+          errorHandler('DBus: mainWindow not ready');
         }
         console.log('markAsDone');
         mainWindow.webContents.send('TASK_MARK_AS_DONE');
       },
       startTask: function() {
         if (!mainWindow) {
-          console.error('mainWindow not ready');
+          errorHandler('DBus: mainWindow not ready');
         }
         console.log('startTask');
         mainWindow.webContents.send('TASK_START');
       },
       pauseTask: function() {
         if (!mainWindow) {
-          console.error('mainWindow not ready');
+          errorHandler('DBus: mainWindow not ready');
         }
         console.log('pauseTask');
         mainWindow.webContents.send('TASK_PAUSE');
@@ -131,7 +131,7 @@ if (!isDBusError) {
       }
 
       if (!iface) {
-        console.error('interface not ready yet');
+        errorHandler('DBus: interface not ready yet');
         return;
       }
 
