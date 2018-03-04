@@ -10,9 +10,9 @@
 
   class PomodoroButtonCtrl {
     /* @ngInject */
-    constructor(PomodoroButton, Dialogs) {
+    constructor(PomodoroButton, $state) {
       this.svc = PomodoroButton;
-      this.Dialogs = Dialogs;
+      this.$state = $state;
     }
 
     play($ev) {
@@ -52,10 +52,7 @@
     focusMode($ev) {
       $ev.preventDefault();
       $ev.stopPropagation();
-      this.Dialogs('POMODORO_FOCUS', {
-        pomodoroData: this.svc.data,
-        pomodoroConfig: this.svc.config
-      }, true);
+      this.$state.go('pomodoro-focus');
     }
   }
 

@@ -1,12 +1,8 @@
-.pomodoro-focus-dialog {
+pomodoro-focus {
   text-align: center;
-
-  .md-dialog-content {
-  }
-  .inner-wrapper {
-    max-width: $component-max-width;
-    margin: auto;
-  }
+  max-width: $component-max-width;
+  margin: auto;
+  display: block;
 
   .timer {
     font-weight: bold;
@@ -20,6 +16,7 @@
 
   .task {
     border: none;
+    background: transparent;
 
     // overwrite green background color
     &.is-current {
@@ -32,7 +29,7 @@
         text-align: center;
       }
 
-      &.is-done{
+      &.is-done {
         text-decoration: line-through;
         color: #aaaaaa;
       }

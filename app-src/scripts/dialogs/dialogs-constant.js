@@ -77,10 +77,6 @@
         controller: 'PomodoroBreakCtrl',
         templateUrl: 'scripts/dialogs/pomodoro-break/pomodoro-break-c.html'
       },
-      POMODORO_FOCUS: {
-        controller: 'PomodoroFocusCtrl',
-        templateUrl: 'scripts/dialogs/pomodoro-focus/pomodoro-focus-c.html'
-      },
       TIME_SHEET_EXPORT: {
         controller: 'TimeSheetExportCtrl',
         templateUrl: 'scripts/dialogs/time-sheet-export/time-sheet-export-c.html'

@@ -42,6 +42,10 @@
         url: '/done-tasks-backlog',
         template: '<done-tasks-backlog></done-tasks-backlog>'
       })
+      .state('pomodoro-focus', {
+        url: '/pomodoro-focus',
+        template: '<pomodoro-focus></pomodoro-focus>'
+      })
       .state('agenda-and-history', {
         url: '/agenda-and-history',
         template: '<agenda-and-history></agenda-and-history>'
@@ -55,11 +59,6 @@
         parent: 'agenda-and-history',
         url: '/daily-agenda',
         template: '<daily-agenda></daily-agenda>'
-      })
-      .state('pomodoro-focus', {
-        parent: 'pomodoro-focus',
-        url: '/pomodoro-focus',
-        template: '<pomodoro-focus></pomodoro-focus>'
       })
     /* STATES-NEEDLE - DO NOT REMOVE THIS */;
   }

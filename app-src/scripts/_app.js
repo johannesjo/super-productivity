@@ -50,9 +50,6 @@
     .run(setStartedTime)
     .run(checkIfLatestVersion)
     .run(showWelcomeDialog)
-    .run((Dialogs)=>{
-
-    })
     .run(goToWorkViewIfTasks);
 
   /* @ngInject */
