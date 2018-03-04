@@ -99,6 +99,7 @@
         globalShowHide: 'Ctrl+Shift+X',
         goToDailyPlanner: 'p',
         goToWorkView: 'w',
+        goToFocusMode: 'F',
         goToDailyAgenda: '',
         goToSettings: '',
         addNewTask: '*',
