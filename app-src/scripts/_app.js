@@ -133,6 +133,9 @@
         if (CheckShortcutKeyCombo(ev, $rootScope.r.keys.goToSettings)) {
           $state.go('settings');
         }
+        if (CheckShortcutKeyCombo(ev, $rootScope.r.keys.goToFocusMode)) {
+          $state.go('pomodoro-focus');
+        }
       }
 
       // special hidden dev tools combo to use them for production
