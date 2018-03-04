@@ -22,9 +22,11 @@
     <div class="md-dialog-content">
       <div class="inner-wrapper">
         <div class="timer"
+             ng-class="{'is-pause':vm.pomodoroData.status!=='PLAY'}"
              ng-bind="(vm.pomodoroData.currentSessionTime | date:'mm:ss')"></div>
 
-        <div class="task is-current">
+        <div class="task"
+             ng-class="{'is-current':vm.pomodoroData.status==='PLAY'}">
           <h2 edit-on-click="vm.task.title"
               class="title"></h2>
           <md-progress-linear md-mode="determinate"
@@ -36,10 +38,15 @@
             <md-button class="md-fab md-raised md-primary"
                        aria-label="play/pause"
                        tabindex="2"
-                       ng-class="{'md-accent':vm.task.id === vm.currentTask.id}"
+                       ng-class="{'md-accent':vm.pomodoroData.status==='PLAY'}"
                        ng-click="vm.togglePlay()">
-              <ng-md-icon icon="{{vm.task.id === vm.currentTask.id ? 'pause':'play_arrow'}}"
-                          aria-label="play/pause"></ng-md-icon>
+              <ng-md-icon icon="play_arrow"
+                          ng-if="!vm.pomodoroData.isOnBreak && vm.pomodoroData.status==='PLAY'"></ng-md-icon>
+              <ng-md-icon icon="pause"
+                          ng-if="vm.pomodoroData.status==='MANUAL_PAUSE'"></ng-md-icon>
+              <ng-md-icon icon="free_breakfast"
+                          ng-if="vm.pomodoroData.isOnBreak && vm.pomodoroData.status!=='MANUAL_PAUSE'"></ng-md-icon>
+
               <md-tooltip md-direction="top">Start/Pause working</md-tooltip>
             </md-button>
             <!--<md-button class="md-fab md-raised md-primary"-->
@@ -63,7 +70,7 @@
             <md-button class="md-fab md-raised md-primary"
                        tabindex="2"
                        aria-label="Mark as done and start next task"
-                       ng-click="vm.estimateTime()">
+                       ng-click="vm.markAsDone()">
               <ng-md-icon icon="check"
                           aria-label="Mark as done and start next task"></ng-md-icon>
               <md-tooltip md-direction="top">Mark as done and start next task</md-tooltip>
