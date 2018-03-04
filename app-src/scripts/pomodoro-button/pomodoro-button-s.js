@@ -107,7 +107,6 @@
       this.data.currentCycle = 1;
       this.data.isOnBreak = false;
       this.setSessionTimerTime();
-
     }
 
     play() {
@@ -115,16 +114,6 @@
       this.Tasks.startLastTaskOrOpenDialog()
         .then(() => {
           this.start();
-
-          this.Dialogs('POMODORO_FOCUS', {
-            pomodoroData: this.data,
-            pomodoroConfig: this.config
-          })
-            .then((isSkipBreak) => {
-              if (isSkipBreak) {
-                this.skipBreak();
-              }
-            });
 
           if (this.config.isGoToWorkView) {
             this.$state.go('work-view');
