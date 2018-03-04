@@ -14,16 +14,18 @@
     .controller('PomodoroFocusCtrl', PomodoroFocusCtrl);
 
   /* @ngInject */
-  function PomodoroFocusCtrl($mdDialog, $rootScope, theme, pomodoroData, pomodoroConfig, $scope, $timeout, IS_ELECTRON, PomodoroButton, Notifier) {
+  function PomodoroFocusCtrl($mdDialog, $rootScope, theme, pomodoroData, pomodoroConfig, $scope, $timeout, IS_ELECTRON, PomodoroButton, Notifier, Tasks) {
     this.r = $rootScope.r;
     this.theme = theme;
     this.pomodoroData = pomodoroData;
     this.isShowDistractionsOnFocus = pomodoroConfig.isShowDistractionsOnFocus;
     this.isFocusDone = false;
-    this.currentTask = this.r.currentTask;
+
+    this.currentTask = Tasks.getCurrent();
+    this.task = Tasks.getCurrent() || Tasks.getLastCurrent();
 
     console.log(this.r);
-    
+
     if (IS_ELECTRON) {
       window.ipcRenderer.send('SHOW_OR_FOCUS');
     }

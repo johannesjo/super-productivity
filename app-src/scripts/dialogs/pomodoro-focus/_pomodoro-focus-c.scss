@@ -1,14 +1,67 @@
 .pomodoro-focus-dialog {
+  text-align: center;
+
+  .md-dialog-content {
+  }
+  .inner-wrapper {
+    max-width: $component-max-width;
+    margin: auto;
+  }
+
   .timer {
     font-weight: bold;
     text-align: center;
     font-size: 34px;
-    margin: 20px 0;
+    margin: 5px 0 0;
   }
 
-  .task {
+  .task.is-current {
+    border: none;
+    background: transparent;
+
     .title {
+      &,
+      input {
+        text-align: center;
+      }
+    }
+
+    md-progress-linear {
+      // needed to overwrite ng-materials default styles
+      margin-bottom: 10px !important;
+      border-bottom: 1px dashed #bcbcbc;
+
+      .md-bar,
+      .md-container {
+        height: 8px;
+      }
+    }
+
+    .time {
       text-align: center;
+      font-size: 16px;
+      margin-bottom: 15px;
+    }
+
+    .notes {
+      margin-top: 15px;
+      inline-markdown {
+        text-align: left;
+      }
+    }
+
+    task-local-links {
+      li {
+        display: inline-block;
+        a {
+          display: inline-block;
+          white-space: nowrap;
+        }
+
+        .trash-button {
+          margin-left: 5px;
+        }
+      }
     }
   }
 }
