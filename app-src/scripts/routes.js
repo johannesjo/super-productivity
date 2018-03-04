@@ -28,7 +28,7 @@
         url: '/work-view',
         template: '<work-view></work-view>'
       })
-      .state('xxxxxxxxxxxxxxxxxxxxx', {
+      .state('settings', {
         url: '/settings',
         controller: 'SettingsCtrl',
         controllerAs: 'vm',
@@ -55,6 +55,11 @@
         parent: 'agenda-and-history',
         url: '/daily-agenda',
         template: '<daily-agenda></daily-agenda>'
+      })
+      .state('pomodoro-focus', {
+        parent: 'pomodoro-focus',
+        url: '/pomodoro-focus',
+        template: '<pomodoro-focus></pomodoro-focus>'
       })
     /* STATES-NEEDLE - DO NOT REMOVE THIS */;
   }

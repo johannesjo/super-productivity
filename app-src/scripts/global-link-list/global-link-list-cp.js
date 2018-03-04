@@ -43,7 +43,9 @@
         return;
       }
 
+      const focusModeEl = ev.target.closest('')
       const taskEl = ev.target.closest('.task');
+      console.log('I am here!', taskEl);
 
       if (taskEl) {
         const $taskEl = angular.element(taskEl);
