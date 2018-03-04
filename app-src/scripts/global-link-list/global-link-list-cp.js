@@ -43,11 +43,13 @@
         return;
       }
 
-      const focusModeEl = ev.target.closest('')
+      const focusModeEl = ev.target.closest('pomodoro-focus');
       const taskEl = ev.target.closest('.task');
-      console.log('I am here!', taskEl);
 
-      if (taskEl) {
+      if (focusModeEl) {
+        const task = this.Tasks.getCurrent() || this.Tasks.getLastCurrent();
+        this.openEditDialog(link, true, task);
+      } else if (taskEl) {
         const $taskEl = angular.element(taskEl);
         const task = $taskEl.scope().modelValue;
         this.openEditDialog(link, true, task);
