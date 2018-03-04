@@ -14,7 +14,7 @@
     .controller('PomodoroFocusCtrl', PomodoroFocusCtrl);
 
   /* @ngInject */
-  function PomodoroFocusCtrl($mdDialog, $rootScope, theme, pomodoroData, pomodoroConfig, $scope, $timeout, IS_ELECTRON, PomodoroButton, Notifier, Tasks) {
+  function PomodoroFocusCtrl($mdDialog, $rootScope, theme, pomodoroData, pomodoroConfig, $scope, $timeout, IS_ELECTRON, PomodoroButton, Notifier, Tasks, SimpleToast) {
     this.r = $rootScope.r;
     this.theme = theme;
     this.pomodoroData = pomodoroData;
@@ -27,6 +27,11 @@
 
     this.markAsDone = () => {
       Tasks.markAsDone(this.task);
+      this.task = Tasks.getCurrent() || Tasks.getLastCurrent();
+      if (this.task.isDone) {
+        SimpleToast('SUCCESS', 'All tasks done for today, create some new if you have to!')
+        $mdDialog.hide();
+      }
     };
 
     this.cancel = () => {
