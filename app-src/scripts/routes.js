@@ -28,7 +28,7 @@
         url: '/work-view',
         template: '<work-view></work-view>'
       })
-      .state('xxxxxxxxxxxxxxxxxxxxx', {
+      .state('settings', {
         url: '/settings',
         controller: 'SettingsCtrl',
         controllerAs: 'vm',
@@ -41,6 +41,10 @@
       .state('done-tasks-backlog', {
         url: '/done-tasks-backlog',
         template: '<done-tasks-backlog></done-tasks-backlog>'
+      })
+      .state('pomodoro-focus', {
+        url: '/pomodoro-focus',
+        template: '<pomodoro-focus></pomodoro-focus>'
       })
       .state('agenda-and-history', {
         url: '/agenda-and-history',

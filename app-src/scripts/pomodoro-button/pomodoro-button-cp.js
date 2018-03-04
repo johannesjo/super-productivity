@@ -10,8 +10,9 @@
 
   class PomodoroButtonCtrl {
     /* @ngInject */
-    constructor(PomodoroButton) {
+    constructor(PomodoroButton, $state) {
       this.svc = PomodoroButton;
+      this.$state = $state;
     }
 
     play($ev) {
@@ -46,6 +47,12 @@
       $ev.preventDefault();
       $ev.stopPropagation();
       this.svc.skipBreak();
+    }
+
+    focusMode($ev) {
+      $ev.preventDefault();
+      $ev.stopPropagation();
+      this.$state.go('pomodoro-focus');
     }
   }
 

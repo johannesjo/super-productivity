@@ -1,0 +1,115 @@
+<div class="pomodoro-focus">
+  <div class="timer"
+       ng-class="{'is-pause':vm.svc.data.status!=='PLAY'}"
+       ng-bind="(vm.svc.data.currentSessionTime | date:'mm:ss')"></div>
+
+  <div class="task"
+       ng-class="{'is-current':vm.svc.data.status==='PLAY'}">
+    <h2 edit-on-click="vm.task.title"
+        ng-class="{'is-done':vm.task.isDone}"
+        class="title"></h2>
+    <md-progress-linear md-mode="determinate"
+                        value="{{vm.task.progress}}"></md-progress-linear>
+    <div class="time"
+         ng-bind="(vm.task.timeSpent|duration) +' / ' + (vm.task.timeEstimate|duration)"></div>
+
+
+    <div class="controls">
+      <md-button class="md-fab md-raised md-primary"
+                 aria-label="play/pause"
+                 tabindex="2"
+                 ng-class="{'md-accent':vm.svc.data.status==='PLAY'}"
+                 ng-click="vm.togglePlay()">
+        <ng-md-icon icon="play_arrow"
+                    ng-if="!vm.svc.data.isOnBreak && vm.svc.data.status==='PLAY'"></ng-md-icon>
+        <ng-md-icon icon="pause"
+                    ng-if="vm.svc.data.status==='MANUAL_PAUSE'"></ng-md-icon>
+        <ng-md-icon icon="free_breakfast"
+                    ng-if="vm.svc.data.isOnBreak && vm.svc.data.status!=='MANUAL_PAUSE'"></ng-md-icon>
+
+        <md-tooltip md-direction="top">Start/Pause working</md-tooltip>
+      </md-button>
+      <!--<md-button class="md-fab md-raised md-primary"-->
+      <!--tabindex="2"-->
+      <!--aria-label="time estimation"-->
+      <!--ng-click="vm.estimateTime(task)">-->
+      <!--<ng-md-icon icon="access_time"-->
+      <!--aria-label="time estimation"></ng-md-icon>-->
+      <!--</md-button>-->
+      <md-button class="md-fab md-raised md-primary"
+                 aria-label="link"
+                 tabindex="2"
+                 target="_blank"
+                 ng-if="::vm.task.originalLink"
+                 external-link
+                 ng-href="{{ ::vm.task.originalLink }}">
+        <ng-md-icon icon="{{vm.task.originalType ==='GITHUB' ? 'github-circle':'link'}}"
+                    aria-label="link"></ng-md-icon>
+        <md-tooltip md-direction="top">Go to issue page</md-tooltip>
+      </md-button>
+      <md-button class="md-fab md-raised md-primary"
+                 tabindex="2"
+                 aria-label="Mark as done and start next task"
+                 ng-click="vm.markAsDone()">
+        <ng-md-icon icon="check"
+                    aria-label="Mark as done and start next task"></ng-md-icon>
+        <md-tooltip md-direction="top">Mark as done and start next task</md-tooltip>
+      </md-button>
+    </div>
+
+
+    <section class="notes">
+      <div class="md-headline"
+           ng-bind="vm.task.originalId ? 'Description': 'Notes'"></div>
+      <inline-markdown ng-model="vm.task.notes"
+                       md-whiteframe="4"
+                       on-edit-finished="vm.onTaskNotesEditFinished(newVal, isChanged, vm.task)"></inline-markdown>
+    </section>
+
+    <section ng-if="vm.task.localAttachments && vm.task.localAttachments.length">
+      <collapsible collapsible-title="Local attachments and links"
+                   is-initially-expanded="'true'">
+        <task-local-links local-links="vm.task.localAttachments"></task-local-links>
+      </collapsible>
+    </section>
+
+    <section ng-if="vm.task.originalAssigneeKey"
+             class="assignee">
+      <div class="md-caption">Assignee: <span ng-bind="vm.task.originalAssigneeKey"></span></div>
+    </section>
+
+    <section ng-if="vm.task.originalAttachment.length > 0">
+      <collapsible collapsible-title="Attachments ({{ ::vm.task.originalAttachment.length }})"
+                   is-initially-expanded="'true'">
+        <ul class="attachments">
+          <li ng-repeat="attachment in vm.task.originalAttachment">
+            <a href="{{ ::attachment}}"
+               external-link
+               target="_blank"
+               class="md-accent">{{ ::attachment}}</a>
+            <a href="{{ ::attachment}}"
+               download="{{ ::attachment}}"
+               class="md-accent">
+              <ng-md-icon icon="file_download"
+                          aria-label="download file directly"></ng-md-icon>
+            </a>
+          </li>
+        </ul>
+      </collapsible>
+    </section>
+
+    <section ng-if="vm.task.originalComments.length > 0">
+      <collapsible collapsible-title="Comments ({{:: vm.task.originalComments.length }})"
+                   is-initially-expanded="'true'">
+        <md-divider></md-divider>
+        <ul class="comments">
+          <li ng-repeat="comment in vm.task.originalComments"
+              class="comment">
+            <strong class="author">[<span ng-bind="::comment.author"></span>]: </strong>
+            <span marked="comment.body"></span>
+          </li>
+        </ul>
+      </collapsible>
+    </section>
+  </div>
+</div>
