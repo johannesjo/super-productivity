@@ -1,7 +1,45 @@
 <div class="pomodoro-focus">
-  <div class="timer"
-       ng-class="{'is-pause':vm.svc.data.status!=='PLAY'}"
-       ng-bind="(vm.svc.data.currentSessionTime | date:'mm:ss')"></div>
+  <div class="wrapper">
+    <md-button class="md-icon-button md-raised"
+               aria-label="play/pause"
+               tabindex="2"
+               ng-class="{'md-accent':vm.svc.data.status==='PLAY'}"
+               ng-click="vm.togglePlay()">
+      <ng-md-icon icon="play_arrow"
+                  ng-if="!vm.svc.data.isOnBreak && vm.svc.data.status==='PLAY'"></ng-md-icon>
+      <ng-md-icon icon="pause"
+                  ng-if="vm.svc.data.status==='MANUAL_PAUSE'"></ng-md-icon>
+      <ng-md-icon icon="free_breakfast"
+                  ng-if="vm.svc.data.isOnBreak && vm.svc.data.status!=='MANUAL_PAUSE'"></ng-md-icon>
+
+      <md-tooltip md-direction="top">Start/Pause working</md-tooltip>
+    </md-button>
+
+    <div class="timer"
+         ng-class="{'is-pause':vm.svc.data.status!=='PLAY'}"
+         ng-bind="(vm.svc.data.currentSessionTime | date:'mm:ss')"></div>
+
+    <md-button class="md-icon-button md-raised md-primary"
+               aria-label="link"
+               tabindex="2"
+               target="_blank"
+               ng-if="::vm.task.originalLink"
+               external-link
+               ng-href="{{ ::vm.task.originalLink }}">
+      <ng-md-icon icon="{{vm.task.originalType ==='GITHUB' ? 'github-circle':'link'}}"
+                  aria-label="link"></ng-md-icon>
+      <md-tooltip md-direction="top">Go to issue page</md-tooltip>
+    </md-button>
+
+    <md-button class="md-icon-button md-raised md-primary"
+               tabindex="2"
+               aria-label="Mark as done and start next task"
+               ng-click="vm.markAsDone()">
+      <ng-md-icon icon="check"
+                  aria-label="Mark as done and start next task"></ng-md-icon>
+      <md-tooltip md-direction="top">Mark as done and start next task</md-tooltip>
+    </md-button>
+  </div>
 
   <div class="task"
        ng-class="{'is-current':vm.svc.data.status==='PLAY'}">
@@ -12,51 +50,6 @@
                         value="{{vm.task.progress}}"></md-progress-linear>
     <div class="time"
          ng-bind="(vm.task.timeSpent|duration) +' / ' + (vm.task.timeEstimate|duration)"></div>
-
-
-    <div class="controls">
-      <md-button class="md-fab md-raised md-primary"
-                 aria-label="play/pause"
-                 tabindex="2"
-                 ng-class="{'md-accent':vm.svc.data.status==='PLAY'}"
-                 ng-click="vm.togglePlay()">
-        <ng-md-icon icon="play_arrow"
-                    ng-if="!vm.svc.data.isOnBreak && vm.svc.data.status==='PLAY'"></ng-md-icon>
-        <ng-md-icon icon="pause"
-                    ng-if="vm.svc.data.status==='MANUAL_PAUSE'"></ng-md-icon>
-        <ng-md-icon icon="free_breakfast"
-                    ng-if="vm.svc.data.isOnBreak && vm.svc.data.status!=='MANUAL_PAUSE'"></ng-md-icon>
-
-        <md-tooltip md-direction="top">Start/Pause working</md-tooltip>
-      </md-button>
-      <!--<md-button class="md-fab md-raised md-primary"-->
-      <!--tabindex="2"-->
-      <!--aria-label="time estimation"-->
-      <!--ng-click="vm.estimateTime(task)">-->
-      <!--<ng-md-icon icon="access_time"-->
-      <!--aria-label="time estimation"></ng-md-icon>-->
-      <!--</md-button>-->
-      <md-button class="md-fab md-raised md-primary"
-                 aria-label="link"
-                 tabindex="2"
-                 target="_blank"
-                 ng-if="::vm.task.originalLink"
-                 external-link
-                 ng-href="{{ ::vm.task.originalLink }}">
-        <ng-md-icon icon="{{vm.task.originalType ==='GITHUB' ? 'github-circle':'link'}}"
-                    aria-label="link"></ng-md-icon>
-        <md-tooltip md-direction="top">Go to issue page</md-tooltip>
-      </md-button>
-      <md-button class="md-fab md-raised md-primary"
-                 tabindex="2"
-                 aria-label="Mark as done and start next task"
-                 ng-click="vm.markAsDone()">
-        <ng-md-icon icon="check"
-                    aria-label="Mark as done and start next task"></ng-md-icon>
-        <md-tooltip md-direction="top">Mark as done and start next task</md-tooltip>
-      </md-button>
-    </div>
-
 
     <section class="notes">
       <div class="md-headline"
