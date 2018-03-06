@@ -26,18 +26,18 @@
       // handle drop
       $document[0].ondrop = (ev) => {
         const link = this.GlobalLinkList.createLinkFromDrop(ev);
-        this.handleLinkinput(link, ev);
+        this.handleLinkInput(link, ev);
       };
 
       // handle paste
       $document[0].onpaste = (ev) => {
         const link = this.GlobalLinkList.createLinkFromPaste(ev);
-        this.handleLinkinput(link, ev);
+        this.handleLinkInput(link, ev);
         //  const html = e.clipboardData.getData('text/html');
       };
     }
 
-    handleLinkinput(link, ev) {
+    handleLinkInput(link, ev) {
       // don't intervene with text inputs
       if (ev.target.tagName === 'INPUT' || ev.target.tagName === 'TEXTAREA') {
         return;
@@ -45,14 +45,27 @@
 
       const focusModeEl = ev.target.closest('pomodoro-focus');
       const taskEl = ev.target.closest('.task');
+      const markdownEl = ev.target.closest('inline-markdown');
+      const isImagePath = link.path.match(/jpg|png/);
 
       if (focusModeEl) {
         const task = this.Tasks.getCurrent() || this.Tasks.getLastCurrent();
-        this.openEditDialog(link, true, task);
+
+        if (markdownEl && isImagePath) {
+          this.handleImageDrop(link, task);
+        } else {
+          this.openEditDialog(link, true, task);
+        }
+
       } else if (taskEl) {
         const $taskEl = angular.element(taskEl);
         const task = $taskEl.scope().modelValue;
-        this.openEditDialog(link, true, task);
+
+        if (markdownEl && isImagePath) {
+          this.handleImageDrop(link, task);
+        } else {
+          this.openEditDialog(link, true, task);
+        }
       } else {
         this.openEditDialog(link, true);
       }
@@ -60,6 +73,10 @@
       ev.preventDefault();
       ev.stopPropagation();
       this.$scope.$apply();
+    }
+
+    handleImageDrop(link, task) {
+      task.notes = task.notes + `<img src="${link.path}" style="max-width: 100%;">`;
     }
 
     openEditDialog(link, isNew, task) {
