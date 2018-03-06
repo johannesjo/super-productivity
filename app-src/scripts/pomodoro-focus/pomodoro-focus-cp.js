@@ -18,11 +18,10 @@
 
       this.svc = PomodoroButton;
 
-      this.currentTask = Tasks.getCurrent();
-      this.task = Tasks.getCurrent() || Tasks.getLastCurrent();
       this.r = $rootScope.r;
 
-      this.getTaskData();
+      this.setTaskData();
+      this.setCurrentTask();
       this.handleAllDone();
     }
 
@@ -30,23 +29,33 @@
       this.PomodoroButton.toggle();
     }
 
-    getTaskData() {
+    setCurrentTask() {
       this.currentTask = this.Tasks.getCurrent();
+    }
+
+    setTaskData() {
       this.task = this.Tasks.getCurrent() || this.Tasks.getLastCurrent();
+
+      if (this.task.parentId) {
+        this.parentTitle = this.Tasks.getById(this.task.parentId).title;
+      } else {
+        this.parentTitle = undefined;
+      }
     }
 
     handleAllDone() {
       if (this.task.isDone) {
         this.Tasks.startLastTaskOrOpenDialog()
           .then(() => {
-            this.getTaskData();
+            this.setTaskData();
+            this.setCurrentTask();
           });
       }
     }
 
     markAsDone() {
       this.Tasks.markAsDone(this.task);
-      this.task = this.Tasks.getCurrent() || this.Tasks.getLastCurrent();
+      this.setTaskData();
       this.handleAllDone();
     }
   }

@@ -12,7 +12,7 @@
       <ng-md-icon icon="free_breakfast"
                   ng-if="vm.svc.data.isOnBreak && vm.svc.data.status!=='MANUAL_PAUSE'"></ng-md-icon>
 
-      <md-tooltip md-direction="top">Start/Pause working</md-tooltip>
+      <md-tooltip md-direction="bottom">Start/Pause working</md-tooltip>
     </md-button>
 
     <div class="timer"
@@ -28,7 +28,7 @@
                ng-href="{{ ::vm.task.originalLink }}">
       <ng-md-icon icon="{{vm.task.originalType ==='GITHUB' ? 'github-circle':'link'}}"
                   aria-label="link"></ng-md-icon>
-      <md-tooltip md-direction="top">Go to issue page</md-tooltip>
+      <md-tooltip md-direction="bottom">Go to issue page</md-tooltip>
     </md-button>
 
     <md-button class="md-icon-button md-raised md-primary"
@@ -37,12 +37,15 @@
                ng-click="vm.markAsDone()">
       <ng-md-icon icon="check"
                   aria-label="Mark as done and start next task"></ng-md-icon>
-      <md-tooltip md-direction="top">Mark as done and start next task</md-tooltip>
+      <md-tooltip md-direction="bottom">Mark as done and start next task</md-tooltip>
     </md-button>
   </div>
 
   <div class="task"
        ng-class="{'is-current':vm.svc.data.status==='PLAY'}">
+    <h3 class="parent-title"
+        ng-bind="vm.parentTitle"
+        ng-if="vm.parentTitle"></h3>
     <h2 edit-on-click="vm.task.title"
         ng-class="{'is-done':vm.task.isDone}"
         class="title"></h2>
