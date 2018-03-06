@@ -94,6 +94,11 @@
 
     function replaceVals(defaultVal) {
       const dVal = defaultVal.trim();
+
+      if (dVal.match(/\{date:/)) {
+        return getCustomDate(dVal);
+      }
+
       switch (dVal) {
         case '{startTime}':
           return getStartTime();
@@ -140,6 +145,14 @@
         default:
           return value;
       }
+    }
+
+    function getCustomDate(dVal) {
+      const dateFormatStr = dVal
+        .replace('{date:', '')
+        .replace('}', '')
+        .trim();
+      return window.moment().format(dateFormatStr);
     }
 
     function getStartTime() {
