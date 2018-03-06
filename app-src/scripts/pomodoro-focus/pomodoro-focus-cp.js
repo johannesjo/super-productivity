@@ -22,7 +22,7 @@
 
       this.setTaskData();
       this.setCurrentTask();
-      this.handleAllDone();
+      this.handleAllDoneIfNeeded();
     }
 
     togglePlay() {
@@ -36,15 +36,23 @@
     setTaskData() {
       this.task = this.Tasks.getCurrent() || this.Tasks.getLastCurrent();
 
-      if (this.task.parentId) {
-        this.parentTitle = this.Tasks.getById(this.task.parentId).title;
+      if (this.task) {
+        if (this.task.parentId) {
+          this.parentTitle = this.Tasks.getById(this.task.parentId).title;
+        } else {
+          this.parentTitle = undefined;
+        }
       } else {
-        this.parentTitle = undefined;
+        this.Tasks.startLastTaskOrOpenDialog()
+          .then(() => {
+            this.setTaskData();
+            this.setCurrentTask();
+          });
       }
     }
 
-    handleAllDone() {
-      if (this.task.isDone) {
+    handleAllDoneIfNeeded() {
+      if (this.task && this.task.isDone) {
         this.Tasks.startLastTaskOrOpenDialog()
           .then(() => {
             this.setTaskData();
@@ -56,7 +64,7 @@
     markAsDone() {
       this.Tasks.markAsDone(this.task);
       this.setTaskData();
-      this.handleAllDone();
+      this.handleAllDoneIfNeeded();
     }
   }
 
