@@ -100,7 +100,7 @@
         case '{currentTime}':
           return getCurrentTime();
         case '{date}':
-          return window.moment().format('DD/MM/YYYY');
+          return window.moment().format('MM/DD/YYYY');
         case '{taskTitles}':
           return getTaskTitles();
         case '{subTaskTitles}':
