@@ -34,6 +34,7 @@
     let textareaEl;
     let ngModelCopy;
     let textareaTimeout;
+    const wrapperEl = $element.children();
 
     const keypressHandler = ($event) => {
       if ($event.keyCode === 10 && $event.ctrlKey) {
@@ -81,6 +82,9 @@
           });
         });
       }
+
+      wrapperEl.addClass('is-editing');
+
     };
 
     vm.untoggleShowEdit = () => {
@@ -100,6 +104,8 @@
           isChanged: isChanged
         });
       }
+
+      wrapperEl.removeClass('is-editing');
     };
 
     vm.resizeToFit = () => {

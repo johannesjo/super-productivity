@@ -3,16 +3,21 @@ inline-markdown {
 }
 
 .markdown-wrapper {
-  min-height: 160px;
+  min-height: 60px;
   max-height: 600px;
   margin-bottom: 20px;
   display: block;
   box-sizing: border-box;
-  height: 30px;
   border: none;
   resize: both;
   overflow: auto;
   position: relative;
+  cursor: text;
+
+  &.is-editing {
+    min-height: 160px;
+  }
+
   .resize-to-fit {
     position: absolute;
     right: 14px;
