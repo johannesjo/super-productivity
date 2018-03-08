@@ -28,6 +28,7 @@
           <label>
             <span ng-if="vm.linkCopy.type ==='LINK' || !vm.linkCopy.type">Url</span>
             <span ng-if="vm.linkCopy.type ==='FILE'">File Path</span>
+            <span ng-if="vm.linkCopy.type ==='IMG'">Image</span>
             <span ng-if="vm.linkCopy.type ==='COMMAND'">Command</span>
           </label>
           <input type="text"
@@ -36,7 +37,7 @@
                  tabindex="1"
                  aria-label="Path/Url">
         </md-input-container>
-        <md-select ng-if="vm.IS_ELECTRON"
+        <md-select ng-if="vm.types.length > 1"
                    ng-model="vm.linkCopy.type"
                    required="true"
                    tabindex="1"

@@ -29,26 +29,13 @@
     vm.linkCopy = angular.copy(link) || {};
     vm.tasks = Tasks.getTodayAndBacklog();
 
-    vm.types = [
-      { type: 'LINK', title: 'Link (opens in browser)' },
-    ];
-    if (IS_ELECTRON) {
-      vm.types.push({ type: 'FILE', title: 'File (opened by default system app)' });
-      vm.types.push({ type: 'COMMAND', title: 'Command (custom shell command)' });
-
-      if (!vm.linkCopy.type) {
-        vm.linkCopy.type = 'LINK';
-      }
-
-    } else {
-      vm.linkCopy.type = 'LINK';
-    }
-
     // displaying [Object object] not fixable at the moment
     // @see: https://github.com/angular/material/issues/2462
     if (task) {
       vm.selectedTask = task;
     }
+
+    setTypes();
 
     vm.saveGlobalLink = () => {
       if (vm.linkCopy.type === 'LINK' && !vm.linkCopy.path.match(/(https?|ftp|file):\/\//)) {
@@ -79,5 +66,28 @@
     vm.getFilteredTasks = (searchText) => {
       return searchText ? $filter('filter')(vm.tasks, searchText, false) : vm.tasks;
     };
+
+    function setTypes() {
+      vm.types = [
+        { type: 'LINK', title: 'Link (opens in browser)' },
+      ];
+
+      if (IS_ELECTRON) {
+        vm.types.push({ type: 'FILE', title: 'File (opened by default system app)' });
+        vm.types.push({ type: 'COMMAND', title: 'Command (custom shell command)' });
+
+        if (!vm.linkCopy.type) {
+          vm.linkCopy.type = 'LINK';
+        }
+
+      } else {
+        vm.linkCopy.type = 'LINK';
+      }
+
+      if (vm.linkCopy && vm.linkCopy.path.match(/(jpg|jpeg|png|gif)$/i)) {
+        vm.types.push({ type: 'IMG', title: 'Image (shown as thumbnail)' });
+        vm.linkCopy.type = 'IMG';
+      }
+    }
   }
 })();
