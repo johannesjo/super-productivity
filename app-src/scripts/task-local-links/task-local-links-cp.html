@@ -1,5 +1,35 @@
 <ul class="attachments">
-  <li ng-repeat="link in $ctrl.localLinks track by $index">
+  <!-- images -->
+  <li ng-repeat="link in $ctrl.localLinks |filter:{type:'IMG'} track by $index"
+      class="thumbnail-box">
+    <img src="{{::link.path}}">
+
+    <div class="status-line">
+      <md-button class="md-icon-button md-raised md-warn trash-button"
+                 ng-click="$ctrl.removeLink($index)"
+                 aria-label="remove link">
+        <ng-md-icon icon="delete_forever"
+                    size="22"></ng-md-icon>
+      </md-button>
+
+      <a external-link
+         class="md-accent"
+         href="{{::link.path}}"
+         type="{{::link.type}}"
+         target="_blank"
+         tabindex="1"
+         draggable="false"
+         aria-label="open global link">
+        <div>
+          <span ng-bind="link.title"></span>
+        </div>
+      </a>
+    </div>
+  </li>
+
+  <!-- non images -->
+  <li ng-repeat="link in $ctrl.localLinks |filter:{type:'!IMG'} track by $index"
+      class="normal-link">
     <a external-link
        class="md-accent"
        href="{{::link.path}}"
@@ -29,7 +59,8 @@
     <md-button class="md-icon-button md-raised md-warn trash-button"
                ng-click="$ctrl.removeLink($index)"
                aria-label="remove link">
-      <ng-md-icon icon="delete_forever" size="22"></ng-md-icon>
+      <ng-md-icon icon="delete_forever"
+                  size="22"></ng-md-icon>
     </md-button>
   </li>
 </ul>

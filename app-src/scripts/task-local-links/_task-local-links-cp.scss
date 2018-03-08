@@ -1,5 +1,4 @@
 task-local-links {
-
   li {
     display: flex;
     flex-wrap: wrap;
@@ -15,5 +14,36 @@ task-local-links {
 
     ng-md-icon {
     }
+  }
+
+  li.thumbnail-box {
+    max-width: 32%;
+    display: block;
+    float: left;
+    margin-bottom: 10px;
+    margin-right: 1%;
+
+    img {
+      max-width: 100%;
+      height: auto;
+    }
+
+    .status-line {
+      white-space: nowrap;
+      overflow: hidden;
+
+      a,
+      .md-button.md-icon-button {
+        display: inline-block;
+        margin-left: 0;
+
+        ng-md-icon {
+        }
+      }
+    }
+  }
+  .thumbnail-box + .normal-link {
+    padding-top: 20px;
+    clear: left;
   }
 }

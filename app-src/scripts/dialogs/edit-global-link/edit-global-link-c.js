@@ -44,7 +44,7 @@
 
       if (isNew) {
         if (vm.selectedTask) {
-          Tasks.addLocalAttachment(vm.selectedTask, link);
+          Tasks.addLocalAttachment(vm.selectedTask, vm.linkCopy);
         } else {
           GlobalLinkList.addItem(vm.linkCopy);
         }
