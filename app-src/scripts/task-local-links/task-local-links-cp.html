@@ -2,7 +2,9 @@
   <!-- images -->
   <li ng-repeat="link in $ctrl.localLinks |filter:{type:'IMG'} track by $index"
       class="thumbnail-box">
-    <img src="{{::link.path}}">
+
+    <img src="{{::link.path}}"
+         enlarge-image="link.path">
 
     <div class="status-line">
       <md-button class="md-icon-button md-raised md-warn trash-button"
