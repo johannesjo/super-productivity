@@ -40,6 +40,15 @@
     vm.backupNow = () => {
       GoogleDriveSync.saveTo();
     };
+    vm.loadRemoteData = () => {
+      GoogleDriveSync.loadFrom()
+        .then((res) => {
+          console.log(res);
+          if (res.backup) {
+            AppStorage.importData(res.backup);
+          }
+        });
+    };
 
     vm.login = () => {
       vm.isLoading = true;

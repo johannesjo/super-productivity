@@ -2,3 +2,9 @@ backup-settings {
   display: block;
   position: relative;
 }
+
+.sync-from-btn {
+  ng-md-icon{
+    transform: rotate(180deg);
+  }
+}

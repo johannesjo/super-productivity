@@ -154,7 +154,7 @@
     }
 
     setupPollingForSavingCurrentState() {
-      this.$interval(() => {
+      this.updateLsInterval = this.$interval(() => {
         this.saveToLs();
       }, this.SAVE_APP_STORAGE_POLL_INTERVAL);
     }
@@ -210,12 +210,19 @@
     importData(data) {
       this.SimpleToast('ERROR', 'If you can see this, something went wrong importing your data.');
 
+      // cancel saving current app data to ls
+      if (this.updateLsInterval) {
+        this.$interval.cancel(this.updateLsInterval);
+      }
+
+      // TODO not working correctly
       _.forOwn(data, (val, key) => {
-        this.saveLsItem(val[key], key);
+        console.log(key, val);
+        //this.saveLsItem(val[key], key);
       });
 
       // reload page completely afterwards
-      window.location.reload(true);
+      //window.location.reload(true);
     }
 
     getProjects() {

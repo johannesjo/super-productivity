@@ -19,21 +19,25 @@
       this.$rootScope = $rootScope;
     }
 
-    getData() {
+    getLocalAppData() {
       return this.AppStorage.getCompleteBackupData();
     }
 
     saveTo() {
-      return this.GoogleApi.saveFile({
+      return this.GoogleApi.saveFile(this.getLocalAppData(), {
         title: SYNC_FILE_NAME,
         id: this.$rootScope.r.googleDriveSync.backupDocId,
         editable: true
-      }, this.getData())
+      })
         .then((res) => {
           if (res && res.data) {
             this.$rootScope.r.googleDriveSync.backupDocId = res.data.id;
           }
         });
+    }
+
+    loadFrom() {
+      return this.GoogleApi.loadFile(this.$rootScope.r.googleDriveSync.backupDocId);
     }
   }
 

@@ -63,6 +63,12 @@
       <ng-md-icon icon="backup"></ng-md-icon>
       Save Backup now
     </md-button>
+    <md-button class="md-raised md-primary sync-from-btn"
+               ng-show="vm.isLoggedIn"
+               ng-click="vm.loadRemoteData()">
+      <ng-md-icon icon="backup"></ng-md-icon>
+      Load from Google Drive
+    </md-button>
   </div>
 
   <div>
@@ -83,9 +89,11 @@
       Auto sync from remote
     </md-switch>
   </div>
+  <!-- todo add sync doc id -->
+
   <md-input-container class="md-block md-icon-float"
                       ng-show="vm.settings.googleDriveSync.isAutoSyncToRemote || vm.settings.googleDriveSync.isAutoSyncFromRemote">
-    <label>Remind when I worked longer than X without a break</label>
+    <label>Sync interval (sync every x)</label>
     <ng-md-icon icon="timer"
                 aria-label="timer"></ng-md-icon>
     <input type="text"
