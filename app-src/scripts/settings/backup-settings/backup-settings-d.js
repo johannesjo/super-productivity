@@ -44,13 +44,7 @@
         });
     };
     vm.loadRemoteData = () => {
-      return GoogleDriveSync.loadFrom()
-        .then((res) => {
-          console.log(res);
-          if (res.backup) {
-            AppStorage.importData(res.backup);
-          }
-        });
+      return GoogleDriveSync.loadFrom();
     };
 
     vm.login = () => {
