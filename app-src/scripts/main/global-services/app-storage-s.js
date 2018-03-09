@@ -124,13 +124,17 @@
       }
     }
 
-    saveToFileSystem(fs, path, cb, isSync) {
+    getCompleteBackupData() {
       const data = angular.copy(this.getCurrentAppState());
-
       // also add projects data
       data[this.PROJECTS_KEY] = this.getProjects();
       // also add backlog tasks
       data[this.DONE_BACKLOG_TASKS_KEY] = this.getDoneBacklogTasks();
+      return data;
+    }
+
+    saveToFileSystem(fs, path, cb, isSync) {
+      const data = this.getCompleteBackupData();
 
       fs.writeFile(path, JSON.stringify(data), function(err) {
         if (err) {

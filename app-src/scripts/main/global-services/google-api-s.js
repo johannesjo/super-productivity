@@ -285,7 +285,7 @@
         });
     };
 
-    saveFile(metadata, content) {
+    saveFile(metadata = {}, content) {
       //window.gapi.client.setApiKey(this.GOOGLE.API_KEY);
 
       if (!angular.isString(content)) {
@@ -303,16 +303,19 @@
         method = 'POST';
       }
 
+      if (!metadata.mimeType) {
+        metadata.mimeType = 'application/json';
+      }
+
       const multipart = new MultiPartBuilder()
         .append('application/json', JSON.stringify(metadata))
-        //.append(metadata.mimeType, content)
-        .append('application/json', content)
+        .append(metadata.mimeType, content)
         .finish();
 
       return this.$http({
         method: method,
         url: `https://content.googleapis.com/upload/drive/v2/files/`,
-        //url: `https://content.googleapis.com/${path}`,
+        url: `https://content.googleapis.com${path}`,
         params: {
           'key': this.GOOGLE.API_KEY,
           uploadType: 'multipart',

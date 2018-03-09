@@ -27,7 +27,7 @@
   }
 
   /* @ngInject */
-  function BackupSettingsCtrl(AppStorage, IS_ELECTRON, GoogleApi) {
+  function BackupSettingsCtrl(AppStorage, IS_ELECTRON, GoogleApi, GoogleDriveSync) {
     let vm = this;
     vm.IS_ELECTRON = IS_ELECTRON;
 
@@ -37,15 +37,8 @@
       AppStorage.importData(settings);
     };
 
-    vm.test = () => {
-      GoogleApi.saveFile({
-        title: 'SUPER_PRODUCTIVITY_SYNC.json',
-        id: null,
-        editable: true
-      }, {
-        test: 'DDDDDDDDDDDDDDDDDDDDDDDDD'
-      })
-        .then((res) => console.log(res));
+    vm.backupNow = () => {
+      GoogleDriveSync.saveTo();
     };
 
     vm.login = () => {

@@ -22,7 +22,9 @@
       'keys',
       'isShowWelcomeDialog',
       'config',
-      'keys'
+      'keys',
+      'googleDriveSync',
+      'googleTokens'
     ])
     .constant('ON_DEMAND_LS_FIELDS', [
       'doneBacklogTasks',
@@ -82,6 +84,11 @@
         refreshToken: undefined,
         expiresAt: undefined
       },
+      googleDriveSync: {
+        backupDocId: undefined,
+        lastLocalUpdate: undefined,
+        lastSyncToRemote: undefined,
+      },
       tasks: [],
       backlogTasks: [],
       doneBacklogTasks: [],
@@ -124,6 +131,12 @@
         togglePlay: 'y',
       },
       config: {
+        googleDriveSync: {
+          isAutoLogin: undefined,
+          isAutoSyncToRemote: false,
+          isAutoSyncFromRemote: false,
+          syncInterval: moment.duration(1, 'minutes'),
+        },
         automaticBackups: {
           isEnabled: false,
           path: '~/backup-{date}.json',
