@@ -16,6 +16,56 @@
 
   const DEFAULT_FIELDS_FOR_DRIVE = 'id,title,mimeType,userPermission,editable,copyable,shared,fileSize';
 
+  /**
+   * Helper for building multipart requests for uploading to Drive.
+   */
+  const MultiPartBuilder = function() {
+    this.boundary = Math.random().toString(36).slice(2);
+    this.mimeType = 'multipart/mixed; boundary="' + this.boundary + '"';
+    this.parts = [];
+    this.body = null;
+  };
+
+  /**
+   * Appends a part.
+   *
+   * @param {String} mimeType Content type of this part
+   * @param {Blob|File|String} content Body of this part
+   */
+  MultiPartBuilder.prototype.append = function(mimeType, content) {
+    if (this.body !== null) {
+      throw new Error('Builder has already been finalized.');
+    }
+    this.parts.push(
+      '\r\n--', this.boundary, '\r\n',
+      'Content-Type: ', mimeType, '\r\n\r\n',
+      content);
+    return this;
+  };
+
+  /**
+   * Finalizes building of the multipart request and returns a Blob containing
+   * the request. Once finalized, appending additional parts will result in an
+   * error.
+   *
+   * @returns {Object} Object containing the mime type (mimeType) & assembled multipart body (body)
+   */
+  MultiPartBuilder.prototype.finish = function() {
+    if (this.parts.length === 0) {
+      throw new Error('No parts have been added.');
+    }
+    if (this.body === null) {
+      this.parts.push('\r\n--', this.boundary, '--');
+      this.body = this.parts.join('');
+      // TODO - switch to blob once gapi.client.request allows it
+      // this.body = new Blob(this.parts, {type: this.mimeType});
+    }
+    return {
+      type: this.mimeType,
+      body: this.body
+    };
+  };
+
   class GoogleApi {
     /* @ngInject */
     constructor(GOOGLE, $q, IS_ELECTRON, $http, $rootScope, SimpleToast, $log) {
@@ -155,8 +205,20 @@
     }
 
     handleError(err) {
-      this.$log(err);
-      this.SimpleToast('ERROR', 'GoogleApi Error');
+      let errStr = '';
+
+      if (typeof err === 'string') {
+        errStr = err;
+      } else if (err && err.data && err.data.error) {
+        errStr = err.data.error.message;
+      }
+
+      if (errStr) {
+        errStr = ': ' + errStr;
+      }
+
+      this.$log.error(err);
+      this.SimpleToast('ERROR', 'GoogleApi Error' + errStr);
       return this.$q.reject();
     }
 
@@ -207,12 +269,9 @@
               lastRow: range.values[range.values.length - 1],
             });
           } else {
-            console.log('No data found.');
             defer.reject('No data found');
+            this.handleError('No data found');
           }
-        }, (response) => {
-          console.log('Error: ' + response.result.error.message);
-          defer.reject(response.result.error);
         }).catch(this.handleError.bind(this));
 
       return defer.promise;
@@ -310,55 +369,5 @@
 
   // hacky fix for ff
   GoogleApi.$$ngIsClass = true;
-
-  /**
-   * Helper for building multipart requests for uploading to Drive.
-   */
-  const MultiPartBuilder = function() {
-    this.boundary = Math.random().toString(36).slice(2);
-    this.mimeType = 'multipart/mixed; boundary="' + this.boundary + '"';
-    this.parts = [];
-    this.body = null;
-  };
-
-  /**
-   * Appends a part.
-   *
-   * @param {String} mimeType Content type of this part
-   * @param {Blob|File|String} content Body of this part
-   */
-  MultiPartBuilder.prototype.append = function(mimeType, content) {
-    if (this.body !== null) {
-      throw new Error('Builder has already been finalized.');
-    }
-    this.parts.push(
-      '\r\n--', this.boundary, '\r\n',
-      'Content-Type: ', mimeType, '\r\n\r\n',
-      content);
-    return this;
-  };
-
-  /**
-   * Finalizes building of the multipart request and returns a Blob containing
-   * the request. Once finalized, appending additional parts will result in an
-   * error.
-   *
-   * @returns {Object} Object containing the mime type (mimeType) & assembled multipart body (body)
-   */
-  MultiPartBuilder.prototype.finish = function() {
-    if (this.parts.length === 0) {
-      throw new Error('No parts have been added.');
-    }
-    if (this.body === null) {
-      this.parts.push('\r\n--', this.boundary, '--');
-      this.body = this.parts.join('');
-      // TODO - switch to blob once gapi.client.request allows it
-      // this.body = new Blob(this.parts, {type: this.mimeType});
-    }
-    return {
-      type: this.mimeType,
-      body: this.body
-    };
-  };
 })();
 
