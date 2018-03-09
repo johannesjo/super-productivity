@@ -1,8 +1,15 @@
 task-local-links {
+  ul {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
   li {
     display: flex;
     flex-wrap: wrap;
     flex-direction: row;
+    width: 100%;
   }
 
   .md-button.md-icon-button {
@@ -17,11 +24,15 @@ task-local-links {
   }
 
   li.thumbnail-box {
-    max-width: 32%;
+    // width: calc(98% / 3);
+    width: 32.666666666%;
     display: block;
-    float: left;
     margin-bottom: 10px;
     margin-right: 1%;
+
+    &:nth-of-type(3n) {
+      margin-right: 0;
+    }
 
     img {
       max-width: 100%;

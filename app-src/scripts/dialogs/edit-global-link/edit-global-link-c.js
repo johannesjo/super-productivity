@@ -16,7 +16,7 @@
     .controller('EditGlobalLinkCtrl', EditGlobalLinkCtrl);
 
   /* @ngInject */
-  function EditGlobalLinkCtrl($mdDialog, theme, link, isNew, task, Tasks, GlobalLinkList, $filter, IS_ELECTRON) {
+  function EditGlobalLinkCtrl($mdDialog, theme, link, isNew, task, Tasks, GlobalLinkList, $filter, Uid, IS_ELECTRON) {
     let vm = this;
 
     vm.editOrAddStr = isNew ? 'Add' : 'Edit';
@@ -40,6 +40,11 @@
     vm.saveGlobalLink = () => {
       if (vm.linkCopy.type === 'LINK' && !vm.linkCopy.path.match(/(https?|ftp|file):\/\//)) {
         vm.linkCopy.path = 'http://' + vm.linkCopy.path;
+      }
+
+      if (!vm.linkCopy.id) {
+        // needed to make them uniquely distinguishable
+        vm.linkCopy.id = Uid();
       }
 
       if (isNew) {

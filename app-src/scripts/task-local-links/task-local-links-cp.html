@@ -8,7 +8,7 @@
 
     <div class="status-line">
       <md-button class="md-icon-button md-raised md-warn trash-button"
-                 ng-click="$ctrl.removeLink($index)"
+                 ng-click="$ctrl.removeLink(link)"
                  aria-label="remove link">
         <ng-md-icon icon="delete_forever"
                     size="22"></ng-md-icon>
@@ -59,7 +59,7 @@
     </a>
 
     <md-button class="md-icon-button md-raised md-warn trash-button"
-               ng-click="$ctrl.removeLink($index)"
+               ng-click="$ctrl.removeLink(link)"
                aria-label="remove link">
       <ng-md-icon icon="delete_forever"
                   size="22"></ng-md-icon>
