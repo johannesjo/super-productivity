@@ -215,14 +215,12 @@
         this.$interval.cancel(this.updateLsInterval);
       }
 
-      // TODO not working correctly
       _.forOwn(data, (val, key) => {
-        console.log(key, val);
-        //this.saveLsItem(val[key], key);
+        this.saveLsItem(val, key);
       });
 
       // reload page completely afterwards
-      //window.location.reload(true);
+      window.location.reload(true);
     }
 
     getProjects() {
