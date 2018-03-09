@@ -33,6 +33,36 @@
   Import Settings
 </md-button>
 
+<section>
+  <h3 class="md-caption">Sync via Google Drive</h3>
+  <div>
+    <md-button class="md-raised md-primary"
+               ng-show="!vm.isLoggedIn"
+               ng-click="vm.login()">Login
+    </md-button>
+    <md-button class="md-raised md-primary"
+               ng-show="vm.isLoggedIn"
+               ng-click="vm.logout()">Logout
+    </md-button>
+    <md-button class="md-raised md-primary"
+               ng-show="vm.isLoggedIn"
+               external-link
+               target="_blank"
+               href="https://myaccount.google.com/permissions">Revoke permissions
+    </md-button>
+    <md-button class="md-raised md-primary"
+               ng-show="vm.isLoggedIn"
+               ng-click="vm.test()">TEST
+    </md-button>
+  </div>
+  <div>
+    <md-switch ng-model="vm.settings.isAutoStartNextTask"
+               aria-label="Auto sync tasks">
+      Auto sync tasks
+    </md-switch>
+  </div>
+</section>
+
 
 <form ng-if="vm.showUploadForm"
       ng-submit="vm.importSettings(vm.uploadSettingsTextarea)">
@@ -86,7 +116,8 @@
     </md-switch>
   </div>
 
-  <p><strong>NOTE:</strong> This is <strong>a highly experimental feature!!!</strong> Take care! Make a backup! Changes to the sync settings require you to restart the application to take effect.
+  <p><strong>NOTE:</strong> This is
+    <strong>a highly experimental feature!!!</strong> Take care! Make a backup! Changes to the sync settings require you to restart the application to take effect.
   </p>
 
   <div ng-show="vm.settings.isSyncEnabled">

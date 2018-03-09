@@ -7,20 +7,75 @@
  */
 (() => {
   'use strict';
+  'use strict';
+
+  /**
+   * Helper for building multipart requests for uploading to Drive.
+   */
+  var MultiPartBuilder = function() {
+    this.boundary = Math.random().toString(36).slice(2);
+    this.mimeType = 'multipart/mixed; boundary="' + this.boundary + '"';
+    this.parts = [];
+    this.body = null;
+  };
+
+  /**
+   * Appends a part.
+   *
+   * @param {String} mimeType Content type of this part
+   * @param {Blob|File|String} content Body of this part
+   */
+  MultiPartBuilder.prototype.append = function(mimeType, content) {
+    if (this.body !== null) {
+      throw new Error("Builder has already been finalized.");
+    }
+    this.parts.push(
+      "\r\n--", this.boundary, "\r\n",
+      "Content-Type: ", mimeType, "\r\n\r\n",
+      content);
+    return this;
+  };
+
+  /**
+   * Finalizes building of the multipart request and returns a Blob containing
+   * the request. Once finalized, appending additional parts will result in an
+   * error.
+   *
+   * @returns {Object} Object containing the mime type (mimeType) & assembled multipart body (body)
+   */
+  MultiPartBuilder.prototype.finish = function() {
+    if (this.parts.length === 0) {
+      throw new Error("No parts have been added.");
+    }
+    if (this.body === null) {
+      this.parts.push("\r\n--", this.boundary, "--");
+      this.body = this.parts.join('');
+      // TODO - switch to blob once gapi.client.request allows it
+      // this.body = new Blob(this.parts, {type: this.mimeType});
+    }
+    return {
+      type: this.mimeType,
+      body: this.body
+    };
+  };
 
   const DISCOVERY_DOCS = ['https://sheets.googleapis.com/$discovery/rest?version=v4'];
   const SCOPES = '' +
     'https://www.googleapis.com/auth/spreadsheets.readonly' +
+    ' https://www.googleapis.com/auth/drive.install' +
     ' https://www.googleapis.com/auth/drive';
+
+  const DEFAULT_FIELDS_FOR_DRIVE = 'id,title,mimeType,userPermission,editable,copyable,shared,fileSize';
 
   class GoogleApi {
     /* @ngInject */
-    constructor(GOOGLE, $q, IS_ELECTRON, $http, $rootScope) {
+    constructor(GOOGLE, $q, IS_ELECTRON, $http, $rootScope, $cacheFactory) {
       this.$q = $q;
       this.$http = $http;
       this.$rootScope = $rootScope;
       this.GOOGLE = GOOGLE;
       this.IS_ELECTRON = IS_ELECTRON;
+      this.cache = $cacheFactory('files');
     }
 
     initClientLibraryIfNotDone() {
@@ -206,6 +261,70 @@
         });
 
       return defer.promise;
+    }
+
+    loadFile(fileId) {
+      const file = this.cache.get(fileId);
+      if (file) {
+        return this.$q.when(file);
+      }
+      const metadataRequest = window.gapi.client.drive.files.get({
+        fileId: fileId,
+        supportsTeamDrives: true,
+        fields: DEFAULT_FIELDS_FOR_DRIVE
+      });
+      const contentRequest = window.gapi.client.drive.files.get({
+        fileId: fileId,
+        supportsTeamDrives: true,
+        alt: 'media'
+      });
+      return this.$q.all([this.$q.when(metadataRequest), this.$q.when(contentRequest)])
+        .then(function(responses) {
+          console.log(responses);
+          //return combineAndStoreResults(responses[0].result, responses[1].body);
+        });
+    };
+
+    saveFile(metadata, content) {
+      //window.gapi.client.setApiKey(this.GOOGLE.API_KEY);
+
+      if (!angular.isString(content)) {
+        content = JSON.stringify(content);
+      }
+
+      let path;
+      let method;
+
+      if (metadata.id) {
+        path = '/upload/drive/v2/files/' + encodeURIComponent(metadata.id);
+        method = 'PUT';
+      } else {
+        path = '/upload/drive/v2/files/';
+        method = 'POST';
+      }
+
+      const multipart = new MultiPartBuilder()
+        .append('application/json', JSON.stringify(metadata))
+        //.append(metadata.mimeType, content)
+        .append('application/json', content)
+        .finish();
+
+      return this.$http({
+        method: method,
+        url: `https://content.googleapis.com/upload/drive/v2/files/`,
+        //url: `https://content.googleapis.com/${path}`,
+        params: {
+          'key': this.GOOGLE.API_KEY,
+          uploadType: 'multipart',
+          supportsTeamDrives: true,
+          fields: DEFAULT_FIELDS_FOR_DRIVE
+        },
+        headers: {
+          'Authorization': `Bearer ${this.accessToken}`,
+          'Content-Type': multipart.type
+        },
+        data: multipart.body
+      });
     }
   }
 
