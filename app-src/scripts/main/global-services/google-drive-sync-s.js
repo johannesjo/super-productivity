@@ -30,14 +30,36 @@
       if (this.config.isAutoSync) {
 
       }
-      if (this.config.isLoadRemoteDataOnStartup) {
 
+      if (this.config.isLoadRemoteDataOnStartup) {
+        this.GoogleApi.getFileInfo(this.data.backupDocId)
+          .then((res) => {
+            const lastModifiedRemote = res.data.modifiedDate;
+            console.log(lastModifiedRemote, this.data.lastLocalUpdate);
+
+            if (this._isNewerThan(lastModifiedRemote, this.data.lastLocalUpdate)) {
+              console.log('GoogleDriveSync: HAS CHANGED, TRYING TO UPDATE');
+              const lastActiveTime = this.$rootScope.r.lastActiveTime;
+              const isSkipConfirm = this._isNewerThan(lastModifiedRemote, lastActiveTime);
+              console.log('GoogleDriveSync: Skipping Dialog', isSkipConfirm);
+              this.loadFrom(isSkipConfirm);
+            }
+          });
       }
     }
 
     _import(loadRes) {
-      this.data.lastLocalUpdate = loadRes.meta.modifiedDate;
-      this.AppStorage.importData(loadRes.backup);
+      const backupData = loadRes.backup;
+      const metaData = loadRes.meta;
+
+      // we also need to update the backup to persist it also after the import
+      backupData.googleDriveSync.lastLocalUpdate = this.data.lastLocalUpdate = metaData.modifiedDate;
+      // and we also need to update last sync to remote, as it kind of happened now
+      backupData.googleDriveSync.lastSyncToRemote = this.data.lastSyncToRemote = metaData.modifiedDate;
+      // also needs to be set to prevent double upgrades
+      backupData.lastActiveTime = new Date();
+
+      this.AppStorage.importData(backupData);
     }
 
     _isNewerThan(strDate1, strDate2) {
@@ -56,7 +78,7 @@
     }
 
     _formatDate(date) {
-      return window.moment(date).format('DD-MM-YYYY hh:mm:ss')
+      return window.moment(date).format('DD-MM-YYYY hh:mm:ss');
     }
 
     _confirmSaveDialog(remoteModified) {
@@ -64,20 +86,20 @@
         .title('Overwrite unsaved data on Google Drive?')
         .textContent(`
         There seem to be some changes on Google Drive, that you don\'t have locally. Do you want to overwrite them anyway? 
-        \nRemote data last saved change: ${this._formatDate(remoteModified)}; 
-        \nLast sync to remote from this app instance: ${this._formatDate(this.data.lastSyncToRemote)}.`)
+        -- Last modification of remote data: ${this._formatDate(remoteModified)} 
+        -- Last sync to remote from this app instance: ${this._formatDate(this.data.lastSyncToRemote)}.`)
         .ok('Please do it!')
         .cancel('No');
 
       return this.$mdDialog.show(confirm);
     }
 
-    _confirmLoadDialog(remoteChanged) {
+    _confirmLoadDialog(remoteModified) {
       const confirm = this.$mdDialog.confirm()
-        .title('Overwrite unsaved local changes?')
+        .title('Update from Google Drive Backup')
         .textContent(`
-        All data will be lost forever. 
-        Last modification of remote data: ${this._formatDate(remoteChanged)}`)
+        Overwrite unsaved local changes? All data will be lost forever. 
+        -- Last modification of remote data: ${this._formatDate(remoteModified)}`)
         .ok('Please do it!')
         .cancel('No');
 
@@ -105,6 +127,14 @@
         .then((res) => {
           return this.$q.when(res);
         });
+    }
+
+    initAutoSyncInterval() {
+
+    }
+
+    cancelAutoSyncInterval() {
+
     }
 
     saveTo() {

@@ -49,7 +49,7 @@
     .run(initElectronErrorHandling)
     .run(sendAppReadyToElectron)
     .run(preventMultipleInstances)
-    .run(setStartedTime)
+    .run(setStartedTimes)
     .run(checkIfLatestVersion)
     .run(showWelcomeDialog)
   //.run(goToWorkViewIfTasks);
@@ -301,9 +301,13 @@
     });
   }
 
-  function setStartedTime($rootScope, $timeout) {
+  function setStartedTimes($rootScope, $timeout) {
     $timeout(() => {
+
       const moment = window.moment;
+      const now = moment();
+
+      // set started time today as used by the time sheet export
       const startedTime = $rootScope.r.startedTimeToday;
 
       if (startedTime && moment(startedTime).isSame(moment(), 'day')) {
@@ -311,7 +315,7 @@
         $rootScope.r.startedTimeToday = moment(startedTime);
       } else {
         // set to now
-        $rootScope.r.startedTimeToday = moment();
+        $rootScope.r.startedTimeToday = now;
       }
     });
   }

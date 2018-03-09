@@ -24,7 +24,8 @@
       'config',
       'keys',
       'googleDriveSync',
-      'googleTokens'
+      'googleTokens',
+      'lastActiveTime',
     ])
     .constant('ON_DEMAND_LS_FIELDS', [
       'doneBacklogTasks',
@@ -68,6 +69,7 @@
       theme: undefined,
       currentTask: undefined,
       lastActiveTaskTask: undefined,
+      lastActiveTime: undefined,
       startedTimeToday: undefined,
       currentProject: undefined,
       currentSession: {

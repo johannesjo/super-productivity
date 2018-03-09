@@ -42,6 +42,7 @@
 
     initUnloadSave() {
       window.onbeforeunload = window.onunload = () => {
+        this.$rootScope.r.lastActiveTime = new Date();
         this.saveToLs();
       };
     }
