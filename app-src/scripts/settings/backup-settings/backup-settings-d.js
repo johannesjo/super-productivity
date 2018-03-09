@@ -54,23 +54,14 @@
     };
 
     vm.login = () => {
-      vm.isLoading = true;
-
-      return GoogleApi.login()
-        .then(() => {
-          vm.isLoggedIn = true;
-          vm.isLoading = false;
-        });
+      return GoogleApi.login();
     };
 
     vm.logout = () => {
-      vm.isLoading = true;
-      return GoogleApi.logout()
-        .then(() => {
-          vm.isLoggedIn = false;
-          vm.isLoading = false;
-        });
+      return GoogleApi.logout();
     };
+
+    vm.GoogleApi = GoogleApi;
   }
 
 })();

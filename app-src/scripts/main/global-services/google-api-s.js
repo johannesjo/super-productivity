@@ -88,6 +88,7 @@
 
       if (this.$rootScope.r.googleTokens.accessToken && !isExpired) {
         this.accessToken = this.$rootScope.r.googleTokens.accessToken;
+        this.isLoggedIn = true;
         return new Promise((resolve) => resolve());
       }
 
@@ -99,6 +100,7 @@
             this.accessToken = token;
             this.$rootScope.r.googleTokens.accessToken = this.accessToken;
             //this.$rootScope.r.googleTokens.refreshToken = data.refresh_token;
+            this.isLoggedIn = true;
             resolve();
             // TODO remove
             // mainWindow.webContents.removeListener('did-finish-load', handler);
@@ -109,11 +111,13 @@
         return this.initClientLibraryIfNotDone()
           .then((user) => {
             if (user && user.Zi && user.Zi.access_token) {
+              this.isLoggedIn = true;
               this.saveToken(user);
             } else {
               return window.gapi.auth2.getAuthInstance().signIn()
                 .then((res) => {
                   console.log(res);
+                  this.isLoggedIn = true;
                   this.saveToken(res);
                 });
             }
@@ -131,6 +135,8 @@
     }
 
     logout() {
+      this.isLoggedIn = false;
+
       if (this.IS_ELECTRON) {
         this.accessToken = undefined;
         this.$rootScope.r.googleTokens.accessToken = undefined;
@@ -138,12 +144,18 @@
           resolve();
         });
       } else {
-        return window.gapi.auth2.getAuthInstance().signOut();
+        if (window.gapi) {
+          return window.gapi.auth2.getAuthInstance().signOut();
+        } else {
+          return new Promise((resolve) => {
+            resolve();
+          });
+        }
       }
     }
 
     handleError(err) {
-      console.log(err);
+      this.$log(err);
       this.SimpleToast('ERROR', 'GoogleApi Error');
       return this.$q.reject();
     }

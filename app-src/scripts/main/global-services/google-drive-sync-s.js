@@ -13,10 +13,17 @@
 
   class GoogleDriveSync {
     /* @ngInject */
-    constructor(AppStorage, GoogleApi, $rootScope) {
+    constructor(AppStorage, GoogleApi, $rootScope, SimpleToast, $q) {
       this.AppStorage = AppStorage;
       this.GoogleApi = GoogleApi;
       this.$rootScope = $rootScope;
+      this.SimpleToast = SimpleToast;
+      this.$q = $q;
+
+      if (this.$rootScope.r.config.googleDriveSync.isAutoLogin) {
+        GoogleApi.login();
+      }
+
     }
 
     getLocalAppData() {
@@ -37,7 +44,11 @@
     }
 
     loadFrom() {
-      return this.GoogleApi.loadFile(this.$rootScope.r.googleDriveSync.backupDocId);
+      return this.GoogleApi.loadFile(this.$rootScope.r.googleDriveSync.backupDocId)
+        .then((res) => {
+          console.log(res);
+          return this.$q.when(res);
+        });
     }
   }
 

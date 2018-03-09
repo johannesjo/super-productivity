@@ -39,20 +39,20 @@
   <div>
     <md-button class="md-raised md-primary"
                promise-btn
-               ng-show="!vm.isLoggedIn"
+               ng-show="!vm.GoogleApi.isLoggedIn"
                ng-click="vm.login()">
       <ng-md-icon icon="login"></ng-md-icon>
       Login
     </md-button>
     <md-button class="md-raised md-primary"
-               ng-show="vm.isLoggedIn"
+               ng-show="vm.GoogleApi.isLoggedIn"
                ng-click="vm.logout()">
       <ng-md-icon icon="logout"></ng-md-icon>
       Logout
     </md-button>
 
     <md-button class="md-raised md-primary"
-               ng-show="vm.isLoggedIn"
+               ng-show="vm.GoogleApi.isLoggedIn"
                external-link
                target="_blank"
                href="https://myaccount.google.com/permissions">
@@ -61,14 +61,14 @@
     </md-button>
     <md-button class="md-raised md-primary"
                promise-btn
-               ng-show="vm.isLoggedIn"
+               ng-show="vm.GoogleApi.isLoggedIn"
                ng-click="vm.backupNow()">
       <ng-md-icon icon="backup"></ng-md-icon>
       Save Backup now
     </md-button>
     <md-button class="md-raised md-primary sync-from-btn"
                promise-btn
-               ng-show="vm.isLoggedIn"
+               ng-show="vm.GoogleApi.isLoggedIn"
                ng-click="vm.loadRemoteData()">
       <ng-md-icon icon="backup"></ng-md-icon>
       Load from Google Drive
