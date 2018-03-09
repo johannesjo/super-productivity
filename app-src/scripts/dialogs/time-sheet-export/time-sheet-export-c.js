@@ -18,6 +18,7 @@
     let vm = this;
     vm.theme = theme;
     vm.opts = $rootScope.r.uiHelper.timeSheetExportSettings;
+    vm.GoogleApi = GoogleApi;
     vm.actualValues = [];
 
     vm.roundTimeOptions = [
@@ -53,7 +54,7 @@
 
     vm.logout = () => {
       vm.isLoading = true;
-      GoogleApi.logout()
+      return GoogleApi.logout()
         .then(() => {
           vm.isLoggedIn = false;
           vm.isLoading = false;

@@ -103,14 +103,17 @@
 
         <div>
           <md-button class="md-raised md-primary"
+                     promise-btn
                      ng-show="!vm.isLoggedIn"
                      ng-click="vm.login()">Login
           </md-button>
           <md-button class="md-raised md-primary"
+                     promise-btn
                      ng-show="vm.isLoggedIn"
                      ng-click="vm.logout()">Logout
           </md-button>
           <md-button class="md-raised md-primary"
+                     promise-btn
                      ng-disabled="!vm.opts.spreadsheetId"
                      ng-show="vm.isLoggedIn"
                      ng-click="vm.readSpreadsheet()">Read spreadsheet
@@ -193,7 +196,8 @@
       <md-button ng-click="vm.save()"
                  ng-show="vm.actualValues.length > 0 && vm.isLoggedIn"
                  type="button"
-                 class="md-raised md-primary">
+                 class="md-raised md-primary"
+                 promise-btn>
         <ng-md-icon icon="save"></ng-md-icon>
         Save row
       </md-button>
