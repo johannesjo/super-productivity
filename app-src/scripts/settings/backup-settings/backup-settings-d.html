@@ -17,6 +17,7 @@
   </section>
 </help-section>
 
+<h3 class="md-caption">File import/export</h3>
 <a class="md-raised md-button md-ink-ripple"
    type="button"
    download-backup>
@@ -37,6 +38,7 @@
   <h3 class="md-caption">Sync via Google Drive</h3>
   <div>
     <md-button class="md-raised md-primary"
+               promise-btn
                ng-show="!vm.isLoggedIn"
                ng-click="vm.login()">
       <ng-md-icon icon="login"></ng-md-icon>
@@ -58,12 +60,14 @@
       Revoke permissions
     </md-button>
     <md-button class="md-raised md-primary"
+               promise-btn
                ng-show="vm.isLoggedIn"
                ng-click="vm.backupNow()">
       <ng-md-icon icon="backup"></ng-md-icon>
       Save Backup now
     </md-button>
     <md-button class="md-raised md-primary sync-from-btn"
+               promise-btn
                ng-show="vm.isLoggedIn"
                ng-click="vm.loadRemoteData()">
       <ng-md-icon icon="backup"></ng-md-icon>

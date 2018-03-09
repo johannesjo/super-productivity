@@ -27,7 +27,7 @@
   }
 
   /* @ngInject */
-  function BackupSettingsCtrl(AppStorage, IS_ELECTRON, GoogleApi, GoogleDriveSync) {
+  function BackupSettingsCtrl(AppStorage, IS_ELECTRON, GoogleApi, GoogleDriveSync, SimpleToast) {
     let vm = this;
     vm.IS_ELECTRON = IS_ELECTRON;
 
@@ -38,10 +38,13 @@
     };
 
     vm.backupNow = () => {
-      GoogleDriveSync.saveTo();
+      return GoogleDriveSync.saveTo()
+        .then(() => {
+          SimpleToast('SUCCESS', 'Google Drive: Successfully saved backup');
+        });
     };
     vm.loadRemoteData = () => {
-      GoogleDriveSync.loadFrom()
+      return GoogleDriveSync.loadFrom()
         .then((res) => {
           console.log(res);
           if (res.backup) {
@@ -52,6 +55,7 @@
 
     vm.login = () => {
       vm.isLoading = true;
+
       return GoogleApi.login()
         .then(() => {
           vm.isLoggedIn = true;
@@ -61,7 +65,7 @@
 
     vm.logout = () => {
       vm.isLoading = true;
-      GoogleApi.logout()
+      return GoogleApi.logout()
         .then(() => {
           vm.isLoggedIn = false;
           vm.isLoading = false;

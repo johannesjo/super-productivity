@@ -31,11 +31,13 @@
       'as.sortable',
       'angularMoment',
       'hc.marked',
-      'mwl.calendar'
+      'mwl.calendar',
+      'angularPromiseButtons'
     ])
     .config(configMdTheme)
     .config(configMarked)
     .config(fixUnhandledRejectionError)
+    .config(configPromiseButtons)
     .run(initGlobalModels)
     .run(initPollJiraTaskUpdates)
     .run(initPollGitTaskUpdates)
@@ -50,7 +52,18 @@
     .run(setStartedTime)
     .run(checkIfLatestVersion)
     .run(showWelcomeDialog)
-    //.run(goToWorkViewIfTasks);
+  //.run(goToWorkViewIfTasks);
+
+  /* @ngInject */
+  function configPromiseButtons(angularPromiseButtonsProvider) {
+    angularPromiseButtonsProvider.extendConfig({
+      spinnerTpl: '<div class="btn-spinner"></div>',
+      disableBtn: true,
+      btnLoadingClass: 'is-loading',
+      minDuration: 100,
+      priority: 100
+    });
+  }
 
   /* @ngInject */
   function configMarked(markedProvider) {
