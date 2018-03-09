@@ -132,9 +132,9 @@
       },
       config: {
         googleDriveSync: {
-          isAutoLogin: undefined,
-          isAutoSyncToRemote: false,
-          isAutoSyncFromRemote: false,
+          isAutoLogin: false,
+          isLoadRemoteDataOnStartup: false,
+          isAutoSync: false,
           syncInterval: moment.duration(1, 'minutes'),
         },
         automaticBackups: {

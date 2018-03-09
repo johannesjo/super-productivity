@@ -226,7 +226,8 @@
         this.saveLsItem(val, key);
       });
 
-      // reload page completely afterwards
+      // unset handlers for unload to prevent current app state from overwriting the imports
+      window.onbeforeunload = window.onunload = undefined;
       window.location.reload(true);
     }
 

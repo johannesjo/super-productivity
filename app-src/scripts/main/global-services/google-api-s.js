@@ -14,7 +14,7 @@
     ' https://www.googleapis.com/auth/drive.install' +
     ' https://www.googleapis.com/auth/drive';
 
-  const DEFAULT_FIELDS_FOR_DRIVE = 'id,title,mimeType,userPermission,editable,copyable,shared,fileSize';
+  const DEFAULT_FIELDS_FOR_DRIVE = 'id,title,mimeType,userPermission,editable,modifiedDate,shared,createdDate,fileSize';
 
   /**
    * Helper for building multipart requests for uploading to Drive.
@@ -277,13 +277,13 @@
       return defer.promise;
     }
 
-    loadFile(fileId) {
+    getFileInfo(fileId) {
       if (!fileId) {
         this.SimpleToast('ERROR', 'GoogleApi: No file id specified');
         return this.$q.reject('No file id given');
       }
 
-      const metaData = this.$http({
+      return this.$http({
         method: 'GET',
         url: `https://content.googleapis.com/drive/v2/files/${encodeURIComponent(fileId)}`,
         params: {
@@ -295,8 +295,16 @@
           'Authorization': `Bearer ${this.accessToken}`,
         },
       });
+    }
 
-      const fileData = this.$http({
+    loadFile(fileId) {
+      if (!fileId) {
+        this.SimpleToast('ERROR', 'GoogleApi: No file id specified');
+        return this.$q.reject('No file id given');
+      }
+
+      const metaData = this.getFileInfo(fileId);
+      const fileContents = this.$http({
         method: 'GET',
         url: `https://content.googleapis.com/drive/v2/files/${encodeURIComponent(fileId)}`,
         params: {
@@ -309,7 +317,7 @@
         },
       });
 
-      return this.$q.all([this.$q.when(metaData), this.$q.when(fileData)])
+      return this.$q.all([this.$q.when(metaData), this.$q.when(fileContents)])
         .then((res) => {
           return this.$q.when({
             backup: res[1].data,

@@ -17,22 +17,42 @@
   </section>
 </help-section>
 
-<h3 class="md-caption">File import/export</h3>
-<a class="md-raised md-button md-ink-ripple"
-   type="button"
-   download-backup>
-  <ng-md-icon icon="file_download"
-              aria-label="download settings"></ng-md-icon>
-  Export your tasks and settings
-  <div class="md-ripple-container"></div>
-</a>
-<md-button
-  class="md-raised"
-  ng-click="vm.showUploadForm=!vm.showUploadForm;">
-  <ng-md-icon icon="file_upload"
-              aria-label="import settings"></ng-md-icon>
-  Import Settings
-</md-button>
+<section>
+  <h3 class="md-caption">File import/export</h3>
+  <a class="md-raised md-button md-ink-ripple"
+     type="button"
+     download-backup>
+    <ng-md-icon icon="file_download"
+                aria-label="download settings"></ng-md-icon>
+    Export your tasks and settings
+    <div class="md-ripple-container"></div>
+  </a>
+  <md-button
+    class="md-raised"
+    ng-click="vm.showUploadForm=!vm.showUploadForm;">
+    <ng-md-icon icon="file_upload"
+                aria-label="import settings"></ng-md-icon>
+    Import Settings
+  </md-button>
+
+  <form ng-if="vm.showUploadForm"
+        ng-submit="vm.importSettings(vm.uploadSettingsTextarea)">
+    <md-input-container class="md-block"
+                        flex-gt-sm>
+      <label>Copy and paste the contents of the saved JSON file here</label>
+      <textarea ng-model="vm.uploadSettingsTextarea"
+                md-auto-focus
+                rows="3"></textarea>
+    </md-input-container>
+
+    <div><strong>NOTE: Once you hit the import button all your current settings and data will be overwritten!</strong>
+    </div>
+
+    <md-button type="submit"
+               class="md-raised md-primary">Import settings
+    </md-button>
+  </form>
+</section>
 
 <section>
   <h3 class="md-caption">Sync via Google Drive</h3>
@@ -82,15 +102,15 @@
     </md-switch>
   </div>
   <div>
-    <md-switch ng-model="vm.settings.googleDriveSync.isAutoSyncToRemote"
-               aria-label="Auto sync to remote">
-      Auto sync to remote
+    <md-switch ng-model="vm.settings.googleDriveSync.isLoadRemoteDataOnStartup"
+               aria-label="Load remote data on startup">
+      Load remote data on startup
     </md-switch>
   </div>
   <div>
-    <md-switch ng-model="vm.settings.googleDriveSync.isAutoSyncFromRemote"
-               aria-label="Auto sync from remote">
-      Auto sync from remote
+    <md-switch ng-model="vm.settings.googleDriveSync.isAutoSync"
+               aria-label="Auto sync data">
+      Auto sync data
     </md-switch>
   </div>
   <!-- todo add sync doc id -->
@@ -106,26 +126,6 @@
   </md-input-container>
 
 </section>
-
-
-<form ng-if="vm.showUploadForm"
-      ng-submit="vm.importSettings(vm.uploadSettingsTextarea)">
-  <md-input-container class="md-block"
-                      flex-gt-sm>
-    <label>Copy and paste the contents of the saved JSON file here</label>
-    <textarea ng-model="vm.uploadSettingsTextarea"
-              md-auto-focus
-              rows="3"></textarea>
-  </md-input-container>
-
-  <div><strong>NOTE: Once you hit the import button all your current settings and data will be overwritten!</strong>
-  </div>
-
-  <md-button type="submit"
-             class="md-raised md-primary">Import settings
-  </md-button>
-</form>
-
 
 <section ng-if="vm.IS_ELECTRON">
   <h3 class="md-caption">Automatic Backups</h3>
