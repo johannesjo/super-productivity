@@ -37,41 +37,41 @@
 <section>
   <h3 class="md-caption">Sync via Google Drive</h3>
   <div>
-    <md-button class="md-raised md-primary"
+    <md-button class="md-raised"
                promise-btn
                ng-show="!vm.GoogleApi.isLoggedIn"
                ng-click="vm.login()">
       <ng-md-icon icon="login"></ng-md-icon>
       Login
     </md-button>
-    <md-button class="md-raised md-primary"
+    <md-button class="md-raised"
                ng-show="vm.GoogleApi.isLoggedIn"
                ng-click="vm.logout()">
       <ng-md-icon icon="logout"></ng-md-icon>
       Logout
     </md-button>
 
-    <md-button class="md-raised md-primary"
+    <md-button class="md-raised"
+               promise-btn
+               ng-show="vm.GoogleApi.isLoggedIn"
+               ng-click="vm.backupNow()">
+      <ng-md-icon icon="backup"></ng-md-icon>
+      Backup now
+    </md-button>
+    <md-button class="md-raised sync-from-btn"
+               promise-btn
+               ng-show="vm.GoogleApi.isLoggedIn"
+               ng-click="vm.loadRemoteData()">
+      <ng-md-icon icon="backup"></ng-md-icon>
+      Load From GDrive
+    </md-button>
+    <md-button class="md-raised"
                ng-show="vm.GoogleApi.isLoggedIn"
                external-link
                target="_blank"
                href="https://myaccount.google.com/permissions">
       <ng-md-icon icon="remove_circle"></ng-md-icon>
       Revoke permissions
-    </md-button>
-    <md-button class="md-raised md-primary"
-               promise-btn
-               ng-show="vm.GoogleApi.isLoggedIn"
-               ng-click="vm.backupNow()">
-      <ng-md-icon icon="backup"></ng-md-icon>
-      Save Backup now
-    </md-button>
-    <md-button class="md-raised md-primary sync-from-btn"
-               promise-btn
-               ng-show="vm.GoogleApi.isLoggedIn"
-               ng-click="vm.loadRemoteData()">
-      <ng-md-icon icon="backup"></ng-md-icon>
-      Load from Google Drive
     </md-button>
   </div>
 
