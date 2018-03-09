@@ -18,12 +18,14 @@
 
   class GoogleApi {
     /* @ngInject */
-    constructor(GOOGLE, $q, IS_ELECTRON, $http, $rootScope) {
+    constructor(GOOGLE, $q, IS_ELECTRON, $http, $rootScope, SimpleToast, $log) {
       this.$q = $q;
       this.$http = $http;
+      this.$log = $log;
       this.$rootScope = $rootScope;
       this.GOOGLE = GOOGLE;
       this.IS_ELECTRON = IS_ELECTRON;
+      this.SimpleToast = SimpleToast;
     }
 
     initClientLibraryIfNotDone() {
@@ -140,6 +142,14 @@
       }
     }
 
+    handleError(err) {
+      console.log(err);
+      this.SimpleToast('ERROR', 'GoogleApi Error');
+      return this.$q.reject();
+    }
+
+    // Other interaction
+    //-------------------
     appendRow(spreadsheetId, row) {
       // @see: https://developers.google.com/sheets/api/reference/rest/
       const range = 'A1:Z99';
@@ -155,17 +165,7 @@
           'Authorization': `Bearer ${this.accessToken}`
         },
         data: { values: [row] }
-      });
-      // that's the way we would do it if we could use the gapi.client
-      // return window.gapi.client.sheets.spreadsheets.values.append({
-      //  spreadsheetId: spreadsheetId,
-      //  range: range,
-      //  valueInputOption: 'USER_ENTERED',
-      //  insertDataOption: 'INSERT_ROWS',
-      //  resource: {
-      //    values: [row]
-      //  }
-      // }, row);
+      }).catch(this.handleError.bind(this));
     }
 
     getSpreadsheetData(spreadsheetId, range) {
@@ -179,12 +179,7 @@
         headers: {
           'Authorization': `Bearer ${this.accessToken}`
         }
-      });
-      // that's the way we would do it if we could use the gapi.client
-      // return window.gapi.client.sheets.spreadsheets.values.get({
-      //  spreadsheetId: spreadsheetId,
-      //  range: range,
-      // });
+      }).catch(this.handleError.bind(this));
     }
 
     getSpreadsheetHeadingsAndLastRow(spreadsheetId) {
@@ -206,13 +201,14 @@
         }, (response) => {
           console.log('Error: ' + response.result.error.message);
           defer.reject(response.result.error);
-        });
+        }).catch(this.handleError.bind(this));
 
       return defer.promise;
     }
 
     loadFile(fileId) {
       if (!fileId) {
+        this.SimpleToast('ERROR', 'GoogleApi: No file id specified');
         return this.$q.reject('No file id given');
       }
 
@@ -248,7 +244,7 @@
             backup: res[1].data,
             meta: res[0].data,
           });
-        });
+        }).catch(this.handleError.bind(this));
     }
 
     saveFile(content, metadata = {}) {
@@ -292,7 +288,7 @@
           'Content-Type': multipart.type
         },
         data: multipart.body
-      });
+      }).catch(this.handleError.bind(this));
     }
   }
 
