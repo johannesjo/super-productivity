@@ -51,7 +51,7 @@
         controllerAs: '$ctrl',
         restrict: 'A',
         scope: true
-      }
+      };
     });
 
   // hacky fix for ff
