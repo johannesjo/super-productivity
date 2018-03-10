@@ -36,7 +36,7 @@
         this.GoogleApi.getFileInfo(this.data.backupDocId)
           .then((res) => {
             const lastModifiedRemote = res.data.modifiedDate;
-            console.log(lastModifiedRemote, this.data.lastLocalUpdate);
+            console.log(lastModifiedRemote, this.data.lastLocalUpdate, this._isNewerThan(lastModifiedRemote, this.data.lastLocalUpdate));
 
             if (this._isNewerThan(lastModifiedRemote, this.data.lastLocalUpdate)) {
               console.log('GoogleDriveSync: HAS CHANGED, TRYING TO UPDATE');
@@ -67,11 +67,6 @@
       const d1 = new Date(strDate1);
       const d2 = new Date(strDate2);
       return (d1.getTime() > d2.getTime());
-    }
-
-    // TODO check for valid data
-    _isValidData(data) {
-      return data.tasks && data.backlogTasks && data.config;
     }
 
     _getLocalAppData() {
@@ -119,6 +114,8 @@
           if (res && res.data) {
             this.data.backupDocId = res.data.id;
             this.data.lastSyncToRemote = res.data.modifiedDate;
+            // also needs to be updated
+            this.data.lastLocalUpdate = res.data.modifiedDate;
           }
         });
     }
