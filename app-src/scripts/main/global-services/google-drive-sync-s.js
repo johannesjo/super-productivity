@@ -33,24 +33,7 @@
       }
 
       if (this.config.isLoadRemoteDataOnStartup) {
-        this.GoogleApi.getFileInfo(this.data.backupDocId)
-          .then((res) => {
-            const lastModifiedRemote = res.data.modifiedDate;
-            this._log(
-              this._formatDate(lastModifiedRemote),
-              ' > ',
-              this._formatDate(this.data.lastLocalUpdate),
-              this._isNewerThan(lastModifiedRemote, this.data.lastLocalUpdate)
-            );
-
-            if (this._isNewerThan(lastModifiedRemote, this.data.lastLocalUpdate)) {
-              this._log('HAS CHANGED, TRYING TO UPDATE');
-              const lastActiveTime = this.$rootScope.r.lastActiveTime;
-              const isSkipConfirm = this._isNewerThan(lastModifiedRemote, lastActiveTime);
-              this._log('Skipping Dialog', isSkipConfirm);
-              this.loadFrom(isSkipConfirm);
-            }
-          });
+        this._checkForInitialUpdate();
       }
     }
 
@@ -78,12 +61,39 @@
       return (d1.getTime() > d2.getTime());
     }
 
+    _isCurrentPromisePending() {
+      return (this.currentPromise && this.currentPromise.$$state.status === 0);
+    }
+
     _getLocalAppData() {
       return this.AppStorage.getCompleteBackupData();
     }
 
     _formatDate(date) {
       return window.moment(date).format('DD-MM-YYYY * hh:mm:ss');
+    }
+
+    _checkForInitialUpdate() {
+      this.currentPromise = this.GoogleApi.getFileInfo(this.data.backupDocId)
+        .then((res) => {
+          const lastModifiedRemote = res.data.modifiedDate;
+          this._log(
+            this._formatDate(lastModifiedRemote),
+            ' > ',
+            this._formatDate(this.data.lastLocalUpdate),
+            this._isNewerThan(lastModifiedRemote, this.data.lastLocalUpdate)
+          );
+
+          if (this._isNewerThan(lastModifiedRemote, this.data.lastLocalUpdate)) {
+            this._log('HAS CHANGED, TRYING TO UPDATE');
+            const lastActiveTime = this.$rootScope.r.lastActiveTime;
+            const isSkipConfirm = this._isNewerThan(lastModifiedRemote, lastActiveTime);
+            this._log('Skipping Dialog', isSkipConfirm);
+            this.loadFrom(isSkipConfirm);
+          }
+        });
+
+      return this.currentPromise;
     }
 
     _confirmSaveDialog(remoteModified) {
@@ -165,11 +175,11 @@
 
       this.autoSyncInterval = this.$interval(() => {
         // only sync if not in the middle of something
-        if (!this.currentPromise || this.currentPromise.$$state.status === 1) {
+        if (this._isCurrentPromisePending()) {
+          this._log('SYNC OMITTED because of promise', this.currentPromise, this.currentPromise.$$state.status);
+        } else {
           this._log('SYNC');
           this.saveTo();
-        } else {
-          this._log('SYNC OMITTED because of promise');
         }
       }, interval);
     }
@@ -181,6 +191,12 @@
     }
 
     saveTo() {
+      // don't execute sync interactions at the same time
+      if (this._isCurrentPromisePending()) {
+        this._log('saveTo omitted because is in progress', this.currentPromise, this.currentPromise.$$state.status);
+        return this.$q.reject('Something in progress');
+      }
+
       const defer = this.$q.defer();
       this.currentPromise = defer.promise;
 
@@ -237,6 +253,12 @@
     }
 
     loadFrom(isSkipPrompt = false) {
+      // don't execute sync interactions at the same time
+      if (this._isCurrentPromisePending()) {
+        this._log('loadFrom omitted because is in progress', this.currentPromise, this.currentPromise.$$state.status);
+        return this.$q.reject('Something in progress');
+      }
+
       const defer = this.$q.defer();
       this.currentPromise = defer.promise;
 
