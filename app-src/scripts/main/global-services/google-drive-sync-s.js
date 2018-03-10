@@ -36,8 +36,7 @@
         this.GoogleApi.getFileInfo(this.data.backupDocId)
           .then((res) => {
             const lastModifiedRemote = res.data.modifiedDate;
-            console.log(
-              'GoogleDriveSync:',
+            this._log(
               this._formatDate(lastModifiedRemote),
               ' > ',
               this._formatDate(this.data.lastLocalUpdate),
@@ -45,14 +44,18 @@
             );
 
             if (this._isNewerThan(lastModifiedRemote, this.data.lastLocalUpdate)) {
-              console.log('GoogleDriveSync: HAS CHANGED, TRYING TO UPDATE');
+              this._log('HAS CHANGED, TRYING TO UPDATE');
               const lastActiveTime = this.$rootScope.r.lastActiveTime;
               const isSkipConfirm = this._isNewerThan(lastModifiedRemote, lastActiveTime);
-              console.log('GoogleDriveSync: Skipping Dialog', isSkipConfirm);
+              this._log('Skipping Dialog', isSkipConfirm);
               this.loadFrom(isSkipConfirm);
             }
           });
       }
+    }
+
+    _log() {
+      console.log(this.constructor.name + ':', ...arguments);
     }
 
     _import(loadRes) {
@@ -156,17 +159,17 @@
       const interval = window.moment.duration(this.config.syncInterval).asMilliseconds();
 
       if (interval < 5000) {
-        console.log('GoogleDriveSync: Interval too low');
+        this._log('Interval too low');
         return;
       }
 
       this.autoSyncInterval = this.$interval(() => {
         // only sync if not in the middle of something
         if (!this.currentPromise || this.currentPromise.$$state.status === 1) {
-          console.log('GoogleDriveSync: SYNC');
+          this._log('SYNC');
           this.saveTo();
         } else {
-          console.log('GoogleDriveSync: SYNC OMITTED because of promise');
+          this._log('SYNC OMITTED because of promise');
         }
       }, interval);
     }
@@ -193,10 +196,10 @@
           .then((res) => {
             const filesFound = res.data.items;
             if (!filesFound || filesFound.length === 0) {
-              this.SimpleToast('CUSTOM', `GoogleDriveSync: No file with the name "${this.config.syncFileName}" found. Creating it now...`, 'file_upload');
+              this.SimpleToast('CUSTOM', `No file with the name "${this.config.syncFileName}" found. Creating it now...`, 'file_upload');
               this._save().then(defer.resolve);
             } else if (filesFound.length > 1) {
-              this.SimpleToast('ERROR', `GoogleDriveSync: Multiple files with the name "${this.config.syncFileName}" found. Please delete all but one or choose a different name.`);
+              this.SimpleToast('ERROR', `Multiple files with the name "${this.config.syncFileName}" found. Please delete all but one or choose a different name.`);
               defer.reject();
             } else if (filesFound.length === 1) {
               this._confirmUsingExistingFileDialog(this.config.syncFileName)
