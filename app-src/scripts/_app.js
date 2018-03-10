@@ -52,7 +52,7 @@
     .run(setStartedTimes)
     .run(checkIfLatestVersion)
     .run(showWelcomeDialog)
-    //.run(goToWorkViewIfTasks);
+  //.run(goToWorkViewIfTasks);
 
   /* @ngInject */
   function configPromiseButtons(angularPromiseButtonsProvider) {
@@ -320,29 +320,26 @@
     });
   }
 
-  function preventMultipleInstances() {
+  function preventMultipleInstances(Notifier) {
     const KEY = 'SP_MULTI_INSTANCE_KEY';
     const SHUTDOWN_KEY = 'SP_MULTI_INSTANCE_SHUTDOWN_KEY';
-    if (window.addEventListener) { // IE9, FF, Chrome, Safari, Opera
-      window.addEventListener('storage', onStorageChanged, false);
-    }
-    else if (window.attachEvent) {
-      window.attachEvent('onstorage', onStorageChanged); // IE 8
-    }
+    let isClosing = false;
 
-    function onStorageChanged(ev) {
-      let isClosing = false;
-
+    const onStorageChanged = (ev) => {
       // we're the second instance so 'close' if not done already
       if (ev.key === SHUTDOWN_KEY) {
         if (!isClosing) {
           isClosing = true;
+          Notifier({
+            title: 'Shutting additional instance',
+            message: 'To avoid trouble it\'s best to always run just one instance of Super Productivity.',
+            sound: true,
+            wait: true
+          });
           //alert('You already have another instance open! This could lead to a lot of problems. Please close this tab asap!');
           window.location.assign('https://github.com/johannesjo/super-productivity');
         }
-      }
-
-      // means we're the original instance
+      } // means we're the original instance
       else if (ev.key === KEY) {
         // 'send' shutdown_key to shutdown other instance
         localStorage.setItem(SHUTDOWN_KEY, 'Something');
@@ -351,9 +348,14 @@
         setTimeout(() => {
           localStorage.removeItem(SHUTDOWN_KEY);
         }, 50);
-
       }
+    };
 
+    if (window.addEventListener) { // IE9, FF, Chrome, Safari, Opera
+      window.addEventListener('storage', onStorageChanged, false);
+    }
+    else if (window.attachEvent) {
+      window.attachEvent('onstorage', onStorageChanged); // IE 8
     }
 
     localStorage.setItem(KEY, Date.now());
