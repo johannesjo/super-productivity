@@ -35,7 +35,6 @@
       vm.isLoading = true;
       return GoogleApi.login()
         .then(() => {
-          vm.isLoggedIn = true;
           vm.isLoading = false;
         });
     };
@@ -56,7 +55,6 @@
       vm.isLoading = true;
       return GoogleApi.logout()
         .then(() => {
-          vm.isLoggedIn = false;
           vm.isLoading = false;
         });
     };

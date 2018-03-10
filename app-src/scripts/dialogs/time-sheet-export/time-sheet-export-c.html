@@ -104,22 +104,22 @@
         <div>
           <md-button class="md-raised md-primary"
                      promise-btn
-                     ng-show="!vm.isLoggedIn"
+                     ng-show="!vm.GoogleApi.isLoggedIn"
                      ng-click="vm.login()">Login
           </md-button>
           <md-button class="md-raised md-primary"
                      promise-btn
-                     ng-show="vm.isLoggedIn"
+                     ng-show="vm.GoogleApi.isLoggedIn"
                      ng-click="vm.logout()">Logout
           </md-button>
           <md-button class="md-raised md-primary"
                      promise-btn
                      ng-disabled="!vm.opts.spreadsheetId"
-                     ng-show="vm.isLoggedIn"
+                     ng-show="vm.GoogleApi.isLoggedIn"
                      ng-click="vm.readSpreadsheet()">Read spreadsheet
           </md-button>
           <md-button class="md-raised md-primary"
-                     ng-show="vm.isLoggedIn"
+                     ng-show="vm.GoogleApi.isLoggedIn"
                      external-link
                      target="_blank"
                      href="https://myaccount.google.com/permissions">Revoke permissions
@@ -127,7 +127,7 @@
           <md-button class="md-raised md-primary"
                      external-link
                      target="_blank"
-                     ng-show="vm.isLoggedIn && vm.opts.spreadsheetId"
+                     ng-show="vm.GoogleApi.isLoggedIn && vm.opts.spreadsheetId"
                      ng-href="https://docs.google.com/spreadsheets/d/{{vm.opts.spreadsheetId}}">Edit spreadsheet
           </md-button>
         </div>
@@ -137,11 +137,11 @@
              class="loading-spinner"
              layout-sm="column"
              layout-align="space-around"
-             ng-show="vm.isLoading && !vm.isLoggedIn">
+             ng-show="vm.isLoading && !vm.GoogleApi.isLoggedIn">
           <md-progress-circular md-mode="indeterminate"></md-progress-circular>
         </div>
 
-        <section ng-show="vm.isLoggedIn">
+        <section ng-show="vm.GoogleApi.isLoggedIn">
           <md-input-container class="md-block">
             <label>Spreadsheet ID</label>
             <input type="text"
@@ -152,7 +152,7 @@
                class="loading-spinner"
                layout-sm="column"
                layout-align="space-around"
-               ng-show="vm.isLoading && vm.isLoggedIn">
+               ng-show="vm.isLoading && vm.GoogleApi.isLoggedIn">
             <md-progress-circular md-mode="indeterminate"></md-progress-circular>
           </div>
 
@@ -194,7 +194,7 @@
     <md-dialog-actions>
 
       <md-button ng-click="vm.save()"
-                 ng-show="vm.actualValues.length > 0 && vm.isLoggedIn"
+                 ng-show="vm.actualValues.length > 0 &&  m.GoogleApi.isLoggedIn"
                  type="button"
                  class="md-raised md-primary"
                  promise-btn>
