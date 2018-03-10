@@ -36,7 +36,13 @@
         this.GoogleApi.getFileInfo(this.data.backupDocId)
           .then((res) => {
             const lastModifiedRemote = res.data.modifiedDate;
-            console.log(lastModifiedRemote, this.data.lastLocalUpdate, this._isNewerThan(lastModifiedRemote, this.data.lastLocalUpdate));
+            console.log(
+              'GoogleDriveSync:',
+              this._formatDate(lastModifiedRemote),
+              ' > ',
+              this._formatDate(this.data.lastLocalUpdate),
+              this._isNewerThan(lastModifiedRemote, this.data.lastLocalUpdate)
+            );
 
             if (this._isNewerThan(lastModifiedRemote, this.data.lastLocalUpdate)) {
               console.log('GoogleDriveSync: HAS CHANGED, TRYING TO UPDATE');
@@ -74,7 +80,7 @@
     }
 
     _formatDate(date) {
-      return window.moment(date).format('DD-MM-YYYY hh:mm:ss');
+      return window.moment(date).format('DD-MM-YYYY * hh:mm:ss');
     }
 
     _confirmSaveDialog(remoteModified) {
