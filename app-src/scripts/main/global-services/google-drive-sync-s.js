@@ -156,7 +156,7 @@
     saveTo() {
       // when we have no backup file we create one directly
       if (!this.data.backupDocId) {
-        this.SimpleToast('INFO', 'GoogleDriveSync: Creating new file for backups, as none was found');
+        this.SimpleToast('CUSTOM', 'GoogleDriveSync: Creating new file for backups, as none was found');
         return this._save();
       }
 
