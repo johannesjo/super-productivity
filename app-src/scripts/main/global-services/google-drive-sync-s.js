@@ -154,8 +154,14 @@
     }
 
     saveTo() {
-      const defer = this.$q.defer();
+      // when we have no backup file we create one directly
+      if (!this.data.backupDocId) {
+        this.SimpleToast('INFO', 'GoogleDriveSync: Creating new file for backups, as none was found');
+        return this._save();
+      }
 
+      // otherwise update
+      const defer = this.$q.defer();
       this.GoogleApi.getFileInfo(this.data.backupDocId)
         .then((res) => {
           const lastModifiedRemote = res.data.modifiedDate;
