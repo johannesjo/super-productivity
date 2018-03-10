@@ -52,7 +52,7 @@
     .run(setStartedTimes)
     .run(checkIfLatestVersion)
     .run(showWelcomeDialog)
-  //.run(goToWorkViewIfTasks);
+    .run(goToWorkViewIfTasks);
 
   /* @ngInject */
   function configPromiseButtons(angularPromiseButtonsProvider) {
