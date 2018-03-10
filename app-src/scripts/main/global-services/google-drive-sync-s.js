@@ -122,10 +122,10 @@
         editable: true
       })
         .then((res) => {
-            this.data.backupDocId = res.data.id;
-            this.data.lastSyncToRemote = res.data.modifiedDate;
-            // also needs to be updated
-            this.data.lastLocalUpdate = res.data.modifiedDate;
+          this.data.backupDocId = res.data.id;
+          this.data.lastSyncToRemote = res.data.modifiedDate;
+          // also needs to be updated
+          this.data.lastLocalUpdate = res.data.modifiedDate;
         });
     }
 
@@ -155,8 +155,13 @@
       }
 
       this.autoSyncInterval = this.$interval(() => {
-        console.log('GoogleDriveSync: SYNC');
-        this.saveTo();
+        // only sync if not in the middle of something
+        if (!this.currentPromise || this.currentPromise.$$state.status === 1) {
+          console.log('GoogleDriveSync: SYNC');
+          this.saveTo();
+        } else {
+          console.log('GoogleDriveSync: SYNC OMITTED because of promise');
+        }
       }, interval);
     }
 
@@ -168,6 +173,7 @@
 
     saveTo() {
       const defer = this.$q.defer();
+      this.currentPromise = defer.promise;
 
       // CREATE OR FIND
       // ---------------------------
@@ -223,6 +229,7 @@
 
     loadFrom(isSkipPrompt = false) {
       const defer = this.$q.defer();
+      this.currentPromise = defer.promise;
 
       if (isSkipPrompt) {
         this._load().then((loadRes) => {
