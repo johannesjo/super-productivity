@@ -97,16 +97,56 @@
     }
 
     _confirmSaveDialog(remoteModified) {
-      const confirm = this.$mdDialog.confirm()
-        .title('Overwrite unsaved data on Google Drive?')
-        .textContent(`
-        There seem to be some changes on Google Drive, that you don\'t have locally. Do you want to overwrite them anyway? 
-        -- Last modification of remote data: ${this._formatDate(remoteModified)} 
-        -- Last sync to remote from this app instance: ${this._formatDate(this.data.lastSyncToRemote)}.`)
-        .ok('Please do it!')
-        .cancel('No');
+      return this.$mdDialog.show({
+        template: `
+<md-dialog>
+  <md-dialog-content>
+    <div class="md-dialog-content">
+      <h2 class="md-title" style="margin-top: 0">Overwrite unsaved data on Google Drive?</h2>
+      <p>There seem to be some changes on Google Drive, that you don\\'t have locally. Do you want to overwrite them anyway?</p>
+      <table> 
+        <tr>
+          <td>Last modification of remote data:</td>
+          <td> ${this._formatDate(remoteModified)}</td>
+        </tr>
+        <tr>
+          <td>Last sync to remote from this app instance:</td>
+          <td> ${this._formatDate(this.data.lastSyncToRemote)}</td>
+        </tr>
+      </table>
+    </div>
+  </md-dialog-content>
 
-      return this.$mdDialog.show(confirm);
+  <md-dialog-actions>
+    <md-button ng-click="saveToRemote()" class="md-primary">
+      Please do it!
+    </md-button>
+    <md-button ng-click="loadFromRemote()" class="md-primary">
+      Load remote data instead
+    </md-button>
+    <md-button ng-click="cancel()" class="md-primary">
+      Abort
+    </md-button>
+  </md-dialog-actions>
+</md-dialog>`,
+        controller: ($mdDialog, $scope, GoogleDriveSync) => {
+          $scope.saveToRemote = () => {
+            $mdDialog.hide();
+          };
+
+          $scope.loadFromRemote = () => {
+            $mdDialog.cancel();
+            // we need some time so the promise is canceled
+            setTimeout(() => {
+              GoogleDriveSync.loadFrom();
+            }, 100);
+          };
+
+          $scope.cancel = () => {
+            $mdDialog.cancel();
+          };
+        },
+      });
     }
 
     _confirmLoadDialog(remoteModified) {
