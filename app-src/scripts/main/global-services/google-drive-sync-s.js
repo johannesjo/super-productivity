@@ -9,7 +9,7 @@
 (() => {
   'use strict';
 
-  const SYNC_FILE_NAME = 'SUPER_PRODUCTIVITY_SYNC.json';
+  const DEFAULT_SYNC_FILE_NAME = 'SUPER_PRODUCTIVITY_SYNC.json';
 
   class GoogleDriveSync {
     /* @ngInject */
@@ -102,25 +102,38 @@
       return this.$mdDialog.show(confirm);
     }
 
+    _confirmUsingExistingFileDialog(fileName) {
+      const confirm = this.$mdDialog.confirm()
+        .title(`Use existing file "${fileName}" as sync file?`)
+        .textContent(`
+        We found a file with the name you specified. Do you want to use it as your sync file? If not please change the Sync file name.`)
+        .ok('Please do it!')
+        .cancel('Abort');
+
+      return this.$mdDialog.show(confirm);
+    }
+
     _save() {
       const completeData = this._getLocalAppData();
 
       return this.GoogleApi.saveFile(completeData, {
-        title: SYNC_FILE_NAME,
+        title: this.config.syncFileName,
         id: this.data.backupDocId,
         editable: true
       })
         .then((res) => {
-          if (res && res.data) {
             this.data.backupDocId = res.data.id;
             this.data.lastSyncToRemote = res.data.modifiedDate;
             // also needs to be updated
             this.data.lastLocalUpdate = res.data.modifiedDate;
-          }
         });
     }
 
     _load() {
+      if (!this.config.syncFileName) {
+        return this.$q.reject('No file name specified');
+      }
+
       return this.GoogleApi.loadFile(this.data.backupDocId)
         .then((res) => {
           return this.$q.when(res);
@@ -154,30 +167,56 @@
     }
 
     saveTo() {
+      const defer = this.$q.defer();
+
+      // CREATE OR FIND
+      // ---------------------------
       // when we have no backup file we create one directly
       if (!this.data.backupDocId) {
-        this.SimpleToast('CUSTOM', 'GoogleDriveSync: Creating new file for backups, as none was found');
-        return this._save();
+        if (!this.config.syncFileName) {
+          this.config.syncFileName = DEFAULT_SYNC_FILE_NAME;
+        }
+
+        this.GoogleApi.findFile(this.config.syncFileName)
+          .then((res) => {
+            const filesFound = res.data.items;
+            if (!filesFound || filesFound.length === 0) {
+              this.SimpleToast('CUSTOM', `GoogleDriveSync: No file with the name "${this.config.syncFileName}" found. Creating it now...`, 'file_upload');
+              this._save().then(defer.resolve);
+            } else if (filesFound.length > 1) {
+              this.SimpleToast('ERROR', `GoogleDriveSync: Multiple files with the name "${this.config.syncFileName}" found. Please delete all but one or choose a different name.`);
+              defer.reject();
+            } else if (filesFound.length === 1) {
+              this._confirmUsingExistingFileDialog(this.config.syncFileName)
+                .then(() => {
+                  const fileToUpdate = filesFound[0];
+                  this.data.backupDocId = fileToUpdate.id;
+                  this._save().then(defer.resolve);
+                }, defer.reject);
+            }
+          });
+
+        // JUST UPDATE
+        // ---------------------------
+        // otherwise update
+      } else {
+        this.GoogleApi.getFileInfo(this.data.backupDocId)
+          .then((res) => {
+            const lastModifiedRemote = res.data.modifiedDate;
+
+            if (this._isNewerThan(lastModifiedRemote, this.data.lastSyncToRemote)) {
+              // remote has an update so prompt what to do
+              this._confirmSaveDialog(lastModifiedRemote)
+                .then(() => {
+                  this._save().then(defer.resolve);
+                }, defer.reject);
+            } else {
+              // all clear just save
+              this._save().then(defer.resolve);
+            }
+          })
+          .catch(defer.reject);
       }
-
-      // otherwise update
-      const defer = this.$q.defer();
-      this.GoogleApi.getFileInfo(this.data.backupDocId)
-        .then((res) => {
-          const lastModifiedRemote = res.data.modifiedDate;
-
-          if (this._isNewerThan(lastModifiedRemote, this.data.lastSyncToRemote)) {
-            // remote has an update so prompt what to do
-            this._confirmSaveDialog(lastModifiedRemote)
-              .then(() => {
-                this._save().then(defer.resolve);
-              }, defer.reject);
-          } else {
-            // all clear just save
-            this._save().then(defer.resolve);
-          }
-        })
-        .catch(defer.reject);
 
       return defer.promise;
     }

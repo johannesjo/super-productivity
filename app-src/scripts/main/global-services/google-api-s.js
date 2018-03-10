@@ -297,6 +297,26 @@
       });
     }
 
+    findFile(fileName) {
+      if (!fileName) {
+        this.SimpleToast('ERROR', 'GoogleApi: No file name specified');
+        return this.$q.reject('No file name given');
+      }
+
+      return this.$http({
+        method: 'GET',
+        url: `https://content.googleapis.com/drive/v2/files`,
+        params: {
+          'key': this.GOOGLE.API_KEY,
+          // should be called name officially instead of title
+          q: `title='${fileName}' and trashed=false`,
+        },
+        headers: {
+          'Authorization': `Bearer ${this.accessToken}`,
+        },
+      }).catch(this.handleError.bind(this));
+    }
+
     loadFile(fileId) {
       if (!fileId) {
         this.SimpleToast('ERROR', 'GoogleApi: No file id specified');

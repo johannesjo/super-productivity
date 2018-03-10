@@ -117,6 +117,17 @@
   <!-- todo add sync doc id -->
 
   <md-input-container class="md-block md-icon-float"
+                      ng-show="vm.GoogleApi.isLoggedIn">
+    <label>Sync file name</label>
+    <ng-md-icon icon="file_upload"
+                aria-label="file_upload"></ng-md-icon>
+    <input type="text"
+           ng-model-options="{ debounce: 250 }"
+           ng-change="vm.resetSync();"
+           ng-model="vm.settings.googleDriveSync.syncFileName">
+  </md-input-container>
+
+  <md-input-container class="md-block md-icon-float"
                       ng-show="vm.settings.googleDriveSync.isAutoSyncToRemote">
     <label>Sync interval (sync every x)</label>
     <ng-md-icon icon="timer"

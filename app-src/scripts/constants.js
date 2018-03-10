@@ -137,6 +137,7 @@
           isAutoLogin: false,
           isLoadRemoteDataOnStartup: false,
           isAutoSyncToRemote: false,
+          syncFileName: 'SUPER_PRODUCTIVITY_SYNC.json',
           syncInterval: moment.duration(1, 'minutes'),
         },
         automaticBackups: {
