@@ -13,12 +13,13 @@
 
   class GoogleDriveSync {
     /* @ngInject */
-    constructor(AppStorage, GoogleApi, $rootScope, SimpleToast, $mdDialog, $q) {
+    constructor(AppStorage, GoogleApi, $rootScope, SimpleToast, $mdDialog, $q, $interval) {
       this.AppStorage = AppStorage;
       this.GoogleApi = GoogleApi;
       this.$rootScope = $rootScope;
       this.SimpleToast = SimpleToast;
       this.$mdDialog = $mdDialog;
+      this.$interval = $interval;
       this.$q = $q;
 
       this.data = this.$rootScope.r.googleDriveSync;
@@ -27,8 +28,8 @@
       if (this.config.isAutoLogin) {
         GoogleApi.login();
       }
-      if (this.config.isAutoSync) {
-
+      if (this.config.isAutoSyncToRemote) {
+        this.resetAutoSyncToRemoteInterval();
       }
 
       if (this.config.isLoadRemoteDataOnStartup) {
@@ -129,12 +130,30 @@
         });
     }
 
-    initAutoSyncInterval() {
+    resetAutoSyncToRemoteInterval() {
+      // always unset if set
+      this.cancelAutoSyncToRemoteIntervalIfSet();
+      if (!this.config.isAutoSyncToRemote) {
+        return;
+      }
 
+      const interval = window.moment.duration(this.config.syncInterval).asMilliseconds();
+
+      if (interval < 5000) {
+        console.log('GoogleDriveSync: Interval too low');
+        return;
+      }
+
+      this.autoSyncInterval = this.$interval(() => {
+        console.log('GoogleDriveSync: SYNC');
+        this.saveTo();
+      }, interval);
     }
 
-    cancelAutoSyncInterval() {
-
+    cancelAutoSyncToRemoteIntervalIfSet() {
+      if (this.autoSyncInterval) {
+        this.$interval.cancel(this.autoSyncInterval);
+      }
     }
 
     saveTo() {

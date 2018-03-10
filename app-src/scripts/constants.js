@@ -136,7 +136,7 @@
         googleDriveSync: {
           isAutoLogin: false,
           isLoadRemoteDataOnStartup: false,
-          isAutoSync: false,
+          isAutoSyncToRemote: false,
           syncInterval: moment.duration(1, 'minutes'),
         },
         automaticBackups: {

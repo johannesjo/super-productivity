@@ -55,6 +55,10 @@
       return GoogleApi.logout();
     };
 
+    vm.resetSync = () => {
+      GoogleDriveSync.resetAutoSyncToRemoteInterval();
+    };
+
     vm.GoogleApi = GoogleApi;
   }
 

@@ -108,20 +108,23 @@
     </md-switch>
   </div>
   <div>
-    <md-switch ng-model="vm.settings.googleDriveSync.isAutoSync"
-               aria-label="Auto sync data">
-      Auto sync data
+    <md-switch ng-model="vm.settings.googleDriveSync.isAutoSyncToRemote"
+               ng-change="vm.resetSync();"
+               aria-label="Auto sync data TO remote">
+      Auto sync data TO remote
     </md-switch>
   </div>
   <!-- todo add sync doc id -->
 
   <md-input-container class="md-block md-icon-float"
-                      ng-show="vm.settings.googleDriveSync.isAutoSyncToRemote || vm.settings.googleDriveSync.isAutoSyncFromRemote">
+                      ng-show="vm.settings.googleDriveSync.isAutoSyncToRemote">
     <label>Sync interval (sync every x)</label>
     <ng-md-icon icon="timer"
                 aria-label="timer"></ng-md-icon>
     <input type="text"
            input-duration
+           ng-model-options="{ debounce: 250 }"
+           ng-change="vm.resetSync();"
            ng-model="vm.settings.googleDriveSync.syncInterval">
   </md-input-container>
 
