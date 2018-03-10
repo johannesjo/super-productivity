@@ -17,46 +17,123 @@
   </section>
 </help-section>
 
-<a class="md-raised md-button md-ink-ripple"
-   type="button"
-   download-backup>
-  <ng-md-icon icon="file_download"
-              aria-label="download settings"></ng-md-icon>
-  Export your tasks and settings
-  <div class="md-ripple-container"></div>
-</a>
-<md-button
-  class="md-raised"
-  ng-click="vm.showUploadForm=!vm.showUploadForm;">
-  <ng-md-icon icon="file_upload"
-              aria-label="import settings"></ng-md-icon>
-  Import Settings
-</md-button>
+<section>
+  <h3 class="md-caption">File import/export</h3>
+  <a class="md-raised md-button md-ink-ripple"
+     type="button"
+     download-backup>
+    <ng-md-icon icon="file_download"
+                aria-label="download settings"></ng-md-icon>
+    Export your tasks and settings
+    <div class="md-ripple-container"></div>
+  </a>
+  <md-button
+    class="md-raised"
+    ng-click="vm.showUploadForm=!vm.showUploadForm;">
+    <ng-md-icon icon="file_upload"
+                aria-label="import settings"></ng-md-icon>
+    Import Settings
+  </md-button>
 
+  <form ng-if="vm.showUploadForm"
+        ng-submit="vm.importSettings(vm.uploadSettingsTextarea)">
+    <md-input-container class="md-block"
+                        flex-gt-sm>
+      <label>Copy and paste the contents of the saved JSON file here</label>
+      <textarea ng-model="vm.uploadSettingsTextarea"
+                md-auto-focus
+                rows="3"></textarea>
+    </md-input-container>
 
-<form ng-if="vm.showUploadForm"
-      ng-submit="vm.importSettings(vm.uploadSettingsTextarea)">
-  <md-input-container class="md-block"
-                      flex-gt-sm>
-    <label>Copy and paste the contents of the saved JSON file here</label>
-    <textarea ng-model="vm.uploadSettingsTextarea"
-              md-auto-focus
-              rows="3"></textarea>
-  </md-input-container>
+    <div><strong>NOTE: Once you hit the import button all your current settings and data will be overwritten!</strong>
+    </div>
 
-  <div><strong>NOTE: Once you hit the import button all your current settings and data will be overwritten!</strong>
+    <md-button type="submit"
+               class="md-raised md-primary">Import settings
+    </md-button>
+  </form>
+</section>
+
+<section>
+  <h3 class="md-caption">Sync via Google Drive</h3>
+  <div>
+    <md-button class="md-raised"
+               promise-btn
+               ng-show="!vm.GoogleApi.isLoggedIn"
+               ng-click="vm.login()">
+      <ng-md-icon icon="login"></ng-md-icon>
+      Login
+    </md-button>
+    <md-button class="md-raised"
+               ng-show="vm.GoogleApi.isLoggedIn"
+               ng-click="vm.logout()">
+      <ng-md-icon icon="logout"></ng-md-icon>
+      Logout
+    </md-button>
+
+    <md-button class="md-raised"
+               promise-btn
+               ng-show="vm.GoogleApi.isLoggedIn"
+               ng-click="vm.backupNow()">
+      <ng-md-icon icon="backup"></ng-md-icon>
+      Backup now
+    </md-button>
+    <md-button class="md-raised sync-from-btn"
+               promise-btn
+               ng-show="vm.GoogleApi.isLoggedIn"
+               ng-click="vm.loadRemoteData()">
+      <ng-md-icon icon="backup"></ng-md-icon>
+      Load From GDrive
+    </md-button>
+    <md-button class="md-raised"
+               ng-show="vm.GoogleApi.isLoggedIn"
+               external-link
+               target="_blank"
+               href="https://myaccount.google.com/permissions">
+      <ng-md-icon icon="remove_circle"></ng-md-icon>
+      Revoke permissions
+    </md-button>
   </div>
 
-  <md-button type="submit"
-             class="md-raised md-primary">Import settings
-  </md-button>
-</form>
+  <div>
+    <md-switch ng-model="vm.settings.googleDriveSync.isAutoLogin"
+               aria-label="Auto login at when starting app">
+      Auto login at when starting app
+    </md-switch>
+  </div>
+  <div>
+    <md-switch ng-model="vm.settings.googleDriveSync.isLoadRemoteDataOnStartup"
+               aria-label="Load remote data on startup">
+      Load remote data on startup
+    </md-switch>
+  </div>
+  <div>
+    <md-switch ng-model="vm.settings.googleDriveSync.isAutoSyncToRemote"
+               ng-change="vm.resetSync();"
+               aria-label="Auto sync data TO remote">
+      Auto sync data TO remote
+    </md-switch>
+  </div>
+  <!-- todo add sync doc id -->
 
+  <md-input-container class="md-block md-icon-float"
+                      ng-show="vm.settings.googleDriveSync.isAutoSyncToRemote">
+    <label>Sync interval (sync every x)</label>
+    <ng-md-icon icon="timer"
+                aria-label="timer"></ng-md-icon>
+    <input type="text"
+           input-duration
+           ng-model-options="{ debounce: 250 }"
+           ng-change="vm.resetSync();"
+           ng-model="vm.settings.googleDriveSync.syncInterval">
+  </md-input-container>
+
+</section>
 
 <section ng-if="vm.IS_ELECTRON">
   <h3 class="md-caption">Automatic Backups</h3>
   <div>
-    <md-switch ng-model="vm.settings.isEnabled"
+    <md-switch ng-model="vm.settings.automaticBackups.isEnabled"
                aria-label="Enable automatic backups">
       Enable automatic backups
     </md-switch>
@@ -65,35 +142,36 @@
   <p><strong>NOTE:</strong> Changes to automated backup settings require you to restart the application to take effect.
   </p>
 
-  <div ng-show="vm.settings.isEnabled">
+  <div ng-show="vm.settings.automaticBackups.isEnabled">
     <md-input-container class="md-block">
       <label>Interval in seconds to make backups</label>
       <input type="number"
-             ng-model="vm.settings.intervalInSeconds">
+             ng-model="vm.settings.automaticBackups.intervalInSeconds">
     </md-input-container>
     <md-input-container class="md-block">
       <label>Path to backup (e.g. ~/backup-{date}.json)</label>
       <input type="text"
-             ng-model="vm.settings.path">
+             ng-model="vm.settings.automaticBackups.path">
     </md-input-container>
   </div>
 
   <h3 class="md-caption">Automatic Sync</h3>
   <div>
-    <md-switch ng-model="vm.settings.isSyncEnabled"
+    <md-switch ng-model="vm.settings.automaticBackups.isSyncEnabled"
                aria-label="Enable automatic backups">
       Enable auto sync
     </md-switch>
   </div>
 
-  <p><strong>NOTE:</strong> This is <strong>a highly experimental feature!!!</strong> Take care! Make a backup! Changes to the sync settings require you to restart the application to take effect.
+  <p><strong>NOTE:</strong> This is
+    <strong>a highly experimental feature!!!</strong> Take care! Make a backup! Changes to the sync settings require you to restart the application to take effect.
   </p>
 
-  <div ng-show="vm.settings.isSyncEnabled">
+  <div ng-show="vm.settings.automaticBackups.isSyncEnabled">
     <md-input-container class="md-block">
       <label>Path to sync file</label>
       <input type="text"
-             ng-model="vm.settings.syncPath">
+             ng-model="vm.settings.automaticBackups.syncPath">
     </md-input-container>
   </div>
 </section>

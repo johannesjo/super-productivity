@@ -31,12 +31,20 @@
 
       this.getCurrentLs();
       this.setupPollingForSavingCurrentState();
+      this.initUnloadSave();
 
       // this is really nice for debugging but we don't want to use it for
       // actual saving the data as it is costly to run
       //window.watch(this.s, function(prop, action, difference, oldvalue) {
       //  console.log(prop, action, difference, oldvalue);
       //}, 5);
+    }
+
+    initUnloadSave() {
+      window.onbeforeunload = window.onunload = () => {
+        this.$rootScope.r.lastActiveTime = new Date();
+        this.saveToLs();
+      };
     }
 
     initBackupsIfEnabled() {
@@ -124,13 +132,17 @@
       }
     }
 
-    saveToFileSystem(fs, path, cb, isSync) {
+    getCompleteBackupData() {
       const data = angular.copy(this.getCurrentAppState());
-
       // also add projects data
       data[this.PROJECTS_KEY] = this.getProjects();
       // also add backlog tasks
       data[this.DONE_BACKLOG_TASKS_KEY] = this.getDoneBacklogTasks();
+      return data;
+    }
+
+    saveToFileSystem(fs, path, cb, isSync) {
+      const data = this.getCompleteBackupData();
 
       fs.writeFile(path, JSON.stringify(data), function(err) {
         if (err) {
@@ -150,7 +162,7 @@
     }
 
     setupPollingForSavingCurrentState() {
-      this.$interval(() => {
+      this.updateLsInterval = this.$interval(() => {
         this.saveToLs();
       }, this.SAVE_APP_STORAGE_POLL_INTERVAL);
     }
@@ -206,11 +218,17 @@
     importData(data) {
       this.SimpleToast('ERROR', 'If you can see this, something went wrong importing your data.');
 
+      // cancel saving current app data to ls
+      if (this.updateLsInterval) {
+        this.$interval.cancel(this.updateLsInterval);
+      }
+
       _.forOwn(data, (val, key) => {
-        this.saveLsItem(val[key], key);
+        this.saveLsItem(val, key);
       });
 
-      // reload page completely afterwards
+      // unset handlers for unload to prevent current app state from overwriting the imports
+      window.onbeforeunload = window.onunload = undefined;
       window.location.reload(true);
     }
 

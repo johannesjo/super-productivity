@@ -31,11 +31,13 @@
       'as.sortable',
       'angularMoment',
       'hc.marked',
-      'mwl.calendar'
+      'mwl.calendar',
+      'angularPromiseButtons'
     ])
     .config(configMdTheme)
     .config(configMarked)
     .config(fixUnhandledRejectionError)
+    .config(configPromiseButtons)
     .run(initGlobalModels)
     .run(initPollJiraTaskUpdates)
     .run(initPollGitTaskUpdates)
@@ -47,10 +49,21 @@
     .run(initElectronErrorHandling)
     .run(sendAppReadyToElectron)
     .run(preventMultipleInstances)
-    .run(setStartedTime)
+    .run(setStartedTimes)
     .run(checkIfLatestVersion)
     .run(showWelcomeDialog)
     .run(goToWorkViewIfTasks);
+
+  /* @ngInject */
+  function configPromiseButtons(angularPromiseButtonsProvider) {
+    angularPromiseButtonsProvider.extendConfig({
+      spinnerTpl: '<div class="btn-spinner"></div>',
+      disableBtn: true,
+      btnLoadingClass: 'is-loading',
+      minDuration: 100,
+      priority: 100
+    });
+  }
 
   /* @ngInject */
   function configMarked(markedProvider) {
@@ -288,9 +301,13 @@
     });
   }
 
-  function setStartedTime($rootScope, $timeout) {
+  function setStartedTimes($rootScope, $timeout) {
     $timeout(() => {
+
       const moment = window.moment;
+      const now = moment();
+
+      // set started time today as used by the time sheet export
       const startedTime = $rootScope.r.startedTimeToday;
 
       if (startedTime && moment(startedTime).isSame(moment(), 'day')) {
@@ -298,7 +315,7 @@
         $rootScope.r.startedTimeToday = moment(startedTime);
       } else {
         // set to now
-        $rootScope.r.startedTimeToday = moment();
+        $rootScope.r.startedTimeToday = now;
       }
     });
   }

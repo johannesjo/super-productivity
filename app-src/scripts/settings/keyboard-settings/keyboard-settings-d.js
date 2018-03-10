@@ -5,7 +5,7 @@
  * # keyboardSettings
  */
 
-(function () {
+(function() {
   'use strict';
 
   angular
@@ -27,7 +27,7 @@
   }
 
   /* @ngInject */
-  function KeyboardSettingsCtrl(IS_ELECTRON) {
+  function KeyboardSettingsCtrl(IS_ELECTRON, LS_DEFAULTS) {
     let vm = this;
     const IPC_REGISTER_GLOBAL_SHORTCUT_EVENT = 'REGISTER_GLOBAL_SHORTCUT';
 
@@ -39,6 +39,10 @@
         // send to electron
         window.ipcRenderer.send(IPC_REGISTER_GLOBAL_SHORTCUT_EVENT, globalShowHide);
       }
+    };
+
+    vm.resetAllShortcuts = () => {
+      vm.keys = LS_DEFAULTS.keys;
     };
   }
 

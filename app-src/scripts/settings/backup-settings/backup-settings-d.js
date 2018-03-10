@@ -27,7 +27,7 @@
   }
 
   /* @ngInject */
-  function BackupSettingsCtrl(AppStorage, IS_ELECTRON) {
+  function BackupSettingsCtrl(AppStorage, IS_ELECTRON, GoogleApi, GoogleDriveSync, SimpleToast) {
     let vm = this;
     vm.IS_ELECTRON = IS_ELECTRON;
 
@@ -36,6 +36,30 @@
       let settings = JSON.parse(uploadSettingsTextarea);
       AppStorage.importData(settings);
     };
+
+    vm.backupNow = () => {
+      return GoogleDriveSync.saveTo()
+        .then(() => {
+          SimpleToast('SUCCESS', 'Google Drive: Successfully saved backup');
+        });
+    };
+    vm.loadRemoteData = () => {
+      return GoogleDriveSync.loadFrom();
+    };
+
+    vm.login = () => {
+      return GoogleApi.login();
+    };
+
+    vm.logout = () => {
+      return GoogleApi.logout();
+    };
+
+    vm.resetSync = () => {
+      GoogleDriveSync.resetAutoSyncToRemoteInterval();
+    };
+
+    vm.GoogleApi = GoogleApi;
   }
 
 })();
