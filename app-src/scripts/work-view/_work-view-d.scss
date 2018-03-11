@@ -2,5 +2,16 @@ work-view {
   display: block;
   max-width: $component-max-width;
   text-align: center;
-  margin:auto;
+  margin: auto;
+}
+
+.work-view-header {
+  @media(max-width: $layout-xs) {
+    .label {
+      display: none;
+    }
+    p {
+      margin: 0;
+    }
+  }
 }

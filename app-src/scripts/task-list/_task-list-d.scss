@@ -21,6 +21,11 @@ task-list {
       background-color: $dark-theme-bg-darker;
     }
   }
+
+  @media(max-width: $layout-xs) {
+    // make space for the expand icon
+    margin-left: 12px;
+  }
   &__backlog {
   }
 }
@@ -75,7 +80,7 @@ task-list {
 
   .first-line {
     display: flex;
-    flex-wrap: nowrap;
+    flex-wrap: wrap;
 
     // Button Stuff
     ng-md-icon {
@@ -144,6 +149,12 @@ task-list {
 
   .controls {
     white-space: nowrap;
+    text-align: right;
+
+    @media(max-width: $layout-xs) {
+      white-space: normal;
+      flex-basis: 100%;
+    }
   }
 
   .title {

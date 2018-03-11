@@ -20,6 +20,11 @@ html {
 
 main {
   padding: 20px 20px 50px;
+
+  @media(max-width: $layout-xs) {
+    padding-left: 5px;
+    padding-right: 5px;
+  }
 }
 
 global-link-list + .ui-view-container > main {

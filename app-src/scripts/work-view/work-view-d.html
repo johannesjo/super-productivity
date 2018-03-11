@@ -1,10 +1,11 @@
 <header class="work-view-header">
   <p>
     <ng-md-icon icon="playlist_play"></ng-md-icon>
-    Working today: <strong ng-bind="vm.totalTimeWorkedToday|duration"></strong>
+    <span class="label">Working today:</span>
+    <strong ng-bind="vm.totalTimeWorkedToday|duration"></strong>
     <ng-md-icon icon="timer"></ng-md-icon>
     –
-    Estimate remaining: ~<strong ng-bind="vm.totalEstimationRemaining|duration"></strong>
+    <span class="label">Estimate remaining:</span> ~<strong ng-bind="vm.totalEstimationRemaining|duration"></strong>
     <ng-md-icon icon="timer"></ng-md-icon>
 
     <md-button ng-click="vm.collapseAllNotesAndSubTasks()"
