@@ -176,6 +176,17 @@
       return this.$mdDialog.show(confirm);
     }
 
+    _confirmSaveNewFile(fileName) {
+      const confirm = this.$mdDialog.confirm()
+        .title(`Create "${fileName}" as sync file on Google Drive?`)
+        .textContent(`
+        No file with the name you specified was found. Do you want to create it?`)
+        .ok('Please do it!')
+        .cancel('Abort');
+
+      return this.$mdDialog.show(confirm);
+    }
+
     _save() {
       const completeData = this._getLocalAppData();
 
@@ -185,6 +196,8 @@
         editable: true
       })
         .then((res) => {
+          console.log(res);
+          //this.config.syncFileName
           this.data.backupDocId = res.data.id;
           this.data.lastSyncToRemote = res.data.modifiedDate;
           // also needs to be updated
@@ -234,6 +247,37 @@
       }
     }
 
+    changeSyncFileName(newSyncFileName) {
+      const defer = this.$q.defer();
+
+      this.GoogleApi.findFile(newSyncFileName)
+        .then((res) => {
+          const filesFound = res.data.items;
+          if (!filesFound || filesFound.length === 0) {
+            this._confirmSaveNewFile(newSyncFileName)
+              .then(() => {
+                this.config.syncFileName = newSyncFileName;
+                // we need to unset to save to a new file
+                this.data.backupDocId = undefined;
+                this._save().then(defer.resolve);
+              }, defer.reject);
+          } else if (filesFound.length > 1) {
+            this.SimpleToast('ERROR', `Multiple files with the name "${newSyncFileName}" found. Please delete all but one or choose a different name.`);
+            defer.reject();
+          } else if (filesFound.length === 1) {
+            this._confirmUsingExistingFileDialog(newSyncFileName)
+              .then(() => {
+                const fileToUpdate = filesFound[0];
+                this.data.backupDocId = fileToUpdate.id;
+                this.config.syncFileName = newSyncFileName;
+                defer.resolve(this.data.backupDocId);
+              }, defer.reject);
+          }
+        });
+
+      return defer.promise;
+    }
+
     saveTo() {
       // don't execute sync interactions at the same time
       if (this._isCurrentPromisePending()) {
@@ -252,24 +296,10 @@
           this.config.syncFileName = DEFAULT_SYNC_FILE_NAME;
         }
 
-        this.GoogleApi.findFile(this.config.syncFileName)
-          .then((res) => {
-            const filesFound = res.data.items;
-            if (!filesFound || filesFound.length === 0) {
-              this.SimpleToast('CUSTOM', `No file with the name "${this.config.syncFileName}" found. Creating it now...`, 'file_upload');
-              this._save().then(defer.resolve);
-            } else if (filesFound.length > 1) {
-              this.SimpleToast('ERROR', `Multiple files with the name "${this.config.syncFileName}" found. Please delete all but one or choose a different name.`);
-              defer.reject();
-            } else if (filesFound.length === 1) {
-              this._confirmUsingExistingFileDialog(this.config.syncFileName)
-                .then(() => {
-                  const fileToUpdate = filesFound[0];
-                  this.data.backupDocId = fileToUpdate.id;
-                  this._save().then(defer.resolve);
-                }, defer.reject);
-            }
-          });
+        this.changeSyncFileName(this.config.syncFileName)
+          .then(() => {
+            this._save().then(defer.resolve);
+          }, defer.reject);
 
         // JUST UPDATE
         // ---------------------------

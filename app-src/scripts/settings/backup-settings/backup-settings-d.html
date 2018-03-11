@@ -56,6 +56,11 @@
 
 <section>
   <h3 class="md-caption">Sync via Google Drive</h3>
+  <p><strong>NOTE:</strong> This is
+    <strong>a highly experimental feature!!!</strong> Take care! Make a backup! Changes to the sync settings require you to restart the application to take effect.
+  </p>
+
+
   <div>
     <md-button class="md-raised"
                promise-btn
@@ -95,6 +100,22 @@
     </md-button>
   </div>
 
+  <div ng-show="vm.GoogleApi.isLoggedIn"
+       class="sync-file-wrapper">
+    <md-input-container class="md-block md-icon-float">
+      <label>Sync file name</label>
+      <ng-md-icon icon="file_upload"
+                  aria-label="file_upload"></ng-md-icon>
+      <input type="text"
+             ng-model="vm.tmpSyncFile">
+    </md-input-container>
+
+    <md-button class="md-raised md-primary md-icon-button"
+               ng-click="vm.changeSyncFileName(vm.tmpSyncFile)">
+      <ng-md-icon icon="save"></ng-md-icon>
+    </md-button>
+  </div>
+
   <div>
     <md-switch ng-model="vm.settings.googleDriveSync.isAutoLogin"
                aria-label="Auto login at when starting app">
@@ -114,18 +135,6 @@
       Auto sync data TO remote
     </md-switch>
   </div>
-  <!-- todo add sync doc id -->
-
-  <md-input-container class="md-block md-icon-float"
-                      ng-show="vm.GoogleApi.isLoggedIn">
-    <label>Sync file name</label>
-    <ng-md-icon icon="file_upload"
-                aria-label="file_upload"></ng-md-icon>
-    <input type="text"
-           ng-model-options="{ debounce: 250 }"
-           ng-change="vm.resetSync();"
-           ng-model="vm.settings.googleDriveSync.syncFileName">
-  </md-input-container>
 
   <md-input-container class="md-block md-icon-float"
                       ng-show="vm.settings.googleDriveSync.isAutoLogin && vm.settings.googleDriveSync.isAutoSyncToRemote">

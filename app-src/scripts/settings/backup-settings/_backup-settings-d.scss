@@ -4,7 +4,17 @@ backup-settings {
 }
 
 .sync-from-btn {
-  ng-md-icon{
+  ng-md-icon {
     transform: rotate(180deg);
+  }
+}
+
+.sync-file-wrapper {
+  display: flex;
+  flex-direction: row;
+  //justify-content: center;
+  align-items: center;
+  md-input-container{
+    flex: 1;
   }
 }

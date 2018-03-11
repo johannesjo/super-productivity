@@ -27,9 +27,13 @@
   }
 
   /* @ngInject */
-  function BackupSettingsCtrl(AppStorage, IS_ELECTRON, GoogleApi, GoogleDriveSync, SimpleToast) {
+  function BackupSettingsCtrl(AppStorage, IS_ELECTRON, GoogleApi, GoogleDriveSync, SimpleToast, $timeout) {
     let vm = this;
     vm.IS_ELECTRON = IS_ELECTRON;
+
+    $timeout(() => {
+      vm.tmpSyncFile = vm.settings.googleDriveSync.syncFileName;
+    });
 
     // import/export stuff
     vm.importSettings = (uploadSettingsTextarea) => {
@@ -57,6 +61,10 @@
 
     vm.resetSync = () => {
       GoogleDriveSync.resetAutoSyncToRemoteInterval();
+    };
+
+    vm.changeSyncFileName = (newSyncFile) => {
+      GoogleDriveSync.changeSyncFileName(newSyncFile);
     };
 
     vm.GoogleApi = GoogleApi;
