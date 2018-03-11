@@ -1,6 +1,6 @@
 <md-toolbar md-whiteframe="3">
   <div class="md-toolbar-tools">
-    <md-button class="md-icon-button"
+    <md-button class="md-icon-button sp-icon"
                aria-label="Home"
                ui-sref="daily-planner">
       <md-icon md-svg-src="img/ico.svg"
@@ -25,7 +25,8 @@
       </md-menu-content>
     </md-menu>
 
-    <h2 ng-if="!r.currentProject">
+    <h2 ng-if="!r.currentProject"
+        class="sp-title">
       <a ui-sref="daily-planner">SuperProductivity</a>
     </h2>
 

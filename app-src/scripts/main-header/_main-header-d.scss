@@ -10,6 +10,10 @@ main-header {
       &.is-active {
         border: 1px solid #ffffff;
       }
+
+      @media(max-width: $layout-xs) {
+        margin: 0;
+      }
     }
   }
 
@@ -17,5 +21,28 @@ main-header {
     display: flex;
     align-items: center;
     justify-content: center;
+  }
+
+  @media(max-width: $layout-xs) {
+    md-menu,
+    .sp-title {
+      flex-shrink: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .sp-icon {
+      display: none;
+    }
+
+    md-menu {
+      button {
+        margin: 0;
+      }
+    }
+
+    .md-toolbar-tools {
+      padding: 0;
+    }
   }
 }
