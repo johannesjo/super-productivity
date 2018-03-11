@@ -1,3 +1,15 @@
+<a name="1.9.1"></a>
+## [1.9.1](https://github.com/johannesjo/super-productivity/compare/v1.9.0...v1.9.1) (2018-03-11)
+
+
+### Features
+
+* **gDriveSync:** better error case handling ([eeefbff](https://github.com/johannesjo/super-productivity/commit/eeefbff))
+* **gDriveSync:** improve sync file selection ([52722c7](https://github.com/johannesjo/super-productivity/commit/52722c7))
+* **gDriveSync:** wait for login before syncing ([8aa264f](https://github.com/johannesjo/super-productivity/commit/8aa264f))
+
+
+
 <a name="1.9.0"></a>
 # [1.9.0](https://github.com/johannesjo/super-productivity/compare/v1.8.3...v1.9.0) (2018-03-11)
 
