@@ -39,4 +39,10 @@
       margin-top: 0;
     }
   }
+
+  @media(max-width: $layout-xs) {
+    .keyboard-settings {
+      display: none;
+    }
+  }
 }
