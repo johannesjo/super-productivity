@@ -12,7 +12,7 @@ main-header {
       }
 
       @media(max-width: $layout-xs) {
-        margin: 0;
+        margin: 0 1px;
       }
     }
   }
@@ -36,13 +36,15 @@ main-header {
     }
 
     md-menu {
+      .md-button,
       button {
         margin: 0;
+        min-width: 20px;
       }
     }
 
     .md-toolbar-tools {
-      padding: 0;
+      padding: 0 0 0 8px;
     }
   }
 }
