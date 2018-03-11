@@ -70,7 +70,8 @@
 
     this.createNewFromCurrent = (projectTitle) => {
       const projects = this.getListWithLsData();
-      if (projects) {
+
+      if (projects && projects.length > 0) {
         SimpleToast('ERROR', 'ERROR: There is already a project');
         return;
       }
