@@ -229,7 +229,10 @@ function idleChecker() {
       return;
     }
 
-    mainWin.webContents.send('IDLE_TIME', idleTime);
+    // don't update if the user is about to close
+    if (!app.isQuiting) {
+      mainWin.webContents.send('IDLE_TIME', idleTime);
+    }
   });
 }
 

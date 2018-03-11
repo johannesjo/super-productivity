@@ -2,6 +2,9 @@ const electron = require('electron');
 const dbus = require('./dbus');
 const fs = require('fs');
 const moment = require('moment');
+const errorHandler = require('./error-handler');
+
+const GNOME_SHELL_EXT_MIN_VERSION = 2;
 
 let tray;
 let isIndicatorRunning = false;
@@ -66,8 +69,16 @@ function isGnomeShellInstalled(IS_LINUX, IS_GNOME) {
   let isGnomeShellExtInstalled = false;
   if (IS_LINUX && IS_GNOME) {
     const LINUX_HOME_DIR = process.env['HOME'];
-    if (fs.existsSync(LINUX_HOME_DIR + '/.local/share/gnome-shell/extensions/indicator@johannes.super-productivity.com')) {
-      isGnomeShellExtInstalled = true;
+    const EXTENSION_PATH = LINUX_HOME_DIR + '/.local/share/gnome-shell/extensions/indicator@johannes.super-productivity.com';
+
+    if (fs.existsSync(EXTENSION_PATH)) {
+      const metaData = fs.readFileSync(EXTENSION_PATH + '/metadata.json');
+      const version = JSON.parse(metaData).version;
+      if (version >= GNOME_SHELL_EXT_MIN_VERSION) {
+        isGnomeShellExtInstalled = true;
+      } else {
+        errorHandler('Indicator: Outdated version ' + version + ' of Gnome Shell Extension installed. Please install at least version ' + GNOME_SHELL_EXT_MIN_VERSION + '.');
+      }
     }
   }
   return isGnomeShellExtInstalled;
