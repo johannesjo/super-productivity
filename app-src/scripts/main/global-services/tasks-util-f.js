@@ -44,6 +44,12 @@
           });
           $log.info('DUPE', firstDupe);
 
+          // remove dupe
+          let firstDupeIndex = _.findIndex(tasksArray, (task) => {
+            return dupeIds.indexOf(task.id) > -1;
+          });
+          tasksArray.splice(firstDupeIndex, 1);
+
           SimpleToast('ERROR', '!!! Dupes detected in data for the ids: ' + dupeIds.join(', ') + '. First task title is "' + firstDupe.title + '" !!!', 60000);
         }
         return hasDupe;
