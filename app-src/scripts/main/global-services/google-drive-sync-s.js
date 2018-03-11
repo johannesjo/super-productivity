@@ -196,8 +196,6 @@
         editable: true
       })
         .then((res) => {
-          console.log(res);
-          //this.config.syncFileName
           this.data.backupDocId = res.data.id;
           this.data.lastSyncToRemote = res.data.modifiedDate;
           // also needs to be updated
@@ -339,7 +337,7 @@
         this._load().then((loadRes) => {
           this._import(loadRes);
           defer.resolve(loadRes);
-        });
+        }, defer.reject);
       } else {
         this._load().then((loadRes) => {
           const lastModifiedRemote = loadRes.meta.modifiedDate;
@@ -348,7 +346,7 @@
               this._import(loadRes);
               defer.resolve(loadRes);
             }, defer.reject);
-        });
+        }, defer.reject);
       }
 
       return defer.promise;
