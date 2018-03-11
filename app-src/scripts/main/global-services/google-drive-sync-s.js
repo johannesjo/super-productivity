@@ -26,14 +26,15 @@
       this.config = this.$rootScope.r.config.googleDriveSync;
 
       if (this.config.isAutoLogin) {
-        GoogleApi.login();
-      }
-      if (this.config.isAutoSyncToRemote) {
-        this.resetAutoSyncToRemoteInterval();
-      }
+        GoogleApi.login().then(() => {
+          if (this.config.isAutoSyncToRemote) {
+            this.resetAutoSyncToRemoteInterval();
+          }
 
-      if (this.config.isLoadRemoteDataOnStartup) {
-        this._checkForInitialUpdate();
+          if (this.config.isLoadRemoteDataOnStartup) {
+            this._checkForInitialUpdate();
+          }
+        });
       }
     }
 

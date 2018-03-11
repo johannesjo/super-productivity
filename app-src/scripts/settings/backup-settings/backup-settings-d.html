@@ -101,13 +101,13 @@
       Auto login at when starting app
     </md-switch>
   </div>
-  <div>
+  <div ng-if="vm.settings.googleDriveSync.isAutoLogin">
     <md-switch ng-model="vm.settings.googleDriveSync.isLoadRemoteDataOnStartup"
                aria-label="Load remote data on startup">
       Load remote data on startup
     </md-switch>
   </div>
-  <div>
+  <div ng-if="vm.settings.googleDriveSync.isAutoLogin">
     <md-switch ng-model="vm.settings.googleDriveSync.isAutoSyncToRemote"
                ng-change="vm.resetSync();"
                aria-label="Auto sync data TO remote">
@@ -128,7 +128,7 @@
   </md-input-container>
 
   <md-input-container class="md-block md-icon-float"
-                      ng-show="vm.settings.googleDriveSync.isAutoSyncToRemote">
+                      ng-show="vm.settings.googleDriveSync.isAutoLogin && vm.settings.googleDriveSync.isAutoSyncToRemote">
     <label>Sync interval (sync every x)</label>
     <ng-md-icon icon="timer"
                 aria-label="timer"></ng-md-icon>
