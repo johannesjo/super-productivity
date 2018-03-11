@@ -85,11 +85,14 @@
           );
 
           if (this._isNewerThan(lastModifiedRemote, this.data.lastLocalUpdate)) {
+            this.SimpleToast('CUSTOM', `There is a remote update! Downloading...`, 'file_upload');
+
             this._log('HAS CHANGED, TRYING TO UPDATE');
             const lastActiveTime = this.$rootScope.r.lastActiveTime;
             const isSkipConfirm = this._isNewerThan(lastModifiedRemote, lastActiveTime);
             this._log('Skipping Dialog', isSkipConfirm);
-            this.loadFrom(isSkipConfirm);
+
+            this.loadFrom(isSkipConfirm, true);
           }
         });
 
@@ -274,7 +277,6 @@
         this.GoogleApi.getFileInfo(this.data.backupDocId)
           .then((res) => {
             const lastModifiedRemote = res.data.modifiedDate;
-
             if (this._isNewerThan(lastModifiedRemote, this.data.lastSyncToRemote)) {
               // remote has an update so prompt what to do
               this._confirmSaveDialog(lastModifiedRemote)
@@ -292,9 +294,9 @@
       return defer.promise;
     }
 
-    loadFrom(isSkipPrompt = false) {
+    loadFrom(isSkipPrompt = false, isSkipPromiseCheck = false) {
       // don't execute sync interactions at the same time
-      if (this._isCurrentPromisePending()) {
+      if (!isSkipPromiseCheck && this._isCurrentPromisePending()) {
         this._log('loadFrom omitted because is in progress', this.currentPromise, this.currentPromise.$$state.status);
         return this.$q.reject('Something in progress');
       }
