@@ -365,7 +365,12 @@
     const ERROR_EV = 'ELECTRON_ERROR';
     if (IS_ELECTRON) {
       window.ipcRenderer.on(ERROR_EV, (ev, errorData) => {
-        SimpleToast('ERROR', 'Electron Error: ' + errorData.error);
+        let msg = errorData.error;
+        if (typeof msg !== 'string') {
+          msg = 'Please check the console!';
+        }
+
+        SimpleToast('ERROR', 'Electron Error: ' + msg);
         console.error('Electron Error: ' + errorData.error);
         console.log('Stacktrace: ', errorData.stack);
       });

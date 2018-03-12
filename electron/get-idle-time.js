@@ -5,8 +5,9 @@ let cmd;
 
 // todo check if programm exists
 // command -v foo >/dev/null 2>&1 || { echo >&2 "I require foo but it's not installed.  Aborting."; exit 1; }
+const isLinux = (process.platform === 'linux');
 
-if (process.platform === 'linux') {
+if (isLinux) {
   cmd = 'xprintidle';
 } else if (process.platform === 'darwin') {
   cmd = "echo $((`ioreg -c IOHIDSystem | sed -e '/HIDIdleTime/ !{ d' -e 't' -e '}' -e 's/.* = //g' -e 'q'` / 1000000))";
@@ -21,7 +22,12 @@ if (process.platform === 'linux') {
 module.exports = (cb) => {
   exec(cmd, function(error, stdout) {
     if (error) {
-      errorHandler(error);
+      let msg = 'Something went wrong with the idle checker.';
+      if (isLinux) {
+        msg += 'You need to install ' + cmd + '.';
+      }
+      errorHandler(msg);
+      cb('NO_SUPPORT');
     }
 
     // command output is in stdout

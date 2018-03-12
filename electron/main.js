@@ -70,9 +70,10 @@ app.on('activate', function() {
   }
 });
 
+let idleInterval;
 app.on('ready', () => {
   // init time tracking interval
-  setInterval(idleChecker, CONFIG.IDLE_PING_INTERVAL);
+  idleInterval = setInterval(idleChecker, CONFIG.IDLE_PING_INTERVAL);
 });
 
 app.on('before-quit', () => {
@@ -223,6 +224,10 @@ function showOrFocus(passedWin) {
 
 function idleChecker() {
   getIdleTime((idleTime) => {
+    if (idleTime === 'NO_SUPPORT' && idleInterval) {
+      clearInterval(idleInterval);
+    }
+
     // sometimes when starting a second instance we get here although we don't want to
     if (!mainWin) {
       log.info('special case occurred when trackTimeFn is called even though, this is a second instance of the app');
