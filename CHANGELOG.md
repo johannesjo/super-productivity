@@ -1,3 +1,15 @@
+<a name="1.9.2"></a>
+## [1.9.2](https://github.com/johannesjo/super-productivity/compare/v1.9.1...v1.9.2) (2018-03-12)
+
+
+### Bug Fixes
+
+* endless error messages if xprintidle is not installed [#60](https://github.com/johannesjo/super-productivity/issues/60) ([58a631a](https://github.com/johannesjo/super-productivity/commit/58a631a))
+* google login not working sometimes ([a5ff1f7](https://github.com/johannesjo/super-productivity/commit/a5ff1f7))
+* save button not appearing for timesheet export ([f6d6b0e](https://github.com/johannesjo/super-productivity/commit/f6d6b0e))
+
+
+
 <a name="1.9.1"></a>
 ## [1.9.1](https://github.com/johannesjo/super-productivity/compare/v1.9.0...v1.9.1) (2018-03-11)
 
