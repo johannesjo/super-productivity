@@ -133,7 +133,7 @@
     login() {
       /*jshint camelcase: false */
       const EXPIRES_SAFETY_MARGIN = 30000;
-      const isExpired = (window.moment()
+      const isExpired = (!this.$rootScope.r.googleTokens.expiresAt || window.moment()
         .valueOf() + EXPIRES_SAFETY_MARGIN > this.$rootScope.r.googleTokens.expiresAt);
 
       if (this.$rootScope.r.googleTokens.accessToken && !isExpired) {
