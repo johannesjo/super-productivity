@@ -76,6 +76,8 @@
       this.GOOGLE = GOOGLE;
       this.IS_ELECTRON = IS_ELECTRON;
       this.SimpleToast = SimpleToast;
+      this.data = this.$rootScope.r.googleTokens;
+      this.isLoggedIn = false;
     }
 
     initClientLibraryIfNotDone() {
@@ -133,11 +135,14 @@
     login() {
       /*jshint camelcase: false */
       const EXPIRES_SAFETY_MARGIN = 30000;
-      const isExpired = (!this.$rootScope.r.googleTokens.expiresAt || window.moment()
-        .valueOf() + EXPIRES_SAFETY_MARGIN > this.$rootScope.r.googleTokens.expiresAt);
+      const isExpired = (!this.data.expiresAt || window.moment()
+        .valueOf() + EXPIRES_SAFETY_MARGIN > this.data.expiresAt);
 
-      if (this.$rootScope.r.googleTokens.accessToken && !isExpired) {
-        this.accessToken = this.$rootScope.r.googleTokens.accessToken;
+      if (isExpired) {
+        this.data.accessToken = undefined;
+      }
+
+      if (this.data.accessToken && !isExpired) {
         this.isLoggedIn = true;
         return new Promise((resolve) => resolve());
       }
@@ -147,9 +152,8 @@
         return new Promise((resolve, reject) => {
           window.ipcRenderer.on('GOOGLE_AUTH_TOKEN', (ev, data) => {
             const token = data.access_token;
-            this.accessToken = token;
-            this.$rootScope.r.googleTokens.accessToken = this.accessToken;
-            //this.$rootScope.r.googleTokens.refreshToken = data.refresh_token;
+            this.data.accessToken = token;
+            //this.data.refreshToken = data.refresh_token;
             this.isLoggedIn = true;
             resolve();
             // TODO remove
@@ -178,21 +182,18 @@
 
     saveToken(res) {
       /*jshint camelcase: false */
-      this.accessToken = res.Zi.access_token;
-      this.$rootScope.r.googleTokens.accessToken = this.accessToken;
-      this.$rootScope.r.googleTokens.expiresAt = res.Zi.expires_at;
+      this.data.accessToken = res.Zi.access_token;
+      this.data.expiresAt = res.Zi.expires_at;
       /*jshint camelcase: true */
     }
 
     logout() {
       this.isLoggedIn = false;
+      this.data.accessToken = undefined;
+      this.data.expiresAt = undefined;
+      this.data.refreshToken = undefined;
 
       if (this.IS_ELECTRON) {
-        this.accessToken = undefined;
-        this.$rootScope.r.googleTokens.accessToken = undefined;
-        this.$rootScope.r.googleTokens.expiresAt = undefined;
-        this.$rootScope.r.googleTokens.refreshToken = undefined;
-
         return new Promise((resolve) => {
           resolve();
         });
@@ -239,7 +240,7 @@
           valueInputOption: 'USER_ENTERED'
         },
         headers: {
-          'Authorization': `Bearer ${this.accessToken}`
+          'Authorization': `Bearer ${this.data.accessToken}`
         },
         data: { values: [row] }
       }).catch(this.handleError.bind(this));
@@ -254,7 +255,7 @@
           'key': this.GOOGLE.API_KEY,
         },
         headers: {
-          'Authorization': `Bearer ${this.accessToken}`
+          'Authorization': `Bearer ${this.data.accessToken}`
         }
       }).catch(this.handleError.bind(this));
     }
@@ -295,7 +296,7 @@
           fields: DEFAULT_FIELDS_FOR_DRIVE
         },
         headers: {
-          'Authorization': `Bearer ${this.accessToken}`,
+          'Authorization': `Bearer ${this.data.accessToken}`,
         },
       });
     }
@@ -315,7 +316,7 @@
           q: `title='${fileName}' and trashed=false`,
         },
         headers: {
-          'Authorization': `Bearer ${this.accessToken}`,
+          'Authorization': `Bearer ${this.data.accessToken}`,
         },
       }).catch(this.handleError.bind(this));
     }
@@ -336,7 +337,7 @@
           alt: 'media'
         },
         headers: {
-          'Authorization': `Bearer ${this.accessToken}`,
+          'Authorization': `Bearer ${this.data.accessToken}`,
         },
       });
 
@@ -386,7 +387,7 @@
           fields: DEFAULT_FIELDS_FOR_DRIVE
         },
         headers: {
-          'Authorization': `Bearer ${this.accessToken}`,
+          'Authorization': `Bearer ${this.data.accessToken}`,
           'Content-Type': multipart.type
         },
         data: multipart.body
