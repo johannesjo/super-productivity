@@ -1,3 +1,24 @@
+<a name="1.9.3"></a>
+## [1.9.3](https://github.com/johannesjo/super-productivity/compare/v1.9.2...v1.9.3) (2018-03-13)
+
+
+### Bug Fixes
+
+* add more verbose logout ([1187bce](https://github.com/johannesjo/super-productivity/commit/1187bce))
+* desktop styling for task list ([2aed60a](https://github.com/johannesjo/super-productivity/commit/2aed60a))
+* missing space in error message ([51a1349](https://github.com/johannesjo/super-productivity/commit/51a1349))
+* save sync file name button on mobile ([3cf205f](https://github.com/johannesjo/super-productivity/commit/3cf205f))
+
+
+### Features
+
+* add more accurate warning ([e845879](https://github.com/johannesjo/super-productivity/commit/e845879))
+* **mobile:** improve task list styles ([21db12e](https://github.com/johannesjo/super-productivity/commit/21db12e))
+* improve google login flow and really log out if the users does so ([712ffea](https://github.com/johannesjo/super-productivity/commit/712ffea))
+* insert new tasks after current task ([566ebc7](https://github.com/johannesjo/super-productivity/commit/566ebc7))
+
+
+
 <a name="1.9.2"></a>
 ## [1.9.2](https://github.com/johannesjo/super-productivity/compare/v1.9.1...v1.9.2) (2018-03-12)
 
