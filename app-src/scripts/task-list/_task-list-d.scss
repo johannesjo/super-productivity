@@ -28,6 +28,15 @@ task-list {
   }
   &__backlog {
   }
+
+  // nested lists
+  .task-list {
+    margin: 2px -5px 10px 5px;
+
+    @media(max-width: $layout-xs) {
+      margin: 1px -5px 10px 0;
+    }
+  }
 }
 
 .task {
@@ -76,6 +85,16 @@ task-list {
       background-color: $dark-theme-bg-darker;
       color: #dddddd;
     }
+  }
+
+  .title-bar-wrapper {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: center;
+    min-height: 36px;
+    flex-grow: 1;
+    flex-basis: 100%;
   }
 
   .first-line {
@@ -157,12 +176,7 @@ task-list {
 
     @media(max-width: $layout-xs) {
       white-space: normal;
-      flex-basis: 100%;
     }
-  }
-
-  .title {
-
   }
 
   ng-md-icon.delete-icon {
@@ -216,9 +230,7 @@ task-list {
   }
 
   .handle {
-    margin-right: 4px;
-    margin-top: 0;
-    margin-bottom: 0;
+    margin: 0 4px 0 0;
   }
 
   .title {
@@ -251,6 +263,10 @@ task-list {
   .time {
     white-space: nowrap;
     margin-left: 10px;
+    @media(max-width: $layout-xs) {
+      margin-left: 8px;
+      font-size: 13px;
+    }
   }
 
   .notes {

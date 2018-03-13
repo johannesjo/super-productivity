@@ -13,60 +13,62 @@
     <div class="first-line"
          layout="row"
          layout-align="space-between center">
-      <md-button class="md-icon-button "
-                 aria-label="is updated"
-                 tabindex="2"
-                 ng-click="task.showNotes = !task.showNotes;"
-                 ng-if="task.isUpdated">
-        <md-tooltip>
-          Click to show updates
-        </md-tooltip>
-        <ng-md-icon class="update update-icon"
+      <div class="title-bar-wrapper">
+        <md-button class="md-icon-button "
+                   aria-label="is updated"
+                   tabindex="2"
+                   ng-click="task.showNotes = !task.showNotes;"
+                   ng-if="task.isUpdated">
+          <md-tooltip>
+            Click to show updates
+          </md-tooltip>
+          <ng-md-icon class="update update-icon"
+                      flex="none"
+                      icon="update"></ng-md-icon>
+        </md-button>
+
+
+        <ng-md-icon class="handle"
                     flex="none"
-                    icon="update"></ng-md-icon>
-      </md-button>
+                    as-sortable-item-handle
+                    icon="drag_handle"></ng-md-icon>
 
+        <md-button class="md-icon-button play-btn"
+                   aria-label="mark as current"
+                   tabindex="2"
+                   ng-click="$ctrl.togglePlay(task)"
+                   ng-if="!task.isDone && $ctrl.allowTaskSelection && !task.subTasks.length">
 
-      <ng-md-icon class="handle"
-                  flex="none"
-                  as-sortable-item-handle
-                  icon="drag_handle"></ng-md-icon>
+          <ng-md-icon icon="{{$ctrl.currentTaskId === task.id ? 'pause_circle_filled':'play_circle_fill'}}"
+                      aria-label="mark as current"></ng-md-icon>
+        </md-button>
+        <md-button class="md-icon-button original-link-btn"
+                   aria-label="link"
+                   tabindex="2"
+                   target="_blank"
+                   external-link
+                   ng-if="::task.originalLink"
+                   ng-href="{{ ::task.originalLink }}">
 
-      <md-button class="md-icon-button play-btn"
-                 aria-label="mark as current"
-                 tabindex="2"
-                 ng-click="$ctrl.togglePlay(task)"
-                 ng-if="!task.isDone && $ctrl.allowTaskSelection && !task.subTasks.length">
+          <ng-md-icon icon="link"
+                      ng-if="::task.originalType !=='GITHUB'"
+                      aria-label="link"></ng-md-icon>
+          <ng-md-icon icon="github-circle"
+                      ng-if="::task.originalType ==='GITHUB'"
+                      aria-label="link"></ng-md-icon>
+        </md-button>
 
-        <ng-md-icon icon="{{$ctrl.currentTaskId === task.id ? 'pause_circle_filled':'play_circle_fill'}}"
-                    aria-label="mark as current"></ng-md-icon>
-      </md-button>
-      <md-button class="md-icon-button original-link-btn"
-                 aria-label="link"
-                 tabindex="2"
-                 target="_blank"
-                 external-link
-                 ng-if="::task.originalLink"
-                 ng-href="{{ ::task.originalLink }}">
-
-        <ng-md-icon icon="link"
-                    ng-if="::task.originalType !=='GITHUB'"
-                    aria-label="link"></ng-md-icon>
-        <ng-md-icon icon="github-circle"
-                    ng-if="::task.originalType ==='GITHUB'"
-                    aria-label="link"></ng-md-icon>
-      </md-button>
-
-      <div class="title"
-           flex="auto"
-           layout="row"
-           layout-align="center center">
+        <div class="title"
+             flex="auto"
+             layout="row"
+             layout-align="center center">
 
         <span class="text"
               tabindex="2"
               edit-on-click-on-edit-finished="$ctrl.focusTaskEl($taskEl); $ctrl.onChangeTitle(task, isChanged, newVal);"
               edit-on-click-ev-id="task.id"
               edit-on-click="task.title"></span>
+        </div>
       </div>
 
       <div class="time">
