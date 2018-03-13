@@ -80,7 +80,11 @@ task-list {
 
   .first-line {
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
+
+    @media(max-width: $layout-xs) {
+      flex-wrap: wrap;
+    }
 
     // Button Stuff
     ng-md-icon {
