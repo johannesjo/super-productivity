@@ -190,6 +190,9 @@
       if (this.IS_ELECTRON) {
         this.accessToken = undefined;
         this.$rootScope.r.googleTokens.accessToken = undefined;
+        this.$rootScope.r.googleTokens.expiresAt = undefined;
+        this.$rootScope.r.googleTokens.refreshToken = undefined;
+
         return new Promise((resolve) => {
           resolve();
         });
