@@ -24,7 +24,7 @@ module.exports = (cb) => {
     if (error) {
       let msg = 'Something went wrong with the idle checker.';
       if (isLinux) {
-        msg += 'You need to install ' + cmd + '.';
+        msg += ' You need to install ' + cmd + '.';
       }
       errorHandler(msg);
       cb('NO_SUPPORT');
