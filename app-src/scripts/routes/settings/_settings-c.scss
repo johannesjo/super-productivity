@@ -47,12 +47,14 @@
 
     .md-button,
     button {
-      width: 100%;
-      max-width: 100%;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      margin-left: 0;
-      margin-right: 0;
+      &:not(.md-icon-button) {
+        width: 100%;
+        max-width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        margin-left: 0;
+        margin-right: 0;
+      }
     }
   }
 }
