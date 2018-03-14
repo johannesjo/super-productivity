@@ -1,0 +1,13 @@
+/* ng-sortable: Fix mobile touch scrolling */
+.as-sortable-item {
+  -ms-touch-action: auto;
+  touch-action: auto;
+  -webkit-touch-callout: inherit;
+}
+
+.as-sortable-item-handle {
+  -ms-touch-action: none;
+  touch-action: none;
+  /* to disable context menu on iOS devices */
+  -webkit-touch-callout: none;
+}
