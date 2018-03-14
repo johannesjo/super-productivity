@@ -26,8 +26,6 @@ task-list {
     // make space for the expand icon
     margin-left: 12px;
   }
-  &__backlog {
-  }
 
   // nested lists
   .task-list {
@@ -57,22 +55,26 @@ task-list {
 
     &.is-done {
       .time,
-      > .title,
-      > .first-line > .title {
+      .task-title {
         color: #777777;
+      }
+      ng-md-icon {
+        fill: #777777;
       }
     }
   }
 
   &.is-done {
+    ng-md-icon {
+      fill: #aaaaaa !important;
+    }
+
     .time,
-    > .title,
-    > .first-line > .title {
+    .task-title {
       color: #aaaaaa;
     }
 
-    > .title,
-    > .first-line > .title {
+    .task-title {
       text-decoration: line-through;
     }
   }
@@ -233,7 +235,7 @@ task-list {
     margin: 0 4px 0 0;
   }
 
-  .title {
+  .task-title {
     text-align: left;
     cursor: pointer;
     outline: none;
