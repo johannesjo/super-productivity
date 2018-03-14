@@ -234,7 +234,10 @@
           this._log('SYNC OMITTED because of promise', this.currentPromise, this.currentPromise.$$state.status);
         } else {
           this._log('SYNC');
-          this.saveTo();
+          this.saveTo()
+            .then(() => {
+              this.SimpleToast('SUCCESS', `Successfully synced Data to Google drive.`, 'file_upload');
+            });
         }
       }, interval);
     }
