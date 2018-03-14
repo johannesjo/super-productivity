@@ -31,20 +31,12 @@
 
       this.getCurrentLs();
       this.setupPollingForSavingCurrentState();
-      this.initUnloadSave();
 
       // this is really nice for debugging but we don't want to use it for
       // actual saving the data as it is costly to run
       //window.watch(this.s, function(prop, action, difference, oldvalue) {
       //  console.log(prop, action, difference, oldvalue);
       //}, 5);
-    }
-
-    initUnloadSave() {
-      window.onbeforeunload = window.onunload = () => {
-        this.$rootScope.r.lastActiveTime = new Date();
-        this.saveToLs();
-      };
     }
 
     initBackupsIfEnabled() {

@@ -52,6 +52,7 @@
     .run(setStartedTimes)
     .run(checkIfLatestVersion)
     .run(showWelcomeDialog)
+    .run(initUnloadActions)
   //.run(goToWorkViewIfTasks);
 
   /* @ngInject */
@@ -382,6 +383,13 @@
     if (IS_ELECTRON) {
       window.ipcRenderer.send(APP_READY, {});
     }
+  }
+
+  function initUnloadActions($rootScope, AppStorage) {
+    window.onbeforeunload = window.onunload = () => {
+      $rootScope.r.lastActiveTime = new Date();
+      AppStorage.saveToLs();
+    };
   }
 
 })();
