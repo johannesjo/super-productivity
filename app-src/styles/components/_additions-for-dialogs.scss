@@ -24,4 +24,9 @@ md-dialog {
     transition: none;
     transform: translate(0, 100%) scale(0.2);
   }
+
+  @media(max-width: $layout-xs) {
+    max-width: 95%;
+    max-height: 95%;
+  }
 }
