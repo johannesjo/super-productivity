@@ -352,13 +352,15 @@
     }
 
     markAsDone(task) {
+      const currentTask = this.getCurrent();
+      const wasCurrent = (currentTask && currentTask.id === task.id);
       const parentTask = task.parentId && this.getById(task.parentId);
 
       // unset current task first
       this.updateCurrent(undefined);
 
       task.isDone = true;
-      task.doneDate = moment();
+      task.doneDate = window.moment();
 
       if (this.IS_ELECTRON) {
         // add worklog before marking the task as done
@@ -375,7 +377,10 @@
           this.Jira.addWorklog(task);
         }
       }
-      this.selectNextTask(task);
+
+      if (wasCurrent) {
+        this.selectNextTask(task);
+      }
     }
 
     // TODO isCallFromTimeTracking is possibly not needed any more
