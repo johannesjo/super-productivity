@@ -26,7 +26,7 @@
   }
 
   /* @ngInject */
-  function DailySummaryCtrl($rootScope, Tasks, TasksUtil, $mdDialog, Dialogs, $state, GitLog, IS_ELECTRON, $timeout, $scope, AppStorage) {
+  function DailySummaryCtrl($rootScope, Tasks, TasksUtil, $mdDialog, Dialogs, $state, GitLog, IS_ELECTRON, $timeout, $scope, AppStorage, GoogleDriveSync, SimpleToast) {
     const IPC_EVENT_SHUTDOWN = 'SHUTDOWN';
     const SUCCESS_ANIMATION_DURATION = 500;
 
@@ -73,6 +73,10 @@
 
       // save everything
       AppStorage.saveToLs();
+      if (GoogleDriveSync.config && GoogleDriveSync.config.isAutoSyncToRemote) {
+        SimpleToast('CUSTOM', `Syncing Data to Google Drive.`, 'file_upload');
+        GoogleDriveSync.saveTo();
+      }
 
       if (IS_ELECTRON) {
         $mdDialog.show(
