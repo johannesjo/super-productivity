@@ -230,15 +230,7 @@
 
       this.autoSyncInterval = this.$interval(() => {
         // only sync if not in the middle of something
-        if (this._isCurrentPromisePending()) {
-          this._log('SYNC OMITTED because of promise', this.currentPromise, this.currentPromise.$$state.status);
-        } else {
-          this._log('SYNC');
-          this.saveTo()
-            .then(() => {
-              this.SimpleToast('SUCCESS', `Successfully synced Data to Google drive.`, 'file_upload');
-            });
-        }
+        this.saveForSyncIfEnabled();
       }, interval);
     }
 
@@ -277,6 +269,23 @@
         });
 
       return defer.promise;
+    }
+
+    saveForSyncIfEnabled() {
+      if (!this.config.isAutoSyncToRemote) {
+        return this.$q.resolve();
+      }
+
+      if (this._isCurrentPromisePending()) {
+        this._log('SYNC OMITTED because of promise', this.currentPromise, this.currentPromise.$$state.status);
+        return this.$q.reject();
+      } else {
+        this._log('SYNC');
+        return this.saveTo()
+          .then(() => {
+            this.SimpleToast('SUCCESS', `Successfully synced Data to Google drive.`, 'file_upload');
+          });
+      }
     }
 
     saveTo() {

@@ -53,6 +53,7 @@
     .run(checkIfLatestVersion)
     .run(showWelcomeDialog)
     .run(initUnloadActions)
+    .run(initElectronOnBeforeQuit)
   //.run(goToWorkViewIfTasks);
 
   /* @ngInject */
@@ -374,6 +375,38 @@
         SimpleToast('ERROR', 'Electron Error: ' + msg);
         console.error('Electron Error: ' + errorData.error);
         console.log('Stacktrace: ', errorData.stack);
+      });
+    }
+  }
+
+  function initElectronOnBeforeQuit(IS_ELECTRON, GoogleDriveSync, $mdDialog) {
+    const ON_BEFORE_QUIT_EV = 'ON_BEFORE_QUIT';
+    const SHUTDOWN_NOW_EV = 'SHUTDOWN_NOW';
+
+    const confirmQuitAnyWay = () => {
+      const confirm = $mdDialog.confirm()
+        .title(`Some error occurred while syncing`)
+        .textContent(`
+        Some error occurred while syncing to Google Drive (check the console). Do you want to quit anyway?`)
+        .ok('Yes')
+        .cancel('No!');
+      $mdDialog.show(confirm)
+        .then(() => {
+          window.ipcRenderer.send(SHUTDOWN_NOW_EV, {});
+        });
+    };
+
+    if (IS_ELECTRON) {
+      window.ipcRenderer.on(ON_BEFORE_QUIT_EV, () => {
+        if (GoogleDriveSync.config.isAutoSyncToRemote) {
+          GoogleDriveSync.saveForSyncIfEnabled()
+            .then(() => {
+              window.ipcRenderer.send(SHUTDOWN_NOW_EV, {});
+            })
+            .catch(confirmQuitAnyWay);
+        } else {
+          window.ipcRenderer.send(SHUTDOWN_NOW_EV, {});
+        }
       });
     }
   }

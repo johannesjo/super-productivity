@@ -51,7 +51,7 @@ let shouldQuitBecauseAppIsAnotherInstance = app.makeSingleInstance(() => {
 });
 
 if (shouldQuitBecauseAppIsAnotherInstance) {
-  quitApp();
+  quitAppNow();
   return;
 }
 
@@ -109,6 +109,8 @@ app.on('before-quit', () => {
 
 // FRONTEND EVENTS
 // ---------------
+electron.ipcMain.on('SHUTDOWN_NOW', quitAppNow);
+
 electron.ipcMain.on('SHUTDOWN', quitApp);
 
 electron.ipcMain.on('REGISTER_GLOBAL_SHORTCUT', (ev, shortcutPassed) => {
@@ -182,19 +184,15 @@ function registerShowAppShortCut(shortcutPassed) {
   }
 }
 
-function showIdleDialog(idleTimeInMs) {
-  // first show, then send again
-  mainWin.webContents.send('WAS_IDLE', ({
-    idleTimeInMs: idleTimeInMs,
-    minIdleTimeInMs: CONFIG.MIN_IDLE_TIME
-  }));
-}
-
 function showApp() {
   showOrFocus(mainWin);
 }
 
 function quitApp() {
+  mainWin.webContents.send('ON_BEFORE_QUIT');
+}
+
+function quitAppNow() {
   app.isQuiting = true;
   app.quit();
 }

@@ -73,7 +73,8 @@
 
       // save everything
       AppStorage.saveToLs();
-      if (GoogleDriveSync.config && GoogleDriveSync.config.isAutoSyncToRemote) {
+
+      if (!IS_ELECTRON && GoogleDriveSync.config && GoogleDriveSync.config.isAutoSyncToRemote) {
         SimpleToast('CUSTOM', `Syncing Data to Google Drive.`, 'file_upload');
         GoogleDriveSync.saveTo();
       }
