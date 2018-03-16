@@ -1,13 +1,18 @@
 collapsible {
   display: block;
+
+  .collapsible-extra-icon {
+
+  }
+
   .collapsible-title {
     cursor: pointer;
-    //color: $c-accent;
-    ng-md-icon {
+
+    .collapsible-expand-icon {
       transition: all 200ms;
     }
     &.is-expanded {
-      ng-md-icon {
+      .collapsible-expand-icon {
         transform: rotate(-180deg);
       }
     }

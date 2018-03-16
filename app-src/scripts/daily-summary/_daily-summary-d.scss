@@ -1,9 +1,42 @@
 daily-summary {
   @extend %centered-component;
+
+  textarea {
+    background: #ffffff !important;
+    border: 1px solid #cccccc;
+    border-top-width: 1px !important;
+    border-left-width: 1px !important;
+    border-right-width: 1px !important;
+
+    @include dark-theme {
+      background: $dark-theme-bg-lighter !important;
+      color: #ffffff;
+    }
+  }
 }
 
 md-input-container {
   text-align: left;
+}
+
+.finish-day-opts {
+  margin-top: 10px;
+}
+
+.daily-summary-summary {
+  margin-bottom: 30px;
+  p {
+    margin: 5px;
+  }
+}
+
+.daily-summary-collapsible {
+  margin-bottom: 15px;
+  margin-top: 20px;
+
+  .collapsible-title {
+    font-size: 19px;
+  }
 }
 
 .task-summary-table {
@@ -54,6 +87,17 @@ md-input-container {
     text-align: right;
   }
 }
+
+.daily-summary-actions {
+  margin-top: 30px;
+
+  button {
+    ng-md-icon + ng-md-icon {
+      margin-left: -7px;
+    }
+  }
+}
+
 
 .success-animation-wrapper {
   $this-ico-size: 64px;
