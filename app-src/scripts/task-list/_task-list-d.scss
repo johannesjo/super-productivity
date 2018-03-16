@@ -343,7 +343,7 @@ task-list {
   }
 
   .task {
-    @include ng-pop-in-popout;
+    @include crawl-in-out;
   }
 
   .notes {

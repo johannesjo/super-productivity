@@ -24,6 +24,35 @@
   }
 }
 
+@mixin crawl-in-out() {
+  &.ng-enter,
+  &.ng-leave {
+    transition: all 0.2s ease-in-out;
+  }
+
+  &.ng-enter {
+    transform: scaleY(0);
+    max-height: 0;
+  }
+  &.ng-enter-active {
+    transform: scale(1);
+    max-height: 100px;
+  }
+
+  &.ng-leave {
+    display: block;
+    opacity: 1;
+    transform: scale(1);
+    max-height: 50px;
+  }
+  &.ng-leave-active {
+    display: block;
+    opacity: 0;
+    transform: scale(0);
+    max-height: 0;
+  }
+}
+
 @mixin ng-slide-down-up($max-down: 400px, $start-up: 200px) {
   // animation
   &.ng-enter,
