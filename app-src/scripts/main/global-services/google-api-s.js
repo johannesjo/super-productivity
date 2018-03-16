@@ -153,6 +153,8 @@
           window.ipcRenderer.on('GOOGLE_AUTH_TOKEN', (ev, data) => {
             const token = data.access_token;
             this.data.accessToken = token;
+            this.data.expiresAt = (data.expires_in * 1000) + window.moment().valueOf();
+
             //this.data.refreshToken = data.refresh_token;
             this.isLoggedIn = true;
             resolve();
