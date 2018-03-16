@@ -120,7 +120,7 @@ electron.ipcMain.on('TOGGLE_DEV_TOOLS', () => {
 });
 
 electron.ipcMain.on('JIRA', (ev, request) => {
-  jira(mainWin, request);
+  jira(request);
 });
 
 electron.ipcMain.on('GIT_LOG', (ev, cwd) => {
@@ -140,7 +140,6 @@ electron.ipcMain.on('SHOW_OR_FOCUS', () => {
 function createIndicator() {
   indicatorMod.init({
     app,
-    mainWin,
     showApp,
     quitApp,
     IS_MAC,

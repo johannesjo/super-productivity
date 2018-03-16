@@ -1,6 +1,7 @@
 'use strict';
 
 const errorHandler = require('./error-handler');
+const mainWinMod = require('./main-window');
 
 // only optionally require dbus
 let isDBusError = false;
@@ -20,7 +21,6 @@ const interfaceName = serviceName;
 const objectPath = '/' + serviceName.replace(/\./g, '/');
 
 let sessionBus;
-let mainWindow;
 let ifaceDesc;
 let iface;
 
@@ -75,36 +75,35 @@ function init(params) {
       },
     };
 
+    function checkMainWin() {
+      const mainWin = mainWinMod.getWin();
+      if (!mainWin) {
+        errorHandler('DBus: mainWin not ready');
+      }
+    }
+
     // Then we need to create the interface implementation (with actual functions)
     iface = {
       markAsDone: function() {
-        if (!mainWindow) {
-          errorHandler('DBus: mainWindow not ready');
-        }
-        console.log('markAsDone');
-        mainWindow.webContents.send('TASK_MARK_AS_DONE');
+        checkMainWin();
+        const mainWin = mainWinMod.getWin();
+        mainWin.webContents.send('TASK_MARK_AS_DONE');
       },
       startTask: function() {
-        if (!mainWindow) {
-          errorHandler('DBus: mainWindow not ready');
-        }
-        console.log('startTask');
-        mainWindow.webContents.send('TASK_START');
+        checkMainWin();
+        const mainWin = mainWinMod.getWin();
+        mainWin.webContents.send('TASK_START');
       },
       pauseTask: function() {
-        if (!mainWindow) {
-          errorHandler('DBus: mainWindow not ready');
-        }
-        console.log('pauseTask');
-        mainWindow.webContents.send('TASK_PAUSE');
+        checkMainWin();
+        const mainWin = mainWinMod.getWin();
+        mainWin.webContents.send('TASK_PAUSE');
       },
       showApp: function() {
-        console.log('show app');
         params.showApp();
       },
       quitApp: function() {
         params.quitApp();
-        console.log('quit app');
       },
       emit: function() {
         // no nothing, as usual
@@ -122,9 +121,6 @@ function init(params) {
 if (!isDBusError) {
   module.exports = {
     init: init,
-    setMainWindow: (mainWindowPassed) => {
-      mainWindow = mainWindowPassed;
-    },
     setTask: (taskId, taskText) => {
       if (isDBusError) {
         return;
@@ -144,8 +140,6 @@ if (!isDBusError) {
 } else {
   module.exports = {
     init: () => {
-    },
-    setMainWindow: () => {
     },
     setTask: () => {
     },

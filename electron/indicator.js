@@ -13,7 +13,6 @@ let isGnomeShellExtensionRunning = false;
 function init(params) {
   const IS_LINUX = params.IS_LINUX;
   const IS_GNOME = params.IS_GNOME;
-  const mainWin = params.mainWin;
   const showApp = params.showApp;
   const quitApp = params.quitApp;
   const IS_MAC = params.IS_MAC;
@@ -27,11 +26,9 @@ function init(params) {
   // if we have the gnome shell extension installed set up bus
   if (IS_GNOME && isGnomeShellExtensionInstalled) {
     dbus.init({
-      mainWin,
       quitApp,
       showApp,
     });
-    dbus.setMainWindow(mainWin);
     isGnomeShellExtensionRunning = true;
     return;
   }

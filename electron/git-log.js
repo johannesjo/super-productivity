@@ -1,4 +1,6 @@
-module.exports = function (data, mainWindow) {
+const mainWinMod = require('./main-window');
+
+module.exports = function(data) {
   'use strict';
 
   const exec = require('child_process').exec;
@@ -6,8 +8,9 @@ module.exports = function (data, mainWindow) {
 
   exec(cmd, {
     cwd: data.cwd
-  }, function (error, stdout) {
-    mainWindow.webContents.send('GIT_LOG_RESPONSE', {
+  }, function(error, stdout) {
+    const mainWin = mainWinMod.getWin();
+    mainWin.webContents.send('GIT_LOG_RESPONSE', {
       stdout: stdout,
       requestId: data.requestId
     });

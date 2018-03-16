@@ -1,5 +1,6 @@
 const electronGoogleOauth = require('electron-google-oauth');
 const electron = require('electron');
+const mainWinMod = require('./main-window');
 
 const A = {
   CLIENT_ID: '37646582031-e281jj291amtk805td0hgfqss2jfkdcd.apps.googleusercontent.com',

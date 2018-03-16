@@ -1,6 +1,8 @@
 const JiraApi = require('jira-client-fork');
+const mainWinMod = require('./main-window');
 
-module.exports = (mainWindow, request) => {
+module.exports = (request) => {
+  const mainWin = mainWinMod.getWin();
   let config = request.config;
   let apiMethod = request.apiMethod;
   let arguments = request.arguments;
@@ -43,13 +45,13 @@ module.exports = (mainWindow, request) => {
   jira[apiMethod](...arguments)
     .then(res => {
       //console.log('JIRA_RESPONSE', error, res);
-      mainWindow.webContents.send('JIRA_RESPONSE', {
+      mainWin.webContents.send('JIRA_RESPONSE', {
         response: res,
         requestId: requestId
       });
     })
     .catch(err => {
-      mainWindow.webContents.send('JIRA_RESPONSE', {
+      mainWin.webContents.send('JIRA_RESPONSE', {
         error: err,
         requestId: requestId
       });
