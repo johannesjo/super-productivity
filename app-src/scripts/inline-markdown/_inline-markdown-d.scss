@@ -13,6 +13,7 @@ inline-markdown {
   overflow: auto;
   position: relative;
   cursor: text;
+  transition: min-height .2s $ease-in-out-quint;
 
   &.is-editing {
     min-height: 160px;
