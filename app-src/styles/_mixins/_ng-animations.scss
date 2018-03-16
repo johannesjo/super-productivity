@@ -29,26 +29,27 @@
   &.ng-enter,
   &.ng-leave {
     transition: all 0.2s $ease-in-out-quint;
-    overflow: hidden;
+    //overflow: hidden;
+    //transform-origin: 0 0;
   }
 
   &.ng-enter {
-    opacity: 0;
     max-height: 0;
+    transform: scaleY(0);
   }
 
   &.ng-enter.ng-enter-active {
-    opacity: 1;
-    max-height: 400px;
+    max-height: 200px;
+    transform: scaleY(1);
   }
   &.ng-leave {
-    opacity: 1;
     max-height: 200px;
+    transform: scaleY(1);
   }
 
   &.ng-leave.ng-leave-active {
     max-height: 0;
-    opacity: 1;
+    transform: scaleY(0);
   }
 }
 
