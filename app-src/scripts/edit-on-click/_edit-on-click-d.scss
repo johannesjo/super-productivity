@@ -3,8 +3,13 @@
   cursor: pointer;
 }
 
+.edit-on-click-text {
+  display: inline-block;
+}
+
 .edit-on-click-form {
   display: inline-block;
+
   &.duration-form {
     width: auto;
   }
@@ -17,8 +22,20 @@
     padding-left: 2px;
     padding-right: 2px;
   }
-}
 
-.edit-on-click-text {
-  display: inline-block;
+  &.ng-leave {
+    transition: none;
+  }
+
+  &.ng-enter {
+    transition: all 0.15s $ease-in-out-quint;
+  }
+
+  &.ng-enter {
+    transform: scaleY(0);
+  }
+
+  &.ng-enter-active {
+    transform: scaleY(1);
+  }
 }
