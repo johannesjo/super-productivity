@@ -25,14 +25,15 @@
   }
 
   /* @ngInject */
-  function DailyPlannerCtrl($rootScope, $window, $scope, Tasks, TasksUtil, Dialogs, $state, Jira, $filter, IS_ELECTRON, Git, $mdDialog, EV_PROJECT_CHANGED) {
+  function DailyPlannerCtrl(IS_ELECTRON, $rootScope, $window, $scope, Tasks, TasksUtil, Dialogs, $state, Jira, $filter, Git, $mdDialog, EV_PROJECT_CHANGED) {
     let vm = this;
     const _ = $window._;
 
     vm.refreshRemoteTasks = () => {
       vm.taskSuggestions = [];
 
-      if (IS_ELECTRON && Jira.isSufficientJiraSettings()) {
+      const preCheckFailed = Jira.preCheck();
+      if (!preCheckFailed) {
         Jira.checkForNewAndAddToBacklog();
 
         Jira.getSuggestions().then((res) => {
