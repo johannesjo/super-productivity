@@ -48,31 +48,41 @@
       this.SimpleToast = SimpleToast;
       this.$window = $window;
 
+      const that = this;
+
+      const handleResponse = (res) => {
+        // check if proper id is given in callback and if exists in requestLog
+        if (res.requestId && that.requestsLog[res.requestId]) {
+          let currentRequest = that.requestsLog[res.requestId];
+          // cancel timeout for request
+          that.$timeout.cancel(currentRequest.timeout);
+
+          // resolve saved promise
+          if (!res || res.error) {
+            that.$log.log('FRONTEND_REQUEST', currentRequest);
+            that.$log.log('RESPONSE', res);
+            that.SimpleToast('ERROR', 'Jira Request failed: ' + currentRequest.clientRequest.apiMethod + ' – ' + (res && res.error));
+            currentRequest.defer.reject(res);
+          } else {
+            console.log('JIRA_RESPONSE', res);
+
+            currentRequest.defer.resolve(res);
+          }
+          // delete entry for promise afterwards
+          delete that.requestsLog[res.requestId];
+        }
+      };
+
       // set up callback listener for electron
       if (IS_ELECTRON) {
-        const that = this;
         window.ipcRenderer.on(IPC_JIRA_CB_EVENT, (ev, res) => {
-          // check if proper id is given in callback and if exists in requestLog
-          if (res.requestId && that.requestsLog[res.requestId]) {
-            let currentRequest = that.requestsLog[res.requestId];
-            // cancel timeout for request
-            that.$timeout.cancel(currentRequest.timeout);
-
-            // resolve saved promise
-            if (!res || res.error) {
-              that.$log.log('FRONTEND_REQUEST', currentRequest);
-              that.$log.log('RESPONSE', res);
-              that.SimpleToast('ERROR', 'Jira Request failed: ' + currentRequest.clientRequest.apiMethod + ' – ' + (res && res.error));
-              currentRequest.defer.reject(res);
-            } else {
-              currentRequest.defer.resolve(res);
-            }
-            // delete entry for promise afterwards
-            delete that.requestsLog[res.requestId];
-          }
+          handleResponse(res);
         });
       } else if (IS_EXTENSION) {
-        // TODO callback
+        window.addEventListener('SP_JIRA_RESPONSE', (ev) => {
+          handleResponse(ev.detail);
+        });
+
       }
     }
 
@@ -81,6 +91,8 @@
     // Helper functions
     // ----------------
     sendRequest(request) {
+      console.log(request);
+
       // assign uuid to request to know which responsive belongs to which promise
       request.requestId = this.Uid();
       const defer = this.$q.defer();
@@ -103,7 +115,9 @@
         const ev = new CustomEvent('SP_JIRA_REQUEST', {
           detail: request,
         });
-        window.dispatchEvent(ev)
+        setTimeout(() => {
+          window.dispatchEvent(ev);
+        }, 1000);
       }
 
       return defer.promise;
@@ -212,11 +226,14 @@
     }
 
     preCheck(task) {
-      if (!this.IS_ELECTRON) {
-        return this.$q.reject('Jira: Not a in electron context');
-      } else if (!this.isSufficientJiraSettings()) {
+      if (!this.IS_ELECTRON && !this.IS_EXTENSION) {
+        return this.$q.reject('Jira: Not a in electron or extension context');
+      }
+      if (this.IS_ELECTRON && !this.isSufficientJiraSettings()) {
         return this.$q.reject('Jira: Insufficient settings.');
-      } else if (task && !Jira.isJiraTask(task)) {
+      }
+
+      if (task && !Jira.isJiraTask(task)) {
         this.SimpleToast('ERROR', 'Jira Request failed: Not a real ' + ISSUE_TYPE + ' issue.');
         return this.$q.reject('Jira: Not a real ' + ISSUE_TYPE + ' issue.');
       } else if (!this.$window.navigator.onLine) {
