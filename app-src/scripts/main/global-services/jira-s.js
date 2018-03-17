@@ -47,6 +47,7 @@
       this.$log = $log;
       this.SimpleToast = SimpleToast;
       this.$window = $window;
+      this.isExtensionReady = false;
 
       const that = this;
 
@@ -82,7 +83,9 @@
         window.addEventListener('SP_JIRA_RESPONSE', (ev) => {
           handleResponse(ev.detail);
         });
-
+        window.addEventListener('SP_EXTENSION_READY', (ev) => {
+          this.isExtensionReady = true;
+        });
       }
     }
 
@@ -91,8 +94,6 @@
     // Helper functions
     // ----------------
     sendRequest(request) {
-      console.log(request);
-
       // assign uuid to request to know which responsive belongs to which promise
       request.requestId = this.Uid();
       const defer = this.$q.defer();
@@ -115,7 +116,14 @@
         const ev = new CustomEvent('SP_JIRA_REQUEST', {
           detail: request,
         });
-        window.dispatchEvent(ev);
+
+        if (this.isExtensionReady) {
+          window.dispatchEvent(ev);
+        } else {
+          setTimeout(() => {
+            window.dispatchEvent(ev);
+          }, 2000);
+        }
       }
 
       return defer.promise;
