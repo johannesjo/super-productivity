@@ -31,10 +31,11 @@
 
   /* @ngInject */
   class Jira {
-    constructor(IS_ELECTRON, SimpleToast, Uid, $q, $rootScope, Dialogs, Notifier, $injector, $timeout, REQUEST_TIMEOUT, $log, $window) {
+    constructor(IS_ELECTRON, IS_EXTENSION, SimpleToast, Uid, $q, $rootScope, Dialogs, Notifier, $injector, $timeout, REQUEST_TIMEOUT, $log, $window) {
       this.requestsLog = {};
 
       this.IS_ELECTRON = IS_ELECTRON;
+      this.IS_EXTENSION = IS_EXTENSION;
       this.Uid = Uid;
       this.$q = $q;
       this.$rootScope = $rootScope;
@@ -70,8 +71,12 @@
             delete that.requestsLog[res.requestId];
           }
         });
+      } else if (IS_EXTENSION) {
+        // TODO callback
       }
     }
+
+    //SP_JIRA_REQUEST
 
     // Helper functions
     // ----------------
@@ -92,7 +97,14 @@
       };
 
       // send to electron
-      window.ipcRenderer.send(IPC_JIRA_MAKE_REQUEST_EVENT, request);
+      if (this.IS_ELECTRON) {
+        window.ipcRenderer.send(IPC_JIRA_MAKE_REQUEST_EVENT, request);
+      } else if (this.IS_EXTENSION) {
+        const ev = new CustomEvent('SP_JIRA_REQUEST', {
+          detail: request,
+        });
+        window.dispatchEvent(ev)
+      }
 
       return defer.promise;
     }

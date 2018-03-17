@@ -39,7 +39,7 @@
           }, () => {
             // give other error time to display
             errorMsgTimeout = $timeout(() => {
-              SimpleToast('ERROR', 'Connection failed!');
+              SimpleToast('ERROR', 'Connection timed out!');
             }, 3000);
           }
         );
