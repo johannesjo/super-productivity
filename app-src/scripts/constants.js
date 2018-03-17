@@ -254,6 +254,7 @@
     .constant('GIT_UPDATE_POLL_INTERVAL', 60 * 1000 * 0.25)
     .constant('TRACKING_INTERVAL', 1000)
     .constant('IS_ELECTRON', (typeof window.ipcRenderer !== 'undefined'))
+    .constant('IS_EXTENSION', (window.localStorage.getItem('SUPER_PRODUCTIVITY_CHROME_EXTENSION') === 'IS_ENABLED'))
     .constant('THEMES', [
         'red',
         'pink',

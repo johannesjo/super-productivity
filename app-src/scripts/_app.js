@@ -47,7 +47,7 @@
     .run(initAutomaticSyncIfEnabled)
     .run(initAutomaticBackupsIfEnabled)
     .run(initElectronErrorHandling)
-    .run(sendAppReadyToElectron)
+    .run(sendAppReadyToElectronAndExtension)
     .run(preventMultipleInstances)
     .run(setStartedTimes)
     .run(checkIfLatestVersion)
@@ -411,10 +411,17 @@
     }
   }
 
-  function sendAppReadyToElectron(IS_ELECTRON) {
+  function sendAppReadyToElectronAndExtension(IS_ELECTRON, IS_EXTENSION) {
     const APP_READY = 'APP_READY';
     if (IS_ELECTRON) {
       window.ipcRenderer.send(APP_READY, {});
+    }
+    // send to extension if enabled
+    else if (IS_EXTENSION) {
+      // we need to wait a second for the extension to be loaded as well
+      setTimeout(() => {
+        window.dispatchEvent(new Event(APP_READY));
+      }, 1500);
     }
   }
 
