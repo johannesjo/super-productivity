@@ -6,7 +6,7 @@
  * Service in the superProductivity.
  */
 
-(function () {
+(function() {
   'use strict';
 
   const IPC_JIRA_CB_EVENT = 'JIRA_RESPONSE';
@@ -99,17 +99,17 @@
 
     static mapComments(issue) {
       return issue.fields.comment && issue.fields.comment.comments && issue.fields.comment.comments.map((comment) => {
-          return {
-            author: comment.author.name,
-            body: comment.body
-          };
-        });
+        return {
+          author: comment.author.name,
+          body: comment.body
+        };
+      });
     }
 
     static mapAttachments(issue) {
       return issue.fields.attachment && issue.fields.attachment.map((attachment) => {
-          return attachment.content;
-        });
+        return attachment.content;
+      });
     }
 
     static mapAndAddChangelogToTask(task, issue) {
