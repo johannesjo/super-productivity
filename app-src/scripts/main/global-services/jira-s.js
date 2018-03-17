@@ -115,9 +115,7 @@
         const ev = new CustomEvent('SP_JIRA_REQUEST', {
           detail: request,
         });
-        setTimeout(() => {
-          window.dispatchEvent(ev);
-        }, 1000);
+        window.dispatchEvent(ev);
       }
 
       return defer.promise;
