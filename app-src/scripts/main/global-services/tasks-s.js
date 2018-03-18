@@ -17,7 +17,7 @@
   /* @ngInject */
   class Tasks {
 
-    constructor(Uid, $rootScope, Dialogs, IS_ELECTRON, ShortSyntax, TasksUtil, Jira, TakeABreakReminder, SimpleToast, AppStorage, EV, $q) {
+    constructor(Uid, $rootScope, Dialogs, IS_ELECTRON, IS_EXTENSION, ShortSyntax, TasksUtil, Jira, TakeABreakReminder, SimpleToast, AppStorage, EV, $q) {
       this.EV = EV;
       this.$rootScope = $rootScope;
       this.$q = $q;
@@ -27,6 +27,7 @@
       this.ShortSyntax = ShortSyntax;
       this.TasksUtil = TasksUtil;
       this.IS_ELECTRON = IS_ELECTRON;
+      this.IS_EXTENSION = IS_EXTENSION;
       this.SimpleToast = SimpleToast;
       this.Jira = Jira;
       this.AppStorage = AppStorage;
@@ -362,7 +363,7 @@
       task.isDone = true;
       task.doneDate = window.moment();
 
-      if (this.IS_ELECTRON) {
+      if (this.IS_ELECTRON || this.IS_EXTENSION) {
         // add worklog before marking the task as done
         if (this.TasksUtil.isJiraTask(task)) {
           this.Jira.addWorklog(task).then(() => {
@@ -405,7 +406,7 @@
         }
 
         // check if in electron context
-        if (this.IS_ELECTRON) {
+        if (this.IS_ELECTRON || this.IS_EXTENSION) {
           if (!isCallFromTimeTracking) {
             const parentTask = task.parentId && this.getById(task.parentId);
 
