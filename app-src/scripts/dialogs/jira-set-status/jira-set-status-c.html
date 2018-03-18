@@ -31,19 +31,19 @@
           Do you want to update the task '<strong ng-bind="vm.task.title"></strong>' on Jira?
         </p>
 
-        <p>Move to:</p>
+        <h2 class="md-subhead">Move to:</h2>
         <md-radio-group ng-model="vm.chosenTransitionIndex">
-          <md-radio-button ng-repeat="transition in vm.transitions"
-                           value="{{$index}}"
-                           class="md-primary"
-                           ng-bind="transition.name">
+          <md-radio-button
+            ng-value="$index"
+            ng-repeat="transition in vm.transitions"
+            class="md-primary">{{transition.name}}
           </md-radio-button>
         </md-radio-group>
 
         <md-checkbox md-no-ink
                      ng-model="vm.saveAsDefaultAction"
                      aria-label="save as default action">
-          Mark this as a default action for setting a task to
+          Make <strong ng-bind="vm.transitions[vm.chosenTransitionIndex].name"></strong> the default action for setting a task to
           <strong ng-if="vm.localType==='OPEN'">open</strong>
           <strong ng-if="vm.localType==='IN_PROGRESS'">in progress</strong>
           <strong ng-if="vm.localType==='DONE'">done</strong>.
