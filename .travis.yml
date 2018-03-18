@@ -40,7 +40,7 @@ cache:
 
 
 before_script:
-  - 'yarn add -g bower gulp --quiet'
+  - 'yarn global add bower gulp'
   - 'bower install'
 
 script:
