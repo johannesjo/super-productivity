@@ -129,7 +129,7 @@
     "karma-sinon": "^1.0.5",
     "lazypipe": "latest",
     "merge-stream": "latest",
-    "node-sass": "latest",
+    "node-sass": "4.8.1",
     "npm-run-all": "^4.1.2",
     "protractor": "latest",
     "require-dir": "latest",
