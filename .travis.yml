@@ -33,6 +33,7 @@ addons:
       - sshpass
 
 cache:
+  yarn: true
   directories:
   - node_modules
   - $HOME/.cache/electron
@@ -40,7 +41,7 @@ cache:
 
 
 before_script:
-  - 'npm install -g bower gulp --quiet'
+  - 'yarn add -g bower gulp --quiet'
   - 'bower install'
 
 script:
@@ -55,7 +56,7 @@ script:
         electronuserland/builder:wine-chrome \
         /bin/bash -c "echo '____DOCKER_INNER_START____' && ls -l && yarn global add bower gulp && yarn --link-duplicates --pure-lockfile && yarn run distLinuxAndWindows && ls -l ./dist"
     else
-      npm install --quiet && npm install 7zip-bin-mac && npm run pub
+      yarn install && yarn add 7zip-bin-mac && yarn run pub
     fi
 
 after_success:
