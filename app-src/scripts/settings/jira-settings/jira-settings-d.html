@@ -30,15 +30,15 @@
   <p>Here you can reconfigure your default transitions. Jira enables a wide configuration of transitions usually coming into action as different columns on your Jira agile board we can't make assumptions about where and when to transition your tasks and you need to set it manually.</p>
 </help-section>
 
-<!--<div class="!vm.IS_ELECTRON">-->
-<p>Please download the chrome extension in order to allow communication with the Jira Api.</p>
-<md-button class="md-raised md-primary"
-           target="_blank"
-           href="https://github.com/johannesjo/super-productivity-chrome-extension">
-  <ng-md-icon icon="file_download"></ng-md-icon>
-  Download now
-</md-button>
-<!--</div>-->
+<div class="!vm.IS_ELECTRON">
+  <p>Please download the chrome extension in order to allow communication with the Jira Api.</p>
+  <md-button class="md-raised md-primary"
+             target="_blank"
+             href="https://github.com/johannesjo/super-productivity-chrome-extension">
+    <ng-md-icon icon="file_download"></ng-md-icon>
+    Download now
+  </md-button>
+</div>
 
 <div ng-if="vm.hasJiraSupport">
   <md-switch ng-model="vm.settings.isJiraEnabled"
