@@ -26,7 +26,9 @@ This is a ToDo List / Time Tracker / Personal Jira Task Manager for Linux, MacOS
 And much more!
 
 ## Web Version
-Check out the [web-version](http://super-productivity.com) to get a quick idea of the app. But keep in mind it is more limited (no Jira integration, time tracking only works if the app is open).
+Check out the [web-version](http://super-productivity.com). It is a little bit more limited (time tracking only works if the app is open and idle time tracking is disabled).
+
+If you want the Jira Integration to work you have also to download and install the [Super Productivity Chrome Extension](https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb).
 
 ## Downloads & Install
 ### Linux
