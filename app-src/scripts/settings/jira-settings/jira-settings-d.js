@@ -27,8 +27,11 @@
   }
 
   /* @ngInject */
-  function JiraSettingsCtrl(Jira, SimpleToast, $timeout, $scope) {
+  function JiraSettingsCtrl(Jira, SimpleToast, $timeout, $scope, IS_ELECTRON, IS_EXTENSION) {
     let vm = this;
+    vm.IS_ELECTRON = IS_ELECTRON;
+    vm.IS_EXTENSION = IS_EXTENSION;
+    vm.hasJiraSupport = IS_ELECTRON || IS_EXTENSION;
 
     vm.testJiraCredentials = () => {
       let errorMsgTimeout;
