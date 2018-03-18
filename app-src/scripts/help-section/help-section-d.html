@@ -1,11 +1,11 @@
-<md-button class="md-icon-button help-btn"
+<md-button class="md-icon-button help-btn md-raised"
            aria-label="Show Help for section"
            ng-click="vm.isShowHelp =!vm.isShowHelp;">
   <ng-md-icon icon="help_outline"></ng-md-icon>
 </md-button>
 
 <div class="help-text"
-     ng-show="vm.isShowHelp">
+     ng-if="vm.isShowHelp">
   <div class="help-icon-wrapper">
     <ng-md-icon icon="help_outline"></ng-md-icon>
   </div>

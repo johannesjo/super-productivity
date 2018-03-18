@@ -5,6 +5,7 @@ help-section {
     margin-bottom: 40px;
     border-bottom: 2px solid $c-accent;
     border-top: 2px solid $c-accent;
+    @include ng-slide-down-up();
   }
 
   .help-btn {
