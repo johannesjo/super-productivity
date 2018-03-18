@@ -1,3 +1,42 @@
+<a name="1.9.4"></a>
+## [1.9.4](https://github.com/johannesjo/super-productivity/compare/v1.9.3...v1.9.4) (2018-03-18)
+
+
+### Bug Fixes
+
+* add strike-through again for done tasks ([a6bd449](https://github.com/johannesjo/super-productivity/commit/a6bd449))
+* only select next task if current task was marked as done ([a543829](https://github.com/johannesjo/super-productivity/commit/a543829))
+* **chromeExtension:** jira set status modal ([e7c75ac](https://github.com/johannesjo/super-productivity/commit/e7c75ac))
+* only show download extension button for web version ([6444a40](https://github.com/johannesjo/super-productivity/commit/6444a40))
+* only show download extension button for web version and if the extension is not installed already ([9b3359c](https://github.com/johannesjo/super-productivity/commit/9b3359c))
+* scrolling on mobile with ng-sortable ([9aac5bb](https://github.com/johannesjo/super-productivity/commit/9aac5bb))
+
+
+### Features
+
+* add nice little animation to the task title edit form ([565250f](https://github.com/johannesjo/super-productivity/commit/565250f))
+* add notification when syncing ([26f4d40](https://github.com/johannesjo/super-productivity/commit/26f4d40))
+* add transition to inline-markdown ([fba83fa](https://github.com/johannesjo/super-productivity/commit/fba83fa))
+* improve slide animation ([caca38a](https://github.com/johannesjo/super-productivity/commit/caca38a))
+* make daily summary much more lucid ([df1437c](https://github.com/johannesjo/super-productivity/commit/df1437c))
+* make dialogs bigger on mobile ([a6f609f](https://github.com/johannesjo/super-productivity/commit/a6f609f))
+* only show import error, when an error occured ([1a6aab3](https://github.com/johannesjo/super-productivity/commit/1a6aab3))
+* **chromeExtension:** wait for extension to be ready before sending jira events ([54e1877](https://github.com/johannesjo/super-productivity/commit/54e1877))
+* slightly improve task enter leave animations ([46c79eb](https://github.com/johannesjo/super-productivity/commit/46c79eb))
+* sync to google drive before closing app ([3e4d4e9](https://github.com/johannesjo/super-productivity/commit/3e4d4e9))
+* **chromeExtension:** add basic jira interface ([1cf304d](https://github.com/johannesjo/super-productivity/commit/1cf304d))
+* **chromeExtension:** add IS_EXTENSION checks for task jira actions ([64eef30](https://github.com/johannesjo/super-productivity/commit/64eef30))
+* sync before finishing day ([4b6b37a](https://github.com/johannesjo/super-productivity/commit/4b6b37a))
+* **chromeExtension:** basic communication interface for jira ready ([348ecb1](https://github.com/johannesjo/super-productivity/commit/348ecb1))
+* **chromeExtension:** basic initialization of extension interface ([de3164e](https://github.com/johannesjo/super-productivity/commit/de3164e))
+* **chromeExtension:** improve help section ([18118ba](https://github.com/johannesjo/super-productivity/commit/18118ba))
+* **chromeExtension:** remove APP_READY and timeouts ([5d3651f](https://github.com/johannesjo/super-productivity/commit/5d3651f))
+* **chromeExtension:** update jira settings to reflect on the extension being available ([de93daa](https://github.com/johannesjo/super-productivity/commit/de93daa))
+* **gDriveSync:** also set expires at for electron flow ([076525d](https://github.com/johannesjo/super-productivity/commit/076525d))
+* **taskList:** move time and time button together ([6a5ba34](https://github.com/johannesjo/super-productivity/commit/6a5ba34))
+
+
+
 <a name="1.9.3"></a>
 ## [1.9.3](https://github.com/johannesjo/super-productivity/compare/v1.9.2...v1.9.3) (2018-03-13)
 
