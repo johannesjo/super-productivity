@@ -208,20 +208,23 @@
     }
 
     importData(data) {
-      this.SimpleToast('ERROR', 'If you can see this, something went wrong importing your data.');
+      try {
+        // cancel saving current app data to ls
+        if (this.updateLsInterval) {
+          this.$interval.cancel(this.updateLsInterval);
+        }
 
-      // cancel saving current app data to ls
-      if (this.updateLsInterval) {
-        this.$interval.cancel(this.updateLsInterval);
+        _.forOwn(data, (val, key) => {
+          this.saveLsItem(val, key);
+        });
+
+        // unset handlers for unload to prevent current app state from overwriting the imports
+        window.onbeforeunload = window.onunload = undefined;
+        window.location.reload(true);
+      } catch (e) {
+        console.error(e);
+        this.SimpleToast('ERROR', 'Something went wrong importing your data.');
       }
-
-      _.forOwn(data, (val, key) => {
-        this.saveLsItem(val, key);
-      });
-
-      // unset handlers for unload to prevent current app state from overwriting the imports
-      window.onbeforeunload = window.onunload = undefined;
-      window.location.reload(true);
     }
 
     getProjects() {
