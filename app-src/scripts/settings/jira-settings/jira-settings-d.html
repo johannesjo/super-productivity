@@ -70,15 +70,25 @@
         <div class="hint">e.g.: assignee = "<span ng-bind="vm.settings.userName"></span>" AND resolution = Unresolved ORDER BY updatedDate DESC
         </div>
       </md-input-container>
-      <md-input-container class="md-block">
-        <div>
-          <md-switch ng-model="vm.settings.isEnabledAutoAdd"
-                     aria-label="Add worklog when sub task is done">
-            Auto add issues from Jira to backlog
-          </md-switch>
-        </div>
-      </md-input-container>
-      <md-input-container class="md-block">
+
+      <md-button aria-label="Test credentials"
+                 class="md-primary md-raised"
+                 ng-click="vm.testJiraCredentials()">
+        <ng-md-icon icon="import_export"></ng-md-icon>
+        Test credentials
+      </md-button>
+
+      <h3 class="md-subtitle">Advanced Options</h3>
+
+      <div>
+        <md-switch ng-model="vm.settings.isEnabledAutoAdd"
+                   aria-label="Auto add issues from Jira to backlog">
+          Auto add issues from Jira to backlog
+        </md-switch>
+      </div>
+
+      <md-input-container class="md-block"
+                          ng-if="vm.settings.isEnabledAutoAdd">
         <label>JQL Query for Auto Adding Tasks to Backlog</label>
         <input type="text"
                ng-disabled="!vm.settings.isEnabledAutoAdd"
@@ -90,47 +100,37 @@
                  aria-label="Update issue description on jira if task notes are updated">
         Update issue description on Jira if task notes are updated
       </md-switch>
+
       <md-switch ng-model="vm.settings.isCheckToReAssignTicketOnTaskStart"
                  aria-label="Check if current ticket is assigned to current user">
         Check if current ticket is assigned to current user
       </md-switch>
-      <md-button aria-label="Test credentials"
-                 class="md-primary md-raised"
-                 ng-click="vm.testJiraCredentials()">
-        <ng-md-icon icon="import_export"></ng-md-icon>
-        Test credentials
-      </md-button>
+
       <section>
         <h3 class="md-subtitle">Worklog</h3>
 
-        <md-input-container class="md-block">
-          <div>
-            <md-switch ng-model="vm.settings.isWorklogEnabled"
-                       aria-label="open dialog for adding a worklog to jira when task is done">
-              Open worklog dialog for adding a worklog to Jira when task is done
-            </md-switch>
-          </div>
-        </md-input-container>
+        <div>
+          <md-switch ng-model="vm.settings.isWorklogEnabled"
+                     aria-label="open dialog for adding a worklog to jira when task is done">
+            Open worklog dialog for adding a worklog to Jira when task is done
+          </md-switch>
+        </div>
 
-        <md-input-container class="md-block">
-          <div>
-            <md-switch ng-model="vm.settings.isAddWorklogOnSubTaskDone"
-                       ng-disabled="!vm.settings.isWorklogEnabled"
-                       aria-label="Add worklog when sub task is done">
-              Open worklog dialog when sub task is done and not for tasks with sub tasks themselves
-            </md-switch>
-          </div>
-        </md-input-container>
+        <div>
+          <md-switch ng-model="vm.settings.isAddWorklogOnSubTaskDone"
+                     ng-disabled="!vm.settings.isWorklogEnabled"
+                     aria-label="Add worklog when sub task is done">
+            Open worklog dialog when sub task is done and not for tasks with sub tasks themselves
+          </md-switch>
+        </div>
 
-        <md-input-container class="md-block">
-          <div>
-            <md-switch ng-model="vm.settings.isAutoWorklog"
-                       ng-disabled="!vm.settings.isWorklogEnabled"
-                       aria-label="(not recommended) send updates to worklog automatically when task is done">
-              (not recommended!) Send updates to worklog automatically without dialog
-            </md-switch>
-          </div>
-        </md-input-container>
+        <div>
+          <md-switch ng-model="vm.settings.isAutoWorklog"
+                     ng-disabled="!vm.settings.isWorklogEnabled"
+                     aria-label="(not recommended) send updates to worklog automatically when task is done">
+            (not recommended!) Send updates to worklog automatically without dialog
+          </md-switch>
+        </div>
       </section>
 
 
