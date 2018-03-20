@@ -37,12 +37,14 @@
     function cleanupThemeVars() {
       // wait for var to be there
       $scope.$evalAsync(() => {
-
         vm.currentTheme = vm.currentTheme || DEFAULT_THEME;
         vm.isDarkTheme = vm.currentTheme && vm.currentTheme.indexOf('dark') > -1;
         vm.selectedTheme = vm.currentTheme && vm.currentTheme
           .replace('-theme', '')
           .replace('-dark', '');
+
+        console.log(vm.currentTheme, vm.isDarkTheme);
+
       });
     }
 
@@ -56,7 +58,7 @@
       if (value) {
         if (vm.isDarkTheme) {
           vm.currentTheme = value + '-dark';
-        } else {
+        } else if (vm.isDarkTheme === false) {
           vm.currentTheme = value + '-theme';
         }
 
@@ -75,7 +77,7 @@
               $rootScope.r.bodyClass = 'dark-theme';
             }
           }
-        } else {
+        } else if (value === false) {
           vm.currentTheme = vm.currentTheme.replace('-dark', '-theme');
           if (vm.isCurrentProjectTheme) {
             if (!vm.isBoxed) {
@@ -104,6 +106,8 @@
     });
 
     $scope.$on('$destroy', () => {
+      console.log('DESTROY');
+
       // remove watchers manually
       _.each(watchers, (watcher) => {
         watcher();
