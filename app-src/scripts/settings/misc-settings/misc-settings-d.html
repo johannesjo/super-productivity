@@ -13,14 +13,6 @@
     <p>Allows you to configure a reoccurring reminder when you have worked for a specified amount of time without taking a break.</p>
     <p>You can modify the message displayed. ${duration} will be replaced with the time spent without a break.</p>
   </div>
-
-  <div class="md-subhead">Pomodoro Settings</div>
-  <p>The pomodoro timer can be configured via a couple of settings. The duration of every work session, the duration of normal breaks, the number of work sessions to run before a longer break is started and the duration of this longer break.</p>
-  <p>You can also set if you want to display your distractions during your pomodoro breaks.</p>
-  <p>Setting "Pause time tracking on pomodoro break" will also track your breaks as work time spent on a task. Setting "Pause time tracking on
-    <strong>longer</strong> pomodoro break" will do the same for the longer breaks.</p>
-  <p>Enabling "Pause pomodoro session when no active task" will also pause the pomodoro session, when you pause a task.</p>
-
 </help-section>
 
 <div>
@@ -77,93 +69,4 @@
     <textarea ng-model="vm.settings.takeABreakMessage"
               rows="3"></textarea>
   </md-input-container>
-</section>
-
-<section>
-  <h3 class="md-subhead">
-    <ng-md-icon icon="add_alert"></ng-md-icon>
-    Pomodoro
-  </h3>
-
-  <div>
-    <md-switch ng-model="vm.settings.pomodoro.isEnabled"
-               aria-label="Enable Pomodoro Timer">
-      Enable Pomodoro Timer
-    </md-switch>
-  </div>
-
-  <div ng-show="vm.settings.pomodoro.isEnabled">
-    <md-input-container class="md-block md-icon-float">
-      <label>Work Session Duration</label>
-      <ng-md-icon icon="timer"
-                  aria-label="timer"></ng-md-icon>
-      <input type="text"
-             input-duration
-             ng-model="vm.settings.pomodoro.duration">
-    </md-input-container>
-
-    <md-input-container class="md-block md-icon-float">
-      <label>Break Duration</label>
-      <ng-md-icon icon="timer"
-                  aria-label="timer"></ng-md-icon>
-      <input type="text"
-             input-duration
-             ng-model="vm.settings.pomodoro.breakDuration">
-    </md-input-container>
-
-    <md-input-container class="md-block md-icon-float">
-      <label>Longer Break Duration</label>
-      <ng-md-icon icon="timer"
-                  aria-label="timer"></ng-md-icon>
-      <input type="text"
-             input-duration
-             ng-model="vm.settings.pomodoro.longerBreakDuration">
-    </md-input-container>
-
-    <md-input-container class="md-block">
-      <label>Cycles for longer break</label>
-      <input type="text"
-             ng-model="vm.settings.pomodoro.cyclesBeforeLongerBreak">
-    </md-input-container>
-
-    <div>
-      <md-switch ng-model="vm.settings.pomodoro.isGoToWorkView"
-                 aria-label="Go to work view when starting a session">
-        Go to work view when starting a session
-      </md-switch>
-    </div>
-    <div>
-      <md-switch ng-model="vm.settings.pomodoro.isManualContinue"
-                 aria-label="Manually confirm continuing session after break ">
-        Manually confirm continuing session after break
-      </md-switch>
-    </div>
-    <div>
-      <md-switch ng-model="vm.settings.pomodoro.isStopTrackingOnBreak"
-                 aria-label="Pause time tracking on pomodoro break">
-        Pause time tracking on pomodoro break
-      </md-switch>
-    </div>
-
-    <div>
-      <md-switch ng-model="vm.settings.pomodoro.isStopTrackingOnLongBreak"
-                 aria-label="Pause time tracking on longer pomodoro break">
-        Pause time tracking on <strong>longer</strong> pomodoro break
-      </md-switch>
-    </div>
-
-    <div>
-      <md-switch ng-model="vm.settings.pomodoro.isPlaySound"
-                 aria-label="Play sound when session done">
-        Play sound when session done
-      </md-switch>
-    </div>
-
-    <div>
-      <md-switch ng-model="vm.settings.pomodoro.isShowDistractionsOnBreak"
-                 aria-label="Show distractions on break">
-        Show distractions on break
-      </md-switch>
-    </div>
-  </div>
 </section>
