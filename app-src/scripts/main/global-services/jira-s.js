@@ -188,6 +188,15 @@
       });
     }
 
+    _makeIssueLink(issueKey) {
+      let fullLink = this.$rootScope.r.jiraSettings.host + '/browse/' + issueKey;
+      const matchProtocolRegEx = /(^[^:]+):\/\//;
+      if (!fullLink.match(matchProtocolRegEx)) {
+        fullLink = 'https://' + fullLink;
+      }
+      return fullLink;
+    }
+
     mapIssue(issue) {
       return {
         title: issue.key + ' ' + issue.fields.summary,
@@ -200,7 +209,7 @@
         originalUpdated: issue.fields.updated,
         originalStatus: issue.fields.status,
         originalAttachment: Jira.mapAttachments(issue),
-        originalLink: 'https://' + this.$rootScope.r.jiraSettings.host + '/browse/' + issue.key,
+        originalLink: this._makeIssueLink(issue.key),
         originalEstimate: issue.fields.timeestimate && moment.duration({
           seconds: issue.fields.timeestimate
         }),
