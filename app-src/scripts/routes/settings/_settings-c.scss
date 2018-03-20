@@ -1,42 +1,62 @@
 .page-settings {
   text-align: left;
 
-  h1 {
-    // NOTE: this is not working
-    break-after: avoid;
+  collapsible {
+    position: relative;
   }
 
-  @media(min-width: $layout-gt-sm) {
-    column-count: 2;
-    section {
-      display: inline-block;
-      width: 100%;
-      overflow: hidden;
-      break-inside: avoid;
-      -webkit-column-break-inside: avoid;
+  .collapsible-title {
+    font-size: 18px;
+    margin-top: 0;
+    max-width: 90%;
+    display: block;
+  }
+
+  .collapsible-panel {
+    overflow: visible;
+    padding-top: 10px;
+
+    > * {
+      // for help icon positioning
+      position: static;
     }
   }
 
-  @media(min-width: $layout-gt-lg) {
-    column-count: 3;
+  .help-btn {
+    top: -8px;
+    right: -8px;
+    visibility: hidden;
+    animation: 0.3s help-ico-animation ease-in-out;
+    animation-fill-mode: forwards;
+    // wait for slide up
+    animation-delay: 0.3s;
   }
 
-  .keep-together {
-    display: inline-block;
-    width: 100%;
+  .ng-leave .help-btn {
+    display: none;
   }
 
   .config-section {
     padding: 15px;
     margin-bottom: 10px;
     background: #ffffff;
-    position: relative;
 
     @include dark-theme {
       background-color: $dark-theme-bg-lighter;
     }
     .md-title {
       margin-top: 0;
+    }
+  }
+
+  @media(min-width: $layout-gt-sm) {
+    .settings-col {
+      &:first-child {
+        margin-right: 10px;
+      }
+      &:last-child {
+        margin-left: 10px;
+      }
     }
   }
 
@@ -56,5 +76,22 @@
         margin-right: 0;
       }
     }
+  }
+}
+
+@keyframes help-ico-animation {
+  0% {
+    -webkit-transform: scale(0);
+    transform: scale(0);
+    visibility: visible;
+  }
+  50% {
+    -webkit-transform: scale(1.1);
+    transform: scale(1.1);
+  }
+  100% {
+    -webkit-transform: scale(1);
+    transform: scale(1);
+    visibility: visible;
   }
 }

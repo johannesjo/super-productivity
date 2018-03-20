@@ -8,6 +8,10 @@ collapsible {
   .collapsible-title {
     cursor: pointer;
 
+    &:focus{
+      outline: none;
+    }
+
     .collapsible-expand-icon {
       transition: all 200ms;
     }

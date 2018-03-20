@@ -1,50 +1,81 @@
 <div class="page-settings">
 
-  <section class="config-section"
-           md-whiteframe="2">
-    <project-settings all-projects="vm.allProjects"
-                      selected-current-project="vm.selectedCurrentProject"></project-settings>
-  </section>
+  <div layout-gt-sm="row">
+    <div flex-gt-sm="50"
+         class="settings-col">
+      <h1 class="md-title">Global Settings</h1>
+
+      <section class="config-section"
+               md-whiteframe="2">
+        <collapsible collapsible-title="Projects"
+                     icon="account_balance">
+          <project-settings all-projects="vm.allProjects"
+                            selected-current-project="vm.selectedCurrentProject"></project-settings>
+        </collapsible>
+      </section>
 
 
-  <section class="config-section"
-           md-whiteframe="2">
-    <backup-settings settings="r.config"></backup-settings>
-  </section>
+      <section class="config-section"
+               md-whiteframe="2">
+        <collapsible collapsible-title="Backup and Sync"
+                     icon="swap_vert">
+
+          <backup-settings settings="r.config"></backup-settings>
+        </collapsible>
+      </section>
 
 
-  <section class="config-section keyboard-settings"
-           md-whiteframe="2">
-    <keyboard-settings keys="r.keys"></keyboard-settings>
-  </section>
+      <section class="config-section keyboard-settings"
+               md-whiteframe="2">
+        <collapsible collapsible-title="Keyboard Shortcuts"
+                     icon="keyboard">
+
+          <keyboard-settings keys="r.keys"></keyboard-settings>
+        </collapsible>
+      </section>
 
 
-  <section class="config-section"
-           md-whiteframe="2">
-    <misc-settings settings="r.config"></misc-settings>
-  </section>
+      <section class="config-section"
+               md-whiteframe="2">
+        <collapsible collapsible-title="Misc Settings"
+                     icon="settings">
+
+          <misc-settings settings="r.config"></misc-settings>
+        </collapsible>
+      </section>
+    </div>
+
+    <div flex-gt-sm="50"
+         class="settings-col">
+
+      <h1 class="md-title">Project Specific Settings</h1>
+
+      <section class="config-section"
+               md-whiteframe="2">
+        <collapsible collapsible-title="Theme Settings"
+                     icon="color_lens">
+          <theme-settings current-theme="r.theme"
+                          is-current-project-theme="true"></theme-settings>
+        </collapsible>
+      </section>
+
+      <section class="config-section"
+               md-whiteframe="2">
+        <collapsible collapsible-title="Jira-Integration">
+
+          <jira-settings settings="r.jiraSettings"></jira-settings>
+        </collapsible>
+      </section>
 
 
-  <div class="keep-together">
-    <h1 class="md-title">Project Specific Settings</h1>
+      <section class="config-section"
+               md-whiteframe="2">
+        <collapsible collapsible-title="Git Integration"
+                     icon="github-circle">
 
-    <section class="config-section"
-             md-whiteframe="2">
-      <theme-settings current-theme="r.theme"
-                      is-current-project-theme="true"></theme-settings>
-    </section>
+          <git-settings settings="r.git"></git-settings>
+        </collapsible>
+      </section>
+    </div>
   </div>
-
-  <section class="config-section"
-           md-whiteframe="2">
-    <jira-settings settings="r.jiraSettings"></jira-settings>
-  </section>
-
-
-  <section class="config-section"
-           md-whiteframe="2">
-    <git-settings settings="r.git"></git-settings>
-  </section>
-
-
 </div>
