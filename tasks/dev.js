@@ -33,10 +33,12 @@ const merge = require('merge-stream');
 const plumber = require('gulp-plumber');
 const sort = require('gulp-natural-sort');
 const notify = require('gulp-notify');
+const del = require('del');
 
 // main task
 gulp.task('default', function(cb) {
   runSequence(
+    'cleanTemplateCacheFile',
     //'ngConfig',
     'wiredep',
     'lint',
@@ -54,6 +56,10 @@ gulp.task('default', function(cb) {
 });
 gulp.task('serve', ['default']);
 gulp.task('server', ['default']);
+
+gulp.task('cleanTemplateCacheFile', function() {
+  return del.sync(config.scripts + config.templateCacheFileName);
+});
 
 gulp.task('injectAll', function(callback) {
   runSequence(

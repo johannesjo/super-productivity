@@ -1897,7 +1897,7 @@ concat-stream@~1.4.7:
     readable-stream "~1.1.9"
     typedarray "~0.0.5"
 
-concat-with-sourcemaps@^1.0.0:
+concat-with-sourcemaps@*, concat-with-sourcemaps@^1.0.0:
   version "1.0.5"
   resolved "https://registry.yarnpkg.com/concat-with-sourcemaps/-/concat-with-sourcemaps-1.0.5.tgz#8964bc2347d05819b63798104d87d6e001bed8d0"
   dependencies:
@@ -3115,7 +3115,7 @@ event-emitter@^0.3.5, event-emitter@~0.3.4:
     d "1"
     es5-ext "~0.10.14"
 
-event-stream@^3.1.0, event-stream@^3.1.7, event-stream@^3.3.4, event-stream@~3.3.0:
+event-stream@*, event-stream@3.3.4, event-stream@^3.1.0, event-stream@^3.1.7, event-stream@^3.3.4, event-stream@~3.3.0:
   version "3.3.4"
   resolved "http://registry.npmjs.org/event-stream/-/event-stream-3.3.4.tgz#4ab4c9a0f5a54db9338b4c34d86bfce8f4b35571"
   dependencies:
@@ -4017,6 +4017,18 @@ gtoken@^1.1.0:
     mime "^1.4.1"
     request "^2.72.0"
 
+gulp-angular-templatecache@^2.2.0:
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/gulp-angular-templatecache/-/gulp-angular-templatecache-2.2.0.tgz#208a5123e3d0683a62d18e3b76798327b8bf1a74"
+  dependencies:
+    event-stream "3.3.4"
+    gulp-concat "2.6.1"
+    gulp-footer "1.0.5"
+    gulp-header "1.8.9"
+    jsesc "2.5.1"
+    lodash.template "^4.4.0"
+    through2 "^2.0.3"
+
 gulp-autoprefixer@latest:
   version "5.0.0"
   resolved "https://registry.yarnpkg.com/gulp-autoprefixer/-/gulp-autoprefixer-5.0.0.tgz#8237c278a69775270a1cafe7d6f101cfcd585544"
@@ -4048,7 +4060,7 @@ gulp-clean-css@latest:
     through2 "2.0.3"
     vinyl-sourcemaps-apply "0.2.1"
 
-gulp-concat@^2.6.1:
+gulp-concat@2.6.1, gulp-concat@^2.6.1:
   version "2.6.1"
   resolved "https://registry.yarnpkg.com/gulp-concat/-/gulp-concat-2.6.1.tgz#633d16c95d88504628ad02665663cee5a4793353"
   dependencies:
@@ -4064,6 +4076,23 @@ gulp-decompress@^1.2.0:
     decompress "^3.0.0"
     gulp-util "^3.0.1"
     readable-stream "^2.0.2"
+
+gulp-footer@1.0.5:
+  version "1.0.5"
+  resolved "https://registry.yarnpkg.com/gulp-footer/-/gulp-footer-1.0.5.tgz#e84ca777e266be7bbc2d45d2df0e7eba8dfa3e54"
+  dependencies:
+    event-stream "*"
+    gulp-util "*"
+    lodash.assign "*"
+
+gulp-header@1.8.9:
+  version "1.8.9"
+  resolved "https://registry.yarnpkg.com/gulp-header/-/gulp-header-1.8.9.tgz#c9f10fee0632d81e939789c6ecf45a151bf3098b"
+  dependencies:
+    concat-with-sourcemaps "*"
+    gulp-util "*"
+    object-assign "*"
+    through2 "^2.0.0"
 
 gulp-if@^2.0.2, gulp-if@latest:
   version "2.0.2"
@@ -4294,7 +4323,7 @@ gulp-useref@latest:
     useref "^1.4.1"
     vinyl-fs "^3.0.2"
 
-"gulp-util@>=2.2.14 <4.0.0", gulp-util@^3.0, gulp-util@^3.0.0, gulp-util@^3.0.1, gulp-util@^3.0.2, gulp-util@^3.0.3, gulp-util@^3.0.7, gulp-util@^3.0.8, gulp-util@latest, gulp-util@~3.0.6:
+gulp-util@*, "gulp-util@>=2.2.14 <4.0.0", gulp-util@^3.0, gulp-util@^3.0.0, gulp-util@^3.0.1, gulp-util@^3.0.2, gulp-util@^3.0.3, gulp-util@^3.0.7, gulp-util@^3.0.8, gulp-util@latest, gulp-util@~3.0.6:
   version "3.0.8"
   resolved "https://registry.yarnpkg.com/gulp-util/-/gulp-util-3.0.8.tgz#0054e1e744502e27c04c187c3ecc505dd54bbb4f"
   dependencies:
@@ -5307,6 +5336,10 @@ jsdoctypeparser@~1.2.0:
   dependencies:
     lodash "^3.7.0"
 
+jsesc@2.5.1:
+  version "2.5.1"
+  resolved "https://registry.yarnpkg.com/jsesc/-/jsesc-2.5.1.tgz#e421a2a8e20d6b0819df28908f782526b96dd1fe"
+
 jsesc@^1.3.0:
   version "1.3.0"
   resolved "https://registry.yarnpkg.com/jsesc/-/jsesc-1.3.0.tgz#46c3fec8c1892b12b0833db9bc7622176dbab34b"
@@ -5734,6 +5767,10 @@ lodash._root@^3.0.0:
   version "3.0.1"
   resolved "https://registry.yarnpkg.com/lodash._root/-/lodash._root-3.0.1.tgz#fba1c4524c19ee9a5f8136b4609f017cf4ded692"
 
+lodash.assign@*, lodash.assign@^4.2.0:
+  version "4.2.0"
+  resolved "https://registry.yarnpkg.com/lodash.assign/-/lodash.assign-4.2.0.tgz#0d99f3ccd7a6d261d19bdaeb9245005d285808e7"
+
 lodash.assign@^3.0.0:
   version "3.2.0"
   resolved "https://registry.yarnpkg.com/lodash.assign/-/lodash.assign-3.2.0.tgz#3ce9f0234b4b2223e296b8fa0ac1fee8ebca64fa"
@@ -5741,10 +5778,6 @@ lodash.assign@^3.0.0:
     lodash._baseassign "^3.0.0"
     lodash._createassigner "^3.0.0"
     lodash.keys "^3.0.0"
-
-lodash.assign@^4.2.0:
-  version "4.2.0"
-  resolved "https://registry.yarnpkg.com/lodash.assign/-/lodash.assign-4.2.0.tgz#0d99f3ccd7a6d261d19bdaeb9245005d285808e7"
 
 lodash.clonedeep@^3.0.0:
   version "3.0.2"
@@ -6277,7 +6310,7 @@ mute-stream@~0.0.4:
   version "0.0.7"
   resolved "https://registry.yarnpkg.com/mute-stream/-/mute-stream-0.0.7.tgz#3075ce93bc21b8fab43e1bc4da7e8115ed1e7bab"
 
-nan@^2.0.9, nan@^2.3.0, nan@^2.3.2:
+nan@^2.0.9, nan@^2.3.0, nan@^2.3.2, nan@^2.9.2:
   version "2.10.0"
   resolved "https://registry.yarnpkg.com/nan/-/nan-2.10.0.tgz#96d0cd610ebd58d4b4de9cc0c6828cda99c7548f"
 
@@ -6425,7 +6458,31 @@ node-pre-gyp@^0.6.39:
     tar "^2.2.1"
     tar-pack "^3.4.0"
 
-node-sass@^4.2.0, node-sass@latest:
+node-sass@4.8.1:
+  version "4.8.1"
+  resolved "https://registry.yarnpkg.com/node-sass/-/node-sass-4.8.1.tgz#8ad4de07456cc4ba2fa0c808729bec09fa1b5065"
+  dependencies:
+    async-foreach "^0.1.3"
+    chalk "^1.1.1"
+    cross-spawn "^3.0.0"
+    gaze "^1.0.0"
+    get-stdin "^4.0.1"
+    glob "^7.0.3"
+    in-publish "^2.0.0"
+    lodash.assign "^4.2.0"
+    lodash.clonedeep "^4.3.2"
+    lodash.mergewith "^4.6.0"
+    meow "^3.7.0"
+    mkdirp "^0.5.1"
+    nan "^2.9.2"
+    node-gyp "^3.3.1"
+    npmlog "^4.0.0"
+    request "~2.79.0"
+    sass-graph "^2.2.4"
+    stdout-stream "^1.4.0"
+    "true-case-path" "^1.0.2"
+
+node-sass@^4.2.0:
   version "4.7.2"
   resolved "https://registry.yarnpkg.com/node-sass/-/node-sass-4.7.2.tgz#9366778ba1469eb01438a9e8592f4262bcb6794e"
   dependencies:
@@ -6571,13 +6628,13 @@ oauth-sign@~0.8.0, oauth-sign@~0.8.1, oauth-sign@~0.8.2:
   version "0.8.2"
   resolved "https://registry.yarnpkg.com/oauth-sign/-/oauth-sign-0.8.2.tgz#46a6ab7f0aead8deae9ec0565780b7d4efeb9d43"
 
+object-assign@*, object-assign@4.X, object-assign@^4.0.0, object-assign@^4.0.1, object-assign@^4.1.0:
+  version "4.1.1"
+  resolved "https://registry.yarnpkg.com/object-assign/-/object-assign-4.1.1.tgz#2109adc7965887cfc05cbbd442cac8bfbb360863"
+
 object-assign@4.1.0:
   version "4.1.0"
   resolved "https://registry.yarnpkg.com/object-assign/-/object-assign-4.1.0.tgz#7a3b3d0e98063d43f4c03f2e8ae6cd51a86883a0"
-
-object-assign@4.X, object-assign@^4.0.0, object-assign@^4.0.1, object-assign@^4.1.0:
-  version "4.1.1"
-  resolved "https://registry.yarnpkg.com/object-assign/-/object-assign-4.1.1.tgz#2109adc7965887cfc05cbbd442cac8bfbb360863"
 
 object-assign@^1.0.0:
   version "1.0.0"

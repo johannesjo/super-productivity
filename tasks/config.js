@@ -1,4 +1,4 @@
-module.exports = (function () {
+module.exports = (function() {
   'use strict';
 
   // config vars
@@ -41,6 +41,7 @@ module.exports = (function () {
     ],
     scriptsAllF: base + '/scripts/**/*.js',
     scriptTestsF: base + '/scripts/**/*.spec.js',
+    templateCacheFileName: 'tmp.templates.js',
     html: base + '/scripts/',
     htmlF: [
       base + '/scripts/**/*.html'

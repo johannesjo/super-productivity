@@ -24,6 +24,7 @@ const wiredep = require('wiredep').stream;
 const merge = require('merge-stream');
 const lazypipe = require('lazypipe');
 const babel = require('gulp-babel');
+const templateCache = require('gulp-angular-templatecache');
 
 // main task
 gulp.task('build', function(callback) {
@@ -36,12 +37,17 @@ gulp.task('build', function(callback) {
 
     'cleanDist',
     'wiredepBuild',
+    'createTemplateCacheFiles',
     'injectAll',
     'testSingle',
     'lint',
     //  'sass',
     'minFiles',
     'copy',
+
+    // cleanup after
+    'cleanTemplateCacheFile',
+    'injectAll',
 
     callback);
 });
@@ -55,19 +61,31 @@ gulp.task('wiredepBuild', function() {
     .pipe(gulp.dest('./'));
 });
 
+gulp.task('createTemplateCacheFiles', function() {
+  return gulp.src(config.htmlF)
+    .pipe(templateCache({
+      filename: config.templateCacheFileName,
+      templateHeader: `'use strict'; angular.module('<%= module %>'<%= standalone %>).run(['$templateCache', ($templateCache) => {`,
+      templateBody: `$templateCache.put('<%= url %>','<%= contents %>');`,
+      module: 'superProductivity',
+      root: 'scripts'
+    }))
+    .pipe(gulp.dest(config.scripts));
+});
+
 gulp.task('cleanDist', function() {
   return del.sync(config.dist);
 });
 
 gulp.task('copy', function() {
-  const html = gulp.src(config.htmlF, { base: config.base })
-    .pipe(minifyHtml({
-      conditionals: true,
-      loose: true,
-      empty: true,
-      quotes: true
-    }))
-    .pipe(gulp.dest(config.dist));
+  //const html = gulp.src(config.htmlF, { base: config.base })
+  //  .pipe(minifyHtml({
+  //    conditionals: true,
+  //    loose: true,
+  //    empty: true,
+  //    quotes: true
+  //  }))
+  //  .pipe(gulp.dest(config.dist));
 
   const fonts = gulp.src(config.fontsF, { base: config.base })
     .pipe(gulp.dest(config.dist));
@@ -83,7 +101,7 @@ gulp.task('copy', function() {
     }))
     .pipe(gulp.dest(config.dist));
 
-  return merge(html, fonts, images, sounds);
+  return merge(fonts, images, sounds);
 });
 
 gulp.task('minFiles', function() {

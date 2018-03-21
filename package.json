@@ -144,6 +144,7 @@
     "electron-google-oauth": "^2.0.0",
     "electron-log": "^2.2.12",
     "electron-updater": "^2.18.2",
+    "gulp-angular-templatecache": "^2.2.0",
     "jira-client-fork": "latest",
     "moment": "^2.17.1",
     "moment-duration-format": "^1.3.0",
