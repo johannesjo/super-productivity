@@ -15,7 +15,7 @@
 
   .collapsible-panel {
     overflow: visible;
-    padding-top: 10px;
+    padding-top: 15px;
 
     > * {
       // for help icon positioning
@@ -24,13 +24,13 @@
   }
 
   .help-btn {
-    top: -8px;
-    right: -8px;
+    top: -2px;
+    right: -10px;
     visibility: hidden;
-    animation: 0.3s help-ico-animation ease-in-out;
+    animation: 0.2s help-ico-animation $ease-in-out-quint;
     animation-fill-mode: forwards;
     // wait for slide up
-    animation-delay: 0.3s;
+    animation-delay: 0.16s;
   }
 
   .ng-leave .help-btn {
@@ -82,12 +82,10 @@
 
 @keyframes help-ico-animation {
   0% {
-    -webkit-transform: scale(0);
     transform: scale(0);
     visibility: visible;
   }
-  50% {
-    -webkit-transform: scale(1.1);
+  60% {
     transform: scale(1.1);
   }
   100% {
