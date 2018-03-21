@@ -8,6 +8,7 @@
 
 <div>
   <md-switch ng-model="vm.settings.isEnabled"
+             ng-change="vm.onIsEnabledChange(vm.settings.isEnabled)"
              aria-label="Enable Pomodoro Timer">
     Enable Pomodoro Timer
   </md-switch>

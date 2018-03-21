@@ -5,7 +5,7 @@
  * # pomodoroSettings
  */
 
-(function () {
+(function() {
   'use strict';
 
   angular
@@ -27,9 +27,15 @@
   }
 
   /* @ngInject */
-  function PomodoroSettingsCtrl(IS_ELECTRON) {
+  function PomodoroSettingsCtrl(IS_ELECTRON, PomodoroButton) {
     let vm = this;
     vm.IS_ELECTRON = IS_ELECTRON;
+
+    vm.onIsEnabledChange = (isEnabled) => {
+      if (!isEnabled) {
+        PomodoroButton.stop();
+      }
+    };
   }
 
 })();

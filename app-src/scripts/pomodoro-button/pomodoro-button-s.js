@@ -31,8 +31,6 @@
       this.Notifier = Notifier;
 
       this.initListeners();
-
-      // TODO: INIT REMOTE INTERFACE
     }
 
     reInit() {
