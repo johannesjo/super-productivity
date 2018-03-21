@@ -83,7 +83,7 @@
         window.addEventListener('SP_JIRA_RESPONSE', (ev) => {
           handleResponse(ev.detail);
         });
-        window.addEventListener('SP_EXTENSION_READY', (ev) => {
+        window.addEventListener('SP_EXTENSION_READY', () => {
           this.isExtensionReady = true;
         });
       }
