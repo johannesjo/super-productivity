@@ -63,12 +63,12 @@
   }
 
   &.ng-enter {
-    // max-height: 0;
+     max-height: 0;
     transform: scaleY(0);
   }
 
   &.ng-enter.ng-enter-active {
-    //max-height: 200px;
+    max-height: 500px;
     transform: scaleY(1);
   }
   &.ng-leave {
