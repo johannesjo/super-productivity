@@ -57,22 +57,22 @@
   // animation
   &.ng-enter,
   &.ng-leave {
-    transition: all 0.2s $ease-in-out-quint;
-    //overflow: hidden;
-    //transform-origin: 0 0;
+    transition: all 0.15s $ease-in-out-quint;
+    overflow: hidden;
+    transform-origin: 0 0;
   }
 
   &.ng-enter {
-    max-height: 0;
+    // max-height: 0;
     transform: scaleY(0);
   }
 
   &.ng-enter.ng-enter-active {
-    max-height: 200px;
+    //max-height: 200px;
     transform: scaleY(1);
   }
   &.ng-leave {
-    max-height: 200px;
+    max-height: 400px;
     transform: scaleY(1);
   }
 
