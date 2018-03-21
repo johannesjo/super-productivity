@@ -49,6 +49,14 @@
     }
   }
 
+  .settings-col {
+    margin-bottom: 30px;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
   @media(min-width: $layout-gt-sm) {
     .settings-col {
       &:first-child {
