@@ -53,8 +53,7 @@
     .run(checkIfLatestVersion)
     .run(showWelcomeDialog)
     .run(initUnloadActions)
-    .run(initElectronOnBeforeQuit)
-  //.run(goToWorkViewIfTasks);
+    .run(initElectronOnBeforeQuit);
 
   /* @ngInject */
   function configPromiseButtons(angularPromiseButtonsProvider) {
@@ -104,6 +103,7 @@
     $mdThemingProvider.alwaysWatchTheme(true);
   }
 
+  /* @ngInject */
   function fixUnhandledRejectionError($qProvider) {
     $qProvider.errorOnUnhandledRejections(false);
   }
@@ -211,14 +211,6 @@
   }
 
   /* @ngInject */
-  function goToWorkViewIfTasks($state, Tasks) {
-    const todaysTasks = Tasks.getUndoneToday();
-    if (todaysTasks && todaysTasks.length > 0) {
-      $state.go('work-view');
-    }
-  }
-
-  /* @ngInject */
   function initMousewheelZoomForElectron($document, $window, IS_ELECTRON) {
     if (IS_ELECTRON) {
       const { webFrame } = require('electron');
@@ -303,6 +295,7 @@
     });
   }
 
+  /* @ngInject */
   function setStartedTimes($rootScope, $timeout) {
     $timeout(() => {
 
@@ -322,6 +315,7 @@
     });
   }
 
+  /* @ngInject */
   function preventMultipleInstances(Notifier) {
     const KEY = 'SP_MULTI_INSTANCE_KEY';
     const SHUTDOWN_KEY = 'SP_MULTI_INSTANCE_SHUTDOWN_KEY';
@@ -363,6 +357,7 @@
     localStorage.setItem(KEY, Date.now());
   }
 
+  /* @ngInject */
   function initElectronErrorHandling(SimpleToast, IS_ELECTRON) {
     const ERROR_EV = 'ELECTRON_ERROR';
     if (IS_ELECTRON) {
@@ -379,6 +374,7 @@
     }
   }
 
+  /* @ngInject */
   function initElectronOnBeforeQuit(IS_ELECTRON, GoogleDriveSync, $mdDialog) {
     const ON_BEFORE_QUIT_EV = 'ON_BEFORE_QUIT';
     const SHUTDOWN_NOW_EV = 'SHUTDOWN_NOW';
@@ -411,6 +407,7 @@
     }
   }
 
+  /* @ngInject */
   function sendAppReadyToElectron(IS_ELECTRON) {
     const APP_READY = 'APP_READY';
     if (IS_ELECTRON) {
@@ -418,6 +415,7 @@
     }
   }
 
+  /* @ngInject */
   function initUnloadActions($rootScope, AppStorage) {
     window.onbeforeunload = window.onunload = () => {
       $rootScope.r.lastActiveTime = new Date();
