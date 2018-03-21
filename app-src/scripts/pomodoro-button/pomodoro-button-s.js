@@ -14,8 +14,6 @@
   const TICK_INTERVAL = 1000;
   const DEFAULT_SOUND = 'snd/positive.ogg';
 
-  //const IPC_EVENT_IS_IDLE = 'IS_IDLE';
-
   class PomodoroButton {
     /* @ngInject */
     constructor($rootScope, $interval, $q, Dialogs, Tasks, SimpleToast, LS_DEFAULTS, EV, IS_ELECTRON, Notifier, $state, TakeABreakReminder) {
@@ -178,8 +176,8 @@
         this.Tasks.startLastTaskOrOpenDialog()
           .then((task) => {
             this.Notifier({
-              title: 'Pomodoro session #' + this.data.currentCycle + ' started',
-              message: task && ('Working on: >> ' + task.title + ' <<'),
+              title: `Pomodoro session #${this.data.currentCycle} started`,
+              message: task && (`Working on >>  ${task.title}`),
             });
           });
       }
