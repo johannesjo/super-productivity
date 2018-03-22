@@ -31,7 +31,7 @@
 
   /* @ngInject */
   class Jira {
-    constructor(IS_ELECTRON, IS_EXTENSION, SimpleToast, Uid, $q, $rootScope, Dialogs, Notifier, $injector, $timeout, REQUEST_TIMEOUT, $log, $window) {
+    constructor(IS_ELECTRON, IS_EXTENSION, SimpleToast, Uid, $q, $rootScope, Dialogs, Notifier, $injector, $timeout, REQUEST_TIMEOUT, $log, $window, ExtensionInterface) {
       this.requestsLog = {};
 
       this.IS_ELECTRON = IS_ELECTRON;
@@ -47,6 +47,7 @@
       this.$log = $log;
       this.SimpleToast = SimpleToast;
       this.$window = $window;
+      this.ExtensionInterface = ExtensionInterface;
       this.isExtensionReady = false;
 
       const that = this;
@@ -80,12 +81,10 @@
           handleResponse(res);
         });
       } else if (IS_EXTENSION) {
-        window.addEventListener('SP_JIRA_RESPONSE', (ev) => {
-          handleResponse(ev.detail);
+        this.ExtensionInterface.addEventListener('SP_JIRA_RESPONSE', (ev, data) => {
+          handleResponse(data);
         });
-        window.addEventListener('SP_EXTENSION_READY', () => {
-          this.isExtensionReady = true;
-        });
+
       }
     }
 
@@ -113,17 +112,7 @@
       if (this.IS_ELECTRON) {
         window.ipcRenderer.send(IPC_JIRA_MAKE_REQUEST_EVENT, request);
       } else if (this.IS_EXTENSION) {
-        const ev = new CustomEvent('SP_JIRA_REQUEST', {
-          detail: request,
-        });
-
-        if (this.isExtensionReady) {
-          window.dispatchEvent(ev);
-        } else {
-          setTimeout(() => {
-            window.dispatchEvent(ev);
-          }, 2000);
-        }
+        this.ExtensionInterface.dispatchEvent('SP_JIRA_REQUEST', request);
       }
 
       return defer.promise;
