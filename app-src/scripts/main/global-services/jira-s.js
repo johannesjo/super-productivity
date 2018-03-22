@@ -223,7 +223,7 @@
       if (!settingsToTest) {
         settingsToTest = this.$rootScope.r.jiraSettings;
       }
-      return settingsToTest && settingsToTest.isJiraEnabled && !!settingsToTest.host && !!settingsToTest.userName && !!settingsToTest.password;
+      return settingsToTest && settingsToTest.isJiraEnabled && !!settingsToTest.host && !!settingsToTest.userName && !!settingsToTest.password && (this.IS_ELECTRON || this.IS_EXTENSION);
     }
 
     transformIssues(response) {

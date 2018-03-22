@@ -32,8 +32,7 @@
     vm.refreshRemoteTasks = () => {
       vm.taskSuggestions = [];
 
-      const preCheckFailed = Jira.preCheck();
-      if (!preCheckFailed) {
+      if (Jira.isSufficientJiraSettings()) {
         Jira.checkForNewAndAddToBacklog();
 
         Jira.getSuggestions().then((res) => {
