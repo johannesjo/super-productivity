@@ -15,3 +15,20 @@ work-view {
     }
   }
 }
+
+.status-bar {
+  display: flex;
+  align-items: center;
+  flex-direction: row;
+  justify-content: center;
+  margin-top: -4px;
+  padding: 10px 0;
+
+  .item {
+    margin: 0 12px;
+  }
+  .no-wrap {
+    display: inline-block;
+    white-space: nowrap;
+  }
+}

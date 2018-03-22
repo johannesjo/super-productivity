@@ -65,11 +65,14 @@
               current: this.$rootScope.r.currentTask,
               lastActiveTask: this.Tasks.getLastActiveIfStartable()
             });
+          }
 
+          if (this.IS_ELECTRON || this.IS_EXTENSION) {
             if (!this.isIdle) {
               this.TakeABreakReminder.update(realPeriodDuration, this.isIdle);
             }
           }
+
         } else {
           // reset currentTrackingStart
           currentTrackingStart = moment();

@@ -160,6 +160,7 @@
           isPlaySound: true,
           isGoToWorkView: false,
         },
+        isShowTimeWorkedWithoutBreak: false,
         isTakeABreakEnabled: false,
         takeABreakMinWorkingTime: undefined,
         isAutoStartNextTask: true,

@@ -1,18 +1,34 @@
 <header class="work-view-header">
-  <p>
-    <ng-md-icon icon="playlist_play"></ng-md-icon>
-    <span class="label">Working today:</span>
-    <strong ng-bind="vm.totalTimeWorkedToday|duration"></strong>
-    <ng-md-icon icon="timer"></ng-md-icon>
-    –
-    <span class="label">Estimate remaining:</span> ~<strong ng-bind="vm.totalEstimationRemaining|duration"></strong>
-    <ng-md-icon icon="timer"></ng-md-icon>
+  <div class="status-bar">
+    <div class="item"><span class="label">Working today:</span>
+      <span class="no-wrap">
+      <strong ng-bind="vm.totalTimeWorkedToday|duration"></strong>
+      <ng-md-icon icon="timer"></ng-md-icon>
+      </span>
+    </div>
+
+    <div class="item">
+      <span class="label">Estimate remaining:</span>
+      <span class="no-wrap">
+      ~<strong ng-bind="vm.totalEstimationRemaining|duration"></strong>
+      <ng-md-icon icon="timer"></ng-md-icon>
+      </span>
+    </div>
+
+    <div class="item"
+         ng-if="vm.config.isShowTimeWorkedWithoutBreak">
+      <span class="label">Without break: </span>
+      <span class="no-wrap">
+        <strong ng-bind="vm.session.timeWorkedWithoutBreak|duration"></strong><ng-md-icon icon="timer"></ng-md-icon>
+      </span>
+    </div>
 
     <md-button ng-click="vm.collapseAllNotesAndSubTasks()"
                class="md-icon-button md-primary">
-      <ng-md-icon icon="vertical_align_center" aria-label="collapse sub tasks and notes"></ng-md-icon>
+      <ng-md-icon icon="vertical_align_center"
+                  aria-label="collapse sub tasks and notes"></ng-md-icon>
     </md-button>
-  </p>
+  </div>
 </header>
 
 <section class="work-view-tasks work-view-tasks--undone">

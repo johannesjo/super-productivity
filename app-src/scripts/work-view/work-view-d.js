@@ -30,6 +30,8 @@
     const _ = $window._;
 
     // INIT
+    vm.session = $rootScope.r.currentSession;
+    vm.config = $rootScope.r.config;
     vm.tasksUndone = Tasks.getUndoneToday();
     vm.tasksDone = Tasks.getDoneToday();
     updateTimeTotals();
