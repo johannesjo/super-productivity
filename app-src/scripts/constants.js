@@ -73,6 +73,7 @@
       startedTimeToday: undefined,
       currentProject: undefined,
       currentSession: {
+        isTimeSheetExported: false,
         timeWorkedWithoutBreak: undefined,
         pomodoro: {
           status: undefined,
@@ -160,6 +161,7 @@
           isPlaySound: true,
           isGoToWorkView: false,
         },
+        isBlockFinishDayUntilTimeTimeTracked: true,
         isShowTimeWorkedWithoutBreak: false,
         isTakeABreakEnabled: false,
         takeABreakMinWorkingTime: undefined,

@@ -102,13 +102,14 @@
     </md-button>
 
     <md-button class="md-raised md-primary"
+               ng-class="{'md-accent':r.config.isBlockFinishDayUntilTimeTimeTracked && !r.currentSession.isTimeSheetExported}"
                ng-click="vm.showTimeSheetExportModal()">
       <ng-md-icon icon="call_made"></ng-md-icon>
       <ng-md-icon icon="timer"></ng-md-icon>
       Export To Time Sheet
     </md-button>
-
     <md-button class="md-raised md-primary"
+               ng-disabled="r.config.isBlockFinishDayUntilTimeTimeTracked && !r.currentSession.isTimeSheetExported"
                ng-click="vm.finishDay()">
       <ng-md-icon icon="wb_sunny"></ng-md-icon>
       <span>Save and go home</span>

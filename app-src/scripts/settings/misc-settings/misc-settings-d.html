@@ -26,12 +26,16 @@
   Use short syntax (e.g. 'TaskTitleBla t:30m') for task creation
 </md-switch>
 
+<md-switch ng-model="vm.settings.isBlockFinishDayUntilTimeTimeTracked"
+           aria-label="Disable finish day button until time sheet was exported">
+  Disable finish day button until time sheet was exported
+</md-switch>
+
 <section ng-if="vm.isIdleTimeAvailable">
   <md-switch ng-model="vm.settings.isEnableIdleTimeTracking"
              aria-label="Enable idle time tracking">
     Enable idle time handling (when idle, open dialog on what to track)
   </md-switch>
-
   <md-input-container class="md-block md-icon-float"
                       ng-if="vm.settings.isEnableIdleTimeTracking">
     <label>Idle time minimum idle time</label>

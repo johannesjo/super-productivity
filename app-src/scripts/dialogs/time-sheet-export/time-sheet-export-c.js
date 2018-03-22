@@ -80,6 +80,7 @@
           .then(() => {
             SimpleToast('SUCCESS', 'Row successfully appended');
             $mdDialog.hide();
+            $rootScope.r.currentSession.isTimeSheetExported = true;
             vm.isLoading = false;
           });
       }
