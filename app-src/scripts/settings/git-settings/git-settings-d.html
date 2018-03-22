@@ -14,23 +14,15 @@
   </md-input-container>
 </section>
 
-<md-input-container class="md-block">
-  <div>
-    <md-switch ng-model="vm.settings.isShowIssuesFromGit"
-               aria-label="Enable showing Git tasks when adding tasks">
-      Show open Git issues when adding tasks
-    </md-switch>
-  </div>
-</md-input-container>
+<md-switch ng-model="vm.settings.isShowIssuesFromGit"
+           aria-label="Enable showing Git tasks when adding tasks">
+  Show open Git issues when adding tasks
+</md-switch>
 
-<md-input-container class="md-block">
-  <div>
-    <md-switch ng-model="vm.settings.isAutoImportToBacklog"
-               aria-label="Auto-import all issues to backlog">
-      Auto-import all issues to backlog
-    </md-switch>
-  </div>
-</md-input-container>
+<md-switch ng-model="vm.settings.isAutoImportToBacklog"
+           aria-label="Auto-import all issues to backlog">
+  Auto-import all issues to backlog
+</md-switch>
 
 <section>
   <md-input-container class="md-block">

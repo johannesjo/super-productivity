@@ -5,26 +5,33 @@
     position: relative;
   }
 
+  $this-panel-padding-left-right: 12px;
+
   .collapsible-title {
     font-size: 17px;
     margin-top: 0;
     display: block;
-
+    padding: 10px $this-panel-padding-left-right;
   }
 
   .collapsible-panel {
+    //border-top: 1px solid black;
     overflow: visible;
-    padding-top: 15px;
+    padding: 10px $this-panel-padding-left-right;
 
     > * {
       // for help icon positioning
       position: static;
     }
+
+    md-switch:first-of-type{
+      margin-top:  0;
+    }
   }
 
   .help-btn {
-    top: -2px;
-    right: -10px;
+    top: 0px;
+    right: -2px;
     visibility: hidden;
     animation: 0.2s help-ico-animation $ease-in-out-quint;
     animation-fill-mode: forwards;
@@ -37,7 +44,6 @@
   }
 
   .config-section {
-    padding: 10px 12px;
     margin-bottom: 10px;
     background: #ffffff;
 

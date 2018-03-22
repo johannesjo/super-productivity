@@ -15,19 +15,16 @@
   </div>
 </help-section>
 
-<div>
-  <md-switch ng-model="vm.settings.isAutoStartNextTask"
-             aria-label="Auto-start next task on done">
-    Auto-start next task on done
-  </md-switch>
-</div>
+<md-switch ng-model="vm.settings.isAutoStartNextTask"
+           aria-label="Auto-start next task on done">
+  Auto-start next task on done
+</md-switch>
 
-<div>
-  <md-switch ng-model="vm.settings.isShortSyntaxEnabled"
-             aria-label="Use short syntax (e.g. 'TaskTitleBla e:30m')">
-    Use short syntax (e.g. 'TaskTitleBla t:30m') for task creation
-  </md-switch>
-</div>
+
+<md-switch ng-model="vm.settings.isShortSyntaxEnabled"
+           aria-label="Use short syntax (e.g. 'TaskTitleBla e:30m')">
+  Use short syntax (e.g. 'TaskTitleBla t:30m') for task creation
+</md-switch>
 
 
 <section ng-if="vm.IS_ELECTRON">
