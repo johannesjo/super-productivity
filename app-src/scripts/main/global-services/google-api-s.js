@@ -210,30 +210,12 @@
       }
     }
 
-    handleError(err) {
-      let errStr = '';
-
-      if (typeof err === 'string') {
-        errStr = err;
-      } else if (err && err.data && err.data.error) {
-        errStr = err.data.error.message;
-      }
-
-      if (errStr) {
-        errStr = ': ' + errStr;
-      }
-
-      this.$log.error(err);
-      this.SimpleToast('ERROR', 'GoogleApi Error' + errStr);
-      return this.$q.reject();
-    }
-
     // Other interaction
     //-------------------
     appendRow(spreadsheetId, row) {
       // @see: https://developers.google.com/sheets/api/reference/rest/
       const range = 'A1:Z99';
-      return this.$http({
+      return this.requestWrapper(this.$http({
         method: 'POST',
         url: `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${range}:append`,
         params: {
@@ -245,12 +227,12 @@
           'Authorization': `Bearer ${this.data.accessToken}`
         },
         data: { values: [row] }
-      }).catch(this.handleError.bind(this));
+      }));
     }
 
     getSpreadsheetData(spreadsheetId, range) {
       // @see: https://developers.google.com/sheets/api/reference/rest/
-      return this.$http({
+      return this.requestWrapper(this.$http({
         method: 'GET',
         url: `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${range}`,
         params: {
@@ -259,7 +241,7 @@
         headers: {
           'Authorization': `Bearer ${this.data.accessToken}`
         }
-      }).catch(this.handleError.bind(this));
+      }));
     }
 
     getSpreadsheetHeadingsAndLastRow(spreadsheetId) {
@@ -278,9 +260,9 @@
             defer.reject('No data found');
             this.handleError('No data found');
           }
-        }).catch(this.handleError.bind(this));
+        });
 
-      return defer.promise;
+      return this.requestWrapper(defer.promise);
     }
 
     getFileInfo(fileId) {
@@ -289,7 +271,7 @@
         return this.$q.reject('No file id given');
       }
 
-      return this.$http({
+      return this.requestWrapper(this.$http({
         method: 'GET',
         url: `https://content.googleapis.com/drive/v2/files/${encodeURIComponent(fileId)}`,
         params: {
@@ -300,7 +282,7 @@
         headers: {
           'Authorization': `Bearer ${this.data.accessToken}`,
         },
-      });
+      }));
     }
 
     findFile(fileName) {
@@ -309,7 +291,7 @@
         return this.$q.reject('No file name given');
       }
 
-      return this.$http({
+      return this.requestWrapper(this.$http({
         method: 'GET',
         url: `https://content.googleapis.com/drive/v2/files`,
         params: {
@@ -320,7 +302,7 @@
         headers: {
           'Authorization': `Bearer ${this.data.accessToken}`,
         },
-      }).catch(this.handleError.bind(this));
+      }));
     }
 
     loadFile(fileId) {
@@ -343,17 +325,17 @@
         },
       });
 
-      return this.$q.all([this.$q.when(metaData), this.$q.when(fileContents)])
+      return this.requestWrapper(this.$q.all([this.$q.when(metaData), this.$q.when(fileContents)])
         .then((res) => {
           return this.$q.when({
             backup: res[1].data,
             meta: res[0].data,
           });
-        }).catch(this.handleError.bind(this));
+        }));
     }
 
     saveFile(content, metadata = {}) {
-      //window.gapi.client.setApiKey(this.GOOGLE.API_KEY);
+      console.log('SAVE');
 
       if (!angular.isString(content)) {
         content = JSON.stringify(content);
@@ -379,7 +361,7 @@
         .append(metadata.mimeType, content)
         .finish();
 
-      return this.$http({
+      return this.requestWrapper(this.$http({
         method: method,
         url: `https://content.googleapis.com${path}`,
         params: {
@@ -393,7 +375,58 @@
           'Content-Type': multipart.type
         },
         data: multipart.body
-      }).catch(this.handleError.bind(this));
+      }));
+    }
+
+    handleUnAuthenticated(err) {
+      this.$log.error(err);
+      this.SimpleToast('ERROR', 'GoogleApi: Failed to authenticate please try logging in again!');
+      this.logout();
+    }
+
+    handleError(err) {
+      let errStr = '';
+
+      if (typeof err === 'string') {
+        errStr = err;
+      } else if (err && err.data && err.data.error) {
+        errStr = err.data.error.message;
+      }
+
+      if (errStr) {
+        errStr = ': ' + errStr;
+      }
+
+      if (err && err.status === 401) {
+        this.handleUnAuthenticated(err);
+      } else {
+        this.$log.error(err);
+        this.SimpleToast('ERROR', 'GoogleApi Error' + errStr);
+      }
+
+      return this.$q.reject();
+    }
+
+    requestWrapper(request) {
+      const defer = this.$q.defer();
+      request.then((res) => {
+        if (res && res.status && res.status >= 400) {
+          if (res.status === 401) {
+            this.handleUnAuthenticated(res);
+            defer.reject();
+          } else {
+            this.handleError(res);
+            defer.reject();
+          }
+        } else {
+          defer.resolve(res);
+        }
+
+      }).catch((err) => {
+        this.handleError(err);
+        defer.reject(err);
+      });
+      return defer.promise;
     }
   }
 
