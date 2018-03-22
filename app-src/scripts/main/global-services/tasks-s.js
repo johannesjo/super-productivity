@@ -411,7 +411,7 @@
             const parentTask = task.parentId && this.getById(task.parentId);
 
             // check for updates first
-            if (this.TasksUtil.isJiraTask(task) || this.TasksUtil.isJiraTask(parentTask)) {
+            if (this.Jira.isSufficientJiraSettings() && (this.TasksUtil.isJiraTask(task) || this.TasksUtil.isJiraTask(parentTask))) {
               // find out if current or parent is the task we want to handle
               let jiraTaskToHandle = task;
               if (!this.TasksUtil.isJiraTask(task) && this.TasksUtil.isJiraTask(parentTask)) {
