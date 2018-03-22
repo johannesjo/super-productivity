@@ -68,6 +68,9 @@
         inputEl = $element.find('input');
         inputEl[0].focus();
         inputEl[0].value = modelCopy;
+        setTimeout(() => {
+          inputEl[0].select();
+        });
       });
     };
 
