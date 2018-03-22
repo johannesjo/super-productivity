@@ -48,7 +48,6 @@
       this.SimpleToast = SimpleToast;
       this.$window = $window;
       this.ExtensionInterface = ExtensionInterface;
-      this.isExtensionReady = false;
 
       const that = this;
 

@@ -5,7 +5,7 @@
  * # miscSettings
  */
 
-(function () {
+(function() {
   'use strict';
 
   angular
@@ -27,9 +27,9 @@
   }
 
   /* @ngInject */
-  function MiscSettingsCtrl(IS_ELECTRON) {
+  function MiscSettingsCtrl(IS_ELECTRON, IS_EXTENSION) {
     let vm = this;
-    vm.IS_ELECTRON = IS_ELECTRON;
+    vm.isIdleTimeAvailable = (IS_ELECTRON || IS_EXTENSION);
   }
 
 })();

@@ -15,14 +15,16 @@
 
   class TimeTracking {
     /* @ngInject */
-    constructor($rootScope, Tasks, Dialogs, TakeABreakReminder, TRACKING_INTERVAL, IS_ELECTRON, EV, $interval) {
+    constructor($rootScope, Tasks, Dialogs, TakeABreakReminder, TRACKING_INTERVAL, IS_ELECTRON, IS_EXTENSION, EV, $interval, ExtensionInterface) {
       this.$rootScope = $rootScope;
       this.$interval = $interval;
       this.Tasks = Tasks;
       this.Dialogs = Dialogs;
       this.TakeABreakReminder = TakeABreakReminder;
+      this.ExtensionInterface = ExtensionInterface;
       this.TRACKING_INTERVAL = TRACKING_INTERVAL;
       this.IS_ELECTRON = IS_ELECTRON;
+      this.IS_EXTENSION = IS_EXTENSION;
       this.EV = EV;
     }
 
@@ -30,7 +32,10 @@
       this.initPoll();
 
       if (this.IS_ELECTRON) {
-        this.handleIdle();
+        this.handleIdleElectron();
+      }
+      if (this.IS_EXTENSION) {
+        this.handleIdleExtension();
       }
     }
 
@@ -72,46 +77,57 @@
       }, this.TRACKING_INTERVAL);
     }
 
-    handleIdle() {
-      window.ipcRenderer.on(IPC_EVENT_IDLE_TIME, (ev, idleTimeInMs) => {
-        // don't run if option is not enabled
-        if (!this.$rootScope.r.config.isEnableIdleTimeTracking) {
-          this.isIdle = false;
-          return;
-        }
-        const minIdleTimeInMs = moment.duration(this.$rootScope.r.config.minIdleTime).asMilliseconds();
-
-        if (idleTimeInMs > minIdleTimeInMs) {
-          this.isIdle = true;
-          this.$rootScope.$broadcast(this.EV.IS_IDLE);
-
-          // do not show as long as the user hasn't decided
-          this.TakeABreakReminder.isShown = false;
-
-          if (!this.isIdleDialogOpen) {
-            this.isIdleDialogOpen = true;
-            this.Dialogs('WAS_IDLE', {
-              initialIdleTime: idleTimeInMs,
-              minIdleTimeInMs: minIdleTimeInMs,
-            })
-              .then(() => {
-                // if tracked
-                this.TakeABreakReminder.isShown = true;
-                this.isIdleDialogOpen = false;
-              }, () => {
-                // if not tracked
-                // unset currentSession.timeWorkedWithoutBreak
-                this.TakeABreakReminder.resetCounter();
-                this.TakeABreakReminder.isShown = true;
-                this.isIdleDialogOpen = false;
-              });
-          }
-
-        } else {
-          this.isIdle = false;
-          this.$rootScope.$broadcast(this.EV.IS_BUSY);
-        }
+    handleIdleExtension() {
+      this.ExtensionInterface.addEventListener(IPC_EVENT_IDLE_TIME, (ev, idleTimeInMs) => {
+        this.handleIdle(idleTimeInMs);
       });
+    }
+
+    handleIdleElectron() {
+      window.ipcRenderer.on(IPC_EVENT_IDLE_TIME, (ev, idleTimeInMs) => {
+        this.handleIdle(idleTimeInMs);
+      });
+    }
+
+    handleIdle(idleTimeInMs) {
+      // don't run if option is not enabled
+      if (!this.$rootScope.r.config.isEnableIdleTimeTracking) {
+        this.isIdle = false;
+        return;
+      }
+      const minIdleTimeInMs = moment.duration(this.$rootScope.r.config.minIdleTime)
+        .asMilliseconds();
+
+      if (idleTimeInMs > minIdleTimeInMs) {
+        this.isIdle = true;
+        this.$rootScope.$broadcast(this.EV.IS_IDLE);
+
+        // do not show as long as the user hasn't decided
+        this.TakeABreakReminder.isShown = false;
+
+        if (!this.isIdleDialogOpen) {
+          this.isIdleDialogOpen = true;
+          this.Dialogs('WAS_IDLE', {
+            initialIdleTime: idleTimeInMs,
+            minIdleTimeInMs: minIdleTimeInMs,
+          })
+            .then(() => {
+              // if tracked
+              this.TakeABreakReminder.isShown = true;
+              this.isIdleDialogOpen = false;
+            }, () => {
+              // if not tracked
+              // unset currentSession.timeWorkedWithoutBreak
+              this.TakeABreakReminder.resetCounter();
+              this.TakeABreakReminder.isShown = true;
+              this.isIdleDialogOpen = false;
+            });
+        }
+
+      } else {
+        this.isIdle = false;
+        this.$rootScope.$broadcast(this.EV.IS_BUSY);
+      }
     }
   }
 

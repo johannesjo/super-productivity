@@ -30,7 +30,7 @@
     vm.selectedTask = $rootScope.r.currentTask || $rootScope.r.lastActiveTaskTask || undefined;
 
     vm.trackIdleToTask = () => {
-      if (vm.selectedTask) {
+      if (vm.selectedTask && vm.selectedTask.id) {
         // add the idle time in milliseconds + the minIdleTime that was
         // not tracked or removed
         Tasks.addTimeSpent(vm.selectedTask, realIdleTime);
