@@ -26,14 +26,11 @@
   Use short syntax (e.g. 'TaskTitleBla t:30m') for task creation
 </md-switch>
 
-
 <section ng-if="vm.IS_ELECTRON">
-  <div>
-    <md-switch ng-model="vm.settings.isEnableIdleTimeTracking"
-               aria-label="Enable idle time tracking">
-      Enable idle time handling (when idle, open dialog on what to track)
-    </md-switch>
-  </div>
+  <md-switch ng-model="vm.settings.isEnableIdleTimeTracking"
+             aria-label="Enable idle time tracking">
+    Enable idle time handling (when idle, open dialog on what to track)
+  </md-switch>
 
   <md-input-container class="md-block md-icon-float"
                       ng-if="vm.settings.isEnableIdleTimeTracking">
@@ -45,12 +42,11 @@
            ng-model="vm.settings.minIdleTime">
   </md-input-container>
 
-  <div>
-    <md-switch ng-model="vm.settings.isTakeABreakEnabled"
-               aria-label="Enable take a break reminder">
-      Enable take a break reminder
-    </md-switch>
-  </div>
+  <md-switch ng-model="vm.settings.isTakeABreakEnabled"
+             aria-label="Enable take a break reminder">
+    Enable take a break reminder
+  </md-switch>
+
   <md-input-container class="md-block md-icon-float"
                       ng-hide="!vm.settings.isTakeABreakEnabled">
     <label>Remind when I worked longer than X without a break</label>

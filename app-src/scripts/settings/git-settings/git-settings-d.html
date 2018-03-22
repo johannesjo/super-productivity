@@ -6,13 +6,11 @@
   <p ng-if="vm.IS_ELECTRON">You can also configure the path to your project's .git directory to show you a summary of commits at the end of the day.</p>
 </help-section>
 
-<section>
-  <md-input-container class="md-block">
-    <label>Git repository to track for importing tasks (e.g.: johannesjo/super-productivity)</label>
-    <input type="text"
-           ng-model="vm.settings.repo">
-  </md-input-container>
-</section>
+<md-input-container class="md-block">
+  <label>Git repository to track for importing tasks (e.g.: johannesjo/super-productivity)</label>
+  <input type="text"
+         ng-model="vm.settings.repo">
+</md-input-container>
 
 <md-switch ng-model="vm.settings.isShowIssuesFromGit"
            aria-label="Enable showing Git tasks when adding tasks">
@@ -24,13 +22,11 @@
   Auto-import all issues to backlog
 </md-switch>
 
-<section>
-  <md-input-container class="md-block">
-    <label>Prefix for pull request issues</label>
-    <input type="text"
-           ng-model="vm.settings.prPrefix">
-  </md-input-container>
-</section>
+<md-input-container class="md-block">
+  <label>Prefix for pull request issues</label>
+  <input type="text"
+         ng-model="vm.settings.prPrefix">
+</md-input-container>
 
 <section ng-if="vm.IS_ELECTRON">
   <p>Set project directory to show the day's commits at summary.</p>
