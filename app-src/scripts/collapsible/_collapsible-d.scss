@@ -7,6 +7,7 @@ collapsible {
 
   .collapsible-title {
     cursor: pointer;
+    user-select: none;
 
     &:focus{
       outline: none;

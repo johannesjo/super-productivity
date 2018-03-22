@@ -102,6 +102,7 @@ task-list {
   .first-line {
     display: flex;
     flex-wrap: nowrap;
+    user-select: none;
 
     @media(max-width: $layout-xs) {
       flex-wrap: wrap;
