@@ -200,6 +200,9 @@
           this.data.lastSyncToRemote = res.data.modifiedDate;
           // also needs to be updated
           this.data.lastLocalUpdate = res.data.modifiedDate;
+
+          // directly save app storage to minify the risk of getting conflicts
+          this.AppStorage.saveToLs();
         });
     }
 
