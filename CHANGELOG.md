@@ -1,3 +1,60 @@
+<a name="1.10.0"></a>
+# [1.10.0](https://github.com/johannesjo/super-productivity/compare/v1.9.4...v1.10.0) (2018-03-23)
+
+
+### Bug Fixes
+
+* dark theme being unset after toggling theme settings ([06da8b9](https://github.com/johannesjo/super-productivity/commit/06da8b9))
+* jira issue urls being wrong sometimes ([67fb8bf](https://github.com/johannesjo/super-productivity/commit/67fb8bf))
+* jira requests being made event though the configuration is invalid ([31b0bc1](https://github.com/johannesjo/super-productivity/commit/31b0bc1))
+* keyboard shortcuts from firing when editing text ([9a9ae61](https://github.com/johannesjo/super-productivity/commit/9a9ae61))
+* only check for tasks updates if jira is enabled ([e8e9c73](https://github.com/johannesjo/super-productivity/commit/e8e9c73))
+* original link icon wrongly aligned ([13cc557](https://github.com/johannesjo/super-productivity/commit/13cc557))
+
+
+### Features
+
+* add a way to configure transition handling initially ([6548fb4](https://github.com/johannesjo/super-productivity/commit/6548fb4))
+* add animation utility classes and use them ([1bceb9c](https://github.com/johannesjo/super-productivity/commit/1bceb9c))
+* add dark theme for new task list styles ([902fd7e](https://github.com/johannesjo/super-productivity/commit/902fd7e))
+* add idle time tracking for extension ([49f4bde](https://github.com/johannesjo/super-productivity/commit/49f4bde))
+* add login toast if authentication fails ([6534f7d](https://github.com/johannesjo/super-productivity/commit/6534f7d))
+* add mark as done button again ([dffe15d](https://github.com/johannesjo/super-productivity/commit/dffe15d))
+* add neat progress bar when syncing to google drive ([219b762](https://github.com/johannesjo/super-productivity/commit/219b762))
+* add notification for successful login ([c20d9a8](https://github.com/johannesjo/super-productivity/commit/c20d9a8))
+* add notification to extension interface ([190f41e](https://github.com/johannesjo/super-productivity/commit/190f41e))
+* add possibility to hide task list controls ([c55b65b](https://github.com/johannesjo/super-productivity/commit/c55b65b))
+* add user select none to several ui items ([7b6ea97](https://github.com/johannesjo/super-productivity/commit/7b6ea97))
+* beautification ([def56f2](https://github.com/johannesjo/super-productivity/commit/def56f2))
+* beautification ([1b21001](https://github.com/johannesjo/super-productivity/commit/1b21001))
+* beautify settings and fix clickable area for extendable ([627a433](https://github.com/johannesjo/super-productivity/commit/627a433))
+* don't hide collapse/expand button as it is an important indicator ([6696c0b](https://github.com/johannesjo/super-productivity/commit/6696c0b))
+* give pomodoro settings their own panel ([f4b0899](https://github.com/johannesjo/super-productivity/commit/f4b0899))
+* improve google api handling ([b0e1a8d](https://github.com/johannesjo/super-productivity/commit/b0e1a8d))
+* improve google auth behaviour ([394f59a](https://github.com/johannesjo/super-productivity/commit/394f59a))
+* improve pomodoro messages ([04a9325](https://github.com/johannesjo/super-productivity/commit/04a9325))
+* make all settings expandables ([a0b2c90](https://github.com/johannesjo/super-productivity/commit/a0b2c90))
+* make app much more responsive by using template cache ([0374f5a](https://github.com/johannesjo/super-productivity/commit/0374f5a))
+* make issue transitioning optional ([c49601d](https://github.com/johannesjo/super-productivity/commit/c49601d))
+* make settings a bit more compact ([0c1c608](https://github.com/johannesjo/super-productivity/commit/0c1c608))
+* only show extension notification once ([c417f1d](https://github.com/johannesjo/super-productivity/commit/c417f1d))
+* optionally block finish day until time sheet is exported ([e479b29](https://github.com/johannesjo/super-productivity/commit/e479b29))
+* organize jira options better ([93d194e](https://github.com/johannesjo/super-productivity/commit/93d194e))
+* restyle task list ([4fcf15e](https://github.com/johannesjo/super-productivity/commit/4fcf15e))
+* save to ls directly after sync to google drive to minify the risk of conflicting data ([a032137](https://github.com/johannesjo/super-productivity/commit/a032137))
+* select text for edit on click ([e707f8c](https://github.com/johannesjo/super-productivity/commit/e707f8c))
+* show optional time worked without break ([d43150d](https://github.com/johannesjo/super-productivity/commit/d43150d))
+* simply remove timer button for parent tasks if they have sub tasks ([c8103c2](https://github.com/johannesjo/super-productivity/commit/c8103c2))
+* smoth out help icon animation ([277ef51](https://github.com/johannesjo/super-productivity/commit/277ef51))
+* smoth out some more ([77dad29](https://github.com/johannesjo/super-productivity/commit/77dad29))
+* smothen up animations once more ([9c00f56](https://github.com/johannesjo/super-productivity/commit/9c00f56))
+* stop pomodoro timer if button is disabled ([d557819](https://github.com/johannesjo/super-productivity/commit/d557819))
+* styling adjustments for settings ([d843008](https://github.com/johannesjo/super-productivity/commit/d843008))
+* update chrome extension link ([3fa0d8e](https://github.com/johannesjo/super-productivity/commit/3fa0d8e))
+* update pomodoro focus jira icon ([e35adae](https://github.com/johannesjo/super-productivity/commit/e35adae))
+
+
+
 <a name="1.9.4"></a>
 ## [1.9.4](https://github.com/johannesjo/super-productivity/compare/v1.9.3...v1.9.4) (2018-03-18)
 
