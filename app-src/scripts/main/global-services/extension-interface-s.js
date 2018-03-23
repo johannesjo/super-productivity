@@ -18,8 +18,11 @@
       this.SimpleToast = SimpleToast;
 
       interfaceEl.addEventListener('SP_EXTENSION_READY', () => {
+        // we only want to show the notification once
+        if (!this.isInterfaceReady) {
+          this.SimpleToast('SUCCESS', 'Super Productivity Extension found and loaded.');
+        }
         this.isInterfaceReady = true;
-        this.SimpleToast('SUCCESS', 'Super Productivity Extension found and loaded.');
       });
     }
 
