@@ -158,6 +158,8 @@
 
             //this.data.refreshToken = data.refresh_token;
             this.isLoggedIn = true;
+            this.SimpleToast('SUCCESS', 'GoogleApi: Login successful');
+
             resolve();
             // TODO remove
             // mainWindow.webContents.removeListener('did-finish-load', handler);
@@ -170,12 +172,14 @@
             if (user && user.Zi && user.Zi.access_token) {
               this.isLoggedIn = true;
               this.saveToken(user);
+              this.SimpleToast('SUCCESS', 'GoogleApi: Login successful');
             } else {
               return window.gapi.auth2.getAuthInstance().signIn()
                 .then((res) => {
                   console.log(res);
                   this.isLoggedIn = true;
                   this.saveToken(res);
+                  this.SimpleToast('SUCCESS', 'GoogleApi: Login successful');
                 });
             }
           });
