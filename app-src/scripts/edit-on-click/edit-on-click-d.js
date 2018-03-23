@@ -66,6 +66,12 @@
       modelCopy = vm.editOnClick;
       $timeout(function() {
         inputEl = $element.find('input');
+
+        // prevent keyboard shortcuts from firing when here
+        inputEl[0].addEventListener('keydown', (ev) => {
+          ev.stopPropagation();
+        });
+
         inputEl[0].focus();
         inputEl[0].value = modelCopy;
         setTimeout(() => {

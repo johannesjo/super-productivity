@@ -59,6 +59,12 @@
       }
     }
 
+    function stopPropagation(ev) {
+      console.log('STOP');
+
+      ev.stopPropagation();
+    }
+
     if (IS_ELECTRON) {
       waitForMarkedTimeOut = $timeout(() => {
         makeLinksWorkForElectron();
@@ -77,8 +83,12 @@
           textareaEl[0].focus();
           textareaEl.on('keypress', keypressHandler);
 
+          // prevent keyboard shortcuts from firing when here
+          textareaEl.on('keydown', stopPropagation);
+
           textareaEl.on('$destroy', () => {
             textareaEl.off('keypress', keypressHandler);
+            textareaEl.off('keydown', stopPropagation);
           });
         });
       }
