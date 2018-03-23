@@ -80,7 +80,7 @@
         <span ng-bind="(task.timeSpent|duration) +' / ' + (task.timeEstimate|duration)"></span>
         <md-button class="md-icon-button"
                    tabindex="2"
-                   ng-disabled="task.subTasks.length>0"
+                   ng-if="!(task.subTasks.length>0)"
                    aria-label="time estimation"
                    ng-click="$ctrl.estimateTime(task)">
 
