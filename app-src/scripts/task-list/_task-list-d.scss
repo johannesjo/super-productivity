@@ -56,10 +56,10 @@ task-list {
     &.is-done {
       .time,
       .task-title {
-        color: #777777;
+        color: $dark-theme-text-color;
       }
       ng-md-icon {
-        fill: #777777;
+        fill: $dark-theme-text-color;
       }
     }
   }
@@ -97,6 +97,9 @@ task-list {
     min-height: 36px;
     flex-grow: 1;
     flex-basis: 100%;
+    @media(max-width: $layout-xs) {
+      margin-bottom: 10px;
+    }
   }
 
   .first-line {
@@ -108,8 +111,8 @@ task-list {
       flex-wrap: wrap;
     }
 
-    $this-button-spacer: 2px;
-    $this-button-spacer-mobile: 4px;
+    $this-button-spacer: 1px;
+    $this-button-spacer-mobile: 1px;
     $this-button-size: 34px;
     $this-button-size-mobile: 34px;
     $this-icon-color: #545454;
@@ -123,35 +126,52 @@ task-list {
       line-height: $this-button-size + -1;
       padding: 0;
       box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.26);
-      border: 1px solid #dddddd;
       border-radius: 100%;
       text-align: center;
-      background: #ffffff !important;
       overflow: hidden;
       position: relative;
+      transition: 0.1s !important;
 
-      &:hover {
-        transform: scale(1.3);
-        background: #ffffff;
+      // theming
+      border: 1px solid #dddddd;
+      background: #ffffff !important;
+
+      @include dark-theme {
+        background: $dark-theme-bg-darker !important;
+        border: 1px solid $dark-theme-bg;
       }
-      &:hover,
-      &.is-active {
-        background: #000000 !important;
-        background: $this-icon-color !important;
 
-        > ng-md-icon {
-          fill: #ffffff;
-          @include dark-theme {
-            fill: #ffffff;
+      @at-root {
+        .task {
+          .md-icon-button:hover,
+          .md-icon-button.is-active,
+          &.is-current .md-icon-button.play-btn {
+            background: #000000 !important;
+            background: $this-icon-color !important;
+            border-color: transparent;
+
+            @include dark-theme {
+              background: #ffffff !important;
+            }
+
+            > ng-md-icon {
+              fill: #ffffff !important;
+              @include dark-theme {
+                fill: #000000 !important;
+              }
+            }
           }
         }
       }
+
       ng-md-icon {
         fill: $this-icon-color;
         margin: 0;
         padding: 0;
         line-height: 1;
-
+        @include dark-theme {
+          fill: $dark-theme-text-color-lighter;
+        }
       }
 
       &.delete-btn {
@@ -171,7 +191,6 @@ task-list {
             }
           }
         }
-
       }
 
       @media(max-width: $layout-xs) {
@@ -227,14 +246,6 @@ task-list {
     .md-bar {
       background-color: $green !important;
     }
-    .play-btn {
-      ng-md-icon {
-        fill: #000000 !important;
-        @include dark-theme {
-          fill: #ffffff !important;
-        }
-      }
-    }
   }
 
   .md-bar {
@@ -285,8 +296,10 @@ task-list {
   }
 
   .time {
+    font-style: italic;
     white-space: nowrap;
     margin-left: 10px;
+    margin-right: 10px;
     @media(max-width: $layout-xs) {
       margin-left: 8px;
       font-size: 13px;
