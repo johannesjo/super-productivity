@@ -19,7 +19,7 @@
 
       interfaceEl.addEventListener('SP_EXTENSION_READY', () => {
         this.isInterfaceReady = true;
-        this.SimpleToast('SUCCESS', 'Super Productivity Extension found and loaded.')
+        this.SimpleToast('SUCCESS', 'Super Productivity Extension found and loaded.');
       });
     }
 
