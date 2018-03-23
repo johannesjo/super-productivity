@@ -105,7 +105,6 @@
       this.$mdToast.show({
         hideDelay: (promise ? (15 * 1000) : (5 * 1000)),
         controller: ($mdToast) => {
-
           if (promise) {
             promise.then($mdToast.hide, $mdToast.hide);
           }

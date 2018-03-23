@@ -68,7 +68,7 @@
 
   class GoogleApi {
     /* @ngInject */
-    constructor(GOOGLE, $q, IS_ELECTRON, $http, $rootScope, SimpleToast, $log) {
+    constructor(GOOGLE, $q, IS_ELECTRON, $http, $rootScope, $mdToast, SimpleToast, $log) {
       this.$q = $q;
       this.$http = $http;
       this.$log = $log;
@@ -76,6 +76,7 @@
       this.GOOGLE = GOOGLE;
       this.IS_ELECTRON = IS_ELECTRON;
       this.SimpleToast = SimpleToast;
+      this.$mdToast = $mdToast;
       this.data = this.$rootScope.r.googleTokens;
       this.isLoggedIn = false;
     }
@@ -378,8 +379,28 @@
 
     handleUnAuthenticated(err) {
       this.$log.error(err);
-      this.SimpleToast('ERROR', 'GoogleApi: Failed to authenticate please try logging in again!');
       this.logout();
+
+      const icon = 'error';
+      const iconColor = '#e15d63';
+      const msg = 'GoogleApi: Failed to authenticate please try logging in again!';
+      this.$mdToast.show({
+        hideDelay: 20 * 1000,
+        controller: ($scope, $mdToast, GoogleApi) => {
+          $scope.login = () => {
+            GoogleApi.login();
+            $mdToast.hide();
+          }
+        },
+        template: `
+<md-toast>
+  <div class="md-toast-text" flex>
+        <ng-md-icon icon="${icon}" style="fill:${iconColor}"></ng-md-icon>
+        ${msg} 
+        <md-button ng-click="login()">Login</md-button>
+  </div>
+</md-toast>`
+      });
     }
 
     handleError(err) {
@@ -394,6 +415,8 @@
       if (errStr) {
         errStr = ': ' + errStr;
       }
+
+      this.$log.error(err);
 
       if (err && err.status === 401) {
         this.handleUnAuthenticated(err);
@@ -413,19 +436,19 @@
         }
         else if (!res) {
           this.handleError('No response body');
-          defer.reject();
+          defer.reject(res);
         }
         else if (!res.status) {
           this.handleError('No status code returned');
-          defer.reject();
+          defer.reject(res);
         }
         else {
           if (res.status === 401) {
             this.handleUnAuthenticated(res);
-            defer.reject();
+            defer.reject(res);
           } else {
             this.handleError(res);
-            defer.reject();
+            defer.reject(res);
           }
         }
 
