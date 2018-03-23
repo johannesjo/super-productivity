@@ -37,10 +37,15 @@ task-list {
   }
 
   &.is-hide-controls {
-    .handle,
-    .controls,
-    .md-icon-button {
-      display: none;
+    .task {
+      .handle,
+      .controls,
+      .md-icon-button {
+        display: none;
+      }
+      .collapse-sub-tasks-btn{
+        display: block;
+      }
     }
   }
 }
@@ -48,7 +53,6 @@ task-list {
 $this-task-text-color: #333333;
 $this-task-text-color-dark: #dddddd;
 $this-task-text-color-done: #aaaaaa;
-
 
 .task {
   $this-inner-padding-left-right: 12px;
