@@ -119,6 +119,8 @@ task-list {
       width: $this-button-size;
       min-width: $this-button-size;
       min-height: $this-button-size;
+      // this fixes the original link button icon for some reason
+      line-height: $this-button-size + -1;
       padding: 0;
       box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.26);
       border: 1px solid #dddddd;
@@ -126,6 +128,7 @@ task-list {
       text-align: center;
       background: #ffffff !important;
       overflow: hidden;
+      position: relative;
 
       &:hover {
         transform: scale(1.3);
@@ -145,6 +148,10 @@ task-list {
       }
       ng-md-icon {
         fill: $this-icon-color;
+        margin: 0;
+        padding: 0;
+        line-height: 1;
+
       }
 
       &.delete-btn {
@@ -173,6 +180,7 @@ task-list {
         width: $this-button-size-mobile;
         min-width: $this-button-size-mobile;
         min-height: $this-button-size-mobile;
+        line-height: $this-button-size-mobile + -1;
       }
     }
 
