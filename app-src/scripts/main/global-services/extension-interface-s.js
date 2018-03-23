@@ -13,18 +13,20 @@
 
   class ExtensionInterface {
     /* @ngInject */
-    constructor() {
+    constructor(SimpleToast) {
       this.isInterfaceReady = false;
+      this.SimpleToast = SimpleToast;
 
       interfaceEl.addEventListener('SP_EXTENSION_READY', () => {
         this.isInterfaceReady = true;
+        this.SimpleToast('SUCCESS', 'Super Productivity Extension found and loaded.')
       });
     }
 
     addEventListener(ev, cb) {
       interfaceEl.addEventListener(ev, (ev) => {
         cb(ev, ev.detail);
-      })
+      });
     }
 
     dispatchEvent(evName, data) {
