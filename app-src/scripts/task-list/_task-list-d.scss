@@ -108,84 +108,102 @@ task-list {
       flex-wrap: wrap;
     }
 
-    // Button Stuff
-    ng-md-icon {
-      fill: gray;
-    }
-    .md-button,
-    md-checkbox {
-      padding: 4px 2px;
-      // always reserve space for buttons
-      min-width: 28px;
-      width: 32px;
-      height: 32px;
-      margin: 0;
+    $this-button-spacer: 2px;
+    $this-button-spacer-mobile: 4px;
+    $this-button-size: 34px;
+    $this-button-size-mobile: 34px;
+    $this-icon-color: #545454;
+    .md-icon-button {
+      margin: $this-button-spacer;
+      height: $this-button-size;
+      width: $this-button-size;
+      min-width: $this-button-size;
+      min-height: $this-button-size;
+      padding: 0;
+      box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.26);
+      border: 1px solid #dddddd;
+      border-radius: 100%;
+      text-align: center;
+      background: #ffffff !important;
+      overflow: hidden;
 
       &:hover {
-        transform: scale(1.4);
+        transform: scale(1.3);
+        background: #ffffff;
       }
-    }
-    .play-btn {
-      padding-left: 0;
-      margin-left: -2px;
-
-      // move over original link btn
-      position: relative;
-      z-index: 1;
-    }
-
-    .original-link-btn {
-      margin-left: -2px;
-      margin-right: 10px;
-      ng-md-icon {
-        // hacky align icon inside link with the one inside the play button
-        margin-top: 2px;
-      }
-    }
-
-    md-checkbox {
-      margin-left: 6px;
-      min-width: 16px;
-      width: 32px;
-      height: 32px;
-    }
-
-    ng-md-icon {
-      min-width: 24px;
-    }
-
-    .update-icon {
-      fill: #000000;
-      @include dark-theme {
-        fill: #ffffff;
-      }
-    }
-    .md-button {
       &:hover,
       &.is-active {
+        background: #000000 !important;
+        background: $this-icon-color !important;
+
         > ng-md-icon {
-          fill: #000000;
+          fill: #ffffff;
           @include dark-theme {
             fill: #ffffff;
           }
         }
       }
+      ng-md-icon {
+        fill: $this-icon-color;
+      }
+
+      &.delete-btn {
+        ng-md-icon.delete-icon {
+          fill: $red !important;
+          @include dark-theme {
+            fill: $red !important;
+          }
+        }
+
+        &:hover {
+          background: $red !important;
+          ng-md-icon.delete-icon {
+            fill: #ffffff !important;
+            @include dark-theme {
+              fill: #ffffff !important;
+            }
+          }
+        }
+
+      }
+
+      @media(max-width: $layout-xs) {
+        margin: $this-button-spacer-mobile;
+        height: $this-button-size-mobile;
+        width: $this-button-size-mobile;
+        min-width: $this-button-size-mobile;
+        min-height: $this-button-size-mobile;
+      }
+    }
+
+    // Button Stuff
+    ng-md-icon {
+      fill: #545454;
+    }
+
+    .play-btn {
+      padding-left: 0;
+      margin-left: -2px;
+      margin-right: 3px;
+      // move over original link btn
+      position: relative;
+      z-index: 1;
     }
   }
 
   .controls {
     white-space: nowrap;
     text-align: right;
+    // move a little closer to the right
+    margin-right: -2px;
 
+    // nice idea but problematic with the time button and also the play and original issue
+    //transition: 300ms;
+    //&:hover {
+    //  transform: scale(1.2);
+    //}
     @media(max-width: $layout-xs) {
       white-space: normal;
-    }
-  }
-
-  ng-md-icon.delete-icon {
-    fill: $red !important;
-    @include dark-theme {
-      fill: $red !important;
     }
   }
 
@@ -210,16 +228,10 @@ task-list {
       }
     }
   }
+
   .md-bar {
     background-color: #cccccc !important;
   }
-
-  //md-checkbox.md-checked .md-icon {
-  //  background-color: $green;
-  //  @include dark-theme {
-  //    background-color: $green;
-  //  }
-  //}
 
   md-progress-linear {
     margin-left: -12px;
@@ -240,6 +252,7 @@ task-list {
     text-align: left;
     cursor: pointer;
     outline: none;
+    margin-left: 10px;
     .text {
       outline: none;
       display: block;
@@ -339,7 +352,7 @@ task-list {
   .first-line {
     .md-button,
     md-checkbox {
-      transition: 300ms;
+      transition: 200ms;
     }
   }
 

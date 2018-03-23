@@ -7,10 +7,6 @@ main-header {
     &.md-icon-button {
       margin: 0 3px;
 
-      &.is-active {
-        border: 1px solid #ffffff;
-      }
-
       @media(max-width: $layout-xs) {
         margin: 0 1px;
       }

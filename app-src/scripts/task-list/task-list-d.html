@@ -39,7 +39,7 @@
                    ng-click="$ctrl.togglePlay(task)"
                    ng-if="!task.isDone && $ctrl.allowTaskSelection && !task.subTasks.length">
 
-          <ng-md-icon icon="{{$ctrl.currentTaskId === task.id ? 'pause_circle_filled':'play_circle_fill'}}"
+          <ng-md-icon icon="{{$ctrl.currentTaskId === task.id ? 'pause':'play_arrow'}}"
                       aria-label="mark as current"></ng-md-icon>
         </md-button>
         <md-button class="md-icon-button original-link-btn"
@@ -50,7 +50,7 @@
                    ng-if="::task.originalLink"
                    ng-href="{{ ::task.originalLink }}">
 
-          <ng-md-icon icon="link"
+          <ng-md-icon icon="explore"
                       ng-if="::task.originalType !=='GITHUB'"
                       aria-label="link"></ng-md-icon>
           <ng-md-icon icon="github-circle"
@@ -104,7 +104,7 @@
           <ng-md-icon icon="{{(task.notes||task.originalKey) ?'insert_comment': 'mode_comment'}}"
                       aria-label="notes"></ng-md-icon>
         </md-button>
-        <md-button class="md-icon-button"
+        <md-button class="md-icon-button delete-btn"
                    aria-label="delete"
                    tabindex="2"
                    ng-click="$ctrl.deleteTask(task, $index)">
@@ -113,11 +113,15 @@
                       class="delete-icon"
                       aria-label="delete"></ng-md-icon>
         </md-button>
-        <md-checkbox ng-model="task.isDone"
-                     tabindex="2"
-                     ng-change="$ctrl.onTaskDoneChanged(task)"
-                     aria-label="un-/mark as done">
-        </md-checkbox>
+        <md-button ng-click="task.isDone= !task.isDone; $ctrl.onTaskDoneChanged(task)"
+                   class="md-icon-button"
+                   tabindex="2"
+                   aria-label="un-/mark as done">
+          <ng-md-icon icon="check"
+                      ng-show="!task.isDone"></ng-md-icon>
+          <ng-md-icon icon="undo"
+                      ng-show="task.isDone"></ng-md-icon>
+        </md-button>
       </div>
     </div>
 
