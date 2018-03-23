@@ -44,7 +44,8 @@
     Enable Jira Integration
   </md-switch>
 
-  <div ng-show="vm.settings.isJiraEnabled">
+  <div ng-show="vm.settings.isJiraEnabled"
+       class="ani-slide-up-down">
     <form>
       <md-input-container class="md-block">
         <label>Host / Base URL</label>
@@ -131,49 +132,85 @@
         </div>
       </section>
 
+      <h3 class="md-subtitle">Transition Issues</h3>
+      <md-switch ng-model="vm.settings.isUpdateTicketStatusEnabled"
+                 aria-label="Enable transition handling">
+        Enable transition handling
+      </md-switch>
 
-      <section ng-if="vm.settings.allTransitions">
-        <h3 class="md-subtitle">Default Transitions</h3>
+      <section ng-if="vm.settings.isUpdateTicketStatusEnabled"
+               class="ani-slide-up-down">
         <p>Jira enables a wide configuration of transitions usually coming into action as different columns on your jira agile board. That's why we can't make assumptions about where and when to transition your tasks and you need to set it manually.</p>
-        <md-input-container class="md-block">
-          <label>Default transition for OPEN</label>
-          <md-select ng-model="vm.settings.transitions.OPEN"
-                     arial-label="Select default transition for OPEN">
-            <md-option ng-value="'ALWAYS_ASK'"><em>Always ask</em></md-option>
-            <md-option ng-value="'DO_NOT'"><em>Don't transition</em></md-option>
-            <md-option ng-repeat="jiraTransition in vm.settings.allTransitions"
-                       ng-value="jiraTransition.id">
-              <span ng-bind="jiraTransition.id"></span> -
-              <span ng-bind="jiraTransition.name"></span>
-            </md-option>
-          </md-select>
-        </md-input-container>
-        <md-input-container class="md-block">
-          <label>Default transition for IN_PROGRESS</label>
-          <md-select ng-model="vm.settings.transitions.IN_PROGRESS"
-                     arial-label="Select default transition for IN_PROGRESS">
-            <md-option ng-value="'ALWAYS_ASK'"><em>Always ask</em></md-option>
-            <md-option ng-value="'DO_NOT'"><em>Don't transition</em></md-option>
-            <md-option ng-repeat="jiraTransition in vm.settings.allTransitions"
-                       ng-value="jiraTransition.id">
-              <span ng-bind="jiraTransition.id"></span> -
-              <span ng-bind="jiraTransition.name"></span>
-            </md-option>
-          </md-select>
-        </md-input-container>
-        <md-input-container class="md-block">
-          <label>Default transition for DONE (leave empty to not change assignment)</label>
-          <md-select ng-model="vm.settings.transitions.DONE"
-                     arial-label="Select default transition for DONE">
-            <md-option ng-value="'ALWAYS_ASK'"><em>Always ask</em></md-option>
-            <md-option ng-value="'DO_NOT'"><em>Don't transition</em></md-option>
-            <md-option ng-repeat="jiraTransition in vm.settings.allTransitions"
-                       ng-value="jiraTransition.id">
-              <span ng-bind="jiraTransition.id"></span> -
-              <span ng-bind="jiraTransition.name"></span>
-            </md-option>
-          </md-select>
-        </md-input-container>
+        <p>First you need to select an example ticket from which we can load the different available transitions. This requires you to
+          <strong>already have set valid credentials</strong> and a <strong>valid JQL Query for searching tasks</strong>.
+        </p>
+        <p>
+          <strong>Click on the "Test Credentials" button above to (re)load the task list for that</strong> and then use the input below to select an example task to load the transitions from.
+        </p>
+
+        <md-autocomplete
+          ng-show="vm.taskSuggestions.length"
+          md-whiteframe="2"
+          flex="100"
+          tabindex="1"
+          md-selected-item="vm.transitionExampleTask"
+          md-search-text="vm.transitionExampleTaskTitle"
+          md-items="task in vm.getFilteredTaskSuggestions(vm.transitionExampleTaskTitle)"
+          md-item-text="task.title"
+          md-require-match="true"
+          md-selected-item-change="vm.onTransitionExampleTaskSelected(vm.transitionExampleTask)"
+          autofocus-autocomplete
+          placeholder="Select an example task to load it's transitions">
+          <md-item-template>
+          <span md-highlight-text="vm.transitionExampleTaskTitle"
+                md-highlight-flags="i">{{task.title}}</span>
+          </md-item-template>
+        </md-autocomplete>
+
+        <h3 class="md-caption">Configure transitions</h3>
+
+        <section ng-if="vm.settings.transitions"
+                 class="ani-slide-up-down">
+          <md-input-container class="md-block">
+            <label>Default transition for OPEN</label>
+            <md-select ng-model="vm.settings.transitions.OPEN"
+                       arial-label="Select default transition for OPEN">
+              <md-option ng-value="'ALWAYS_ASK'"><em>Always ask</em></md-option>
+              <md-option ng-value="'DO_NOT'"><em>Don't transition</em></md-option>
+              <md-option ng-repeat="jiraTransition in vm.settings.allTransitions"
+                         ng-value="jiraTransition.id">
+                <span ng-bind="jiraTransition.id"></span> -
+                <span ng-bind="jiraTransition.name"></span>
+              </md-option>
+            </md-select>
+          </md-input-container>
+          <md-input-container class="md-block">
+            <label>Default transition for IN_PROGRESS</label>
+            <md-select ng-model="vm.settings.transitions.IN_PROGRESS"
+                       arial-label="Select default transition for IN_PROGRESS">
+              <md-option ng-value="'ALWAYS_ASK'"><em>Always ask</em></md-option>
+              <md-option ng-value="'DO_NOT'"><em>Don't transition</em></md-option>
+              <md-option ng-repeat="jiraTransition in vm.settings.allTransitions"
+                         ng-value="jiraTransition.id">
+                <span ng-bind="jiraTransition.id"></span> -
+                <span ng-bind="jiraTransition.name"></span>
+              </md-option>
+            </md-select>
+          </md-input-container>
+          <md-input-container class="md-block">
+            <label>Default transition for DONE</label>
+            <md-select ng-model="vm.settings.transitions.DONE"
+                       arial-label="Select default transition for DONE">
+              <md-option ng-value="'ALWAYS_ASK'"><em>Always ask</em></md-option>
+              <md-option ng-value="'DO_NOT'"><em>Don't transition</em></md-option>
+              <md-option ng-repeat="jiraTransition in vm.settings.allTransitions"
+                         ng-value="jiraTransition.id">
+                <span ng-bind="jiraTransition.id"></span> -
+                <span ng-bind="jiraTransition.name"></span>
+              </md-option>
+            </md-select>
+          </md-input-container>
+        </section>
       </section>
     </form>
 

@@ -241,6 +241,7 @@
         userName: undefined,
         password: undefined,
         host: undefined,
+        isUpdateTicketStatusEnabled: true,
         transitions: {
           OPEN: 'ALWAYS_ASK',
           IN_PROGRESS: 'ALWAYS_ASK',
