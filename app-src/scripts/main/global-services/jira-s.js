@@ -339,6 +339,11 @@
 
       const defer = this.$q.defer();
 
+      if (!this.$rootScope.r.jiraSettings.isTransitionIssuesEnabled) {
+        defer.resolve();
+        return;
+      }
+
       const isAutoTransitionAndGotTransitions = this.$rootScope.r.jiraSettings.transitions && this.$rootScope.r.jiraSettings.transitions[localType] && this.$rootScope.r.jiraSettings.transitions[localType] !== 'ALWAYS_ASK';
 
       if (isAutoTransitionAndGotTransitions) {
