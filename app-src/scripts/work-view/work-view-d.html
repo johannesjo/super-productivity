@@ -22,6 +22,12 @@
         <strong ng-bind="vm.session.timeWorkedWithoutBreak|duration"></strong><ng-md-icon icon="timer"></ng-md-icon>
       </span>
     </div>
+    <md-button ng-click="vm.isHideControls = !(vm.isHideControls);"
+               class="md-icon-button md-primary">
+      <ng-md-icon icon="vertical_align_center"
+                  class="hide-controls-icon"
+                  aria-label="collapse sub tasks and notes"></ng-md-icon>
+    </md-button>
 
     <md-button ng-click="vm.collapseAllNotesAndSubTasks()"
                class="md-icon-button md-primary">
@@ -36,6 +42,7 @@
 
   <task-list tasks="vm.tasksUndone"
              current-task-id="r.currentTask.id"
+             is-hide-controls="vm.isHideControls"
              on-task-done-changed="vm.onTaskDoneChangedUndoneList(task)"
              allow-task-selection="true"></task-list>
 </section>
@@ -63,6 +70,7 @@
   <p ng-if="!vm.tasksDone.length">You currently have no done tasks.</p>
 
   <task-list tasks="vm.tasksDone"
+             is-hide-controls="vm.isHideControls"
              on-task-done-changed="vm.onTaskDoneChangedDoneList(task)"
              current-task-id="r.currentTask.id"></task-list>
 </section>

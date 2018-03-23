@@ -3,6 +3,10 @@ work-view {
   max-width: $component-max-width;
   text-align: center;
   margin: auto;
+
+  .hide-controls-icon {
+    transform: rotate(90deg);
+  }
 }
 
 .work-view-header {

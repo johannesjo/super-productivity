@@ -1,9 +1,13 @@
 <ul class="task-list"
     as-sortable="$ctrl.dragControlListeners"
+    ng-class="{ 'is-hide-controls': $ctrl.isHideControls}"
     ng-model="$ctrl.tasks">
   <li class="task"
       as-sortable-item
-      ng-class="{'is-current': $ctrl.currentTaskId === task.id, 'is-done':task.isDone}"
+      ng-class="{
+      'is-current': $ctrl.currentTaskId === task.id,
+      'is-done':task.isDone
+      }"
       ng-repeat="task in $ctrl.tasks|limitTo:$ctrl.limitTo|filter:$ctrl.filter track by task.id"
       tabindex="1"
       md-whiteframe="1"
@@ -113,15 +117,15 @@
                       class="delete-icon"
                       aria-label="delete"></ng-md-icon>
         </md-button>
-        <md-button ng-click="task.isDone= !task.isDone; $ctrl.onTaskDoneChanged(task)"
-                   class="md-icon-button"
-                   tabindex="2"
-                   aria-label="un-/mark as done">
-          <ng-md-icon icon="check"
-                      ng-show="!task.isDone"></ng-md-icon>
-          <ng-md-icon icon="undo"
-                      ng-show="task.isDone"></ng-md-icon>
-        </md-button>
+        <!--<md-button ng-click="task.isDone= !task.isDone; $ctrl.onTaskDoneChanged(task)"-->
+        <!--class="md-icon-button"-->
+        <!--tabindex="2"-->
+        <!--aria-label="un-/mark as done">-->
+        <!--<ng-md-icon icon="check"-->
+        <!--ng-show="!task.isDone"></ng-md-icon>-->
+        <!--<ng-md-icon icon="undo"-->
+        <!--ng-show="task.isDone"></ng-md-icon>-->
+        <!--</md-button>-->
       </div>
     </div>
 

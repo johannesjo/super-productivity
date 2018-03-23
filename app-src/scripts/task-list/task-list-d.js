@@ -458,7 +458,8 @@
         onItemMoved: '&',
         onOrderChanged: '&',
         onTaskDoneChangedCallback: '&onTaskDoneChanged',
-        parentTask: '='
+        parentTask: '=',
+        isHideControls: '<'
       }
     });
 })();

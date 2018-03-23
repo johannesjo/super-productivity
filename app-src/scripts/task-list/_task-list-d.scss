@@ -35,6 +35,15 @@ task-list {
       margin: 1px -5px 10px 0;
     }
   }
+
+
+  &.is-hide-controls {
+    .handle,
+    .controls,
+    .md-icon-button {
+      display: none;
+    }
+  }
 }
 
 .task {
@@ -365,7 +374,6 @@ task-list {
       margin-top: 8px;
     }
   }
-
 }
 
 // animations
