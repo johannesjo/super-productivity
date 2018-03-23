@@ -6,7 +6,7 @@
  * Service in the superProductivity.
  */
 
-(function () {
+(function() {
   'use strict';
 
   angular
@@ -45,17 +45,19 @@
           type = tmpType;
         }
 
-        if (type === 'SUCCESS') {
-          icon = icon || 'check_circle';
-          iconColor = '#4fa758';
-        }
-        else if (type === 'WARNING') {
-          icon = icon || 'warning';
-          iconColor = '#e1e048';
-        }
-        else if (type === 'ERROR') {
-          icon = icon || 'error';
-          iconColor = '#e15d63';
+        switch (type) {
+          case 'SUCCESS':
+            icon = icon || 'check_circle';
+            iconColor = '#4fa758';
+            break;
+          case 'WARNING':
+            icon = icon || 'warning';
+            iconColor = '#e1e048';
+            break;
+          case 'ERROR':
+            icon = icon || 'error';
+            iconColor = '#e15d63';
+            break;
         }
 
         $mdToast.show({
