@@ -13,15 +13,15 @@
 
   class GoogleDriveSync {
     /* @ngInject */
-    constructor(AppStorage, GoogleApi, $rootScope, SimpleToast, $mdDialog, $q, $interval) {
+    constructor(AppStorage, GoogleApi, $rootScope, SimpleToast, $mdDialog, $mdToast, $q, $interval) {
       this.AppStorage = AppStorage;
       this.GoogleApi = GoogleApi;
       this.$rootScope = $rootScope;
       this.SimpleToast = SimpleToast;
       this.$mdDialog = $mdDialog;
+      this.$mdToast = $mdToast;
       this.$interval = $interval;
       this.$q = $q;
-
       this.data = this.$rootScope.r.googleDriveSync;
       this.config = this.$rootScope.r.config.googleDriveSync;
 
@@ -98,6 +98,29 @@
         });
 
       return this.currentPromise;
+    }
+
+    _showAsyncToast(promise, msg) {
+      const icon = 'file_upload';
+      this.$mdToast.show({
+        hideDelay: (promise ? (15 * 1000) : (5 * 1000)),
+        controller: ($mdToast) => {
+
+          if (promise) {
+            promise.then($mdToast.hide, $mdToast.hide);
+          }
+        },
+        template: `
+<md-toast>
+  <md-progress-linear md-mode="indeterminate"
+    style="position: absolute; top: 0; left: 0;"></md-progress-linear>
+
+  <div class="md-toast-text" flex>
+        <ng-md-icon icon="${icon}"></ng-md-icon>
+        ${msg}
+  </div>
+</md-toast>`
+      });
     }
 
     _confirmSaveDialog(remoteModified) {
@@ -284,10 +307,9 @@
         return this.$q.reject();
       } else {
         this._log('SYNC');
-        return this.saveTo()
-          .then(() => {
-            this.SimpleToast('SUCCESS', `Successfully synced Data to Google drive.`, 'file_upload');
-          });
+        const promise = this.saveTo();
+        this._showAsyncToast(promise, 'Syncing to google drive');
+        return promise;
       }
     }
 
