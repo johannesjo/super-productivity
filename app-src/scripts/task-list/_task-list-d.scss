@@ -36,7 +36,6 @@ task-list {
     }
   }
 
-
   &.is-hide-controls {
     .handle,
     .controls,
@@ -46,13 +45,18 @@ task-list {
   }
 }
 
+$this-task-text-color: #333333;
+$this-task-text-color-dark: #dddddd;
+$this-task-text-color-done: #aaaaaa;
+
+
 .task {
   $this-inner-padding-left-right: 12px;
   padding: 2px $this-inner-padding-left-right 0;
   display: block;
   margin-bottom: 6px;
   background-color: #ffffff;
-  color: #333333;
+  color: $this-task-text-color;
   position: relative;
   border: 1px solid #dddddd;
   border-bottom-width: 0;
@@ -60,7 +64,7 @@ task-list {
   @include dark-theme {
     border-color: rgb(60, 60, 60);
     background-color: $dark-theme-bg-lighter;
-    color: #dddddd;
+    color: $this-task-text-color-dark;
 
     &.is-done {
       .time,
@@ -75,12 +79,12 @@ task-list {
 
   &.is-done {
     ng-md-icon {
-      fill: #aaaaaa !important;
+      fill: $this-task-text-color-done !important;
     }
 
     .time,
     .task-title {
-      color: #aaaaaa;
+      color: $this-task-text-color-done;
     }
 
     .task-title {
@@ -391,5 +395,14 @@ task-list {
 
   .notes {
     @include ng-slide-down-up(400px, 200px);
+  }
+
+  .task .time {
+    .md-icon-button {
+      &.ng-enter,
+      &.ng-leave {
+        transition: none !important;
+      }
+    }
   }
 }
