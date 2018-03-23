@@ -335,8 +335,6 @@
     }
 
     saveFile(content, metadata = {}) {
-      console.log('SAVE');
-
       if (!angular.isString(content)) {
         content = JSON.stringify(content);
       }
@@ -410,7 +408,18 @@
     requestWrapper(request) {
       const defer = this.$q.defer();
       request.then((res) => {
-        if (res && res.status && res.status >= 400) {
+        if (res && res.status < 300) {
+          defer.resolve(res);
+        }
+        else if (!res) {
+          this.handleError('No response body');
+          defer.reject();
+        }
+        else if (!res.status) {
+          this.handleError('No status code returned');
+          defer.reject();
+        }
+        else {
           if (res.status === 401) {
             this.handleUnAuthenticated(res);
             defer.reject();
@@ -418,8 +427,6 @@
             this.handleError(res);
             defer.reject();
           }
-        } else {
-          defer.resolve(res);
         }
 
       }).catch((err) => {
