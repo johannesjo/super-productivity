@@ -1,3 +1,18 @@
+<a name="1.10.1"></a>
+## [1.10.1](https://github.com/johannesjo/super-productivity/compare/v1.10.0...v1.10.1) (2018-03-24)
+
+
+### Bug Fixes
+
+* google api not working any more ([9812b1b](https://github.com/johannesjo/super-productivity/commit/9812b1b))
+
+
+### Features
+
+* make focus view work without pomodoro ([2cc8607](https://github.com/johannesjo/super-productivity/commit/2cc8607))
+
+
+
 <a name="1.10.0"></a>
 # [1.10.0](https://github.com/johannesjo/super-productivity/compare/v1.9.4...v1.10.0) (2018-03-23)
 
