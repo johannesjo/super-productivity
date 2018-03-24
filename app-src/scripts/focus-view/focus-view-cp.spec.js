@@ -1,6 +1,6 @@
 'use strict';
 
-describe('Component: pomodoroFocus', () => {
+describe('Component: focusView', () => {
 
     // load the directive's module
     beforeEach(module('superProductivity'));
@@ -14,7 +14,7 @@ describe('Component: pomodoroFocus', () => {
     }));
 
     it('should do something', inject(($compile) => {
-        element = $compile('<pomodoro-focus></pomodoro-focus>')(scope);
+        element = $compile('<focus-view></focus-view>')(scope);
         scope.$digest();
         expect(true).toBe(true);
     }));

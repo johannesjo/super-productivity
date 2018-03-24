@@ -149,7 +149,7 @@
           $state.go('settings');
         }
         if (CheckShortcutKeyCombo(ev, $rootScope.r.keys.goToFocusMode)) {
-          $state.go('pomodoro-focus');
+          $state.go('focus-view');
         }
       }
 

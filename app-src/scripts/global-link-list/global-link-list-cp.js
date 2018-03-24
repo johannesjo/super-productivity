@@ -43,7 +43,7 @@
         return;
       }
 
-      const focusModeEl = ev.target.closest('pomodoro-focus');
+      const focusModeEl = ev.target.closest('focus-view');
       const taskEl = ev.target.closest('.task');
       const markdownEl = ev.target.closest('inline-markdown');
       const isImagePath = link.path.match(/jpg|png/);

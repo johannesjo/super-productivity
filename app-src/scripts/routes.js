@@ -42,9 +42,9 @@
         url: '/done-tasks-backlog',
         template: '<done-tasks-backlog></done-tasks-backlog>'
       })
-      .state('pomodoro-focus', {
-        url: '/pomodoro-focus',
-        template: '<pomodoro-focus></pomodoro-focus>'
+      .state('focus-view', {
+        url: '/focus-view',
+        template: '<focus-view></focus-view>'
       })
       .state('agenda-and-history', {
         url: '/agenda-and-history',

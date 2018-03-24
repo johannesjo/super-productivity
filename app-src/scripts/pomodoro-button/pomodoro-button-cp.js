@@ -52,7 +52,7 @@
     focusMode($ev) {
       $ev.preventDefault();
       $ev.stopPropagation();
-      this.$state.go('pomodoro-focus');
+      this.$state.go('focus-view');
     }
   }
 

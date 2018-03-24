@@ -1,14 +1,14 @@
 /**
  * @ngdoc component
- * @name superProductivity.component:pomodoroFocus
+ * @name superProductivity.component:focusView
  * @description
- * # pomodoroFocus
+ * # focusView
  */
 
 (() => {
   'use strict';
 
-  class PomodoroFocusCtrl {
+  class FocusViewCtrl {
     /* @ngInject */
     constructor($rootScope, PomodoroButton, Notifier, Tasks, SimpleToast, $state) {
       this.Tasks = Tasks;
@@ -70,13 +70,13 @@
 
   angular
     .module('superProductivity')
-    .component('pomodoroFocus', {
-      templateUrl: 'scripts/pomodoro-focus/pomodoro-focus-cp.html',
-      controller: PomodoroFocusCtrl,
+    .component('focusView', {
+      templateUrl: 'scripts/focus-view/focus-view-cp.html',
+      controller: FocusViewCtrl,
       controllerAs: 'vm',
       bindToController: {},
     });
 
   // hacky fix for ff
-  PomodoroFocusCtrl.$$ngIsClass = true;
+  FocusViewCtrl.$$ngIsClass = true;
 })();
