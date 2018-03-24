@@ -1,25 +1,42 @@
 <div class="focus-view">
   <div class="wrapper">
-    <md-button class="md-icon-button md-raised"
+
+    <md-button ng-if="vm.pomodoroSvc.config.isEnabled"
+               class="md-icon-button md-raised"
                aria-label="play/pause"
                tabindex="2"
-               ng-class="{'md-accent':vm.svc.data.status==='PLAY'}"
-               ng-click="vm.togglePlay()">
+               ng-class="{'md-accent':vm.pomodoroSvc.data.status==='PLAY'}"
+               ng-click="vm.togglePlayPomodoro()">
       <ng-md-icon icon="play_arrow"
-                  ng-if="!vm.svc.data.isOnBreak && vm.svc.data.status==='PLAY'"></ng-md-icon>
+                  ng-if="!vm.pomodoroSvc.data.isOnBreak && vm.pomodoroSvc.data.status==='PLAY'"></ng-md-icon>
       <ng-md-icon icon="pause"
-                  ng-if="vm.svc.data.status==='MANUAL_PAUSE'"></ng-md-icon>
+                  ng-if="vm.pomodoroSvc.data.status==='MANUAL_PAUSE'"></ng-md-icon>
       <ng-md-icon icon="free_breakfast"
-                  ng-if="vm.svc.data.isOnBreak && vm.svc.data.status!=='MANUAL_PAUSE'"></ng-md-icon>
+                  ng-if="vm.pomodoroSvc.data.isOnBreak && vm.pomodoroSvc.data.status!=='MANUAL_PAUSE'"></ng-md-icon>
+
+      <md-tooltip md-direction="bottom">Start/Pause working</md-tooltip>
+    </md-button>
+    <div ng-if="vm.pomodoroSvc.config.isEnabled"
+         class="timer"
+         ng-class="{'is-pause':vm.pomodoroSvc.data.status!=='PLAY'}"
+         ng-bind="(vm.pomodoroSvc.data.currentSessionTime | date:'mm:ss')"></div>
+
+
+    <md-button ng-if="!vm.pomodoroSvc.config.isEnabled"
+               class="md-icon-button md-raised"
+               aria-label="play/pause"
+               tabindex="2"
+               ng-class="{'md-accent': vm.r.currentTask}"
+               ng-click="vm.toggleMarkAsCurrentTask()">
+      <ng-md-icon icon="play_arrow"
+                  ng-if="!vm.r.currentTask"></ng-md-icon>
+      <ng-md-icon icon="pause"
+                  ng-if="vm.r.currentTask"></ng-md-icon>
 
       <md-tooltip md-direction="bottom">Start/Pause working</md-tooltip>
     </md-button>
 
-    <div class="timer"
-         ng-class="{'is-pause':vm.svc.data.status!=='PLAY'}"
-         ng-bind="(vm.svc.data.currentSessionTime | date:'mm:ss')"></div>
-
-    <md-button class="md-icon-button md-raised md-primary"
+    <md-button class="md-icon-button md-raised md-primary btn-link"
                aria-label="link"
                tabindex="2"
                target="_blank"
@@ -42,7 +59,7 @@
   </div>
 
   <div class="task"
-       ng-class="{'is-current':vm.svc.data.status==='PLAY'}">
+       ng-class="{'is-current':vm.r.currentTask}">
     <h3 class="parent-title"
         ng-bind="vm.parentTitle"
         ng-if="vm.parentTitle"></h3>

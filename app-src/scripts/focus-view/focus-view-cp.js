@@ -16,7 +16,7 @@
       this.PomodoroButton = PomodoroButton;
       this.$state = $state;
 
-      this.svc = PomodoroButton;
+      this.pomodoroSvc = PomodoroButton;
 
       this.r = $rootScope.r;
 
@@ -25,8 +25,16 @@
       this.handleAllDoneIfNeeded();
     }
 
-    togglePlay() {
+    togglePlayPomodoro() {
       this.PomodoroButton.toggle();
+    }
+
+    toggleMarkAsCurrentTask() {
+      if (this.Tasks.getCurrent()) {
+        this.Tasks.updateCurrent(undefined);
+      } else {
+        this.Tasks.updateCurrent(this.task);
+      }
     }
 
     setCurrentTask() {

@@ -12,8 +12,15 @@ focus-view {
     margin: 20px 0 0;
 
     .md-icon-button {
-      width: 50px;
-      height: 50px;
+      width: 45px;
+      height: 45px;
+
+      // needs manual adjustment to stay centered :(
+      &.btn-link {
+        ng-md-icon {
+          margin-top: 2px;
+        }
+      }
     }
   }
 
@@ -34,6 +41,10 @@ focus-view {
     // overwrite green background color
     &.is-current {
       background: transparent;
+
+      md-progress-linear {
+        border-color: $light-green;
+      }
     }
 
     .parent-title {
@@ -58,7 +69,7 @@ focus-view {
     md-progress-linear {
       // needed to overwrite ng-materials default styles
       margin-bottom: 10px !important;
-      border-bottom: 1px dashed #bcbcbc;
+      border-bottom: 2px dashed #bcbcbc;
 
       .md-bar,
       .md-container {
