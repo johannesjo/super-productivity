@@ -317,7 +317,7 @@
       }
 
       const metaData = this.getFileInfo(fileId);
-      const fileContents = this.$http({
+      const fileContents = this.requestWrapper(this.$http({
         method: 'GET',
         url: `https://content.googleapis.com/drive/v2/files/${encodeURIComponent(fileId)}`,
         params: {
@@ -328,15 +328,15 @@
         headers: {
           'Authorization': `Bearer ${this.data.accessToken}`,
         },
-      });
+      }));
 
-      return this.requestWrapper(this.$q.all([this.$q.when(metaData), this.$q.when(fileContents)])
+      return this.$q.all([this.$q.when(metaData), this.$q.when(fileContents)])
         .then((res) => {
           return this.$q.when({
             backup: res[1].data,
             meta: res[0].data,
           });
-        }));
+        });
     }
 
     saveFile(content, metadata = {}) {
@@ -394,7 +394,7 @@
           $scope.login = () => {
             GoogleApi.login();
             $mdToast.hide();
-          }
+          };
         },
         template: `
 <md-toast>
@@ -437,23 +437,17 @@
       request.then((res) => {
         if (res && res.status < 300) {
           defer.resolve(res);
-        }
-        else if (!res) {
+        } else if (!res) {
           this.handleError('No response body');
           defer.reject(res);
-        }
-        else if (!res.status) {
-          this.handleError('No status code returned');
+        } else if (res && res.status >= 300) {
+          this.handleError(res);
+        } else if (res && res.status === 401) {
+          this.handleUnAuthenticated(res);
           defer.reject(res);
-        }
-        else {
-          if (res.status === 401) {
-            this.handleUnAuthenticated(res);
-            defer.reject(res);
-          } else {
-            this.handleError(res);
-            defer.reject(res);
-          }
+        } else {
+          // in dubio pro reo
+          defer.resolve(res);
         }
 
       }).catch((err) => {
