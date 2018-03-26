@@ -1,3 +1,20 @@
+<a name="1.10.2"></a>
+## [1.10.2](https://github.com/johannesjo/super-productivity/compare/v1.10.1...v1.10.2) (2018-03-26)
+
+
+### Bug Fixes
+
+* add missing ngInject statements [#65](https://github.com/johannesjo/super-productivity/issues/65) ([57daea4](https://github.com/johannesjo/super-productivity/commit/57daea4))
+* set the right default value for 'isBlockFinishDayUntilTimeTimeTracked' [#66](https://github.com/johannesjo/super-productivity/issues/66) ([d5857e5](https://github.com/johannesjo/super-productivity/commit/d5857e5))
+
+
+### Features
+
+* add optional reset break timer but track when tracking on idle dialog ([359ddb2](https://github.com/johannesjo/super-productivity/commit/359ddb2))
+* show optional 'Are you sure you want to leave?' confirm dialog when quitting web version ([db34ac0](https://github.com/johannesjo/super-productivity/commit/db34ac0))
+
+
+
 <a name="1.10.1"></a>
 ## [1.10.1](https://github.com/johannesjo/super-productivity/compare/v1.10.0...v1.10.1) (2018-03-24)
 
