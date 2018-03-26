@@ -20,6 +20,10 @@
     const TOAST_DISPLAY_TIME = 30000;
     let toast;
 
+    this.isEnabled = () => {
+      return $rootScope.r.config && $rootScope.r.config.isTakeABreakEnabled;
+    };
+
     this.resetCounter = () => {
       this.lastCounterValBeforeReset = $rootScope.r.currentSession.timeWorkedWithoutBreak;
       $rootScope.r.currentSession.timeWorkedWithoutBreak = undefined;
@@ -43,7 +47,7 @@
     };
 
     this.update = (timeSpentInMs, isIdle) => {
-      if ($rootScope.r.config && $rootScope.r.config.isTakeABreakEnabled) {
+      if (this.isEnabled()) {
         if (!$rootScope.r.currentSession) {
           $rootScope.r.currentSession = {};
         }

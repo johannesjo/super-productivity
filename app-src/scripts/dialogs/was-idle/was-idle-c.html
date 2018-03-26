@@ -13,7 +13,7 @@
     </div>
   </md-toolbar>
 
-  <form ng-submit="vm.trackIdleToTask()">
+  <form ng-submit="vm.trackIdleToTask(false)">
     <md-dialog-content>
       <div class="md-dialog-content">
 
@@ -32,7 +32,7 @@
           <md-item-template>
           <span md-highlight-text="vm.searchText"
                 md-highlight-flags="i"
-          ng-bind="task.title"></span>
+                ng-bind="task.title"></span>
           </md-item-template>
           <md-not-found>
             No states matching "<span ng-bind="vm.searchText"></span>" were found.
@@ -47,6 +47,13 @@
       <md-button type="submit"
                  class="md-primary md-raised">
         Track
+      </md-button>
+
+      <md-button ng-click="vm.trackIdleToTask(true)"
+                 ng-if="vm.isShowTrackButResetTakeABreakTimer"
+                 type="button"
+                 class="md-primary md-raised">
+        Track but reset break timer
       </md-button>
 
       <md-button ng-click="vm.cancel()"

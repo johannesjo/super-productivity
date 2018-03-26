@@ -14,7 +14,7 @@
     .controller('WasIdleCtrl', WasIdleCtrl);
 
   /* @ngInject */
-  function WasIdleCtrl($mdDialog, $rootScope, $scope, Tasks, $window, initialIdleTime, minIdleTimeInMs, theme, $filter, $interval) {
+  function WasIdleCtrl($mdDialog, $rootScope, $scope, Tasks, $window, initialIdleTime, minIdleTimeInMs, theme, $filter, $interval, TakeABreakReminder) {
     const POLL_INTERVAL = 1000;
 
     let vm = this;
@@ -29,7 +29,13 @@
     vm.undoneTasks = Tasks.getUndoneToday(true);
     vm.selectedTask = $rootScope.r.currentTask || $rootScope.r.lastActiveTaskTask || undefined;
 
-    vm.trackIdleToTask = () => {
+    vm.isShowTrackButResetTakeABreakTimer = TakeABreakReminder.isEnabled();
+
+    vm.trackIdleToTask = (isResetTakeABreakTimer) => {
+      if (isResetTakeABreakTimer) {
+        TakeABreakReminder.resetCounter();
+      }
+
       if (vm.selectedTask && vm.selectedTask.id) {
         // add the idle time in milliseconds + the minIdleTime that was
         // not tracked or removed
