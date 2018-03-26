@@ -57,7 +57,7 @@
       }
 
       vm.showEdit = false;
-      textEl.css('display', 'block');
+      textEl.css('display', '');
     };
 
     vm.toggleShowEdit = () => {
