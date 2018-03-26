@@ -422,7 +422,7 @@
       AppStorage.saveToLs();
 
       if ($rootScope.r.config && $rootScope.r.config.isConfirmBeforeExit) {
-        return 'Are you sure you want to leave?'
+        return 'Are you sure you want to leave?';
       }
     };
   }
