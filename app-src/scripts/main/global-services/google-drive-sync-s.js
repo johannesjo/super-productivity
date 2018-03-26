@@ -104,11 +104,13 @@
       const icon = 'file_upload';
       this.$mdToast.show({
         hideDelay: (promise ? (15 * 1000) : (5 * 1000)),
-        controller: ($mdToast) => {
-          if (promise) {
-            promise.then($mdToast.hide, $mdToast.hide);
-          }
-        },
+        controller:
+        /* @ngInject */
+          ($mdToast) => {
+            if (promise) {
+              promise.then($mdToast.hide, $mdToast.hide);
+            }
+          },
         template: `
 <md-toast>
   <md-progress-linear md-mode="indeterminate"
@@ -155,23 +157,25 @@
     </md-button>
   </md-dialog-actions>
 </md-dialog>`,
-        controller: ($mdDialog, $scope, GoogleDriveSync) => {
-          $scope.saveToRemote = () => {
-            $mdDialog.hide();
-          };
+        controller:
+        /* @ngInject */
+          ($mdDialog, $scope, GoogleDriveSync) => {
+            $scope.saveToRemote = () => {
+              $mdDialog.hide();
+            };
 
-          $scope.loadFromRemote = () => {
-            $mdDialog.cancel();
-            // we need some time so the promise is canceled
-            setTimeout(() => {
-              GoogleDriveSync.loadFrom();
-            }, 100);
-          };
+            $scope.loadFromRemote = () => {
+              $mdDialog.cancel();
+              // we need some time so the promise is canceled
+              setTimeout(() => {
+                GoogleDriveSync.loadFrom();
+              }, 100);
+            };
 
-          $scope.cancel = () => {
-            $mdDialog.cancel();
-          };
-        },
+            $scope.cancel = () => {
+              $mdDialog.cancel();
+            };
+          },
       });
     }
 
