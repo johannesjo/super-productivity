@@ -31,6 +31,12 @@
   Disable finish day button until time sheet was exported
 </md-switch>
 
+<md-switch ng-if="!vm.IS_ELECTRON"
+           ng-model="vm.settings.isConfirmBeforeExit"
+           aria-label="Show confirm before exiting the app">
+  Show confirm before exiting the app
+</md-switch>
+
 <section ng-if="vm.isIdleTimeAvailable">
   <md-switch ng-model="vm.settings.isEnableIdleTimeTracking"
              aria-label="Enable idle time tracking">

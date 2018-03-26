@@ -417,9 +417,13 @@
 
   /* @ngInject */
   function initUnloadActions($rootScope, AppStorage) {
-    window.onbeforeunload = window.onunload = () => {
+    window.onbeforeunload = window.onunload = function() {
       $rootScope.r.lastActiveTime = new Date();
       AppStorage.saveToLs();
+
+      if ($rootScope.r.config && $rootScope.r.config.isConfirmBeforeExit) {
+        return 'Are you sure you want to leave?'
+      }
     };
   }
 

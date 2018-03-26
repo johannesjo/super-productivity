@@ -162,6 +162,7 @@
           isGoToWorkView: false,
         },
         isBlockFinishDayUntilTimeTimeTracked: false,
+        isConfirmBeforeExit: false,
         isShowTimeWorkedWithoutBreak: false,
         isTakeABreakEnabled: false,
         takeABreakMinWorkingTime: undefined,
