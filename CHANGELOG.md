@@ -1,3 +1,14 @@
+<a name="1.10.3"></a>
+## [1.10.3](https://github.com/johannesjo/super-productivity/compare/v1.10.2...v1.10.3) (2018-03-26)
+
+
+### Bug Fixes
+
+* edit on click producing block elements ([3a87061](https://github.com/johannesjo/super-productivity/commit/3a87061))
+* project renaming not working [#65](https://github.com/johannesjo/super-productivity/issues/65) ([24de1e3](https://github.com/johannesjo/super-productivity/commit/24de1e3))
+
+
+
 <a name="1.10.2"></a>
 ## [1.10.2](https://github.com/johannesjo/super-productivity/compare/v1.10.1...v1.10.2) (2018-03-26)
 
