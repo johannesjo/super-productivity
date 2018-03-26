@@ -161,7 +161,7 @@
           isPlaySound: true,
           isGoToWorkView: false,
         },
-        isBlockFinishDayUntilTimeTimeTracked: true,
+        isBlockFinishDayUntilTimeTimeTracked: false,
         isShowTimeWorkedWithoutBreak: false,
         isTakeABreakEnabled: false,
         takeABreakMinWorkingTime: undefined,
