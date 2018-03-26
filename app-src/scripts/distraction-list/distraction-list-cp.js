@@ -9,7 +9,7 @@
   'use strict';
 
   class DistractionListCtrl {
-    /* @ngInject */
+    /* We dont use it here since it somehow get's injected twice then @XXXngInject */
     constructor($rootScope) {
       this.r = $rootScope.r;
     }
