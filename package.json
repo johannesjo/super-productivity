@@ -105,7 +105,7 @@
     "gulp-livereload": "latest",
     "gulp-minify-html": "latest",
     "gulp-natural-sort": "latest",
-    "gulp-ng-annotate": "latest",
+    "gulp-ng-annotate": "^2.1.0",
     "gulp-ng-config": "latest",
     "gulp-notify": "^3.0.0",
     "gulp-plumber": "latest",

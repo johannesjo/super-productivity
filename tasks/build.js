@@ -25,6 +25,7 @@ const merge = require('merge-stream');
 const lazypipe = require('lazypipe');
 const babel = require('gulp-babel');
 const templateCache = require('gulp-angular-templatecache');
+const ngAnnotate = require('gulp-ng-annotate');
 
 // main task
 gulp.task('build', function(callback) {
@@ -107,15 +108,17 @@ gulp.task('copy', function() {
 gulp.task('minFiles', function() {
   return gulp.src(config.mainFile)
     .pipe(useref({}))
-    //.pipe(useref({}, lazypipe()
-    //  .pipe(sourcemaps.init, { loadMaps: true })))
+    .pipe(useref({}, lazypipe()
+      .pipe(sourcemaps.init, { loadMaps: true })))
     .pipe(gulpif(/scripts\.js/, babel()))
-    .pipe(gulpif(/\.js$/, uglify({
+    .pipe(gulpif(/\.js$/, ngAnnotate({ single_quotes: true })))
+    //.pipe(gulpif(/\.js$/, uglify({
+    .pipe(gulpif(/scripts\.js/, uglify({
       output: {
         comments: saveLicense
       }
     })))
     .pipe(gulpif(/\.css$/, cleanCSS()))
-    //.pipe(sourcemaps.write('maps'))
+    .pipe(sourcemaps.write('maps'))
     .pipe(gulp.dest(config.dist));
 });
