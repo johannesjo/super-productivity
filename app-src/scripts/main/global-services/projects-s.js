@@ -57,6 +57,15 @@
       return _.find(projects, ['id', projectId]);
     };
 
+    this.updateProjectTitle = (projectToUpdateId, newTitle) => {
+      let projects = this.getListWithLsData();
+      let projectToUpdate = $window._.find(projects, (project) => {
+        return project.id === projectToUpdateId;
+      });
+      projectToUpdate.title = newTitle;
+      AppStorage.saveProjects(projects);
+    };
+
     this.updateProjectData = (projectToUpdateId, data) => {
       let projects = this.getListWithLsData();
       let projectToUpdate = $window._.find(projects, (project) => {

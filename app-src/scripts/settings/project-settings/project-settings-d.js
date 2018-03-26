@@ -5,7 +5,7 @@
  * # projectSettings
  */
 
-(function () {
+(function() {
   'use strict';
 
   angular
@@ -42,6 +42,10 @@
       Dialogs('CREATE_PROJECT');
     };
 
+    vm.updateProjectTitle = (projectId, newTitle) => {
+      Projects.updateProjectTitle(projectId, newTitle);
+    };
+
     vm.deleteProject = (project) => {
       if (project.id === $rootScope.r.currentProject.id) {
         SimpleToast('ERROR', 'Cannot delete ' + project.title + ' as it is the current project!');
@@ -53,7 +57,7 @@
           .ok('Please do it!')
           .cancel('Better not');
 
-        $mdDialog.show(confirm).then(function () {
+        $mdDialog.show(confirm).then(() => {
           Projects.remove(project);
         });
       }
