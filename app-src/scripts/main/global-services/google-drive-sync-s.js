@@ -311,7 +311,9 @@
       } else {
         this._log('SYNC');
         const promise = this.saveTo();
-        this._showAsyncToast(promise, 'Syncing to google drive');
+        if (this.config.isNotifyOnSync) {
+          this._showAsyncToast(promise, 'Syncing to google drive');
+        }
         return promise;
       }
     }

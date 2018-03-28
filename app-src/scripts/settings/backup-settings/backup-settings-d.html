@@ -131,6 +131,13 @@
     </md-switch>
   </div>
 
+  <div ng-if="vm.settings.googleDriveSync.isAutoLogin">
+    <md-switch ng-model="vm.settings.googleDriveSync.isNotifyOnSync"
+               aria-label="Notify when syncing">
+      Notify when syncing
+    </md-switch>
+  </div>
+
   <md-input-container class="md-block md-icon-float"
                       ng-show="vm.settings.googleDriveSync.isAutoLogin && vm.settings.googleDriveSync.isAutoSyncToRemote">
     <label>Sync interval (sync every x)</label>
