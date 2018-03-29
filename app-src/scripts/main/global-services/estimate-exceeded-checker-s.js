@@ -50,7 +50,7 @@
       this.isNotificationTimeoutRunning = true;
       this.notificationTimeout = this.$timeout(() => {
         this.isNotificationTimeoutRunning = false;
-      }, EXTRA_TIME_BETWEEN_NOTIFICATIONS)
+      }, EXTRA_TIME_BETWEEN_NOTIFICATIONS);
     }
 
     notify(task) {
