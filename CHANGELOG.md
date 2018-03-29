@@ -1,3 +1,20 @@
+<a name="1.10.4"></a>
+## [1.10.4](https://github.com/johannesjo/super-productivity/compare/v1.10.3...v1.10.4) (2018-03-29)
+
+
+### Bug Fixes
+
+* tasks getting replaced when switching projects in work view [#69](https://github.com/johannesjo/super-productivity/issues/69) ([adcc034](https://github.com/johannesjo/super-productivity/commit/adcc034))
+
+
+### Features
+
+* improve project creation dialog ([9fda280](https://github.com/johannesjo/super-productivity/commit/9fda280))
+* make sync notification optional [#67](https://github.com/johannesjo/super-productivity/issues/67) ([f4b7887](https://github.com/johannesjo/super-productivity/commit/f4b7887))
+* optionally notify when time estimate was exceeded [#69](https://github.com/johannesjo/super-productivity/issues/69) ([0f84ef8](https://github.com/johannesjo/super-productivity/commit/0f84ef8))
+
+
+
 <a name="1.10.3"></a>
 ## [1.10.3](https://github.com/johannesjo/super-productivity/compare/v1.10.2...v1.10.3) (2018-03-26)
 
