@@ -162,6 +162,7 @@
           isPlaySound: true,
           isGoToWorkView: false,
         },
+        isNotifyWhenTimeEstimateExceeded: false,
         isBlockFinishDayUntilTimeTimeTracked: false,
         isConfirmBeforeExit: false,
         isShowTimeWorkedWithoutBreak: false,

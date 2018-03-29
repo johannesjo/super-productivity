@@ -15,13 +15,14 @@
 
   class TimeTracking {
     /* @ngInject */
-    constructor($rootScope, Tasks, Dialogs, TakeABreakReminder, TRACKING_INTERVAL, IS_ELECTRON, IS_EXTENSION, EV, $interval, ExtensionInterface) {
+    constructor($rootScope, Tasks, Dialogs, TakeABreakReminder, TRACKING_INTERVAL, IS_ELECTRON, IS_EXTENSION, EV, $interval, ExtensionInterface, EstimateExceededChecker) {
       this.$rootScope = $rootScope;
       this.$interval = $interval;
       this.Tasks = Tasks;
       this.Dialogs = Dialogs;
       this.TakeABreakReminder = TakeABreakReminder;
       this.ExtensionInterface = ExtensionInterface;
+      this.EstimateExceededChecker = EstimateExceededChecker;
       this.TRACKING_INTERVAL = TRACKING_INTERVAL;
       this.IS_ELECTRON = IS_ELECTRON;
       this.IS_EXTENSION = IS_EXTENSION;
@@ -54,6 +55,7 @@
           // only track if not idle and interval is smaller than threshold
           if (!this.isIdle && realPeriodDuration <= MAX_TRACKING_PERIOD_VAL) {
             this.Tasks.addTimeSpent(this.$rootScope.r.currentTask, realPeriodDuration);
+            this.EstimateExceededChecker.checkTaskAndNotify(this.$rootScope.r.currentTask);
           }
 
           // set to now
