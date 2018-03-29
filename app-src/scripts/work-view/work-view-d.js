@@ -25,17 +25,21 @@
   }
 
   /* @ngInject */
-  function WorkViewCtrl(Tasks, $window, $scope, Dialogs, $rootScope, TasksUtil, $timeout) {
+  function WorkViewCtrl(Tasks, $window, $scope, Dialogs, $rootScope, TasksUtil, $timeout, EV_PROJECT_CHANGED) {
     let vm = this;
     const _ = $window._;
 
     // INIT
-    vm.session = $rootScope.r.currentSession;
-    vm.config = $rootScope.r.config;
-    vm.tasksUndone = Tasks.getUndoneToday();
-    vm.tasksDone = Tasks.getDoneToday();
-    updateTimeTotals();
-    focusFirstTask();
+    function init() {
+      vm.session = $rootScope.r.currentSession;
+      vm.config = $rootScope.r.config;
+      vm.tasksUndone = Tasks.getUndoneToday();
+      vm.tasksDone = Tasks.getDoneToday();
+      updateTimeTotals();
+      focusFirstTask();
+    }
+
+    init();
 
     // PRIVATE FUNCTIONS
     // -----------------
@@ -132,6 +136,10 @@
       // we wan't to save to the LS in case the app crashes
       updateTasksLsOnly();
     }));
+
+    $scope.$on(EV_PROJECT_CHANGED, () => {
+      init();
+    });
 
     // otherwise we update on view change
     $scope.$on('$destroy', () => {
