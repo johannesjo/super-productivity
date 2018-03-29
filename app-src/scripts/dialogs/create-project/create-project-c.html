@@ -27,12 +27,15 @@
                  aria-label="Title">
         </md-input-container>
 
-        <theme-settings current-theme="vm.projectSettings.theme" is-boxed="true"></theme-settings>
+        <theme-settings current-theme="vm.projectSettings.theme"
+                        is-boxed="true"></theme-settings>
+
 
         <jira-settings settings="vm.projectSettings.jiraSettings"
-                       ng-if="vm.IS_ELECTRON"></jira-settings>
+                       ng-if="vm.IS_ELECTRON || vm.IS_EXTENSION"></jira-settings>
 
-        <misc-settings settings="vm.projectSettings.config"></misc-settings>
+        <!--<git-settings settings="vm.projectSettings.git"-->
+        <!--ng-if="vm.IS_ELECTRON || vm.IS_EXTENSION"></git-settings>-->
       </div>
     </md-dialog-content>
 

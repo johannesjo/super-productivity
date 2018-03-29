@@ -6,7 +6,7 @@
  * Controller of the superProductivity
  */
 
-(function () {
+(function() {
   'use strict';
 
   angular
@@ -14,9 +14,10 @@
     .controller('CreateProjectCtrl', CreateProjectCtrl);
 
   /* @ngInject */
-  function CreateProjectCtrl($mdDialog, Projects, SimpleToast, IS_ELECTRON, $rootScope) {
+  function CreateProjectCtrl($mdDialog, Projects, SimpleToast, IS_ELECTRON, IS_EXTENSION, $rootScope) {
     let vm = this;
     vm.IS_ELECTRON = IS_ELECTRON;
+    vm.IS_EXTENSION = IS_EXTENSION;
     vm.task = {};
     vm.projectSettings = {};
     vm.projectSettings.theme = $rootScope.r.theme;
