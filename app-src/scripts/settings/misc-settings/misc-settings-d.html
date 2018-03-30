@@ -3,7 +3,7 @@
   <p>Decide if you want to automatically start the next task, once you mark a task as done.</p>
 
   <div class="md-caption">Use short syntax</div>
-  <p>The short syntax can be enabled to quickly create tasks with an estimation already set. If you enter 'TaskTitleBla t:30m' a task with the name 'TaskTitleBla' will be created with the estimation set to 30 minutes.</p>
+  <p>The short syntax can be enabled to quickly create tasks with an estimation already set. If you enter 'TaskTitleBla t30m' a task with the name 'TaskTitleBla' will be created with the estimation set to 30 minutes.</p>
 
   <div ng-if="vm.IS_ELECTRON">
     <div class="md-caption">Enable idle time handling</div>
@@ -23,7 +23,7 @@
 
 <md-switch ng-model="vm.settings.isShortSyntaxEnabled"
            aria-label="Use short syntax (e.g. 'TaskTitleBla e:30m')">
-  Use short syntax (e.g. 'TaskTitleBla t:30m') for task creation
+  Use short syntax (e.g. 'TaskTitleBla t30m') for task creation
 </md-switch>
 
 <md-switch ng-model="vm.settings.isBlockFinishDayUntilTimeTimeTracked"
