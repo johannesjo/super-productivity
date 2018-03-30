@@ -63,7 +63,7 @@ after_success:
   - 'echo "DIST-RESULT:"'
   - 'ls -l ./dist'
   - |
-    if [ "$TRAVIS_OS_NAME" == "linux" ]; then
+    if [ -n "$TRAVIS_TAG" ] && [ "$TRAVIS_OS_NAME" == "linux" ]; then
       sshpass -p "$DEPLOY_PASS" rsync -avz ./app/ $DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH/app
       openssl aes-256-cbc -K $encrypted_c04542ca1075_key -iv $encrypted_c04542ca1075_iv -in .snapcraft/travis_snapcraft.cfg -out .snapcraft/snapcraft.cfg -d
       docker run -v $(pwd):$(pwd) -t snapcore/snapcraft sh -c "apt update -qq && cd $(pwd) && snapcraft push ./dist/*.snap --release stable"
