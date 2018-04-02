@@ -1,38 +1,52 @@
-//(function() {
-//  'use strict';
-//
-//  angular
-//    .module('superProductivity')
-//    .animation('.ani-slide-up-down', slideAnimation);
-//
-//  /* @ngInject */
-//  function slideAnimation() {
-//    // placeholder for later
-//
-//    return {
-//      enter: function($el, doneFn) {
-//        const el = $el[0];
-//        const ch = el.clientHeight;
-//        const sh = el.scrollHeight;
-//        const noHeightSet = !el.style.height;
-//        const isCollapsed = true;
-//
-//        el.style.maxHeight = (isCollapsed || noHeightSet ? sh : 0) + 'px';
-//
-//        console.log(el);
-//        //$(el).slideIn(1000, doneFn);
-//        //return $animateCss(el, {
-//        //  event: 'enter',
-//        //  structural: true,
-//        //  addClass: 'maroon-setting',
-//        //  from: { height: 0 },
-//        //  to: { height: 200 }
-//        //});
-//
-//        doneFn();
-//      }
-//    }
-//  }
-//}());
-//
-//
+(function() {
+  'use strict';
+
+  angular
+    .module('superProductivity')
+    .animation('.ani-slide-up-down', slideAnimation);
+
+  const DUR = 0.2;
+  const EASE = 'cubic-bezier(.38, .04, .35, .96)';
+
+  const animationSpeed = (height) => {
+    if (height >= 450) {
+      return DUR * 1.5;
+    } else if (height > 200 && height < 450) {
+      return DUR * 1.5;
+    } else {
+      return DUR;
+    }
+  };
+
+  /* @ngInject */
+  function slideAnimation($animateCss) {
+    return {
+      enter: function($el) {
+        const el = $el[0];
+        //const sh = el.scrollHeight;
+        const height = el.offsetHeight;
+        return $animateCss($el, {
+          from: { height: '0px' },
+          to: { height: height + 'px' },
+          duration: animationSpeed(height),
+          easing: EASE,
+          cleanupStyles: true
+        });
+      },
+      leave: ($el) => {
+        const el = $el[0];
+        //const sh = el.scrollHeight;
+        const height = el.offsetHeight;
+        return $animateCss($el, {
+          from: { height: height + 'px', opacity: 1 },
+          to: { height: '0px', opacity: 0 },
+          duration: animationSpeed(height),
+          easing: EASE,
+          cleanupStyles: true
+        });
+      }
+    }
+  }
+}());
+
+

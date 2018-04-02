@@ -27,8 +27,5 @@ collapsible {
     height: auto;
     display: block;
     overflow: hidden;
-
-    @include ng-slide-down-up(300px, 300px);
-
   }
 }

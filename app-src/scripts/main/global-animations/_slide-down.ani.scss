@@ -1,7 +1,4 @@
 .ani-slide-up-down {
-  transition: height 0.5s;
-
-  &.is-ani-active {
-    @include ng-slide-down-up();
-  }
+  overflow: hidden !important;
+  margin: 0 !important;
 }

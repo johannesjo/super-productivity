@@ -405,7 +405,6 @@ $this-task-text-color-done: #aaaaaa;
   }
 
   .notes {
-    @include ng-slide-down-up(400px, 200px);
   }
 
   .task .time {

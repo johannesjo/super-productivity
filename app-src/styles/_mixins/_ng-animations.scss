@@ -55,63 +55,6 @@
   }
 }
 
-@mixin ng-slide-down-up($max-down: 400px, $start-up: 200px) {
-  // animation
-  &.ng-enter,
-  &.ng-leave {
-    transition: all 0.15s $ease-in-out-quint;
-    overflow: hidden;
-    transform-origin: 0 0;
-  }
-
-  &.ng-enter {
-    max-height: 0;
-    transform: scaleY(0);
-  }
-
-  &.ng-enter.ng-enter-active {
-    max-height: 500px;
-    transform: scaleY(1);
-  }
-  &.ng-leave {
-    max-height: 400px;
-    transform: scaleY(1);
-  }
-
-  &.ng-leave.ng-leave-active {
-    max-height: 0;
-    transform: scaleY(0);
-  }
-}
-
-@mixin ng-show-slide-down-up($max-down: 400px, $start-up: 200px) {
-  // animation
-  &.ng-hide-remove,
-  &.ng-hide-add {
-    transition: all 0.15s $ease-in-out-quint;
-    overflow: hidden;
-    transform-origin: 0 0;
-  }
-
-  &.ng-hide-remove {
-    max-height: 0;
-    transform: scaleY(0);
-  }
-
-  &.ng-hide-remove.ng-hide-remove-active {
-    max-height: 500px;
-    transform: scaleY(1);
-  }
-  &.ng-hide-add {
-    max-height: 400px;
-    transform: scaleY(1);
-  }
-
-  &.ng-hide-add.ng-hide-add-active {
-    max-height: 0;
-    transform: scaleY(0);
-  }
-}
 
 @mixin ng-pop-in() {
   &.ng-leave {
@@ -131,10 +74,6 @@
   }
 }
 
-.ani-slide-up-down {
-  @include ng-slide-down-up();
-  @include ng-show-slide-down-up();
-}
 
 .ani-pop-in-pop-out {
   @include ng-pop-in-popout();
