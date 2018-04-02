@@ -45,7 +45,7 @@
           cleanupStyles: true
         });
       }
-    }
+    };
   }
 }());
 
