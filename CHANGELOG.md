@@ -1,3 +1,20 @@
+<a name="1.10.5"></a>
+## [1.10.5](https://github.com/johannesjo/super-productivity/compare/v1.10.4...v1.10.5) (2018-04-02)
+
+
+### Bug Fixes
+
+* description text for short syntax [#71](https://github.com/johannesjo/super-productivity/issues/71) ([d6e682d](https://github.com/johannesjo/super-productivity/commit/d6e682d))
+* time sheet export wrong total time [#72](https://github.com/johannesjo/super-productivity/issues/72) ([3704db1](https://github.com/johannesjo/super-productivity/commit/3704db1))
+
+
+### Features
+
+* add js based animation for slide up down ([7a217de](https://github.com/johannesjo/super-productivity/commit/7a217de))
+* improve task list styling ([7a8a7bd](https://github.com/johannesjo/super-productivity/commit/7a8a7bd))
+
+
+
 <a name="1.10.4"></a>
 ## [1.10.4](https://github.com/johannesjo/super-productivity/compare/v1.10.3...v1.10.4) (2018-03-29)
 
