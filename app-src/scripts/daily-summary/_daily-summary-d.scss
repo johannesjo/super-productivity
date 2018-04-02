@@ -99,45 +99,80 @@ md-input-container {
 }
 
 .success-animation-wrapper {
+  $this-ani-style: 1s linear infinite;
   $this-ico-size: 128px;
   clear: both;
   display: block;
   position: fixed;
   top: 50%;
   left: 50%;
-  margin-left: $this-ico-size/-2;
-  margin-top: $this-ico-size/-2;
-  transform-origin: center center;
-  animation: success-animation 2s linear infinite;
+  transform: translate(-50%, -50%);
 
   ng-md-icon {
     width: $this-ico-size;
     height: $this-ico-size;
     display: block;
-    fill: $yellow !important;
     font-size: 30px;
+    fill: $yellow;
+    transform-origin: center center;
+    animation: success-animation-sun #{$this-ani-style};
+
     svg {
       width: $this-ico-size;
       height: $this-ico-size;
     }
   }
+  .unicorn-wrapper {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+  .unicorn {
+    transform-origin: center center;
+    animation: success-animation-unicorn #{$this-ani-style};
+  }
 }
 
-@keyframes success-animation {
+@keyframes success-animation-sun {
   0% {
-    transform: scale(0) rotate(0deg);
+    transform: scale(0) rotate(-180deg);
     opacity: 1;
   }
   50% {
     opacity: 1;
-    transform: scale(5) rotate(180deg);
+    transform: scale(5) rotate(0deg);
   }
-  80% {
-    transform: scale(10) rotate(320deg);
-    opacity: 1;
+  75% {
+    transform: scale(10) rotate(90deg);
+    opacity: 0.4;
   }
   100% {
-    transform: scale(12) rotate(720deg);
-    opacity: 0.5;
+    transform: scale(12) rotate(180deg);
+    opacity: 0;
   }
 }
+
+@keyframes success-animation-unicorn {
+  0% {
+    opacity: 0;
+    transform: scale(0);
+  }
+  25% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 1;
+  }
+  55% {
+    transform: scale(2);
+  }
+  75% {
+    transform: scale(3);
+    opacity: 0;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
