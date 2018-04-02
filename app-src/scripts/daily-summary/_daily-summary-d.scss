@@ -98,18 +98,17 @@ md-input-container {
   }
 }
 
-
 .success-animation-wrapper {
-  $this-ico-size: 64px;
+  $this-ico-size: 128px;
   clear: both;
   display: block;
   position: fixed;
   top: 50%;
   left: 50%;
   margin-left: $this-ico-size/-2;
-  margin-top: $this-ico-size/2;
-  animation: success-animation 1s ease-out infinite;
-  transform: scale(20);
+  margin-top: $this-ico-size/-2;
+  transform-origin: center center;
+  animation: success-animation 2s linear infinite;
 
   ng-md-icon {
     width: $this-ico-size;
@@ -126,14 +125,19 @@ md-input-container {
 
 @keyframes success-animation {
   0% {
-    transform: scale(0.1);
+    transform: scale(0) rotate(0deg);
     opacity: 1;
   }
   50% {
-    opacity: 0.7;
+    opacity: 1;
+    transform: scale(5) rotate(180deg);
+  }
+  80% {
+    transform: scale(10) rotate(320deg);
+    opacity: 1;
   }
   100% {
-    transform: scale(20);
-    opacity: 0;
+    transform: scale(12) rotate(720deg);
+    opacity: 0.5;
   }
 }
