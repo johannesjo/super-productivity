@@ -93,6 +93,10 @@
     };
 
     function replaceVals(defaultVal) {
+      if (!defaultVal) {
+        return;
+      }
+
       const dVal = defaultVal.trim();
 
       if (dVal.match(/\{date:/)) {
@@ -114,6 +118,36 @@
           return getTotalTimeWorked();
         default:
           return dVal;
+      }
+    }
+
+    function roundDuration(value, roundTo, isRoundUp) {
+      let rounded;
+
+      switch (roundTo) {
+        case 'QUARTER':
+          rounded = Math.round(value.asMinutes() / 15) * 15;
+          if (isRoundUp) {
+            rounded = Math.ceil(value.asMinutes() / 15) * 15;
+          }
+          return window.moment.duration({ minutes: rounded });
+
+        case 'HALF':
+          rounded = Math.round(value.asMinutes() / 30) * 30;
+          if (isRoundUp) {
+            rounded = Math.ceil(value.asMinutes() / 30) * 30;
+          }
+          return window.moment.duration({ minutes: rounded });
+
+        case 'HOUR':
+          rounded = Math.round(value.asMinutes() / 60) * 60;
+          if (isRoundUp) {
+            rounded = Math.ceil(value.asMinutes() / 60) * 60;
+          }
+          return window.moment.duration({ minutes: rounded });
+
+        default:
+          return value;
       }
     }
 
@@ -171,11 +205,10 @@
     }
 
     function getTotalTimeWorked() {
-      let val = Tasks.getTimeWorkedToday();
-      // convert to moment time
-      val = window.moment().hours(val.asHours()).minutes(val.asMinutes());
+      const val = Tasks.getTimeWorkedToday();
+
       const roundTo = vm.opts.roundWorkTimeTo;
-      return roundTime(val, roundTo, vm.opts.isRoundWorkTimeUp)
+      return roundDuration(val, roundTo, vm.opts.isRoundWorkTimeUp)
         .format('HH:mm');
     }
 
