@@ -1,3 +1,13 @@
+<a name="1.10.6"></a>
+## [1.10.6](https://github.com/johannesjo/super-productivity/compare/v1.10.5...v1.10.6) (2018-04-02)
+
+
+### Features
+
+* beautify daily success animation ([daa91bb](https://github.com/johannesjo/super-productivity/commit/daa91bb))
+
+
+
 <a name="1.10.5"></a>
 ## [1.10.5](https://github.com/johannesjo/super-productivity/compare/v1.10.4...v1.10.5) (2018-04-02)
 
