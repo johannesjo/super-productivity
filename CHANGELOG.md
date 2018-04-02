@@ -1,3 +1,13 @@
+<a name="1.10.8"></a>
+## [1.10.8](https://github.com/johannesjo/super-productivity/compare/v1.10.7...v1.10.8) (2018-04-02)
+
+
+### Features
+
+* objectively improve success animation even more ([9340a1a](https://github.com/johannesjo/super-productivity/commit/9340a1a))
+
+
+
 <a name="1.10.7"></a>
 ## [1.10.7](https://github.com/johannesjo/super-productivity/compare/v1.10.6...v1.10.7) (2018-04-02)
 
