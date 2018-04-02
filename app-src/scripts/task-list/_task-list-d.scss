@@ -17,6 +17,7 @@ task-list {
     display: block;
     min-height: 22px;
     background-color: #dddddd;
+
     @include dark-theme {
       background-color: $dark-theme-bg-darker;
     }
@@ -29,10 +30,10 @@ task-list {
 
   // nested lists
   .task-list {
-    margin: 2px -5px 10px 5px;
+    margin: 2px 5px 5px 5px;
 
     @media(max-width: $layout-xs) {
-      margin: 1px -5px 10px 0;
+      margin: 1px 0 5px 0;
     }
   }
 
@@ -43,7 +44,7 @@ task-list {
       .md-icon-button {
         display: none;
       }
-      .collapse-sub-tasks-btn{
+      .collapse-sub-tasks-btn {
         display: block;
       }
     }
@@ -55,7 +56,7 @@ $this-task-text-color-dark: #dddddd;
 $this-task-text-color-done: #aaaaaa;
 
 .task {
-  $this-inner-padding-left-right: 12px;
+  $this-inner-padding-left-right: 6px;
   padding: 2px $this-inner-padding-left-right 0;
   display: block;
   margin-bottom: 6px;
@@ -79,6 +80,10 @@ $this-task-text-color-done: #aaaaaa;
         fill: $dark-theme-text-color;
       }
     }
+  }
+
+  &:last-child {
+    margin-bottom: 0;
   }
 
   &.is-done {
@@ -270,8 +275,9 @@ $this-task-text-color-done: #aaaaaa;
   }
 
   md-progress-linear {
-    margin-left: -12px;
-    margin-right: -12px;
+    margin-top: 1px;
+    margin-left: -1*$this-inner-padding-left-right;
+    margin-right: -1*$this-inner-padding-left-right;
     width: auto;
   }
 
@@ -281,7 +287,7 @@ $this-task-text-color-done: #aaaaaa;
   }
 
   .handle {
-    margin: 0 4px 0 0;
+    margin: 0 4px 0 6px;
   }
 
   .task-title {
@@ -324,12 +330,13 @@ $this-task-text-color-done: #aaaaaa;
   }
 
   .notes {
+    $this-notes-extra-padding: 3px;
     display: block;
     margin-left: -$this-inner-padding-left-right;
     margin-right: -$this-inner-padding-left-right;
     overflow: hidden;
-    padding-left: $this-inner-padding-left-right;
-    padding-right: $this-inner-padding-left-right;
+    padding-left: $this-inner-padding-left-right +$this-notes-extra-padding;
+    padding-right: $this-inner-padding-left-right +$this-notes-extra-padding;
 
     section {
       margin-top: 10px;
