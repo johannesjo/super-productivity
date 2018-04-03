@@ -29,13 +29,15 @@
         <strong ng-bind="worklogForDay.timeSpent|duration"></strong>
       </div>
 
-      <table class="task-summary-table"
-             ng-if="worklogForDay.isVisible">
-        <tr ng-repeat="logEntry in worklogForDay.entries track by logEntry.task.id">
-          <td ng-bind="logEntry.task.title"></td>
-          <td ng-bind="logEntry.task.timeSpentOnDay[worklogForDay.dateStr] |duration"></td>
-        </tr>
-      </table>
+      <div class="ani-slide-up-down"
+           ng-if="worklogForDay.isVisible">
+        <table class="task-summary-table">
+          <tr ng-repeat="logEntry in worklogForDay.entries track by logEntry.task.id">
+            <td ng-bind="logEntry.task.title"></td>
+            <td ng-bind="logEntry.task.timeSpentOnDay[worklogForDay.dateStr] |duration"></td>
+          </tr>
+        </table>
+      </div>
     </div>
   </div>
 </div>
