@@ -158,6 +158,15 @@ $this-task-text-color-done: #aaaaaa;
       border: 1px solid #dddddd;
       background: #ffffff !important;
 
+      &.update-indicator-btn {
+        margin-left: 12px;
+
+        .task-list .task-list & {
+          margin: $this-button-spacer;
+          margin-right: -2px;
+        }
+      }
+
       @include dark-theme {
         background: $dark-theme-bg-darker !important;
         border: 1px solid $dark-theme-bg;
