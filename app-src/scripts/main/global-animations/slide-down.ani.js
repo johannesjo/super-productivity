@@ -26,8 +26,14 @@
         //const sh = el.scrollHeight;
         const height = el.offsetHeight;
         return $animateCss($el, {
-          from: { height: '0px' },
-          to: { height: height + 'px' },
+          from: {
+            height: '0',
+            transform: 'scaleY(0)',
+          },
+          to: {
+            height: height + 'px',
+            transform: 'scaleY(1)',
+          },
           duration: animationSpeed(height),
           easing: EASE,
           cleanupStyles: true
@@ -38,8 +44,14 @@
         //const sh = el.scrollHeight;
         const height = el.offsetHeight;
         return $animateCss($el, {
-          from: { height: height + 'px', opacity: 1 },
-          to: { height: '0px', opacity: 0 },
+          from: {
+            height: height + 'px',
+            transform: 'scaleY(1)'
+          },
+          to: {
+            height: '0',
+            transform: 'scaleY(0)'
+          },
           duration: animationSpeed(height),
           easing: EASE,
           cleanupStyles: true

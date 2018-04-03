@@ -27,5 +27,9 @@ collapsible {
     height: auto;
     display: block;
     overflow: hidden;
+
+    // make sure we don't produce clunky animations
+    padding: 0!important;
+    margin: 0!important;
   }
 }
