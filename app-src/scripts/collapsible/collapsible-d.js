@@ -9,7 +9,7 @@
   'use strict';
 
   /* @ngInject */
-  function CollapsibleCtrl($timeout) {
+  function CollapsibleCtrl($timeout, $element) {
     const vm = this;
 
     // TODO fix this
@@ -21,6 +21,9 @@
 
     vm.toggleExpand = () => {
       vm.isExpanded = !vm.isExpanded;
+
+      vm.isExpanded ? $element.addClass('is-expanded') : $element.removeClass('is-expanded');
+
     };
   }
 

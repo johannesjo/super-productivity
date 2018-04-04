@@ -32,18 +32,20 @@
   }
 
   .help-btn {
+    display: none;
+  }
+
+  .is-expanded .help-btn {
+    display: block;
     top: 0px;
     right: -2px;
     visibility: hidden;
-    animation: 0.2s help-ico-animation $ease-in-out-quint;
+    animation: 0.2s help-ico-animation ease-out;
     animation-fill-mode: forwards;
-    // wait for slide up
-    animation-delay: 0.16s;
+    // wait for slide up (kind of because we have a dynamic duration)
+    animation-delay: 0.20s;
   }
 
-  .ng-leave .help-btn {
-    display: none;
-  }
 
   .config-section {
     margin-bottom: 10px;
@@ -101,7 +103,7 @@
     visibility: visible;
   }
   60% {
-    transform: scale(1.1);
+    transform: scale(1.4);
   }
   100% {
     -webkit-transform: scale(1);
