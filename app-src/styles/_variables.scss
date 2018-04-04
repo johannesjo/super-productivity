@@ -26,6 +26,8 @@ $layout-gt-lg: 1920px;
 
 $ease-in-out-quint: cubic-bezier(.38, .04, .35, .96);
 $transition-duration-xs: 200ms;
-$transition-duration-s: 400ms;
-$transition-duration-m: 600ms;
-$transition-duration-l: 800ms;
+$transition-duration-s: 250ms;
+$transition-duration-m: 300ms;
+$transition-duration-l: 600ms;
+
+$page-transition-duration: $transition-duration-s;
