@@ -734,6 +734,11 @@
     collapseNotes(tasks) {
       tasks.forEach((task) => {
         delete task.showNotes;
+        if (task.subTasks) {
+          task.subTasks.forEach((subTask) => {
+            delete subTask.showNotes;
+          });
+        }
       });
     }
 
