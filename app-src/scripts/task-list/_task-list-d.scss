@@ -417,6 +417,13 @@ $this-task-text-color-done: #aaaaaa;
 
   .task {
     @include crawl-in-out;
+    transition: background-color $transition-duration-m $ease-in-out-quint;
+
+    &.is-current {
+      .play-btn {
+        transition: all $transition-duration-s $ease-in-out-quint;
+      }
+    }
   }
 
   .notes {
@@ -431,3 +438,13 @@ $this-task-text-color-done: #aaaaaa;
     }
   }
 }
+
+@keyframes task-started-animation {
+  0% {
+    transform: translate3d(-100%, 0, 0);
+  }
+  100% {
+    transform: translate3d(100%, 0, 0);
+  }
+}
+
