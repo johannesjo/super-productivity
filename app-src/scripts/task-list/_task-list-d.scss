@@ -417,7 +417,10 @@ $this-task-text-color-done: #aaaaaa;
 
   .task {
     @include crawl-in-out;
-    transition: background-color $transition-duration-m $ease-in-out-quint;
+
+    &:focus {
+      transition: none;
+    }
 
     &.is-current {
       .play-btn {
