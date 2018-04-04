@@ -7,6 +7,12 @@ work-view {
   .hide-controls-icon {
     transform: rotate(90deg);
   }
+
+  .task {
+    &.is-current {
+      animation: $transition-duration-s attention-for-current-task;
+    }
+  }
 }
 
 .work-view-header {
@@ -34,5 +40,17 @@ work-view {
   .no-wrap {
     display: inline-block;
     white-space: nowrap;
+  }
+}
+
+@keyframes attention-for-current-task {
+  0% {
+    transform: scale(1);
+  }
+  70% {
+    transform: scale(1.01, 1.1);
+  }
+  100% {
+    transform: scale(1);
   }
 }
