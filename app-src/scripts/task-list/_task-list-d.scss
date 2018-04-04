@@ -214,7 +214,7 @@ $this-task-text-color-done: #aaaaaa;
         }
 
         &:hover {
-          background: $red !important;
+          background: $red-danger !important;
           ng-md-icon.delete-icon {
             fill: #ffffff !important;
             @include dark-theme {
