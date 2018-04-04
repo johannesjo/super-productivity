@@ -20,7 +20,7 @@
     let vm = this;
 
     vm.editOrAddStr = isNew ? 'Add' : 'Edit';
-    vm.getGlobalOrTaskStr = () => vm.selectedTask ? `link to task "${vm.selectedTask.title}"` : 'global link';
+    vm.getGlobalOrTaskStr = () => vm.selectedTask ? `link to task` : 'global link';
 
     vm.isNew = isNew;
     vm.IS_ELECTRON = IS_ELECTRON;

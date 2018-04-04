@@ -2,7 +2,7 @@
            md-theme="vm.theme">
   <md-toolbar>
     <div class="md-toolbar-tools">
-      <h2>Submit worklog to Jira for "<span ng-bind="vm.taskCopy.originalKey"></span>"</h2>
+      <h2>Submit worklog for "<span ng-bind="vm.taskCopy.originalKey"></span>"</h2>
       <span flex></span>
       <md-button class="md-icon-button"
                  aria-label="Cancel"
@@ -18,7 +18,7 @@
 
     <md-dialog-content>
       <div class="md-dialog-content">
-        <p>Submit a worklog for "<span ng-bind="vm.taskCopy.title"></span>".</p>
+        <p>Submit a worklog to Jira for "<span ng-bind="vm.taskCopy.title"></span>".</p>
         <p>The current logged work amount on Jira is <strong ng-bind="vm.taskCopy.originalTimeSpent|duration"></strong>.</p>
 
 

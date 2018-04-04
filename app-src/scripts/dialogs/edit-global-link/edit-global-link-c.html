@@ -16,6 +16,7 @@
   <form ng-submit="vm.saveGlobalLink()">
     <md-dialog-content>
       <div class="md-dialog-content">
+        <p ng-if="vm.selectedTask"><strong>Add link to task:<br>{{vm.selectedTask.title}}</strong><br><br></p>
         <md-input-container class="md-block">
           <label>Title</label>
           <input type="text"
