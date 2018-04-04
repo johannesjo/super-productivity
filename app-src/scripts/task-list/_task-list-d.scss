@@ -247,6 +247,12 @@ $this-task-text-color-done: #aaaaaa;
       position: relative;
       z-index: 1;
     }
+
+    .show-notes-btn {
+      &.is-active {
+        transform: rotate(45deg);
+      }
+    }
   }
 
   .controls {
