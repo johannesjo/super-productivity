@@ -18,7 +18,7 @@ daily-planner {
   .add-task-form {
     margin: 20px auto;
     max-width: $component-max-width;
-    @include pulse(0.3s);
+    @include pulse($transition-duration-m, $page-transition-duration);
 
     ng-md-icon {
       width: 32px;
