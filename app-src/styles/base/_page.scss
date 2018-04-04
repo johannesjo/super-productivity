@@ -37,6 +37,7 @@ article {
 
 md-content {
   background: rgb(244, 244, 244) !important;
+  overflow-y: scroll !important;
 
   @include dark-theme {
     background: rgb(48, 48, 48) !important;

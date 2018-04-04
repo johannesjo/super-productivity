@@ -5,14 +5,12 @@
 
 $this-transition-duration: $page-transition-duration;
 [ui-view].ng-enter {
-  top: 0;
-  left: 0;
-  right: 0;
-  position: absolute;
   transition: all $this-transition-duration $ease-in-out-quint;
+  transform-origin: center top;
 }
 
 [ui-view].ng-leave {
+  transform-origin: center top;
   transition: all $this-transition-duration $ease-in-out-quint;
   position: absolute;
   height: 100%;
@@ -25,7 +23,7 @@ $this-transition-duration: $page-transition-duration;
 
 [ui-view].ng-enter {
   opacity: 0;
-  transform: scale(0.9);
+  transform: scale(0.95);
 }
 
 [ui-view].ng-enter-active {
@@ -40,5 +38,5 @@ $this-transition-duration: $page-transition-duration;
 
 [ui-view].ng-leave-active {
   opacity: 0;
-  transform: scale(0.85);
+  //transform: scale(0.7);
 }
