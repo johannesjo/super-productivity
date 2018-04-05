@@ -20,24 +20,26 @@
 
     > * {
       // for help icon positioning
-      position: static;
+      // does not work because of translate on the slide down ani element
+      // position: static;
 
       // add a padding
       padding: 10px $this-panel-padding-left-right;
     }
 
-    md-switch:first-of-type{
-      margin-top:  0;
+    md-switch:first-of-type {
+      margin-top: 0;
     }
   }
 
   .help-btn {
     display: none;
+    position: absolute;
   }
 
   .is-expanded .help-btn {
     display: block;
-    top: 0px;
+    top: -40px;
     right: -2px;
     visibility: hidden;
     animation: 0.2s help-ico-animation ease-out;
@@ -45,7 +47,6 @@
     // wait for slide up (kind of because we have a dynamic duration)
     animation-delay: 0.20s;
   }
-
 
   .config-section {
     margin-bottom: 10px;
