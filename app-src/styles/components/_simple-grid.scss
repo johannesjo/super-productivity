@@ -1,6 +1,6 @@
 .gt-xs-2-col {
   @media (min-width: $layout-gt-xs) {
-    overflow: hidden;
+    @include clearfix;
     > * {
       float: left;
       @include row-machine(2, 2%);
@@ -10,7 +10,7 @@
 
 .gt-md-2-col {
   @media (min-width: $layout-gt-md) {
-    overflow: hidden;
+    @include clearfix;
     > * {
       float: left;
       @include row-machine(2, 2%);
