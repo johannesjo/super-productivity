@@ -2,4 +2,7 @@
   overflow: hidden !important;
   margin: 0 !important;
   transform-origin: center 0;
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  // will-change: transform, height;
 }

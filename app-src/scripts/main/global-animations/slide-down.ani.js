@@ -5,14 +5,14 @@
     .module('superProductivity')
     .animation('.ani-slide-up-down', slideAnimation);
 
-  const DUR = 0.16;
+  const DUR = 0.15;
   const EASE = 'cubic-bezier(.38, .04, .35, .96)';
 
   const animationSpeed = (height) => {
     if (height >= 450) {
-      return DUR * 1.5;
-    } else if (height > 200 && height < 450) {
       return DUR * 1.25;
+    } else if (height > 200 && height < 450) {
+      return DUR;
     } else {
       return DUR;
     }
