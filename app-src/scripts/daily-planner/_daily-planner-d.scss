@@ -20,7 +20,7 @@ daily-planner {
     max-width: $component-max-width;
 
     animation: $transition-duration-m attention-for-input-daily-planner ease-in;
-    animation-delay: $page-transition-duration/2;
+    animation-delay: $page-transition-duration*0.75;
     backface-visibility: hidden;
 
     ng-md-icon {
