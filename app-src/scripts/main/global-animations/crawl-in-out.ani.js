@@ -6,18 +6,7 @@
     .animation('.ani-crawl-in-out', slideAnimation);
 
   const DUR = .2;
-  const EASE = 'cubic-bezier(.38, .04, .35, .96)';
-
-  const animationSpeed = (maxHeight) => {
-    return DUR;
-    //if (maxHeight >= 450) {
-    //  return DUR * 1.25;
-    //} else if (maxHeight > 200 && maxHeight < 450) {
-    //  return DUR;
-    //} else {
-    //  return DUR;
-    //}
-  };
+  const EASE = 'ease-in-out';
 
   /* @ngInject */
   function slideAnimation($animateCss) {
@@ -35,7 +24,7 @@
             maxHeight: maxHeight + 'px',
             transform: 'scale(1)',
           },
-          duration: animationSpeed(maxHeight),
+          duration: DUR,
           easing: EASE,
           cleanupStyles: true
         });
@@ -47,13 +36,13 @@
         return $animateCss($el, {
           from: {
             maxHeight: maxHeight + 'px',
-            transform: 'scaleY(1)',
+            transform: 'scale(1)',
           },
           to: {
             maxHeight: '0',
-            transform: 'scaleY(0)',
+            transform: 'scale(0)',
           },
-          duration: animationSpeed(maxHeight),
+          duration: DUR,
           easing: EASE,
           cleanupStyles: true
         });
