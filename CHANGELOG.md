@@ -1,3 +1,46 @@
+<a name="1.10.9"></a>
+## [1.10.9](https://github.com/johannesjo/super-productivity/compare/v1.10.8...v1.10.9) (2018-04-06)
+
+
+### Bug Fixes
+
+* expand collapse icons not shown for daily planner ([3561c8e](https://github.com/johannesjo/super-productivity/commit/3561c8e))
+* help icon displaced ([c16ede6](https://github.com/johannesjo/super-productivity/commit/c16ede6))
+* hide sub task notes when clicking collapse all button ([b5204c3](https://github.com/johannesjo/super-productivity/commit/b5204c3))
+* lint ([d557032](https://github.com/johannesjo/super-productivity/commit/d557032))
+* update icon position ([2dbd64b](https://github.com/johannesjo/super-productivity/commit/2dbd64b))
+
+
+### Features
+
+* add a little bit of animation to the current task ([9e05a04](https://github.com/johannesjo/super-productivity/commit/9e05a04))
+* add animation to time tracking history ([0a13b4b](https://github.com/johannesjo/super-productivity/commit/0a13b4b))
+* don't transition task background color as it is bad for keyboard navigation experience ([a2d225c](https://github.com/johannesjo/super-productivity/commit/a2d225c))
+* improve animation for daily planner input ([52e2d70](https://github.com/johannesjo/super-productivity/commit/52e2d70))
+* improve daily planner animations ([9d3ca22](https://github.com/johannesjo/super-productivity/commit/9d3ca22))
+* improve help icon animation ([902b6d8](https://github.com/johannesjo/super-productivity/commit/902b6d8))
+* improve page transitions ([7acb415](https://github.com/johannesjo/super-productivity/commit/7acb415))
+* improve page transitions once more ([ff473d6](https://github.com/johannesjo/super-productivity/commit/ff473d6))
+* improve pulse on daily planner ([b1c3e29](https://github.com/johannesjo/super-productivity/commit/b1c3e29))
+* improve slide down up animation ([8a27f57](https://github.com/johannesjo/super-productivity/commit/8a27f57))
+* make page transitions more subtle ([93759a4](https://github.com/johannesjo/super-productivity/commit/93759a4))
+* make progress bars less dominant for dark theme ([ac6c796](https://github.com/johannesjo/super-productivity/commit/ac6c796))
+* make task list a little bit more compact ([dcd2a04](https://github.com/johannesjo/super-productivity/commit/dcd2a04))
+* minor tweaks for task list ([9bda05e](https://github.com/johannesjo/super-productivity/commit/9bda05e))
+* put loading bar just on the edge of the task ([85c02bf](https://github.com/johannesjo/super-productivity/commit/85c02bf))
+* remove old progress bar ([eb80f75](https://github.com/johannesjo/super-productivity/commit/eb80f75))
+* replace md-progress with custom solution and make it a little bit more recognizable ([c2ecc99](https://github.com/johannesjo/super-productivity/commit/c2ecc99))
+* shorten dialog titles ([43a6f1f](https://github.com/johannesjo/super-productivity/commit/43a6f1f))
+* slightly improve all animations related to entering or leaving a page ([6572fd9](https://github.com/johannesjo/super-productivity/commit/6572fd9))
+* slightly improve delete btn ([b19531c](https://github.com/johannesjo/super-productivity/commit/b19531c))
+* slightly improve show notes btn ([b019f0a](https://github.com/johannesjo/super-productivity/commit/b019f0a))
+* slightly speed up expand collapse ([b46a9c1](https://github.com/johannesjo/super-productivity/commit/b46a9c1))
+* slightly speed up expand collapse ([c2d08b1](https://github.com/johannesjo/super-productivity/commit/c2d08b1))
+* update page transitions ([c39c433](https://github.com/johannesjo/super-productivity/commit/c39c433))
+* very politely animate current task on work view ([bfc6ffd](https://github.com/johannesjo/super-productivity/commit/bfc6ffd))
+
+
+
 <a name="1.10.8"></a>
 ## [1.10.8](https://github.com/johannesjo/super-productivity/compare/v1.10.7...v1.10.8) (2018-04-02)
 
