@@ -57,9 +57,9 @@ $this-task-text-color-done: #aaaaaa;
 $task-inner-padding-left-right: 6px;
 
 .task {
-  padding: 2px 0 0;
+  padding: 2px 0 2px;
   display: block;
-  margin-bottom: 6px;
+  margin-bottom: 7px;
   background-color: #ffffff;
   color: $this-task-text-color;
   position: relative;

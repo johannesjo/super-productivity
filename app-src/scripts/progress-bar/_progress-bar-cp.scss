@@ -1,24 +1,21 @@
 $this-inner-padding-left-right: 6px;
 progress-bar {
-  //position: absolute !important;
+  position: absolute !important;
   width: 0;
   height: 5px;
   display: block;
-  margin-top: 1px;
   left: 0;
   pointer-events: none;
   max-width: 100%;
-  //margin-left: -1*$this-inner-padding-left-right;
-  //margin-right: -1*$this-inner-padding-left-right;
-  background-color: #cccccc;
-  position: relative;
+  background-color: #bbbbbb;
+  z-index: 2;
 
   &:before,
   &:after {
     content: '';
     position: absolute;
     bottom: 50%;
-    right: 0;
+    right: -2px;
     transform: translateY(50%);
     background: inherit;
     width: 2px;
@@ -28,7 +25,7 @@ progress-bar {
 
   &:before {
     right: auto;
-    left: 0;
+    left: -2px;
   }
 
   .task.is-current & {
