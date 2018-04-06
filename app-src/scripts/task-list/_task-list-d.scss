@@ -30,10 +30,10 @@ task-list {
 
   // nested lists
   .task-list {
-    margin: 2px 5px 5px 5px;
+    margin: 2px 5px 0 5px;
 
     @media(max-width: $layout-xs) {
-      margin: 1px 0 5px 0;
+      margin: 1px 0 0 10px;
     }
   }
 
