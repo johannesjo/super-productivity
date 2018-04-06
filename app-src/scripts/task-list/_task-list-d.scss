@@ -279,26 +279,6 @@ $this-task-text-color-done: #aaaaaa;
       background-color: $dark-green;
       color: #ffffff;
     }
-
-    .md-bar {
-      background-color: $green !important;
-    }
-  }
-
-  .md-bar {
-    background-color: #cccccc !important;
-  }
-
-  md-progress-linear {
-    margin-top: 1px;
-    margin-left: -1*$this-inner-padding-left-right;
-    margin-right: -1*$this-inner-padding-left-right;
-    width: auto;
-  }
-
-  md-progress-linear.md-default-theme .md-container,
-  md-progress-linear .md-container {
-    background: none;
   }
 
   .handle {
