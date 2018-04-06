@@ -57,20 +57,30 @@ $this-task-text-color-done: #aaaaaa;
 $task-inner-padding-left-right: 6px;
 
 .task {
-  padding: 2px 0;
   display: block;
-  margin-bottom: 7px;
-  background-color: #ffffff;
-  color: $this-task-text-color;
-  position: relative;
-  border: 1px solid #dddddd;
-  border-bottom-width: 0;
+  overflow: visible;
+
+  .inner-wrapper {
+    padding: 2px 0;
+    margin-bottom: 7px;
+    background-color: #ffffff;
+    color: $this-task-text-color;
+    position: relative;
+    border: 1px solid #dddddd;
+    border-bottom-width: 0;
+
+    @include dark-theme {
+      border-color: rgb(60, 60, 60);
+      background-color: $dark-theme-bg-lighter;
+      color: $this-task-text-color-dark;
+    }
+  }
+
+  &:last-child .inner-wrapper{
+    margin-bottom: 0;
+  }
 
   @include dark-theme {
-    border-color: rgb(60, 60, 60);
-    background-color: $dark-theme-bg-lighter;
-    color: $this-task-text-color-dark;
-
     &.is-done {
       .time,
       .task-title {
@@ -82,13 +92,8 @@ $task-inner-padding-left-right: 6px;
     }
   }
 
-  &:last-child {
-    margin-bottom: 0;
-  }
-
   &.is-done {
     opacity: 0.8;
-
     ng-md-icon {
       fill: $this-task-text-color-done !important;
     }
@@ -400,6 +405,8 @@ $task-inner-padding-left-right: 6px;
   }
 
   .task {
+    @include crawl-in-out;
+
     &:focus {
       transition: none;
     }

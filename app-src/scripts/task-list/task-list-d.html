@@ -1,231 +1,234 @@
 <div class="task-list"
-    as-sortable="$ctrl.dragControlListeners"
-    ng-class="{ 'is-hide-controls': $ctrl.isHideControls}"
-    ng-model="$ctrl.tasks">
-  <div class="task ani-crawl-in-out"
-      as-sortable-item
-      ng-class="{
+     as-sortable="$ctrl.dragControlListeners"
+     ng-class="{ 'is-hide-controls': $ctrl.isHideControls}"
+     ng-model="$ctrl.tasks">
+  <div class="task"
+       as-sortable-item
+       ng-class="{
       'is-current': $ctrl.currentTaskId === task.id,
       'is-done':task.isDone
       }"
-      ng-repeat="task in $ctrl.tasks|limitTo:$ctrl.limitTo|filter:$ctrl.filter track by task.id"
-      tabindex="1"
-      md-whiteframe="1"
-      ng-focus="$ctrl.onFocus($event)"
-      ng-blur="$ctrl.onBlur($event)">
+       ng-repeat="task in $ctrl.tasks|limitTo:$ctrl.limitTo|filter:$ctrl.filter track by task.id"
+       tabindex="1"
+       ng-focus="$ctrl.onFocus($event)"
+       ng-blur="$ctrl.onBlur($event)">
 
-    <div class="first-line"
-         layout="row"
-         layout-align="space-between center">
-      <div class="title-bar-wrapper">
-        <md-button class="md-icon-button update-indicator-btn"
-                   aria-label="is updated"
-                   tabindex="2"
-                   ng-click="task.showNotes = !task.showNotes;"
-                   ng-if="task.isUpdated">
-          <md-tooltip>
-            Click to show updates
-          </md-tooltip>
-          <ng-md-icon class="update update-icon"
+    <div class="inner-wrapper"
+         md-whiteframe="1">
+
+      <div class="first-line"
+           layout="row"
+           layout-align="space-between center">
+        <div class="title-bar-wrapper">
+          <md-button class="md-icon-button update-indicator-btn"
+                     aria-label="is updated"
+                     tabindex="2"
+                     ng-click="task.showNotes = !task.showNotes;"
+                     ng-if="task.isUpdated">
+            <md-tooltip>
+              Click to show updates
+            </md-tooltip>
+            <ng-md-icon class="update update-icon"
+                        flex="none"
+                        icon="update"></ng-md-icon>
+          </md-button>
+
+
+          <ng-md-icon class="handle"
                       flex="none"
-                      icon="update"></ng-md-icon>
-        </md-button>
+                      as-sortable-item-handle
+                      icon="drag_handle"></ng-md-icon>
 
+          <md-button class="md-icon-button play-btn"
+                     aria-label="mark as current"
+                     tabindex="2"
+                     ng-click="$ctrl.togglePlay(task)"
+                     ng-if="!task.isDone && $ctrl.allowTaskSelection && !task.subTasks.length">
 
-        <ng-md-icon class="handle"
-                    flex="none"
-                    as-sortable-item-handle
-                    icon="drag_handle"></ng-md-icon>
+            <ng-md-icon icon="{{$ctrl.currentTaskId === task.id ? 'pause':'play_arrow'}}"
+                        aria-label="mark as current"></ng-md-icon>
+          </md-button>
+          <md-button class="md-icon-button original-link-btn"
+                     aria-label="link"
+                     tabindex="2"
+                     target="_blank"
+                     external-link
+                     ng-if="::task.originalLink"
+                     ng-href="{{ ::task.originalLink }}">
 
-        <md-button class="md-icon-button play-btn"
-                   aria-label="mark as current"
-                   tabindex="2"
-                   ng-click="$ctrl.togglePlay(task)"
-                   ng-if="!task.isDone && $ctrl.allowTaskSelection && !task.subTasks.length">
+            <ng-md-icon icon="explore"
+                        ng-if="::task.originalType !=='GITHUB'"
+                        aria-label="link"></ng-md-icon>
+            <ng-md-icon icon="github-circle"
+                        ng-if="::task.originalType ==='GITHUB'"
+                        aria-label="link"></ng-md-icon>
+          </md-button>
 
-          <ng-md-icon icon="{{$ctrl.currentTaskId === task.id ? 'pause':'play_arrow'}}"
-                      aria-label="mark as current"></ng-md-icon>
-        </md-button>
-        <md-button class="md-icon-button original-link-btn"
-                   aria-label="link"
-                   tabindex="2"
-                   target="_blank"
-                   external-link
-                   ng-if="::task.originalLink"
-                   ng-href="{{ ::task.originalLink }}">
-
-          <ng-md-icon icon="explore"
-                      ng-if="::task.originalType !=='GITHUB'"
-                      aria-label="link"></ng-md-icon>
-          <ng-md-icon icon="github-circle"
-                      ng-if="::task.originalType ==='GITHUB'"
-                      aria-label="link"></ng-md-icon>
-        </md-button>
-
-        <div class="task-title"
-             flex="auto"
-             layout="row"
-             layout-align="center center">
+          <div class="task-title"
+               flex="auto"
+               layout="row"
+               layout-align="center center">
 
         <span class="text"
               tabindex="2"
               edit-on-click-on-edit-finished="$ctrl.focusTaskEl($taskEl); $ctrl.onChangeTitle(task, isChanged, newVal);"
               edit-on-click-ev-id="task.id"
               edit-on-click="task.title"></span>
+          </div>
+        </div>
+
+        <div class="time">
+          <span ng-if="task.subTasks.length>0">∑</span>
+          <span ng-bind="(task.timeSpent|duration) +' / ' + (task.timeEstimate|duration)"></span>
+          <md-button class="md-icon-button"
+                     tabindex="2"
+                     ng-if="!(task.subTasks.length>0)"
+                     aria-label="time estimation"
+                     ng-click="$ctrl.estimateTime(task)">
+
+            <ng-md-icon icon="access_time"
+                        aria-label="time estimation"></ng-md-icon>
+          </md-button>
+        </div>
+
+        <div class="controls">
+          <md-button class="md-icon-button"
+                     aria-label="add sub task"
+                     ng-if="!$ctrl.isSubTasksDisabled&&!task.isDone"
+                     tabindex="2"
+                     ng-click="$ctrl.addSubTask(task, $event);">
+
+            <ng-md-icon icon="playlist_add"
+                        aria-label="add sub task"></ng-md-icon>
+          </md-button>
+          <md-button class="md-icon-button show-notes-btn"
+                     aria-label="notes"
+                     tabindex="2"
+                     ng-class="{'is-active':task.showNotes}"
+                     ng-click="task.showNotes=!task.showNotes">
+
+            <ng-md-icon icon="{{(task.notes||task.originalKey) ?'insert_comment': 'mode_comment'}}"
+                        aria-label="notes"></ng-md-icon>
+          </md-button>
+          <md-button class="md-icon-button delete-btn"
+                     aria-label="delete"
+                     tabindex="2"
+                     ng-click="$ctrl.deleteTask(task, $index)">
+
+            <ng-md-icon icon="delete_forever"
+                        class="delete-icon"
+                        aria-label="delete"></ng-md-icon>
+          </md-button>
+          <md-button ng-click="task.isDone= !task.isDone; $ctrl.onTaskDoneChanged(task)"
+                     class="md-icon-button"
+                     tabindex="2"
+                     aria-label="un-/mark as done">
+            <ng-md-icon icon="check"
+                        ng-show="!task.isDone"></ng-md-icon>
+            <ng-md-icon icon="undo"
+                        ng-show="task.isDone"></ng-md-icon>
+          </md-button>
         </div>
       </div>
 
-      <div class="time">
-        <span ng-if="task.subTasks.length>0">∑</span>
-        <span ng-bind="(task.timeSpent|duration) +' / ' + (task.timeEstimate|duration)"></span>
-        <md-button class="md-icon-button"
-                   tabindex="2"
-                   ng-if="!(task.subTasks.length>0)"
-                   aria-label="time estimation"
-                   ng-click="$ctrl.estimateTime(task)">
-
-          <ng-md-icon icon="access_time"
-                      aria-label="time estimation"></ng-md-icon>
-        </md-button>
-      </div>
-
-      <div class="controls">
-        <md-button class="md-icon-button"
-                   aria-label="add sub task"
-                   ng-if="!$ctrl.isSubTasksDisabled&&!task.isDone"
-                   tabindex="2"
-                   ng-click="$ctrl.addSubTask(task, $event);">
-
-          <ng-md-icon icon="playlist_add"
-                      aria-label="add sub task"></ng-md-icon>
-        </md-button>
-        <md-button class="md-icon-button show-notes-btn"
-                   aria-label="notes"
-                   tabindex="2"
-                   ng-class="{'is-active':task.showNotes}"
-                   ng-click="task.showNotes=!task.showNotes">
-
-          <ng-md-icon icon="{{(task.notes||task.originalKey) ?'insert_comment': 'mode_comment'}}"
-                      aria-label="notes"></ng-md-icon>
-        </md-button>
-        <md-button class="md-icon-button delete-btn"
-                   aria-label="delete"
-                   tabindex="2"
-                   ng-click="$ctrl.deleteTask(task, $index)">
-
-          <ng-md-icon icon="delete_forever"
-                      class="delete-icon"
-                      aria-label="delete"></ng-md-icon>
-        </md-button>
-        <md-button ng-click="task.isDone= !task.isDone; $ctrl.onTaskDoneChanged(task)"
-                   class="md-icon-button"
-                   tabindex="2"
-                   aria-label="un-/mark as done">
-          <ng-md-icon icon="check"
-                      ng-show="!task.isDone"></ng-md-icon>
-          <ng-md-icon icon="undo"
-                      ng-show="task.isDone"></ng-md-icon>
-        </md-button>
-      </div>
-    </div>
-
-    <progress-bar progress="task.progress"></progress-bar>
+      <progress-bar progress="task.progress"></progress-bar>
 
 
-    <div class="notes ani-slide-up-down"
-         ng-if="task.showNotes===true">
+      <div class="notes ani-slide-up-down"
+           ng-if="task.showNotes===true">
 
-      <section ng-if="task.isUpdated;">
-        <div class="md-caption">
-          Changes since last update
-        </div>
+        <section ng-if="task.isUpdated;">
+          <div class="md-caption">
+            Changes since last update
+          </div>
 
-        <ul class="changelog">
-          <li ng-repeat="changelogEntry in task.originalChangelog">
-            <div ng-if="::changelogEntry.author">
-              <em>[<span ng-bind="::changelogEntry.author"></span>]
-                <span ng-bind="::changelogEntry.created| amDateFormat:'Y.MM.DD HH:mm'"></span></em>
-            </div>
-            <div ng-repeat="change in changelogEntry.items">
-              <strong ng-bind="::change.field"></strong>
-              <span ng-if="change.toString.length"><em>changed to:</em> <span ng-bind="::change.toString"></span></span></span>
-            </div>
-          </li>
-        </ul>
-        <md-button class="md-raised"
-                   ng-click="task.isUpdated=false;task.originalChangelog=undefined;task.showNotes=false">
-          <ng-md-icon icon="delete"></ng-md-icon>
-          Hide changes
-        </md-button>
-      </section>
-
-      <section>
-        <div class="md-caption"
-             ng-bind="task.originalId ? 'Description': 'Notes'"></div>
-        <div md-whiteframe="4">
-          <inline-markdown ng-model="task.notes"
-                           on-edit-finished="$ctrl.onTaskNotesEditFinished(newVal, isChanged, task)"></inline-markdown>
-        </div>
-      </section>
-
-      <section ng-if="task.status.length > 0 || task.originalStatus.length > 0"
-               class="status">
-        <div class="md-caption">Status: <span ng-bind="task.originalStatus.name || task.originalStatus"></span>
-          <ng-md-icon icon="arrow_forward"
-                      ng-if="task.status.length > 0 "
-                      aria-label="arrow forward"></ng-md-icon>
-          <span ng-bind="task.status"></span>
-        </div>
-      </section>
-
-      <section ng-if="task.originalAssigneeKey"
-               class="assignee">
-        <div class="md-caption">Assignee: <span ng-bind="task.originalAssigneeKey"></span></div>
-      </section>
-
-      <section ng-if="task.originalAttachment.length > 0">
-        <collapsible collapsible-title="Attachments ({{ ::task.originalAttachment.length }})">
-          <ul class="attachments">
-            <li ng-repeat="attachment in task.originalAttachment">
-              <a href="{{ ::attachment}}"
-                 external-link
-                 target="_blank"
-                 class="md-accent">{{ ::attachment}}</a>
-              <a href="{{ ::attachment}}"
-                 download="{{ ::attachment}}"
-                 class="md-accent">
-                <ng-md-icon icon="file_download"
-                            aria-label="download file directly"></ng-md-icon>
-              </a>
+          <ul class="changelog">
+            <li ng-repeat="changelogEntry in task.originalChangelog">
+              <div ng-if="::changelogEntry.author">
+                <em>[<span ng-bind="::changelogEntry.author"></span>]
+                  <span ng-bind="::changelogEntry.created| amDateFormat:'Y.MM.DD HH:mm'"></span></em>
+              </div>
+              <div ng-repeat="change in changelogEntry.items">
+                <strong ng-bind="::change.field"></strong>
+                <span ng-if="change.toString.length"><em>changed to:</em> <span ng-bind="::change.toString"></span></span></span>
+              </div>
             </li>
           </ul>
-        </collapsible>
-      </section>
+          <md-button class="md-raised"
+                     ng-click="task.isUpdated=false;task.originalChangelog=undefined;task.showNotes=false">
+            <ng-md-icon icon="delete"></ng-md-icon>
+            Hide changes
+          </md-button>
+        </section>
 
-      <section ng-if="task.originalComments.length > 0">
-        <collapsible collapsible-title="Comments ({{:: task.originalComments.length }})">
-          <md-divider></md-divider>
-          <ul class="comments">
-            <li ng-repeat="comment in task.originalComments"
-                class="comment">
-              <strong class="author">[<span ng-bind="::comment.author"></span>]: </strong>
-              <span marked="comment.body"></span>
-            </li>
-          </ul>
-        </collapsible>
-      </section>
+        <section>
+          <div class="md-caption"
+               ng-bind="task.originalId ? 'Description': 'Notes'"></div>
+          <div md-whiteframe="4">
+            <inline-markdown ng-model="task.notes"
+                             on-edit-finished="$ctrl.onTaskNotesEditFinished(newVal, isChanged, task)"></inline-markdown>
+          </div>
+        </section>
 
-      <section ng-if="task.localAttachments && task.localAttachments.length">
-        <collapsible collapsible-title="Local attachments and links"
-                     is-initially-expanded="'true'">
-          <task-local-links local-links="task.localAttachments"></task-local-links>
-        </collapsible>
-      </section>
+        <section ng-if="task.status.length > 0 || task.originalStatus.length > 0"
+                 class="status">
+          <div class="md-caption">Status: <span ng-bind="task.originalStatus.name || task.originalStatus"></span>
+            <ng-md-icon icon="arrow_forward"
+                        ng-if="task.status.length > 0 "
+                        aria-label="arrow forward"></ng-md-icon>
+            <span ng-bind="task.status"></span>
+          </div>
+        </section>
+
+        <section ng-if="task.originalAssigneeKey"
+                 class="assignee">
+          <div class="md-caption">Assignee: <span ng-bind="task.originalAssigneeKey"></span></div>
+        </section>
+
+        <section ng-if="task.originalAttachment.length > 0">
+          <collapsible collapsible-title="Attachments ({{ ::task.originalAttachment.length }})">
+            <ul class="attachments">
+              <li ng-repeat="attachment in task.originalAttachment">
+                <a href="{{ ::attachment}}"
+                   external-link
+                   target="_blank"
+                   class="md-accent">{{ ::attachment}}</a>
+                <a href="{{ ::attachment}}"
+                   download="{{ ::attachment}}"
+                   class="md-accent">
+                  <ng-md-icon icon="file_download"
+                              aria-label="download file directly"></ng-md-icon>
+                </a>
+              </li>
+            </ul>
+          </collapsible>
+        </section>
+
+        <section ng-if="task.originalComments.length > 0">
+          <collapsible collapsible-title="Comments ({{:: task.originalComments.length }})">
+            <md-divider></md-divider>
+            <ul class="comments">
+              <li ng-repeat="comment in task.originalComments"
+                  class="comment">
+                <strong class="author">[<span ng-bind="::comment.author"></span>]: </strong>
+                <span marked="comment.body"></span>
+              </li>
+            </ul>
+          </collapsible>
+        </section>
+
+        <section ng-if="task.localAttachments && task.localAttachments.length">
+          <collapsible collapsible-title="Local attachments and links"
+                       is-initially-expanded="'true'">
+            <task-local-links local-links="task.localAttachments"></task-local-links>
+          </collapsible>
+        </section>
+      </div>
+
+      <sub-task-list ng-if="task.subTasks.length > 0"
+                     allow-task-selection="{{$ctrl.allowTaskSelection}}"
+                     current-task-id="$ctrl.currentTaskId"
+                     task="task"></sub-task-list>
     </div>
-
-    <sub-task-list ng-if="task.subTasks.length > 0"
-                   allow-task-selection="{{$ctrl.allowTaskSelection}}"
-                   current-task-id="$ctrl.currentTaskId"
-                   task="task"></sub-task-list>
   </div>
 </div>
