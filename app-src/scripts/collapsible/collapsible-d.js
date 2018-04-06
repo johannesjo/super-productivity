@@ -22,7 +22,11 @@
     vm.toggleExpand = () => {
       vm.isExpanded = !vm.isExpanded;
 
-      vm.isExpanded ? $element.addClass('is-expanded') : $element.removeClass('is-expanded');
+      if (vm.isExpanded) {
+        $element.addClass('is-expanded');
+      } else {
+        $element.removeClass('is-expanded');
+      }
 
     };
   }
