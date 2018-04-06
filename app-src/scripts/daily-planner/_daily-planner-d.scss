@@ -18,10 +18,14 @@ daily-planner {
   .add-task-form {
     margin: 20px auto;
     max-width: $component-max-width;
-
-    animation: $transition-duration-m attention-for-input-daily-planner ease-in;
-    animation-delay: $page-transition-duration*0.75;
     backface-visibility: hidden;
+    animation: $transition-duration-m attention-for-input-daily-planner linear;
+    transform: translateZ(0);
+
+    [ui-view].ng-enter & {
+      // only start after view is complete
+      animation: none;
+    }
 
     ng-md-icon {
       width: 32px;
@@ -37,6 +41,9 @@ daily-planner {
 @keyframes attention-for-input-daily-planner {
   0% {
     transform: scale(1);
+  }
+  25% {
+    transform: scale(1.05, 1.2);
   }
   50% {
     transform: scale(1.05, 1.2);

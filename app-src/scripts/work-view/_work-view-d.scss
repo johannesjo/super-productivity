@@ -10,7 +10,13 @@ work-view {
 
   .task {
     &.is-current {
+      transform: translateZ(0);
+      backface-visibility: hidden;
       animation: $transition-duration-s attention-for-current-task;
+      [ui-view].ng-enter & {
+        // only start after view is complete
+        animation: none;
+      }
     }
   }
 }

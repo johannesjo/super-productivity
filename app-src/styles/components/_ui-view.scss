@@ -3,6 +3,11 @@
   height: 65px;
 }
 
+[ui-view] {
+  backface-visibility: hidden;
+  transform: translateZ(0);
+}
+
 $this-transition-duration: $page-transition-duration;
 [ui-view].ng-enter {
   transition: all $this-transition-duration $ease-in-out-quint;
