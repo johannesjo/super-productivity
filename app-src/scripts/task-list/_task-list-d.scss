@@ -54,10 +54,10 @@ task-list {
 $this-task-text-color: #333333;
 $this-task-text-color-dark: #dddddd;
 $this-task-text-color-done: #aaaaaa;
+$task-inner-padding-left-right: 6px;
 
 .task {
-  $this-inner-padding-left-right: 6px;
-  padding: 2px $this-inner-padding-left-right 0;
+  padding: 2px 0 0;
   display: block;
   margin-bottom: 6px;
   background-color: #ffffff;
@@ -258,8 +258,7 @@ $this-task-text-color-done: #aaaaaa;
   .controls {
     white-space: nowrap;
     text-align: right;
-    // move a little closer to the right
-    margin-right: -2px;
+    margin-right: 2px;
 
     // nice idea but problematic with the time button and also the play and original issue
     //transition: 300ms;
@@ -282,7 +281,7 @@ $this-task-text-color-done: #aaaaaa;
   }
 
   .handle {
-    margin: 0 4px 0 6px;
+    margin: 0 4px 0 9px;
   }
 
   .task-title {
@@ -327,11 +326,11 @@ $this-task-text-color-done: #aaaaaa;
   .notes {
     $this-notes-extra-padding: 3px;
     display: block;
-    margin-left: -$this-inner-padding-left-right;
-    margin-right: -$this-inner-padding-left-right;
+    margin-left: -$task-inner-padding-left-right;
+    margin-right: -$task-inner-padding-left-right;
     overflow: hidden;
-    padding-left: $this-inner-padding-left-right +$this-notes-extra-padding;
-    padding-right: $this-inner-padding-left-right +$this-notes-extra-padding;
+    padding-left: $task-inner-padding-left-right +$this-notes-extra-padding;
+    padding-right: $task-inner-padding-left-right +$this-notes-extra-padding;
 
     section {
       margin-top: 10px;
