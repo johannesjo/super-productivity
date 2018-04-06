@@ -1,4 +1,3 @@
-$this-inner-padding-left-right: 6px;
 progress-bar {
   position: absolute !important;
   width: 0;
@@ -10,12 +9,16 @@ progress-bar {
   background-color: #bbbbbb;
   z-index: 2;
 
+  @include dark-theme {
+    background-color: #999999;
+  }
+
   &:before,
   &:after {
     content: '';
     position: absolute;
     bottom: 50%;
-    right: -2px;
+    right: -1px;
     transform: translateY(50%);
     background: inherit;
     width: 2px;
@@ -25,26 +28,14 @@ progress-bar {
 
   &:before {
     right: auto;
-    left: -2px;
+    left: -1px;
+  }
+
+  .task.is-done & {
+    opacity: 0.6;
   }
 
   .task.is-current & {
     background-color: $green;
-
-    @include dark-theme {
-      //background-color: $dark-green;
-    }
   }
-
-  md-progress-linear {
-    top: 1px;
-
-    width: auto;
-  }
-
-  md-progress-linear.md-default-theme .md-container,
-  md-progress-linear .md-container {
-    background: none;
-  }
-
 }
