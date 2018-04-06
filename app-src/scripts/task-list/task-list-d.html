@@ -1,8 +1,8 @@
-<ul class="task-list"
+<div class="task-list"
     as-sortable="$ctrl.dragControlListeners"
     ng-class="{ 'is-hide-controls': $ctrl.isHideControls}"
     ng-model="$ctrl.tasks">
-  <li class="task"
+  <div class="task ani-crawl-in-out"
       as-sortable-item
       ng-class="{
       'is-current': $ctrl.currentTaskId === task.id,
@@ -227,5 +227,5 @@
                    allow-task-selection="{{$ctrl.allowTaskSelection}}"
                    current-task-id="$ctrl.currentTaskId"
                    task="task"></sub-task-list>
-  </li>
-</ul>
+  </div>
+</div>

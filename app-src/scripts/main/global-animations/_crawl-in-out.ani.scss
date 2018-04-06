@@ -1,0 +1,8 @@
+.ani-crawl-in-out {
+  overflow: hidden;
+  //margin: 0 !important;
+  //transform-origin: center center;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  //will-change: transform, maxHeight;
+}
