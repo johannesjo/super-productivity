@@ -58,9 +58,8 @@ $task-inner-padding-left-right: 6px;
 
 .task {
   display: block;
-  overflow: visible;
 
-  .inner-wrapper {
+  > .inner-wrapper {
     padding: 2px 0;
     margin-bottom: 7px;
     background-color: #ffffff;
@@ -76,8 +75,31 @@ $task-inner-padding-left-right: 6px;
     }
   }
 
-  &:last-child .inner-wrapper{
+  &:last-child > .inner-wrapper {
     margin-bottom: 0;
+  }
+
+  &.as-sortable-dragging,
+  &:focus > .inner-wrapper {
+    background: #eeeeee;
+    color: #000000;
+  }
+  @include dark-theme {
+    &:focus > .inner-wrapper {
+      background-color: $dark-theme-bg-darker;
+      color: #dddddd;
+    }
+  }
+
+  &.is-current > .inner-wrapper {
+    background: $light-green;
+    color: #000000;
+  }
+  @include dark-theme {
+    &.is-current > .inner-wrapper {
+      background-color: $dark-green;
+      color: #ffffff;
+    }
   }
 
   @include dark-theme {
@@ -109,16 +131,6 @@ $task-inner-padding-left-right: 6px;
 
     .play-btn {
       display: none;
-    }
-  }
-
-  &.as-sortable-dragging,
-  &:focus {
-    background: #eeeeee;
-    color: #000000;
-    @include dark-theme {
-      background-color: $dark-theme-bg-darker;
-      color: #dddddd;
     }
   }
 
@@ -278,16 +290,6 @@ $task-inner-padding-left-right: 6px;
     //}
     @media(max-width: $layout-xs) {
       white-space: normal;
-    }
-  }
-
-  &.is-current {
-    background: $light-green;
-    color: #000000;
-
-    @include dark-theme {
-      background-color: $dark-green;
-      color: #ffffff;
     }
   }
 
