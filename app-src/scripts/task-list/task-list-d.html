@@ -67,14 +67,12 @@
           <div class="task-title"
                flex="auto"
                layout="row"
-               layout-align="center center">
-
-        <span class="text"
-              tabindex="2"
-              edit-on-click-on-edit-finished="$ctrl.focusTaskEl($taskEl); $ctrl.onChangeTitle(task, isChanged, newVal);"
-              edit-on-click-ev-id="task.id"
-              edit-on-click="task.title"></span>
-          </div>
+               layout-align="center center"
+               tabindex="2"
+               edit-on-click-on-edit-finished="$ctrl.focusTaskEl($taskEl); $ctrl.onChangeTitle(task, isChanged, newVal);"
+               edit-on-click-ev-id="task.id"
+               edit-on-click
+               ng-model="task.title"></div>
         </div>
 
         <div class="time">

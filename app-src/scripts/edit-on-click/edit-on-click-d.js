@@ -13,80 +13,98 @@
     .constant('EDIT_ON_CLICK_TOGGLE_EV', 'EDIT_ON_CLICK_TOGGLE_EV')
     .directive('editOnClick', editOnClick);
 
+  let EV_NAME;
+
   /* @ngInject */
-  function editOnClick() {
+  function editOnClick(EDIT_ON_CLICK_TOGGLE_EV) {
+    EV_NAME = EDIT_ON_CLICK_TOGGLE_EV;
     return {
-      templateUrl: 'scripts/edit-on-click/edit-on-click-d.html',
-      bindToController: true,
-      controller: EditOnClickCtrl,
-      controllerAs: 'vm',
       restrict: 'A',
+      require: 'ngModel',
       scope: {
         editOnClickEvId: '<',
-        editOnClick: '=',
         editOnClickOnEditFinished: '&'
-      }
+      },
+      link: linkFn
     };
   }
 
-  /* @ngInject */
-  function EditOnClickCtrl($element, $scope, $timeout, EDIT_ON_CLICK_TOGGLE_EV) {
-    let vm = this;
-    let inputEl;
-    let modelCopy;
+  function linkFn(scope, el, attrs, ngModel) {
+    let lastVal;
+    el[0].setAttribute('contenteditable', true);
 
-    //const formEl = $element.find('form');
-    const textEl = angular.element($element.find('div'));
+    function execCb() {
+      // deselect all text
+      //if (window.getSelection) {
+      //  window.getSelection().removeAllRanges();
+      //}
+      //else if (document.selection) {
+      //  document.selection.empty();
+      //}
 
-    vm.finishEdit = () => {
-      modelCopy = inputEl[0].value;
-      let isChanged = (vm.editOnClick !== modelCopy);
-
-      if (isChanged) {
-        // update if changes were made
-        vm.editOnClick = modelCopy;
-      }
-
-      // check for show edit to only trigger once
-      if (vm.showEdit && angular.isFunction(vm.editOnClickOnEditFinished)) {
-        vm.editOnClickOnEditFinished({
+      const curVal = el.html();
+      const isChanged = lastVal !== curVal;
+      if (angular.isFunction(scope.editOnClickOnEditFinished)) {
+        scope.editOnClickOnEditFinished({
           isChanged,
-          newVal: vm.editOnClick,
-          $taskEl: $element[0].closest('.task')
+          newVal: curVal,
+          $taskEl: el[0].closest('.task')
         });
-      }
-
-      vm.showEdit = false;
-      textEl.css('display', '');
-    };
-
-    vm.toggleShowEdit = () => {
-      textEl.css('display', 'none');
-      vm.showEdit = true;
-      modelCopy = vm.editOnClick;
-      $timeout(function() {
-        inputEl = $element.find('input');
-
-        // prevent keyboard shortcuts from firing when here
-        inputEl[0].addEventListener('keydown', (ev) => {
-          ev.stopPropagation();
-        });
-
-        inputEl[0].focus();
-        inputEl[0].value = modelCopy;
-        setTimeout(() => {
-          inputEl[0].select();
-        });
-      });
-    };
-
-    function clickToggleEvHandler(ev, eventId) {
-      if (eventId === vm.editOnClickEvId) {
-        vm.toggleShowEdit();
       }
     }
 
-    $scope.$on(EDIT_ON_CLICK_TOGGLE_EV, clickToggleEvHandler);
-  }
+    function read() {
+      let curVal = el.html();
+      // strip tags
+      curVal = curVal.replace(/<\S[^><]*>/g, '');
 
+      const isChanged = lastVal !== curVal;
+      if (isChanged) {
+        ngModel.$setViewValue(curVal);
+        lastVal = curVal;
+      }
+    }
+
+    ngModel.$render = () => {
+      let html = ngModel.$viewValue || '';
+      // strip tags
+      html = html.replace(/<\S[^><]*>/g, '');
+      el.html(html);
+    };
+
+    el.bind('input', () => {
+      scope.$apply(read);
+    });
+
+    el.bind('blur', () => {
+      scope.$apply(read);
+      execCb();
+    });
+
+    // prevent keyboard shortcuts from firing when here
+    el[0].addEventListener('keydown', (ev) => {
+      console.log('keydown');
+
+      ev.stopPropagation();
+    });
+
+    // prevent enter key from firing here (but don't stop propagation)
+    el[0].addEventListener('keypress', function(evt) {
+      if (evt.which === 13) {
+        evt.preventDefault();
+        el.blur();
+      }
+    });
+
+    function clickToggleEvHandler(ev, eventId) {
+      if (eventId === scope.editOnClickEvId) {
+        el.focus();
+        setTimeout(() => {
+          //document.execCommand('selectAll', false, null)
+        });
+      }
+    }
+
+    scope.$on(EV_NAME, clickToggleEvHandler);
+  }
 })();

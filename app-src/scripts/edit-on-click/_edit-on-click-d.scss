@@ -1,41 +1,24 @@
 [edit-on-click-duration],
 [edit-on-click] {
-  cursor: pointer;
+  cursor: text;
+  transition: padding 0.20s $ease-in-out-quint;
+  display: block;
+
+  &:focus {
+    user-select: all;
+    padding-left: 6px !important;
+
+    animation: toggle-edit-on-click-ani 0.15s $ease-in-out-quint;
+    box-shadow: 0 0 4px 0 rgba(0, 0, 0, 0.8), 3px 3px 10px 0 rgba(0, 0, 0, 0.4);
+    //box-shadow: 0 1px 5px 0 rgba(0, 0, 0, .2), 0 2px 2px 0 rgba(0, 0, 0, .14), 0 3px 1px -2px rgba(0, 0, 0, .12);
+  }
 }
 
-.edit-on-click-text {
-  display: inline-block;
-}
-
-.edit-on-click-form {
-  display: inline-block;
-
-  &.duration-form {
-    width: auto;
-  }
-
-  input {
-    display: inline-block;
-  }
-  input.edit-on-click-duration-input {
-    width: 70px;
-    padding-left: 2px;
-    padding-right: 2px;
-  }
-
-  &.ng-leave {
-    transition: none;
-  }
-
-  &.ng-enter {
-    transition: all 0.15s $ease-in-out-quint;
-  }
-
-  &.ng-enter {
+@keyframes toggle-edit-on-click-ani {
+  0% {
     transform: scaleY(0);
   }
-
-  &.ng-enter-active {
+  100% {
     transform: scaleY(1);
   }
 }
