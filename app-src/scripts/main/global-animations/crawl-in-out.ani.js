@@ -5,7 +5,7 @@
     .module('superProductivity')
     .animation('.ani-crawl-in-out', slideAnimation);
 
-  const DUR = .2;
+  const DUR = 0.2;
   const EASE = 'ease-in-out';
 
   /* @ngInject */
