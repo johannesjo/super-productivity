@@ -166,15 +166,30 @@
       }
 
       // show toast for undo
-      let toast = this.$mdToast.simple()
-        .textContent('You deleted "' + task.title + '"')
-        .action('UNDO')
-        .hideDelay(15000)
-        .position('bottom');
-
-      this.$mdToast.show(toast)
+      this.$mdToast.show({
+        hideDelay: 20000,
+        controller:
+        /* @ngInject */
+          ($scope, $mdToast) => {
+            $scope.undo = () => {
+              $mdToast.hide('UNDO');
+            };
+          },
+        template: `
+<md-toast>
+  <div class="md-toast-text" flex>
+        <ng-md-icon icon="delete_forever"
+                    style="fill:#e11826"></ng-md-icon>
+        You deleted "${task.title}"
+        <md-button class=""
+                   ng-click="undo()">
+          <ng-md-icon icon="undo"></ng-md-icon>
+          UNDO</md-button>
+  </div>
+</md-toast>`
+      })
         .then(function(response) {
-          if (response === 'ok') {
+          if (response === 'UNDO') {
             // re-add task on undo
             that.tasks.splice($index, 0, taskCopy);
           }
