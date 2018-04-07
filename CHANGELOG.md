@@ -1,3 +1,24 @@
+<a name="1.10.10"></a>
+## [1.10.10](https://github.com/johannesjo/super-productivity/compare/v1.10.9...v1.10.10) (2018-04-07)
+
+
+### Bug Fixes
+
+* quick access menu blocking ui underneath ([1fb826d](https://github.com/johannesjo/super-productivity/commit/1fb826d))
+* several issues with the new task wrapper ([41456f0](https://github.com/johannesjo/super-productivity/commit/41456f0))
+
+
+### Features
+
+* improve crawl in crawl out ([2e1c398](https://github.com/johannesjo/super-productivity/commit/2e1c398))
+* improve outlines ([5540461](https://github.com/johannesjo/super-productivity/commit/5540461))
+* improve progress bar styling ([5fb50a5](https://github.com/johannesjo/super-productivity/commit/5fb50a5))
+* make nested lists look better ([7799a43](https://github.com/johannesjo/super-productivity/commit/7799a43))
+* speed up task enter/leave animations by using js ([54b3340](https://github.com/johannesjo/super-productivity/commit/54b3340))
+* use css animation again as cleanup styles is not playing nicely with the sortable lists ([389dc6f](https://github.com/johannesjo/super-productivity/commit/389dc6f))
+
+
+
 <a name="1.10.9"></a>
 ## [1.10.9](https://github.com/johannesjo/super-productivity/compare/v1.10.8...v1.10.9) (2018-04-06)
 
