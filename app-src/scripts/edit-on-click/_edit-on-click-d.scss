@@ -1,29 +1,31 @@
 [edit-on-click-duration],
 [edit-on-click] {
   cursor: text;
-  transition: padding 0.20s $ease-in-out-quint;
+  transition: all 0.20s $ease-in-out-quint;
   display: block;
   caret-color: #000000;
+  background: inherit;
+  border: 1px solid transparent;
 
   @include dark-theme() {
     caret-color: #ffffff;
   }
 
   &:focus {
+    position: relative;
+    z-index: 3;
     user-select: all;
-    padding-left: 6px !important;
+    border: 1px solid black;
+    transform: scale(1.05);
+    box-shadow: 0 0 4px 0 rgba(0, 0, 0, 0.8), 3px 3px 10px 0 rgba(0, 0, 0, 0.6);
+    @include dark-theme() {
+      border: 1px solid #ffffff;
+      box-shadow: 0 0 4px 0 rgba(255, 255, 255, 0.8), 3px 3px 10px 0 rgba(255, 255, 255, 0.6);
+      background: $dark-theme-bg-darker;
+    }
 
-    animation: toggle-edit-on-click-ani 0.15s $ease-in-out-quint;
-    box-shadow: 0 0 4px 0 rgba(0, 0, 0, 0.8), 3px 3px 10px 0 rgba(0, 0, 0, 0.4);
-    //box-shadow: 0 1px 5px 0 rgba(0, 0, 0, .2), 0 2px 2px 0 rgba(0, 0, 0, .14), 0 3px 1px -2px rgba(0, 0, 0, .12);
-  }
-}
-
-@keyframes toggle-edit-on-click-ani {
-  0% {
-    transform: scaleY(0.5);
-  }
-  100% {
-    transform: scaleY(1);
+    @media(max-width: $layout-xs) {
+      transform: scale(1.05) translateX(-20px);
+    }
   }
 }
