@@ -117,13 +117,10 @@
                         aria-label="delete"></ng-md-icon>
           </md-button>
           <md-button ng-click="task.isDone= !task.isDone; $ctrl.onTaskDoneChanged(task)"
-                     class="md-icon-button"
+                     class="md-icon-button mark-as-done-btn"
                      tabindex="2"
                      aria-label="un-/mark as done">
-            <ng-md-icon icon="check"
-                        ng-show="!task.isDone"></ng-md-icon>
-            <ng-md-icon icon="undo"
-                        ng-show="task.isDone"></ng-md-icon>
+            <ng-md-icon icon="{{(task.isDone?'undo':'check')}}"></ng-md-icon>
           </md-button>
         </div>
       </div>
