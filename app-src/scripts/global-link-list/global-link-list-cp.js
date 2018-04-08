@@ -39,7 +39,7 @@
 
     handleLinkInput(link, ev) {
       // don't intervene with text inputs
-      if (ev.target.tagName === 'INPUT' || ev.target.tagName === 'TEXTAREA') {
+      if (ev.target.tagName === 'INPUT' || ev.target.tagName === 'TEXTAREA' || ev.target.getAttribute('contenteditable')) {
         return;
       }
 
