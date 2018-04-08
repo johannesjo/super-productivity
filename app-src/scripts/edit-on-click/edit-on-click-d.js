@@ -81,7 +81,8 @@
       }
 
       const curVal = el.html();
-      const isChanged = lastVal !== curVal;
+      const isChanged = (lastVal !== curVal);
+
       if (angular.isFunction(scope.editOnClickOnEditFinished)) {
         scope.editOnClickOnEditFinished({
           isChanged,
@@ -90,19 +91,14 @@
           event,
         });
       }
+      lastVal = curVal;
     }
 
     function read() {
       let curVal = el.html();
       // strip tags
       curVal = removeTags(curVal);
-
-      const isChanged = lastVal !== curVal;
-
-      if (isChanged) {
-        ngModel.$setViewValue(curVal);
-        lastVal = curVal;
-      }
+      ngModel.$setViewValue(curVal);
     }
 
     ngModel.$render = () => {
