@@ -1,28 +1,54 @@
 [edit-on-click-duration],
 [edit-on-click] {
   cursor: text;
-  transition: transform 0.20s $ease-in-out-quint;
+  transition: all .20s $ease-in-out-quint;
   display: block;
-  caret-color: #000000;
   background: inherit;
-  border: 1px solid transparent;
+  position: relative;
+  overflow: visible;
+  user-select: none;
+  caret-color: #000000;
 
   @include dark-theme() {
     caret-color: #ffffff;
   }
 
-  &:focus {
-    position: relative;
-    z-index: 3;
-    user-select: all;
-    border: 1px solid black;
-    transform: scale(1.05);
+  &:after {
+    transition: all .20s $ease-in-out-quint;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    content: '';
     box-shadow: 0 0 4px 0 rgba(0, 0, 0, 0.8), $whiteframe-shadow-13dp;
+    opacity: 0;
+    z-index: 5;
+    border: 1px solid black;
+    pointer-events: none;
+
     @include dark-theme() {
       border: 1px solid #ffffff;
       box-shadow: 0 0 4px 0 rgba(255, 255, 255, 0.8), $whiteframe-shadow-13dp;
+    }
+  }
+
+  &:focus {
+    z-index: 5;
+    background: #ffffff;
+    user-select: all;
+    transform: scale(1.1);
+    &:after {
+      opacity: 1;
+    }
+    @include dark-theme() {
       background: $dark-theme-bg-darker;
     }
 
+    @media(max-width: $layout-xs) {
+      transform: scale(1.05);
+    }
   }
 }
