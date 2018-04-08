@@ -60,13 +60,13 @@ $task-inner-padding-left-right: 6px;
   display: block;
 
   > .inner-wrapper {
+
     padding: 2px 0;
     margin-bottom: 7px;
     background-color: #ffffff;
     color: $this-task-text-color;
     position: relative;
-    border: 1px solid #dddddd;
-    border-bottom-width: 0;
+    box-shadow: $whiteframe-shadow-4dp;
 
     .title-bar-wrapper,
     .first-line {
@@ -77,6 +77,7 @@ $task-inner-padding-left-right: 6px;
       border-color: rgb(60, 60, 60);
       background-color: $dark-theme-bg-lighter;
       color: $this-task-text-color-dark;
+      box-shadow: $whiteframe-shadow-6dp;
     }
   }
 
@@ -127,7 +128,8 @@ $task-inner-padding-left-right: 6px;
   }
 
   &.is-done {
-    opacity: 0.8;
+    //opacity: 0.8;
+
     ng-md-icon {
       fill: $this-task-text-color-done !important;
     }
