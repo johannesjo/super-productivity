@@ -29,11 +29,17 @@
     };
   }
 
+
   function linkFn(scope, el, attrs, ngModel) {
     let lastVal;
+    // to do this better
+    setTimeout(() => {
+      lastVal = el.html().replace(/<\S[^><]*>/g, '');
+    });
+
     el[0].setAttribute('contenteditable', true);
 
-    function execCb() {
+    function execCb(event) {
       // deselect all text
       //if (window.getSelection) {
       //  window.getSelection().removeAllRanges();
@@ -48,7 +54,8 @@
         scope.editOnClickOnEditFinished({
           isChanged,
           newVal: curVal,
-          $taskEl: el[0].closest('.task')
+          $taskEl: el[0].closest('.task'),
+          event,
         });
       }
     }
@@ -59,6 +66,8 @@
       curVal = curVal.replace(/<\S[^><]*>/g, '');
 
       const isChanged = lastVal !== curVal;
+      console.log(curVal, lastVal, isChanged);
+
       if (isChanged) {
         ngModel.$setViewValue(curVal);
         lastVal = curVal;
@@ -76,15 +85,13 @@
       scope.$apply(read);
     });
 
-    el.bind('blur', () => {
+    el.bind('blur', (ev) => {
       scope.$apply(read);
-      execCb();
+      execCb(ev);
     });
 
     // prevent keyboard shortcuts from firing when here
     el[0].addEventListener('keydown', (ev) => {
-      console.log('keydown');
-
       ev.stopPropagation();
     });
 

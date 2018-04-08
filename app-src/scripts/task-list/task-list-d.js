@@ -14,6 +14,16 @@
   const KEY_RIGHT = 39;
   const KEY_DOWN = 40;
 
+  function isTargetAnInput(target) {
+    if (target) {
+      const isContentEditable = !!target.getAttribute('contenteditable');
+      const isInput = (target.tagName === 'INPUT') || (target.tagName === 'TEXTAREA');
+      return isContentEditable || isInput;
+    }
+
+    return false;
+  }
+
   class TaskListCtrl {
     /* @ngInject */
     constructor(Dialogs, $rootScope, $mdToast, $timeout, Tasks, EDIT_ON_CLICK_TOGGLE_EV, $scope, ShortSyntax, $element, Jira, CheckShortcutKeyCombo, Util) {
@@ -115,7 +125,11 @@
       }
     }
 
-    focusTaskEl(taskEl) {
+    focusTaskEl(taskEl, ev) {
+      if (ev && isTargetAnInput(ev.relatedTarget)) {
+        return;
+      }
+
       if (taskEl) {
         taskEl.focus();
       }
