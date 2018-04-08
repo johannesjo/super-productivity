@@ -1,0 +1,7 @@
+.md-toast-content{
+  display: flex;
+  flex-direction: row;
+  ng-md-icon:first-child{
+    margin-right: 10px;
+  }
+}

@@ -63,11 +63,10 @@
         $mdToast.show({
           template: `
 <md-toast>
-<div class="md-toast-content">
-<div><ng-md-icon icon="${icon}" ${iconColor && 'style="fill:' + iconColor + '"'}></ng-md-icon>
-${textContent} 
-</div>
-</div>          
+  <div class="md-toast-content">
+    <ng-md-icon icon="${icon}" ${iconColor && 'style="fill:' + iconColor + '"'}></ng-md-icon> 
+    <div class="toast-text">${textContent}</div>
+  </div>          
 </md-toast>
           `,
           hideDelay: hideDelay || DEFAULT_HIDE_DELAY
