@@ -41,25 +41,6 @@
       .trim();
   }
 
-  function getCaretPosition(editableDiv) {
-    let caretPos = 0;
-    let sel;
-    let range;
-
-    if (window.getSelection) {
-      sel = window.getSelection();
-      if (sel.rangeCount) {
-        range = sel.getRangeAt(0);
-        if (range.commonAncestorContainer.parentNode == editableDiv) {
-          caretPos = range.endOffset;
-        }
-      }
-      return caretPos;
-    } else {
-      throw new Error('no window.getSelection :(')
-    }
-  }
-
   angular
     .module('superProductivity')
     .constant('EDIT_ON_CLICK_TOGGLE_EV', 'EDIT_ON_CLICK_TOGGLE_EV')
@@ -143,13 +124,23 @@
     // prevent keyboard shortcuts from firing when here
     el[0].addEventListener('keydown', (ev) => {
       ev.stopPropagation();
+
+      // also blur on escape
+      if (ev.keyCode === 13 || ev.keyCode === 27) {
+        ev.preventDefault();
+        setTimeout(() => {
+          el.blur();
+        });
+      }
     });
 
-    // prevent enter key from firing here (but don't stop propagation)
-    el[0].addEventListener('keypress', function(evt) {
-      if (evt.which === 13) {
-        evt.preventDefault();
-        el.blur();
+    // blur on enter
+    el[0].addEventListener('keypress', function(ev) {
+      if (ev.keyCode === 13) {
+        ev.preventDefault();
+        setTimeout(() => {
+          el.blur();
+        });
       }
     });
 
@@ -164,9 +155,11 @@
 
     function clickToggleEvHandler(ev, eventId) {
       if (eventId === scope.editOnClickEvId) {
-        el.focus();
         setTimeout(() => {
-          //document.execCommand('selectAll', false, null)
+          el.focus();
+
+          // select all when doing this
+          document.execCommand('selectAll', false, null)
         });
       }
     }
