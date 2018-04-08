@@ -8,6 +8,58 @@
 (function() {
   'use strict';
 
+  // HELPER
+  // -----------------------------------
+  function insertAtCursor(el, newText) {
+    const sel = window.getSelection();
+
+    const start = sel.anchorOffset;
+    const end = sel.focusOffset;
+    const text = el.innerText;
+
+    const textBefore = text.substring(0, start);
+    const textAfter = text.substring(end, text.length);
+
+    const completeTextAfterInsert = (textBefore + newText + textAfter).trim();
+
+    el.innerText = completeTextAfterInsert;
+
+    // reset caret to proper offset
+    const range = document.createRange();
+    range.setStart(el.childNodes[0], start + newText.length);
+    range.collapse(true);
+    const sel2 = window.getSelection();
+
+    sel2.removeAllRanges();
+    sel2.addRange(range);
+  }
+
+  function removeTags(str) {
+    return str.replace(/<\/?[^`]+?\/?>/gmi, '\n') //replace all tags
+      .replace(/\n/gmi, '') // replace line breaks
+      .replace(/&nbsp;/gmi, '') // replace line breaks
+      .trim();
+  }
+
+  function getCaretPosition(editableDiv) {
+    let caretPos = 0;
+    let sel;
+    let range;
+
+    if (window.getSelection) {
+      sel = window.getSelection();
+      if (sel.rangeCount) {
+        range = sel.getRangeAt(0);
+        if (range.commonAncestorContainer.parentNode == editableDiv) {
+          caretPos = range.endOffset;
+        }
+      }
+      return caretPos;
+    } else {
+      throw new Error('no window.getSelection :(')
+    }
+  }
+
   angular
     .module('superProductivity')
     .constant('EDIT_ON_CLICK_TOGGLE_EV', 'EDIT_ON_CLICK_TOGGLE_EV')
@@ -29,24 +81,23 @@
     };
   }
 
-
   function linkFn(scope, el, attrs, ngModel) {
     let lastVal;
     // to do this better
     setTimeout(() => {
-      lastVal = el.html().replace(/<\S[^><]*>/g, '');
+      lastVal = removeTags(el.html());
     });
 
     el[0].setAttribute('contenteditable', true);
 
     function execCb(event) {
       // deselect all text
-      //if (window.getSelection) {
-      //  window.getSelection().removeAllRanges();
-      //}
-      //else if (document.selection) {
-      //  document.selection.empty();
-      //}
+      if (window.getSelection) {
+        window.getSelection().removeAllRanges();
+      }
+      else if (document.selection) {
+        document.selection.empty();
+      }
 
       const curVal = el.html();
       const isChanged = lastVal !== curVal;
@@ -63,10 +114,9 @@
     function read() {
       let curVal = el.html();
       // strip tags
-      curVal = curVal.replace(/<\S[^><]*>/g, '');
+      curVal = removeTags(curVal);
 
       const isChanged = lastVal !== curVal;
-      console.log(curVal, lastVal, isChanged);
 
       if (isChanged) {
         ngModel.$setViewValue(curVal);
@@ -77,7 +127,7 @@
     ngModel.$render = () => {
       let html = ngModel.$viewValue || '';
       // strip tags
-      html = html.replace(/<\S[^><]*>/g, '');
+      html = removeTags(html);
       el.html(html);
     };
 
@@ -102,6 +152,15 @@
         el.blur();
       }
     });
+
+    el[0].onpaste = (ev) => {
+      ev.stopPropagation();
+      ev.preventDefault();
+      const text = ev.clipboardData.getData('text/plain')
+        .trim();
+      insertAtCursor(el[0], text);
+      scope.$apply(read);
+    };
 
     function clickToggleEvHandler(ev, eventId) {
       if (eventId === scope.editOnClickEvId) {
