@@ -390,6 +390,7 @@
       const msg = 'GoogleApi: Failed to authenticate please try logging in again!';
       this.$mdToast.show({
         hideDelay: 20 * 1000,
+        /* @ngInject */
         controller: ($scope, $mdToast, GoogleApi) => {
           $scope.login = () => {
             GoogleApi.login();
