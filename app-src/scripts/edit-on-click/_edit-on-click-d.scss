@@ -1,7 +1,7 @@
 [edit-on-click-duration],
 [edit-on-click] {
   cursor: text;
-  transition: all 0.20s $ease-in-out-quint;
+  transition: transform 0.20s $ease-in-out-quint;
   display: block;
   caret-color: #000000;
   background: inherit;
@@ -17,15 +17,12 @@
     user-select: all;
     border: 1px solid black;
     transform: scale(1.05);
-    box-shadow: 0 0 4px 0 rgba(0, 0, 0, 0.8), 3px 3px 10px 0 rgba(0, 0, 0, 0.6);
+    box-shadow: 0 0 4px 0 rgba(0, 0, 0, 0.8), $whiteframe-shadow-13dp;
     @include dark-theme() {
       border: 1px solid #ffffff;
-      box-shadow: 0 0 4px 0 rgba(255, 255, 255, 0.8), 3px 3px 10px 0 rgba(255, 255, 255, 0.6);
+      box-shadow: 0 0 4px 0 rgba(255, 255, 255, 0.8), $whiteframe-shadow-13dp;
       background: $dark-theme-bg-darker;
     }
 
-    @media(max-width: $layout-xs) {
-      transform: scale(1.05) translateX(-20px);
-    }
   }
 }
