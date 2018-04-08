@@ -191,10 +191,10 @@
           },
         template: `
 <md-toast>
-  <div class="md-toast-text" flex>
+  <div class="md-toast-content">
         <ng-md-icon icon="delete_forever"
                     style="fill:#e11826"></ng-md-icon>
-        You deleted "${task.title}"
+        <div>You deleted "${task.title}"</div>
         <md-button class=""
                    ng-click="undo()">
           <ng-md-icon icon="undo"></ng-md-icon>
