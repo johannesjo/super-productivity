@@ -1,3 +1,24 @@
+<a name="1.10.12"></a>
+## [1.10.12](https://github.com/johannesjo/super-productivity/compare/v1.10.11...v1.10.12) (2018-04-08)
+
+
+### Bug Fixes
+
+* change detection parameter for callback for edit on click ([3d0cfc8](https://github.com/johannesjo/super-productivity/commit/3d0cfc8))
+* rare global link list error ([4f9acec](https://github.com/johannesjo/super-productivity/commit/4f9acec))
+* undo delete task toast weird layout for long task names ([e7cc5cd](https://github.com/johannesjo/super-productivity/commit/e7cc5cd))
+
+
+### Features
+
+* add simple animation to mark as done button ([5051bfd](https://github.com/johannesjo/super-productivity/commit/5051bfd))
+* handle hide controls case for edit on click focus transition ([f8aa235](https://github.com/johannesjo/super-productivity/commit/f8aa235))
+* limit short syntax to a lesser degree ([e1cc08f](https://github.com/johannesjo/super-productivity/commit/e1cc08f))
+* make simple toast handle multi line content better ([6e857c3](https://github.com/johannesjo/super-productivity/commit/6e857c3))
+* smooth out edit on click transition ([d271cc3](https://github.com/johannesjo/super-productivity/commit/d271cc3))
+
+
+
 <a name="1.10.11"></a>
 ## [1.10.11](https://github.com/johannesjo/super-productivity/compare/v1.10.10...v1.10.11) (2018-04-08)
 
