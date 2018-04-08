@@ -3,6 +3,11 @@
   cursor: text;
   transition: padding 0.20s $ease-in-out-quint;
   display: block;
+  caret-color: #000000;
+
+  @include dark-theme() {
+    caret-color: #ffffff;
+  }
 
   &:focus {
     user-select: all;
