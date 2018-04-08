@@ -159,7 +159,7 @@
           el.focus();
 
           // select all when doing this
-          document.execCommand('selectAll', false, null)
+          document.execCommand('selectAll', false, null);
         });
       }
     }
