@@ -1,19 +1,19 @@
 progress-bar {
-  position: absolute !important;
+  position: relative !important;
   width: 0;
-  height: 4px;
+  height: 3px;
   display: block;
   left: 0;
   pointer-events: none;
   max-width: 100%;
-  background-color: #aaaaaa;
+  background-color: #777777;
   z-index: 2;
+  //margin-bottom: -1px;
 
   @include dark-theme {
     background-color: #999999;
   }
 
-  &:before,
   &:after {
     content: '';
     position: absolute;
@@ -26,13 +26,8 @@ progress-bar {
     border: 1px solid inherit;
   }
 
-  &:before {
-    right: auto;
-    left: -1px;
-  }
-
   .task.is-done & {
-    opacity: 0.6;
+    //opacity: 0.6;
   }
 
   .task.is-current & {
