@@ -6,7 +6,7 @@
  * Service in the superProductivity.
  */
 
-(function () {
+(function() {
   'use strict';
 
   angular
@@ -20,7 +20,7 @@
 
     return (task) => {
       if ($rootScope.r.config && $rootScope.r.config.isShortSyntaxEnabled) {
-        if (!task.originalKey && !task.timeEstimate && !task.subTasks) {
+        if (!task.subTasks) {
           let matches = timeEstimateRegExp.exec(task.title);
 
           if (matches) {
