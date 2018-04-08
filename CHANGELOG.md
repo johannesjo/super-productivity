@@ -1,3 +1,30 @@
+<a name="1.10.11"></a>
+## [1.10.11](https://github.com/johannesjo/super-productivity/compare/v1.10.10...v1.10.11) (2018-04-08)
+
+
+### Bug Fixes
+
+* toggling edit on click via enter key not working ([90a49d2](https://github.com/johannesjo/super-productivity/commit/90a49d2))
+* unknown provider error caused by missing inject ([9c0cee2](https://github.com/johannesjo/super-productivity/commit/9c0cee2))
+
+
+### Features
+
+* add better styling to overflowing text elements (for very looong words) ([2a49d4a](https://github.com/johannesjo/super-productivity/commit/2a49d4a))
+* adjust task title styles ([815d989](https://github.com/johannesjo/super-productivity/commit/815d989))
+* allow directly editing other task titles and inputs on click ([cf0a689](https://github.com/johannesjo/super-productivity/commit/cf0a689))
+* caret color of contenteditable ([1e8aba4](https://github.com/johannesjo/super-productivity/commit/1e8aba4))
+* improve edit on click styles ([0573003](https://github.com/johannesjo/super-productivity/commit/0573003))
+* improve edit on click styles again ([e0592da](https://github.com/johannesjo/super-productivity/commit/e0592da))
+* improve sub task visibility further by adjusting progress bars ([16589ec](https://github.com/johannesjo/super-productivity/commit/16589ec))
+* improve task deletion toast ([9103e5c](https://github.com/johannesjo/super-productivity/commit/9103e5c))
+* make copy & paste work for edit on click ([46e28f5](https://github.com/johannesjo/super-productivity/commit/46e28f5))
+* make tasks borders more distinguishable ([0ac309a](https://github.com/johannesjo/super-productivity/commit/0ac309a))
+* prevent global link list from triggering on contenteditable ([d796855](https://github.com/johannesjo/super-productivity/commit/d796855))
+* use contenteditable for edit-on-click ([d87d075](https://github.com/johannesjo/super-productivity/commit/d87d075))
+
+
+
 <a name="1.10.10"></a>
 ## [1.10.10](https://github.com/johannesjo/super-productivity/compare/v1.10.9...v1.10.10) (2018-04-07)
 
