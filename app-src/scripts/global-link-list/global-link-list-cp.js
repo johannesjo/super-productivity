@@ -42,6 +42,10 @@
       if (ev.target.tagName === 'INPUT' || ev.target.tagName === 'TEXTAREA' || ev.target.getAttribute('contenteditable')) {
         return;
       }
+      // properly not intentional so we leave
+      if (!link.path) {
+        return;
+      }
 
       const focusModeEl = ev.target.closest('focus-view');
       const taskEl = ev.target.closest('.task');
