@@ -9,10 +9,8 @@
 
     <md-menu ng-if="r.currentProject">
       <md-button aria-label="Switch project"
+                 title="Switch project"
                  ng-click="vm.openMenu($mdMenu.open, $event)">
-        <md-tooltip md-direction="bottom">
-          Switch project
-        </md-tooltip>
         <span ng-bind="r.currentProject.title"></span>
       </md-button>
       <md-menu-content width="4">
@@ -30,20 +28,16 @@
     <nav class="nav">
       <md-button class="md-icon-button"
                  aria-label="Add Task"
+                 title="Add task"
                  ng-click="vm.openAddTask()">
-        <md-tooltip md-direction="bottom">
-          Add task
-        </md-tooltip>
         <ng-md-icon icon="add"></ng-md-icon>
       </md-button>
 
       <md-button class="md-icon-button"
                  aria-label="Daily Planner"
                  ui-sref-active="md-raised"
-                 ui-sref="daily-planner">
-        <md-tooltip md-direction="bottom">
-          Go to daily planer
-        </md-tooltip>
+                 ui-sref="daily-planner"
+                 title="Go to daily planer">
         <ng-md-icon icon="border_color"></ng-md-icon>
       </md-button>
 
@@ -51,10 +45,8 @@
                  aria-label="Work View"
                  ui-sref-active="md-raised"
                  ng-if="$state.current.name!=='daily-summary'"
-                 ui-sref="work-view">
-        <md-tooltip md-direction="bottom">
-          Go to work view
-        </md-tooltip>
+                 ui-sref="work-view"
+                 title="Go to work view">
         <ng-md-icon icon="playlist_play"></ng-md-icon>
       </md-button>
 
@@ -62,39 +54,31 @@
                  aria-label="Daily Summary"
                  ng-if="$state.current.name==='daily-summary'"
                  ui-sref-active="md-raised"
-                 ui-sref="daily-summary">
-        <md-tooltip md-direction="bottom">
-          Finish your day / Go to summary
-        </md-tooltip>
+                 ui-sref="daily-summary"
+                 title="Finish your day / Go to summary">
         <ng-md-icon icon="done_all"></ng-md-icon>
       </md-button>
 
       <md-button class="md-icon-button"
                  aria-label="Daily Agenda / Tracking History"
                  ui-sref-active="md-raised"
-                 ui-sref="daily-agenda">
-        <md-tooltip md-direction="bottom">
-          Go to daily agenda / Tracking history
-        </md-tooltip>
+                 ui-sref="daily-agenda"
+                 title="Go to daily agenda / Tracking history">
         <ng-md-icon icon="today"></ng-md-icon>
       </md-button>
 
       <md-button class="md-icon-button"
                  aria-label="Settings"
                  ui-sref-active="md-raised"
-                 ui-sref="settings">
-        <md-tooltip md-direction="bottom">
-          Go to settings
-        </md-tooltip>
+                 ui-sref="settings"
+                 title="Go to settings">
         <ng-md-icon icon="settings"></ng-md-icon>
       </md-button>
 
       <md-button class="md-icon-button"
                  aria-label="Help"
-                 ng-click="vm.openHelp();">
-        <md-tooltip md-direction="bottom">
-          Open help for current view
-        </md-tooltip>
+                 ng-click="vm.openHelp();"
+                 title="Open help for current view">
         <ng-md-icon icon="help_outline"></ng-md-icon>
       </md-button>
 
