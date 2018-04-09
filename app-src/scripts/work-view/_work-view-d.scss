@@ -7,18 +7,6 @@ work-view {
   .hide-controls-icon {
     transform: rotate(90deg);
   }
-
-  .task {
-    &.is-current {
-      transform: translateZ(0);
-      backface-visibility: hidden;
-      animation: $transition-duration-s attention-for-current-task;
-      [ui-view].ng-enter & {
-        // only start after view is complete
-        animation: none;
-      }
-    }
-  }
 }
 
 .work-view-header {
