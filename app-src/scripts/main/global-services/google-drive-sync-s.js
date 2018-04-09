@@ -113,13 +113,12 @@
           },
         template: `
 <md-toast>
+  <div class="md-toast-content" flex>
+        <ng-md-icon icon="${icon}"></ng-md-icon>
+        <div class="toast-text">${msg}</div>
+  </div>
   <md-progress-linear md-mode="indeterminate"
     style="position: absolute; top: 0; left: 0;"></md-progress-linear>
-
-  <div class="md-toast-text" flex>
-        <ng-md-icon icon="${icon}"></ng-md-icon>
-        ${msg}
-  </div>
 </md-toast>`
       });
     }

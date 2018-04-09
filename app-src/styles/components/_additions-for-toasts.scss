@@ -1,7 +1,27 @@
-.md-toast-content{
+md-toast .md-toast-content {
   display: flex;
-  flex-direction: row;
-  ng-md-icon:first-child{
-    margin-right: 10px;
+  justify-content: space-between;
+  padding-top: 3px;
+  padding-bottom: 3px;
+  min-height: 38px;
+
+  ng-md-icon:first-child {
+    flex: 0;
+    margin: 0 10px 0 0;
+  }
+
+  .toast-text {
+    flex: 1;
+  }
+
+  .md-button:last-child {
+    margin-left: 10px;
+  }
+
+  .md-button {
+    flex: 0;
+    min-width: 88px;
+    margin-top: 0;
+    margin-bottom: 0;
   }
 }

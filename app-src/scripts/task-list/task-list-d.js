@@ -194,7 +194,7 @@
   <div class="md-toast-content">
         <ng-md-icon icon="delete_forever"
                     style="fill:#e11826"></ng-md-icon>
-        <div>You deleted "${task.title}"</div>
+        <div class="toast-text">You deleted "${task.title}"</div>
         <md-button class=""
                    ng-click="undo()">
           <ng-md-icon icon="undo"></ng-md-icon>
