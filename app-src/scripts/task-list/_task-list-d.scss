@@ -464,17 +464,12 @@ $task-inner-padding-left-right: 6px;
   }
 }
 
-.mark-as-done-btn {
-  ng-md-icon {
-    svg {
-      animation: 0.2s success-btn-ani linear;
-
-      [ui-view].ng-enter-active &,
-      [ui-view].ng-leave &,
-      [ui-view].ng-enter & {
-        animation-duration: 0s !important;
-      }
-    }
+.mark-as-done-btn:active {
+  animation: 0.2s success-btn-ani linear;
+  [ui-view].ng-enter-active &,
+  [ui-view].ng-leave &,
+  [ui-view].ng-enter & {
+    animation-duration: 0s !important;
   }
 }
 
