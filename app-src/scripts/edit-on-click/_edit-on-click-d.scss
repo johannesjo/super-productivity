@@ -2,6 +2,7 @@
 [edit-on-click] {
   cursor: text;
   transition: all .20s $ease-in-out-quint;
+  transition-property: opacity, transform;
   display: block;
   background: inherit;
   position: relative;
@@ -14,6 +15,7 @@
   }
 
   &:after {
+    background: #ffffff;
     transition: all .20s $ease-in-out-quint;
     position: absolute;
     width: 100%;
@@ -25,11 +27,12 @@
     content: '';
     box-shadow: 0 0 4px 0 rgba(0, 0, 0, 0.8), $whiteframe-shadow-13dp;
     opacity: 0;
-    z-index: 5;
+    z-index: -1;
     border: 1px solid black;
     pointer-events: none;
 
     @include dark-theme() {
+      background: $dark-theme-bg-darker;
       border: 1px solid #ffffff;
       box-shadow: 0 0 4px 0 rgba(255, 255, 255, 0.8), $whiteframe-shadow-13dp;
     }
@@ -37,14 +40,10 @@
 
   &:focus {
     z-index: 5;
-    background: #ffffff;
     user-select: all;
     transform: scale(1.1);
     &:after {
       opacity: 1;
-    }
-    @include dark-theme() {
-      background: $dark-theme-bg-darker;
     }
 
     @media(max-width: $layout-xs) {
