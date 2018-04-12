@@ -9,17 +9,18 @@ collapsible {
     cursor: pointer;
     user-select: none;
 
-    &:focus{
+    &:focus {
       outline: none;
     }
 
     .collapsible-expand-icon {
       transition: all 200ms;
     }
-    &.is-expanded {
-      .collapsible-expand-icon {
-        transform: rotate(-180deg);
-      }
+  }
+
+  &.is-expanded {
+    .collapsible-expand-icon {
+      transform: rotate(-180deg);
     }
   }
 
@@ -29,7 +30,7 @@ collapsible {
     overflow: hidden;
 
     // make sure we don't produce clunky animations
-    padding: 0!important;
-    margin: 0!important;
+    padding: 0 !important;
+    margin: 0 !important;
   }
 }
