@@ -11,6 +11,7 @@
   class EnlargeImageCtrl {
     /* @ngInject */
     constructor($element) {
+      this.lightboxEl = angular.element(document.body);
       this.$el = $element;
       $element.bind('click', () => {
         this.showImg();
@@ -25,7 +26,7 @@
       const enlargedImgWrapperEl = this.htmlToElement(`<div class="enlarged-image-wrapper"><img src="${this.enlargeImage}" class="enlarged-image"></div>`);
       this.$enlargedImgWrapperEl = angular.element(enlargedImgWrapperEl);
 
-      this.$el.parent().append(this.$enlargedImgWrapperEl);
+      this.lightboxEl.append(this.$enlargedImgWrapperEl);
 
       this.$enlargedImgWrapperEl.bind('click', () => {
         this.hideImg();
