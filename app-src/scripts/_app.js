@@ -53,6 +53,7 @@
     .run(checkIfLatestVersion)
     .run(showWelcomeDialog)
     .run(initUnloadActions)
+    .run(initInputFocusFixForAndroid)
     .run(initElectronOnBeforeQuit);
 
   /* @ngInject */
@@ -425,6 +426,21 @@
         return 'Are you sure you want to leave?';
       }
     };
+  }
+
+  function initInputFocusFixForAndroid() {
+    // dirty hack to fix inputs not being visible when the keyboard open
+    if (/Android/.test(navigator.appVersion)) {
+      window.addEventListener('resize', function() {
+        if (document.activeElement.tagName === 'INPUT' ||
+          document.activeElement.tagName === 'TEXTAREA' ||
+          document.activeElement.getAttribute('contenteditable')) {
+          window.setTimeout(function() {
+            document.activeElement.scrollIntoViewIfNeeded();
+          }, 0);
+        }
+      });
+    }
   }
 
 })();
