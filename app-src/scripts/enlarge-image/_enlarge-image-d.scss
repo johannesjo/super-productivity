@@ -14,30 +14,29 @@
   height: 100%;
   animation: 0.2s enlargeImageFadeIn ease-out;
   cursor: zoom-out;
+  display: flex; /* establish flex container */
+  flex-direction: column; /* make main axis vertical */
+  justify-content: center; /* center items vertically, in this case */
+  align-items: center; /* center items horizontally, in this case */
 }
 
 .enlarged-image {
-  position: fixed;
-  left: 50%;
-  top: 50%;
   z-index: 10;
   user-select: none;
   pointer-events: none;
-  transform: translate(-50%, -50%);
   animation: 0.2s enlargeImageAni ease-out;
   max-width: 100%;
   max-height: 100%;
   opacity: 1;
+  animation-fill-mode: forwards;
 }
 
 @keyframes enlargeImageAni {
   0% {
-    opacity: 0;
-    transform: scale(0.3) translate(-100%, -100%);
+    //transform: scale(0.1);
   }
   100% {
-    opacity: 1;
-    transform: scale(1) translate(-50%, -50%);
+    transform: scale(1) translate3d(0, 0, 0);
   }
 }
 
