@@ -1,3 +1,29 @@
+<a name="1.10.13"></a>
+## [1.10.13](https://github.com/johannesjo/super-productivity/compare/v1.10.12...v1.10.13) (2018-04-13)
+
+
+### Bug Fixes
+
+* blurry fonts on scale ([a1eba3a](https://github.com/johannesjo/super-productivity/commit/a1eba3a))
+* broken focus mode ([447b16b](https://github.com/johannesjo/super-productivity/commit/447b16b))
+* collapsible icon not turning ([8d7604b](https://github.com/johannesjo/super-productivity/commit/8d7604b))
+* edit on click transition messing up hover states ([a3519b9](https://github.com/johannesjo/super-productivity/commit/a3519b9))
+* image preview not working any more due to translateZ ([0c43378](https://github.com/johannesjo/super-productivity/commit/0c43378))
+* limit mark-done-btn animation to active button state ([2c3be8b](https://github.com/johannesjo/super-productivity/commit/2c3be8b))
+* quick fix for syncing issue [#76](https://github.com/johannesjo/super-productivity/issues/76) ([b69cc4d](https://github.com/johannesjo/super-productivity/commit/b69cc4d))
+* toast styling not being good in some circumstances ([d263483](https://github.com/johannesjo/super-productivity/commit/d263483))
+
+
+### Features
+
+* add hack for android issue with the keyboard opening over inputs ([40ee1a9](https://github.com/johannesjo/super-productivity/commit/40ee1a9))
+* give task controls just a little bit more space on mobile ([759eaae](https://github.com/johannesjo/super-productivity/commit/759eaae))
+* remove tooltips in favor of just a simple title attribute (unfortunately tooltips are messing up in several scenarios) ([232f062](https://github.com/johannesjo/super-productivity/commit/232f062))
+* run current task animation only after expand animation ([43bfc13](https://github.com/johannesjo/super-productivity/commit/43bfc13))
+* **enlargeImage:** make it appear as original image is being enlarged ([b71a0fd](https://github.com/johannesjo/super-productivity/commit/b71a0fd))
+
+
+
 <a name="1.10.12"></a>
 ## [1.10.12](https://github.com/johannesjo/super-productivity/compare/v1.10.11...v1.10.12) (2018-04-08)
 
