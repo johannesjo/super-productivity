@@ -119,7 +119,7 @@
     loadFromFileSystem(fs, path) {
       if (fs.existsSync(path)) {
         const data = JSON.parse(fs.readFileSync(path, 'utf-8'));
-        this.importData(data);
+        this.importData(data, true);
         this.SimpleToast('CUSTOM', 'Data updated from the outside. Updating...', 'update');
       }
     }
@@ -135,8 +135,7 @@
 
     saveToFileSystem(fs, path, cb, isSync) {
       const data = this.getCompleteBackupData();
-
-      fs.writeFile(path, JSON.stringify(data), function(err) {
+      fs.writeFile(path, JSON.stringify(data), { flag: 'w' }, (err) => {
         if (err) {
           console.error(err);
         } else {
@@ -207,7 +206,7 @@
       }
     }
 
-    importData(data) {
+    importData(data, isNoReload = false) {
       try {
         // cancel saving current app data to ls
         if (this.updateLsInterval) {
@@ -218,9 +217,11 @@
           this.saveLsItem(val, key);
         });
 
-        // unset handlers for unload to prevent current app state from overwriting the imports
-        window.onbeforeunload = window.onunload = undefined;
-        window.location.reload(true);
+        if (!isNoReload) {
+          // unset handlers for unload to prevent current app state from overwriting the imports
+          window.onbeforeunload = window.onunload = undefined;
+          window.location.reload(true);
+        }
       } catch (e) {
         console.error(e);
         this.SimpleToast('ERROR', 'Something went wrong importing your data.');
