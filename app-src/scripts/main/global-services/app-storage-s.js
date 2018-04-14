@@ -29,9 +29,7 @@
       this.$interval = $interval;
       this.serializer = angular.toJson;
       this.deserializer = angular.fromJson;
-      this.s = {};
 
-      this.getCurrentLs();
       this.setupPollingForSavingCurrentState();
 
       // this is really nice for debugging but we don't want to use it for
@@ -92,9 +90,6 @@
         if (isOutsideChange) {
           const path = this.$rootScope.r.config.automaticBackups.syncPath;
           this.loadFromFileSystem(fs, path);
-
-          // TODO find a better way to do so
-          window.location.reload(true);
         }
       });
 
@@ -208,12 +203,11 @@
       }
     }
 
-    loadLsDataToApp(){
+    loadLsDataToApp() {
       const Projects = this.$injector.get('Projects');
       const InitGlobalModels = this.$injector.get('InitGlobalModels');
       // sync initially
-      this.getCurrentLs();
-      this.$rootScope.r = this.s;
+      this.$rootScope.r = this.getCurrentLsWithReducedProjects();
       Projects.getAndUpdateCurrent();
       InitGlobalModels();
     }
@@ -300,7 +294,8 @@
       return newObj;
     }
 
-    getCurrentLs() {
+    getCurrentLsWithReducedProjects() {
+      const data = {};
       const keys = Object.keys(this.LS_DEFAULTS);
 
       keys.forEach((key) => {
@@ -308,24 +303,24 @@
 
         // reassign to original value, but only when the item is undefined
         if (item === undefined) {
-          this.s[key] = this.LS_DEFAULTS[key];
+          data[key] = this.LS_DEFAULTS[key];
 
         } else {
           // deep check object defaults
           if (item !== null && typeof item === 'object' && !Array.isArray(item)) {
-            this.s[key] = this.getDefaultsForDeepObject(item, this.LS_DEFAULTS[key]);
+            data[key] = this.getDefaultsForDeepObject(item, this.LS_DEFAULTS[key]);
           } else {
-            this.s[key] = item;
+            data[key] = item;
           }
 
           if (key === this.PROJECTS_KEY) {
-            const projects = this.s[key];
+            const projects = data[key];
             this.makeProjectsSimple(projects);
           }
         }
       });
 
-      return this.s;
+      return data;
     }
   }
 
