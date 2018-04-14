@@ -22,6 +22,7 @@ This is a ToDo List / Time Tracker / Personal Jira Task Manager for Linux, MacOS
 * Full Keyboard Support
 * (Anti-) Distraction Pad
 * Different Themes!
+* Sync data between multiple instances 
 
 And much more!
 
@@ -48,10 +49,15 @@ sudo apt-get install superproductivity
 ```
 
 ### MacOS
-* Install [superProductivity-latest.dmg from the releases page](https://github.com/johannesjo/super-productivity/releases).
+Install via [homebrew cask](https://github.com/caskroom/homebrew-cask):
+```
+brew cask install superProductivity
+```
+
+Or install [superProductivity-latest.dmg from the releases page](https://github.com/johannesjo/super-productivity/releases) directly.
 
 ### Windows
-* Install [superProductivity_Setup_latest.exe from the releases page](https://github.com/johannesjo/super-productivity/releases).
+Install [superProductivity_Setup_latest.exe from the releases page](https://github.com/johannesjo/super-productivity/releases).
 
 ### Android & iOS
 For Android and iOS it is recommended to use the [web-version](http://super-productivity.com/app). You can then add the app to your start screen via the browser. Here is a [guide that explains how to do it](https://www.howtogeek.com/196087/how-to-add-websites-to-the-home-screen-on-any-smartphone-or-tablet/).
