@@ -67,6 +67,14 @@
       }
     };
 
+    vm.onLocalSyncToggle = (isEnabled) => {
+      if (isEnabled) {
+        AppStorage.resetAutoSyncToRemoteInterval();
+      } else {
+        AppStorage.cancelAutoSyncToRemoteIntervalIfSet();
+      }
+    };
+
     vm.resetSync = () => {
       GoogleDriveSync.resetAutoSyncToRemoteInterval();
     };

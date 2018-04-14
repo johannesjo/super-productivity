@@ -158,6 +158,8 @@
 
 <section ng-if="vm.IS_ELECTRON">
   <h3 class="md-subtitle">Automatic Backups</h3>
+  <p><strong>NOTE:</strong> Changes to automated backup settings require you to restart the application to take effect.
+  </p>
   <div>
     <md-switch ng-model="vm.settings.automaticBackups.isEnabled"
                aria-label="Enable automatic backups">
@@ -165,8 +167,6 @@
     </md-switch>
   </div>
 
-  <p><strong>NOTE:</strong> Changes to automated backup settings require you to restart the application to take effect.
-  </p>
 
   <div ng-if="vm.settings.automaticBackups.isEnabled"
        class="ani-slide-up-down">
@@ -183,6 +183,9 @@
   </div>
 
   <h3 class="md-subtitle">Automatic Sync</h3>
+  <p><strong>NOTE:</strong> This is
+    <strong>a experimental feature!!!</strong> Take care! Make a backup with the export button above!
+  </p>
   <div>
     <md-switch ng-model="vm.settings.automaticBackups.isSyncEnabled"
                aria-label="Enable automatic backups">
@@ -190,15 +193,12 @@
     </md-switch>
   </div>
 
-  <p><strong>NOTE:</strong> This is
-    <strong>a experimental feature!!!</strong> Take care! Make a backup! Changes to the sync settings require you to restart the application to take effect.
-  </p>
-
   <div ng-if="vm.settings.automaticBackups.isSyncEnabled"
        class="ani-slide-up-down">
     <md-input-container class="md-block">
       <label>Path to sync file</label>
       <input type="text"
+             ng-change="vm.onLocalSyncToggle(vm.settings.automaticBackups.isSyncEnabled)"
              ng-model="vm.settings.automaticBackups.syncPath">
     </md-input-container>
   </div>
