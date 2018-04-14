@@ -38,7 +38,8 @@
             'SUCCESS',
             'ERROR',
             'WARNING',
-            'INFO'
+            'INFO',
+            'CUSTOM'
           ].indexOf(textContent) > -1) {
           const tmpType = textContent;
           textContent = type;
@@ -57,6 +58,8 @@
           case 'ERROR':
             icon = icon || 'error';
             iconColor = '#e15d63';
+            break;
+          case 'CUSTOM':
             break;
           default:
             icon = icon || 'info';
