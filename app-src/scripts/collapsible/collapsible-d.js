@@ -12,6 +12,10 @@
   function CollapsibleCtrl($timeout, $element) {
     const vm = this;
 
+    if ($element.attr('counter')) {
+      vm.isCounter = true;
+    }
+
     // TODO fix this
     $timeout(() => {
       if (vm.isInitiallyExpanded) {
@@ -50,7 +54,8 @@
         icon: '@',
         isInitiallyExpanded: '@',
         btnAction: '&',
-        btnIcon: '@'
+        btnIcon: '@',
+        counter: '<'
       }
     });
 })();

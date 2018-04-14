@@ -213,9 +213,9 @@
 
         <section>
           <collapsible collapsible-title="Local attachments and links"
+                       counter="task.localAttachments.length"
                        btn-action="$ctrl.addLocalAttachment(task)"
-                       btn-icon="add"
-                       is-initially-expanded="'true'">
+                       btn-icon="add">
             <task-local-links local-links="task.localAttachments"></task-local-links>
           </collapsible>
         </section>
