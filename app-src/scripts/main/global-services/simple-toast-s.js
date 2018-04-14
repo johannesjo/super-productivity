@@ -38,7 +38,7 @@
             'SUCCESS',
             'ERROR',
             'WARNING',
-            'CUSTOM'
+            'INFO'
           ].indexOf(textContent) > -1) {
           const tmpType = textContent;
           textContent = type;
@@ -58,6 +58,8 @@
             icon = icon || 'error';
             iconColor = '#e15d63';
             break;
+          default:
+            icon = icon || 'info';
         }
 
         $mdToast.show({

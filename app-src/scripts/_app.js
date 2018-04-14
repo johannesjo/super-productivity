@@ -110,13 +110,8 @@
   }
 
   /* @ngInject */
-  function initGlobalModels(Projects, InitGlobalModels, AppStorage, $rootScope) {
-    // sync initially
-    $rootScope.r = AppStorage.s;
-
-    Projects.getAndUpdateCurrent();
-
-    InitGlobalModels();
+  function initGlobalModels(AppStorage) {
+    AppStorage.loadLsDataToApp();
   }
 
   /* @ngInject */

@@ -98,7 +98,7 @@
       }
     }));
 
-    $scope.$on(EV.PROJECT_CHANGED, () => {
+    $scope.$on(EV.PROJECT_CHANGED + ' ' + EV.COMPLETE_DATA_RELOAD, () => {
       // currentTheme is not updated right away, because it is a primitive,
       // that's why we set it here from the rootScope
       vm.currentTheme = $rootScope.r.theme;

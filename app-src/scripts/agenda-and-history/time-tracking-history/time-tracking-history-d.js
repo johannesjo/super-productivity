@@ -5,7 +5,7 @@
  * # timeTrackingHistory
  */
 
-(function () {
+(function() {
   'use strict';
 
   angular
@@ -64,7 +64,9 @@
       }
     };
 
-    $scope.$on(EV.PROJECT_CHANGED, () => {
+    $scope.$on(EV.PROJECT_CHANGED + ' ' + EV.COMPLETE_DATA_RELOAD, () => {
+      console.log('IAM');
+
       vm.worklog = Tasks.getCompleteWorkLog();
     });
   }

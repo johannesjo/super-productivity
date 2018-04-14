@@ -30,7 +30,7 @@
     // ----------------
     const watchers = [];
 
-    $scope.$on(EV.PROJECT_CHANGED, () => {
+    $scope.$on(EV.PROJECT_CHANGED + ' ' + EV.COMPLETE_DATA_RELOAD, () => {
       init();
     });
 

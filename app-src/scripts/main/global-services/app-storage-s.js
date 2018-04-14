@@ -13,7 +13,7 @@
 
   class AppStorage {
     /* @ngInject */
-    constructor(LS_DEFAULTS, SAVE_APP_STORAGE_POLL_INTERVAL, TMP_FIELDS, $interval, $rootScope, ON_DEMAND_LS_FIELDS, ON_DEMAND_LS_FIELDS_FOR_PROJECT, IS_ELECTRON, SimpleToast) {
+    constructor(LS_DEFAULTS, SAVE_APP_STORAGE_POLL_INTERVAL, TMP_FIELDS, $interval, $rootScope, ON_DEMAND_LS_FIELDS, ON_DEMAND_LS_FIELDS_FOR_PROJECT, IS_ELECTRON, SimpleToast, EV, $injector) {
       this.PROJECTS_KEY = 'projects';
       this.DONE_BACKLOG_TASKS_KEY = 'doneBacklogTasks';
       this.LS_DEFAULTS = LS_DEFAULTS;
@@ -22,7 +22,9 @@
       this.ON_DEMAND_LS_FIELDS = ON_DEMAND_LS_FIELDS;
       this.ON_DEMAND_LS_FIELDS_FOR_PROJECT = ON_DEMAND_LS_FIELDS_FOR_PROJECT;
       this.IS_ELECTRON = IS_ELECTRON;
+      this.EV = EV;
       this.$rootScope = $rootScope;
+      this.$injector = $injector;
       this.SimpleToast = SimpleToast;
       this.$interval = $interval;
       this.serializer = angular.toJson;
@@ -206,7 +208,19 @@
       }
     }
 
-    importData(data, isNoReload = false) {
+    loadLsDataToApp(){
+      const Projects = this.$injector.get('Projects');
+      const InitGlobalModels = this.$injector.get('InitGlobalModels');
+      // sync initially
+      this.getCurrentLs();
+      this.$rootScope.r = this.s;
+      Projects.getAndUpdateCurrent();
+      InitGlobalModels();
+    }
+
+    importData(data) {
+      this.SimpleToast('INFO', 'Importing data.');
+
       try {
         // cancel saving current app data to ls
         if (this.updateLsInterval) {
@@ -216,12 +230,11 @@
         _.forOwn(data, (val, key) => {
           this.saveLsItem(val, key);
         });
+        this.loadLsDataToApp();
 
-        if (!isNoReload) {
-          // unset handlers for unload to prevent current app state from overwriting the imports
-          window.onbeforeunload = window.onunload = undefined;
-          window.location.reload(true);
-        }
+        this.$rootScope.$broadcast(this.EV.COMPLETE_DATA_RELOAD);
+        this.SimpleToast('SUCCESS', 'Successfully imported data.');
+
       } catch (e) {
         console.error(e);
         this.SimpleToast('ERROR', 'Something went wrong importing your data.');

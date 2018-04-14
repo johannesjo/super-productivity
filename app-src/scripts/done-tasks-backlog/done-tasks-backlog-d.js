@@ -36,7 +36,7 @@
 
     $scope.$on('$destroy', watcher);
 
-    $scope.$on(EV.PROJECT_CHANGED, () => {
+    $scope.$on(EV.PROJECT_CHANGED + ' ' + EV.COMPLETE_DATA_RELOAD, () => {
       vm.doneBacklogTasks = Tasks.getDoneBacklog();
     });
 
