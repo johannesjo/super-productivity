@@ -88,6 +88,9 @@ gulp.task('copy', function() {
   //  }))
   //  .pipe(gulp.dest(config.dist));
 
+  const otherStaticFiles = gulp.src(config.staticFiles, { base: config.base })
+    .pipe(gulp.dest(config.dist));
+
   const fonts = gulp.src(config.fontsF, { base: config.base })
     .pipe(gulp.dest(config.dist));
 
@@ -102,7 +105,7 @@ gulp.task('copy', function() {
     }))
     .pipe(gulp.dest(config.dist));
 
-  return merge(fonts, images, sounds);
+  return merge(fonts, images, sounds, otherStaticFiles);
 });
 
 gulp.task('minFiles', function() {
