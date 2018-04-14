@@ -24,7 +24,7 @@
     function linkFn(scope, element) {
       element.on('click', () => {
         AppStorage.saveToLs();
-        let storageObj = AppStorage.getCurrentLs();
+        let storageObj = AppStorage.getCompleteBackupData();
 
         let dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(storageObj));
 
