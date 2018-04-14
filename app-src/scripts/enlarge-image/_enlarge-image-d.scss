@@ -8,7 +8,6 @@
   top: 0;
   bottom: 0;
   right: 0;
-  background: rgba(0, 0, 0, 0.2);
   z-index: 10;
   width: 100%;
   height: 100%;
@@ -18,13 +17,24 @@
   justify-content: center; /* center items vertically, in this case */
   align-items: center; /* center items horizontally, in this case */
   transition: 0.2s all;
-  opacity: 0;
 
-  &.ani-enter {
-    opacity: 1;
+  &:after {
+    transition: 0.2s all;
+
+    content: '';
+    background: rgba(0, 0, 0, 0.2);
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    opacity: 0;
   }
 
-  &.ani-remove {
+  &.ani-enter:after {
+    opacity: 1;
+  }
+  &.ani-remove:after {
     opacity: 0;
   }
 }

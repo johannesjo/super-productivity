@@ -38,14 +38,13 @@
     }
 
     hideImg() {
-
       this.$enlargedImgWrapperEl.removeClass('ani-enter');
       this.$enlargedImgWrapperEl.addClass('ani-remove');
       this.setCoordsForImageAni();
-      this.imageEl.setAttribute('style', `visibility: visible`);
 
       this.$enlargedImgWrapperEl.on('transitionend', () => {
         this.$enlargedImgWrapperEl.remove();
+        this.imageEl.setAttribute('style', `visibility: visible`);
       });
     }
 
@@ -65,7 +64,7 @@
 
       setTimeout(() => {
         this.$enlargedImgWrapperEl.addClass('ani-enter');
-      }, 0);
+      }, 10);
 
       this.$enlargedImgWrapperEl.bind('click', () => {
         this.hideImg();
