@@ -25,7 +25,7 @@
   }
 
   /* @ngInject */
-  function TimeTrackingHistoryCtrl(Tasks, Dialogs, $rootScope, $scope, EV_PROJECT_CHANGED) {
+  function TimeTrackingHistoryCtrl(Tasks, Dialogs, $rootScope, $scope, EV) {
     let vm = this;
     vm.worklog = Tasks.getCompleteWorkLog();
 
@@ -64,7 +64,7 @@
       }
     };
 
-    $scope.$on(EV_PROJECT_CHANGED, () => {
+    $scope.$on(EV.PROJECT_CHANGED, () => {
       vm.worklog = Tasks.getCompleteWorkLog();
     });
   }

@@ -14,7 +14,7 @@
     .service('Projects', Projects);
 
   /* @ngInject */
-  function Projects(LS_DEFAULTS, $rootScope, Uid, $window, SimpleToast, $injector, GLOBAL_LS_FIELDS, EV_PROJECT_CHANGED, TMP_FIELDS, AppStorage) {
+  function Projects(LS_DEFAULTS, $rootScope, Uid, $window, SimpleToast, $injector, GLOBAL_LS_FIELDS, EV, TMP_FIELDS, AppStorage) {
 
     const OMITTED_LS_FIELDS = GLOBAL_LS_FIELDS.concat(TMP_FIELDS);
 
@@ -200,7 +200,7 @@
         // Show success message
         SimpleToast('SUCCESS', `Switched to project "${newCurrentProject.title}"`);
 
-        $rootScope.$broadcast(EV_PROJECT_CHANGED);
+        $rootScope.$broadcast(EV.PROJECT_CHANGED);
       }
     };
   }

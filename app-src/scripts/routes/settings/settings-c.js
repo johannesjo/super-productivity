@@ -14,7 +14,7 @@
     .controller('SettingsCtrl', SettingsCtrl);
 
   /* @ngInject */
-  function SettingsCtrl($rootScope, $window, $scope, Projects, IS_ELECTRON, EV_PROJECT_CHANGED) {
+  function SettingsCtrl($rootScope, $window, $scope, Projects, IS_ELECTRON, EV) {
     let vm = this;
     const _ = $window._;
     vm.IS_ELECTRON = IS_ELECTRON;
@@ -30,7 +30,7 @@
     // ----------------
     const watchers = [];
 
-    $scope.$on(EV_PROJECT_CHANGED, () => {
+    $scope.$on(EV.PROJECT_CHANGED, () => {
       init();
     });
 

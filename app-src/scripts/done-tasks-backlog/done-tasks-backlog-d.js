@@ -25,7 +25,7 @@
   }
 
   /* @ngInject */
-  function DoneTasksBacklogCtrl($scope, TasksUtil, Tasks, EV_PROJECT_CHANGED) {
+  function DoneTasksBacklogCtrl($scope, TasksUtil, Tasks, EV) {
     let vm = this;
 
     vm.doneBacklogTasks = Tasks.getDoneBacklog();
@@ -36,7 +36,7 @@
 
     $scope.$on('$destroy', watcher);
 
-    $scope.$on(EV_PROJECT_CHANGED, () => {
+    $scope.$on(EV.PROJECT_CHANGED, () => {
       vm.doneBacklogTasks = Tasks.getDoneBacklog();
     });
 

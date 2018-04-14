@@ -25,7 +25,7 @@
   }
 
   /* @ngInject */
-  function DailyPlannerCtrl(IS_ELECTRON, $rootScope, $window, $scope, Tasks, TasksUtil, Dialogs, $state, Jira, $filter, Git, $mdDialog, EV_PROJECT_CHANGED) {
+  function DailyPlannerCtrl(IS_ELECTRON, $rootScope, $window, $scope, Tasks, TasksUtil, Dialogs, $state, Jira, $filter, Git, $mdDialog, EV) {
     let vm = this;
     const _ = $window._;
 
@@ -139,7 +139,7 @@
       });
     });
 
-    $scope.$on(EV_PROJECT_CHANGED, () => {
+    $scope.$on(EV.PROJECT_CHANGED, () => {
       vm.init();
     });
   }

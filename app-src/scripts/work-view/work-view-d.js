@@ -25,7 +25,7 @@
   }
 
   /* @ngInject */
-  function WorkViewCtrl(Tasks, $window, $scope, Dialogs, $rootScope, TasksUtil, $timeout, EV_PROJECT_CHANGED) {
+  function WorkViewCtrl(Tasks, $window, $scope, Dialogs, $rootScope, TasksUtil, $timeout, EV) {
     let vm = this;
     const _ = $window._;
 
@@ -137,7 +137,7 @@
       updateTasksLsOnly();
     }));
 
-    $scope.$on(EV_PROJECT_CHANGED, () => {
+    $scope.$on(EV.PROJECT_CHANGED, () => {
       init();
     });
 

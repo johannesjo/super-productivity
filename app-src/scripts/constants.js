@@ -61,8 +61,8 @@
       IS_IDLE: 'IS_IDLE',
       IS_BUSY: 'IS_BUSY',
       IPC_EVENT_POMODORO_UPDATE: 'IPC_EVENT_POMODORO_UPDATE',
+      PROJECT_CHANGED: 'PROJECT_CHANGED',
     })
-    .constant('EV_PROJECT_CHANGED', 'EV_PROJECT_CHANGED')
     .constant('LS_DEFAULTS', {
       note: undefined,
       tomorrowsNote: undefined,

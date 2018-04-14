@@ -29,7 +29,7 @@
   }
 
   /* @ngInject */
-  function ThemeSettingsCtrl($scope, THEMES, DEFAULT_THEME, $rootScope, EV_PROJECT_CHANGED) {
+  function ThemeSettingsCtrl($scope, THEMES, DEFAULT_THEME, $rootScope, EV) {
     let vm = this;
     vm.themes = THEMES;
 
@@ -98,7 +98,7 @@
       }
     }));
 
-    $scope.$on(EV_PROJECT_CHANGED, () => {
+    $scope.$on(EV.PROJECT_CHANGED, () => {
       // currentTheme is not updated right away, because it is a primitive,
       // that's why we set it here from the rootScope
       vm.currentTheme = $rootScope.r.theme;
