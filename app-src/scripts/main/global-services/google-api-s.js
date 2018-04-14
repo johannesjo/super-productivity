@@ -401,7 +401,7 @@
 <md-toast>
   <div class="md-toast-text" flex>
         <ng-md-icon icon="${icon}" style="fill:${iconColor}"></ng-md-icon>
-        ${msg} 
+        <div class="toast-text">${msg}</div> 
         <md-button ng-click="login()">Login</md-button>
   </div>
 </md-toast>`
