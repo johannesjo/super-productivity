@@ -137,8 +137,11 @@
       updateTasksLsOnly();
     }));
 
-    $scope.$on(EV.PROJECT_CHANGED + ' ' + EV.COMPLETE_DATA_RELOAD, () => {
-      init();
+    [EV.PROJECT_CHANGED, EV.COMPLETE_DATA_RELOAD].forEach((EV) => {
+      $scope.$on(EV, () => {
+        console.log('I am here!');
+        init();
+      });
     });
 
     // otherwise we update on view change

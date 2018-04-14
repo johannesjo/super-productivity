@@ -6,7 +6,7 @@
  * Controller of the superProductivity
  */
 
-(function () {
+(function() {
   'use strict';
 
   angular
@@ -30,8 +30,10 @@
     // ----------------
     const watchers = [];
 
-    $scope.$on(EV.PROJECT_CHANGED + ' ' + EV.COMPLETE_DATA_RELOAD, () => {
-      init();
+    [EV.PROJECT_CHANGED, EV.COMPLETE_DATA_RELOAD].forEach((EV) => {
+      $scope.$on(EV, () => {
+        init();
+      });
     });
 
     $scope.$on('$destroy', () => {

@@ -36,8 +36,10 @@
 
     $scope.$on('$destroy', watcher);
 
-    $scope.$on(EV.PROJECT_CHANGED + ' ' + EV.COMPLETE_DATA_RELOAD, () => {
-      vm.doneBacklogTasks = Tasks.getDoneBacklog();
+    [EV.PROJECT_CHANGED, EV.COMPLETE_DATA_RELOAD].forEach((EV) => {
+      $scope.$on(EV, () => {
+        vm.doneBacklogTasks = Tasks.getDoneBacklog();
+      });
     });
 
     vm.restoreTask = (task) => {

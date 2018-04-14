@@ -139,8 +139,10 @@
       });
     });
 
-    $scope.$on(EV.PROJECT_CHANGED + ' ' + EV.COMPLETE_DATA_RELOAD, () => {
-      vm.init();
+    [EV.PROJECT_CHANGED, EV.COMPLETE_DATA_RELOAD].forEach((EV) => {
+      $scope.$on(EV, () => {
+        vm.init();
+      });
     });
   }
 })();

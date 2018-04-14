@@ -64,10 +64,11 @@
       }
     };
 
-    $scope.$on(EV.PROJECT_CHANGED + ' ' + EV.COMPLETE_DATA_RELOAD, () => {
-      console.log('IAM');
-
-      vm.worklog = Tasks.getCompleteWorkLog();
+    [EV.PROJECT_CHANGED, EV.COMPLETE_DATA_RELOAD].forEach((EV) => {
+      $scope.$on(EV, () => {
+        console.log('IAM');
+        vm.worklog = Tasks.getCompleteWorkLog();
+      });
     });
   }
 
