@@ -25,7 +25,7 @@
       this.data = this.$rootScope.r.googleDriveSync;
       this.config = this.$rootScope.r.config.googleDriveSync;
 
-      if (this.config.isAutoLogin) {
+      if (this.config.isEnabled && this.config.isAutoLogin) {
         GoogleApi.login().then(() => {
           if (this.config.isAutoSyncToRemote) {
             this.resetAutoSyncToRemoteInterval();
@@ -245,7 +245,7 @@
     resetAutoSyncToRemoteInterval() {
       // always unset if set
       this.cancelAutoSyncToRemoteIntervalIfSet();
-      if (!this.config.isAutoSyncToRemote) {
+      if (!this.config.isAutoSyncToRemote || !this.config.isEnabled) {
         return;
       }
 
@@ -300,7 +300,7 @@
     }
 
     saveForSyncIfEnabled() {
-      if (!this.config.isAutoSyncToRemote) {
+      if (!this.config.isAutoSyncToRemote || !this.config.isEnabled) {
         return this.$q.resolve();
       }
 

@@ -13,7 +13,7 @@
 </help-section>
 
 <section>
-  <h3 class="md-caption">File import/export</h3>
+  <h3 class="md-subtitle">File import/export</h3>
   <a class="md-raised md-button md-ink-ripple"
      type="button"
      download-backup>
@@ -50,110 +50,114 @@
 </section>
 
 <section>
-  <h3 class="md-caption">Sync via Google Drive</h3>
-  <p><strong>NOTE:</strong> This is
-    <strong>a highly experimental feature!!!</strong> Take care! Make a backup with the export Button above!
-  </p>
+  <h3 class="md-subtitle">Sync via Google Drive</h3>
 
+  <md-switch ng-model="vm.settings.googleDriveSync.isEnabled"
+             ng-change="vm.onGoogleDriveSyncToggle(vm.settings.googleDriveSync.isEnabled)"
+             aria-label="Enable syncing via Google Drive">
+    Enable syncing via Google Drive
+  </md-switch>
 
-  <div>
-    <md-button class="md-raised"
-               promise-btn
-               ng-show="!vm.GoogleApi.isLoggedIn"
-               ng-click="vm.login()">
-      <ng-md-icon icon="login"></ng-md-icon>
-      Login
-    </md-button>
-    <md-button class="md-raised"
-               ng-show="vm.GoogleApi.isLoggedIn"
-               ng-click="vm.logout()">
-      <ng-md-icon icon="logout"></ng-md-icon>
-      Logout
-    </md-button>
+  <div ng-if="vm.settings.googleDriveSync.isEnabled"
+       class="ani-slide-up-down">
+    <div>
+      <md-button class="md-raised"
+                 promise-btn
+                 ng-show="!vm.GoogleApi.isLoggedIn"
+                 ng-click="vm.login()">
+        <ng-md-icon icon="login"></ng-md-icon>
+        Login
+      </md-button>
+      <md-button class="md-raised"
+                 ng-show="vm.GoogleApi.isLoggedIn"
+                 ng-click="vm.logout()">
+        <ng-md-icon icon="logout"></ng-md-icon>
+        Logout
+      </md-button>
 
-    <md-button class="md-raised"
-               promise-btn
-               ng-show="vm.GoogleApi.isLoggedIn"
-               ng-click="vm.backupNow()">
-      <ng-md-icon icon="backup"></ng-md-icon>
-      Backup now
-    </md-button>
-    <md-button class="md-raised sync-from-btn"
-               promise-btn
-               ng-show="vm.GoogleApi.isLoggedIn"
-               ng-click="vm.loadRemoteData()">
-      <ng-md-icon icon="backup"></ng-md-icon>
-      Load From GDrive
-    </md-button>
-    <md-button class="md-raised"
-               ng-show="vm.GoogleApi.isLoggedIn"
-               external-link
-               target="_blank"
-               href="https://myaccount.google.com/permissions">
-      <ng-md-icon icon="remove_circle"></ng-md-icon>
-      Revoke permissions
-    </md-button>
-  </div>
+      <md-button class="md-raised"
+                 promise-btn
+                 ng-show="vm.GoogleApi.isLoggedIn"
+                 ng-click="vm.backupNow()">
+        <ng-md-icon icon="backup"></ng-md-icon>
+        Backup now
+      </md-button>
+      <md-button class="md-raised sync-from-btn"
+                 promise-btn
+                 ng-show="vm.GoogleApi.isLoggedIn"
+                 ng-click="vm.loadRemoteData()">
+        <ng-md-icon icon="backup"></ng-md-icon>
+        Load From GDrive
+      </md-button>
+      <md-button class="md-raised"
+                 ng-show="vm.GoogleApi.isLoggedIn"
+                 external-link
+                 target="_blank"
+                 href="https://myaccount.google.com/permissions">
+        <ng-md-icon icon="remove_circle"></ng-md-icon>
+        Revoke permissions
+      </md-button>
+    </div>
 
-  <div ng-show="vm.GoogleApi.isLoggedIn"
-       class="sync-file-wrapper">
-    <md-input-container class="md-block md-icon-float">
-      <label>Sync file name</label>
-      <ng-md-icon icon="file_upload"
-                  aria-label="file_upload"></ng-md-icon>
+    <div ng-show="vm.GoogleApi.isLoggedIn"
+         class="sync-file-wrapper">
+      <md-input-container class="md-block md-icon-float">
+        <label>Sync file name</label>
+        <ng-md-icon icon="file_upload"
+                    aria-label="file_upload"></ng-md-icon>
+        <input type="text"
+               ng-model="vm.tmpSyncFile">
+      </md-input-container>
+
+      <md-button class="md-raised md-primary md-icon-button"
+                 ng-click="vm.changeSyncFileName(vm.tmpSyncFile)">
+        <ng-md-icon icon="save"></ng-md-icon>
+      </md-button>
+    </div>
+
+    <div>
+      <md-switch ng-model="vm.settings.googleDriveSync.isAutoLogin"
+                 aria-label="Auto login at when starting app">
+        Auto login at when starting app
+      </md-switch>
+    </div>
+    <div ng-if="vm.settings.googleDriveSync.isAutoLogin">
+      <md-switch ng-model="vm.settings.googleDriveSync.isLoadRemoteDataOnStartup"
+                 aria-label="Load remote data on startup">
+        Load remote data on startup
+      </md-switch>
+    </div>
+    <div ng-if="vm.settings.googleDriveSync.isAutoLogin">
+      <md-switch ng-model="vm.settings.googleDriveSync.isAutoSyncToRemote"
+                 ng-change="vm.resetSync();"
+                 aria-label="Auto sync data TO remote">
+        Auto sync data TO remote
+      </md-switch>
+    </div>
+
+    <div ng-if="vm.settings.googleDriveSync.isAutoLogin">
+      <md-switch ng-model="vm.settings.googleDriveSync.isNotifyOnSync"
+                 aria-label="Notify when syncing">
+        Notify when syncing
+      </md-switch>
+    </div>
+
+    <md-input-container class="md-block md-icon-float"
+                        ng-show="vm.settings.googleDriveSync.isAutoLogin && vm.settings.googleDriveSync.isAutoSyncToRemote">
+      <label>Sync interval (sync every x)</label>
+      <ng-md-icon icon="timer"
+                  aria-label="timer"></ng-md-icon>
       <input type="text"
-             ng-model="vm.tmpSyncFile">
+             input-duration
+             ng-model-options="{ debounce: 250 }"
+             ng-change="vm.resetSync();"
+             ng-model="vm.settings.googleDriveSync.syncInterval">
     </md-input-container>
-
-    <md-button class="md-raised md-primary md-icon-button"
-               ng-click="vm.changeSyncFileName(vm.tmpSyncFile)">
-      <ng-md-icon icon="save"></ng-md-icon>
-    </md-button>
   </div>
-
-  <div>
-    <md-switch ng-model="vm.settings.googleDriveSync.isAutoLogin"
-               aria-label="Auto login at when starting app">
-      Auto login at when starting app
-    </md-switch>
-  </div>
-  <div ng-if="vm.settings.googleDriveSync.isAutoLogin">
-    <md-switch ng-model="vm.settings.googleDriveSync.isLoadRemoteDataOnStartup"
-               aria-label="Load remote data on startup">
-      Load remote data on startup
-    </md-switch>
-  </div>
-  <div ng-if="vm.settings.googleDriveSync.isAutoLogin">
-    <md-switch ng-model="vm.settings.googleDriveSync.isAutoSyncToRemote"
-               ng-change="vm.resetSync();"
-               aria-label="Auto sync data TO remote">
-      Auto sync data TO remote
-    </md-switch>
-  </div>
-
-  <div ng-if="vm.settings.googleDriveSync.isAutoLogin">
-    <md-switch ng-model="vm.settings.googleDriveSync.isNotifyOnSync"
-               aria-label="Notify when syncing">
-      Notify when syncing
-    </md-switch>
-  </div>
-
-  <md-input-container class="md-block md-icon-float"
-                      ng-show="vm.settings.googleDriveSync.isAutoLogin && vm.settings.googleDriveSync.isAutoSyncToRemote">
-    <label>Sync interval (sync every x)</label>
-    <ng-md-icon icon="timer"
-                aria-label="timer"></ng-md-icon>
-    <input type="text"
-           input-duration
-           ng-model-options="{ debounce: 250 }"
-           ng-change="vm.resetSync();"
-           ng-model="vm.settings.googleDriveSync.syncInterval">
-  </md-input-container>
-
 </section>
 
 <section ng-if="vm.IS_ELECTRON">
-  <h3 class="md-caption">Automatic Backups</h3>
+  <h3 class="md-subtitle">Automatic Backups</h3>
   <div>
     <md-switch ng-model="vm.settings.automaticBackups.isEnabled"
                aria-label="Enable automatic backups">
@@ -177,7 +181,7 @@
     </md-input-container>
   </div>
 
-  <h3 class="md-caption">Automatic Sync</h3>
+  <h3 class="md-subtitle">Automatic Sync</h3>
   <div>
     <md-switch ng-model="vm.settings.automaticBackups.isSyncEnabled"
                aria-label="Enable automatic backups">

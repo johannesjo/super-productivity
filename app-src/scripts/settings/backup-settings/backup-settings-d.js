@@ -59,6 +59,14 @@
       return GoogleApi.logout();
     };
 
+    vm.onGoogleDriveSyncToggle = (isEnabled) => {
+      if (isEnabled) {
+        GoogleDriveSync.resetAutoSyncToRemoteInterval();
+      } else {
+        GoogleDriveSync.cancelAutoSyncToRemoteIntervalIfSet();
+      }
+    };
+
     vm.resetSync = () => {
       GoogleDriveSync.resetAutoSyncToRemoteInterval();
     };

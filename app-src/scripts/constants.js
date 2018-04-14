@@ -136,6 +136,7 @@
       },
       config: {
         googleDriveSync: {
+          isEnabled: false,
           isAutoLogin: false,
           isLoadRemoteDataOnStartup: false,
           isAutoSyncToRemote: false,
