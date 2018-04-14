@@ -19,7 +19,18 @@
 
       if (IS_ELECTRON) {
         this.fs = require('fs');
+        this.os = require('os');
+        this.path = require('path');
       }
+    }
+
+    addHome(pathParam){
+      const pathParts = pathParam.split(this.path.sep);
+
+      if (pathParts[0] === '~') {
+        pathParts[0] = this.os.homedir();
+      }
+      return this.path.join(...pathParts);
     }
 
     initBackupsIfEnabled() {
@@ -51,8 +62,8 @@
     }
 
     loadFromFileSystem(path) {
-      if (this.fs.existsSync(path)) {
-        const data = JSON.parse(this.fs.readFileSync(path, 'utf-8'));
+      if (this.fs.existsSync(this.addHome(path))) {
+        const data = JSON.parse(this.fs.readFileSync(this.addHome(path), 'utf-8'));
         this.AppStorage.importData(data);
       }
     }
@@ -69,7 +80,7 @@
       this.loadFromFileSystem(path);
 
       // init load
-      this.fs.watchFile(this.$rootScope.r.config.automaticBackups.syncPath, (curr) => {
+      this.fs.watchFile(this.addHome(this.$rootScope.r.config.automaticBackups.syncPath), (curr) => {
         const newFileTime = curr && curr.ctime && moment(curr.ctime);
         const isOutsideChange = newFileTime.isAfter(moment(this.lastSyncSaveChangedTime));
 
@@ -90,7 +101,7 @@
 
     saveToFileSystem(path, cb, isSync) {
       const data = this.AppStorage.getCompleteBackupData();
-      this.fs.writeFile(path, JSON.stringify(data), { flag: 'w' }, (err) => {
+      this.fs.writeFile(this.addHome(path), JSON.stringify(data), { flag: 'w' }, (err) => {
         if (err) {
           console.error(err);
         } else {
@@ -125,7 +136,7 @@
         const path = this.$rootScope.r.config.automaticBackups.syncPath;
 
         this.saveToFileSystem(path, () => {
-          const stats = this.fs.statSync(path);
+          const stats = this.fs.statSync(this.addHome(path));
           this.lastSyncSaveChangedTime = stats.ctime;
         }, true);
       }, SYNC_INTERVAL);
