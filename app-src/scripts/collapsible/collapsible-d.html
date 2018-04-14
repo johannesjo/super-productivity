@@ -6,7 +6,7 @@
   <ng-md-icon ng-if="vm.icon"
               class="collapsible-icon"
               icon="{{::vm.icon}}"></ng-md-icon>
-  <md-button ng-if="vm.btnAction"
+  <md-button ng-if="::vm.btnIcon"
              class="md-icon-button "
              ng-click="vm.execAction($event)">
     <ng-md-icon icon="{{::vm.btnIcon}}"></ng-md-icon>
