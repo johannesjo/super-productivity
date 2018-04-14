@@ -48,7 +48,8 @@ collapsible {
     &.ng-animate {
       overflow: hidden !important;
 
-      * {
+      md-input-container,
+      md-input-container * {
         transition: none !important;
         animation-duration: 0s !important;
       }
