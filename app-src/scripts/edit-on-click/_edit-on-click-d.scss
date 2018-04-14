@@ -11,6 +11,7 @@
   caret-color: #000000;
   backface-visibility: hidden;
   transform: translateZ(0);
+  z-index: 4;
 
   @include dark-theme() {
     caret-color: #ffffff;
