@@ -75,6 +75,7 @@
     function setTypes() {
       vm.types = [
         { type: 'LINK', title: 'Link (opens in browser)' },
+        { type: 'IMG', title: 'Image (shown as thumbnail)' },
       ];
 
       if (IS_ELECTRON) {
@@ -87,11 +88,6 @@
 
       } else {
         vm.linkCopy.type = 'LINK';
-      }
-
-      if (vm.linkCopy && vm.linkCopy.path && vm.linkCopy.path.match(/(jpg|jpeg|png|gif)$/i)) {
-        vm.types.push({ type: 'IMG', title: 'Image (shown as thumbnail)' });
-        vm.linkCopy.type = 'IMG';
       }
     }
   }

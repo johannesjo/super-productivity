@@ -27,7 +27,12 @@
       } else {
         $element.removeClass('is-expanded');
       }
+    };
 
+    vm.execAction = ($ev) => {
+      $ev.preventDefault();
+      $ev.stopPropagation();
+      vm.btnAction();
     };
   }
 
@@ -43,7 +48,9 @@
       bindings: {
         title: '@collapsibleTitle',
         icon: '@',
-        isInitiallyExpanded: '@'
+        isInitiallyExpanded: '@',
+        btnAction: '&',
+        btnIcon: '@'
       }
     });
 })();

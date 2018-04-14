@@ -441,6 +441,10 @@
       }
     }
 
+    addLocalAttachment(task) {
+      this.Dialogs('EDIT_GLOBAL_LINK', { link: {}, isNew: true, task }, true);
+    }
+
     togglePlay(task) {
       if (this.currentTaskId === task.id) {
         this.Tasks.updateCurrent(undefined);

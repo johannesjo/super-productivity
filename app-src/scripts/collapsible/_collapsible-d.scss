@@ -16,6 +16,19 @@ collapsible {
     .collapsible-expand-icon {
       transition: all 200ms;
     }
+
+    .md-button {
+      margin-left: auto;
+      $this-button-size: 34px;
+      padding: 0;
+      height: $this-button-size;
+      width: $this-button-size;
+      min-width: $this-button-size;
+      min-height: $this-button-size;
+
+      // this fixes the original link button icon for some reason
+      line-height: $this-button-size + -1;
+    }
   }
 
   &.is-expanded {
