@@ -225,16 +225,16 @@
   }
 
   /* @ngInject */
-  function initAutomaticBackupsIfEnabled(IS_ELECTRON, AppStorage) {
+  function initAutomaticBackupsIfEnabled(IS_ELECTRON, LocalSync) {
     if (IS_ELECTRON) {
-      AppStorage.initBackupsIfEnabled();
+      LocalSync.initBackupsIfEnabled();
     }
   }
 
   /* @ngInject */
-  function initAutomaticSyncIfEnabled(IS_ELECTRON, AppStorage) {
+  function initAutomaticSyncIfEnabled(IS_ELECTRON, LocalSync) {
     if (IS_ELECTRON) {
-      AppStorage.initSyncIfEnabled();
+      LocalSync.initSyncIfEnabled();
     }
   }
 

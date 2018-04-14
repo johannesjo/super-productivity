@@ -39,88 +39,6 @@
       //}, 5);
     }
 
-    initBackupsIfEnabled() {
-      if (!this.IS_ELECTRON ||
-        !this.$rootScope.r.config.automaticBackups ||
-        !this.$rootScope.r.config.automaticBackups.isEnabled) {
-        return;
-      }
-      const fs = require('fs');
-      const interval = parseInt(this.$rootScope.r.config.automaticBackups.intervalInSeconds, 10) * 1000;
-
-      this.$interval(() => {
-        if (!this.$rootScope.r.config.automaticBackups ||
-          !this.$rootScope.r.config.automaticBackups.isEnabled ||
-          parseInt(this.$rootScope.r.config.automaticBackups.intervalInSeconds, 10) === 0 ||
-          !this.$rootScope.r.config.automaticBackups.path ||
-          this.$rootScope.r.config.automaticBackups.path.trim().length === 0
-        ) {
-          return;
-        }
-
-        const now = window.moment();
-        const path = this.$rootScope.r.config.automaticBackups.path
-          .replace('{date}', now.format('YYYY-MM-DD'))
-          .replace('{unix}', now.format('x'));
-
-        this.saveToFileSystem(fs, path);
-      }, interval);
-    }
-
-    initSyncIfEnabled() {
-      let lastSyncSaveChangedTime;
-      const SYNC_INTERVAL = 10000;
-      if (!this.IS_ELECTRON ||
-        !this.$rootScope.r.config.automaticBackups ||
-        !this.$rootScope.r.config.automaticBackups.isSyncEnabled) {
-        return;
-      }
-
-      const fs = require('fs');
-
-      // load once initially
-      const path = this.$rootScope.r.config.automaticBackups.syncPath;
-      this.loadFromFileSystem(fs, path);
-
-      // init load
-      fs.watchFile(this.$rootScope.r.config.automaticBackups.syncPath, (curr) => {
-        const newFileTime = curr && curr.ctime && moment(curr.ctime);
-        const isOutsideChange = newFileTime.isAfter(moment(lastSyncSaveChangedTime));
-
-        if (isOutsideChange) {
-          const path = this.$rootScope.r.config.automaticBackups.syncPath;
-          this.loadFromFileSystem(fs, path);
-        }
-      });
-
-      // init save
-      this.$interval(() => {
-        if (!this.$rootScope.r.config.automaticBackups ||
-          !this.$rootScope.r.config.automaticBackups.isSyncEnabled ||
-          parseInt(this.$rootScope.r.config.automaticBackups.intervalInSeconds, 10) === 0 ||
-          !this.$rootScope.r.config.automaticBackups.syncPath ||
-          this.$rootScope.r.config.automaticBackups.syncPath.trim().length === 0
-        ) {
-          return;
-        }
-
-        const path = this.$rootScope.r.config.automaticBackups.syncPath;
-
-        this.saveToFileSystem(fs, path, () => {
-          const stats = fs.statSync(path);
-          lastSyncSaveChangedTime = stats.ctime;
-        }, true);
-      }, SYNC_INTERVAL);
-    }
-
-    loadFromFileSystem(fs, path) {
-      if (fs.existsSync(path)) {
-        const data = JSON.parse(fs.readFileSync(path, 'utf-8'));
-        this.importData(data, true);
-        this.SimpleToast('CUSTOM', 'Data updated from the outside. Updating...', 'update');
-      }
-    }
-
     getCompleteBackupData() {
       const data = angular.copy(this.getCurrentAppState());
       // also add projects data
@@ -128,25 +46,6 @@
       // also add backlog tasks
       data[this.DONE_BACKLOG_TASKS_KEY] = this.getDoneBacklogTasks();
       return data;
-    }
-
-    saveToFileSystem(fs, path, cb, isSync) {
-      const data = this.getCompleteBackupData();
-      fs.writeFile(path, JSON.stringify(data), { flag: 'w' }, (err) => {
-        if (err) {
-          console.error(err);
-        } else {
-          if (isSync) {
-            console.log('Sync saved to ' + path + ' completed');
-          } else {
-            console.log('Backup to ' + path + ' completed');
-          }
-
-          if (cb) {
-            cb();
-          }
-        }
-      });
     }
 
     setupPollingForSavingCurrentState() {
@@ -213,7 +112,7 @@
     }
 
     importData(data) {
-      this.SimpleToast('INFO', 'Importing data.');
+      this.SimpleToast('CUSTOM', 'Data updated from the outside. Updating...', 'update');
 
       try {
         // cancel saving current app data to ls
