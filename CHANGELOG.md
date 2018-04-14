@@ -1,3 +1,38 @@
+<a name="1.10.14"></a>
+## [1.10.14](https://github.com/johannesjo/super-productivity/compare/v1.10.13...v1.10.14) (2018-04-14)
+
+
+### Bug Fixes
+
+* add missing aria attribute ([a3d2b5f](https://github.com/johannesjo/super-productivity/commit/a3d2b5f))
+* backup button not giving full back up for all projects ([f23da6a](https://github.com/johannesjo/super-productivity/commit/f23da6a))
+* collapsible button appearing everywhere ([4b2c801](https://github.com/johannesjo/super-productivity/commit/4b2c801))
+* custom toast not working ([df55b22](https://github.com/johannesjo/super-productivity/commit/df55b22))
+* edit on click for project settings ([3270ae1](https://github.com/johannesjo/super-productivity/commit/3270ae1))
+* google api toast appearance ([03d619f](https://github.com/johannesjo/super-productivity/commit/03d619f))
+* multiple scope events not being called correctly [#76](https://github.com/johannesjo/super-productivity/issues/76) ([1c07338](https://github.com/johannesjo/super-productivity/commit/1c07338))
+* prevent collapsible from overflowing ([b563e84](https://github.com/johannesjo/super-productivity/commit/b563e84))
+
+
+### Features
+
+* improve backup settings section [#76](https://github.com/johannesjo/super-productivity/issues/76) ([66c54eb](https://github.com/johannesjo/super-productivity/commit/66c54eb))
+* **enlargeImage:** also add zoom out ani ([34c11b4](https://github.com/johannesjo/super-productivity/commit/34c11b4))
+* add button to add local attachments to task list ([47e5e8b](https://github.com/johannesjo/super-productivity/commit/47e5e8b))
+* add counter to collapsible and for local attachments ([08339ad](https://github.com/johannesjo/super-productivity/commit/08339ad))
+* add manifest for better mobile experience ([4d8c7f8](https://github.com/johannesjo/super-productivity/commit/4d8c7f8))
+* add on the fly data syncing without reloads [#76](https://github.com/johannesjo/super-productivity/issues/76) ([d2b4828](https://github.com/johannesjo/super-productivity/commit/d2b4828))
+* add option to completely enable/disable Google Drive Sync [#76](https://github.com/johannesjo/super-productivity/issues/76) ([dce0140](https://github.com/johannesjo/super-productivity/commit/dce0140))
+* allow home tilde to be used in local backup and sync paths [#76](https://github.com/johannesjo/super-productivity/issues/76) ([96ab646](https://github.com/johannesjo/super-productivity/commit/96ab646))
+* improve edit on click out transition ([42297d3](https://github.com/johannesjo/super-productivity/commit/42297d3))
+* improve image zoom animation once more ([1a7640f](https://github.com/johannesjo/super-productivity/commit/1a7640f))
+* make app storage more efficient ([a2ef65f](https://github.com/johannesjo/super-productivity/commit/a2ef65f))
+* only disable md-input-container transitions for collapsible content ([bd41f1f](https://github.com/johannesjo/super-productivity/commit/bd41f1f))
+* prevent animations and transitions inside when collapsible is animating ([0df2337](https://github.com/johannesjo/super-productivity/commit/0df2337))
+* reintroduce dialog transitions ([1519851](https://github.com/johannesjo/super-productivity/commit/1519851))
+
+
+
 <a name="1.10.13"></a>
 ## [1.10.13](https://github.com/johannesjo/super-productivity/compare/v1.10.12...v1.10.13) (2018-04-13)
 
