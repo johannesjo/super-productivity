@@ -39,8 +39,15 @@ main-header {
       }
     }
 
+    $this-height: 48px;
+    md-toolbar {
+      min-height: $this-height;
+    }
+
     .md-toolbar-tools {
       padding: 0 0 0 8px;
+      height: $this-height;
+      max-height: $this-height;
     }
   }
 }
