@@ -1,7 +1,7 @@
 <md-button class="md-icon-button help-btn md-raised"
            aria-label="Show Help for section"
            ng-click="vm.isShowHelp =!vm.isShowHelp;">
-  <ng-md-icon icon="help_outline"></ng-md-icon>
+  <ng-md-icon icon="{{vm.isShowHelp ? 'close':'help_outline'}}"></ng-md-icon>
 </md-button>
 
 <div class="help-text ani-slide-up-down"
