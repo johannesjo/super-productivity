@@ -167,6 +167,14 @@
       const newCurrentProject = this.getWithLsDataById(newCurrentProjectParam.id);
 
       if (newCurrentProject && newCurrentProject.id && oldCurrentProject && oldCurrentProject.id !== newCurrentProject.id) {
+        // smooth up transition
+        const bodyEl = angular.element(document.body);
+        bodyEl.addClass('is-project-changing');
+        setTimeout(() => {
+          bodyEl.removeClass('is-project-changing');
+        });
+
+
         // when there is an old current project existing
         if (oldCurrentProject && oldCurrentProject.id) {
           // save all current project data in $rootScope.r.projects[oldProject]

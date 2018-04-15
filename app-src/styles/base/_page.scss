@@ -43,3 +43,33 @@ md-content {
     background: rgb(48, 48, 48) !important;
   }
 }
+
+html {
+  overflow: hidden;
+}
+
+body {
+  animation: 0.3s ani-app-enter $ease-in-out-quint;
+}
+
+body.is-project-changing {
+  display: none;
+
+  &,
+  * {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+@keyframes ani-app-enter {
+  0% {
+    opacity: 0;
+    transform: scale(1.7);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}

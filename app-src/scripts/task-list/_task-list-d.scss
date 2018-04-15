@@ -1,10 +1,13 @@
+// for drag and drop
+$this-min-height: 50px;
 task-list {
   display: block;
+  min-height: $this-min-height;
 }
 
 .task-list {
   text-align: left;
-  min-height: 50px;
+  min-height: $this-min-height;
   list-style: none;
   // add a little padding to top and bottom, to make drag dropping easier
   padding: 5px 0;
