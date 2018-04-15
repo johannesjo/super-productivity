@@ -19,6 +19,14 @@ main-header {
     justify-content: center;
   }
 
+  .project-switcher-btn {
+    margin-left: 0;
+    white-space: nowrap;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
   @media(max-width: $layout-xs) {
     md-menu,
     .sp-title {

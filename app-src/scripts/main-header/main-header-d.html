@@ -7,11 +7,13 @@
                aria-label="logo"></md-icon>
     </md-button>
 
-    <md-menu ng-if="r.currentProject">
+    <md-menu ng-if="r.currentProject"
+             md-offset="0 42">
       <md-button aria-label="Switch project"
                  title="Switch project"
+                 ng-bind="r.currentProject.title"
+                 class="project-switcher-btn"
                  ng-click="vm.openMenu($mdMenu.open, $event)">
-        <span ng-bind="r.currentProject.title"></span>
       </md-button>
       <md-menu-content width="4">
         <md-menu-item ng-repeat="project in vm.allProjects">
