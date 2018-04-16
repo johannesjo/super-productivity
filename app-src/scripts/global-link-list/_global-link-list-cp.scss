@@ -55,6 +55,7 @@
     visibility: hidden;
     display: flex;
     flex-direction: row;
+    // TODO fix that this causes an overflow
     padding: 0 10px;
     transform: translate(-50%, 0);
 
@@ -72,9 +73,11 @@
 
   $this-distance: 30px;
   .edit-button {
+    // TODO fix that this causes an overflow
     transform: translate(-$this-distance, $this-distance);
   }
   .trash-button {
+    // TODO fix that this causes an overflow
     transform: translate($this-distance, $this-distance);
   }
 }
