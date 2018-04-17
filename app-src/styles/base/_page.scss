@@ -50,6 +50,7 @@ html {
 
 body {
   animation: 0.3s ani-app-enter $ease-in-out-quint;
+  backface-visibility: hidden;
 }
 
 body.is-project-changing {

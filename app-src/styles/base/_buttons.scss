@@ -1,6 +1,7 @@
 md-button,
 button {
   text-align: center;
+  backface-visibility: hidden;
 
   &:hover {
 

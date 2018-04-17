@@ -107,6 +107,7 @@ md-input-container {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+  backface-visibility: hidden;
 
   ng-md-icon {
     width: $this-ico-size;
@@ -116,6 +117,7 @@ md-input-container {
     fill: $yellow;
     transform-origin: center center;
     animation: success-animation-sun #{$this-ani-style};
+    backface-visibility: hidden;
 
     svg {
       width: $this-ico-size;
