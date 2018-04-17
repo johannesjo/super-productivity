@@ -88,6 +88,9 @@ $task-inner-padding-left-right: 6px;
     margin-bottom: 0;
   }
 
+  &:focus {
+    outline: none;
+  }
   &.as-sortable-dragging,
   &:focus > .inner-wrapper {
     background: #eeeeee;
@@ -438,10 +441,11 @@ $task-inner-padding-left-right: 6px;
       }
     }
 
-    &.is-current > .inner-wrapper > .first-line {
+    &.is-current > .inner-wrapper {
       work-view & {
         transform: translateZ(0);
         backface-visibility: hidden;
+        animation: $transition-duration-s attention-for-current-task;
         animation: $transition-duration-s attention-for-current-task;
       }
       [ui-view].ng-enter & {
@@ -485,13 +489,12 @@ $task-inner-padding-left-right: 6px;
   }
 }
 
-
 @keyframes attention-for-current-task {
   0% {
     transform: scale(1);
   }
-  70% {
-    transform: scale(1.01, 1.1);
+  50% {
+    transform: scale(0.97);
   }
   100% {
     transform: scale(1);
