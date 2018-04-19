@@ -195,7 +195,7 @@ $task-inner-padding-left-right: 6px;
       text-align: center;
       overflow: hidden;
       position: relative;
-      transition: 0.1s !important;
+      z-index: 4;
 
       // theming
       border: 1px solid #dddddd;
@@ -213,6 +213,12 @@ $task-inner-padding-left-right: 6px;
       @include dark-theme {
         background: $dark-theme-bg-darker !important;
         border: 1px solid $dark-theme-bg;
+      }
+
+      transition: transform $transition-duration-s ease-out;
+      &:hover {
+        z-index: 5;
+        transform: scale(1.15);
       }
 
       @at-root {
@@ -445,7 +451,6 @@ $task-inner-padding-left-right: 6px;
       work-view & {
         transform: translateZ(0);
         backface-visibility: hidden;
-        animation: $transition-duration-s attention-for-current-task;
         animation: $transition-duration-s attention-for-current-task;
       }
       [ui-view].ng-enter & {
