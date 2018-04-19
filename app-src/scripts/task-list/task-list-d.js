@@ -301,6 +301,9 @@
       }
       if (this.checkKeyCombo($ev, lsKeys.taskAddSubTask)) {
         this.addSubTask(task);
+        // allow for same keyboard shortcut with the global add task
+        $ev.preventDefault();
+        $ev.stopPropagation();
       }
       if (this.checkKeyCombo($ev, lsKeys.moveToBacklog)) {
         this.Tasks.moveTaskFromTodayToBackLog(task);
