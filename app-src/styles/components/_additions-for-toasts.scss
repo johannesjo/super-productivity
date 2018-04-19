@@ -19,7 +19,8 @@ md-toast .md-toast-content {
   }
 
   .md-button {
-    flex: 0;
+    flex: 0 0 25%;
+    text-overflow: ellipsis;
     min-width: 88px;
     margin-top: 0;
     margin-bottom: 0;
