@@ -32,16 +32,21 @@
       // handle paste
       $document[0].onpaste = (ev) => {
         const link = this.GlobalLinkList.createLinkFromPaste(ev);
-        this.handleLinkInput(link, ev);
+        this.handleLinkInput(link, ev, true);
         //  const html = e.clipboardData.getData('text/html');
       };
     }
 
-    handleLinkInput(link, ev) {
+    handleLinkInput(link, ev, isPaste) {
       // don't intervene with text inputs
-      if (ev.target.tagName === 'INPUT' || ev.target.tagName === 'TEXTAREA' || ev.target.getAttribute('contenteditable')) {
+      if (ev.target.tagName === 'INPUT' || ev.target.tagName === 'TEXTAREA') {
         return;
       }
+      // only block on paste
+      if (ev.target.getAttribute('contenteditable') && isPaste) {
+        return;
+      }
+
       // properly not intentional so we leave
       if (!link.path) {
         return;
@@ -51,6 +56,7 @@
       const taskEl = ev.target.closest('.task');
       const markdownEl = ev.target.closest('inline-markdown');
       const isImagePath = link.path.match(/jpg|png/);
+      console.log(focusModeEl, taskEl);
 
       if (focusModeEl) {
         const task = this.Tasks.getCurrent() || this.Tasks.getLastCurrent();
