@@ -82,7 +82,7 @@
 
       ev.preventDefault();
       ev.stopPropagation();
-      this.$scope.$apply();
+      this.$scope.$evalAsync();
     }
 
     handleImageDrop(link, task) {
