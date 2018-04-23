@@ -64,8 +64,7 @@
 
   function linkFn(scope, el, attrs, ngModel) {
     let lastVal;
-    // to do this better
-    setTimeout(() => {
+    scope.$evalAsync(() => {
       lastVal = removeTags(el.html());
     });
 
@@ -109,11 +108,11 @@
     };
 
     el.bind('input', () => {
-      scope.$apply(read);
+      scope.$evalAsync(read);
     });
 
     el.bind('blur', (ev) => {
-      scope.$apply(read);
+      scope.$evalAsync(read);
       execCb(ev);
     });
 
@@ -146,7 +145,7 @@
       const text = ev.clipboardData.getData('text/plain')
         .trim();
       insertAtCursor(el[0], text);
-      scope.$apply(read);
+      scope.$evalAsync(read);
     };
 
     function clickToggleEvHandler(ev, eventId) {
