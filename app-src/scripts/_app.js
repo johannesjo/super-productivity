@@ -38,6 +38,7 @@
     .config(configMarked)
     .config(fixUnhandledRejectionError)
     .config(configPromiseButtons)
+    .config(initPerformanceOptimizations)
     .run(initGlobalModels)
     .run(initPollJiraTaskUpdates)
     .run(initPollGitTaskUpdates)
@@ -55,6 +56,14 @@
     .run(initUnloadActions)
     .run(initInputFocusFixForAndroid)
     .run(initElectronOnBeforeQuit);
+
+  /* @ngInject */
+  function initPerformanceOptimizations($httpProvider, $compileProvider) {
+    $httpProvider.useApplyAsync(true);
+    //$compileProvider.debugInfoEnabled(false);
+    $compileProvider.cssClassDirectivesEnabled(false);
+    $compileProvider.commentDirectivesEnabled(false);
+  }
 
   /* @ngInject */
   function configPromiseButtons(angularPromiseButtonsProvider) {
