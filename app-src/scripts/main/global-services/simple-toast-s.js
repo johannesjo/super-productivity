@@ -9,6 +9,8 @@
 (function() {
   'use strict';
 
+  const MINIMAL_TIMEOUT_DURATION = 10;
+
   angular
     .module('superProductivity')
     .service('SimpleToast', SimpleToast);
@@ -25,11 +27,13 @@
       }
 
       if (!type) {
-        $mdToast.show($mdToast.simple()
-          .textContent(textContent)
-          .capsule(false)
-          .hideDelay(hideDelay || DEFAULT_HIDE_DELAY)
-          .position('bottom'));
+        setTimeout(() => {
+          $mdToast.show($mdToast.simple()
+            .textContent(textContent)
+            .capsule(false)
+            .hideDelay(hideDelay || DEFAULT_HIDE_DELAY)
+            .position('bottom'));
+        }, MINIMAL_TIMEOUT_DURATION);
       } else {
         let iconColor;
 
@@ -65,8 +69,9 @@
             icon = icon || 'info';
         }
 
-        $mdToast.show({
-          template: `
+        setTimeout(() => {
+          $mdToast.show({
+            template: `
 <md-toast>
   <div class="md-toast-content">
     <ng-md-icon icon="${icon}" ${iconColor && 'style="fill:' + iconColor + '"'}></ng-md-icon> 
@@ -74,8 +79,10 @@
   </div>          
 </md-toast>
           `,
-          hideDelay: hideDelay || DEFAULT_HIDE_DELAY
-        });
+            hideDelay: hideDelay || DEFAULT_HIDE_DELAY
+          });
+        }, MINIMAL_TIMEOUT_DURATION);
+
       }
     };
   }
