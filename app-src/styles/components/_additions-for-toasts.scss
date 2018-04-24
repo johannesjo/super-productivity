@@ -5,13 +5,13 @@ md-toast .md-toast-content {
   padding-bottom: 3px;
   min-height: 38px;
 
-  ng-md-icon:first-child {
-    flex: 0;
+  .icon-wrapper {
     margin: 0 10px 0 0;
   }
 
   .toast-text {
     flex: 1;
+    min-width: 50%;
   }
 
   .md-button:last-child {
@@ -19,7 +19,6 @@ md-toast .md-toast-content {
   }
 
   .md-button {
-    flex: 0 0 25%;
     text-overflow: ellipsis;
     min-width: 88px;
     margin-top: 0;

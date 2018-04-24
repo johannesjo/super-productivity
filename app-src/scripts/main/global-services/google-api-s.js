@@ -399,10 +399,12 @@
         },
         template: `
 <md-toast>
-  <div class="md-toast-text" flex>
-        <ng-md-icon icon="${icon}" style="fill:${iconColor}"></ng-md-icon>
-        <div class="toast-text">${msg}</div> 
-        <md-button ng-click="login()">Login</md-button>
+  <div class="md-toast-content">
+    <div class="icon-wrapper">
+      <ng-md-icon icon="${icon}" style="fill:${iconColor}"></ng-md-icon>
+    </div>
+    <div class="toast-text">${msg}</div> 
+    <md-button ng-click="login()">Login</md-button>
   </div>
 </md-toast>`
       });
