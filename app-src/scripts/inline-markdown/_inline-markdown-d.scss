@@ -9,11 +9,17 @@ inline-markdown {
   display: block;
   box-sizing: border-box;
   border: none;
-  resize: both;
+  resize: vertical;
   overflow: auto;
   position: relative;
   cursor: text;
+  background: #fbefdd;
   transition: min-height .2s $ease-in-out-quint;
+
+  @include dark-theme {
+    background-color: $dark-theme-bg;
+    color: #eeeeee;
+  }
 
   &.is-editing {
     min-height: 160px;
@@ -24,6 +30,16 @@ inline-markdown {
     right: 14px;
     top: 0;
     cursor: pointer;
+  }
+
+  .edit-container {
+    height: 100%;
+  }
+
+  .lock-edit-btn {
+    position: absolute;
+    right: 0;
+    bottom: 2px;
   }
 }
 
@@ -39,9 +55,8 @@ inline-markdown {
   overflow: auto;
   height: 100%;
   box-sizing: border-box;
-  background: #fbefdd;
+  background: transparent;
   @include dark-theme {
-    background-color: $dark-theme-bg;
     color: #eeeeee;
   }
 }

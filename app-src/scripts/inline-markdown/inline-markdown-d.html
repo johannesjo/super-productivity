@@ -1,9 +1,16 @@
 <div class="markdown-wrapper">
-  <textarea ng-if="vm.showEdit"
-            ng-model-options="{ debounce: 30 }"
-            ng-blur="vm.untoggleShowEdit()"
-            class="md-body-1 markdown-unparsed"
-            rows="5"></textarea>
+  <div ng-if="vm.showEdit"
+       class="edit-container">
+    <textarea ng-model-options="{ debounce: 30 }"
+              ng-blur="vm.untoggleShowEdit()"
+              class="md-body-1 markdown-unparsed"
+              rows="5"></textarea>
+    <md-button class="md-icon-button lock-edit-btn"
+               aria-label="Lock edit mode"
+               ng-mousedown="vm.toggleEditLock($event)">
+      <ng-md-icon icon="{{vm.isLocked ? 'lock_outline':'lock_open'}}"></ng-md-icon>
+    </md-button>
+  </div>
 
   <marked-preview marked="vm.ngModel"
                   ng-show="!vm.showEdit"

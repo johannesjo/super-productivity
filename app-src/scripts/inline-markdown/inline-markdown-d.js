@@ -60,8 +60,6 @@
     }
 
     function stopPropagation(ev) {
-      console.log('STOP');
-
       ev.stopPropagation();
     }
 
@@ -73,7 +71,7 @@
 
     vm.toggleShowEdit = ($event) => {
       // check if anchor link was clicked
-      if ($event.target.tagName !== 'A') {
+      if ($event && $event.target.tagName !== 'A') {
         vm.showEdit = true;
         ngModelCopy = vm.ngModel || '';
 
@@ -97,11 +95,27 @@
 
     };
 
+    vm.toggleEditLock = ($event) => {
+      vm.isLocked = !vm.isLocked;
+
+      if (vm.isLocked) {
+        $event.preventDefault();
+        $event.stopPropagation();
+      } else {
+        vm.untoggleShowEdit();
+      }
+    };
+
     vm.untoggleShowEdit = () => {
       ngModelCopy = textareaEl[0].value;
-      vm.showEdit = false;
-      makeLinksWorkForElectron();
-      vm.resizeToFit();
+
+      if (!vm.isLocked) {
+        vm.showEdit = false;
+        makeLinksWorkForElectron();
+        vm.resizeToFit();
+        wrapperEl.removeClass('is-editing');
+      }
+
       const isChanged = (ngModelCopy !== vm.ngModel);
 
       if (isChanged) {
@@ -114,8 +128,6 @@
           isChanged: isChanged
         });
       }
-
-      wrapperEl.removeClass('is-editing');
     };
 
     vm.resizeToFit = () => {
