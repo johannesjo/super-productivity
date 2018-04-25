@@ -139,7 +139,6 @@
 
     [EV.PROJECT_CHANGED, EV.COMPLETE_DATA_RELOAD].forEach((EV) => {
       $scope.$on(EV, () => {
-        console.log('I am here!');
         init();
       });
     });
