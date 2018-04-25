@@ -48,7 +48,7 @@
       }
 
       // properly not intentional so we leave
-      if (!link.path) {
+      if (!link || !link.path) {
         return;
       }
 
