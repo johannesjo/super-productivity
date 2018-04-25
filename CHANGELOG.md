@@ -1,3 +1,37 @@
+<a name="1.10.15"></a>
+## [1.10.15](https://github.com/johannesjo/super-productivity/compare/v1.10.14...v1.10.15) (2018-04-25)
+
+
+### Bug Fixes
+
+* add missing aria attribute ([ad5d226](https://github.com/johannesjo/super-productivity/commit/ad5d226))
+* dropping links on task title edit area not working ([292385e](https://github.com/johannesjo/super-productivity/commit/292385e))
+* make toasts look a little better ([901c397](https://github.com/johannesjo/super-productivity/commit/901c397))
+* toasts once more ([3e61911](https://github.com/johannesjo/super-productivity/commit/3e61911))
+* unit test ([6f45276](https://github.com/johannesjo/super-productivity/commit/6f45276))
+* use eval async for global link list ([cb575c9](https://github.com/johannesjo/super-productivity/commit/cb575c9))
+* use eval async where possible to prevent digest errors ([fe6b4e6](https://github.com/johannesjo/super-productivity/commit/fe6b4e6))
+* **globalLinks:** error when copying empty clipboard ([d041844](https://github.com/johannesjo/super-productivity/commit/d041844))
+* **taskList:** rotate icon instead of button ([6c3851e](https://github.com/johannesjo/super-productivity/commit/6c3851e))
+
+
+### Features
+
+* add backface-visibility: hidden to prevent flicker ([4eb6430](https://github.com/johannesjo/super-productivity/commit/4eb6430))
+* add general performance optimizations for angularjs ([ba8407d](https://github.com/johannesjo/super-productivity/commit/ba8407d))
+* add global error handler to notify the user ([98bdd47](https://github.com/johannesjo/super-productivity/commit/98bdd47))
+* add lock edit mode feature to task notes ([03cae43](https://github.com/johannesjo/super-productivity/commit/03cae43))
+* add minimal hover transition for icon buttons ([551d217](https://github.com/johannesjo/super-productivity/commit/551d217))
+* add minimal timeout to simple toast to make it run more smoothly ([3501b16](https://github.com/johannesjo/super-productivity/commit/3501b16))
+* allow global add task and add sub task to have the same shortcut ([f30a562](https://github.com/johannesjo/super-productivity/commit/f30a562))
+* improve project switcher button ([5f28f00](https://github.com/johannesjo/super-productivity/commit/5f28f00))
+* improve task started animation ([0efea2a](https://github.com/johannesjo/super-productivity/commit/0efea2a))
+* make changing projects much smoother ([1560acb](https://github.com/johannesjo/super-productivity/commit/1560acb))
+* make header a little smaller for mobile ([8b0ded2](https://github.com/johannesjo/super-productivity/commit/8b0ded2))
+* show x icon when help section is open ([05518a7](https://github.com/johannesjo/super-productivity/commit/05518a7))
+
+
+
 <a name="1.10.14"></a>
 ## [1.10.14](https://github.com/johannesjo/super-productivity/compare/v1.10.13...v1.10.14) (2018-04-14)
 
