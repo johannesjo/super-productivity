@@ -315,6 +315,9 @@
       if (this.checkKeyCombo($ev, lsKeys.togglePlay)) {
         this.expandSubTasks(task);
         this.togglePlay(task);
+        // stop propagation to prevent from occurring twice (important to allow global keyboard shortcuts)
+        $ev.preventDefault();
+        $ev.stopPropagation();
       }
 
       if (this.checkKeyCombo($ev, lsKeys.taskDelete)) {
@@ -449,6 +452,11 @@
     }
 
     togglePlay(task) {
+      // TODO maybe move instead
+      if (task.isDone) {
+        return;
+      }
+
       if (this.currentTaskId === task.id) {
         this.Tasks.updateCurrent(undefined);
       } else {
@@ -458,6 +466,8 @@
             this.Tasks.updateCurrent(firstUndone);
           }
         } else {
+          console.log('I am here!');
+
           this.Tasks.updateCurrent(task);
         }
       }
