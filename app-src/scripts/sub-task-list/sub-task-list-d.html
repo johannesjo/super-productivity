@@ -10,7 +10,7 @@
 </md-button>
 <task-list tasks="vm.task.subTasks"
            class="ani-slide-up-down"
-           ng-if="!vm.task.isHideSubTasks"
+           ng-show="!vm.task.isHideSubTasks"
            allow-task-selection="{{vm.allowTaskSelection}}"
            current-task-id="vm.currentTaskId"
            is-sub-tasks-disabled="true"
