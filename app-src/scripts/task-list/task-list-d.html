@@ -10,8 +10,7 @@
       }"
        ng-repeat="task in $ctrl.tasks|limitTo:$ctrl.limitTo|filter:$ctrl.filter track by task.id"
        tabindex="1"
-       ng-focus="$ctrl.onFocus($event)"
-       ng-blur="$ctrl.onBlur($event)">
+       ng-focus="$ctrl.onFocus($event)">
 
     <div class="inner-wrapper">
 

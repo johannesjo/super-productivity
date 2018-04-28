@@ -42,13 +42,15 @@
       this.Util = Util;
       // this.selectCurrentTaskTimeout;
 
-      this.boundHandleKeyPress = this.handleKeyPress.bind(this);
+      this.boundHandleKeyDown = this.handleKeyDown.bind(this);
       this.boundFocusLastTaskEl = this.focusLastFocusedTaskEl.bind(this);
+      this.$element[0].addEventListener('keydown', this.boundHandleKeyDown);
     }
 
     $onDestroy() {
       this.$timeout.cancel(this.animationReadyTimeout);
       this.$timeout.cancel(this.selectCurrentTaskTimeout);
+      this.$element[0].removeEventListener('keydown', this.boundHandleKeyDown);
     }
 
     $onInit() {
@@ -262,19 +264,14 @@
       let taskEl = $event.currentTarget || $event.srcElement || $event.originalTarget;
       taskEl = angular.element(taskEl);
       this.lastFocusedTaskEl = taskEl;
-      taskEl.on('keydown', this.boundHandleKeyPress);
     }
 
-    onBlur($event) {
-      let taskEl = $event.currentTarget || $event.srcElement || $event.originalTarget;
+    handleKeyDown($ev) {
+      // TODO check for closest parent if not task el
+      let taskEl = $ev.srcElement;
       taskEl = angular.element(taskEl);
-      taskEl.off('keydown', this.boundHandleKeyPress);
-    }
 
-    handleKeyPress($ev) {
-      let taskEl = $ev.currentTarget || $ev.srcElement || $ev.originalTarget;
-      taskEl = angular.element(taskEl);
-      const task = this.lastFocusedTaskEl.scope().modelValue;
+      const task = taskEl.scope().modelValue;
       const lsKeys = this.$rootScope.r.keys;
       const isShiftOrCtrlPressed = ($ev.shiftKey === false && $ev.ctrlKey === false);
       const getTaskIndex = () => {
