@@ -37,7 +37,7 @@
     const wrapperEl = $element.children();
 
     const keypressHandler = ($event) => {
-      if ($event.keyCode === 10 && $event.ctrlKey) {
+      if ($event.keyCode === 10 && $event.ctrlKey || $event.keyCode === 27) {
         vm.untoggleShowEdit();
       }
     };
