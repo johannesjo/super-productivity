@@ -3,9 +3,9 @@
     <md-button class="md-raised md-icon-button md-primary md-hue-3"
                md-whiteframe="1"
                ng-click="$ctrl.addLink()"
-               tabindex="1">
-      <ng-md-icon icon="add"
-                  aria-label="add global link"></ng-md-icon>
+               tabindex="1"
+               aria-label="add global link">
+      <ng-md-icon icon="add"></ng-md-icon>
     </md-button>
   </div>
 
@@ -41,9 +41,9 @@
 
     <div class="controls">
       <md-button class="md-icon-button md-raised md-primary md-hue-3 edit-button"
+                 aria-label="open edit dialog"
                  ng-click="$ctrl.openEditDialog(link)">
-        <ng-md-icon icon="edit"
-                    aria-label="edit link"></ng-md-icon>
+        <ng-md-icon icon="edit"></ng-md-icon>
       </md-button>
       <md-button class="md-icon-button md-raised md-warn md-hue-3 trash-button"
                  ng-click="$ctrl.remove($index)"

@@ -3,7 +3,8 @@
     <div class="item"><span class="label">Working today:</span>
       <span class="no-wrap">
       <strong ng-bind="vm.totalTimeWorkedToday|duration"></strong>
-      <ng-md-icon icon="timer"></ng-md-icon>
+      <ng-md-icon icon="timer"
+                  aria-label="timer icon"></ng-md-icon>
       </span>
     </div>
 
@@ -23,16 +24,16 @@
       </span>
     </div>
     <md-button ng-click="vm.isHideControls = !(vm.isHideControls);"
-               class="md-icon-button md-primary">
+               class="md-icon-button md-primary"
+               aria-label="collapse sub tasks and notes">
       <ng-md-icon icon="vertical_align_center"
-                  class="hide-controls-icon"
-                  aria-label="collapse sub tasks and notes"></ng-md-icon>
+                  class="hide-controls-icon"></ng-md-icon>
     </md-button>
 
     <md-button ng-click="vm.collapseAllNotesAndSubTasks()"
-               class="md-icon-button md-primary">
-      <ng-md-icon icon="vertical_align_center"
-                  aria-label="collapse sub tasks and notes"></ng-md-icon>
+               class="md-icon-button md-primary"
+               aria-label="collapse sub tasks and notes">
+      <ng-md-icon icon="vertical_align_center"></ng-md-icon>
     </md-button>
   </div>
 </header>
