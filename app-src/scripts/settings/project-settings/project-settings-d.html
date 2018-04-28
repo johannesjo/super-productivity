@@ -25,6 +25,7 @@
         <ng-md-icon icon="edit"
                     aria-label="edit"></ng-md-icon>
         <span edit-on-click
+              contenteditable="true"
               ng-model="project.title"
               class="title"
               edit-on-click-on-edit-finished="vm.updateProjectTitle(project.id, newVal)"></span>

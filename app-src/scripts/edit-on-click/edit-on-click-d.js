@@ -68,7 +68,10 @@
       lastVal = removeTags(el.html());
     });
 
-    el[0].setAttribute('contenteditable', true);
+    // ideally we set the attribute manually to minimize performance loss
+    if (!!(el[0].getAttribute('contenteditable')) !== true) {
+      el[0].setAttribute('contenteditable', true);
+    }
 
     function execCb(event) {
       // deselect all text

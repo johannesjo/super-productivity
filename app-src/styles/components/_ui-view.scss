@@ -7,6 +7,17 @@
   transform: translateZ(0);
 }
 
+[ui-view] {
+  // disable all other animations for performance gains
+  &.ng-enter,
+  &.ng-leave {
+    * {
+      animation: none !important;
+      transition: none !important;
+    }
+  }
+}
+
 $this-transition-duration: $page-transition-duration;
 [ui-view].ng-enter {
   transition: all $this-transition-duration $ease-in-out-quint;

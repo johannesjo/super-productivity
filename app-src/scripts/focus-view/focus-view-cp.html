@@ -64,6 +64,7 @@
         ng-bind="vm.parentTitle"
         ng-if="vm.parentTitle"></h3>
     <h2 edit-on-click
+        contenteditable="true"
         ng-model="vm.task.title"
         ng-class="{'is-done':vm.task.isDone}"
         class="title"></h2>
