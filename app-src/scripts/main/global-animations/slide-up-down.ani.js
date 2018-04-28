@@ -20,43 +20,52 @@
 
   /* @ngInject */
   function slideAnimation($animateCss) {
+
+    function show($el) {
+      const el = $el[0];
+      //const sh = el.scrollHeight;
+      const height = el.offsetHeight;
+      return $animateCss($el, {
+        from: {
+          height: '0',
+          transform: 'scaleY(0)',
+        },
+        to: {
+          height: height + 'px',
+          transform: 'scaleY(1)',
+        },
+        duration: animationSpeed(height),
+        easing: EASE,
+        cleanupStyles: true
+      });
+    }
+
+    function hide($el) {
+      const el = $el[0];
+      //const sh = el.scrollHeight;
+      const height = el.offsetHeight;
+      return $animateCss($el, {
+        from: {
+          height: height + 'px',
+          transform: 'scaleY(1)'
+        },
+        to: {
+          height: '0',
+          transform: 'scaleY(0)'
+        },
+        duration: animationSpeed(height),
+        easing: EASE,
+        cleanupStyles: true
+      });
+    }
+
     return {
-      enter: function($el) {
-        const el = $el[0];
-        //const sh = el.scrollHeight;
-        const height = el.offsetHeight;
-        return $animateCss($el, {
-          from: {
-            height: '0',
-            transform: 'scaleY(0)',
-          },
-          to: {
-            height: height + 'px',
-            transform: 'scaleY(1)',
-          },
-          duration: animationSpeed(height),
-          easing: EASE,
-          cleanupStyles: true
-        });
-      },
-      leave: ($el) => {
-        const el = $el[0];
-        //const sh = el.scrollHeight;
-        const height = el.offsetHeight;
-        return $animateCss($el, {
-          from: {
-            height: height + 'px',
-            transform: 'scaleY(1)'
-          },
-          to: {
-            height: '0',
-            transform: 'scaleY(0)'
-          },
-          duration: animationSpeed(height),
-          easing: EASE,
-          cleanupStyles: true
-        });
-      }
+      enter: show,
+      leave: hide,
+
+      // todo maybe check if it was the right class
+      addClass: hide,
+      removeClass: show,
     };
   }
 }());
