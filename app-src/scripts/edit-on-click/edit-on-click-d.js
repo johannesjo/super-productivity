@@ -69,7 +69,7 @@
     });
 
     // ideally we set the attribute manually to minimize performance loss
-    if (!!(el[0].getAttribute('contenteditable')) !== true) {
+    if (!(el[0].getAttribute('contenteditable'))) {
       el[0].setAttribute('contenteditable', true);
     }
 
