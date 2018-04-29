@@ -271,6 +271,7 @@
       let taskEl = $ev.srcElement;
       taskEl = angular.element(taskEl);
 
+      let isTaskKeyboardShortcutTriggered = false;
       const task = taskEl.scope().modelValue;
       const lsKeys = this.$rootScope.r.keys;
       const isShiftOrCtrlPressed = ($ev.shiftKey === false && $ev.ctrlKey === false);
@@ -281,11 +282,12 @@
       };
 
       if (this.checkKeyCombo($ev, lsKeys.taskEditTitle) || $ev.key === 'Enter') {
+        isTaskKeyboardShortcutTriggered = true;
         this.$scope.$broadcast(this.EDIT_ON_CLICK_TOGGLE_EV, task.id);
       }
       if (this.checkKeyCombo($ev, lsKeys.taskToggleNotes)) {
+        isTaskKeyboardShortcutTriggered = true;
         task.showNotes = !task.showNotes;
-
         if (task.showNotes) {
           this.$timeout(() => {
             taskEl.find('marked-preview').focus();
@@ -293,69 +295,60 @@
         }
       }
       if (this.checkKeyCombo($ev, lsKeys.taskOpenEstimationDialog)) {
+        isTaskKeyboardShortcutTriggered = true;
         this.estimateTime(task);
       }
       if (this.checkKeyCombo($ev, lsKeys.taskToggleDone)) {
+        isTaskKeyboardShortcutTriggered = true;
         task.isDone = !task.isDone;
         this.onTaskDoneChanged(task);
       }
       if (this.checkKeyCombo($ev, lsKeys.taskAddSubTask)) {
-        this.addSubTask(task);
         // allow for same keyboard shortcut with the global add task
-        $ev.preventDefault();
-        $ev.stopPropagation();
+        isTaskKeyboardShortcutTriggered = true;
+        this.addSubTask(task);
       }
       if (this.checkKeyCombo($ev, lsKeys.moveToBacklog)) {
+        isTaskKeyboardShortcutTriggered = true;
         this.Tasks.moveTaskFromTodayToBackLog(task);
       }
       if (this.checkKeyCombo($ev, lsKeys.taskOpenOriginalLink)) {
+        isTaskKeyboardShortcutTriggered = true;
         this.Util.openExternalUrl(task.originalLink);
       }
 
       if (this.checkKeyCombo($ev, lsKeys.togglePlay)) {
+        isTaskKeyboardShortcutTriggered = true;
         this.expandSubTasks(task);
         this.togglePlay(task);
-        // stop propagation to prevent from occurring twice (important to allow global keyboard shortcuts)
-        $ev.preventDefault();
-        $ev.stopPropagation();
       }
 
       if (this.checkKeyCombo($ev, lsKeys.taskDelete)) {
+        isTaskKeyboardShortcutTriggered = true;
         this.deleteTask(task);
-        // don't propagate to next focused element (important to allow global keyboard shortcuts)
-        $ev.preventDefault();
-        $ev.stopPropagation();
       }
       if (this.checkKeyCombo($ev, lsKeys.moveToTodaysTasks)) {
+        isTaskKeyboardShortcutTriggered = true;
         this.Tasks.moveTaskFromBackLogToToday(task);
       }
 
       // move focus up
       if ((isShiftOrCtrlPressed && $ev.keyCode === KEY_UP) || this.checkKeyCombo($ev, lsKeys.selectPreviousTask)) {
+        isTaskKeyboardShortcutTriggered = true;
         this.focusPrevTask(taskEl);
-
-        // stop propagation to prevent from occurring twice (important to allow global keyboard shortcuts)
-        $ev.preventDefault();
-        $ev.stopPropagation();
       }
       // move focus down
       if ((isShiftOrCtrlPressed && $ev.keyCode === KEY_DOWN) || this.checkKeyCombo($ev, lsKeys.selectNextTask)) {
+        isTaskKeyboardShortcutTriggered = true;
         this.focusNextTask(taskEl);
-
-        // stop propagation to prevent from occurring twice (important to allow global keyboard shortcuts)
-        $ev.preventDefault();
-        $ev.stopPropagation();
       }
 
       // expand sub tasks
       if (($ev.keyCode === KEY_RIGHT) || this.checkKeyCombo($ev, lsKeys.expandSubTasks)) {
+        isTaskKeyboardShortcutTriggered = true;
         // if already opened or is sub task select next task
         if ((task.subTasks && task.subTasks.length > 0 && task.isHideSubTasks === false) || this.parentTask) {
           this.focusNextTask(taskEl);
-
-          // stop propagation to prevent from occurring twice (important to allow global keyboard shortcuts)
-          $ev.preventDefault();
-          $ev.stopPropagation();
         }
 
         this.expandSubTasks(task);
@@ -363,6 +356,7 @@
 
       // collapse sub tasks
       if (($ev.keyCode === KEY_LEFT) || this.checkKeyCombo($ev, lsKeys.collapseSubTasks)) {
+        isTaskKeyboardShortcutTriggered = true;
         if (task.subTasks && task.subTasks.length > 0) {
           this.collapseSubTasks(task);
         }
@@ -374,6 +368,7 @@
       // moving items
       // move task up
       if (this.checkKeyCombo($ev, lsKeys.moveTaskUp)) {
+        isTaskKeyboardShortcutTriggered = true;
         const taskIndex = getTaskIndex();
         if (taskIndex > 0) {
           TaskListCtrl.moveItem(this.tasks, taskIndex, taskIndex - 1);
@@ -386,14 +381,20 @@
       }
       // move task down
       if (this.checkKeyCombo($ev, lsKeys.moveTaskDown)) {
+        isTaskKeyboardShortcutTriggered = true;
         const taskIndex = getTaskIndex();
         if (taskIndex < this.tasks.length - 1) {
           TaskListCtrl.moveItem(this.tasks, taskIndex, taskIndex + 1);
         }
       }
 
-      // finally apply
-      this.$scope.$apply();
+      if (isTaskKeyboardShortcutTriggered) {
+        $ev.preventDefault();
+        $ev.stopPropagation();
+
+        // finally apply
+        this.$scope.$apply();
+      }
     }
 
     expandSubTasks(task) {
