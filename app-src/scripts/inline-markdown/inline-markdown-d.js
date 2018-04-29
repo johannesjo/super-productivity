@@ -36,8 +36,9 @@
     let textareaTimeout;
     const wrapperEl = $element.children();
 
-    const keypressHandler = ($event) => {
-      if ($event.keyCode === 10 && $event.ctrlKey || $event.keyCode === 27) {
+    const onKeypress = ($event) => {
+      // close on str+enter
+      if ($event.keyCode === 10 && $event.ctrlKey) {
         vm.untoggleShowEdit();
       }
     };
@@ -59,8 +60,13 @@
       }
     }
 
-    function stopPropagation(ev) {
+    function onKeyDown(ev) {
       ev.stopPropagation();
+
+      // also untoggle on escape key
+      if (ev.keyCode === 27) {
+        vm.untoggleShowEdit();
+      }
     }
 
     if (IS_ELECTRON) {
@@ -79,20 +85,19 @@
           textareaEl = angular.element($element.find('textarea'));
           textareaEl[0].value = ngModelCopy;
           textareaEl[0].focus();
-          textareaEl.on('keypress', keypressHandler);
+          textareaEl.on('keypress', onKeypress);
 
           // prevent keyboard shortcuts from firing when here
-          textareaEl.on('keydown', stopPropagation);
+          textareaEl.on('keydown', onKeyDown);
 
           textareaEl.on('$destroy', () => {
-            textareaEl.off('keypress', keypressHandler);
-            textareaEl.off('keydown', stopPropagation);
+            textareaEl.off('keypress', onKeypress);
+            textareaEl.off('keydown', onKeyDown);
           });
         });
       }
 
       wrapperEl.addClass('is-editing');
-
     };
 
     vm.toggleEditLock = ($event) => {
