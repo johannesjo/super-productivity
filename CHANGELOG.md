@@ -1,3 +1,31 @@
+<a name="1.10.16"></a>
+## [1.10.16](https://github.com/johannesjo/super-productivity/compare/v1.10.15...v1.10.16) (2018-04-29)
+
+
+### Bug Fixes
+
+* allowing closing of inline markdown via escape key ([414a9e3](https://github.com/johannesjo/super-productivity/commit/414a9e3))
+* focusing last or next task not working for closed sub tasks ([a2b0625](https://github.com/johannesjo/super-productivity/commit/a2b0625))
+* it not being possible to start sub tasks via keyboard shortcut ([3b134ea](https://github.com/johannesjo/super-productivity/commit/3b134ea))
+* missing aria labels ([e2177fb](https://github.com/johannesjo/super-productivity/commit/e2177fb))
+* remove missing function call ([a1f61d0](https://github.com/johannesjo/super-productivity/commit/a1f61d0))
+
+
+### Features
+
+* **performance:** improve edit on click by generally setting the contenteditable attribute manually ([5f1c95c](https://github.com/johannesjo/super-productivity/commit/5f1c95c))
+* add untoggling task notes via escape key ([cf2125a](https://github.com/johannesjo/super-productivity/commit/cf2125a))
+* improve on task keyboard shortcuts and trigger stop propagation and prevent default for all ([a7c6202](https://github.com/johannesjo/super-productivity/commit/a7c6202))
+* improve performance by replacing watchers with intervals ([d66fdd2](https://github.com/johannesjo/super-productivity/commit/d66fdd2))
+* improve sub tasks slide down up ([c7ccc6e](https://github.com/johannesjo/super-productivity/commit/c7ccc6e))
+* make keyboard focusing much smoother ([574f77b](https://github.com/johannesjo/super-productivity/commit/574f77b))
+* make slide up down work for ng-hide ([aadffcb](https://github.com/johannesjo/super-productivity/commit/aadffcb))
+* use outline instead of box shadow for focus styles, as the performance is much better ([0df98c7](https://github.com/johannesjo/super-productivity/commit/0df98c7))
+* use parent el for keyboard shortcut ([5777e8d](https://github.com/johannesjo/super-productivity/commit/5777e8d))
+* when using toggle play mark done tasks as undone ([15407fa](https://github.com/johannesjo/super-productivity/commit/15407fa))
+
+
+
 <a name="1.10.15"></a>
 ## [1.10.15](https://github.com/johannesjo/super-productivity/compare/v1.10.14...v1.10.15) (2018-04-25)
 
