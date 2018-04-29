@@ -25,7 +25,7 @@
   }
 
   /* @ngInject */
-  function DailyPlannerCtrl(IS_ELECTRON, $rootScope, $window, $scope, Tasks, TasksUtil, Dialogs, $state, Jira, $filter, Git, $mdDialog, EV) {
+  function DailyPlannerCtrl(IS_ELECTRON, $rootScope, $window, $scope, Tasks, TasksUtil, Dialogs, $state, Jira, $filter, Git, $mdDialog, EV, $interval) {
     let vm = this;
     const _ = $window._;
 
@@ -122,21 +122,17 @@
 
     // WATCHER & EVENTS
     // ----------------
-    const watchers = [];
-    watchers.push($scope.$watch('r.tasks', (mVal) => {
-      vm.totaleEstimate = TasksUtil.calcTotalEstimate(mVal);
-    }, true));
-
-    watchers.push($scope.$watch('vm.backlogTasks', (mVal) => {
-      vm.totaleEstimateBacklog = TasksUtil.calcTotalEstimate(mVal);
-    }, true));
+    // its much more efficient to do this in an interval rather than listening to actual data changes, so we just do it this way
+    const updateTimeTotalsInterval = $interval(() => {
+      vm.totaleEstimate = TasksUtil.calcTotalEstimate($rootScope.r.tasks);
+      vm.totaleEstimateBacklog = TasksUtil.calcTotalEstimate($rootScope.r.backlogTasks);
+    }, 500);
 
     // otherwise we update on view change
     $scope.$on('$destroy', () => {
-      // remove watchers manually
-      _.each(watchers, (watcher) => {
-        watcher();
-      });
+      if (updateTimeTotalsInterval) {
+        $interval.cancel(updateTimeTotalsInterval);
+      }
     });
 
     [EV.PROJECT_CHANGED, EV.COMPLETE_DATA_RELOAD].forEach((EV) => {

@@ -25,7 +25,7 @@
   }
 
   /* @ngInject */
-  function WorkViewCtrl(Tasks, $window, $scope, Dialogs, $rootScope, TasksUtil, $timeout, EV) {
+  function WorkViewCtrl(Tasks, $window, $scope, Dialogs, $rootScope, TasksUtil, $timeout, EV, $interval) {
     let vm = this;
     const _ = $window._;
 
@@ -109,14 +109,17 @@
       }
     };
 
+    // its much more efficient to do this in an interval rather than listening to actual data changes, so we just do it this way
+    const updateTimeTotalsInterval = $interval(updateTimeTotals, 500);
+
     // WATCHER & EVENTS
     // ----------------
     const watchers = [];
-    watchers.push($scope.$watch('r.tasks', (newTasks, oldTasks) => {
-      updateTimeTotals();
 
+    // TODO find a much more efficient way to do this
+    watchers.push($scope.$watch('r.tasks.length', (newLength, oldLength) => {
       // update when the global tasks array changes for some outside reason (e.g. task is added)
-      if (newTasks && (newTasks.length !== (oldTasks && oldTasks.length))) {
+      if (newLength !== oldLength) {
         vm.tasksUndone = Tasks.getUndoneToday();
         vm.tasksDone = Tasks.getDoneToday();
       }
@@ -151,6 +154,10 @@
       _.each(watchers, (watcher) => {
         watcher();
       });
+
+      if (updateTimeTotalsInterval) {
+        $interval.cancel(updateTimeTotalsInterval);
+      }
     });
 
   }
