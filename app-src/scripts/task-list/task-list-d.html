@@ -14,9 +14,7 @@
 
     <div class="inner-wrapper">
 
-      <div class="first-line"
-           layout="row"
-           layout-align="space-between center">
+      <div class="first-line">
         <div class="title-bar-wrapper">
           <md-button class="md-icon-button update-indicator-btn"
                      aria-label="is updated"
@@ -27,13 +25,11 @@
               Click to show updates
             </md-tooltip>
             <ng-md-icon class="update update-icon"
-                        flex="none"
                         icon="update"></ng-md-icon>
           </md-button>
 
 
           <ng-md-icon class="handle"
-                      flex="none"
                       as-sortable-item-handle
                       icon="drag_handle"></ng-md-icon>
 
@@ -63,9 +59,6 @@
           </md-button>
 
           <div class="task-title"
-               flex="auto"
-               layout="row"
-               layout-align="center center"
                tabindex="2"
                contenteditable="true"
                edit-on-click-on-edit-finished="$ctrl.focusTaskEl($taskEl, event); $ctrl.onChangeTitle(task, isChanged, newVal);"
