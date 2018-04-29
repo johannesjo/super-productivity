@@ -452,9 +452,8 @@
     }
 
     togglePlay(task) {
-      // TODO maybe move instead
       if (task.isDone) {
-        return;
+        task.isDone = false;
       }
 
       if (this.currentTaskId === task.id) {
@@ -466,8 +465,6 @@
             this.Tasks.updateCurrent(firstUndone);
           }
         } else {
-          console.log('I am here!');
-
           this.Tasks.updateCurrent(task);
         }
       }
