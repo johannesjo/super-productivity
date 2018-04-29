@@ -636,7 +636,6 @@
 
     moveTaskFromTodayToBackLog(task) {
       this.moveTask(task, this.$rootScope.r.tasks, this.$rootScope.r.backlogTasks);
-      this.updateBacklogVm();
     }
 
     addTasksToTopOfBacklog(tasks) {
