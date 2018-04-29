@@ -267,9 +267,14 @@
     }
 
     handleKeyDown($ev) {
-      // TODO check for closest parent if not task el
       let taskEl = $ev.srcElement;
       taskEl = angular.element(taskEl);
+
+      // use parent el if no valid src element given
+      const isTaskSrcEl = taskEl[0].classList.contains('task');
+      if (!isTaskSrcEl) {
+        taskEl = angular.element(taskEl[0].closest('.task'));
+      }
 
       let isTaskKeyboardShortcutTriggered = false;
       const task = taskEl.scope().modelValue;
