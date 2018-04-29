@@ -40,7 +40,6 @@
       this.lastFocusedTaskEl = undefined;
       this.checkKeyCombo = CheckShortcutKeyCombo;
       this.Util = Util;
-      // this.selectCurrentTaskTimeout;
 
       this.boundHandleKeyDown = this.handleKeyDown.bind(this);
       this.boundFocusLastTaskEl = this.focusLastFocusedTaskEl.bind(this);
@@ -249,14 +248,24 @@
     focusPrevTask(currentTaskEl) {
       const taskEls = document.querySelectorAll('.task');
       const index = Array.prototype.indexOf.call(taskEls, currentTaskEl[0]);
-      const nextEl = taskEls[index - 1] || taskEls[0];
-      nextEl.focus();
+      const prevEl = taskEls[index - 1] || taskEls[0];
+      // if this or the parent is hidden execute again
+      // NOTE_ this does not work for position fixed
+      if (prevEl.offsetParent === null) {
+        this.focusPrevTask([prevEl]);
+      }
+      prevEl.focus();
     }
 
     focusNextTask(currentTaskEl) {
       const taskEls = document.querySelectorAll('.task');
       const index = Array.prototype.indexOf.call(taskEls, currentTaskEl[0]);
       const nextEl = taskEls[index + 1] || currentTaskEl[0];
+      // if this or the parent is hidden execute again
+      // NOTE_ this does not work for position fixed
+      if (nextEl.offsetParent === null) {
+        this.focusNextTask([nextEl]);
+      }
       nextEl.focus();
     }
 
