@@ -2,9 +2,13 @@
   position: relative;
 }
 
+$this-transition-duration: $page-transition-duration;
 [ui-view] {
   backface-visibility: hidden;
   transform: translateZ(0);
+  transition: all $this-transition-duration $ease-in-out-quint;
+  transition-properties: scale, opacity;
+  transform-origin: center top;
 }
 
 [ui-view] {
@@ -18,24 +22,6 @@
   }
 }
 
-$this-transition-duration: $page-transition-duration;
-[ui-view].ng-enter {
-  transition: all $this-transition-duration $ease-in-out-quint;
-  transform-origin: center top;
-}
-
-[ui-view].ng-leave {
-  transform-origin: center top;
-  transition: all $this-transition-duration $ease-in-out-quint;
-  position: absolute;
-  height: 100%;
-  width: 100%;
-  left: 0;
-  right: 0;
-  top: 0;
-  bottom: 0;
-}
-
 [ui-view].ng-enter {
   opacity: 0;
   transform: scale(1.1);
@@ -47,6 +33,13 @@ $this-transition-duration: $page-transition-duration;
 }
 
 [ui-view].ng-leave {
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
   opacity: 1;
   transform: scale(1);
 }
