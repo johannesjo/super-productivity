@@ -27,8 +27,6 @@
   /* @ngInject */
   function DailyPlannerCtrl(IS_ELECTRON, $rootScope, $window, $scope, Tasks, TasksUtil, Dialogs, $state, Jira, $filter, Git, $mdDialog, EV, $interval) {
     let vm = this;
-    const _ = $window._;
-
     vm.refreshRemoteTasks = () => {
       vm.taskSuggestions = [];
 
