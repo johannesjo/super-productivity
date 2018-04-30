@@ -56,6 +56,7 @@
         You currently have no tasks. Create one!
       </p>
       <task-list tasks="r.tasks"
+                 class="todays-tasks"
                  current-task-id="r.currentTask.id"></task-list>
     </section>
 
@@ -83,6 +84,7 @@
       </md-input-container>
 
       <task-list tasks="vm.backlogTasks"
+                 class="backlog-tasks"
                  filter="vm.search"
                  limit-to="{{vm.limitBacklogTo}}"></task-list>
 

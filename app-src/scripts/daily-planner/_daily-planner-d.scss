@@ -38,6 +38,13 @@ daily-planner {
   }
 }
 
+.todays-tasks,
+.backlog-tasks {
+  opacity: 0;
+  animation: $transition-duration-xs ani-task-list-enter ease-out;
+  animation-fill-mode: forwards;
+}
+
 @keyframes attention-for-input-daily-planner {
   0% {
     transform: scale(1);

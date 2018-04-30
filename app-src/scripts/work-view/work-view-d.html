@@ -42,6 +42,7 @@
   <p ng-if="!vm.tasksUndone.length">You currently have no undone tasks.</p>
 
   <task-list tasks="vm.tasksUndone"
+             class="undone-tasks"
              current-task-id="r.currentTask.id"
              is-hide-controls="vm.isHideControls"
              on-task-done-changed="vm.onTaskDoneChangedUndoneList(task)"
@@ -71,6 +72,7 @@
   <p ng-if="!vm.tasksDone.length">You currently have no done tasks.</p>
 
   <task-list tasks="vm.tasksDone"
+             class="done-tasks"
              is-hide-controls="vm.isHideControls"
              on-task-done-changed="vm.onTaskDoneChangedDoneList(task)"
              current-task-id="r.currentTask.id"></task-list>
