@@ -260,7 +260,7 @@
     .constant('REQUEST_TIMEOUT', 15000)
     .constant('WORKLOG_DATE_STR_FORMAT', 'YYYY-MM-DD')
     .constant('JIRA_UPDATE_POLL_INTERVAL', 60 * 1000 * 5)
-    .constant('GIT_UPDATE_POLL_INTERVAL', 60 * 1000 * 0.25)
+    .constant('GIT_UPDATE_POLL_INTERVAL', 60 * 1000 * 5)
     .constant('TRACKING_INTERVAL', 1000)
     .constant('IS_ELECTRON', (typeof window.ipcRenderer !== 'undefined'))
     .constant('IS_EXTENSION', (window.localStorage.getItem('SUPER_PRODUCTIVITY_CHROME_EXTENSION') === 'IS_ENABLED'))
