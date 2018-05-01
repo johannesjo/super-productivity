@@ -52,13 +52,13 @@
         let offsetX;
         let offsetY;
 
-        if (ev.type === 'mousemove') {
-          offsetX = ev.offsetX;
-          offsetY = ev.offsetY;
-        } else {
+        if (ev.type === 'touchmove') {
           const rect = ev.target.getBoundingClientRect();
           offsetX = ev.targetTouches[0].pageX - rect.left;
           offsetY = ev.targetTouches[0].pageY - rect.top;
+        } else {
+          offsetX = ev.offsetX;
+          offsetY = ev.offsetY;
         }
 
         const x = offsetX - centerX;
@@ -83,16 +83,21 @@
       this.el.addEventListener('mousedown', this.startHandler);
       this.el.addEventListener('touchstart', this.startHandler);
 
+      this.el.addEventListener('click', this.moveHandler);
+
       this.setRotationFromValue();
     }
 
     $onDestroy() {
       // remove mouse events
-      this.el.removeEventListener('mousedown', this.endHandler);
+      this.el.removeEventListener('mousedown', this.startHandler);
       this.el.removeEventListener('mousemove', this.moveHandler);
       this.el.removeEventListener('mouseup', this.endHandler);
 
       // remove touch events
+      this.el.removeEventListener('touchstart', this.startHandler);
+      this.el.removeEventListener('touchmove', this.moveHandler);
+      this.el.removeEventListener('touchend', this.endHandler);
     }
 
     setCircleRotation(cssDegrees) {
