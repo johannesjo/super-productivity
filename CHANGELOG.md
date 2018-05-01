@@ -1,3 +1,13 @@
+<a name="1.10.20"></a>
+## [1.10.20](https://github.com/johannesjo/super-productivity/compare/v1.10.19...v1.10.20) (2018-05-01)
+
+
+### Bug Fixes
+
+* appcache manifest killing external apis ([df4bfa7](https://github.com/johannesjo/super-productivity/commit/df4bfa7))
+
+
+
 <a name="1.10.19"></a>
 ## [1.10.19](https://github.com/johannesjo/super-productivity/compare/v1.10.18...v1.10.19) (2018-05-01)
 
