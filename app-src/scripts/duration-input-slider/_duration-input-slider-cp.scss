@@ -49,6 +49,7 @@ duration-input-slider {
     bottom: 0;
     pointer-events: none;
     z-index: 2;
+    transition: $transition-duration-s ease-in;
     &:before {
       border-radius: 100%;
       content: '';
@@ -68,6 +69,9 @@ duration-input-slider {
       left: -$this-extra-touch-space;
       bottom: -$this-extra-touch-space;
     }
+  }
+  &.is-dragging .handle-wrapper {
+    transition: none;
   }
 
   .handle {

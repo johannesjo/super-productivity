@@ -35,6 +35,7 @@
       this.startHandler = (ev) => {
         // don't execute when clicked on label or input
         if (ev.target.tagName === 'LABEL' || ev.target.tagName === 'INPUT') {
+          this.endHandler();
           return;
         }
 
@@ -78,6 +79,14 @@
       };
 
       this.endHandler = () => {
+        //// should be 5 min values
+        //const hours = Math.floor(this.ngModel.asHours());
+        //const minutesFromDegrees = Math.round(this.ngModel.asMinutes() / 5) * 5;
+        //this.ngModel = moment.duration({
+        //  hours: hours,
+        //  minutes: minutesFromDegrees
+        //});
+
         this.el.classList.remove('is-dragging');
         this.el.removeEventListener('mousemove', this.moveHandler);
         this.el.removeEventListener('mouseup', this.endHandler);
@@ -116,7 +125,7 @@
 
       minutesFromDegrees = parseInt(minutesFromDegrees, 10);
 
-      let hours = parseInt(moment.duration(this.ngModel).asHours(), 10);
+      let hours = Math.floor(moment.duration(this.ngModel).asHours());
 
       const minuteDelta = minutesFromDegrees - this.minutesBefore;
       const threshold = 40;
