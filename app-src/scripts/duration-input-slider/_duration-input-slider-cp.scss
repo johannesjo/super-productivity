@@ -1,6 +1,7 @@
 duration-input-slider {
   overflow: hidden;
   display: block;
+  user-select: none;
 
   .circle {
     margin: 20px;
