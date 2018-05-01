@@ -1,0 +1,49 @@
+duration-input-slider {
+  overflow: hidden;
+  display: block;
+
+  .circle {
+    margin: 20px;
+    width: 150px;
+    height: 150px;
+    border-radius: 100%;
+    border: 3px solid #000000;
+    position: relative;
+  }
+  .handle-wrapper {
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+    bottom: 0;
+    border-top: 4px solid #000000;
+    pointer-events: none;
+    border-radius: 100%;
+  }
+
+  .handle {
+    background: #000000;
+    height: 20%;
+    left: 40%;
+    position: absolute;
+    top: 0;
+    transform-origin: 50% 100%;
+    width: 20%;
+    border-radius: 100%;
+    cursor: grab;
+  }
+
+  .value {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 80px;
+    text-align: center;
+    transform: translate3d(-50%, -50%, 0);
+  }
+  &.is-dragging {
+    .value {
+      pointer-events: none;
+    }
+  }
+}
