@@ -3,6 +3,7 @@ $this-extra-touch-space: 14px;
 $this-border-width: 2px;
 $this-margin: $this-extra-touch-space;
 $this-handle-size: 20px;
+$this-border-color: #333333;
 
 duration-input-slider {
   overflow: hidden;
@@ -15,11 +16,11 @@ duration-input-slider {
     width: $this-size;
     height: $this-size;
     border-radius: 100%;
-    border: $this-border-width solid #333333;
+    border: $this-border-width solid $this-border-color;
     position: relative;
     box-shadow: $whiteframe-shadow-2dp;
-    background: #fff;
-    @include dark-theme(){
+    background: #ffffff;
+    @include dark-theme() {
       background: $dark-theme-bg-darker;
       border-color: transparent;
     }
@@ -53,7 +54,7 @@ duration-input-slider {
     &:before {
       border-radius: 100%;
       content: '';
-      border-top: $this-handle-border-width solid #333333;
+      border-top: $this-handle-border-width solid $this-border-color;
       // get rid of whitespace
       top: -1px;
       left: 0;
@@ -109,6 +110,8 @@ duration-input-slider {
     border-radius: 4px;
     font-weight: bold;
     font-size: 17px;
+    line-height: 17px;
+    padding: 0;
     cursor: text;
     transition: all .20s $ease-in-out-quint;
     transition-property: opacity, transform;
@@ -121,7 +124,7 @@ duration-input-slider {
     transform: translateZ(0);
     z-index: 4;
     background: #ffffff;
-    border: 1px solid #333333;
+    border: 1px solid #000000;
 
     @include dark-theme() {
       color: #ffffff;
@@ -137,7 +140,7 @@ duration-input-slider {
       z-index: 5;
       background: #ffffff;
       user-select: all;
-      transform: scale(1.1);
+      transform: scale(1.2);
       &:after {
         opacity: 1;
       }
@@ -157,9 +160,14 @@ duration-input-slider {
     font-size: 13px;
     display: inline-block;
     cursor: pointer;
+    color: #000000;
     text-align: center;
     transition: $transition-duration-xs ease-out;
     backface-visibility: hidden;
+
+    @include dark-theme() {
+      color: #ffffff;
+    }
   }
 
 }
