@@ -1,3 +1,20 @@
+<a name="1.10.17"></a>
+## [1.10.17](https://github.com/johannesjo/super-productivity/compare/v1.10.16...v1.10.17) (2018-05-01)
+
+
+### Bug Fixes
+
+* page transition ([aa98cb9](https://github.com/johannesjo/super-productivity/commit/aa98cb9))
+
+
+### Features
+
+* add minimal transition for main task lists ([b300cb2](https://github.com/johannesjo/super-productivity/commit/b300cb2))
+* make offline access work ([67cd09a](https://github.com/johannesjo/super-productivity/commit/67cd09a))
+* set git update poll interval duration much higher to prevent reaching githubs limit so quickly ([c3888f2](https://github.com/johannesjo/super-productivity/commit/c3888f2))
+
+
+
 <a name="1.10.16"></a>
 ## [1.10.16](https://github.com/johannesjo/super-productivity/compare/v1.10.15...v1.10.16) (2018-04-29)
 
