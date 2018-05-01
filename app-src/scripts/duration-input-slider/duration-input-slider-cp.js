@@ -15,18 +15,10 @@
       this.el = el;
       this.$scope = $scope;
       this.minutesBefore = 0;
-      this.oldModel = undefined;
     }
 
-    $doCheck() {
-      if (this.ngModel !== this.oldModel &&
-        this.ngModel &&
-        this.oldModel &&
-        this.ngModel._milliseconds !== this.oldModel._milliseconds
-      ) {
-        this.setRotationFromValue();
-      }
-      this.oldModel = this.ngModel;
+    onChangeValue(){
+      this.setRotationFromValue();
     }
 
     $onInit() {
