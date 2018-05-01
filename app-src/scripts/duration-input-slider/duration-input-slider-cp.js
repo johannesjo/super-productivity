@@ -24,54 +24,78 @@
     $onInit() {
       this.circle = this.el.querySelector('.handle-wrapper');
 
-      this.mouseDownHandler = (ev) => {
+      this.startHandler = (ev) => {
         // don't execute when clicked on label or input
         if (ev.target.tagName === 'LABEL' || ev.target.tagName === 'INPUT') {
           return;
         }
 
-        this.el.addEventListener('mousemove', this.mouseMoveHandler);
-        this.el.addEventListener('mouseup', this.mouseUpHandler);
+        this.el.addEventListener('mousemove', this.moveHandler);
+        this.el.addEventListener('mouseup', this.endHandler);
+
+        this.el.addEventListener('touchmove', this.moveHandler);
+        this.el.addEventListener('touchend', this.endHandler);
         this.el.classList.add('is-dragging');
       };
 
-      this.mouseMoveHandler = (ev) => {
+      this.moveHandler = (ev) => {
+        // prevent touchmove
+        ev.preventDefault();
+
+        function convertThetaToCssDegrees(theta) {
+          return 90 - theta;
+        }
+
         const centerX = 75;
         const centerY = 75;
-        const x = ev.offsetX - centerX;
-        const y = -1 * (ev.offsetY - centerY);
+        let offsetX;
+        let offsetY;
+
+        if (ev.type === 'mousemove') {
+          offsetX = ev.offsetX;
+          offsetY = ev.offsetY;
+        } else {
+          const rect = ev.target.getBoundingClientRect();
+          offsetX = ev.targetTouches[0].pageX - rect.left;
+          offsetY = ev.targetTouches[0].pageY - rect.top;
+        }
+
+        const x = offsetX - centerX;
+        const y = -1 * (offsetY - centerY);
+
         const theta = Math.atan2(y, x) * (180 / Math.PI);
 
         const cssDegrees = convertThetaToCssDegrees(theta);
-        //const isMovingRight = ev
         this.setValueFromRotation(cssDegrees);
         this.setCircleRotation(cssDegrees);
       };
 
-      function convertThetaToCssDegrees(theta) {
-        return 90 - theta;
-      }
-
-      this.mouseUpHandler = () => {
+      this.endHandler = () => {
         this.el.classList.remove('is-dragging');
-        this.el.removeEventListener('mousemove', this.mouseMoveHandler);
-        this.el.removeEventListener('mouseup', this.mouseUpHandler);
+        this.el.removeEventListener('mousemove', this.moveHandler);
+        this.el.removeEventListener('mouseup', this.endHandler);
+
+        this.el.removeEventListener('touchmove', this.moveHandler);
+        this.el.removeEventListener('touchend', this.endHandler);
       };
 
-      this.el.addEventListener('mousedown', this.mouseDownHandler);
+      this.el.addEventListener('mousedown', this.startHandler);
+      this.el.addEventListener('touchstart', this.startHandler);
 
       this.setRotationFromValue();
     }
 
     $onDestroy() {
-      this.el.removeEventListener('mousedown', this.mouseUpHandler);
-      this.el.removeEventListener('mousemove', this.mouseMoveHandler);
-      this.el.removeEventListener('mouseup', this.mouseUpHandler);
+      // remove mouse events
+      this.el.removeEventListener('mousedown', this.endHandler);
+      this.el.removeEventListener('mousemove', this.moveHandler);
+      this.el.removeEventListener('mouseup', this.endHandler);
+
+      // remove touch events
     }
 
     setCircleRotation(cssDegrees) {
-      const rotate = 'rotate(' + cssDegrees + 'deg)';
-      this.circle.style.transform = rotate;
+      this.circle.style.transform = 'rotate(' + cssDegrees + 'deg)';
     }
 
     setValueFromRotation(degrees) {

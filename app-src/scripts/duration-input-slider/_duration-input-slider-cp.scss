@@ -1,13 +1,15 @@
-$this-size: 150px;
-$this-extra-touch-space: 20px;
+$this-size: 120px;
+$this-extra-touch-space: 10px;
 $this-border-width: 4px;
+$this-margin: 20px;
 duration-input-slider {
   overflow: hidden;
   display: block;
   user-select: none;
+  width: $this-size+$this-margin*2;
 
   .circle {
-    margin: 20px;
+    margin: $this-margin;
     width: $this-size;
     height: $this-size;
     border-radius: 100%;
