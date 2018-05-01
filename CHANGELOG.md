@@ -1,3 +1,19 @@
+<a name="1.10.19"></a>
+## [1.10.19](https://github.com/johannesjo/super-productivity/compare/v1.10.18...v1.10.19) (2018-05-01)
+
+
+### Bug Fixes
+
+* **durationInputSlider:** slide not moving on grab ([b7c45d0](https://github.com/johannesjo/super-productivity/commit/b7c45d0))
+
+
+### Features
+
+* **durationInputSlider:** also allow click to set the handle ([dab2830](https://github.com/johannesjo/super-productivity/commit/dab2830))
+* **durationInputSlider:** improve styling ([90af925](https://github.com/johannesjo/super-productivity/commit/90af925))
+
+
+
 <a name="1.10.18"></a>
 ## [1.10.18](https://github.com/johannesjo/super-productivity/compare/v1.10.17...v1.10.18) (2018-05-01)
 
