@@ -24,10 +24,15 @@
     $onInit() {
       this.circle = this.el.querySelector('.handle-wrapper');
 
-      this.mouseDownHandler = () => {
-        this.el.classList.add('is-dragging');
+      this.mouseDownHandler = (ev) => {
+        // don't execute when clicked on label or input
+        if (ev.target.tagName === 'LABEL' || ev.target.tagName === 'INPUT') {
+          return;
+        }
+
         this.el.addEventListener('mousemove', this.mouseMoveHandler);
         this.el.addEventListener('mouseup', this.mouseUpHandler);
+        this.el.classList.add('is-dragging');
       };
 
       this.mouseMoveHandler = (ev) => {
@@ -83,10 +88,10 @@
       let hours = parseInt(moment.duration(this.ngModel).asHours(), 10);
 
       const minuteDelta = minutesFromDegrees - this.minutesBefore;
-      const threeshold = 40;
-      if (minuteDelta > threeshold) {
+      const threshold = 40;
+      if (minuteDelta > threshold) {
         hours--;
-      } else if (-1 * minuteDelta > threeshold) {
+      } else if (-1 * minuteDelta > threshold) {
         hours++;
       }
 
@@ -120,7 +125,8 @@
       controller: DurationInputSliderCtrl,
       controllerAs: '$ctrl',
       bindings: {
-        ngModel: '='
+        ngModel: '=',
+        label: '@',
       },
       require: { $ngModelCtrl: '^ngModel' }
     });
