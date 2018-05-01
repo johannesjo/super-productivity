@@ -1,3 +1,22 @@
+<a name="1.10.18"></a>
+## [1.10.18](https://github.com/johannesjo/super-productivity/compare/v1.10.17...v1.10.18) (2018-05-01)
+
+
+### Features
+
+* **durationInputSlider:** add basic user input ([d5a3535](https://github.com/johannesjo/super-productivity/commit/d5a3535))
+* **durationInputSlider:** add to time estimate dialog ([1a5d475](https://github.com/johannesjo/super-productivity/commit/1a5d475))
+* **durationInputSlider:** beautify ([343c9cb](https://github.com/johannesjo/super-productivity/commit/343c9cb))
+* **durationInputSlider:** connect input to model and allow for multiple rounds ([965909f](https://github.com/johannesjo/super-productivity/commit/965909f))
+* **durationInputSlider:** fix click on input or label behavior ([f9e326c](https://github.com/johannesjo/super-productivity/commit/f9e326c))
+* **durationInputSlider:** fix on change behavior ([d5a03a9](https://github.com/johannesjo/super-productivity/commit/d5a03a9))
+* **durationInputSlider:** improve styling and add to add task dialog ([f80f85a](https://github.com/johannesjo/super-productivity/commit/f80f85a))
+* **durationInputSlider:** make it work for touch devices ([e77cad0](https://github.com/johannesjo/super-productivity/commit/e77cad0))
+* **durationInputSlider:** minor improvements ([c037195](https://github.com/johannesjo/super-productivity/commit/c037195))
+* **durationInputSlider:** update on model changes ([73aa0fe](https://github.com/johannesjo/super-productivity/commit/73aa0fe))
+
+
+
 <a name="1.10.17"></a>
 ## [1.10.17](https://github.com/johannesjo/super-productivity/compare/v1.10.16...v1.10.17) (2018-05-01)
 
