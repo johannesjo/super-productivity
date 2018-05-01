@@ -110,7 +110,7 @@
       if (degrees >= 0) {
         minutesFromDegrees = (degrees / 360 * 60);
       } else {
-        minutesFromDegrees = ((degrees + 360) / 360 * 60)
+        minutesFromDegrees = ((degrees + 360) / 360 * 60);
       }
 
       minutesFromDegrees = parseInt(minutesFromDegrees, 10);
