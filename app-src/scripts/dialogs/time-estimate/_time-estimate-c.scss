@@ -1,2 +1,24 @@
 .dialog-time-estimate {
+  text-align: center;
+
+  .time-estimate-spent-wrapper {
+    duration-input-slider {
+      display: inline-block;
+    }
+    margin-bottom: 20px;
+  }
+
+  .time-spend-on-days-wrapper {
+    display: inline-block;
+    margin-bottom: 20px;
+
+    .inner-wrapper {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+  }
+  duration-input-slider {
+  }
 }

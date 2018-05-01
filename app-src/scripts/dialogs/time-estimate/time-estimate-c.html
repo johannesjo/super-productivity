@@ -17,54 +17,34 @@
     <div class="md-dialog-content">
 
       <form ng-submit="vm.submit(vm.timeEstimate, vm.timeSpent)">
-        <md-input-container class="md-icon-float md-block">
-          <ng-md-icon icon="timer"
-                      aria-label="Estimated Durations"></ng-md-icon>
-          <label>Estimated Duration</label>
+        <div class="time-estimate-spent-wrapper">
+          <duration-input-slider ng-model="vm.timeEstimate"
+                                 label="Estimated Duration"></duration-input-slider>
 
-          <input type="text"
-                 md-auto-focus
-                 input-duration
-                 ng-model="vm.timeEstimate"
-                 aria-label="Estimated Durations">
-        </md-input-container>
-        <h3 class="md-caption">Time Spent</h3>
+          <duration-input-slider ng-model="vm.timeSpentOnDayCopy[vm.todayStr]"
+                                 label="Time Spent Today"></duration-input-slider>
+        </div>
 
-        <md-input-container class="md-icon-float md-block">
-          <ng-md-icon icon="timer"
-                      aria-label="Time Spent Today"></ng-md-icon>
-          <label>Time Spent Today</label>
-          <input type="text"
-                 input-duration="optional"
-                 ng-model="vm.timeSpentOnDayCopy[vm.todayStr]"
-                 aria-label="Time Spent Today">
-        </md-input-container>
+        <h3 class="md-subhead">Time Spent on other days</h3>
 
-
-        <div layout="row"
-             ng-repeat="(strDate,timeSpent) in vm.timeSpentOnDayCopy"
-             ng-if="vm.todayStr !== strDate">
-          <div flex>
-            <md-input-container class="md-icon-float md-block">
-              <ng-md-icon icon="timer"
-                          aria-label="Time Spent"></ng-md-icon>
-              <label>Time Spent on <span ng-bind="strDate"></span></label>
-              <input type="text"
-                     input-duration="optional"
-                     ng-model="vm.timeSpentOnDayCopy[strDate]"
-                     aria-label="Time Spent">
-            </md-input-container>
-          </div>
-          <div flex="20">
-            <md-button class="md-raised md-icon-button md-accent"
-                       aria-label="Delete"
-                       ng-click="vm.deleteValue(strDate)">
-              <ng-md-icon icon="delete_forever"></ng-md-icon>
-            </md-button>
+        <div>
+          <div class="time-spend-on-days-wrapper"
+               ng-repeat="(strDate,timeSpent) in vm.timeSpentOnDayCopy"
+               ng-if="vm.todayStr !== strDate">
+            <div class="inner-wrapper">
+              <label>Time Spent on <strong ng-bind="strDate"></strong></label>
+              <duration-input-slider ng-model="vm.timeSpentOnDayCopy[strDate]"></duration-input-slider>
+              <md-button class="md-raised md-icon-button md-accent"
+                         aria-label="Delete"
+                         ng-click="vm.deleteValue(strDate)">
+                <ng-md-icon icon="delete_forever"></ng-md-icon>
+              </md-button>
+            </div>
           </div>
         </div>
 
         <md-button type="button"
+                   class="md-raised md-primary"
                    aria-label="add for another day"
                    ng-hide="vm.showAddForAnotherDayForm"
                    ng-click="vm.showAddForAnotherDayForm = true;">

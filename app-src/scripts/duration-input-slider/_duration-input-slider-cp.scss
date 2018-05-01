@@ -1,7 +1,7 @@
 $this-size: 120px;
-$this-extra-touch-space: 10px;
+$this-extra-touch-space: 12px;
 $this-border-width: 4px;
-$this-margin: 20px;
+$this-margin: $this-extra-touch-space;
 duration-input-slider {
   overflow: hidden;
   display: block;
@@ -103,12 +103,12 @@ duration-input-slider {
     &:focus {
       background: #ffffff;
       + label {
-        transform: scaleX(1.3);
       }
     }
   }
 
   label {
+    display: inline-block;
     cursor: pointer;
     text-align: center;
     transition: $transition-duration-xs ease-out;
