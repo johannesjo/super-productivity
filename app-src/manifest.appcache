@@ -1,5 +1,6 @@
 CACHE MANIFEST
 # ${DATE}
+
 FALLBACK:
 ./index.html ./index.html
 ./styles/main.css ./styles/main.css
@@ -9,3 +10,6 @@ FALLBACK:
 ./snd/positive.ogg ./snd/positive.ogg
 ./img/icon_192.png ./img/icon_192.png
 ./img/ico.svg ./img/ico.svg
+
+NETWORK:
+*
