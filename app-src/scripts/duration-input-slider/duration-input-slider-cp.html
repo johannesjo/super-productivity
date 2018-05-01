@@ -2,9 +2,15 @@
   <div class="handle-wrapper">
     <div class="handle"></div>
   </div>
-  <input type="text"
-         input-duration="optional"
-         class="value"
-         ng-change="onModelChange()"
-         ng-model="$ctrl.ngModel">
+  <div class="value-wrapper">
+    <input type="text"
+           input-duration="optional"
+           class="value"
+           id="duration"
+           ng-change="onModelChange()"
+           ng-model="$ctrl.ngModel">
+    <label for="duration"
+           ng-if="$ctrl.label"
+           ng-bind="$ctrl.label"></label>
+  </div>
 </div>
