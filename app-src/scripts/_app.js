@@ -10,6 +10,18 @@
 (function() {
   'use strict';
 
+  // reload right away if there is an update
+  function onUpdateReady() {
+    console.log('RELOAD RIGHT AWAY');
+    // force reload without cache
+    window.location.reload(true);
+  }
+
+  window.applicationCache.addEventListener('updateready', onUpdateReady);
+  if (window.applicationCache.status === window.applicationCache.UPDATEREADY) {
+    onUpdateReady();
+  }
+
   // Electron stuff
   // require ipcRenderer if available
   if (typeof require === 'function') {

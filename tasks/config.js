@@ -47,6 +47,7 @@ module.exports = (function() {
       base + '/scripts/**/*.html'
     ],
     staticFiles: [base + '/manifest.json'],
+    appCacheManifest: base + '/manifest.appcache',
     images: base + '/img/',
     imagesF: base + '/img/**/*.*',
     fonts: base + '/fonts/',

@@ -26,6 +26,7 @@ const lazypipe = require('lazypipe');
 const babel = require('gulp-babel');
 const templateCache = require('gulp-angular-templatecache');
 const ngAnnotate = require('gulp-ng-annotate');
+const replace = require('gulp-replace');
 
 // main task
 gulp.task('build', function(callback) {
@@ -45,6 +46,7 @@ gulp.task('build', function(callback) {
     //  'sass',
     'minFiles',
     'copy',
+    'updateAppCacheManifest',
 
     // cleanup after
     'cleanTemplateCacheFile',
@@ -60,6 +62,12 @@ gulp.task('wiredepBuild', function() {
       devDependencies: false
     }))
     .pipe(gulp.dest('./'));
+});
+
+gulp.task('updateAppCacheManifest', function() {
+  return gulp.src(config.appCacheManifest)
+    .pipe(replace('${DATE}', new Date()))
+    .pipe(gulp.dest(config.dist));
 });
 
 gulp.task('createTemplateCacheFiles', function() {
