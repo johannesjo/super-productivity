@@ -15,10 +15,18 @@
       this.el = el;
       this.$scope = $scope;
       this.minutesBefore = 0;
+      this.oldModel = undefined;
     }
 
-    onModelChange() {
-      console.log(this);
+    $doCheck() {
+      if (this.ngModel !== this.oldModel &&
+        this.ngModel &&
+        this.oldModel &&
+        this.ngModel._milliseconds !== this.oldModel._milliseconds
+      ) {
+        this.setRotationFromValue();
+      }
+      this.oldModel = this.ngModel;
     }
 
     $onInit() {
@@ -67,7 +75,6 @@
 
         const cssDegrees = convertThetaToCssDegrees(theta);
         this.setValueFromRotation(cssDegrees);
-        this.setCircleRotation(cssDegrees);
       };
 
       this.endHandler = () => {
