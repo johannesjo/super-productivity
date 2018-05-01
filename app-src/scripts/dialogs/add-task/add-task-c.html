@@ -25,16 +25,10 @@
                  aria-label="Title">
         </md-input-container>
 
-        <md-input-container class="md-icon-float md-block">
-          <ng-md-icon icon="access_time"
-                      aria-label="Estimated Durations"></ng-md-icon>
-          <label>Estimated Duration</label>
-
-          <input type="text"
-                 input-duration="optional"
-                 ng-model="vm.task.timeEstimate"
-                 aria-label="Estimated Durations">
-        </md-input-container>
+        <div style="text-align: center">
+          <duration-input-slider ng-model="vm.task.timeEstimate"
+                                 label="Estimated Duration"></duration-input-slider>
+        </div>
 
         <md-input-container class="md-block">
           <label>Notes</label>

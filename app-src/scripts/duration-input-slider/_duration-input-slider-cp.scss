@@ -1,7 +1,9 @@
 $this-size: 120px;
-$this-extra-touch-space: 12px;
-$this-border-width: 4px;
+$this-extra-touch-space: 14px;
+$this-border-width: 2px;
 $this-margin: $this-extra-touch-space;
+$this-handle-size: 20px;
+
 duration-input-slider {
   overflow: hidden;
   display: block;
@@ -16,6 +18,11 @@ duration-input-slider {
     border: $this-border-width solid #333333;
     position: relative;
     box-shadow: $whiteframe-shadow-2dp;
+    background: #fff;
+    @include dark-theme(){
+      background: $dark-theme-bg-darker;
+      border-color: transparent;
+    }
 
     cursor: grab;
     &:after {
@@ -41,7 +48,7 @@ duration-input-slider {
     left: 0;
     bottom: 0;
     pointer-events: none;
-    z-index: 1;
+    z-index: 2;
     &:before {
       border-radius: 100%;
       content: '';
@@ -63,7 +70,6 @@ duration-input-slider {
     }
   }
 
-  $this-handle-size: 30px;
   .handle {
     background: $c-accent;
     left: calc(50% - #{$this-handle-size/2});
@@ -77,37 +83,74 @@ duration-input-slider {
   }
 
   .value-wrapper {
-    overflow: hidden;
     z-index: 3;
     position: absolute;
     top: 50%;
     left: 50%;
-    width: 80%;
+    width: 82%;
     transform: translate3d(-50%, -50%, 0);
+    overflow: visible;
   }
 
   &.is-dragging {
     .value-wrapper {
+      z-index: 1;
       pointer-events: none;
     }
   }
 
   .value {
-    background: transparent;
     width: 100%;
-    border: none;
     text-align: center;
     border-radius: 4px;
     font-weight: bold;
     font-size: 17px;
+    cursor: text;
+    transition: all .20s $ease-in-out-quint;
+    transition-property: opacity, transform;
+    display: block;
+    position: relative;
+    overflow: visible;
+    user-select: none;
+    caret-color: #000000;
+    backface-visibility: hidden;
+    transform: translateZ(0);
+    z-index: 4;
+    background: #ffffff;
+    border: 1px solid #333333;
+
+    @include dark-theme() {
+      color: #ffffff;
+      background: $dark-theme-bg-darker;
+      border: 1px solid #ffffff;
+    }
+
+    @include dark-theme() {
+      caret-color: #ffffff;
+    }
+
     &:focus {
+      z-index: 5;
       background: #ffffff;
+      user-select: all;
+      transform: scale(1.1);
+      &:after {
+        opacity: 1;
+      }
+
+      @media(max-width: $layout-xs) {
+        transform: scale(1.05);
+      }
+    }
+
+    &:focus {
       + label {
       }
     }
   }
 
   label {
+    font-size: 13px;
     display: inline-block;
     cursor: pointer;
     text-align: center;
