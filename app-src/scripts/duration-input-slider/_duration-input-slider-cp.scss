@@ -16,6 +16,7 @@ duration-input-slider {
     height: $this-size;
     border-radius: 100%;
     position: relative;
+    border: 1px solid $this-handle-border-color;
     box-shadow: $whiteframe-shadow-4dp;
     background: #ffffff;
     @include dark-theme() {
@@ -74,6 +75,7 @@ duration-input-slider {
   }
 
   .handle {
+    top: 1px;
     background: $c-accent;
     left: calc(50% - #{$this-handle-size/2});
     position: absolute;
