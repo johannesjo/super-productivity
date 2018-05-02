@@ -123,6 +123,7 @@ duration-input-slider {
     background: transparent;
     border-radius: 0px;
     border: none;
+    color: #111111;
 
     @include dark-theme() {
       color: #ffffff;
@@ -155,7 +156,7 @@ duration-input-slider {
     margin-bottom: 3px;
     display: inline-block;
     cursor: pointer;
-    color: #000000;
+    color: #111111;
     text-align: center;
     transition: $transition-duration-xs ease-out;
     backface-visibility: hidden;
