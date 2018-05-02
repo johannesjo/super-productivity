@@ -51,11 +51,11 @@
 
         function convertThetaToCssDegrees(theta) {
           return 90 - theta;
-
         }
 
-        const centerX = 75;
-        const centerY = 75;
+        const centerX = this.circle.offsetWidth / 2;
+        const centerY = this.circle.offsetHeight / 2;
+
         let offsetX;
 
         let offsetY;
