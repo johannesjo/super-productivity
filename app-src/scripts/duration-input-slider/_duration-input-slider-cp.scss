@@ -19,12 +19,12 @@ duration-input-slider {
     border: 1px solid $this-handle-border-color;
     box-shadow: $whiteframe-shadow-4dp;
     background: #ffffff;
+    cursor: grab;
     @include dark-theme() {
       background: $dark-theme-bg-darker;
       border-color: transparent;
     }
 
-    cursor: grab;
     &:after {
       content: '';
       position: absolute;
