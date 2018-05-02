@@ -71,8 +71,7 @@
       let val = angular.copy(value);
       if (val) {
         // if moment duration object
-        if (val.duration || val._milliseconds) {
-
+        if (typeof val === 'object' && ('duration' in val || '_milliseconds' in val)) {
           let durationData = val.duration && val.duration()._data || val._data;
           const days = parseInt(durationData.days, 10);
           const hours = parseInt(durationData.hours, 10);
@@ -95,8 +94,13 @@
           // replace comma values
           val = val.replace(/\.\d+/g, '');
           val = val.trim();
+
+          if (val === 'P0D') {
+            val = '';
+          }
         }
       }
+
       return val;
     };
   }

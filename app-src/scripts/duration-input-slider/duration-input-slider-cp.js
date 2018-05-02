@@ -75,7 +75,6 @@
 
         const cssDegrees = convertThetaToCssDegrees(theta);
         this.setValueFromRotation(cssDegrees);
-        this.setCircleRotation(cssDegrees);
       };
 
       this.endHandler = () => {
@@ -134,11 +133,15 @@
         hours++;
       }
 
-      this.minutesBefore = minutesFromDegrees;
-
       if (hours < 0) {
         hours = 0;
+        minutesFromDegrees = 0;
+        this.setCircleRotation(0);
+      } else {
+        this.setCircleRotation(degrees);
       }
+
+      this.minutesBefore = minutesFromDegrees;
 
       this.$scope.$evalAsync(() => {
         this.ngModel = moment.duration({
