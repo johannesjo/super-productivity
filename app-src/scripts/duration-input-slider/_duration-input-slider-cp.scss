@@ -1,5 +1,5 @@
-$this-size: 120px;
-$this-extra-touch-space: 14px;
+$this-size: 130px;
+$this-extra-touch-space: 8px;
 $this-border-width: 2px;
 $this-margin: $this-extra-touch-space;
 $this-handle-size: 20px;
@@ -158,6 +158,8 @@ duration-input-slider {
 
   label {
     font-size: 13px;
+    font-weight: bold;
+    margin-bottom: 3px;
     display: inline-block;
     cursor: pointer;
     color: #000000;
