@@ -1,6 +1,5 @@
 $this-size: 130px;
 $this-extra-touch-space: 8px;
-$this-border-width: 2px;
 $this-margin: $this-extra-touch-space;
 $this-handle-size: 20px;
 $this-border-color: #333333;
@@ -16,9 +15,8 @@ duration-input-slider {
     width: $this-size;
     height: $this-size;
     border-radius: 100%;
-    border: $this-border-width solid $this-border-color;
     position: relative;
-    box-shadow: $whiteframe-shadow-2dp;
+    box-shadow: $whiteframe-shadow-4dp;
     background: #ffffff;
     @include dark-theme() {
       background: $dark-theme-bg-darker;
@@ -54,7 +52,7 @@ duration-input-slider {
     &:before {
       border-radius: 100%;
       content: '';
-      border-top: $this-handle-border-width solid $this-border-color;
+      border-top: 2px solid #888888;
       // get rid of whitespace
       top: -1px;
       left: 0;
@@ -79,7 +77,6 @@ duration-input-slider {
     background: $c-accent;
     left: calc(50% - #{$this-handle-size/2});
     position: absolute;
-    top: -$this-handle-size/2;
     transform-origin: 50% 100%;
     height: $this-handle-size;
     width: $this-handle-size;
@@ -92,9 +89,8 @@ duration-input-slider {
     position: absolute;
     top: 50%;
     left: 50%;
-    width: 82%;
+    width: 80%;
     transform: translate3d(-50%, -50%, 0);
-    overflow: visible;
   }
 
   &.is-dragging {
@@ -107,7 +103,6 @@ duration-input-slider {
   .value {
     width: 100%;
     text-align: center;
-    border-radius: 4px;
     font-weight: bold;
     font-size: 17px;
     line-height: 17px;
@@ -123,16 +118,12 @@ duration-input-slider {
     backface-visibility: hidden;
     transform: translateZ(0);
     z-index: 4;
-    background: #ffffff;
-    border: 1px solid #000000;
+    background: transparent;
+    border-radius: 0px;
+    border: none;
 
     @include dark-theme() {
       color: #ffffff;
-      background: $dark-theme-bg-darker;
-      border: 1px solid #ffffff;
-    }
-
-    @include dark-theme() {
       caret-color: #ffffff;
     }
 
