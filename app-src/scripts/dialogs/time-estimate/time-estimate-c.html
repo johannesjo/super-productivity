@@ -32,7 +32,7 @@
                ng-repeat="(strDate,timeSpent) in vm.timeSpentOnDayCopy"
                ng-if="vm.todayStr !== strDate">
             <div class="inner-wrapper">
-              <label>Time Spent on <strong ng-bind="strDate"></strong></label>
+              <label><strong ng-bind="strDate"></strong></label>
               <duration-input-slider ng-model="vm.timeSpentOnDayCopy[strDate]"></duration-input-slider>
               <md-button class="md-raised md-icon-button md-accent"
                          aria-label="Delete"
