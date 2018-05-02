@@ -1,3 +1,22 @@
+<a name="1.10.21"></a>
+## [1.10.21](https://github.com/johannesjo/super-productivity/compare/v1.10.20...v1.10.21) (2018-05-02)
+
+
+### Features
+
+* **durationInputSlider:** allow sliding to zero ([7d61597](https://github.com/johannesjo/super-productivity/commit/7d61597))
+* **durationInputSlider:** disable spellcheck for input ([1d032a5](https://github.com/johannesjo/super-productivity/commit/1d032a5))
+* **durationInputSlider:** don't trigger when clicking on label or input ([275322f](https://github.com/johannesjo/super-productivity/commit/275322f))
+* **durationInputSlider:** fix circle being slightly off ([f9f92f3](https://github.com/johannesjo/super-productivity/commit/f9f92f3))
+* **durationInputSlider:** fix comma seconds for moment duration ([100eb90](https://github.com/johannesjo/super-productivity/commit/100eb90))
+* **durationInputSlider:** fix styling on time estimate ([4d9e6b7](https://github.com/johannesjo/super-productivity/commit/4d9e6b7))
+* **durationInputSlider:** improve styling ([b6c9bb6](https://github.com/johannesjo/super-productivity/commit/b6c9bb6))
+* **durationInputSlider:** improve styling ([de8d507](https://github.com/johannesjo/super-productivity/commit/de8d507))
+* **durationInputSlider:** improve styling ([d9b2baf](https://github.com/johannesjo/super-productivity/commit/d9b2baf))
+* **durationInputSlider:** make label more readable ([a57b75d](https://github.com/johannesjo/super-productivity/commit/a57b75d))
+
+
+
 <a name="1.10.20"></a>
 ## [1.10.20](https://github.com/johannesjo/super-productivity/compare/v1.10.19...v1.10.20) (2018-05-01)
 
