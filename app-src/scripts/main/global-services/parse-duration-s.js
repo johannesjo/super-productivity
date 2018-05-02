@@ -6,7 +6,7 @@
  * Service in the superProductivity.
  */
 
-(function () {
+(function() {
   'use strict';
 
   angular
@@ -74,11 +74,16 @@
         if (val.duration || val._milliseconds) {
 
           let durationData = val.duration && val.duration()._data || val._data;
+          const days = parseInt(durationData.days, 10);
+          const hours = parseInt(durationData.hours, 10);
+          const minutes = parseInt(durationData.minutes, 10);
+          const seconds = parseInt(durationData.seconds, 10);
+
           val = '';
-          val += parseInt(durationData.days) > 0 && (durationData.days + 'd ') || '';
-          val += parseInt(durationData.hours) > 0 && (durationData.hours + 'h ') || '';
-          val += parseInt(durationData.minutes) > 0 && (durationData.minutes + 'm ') || '';
-          val += parseInt(durationData.seconds) > 0 && (durationData.seconds + 's ') || '';
+          val += (days > 0) && days + 'd ' || '';
+          val += (hours > 0) && hours + 'h ' || '';
+          val += (minutes > 0) && minutes + 'm ' || '';
+          val += (seconds > 0) && seconds + 's ' || '';
           val = val.trim();
         }
 
@@ -87,6 +92,8 @@
           val = val.replace('PT', '');
           val = val.toLowerCase(val);
           val = val.replace(/(d|h|m|s)/g, '$1 ');
+          // replace comma values
+          val = val.replace(/\.\d+/g, '');
           val = val.trim();
         }
       }
