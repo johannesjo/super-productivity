@@ -32,10 +32,11 @@
         }
 
         this.el.addEventListener('mousemove', this.moveHandler);
-        this.el.addEventListener('mouseup', this.endHandler);
+        document.addEventListener('mouseup', this.endHandler);
 
         this.el.addEventListener('touchmove', this.moveHandler);
-        this.el.addEventListener('touchend', this.endHandler);
+        document.addEventListener('touchend', this.endHandler);
+
         this.el.classList.add('is-dragging');
       };
 
@@ -80,10 +81,10 @@
       this.endHandler = () => {
         this.el.classList.remove('is-dragging');
         this.el.removeEventListener('mousemove', this.moveHandler);
-        this.el.removeEventListener('mouseup', this.endHandler);
+        document.removeEventListener('mouseup', this.endHandler);
 
         this.el.removeEventListener('touchmove', this.moveHandler);
-        this.el.removeEventListener('touchend', this.endHandler);
+        document.removeEventListener('touchend', this.endHandler);
       };
 
       this.el.addEventListener('mousedown', this.startHandler);
@@ -98,12 +99,12 @@
       // remove mouse events
       this.el.removeEventListener('mousedown', this.startHandler);
       this.el.removeEventListener('mousemove', this.moveHandler);
-      this.el.removeEventListener('mouseup', this.endHandler);
+      document.removeEventListener('mouseup', this.endHandler);
 
       // remove touch events
       this.el.removeEventListener('touchstart', this.startHandler);
       this.el.removeEventListener('touchmove', this.moveHandler);
-      this.el.removeEventListener('touchend', this.endHandler);
+      document.removeEventListener('touchend', this.endHandler);
     }
 
     setCircleRotation(cssDegrees) {
