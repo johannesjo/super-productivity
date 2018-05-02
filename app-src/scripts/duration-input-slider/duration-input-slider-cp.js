@@ -17,7 +17,7 @@
       this.minutesBefore = 0;
     }
 
-    onChangeValue(){
+    onChangeValue() {
       this.setRotationFromValue();
     }
 
@@ -40,18 +40,25 @@
       };
 
       this.moveHandler = (ev) => {
+        if (ev.type === 'click' &&
+          ev.target.tagName === 'LABEL' ||
+          ev.target.tagName === 'INPUT') {
+          return;
+        }
+
         // prevent touchmove
         ev.preventDefault();
 
         function convertThetaToCssDegrees(theta) {
           return 90 - theta;
+
         }
 
         const centerX = 75;
         const centerY = 75;
         let offsetX;
-        let offsetY;
 
+        let offsetY;
         if (ev.type === 'touchmove') {
           const rect = ev.target.getBoundingClientRect();
           offsetX = ev.targetTouches[0].pageX - rect.left;
