@@ -3,13 +3,13 @@
     <div class="handle"></div>
   </div>
   <div class="value-wrapper">
-    <label for="duration"
+    <label for="{{::$ctrl.uid}}"
            ng-if="$ctrl.label"
            ng-bind="$ctrl.label"></label>
     <input type="text"
            input-duration="optional"
            class="value"
-           id="duration"
+           id="{{::$ctrl.uid}}"
            placeholder="click to edit"
            spellcheck="false"
            ng-change="$ctrl.onChangeValue();"

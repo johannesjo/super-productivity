@@ -10,11 +10,12 @@
 
   class DurationInputSliderCtrl {
     /* @ngInject */
-    constructor(ParseDuration, $element, $scope) {
+    constructor(ParseDuration, $element, $scope, Uid) {
       const el = $element[0];
       this.el = el;
       this.$scope = $scope;
       this.minutesBefore = 0;
+      this.uid = 'duration-input-slider' + Uid();
     }
 
     onChangeValue() {
