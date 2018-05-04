@@ -1,8 +1,11 @@
 $this-size: 130px;
 $this-extra-touch-space: 8px;
 $this-margin: $this-extra-touch-space;
-$this-handle-size: 20px;
-$this-handle-border-color: #666666;
+$this-handle-size: 18px;
+$this-handle-color: rgb(255, 64, 129);
+$this-handle-border-color: rgba(255, 64, 129, 0.5);
+$this-circle-width: 6px;
+$this-text-color: #222222;
 
 duration-input-slider {
   overflow: hidden;
@@ -16,15 +19,14 @@ duration-input-slider {
     height: $this-size;
     border-radius: 100%;
     position: relative;
-    border: 1px solid $this-handle-border-color;
-    box-shadow: $whiteframe-shadow-4dp;
-    background: #ffffff;
+    box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3), 0 0 1px rgba(0, 0, 0, 0.3);
     cursor: grab;
     @include dark-theme() {
       background: $dark-theme-bg-darker;
       border-color: transparent;
     }
 
+    // touch spacer
     &:after {
       content: '';
       position: absolute;
@@ -32,6 +34,20 @@ duration-input-slider {
       right: -$this-extra-touch-space;
       left: -$this-extra-touch-space;
       bottom: -$this-extra-touch-space;
+      border-radius: 100%;
+    }
+
+    // inner circle
+    &:before {
+      background: #ffffff;
+      content: '';
+      box-shadow: -1px -1px 2px rgba(0, 0, 0, 0.2), 0 0 1px rgba(0, 0, 0, 0.3);
+      position: absolute;
+      top: $this-circle-width;
+      right: $this-circle-width;
+      left: $this-circle-width;
+      bottom: $this-circle-width;
+      border-radius: 100%;
     }
   }
 
@@ -50,17 +66,7 @@ duration-input-slider {
     pointer-events: none;
     z-index: 2;
     transition: $transition-duration-s ease-in;
-    &:before {
-      border-radius: 100%;
-      content: '';
-      border-top: 2px solid $this-handle-border-color;
-      // get rid of whitespace
-      top: -1px;
-      left: 0;
-      bottom: 0;
-      right: 0;
-      position: absolute;
-    }
+
     &:after {
       content: '';
       position: absolute;
@@ -74,16 +80,31 @@ duration-input-slider {
     transition: none;
   }
 
+  $this-stroke-width: 4px;
   .handle {
-    top: 1px;
-    background: $c-accent;
-    left: calc(50% - #{$this-handle-size/2});
+    top: 0;
+    background: $this-handle-color;
+    left: 50%;
+    width: 0;
+    height: $this-handle-size+5;
     position: absolute;
     transform-origin: 50% 100%;
-    height: $this-handle-size;
-    width: $this-handle-size;
-    border-radius: 100%;
     cursor: grabbing;
+
+    &:after {
+      content: '';
+      top: $this-circle-width;
+      background: $this-handle-color;
+      border: 4px solid $this-handle-border-color;
+      left: 50%;
+      margin-left: - #{$this-handle-size/2};
+      position: absolute;
+      transform-origin: 50% 100%;
+      height: $this-handle-size;
+      width: $this-handle-size;
+      border-radius: 100%;
+      cursor: grabbing;
+    }
   }
 
   .value-wrapper {
@@ -105,7 +126,6 @@ duration-input-slider {
   .value {
     width: 100%;
     text-align: center;
-    font-weight: bold;
     font-size: 17px;
     line-height: 17px;
     padding: 0;
@@ -123,7 +143,7 @@ duration-input-slider {
     background: transparent;
     border-radius: 0px;
     border: none;
-    color: #111111;
+    color: $this-text-color;
 
     @include dark-theme() {
       color: #ffffff;
@@ -152,11 +172,10 @@ duration-input-slider {
 
   label {
     font-size: 13px;
-    font-weight: bold;
     margin-bottom: 3px;
     display: inline-block;
     cursor: pointer;
-    color: #111111;
+    color: $this-text-color;
     text-align: center;
     transition: $transition-duration-xs ease-out;
     backface-visibility: hidden;
