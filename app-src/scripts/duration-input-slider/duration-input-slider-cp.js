@@ -74,7 +74,8 @@
 
         const theta = Math.atan2(y, x) * (180 / Math.PI);
 
-        const cssDegrees = convertThetaToCssDegrees(theta);
+        const cssDegrees = parseInt(convertThetaToCssDegrees(theta), 10);
+
         this.setValueFromRotation(cssDegrees);
       };
 
