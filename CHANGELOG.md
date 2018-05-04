@@ -1,3 +1,23 @@
+<a name="1.10.22"></a>
+## [1.10.22](https://github.com/johannesjo/super-productivity/compare/v1.10.21...v1.10.22) (2018-05-04)
+
+
+### Bug Fixes
+
+* **durationInputSlider:** drag not being canceled when mouseup is occurring outside wrapper ([7f72089](https://github.com/johannesjo/super-productivity/commit/7f72089))
+
+
+### Features
+
+* **durationInputSlider:** add uid to input and label ([f31bb57](https://github.com/johannesjo/super-productivity/commit/f31bb57))
+* **durationInputSlider:** beautify ([3c06774](https://github.com/johannesjo/super-productivity/commit/3c06774))
+* **durationInputSlider:** beautify for dark theme ([6efd327](https://github.com/johannesjo/super-productivity/commit/6efd327))
+* **durationInputSlider:** improve performance a little ([5042abe](https://github.com/johannesjo/super-productivity/commit/5042abe))
+* **durationInputSlider:** minor adjustments ([b7ba628](https://github.com/johannesjo/super-productivity/commit/b7ba628))
+* **durationInputSlider:** minor refactor ([e80d1e4](https://github.com/johannesjo/super-productivity/commit/e80d1e4))
+
+
+
 <a name="1.10.21"></a>
 ## [1.10.21](https://github.com/johannesjo/super-productivity/compare/v1.10.20...v1.10.21) (2018-05-02)
 
