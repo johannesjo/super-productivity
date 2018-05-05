@@ -1,3 +1,18 @@
+<a name="1.10.23"></a>
+## [1.10.23](https://github.com/johannesjo/super-productivity/compare/v1.10.22...v1.10.23) (2018-05-05)
+
+
+### Features
+
+* **durationInputSlider:** add dots for hours and update styling ([1caf315](https://github.com/johannesjo/super-productivity/commit/1caf315))
+* improve collapsible global link list ([55d0318](https://github.com/johannesjo/super-productivity/commit/55d0318))
+* make glboal link list expandable ([4f1ce4a](https://github.com/johannesjo/super-productivity/commit/4f1ce4a))
+* move add task to quick access ([876d20a](https://github.com/johannesjo/super-productivity/commit/876d20a))
+* move settings and help to quick access ([463afbf](https://github.com/johannesjo/super-productivity/commit/463afbf))
+* open speed dial on hover ([121ffe5](https://github.com/johannesjo/super-productivity/commit/121ffe5))
+
+
+
 <a name="1.10.22"></a>
 ## [1.10.22](https://github.com/johannesjo/super-productivity/compare/v1.10.21...v1.10.22) (2018-05-04)
 
