@@ -1,6 +1,8 @@
 <md-fab-speed-dial md-open="vm.isOpen"
                    md-direction="up"
-                   ng-class="vm.selectedMode">
+                   ng-class="vm.selectedMode"
+                   ng-mouseenter="vm.isOpen=true"
+                   ng-mouseleave="vm.isOpen=false">
   <md-fab-trigger>
     <md-button aria-label="menu"
                class="md-fab md-accent">
