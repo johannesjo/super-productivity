@@ -179,6 +179,7 @@
       // non setting variables which are simply saved where they are entered
       uiHelper: {
         isShowWelcomeDialog: true,
+        isShowBookmarkBar: false,
         dailyTaskExportSettings: {
           separateBy: ', ',
           separateFieldsBy: '',

@@ -12,11 +12,12 @@
 
   class GlobalLinkListCtrl {
     /* @ngInject */
-    constructor(GlobalLinkList, $document, $scope, Dialogs, Tasks) {
+    constructor(GlobalLinkList, $document, $scope, Dialogs, Tasks, $rootScope) {
       this.Dialogs = Dialogs;
       this.GlobalLinkList = GlobalLinkList;
       this.Tasks = Tasks;
       this.$scope = $scope;
+      this.r = $rootScope.r;
 
       // required otherwise the page would be reloaded
       $document[0].ondragover = $document[0].ondrop = (ev) => {

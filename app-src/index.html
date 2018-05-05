@@ -52,11 +52,12 @@ TODO configure more restrictive Content-Security-Policy
       ng-class="r.bodyClass"
       md-theme="{{r.theme}}">
 <main-header class="md-whiteframe-glow-z1"></main-header>
+<global-link-list global-links="r.globalLinks"></global-link-list>
+
 <md-content md-scroll-y
             layout="column"
             flex>
   <hint></hint>
-  <global-link-list global-links="r.globalLinks"></global-link-list>
 
   <div class="ui-view-container">
     <main ui-view></main>

@@ -1,4 +1,10 @@
-<div class="global-link-list-inner">
+<md-button class="md-icon-button show-bookmarks-btn md-raised md-primary"
+           aria-label="Show Help for section"
+           ng-click="$ctrl.r.uiHelper.isShowBookmarkBar=!$ctrl.r.uiHelper.isShowBookmarkBar;">
+  <ng-md-icon icon="bookmark"></ng-md-icon>
+</md-button>
+<div class="global-link-list-inner ani-slide-up-down"
+     ng-if="$ctrl.r.uiHelper.isShowBookmarkBar">
   <div class="global-link">
     <md-button class="md-raised md-icon-button md-primary md-hue-3"
                md-whiteframe="1"

@@ -1,3 +1,21 @@
+global-link-list {
+  position: relative;
+  z-index: 15;
+  .show-bookmarks-btn {
+    position: absolute;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1;
+    top: 0;
+    @media(max-width: $layout-xs) {
+      transform: translate(-50%, -33%);
+      height: 30px !important;
+      min-height: 30px !important;
+      padding: 0 !important;
+    }
+  }
+}
+
 .global-link-list-inner {
   display: flex;
   flex-flow: row;
