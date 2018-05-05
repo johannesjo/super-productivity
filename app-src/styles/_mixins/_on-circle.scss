@@ -1,0 +1,20 @@
+@mixin on-circle($item-count, $circle-size, $item-size, $start-rotation: -90) {
+    display: block;
+    position: absolute;
+    top:  50%;
+    left: 50%;
+    margin: -($item-size / 2);
+    width:  $item-size;
+    height: $item-size;
+
+    $angle: (360 / $item-count);
+    $rot: $start-rotation;
+
+    @for $i from 1 through $item-count {
+      &:nth-of-type(#{$i}) {
+        transform: rotate($rot * 1deg) translate($circle-size / 2);
+      }
+
+      $rot: $rot + $angle;
+    }
+}

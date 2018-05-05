@@ -1,4 +1,8 @@
 <div class="circle">
+  <div class="dots">
+    <div class="dot"
+         ng-repeat="hour in $ctrl.dots track by $index |limitTo:12"></div>
+  </div>
   <div class="handle-wrapper">
     <div class="handle"></div>
   </div>

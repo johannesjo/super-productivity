@@ -1,10 +1,10 @@
 $this-size: 130px;
 $this-extra-touch-space: 8px;
 $this-margin: $this-extra-touch-space;
-$this-handle-size: 18px;
+$this-handle-size: 16px;
 $this-handle-color: rgb(255, 64, 129);
 $this-handle-border-color: rgba(255, 64, 129, 0.5);
-$this-circle-width: 6px;
+$this-circle-width: $this-handle-size;
 $this-text-color: #222222;
 
 duration-input-slider {
@@ -19,8 +19,10 @@ duration-input-slider {
     height: $this-size;
     border-radius: 100%;
     position: relative;
-    box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3), 0 0 1px rgba(0, 0, 0, 0.3);
+    box-shadow: 1px 1px 6px rgba(0, 0, 0, 0.5);
     cursor: grab;
+    background: #ffffff;
+
     @include dark-theme() {
       background: $dark-theme-bg;
       border-color: transparent;
@@ -40,16 +42,49 @@ duration-input-slider {
     // inner circle
     &:before {
       content: '';
-      box-shadow: -1px -1px 2px rgba(0, 0, 0, 0.2), 0 0 1px rgba(0, 0, 0, 0.3);
+      box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2) inset, 0 0 1px rgba(0, 0, 0, 0.3) inset;
       position: absolute;
       top: $this-circle-width;
       right: $this-circle-width;
       left: $this-circle-width;
       bottom: $this-circle-width;
       border-radius: 100%;
+      background: #ffffff;
       @include dark-theme() {
         background: $dark-theme-bg-darker;
         border-color: transparent;
+      }
+    }
+
+    .dots {
+      position: absolute;
+      top: 0;
+      right: 0;
+      left: 0;
+      bottom: 0;
+      width: $this-size;
+      height: $this-size;
+    }
+
+    $this-dot-size: 12px;
+    .dot {
+      background: lighten($this-handle-color, 11);
+      background: #eeeeee;
+      box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3), 0 0 1px rgba(0, 0, 0, 0.3);
+      height: 8px;
+      width: 8px;
+      border-radius: 100%;
+      cursor: grabbing;
+      @include on-circle(12, $this-size - $this-circle-width, $this-dot-size);
+      animation: $transition-duration-m ani-circle-reveal;
+
+      @include dark-theme() {
+        background: #cccccc;
+      }
+
+      &.ng-leave,
+      &.ng-leave-active {
+        animation: $transition-duration-m ani-circle-remove;
       }
     }
   }
@@ -94,9 +129,11 @@ duration-input-slider {
     transform-origin: 50% 100%;
     cursor: grabbing;
 
+    // actual handle
     &:after {
+      box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3), 0 0 1px rgba(0, 0, 0, 0.3);
       content: '';
-      top: $this-circle-width;
+      top: 0;
       background: $this-handle-color;
       border: 4px solid $this-handle-border-color;
       left: 50%;
@@ -129,8 +166,8 @@ duration-input-slider {
   .value {
     width: 100%;
     text-align: center;
-    font-size: 17px;
-    line-height: 17px;
+    font-size: 16px;
+    line-height: 16px;
     padding: 0;
     cursor: text;
     transition: all .20s $ease-in-out-quint;
@@ -144,8 +181,10 @@ duration-input-slider {
     transform: translateZ(0);
     z-index: 4;
     background: transparent;
-    border-radius: 0px;
     border: none;
+    border-bottom-left-radius: 20px;
+    border-bottom-right-radius: 20px;
+
     color: $this-text-color;
 
     @include dark-theme() {
@@ -187,5 +226,18 @@ duration-input-slider {
       color: #ffffff;
     }
   }
+}
 
+@keyframes ani-circle-reveal {
+  from {
+    opacity: 0;
+    transform: translate(0);
+  }
+}
+
+@keyframes ani-circle-remove {
+  to {
+    opacity: 0;
+    transform: translate(0);
+  }
 }

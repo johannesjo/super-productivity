@@ -15,6 +15,7 @@
       this.el = el;
       this.$scope = $scope;
       this.minutesBefore = 0;
+      this.dots = undefined;
       this.uid = 'duration-input-slider' + Uid();
     }
 
@@ -145,6 +146,7 @@
       }
 
       this.minutesBefore = minutesFromDegrees;
+      this.dots = new Array(hours);
 
       this.$scope.$evalAsync(() => {
         this.ngModel = moment.duration({
@@ -157,6 +159,7 @@
     setRotationFromValue() {
       const momentVal = moment.duration(this.ngModel);
       const minutes = momentVal.minutes();
+      this.dots = new Array(Math.floor(momentVal.asHours()));
       const degrees = minutes * 360 / 60;
       this.minutesBefore = minutes;
       this.setCircleRotation(degrees);
