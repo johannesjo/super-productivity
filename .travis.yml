@@ -12,6 +12,7 @@ matrix:
       install:
         - brew update
         - brew install https://raw.githubusercontent.com/kadwanev/bigboybrew/master/Library/Formula/sshpass.rb
+        - brew install yarn
       addons:
         chrome: stable
     - os: linux
