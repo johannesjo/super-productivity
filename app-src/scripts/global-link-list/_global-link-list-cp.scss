@@ -7,11 +7,18 @@ global-link-list {
     transform: translate(-50%, -50%);
     z-index: 1;
     top: 0;
+    transition: $transition-duration-xs;
+    transition-property: transform !important;
+
     @media(max-width: $layout-xs) {
       transform: translate(-50%, -33%);
       height: 30px !important;
       min-height: 30px !important;
       padding: 0 !important;
+    }
+
+    &.is-open {
+      transform: translate(-50%, -100%);
     }
   }
 }
