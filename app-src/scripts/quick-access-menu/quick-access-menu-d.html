@@ -11,6 +11,12 @@
   </md-fab-trigger>
 
   <md-fab-actions>
+    <md-button class="md-fab md-raised md-mini"
+               aria-label="Add Task"
+               title="Add task"
+               ng-click="vm.openAddTask()">
+      <ng-md-icon icon="add"></ng-md-icon>
+    </md-button>
     <md-button aria-label="Notepad"
                ng-click="vm.openNotepad()"
                class="md-fab md-raised md-mini">
@@ -22,10 +28,18 @@
       <ng-md-icon icon="flash_on"></ng-md-icon>
     </md-button>
     <md-button class="md-fab md-raised md-mini"
-               aria-label="Add Task"
-               title="Add task"
-               ng-click="vm.openAddTask()">
-      <ng-md-icon icon="add"></ng-md-icon>
+               aria-label="Settings"
+               ui-sref="settings"
+               title="Go to settings">
+      <ng-md-icon icon="settings"></ng-md-icon>
     </md-button>
+
+    <md-button class="md-fab md-raised md-mini"
+               aria-label="Help"
+               ng-click="vm.openHelp();"
+               title="Open help for current view">
+      <ng-md-icon icon="help_outline"></ng-md-icon>
+    </md-button>
+
   </md-fab-actions>
 </md-fab-speed-dial>

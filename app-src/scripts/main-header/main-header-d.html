@@ -62,21 +62,6 @@
         <ng-md-icon icon="today"></ng-md-icon>
       </md-button>
 
-      <md-button class="md-icon-button"
-                 aria-label="Settings"
-                 ui-sref-active="md-raised"
-                 ui-sref="settings"
-                 title="Go to settings">
-        <ng-md-icon icon="settings"></ng-md-icon>
-      </md-button>
-
-      <md-button class="md-icon-button"
-                 aria-label="Help"
-                 ng-click="vm.openHelp();"
-                 title="Open help for current view">
-        <ng-md-icon icon="help_outline"></ng-md-icon>
-      </md-button>
-
       <pomodoro-button ng-if="r.config.pomodoro.isEnabled"></pomodoro-button>
     </nav>
   </div>
