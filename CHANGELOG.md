@@ -1,3 +1,13 @@
+<a name="1.10.24"></a>
+## [1.10.24](https://github.com/johannesjo/super-productivity/compare/v1.10.23...v1.10.24) (2018-05-05)
+
+
+### Features
+
+* add minor improvement to bookmark bar button ([14b0de5](https://github.com/johannesjo/super-productivity/commit/14b0de5))
+
+
+
 <a name="1.10.23"></a>
 ## [1.10.23](https://github.com/johannesjo/super-productivity/compare/v1.10.22...v1.10.23) (2018-05-05)
 
