@@ -35,10 +35,6 @@
       $mdOpenMenu(ev);
     };
 
-    vm.openAddTask = () => {
-      Dialogs('ADD_TASK');
-    };
-
     vm.openHelp = () => {
       Dialogs('HELP', { template: 'PAGE' });
     };

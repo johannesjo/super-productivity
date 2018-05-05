@@ -38,6 +38,11 @@
       Dialogs('DISTRACTIONS');
       this.isOpen = false;
     };
+
+
+    this.openAddTask = () => {
+      Dialogs('ADD_TASK');
+    };
   }
 
 })();
