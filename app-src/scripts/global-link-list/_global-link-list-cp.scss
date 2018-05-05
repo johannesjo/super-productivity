@@ -16,6 +16,10 @@ global-link-list {
   }
 }
 
+.global-link-list-outer {
+  overflow: visible !important;
+}
+
 .global-link-list-inner {
   display: flex;
   flex-flow: row;
