@@ -118,9 +118,9 @@
       <ng-md-icon icon="${icon}"></ng-md-icon>
     </div>
     <div class="toast-text">${msg}</div>
+    <md-progress-linear md-mode="indeterminate"
+      style="position: absolute; top: 0; left: 0;"></md-progress-linear>
   </div>
-  <md-progress-linear md-mode="indeterminate"
-    style="position: absolute; top: 0; left: 0;"></md-progress-linear>
 </md-toast>`
       });
     }
