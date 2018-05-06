@@ -5,7 +5,7 @@ $this-margin: $this-extra-touch-space;
 $this-handle-scale: 2;
 $this-handle-color: rgb(255, 64, 129);
 $this-handle-border-color: rgba(255, 64, 129, 0.5);
-$this-circle-width: 3px;
+$this-circle-width: 2px;
 $this-text-color: #222222;
 $this-dot-size: 10px;
 
@@ -22,7 +22,7 @@ duration-input-slider {
     border-radius: 100%;
     position: relative;
     box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
-
+    box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.26);
     cursor: grab;
     background: #ffffff;
 
