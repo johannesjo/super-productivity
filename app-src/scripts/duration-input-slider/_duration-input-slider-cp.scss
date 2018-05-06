@@ -4,7 +4,7 @@ $this-margin: $this-extra-touch-space;
 $this-handle-size: 16px;
 $this-handle-color: rgb(255, 64, 129);
 $this-handle-border-color: rgba(255, 64, 129, 0.5);
-$this-circle-width: $this-handle-size;
+$this-circle-width: 8px;
 $this-text-color: #222222;
 
 duration-input-slider {
@@ -40,8 +40,7 @@ duration-input-slider {
     }
 
     // inner circle
-    &:before {
-      content: '';
+    .inner-circle {
       box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2) inset, 0 0 1px rgba(0, 0, 0, 0.3) inset;
       position: absolute;
       top: $this-circle-width;
@@ -131,6 +130,7 @@ duration-input-slider {
 
     // actual handle
     &:after {
+      transform: scale(1.3);
       box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3), 0 0 1px rgba(0, 0, 0, 0.3);
       content: '';
       top: 0;
