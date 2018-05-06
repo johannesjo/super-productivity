@@ -12,7 +12,7 @@
 
   class GlobalLinkListCtrl {
     /* @ngInject */
-    constructor(GlobalLinkList, $document, $scope, Dialogs, Tasks, $rootScope) {
+    constructor(GlobalLinkList, $document, $scope, Dialogs, Tasks, $rootScope, EV) {
       this.Dialogs = Dialogs;
       this.GlobalLinkList = GlobalLinkList;
       this.Tasks = Tasks;
@@ -36,6 +36,10 @@
         this.handleLinkInput(link, ev, true);
         //  const html = e.clipboardData.getData('text/html');
       };
+
+      $scope.$on(EV.PROJECT_CHANGED, () => {
+        $rootScope.r.uiHelper.isShowBookmarkBar = false;
+      });
     }
 
     handleLinkInput(link, ev, isPaste) {
