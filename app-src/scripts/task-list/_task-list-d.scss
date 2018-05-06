@@ -50,6 +50,10 @@ task-list {
       .collapse-sub-tasks-btn {
         display: block;
       }
+      .title-bar-wrapper {
+        // make sure we're not overlapping with expand button
+        margin-left: 8px;
+      }
     }
   }
 }
