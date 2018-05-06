@@ -4,6 +4,8 @@ $dark-theme-bg: rgb(48, 48, 48);
 $dark-theme-text-color: #777777;
 $dark-theme-text-color-lighter: #bdbdbd;
 
+$light-theme-text-color: #333;
+$light-theme-bg: rgb(244, 244, 244);
 
 $dark-green: #30412d;
 $green: #4fa758;
@@ -33,9 +35,8 @@ $transition-duration-l: 600ms;
 
 $page-transition-duration: 300ms;
 
-
-$shadow-key-umbra-opacity:      0.2 !default;
-$shadow-key-penumbra-opacity:   0.14 !default;
+$shadow-key-umbra-opacity: 0.2 !default;
+$shadow-key-penumbra-opacity: 0.14 !default;
 $shadow-ambient-shadow-opacity: 0.12 !default;
 $whiteframe-shadow-1dp: 0px 1px 3px 0px rgba(0, 0, 0, $shadow-key-umbra-opacity), 0px 1px 1px 0px rgba(0, 0, 0, $shadow-key-penumbra-opacity), 0px 2px 1px -1px rgba(0, 0, 0, $shadow-ambient-shadow-opacity) !default;
 $whiteframe-shadow-2dp: 0px 1px 5px 0px rgba(0, 0, 0, $shadow-key-umbra-opacity), 0px 2px 2px 0px rgba(0, 0, 0, $shadow-key-penumbra-opacity), 0px 3px 1px -2px rgba(0, 0, 0, $shadow-ambient-shadow-opacity) !default;

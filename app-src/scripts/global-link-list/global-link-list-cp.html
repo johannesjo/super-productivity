@@ -18,6 +18,10 @@
       </md-button>
     </div>
 
+    <div class="msg"
+         ng-if="!$ctrl.globalLinks.length">You have no project bookmarks. Add one via drag and drop or by clicking on the '+' icon.
+    </div>
+
     <div class="global-link"
          ng-repeat="link in $ctrl.globalLinks"
          draggable="false">

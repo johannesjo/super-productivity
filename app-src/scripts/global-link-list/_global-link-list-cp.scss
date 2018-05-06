@@ -1,6 +1,11 @@
 global-link-list {
   position: relative;
   z-index: 15;
+  background: $light-theme-bg;
+  @include dark-theme() {
+    background: $dark-theme-bg;
+  }
+
   .show-bookmarks-btn {
     position: absolute;
     left: 50%;
@@ -34,6 +39,18 @@ global-link-list {
   flex-wrap: wrap;
   padding-bottom: 10px;
 
+  .msg {
+    flex: 1 1 auto;
+    display: flex;
+    justify-content: center;
+    align-content: center;
+    align-self: center;
+
+    color: $light-theme-text-color;
+    @include dark-theme() {
+      color: $dark-theme-text-color-lighter;
+    }
+  }
   .global-link {
     flex: 1 1 auto;
     margin: 6px 3px 0;
