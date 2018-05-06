@@ -14,23 +14,23 @@ progress-bar {
     background-color: #999999;
   }
 
-  &:after {
-    content: '';
-    position: absolute;
-    bottom: 50%;
-    right: -1px;
-    transform: translateY(50%);
-    background: inherit;
-    width: 2px;
-    height: 9px;
-    border: 1px solid inherit;
-  }
+  //&:after {
+  //  content: '';
+  //  position: absolute;
+  //  bottom: 50%;
+  //  right: -1px;
+  //  transform: translateY(50%);
+  //  background: inherit;
+  //  width: 2px;
+  //  height: 9px;
+  //  border: 1px solid inherit;
+  //}
 
   .task.is-done & {
     //opacity: 0.6;
   }
 
   .task.is-current & {
-    background-color: $green;
+    background-color: $green !important;
   }
 }
