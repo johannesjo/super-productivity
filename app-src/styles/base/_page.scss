@@ -18,9 +18,9 @@ html {
   font-family: sans-serif;
 }
 
-body{
+body {
   background: $light-theme-bg;
-  @include dark-theme() {
+  &.dark-theme {
     background: $dark-theme-bg;
   }
 }
