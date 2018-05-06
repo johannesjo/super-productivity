@@ -68,8 +68,11 @@
         timeSpentOnDay: vm.timeSpentOnDayCopy
       });
 
-      vm.timeSpentOnOtherDaysTotal = totalTimeSpent.subtract(vm.timeSpentOnDayCopy[vm.todayStr]);
-      if (vm.timeSpentOnOtherDaysTotal._milliseconds === 0) {
+      if (totalTimeSpent) {
+        vm.timeSpentOnOtherDaysTotal = totalTimeSpent.subtract(vm.timeSpentOnDayCopy[vm.todayStr]);
+      }
+
+      if (vm.timeSpentOnOtherDaysTotal && vm.timeSpentOnOtherDaysTotal._milliseconds === 0) {
         vm.timeSpentOnOtherDaysTotal = undefined;
       }
 
