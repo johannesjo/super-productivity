@@ -1,11 +1,6 @@
 'use strict';
 
-console.log('SERVICE WORKER');
-
-
 self.addEventListener('push', function(event) {
-  console.log('Received a push message', event);
-
   const title = 'Yay a message.';
   const body = 'We have received a push message.';
   const icon = '../img/' + (event.icon || 'icon_128x128-with-pad.png');

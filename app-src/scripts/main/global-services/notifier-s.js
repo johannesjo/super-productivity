@@ -47,7 +47,6 @@
       } else if (isServiceWorkerNotificationSupport()) {
         navigator.serviceWorker.getRegistration(SERVICE_WORKER_URL)
           .then((reg) => {
-            console.log(reg);
             reg.showNotification(notification.title, {
               body: notification.message,
               icon: notification.icon || 'img/icon_128x128-with-pad.png',
