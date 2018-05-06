@@ -5,7 +5,6 @@
     duration-input-slider {
       display: inline-block;
     }
-    margin-bottom: 20px;
   }
 
   .time-spend-on-days-wrapper {
@@ -21,5 +20,24 @@
     }
   }
   duration-input-slider {
+  }
+
+  progress-bar {
+    background-color: $green;
+    z-index: 2;
+    height: 5px;
+  }
+  .progress-bar-wrapper {
+    margin-top: 2px;
+    position: relative;
+    &:after {
+      position: absolute;
+      border-top: 2px dashed #bcbcbc;
+      content: '';
+      top: 2px;
+      right: 0;
+      left: 0;
+      bottom: 0;
+    }
   }
 }

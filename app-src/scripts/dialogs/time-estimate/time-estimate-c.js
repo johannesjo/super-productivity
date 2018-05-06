@@ -6,7 +6,7 @@
  * Controller of the superProductivity
  */
 
-(function () {
+(function() {
   'use strict';
 
   angular
@@ -14,7 +14,7 @@
     .controller('TimeEstimateCtrl', TimeEstimateCtrl);
 
   /* @ngInject */
-  function TimeEstimateCtrl($mdDialog, task, Tasks, TasksUtil, $window, theme) {
+  function TimeEstimateCtrl($mdDialog, task, Tasks, TasksUtil, $window, theme, $scope) {
     let vm = this;
     vm.theme = theme;
 
@@ -62,5 +62,27 @@
     vm.cancel = () => {
       $mdDialog.cancel();
     };
+
+    const updateProgress = () => {
+      const totalTimeSpent = TasksUtil.calcTotalTimeSpentOnTask({
+        timeSpentOnDay: vm.timeSpentOnDayCopy
+      });
+      vm.progress = TasksUtil.calcProgress({
+        timeSpent: totalTimeSpent,
+        timeEstimate: vm.timeEstimate,
+      });
+    };
+
+    updateProgress();
+
+    const timeSpentOnDayWatcher = $scope.$watch('vm.timeSpentOnDayCopy', updateProgress, true);
+    const timeEstimateWatcher = $scope.$watch('vm.timeEstimate', updateProgress, true);
+
+    $scope.$on('$destroy', () => {
+      // remove watchers manually
+      timeSpentOnDayWatcher();
+      timeEstimateWatcher();
+    });
   }
+
 })();
