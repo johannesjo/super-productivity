@@ -18,6 +18,13 @@ html {
   font-family: sans-serif;
 }
 
+body{
+  background: $light-theme-bg;
+  @include dark-theme() {
+    background: $dark-theme-bg;
+  }
+}
+
 main {
   padding: 20px 20px 50px;
 

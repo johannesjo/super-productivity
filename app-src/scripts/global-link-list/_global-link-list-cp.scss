@@ -1,10 +1,6 @@
 global-link-list {
   position: relative;
   z-index: 15;
-  background: $light-theme-bg;
-  @include dark-theme() {
-    background: $dark-theme-bg;
-  }
 
   .show-bookmarks-btn {
     position: absolute;
