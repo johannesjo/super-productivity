@@ -1,3 +1,23 @@
+<a name="1.10.28"></a>
+## [1.10.28](https://github.com/johannesjo/super-productivity/compare/v1.10.27...v1.10.28) (2018-05-06)
+
+
+### Bug Fixes
+
+* error case for time estimate ([9e78e06](https://github.com/johannesjo/super-productivity/commit/9e78e06))
+* progress calculation for time estimate ([b2d1353](https://github.com/johannesjo/super-productivity/commit/b2d1353))
+* sync toast being off ([1f9506d](https://github.com/johannesjo/super-productivity/commit/1f9506d))
+
+
+### Features
+
+* adjust styles for global link list ([720e9d6](https://github.com/johannesjo/super-productivity/commit/720e9d6))
+* minor style adjustments ([6a655b7](https://github.com/johannesjo/super-productivity/commit/6a655b7))
+* sexify task list shadows ([d722ddb](https://github.com/johannesjo/super-productivity/commit/d722ddb))
+* unify task list styles for mobile ([e1780c6](https://github.com/johannesjo/super-productivity/commit/e1780c6))
+
+
+
 <a name="1.10.27"></a>
 ## [1.10.27](https://github.com/johannesjo/super-productivity/compare/v1.10.26...v1.10.27) (2018-05-06)
 
