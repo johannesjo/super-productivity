@@ -25,9 +25,17 @@
   }
 
   /* @ngInject */
-  function QuickAccessMenuCtrl(Dialogs) {
+  function QuickAccessMenuCtrl(Dialogs, $timeout) {
     this.isOpen = false;
     this.selectedMode = 'md-fling';
+
+    // hacky fix to make sure it doesn't start open
+    $timeout(() => {
+      this.isOpen = true;
+      $timeout(() => {
+        this.isOpen = false;
+      });
+    });
 
     this.openNotepad = () => {
       Dialogs('NOTES');
