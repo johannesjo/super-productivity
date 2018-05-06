@@ -1,3 +1,13 @@
+<a name="1.10.29"></a>
+## [1.10.29](https://github.com/johannesjo/super-productivity/compare/v1.10.28...v1.10.29) (2018-05-06)
+
+
+### Features
+
+* update electron builder and electron core [#27](https://github.com/johannesjo/super-productivity/issues/27) ([7318217](https://github.com/johannesjo/super-productivity/commit/7318217))
+
+
+
 <a name="1.10.28"></a>
 ## [1.10.28](https://github.com/johannesjo/super-productivity/compare/v1.10.27...v1.10.28) (2018-05-06)
 
