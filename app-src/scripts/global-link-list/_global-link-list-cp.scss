@@ -14,7 +14,7 @@ global-link-list {
     top: 0;
     transition: $transition-duration-xs;
     transition-property: transform !important;
-
+    margin: 0 !important;
     @media(max-width: $layout-xs) {
       transform: translate(-50%, -33%);
       height: 30px !important;
