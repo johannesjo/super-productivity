@@ -69,6 +69,8 @@ function createWindow(params) {
 
   if (IS_MAC) {
     createMenu(quitApp);
+  } else {
+    mainWin.setMenu(null);
   }
 
   // update prop
