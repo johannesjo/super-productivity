@@ -31,32 +31,32 @@
                         mdx-paint-bg="primary"></progress-bar>
         </div>
 
-        <h3 class="md-subhead">Time Spent on other days ({{vm.timeSpentOnOtherDaysTotal|duration}})</h3>
-
-        <div>
-          <div class="time-spend-on-days-wrapper"
-               ng-repeat="(strDate,timeSpent) in vm.timeSpentOnDayCopy"
-               ng-if="vm.todayStr !== strDate">
-            <div class="inner-wrapper">
-              <label><strong ng-bind="strDate"></strong></label>
-              <duration-input-slider ng-model="vm.timeSpentOnDayCopy[strDate]"></duration-input-slider>
-              <md-button class="md-raised md-icon-button md-accent"
-                         aria-label="Delete"
-                         ng-click="vm.deleteValue(strDate)">
-                <ng-md-icon icon="delete_forever"></ng-md-icon>
-              </md-button>
+        <collapsible collapsible-title="Time Spent on other days ({{vm.timeSpentOnOtherDaysTotal|duration}})">
+          <div>
+            <div class="time-spend-on-days-wrapper"
+                 ng-repeat="(strDate,timeSpent) in vm.timeSpentOnDayCopy"
+                 ng-if="vm.todayStr !== strDate">
+              <div class="inner-wrapper">
+                <label><strong ng-bind="strDate"></strong></label>
+                <duration-input-slider ng-model="vm.timeSpentOnDayCopy[strDate]"></duration-input-slider>
+                <md-button class="md-raised md-icon-button md-accent"
+                           aria-label="Delete"
+                           ng-click="vm.deleteValue(strDate)">
+                  <ng-md-icon icon="delete_forever"></ng-md-icon>
+                </md-button>
+              </div>
             </div>
           </div>
-        </div>
 
-        <md-button type="button"
-                   class="md-raised md-primary"
-                   aria-label="add for another day"
-                   ng-hide="vm.showAddForAnotherDayForm"
-                   ng-click="vm.showAddForAnotherDayForm = true;">
-          <ng-md-icon icon="add"></ng-md-icon>
-          add for another day
-        </md-button>
+          <md-button type="button"
+                     class="md-raised md-primary"
+                     aria-label="add for another day"
+                     ng-hide="vm.showAddForAnotherDayForm"
+                     ng-click="vm.showAddForAnotherDayForm = true;">
+            <ng-md-icon icon="add"></ng-md-icon>
+            add for another day
+          </md-button>
+        </collapsible>
         <button type="submit"
                 style="width: 0;height: 0; font-size: 0;border: 0;background: transparent;"
                 tabindex="-1"></button>
