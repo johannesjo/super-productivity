@@ -114,6 +114,13 @@
       this.circle.style.transform = 'rotate(' + cssDegrees + 'deg)';
     }
 
+    setDots(hours) {
+      if (hours > 12) {
+        hours = 12;
+      }
+      this.dots = new Array(hours);
+    }
+
     setValueFromRotation(degrees) {
       let minutesFromDegrees;
       // NOTE: values are negative for the last quadrant
@@ -146,8 +153,7 @@
       }
 
       this.minutesBefore = minutesFromDegrees;
-      this.dots = new Array(hours);
-
+      this.setDots(hours);
       this.$scope.$evalAsync(() => {
         this.ngModel = moment.duration({
           hours: hours,
@@ -159,7 +165,7 @@
     setRotationFromValue() {
       const momentVal = moment.duration(this.ngModel);
       const minutes = momentVal.minutes();
-      this.dots = new Array(Math.floor(momentVal.asHours()));
+      this.setDots(Math.floor(momentVal.asHours()));
       const degrees = minutes * 360 / 60;
       this.minutesBefore = minutes;
       this.setCircleRotation(degrees);
