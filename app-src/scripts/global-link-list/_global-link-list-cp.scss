@@ -28,8 +28,8 @@ global-link-list {
   }
 }
 
-.global-link-list-outer {
-  overflow: visible !important;
+.global-link-list-outer.ani-slide-up-down {
+  overflow: visible;
 }
 
 .global-link-list-inner {

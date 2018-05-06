@@ -28,11 +28,11 @@
       return $animateCss($el, {
         from: {
           height: '0',
-          transform: 'scaleY(0)',
+          opacity: 0,
         },
         to: {
           height: height + 'px',
-          transform: 'scaleY(1)',
+          opacity: 1,
         },
         duration: animationSpeed(height),
         easing: EASE,
@@ -47,11 +47,11 @@
       return $animateCss($el, {
         from: {
           height: height + 'px',
-          transform: 'scaleY(1)'
+          opacity: 1
         },
         to: {
           height: '0',
-          transform: 'scaleY(0)'
+          opacity: 0
         },
         duration: animationSpeed(height),
         easing: EASE,

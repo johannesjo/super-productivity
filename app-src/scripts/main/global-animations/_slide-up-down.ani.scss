@@ -5,4 +5,8 @@
   transform: translateZ(0);
   backface-visibility: hidden;
   // will-change: transform, height;
+
+  &.ng-animate {
+    overflow: hidden;
+  }
 }
