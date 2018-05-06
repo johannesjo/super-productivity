@@ -1,3 +1,13 @@
+<a name="1.10.27"></a>
+## [1.10.27](https://github.com/johannesjo/super-productivity/compare/v1.10.26...v1.10.27) (2018-05-06)
+
+
+### Bug Fixes
+
+* minor styling issues ([f2d36db](https://github.com/johannesjo/super-productivity/commit/f2d36db))
+
+
+
 <a name="1.10.26"></a>
 ## [1.10.26](https://github.com/johannesjo/super-productivity/compare/v1.10.25...v1.10.26) (2018-05-06)
 
