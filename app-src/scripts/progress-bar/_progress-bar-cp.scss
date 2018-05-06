@@ -8,7 +8,7 @@ progress-bar {
   max-width: 100%;
   background-color: #777777;
   z-index: 2;
-  //margin-bottom: -1px;
+  //margin-bottom: -2px;
 
   @include dark-theme {
     background-color: #999999;

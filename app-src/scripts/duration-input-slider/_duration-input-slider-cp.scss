@@ -5,7 +5,7 @@ $this-margin: $this-extra-touch-space;
 $this-handle-scale: 2;
 $this-handle-color: rgb(255, 64, 129);
 $this-handle-border-color: rgba(255, 64, 129, 0.5);
-$this-circle-width: 2px;
+$this-circle-width: 3px;
 $this-text-color: #222222;
 $this-dot-size: 10px;
 
@@ -21,7 +21,8 @@ duration-input-slider {
     height: $this-size;
     border-radius: 100%;
     position: relative;
-    box-shadow: 2px 3px 5px rgba(0, 0, 0, 0.3);
+    box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
+
     cursor: grab;
     background: #ffffff;
 
@@ -43,7 +44,6 @@ duration-input-slider {
 
     // inner circle
     .inner-circle {
-      box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5) inset, 0 0 1px rgba(0, 0, 0, 0.5) inset;
       position: absolute;
       top: $this-circle-width;
       right: $this-circle-width;
@@ -70,7 +70,7 @@ duration-input-slider {
     .dot {
       background: lighten($this-handle-color, 11);
       background: #eeeeee;
-      box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.4);
+      box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.3);
       height: 8px;
       width: 8px;
       border-radius: 100%;
