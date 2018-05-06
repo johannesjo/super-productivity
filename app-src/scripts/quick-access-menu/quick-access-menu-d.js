@@ -5,7 +5,7 @@
  * # quickAccessMenu
  */
 
-(function () {
+(function() {
   'use strict';
 
   angular
@@ -39,9 +39,14 @@
       this.isOpen = false;
     };
 
+    this.openHelp = () => {
+      Dialogs('HELP', { template: 'PAGE' });
+      this.isOpen = false;
+    };
 
     this.openAddTask = () => {
       Dialogs('ADD_TASK');
+      this.isOpen = false;
     };
   }
 
