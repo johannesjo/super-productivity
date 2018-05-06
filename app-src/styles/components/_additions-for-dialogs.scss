@@ -29,4 +29,10 @@ md-dialog {
     max-width: 95%;
     max-height: 95%;
   }
+
+  .md-dialog-content {
+    @media(max-width: $layout-xs) {
+      padding: 10px;
+    }
+  }
 }
