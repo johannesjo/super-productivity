@@ -1,48 +1,45 @@
 (function() {
 
+  'use strict';
+
   angular.module('mdxUtil', ['ngMaterial'])
     .directive('mdxPaintFg', function(mdx) {
-      "use strict";
       return {
         restrict: 'A',
         link: function(scope, element, attributes) {
           setRGB(element, 'color', mdx, attributes.mdxPaintFg, 'mdx-paint-fg');
         }
-      }
+      };
     })
     .directive('mdxPaintBg', function(mdx) {
-      "use strict";
       return {
         restrict: 'A',
         link: function(scope, element, attributes) {
           setRGB(element, 'background-color', mdx, attributes.mdxPaintBg, 'mdx-paint-bg');
         }
-      }
+      };
     })
     .directive('mdxPaintSvg', function(mdx) {
-      "use strict";
       return {
         restrict: 'A',
         link: function(scope, element, attributes) {
           setRGB(element, 'fill', mdx, attributes.mdxPaintSvg, 'mdx-paint-svg');
         }
-      }
+      };
     })
     // Couldn't get access to _PALETTES any other way?
     .provider('mdx', function($mdThemingProvider) {
       return {
         $get: function($rootScope) {
-          "use strict";
           return {
             mdxThemeColors: $mdThemingProvider,
             $rootScope: $rootScope
-          }
+          };
         }
-      }
+      };
     });
 
   function setRGB(element, styled, mdx, input, directiveName) {
-    "use strict";
     const themeProvider = mdx.mdxThemeColors;
     var themeName = mdx.$rootScope.r.theme;
     var hueName = 'default';
@@ -50,7 +47,7 @@
     var hueKey, theme, hue, intention;
 
     // Do our best to parse out the attributes
-    angular.forEach(input.split(" "), function(value, key) {
+    angular.forEach(input.split(' '), function(value, key) {
       if (0 === key && 'default' === value) {
         themeName = value;
       } else if ({
@@ -88,11 +85,10 @@
         }
       }
     }
-    reportError("%s='%s' bad or missing attributes", directiveName, input);
+    reportError(`%s='%s' bad or missing attributes`, directiveName, input);
   }
 
   function reportError(errString, name, input) {
-    "use strict";
     console.error(errString, name, input);
     console.log('  usage %s="[theme] intention [hue]"', name);
     console.log('    acceptable intentions : primary,accent,warn,background');
