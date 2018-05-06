@@ -18,7 +18,7 @@ if (isLinux) {
   };
   return;
 }
-
+let isErrorShown = false;
 module.exports = (cb) => {
   exec(cmd, function(error, stdout) {
     if (error) {
@@ -26,7 +26,10 @@ module.exports = (cb) => {
       if (isLinux) {
         msg += ' You need to install ' + cmd + '.';
       }
-      errorHandler(msg);
+      if (!isErrorShown) {
+        errorHandler(msg);
+        isErrorShown = true;
+      }
       cb('NO_SUPPORT');
     }
 
