@@ -69,7 +69,8 @@
       });
 
       if (totalTimeSpent) {
-        vm.timeSpentOnOtherDaysTotal = totalTimeSpent.subtract(vm.timeSpentOnDayCopy[vm.todayStr]);
+        vm.timeSpentOnOtherDaysTotal = window.moment.duration(totalTimeSpent)
+          .subtract(vm.timeSpentOnDayCopy[vm.todayStr]);
       }
 
       if (vm.timeSpentOnOtherDaysTotal && vm.timeSpentOnOtherDaysTotal._milliseconds === 0) {
