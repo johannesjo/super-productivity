@@ -46,7 +46,10 @@ module.exports = (function() {
     htmlF: [
       base + '/scripts/**/*.html'
     ],
-    staticFiles: [base + '/manifest.json'],
+    staticFiles: [
+      base + '/manifest.json',
+      base + '/service-workers/notifications.js',
+    ],
     appCacheManifest: base + '/manifest.appcache',
     images: base + '/img/',
     imagesF: base + '/img/**/*.*',
