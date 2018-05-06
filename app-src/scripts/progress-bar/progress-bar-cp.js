@@ -22,10 +22,10 @@
       }
 
       if (this._progress > 1) {
-        this.$el[0].style = `width: ${this._progress}%; visibility: visible;`;
-        //this.$el[0].style = `transform: scaleX(${_value/100}); visibility: visible;`;
+        this.$el[0].style.visibility = 'visible';
+        this.$el[0].style.width = `${this._progress}%`;
       } else {
-        this.$el[0].style = `visibility: hidden;`;
+        this.$el[0].style.visibility = 'hidden';
       }
     }
 

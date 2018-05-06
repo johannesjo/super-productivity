@@ -23,9 +23,9 @@
   }
 
   progress-bar {
-    background-color: $green;
     z-index: 2;
-    height: 5px;
+    height: 6px;
+    box-shadow: 1px 1px 4px rgba(0, 0, 0, 0.3);
   }
   .progress-bar-wrapper {
     margin-top: 2px;
