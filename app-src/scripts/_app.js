@@ -44,6 +44,7 @@
       'angularMoment',
       'hc.marked',
       'mwl.calendar',
+      'mdxUtil',
       'angularPromiseButtons'
     ])
     .config(configMdTheme)
