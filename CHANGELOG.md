@@ -1,3 +1,22 @@
+<a name="1.10.26"></a>
+## [1.10.26](https://github.com/johannesjo/super-productivity/compare/v1.10.25...v1.10.26) (2018-05-06)
+
+
+### Bug Fixes
+
+* missing toolbar shadow when global link list is expanded ([992c01d](https://github.com/johannesjo/super-productivity/commit/992c01d))
+
+
+### Features
+
+* add time spent on other days total to time estimate ([a6d6c0f](https://github.com/johannesjo/super-productivity/commit/a6d6c0f))
+* beautify duration input slider ([09d40ec](https://github.com/johannesjo/super-productivity/commit/09d40ec))
+* improve duration input styling ([1514d79](https://github.com/johannesjo/super-productivity/commit/1514d79))
+* use theme color for progress bar ([7032929](https://github.com/johannesjo/super-productivity/commit/7032929))
+* use theme color for progress bar ([4d369b0](https://github.com/johannesjo/super-productivity/commit/4d369b0))
+
+
+
 <a name="1.10.25"></a>
 ## [1.10.25](https://github.com/johannesjo/super-productivity/compare/v1.10.24...v1.10.25) (2018-05-06)
 
