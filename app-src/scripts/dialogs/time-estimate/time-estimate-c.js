@@ -63,20 +63,26 @@
       $mdDialog.cancel();
     };
 
-    const updateProgress = () => {
+    const update = () => {
       const totalTimeSpent = TasksUtil.calcTotalTimeSpentOnTask({
         timeSpentOnDay: vm.timeSpentOnDayCopy
       });
+
+      vm.timeSpentOnOtherDaysTotal = totalTimeSpent.subtract(vm.timeSpentOnDayCopy[vm.todayStr]);
+      if (vm.timeSpentOnOtherDaysTotal._milliseconds === 0) {
+        vm.timeSpentOnOtherDaysTotal = undefined;
+      }
+
       vm.progress = TasksUtil.calcProgress({
         timeSpent: totalTimeSpent,
         timeEstimate: vm.timeEstimate,
       });
     };
 
-    updateProgress();
+    update();
 
-    const timeSpentOnDayWatcher = $scope.$watch('vm.timeSpentOnDayCopy', updateProgress, true);
-    const timeEstimateWatcher = $scope.$watch('vm.timeEstimate', updateProgress, true);
+    const timeSpentOnDayWatcher = $scope.$watch('vm.timeSpentOnDayCopy', update, true);
+    const timeEstimateWatcher = $scope.$watch('vm.timeEstimate', update, true);
 
     $scope.$on('$destroy', () => {
       // remove watchers manually
