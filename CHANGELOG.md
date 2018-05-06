@@ -1,3 +1,31 @@
+<a name="1.10.25"></a>
+## [1.10.25](https://github.com/johannesjo/super-productivity/compare/v1.10.24...v1.10.25) (2018-05-06)
+
+
+### Bug Fixes
+
+* don't display more than 12 hour dots ([7c9ec07](https://github.com/johannesjo/super-productivity/commit/7c9ec07))
+* global link toggle button position ([11b6225](https://github.com/johannesjo/super-productivity/commit/11b6225))
+* help not working for quick access ([f21b360](https://github.com/johannesjo/super-productivity/commit/f21b360))
+* make sure quick access doesn't start open ([d220cc5](https://github.com/johannesjo/super-productivity/commit/d220cc5))
+* only show missing xprintidle error once ([d1f4984](https://github.com/johannesjo/super-productivity/commit/d1f4984))
+* only show missing xprintidle error once [#80](https://github.com/johannesjo/super-productivity/issues/80) ([4d4a957](https://github.com/johannesjo/super-productivity/commit/4d4a957))
+* prevent expand button being overlapped ([035914a](https://github.com/johannesjo/super-productivity/commit/035914a))
+
+
+### Features
+
+* add message to the global link list if no items ([8040104](https://github.com/johannesjo/super-productivity/commit/8040104))
+* add mobile notifications ([80749fb](https://github.com/johannesjo/super-productivity/commit/80749fb))
+* add progress to time estimate ([18ee933](https://github.com/johannesjo/super-productivity/commit/18ee933))
+* add utility directives for theme coloring ([2e4ab7d](https://github.com/johannesjo/super-productivity/commit/2e4ab7d))
+* hide global link list when changing project ([165efb5](https://github.com/johannesjo/super-productivity/commit/165efb5))
+* make quick access buttons more recognizable ([fb5eebc](https://github.com/johannesjo/super-productivity/commit/fb5eebc))
+* speed up slide down animation ([913a945](https://github.com/johannesjo/super-productivity/commit/913a945))
+* use theme colors for duration input slider ([d62b490](https://github.com/johannesjo/super-productivity/commit/d62b490))
+
+
+
 <a name="1.10.24"></a>
 ## [1.10.24](https://github.com/johannesjo/super-productivity/compare/v1.10.23...v1.10.24) (2018-05-05)
 
