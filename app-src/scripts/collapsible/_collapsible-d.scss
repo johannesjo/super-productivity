@@ -14,7 +14,7 @@ collapsible {
     }
 
     .collapsible-expand-icon {
-      transition: all 200ms;
+      transition: all $transition-standard;
     }
 
     .md-button {

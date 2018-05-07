@@ -209,6 +209,12 @@ $task-inner-padding-left-right: 6px;
       border: 1px solid #dddddd;
       background: #ffffff !important;
 
+      transition: transform $transition-standard;
+      &:hover {
+        z-index: 5;
+        transform: scale(1.15);
+      }
+
       // somehow the icons are a little of so we move them
       ng-md-icon {
         margin-top: -3px !important;
@@ -226,12 +232,6 @@ $task-inner-padding-left-right: 6px;
       @include dark-theme {
         background: $dark-theme-bg-darker !important;
         border: 1px solid $dark-theme-bg;
-      }
-
-      transition: transform $transition-duration-m ease-out;
-      &:hover {
-        z-index: 5;
-        transform: scale(1.15);
       }
 
       @at-root {
@@ -312,7 +312,7 @@ $task-inner-padding-left-right: 6px;
 
     .show-notes-btn {
       ng-md-icon {
-        transition: 200ms;
+        transition: $transition-standard;
         backface-visibility: hidden;
       }
 
@@ -451,7 +451,7 @@ $task-inner-padding-left-right: 6px;
 .is-animation-ready > .task-list {
   > .task > .inner-wrapper > .first-line {
     .md-button {
-      transition: 200ms;
+      transition: $transition-standard;
       backface-visibility: hidden;
     }
   }
@@ -465,7 +465,7 @@ $task-inner-padding-left-right: 6px;
 
     &.is-current > .inner-wrapper > .first-line {
       .play-btn {
-        transition: all $transition-duration-m $ease-in-out-quint;
+        transition: $transition-standard;
       }
     }
 
@@ -473,7 +473,7 @@ $task-inner-padding-left-right: 6px;
       work-view & {
         transform: translateZ(0);
         backface-visibility: hidden;
-        animation: $transition-duration-m attention-for-current-task;
+        animation: attention-for-current-task $transition-standard;
       }
       [ui-view].ng-enter & {
         // only start after view is complete

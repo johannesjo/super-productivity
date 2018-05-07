@@ -44,20 +44,18 @@ button {
 .btn-spinner:not(:required) {
   margin-left: -22px;
   opacity: 0;
-  transition: 0.4s margin ease-out,
-  0.2s opacity ease-out;
+  transition: $transition-duration--leave $ani-leave-timing;
+  transition-property: opacity, margin;
 }
 
 .is-loading {
   .btn-spinner {
-    transition: 0.2s margin ease-in,
-    0.4s opacity ease-in;
-
+    transition: $transition-duration--leave $ani-enter-timing;
+    transition-property: opacity, margin;
     margin-left: 5px;
     opacity: 1;
   }
 }
-
 
 @-webkit-keyframes three-quarters {
   0% {

@@ -1,7 +1,7 @@
 [edit-on-click-duration],
 [edit-on-click] {
   cursor: text;
-  transition: all .20s $ease-in-out-quint;
+  transition: $transition-leave;
   transition-property: opacity, transform;
   display: block;
   background: inherit;
@@ -19,7 +19,7 @@
 
   &:after {
     background: #ffffff;
-    transition: all .20s $ease-in-out-quint;
+    transition: $transition-leave;
     position: absolute;
     width: 100%;
     height: 100%;
@@ -45,8 +45,10 @@
     z-index: 5;
     user-select: all;
     transform: scale(1.1);
+    transition: $transition-enter;
     &:after {
       opacity: 1;
+      transition: $transition-enter;
     }
 
     @media(max-width: $layout-xs) {
