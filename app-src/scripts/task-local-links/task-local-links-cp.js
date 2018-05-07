@@ -15,8 +15,6 @@
 
     removeLink(link) {
       const itemIndex = this.localLinks.findIndex(item => (item === link));
-      console.log(itemIndex);
-      
       this.localLinks.splice(itemIndex, 1);
     }
   }
