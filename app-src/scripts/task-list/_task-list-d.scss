@@ -73,7 +73,7 @@ $task-inner-padding-left-right: 6px;
     background-color: #ffffff;
     color: $this-task-text-color;
     position: relative;
-    box-shadow: 0 10px 6px -6px rgba(0, 0, 0, .3), 0 0 1px rgba(0, 0, 0, .3);
+    box-shadow: $shadow-bottom-boxed;
 
     .title-bar-wrapper,
     .first-line {
@@ -84,7 +84,6 @@ $task-inner-padding-left-right: 6px;
       border-color: rgb(60, 60, 60);
       background-color: $dark-theme-bg-lighter;
       color: $this-task-text-color-dark;
-      box-shadow: $whiteframe-shadow-6dp;
     }
   }
 
@@ -198,7 +197,7 @@ $task-inner-padding-left-right: 6px;
       // this fixes the original link button icon for some reason
       line-height: $this-button-size + -1;
       padding: 0;
-      box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.26);
+      box-shadow: $shadow-icon-button;
       border-radius: 100%;
       text-align: center;
       overflow: hidden;

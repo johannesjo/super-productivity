@@ -28,7 +28,7 @@
     bottom: 0;
     left: 0;
     content: '';
-    box-shadow: 0 0 4px 0 rgba(0, 0, 0, 0.8), $whiteframe-shadow-13dp;
+    box-shadow: $shadow-edit-on-click;
     opacity: 0;
     z-index: -1;
     border: 1px solid black;
