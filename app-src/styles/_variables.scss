@@ -29,11 +29,6 @@ $layout-gt-md: 1280px;
 $layout-gt-lg: 1920px;
 //$layout-xl: 1920px;
 
-$ease-in-out-quint: cubic-bezier(.38, .04, .35, .96);
-$transition-duration-xs: 150ms;
-$transition-duration-s: 250ms;
-$transition-duration-m: 350ms;
-$transition-duration-l: 600ms;
 
 $page-transition-duration: 300ms;
 
@@ -42,3 +37,7 @@ $shadow-bottom-boxed: #{$shadow-bottom}, 0 0 1px rgba(0, 0, 0, .3);
 $shadow-icon-button: 0 2px 5px 0 rgba(0, 0, 0, 0.26);
 $shadow-edit-on-click: 0 0 4px 0 rgba(0, 0, 0, 0.8), $whiteframe-shadow-13dp;
 
+$ease-in-out-quint: cubic-bezier(.38, .04, .35, .96);
+$transition-duration-s: 150ms;
+$transition-duration-m: 225ms;
+$transition-duration-l: 375ms;

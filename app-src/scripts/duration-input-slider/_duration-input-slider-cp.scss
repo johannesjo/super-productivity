@@ -75,7 +75,7 @@ duration-input-slider {
       border-radius: 100%;
       cursor: grabbing;
       @include on-circle(12, $this-size - $this-circle-width, $this-dot-size);
-      animation: $transition-duration-m ani-circle-reveal;
+      animation: $transition-duration-l ani-circle-reveal;
 
       @include dark-theme() {
         background: #cccccc;
@@ -83,7 +83,7 @@ duration-input-slider {
 
       &.ng-leave,
       &.ng-leave-active {
-        animation: $transition-duration-m ani-circle-remove;
+        animation: $transition-duration-l ani-circle-remove;
       }
     }
   }
@@ -102,7 +102,7 @@ duration-input-slider {
     bottom: 0;
     pointer-events: none;
     z-index: 2;
-    transition: $transition-duration-s ease-in;
+    transition: $transition-duration-m ease-in;
 
     &:after {
       content: '';
@@ -217,7 +217,7 @@ duration-input-slider {
     cursor: pointer;
     color: $this-text-color;
     text-align: center;
-    transition: $transition-duration-xs ease-out;
+    transition: $transition-duration-s ease-out;
     backface-visibility: hidden;
 
     @include dark-theme() {

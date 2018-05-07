@@ -8,7 +8,7 @@ global-link-list {
     transform: translate(-50%, -50%);
     z-index: 1;
     top: 0;
-    transition: $transition-duration-xs;
+    transition: $transition-duration-s;
     transition-property: transform !important;
     margin: 0 !important;
     @media(max-width: $layout-xs) {

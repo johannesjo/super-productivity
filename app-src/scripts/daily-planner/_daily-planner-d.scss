@@ -19,7 +19,7 @@ daily-planner {
     margin: 20px auto;
     max-width: $component-max-width;
     backface-visibility: hidden;
-    animation: $transition-duration-m attention-for-input-daily-planner linear;
+    animation: $transition-duration-l attention-for-input-daily-planner linear;
     transform: translateZ(0);
 
     [ui-view].ng-enter & {
@@ -41,7 +41,7 @@ daily-planner {
 .todays-tasks,
 .backlog-tasks {
   opacity: 0;
-  animation: $transition-duration-xs ani-task-list-enter ease-out;
+  animation: $transition-duration-s ani-task-list-enter ease-out;
   animation-fill-mode: forwards;
 }
 
