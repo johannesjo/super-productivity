@@ -7,7 +7,6 @@
 
   const DUR_ENTER = 0.225;
   const DUR_LEAVE = 0.195;
-  // $ani-standard-timing
   const EASE_ENTER = 'cubic-bezier(0, 0, .2, 1)';
   const EASE_LEAVE = 'cubic-bezier(.4, 0, 1, 1)';
 
@@ -39,7 +38,7 @@
           height: height + 'px',
           opacity: 1,
         },
-        duration: animationSpeed(height),
+        duration: animationSpeed(true, height),
         easing: EASE_ENTER,
         cleanupStyles: true
       });
@@ -58,7 +57,7 @@
           height: '0',
           opacity: 0
         },
-        duration: animationSpeed(height),
+        duration: animationSpeed(false, height),
         easing: EASE_LEAVE,
         cleanupStyles: true
       });
