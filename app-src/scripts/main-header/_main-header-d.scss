@@ -58,4 +58,26 @@ main-header {
       max-height: $this-height;
     }
   }
+
+  .show-bookmarks-btn {
+    position: absolute;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1;
+    top: 100%;
+    transition: $transition-leave !important;
+    transition-property: transform !important;
+    margin: 0 !important;
+    @media(max-width: $layout-xs) {
+      height: 30px !important;
+      min-height: 30px !important;
+      padding: 0 !important;
+    }
+
+    &.is-open {
+      transition-property: transform !important;
+      transition: $transition-enter !important;
+      transform: translate(-50%, -75%);
+    }
+  }
 }

@@ -64,5 +64,12 @@
 
       <pomodoro-button ng-if="r.config.pomodoro.isEnabled"></pomodoro-button>
     </nav>
+
+    <md-button class="md-icon-button show-bookmarks-btn md-raised md-primary"
+               aria-label="Show Help for section"
+               ng-class="{'is-open':r.uiHelper.isShowBookmarkBar}"
+               ng-click="r.uiHelper.isShowBookmarkBar=!r.uiHelper.isShowBookmarkBar;">
+      <ng-md-icon icon="bookmark"></ng-md-icon>
+    </md-button>
   </div>
 </md-toolbar>

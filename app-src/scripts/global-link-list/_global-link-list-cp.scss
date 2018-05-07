@@ -1,28 +1,6 @@
 global-link-list {
   position: relative;
-  z-index: 10;
-
-  .show-bookmarks-btn {
-    position: absolute;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 1;
-    top: 0;
-    transition: $transition-duration-m;
-    transition-timing-function: $ani-leave-timing;
-    transition-property: transform !important;
-    margin: 0 !important;
-    @media(max-width: $layout-xs) {
-      height: 30px !important;
-      min-height: 30px !important;
-      padding: 0 !important;
-    }
-
-    &.is-open {
-      transition-timing-function: $ani-enter-timing;
-      transform: translate(-50%, -100%);
-    }
-  }
+  z-index: 1;
 }
 
 .global-link-list-outer.ani-slide-up-down {
