@@ -152,7 +152,7 @@
         <section>
           <div class="md-caption"
                ng-bind="task.originalId ? 'Description': 'Notes'"></div>
-          <div md-whiteframe="4">
+          <div class="actual-notes-wrapper">
             <inline-markdown ng-model="task.notes"
                              on-edit-finished="$ctrl.onTaskNotesEditFinished(newVal, isChanged, task)"></inline-markdown>
           </div>

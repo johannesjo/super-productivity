@@ -359,6 +359,10 @@ $task-inner-padding-left-right: 6px;
     }
   }
 
+  .actual-notes-wrapper {
+    box-shadow: $whiteframe-shadow-4dp;
+  }
+
   form {
     width: 100%;
   }
