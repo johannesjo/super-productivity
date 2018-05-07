@@ -42,10 +42,10 @@
     top: -40px;
     right: -2px;
     visibility: hidden;
-    animation: 0.2s help-ico-animation ease-out;
+    animation: $transition-duration-m help-ico-animation $ani-standard-timing;
     animation-fill-mode: forwards;
     // wait for slide up (kind of because we have a dynamic duration)
-    animation-delay: 0.20s;
+    animation-delay: $transition-duration-m;
   }
 
   .config-section {
@@ -103,7 +103,7 @@
     transform: scale(0);
     visibility: visible;
   }
-  60% {
+  50% {
     transform: scale(1.4);
   }
   100% {

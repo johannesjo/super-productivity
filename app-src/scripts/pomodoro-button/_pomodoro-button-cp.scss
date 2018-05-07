@@ -40,7 +40,7 @@ pomodoro-button {
   }
 
   .timer-btn-text {
-    transition: all 0.2s $ease-in-out-quint;
+    transition: $transition-standard;
     font-size: 15px;
     line-height: 1;
     font-weight: bold;

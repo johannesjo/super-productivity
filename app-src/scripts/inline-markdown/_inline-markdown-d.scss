@@ -14,7 +14,7 @@ inline-markdown {
   position: relative;
   cursor: text;
   background: #fbefdd;
-  transition: min-height .2s $ease-in-out-quint;
+  transition: min-height $transition-leave;
 
   @include dark-theme {
     background-color: $dark-theme-bg;
@@ -22,6 +22,7 @@ inline-markdown {
   }
 
   &.is-editing {
+    transition: min-height $transition-enter;
     min-height: 160px;
   }
 
