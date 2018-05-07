@@ -5,8 +5,10 @@
     .module('superProductivity')
     .animation('.ani-crawl-in-out', slideAnimation);
 
-  const DUR = 0.2;
-  const EASE = 'ease-in-out';
+  const DUR_ENTER = 0.225;
+  const DUR_LEAVE = 0.195;
+  const EASE_ENTER = 'cubic-bezier(0, 0, .2, 1)';
+  const EASE_LEAVE = 'cubic-bezier(.4, 0, 1, 1)';
 
   /* @ngInject */
   function slideAnimation($animateCss) {
@@ -24,8 +26,8 @@
             maxHeight: maxHeight + 'px',
             transform: 'scale(1)',
           },
-          duration: DUR,
-          easing: EASE,
+          duration: DUR_ENTER,
+          easing: EASE_ENTER,
           cleanupStyles: true
         });
       },
@@ -42,8 +44,8 @@
             maxHeight: '0',
             transform: 'scale(0)',
           },
-          duration: DUR,
-          easing: EASE,
+          duration: DUR_LEAVE,
+          easing: EASE_LEAVE,
           cleanupStyles: true
         });
       }

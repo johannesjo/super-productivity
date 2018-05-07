@@ -8,7 +8,8 @@ global-link-list {
     transform: translate(-50%, -50%);
     z-index: 1;
     top: 0;
-    transition: $transition-duration-s;
+    transition: $transition-duration-m;
+    transition-timing-function: $ani-leave-timing;
     transition-property: transform !important;
     margin: 0 !important;
     @media(max-width: $layout-xs) {
@@ -18,6 +19,7 @@ global-link-list {
     }
 
     &.is-open {
+      transition-timing-function: $ani-enter-timing;
       transform: translate(-50%, -100%);
     }
   }

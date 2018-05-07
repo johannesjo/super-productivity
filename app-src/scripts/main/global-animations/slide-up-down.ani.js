@@ -5,16 +5,21 @@
     .module('superProductivity')
     .animation('.ani-slide-up-down', slideAnimation);
 
-  const DUR = 0.15;
-  const EASE = 'cubic-bezier(.38, .04, .35, .96)';
+  const DUR_ENTER = 0.225;
+  const DUR_LEAVE = 0.195;
+  // $ani-standard-timing
+  const EASE_ENTER = 'cubic-bezier(0, 0, .2, 1)';
+  const EASE_LEAVE = 'cubic-bezier(.4, 0, 1, 1)';
 
-  const animationSpeed = (height) => {
+  const animationSpeed = (isEnter, height) => {
+    let baseDur = isEnter ? DUR_ENTER : DUR_LEAVE;
+
     if (height >= 450) {
-      return DUR * 1.25;
+      return baseDur * 1.25;
     } else if (height > 200 && height < 450) {
-      return DUR;
+      return baseDur;
     } else {
-      return DUR;
+      return baseDur;
     }
   };
 
@@ -35,7 +40,7 @@
           opacity: 1,
         },
         duration: animationSpeed(height),
-        easing: EASE,
+        easing: EASE_ENTER,
         cleanupStyles: true
       });
     }
@@ -54,7 +59,7 @@
           opacity: 0
         },
         duration: animationSpeed(height),
-        easing: EASE,
+        easing: EASE_LEAVE,
         cleanupStyles: true
       });
     }
