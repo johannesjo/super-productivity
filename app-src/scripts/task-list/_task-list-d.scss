@@ -217,7 +217,16 @@ $task-inner-padding-left-right: 6px;
 
       // somehow the icons are a little of so we move them
       ng-md-icon {
-        margin-top: -3px !important;
+        // only affects linux for some reason
+        // margin-top: -3px !important;
+        //display: block;
+        //text-align: center;
+        //svg {
+        //  position: absolute;
+        //  left: 50%;
+        //  top: 50%;
+        //  transform: translate(-50%, -50%);
+        //}
       }
 
       &.update-indicator-btn {
