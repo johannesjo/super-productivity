@@ -6,7 +6,7 @@ $this-transition-duration: $page-transition-duration;
 [ui-view] {
   backface-visibility: hidden;
   transform: translateZ(0);
-  transition: all $this-transition-duration $ease-in-out-quint;
+  transition: all $this-transition-duration $ani-standard-timing;
   transition-properties: scale, opacity;
   transform-origin: center top;
 }

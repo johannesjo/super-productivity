@@ -29,9 +29,6 @@ $layout-gt-md: 1280px;
 $layout-gt-lg: 1920px;
 //$layout-xl: 1920px;
 
-
-$page-transition-duration: 300ms;
-
 $shadow-bottom: 0 10px 6px -6px rgba(0, 0, 0, .3);
 $shadow-bottom-boxed: #{$shadow-bottom}, 0 0 1px rgba(0, 0, 0, .3);
 $shadow-icon-button: 0 2px 5px 0 rgba(0, 0, 0, 0.26);
@@ -54,3 +51,5 @@ $transition-duration--leave: 195ms;
 $transition-enter: $transition-duration--enter $ani-enter-timing;
 $transition-leave: $transition-duration--leave $ani-leave-timing;
 $transition-standard: $transition-duration-m $ani-standard-timing;
+
+$page-transition-duration: $transition-duration-m;
