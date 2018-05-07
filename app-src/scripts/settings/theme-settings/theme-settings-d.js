@@ -42,9 +42,6 @@
         vm.selectedTheme = vm.currentTheme && vm.currentTheme
           .replace('-theme', '')
           .replace('-dark', '');
-
-        console.log(vm.currentTheme, vm.isDarkTheme);
-
       });
     }
 
@@ -108,8 +105,6 @@
     });
 
     $scope.$on('$destroy', () => {
-      console.log('DESTROY');
-
       // remove watchers manually
       _.each(watchers, (watcher) => {
         watcher();
