@@ -10,9 +10,11 @@ global-link-list {
 .global-link-list-inner {
   display: flex;
   flex-flow: row;
-  justify-content: space-between;
+  justify-content: center;
   flex-wrap: wrap;
   padding-bottom: 10px;
+  .md-button {
+  }
 
   .msg {
     flex: 1 1 auto;
@@ -29,7 +31,7 @@ global-link-list {
   }
   .global-link {
     flex: 1 1 auto;
-    margin: 6px 3px 0;
+    margin: 4px 2px 0;
     position: relative;
 
     > .md-button:focus + .controls,
