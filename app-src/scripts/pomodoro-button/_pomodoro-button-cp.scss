@@ -9,7 +9,6 @@ pomodoro-button {
   .timer-btn {
     position: relative;
     overflow: visible;
-    transform: scale(1.2);
 
     @media(max-width: $layout-xs) {
       transform: scale(1);
