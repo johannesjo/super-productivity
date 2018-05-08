@@ -1,3 +1,38 @@
+<a name="1.10.30"></a>
+## [1.10.30](https://github.com/johannesjo/super-productivity/compare/v1.10.29...v1.10.30) (2018-05-08)
+
+
+### Bug Fixes
+
+* blurry fonts for edit on click [#81](https://github.com/johannesjo/super-productivity/issues/81) ([a0a42e6](https://github.com/johannesjo/super-productivity/commit/a0a42e6))
+* icon positions for icon buttons on task list ([7197acd](https://github.com/johannesjo/super-productivity/commit/7197acd))
+* make idle time calculation more exact ([9950ee5](https://github.com/johannesjo/super-productivity/commit/9950ee5))
+* pomodoro button being beneath bookmark bar ([7cd4a31](https://github.com/johannesjo/super-productivity/commit/7cd4a31))
+* remove icon center fix ([730cb20](https://github.com/johannesjo/super-productivity/commit/730cb20))
+* slide up down longer item duration ([f1e977c](https://github.com/johannesjo/super-productivity/commit/f1e977c))
+
+
+### Features
+
+* adjust animation for edit on click ([0c3da1a](https://github.com/johannesjo/super-productivity/commit/0c3da1a))
+* adjust animation timings for collapsible and related ([d0388ee](https://github.com/johannesjo/super-productivity/commit/d0388ee))
+* adjust bookmark icon transition ([65c6a55](https://github.com/johannesjo/super-productivity/commit/65c6a55))
+* adjust font family ([2dccaec](https://github.com/johannesjo/super-productivity/commit/2dccaec))
+* adjust more transition timings for page transitions ([5710152](https://github.com/johannesjo/super-productivity/commit/5710152))
+* adjust more transition timings to material guidelines ([44335cb](https://github.com/johannesjo/super-productivity/commit/44335cb))
+* adjust multiple transitions to material guidelines ([23c9314](https://github.com/johannesjo/super-productivity/commit/23c9314))
+* adjust task box shadow for dark theme ([f020d84](https://github.com/johannesjo/super-productivity/commit/f020d84))
+* improve slide-up-down.ani again ([843b46a](https://github.com/johannesjo/super-productivity/commit/843b46a))
+* load roboto font from google fonts ([5512029](https://github.com/johannesjo/super-productivity/commit/5512029))
+* make padding for dialogs a little smaller on mobile ([666fc95](https://github.com/johannesjo/super-productivity/commit/666fc95))
+* minor style adjustments ([76d2c8f](https://github.com/johannesjo/super-productivity/commit/76d2c8f))
+* move time spent on other days to collapsible ([541dcdc](https://github.com/johannesjo/super-productivity/commit/541dcdc))
+* remove one example ([6a3052e](https://github.com/johannesjo/super-productivity/commit/6a3052e))
+* show sp icon on mobile ([f6da59e](https://github.com/johannesjo/super-productivity/commit/f6da59e))
+* use css rather than angular material shadow helper ([24f4305](https://github.com/johannesjo/super-productivity/commit/24f4305))
+
+
+
 <a name="1.10.29"></a>
 ## [1.10.29](https://github.com/johannesjo/super-productivity/compare/v1.10.28...v1.10.29) (2018-05-06)
 
