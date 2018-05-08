@@ -65,7 +65,7 @@ main-header {
     transform: translate(-50%, -50%);
     z-index: 1;
     top: 100%;
-    transition: $transition-leave !important;
+    transition: $transition-standard !important;
     transition-property: transform !important;
     margin: 0 !important;
     @media(max-width: $layout-xs) {
@@ -76,7 +76,7 @@ main-header {
 
     &.is-open {
       transition-property: transform !important;
-      transition: $transition-enter !important;
+      transition: $transition-standard !important;
       transform: translate(-50%, -75%);
     }
   }
