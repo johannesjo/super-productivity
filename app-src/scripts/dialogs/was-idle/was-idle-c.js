@@ -55,16 +55,14 @@
       $mdDialog.cancel();
     };
 
-    let currentIdleStart = moment();
+    const idleStart = moment();
     const poll = $interval(() => {
       let now = moment();
-
-      realIdleTime += moment.duration(now.diff(currentIdleStart))
+      realIdleTime = moment
+        .duration(now.diff(idleStart))
+        .add(initialIdleTime)
         .asMilliseconds();
       vm.idleTime = $window.moment.duration(realIdleTime, 'milliseconds').format('hh:mm:ss');
-
-      // set to now
-      currentIdleStart = moment();
     }, POLL_INTERVAL);
 
     $scope.$on('$destroy', () => {
