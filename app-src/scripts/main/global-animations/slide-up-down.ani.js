@@ -7,18 +7,24 @@
 
   const DUR_ENTER = 0.225;
   const DUR_LEAVE = 0.195;
-  const EASE_ENTER = 'cubic-bezier(0, 0, .2, 1)';
-  const EASE_LEAVE = 'cubic-bezier(.4, 0, 1, 1)';
+  const EASE_ENTER = 'cubic-bezier(.4, 0, .2, 1)';
+  const EASE_LEAVE = 'cubic-bezier(.4, 0, .2, 1)';
 
   const animationSpeed = (isEnter, height) => {
     let baseDur = isEnter ? DUR_ENTER : DUR_LEAVE;
 
-    if (height >= 450) {
+    if (height > 600) {
+      return baseDur * 2;
+    } else if (height > 500) {
+      return baseDur * 1.75;
+    } else if (height > 400) {
+      return baseDur * 1.5;
+    } else if (height > 300) {
       return baseDur * 1.25;
-    } else if (height > 200 && height < 450) {
+    } else if (height > 100) {
       return baseDur;
     } else {
-      return baseDur;
+      return baseDur * 0.75;
     }
   };
 
@@ -32,11 +38,11 @@
       return $animateCss($el, {
         from: {
           height: '0',
-          opacity: 0,
+          //opacity: 0,
         },
         to: {
           height: height + 'px',
-          opacity: 1,
+          //opacity: 1,
         },
         duration: animationSpeed(true, height),
         easing: EASE_ENTER,
@@ -51,11 +57,11 @@
       return $animateCss($el, {
         from: {
           height: height + 'px',
-          opacity: 1
+          //opacity: 1
         },
         to: {
           height: '0',
-          opacity: 0
+          //opacity: 0
         },
         duration: animationSpeed(false, height),
         easing: EASE_LEAVE,

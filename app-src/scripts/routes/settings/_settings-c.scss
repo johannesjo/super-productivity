@@ -35,17 +35,14 @@
   .help-btn {
     display: none;
     position: absolute;
-  }
-
-  .is-expanded .help-btn {
-    display: block;
     top: -40px;
     right: -2px;
-    visibility: hidden;
+  }
+
+
+  .is-expanded .ani-slide-up-down:not(.ng-animate) .help-btn {
+    display: block;
     animation: $transition-duration-m help-ico-animation $ani-standard-timing;
-    animation-fill-mode: forwards;
-    // wait for slide up (kind of because we have a dynamic duration)
-    animation-delay: $transition-duration-m;
   }
 
   .config-section {
@@ -101,14 +98,11 @@
 @keyframes help-ico-animation {
   0% {
     transform: scale(0);
-    visibility: visible;
   }
   50% {
     transform: scale(1.4);
   }
   100% {
-    -webkit-transform: scale(1);
     transform: scale(1);
-    visibility: visible;
   }
 }
