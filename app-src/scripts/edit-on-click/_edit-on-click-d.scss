@@ -44,7 +44,7 @@
     user-select: all;
     // thee magic number is 16/14 so we scale to whole pixels
     transform: scale(1.142857143);
-    transition: $transition-enter;
+    transition: $transition-standard;
 
     .is-hide-controls & {
       transform-origin: center center;
@@ -53,7 +53,7 @@
 
     &:after {
       opacity: 1;
-      transition: $transition-enter;
+      transition: $transition-standard;
     }
     @media(max-width: $layout-xs) {
       transform: scale(1);
