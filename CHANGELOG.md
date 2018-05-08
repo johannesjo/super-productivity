@@ -1,3 +1,14 @@
+<a name="1.10.31"></a>
+## [1.10.31](https://github.com/johannesjo/super-productivity/compare/v1.10.30...v1.10.31) (2018-05-08)
+
+
+### Features
+
+* make pomodoro button less prominent ([1250cb2](https://github.com/johannesjo/super-productivity/commit/1250cb2))
+* move global links closer together ([d0f8108](https://github.com/johannesjo/super-productivity/commit/d0f8108))
+
+
+
 <a name="1.10.30"></a>
 ## [1.10.30](https://github.com/johannesjo/super-productivity/compare/v1.10.29...v1.10.30) (2018-05-08)
 
