@@ -9,8 +9,6 @@
   overflow: visible;
   user-select: none;
   caret-color: #000000;
-  backface-visibility: hidden;
-  transform: translateZ(0);
   z-index: 4;
 
   @include dark-theme() {
@@ -44,15 +42,21 @@
   &:focus {
     z-index: 5;
     user-select: all;
-    transform: scale(1.1);
+    // thee magic number is 16/14 so we scale to whole pixels
+    transform: scale(1.142857143);
     transition: $transition-enter;
+
+    .is-hide-controls & {
+      transform-origin: center center;
+      transform: scale(1.142857143) translateX(20px);
+    }
+
     &:after {
       opacity: 1;
       transition: $transition-enter;
     }
-
     @media(max-width: $layout-xs) {
-      transform: scale(1.05);
+      transform: scale(1);
     }
   }
 }
