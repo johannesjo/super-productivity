@@ -30,6 +30,7 @@
     <nav class="nav">
       <md-button class="md-icon-button"
                  aria-label="Daily Planner"
+                 md-no-ink
                  ui-sref-active="md-raised"
                  ui-sref="daily-planner"
                  title="Go to daily planer">
@@ -38,6 +39,7 @@
 
       <md-button class="md-icon-button"
                  aria-label="Work View"
+                 md-no-ink
                  ui-sref-active="md-raised"
                  ng-if="$state.current.name!=='daily-summary'"
                  ui-sref="work-view"
@@ -48,6 +50,7 @@
       <md-button class="md-icon-button"
                  aria-label="Daily Summary"
                  ng-if="$state.current.name==='daily-summary'"
+                 md-no-ink
                  ui-sref-active="md-raised"
                  ui-sref="daily-summary"
                  title="Finish your day / Go to summary">
@@ -56,6 +59,7 @@
 
       <md-button class="md-icon-button"
                  aria-label="Daily Agenda / Tracking History"
+                 md-no-ink
                  ui-sref-active="md-raised"
                  ui-sref="daily-agenda"
                  title="Go to daily agenda / Tracking history">
