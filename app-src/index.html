@@ -53,7 +53,8 @@ TODO configure more restrictive Content-Security-Policy
       ng-class="r.bodyClass"
       md-theme="{{r.theme}}">
 <main-header class="md-whiteframe-glow-z1"></main-header>
-<global-link-list global-links="r.globalLinks"></global-link-list>
+<global-link-list global-links="r.globalLinks"
+                  is-toggled="r.uiHelper.isShowBookmarkBar"></global-link-list>
 
 <md-content md-scroll-y
             layout="column"

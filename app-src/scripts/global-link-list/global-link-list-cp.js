@@ -17,7 +17,6 @@
       this.GlobalLinkList = GlobalLinkList;
       this.Tasks = Tasks;
       this.$scope = $scope;
-      this.r = $rootScope.r;
 
       // required otherwise the page would be reloaded
       $document[0].ondragover = $document[0].ondrop = (ev) => {
@@ -115,7 +114,8 @@
       controller: GlobalLinkListCtrl,
       controllerAs: CONTROLLER_AS,
       bindings: {
-        globalLinks: '='
+        globalLinks: '=',
+        isToggled: '=',
       }
     });
 
