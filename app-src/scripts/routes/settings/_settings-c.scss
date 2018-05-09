@@ -40,7 +40,7 @@
   }
 
 
-  .is-expanded .ani-slide-up-down:not(.ng-animate) .help-btn {
+  .is-expanded .ani-expand-collapse:not(.ng-animate) .help-btn {
     display: block;
     animation: $transition-duration-m help-ico-animation $ani-standard-timing;
   }

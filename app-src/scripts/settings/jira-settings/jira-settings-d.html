@@ -45,7 +45,7 @@
   </md-switch>
 
   <div ng-show="vm.settings.isJiraEnabled"
-       class="ani-slide-up-down">
+       class="ani-expand-collapse">
     <form>
       <md-input-container class="md-block">
         <label>Host / Base URL</label>
@@ -139,7 +139,7 @@
       </md-switch>
 
       <section ng-if="vm.settings.isTransitionIssuesEnabled"
-               class="ani-slide-up-down">
+               class="ani-expand-collapse">
         <p>Jira enables a wide configuration of transitions usually coming into action as different columns on your jira agile board. That's why we can't make assumptions about where and when to transition your tasks and you need to set it manually.</p>
         <p>First you need to select an example ticket from which we can load the different available transitions. This requires you to
           <strong>already have set valid credentials</strong> and a <strong>valid JQL Query for searching tasks</strong>.
@@ -170,7 +170,7 @@
         <h3 class="md-caption">Configure transitions</h3>
 
         <section ng-if="vm.settings.transitions"
-                 class="ani-slide-up-down">
+                 class="ani-expand-collapse">
           <md-input-container class="md-block">
             <label>Default transition for OPEN</label>
             <md-select ng-model="vm.settings.transitions.OPEN"

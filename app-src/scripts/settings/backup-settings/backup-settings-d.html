@@ -59,7 +59,7 @@
   </md-switch>
 
   <div ng-if="vm.settings.googleDriveSync.isEnabled"
-       class="ani-slide-up-down">
+       class="ani-expand-collapse">
     <div>
       <md-button class="md-raised"
                  promise-btn
@@ -170,7 +170,7 @@
 
 
   <div ng-if="vm.settings.automaticBackups.isEnabled"
-       class="ani-slide-up-down">
+       class="ani-expand-collapse">
     <md-input-container class="md-block">
       <label>Interval in seconds to make backups</label>
       <input type="number"
@@ -195,7 +195,7 @@
   </div>
 
   <div ng-if="vm.settings.automaticBackups.isSyncEnabled"
-       class="ani-slide-up-down">
+       class="ani-expand-collapse">
     <md-input-container class="md-block">
       <label>Path to sync file</label>
       <input type="text"

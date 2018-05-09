@@ -29,7 +29,7 @@
         <strong ng-bind="worklogForDay.timeSpent|duration"></strong>
       </div>
 
-      <div class="ani-slide-up-down"
+      <div class="ani-expand-collapse"
            ng-if="worklogForDay.isVisible">
         <table class="task-summary-table">
           <tr ng-repeat="logEntry in worklogForDay.entries track by logEntry.task.id">

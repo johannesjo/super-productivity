@@ -3,7 +3,7 @@
 
   angular
     .module('superProductivity')
-    .animation('.ani-slide-up-down', slideAnimation);
+    .animation('.ani-expand-collapse', slideAnimation);
 
   const DUR_ENTER = 0.225;
   const DUR_LEAVE = 0.195;
