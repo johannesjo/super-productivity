@@ -13,18 +13,20 @@
   const animationSpeed = (isEnter, height) => {
     let baseDur = isEnter ? DUR_ENTER : DUR_LEAVE;
 
-    if (height > 600) {
+    if (height > 800) {
       return baseDur * 2;
+    } else if (height > 600) {
+      return baseDur * 1.8;
     } else if (height > 500) {
-      return baseDur * 1.75;
+      return baseDur * 1.6;
     } else if (height > 400) {
-      return baseDur * 1.5;
+      return baseDur * 1.4;
     } else if (height > 300) {
-      return baseDur * 1.25;
+      return baseDur * 1.2;
     } else if (height > 100) {
       return baseDur;
     } else {
-      return baseDur * 0.75;
+      return baseDur * 0.8;
     }
   };
 
