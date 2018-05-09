@@ -1,0 +1,13 @@
+.ani-slide-up-down {
+  overflow: hidden;
+  margin: 0;
+  transform-origin: center 0;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  position: relative;
+  // will-change: transform, height;
+
+  &.ng-animate {
+    overflow: hidden;
+  }
+}
