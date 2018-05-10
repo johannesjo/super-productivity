@@ -81,7 +81,7 @@
       bindings: {
         onEmptySubmit: '&',
         onBlur: '&',
-        newTaskTitle: '='
+        newTaskTitle: '=?'
       },
     });
 
