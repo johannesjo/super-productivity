@@ -1,3 +1,31 @@
+<a name="1.10.32"></a>
+## [1.10.32](https://github.com/johannesjo/super-productivity/compare/v1.10.31...v1.10.32) (2018-05-10)
+
+
+### Bug Fixes
+
+* global link list not showing initially sometimes ([d94a56f](https://github.com/johannesjo/super-productivity/commit/d94a56f))
+* minor styling issue ([d1469a3](https://github.com/johannesjo/super-productivity/commit/d1469a3))
+
+
+### Features
+
+* add add-task-bar as standalone component ([7912b74](https://github.com/johannesjo/super-productivity/commit/7912b74))
+* add global add task bar ([3b4c49e](https://github.com/johannesjo/super-productivity/commit/3b4c49e))
+* add missing ani-expand-collapse ([b346974](https://github.com/johannesjo/super-productivity/commit/b346974))
+* adjust main header and global link lists z-index ([8a5dae6](https://github.com/johannesjo/super-productivity/commit/8a5dae6))
+* adjust timings for expand collapse ([1688471](https://github.com/johannesjo/super-productivity/commit/1688471))
+* blend in rather than sliding ([5282c5e](https://github.com/johannesjo/super-productivity/commit/5282c5e))
+* improve performance by replacing md-button with just a regular button for the task list where possible ([5d3433d](https://github.com/johannesjo/super-productivity/commit/5d3433d))
+* improve styling for global add task bar ([4a20402](https://github.com/johannesjo/super-productivity/commit/4a20402))
+* remove margin top for first list inside inline markdown ([d3e63fc](https://github.com/johannesjo/super-productivity/commit/d3e63fc))
+* remove padding bottom for global link list ([e694c18](https://github.com/johannesjo/super-productivity/commit/e694c18))
+* remove ripple effect from navigation buttons ([355e611](https://github.com/johannesjo/super-productivity/commit/355e611))
+* reset task title when opening global task bar ([7f8c1b7](https://github.com/johannesjo/super-productivity/commit/7f8c1b7))
+* slide down bookmark bar instead of expanding ([3b26c63](https://github.com/johannesjo/super-productivity/commit/3b26c63))
+
+
+
 <a name="1.10.31"></a>
 ## [1.10.31](https://github.com/johannesjo/super-productivity/compare/v1.10.30...v1.10.31) (2018-05-08)
 
