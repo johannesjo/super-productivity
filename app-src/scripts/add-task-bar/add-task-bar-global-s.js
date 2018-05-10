@@ -23,12 +23,14 @@
     }
 
     show(isShowFromBottom) {
+      this.model.newTaskTitle = '';
       this.model.isShowFromBottom = isShowFromBottom;
       this.model.isShow = !this.model.isShow;
       //this.model.isShow = true;
       if (this.focuesEl) {
         setTimeout(() => {
-          this.focuesEl.find('input').focus();
+          const inputEl = this.focuesEl.find('input');
+          inputEl.focus();
         });
       }
     }
