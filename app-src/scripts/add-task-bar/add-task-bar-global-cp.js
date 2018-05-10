@@ -9,7 +9,7 @@
   'use strict';
 
   class AddTaskBarGlobalCtrl {
-    /* @ngInject */
+    /* WEEEEIRD it is not needed here @ng?????Inject */
     constructor(AddTaskBarGlobal, $element) {
       this.model = AddTaskBarGlobal.model;
       AddTaskBarGlobal.setFocusEl($element);
