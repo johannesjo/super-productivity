@@ -1,3 +1,13 @@
+<a name="1.10.34"></a>
+## [1.10.34](https://github.com/johannesjo/super-productivity/compare/v1.10.33...v1.10.34) (2018-05-10)
+
+
+### Bug Fixes
+
+* unit tests ([b58d0c4](https://github.com/johannesjo/super-productivity/commit/b58d0c4))
+
+
+
 <a name="1.10.33"></a>
 ## [1.10.33](https://github.com/johannesjo/super-productivity/compare/v1.10.32...v1.10.33) (2018-05-10)
 
