@@ -68,5 +68,9 @@ inline-markdown {
   }
   ul {
     padding-left: 18px;
+
+    &:first-child{
+      margin-top: 0;
+    }
   }
 }
