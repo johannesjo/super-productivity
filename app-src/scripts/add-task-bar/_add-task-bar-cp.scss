@@ -1,0 +1,10 @@
+add-task-bar {
+  display: block;
+
+  .add-task-form {
+    width: 100%;
+    md-autocomplete {
+      width: 100%;
+    }
+  }
+}

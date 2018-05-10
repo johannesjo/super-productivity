@@ -1,0 +1,19 @@
+<form ng-submit="vm.addTask()"
+      layout="row"
+      class="add-task-form">
+
+  <md-autocomplete
+    tabindex="1"
+    md-selected-item="vm.newTask"
+    md-search-text="vm.newTaskTitle"
+    md-items="task in vm.getFilteredTaskSuggestions(vm.newTaskTitle)"
+    md-item-text="task.title"
+    md-require-match="false"
+    autofocus-autocomplete
+    placeholder="Select or create a task">
+    <md-item-template>
+          <span md-highlight-text="vm.newTaskTitle"
+                md-highlight-flags="i">{{task.title}}</span>
+    </md-item-template>
+  </md-autocomplete>
+</form>
