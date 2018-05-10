@@ -1,3 +1,13 @@
+<a name="1.10.35"></a>
+## [1.10.35](https://github.com/johannesjo/super-productivity/compare/v1.10.34...v1.10.35) (2018-05-10)
+
+
+### Bug Fixes
+
+* make new task title optional for add task bar component ([cdbe0b6](https://github.com/johannesjo/super-productivity/commit/cdbe0b6))
+
+
+
 <a name="1.10.34"></a>
 ## [1.10.34](https://github.com/johannesjo/super-productivity/compare/v1.10.33...v1.10.34) (2018-05-10)
 
