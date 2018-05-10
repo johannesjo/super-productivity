@@ -137,12 +137,13 @@
   }
 
   /* @ngInject */
-  function initGlobalShortcuts($document, Dialogs, $rootScope, CheckShortcutKeyCombo, IS_ELECTRON, $state) {
-    $document.bind('keydown', (ev) => {
+  function initGlobalShortcuts($document, Dialogs, $rootScope, CheckShortcutKeyCombo, IS_ELECTRON, $state, AddTaskBarGlobal) {
+    document.addEventListener('keydown', (ev) => {
       // only trigger if not in typing mode
       if (ev.target.tagName !== 'INPUT' && ev.target.tagName !== 'TEXTAREA') {
         if (CheckShortcutKeyCombo(ev, $rootScope.r.keys.addNewTask)) {
-          Dialogs('ADD_TASK', undefined, true);
+          AddTaskBarGlobal.show();
+          $rootScope.$apply();
         }
         if (CheckShortcutKeyCombo(ev, $rootScope.r.keys.openProjectNotes)) {
           Dialogs('NOTES', undefined, true);

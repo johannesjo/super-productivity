@@ -59,7 +59,6 @@
   }
 }
 
-
 @mixin ng-pop-in() {
   &.ng-leave {
     transition: none;
@@ -78,6 +77,39 @@
   }
 }
 
+@mixin ng-slide-in-out($speed-factor: 1, $off-pos: -100%) {
+  &.ng-hide-remove,
+  &.ng-hide-add,
+  &.ng-enter,
+  &.ng-leave {
+    transition-property: opacity, transform;
+  }
+
+  &.ng-hide-remove,
+  &.ng-enter {
+    opacity: 0;
+    transform: translate3d(0, $off-pos, 0);
+    transition: ($transition-duration--enter * $speed-factor) $ani-standard-timing;
+  }
+
+  &.ng-hide-remove-active,
+  &.ng-enter-active {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+
+  &.ng-hide-add,
+  &.ng-leave {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+    transition: ($transition-duration--leave * $speed-factor) $ani-leave-timing;
+  }
+  &.ng-hide-add-active,
+  &.ng-leave-active {
+    opacity: 0;
+    transform: translate3d(0, $off-pos, 0);
+  }
+}
 
 .ani-pop-in-pop-out {
   @include ng-pop-in-popout();

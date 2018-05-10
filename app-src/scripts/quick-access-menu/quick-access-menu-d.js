@@ -25,7 +25,7 @@
   }
 
   /* @ngInject */
-  function QuickAccessMenuCtrl(Dialogs, $timeout) {
+  function QuickAccessMenuCtrl(Dialogs, $timeout, AddTaskBarGlobal) {
     this.isOpen = false;
     this.selectedMode = 'md-fling';
 
@@ -53,7 +53,7 @@
     };
 
     this.openAddTask = () => {
-      Dialogs('ADD_TASK');
+      AddTaskBarGlobal.show(true);
       this.isOpen = false;
     };
   }

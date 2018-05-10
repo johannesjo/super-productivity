@@ -46,8 +46,6 @@
     }
 
     addTask() {
-      console.log(this.newTask);
-
       if (this.newTask) {
         if (this.newTask.originalType && this.newTask.originalType === 'GITHUB' && this.$rootScope.r.git.isShowIssuesFromGit) {
           this.Git.getCommentListForIssue(this.newTask.originalId)
@@ -81,7 +79,8 @@
       controller: AddTaskBarCtrl,
       controllerAs: 'vm',
       bindings: {
-        onEmptySubmit: '&'
+        onEmptySubmit: '&',
+        onBlur: '&',
       },
     });
 

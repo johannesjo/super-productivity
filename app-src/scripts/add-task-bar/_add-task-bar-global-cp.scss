@@ -7,17 +7,41 @@ add-task-bar-global {
   overflow: visible;
   margin-top: 20px;
 
+  .add-task-bar-wrapper {
+    background: #ffffff;
+    position: relative;
+    padding: 2px;
+    border-radius: 3px;
+    padding-bottom: 3px;
+    @include ng-slide-in-out(1, -120%);
+
+    //&.is-show-from-bottom {
+    //  position: fixed;
+    //  left: 10%;
+    //  width: 80%;
+    //  bottom: 20px;
+    //  @include ng-slide-in-out(1, 120%);
+    //}
+
+    > ng-md-icon {
+      position: absolute;
+      left: 10px;
+      top: 50%;
+      margin-top: -2px;
+      transform: translateY(-50%);
+      z-index: 2;
+    }
+  }
+
   add-task-bar {
-    padding: 3px;
-    ng-md-icon {
-      margin-right: 10px;
+    input {
+      padding-left: 50px !important;
     }
 
-    @include ng-slide-in-out(1);
   }
 
   @media (max-width: $layout-xs) {
-    left: 0;
-    width: 100%;
+    left: 5%;
+    width: 90%;
   }
 }

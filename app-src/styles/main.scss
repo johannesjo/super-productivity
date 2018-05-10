@@ -43,6 +43,10 @@ IMPORTANT NOTE:
 
 @import '_variables.scss';
 
+@import '../scripts/add-task-bar/_add-task-bar-cp.scss';
+
+@import '../scripts/add-task-bar/_add-task-bar-global-cp.scss';
+
 @import '../scripts/agenda-and-history/_agenda-and-history-d.scss';
 
 @import '../scripts/agenda-and-history/daily-agenda/_daily-agenda-d.scss';
