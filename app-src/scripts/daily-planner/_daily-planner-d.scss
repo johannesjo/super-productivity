@@ -16,14 +16,15 @@ daily-planner {
   }
 
   .add-task-bar-wrapper {
+    max-width: $component-max-width;
+    margin: 20px auto;
+
     add-task-bar {
       flex-grow: 1;
     }
   }
 
   .add-task-form {
-    margin: 20px auto;
-    max-width: $component-max-width;
     backface-visibility: hidden;
     transform: translateZ(0);
 
