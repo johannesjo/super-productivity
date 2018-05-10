@@ -19,6 +19,14 @@
         }
       };
     })
+    .directive('mdxPaintBorder', function(mdx) {
+      return {
+        restrict: 'A',
+        link: function(scope, element, attributes) {
+          setRGB(element, 'border-color', mdx, attributes.mdxPaintBorder, 'mdx-paint-border');
+        }
+      };
+    })
     .directive('mdxPaintSvg', function(mdx) {
       return {
         restrict: 'A',
