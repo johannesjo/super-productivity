@@ -14,7 +14,8 @@ add-task-bar-global {
     border-bottom-width: 3px;
     //background: #ffffff;
     position: relative;
-    @include ng-slide-in-out(1, -120%);
+    @include ng-blend-in-out(1);
+
 
     @include dark-theme(){
 
