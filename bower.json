@@ -32,7 +32,8 @@
     "hamsterjs": "^1.1.2",
     "clipboard": "^1.6.0",
     "moment-duration-format": "https://github.com/johannesjo/moment-duration-format.git#master",
-    "angular-promise-buttons": "^0.1.22"
+    "angular-promise-buttons": "^0.1.22",
+    "quick-ng-repeat": "^0.0.1"
   },
   "devDependencies": {
     "angular-mocks": "1.6.9",

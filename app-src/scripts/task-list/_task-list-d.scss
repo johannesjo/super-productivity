@@ -44,7 +44,7 @@ task-list {
     .task {
       .handle,
       .controls,
-      .md-icon-button {
+      .ico-btn {
         display: none;
       }
       .collapse-sub-tasks-btn {
@@ -189,7 +189,7 @@ $task-inner-padding-left-right: 6px;
     $this-button-size: 34px;
     $this-button-size-mobile: 34px;
     $this-icon-color: #545454;
-    .md-icon-button {
+    .ico-btn {
       margin: $this-button-spacer;
       height: $this-button-size;
       width: $this-button-size;
@@ -213,6 +213,9 @@ $task-inner-padding-left-right: 6px;
       &:hover {
         z-index: 5;
         transform: scale(1.15);
+      }
+      &:focus {
+        outline: none;
       }
 
       // somehow the icons are a little of so we move them
@@ -245,9 +248,9 @@ $task-inner-padding-left-right: 6px;
 
       @at-root {
         .task {
-          .md-icon-button:hover,
-          .md-icon-button.is-active,
-          &.is-current .md-icon-button.play-btn {
+          .ico-btn:hover,
+          .ico-btn.is-active,
+          &.is-current .ico-btn.play-btn {
             background: #000000 !important;
             background: $this-icon-color !important;
             border-color: transparent;
@@ -493,7 +496,7 @@ $task-inner-padding-left-right: 6px;
   }
 
   .task .time {
-    .md-icon-button {
+    .ico-btn {
       &.ng-enter,
       &.ng-leave {
         transition: none !important;
