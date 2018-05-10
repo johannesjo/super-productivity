@@ -1,4 +1,6 @@
 main-header {
+  position: relative;
+  z-index: 3;
 
   nav > .md-button {
     // only use background color to speed up animation
@@ -63,7 +65,7 @@ main-header {
     position: absolute;
     left: 50%;
     transform: translate(-50%, -50%);
-    z-index: 1;
+    z-index: 2;
     top: 100%;
     transition: $transition-standard !important;
     transition-property: transform !important;
