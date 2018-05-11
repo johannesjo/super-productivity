@@ -55,6 +55,7 @@
     }
 
     $onInit() {
+      // TODO improve naming here
       this.$animate.enabled(this.$element, false);
       this.$element.addClass('is-initial-entering');
 
@@ -67,7 +68,7 @@
       // we need this longer for the animation to complete
       this.isEnteringDoneTimeout = this.$timeout(() => {
         this.$element.removeClass('is-initial-entering');
-      }, 1000);
+      }, 2000);
 
       // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       // NOTE: Take good care not to update the dom (scope) structure
