@@ -309,7 +309,7 @@
           this.$rootScope.r.tasks.unshift(this.createTask(task));
         }
 
-        this.SimpleToast('SUCCESS', 'Task "' + task.title + '" created.', 200);
+        // this.SimpleToast('SUCCESS', 'Task "' + task.title + '" created.', 200);
 
         // return correct reference in today's list
         return this.$rootScope.r.tasks[0];
