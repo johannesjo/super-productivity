@@ -9,7 +9,6 @@
     md-search-text="vm.newTaskTitle"
     md-items="task in vm.getFilteredTaskSuggestions(vm.newTaskTitle)"
     md-item-text="task.title"
-    md-require-match="false"
     md-min-length="2"
     autofocus-autocomplete
     placeholder="Select or create a task">
@@ -17,8 +16,8 @@
           <span md-highlight-text="vm.newTaskTitle"
                 md-highlight-flags="i">{{task.title}}</span>
     </md-item-template>
-    <md-not-found>
-      <i>Create task</i> "{{vm.newTaskTitle}}"
-    </md-not-found>
+    <!--<md-not-found>-->
+      <!--<i>Create task</i> "{{vm.newTaskTitle}}"-->
+    <!--</md-not-found>-->
   </md-autocomplete>
 </form>
