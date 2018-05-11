@@ -25,7 +25,7 @@
   }
 
   /* @ngInject */
-  function WorkViewCtrl(Tasks, $window, $scope, Dialogs, $rootScope, TasksUtil, $timeout, EV, $interval) {
+  function WorkViewCtrl(Tasks, $window, $scope, $rootScope, TasksUtil, $timeout, EV, $interval, AddTaskBarGlobal) {
     let vm = this;
     const _ = $window._;
 
@@ -74,7 +74,7 @@
     // DIRECTIVE METHODS
     // -----------------
     vm.openAddTask = () => {
-      Dialogs('ADD_TASK', undefined, true);
+      AddTaskBarGlobal.show();
     };
 
     vm.collapseAllNotesAndSubTasks = () => {
