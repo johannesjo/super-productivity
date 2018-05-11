@@ -49,18 +49,25 @@
 
     $onDestroy() {
       this.$timeout.cancel(this.animationReadyTimeout);
+      this.$timeout.cancel(this.isEnteringDoneTimeout);
       this.$timeout.cancel(this.selectCurrentTaskTimeout);
       this.$element[0].removeEventListener('keydown', this.boundHandleKeyDown);
     }
 
     $onInit() {
       this.$animate.enabled(this.$element, false);
+      this.$element.addClass('is-initial-entering');
 
       // only allow after short delay
       this.animationReadyTimeout = this.$timeout(() => {
-        this.$element.addClass('is-animation-ready');
+        this.$element.addClass('is-initial-entering-done');
         this.$animate.enabled(this.$element, true);
       }, 400);
+
+      // we need this longer for the animation to complete
+      this.isEnteringDoneTimeout = this.$timeout(() => {
+        this.$element.removeClass('is-initial-entering');
+      }, 1000);
 
       // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       // NOTE: Take good care not to update the dom (scope) structure

@@ -39,9 +39,9 @@ work-view {
 
 .done-tasks,
 .undone-tasks {
-  opacity: 0;
-  animation: $transition-duration-s ani-task-list-enter $ani-standard-timing;
-  animation-fill-mode: forwards;
+  //opacity: 0;
+  //animation: $transition-duration-s ani-task-list-enter $ani-standard-timing;
+  //animation-fill-mode: forwards;
 }
 
 @keyframes ani-task-list-enter {

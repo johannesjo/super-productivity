@@ -458,7 +458,7 @@ $task-inner-padding-left-right: 6px;
 }
 
 // animations
-.is-animation-ready > .task-list {
+.is-initial-entering-done > .task-list {
   > .task > .inner-wrapper > .first-line {
     .md-button {
       transition: $transition-standard;
@@ -535,5 +535,46 @@ $task-inner-padding-left-right: 6px;
   }
   100% {
     transform: scale(1);
+  }
+}
+
+@mixin createCircleAnimation($i, $animTime, $totalTime, $delay) {
+  @keyframes #{circle#{$i}} {
+    0% {
+      opacity: 0;
+      //transform: scale(0);
+      //transform: translateY(-100%);
+    }
+    #{($i * $delay)/$totalTime * 100%} {
+      opacity: 0;
+      //transform: scale(0);
+      //transform: translateY(-100%);
+    }
+    #{($i * $delay + $animTime)/$totalTime * 100%} {
+      opacity: 1;
+      //transform: scale(1);
+      //transform: translateX(0);
+    }
+    100% {
+      opacity: 1;
+      //transform: scale(1);
+      //transform: translateX(0);
+    }
+  }
+}
+
+$animTime: 0.25s;
+$totalTime: 1s;
+$staggerTime: 0.02s;
+//.done-tasks,
+//.undone-tasks {
+@for $i from 0 through 15 {
+  @include createCircleAnimation($i, $animTime, $totalTime, $staggerTime);
+  .is-initial-entering .task:nth-child(#{($i + 1)}) {
+    opacity: 0;
+    transform-origin: center top;
+    //transform: scale(0);
+    animation: circle#{($i)} $totalTime $ani-enter-timing;
+    animation-fill-mode: forwards;
   }
 }
