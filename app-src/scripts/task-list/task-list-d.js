@@ -26,7 +26,7 @@
 
   class TaskListCtrl {
     /* @ngInject */
-    constructor(Dialogs, $rootScope, $mdToast, $timeout, Tasks, EDIT_ON_CLICK_TOGGLE_EV, $scope, ShortSyntax, $element, Jira, CheckShortcutKeyCombo, Util) {
+    constructor(Dialogs, $rootScope, $mdToast, $timeout, Tasks, EDIT_ON_CLICK_TOGGLE_EV, $scope, ShortSyntax, $element, Jira, CheckShortcutKeyCombo, Util, $animate) {
       this.Dialogs = Dialogs;
       this.$mdToast = $mdToast;
       this.$timeout = $timeout;
@@ -35,6 +35,7 @@
       this.$scope = $scope;
       this.ShortSyntax = ShortSyntax;
       this.$element = $element;
+      this.$animate = $animate;
       this.Jira = Jira;
       this.$rootScope = $rootScope;
       this.lastFocusedTaskEl = undefined;
@@ -53,9 +54,12 @@
     }
 
     $onInit() {
+      this.$animate.enabled(this.$element, false);
+
       // only allow after short delay
       this.animationReadyTimeout = this.$timeout(() => {
         this.$element.addClass('is-animation-ready');
+        this.$animate.enabled(this.$element, true);
       }, 400);
 
       // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
