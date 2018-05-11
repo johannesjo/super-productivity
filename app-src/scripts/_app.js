@@ -14,7 +14,11 @@
   function onUpdateReady() {
     console.log('RELOAD RIGHT AWAY');
     // force reload without cache
-    window.location.reload(true);
+    const r = window.confirm('Super Productivity has been updated to a new version. Reload the page to refresh the cache?');
+
+    if (r === true) {
+      window.location.reload(true);
+    }
   }
 
   window.applicationCache.addEventListener('updateready', onUpdateReady);
