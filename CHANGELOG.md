@@ -1,3 +1,23 @@
+<a name="1.10.36"></a>
+## [1.10.36](https://github.com/johannesjo/super-productivity/compare/v1.10.35...v1.10.36) (2018-05-11)
+
+
+### Bug Fixes
+
+*  add global add task bar for work view button ([a3b151b](https://github.com/johannesjo/super-productivity/commit/a3b151b))
+* global add task bar for mobile ([7fa461a](https://github.com/johannesjo/super-productivity/commit/7fa461a))
+* remove inject for add task bar global because other wise the build doesn't work WEIRD ([c9d3e45](https://github.com/johannesjo/super-productivity/commit/c9d3e45))
+
+
+### Features
+
+* add nice staggering animation for task list ([3b7e659](https://github.com/johannesjo/super-productivity/commit/3b7e659))
+* add update confirm for web version ([77d1bde](https://github.com/johannesjo/super-productivity/commit/77d1bde))
+* improve performance by disabling task list animations on route change ([8e3ae71](https://github.com/johannesjo/super-productivity/commit/8e3ae71))
+* speed up task deletion animation ([0f33af8](https://github.com/johannesjo/super-productivity/commit/0f33af8))
+
+
+
 <a name="1.10.35"></a>
 ## [1.10.35](https://github.com/johannesjo/super-productivity/compare/v1.10.34...v1.10.35) (2018-05-10)
 
