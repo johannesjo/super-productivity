@@ -28,7 +28,7 @@
   }
 }
 
-@mixin crawl-in-out() {
+@mixin crawl-in-out($speed-factor: 1) {
   &.ng-enter,
   &.ng-leave {
     transition-property: all;
@@ -37,7 +37,7 @@
   &.ng-enter {
     transform: scaleY(0);
     max-height: 0;
-    transition: $transition-duration--enter $ani-enter-timing;
+    transition: ($transition-duration--enter * $speed-factor) $ani-enter-timing;
   }
   &.ng-enter-active {
     transform: scale(1);
@@ -47,14 +47,14 @@
   &.ng-leave {
     display: block;
     opacity: 1;
-    transform: scale(1);
+    transform: scaleY(1);
     max-height: 50px;
-    transition: $transition-duration--leave $ani-leave-timing;
+    transition: ($transition-duration--leave * $speed-factor * 0.8) $ani-leave-timing;
   }
   &.ng-leave-active {
     display: block;
     opacity: 0;
-    transform: scale(0);
+    transform: scaleY(0);
     max-height: 0;
   }
 }
