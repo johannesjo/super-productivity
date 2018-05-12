@@ -27,18 +27,18 @@
           if (!attrs.type || attrs.type === 'LINK') {
             Util.openExternalUrl(element.attr('href'));
           } else if (attrs.type === 'FILE') {
-            const shell = require('electron').shell;
-            shell.openItem(attrs.href);
+            //const shell = require('electron').shell;
+            //shell.openItem(attrs.href);
           } else if (attrs.type === 'COMMAND') {
-            const exec = require('child_process').exec;
+            //const exec = require('child_process').exec;
 
-            SimpleToast('CUSTOM', `Running "${attrs.href}".`, 'laptop_windows');
-
-            exec(attrs.href, (error) => {
-              if (error) {
-                SimpleToast('ERROR', `"${attrs.href}: ${error}`);
-              }
-            });
+            //SimpleToast('CUSTOM', `Running "${attrs.href}".`, 'laptop_windows');
+            //
+            //exec(attrs.href, (error) => {
+            //  if (error) {
+            //    SimpleToast('ERROR', `"${attrs.href}: ${error}`);
+            //  }
+            //});
           }
         });
       }

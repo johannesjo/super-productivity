@@ -45,7 +45,7 @@
 
     function makeLinksWorkForElectron() {
       if (IS_ELECTRON) {
-        const shell = require('electron').shell;
+        //const shell = require('electron').shell;
         const links = $element.find('a');
 
         links.on('click', (event) => {
@@ -55,7 +55,7 @@
             url = 'http://' + url;
           }
           event.preventDefault();
-          shell.openExternal(url);
+          //shell.openExternal(url);
         });
       }
     }
