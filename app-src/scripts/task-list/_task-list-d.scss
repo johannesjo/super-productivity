@@ -570,11 +570,19 @@ $staggerTime: 0.02s;
 //.undone-tasks {
 @for $i from 0 through 15 {
   @include createCircleAnimation($i, $animTime, $totalTime, $staggerTime);
+
   .is-initial-entering .task:nth-child(#{($i + 1)}) {
     opacity: 0;
     transform-origin: center top;
     //transform: scale(0);
     animation: circle#{($i)} $totalTime $ani-enter-timing;
     animation-fill-mode: forwards;
+  }
+}
+
+.backlog-tasks,
+.done-tasks {
+  &.is-initial-entering .task {
+    animation-delay: 0.1s;
   }
 }
