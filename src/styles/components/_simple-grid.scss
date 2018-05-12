@@ -1,0 +1,19 @@
+.gt-xs-2-col {
+  @media (min-width: $layout-gt-xs) {
+    @include clearfix;
+    > * {
+      float: left;
+      @include row-machine(2, 2%);
+    }
+  }
+}
+
+.gt-md-2-col {
+  @media (min-width: $layout-gt-md) {
+    @include clearfix;
+    > * {
+      float: left;
+      @include row-machine(2, 2%);
+    }
+  }
+}

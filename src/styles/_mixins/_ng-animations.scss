@@ -1,0 +1,148 @@
+@import "../variables";
+
+@mixin ng-pop-in-popout() {
+
+  &.ng-enter,
+  &.ng-leave {
+    transition-property: transform, opacity;
+  }
+
+  &.ng-enter {
+    transform: scaleY(0);
+    transition: $transition-duration--enter $ani-enter-timing;
+  }
+  &.ng-enter-active {
+    transform: scale(1);
+  }
+
+  &.ng-leave {
+    display: block;
+    opacity: 1;
+    transform: scale(1);
+    transition: $transition-duration--leave $ani-leave-timing;
+  }
+  &.ng-leave-active {
+    display: block;
+    opacity: 0;
+    transform: scale(0);
+  }
+}
+
+@mixin crawl-in-out($speed-factor: 1, $max-height-to: 100px) {
+  &.ng-enter,
+  &.ng-leave {
+    transition-property: all;
+  }
+
+  &.ng-enter {
+    transform: scaleY(0);
+    max-height: 0;
+    transition: ($transition-duration--enter * $speed-factor) $ani-standard-timing;
+  }
+  &.ng-enter-active {
+    transform: scale(1);
+    max-height: $max-height-to;
+  }
+
+  &.ng-leave {
+    display: block;
+    transform: scaleY(1);
+    max-height: 50px;
+    transition: ($transition-duration--leave * $speed-factor * 0.8) $ani-standard-timing;
+  }
+  &.ng-leave-active {
+    display: block;
+    transform: scaleY(0);
+    max-height: 0;
+  }
+}
+
+@mixin ng-pop-in() {
+  &.ng-leave {
+    transition: none;
+  }
+
+  &.ng-enter {
+    transition: transform $transition-duration--leave $ani-leave-timing;
+  }
+
+  &.ng-enter {
+    transform: scale(0);
+  }
+
+  &.ng-enter-active {
+    transform: scale(1);
+  }
+}
+
+@mixin ng-slide-in-out($speed-factor: 1, $off-pos: -100%) {
+  &.ng-hide-remove,
+  &.ng-hide-add,
+  &.ng-enter,
+  &.ng-leave {
+    transition-property: opacity, transform;
+  }
+
+  &.ng-hide-remove,
+  &.ng-enter {
+    opacity: 0;
+    transform: translate3d(0, $off-pos, 0);
+    transition: ($transition-duration--enter * $speed-factor) $ani-standard-timing;
+  }
+
+  &.ng-hide-remove-active,
+  &.ng-enter-active {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+
+  &.ng-hide-add,
+  &.ng-leave {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+    transition: ($transition-duration--leave * $speed-factor) $ani-leave-timing;
+  }
+  &.ng-hide-add-active,
+  &.ng-leave-active {
+    opacity: 0;
+    transform: translate3d(0, $off-pos, 0);
+  }
+}
+
+@mixin ng-blend-in-out($speed-factor: 1) {
+  &.ng-hide-remove,
+  &.ng-hide-add,
+  &.ng-enter,
+  &.ng-leave {
+    transition-property: opacity, transform;
+  }
+
+  &.ng-hide-remove,
+  &.ng-enter {
+    opacity: 0;
+    transform: scaleY(0);
+    transition: ($transition-duration--enter * $speed-factor) $ani-standard-timing;
+  }
+
+  &.ng-hide-remove-active,
+  &.ng-enter-active {
+    opacity: 1;
+    transform: scaleY(1);
+  }
+
+  &.ng-hide-add,
+  &.ng-leave {
+    opacity: 1;
+    transform: scaleY(1);
+    transition: ($transition-duration--leave * $speed-factor) $ani-standard-timing;
+  }
+  &.ng-hide-add-active,
+  &.ng-leave-active {
+    opacity: 0;
+    transform: scaleY(0);
+  }
+}
+
+.ani-pop-in-pop-out {
+  @include ng-pop-in-popout();
+}

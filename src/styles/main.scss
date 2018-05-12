@@ -1,0 +1,200 @@
+/*
+IMPORTANT NOTE:
+ This file SHOULD NOT BE EDITED MANUALLY, as its purpose
+ is to be the point where all your stylesheet-files will
+ be imported
+*/
+
+@import
+"../bower_components/animate.css-scss/_properties";
+@import
+"../bower_components/animate.css-scss/_attention/attention.scss";
+//"../bower_components/animate.css-scss/_bouncing-entrances/bouncing-entrances.scss",
+//"../bower_components/animate.css-scss/_bouncing-exits/bouncing-exits.scss",
+//"../bower_components/animate.css-scss/_fading-entrances/fading-entrances.scss",
+//"../bower_components/animate.css-scss/_fading-exits/fading-exits.scss",
+//"../bower_components/animate.css-scss/_flippers/flippers.scss",
+//"../bower_components/animate.css-scss/_lightspeed/lightspeed.scss",
+//"../bower_components/animate.css-scss/_rotating-entrances/rotating-entrances.scss",
+//"../bower_components/animate.css-scss/_rotating-exits/rotating-exits.scss",
+//"../bower_components/animate.css-scss/_specials/specials.scss";
+
+// inject:sass
+
+@import '_functions/_some-function.scss';
+
+@import '_material-shadows.scss';
+
+@import '_mixins/_clearfix.scss';
+
+@import '_mixins/_dark-theme.scss';
+
+@import '_mixins/_ng-animations.scss';
+
+@import '_mixins/_on-circle.scss';
+
+@import '_mixins/_row-machine.scss';
+
+@import '_placeholders/_centered-component.scss';
+
+@import '_placeholders/_clearfix.scss';
+
+@import '_placeholders/_some-placeholder.scss';
+
+@import '_variables.scss';
+
+@import '../scripts/add-task-bar/_add-task-bar-cp.scss';
+
+@import '../scripts/add-task-bar/_add-task-bar-global-cp.scss';
+
+@import '../scripts/agenda-and-history/_agenda-and-history-d.scss';
+
+@import '../scripts/agenda-and-history/daily-agenda/_daily-agenda-d.scss';
+
+@import '../scripts/agenda-and-history/time-tracking-history/_time-tracking-history-d.scss';
+
+@import 'animations/_animations.scss';
+
+@import 'base/_buttons.scss';
+
+@import 'base/_fonts.scss';
+
+@import 'base/_forms.scss';
+
+@import 'base/_icons.scss';
+
+@import 'base/_lists.scss';
+
+@import 'base/_page.scss';
+
+@import 'base/_tables.scss';
+
+@import 'base/_typography.scss';
+
+@import '../scripts/collapsible/_collapsible-d.scss';
+
+@import 'components/_additions-for-buttons.scss';
+
+@import 'components/_additions-for-dialogs.scss';
+
+@import 'components/_additions-for-forms.scss';
+
+@import 'components/_additions-for-icons.scss';
+
+@import 'components/_additions-for-md-switch.scss';
+
+@import 'components/_additions-for-ng-sortable.scss';
+
+@import 'components/_additions-for-toasts.scss';
+
+@import 'components/_fix-md-toast.scss';
+
+@import 'components/_resytle-autocomplete.scss';
+
+@import 'components/_side-info.scss';
+
+@import 'components/_simple-grid.scss';
+
+@import 'components/_simple-textarea.scss';
+
+@import 'components/_ui-view.scss';
+
+@import '../scripts/daily-planner/_daily-planner-d.scss';
+
+@import '../scripts/daily-summary/_daily-summary-d.scss';
+
+@import '../scripts/dialogs/add-task/_add-task-c.scss';
+
+@import '../scripts/dialogs/create-project/_create-project-c.scss';
+
+@import '../scripts/dialogs/distractions/_distractions-c.scss';
+
+@import '../scripts/dialogs/edit-global-link/_edit-global-link-c.scss';
+
+@import '../scripts/dialogs/help/_help-c.scss';
+
+@import '../scripts/dialogs/jira-add-worklog/_jira-add-worklog-c.scss';
+
+@import '../scripts/dialogs/jira-assign-ticket/_jira-assign-ticket-c.scss';
+
+@import '../scripts/dialogs/jira-set-status/_jira-set-status-c.scss';
+
+@import '../scripts/dialogs/notes/_notes-c.scss';
+
+@import '../scripts/dialogs/pomodoro-break/_pomodoro-break-c.scss';
+
+@import '../scripts/dialogs/simple-task-summary/_simple-task-summary.scss';
+
+@import '../scripts/dialogs/task-selection/_task-selection-c.scss';
+
+@import '../scripts/dialogs/time-estimate/_time-estimate-c.scss';
+
+@import '../scripts/dialogs/time-sheet-export/_time-sheet-export.scss';
+
+@import '../scripts/dialogs/was-idle/_was-idle-c.scss';
+
+@import '../scripts/dialogs/welcome/_welcome-c.scss';
+
+@import '../scripts/distraction-list/_distraction-list-cp.scss';
+
+@import '../scripts/done-tasks-backlog/_done-tasks-backlog-d.scss';
+
+@import '../scripts/duration-input-slider/_duration-input-slider-cp.scss';
+
+@import '../scripts/edit-on-click/_edit-on-click-d.scss';
+
+@import '../scripts/enlarge-image/_enlarge-image-d.scss';
+
+@import '../scripts/external-link/_external-link.scss';
+
+@import '../scripts/focus-view/_focus-view-cp.scss';
+
+@import '../scripts/global-link-list/_global-link-list-cp.scss';
+
+@import '../scripts/help-section/_help-section-d.scss';
+
+@import '../scripts/hint/_hint-d.scss';
+
+@import '../scripts/inline-markdown/_inline-markdown-d.scss';
+
+@import '../scripts/main/global-animations/_crawl-in-out.ani.scss';
+
+@import '../scripts/main/global-animations/_expand-collapse.ani.scss';
+
+@import '../scripts/main/global-animations/_slide-up-down.ani.scss';
+
+@import '../scripts/main-header/_main-header-d.scss';
+
+@import '../scripts/pomodoro-button/_pomodoro-button-cp.scss';
+
+@import '../scripts/progress-bar/_progress-bar-cp.scss';
+
+@import '../scripts/quick-access-menu/_quick-access-menu-d.scss';
+
+@import '../scripts/routes/settings/_settings-c.scss';
+
+@import '../scripts/settings/backup-settings/_backup-settings-d.scss';
+
+@import '../scripts/settings/git-settings/_git-settings-d.scss';
+
+@import '../scripts/settings/jira-settings/_jira-settings-d.scss';
+
+@import '../scripts/settings/keyboard-settings/_keyboard-settings-d.scss';
+
+@import '../scripts/settings/misc-settings/_misc-settings-d.scss';
+
+@import '../scripts/settings/pomodoro-settings/_pomodoro-settings-d.scss';
+
+@import '../scripts/settings/project-settings/_project-settings-d.scss';
+
+@import '../scripts/settings/theme-settings/_theme-settings-d.scss';
+
+@import '../scripts/sub-task-list/_sub-task-list-d.scss';
+
+@import '../scripts/task-list/_task-list-d.scss';
+
+@import '../scripts/task-local-links/_task-local-links-cp.scss';
+
+@import '../scripts/work-view/_work-view-d.scss';
+
+// endinject

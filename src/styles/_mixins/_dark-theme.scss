@@ -1,0 +1,5 @@
+@mixin dark-theme {
+  body.dark-theme & {
+    @content;
+  }
+}
