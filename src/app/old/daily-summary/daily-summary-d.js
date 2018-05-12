@@ -1,125 +1,113 @@
-/**
- * @ngdoc directive
- * @name superProductivity.directive:dailySummary
- * @description
- * # dailySummary
- */
+angular
+  .module('superProductivity')
+  .directive('dailySummary', dailySummary);
 
-(function() {
-  'use strict';
+/* @ngInject */
+function dailySummary() {
+  return {
+    template: require('./daily-summary-d.html'),
+    bindToController: true,
+    controller: DailySummaryCtrl,
+    controllerAs: 'vm',
+    restrict: 'E',
+    scope: true
+  };
 
-  angular
-    .module('superProductivity')
-    .directive('dailySummary', dailySummary);
+}
 
-  /* @ngInject */
-  function dailySummary() {
-    return {
-      template: require('./daily-summary-d.html'),
-      bindToController: true,
-      controller: DailySummaryCtrl,
-      controllerAs: 'vm',
-      restrict: 'E',
-      scope: true
-    };
+/* @ngInject */
+function DailySummaryCtrl($rootScope, Tasks, TasksUtil, $mdDialog, Dialogs, $state, GitLog, IS_ELECTRON, $timeout, $scope, AppStorage, GoogleDriveSync, SimpleToast) {
+  const IPC_EVENT_SHUTDOWN = 'SHUTDOWN';
+  const SUCCESS_ANIMATION_DURATION = 500;
 
+  let successAnimationTimeout;
+  let vm = this;
+  vm.IS_ELECTRON = IS_ELECTRON;
+  vm.todayStr = TasksUtil.getTodayStr();
+  vm.doneTasks = Tasks.getDoneToday();
+
+  // calc total time spent on todays tasks
+  vm.totalTimeSpentTasks = Tasks.getTotalTimeWorkedOnTasksToday();
+
+  // calc time spent on todays tasks today
+  // use mysql date as it is sortable
+  vm.totalTimeSpentToday = Tasks.getTimeWorkedToday();
+
+  if ($rootScope.r.git && $rootScope.r.git.projectDir) {
+    GitLog.get($rootScope.r.git.projectDir).then(function(res) {
+      vm.commitLog = res;
+    });
   }
 
-  /* @ngInject */
-  function DailySummaryCtrl($rootScope, Tasks, TasksUtil, $mdDialog, Dialogs, $state, GitLog, IS_ELECTRON, $timeout, $scope, AppStorage, GoogleDriveSync, SimpleToast) {
-    const IPC_EVENT_SHUTDOWN = 'SHUTDOWN';
-    const SUCCESS_ANIMATION_DURATION = 500;
+  vm.showExportModal = () => {
+    Dialogs('SIMPLE_TASK_SUMMARY', {
+      settings: $rootScope.r.uiHelper.dailyTaskExportSettings,
+      finishDayFn: vm.finishDay,
+      tasks: Tasks.getToday()
+    }, true);
+  };
 
-    let successAnimationTimeout;
-    let vm = this;
-    vm.IS_ELECTRON = IS_ELECTRON;
-    vm.todayStr = TasksUtil.getTodayStr();
-    vm.doneTasks = Tasks.getDoneToday();
+  vm.showTimeSheetExportModal = () => {
+    Dialogs('TIME_SHEET_EXPORT', {
+      settings: $rootScope.r.uiHelper.dailyTaskExportSettings,
+      finishDayFn: vm.finishDay,
+      tasks: Tasks.getToday()
+    }, true);
+  };
 
-    // calc total time spent on todays tasks
-    vm.totalTimeSpentTasks = Tasks.getTotalTimeWorkedOnTasksToday();
+  vm.finishDay = () => {
+    $rootScope.r.tomorrowsNote = vm.tomorrowsNote;
 
-    // calc time spent on todays tasks today
-    // use mysql date as it is sortable
-    vm.totalTimeSpentToday = Tasks.getTimeWorkedToday();
+    Tasks.finishDay(vm.clearDoneTasks, vm.moveUnfinishedToBacklog);
 
-    if ($rootScope.r.git && $rootScope.r.git.projectDir) {
-      GitLog.get($rootScope.r.git.projectDir).then(function(res) {
-        vm.commitLog = res;
+    // save everything
+    AppStorage.saveToLs();
+
+    if (!IS_ELECTRON && GoogleDriveSync.config && GoogleDriveSync.config.isAutoSyncToRemote) {
+      SimpleToast('CUSTOM', `Syncing Data to Google Drive.`, 'file_upload');
+      GoogleDriveSync.saveTo();
+    }
+
+    if (IS_ELECTRON) {
+      $mdDialog.show(
+        $mdDialog.confirm()
+          .clickOutsideToClose(false)
+          .title('All Done! Shutting down now..')
+          .textContent('You work is done. Time to go home!')
+          .ariaLabel('Alert Shutdown')
+          .ok('Aye aye! Shutdown!')
+          .cancel('No, just clear the tasks')
+      )
+        .then(() => {
+            initSuccessAnimation(() => {
+              window.ipcRenderer.send(IPC_EVENT_SHUTDOWN);
+            });
+          },
+          () => {
+            initSuccessAnimation(() => {
+              $state.go('daily-planner');
+            });
+          });
+    } else {
+      initSuccessAnimation(() => {
+        $state.go('daily-planner');
       });
     }
+  };
 
-    vm.showExportModal = () => {
-      Dialogs('SIMPLE_TASK_SUMMARY', {
-        settings: $rootScope.r.uiHelper.dailyTaskExportSettings,
-        finishDayFn: vm.finishDay,
-        tasks: Tasks.getToday()
-      }, true);
-    };
-
-    vm.showTimeSheetExportModal = () => {
-      Dialogs('TIME_SHEET_EXPORT', {
-        settings: $rootScope.r.uiHelper.dailyTaskExportSettings,
-        finishDayFn: vm.finishDay,
-        tasks: Tasks.getToday()
-      }, true);
-    };
-
-    vm.finishDay = () => {
-      $rootScope.r.tomorrowsNote = vm.tomorrowsNote;
-
-      Tasks.finishDay(vm.clearDoneTasks, vm.moveUnfinishedToBacklog);
-
-      // save everything
-      AppStorage.saveToLs();
-
-      if (!IS_ELECTRON && GoogleDriveSync.config && GoogleDriveSync.config.isAutoSyncToRemote) {
-        SimpleToast('CUSTOM', `Syncing Data to Google Drive.`, 'file_upload');
-        GoogleDriveSync.saveTo();
-      }
-
-      if (IS_ELECTRON) {
-        $mdDialog.show(
-          $mdDialog.confirm()
-            .clickOutsideToClose(false)
-            .title('All Done! Shutting down now..')
-            .textContent('You work is done. Time to go home!')
-            .ariaLabel('Alert Shutdown')
-            .ok('Aye aye! Shutdown!')
-            .cancel('No, just clear the tasks')
-        )
-          .then(() => {
-              initSuccessAnimation(() => {
-                window.ipcRenderer.send(IPC_EVENT_SHUTDOWN);
-              });
-            },
-            () => {
-              initSuccessAnimation(() => {
-                $state.go('daily-planner');
-              });
-            });
-      } else {
-        initSuccessAnimation(() => {
-          $state.go('daily-planner');
-        });
-      }
-    };
-
-    $scope.$on('$destroy', () => {
-      if (successAnimationTimeout) {
-        $timeout.cancel(successAnimationTimeout);
-      }
-    });
-
-    function initSuccessAnimation(cb) {
-      vm.showSuccessAnimation = true;
-      successAnimationTimeout = $timeout(() => {
-        if (cb) {
-          cb();
-        }
-      }, SUCCESS_ANIMATION_DURATION);
-
+  $scope.$on('$destroy', () => {
+    if (successAnimationTimeout) {
+      $timeout.cancel(successAnimationTimeout);
     }
-  }
+  });
 
-})();
+  function initSuccessAnimation(cb) {
+    vm.showSuccessAnimation = true;
+    successAnimationTimeout = $timeout(() => {
+      if (cb) {
+        cb();
+      }
+    }, SUCCESS_ANIMATION_DURATION);
+
+  }
+}
