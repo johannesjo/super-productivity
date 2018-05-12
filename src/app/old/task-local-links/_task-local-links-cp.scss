@@ -1,0 +1,60 @@
+task-local-links {
+  ul {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  li {
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: row;
+    width: 100%;
+  }
+
+  .md-button.md-icon-button {
+    padding: 0;
+    margin-left: 20px;
+    width: 24px;
+    height: 24px;
+    min-height: 0;
+
+    ng-md-icon {
+    }
+  }
+
+  li.thumbnail-box {
+    // width: calc(98% / 3);
+    width: 32.666666666%;
+    display: block;
+    margin-bottom: 10px;
+    margin-right: 1%;
+
+    &:nth-of-type(3n) {
+      margin-right: 0;
+    }
+
+    img {
+      max-width: 100%;
+      height: auto;
+    }
+
+    .status-line {
+      white-space: nowrap;
+      overflow: hidden;
+
+      a,
+      .md-button.md-icon-button {
+        display: inline-block;
+        margin-left: 0;
+
+        ng-md-icon {
+        }
+      }
+    }
+  }
+  .thumbnail-box + .normal-link {
+    padding-top: 20px;
+    clear: left;
+  }
+}

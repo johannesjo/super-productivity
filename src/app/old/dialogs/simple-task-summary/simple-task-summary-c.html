@@ -1,0 +1,146 @@
+<md-dialog aria-label="Task list export"
+           class="dialog-simple-task-summary"
+           md-theme="vm.theme">
+  <md-toolbar>
+    <div class="md-toolbar-tools">
+      <h2>Task List Export</h2>
+      <span flex></span>
+      <md-button class="md-icon-button"
+                 aria-label="Cancel"
+                 ng-click="vm.cancel()">
+        <ng-md-icon icon="close"></ng-md-icon>
+      </md-button>
+    </div>
+  </md-toolbar>
+
+  <form ng-submit="vm.copyToClippboard()">
+    <md-dialog-content>
+      <div class="md-dialog-content">
+
+        <textarea ng-model="vm.tasksTxt"
+                  rows="10"
+                  id="task-textarea"
+                  md-whiteframe="2"
+                  class="simple-textarea"></textarea>
+
+
+        <section class="options">
+          <div layout-gt-xs="row">
+            <div flex-gt-xs="50">
+              <div class="md-caption"
+                   style="margin: 10px 0;">Options
+              </div>
+              <div>
+                <md-switch ng-model="vm.options.isUseNewLine"
+                           aria-label="Add new line">
+                  Add new line after task
+                </md-switch>
+              </div>
+              <div>
+                <md-switch ng-model="vm.options.isListSubTasks"
+                           aria-label="List sub tasks">
+                  List sub tasks
+                </md-switch>
+              </div>
+              <div>
+                <md-switch ng-model="vm.options.isWorkedOnTodayOnly"
+                           aria-label="List worked on today tasks only">
+                  List worked on today tasks only
+                </md-switch>
+              </div>
+              <div>
+                <md-switch ng-model="vm.options.isListDoneOnly"
+                           aria-label="List done tasks only">
+                  List done tasks only
+                </md-switch>
+              </div>
+              <md-input-container class="md-block">
+                <label>Separate tasks by</label>
+                <input type="text"
+                       ng-model="vm.options.separateBy">
+              </md-input-container>
+            </div>
+
+            <div flex-gt-xs="50">
+              <div class="md-caption"
+                   style="margin: 10px 0;">Fields to display
+              </div>
+              <div>
+                <md-switch ng-model="vm.options.showTitle"
+                           aria-label="Title">
+                  Title
+                </md-switch>
+              </div>
+              <div>
+                <md-switch ng-model="vm.options.showDate"
+                           aria-label="Date">
+                  Date
+                </md-switch>
+              </div>
+              <div>
+                <md-switch ng-model="vm.options.showTimeSpent"
+                           aria-label="Time Spent">
+                  Time Spent
+                </md-switch>
+              </div>
+              <div>
+                <md-switch ng-model="vm.options.isTimeSpentAsMilliseconds"
+                           ng-disabled="!vm.options.showTimeSpent"
+                           aria-label="Show time spent as milliseconds">
+                  Time Spent in milliseconds
+                </md-switch>
+              </div>
+              <md-input-container class="md-block">
+                <label>Separate fields by</label>
+                <input type="text"
+                       ng-model="vm.options.separateFieldsBy">
+              </md-input-container>
+            </div>
+          </div>
+
+          <div flex-gt-xs="100">
+            <md-input-container class="md-block">
+              <label>Regular Expression to remove</label>
+              <input type="text"
+                     ng-model="vm.options.regExToRemove"
+                     ng-model-options="{ debounce: 50 }">
+              <div class="validation-messages">
+                <div ng-if="vm.isInvalidRegEx"
+                     class="error">Invalid Regular Expression
+                </div>
+              </div>
+            </md-input-container>
+          </div>
+        </section>
+      </div>
+    </md-dialog-content>
+
+
+    <md-dialog-actions>
+      <md-button class="md-raised md-primary"
+                 ng-show="vm.finishDayFn"
+                 ng-click="vm.cancel();vm.finishDayFn()">
+        <ng-md-icon icon="wb_sunny"></ng-md-icon>
+        Clear Done and go home
+      </md-button>
+      <md-button class="md-primary md-raised"
+                 id="clipboard-btn"
+                 data-clipboard-action="copy"
+                 data-clipboard-target="#task-textarea">
+        <ng-md-icon icon="content_paste"></ng-md-icon>
+        Copy to clipboard
+      </md-button>
+      <a class="md-button md-primary md-raised"
+         text-to-file-download="vm.tasksTxt">
+        <ng-md-icon icon="file_download"></ng-md-icon>
+        Save to file
+      </a>
+      <md-button ng-click="vm.cancel()"
+                 type="button"
+                 class="md-raised">
+        <ng-md-icon icon="close"></ng-md-icon>
+        Close
+      </md-button>
+    </md-dialog-actions>
+  </form>
+</md-dialog>

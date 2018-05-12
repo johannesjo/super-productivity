@@ -1,0 +1,108 @@
+<md-dialog aria-label="{{vm.editOrAddStr}} {{vm.getGlobalOrTaskStr()}}"
+           md-theme="vm.theme"
+           class="edit-global-link-dialog">
+  <md-toolbar>
+    <div class="md-toolbar-tools">
+      <h2>{{vm.editOrAddStr}} {{vm.getGlobalOrTaskStr()}}</h2>
+      <span flex></span>
+      <md-button class="md-icon-button"
+                 aria-label="Cancel"
+                 ng-click="vm.cancel()">
+        <ng-md-icon icon="close"></ng-md-icon>
+      </md-button>
+    </div>
+  </md-toolbar>
+
+  <form ng-submit="vm.saveGlobalLink()">
+    <md-dialog-content>
+      <div class="md-dialog-content">
+        <p ng-if="vm.selectedTask"><strong>Add link to task:<br>{{vm.selectedTask.title}}</strong><br><br></p>
+        <md-input-container class="md-block">
+          <label>Title</label>
+          <input type="text"
+                 ng-model="vm.linkCopy.title"
+                 md-auto-focus="true"
+                 tabindex="1"
+                 aria-label="Title">
+        </md-input-container>
+        <md-input-container class="md-block">
+          <label>
+            <span ng-if="vm.linkCopy.type ==='LINK' || !vm.linkCopy.type">Url</span>
+            <span ng-if="vm.linkCopy.type ==='FILE'">File Path</span>
+            <span ng-if="vm.linkCopy.type ==='IMG'">Image</span>
+            <span ng-if="vm.linkCopy.type ==='COMMAND'">Command</span>
+          </label>
+          <input type="text"
+                 ng-model="vm.linkCopy.path"
+                 required
+                 tabindex="1"
+                 aria-label="Path/Url">
+        </md-input-container>
+        <md-select ng-model="vm.linkCopy.type"
+                   required="true"
+                   tabindex="1"
+                   placeholder="Select a type">
+          <md-option ng-repeat="type in vm.types"
+                     ng-value="type.type"
+                     ng-bind="type.title">
+          </md-option>
+        </md-select>
+
+
+        <div class="custom-icon-wrapper">
+          <ng-md-icon ng-if="vm.linkCopy.customIcon"
+                      icon="{{vm.linkCopy.customIcon}}"></ng-md-icon>
+          <md-autocomplete tabindex="1"
+                           md-floating-label="Select custom icon (optional)"
+                           md-selected-item="vm.linkCopy.customIcon"
+                           md-search-text="vm.searchIconTxt"
+                           md-items="icon in vm.getFilteredIconSuggestions(vm.searchIconTxt)"
+                           md-item-text="icon"
+                           md-require-match="true"
+                           placeholder="Select custom icon">
+            <md-item-template>
+              <ng-md-icon icon="{{icon}}"></ng-md-icon>
+              <span md-highlight-text="vm.searchIconTxt"
+                    md-highlight-flags="i">{{icon}}</span>
+            </md-item-template>
+            <md-not-found>
+              No icon found
+            </md-not-found>
+          </md-autocomplete>
+        </div>
+
+        <div ng-if="vm.isNew">
+          <md-autocomplete
+            md-floating-label="Select task to add to (or leave empty to add to the global link list)."
+            md-selected-item="vm.selectedTask"
+            md-search-text="vm.searchTaskText"
+            md-items="task in vm.getFilteredTasks(vm.searchTaskText)"
+            md-item-text="task.title"
+            tabindex="1"
+            placeholder="Select task">
+            <md-item-template>
+          <span md-highlight-text="vm.searchTaskText"
+                md-highlight-flags="i">{{ task.title }}</span>
+            </md-item-template>
+            <md-not-found>
+              No task found
+            </md-not-found>
+          </md-autocomplete>
+        </div>
+      </div>
+    </md-dialog-content>
+
+    <md-dialog-actions>
+      <md-button type="submit"
+                 class="md-primary md-raised">
+        Save
+      </md-button>
+
+      <md-button ng-click="vm.cancel()"
+                 type="button"
+                 class="md-raised">
+        Cancel
+      </md-button>
+    </md-dialog-actions>
+  </form>
+</md-dialog>

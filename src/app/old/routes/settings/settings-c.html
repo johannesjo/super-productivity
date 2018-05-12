@@ -1,0 +1,89 @@
+<div class="page-settings">
+
+  <div layout-gt-sm="row">
+    <div flex-gt-sm="50"
+         class="settings-col">
+      <h1 class="md-subhead">Global Settings</h1>
+
+      <section class="config-section"
+               md-whiteframe="2">
+        <collapsible collapsible-title="Projects"
+                     icon="work">
+          <project-settings all-projects="vm.allProjects"
+                            selected-current-project="vm.selectedCurrentProject"></project-settings>
+        </collapsible>
+      </section>
+
+
+      <section class="config-section"
+               md-whiteframe="2">
+        <collapsible collapsible-title="Backup and Sync"
+                     icon="swap_vert">
+
+          <backup-settings settings="r.config"></backup-settings>
+        </collapsible>
+      </section>
+
+
+      <section class="config-section keyboard-settings"
+               md-whiteframe="2">
+        <collapsible collapsible-title="Keyboard Shortcuts"
+                     icon="keyboard">
+
+          <keyboard-settings keys="r.keys"></keyboard-settings>
+        </collapsible>
+      </section>
+
+
+      <section class="config-section"
+               md-whiteframe="2">
+        <collapsible collapsible-title="Misc Settings"
+                     icon="settings">
+
+          <misc-settings settings="r.config"></misc-settings>
+        </collapsible>
+      </section>
+
+      <section class="config-section"
+               md-whiteframe="2">
+        <collapsible collapsible-title="Pomodoro Timer"
+                     icon="add_alert">
+          <pomodoro-settings settings="r.config.pomodoro"></pomodoro-settings>
+        </collapsible>
+      </section>
+    </div>
+
+    <div flex-gt-sm="50"
+         class="settings-col">
+
+      <h1 class="md-subhead">Project Specific Settings</h1>
+
+      <section class="config-section"
+               md-whiteframe="2">
+        <collapsible collapsible-title="Theme Settings"
+                     icon="color_lens">
+          <theme-settings current-theme="r.theme"
+                          is-current-project-theme="true"></theme-settings>
+        </collapsible>
+      </section>
+
+      <section class="config-section"
+               md-whiteframe="2">
+        <collapsible collapsible-title="Jira-Integration">
+
+          <jira-settings settings="r.jiraSettings"></jira-settings>
+        </collapsible>
+      </section>
+
+
+      <section class="config-section"
+               md-whiteframe="2">
+        <collapsible collapsible-title="Git Integration"
+                     icon="github-circle">
+
+          <git-settings settings="r.git"></git-settings>
+        </collapsible>
+      </section>
+    </div>
+  </div>
+</div>

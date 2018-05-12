@@ -1,0 +1,594 @@
+// for drag and drop
+$this-min-height: 50px;
+task-list {
+  display: block;
+  min-height: $this-min-height;
+}
+
+.task-list {
+  text-align: left;
+  min-height: $this-min-height;
+  list-style: none;
+  // add a little padding to top and bottom, to make drag dropping easier
+  padding: 5px 0;
+  margin: 0;
+  display: block;
+
+  .as-sortable-placeholder,
+  .dndPlaceholder {
+    margin: 1px 2px 5px 1px;
+    display: block;
+    min-height: 22px;
+    background-color: #dddddd;
+
+    @include dark-theme {
+      background-color: $dark-theme-bg-darker;
+    }
+  }
+
+  @media(max-width: $layout-xs) {
+    // make space for the expand icon
+    margin-left: 12px;
+  }
+
+  // nested lists
+  .task-list {
+    margin: 2px 5px 0 5px;
+
+    @media(max-width: $layout-xs) {
+      margin: 1px 0 0 10px;
+    }
+  }
+
+  &.is-hide-controls {
+    .task {
+      .handle,
+      .controls,
+      .ico-btn {
+        display: none;
+      }
+      .collapse-sub-tasks-btn {
+        display: block;
+      }
+      .title-bar-wrapper {
+        // make sure we're not overlapping with expand button
+        margin-left: 8px;
+      }
+    }
+  }
+}
+
+$this-task-text-color: #333333;
+$this-task-text-color-dark: #dddddd;
+$this-task-text-color-done: #aaaaaa;
+$task-inner-padding-left-right: 6px;
+
+.task {
+  display: block;
+
+  > .inner-wrapper {
+
+    padding: 2px 0;
+    margin-bottom: 7px;
+    background-color: #ffffff;
+    color: $this-task-text-color;
+    position: relative;
+    box-shadow: $shadow-bottom-boxed;
+
+    .title-bar-wrapper,
+    .first-line {
+      background: inherit;
+    }
+
+    @include dark-theme {
+      border-color: rgb(60, 60, 60);
+      background-color: $dark-theme-bg-lighter;
+      color: $this-task-text-color-dark;
+      box-shadow: $whiteframe-shadow-6dp;
+    }
+  }
+
+  &:last-child > .inner-wrapper {
+    margin-bottom: 0;
+  }
+
+  &:focus {
+    outline: none;
+  }
+  &.as-sortable-dragging,
+  &:focus > .inner-wrapper {
+    background: #eeeeee;
+    color: #000000;
+
+    // outline
+    outline: 1px solid #000000;
+  }
+
+  @include dark-theme {
+    &:focus > .inner-wrapper {
+      background-color: $dark-theme-bg-darker;
+      color: #dddddd;
+
+      // outline
+      outline: 1px solid #ffffff;
+    }
+  }
+
+  &.is-current > .inner-wrapper {
+    background: $light-green;
+    color: #000000;
+  }
+  @include dark-theme {
+    &.is-current > .inner-wrapper {
+      background-color: $dark-green;
+      color: #ffffff;
+    }
+  }
+
+  @include dark-theme {
+    &.is-done {
+      .time,
+      .task-title {
+        color: $dark-theme-text-color;
+      }
+      ng-md-icon {
+        fill: $dark-theme-text-color;
+      }
+    }
+  }
+
+  &.is-done {
+    //opacity: 0.8;
+
+    ng-md-icon {
+      fill: $this-task-text-color-done !important;
+    }
+
+    .time,
+    .task-title {
+      color: $this-task-text-color-done;
+    }
+
+    .task-title {
+      text-decoration: line-through;
+    }
+
+    .play-btn {
+      display: none;
+    }
+  }
+
+  .title-bar-wrapper {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: center;
+    min-height: 36px;
+    flex-grow: 1;
+    flex-basis: 70%;
+    @media(max-width: $layout-xs) {
+      margin-bottom: 5px;
+      flex-shrink: 0;
+      flex-basis: 100%;
+    }
+  }
+
+  .first-line {
+    display: flex;
+    flex-wrap: nowrap;
+    user-select: none;
+    justify-content: space-between;
+    align-items: center;
+
+    @media(max-width: $layout-xs) {
+      flex-wrap: wrap;
+    }
+
+    $this-button-spacer: 1px;
+    $this-button-spacer-mobile: 1px;
+    $this-button-size: 34px;
+    $this-button-size-mobile: 34px;
+    $this-icon-color: #545454;
+    .ico-btn {
+      margin: $this-button-spacer;
+      height: $this-button-size;
+      width: $this-button-size;
+      min-width: $this-button-size;
+      min-height: $this-button-size;
+      // this fixes the original link button icon for some reason
+      line-height: $this-button-size + -1;
+      padding: 0;
+      box-shadow: $shadow-icon-button;
+      border-radius: 100%;
+      text-align: center;
+      overflow: hidden;
+      position: relative;
+      z-index: 4;
+
+      // theming
+      border: 1px solid #dddddd;
+      background: #ffffff !important;
+
+      transition: transform $transition-standard;
+      &:hover {
+        z-index: 5;
+        transform: scale(1.15);
+      }
+      &:focus {
+        outline: none;
+      }
+
+      // somehow the icons are a little of so we move them
+      ng-md-icon {
+        // only affects linux for some reason
+        // margin-top: -3px !important;
+        //display: block;
+        //text-align: center;
+        //svg {
+        //  position: absolute;
+        //  left: 50%;
+        //  top: 50%;
+        //  transform: translate(-50%, -50%);
+        //}
+      }
+
+      &.update-indicator-btn {
+        margin-left: 12px;
+
+        .task-list .task-list & {
+          margin: $this-button-spacer;
+          margin-right: -2px;
+        }
+      }
+
+      @include dark-theme {
+        background: $dark-theme-bg-darker !important;
+        border: 1px solid $dark-theme-bg;
+      }
+
+      @at-root {
+        .task {
+          .ico-btn:hover,
+          .ico-btn.is-active,
+          &.is-current .ico-btn.play-btn {
+            background: #000000 !important;
+            background: $this-icon-color !important;
+            border-color: transparent;
+
+            @include dark-theme {
+              background: #ffffff !important;
+            }
+
+            > ng-md-icon {
+              fill: #ffffff !important;
+              @include dark-theme {
+                fill: #000000 !important;
+              }
+            }
+          }
+        }
+      }
+
+      ng-md-icon {
+        fill: $this-icon-color;
+        margin: 0;
+        padding: 0;
+        line-height: 1;
+        @include dark-theme {
+          fill: $dark-theme-text-color-lighter;
+        }
+      }
+
+      &.delete-btn {
+        ng-md-icon.delete-icon {
+          fill: $red !important;
+          @include dark-theme {
+            fill: $red !important;
+          }
+        }
+
+        &:hover {
+          background: $red-danger !important;
+          ng-md-icon.delete-icon {
+            fill: #ffffff !important;
+            @include dark-theme {
+              fill: #ffffff !important;
+            }
+          }
+        }
+      }
+
+      @media(max-width: $layout-xs) {
+        margin: $this-button-spacer-mobile;
+        height: $this-button-size-mobile;
+        width: $this-button-size-mobile;
+        min-width: $this-button-size-mobile;
+        min-height: $this-button-size-mobile;
+        line-height: $this-button-size-mobile + -1;
+      }
+    }
+
+    // Button Stuff
+    ng-md-icon {
+      fill: #545454;
+    }
+
+    .play-btn {
+      padding-left: 0;
+      margin-left: -2px;
+      margin-right: 3px;
+      // move over original link btn
+      position: relative;
+      z-index: 1;
+    }
+
+    .show-notes-btn {
+      ng-md-icon {
+        transition: $transition-standard;
+        backface-visibility: hidden;
+      }
+
+      &.is-active ng-md-icon {
+        transform: rotate(45deg);
+      }
+    }
+  }
+
+  .controls {
+    white-space: nowrap;
+    text-align: right;
+    margin-right: 2px;
+
+    @media(max-width: $layout-xs) {
+      white-space: normal;
+      margin-left: 5px;
+    }
+  }
+
+  .handle {
+    margin: 0 4px 0 9px;
+  }
+
+  .task-title {
+    flex-direction: row;
+    align-items: center;
+    align-content: center;
+    flex: 1 1 auto;
+    flex-grow: 1;
+    text-align: left;
+    outline: none;
+    margin-left: 4px;
+    padding: 4px 0 4px 6px;
+    line-height: 1.5;
+    display: block;
+    min-height: 20px;
+    text-overflow: ellipsis;
+  }
+
+  .actual-notes-wrapper {
+    box-shadow: $whiteframe-shadow-4dp;
+  }
+
+  form {
+    width: 100%;
+  }
+  input {
+    outline: none;
+  }
+  input {
+    width: 100%;
+    display: block;
+    box-sizing: border-box;
+    height: 30px;
+    padding: 4px 10px;
+    border: none;
+  }
+
+  .time {
+    font-style: italic;
+    white-space: nowrap;
+    margin-left: 10px;
+    margin-right: 10px;
+    @media(max-width: $layout-xs) {
+      margin-left: 8px;
+      font-size: 13px;
+    }
+  }
+
+  .notes {
+    $this-notes-extra-padding: 3px;
+    display: block;
+    margin-left: -$task-inner-padding-left-right;
+    margin-right: -$task-inner-padding-left-right;
+    overflow: hidden;
+    padding-left: $task-inner-padding-left-right +$this-notes-extra-padding;
+    padding-right: $task-inner-padding-left-right +$this-notes-extra-padding;
+
+    section {
+      margin-top: 10px;
+    }
+
+    .md-caption {
+      font-weight: bold;
+      margin-bottom: 6px;
+    }
+  }
+
+  a {
+    cursor: pointer;
+  }
+
+  .status {
+    margin-bottom: 10px;
+  }
+  .changelog,
+  .comments,
+  .attachments {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding: 0;
+    margin: 0 0 10px;
+    list-style-type: none;
+    li {
+      padding: 0;
+      font-size: 14px;
+      margin-top: 5px;
+    }
+  }
+
+  .comments {
+    li {
+      position: relative;
+      margin-top: 16px;
+      &:first-child {
+        margin-top: 8px;
+        &:before {
+          display: none;
+        }
+      }
+    }
+    p:first-child {
+      display: inline;
+    }
+    p {
+      margin-bottom: 8px;
+      margin-top: 8px;
+    }
+  }
+}
+
+// animations
+.is-initial-entering-done > .task-list {
+  > .task > .inner-wrapper > .first-line {
+    .md-button {
+      transition: $transition-standard;
+      backface-visibility: hidden;
+    }
+  }
+
+  > .task {
+    @include crawl-in-out(1, 50px);
+
+    &:focus {
+      transition: none;
+    }
+
+    &.is-current > .inner-wrapper > .first-line {
+      .play-btn {
+        transition: $transition-standard;
+      }
+    }
+
+    &.is-current > .inner-wrapper {
+      work-view & {
+        transform: translateZ(0);
+        backface-visibility: hidden;
+        animation: attention-for-current-task $transition-standard;
+      }
+      [ui-view].ng-enter & {
+        // only start after view is complete
+        animation: none;
+      }
+    }
+  }
+
+  .notes {
+  }
+
+  .task .time {
+    .ico-btn {
+      &.ng-enter,
+      &.ng-leave {
+        transition: none !important;
+      }
+    }
+  }
+}
+
+.mark-as-done-btn:active {
+  animation: $transition-duration-m success-btn-ani $ani-standard-timing;
+  [ui-view].ng-enter-active &,
+  [ui-view].ng-leave &,
+  [ui-view].ng-enter & {
+    animation-duration: 0s !important;
+  }
+}
+
+@keyframes success-btn-ani {
+  0% {
+    transform: scale(0) rotate(0deg);
+  }
+  50% {
+    transform: scale(1.2) rotate(180deg);
+  }
+  100% {
+    transform: scale(1) rotate(360deg);
+  }
+}
+
+@keyframes attention-for-current-task {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(0.97);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@mixin createCircleAnimation($i, $animTime, $totalTime, $delay) {
+  @keyframes #{circle#{$i}} {
+    0% {
+      opacity: 0;
+      //transform: scale(0);
+      transform: translateY(-100px);
+    }
+    #{($i * $delay)/$totalTime * 100%} {
+      opacity: 0;
+      //transform: scale(0);
+      transform: translateY(-100px);
+    }
+    #{($i * $delay + $animTime)/$totalTime * 100%} {
+      opacity: 1;
+      //transform: scale(1);
+      transform: translateX(0);
+    }
+    100% {
+      opacity: 1;
+      //transform: scale(1);
+      transform: translateX(0);
+    }
+  }
+}
+
+$animTime: 0.25s;
+$totalTime: 1s;
+$staggerTime: 0.02s;
+//.done-tasks,
+//.undone-tasks {
+@for $i from 0 through 15 {
+  @include createCircleAnimation($i, $animTime, $totalTime, $staggerTime);
+
+  .is-initial-entering .task:nth-child(#{($i + 1)}) {
+    opacity: 0;
+    transform-origin: center top;
+    //transform: scale(0);
+    animation: circle#{($i)} $totalTime $ani-enter-timing;
+    animation-fill-mode: forwards;
+  }
+}
+
+.backlog-tasks,
+.done-tasks {
+  &.is-initial-entering .task {
+    animation-delay: 0.1s;
+  }
+}
+
+.task-list {
+  opacity: 0;
+  animation: $transition-duration-s ani-task-list-enter $ani-standard-timing;
+  animation-fill-mode: forwards;
+}

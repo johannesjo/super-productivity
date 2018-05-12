@@ -1,0 +1,34 @@
+agenda-and-history {
+  margin-top: -20px;
+  margin-left: -20px;
+  margin-right: -20px;
+  display: block;
+
+  global-link-list + .ui-view-container > main & {
+    margin-top: 0;
+  }
+
+  .content {
+    padding-left: 20px;
+    padding-right: 20px;
+    @extend %centered-component;
+  }
+
+  md-toolbar {
+    height: 36px;
+    min-height: 36px;
+    padding: 0;
+    .md-toolbar-tools {
+      padding: 0;
+    }
+    .md-button {
+      border-radius: 0;
+      margin: 0;
+      //border-top: 5px solid transparent;
+      //border-bottom: 5px solid transparent;
+    }
+    .is-active {
+      //border-bottom: 5px solid rgb(197,17,98);
+    }
+  }
+}

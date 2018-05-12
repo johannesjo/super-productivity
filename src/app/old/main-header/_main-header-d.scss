@@ -1,0 +1,85 @@
+main-header {
+  position: relative;
+  z-index: 3;
+
+  nav > .md-button {
+    // only use background color to speed up animation
+    transition-property: background-color !important;
+
+    &.md-icon-button {
+      margin: 0 3px;
+
+      @media(max-width: $layout-xs) {
+        margin: 0 1px;
+      }
+    }
+  }
+
+  nav {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .project-switcher-btn {
+    margin-left: 0;
+    white-space: nowrap;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  @media(max-width: $layout-xs) {
+    md-menu,
+    .sp-title {
+      flex-shrink: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .sp-icon {
+      margin-right: 0 !important;
+    }
+
+    md-menu {
+      .md-button,
+      button {
+        margin: 0;
+        min-width: 20px;
+      }
+    }
+
+    $this-height: 48px;
+    md-toolbar {
+      min-height: $this-height;
+    }
+
+    .md-toolbar-tools {
+      padding: 0 0 0 8px;
+      height: $this-height;
+      max-height: $this-height;
+    }
+  }
+
+  .show-bookmarks-btn {
+    position: absolute;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 2;
+    top: 100%;
+    transition: $transition-standard !important;
+    transition-property: transform !important;
+    margin: 0 !important;
+    @media(max-width: $layout-xs) {
+      height: 30px !important;
+      min-height: 30px !important;
+      padding: 0 !important;
+    }
+
+    &.is-open {
+      transition-property: transform !important;
+      transition: $transition-standard !important;
+      transform: translate(-50%, -75%);
+    }
+  }
+}

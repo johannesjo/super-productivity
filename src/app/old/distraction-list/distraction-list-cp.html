@@ -1,0 +1,15 @@
+<div ng-if=" $ctrl.r.distractions.length >0">
+  <h2 class="md-title">
+    <ng-md-icon icon="flash_on"></ng-md-icon>
+    Your distractions for today
+  </h2>
+  <ul>
+    <li ng-repeat="distraction in $ctrl.r.distractions track by $index"
+        ng-bind="distraction"></li>
+  </ul>
+  <md-button class="md-raised"
+             ng-click="$ctrl.r.distractions=[]">
+    <ng-md-icon icon="delete"></ng-md-icon>
+    Delete distractions
+  </md-button>
+</div>

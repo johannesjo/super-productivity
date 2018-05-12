@@ -1,0 +1,239 @@
+<h3 class="md-title">The task lists</h3>
+<p>The task list will be your main tool to organize yourself. You start a task and time tracking for it by clicking on the play icon. There can only be one task tracked at a time.</p>
+<p>You can <strong>order the tasks</strong> via drag and drop or move them up or down by pressing
+  <ng-md-icon icon="keyboard"></ng-md-icon>
+  <em ng-bind="::vm.keys.moveTaskUp"></em> or
+  <ng-md-icon icon="keyboard"></ng-md-icon>
+  <em ng-bind="::vm.keys.moveTaskDown "></em>
+</p>
+
+<p>There are also several other <strong>keyboard shortcuts</strong> available. Check them out in the
+  <a class="md-accent"
+     ui-sref="settings">
+    <ng-md-icon icon="settings"></ng-md-icon>
+    settings section</a>.
+</p>
+
+<p>Each tasks can have a number of
+  <strong>sub tasks</strong>. When a task has sub tasks it cannot be started by itself or have tracked time directly to it. This because time spent and time estimated are set by the sum of the sub tasks.
+</p>
+
+<h3 class="md-title">An interactive example task</h3>
+<p>Hover the different buttons, icons and sections to get the information what a thing does.</p>
+<ul class="task-list">
+  <li class="task"
+      tabindex="1"
+      md-whiteframe="1">
+
+    <div class="first-line"
+         layout="row"
+         layout-align="space-between center">
+      <md-button class="md-icon-button "
+                 aria-label="is updated"
+                 tabindex="2"
+                 ng-if="vm.exampleTask.isUpdated"
+                 ng-click="vm.exampleTask.showNotes = true;">
+        <md-tooltip>
+          If shown, it means that the task was updated on Jira or GitHub
+        </md-tooltip>
+        <ng-md-icon class="update update-icon"
+                    flex="none"
+                    icon="update"></ng-md-icon>
+      </md-button>
+
+      <ng-md-icon class="handle"
+                  flex="none"
+                  icon="drag_handle"></ng-md-icon>
+
+      <md-button class="md-icon-button play-btn"
+                 aria-label="mark as current"
+                 tabindex="2"
+                 ng-click="vm.isCurrent= !vm.isCurrent">
+        <md-tooltip>
+          Starts time tracking for the task and marks it as the current active task. Will only appear on the work view.
+        </md-tooltip>
+        <ng-md-icon icon="{{vm.isCurrent? 'pause_circle_filled':'play_circle_fill'}}"
+                    aria-label="start task"></ng-md-icon>
+      </md-button>
+
+      <div class="title"
+           flex="auto"
+           layout="row"
+           layout-align="center center">
+        <md-tooltip>
+          Clicking on the task title will allow you to edit it
+        </md-tooltip>
+        <span class="text"
+              tabindex="2"
+              contenteditable="true"
+              ng-model="vm.exampleTask.title"
+              edit-on-click-ev-id="vm.exampleTask.id"
+              edit-on-click="vm.exampleTask.title"></span>
+      </div>
+
+      <div class="time">
+        <span ng-bind="vm.exampleTask.timeSpent|duration"></span> /
+        <span ng-bind="vm.exampleTask.timeEstimate|duration"></span>
+        <md-tooltip>
+          Time spent / time estimated
+        </md-tooltip>
+      </div>
+
+      <div class="controls">
+        <md-button class="md-icon-button"
+                   tabindex="2"
+                   ng-disabled="vm.exampleTask.subTasks.length>0"
+                   aria-label="time estimation">
+          <md-tooltip>
+            Opens a dialog for you to specify time spent and time estimated for the task
+          </md-tooltip>
+          <ng-md-icon icon="access_time"
+                      aria-label="time estimation"></ng-md-icon>
+        </md-button>
+        <md-button class="md-icon-button"
+                   aria-label="add sub task"
+                   tabindex="2">
+          <md-tooltip>
+            Adds a sub task for this task
+          </md-tooltip>
+          <ng-md-icon icon="playlist_add"
+                      aria-label="add sub task"></ng-md-icon>
+        </md-button>
+        <md-button class="md-icon-button"
+                   aria-label="notes"
+                   tabindex="2"
+                   ng-class="{'is-active':vm.exampleTask.showNotes}"
+                   ng-click="vm.exampleTask.showNotes=!vm.exampleTask.showNotes">
+          <md-tooltip>
+            Opens a note section for the task. Jira or GitHub comments are also shown here.
+          </md-tooltip>
+          <ng-md-icon icon="{{(vm.exampleTask.notes||vm.exampleTask.originalKey) ?'insert_comment': 'mode_comment'}}"
+                      aria-label="notes"></ng-md-icon>
+        </md-button>
+        <md-button class="md-icon-button"
+                   aria-label="link"
+                   tabindex="2">
+          <md-tooltip>
+            Link to the original issue on Jira or GitHub. Only shown for Jira or GitHub tasks.
+          </md-tooltip>
+          <ng-md-icon icon="link"
+                      aria-label="link"></ng-md-icon>
+        </md-button>
+        <md-button class="md-icon-button"
+                   aria-label="delete"
+                   tabindex="2">
+
+          <md-tooltip>
+            Deletes the task and all its sub tasks
+          </md-tooltip>
+          <ng-md-icon icon="delete_forever"
+                      class="delete-icon"
+                      aria-label="delete"></ng-md-icon>
+        </md-button>
+        <span>
+          <md-tooltip>
+            Marks task as done/undone
+          </md-tooltip>
+          <md-checkbox ng-model="vm.exampleTask.isDone"
+                       tabindex="2"
+                       aria-label="un-/mark as done">
+          </md-checkbox>
+        </span>
+      </div>
+    </div>
+
+    <md-progress-linear md-mode="determinate"
+                        value="{{vm.exampleTask.progress}}"></md-progress-linear>
+
+    <div class="notes"
+         flex="100"
+         ng-if="vm.exampleTask.showNotes===true">
+
+      <section ng-if="vm.exampleTask.isUpdated;">
+        <md-tooltip>
+          Shows remote changes made on Jira or Github, when there have been some made.
+        </md-tooltip>
+        <div class="md-caption">
+          Changes since last update
+        </div>
+
+        <ul class="changelog">
+          <li ng-repeat="changelogEntry in vm.exampleTask.originalChangelog">
+            <div><em>[<span ng-bind="::changelogEntry.author"></span>]
+              <span ng-bind="::changelogEntry.created| amDateFormat:'Y.MM.DD HH:mm'"></span>: </em>
+            </div>
+            <div ng-repeat="change in changelogEntry.items">
+              <strong>"<span ng-bind="::change.field"></span>" changed to:</strong>
+              <span ng-bind="::change.toString"></span>
+            </div>
+          </li>
+        </ul>
+        <md-button class="md-raised"
+                   ng-click="vm.exampleTask.isUpdated=false;vm.exampleTask.originalChangelog=undefined;">
+          <ng-md-icon icon="delete"></ng-md-icon>
+          Hide changes
+        </md-button>
+      </section>
+
+      <section>
+        <div class="md-caption">Notes</div>
+        <div md-whiteframe="4">
+          <md-tooltip>
+            Notes section. Click to edit.
+          </md-tooltip>
+          <inline-markdown ng-model="vm.exampleTask.notes"></inline-markdown>
+        </div>
+      </section>
+
+      <section ng-if="vm.exampleTask.status || vm.exampleTask.originalStatus"
+               class="status">
+        <div class="md-caption">Status: <span ng-bind="vm.exampleTask.originalStatus.name"></span>
+          <ng-md-icon icon="arrow_forward"
+                      aria-label="arrow forward"></ng-md-icon>
+          <span ng-bind="vm.exampleTask.status"></span>
+        </div>
+      </section>
+
+      <section ng-if="vm.exampleTask.originalAttachment.length > 0">
+        <collapsible collapsible-title="Attachments ({{ ::vm.exampleTask.originalAttachment.length }})">
+          <ul class="attachments">
+            <li ng-repeat="attachment in vm.exampleTask.originalAttachment">
+              <a href="{{ ::attachment}}"
+                 external-link
+                 target="_blank"
+                 class="md-accent"
+                 ng-bind="::attachment"></a>
+              <a href="{{ ::attachment}}"
+                 download="{{ ::attachment}}"
+                 class="md-accent">
+                <ng-md-icon icon="file_download"
+                            aria-label="download file directly"></ng-md-icon>
+              </a>
+            </li>
+          </ul>
+        </collapsible>
+      </section>
+
+      <section ng-if="vm.exampleTask.originalComments.length > 0">
+        <collapsible collapsible-title="Comments ({{:: vm.exampleTask.originalComments.length }})">
+          <md-divider></md-divider>
+          <ul class="comments">
+            <li ng-repeat="comment in vm.exampleTask.originalComments"
+                class="comment">
+              <strong class="author">[<span ng-bind="::comment.author"></span>]: </strong>
+              <span marked="comment.body"></span>
+            </li>
+          </ul>
+        </collapsible>
+      </section>
+
+      <section ng-if="vm.exampleTask.localAttachments && vm.exampleTask.localAttachments.length">
+        <collapsible collapsible-title="Local attachments and links"
+                     is-initially-expanded="'true'">
+          <task-local-links local-links="vm.exampleTask.localAttachments"></task-local-links>
+        </collapsible>
+      </section>
+    </div>
+
+  </li>
+</ul>

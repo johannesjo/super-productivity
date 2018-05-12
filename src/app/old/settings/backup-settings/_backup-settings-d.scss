@@ -1,0 +1,20 @@
+backup-settings {
+  display: block;
+  position: relative;
+}
+
+.sync-from-btn {
+  ng-md-icon {
+    transform: rotate(180deg);
+  }
+}
+
+.sync-file-wrapper {
+  display: flex;
+  flex-direction: row;
+  //justify-content: center;
+  align-items: center;
+  md-input-container{
+    flex: 1;
+  }
+}

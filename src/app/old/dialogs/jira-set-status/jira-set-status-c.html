@@ -1,0 +1,84 @@
+<md-dialog aria-label="Jira Set Status Dialog"
+           md-theme="vm.theme">
+
+  <md-toolbar>
+    <div class="md-toolbar-tools">
+      <h2>Update Jira status for <span ng-bind="vm.task.originalKey"></span></h2>
+      <span flex></span>
+      <md-button class="md-icon-button"
+                 aria-label="Cancel"
+                 ng-click="vm.cancel()">
+        <ng-md-icon icon="close"></ng-md-icon>
+      </md-button>
+    </div>
+  </md-toolbar>
+
+  <form ng-submit="vm.updateTask(vm.chosenTransitionIndex)">
+    <md-dialog-content>
+      <div class="md-dialog-content">
+        <p>
+          <span ng-if="vm.localType==='OPEN'">
+            <strong>Open</strong>: You stopped working on a task.
+          </span>
+          <span ng-if="vm.localType==='IN_PROGRESS'">
+            <strong>In progress</strong>: You started to work on a task.
+          </span>
+          <span ng-if="vm.localType==='DONE'">
+            <strong>Done</strong>: You completed a task.
+          </span>
+        </p>
+        <p>
+          Do you want to update the task '<strong ng-bind="vm.task.title"></strong>' on Jira?
+        </p>
+
+        <h2 class="md-subhead">Move to:</h2>
+        <md-radio-group ng-model="vm.chosenTransitionIndex">
+          <md-radio-button
+            ng-value="$index"
+            ng-repeat="transition in vm.transitions"
+            class="md-primary">{{transition.name}}
+          </md-radio-button>
+        </md-radio-group>
+
+        <md-checkbox md-no-ink
+                     ng-model="vm.saveAsDefaultAction"
+                     aria-label="save as default action">
+          Make <strong ng-bind="vm.transitions[vm.chosenTransitionIndex].name"></strong> the default action for setting a task to
+          <strong ng-if="vm.localType==='OPEN'">open</strong>
+          <strong ng-if="vm.localType==='IN_PROGRESS'">in progress</strong>
+          <strong ng-if="vm.localType==='DONE'">done</strong>.
+          This will be set then always, when a task is changed to
+          <strong ng-if="vm.localType==='OPEN'">open</strong>
+          <strong ng-if="vm.localType==='IN_PROGRESS'">in progress</strong>
+          <strong ng-if="vm.localType==='DONE'">done</strong>. You can change this later in the project settings.
+        </md-checkbox>
+
+        <div>
+          <label class="md-caption">Assign issue to another user, (leave empty to leave it assigned to current user)</label>
+          <md-autocomplete md-selected-item="vm.userToAssign"
+                           md-require-match="true"
+                           md-search-text="vm.userSearchText"
+                           md-items="userKey in vm.userQuery(vm.userSearchText)">
+            <md-item-template>
+              <span md-highlight-text="vm.userSearchText"
+                    ng-bind="userKey"></span>
+            </md-item-template>
+          </md-autocomplete>
+        </div>
+      </div>
+    </md-dialog-content>
+
+
+    <md-dialog-actions>
+      <md-button type="submit"
+                 class="md-raised md-primary">
+        Update Task on Jira
+      </md-button>
+      <md-button ng-click="vm.cancel()"
+                 type="button"
+                 class="md-raised">
+        Cancel
+      </md-button>
+    </md-dialog-actions>
+  </form>
+</md-dialog>

@@ -1,0 +1,212 @@
+<md-dialog aria-label="Task list export"
+           class="dialog-time-sheet-export fullscreen-dialog"
+           md-theme="vm.theme">
+  <md-toolbar>
+    <div class="md-toolbar-tools">
+      <h2>Time Sheet Export</h2>
+      <span flex></span>
+      <md-button class="md-icon-button"
+                 aria-label="Cancel"
+                 ng-click="vm.cancel()">
+        <ng-md-icon icon="close"></ng-md-icon>
+      </md-button>
+    </div>
+  </md-toolbar>
+
+  <form ng-submit="vm.save()">
+    <md-dialog-content>
+      <div class="md-dialog-content">
+        <collapsible class="help-collapsible"
+                     collapsible-title="What is this and how does it work?"
+                     is-initially-expanded="{{(vm.opts.spreadsheetId ? '':'true')}}">
+          <div class="info">
+            <p>This view allows you to export your worked time to a google sheet. You need to allow for your Google Spreadsheets to be accessed by Super Productivity. You also need to create a spreadsheet with a headings in the first row nad specify it's ID in the input field (<a external-link
+                                                                                                                                                                                                                                                                                         target="_blank"
+                                                                                                                                                                                                                                                                                         href="https://stackoverflow.com/questions/36061433/how-to-do-i-locate-a-google-spreadsheet-id">Ho to find the id of a spreadsheet?</a>).
+            </p>
+            <p>After successfully loading your spreadsheet a table will show up with 4 rows. The first row shows the heading you specified in the spreadsheet itself.</p>
+            <p>The second row is for informational purposes and shows the last row from the spreadsheet.</p>
+            <p>The forth row is a list of values you can directly enter save to the spreadsheet.</p>
+            <p>The third row is there to automatically define some values for the forth row. There are several special strings you can enter into the cells:</p>
+          </div>
+
+          <dl class="possible-properties">
+            <dt>{startTime}</dt>
+            <dd>The time when you first used this app today. It's possible to round this via the options.</dd>
+
+            <dt>{currentTime}</dt>
+            <dd>The current time. Could be used for the for the end time of todays working day It's possible to round this via the options.</dd>
+
+            <dt>{date}</dt>
+            <dd>Todays date in standard format (mm/dd/yyyy)</dd>
+
+            <dt>{date:DD/MM/YYYY} (example)</dt>
+            <dd>Date with a custom date format string.</dd>
+
+            <dt>{taskTitles}</dt>
+            <dd>Comma separated (parent) task titles</dd>
+
+            <dt>{subTaskTitles}</dt>
+            <dd>Comma separated sub task titles</dd>
+
+            <dt>{totalTime}</dt>
+            <dd>The total time you spend working on your todays tasks.</dd>
+          </dl>
+
+          <p>In addition to this there are several options you can use to modify the calculation of those values.</p>
+        </collapsible>
+
+        <collapsible collapsible-title="Options"
+                     class="options-collapsible"
+                     is-initially-expanded="{{(vm.opts.spreadsheetId ? '':'true')}}">
+          <md-switch ng-model="vm.opts.isAutoLogin">Auto-login and load data next time</md-switch>
+          <!--<md-switch ng-model="vm.opts.isAutoFocusEmpty">Auto-focus first empty field after loading table headings</md-switch>-->
+          <md-switch ng-model="vm.opts.isRoundWorkTimeUp"
+                     ng-change="vm.updateDefaults()">Always round work time up
+          </md-switch>
+          <md-input-container>
+            <label>Round start time to</label>
+            <md-select ng-change="vm.updateDefaults()"
+                       ng-model="vm.opts.roundStartTimeTo">
+              <md-option><em>don't round</em></md-option>
+              <md-option ng-repeat="roundOption in vm.roundTimeOptions"
+                         ng-value="roundOption.id">
+                {{roundOption.title}}
+              </md-option>
+            </md-select>
+          </md-input-container>
+
+          <md-input-container>
+            <label>Round end time to</label>
+            <md-select ng-change="vm.updateDefaults()"
+                       ng-model="vm.opts.roundEndTimeTo">
+              <md-option><em>don't round</em></md-option>
+              <md-option ng-repeat="roundOption in vm.roundTimeOptions"
+                         ng-value="roundOption.id">
+                {{roundOption.title}}
+              </md-option>
+            </md-select>
+          </md-input-container>
+
+          <md-input-container>
+            <label>Round time worked to</label>
+            <md-select ng-change="vm.updateDefaults()"
+                       ng-model="vm.opts.roundWorkTimeTo">
+              <md-option><em>don't round</em></md-option>
+              <md-option ng-repeat="roundOption in vm.roundTimeOptions"
+                         ng-value="roundOption.id">
+                {{roundOption.title}}
+              </md-option>
+            </md-select>
+          </md-input-container>
+        </collapsible>
+
+        <div>
+          <md-button class="md-raised md-primary"
+                     promise-btn
+                     ng-show="!vm.GoogleApi.isLoggedIn"
+                     ng-click="vm.login()">Login
+          </md-button>
+          <md-button class="md-raised md-primary"
+                     promise-btn
+                     ng-show="vm.GoogleApi.isLoggedIn"
+                     ng-click="vm.logout()">Logout
+          </md-button>
+          <md-button class="md-raised md-primary"
+                     promise-btn
+                     ng-disabled="!vm.opts.spreadsheetId"
+                     ng-show="vm.GoogleApi.isLoggedIn"
+                     ng-click="vm.readSpreadsheet()">Read spreadsheet
+          </md-button>
+          <md-button class="md-raised md-primary"
+                     ng-show="vm.GoogleApi.isLoggedIn"
+                     external-link
+                     target="_blank"
+                     href="https://myaccount.google.com/permissions">Revoke permissions
+          </md-button>
+          <md-button class="md-raised md-primary"
+                     external-link
+                     target="_blank"
+                     ng-show="vm.GoogleApi.isLoggedIn && vm.opts.spreadsheetId"
+                     ng-href="https://docs.google.com/spreadsheets/d/{{vm.opts.spreadsheetId}}">Edit spreadsheet
+          </md-button>
+        </div>
+
+
+        <div layout="row"
+             class="loading-spinner"
+             layout-sm="column"
+             layout-align="space-around"
+             ng-show="vm.isLoading && !vm.GoogleApi.isLoggedIn">
+          <md-progress-circular md-mode="indeterminate"></md-progress-circular>
+        </div>
+
+        <section ng-show="vm.GoogleApi.isLoggedIn">
+          <md-input-container class="md-block">
+            <label>Spreadsheet ID</label>
+            <input type="text"
+                   ng-model="vm.opts.spreadsheetId">
+          </md-input-container>
+
+          <div layout="row"
+               class="loading-spinner"
+               layout-sm="column"
+               layout-align="space-around"
+               ng-show="vm.isLoading && vm.GoogleApi.isLoggedIn">
+            <md-progress-circular md-mode="indeterminate"></md-progress-circular>
+          </div>
+
+          <table class="export-input-table"
+                 ng-show="vm.headings">
+            <tr>
+              <th></th>
+              <th class="heading"
+                  ng-repeat="heading in vm.headings track by $index"
+                  ng-bind="heading"></th>
+            </tr>
+            <tr>
+              <th>Last saved row</th>
+              <td ng-repeat="col in vm.lastRow track by $index">{{col}}</td>
+            </tr>
+            <tr>
+              <th>Default</th>
+              <td class="default"
+                  ng-repeat="(i,heading) in vm.headings track by $index">
+                <input type="text"
+                       ng-change="vm.updateDefaults()"
+                       ng-model="vm.opts.defaultValues[i]">
+              </td>
+            </tr>
+            <tr>
+              <th>Actual</th>
+              <td class="actual"
+                  ng-repeat="(i,heading) in vm.headings track by $index">
+                <input type="text"
+                       ng-model="vm.actualValues[i]">
+              </td>
+            </tr>
+          </table>
+        </section>
+      </div>
+    </md-dialog-content>
+
+
+    <md-dialog-actions>
+
+      <md-button ng-click="vm.save()"
+                 ng-show="vm.actualValues.length > 0 &&  vm.GoogleApi.isLoggedIn"
+                 type="button"
+                 class="md-raised md-primary"
+                 promise-btn>
+        <ng-md-icon icon="save"></ng-md-icon>
+        Save row
+      </md-button>
+      <md-button ng-click="vm.cancel()"
+                 type="button"
+                 class="md-raised">
+        <ng-md-icon icon="close"></ng-md-icon>
+        Close
+      </md-button>
+    </md-dialog-actions>
+  </form>
+</md-dialog>

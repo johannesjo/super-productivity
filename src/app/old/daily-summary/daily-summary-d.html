@@ -1,0 +1,143 @@
+<div layout-align="center center">
+  <md-button class="md-raised md-accent"
+             aria-label="Work View"
+             ui-sref="work-view">
+    <md-tooltip md-direction="bottom">
+      Go back to work view
+    </md-tooltip>
+    <ng-md-icon icon="chevron_left"></ng-md-icon>
+    Wait I forgot something!
+    <ng-md-icon icon="playlist_play"></ng-md-icon>
+  </md-button>
+</div>
+
+<h2>Done for today! Take a moment to celebrate!</h2>
+<div class="daily-summary-summary">
+  <p>
+    <ng-md-icon icon="check"></ng-md-icon>
+    Tasks completed: <strong><span ng-bind="vm.doneTasks.length"></span>/<span ng-bind="r.tasks.length"></span></strong>
+  </p>
+  <p>
+    <ng-md-icon icon="timer"></ng-md-icon>
+    Total time spent on today's task: <strong ng-bind="vm.totalTimeSpentTasks|duration"></strong></p>
+  <p>
+    <ng-md-icon icon="timer"></ng-md-icon>
+    Total time spent today: <strong ng-bind="vm.totalTimeSpentToday|duration"></strong></p>
+</div>
+
+
+<collapsible collapsible-title="Tasks worked on today"
+             icon="playlist_play"
+             class="daily-summary-collapsible">
+  <table class="task-summary-table">
+    <tr>
+      <th>Title</th>
+      <th>Sub-Tasks</th>
+      <th>Time spent today</th>
+      <th>Time spent total</th>
+      <th>Time esti.</th>
+      <th></th>
+    </tr>
+
+    <tr ng-repeat="task in r.tasks"
+        ng-class="{'is-done': task.isDone}">
+      <td ng-bind="task.title"></td>
+      <td>
+        <span ng-repeat="task in task.subTasks"><span ng-bind="task.title"></span>: <span ng-bind="task.timeSpentOnDay[vm.todayStr]|duration"></span><br></span>
+      </td>
+      <td ng-bind="task.timeSpentOnDay[vm.todayStr] |duration"></td>
+      <td ng-bind="task.timeSpent |duration"></td>
+      <td ng-bind="task.timeEstimate |duration"></td>
+      <td>
+        <ng-md-icon icon="check"
+                    ng-show="task.isDone"
+                    style="fill:green;"
+                    aria-label="checkmark"></ng-md-icon>
+      </td>
+    </tr>
+  </table>
+</collapsible>
+
+<section class="distractions"
+         ng-if="r.distractions.length > 0">
+  <distraction-list></distraction-list>
+</section>
+
+
+<collapsible collapsible-title="Todays commits"
+             class="commits"
+             ng-if="vm.commitLog"
+             class="daily-summary-collapsible">
+
+
+  <h2 class="md-title">Todays commits</h2>
+  <pre><code ng-bind="::vm.commitLog"></code></pre>
+</collapsible>
+
+<collapsible collapsible-title="Make a note for tomorrow"
+             icon="speaker_notes"
+             class="daily-summary-collapsible">
+  <p>This is meant to be a takeaway to be even more productive and happy tomorrow. E.g.: What did you learn today? What do you want to do better/smarter tomorrow? What do you want to achieve and why?</p>
+  <p>Think a second and reflect on the day.</p>
+
+  <md-input-container class="md-block"
+                      flex-gt-sm>
+    <label>Your personal tomorrow's note</label>
+    <textarea ng-model="vm.tomorrowsNote"
+              md-auto-focus
+              rows="4"></textarea>
+  </md-input-container>
+</collapsible>
+
+
+<section class="daily-summary-actions">
+  <div layout="row"
+       layout-wrap=""
+       layout-align="center center">
+    <md-button class="md-raised md-primary"
+               ng-click="vm.showExportModal()">
+      <ng-md-icon icon="call_made"></ng-md-icon>
+      <ng-md-icon icon="playlist_play"></ng-md-icon>
+      Export Task List
+    </md-button>
+
+    <md-button class="md-raised md-primary"
+               ng-class="{'md-accent':r.config.isBlockFinishDayUntilTimeTimeTracked && !r.currentSession.isTimeSheetExported}"
+               ng-click="vm.showTimeSheetExportModal()">
+      <ng-md-icon icon="call_made"></ng-md-icon>
+      <ng-md-icon icon="timer"></ng-md-icon>
+      Export To Time Sheet
+    </md-button>
+    <md-button class="md-raised md-primary"
+               ng-disabled="r.config.isBlockFinishDayUntilTimeTimeTracked && !r.currentSession.isTimeSheetExported"
+               ng-click="vm.finishDay()">
+      <ng-md-icon icon="wb_sunny"></ng-md-icon>
+      <span>Save and go home</span>
+    </md-button>
+  </div>
+  <div layout-wrap
+       layout-sm="row"
+       class="finish-day-opts"
+       layout-align="center center"
+       layout-gt-sm="row">
+    <md-checkbox ng-init="vm.clearDoneTasks = true;"
+                 ng-model="vm.clearDoneTasks"
+                 aria-label="Clear done tasks">
+      Clear done tasks (Move to Done-Backlog)
+    </md-checkbox>
+    <md-checkbox ng-model="vm.moveUnfinishedToBacklog"
+                 aria-label="Move unfinished tasks to backlog">
+      Move unfinished tasks back to backlog
+    </md-checkbox>
+  </div>
+
+  <div class="success-animation-wrapper"
+       ng-show="vm.showSuccessAnimation">
+    <ng-md-icon icon="wb_sunny"
+                size="128"></ng-md-icon>
+    <div class="unicorn-wrapper">
+      <img src="img/unicorn.png"
+           class="unicorn">
+    </div>
+  </div>
+</section>

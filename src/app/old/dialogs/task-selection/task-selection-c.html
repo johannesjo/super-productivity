@@ -1,0 +1,85 @@
+<md-dialog aria-label="Time estimation dialog"
+           class="dialog-task-selection"
+           md-theme="vm.theme">
+  <md-toolbar>
+    <div class="md-toolbar-tools">
+      <h2>Select a task</h2>
+      <span flex></span>
+      <md-button class="md-icon-button"
+                 aria-label="Cancel"
+                 ng-click="vm.cancel()">
+        <ng-md-icon icon="close"></ng-md-icon>
+      </md-button>
+    </div>
+  </md-toolbar>
+
+  <form ng-submit="vm.submit()">
+
+    <md-dialog-content>
+      <div class="md-dialog-content">
+
+        <section ng-if="!vm.isShowTaskCreationForm">
+          <p>Select the task you want to work on next or just press enter to work on</p><p>
+          <strong ng-bind="vm.undoneTasks[0].title"></strong></p>
+
+          <md-autocomplete
+            md-selected-item="vm.selectedTask"
+            md-search-text="vm.searchText"
+            md-items="task in vm.getFilteredUndoneTasks(vm.searchText)"
+            md-item-text="task.title"
+            md-input-minlength="0"
+            md-require-match="true"
+            md-autofocus="true"
+            md-autoselect
+            placeholder="Select a task to start with">
+            <md-item-template>
+              <span md-highlight-text="vm.searchText">{{ task.title }}</span>
+            </md-item-template>
+            <md-not-found>
+              No states matching "<span ng-bind="vm.searchText"></span>" were found.
+              <a ng-click="vm.newState(vm.searchText)">Create a new one!</a>
+            </md-not-found>
+          </md-autocomplete>
+        </section>
+
+
+        <section ng-if="vm.isShowTaskCreationForm">
+          <p><strong>No tasks created for today's list. Please create a new one.</strong></p>
+          <md-input-container class="md-block">
+            <label>Task Name</label>
+            <input type="text"
+                   ng-model="vm.newTask.title"
+                   md-auto-focus
+                   required
+                   aria-label="Title">
+          </md-input-container>
+
+          <md-input-container class="md-icon-float md-block">
+            <ng-md-icon icon="access_time"
+                        aria-label="Estimated Durations"></ng-md-icon>
+            <label>Estimated Duration</label>
+
+            <input type="text"
+                   input-duration="optional"
+                   ng-model="vm.newTask.timeEstimate"
+                   aria-label="Estimated Durations">
+          </md-input-container>
+
+          <md-input-container class="md-block">
+            <label>Notes</label>
+
+            <textarea ng-model="vm.newTask.notes"
+                      aria-label="Notes"></textarea>
+          </md-input-container>
+        </section>
+      </div>
+    </md-dialog-content>
+
+    <md-dialog-actions>
+      <md-button type="submit"
+                 class="md-primary md-raised">
+        Go go go!
+      </md-button>
+    </md-dialog-actions>
+  </form>
+</md-dialog>

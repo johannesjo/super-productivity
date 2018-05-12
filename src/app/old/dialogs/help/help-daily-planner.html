@@ -1,0 +1,29 @@
+<h3 class="md-title">The daily planner view</h3>
+<p>This is the daily planner view. It's meant to help you organize your day in the morning before you start to work.</p>
+<p>You can <strong>add new tasks</strong>
+  <ng-md-icon icon="playlist_add"></ng-md-icon>
+  by entering the title you want for your task into the
+  <strong>input at the top</strong>. Pressing enter will add the task to your todays ToDo-list
+  <ng-md-icon icon="playlist_play"></ng-md-icon>
+  .
+</p>
+<p>If <strong>Jira integration</strong> is enabled (you can enable it on the <a class="md-accent"
+                                                                                ui-sref="settings">
+  <ng-md-icon icon="settings"></ng-md-icon>
+  settings</a> page) you can use the input the top also for importing tasks from Jira. Just enter the issue number or the issue summary and select the issue you from the auto suggestions. You can
+  <strong>identify a successfully imported Jira issue by the link icon
+    <ng-md-icon icon="link"></ng-md-icon>
+  </strong>
+  in the actions bar of the task.
+</p>
+<p>There is also a <strong>task backlog</strong>
+  <ng-md-icon icon="my_library_books"></ng-md-icon>
+  meant to store tasks for later use below the list for your todays tasks. You can move tasks via drag and drop between the two lists. Or use the globally
+  <a class="md-accent"
+     ui-sref="settings">
+    <ng-md-icon icon="settings"></ng-md-icon>
+    configurable keyboard shortcuts</a>.
+</p>
+
+<div ng-include="'scripts/dialogs/help/help-task-list.html'"></div>
+<div ng-include="'scripts/dialogs/help/help-global-link-list.html'"></div>

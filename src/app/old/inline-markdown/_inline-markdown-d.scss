@@ -1,0 +1,76 @@
+inline-markdown {
+  display: block;
+}
+
+.markdown-wrapper {
+  min-height: 60px;
+  max-height: 600px;
+  margin-bottom: 20px;
+  display: block;
+  box-sizing: border-box;
+  border: none;
+  resize: vertical;
+  overflow: auto;
+  position: relative;
+  cursor: text;
+  background: #fbefdd;
+  transition: min-height $transition-leave;
+
+  @include dark-theme {
+    background-color: $dark-theme-bg;
+    color: #eeeeee;
+  }
+
+  &.is-editing {
+    transition: min-height $transition-enter;
+    min-height: 160px;
+  }
+
+  .resize-to-fit {
+    position: absolute;
+    right: 14px;
+    top: 0;
+    cursor: pointer;
+  }
+
+  .edit-container {
+    height: 100%;
+  }
+
+  .lock-edit-btn {
+    position: absolute;
+    right: 0;
+    bottom: 2px;
+  }
+}
+
+.markdown-unparsed,
+.markdown-parsed {
+  padding: 10px 14px;
+  margin: 0;
+  width: 100%;
+  word-wrap: break-word;
+  display: block;
+  border: none;
+  resize: none;
+  overflow: auto;
+  height: 100%;
+  box-sizing: border-box;
+  background: transparent;
+  @include dark-theme {
+    color: #eeeeee;
+  }
+}
+
+.markdown-parsed {
+  p:first-child {
+    margin-top: 0;
+  }
+  ul {
+    padding-left: 18px;
+
+    &:first-child{
+      margin-top: 0;
+    }
+  }
+}

@@ -1,0 +1,193 @@
+<help-section>
+  <p>Here you can configure all keyboard shortcuts.</p>
+  <p>Click on the text input and enter the desired keyboard combination. Hit enter to save and Escape to abort.</p>
+  <p>There are three types of shortcuts:</p>
+  <ul>
+    <li>
+      <strong>Global shortcuts:</strong> When the app is running it will trigger the action from every other application.
+    </li>
+    <li>
+      <strong>Application level shortcuts:</strong> Will trigger from every screen of the application, but not if you're currently editing a text field.
+    </li>
+    <li>
+      <strong>Task level shortcuts:</strong> They will only trigger if you have selected a task via mouse or keyboard and usually trigger an action specifically related to that one task.
+    </li>
+  </ul>
+</help-section>
+
+<section ng-if="vm.IS_ELECTRON">
+  <h3 class="md-caption">Global Shortcuts (system wide)</h3>
+  <md-input-container class="md-block">
+    <label>Show/Hide Super Productivity</label>
+    <input type="text"
+           ng-blur="vm.registerGlobalShortcut(vm.keys.globalShowHide)"
+           keyboard-key-input
+           ng-model="vm.keys.globalShowHide">
+  </md-input-container>
+</section>
+
+<h3 class="md-caption">Global Shortcuts (application wide)</h3>
+
+<div class="gt-xs-2-col">
+  <md-input-container class="md-block">
+    <label>Add New Task</label>
+    <input type="text"
+           keyboard-key-input
+           ng-model="vm.keys.addNewTask">
+  </md-input-container>
+  <md-input-container class="md-block">
+    <label>Open Project Notes</label>
+    <input type="text"
+           keyboard-key-input
+           ng-model="vm.keys.openProjectNotes">
+  </md-input-container>
+  <md-input-container class="md-block">
+    <label>Open Distraction Panel</label>
+    <input type="text"
+           keyboard-key-input
+           ng-model="vm.keys.openDistractionPanel">
+  </md-input-container>
+  <md-input-container class="md-block">
+    <label>Show Help</label>
+    <input type="text"
+           keyboard-key-input
+           ng-model="vm.keys.showHelp">
+  </md-input-container>
+  <md-input-container class="md-block">
+    <label>Go to Daily Planner</label>
+    <input type="text"
+           keyboard-key-input
+           ng-model="vm.keys.goToDailyPlanner">
+  </md-input-container>
+  <md-input-container class="md-block">
+    <label>Go to Work View</label>
+    <input type="text"
+           keyboard-key-input
+           ng-model="vm.keys.goToWorkView">
+  </md-input-container>
+  <md-input-container class="md-block">
+    <label>Go to Agenda</label>
+    <input type="text"
+           keyboard-key-input
+           ng-model="vm.keys.goToDailyAgenda">
+  </md-input-container>
+  <md-input-container class="md-block">
+    <label>Go to Settings</label>
+    <input type="text"
+           keyboard-key-input
+           ng-model="vm.keys.goToSettings">
+  </md-input-container>
+  <md-input-container class="md-block">
+    <label>Go to Focus Mode</label>
+    <input type="text"
+           keyboard-key-input
+           ng-model="vm.keys.goToFocusMode">
+  </md-input-container>
+</div>
+
+<h3 class="md-caption">Tasks</h3>
+<p>The following shortcuts apply for the currently selected task (selected via tab or mouse).</p>
+<div class="gt-xs-2-col">
+  <md-input-container class="md-block">
+    <label>Edit Title</label>
+    <input type="text"
+           keyboard-key-input
+           ng-model="vm.keys.taskEditTitle">
+  </md-input-container>
+  <md-input-container class="md-block">
+    <label>Show/Hide Notes</label>
+    <input type="text"
+           keyboard-key-input
+           ng-model="vm.keys.taskToggleNotes">
+  </md-input-container>
+  <md-input-container class="md-block">
+    <label>Edit estimation / time spent</label>
+    <input type="text"
+           keyboard-key-input
+           ng-model="vm.keys.taskOpenEstimationDialog">
+  </md-input-container>
+  <md-input-container class="md-block">
+    <label>Toggle Done</label>
+    <input type="text"
+           keyboard-key-input
+           ng-model="vm.keys.taskToggleDone">
+  </md-input-container>
+  <md-input-container class="md-block">
+    <label>Add sub Task</label>
+    <input type="text"
+           keyboard-key-input
+           ng-model="vm.keys.taskAddSubTask">
+  </md-input-container>
+  <md-input-container class="md-block">
+    <label>Delete Task</label>
+    <input type="text"
+           keyboard-key-input
+           ng-model="vm.keys.taskDelete">
+  </md-input-container>
+  <md-input-container class="md-block">
+    <label>Select next Task</label>
+    <input type="text"
+           keyboard-key-input
+           ng-model="vm.keys.selectNextTask">
+  </md-input-container>
+  <md-input-container class="md-block">
+    <label>Select previous Task</label>
+    <input type="text"
+           keyboard-key-input
+           ng-model="vm.keys.selectPreviousTask">
+  </md-input-container>
+  <md-input-container class="md-block">
+    <label>Move Task up in List</label>
+    <input type="text"
+           keyboard-key-input
+           ng-model="vm.keys.moveTaskUp">
+  </md-input-container>
+  <md-input-container class="md-block">
+    <label>Move Task down in Tist</label>
+    <input type="text"
+           keyboard-key-input
+           ng-model="vm.keys.moveTaskDown">
+  </md-input-container>
+  <md-input-container class="md-block">
+    <label>Expand sub Tasks</label>
+    <input type="text"
+           keyboard-key-input
+           ng-model="vm.keys.expandSubTasks">
+  </md-input-container>
+  <md-input-container class="md-block">
+    <label>Collapse sub Tasks</label>
+    <input type="text"
+           keyboard-key-input
+           ng-model="vm.keys.collapseSubTasks">
+  </md-input-container>
+  <md-input-container class="md-block">
+    <label>Start/Stop Task</label>
+    <input type="text"
+           keyboard-key-input
+           ng-model="vm.keys.togglePlay">
+  </md-input-container>
+  <md-input-container class="md-block">
+    <label>Move Task to Task Backlog</label>
+    <input type="text"
+           keyboard-key-input
+           ng-model="vm.keys.moveToBacklog">
+  </md-input-container>
+  <md-input-container class="md-block">
+    <label>Move Task to Today's Task List</label>
+    <input type="text"
+           keyboard-key-input
+           ng-model="vm.keys.moveToTodaysTasks">
+  </md-input-container>
+  <md-input-container class="md-block">
+    <label>Open Original Issue URL on Jira/Git</label>
+    <input type="text"
+           keyboard-key-input
+           ng-model="vm.keys.taskOpenOriginalLink">
+  </md-input-container>
+</div>
+
+<md-button class="md-raised md-primary"
+           ng-click="vm.resetAllShortcuts()">
+  <ng-md-icon icon="undo"></ng-md-icon>
+  Reset all shortcuts
+</md-button>

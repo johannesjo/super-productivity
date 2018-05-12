@@ -1,0 +1,50 @@
+<md-dialog aria-label="Welcome Dialog"
+           class="welcome-dialog"
+           md-theme="vm.theme">
+  <md-toolbar>
+    <div class="md-toolbar-tools">
+      <h2>Welcome to Super Productivity!</h2>
+      <span flex></span>
+      <md-button class="md-icon-button"
+                 aria-label="Cancel"
+                 ng-click="vm.cancel()">
+        <ng-md-icon icon="close"></ng-md-icon>
+      </md-button>
+    </div>
+  </md-toolbar>
+
+  <md-dialog-content>
+    <div class="md-dialog-content">
+      <p>Happy to see you try out Super Productivity!</p>
+      <p>After familiarizing you with the basic functionality, you might want head over to
+        <a ui-sref="settings"
+           ng-click="vm.cancel()"
+           class="md-accent">
+          <ng-md-icon icon="settings"></ng-md-icon>
+          the settings</a> to adjust everything to your personal needs<span ng-if="vm.IS_ELECTRON"> and to set up the Jira integration</span>. You can find them under the cog icon in the upper right.
+      </p>
+      <p>If you need it there is also <a ng-click="vm.openHelp($event)"
+                                         href="#"
+                                         class="md-accent">
+        <ng-md-icon icon="help_outline"></ng-md-icon>
+        help</a> on every page.
+      </p>
+      <p>Enjoy yourself!</p>
+
+      <md-switch ng-model="vm.isHideDialog"
+                 ng-change="vm.hideDialogChange(vm.isHideDialog)"
+                 aria-label="Don't show this dialog at startup any more">
+        Don't show this dialog at startup any more
+      </md-switch>
+    </div>
+  </md-dialog-content>
+
+
+  <md-dialog-actions>
+    <md-button ng-click="vm.cancel()"
+               type="button"
+               class="md-raised">
+      Dismiss
+    </md-button>
+  </md-dialog-actions>
+</md-dialog>

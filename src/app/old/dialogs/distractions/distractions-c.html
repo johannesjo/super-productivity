@@ -1,0 +1,41 @@
+<md-dialog aria-label="Distractions"
+           md-theme="vm.theme"
+           class="distractions">
+  <md-toolbar>
+    <div class="md-toolbar-tools">
+      <h2>What is distracting you?</h2>
+      <span flex></span>
+      <md-button class="md-icon-button"
+                 aria-label="Cancel"
+                 ng-click="vm.cancel()">
+        <ng-md-icon icon="close"></ng-md-icon>
+      </md-button>
+    </div>
+  </md-toolbar>
+  <md-dialog-content>
+    <div class="md-dialog-content">
+
+      <h2 class="md-title"></h2>
+      <form ng-submit="vm.saveDistraction()">
+        <md-input-container class="md-block">
+        <textarea ng-model="vm.newDistraction"
+                  md-autofocus
+                  minlength="2"
+                  aria-label="What is distracting you? Write it down to save it for later!"
+                  autofocus></textarea>
+        </md-input-container>
+
+        <md-button type="button"
+                   ng-click="vm.cancel();"
+                   class="md-raised">
+          Nevermind
+        </md-button>
+        <md-button type="submit"
+                   class="md-raised md-primary">
+          Save it for later
+        </md-button>
+      </form>
+    </div>
+  </md-dialog-content>
+
+</md-dialog>

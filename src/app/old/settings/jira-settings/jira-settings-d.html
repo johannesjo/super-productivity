@@ -1,0 +1,219 @@
+<help-section ng-if="vm.hasJiraSupport">
+  <div class="md-caption">Basic configuration</div>
+  <p>Please provide a username (can be found on your profile page) and an
+    <a class="md-accent"
+       href="https://confluence.atlassian.com/cloud/api-tokens-938839638.html"
+       external-link="">API token</a> or password if you can't generate one for some reason.
+  </p>
+  <p>You also need to specify a JQL query which is used for the suggestions to add tasks from Jira. If you need help check out this link
+    <a class="md-accent"
+       href="https://confluence.atlassian.com/jirasoftwarecloud/advanced-searching-764478330.html"
+       external-link="">https://confluence.atlassian.com/jirasoftwarecloud/advanced-searching-764478330.html</a>.</p>
+  <p>You can also configure, if you want to automatically (e.g. every time you visit the planning view), to add all new tasks specified by a custom JQL query to the backlog.</p>
+  <p>Another option is "Check if current ticket is assigned to current user". If enabled and you're starting, a check will be made if you're currently assigned to that ticket on Jira, if not an Dialog appears in which you can chose to assign the ticket to yourself.</p>
+
+
+  <div class="md-caption">Worklog settings</div>
+  <p>There are several options to determine when and how you want to submit a worklog. Enabling
+    <em>'Open worklog dialog for adding a worklog to Jira when task is done'</em> opens a dialog to add an worklog every time you mark a Jira Task as done. So keep in mind that worklogs will be added on top of everything tracked so far. So if you mark a task as done for a second time, you might not want to submit the complete worked time for the task again.
+  </p>
+  <p>
+    <em>'Open worklog dialog when sub task is done and not for tasks with sub tasks themselves'</em> opens a worklog dialog every time when you mark a sub task of a Jira issue as done. Because you already track your time via the sub tasks, no dialog is opened once you mark the Jira task itself as done.
+  </p>
+  <p>
+    <em>'Send updates to worklog automatically without dialog'</em> does what it says. Because marking a task as done several times leads to the whole worked time being tracked twice, this is not recommended.
+  </p>
+
+  <div class="md-caption">Default transitions</div>
+  <p>Here you can reconfigure your default transitions. Jira enables a wide configuration of transitions usually coming into action as different columns on your Jira agile board we can't make assumptions about where and when to transition your tasks and you need to set it manually.</p>
+</help-section>
+
+<div ng-if="!vm.IS_ELECTRON && !vm.hasJiraSupport">
+  <p>Please download the chrome extension in order to allow communication with the Jira Api. Note that this doesn't work for mobile</p>
+  <md-button class="md-raised md-primary"
+             target="_blank"
+             href="https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb">
+    <ng-md-icon icon="file_download"></ng-md-icon>
+    Download now
+  </md-button>
+</div>
+
+<div ng-if="vm.hasJiraSupport">
+  <md-switch ng-model="vm.settings.isJiraEnabled"
+             aria-label="Enable Jira Integration">
+    Enable Jira Integration
+  </md-switch>
+
+  <div ng-show="vm.settings.isJiraEnabled"
+       class="ani-expand-collapse">
+    <form>
+      <md-input-container class="md-block">
+        <label>Host / Base URL</label>
+        <input type="text"
+               ng-model="vm.settings.host">
+      </md-input-container>
+      <md-input-container class="md-block">
+        <label>Username</label>
+        <input type="text"
+               ng-model="vm.settings.userName">
+      </md-input-container>
+      <md-input-container class="md-block">
+        <label>Token / Password</label>
+        <input type="password"
+               ng-model="vm.settings.password">
+      </md-input-container>
+      <md-input-container class="md-block">
+        <label>JQL Query for Searching Tasks</label>
+        <input type="text"
+               ng-model="vm.settings.jqlQuery">
+        <div class="hint">e.g.: assignee = "<span ng-bind="vm.settings.userName"></span>" AND resolution = Unresolved ORDER BY updatedDate DESC
+        </div>
+      </md-input-container>
+
+      <md-button aria-label="Test credentials"
+                 class="md-primary md-raised"
+                 ng-click="vm.testJiraCredentials()">
+        <ng-md-icon icon="import_export"></ng-md-icon>
+        Test credentials
+      </md-button>
+
+      <h3 class="md-subtitle">Advanced Options</h3>
+
+      <div>
+        <md-switch ng-model="vm.settings.isEnabledAutoAdd"
+                   aria-label="Auto add issues from Jira to backlog">
+          Auto add issues from Jira to backlog
+        </md-switch>
+      </div>
+
+      <md-input-container class="md-block"
+                          ng-if="vm.settings.isEnabledAutoAdd">
+        <label>JQL Query for Auto Adding Tasks to Backlog</label>
+        <input type="text"
+               ng-disabled="!vm.settings.isEnabledAutoAdd"
+               ng-model="vm.settings.jqlQueryAutoAdd">
+        <div class="hint">e.g.: assignee = currentUser() AND resolution = Unresolved ORDER BY updatedDate DESC</div>
+      </md-input-container>
+
+      <md-switch ng-model="vm.settings.isUpdateIssueFromLocal"
+                 aria-label="Update issue description on jira if task notes are updated">
+        Update issue description on Jira if task notes are updated
+      </md-switch>
+
+      <md-switch ng-model="vm.settings.isCheckToReAssignTicketOnTaskStart"
+                 aria-label="Check if current ticket is assigned to current user">
+        Check if current ticket is assigned to current user
+      </md-switch>
+
+      <section>
+        <h3 class="md-subtitle">Worklog</h3>
+
+        <div>
+          <md-switch ng-model="vm.settings.isWorklogEnabled"
+                     aria-label="open dialog for adding a worklog to jira when task is done">
+            Open worklog dialog for adding a worklog to Jira when task is done
+          </md-switch>
+        </div>
+
+        <div>
+          <md-switch ng-model="vm.settings.isAddWorklogOnSubTaskDone"
+                     ng-disabled="!vm.settings.isWorklogEnabled"
+                     aria-label="Add worklog when sub task is done">
+            Open worklog dialog when sub task is done and not for tasks with sub tasks themselves
+          </md-switch>
+        </div>
+
+        <div>
+          <md-switch ng-model="vm.settings.isAutoWorklog"
+                     ng-disabled="!vm.settings.isWorklogEnabled"
+                     aria-label="(not recommended) send updates to worklog automatically when task is done">
+            (not recommended!) Send updates to worklog automatically without dialog
+          </md-switch>
+        </div>
+      </section>
+
+      <h3 class="md-subtitle">Transition Issues</h3>
+      <md-switch ng-model="vm.settings.isTransitionIssuesEnabled"
+                 aria-label="Enable transition handling">
+        Enable transition handling
+      </md-switch>
+
+      <section ng-if="vm.settings.isTransitionIssuesEnabled"
+               class="ani-expand-collapse">
+        <p>Jira enables a wide configuration of transitions usually coming into action as different columns on your jira agile board. That's why we can't make assumptions about where and when to transition your tasks and you need to set it manually.</p>
+        <p>First you need to select an example ticket from which we can load the different available transitions. This requires you to
+          <strong>already have set valid credentials</strong> and a <strong>valid JQL Query for searching tasks</strong>.
+        </p>
+        <p>
+          <strong>Click on the "Test Credentials" button above to (re)load the task list for that</strong> and then use the input below to select an example task to load the transitions from.
+        </p>
+
+        <md-autocomplete
+          ng-show="vm.taskSuggestions.length"
+          md-whiteframe="2"
+          flex="100"
+          tabindex="1"
+          md-selected-item="vm.transitionExampleTask"
+          md-search-text="vm.transitionExampleTaskTitle"
+          md-items="task in vm.getFilteredTaskSuggestions(vm.transitionExampleTaskTitle)"
+          md-item-text="task.title"
+          md-require-match="true"
+          md-selected-item-change="vm.onTransitionExampleTaskSelected(vm.transitionExampleTask)"
+          autofocus-autocomplete
+          placeholder="Select an example task to load it's transitions">
+          <md-item-template>
+          <span md-highlight-text="vm.transitionExampleTaskTitle"
+                md-highlight-flags="i">{{task.title}}</span>
+          </md-item-template>
+        </md-autocomplete>
+
+        <h3 class="md-caption">Configure transitions</h3>
+
+        <section ng-if="vm.settings.transitions"
+                 class="ani-expand-collapse">
+          <md-input-container class="md-block">
+            <label>Default transition for OPEN</label>
+            <md-select ng-model="vm.settings.transitions.OPEN"
+                       arial-label="Select default transition for OPEN">
+              <md-option ng-value="'ALWAYS_ASK'"><em>Always ask</em></md-option>
+              <md-option ng-value="'DO_NOT'"><em>Don't transition</em></md-option>
+              <md-option ng-repeat="jiraTransition in vm.settings.allTransitions"
+                         ng-value="jiraTransition.id">
+                <span ng-bind="jiraTransition.id"></span> -
+                <span ng-bind="jiraTransition.name"></span>
+              </md-option>
+            </md-select>
+          </md-input-container>
+          <md-input-container class="md-block">
+            <label>Default transition for IN_PROGRESS</label>
+            <md-select ng-model="vm.settings.transitions.IN_PROGRESS"
+                       arial-label="Select default transition for IN_PROGRESS">
+              <md-option ng-value="'ALWAYS_ASK'"><em>Always ask</em></md-option>
+              <md-option ng-value="'DO_NOT'"><em>Don't transition</em></md-option>
+              <md-option ng-repeat="jiraTransition in vm.settings.allTransitions"
+                         ng-value="jiraTransition.id">
+                <span ng-bind="jiraTransition.id"></span> -
+                <span ng-bind="jiraTransition.name"></span>
+              </md-option>
+            </md-select>
+          </md-input-container>
+          <md-input-container class="md-block">
+            <label>Default transition for DONE</label>
+            <md-select ng-model="vm.settings.transitions.DONE"
+                       arial-label="Select default transition for DONE">
+              <md-option ng-value="'ALWAYS_ASK'"><em>Always ask</em></md-option>
+              <md-option ng-value="'DO_NOT'"><em>Don't transition</em></md-option>
+              <md-option ng-repeat="jiraTransition in vm.settings.allTransitions"
+                         ng-value="jiraTransition.id">
+                <span ng-bind="jiraTransition.id"></span> -
+                <span ng-bind="jiraTransition.name"></span>
+              </md-option>
+            </md-select>
+          </md-input-container>
+        </section>
+      </section>
+    </form>
+
+    <md-divider></md-divider>
+  </div>
+</div>

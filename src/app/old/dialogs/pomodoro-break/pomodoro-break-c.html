@@ -1,0 +1,57 @@
+<md-dialog aria-label="Pomodoro Break"
+           class="pomodoro-break-dialog"
+           md-theme="vm.theme">
+  <md-toolbar>
+    <div class="md-toolbar-tools">
+      <h2>
+        <ng-md-icon icon="free_breakfast"></ng-md-icon>
+        Take a break
+      </h2>
+      <span flex></span>
+      <md-button class="md-icon-button"
+                 aria-label="Cancel"
+                 ng-click="vm.cancel()">
+        <ng-md-icon icon="close"></ng-md-icon>
+      </md-button>
+    </div>
+  </md-toolbar>
+  <md-dialog-content md-scroll-y
+                     layout="column"
+                     style="position: relative;"
+                     flex>
+    <div class="md-dialog-content">
+      <div ng-if="!vm.isBreakDone">
+        <p>You successfully finished session
+          <strong ng-bind="vm.pomodoroData.currentCycle"></strong>! Enjoy yourself, get yourself moving, come back in:
+        </p>
+      </div>
+
+      <div ng-if="vm.isBreakDone">
+        <p>You're break is done!</p>
+      </div>
+
+
+      <div class="timer"
+           ng-bind="(vm.pomodoroData.currentSessionTime | date:'mm:ss')"></div>
+
+      <section class="distractions"
+               ng-if="vm.isShowDistractionsOnBreak">
+
+        <distraction-list></distraction-list>
+      </section>
+    </div>
+
+    <md-dialog-actions>
+      <md-button ng-click="vm.continue()"
+                 class="md-primary md-raised">
+        <span ng-if="!vm.isBreakDone">But I want to work (skip break)!!</span>
+        <span ng-if="vm.isBreakDone">Go back to work!</span>
+      </md-button>
+      <md-button class="md-raised"
+                 ng-click="vm.cancel()">
+        Hide me
+      </md-button>
+    </md-dialog-actions>
+  </md-dialog-content>
+
+</md-dialog>

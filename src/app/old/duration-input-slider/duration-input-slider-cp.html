@@ -1,0 +1,25 @@
+<div class="circle"
+     mdx-paint-bg="primary">
+  <div class="inner-circle"></div>
+  <div class="dots">
+    <div class="dot"
+         mdx-paint-bg="hue-3"
+         ng-repeat="hour in $ctrl.dots track by $index"></div>
+  </div>
+  <div class="handle-wrapper">
+    <div class="handle"></div>
+  </div>
+  <div class="value-wrapper">
+    <label for="{{::$ctrl.uid}}"
+           ng-if="$ctrl.label"
+           ng-bind="$ctrl.label"></label>
+    <input type="text"
+           input-duration="optional"
+           class="value"
+           id="{{::$ctrl.uid}}"
+           placeholder="click to edit"
+           spellcheck="false"
+           ng-change="$ctrl.onChangeValue();"
+           ng-model="$ctrl.ngModel">
+  </div>
+</div>

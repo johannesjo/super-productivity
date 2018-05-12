@@ -1,0 +1,34 @@
+<md-dialog aria-label="Help Dialog"
+           md-theme="vm.theme"
+           class="help-dialog">
+  <md-toolbar>
+    <div class="md-toolbar-tools">
+      <h2>
+        <ng-md-icon icon="help_outline"></ng-md-icon>
+        Help (v{{vm.VERSION}})
+      </h2>
+      <span flex></span>
+      <md-button class="md-icon-button"
+                 aria-label="Cancel"
+                 ng-click="vm.cancel()">
+        <ng-md-icon icon="close"></ng-md-icon>
+      </md-button>
+    </div>
+  </md-toolbar>
+
+  <md-dialog-content>
+    <div class="md-dialog-content"
+         ng-include="vm.helpTpl">
+
+    </div>
+  </md-dialog-content>
+
+
+  <md-dialog-actions>
+    <md-button ng-click="vm.cancel()"
+               type="button"
+               class="md-raised">
+      Close
+    </md-button>
+  </md-dialog-actions>
+</md-dialog>
