@@ -1,0 +1,294 @@
+@import '../_variables.scss';
+
+:host {
+  $this-inner-padding-left-right: 12px;
+  padding: 3px $this-inner-padding-left-right 0 3px;
+  display: block;
+  margin-bottom: 6px;
+  background-color: #ffffff;
+  color: #333333;
+  border-top: 1px solid lightgray;
+
+  body.dark-theme & {
+    background-color: $dark-theme-bg-lighter;
+    color: #dddddd;
+
+    &.is-done {
+      .time,
+      > .title,
+      > .first-line > .title {
+        color: #777777;
+      }
+    }
+  }
+
+  &.is-done {
+    .time,
+    > .title,
+    > .first-line > .title {
+      color: #aaaaaa;
+    }
+
+    > .title,
+    > .first-line > .title {
+      text-decoration: line-through;
+    }
+  }
+
+  &.as-sortable-dragging,
+  &:focus {
+    background: #eeeeee;
+    color: #000000;
+    body.dark-theme & {
+      background-color: $dark-theme-bg-darker;
+      color: #dddddd;
+    }
+  }
+
+  .first-line {
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: row;
+    align-items: center;
+    align-content: center;
+    justify-content: space-between;
+    max-width: 100%;
+
+    // Button Stuff
+    .material-icons {
+      fill: gray;
+    }
+    //.mat-icon-button,
+    mat-checkbox {
+      &:hover {
+        transform: scale(1.4);
+      }
+    }
+    .play-btn {
+      //flex: 0 0 ;
+      display: block;
+      justify-self: flex-start;
+      //margin-right: auto;
+      padding-left: 0;
+      margin-left: -2px;
+      //flex: none;
+      // move over original link btn
+      position: relative;
+      z-index: 1;
+    }
+
+    .original-link-btn {
+      margin-left: -2px;
+      margin-right: 10px;
+      .material-icons {
+        // hacky align icon inside link with the one inside the play button
+        margin-top: 2px;
+      }
+    }
+
+    //mat-checkbox {
+    //  margin-left: 6px;
+    //  min-width: 16px;
+    //  width: 32px;
+    //  height: 32px;
+    //}
+
+    .material-icons {
+      min-width: 24px;
+    }
+
+    .update-icon {
+      fill: #000000;
+      body.dark-theme & {
+        fill: #ffffff;
+      }
+    }
+    .mat-icon-button {
+      &:hover,
+      &.is-active {
+        > .material-icons {
+          fill: #000000;
+          body.dark-theme & {
+            fill: #ffffff;
+          }
+        }
+      }
+    }
+  }
+
+  .controls {
+    white-space: nowrap;
+    display: flex;
+    flex-wrap: nowrap;
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .title {
+    margin-right: auto;
+    flex-grow: 1;
+  }
+
+  .material-icons.delete-icon {
+    fill: $red !important;
+    body.dark-theme & {
+      fill: $red !important;
+    }
+  }
+
+  &.is-current {
+    background: $light-green;
+    color: #000000;
+
+    body.dark-theme & {
+      background-color: $dark-green;
+      color: #ffffff;
+    }
+
+    .mat-bar {
+      background-color: $green !important;
+    }
+    .play-btn {
+      .material-icons {
+        fill: #000000 !important;
+        body.dark-theme & {
+          fill: #ffffff !important;
+        }
+      }
+    }
+  }
+  .mat-bar {
+    background-color: #cccccc !important;
+  }
+
+  //mat-checkbox.mat-checked .mat-icon {
+  //  background-color: $green;
+  //  body.dark-theme & {
+  //    background-color: $green;
+  //  }
+  //}
+
+  mat-progress-bar {
+    margin-left: -2px;
+    margin-right: -12px;
+    width: auto;
+    //.mat-progress-bar-element {
+    //  background: yellow !important;
+    //}
+    //.mat-progress-bar-fill:after {
+    //  background: red !important;
+    //}
+  }
+
+  mat-progress-bar.mat-default-theme .mat-container,
+  mat-progress-bar .mat-container {
+    background: none !important;
+  }
+
+  .handle {
+    margin-right: 4px;
+    margin-top: 0;
+    margin-bottom: 0;
+    flex-basis: auto;
+    flex-grow: 0;
+    flex-shrink: 0;
+    cursor: grab;
+    //width: 40px;
+    padding-left: $this-inner-padding-left-right;
+    height: 40px;
+    line-height: 40px;
+  }
+
+  .title {
+    text-align: left;
+    cursor: pointer;
+    outline: none;
+    height: 100%;
+    display: block;
+  }
+
+  form {
+    width: 100%;
+  }
+  input {
+    outline: none;
+  }
+  input {
+    width: 100%;
+    display: block;
+    box-sizing: border-box;
+    height: 30px;
+    padding: 4px 10px;
+    border: none;
+  }
+
+  .time {
+    white-space: nowrap;
+    margin-left: 10px;
+  }
+
+  .notes {
+    display: block;
+    margin-left: -$this-inner-padding-left-right;
+    margin-right: -$this-inner-padding-left-right;
+    overflow: hidden;
+    padding-left: $this-inner-padding-left-right;
+    padding-right: $this-inner-padding-left-right;
+
+    section {
+      margin-top: 10px;
+    }
+
+    .mat-caption {
+      font-weight: bold;
+      margin-bottom: 6px;
+    }
+  }
+
+  a {
+    cursor: pointer;
+  }
+
+  .status {
+    margin-bottom: 10px;
+  }
+  .changelog,
+  .comments,
+  .attachments {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding: 0;
+    margin: 0 0 10px;
+    list-style-type: none;
+    li {
+      padding: 0;
+      font-size: 14px;
+      margin-top: 5px;
+    }
+  }
+
+  .comments {
+    li {
+      position: relative;
+      margin-top: 16px;
+      &:first-child {
+        margin-top: 8px;
+        &:before {
+          display: none;
+        }
+      }
+    }
+    p:first-child {
+      display: inline;
+    }
+    p {
+      margin-bottom: 8px;
+      margin-top: 8px;
+    }
+  }
+
+  .sub-tasks {
+    padding-left: $this-inner-padding-left-right;
+    padding-bottom: 3px;
+  }
+}

@@ -15,30 +15,6 @@
 <!--<script src="./app/old/vendor.js"></script>-->
 <!--<script src="./app/old/scripts.js"></script>-->
 
-<div id="ng1-app"
-     ng-app="superProductivity"
-     layout="column"
-     flex
-     ng-cloak
-     ng-class="r.bodyClass"
-     md-theme="{{r.theme}}">
-  <main-header class="md-whiteframe-glow-z1"></main-header>
-  <global-link-list global-links="r.globalLinks"
-                    is-toggled="r.uiHelper.isShowBookmarkBar"></global-link-list>
-
-  <md-content md-scroll-y
-              layout="column"
-              flex>
-    <add-task-bar-global></add-task-bar-global>
-    <hint></hint>
-
-    <div class="ui-view-container">
-      <main ui-view></main>
-    </div>
-    <quick-access-menu></quick-access-menu>
-  </md-content>
-</div>
-
 <app-root></app-root>
 </body>
 

@@ -1,0 +1,7 @@
+<div class="wrapper">
+  <h2 class="mat-h2"> work-view</h2>
+  <sup-task-list [tasks$]="tasks$" [filterArgs]="{'isDone':false}"></sup-task-list>
+
+  <h2 class="mat-h2">Completed Tasks</h2>
+  <sup-task-list [tasks$]="tasks$" [filterArgs]="{'isDone':true}"></sup-task-list>
+</div>
