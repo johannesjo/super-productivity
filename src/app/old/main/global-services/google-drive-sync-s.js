@@ -5,6 +5,7 @@
  * # GoogleDriveSync
  * Service in the superProductivity.
  */
+import moment from 'moment';
 
 (() => {
   'use strict';
@@ -71,7 +72,7 @@
     }
 
     _formatDate(date) {
-      return window.moment(date).format('DD-MM-YYYY * hh:mm:ss');
+      return moment(date).format('DD-MM-YYYY * hh:mm:ss');
     }
 
     _checkForInitialUpdate() {
@@ -251,7 +252,7 @@
         return;
       }
 
-      const interval = window.moment.duration(this.config.syncInterval).asMilliseconds();
+      const interval = moment.duration(this.config.syncInterval).asMilliseconds();
 
       if (interval < 5000) {
         this._log('Interval too low');

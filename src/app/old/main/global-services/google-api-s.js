@@ -5,6 +5,9 @@
  * # GoogleApi
  * Service in the superProductivity.
  */
+
+import moment from 'moment';
+
 (() => {
   'use strict';
 
@@ -136,7 +139,7 @@
     login() {
       /*jshint camelcase: false */
       const EXPIRES_SAFETY_MARGIN = 30000;
-      const isExpired = (!this.data.expiresAt || window.moment()
+      const isExpired = (!this.data.expiresAt || moment()
         .valueOf() + EXPIRES_SAFETY_MARGIN > this.data.expiresAt);
 
       if (isExpired) {
@@ -154,7 +157,7 @@
           window.ipcRenderer.on('GOOGLE_AUTH_TOKEN', (ev, data) => {
             const token = data.access_token;
             this.data.accessToken = token;
-            this.data.expiresAt = (data.expires_in * 1000) + window.moment().valueOf();
+            this.data.expiresAt = (data.expires_in * 1000) + moment().valueOf();
 
             //this.data.refreshToken = data.refresh_token;
             this.isLoggedIn = true;

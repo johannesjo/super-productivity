@@ -5,6 +5,7 @@
  * # TimeEstimateCtrl
  * Controller of the superProductivity
  */
+import moment from 'moment';
 
 (function() {
   'use strict';
@@ -17,8 +18,6 @@
   function TimeEstimateCtrl($mdDialog, task, Tasks, TasksUtil, $window, theme, $scope) {
     let vm = this;
     vm.theme = theme;
-
-    const moment = $window.moment;
 
     // TODO refactor and add to Tasks.service
     vm.todayStr = TasksUtil.getTodayStr();
@@ -69,7 +68,7 @@
       });
 
       if (totalTimeSpent) {
-        vm.timeSpentOnOtherDaysTotal = window.moment.duration(totalTimeSpent)
+        vm.timeSpentOnOtherDaysTotal = moment.duration(totalTimeSpent)
           .subtract(vm.timeSpentOnDayCopy[vm.todayStr]);
       }
 

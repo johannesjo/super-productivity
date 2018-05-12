@@ -5,6 +5,7 @@
  * # JiraAddWorklogCtrl
  * Controller of the superProductivity
  */
+import moment from 'moment';
 
 (function () {
   'use strict';
@@ -16,7 +17,6 @@
   /* @ngInject */
   function JiraAddWorklogCtrl($mdDialog, task, $window, comment, theme) {
     let vm = this;
-    const moment = $window.moment;
 
     vm.theme = theme;
     vm.taskCopy = angular.copy(task);

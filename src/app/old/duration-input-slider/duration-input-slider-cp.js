@@ -4,7 +4,7 @@
  * @description
  * # durationInputSlider
  */
-
+import moment from 'moment';
 (() => {
   'use strict';
 

@@ -7,6 +7,9 @@
  * Filter in the superProductivity.
  */
 
+import moment from 'moment';
+
+
 (function () {
   'use strict';
 
@@ -26,9 +29,9 @@
       let dayHours = 0;
 
       // this would be correct but simply checking for an object is faster
-      //if (!$window.moment.isDuration(input)) {
+      //if (!moment.isDuration(input)) {
       if (!angular.isObject(input)) {
-        input = $window.moment.duration(input);
+        input = moment.duration(input);
       }
 
       if (!longWords) {

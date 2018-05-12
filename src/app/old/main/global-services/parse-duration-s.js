@@ -6,6 +6,8 @@
  * Service in the superProductivity.
  */
 
+import moment from 'moment';
+
 (function() {
   'use strict';
 
@@ -15,8 +17,6 @@
 
   /* @ngInject */
   function ParseDuration($window) {
-
-    const moment = $window.moment;
     const _ = $window._;
 
     this.fromString = (strValue) => {

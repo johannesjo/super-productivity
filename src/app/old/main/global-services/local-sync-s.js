@@ -5,6 +5,7 @@
  * # LocalSync
  * Service in the superProductivity.
  */
+import moment from 'moment';
 
 (() => {
   'use strict';
@@ -52,7 +53,7 @@
           return;
         }
 
-        const now = window.moment();
+        const now = moment();
         const path = this.$rootScope.r.config.automaticBackups.path
           .replace('{date}', now.format('YYYY-MM-DD'))
           .replace('{unix}', now.format('x'));

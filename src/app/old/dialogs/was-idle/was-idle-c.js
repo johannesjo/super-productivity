@@ -6,6 +6,9 @@
  * Controller of the superProductivity
  */
 
+
+import moment from 'moment';
+
 (function() {
   'use strict';
 
@@ -24,7 +27,7 @@
 
     // used to display only; we add minIdleTimeInMs because that is idleTime too
     // even if it is tracked already
-    vm.idleTime = $window.moment.duration(realIdleTime, 'milliseconds').format('hh:mm:ss');
+    vm.idleTime = moment.duration(realIdleTime, 'milliseconds').format('hh:mm:ss');
 
     vm.undoneTasks = Tasks.getUndoneToday(true);
     vm.selectedTask = $rootScope.r.currentTask || $rootScope.r.lastActiveTaskTask || undefined;
@@ -62,7 +65,7 @@
         .duration(now.diff(idleStart))
         .add(initialIdleTime)
         .asMilliseconds();
-      vm.idleTime = $window.moment.duration(realIdleTime, 'milliseconds').format('hh:mm:ss');
+      vm.idleTime = moment.duration(realIdleTime, 'milliseconds').format('hh:mm:ss');
     }, POLL_INTERVAL);
 
     $scope.$on('$destroy', () => {

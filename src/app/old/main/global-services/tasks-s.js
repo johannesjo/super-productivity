@@ -352,7 +352,7 @@ class Tasks {
     this.updateCurrent(undefined);
 
     task.isDone = true;
-    task.doneDate = window.moment();
+    task.doneDate = moment();
 
     if (this.IS_ELECTRON || this.IS_EXTENSION) {
       // add worklog before marking the task as done
@@ -760,4 +760,4 @@ Tasks.$$ngIsClass = true;
 angular
   .module('superProductivity')
   .service('Tasks', Tasks);
-  
+

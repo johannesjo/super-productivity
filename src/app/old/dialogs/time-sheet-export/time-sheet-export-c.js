@@ -6,6 +6,8 @@
  * Controller of the superProductivity
  */
 
+import moment from 'moment';
+
 (function() {
   'use strict';
 
@@ -109,7 +111,7 @@
         case '{currentTime}':
           return getCurrentTime();
         case '{date}':
-          return window.moment().format('MM/DD/YYYY');
+          return moment().format('MM/DD/YYYY');
         case '{taskTitles}':
           return getTaskTitles();
         case '{subTaskTitles}':
@@ -130,21 +132,21 @@
           if (isRoundUp) {
             rounded = Math.ceil(value.asMinutes() / 15) * 15;
           }
-          return window.moment.duration({ minutes: rounded });
+          return moment.duration({ minutes: rounded });
 
         case 'HALF':
           rounded = Math.round(value.asMinutes() / 30) * 30;
           if (isRoundUp) {
             rounded = Math.ceil(value.asMinutes() / 30) * 30;
           }
-          return window.moment.duration({ minutes: rounded });
+          return moment.duration({ minutes: rounded });
 
         case 'HOUR':
           rounded = Math.round(value.asMinutes() / 60) * 60;
           if (isRoundUp) {
             rounded = Math.ceil(value.asMinutes() / 60) * 60;
           }
-          return window.moment.duration({ minutes: rounded });
+          return moment.duration({ minutes: rounded });
 
         default:
           return value;
@@ -186,7 +188,7 @@
         .replace('{date:', '')
         .replace('}', '')
         .trim();
-      return window.moment().format(dateFormatStr);
+      return moment().format(dateFormatStr);
     }
 
     function getStartTime() {
@@ -197,7 +199,7 @@
     }
 
     function getCurrentTime() {
-      const val = window.moment();
+      const val = moment();
       const roundTo = vm.opts.roundEndTimeTo;
 
       return roundTime(val, roundTo)
