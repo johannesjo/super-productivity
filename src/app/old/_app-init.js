@@ -1,4 +1,5 @@
 import mod from './_app';
+import moment from 'moment';
 
 mod
 //.config(configMdTheme)
@@ -272,7 +273,6 @@ function checkIfLatestVersion(IS_ELECTRON, $http, Git, VERSION, $mdToast, Util) 
 function setStartedTimes($rootScope, $timeout) {
   $timeout(() => {
 
-    const moment = window.moment;
     const now = moment();
 
     // set started time today as used by the time sheet export
