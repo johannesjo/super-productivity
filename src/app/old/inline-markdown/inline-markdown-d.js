@@ -15,7 +15,7 @@
   /* @ngInject */
   function inlineMarkdown() {
     return {
-      templateUrl: 'scripts/inline-markdown/inline-markdown-d.html',
+      template: require('./inline-markdown-d.html'),
       bindToController: true,
       controller: InlineMarkdownCtrl,
       controllerAs: 'vm',

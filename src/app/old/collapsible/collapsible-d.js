@@ -43,7 +43,7 @@
   angular
     .module('superProductivity')
     .component('collapsible', {
-      templateUrl: 'scripts/collapsible/collapsible-d.html',
+      template: require('./collapsible-d.html'),
       bindToController: true,
       controller: CollapsibleCtrl,
       controllerAs: 'vm',

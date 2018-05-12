@@ -15,7 +15,7 @@
   /* @ngInject */
   function mainHeader() {
     return {
-      templateUrl: 'scripts/main-header/main-header-d.html',
+      template: require('./main-header-d.html'),
       bindToController: true,
       controller: MainHeaderCtrl,
       controllerAs: 'vm',

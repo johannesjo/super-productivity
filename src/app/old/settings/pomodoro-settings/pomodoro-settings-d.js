@@ -15,7 +15,7 @@
   /* @ngInject */
   function pomodoroSettings() {
     return {
-      templateUrl: 'scripts/settings/pomodoro-settings/pomodoro-settings-d.html',
+      template: require('./pomodoro-settings-d.html'),
       bindToController: true,
       controller: PomodoroSettingsCtrl,
       controllerAs: 'vm',

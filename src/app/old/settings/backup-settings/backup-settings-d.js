@@ -15,7 +15,7 @@
   /* @ngInject */
   function backupSettings() {
     return {
-      templateUrl: 'scripts/settings/backup-settings/backup-settings-d.html',
+      template: require('./backup-settings-d.html'),
       bindToController: true,
       controller: BackupSettingsCtrl,
       controllerAs: 'vm',

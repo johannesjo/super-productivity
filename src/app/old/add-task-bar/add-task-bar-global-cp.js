@@ -19,7 +19,7 @@
   angular
     .module('superProductivity')
     .component('addTaskBarGlobal', {
-      templateUrl: 'scripts/add-task-bar/add-task-bar-global-cp.html',
+      template: require('./add-task-bar-global-cp.html'),
       controller: AddTaskBarGlobalCtrl,
       controllerAs: 'vm',
       bindToController: {},

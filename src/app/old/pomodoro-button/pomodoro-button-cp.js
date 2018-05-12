@@ -59,7 +59,7 @@
   angular
     .module('superProductivity')
     .component('pomodoroButton', {
-      templateUrl: 'scripts/pomodoro-button/pomodoro-button-cp.html',
+      template: require('./pomodoro-button-cp.html'),
       controller: PomodoroButtonCtrl,
       controllerAs: '$ctrl',
       bindToController: {},

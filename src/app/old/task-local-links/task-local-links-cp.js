@@ -22,7 +22,7 @@
   angular
     .module('superProductivity')
     .component('taskLocalLinks', {
-      templateUrl: 'scripts/task-local-links/task-local-links-cp.html',
+      template: require('./task-local-links-cp.html'),
       controller: TaskLocalLinksCtrl,
       bindToController: true,
       controllerAs: '$ctrl',

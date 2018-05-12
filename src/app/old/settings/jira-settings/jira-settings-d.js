@@ -15,7 +15,7 @@
   /* @ngInject */
   function jiraSettings() {
     return {
-      templateUrl: 'scripts/settings/jira-settings/jira-settings-d.html',
+      template: require('./jira-settings-d.html'),
       bindToController: true,
       controller: JiraSettingsCtrl,
       controllerAs: 'vm',

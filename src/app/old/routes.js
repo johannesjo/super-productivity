@@ -32,7 +32,7 @@
         url: '/settings',
         controller: 'SettingsCtrl',
         controllerAs: 'vm',
-        templateUrl: 'scripts/routes/settings/settings-c.html'
+        template: require('./routes/settings/settings-c.html')
       })
       .state('daily-summary', {
         url: '/daily-summary',

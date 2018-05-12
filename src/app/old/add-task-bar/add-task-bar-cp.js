@@ -75,7 +75,7 @@
   angular
     .module('superProductivity')
     .component('addTaskBar', {
-      templateUrl: 'scripts/add-task-bar/add-task-bar-cp.html',
+      template: require('./add-task-bar-cp.html'),
       controller: AddTaskBarCtrl,
       controllerAs: 'vm',
       bindings: {

@@ -175,7 +175,7 @@
   angular
     .module('superProductivity')
     .component('durationInputSlider', {
-      templateUrl: 'scripts/duration-input-slider/duration-input-slider-cp.html',
+      template: require('./duration-input-slider-cp.html'),
       controller: DurationInputSliderCtrl,
       controllerAs: '$ctrl',
       bindings: {

@@ -15,7 +15,7 @@
   /* @ngInject */
   function dailyPlanner() {
     return {
-      templateUrl: 'scripts/daily-planner/daily-planner-d.html',
+      template: require('./daily-planner-d.html'),
       bindToController: true,
       controller: DailyPlannerCtrl,
       controllerAs: 'vm',

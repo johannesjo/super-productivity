@@ -15,7 +15,7 @@
   /* @ngInject */
   function themeSettings() {
     return {
-      templateUrl: 'scripts/settings/theme-settings/theme-settings-d.html',
+      template: require('./theme-settings-d.html'),
       bindToController: true,
       controller: ThemeSettingsCtrl,
       controllerAs: 'vm',

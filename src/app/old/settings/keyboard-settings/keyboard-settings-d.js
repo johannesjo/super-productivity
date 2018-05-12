@@ -15,7 +15,7 @@
   /* @ngInject */
   function keyboardSettings() {
     return {
-      templateUrl: 'scripts/settings/keyboard-settings/keyboard-settings-d.html',
+      template: require('./keyboard-settings-d.html'),
       bindToController: true,
       controller: KeyboardSettingsCtrl,
       controllerAs: 'vm',

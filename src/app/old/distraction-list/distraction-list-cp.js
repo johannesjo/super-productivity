@@ -18,7 +18,7 @@
   angular
     .module('superProductivity')
     .component('distractionList', {
-      templateUrl: 'scripts/distraction-list/distraction-list-cp.html',
+      template: require('./distraction-list-cp.html'),
       controller: DistractionListCtrl,
       controllerAs: '$ctrl',
       bindToController: {},

@@ -15,7 +15,7 @@
   /* @ngInject */
   function timeTrackingHistory() {
     return {
-      templateUrl: 'scripts/agenda-and-history/time-tracking-history/time-tracking-history-d.html',
+      template: require('./time-tracking-history-d.html'),
       bindToController: true,
       controller: TimeTrackingHistoryCtrl,
       controllerAs: 'vm',

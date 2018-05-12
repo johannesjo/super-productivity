@@ -513,7 +513,7 @@
     .module('superProductivity')
     .controller('TaskListCtrl', TaskListCtrl)
     .component('taskList', {
-      templateUrl: 'scripts/task-list/task-list-d.html',
+      template: require('./task-list-d.html'),
       bindToController: true,
       controller: 'TaskListCtrl',
       controllerAs: CONTROLLER_AS,

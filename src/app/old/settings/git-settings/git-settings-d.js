@@ -15,7 +15,7 @@
   /* @ngInject */
   function gitSettings() {
     return {
-      templateUrl: 'scripts/settings/git-settings/git-settings-d.html',
+      template: require('./git-settings-d.html'),
       bindToController: true,
       controller: GitSettingsCtrl,
       controllerAs: 'vm',

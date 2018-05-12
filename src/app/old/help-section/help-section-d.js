@@ -15,7 +15,7 @@
   /* @ngInject */
   function helpSection() {
     return {
-      templateUrl: 'scripts/help-section/help-section-d.html',
+      template: require('./help-section-d.html'),
       bindToController: true,
       controller: HelpSectionCtrl,
       controllerAs: 'vm',

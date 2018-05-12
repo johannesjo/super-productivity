@@ -2,10 +2,10 @@ import mod from './_app';
 import moment from 'moment';
 
 mod
-//.config(configMdTheme)
-//.config(configMarked)
+  .config(configMdTheme)
+  .config(configMarked)
   .config(fixUnhandledRejectionError)
-  //.config(configPromiseButtons)
+  .config(configPromiseButtons)
   .config(initPerformanceOptimizations)
   .run(initGlobalModels)
   .run(initPollJiraTaskUpdates)

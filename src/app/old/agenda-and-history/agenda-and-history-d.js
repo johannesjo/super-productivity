@@ -15,7 +15,7 @@
   /* @ngInject */
   function agendaAndHistory() {
     return {
-      templateUrl: 'scripts/agenda-and-history/agenda-and-history-d.html',
+      template: require('./agenda-and-history-d.html'),
       bindToController: true,
       controller: AgendaAndHistoryCtrl,
       controllerAs: 'vm',

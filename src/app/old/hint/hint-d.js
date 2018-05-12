@@ -15,7 +15,7 @@
   /* @ngInject */
   function hint() {
     return {
-      templateUrl: 'scripts/hint/hint-d.html',
+      template: require('./hint-d.html'),
       bindToController: true,
       controller: HintCtrl,
       controllerAs: 'vm',

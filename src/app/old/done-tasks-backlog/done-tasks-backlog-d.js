@@ -15,7 +15,7 @@
   /* @ngInject */
   function doneTasksBacklog() {
     return {
-      templateUrl: 'scripts/done-tasks-backlog/done-tasks-backlog-d.html',
+      template: require('./done-tasks-backlog-d.html'),
       bindToController: true,
       controller: DoneTasksBacklogCtrl,
       controllerAs: 'vm',

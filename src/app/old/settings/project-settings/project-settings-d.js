@@ -15,7 +15,7 @@
   /* @ngInject */
   function projectSettings() {
     return {
-      templateUrl: 'scripts/settings/project-settings/project-settings-d.html',
+      template: require('./project-settings-d.html'),
       bindToController: true,
       controller: ProjectSettingsCtrl,
       controllerAs: 'vm',

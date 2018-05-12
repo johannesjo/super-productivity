@@ -109,7 +109,7 @@
   angular
     .module('superProductivity')
     .component('globalLinkList', {
-      templateUrl: 'scripts/global-link-list/global-link-list-cp.html',
+      template: require('./global-link-list-cp.html'),
       bindToController: true,
       controller: GlobalLinkListCtrl,
       controllerAs: CONTROLLER_AS,

@@ -15,7 +15,7 @@
   /* @ngInject */
   function miscSettings() {
     return {
-      templateUrl: 'scripts/settings/misc-settings/misc-settings-d.html',
+      template: require('./misc-settings-d.html'),
       bindToController: true,
       controller: MiscSettingsCtrl,
       controllerAs: 'vm',

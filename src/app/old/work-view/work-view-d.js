@@ -15,7 +15,7 @@
   /* @ngInject */
   function workView() {
     return {
-      templateUrl: 'scripts/work-view/work-view-d.html',
+      template: require('./work-view-d.html'),
       bindToController: true,
       controller: WorkViewCtrl,
       controllerAs: 'vm',

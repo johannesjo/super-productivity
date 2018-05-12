@@ -16,7 +16,7 @@
   /* @ngInject */
   function subTaskList() {
     return {
-      templateUrl: 'scripts/sub-task-list/sub-task-list-d.html',
+      template: require('./sub-task-list-d.html'),
       bindToController: true,
       controller: SubTaskListCtrl,
       controllerAs: 'vm',

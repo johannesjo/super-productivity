@@ -15,7 +15,7 @@
   /* @ngInject */
   function dailySummary() {
     return {
-      templateUrl: 'scripts/daily-summary/daily-summary-d.html',
+      template: require('./daily-summary-d.html'),
       bindToController: true,
       controller: DailySummaryCtrl,
       controllerAs: 'vm',

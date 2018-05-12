@@ -15,7 +15,7 @@
   /* @ngInject */
   function quickAccessMenu() {
     return {
-      templateUrl: 'scripts/quick-access-menu/quick-access-menu-d.html',
+      template: require('./quick-access-menu-d.html'),
       bindToController: true,
       controller: QuickAccessMenuCtrl,
       controllerAs: 'vm',

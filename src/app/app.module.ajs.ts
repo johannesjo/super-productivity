@@ -1,4 +1,4 @@
-import './old/vendor';
+import './vendor';
 
 import mod from './old/_app';
 

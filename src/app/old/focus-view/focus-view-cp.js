@@ -79,7 +79,7 @@
   angular
     .module('superProductivity')
     .component('focusView', {
-      templateUrl: 'scripts/focus-view/focus-view-cp.html',
+      template: require('./focus-view-cp.html'),
       controller: FocusViewCtrl,
       controllerAs: 'vm',
       bindToController: {},
