@@ -36,21 +36,3 @@ work-view {
     white-space: nowrap;
   }
 }
-
-.done-tasks,
-.undone-tasks {
-  //opacity: 0;
-  //animation: $transition-duration-s ani-task-list-enter $ani-standard-timing;
-  //animation-fill-mode: forwards;
-}
-
-@keyframes ani-task-list-enter {
-  0% {
-    opacity: 0;
-    transform: scale(0.9);
-  }
-
-  100% {
-    opacity: 1;
-  }
-}

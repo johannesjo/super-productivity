@@ -543,22 +543,22 @@ $task-inner-padding-left-right: 6px;
     0% {
       opacity: 0;
       //transform: scale(0);
-      //transform: translateY(-100%);
+      transform: translateY(-100px);
     }
     #{($i * $delay)/$totalTime * 100%} {
       opacity: 0;
       //transform: scale(0);
-      //transform: translateY(-100%);
+      transform: translateY(-100px);
     }
     #{($i * $delay + $animTime)/$totalTime * 100%} {
       opacity: 1;
       //transform: scale(1);
-      //transform: translateX(0);
+      transform: translateX(0);
     }
     100% {
       opacity: 1;
       //transform: scale(1);
-      //transform: translateX(0);
+      transform: translateX(0);
     }
   }
 }
@@ -585,4 +585,10 @@ $staggerTime: 0.02s;
   &.is-initial-entering .task {
     animation-delay: 0.1s;
   }
+}
+
+.task-list {
+  opacity: 0;
+  animation: $transition-duration-s ani-task-list-enter $ani-standard-timing;
+  animation-fill-mode: forwards;
 }
