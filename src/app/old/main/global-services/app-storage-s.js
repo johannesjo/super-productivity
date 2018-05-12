@@ -55,14 +55,14 @@ export class AppStorage {
   // gets the current state of the app excluding tmp variables and the projects
   getCurrentAppState() {
     const currentState = {};
-    //for (let key in this.LS_DEFAULTS) {
-    //  const isNoTmpField = (this.TMP_FIELDS.indexOf(key) === -1);
-    //  const isNoOnDemand = (this.ON_DEMAND_LS_FIELDS.indexOf(key) === -1);
-    //  const isNotProjects = (key !== this.PROJECTS_KEY);
-      //if (this.LS_DEFAULTS.hasOwnProperty(key) && isNoOnDemand && isNoTmpField && isNotProjects) {
-        //currentState[key] = this.$rootScope.r[key];
-      //}
-    //}
+    for (let key in this.LS_DEFAULTS) {
+      const isNoTmpField = (this.TMP_FIELDS.indexOf(key) === -1);
+      const isNoOnDemand = (this.ON_DEMAND_LS_FIELDS.indexOf(key) === -1);
+      const isNotProjects = (key !== this.PROJECTS_KEY);
+      if (this.LS_DEFAULTS.hasOwnProperty(key) && isNoOnDemand && isNoTmpField && isNotProjects) {
+        currentState[key] = this.$rootScope.r[key];
+      }
+    }
     return currentState;
   }
 

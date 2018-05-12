@@ -14,7 +14,7 @@
     .service('Dialogs', Dialogs);
 
   /* @ngInject */
-  function Dialogs(/*$mdDialog,*/ DIALOGS, $q, $document, $rootScope) {
+  function Dialogs($mdDialog, DIALOGS, $q, $document, $rootScope) {
     const dialogQueue = [];
 
     function createDialogObject(dialogName, locals) {
@@ -59,31 +59,31 @@
         if (nextDialog.isNoQueue) {
           removeLastResolvedFromQueue();
           openNextInQueue();
-          //$mdDialog.show(nextDialog.obj)
-          //  .then((res) => {
-          //    nextDialog.wrapperPromise.resolve(res);
-          //  }, (err) => {
-          //    nextDialog.wrapperPromise.reject(err);
-          //  })
-          //  .catch((err) => {
-          //    nextDialog.wrapperPromise.reject(err);
-          //  });
+          $mdDialog.show(nextDialog.obj)
+            .then((res) => {
+              nextDialog.wrapperPromise.resolve(res);
+            }, (err) => {
+              nextDialog.wrapperPromise.reject(err);
+            })
+            .catch((err) => {
+              nextDialog.wrapperPromise.reject(err);
+            });
         } else {
-          //$mdDialog.show(nextDialog.obj)
-          //  .then((res) => {
-          //    nextDialog.wrapperPromise.resolve(res);
-          //    removeLastResolvedFromQueue();
-          //    openNextInQueue();
-          //  }, (err) => {
-          //    nextDialog.wrapperPromise.reject(err);
-          //    removeLastResolvedFromQueue();
-          //    openNextInQueue();
-          //  })
-          //  .catch((err) => {
-          //    nextDialog.wrapperPromise.reject(err);
-          //    removeLastResolvedFromQueue();
-          //    openNextInQueue();
-          //  });
+          $mdDialog.show(nextDialog.obj)
+            .then((res) => {
+              nextDialog.wrapperPromise.resolve(res);
+              removeLastResolvedFromQueue();
+              openNextInQueue();
+            }, (err) => {
+              nextDialog.wrapperPromise.reject(err);
+              removeLastResolvedFromQueue();
+              openNextInQueue();
+            })
+            .catch((err) => {
+              nextDialog.wrapperPromise.reject(err);
+              removeLastResolvedFromQueue();
+              openNextInQueue();
+            });
         }
       }
     }

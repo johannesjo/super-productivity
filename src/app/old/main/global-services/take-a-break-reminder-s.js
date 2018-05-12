@@ -14,7 +14,7 @@
     .service('TakeABreakReminder', TakeABreakReminder);
 
   /* @ngInject */
-  function TakeABreakReminder($rootScope, Notifier, /*$mdToast,*/ ParseDuration, $timeout) {
+  function TakeABreakReminder($rootScope, Notifier, $mdToast, ParseDuration, $timeout) {
     this.isShown = true;
 
     const TOAST_DISPLAY_TIME = 30000;
@@ -72,17 +72,17 @@
             const durationStr = ParseDuration.toString($rootScope.r.currentSession.timeWorkedWithoutBreak);
             const message = $rootScope.r.config && $rootScope.r.config.takeABreakMessage && $rootScope.r.config.takeABreakMessage.replace(/\$\{duration\}/gi, durationStr);
 
-            //toast = $mdToast.simple()
-            //  .textContent(message)
-            //  .action('I already did!')
-            //  .hideDelay(TOAST_DISPLAY_TIME)
-            //  .position('bottom');
-            //$mdToast.show(toast).then(function(response) {
-            //  if (response === 'ok') {
-            //    // re-add task on undo
-            //    $rootScope.r.currentSession.timeWorkedWithoutBreak = undefined;
-            //  }
-            //});
+            toast = $mdToast.simple()
+              .textContent(message)
+              .action('I already did!')
+              .hideDelay(TOAST_DISPLAY_TIME)
+              .position('bottom');
+            $mdToast.show(toast).then(function(response) {
+              if (response === 'ok') {
+                // re-add task on undo
+                $rootScope.r.currentSession.timeWorkedWithoutBreak = undefined;
+              }
+            });
 
             Notifier({
               title: 'Take a break!',

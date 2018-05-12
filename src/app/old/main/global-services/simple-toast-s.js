@@ -16,7 +16,7 @@
     .service('SimpleToast', SimpleToast);
 
   /* @ngInject */
-  function SimpleToast(/*$mdToast*/) {
+  function SimpleToast($mdToast) {
     const DEFAULT_HIDE_DELAY = 4000;
 
     return (textContent, type, hideDelay, icon) => {
@@ -28,11 +28,11 @@
 
       if (!type) {
         setTimeout(() => {
-          //$mdToast.show($mdToast.simple()
-          //  .textContent(textContent)
-          //  .capsule(false)
-          //  .hideDelay(hideDelay || DEFAULT_HIDE_DELAY)
-          //  .position('bottom'));
+          $mdToast.show($mdToast.simple()
+            .textContent(textContent)
+            .capsule(false)
+            .hideDelay(hideDelay || DEFAULT_HIDE_DELAY)
+            .position('bottom'));
         }, MINIMAL_TIMEOUT_DURATION);
       } else {
         let iconColor;
@@ -70,19 +70,19 @@
         }
 
         setTimeout(() => {
-//          $mdToast.show({
-//            template: `
-//<md-toast>
-//  <div class="md-toast-content">
-//    <div class="icon-wrapper">
-//      <ng-md-icon icon="${icon}" ${iconColor && 'style="fill:' + iconColor + '"'}></ng-md-icon>
-//    </div>
-//    <div class="toast-text">${textContent}</div>
-//  </div>
-//</md-toast>
-//          `,
-//            hideDelay: hideDelay || DEFAULT_HIDE_DELAY
-//          });
+          $mdToast.show({
+            template: `
+<md-toast>
+  <div class="md-toast-content">
+    <div class="icon-wrapper">
+      <ng-md-icon icon="${icon}" ${iconColor && 'style="fill:' + iconColor + '"'}></ng-md-icon>
+    </div>
+    <div class="toast-text">${textContent}</div>
+  </div>
+</md-toast>
+          `,
+            hideDelay: hideDelay || DEFAULT_HIDE_DELAY
+          });
         }, MINIMAL_TIMEOUT_DURATION);
 
       }

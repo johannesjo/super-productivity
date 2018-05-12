@@ -14,12 +14,12 @@
     .service('InitGlobalModels', InitGlobalModels);
 
   /* @ngInject */
-  function InitGlobalModels(DEFAULT_THEME, $rootScope, /*$state,*/ Tasks, PomodoroButton, LS_DEFAULTS) {
+  function InitGlobalModels(DEFAULT_THEME, $rootScope, $state, Tasks, PomodoroButton, LS_DEFAULTS) {
     return () => {
 
       // we don't use r.$state because it looks more like something special
       // this way
-      //$rootScope.$state = $state;
+      $rootScope.$state = $state;
 
       // we want the current task to be a reference to the tasks array
       // that's why we need to reassign
