@@ -5,8 +5,6 @@
  * # $rootScope
  * Service in the superProductivity.
  */
-import angular from 'angular';
-
 const PREFIX = 'ngStorage-';
 
 export class AppStorage {

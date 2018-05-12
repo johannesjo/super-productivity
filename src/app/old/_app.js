@@ -1,5 +1,3 @@
-import angular from 'angular';
-
 // reload right away if there is an update
 function onUpdateReady() {
   console.log('RELOAD RIGHT AWAY');
