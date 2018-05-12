@@ -28,16 +28,16 @@ if (window.applicationCache.status === window.applicationCache.UPDATEREADY) {
 // app initialization
 export default angular
   .module('superProductivity', [
-    //'ngAnimate',
-    //'ngAria',
-    //'ngResource',
-    //'ui.router',
-    //'ngMaterial',
-    //'ngMdIcons',
-    //'as.sortable',
-    //'angularMoment',
-    //'hc.marked',
-    //'mwl.calendar',
-    //'mdxUtil',
-    //'angularPromiseButtons'
+    'ngAnimate',
+    'ngAria',
+    'ngResource',
+    'ui.router',
+    'ngMaterial',
+    'ngMdIcons',
+    'as.sortable',
+    'angularMoment',
+    'hc.marked',
+    'mwl.calendar',
+    'mdxUtil',
+    'angularPromiseButtons'
   ]);
