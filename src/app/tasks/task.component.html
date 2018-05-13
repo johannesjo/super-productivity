@@ -105,16 +105,16 @@
          aria-label="delete">delete_forever</i>
     </button>
     <mat-checkbox [(ngModel)]="isDone"
-                 tabindex="2"
-                 (ngModelChange)="onTaskDoneChanged(task.id, isDone)"
-                 aria-label="un-/mark as done"
-                 ngDefaultControl>
+                  tabindex="2"
+                  (ngModelChange)="onTaskDoneChanged(task.id, isDone)"
+                  aria-label="un-/mark as done"
+                  ngDefaultControl>
     </mat-checkbox>
   </div>
 </div>
 
-<mat-progress-bar [mode]="'determinate'"
-                 [value]="task.progress"></mat-progress-bar>
+<mat-progress-bar mode="determinate"
+                  [value]="task.progress"></mat-progress-bar>
 
 
 <div class="notes"

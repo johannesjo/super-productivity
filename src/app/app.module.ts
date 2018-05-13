@@ -41,6 +41,7 @@ import { CurrentTaskReducer } from './tasks/current-task.reducer';
 import { metaReducers } from './meta.reducer';
 import { EffectsModule } from '@ngrx/effects';
 import { TaskEffects } from './tasks/task.effects';
+import { MarkdownModule } from 'ngx-markdown';
 
 export const appRoutes: Routes = [
   {path: 'work-view', component: WorkViewComponent},
@@ -111,7 +112,7 @@ export const appRoutes: Routes = [
 
     // other
     DragulaModule,
-    // MarkdownToHtmlModule.forRoot(),
+    MarkdownModule.forRoot(),
   ],
   providers: [TaskService],
   bootstrap: [AppComponent]

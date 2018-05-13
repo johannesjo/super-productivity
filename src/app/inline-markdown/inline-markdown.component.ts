@@ -70,7 +70,7 @@ export class InlineMarkdownComponent implements OnInit {
 
   resizeToFit() {
     setTimeout(() => {
-      const previewEl: any = this.el.querySelectorAll('markdown-to-html')[0];
+      const previewEl: any = this.el.querySelectorAll('.markdown-parsed')[0];
       const wrapperEl: HTMLElement = this.el.querySelectorAll('div')[0];
 
       previewEl.style.height = 'auto';

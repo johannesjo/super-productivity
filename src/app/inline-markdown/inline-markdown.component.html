@@ -4,10 +4,11 @@
             class="mat-body-1 markdown-unparsed"
             rows="5"></textarea>
 
-  <!--<markdown-to-html [data]="model"-->
-                    <!--[hidden]="isShowEdit"-->
-                    <!--(click)="toggleShowEdit($event)"-->
-                    <!--(focus)="toggleShowEdit($event)"-->
-                    <!--(keypress)="keypressHandler($event)"-->
-                    <!--class="mat-body-1 markdown-parsed"></markdown-to-html>-->
+  <div markdown
+       [data]="model"
+       [hidden]="isShowEdit"
+       (click)="toggleShowEdit($event)"
+       (focus)="toggleShowEdit($event)"
+       (keypress)="keypressHandler($event)"
+       class="mat-body-1 markdown-parsed"></div>
 </div>
