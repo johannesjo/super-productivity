@@ -1,210 +1,318 @@
 @import '../_variables.scss';
-
-:host {
-  $this-inner-padding-left-right: 12px;
-  padding: 3px $this-inner-padding-left-right 0 3px;
-  display: block;
-  margin-bottom: 6px;
-  background-color: #ffffff;
-  color: #333333;
-  border-top: 1px solid lightgray;
-
+@mixin dark-theme {
   body.dark-theme & {
-    background-color: $dark-theme-bg-lighter;
-    color: #dddddd;
+    @content;
+  }
+}
 
+$this-task-text-color: #333333;
+$this-task-text-color-dark: #dddddd;
+$this-task-text-color-done: #aaaaaa;
+$task-inner-padding-left-right: 6px;
+:host {
+  display: block;
+
+  > .inner-wrapper {
+
+    padding: 2px 0;
+    margin-bottom: 7px;
+    background-color: #ffffff;
+    color: $this-task-text-color;
+    position: relative;
+    box-shadow: $shadow-bottom-boxed;
+
+    .title-bar-wrapper,
+    .first-line {
+      background: inherit;
+    }
+
+    @include dark-theme {
+      border-color: rgb(60, 60, 60);
+      background-color: $dark-theme-bg-lighter;
+      color: $this-task-text-color-dark;
+      box-shadow: $whiteframe-shadow-6dp;
+    }
+  }
+
+  &:last-child > .inner-wrapper {
+    margin-bottom: 0;
+  }
+
+  &:focus {
+    outline: none;
+  }
+  &.as-sortable-dragging,
+  &:focus > .inner-wrapper {
+    background: #eeeeee;
+    color: #000000;
+
+    // outline
+    outline: 1px solid #000000;
+  }
+
+  @include dark-theme {
+    &:focus > .inner-wrapper {
+      background-color: $dark-theme-bg-darker;
+      color: #dddddd;
+
+      // outline
+      outline: 1px solid #ffffff;
+    }
+  }
+
+  &.is-current > .inner-wrapper {
+    background: $light-green;
+    color: #000000;
+  }
+  @include dark-theme {
+    &.is-current > .inner-wrapper {
+      background-color: $dark-green;
+      color: #ffffff;
+    }
+  }
+
+  @include dark-theme {
     &.is-done {
       .time,
-      > .title,
-      > .first-line > .title {
-        color: #777777;
+      .task-title {
+        color: $dark-theme-text-color;
+      }
+      .material-icons {
+        fill: $dark-theme-text-color;
       }
     }
   }
 
   &.is-done {
-    .time,
-    > .title,
-    > .first-line > .title {
-      color: #aaaaaa;
+    //opacity: 0.8;
+
+    .material-icons {
+      fill: $this-task-text-color-done !important;
     }
 
-    > .title,
-    > .first-line > .title {
+    .time,
+    .task-title {
+      color: $this-task-text-color-done;
+    }
+
+    .task-title {
       text-decoration: line-through;
+    }
+
+    .play-btn {
+      display: none;
     }
   }
 
-  &.as-sortable-dragging,
-  &:focus {
-    background: #eeeeee;
-    color: #000000;
-    body.dark-theme & {
-      background-color: $dark-theme-bg-darker;
-      color: #dddddd;
+  .title-bar-wrapper {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: center;
+    min-height: 36px;
+    flex-grow: 1;
+    flex-basis: 70%;
+    @media(max-width: $layout-xs) {
+      margin-bottom: 5px;
+      flex-shrink: 0;
+      flex-basis: 100%;
     }
   }
 
   .first-line {
     display: flex;
-    flex-wrap: wrap;
-    flex-direction: row;
-    align-items: center;
-    align-content: center;
+    flex-wrap: nowrap;
+    user-select: none;
     justify-content: space-between;
-    max-width: 100%;
+    align-items: center;
+
+    @media(max-width: $layout-xs) {
+      flex-wrap: wrap;
+    }
+
+    $this-button-spacer: 1px;
+    $this-button-spacer-mobile: 1px;
+    $this-button-size: 34px;
+    $this-button-size-mobile: 34px;
+    $this-icon-color: #545454;
+    .ico-btn {
+      margin: $this-button-spacer;
+      height: $this-button-size;
+      width: $this-button-size;
+      min-width: $this-button-size;
+      min-height: $this-button-size;
+      // this fixes the original link button icon for some reason
+      line-height: $this-button-size + -1;
+      padding: 0;
+      box-shadow: $shadow-icon-button;
+      border-radius: 100%;
+      text-align: center;
+      overflow: hidden;
+      position: relative;
+      z-index: 4;
+
+      // theming
+      border: 1px solid #dddddd;
+      background: #ffffff !important;
+
+      transition: transform $transition-standard;
+      &:hover {
+        z-index: 5;
+        transform: scale(1.15);
+      }
+      &:focus {
+        outline: none;
+      }
+
+      // somehow the icons are a little of so we move them
+      .material-icons {
+        // only affects linux for some reason
+        // margin-top: -3px !important;
+        //display: block;
+        //text-align: center;
+        //svg {
+        //  position: absolute;
+        //  left: 50%;
+        //  top: 50%;
+        //  transform: translate(-50%, -50%);
+        //}
+      }
+
+      &.update-indicator-btn {
+        margin-left: 12px;
+
+        .task-list .task-list & {
+          margin: $this-button-spacer;
+          margin-right: -2px;
+        }
+      }
+
+      @include dark-theme {
+        background: $dark-theme-bg-darker !important;
+        border: 1px solid $dark-theme-bg;
+      }
+
+      @at-root {
+        .task {
+          .ico-btn:hover,
+          .ico-btn.is-active,
+          &.is-current .ico-btn.play-btn {
+            background: #000000 !important;
+            background: $this-icon-color !important;
+            border-color: transparent;
+
+            @include dark-theme {
+              background: #ffffff !important;
+            }
+
+            > .material-icons {
+              fill: #ffffff !important;
+              @include dark-theme {
+                fill: #000000 !important;
+              }
+            }
+          }
+        }
+      }
+
+      .material-icons {
+        fill: $this-icon-color;
+        margin: 0;
+        padding: 0;
+        line-height: 1;
+        @include dark-theme {
+          fill: $dark-theme-text-color-lighter;
+        }
+      }
+
+      &.delete-btn {
+        .material-icons.delete-icon {
+          fill: $red !important;
+          @include dark-theme {
+            fill: $red !important;
+          }
+        }
+
+        &:hover {
+          background: $red-danger !important;
+          .material-icons.delete-icon {
+            fill: #ffffff !important;
+            @include dark-theme {
+              fill: #ffffff !important;
+            }
+          }
+        }
+      }
+
+      @media(max-width: $layout-xs) {
+        margin: $this-button-spacer-mobile;
+        height: $this-button-size-mobile;
+        width: $this-button-size-mobile;
+        min-width: $this-button-size-mobile;
+        min-height: $this-button-size-mobile;
+        line-height: $this-button-size-mobile + -1;
+      }
+    }
 
     // Button Stuff
     .material-icons {
-      fill: gray;
+      fill: #545454;
     }
-    //.mat-icon-button,
-    mat-checkbox {
-      &:hover {
-        transform: scale(1.4);
-      }
-    }
+
     .play-btn {
-      //flex: 0 0 ;
-      display: block;
-      justify-self: flex-start;
-      //margin-right: auto;
       padding-left: 0;
       margin-left: -2px;
-      //flex: none;
+      margin-right: 3px;
       // move over original link btn
       position: relative;
       z-index: 1;
     }
 
-    .original-link-btn {
-      margin-left: -2px;
-      margin-right: 10px;
+    .show-notes-btn {
       .material-icons {
-        // hacky align icon inside link with the one inside the play button
-        margin-top: 2px;
+        transition: $transition-standard;
+        backface-visibility: hidden;
       }
-    }
 
-    //mat-checkbox {
-    //  margin-left: 6px;
-    //  min-width: 16px;
-    //  width: 32px;
-    //  height: 32px;
-    //}
-
-    .material-icons {
-      min-width: 24px;
-    }
-
-    .update-icon {
-      fill: #000000;
-      body.dark-theme & {
-        fill: #ffffff;
-      }
-    }
-    .mat-icon-button {
-      &:hover,
-      &.is-active {
-        > .material-icons {
-          fill: #000000;
-          body.dark-theme & {
-            fill: #ffffff;
-          }
-        }
+      &.is-active .material-icons {
+        transform: rotate(45deg);
       }
     }
   }
 
   .controls {
     white-space: nowrap;
-    display: flex;
-    flex-wrap: nowrap;
-    flex-direction: row;
-    align-items: center;
-  }
+    text-align: right;
+    margin-right: 2px;
 
-  .title {
-    margin-right: auto;
-    flex-grow: 1;
-  }
-
-  .material-icons.delete-icon {
-    fill: $red !important;
-    body.dark-theme & {
-      fill: $red !important;
+    @media(max-width: $layout-xs) {
+      white-space: normal;
+      margin-left: 5px;
     }
-  }
-
-  &.is-current {
-    background: $light-green;
-    color: #000000;
-
-    body.dark-theme & {
-      background-color: $dark-green;
-      color: #ffffff;
-    }
-
-    .mat-bar {
-      background-color: $green !important;
-    }
-    .play-btn {
-      .material-icons {
-        fill: #000000 !important;
-        body.dark-theme & {
-          fill: #ffffff !important;
-        }
-      }
-    }
-  }
-  .mat-bar {
-    background-color: #cccccc !important;
-  }
-
-  //mat-checkbox.mat-checked .mat-icon {
-  //  background-color: $green;
-  //  body.dark-theme & {
-  //    background-color: $green;
-  //  }
-  //}
-
-  mat-progress-bar {
-    margin-left: -2px;
-    margin-right: -12px;
-    width: auto;
-    //.mat-progress-bar-element {
-    //  background: yellow !important;
-    //}
-    //.mat-progress-bar-fill:after {
-    //  background: red !important;
-    //}
-  }
-
-  mat-progress-bar.mat-default-theme .mat-container,
-  mat-progress-bar .mat-container {
-    background: none !important;
   }
 
   .handle {
-    margin-right: 4px;
-    margin-top: 0;
-    margin-bottom: 0;
-    flex-basis: auto;
-    flex-grow: 0;
-    flex-shrink: 0;
-    cursor: grab;
-    //width: 40px;
-    padding-left: $this-inner-padding-left-right;
-    height: 40px;
-    line-height: 40px;
+    margin: 0 4px 0 9px;
   }
 
-  .title {
+  .task-title {
+    flex-direction: row;
+    align-items: center;
+    align-content: center;
+    flex: 1 1 auto;
+    flex-grow: 1;
     text-align: left;
-    cursor: pointer;
     outline: none;
-    height: 100%;
+    margin-left: 4px;
+    padding: 4px 0 4px 6px;
+    line-height: 1.5;
     display: block;
+    min-height: 20px;
+    text-overflow: ellipsis;
+  }
+
+  .actual-notes-wrapper {
+    box-shadow: $whiteframe-shadow-4dp;
   }
 
   form {
@@ -223,23 +331,30 @@
   }
 
   .time {
+    font-style: italic;
     white-space: nowrap;
     margin-left: 10px;
+    margin-right: 10px;
+    @media(max-width: $layout-xs) {
+      margin-left: 8px;
+      font-size: 13px;
+    }
   }
 
   .notes {
+    $this-notes-extra-padding: 3px;
     display: block;
-    margin-left: -$this-inner-padding-left-right;
-    margin-right: -$this-inner-padding-left-right;
+    margin-left: -$task-inner-padding-left-right;
+    margin-right: -$task-inner-padding-left-right;
     overflow: hidden;
-    padding-left: $this-inner-padding-left-right;
-    padding-right: $this-inner-padding-left-right;
+    padding-left: $task-inner-padding-left-right +$this-notes-extra-padding;
+    padding-right: $task-inner-padding-left-right +$this-notes-extra-padding;
 
     section {
       margin-top: 10px;
     }
 
-    .mat-caption {
+    .md-caption {
       font-weight: bold;
       margin-bottom: 6px;
     }
@@ -286,9 +401,5 @@
       margin-top: 8px;
     }
   }
-
-  .sub-tasks {
-    padding-left: $this-inner-padding-left-right;
-    padding-bottom: 3px;
-  }
 }
+
