@@ -1,1 +1,8 @@
-@import "~@angular/material/prebuilt-themes/indigo-pink.css";
+mat-toolbar {
+  position: fixed;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 2;
+  width: 100%  !important;
+}
