@@ -8,5 +8,8 @@
   "exclude": [
     "src/test.ts",
     "**/*.spec.ts"
-  ]
+  ],
+  "paths": {
+    "dragula": ["../node_modules/dragula/dist/dragula.min.js"]
+  }
 }
