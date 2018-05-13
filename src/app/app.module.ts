@@ -35,6 +35,12 @@ import { DurationToStringPipe } from './duration/duration-to-string.pipe';
 import { DurationFromStringPipe } from './duration/duration-from-string.pipe';
 import { KeysPipe } from './helper/keys.pipe';
 import { ToArrayPipe } from './helper/to-array.pipe';
+import { StoreModule } from '@ngrx/store';
+import { TaskReducer } from './tasks/task.reducer';
+import { CurrentTaskReducer } from './tasks/current-task.reducer';
+import { metaReducers } from './meta.reducer';
+import { EffectsModule } from '@ngrx/effects';
+import { TaskEffects } from './tasks/task.effects';
 
 export const appRoutes: Routes = [
   {path: 'work-view', component: WorkViewComponent},
@@ -92,6 +98,16 @@ export const appRoutes: Routes = [
     MatIconModule,
     MatDatepickerModule,
     MatNativeDateModule,
+
+    // store stuff
+    StoreModule.forRoot({
+        TaskReducer,
+        CurrentTaskReducer
+      },
+      {metaReducers}
+    ),
+    EffectsModule.forRoot([TaskEffects]),
+
 
     // other
     DragulaModule,

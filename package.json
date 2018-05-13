@@ -23,6 +23,8 @@
     "@angular/platform-browser-dynamic": "^6.0.0",
     "@angular/router": "^6.0.0",
     "@angular/upgrade": "^6.0.1",
+    "@ngrx/effects": "^5.2.0",
+    "@ngrx/store": "^5.2.0",
     "angular": "^1.7.0",
     "core-js": "^2.5.4",
     "hammerjs": "^2.0.8",
