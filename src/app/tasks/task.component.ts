@@ -1,14 +1,19 @@
-import {Component, OnInit} from '@angular/core';
-import {Input} from '@angular/core';
-import {HostBinding} from '@angular/core';
-import {DoCheck} from '@angular/core';
-import {TaskService} from './task.service';
-import {Observable} from 'rxjs';
-import {DragulaService} from 'ng2-dragula';
-import {Task} from './task';
+import { Component, OnInit } from '@angular/core';
+import { Input } from '@angular/core';
+import { HostBinding } from '@angular/core';
+import { DoCheck } from '@angular/core';
+import { TaskService } from './task.service';
+import { Observable } from 'rxjs';
+import { DragulaService } from 'ng2-dragula';
+import { Task } from './task';
 import shortid from 'shortid';
-import {MatDialog} from '@angular/material';
-import {DialogTimeEstimateComponent} from '../dialogs/dialog-time-estimate/dialog-time-estimate.component';
+import { MatDialog } from '@angular/material';
+import { DialogTimeEstimateComponent } from '../dialogs/dialog-time-estimate/dialog-time-estimate.component';
+import { expandAnimation } from '../animations/expand.ani';
+import { transition } from '@angular/animations';
+import { trigger } from '@angular/animations';
+import { style } from '@angular/animations';
+import { animate } from '@angular/animations';
 
 // import {Task} from './task'
 
@@ -19,7 +24,8 @@ import {DialogTimeEstimateComponent} from '../dialogs/dialog-time-estimate/dialo
   host: {
     'class': 'mat-elevation-z4'
   },
-  // changeDetection: ChangeDetectionStrategy.OnPush
+  // changeDetection: ChangeDetectionStrategy.OnPush,
+  animations: [expandAnimation]
 })
 export class TaskComponent implements OnInit, DoCheck {
   // @Input() task: Task;
