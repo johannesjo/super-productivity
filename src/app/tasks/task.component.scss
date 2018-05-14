@@ -1,4 +1,5 @@
 @import '../_variables.scss';
+
 @mixin dark-theme {
   body.dark-theme & {
     @content;
@@ -309,6 +310,65 @@ $task-inner-padding-left-right: 6px;
     display: block;
     min-height: 20px;
     text-overflow: ellipsis;
+    cursor: text;
+    transition: $transition-leave;
+    transition-property: opacity, transform;
+    display: block;
+    background: inherit;
+    position: relative;
+    overflow: visible;
+    user-select: none;
+    caret-color: #000000;
+    z-index: 4;
+
+    @include dark-theme() {
+      caret-color: #ffffff;
+    }
+
+    &:after {
+      background: #ffffff;
+      transition: $transition-leave;
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      content: '';
+      box-shadow: $shadow-edit-on-click;
+      opacity: 0;
+      z-index: -1;
+      border: 1px solid black;
+      pointer-events: none;
+
+      @include dark-theme() {
+        background: $dark-theme-bg-darker;
+        border: 1px solid #ffffff;
+        box-shadow: 0 0 4px 0 rgba(255, 255, 255, 0.8), $whiteframe-shadow-13dp;
+      }
+    }
+
+    &:focus {
+      z-index: 5;
+      user-select: all;
+      // thee magic number is 16/14 so we scale to whole pixels
+      transform: scale(1.142857143);
+      transition: $transition-standard;
+
+      .is-hide-controls & {
+        transform-origin: center center;
+        transform: scale(1.142857143) translateX(20px);
+      }
+
+      &:after {
+        opacity: 1;
+        transition: $transition-standard;
+      }
+      @media(max-width: $layout-xs) {
+        transform: scale(1);
+      }
+    }
   }
 
   .actual-notes-wrapper {

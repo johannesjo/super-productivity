@@ -56,10 +56,11 @@
     <!--aria-label="link"></i>-->
     <!--</button>-->
 
-    <sup-edit-on-click class="title task-title"
-                       [value]="task.title"
-                       (editFinished)="updateTaskIfChanged($event.isChanged, task.id, $event.newVal)"
-                       tabindex="2"></sup-edit-on-click>
+    <div supEditOnClick
+         class="title task-title"
+         [value]="task.title"
+         (editFinished)="updateTaskIfChanged($event.isChanged, task.id, $event.newVal)"
+         tabindex="2"></div>
 
     <div class="time">
       <span *ngIf="task.subTasks && task.subTasks.length>0">∑</span>
