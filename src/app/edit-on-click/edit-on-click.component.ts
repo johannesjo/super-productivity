@@ -48,7 +48,6 @@ export class EditOnClickComponent implements OnInit, OnChanges {
   @Input() eventId: string;
   @Output() editFinished: EventEmitter<any> = new EventEmitter();
   lastValue: string;
-  isShowEdit: boolean;
   el: HTMLElement;
 
 
@@ -125,11 +124,6 @@ export class EditOnClickComponent implements OnInit, OnChanges {
     if (window.getSelection) {
       window.getSelection().removeAllRanges();
     }
-    /* tslint:disable */
-    else if (document.selection) {
-      document.selection.empty();
-    }
-    /* tslint:enable */
 
     const curVal = this.el.innerText;
     const isChanged = (this.lastValue !== curVal);

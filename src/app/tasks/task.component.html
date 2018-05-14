@@ -57,6 +57,7 @@
     <!--</button>-->
 
     <div supEditOnClick
+         contenteditable="true"
          class="title task-title"
          [value]="task.title"
          (editFinished)="updateTaskIfChanged($event.isChanged, task.id, $event.newVal)"
