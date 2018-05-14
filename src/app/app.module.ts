@@ -42,6 +42,14 @@ import { metaReducers } from './meta.reducer';
 import { EffectsModule } from '@ngrx/effects';
 import { TaskEffects } from './tasks/task.effects';
 import { MarkdownModule } from 'ngx-markdown';
+import { AddTaskBarComponent } from './add-task-bar/add-task-bar.component';
+import { MatFormField } from '@angular/material';
+import { MatAutocomplete } from '@angular/material';
+import { MatFormFieldModule } from '@angular/material';
+import { MatAutocompleteModule } from '@angular/material';
+import { MatOptionModule } from '@angular/material';
+import { FormControl } from '@angular/forms';
+import { ReactiveFormsModule } from '@angular/forms';
 
 export const appRoutes: Routes = [
   {path: 'work-view', component: WorkViewComponent},
@@ -63,6 +71,7 @@ export const appRoutes: Routes = [
 @NgModule({
   declarations: [
     AppComponent,
+    AddTaskBarComponent,
     WorkViewComponent,
     TaskListComponent,
     EditOnClickComponent,
@@ -77,7 +86,8 @@ export const appRoutes: Routes = [
     DurationToStringPipe,
     DurationFromStringPipe,
     KeysPipe,
-    ToArrayPipe
+    ToArrayPipe,
+    AddTaskBarComponent
   ],
   entryComponents: [
     DialogTimeEstimateComponent,
@@ -86,6 +96,7 @@ export const appRoutes: Routes = [
     // base
     BrowserModule,
     FormsModule,
+    ReactiveFormsModule,
     BrowserAnimationsModule,
     RouterModule.forRoot(appRoutes, {useHash: true}),
 
@@ -99,6 +110,10 @@ export const appRoutes: Routes = [
     MatIconModule,
     MatDatepickerModule,
     MatNativeDateModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatAutocompleteModule,
+    MatOptionModule,
 
     // store stuff
     StoreModule.forRoot({

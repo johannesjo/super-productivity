@@ -1,14 +1,4 @@
 <section class="mat-typography">
-  <input placeholder="your task"
-         [(ngModel)]="taskTitle">
-
-  <button
-    (click)="addTask(taskTitle)"
-    [disabled]="!taskTitle">
-    Add task
-  </button>
-
-
   <div class="task-list"
        [dragula]='taskListId'
        [dragulaModel]="tasks$| async">

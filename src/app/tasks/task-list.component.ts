@@ -18,7 +18,6 @@ export class TaskListComponent implements OnInit {
   @Input() tasks$: Observable<[Task]>;
   @Input() filterArgs: string;
 
-  taskTitle: string;
   taskListId: string;
 
   constructor(private _taskService: TaskService, private _dragulaService: DragulaService) {
@@ -35,12 +34,6 @@ export class TaskListComponent implements OnInit {
   }
 
   ngOnInit() {
-  }
-
-  // TODO remove from here to it's own component
-  addTask(taskTitle) {
-    this._taskService.addTask(taskTitle);
-    this.taskTitle = '';
   }
 
   focusLastFocusedTaskEl() {
