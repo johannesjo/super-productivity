@@ -41,7 +41,8 @@
         $get: function($rootScope) {
           return {
             mdxThemeColors: $mdThemingProvider,
-            $rootScope: $rootScope
+            $rootScope: $rootScope,
+            setRGB,
           };
         }
       };

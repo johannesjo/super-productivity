@@ -10,6 +10,8 @@
   user-select: none;
   caret-color: #000000;
   z-index: 4;
+  border: 2px solid transparent;
+  border-radius: 3px;
 
   @include dark-theme() {
     caret-color: #ffffff;
@@ -29,13 +31,10 @@
     box-shadow: $shadow-edit-on-click;
     opacity: 0;
     z-index: -1;
-    border: 1px solid black;
     pointer-events: none;
 
     @include dark-theme() {
       background: $dark-theme-bg-darker;
-      border: 1px solid #ffffff;
-      box-shadow: 0 0 4px 0 rgba(255, 255, 255, 0.8), $whiteframe-shadow-13dp;
     }
   }
 

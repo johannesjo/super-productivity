@@ -32,7 +32,7 @@ $layout-gt-lg: 1920px;
 $shadow-bottom: 0 10px 6px -6px rgba(0, 0, 0, .3);
 $shadow-bottom-boxed: #{$shadow-bottom}, 0 0 1px rgba(0, 0, 0, .3);
 $shadow-icon-button: 0 2px 5px 0 rgba(0, 0, 0, 0.26);
-$shadow-edit-on-click: 0 0 4px 0 rgba(0, 0, 0, 0.8), $whiteframe-shadow-13dp;
+$shadow-edit-on-click: $whiteframe-shadow-13dp;
 
 // https://github.com/material-components/material-components-web/blob/master/packages/mdc-animation/_variables.scss
 $ani-standard-timing: cubic-bezier(.4, 0, .2, 1) !default;

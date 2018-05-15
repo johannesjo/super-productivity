@@ -47,10 +47,13 @@
     .directive('editOnClick', editOnClick);
 
   let EV_NAME;
+  let mdxSvc;
 
   /* @ngInject */
-  function editOnClick(EDIT_ON_CLICK_TOGGLE_EV) {
+  function editOnClick(EDIT_ON_CLICK_TOGGLE_EV, mdx) {
     EV_NAME = EDIT_ON_CLICK_TOGGLE_EV;
+    mdxSvc = mdx;
+
     return {
       restrict: 'A',
       require: 'ngModel',
@@ -115,8 +118,13 @@
     });
 
     el.bind('blur', (ev) => {
+      el[0].style.borderColor = '';
       scope.$evalAsync(read);
       execCb(ev);
+    });
+
+    el.bind('focus', () => {
+      mdxSvc.setRGB(el, 'border-color', mdxSvc, 'primary', 'editOnClick');
     });
 
     // prevent keyboard shortcuts from firing when here
