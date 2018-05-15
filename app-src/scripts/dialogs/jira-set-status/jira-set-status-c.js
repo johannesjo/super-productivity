@@ -6,7 +6,7 @@
  * Controller of the superProductivity
  */
 
-(function () {
+(function() {
   'use strict';
 
   angular
@@ -18,6 +18,12 @@
     let vm = this;
     vm.theme = theme;
     vm.transitions = transitions;
+
+    vm.transitions.push({
+      id: 'DO_NOT',
+      name: 'Don`t transition'
+    });
+
     vm.task = task;
     vm.localType = localType;
 
@@ -47,10 +53,19 @@
 
       if (vm.userToAssign) {
         Jira.updateAssignee(task, vm.userToAssign)
-          .then($mdDialog.hide);
-        $mdDialog.hide();
+          .then(() => {
+            if (!transition || transition.id === 'DO_NOT') {
+              $mdDialog.cancel();
+            } else {
+              $mdDialog.hide(transition);
+            }
+          });
       } else {
-        $mdDialog.hide(transition);
+        if (!transition || transition.id === 'DO_NOT') {
+          $mdDialog.cancel();
+        } else {
+          $mdDialog.hide(transition);
+        }
       }
     };
 

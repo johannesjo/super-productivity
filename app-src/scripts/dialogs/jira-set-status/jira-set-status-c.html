@@ -16,19 +16,21 @@
   <form ng-submit="vm.updateTask(vm.chosenTransitionIndex)">
     <md-dialog-content>
       <div class="md-dialog-content">
+        <p ng-if="vm.task.originalStatus">Current Jira Status: <strong ng-bind="vm.task.originalStatus.name"></strong></p>
         <p>
+          Current local status:
           <span ng-if="vm.localType==='OPEN'">
-            <strong>Open</strong>: You stopped working on a task.
+            <strong>Open</strong> – You stopped working on the task.
           </span>
           <span ng-if="vm.localType==='IN_PROGRESS'">
-            <strong>In progress</strong>: You started to work on a task.
+            <strong>In Progress</strong> – You started to work on the task.
           </span>
           <span ng-if="vm.localType==='DONE'">
-            <strong>Done</strong>: You completed a task.
+            <strong>Done</strong> – You marked the task as done.
           </span>
         </p>
         <p>
-          Do you want to update the task '<strong ng-bind="vm.task.title"></strong>' on Jira?
+          Do you want to update the task <strong ng-bind="vm.task.originalKey"></strong> (<i ng-bind="vm.task.title"></i>) on Jira?
         </p>
 
         <h2 class="md-subhead">Move to:</h2>
@@ -43,14 +45,12 @@
         <md-checkbox md-no-ink
                      ng-model="vm.saveAsDefaultAction"
                      aria-label="save as default action">
-          Make <strong ng-bind="vm.transitions[vm.chosenTransitionIndex].name"></strong> the default action for setting a task to
-          <strong ng-if="vm.localType==='OPEN'">open</strong>
-          <strong ng-if="vm.localType==='IN_PROGRESS'">in progress</strong>
-          <strong ng-if="vm.localType==='DONE'">done</strong>.
-          This will be set then always, when a task is changed to
-          <strong ng-if="vm.localType==='OPEN'">open</strong>
-          <strong ng-if="vm.localType==='IN_PROGRESS'">in progress</strong>
-          <strong ng-if="vm.localType==='DONE'">done</strong>. You can change this later in the project settings.
+          Make <strong ng-bind="vm.transitions[vm.chosenTransitionIndex].name"></strong> the default transition on Jira when
+          <strong ng-if="vm.localType==='OPEN'">pausing a task</strong>
+          <strong ng-if="vm.localType==='IN_PROGRESS'">when clicking play on a task</strong>
+          <strong ng-if="vm.localType==='DONE'">marking a task as done</strong>.
+
+          The Issue on Jira will then always be transitioned to this status when you perform this action on a Jira Task.
         </md-checkbox>
 
         <div>
