@@ -1,3 +1,20 @@
+<a name="1.10.37"></a>
+## [1.10.37](https://github.com/johannesjo/super-productivity/compare/v1.10.36...v1.10.37) (2018-05-15)
+
+
+### Features
+
+* improve jira set status ([a3037dc](https://github.com/johannesjo/super-productivity/commit/a3037dc))
+* improve task list enter animation ([49a7e14](https://github.com/johannesjo/super-productivity/commit/49a7e14))
+* minor adjustment for mobile ([12b98de](https://github.com/johannesjo/super-productivity/commit/12b98de))
+* prolong entering done by 1s ([e9f115c](https://github.com/johannesjo/super-productivity/commit/e9f115c))
+* remove notification for task created to today ([bd11ac9](https://github.com/johannesjo/super-productivity/commit/bd11ac9))
+* slightly improve task enter animation ([642d9a7](https://github.com/johannesjo/super-productivity/commit/642d9a7))
+* smoothen up crawl in crawl out ani ([6de8bd4](https://github.com/johannesjo/super-productivity/commit/6de8bd4))
+* use theme color for edit on click border ([d031655](https://github.com/johannesjo/super-productivity/commit/d031655))
+
+
+
 <a name="1.10.36"></a>
 ## [1.10.36](https://github.com/johannesjo/super-productivity/compare/v1.10.35...v1.10.36) (2018-05-11)
 
