@@ -2,7 +2,6 @@
 $this-min-height: 50px;
 task-list {
   display: block;
-  min-height: $this-min-height;
 }
 
 .task-list {
@@ -34,6 +33,7 @@ task-list {
   // nested lists
   .task-list {
     margin: 2px 5px 0 5px;
+    min-height: 0 !important;
 
     @media(max-width: $layout-xs) {
       margin: 1px 0 0 10px;
