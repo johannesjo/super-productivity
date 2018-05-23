@@ -46,7 +46,7 @@
       return timeoutRunning;
     };
 
-    this.update = (timeSpentInMs, isIdle) => {
+    this.update = (timeSpentInMs) => {
       if (this.isEnabled()) {
         if (!$rootScope.r.currentSession) {
           $rootScope.r.currentSession = {};
@@ -62,10 +62,6 @@
 
         if (moment.duration($rootScope.r.config.takeABreakMinWorkingTime)
             .asSeconds() < $rootScope.r.currentSession.timeWorkedWithoutBreak.asSeconds()) {
-
-          if (isIdle) {
-            return;
-          }
 
           if (this.isShown && !timeoutRunning) {
             this.notificationTimeout();

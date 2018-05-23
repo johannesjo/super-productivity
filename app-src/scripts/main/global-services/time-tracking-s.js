@@ -71,7 +71,7 @@
 
           if (this.IS_ELECTRON || this.IS_EXTENSION) {
             if (!this.isIdle) {
-              this.TakeABreakReminder.update(realPeriodDuration, this.isIdle);
+              this.TakeABreakReminder.update(realPeriodDuration);
             }
           }
 
