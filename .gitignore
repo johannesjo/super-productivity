@@ -14,3 +14,4 @@ dist
 release-builds
 *.log
 deploy.sh
+yarn.lock
