@@ -17,7 +17,7 @@
   /* @ngInject */
   class Tasks {
 
-    constructor(Uid, $rootScope, Dialogs, IS_ELECTRON, IS_EXTENSION, ShortSyntax, TasksUtil, Jira, TakeABreakReminder, SimpleToast, AppStorage, EV, $q) {
+    constructor(Uid, $rootScope, Dialogs, IS_ELECTRON, IS_EXTENSION, ShortSyntax, TasksUtil, Jira, SimpleToast, AppStorage, EV, $q) {
       this.EV = EV;
       this.$rootScope = $rootScope;
       this.$q = $q;
@@ -357,9 +357,6 @@
       const wasCurrent = (currentTask && currentTask.id === task.id);
       const parentTask = task.parentId && this.getById(task.parentId);
 
-      // unset current task first
-      this.updateCurrent(undefined);
-
       task.isDone = true;
       task.doneDate = window.moment();
 
@@ -380,6 +377,9 @@
       }
 
       if (wasCurrent) {
+        // unset current task first to handle case, when there are no other tasks left
+        // todo this could probably be done more nicely
+        this.updateCurrent(undefined);
         this.selectNextTask(task);
       }
     }
@@ -709,22 +709,27 @@
         if (finishedCurrentTask.parentId) {
           let parentTask = this.getById(finishedCurrentTask.parentId);
           if (parentTask.subTasks && parentTask.subTasks.length) {
-            // if there is one it will be the next current otherwise it will be no task
-            this.updateCurrent(_.find(parentTask.subTasks, (task) => {
+            const nextSubTask = _.find(parentTask.subTasks, (task) => {
               // NOTE: we don't use the short syntax here, as we also want to account
               // for the property not being set yet
               return !task.isDone;
-            }));
+            });
+            if (nextSubTask) {
+              this.updateCurrent(nextSubTask);
+            } else {
+              const undoneTasks = this.getUndoneToday();
+              this.updateCurrent(this.TasksUtil.getFirstUndone(undoneTasks));
+            }
             // otherwise do nothing as it isn't obvious what to do next
             // TODO maybe open toast asking if the parent task should also be marked as done
           }
         } else {
-          let undoneTasks = this.getUndoneToday();
+          const undoneTasks = this.getUndoneToday();
           // go to daily planner if there are no undone tasks left
           if (!undoneTasks || undoneTasks.length === 0) {
             // $state.go('daily-planner');
           } else {
-            this.updateCurrent(this.TasksUtil.getNextUndone(undoneTasks));
+            this.updateCurrent(this.TasksUtil.getFirstUndone(undoneTasks));
           }
         }
       }

@@ -6,7 +6,7 @@
  * Factory in the superProductivity.
  */
 
-(function() {
+(function () {
   'use strict';
 
   angular
@@ -28,11 +28,11 @@
     function checkDupes(tasksArray) {
       if (tasksArray) {
         deleteNullValueTasks(tasksArray);
-        let valueArr = tasksArray.map(function(item) {
+        let valueArr = tasksArray.map(function (item) {
           return item && item.id;
         });
         let dupeIds = [];
-        let hasDupe = valueArr.some(function(item, idx) {
+        let hasDupe = valueArr.some(function (item, idx) {
           if (valueArr.indexOf(item) !== idx) {
             dupeIds.push(item);
           }
@@ -179,7 +179,7 @@
           let timeSpentMilliseconds = moment.duration(task.timeSpent).asMilliseconds();
           let timeEstimateMilliseconds = moment.duration(task.timeEstimate).asMilliseconds();
           if (timeSpentMilliseconds < timeEstimateMilliseconds) {
-            totalRemaining.add(moment.duration({ milliseconds: timeEstimateMilliseconds - timeSpentMilliseconds }));
+            totalRemaining.add(moment.duration({milliseconds: timeEstimateMilliseconds - timeSpentMilliseconds}));
           }
         } else if (task.timeEstimate) {
           totalRemaining.add(task.timeEstimate);
@@ -261,7 +261,7 @@
       // calc progress
       if (task && task.timeSpent && task.timeEstimate) {
         progress = parseInt(moment.duration(task.timeSpent)
-          .format('ss') / moment.duration(task.timeEstimate).format('ss') * 100, 10);
+            .format('ss') / moment.duration(task.timeEstimate).format('ss') * 100, 10);
       }
       return progress;
     }
@@ -270,14 +270,14 @@
       return ((task && task.id) !== (oldTask && oldTask.id)) && !(!task && !oldTask);
     }
 
-    function getNextUndone(tasks) {
+    function getFirstUndone(tasks) {
       let foundTask;
-      _.each(tasks, (task) => {
+      tasks.forEach((task) => {
         if (foundTask) {
           return false;
         }
         if (task.subTasks && task.subTasks.length) {
-          _.each(task.subTasks, (subTask) => {
+          task.subTasks.forEach((subTask) => {
             if (!subTask.isDone) {
               foundTask = subTask;
               return false;
@@ -294,7 +294,7 @@
 
     // ACTUAL DEFINITION
     return {
-      getNextUndone: getNextUndone,
+      getFirstUndone: getFirstUndone,
       isTaskChanged: isTaskChanged,
       calcProgress: calcProgress,
       isJiraTask: isJiraTask,
