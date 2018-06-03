@@ -1,3 +1,21 @@
+<a name="1.10.40"></a>
+## [1.10.40](https://github.com/johannesjo/super-productivity/compare/v1.10.38...v1.10.40) (2018-06-03)
+
+
+### Bug Fixes
+
+* sub task list collapse animation ([1293364](https://github.com/johannesjo/super-productivity/commit/1293364))
+* **tasks:** next task selection ([78d3466](https://github.com/johannesjo/super-productivity/commit/78d3466))
+
+
+### Features
+
+* round minutes in respect to seconds for duration filter ([338cab6](https://github.com/johannesjo/super-productivity/commit/338cab6))
+* show total time left on daily planner rather than total estimate [#86](https://github.com/johannesjo/super-productivity/issues/86) ([bac0329](https://github.com/johannesjo/super-productivity/commit/bac0329))
+* update button text ([addb37a](https://github.com/johannesjo/super-productivity/commit/addb37a))
+
+
+
 <a name="1.10.38"></a>
 ## [1.10.38](https://github.com/johannesjo/super-productivity/compare/v1.10.37...v1.10.38) (2018-05-15)
 
