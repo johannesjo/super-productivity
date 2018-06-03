@@ -25,7 +25,7 @@
   }
 
   /* @ngInject */
-  function DailyPlannerCtrl(IS_ELECTRON, $rootScope, $window, $scope, Tasks, TasksUtil, Dialogs, $state, Jira, $filter, Git, $mdDialog, EV, $interval) {
+  function DailyPlannerCtrl(IS_ELECTRON, $rootScope, $scope, Tasks, TasksUtil, Dialogs, $state, Jira, $mdDialog, EV, $interval) {
     let vm = this;
 
     vm.init = () => {
@@ -74,8 +74,8 @@
     // ----------------
     // its much more efficient to do this in an interval rather than listening to actual data changes, so we just do it this way
     const updateTimeTotalsInterval = $interval(() => {
-      vm.totaleEstimate = TasksUtil.calcTotalEstimate($rootScope.r.tasks);
-      vm.totaleEstimateBacklog = TasksUtil.calcTotalEstimate($rootScope.r.backlogTasks);
+      vm.totalTimeLeft = TasksUtil.calcEstimateLeft($rootScope.r.tasks);
+      vm.totalTimeLeftBacklog = TasksUtil.calcEstimateLeft($rootScope.r.backlogTasks);
     }, 500);
 
     // otherwise we update on view change

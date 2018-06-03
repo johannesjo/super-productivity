@@ -6,7 +6,7 @@
  * Factory in the superProductivity.
  */
 
-(function () {
+(function() {
   'use strict';
 
   angular
@@ -28,11 +28,11 @@
     function checkDupes(tasksArray) {
       if (tasksArray) {
         deleteNullValueTasks(tasksArray);
-        let valueArr = tasksArray.map(function (item) {
+        let valueArr = tasksArray.map(function(item) {
           return item && item.id;
         });
         let dupeIds = [];
-        let hasDupe = valueArr.some(function (item, idx) {
+        let hasDupe = valueArr.some(function(item, idx) {
           if (valueArr.indexOf(item) !== idx) {
             dupeIds.push(item);
           }
@@ -108,6 +108,22 @@
       return totalEstimate;
     }
 
+    function calcEstimateLeft(tasks) {
+      const totalEstimate = moment.duration();
+      if (angular.isArray(tasks) && tasks.length > 0) {
+        tasks.forEach((task) => {
+          const timeLeft = moment.duration()
+            .add(task.timeEstimate)
+            .subtract(task.timeSpent);
+          if (task.isDone === false && timeLeft.asSeconds() > 0) {
+            totalEstimate.add(timeLeft);
+          }
+        });
+      }
+
+      return totalEstimate;
+    }
+
     function calcTotalTimeSpent(tasks) {
       let totalTimeSpent;
       if (angular.isArray(tasks) && tasks.length > 0) {
@@ -179,7 +195,7 @@
           let timeSpentMilliseconds = moment.duration(task.timeSpent).asMilliseconds();
           let timeEstimateMilliseconds = moment.duration(task.timeEstimate).asMilliseconds();
           if (timeSpentMilliseconds < timeEstimateMilliseconds) {
-            totalRemaining.add(moment.duration({milliseconds: timeEstimateMilliseconds - timeSpentMilliseconds}));
+            totalRemaining.add(moment.duration({ milliseconds: timeEstimateMilliseconds - timeSpentMilliseconds }));
           }
         } else if (task.timeEstimate) {
           totalRemaining.add(task.timeEstimate);
@@ -300,6 +316,7 @@
       isJiraTask: isJiraTask,
       checkDupes: checkDupes,
       calcTotalEstimate: calcTotalEstimate,
+      calcEstimateLeft: calcEstimateLeft,
       calcTotalTimeSpent: calcTotalTimeSpent,
       calcTotalTimeSpentOnDay: calcTotalTimeSpentOnDay,
       mergeTotalTimeSpentOnDayFrom: mergeTotalTimeSpentOnDayFrom,

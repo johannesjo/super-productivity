@@ -30,8 +30,8 @@
       <h2 class="md-title">
         <ng-md-icon icon="playlist_play"></ng-md-icon>
         Tasks for today
-        <span ng-show="vm.totaleEstimate.asSeconds()> 0">
-          ~<span ng-bind="vm.totaleEstimate|duration"></span>
+        <span ng-show="vm.totalTimeLeft.asSeconds()> 0">
+          ~<span ng-bind="vm.totalTimeLeft|duration"></span>
         </span>
       </h2>
 
@@ -49,8 +49,8 @@
       <h2 class="md-title">
         <ng-md-icon icon="my_library_books"></ng-md-icon>
         Task Backlog
-        <span ng-show="vm.totaleEstimateBacklog.asSeconds()> 0">
-          ~<span ng-bind="vm.totaleEstimateBacklog|duration"></span>
+        <span ng-show="vm.totalTimeLeftBacklog.asSeconds()> 0">
+          ~<span ng-bind="vm.totalTimeLeftBacklog|duration"></span>
         </span>
       </h2>
 
