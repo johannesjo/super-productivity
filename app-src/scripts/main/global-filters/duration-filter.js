@@ -7,7 +7,7 @@
  * Filter in the superProductivity.
  */
 
-(function () {
+(function() {
   'use strict';
 
   angular
@@ -17,7 +17,7 @@
   function duration($window) {
     const DEFAULT_RETURN_VAL = '-';
 
-    return function (input, longWords) {
+    return function(input, longWords) {
       if (!input) {
         return DEFAULT_RETURN_VAL;
       }
@@ -40,7 +40,11 @@
           output += input._data.hours + dayHours + 'h ';
         }
         if (input._data.minutes) {
-          output += input._data.minutes + 'm ';
+          let minutes = input._data.minutes;
+          if (input._data.seconds > 29) {
+            minutes++;
+          }
+          output += minutes + 'm ';
         }
         if (output.length === 0) {
           output = DEFAULT_RETURN_VAL;
@@ -54,7 +58,11 @@
           output += input._data.hours + dayHours + ' hours ';
         }
         if (input._data.minutes) {
-          output += input._data.minutes + ' minutes ';
+          let minutes = input._data.minutes;
+          if (input._data.seconds > 29) {
+            minutes++;
+          }
+          output += minutes + ' minutes ';
         }
         if (output.length === 0) {
           output = DEFAULT_RETURN_VAL;
