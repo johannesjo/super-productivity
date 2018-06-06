@@ -1,3 +1,8 @@
+<a name="1.10.41"></a>
+## [1.10.41](https://github.com/johannesjo/super-productivity/compare/v1.10.40...v1.10.41) (2018-06-06)
+
+
+
 <a name="1.10.40"></a>
 ## [1.10.40](https://github.com/johannesjo/super-productivity/compare/v1.10.38...v1.10.40) (2018-06-03)
 
