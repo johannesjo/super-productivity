@@ -1,4 +1,4 @@
 angular
   .module('superProductivity')
-  .constant('VERSION', '1.10.41');
+  .constant('VERSION', '1.10.42');
   
