@@ -18,7 +18,7 @@ import { animate } from '@angular/animations';
 // import {Task} from './task'
 
 @Component({
-  selector: 'sup-task',
+  selector: 'task',
   templateUrl: './task.component.html',
   styleUrls: ['./task.component.scss'],
   host: {

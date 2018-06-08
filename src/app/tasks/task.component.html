@@ -154,8 +154,8 @@
       <div class="mat-caption"
            [innerHtml]="task.originalId ? 'Description': 'Notes'"></div>
       <div class="mat-elevation-z4">
-        <sup-inline-markdown [model]="task.notes"
-                             (onChanged)="onTaskNotesChanged(task.id,$event)"></sup-inline-markdown>
+        <inline-markdown [model]="task.notes"
+                             (onChanged)="onTaskNotesChanged(task.id,$event)"></inline-markdown>
       </div>
     </section>
 
@@ -213,8 +213,8 @@
        *ngIf="task.subTasks"
        [dragula]="subTaskListId"
        [dragulaModel]="task.subTasks">
-    <sup-task *ngFor="let task of task.subTasks; let i = index;"
+    <task *ngFor="let task of task.subTasks; let i = index;"
               [task]="task">
-    </sup-task>
+    </task>
   </div>
 </div>

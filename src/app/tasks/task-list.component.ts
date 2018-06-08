@@ -7,7 +7,7 @@ import {DragulaService} from 'ng2-dragula';
 import shortid from 'shortid'
 
 @Component({
-  selector: 'sup-task-list',
+  selector: 'task-list',
   templateUrl: './task-list.component.html',
   styleUrls: ['./task-list.component.scss'],
   providers: [TaskService],

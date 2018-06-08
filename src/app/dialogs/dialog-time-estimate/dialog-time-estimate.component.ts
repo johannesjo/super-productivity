@@ -6,7 +6,7 @@ import {TaskService} from '../../tasks/task.service';
 import {formatWorklogDateStr} from '../../helper/format-worklog-date-str';
 
 @Component({
-  selector: 'sup-dialog-time-estimate',
+  selector: 'dialog-time-estimate',
   templateUrl: './dialog-time-estimate.component.html',
   styleUrls: ['./dialog-time-estimate.component.scss'],
   providers: [TaskUtilService],
