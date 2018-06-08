@@ -18,11 +18,12 @@
     const IPC_NOTIFIER_EV = 'NOTIFY';
 
     function isOldNotificationSupport() {
-      return !!Notification;
+      // make weird mobile safari happy
+      return !!window.Notification && (typeof window.Notification === 'Object');
     }
 
     function isOldNotificationPermissionGranted() {
-      return isOldNotificationSupport() && Notification.permission === 'granted';
+      return isOldNotificationSupport() && (window.Notification.permission === 'granted');
     }
 
     function isServiceWorkerNotificationSupport() {
@@ -32,11 +33,11 @@
     const SCOPE = './service-workers/';
     const SERVICE_WORKER_URL = `${SCOPE}notifications.js`;
     if (!IS_ELECTRON) {
-      if (isServiceWorkerNotificationSupport()) {
-        Notification.requestPermission();
+      if (isOldNotificationSupport() && isServiceWorkerNotificationSupport()) {
+        window.Notification.requestPermission();
         navigator.serviceWorker.register(SERVICE_WORKER_URL);
-      } else if (isOldNotificationSupport && !isOldNotificationPermissionGranted()) {
-        Notification.requestPermission();
+      } else if (isOldNotificationSupport() && !isOldNotificationPermissionGranted()) {
+        window.Notification.requestPermission();
       }
     }
 
@@ -58,7 +59,7 @@
             });
           });
       } else if (isOldNotificationPermissionGranted()) {
-        const notificationInstance = new Notification(notification.title, {
+        const notificationInstance = new window.Notification(notification.title, {
           icon: notification.icon || 'img/icon_128x128-with-pad.png',
           body: notification.message
         });
