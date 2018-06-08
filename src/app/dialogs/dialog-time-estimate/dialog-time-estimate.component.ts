@@ -1,9 +1,9 @@
-import {Component, Inject} from '@angular/core';
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material';
-import {Task} from '../../tasks/task';
-import {TaskUtilService} from '../../tasks/task-util.service';
-import {TaskService} from '../../tasks/task.service';
-import {formatWorklogDateStr} from '../../helper/format-worklog-date-str';
+import { Component, Inject } from '@angular/core';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material';
+import { Task } from '../../tasks/task';
+import { TaskUtilService } from '../../tasks/task-util.service';
+import { TaskService } from '../../tasks/task.service';
+import { formatWorklogDateStr } from '../../helper/format-worklog-date-str';
 
 @Component({
   selector: 'dialog-time-estimate',

@@ -8,9 +8,9 @@ describe('InlineMarkdownComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ InlineMarkdownComponent ]
+      declarations: [InlineMarkdownComponent]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

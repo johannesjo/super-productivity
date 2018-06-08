@@ -1,4 +1,4 @@
-import {SET_TASK_DONE} from './tasks/task.actions'
+import { SET_TASK_DONE } from './tasks/task.actions';
 
 const flattenToDoableTasks = (tasks, currentTaskId) => {
   const result = [];
@@ -69,7 +69,7 @@ function selectNextTask(reducer) {
       default:
         return reducer(state, action);
     }
-  }
+  };
 }
 
 export const metaReducers = [selectNextTask];

@@ -1,24 +1,26 @@
 import 'hammerjs';
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule, Routes } from '@angular/router';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import {
+  MatAutocompleteModule,
   MatButtonModule,
   MatCheckboxModule,
   MatDatepickerModule,
   MatDialogModule,
+  MatFormFieldModule,
   MatIconModule,
   MatInputModule,
   MatNativeDateModule,
+  MatOptionModule,
   MatProgressBarModule,
   MatToolbarModule
 } from '@angular/material';
 import { DragulaModule } from 'ng2-dragula';
 // import { MarkdownToHtmlModule } from 'ng2-markdown-to-html';
 import { AppComponent } from './app.component';
-
 // import { TaskReducer } from './tasks/task.reducer';
 // import { CurrentTaskReducer } from './tasks/current-task.reducer';
 // import { TaskEffects } from './tasks/task.effects';
@@ -43,13 +45,6 @@ import { EffectsModule } from '@ngrx/effects';
 import { TaskEffects } from './tasks/task.effects';
 import { MarkdownModule } from 'ngx-markdown';
 import { AddTaskBarComponent } from './add-task-bar/add-task-bar.component';
-import { MatFormField } from '@angular/material';
-import { MatAutocomplete } from '@angular/material';
-import { MatFormFieldModule } from '@angular/material';
-import { MatAutocompleteModule } from '@angular/material';
-import { MatOptionModule } from '@angular/material';
-import { FormControl } from '@angular/forms';
-import { ReactiveFormsModule } from '@angular/forms';
 
 export const appRoutes: Routes = [
   {path: 'work-view', component: WorkViewComponent},

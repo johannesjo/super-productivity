@@ -3,9 +3,9 @@
   <add-task-bar></add-task-bar>
 
   <task-list [tasks$]="tasks$"
-                 [filterArgs]="{'isDone':false}"></task-list>
+             [filterArgs]="{'isDone':false}"></task-list>
 
   <h2 class="mat-h2">Completed Tasks</h2>
   <task-list [tasks$]="tasks$"
-                 [filterArgs]="{'isDone':true}"></task-list>
+             [filterArgs]="{'isDone':true}"></task-list>
 </div>

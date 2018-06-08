@@ -9,10 +9,10 @@ import {
   SYNC,
   UPDATE_TASK
 } from './task.actions';
-import {Task} from './task';
-import {LS_TASKS} from '../app.constants';
+import { Task } from './task';
+import { LS_TASKS } from '../app.constants';
 import shortid from 'shortid';
-import {calcTotalTimeSpent, parseFromLs} from './task-helper-fns';
+import { calcTotalTimeSpent, parseFromLs } from './task-helper-fns';
 
 
 const INITIAL_TASK_STATE = [];

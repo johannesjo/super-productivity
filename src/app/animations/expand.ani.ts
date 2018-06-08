@@ -1,8 +1,4 @@
-import { transition } from '@angular/animations';
-import { animate } from '@angular/animations';
-import { style } from '@angular/animations';
-import { trigger } from '@angular/animations';
-import { state } from '@angular/animations';
+import { animate, state, style, transition, trigger } from '@angular/animations';
 
 const EXPANSION_PANEL_ANIMATION_TIMING = '225ms cubic-bezier(0.4,0.0,0.2,1)';
 

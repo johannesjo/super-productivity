@@ -1,7 +1,6 @@
 // import { Action } from '@ngrx/store';
-import {RELOAD_FROM_LS, SET_CURRENT_TASK, UNSET_CURRENT_TASK} from './task.actions';
-import {SET_TASK_DONE} from './task.actions';
-import {LS_CURRENT_TASK} from '../app.constants'
+import { RELOAD_FROM_LS, SET_CURRENT_TASK, UNSET_CURRENT_TASK } from './task.actions';
+import { LS_CURRENT_TASK } from '../app.constants'
 
 const INITIAL_TASK_STATE = undefined;
 

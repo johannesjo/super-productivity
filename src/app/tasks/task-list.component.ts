@@ -1,10 +1,9 @@
-import {Component, Input, OnInit} from '@angular/core';
-import {ChangeDetectionStrategy} from '@angular/core';
-import {Observable} from 'rxjs';
-import {TaskService} from './task.service';
-import {Task} from './task'
-import {DragulaService} from 'ng2-dragula';
-import shortid from 'shortid'
+import { ChangeDetectionStrategy, Component, Input, OnInit } from '@angular/core';
+import { Observable } from 'rxjs';
+import { TaskService } from './task.service';
+import { Task } from './task';
+import { DragulaService } from 'ng2-dragula';
+import shortid from 'shortid';
 
 @Component({
   selector: 'task-list',

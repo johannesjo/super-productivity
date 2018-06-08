@@ -8,9 +8,9 @@ describe('DialogTimeEstimateComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ DialogTimeEstimateComponent ]
+      declarations: [DialogTimeEstimateComponent]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

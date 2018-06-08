@@ -1,8 +1,7 @@
 import { Component } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { Observable } from 'rxjs/Rx';
-import { startWith } from 'rxjs/internal/operators';
-import { map } from 'rxjs/internal/operators';
+import { map, startWith } from 'rxjs/internal/operators';
 import { TaskService } from '../tasks/task.service';
 
 @Component({

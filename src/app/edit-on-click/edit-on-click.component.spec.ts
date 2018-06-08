@@ -8,9 +8,9 @@ describe('EditOnClickComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ EditOnClickComponent ]
+      declarations: [EditOnClickComponent]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

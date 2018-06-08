@@ -1,7 +1,7 @@
-import {Injectable} from '@angular/core';
-import {Observable} from 'rxjs'
-import {Task} from './task'
-import {Store} from '@ngrx/store';
+import { Injectable } from '@angular/core';
+import { Observable } from 'rxjs'
+import { Task } from './task'
+import { Store } from '@ngrx/store';
 import {
   ADD_SUB_TASK,
   ADD_TASK,

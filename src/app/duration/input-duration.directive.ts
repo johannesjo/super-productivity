@@ -1,4 +1,4 @@
-import {Attribute, Directive, ElementRef, forwardRef, Renderer2} from '@angular/core';
+import { Attribute, Directive, ElementRef, forwardRef, Renderer2 } from '@angular/core';
 import {
   AbstractControl,
   ControlValueAccessor,
@@ -10,8 +10,8 @@ import {
   Validators,
 } from '@angular/forms';
 
-import {DurationFromStringPipe} from './duration-from-string.pipe';
-import {DurationToStringPipe} from './duration-to-string.pipe';
+import { DurationFromStringPipe } from './duration-from-string.pipe';
+import { DurationToStringPipe } from './duration-to-string.pipe';
 
 const noop = () => {
 };
@@ -46,6 +46,25 @@ export const INPUT_DURATION_VALIDATORS: any = {
 export class InputDurationDirective<D> implements ControlValueAccessor,
   Validator {
 
+  // by the Control Value Accessor
+  private _onTouchedCallback: () => void = noop;
+
+  // Placeholders for the callbacks which are later provided
+  private _validatorOnChange: (_: any) => void = noop;
+  private _onChangeCallback: (_: any) => void = noop;
+  // -----------
+  private _parseValidator: ValidatorFn = (): ValidationErrors | null => {
+    return this._value ?
+      null : {'inputDurationParse': {'text': this._elementRef.nativeElement.value}};
+  }
+
+
+  // @Input('value') value: string = '';
+  /* tslint:disable */
+  private _validator: ValidatorFn | null =
+    Validators.compose(
+      [this._parseValidator]);
+
   constructor(@Attribute('supInputDuration') public supInputDuration,
               private _elementRef: ElementRef,
               private _durationToString: DurationToStringPipe,
@@ -53,16 +72,10 @@ export class InputDurationDirective<D> implements ControlValueAccessor,
               private _renderer: Renderer2) {
   }
 
-  // Placeholders for the callbacks which are later provided
-  // by the Control Value Accessor
-  private _onTouchedCallback: () => void = noop;
-  private _validatorOnChange: (_: any) => void = noop;
-  private _onChangeCallback: (_: any) => void = noop;
-
-
-  // @Input('value') value: string = '';
-
   private _value;
+
+
+  // Validations
 
   get value() {
     return this._value;
@@ -74,19 +87,6 @@ export class InputDurationDirective<D> implements ControlValueAccessor,
       this._onChangeCallback(this._value);
     }
   }
-
-
-  // Validations
-  // -----------
-  private _parseValidator: ValidatorFn = (): ValidationErrors | null => {
-    return this._value ?
-      null : {'inputDurationParse': {'text': this._elementRef.nativeElement.value}};
-  }
-
-  /* tslint:disable */
-  private _validator: ValidatorFn | null =
-    Validators.compose(
-      [this._parseValidator]);
   /* tslint:enable */
 
   // ControlValueAccessor interface

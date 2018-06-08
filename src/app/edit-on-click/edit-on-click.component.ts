@@ -1,10 +1,4 @@
-import { OnInit } from '@angular/core';
-import { Input } from '@angular/core';
-import { Output } from '@angular/core';
-import { EventEmitter } from '@angular/core';
-import { ElementRef } from '@angular/core';
-import { Directive } from '@angular/core';
-import { OnChanges } from '@angular/core';
+import { Directive, ElementRef, EventEmitter, Input, OnChanges, OnInit, Output } from '@angular/core';
 
 
 // HELPER
