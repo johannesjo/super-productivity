@@ -70,6 +70,13 @@ body.is-project-changing {
   }
 }
 
+// fix contenteditable for safari :/
+[contenteditable] {
+  -webkit-user-select: text !important;
+  -webkit-user-modify: read-write !important;;
+  user-select: text !important;;
+}
+
 @keyframes ani-app-enter {
   0% {
     opacity: 0;
