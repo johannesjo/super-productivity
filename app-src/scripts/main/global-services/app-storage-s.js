@@ -61,6 +61,10 @@
         const isNoTmpField = (this.TMP_FIELDS.indexOf(key) === -1);
         const isNoOnDemand = (this.ON_DEMAND_LS_FIELDS.indexOf(key) === -1);
         const isNotProjects = (key !== this.PROJECTS_KEY);
+        // make mobile safari happy
+        if(!this.$rootScope.r) {
+          this.$rootScope.r = {};
+        }
         if (this.LS_DEFAULTS.hasOwnProperty(key) && isNoOnDemand && isNoTmpField && isNotProjects) {
           currentState[key] = this.$rootScope.r[key];
         }
