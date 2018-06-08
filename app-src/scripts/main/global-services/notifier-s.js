@@ -19,7 +19,7 @@
 
     function isOldNotificationSupport() {
       // make weird mobile safari happy
-      return !!window.Notification && (typeof window.Notification === 'Object');
+      return !!window.Notification && (typeof window.Notification === 'object');
     }
 
     function isOldNotificationPermissionGranted() {
