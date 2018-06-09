@@ -35,6 +35,10 @@ export class TaskListComponent implements OnInit {
   ngOnInit() {
   }
 
+  trackByFn(i: number, task: Task) {
+    return task.id;
+  }
+
   focusLastFocusedTaskEl() {
   }
 }
