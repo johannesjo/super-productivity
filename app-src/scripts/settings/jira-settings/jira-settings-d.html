@@ -1,6 +1,6 @@
 <help-section ng-if="vm.hasJiraSupport">
   <div class="md-caption">Basic configuration</div>
-  <p>Please provide a username (can be found on your profile page) and an
+  <p>Please provide a login name (can be found on your profile page) and an
     <a class="md-accent"
        href="https://confluence.atlassian.com/cloud/api-tokens-938839638.html"
        external-link="">API token</a> or password if you can't generate one for some reason.
@@ -53,7 +53,7 @@
                ng-model="vm.settings.host">
       </md-input-container>
       <md-input-container class="md-block">
-        <label>Username</label>
+        <label>Login Name</label>
         <input type="text"
                ng-model="vm.settings.userName">
       </md-input-container>
@@ -104,6 +104,16 @@
                  aria-label="Check if current ticket is assigned to current user">
         Check if current ticket is assigned to current user
       </md-switch>
+
+      <div class="ani-expand-collapse"
+           ng-if="vm.settings.isCheckToReAssignTicketOnTaskStart"
+           ng-init="!vm.settings.userAssigneeName ? (vm.settings.userAssigneeName = vm.settings.userName):''">
+        <md-input-container class="md-block">
+          <label>Assignee name to check for</label>
+          <input type="text"
+                 ng-model="vm.settings.userAssigneeName">
+        </md-input-container>
+      </div>
 
       <section>
         <h3 class="md-subtitle">Worklog</h3>

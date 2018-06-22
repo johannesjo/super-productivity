@@ -245,6 +245,7 @@
         isEnabledAutoAdd: true,
         jqlQueryAutoAdd: 'assignee = currentUser() AND sprint in openSprints() AND resolution = Unresolved ORDER BY updatedDate DESC',
         userName: undefined,
+        userAssigneeName: undefined,
         password: undefined,
         host: undefined,
         isTransitionIssuesEnabled: true,
