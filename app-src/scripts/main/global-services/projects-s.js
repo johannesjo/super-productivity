@@ -174,11 +174,12 @@
           bodyEl.removeClass('is-project-changing');
         });
 
-
         // when there is an old current project existing
         if (oldCurrentProject && oldCurrentProject.id) {
-          // save all current project data in $rootScope.r.projects[oldProject]
-          this.updateProjectData(oldCurrentProject.id, $rootScope.r);
+          // save all current project data to ls
+          // NOTE: we create a copy to prevent referencing issues
+          const updateData = Object.assign($rootScope.r, {});
+          this.updateProjectData(oldCurrentProject.id, updateData);
         }
         // update with new model fields, if we change the model
         this.updateNewFields(newCurrentProject);
