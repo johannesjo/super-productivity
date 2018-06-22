@@ -1,3 +1,26 @@
+<a name="1.10.43"></a>
+## [1.10.43](https://github.com/johannesjo/super-productivity/compare/v1.10.38...v1.10.43) (2018-06-22)
+
+
+### Bug Fixes
+
+* **tasks:** next task selection ([78d3466](https://github.com/johannesjo/super-productivity/commit/78d3466))
+* app storage for mobile safari [#87](https://github.com/johannesjo/super-productivity/issues/87) ([b8b4666](https://github.com/johannesjo/super-productivity/commit/b8b4666))
+* contenteditable for mobile safari [#87](https://github.com/johannesjo/super-productivity/issues/87) ([5f341f3](https://github.com/johannesjo/super-productivity/commit/5f341f3))
+* remove notifications for mobile safari [#87](https://github.com/johannesjo/super-productivity/issues/87) ([80e5b30](https://github.com/johannesjo/super-productivity/commit/80e5b30))
+* sub task list collapse animation ([1293364](https://github.com/johannesjo/super-productivity/commit/1293364))
+* wrong check for notifications ([46b3209](https://github.com/johannesjo/super-productivity/commit/46b3209))
+* wrong check for notifications ([b329e78](https://github.com/johannesjo/super-productivity/commit/b329e78))
+
+
+### Features
+
+* round minutes in respect to seconds for duration filter ([338cab6](https://github.com/johannesjo/super-productivity/commit/338cab6))
+* show total time left on daily planner rather than total estimate [#86](https://github.com/johannesjo/super-productivity/issues/86) ([bac0329](https://github.com/johannesjo/super-productivity/commit/bac0329))
+* update button text ([addb37a](https://github.com/johannesjo/super-productivity/commit/addb37a))
+
+
+
 <a name="1.10.42"></a>
 ## [1.10.42](https://github.com/johannesjo/super-productivity/compare/v1.10.41...v1.10.42) (2018-06-06)
 
