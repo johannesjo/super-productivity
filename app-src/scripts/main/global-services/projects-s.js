@@ -178,7 +178,11 @@
         if (oldCurrentProject && oldCurrentProject.id) {
           // save all current project data to ls
           // NOTE: we create a copy to prevent referencing issues
-          const updateData = Object.assign($rootScope.r, {});
+          // and we need to specifically get the done backlog tasks, otherwise this might be empty
+          const updateData = Object.assign({}, $rootScope.r, {
+            doneBacklogTasks: AppStorage.getDoneBacklogTasks(oldCurrentProject.id)
+          });
+
           this.updateProjectData(oldCurrentProject.id, updateData);
         }
         // update with new model fields, if we change the model

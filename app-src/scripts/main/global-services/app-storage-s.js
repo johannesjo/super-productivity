@@ -62,7 +62,7 @@
         const isNoOnDemand = (this.ON_DEMAND_LS_FIELDS.indexOf(key) === -1);
         const isNotProjects = (key !== this.PROJECTS_KEY);
         // make mobile safari happy
-        if(!this.$rootScope.r) {
+        if (!this.$rootScope.r) {
           this.$rootScope.r = {};
         }
         if (this.LS_DEFAULTS.hasOwnProperty(key) && isNoOnDemand && isNoTmpField && isNotProjects) {
@@ -72,25 +72,27 @@
       return currentState;
     }
 
-    getDoneBacklogTasks() {
+    getDoneBacklogTasks(projectId) {
       const projects = this.getProjects();
+      projectId = projectId || this.$rootScope.r.currentProject && this.$rootScope.r.currentProject.id;
 
-      if (projects && this.$rootScope.r.currentProject && this.$rootScope.r.currentProject.id) {
-        const currentProject = _.find(projects, ['id', this.$rootScope.r.currentProject.id]);
+      if (projects && projectId) {
+        const currentProject = _.find(projects, ['id', projectId]);
         return currentProject.data[this.DONE_BACKLOG_TASKS_KEY];
       } else {
         return this.getLsItem(this.DONE_BACKLOG_TASKS_KEY);
       }
     }
 
-    saveDoneBacklogTasks(doneBacklogTasks) {
+    saveDoneBacklogTasks(doneBacklogTasks, projectId) {
       if (Array.isArray(doneBacklogTasks)) {
         const projects = this.getProjects();
+        projectId = projectId || this.$rootScope.r.currentProject && this.$rootScope.r.currentProject.id;
 
         // we also need to save the backlog tasks to the current project
-        if (projects && this.$rootScope.r.currentProject && this.$rootScope.r.currentProject.id) {
+        if (projects && projectId) {
+          const currentProject = _.find(projects, ['id', projectId]);
 
-          const currentProject = _.find(projects, ['id', this.$rootScope.r.currentProject.id]);
           currentProject.data[this.DONE_BACKLOG_TASKS_KEY] = doneBacklogTasks;
           this.saveProjects(projects);
         } else {
