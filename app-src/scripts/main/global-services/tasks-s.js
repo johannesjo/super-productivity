@@ -585,13 +585,6 @@
       task.timeSpentOnDay = timeSpentOnDay;
       task.timeSpent = totalTimeSpent;
       task.progress = this.TasksUtil.calcProgress(task);
-
-      // TODO this is not clear and probably buggy
-      //if (task.parentId) {
-      //  const parentTask = this.getById(task.parentId);
-      //  // also track time spent on day for parent task
-      //  parentTask.progress = this.TasksUtil.calcProgress(parentTask);
-      //}
     }
 
     updateToday(tasks) {
