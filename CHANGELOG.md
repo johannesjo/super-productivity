@@ -1,3 +1,20 @@
+<a name="1.10.44"></a>
+## [1.10.44](https://github.com/johannesjo/super-productivity/compare/v1.10.43...v1.10.44) (2018-06-23)
+
+
+### Bug Fixes
+
+* done log acting weirdly on project change [#93](https://github.com/johannesjo/super-productivity/issues/93) ([801a8f4](https://github.com/johannesjo/super-productivity/commit/801a8f4))
+* doneBacklog acting weirdly on project change(2) [#93](https://github.com/johannesjo/super-productivity/issues/93) ([caf235d](https://github.com/johannesjo/super-productivity/commit/caf235d))
+
+
+### Features
+
+* add xprintidle to linux dependencies [#92](https://github.com/johannesjo/super-productivity/issues/92) ([c4f5674](https://github.com/johannesjo/super-productivity/commit/c4f5674))
+* make assignee to check configurable [#94](https://github.com/johannesjo/super-productivity/issues/94) ([973f4d6](https://github.com/johannesjo/super-productivity/commit/973f4d6))
+
+
+
 <a name="1.10.43"></a>
 ## [1.10.43](https://github.com/johannesjo/super-productivity/compare/v1.10.38...v1.10.43) (2018-06-22)
 
