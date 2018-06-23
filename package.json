@@ -76,6 +76,9 @@
           "owner": "johannesjo",
           "distribution": "stable"
         }
+      ],
+      "depends": [
+        "xprintidle"
       ]
     },
     "snap": {
