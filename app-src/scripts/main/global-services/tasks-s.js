@@ -338,6 +338,22 @@
         originalUpdated: task.originalUpdated
       };
 
+      if (task.originalLink && task.originalType) {
+        transformedTask.localAttachments = [{
+          title: 'Link to issue',
+          path: task.originalLink,
+          type: 'LINK'
+        }];
+        switch (task.originalType) {
+          case 'JIRA':
+            transformedTask.localAttachments[0].customIcon = 'explore';
+            break;
+          case 'GITHUB':
+            transformedTask.localAttachments[0].customIcon = 'github-circle';
+            break;
+        }
+      }
+
       // check if new task on parent to copy over time tracking data
       if (!transformedTask.title || transformedTask.title.trim() === '' && transformedTask.parentId) {
         const parentTask = this.getById(transformedTask.parentId);
