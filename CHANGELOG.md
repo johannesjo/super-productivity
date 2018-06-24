@@ -1,3 +1,14 @@
+<a name="1.10.45"></a>
+## [1.10.45](https://github.com/johannesjo/super-productivity/compare/v1.10.44...v1.10.45) (2018-06-24)
+
+
+### Features
+
+* add issue link also to local attachments [#89](https://github.com/johannesjo/super-productivity/issues/89) ([b18ec6e](https://github.com/johannesjo/super-productivity/commit/b18ec6e))
+* focus next closest task when using shortcuts for move from or to backlog ([dcabe2e](https://github.com/johannesjo/super-productivity/commit/dcabe2e))
+
+
+
 <a name="1.10.44"></a>
 ## [1.10.44](https://github.com/johannesjo/super-productivity/compare/v1.10.43...v1.10.44) (2018-06-23)
 
