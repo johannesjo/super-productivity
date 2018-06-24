@@ -281,6 +281,18 @@
       nextEl.focus();
     }
 
+    focusClosestTask(currentTaskEl) {
+      const taskEls = document.querySelectorAll('.task');
+      const index = Array.prototype.indexOf.call(taskEls, currentTaskEl[0]);
+      const nextEl = taskEls[index + 1] || taskEls[index - 1] || currentTaskEl[0];
+      // if this or the parent is hidden execute again
+      // NOTE_ this does not work for position fixed
+      if (nextEl.offsetParent === null) {
+        this.focusClosestTask([nextEl]);
+      }
+      nextEl.focus();
+    }
+
     onFocus($event) {
       let taskEl = $event.currentTarget || $event.srcElement || $event.originalTarget;
       taskEl = angular.element(taskEl);
@@ -334,10 +346,7 @@
         isTaskKeyboardShortcutTriggered = true;
         this.addSubTask(task);
       }
-      if (this.checkKeyCombo($ev, lsKeys.moveToBacklog)) {
-        isTaskKeyboardShortcutTriggered = true;
-        this.Tasks.moveTaskFromTodayToBackLog(task);
-      }
+
       if (this.checkKeyCombo($ev, lsKeys.taskOpenOriginalLink)) {
         isTaskKeyboardShortcutTriggered = true;
         this.Util.openExternalUrl(task.originalLink);
@@ -353,9 +362,17 @@
         isTaskKeyboardShortcutTriggered = true;
         this.deleteTask(task);
       }
+
+      if (this.checkKeyCombo($ev, lsKeys.moveToBacklog)) {
+        isTaskKeyboardShortcutTriggered = true;
+        this.Tasks.moveTaskFromTodayToBackLog(task);
+        this.focusClosestTask(taskEl);
+      }
+
       if (this.checkKeyCombo($ev, lsKeys.moveToTodaysTasks)) {
         isTaskKeyboardShortcutTriggered = true;
         this.Tasks.moveTaskFromBackLogToToday(task);
+        this.focusClosestTask(taskEl);
       }
 
       // move focus up
