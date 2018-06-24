@@ -24,3 +24,5 @@ Please search the issues before creating one. -->
 3.
 4.
 
+## Console Output
+<!--- Is there any output if you press Ctrl+Shift+J in the console tab? If so please post it here. -->
