@@ -29,8 +29,10 @@
   function DailySummaryCtrl($rootScope, Tasks, TasksUtil, $mdDialog, Dialogs, $state, GitLog, IS_ELECTRON, $timeout, $scope, AppStorage, GoogleDriveSync, SimpleToast) {
     const IPC_EVENT_SHUTDOWN = 'SHUTDOWN';
     const SUCCESS_ANIMATION_DURATION = 500;
+    const SUCCESS_ANIMATION_MAX_DURATION = 10000;
 
     let successAnimationTimeout;
+    let successAnimationMaxTimeout;
     let vm = this;
     vm.IS_ELECTRON = IS_ELECTRON;
     vm.todayStr = TasksUtil.getTodayStr();
@@ -109,6 +111,9 @@
       if (successAnimationTimeout) {
         $timeout.cancel(successAnimationTimeout);
       }
+      if (successAnimationMaxTimeout) {
+        $timeout.cancel(successAnimationMaxTimeout);
+      }
     });
 
     function initSuccessAnimation(cb) {
@@ -118,6 +123,10 @@
           cb();
         }
       }, SUCCESS_ANIMATION_DURATION);
+
+      successAnimationMaxTimeout = $timeout(() => {
+        vm.showSuccessAnimation = false;
+      }, SUCCESS_ANIMATION_MAX_DURATION);
 
     }
   }
