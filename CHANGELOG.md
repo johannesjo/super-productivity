@@ -1,3 +1,16 @@
+<a name="1.10.46"></a>
+## [1.10.46](https://github.com/johannesjo/super-productivity/compare/v1.10.45...v1.10.46) (2018-07-07)
+
+
+### Features
+
+* add last action decorator to better handle data syncing ([4ebfd11](https://github.com/johannesjo/super-productivity/commit/4ebfd11))
+* add max duration to success animation ([b2a0d38](https://github.com/johannesjo/super-productivity/commit/b2a0d38))
+* improve remote update checks ([4153880](https://github.com/johannesjo/super-productivity/commit/4153880))
+* provide minimum and default value for idle time and take a break [#96](https://github.com/johannesjo/super-productivity/issues/96) ([aa8ec69](https://github.com/johannesjo/super-productivity/commit/aa8ec69))
+
+
+
 <a name="1.10.45"></a>
 ## [1.10.45](https://github.com/johannesjo/super-productivity/compare/v1.10.44...v1.10.45) (2018-06-24)
 
