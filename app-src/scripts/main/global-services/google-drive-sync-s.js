@@ -62,6 +62,12 @@
       return (d1.getTime() > d2.getTime());
     }
 
+    _isEqual(strDate1, strDate2) {
+      const d1 = new Date(strDate1);
+      const d2 = new Date(strDate2);
+      return (d1.getTime() === d2.getTime());
+    }
+
     _isCurrentPromisePending() {
       return (this.currentPromise && this.currentPromise.$$state.status === 0);
     }
@@ -376,20 +382,29 @@
         // const lastModifiedRemote = loadRes.meta.modifiedDate;
         const lastActiveLocal = this.$rootScope.r.lastActiveTime;
         const lastActiveRemote = loadRes.backup.lastActiveTime;
-        const isSkipConfirm = lastActiveRemote && this._isNewerThan(lastActiveRemote, lastActiveLocal);
 
-        this._log('date comparision skipConfirm', isSkipConfirm, lastActiveLocal, lastActiveRemote);
+        // no update required
+        if (this._isEqual(lastActiveLocal, lastActiveRemote)) {
+          this._log('date comparision isEqual', lastActiveLocal, lastActiveRemote);
+          this.SimpleToast('SUCCESS', `Data already up to date`);
+          defer.reject();
+        }
 
+        // update but ask if remote data is not newer than the last local update
+        else {
+          const isSkipConfirm = lastActiveRemote && this._isNewerThan(lastActiveRemote, lastActiveLocal);
+          this._log('date comparision skipConfirm', isSkipConfirm, lastActiveLocal, lastActiveRemote);
 
-        if (isSkipConfirm) {
-          this._import(loadRes);
-          defer.resolve(loadRes);
-        } else {
-          this._confirmLoadDialog(lastActiveRemote)
-            .then(() => {
-              this._import(loadRes);
-              defer.resolve(loadRes);
-            }, defer.reject);
+          if (isSkipConfirm) {
+            this._import(loadRes);
+            defer.resolve(loadRes);
+          } else {
+            this._confirmLoadDialog(lastActiveRemote)
+              .then(() => {
+                this._import(loadRes);
+                defer.resolve(loadRes);
+              }, defer.reject);
+          }
         }
       }, defer.reject);
 
