@@ -88,12 +88,8 @@
           if (this._isNewerThan(lastModifiedRemote, this.data.lastLocalUpdate)) {
             this.SimpleToast('CUSTOM', `There is a remote update! Downloading...`, 'file_upload');
 
-            this._log('HAS CHANGED, TRYING TO UPDATE');
-            const lastActiveTime = this.$rootScope.r.lastActiveTime;
-            const isSkipConfirm = this._isNewerThan(lastModifiedRemote, lastActiveTime);
-            this._log('Skipping Dialog', isSkipConfirm);
-
-            this.loadFrom(isSkipConfirm, true);
+            this._log('HAS CHANGED (modified Date comparision), TRYING TO UPDATE');
+            this.loadFrom(true);
           }
         });
 
@@ -366,7 +362,7 @@
       return defer.promise;
     }
 
-    loadFrom(isSkipPrompt = false, isSkipPromiseCheck = false) {
+    loadFrom(isSkipPromiseCheck = false) {
       // don't execute sync interactions at the same time
       if (!isSkipPromiseCheck && this._isCurrentPromisePending()) {
         this._log('loadFrom omitted because is in progress', this.currentPromise, this.currentPromise.$$state.status);
@@ -376,21 +372,26 @@
       const defer = this.$q.defer();
       this.currentPromise = defer.promise;
 
-      if (isSkipPrompt) {
-        this._load().then((loadRes) => {
+      this._load().then((loadRes) => {
+        // const lastModifiedRemote = loadRes.meta.modifiedDate;
+        const lastActiveLocal = this.$rootScope.r.lastActiveTime;
+        const lastActiveRemote = loadRes.backup.lastActiveTime;
+        const isSkipConfirm = lastActiveRemote && this._isNewerThan(lastActiveRemote, lastActiveLocal);
+
+        this._log('date comparision skipConfirm', isSkipConfirm, lastActiveLocal, lastActiveRemote);
+
+
+        if (isSkipConfirm) {
           this._import(loadRes);
           defer.resolve(loadRes);
-        }, defer.reject);
-      } else {
-        this._load().then((loadRes) => {
-          const lastModifiedRemote = loadRes.meta.modifiedDate;
-          this._confirmLoadDialog(lastModifiedRemote)
+        } else {
+          this._confirmLoadDialog(lastActiveRemote)
             .then(() => {
               this._import(loadRes);
               defer.resolve(loadRes);
             }, defer.reject);
-        }, defer.reject);
-      }
+        }
+      }, defer.reject);
 
       return defer.promise;
     }
