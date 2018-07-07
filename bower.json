@@ -16,10 +16,10 @@
   ],
   "dependencies": {
     "animate.css-scss": "latest",
-    "angular": "1.7.0",
-    "angular-animate": "1.7.0",
-    "angular-aria": "1.7.0",
-    "angular-resource": "1.7.0",
+    "angular": "1.7.2",
+    "angular-animate": "1.7.2",
+    "angular-aria": "1.7.2",
+    "angular-resource": "1.7.2",
     "angular-ui-router": "1.0.15",
     "angular-material": "^1.1.8",
     "angular-material-icons": "^0.7.1",
@@ -35,13 +35,14 @@
     "angular-promise-buttons": "^0.1.22"
   },
   "devDependencies": {
-    "angular-mocks": "1.7.0",
+    "angular-mocks": "1.7.2",
     "Watch.JS": "watch#^1.3.1"
   },
   "scripts": {
     "postinstall": "gulp wiredep"
   },
   "resolutions": {
-    "angular": "1.7.0"
+    "angular": "1.7.2",
+    "angular-aria": "1.7.2"
   }
 }
