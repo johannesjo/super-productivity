@@ -26,6 +26,7 @@
       'googleDriveSync',
       'googleTokens',
       'lastActiveTime',
+      'lastAction',
     ])
     .constant('ON_DEMAND_LS_FIELDS', [
       'doneBacklogTasks',
