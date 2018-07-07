@@ -300,14 +300,16 @@
     addToday(task) {
       if (task && task.title) {
         const currentTask = this.$rootScope.r.currentTask;
+        const newTask = this.createTask(task);
         if (currentTask) {
           // insert after current
           const indexOfCurrent = this.$rootScope.r.tasks.findIndex((task) => task.id === currentTask.id);
-          this.$rootScope.r.tasks.splice((indexOfCurrent + 1), 0, this.createTask(task));
+          this.$rootScope.r.tasks.splice((indexOfCurrent + 1), 0, newTask);
         } else {
           // insert at the top
-          this.$rootScope.r.tasks.unshift(this.createTask(task));
+          this.$rootScope.r.tasks.unshift(newTask);
         }
+
 
         // this.SimpleToast('SUCCESS', 'Task "' + task.title + '" created.', 200);
 
@@ -357,7 +359,7 @@
       // check if new task on parent to copy over time tracking data
       if (!transformedTask.title || transformedTask.title.trim() === '' && transformedTask.parentId) {
         const parentTask = this.getById(transformedTask.parentId);
-        if ((!parentTask.subTasks || parentTask.subTasks.length === 0)) {
+        if (parentTask && (!parentTask.subTasks || parentTask.subTasks.length === 0)) {
           transformedTask.timeSpent = parentTask.timeSpent;
           transformedTask.timeSpentOnDay = parentTask.timeSpentOnDay;
           transformedTask.timeEstimate = parentTask.timeEstimate;
