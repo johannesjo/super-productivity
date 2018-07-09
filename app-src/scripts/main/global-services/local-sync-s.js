@@ -24,7 +24,7 @@
       }
     }
 
-    addHome(pathParam){
+    addHome(pathParam) {
       const pathParts = pathParam.split(this.path.sep);
 
       if (pathParts[0] === '~') {
@@ -33,10 +33,18 @@
       return this.path.join(...pathParts);
     }
 
-    initBackupsIfEnabled() {
+    isBackupsEnabled() {
       if (!this.IS_ELECTRON ||
         !this.$rootScope.r.config.automaticBackups ||
         !this.$rootScope.r.config.automaticBackups.isEnabled) {
+        return false;
+      } else {
+        return true;
+      }
+    }
+
+    initBackupsIfEnabled() {
+      if (!this.isBackupsEnabled()) {
         return;
       }
 
@@ -101,7 +109,7 @@
 
     saveToFileSystem(path, cb, isSync) {
       const data = this.AppStorage.getCompleteBackupData();
-      this.fs.writeFile(this.addHome(path), JSON.stringify(data), { flag: 'w' }, (err) => {
+      this.fs.writeFile(this.addHome(path), JSON.stringify(data), {flag: 'w'}, (err) => {
         if (err) {
           console.error(err);
         } else {
@@ -120,26 +128,30 @@
 
     reInitLocalSyncInterval() {
       this.clearLocalSyncIntervalIfSet();
-
       const SYNC_INTERVAL = 10000;
       // init save
       this.localSyncInterval = this.$interval(() => {
-        if (!this.$rootScope.r.config.automaticBackups ||
-          !this.$rootScope.r.config.automaticBackups.isSyncEnabled ||
-          parseInt(this.$rootScope.r.config.automaticBackups.intervalInSeconds, 10) === 0 ||
-          !this.$rootScope.r.config.automaticBackups.syncPath ||
-          this.$rootScope.r.config.automaticBackups.syncPath.trim().length === 0
-        ) {
-          return;
-        }
-
-        const path = this.$rootScope.r.config.automaticBackups.syncPath;
-
-        this.saveToFileSystem(path, () => {
-          const stats = this.fs.statSync(this.addHome(path));
-          this.lastSyncSaveChangedTime = stats.ctime;
-        }, true);
+        this.saveBackup();
       }, SYNC_INTERVAL);
+    }
+
+    saveBackup() {
+      console.log('LocalSync: Saving backup');
+      if (!this.$rootScope.r.config.automaticBackups ||
+        !this.$rootScope.r.config.automaticBackups.isSyncEnabled ||
+        parseInt(this.$rootScope.r.config.automaticBackups.intervalInSeconds, 10) === 0 ||
+        !this.$rootScope.r.config.automaticBackups.syncPath ||
+        this.$rootScope.r.config.automaticBackups.syncPath.trim().length === 0
+      ) {
+        return;
+      }
+
+      const path = this.$rootScope.r.config.automaticBackups.syncPath;
+
+      this.saveToFileSystem(path, () => {
+        const stats = this.fs.statSync(this.addHome(path));
+        this.lastSyncSaveChangedTime = stats.ctime;
+      }, true);
     }
   }
 

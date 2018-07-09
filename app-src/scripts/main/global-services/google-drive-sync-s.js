@@ -13,7 +13,7 @@
 
   class GoogleDriveSync {
     /* @ngInject */
-    constructor(AppStorage, GoogleApi, $rootScope, SimpleToast, $mdDialog, $mdToast, $q, $interval) {
+    constructor(AppStorage, GoogleApi, $rootScope, SimpleToast, $mdDialog, $mdToast, $q, $interval, LocalSync) {
       this.AppStorage = AppStorage;
       this.GoogleApi = GoogleApi;
       this.$rootScope = $rootScope;
@@ -21,6 +21,7 @@
       this.$mdDialog = $mdDialog;
       this.$mdToast = $mdToast;
       this.$interval = $interval;
+      this.LocalSync = LocalSync;
       this.$q = $q;
       this.data = this.$rootScope.r.googleDriveSync;
       this.config = this.$rootScope.r.config.googleDriveSync;
@@ -43,6 +44,10 @@
     }
 
     _import(loadRes) {
+      if (this.LocalSync.isBackupsEnabled()) {
+        this.LocalSync.saveBackup();
+      }
+
       const backupData = loadRes.backup;
       const metaData = loadRes.meta;
 
