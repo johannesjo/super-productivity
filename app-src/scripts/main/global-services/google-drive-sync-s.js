@@ -376,6 +376,38 @@
     }
 
     loadFrom(isSkipPromiseCheck = false) {
+      const loadHandler = () => {
+        this._load().then((loadRes) => {
+          // const lastModifiedRemote = loadRes.meta.modifiedDate;
+          const lastActiveLocal = this.$rootScope.r.lastActiveTime;
+          const lastActiveRemote = loadRes.backup.lastActiveTime;
+
+          // no update required
+          if (this._isEqual(lastActiveLocal, lastActiveRemote)) {
+            this._log('date comparision isEqual', lastActiveLocal, lastActiveRemote);
+            this.SimpleToast('SUCCESS', `Data already up to date`);
+            defer.reject();
+          }
+
+          // update but ask if remote data is not newer than the last local update
+          else {
+            const isSkipConfirm = lastActiveRemote && this._isNewerThan(lastActiveRemote, lastActiveLocal);
+            this._log('date comparision skipConfirm', isSkipConfirm, lastActiveLocal, lastActiveRemote);
+
+            if (isSkipConfirm) {
+              this._import(loadRes);
+              defer.resolve(loadRes);
+            } else {
+              this._confirmLoadDialog(lastActiveRemote, lastActiveLocal)
+                .then(() => {
+                  this._import(loadRes);
+                  defer.resolve(loadRes);
+                }, defer.reject);
+            }
+          }
+        }, defer.reject);
+      };
+
       // don't execute sync interactions at the same time
       if (!isSkipPromiseCheck && this._isCurrentPromisePending()) {
         this._log('loadFrom omitted because is in progress', this.currentPromise, this.currentPromise.$$state.status);
@@ -385,35 +417,19 @@
       const defer = this.$q.defer();
       this.currentPromise = defer.promise;
 
-      this._load().then((loadRes) => {
-        // const lastModifiedRemote = loadRes.meta.modifiedDate;
-        const lastActiveLocal = this.$rootScope.r.lastActiveTime;
-        const lastActiveRemote = loadRes.backup.lastActiveTime;
-
-        // no update required
-        if (this._isEqual(lastActiveLocal, lastActiveRemote)) {
-          this._log('date comparision isEqual', lastActiveLocal, lastActiveRemote);
-          this.SimpleToast('SUCCESS', `Data already up to date`);
-          defer.reject();
+      // when we have no backup file we create one directly
+      if (!this.data.backupDocId) {
+        if (!this.config.syncFileName) {
+          this.config.syncFileName = DEFAULT_SYNC_FILE_NAME;
         }
+        this.changeSyncFileName(this.config.syncFileName)
+          .then(() => {
+            loadHandler();
+          }, defer.reject);
+      } else {
+        loadHandler();
+      }
 
-        // update but ask if remote data is not newer than the last local update
-        else {
-          const isSkipConfirm = lastActiveRemote && this._isNewerThan(lastActiveRemote, lastActiveLocal);
-          this._log('date comparision skipConfirm', isSkipConfirm, lastActiveLocal, lastActiveRemote);
-
-          if (isSkipConfirm) {
-            this._import(loadRes);
-            defer.resolve(loadRes);
-          } else {
-            this._confirmLoadDialog(lastActiveRemote, lastActiveLocal)
-              .then(() => {
-                this._import(loadRes);
-                defer.resolve(loadRes);
-              }, defer.reject);
-          }
-        }
-      }, defer.reject);
 
       return defer.promise;
     }
