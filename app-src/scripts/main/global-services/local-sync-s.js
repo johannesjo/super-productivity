@@ -136,7 +136,6 @@
     }
 
     saveBackup() {
-      console.log('LocalSync: Saving backup');
       if (!this.$rootScope.r.config.automaticBackups ||
         !this.$rootScope.r.config.automaticBackups.isSyncEnabled ||
         parseInt(this.$rootScope.r.config.automaticBackups.intervalInSeconds, 10) === 0 ||
@@ -148,9 +147,11 @@
 
       const path = this.$rootScope.r.config.automaticBackups.syncPath;
 
+      console.log('LocalSync: Saving backup');
       this.saveToFileSystem(path, () => {
         const stats = this.fs.statSync(this.addHome(path));
         this.lastSyncSaveChangedTime = stats.ctime;
+        console.log('LocalSync: Backup saved');
       }, true);
     }
   }
