@@ -182,12 +182,14 @@
       });
     }
 
-    _confirmLoadDialog(remoteModified) {
+    _confirmLoadDialog(remoteModified, lastActiveLocal) {
       const confirm = this.$mdDialog.confirm()
         .title('Update from Google Drive Backup')
         .textContent(`
+        Local data seems to be newer than the remote data. 
         Overwrite unsaved local changes? All data will be lost forever. 
-        -- Last modification of remote data: ${this._formatDate(remoteModified)}`)
+        -- Last modification of remote data: ${this._formatDate(remoteModified)}
+        -- Last modification of local data: ${this._formatDate(lastActiveLocal)}`)
         .ok('Please do it!')
         .cancel('No');
 
@@ -399,7 +401,7 @@
             this._import(loadRes);
             defer.resolve(loadRes);
           } else {
-            this._confirmLoadDialog(lastActiveRemote)
+            this._confirmLoadDialog(lastActiveRemote, lastActiveLocal)
               .then(() => {
                 this._import(loadRes);
                 defer.resolve(loadRes);
