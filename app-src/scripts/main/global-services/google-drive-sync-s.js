@@ -376,6 +376,9 @@
     }
 
     loadFrom(isSkipPromiseCheck = false) {
+      const defer = this.$q.defer();
+      this.currentPromise = defer.promise;
+
       const loadHandler = () => {
         this._load().then((loadRes) => {
           // const lastModifiedRemote = loadRes.meta.modifiedDate;
@@ -414,8 +417,6 @@
         return this.$q.reject('Something in progress');
       }
 
-      const defer = this.$q.defer();
-      this.currentPromise = defer.promise;
 
       // when we have no backup file we create one directly
       if (!this.data.backupDocId) {
