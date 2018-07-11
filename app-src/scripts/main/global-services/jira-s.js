@@ -660,7 +660,7 @@
       }
 
       // check if the user assigned matches the current user
-      if (originalTask && originalTask.originalAssigneeKey && originalTask.originalAssigneeKey !== this.$rootScope.r.jiraSettings.userAssigneeName && !originalTask.isDone) {
+      if (originalTask && originalTask.originalAssigneeKey && originalTask.originalAssigneeKey !== this.$rootScope.r.jiraSettings.userAssigneeName && !originalTask.isDone && this.$rootScope.r.jiraSettings.isCheckToReAssignTicketOnTaskStart) {
         const msg = '"' + originalTask.originalKey + '" is assigned to "' + originalTask.originalAssigneeKey + '".';
         this.Notifier({
           title: 'Jira issue ' + originalTask.originalKey + ' is assigned to another user',
