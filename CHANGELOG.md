@@ -1,3 +1,13 @@
+<a name="1.10.49"></a>
+## [1.10.49](https://github.com/johannesjo/super-productivity/compare/v1.10.48...v1.10.49) (2018-07-18)
+
+
+### Bug Fixes
+
+* remove unused modules ([c1b41d6](https://github.com/johannesjo/super-productivity/commit/c1b41d6))
+
+
+
 <a name="1.10.48"></a>
 ## [1.10.48](https://github.com/johannesjo/super-productivity/compare/v1.10.47...v1.10.48) (2018-07-18)
 
