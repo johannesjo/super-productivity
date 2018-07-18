@@ -14,12 +14,12 @@
     .controller('PomodoroBreakCtrl', PomodoroBreakCtrl);
 
   /* @ngInject */
-  function PomodoroBreakCtrl($mdDialog, $rootScope, theme, pomodoroData, pomodoroConfig, $scope, $timeout, IS_ELECTRON, PomodoroButton, Notifier) {
+  function PomodoroBreakCtrl($mdDialog, $rootScope, theme, pomodoroData, pomodoroConfig, $scope, $timeout, IS_ELECTRON, PomodoroButton, Notifier, isBreakDone) {
     this.r = $rootScope.r;
     this.theme = theme;
     this.pomodoroData = pomodoroData;
     this.isShowDistractionsOnBreak = pomodoroConfig.isShowDistractionsOnBreak;
-    this.isBreakDone = false;
+    this.isBreakDone = !!isBreakDone;
 
     if (IS_ELECTRON) {
       window.ipcRenderer.send('SHOW_OR_FOCUS');

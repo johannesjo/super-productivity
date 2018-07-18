@@ -148,39 +148,56 @@
 
     sessionDone() {
       this.playSessionDoneSound();
-      this.data.isOnBreak = !this.data.isOnBreak;
-      if (this.data.isOnBreak) {
-        this.TakeABreakReminder.resetCounter();
-        this.Notifier({
-          title: 'Pomodoro break #' + this.data.currentCycle + ' started.',
-        });
 
-        this.dialog = this.Dialogs('POMODORO_BREAK', {
-          pomodoroData: this.data,
-          pomodoroConfig: this.config
-        })
-          .then((isSkipBreak) => {
-            if (isSkipBreak) {
-              this.skipBreak();
-            }
-          });
-
-        if ((this.config.isStopTrackingOnBreak && this.isOnShortBreak()) ||
-          (this.config.isStopTrackingOnLongBreak && this.isOnLongBreak())) {
-          this.Tasks.updateCurrent(undefined);
-        }
-      } else {
-        this.data.currentCycle++;
-        this.Tasks.startLastTaskOrOpenDialog()
-          .then((task) => {
-            this.Notifier({
-              title: `Pomodoro session #${this.data.currentCycle} started`,
-              message: task && (`Working on >>  ${task.title}`),
-            });
-          });
+      // handle special state when manual continue is activated and the dialog
+      // was clicked away
+      if (this.config.isManualContinue && this.data.isOnBreak && (this.dialog && this.dialog.$$state.status === 1)) {
+        this.data.currentSessionTime = 0;
+        this.pause();
+        this.openDialog(true);
       }
 
-      this.setSessionTimerTime();
+      // regular handling
+      else {
+        this.data.isOnBreak = !this.data.isOnBreak;
+        if (this.data.isOnBreak) {
+          this.TakeABreakReminder.resetCounter();
+          this.Notifier({
+            title: 'Pomodoro break #' + this.data.currentCycle + ' started.',
+          });
+          this.openDialog();
+
+          if ((this.config.isStopTrackingOnBreak && this.isOnShortBreak()) ||
+            (this.config.isStopTrackingOnLongBreak && this.isOnLongBreak())) {
+            this.Tasks.updateCurrent(undefined);
+          }
+        } else {
+          this.data.currentCycle++;
+          this.Tasks.startLastTaskOrOpenDialog()
+            .then((task) => {
+              this.Notifier({
+                title: `Pomodoro session #${this.data.currentCycle} started`,
+                message: task && (`Working on >>  ${task.title}`),
+              });
+            });
+        }
+        this.setSessionTimerTime();
+      }
+    }
+
+    openDialog(isBreakDone) {
+      this.dialog = this.Dialogs('POMODORO_BREAK', {
+        pomodoroData: this.data,
+        pomodoroConfig: this.config,
+        isBreakDone: isBreakDone,
+      })
+        .then((isSkipBreak) => {
+          if (isSkipBreak) {
+            this.skipBreak();
+          }
+        });
+
+      return this.dialog;
     }
 
     skipBreak() {
