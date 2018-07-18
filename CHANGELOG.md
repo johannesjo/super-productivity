@@ -1,3 +1,25 @@
+<a name="1.10.48"></a>
+## [1.10.48](https://github.com/johannesjo/super-productivity/compare/v1.10.47...v1.10.48) (2018-07-18)
+
+
+### Bug Fixes
+
+* checking for assigned user when setting is disabled [#99](https://github.com/johannesjo/super-productivity/issues/99) ([5d0e05f](https://github.com/johannesjo/super-productivity/commit/5d0e05f))
+* prevent double links in global link list ([eb1ebb6](https://github.com/johannesjo/super-productivity/commit/eb1ebb6))
+
+
+### Features
+
+* add better logging to local sync ([e8bcec8](https://github.com/johannesjo/super-productivity/commit/e8bcec8))
+* allow choosing sync file and loading data afterwards ([c2b3966](https://github.com/johannesjo/super-productivity/commit/c2b3966))
+* also check for equal dates when syncing ([423eb4e](https://github.com/johannesjo/super-productivity/commit/423eb4e))
+* handle special state when manual continue is activated and the dialog was clicked away [#100](https://github.com/johannesjo/super-productivity/issues/100) ([cebf58c](https://github.com/johannesjo/super-productivity/commit/cebf58c))
+* log into google via refresh token if present ([405c2e1](https://github.com/johannesjo/super-productivity/commit/405c2e1))
+* save local backup before importing data from google drive ([8facbd4](https://github.com/johannesjo/super-productivity/commit/8facbd4))
+* update message for google drive sync ([42c26d8](https://github.com/johannesjo/super-productivity/commit/42c26d8))
+
+
+
 <a name="1.10.47"></a>
 ## [1.10.47](https://github.com/johannesjo/super-productivity/compare/v1.10.46...v1.10.47) (2018-07-07)
 
