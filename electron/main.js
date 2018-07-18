@@ -161,7 +161,7 @@ function createMainWin() {
     nestedWinParams,
     indicatorMod,
   });
-  googleAuth(mainWin);
+  googleAuth.init();
 }
 
 function registerShowAppShortCut(shortcutPassed) {

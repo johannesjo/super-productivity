@@ -149,14 +149,12 @@
       }
 
       if (this.IS_ELECTRON) {
-        window.ipcRenderer.send('TRIGGER_GOOGLE_AUTH');
+        window.ipcRenderer.send('TRIGGER_GOOGLE_AUTH', this.data.refreshToken);
         return new Promise((resolve, reject) => {
           window.ipcRenderer.on('GOOGLE_AUTH_TOKEN', (ev, data) => {
-            const token = data.access_token;
-            this.data.accessToken = token;
+            this.data.accessToken = data.access_token;
             this.data.expiresAt = (data.expires_in * 1000) + window.moment().valueOf();
-
-            //this.data.refreshToken = data.refresh_token;
+            this.data.refreshToken = data.refresh_token;
             this.isLoggedIn = true;
             this.SimpleToast('SUCCESS', 'GoogleApi: Login successful');
 
@@ -231,7 +229,7 @@
         headers: {
           'Authorization': `Bearer ${this.data.accessToken}`
         },
-        data: { values: [row] }
+        data: {values: [row]}
       }));
     }
 
