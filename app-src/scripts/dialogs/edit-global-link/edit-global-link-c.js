@@ -42,17 +42,20 @@
         vm.linkCopy.path = 'http://' + vm.linkCopy.path;
       }
 
-      if (!vm.linkCopy.id) {
-        // needed to make them uniquely distinguishable
-        vm.linkCopy.id = Uid();
-      }
-
       if (isNew) {
-        if (vm.selectedTask) {
-          Tasks.addLocalAttachment(vm.selectedTask, vm.linkCopy);
+        if (vm.linkCopy.id) {
+          console.warn('EditGlobalLink: Link id present, preventing double save');
+          return;
         } else {
-          GlobalLinkList.addItem(vm.linkCopy);
+          // needed to make them uniquely distinguishable
+          vm.linkCopy.id = Uid();
+          if (vm.selectedTask) {
+            Tasks.addLocalAttachment(vm.selectedTask, vm.linkCopy);
+          } else {
+            GlobalLinkList.addItem(vm.linkCopy);
+          }
         }
+
       } else {
         angular.extend(link, vm.linkCopy);
       }
@@ -74,13 +77,13 @@
 
     function setTypes() {
       vm.types = [
-        { type: 'LINK', title: 'Link (opens in browser)' },
-        { type: 'IMG', title: 'Image (shown as thumbnail)' },
+        {type: 'LINK', title: 'Link (opens in browser)'},
+        {type: 'IMG', title: 'Image (shown as thumbnail)'},
       ];
 
       if (IS_ELECTRON) {
-        vm.types.push({ type: 'FILE', title: 'File (opened by default system app)' });
-        vm.types.push({ type: 'COMMAND', title: 'Command (custom shell command)' });
+        vm.types.push({type: 'FILE', title: 'File (opened by default system app)'});
+        vm.types.push({type: 'COMMAND', title: 'Command (custom shell command)'});
 
         if (!vm.linkCopy.type) {
           vm.linkCopy.type = 'LINK';
