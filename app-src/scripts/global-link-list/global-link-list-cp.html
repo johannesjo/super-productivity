@@ -16,7 +16,7 @@
     </div>
 
     <div class="global-link"
-         ng-repeat="link in $ctrl.globalLinks track by link.id"
+         ng-repeat="link in $ctrl.globalLinks track by $index"
          draggable="false">
       <md-button external-link
                  class="md-raised md-primary md-hue-2"
