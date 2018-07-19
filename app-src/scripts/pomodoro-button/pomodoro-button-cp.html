@@ -10,9 +10,9 @@
                md-no-ink
                ng-class="{'md-accent':$ctrl.svc.data.status=='PLAY'}"
                aria-label="Open Pomodoro Actions">
-      <ng-md-icon icon="play_arrow"
-                  ng-if="!$ctrl.svc.data.isOnBreak && $ctrl.svc.data.status==='PLAY'"></ng-md-icon>
       <ng-md-icon icon="pause"
+                  ng-if="!$ctrl.svc.data.isOnBreak && $ctrl.svc.data.status==='PLAY'"></ng-md-icon>
+      <ng-md-icon icon="play_arrow"
                   ng-if="$ctrl.svc.data.status==='MANUAL_PAUSE'"></ng-md-icon>
       <ng-md-icon icon="free_breakfast"
                   ng-if="$ctrl.svc.data.isOnBreak && $ctrl.svc.data.status!=='MANUAL_PAUSE'"></ng-md-icon>

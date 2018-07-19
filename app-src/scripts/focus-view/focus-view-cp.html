@@ -7,9 +7,9 @@
                tabindex="2"
                ng-class="{'md-accent':vm.pomodoroSvc.data.status==='PLAY'}"
                ng-click="vm.togglePlayPomodoro()">
-      <ng-md-icon icon="play_arrow"
-                  ng-if="!vm.pomodoroSvc.data.isOnBreak && vm.pomodoroSvc.data.status==='PLAY'"></ng-md-icon>
       <ng-md-icon icon="pause"
+                  ng-if="!vm.pomodoroSvc.data.isOnBreak && vm.pomodoroSvc.data.status==='PLAY'"></ng-md-icon>
+      <ng-md-icon icon="play_arrow"
                   ng-if="vm.pomodoroSvc.data.status==='MANUAL_PAUSE'"></ng-md-icon>
       <ng-md-icon icon="free_breakfast"
                   ng-if="vm.pomodoroSvc.data.isOnBreak && vm.pomodoroSvc.data.status!=='MANUAL_PAUSE'"></ng-md-icon>
