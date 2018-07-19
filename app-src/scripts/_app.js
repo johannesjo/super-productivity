@@ -398,7 +398,7 @@
   }
 
   /* @ngInject */
-  function initElectronOnBeforeQuit(IS_ELECTRON, GoogleDriveSync, $mdDialog) {
+  function initElectronOnBeforeQuit(IS_ELECTRON, GoogleDriveSync, $mdDialog, $rootScope, AppStorage) {
     const ON_BEFORE_QUIT_EV = 'ON_BEFORE_QUIT';
     const SHUTDOWN_NOW_EV = 'SHUTDOWN_NOW';
 
@@ -418,8 +418,10 @@
     if (IS_ELECTRON) {
       window.ipcRenderer.on(ON_BEFORE_QUIT_EV, () => {
         if (GoogleDriveSync.config.isAutoSyncToRemote) {
+          $rootScope.r.lastActiveTime = new Date();
           GoogleDriveSync.saveForSyncIfEnabled()
             .then(() => {
+              AppStorage.saveToLs();
               window.ipcRenderer.send(SHUTDOWN_NOW_EV, {});
             })
             .catch(confirmQuitAnyWay);
@@ -441,7 +443,6 @@
   /* @ngInject */
   function initUnloadActions($rootScope, AppStorage) {
     window.onbeforeunload = window.onunload = function() {
-      $rootScope.r.lastActiveTime = new Date();
       AppStorage.saveToLs();
 
       if ($rootScope.r.config && $rootScope.r.config.isConfirmBeforeExit) {

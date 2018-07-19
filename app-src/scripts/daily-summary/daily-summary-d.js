@@ -75,11 +75,6 @@
       // save everything
       AppStorage.saveToLs();
 
-      if (!IS_ELECTRON && GoogleDriveSync.config && GoogleDriveSync.config.isAutoSyncToRemote) {
-        SimpleToast('CUSTOM', `Syncing Data to Google Drive.`, 'file_upload');
-        GoogleDriveSync.saveTo();
-      }
-
       if (IS_ELECTRON) {
         $mdDialog.show(
           $mdDialog.confirm()
@@ -101,6 +96,11 @@
               });
             });
       } else {
+        if (GoogleDriveSync.config && GoogleDriveSync.config.isAutoSyncToRemote) {
+          SimpleToast('CUSTOM', `Syncing Data to Google Drive.`, 'file_upload');
+          GoogleDriveSync.saveTo();
+        }
+
         initSuccessAnimation(() => {
           $state.go('daily-planner');
         });
