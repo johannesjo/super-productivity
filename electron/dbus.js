@@ -134,7 +134,11 @@ if (!isDBusError) {
       iface.emit('taskChanged', taskId + '', taskText + '')
     },
     updatePomodoro: (isOnBreak, currentSessionTime, currentSessionInitialTime) => {
-      iface.emit('pomodoroUpdate', (isOnBreak ? 1 : 0), currentSessionTime, currentSessionInitialTime)
+      if (iface) {
+        iface.emit('pomodoroUpdate', (isOnBreak ? 1 : 0), currentSessionTime, currentSessionInitialTime)
+      } else {
+        errorHandler('DBus: interface not ready yet');
+      }
     }
   };
 } else {
