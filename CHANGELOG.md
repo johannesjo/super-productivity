@@ -1,3 +1,20 @@
+<a name="1.10.50"></a>
+## [1.10.50](https://github.com/johannesjo/super-productivity/compare/v1.10.49...v1.10.50) (2018-07-19)
+
+
+### Bug Fixes
+
+* check if dbus is ready before emiting pomodoro status ([f3f4885](https://github.com/johannesjo/super-productivity/commit/f3f4885))
+* play icons [#101](https://github.com/johannesjo/super-productivity/issues/101) ([ef75ee8](https://github.com/johannesjo/super-productivity/commit/ef75ee8))
+* potential issue with global link list ([a7075b0](https://github.com/johannesjo/super-productivity/commit/a7075b0))
+
+
+### Features
+
+* improve google drive syncing experience by changing when data is saved when lastActive is set ([eeba0e9](https://github.com/johannesjo/super-productivity/commit/eeba0e9))
+
+
+
 <a name="1.10.49"></a>
 ## [1.10.49](https://github.com/johannesjo/super-productivity/compare/v1.10.48...v1.10.49) (2018-07-18)
 
