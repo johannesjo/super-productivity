@@ -1,3 +1,19 @@
+<a name="1.10.51"></a>
+## [1.10.51](https://github.com/johannesjo/super-productivity/compare/v1.10.50...v1.10.51) (2018-08-17)
+
+
+### Bug Fixes
+
+* show success animation only after syncing to google if enabled ([7616f00](https://github.com/johannesjo/super-productivity/commit/7616f00))
+* welcome screen showing up per project basis ([4ecfcf4](https://github.com/johannesjo/super-productivity/commit/4ecfcf4))
+
+
+### Features
+
+* make minimize to tray optional [#106](https://github.com/johannesjo/super-productivity/issues/106) ([43f9968](https://github.com/johannesjo/super-productivity/commit/43f9968))
+
+
+
 <a name="1.10.50"></a>
 ## [1.10.50](https://github.com/johannesjo/super-productivity/compare/v1.10.49...v1.10.50) (2018-07-19)
 
