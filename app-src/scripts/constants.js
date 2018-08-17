@@ -20,7 +20,7 @@
       'currentProject',
       'projects',
       'keys',
-      'isShowWelcomeDialog',
+      'uiHelper',
       'config',
       'keys',
       'googleDriveSync',
