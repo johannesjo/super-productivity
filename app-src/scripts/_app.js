@@ -71,6 +71,7 @@
     .run(checkIfLatestVersion)
     .run(showWelcomeDialog)
     .run(initUnloadActions)
+    .run(initGetSettings)
     .run(initInputFocusFixForAndroid)
     .run(initElectronOnBeforeQuit);
 
@@ -156,7 +157,7 @@
           Dialogs('DISTRACTIONS', undefined, true);
         }
         if (CheckShortcutKeyCombo(ev, $rootScope.r.keys.showHelp)) {
-          Dialogs('HELP', { template: 'PAGE' }, true);
+          Dialogs('HELP', {template: 'PAGE'}, true);
         }
 
         if (CheckShortcutKeyCombo(ev, $rootScope.r.keys.goToDailyPlanner)) {
@@ -449,6 +450,15 @@
         return 'Are you sure you want to leave?';
       }
     };
+  }
+
+  /* @ngInject */
+  function initGetSettings($rootScope, IS_ELECTRON) {
+    if (IS_ELECTRON) {
+      window.ipcRenderer.on('TRANSFER_SETTINGS_REQUESTED', () => {
+        window.ipcRenderer.send('TRANSFER_SETTINGS_TO_ELECTRON', $rootScope.r.config);
+      });
+    }
   }
 
   function initInputFocusFixForAndroid() {

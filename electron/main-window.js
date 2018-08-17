@@ -1,4 +1,5 @@
 const electron = require('electron');
+const getSettings = require('./get-settings');
 const errorHandler = require('./error-handler');
 const BrowserWindow = electron.BrowserWindow;
 const path = require('path');
@@ -47,7 +48,7 @@ function createWindow(params) {
   }
 
   // Create the browser window.
-  mainWin = new BrowserWindow({ width: 800, height: 600 });
+  mainWin = new BrowserWindow({width: 800, height: 600});
 
   // and load the index.html of the app.
   mainWin.loadURL(url.format({
@@ -93,20 +94,36 @@ function initWinEventListeners(app, IS_MAC, nestedWinParams) {
   });
 
   mainWin.on('close', function(event) {
-    // handle darwin
-    if (IS_MAC) {
-      if (!nestedWinParams.isDarwinForceQuit) {
-        event.preventDefault();
-        mainWin.hide();
-      }
+    if (app.isQuiting) {
+      app.quit();
     } else {
-      if (!app.isQuiting && indicatorMod.isRunning()) {
-        event.preventDefault();
-        mainWin.hide();
-      } else {
-        // just quit (NOTE: normally this shouldn't be necessary)
-        app.quit();
-      }
+      event.preventDefault();
+
+      getSettings(mainWin, (appCfg) => {
+        if (appCfg && appCfg.isDontMinimizeToTray) {
+          app.isQuiting = true;
+          app.quit();
+        } else {
+          // handle darwin
+          if (IS_MAC) {
+            if (nestedWinParams.isDarwinForceQuit) {
+              app.isQuiting = true;
+              app.quit();
+            } else {
+              event.preventDefault();
+              mainWin.hide();
+            }
+          } else {
+            if (indicatorMod.isRunning()) {
+              event.preventDefault();
+              mainWin.hide();
+            } else {
+              app.isQuiting = true;
+              app.quit();
+            }
+          }
+        }
+      });
     }
   });
 }
@@ -116,8 +133,8 @@ function createMenu(quitApp) {
   const menuTpl = [{
     label: 'Application',
     submenu: [
-      { label: 'About Application', selector: 'orderFrontStandardAboutPanel:' },
-      { type: 'separator' },
+      {label: 'About Application', selector: 'orderFrontStandardAboutPanel:'},
+      {type: 'separator'},
       {
         label: 'Quit', click: quitApp
       }
@@ -125,13 +142,13 @@ function createMenu(quitApp) {
   }, {
     label: 'Edit',
     submenu: [
-      { label: 'Undo', accelerator: 'CmdOrCtrl+Z', selector: 'undo:' },
-      { label: 'Redo', accelerator: 'Shift+CmdOrCtrl+Z', selector: 'redo:' },
-      { type: 'separator' },
-      { label: 'Cut', accelerator: 'CmdOrCtrl+X', selector: 'cut:' },
-      { label: 'Copy', accelerator: 'CmdOrCtrl+C', selector: 'copy:' },
-      { label: 'Paste', accelerator: 'CmdOrCtrl+V', selector: 'paste:' },
-      { label: 'Select All', accelerator: 'CmdOrCtrl+A', selector: 'selectAll:' }
+      {label: 'Undo', accelerator: 'CmdOrCtrl+Z', selector: 'undo:'},
+      {label: 'Redo', accelerator: 'Shift+CmdOrCtrl+Z', selector: 'redo:'},
+      {type: 'separator'},
+      {label: 'Cut', accelerator: 'CmdOrCtrl+X', selector: 'cut:'},
+      {label: 'Copy', accelerator: 'CmdOrCtrl+C', selector: 'copy:'},
+      {label: 'Paste', accelerator: 'CmdOrCtrl+V', selector: 'paste:'},
+      {label: 'Select All', accelerator: 'CmdOrCtrl+A', selector: 'selectAll:'}
     ]
   }
   ];

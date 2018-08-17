@@ -165,6 +165,7 @@
           isPlaySound: true,
           isGoToWorkView: false,
         },
+        isDontMinimizeToTray: false,
         isNotifyWhenTimeEstimateExceeded: false,
         isBlockFinishDayUntilTimeTimeTracked: false,
         isConfirmBeforeExit: false,

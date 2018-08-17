@@ -30,6 +30,7 @@
   function MiscSettingsCtrl(IS_ELECTRON, IS_EXTENSION) {
     let vm = this;
     vm.isIdleTimeAvailable = (IS_ELECTRON || IS_EXTENSION);
+    vm.IS_ELECTRON = IS_ELECTRON;
   }
 
 })();
