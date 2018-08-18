@@ -189,10 +189,9 @@
 
     _confirmLoadDialog(remoteModified, lastActiveLocal) {
       const confirm = this.$mdDialog.confirm()
-        .title('Update from Google Drive Backup')
+        .title('Overwrite local data with GDrive Update?')
         .textContent(`
-        Local data seems to be newer than the remote data. 
-        Overwrite unsaved local changes? All data will be lost forever. 
+        Update from Google Drive Backup. Local data seems to be newer than the remote data.  Overwrite unsaved local changes? All data will be lost forever. 
         -- Last modification of remote data: ${this._formatDate(remoteModified)}
         -- Last modification of local data: ${this._formatDate(lastActiveLocal)}`)
         .ok('Please do it!')
