@@ -1,3 +1,19 @@
+<a name="1.10.52"></a>
+## [1.10.52](https://github.com/johannesjo/super-productivity/compare/v1.10.51...v1.10.52) (2018-08-18)
+
+
+### Bug Fixes
+
+* add missing aria label ([b21fa21](https://github.com/johannesjo/super-productivity/commit/b21fa21))
+* chrome throwing errors on focus sometimes ([d2f1755](https://github.com/johannesjo/super-productivity/commit/d2f1755))
+
+
+### Features
+
+* improve wording for google drive sync dialog ([8fdcfc6](https://github.com/johannesjo/super-productivity/commit/8fdcfc6))
+
+
+
 <a name="1.10.51"></a>
 ## [1.10.51](https://github.com/johannesjo/super-productivity/compare/v1.10.50...v1.10.51) (2018-08-17)
 
