@@ -235,6 +235,7 @@
       },
       jiraSettings: {
         isJiraEnabled: false,
+        isAutoPollTickets: true,
         isFirstLogin: true,
         isWorklogEnabled: true,
         isAutoWorklog: false,

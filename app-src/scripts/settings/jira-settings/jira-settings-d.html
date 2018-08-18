@@ -80,6 +80,13 @@
       <h3 class="md-subtitle">Advanced Options</h3>
 
       <div>
+        <md-switch ng-model="vm.settings.isAutoPollTickets"
+                   aria-label="Check imported issues for changes automatically">
+          Check imported issues for changes automatically
+        </md-switch>
+      </div>
+
+      <div>
         <md-switch ng-model="vm.settings.isEnabledAutoAdd"
                    aria-label="Auto add issues from Jira to backlog">
           Auto add issues from Jira to backlog

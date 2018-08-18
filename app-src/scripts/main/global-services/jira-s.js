@@ -283,7 +283,7 @@
       const request = {
         config: this.$rootScope.r.jiraSettings,
         apiMethod: 'searchUsers',
-        arguments: [{ username: userNameQuery }]
+        arguments: [{username: userNameQuery}]
       };
 
       return this.sendRequest(request);
@@ -366,7 +366,7 @@
         this.getTransitionsForIssue(task)
           .then((response) => {
             let transitions = response.response.transitions;
-            this.Dialogs('JIRA_SET_STATUS', { transitions, task, localType })
+            this.Dialogs('JIRA_SET_STATUS', {transitions, task, localType})
               .then((transition) => {
                 this.transitionIssue(task, transition, localType)
                   .then(defer.resolve, defer.reject);
@@ -529,7 +529,7 @@
                 this._addWorklog(task.originalKey, moment(task.started), task.timeSpent)
                   .then(successHandler, defer.reject);
               } else {
-                this.Dialogs('JIRA_ADD_WORKLOG', { task, comment })
+                this.Dialogs('JIRA_ADD_WORKLOG', {task, comment})
                   .then((dialogTaskCopy) => {
                     outerTimeSpent = dialogTaskCopy.timeSpent;
                     this._addWorklog(dialogTaskCopy.originalKey, dialogTaskCopy.started, dialogTaskCopy.timeSpent, dialogTaskCopy.comment)
@@ -635,22 +635,25 @@
       const TasksUtil = this.$injector.get('TasksUtil');
       const defer = this.$q.defer();
 
-      let tasksToPoll = TasksUtil.flattenTasks(tasks, Jira.isJiraTask, Jira.isJiraTask);
-      // execute requests sequentially to have a little more time
-      let pollPromise = tasksToPoll.reduce((promise, task) =>
-        promise.then(() =>
-          this.checkUpdatesForTicket(task)
-            .then((isUpdated) => {
-              this.taskIsUpdatedHandler(isUpdated, task);
-            }, defer.reject)
-        ), Promise.resolve()
-      );
+      if (this.$rootScope.r.jiraSettings.isAutoPollTickets) {
+        let tasksToPoll = TasksUtil.flattenTasks(tasks, Jira.isJiraTask, Jira.isJiraTask);
+        // execute requests sequentially to have a little more time
+        let pollPromise = tasksToPoll.reduce((promise, task) =>
+          promise.then(() =>
+            this.checkUpdatesForTicket(task)
+              .then((isUpdated) => {
+                this.taskIsUpdatedHandler(isUpdated, task);
+              }, defer.reject)
+          ), Promise.resolve()
+        );
 
-      pollPromise
-        .then(() => {
-          defer.resolve();
-        });
-
+        pollPromise
+          .then(() => {
+            defer.resolve();
+          });
+      } else {
+        defer.reject('POLLING DISABLED');
+      }
       return defer.promise;
     }
 
