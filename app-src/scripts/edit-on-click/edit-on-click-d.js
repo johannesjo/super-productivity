@@ -163,9 +163,11 @@
       if (eventId === scope.editOnClickEvId) {
         setTimeout(() => {
           el.focus();
-
-          // select all when doing this
-          document.execCommand('selectAll', false, null);
+          // we need another timeout to prevent buggy chrome behaviour
+          setTimeout(() => {
+            // select all when doing this
+            document.execCommand('selectAll', false, null);
+          });
         });
       }
     }
