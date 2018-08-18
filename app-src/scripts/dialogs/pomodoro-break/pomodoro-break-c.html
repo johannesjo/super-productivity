@@ -43,6 +43,7 @@
 
     <md-dialog-actions>
       <md-button ng-click="vm.continue()"
+                 aria-label="Continue"
                  class="md-primary md-raised">
         <span ng-if="!vm.isBreakDone">But I want to work (skip break)!!</span>
         <span ng-if="vm.isBreakDone">Go back to work!</span>
