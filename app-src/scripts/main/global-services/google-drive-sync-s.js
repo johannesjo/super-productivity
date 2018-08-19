@@ -376,7 +376,6 @@
 
     loadFrom(isSkipPromiseCheck = false) {
       const defer = this.$q.defer();
-      this.currentPromise = defer.promise;
 
       const loadHandler = () => {
         this._load().then((loadRes) => {
@@ -415,7 +414,8 @@
         this._log('loadFrom omitted because is in progress', this.currentPromise, this.currentPromise.$$state.status);
         return this.$q.reject('Something in progress');
       }
-
+      // only assign this after promise check
+      this.currentPromise = defer.promise;
 
       // when we have no backup file we create one directly
       if (!this.data.backupDocId) {
