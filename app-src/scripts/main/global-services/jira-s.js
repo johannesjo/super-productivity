@@ -31,9 +31,10 @@
 
   /* @ngInject */
   class Jira {
-    constructor(IS_ELECTRON, IS_EXTENSION, SimpleToast, Uid, $q, $rootScope, Dialogs, Notifier, $injector, $timeout, REQUEST_TIMEOUT, $log, $window, ExtensionInterface) {
+    constructor(IS_ELECTRON, IS_EXTENSION, SimpleToast, Uid, $q, $rootScope, Dialogs, Notifier, $injector, $timeout, REQUEST_TIMEOUT, $log, $window, $mdToast, ExtensionInterface) {
       this.requestsLog = {};
 
+      this.isPreventNextRequestAfterFailedAuth = false;
       this.IS_ELECTRON = IS_ELECTRON;
       this.IS_EXTENSION = IS_EXTENSION;
       this.Uid = Uid;
@@ -47,6 +48,7 @@
       this.$log = $log;
       this.SimpleToast = SimpleToast;
       this.$window = $window;
+      this.$mdToast = $mdToast;
       this.ExtensionInterface = ExtensionInterface;
 
       const that = this;
@@ -62,8 +64,13 @@
           if (!res || res.error) {
             that.$log.log('FRONTEND_REQUEST', currentRequest);
             that.$log.log('RESPONSE', res);
-            that.SimpleToast('ERROR', 'Jira Request failed: ' + currentRequest.clientRequest.apiMethod + ' – ' + (res && res.error));
+            const errorTxt = (res && res.error && (typeof res.error === 'string' && res.error) || res.error.name);
+            that.SimpleToast('ERROR', 'Jira Request failed: ' + currentRequest.clientRequest.apiMethod + ' – ' + errorTxt);
             currentRequest.defer.reject(res);
+            if (res.error.statusCode && res.error.statusCode === 401) {
+              that.isPreventNextRequestAfterFailedAuth = true;
+            }
+
           } else {
             console.log('JIRA_RESPONSE', res);
 
@@ -228,6 +235,23 @@
       }
     }
 
+    showTryAuthAgainToast() {
+      const toast = this.$mdToast.simple()
+        .textContent('Jira authentication failed for last request, please check your credentials before trying again.')
+        .action('I\'m ready')
+        .position('bottom');
+
+      this.$mdToast.show(toast)
+        .then((response) => {
+          if (response === 'ok') {
+            this.isPreventNextRequestAfterFailedAuth = false;
+          }
+        })
+        // we need an empty catch to prevent the unhandled rejection error
+        .catch(() => {
+        });
+    }
+
     preCheck(task) {
       if (!this.IS_ELECTRON && !this.IS_EXTENSION) {
         return this.$q.reject('Jira: Not a in electron or extension context');
@@ -242,6 +266,9 @@
       } else if (!this.$window.navigator.onLine) {
         this.SimpleToast('ERROR', 'Not connected to the Internet.');
         return this.$q.reject('Not connected to the Internet.');
+      } else if (this.isPreventNextRequestAfterFailedAuth) {
+        this.showTryAuthAgainToast();
+        return this.$q.reject('Jira authentication failed, please check your credentials.');
       } else {
         return false;
       }
@@ -615,6 +642,10 @@
     }
 
     checkForNewAndAddToBacklog() {
+      const isFailedPreCheck = this.preCheck();
+      if (isFailedPreCheck) {
+        return isFailedPreCheck;
+      }
       const Tasks = this.$injector.get('Tasks');
 
       if (this.isSufficientJiraSettings() && this.$rootScope.r.jiraSettings.isEnabledAutoAdd) {
@@ -632,6 +663,10 @@
     }
 
     checkForUpdates(tasks) {
+      const isFailedPreCheck = this.preCheck();
+      if (isFailedPreCheck) {
+        return isFailedPreCheck;
+      }
       const TasksUtil = this.$injector.get('TasksUtil');
       const defer = this.$q.defer();
 
@@ -658,6 +693,10 @@
     }
 
     taskIsUpdatedHandler(updatedTask, originalTask) {
+      const isFailedPreCheck = this.preCheck();
+      if (isFailedPreCheck) {
+        return isFailedPreCheck;
+      }
       if (!originalTask) {
         originalTask = updatedTask;
       }
@@ -687,6 +726,11 @@
     }
 
     checkUpdatesForTaskOrParent(task, isNoNotify) {
+      const isFailedPreCheck = this.preCheck(task);
+      if (isFailedPreCheck) {
+        return isFailedPreCheck;
+      }
+
       let isCallMade = false;
       const Tasks = this.$injector.get('Tasks');
       const defer = this.$q.defer();

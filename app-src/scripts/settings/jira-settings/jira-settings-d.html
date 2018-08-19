@@ -50,16 +50,19 @@
       <md-input-container class="md-block">
         <label>Host / Base URL</label>
         <input type="text"
+               ng-change="vm.onCredentialsChange()"
                ng-model="vm.settings.host">
       </md-input-container>
       <md-input-container class="md-block">
         <label>Login Name</label>
         <input type="text"
+               ng-change="vm.onCredentialsChange()"
                ng-model="vm.settings.userName">
       </md-input-container>
       <md-input-container class="md-block">
         <label>Token / Password</label>
         <input type="password"
+               ng-change="vm.onCredentialsChange()"
                ng-model="vm.settings.password">
       </md-input-container>
       <md-input-container class="md-block">

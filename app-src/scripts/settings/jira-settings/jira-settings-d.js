@@ -40,6 +40,10 @@
       });
     }
 
+    vm.onCredentialsChange = () => {
+      Jira.isPreventNextRequestAfterFailedAuth = false;
+    };
+
     vm.onTransitionExampleTaskSelected = (task) => {
       SimpleToast('SUCCESS', 'Jira Config: Example task selected!');
       Jira.getTransitionsForIssue(task)
@@ -54,18 +58,13 @@
 
     vm.testJiraCredentials = () => {
       let errorMsgTimeout;
+      Jira.isPreventNextRequestAfterFailedAuth = false;
 
       if (Jira.isSufficientJiraSettings(vm.settings)) {
         Jira.getSuggestions().then((res) => {
-            vm.taskSuggestions = vm.taskSuggestions.concat(Jira.transformIssues(res));
-            SimpleToast('SUCCESS', 'Connection successful!');
-          }, () => {
-            // give other error time to display
-            errorMsgTimeout = $timeout(() => {
-              SimpleToast('ERROR', 'Connection timed out!');
-            }, 3000);
-          }
-        );
+          vm.taskSuggestions = vm.taskSuggestions.concat(Jira.transformIssues(res));
+          SimpleToast('SUCCESS', 'Connection successful!');
+        });
       } else {
         SimpleToast('ERROR', 'Insuffcient settings!');
       }
