@@ -76,6 +76,7 @@
       AppStorage.saveToLs();
 
       if (IS_ELECTRON) {
+        // NOTE: syncing for electron is done in a before unload action
         $mdDialog.show(
           $mdDialog.confirm()
             .clickOutsideToClose(false)
