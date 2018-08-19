@@ -86,19 +86,9 @@
             .cancel('No, just clear the tasks')
         )
           .then(() => {
-              if (GoogleDriveSync.config && GoogleDriveSync.config.isAutoSyncToRemote) {
-                SimpleToast('CUSTOM', `Syncing Data to Google Drive.`, 'file_upload');
-                GoogleDriveSync.saveTo()
-                  .then(() => {
-                    initSuccessAnimation(() => {
-                      window.ipcRenderer.send(IPC_EVENT_SHUTDOWN);
-                    });
-                  });
-              } else {
-                initSuccessAnimation(() => {
-                  window.ipcRenderer.send(IPC_EVENT_SHUTDOWN);
-                });
-              }
+              initSuccessAnimation(() => {
+                window.ipcRenderer.send(IPC_EVENT_SHUTDOWN);
+              });
             },
             () => {
               initSuccessAnimation(() => {

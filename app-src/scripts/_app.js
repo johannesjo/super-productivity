@@ -427,6 +427,7 @@
             })
             .catch(confirmQuitAnyWay);
         } else {
+          AppStorage.saveToLs();
           window.ipcRenderer.send(SHUTDOWN_NOW_EV, {});
         }
       });
