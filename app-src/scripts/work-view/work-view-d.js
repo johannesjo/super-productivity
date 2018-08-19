@@ -123,7 +123,7 @@
         vm.tasksUndone = Tasks.getUndoneToday();
         vm.tasksDone = Tasks.getDoneToday();
       }
-    }, true));
+    }));
 
     watchers.push($scope.$watchCollection('vm.tasksDone', () => {
       _.each(vm.tasksDone, (task) => {
