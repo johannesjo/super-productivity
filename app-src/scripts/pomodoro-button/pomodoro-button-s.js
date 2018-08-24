@@ -11,7 +11,7 @@
 
   const PLAY = 'PLAY';
   const MANUAL_PAUSE = 'MANUAL_PAUSE';
-  const TICK_INTERVAL = 1000;
+  const TICK_INTERVAL = 500;
   const DEFAULT_SOUND = 'snd/positive.ogg';
 
   class PomodoroButton {
@@ -223,6 +223,7 @@
     }
 
     initTimer() {
+      this.lastIntervalStart = moment();
       if (this.timer) {
         this.$interval.cancel(this.timer);
       }
@@ -233,7 +234,11 @@
     }
 
     tick() {
-      this.data.currentSessionTime -= TICK_INTERVAL;
+      const now = moment();
+      this.data.currentSessionTime -= moment.duration(now.diff(this.lastIntervalStart)).asMilliseconds();
+
+      this.lastIntervalStart = moment();
+
       if (this.data.currentSessionTime <= 0) {
         this.sessionDone();
       }
