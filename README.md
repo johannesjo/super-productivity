@@ -70,6 +70,17 @@ There is also an extension which integrates the application into the status bar.
 * [install from extensions.gnome.org](https://extensions.gnome.org/extension/1348/super-productivity-indicator/)
 
 
+## FAQ
+**How to run on iOS/Android**  
+*Answer*: Use the web version.
+
+<!-- 
+
+**QUESTION**  
+*Answer*: ANSWER.
+-->
+
+
 ## Build and run for yourself
 ```
 git clone https://github.com/johannesjo/super-productivity.git
