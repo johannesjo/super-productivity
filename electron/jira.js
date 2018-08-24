@@ -13,7 +13,6 @@ module.exports = (request) => {
   // parse port from host and remove it
   if (config.host.match(matchPortRegEx)) {
     const match = matchPortRegEx.exec(config.host);
-
     config.host = config.host.replace(matchPortRegEx, '');
     config.port = parseInt(match[0].replace(':', ''), 10);
   }
@@ -23,8 +22,11 @@ module.exports = (request) => {
   // parse protocol from host and remove it
   if (config.host.match(matchProtocolRegEx)) {
     const match = matchProtocolRegEx.exec(config.host);
+    config.host = config.host
+      .replace(matchProtocolRegEx, '')
+      // remove trailing slash just in case
+      .replace(/\/$/, '');
 
-    config.host = config.host.replace(matchProtocolRegEx, '');
     config.protocol = match[1];
   } else {
     config.protocol = 'https';
