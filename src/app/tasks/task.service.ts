@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs'
-import { Task } from './task'
+import { Observable } from 'rxjs';
+import { Task } from './task';
 import { Store } from '@ngrx/store';
+import 'rxjs/add/operator/map';
 import {
   ADD_SUB_TASK,
   ADD_TASK,
@@ -14,18 +15,20 @@ import {
   UNSET_CURRENT_TASK,
   UPDATE_TASK,
 } from './task.actions';
+import { getTasks } from './task.selectors';
+import { getCurrentTask } from './task.selectors';
 
 
 @Injectable()
 export class TaskService {
-  tasks$: Observable<Array<Task>>;
-  currentTask$: Observable<string>;
+  currentTask$: Observable<string> = this._store.select(getCurrentTask);
+  tasks$: Observable<Task[]> = this._store.select(getTasks);
+  undoneTasks$: Observable<Task[]> = this.tasks$.map((tasks) => tasks.filter((task: Task) => !task.isDone));
+  doneTasks$: Observable<Task[]> = this.tasks$.map((tasks) => tasks.filter((task: Task) => task.isDone));
 
   constructor(
     private _store: Store<any>
   ) {
-    this.tasks$ = this._store.select(state => state.TaskReducer);
-    this.currentTask$ = this._store.select(state => state.CurrentTaskReducer);
     this.reloadFromLs();
   }
 

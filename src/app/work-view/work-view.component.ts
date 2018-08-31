@@ -10,12 +10,12 @@ import { Task } from '../tasks/task';
   providers: [TaskService],
 })
 export class WorkViewComponent implements OnInit {
-  tasks$: Observable<Task[]>;
+  doneTasks$: Observable<Task[]>  = this._taskService.doneTasks$;
+  undoneTasks$: Observable<Task[]>  = this._taskService.undoneTasks$;
 
   constructor(private _taskService: TaskService) {
   }
 
   ngOnInit() {
-    this.tasks$ = this._taskService.tasks$;
   }
 }
