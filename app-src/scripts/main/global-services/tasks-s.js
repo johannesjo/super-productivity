@@ -76,7 +76,7 @@
       if (this.$rootScope.r.currentTask) {
         currentTask = _.find(this.$rootScope.r.tasks, (task) => {
           if (task.subTasks && task.subTasks.length > 0) {
-            let subTaskMatchTmp = _.find(task.subTasks, { id: this.$rootScope.r.currentTask.id });
+            let subTaskMatchTmp = _.find(task.subTasks, {id: this.$rootScope.r.currentTask.id});
             if (subTaskMatchTmp) {
               subTaskMatch = subTaskMatchTmp;
             }
@@ -99,7 +99,7 @@
 
       currentTask = _.find(this.$rootScope.r.tasks, (task) => {
         if (task.subTasks && task.subTasks.length > 0) {
-          let subTaskMatchTmp = _.find(task.subTasks, { id: taskToCheck.id });
+          let subTaskMatchTmp = _.find(task.subTasks, {id: taskToCheck.id});
           if (subTaskMatchTmp) {
             subTaskMatch = subTaskMatchTmp;
           }
@@ -133,6 +133,11 @@
       const doneBacklogTasks = this.getDoneBacklog();
       return _.find(this.$rootScope.r.tasks, ['id', taskId]) || _.find(this.$rootScope.r.backlogTasks, ['id', taskId]) || _.find(doneBacklogTasks, ['id', taskId]);
     }
+
+    getByOriginalIdFromBacklog(taskOriginalId) {
+      return _.find(this.$rootScope.r.backlogTasks, ['id', taskOriginalId]);
+    }
+
 
     isTaskWithOriginalIdExistant(originalId) {
       const allTasks = this.TasksUtil.flattenTasks(this.getAllTasks());
@@ -300,7 +305,21 @@
     addToday(task) {
       if (task && task.title) {
         const currentTask = this.$rootScope.r.currentTask;
-        const newTask = this.createTask(task);
+        let newTask = this.createTask(task);
+
+        const backlogSameOrigIdTaskIndex = newTask.originalId && _.findIndex(this.$rootScope.r.backlogTasks, (task_) => {
+          return task_.originalId === newTask.originalId;
+        });
+
+        // move backlog task if there is already one present
+        if (backlogSameOrigIdTaskIndex > -1) {
+          // reference
+          newTask = this.$rootScope.r.backlogTasks[backlogSameOrigIdTaskIndex];
+          // delete from backlog
+          this.$rootScope.r.backlogTasks.splice(backlogSameOrigIdTaskIndex, 1);
+          this.SimpleToast('INFO', 'Found a task with the same id in backlog and moved it to today\'s tasks.');
+        }
+
         if (currentTask) {
           // insert after current
           const indexOfCurrent = this.$rootScope.r.tasks.findIndex((task) => task.id === currentTask.id);
@@ -310,11 +329,10 @@
           this.$rootScope.r.tasks.unshift(newTask);
         }
 
-
         // this.SimpleToast('SUCCESS', 'Task "' + task.title + '" created.', 200);
 
         // return correct reference in today's list
-        return this.$rootScope.r.tasks[0];
+        return this.$rootScope.r.tasks[_.findIndex(this.$rootScope.r.tasks, (task_) => task_.id === newTask.id)];
       }
     }
 
@@ -441,7 +459,7 @@
                   if ((this.$rootScope.r.jiraSettings.isCheckToReAssignTicketOnTaskStart) &&
                     (!jiraTaskToHandle.originalAssigneeKey || jiraTaskToHandle.originalAssigneeKey !== this.$rootScope.r.jiraSettings.userName)) {
                     // ask if to assign to yourself or just ignore it
-                    this.Dialogs('JIRA_ASSIGN_TICKET', { task: jiraTaskToHandle })
+                    this.Dialogs('JIRA_ASSIGN_TICKET', {task: jiraTaskToHandle})
                       .then(() => {
                         moveInProgress(jiraTaskToHandle);
                       }, () => {
@@ -472,7 +490,7 @@
       this.$rootScope.r.currentTask = task;
 
       // broadcast event
-      this.$rootScope.$broadcast(this.EV.UPDATE_CURRENT_TASK, { task, isCallFromTimeTracking });
+      this.$rootScope.$broadcast(this.EV.UPDATE_CURRENT_TASK, {task, isCallFromTimeTracking});
     }
 
     removeTimeSpent(task, timeSpentToRemoveAsMoment) {
@@ -541,9 +559,9 @@
       }
       if (task.timeSpentOnDay[TODAY_STR]) {
         timeSpentCalculatedOnDay = moment.duration(task.timeSpentOnDay[TODAY_STR]);
-        timeSpentCalculatedOnDay.add(moment.duration({ milliseconds: timeSpentInMs }));
+        timeSpentCalculatedOnDay.add(moment.duration({milliseconds: timeSpentInMs}));
       } else {
-        timeSpentCalculatedOnDay = moment.duration({ milliseconds: timeSpentInMs });
+        timeSpentCalculatedOnDay = moment.duration({milliseconds: timeSpentInMs});
       }
 
       // assign values
