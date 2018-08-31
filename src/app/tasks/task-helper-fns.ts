@@ -1,6 +1,7 @@
 import * as moment from 'moment';
-import { durationFromString } from '../duration/duration-from-string.pipe';
-import { durationToString } from '../duration/duration-to-string.pipe';
+// TODO this needs to be improved
+import { durationFromString } from '../ui/duration/duration-from-string.pipe';
+import { durationToString } from '../ui/duration/duration-to-string.pipe';
 
 export const calcTotalTimeSpent = (timeSpentOnDay) => {
   const totalTimeSpent = moment.duration();

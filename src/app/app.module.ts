@@ -4,20 +4,6 @@ import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule, Routes } from '@angular/router';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import {
-  MatAutocompleteModule,
-  MatButtonModule,
-  MatCheckboxModule,
-  MatDatepickerModule,
-  MatDialogModule,
-  MatFormFieldModule,
-  MatIconModule,
-  MatInputModule,
-  MatNativeDateModule,
-  MatOptionModule,
-  MatProgressBarModule,
-  MatToolbarModule
-} from '@angular/material';
 import { DragulaModule } from 'ng2-dragula';
 // import { MarkdownToHtmlModule } from 'ng2-markdown-to-html';
 import { AppComponent } from './app.component';
@@ -28,13 +14,8 @@ import { AppComponent } from './app.component';
 import { TaskService } from './tasks/task.service';
 import { WorkViewComponent } from './work-view/work-view.component';
 import { TaskListComponent } from './tasks/task-list/task-list.component';
-import { EditOnClickComponent } from './edit-on-click/edit-on-click.component';
 import { TaskComponent } from './tasks/task/task.component';
-import { InlineMarkdownComponent } from './inline-markdown/inline-markdown.component';
 import { DialogTimeEstimateComponent } from './dialogs/dialog-time-estimate/dialog-time-estimate.component';
-import { InputDurationDirective } from './duration/input-duration.directive';
-import { DurationToStringPipe } from './duration/duration-to-string.pipe';
-import { DurationFromStringPipe } from './duration/duration-from-string.pipe';
 import { KeysPipe } from './helper/keys.pipe';
 import { ToArrayPipe } from './helper/to-array.pipe';
 import { StoreModule } from '@ngrx/store';
@@ -45,6 +26,7 @@ import { EffectsModule } from '@ngrx/effects';
 import { TaskEffects } from './tasks/task.effects';
 import { MarkdownModule } from 'ngx-markdown';
 import { AddTaskBarComponent } from './add-task-bar/add-task-bar.component';
+import { UiModule } from './ui/ui.module';
 
 export const appRoutes: Routes = [
   {path: 'work-view', component: WorkViewComponent},
@@ -69,17 +51,12 @@ export const appRoutes: Routes = [
     AddTaskBarComponent,
     WorkViewComponent,
     TaskListComponent,
-    EditOnClickComponent,
     TaskComponent,
-    InlineMarkdownComponent,
 
     // dialogs
     DialogTimeEstimateComponent,
 
-    InputDurationDirective,
 
-    DurationToStringPipe,
-    DurationFromStringPipe,
     KeysPipe,
     ToArrayPipe,
     AddTaskBarComponent
@@ -93,22 +70,9 @@ export const appRoutes: Routes = [
     FormsModule,
     ReactiveFormsModule,
     BrowserAnimationsModule,
+    UiModule,
     RouterModule.forRoot(appRoutes, {useHash: true}),
 
-    // material2
-    MatToolbarModule,
-    MatButtonModule,
-    MatCheckboxModule,
-    MatProgressBarModule,
-    MatDialogModule,
-    MatInputModule,
-    MatIconModule,
-    MatDatepickerModule,
-    MatNativeDateModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatAutocompleteModule,
-    MatOptionModule,
 
     // store stuff
     StoreModule.forRoot({
@@ -122,7 +86,6 @@ export const appRoutes: Routes = [
 
     // other
     DragulaModule,
-    MarkdownModule.forRoot(),
   ],
   providers: [TaskService],
   bootstrap: [AppComponent]
