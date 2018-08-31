@@ -82,7 +82,7 @@
     }
 
     _formatDate(date) {
-      return window.moment(date).format('DD-MM-YYYY * hh:mm:ss');
+      return window.moment(date).format('DD-MM-YYYY --- hh:mm:ss');
     }
 
     _checkForInitialUpdate() {
@@ -133,17 +133,23 @@
     }
 
     _confirmSaveDialog(remoteModified) {
+      const lastActiveLocal = this.$rootScope.r.lastActiveTime;
+
       return this.$mdDialog.show({
         template: `
 <md-dialog>
   <md-dialog-content>
     <div class="md-dialog-content">
       <h2 class="md-title" style="margin-top: 0">Overwrite unsaved data on Google Drive?</h2>
-      <p>There seem to be some changes on Google Drive, that you don\\'t have locally. Do you want to overwrite them anyway?</p>
+      <p>There seem to be some changes on Google Drive, that you don't have locally. Do you want to overwrite them anyway?</p>
       <table> 
         <tr>
           <td>Last modification of remote data:</td>
           <td> ${this._formatDate(remoteModified)}</td>
+        </tr>
+        <tr>
+          <td>Last modification of local data:</td>
+          <td> ${this._formatDate(lastActiveLocal)}</td>
         </tr>
         <tr>
           <td>Last sync to remote from this app instance:</td>
@@ -188,16 +194,58 @@
     }
 
     _confirmLoadDialog(remoteModified, lastActiveLocal) {
-      const confirm = this.$mdDialog.confirm()
-        .title('Overwrite local data with GDrive Update?')
-        .textContent(`
-        Update from Google Drive Backup. Local data seems to be newer than the remote data.  Overwrite unsaved local changes? All data will be lost forever. 
-        -- Last modification of remote data: ${this._formatDate(remoteModified)}
-        -- Last modification of local data: ${this._formatDate(lastActiveLocal)}`)
-        .ok('Please do it!')
-        .cancel('No');
+      return this.$mdDialog.show({
+        template: `
+<md-dialog>
+  <md-dialog-content>
+    <div class="md-dialog-content">
+      <h2 class="md-title" style="margin-top: 0">Overwrite local data with GDrive Update?</h2>
+      <p>Update from Google Drive Backup. <strong>Local data seems to be newer</strong> than the remote data.  Overwrite unsaved local changes? <strong>All data will be lost forever</strong>.</p>
+      <table> 
+        <tr>
+          <td>Last modification of remote data:</td>
+          <td> ${this._formatDate(remoteModified)}</td>
+        </tr>
+        <tr>
+          <td>Last modification of local data:</td>
+          <td> ${this._formatDate(lastActiveLocal)}</td>
+        </tr>
+      </table>
+    </div>
+  </md-dialog-content>
 
-      return this.$mdDialog.show(confirm);
+  <md-dialog-actions>
+    <md-button ng-click="loadFromRemote()" class="md-primary">
+      Please do it!
+    </md-button>
+    <md-button ng-click="saveToRemote()" class="md-primary">
+      Overwrite remote data instead
+    </md-button>
+    <md-button ng-click="cancel()" class="md-primary">
+      Abort
+    </md-button>
+  </md-dialog-actions>
+</md-dialog>`,
+        controller:
+        /* @ngInject */
+          ($mdDialog, $scope, GoogleDriveSync) => {
+            $scope.loadFromRemote = () => {
+              $mdDialog.hide();
+            };
+
+            $scope.saveToRemote = () => {
+              $mdDialog.cancel();
+              // we need some time so the promise is canceled
+              setTimeout(() => {
+                GoogleDriveSync.saveTo();
+              }, 100);
+            };
+
+            $scope.cancel = () => {
+              $mdDialog.cancel();
+            };
+          },
+      });
     }
 
     _confirmUsingExistingFileDialog(fileName) {
