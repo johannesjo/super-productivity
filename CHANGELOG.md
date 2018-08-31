@@ -1,3 +1,26 @@
+<a name="1.10.53"></a>
+## [1.10.53](https://github.com/johannesjo/super-productivity/compare/v1.10.52...v1.10.53) (2018-08-31)
+
+
+### Bug Fixes
+
+* google drive load from never working ([81cdf3f](https://github.com/johannesjo/super-productivity/commit/81cdf3f))
+* pomodoro timer not being precise [#107](https://github.com/johannesjo/super-productivity/issues/107) ([71c7bf1](https://github.com/johannesjo/super-productivity/commit/71c7bf1))
+
+
+### Features
+
+* add tick sound [#112](https://github.com/johannesjo/super-productivity/issues/112) ([5309de6](https://github.com/johannesjo/super-productivity/commit/5309de6))
+* fix syncing behaviour before quit ([fd68c77](https://github.com/johannesjo/super-productivity/commit/fd68c77))
+* if task with same original id exists in backlog use it instead of creating a new instance ([5084626](https://github.com/johannesjo/super-productivity/commit/5084626))
+* improve google drive sync dialogs ([ef4c9ff](https://github.com/johannesjo/super-productivity/commit/ef4c9ff))
+* improve performance ([9a41144](https://github.com/johannesjo/super-productivity/commit/9a41144))
+* make auto checking issues for updates optional ([29c0aa3](https://github.com/johannesjo/super-productivity/commit/29c0aa3))
+* prevent additional jira requests after a failed one ([4fb3030](https://github.com/johannesjo/super-productivity/commit/4fb3030))
+* remove trailing slash for jira url [#108](https://github.com/johannesjo/super-productivity/issues/108) ([8c37204](https://github.com/johannesjo/super-productivity/commit/8c37204))
+
+
+
 <a name="1.10.52"></a>
 ## [1.10.52](https://github.com/johannesjo/super-productivity/compare/v1.10.51...v1.10.52) (2018-08-18)
 
