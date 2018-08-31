@@ -13,6 +13,7 @@
   const MANUAL_PAUSE = 'MANUAL_PAUSE';
   const TICK_INTERVAL = 500;
   const DEFAULT_SOUND = 'snd/positive.ogg';
+  const DEFAULT_TICK_SOUND = 'snd/tick.mp3';
 
   class PomodoroButton {
     /* @ngInject */
@@ -245,6 +246,18 @@
 
       if (this.IS_ELECTRON) {
         this.sendUpdateToRemoteInterface();
+      }
+
+      if (this.config.isPlayTick) {
+        const st = parseInt(this.data.currentSessionTime, 10);
+        const last3digits = parseInt(st.toString().substr(-3), 10);
+
+        // interestingly our time string is just cut off when formatted, that's why we don't use this
+        // if (last3digits > 750 || last3digits < 250) {
+        // but this
+        if (last3digits > 250 && last3digits < 750) {
+          new Audio(DEFAULT_TICK_SOUND).play();
+        }
       }
     }
 

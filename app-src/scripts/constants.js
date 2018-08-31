@@ -164,6 +164,7 @@
           isManualContinue: false,
           isPlaySound: true,
           isGoToWorkView: false,
+          isPlayTick: false,
         },
         isDontMinimizeToTray: false,
         isNotifyWhenTimeEstimateExceeded: false,
