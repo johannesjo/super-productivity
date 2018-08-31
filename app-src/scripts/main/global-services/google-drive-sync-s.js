@@ -161,12 +161,14 @@
 
   <md-dialog-actions>
     <md-button ng-click="saveToRemote()" class="md-primary">
-      Overwrite remote data
+        <ng-md-icon icon="file_upload"
+                    aria-label="file_upload"></ng-md-icon> Overwrite remote data
     </md-button>
     <md-button ng-click="loadFromRemote()" class="md-primary">
-      Overwrite local data
+      <ng-md-icon icon="file_download"
+                    aria-label="file_download"></ng-md-icon> Overwrite local data
     </md-button>
-    <md-button ng-click="cancel()" class="md-primary">
+    <md-button ng-click="cancel()" class="md-primary md-warn">
       Abort
     </md-button>
   </md-dialog-actions>
@@ -216,12 +218,14 @@
 
   <md-dialog-actions>
     <md-button ng-click="saveToRemote()" class="md-primary">
-      Overwrite remote data
+      <ng-md-icon icon="file_upload"
+                    aria-label="file_upload"></ng-md-icon> Overwrite remote data
     </md-button>
     <md-button ng-click="loadFromRemote()" class="md-primary">
-      Overwrite local data
+        <ng-md-icon icon="file_download"
+                    aria-label="file_download"></ng-md-icon> Overwrite local data
     </md-button>
-    <md-button ng-click="cancel()" class="md-primary">
+    <md-button ng-click="cancel()" class="md-primary md-warn">
       Abort
     </md-button>
   </md-dialog-actions>
