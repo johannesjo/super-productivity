@@ -161,10 +161,10 @@
 
   <md-dialog-actions>
     <md-button ng-click="saveToRemote()" class="md-primary">
-      Please do it!
+      Overwrite remote data
     </md-button>
     <md-button ng-click="loadFromRemote()" class="md-primary">
-      Load remote data instead
+      Overwrite local data
     </md-button>
     <md-button ng-click="cancel()" class="md-primary">
       Abort
@@ -215,11 +215,11 @@
   </md-dialog-content>
 
   <md-dialog-actions>
-    <md-button ng-click="loadFromRemote()" class="md-primary">
-      Please do it!
-    </md-button>
     <md-button ng-click="saveToRemote()" class="md-primary">
-      Overwrite remote data instead
+      Overwrite remote data
+    </md-button>
+    <md-button ng-click="loadFromRemote()" class="md-primary">
+      Overwrite local data
     </md-button>
     <md-button ng-click="cancel()" class="md-primary">
       Abort
