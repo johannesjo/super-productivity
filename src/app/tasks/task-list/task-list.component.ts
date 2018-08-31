@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, Input, OnInit } from '@angular/core';
 import { Observable } from 'rxjs';
-import { TaskService } from './task.service';
-import { Task } from './task';
+import { TaskService } from '../task.service';
+import { Task } from '../task';
 import { DragulaService } from 'ng2-dragula';
 import shortid from 'shortid';
 

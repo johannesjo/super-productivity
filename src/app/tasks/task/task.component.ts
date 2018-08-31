@@ -1,12 +1,12 @@
 import { Component, DoCheck, HostBinding, Input, OnInit } from '@angular/core';
-import { TaskService } from './task.service';
+import { TaskService } from '../task.service';
 import { Observable } from 'rxjs';
 import { DragulaService } from 'ng2-dragula';
-import { Task } from './task';
+import { Task } from '../task';
 import shortid from 'shortid';
 import { MatDialog } from '@angular/material';
-import { DialogTimeEstimateComponent } from '../dialogs/dialog-time-estimate/dialog-time-estimate.component';
-import { expandAnimation } from '../animations/expand.ani';
+import { DialogTimeEstimateComponent } from '../../dialogs/dialog-time-estimate/dialog-time-estimate.component';
+import { expandAnimation } from '../../animations/expand.ani';
 
 // import {Task} from './task'
 
