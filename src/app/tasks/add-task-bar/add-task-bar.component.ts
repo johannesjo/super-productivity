@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { Observable } from 'rxjs/Rx';
 import { map, startWith } from 'rxjs/internal/operators';
-import { TaskService } from '../tasks/task.service';
+import { TaskService } from '../task.service';
 
 @Component({
   selector: 'add-task-bar',
