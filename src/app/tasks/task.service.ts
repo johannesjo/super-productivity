@@ -3,28 +3,17 @@ import { Observable } from 'rxjs';
 import { Task } from './task';
 import { Store } from '@ngrx/store';
 import 'rxjs/add/operator/map';
-import {
-  ADD_SUB_TASK,
-  ADD_TASK,
-  DELETE_TASK,
-  RELOAD_FROM_LS,
-  SET_CURRENT_TASK,
-  SET_TASK_DONE,
-  SET_TASK_UNDONE,
-  SYNC,
-  UNSET_CURRENT_TASK,
-  UPDATE_TASK,
-} from './task.actions';
-import { getTasks } from './task.selectors';
-import { getCurrentTask } from './task.selectors';
+import { getTasks } from './store/task.selectors';
+import { getCurrentTask } from './store/task.selectors';
+import { TaskActionTypes } from './store/task.actions';
 
 
 @Injectable()
 export class TaskService {
   currentTask$: Observable<string> = this._store.select(getCurrentTask);
   tasks$: Observable<Task[]> = this._store.select(getTasks);
-  undoneTasks$: Observable<Task[]> = this.tasks$.map((tasks) => tasks.filter((task: Task) => !task.isDone));
-  doneTasks$: Observable<Task[]> = this.tasks$.map((tasks) => tasks.filter((task: Task) => task.isDone));
+  undoneTasks$: Observable<Task[]> = this.tasks$.map((tasks) => tasks && tasks.filter((task: Task) => !task.isDone));
+  doneTasks$: Observable<Task[]> = this.tasks$.map((tasks) => tasks && tasks.filter((task: Task) => task.isDone));
 
   constructor(
     private _store: Store<any>
@@ -34,19 +23,19 @@ export class TaskService {
 
   reloadFromLs() {
     this._store.dispatch({
-      type: RELOAD_FROM_LS
+      type: TaskActionTypes.ReloadFromLs
     });
   }
 
   sync() {
     this._store.dispatch({
-      type: SYNC
+      type: TaskActionTypes.Sync
     });
   }
 
   addTask(title: string) {
     this._store.dispatch({
-      type: ADD_TASK,
+      type: TaskActionTypes.AddTask,
       payload: {
         title,
         isDone: false
@@ -56,7 +45,7 @@ export class TaskService {
 
   deleteTask(taskId: string) {
     this._store.dispatch({
-      type: DELETE_TASK,
+      type: TaskActionTypes.DeleteTask,
       payload: taskId
     });
   }
@@ -64,7 +53,7 @@ export class TaskService {
 
   updateTask(taskId: string, changedFields: any) {
     this._store.dispatch({
-      type: UPDATE_TASK,
+      type: TaskActionTypes.UpdateTask,
       payload: {
         id: taskId,
         changedFields: changedFields
@@ -74,27 +63,27 @@ export class TaskService {
 
   setCurrentTask(taskId: string) {
     this._store.dispatch({
-      type: SET_CURRENT_TASK,
+      type: TaskActionTypes.SetCurrentTask,
       payload: taskId,
     });
   }
 
   pauseCurrentTask() {
     this._store.dispatch({
-      type: UNSET_CURRENT_TASK,
+      type: TaskActionTypes.UnsetCurrentTask,
     });
   }
 
   setTaskDone(taskId: string) {
     this._store.dispatch({
-      type: SET_TASK_DONE,
+      type: TaskActionTypes.SetTaskDone,
       payload: taskId,
     });
   }
 
   setTaskUnDone(taskId: string) {
     this._store.dispatch({
-      type: SET_TASK_UNDONE,
+      type: TaskActionTypes.SetTaskUndone,
       payload: taskId,
     });
   }
@@ -102,7 +91,7 @@ export class TaskService {
 
   addSubTask(parentTask: Task) {
     this._store.dispatch({
-      type: ADD_SUB_TASK,
+      type: TaskActionTypes.AddSubTask,
       payload: parentTask
     });
   }

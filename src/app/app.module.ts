@@ -6,15 +6,14 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { AppComponent } from './app.component';
 import { TaskService } from './tasks/task.service';
 import { StoreModule } from '@ngrx/store';
-import { TaskReducer } from './tasks/task.reducer';
-import { CurrentTaskReducer } from './tasks/current-task.reducer';
-import { metaReducers } from './meta.reducer';
-import { EffectsModule } from '@ngrx/effects';
-import { TaskEffects } from './tasks/task.effects';
 import { UiModule } from './ui/ui.module';
 import { TasksModule } from './tasks/tasks.module';
 import { WorkViewModule } from './work-view/work-view.module';
 import { APP_ROUTES } from './app.routes';
+import { StoreDevtoolsModule } from '@ngrx/store-devtools';
+import { environment } from '../environments/environment';
+import { TaskEffects } from './tasks/store/task.effects';
+import { EffectsModule } from '@ngrx/effects';
 
 
 @NgModule({
@@ -29,13 +28,11 @@ import { APP_ROUTES } from './app.routes';
     RouterModule.forRoot(APP_ROUTES, {useHash: true}),
 
     // store stuff
-    StoreModule.forRoot({
-        TaskReducer,
-        CurrentTaskReducer
-      },
-      {metaReducers}
-    ),
-    EffectsModule.forRoot([TaskEffects]),
+    // StoreModule.forRoot(reducers, {metaReducers}),
+    // NOTE: both need to be present to use forFeature stores
+    StoreModule.forRoot({}),
+    EffectsModule.forRoot([]),
+    !environment.production ? StoreDevtoolsModule.instrument() : [],
 
 
     // local

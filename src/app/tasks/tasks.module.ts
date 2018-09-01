@@ -11,6 +11,10 @@ import { AddTaskBarComponent } from './add-task-bar/add-task-bar.component';
 import { DialogTimeEstimateComponent } from './dialogs/dialog-time-estimate/dialog-time-estimate.component';
 import { ToArrayPipe } from '../helper/to-array.pipe';
 import { KeysPipe } from '../helper/keys.pipe';
+import { StoreModule } from '@ngrx/store';
+import * as fromTask from './store/task.reducer';
+import { TaskEffects } from './store/task.effects';
+import { EffectsModule } from '@ngrx/effects';
 
 @NgModule({
   imports: [
@@ -19,6 +23,8 @@ import { KeysPipe } from '../helper/keys.pipe';
     FormsModule,
     ReactiveFormsModule,
     DragulaModule,
+    StoreModule.forFeature('task', fromTask.reducer),
+    EffectsModule.forFeature([TaskEffects]),
   ],
   declarations: [
     TaskComponent,
