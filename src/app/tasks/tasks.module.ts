@@ -2,7 +2,6 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TaskComponent } from './task/task.component';
 import { TaskListComponent } from './task-list/task-list.component';
-import { TaskService } from './task.service';
 import { UiModule } from '../ui/ui.module';
 import { ReactiveFormsModule } from '@angular/forms';
 import { FormsModule } from '@angular/forms';
@@ -15,6 +14,8 @@ import { StoreModule } from '@ngrx/store';
 import * as fromTask from './store/task.reducer';
 import { TaskEffects } from './store/task.effects';
 import { EffectsModule } from '@ngrx/effects';
+import { TaskService } from './task.service';
+import { TASK_FEATURE_NAME } from './task.const';
 
 @NgModule({
   imports: [
@@ -23,7 +24,10 @@ import { EffectsModule } from '@ngrx/effects';
     FormsModule,
     ReactiveFormsModule,
     DragulaModule,
-    StoreModule.forFeature('task', fromTask.reducer),
+    StoreModule.forFeature(TASK_FEATURE_NAME, {
+      taskFeatureReducer: fromTask.taskFeatureReducer,
+      tasks: fromTask.taskReducer
+    }),
     EffectsModule.forFeature([TaskEffects]),
   ],
   declarations: [
@@ -34,12 +38,16 @@ import { EffectsModule } from '@ngrx/effects';
     KeysPipe,
     ToArrayPipe,
   ],
-  exports:[
+  exports: [
     TaskComponent,
     TaskListComponent,
     AddTaskBarComponent,
     DialogTimeEstimateComponent,
-  ]
+  ],
+  providers: [
+    TaskService
+  ],
+
 })
 export class TasksModule {
 }

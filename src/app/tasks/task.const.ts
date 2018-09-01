@@ -1,0 +1,1 @@
+export const TASK_FEATURE_NAME = 'tasks';

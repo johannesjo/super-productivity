@@ -3,21 +3,25 @@ import { Observable } from 'rxjs';
 import { Task } from './task';
 import { Store } from '@ngrx/store';
 import 'rxjs/add/operator/map';
-import { getTasks } from './store/task.selectors';
-import { getCurrentTask } from './store/task.selectors';
+import { selectTasks } from './store/task.selectors';
+import { selectCurrentTask } from './store/task.selectors';
 import { TaskActionTypes } from './store/task.actions';
+import { select } from '@ngrx/store';
 
 
 @Injectable()
 export class TaskService {
-  currentTask$: Observable<string> = this._store.select(getCurrentTask);
-  tasks$: Observable<Task[]> = this._store.select(getTasks);
+  currentTask$: Observable<string> = this._store.pipe(select(selectCurrentTask));
+  tasks$: Observable<Task[]> = this._store.pipe(select(selectTasks));
   undoneTasks$: Observable<Task[]> = this.tasks$.map((tasks) => tasks && tasks.filter((task: Task) => !task.isDone));
   doneTasks$: Observable<Task[]> = this.tasks$.map((tasks) => tasks && tasks.filter((task: Task) => task.isDone));
 
   constructor(
     private _store: Store<any>
   ) {
+    // TODO find out why this gets initialized multiple times
+    console.log('SERVICE constructor');
+
     this.reloadFromLs();
   }
 
