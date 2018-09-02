@@ -11,7 +11,7 @@ import { select } from '@ngrx/store';
 
 @Injectable()
 export class TaskService {
-  currentTask$: Observable<string> = this._store.pipe(select(selectCurrentTask));
+  currentTaskId$: Observable<string> = this._store.pipe(select(selectCurrentTask));
   tasks$: Observable<Task[]> = this._store.pipe(select(selectTasks));
   undoneTasks$: Observable<Task[]> = this.tasks$.map((tasks) => tasks && tasks.filter((task: Task) => !task.isDone));
   doneTasks$: Observable<Task[]> = this.tasks$.map((tasks) => tasks && tasks.filter((task: Task) => task.isDone));

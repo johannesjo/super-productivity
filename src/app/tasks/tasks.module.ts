@@ -25,7 +25,7 @@ import { TASK_FEATURE_NAME } from './task.const';
     ReactiveFormsModule,
     DragulaModule,
     StoreModule.forFeature(TASK_FEATURE_NAME, {
-      taskFeatureReducer: fromTask.taskFeatureReducer,
+      taskSharedState: fromTask.taskSharedStateReducer,
       tasks: fromTask.taskReducer
     }),
     EffectsModule.forFeature([TaskEffects]),

@@ -26,7 +26,7 @@ export class TaskComponent implements OnInit, DoCheck {
   @HostBinding('class.is-done') isDone = false;
   @HostBinding('class.is-current') isCurrent = false;
   isShowNotes = false;
-  currentTask$: Observable<string>;
+  currentTaskId$: Observable<string>;
   subTaskListId: string;
 
   constructor(private taskService: TaskService, private _dragulaService: DragulaService, public dialog: MatDialog) {
@@ -37,8 +37,8 @@ export class TaskComponent implements OnInit, DoCheck {
   }
 
   ngOnInit() {
-    this.currentTask$ = this.taskService.currentTask$;
-    this.currentTask$.subscribe((val) => {
+    this.currentTaskId$ = this.taskService.currentTaskId$;
+    this.currentTaskId$.subscribe((val) => {
       this.isCurrent = (this.task && val === this.task.id);
     });
 

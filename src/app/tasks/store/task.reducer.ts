@@ -4,28 +4,42 @@ import { Task } from '../task';
 import { calcTotalTimeSpent } from '../task-helper-fns';
 import shortid from 'shortid';
 
+
 export interface TasksState extends Array<Task> {
 }
 
-export interface TaskFeatureState {
-  currentTask: string;
+export interface TaskSharedState {
+  currentTaskId: string;
+}
+
+export interface TaskModuleState {
+  taskSharedState: TaskSharedState;
   tasks: TasksState;
 }
 
-export const INITIAL_FEATURE_STATE: TaskFeatureState = {
-  currentTask: undefined,
-  tasks: []
+
+export const INITIAL_FEATURE_STATE: TaskSharedState = {
+  currentTaskId: undefined,
 };
 
 
-export function taskFeatureReducer(state = INITIAL_FEATURE_STATE, action: TaskActions): TaskFeatureState {
-  return state;
+export function taskSharedStateReducer(state = INITIAL_FEATURE_STATE, action: TaskActions): TaskSharedState {
+  console.log(action, state);
+
+  switch (action.type) {
+    case TaskActionTypes.SetCurrentTask:
+      return Object.assign({}, state, {currentTaskId: action.payload});
+    case TaskActionTypes.UnsetCurrentTask:
+      return Object.assign({}, state, {currentTaskId: undefined});
+    default:
+      return state;
+  }
 }
 
 
-export function taskReducer(state = INITIAL_FEATURE_STATE.tasks, action: TaskActions): TasksState {
+export function taskReducer(state = [], action: TaskActions): TasksState {
+  console.log(action, state);
   switch (action.type) {
-
     // case TaskActionTypes.ReloadFromLs:
     // const TASKS_FROM_LS = JSON.parse(localStorage.getItem(LS_TASKS));
 
