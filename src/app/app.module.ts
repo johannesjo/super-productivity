@@ -12,6 +12,8 @@ import { APP_ROUTES } from './app.routes';
 import { StoreDevtoolsModule } from '@ngrx/store-devtools';
 import { environment } from '../environments/environment';
 import { EffectsModule } from '@ngrx/effects';
+import { AppStorageModule } from './shared/app-storage/app-storage.module';
+import { rootReducer } from './root-store';
 
 
 @NgModule({
@@ -28,7 +30,7 @@ import { EffectsModule } from '@ngrx/effects';
     // store stuff
     // StoreModule.forRoot(reducers, {metaReducers}),
     // NOTE: both need to be present to use forFeature stores
-    StoreModule.forRoot({}),
+    StoreModule.forRoot({rootReducer: rootReducer}),
     EffectsModule.forRoot([]),
     !environment.production ? StoreDevtoolsModule.instrument() : [],
 
@@ -37,6 +39,7 @@ import { EffectsModule } from '@ngrx/effects';
     UiModule,
     TasksModule,
     WorkViewModule,
+    AppStorageModule,
   ],
   // providers: [TaskService],
   bootstrap: [AppComponent]
