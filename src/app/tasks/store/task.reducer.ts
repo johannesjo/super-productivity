@@ -1,9 +1,8 @@
 import { TaskActions } from './task.actions';
 import { TaskActionTypes } from './task.actions';
 import { Task } from '../task';
-import { calcTotalTimeSpent } from '../task-helper-fns';
 import shortid from 'shortid';
-
+import { calcTotalTimeSpent } from '../util/calc-total-time-spent';
 
 export interface TasksState extends Array<Task> {
 }
