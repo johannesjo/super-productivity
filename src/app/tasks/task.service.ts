@@ -2,11 +2,11 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Task } from './task';
 import { Store } from '@ngrx/store';
+import { select } from '@ngrx/store';
 import 'rxjs/add/operator/map';
 import { selectTasks } from './store/task.selectors';
 import { selectCurrentTask } from './store/task.selectors';
 import { TaskActionTypes } from './store/task.actions';
-import { select } from '@ngrx/store';
 
 
 @Injectable()

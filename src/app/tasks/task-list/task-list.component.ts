@@ -1,5 +1,7 @@
 import { ChangeDetectionStrategy, Component, Input, OnInit } from '@angular/core';
+import { OnDestroy } from '@angular/core';
 import { Observable } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { TaskService } from '../task.service';
 import { Task } from '../task';
 import { DragulaService } from 'ng2-dragula';
@@ -13,26 +15,30 @@ import shortid from 'shortid';
   changeDetection: ChangeDetectionStrategy.OnPush
 
 })
-export class TaskListComponent implements OnInit {
+export class TaskListComponent implements OnInit, OnDestroy {
   @Input() tasks$: Observable<[Task]>;
   @Input() filterArgs: string;
-
   taskListId: string;
+  private subs: Subscription[] = [];
 
-  constructor(private _taskService: TaskService, private _dragulaService: DragulaService) {
+  constructor(private _taskService: TaskService,
+              private _dragulaService: DragulaService) {
+  }
+
+  ngOnInit() {
     this.taskListId = shortid();
-
-    _dragulaService.dropModel.subscribe(() => {
-      _taskService.sync();
-    });
-    _dragulaService.setOptions(this.taskListId, {
+    this._dragulaService.setOptions(this.taskListId, {
       moves: function (el, container, handle) {
         return handle.className.indexOf('handle-par') > -1;
       }
     });
+    this.subs.push(this._dragulaService.dropModel.subscribe(() => {
+      this._taskService.sync();
+    }));
   }
 
-  ngOnInit() {
+  ngOnDestroy() {
+    this.subs.forEach((sub) => sub && sub.unsubscribe());
   }
 
   trackByFn(i: number, task: Task) {
