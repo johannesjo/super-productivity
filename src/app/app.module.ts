@@ -12,7 +12,6 @@ import { APP_ROUTES } from './app.routes';
 import { StoreDevtoolsModule } from '@ngrx/store-devtools';
 import { environment } from '../environments/environment';
 import { EffectsModule } from '@ngrx/effects';
-import { AppStorageModule } from './shared/app-storage/app-storage.module';
 import { rootReducer } from './root-store';
 
 
@@ -39,7 +38,6 @@ import { rootReducer } from './root-store';
     UiModule,
     TasksModule,
     WorkViewModule,
-    AppStorageModule,
   ],
   // providers: [TaskService],
   bootstrap: [AppComponent]

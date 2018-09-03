@@ -3,6 +3,8 @@ import { TaskActionTypes } from './task.actions';
 import { Task } from '../task';
 import shortid from 'shortid';
 import { calcTotalTimeSpent } from '../util/calc-total-time-spent';
+import { LS_CURRENT_TASK_ID, LS_TASKS } from '../task.const';
+import { loadFromLs } from '../../shared/local-storage';
 
 export interface TasksState extends Array<Task> {
 }
@@ -23,9 +25,10 @@ export const INITIAL_FEATURE_STATE: TaskSharedState = {
 
 
 export function taskSharedStateReducer(state = INITIAL_FEATURE_STATE, action: TaskActions): TaskSharedState {
-  console.log(action, state);
-
   switch (action.type) {
+    case TaskActionTypes.ReloadFromLs:
+      const currentTaskId: string = loadFromLs(LS_CURRENT_TASK_ID);
+      return Object.assign({}, state, {currentTaskId: currentTaskId});
     case TaskActionTypes.SetCurrentTask:
       return Object.assign({}, state, {currentTaskId: action.payload});
     case TaskActionTypes.UnsetCurrentTask:
@@ -39,17 +42,13 @@ export function taskSharedStateReducer(state = INITIAL_FEATURE_STATE, action: Ta
 export function taskReducer(state = [], action: TaskActions): TasksState {
   console.log(action, state);
   switch (action.type) {
-    // case TaskActionTypes.ReloadFromLs:
-    // const TASKS_FROM_LS = JSON.parse(localStorage.getItem(LS_TASKS));
-
-    // TODO should be done somewhere else
-    // create local storage if not done already
-    // if (!TASKS_FROM_LS || !Array.isArray(TASKS_FROM_LS)) {
-    //   localStorage.setItem(LS_TASKS, JSON.stringify(INITIAL_FEATURE_STATE));
-    // }
-
-    // const lsTasks: [Task] = parseFromLs(LS_TASKS);
-    // return [...lsTasks];
+    case TaskActionTypes.ReloadFromLs:
+      const lsTasks: [Task] = loadFromLs(LS_TASKS);
+      if (Array.isArray(lsTasks)) {
+        return [...lsTasks];
+      } else {
+        return state;
+      }
 
     case TaskActionTypes.AddTask:
       const newTask: Task = Object.assign(action.payload, {id: shortid()});
