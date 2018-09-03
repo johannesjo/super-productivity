@@ -169,7 +169,7 @@
     }
 
     static isJiraTask(task) {
-      return task && task.originalType === ISSUE_TYPE;
+      return (task && task.originalType === ISSUE_TYPE);
     }
 
     updateTaskWithIssue(task, issue) {
@@ -262,6 +262,7 @@
 
       if (task && !Jira.isJiraTask(task)) {
         this.SimpleToast('ERROR', 'Jira Request failed: Not a real ' + ISSUE_TYPE + ' issue.');
+        console.error(task);
         return this.$q.reject('Jira: Not a real ' + ISSUE_TYPE + ' issue.');
       } else if (!this.$window.navigator.onLine) {
         this.SimpleToast('ERROR', 'Not connected to the Internet.');
