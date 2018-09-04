@@ -111,12 +111,18 @@
         <i class="material-icons delete-icon"
            aria-label="delete">delete_forever</i>
       </button>
-      <mat-checkbox [(ngModel)]="isDone"
-                    tabindex="2"
-                    (ngModelChange)="onTaskDoneChanged(task.id, isDone)"
-                    aria-label="un-/mark as done"
-                    ngDefaultControl>
-      </mat-checkbox>
+      <button mat-icon-button
+              (click)="toggleTaskDone(task.id, isDone)"
+              class="ico-btn mark-as-done-btn"
+              tabindex="2"
+              aria-label="un-/mark as done">
+        <i class="material-icons delete-icon"
+           *ngIf="task.isDone"
+           aria-label="Mark as undone">undo</i>
+        <i class="material-icons delete-icon"
+           *ngIf="!task.isDone"
+           aria-label="Mark as done">check</i>
+      </button>
     </div>
   </div>
 

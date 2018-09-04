@@ -90,8 +90,8 @@ export class TaskComponent implements OnInit, DoCheck {
   }
 
   // TODO refactor to action ?
-  onTaskDoneChanged(taskId: string, isDone: boolean) {
-    if (isDone) {
+  toggleTaskDone(taskId: string, isDone: boolean) {
+    if (!isDone) {
       this.taskService.setTaskDone(taskId);
     } else {
       this.taskService.setTaskUnDone(taskId);
