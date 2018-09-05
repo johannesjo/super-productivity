@@ -96,6 +96,13 @@
         </md-switch>
       </div>
 
+      <div>
+        <md-switch ng-model="vm.settings.isShowComponents"
+                   aria-label="Also show components for issues in task list">
+          Also show components for issues in task list
+        </md-switch>
+      </div>
+
       <md-input-container class="md-block"
                           ng-if="vm.settings.isEnabledAutoAdd">
         <label>JQL Query for Auto Adding Tasks to Backlog</label>

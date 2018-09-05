@@ -355,7 +355,8 @@
         originalTimeSpent: task.originalTimeSpent,
         originalAttachment: task.originalAttachment,
         originalComments: task.originalComments,
-        originalUpdated: task.originalUpdated
+        originalUpdated: task.originalUpdated,
+        originalComponents: task.originalComponents
       };
 
       if (task.originalLink && task.originalType) {

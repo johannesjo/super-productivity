@@ -243,6 +243,7 @@
         isCheckToReAssignTicketOnTaskStart: true,
         isUpdateIssueFromLocal: false,
         isAddWorklogOnSubTaskDone: true,
+        isShowComponents: true,
         defaultTransitionInProgress: undefined,
         defaultTransitionDone: undefined,
         jqlQuery: 'assignee = currentUser() AND resolution = Unresolved ORDER BY updatedDate DESC',

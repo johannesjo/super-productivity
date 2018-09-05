@@ -26,7 +26,8 @@
     'status',
     'attachment',
     'comment',
-    'updated'
+    'updated',
+    'components',
   ];
 
   /* @ngInject */
@@ -133,6 +134,13 @@
       });
     }
 
+
+    static mapComponents(issue) {
+      return issue.fields.components && issue.fields.components.map((component) => {
+        return component.name;
+      });
+    }
+
     static mapAttachments(issue) {
       return issue.fields.attachment && issue.fields.attachment.map((attachment) => {
         return attachment.content;
@@ -211,6 +219,7 @@
         originalTimeSpent: issue.fields.timespent && moment.duration({
           seconds: issue.fields.timespent
         }),
+        originalComponents: Jira.mapComponents(issue)
       };
     }
 

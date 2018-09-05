@@ -38,6 +38,8 @@
       this.$animate = $animate;
       this.Jira = Jira;
       this.$rootScope = $rootScope;
+      this.r = this.$rootScope.r;
+
       this.lastFocusedTaskEl = undefined;
       this.checkKeyCombo = CheckShortcutKeyCombo;
       this.Util = Util;
@@ -109,7 +111,7 @@
         },
         orderChanged: function(event) {
           if (angular.isFunction(this.onOrderChanged)) {
-            this.onOrderChanged({ $event: event });
+            this.onOrderChanged({$event: event});
           }
         },
         allowDuplicates: false,
@@ -168,7 +170,7 @@
     }
 
     estimateTime(task) {
-      this.Dialogs('TIME_ESTIMATE', { task })
+      this.Dialogs('TIME_ESTIMATE', {task})
         .then(this.boundFocusLastTaskEl, this.boundFocusLastTaskEl);
     }
 
@@ -253,7 +255,7 @@
       }
 
       if (angular.isFunction(this.onTaskDoneChangedCallback)) {
-        this.onTaskDoneChangedCallback({ task, taskList: this.tasks });
+        this.onTaskDoneChangedCallback({task, taskList: this.tasks});
       }
     }
 
@@ -492,7 +494,7 @@
     }
 
     addLocalAttachment(task) {
-      this.Dialogs('EDIT_GLOBAL_LINK', { link: {}, isNew: true, task }, true);
+      this.Dialogs('EDIT_GLOBAL_LINK', {link: {}, isNew: true, task}, true);
     }
 
     togglePlay(task) {

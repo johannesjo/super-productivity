@@ -119,6 +119,13 @@
         </div>
       </div>
 
+      <div ng-if="$ctrl.r.jiraSettings.isShowComponents && task.originalComponents.length"
+           class="tags">
+        <div class="tag" ng-repeat="componentName in task.originalComponents"
+             ng-bind="componentName"></div>
+      </div>
+
+
       <progress-bar progress="task.progress"
                     mdx-paint-bg="primary"></progress-bar>
 
@@ -139,12 +146,13 @@
               </div>
               <div ng-repeat="change in changelogEntry.items">
                 <strong ng-bind="::change.field"></strong>
-                <span ng-if="change.toString.length"><em>changed to:</em> <span ng-bind="::change.toString"></span></span></span>
+                <span ng-if="change.toString.length"><em>changed to:</em> <span
+                  ng-bind="::change.toString"></span></span></span>
               </div>
             </li>
           </ul>
           <md-button class="md-raised"
-                  ng-click="task.isUpdated=false;task.originalChangelog=undefined;task.showNotes=false">
+                     ng-click="task.isUpdated=false;task.originalChangelog=undefined;task.showNotes=false">
             <ng-md-icon icon="delete"></ng-md-icon>
             Hide changes
           </md-button>
