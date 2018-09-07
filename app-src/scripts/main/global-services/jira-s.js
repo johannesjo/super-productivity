@@ -712,7 +712,11 @@
       }
 
       // check if the user assigned matches the current user
-      if (originalTask && originalTask.originalAssigneeKey && originalTask.originalAssigneeKey !== this.$rootScope.r.jiraSettings.userAssigneeName && !originalTask.isDone && this.$rootScope.r.jiraSettings.isCheckToReAssignTicketOnTaskStart) {
+      if (originalTask &&
+        originalTask.originalAssigneeKey &&
+        originalTask.originalAssigneeKey !== this.$rootScope.r.jiraSettings.userAssigneeName &&
+        !originalTask.isDone &&
+        this.$rootScope.r.jiraSettings.isCheckToReAssignTicketOnTaskStart) {
         const msg = '"' + originalTask.originalKey + '" is assigned to "' + originalTask.originalAssigneeKey + '".';
         this.Notifier({
           title: 'Jira issue ' + originalTask.originalKey + ' is assigned to another user',
@@ -735,45 +739,20 @@
       }
     }
 
-    checkUpdatesForTaskOrParent(task, isNoNotify) {
+    checkAndHandleUpdatesForTicket(task) {
+      const defer = this.$q.defer();
       const isFailedPreCheck = this.preCheck(task);
       if (isFailedPreCheck) {
         return isFailedPreCheck;
       }
 
-      let isCallMade = false;
-      const Tasks = this.$injector.get('Tasks');
-      const defer = this.$q.defer();
-      if (task) {
-        if (!task.originalKey && task.parentId) {
-          let parentTask = Tasks.getById(task.parentId);
-          if (parentTask.originalKey) {
-            // set task to parent task
-            task = parentTask;
-          }
-        }
-        if (Jira.isJiraTask(task)) {
-          this.checkUpdatesForTicket(task, isNoNotify)
-            .then((updatedTask) => {
-              this.taskIsUpdatedHandler(updatedTask, task);
-              if (updatedTask) {
-                defer.resolve(updatedTask);
-              } else {
-                defer.resolve(task);
-              }
-            }, () => {
-              // just resolve original
-              defer.resolve(task);
-            });
-
-          isCallMade = true;
-        }
-      }
-
-      if (!isCallMade) {
-        // just resolve original
-        defer.resolve(task);
-      }
+      this.checkUpdatesForTicket(task)
+        .then((updatedTask) => {
+          this.taskIsUpdatedHandler(updatedTask, task);
+          defer.resolve(true);
+        }, () => {
+          defer.resolve(true);
+        });
 
       return defer.promise;
     }

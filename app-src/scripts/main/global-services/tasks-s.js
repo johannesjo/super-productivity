@@ -455,7 +455,7 @@
                 jiraTaskToHandle = parentTask;
               }
 
-              this.Jira.checkUpdatesForTaskOrParent(task)
+              this.Jira.checkAndHandleUpdatesForTicket(jiraTaskToHandle)
                 .then(() => {
                   if ((this.$rootScope.r.jiraSettings.isCheckToReAssignTicketOnTaskStart) &&
                     (!jiraTaskToHandle.originalAssigneeKey || jiraTaskToHandle.originalAssigneeKey !== this.$rootScope.r.jiraSettings.userName)) {
