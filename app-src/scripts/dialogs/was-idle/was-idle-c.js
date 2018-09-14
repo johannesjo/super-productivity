@@ -14,17 +14,12 @@
     .controller('WasIdleCtrl', WasIdleCtrl);
 
   /* @ngInject */
-  function WasIdleCtrl($mdDialog, $rootScope, $scope, Tasks, $window, initialIdleTime, minIdleTimeInMs, theme, $filter, $interval, TakeABreakReminder) {
-    const POLL_INTERVAL = 1000;
-
+  function WasIdleCtrl($mdDialog, $rootScope, Tasks, $window, initialIdleTime, theme, $filter, $interval, TakeABreakReminder, TimeTracking) {
     let vm = this;
     vm.theme = theme;
 
-    let realIdleTime = initialIdleTime;
-
-    // used to display only; we add minIdleTimeInMs because that is idleTime too
-    // even if it is tracked already
-    vm.idleTime = $window.moment.duration(realIdleTime, 'milliseconds').format('hh:mm:ss');
+    // used to display idle time
+    vm.TimeTracking = TimeTracking;
 
     vm.undoneTasks = Tasks.getUndoneToday(true);
     vm.selectedTask = $rootScope.r.currentTask || $rootScope.r.lastActiveTaskTask || undefined;
@@ -32,18 +27,11 @@
     vm.isShowTrackButResetTakeABreakTimer = TakeABreakReminder.isEnabled();
 
     vm.trackIdleToTask = (isResetTakeABreakTimer) => {
-      if (isResetTakeABreakTimer) {
-        TakeABreakReminder.resetCounter();
-      }
-
       if (vm.selectedTask && vm.selectedTask.id) {
-        // add the idle time in milliseconds + the minIdleTime that was
-        // not tracked or removed
-        Tasks.addTimeSpent(vm.selectedTask, realIdleTime);
-        // set current task to the selected one
-        Tasks.updateCurrent(vm.selectedTask);
-
-        $mdDialog.hide();
+        $mdDialog.hide({
+          isResetTakeABreakTimer,
+          selectedTask: vm.selectedTask
+        });
       }
     };
 
@@ -54,19 +42,5 @@
     vm.cancel = () => {
       $mdDialog.cancel();
     };
-
-    const idleStart = moment();
-    const poll = $interval(() => {
-      let now = moment();
-      realIdleTime = moment
-        .duration(now.diff(idleStart))
-        .add(initialIdleTime)
-        .asMilliseconds();
-      vm.idleTime = $window.moment.duration(realIdleTime, 'milliseconds').format('hh:mm:ss');
-    }, POLL_INTERVAL);
-
-    $scope.$on('$destroy', () => {
-      $interval.cancel(poll);
-    });
   }
 })();

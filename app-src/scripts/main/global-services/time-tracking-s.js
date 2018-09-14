@@ -15,9 +15,10 @@
 
   class TimeTracking {
     /* @ngInject */
-    constructor($rootScope, Tasks, Dialogs, TakeABreakReminder, TRACKING_INTERVAL, IS_ELECTRON, IS_EXTENSION, EV, $interval, ExtensionInterface, EstimateExceededChecker) {
+    constructor($rootScope, Tasks, Dialogs, TakeABreakReminder, TRACKING_INTERVAL, IS_ELECTRON, IS_EXTENSION, EV, $interval, ExtensionInterface, EstimateExceededChecker, $window) {
       this.$rootScope = $rootScope;
       this.$interval = $interval;
+      this.$window = $window;
       this.Tasks = Tasks;
       this.Dialogs = Dialogs;
       this.TakeABreakReminder = TakeABreakReminder;
@@ -27,6 +28,9 @@
       this.IS_ELECTRON = IS_ELECTRON;
       this.IS_EXTENSION = IS_EXTENSION;
       this.EV = EV;
+
+      this.idlePollInterval = undefined;
+      this.idleTime = undefined;
     }
 
     init() {
@@ -112,26 +116,67 @@
 
         if (!this.isIdleDialogOpen) {
           this.isIdleDialogOpen = true;
+
+          this.initIdlePoll(idleTimeInMs);
           this.Dialogs('WAS_IDLE', {
             initialIdleTime: idleTimeInMs,
-            minIdleTimeInMs: minIdleTimeInMs,
           })
-            .then(() => {
+            .then((res) => {
               // if tracked
+              // ----------
+              console.log(res);
+              if (res.isResetTakeABreakTimer) {
+                this.TakeABreakReminder.resetCounter();
+              }
+              // add the idle time in milliseconds + the minIdleTime that was
+              // not tracked or removed
+              this.Tasks.addTimeSpent(res.selectedTask, this.idleTime);
+              // set current task to the selected one
+              this.Tasks.updateCurrent(res.selectedTask);
+
               this.TakeABreakReminder.isShown = true;
               this.isIdleDialogOpen = false;
+              this.cancelIdlePoll();
             }, () => {
               // if not tracked
               // unset currentSession.timeWorkedWithoutBreak
               this.TakeABreakReminder.resetCounter();
               this.TakeABreakReminder.isShown = true;
               this.isIdleDialogOpen = false;
+              this.cancelIdlePoll();
             });
         }
 
       } else {
         this.isIdle = false;
         this.$rootScope.$broadcast(this.EV.IS_BUSY);
+      }
+    }
+
+
+    initIdlePoll(idleTimeInMs) {
+      const POLL_INTERVAL = 1000;
+      const idleStart = this.$window.moment();
+
+      const initialIdleTime = idleTimeInMs;
+      let realIdleTime = idleTimeInMs;
+      this.idleTime = realIdleTime;
+
+      this.idlePollInterval = this.$interval(() => {
+        const now = this.$window.moment();
+        realIdleTime = this.$window.moment
+          .duration(now.diff(idleStart))
+          .add(initialIdleTime)
+          .asMilliseconds();
+        this.idleTime = realIdleTime;
+        console.log(realIdleTime);
+      }, POLL_INTERVAL);
+    }
+
+    cancelIdlePoll() {
+      if (this.idlePollInterval) {
+        this.$interval.cancel(this.idlePollInterval);
+        this.idleTime = 0;
       }
     }
   }
