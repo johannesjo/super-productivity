@@ -118,26 +118,35 @@ function init(params) {
   }
 }
 
+let isErrorShownOnce = false;
+
 if (!isDBusError) {
   module.exports = {
     init: init,
     setTask: (taskId, taskText) => {
-      if (isDBusError) {
+      // fail silently to prevent hundreds of error messages
+      if (isDBusError || isErrorShownOnce) {
         return;
       }
 
-      if (!iface) {
+      if (iface) {
         errorHandler('DBus: interface not ready yet');
-        return;
+        isErrorShownOnce = true;
+      } else {
+        iface.emit('taskChanged', taskId + '', taskText + '')
       }
-
-      iface.emit('taskChanged', taskId + '', taskText + '')
     },
     updatePomodoro: (isOnBreak, currentSessionTime, currentSessionInitialTime) => {
+      // fail silently to prevent hundreds of error messages
+      if (isDBusError || isErrorShownOnce) {
+        return;
+      }
+
       if (iface) {
         iface.emit('pomodoroUpdate', (isOnBreak ? 1 : 0), currentSessionTime, currentSessionInitialTime)
       } else {
         errorHandler('DBus: interface not ready yet');
+        isErrorShownOnce = true;
       }
     }
   };
