@@ -494,7 +494,8 @@
       this.$rootScope.$broadcast(this.EV.UPDATE_CURRENT_TASK, {task, isCallFromTimeTracking});
     }
 
-    removeTimeSpent(task, timeSpentToRemoveAsMoment) {
+    removeTimeSpent(taskId, timeSpentToRemoveAsMoment) {
+      const task = this.getById(taskId);
       const TODAY_STR = this.TasksUtil.getTodayStr();
       let timeSpentToRemoveInMs;
       let timeSpentCalculatedOnDay;
@@ -532,11 +533,11 @@
       // track total time spent
       task.timeSpent = this.TasksUtil.calcTotalTimeSpentOnTask(task);
       task.progress = this.TasksUtil.calcProgress(task);
-
-      return task;
     }
 
-    addTimeSpent(task, timeSpentInMsOrMomentDuration) {
+    addTimeSpent(taskId, timeSpentInMsOrMomentDuration) {
+      const task = this.getById(taskId);
+
       // use mysql date as it is sortable
       const TODAY_STR = this.TasksUtil.getTodayStr();
       let timeSpentCalculatedOnDay;
@@ -587,8 +588,6 @@
       // track total time spent
       task.timeSpent = this.TasksUtil.calcTotalTimeSpentOnTask(task);
       task.progress = this.TasksUtil.calcProgress(task);
-
-      return task;
     }
 
     updateEstimate(task, estimate) {

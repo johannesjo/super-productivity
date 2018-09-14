@@ -59,7 +59,7 @@
 
           // only track if not idle and interval is smaller than threshold
           if (!this.isIdle && realPeriodDuration <= MAX_TRACKING_PERIOD_VAL) {
-            this.Tasks.addTimeSpent(this.$rootScope.r.currentTask, realPeriodDuration);
+            this.Tasks.addTimeSpent(this.$rootScope.r.currentTask.id, realPeriodDuration);
             this.EstimateExceededChecker.checkTaskAndNotify(this.$rootScope.r.currentTask);
           }
 
@@ -113,21 +113,21 @@
 
         // do not show as long as the user hasn't decided
         this.TakeABreakReminder.isShown = false;
-        console.log(!this.isIdleDialogOpen &&
-          (!this.PomodoroButton.config.isEnabled || !this.PomodoroButton.data.isOnBreak));
-        console.log(!this.isIdleDialogOpen,
-          !this.PomodoroButton.config.isEnabled, !this.PomodoroButton.data.isOnBreak);
-
 
         if (!this.isIdleDialogOpen &&
           (!this.PomodoroButton.config.isEnabled || !this.PomodoroButton.data.isOnBreak)) {
+          const initialIdleTime = idleTimeInMs;
+
+          if (this.$rootScope.r.currentTask) {
+            // remove idle time already tracked
+            this.Tasks.removeTimeSpent(this.$rootScope.r.currentTask.id, this.$window.moment.duration(initialIdleTime));
+          }
 
           this.isIdleDialogOpen = true;
-
-          this.initIdlePoll(idleTimeInMs);
+          this.initIdlePoll(initialIdleTime);
           this.$rootScope.$broadcast(this.EV.IS_IDLE);
           this.Dialogs('WAS_IDLE', {
-            initialIdleTime: idleTimeInMs,
+            initialIdleTime: initialIdleTime,
           })
             .then((res) => {
               // if tracked
@@ -137,18 +137,20 @@
               }
               // add the idle time in milliseconds + the minIdleTime that was
               // not tracked or removed
-              this.Tasks.addTimeSpent(res.selectedTask, this.idleTime);
-              console.log('TRACK', this.idleTime);
-              
-              // set current task to the selected one
-              this.Tasks.updateCurrent(res.selectedTask);
+              if (res.selectedTask) {
+                this.Tasks.addTimeSpent(res.selectedTask.id, this.idleTime);
+                // set current task to the selected one
+                this.Tasks.updateCurrent(res.selectedTask);
+              } else {
+                console.error('No Task selected');
+              }
 
               this.TakeABreakReminder.isShown = true;
               this.isIdleDialogOpen = false;
               this.cancelIdlePoll();
             }, () => {
               // if not tracked
-              // unset currentSession.timeWorkedWithoutBreak
+              // --------------
               this.TakeABreakReminder.resetCounter();
               this.TakeABreakReminder.isShown = true;
               this.isIdleDialogOpen = false;
