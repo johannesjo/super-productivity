@@ -18,6 +18,7 @@
     let vm = this;
     vm.theme = theme;
 
+
     // used to display idle time
     vm.TimeTracking = TimeTracking;
 

@@ -15,7 +15,7 @@
 
   class TimeTracking {
     /* @ngInject */
-    constructor($rootScope, Tasks, Dialogs, TakeABreakReminder, TRACKING_INTERVAL, IS_ELECTRON, IS_EXTENSION, EV, $interval, ExtensionInterface, EstimateExceededChecker, $window) {
+    constructor($rootScope, Tasks, Dialogs, TakeABreakReminder, TRACKING_INTERVAL, IS_ELECTRON, IS_EXTENSION, EV, $interval, ExtensionInterface, EstimateExceededChecker, $window, PomodoroButton) {
       this.$rootScope = $rootScope;
       this.$interval = $interval;
       this.$window = $window;
@@ -24,6 +24,7 @@
       this.TakeABreakReminder = TakeABreakReminder;
       this.ExtensionInterface = ExtensionInterface;
       this.EstimateExceededChecker = EstimateExceededChecker;
+      this.PomodoroButton = PomodoroButton;
       this.TRACKING_INTERVAL = TRACKING_INTERVAL;
       this.IS_ELECTRON = IS_ELECTRON;
       this.IS_EXTENSION = IS_EXTENSION;
@@ -109,28 +110,36 @@
 
       if (idleTimeInMs > minIdleTimeInMs) {
         this.isIdle = true;
-        this.$rootScope.$broadcast(this.EV.IS_IDLE);
 
         // do not show as long as the user hasn't decided
         this.TakeABreakReminder.isShown = false;
+        console.log(!this.isIdleDialogOpen &&
+          (!this.PomodoroButton.config.isEnabled || !this.PomodoroButton.data.isOnBreak));
+        console.log(!this.isIdleDialogOpen,
+          !this.PomodoroButton.config.isEnabled, !this.PomodoroButton.data.isOnBreak);
 
-        if (!this.isIdleDialogOpen) {
+
+        if (!this.isIdleDialogOpen &&
+          (!this.PomodoroButton.config.isEnabled || !this.PomodoroButton.data.isOnBreak)) {
+
           this.isIdleDialogOpen = true;
 
           this.initIdlePoll(idleTimeInMs);
+          this.$rootScope.$broadcast(this.EV.IS_IDLE);
           this.Dialogs('WAS_IDLE', {
             initialIdleTime: idleTimeInMs,
           })
             .then((res) => {
               // if tracked
               // ----------
-              console.log(res);
               if (res.isResetTakeABreakTimer) {
                 this.TakeABreakReminder.resetCounter();
               }
               // add the idle time in milliseconds + the minIdleTime that was
               // not tracked or removed
               this.Tasks.addTimeSpent(res.selectedTask, this.idleTime);
+              console.log('TRACK', this.idleTime);
+              
               // set current task to the selected one
               this.Tasks.updateCurrent(res.selectedTask);
 
@@ -169,7 +178,6 @@
           .add(initialIdleTime)
           .asMilliseconds();
         this.idleTime = realIdleTime;
-        console.log(realIdleTime);
       }, POLL_INTERVAL);
     }
 

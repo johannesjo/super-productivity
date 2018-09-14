@@ -17,14 +17,13 @@
 
   class PomodoroButton {
     /* @ngInject */
-    constructor($rootScope, $interval, $q, Dialogs, Tasks, SimpleToast, LS_DEFAULTS, EV, IS_ELECTRON, Notifier, $state, TakeABreakReminder) {
+    constructor($rootScope, $interval, Dialogs, Tasks, SimpleToast, LS_DEFAULTS, EV, IS_ELECTRON, Notifier, $state, TakeABreakReminder) {
       this.LS_DEFAULTS = LS_DEFAULTS;
       this.IS_ELECTRON = IS_ELECTRON;
       this.EV = EV;
       this.$rootScope = $rootScope;
       this.$interval = $interval;
       this.$state = $state;
-      this.$q = $q;
       this.Dialogs = Dialogs;
       this.SimpleToast = SimpleToast;
       this.Tasks = Tasks;
