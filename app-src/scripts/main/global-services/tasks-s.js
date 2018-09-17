@@ -129,9 +129,14 @@
     }
 
     // NOTE: doneBacklogTasks can't be really updated when accessed with this
-    getById(taskId) {
+    getById(taskId, isIncludeSubTasks) {
       const doneBacklogTasks = this.getDoneBacklog();
-      return _.find(this.$rootScope.r.tasks, ['id', taskId]) || _.find(this.$rootScope.r.backlogTasks, ['id', taskId]) || _.find(doneBacklogTasks, ['id', taskId]);
+      if (!isIncludeSubTasks) {
+        return _.find(this.$rootScope.r.tasks, ['id', taskId]) || _.find(this.$rootScope.r.backlogTasks, ['id', taskId]) || _.find(doneBacklogTasks, ['id', taskId]);
+      } else {
+        const allTasks = this.TasksUtil.flattenTasks(this.getAllTasks());
+        return _.find(allTasks, ['id', taskId]);
+      }
     }
 
     getByOriginalIdFromBacklog(taskOriginalId) {
@@ -535,9 +540,7 @@
       task.progress = this.TasksUtil.calcProgress(task);
     }
 
-    addTimeSpent(taskId, timeSpentInMsOrMomentDuration) {
-      const task = this.getById(taskId);
-
+    addTimeSpent(task, timeSpentInMsOrMomentDuration) {
       // use mysql date as it is sortable
       const TODAY_STR = this.TasksUtil.getTodayStr();
       let timeSpentCalculatedOnDay;

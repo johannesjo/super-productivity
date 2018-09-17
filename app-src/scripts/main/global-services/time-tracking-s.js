@@ -59,7 +59,7 @@
 
           // only track if not idle and interval is smaller than threshold
           if (!this.isIdle && realPeriodDuration <= MAX_TRACKING_PERIOD_VAL) {
-            this.Tasks.addTimeSpent(this.$rootScope.r.currentTask.id, realPeriodDuration);
+            this.Tasks.addTimeSpent(this.$rootScope.r.currentTask, realPeriodDuration);
             this.EstimateExceededChecker.checkTaskAndNotify(this.$rootScope.r.currentTask);
           }
 
@@ -137,8 +137,8 @@
               }
               // add the idle time in milliseconds + the minIdleTime that was
               // not tracked or removed
-              if (res.selectedTask) {
-                this.Tasks.addTimeSpent(res.selectedTask.id, this.idleTime);
+              if (res.selectedTask && res.selectedTask.id) {
+                this.Tasks.addTimeSpent(res.selectedTask, this.idleTime);
                 // set current task to the selected one
                 this.Tasks.updateCurrent(res.selectedTask);
               } else {
