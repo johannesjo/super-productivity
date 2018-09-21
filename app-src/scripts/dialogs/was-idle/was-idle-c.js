@@ -33,6 +33,13 @@
           isResetTakeABreakTimer,
           selectedTask: vm.selectedTask
         });
+      } else if ((!vm.selectedTask || !vm.selectedTask.id) && vm.searchText.length > 0) {
+        $mdDialog.hide({
+          isResetTakeABreakTimer,
+          selectedTask: Tasks.addToday({
+            title: vm.searchText
+          })
+        });
       }
     };
 

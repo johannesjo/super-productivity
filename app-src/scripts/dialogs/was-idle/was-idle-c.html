@@ -34,10 +34,6 @@
                 md-highlight-flags="i"
                 ng-bind="task.title"></span>
           </md-item-template>
-          <md-not-found>
-            No states matching "<span ng-bind="vm.searchText"></span>" were found.
-            <!--<a ng-click="vm.newState(vm.searchText)">Create a new one!</a>-->
-          </md-not-found>
         </md-autocomplete>
 
       </div>
@@ -46,7 +42,7 @@
     <md-dialog-actions>
       <md-button type="submit"
                  class="md-primary md-raised">
-        Track
+       <span ng-if="(!vm.selectedTask || !vm.selectedTask.id) && vm.searchText.length > 0">Create task and </span>Track
       </md-button>
 
       <md-button ng-click="vm.trackIdleToTask(true)"
