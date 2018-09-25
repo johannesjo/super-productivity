@@ -1,3 +1,27 @@
+<a name="1.10.54"></a>
+## [1.10.54](https://github.com/johannesjo/super-productivity/compare/v1.10.53...v1.10.54) (2018-09-25)
+
+
+### Bug Fixes
+
+* **idleTime:** not playing nicely with pomodoro button ([24b5745](https://github.com/johannesjo/super-productivity/commit/24b5745))
+* **Jira:** checking for updates on sub tasks not working correctly ([15d9ca8](https://github.com/johannesjo/super-productivity/commit/15d9ca8))
+* **tasks:** time tracking sometimes not working as intended ([982d5c3](https://github.com/johannesjo/super-productivity/commit/982d5c3))
+* **tasks:** tracking for sub tasks throwing errors ([71c677f](https://github.com/johannesjo/super-productivity/commit/71c677f))
+
+
+### Features
+
+* add logging for not a real jira issue (shouldn't happen) ([63c9f6f](https://github.com/johannesjo/super-productivity/commit/63c9f6f))
+* improve google drive sync dialogs ([bb6e8a4](https://github.com/johannesjo/super-productivity/commit/bb6e8a4))
+* improve google drive sync dialogs ([75b84f9](https://github.com/johannesjo/super-productivity/commit/75b84f9))
+* show components for jira tasks [#113](https://github.com/johannesjo/super-productivity/issues/113) ([f9affe7](https://github.com/johannesjo/super-productivity/commit/f9affe7))
+* **dbus:** only show errors once ([968694e](https://github.com/johannesjo/super-productivity/commit/968694e))
+* **idle:** create new tasks from idle time dialog ([43f244c](https://github.com/johannesjo/super-productivity/commit/43f244c))
+* **idleTime:** refactor idle time handling to service [#118](https://github.com/johannesjo/super-productivity/issues/118) ([e775c59](https://github.com/johannesjo/super-productivity/commit/e775c59))
+
+
+
 <a name="1.10.53"></a>
 ## [1.10.53](https://github.com/johannesjo/super-productivity/compare/v1.10.52...v1.10.53) (2018-08-31)
 
