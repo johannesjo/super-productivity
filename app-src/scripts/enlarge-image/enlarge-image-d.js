@@ -23,7 +23,7 @@
     const top = box.top + scrollTop - clientTop;
     const left = box.left + scrollLeft - clientLeft;
 
-    return { top: Math.round(top), left: Math.round(left) };
+    return {top: Math.round(top), left: Math.round(left)};
   }
 
   class EnlargeImageCtrl {
@@ -35,6 +35,9 @@
       $element.bind('click', () => {
         this.showImg();
       });
+      setTimeout(() => {
+        // this.showImg()
+      }, 1000)
     }
 
     hideImg() {
@@ -51,7 +54,12 @@
     setCoordsForImageAni() {
       const origImgCoords = getCoords(this.imageEl);
       const newImageCoords = getCoords(this.newImageEl);
-      this.newImageEl.setAttribute('style', `transform: translate3d(${origImgCoords.left - newImageCoords.left - this.imageEl.width}px, ${origImgCoords.top - newImageCoords.top - this.imageEl.height}px, 0) scale(0.3)`);
+
+      const scale = this.imageEl.width / this.newImageEl.width;
+      const startLeft = origImgCoords.left - newImageCoords.left;
+      const startTop = origImgCoords.top - newImageCoords.top;
+
+      this.newImageEl.setAttribute('style', `transform: translate3d(${startLeft}px, ${startTop}px, 0) scale(${scale})`);
     }
 
     showImg() {

@@ -53,6 +53,7 @@
   max-width: 100%;
   max-height: 100%;
   opacity: 1;
+  transform-origin: top left;
 
   .ani-enter & {
     transition: $transition-enter;
