@@ -1,3 +1,18 @@
+<a name="1.10.55"></a>
+## [1.10.55](https://github.com/johannesjo/super-productivity/compare/v1.10.54...v1.10.55) (2018-09-26)
+
+
+### Bug Fixes
+
+* animation for enlarge image ([59351a7](https://github.com/johannesjo/super-productivity/commit/59351a7))
+
+
+### Features
+
+* also enable preview for jira images ([08c479f](https://github.com/johannesjo/super-productivity/commit/08c479f))
+
+
+
 <a name="1.10.54"></a>
 ## [1.10.54](https://github.com/johannesjo/super-productivity/compare/v1.10.53...v1.10.54) (2018-09-25)
 
