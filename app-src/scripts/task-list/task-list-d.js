@@ -493,6 +493,10 @@
       }
     }
 
+    isImage(str) {
+      return !!str.match(/png|jpg|jpeg$/i);
+    }
+
     addLocalAttachment(task) {
       this.Dialogs('EDIT_GLOBAL_LINK', {link: {}, isNew: true, task}, true);
     }

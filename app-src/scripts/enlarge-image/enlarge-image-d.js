@@ -32,12 +32,10 @@
       this.lightboxParentEl = angular.element(document.body);
       this.$el = $element;
       this.imageEl = this.$el[0];
+
       $element.bind('click', () => {
         this.showImg();
       });
-      setTimeout(() => {
-        // this.showImg()
-      }, 1000)
     }
 
     hideImg() {
@@ -55,9 +53,10 @@
       const origImgCoords = getCoords(this.imageEl);
       const newImageCoords = getCoords(this.newImageEl);
 
-      const scale = this.imageEl.width / this.newImageEl.width;
+      const scale = this.imageEl.width / this.newImageEl.width || 0.3;
       const startLeft = origImgCoords.left - newImageCoords.left;
       const startTop = origImgCoords.top - newImageCoords.top;
+      console.log(scale, startLeft, startTop);
 
       this.newImageEl.setAttribute('style', `transform: translate3d(${startLeft}px, ${startTop}px, 0) scale(${scale})`);
     }

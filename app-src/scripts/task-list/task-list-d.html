@@ -185,7 +185,7 @@
         <section ng-if="task.originalAttachment.length > 0">
           <collapsible collapsible-title="Attachments ({{ ::task.originalAttachment.length }})">
             <ul class="attachments">
-              <li ng-repeat="attachment in task.originalAttachment">
+              <li ng-repeat="attachment in task.originalAttachment track by $index">
                 <a href="{{ ::attachment}}"
                    external-link
                    target="_blank"
@@ -196,6 +196,12 @@
                   <ng-md-icon icon="file_download"
                               aria-label="download file directly"></ng-md-icon>
                 </a>
+                <span ng-if="::$ctrl.isImage(attachment)"
+                      enlarge-image="attachment"
+                      class="md-accent enlarge-image">
+                  <ng-md-icon icon="image"
+                              aria-label="preview image"></ng-md-icon>
+                </span>
               </li>
             </ul>
           </collapsible>
