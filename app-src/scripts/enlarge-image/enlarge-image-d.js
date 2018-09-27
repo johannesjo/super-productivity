@@ -53,10 +53,9 @@
       const origImgCoords = getCoords(this.imageEl);
       const newImageCoords = getCoords(this.newImageEl);
 
-      const scale = this.imageEl.width / this.newImageEl.width || 0.3;
+      const scale = this.imageEl.width / this.newImageEl.width || 0.01;
       const startLeft = origImgCoords.left - newImageCoords.left;
       const startTop = origImgCoords.top - newImageCoords.top;
-      console.log(scale, startLeft, startTop);
 
       this.newImageEl.setAttribute('style', `transform: translate3d(${startLeft}px, ${startTop}px, 0) scale(${scale})`);
     }
