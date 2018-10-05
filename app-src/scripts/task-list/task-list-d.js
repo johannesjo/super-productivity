@@ -100,19 +100,6 @@
               delete currentlyMovedTask.parentId;
             }
           }
-
-          if (angular.isFunction(this.onItemMoved)) {
-            this.onItemMoved({
-              currentlyMovedTask,
-              parentTask,
-              $event: event
-            });
-          }
-        },
-        orderChanged: function(event) {
-          if (angular.isFunction(this.onOrderChanged)) {
-            this.onOrderChanged({$event: event});
-          }
         },
         allowDuplicates: false,
         containment: '#board'
@@ -548,8 +535,6 @@
         isSubTasksDisabled: '@',
         allowTaskSelection: '@',
         disableDropInto: '<',
-        onItemMoved: '&',
-        onOrderChanged: '&',
         onTaskDoneChangedCallback: '&onTaskDoneChanged',
         parentTask: '=',
         isHideControls: '<'
