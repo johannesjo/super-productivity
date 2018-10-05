@@ -77,7 +77,7 @@
     }
 
     createFileLink(dataTransfer) {
-      const path = dataTransfer.files[0].path;
+      const path = dataTransfer.files[0] && dataTransfer.files[0].path;
       if (path) {
         return {
           title: this.constructor.baseName(path),
