@@ -3,40 +3,9 @@ import { TaskActionTypes } from './task.actions';
 import { Task } from '../task';
 import shortid from 'shortid';
 import { calcTotalTimeSpent } from '../util/calc-total-time-spent';
-import { LS_CURRENT_TASK_ID, LS_TASKS } from '../task.const';
+import { LS_TASKS } from '../task.const';
 import { loadFromLs } from '../../shared/local-storage';
-
-export interface TasksState extends Array<Task> {
-}
-
-export interface TaskSharedState {
-  currentTaskId: string;
-}
-
-export interface TaskModuleState {
-  taskSharedState: TaskSharedState;
-  tasks: TasksState;
-}
-
-
-export const INITIAL_FEATURE_STATE: TaskSharedState = {
-  currentTaskId: undefined,
-};
-
-
-export function taskSharedStateReducer(state = INITIAL_FEATURE_STATE, action: TaskActions): TaskSharedState {
-  switch (action.type) {
-    case TaskActionTypes.ReloadFromLs:
-      const currentTaskId: string = loadFromLs(LS_CURRENT_TASK_ID);
-      return Object.assign({}, state, {currentTaskId: currentTaskId});
-    case TaskActionTypes.SetCurrentTask:
-      return Object.assign({}, state, {currentTaskId: action.payload});
-    case TaskActionTypes.UnsetCurrentTask:
-      return Object.assign({}, state, {currentTaskId: undefined});
-    default:
-      return state;
-  }
-}
+import { TasksState } from './task-store';
 
 
 export function taskReducer(state = [], action: TaskActions): TasksState {
@@ -139,7 +108,7 @@ export function taskReducer(state = [], action: TaskActions): TasksState {
       return state.map((item) => {
         if (item.id === action.payload.id) {
           const updatedTask: Task = Object.assign({}, item);
-          const newTask: Task = {
+          const newTask_: Task = {
             id: shortid(),
             parentId: item.id,
             title: '',
@@ -148,9 +117,9 @@ export function taskReducer(state = [], action: TaskActions): TasksState {
 
 
           if (!updatedTask.subTasks) {
-            updatedTask.subTasks = [newTask];
+            updatedTask.subTasks = [newTask_];
           } else {
-            updatedTask.subTasks.push(newTask);
+            updatedTask.subTasks.push(newTask_);
           }
 
           return updatedTask;

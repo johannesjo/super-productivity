@@ -11,11 +11,12 @@ import { DialogTimeEstimateComponent } from './dialogs/dialog-time-estimate/dial
 import { ToArrayPipe } from '../helper/to-array.pipe';
 import { KeysPipe } from '../helper/keys.pipe';
 import { StoreModule } from '@ngrx/store';
-import * as fromTask from './store/task.reducer';
 import { TaskEffects } from './store/task.effects';
 import { EffectsModule } from '@ngrx/effects';
 import { TaskService } from './task.service';
 import { TASK_FEATURE_NAME } from './task.const';
+import { taskSharedStateReducer } from './store/task-shared.reducer';
+import { taskReducer } from './store/task.reducer';
 
 @NgModule({
   imports: [
@@ -25,8 +26,8 @@ import { TASK_FEATURE_NAME } from './task.const';
     ReactiveFormsModule,
     DragulaModule,
     StoreModule.forFeature(TASK_FEATURE_NAME, {
-      taskSharedState: fromTask.taskSharedStateReducer,
-      tasks: fromTask.taskReducer
+      taskSharedState: taskSharedStateReducer,
+      tasks: taskReducer
     }),
     EffectsModule.forFeature([TaskEffects]),
   ],
