@@ -547,7 +547,7 @@
         filter: '<',
         isSubTasksDisabled: '@',
         allowTaskSelection: '@',
-        disableDropInto: '@',
+        disableDropInto: '<',
         onItemMoved: '&',
         onOrderChanged: '&',
         onTaskDoneChangedCallback: '&onTaskDoneChanged',

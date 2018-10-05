@@ -1,6 +1,9 @@
 <div class="task-list"
      as-sortable="$ctrl.dragControlListeners"
-     ng-class="{ 'is-hide-controls': $ctrl.isHideControls}"
+     ng-class="{
+     'is-hide-controls': $ctrl.isHideControls,
+     'is-disable-drop-into': $ctrl.disableDropInto,
+     }"
      ng-model="$ctrl.tasks">
   <div class="task"
        as-sortable-item

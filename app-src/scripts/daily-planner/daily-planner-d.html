@@ -66,10 +66,10 @@
         <input type="text"
                ng-model="vm.search">
       </md-input-container>
-
       <task-list tasks="vm.backlogTasks"
                  class="backlog-tasks"
                  filter="vm.search"
+                 disable-drop-into="vm.search.length>0"
                  limit-to="{{vm.limitBacklogTo}}"></task-list>
 
 
