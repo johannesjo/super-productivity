@@ -3,7 +3,7 @@ import { OnDestroy } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Subscription } from 'rxjs';
 import { TaskService } from '../task.service';
-import { Task } from '../store/task.model';
+import { Task } from '../task.model';
 import { DragulaService } from 'ng2-dragula';
 import shortid from 'shortid';
 
@@ -33,7 +33,8 @@ export class TaskListComponent implements OnInit, OnDestroy {
     });
     this.subs.push(this._dragulaService.dropModel(this.taskListId)
       .subscribe(() => {
-        this._taskService.sync();
+        // TODO figure something out
+        // this._taskService.sync();
       }));
   }
 

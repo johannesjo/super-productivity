@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { Task } from './store/task.model';
+import { Task } from './task.model';
 import { Store } from '@ngrx/store';
 import { select } from '@ngrx/store';
 import 'rxjs/add/operator/map';
@@ -27,8 +27,7 @@ export class TaskService {
 
   loadStateFromLS() {
     const lsTaskState = loadFromLs(LS_TASK);
-    console.log('LOAD_STATE');
-    
+
     this._store.dispatch({
       type: TaskActionTypes.LoadState,
       payload: {

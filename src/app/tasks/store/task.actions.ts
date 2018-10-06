@@ -1,6 +1,6 @@
 import { Action } from '@ngrx/store';
 import { Update } from '@ngrx/entity';
-import { Task } from './task.model';
+import { Task } from '../task.model';
 import { TaskState } from './task.reducer';
 
 export enum TaskActionTypes {
