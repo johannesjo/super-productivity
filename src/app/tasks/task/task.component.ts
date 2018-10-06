@@ -2,7 +2,7 @@ import { Component, DoCheck, HostBinding, Input, OnInit } from '@angular/core';
 import { TaskService } from '../task.service';
 import { Observable } from 'rxjs';
 import { DragulaService } from 'ng2-dragula';
-import { Task } from '../task';
+import { Task } from '../store/task.model';
 import shortid from 'shortid';
 import { MatDialog } from '@angular/material';
 import { DialogTimeEstimateComponent } from '../dialogs/dialog-time-estimate/dialog-time-estimate.component';
@@ -37,10 +37,10 @@ export class TaskComponent implements OnInit, DoCheck {
   }
 
   ngOnInit() {
-    // this.currentTaskId$ = this.taskService.currentTaskId$;
-    // this.currentTaskId$.subscribe((val) => {
-    //   this.isCurrent = (this.task && val === this.task.id);
-    // });
+    this.currentTaskId$ = this.taskService.currentTaskId$;
+    this.currentTaskId$.subscribe((val) => {
+      this.isCurrent = (this.task && val === this.task.id);
+    });
 
     this.subTaskListId = shortid();
     this._dragulaService.createGroup(this.subTaskListId, {

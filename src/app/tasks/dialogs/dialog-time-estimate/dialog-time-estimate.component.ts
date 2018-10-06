@@ -1,6 +1,6 @@
 import { Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material';
-import { Task } from '../../task';
+import { Task } from '../../store/task.model';
 import { TaskUtilService } from '../../task-util.service';
 import { TaskService } from '../../task.service';
 import { formatWorklogDateStr } from '../../../util/format-worklog-date-str';

@@ -4,7 +4,7 @@ import { TaskActions, TaskActionTypes } from './task.actions';
 
 export interface TaskState extends EntityState<Task> {
   // additional entities state properties
-  // currentTaskId: string | null;
+  currentTaskId: string | null;
 }
 
 export const taskAdapter: EntityAdapter<Task> = createEntityAdapter<Task>();
@@ -31,6 +31,18 @@ export function taskReducer(
   console.log(state, action);
 
   switch (action.type) {
+    // Meta Actions
+    // ------------
+    case TaskActionTypes.SetCurrentTask: {
+      return Object.assign({}, state, {currentTaskId: action.payload});
+    }
+
+    case TaskActionTypes.UnsetCurrentTask: {
+      return Object.assign({}, state, {currentTaskId: null});
+    }
+
+    // Task Actions
+    // ------------
     case TaskActionTypes.AddTask: {
       return taskAdapter.addOne(action.payload.task, state);
     }

@@ -12,3 +12,4 @@ export class TaskUtilService {
     return moment().format(WORKLOG_DATE_STR_FORMAT);
   }
 }
+// TODO move to util

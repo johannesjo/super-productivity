@@ -3,6 +3,10 @@ import { Update } from '@ngrx/entity';
 import { Task } from './task.model';
 
 export enum TaskActionTypes {
+  SetCurrentTask = '[Task] SetCurrentTask',
+  UnsetCurrentTask = '[Task] UnsetCurrentTask',
+
+  // Task Actions
   LoadTasks = '[Task] Load Tasks',
   AddTask = '[Task] Add Task',
   UpsertTask = '[Task] Upsert Task',
@@ -15,66 +19,91 @@ export enum TaskActionTypes {
   ClearTasks = '[Task] Clear Tasks'
 }
 
+export class SetCurrentTask implements Action {
+  readonly type = TaskActionTypes.SetCurrentTask;
+
+  constructor(public payload: any) {
+  }
+}
+
+export class UnsetCurrentTask implements Action {
+  readonly type = TaskActionTypes.UnsetCurrentTask;
+
+  constructor(public payload: any) {
+  }
+}
+
 export class LoadTasks implements Action {
   readonly type = TaskActionTypes.LoadTasks;
 
-  constructor(public payload: { tasks: Task[] }) {}
+  constructor(public payload: { tasks: Task[] }) {
+  }
 }
 
 export class AddTask implements Action {
   readonly type = TaskActionTypes.AddTask;
 
-  constructor(public payload: { task: Task }) {}
+  constructor(public payload: { task: Task }) {
+  }
 }
 
 export class UpsertTask implements Action {
   readonly type = TaskActionTypes.UpsertTask;
 
-  constructor(public payload: { task: Task }) {}
+  constructor(public payload: { task: Task }) {
+  }
 }
 
 export class AddTasks implements Action {
   readonly type = TaskActionTypes.AddTasks;
 
-  constructor(public payload: { tasks: Task[] }) {}
+  constructor(public payload: { tasks: Task[] }) {
+  }
 }
 
 export class UpsertTasks implements Action {
   readonly type = TaskActionTypes.UpsertTasks;
 
-  constructor(public payload: { tasks: Task[] }) {}
+  constructor(public payload: { tasks: Task[] }) {
+  }
 }
 
 export class UpdateTask implements Action {
   readonly type = TaskActionTypes.UpdateTask;
 
-  constructor(public payload: { task: Update<Task> }) {}
+  constructor(public payload: { task: Update<Task> }) {
+  }
 }
 
 export class UpdateTasks implements Action {
   readonly type = TaskActionTypes.UpdateTasks;
 
-  constructor(public payload: { tasks: Update<Task>[] }) {}
+  constructor(public payload: { tasks: Update<Task>[] }) {
+  }
 }
 
 export class DeleteTask implements Action {
   readonly type = TaskActionTypes.DeleteTask;
 
-  constructor(public payload: { id: string }) {}
+  constructor(public payload: { id: string }) {
+  }
 }
 
 export class DeleteTasks implements Action {
   readonly type = TaskActionTypes.DeleteTasks;
 
-  constructor(public payload: { ids: string[] }) {}
+  constructor(public payload: { ids: string[] }) {
+  }
 }
 
 export class ClearTasks implements Action {
   readonly type = TaskActionTypes.ClearTasks;
 }
 
-export type TaskActions =
-  LoadTasks
+export type TaskActions
+  = LoadTasks
+  | SetCurrentTask
+  | UnsetCurrentTask
   | AddTask
   | UpsertTask
   | AddTasks

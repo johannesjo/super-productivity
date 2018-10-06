@@ -1,9 +1,9 @@
 import { taskAdapter } from './task.reducer';
 import { createFeatureSelector } from '@ngrx/store';
-import { TASK_FEATURE_NAME } from '../task.const';
 import { createSelector } from '@ngrx/store';
+import { TASK_FEATURE_NAME } from '../task.const';
 
-export const selectFeatureState = createFeatureSelector<any>(TASK_FEATURE_NAME);
+export const selectTaskFeatureState = createFeatureSelector<any>(TASK_FEATURE_NAME);
 
 // export const selectTasks = createSelector(selectTaskModuleState, state => state.tasks);
 //
@@ -23,9 +23,9 @@ export const selectTaskIds = selectIds;
 export const selectTaskEntities = selectEntities;
 
 // select the array of users
-export const selectAllTasks = createSelector(selectFeatureState, selectAll);
+export const selectAllTasks = createSelector(selectTaskFeatureState, selectAll);
 
 // select the total user count
 export const selectTaskTotal = selectTotal;
 
-// export const selectCurrentTask = createSelector(selectTaskModuleState, state => state.currentTaskId);
+export const selectCurrentTask = createSelector(selectTaskFeatureState, state => state.currentTaskId);

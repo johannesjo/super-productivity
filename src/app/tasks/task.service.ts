@@ -7,14 +7,13 @@ import 'rxjs/add/operator/map';
 // import { selectCurrentTask } from './store/task.selectors';
 import { TaskActionTypes } from './store/task.actions';
 import { selectAllTasks } from './store/task.selectors';
+import { selectCurrentTask } from './store/task.selectors';
 import shortid from 'shortid';
 
 
 @Injectable()
 export class TaskService {
-  // currentTaskId$: Observable<string> = this._store.pipe(select(selectCurrentTask));
-  // tasks$: Observable<Task[]> = this._store.pipe(select(selectAllTasks));
-  // tasks$: Observable<any> = this._store.pipe(select(selectAllTasks));
+  currentTaskId$: Observable<string> = this._store.pipe(select(selectCurrentTask));
   tasks$: Observable<Task[]> = this._store.pipe(select(selectAllTasks));
   undoneTasks$: Observable<Task[]> = this.tasks$.map((tasks) => tasks && tasks.filter((task: Task) => !task.isDone));
   doneTasks$: Observable<Task[]> = this.tasks$.map((tasks) => tasks && tasks.filter((task: Task) => task.isDone));
@@ -57,46 +56,41 @@ export class TaskService {
   deleteTask(taskId: string) {
     this._store.dispatch({
       type: TaskActionTypes.DeleteTask,
-      payload: taskId
+      payload: {id: taskId}
     });
   }
 
 
-  updateTask(taskId: string, changedFields: any) {
+  updateTask(taskId: string, changedFields: Partial<Task>) {
     this._store.dispatch({
       type: TaskActionTypes.UpdateTask,
       payload: {
-        id: taskId,
-        changedFields: changedFields
+        task: Object.assign({
+          id: taskId
+        }, changedFields)
       }
     });
   }
 
   setCurrentTask(taskId: string) {
-    // this._store.dispatch({
-    //   type: TaskActionTypes.SetCurrentTask,
-    //   payload: taskId,
-    // });
+    this._store.dispatch({
+      type: TaskActionTypes.SetCurrentTask,
+      payload: taskId,
+    });
   }
 
   pauseCurrentTask() {
-    // this._store.dispatch({
-    //   type: TaskActionTypes.UnsetCurrentTask,
-    // });
+    this._store.dispatch({
+      type: TaskActionTypes.UnsetCurrentTask,
+    });
   }
 
   setTaskDone(taskId: string) {
-    // this._store.dispatch({
-    //   type: TaskActionTypes.SetTaskDone,
-    //   payload: taskId,
-    // });
+    this.updateTask(taskId, {isDone: true});
   }
 
   setTaskUnDone(taskId: string) {
-    // this._store.dispatch({
-    //   type: TaskActionTypes.SetTaskUndone,
-    //   payload: taskId,
-    // });
+    this.updateTask(taskId, {isDone: false});
   }
 
 

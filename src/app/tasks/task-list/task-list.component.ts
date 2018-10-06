@@ -3,7 +3,7 @@ import { OnDestroy } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Subscription } from 'rxjs';
 import { TaskService } from '../task.service';
-import { Task } from '../task';
+import { Task } from '../store/task.model';
 import { DragulaService } from 'ng2-dragula';
 import shortid from 'shortid';
 
@@ -11,7 +11,6 @@ import shortid from 'shortid';
   selector: 'task-list',
   templateUrl: './task-list.component.html',
   styleUrls: ['./task-list.component.scss'],
-  providers: [TaskService],
   changeDetection: ChangeDetectionStrategy.OnPush
 
 })
@@ -34,8 +33,8 @@ export class TaskListComponent implements OnInit, OnDestroy {
     });
     this.subs.push(this._dragulaService.dropModel(this.taskListId)
       .subscribe(() => {
-      this._taskService.sync();
-    }));
+        this._taskService.sync();
+      }));
   }
 
   ngOnDestroy() {
