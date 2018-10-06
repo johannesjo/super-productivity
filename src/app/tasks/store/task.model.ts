@@ -9,4 +9,5 @@ export class Task {
   timeSpent?: any;
   timeEstimate?: string;
   timeSpentOnDay?: Object;
+  index?: number;
 }

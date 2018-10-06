@@ -15,7 +15,6 @@ import { TaskEffects } from './store/task.effects';
 import { EffectsModule } from '@ngrx/effects';
 import { TaskService } from './task.service';
 import { TASK_FEATURE_NAME } from './task.const';
-import { taskSharedStateReducer } from './store/task-shared.reducer';
 import { taskReducer } from './store/task.reducer';
 import { DragulaService } from 'ng2-dragula';
 
@@ -26,10 +25,7 @@ import { DragulaService } from 'ng2-dragula';
     FormsModule,
     ReactiveFormsModule,
     DragulaModule,
-    StoreModule.forFeature(TASK_FEATURE_NAME, {
-      taskSharedState: taskSharedStateReducer,
-      tasks: taskReducer
-    }),
+    StoreModule.forFeature(TASK_FEATURE_NAME, taskReducer),
     EffectsModule.forFeature([TaskEffects]),
   ],
   declarations: [

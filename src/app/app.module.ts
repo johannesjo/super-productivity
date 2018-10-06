@@ -11,6 +11,7 @@ import { RouterModule } from '@angular/router';
 import { APP_ROUTES } from './app.routes';
 import { WorkViewModule } from './pages/work-view/work-view.module';
 import { UiModule } from './ui/ui.module';
+import { reducers } from './root-store';
 
 @NgModule({
   declarations: [
@@ -22,7 +23,7 @@ import { UiModule } from './ui/ui.module';
     RouterModule.forRoot(APP_ROUTES, {useHash: true}),
     ServiceWorkerModule.register('ngsw-worker.js', {enabled: environment.production}),
     // NOTE: both need to be present to use forFeature stores
-    StoreModule.forRoot({}),
+    StoreModule.forRoot(reducers),
     EffectsModule.forRoot([]),
     !environment.production ? StoreDevtoolsModule.instrument() : [],
 

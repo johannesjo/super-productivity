@@ -1,18 +1,21 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { Task } from './task';
+import { Task } from './store/task.model';
 import { Store } from '@ngrx/store';
 import { select } from '@ngrx/store';
 import 'rxjs/add/operator/map';
-import { selectTasks } from './store/task.selectors';
-import { selectCurrentTask } from './store/task.selectors';
+// import { selectCurrentTask } from './store/task.selectors';
 import { TaskActionTypes } from './store/task.actions';
+import { selectAllTasks } from './store/task.selectors';
+import shortid from 'shortid';
 
 
 @Injectable()
 export class TaskService {
-  currentTaskId$: Observable<string> = this._store.pipe(select(selectCurrentTask));
-  tasks$: Observable<Task[]> = this._store.pipe(select(selectTasks));
+  // currentTaskId$: Observable<string> = this._store.pipe(select(selectCurrentTask));
+  // tasks$: Observable<Task[]> = this._store.pipe(select(selectAllTasks));
+  // tasks$: Observable<any> = this._store.pipe(select(selectAllTasks));
+  tasks$: Observable<Task[]> = this._store.pipe(select(selectAllTasks));
   undoneTasks$: Observable<Task[]> = this.tasks$.map((tasks) => tasks && tasks.filter((task: Task) => !task.isDone));
   doneTasks$: Observable<Task[]> = this.tasks$.map((tasks) => tasks && tasks.filter((task: Task) => task.isDone));
 
@@ -23,26 +26,30 @@ export class TaskService {
     console.log('SERVICE constructor');
 
     this.reloadFromLs();
+    this.tasks$.subscribe((p) => console.log(p));
   }
 
   reloadFromLs() {
-    this._store.dispatch({
-      type: TaskActionTypes.ReloadFromLs
-    });
+    // this._store.dispatch({
+    //   type: TaskActionTypes.ReloadFromLs
+    // });
   }
 
   sync() {
-    this._store.dispatch({
-      type: TaskActionTypes.Sync
-    });
+    // this._store.dispatch({
+    //   type: TaskActionTypes.Sync
+    // });
   }
 
   addTask(title: string) {
     this._store.dispatch({
       type: TaskActionTypes.AddTask,
       payload: {
-        title,
-        isDone: false
+        task: {
+          title,
+          id: shortid(),
+          isDone: false
+        }
       }
     });
   }
@@ -66,37 +73,37 @@ export class TaskService {
   }
 
   setCurrentTask(taskId: string) {
-    this._store.dispatch({
-      type: TaskActionTypes.SetCurrentTask,
-      payload: taskId,
-    });
+    // this._store.dispatch({
+    //   type: TaskActionTypes.SetCurrentTask,
+    //   payload: taskId,
+    // });
   }
 
   pauseCurrentTask() {
-    this._store.dispatch({
-      type: TaskActionTypes.UnsetCurrentTask,
-    });
+    // this._store.dispatch({
+    //   type: TaskActionTypes.UnsetCurrentTask,
+    // });
   }
 
   setTaskDone(taskId: string) {
-    this._store.dispatch({
-      type: TaskActionTypes.SetTaskDone,
-      payload: taskId,
-    });
+    // this._store.dispatch({
+    //   type: TaskActionTypes.SetTaskDone,
+    //   payload: taskId,
+    // });
   }
 
   setTaskUnDone(taskId: string) {
-    this._store.dispatch({
-      type: TaskActionTypes.SetTaskUndone,
-      payload: taskId,
-    });
+    // this._store.dispatch({
+    //   type: TaskActionTypes.SetTaskUndone,
+    //   payload: taskId,
+    // });
   }
 
 
   addSubTask(parentTask: Task) {
-    this._store.dispatch({
-      type: TaskActionTypes.AddSubTask,
-      payload: parentTask
-    });
+    // this._store.dispatch({
+    //   type: TaskActionTypes.AddSubTask,
+    //   payload: parentTask
+    // });
   }
 }

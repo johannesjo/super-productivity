@@ -22,60 +22,60 @@ function syncToLs(state) {
 export class TaskEffects {
   // we're using n interval instead for better performance
 
-  @Effect({dispatch: false}) addTask$: any = this.actions$
-    .pipe(
-      ofType(TaskActionTypes.AddTask),
-      withLatestFrom(this.store$),
-      tap(syncToLs)
-    );
-  @Effect({dispatch: false}) updateTask$: any = this.actions$
-    .pipe(
-      ofType(TaskActionTypes.UpdateTask),
-      withLatestFrom(this.store$),
-      tap(syncToLs)
-    );
-  @Effect({dispatch: false}) deleteTask$: any = this.actions$
-    .pipe(
-      ofType(TaskActionTypes.DeleteTask),
-      withLatestFrom(this.store$),
-      tap(syncToLs)
-    );
-  @Effect({dispatch: false}) setTaskDone$: any = this.actions$
-    .pipe(
-      ofType(TaskActionTypes.SetTaskDone),
-      withLatestFrom(this.store$),
-      tap(syncToLs)
-    );
-  @Effect({dispatch: false}) setTaskUnDone$: any = this.actions$
-    .pipe(
-      ofType(TaskActionTypes.SetTaskUndone),
-      withLatestFrom(this.store$),
-      tap(syncToLs)
-    );
-  @Effect({dispatch: false}) addSubTask$: any = this.actions$
-    .pipe(
-      ofType(TaskActionTypes.AddSubTask),
-      withLatestFrom(this.store$),
-      tap(syncToLs)
-    );
-  @Effect({dispatch: false}) sync$: any = this.actions$
-    .pipe(
-      ofType(TaskActionTypes.Sync),
-      withLatestFrom(this.store$),
-      tap(syncToLs)
-    );
-  @Effect({dispatch: false}) setCurrentTask$: any = this.actions$
-    .pipe(
-      ofType(TaskActionTypes.SetCurrentTask),
-      withLatestFrom(this.store$),
-      tap(syncToLs)
-    );
-  @Effect({dispatch: false}) unsetCurrentTask$: any = this.actions$
-    .pipe(
-      ofType(TaskActionTypes.UnsetCurrentTask),
-      withLatestFrom(this.store$),
-      tap(syncToLs)
-    );
+  // @Effect({dispatch: false}) addTask$: any = this.actions$
+  //   .pipe(
+  //     ofType(TaskActionTypes.AddTask),
+  //     withLatestFrom(this.store$),
+  //     tap(syncToLs)
+  //   );
+  // @Effect({dispatch: false}) updateTask$: any = this.actions$
+  //   .pipe(
+  //     ofType(TaskActionTypes.UpdateTask),
+  //     withLatestFrom(this.store$),
+  //     tap(syncToLs)
+  //   );
+  // @Effect({dispatch: false}) deleteTask$: any = this.actions$
+  //   .pipe(
+  //     ofType(TaskActionTypes.DeleteTask),
+  //     withLatestFrom(this.store$),
+  //     tap(syncToLs)
+  //   );
+  // @Effect({dispatch: false}) setTaskDone$: any = this.actions$
+  //   .pipe(
+  //     ofType(TaskActionTypes.SetTaskDone),
+  //     withLatestFrom(this.store$),
+  //     tap(syncToLs)
+  //   );
+  // @Effect({dispatch: false}) setTaskUnDone$: any = this.actions$
+  //   .pipe(
+  //     ofType(TaskActionTypes.SetTaskUndone),
+  //     withLatestFrom(this.store$),
+  //     tap(syncToLs)
+  //   );
+  // @Effect({dispatch: false}) addSubTask$: any = this.actions$
+  //   .pipe(
+  //     ofType(TaskActionTypes.AddSubTask),
+  //     withLatestFrom(this.store$),
+  //     tap(syncToLs)
+  //   );
+  // @Effect({dispatch: false}) sync$: any = this.actions$
+  //   .pipe(
+  //     ofType(TaskActionTypes.Sync),
+  //     withLatestFrom(this.store$),
+  //     tap(syncToLs)
+  //   );
+  // @Effect({dispatch: false}) setCurrentTask$: any = this.actions$
+  //   .pipe(
+  //     ofType(TaskActionTypes.SetCurrentTask),
+  //     withLatestFrom(this.store$),
+  //     tap(syncToLs)
+  //   );
+  // @Effect({dispatch: false}) unsetCurrentTask$: any = this.actions$
+  //   .pipe(
+  //     ofType(TaskActionTypes.UnsetCurrentTask),
+  //     withLatestFrom(this.store$),
+  //     tap(syncToLs)
+  //   );
 
   constructor(private actions$: Actions,
               private store$: Store<any>) {

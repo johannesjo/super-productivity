@@ -37,10 +37,10 @@ export class TaskComponent implements OnInit, DoCheck {
   }
 
   ngOnInit() {
-    this.currentTaskId$ = this.taskService.currentTaskId$;
-    this.currentTaskId$.subscribe((val) => {
-      this.isCurrent = (this.task && val === this.task.id);
-    });
+    // this.currentTaskId$ = this.taskService.currentTaskId$;
+    // this.currentTaskId$.subscribe((val) => {
+    //   this.isCurrent = (this.task && val === this.task.id);
+    // });
 
     this.subTaskListId = shortid();
     this._dragulaService.createGroup(this.subTaskListId, {
