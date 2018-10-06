@@ -2,16 +2,10 @@
   "extends": "../tsconfig.json",
   "compilerOptions": {
     "outDir": "../out-tsc/app",
-    "module": "es2015",
     "types": []
   },
   "exclude": [
-    "src/test.ts",
+    "test.ts",
     "**/*.spec.ts"
-  ],
-  "paths": {
-    "dragula": [
-      "../node_modules/dragula/dist/dragula.min.js"
-    ]
-  }
+  ]
 }

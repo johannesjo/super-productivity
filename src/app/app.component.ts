@@ -1,11 +1,10 @@
 import { Component } from '@angular/core';
 
 @Component({
-  selector: 'sup-root',
+  selector: 'app-root',
   templateUrl: './app.component.html',
-  styleUrls: ['./app.component.scss'],
-  providers: [],
+  styleUrls: ['./app.component.css']
 })
 export class AppComponent {
-
+  title = 'sp2';
 }
