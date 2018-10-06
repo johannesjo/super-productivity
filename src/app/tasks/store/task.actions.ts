@@ -47,22 +47,8 @@ export class AddTask implements Action {
   }
 }
 
-export class UpsertTask implements Action {
-  readonly type = TaskActionTypes.UpsertTask;
-
-  constructor(public payload: { task: Task }) {
-  }
-}
-
 export class AddTasks implements Action {
   readonly type = TaskActionTypes.AddTasks;
-
-  constructor(public payload: { tasks: Task[] }) {
-  }
-}
-
-export class UpsertTasks implements Action {
-  readonly type = TaskActionTypes.UpsertTasks;
 
   constructor(public payload: { tasks: Task[] }) {
   }
@@ -105,9 +91,7 @@ export type TaskActions
   | SetCurrentTask
   | UnsetCurrentTask
   | AddTask
-  | UpsertTask
   | AddTasks
-  | UpsertTasks
   | UpdateTask
   | UpdateTasks
   | DeleteTask
