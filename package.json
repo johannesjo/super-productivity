@@ -40,11 +40,13 @@
   "private": true,
   "dependencies": {
     "@angular/animations": "^6.1.7",
+    "@angular/cdk": "^6.4.7",
     "@angular/common": "^6.1.7",
     "@angular/compiler": "^6.1.7",
     "@angular/core": "^6.1.7",
     "@angular/forms": "^6.1.7",
     "@angular/http": "^6.1.7",
+    "@angular/material": "^6.4.7",
     "@angular/platform-browser": "^6.1.7",
     "@angular/platform-browser-dynamic": "^6.1.7",
     "@angular/pwa": "^0.8.4",
@@ -55,8 +57,11 @@
     "@ngrx/store": "^6.1.0",
     "@ngrx/store-devtools": "^6.1.0",
     "core-js": "^2.5.4",
+    "ng2-dragula": "^2.1.0",
+    "ngx-markdown": "^6.2.1",
     "rxjs": "^6.2.2",
     "rxjs-compat": "^6.2.2",
+    "shortid": "^2.2.13",
     "zone.js": "~0.8.26"
   },
   "devDependencies": {

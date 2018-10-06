@@ -1,0 +1,55 @@
+@import "../../../_variables";
+
+:host {
+  display: block;
+  [hidden] {
+    display: none !important;
+  }
+}
+
+.markdown-wrapper {
+  min-height: 160px;
+  max-height: 600px;
+  margin-bottom: 20px;
+  display: block;
+  box-sizing: border-box;
+  height: 30px;
+  border: none;
+  resize: both;
+  overflow: auto;
+  position: relative;
+  .resize-to-fit {
+    position: absolute;
+    right: 14px;
+    top: 0;
+    cursor: pointer;
+  }
+}
+
+.markdown-unparsed,
+.markdown-parsed {
+  padding: 10px 14px;
+  margin: 0;
+  width: 100%;
+  word-wrap: break-word;
+  display: block;
+  border: none;
+  resize: none;
+  overflow: auto;
+  height: 100%;
+  box-sizing: border-box;
+  background: #fbfbfb;
+  body.dark-theme & {
+    background-color: $dark-theme-bg;
+    color: #eeeeee;
+  }
+}
+
+.markdown-parsed {
+  p:first-child {
+    margin-top: 0;
+  }
+  ul {
+    padding-left: 18px;
+  }
+}
