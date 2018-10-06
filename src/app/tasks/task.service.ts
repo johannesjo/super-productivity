@@ -4,11 +4,12 @@ import { Task } from './store/task.model';
 import { Store } from '@ngrx/store';
 import { select } from '@ngrx/store';
 import 'rxjs/add/operator/map';
-// import { selectCurrentTask } from './store/task.selectors';
 import { TaskActionTypes } from './store/task.actions';
 import { selectAllTasks } from './store/task.selectors';
 import { selectCurrentTask } from './store/task.selectors';
 import shortid from 'shortid';
+import { LS_TASK } from './task.const';
+import { loadFromLs } from '../util/local-storage';
 
 
 @Injectable()
@@ -21,23 +22,19 @@ export class TaskService {
   constructor(
     private _store: Store<any>
   ) {
-    // TODO find out why this gets initialized multiple times
-    console.log('SERVICE constructor');
-
-    this.reloadFromLs();
-    this.tasks$.subscribe((p) => console.log(p));
+    this.loadStateFromLS();
   }
 
-  reloadFromLs() {
-    // this._store.dispatch({
-    //   type: TaskActionTypes.ReloadFromLs
-    // });
-  }
-
-  sync() {
-    // this._store.dispatch({
-    //   type: TaskActionTypes.Sync
-    // });
+  loadStateFromLS() {
+    const lsTaskState = loadFromLs(LS_TASK);
+    console.log('LOAD_STATE');
+    
+    this._store.dispatch({
+      type: TaskActionTypes.LoadState,
+      payload: {
+        state: lsTaskState,
+      }
+    });
   }
 
   addTask(title: string) {

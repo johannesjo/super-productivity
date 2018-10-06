@@ -11,7 +11,7 @@
             true,
             "element",
             false,
-            "kebab-case"
+            "dashed-case"
         ]
     }
 }

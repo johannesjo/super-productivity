@@ -11,14 +11,6 @@ export const taskAdapter: EntityAdapter<Task> = createEntityAdapter<Task>();
 
 export const initialState: TaskState = taskAdapter.getInitialState({
   currentTaskId: null,
-  // additional entity state properties
-  ids: ['123'],
-  entities: {
-    '123': {
-      id: '123',
-      title: 'small'
-    }
-  }
 });
 
 export function taskReducer(
@@ -30,6 +22,11 @@ export function taskReducer(
   switch (action.type) {
     // Meta Actions
     // ------------
+
+    case TaskActionTypes.LoadState: {
+      return Object.assign({}, action.payload.state);
+    }
+
     case TaskActionTypes.SetCurrentTask: {
       return Object.assign({}, state, {currentTaskId: action.payload});
     }

@@ -1,22 +1,29 @@
 import { Action } from '@ngrx/store';
 import { Update } from '@ngrx/entity';
 import { Task } from './task.model';
+import { TaskState } from './task.reducer';
 
 export enum TaskActionTypes {
+  LoadState = '[Task] Load Task State',
   SetCurrentTask = '[Task] SetCurrentTask',
   UnsetCurrentTask = '[Task] UnsetCurrentTask',
 
   // Task Actions
   LoadTasks = '[Task] Load Tasks',
   AddTask = '[Task] Add Task',
-  UpsertTask = '[Task] Upsert Task',
   AddTasks = '[Task] Add Tasks',
-  UpsertTasks = '[Task] Upsert Tasks',
   UpdateTask = '[Task] Update Task',
   UpdateTasks = '[Task] Update Tasks',
   DeleteTask = '[Task] Delete Task',
   DeleteTasks = '[Task] Delete Tasks',
   ClearTasks = '[Task] Clear Tasks'
+}
+
+export class LoadState implements Action {
+  readonly type = TaskActionTypes.LoadState;
+
+  constructor(public payload: { state: TaskState }) {
+  }
 }
 
 export class SetCurrentTask implements Action {
@@ -88,6 +95,7 @@ export class ClearTasks implements Action {
 
 export type TaskActions
   = LoadTasks
+  | LoadState
   | SetCurrentTask
   | UnsetCurrentTask
   | AddTask
