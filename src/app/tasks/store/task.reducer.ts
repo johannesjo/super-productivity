@@ -17,12 +17,11 @@ export function taskReducer(
   state = initialState,
   action: TaskActions
 ): TaskState {
-  console.log(state, action);
+  console.log(state.entities, state, action);
 
   switch (action.type) {
     // Meta Actions
     // ------------
-
     case TaskActionTypes.LoadState: {
       return Object.assign({}, action.payload.state);
     }

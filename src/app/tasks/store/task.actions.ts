@@ -35,9 +35,6 @@ export class SetCurrentTask implements Action {
 
 export class UnsetCurrentTask implements Action {
   readonly type = TaskActionTypes.UnsetCurrentTask;
-
-  constructor(public payload: any) {
-  }
 }
 
 export class LoadTasks implements Action {

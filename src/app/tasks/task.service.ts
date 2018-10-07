@@ -61,9 +61,10 @@ export class TaskService {
     this._store.dispatch({
       type: TaskActionTypes.UpdateTask,
       payload: {
-        task: Object.assign({
-          id: taskId
-        }, changedFields)
+        task: {
+          id: taskId,
+          changes: changedFields
+        }
       }
     });
   }
