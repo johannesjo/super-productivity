@@ -23,9 +23,11 @@ export const selectMainTasksWithSubTasks = createSelector(
     .map((task) => {
       if (task.subTasks && task.subTasks.length > 0) {
         const newTask: any = Object.assign({}, task);
-        newTask.subTasks = task.subTasks.map((subTaskId) => {
-          return tasks.find((task_) => task_.id === subTaskId);
-        });
+        newTask.subTasks = task.subTasks
+          .map((subTaskId) => {
+            return tasks.find((task_) => task_.id === subTaskId);
+          })
+          .filter((subTask) => !!subTask);
         return newTask;
       } else {
         return task;

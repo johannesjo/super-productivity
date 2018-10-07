@@ -53,7 +53,15 @@ export function taskReducer(
     }
 
     case TaskActionTypes.DeleteTask: {
-      return taskAdapter.removeOne(action.payload.id, state);
+      const parentId = state.entities[action.payload.id].parentId;
+      // delete entry
+      const stateCopy = taskAdapter.removeOne(action.payload.id, state);
+      // also delete from parent task
+      if (parentId) {
+        const subTasksArray = stateCopy.entities[parentId].subTasks;
+        subTasksArray.splice(subTasksArray.indexOf(action.payload.id), 1);
+      }
+      return stateCopy;
     }
 
     case TaskActionTypes.DeleteTasks: {
@@ -81,7 +89,9 @@ export function taskReducer(
 
     case TaskActionTypes.AddSubTask: {
       const taskWithParentId = Object.assign(action.payload.task, {parentId: action.payload.parentId});
+      // add item
       const stateCopy = taskAdapter.addOne(taskWithParentId, state);
+      // also add to parent task
       const parentTask = stateCopy.entities[action.payload.parentId];
       parentTask.subTasks.push(action.payload.task.id);
       return stateCopy;
