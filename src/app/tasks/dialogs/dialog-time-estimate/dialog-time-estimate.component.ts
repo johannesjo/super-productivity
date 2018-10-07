@@ -1,15 +1,14 @@
 import { Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material';
 import { Task } from '../../task.model';
-import { TaskUtilService } from '../../task-util.service';
 import { TaskService } from '../../task.service';
 import { formatWorklogDateStr } from '../../../util/format-worklog-date-str';
+import { getTodayStr } from '../../util/get-today-str';
 
 @Component({
   selector: 'dialog-time-estimate',
   templateUrl: './dialog-time-estimate.component.html',
   styleUrls: ['./dialog-time-estimate.component.scss'],
-  providers: [TaskUtilService],
 })
 export class DialogTimeEstimateComponent {
   todayStr: string;
@@ -24,7 +23,7 @@ export class DialogTimeEstimateComponent {
               private _taskService: TaskService,
               @Inject(MAT_DIALOG_DATA) public data: any) {
     this.task = this.data.task;
-    this.todayStr = TaskUtilService.getTodayStr();
+    this.todayStr = getTodayStr();
     this._taskService = _taskService;
     this.taskCopy = Object.assign({}, this.task);
     this.timeSpentOnDayCopy = this.taskCopy.timeSpentOnDay || {};
