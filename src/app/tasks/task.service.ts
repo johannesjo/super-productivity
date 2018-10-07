@@ -16,7 +16,7 @@ import { loadFromLs } from '../util/local-storage';
 export class TaskService {
   currentTaskId$: Observable<string> = this._store.pipe(select(selectCurrentTask));
   flatTasks$: Observable<Task[]> = this._store.pipe(select(selectAllTasks));
-  tasks$: Observable<any[]> = this._store.pipe(select(selectMainTasksWithSubTasks));
+  tasks$: Observable<TaskWithSubTasks[]> = this._store.pipe(select(selectMainTasksWithSubTasks));
   undoneTasks$: Observable<TaskWithSubTasks[]> = this.tasks$.map(
     (tasks) => tasks && tasks.filter((task: TaskWithSubTasks) => !task.isDone)
   );

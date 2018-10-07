@@ -18,7 +18,7 @@ export type TaskWithSubTasks = Readonly<{
   isDone?: boolean;
   notes?: string;
   parentId?: string;
-  subTasks?: Task[];
+  subTasks?: TaskWithSubTasks[];
   progress?: number;
   timeSpent?: any;
   timeEstimate?: string;
