@@ -77,7 +77,14 @@ export function taskReducer(
       return Object.assign({}, state, {
         ids: newStateIds,
       });
+    }
 
+    case TaskActionTypes.AddSubTask: {
+      const taskWithParentId = Object.assign(action.payload.task, {parentId: action.payload.parentId});
+      const stateCopy = taskAdapter.addOne(taskWithParentId, state);
+      const parentTask = stateCopy.entities[action.payload.parentId];
+      parentTask.subTasks.push(action.payload.task.id);
+      return stateCopy;
     }
 
     default: {

@@ -15,3 +15,20 @@ export const selectAllTasks = createSelector(selectTaskFeatureState, selectAll);
 export const selectTaskTotal = createSelector(selectTaskFeatureState, selectTotal);
 
 export const selectCurrentTask = createSelector(selectTaskFeatureState, state => state.currentTaskId);
+
+export const selectMainTasksWithSubTasks = createSelector(
+  selectAllTasks,
+  tasks => tasks
+    .filter((task) => !task.parentId)
+    .map((task) => {
+      if (task.subTasks && task.subTasks.length > 0) {
+        const newTask: any = Object.assign({}, task);
+        newTask.subTasks = task.subTasks.map((subTaskId) => {
+          return tasks.find((task_) => task_.id === subTaskId);
+        });
+        return newTask;
+      } else {
+        return task;
+      }
+    })
+);

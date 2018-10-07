@@ -18,6 +18,9 @@ export enum TaskActionTypes {
   DeleteTasks = '[Task] Delete Tasks',
   ClearTasks = '[Task] Clear Tasks',
   MoveAfter = '[Task] Move After',
+
+  // Sub Task Actions
+  AddSubTask = '[Task] Add SubTask',
 }
 
 export class LoadState implements Action {
@@ -98,6 +101,13 @@ export class MoveAfter implements Action {
   }
 }
 
+export class AddSubTask implements Action {
+  readonly type = TaskActionTypes.AddSubTask;
+
+  constructor(public payload: { task: Task, parentId: string }) {
+  }
+}
+
 export type TaskActions
   = LoadTasks
   | LoadState
@@ -110,7 +120,8 @@ export type TaskActions
   | DeleteTask
   | DeleteTasks
   | ClearTasks
-  | MoveAfter;
+  | MoveAfter
+  | AddSubTask;
 
 
 // export enum TaskActionTypes {

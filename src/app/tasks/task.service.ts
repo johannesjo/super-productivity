@@ -1,11 +1,12 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Task } from './task.model';
+import { TaskWithSubTasks } from './task.model';
 import { Store } from '@ngrx/store';
 import { select } from '@ngrx/store';
 import 'rxjs/add/operator/map';
 import { TaskActionTypes } from './store/task.actions';
-import { selectAllTasks, selectCurrentTask, selectTaskIds } from './store/task.selectors';
+import { selectAllTasks, selectCurrentTask, selectMainTasksWithSubTasks } from './store/task.selectors';
 import shortid from 'shortid';
 import { LS_TASK } from './task.const';
 import { loadFromLs } from '../util/local-storage';
@@ -14,16 +15,22 @@ import { loadFromLs } from '../util/local-storage';
 @Injectable()
 export class TaskService {
   currentTaskId$: Observable<string> = this._store.pipe(select(selectCurrentTask));
-  tasks$: Observable<Task[]> = this._store.pipe(select(selectAllTasks));
-  tasksId$: Observable<string[] | number[]> = this._store.pipe(select(selectTaskIds));
-  undoneTasks$: Observable<Task[]> = this.tasks$.map((tasks) => tasks && tasks.filter((task: Task) => !task.isDone));
-  doneTasks$: Observable<Task[]> = this.tasks$.map((tasks) => tasks && tasks.filter((task: Task) => task.isDone));
+  flatTasks$: Observable<Task[]> = this._store.pipe(select(selectAllTasks));
+  tasks$: Observable<any[]> = this._store.pipe(select(selectMainTasksWithSubTasks));
+  undoneTasks$: Observable<TaskWithSubTasks[]> = this.tasks$.map(
+    (tasks) => tasks && tasks.filter((task: TaskWithSubTasks) => !task.isDone)
+  );
+  doneTasks$: Observable<TaskWithSubTasks[]> = this.tasks$.map(
+    (tasks) => tasks && tasks.filter((task: TaskWithSubTasks) => task.isDone)
+  );
+
+  // tasksId$: Observable<string[] | number[]> = this._store.pipe(select(selectTaskIds));
 
   constructor(
     private _store: Store<any>
   ) {
     this.loadStateFromLS();
-    this.tasksId$.subscribe((val) => console.log(val));
+    this.tasks$.subscribe((val) => console.log(val));
   }
 
   // META
@@ -31,12 +38,14 @@ export class TaskService {
   loadStateFromLS() {
     const lsTaskState = loadFromLs(LS_TASK);
 
-    this._store.dispatch({
-      type: TaskActionTypes.LoadState,
-      payload: {
-        state: lsTaskState,
-      }
-    });
+    if (lsTaskState) {
+      this._store.dispatch({
+        type: TaskActionTypes.LoadState,
+        payload: {
+          state: lsTaskState,
+        }
+      });
+    }
   }
 
   setCurrentTask(taskId: string) {
@@ -61,7 +70,8 @@ export class TaskService {
         task: {
           title,
           id: shortid(),
-          isDone: false
+          isDone: false,
+          subTasks: []
         }
       }
     });
@@ -107,9 +117,16 @@ export class TaskService {
   }
 
   addSubTask(parentTask: Task) {
-    // this._store.dispatch({
-    //   type: TaskActionTypes.AddSubTask,
-    //   payload: parentTask
-    // });
+    this._store.dispatch({
+      type: TaskActionTypes.AddSubTask,
+      payload: {
+        task: {
+          title: '',
+          id: shortid(),
+          isDone: false
+        },
+        parentId: parentTask.id
+      }
+    });
   }
 }

@@ -1,4 +1,4 @@
-export interface ITask {
+export type Task = Readonly<{
   id: string;
   title: string;
   isDone?: boolean;
@@ -10,15 +10,15 @@ export interface ITask {
   timeEstimate?: string;
   timeSpentOnDay?: Object;
   index?: number;
-}
+}>;
 
-export type Task = Readonly< {
+export type TaskWithSubTasks = Readonly<{
   id: string;
   title: string;
   isDone?: boolean;
   notes?: string;
   parentId?: string;
-  subTasks?: string[];
+  subTasks?: Task[];
   progress?: number;
   timeSpent?: any;
   timeEstimate?: string;
