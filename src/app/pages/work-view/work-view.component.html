@@ -1,10 +1,10 @@
 <div class="wrapper">
   <h2 class="mat-h2"> work-view</h2>
   <add-task-bar></add-task-bar>
-  <task-list [tasks$]="undoneTasks$"
+  <task-list [tasks]="undoneTasks$|async"
              [filterArgs]="{'isDone':false}"></task-list>
 
   <h2 class="mat-h2">Completed Tasks</h2>
-  <task-list [tasks$]="doneTasks$"
+  <task-list [tasks]="doneTasks$|async"
              [filterArgs]="{'isDone':true}"></task-list>
 </div>

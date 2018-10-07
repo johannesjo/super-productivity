@@ -5,8 +5,7 @@ import { Store } from '@ngrx/store';
 import { select } from '@ngrx/store';
 import 'rxjs/add/operator/map';
 import { TaskActionTypes } from './store/task.actions';
-import { selectAllTasks } from './store/task.selectors';
-import { selectCurrentTask } from './store/task.selectors';
+import { selectAllTasks, selectCurrentTask, selectTaskIds } from './store/task.selectors';
 import shortid from 'shortid';
 import { LS_TASK } from './task.const';
 import { loadFromLs } from '../util/local-storage';
@@ -16,6 +15,7 @@ import { loadFromLs } from '../util/local-storage';
 export class TaskService {
   currentTaskId$: Observable<string> = this._store.pipe(select(selectCurrentTask));
   tasks$: Observable<Task[]> = this._store.pipe(select(selectAllTasks));
+  tasksId$: Observable<string[] | number[]> = this._store.pipe(select(selectTaskIds));
   undoneTasks$: Observable<Task[]> = this.tasks$.map((tasks) => tasks && tasks.filter((task: Task) => !task.isDone));
   doneTasks$: Observable<Task[]> = this.tasks$.map((tasks) => tasks && tasks.filter((task: Task) => task.isDone));
 
@@ -23,8 +23,11 @@ export class TaskService {
     private _store: Store<any>
   ) {
     this.loadStateFromLS();
+    this.tasksId$.subscribe((val) => console.log(val));
   }
 
+  // META
+  // ----
   loadStateFromLS() {
     const lsTaskState = loadFromLs(LS_TASK);
 
@@ -36,6 +39,21 @@ export class TaskService {
     });
   }
 
+  setCurrentTask(taskId: string) {
+    this._store.dispatch({
+      type: TaskActionTypes.SetCurrentTask,
+      payload: taskId,
+    });
+  }
+
+  pauseCurrentTask() {
+    this._store.dispatch({
+      type: TaskActionTypes.UnsetCurrentTask,
+    });
+  }
+
+  // Tasks
+  // -----
   addTask(title: string) {
     this._store.dispatch({
       type: TaskActionTypes.AddTask,
@@ -69,19 +87,6 @@ export class TaskService {
     });
   }
 
-  setCurrentTask(taskId: string) {
-    this._store.dispatch({
-      type: TaskActionTypes.SetCurrentTask,
-      payload: taskId,
-    });
-  }
-
-  pauseCurrentTask() {
-    this._store.dispatch({
-      type: TaskActionTypes.UnsetCurrentTask,
-    });
-  }
-
   setTaskDone(taskId: string) {
     this.updateTask(taskId, {isDone: true});
   }
@@ -90,6 +95,16 @@ export class TaskService {
     this.updateTask(taskId, {isDone: false});
   }
 
+
+  moveAfter(taskId, targetItemId: string | undefined) {
+    this._store.dispatch({
+      type: TaskActionTypes.MoveAfter,
+      payload: {
+        taskId,
+        targetItemId,
+      }
+    });
+  }
 
   addSubTask(parentTask: Task) {
     // this._store.dispatch({

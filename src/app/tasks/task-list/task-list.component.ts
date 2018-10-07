@@ -1,6 +1,5 @@
 import { ChangeDetectionStrategy, Component, Input, OnInit } from '@angular/core';
 import { OnDestroy } from '@angular/core';
-import { Observable } from 'rxjs';
 import { Subscription } from 'rxjs';
 import { TaskService } from '../task.service';
 import { Task } from '../task.model';
@@ -15,7 +14,7 @@ import shortid from 'shortid';
 
 })
 export class TaskListComponent implements OnInit, OnDestroy {
-  @Input() tasks$: Observable<[Task]>;
+  @Input() tasks: Task[];
   @Input() filterArgs: string;
   taskListId: string;
   private subs: Subscription[] = [];
@@ -32,9 +31,14 @@ export class TaskListComponent implements OnInit, OnDestroy {
       }
     });
     this.subs.push(this._dragulaService.dropModel(this.taskListId)
-      .subscribe(() => {
-        // TODO figure something out
-        // this._taskService.sync();
+      .subscribe((dm) => {
+        const targetItemId = dm.targetModel[dm.targetIndex].id;
+        // const sourceItemId = dm.sourceModel[dm.sourceIndex].id;
+        const sourceItemId = dm.item.id;
+        console.log(dm.item, sourceItemId, targetItemId);
+        if (sourceItemId !== targetItemId) {
+          // this._taskService.moveAfter(sourceItemId, targetItemId);
+        }
       }));
   }
 

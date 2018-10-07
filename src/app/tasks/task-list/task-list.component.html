@@ -1,8 +1,6 @@
 <section class="mat-typography">
-  <div class="task-list"
-       [dragula]='taskListId'
-       [dragulaModel]="tasks$| async">
-    <task *ngFor="let task of tasks$ | async; trackBy: trackByFn; let i = index;"
+  <div class="task-list">
+    <task *ngFor="let task of tasks; trackBy: trackByFn; let i = index;"
           [task]="task">
     </task>
   </div>

@@ -68,6 +68,18 @@ export function taskReducer(
       return taskAdapter.removeAll(state);
     }
 
+    case TaskActionTypes.MoveAfter: {
+      const newStateIds: string[] = state.ids.slice(0) as string[];
+      newStateIds.splice(newStateIds.indexOf(action.payload.taskId), 1);
+      const targetIndex = action.payload.targetItemId ? newStateIds.indexOf(action.payload.targetItemId) : 0;
+      newStateIds.splice(targetIndex, 0, action.payload.taskId);
+
+      return Object.assign({}, state, {
+        ids: newStateIds,
+      });
+
+    }
+
     default: {
       return state;
     }
