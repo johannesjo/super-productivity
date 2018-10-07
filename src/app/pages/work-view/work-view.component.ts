@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { TaskService } from '../../tasks/task.service';
 import { Observable } from 'rxjs';
-import { Task } from '../../tasks/task.model';
+import { TaskWithData } from '../../tasks/task.model';
 
 @Component({
   selector: 'work-view',
@@ -9,8 +9,8 @@ import { Task } from '../../tasks/task.model';
   styleUrls: ['./work-view.component.scss'],
 })
 export class WorkViewComponent implements OnInit {
-  doneTasks$: Observable<Task[]> = this._taskService.doneTasks$;
-  undoneTasks$: Observable<Task[]> = this._taskService.undoneTasks$;
+  doneTasks$: Observable<TaskWithData[]> = this._taskService.doneTasks$;
+  undoneTasks$: Observable<TaskWithData[]> = this._taskService.undoneTasks$;
 
   constructor(private _taskService: TaskService) {
   }
