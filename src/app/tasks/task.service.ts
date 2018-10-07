@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Task } from './task.model';
-import { TaskWithSubTasks } from './task.model';
+import { TaskWithData } from './task.model';
 import { Store } from '@ngrx/store';
 import { select } from '@ngrx/store';
 import 'rxjs/add/operator/map';
@@ -16,12 +16,12 @@ import { loadFromLs } from '../util/local-storage';
 export class TaskService {
   currentTaskId$: Observable<string> = this._store.pipe(select(selectCurrentTask));
   flatTasks$: Observable<Task[]> = this._store.pipe(select(selectAllTasks));
-  tasks$: Observable<TaskWithSubTasks[]> = this._store.pipe(select(selectMainTasksWithSubTasks));
-  undoneTasks$: Observable<TaskWithSubTasks[]> = this.tasks$.map(
-    (tasks) => tasks && tasks.filter((task: TaskWithSubTasks) => !task.isDone)
+  tasks$: Observable<TaskWithData[]> = this._store.pipe(select(selectMainTasksWithSubTasks));
+  undoneTasks$: Observable<TaskWithData[]> = this.tasks$.map(
+    (tasks) => tasks && tasks.filter((task: TaskWithData) => !task.isDone)
   );
-  doneTasks$: Observable<TaskWithSubTasks[]> = this.tasks$.map(
-    (tasks) => tasks && tasks.filter((task: TaskWithSubTasks) => task.isDone)
+  doneTasks$: Observable<TaskWithData[]> = this.tasks$.map(
+    (tasks) => tasks && tasks.filter((task: TaskWithData) => task.isDone)
   );
 
   // tasksId$: Observable<string[] | number[]> = this._store.pipe(select(selectTaskIds));

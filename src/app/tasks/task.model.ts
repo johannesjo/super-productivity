@@ -1,8 +1,11 @@
+export type IssueType = 'JIRA' | 'GIT';
+
 export type Task = Readonly<{
   id: string;
   title: string;
   isDone?: boolean;
   notes?: string;
+  issueId?: string;
   parentId?: string;
   subTasks?: string[];
   progress?: number;
@@ -12,13 +15,15 @@ export type Task = Readonly<{
   index?: number;
 }>;
 
-export type TaskWithSubTasks = Readonly<{
+export type TaskWithData = Readonly<{
   id: string;
   title: string;
   isDone?: boolean;
   notes?: string;
   parentId?: string;
-  subTasks?: TaskWithSubTasks[];
+  issueId?: string;
+  issueData?: any;
+  subTasks?: TaskWithData[];
   progress?: number;
   timeSpent?: any;
   timeEstimate?: string;
