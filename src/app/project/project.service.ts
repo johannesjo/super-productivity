@@ -3,6 +3,7 @@ import { Observable } from 'rxjs';
 import { ProjectCfg } from './project';
 import { PersistenceService } from '../core/persistence/persistence.service';
 import { ProjectDataLsKey } from '../core/persistence/persistence';
+import { LS_TASK_STATE } from '../core/persistence/ls-keys.const';
 
 @Injectable()
 export class ProjectService {
@@ -10,6 +11,7 @@ export class ProjectService {
   // TODO get from store
   currentProjectMeta$: Observable<ProjectCfg>;
   projects$: Observable<ProjectCfg[]>;
+  projectId = 'PROJECT_ID';
 
   // HOW TO
   // update project data either directly from the observables or
@@ -17,6 +19,10 @@ export class ProjectService {
 
   constructor(private readonly _persistenceService: PersistenceService) {
     const projects = this._persistenceService.loadProjectsMeta();
+    console.log(_persistenceService);
+    console.log(_persistenceService);
+    console.log(_persistenceService.saveProjectData);
+
   }
 
   setCurrentProject(projectId) {
@@ -26,11 +32,19 @@ export class ProjectService {
   }
 
   saveProjectCfg(projectId, cfg: ProjectCfg) {
-    this._persistenceService.saveProjectData(projectId, 'cfg', cfg);
+    this._persistenceService.saveProjectData(projectId, LS_TASK_STATE, cfg);
   }
 
   saveProjectData(projectId, dataKey: ProjectDataLsKey, cfg: ProjectCfg) {
     this._persistenceService.saveProjectData(projectId, dataKey, cfg);
+  }
+
+  // TODO add current type
+  saveTasksForCurrentProject(taskState: any) {
+    console.log('I am here!');
+    console.log(this._persistenceService);
+
+    this._persistenceService.saveProjectData(this.projectId, LS_TASK_STATE, taskState);
   }
 
   load() {

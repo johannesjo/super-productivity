@@ -12,12 +12,14 @@ import { APP_ROUTES } from './app.routes';
 import { WorkViewModule } from './pages/work-view/work-view.module';
 import { UiModule } from './ui/ui.module';
 import { reducers } from './root-store';
+import { CoreModule } from './core/core.module';
 
 @NgModule({
   declarations: [
     AppComponent,
   ],
   imports: [
+    CoreModule,
     BrowserModule,
     BrowserAnimationsModule,
     RouterModule.forRoot(APP_ROUTES, {useHash: true}),

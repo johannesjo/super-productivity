@@ -5,6 +5,7 @@ import * as fromProject from './store/project.reducer';
 import { EffectsModule } from '@ngrx/effects';
 import { ProjectEffects } from './store/project.effects';
 import { CoreModule } from '../core/core.module';
+import { ProjectService } from './project.service';
 
 @NgModule({
   imports: [
@@ -13,7 +14,10 @@ import { CoreModule } from '../core/core.module';
     StoreModule.forFeature('project', fromProject.reducer),
     EffectsModule.forFeature([ProjectEffects])
   ],
-  declarations: []
+  declarations: [],
+  providers: [
+    ProjectService
+  ]
 })
 export class ProjectModule {
 }

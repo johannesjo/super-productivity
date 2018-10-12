@@ -17,10 +17,12 @@ import { TaskService } from './task.service';
 import { TASK_FEATURE_NAME } from './task.const';
 import { taskReducer } from './store/task.reducer';
 import { DragulaService } from 'ng2-dragula';
+import { ProjectModule } from '../project/project.module';
 
 @NgModule({
   imports: [
     CommonModule,
+    ProjectModule,
     UiModule,
     FormsModule,
     ReactiveFormsModule,

@@ -1,1 +1,4 @@
-export type ProjectDataLsKey = 'cfg' | 'tasks' | 'tasksBacklog' | 'tasksArchive';
+export type ProjectDataLsKey
+  = 'CFG'
+  | 'TASKS_STATE'
+  | 'TASKS_ARCHIVE';
