@@ -1,4 +1,6 @@
 export const ConfigFormConfig = [
+  // MISC SETTINGS
+  // -------------
   {
     title: 'Misc Settings',
     key: 'misc',
@@ -9,15 +11,13 @@ export const ConfigFormConfig = [
         type: 'checkbox',
         templateOptions: {
           label: 'Do not minimize to tray when closing',
-          description: 'Description',
         },
       },
       {
         key: 'takeABreakMessage',
-        type: 'checkbox',
+        type: 'textarea',
         templateOptions: {
           label: 'Take a break messsage',
-          description: 'Description',
         },
       },
     ]

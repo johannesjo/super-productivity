@@ -1,2 +1,14 @@
-<div>{{formCfg|json}}</div>
-<div>{{cfg|json}}</div>
+<form [formGroup]="form"
+      (ngSubmit)="submit()">
+  <formly-form [model]="cfg"
+               [fields]="fields"
+               [options]="options"
+               [form]="form">
+    <button type="submit"
+            class="btn btn-primary submit-button"
+            [disabled]="!form.valid">Save
+    </button>
+  </formly-form>
+</form>
+
+<!--<div>{{cfg|json}}</div>-->
