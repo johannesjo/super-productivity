@@ -1,10 +1,10 @@
-import { WorkViewModule } from './work-view.module';
+import { WorkViewPageModule } from './work-view.module';
 
 describe('WorkViewModule', () => {
-  let workViewModule: WorkViewModule;
+  let workViewModule: WorkViewPageModule;
 
   beforeEach(() => {
-    workViewModule = new WorkViewModule();
+    workViewModule = new WorkViewPageModule();
   });
 
   it('should create an instance', () => {

@@ -5,10 +5,10 @@ import { TaskWithData } from '../../tasks/task.model';
 
 @Component({
   selector: 'work-view',
-  templateUrl: './work-view.component.html',
-  styleUrls: ['./work-view.component.scss'],
+  templateUrl: './work-view-page.component.html',
+  styleUrls: ['./work-view-page.component.scss'],
 })
-export class WorkViewComponent implements OnInit {
+export class WorkViewPageComponent implements OnInit {
   doneTasks$: Observable<TaskWithData[]> = this._taskService.doneTasks$;
   undoneTasks$: Observable<TaskWithData[]> = this._taskService.undoneTasks$;
 

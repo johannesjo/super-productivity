@@ -1,20 +1,20 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { WorkViewComponent } from './work-view.component';
+import { WorkViewPageComponent } from './work-view.component';
 
 describe('WorkViewComponent', () => {
-  let component: WorkViewComponent;
-  let fixture: ComponentFixture<WorkViewComponent>;
+  let component: WorkViewPageComponent;
+  let fixture: ComponentFixture<WorkViewPageComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [WorkViewComponent]
+      declarations: [WorkViewPageComponent]
     })
       .compileComponents();
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(WorkViewComponent);
+    fixture = TestBed.createComponent(WorkViewPageComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

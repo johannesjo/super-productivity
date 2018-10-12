@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { WorkViewComponent } from './work-view.component';
+import { WorkViewPageComponent } from './work-view-page.component';
 import { ReactiveFormsModule } from '@angular/forms';
 import { FormsModule } from '@angular/forms';
 import { UiModule } from '../../ui/ui.module';
@@ -14,8 +14,8 @@ import { TasksModule } from '../../tasks/tasks.module';
     ReactiveFormsModule,
     TasksModule,
   ],
-  declarations: [WorkViewComponent],
-  exports: [WorkViewComponent],
+  declarations: [WorkViewPageComponent],
+  exports: [WorkViewPageComponent],
 })
-export class WorkViewModule {
+export class WorkViewPageModule {
 }

@@ -9,10 +9,11 @@ import { StoreDevtoolsModule } from '@ngrx/store-devtools';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterModule } from '@angular/router';
 import { APP_ROUTES } from './app.routes';
-import { WorkViewModule } from './pages/work-view/work-view.module';
 import { UiModule } from './ui/ui.module';
 import { reducers } from './root-store';
 import { CoreModule } from './core/core.module';
+import { ConfigPageModule } from './pages/config-page/config-page.module';
+import { WorkViewPageModule } from './pages/work-view/work-view-page.module';
 
 @NgModule({
   declarations: [
@@ -33,7 +34,8 @@ import { CoreModule } from './core/core.module';
     UiModule,
 
     // Pages
-    WorkViewModule,
+    WorkViewPageModule,
+    ConfigPageModule,
   ],
   providers: [],
   bootstrap: [AppComponent]
