@@ -1,3 +1,6 @@
-<p>
-  config-page works!
-</p>
+<h2>Global Config</h2>
+<div *ngFor="let section of formCfg">
+  <config-section [section]="section"
+                  [cfg]="(configService.cfg$|async)[section.key]"></config-section>
+</div>
+

@@ -17,7 +17,7 @@ export function taskReducer(
   state = initialState,
   action: TaskActions
 ): TaskState {
-  console.log(state.entities, state, action);
+  // console.log(state.entities, state, action);
 
   switch (action.type) {
     // Meta Actions

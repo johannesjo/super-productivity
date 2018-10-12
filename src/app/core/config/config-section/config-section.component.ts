@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { Input } from '@angular/core';
 
 @Component({
   selector: 'config-section',
@@ -7,7 +8,11 @@ import { Component, OnInit } from '@angular/core';
 })
 export class ConfigSectionComponent implements OnInit {
 
-  constructor() { }
+  @Input() section;
+  @Input() cfg;
+
+  constructor() {
+  }
 
   ngOnInit() {
   }

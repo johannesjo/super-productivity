@@ -2,10 +2,10 @@ import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { select } from '@ngrx/store';
 import { ConfigActionTypes } from './store/config.actions';
-import { DEFAULT_CONFIG } from 'tslint/lib/configuration';
 import { Observable } from 'rxjs';
 import { GlobalConfig } from './config.model';
 import { selectConfigFeatureState } from './store/config.reducer';
+import { DEFAULT_CFG } from './default-config.const';
 
 @Injectable({
   providedIn: 'root'
@@ -15,7 +15,7 @@ export class ConfigService {
 
   constructor(private readonly _store: Store<any>) {
     this.load();
-    this.cfg$.subscribe((val) => console.log(val));
+    this.cfg$.subscribe((val) => console.log('SUB', val));
 
   }
 
@@ -23,18 +23,7 @@ export class ConfigService {
     // load project cfg
     this._store.dispatch({
       type: ConfigActionTypes.LoadConfig,
-      payload: DEFAULT_CONFIG,
-    });
-  }
-
-  updateItem(sectionKey, itemKey, value) {
-    this._store.dispatch({
-      type: ConfigActionTypes.LoadConfig,
-      payload: {
-        sectionKey,
-        itemKey,
-        value
-      },
+      payload: DEFAULT_CFG,
     });
   }
 

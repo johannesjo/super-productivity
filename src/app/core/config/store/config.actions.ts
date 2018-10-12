@@ -11,14 +11,17 @@ export enum ConfigActionTypes {
 export class LoadConfig implements Action {
   readonly type = ConfigActionTypes.LoadConfig;
 
-  constructor(public cfg: GlobalConfig) {
+  constructor(public payload: GlobalConfig) {
   }
 }
 
 export class UpdateConfigSection implements Action {
   readonly type = ConfigActionTypes.UpdateConfigSection;
 
-  constructor(public sectionKey, public sectionCfg: Partial<SectionConfig>) {
+  constructor(public payload: {
+    sectionKey: string
+    sectionCfg: Partial<SectionConfig>
+  }) {
   }
 }
 

@@ -9,6 +9,7 @@ import { CoreModule } from '../../core/core.module';
   imports: [
     CommonModule,
     CoreModule,
+    ConfigModule,
     UiModule,
   ],
   declarations: [ConfigPageComponent]
