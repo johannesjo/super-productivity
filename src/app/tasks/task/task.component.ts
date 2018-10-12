@@ -6,7 +6,7 @@ import { Task } from '../task.model';
 import shortid from 'shortid';
 import { MatDialog } from '@angular/material';
 import { DialogTimeEstimateComponent } from '../dialogs/dialog-time-estimate/dialog-time-estimate.component';
-import { expandAnimation } from '../../animations/expand.ani';
+import { expandAnimation } from '../../ui/animations/expand.ani';
 
 // import {Task} from './task'
 
