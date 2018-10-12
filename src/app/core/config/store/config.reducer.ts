@@ -1,7 +1,7 @@
 import { ConfigActions, ConfigActionTypes } from './config.actions';
 
-export interface State {1
-
+export interface State {
+  [key: string]: any;
 }
 
 export const initialState: State = {};

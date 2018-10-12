@@ -14,6 +14,9 @@ import { reducers } from './root-store';
 import { CoreModule } from './core/core.module';
 import { ConfigPageModule } from './pages/config-page/config-page.module';
 import { WorkViewPageModule } from './pages/work-view/work-view-page.module';
+import { ReactiveFormsModule } from '@angular/forms';
+import { FormlyModule } from '@ngx-formly/core';
+import { FormlyMaterialModule } from '@ngx-formly/material';
 
 @NgModule({
   declarations: [
@@ -36,6 +39,9 @@ import { WorkViewPageModule } from './pages/work-view/work-view-page.module';
     // Pages
     WorkViewPageModule,
     ConfigPageModule,
+    ReactiveFormsModule,
+    FormlyModule.forRoot(),
+    FormlyMaterialModule,
   ],
   providers: [],
   bootstrap: [AppComponent]

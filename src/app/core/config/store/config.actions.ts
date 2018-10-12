@@ -4,8 +4,12 @@ export enum ConfigActionTypes {
   LoadConfigs = '[Config] Load Configs'
 }
 
-export class LoadConfigs implements Action {
-  readonly type = ConfigActionTypes.LoadConfigs;
+export class LoadConfig implements Action {
+  readonly type = ConfigActionTypes.LoadConfig;
 }
 
-export type ConfigActions = LoadConfigs;
+export class UpdateConfig implements Action {
+  readonly type = ConfigActionTypes.UpdateConfig;
+}
+
+export type ConfigActions = LoadConfig;
