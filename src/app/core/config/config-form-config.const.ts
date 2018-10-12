@@ -15,7 +15,7 @@ export const ConfigFormConfig = [
       },
       {
         key: 'takeABreakMessage',
-        type: 'textarea',
+        type: 'input',
         templateOptions: {
           label: 'Take a break messsage',
         },

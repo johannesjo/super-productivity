@@ -11,9 +11,11 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { FormlyModule } from '@ngx-formly/core';
 import { FormlyMaterialModule } from '@ngx-formly/material';
 import { ConfigService } from './config.service';
+import { UiModule } from '../../ui/ui.module';
 
 @NgModule({
   imports: [
+    UiModule,
     ReactiveFormsModule,
     FormlyModule.forChild(),
     FormlyMaterialModule,
