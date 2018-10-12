@@ -62,6 +62,7 @@ export class ProjectService {
   }
 
   loadCurrentCfg() {
+    // TODO load issue config
   }
 
   loadTasksForCurrent() {

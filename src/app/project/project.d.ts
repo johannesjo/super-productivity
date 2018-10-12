@@ -1,7 +1,7 @@
 import { IssueIntegrationCfg } from '../issue-integration/issue-integration';
 
-export interface ProjectCfg {
-  IssueIntegrationCfgs: {
+export type ProjectCfg = Readonly<{
+  issueIntegrationCfgs: {
     [key: string]: IssueIntegrationCfg[]
   };
-}
+}>;
