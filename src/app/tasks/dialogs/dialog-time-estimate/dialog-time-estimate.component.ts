@@ -32,7 +32,7 @@ export class DialogTimeEstimateComponent {
 
 
   submit() {
-    this._taskService.updateTask(this.taskCopy.id, {
+    this._taskService.update(this.taskCopy.id, {
       timeEstimate: this.taskCopy.timeEstimate,
       timeSpentOnDay: this.timeSpentOnDayCopy,
     });

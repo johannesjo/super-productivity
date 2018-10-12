@@ -32,14 +32,14 @@ export class TaskService {
 
   // META
   // ----
-  setCurrentTask(taskId: string) {
+  setCurrentId(taskId: string) {
     this._store.dispatch({
       type: TaskActionTypes.SetCurrentTask,
       payload: taskId,
     });
   }
 
-  pauseCurrentTask() {
+  pauseCurrent() {
     this._store.dispatch({
       type: TaskActionTypes.UnsetCurrentTask,
     });
@@ -47,7 +47,7 @@ export class TaskService {
 
   // Tasks
   // -----
-  addTask(title: string) {
+  add(title: string) {
     this._store.dispatch({
       type: TaskActionTypes.AddTask,
       payload: {
@@ -61,7 +61,7 @@ export class TaskService {
     });
   }
 
-  deleteTask(taskId: string) {
+  remove(taskId: string) {
     this._store.dispatch({
       type: TaskActionTypes.DeleteTask,
       payload: {id: taskId}
@@ -69,7 +69,7 @@ export class TaskService {
   }
 
 
-  updateTask(taskId: string, changedFields: Partial<Task>) {
+  update(taskId: string, changedFields: Partial<Task>) {
     this._store.dispatch({
       type: TaskActionTypes.UpdateTask,
       payload: {
@@ -81,12 +81,12 @@ export class TaskService {
     });
   }
 
-  setTaskDone(taskId: string) {
-    this.updateTask(taskId, {isDone: true});
+  setDone(taskId: string) {
+    this.update(taskId, {isDone: true});
   }
 
-  setTaskUnDone(taskId: string) {
-    this.updateTask(taskId, {isDone: false});
+  setUnDone(taskId: string) {
+    this.update(taskId, {isDone: false});
   }
 
 

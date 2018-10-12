@@ -66,7 +66,7 @@ export class AddTaskBarComponent {
       }
 
     } else if (newTaskTitle) {
-      this._taskService.addTask(newTaskTitle);
+      this._taskService.add(newTaskTitle);
       this.taskSuggestionsCtrl.setValue('');
     }
     // else if (this.onEmptySubmit) {

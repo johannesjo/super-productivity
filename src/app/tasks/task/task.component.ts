@@ -51,16 +51,16 @@ export class TaskComponent implements OnInit, DoCheck {
   }
 
   deleteTask(taskId: string) {
-    this.taskService.deleteTask(taskId);
+    this.taskService.remove(taskId);
   }
 
 
   startTask(taskId: string) {
-    this.taskService.setCurrentTask(taskId);
+    this.taskService.setCurrentId(taskId);
   }
 
   pauseTask() {
-    this.taskService.pauseCurrentTask();
+    this.taskService.pauseCurrent();
   }
 
   updateTaskIfChanged(isChanged, idToEdit, task) {
@@ -70,7 +70,7 @@ export class TaskComponent implements OnInit, DoCheck {
   }
 
   updateTask(idToEdit: string, taskTitle: string) {
-    this.taskService.updateTask(idToEdit, {title: taskTitle});
+    this.taskService.update(idToEdit, {title: taskTitle});
     // todo focus task again
   }
 
@@ -92,9 +92,9 @@ export class TaskComponent implements OnInit, DoCheck {
   // TODO refactor to action ?
   toggleTaskDone(taskId: string, isDone: boolean) {
     if (!isDone) {
-      this.taskService.setTaskDone(taskId);
+      this.taskService.setDone(taskId);
     } else {
-      this.taskService.setTaskUnDone(taskId);
+      this.taskService.setUnDone(taskId);
     }
   }
 
@@ -103,6 +103,6 @@ export class TaskComponent implements OnInit, DoCheck {
 
 
   onTaskNotesChanged(idToEdit: string, $event) {
-    this.taskService.updateTask(idToEdit, {notes: $event.newVal});
+    this.taskService.update(idToEdit, {notes: $event.newVal});
   }
 }
