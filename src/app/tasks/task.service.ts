@@ -8,8 +8,6 @@ import 'rxjs/add/operator/map';
 import { TaskActionTypes } from './store/task.actions';
 import { selectAllTasks, selectCurrentTask, selectMainTasksWithSubTasks } from './store/task.selectors';
 import shortid from 'shortid';
-import { LS_TASK } from './task.const';
-import { loadFromLs } from '../util/local-storage';
 
 
 @Injectable()
@@ -27,27 +25,13 @@ export class TaskService {
   // tasksId$: Observable<string[] | number[]> = this._store.pipe(select(selectTaskIds));
 
   constructor(
-    private _store: Store<any>
+    private _store: Store<any>,
   ) {
-    this.loadStateFromLS();
     this.tasks$.subscribe((val) => console.log(val));
   }
 
   // META
   // ----
-  loadStateFromLS() {
-    const lsTaskState = loadFromLs(LS_TASK);
-
-    if (lsTaskState) {
-      this._store.dispatch({
-        type: TaskActionTypes.LoadState,
-        payload: {
-          state: lsTaskState,
-        }
-      });
-    }
-  }
-
   setCurrentTask(taskId: string) {
     this._store.dispatch({
       type: TaskActionTypes.SetCurrentTask,

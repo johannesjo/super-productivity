@@ -27,8 +27,9 @@ export class PersistenceService {
     saveToLs(PersistenceService._makeProjectKey(projectId, subKey), data);
   }
 
-  loadProjectData(projectId, subKey: ProjectDataLsKey) {
-    loadFromLs(PersistenceService._makeProjectKey(projectId, subKey));
+  // TODO add correct type
+  loadProjectData(projectId, subKey: ProjectDataLsKey): any {
+    return loadFromLs(PersistenceService._makeProjectKey(projectId, subKey));
   }
 
   loadProjectsMeta() {

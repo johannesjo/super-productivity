@@ -4,50 +4,75 @@ import { ProjectCfg } from './project';
 import { PersistenceService } from '../core/persistence/persistence.service';
 import { ProjectDataLsKey } from '../core/persistence/persistence';
 import { LS_TASK_STATE } from '../core/persistence/ls-keys.const';
+import { LS_PROJECT_CFG } from '../core/persistence/ls-keys.const';
+import { TaskActionTypes } from '../tasks/store/task.actions';
+import { Store } from '@ngrx/store';
 
 @Injectable()
 export class ProjectService {
-
   // TODO get from store
-  currentProjectMeta$: Observable<ProjectCfg>;
-  projects$: Observable<ProjectCfg[]>;
-  projectId = 'PROJECT_ID';
+  list$: Observable<ProjectCfg[]>;
+  currentCfg$: Observable<ProjectCfg>;
+  currentId$: Observable<string>;
+  private _currentProjectId;
 
-  // HOW TO
-  // update project data either directly from the observables or
-  // hook into all the actions to check for when data needs saving
+  constructor(
+    private readonly _persistenceService: PersistenceService,
+    // TODO correct type?
+    private readonly _store: Store<any>,
+  ) {
+    // this will be the actual mechanism
+    // or refactor this to an effect??? both valid
+    // this.currentProjectsId$.subscribe((projectId) => {
+    //   this._currentProjectId = projectId;
+    //   const projects = this._persistenceService.loadProjectsMeta();
+    //   this.loadTasksForCurrentProject();
+    // });
 
-  constructor(private readonly _persistenceService: PersistenceService) {
     const projects = this._persistenceService.loadProjectsMeta();
-    console.log(_persistenceService);
-    console.log(_persistenceService);
-    console.log(_persistenceService.saveProjectData);
-
+    this.loadTasksForCurrent();
   }
 
-  setCurrentProject(projectId) {
-    // ...
-    // dispatch all necessary actions here
-    // this._persistenceService.loadProjectData(projectId);
+  // ONLY PERSISTENCE
+  // ----------------
+  // TODO add taskState type
+  saveTasksForCurrent(taskState: any) {
+    this.persistData(this._currentProjectId, LS_TASK_STATE, taskState);
   }
 
   saveProjectCfg(projectId, cfg: ProjectCfg) {
-    this._persistenceService.saveProjectData(projectId, LS_TASK_STATE, cfg);
+    this.persistData(projectId, LS_PROJECT_CFG, cfg);
   }
 
-  saveProjectData(projectId, dataKey: ProjectDataLsKey, cfg: ProjectCfg) {
+  persistData(projectId, dataKey: ProjectDataLsKey, cfg: ProjectCfg) {
     this._persistenceService.saveProjectData(projectId, dataKey, cfg);
   }
 
-  // TODO add current type
-  saveTasksForCurrentProject(taskState: any) {
-    console.log('I am here!');
-    console.log(this._persistenceService);
-
-    this._persistenceService.saveProjectData(this.projectId, LS_TASK_STATE, taskState);
+  // USING ALSO STORE
+  // ----------------
+  create() {
   }
 
-  load() {
-    // store.dispatch to update obs
+  remove() {
+  }
+
+  setCurrentId(projectId) {
+    // ...
+    // dispatch save
+  }
+
+  loadCurrentCfg() {
+  }
+
+  loadTasksForCurrent() {
+    const lsTaskState = this._persistenceService.loadProjectData(this._currentProjectId, LS_TASK_STATE);
+    if (lsTaskState) {
+      this._store.dispatch({
+        type: TaskActionTypes.LoadState,
+        payload: {
+          state: lsTaskState,
+        }
+      });
+    }
   }
 }

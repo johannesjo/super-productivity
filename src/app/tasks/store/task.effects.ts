@@ -33,7 +33,7 @@ export class TaskEffects {
     const tasksFeatureState = state[1][TASK_FEATURE_NAME];
     const currentTaskId = tasksFeatureState.currentTaskId;
     console.log('SYNC', tasksFeatureState, currentTaskId);
-    this._projectService.saveTasksForCurrentProject(tasksFeatureState);
+    this._projectService.saveTasksForCurrent(tasksFeatureState);
   }
 }
 
