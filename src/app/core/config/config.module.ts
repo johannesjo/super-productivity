@@ -1,8 +1,7 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { StoreModule } from '@ngrx/store';
-import * as fromConfig from './store/config.reducer';
-import { CONFIG_FEATURE_NAME } from './store/config.reducer';
+import { CONFIG_FEATURE_NAME, configReducer } from './store/config.reducer';
 import { EffectsModule } from '@ngrx/effects';
 import { ConfigEffects } from './store/config.effects';
 import { ConfigSectionComponent } from './config-section/config-section.component';
@@ -20,7 +19,7 @@ import { UiModule } from '../../ui/ui.module';
     FormlyModule.forChild(),
     FormlyMaterialModule,
     CommonModule,
-    StoreModule.forFeature(CONFIG_FEATURE_NAME, fromConfig.reducer),
+    StoreModule.forFeature(CONFIG_FEATURE_NAME, configReducer),
     EffectsModule.forFeature([ConfigEffects])
   ],
   declarations: [

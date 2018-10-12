@@ -5,7 +5,7 @@ import { ConfigActionTypes } from './store/config.actions';
 import { Observable } from 'rxjs';
 import { GlobalConfig } from './config.model';
 import { selectConfigFeatureState } from './store/config.reducer';
-import { DEFAULT_CFG } from './default-config.const';
+import { PersistenceService } from '../persistence/persistence.service';
 
 @Injectable({
   providedIn: 'root'
@@ -13,17 +13,18 @@ import { DEFAULT_CFG } from './default-config.const';
 export class ConfigService {
   cfg$: Observable<GlobalConfig> = this._store.pipe(select(selectConfigFeatureState));
 
-  constructor(private readonly _store: Store<any>) {
+  constructor(
+    private readonly _store: Store<any>,
+    private readonly _persistenceService: PersistenceService
+  ) {
     this.load();
-    this.cfg$.subscribe((val) => console.log('SUB', val));
-
   }
 
   load() {
     // load project cfg
     this._store.dispatch({
       type: ConfigActionTypes.LoadConfig,
-      payload: DEFAULT_CFG,
+      payload: this._persistenceService.loadGlobalConfig(),
     });
   }
 

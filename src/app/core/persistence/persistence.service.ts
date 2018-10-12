@@ -1,8 +1,10 @@
 import { Injectable } from '@angular/core';
 import { ProjectDataLsKey } from './persistence';
-import { saveToLs } from '../../util/local-storage';
-import { loadFromLs } from '../../util/local-storage';
 import { LS_PROJECT_PREFIX } from './ls-keys.const';
+import { LS_GLOBAL_CFG } from './ls-keys.const';
+import { GlobalConfig } from '../config/config.model';
+import { saveToLs } from './local-storage';
+import { loadFromLs } from './local-storage';
 
 @Injectable({
   providedIn: 'root'
@@ -51,8 +53,10 @@ export class PersistenceService {
   // GLOBAL CONFIG
   // -------------
   loadGlobalConfig() {
+    return loadFromLs(LS_GLOBAL_CFG);
   }
 
-  saveGlobalConfig() {
+  saveGlobalConfig(globalConfig: GlobalConfig) {
+    saveToLs(LS_GLOBAL_CFG, globalConfig);
   }
 }

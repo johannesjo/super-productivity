@@ -9,7 +9,7 @@ export const selectConfigFeatureState = createFeatureSelector<GlobalConfig>(CONF
 
 export const initialState: GlobalConfig = DEFAULT_CFG;
 
-export function reducer(
+export function configReducer(
   state = initialState,
   action: ConfigActions
 ): GlobalConfig {
