@@ -2,8 +2,10 @@ import { taskAdapter } from './task.reducer';
 import { createFeatureSelector } from '@ngrx/store';
 import { createSelector } from '@ngrx/store';
 import { TASK_FEATURE_NAME } from '../task.const';
+import { TaskState } from './task.reducer';
 
-export const selectTaskFeatureState = createFeatureSelector<any>(TASK_FEATURE_NAME);
+// TODO proper type
+export const selectTaskFeatureState = createFeatureSelector<TaskState>(TASK_FEATURE_NAME);
 
 const {selectIds, selectEntities, selectAll, selectTotal} = taskAdapter.getSelectors();
 

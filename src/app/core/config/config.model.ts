@@ -92,3 +92,7 @@ export type GlobalConfig = Readonly<{
   _googleTokens: GoogleTokensSettings;
 }>;
 
+export type SectionConfig
+  = MiscConfig
+  | PomodoroConfig
+  | KeyboardConfig;

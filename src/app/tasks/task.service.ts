@@ -24,9 +24,7 @@ export class TaskService {
 
   // tasksId$: Observable<string[] | number[]> = this._store.pipe(select(selectTaskIds));
 
-  constructor(
-    private _store: Store<any>,
-  ) {
+  constructor(private _store: Store<any>) {
     this.tasks$.subscribe((val) => console.log(val));
   }
 
