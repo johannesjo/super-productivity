@@ -10,7 +10,7 @@ import { ProjectService } from '../../project/project.service';
 
 @Injectable()
 export class TaskEffects {
-  @Effect({dispatch: false}) updateTask$: any = this.actions$
+  @Effect({dispatch: false}) updateTask$: any = this._actions$
     .pipe(
       ofType(
         TaskActionTypes.AddTask,
@@ -20,12 +20,12 @@ export class TaskEffects {
         TaskActionTypes.UnsetCurrentTask,
         TaskActionTypes.UpdateTask,
       ),
-      withLatestFrom(this.store$),
+      withLatestFrom(this._store$),
       tap(this._saveToLs.bind(this))
     );
 
-  constructor(private actions$: Actions,
-              private store$: Store<any>,
+  constructor(private _actions$: Actions,
+              private _store$: Store<any>,
               private _projectService: ProjectService) {
   }
 

@@ -32,6 +32,10 @@ export class ConfigFormComponent {
   }
 
   submit() {
-    this._configService.updateSection(this.sectionKey, this.cfg);
+    if (!this.cfg) {
+      throw new Error('No cfg for ' + this.sectionKey);
+    } else {
+      this._configService.updateSection(this.sectionKey, this.cfg);
+    }
   }
 }

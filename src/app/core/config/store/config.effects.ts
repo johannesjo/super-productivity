@@ -29,11 +29,7 @@ export class ConfigEffects {
   }
 
   private _saveToLs(state) {
-    console.log('SAVE_TO_LS', state);
     const globalConfig = state[1][CONFIG_FEATURE_NAME];
-    console.log(globalConfig);
-
-
     this._persistenceService.saveGlobalConfig(globalConfig);
   }
 }

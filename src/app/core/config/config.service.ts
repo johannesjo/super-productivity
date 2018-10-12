@@ -18,14 +18,19 @@ export class ConfigService {
     private readonly _persistenceService: PersistenceService
   ) {
     this.load();
+    this.cfg$.subscribe((val) => console.log(val));
   }
 
   load() {
-    // load project cfg
-    this._store.dispatch({
-      type: ConfigActionTypes.LoadConfig,
-      payload: this._persistenceService.loadGlobalConfig(),
-    });
+    const cfg = this._persistenceService.loadGlobalConfig();
+    if (cfg && Object.keys(cfg).length > 0) {
+      this._store.dispatch({
+        type: ConfigActionTypes.LoadConfig,
+        payload: cfg,
+      });
+    } else {
+      console.log('ConfigService No config found in ls');
+    }
   }
 
   updateSection(sectionKey, sectionCfg) {
