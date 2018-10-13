@@ -6,6 +6,7 @@ import { UiModule } from '../ui/ui.module';
 import { ReactiveFormsModule } from '@angular/forms';
 import { FormsModule } from '@angular/forms';
 import { DragulaModule } from 'ng2-dragula';
+import { DragulaService } from 'ng2-dragula';
 import { AddTaskBarComponent } from './add-task-bar/add-task-bar.component';
 import { DialogTimeEstimateComponent } from './dialogs/dialog-time-estimate/dialog-time-estimate.component';
 import { ToArrayPipe } from '../util/to-array.pipe';
@@ -16,7 +17,6 @@ import { EffectsModule } from '@ngrx/effects';
 import { TaskService } from './task.service';
 import { TASK_FEATURE_NAME } from './task.const';
 import { taskReducer } from './store/task.reducer';
-import { DragulaService } from 'ng2-dragula';
 import { ProjectModule } from '../project/project.module';
 
 @NgModule({
@@ -48,6 +48,7 @@ import { ProjectModule } from '../project/project.module';
     TaskService,
     DragulaService
   ],
+  entryComponents: [DialogTimeEstimateComponent]
 
 })
 export class TasksModule {

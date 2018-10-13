@@ -1,3 +1,4 @@
+<button (click)="openCreateDialog()">Create New</button>
 <h2>Projects</h2>
 <div *ngFor="let project of projectService.list$|async">
   {{project.title}}

@@ -7,18 +7,24 @@ import { EffectsModule } from '@ngrx/effects';
 import { ProjectEffects } from './store/project.effects';
 import { CoreModule } from '../core/core.module';
 import { ProjectService } from './project.service';
+import { DialogCreateProjectComponent } from './dialogs/create-project/dialog-create-project.component';
+import { UiModule } from '../ui/ui.module';
 
 @NgModule({
   imports: [
     CommonModule,
     CoreModule,
+    UiModule,
     StoreModule.forFeature(PROJECT_FEATURE_NAME, projectReducer),
     EffectsModule.forFeature([ProjectEffects])
   ],
-  declarations: [],
+  declarations: [
+    DialogCreateProjectComponent
+  ],
   providers: [
     ProjectService
-  ]
+  ],
+  exports: [DialogCreateProjectComponent]
 })
 export class ProjectModule {
 }

@@ -1,0 +1,19 @@
+<h2 mat-dialog-title>Create Project</h2>
+<mat-dialog-content>
+  <form (submit)="submit()"
+        class="mat-body"
+        name="create-project-form">
+
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions>
+  <button mat-raised-button
+          (click)="submit()">Save
+  </button>
+  <!-- Can optionally provide a result for the closing dialog. -->
+  <button mat-raised-button
+          [mat-dialog-close]="true">Cancel
+  </button>
+</mat-dialog-actions>
+
