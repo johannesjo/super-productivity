@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { ProjectDataLsKey } from './persistence';
 import { LS_PROJECT_PREFIX } from './ls-keys.const';
 import { LS_GLOBAL_CFG } from './ls-keys.const';
+import { LS_PROJECT_META_LIST } from './ls-keys.const';
 import { GlobalConfig } from '../config/config.model';
 import { saveToLs } from './local-storage';
 import { loadFromLs } from './local-storage';
@@ -24,6 +25,7 @@ export class PersistenceService {
   // PROJECT DATA
   // -------------
   // loads partial project data
+  // TODO check naming
   saveProjectData(projectId, subKey: ProjectDataLsKey, data) {
     console.log('saveProjectData XXX');
     saveToLs(PersistenceService._makeProjectKey(projectId, subKey), data);
@@ -35,9 +37,11 @@ export class PersistenceService {
   }
 
   loadProjectsMeta() {
+    return loadFromLs(LS_PROJECT_META_LIST);
   }
 
-  saveProjectsMeta() {
+  saveProjectsMeta(projectData) {
+    saveToLs(LS_PROJECT_META_LIST, projectData);
   }
 
 

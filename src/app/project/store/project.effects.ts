@@ -6,6 +6,7 @@ import { withLatestFrom } from 'rxjs/operators';
 import { tap } from 'rxjs/operators';
 import { ProjectActionTypes } from './project.actions';
 import { PROJECT_FEATURE_NAME } from './project.reducer';
+import { PersistenceService } from '../../core/persistence/persistence.service';
 
 @Injectable()
 export class ProjectEffects {
@@ -21,15 +22,18 @@ export class ProjectEffects {
       tap(this._saveToLs.bind(this))
     );
 
-  constructor(private _actions$: Actions,
-              private _store$: Store<any>,) {
+  constructor(
+    private _actions$: Actions,
+    private _store$: Store<any>,
+    private _persistenceService: PersistenceService,
+  ) {
   }
 
   private _saveToLs(state) {
     const projectsFeatureState = state[1][PROJECT_FEATURE_NAME];
     const currentProjectId = projectsFeatureState.currentProjectId;
     console.log('SYNC', projectsFeatureState, currentProjectId);
-    // this._projectService.saveProjectsForCurrent(projectsFeatureState);
+    this._persistenceService.saveProjectsMeta(projectsFeatureState);
   }
 }
 

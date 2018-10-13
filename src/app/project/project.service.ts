@@ -35,8 +35,19 @@ export class ProjectService {
     //   this.loadTasksForCurrentProject();
     // });
 
-    const projects = this._persistenceService.loadProjectsMeta();
+
+    this.load();
     this.loadTasksForCurrent();
+  }
+
+  load() {
+    const projectState = this._persistenceService.loadProjectsMeta();
+    if (projectState) {
+      this._store.dispatch({
+        type: ProjectActionTypes.LoadState,
+        payload: {state: projectState}
+      });
+    }
   }
 
   add(project: Partial<Project>) {
@@ -76,7 +87,7 @@ export class ProjectService {
     });
   }
 
-  // TODO there is probably a smarter way
+  // TODO there is probably a smarter way make it work as part from project effects
   loadTasksForCurrent() {
     const lsTaskState = this._persistenceService.loadProjectData(this._currentProjectId, LS_TASK_STATE);
     if (lsTaskState) {
@@ -91,7 +102,7 @@ export class ProjectService {
 
   // PERSISTENCE
   // -----------
-  // TODO make this work via tasks effect directly
+  // TODO make this work via tasks effect directly (get project id from state)
   saveTasksForCurrent(taskState: any) {
     this._persistData(this._currentProjectId, LS_TASK_STATE, taskState);
   }
