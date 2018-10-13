@@ -5,3 +5,12 @@ export type ProjectCfg = Readonly<{
     [key: string]: IssueIntegrationCfg[]
   };
 }>;
+
+export type Project = Readonly<{
+  title: string;
+  id: string;
+  themeColor: string;
+  isDarkTheme: boolean;
+  cfg: ProjectCfg;
+}>;
+

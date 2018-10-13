@@ -1,19 +1,25 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ProjectCfg } from './project';
+import { Project } from './project';
 import { PersistenceService } from '../core/persistence/persistence.service';
 import { ProjectDataLsKey } from '../core/persistence/persistence';
 import { LS_TASK_STATE } from '../core/persistence/ls-keys.const';
-import { LS_PROJECT_CFG } from '../core/persistence/ls-keys.const';
 import { TaskActionTypes } from '../tasks/store/task.actions';
 import { Store } from '@ngrx/store';
+import { select } from '@ngrx/store';
+import { ProjectActionTypes } from './store/project.actions';
+import shortid from 'shortid';
+import { selectCurrentProjectId } from './store/project.reducer';
+import { selectAllProjects } from './store/project.reducer';
 
 @Injectable()
 export class ProjectService {
   // TODO get from store
-  list$: Observable<ProjectCfg[]>;
-  currentCfg$: Observable<ProjectCfg>;
-  currentId$: Observable<string>;
+  list$: Observable<Project[]> = this._store.pipe(select(selectAllProjects));
+  currentProject$: Observable<Project>;
+  currentId$: Observable<string> = this._store.pipe(select(selectCurrentProjectId));
+
   private _currentProjectId;
 
   constructor(
@@ -33,38 +39,44 @@ export class ProjectService {
     this.loadTasksForCurrent();
   }
 
-  // ONLY PERSISTENCE
-  // ----------------
-  // TODO add taskState type
-  saveTasksForCurrent(taskState: any) {
-    this.persistData(this._currentProjectId, LS_TASK_STATE, taskState);
+  add(project: Partial<Project>) {
+    this._store.dispatch({
+      type: ProjectActionTypes.AddProject,
+      payload: {
+        task: Object.assign(project, {
+          id: shortid(),
+        })
+      }
+    });
   }
 
-  saveProjectCfg(projectId, cfg: ProjectCfg) {
-    this.persistData(projectId, LS_PROJECT_CFG, cfg);
+  remove(projectId) {
+    this._store.dispatch({
+      type: ProjectActionTypes.DeleteProject,
+      payload: {id: projectId}
+    });
   }
 
-  persistData(projectId, dataKey: ProjectDataLsKey, cfg: ProjectCfg) {
-    this._persistenceService.saveProjectData(projectId, dataKey, cfg);
+  update(projectId: string, changedFields: Partial<Project>) {
+    this._store.dispatch({
+      type: ProjectActionTypes.UpdateProject,
+      payload: {
+        task: {
+          id: projectId,
+          changes: changedFields
+        }
+      }
+    });
   }
 
-  // USING ALSO STORE
-  // ----------------
-  create() {
+  setCurrentId(projectId: string) {
+    this._store.dispatch({
+      type: ProjectActionTypes.SetCurrentProject,
+      payload: projectId,
+    });
   }
 
-  remove() {
-  }
-
-  setCurrentId(projectId) {
-    // ...
-    // dispatch save
-  }
-
-  loadCurrentCfg() {
-    // TODO load issue config
-  }
-
+  // TODO there is probably a smarter way
   loadTasksForCurrent() {
     const lsTaskState = this._persistenceService.loadProjectData(this._currentProjectId, LS_TASK_STATE);
     if (lsTaskState) {
@@ -76,4 +88,16 @@ export class ProjectService {
       });
     }
   }
+
+  // PERSISTENCE
+  // -----------
+  // TODO make this work via tasks effect directly
+  saveTasksForCurrent(taskState: any) {
+    this._persistData(this._currentProjectId, LS_TASK_STATE, taskState);
+  }
+
+  private _persistData(projectId, dataKey: ProjectDataLsKey, cfg: ProjectCfg) {
+    this._persistenceService.saveProjectData(projectId, dataKey, cfg);
+  }
+
 }
