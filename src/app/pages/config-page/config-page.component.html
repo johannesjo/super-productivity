@@ -1,5 +1,14 @@
+<h2>Project Settings</h2>
+<button>Project Switcher</button>
+
+
+<div *ngFor="let section of projectConfigFormCfg">
+  <config-section [section]="section"
+                  [cfg]="(configService.cfg$|async)[section.key]"></config-section>
+</div>
+
 <h2>Global Config</h2>
-<div *ngFor="let section of formCfg">
+<div *ngFor="let section of globalConfigFormCfg">
   <config-section [section]="section"
                   [cfg]="(configService.cfg$|async)[section.key]"></config-section>
 </div>

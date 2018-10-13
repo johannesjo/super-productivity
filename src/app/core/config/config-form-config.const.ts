@@ -1,4 +1,4 @@
-export const ConfigFormConfig = [
+export const GLOBAL_CONFIG_FORM_CONFIG = [
   // MISC SETTINGS
   // -------------
   {

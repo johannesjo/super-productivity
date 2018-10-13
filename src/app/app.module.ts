@@ -12,18 +12,22 @@ import { APP_ROUTES } from './app.routes';
 import { UiModule } from './ui/ui.module';
 import { reducers } from './root-store';
 import { CoreModule } from './core/core.module';
-import { ConfigPageModule } from './pages/config-page/config-page.module';
-import { WorkViewPageModule } from './pages/work-view/work-view-page.module';
 import { ReactiveFormsModule } from '@angular/forms';
 import { FormlyModule } from '@ngx-formly/core';
 import { FormlyMaterialModule } from '@ngx-formly/material';
+import { PagesModule } from './pages/pages.module';
 
 @NgModule({
   declarations: [
     AppComponent,
   ],
   imports: [
+    // Local
+    UiModule,
     CoreModule,
+    PagesModule,
+
+    // External
     BrowserModule,
     BrowserAnimationsModule,
     RouterModule.forRoot(APP_ROUTES, {useHash: true}),
@@ -32,13 +36,6 @@ import { FormlyMaterialModule } from '@ngx-formly/material';
     StoreModule.forRoot(reducers),
     EffectsModule.forRoot([]),
     !environment.production ? StoreDevtoolsModule.instrument() : [],
-
-    // Other local
-    UiModule,
-
-    // Pages
-    WorkViewPageModule,
-    ConfigPageModule,
     ReactiveFormsModule,
     FormlyModule.forRoot(),
     FormlyMaterialModule,
