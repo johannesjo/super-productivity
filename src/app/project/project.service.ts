@@ -43,7 +43,7 @@ export class ProjectService {
     this._store.dispatch({
       type: ProjectActionTypes.AddProject,
       payload: {
-        task: Object.assign(project, {
+        project: Object.assign(project, {
           id: shortid(),
         })
       }
@@ -61,7 +61,7 @@ export class ProjectService {
     this._store.dispatch({
       type: ProjectActionTypes.UpdateProject,
       payload: {
-        task: {
+        project: {
           id: projectId,
           changes: changedFields
         }

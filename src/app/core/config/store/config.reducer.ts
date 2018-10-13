@@ -13,7 +13,7 @@ export function configReducer(
   state = initialState,
   action: ConfigActions
 ): GlobalConfig {
-  console.log(action, state);
+  // console.log(action, state);
 
   switch (action.type) {
     case ConfigActionTypes.LoadConfig:

@@ -18,11 +18,18 @@ import { MatToolbarModule } from '@angular/material';
 import { MatFormFieldModule } from '@angular/material';
 import { MatButtonModule } from '@angular/material';
 import { MarkdownModule } from 'ngx-markdown';
+import { ReactiveFormsModule } from '@angular/forms';
+import { FormlyMaterialModule } from '@ngx-formly/material';
+import { FormlyModule } from '@ngx-formly/core';
 
 @NgModule({
   imports: [
     CommonModule,
     MarkdownModule.forRoot(),
+
+    ReactiveFormsModule,
+    FormlyModule.forChild(),
+    FormlyMaterialModule,
 
     // material2
     MatToolbarModule,
@@ -67,6 +74,10 @@ import { MarkdownModule } from 'ngx-markdown';
     MatInputModule,
     MatAutocompleteModule,
     MatOptionModule,
+
+    ReactiveFormsModule,
+    FormlyModule,
+    FormlyMaterialModule,
   ]
 })
 export class UiModule {

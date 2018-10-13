@@ -9,6 +9,7 @@ import { CoreModule } from '../core/core.module';
 import { ProjectService } from './project.service';
 import { DialogCreateProjectComponent } from './dialogs/create-project/dialog-create-project.component';
 import { UiModule } from '../ui/ui.module';
+import { EditProjectFormComponent } from './edit-project-form/edit-project-form.component';
 
 @NgModule({
   imports: [
@@ -16,15 +17,22 @@ import { UiModule } from '../ui/ui.module';
     CoreModule,
     UiModule,
     StoreModule.forFeature(PROJECT_FEATURE_NAME, projectReducer),
-    EffectsModule.forFeature([ProjectEffects])
+    EffectsModule.forFeature([ProjectEffects]),
   ],
   declarations: [
-    DialogCreateProjectComponent
+    EditProjectFormComponent,
+    DialogCreateProjectComponent,
   ],
   providers: [
     ProjectService
   ],
-  exports: [DialogCreateProjectComponent]
+  exports: [
+    EditProjectFormComponent,
+    DialogCreateProjectComponent,
+  ],
+  entryComponents: [
+    DialogCreateProjectComponent,
+  ]
 })
 export class ProjectModule {
 }
