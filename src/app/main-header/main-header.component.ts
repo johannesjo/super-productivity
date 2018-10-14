@@ -11,7 +11,7 @@ import { MatDialog } from '@angular/material';
 export class MainHeaderComponent implements OnInit {
   constructor(
     public readonly projectService: ProjectService,
-    private readonly _matDialog: MatDialog
+    private readonly _matDialog: MatDialog,
   ) {
   }
 

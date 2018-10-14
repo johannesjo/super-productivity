@@ -17,6 +17,7 @@ import { FormlyModule } from '@ngx-formly/core';
 import { FormlyMaterialModule } from '@ngx-formly/material';
 import { PagesModule } from './pages/pages.module';
 import { MainHeaderModule } from './main-header/main-header.module';
+import { HttpClientModule } from '@angular/common/http';
 
 @NgModule({
   declarations: [
@@ -32,6 +33,7 @@ import { MainHeaderModule } from './main-header/main-header.module';
     // External
     BrowserModule,
     BrowserAnimationsModule,
+    HttpClientModule,
     RouterModule.forRoot(APP_ROUTES, {useHash: true}),
     ServiceWorkerModule.register('ngsw-worker.js', {enabled: environment.production}),
     // NOTE: both need to be present to use forFeature stores
