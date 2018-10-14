@@ -24,6 +24,8 @@ import { FormlyModule } from '@ngx-formly/core';
 import { MatMenuModule } from '@angular/material';
 import { MatListModule } from '@angular/material';
 import { MatTableModule } from '@angular/material';
+import { ThemeSelectComponent } from './theme-select/theme-select.component';
+import { MatSelectModule } from '@angular/material';
 
 @NgModule({
   imports: [
@@ -35,6 +37,7 @@ import { MatTableModule } from '@angular/material';
     FormlyMaterialModule,
 
     // material2
+    MatSelectModule,
     MatToolbarModule,
     MatMenuModule,
     MatButtonModule,
@@ -58,6 +61,7 @@ import { MatTableModule } from '@angular/material';
     InputDurationDirective,
     EditOnClickComponent,
     InlineMarkdownComponent,
+    ThemeSelectComponent,
   ],
   exports: [
     DurationFromStringPipe,
@@ -65,8 +69,10 @@ import { MatTableModule } from '@angular/material';
     InputDurationDirective,
     EditOnClickComponent,
     InlineMarkdownComponent,
+    ThemeSelectComponent,
 
     // material2
+    MatSelectModule,
     MatToolbarModule,
     MatMenuModule,
     MatButtonModule,

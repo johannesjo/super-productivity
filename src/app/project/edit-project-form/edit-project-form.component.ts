@@ -8,7 +8,31 @@ import { FormlyFormOptions } from '@ngx-formly/core';
 import { FormGroup } from '@angular/forms';
 import { ProjectService } from '../project.service';
 
-const EDIT_PPROJECT_FORM_CFG = [];
+const ALL_THEMES = [
+  'blue',
+  'indigo',
+  'purple',
+  'deep-purple',
+  'light-blue',
+  'cyan',
+  'teal',
+  'green',
+  'light-green',
+  'indigo',
+  'lime',
+  'yellow',
+  'amber',
+  'deep-orange',
+  'grey',
+  'blue-grey',
+  'indigo',
+  'indigo',
+];
+const themeOpts = ALL_THEMES.map((theme) => {
+  return {label: theme, value: theme};
+});
+console.log(themeOpts);
+
 
 @Component({
   selector: 'edit-project-form',
@@ -43,9 +67,13 @@ export class EditProjectFormComponent implements OnInit {
     },
     {
       key: 'themeColor',
-      type: 'input',
+      type: 'select',
       templateOptions: {
         label: 'Theme Color',
+        options: themeOpts,
+        valueProp: 'value',
+        labelProp: 'label',
+        placeholder: 'Theme Color'
       },
     },
     {

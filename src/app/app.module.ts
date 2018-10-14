@@ -18,6 +18,7 @@ import { FormlyMaterialModule } from '@ngx-formly/material';
 import { PagesModule } from './pages/pages.module';
 import { MainHeaderModule } from './main-header/main-header.module';
 import { HttpClientModule } from '@angular/common/http';
+import { MatSidenavModule } from '@angular/material';
 
 @NgModule({
   declarations: [
@@ -29,6 +30,7 @@ import { HttpClientModule } from '@angular/common/http';
     CoreModule,
     PagesModule,
     MainHeaderModule,
+    MatSidenavModule,
 
     // External
     BrowserModule,
