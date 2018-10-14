@@ -5,13 +5,35 @@
   </button>
   <mat-menu #menu="matMenu">
     <button mat-menu-item
-            [routerLink]="'projects'">_Manage Projects_
-    </button>
-    <button mat-menu-item
             (click)="switchProject(project.id)"
             *ngFor="let project of projectService.list$|async">
+      <mat-icon *ngIf="project.id===(projectService.currentId$|async)">radio_button_checked</mat-icon>
+      <mat-icon *ngIf="project.id!==(projectService.currentId$|async)">radio_button_unchecked</mat-icon>
       {{project.title}}
     </button>
+    <button mat-menu-item
+            [routerLink]="'projects'">
+      <mat-icon>list</mat-icon>
+      Manage Projects
+    </button>
+    <button mat-menu-item
+            (click)="addProject()">
+      <mat-icon>add</mat-icon>
+      Create Project
+    </button>
   </mat-menu>
+
   <span class="spacer"></span>
+
+  <nav>
+    <button mat-mini-fab
+            color="accent">
+      <mat-icon>border_color</mat-icon>
+    </button>
+
+    <button mat-mini-fab
+            color="accent">
+      <mat-icon>playlist_play</mat-icon>
+    </button>
+  </nav>
 </mat-toolbar>
