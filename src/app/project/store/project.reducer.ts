@@ -79,6 +79,10 @@ export function projectReducer(
       return projectAdapter.updateMany(action.payload.projects, state);
     }
 
+    case ProjectActionTypes.DeleteProject: {
+      return projectAdapter.removeOne(action.payload.id, state);
+    }
+
     case ProjectActionTypes.DeleteProjects: {
       return projectAdapter.removeMany(action.payload.ids, state);
     }

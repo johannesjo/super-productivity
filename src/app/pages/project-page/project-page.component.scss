@@ -14,9 +14,14 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: $s*6;
+  padding: $s/2 $s;
+  margin-bottom: $s;
 
   .title {
-    font-size: 20px;
+    font-size: 16px;
+
+    &.isCurrent {
+      font-weight: bold;
+    }
   }
 }
