@@ -51,12 +51,12 @@ export const selectMainTasksWithSubTasks = createSelector(
 
 // REDUCER
 // -------
-export const initialState: TaskState = taskAdapter.getInitialState({
+export const initialTaskState: TaskState = taskAdapter.getInitialState({
   currentTaskId: null,
 });
 
 export function taskReducer(
-  state = initialState,
+  state = initialTaskState,
   action: TaskActions
 ): TaskState {
   // console.log(state.entities, state, action);

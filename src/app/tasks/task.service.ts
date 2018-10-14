@@ -10,6 +10,7 @@ import shortid from 'shortid';
 import { selectCurrentTask } from './store/task.reducer';
 import { selectAllTasks } from './store/task.reducer';
 import { selectMainTasksWithSubTasks } from './store/task.reducer';
+import { initialTaskState } from './store/task.reducer';
 import { ProjectService } from '../project/project.service';
 import { PersistenceService } from '../core/persistence/persistence.service';
 
@@ -50,14 +51,16 @@ export class TaskService {
 
   loadStateForProject(projectId) {
     const lsTaskState = this._persistenceService.loadTasksForProject(projectId);
-    if (lsTaskState) {
-      this._store.dispatch({
-        type: TaskActionTypes.LoadState,
-        payload: {
-          state: lsTaskState,
-        }
-      });
-    }
+    this.loadState(lsTaskState || initialTaskState);
+  }
+
+  loadState(state) {
+    this._store.dispatch({
+      type: TaskActionTypes.LoadState,
+      payload: {
+        state: state,
+      }
+    });
   }
 
   pauseCurrent() {
