@@ -26,13 +26,13 @@ export class PersistenceService {
   // -------------
   // loads partial project data
   // TODO check naming
-  saveProjectData(projectId, subKey: ProjectDataLsKey, data) {
+  saveTasksForProject(projectId, subKey: ProjectDataLsKey, data) {
     console.log('saveProjectData XXX');
     saveToLs(PersistenceService._makeProjectKey(projectId, subKey), data);
   }
 
   // TODO add correct type
-  loadProjectData(projectId, subKey: ProjectDataLsKey): any {
+  loadTasksForProject(projectId, subKey: ProjectDataLsKey): any {
     return loadFromLs(PersistenceService._makeProjectKey(projectId, subKey));
   }
 

@@ -1,9 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { ProjectCfg } from './project';
 import { Project } from './project';
 import { PersistenceService } from '../core/persistence/persistence.service';
-import { ProjectDataLsKey } from '../core/persistence/persistence';
 import { LS_TASK_STATE } from '../core/persistence/ls-keys.const';
 import { TaskActionTypes } from '../tasks/store/task.actions';
 import { Store } from '@ngrx/store';
@@ -20,29 +18,28 @@ export class ProjectService {
   currentProject$: Observable<Project>;
   currentId$: Observable<string> = this._store.pipe(select(selectCurrentProjectId));
 
-  private _currentProjectId;
 
   constructor(
     private readonly _persistenceService: PersistenceService,
     // TODO correct type?
     private readonly _store: Store<any>,
   ) {
+    this.load();
+
     // this will be the actual mechanism
     // or refactor this to an effect??? both valid
-    // this.currentProjectsId$.subscribe((projectId) => {
-    //   this._currentProjectId = projectId;
-    //   const projects = this._persistenceService.loadProjectsMeta();
-    //   this.loadTasksForCurrentProject();
-    // });
-
-
-    this.load();
-    this.loadTasksForCurrent();
+    this.currentId$.subscribe((projectId) => {
+      console.log(projectId);
+      this.loadTasksForProject(projectId);
+    });
   }
 
   load() {
     const projectState = this._persistenceService.loadProjectsMeta();
     if (projectState) {
+      if (!projectState.currentProjectId) {
+        projectState.currentProjectId = projectState.ids[0];
+      }
       this._store.dispatch({
         type: ProjectActionTypes.LoadState,
         payload: {state: projectState}
@@ -87,9 +84,8 @@ export class ProjectService {
     });
   }
 
-  // TODO there is probably a smarter way make it work as part from project effects
-  loadTasksForCurrent() {
-    const lsTaskState = this._persistenceService.loadProjectData(this._currentProjectId, LS_TASK_STATE);
+  loadTasksForProject(projectId) {
+    const lsTaskState = this._persistenceService.loadTasksForProject(projectId, LS_TASK_STATE);
     if (lsTaskState) {
       this._store.dispatch({
         type: TaskActionTypes.LoadState,
@@ -99,16 +95,4 @@ export class ProjectService {
       });
     }
   }
-
-  // PERSISTENCE
-  // -----------
-  // TODO make this work via tasks effect directly (get project id from state)
-  saveTasksForCurrent(taskState: any) {
-    this._persistData(this._currentProjectId, LS_TASK_STATE, taskState);
-  }
-
-  private _persistData(projectId, dataKey: ProjectDataLsKey, cfg: ProjectCfg) {
-    this._persistenceService.saveProjectData(projectId, dataKey, cfg);
-  }
-
 }

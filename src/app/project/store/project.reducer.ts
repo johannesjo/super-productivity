@@ -21,12 +21,26 @@ const {selectIds, selectEntities, selectAll, selectTotal} = projectAdapter.getSe
 export const selectCurrentProjectId = createSelector(selectProjectFeatureState, state => state.currentProjectId);
 export const selectAllProjects = createSelector(selectProjectFeatureState, selectAll);
 
-// REDUCER
+// DEFAULT
 // -------
 export const initialState: ProjectState = projectAdapter.getInitialState({
-  currentProjectId: null,
+  currentProjectId: 'DEFAULT',
+  ids: [
+    'DEFAULT'
+  ],
+  entities: {
+    'DEFAULT': {
+      id: 'DEFAULT',
+      title: 'Super Productivity',
+      themeColor: 'lightBlue',
+      isDarkTheme: false,
+      cfg: null
+    }
+  }
 });
 
+// REDUCER
+// -------
 export function projectReducer(
   state = initialState,
   action: ProjectActions

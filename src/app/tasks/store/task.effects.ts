@@ -6,7 +6,9 @@ import 'rxjs/add/operator/withLatestFrom';
 import { withLatestFrom } from 'rxjs/operators';
 import { tap } from 'rxjs/operators';
 import { TASK_FEATURE_NAME } from '../task.const';
-import { ProjectService } from '../../project/project.service';
+import { LS_TASK_STATE } from '../../core/persistence/ls-keys.const';
+import { PROJECT_FEATURE_NAME } from '../../project/store/project.reducer';
+import { PersistenceService } from '../../core/persistence/persistence.service';
 
 @Injectable()
 export class TaskEffects {
@@ -26,14 +28,17 @@ export class TaskEffects {
 
   constructor(private _actions$: Actions,
               private _store$: Store<any>,
-              private _projectService: ProjectService) {
+              private _persistenceService: PersistenceService) {
   }
 
   private _saveToLs(state) {
     const tasksFeatureState = state[1][TASK_FEATURE_NAME];
-    const currentTaskId = tasksFeatureState.currentTaskId;
-    console.log('SYNC', tasksFeatureState, currentTaskId);
-    this._projectService.saveTasksForCurrent(tasksFeatureState);
+    const projectId = state[1][PROJECT_FEATURE_NAME];
+    if (projectId) {
+      this._persistenceService.saveTasksForProject(projectId, LS_TASK_STATE, tasksFeatureState);
+    } else {
+      throw new Error('No current project id');
+    }
   }
 }
 
