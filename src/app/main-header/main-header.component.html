@@ -27,13 +27,20 @@
 
   <nav>
     <button mat-mini-fab
-            color="accent">
+            routerLink="work-view"
+            routerLinkActive
+            #rla="routerLinkActive"
+            [color]="rla.isActive ? 'accent' : null">
       <mat-icon>border_color</mat-icon>
     </button>
 
     <button mat-mini-fab
-            color="accent">
+            color="">
       <mat-icon>playlist_play</mat-icon>
+    </button>
+    <button mat-mini-fab
+            color="">
+      <mat-icon>today</mat-icon>
     </button>
   </nav>
 </mat-toolbar>

@@ -1,3 +1,5 @@
+@import '../../variables';
+
 .current-project-title {
   text-transform: uppercase;
   font-weight: normal;
@@ -5,4 +7,10 @@
 
 .spacer {
   flex: 1 1 auto;
+}
+
+nav {
+  button {
+    margin-left: $s;
+  }
 }
