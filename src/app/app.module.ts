@@ -16,6 +16,7 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { FormlyModule } from '@ngx-formly/core';
 import { FormlyMaterialModule } from '@ngx-formly/material';
 import { PagesModule } from './pages/pages.module';
+import { MainHeaderModule } from './main-header/main-header.module';
 
 @NgModule({
   declarations: [
@@ -26,6 +27,7 @@ import { PagesModule } from './pages/pages.module';
     UiModule,
     CoreModule,
     PagesModule,
+    MainHeaderModule,
 
     // External
     BrowserModule,

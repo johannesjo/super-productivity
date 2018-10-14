@@ -8,12 +8,14 @@ import { ProjectActionTypes } from './store/project.actions';
 import shortid from 'shortid';
 import { selectCurrentProjectId } from './store/project.reducer';
 import { selectAllProjects } from './store/project.reducer';
+import { selectCurrentProject } from './store/project.reducer';
 
 @Injectable()
 export class ProjectService {
   // TODO get from store
   list$: Observable<Project[]> = this._store.pipe(select(selectAllProjects));
-  currentProject$: Observable<Project>;
+  // currentProject$: Observable<Project> = this._store.pipe(select(selectCurrentProject));
+  currentProject$: any = this._store.pipe(select(selectCurrentProject));
   currentId$: Observable<string> = this._store.pipe(select(selectCurrentProjectId));
 
 
@@ -23,6 +25,7 @@ export class ProjectService {
     private readonly _store: Store<any>,
   ) {
     this.load();
+    this.currentProject$.subscribe((x) => console.log(x));
   }
 
   load() {

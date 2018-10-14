@@ -21,6 +21,7 @@ import { MarkdownModule } from 'ngx-markdown';
 import { ReactiveFormsModule } from '@angular/forms';
 import { FormlyMaterialModule } from '@ngx-formly/material';
 import { FormlyModule } from '@ngx-formly/core';
+import { MatMenuModule } from '@angular/material';
 
 @NgModule({
   imports: [
@@ -33,6 +34,7 @@ import { FormlyModule } from '@ngx-formly/core';
 
     // material2
     MatToolbarModule,
+    MatMenuModule,
     MatButtonModule,
     MatCheckboxModule,
     MatProgressBarModule,
@@ -62,6 +64,7 @@ import { FormlyModule } from '@ngx-formly/core';
 
     // material2
     MatToolbarModule,
+    MatMenuModule,
     MatButtonModule,
     MatCheckboxModule,
     MatProgressBarModule,

@@ -1,0 +1,17 @@
+<mat-toolbar color="primary">
+  <button mat-button
+          class="current-project-title"
+          [matMenuTriggerFor]="menu">{{(projectService.currentProject$|async).title}}
+  </button>
+  <mat-menu #menu="matMenu">
+    <button mat-menu-item
+            [routerLink]="'projects'">_Manage Projects_
+    </button>
+    <button mat-menu-item
+            (click)="switchProject(project.id)"
+            *ngFor="let project of projectService.list$|async">
+      {{project.title}}
+    </button>
+  </mat-menu>
+  <span class="spacer"></span>
+</mat-toolbar>

@@ -20,6 +20,9 @@ export const selectProjectFeatureState = createFeatureSelector<ProjectState>(PRO
 const {selectIds, selectEntities, selectAll, selectTotal} = projectAdapter.getSelectors();
 export const selectCurrentProjectId = createSelector(selectProjectFeatureState, state => state.currentId);
 export const selectAllProjects = createSelector(selectProjectFeatureState, selectAll);
+export const selectCurrentProject = createSelector(selectProjectFeatureState,
+  (state) => state.entities[state.currentId]
+);
 
 // DEFAULT
 // -------
