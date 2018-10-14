@@ -12,6 +12,10 @@
         "@schematics/angular:component": {
           "styleext": "scss",
           "changeDetection": "OnPush"
+        },
+        "@ngrx/schematics:component": {
+          "styleext": "scss",
+          "changeDetection": "OnPush"
         }
       },
       "architect": {
