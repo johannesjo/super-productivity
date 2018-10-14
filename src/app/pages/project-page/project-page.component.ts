@@ -6,7 +6,7 @@ import { DialogCreateProjectComponent } from '../../project/dialogs/create-proje
 @Component({
   selector: 'project-page',
   templateUrl: './project-page.component.html',
-  styleUrls: ['./project-page.component.css']
+  styleUrls: ['./project-page.component.scss']
 })
 export class ProjectPageComponent implements OnInit {
   constructor(public readonly projectService: ProjectService,
@@ -20,4 +20,13 @@ export class ProjectPageComponent implements OnInit {
   ngOnInit() {
   }
 
+  edit(project) {
+    this._matDialog.open(DialogCreateProjectComponent, {
+      data: Object.assign({}, project),
+    });
+  }
+
+  remove(projectId) {
+    this.projectService.remove(projectId);
+  }
 }

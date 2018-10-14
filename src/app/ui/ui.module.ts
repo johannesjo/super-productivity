@@ -22,6 +22,8 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { FormlyMaterialModule } from '@ngx-formly/material';
 import { FormlyModule } from '@ngx-formly/core';
 import { MatMenuModule } from '@angular/material';
+import { MatListModule } from '@angular/material';
+import { MatTableModule } from '@angular/material';
 
 @NgModule({
   imports: [
@@ -47,6 +49,8 @@ import { MatMenuModule } from '@angular/material';
     MatInputModule,
     MatAutocompleteModule,
     MatOptionModule,
+    MatListModule,
+    MatTableModule,
   ],
   declarations: [
     DurationFromStringPipe,
@@ -77,6 +81,8 @@ import { MatMenuModule } from '@angular/material';
     MatInputModule,
     MatAutocompleteModule,
     MatOptionModule,
+    MatListModule,
+    MatTableModule,
 
     ReactiveFormsModule,
     FormlyModule,

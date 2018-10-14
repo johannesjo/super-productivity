@@ -1,0 +1,22 @@
+@import '../../../_variables.scss';
+
+.controls {
+  margin-left: 2*$s;
+  button {
+    margin-left: $s;
+  }
+}
+
+.project-list {
+}
+
+.project {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: $s*6;
+
+  .title {
+    font-size: 20px;
+  }
+}

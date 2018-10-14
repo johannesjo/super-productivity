@@ -13,7 +13,7 @@ const EDIT_PPROJECT_FORM_CFG = [];
 @Component({
   selector: 'edit-project-form',
   templateUrl: './edit-project-form.component.html',
-  styleUrls: ['./edit-project-form.component.css']
+  styleUrls: ['./edit-project-form.component.scss']
 })
 export class EditProjectFormComponent implements OnInit {
   @Output() save: EventEmitter<Project> = new EventEmitter();

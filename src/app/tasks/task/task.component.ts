@@ -29,7 +29,11 @@ export class TaskComponent implements OnInit, DoCheck {
   currentTaskId$: Observable<string>;
   subTaskListId: string;
 
-  constructor(private taskService: TaskService, private _dragulaService: DragulaService, public dialog: MatDialog) {
+  constructor(
+    private readonly _taskService: TaskService,
+    private readonly _dragulaService: DragulaService,
+    private readonly _matDialog: MatDialog
+  ) {
   }
 
   ngDoCheck() {
@@ -37,7 +41,7 @@ export class TaskComponent implements OnInit, DoCheck {
   }
 
   ngOnInit() {
-    this.currentTaskId$ = this.taskService.currentTaskId$;
+    this.currentTaskId$ = this._taskService.currentTaskId$;
     this.currentTaskId$.subscribe((val) => {
       this.isCurrent = (this.task && val === this.task.id);
     });
@@ -51,16 +55,16 @@ export class TaskComponent implements OnInit, DoCheck {
   }
 
   deleteTask(taskId: string) {
-    this.taskService.remove(taskId);
+    this._taskService.remove(taskId);
   }
 
 
   startTask(taskId: string) {
-    this.taskService.setCurrentId(taskId);
+    this._taskService.setCurrentId(taskId);
   }
 
   pauseTask() {
-    this.taskService.pauseCurrent();
+    this._taskService.pauseCurrent();
   }
 
   updateTaskIfChanged(isChanged, idToEdit, task) {
@@ -70,12 +74,12 @@ export class TaskComponent implements OnInit, DoCheck {
   }
 
   updateTask(idToEdit: string, taskTitle: string) {
-    this.taskService.update(idToEdit, {title: taskTitle});
+    this._taskService.update(idToEdit, {title: taskTitle});
     // todo focus task again
   }
 
   estimateTime(task: Task) {
-    this.dialog
+    this._matDialog
       .open(DialogTimeEstimateComponent, {
         data: {task},
       })
@@ -86,15 +90,15 @@ export class TaskComponent implements OnInit, DoCheck {
   }
 
   addSubTask(task: Task) {
-    this.taskService.addSubTask(task);
+    this._taskService.addSubTask(task);
   }
 
   // TODO refactor to action ?
   toggleTaskDone(taskId: string, isDone: boolean) {
     if (!isDone) {
-      this.taskService.setDone(taskId);
+      this._taskService.setDone(taskId);
     } else {
-      this.taskService.setUnDone(taskId);
+      this._taskService.setUnDone(taskId);
     }
   }
 
@@ -103,6 +107,6 @@ export class TaskComponent implements OnInit, DoCheck {
 
 
   onTaskNotesChanged(idToEdit: string, $event) {
-    this.taskService.update(idToEdit, {notes: $event.newVal});
+    this._taskService.update(idToEdit, {notes: $event.newVal});
   }
 }

@@ -19,7 +19,7 @@ export class DialogTimeEstimateComponent {
   newEntry: any;
 
 
-  constructor(public dialogRef: MatDialogRef<DialogTimeEstimateComponent>,
+  constructor(private _matDialogRef: MatDialogRef<DialogTimeEstimateComponent>,
               private _taskService: TaskService,
               @Inject(MAT_DIALOG_DATA) public data: any) {
     this.task = this.data.task;
@@ -36,7 +36,7 @@ export class DialogTimeEstimateComponent {
       timeEstimate: this.taskCopy.timeEstimate,
       timeSpentOnDay: this.timeSpentOnDayCopy,
     });
-    this.dialogRef.close({
+    this._matDialogRef.close({
       timeEstimate: this.taskCopy.timeEstimate,
       timeSpentOnDay: this.timeSpentOnDayCopy,
     });

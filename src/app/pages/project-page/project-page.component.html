@@ -1,8 +1,29 @@
-<button (click)="openCreateDialog()">Create New</button>
+<h2 class="mat-h2">Projects</h2>
 
-<edit-project-form ></edit-project-form>
 
-<h2>Projects</h2>
-<div *ngFor="let project of projectService.list$|async">
-  {{project.title}}
+<div class="project-list">
+  <div class="project"
+       *ngFor="let project of projectService.list$|async">
+
+    <div class="title">{{project.title}}</div>
+    <div class="controls">
+      <button mat-mini-fab
+              (click)="edit(project)"
+              color="primary">
+        <mat-icon aria-label="Edit">edit</mat-icon>
+      </button>
+      <button mat-mini-fab
+              (click)="remove(project.id)"
+              color="warn">
+        <mat-icon aria-label="Delete">delete</mat-icon>
+      </button>
+    </div>
+
+  </div>
 </div>
+<button (click)="openCreateDialog()"
+        mat-raised-button
+        color="primary">
+  <mat-icon aria-label="Add">add</mat-icon>
+  Create New
+</button>

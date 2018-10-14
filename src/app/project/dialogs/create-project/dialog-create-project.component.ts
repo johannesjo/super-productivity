@@ -1,6 +1,7 @@
-import { Component, Inject } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material';
-import { ProjectService } from '../../project.service';
+import { Component } from '@angular/core';
+import { Inject } from '@angular/core';
+import { MatDialogRef } from '@angular/material';
+import { MAT_DIALOG_DATA } from '@angular/material';
 import { Project } from '../../project';
 
 @Component({
@@ -9,14 +10,13 @@ import { Project } from '../../project';
   styleUrls: ['./dialog-create-project.component.scss'],
 })
 export class DialogCreateProjectComponent {
-  project: Project;
-
-  constructor(public dialogRef: MatDialogRef<DialogCreateProjectComponent>,
-              private _projectService: ProjectService) {
+  constructor(
+    private _matDialogRef: MatDialogRef<DialogCreateProjectComponent>,
+    @Inject(MAT_DIALOG_DATA) public project: Project
+  ) {
   }
 
-
-  submit() {
-    this.dialogRef.close({});
+  close() {
+    this._matDialogRef.close();
   }
 }
