@@ -31,8 +31,8 @@ export class ProjectEffects {
 
   private _saveToLs(state) {
     const projectsFeatureState = state[1][PROJECT_FEATURE_NAME];
-    const currentProjectId = projectsFeatureState.currentProjectId;
-    console.log('SYNC', projectsFeatureState, currentProjectId);
+    const currentId = projectsFeatureState.currentId;
+    console.log('SYNC', projectsFeatureState, currentId);
     this._persistenceService.saveProjectsMeta(projectsFeatureState);
   }
 }

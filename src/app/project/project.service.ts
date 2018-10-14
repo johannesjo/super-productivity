@@ -2,8 +2,6 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Project } from './project';
 import { PersistenceService } from '../core/persistence/persistence.service';
-import { LS_TASK_STATE } from '../core/persistence/ls-keys.const';
-import { TaskActionTypes } from '../tasks/store/task.actions';
 import { Store } from '@ngrx/store';
 import { select } from '@ngrx/store';
 import { ProjectActionTypes } from './store/project.actions';
@@ -25,20 +23,13 @@ export class ProjectService {
     private readonly _store: Store<any>,
   ) {
     this.load();
-
-    // this will be the actual mechanism
-    // or refactor this to an effect??? both valid
-    this.currentId$.subscribe((projectId) => {
-      console.log(projectId);
-      this.loadTasksForProject(projectId);
-    });
   }
 
   load() {
     const projectState = this._persistenceService.loadProjectsMeta();
     if (projectState) {
-      if (!projectState.currentProjectId) {
-        projectState.currentProjectId = projectState.ids[0];
+      if (!projectState.currentId) {
+        projectState.currentId = projectState.ids[0];
       }
       this._store.dispatch({
         type: ProjectActionTypes.LoadState,
@@ -82,17 +73,5 @@ export class ProjectService {
       type: ProjectActionTypes.SetCurrentProject,
       payload: projectId,
     });
-  }
-
-  loadTasksForProject(projectId) {
-    const lsTaskState = this._persistenceService.loadTasksForProject(projectId, LS_TASK_STATE);
-    if (lsTaskState) {
-      this._store.dispatch({
-        type: TaskActionTypes.LoadState,
-        payload: {
-          state: lsTaskState,
-        }
-      });
-    }
   }
 }

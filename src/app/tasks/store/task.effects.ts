@@ -5,10 +5,10 @@ import { Store } from '@ngrx/store';
 import 'rxjs/add/operator/withLatestFrom';
 import { withLatestFrom } from 'rxjs/operators';
 import { tap } from 'rxjs/operators';
-import { TASK_FEATURE_NAME } from '../task.const';
 import { LS_TASK_STATE } from '../../core/persistence/ls-keys.const';
 import { PROJECT_FEATURE_NAME } from '../../project/store/project.reducer';
 import { PersistenceService } from '../../core/persistence/persistence.service';
+import { TASK_FEATURE_NAME } from './task.reducer';
 
 @Injectable()
 export class TaskEffects {
@@ -33,9 +33,9 @@ export class TaskEffects {
 
   private _saveToLs(state) {
     const tasksFeatureState = state[1][TASK_FEATURE_NAME];
-    const projectId = state[1][PROJECT_FEATURE_NAME];
+    const projectId = state[1][PROJECT_FEATURE_NAME].currentId;
     if (projectId) {
-      this._persistenceService.saveTasksForProject(projectId, LS_TASK_STATE, tasksFeatureState);
+      this._persistenceService.saveTasksForProject(projectId, tasksFeatureState);
     } else {
       throw new Error('No current project id');
     }

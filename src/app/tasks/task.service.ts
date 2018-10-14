@@ -6,8 +6,12 @@ import { Store } from '@ngrx/store';
 import { select } from '@ngrx/store';
 import 'rxjs/add/operator/map';
 import { TaskActionTypes } from './store/task.actions';
-import { selectAllTasks, selectCurrentTask, selectMainTasksWithSubTasks } from './store/task.selectors';
 import shortid from 'shortid';
+import { selectCurrentTask } from './store/task.reducer';
+import { selectAllTasks } from './store/task.reducer';
+import { selectMainTasksWithSubTasks } from './store/task.reducer';
+import { ProjectService } from '../project/project.service';
+import { PersistenceService } from '../core/persistence/persistence.service';
 
 
 @Injectable()
@@ -24,8 +28,15 @@ export class TaskService {
 
   // tasksId$: Observable<string[] | number[]> = this._store.pipe(select(selectTaskIds));
 
-  constructor(private _store: Store<any>) {
-    this.tasks$.subscribe((val) => console.log(val));
+  constructor(
+    private readonly _store: Store<any>,
+    private readonly _projectService: ProjectService,
+    private readonly _persistenceService: PersistenceService,
+  ) {
+    // this.tasks$.subscribe((val) => console.log(val));
+    this._projectService.currentId$.subscribe((projectId) => {
+      this.loadStateForProject(projectId);
+    });
   }
 
   // META
@@ -35,6 +46,18 @@ export class TaskService {
       type: TaskActionTypes.SetCurrentTask,
       payload: taskId,
     });
+  }
+
+  loadStateForProject(projectId) {
+    const lsTaskState = this._persistenceService.loadTasksForProject(projectId);
+    if (lsTaskState) {
+      this._store.dispatch({
+        type: TaskActionTypes.LoadState,
+        payload: {
+          state: lsTaskState,
+        }
+      });
+    }
   }
 
   pauseCurrent() {
@@ -79,15 +102,6 @@ export class TaskService {
     });
   }
 
-  setDone(taskId: string) {
-    this.update(taskId, {isDone: true});
-  }
-
-  setUnDone(taskId: string) {
-    this.update(taskId, {isDone: false});
-  }
-
-
   moveAfter(taskId, targetItemId: string | undefined) {
     this._store.dispatch({
       type: TaskActionTypes.MoveAfter,
@@ -110,5 +124,15 @@ export class TaskService {
         parentId: parentTask.id
       }
     });
+  }
+
+  // HELPER
+  // ------
+  setDone(taskId: string) {
+    this.update(taskId, {isDone: true});
+  }
+
+  setUnDone(taskId: string) {
+    this.update(taskId, {isDone: false});
   }
 }

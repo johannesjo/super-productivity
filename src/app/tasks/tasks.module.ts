@@ -15,9 +15,9 @@ import { StoreModule } from '@ngrx/store';
 import { TaskEffects } from './store/task.effects';
 import { EffectsModule } from '@ngrx/effects';
 import { TaskService } from './task.service';
-import { TASK_FEATURE_NAME } from './task.const';
 import { taskReducer } from './store/task.reducer';
 import { ProjectModule } from '../project/project.module';
+import { TASK_FEATURE_NAME } from './store/task.reducer';
 
 @NgModule({
   imports: [

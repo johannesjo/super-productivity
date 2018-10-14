@@ -1,6 +1,10 @@
 import { createEntityAdapter, EntityAdapter, EntityState } from '@ngrx/entity';
 import { TaskActions, TaskActionTypes } from './task.actions';
 import { Task } from '../task.model';
+import { createFeatureSelector } from '@ngrx/store';
+import { createSelector } from '@ngrx/store';
+
+export const TASK_FEATURE_NAME = 'tasks';
 
 export interface TaskState extends EntityState<Task> {
   // additional entities state properties
@@ -9,6 +13,44 @@ export interface TaskState extends EntityState<Task> {
 
 export const taskAdapter: EntityAdapter<Task> = createEntityAdapter<Task>();
 
+
+// SELECTORS
+// ---------
+export const selectTaskFeatureState = createFeatureSelector<TaskState>(TASK_FEATURE_NAME);
+
+const {selectIds, selectEntities, selectAll, selectTotal} = taskAdapter.getSelectors();
+
+export const selectTaskIds = createSelector(selectTaskFeatureState, selectIds);
+export const selectTaskEntities = createSelector(selectTaskFeatureState, selectEntities);
+export const selectAllTasks = createSelector(selectTaskFeatureState, selectAll);
+
+// select the total user count
+export const selectTaskTotal = createSelector(selectTaskFeatureState, selectTotal);
+
+export const selectCurrentTask = createSelector(selectTaskFeatureState, state => state.currentTaskId);
+
+export const selectMainTasksWithSubTasks = createSelector(
+  selectAllTasks,
+  tasks => tasks
+    .filter((task) => !task.parentId)
+    .map((task) => {
+      if (task.subTasks && task.subTasks.length > 0) {
+        const newTask: any = Object.assign({}, task);
+        newTask.subTasks = task.subTasks
+          .map((subTaskId) => {
+            return tasks.find((task_) => task_.id === subTaskId);
+          })
+          .filter((subTask) => !!subTask);
+        return newTask;
+      } else {
+        return task;
+      }
+    })
+);
+
+
+// REDUCER
+// -------
 export const initialState: TaskState = taskAdapter.getInitialState({
   currentTaskId: null,
 });

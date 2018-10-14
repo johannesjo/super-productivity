@@ -9,7 +9,7 @@ export const PROJECT_FEATURE_NAME = 'projects';
 
 export interface ProjectState extends EntityState<Project> {
   // additional entities state properties
-  currentProjectId: string | null;
+  currentId: string | null;
 }
 
 export const projectAdapter: EntityAdapter<Project> = createEntityAdapter<Project>();
@@ -18,13 +18,13 @@ export const projectAdapter: EntityAdapter<Project> = createEntityAdapter<Projec
 // ---------
 export const selectProjectFeatureState = createFeatureSelector<ProjectState>(PROJECT_FEATURE_NAME);
 const {selectIds, selectEntities, selectAll, selectTotal} = projectAdapter.getSelectors();
-export const selectCurrentProjectId = createSelector(selectProjectFeatureState, state => state.currentProjectId);
+export const selectCurrentProjectId = createSelector(selectProjectFeatureState, state => state.currentId);
 export const selectAllProjects = createSelector(selectProjectFeatureState, selectAll);
 
 // DEFAULT
 // -------
 export const initialState: ProjectState = projectAdapter.getInitialState({
-  currentProjectId: 'DEFAULT',
+  currentId: 'DEFAULT',
   ids: [
     'DEFAULT'
   ],
@@ -45,7 +45,7 @@ export function projectReducer(
   state = initialState,
   action: ProjectActions
 ): ProjectState {
-  console.log(state.entities, state, action);
+  // console.log(state.entities, state, action);
 
   switch (action.type) {
     // Meta Actions
@@ -55,7 +55,7 @@ export function projectReducer(
     }
 
     case ProjectActionTypes.SetCurrentProject: {
-      return Object.assign({}, state, {currentProjectId: action.payload});
+      return Object.assign({}, state, {currentId: action.payload});
     }
 
     // Project Actions
