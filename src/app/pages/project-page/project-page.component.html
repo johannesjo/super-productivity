@@ -2,27 +2,29 @@
 
 
 <div class="project-list">
-  <div class="project mat-elevation-z1"
+  <mat-card class="project"
        *ngFor="let project of projectService.list$|async">
 
     <div class="title"
          [class.isCurrent]="project.id === (projectService.currentId$|async)">{{project.title}}
     </div>
     <div class="controls">
-      <button mat-mini-fab
+      <button mat-raised-button
               (click)="edit(project)"
               color="primary">
         <mat-icon aria-label="Edit">edit</mat-icon>
+        Edit
       </button>
-      <button mat-mini-fab
+      <button mat-raised-button
               *ngIf="project.id !== (projectService.currentId$|async)"
               (click)="remove(project.id)"
               color="warn">
         <mat-icon aria-label="Delete">delete</mat-icon>
+        Delet
       </button>
     </div>
 
-  </div>
+  </mat-card>
 </div>
 <button (click)="openCreateDialog()"
         mat-raised-button

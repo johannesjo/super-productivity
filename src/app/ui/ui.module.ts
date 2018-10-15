@@ -5,7 +5,7 @@ import { DurationFromStringPipe } from './duration/duration-from-string.pipe';
 import { DurationToStringPipe } from './duration/duration-to-string.pipe';
 import { EditOnClickComponent } from './edit-on-click/edit-on-click.component';
 import { InlineMarkdownComponent } from './inline-markdown/inline-markdown.component';
-import { MatIconModule } from '@angular/material';
+import { MatIconModule, MatCardModule } from '@angular/material';
 import { MatDatepickerModule } from '@angular/material';
 import { MatDialogModule } from '@angular/material';
 import { MatProgressBarModule } from '@angular/material';
@@ -26,6 +26,8 @@ import { MatListModule } from '@angular/material';
 import { MatTableModule } from '@angular/material';
 import { ThemeSelectComponent } from './theme-select/theme-select.component';
 import { MatSelectModule } from '@angular/material';
+import { MatStepperModule } from '@angular/material';
+import { MatExpansionModule } from '@angular/material';
 
 @NgModule({
   imports: [
@@ -54,6 +56,9 @@ import { MatSelectModule } from '@angular/material';
     MatOptionModule,
     MatListModule,
     MatTableModule,
+    MatStepperModule,
+    MatExpansionModule,
+    MatCardModule,
   ],
   declarations: [
     DurationFromStringPipe,
@@ -89,6 +94,9 @@ import { MatSelectModule } from '@angular/material';
     MatOptionModule,
     MatListModule,
     MatTableModule,
+    MatStepperModule,
+    MatExpansionModule,
+    MatCardModule,
 
     ReactiveFormsModule,
     FormlyModule,
