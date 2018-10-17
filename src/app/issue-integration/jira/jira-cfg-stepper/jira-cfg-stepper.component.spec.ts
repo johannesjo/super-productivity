@@ -1,20 +1,20 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { EditProjectFormComponent } from './edit-project-form.component';
+import { JiraCfgStepperComponent } from './jira-cfg-stepper.component';
 
-describe('EditProjectFormComponent', () => {
-  let component: EditProjectFormComponent;
-  let fixture: ComponentFixture<EditProjectFormComponent>;
+describe('JiraCfgStepperComponent', () => {
+  let component: JiraCfgStepperComponent;
+  let fixture: ComponentFixture<JiraCfgStepperComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ EditProjectFormComponent ]
+      declarations: [ JiraCfgStepperComponent ]
     })
     .compileComponents();
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(EditProjectFormComponent);
+    fixture = TestBed.createComponent(JiraCfgStepperComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

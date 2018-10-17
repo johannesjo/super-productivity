@@ -9,25 +9,24 @@ import { CoreModule } from '../core/core.module';
 import { ProjectService } from './project.service';
 import { DialogCreateProjectComponent } from './dialogs/create-project/dialog-create-project.component';
 import { UiModule } from '../ui/ui.module';
-import { EditProjectFormComponent } from './edit-project-form/edit-project-form.component';
+import { JiraModule } from '../issue-integration/jira/jira.module';
 
 @NgModule({
   imports: [
     CommonModule,
     CoreModule,
     UiModule,
+    JiraModule,
     StoreModule.forFeature(PROJECT_FEATURE_NAME, projectReducer),
     EffectsModule.forFeature([ProjectEffects]),
   ],
   declarations: [
-    EditProjectFormComponent,
     DialogCreateProjectComponent,
   ],
   providers: [
     ProjectService
   ],
   exports: [
-    EditProjectFormComponent,
     DialogCreateProjectComponent,
   ],
   entryComponents: [

@@ -2,10 +2,62 @@
   <span *ngIf="project">Edit Project</span>
   <span *ngIf="!project">Create Project</span>
 </h2>
-<mat-dialog-content>
-  <edit-project-form class="buttons-right"
-                     [project]="project"
-                     (cancel)="close()"
-                     (save)="close()"></edit-project-form>
-</mat-dialog-content>
 
+
+<form [formGroup]="form"
+      (ngSubmit)="submit()">
+  <mat-dialog-content>
+
+    <formly-form [model]="project"
+                 [fields]="formCfg"
+                 [options]="formOptions"
+                 [form]="form">
+
+      <mat-accordion>
+        <mat-expansion-panel>
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+              <!-- Todo show checkmark only when configured -->
+              <mat-icon>checkmark</mat-icon> Jira
+            </mat-panel-title>
+            <mat-panel-description>
+              Set up jira issue integration
+            </mat-panel-description>
+          </mat-expansion-panel-header>
+
+          <!--Todo show stepper for first setup, show config section when editing afterwards -->
+          <jira-cfg-stepper></jira-cfg-stepper>
+        </mat-expansion-panel>
+
+        <mat-expansion-panel>
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+              GitHub
+            </mat-panel-title>
+            <mat-panel-description>
+              Set up github issue integration
+            </mat-panel-description>
+          </mat-expansion-panel-header>
+        </mat-expansion-panel>
+      </mat-accordion>
+      <br>
+    </formly-form>
+  </mat-dialog-content>
+
+
+  <mat-dialog-actions>
+    <div class="wrap-buttons">
+      <button type="submit"
+              color="primary"
+              class="btn btn-primary submit-button"
+              mat-raised-button
+              [disabled]="!form.valid">Save
+      </button>
+      <button type="button"
+              (click)="cancelEdit()"
+              class="btn btn-primary submit-button"
+              mat-raised-button>Cancel
+      </button>
+    </div>
+  </mat-dialog-actions>
+</form>
