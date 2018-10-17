@@ -6,28 +6,33 @@ import { select } from '@ngrx/store';
 import 'rxjs/add/operator/map';
 import { JiraIssueActionTypes } from './store/jira-issue.actions';
 import { selectAllJiraIssues } from './store/jira-issue.reducer';
+import { ProjectService } from '../../project/project.service';
+import { PersistenceService } from '../../core/persistence/persistence.service';
+import { selectJiraIssueEntities } from './store/jira-issue.reducer';
+import { Dictionary } from '@ngrx/entity';
 
 
 @Injectable()
 export class JiraIssueService {
   jiraIssues$: Observable<JiraIssue[]> = this._store.pipe(select(selectAllJiraIssues));
+  jiraIssuesEntities$: Observable<Dictionary<JiraIssue>> = this._store.pipe(select(selectJiraIssueEntities));
 
   constructor(
     private readonly _store: Store<any>,
-    // private readonly _projectService: ProjectService,
-    // private readonly _persistenceService: PersistenceService,
+    private readonly _projectService: ProjectService,
+    private readonly _persistenceService: PersistenceService,
   ) {
-    // this.jiraIssues$.subscribe((val) => console.log(val));
-    // this._projectService.currentId$.subscribe((projectId) => {
-    //   this.loadStateForProject(projectId);
-    // });
+    this.jiraIssues$.subscribe((val) => console.log(val));
+    this._projectService.currentId$.subscribe((projectId) => {
+      this.loadStateForProject(projectId);
+    });
   }
 
   // META
   // ----
   loadStateForProject(projectId) {
     // const lsJiraIssueState = this._persistenceService.loadJiraIssuesForProject(projectId);
-    // this.loadState(lsJiraIssueState || initialJiraIssueState);
+    // this.loadState(lsJiraIssueState);
   }
 
   loadState(state) {

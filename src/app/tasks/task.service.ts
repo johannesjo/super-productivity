@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { combineLatest } from 'rxjs';
 import { Task } from './task.model';
 import { TaskWithAllData } from './task.model';
 import { Store } from '@ngrx/store';
@@ -13,13 +14,22 @@ import { selectMainTasksWithSubTasks } from './store/task.reducer';
 import { initialTaskState } from './store/task.reducer';
 import { ProjectService } from '../project/project.service';
 import { PersistenceService } from '../core/persistence/persistence.service';
+import { JiraIssueService } from '../issue/jira-issue/jira-issue.service';
 
 
 @Injectable()
 export class TaskService {
   currentTaskId$: Observable<string> = this._store.pipe(select(selectCurrentTask));
   flatTasks$: Observable<Task[]> = this._store.pipe(select(selectAllTasks));
-  tasks$: Observable<TaskWithAllData[]> = this._store.pipe(select(selectMainTasksWithSubTasks));
+  tasksWithSubTasks$: Observable<TaskWithAllData[]> = this._store.pipe(select(selectMainTasksWithSubTasks));
+  tasks$: Observable<TaskWithAllData[]> = combineLatest(this.tasksWithSubTasks$, this._jiraIssueService.jiraIssuesEntities$)
+    .map(([tasks, jiraIssuesEntities]) => {
+      return tasks.map((task) => {
+        const issueDataForTask = jiraIssuesEntities[task.issueId];
+        return issueDataForTask ? Object.assign({issueData: issueDataForTask}, task) : task;
+      });
+    });
+
   undoneTasks$: Observable<TaskWithAllData[]> = this.tasks$.map(
     (tasks) => tasks && tasks.filter((task: TaskWithAllData) => !task.isDone)
   );
@@ -32,9 +42,12 @@ export class TaskService {
   constructor(
     private readonly _store: Store<any>,
     private readonly _projectService: ProjectService,
+    private readonly _jiraIssueService: JiraIssueService,
     private readonly _persistenceService: PersistenceService,
   ) {
-    // this.tasks$.subscribe((val) => console.log(val));
+
+    this._jiraIssueService.jiraIssuesEntities$.subscribe((val) => console.log(val));
+    this.tasks$.subscribe((val) => console.log(val));
     this._projectService.currentId$.subscribe((projectId) => {
       this.loadStateForProject(projectId);
     });
@@ -77,6 +90,7 @@ export class TaskService {
       payload: {
         task: {
           title,
+          issueId: 'TEST',
           id: shortid(),
           isDone: false,
           subTasks: []
