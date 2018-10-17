@@ -244,8 +244,6 @@
         isUpdateIssueFromLocal: false,
         isAddWorklogOnSubTaskDone: true,
         isShowComponents: true,
-        defaultTransitionInProgress: undefined,
-        defaultTransitionDone: undefined,
         jqlQuery: 'assignee = currentUser() AND resolution = Unresolved ORDER BY updatedDate DESC',
         isEnabledAutoAdd: true,
         jqlQueryAutoAdd: 'assignee = currentUser() AND sprint in openSprints() AND resolution = Unresolved ORDER BY updatedDate DESC',
