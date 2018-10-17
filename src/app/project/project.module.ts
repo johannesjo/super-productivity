@@ -9,7 +9,7 @@ import { CoreModule } from '../core/core.module';
 import { ProjectService } from './project.service';
 import { DialogCreateProjectComponent } from './dialogs/create-project/dialog-create-project.component';
 import { UiModule } from '../ui/ui.module';
-import { JiraModule } from '../issue-integration/jira/jira.module';
+import { JiraModule } from '../issue/jira/jira.module';
 
 @NgModule({
   imports: [

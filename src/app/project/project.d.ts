@@ -1,5 +1,5 @@
-import { IssueIntegrationCfg } from '../issue-integration/issue-integration';
-import { JiraCfg } from '../issue-integration/jira/jira';
+import { IssueIntegrationCfg } from '../issue/issue';
+import { JiraCfg } from '../issue/jira/jira';
 
 export type Project = Readonly<{
   title: string;
