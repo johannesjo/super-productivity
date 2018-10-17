@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Task } from './task.model';
-import { TaskWithData } from './task.model';
+import { TaskWithAllData } from './task.model';
 import { Store } from '@ngrx/store';
 import { select } from '@ngrx/store';
 import 'rxjs/add/operator/map';
@@ -19,12 +19,12 @@ import { PersistenceService } from '../core/persistence/persistence.service';
 export class TaskService {
   currentTaskId$: Observable<string> = this._store.pipe(select(selectCurrentTask));
   flatTasks$: Observable<Task[]> = this._store.pipe(select(selectAllTasks));
-  tasks$: Observable<TaskWithData[]> = this._store.pipe(select(selectMainTasksWithSubTasks));
-  undoneTasks$: Observable<TaskWithData[]> = this.tasks$.map(
-    (tasks) => tasks && tasks.filter((task: TaskWithData) => !task.isDone)
+  tasks$: Observable<TaskWithAllData[]> = this._store.pipe(select(selectMainTasksWithSubTasks));
+  undoneTasks$: Observable<TaskWithAllData[]> = this.tasks$.map(
+    (tasks) => tasks && tasks.filter((task: TaskWithAllData) => !task.isDone)
   );
-  doneTasks$: Observable<TaskWithData[]> = this.tasks$.map(
-    (tasks) => tasks && tasks.filter((task: TaskWithData) => task.isDone)
+  doneTasks$: Observable<TaskWithAllData[]> = this.tasks$.map(
+    (tasks) => tasks && tasks.filter((task: TaskWithAllData) => task.isDone)
   );
 
   // tasksId$: Observable<string[] | number[]> = this._store.pipe(select(selectTaskIds));

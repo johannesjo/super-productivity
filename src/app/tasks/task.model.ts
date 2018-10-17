@@ -15,7 +15,7 @@ export type Task = Readonly<{
   index?: number;
 }>;
 
-export type TaskWithData = Readonly<{
+export type TaskWithAllData = Readonly<{
   id: string;
   title: string;
   isDone?: boolean;
@@ -23,7 +23,7 @@ export type TaskWithData = Readonly<{
   parentId?: string;
   issueId?: string;
   issueData?: any;
-  subTasks?: TaskWithData[];
+  subTasks?: TaskWithAllData[];
   progress?: number;
   timeSpent?: any;
   timeEstimate?: string;
