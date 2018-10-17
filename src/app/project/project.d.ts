@@ -1,4 +1,5 @@
 import { IssueIntegrationCfg } from '../issue-integration/issue-integration';
+import { JiraCfg } from '../issue-integration/jira/jira';
 
 export type Project = Readonly<{
   title: string;
@@ -6,7 +7,8 @@ export type Project = Readonly<{
   themeColor: string;
   isDarkTheme: boolean;
   issueIntegrationCfgs: {
-    [key: string]: IssueIntegrationCfg[]
+    jira: JiraCfg,
+    git: IssueIntegrationCfg,
   };
 }>;
 

@@ -1,10 +1,7 @@
-export interface IssueIntegrationCfgConst {
-  providerKey: string;
-}
-
-export interface IssueIntegrationCfg extends IssueIntegrationCfgConst {
+export interface IssueIntegrationCfg {
+  isEnabled: boolean;
+  host: string;
   userName: string;
   password?: string;
   token?: string;
-  settings: Object;
 }

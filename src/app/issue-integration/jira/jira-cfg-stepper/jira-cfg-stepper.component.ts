@@ -2,6 +2,8 @@ import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { FormBuilder } from '@angular/forms';
 import { FormGroup } from '@angular/forms';
 import { Validators } from '@angular/forms';
+import { JiraCfg } from '../jira';
+import { DEFAULT_JIRA_CFG } from '../jira.const';
 
 @Component({
   selector: 'jira-cfg-stepper',
@@ -19,6 +21,8 @@ export class JiraCfgStepperComponent implements OnInit {
   thirdFormGroup: FormGroup = this._formBuilder.group({
     secondCtrl: ['', Validators.required]
   });
+
+  cfg: JiraCfg = Object.assign({}, DEFAULT_JIRA_CFG);
 
   constructor(private _formBuilder: FormBuilder) {
   }
