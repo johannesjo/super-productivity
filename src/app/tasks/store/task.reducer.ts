@@ -34,12 +34,13 @@ export const selectMainTasksWithSubTasks = createSelector(
   tasks => tasks
     .filter((task) => !task.parentId)
     .map((task) => {
-      if (task.subTasks && task.subTasks.length > 0) {
+      if (task.subTaskIds && task.subTaskIds.length > 0) {
         const newTask: any = Object.assign({}, task);
-        newTask.subTasks = task.subTasks
+        newTask.subTasks = task.subTaskIds
           .map((subTaskId) => {
             return tasks.find((task_) => task_.id === subTaskId);
           })
+          // filter out undefined
           .filter((subTask) => !!subTask);
         return newTask;
       } else {
@@ -100,7 +101,7 @@ export function taskReducer(
       const stateCopy = taskAdapter.removeOne(action.payload.id, state);
       // also delete from parent task
       if (parentId) {
-        const subTasksArray = stateCopy.entities[parentId].subTasks;
+        const subTasksArray = stateCopy.entities[parentId].subTaskIds;
         subTasksArray.splice(subTasksArray.indexOf(action.payload.id), 1);
       }
       return stateCopy;
@@ -129,13 +130,17 @@ export function taskReducer(
       });
     }
 
+
     case TaskActionTypes.AddSubTask: {
-      const taskWithParentId = Object.assign(action.payload.task, {parentId: action.payload.parentId});
-      // add item
-      const stateCopy = taskAdapter.addOne(taskWithParentId, state);
+      // add item1
+      const stateCopy = taskAdapter.addOne({
+        ...action.payload.task,
+        parentId: action.payload.parentId
+      }, state);
+
       // also add to parent task
       const parentTask = stateCopy.entities[action.payload.parentId];
-      parentTask.subTasks.push(action.payload.task.id);
+      parentTask.subTaskIds.push(action.payload.task.id);
       return stateCopy;
     }
 

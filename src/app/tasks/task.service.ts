@@ -3,6 +3,7 @@ import { Observable } from 'rxjs';
 import { combineLatest } from 'rxjs';
 import { Task } from './task.model';
 import { TaskWithAllData } from './task.model';
+import { TaskWithSubTaskData } from './task.model';
 import { Store } from '@ngrx/store';
 import { select } from '@ngrx/store';
 import 'rxjs/add/operator/map';
@@ -16,19 +17,19 @@ import { ProjectService } from '../project/project.service';
 import { PersistenceService } from '../core/persistence/persistence.service';
 import { JiraIssueService } from '../issue/jira-issue/jira-issue.service';
 
+0;
+
 
 @Injectable()
 export class TaskService {
   currentTaskId$: Observable<string> = this._store.pipe(select(selectCurrentTask));
   flatTasks$: Observable<Task[]> = this._store.pipe(select(selectAllTasks));
-  tasksWithSubTasks$: Observable<TaskWithAllData[]> = this._store.pipe(select(selectMainTasksWithSubTasks));
+  tasksWithSubTasks$: Observable<TaskWithSubTaskData[]> = this._store.pipe(select(selectMainTasksWithSubTasks));
+
   tasks$: Observable<TaskWithAllData[]> = combineLatest(this.tasksWithSubTasks$, this._jiraIssueService.jiraIssuesEntities$)
-    .map(([tasks, jiraIssuesEntities]) => {
-      return tasks.map((task) => {
-        const issueDataForTask = jiraIssuesEntities[task.issueId];
-        return issueDataForTask ? Object.assign({issueData: issueDataForTask}, task) : task;
-      });
-    });
+    .map(([tasks, jiIssueEntities]) => tasks.map((task) =>
+      jiIssueEntities[task.issueId] ? Object.assign({issueData: jiIssueEntities[task.issueId]}, task) : task
+    ));
 
   undoneTasks$: Observable<TaskWithAllData[]> = this.tasks$.map(
     (tasks) => tasks && tasks.filter((task: TaskWithAllData) => !task.isDone)
@@ -93,7 +94,7 @@ export class TaskService {
           issueId: 'TEST',
           id: shortid(),
           isDone: false,
-          subTasks: []
+          subTaskIds: []
         }
       }
     });

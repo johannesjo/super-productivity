@@ -4,29 +4,23 @@ export type Task = Readonly<{
   id: string;
   title: string;
   isDone?: boolean;
+  isBacklogTask?: boolean;
   notes?: string;
   issueId?: string;
-  parentId?: string;
-  subTasks?: string[];
+  subTaskIds: string[];
   progress?: number;
   timeSpent?: any;
   timeEstimate?: string;
   timeSpentOnDay?: Object;
-  index?: number;
+  parentId?: string;
 }>;
 
-export type TaskWithAllData = Readonly<{
-  id: string;
-  title: string;
-  isDone?: boolean;
-  notes?: string;
-  parentId?: string;
-  issueId?: string;
-  issueData?: any;
-  subTasks?: TaskWithAllData[];
-  progress?: number;
-  timeSpent?: any;
-  timeEstimate?: string;
-  timeSpentOnDay?: Object;
-  index?: number;
-}>;
+
+export interface TaskWithSubTaskData extends Task {
+  readonly subTasks?: TaskWithAllData[];
+}
+
+export interface TaskWithAllData extends TaskWithSubTaskData {
+  readonly issueData?: any;
+}
+
