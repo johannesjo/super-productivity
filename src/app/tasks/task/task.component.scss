@@ -20,7 +20,8 @@ $task-inner-padding-left-right: 6px;
     background-color: #ffffff;
     color: $this-task-text-color;
     position: relative;
-    box-shadow: $shadow-bottom-boxed;
+    box-shadow: $shadow-card-shadow;
+    //box-shadow: $shadow-bottom-boxed;
 
     .title-bar-wrapper,
     .first-line {
@@ -124,8 +125,8 @@ $task-inner-padding-left-right: 6px;
   }
 
   .isShowNotes > .first-line {
-    padding: 5px 0;
-    .title{
+    //padding: 5px 0;
+    .title {
       font-weight: bold;
     }
   }
@@ -381,16 +382,6 @@ $task-inner-padding-left-right: 6px;
     }
   }
 
-  .actual-notes-wrapper {
-    box-shadow: $whiteframe-shadow-4dp;
-  }
-
-  form {
-    width: 100%;
-  }
-  input {
-    outline: none;
-  }
   input {
     width: 100%;
     display: block;
@@ -412,64 +403,8 @@ $task-inner-padding-left-right: 6px;
   }
 
   .notes {
-    $this-notes-extra-padding: 3px;
     display: block;
-    margin-left: -$task-inner-padding-left-right;
-    margin-right: -$task-inner-padding-left-right;
     overflow: hidden;
-    padding-left: $task-inner-padding-left-right +$this-notes-extra-padding;
-    padding-right: $task-inner-padding-left-right +$this-notes-extra-padding;
-
-    section {
-      margin-top: 10px;
-    }
-
-    .md-caption {
-      font-weight: bold;
-      margin-bottom: 6px;
-    }
-  }
-
-  a {
-    cursor: pointer;
-  }
-
-  .status {
-    margin-bottom: 10px;
-  }
-  .changelog,
-  .comments,
-  .attachments {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    padding: 0;
-    margin: 0 0 10px;
-    list-style-type: none;
-    li {
-      padding: 0;
-      font-size: 14px;
-      margin-top: 5px;
-    }
-  }
-
-  .comments {
-    li {
-      position: relative;
-      margin-top: 16px;
-      &:first-child {
-        margin-top: 8px;
-        &:before {
-          display: none;
-        }
-      }
-    }
-    p:first-child {
-      display: inline;
-    }
-    p {
-      margin-bottom: 8px;
-      margin-top: 8px;
-    }
   }
 }
 

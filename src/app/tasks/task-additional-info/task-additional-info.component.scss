@@ -1,5 +1,16 @@
 @import '../../../_variables.scss';
 
+:host {
+}
+
+.wrapper {
+  margin: $s;
+  box-shadow: $shadow-card-shadow;
+  @media (max-width: $layout-xs) {
+    margin: $s/2;
+  }
+}
+
 .tab-header-icon {
   margin-right: $s;
 }
