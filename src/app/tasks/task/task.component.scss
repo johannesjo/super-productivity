@@ -83,7 +83,7 @@ $task-inner-padding-left-right: 6px;
         color: $dark-theme-text-color;
       }
       .material-icons {
-        fill: $dark-theme-text-color;
+        color: $dark-theme-text-color;
       }
     }
   }
@@ -92,7 +92,7 @@ $task-inner-padding-left-right: 6px;
     //opacity: 0.8;
 
     .material-icons {
-      fill: $this-task-text-color-done !important;
+      color: $this-task-text-color-done !important;
     }
 
     .time,
@@ -218,9 +218,9 @@ $task-inner-padding-left-right: 6px;
             }
 
             > .material-icons {
-              fill: #ffffff !important;
+              color: #ffffff !important;
               @include dark-theme {
-                fill: #000000 !important;
+                color: #000000 !important;
               }
             }
           }
@@ -228,29 +228,29 @@ $task-inner-padding-left-right: 6px;
       }
 
       .material-icons {
-        fill: $this-icon-color;
+        color: $this-icon-color;
         margin: 0;
         padding: 0;
         line-height: 1;
         @include dark-theme {
-          fill: $dark-theme-text-color-lighter;
+          color: $dark-theme-text-color-lighter;
         }
       }
 
       &.delete-btn {
         .material-icons.delete-icon {
-          fill: $red !important;
+          color: $red !important;
           @include dark-theme {
-            fill: $red !important;
+            color: $red !important;
           }
         }
 
         &:hover {
           background: $red-danger !important;
           .material-icons.delete-icon {
-            fill: #ffffff !important;
+            color: #ffffff !important;
             @include dark-theme {
-              fill: #ffffff !important;
+              color: #ffffff !important;
             }
           }
         }
@@ -268,7 +268,7 @@ $task-inner-padding-left-right: 6px;
 
     // Button Stuff
     .material-icons {
-      fill: #545454;
+      color: #545454;
     }
 
     .play-btn {
