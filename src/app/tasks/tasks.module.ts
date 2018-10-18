@@ -19,6 +19,7 @@ import { taskReducer } from './store/task.reducer';
 import { ProjectModule } from '../project/project.module';
 import { TASK_FEATURE_NAME } from './store/task.reducer';
 import { JiraIssueModule } from '../issue/jira-issue/jira-issue.module';
+import { TaskAdditionalInfoComponent } from './task-additional-info/task-additional-info.component';
 
 @NgModule({
   imports: [
@@ -39,6 +40,7 @@ import { JiraIssueModule } from '../issue/jira-issue/jira-issue.module';
     DialogTimeEstimateComponent,
     KeysPipe,
     ToArrayPipe,
+    TaskAdditionalInfoComponent,
   ],
   exports: [
     TaskComponent,

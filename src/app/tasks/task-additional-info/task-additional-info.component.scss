@@ -1,0 +1,20 @@
+@import '../../../_variables.scss';
+
+.tab-header-icon {
+  margin-right: $s;
+}
+
+::ng-deep .mat-tab-labels {
+  justify-content: stretch;
+}
+
+::ng-deep .mat-tab-label {
+  flex-grow: 1;
+  height: 30px;
+}
+
+.tab-label-text {
+  @media (max-width: $layout-xs) {
+    display: none;
+  }
+}

@@ -2,7 +2,8 @@
 <!--layout="row"-->
 <!--as-sortable-item-handle-->
 <!--layout-align="space-between center"> -->
-<div class="inner-wrapper">
+<div class="inner-wrapper"
+     [class.isShowNotes]="isShowNotes">
   <div class="first-line">
     <button mat-icon-button
             aria-label="is updated"
@@ -39,22 +40,22 @@
     </button>
 
 
-    <!--<button mat-button-->
-    <!--class="mat-icon-button original-link-btn"-->
-    <!--aria-label="link"-->
-    <!--tabindex="2"-->
-    <!--target="_blank"-->
-    <!--external-link-->
-    <!--*ngIf="task.originalLink"-->
-    <!--ng-href="{{ task.originalLink }}">-->
+    <a mat-icon-button
+       class="ico-btn original-link-btn"
+       aria-label="link"
+       tabindex="2"
+       target="_blank"
+       external-link
+       *ngIf="task.issueData?.url"
+       [href]="task.issueData?.url">
 
-    <!--<i icon="link"-->
-    <!--*ngIf="task.originalType !=='GITHUB'"-->
-    <!--aria-label="link"></i>-->
-    <!--<i icon="github-circle"-->
-    <!--*ngIf="task.originalType ==='GITHUB'"-->
-    <!--aria-label="link"></i>-->
-    <!--</button>-->
+      <mat-icon *ngIf="task.type !=='GITHUB'"
+                aria-label="link">link
+      </mat-icon>
+      <mat-icon *ngIf="task.type ==='GITHUB'"
+                aria-label="github">github-circle
+      </mat-icon>
+    </a>
 
     <div supEditOnClick
          contenteditable="true"
@@ -97,10 +98,10 @@
               (click)="isShowNotes=!isShowNotes">
 
         <i class="material-icons"
-           *ngIf="task.notes||task.originalKey"
+           *ngIf="task.notes||task.issueData"
            aria-label="notes">insert_comment</i>
         <i class="material-icons"
-           *ngIf="!task.notes&&!task.originalKey">mode_comment</i>
+           *ngIf="!task.notes&&!task.issueData">mode_comment</i>
       </button>
       <button mat-icon-button
               tabindex="2"
@@ -130,90 +131,11 @@
                     [value]="task.progress"></mat-progress-bar>
 
 
-  <div class="notes"
-       [@expand]="isShowNotes">
-    <!--<section *ngIf="task.isUpdated;">-->
-    <!--<div class="mat-caption">-->
-    <!--Changes since last update-->
-    <!--</div>-->
-
-    <!--&lt;!&ndash;<ul class="changelog">&ndash;&gt;-->
-    <!--&lt;!&ndash;<li *ngFor="let changelogEntry of task.originalChangelog">&ndash;&gt;-->
-    <!--&lt;!&ndash;<div *ngIf="changelogEntry.author">&ndash;&gt;-->
-    <!--&lt;!&ndash;<em>[<span [innerHtml]="changelogEntry.author"></span>]&ndash;&gt;-->
-    <!--&lt;!&ndash;&lt;!&ndash;<span [innerHtml]="changelogEntry.created| amDateFormat:'Y.MM.DD HH:mm'"></span></em>&ndash;&gt;&ndash;&gt;-->
-    <!--&lt;!&ndash;</div>&ndash;&gt;-->
-    <!--&lt;!&ndash;<div *ngFor="let change of changelogEntry.items">&ndash;&gt;-->
-    <!--&lt;!&ndash;<strong [innerHtml]="change.field"></strong>&ndash;&gt;-->
-    <!--&lt;!&ndash;<span *ngIf="change.toString.length"><em>changed to:</em> <span [innerHtml]="change.toString"></span></span></span>&ndash;&gt;-->
-    <!--&lt;!&ndash;</div>&ndash;&gt;-->
-    <!--&lt;!&ndash;</li>&ndash;&gt;-->
-    <!--&lt;!&ndash;</ul>&ndash;&gt;-->
-    <!--<button mat-raised-button-->
-    <!--(click)="task.isUpdated=false;task.originalChangelog=undefined;isShowNotes=false">-->
-    <!--<i class="material-icons">delete</i>-->
-    <!--Hide changes-->
-    <!--</button>-->
-    <!--</section>-->
-
-    <section>
-      <div class="mat-caption"
-           [innerHtml]="task.originalId ? 'Description': 'Notes'"></div>
-      <div class="mat-elevation-z4">
-        <inline-markdown [model]="task.notes"
-                         (onChanged)="onTaskNotesChanged(task.id,$event)"></inline-markdown>
-      </div>
-    </section>
-
-    <!--<section *ngIf="task.status.length > 0 || task.originalStatus.length > 0"-->
-    <!--class="status">-->
-    <!--<div class="mat-caption">Status: <span [innerHtml]="task.originalStatus.name || task.originalStatus"></span>-->
-    <!--<i icon="arrow_forward"-->
-    <!--*ngIf="task.status.length > 0"-->
-    <!--aria-label="arrow forward"></i>-->
-    <!--<span [innerHtml]="task.status"></span>-->
-    <!--</div>-->
-    <!--</section>-->
-
-    <!--<section *ngIf="task.originalAssigneeKey"-->
-    <!--class="assignee">-->
-    <!--<div class="mat-caption">Assignee: <span [innerHtml]="task.originalAssigneeKey"></span></div>-->
-    <!--</section>-->
-
-    <!--<section *ngIf="task.originalAttachment.length > 0">-->
-    <!--<collapsible title="Attachments ({{ task.originalAttachment.length }})">-->
-    <!--<ul class="attachments">-->
-    <!--<li ng-repeat="attachment in task.originalAttachment">-->
-    <!--<a href="{{ attachment}}"-->
-    <!--external-link-->
-    <!--target="_blank"-->
-    <!--class="mat-accent">{{ attachment}}</a>-->
-    <!--<a href="{{ attachment}}"-->
-    <!--download="{{ attachment}}"-->
-    <!--class="mat-accent">-->
-    <!--<i icon="file_download"-->
-    <!--aria-label="download file directly"></i>-->
-    <!--</a>-->
-    <!--</li>-->
-    <!--</ul>-->
-    <!--</collapsible>-->
-    <!--</section>-->
-
-    <!--<section *ngIf="task.originalComments.length > 0">-->
-    <!--<collapsible title="Comments ({{ task.originalComments.length }})">-->
-    <!--<mat-divider></mat-divider>-->
-    <!--<ul class="comments">-->
-    <!--<li ng-repeat="comment in task.originalComments"-->
-    <!--class="comment">-->
-    <!--<strong class="author">[<span [innerHtml]="comment.author"></span>]: </strong>-->
-    <!--<span marked="comment.body"></span>-->
-    <!--</li>-->
-    <!--</ul>-->
-    <!--</collapsible>-->
-    <!--</section>-->
-
-  </div>
-
+  <task-additional-info class="notes"
+                        *ngIf="isShowNotes"
+                        (onTaskNotesChanged)="onTaskNotesChanged(task.id, $event)"
+                        [@expand]
+                        [task]="task"></task-additional-info>
 
   <div class="sub-tasks"
        *ngIf="task.subTasks"
