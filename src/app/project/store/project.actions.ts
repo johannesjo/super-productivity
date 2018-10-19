@@ -2,6 +2,8 @@ import { Action } from '@ngrx/store';
 import { Update } from '@ngrx/entity';
 import { ProjectState } from './project.reducer';
 import { Project } from '../project';
+import { IssueProviderKey } from '../../issue/issue';
+import { IssueIntegrationCfg } from '../../issue/issue';
 
 export enum ProjectActionTypes {
   LoadState = '[Project] Load Project State',
@@ -15,6 +17,7 @@ export enum ProjectActionTypes {
   UpdateProjects = '[Project] Update Projects',
   DeleteProject = '[Project] Delete Project',
   DeleteProjects = '[Project] Delete Projects',
+  SaveProjectIssueConfig = '[Project] Save Issue Config for Project',
 }
 
 export class LoadState implements Action {
@@ -66,6 +69,7 @@ export class UpdateProjects implements Action {
   }
 }
 
+
 export class DeleteProject implements Action {
   readonly type = ProjectActionTypes.DeleteProject;
 
@@ -80,6 +84,12 @@ export class DeleteProjects implements Action {
   }
 }
 
+export class SaveProjectIssueConfig implements Action {
+  readonly type = ProjectActionTypes.SaveProjectIssueConfig;
+
+  constructor(public payload: { projectId: string, issueProviderKey: IssueProviderKey, providerCfg: IssueIntegrationCfg }) {
+  }
+}
 
 export type ProjectActions
   = LoadProjects
@@ -90,5 +100,7 @@ export type ProjectActions
   | UpdateProject
   | UpdateProjects
   | DeleteProject
-  | DeleteProjects;
+  | DeleteProjects
+  | SaveProjectIssueConfig
+  ;
 

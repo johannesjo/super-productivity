@@ -2,13 +2,14 @@ import { IssueIntegrationCfg } from '../issue/issue';
 import { JiraCfg } from '../issue/jira/jira';
 
 export type Project = Readonly<{
-  title: string;
   id: string;
+  title: string;
   themeColor: string;
   isDarkTheme: boolean;
-  issueIntegrationCfgs?: {
-    jira?: JiraCfg,
-    git?: IssueIntegrationCfg,
+  issueIntegrationCfgs: {
+    // should be the same as key IssueProviderKey
+    JIRA?: JiraCfg,
+    GIT?: IssueIntegrationCfg,
   };
 }>;
 

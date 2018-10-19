@@ -18,7 +18,8 @@
           <mat-expansion-panel-header>
             <mat-panel-title>
               <!-- Todo show checkmark only when configured -->
-              <mat-icon>checkmark</mat-icon> Jira
+              <mat-icon>checkmark</mat-icon>
+              Jira
             </mat-panel-title>
             <mat-panel-description>
               Set up jira issue integration
@@ -26,7 +27,8 @@
           </mat-expansion-panel-header>
 
           <!--Todo show stepper for first setup, show config section when editing afterwards -->
-          <jira-cfg-stepper></jira-cfg-stepper>
+          <jira-cfg-stepper (onSaveCfg)="saveJiraCfg($event)"
+                            [cfg]="projectData.issueIntegrationCfgs.JIRA"></jira-cfg-stepper>
         </mat-expansion-panel>
 
         <mat-expansion-panel>

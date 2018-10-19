@@ -6,3 +6,11 @@ export const DEFAULT_PROJECT: Partial<Project> = {
   isDarkTheme: false,
   issueIntegrationCfgs: {},
 };
+
+export const FIRST_PROJECT: Project = {
+  id: 'DEFAULT',
+  title: 'Super Productivity',
+  themeColor: 'light-blue',
+  isDarkTheme: false,
+  issueIntegrationCfgs: {}
+};

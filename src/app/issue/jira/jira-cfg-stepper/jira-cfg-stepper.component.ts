@@ -1,4 +1,7 @@
 import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
+import { Output } from '@angular/core';
+import { EventEmitter } from '@angular/core';
+import { Input } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { JiraCfg } from '../jira';
 import { DEFAULT_JIRA_CFG } from '../jira.const';
@@ -14,15 +17,16 @@ import { JiraApiService } from '../jira-api.service';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class JiraCfgStepperComponent implements OnInit {
-  credentialsFormGroup: FormGroup = new FormGroup({});
-  credentialsFormConfig: FormlyFieldConfig[] = JIRA_CREDENTIALS_FORM_CFG;
+  public credentialsFormGroup: FormGroup = new FormGroup({});
+  public credentialsFormConfig: FormlyFieldConfig[] = JIRA_CREDENTIALS_FORM_CFG;
 
-  advancedSettingsFormGroup: FormGroup = new FormGroup({});
-  advancedSettingsFormConfig: FormlyFieldConfig[] = JIRA_ADVANCED_FORM_CFG;
-
-  cfg: JiraCfg = Object.assign({}, DEFAULT_JIRA_CFG);
+  public advancedSettingsFormGroup: FormGroup = new FormGroup({});
+  public advancedSettingsFormConfig: FormlyFieldConfig[] = JIRA_ADVANCED_FORM_CFG;
 
   public isTestCredentialsSuccess = false;
+
+  @Input() cfg: JiraCfg = Object.assign({}, DEFAULT_JIRA_CFG);
+  @Output() onSaveCfg: EventEmitter<JiraCfg> = new EventEmitter();
 
   constructor(
     private _jiraApiService: JiraApiService,
@@ -33,7 +37,7 @@ export class JiraCfgStepperComponent implements OnInit {
   }
 
   saveCfg() {
-
+    this.onSaveCfg.emit(this.cfg);
   }
 
   testCredentials() {

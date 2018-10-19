@@ -3,7 +3,7 @@ import { JiraIssueService } from './jira/jira-issue/jira-issue.service';
 import { combineLatest } from 'rxjs';
 import { Observable } from 'rxjs';
 import { IssueEntityMap } from './issue';
-import { IssueType } from './issue';
+import { IssueProviderKey } from './issue';
 import { JiraIssueContentComponent } from './jira/jira-issue/jira-issue-content/jira-issue-content.component';
 import { JiraIssueHeaderComponent } from './jira/jira-issue/jira-issue-header/jira-issue-header.component';
 
@@ -23,7 +23,7 @@ export class IssueService {
     this.issueEntityMap$.subscribe((v) => console.log(v));
   }
 
-  public getTabHeader(issueType: IssueType) {
+  public getTabHeader(issueType: IssueProviderKey) {
     switch (issueType) {
       case 'JIRA': {
         return JiraIssueHeaderComponent;
@@ -32,7 +32,7 @@ export class IssueService {
   }
 
 
-  public getTabContent(issueType: IssueType) {
+  public getTabContent(issueType: IssueProviderKey) {
     switch (issueType) {
       case 'JIRA': {
         return JiraIssueContentComponent;

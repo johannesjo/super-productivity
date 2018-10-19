@@ -1,5 +1,3 @@
-import { IssueIntegrationCfg } from '../issue';
-
 export type JiraTransitionOption = 'ALWAYS_ASK' | 'DO_NOT' | string;
 
 export interface JiraTransitionOptions {
@@ -8,7 +6,11 @@ export interface JiraTransitionOptions {
   DONE: JiraTransitionOption;
 }
 
-export interface JiraCfg extends IssueIntegrationCfg {
+export interface JiraCfg {
+  isEnabled: boolean;
+  host: string;
+  userName: string;
+  password?: string;
   isAutoPollTickets: boolean;
   searchJqlQuery: string;
 

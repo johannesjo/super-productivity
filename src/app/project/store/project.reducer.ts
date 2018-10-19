@@ -1,9 +1,11 @@
 import { createEntityAdapter, EntityAdapter, EntityState } from '@ngrx/entity';
+import { Update } from '@ngrx/entity';
 import { Project } from '../project';
 import { ProjectActions } from './project.actions';
 import { ProjectActionTypes } from './project.actions';
 import { createFeatureSelector } from '@ngrx/store';
 import { createSelector } from '@ngrx/store';
+import { FIRST_PROJECT } from '../project.const';
 
 export const PROJECT_FEATURE_NAME = 'projects';
 
@@ -24,21 +26,16 @@ export const selectCurrentProject = createSelector(selectProjectFeatureState,
   (state) => state.entities[state.currentId]
 );
 
+
 // DEFAULT
 // -------
 export const initialState: ProjectState = projectAdapter.getInitialState({
-  currentId: 'DEFAULT',
+  currentId: FIRST_PROJECT.id,
   ids: [
-    'DEFAULT'
+    FIRST_PROJECT.id
   ],
   entities: {
-    'DEFAULT': {
-      id: 'DEFAULT',
-      title: 'Super Productivity',
-      themeColor: 'lightBlue',
-      isDarkTheme: false,
-      cfg: null
-    }
+    [FIRST_PROJECT.id]: FIRST_PROJECT
   }
 });
 
@@ -48,7 +45,7 @@ export function projectReducer(
   state = initialState,
   action: ProjectActions
 ): ProjectState {
-  // console.log(state.entities, state, action);
+  console.log(state.entities, state, action);
 
   switch (action.type) {
     // Meta Actions
@@ -89,6 +86,18 @@ export function projectReducer(
 
     case ProjectActionTypes.LoadProjects: {
       return projectAdapter.addAll(action.payload.projects, state);
+    }
+
+    case ProjectActionTypes.SaveProjectIssueConfig: {
+      const currentProject = state.entities[action.payload.projectId];
+      const issueProviderCfg = Object.assign({}, currentProject.issueIntegrationCfgs);
+      const update = {
+        id: action.payload.projectId,
+        changes: {
+          issueProviderCfg: issueProviderCfg
+        }
+      } as Update<Project>;
+      return projectAdapter.updateOne(update, state);
     }
 
     default: {

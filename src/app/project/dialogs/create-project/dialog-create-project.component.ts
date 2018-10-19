@@ -9,6 +9,7 @@ import { FormlyFormOptions } from '@ngx-formly/core';
 import { FormlyFieldConfig } from '@ngx-formly/core';
 import { ProjectService } from '../../project.service';
 import { DEFAULT_PROJECT } from '../../project.const';
+import { JiraCfg } from '../../../issue/jira/jira';
 
 const ALL_THEMES = [
   'blue',
@@ -97,6 +98,12 @@ export class DialogCreateProjectComponent implements OnInit {
       this._projectService.add(this.projectData);
     }
     this._matDialogRef.close();
+  }
+
+  saveJiraCfg(jiraCfg: JiraCfg) {
+    console.log(this.projectData);
+
+    this.projectData.issueIntegrationCfgs['JIRA'] = jiraCfg;
   }
 
   cancelEdit() {

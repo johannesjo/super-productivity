@@ -9,6 +9,8 @@ import shortid from 'shortid';
 import { selectCurrentProjectId } from './store/project.reducer';
 import { selectAllProjects } from './store/project.reducer';
 import { selectCurrentProject } from './store/project.reducer';
+import { IssueProviderKey } from '../issue/issue';
+import { IssueIntegrationCfg } from '../issue/issue';
 
 @Injectable()
 export class ProjectService {
@@ -70,6 +72,19 @@ export class ProjectService {
       }
     });
   }
+
+
+  updateIssueProviderConfig(projectId: string, issueProviderKey: IssueProviderKey, providerCfg: IssueIntegrationCfg) {
+    this._store.dispatch({
+      type: ProjectActionTypes.UpdateProject,
+      payload: {
+        projectId,
+        issueProviderKey,
+        providerCfg
+      }
+    });
+  }
+
 
   setCurrentId(projectId: string) {
     this._store.dispatch({

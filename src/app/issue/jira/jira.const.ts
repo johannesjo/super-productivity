@@ -7,7 +7,6 @@ export const DEFAULT_JIRA_CFG: JiraCfg = {
   host: null,
   userName: null,
   password: null,
-  token: null,
 
   isAutoPollTickets: true,
   searchJqlQuery: 'assignee = currentUser() AND resolution = Unresolved ORDER BY updatedDate DESC',

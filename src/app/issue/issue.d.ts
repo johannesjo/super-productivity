@@ -1,15 +1,11 @@
 import { Dictionary } from '@ngrx/entity';
 import { JiraIssue } from './jira/jira-issue/jira-issue.model';
+import { JiraCfg } from './jira/jira';
 
-export interface IssueIntegrationCfg {
-  isEnabled: boolean;
-  host: string;
-  userName: string;
-  password?: string;
-  token?: string;
-}
+// TODO add others
+export type IssueIntegrationCfg = Readonly<JiraCfg>;
 
-export type IssueType = 'JIRA' | 'GIT';
+export type IssueProviderKey = 'JIRA' | 'GIT';
 
 export interface IssueEntityMap {
   JIRA: Dictionary<JiraIssue>;

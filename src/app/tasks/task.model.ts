@@ -1,4 +1,4 @@
-import { IssueType } from '../issue/issue';
+import { IssueProviderKey } from '../issue/issue';
 
 export type Task = Readonly<{
   id: string;
@@ -8,7 +8,7 @@ export type Task = Readonly<{
   isNotesOpen?: boolean;
   notes?: string;
   issueId?: string;
-  issueType?: IssueType;
+  issueType?: IssueProviderKey;
   subTaskIds: string[];
   progress?: number;
   timeSpent?: any;
