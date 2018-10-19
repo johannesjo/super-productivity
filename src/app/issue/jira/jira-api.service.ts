@@ -31,56 +31,39 @@ export class JiraApiService {
       .then((res) => console.log(res));
   }
 
-  getSuggestions(cfg = this.cfg) {
+  getSuggestions(cfg?) {
     const options = {
       maxResults: JIRA_MAX_RESULTS,
       fields: JIRA_SUGGESTION_FIELDS_TO_GET
     };
 
-    const request = {
-      config: {...cfg, isJiraEnabled: true},
+    return this._sendRequest({
       apiMethod: 'searchJira',
       arguments: [this.cfg.jqlQuery, options]
+    }, cfg);
+  }
+
+  searchJira(searchTerm) {
+    const options = {
+      maxResults: JIRA_MAX_RESULTS,
+      fields: JIRA_SUGGESTION_FIELDS_TO_GET
     };
-    return this._sendRequest(request);
+    const searchQuery = `summary ~ "${searchTerm}"${this.cfg.jqlQuery ? ' AND ' + this.cfg.jqlQuery : ''}`;
+
+    return this._sendRequest({
+      apiMethod: 'searchJira',
+      arguments: [searchQuery, options]
+    });
   }
 
   // INTERNAL
   // --------
-  private _handleResponse(res) {
-    // check if proper id is given in callback and if exists in requestLog
-    if (res.requestId && this.requestsLog[res.requestId]) {
-      const currentRequestPromise = this.requestsLog[res.requestId];
-      // cancel timeout for request
-      clearTimeout(currentRequestPromise.timeout);
 
-      // resolve saved promise
-      if (!res || res.error) {
-        console.log('FRONTEND_REQUEST', currentRequestPromise);
-        console.log('RESPONSE', res);
-        const errorTxt = (res && res.error && (typeof res.error === 'string' && res.error) || res.error.name);
-        console.log(errorTxt);
-
-        currentRequestPromise.reject(res);
-        if (res.error.statusCode && res.error.statusCode === 401) {
-          this.isPreventNextRequestAfterFailedAuth = true;
-        }
-
-      } else {
-        console.log('JIRA_RESPONSE', res);
-        currentRequestPromise.resolve(res);
-      }
-      // delete entry for promise afterwards
-      delete this.requestsLog[res.requestId];
-    } else {
-      console.warn('Jira: Response Request ID not existing');
-    }
-  }
-
-
-  private _sendRequest(request) {
+  private _sendRequest(request, cfg = this.cfg) {
     // assign uuid to request to know which responsive belongs to which promise
     request.requestId = shortid();
+    request.config = {...cfg, isJiraEnabled: true};
+
 
     // TODO refactor to observable for request canceling etc
     let promiseResolve;
@@ -113,6 +96,36 @@ export class JiraApiService {
     }
 
     return promise;
+  }
+
+  private _handleResponse(res) {
+    // check if proper id is given in callback and if exists in requestLog
+    if (res.requestId && this.requestsLog[res.requestId]) {
+      const currentRequestPromise = this.requestsLog[res.requestId];
+      // cancel timeout for request
+      clearTimeout(currentRequestPromise.timeout);
+
+      // resolve saved promise
+      if (!res || res.error) {
+        console.log('FRONTEND_REQUEST', currentRequestPromise);
+        console.log('RESPONSE', res);
+        const errorTxt = (res && res.error && (typeof res.error === 'string' && res.error) || res.error.name);
+        console.log(errorTxt);
+
+        currentRequestPromise.reject(res);
+        if (res.error.statusCode && res.error.statusCode === 401) {
+          this.isPreventNextRequestAfterFailedAuth = true;
+        }
+
+      } else {
+        console.log('JIRA_RESPONSE', res);
+        currentRequestPromise.resolve(res);
+      }
+      // delete entry for promise afterwards
+      delete this.requestsLog[res.requestId];
+    } else {
+      console.warn('Jira: Response Request ID not existing');
+    }
   }
 
 
