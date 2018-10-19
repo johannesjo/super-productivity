@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ProjectModule } from '../../project/project.module';
-import { UiModule } from '../../ui/ui.module';
+import { ProjectModule } from '../../../project/project.module';
+import { UiModule } from '../../../ui/ui.module';
 import { FormsModule } from '@angular/forms';
 import { ReactiveFormsModule } from '@angular/forms';
 import { StoreModule } from '@ngrx/store';

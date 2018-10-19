@@ -7,8 +7,8 @@ import 'rxjs/add/operator/map';
 import { JiraIssueActionTypes } from './store/jira-issue.actions';
 import { selectAllJiraIssues } from './store/jira-issue.reducer';
 import { selectJiraIssueEntities } from './store/jira-issue.reducer';
-import { ProjectService } from '../../project/project.service';
-import { PersistenceService } from '../../core/persistence/persistence.service';
+import { ProjectService } from '../../../project/project.service';
+import { PersistenceService } from '../../../core/persistence/persistence.service';
 import { Dictionary } from '@ngrx/entity';
 
 

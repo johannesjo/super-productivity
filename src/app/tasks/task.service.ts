@@ -15,7 +15,7 @@ import { selectMainTasksWithSubTasks } from './store/task.reducer';
 import { initialTaskState } from './store/task.reducer';
 import { ProjectService } from '../project/project.service';
 import { PersistenceService } from '../core/persistence/persistence.service';
-import { JiraIssueService } from '../issue/jira-issue/jira-issue.service';
+import { IssueService } from '../issue/issue.service';
 
 0;
 
@@ -26,10 +26,11 @@ export class TaskService {
   flatTasks$: Observable<Task[]> = this._store.pipe(select(selectAllTasks));
   tasksWithSubTasks$: Observable<TaskWithSubTaskData[]> = this._store.pipe(select(selectMainTasksWithSubTasks));
 
-  tasks$: Observable<TaskWithAllData[]> = combineLatest(this.tasksWithSubTasks$, this._jiraIssueService.jiraIssuesEntities$)
-    .map(([tasks, jiIssueEntities]) => tasks.map((task) =>
-      jiIssueEntities[task.issueId] ? Object.assign({issueData: jiIssueEntities[task.issueId]}, task) : task
-    ));
+  tasks$: Observable<TaskWithAllData[]> = combineLatest(this.tasksWithSubTasks$, this._issueService.issueEntityMap$)
+    .map(([tasks, issueEntityMap]) => tasks.map((task) => {
+      const issueData = issueEntityMap[task.issueType][task.issueId];
+      return issueData ? Object.assign({issueData: issueData}, task) : task;
+    }));
 
   undoneTasks$: Observable<TaskWithAllData[]> = this.tasks$.map(
     (tasks) => tasks && tasks.filter((task: TaskWithAllData) => !task.isDone)
@@ -43,11 +44,10 @@ export class TaskService {
   constructor(
     private readonly _store: Store<any>,
     private readonly _projectService: ProjectService,
-    private readonly _jiraIssueService: JiraIssueService,
+    private readonly _issueService: IssueService,
     private readonly _persistenceService: PersistenceService,
   ) {
 
-    this._jiraIssueService.jiraIssuesEntities$.subscribe((val) => console.log(val));
     this.tasks$.subscribe((val) => console.log(val));
     this._projectService.currentId$.subscribe((projectId) => {
       this.loadStateForProject(projectId);
@@ -92,6 +92,7 @@ export class TaskService {
         task: {
           title,
           issueId: 'TEST',
+          issueType: 'JIRA',
           id: shortid(),
           isDone: false,
           subTaskIds: []
