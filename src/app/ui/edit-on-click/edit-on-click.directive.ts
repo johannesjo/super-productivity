@@ -35,9 +35,9 @@ function removeTags(str) {
 }
 
 @Directive({
-  selector: '[supEditOnClick]',
+  selector: '[editOnClick]',
 })
-export class EditOnClickComponent implements OnInit, OnChanges {
+export class EditOnClickDirective implements OnInit, OnChanges {
   @Input() value: string;
   @Input() eventId: string;
   @Output() editFinished: EventEmitter<any> = new EventEmitter();

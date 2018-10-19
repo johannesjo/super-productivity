@@ -1,20 +1,20 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { EditOnClickComponent } from './edit-on-click.component';
+import { EditOnClickDirective } from './edit-on-click.directive';
 
-describe('EditOnClickComponent', () => {
-  let component: EditOnClickComponent;
-  let fixture: ComponentFixture<EditOnClickComponent>;
+describe('EditOnClickDirective', () => {
+  let component: EditOnClickDirective;
+  let fixture: ComponentFixture<EditOnClickDirective>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [EditOnClickComponent]
+      declarations: [EditOnClickDirective]
     })
       .compileComponents();
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(EditOnClickComponent);
+    fixture = TestBed.createComponent(EditOnClickDirective);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

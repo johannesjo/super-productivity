@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { InputDurationDirective } from './duration/input-duration.directive';
 import { DurationFromStringPipe } from './duration/duration-from-string.pipe';
 import { DurationToStringPipe } from './duration/duration-to-string.pipe';
-import { EditOnClickComponent } from './edit-on-click/edit-on-click.component';
+import { EditOnClickDirective } from './edit-on-click/edit-on-click.directive';
 import { InlineMarkdownComponent } from './inline-markdown/inline-markdown.component';
 import { MatCardModule, MatIconModule } from '@angular/material';
 import { MatDatepickerModule } from '@angular/material';
@@ -23,12 +23,12 @@ import { MatTableModule } from '@angular/material';
 import { MatSelectModule } from '@angular/material';
 import { MatStepperModule } from '@angular/material';
 import { MatExpansionModule } from '@angular/material';
+import { MatTabsModule } from '@angular/material';
 import { MarkdownModule } from 'ngx-markdown';
 import { ReactiveFormsModule } from '@angular/forms';
 import { FormlyMaterialModule } from '@ngx-formly/material';
 import { FormlyModule } from '@ngx-formly/core';
 import { ThemeSelectComponent } from './theme-select/theme-select.component';
-import { MatTabsModule } from '@angular/material';
 
 @NgModule({
   imports: [
@@ -66,7 +66,7 @@ import { MatTabsModule } from '@angular/material';
     DurationFromStringPipe,
     DurationToStringPipe,
     InputDurationDirective,
-    EditOnClickComponent,
+    EditOnClickDirective,
     InlineMarkdownComponent,
     ThemeSelectComponent,
   ],
@@ -74,7 +74,7 @@ import { MatTabsModule } from '@angular/material';
     DurationFromStringPipe,
     DurationToStringPipe,
     InputDurationDirective,
-    EditOnClickComponent,
+    EditOnClickDirective,
     InlineMarkdownComponent,
     ThemeSelectComponent,
 
