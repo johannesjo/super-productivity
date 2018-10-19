@@ -62,7 +62,7 @@ export class JiraApiService {
 
   // INTERNAL
   // --------
-
+  // TODO refactor data madness of request and add types for everything
   private _sendRequest(request, cfg = this.cfg) {
     // assign uuid to request to know which responsive belongs to which promise
     request.requestId = shortid();

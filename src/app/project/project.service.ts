@@ -2,23 +2,23 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Project } from './project';
 import { PersistenceService } from '../core/persistence/persistence.service';
-import { Store } from '@ngrx/store';
-import { select } from '@ngrx/store';
+import { select, Store } from '@ngrx/store';
 import { ProjectActionTypes } from './store/project.actions';
 import shortid from 'shortid';
-import { selectCurrentProjectId } from './store/project.reducer';
-import { selectAllProjects } from './store/project.reducer';
-import { selectCurrentProject } from './store/project.reducer';
-import { IssueProviderKey } from '../issue/issue';
-import { IssueIntegrationCfg } from '../issue/issue';
+import { selectAllProjects, selectCurrentProject, selectCurrentProjectId } from './store/project.reducer';
+import { IssueIntegrationCfg, IssueProviderKey } from '../issue/issue';
+import { JiraCfg } from '../issue/jira/jira';
 
 @Injectable()
 export class ProjectService {
-  // TODO get from store
   list$: Observable<Project[]> = this._store.pipe(select(selectAllProjects));
   // currentProject$: Observable<Project> = this._store.pipe(select(selectCurrentProject));
+  // TODO fix type
   currentProject$: any = this._store.pipe(select(selectCurrentProject));
   currentId$: Observable<string> = this._store.pipe(select(selectCurrentProjectId));
+  currentJiraCfg$: Observable<JiraCfg> = this.currentProject$.map((project: Project) => {
+    return project && project.issueIntegrationCfgs && project.issueIntegrationCfgs.JIRA;
+  });
 
 
   constructor(

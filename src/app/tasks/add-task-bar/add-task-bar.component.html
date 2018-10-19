@@ -9,10 +9,12 @@
          [matAutocomplete]="auto"
          [formControl]="taskSuggestionsCtrl"
          (blur)="onBlur()">
-  <mat-autocomplete #auto="matAutocomplete">
-    <mat-option *ngFor="let task of filteredTaskSuggestions | async"
-                [value]="task.title">
-      <span>{{ task.title }}</span>
+  <mat-autocomplete #auto="matAutocomplete"
+                    [displayWith]="displayWith"
+                    autoActiveFirstOption>
+    <mat-option *ngFor="let issue of filteredIssueSuggestions | async"
+                [value]="issue">
+      <span>{{ issue.fields.summary}}</span>
     </mat-option>
   </mat-autocomplete>
 </form>

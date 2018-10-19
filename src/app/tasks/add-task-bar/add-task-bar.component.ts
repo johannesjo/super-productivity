@@ -1,8 +1,11 @@
 import { Component } from '@angular/core';
 import { FormControl } from '@angular/forms';
-import { Observable } from 'rxjs/Rx';
-import { map, startWith } from 'rxjs/internal/operators';
 import { TaskService } from '../task.service';
+import { JiraApiService } from '../../issue/jira/jira-api.service';
+import { debounceTime, startWith, switchMap } from 'rxjs/operators';
+import { ProjectService } from '../../project/project.service';
+import { from, Observable } from 'rxjs';
+import { TaskWithAllData } from '../task.model';
 
 @Component({
   selector: 'add-task-bar',
@@ -11,87 +14,62 @@ import { TaskService } from '../task.service';
 })
 export class AddTaskBarComponent {
   taskSuggestionsCtrl: FormControl;
-  filteredTaskSuggestions: Observable<any[]>;
-  newTask: any;
+  filteredIssueSuggestions: Observable<any[]>;
+  newTask: Partial<TaskWithAllData>;
 
-  taskSuggestions: any = [
-    {
-      title: 'Arkansas',
-    },
-    {
-      title: 'California',
-    },
-    {
-      title: 'Florida',
-    },
-    {
-      title: 'Texas',
-    }
-  ];
+  constructor(
+    private _taskService: TaskService,
+    private _projectService: ProjectService,
+    private _jiraApiService: JiraApiService,
+  ) {
 
-  constructor(private _taskService: TaskService) {
     this.taskSuggestionsCtrl = new FormControl();
-    this.filteredTaskSuggestions = this.taskSuggestionsCtrl.valueChanges
-      .pipe(
-        startWith(''),
-        map(
-          task => task ? this.filterTaskSuggestions(task) : this.taskSuggestions.slice()
-        )
+
+    this.filteredIssueSuggestions =
+      this.taskSuggestionsCtrl.valueChanges.pipe(
+        startWith(null),
+        debounceTime(200),
+        // distinctUntilChanged(),
+        switchMap(searchTerm => {
+          if (searchTerm && searchTerm.length > 1) {
+            return from(this._jiraApiService.search(searchTerm))
+              .map((res) => {
+                console.log(res);
+                return res;
+              });
+          } else {
+            return [];
+          }
+        })
       );
   }
 
-  onBlur() {
+  onSelectIssue(ev) {
+    console.log(ev);
+
   }
 
-  filterTaskSuggestions(title: string) {
-    return this.taskSuggestions.filter(task =>
-      task.title.toLowerCase().indexOf(title.toLowerCase()) === 0);
+  onBlur(ev) {
+    console.log(ev);
+  }
+
+  displayWith(issue) {
+    return issue && issue.fields.summary;
   }
 
   addTask() {
-    const newTaskTitle = this.taskSuggestionsCtrl.value;
+    console.log(this.taskSuggestionsCtrl.value);
 
-    if (this.newTask) {
-      if (this.newTask.originalType && this.newTask.originalType === 'GITHUB') {
-        // this.Git.getCommentListForIssue(this.newTask.originalId)
-        //   .then(res => {
-        //     this.newTask.originalComments = res.data;
-        //     this.Tasks.addToday(this.newTask);
-        //     this.newTask = undefined;
-        //     this.newTaskTitle = undefined;
-        //   });
-      } else {
-        // this._taskService.addGithubTask(this.newTask);
-        // this.newTask = undefined;
-      }
-
-    } else if (newTaskTitle) {
-      this._taskService.add(newTaskTitle);
-      this.taskSuggestionsCtrl.setValue('');
+    const newTask = this.taskSuggestionsCtrl.value;
+    if (typeof newTask === 'string') {
+      this._taskService.add(newTask);
+    } else {
+      this._taskService.addWithIssue(
+        newTask.fields.summary,
+        'JIRA',
+        newTask.fields.key,
+      );
     }
-    // else if (this.onEmptySubmit) {
-    //   this.onEmptySubmit();
-    // }
+    this.taskSuggestionsCtrl.setValue('');
   }
-
-  // refreshRemoteTasks() {
-  //   this.taskSuggestions = [];
-  //   if (this.Jira.isSufficientJiraSettings()) {
-  //     this.Jira.checkForNewAndAddToBacklog();
-  //
-  //     this.Jira.getSuggestions().then((res) => {
-  //       this.taskSuggestions = this.taskSuggestions.concat(this.Jira.transformIssues(res));
-  //     });
-  //   }
-  //
-  //   // add new git tasks
-  //   this.Git.checkForNewAndAddToBacklog();
-  //
-  //   if (this.Git.isRepoConfigured() && this.$rootScope.r.git.isShowIssuesFromGit) {
-  //     this.Git.getIssueList()
-  //       .then((res) => {
-  //         this.taskSuggestions = this.taskSuggestions.concat(res.data);
-  //       });
-  //   }
-  // }
 }
