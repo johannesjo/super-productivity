@@ -1,9 +1,8 @@
 import { Injectable } from '@angular/core';
 import shortid from 'shortid';
 import { ChromeExtensionInterfaceService } from '../../core/chrome-extension-interface/chrome-extension-interface.service';
-import { JIRA_MAX_RESULTS } from './jira.const';
-import { JIRA_SUGGESTION_FIELDS_TO_GET } from './jira.const';
-import { JIRA_REQUEST_TIMEOUT_DURATION } from './jira.const';
+import { JIRA_MAX_RESULTS, JIRA_REQUEST_TIMEOUT_DURATION, JIRA_SUGGESTION_FIELDS_TO_GET } from './jira.const';
+import { ProjectService } from '../../project/project.service';
 
 @Injectable({
   providedIn: 'root'
@@ -15,7 +14,14 @@ export class JiraApiService {
   IS_EXTENSION = true;
   cfg: any = {};
 
-  constructor(private _chromeExtensionInterface: ChromeExtensionInterfaceService) {
+  constructor(private _chromeExtensionInterface: ChromeExtensionInterfaceService,
+              private _projectService: ProjectService) {
+    this._projectService.currentJiraCfg$.subscribe((cfg) => {
+      console.log(cfg);
+
+      this.cfg = cfg;
+    });
+
     // set up callback listener for electron
     if (this.IS_ELECTRON) {
       // window.ipcRenderer.on(IPC_JIRA_CB_EVENT, (ev, res) => {
@@ -26,9 +32,6 @@ export class JiraApiService {
         this._handleResponse(data);
       });
     }
-
-    this.getSuggestions()
-      .then((res) => console.log(res));
   }
 
   getSuggestions(cfg?) {
@@ -43,16 +46,19 @@ export class JiraApiService {
     }, cfg);
   }
 
-  searchJira(searchTerm) {
+  search(searchTerm) {
     const options = {
       maxResults: JIRA_MAX_RESULTS,
       fields: JIRA_SUGGESTION_FIELDS_TO_GET
     };
+    // const searchQuery = `summary ~ "${searchTerm}"${this.cfg.jqlQuery ? ' AND ' + this.cfg.jqlQuery : ''}`;
     const searchQuery = `summary ~ "${searchTerm}"${this.cfg.jqlQuery ? ' AND ' + this.cfg.jqlQuery : ''}`;
+    console.log(searchQuery, this.cfg);
 
     return this._sendRequest({
       apiMethod: 'searchJira',
-      arguments: [searchQuery, options]
+      arguments: [searchQuery, options],
+      transform: (res) => res.response.issues
     });
   }
 
@@ -86,13 +92,22 @@ export class JiraApiService {
         delete this.requestsLog[request.requestId];
       }, JIRA_REQUEST_TIMEOUT_DURATION)
     };
-    console.log(this.requestsLog);
 
     // send to electron
     if (this.IS_ELECTRON) {
       // window.ipcRenderer.send(IPC_JIRA_MAKE_REQUEST_EVENT, request);
     } else if (this.IS_EXTENSION) {
-      this._chromeExtensionInterface.dispatchEvent('SP_JIRA_REQUEST', request);
+      this._chromeExtensionInterface.dispatchEvent('SP_JIRA_REQUEST', {
+        requestId: request.requestId,
+        apiMethod: request.apiMethod,
+        arguments: request.arguments,
+        config: {
+          host: request.config.host,
+          userName: request.config.userName,
+          password: request.config.password,
+          isJiraEnabled: request.config.isJiraEnabled,
+        }
+      });
     }
 
     return promise;
@@ -101,25 +116,30 @@ export class JiraApiService {
   private _handleResponse(res) {
     // check if proper id is given in callback and if exists in requestLog
     if (res.requestId && this.requestsLog[res.requestId]) {
-      const currentRequestPromise = this.requestsLog[res.requestId];
+      const currentRequest = this.requestsLog[res.requestId];
       // cancel timeout for request
-      clearTimeout(currentRequestPromise.timeout);
+      clearTimeout(currentRequest.timeout);
 
       // resolve saved promise
       if (!res || res.error) {
-        console.log('FRONTEND_REQUEST', currentRequestPromise);
+        console.log('FRONTEND_REQUEST', currentRequest);
         console.log('RESPONSE', res);
+
         const errorTxt = (res && res.error && (typeof res.error === 'string' && res.error) || res.error.name);
         console.log(errorTxt);
 
-        currentRequestPromise.reject(res);
+        currentRequest.reject(res);
         if (res.error.statusCode && res.error.statusCode === 401) {
           this.isPreventNextRequestAfterFailedAuth = true;
         }
 
       } else {
         console.log('JIRA_RESPONSE', res);
-        currentRequestPromise.resolve(res);
+        if (currentRequest.transform) {
+          currentRequest.resolve(currentRequest.transform(res));
+        } else {
+          currentRequest.resolve(res);
+        }
       }
       // delete entry for promise afterwards
       delete this.requestsLog[res.requestId];

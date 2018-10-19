@@ -29,6 +29,8 @@ export class ChromeExtensionInterfaceService {
     const ev = new CustomEvent(evName, {
       detail: data,
     });
+    console.log(ev);
+
 
     if (this.isInterfaceReady) {
       interfaceEl.dispatchEvent(ev);

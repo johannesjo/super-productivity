@@ -41,7 +41,7 @@ export const IPC_JIRA_MAKE_REQUEST_EVENT = 'JIRA';
 // it's weird!!
 export const JIRA_DATE_FORMAT = 'YYYY-MM-DDTHH:mm:ss.SSZZ';
 
-export const JIRA_REQUEST_TIMEOUT_DURATION = 10000;
+export const JIRA_REQUEST_TIMEOUT_DURATION = 20000;
 export const JIRA_MAX_RESULTS = 100;
 export const JIRA_ISSUE_TYPE = 'JIRA';
 export const JIRA_SUGGESTION_FIELDS_TO_GET = [
