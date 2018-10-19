@@ -1,12 +1,14 @@
-export type IssueType = 'JIRA' | 'GIT';
+import { IssueType } from '../issue/issue';
 
 export type Task = Readonly<{
   id: string;
   title: string;
   isDone?: boolean;
   isBacklogTask?: boolean;
+  isNotesOpen?: boolean;
   notes?: string;
   issueId?: string;
+  issueType?: IssueType;
   subTaskIds: string[];
   progress?: number;
   timeSpent?: any;

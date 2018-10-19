@@ -5,3 +5,9 @@
 .align-right {
   text-align: right;
 }
+
+.mw {
+  max-width: $component-max-width;
+  margin: auto;
+
+}

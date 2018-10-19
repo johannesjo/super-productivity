@@ -5,3 +5,5 @@ export interface IssueIntegrationCfg {
   password?: string;
   token?: string;
 }
+
+export type IssueType = 'JIRA' | 'GIT';

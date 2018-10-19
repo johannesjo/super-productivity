@@ -1,2 +1,6 @@
+@import './src/_variables';
+
 .wrapper {
+  max-width: $component-max-width;
+  margin: auto;
 }

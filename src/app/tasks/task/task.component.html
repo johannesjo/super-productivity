@@ -3,12 +3,12 @@
 <!--as-sortable-item-handle-->
 <!--layout-align="space-between center"> -->
 <div class="inner-wrapper"
-     [class.isShowNotes]="isShowNotes">
+     [class.isNotesOpen]="task.isNotesOpen">
   <div class="first-line">
     <button mat-icon-button
             aria-label="is updated"
             tabindex="2"
-            (click)="isShowNotes = !isShowNotes;"
+            (click)="toggleShowNotes(task.id, task.isNotesOpen)"
             *ngIf="task.isUpdated">
       <!--<mat-tooltip>-->
       <!--Click to show updates-->
@@ -94,8 +94,8 @@
               class="ico-btn"
               aria-label="notes"
               tabindex="2"
-              [class.is-active]="isShowNotes"
-              (click)="isShowNotes=!isShowNotes">
+              [class.is-active]="task.isNotesOpen"
+              (click)="toggleShowNotes(task.id, task.isNotesOpen)">
 
         <i class="material-icons"
            *ngIf="task.notes||task.issueData"
@@ -132,7 +132,7 @@
 
 
   <task-additional-info class="notes"
-                        *ngIf="isShowNotes"
+                        *ngIf="task.isNotesOpen"
                         (onTaskNotesChanged)="onTaskNotesChanged(task.id, $event)"
                         [@expand]
                         [task]="task"></task-additional-info>

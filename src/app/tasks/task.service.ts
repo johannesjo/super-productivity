@@ -153,4 +153,12 @@ export class TaskService {
   setUnDone(taskId: string) {
     this.update(taskId, {isDone: false});
   }
+
+  showNotes(taskId: string) {
+    this.update(taskId, {isNotesOpen: true});
+  }
+
+  hideNotes(taskId: string) {
+    this.update(taskId, {isNotesOpen: false});
+  }
 }

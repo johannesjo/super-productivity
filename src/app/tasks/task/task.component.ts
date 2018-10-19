@@ -1,4 +1,5 @@
 import { Component, DoCheck, HostBinding, Input, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy } from '@angular/core';
 import { TaskService } from '../task.service';
 import { Observable } from 'rxjs';
 import { DragulaService } from 'ng2-dragula';
@@ -17,7 +18,7 @@ import { expandAnimation } from '../../ui/animations/expand.ani';
   host: {
     'class': 'mat-elevation-z4'
   },
-  // changeDetection: ChangeDetectionStrategy.OnPush,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [expandAnimation]
 })
 export class TaskComponent implements OnInit, DoCheck {
@@ -25,7 +26,6 @@ export class TaskComponent implements OnInit, DoCheck {
   @Input() task: any;
   @HostBinding('class.is-done') isDone = false;
   @HostBinding('class.is-current') isCurrent = false;
-  isShowNotes = false;
   currentTaskId$: Observable<string>;
   subTaskListId: string;
 
@@ -99,6 +99,14 @@ export class TaskComponent implements OnInit, DoCheck {
       this._taskService.setDone(taskId);
     } else {
       this._taskService.setUnDone(taskId);
+    }
+  }
+
+  toggleShowNotes(taskId: string, isShowNotes: boolean) {
+    if (!isShowNotes) {
+      this._taskService.showNotes(taskId);
+    } else {
+      this._taskService.hideNotes(taskId);
     }
   }
 
