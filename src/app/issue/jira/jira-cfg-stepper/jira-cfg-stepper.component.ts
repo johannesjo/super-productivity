@@ -6,6 +6,7 @@ import { JiraCfg } from '../jira';
 import { DEFAULT_JIRA_CFG } from '../jira.const';
 import { CREDENTIALS_FORM_CFG } from './jira-cfg-stepper.const';
 import { FormlyFieldConfig } from '@ngx-formly/core';
+import { JiraApiService } from '../jira-api.service';
 
 @Component({
   selector: 'jira-cfg-stepper',
@@ -25,11 +26,27 @@ export class JiraCfgStepperComponent implements OnInit {
   });
 
   cfg: JiraCfg = Object.assign({}, DEFAULT_JIRA_CFG);
+  public isTestCredentialsSuccess = false;
 
-  constructor(private _formBuilder: FormBuilder) {
+  constructor(
+    private _formBuilder: FormBuilder,
+    private _jiraApiService: JiraApiService,
+  ) {
   }
 
   ngOnInit() {
   }
 
+  testCredentials() {
+    this.isTestCredentialsSuccess = false;
+
+    this._jiraApiService.getSuggestions(this.cfg)
+      .then((res) => {
+        console.log(res);
+        this.isTestCredentialsSuccess = true;
+      })
+      .catch(() => {
+        this.isTestCredentialsSuccess = false;
+      });
+  }
 }

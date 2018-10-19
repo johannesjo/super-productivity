@@ -31,14 +31,14 @@ export class JiraApiService {
       .then((res) => console.log(res));
   }
 
-  getSuggestions() {
+  getSuggestions(cfg = this.cfg) {
     const options = {
       maxResults: JIRA_MAX_RESULTS,
       fields: JIRA_SUGGESTION_FIELDS_TO_GET
     };
 
     const request = {
-      config: {...this.cfg, isJiraEnabled: true},
+      config: {...cfg, isJiraEnabled: true},
       apiMethod: 'searchJira',
       arguments: [this.cfg.jqlQuery, options]
     };

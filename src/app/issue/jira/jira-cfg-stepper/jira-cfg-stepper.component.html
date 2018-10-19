@@ -12,8 +12,11 @@
       </formly-form>
 
       <div class="center-wrapper">
-        <button mat-raised-button="">
-          <mat-icon>import_export</mat-icon>
+        <button mat-raised-button
+                (click)="testCredentials()"
+                [disabled]="!credentialsFormGroup.valid">
+          <mat-icon *ngIf="!isTestCredentialsSuccess">import_export</mat-icon>
+          <mat-icon *ngIf="isTestCredentialsSuccess">checkmark</mat-icon>
           Test Credentials
         </button>
         <button mat-raised-button
