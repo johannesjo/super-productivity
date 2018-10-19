@@ -17,8 +17,6 @@ export class JiraApiService {
   constructor(private _chromeExtensionInterface: ChromeExtensionInterfaceService,
               private _projectService: ProjectService) {
     this._projectService.currentJiraCfg$.subscribe((cfg) => {
-      console.log(cfg);
-
       this.cfg = cfg;
     });
 
@@ -127,7 +125,7 @@ export class JiraApiService {
         console.log('RESPONSE', res);
 
         const errorTxt = (res && res.error && (typeof res.error === 'string' && res.error) || res.error.name);
-        console.log(errorTxt);
+        console.error(errorTxt);
 
         currentRequest.reject(res);
         if (res.error.statusCode && res.error.statusCode === 401) {
@@ -136,7 +134,6 @@ export class JiraApiService {
 
       } else {
         console.log('JIRA_RESPONSE', res);
-        console.log(currentRequest);
 
         if (currentRequest.transform) {
           currentRequest.resolve(currentRequest.transform(res));
