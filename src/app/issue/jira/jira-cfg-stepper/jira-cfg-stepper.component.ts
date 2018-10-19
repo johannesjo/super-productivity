@@ -14,9 +14,7 @@ import { FormlyFieldConfig } from '@ngx-formly/core';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class JiraCfgStepperComponent implements OnInit {
-  credentialsFormGroup: FormGroup = this._formBuilder.group({
-    credentialsCtrl: ['', Validators.required]
-  });
+  credentialsFormGroup: FormGroup = new FormGroup({});
   credentialsFormConfig: FormlyFieldConfig[] = CREDENTIALS_FORM_CFG;
 
   secondFormGroup: FormGroup = this._formBuilder.group({

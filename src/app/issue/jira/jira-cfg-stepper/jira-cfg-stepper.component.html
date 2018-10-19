@@ -1,4 +1,5 @@
 <mat-horizontal-stepper [linear]="true"
+                        dynamicHeight
                         #stepper>
   <mat-step [stepControl]="credentialsFormGroup">
     <form [formGroup]="credentialsFormGroup">
@@ -16,13 +17,16 @@
           Test Credentials
         </button>
         <button mat-raised-button
-                matStepperNext>
+                color="primary"
+                matStepperNext
+                [disabled]="!credentialsFormGroup.valid">
           Next
           <mat-icon>arrow_forward</mat-icon>
         </button>
       </div>
     </form>
   </mat-step>
+
   <mat-step [stepControl]="secondFormGroup">
     <form [formGroup]="secondFormGroup">
       <ng-template matStepLabel>Issue Search</ng-template>

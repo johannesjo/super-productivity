@@ -20,7 +20,6 @@ export class ChromeExtensionInterfaceService {
   }
 
   addEventListener(evName: ExtensionInterfaceEventName, cb) {
-    // TODO correct ev type
     interfaceEl.addEventListener(evName, (ev: CustomEvent) => {
       cb(ev, ev.detail);
     });
