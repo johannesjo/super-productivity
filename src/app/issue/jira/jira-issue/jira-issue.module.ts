@@ -10,6 +10,8 @@ import { JiraIssueEffects } from './store/jira-issue.effects';
 import { JIRA_ISSUE_FEATURE_NAME } from './store/jira-issue.reducer';
 import { jiraIssueReducer } from './store/jira-issue.reducer';
 import { JiraIssueService } from './jira-issue.service';
+import { JiraIssueHeaderComponent } from './jira-issue-header/jira-issue-header.component';
+import { JiraIssueContentComponent } from './jira-issue-content/jira-issue-content.component';
 
 @NgModule({
   imports: [
@@ -21,12 +23,18 @@ import { JiraIssueService } from './jira-issue.service';
     StoreModule.forFeature(JIRA_ISSUE_FEATURE_NAME, jiraIssueReducer),
     EffectsModule.forFeature([JiraIssueEffects]),
   ],
-  declarations: [],
+  declarations: [
+    JiraIssueHeaderComponent,
+    JiraIssueContentComponent,
+  ],
   exports: [],
   providers: [
     JiraIssueService,
   ],
-  entryComponents: []
+  entryComponents: [
+    JiraIssueHeaderComponent,
+    JiraIssueContentComponent,
+  ],
 
 })
 export class JiraIssueModule {

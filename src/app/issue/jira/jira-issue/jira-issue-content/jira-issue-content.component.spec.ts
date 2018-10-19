@@ -1,20 +1,20 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { JiraCfgStepperComponent } from './jira-cfg-stepper.component';
+import { JiraIssueContentComponent } from './jira-issue-content.component';
 
-describe('JiraCfgStepperComponent', () => {
-  let component: JiraCfgStepperComponent;
-  let fixture: ComponentFixture<JiraCfgStepperComponent>;
+describe('JiraIssueContentComponent', () => {
+  let component: JiraIssueContentComponent;
+  let fixture: ComponentFixture<JiraIssueContentComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [JiraCfgStepperComponent]
+      declarations: [JiraIssueContentComponent]
     })
       .compileComponents();
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(JiraCfgStepperComponent);
+    fixture = TestBed.createComponent(JiraIssueContentComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

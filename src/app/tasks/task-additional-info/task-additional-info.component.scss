@@ -12,7 +12,10 @@
 }
 
 .tab-header-icon {
-  margin-right: $s;
+  &,
+  ::ng-deep & {
+    margin-right: $s;
+  }
 }
 
 ::ng-deep .mat-tab-labels {
@@ -25,7 +28,17 @@
 }
 
 .tab-label-text {
-  @media (max-width: $layout-xs) {
-    display: none;
+  &,
+  ::ng-deep & {
+    @media (max-width: $layout-xs) {
+      display: none;
+    }
   }
+}
+
+::ng-deep .issue-tab-header {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  white-space: nowrap;
 }
