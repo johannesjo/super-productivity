@@ -1,27 +1,9 @@
 import { Injectable } from '@angular/core';
 import shortid from 'shortid';
 import { ChromeExtensionInterfaceService } from '../../core/chrome-extension-interface/chrome-extension-interface.service';
-
-const IPC_JIRA_CB_EVENT = 'JIRA_RESPONSE';
-const IPC_JIRA_MAKE_REQUEST_EVENT = 'JIRA';
-
-// it's weird!!
-const JIRA_DATE_FORMAT = 'YYYY-MM-DDTHH:mm:ss.SSZZ';
-
-const MAX_RESULTS = 100;
-const ISSUE_TYPE = 'JIRA';
-const SUGGESTION_FIELDS_TO_GET = [
-  'assignee',
-  'summary',
-  'description',
-  'timeestimate',
-  'timespent',
-  'status',
-  'attachment',
-  'comment',
-  'updated',
-  'components',
-];
+import { JIRA_MAX_RESULTS } from './jira.const';
+import { JIRA_SUGGESTION_FIELDS_TO_GET } from './jira.const';
+import { JIRA_REQUEST_TIMEOUT_DURATION } from './jira.const';
 
 @Injectable({
   providedIn: 'root'
@@ -31,14 +13,13 @@ export class JiraApiService {
   isPreventNextRequestAfterFailedAuth = false;
   IS_ELECTRON = false;
   IS_EXTENSION = true;
-  REQUEST_TIMEOUT = 10000;
-  cfg: any;
+  cfg: any = {};
 
   constructor(private _chromeExtensionInterface: ChromeExtensionInterfaceService) {
     // set up callback listener for electron
     if (this.IS_ELECTRON) {
       // window.ipcRenderer.on(IPC_JIRA_CB_EVENT, (ev, res) => {
-      //   handleResponse(res);
+      //   this._handleResponse(res);
       // });
     } else if (this.IS_EXTENSION) {
       this._chromeExtensionInterface.addEventListener('SP_JIRA_RESPONSE', (ev, data) => {
@@ -50,12 +31,28 @@ export class JiraApiService {
       .then((res) => console.log(res));
   }
 
+  getSuggestions() {
+    const options = {
+      maxResults: JIRA_MAX_RESULTS,
+      fields: JIRA_SUGGESTION_FIELDS_TO_GET
+    };
+
+    const request = {
+      config: {...this.cfg, isJiraEnabled: true},
+      apiMethod: 'searchJira',
+      arguments: [this.cfg.jqlQuery, options]
+    };
+    return this._sendRequest(request);
+  }
+
+  // INTERNAL
+  // --------
   private _handleResponse(res) {
     // check if proper id is given in callback and if exists in requestLog
     if (res.requestId && this.requestsLog[res.requestId]) {
       const currentRequestPromise = this.requestsLog[res.requestId];
       // cancel timeout for request
-      // setTimeout.cancel(currentRequestPromise.timeout);
+      clearTimeout(currentRequestPromise.timeout);
 
       // resolve saved promise
       if (!res || res.error) {
@@ -75,15 +72,17 @@ export class JiraApiService {
       }
       // delete entry for promise afterwards
       delete this.requestsLog[res.requestId];
+    } else {
+      console.warn('Jira: Response Request ID not existing');
     }
   }
 
 
-  // SP_JIRA_REQUEST
   private _sendRequest(request) {
     // assign uuid to request to know which responsive belongs to which promise
     request.requestId = shortid();
 
+    // TODO refactor to observable for request canceling etc
     let promiseResolve;
     let promiseReject;
 
@@ -102,7 +101,7 @@ export class JiraApiService {
         console.log('ERROR', 'Jira Request timed out for ' + request.apiMethod);
         // delete entry for promise
         delete this.requestsLog[request.requestId];
-      }, this.REQUEST_TIMEOUT)
+      }, JIRA_REQUEST_TIMEOUT_DURATION)
     };
     console.log(this.requestsLog);
 
@@ -116,20 +115,6 @@ export class JiraApiService {
     return promise;
   }
 
-
-  getSuggestions() {
-    const options = {
-      maxResults: MAX_RESULTS,
-      fields: SUGGESTION_FIELDS_TO_GET
-    };
-
-    const request = {
-      config: this.cfg,
-      apiMethod: 'searchJira',
-      arguments: [this.cfg.jqlQuery, options]
-    };
-    return this._sendRequest(request);
-  }
 
   // static mapComments(issue) {
   // }
