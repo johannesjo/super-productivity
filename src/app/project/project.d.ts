@@ -6,9 +6,9 @@ export type Project = Readonly<{
   id: string;
   themeColor: string;
   isDarkTheme: boolean;
-  issueIntegrationCfgs: {
-    jira: JiraCfg,
-    git: IssueIntegrationCfg,
+  issueIntegrationCfgs?: {
+    jira?: JiraCfg,
+    git?: IssueIntegrationCfg,
   };
 }>;
 

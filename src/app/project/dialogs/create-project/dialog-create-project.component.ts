@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { Inject } from '@angular/core';
+import { OnInit } from '@angular/core';
 import { MatDialogRef } from '@angular/material';
 import { MAT_DIALOG_DATA } from '@angular/material';
 import { Project } from '../../project';
@@ -7,6 +8,7 @@ import { FormGroup } from '@angular/forms';
 import { FormlyFormOptions } from '@ngx-formly/core';
 import { FormlyFieldConfig } from '@ngx-formly/core';
 import { ProjectService } from '../../project.service';
+import { DEFAULT_PROJECT } from '../../project.const';
 
 const ALL_THEMES = [
   'blue',
@@ -37,13 +39,8 @@ const themeOpts = ALL_THEMES.map((theme) => {
   templateUrl: './dialog-create-project.component.html',
   styleUrls: ['./dialog-create-project.component.scss'],
 })
-export class DialogCreateProjectComponent {
-  constructor(
-    private _projectService: ProjectService,
-    private _matDialogRef: MatDialogRef<DialogCreateProjectComponent>,
-    @Inject(MAT_DIALOG_DATA) public project: Project
-  ) {
-  }
+export class DialogCreateProjectComponent implements OnInit {
+  public projectData: Project | Partial<Project> = DEFAULT_PROJECT;
 
   form = new FormGroup({});
   formOptions: FormlyFormOptions = {
@@ -80,13 +77,24 @@ export class DialogCreateProjectComponent {
     },
   ];
 
-  submit() {
-    console.log(this.project);
+  constructor(
+    @Inject(MAT_DIALOG_DATA) private _project: Project,
+    private _projectService: ProjectService,
+    private _matDialogRef: MatDialogRef<DialogCreateProjectComponent>,
+  ) {
+  }
 
-    if (this.project.id) {
-      this._projectService.update(this.project.id, this.project);
+  ngOnInit() {
+    if (this._project) {
+      this.projectData = this._project;
+    }
+  }
+
+  submit() {
+    if (this.projectData.id) {
+      this._projectService.update(this.projectData.id, this.projectData);
     } else {
-      this._projectService.add(this.project);
+      this._projectService.add(this.projectData);
     }
     this._matDialogRef.close();
   }
