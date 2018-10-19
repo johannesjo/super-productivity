@@ -82,6 +82,7 @@ export class JiraApiService {
 
     // save to request log
     this.requestsLog[request.requestId] = {
+      transform: request.transform,
       resolve: promiseResolve,
       reject: promiseReject,
       requestMethod: request.apiMethod,
@@ -135,6 +136,8 @@ export class JiraApiService {
 
       } else {
         console.log('JIRA_RESPONSE', res);
+        console.log(currentRequest);
+
         if (currentRequest.transform) {
           currentRequest.resolve(currentRequest.transform(res));
         } else {
