@@ -1,5 +1,6 @@
 // TODO use as a checklist
 import { JiraCfg } from './jira';
+import { FormlyFieldConfig } from '@ngx-formly/core';
 
 export const DEFAULT_JIRA_CFG: JiraCfg = {
   isEnabled: true,
@@ -55,4 +56,78 @@ export const JIRA_SUGGESTION_FIELDS_TO_GET = [
   'comment',
   'updated',
   'components',
+];
+
+export const JIRA_CREDENTIALS_FORM_CFG: FormlyFieldConfig[] = [
+  {
+    key: 'host',
+    type: 'input',
+    templateOptions: {
+      required: true,
+      label: 'Host',
+    },
+  },
+  {
+    key: 'userName',
+    type: 'input',
+    templateOptions: {
+      required: true,
+      label: 'Email / Username',
+    },
+  },
+  {
+    key: 'password',
+    type: 'input',
+    templateOptions: {
+      required: true,
+      label: 'Password / Token',
+    },
+  },
+];
+
+export const JIRA_ADVANCED_FORM_CFG: FormlyFieldConfig[] = [
+  {
+    key: 'isAutoPollTickets',
+    type: 'checkbox',
+    templateOptions: {
+      label: 'Check imported issues for changes automatically and notify',
+    },
+  },
+  {
+    key: 'isCheckToReAssignTicketOnTaskStart',
+    type: 'checkbox',
+    templateOptions: {
+      label: 'Check if the currently worked on issue is assigned to current user',
+    },
+  },
+  {
+    key: 'userAssigneeName',
+    type: 'input',
+    templateOptions: {
+      label: 'Assignee name to check for',
+    },
+    hideExpression: '!model.isCheckToReAssignTicketOnTaskStart',
+  },
+  {
+    key: 'isAutoAddToBacklog',
+    type: 'checkbox',
+    templateOptions: {
+      label: 'Automatically add issues to Jira backlog',
+    },
+  },
+  {
+    key: 'autoAddBacklogJqlQuery',
+    type: 'input',
+    templateOptions: {
+      label: 'JQL used for adding tasks automatically to backlog',
+    },
+  },
+  {
+    key: 'searchJqlQuery',
+    type: 'input',
+    templateOptions: {
+      label: 'JQL Query for to limit the searcher tasks',
+    },
+  },
+
 ];

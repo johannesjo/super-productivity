@@ -30,22 +30,26 @@
     </form>
   </mat-step>
 
-  <mat-step [stepControl]="secondFormGroup">
-    <form [formGroup]="secondFormGroup">
-      <ng-template matStepLabel>Issue Search</ng-template>
-      <mat-form-field>
-        <input matInput
-               placeholder="Address"
-               formControlName="secondCtrl"
-               required>
-      </mat-form-field>
+
+  <mat-step [stepControl]="advancedSettingsFormGroup">
+    <form [formGroup]="advancedSettingsFormGroup">
+      <ng-template matStepLabel>Advanced</ng-template>
+      <formly-form [model]="cfg"
+                   [fields]="advancedSettingsFormConfig"
+                   [form]="advancedSettingsFormGroup">
+      </formly-form>
       <div class="center-wrapper">
         <button mat-raised-button=""
-                matStepperPrevious>Back
+                matStepperPrevious>
+          <mat-icon>arrow_backward</mat-icon>
+          Back
         </button>
         <button mat-raised-button
+                [disabled]="!advancedSettingsFormGroup.valid"
                 color="primary"
-                matStepperNext>Next
+                matStepperNext>
+          <mat-icon>arrow_forward</mat-icon>
+          Next
         </button>
       </div>
     </form>
@@ -76,10 +80,15 @@
     You are now done.
     <div class="center-wrapper">
       <button mat-raised-button=""
-              matStepperPrevious>Back
+              matStepperPrevious>
+        <mat-icon>arrow_backward</mat-icon>
+        Back
       </button>
       <button mat-raised-button=""
-              (click)="stepper.reset()">Reset
+              color="primary"
+              (click)="saveCfg()">
+        <mat-icon>save</mat-icon>
+        Save
       </button>
     </div>
   </mat-step>

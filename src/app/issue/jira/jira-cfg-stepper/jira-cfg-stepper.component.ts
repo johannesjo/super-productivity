@@ -1,10 +1,9 @@
 import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
-import { FormBuilder } from '@angular/forms';
 import { FormGroup } from '@angular/forms';
-import { Validators } from '@angular/forms';
 import { JiraCfg } from '../jira';
 import { DEFAULT_JIRA_CFG } from '../jira.const';
-import { CREDENTIALS_FORM_CFG } from './jira-cfg-stepper.const';
+import { JIRA_CREDENTIALS_FORM_CFG } from '../jira.const';
+import { JIRA_ADVANCED_FORM_CFG } from '../jira.const';
 import { FormlyFieldConfig } from '@ngx-formly/core';
 import { JiraApiService } from '../jira-api.service';
 
@@ -16,25 +15,25 @@ import { JiraApiService } from '../jira-api.service';
 })
 export class JiraCfgStepperComponent implements OnInit {
   credentialsFormGroup: FormGroup = new FormGroup({});
-  credentialsFormConfig: FormlyFieldConfig[] = CREDENTIALS_FORM_CFG;
+  credentialsFormConfig: FormlyFieldConfig[] = JIRA_CREDENTIALS_FORM_CFG;
 
-  secondFormGroup: FormGroup = this._formBuilder.group({
-    secondCtrl: ['', Validators.required]
-  });
-  thirdFormGroup: FormGroup = this._formBuilder.group({
-    secondCtrl: ['', Validators.required]
-  });
+  advancedSettingsFormGroup: FormGroup = new FormGroup({});
+  advancedSettingsFormConfig: FormlyFieldConfig[] = JIRA_ADVANCED_FORM_CFG;
 
   cfg: JiraCfg = Object.assign({}, DEFAULT_JIRA_CFG);
+
   public isTestCredentialsSuccess = false;
 
   constructor(
-    private _formBuilder: FormBuilder,
     private _jiraApiService: JiraApiService,
   ) {
   }
 
   ngOnInit() {
+  }
+
+  saveCfg() {
+
   }
 
   testCredentials() {
