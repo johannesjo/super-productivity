@@ -4,6 +4,8 @@ import { FormGroup } from '@angular/forms';
 import { Validators } from '@angular/forms';
 import { JiraCfg } from '../jira';
 import { DEFAULT_JIRA_CFG } from '../jira.const';
+import { CREDENTIALS_FORM_CFG } from './jira-cfg-stepper.const';
+import { FormlyFieldConfig } from '@ngx-formly/core';
 
 @Component({
   selector: 'jira-cfg-stepper',
@@ -12,9 +14,11 @@ import { DEFAULT_JIRA_CFG } from '../jira.const';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class JiraCfgStepperComponent implements OnInit {
-  firstFormGroup: FormGroup = this._formBuilder.group({
-    firstCtrl: ['', Validators.required]
+  credentialsFormGroup: FormGroup = this._formBuilder.group({
+    credentialsCtrl: ['', Validators.required]
   });
+  credentialsFormConfig: FormlyFieldConfig[] = CREDENTIALS_FORM_CFG;
+
   secondFormGroup: FormGroup = this._formBuilder.group({
     secondCtrl: ['', Validators.required]
   });

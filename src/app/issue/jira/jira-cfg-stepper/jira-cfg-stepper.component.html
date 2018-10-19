@@ -1,75 +1,69 @@
 <mat-horizontal-stepper [linear]="true"
                         #stepper>
-  <mat-step [stepControl]="firstFormGroup">
-    <form [formGroup]="firstFormGroup">
-      <ng-template matStepLabel>Add credentials</ng-template>
-      <mat-form-field>
-        <input matInput
-               placeholder="Host"
-               formControlName="firstCtrl"
-               required>
-      </mat-form-field>
-      <mat-form-field>
-        <input matInput
-               placeholder="Username or email"
-               formControlName="firstCtrl"
-               required>
-      </mat-form-field>
-      <mat-form-field>
-        <input matInput
-               placeholder="Password or token"
-               formControlName="firstCtrl"
-               required>
-      </mat-form-field>
+  <mat-step [stepControl]="credentialsFormGroup">
+    <form [formGroup]="credentialsFormGroup">
+      <ng-template matStepLabel>Credentials</ng-template>
+
+
+      <formly-form [model]="cfg"
+                   [fields]="credentialsFormConfig"
+                   [form]="credentialsFormGroup">
+      </formly-form>
 
       <div class="center-wrapper">
-        <button mat-raised-button="">Test Credentials</button>
-        <button mat-raised-button=""
-                matStepperNext>Next
+        <button mat-raised-button="">
+          <mat-icon>import_export</mat-icon>
+          Test Credentials
+        </button>
+        <button mat-raised-button
+                matStepperNext>
+          Next
+          <mat-icon>arrow_forward</mat-icon>
         </button>
       </div>
     </form>
   </mat-step>
-
   <mat-step [stepControl]="secondFormGroup">
     <form [formGroup]="secondFormGroup">
       <ng-template matStepLabel>Issue Search</ng-template>
       <mat-form-field>
-        <!--<input matInput-->
-        <!--placeholder="Address"-->
-        <!--formControlName="secondCtrl"-->
-        <!--required>-->
+        <input matInput
+               placeholder="Address"
+               formControlName="secondCtrl"
+               required>
       </mat-form-field>
       <div class="center-wrapper">
         <button mat-raised-button=""
                 matStepperPrevious>Back
         </button>
-        <button mat-raised-button=""
+        <button mat-raised-button
+                color="primary"
                 matStepperNext>Next
         </button>
       </div>
     </form>
   </mat-step>
 
-  <mat-step [stepControl]="thirdFormGroup">
-    <form [formGroup]="thirdFormGroup">
-      <ng-template matStepLabel>Advanced</ng-template>
-      <mat-form-field>
-        <!--<input matInput-->
-        <!--placeholder="Address"-->
-        <!--formControlName="secondCtrl"-->
-        <!--required>-->
-      </mat-form-field>
-      <div class="center-wrapper">
-        <button mat-raised-button=""
-                matStepperPrevious>Back
-        </button>
-        <button mat-raised-button=""
-                matStepperNext>Save
-        </button>
-      </div>
-    </form>
-  </mat-step>
+  <!--<mat-step [stepControl]="thirdFormGroup">-->
+  <!--<form [formGroup]="thirdFormGroup">-->
+  <!--<ng-template matStepLabel>Advanced</ng-template>-->
+  <!--<mat-form-field>-->
+  <!--&lt;!&ndash;<input matInput&ndash;&gt;-->
+  <!--&lt;!&ndash;placeholder="Address"&ndash;&gt;-->
+  <!--&lt;!&ndash;formControlName="secondCtrl"&ndash;&gt;-->
+  <!--&lt;!&ndash;required>&ndash;&gt;-->
+  <!--</mat-form-field>-->
+  <!--<div class="center-wrapper">-->
+  <!--<button mat-raised-button=""-->
+  <!--matStepperPrevious>Back-->
+  <!--</button>-->
+  <!--<button mat-raised-button=""-->
+  <!--matStepperNext>Save-->
+  <!--</button>-->
+  <!--</div>-->
+  <!--</form>-->
+  <!--</mat-step>
+-->
   <mat-step>
     <ng-template matStepLabel>Done</ng-template>
     You are now done.
