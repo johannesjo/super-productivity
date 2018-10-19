@@ -1,24 +1,15 @@
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
-import { combineLatest } from 'rxjs';
-import { Task } from './task.model';
-import { TaskWithAllData } from './task.model';
-import { TaskWithSubTaskData } from './task.model';
-import { Store } from '@ngrx/store';
-import { select } from '@ngrx/store';
+import { combineLatest, Observable } from 'rxjs';
+import { Task, TaskWithAllData, TaskWithSubTaskData } from './task.model';
+import { select, Store } from '@ngrx/store';
 import 'rxjs/add/operator/map';
 import { TaskActionTypes } from './store/task.actions';
 import shortid from 'shortid';
-import { selectCurrentTask } from './store/task.reducer';
-import { selectAllTasks } from './store/task.reducer';
-import { selectMainTasksWithSubTasks } from './store/task.reducer';
-import { initialTaskState } from './store/task.reducer';
+import { initialTaskState, selectAllTasks, selectCurrentTask, selectMainTasksWithSubTasks } from './store/task.reducer';
 import { ProjectService } from '../project/project.service';
 import { PersistenceService } from '../core/persistence/persistence.service';
 import { IssueService } from '../issue/issue.service';
-
-0;
-
+import { IssueProviderKey } from '../issue/issue';
 
 @Injectable()
 export class TaskService {
@@ -28,7 +19,7 @@ export class TaskService {
 
   tasks$: Observable<TaskWithAllData[]> = combineLatest(this.tasksWithSubTasks$, this._issueService.issueEntityMap$)
     .map(([tasks, issueEntityMap]) => tasks.map((task) => {
-      const issueData = issueEntityMap[task.issueType][task.issueId];
+      const issueData = (task.issueId && task.issueType) && issueEntityMap[task.issueType][task.issueId];
       return issueData ? Object.assign({issueData: issueData}, task) : task;
     }));
 
@@ -48,7 +39,7 @@ export class TaskService {
     private readonly _persistenceService: PersistenceService,
   ) {
 
-    this.tasks$.subscribe((val) => console.log(val));
+    // this.tasks$.subscribe((val) => console.log(val));
     this._projectService.currentId$.subscribe((projectId) => {
       this.loadStateForProject(projectId);
     });
@@ -91,8 +82,24 @@ export class TaskService {
       payload: {
         task: {
           title,
-          issueId: 'TEST',
-          issueType: 'JIRA',
+          id: shortid(),
+          isDone: false,
+          subTaskIds: []
+        }
+      }
+    });
+  }
+
+
+  addWithIssue(title: string, issueType: IssueProviderKey, issueData) {
+    console.log(title, issueType, issueData);
+    this._store.dispatch({
+      type: TaskActionTypes.AddTaskWithIssue,
+      payload: {
+        task: {
+          title,
+          issueId: issueData.key,
+          issueType: issueType,
           id: shortid(),
           isDone: false,
           subTaskIds: []

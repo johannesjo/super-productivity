@@ -58,7 +58,7 @@ export function jiraIssueReducer(
   state = initialJiraIssueState,
   action: JiraIssueActions
 ): JiraIssueState {
-  // console.log(state.entities, state, action);
+  console.log(state.entities, state, action);
 
   switch (action.type) {
     // Meta Actions

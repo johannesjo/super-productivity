@@ -1,8 +1,7 @@
 import { createEntityAdapter, EntityAdapter, EntityState } from '@ngrx/entity';
 import { TaskActions, TaskActionTypes } from './task.actions';
 import { Task } from '../task.model';
-import { createFeatureSelector } from '@ngrx/store';
-import { createSelector } from '@ngrx/store';
+import { createFeatureSelector, createSelector } from '@ngrx/store';
 
 export const TASK_FEATURE_NAME = 'tasks';
 
@@ -79,6 +78,10 @@ export function taskReducer(
 
     // Task Actions
     // ------------
+    case TaskActionTypes.AddTaskWithIssue: {
+      return taskAdapter.addOne(action.payload.task, state);
+    }
+
     case TaskActionTypes.AddTask: {
       return taskAdapter.addOne(action.payload.task, state);
     }

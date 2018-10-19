@@ -46,7 +46,6 @@ export class AddTaskBarComponent {
 
   onSelectIssue(ev) {
     console.log(ev);
-
   }
 
   onBlur(ev) {
@@ -60,14 +59,14 @@ export class AddTaskBarComponent {
   addTask() {
     console.log(this.taskSuggestionsCtrl.value);
 
-    const newTask = this.taskSuggestionsCtrl.value;
-    if (typeof newTask === 'string') {
-      this._taskService.add(newTask);
+    const issueOrTitle = this.taskSuggestionsCtrl.value;
+    if (typeof issueOrTitle === 'string') {
+      this._taskService.add(issueOrTitle);
     } else {
       this._taskService.addWithIssue(
-        newTask.fields.summary,
+        issueOrTitle.fields.summary,
         'JIRA',
-        newTask.fields.key,
+        issueOrTitle,
       );
     }
     this.taskSuggestionsCtrl.setValue('');

@@ -1,6 +1,6 @@
 import { Action } from '@ngrx/store';
 import { Update } from '@ngrx/entity';
-import { Task } from '../task.model';
+import { Task, TaskWithAllData } from '../task.model';
 import { TaskState } from './task.reducer';
 
 export enum TaskActionTypes {
@@ -11,6 +11,7 @@ export enum TaskActionTypes {
   // Task Actions
   LoadTasks = '[Task] Load Tasks',
   AddTask = '[Task] Add Task',
+  AddTaskWithIssue = '[Task] Add Task with Issue',
   AddTasks = '[Task] Add Tasks',
   UpdateTask = '[Task] Update Task',
   UpdateTasks = '[Task] Update Tasks',
@@ -52,6 +53,13 @@ export class AddTask implements Action {
   readonly type = TaskActionTypes.AddTask;
 
   constructor(public payload: { task: Task }) {
+  }
+}
+
+export class AddTaskWithIssue implements Action {
+  readonly type = TaskActionTypes.AddTaskWithIssue;
+
+  constructor(public payload: { task: TaskWithAllData }) {
   }
 }
 
@@ -114,6 +122,7 @@ export type TaskActions
   | SetCurrentTask
   | UnsetCurrentTask
   | AddTask
+  | AddTaskWithIssue
   | AddTasks
   | UpdateTask
   | UpdateTasks
