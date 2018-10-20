@@ -6,6 +6,7 @@ import { debounceTime, startWith, switchMap } from 'rxjs/operators';
 import { ProjectService } from '../../project/project.service';
 import { from, Observable } from 'rxjs';
 import { TaskWithAllData } from '../task.model';
+import { JiraIssue } from '../../issue/jira/jira-issue/jira-issue.model';
 
 @Component({
   selector: 'add-task-bar',
@@ -52,8 +53,8 @@ export class AddTaskBarComponent {
     console.log(ev);
   }
 
-  displayWith(issue) {
-    return issue && issue.fields.summary;
+  displayWith(issue: JiraIssue) {
+    return issue && issue.summary;
   }
 
   addTask() {
@@ -64,7 +65,7 @@ export class AddTaskBarComponent {
       this._taskService.add(issueOrTitle);
     } else {
       this._taskService.addWithIssue(
-        issueOrTitle.fields.summary,
+        issueOrTitle.summary,
         'JIRA',
         issueOrTitle,
       );

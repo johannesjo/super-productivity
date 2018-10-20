@@ -11,7 +11,7 @@
                     autoActiveFirstOption>
     <mat-option *ngFor="let issue of filteredIssueSuggestions | async"
                 [value]="issue">
-      <span>{{ issue.fields.summary}}</span>
+      <span>{{ issue?.summary}}</span>
     </mat-option>
   </mat-autocomplete>
 </form>

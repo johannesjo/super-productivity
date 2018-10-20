@@ -3,6 +3,7 @@ import shortid from 'shortid';
 import { ChromeExtensionInterfaceService } from '../../core/chrome-extension-interface/chrome-extension-interface.service';
 import { JIRA_MAX_RESULTS, JIRA_REQUEST_TIMEOUT_DURATION, JIRA_SUGGESTION_FIELDS_TO_GET } from './jira.const';
 import { ProjectService } from '../../project/project.service';
+import { mapIssuesResponse } from './jira-issue/jira-issue-map.util';
 
 @Injectable({
   providedIn: 'root'
@@ -56,7 +57,7 @@ export class JiraApiService {
     return this._sendRequest({
       apiMethod: 'searchJira',
       arguments: [searchQuery, options],
-      transform: (res) => res.response.issues
+      transform: mapIssuesResponse
     });
   }
 
@@ -136,7 +137,7 @@ export class JiraApiService {
         console.log('JIRA_RESPONSE', res);
 
         if (currentRequest.transform) {
-          currentRequest.resolve(currentRequest.transform(res));
+          currentRequest.resolve(currentRequest.transform(res, this.cfg));
         } else {
           currentRequest.resolve(res);
         }
