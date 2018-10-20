@@ -15,6 +15,8 @@ import { IssueProviderKey } from '../issue/issue';
 export class TaskService {
   currentTaskId$: Observable<string> = this._store.pipe(select(selectCurrentTask));
   flatTasks$: Observable<Task[]> = this._store.pipe(select(selectAllTasks));
+
+  // TODO map issue data before sub tasks
   tasksWithSubTasks$: Observable<TaskWithSubTaskData[]> = this._store.pipe(select(selectMainTasksWithSubTasks));
 
   tasks$: Observable<TaskWithAllData[]> = combineLatest(this.tasksWithSubTasks$, this._issueService.issueEntityMap$)

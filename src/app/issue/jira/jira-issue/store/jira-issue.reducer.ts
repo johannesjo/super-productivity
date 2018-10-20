@@ -34,24 +34,6 @@ export const selectCurrentJiraIssue = createSelector(selectJiraIssueFeatureState
 // -------
 export const initialJiraIssueState: JiraIssueState = jiraIssueAdapter.getInitialState({
   currentJiraIssueId: null,
-  entities: {
-    'TEST': {
-      id: 'string',
-      key: 'string',
-      url: 'string',
-      summary: 'string',
-      description: 'string',
-      assigneeKey: 'string',
-      updated: 'string',
-      status: 'string',
-      comments: ['any[]'],
-      attachments: ['any[]'],
-      estimate: 222,
-      timeSpent: 333,
-      components: ['string'],
-    }
-  },
-  ids: ['TEST']
 });
 
 export function jiraIssueReducer(
