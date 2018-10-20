@@ -5,6 +5,17 @@
   box-shadow: $shadow-bottom;
   overflow: hidden;
 
+  //position: fixed;
+  //left: 50%;
+  //transform: translateX(-50%);
+  //width: 80%;
+  //z-index: 222;
+  //height: 0;
+  //top: $s*7;
+  //overflow: visible;
+  //margin-top: 20px;
+  //max-width: 600px;
+
   .add-task-form {
     width: 100%;
 
@@ -17,7 +28,8 @@
       border-radius: 5px;
       box-shadow: none;
       outline: 0;
-      background: 0 0;
+      background: #ffffff;
+
       padding: 0 15px;
       line-height: 40px;
       height: 40px
