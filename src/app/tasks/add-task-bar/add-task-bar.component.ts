@@ -32,7 +32,7 @@ export class AddTaskBarComponent implements OnInit, OnDestroy {
     this.taskSuggestionsCtrl.valueChanges.pipe(
       withLatestFrom(this._projectService.currentJiraCfg$),
       tap(([searchTerm, jiraCfg]) => {
-        if (jiraCfg.isEnabled) {
+        if (jiraCfg && jiraCfg.isEnabled) {
           this.isLoading = true;
         }
       }),

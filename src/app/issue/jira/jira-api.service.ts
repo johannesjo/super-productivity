@@ -1,10 +1,19 @@
 import { Injectable } from '@angular/core';
 import shortid from 'shortid';
 import { ChromeExtensionInterfaceService } from '../../core/chrome-extension-interface/chrome-extension-interface.service';
-import { JIRA_ADDITIONAL_ISSUE_FIELDS, JIRA_MAX_RESULTS, JIRA_REDUCED_ISSUE_FIELDS, JIRA_REQUEST_TIMEOUT_DURATION } from './jira.const';
+import {
+  IPC_JIRA_CB_EVENT,
+  IPC_JIRA_MAKE_REQUEST_EVENT,
+  JIRA_ADDITIONAL_ISSUE_FIELDS,
+  JIRA_MAX_RESULTS,
+  JIRA_REDUCED_ISSUE_FIELDS,
+  JIRA_REQUEST_TIMEOUT_DURATION
+} from './jira.const';
 import { ProjectService } from '../../project/project.service';
 import { mapIssueResponse, mapIssuesResponse } from './jira-issue/jira-issue-map.util';
 import { JiraIssue } from './jira-issue/jira-issue.model';
+import { IS_ELECTRON } from '../../app.constants';
+
 
 @Injectable({
   providedIn: 'root'
@@ -12,8 +21,7 @@ import { JiraIssue } from './jira-issue/jira-issue.model';
 export class JiraApiService {
   requestsLog = {};
   isPreventNextRequestAfterFailedAuth = false;
-  IS_ELECTRON = false;
-  IS_EXTENSION = true;
+  isExtension = false;
   cfg: any = {};
 
   constructor(private _chromeExtensionInterface: ChromeExtensionInterfaceService,
@@ -23,14 +31,15 @@ export class JiraApiService {
     });
 
     // set up callback listener for electron
-    if (this.IS_ELECTRON) {
-      // window.ipcRenderer.on(IPC_JIRA_CB_EVENT, (ev, res) => {
-      //   this._handleResponse(res);
-      // });
+    if (IS_ELECTRON) {
+      window.ipcRenderer.on(IPC_JIRA_CB_EVENT, (ev, res) => {
+        this._handleResponse(res);
+      });
     }
 
     this._chromeExtensionInterface.isReady$
-      .subscribe((val) => {
+      .subscribe(() => {
+        this.isExtension = true;
         this._chromeExtensionInterface.addEventListener('SP_JIRA_RESPONSE', (ev, data) => {
           this._handleResponse(data);
         });
@@ -38,13 +47,13 @@ export class JiraApiService {
   }
 
 
-  search(searchTerm: string, isFetchAdditional?: boolean, cfg?): Promise<JiraIssue[]> {
+  search(searchTerm: string, isFetchAdditional?: boolean, cfg = this.cfg): Promise<JiraIssue[]> {
     const options = {
       maxResults: JIRA_MAX_RESULTS,
       fields: isFetchAdditional ? JIRA_ADDITIONAL_ISSUE_FIELDS : JIRA_REDUCED_ISSUE_FIELDS,
     };
 
-    const searchQuery = `summary ~ "${searchTerm}"${this.cfg.jqlQuery ? ' AND ' + this.cfg.jqlQuery : ''}`;
+    const searchQuery = `summary ~ "${searchTerm}"${cfg.jqlQuery ? ' AND ' + this.cfg.jqlQuery : ''}`;
 
     return this._sendRequest({
       apiMethod: 'searchJira',
@@ -106,9 +115,9 @@ export class JiraApiService {
     };
 
     // send to electron
-    if (this.IS_ELECTRON) {
-      // window.ipcRenderer.send(IPC_JIRA_MAKE_REQUEST_EVENT, request);
-    } else if (this.IS_EXTENSION) {
+    if (IS_ELECTRON) {
+      window.ipcRenderer.send(IPC_JIRA_MAKE_REQUEST_EVENT, request);
+    } else if (this.isExtension) {
       this._chromeExtensionInterface.dispatchEvent('SP_JIRA_REQUEST', {
         requestId: request.requestId,
         apiMethod: request.apiMethod,

@@ -28,7 +28,7 @@
 
           <!--Todo show stepper for first setup, show config section when editing afterwards -->
           <jira-cfg-stepper (onSaveCfg)="saveJiraCfg($event)"
-                            [cfg]="projectData.issueIntegrationCfgs.JIRA"></jira-cfg-stepper>
+                            [cfg]="projectData?.issueIntegrationCfgs?.JIRA"></jira-cfg-stepper>
         </mat-expansion-panel>
 
         <mat-expansion-panel>
