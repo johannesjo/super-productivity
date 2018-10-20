@@ -11,7 +11,7 @@ export enum TaskActionTypes {
   // Task Actions
   LoadTasks = '[Task] Load Tasks',
   AddTask = '[Task] Add Task',
-  AddTaskWithIssue = '[Task] Add Task with Issue',
+  AddTaskWithIssue = '[Task]/[Issue] Add Task with Issue',
   AddTasks = '[Task] Add Tasks',
   UpdateTask = '[Task] Update Task',
   UpdateTasks = '[Task] Update Tasks',
@@ -59,7 +59,8 @@ export class AddTask implements Action {
 export class AddTaskWithIssue implements Action {
   readonly type = TaskActionTypes.AddTaskWithIssue;
 
-  constructor(public payload: { task: TaskWithAllData }) {
+  // TODO right type for issue
+  constructor(public payload: { task: TaskWithAllData, issue: any }) {
   }
 }
 

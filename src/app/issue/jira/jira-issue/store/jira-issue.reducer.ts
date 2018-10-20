@@ -1,8 +1,8 @@
 import { createEntityAdapter, EntityAdapter, EntityState } from '@ngrx/entity';
 import { JiraIssueActions, JiraIssueActionTypes } from './jira-issue.actions';
 import { JiraIssue } from '../jira-issue.model';
-import { createFeatureSelector } from '@ngrx/store';
-import { createSelector } from '@ngrx/store';
+import { createFeatureSelector, createSelector } from '@ngrx/store';
+import { TaskActionTypes } from '../../../../tasks/store/task.actions';
 
 export const JIRA_ISSUE_FEATURE_NAME = 'issues';
 
@@ -65,6 +65,13 @@ export function jiraIssueReducer(
     // ------------
     case JiraIssueActionTypes.LoadState: {
       return Object.assign({}, action.payload.state);
+    }
+
+    case TaskActionTypes.AddTaskWithIssue: {
+      if (action.payload.task.issueType === 'JIRA') {
+        return jiraIssueAdapter.addOne(action.payload.issue, state);
+      }
+      return state;
     }
 
     // JiraIssue Actions

@@ -98,12 +98,13 @@ export class TaskService {
       payload: {
         task: {
           title,
-          issueId: issueData.key,
+          issueId: issueData.id,
           issueType: issueType,
           id: shortid(),
           isDone: false,
           subTaskIds: []
-        }
+        },
+        issue: issueData
       }
     });
   }
