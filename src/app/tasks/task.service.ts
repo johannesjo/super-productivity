@@ -46,7 +46,9 @@ export class TaskService {
     private readonly _persistenceService: PersistenceService,
   ) {
     this.missingIssuesForTasks$.subscribe((val) => {
-      console.log('MISSING ISSUE', val);
+      if (val && val.length > 0) {
+        console.error('MISSING ISSUE', val);
+      }
     });
 
     this._projectService.currentId$.subscribe((projectId) => {

@@ -20,7 +20,6 @@ export class JiraIssueService {
     private readonly _projectService: ProjectService,
     private readonly _persistenceService: PersistenceService,
   ) {
-    this.jiraIssues$.subscribe((val) => console.log(val));
     this._projectService.currentId$.subscribe((projectId) => {
       this.loadStateForProject(projectId);
     });

@@ -27,7 +27,7 @@ export class ProjectService {
     private readonly _store: Store<any>,
   ) {
     this.load();
-    this.currentProject$.subscribe((x) => console.log(x));
+    // this.currentProject$.subscribe((x) => console.log(x));
   }
 
   load() {

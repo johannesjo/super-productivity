@@ -51,9 +51,6 @@ export function jiraIssueReducer(
 
     case TaskActionTypes.AddTaskWithIssue: {
       if (action.payload.task.issueType === 'JIRA') {
-        console.log(action.payload.issue);
-        console.log(JSON.stringify(action.payload.issue));
-
         return jiraIssueAdapter.addOne(action.payload.issue, state);
       }
       return state;
