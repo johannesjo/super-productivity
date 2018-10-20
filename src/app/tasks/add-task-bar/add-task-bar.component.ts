@@ -6,6 +6,7 @@ import { debounceTime, switchMap, takeUntil, tap, withLatestFrom } from 'rxjs/op
 import { ProjectService } from '../../project/project.service';
 import { JiraIssue } from '../../issue/jira/jira-issue/jira-issue.model';
 import { Subject } from 'rxjs';
+import { JiraIssueService } from '../../issue/jira/jira-issue/jira-issue.service';
 
 @Component({
   selector: 'add-task-bar',
@@ -22,6 +23,7 @@ export class AddTaskBarComponent implements OnInit, OnDestroy {
     private _taskService: TaskService,
     private _projectService: ProjectService,
     private _jiraApiService: JiraApiService,
+    private _jiraIssueService: JiraIssueService,
   ) {
   }
 
@@ -73,7 +75,13 @@ export class AddTaskBarComponent implements OnInit, OnDestroy {
         'JIRA',
         issueOrTitle,
       );
+      // get full data
+      this._jiraApiService.getIssueById(issueOrTitle.id)
+        .then((issue) => {
+          this._jiraIssueService.add(issue);
+        });
     }
+
     this.taskSuggestionsCtrl.setValue('');
   }
 }

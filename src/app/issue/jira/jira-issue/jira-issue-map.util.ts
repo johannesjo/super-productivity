@@ -16,6 +16,8 @@ export const mapIssuesResponse = (res, cfg: JiraCfg) => res.response.issues.map(
   return mapIssue(issue, cfg);
 });
 
+export const mapIssueResponse = (res, cfg: JiraCfg) => mapIssue(res.response, cfg);
+
 export const mapIssue = (issue: JiraIssueOriginal, cfg: JiraCfg): JiraIssue => {
   const issueCopy = Object.assign({}, issue);
   const fields = issueCopy.fields;
@@ -32,7 +34,7 @@ export const mapIssue = (issue: JiraIssueOriginal, cfg: JiraCfg): JiraIssue => {
     updated: fields.updated,
     status: fields.status,
     attachments: fields.attachment && fields.attachment.map(mapAttachment),
-    comments: fields.comment.comments && fields.comment.comments.map(mapComments),
+    comments: fields.comment && fields.comment.comments.map(mapComments),
     assignee: mapAuthor(fields.assignee),
     url: makeIssueUrl(cfg.host, issueCopy.key)
   };

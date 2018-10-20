@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
 import shortid from 'shortid';
 import { ChromeExtensionInterfaceService } from '../../core/chrome-extension-interface/chrome-extension-interface.service';
-import { JIRA_ADDITIONAL_ISSUE_FIELDS, JIRA_MAX_RESULTS, JIRA_REQUEST_TIMEOUT_DURATION } from './jira.const';
+import { JIRA_ADDITIONAL_ISSUE_FIELDS, JIRA_MAX_RESULTS, JIRA_REDUCED_ISSUE_FIELDS, JIRA_REQUEST_TIMEOUT_DURATION } from './jira.const';
 import { ProjectService } from '../../project/project.service';
-import { mapIssuesResponse } from './jira-issue/jira-issue-map.util';
+import { mapIssueResponse, mapIssuesResponse } from './jira-issue/jira-issue-map.util';
 import { JiraIssue } from './jira-issue/jira-issue.model';
 
 @Injectable({
@@ -35,11 +35,12 @@ export class JiraApiService {
   }
 
 
-  search(searchTerm: string, reduced?: boolean, cfg?): Promise<JiraIssue[]> {
+  search(searchTerm: string, isFetchAdditional?: boolean, cfg?): Promise<JiraIssue[]> {
     const options = {
       maxResults: JIRA_MAX_RESULTS,
-      fields: reduced ? '' : JIRA_ADDITIONAL_ISSUE_FIELDS,
+      fields: isFetchAdditional ? JIRA_ADDITIONAL_ISSUE_FIELDS : JIRA_REDUCED_ISSUE_FIELDS,
     };
+
     const searchQuery = `summary ~ "${searchTerm}"${this.cfg.jqlQuery ? ' AND ' + this.cfg.jqlQuery : ''}`;
 
     return this._sendRequest({
@@ -48,6 +49,17 @@ export class JiraApiService {
       transform: mapIssuesResponse
     }, cfg);
   }
+
+  getIssueById(issueId) {
+    return this._sendRequest({
+      config: this.cfg,
+      apiMethod: 'findIssue',
+      transform: mapIssueResponse,
+      // arguments: [issueId, 'changelog']
+      arguments: [issueId]
+    });
+  }
+
 
   // INTERNAL
   // --------
