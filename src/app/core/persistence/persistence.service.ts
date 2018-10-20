@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { LS_GLOBAL_CFG, LS_JIRA_ISSUE_STATE, LS_PROJECT_META_LIST, LS_PROJECT_PREFIX, LS_TASK_STATE } from './ls-keys.const';
+import { LS_GLOBAL_CFG, LS_ISSUE_STATE, LS_PROJECT_META_LIST, LS_PROJECT_PREFIX, LS_TASK_STATE } from './ls-keys.const';
 import { GlobalConfig } from '../config/config.model';
 import { loadFromLs, saveToLs } from './local-storage';
 import { IssueProviderKey } from '../../issue/issue';
@@ -37,12 +37,12 @@ export class PersistenceService {
 
 
   saveIssuesForProject(projectId, issueType: IssueProviderKey, data) {
-    saveToLs(PersistenceService._makeProjectKey(projectId, LS_JIRA_ISSUE_STATE, issueType), data);
+    saveToLs(PersistenceService._makeProjectKey(projectId, LS_ISSUE_STATE, issueType), data);
   }
 
   // TODO add correct type
   loadIssuesForProject(projectId, issueType: IssueProviderKey): any {
-    return loadFromLs(PersistenceService._makeProjectKey(projectId, LS_JIRA_ISSUE_STATE, issueType));
+    return loadFromLs(PersistenceService._makeProjectKey(projectId, LS_ISSUE_STATE, issueType));
   }
 
 
