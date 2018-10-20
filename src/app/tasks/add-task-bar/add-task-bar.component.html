@@ -6,12 +6,20 @@
          [matAutocomplete]="auto"
          [formControl]="taskSuggestionsCtrl"
          (blur)="onBlur()">
+
   <mat-autocomplete #auto="matAutocomplete"
                     [displayWith]="displayWith"
                     autoActiveFirstOption>
-    <mat-option *ngFor="let issue of filteredIssueSuggestions | async"
-                [value]="issue">
-      <span>{{ issue?.summary}}</span>
+    <mat-option *ngIf="isLoading"
+                class="is-loading">
+      <mat-spinner diameter="50"></mat-spinner>
     </mat-option>
+    <ng-container *ngIf="!isLoading">
+      <mat-option *ngFor="let issue of filteredIssueSuggestions"
+                  [value]="issue">
+        <span>{{ issue?.summary}}</span>
+      </mat-option>
+    </ng-container>
+
   </mat-autocomplete>
 </form>

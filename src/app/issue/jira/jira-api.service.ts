@@ -4,6 +4,7 @@ import { ChromeExtensionInterfaceService } from '../../core/chrome-extension-int
 import { JIRA_MAX_RESULTS, JIRA_REQUEST_TIMEOUT_DURATION, JIRA_SUGGESTION_FIELDS_TO_GET } from './jira.const';
 import { ProjectService } from '../../project/project.service';
 import { mapIssuesResponse } from './jira-issue/jira-issue-map.util';
+import { JiraIssue } from './jira-issue/jira-issue.model';
 
 @Injectable({
   providedIn: 'root'
@@ -45,7 +46,7 @@ export class JiraApiService {
     }, cfg);
   }
 
-  search(searchTerm) {
+  search(searchTerm): Promise<JiraIssue[]> {
     const options = {
       maxResults: JIRA_MAX_RESULTS,
       fields: JIRA_SUGGESTION_FIELDS_TO_GET
@@ -64,7 +65,7 @@ export class JiraApiService {
   // INTERNAL
   // --------
   // TODO refactor data madness of request and add types for everything
-  private _sendRequest(request, cfg = this.cfg) {
+  private _sendRequest(request, cfg = this.cfg): Promise<any> {
     // assign uuid to request to know which responsive belongs to which promise
     request.requestId = shortid();
     request.config = {...cfg, isJiraEnabled: true};

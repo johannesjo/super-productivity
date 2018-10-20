@@ -5,7 +5,7 @@ import { DurationFromStringPipe } from './duration/duration-from-string.pipe';
 import { DurationToStringPipe } from './duration/duration-to-string.pipe';
 import { EditOnClickDirective } from './edit-on-click/edit-on-click.directive';
 import { InlineMarkdownComponent } from './inline-markdown/inline-markdown.component';
-import { MatCardModule, MatIconModule, MatRippleModule } from '@angular/material';
+import { MatCardModule, MatIconModule, MatProgressSpinnerModule, MatRippleModule } from '@angular/material';
 import { MatDatepickerModule } from '@angular/material';
 import { MatDialogModule } from '@angular/material';
 import { MatProgressBarModule } from '@angular/material';
@@ -62,6 +62,7 @@ import { ThemeSelectComponent } from './theme-select/theme-select.component';
     MatCardModule,
     MatTabsModule,
     MatRippleModule,
+    MatProgressSpinnerModule,
   ],
   declarations: [
     DurationFromStringPipe,
@@ -102,6 +103,7 @@ import { ThemeSelectComponent } from './theme-select/theme-select.component';
     MatCardModule,
     MatTabsModule,
     MatRippleModule,
+    MatProgressSpinnerModule,
 
     ReactiveFormsModule,
     FormlyModule,
