@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import shortid from 'shortid';
 import { ChromeExtensionInterfaceService } from '../../core/chrome-extension-interface/chrome-extension-interface.service';
-import { JIRA_MAX_RESULTS, JIRA_REQUEST_TIMEOUT_DURATION, JIRA_SUGGESTION_FIELDS_TO_GET } from './jira.const';
+import { JIRA_ADDITIONAL_ISSUE_FIELDS, JIRA_MAX_RESULTS, JIRA_REQUEST_TIMEOUT_DURATION } from './jira.const';
 import { ProjectService } from '../../project/project.service';
 import { mapIssuesResponse } from './jira-issue/jira-issue-map.util';
 import { JiraIssue } from './jira-issue/jira-issue.model';
@@ -34,38 +34,34 @@ export class JiraApiService {
     }
   }
 
-  getSuggestions(cfg?) {
+
+  search(searchTerm: string, reduced?: boolean, cfg?): Promise<JiraIssue[]> {
     const options = {
       maxResults: JIRA_MAX_RESULTS,
-      fields: JIRA_SUGGESTION_FIELDS_TO_GET
+      fields: reduced ? '' : JIRA_ADDITIONAL_ISSUE_FIELDS,
     };
-
-    return this._sendRequest({
-      apiMethod: 'searchJira',
-      arguments: [this.cfg.jqlQuery, options]
-    }, cfg);
-  }
-
-  search(searchTerm): Promise<JiraIssue[]> {
-    const options = {
-      maxResults: JIRA_MAX_RESULTS,
-      fields: JIRA_SUGGESTION_FIELDS_TO_GET
-    };
-    // const searchQuery = `summary ~ "${searchTerm}"${this.cfg.jqlQuery ? ' AND ' + this.cfg.jqlQuery : ''}`;
     const searchQuery = `summary ~ "${searchTerm}"${this.cfg.jqlQuery ? ' AND ' + this.cfg.jqlQuery : ''}`;
-    console.log(searchQuery, this.cfg);
 
     return this._sendRequest({
       apiMethod: 'searchJira',
       arguments: [searchQuery, options],
       transform: mapIssuesResponse
-    });
+    }, cfg);
   }
 
   // INTERNAL
   // --------
+  private _isMinimalSettings(settings) {
+    return settings && settings.host && settings.userName && settings.password;
+  }
+
   // TODO refactor data madness of request and add types for everything
   private _sendRequest(request, cfg = this.cfg): Promise<any> {
+    if (!this._isMinimalSettings(cfg)) {
+      console.error('Not enough Jira settings. This should not happen!!!');
+      return Promise.reject(new Error('Insufficient Settings for Jira'));
+    }
+
     // assign uuid to request to know which responsive belongs to which promise
     request.requestId = shortid();
     request.config = {...cfg, isJiraEnabled: true};
@@ -148,33 +144,6 @@ export class JiraApiService {
     } else {
       console.warn('Jira: Response Request ID not existing');
     }
-  }
-
-
-  // static mapComments(issue) {
-  // }
-  //
-  //
-  // static mapComponents(issue) {
-  // }
-  //
-  // static mapAttachments(issue) {
-  // }
-  //
-  // static mapAndAddChangelogToTask(task, issue) {
-  // }
-
-
-  _makeIssueLink(issueKey) {
-    let fullLink = this.cfg.host + '/browse/' + issueKey;
-    const matchProtocolRegEx = /(^[^:]+):\/\//;
-    if (!fullLink.match(matchProtocolRegEx)) {
-      fullLink = 'https://' + fullLink;
-    }
-    return fullLink;
-  }
-
-  mapIssue(issue) {
   }
 
   isSufficientJiraSettings(settingsToTest) {

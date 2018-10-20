@@ -1,12 +1,7 @@
-import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
-import { Output } from '@angular/core';
-import { EventEmitter } from '@angular/core';
-import { Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { JiraCfg } from '../jira';
-import { DEFAULT_JIRA_CFG } from '../jira.const';
-import { JIRA_CREDENTIALS_FORM_CFG } from '../jira.const';
-import { JIRA_ADVANCED_FORM_CFG } from '../jira.const';
+import { DEFAULT_JIRA_CFG, JIRA_ADVANCED_FORM_CFG, JIRA_CREDENTIALS_FORM_CFG } from '../jira.const';
 import { FormlyFieldConfig } from '@ngx-formly/core';
 import { JiraApiService } from '../jira-api.service';
 
@@ -43,7 +38,7 @@ export class JiraCfgStepperComponent implements OnInit {
   testCredentials() {
     this.isTestCredentialsSuccess = false;
 
-    this._jiraApiService.getSuggestions(this.cfg)
+    this._jiraApiService.search('Test', true, this.cfg)
       .then((res) => {
         console.log(res);
         this.isTestCredentialsSuccess = true;

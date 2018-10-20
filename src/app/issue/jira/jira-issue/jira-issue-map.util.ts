@@ -13,8 +13,6 @@ import { JiraCfg } from '../jira';
 const matchProtocolRegEx = /(^[^:]+):\/\//;
 
 export const mapIssuesResponse = (res, cfg: JiraCfg) => res.response.issues.map((issue) => {
-  console.log(issue);
-
   return mapIssue(issue, cfg);
 });
 
