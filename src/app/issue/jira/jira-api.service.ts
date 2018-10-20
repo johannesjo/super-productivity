@@ -27,11 +27,14 @@ export class JiraApiService {
       // window.ipcRenderer.on(IPC_JIRA_CB_EVENT, (ev, res) => {
       //   this._handleResponse(res);
       // });
-    } else if (this.IS_EXTENSION) {
-      this._chromeExtensionInterface.addEventListener('SP_JIRA_RESPONSE', (ev, data) => {
-        this._handleResponse(data);
-      });
     }
+
+    this._chromeExtensionInterface.isReady$
+      .subscribe((val) => {
+        this._chromeExtensionInterface.addEventListener('SP_JIRA_RESPONSE', (ev, data) => {
+          this._handleResponse(data);
+        });
+      });
   }
 
 
