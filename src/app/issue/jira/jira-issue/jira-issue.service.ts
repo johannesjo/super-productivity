@@ -1,12 +1,10 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { JiraIssue } from './jira-issue.model';
-import { Store } from '@ngrx/store';
-import { select } from '@ngrx/store';
+import { select, Store } from '@ngrx/store';
 import 'rxjs/add/operator/map';
 import { JiraIssueActionTypes } from './store/jira-issue.actions';
-import { selectAllJiraIssues } from './store/jira-issue.reducer';
-import { selectJiraIssueEntities } from './store/jira-issue.reducer';
+import { selectAllJiraIssues, selectJiraIssueEntities } from './store/jira-issue.reducer';
 import { ProjectService } from '../../../project/project.service';
 import { PersistenceService } from '../../../core/persistence/persistence.service';
 import { Dictionary } from '@ngrx/entity';
@@ -31,8 +29,10 @@ export class JiraIssueService {
   // META
   // ----
   loadStateForProject(projectId) {
-    // const lsJiraIssueState = this._persistenceService.loadJiraIssuesForProject(projectId);
-    // this.loadState(lsJiraIssueState);
+    const lsJiraIssueState = this._persistenceService.loadIssuesForProject(projectId, 'JIRA');
+    if (lsJiraIssueState) {
+      this.loadState(lsJiraIssueState);
+    }
   }
 
   loadState(state) {

@@ -49,11 +49,11 @@
        *ngIf="task.issueData?.url"
        [href]="task.issueData?.url">
 
-      <mat-icon *ngIf="task.type !=='GITHUB'"
+      <mat-icon *ngIf="task.issueType ==='JIRA'"
                 aria-label="explore">explore
       </mat-icon>
-      <mat-icon *ngIf="task.type ==='GITHUB'"
-                aria-label="github">github-circle
+      <mat-icon *ngIf="task.issueType ==='GITHUB'"
+                aria-label="github">github_circle
       </mat-icon>
     </a>
 
