@@ -25,6 +25,11 @@ export class TaskService {
       return issueData ? Object.assign({issueData: issueData}, task) : task;
     }));
 
+  missingIssuesForTasks$ = this.tasks$.map(
+    (tasks) => tasks && tasks.filter((task: TaskWithAllData) => (!task.issueData && (task.issueType || task.issueId)))
+      .map(task => task.issueId)
+  );
+
   undoneTasks$: Observable<TaskWithAllData[]> = this.tasks$.map(
     (tasks) => tasks && tasks.filter((task: TaskWithAllData) => !task.isDone)
   );
@@ -40,8 +45,10 @@ export class TaskService {
     private readonly _issueService: IssueService,
     private readonly _persistenceService: PersistenceService,
   ) {
+    this.missingIssuesForTasks$.subscribe((val) => {
+      console.log('MISSING ISSUE', val);
+    });
 
-    // this.tasks$.subscribe((val) => console.log(val));
     this._projectService.currentId$.subscribe((projectId) => {
       this.loadStateForProject(projectId);
     });
