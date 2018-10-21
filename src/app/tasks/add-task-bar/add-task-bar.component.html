@@ -9,7 +9,7 @@
 
   <mat-autocomplete #auto="matAutocomplete"
                     [displayWith]="displayWith"
-                    autoActiveFirstOption>
+                    [autoActiveFirstOption]="true">
     <mat-option *ngIf="isLoading"
                 class="is-loading">
       <mat-spinner diameter="50"></mat-spinner>
