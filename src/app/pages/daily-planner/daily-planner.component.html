@@ -1,0 +1,10 @@
+<div class="wrapper">
+  <add-task-bar></add-task-bar>
+
+  <task-list [tasks]="todaysTasks$|async"
+             [filterArgs]="{'isDone':false}"></task-list>
+
+  <h2 class="mat-h2">Backlog</h2>
+  <task-list [tasks]="backlogTasks$|async"
+             [filterArgs]="{'isDone':true}"></task-list>
+</div>

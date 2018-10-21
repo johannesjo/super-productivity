@@ -28,17 +28,29 @@ export class TaskService {
       return issueData ? Object.assign({issueData: issueData}, task) : task;
     }));
 
+  backlogTasks$: Observable<TaskWithAllData[]> = this.tasks$.map(
+    (tasks) => tasks && tasks.filter((task: TaskWithAllData) => task.isBacklogTask)
+  );
+
+  todaysTasks$: Observable<TaskWithAllData[]> = this.tasks$.map(
+    (tasks) => tasks && tasks.filter((task: TaskWithAllData) => !task.isBacklogTask)
+  );
+
+  undoneTasks$: Observable<TaskWithAllData[]> = this.todaysTasks$.map(
+    (tasks) => tasks && tasks.filter((task: TaskWithAllData) => !task.isDone)
+  );
+  doneTasks$: Observable<TaskWithAllData[]> = this.todaysTasks$.map(
+    (tasks) => tasks && tasks.filter((task: TaskWithAllData) => task.isDone)
+  );
+
+
+  // META FIELDS
+  // -----------
   missingIssuesForTasks$ = this.tasks$.map(
     (tasks) => tasks && tasks.filter((task: TaskWithAllData) => (!task.issueData && (task.issueType || task.issueId)))
       .map(task => task.issueId)
   );
 
-  undoneTasks$: Observable<TaskWithAllData[]> = this.tasks$.map(
-    (tasks) => tasks && tasks.filter((task: TaskWithAllData) => !task.isDone)
-  );
-  doneTasks$: Observable<TaskWithAllData[]> = this.tasks$.map(
-    (tasks) => tasks && tasks.filter((task: TaskWithAllData) => task.isDone)
-  );
 
   // TODO could be more efficient than using combine latest
   workingToday$: Observable<any> = combineLatest(this.flatTasks$, this._timeTrackingService.tick$)

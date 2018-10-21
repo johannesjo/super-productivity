@@ -29,15 +29,18 @@
 
   <nav>
     <button mat-mini-fab
-            routerLink="work-view"
+            routerLink="daily-planner"
             routerLinkActive
-            #rla="routerLinkActive"
-            [color]="rla.isActive ? 'accent' : null">
+            #rlaDp="routerLinkActive"
+            [color]="rlaDp.isActive ? 'accent' : null">
       <mat-icon>border_color</mat-icon>
     </button>
 
     <button mat-mini-fab
-            color="">
+            routerLink="work-view"
+            routerLinkActive
+            #rlaWv="routerLinkActive"
+            [color]="rlaWv.isActive ? 'accent' : null">
       <mat-icon>playlist_play</mat-icon>
     </button>
     <button mat-mini-fab
