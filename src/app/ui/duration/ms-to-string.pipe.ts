@@ -13,6 +13,6 @@ export class MsToStringPipe implements PipeTransform {
       + ((+md.hours() > 0) ? (md.hours() + 'h ') : '')
       + ((+md.minutes() > 0) ? (md.minutes() + 'm ') : '')
       + (showSeconds && (+md.seconds() > 0) ? (md.seconds() + 's ') : '');
-    return parsed;
+    return parsed.trim();
   }
 }

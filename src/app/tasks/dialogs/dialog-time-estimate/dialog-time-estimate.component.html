@@ -29,6 +29,7 @@
       <mat-form-field class="mat-icon-float mat-block">
         <input matInput
                placeholder="Time Spent on {{strDate}}"
+               supInputDuration="optional"
                type="text"
                name="timeSpentOnDay{{strDate}}"
                [(ngModel)]="timeSpentOnDayCopy[strDate]"

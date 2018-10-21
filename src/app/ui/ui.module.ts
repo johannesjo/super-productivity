@@ -35,6 +35,7 @@ import { FormlyMaterialModule } from '@ngx-formly/material';
 import { FormlyModule } from '@ngx-formly/core';
 import { ThemeSelectComponent } from './theme-select/theme-select.component';
 import { MsToStringPipe } from './duration/ms-to-string.pipe';
+import { StringToMsPipe } from './duration/string-to-ms.pipe';
 
 @NgModule({
   imports: [
@@ -78,6 +79,7 @@ import { MsToStringPipe } from './duration/ms-to-string.pipe';
     InlineMarkdownComponent,
     ThemeSelectComponent,
     MsToStringPipe,
+    StringToMsPipe,
   ],
   exports: [
     DurationFromStringPipe,
@@ -87,6 +89,7 @@ import { MsToStringPipe } from './duration/ms-to-string.pipe';
     InlineMarkdownComponent,
     ThemeSelectComponent,
     MsToStringPipe,
+    StringToMsPipe,
 
     // material2
     MatSelectModule,
