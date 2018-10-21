@@ -11,6 +11,7 @@ import { TaskWithAllData } from '../../tasks/task.model';
 export class WorkViewPageComponent implements OnInit {
   doneTasks$: Observable<TaskWithAllData[]> = this._taskService.doneTasks$;
   undoneTasks$: Observable<TaskWithAllData[]> = this._taskService.undoneTasks$;
+  workingToday$: Observable<number> = this._taskService.workingToday$;
 
   constructor(private _taskService: TaskService) {
   }

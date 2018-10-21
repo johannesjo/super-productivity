@@ -40,6 +40,13 @@ export class TaskService {
     (tasks) => tasks && tasks.filter((task: TaskWithAllData) => task.isDone)
   );
 
+  // TODO could be more efficient
+  workingToday$: Observable<any> = combineLatest(this.flatTasks$, this._timeTrackingService.tick$)
+    .map(([tasks, tick]) => tasks && tasks.length && tasks.reduce((acc, task) => {
+        return acc + (task.timeSpentOnDay ? +task.timeSpentOnDay[tick.date] : 0);
+      }, 0
+    ));
+
 
   // tasksId$: Observable<string[] | number[]> = this._store.pipe(select(selectTaskIds));
 
@@ -54,6 +61,7 @@ export class TaskService {
       if (val && val.length > 0) {
         console.error('MISSING ISSUE', val);
       }
+
     });
 
     this._projectService.currentId$.subscribe((projectId) => {
