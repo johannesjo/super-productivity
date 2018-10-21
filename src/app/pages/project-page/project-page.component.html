@@ -3,11 +3,17 @@
 
 <div class="project-list">
   <mat-card class="project"
-       *ngFor="let project of projectService.list$|async">
+            *ngFor="let project of projectService.list$|async">
 
     <div class="title"
          [class.isCurrent]="project.id === (projectService.currentId$|async)">{{project.title}}
     </div>
+
+    <div class="issue-providers">
+      <mat-icon *ngIf="project.issueIntegrationCfgs?.JIRA?.isEnabled">explore</mat-icon>
+      <mat-icon *ngIf="project.issueIntegrationCfgs?.GIT?.isEnabled">github_circle</mat-icon>
+    </div>
+
     <div class="controls">
       <button mat-raised-button
               (click)="edit(project)"

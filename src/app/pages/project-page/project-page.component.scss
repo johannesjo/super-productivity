@@ -24,4 +24,12 @@
       font-weight: bold;
     }
   }
+
+  .issue-providers {
+    margin-left: 2*$s;
+    margin-right: 2*$s;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
 }
