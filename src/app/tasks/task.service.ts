@@ -40,17 +40,18 @@ export class TaskService {
     (tasks) => tasks && tasks.filter((task: TaskWithAllData) => task.isDone)
   );
 
-  // TODO could be more efficient
+  // TODO could be more efficient than using combine latest
   workingToday$: Observable<any> = combineLatest(this.flatTasks$, this._timeTrackingService.tick$)
     .map(([tasks, tick]) => tasks && tasks.length && tasks.reduce((acc, task) => {
         return acc + (task.timeSpentOnDay ? +task.timeSpentOnDay[tick.date] : 0);
       }, 0
     ));
 
-  estimateRemaining$: Observable<any> = combineLatest(this.flatTasks$, this._timeTrackingService.tick$)
-    .map(([tasks, tick]) => tasks && tasks.length && tasks.reduce((acc, task) => {
+  estimateRemaining$: Observable<any> = this.flatTasks$
+    .map((tasks) => tasks && tasks.length && tasks.reduce((acc, task) => {
         const estimateRemaining = (+task.timeEstimate) - (+task.timeSpent);
-        return acc + ((estimateRemaining > 0) ? estimateRemaining : 0);
+        const isTrackVal = (estimateRemaining > 0) && !task.isDone;
+        return acc + ((isTrackVal) ? estimateRemaining : 0);
       }, 0
     ));
 
