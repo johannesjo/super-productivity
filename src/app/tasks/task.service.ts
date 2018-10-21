@@ -47,6 +47,13 @@ export class TaskService {
       }, 0
     ));
 
+  estimateRemaining$: Observable<any> = combineLatest(this.flatTasks$, this._timeTrackingService.tick$)
+    .map(([tasks, tick]) => tasks && tasks.length && tasks.reduce((acc, task) => {
+        const estimateRemaining = (+task.timeEstimate) - (+task.timeSpent);
+        return acc + ((estimateRemaining > 0) ? estimateRemaining : 0);
+      }, 0
+    ));
+
 
   // tasksId$: Observable<string[] | number[]> = this._store.pipe(select(selectTaskIds));
 

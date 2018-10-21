@@ -3,6 +3,7 @@
   <add-task-bar></add-task-bar>
 
   {{workingToday$|async|msToString}}
+  {{estimateRemaining$|async|msToString}}
 
   <task-list [tasks]="undoneTasks$|async"
              [filterArgs]="{'isDone':false}"></task-list>
