@@ -1,13 +1,5 @@
-import {
-  JiraAttachment,
-  JiraAuthor,
-  JiraComment,
-  JiraIssue,
-  JiraIssueOriginal,
-  JiraOriginalAttachment,
-  JiraOriginalAuthor,
-  JiraOriginalComment,
-} from './jira-issue.model';
+import { JiraAttachment, JiraAuthor, JiraComment, JiraIssue, } from './jira-issue.model';
+import { JiraIssueOriginal, JiraOriginalAttachment, JiraOriginalAuthor, JiraOriginalComment } from '../jira-api-responses';
 import { JiraCfg } from '../jira';
 
 const matchProtocolRegEx = /(^[^:]+):\/\//;
@@ -15,6 +7,8 @@ const matchProtocolRegEx = /(^[^:]+):\/\//;
 export const mapIssuesResponse = (res, cfg: JiraCfg) => res.response.issues.map((issue) => {
   return mapIssue(issue, cfg);
 });
+
+export const mapResponse = (res) => res.response;
 
 export const mapIssueResponse = (res, cfg: JiraCfg) => mapIssue(res.response, cfg);
 

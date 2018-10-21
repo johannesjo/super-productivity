@@ -10,9 +10,11 @@ import {
   JIRA_REQUEST_TIMEOUT_DURATION
 } from './jira.const';
 import { ProjectService } from '../../project/project.service';
-import { mapIssueResponse, mapIssuesResponse } from './jira-issue/jira-issue-map.util';
-import { JiraIssue } from './jira-issue/jira-issue.model';
+import { mapIssueResponse, mapIssuesResponse, mapResponse } from './jira-issue/jira-issue-map.util';
 import { IS_ELECTRON } from '../../app.constants';
+import { JiraOriginalStatus, JiraOriginalUser } from './jira-api-responses';
+import { JiraIssue } from './jira-issue/jira-issue.model';
+import { JiraCfg } from './jira';
 
 
 @Injectable({
@@ -47,29 +49,40 @@ export class JiraApiService {
   }
 
 
-  search(searchTerm: string, isFetchAdditional?: boolean, cfg = this.cfg): Promise<JiraIssue[]> {
+  search(searchTerm: string, isFetchAdditional?: boolean): Promise<JiraIssue[]> {
     const options = {
       maxResults: JIRA_MAX_RESULTS,
       fields: isFetchAdditional ? JIRA_ADDITIONAL_ISSUE_FIELDS : JIRA_REDUCED_ISSUE_FIELDS,
     };
-
-    const searchQuery = `summary ~ "${searchTerm}"${cfg.jqlQuery ? ' AND ' + this.cfg.jqlQuery : ''}`;
-
+    const searchQuery = `summary ~ "${searchTerm}"${this.cfg.jqlQuery ? ' AND ' + this.cfg.jqlQuery : ''}`;
     return this._sendRequest({
       apiMethod: 'searchJira',
       arguments: [searchQuery, options],
       transform: mapIssuesResponse
-    }, cfg);
+    });
   }
 
   getIssueById(issueId) {
     return this._sendRequest({
-      config: this.cfg,
       apiMethod: 'findIssue',
       transform: mapIssueResponse,
       // arguments: [issueId, 'changelog']
       arguments: [issueId]
     });
+  }
+
+  getCurrentUser(cfg?: JiraCfg): Promise<JiraOriginalUser> {
+    return this._sendRequest({
+      apiMethod: 'getCurrentUser',
+      transform: mapResponse,
+    }, cfg);
+  }
+
+  listStatus(cfg?: JiraCfg): Promise<JiraOriginalStatus[]> {
+    return this._sendRequest({
+      apiMethod: 'listStatus',
+      transform: mapResponse,
+    }, cfg);
   }
 
 
@@ -89,6 +102,7 @@ export class JiraApiService {
     // assign uuid to request to know which responsive belongs to which promise
     request.requestId = shortid();
     request.config = {...cfg, isJiraEnabled: true};
+    request.arguments = request.arguments || [];
 
 
     // TODO refactor to observable for request canceling etc

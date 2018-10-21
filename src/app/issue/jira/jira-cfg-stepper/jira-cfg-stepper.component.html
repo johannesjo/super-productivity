@@ -11,6 +11,15 @@
                    [form]="credentialsFormGroup">
       </formly-form>
 
+      <div class="welcome"
+           [@expand]
+           *ngIf="user">
+        <img [src]="user.avatarUrls['48x48']"
+             class="user-avatar"
+             alt="User Avatar">
+        <div class="welcome-txt">Login successful!<br>Welcome {{user.displayName}}!</div>
+      </div>
+
       <div class="center-wrapper">
         <button mat-raised-button
                 (click)="testCredentials()"
