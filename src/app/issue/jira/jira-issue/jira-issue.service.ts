@@ -2,7 +2,6 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { JiraIssue } from './jira-issue.model';
 import { select, Store } from '@ngrx/store';
-import 'rxjs/add/operator/map';
 import { JiraIssueActionTypes } from './store/jira-issue.actions';
 import { selectAllJiraIssues, selectJiraIssueEntities } from './store/jira-issue.reducer';
 import { ProjectService } from '../../../project/project.service';

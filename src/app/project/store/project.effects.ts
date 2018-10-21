@@ -1,9 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
-import 'rxjs/add/operator/withLatestFrom';
-import { withLatestFrom } from 'rxjs/operators';
-import { tap } from 'rxjs/operators';
+import { tap, withLatestFrom } from 'rxjs/operators';
 import { ProjectActionTypes } from './project.actions';
 import { PROJECT_FEATURE_NAME } from './project.reducer';
 import { PersistenceService } from '../../core/persistence/persistence.service';

@@ -1,9 +1,6 @@
 import { Injectable } from '@angular/core';
-import { Actions } from '@ngrx/effects';
-import { ofType } from '@ngrx/effects';
-import { Effect } from '@ngrx/effects';
-import { tap } from 'rxjs/operators';
-import { withLatestFrom } from 'rxjs/operators';
+import { Actions, Effect, ofType } from '@ngrx/effects';
+import { tap, withLatestFrom } from 'rxjs/operators';
 import { ConfigActionTypes } from './config.actions';
 import { Store } from '@ngrx/store';
 import { CONFIG_FEATURE_NAME } from './config.reducer';

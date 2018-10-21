@@ -8,6 +8,7 @@ import shortid from 'shortid';
 import { selectAllProjects, selectCurrentProject, selectCurrentProjectId } from './store/project.reducer';
 import { IssueIntegrationCfg, IssueProviderKey } from '../issue/issue';
 import { JiraCfg } from '../issue/jira/jira';
+import { map } from 'rxjs/operators';
 
 @Injectable()
 export class ProjectService {
@@ -16,9 +17,10 @@ export class ProjectService {
   // TODO fix type
   currentProject$: any = this._store.pipe(select(selectCurrentProject));
   currentId$: Observable<string> = this._store.pipe(select(selectCurrentProjectId));
-  currentJiraCfg$: Observable<JiraCfg> = this.currentProject$.map((project: Project) => {
-    return project && project.issueIntegrationCfgs && project.issueIntegrationCfgs.JIRA;
-  });
+  currentJiraCfg$: Observable<JiraCfg> = this.currentProject$.pipe(
+    map((project: Project) => {
+      return project && project.issueIntegrationCfgs && project.issueIntegrationCfgs.JIRA;
+    }));
 
 
   constructor(

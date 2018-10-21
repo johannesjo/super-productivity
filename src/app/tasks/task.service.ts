@@ -1,8 +1,8 @@
+import { map, withLatestFrom } from 'rxjs/operators';
 import { Injectable } from '@angular/core';
 import { combineLatest, Observable } from 'rxjs';
 import { Task, TaskWithAllData, TaskWithSubTaskData } from './task.model';
 import { select, Store } from '@ngrx/store';
-import 'rxjs/add/operator/map';
 import { TaskActionTypes } from './store/task.actions';
 import shortid from 'shortid';
 import { initialTaskState, selectAllTasks, selectCurrentTask, selectMainTasksWithSubTasks } from './store/task.reducer';
@@ -11,7 +11,6 @@ import { PersistenceService } from '../core/persistence/persistence.service';
 import { IssueService } from '../issue/issue.service';
 import { IssueProviderKey } from '../issue/issue';
 import { TimeTrackingService } from '../core/time-tracking/time-tracking.service';
-import { withLatestFrom } from 'rxjs/operators';
 import { Tick } from '../core/time-tracking/time-tracking';
 
 @Injectable()
@@ -22,50 +21,50 @@ export class TaskService {
   // TODO map issue data before sub tasks
   tasksWithSubTasks$: Observable<TaskWithSubTaskData[]> = this._store.pipe(select(selectMainTasksWithSubTasks));
 
-  tasks$: Observable<TaskWithAllData[]> = combineLatest(this.tasksWithSubTasks$, this._issueService.issueEntityMap$)
-    .map(([tasks, issueEntityMap]) => tasks.map((task) => {
+  tasks$: Observable<TaskWithAllData[]> = combineLatest(this.tasksWithSubTasks$, this._issueService.issueEntityMap$).pipe(
+    map(([tasks, issueEntityMap]) => tasks.map((task) => {
       const issueData = (task.issueId && task.issueType) && issueEntityMap[task.issueType][task.issueId];
       return issueData ? Object.assign({issueData: issueData}, task) : task;
-    }));
+    })));
 
-  backlogTasks$: Observable<TaskWithAllData[]> = this.tasks$.map(
+  backlogTasks$: Observable<TaskWithAllData[]> = this.tasks$.pipe(map(
     (tasks) => tasks && tasks.filter((task: TaskWithAllData) => task.isBacklogTask)
-  );
+  ));
 
-  todaysTasks$: Observable<TaskWithAllData[]> = this.tasks$.map(
+  todaysTasks$: Observable<TaskWithAllData[]> = this.tasks$.pipe(map(
     (tasks) => tasks && tasks.filter((task: TaskWithAllData) => !task.isBacklogTask)
-  );
+  ));
 
-  undoneTasks$: Observable<TaskWithAllData[]> = this.todaysTasks$.map(
+  undoneTasks$: Observable<TaskWithAllData[]> = this.todaysTasks$.pipe(map(
     (tasks) => tasks && tasks.filter((task: TaskWithAllData) => !task.isDone)
-  );
-  doneTasks$: Observable<TaskWithAllData[]> = this.todaysTasks$.map(
+  ));
+  doneTasks$: Observable<TaskWithAllData[]> = this.todaysTasks$.pipe(map(
     (tasks) => tasks && tasks.filter((task: TaskWithAllData) => task.isDone)
-  );
+  ));
 
 
   // META FIELDS
   // -----------
-  missingIssuesForTasks$ = this.tasks$.map(
+  missingIssuesForTasks$ = this.tasks$.pipe(map(
     (tasks) => tasks && tasks.filter((task: TaskWithAllData) => (!task.issueData && (task.issueType || task.issueId)))
       .map(task => task.issueId)
-  );
+  ));
 
 
   // TODO could be more efficient than using combine latest
-  workingToday$: Observable<any> = combineLatest(this.flatTasks$, this._timeTrackingService.tick$)
-    .map(([tasks, tick]) => tasks && tasks.length && tasks.reduce((acc, task) => {
+  workingToday$: Observable<any> = combineLatest(this.flatTasks$, this._timeTrackingService.tick$).pipe(
+    map(([tasks, tick]) => tasks && tasks.length && tasks.reduce((acc, task) => {
         return acc + (task.timeSpentOnDay ? +task.timeSpentOnDay[tick.date] : 0);
       }, 0
-    ));
+    )));
 
-  estimateRemaining$: Observable<any> = this.flatTasks$
-    .map((tasks) => tasks && tasks.length && tasks.reduce((acc, task) => {
+  estimateRemaining$: Observable<any> = this.flatTasks$.pipe(
+    map((tasks) => tasks && tasks.length && tasks.reduce((acc, task) => {
         const estimateRemaining = (+task.timeEstimate) - (+task.timeSpent);
         const isTrackVal = (estimateRemaining > 0) && !task.isDone;
         return acc + ((isTrackVal) ? estimateRemaining : 0);
       }, 0
-    ));
+    )));
 
 
   // tasksId$: Observable<string[] | number[]> = this._store.pipe(select(selectTaskIds));
