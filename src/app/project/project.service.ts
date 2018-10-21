@@ -13,9 +13,7 @@ import { map } from 'rxjs/operators';
 @Injectable()
 export class ProjectService {
   list$: Observable<Project[]> = this._store.pipe(select(selectAllProjects));
-  // currentProject$: Observable<Project> = this._store.pipe(select(selectCurrentProject));
-  // TODO fix type
-  currentProject$: any = this._store.pipe(select(selectCurrentProject));
+  currentProject$: Observable<Project> = this._store.pipe(select(selectCurrentProject));
   currentId$: Observable<string> = this._store.pipe(select(selectCurrentProjectId));
   currentJiraCfg$: Observable<JiraCfg> = this.currentProject$.pipe(
     map((project: Project) => {
