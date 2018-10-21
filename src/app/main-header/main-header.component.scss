@@ -14,3 +14,9 @@ nav {
     margin-left: $s;
   }
 }
+
+:host {
+  position: relative;
+  z-index: 3;
+  display: block;
+}
