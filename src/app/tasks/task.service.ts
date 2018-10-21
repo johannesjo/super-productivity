@@ -10,6 +10,9 @@ import { ProjectService } from '../project/project.service';
 import { PersistenceService } from '../core/persistence/persistence.service';
 import { IssueService } from '../issue/issue.service';
 import { IssueProviderKey } from '../issue/issue';
+import { TimeTrackingService } from '../core/time-tracking/time-tracking.service';
+import { withLatestFrom } from 'rxjs/operators';
+import { Tick } from '../core/time-tracking/time-tracking';
 
 @Injectable()
 export class TaskService {
@@ -37,6 +40,7 @@ export class TaskService {
     (tasks) => tasks && tasks.filter((task: TaskWithAllData) => task.isDone)
   );
 
+
   // tasksId$: Observable<string[] | number[]> = this._store.pipe(select(selectTaskIds));
 
   constructor(
@@ -44,6 +48,7 @@ export class TaskService {
     private readonly _projectService: ProjectService,
     private readonly _issueService: IssueService,
     private readonly _persistenceService: PersistenceService,
+    private readonly _timeTrackingService: TimeTrackingService,
   ) {
     this.missingIssuesForTasks$.subscribe((val) => {
       if (val && val.length > 0) {
@@ -54,6 +59,15 @@ export class TaskService {
     this._projectService.currentId$.subscribe((projectId) => {
       this.loadStateForProject(projectId);
     });
+
+    // time tracking
+    this._timeTrackingService.tick$
+      .pipe(withLatestFrom(this.currentTaskId$))
+      .subscribe(([tick, currentId]) => {
+        if (currentId) {
+          this.addTimeSpent(currentId, tick);
+        }
+      });
   }
 
   // META
@@ -160,6 +174,26 @@ export class TaskService {
           isDone: false
         },
         parentId: parentTask.id
+      }
+    });
+  }
+
+  addTimeSpent(taskId: string, tick: Tick) {
+    this._store.dispatch({
+      type: TaskActionTypes.AddTimeSpent,
+      payload: {
+        taskId: taskId,
+        tick: tick,
+      }
+    });
+  }
+
+  updateTimeSpent(taskId: string, tick: Tick) {
+    this._store.dispatch({
+      type: TaskActionTypes.AddTimeSpent,
+      payload: {
+        taskId: taskId,
+        tick: tick,
       }
     });
   }

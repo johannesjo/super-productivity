@@ -1,5 +1,9 @@
 import { IssueProviderKey } from '../issue/issue';
 
+export type TimeSpentOnDay = Readonly<{
+  [key: string]: number;
+}>;
+
 export type Task = Readonly<{
   id: string;
   title: string;
@@ -13,7 +17,7 @@ export type Task = Readonly<{
   progress?: number;
   timeSpent?: any;
   timeEstimate?: string;
-  timeSpentOnDay?: Object;
+  timeSpentOnDay?: TimeSpentOnDay;
   parentId?: string;
 }>;
 

@@ -2,6 +2,7 @@ import { createEntityAdapter, EntityAdapter, EntityState } from '@ngrx/entity';
 import { TaskActions, TaskActionTypes } from './task.actions';
 import { Task } from '../task.model';
 import { createFeatureSelector, createSelector } from '@ngrx/store';
+import { calcTotalTimeSpent } from '../util/calc-total-time-spent';
 
 export const TASK_FEATURE_NAME = 'tasks';
 
@@ -133,6 +134,33 @@ export function taskReducer(
       });
     }
 
+    case TaskActionTypes.AddTimeSpent: {
+      const taskToUpdate = state.entities[action.payload.taskId];
+      const currentTimeSpentForTickDay = taskToUpdate.timeSpentOnDay && taskToUpdate.timeSpentOnDay[action.payload.tick.date] || 0;
+      const updateTimeSpentOnDay = {
+        ...taskToUpdate.timeSpentOnDay,
+        [action.payload.tick.date]: (currentTimeSpentForTickDay + action.payload.tick.duration)
+      };
+
+      return taskAdapter.updateOne({
+        id: action.payload.taskId,
+        changes: {
+          timeSpentOnDay: updateTimeSpentOnDay,
+          timeSpent: calcTotalTimeSpent(updateTimeSpentOnDay)
+        }
+
+      }, state);
+    }
+
+    case TaskActionTypes.UpdateTimeSpent: {
+      return taskAdapter.updateOne({
+        id: action.payload.taskId,
+        changes: {
+          timeSpentOnDay: action.payload.timeSpentOnDay,
+          timeSpent: calcTotalTimeSpent(action.payload.timeSpentOnDay)
+        }
+      }, state);
+    }
 
     case TaskActionTypes.AddSubTask: {
       // add item1

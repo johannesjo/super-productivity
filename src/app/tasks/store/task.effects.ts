@@ -10,6 +10,8 @@ import { PROJECT_FEATURE_NAME } from '../../project/store/project.reducer';
 import { PersistenceService } from '../../core/persistence/persistence.service';
 import { TASK_FEATURE_NAME } from './task.reducer';
 
+// TODO send message to electron when current task changes here
+
 @Injectable()
 export class TaskEffects {
   @Effect({dispatch: false}) updateTask$: any = this._actions$

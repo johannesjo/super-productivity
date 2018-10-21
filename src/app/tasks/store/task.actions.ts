@@ -1,7 +1,8 @@
 import { Action } from '@ngrx/store';
 import { Update } from '@ngrx/entity';
-import { Task, TaskWithAllData } from '../task.model';
+import { Task, TaskWithAllData, TimeSpentOnDay } from '../task.model';
 import { TaskState } from './task.reducer';
+import { Tick } from '../../core/time-tracking/time-tracking';
 
 export enum TaskActionTypes {
   LoadState = '[Task] Load Task State',
@@ -19,6 +20,8 @@ export enum TaskActionTypes {
   DeleteTasks = '[Task] Delete Tasks',
   ClearTasks = '[Task] Clear Tasks',
   MoveAfter = '[Task] Move After',
+  AddTimeSpent = '[Task] Add time spent',
+  UpdateTimeSpent = '[Task] Update time spent',
 
   // Sub Task Actions
   AddSubTask = '[Task] Add SubTask',
@@ -110,6 +113,20 @@ export class MoveAfter implements Action {
   }
 }
 
+export class AddTimeSpent implements Action {
+  readonly type = TaskActionTypes.AddTimeSpent;
+
+  constructor(public payload: { taskId: string, tick: Tick }) {
+  }
+}
+
+export class UpdateTimeSpent implements Action {
+  readonly type = TaskActionTypes.UpdateTimeSpent;
+
+  constructor(public payload: { taskId: string, timeSpentOnDay: TimeSpentOnDay }) {
+  }
+}
+
 export class AddSubTask implements Action {
   readonly type = TaskActionTypes.AddSubTask;
 
@@ -131,5 +148,7 @@ export type TaskActions
   | DeleteTasks
   | ClearTasks
   | MoveAfter
+  | AddTimeSpent
+  | UpdateTimeSpent
   | AddSubTask;
 
