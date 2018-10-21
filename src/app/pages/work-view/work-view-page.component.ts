@@ -14,9 +14,17 @@ export class WorkViewPageComponent implements OnInit {
   workingToday$: Observable<number> = this._taskService.workingToday$;
   estimateRemaining$: Observable<number> = this._taskService.estimateRemaining$;
 
+  isHideControls: boolean;
+  workedWithoutABreak = '-';
+  isShowTimeWorkedWithoutBreak = true;
+
   constructor(private _taskService: TaskService) {
   }
 
   ngOnInit() {
+  }
+
+  collapseAllNotesAndSubTasks() {
+
   }
 }

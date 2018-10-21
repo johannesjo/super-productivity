@@ -4,3 +4,44 @@
   max-width: $component-max-width;
   margin: auto;
 }
+
+
+.work-view-header {
+  @media(max-width: $layout-xs) {
+    .label {
+      display: none;
+    }
+    p {
+      margin: 0;
+    }
+  }
+}
+
+.status-bar {
+  display: flex;
+  align-items: center;
+  flex-direction: row;
+  justify-content: center;
+  margin-top: -4px;
+  padding: 10px 0;
+
+  .item {
+    margin: 0 12px;
+  }
+
+  .label{
+    margin-right: $s;
+  }
+
+  .no-wrap {
+    display: inline-block;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+.hide-controls-icon {
+  transform: rotate(90deg);
+}

@@ -1,9 +1,46 @@
 <div class="wrapper">
-  <h2 class="mat-h2"> work-view</h2>
   <add-task-bar></add-task-bar>
 
-  {{workingToday$|async|msToString}}
-  {{estimateRemaining$|async|msToString}}
+  <header class="work-view-header">
+    <div class="status-bar">
+      <div class="item"><span class="label">Working today:</span>
+        <span class="no-wrap">
+      <strong>{{workingToday$|async|msToString}}</strong>
+      <mat-icon aria-label="timer icon">timer</mat-icon>
+      </span>
+      </div>
+
+      <div class="item">
+        <span class="label">Estimate remaining:</span>
+        <span class="no-wrap">
+      ~<strong>{{estimateRemaining$|async|msToString}}</strong>
+      <mat-icon>timer</mat-icon>
+      </span>
+      </div>
+
+      <div class="item"
+           *ngIf="isShowTimeWorkedWithoutBreak">
+        <span class="label">Without break: </span>
+        <span class="no-wrap">
+        <strong>{{workedWithoutABreak}}</strong><mat-icon>timer</mat-icon>
+      </span>
+      </div>
+      <button mat-mini-fab
+              color="primary"
+              (click)="isHideControls = !(isHideControls);"
+              aria-label="collapse sub tasks and notes">
+        <mat-icon class="hide-controls-icon">vertical_align_center</mat-icon>
+      </button>
+
+      <button mat-mini-fab
+              color="primary"
+              (click)="collapseAllNotesAndSubTasks()"
+              aria-label="collapse sub tasks and notes">
+        <mat-icon>vertical_align_center</mat-icon>
+      </button>
+    </div>
+  </header>
+
 
   <task-list [tasks]="undoneTasks$|async"
              [filterArgs]="{'isDone':false}"></task-list>
