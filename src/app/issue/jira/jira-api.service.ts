@@ -11,10 +11,10 @@ import {
 } from './jira.const';
 import { ProjectService } from '../../project/project.service';
 import { mapIssueResponse, mapIssuesResponse, mapResponse } from './jira-issue/jira-issue-map.util';
-import { IS_ELECTRON } from '../../app.constants';
 import { JiraOriginalStatus, JiraOriginalUser } from './jira-api-responses';
 import { JiraIssue } from './jira-issue/jira-issue.model';
 import { JiraCfg } from './jira';
+import { ElectronService } from 'ngx-electron';
 
 
 @Injectable({
@@ -26,15 +26,18 @@ export class JiraApiService {
   isExtension = false;
   cfg: any = {};
 
-  constructor(private _chromeExtensionInterface: ChromeExtensionInterfaceService,
-              private _projectService: ProjectService) {
+  constructor(
+    private _chromeExtensionInterface: ChromeExtensionInterfaceService,
+    private _projectService: ProjectService,
+    private _electronService: ElectronService,
+  ) {
     this._projectService.currentJiraCfg$.subscribe((cfg) => {
       this.cfg = cfg;
     });
 
     // set up callback listener for electron
-    if (IS_ELECTRON) {
-      window.ipcRenderer.on(IPC_JIRA_CB_EVENT, (ev, res) => {
+    if (this._electronService.isElectronApp) {
+      this._electronService.ipcRenderer.on(IPC_JIRA_CB_EVENT, (ev, res) => {
         this._handleResponse(res);
       });
     }
@@ -72,8 +75,6 @@ export class JiraApiService {
   }
 
   getCurrentUser(cfg?: JiraCfg): Promise<JiraOriginalUser> {
-    console.log(cfg);
-    
     return this._sendRequest({
       apiMethod: 'getCurrentUser',
       transform: mapResponse,
@@ -96,8 +97,6 @@ export class JiraApiService {
 
   // TODO refactor data madness of request and add types for everything
   private _sendRequest(request, cfg = this.cfg): Promise<any> {
-    console.log(cfg);
-    
     if (!this._isMinimalSettings(cfg)) {
       console.error('Not enough Jira settings. This should not happen!!!');
       return Promise.reject(new Error('Insufficient Settings for Jira'));
@@ -133,8 +132,8 @@ export class JiraApiService {
     };
 
     // send to electron
-    if (IS_ELECTRON) {
-      window.ipcRenderer.send(IPC_JIRA_MAKE_REQUEST_EVENT, request);
+    if (this._electronService.isElectronApp) {
+      this._electronService.ipcRenderer.send(IPC_JIRA_MAKE_REQUEST_EVENT, request);
     } else if (this.isExtension) {
       this._chromeExtensionInterface.dispatchEvent('SP_JIRA_REQUEST', {
         requestId: request.requestId,

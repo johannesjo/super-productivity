@@ -60,6 +60,7 @@
     "@ngx-formly/material": "^4.7.2",
     "core-js": "^2.5.4",
     "ng2-dragula": "^2.1.0",
+    "ngx-electron": "^1.0.4",
     "ngx-markdown": "^6.2.1",
     "rxjs": "^6.2.2",
     "rxjs-compat": "^6.2.2",
