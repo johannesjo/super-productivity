@@ -72,6 +72,8 @@ export class JiraApiService {
   }
 
   getCurrentUser(cfg?: JiraCfg): Promise<JiraOriginalUser> {
+    console.log(cfg);
+    
     return this._sendRequest({
       apiMethod: 'getCurrentUser',
       transform: mapResponse,
@@ -94,6 +96,8 @@ export class JiraApiService {
 
   // TODO refactor data madness of request and add types for everything
   private _sendRequest(request, cfg = this.cfg): Promise<any> {
+    console.log(cfg);
+    
     if (!this._isMinimalSettings(cfg)) {
       console.error('Not enough Jira settings. This should not happen!!!');
       return Promise.reject(new Error('Insufficient Settings for Jira'));

@@ -17,6 +17,7 @@ export class ProjectEffects {
         ProjectActionTypes.DeleteProject,
         ProjectActionTypes.SetCurrentProject,
         ProjectActionTypes.UpdateProject,
+        ProjectActionTypes.SaveProjectIssueConfig,
       ),
       withLatestFrom(this._store$),
       tap(this._saveToLs.bind(this))

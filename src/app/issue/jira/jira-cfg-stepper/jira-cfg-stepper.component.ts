@@ -23,8 +23,16 @@ export class JiraCfgStepperComponent implements OnInit {
 
   public isTestCredentialsSuccess = false;
   public user: JiraOriginalUser;
+  public jiraCfg: JiraCfg;
 
-  @Input() cfg: JiraCfg = Object.assign({}, DEFAULT_JIRA_CFG);
+  @Input() set cfg(cfg: JiraCfg) {
+    if (cfg) {
+      this.jiraCfg = cfg;
+    } else {
+      this.jiraCfg = Object.assign({}, DEFAULT_JIRA_CFG);
+    }
+  }
+
   @Output() onSaveCfg: EventEmitter<JiraCfg> = new EventEmitter();
 
   constructor(
@@ -37,13 +45,17 @@ export class JiraCfgStepperComponent implements OnInit {
   }
 
   saveCfg() {
-    this.onSaveCfg.emit(this.cfg);
+    this.onSaveCfg.emit(this.jiraCfg);
+  }
+
+  saveStepForm(cfg: JiraCfg) {
+    this.jiraCfg = cfg;
   }
 
   testCredentials() {
     this.isTestCredentialsSuccess = false;
 
-    this._jiraApiService.getCurrentUser(this.cfg)
+    this._jiraApiService.getCurrentUser(this.jiraCfg)
       .then((user: JiraOriginalUser) => {
         this.user = user;
         this.isTestCredentialsSuccess = true;

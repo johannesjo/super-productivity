@@ -76,7 +76,7 @@ export class ProjectService {
 
   updateIssueProviderConfig(projectId: string, issueProviderKey: IssueProviderKey, providerCfg: IssueIntegrationCfg) {
     this._store.dispatch({
-      type: ProjectActionTypes.UpdateProject,
+      type: ProjectActionTypes.SaveProjectIssueConfig,
       payload: {
         projectId,
         issueProviderKey,

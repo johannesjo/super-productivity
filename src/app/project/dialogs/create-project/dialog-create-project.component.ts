@@ -1,12 +1,8 @@
-import { Component } from '@angular/core';
-import { Inject } from '@angular/core';
-import { OnInit } from '@angular/core';
-import { MatDialogRef } from '@angular/material';
-import { MAT_DIALOG_DATA } from '@angular/material';
-import { Project } from '../../project';
+import { Component, Inject, OnInit } from '@angular/core';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material';
+import { IssueIntegrationCfgs, Project } from '../../project';
 import { FormGroup } from '@angular/forms';
-import { FormlyFormOptions } from '@ngx-formly/core';
-import { FormlyFieldConfig } from '@ngx-formly/core';
+import { FormlyFieldConfig, FormlyFormOptions } from '@ngx-formly/core';
 import { ProjectService } from '../../project.service';
 import { DEFAULT_PROJECT } from '../../project.const';
 import { JiraCfg } from '../../../issue/jira/jira';
@@ -42,6 +38,9 @@ const themeOpts = ALL_THEMES.map((theme) => {
 })
 export class DialogCreateProjectComponent implements OnInit {
   public projectData: Project | Partial<Project> = DEFAULT_PROJECT;
+  public jiraCfg: JiraCfg;
+
+  public openPanelId: string;
 
   form = new FormGroup({});
   formOptions: FormlyFormOptions = {
@@ -87,23 +86,36 @@ export class DialogCreateProjectComponent implements OnInit {
 
   ngOnInit() {
     if (this._project) {
-      this.projectData = this._project;
+      this.projectData = Object.assign({}, this._project);
     }
   }
 
   submit() {
-    if (this.projectData.id) {
-      this._projectService.update(this.projectData.id, this.projectData);
+    const issueIntegrationCfgs: IssueIntegrationCfgs = Object.assign(this.projectData.issueIntegrationCfgs, {
+      JIRA: this.jiraCfg,
+      GIT: undefined,
+    });
+
+    const projectDataToSave: Project | Partial<Project> = {
+      ...this.projectData,
+      issueIntegrationCfgs,
+    };
+
+    if (projectDataToSave.id) {
+      this._projectService.update(projectDataToSave.id, projectDataToSave);
     } else {
-      this._projectService.add(this.projectData);
+      this._projectService.add(projectDataToSave);
     }
     this._matDialogRef.close();
   }
 
   saveJiraCfg(jiraCfg: JiraCfg) {
-    console.log(this.projectData);
+    this.jiraCfg = jiraCfg;
 
-    this.projectData.issueIntegrationCfgs['JIRA'] = jiraCfg;
+    if (this.projectData.id) {
+      this._projectService.updateIssueProviderConfig(this.projectData.id, 'JIRA', this.jiraCfg);
+    }
+    this.openPanelId = undefined;
   }
 
   cancelEdit() {
