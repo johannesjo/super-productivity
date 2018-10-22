@@ -14,15 +14,13 @@ import { expandAnimation } from '../../ui/animations/expand.ani';
   selector: 'task',
   templateUrl: './task.component.html',
   styleUrls: ['./task.component.scss'],
-  host: {
-    'class': 'mat-elevation-z4'
-  },
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [expandAnimation]
 })
 export class TaskComponent implements OnInit, DoCheck {
   // @Input() task: Task;
   @Input() task: any;
+  @HostBinding('tabindex') tabIndex = 1 ;
   @HostBinding('class.is-done') isDone = false;
   @HostBinding('class.is-current') isCurrent = false;
   currentTaskId$: Observable<string>;
