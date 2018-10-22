@@ -36,6 +36,7 @@ import { FormlyModule } from '@ngx-formly/core';
 import { ThemeSelectComponent } from './theme-select/theme-select.component';
 import { MsToStringPipe } from './duration/ms-to-string.pipe';
 import { StringToMsPipe } from './duration/string-to-ms.pipe';
+import { ProgressBarComponent } from './progress-bar/progress-bar.component';
 
 @NgModule({
   imports: [
@@ -80,6 +81,7 @@ import { StringToMsPipe } from './duration/string-to-ms.pipe';
     ThemeSelectComponent,
     MsToStringPipe,
     StringToMsPipe,
+    ProgressBarComponent,
   ],
   exports: [
     DurationFromStringPipe,
@@ -88,6 +90,8 @@ import { StringToMsPipe } from './duration/string-to-ms.pipe';
     EditOnClickDirective,
     InlineMarkdownComponent,
     ThemeSelectComponent,
+    ProgressBarComponent,
+
     MsToStringPipe,
     StringToMsPipe,
 

@@ -127,9 +127,7 @@
     </div>
   </div>
 
-  <mat-progress-bar mode="determinate"
-                    [value]="task.progress"></mat-progress-bar>
-
+  <progress-bar [progress]="progress"></progress-bar>
 
   <task-additional-info class="notes"
                         *ngIf="task.isNotesOpen"

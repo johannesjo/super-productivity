@@ -1,5 +1,4 @@
-import { Component, DoCheck, HostBinding, Input, OnInit } from '@angular/core';
-import { ChangeDetectionStrategy } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DoCheck, HostBinding, Input, OnInit } from '@angular/core';
 import { TaskService } from '../task.service';
 import { Observable } from 'rxjs';
 import { DragulaService } from 'ng2-dragula';
@@ -34,6 +33,10 @@ export class TaskComponent implements OnInit, DoCheck {
     private readonly _dragulaService: DragulaService,
     private readonly _matDialog: MatDialog
   ) {
+  }
+
+  public get progress() {
+    return this.task && this.task.timeEstimate && (this.task.timeSpent / this.task.timeEstimate) * 100;
   }
 
   ngDoCheck() {
