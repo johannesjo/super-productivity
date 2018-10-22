@@ -2,8 +2,8 @@ import { Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material';
 import { Task } from '../../task.model';
 import { TaskService } from '../../task.service';
-import { formatWorklogDateStr } from '../../../util/format-worklog-date-str';
 import { getTodayStr } from '../../util/get-today-str';
+import { formatWorklogDateStr } from '../../../core/util/format-worklog-date-str';
 
 @Component({
   selector: 'dialog-time-estimate',

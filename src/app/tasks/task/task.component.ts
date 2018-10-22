@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, DoCheck, HostBinding, Input, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, HostBinding, HostListener, Input, OnInit } from '@angular/core';
 import { TaskService } from '../task.service';
 import { Observable } from 'rxjs';
 import { DragulaService } from 'ng2-dragula';
@@ -7,6 +7,7 @@ import shortid from 'shortid';
 import { MatDialog } from '@angular/material';
 import { DialogTimeEstimateComponent } from '../dialogs/dialog-time-estimate/dialog-time-estimate.component';
 import { expandAnimation } from '../../ui/animations/expand.ani';
+import { checkKeyCombo } from '../../core/util/check-key-combo';
 
 // import {Task} from './task'
 
@@ -17,28 +18,33 @@ import { expandAnimation } from '../../ui/animations/expand.ani';
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [expandAnimation]
 })
-export class TaskComponent implements OnInit, DoCheck {
+export class TaskComponent implements OnInit {
   // @Input() task: Task;
   @Input() task: any;
-  @HostBinding('tabindex') tabIndex = 1 ;
-  @HostBinding('class.is-done') isDone = false;
+  @HostBinding('tabindex') tabIndex = 1;
+
+  @HostBinding('class.is-done')
+  private get _isDone() {
+    return this.task.isDone;
+  }
+
   @HostBinding('class.is-current') isCurrent = false;
   currentTaskId$: Observable<string>;
   subTaskListId: string;
 
+  @HostListener('keyup', ['$event']) onKeyDown(ev) {
+    console.log(ev);
+  }
+
   constructor(
     private readonly _taskService: TaskService,
     private readonly _dragulaService: DragulaService,
-    private readonly _matDialog: MatDialog
+    private readonly _matDialog: MatDialog,
   ) {
   }
 
   public get progress() {
     return this.task && this.task.timeEstimate && (this.task.timeSpent / this.task.timeEstimate) * 100;
-  }
-
-  ngDoCheck() {
-    this.isDone = this.task.isDone;
   }
 
   ngOnInit() {
