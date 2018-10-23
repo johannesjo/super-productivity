@@ -19,8 +19,6 @@ export interface TaskState extends EntityState<Task> {
   // TODO though this not so much maybe
   // todayDoneTasks: string[];
   // todayUnDoneTasks: string[];
-
-  // subTasks: string[];
 }
 
 export const taskAdapter: EntityAdapter<Task> = createEntityAdapter<Task>();
@@ -39,11 +37,7 @@ const mapSubTasksToTasks = (tasks__) => {
         return {
           ...task,
           subTasks: task.subTaskIds
-            .map((subTaskId) => {
-              return tasks__.find((task_) => task_.id === subTaskId);
-            })
-          // filter out undefined
-          // .filter((subTask) => !!subTask)
+            .map((subTaskId) => tasks__.find((task_) => task_.id === subTaskId))
         };
       } else {
         return task;
@@ -92,15 +86,15 @@ export function taskReducer(
     // Meta Actions
     // ------------
     case TaskActionTypes.LoadState: {
-      return Object.assign({}, action.payload.state);
+      return {...action.payload.state};
     }
 
     case TaskActionTypes.SetCurrentTask: {
-      return Object.assign({}, state, {currentTaskId: action.payload});
+      return {...state, currentTaskId: action.payload};
     }
 
     case TaskActionTypes.UnsetCurrentTask: {
-      return Object.assign({}, state, {currentTaskId: null});
+      return {...state, currentTaskId: null};
     }
 
     // Task Actions
@@ -140,28 +134,29 @@ export function taskReducer(
       return taskAdapter.updateMany(action.payload.tasks, state);
     }
 
+    // TODO also delete related issue :(
     case TaskActionTypes.DeleteTask: {
-      const parentId = state.entities[action.payload.id].parentId;
+      const currentTask = state.entities[action.payload.id];
       // delete entry
-      const stateCopy = taskAdapter.removeOne(action.payload.id, state);
+      let stateCopy = taskAdapter.removeOne(action.payload.id, state);
 
-      // also delete from parent task
+      // also delete from parent task if any
+      const parentId = currentTask.parentId;
       if (parentId) {
         const subTasksArray = stateCopy.entities[parentId].subTaskIds;
         subTasksArray.splice(subTasksArray.indexOf(action.payload.id), 1);
       }
+
+      // also delete all sub tasks if any
+      if (currentTask.subTaskIds) {
+        stateCopy = {...stateCopy, ...taskAdapter.removeMany(currentTask.subTaskIds, state)};
+      }
+
       return {
         ...stateCopy,
+        // finally delete from backlog or todays tasks
         backlogTaskIds: state.backlogTaskIds.filter((id) => id !== action.payload.id),
         todaysTaskIds: state.todaysTaskIds.filter((id) => id !== action.payload.id),
-      };
-    }
-
-    case TaskActionTypes.DeleteTasks: {
-      return {
-        ...taskAdapter.removeMany(action.payload.ids, state),
-        backlogTaskIds: state.backlogTaskIds.filter((id) => !(action.payload.ids.indexOf(id) > -1)),
-        todaysTaskIds: state.todaysTaskIds.filter((id) => !(action.payload.ids.indexOf(id) > -1)),
       };
     }
 
@@ -179,9 +174,8 @@ export function taskReducer(
       const targetIndex = action.payload.targetItemId ? newStateIds.indexOf(action.payload.targetItemId) : 0;
       newStateIds.splice(targetIndex, 0, action.payload.taskId);
 
-      return Object.assign({}, state, {
-        ids: newStateIds,
-      });
+      // TODO update for specific list only
+      return {...state, ids: newStateIds};
     }
 
     case TaskActionTypes.AddTimeSpent: {
@@ -203,6 +197,7 @@ export function taskReducer(
     }
 
     case TaskActionTypes.UpdateTimeSpent: {
+      // TODO update parent
       return taskAdapter.updateOne({
         id: action.payload.taskId,
         changes: {

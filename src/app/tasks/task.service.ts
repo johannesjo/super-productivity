@@ -25,11 +25,8 @@ export class TaskService {
   currentTaskId$: Observable<string> = this._store.pipe(select(selectCurrentTask));
 
   tasks$: Observable<TaskWithSubTasks[]> = this._store.pipe(select(selectAllTasksWithSubTasks));
-
   todaysTasks$: Observable<TaskWithSubTasks[]> = this._store.pipe(select(selectTodaysTasksWithSubTasks));
-
   backlogTasks$: Observable<TaskWithSubTasks[]> = this._store.pipe(select(selectBacklogTasksWithSubTasks));
-
 
   undoneTasks$: Observable<TaskWithSubTasks[]> = this.todaysTasks$.pipe(map(
     (tasks) => tasks && tasks.filter((task: TaskWithSubTasks) => !task.isDone)

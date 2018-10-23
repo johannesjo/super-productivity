@@ -8,7 +8,6 @@ export type Task = Readonly<{
   id: string;
   title: string;
   isDone?: boolean;
-  isBacklogTask?: boolean;
   isNotesOpen?: boolean;
   notes?: string;
   issueId?: string;

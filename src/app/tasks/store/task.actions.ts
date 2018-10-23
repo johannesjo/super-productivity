@@ -16,7 +16,6 @@ export enum TaskActionTypes {
   UpdateTask = '[Task] Update Task',
   UpdateTasks = '[Task] Update Tasks',
   DeleteTask = '[Task] Delete Task',
-  DeleteTasks = '[Task] Delete Tasks',
   ClearTasks = '[Task] Clear Tasks',
   MoveAfter = '[Task] Move After',
   AddTimeSpent = '[Task] Add time spent',
@@ -87,13 +86,6 @@ export class DeleteTask implements Action {
   }
 }
 
-export class DeleteTasks implements Action {
-  readonly type = TaskActionTypes.DeleteTasks;
-
-  constructor(public payload: { ids: string[] }) {
-  }
-}
-
 export class ClearTasks implements Action {
   readonly type = TaskActionTypes.ClearTasks;
 }
@@ -136,7 +128,6 @@ export type TaskActions
   | UpdateTask
   | UpdateTasks
   | DeleteTask
-  | DeleteTasks
   | ClearTasks
   | MoveAfter
   | AddTimeSpent
