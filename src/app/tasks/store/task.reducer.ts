@@ -76,6 +76,18 @@ export const initialTaskState: TaskState = taskAdapter.getInitialState({
   backlogTaskIds: [],
 });
 
+const moveTaskInArray = (arr_, taskId, targetId) => {
+  if (arr_.indexOf(taskId) > -1) {
+    const arr = arr_.splice(0);
+    arr.splice(arr.indexOf(taskId), 1);
+    const targetIndex = targetId ? arr.indexOf(targetId) : 0;
+    arr.splice(targetIndex, 0, taskId);
+    return arr;
+  } else {
+    return arr_;
+  }
+};
+
 export function taskReducer(
   state = initialTaskState,
   action: TaskActions
@@ -169,13 +181,15 @@ export function taskReducer(
     }
 
     case TaskActionTypes.MoveAfter: {
-      const newStateIds: string[] = state.ids.slice(0) as string[];
-      newStateIds.splice(newStateIds.indexOf(action.payload.taskId), 1);
-      const targetIndex = action.payload.targetItemId ? newStateIds.indexOf(action.payload.targetItemId) : 0;
-      newStateIds.splice(targetIndex, 0, action.payload.taskId);
-
-      // TODO update for specific list only
-      return {...state, ids: newStateIds};
+      const taskId = action.payload.taskId;
+      const targetId = action.payload.targetItemId;
+      // TODO handle sub task case
+      return {
+        ...state,
+        ids: moveTaskInArray(state.ids, taskId, targetId),
+        backlogTaskIds: moveTaskInArray(state.backlogTaskIds, taskId, targetId),
+        todaysTaskIds: moveTaskInArray(state.todaysTaskIds, taskId, targetId),
+      };
     }
 
     case TaskActionTypes.AddTimeSpent: {
