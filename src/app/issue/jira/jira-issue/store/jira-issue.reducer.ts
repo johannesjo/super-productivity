@@ -3,8 +3,9 @@ import { JiraIssueActions, JiraIssueActionTypes } from './jira-issue.actions';
 import { JiraIssue } from '../jira-issue.model';
 import { createFeatureSelector, createSelector } from '@ngrx/store';
 import { TaskActionTypes } from '../../../../tasks/store/task.actions';
+import { IssueProviderKey } from '../../../issue';
 
-export const JIRA_ISSUE_FEATURE_NAME = 'issues';
+export const JIRA_ISSUE_FEATURE_NAME: IssueProviderKey = 'JIRA';
 
 export interface JiraIssueState extends EntityState<JiraIssue> {
   // additional entities state properties
@@ -12,7 +13,6 @@ export interface JiraIssueState extends EntityState<JiraIssue> {
 }
 
 export const jiraIssueAdapter: EntityAdapter<JiraIssue> = createEntityAdapter<JiraIssue>();
-
 
 // SELECTORS
 // ---------

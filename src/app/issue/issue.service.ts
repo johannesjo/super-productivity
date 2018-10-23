@@ -1,8 +1,5 @@
-import { map } from 'rxjs/operators';
 import { Injectable } from '@angular/core';
-import { JiraIssueService } from './jira/jira-issue/jira-issue.service';
-import { combineLatest, Observable } from 'rxjs';
-import { IssueEntityMap, IssueProviderKey } from './issue';
+import { IssueProviderKey } from './issue';
 import { JiraIssueContentComponent } from './jira/jira-issue/jira-issue-content/jira-issue-content.component';
 import { JiraIssueHeaderComponent } from './jira/jira-issue/jira-issue-header/jira-issue-header.component';
 
@@ -10,15 +7,7 @@ import { JiraIssueHeaderComponent } from './jira/jira-issue/jira-issue-header/ji
   providedIn: 'root'
 })
 export class IssueService {
-  public issueEntityMap$: Observable<IssueEntityMap> = combineLatest(
-    this._jiraIssueService.jiraIssuesEntities$
-  ).pipe(map(([jiraEntities]) => {
-    return {
-      JIRA: jiraEntities
-    };
-  }));
-
-  constructor(private _jiraIssueService: JiraIssueService) {
+  constructor() {
   }
 
   public getTabHeader(issueType: IssueProviderKey) {

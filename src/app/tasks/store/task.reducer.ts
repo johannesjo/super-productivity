@@ -3,6 +3,8 @@ import { TaskActions, TaskActionTypes } from './task.actions';
 import { Task } from '../task.model';
 import { createFeatureSelector, createSelector } from '@ngrx/store';
 import { calcTotalTimeSpent } from '../util/calc-total-time-spent';
+import { selectIssueEntityMap } from '../../issue/issue.selector';
+import { tasks } from 'googleapis/build/src/apis/tasks';
 
 export const TASK_FEATURE_NAME = 'tasks';
 
@@ -23,25 +25,53 @@ export interface TaskState extends EntityState<Task> {
 
 export const taskAdapter: EntityAdapter<Task> = createEntityAdapter<Task>();
 
+const mapIssueDataToTask = (tasks_, issueEntityMap) => {
+  return tasks_ && tasks_.map((task) => {
+    const issueData = (task.issueId && task.issueType) && issueEntityMap[task.issueType][task.issueId];
+    return issueData ? {...task, issueData: issueData} : task;
+  });
+};
+
+const mapSubTasksToTasks = (tasks__) => {
+  return tasks__.filter((task) => !task.parentId)
+    .map((task) => {
+      if (task.subTaskIds && task.subTaskIds.length > 0) {
+        return {
+          ...task,
+          subTasks: task.subTaskIds
+            .map((subTaskId) => {
+              return tasks__.find((task_) => task_.id === subTaskId);
+            })
+          // filter out undefined
+          // .filter((subTask) => !!subTask)
+        };
+      } else {
+        return task;
+      }
+    });
+};
+
+const mapTasksFromIds = (tasks__, ids) => {
+  return ids.map(id => tasks__.find(task => task.id === id));
+};
 
 // SELECTORS
 // ---------
-export const selectTaskFeatureState = createFeatureSelector<TaskState>(TASK_FEATURE_NAME);
-
 const {selectIds, selectEntities, selectAll, selectTotal} = taskAdapter.getSelectors();
-
-export const selectAllTasks = createSelector(selectTaskFeatureState, selectAll);
-
-// export const selectAllTasksWithIssueData = createSelector((state) => {
-//   const tasks = state[TASK_FEATURE_NAME];
-//   const issues = state[JIRA_ISSUE_FEATURE_NAME];
-//   return state.tasks;
-// });
-// const selectBacklogTasks = createSelector(selectTaskFeatureState, (state) => state.backlogTaskIds.map(id => state.entities[id]));
-
-export const selectCurrentTask = createSelector(selectTaskFeatureState, state => state.currentTaskId);
+export const selectTaskFeatureState = createFeatureSelector<TaskState>(TASK_FEATURE_NAME);
 export const selectBacklogTaskIds = createSelector(selectTaskFeatureState, state => state.backlogTaskIds);
 export const selectTodaysTaskIds = createSelector(selectTaskFeatureState, state => state.todaysTaskIds);
+export const selectCurrentTask = createSelector(selectTaskFeatureState, state => state.currentTaskId);
+
+
+export const selectAllTasks = createSelector(selectTaskFeatureState, selectAll);
+export const selectAllTasksWithIssueData = createSelector(selectAllTasks, selectIssueEntityMap, mapIssueDataToTask);
+
+export const selectAllTasksWithSubTasks = createSelector(selectAllTasksWithIssueData, mapSubTasksToTasks);
+
+export const selectTodaysTasksWithSubTasks = createSelector(selectAllTasksWithSubTasks, selectTodaysTaskIds, mapTasksFromIds);
+
+export const selectBacklogTasksWithSubTasks = createSelector(selectAllTasksWithSubTasks, selectBacklogTaskIds, mapTasksFromIds);
 
 
 // REDUCER
