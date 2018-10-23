@@ -1,11 +1,11 @@
 import { map, withLatestFrom } from 'rxjs/operators';
 import { Injectable } from '@angular/core';
 import { combineLatest, Observable } from 'rxjs';
-import { Task, TaskWithAllData, TaskWithSubTaskData } from './task.model';
+import { Task, TaskWithSubTasks } from './task.model';
 import { select, Store } from '@ngrx/store';
 import { TaskActionTypes } from './store/task.actions';
 import shortid from 'shortid';
-import { initialTaskState, selectAllTasks, selectCurrentTask, selectMainTasksWithSubTasks } from './store/task.reducer';
+import { initialTaskState, selectAllTasks, selectCurrentTask } from './store/task.reducer';
 import { ProjectService } from '../project/project.service';
 import { PersistenceService } from '../core/persistence/persistence.service';
 import { IssueService } from '../issue/issue.service';
@@ -13,46 +13,67 @@ import { IssueProviderKey } from '../issue/issue';
 import { TimeTrackingService } from '../core/time-tracking/time-tracking.service';
 import { Tick } from '../core/time-tracking/time-tracking';
 
+const mapIssueDataToTasks = map(([tasks, issueEntityMap]) => tasks.map((task) => {
+  const issueData = (task.issueId && task.issueType) && issueEntityMap[task.issueType][task.issueId];
+  return issueData ? {...task, issueData: issueData} : task;
+}));
+
+const mapSubTasksToTasks = map(tasks => {
+  return tasks.filter((task) => !task.parentId)
+    .map((task) => {
+      if (task.subTaskIds && task.subTaskIds.length > 0) {
+        return {
+          ...task,
+          subTasks: task.subTaskIds
+            .map((subTaskId) => {
+              return tasks.find((task_) => task_.id === subTaskId);
+            })
+          // filter out undefined
+          // .filter((subTask) => !!subTask)
+        };
+      } else {
+        return task;
+      }
+    });
+});
+
+
 @Injectable()
 export class TaskService {
   currentTaskId$: Observable<string> = this._store.pipe(select(selectCurrentTask));
-  flatTasks$: Observable<Task[]> = this._store.pipe(select(selectAllTasks));
 
-  // TODO map issue data before sub tasks
-  tasksWithSubTasks$: Observable<TaskWithSubTaskData[]> = this._store.pipe(select(selectMainTasksWithSubTasks));
+  tasks$: Observable<TaskWithSubTasks[]> = combineLatest(
+    this._store.pipe(select(selectAllTasks)),
+    this._issueService.issueEntityMap$
+  ).pipe(mapIssueDataToTasks, mapSubTasksToTasks);
 
-  tasks$: Observable<TaskWithAllData[]> = combineLatest(this.tasksWithSubTasks$, this._issueService.issueEntityMap$).pipe(
-    map(([tasks, issueEntityMap]) => tasks.map((task) => {
-      const issueData = (task.issueId && task.issueType) && issueEntityMap[task.issueType][task.issueId];
-      return issueData ? Object.assign({issueData: issueData}, task) : task;
-    })));
+  backlogTasks$: Observable<TaskWithSubTasks[]> =
+    this.tasks$.pipe(map(
+      (tasks) => tasks && tasks.filter((task: TaskWithSubTasks) => task.isBacklogTask)
+    ));
 
-  backlogTasks$: Observable<TaskWithAllData[]> = this.tasks$.pipe(map(
-    (tasks) => tasks && tasks.filter((task: TaskWithAllData) => task.isBacklogTask)
+  todaysTasks$: Observable<TaskWithSubTasks[]> = this.tasks$.pipe(map(
+    (tasks) => tasks && tasks.filter((task: TaskWithSubTasks) => !task.isBacklogTask)
   ));
 
-  todaysTasks$: Observable<TaskWithAllData[]> = this.tasks$.pipe(map(
-    (tasks) => tasks && tasks.filter((task: TaskWithAllData) => !task.isBacklogTask)
+  undoneTasks$: Observable<TaskWithSubTasks[]> = this.todaysTasks$.pipe(map(
+    (tasks) => tasks && tasks.filter((task: TaskWithSubTasks) => !task.isDone)
   ));
-
-  undoneTasks$: Observable<TaskWithAllData[]> = this.todaysTasks$.pipe(map(
-    (tasks) => tasks && tasks.filter((task: TaskWithAllData) => !task.isDone)
-  ));
-  doneTasks$: Observable<TaskWithAllData[]> = this.todaysTasks$.pipe(map(
-    (tasks) => tasks && tasks.filter((task: TaskWithAllData) => task.isDone)
+  doneTasks$: Observable<TaskWithSubTasks[]> = this.todaysTasks$.pipe(map(
+    (tasks) => tasks && tasks.filter((task: TaskWithSubTasks) => task.isDone)
   ));
 
 
   // META FIELDS
   // -----------
   missingIssuesForTasks$ = this.tasks$.pipe(map(
-    (tasks) => tasks && tasks.filter((task: TaskWithAllData) => (!task.issueData && (task.issueType || task.issueId)))
+    (tasks) => tasks && tasks.filter((task: TaskWithSubTasks) => (!task.issueData && (task.issueType || task.issueId)))
       .map(task => task.issueId)
   ));
 
 
   // TODO could be more efficient than using combine latest
-  workingToday$: Observable<any> = combineLatest(this.flatTasks$, this._timeTrackingService.tick$).pipe(
+  workingToday$: Observable<any> = combineLatest(this.tasks$, this._timeTrackingService.tick$).pipe(
     map(([tasks, tick]) => tasks && tasks.length && tasks.reduce((acc, task) => {
         return acc + (
           (task.timeSpentOnDay && +task.timeSpentOnDay[tick.date])
@@ -63,7 +84,7 @@ export class TaskService {
     // throttleTime(50)
   );
 
-  estimateRemaining$: Observable<any> = this.flatTasks$.pipe(
+  estimateRemaining$: Observable<any> = this.tasks$.pipe(
     map((tasks) => tasks && tasks.length && tasks.reduce((acc, task) => {
         const estimateRemaining = (+task.timeEstimate) - (+task.timeSpent);
         const isTrackVal = (estimateRemaining > 0) && !task.isDone;
@@ -83,11 +104,11 @@ export class TaskService {
     private readonly _persistenceService: PersistenceService,
     private readonly _timeTrackingService: TimeTrackingService,
   ) {
+    // this.test$.subscribe((val) => console.log(val));
     this.missingIssuesForTasks$.subscribe((val) => {
       if (val && val.length > 0) {
         console.error('MISSING ISSUE', val);
       }
-
     });
 
     this._projectService.currentId$.subscribe((projectId) => {
@@ -135,7 +156,7 @@ export class TaskService {
 
   // Tasks
   // -----
-  add(title: string) {
+  add(title: string, isAddToBacklog = true) {
     this._store.dispatch({
       type: TaskActionTypes.AddTask,
       payload: {
@@ -144,26 +165,28 @@ export class TaskService {
           id: shortid(),
           isDone: false,
           subTaskIds: []
-        }
+        },
+        isAddToBacklog
       }
     });
   }
 
 
-  addWithIssue(title: string, issueType: IssueProviderKey, issueData) {
-    console.log(title, issueType, issueData);
+  addWithIssue(title: string, issueType: IssueProviderKey, issue: any, isAddToBacklog = false) {
+    console.log(title, issueType, issue);
     this._store.dispatch({
       type: TaskActionTypes.AddTaskWithIssue,
       payload: {
         task: {
           title,
-          issueId: issueData.id,
+          issueId: issue.id,
           issueType: issueType,
           id: shortid(),
           isDone: false,
           subTaskIds: []
         },
-        issue: issueData
+        issue,
+        isAddToBacklog
       }
     });
   }

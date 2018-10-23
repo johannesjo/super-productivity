@@ -1,6 +1,6 @@
 import { Action } from '@ngrx/store';
 import { Update } from '@ngrx/entity';
-import { Task, TaskWithAllData, TimeSpentOnDay } from '../task.model';
+import { Task, TaskWithSubTasks, TimeSpentOnDay } from '../task.model';
 import { TaskState } from './task.reducer';
 import { Tick } from '../../core/time-tracking/time-tracking';
 
@@ -13,7 +13,6 @@ export enum TaskActionTypes {
   LoadTasks = '[Task] Load Tasks',
   AddTask = '[Task] Add Task',
   AddTaskWithIssue = '[Task]/[Issue] Add Task with Issue',
-  AddTasks = '[Task] Add Tasks',
   UpdateTask = '[Task] Update Task',
   UpdateTasks = '[Task] Update Tasks',
   DeleteTask = '[Task] Delete Task',
@@ -55,7 +54,7 @@ export class LoadTasks implements Action {
 export class AddTask implements Action {
   readonly type = TaskActionTypes.AddTask;
 
-  constructor(public payload: { task: Task }) {
+  constructor(public payload: { task: Task, isAddToBacklog: boolean }) {
   }
 }
 
@@ -63,14 +62,7 @@ export class AddTaskWithIssue implements Action {
   readonly type = TaskActionTypes.AddTaskWithIssue;
 
   // TODO right type for issue
-  constructor(public payload: { task: TaskWithAllData, issue: any }) {
-  }
-}
-
-export class AddTasks implements Action {
-  readonly type = TaskActionTypes.AddTasks;
-
-  constructor(public payload: { tasks: Task[] }) {
+  constructor(public payload: { task: Task, issue: any, isAddToBacklog: boolean }) {
   }
 }
 
@@ -141,7 +133,6 @@ export type TaskActions
   | UnsetCurrentTask
   | AddTask
   | AddTaskWithIssue
-  | AddTasks
   | UpdateTask
   | UpdateTasks
   | DeleteTask

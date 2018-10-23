@@ -21,12 +21,13 @@ export type Task = Readonly<{
   parentId?: string;
 }>;
 
-
-export interface TaskWithSubTaskData extends Task {
-  readonly subTasks?: TaskWithAllData[];
-}
-
-export interface TaskWithAllData extends TaskWithSubTaskData {
+export interface TaskWithIssueData  extends Task {
   readonly issueData?: any;
 }
+
+
+export interface TaskWithSubTasks extends TaskWithIssueData {
+  readonly subTasks?: TaskWithIssueData[];
+}
+
 

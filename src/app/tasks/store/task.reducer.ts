@@ -9,6 +9,16 @@ export const TASK_FEATURE_NAME = 'tasks';
 export interface TaskState extends EntityState<Task> {
   // additional entities state properties
   currentTaskId: string | null;
+
+  // NOTE: but it is not needed currently
+  todaysTaskIds: string[];
+  backlogTaskIds: string[];
+
+  // TODO though this not so much maybe
+  // todayDoneTasks: string[];
+  // todayUnDoneTasks: string[];
+
+  // subTasks: string[];
 }
 
 export const taskAdapter: EntityAdapter<Task> = createEntityAdapter<Task>();
@@ -20,40 +30,26 @@ export const selectTaskFeatureState = createFeatureSelector<TaskState>(TASK_FEAT
 
 const {selectIds, selectEntities, selectAll, selectTotal} = taskAdapter.getSelectors();
 
-export const selectTaskIds = createSelector(selectTaskFeatureState, selectIds);
-export const selectTaskEntities = createSelector(selectTaskFeatureState, selectEntities);
 export const selectAllTasks = createSelector(selectTaskFeatureState, selectAll);
 
-// select the total user count
-export const selectTaskTotal = createSelector(selectTaskFeatureState, selectTotal);
+// export const selectAllTasksWithIssueData = createSelector((state) => {
+//   const tasks = state[TASK_FEATURE_NAME];
+//   const issues = state[JIRA_ISSUE_FEATURE_NAME];
+//   return state.tasks;
+// });
+// const selectBacklogTasks = createSelector(selectTaskFeatureState, (state) => state.backlogTaskIds.map(id => state.entities[id]));
 
 export const selectCurrentTask = createSelector(selectTaskFeatureState, state => state.currentTaskId);
-
-export const selectMainTasksWithSubTasks = createSelector(
-  selectAllTasks,
-  tasks => tasks
-    .filter((task) => !task.parentId)
-    .map((task) => {
-      if (task.subTaskIds && task.subTaskIds.length > 0) {
-        const newTask: any = Object.assign({}, task);
-        newTask.subTasks = task.subTaskIds
-          .map((subTaskId) => {
-            return tasks.find((task_) => task_.id === subTaskId);
-          })
-          // filter out undefined
-          .filter((subTask) => !!subTask);
-        return newTask;
-      } else {
-        return task;
-      }
-    })
-);
+export const selectBacklogTaskIds = createSelector(selectTaskFeatureState, state => state.backlogTaskIds);
+export const selectTodaysTaskIds = createSelector(selectTaskFeatureState, state => state.todaysTaskIds);
 
 
 // REDUCER
 // -------
 export const initialTaskState: TaskState = taskAdapter.getInitialState({
   currentTaskId: null,
+  todaysTaskIds: [],
+  backlogTaskIds: [],
 });
 
 export function taskReducer(
@@ -79,16 +75,26 @@ export function taskReducer(
 
     // Task Actions
     // ------------
+    // TODO maybe merge with AddTask
     case TaskActionTypes.AddTaskWithIssue: {
-      return taskAdapter.addOne(action.payload.task, state);
+      return {
+        ...taskAdapter.addOne(action.payload.task, state),
+        backlogTaskIds: [action.payload.task.id, ...state.backlogTaskIds],
+        todaysTaskIds: [action.payload.task.id, ...state.todaysTaskIds]
+      };
     }
 
     case TaskActionTypes.AddTask: {
-      return taskAdapter.addOne(action.payload.task, state);
-    }
-
-    case TaskActionTypes.AddTasks: {
-      return taskAdapter.addMany(action.payload.tasks, state);
+      return {
+        ...taskAdapter.addOne(action.payload.task, state),
+        ...(
+          action.payload.isAddToBacklog ? {
+            backlogTaskIds: [action.payload.task.id, ...state.backlogTaskIds]
+          } : {
+            todaysTaskIds: [action.payload.task.id, ...state.todaysTaskIds]
+          }
+        ),
+      };
     }
 
     case TaskActionTypes.UpdateTask: {

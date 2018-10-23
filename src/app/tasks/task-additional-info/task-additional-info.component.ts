@@ -7,7 +7,7 @@ import { ComponentFactory } from '@angular/core';
 import { ComponentFactoryResolver } from '@angular/core';
 import { ViewContainerRef } from '@angular/core';
 import { AfterViewInit } from '@angular/core';
-import { TaskWithAllData } from '../task.model';
+import { TaskWithSubTasks } from '../task.model';
 import { IssueService } from '../../issue/issue.service';
 
 @Component({
@@ -17,7 +17,7 @@ import { IssueService } from '../../issue/issue.service';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TaskAdditionalInfoComponent implements OnInit, AfterViewInit {
-  @Input() task: TaskWithAllData;
+  @Input() task: TaskWithSubTasks;
 
   @Output() onTaskNotesChanged: EventEmitter<string> = new EventEmitter();
   @ViewChild('issueHeader', {read: ViewContainerRef}) issueHeaderEl: ViewContainerRef;
@@ -41,7 +41,7 @@ export class TaskAdditionalInfoComponent implements OnInit, AfterViewInit {
     this.onTaskNotesChanged.emit($event);
   }
 
-  private _loadIssueTemplates(task: TaskWithAllData) {
+  private _loadIssueTemplates(task: TaskWithSubTasks) {
     this._renderComponent(
       this._issueService.getTabContent(task.issueType),
       this.issueContentEl,
@@ -55,7 +55,7 @@ export class TaskAdditionalInfoComponent implements OnInit, AfterViewInit {
     );
   }
 
-  private _renderComponent(componentToRender, targetEl, task: TaskWithAllData) {
+  private _renderComponent(componentToRender, targetEl, task: TaskWithSubTasks) {
     if (componentToRender) {
       const factory: ComponentFactory<any> = this._resolver.resolveComponentFactory(componentToRender);
       const ref = targetEl.createComponent(factory);

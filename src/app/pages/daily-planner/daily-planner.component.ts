@@ -1,6 +1,6 @@
 import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { Observable } from 'rxjs';
-import { TaskWithAllData } from '../../tasks/task.model';
+import { TaskWithSubTasks } from '../../tasks/task.model';
 import { TaskService } from '../../tasks/task.service';
 
 @Component({
@@ -10,8 +10,8 @@ import { TaskService } from '../../tasks/task.service';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DailyPlannerComponent implements OnInit {
-  todaysTasks$: Observable<TaskWithAllData[]> = this._taskService.todaysTasks$;
-  backlogTasks$: Observable<TaskWithAllData[]> = this._taskService.backlogTasks$;
+  todaysTasks$: Observable<TaskWithSubTasks[]> = this._taskService.todaysTasks$;
+  backlogTasks$: Observable<TaskWithSubTasks[]> = this._taskService.backlogTasks$;
 
   constructor(private _taskService: TaskService) {
   }

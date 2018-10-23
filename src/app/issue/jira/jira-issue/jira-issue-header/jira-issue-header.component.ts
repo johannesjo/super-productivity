@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { Input } from '@angular/core';
-import { TaskWithAllData } from '../../../../tasks/task.model';
+import { TaskWithSubTasks } from '../../../../tasks/task.model';
 
 @Component({
   selector: 'issue-header.issue-tab-header',
@@ -9,7 +9,7 @@ import { TaskWithAllData } from '../../../../tasks/task.model';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class JiraIssueHeaderComponent implements OnInit {
-  @Input() public task: TaskWithAllData;
+  @Input() public task: TaskWithSubTasks;
 
   constructor() {
   }
