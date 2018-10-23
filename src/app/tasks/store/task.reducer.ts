@@ -109,8 +109,13 @@ export function taskReducer(
     case TaskActionTypes.AddTaskWithIssue: {
       return {
         ...taskAdapter.addOne(action.payload.task, state),
-        backlogTaskIds: [action.payload.task.id, ...state.backlogTaskIds],
-        todaysTaskIds: [action.payload.task.id, ...state.todaysTaskIds]
+        ...(
+          action.payload.isAddToBacklog ? {
+            backlogTaskIds: [action.payload.task.id, ...state.backlogTaskIds]
+          } : {
+            todaysTaskIds: [action.payload.task.id, ...state.todaysTaskIds]
+          }
+        ),
       };
     }
 
@@ -139,16 +144,25 @@ export function taskReducer(
       const parentId = state.entities[action.payload.id].parentId;
       // delete entry
       const stateCopy = taskAdapter.removeOne(action.payload.id, state);
+
       // also delete from parent task
       if (parentId) {
         const subTasksArray = stateCopy.entities[parentId].subTaskIds;
         subTasksArray.splice(subTasksArray.indexOf(action.payload.id), 1);
       }
-      return stateCopy;
+      return {
+        ...stateCopy,
+        backlogTaskIds: state.backlogTaskIds.filter((id) => id !== action.payload.id),
+        todaysTaskIds: state.todaysTaskIds.filter((id) => id !== action.payload.id),
+      };
     }
 
     case TaskActionTypes.DeleteTasks: {
-      return taskAdapter.removeMany(action.payload.ids, state);
+      return {
+        ...taskAdapter.removeMany(action.payload.ids, state),
+        backlogTaskIds: state.backlogTaskIds.filter((id) => !(action.payload.ids.indexOf(id) > -1)),
+        todaysTaskIds: state.todaysTaskIds.filter((id) => !(action.payload.ids.indexOf(id) > -1)),
+      };
     }
 
     case TaskActionTypes.LoadTasks: {
