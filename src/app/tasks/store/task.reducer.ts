@@ -96,15 +96,17 @@ const addTimeSpentToTask = (task: Task, timeSpent: number, date: string): TimeSp
   };
 };
 
-const updateTimeSpentForParent = (task: Task, state: TaskState): TaskState => {
-  const parentId = task.parentId;
+const updateTimeSpentForParent = (parentId, state: TaskState): TaskState => {
   if (parentId) {
-    const parentTask = {...state.entities[parentId]};
+    const parentTask: Task = state.entities[parentId];
     const subTasks = parentTask.subTaskIds.map((id) => state.entities[id]);
     const timeSpentOnDayParent = {};
-    subTasks.forEach((subTask) => {
-      console.log(subTask);
 
+    if (!subTasks.length) {
+      throw new Error('No sub tasks found for parent');
+    }
+
+    subTasks.forEach((subTask) => {
       Object.keys(subTask.timeSpentOnDay).forEach(strDate => {
         if (subTask.timeSpentOnDay[strDate]) {
           if (!timeSpentOnDayParent[strDate]) {
@@ -115,7 +117,7 @@ const updateTimeSpentForParent = (task: Task, state: TaskState): TaskState => {
       });
     });
     return taskAdapter.updateOne({
-      id: task.parentId,
+      id: parentId,
       changes: {
         timeSpentOnDay: timeSpentOnDayParent,
         timeSpent: calcTotalTimeSpent(timeSpentOnDayParent),
@@ -177,7 +179,22 @@ export function taskReducer(
     }
 
     case TaskActionTypes.UpdateTask: {
-      return taskAdapter.updateOne(action.payload.task, state);
+      let stateCopy = state;
+
+      if (action.payload.task.changes.timeSpentOnDay) {
+        action.payload.task.changes = {
+          ...action.payload.task.changes,
+          timeSpent: calcTotalTimeSpent(action.payload.task.changes.timeSpentOnDay)
+        };
+
+        const taskToUpdate = state.entities[action.payload.task.id];
+        // also update time spent for parent
+        stateCopy = updateTimeSpentForParent(taskToUpdate.parentId, stateCopy);
+        stateCopy = {
+          ...stateCopy,
+        };
+      }
+      return taskAdapter.updateOne(action.payload.task, stateCopy);
     }
 
     case TaskActionTypes.UpdateTasks: {
@@ -201,7 +218,7 @@ export function taskReducer(
           }
         }, stateCopy);
         // also update time spent for parent
-        stateCopy = updateTimeSpentForParent(taskToDelete, stateCopy);
+        stateCopy = updateTimeSpentForParent(taskToDelete.parentId, stateCopy);
       }
 
       // also delete all sub tasks if any
@@ -245,7 +262,7 @@ export function taskReducer(
       }, state);
 
       // also update time spent for parent
-      stateCopy = updateTimeSpentForParent(taskToUpdate, stateCopy);
+      stateCopy = updateTimeSpentForParent(taskToUpdate.parentId, stateCopy);
 
       return stateCopy;
     }
