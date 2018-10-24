@@ -8,6 +8,9 @@
   .color-primary {
     color: mat-color($primary);
   }
+  .border-color-primary {
+    border-color: mat-color($primary);
+  }
 }
 
 @include mat-core();

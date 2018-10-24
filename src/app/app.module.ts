@@ -19,6 +19,7 @@ import { PagesModule } from './pages/pages.module';
 import { MainHeaderModule } from './main-header/main-header.module';
 import { HttpClientModule } from '@angular/common/http';
 import { MatSidenavModule } from '@angular/material';
+import { TasksModule } from './tasks/tasks.module';
 
 @NgModule({
   declarations: [
@@ -31,6 +32,7 @@ import { MatSidenavModule } from '@angular/material';
     PagesModule,
     MainHeaderModule,
     MatSidenavModule,
+    TasksModule,
 
     // External
     BrowserModule,
