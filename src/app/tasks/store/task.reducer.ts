@@ -88,6 +88,10 @@ const moveTaskInArray = (arr_, taskId, targetId) => {
   }
 };
 
+const updateTimeSpentForParent = (task, state) => {
+
+};
+
 export function taskReducer(
   state = initialTaskState,
   action: TaskActions
@@ -153,15 +157,19 @@ export function taskReducer(
       let stateCopy = taskAdapter.removeOne(action.payload.id, state);
 
       // also delete from parent task if any
-      const parentId = currentTask.parentId;
-      if (parentId) {
-        const subTasksArray = stateCopy.entities[parentId].subTaskIds;
-        subTasksArray.splice(subTasksArray.indexOf(action.payload.id), 1);
+      if (currentTask.parentId) {
+        stateCopy = taskAdapter.updateOne({
+          id: currentTask.parentId,
+          changes: {
+            subTaskIds: stateCopy.entities[currentTask.parentId].subTaskIds
+              .filter((id) => id !== action.payload.id),
+          }
+        }, stateCopy);
       }
 
       // also delete all sub tasks if any
       if (currentTask.subTaskIds) {
-        stateCopy = {...stateCopy, ...taskAdapter.removeMany(currentTask.subTaskIds, state)};
+        stateCopy = taskAdapter.removeMany(currentTask.subTaskIds, stateCopy);
       }
 
       return {
@@ -200,6 +208,7 @@ export function taskReducer(
         [action.payload.tick.date]: (currentTimeSpentForTickDay + action.payload.tick.duration)
       };
 
+
       return taskAdapter.updateOne({
         id: action.payload.taskId,
         changes: {
@@ -210,16 +219,25 @@ export function taskReducer(
       }, state);
     }
 
-    case TaskActionTypes.UpdateTimeSpent: {
-      // TODO update parent
-      return taskAdapter.updateOne({
-        id: action.payload.taskId,
-        changes: {
-          timeSpentOnDay: action.payload.timeSpentOnDay,
-          timeSpent: calcTotalTimeSpent(action.payload.timeSpentOnDay)
-        }
-      }, state);
-    }
+    // case TaskActionTypes.UpdateTimeSpent: {
+    //   const stateCopy = {
+    //     ...taskAdapter.updateOne({
+    //       id: action.payload.taskId,
+    //       changes: {
+    //         timeSpentOnDay: action.payload.timeSpentOnDay,
+    //         timeSpent: calcTotalTimeSpent(action.payload.timeSpentOnDay)
+    //       }
+    //     }, state)
+    //   };
+    //
+    //   // TODO update parent
+    //   const parentId = currentTask.parentId;
+    //   if (parentId) {
+    //     const subTasksArray = stateCopy.entities[parentId].subTaskIds;
+    //     subTasksArray.splice(subTasksArray.indexOf(action.payload.id), 1);
+    //   }
+    //   return stateCopy;
+    // }
 
     case TaskActionTypes.AddSubTask: {
       // add item1
