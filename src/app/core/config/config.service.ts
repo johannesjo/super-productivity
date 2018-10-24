@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Store } from '@ngrx/store';
-import { select } from '@ngrx/store';
+import { select, Store } from '@ngrx/store';
 import { ConfigActionTypes } from './store/config.actions';
 import { Observable } from 'rxjs';
 import { GlobalConfig } from './config.model';
@@ -11,14 +10,16 @@ import { PersistenceService } from '../persistence/persistence.service';
   providedIn: 'root'
 })
 export class ConfigService {
-  cfg$: Observable<GlobalConfig> = this._store.pipe(select(selectConfigFeatureState));
+  public cfg$: Observable<GlobalConfig> = this._store.pipe(select(selectConfigFeatureState));
+  public cfg: GlobalConfig;
 
   constructor(
     private readonly _store: Store<any>,
     private readonly _persistenceService: PersistenceService
   ) {
     this.load();
-    this.cfg$.subscribe((val) => console.log(val));
+    // this.cfg$.subscribe((val) => console.log(val));
+    this.cfg$.subscribe((cfg) => this.cfg = cfg);
   }
 
   load() {

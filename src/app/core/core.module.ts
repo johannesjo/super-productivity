@@ -4,6 +4,7 @@ import { PersistenceModule } from './persistence/persistence.module';
 import { ConfigModule } from './config/config.module';
 import { ChromeExtensionInterfaceModule } from './chrome-extension-interface/chrome-extension-interface.module';
 import { TimeTrackingModule } from './time-tracking/time-tracking.module';
+import { ShortcutModule } from './shortcut/shortcut.module';
 
 @NgModule({
   imports: [
@@ -12,6 +13,7 @@ import { TimeTrackingModule } from './time-tracking/time-tracking.module';
     PersistenceModule,
     ChromeExtensionInterfaceModule,
     TimeTrackingModule,
+    ShortcutModule,
   ],
   declarations: []
 })

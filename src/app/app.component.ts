@@ -1,12 +1,13 @@
-import { Component } from '@angular/core';
-import { OnInit } from '@angular/core';
-import { HostBinding } from '@angular/core';
+import { Component, HostBinding, HostListener, OnInit } from '@angular/core';
 import { MatIconRegistry } from '@angular/material';
 import { DomSanitizer } from '@angular/platform-browser';
 import { OverlayContainer } from '@angular/cdk/overlay';
 import { ProjectService } from './project/project.service';
 import { Project } from './project/project';
 import { ChromeExtensionInterfaceService } from './core/chrome-extension-interface/chrome-extension-interface.service';
+import { ShortcutService } from './core/shortcut/shortcut.service';
+import { checkKeyCombo } from './core/util/check-key-combo';
+import { ConfigService } from './core/config/config.service';
 
 @Component({
   selector: 'app-root',
@@ -16,7 +17,12 @@ import { ChromeExtensionInterfaceService } from './core/chrome-extension-interfa
 export class AppComponent implements OnInit {
   @HostBinding('class') private _currentTheme: string;
 
+  public isShowAddTaskBar = false;
+
+
   constructor(
+    private _configService: ConfigService,
+    private _shortcutService: ShortcutService,
     private _matIconRegistry: MatIconRegistry,
     private _domSanitizer: DomSanitizer,
     private _overlayContainer: OverlayContainer,
@@ -28,6 +34,13 @@ export class AppComponent implements OnInit {
       this._domSanitizer.bypassSecurityTrustResourceUrl(`assets/icons/sp.svg`)
     );
     this._chromeExtensionInterface.init();
+  }
+
+  @HostListener('document:keydown', ['$event']) onKeyDown(ev: KeyboardEvent) {
+    this._shortcutService.handleKeyDown(ev);
+    if (checkKeyCombo(ev, this._configService.cfg.keyboard.addNewTask)) {
+      this.isShowAddTaskBar = !this.isShowAddTaskBar;
+    }
   }
 
   ngOnInit() {
