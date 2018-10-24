@@ -81,6 +81,26 @@ const updateTimeSpentForParentIfParent = (parentId, state: TaskState): TaskState
   }
 };
 
+const updateTimeEstimateForParentIfParent = (parentId, state: TaskState): TaskState => {
+  if (parentId) {
+    const parentTask: Task = state.entities[parentId];
+    const subTasks = parentTask.subTaskIds.map((id) => state.entities[id]);
+    if (!subTasks.length) {
+      throw new Error('No sub tasks found for parent');
+    }
+
+    return taskAdapter.updateOne({
+      id: parentId,
+      changes: {
+        timeEstimate: subTasks.reduce((acc, task) => acc + task.timeEstimate, 0),
+      }
+    }, state);
+  } else {
+    return state;
+  }
+};
+
+// TODO unit test the shit out of this once the model is settled
 export function taskReducer(
   state = initialTaskState,
   action: TaskActions
@@ -132,28 +152,38 @@ export function taskReducer(
     }
 
     case TaskActionTypes.UpdateTask: {
-      let stateCopy = state;
+      // NOTE needs to b first to include the current changes for the other calculations
+      let stateCopy: TaskState = taskAdapter.updateOne(action.payload.task, state);
 
+      // TIME SPENT side effects
       if (action.payload.task.changes.timeSpentOnDay) {
+        // also adjust total time spent
         action.payload.task.changes = {
           ...action.payload.task.changes,
           timeSpent: calcTotalTimeSpent(action.payload.task.changes.timeSpentOnDay)
         };
-
-        const taskToUpdate = state.entities[action.payload.task.id];
         // also update time spent for parent
-        stateCopy = updateTimeSpentForParentIfParent(taskToUpdate.parentId, stateCopy);
+        stateCopy = updateTimeSpentForParentIfParent(state.entities[action.payload.task.id].parentId, stateCopy);
       }
-      return taskAdapter.updateOne(action.payload.task, stateCopy);
+
+      // TIME ESTIMATE side effects
+      if (action.payload.task.changes.timeEstimate) {
+        // also adjust for parent
+        stateCopy = updateTimeEstimateForParentIfParent(state.entities[action.payload.task.id].parentId, stateCopy);
+      }
+
+      return stateCopy;
     }
+
 
     // TODO also delete related issue :(
     case TaskActionTypes.DeleteTask: {
-      const taskToDelete = state.entities[action.payload.id];
-      // delete entry
-      let stateCopy = taskAdapter.removeOne(action.payload.id, state);
+      let stateCopy: TaskState = taskAdapter.removeOne(action.payload.id, state);
+
+      const taskToDelete: Task = state.entities[action.payload.id];
       let currentTaskId = (state.currentTaskId === action.payload.id) ? null : state.currentTaskId;
 
+      // PARENT TASK side effects
       // also delete from parent task if any
       if (taskToDelete.parentId) {
         stateCopy = taskAdapter.updateOne({
@@ -167,6 +197,7 @@ export function taskReducer(
         stateCopy = updateTimeSpentForParentIfParent(taskToDelete.parentId, stateCopy);
       }
 
+      // SUB TASK side effects
       // also delete all sub tasks if any
       if (taskToDelete.subTaskIds) {
         stateCopy = taskAdapter.removeMany(taskToDelete.subTaskIds, stateCopy);
