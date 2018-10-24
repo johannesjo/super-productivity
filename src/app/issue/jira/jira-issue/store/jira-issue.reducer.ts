@@ -49,7 +49,7 @@ export function jiraIssueReducer(
       return Object.assign({}, action.payload.state);
     }
 
-    case TaskActionTypes.AddTaskWithIssue: {
+    case TaskActionTypes.AddTask: {
       if (action.payload.task.issueType === 'JIRA') {
         return jiraIssueAdapter.addOne(action.payload.issue, state);
       }

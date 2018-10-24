@@ -13,7 +13,7 @@ export class JiraIssueEffects {
   @Effect({dispatch: false}) updateIssue$: any = this._actions$
     .pipe(
       ofType(
-        TaskActionTypes.AddTaskWithIssue,
+        TaskActionTypes.AddTask,
         JiraIssueActionTypes.AddJiraIssue,
         JiraIssueActionTypes.DeleteJiraIssue,
         JiraIssueActionTypes.AddSubJiraIssue,

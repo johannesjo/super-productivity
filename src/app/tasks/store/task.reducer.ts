@@ -124,20 +124,6 @@ export function taskReducer(
 
     // Task Actions
     // ------------
-    // TODO maybe merge with AddTask
-    case TaskActionTypes.AddTaskWithIssue: {
-      return {
-        ...taskAdapter.addOne(action.payload.task, state),
-        ...(
-          action.payload.isAddToBacklog ? {
-            backlogTaskIds: [action.payload.task.id, ...state.backlogTaskIds]
-          } : {
-            todaysTaskIds: [action.payload.task.id, ...state.todaysTaskIds]
-          }
-        ),
-      };
-    }
-
     case TaskActionTypes.AddTask: {
       return {
         ...taskAdapter.addOne(action.payload.task, state),

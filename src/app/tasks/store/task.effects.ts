@@ -15,7 +15,6 @@ export class TaskEffects {
     .pipe(
       ofType(
         TaskActionTypes.AddTask,
-        TaskActionTypes.AddTaskWithIssue,
         TaskActionTypes.DeleteTask,
         TaskActionTypes.AddSubTask,
         TaskActionTypes.SetCurrentTask,

@@ -2,7 +2,7 @@ import { Action } from '@ngrx/store';
 import { Update } from '@ngrx/entity';
 import { JiraIssue } from '../jira-issue.model';
 import { JiraIssueState } from './jira-issue.reducer';
-import { AddTaskWithIssue } from '../../../../tasks/store/task.actions';
+import { AddTask } from '../../../../tasks/store/task.actions';
 
 export enum JiraIssueActionTypes {
   LoadState = '[JiraIssue] Load JiraIssue State',
@@ -91,7 +91,7 @@ export type JiraIssueActions
   | DeleteJiraIssue
   | DeleteJiraIssues
   | ClearJiraIssues
-
-  | AddTaskWithIssue
+  // From tasks model
+  | AddTask
   ;
 

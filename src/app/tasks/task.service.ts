@@ -140,9 +140,8 @@ export class TaskService {
 
 
   addWithIssue(title: string, issueType: IssueProviderKey, issue: any, isAddToBacklog = false) {
-    console.log(title, issueType, issue);
     this._store.dispatch({
-      type: TaskActionTypes.AddTaskWithIssue,
+      type: TaskActionTypes.AddTask,
       payload: {
         task: this._createNewTask(title, {
           issueId: issue.id,

@@ -11,8 +11,7 @@ export enum TaskActionTypes {
   UnsetCurrentTask = '[Task] UnsetCurrentTask',
 
   // Task Actions
-  AddTask = '[Task] Add Task',
-  AddTaskWithIssue = '[Task]/[Issue] Add Task with Issue',
+  AddTask = '[Task][Issue] Add Task',
   UpdateTask = '[Task] Update Task',
   UpdateTasks = '[Task] Update Tasks',
   DeleteTask = '[Task] Delete Task',
@@ -44,14 +43,7 @@ export class UnsetCurrentTask implements Action {
 export class AddTask implements Action {
   readonly type = TaskActionTypes.AddTask;
 
-  constructor(public payload: { task: Task, isAddToBacklog: boolean }) {
-  }
-}
-
-export class AddTaskWithIssue implements Action {
-  readonly type = TaskActionTypes.AddTaskWithIssue;
-
-  constructor(public payload: { task: Task, issue: JiraIssue, isAddToBacklog: boolean }) {
+  constructor(public payload: { task: Task, issue?: JiraIssue, isAddToBacklog: boolean }) {
   }
 }
 
@@ -102,7 +94,6 @@ export type TaskActions
   | SetCurrentTask
   | UnsetCurrentTask
   | AddTask
-  | AddTaskWithIssue
   | UpdateTask
   | UpdateTasks
   | DeleteTask
