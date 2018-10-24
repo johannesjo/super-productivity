@@ -1,12 +1,11 @@
 import { createEntityAdapter, EntityAdapter, EntityState } from '@ngrx/entity';
 import { TaskActions, TaskActionTypes } from './task.actions';
 import { Task, TimeSpentOnDay } from '../task.model';
-import { createFeatureSelector, createSelector } from '@ngrx/store';
 import { calcTotalTimeSpent } from '../util/calc-total-time-spent';
-import { selectIssueEntityMap } from '../../issue/issue.selector';
 import { tasks } from 'googleapis/build/src/apis/tasks';
 
 export const TASK_FEATURE_NAME = 'tasks';
+export const taskAdapter: EntityAdapter<Task> = createEntityAdapter<Task>();
 
 export interface TaskState extends EntityState<Task> {
   // additional entities state properties
@@ -20,52 +19,6 @@ export interface TaskState extends EntityState<Task> {
   // todayDoneTasks: string[];
   // todayUnDoneTasks: string[];
 }
-
-export const taskAdapter: EntityAdapter<Task> = createEntityAdapter<Task>();
-
-const mapIssueDataToTask = (tasks_, issueEntityMap) => {
-  return tasks_ && tasks_.map((task) => {
-    const issueData = (task.issueId && task.issueType) && issueEntityMap[task.issueType][task.issueId];
-    return issueData ? {...task, issueData: issueData} : task;
-  });
-};
-
-const mapSubTasksToTasks = (tasks__) => {
-  return tasks__.filter((task) => !task.parentId)
-    .map((task) => {
-      if (task.subTaskIds && task.subTaskIds.length > 0) {
-        return {
-          ...task,
-          subTasks: task.subTaskIds
-            .map((subTaskId) => tasks__.find((task_) => task_.id === subTaskId))
-        };
-      } else {
-        return task;
-      }
-    });
-};
-
-const mapTasksFromIds = (tasks__, ids) => {
-  return ids.map(id => tasks__.find(task => task.id === id));
-};
-
-// SELECTORS
-// ---------
-const {selectIds, selectEntities, selectAll, selectTotal} = taskAdapter.getSelectors();
-export const selectTaskFeatureState = createFeatureSelector<TaskState>(TASK_FEATURE_NAME);
-export const selectBacklogTaskIds = createSelector(selectTaskFeatureState, state => state.backlogTaskIds);
-export const selectTodaysTaskIds = createSelector(selectTaskFeatureState, state => state.todaysTaskIds);
-export const selectCurrentTask = createSelector(selectTaskFeatureState, state => state.currentTaskId);
-
-
-export const selectAllTasks = createSelector(selectTaskFeatureState, selectAll);
-export const selectAllTasksWithIssueData = createSelector(selectAllTasks, selectIssueEntityMap, mapIssueDataToTask);
-
-export const selectAllTasksWithSubTasks = createSelector(selectAllTasksWithIssueData, mapSubTasksToTasks);
-
-export const selectTodaysTasksWithSubTasks = createSelector(selectAllTasksWithSubTasks, selectTodaysTaskIds, mapTasksFromIds);
-
-export const selectBacklogTasksWithSubTasks = createSelector(selectAllTasksWithSubTasks, selectBacklogTaskIds, mapTasksFromIds);
 
 
 // REDUCER
@@ -96,7 +49,7 @@ const addTimeSpentToTask = (task: Task, timeSpent: number, date: string): TimeSp
   };
 };
 
-const updateTimeSpentForParent = (parentId, state: TaskState): TaskState => {
+const updateTimeSpentForParentIfParent = (parentId, state: TaskState): TaskState => {
   if (parentId) {
     const parentTask: Task = state.entities[parentId];
     const subTasks = parentTask.subTaskIds.map((id) => state.entities[id]);
@@ -189,16 +142,9 @@ export function taskReducer(
 
         const taskToUpdate = state.entities[action.payload.task.id];
         // also update time spent for parent
-        stateCopy = updateTimeSpentForParent(taskToUpdate.parentId, stateCopy);
-        stateCopy = {
-          ...stateCopy,
-        };
+        stateCopy = updateTimeSpentForParentIfParent(taskToUpdate.parentId, stateCopy);
       }
       return taskAdapter.updateOne(action.payload.task, stateCopy);
-    }
-
-    case TaskActionTypes.UpdateTasks: {
-      return taskAdapter.updateMany(action.payload.tasks, state);
     }
 
     // TODO also delete related issue :(
@@ -218,7 +164,7 @@ export function taskReducer(
           }
         }, stateCopy);
         // also update time spent for parent
-        stateCopy = updateTimeSpentForParent(taskToDelete.parentId, stateCopy);
+        stateCopy = updateTimeSpentForParentIfParent(taskToDelete.parentId, stateCopy);
       }
 
       // also delete all sub tasks if any
@@ -262,7 +208,7 @@ export function taskReducer(
       }, state);
 
       // also update time spent for parent
-      stateCopy = updateTimeSpentForParent(taskToUpdate.parentId, stateCopy);
+      stateCopy = updateTimeSpentForParentIfParent(taskToUpdate.parentId, stateCopy);
 
       return stateCopy;
     }

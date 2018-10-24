@@ -5,19 +5,19 @@ import { Task, TaskWithSubTasks } from './task.model';
 import { select, Store } from '@ngrx/store';
 import { TaskActionTypes } from './store/task.actions';
 import shortid from 'shortid';
-import {
-  initialTaskState,
-  selectAllTasksWithSubTasks,
-  selectBacklogTasksWithSubTasks,
-  selectCurrentTask,
-  selectTodaysTasksWithSubTasks,
-} from './store/task.reducer';
+import { initialTaskState, } from './store/task.reducer';
 import { ProjectService } from '../project/project.service';
 import { PersistenceService } from '../core/persistence/persistence.service';
 import { IssueService } from '../issue/issue.service';
 import { IssueProviderKey } from '../issue/issue';
 import { TimeTrackingService } from '../core/time-tracking/time-tracking.service';
 import { Tick } from '../core/time-tracking/time-tracking';
+import {
+  selectAllTasksWithSubTasks,
+  selectBacklogTasksWithSubTasks,
+  selectCurrentTask,
+  selectTodaysTasksWithSubTasks
+} from './store/task.selectors';
 
 
 @Injectable()
