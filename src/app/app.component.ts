@@ -42,6 +42,11 @@ export class AppComponent implements OnInit {
       this.isShowAddTaskBar = !this.isShowAddTaskBar;
     }
   }
+  
+  test(){
+    console.log('TESTXXXXXXXXXXXXXXXXXXXXXX');
+    
+  }
 
   ngOnInit() {
     this._projectService.currentProject$.subscribe((currentProject: Project) => {

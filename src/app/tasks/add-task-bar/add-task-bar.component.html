@@ -2,9 +2,11 @@
       class="add-task-form mat-elevation-z16">
   <mat-icon>playlist_add</mat-icon>
   <input matInput
+         #inputEl
          class="border-color-primary"
          placeholder="Select or create task"
          aria-label="Select or create task"
+         autofocus="autofocus"
          [matAutocomplete]="auto"
          [formControl]="taskSuggestionsCtrl"
          (blur)="onBlur()">

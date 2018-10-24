@@ -1,8 +1,8 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, EventEmitter, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { TaskService } from '../task.service';
 import { JiraApiService } from '../../issue/jira/jira-api.service';
-import { debounceTime, switchMap, takeUntil, tap, throttle, withLatestFrom } from 'rxjs/operators';
+import { debounceTime, switchMap, takeUntil, tap, withLatestFrom } from 'rxjs/operators';
 import { ProjectService } from '../../project/project.service';
 import { JiraIssue } from '../../issue/jira/jira-issue/jira-issue.model';
 import { Subject } from 'rxjs';
@@ -18,6 +18,8 @@ export class AddTaskBarComponent implements OnInit, OnDestroy {
   taskSuggestionsCtrl: FormControl = new FormControl();
   filteredIssueSuggestions: any[];
   isLoading = false;
+  @Output() blur: EventEmitter<any> = new EventEmitter();
+  @ViewChild('inputEl') inputEl;
 
   constructor(
     private _taskService: TaskService,
@@ -29,6 +31,15 @@ export class AddTaskBarComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.taskSuggestionsCtrl.setValue('');
+    setTimeout(() => {
+      this.inputEl.nativeElement.focus();
+      this.inputEl.nativeElement.addEventListener('keydown', (ev) => {
+        if (ev.key === 'Escape') {
+          this.blur.emit();
+        }
+      });
+    });
+
     this.taskSuggestionsCtrl.valueChanges.pipe(
       withLatestFrom(this._projectService.currentJiraCfg$),
       debounceTime(400),
@@ -58,7 +69,8 @@ export class AddTaskBarComponent implements OnInit, OnDestroy {
     this.destroy$.unsubscribe();
   }
 
-  onBlur() {
+  onBlur(ev) {
+    this.blur.emit(ev);
   }
 
   displayWith(issue: JiraIssue) {
