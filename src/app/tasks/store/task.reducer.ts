@@ -220,14 +220,6 @@ export function taskReducer(
       };
     }
 
-    case TaskActionTypes.LoadTasks: {
-      return taskAdapter.addAll(action.payload.tasks, state);
-    }
-
-    case TaskActionTypes.ClearTasks: {
-      return taskAdapter.removeAll(state);
-    }
-
     case TaskActionTypes.MoveAfter: {
       const taskId = action.payload.taskId;
       const targetId = action.payload.targetItemId;
@@ -257,26 +249,6 @@ export function taskReducer(
 
       return stateCopy;
     }
-
-    // case TaskActionTypes.UpdateTimeSpent: {
-    //   const stateCopy = {
-    //     ...taskAdapter.updateOne({
-    //       id: action.payload.taskId,
-    //       changes: {
-    //         timeSpentOnDay: action.payload.timeSpentOnDay,
-    //         timeSpent: calcTotalTimeSpent(action.payload.timeSpentOnDay)
-    //       }
-    //     }, state)
-    //   };
-    //
-    //   // TODO update parent
-    //   const parentId = currentTask.parentId;
-    //   if (parentId) {
-    //     const subTasksArray = stateCopy.entities[parentId].subTaskIds;
-    //     subTasksArray.splice(subTasksArray.indexOf(action.payload.id), 1);
-    //   }
-    //   return stateCopy;
-    // }
 
     case TaskActionTypes.AddSubTask: {
       // add item1

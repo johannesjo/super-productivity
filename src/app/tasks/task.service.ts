@@ -204,16 +204,6 @@ export class TaskService {
     });
   }
 
-  updateTimeSpent(taskId: string, tick: Tick) {
-    this._store.dispatch({
-      type: TaskActionTypes.AddTimeSpent,
-      payload: {
-        taskId: taskId,
-        tick: tick,
-      }
-    });
-  }
-
   // HELPER
   // ------
   setDone(taskId: string) {

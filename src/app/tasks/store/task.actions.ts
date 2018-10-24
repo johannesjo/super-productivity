@@ -3,6 +3,7 @@ import { Update } from '@ngrx/entity';
 import { Task, TaskWithSubTasks, TimeSpentOnDay } from '../task.model';
 import { TaskState } from './task.reducer';
 import { Tick } from '../../core/time-tracking/time-tracking';
+import { JiraIssue } from '../../issue/jira/jira-issue/jira-issue.model';
 
 export enum TaskActionTypes {
   LoadState = '[Task] Load Task State',
@@ -10,16 +11,13 @@ export enum TaskActionTypes {
   UnsetCurrentTask = '[Task] UnsetCurrentTask',
 
   // Task Actions
-  LoadTasks = '[Task] Load Tasks',
   AddTask = '[Task] Add Task',
   AddTaskWithIssue = '[Task]/[Issue] Add Task with Issue',
   UpdateTask = '[Task] Update Task',
   UpdateTasks = '[Task] Update Tasks',
   DeleteTask = '[Task] Delete Task',
-  ClearTasks = '[Task] Clear Tasks',
   MoveAfter = '[Task] Move After',
   AddTimeSpent = '[Task] Add time spent',
-  UpdateTimeSpent = '[Task] Update time spent',
 
   // Sub Task Actions
   AddSubTask = '[Task] Add SubTask',
@@ -43,13 +41,6 @@ export class UnsetCurrentTask implements Action {
   readonly type = TaskActionTypes.UnsetCurrentTask;
 }
 
-export class LoadTasks implements Action {
-  readonly type = TaskActionTypes.LoadTasks;
-
-  constructor(public payload: { tasks: Task[] }) {
-  }
-}
-
 export class AddTask implements Action {
   readonly type = TaskActionTypes.AddTask;
 
@@ -60,8 +51,7 @@ export class AddTask implements Action {
 export class AddTaskWithIssue implements Action {
   readonly type = TaskActionTypes.AddTaskWithIssue;
 
-  // TODO right type for issue
-  constructor(public payload: { task: Task, issue: any, isAddToBacklog: boolean }) {
+  constructor(public payload: { task: Task, issue: JiraIssue, isAddToBacklog: boolean }) {
   }
 }
 
@@ -86,10 +76,6 @@ export class DeleteTask implements Action {
   }
 }
 
-export class ClearTasks implements Action {
-  readonly type = TaskActionTypes.ClearTasks;
-}
-
 export class MoveAfter implements Action {
   readonly type = TaskActionTypes.MoveAfter;
 
@@ -104,13 +90,6 @@ export class AddTimeSpent implements Action {
   }
 }
 
-export class UpdateTimeSpent implements Action {
-  readonly type = TaskActionTypes.UpdateTimeSpent;
-
-  constructor(public payload: { taskId: string, timeSpentOnDay: TimeSpentOnDay }) {
-  }
-}
-
 export class AddSubTask implements Action {
   readonly type = TaskActionTypes.AddSubTask;
 
@@ -119,8 +98,7 @@ export class AddSubTask implements Action {
 }
 
 export type TaskActions
-  = LoadTasks
-  | LoadState
+  = LoadState
   | SetCurrentTask
   | UnsetCurrentTask
   | AddTask
@@ -128,9 +106,7 @@ export type TaskActions
   | UpdateTask
   | UpdateTasks
   | DeleteTask
-  | ClearTasks
   | MoveAfter
   | AddTimeSpent
-  | UpdateTimeSpent
   | AddSubTask;
 
