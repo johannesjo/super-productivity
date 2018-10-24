@@ -3,7 +3,8 @@
 <mat-sidenav-container>
   <div class="page-wrapper mat-typography">
     <add-task-bar class="global"
-                  (blur)="test(); isShowAddTaskBar=false;"
+                  [@blendInOut]
+                  (blur)="isShowAddTaskBar=false;"
                   *ngIf="isShowAddTaskBar"></add-task-bar>
     <router-outlet></router-outlet>
   </div>

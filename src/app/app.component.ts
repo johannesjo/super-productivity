@@ -8,11 +8,13 @@ import { ChromeExtensionInterfaceService } from './core/chrome-extension-interfa
 import { ShortcutService } from './core/shortcut/shortcut.service';
 import { checkKeyCombo } from './core/util/check-key-combo';
 import { ConfigService } from './core/config/config.service';
+import { blendInOutAnimation } from './ui/animations/blend-in-out.ani';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
-  styleUrls: ['./app.component.scss']
+  styleUrls: ['./app.component.scss'],
+  animations: [blendInOutAnimation]
 })
 export class AppComponent implements OnInit {
   @HostBinding('class') private _currentTheme: string;
@@ -40,12 +42,8 @@ export class AppComponent implements OnInit {
     this._shortcutService.handleKeyDown(ev);
     if (checkKeyCombo(ev, this._configService.cfg.keyboard.addNewTask)) {
       this.isShowAddTaskBar = !this.isShowAddTaskBar;
+      ev.preventDefault();
     }
-  }
-  
-  test(){
-    console.log('TESTXXXXXXXXXXXXXXXXXXXXXX');
-    
   }
 
   ngOnInit() {
