@@ -53,6 +53,15 @@ export class JiraIssueService {
     });
   }
 
+  upsert(jiraIssue) {
+    this._store.dispatch({
+      type: JiraIssueActionTypes.UpsertJiraIssue,
+      payload: {
+        jiraIssue: jiraIssue
+      }
+    });
+  }
+
   remove(jiraIssueId: string) {
     this._store.dispatch({
       type: JiraIssueActionTypes.DeleteJiraIssue,

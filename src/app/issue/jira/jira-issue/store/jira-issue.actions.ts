@@ -9,6 +9,7 @@ export enum JiraIssueActionTypes {
 
   // JiraIssue Actions
   LoadJiraIssues = '[JiraIssue] Load JiraIssues',
+  UpsertJiraIssue = '[JiraIssue] Upsert JiraIssue',
   AddJiraIssue = '[JiraIssue] Add JiraIssue',
   AddJiraIssues = '[JiraIssue] Add JiraIssues',
   UpdateJiraIssue = '[JiraIssue] Update JiraIssue',
@@ -37,6 +38,13 @@ export class LoadJiraIssues implements Action {
 
 export class AddJiraIssue implements Action {
   readonly type = JiraIssueActionTypes.AddJiraIssue;
+
+  constructor(public payload: { jiraIssue: JiraIssue }) {
+  }
+}
+
+export class UpsertJiraIssue implements Action {
+  readonly type = JiraIssueActionTypes.UpsertJiraIssue;
 
   constructor(public payload: { jiraIssue: JiraIssue }) {
   }
@@ -84,6 +92,7 @@ export class ClearJiraIssues implements Action {
 export type JiraIssueActions
   = LoadJiraIssues
   | LoadState
+  | UpsertJiraIssue
   | AddJiraIssue
   | AddJiraIssues
   | UpdateJiraIssue

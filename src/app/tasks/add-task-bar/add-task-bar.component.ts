@@ -80,7 +80,7 @@ export class AddTaskBarComponent implements OnInit, OnDestroy {
       // get full data
       this._jiraApiService.getIssueById(issueOrTitle.id)
         .then((issue) => {
-          this._jiraIssueService.add(issue);
+          this._jiraIssueService.upsert(issue);
         });
     }
 

@@ -58,6 +58,10 @@ export function jiraIssueReducer(
 
     // JiraIssue Actions
     // ------------
+    case JiraIssueActionTypes.UpsertJiraIssue: {
+      return jiraIssueAdapter.upsertOne(action.payload.jiraIssue, state);
+    }
+
     case JiraIssueActionTypes.AddJiraIssue: {
       return jiraIssueAdapter.addOne(action.payload.jiraIssue, state);
     }
