@@ -1,6 +1,6 @@
 import { createEntityAdapter, EntityAdapter, EntityState } from '@ngrx/entity';
 import { TaskActions, TaskActionTypes } from './task.actions';
-import { Task } from '../task.model';
+import { Task, TimeSpentOnDay } from '../task.model';
 import { createFeatureSelector, createSelector } from '@ngrx/store';
 import { calcTotalTimeSpent } from '../util/calc-total-time-spent';
 import { selectIssueEntityMap } from '../../issue/issue.selector';
@@ -88,8 +88,42 @@ const moveTaskInArray = (arr_, taskId, targetId) => {
   }
 };
 
-const updateTimeSpentForParent = (task, state) => {
+const addTimeSpentToTask = (task: Task, timeSpent: number, date: string): TimeSpentOnDay => {
+  const currentTimeSpentForTickDay = task.timeSpentOnDay && +task.timeSpentOnDay[date] || 0;
+  return {
+    ...task.timeSpentOnDay,
+    [date]: (currentTimeSpentForTickDay + timeSpent)
+  };
+};
 
+const updateTimeSpentForParent = (task: Task, state: TaskState): TaskState => {
+  const parentId = task.parentId;
+  if (parentId) {
+    const parentTask = {...state.entities[parentId]};
+    const subTasks = parentTask.subTaskIds.map((id) => state.entities[id]);
+    const timeSpentOnDayParent = {};
+    subTasks.forEach((subTask) => {
+      console.log(subTask);
+
+      Object.keys(subTask.timeSpentOnDay).forEach(strDate => {
+        if (subTask.timeSpentOnDay[strDate]) {
+          if (!timeSpentOnDayParent[strDate]) {
+            timeSpentOnDayParent[strDate] = 0;
+          }
+          timeSpentOnDayParent[strDate] += subTask.timeSpentOnDay[strDate];
+        }
+      });
+    });
+    return taskAdapter.updateOne({
+      id: task.parentId,
+      changes: {
+        timeSpentOnDay: timeSpentOnDayParent,
+        timeSpent: calcTotalTimeSpent(timeSpentOnDayParent),
+      }
+    }, state);
+  } else {
+    return state;
+  }
 };
 
 export function taskReducer(
@@ -152,24 +186,29 @@ export function taskReducer(
 
     // TODO also delete related issue :(
     case TaskActionTypes.DeleteTask: {
-      const currentTask = state.entities[action.payload.id];
+      const taskToDelete = state.entities[action.payload.id];
       // delete entry
       let stateCopy = taskAdapter.removeOne(action.payload.id, state);
+      let currentTaskId = (state.currentTaskId === action.payload.id) ? null : state.currentTaskId;
 
       // also delete from parent task if any
-      if (currentTask.parentId) {
+      if (taskToDelete.parentId) {
         stateCopy = taskAdapter.updateOne({
-          id: currentTask.parentId,
+          id: taskToDelete.parentId,
           changes: {
-            subTaskIds: stateCopy.entities[currentTask.parentId].subTaskIds
+            subTaskIds: stateCopy.entities[taskToDelete.parentId].subTaskIds
               .filter((id) => id !== action.payload.id),
           }
         }, stateCopy);
+        // also update time spent for parent
+        stateCopy = updateTimeSpentForParent(taskToDelete, stateCopy);
       }
 
       // also delete all sub tasks if any
-      if (currentTask.subTaskIds) {
-        stateCopy = taskAdapter.removeMany(currentTask.subTaskIds, stateCopy);
+      if (taskToDelete.subTaskIds) {
+        stateCopy = taskAdapter.removeMany(taskToDelete.subTaskIds, stateCopy);
+        // unset current if one of them is the current task
+        currentTaskId = taskToDelete.subTaskIds.includes(currentTaskId) ? null : currentTaskId;
       }
 
       return {
@@ -177,6 +216,7 @@ export function taskReducer(
         // finally delete from backlog or todays tasks
         backlogTaskIds: state.backlogTaskIds.filter((id) => id !== action.payload.id),
         todaysTaskIds: state.todaysTaskIds.filter((id) => id !== action.payload.id),
+        currentTaskId
       };
     }
 
@@ -201,22 +241,21 @@ export function taskReducer(
     }
 
     case TaskActionTypes.AddTimeSpent: {
+      let stateCopy;
       const taskToUpdate = state.entities[action.payload.taskId];
-      const currentTimeSpentForTickDay = taskToUpdate.timeSpentOnDay && +taskToUpdate.timeSpentOnDay[action.payload.tick.date] || 0;
-      const updateTimeSpentOnDay = {
-        ...taskToUpdate.timeSpentOnDay,
-        [action.payload.tick.date]: (currentTimeSpentForTickDay + action.payload.tick.duration)
-      };
-
-
-      return taskAdapter.updateOne({
+      const updateTimeSpentOnDay = addTimeSpentToTask(taskToUpdate, action.payload.tick.duration, action.payload.tick.date);
+      stateCopy = taskAdapter.updateOne({
         id: action.payload.taskId,
         changes: {
           timeSpentOnDay: updateTimeSpentOnDay,
           timeSpent: calcTotalTimeSpent(updateTimeSpentOnDay)
         }
-
       }, state);
+
+      // also update time spent for parent
+      stateCopy = updateTimeSpentForParent(taskToUpdate, stateCopy);
+
+      return stateCopy;
     }
 
     // case TaskActionTypes.UpdateTimeSpent: {

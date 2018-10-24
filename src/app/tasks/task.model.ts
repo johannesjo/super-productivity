@@ -7,20 +7,21 @@ export type TimeSpentOnDay = Readonly<{
 export type Task = Readonly<{
   id: string;
   title: string;
+
+  subTaskIds: string[];
+  timeSpentOnDay: TimeSpentOnDay;
+  timeSpent: number;
+  timeEstimate: number;
+
   isDone?: boolean;
   isNotesOpen?: boolean;
   notes?: string;
   issueId?: string;
   issueType?: IssueProviderKey;
-  subTaskIds: string[];
-  progress?: number;
-  timeSpent?: any;
-  timeEstimate?: string;
-  timeSpentOnDay?: TimeSpentOnDay;
   parentId?: string;
 }>;
 
-export interface TaskWithIssueData  extends Task {
+export interface TaskWithIssueData extends Task {
   readonly issueData?: any;
 }
 
@@ -28,5 +29,3 @@ export interface TaskWithIssueData  extends Task {
 export interface TaskWithSubTasks extends TaskWithIssueData {
   readonly subTasks?: TaskWithIssueData[];
 }
-
-

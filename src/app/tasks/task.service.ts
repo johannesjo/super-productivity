@@ -132,12 +132,7 @@ export class TaskService {
     this._store.dispatch({
       type: TaskActionTypes.AddTask,
       payload: {
-        task: {
-          title,
-          id: shortid(),
-          isDone: false,
-          subTaskIds: []
-        },
+        task: this._createNewTask(title),
         isAddToBacklog
       }
     });
@@ -149,14 +144,10 @@ export class TaskService {
     this._store.dispatch({
       type: TaskActionTypes.AddTaskWithIssue,
       payload: {
-        task: {
-          title,
+        task: this._createNewTask(title, {
           issueId: issue.id,
           issueType: issueType,
-          id: shortid(),
-          isDone: false,
-          subTaskIds: []
-        },
+        }),
         issue,
         isAddToBacklog
       }
@@ -197,11 +188,7 @@ export class TaskService {
     this._store.dispatch({
       type: TaskActionTypes.AddSubTask,
       payload: {
-        task: {
-          title: '',
-          id: shortid(),
-          isDone: false
-        },
+        task: this._createNewTask(''),
         parentId: parentTask.id
       }
     });
@@ -243,5 +230,20 @@ export class TaskService {
 
   hideNotes(taskId: string) {
     this.update(taskId, {isNotesOpen: false});
+  }
+
+  private _createNewTask(title: string, additional: Partial<Task> = {}): Partial<Task> {
+    return {
+      // NOTE needs to be created every time
+      subTaskIds: [],
+      timeSpentOnDay: {},
+      timeSpent: 0,
+      timeEstimate: 0,
+      isDone: false,
+      isNotesOpen: false,
+      title,
+      id: shortid(),
+      ...additional,
+    };
   }
 }
