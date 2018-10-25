@@ -55,10 +55,6 @@ const updateTimeSpentForParentIfParent = (parentId, state: TaskState): TaskState
     const subTasks = parentTask.subTaskIds.map((id) => state.entities[id]);
     const timeSpentOnDayParent = {};
 
-    if (!subTasks.length) {
-      throw new Error('No sub tasks found for parent');
-    }
-
     subTasks.forEach((subTask) => {
       Object.keys(subTask.timeSpentOnDay).forEach(strDate => {
         if (subTask.timeSpentOnDay[strDate]) {
@@ -85,9 +81,6 @@ const updateTimeEstimateForParentIfParent = (parentId, state: TaskState): TaskSt
   if (parentId) {
     const parentTask: Task = state.entities[parentId];
     const subTasks = parentTask.subTaskIds.map((id) => state.entities[id]);
-    if (!subTasks.length) {
-      throw new Error('No sub tasks found for parent');
-    }
 
     return taskAdapter.updateOne({
       id: parentId,
