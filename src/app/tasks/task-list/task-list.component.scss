@@ -22,7 +22,7 @@
   &__backlog {
   }
 
-  .task-list & {
+  ::ng-deep task-list & {
     margin: 2px 5px 0 5px;
 
     @media(max-width: $layout-xs) {

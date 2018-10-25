@@ -1,9 +1,3 @@
-<section class="mat-typography">
-  <div class="task-list">
-    <task *ngFor="let task of tasks; trackBy: trackByFn; let i = index;"
-          [task]="task"
-          [prevId]="tasks[i-1]?.id"
-          [nextId]="tasks[i+1]?.id">
-    </task>
-  </div>
-</section>
+<task *ngFor="let task of tasks; trackBy: trackByFn; let i = index;"
+      [task]="task">
+</task>

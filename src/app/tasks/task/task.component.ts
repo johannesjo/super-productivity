@@ -22,8 +22,7 @@ import { checkKeyCombo } from '../../core/util/check-key-combo';
 export class TaskComponent implements OnInit {
   // @Input() task: Task;
   @Input() task: TaskWithSubTasks;
-  @Input() prevId: string;
-  @Input() nextId: string;
+
   @HostBinding('tabindex') tabIndex = 1;
 
   @HostBinding('class.is-done')
