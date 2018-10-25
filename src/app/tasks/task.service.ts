@@ -183,12 +183,12 @@ export class TaskService {
     });
   }
 
-  addSubTask(parentTask: Task) {
+  addSubTaskTo(parentId) {
     this._store.dispatch({
       type: TaskActionTypes.AddSubTask,
       payload: {
         task: this._createNewTask(''),
-        parentId: parentTask.id
+        parentId: parentId
       }
     });
   }

@@ -8,7 +8,7 @@
     <button mat-icon-button
             aria-label="is updated"
             tabindex="2"
-            (click)="toggleShowNotes(task.id, task.isNotesOpen)"
+            (click)="toggleShowNotes()"
             *ngIf="task.isUpdated">
       <!--<mat-tooltip>-->
       <!--Click to show updates-->
@@ -24,7 +24,7 @@
 
     <button mat-icon-button
             class="play-btn ico-btn"
-            (click)="startTask(task.id)"
+            (click)="startTask()"
             aria-label="mark as current"
             tabindex="2"
             *ngIf="!isDone && !isCurrent && !task.subTasks">
@@ -33,7 +33,7 @@
 
     <button mat-icon-button
             class="play-btn ico-btn"
-            (click)="pauseTask(task.id)"
+            (click)="pauseTask()"
             tabindex="2"
             *ngIf="!isDone && isCurrent && !task.subTasks">
       <i class="material-icons">pause_circle_filled</i>
@@ -61,7 +61,7 @@
          contenteditable="true"
          class="title task-title"
          [value]="task.title"
-         (editFinished)="updateTaskIfChanged($event.isChanged, task.id, $event.newVal)"
+         (editFinished)="updateTaskTitleIfChanged($event.isChanged, $event.newVal)"
          tabindex="2"></div>
 
     <div class="time">
@@ -75,7 +75,7 @@
               class="ico-btn"
               [disabled]="task.subTasks && task.subTasks.length>0"
               aria-label="time estimation"
-              (click)="estimateTime(task)">
+              (click)="estimateTime()">
 
         <i class="material-icons"
            aria-label="time estimation">access_time</i>
@@ -85,7 +85,7 @@
               aria-label="add sub task"
               *ngIf="!task.parentId&&!isDone"
               tabindex="2"
-              (click)="addSubTask(task, $event);">
+              (click)="addSubTask($event);">
 
         <i class="material-icons"
            aria-label="add sub task">playlist_add</i>
@@ -95,7 +95,7 @@
               aria-label="notes"
               tabindex="2"
               [class.is-active]="task.isNotesOpen"
-              (click)="toggleShowNotes(task.id, task.isNotesOpen)">
+              (click)="toggleShowNotes()">
 
         <i class="material-icons"
            *ngIf="task.notes||task.issueData"
@@ -107,13 +107,13 @@
               tabindex="2"
               aria-label="delete"
               class="ico-btn"
-              (click)="deleteTask(task.id)">
+              (click)="deleteTask()">
 
         <i class="material-icons delete-icon"
            aria-label="delete">delete_forever</i>
       </button>
       <button mat-icon-button
-              (click)="toggleTaskDone(task.id, task.isDone)"
+              (click)="toggleTaskDone()"
               class="ico-btn mark-as-done-btn"
               tabindex="2"
               aria-label="un-/mark as done">
@@ -131,7 +131,7 @@
 
   <task-additional-info class="notes"
                         *ngIf="task.isNotesOpen"
-                        (onTaskNotesChanged)="onTaskNotesChanged(task.id, $event)"
+                        (onTaskNotesChanged)="onTaskNotesChanged($event)"
                         [@expand]
                         [task]="task"></task-additional-info>
 
