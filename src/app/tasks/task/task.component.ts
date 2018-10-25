@@ -22,6 +22,8 @@ import { checkKeyCombo } from '../../core/util/check-key-combo';
 export class TaskComponent implements OnInit {
   // @Input() task: Task;
   @Input() task: TaskWithSubTasks;
+  @Input() prevId: string;
+  @Input() nextId: string;
   @HostBinding('tabindex') tabIndex = 1;
 
   @HostBinding('class.is-done')
@@ -201,24 +203,14 @@ export class TaskComponent implements OnInit {
     // moving items
     // move task up
     if (checkKeyCombo(ev, keys.moveTaskUp)) {
-      // TODO
-      // const taskIndex = getTaskIndex();
-      // if (taskIndex > 0) {
-      //   TaskListCtrl.moveItem(this.tasks, taskIndex, taskIndex - 1);
-      //
-      //   // we need to manually re-add focus after timeout
-      //   this.$timeout(() => {
-      //     taskEl.focus();
-      //   });
-      // }
+      if (this.prevId) {
+        this._taskService.move(this.task.id, this.prevId);
+      }
     }
-    // move task down
-    // TODO
-    // if (checkKeyCombo(ev, keys.moveTaskDown)) {
-    //   const taskIndex = getTaskIndex();
-    //   if (taskIndex < this.tasks.length - 1) {
-    //     TaskListCtrl.moveItem(this.tasks, taskIndex, taskIndex + 1);
-    //   }
-    // }
+    if (checkKeyCombo(ev, keys.moveTaskDown)) {
+      if (this.nextId) {
+        this._taskService.move(this.task.id, this.nextId, true);
+      }
+    }
   }
 }

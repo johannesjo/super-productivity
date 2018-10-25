@@ -99,10 +99,10 @@ export class TaskService {
 
   // META
   // ----
-  setCurrentId(taskId: string) {
+  setCurrentId(id: string) {
     this._store.dispatch({
       type: TaskActionTypes.SetCurrentTask,
-      payload: taskId,
+      payload: id,
     });
   }
 
@@ -153,32 +153,51 @@ export class TaskService {
     });
   }
 
-  remove(taskId: string) {
+  remove(id: string) {
     this._store.dispatch({
       type: TaskActionTypes.DeleteTask,
-      payload: {id: taskId}
+      payload: {id: id}
     });
   }
 
 
-  update(taskId: string, changedFields: Partial<Task>) {
+  update(id: string, changedFields: Partial<Task>) {
     this._store.dispatch({
       type: TaskActionTypes.UpdateTask,
       payload: {
         task: {
-          id: taskId,
+          id: id,
           changes: changedFields
         }
       }
     });
   }
 
-  moveAfter(taskId, targetItemId: string | undefined) {
+  move(id: string, targetItemId: string, isMoveAfter = false) {
     this._store.dispatch({
-      type: TaskActionTypes.MoveAfter,
+      type: TaskActionTypes.Move,
       payload: {
-        taskId,
+        id,
         targetItemId,
+        isMoveAfter,
+      }
+    });
+  }
+
+  moveUp(id: string) {
+    this._store.dispatch({
+      type: TaskActionTypes.MoveUp,
+      payload: {
+        id,
+      }
+    });
+  }
+
+  moveDown(id: string) {
+    this._store.dispatch({
+      type: TaskActionTypes.MoveDown,
+      payload: {
+        id,
       }
     });
   }
@@ -193,60 +212,59 @@ export class TaskService {
     });
   }
 
-  addTimeSpent(taskId: string, tick: Tick) {
+  addTimeSpent(id: string, tick: Tick) {
     this._store.dispatch({
       type: TaskActionTypes.AddTimeSpent,
       payload: {
-        taskId: taskId,
+        id: id,
         tick: tick,
       }
     });
   }
 
-  moveToToday(taskId) {
+  moveToToday(id) {
     this._store.dispatch({
       type: TaskActionTypes.MoveToToday,
       payload: {
-        id: taskId,
+        id: id,
       }
     });
   }
 
-  moveToBacklog(taskId) {
-    console.log(taskId);
+  moveToBacklog(id) {
     this._store.dispatch({
       type: TaskActionTypes.MoveToBacklog,
       payload: {
-        id: taskId,
+        id: id,
       }
     });
   }
 
-  moveToArchive(taskId) {
+  moveToArchive(id) {
     this._store.dispatch({
       type: TaskActionTypes.MoveToArchive,
       payload: {
-        id: taskId,
+        id: id,
       }
     });
   }
 
   // HELPER
   // ------
-  setDone(taskId: string) {
-    this.update(taskId, {isDone: true});
+  setDone(id: string) {
+    this.update(id, {isDone: true});
   }
 
-  setUnDone(taskId: string) {
-    this.update(taskId, {isDone: false});
+  setUnDone(id: string) {
+    this.update(id, {isDone: false});
   }
 
-  showNotes(taskId: string) {
-    this.update(taskId, {isNotesOpen: true});
+  showNotes(id: string) {
+    this.update(id, {isNotesOpen: true});
   }
 
-  hideNotes(taskId: string) {
-    this.update(taskId, {isNotesOpen: false});
+  hideNotes(id: string) {
+    this.update(id, {isNotesOpen: false});
   }
 
   private _createNewTask(title: string, additional: Partial<Task> = {}): Partial<Task> {

@@ -15,7 +15,9 @@ export enum TaskActionTypes {
   UpdateTask = '[Task] Update Task',
   UpdateTasks = '[Task] Update Tasks',
   DeleteTask = '[Task] Delete Task',
-  MoveAfter = '[Task] Move After',
+  Move = '[Task] Move task',
+  MoveUp = '[Task] Move up',
+  MoveDown = '[Task] Move down',
   AddTimeSpent = '[Task] Add time spent',
 
   // Sub Task Actions
@@ -73,17 +75,31 @@ export class DeleteTask implements Action {
   }
 }
 
-export class MoveAfter implements Action {
-  readonly type = TaskActionTypes.MoveAfter;
+export class Move implements Action {
+  readonly type = TaskActionTypes.Move;
 
-  constructor(public payload: { taskId: string, targetItemId: string }) {
+  constructor(public payload: { id: string, targetItemId: string, isMoveAfter: boolean }) {
+  }
+}
+
+export class MoveUp implements Action {
+  readonly type = TaskActionTypes.Move;
+
+  constructor(public payload: { id: string }) {
+  }
+}
+
+export class MoveDown implements Action {
+  readonly type = TaskActionTypes.Move;
+
+  constructor(public payload: { id: string }) {
   }
 }
 
 export class AddTimeSpent implements Action {
   readonly type = TaskActionTypes.AddTimeSpent;
 
-  constructor(public payload: { taskId: string, tick: Tick }) {
+  constructor(public payload: { id: string, tick: Tick }) {
   }
 }
 
@@ -123,7 +139,7 @@ export type TaskActions
   | UpdateTask
   | UpdateTasks
   | DeleteTask
-  | MoveAfter
+  | Move
   | AddTimeSpent
   | AddSubTask
   | MoveToBacklog

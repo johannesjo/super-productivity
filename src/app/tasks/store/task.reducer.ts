@@ -29,12 +29,12 @@ export const initialTaskState: TaskState = taskAdapter.getInitialState({
   backlogTaskIds: [],
 });
 
-const moveTaskInArray = (arr_, taskId, targetId) => {
-  if (arr_.indexOf(taskId) > -1) {
+const moveTaskInArray = (arr_, id, targetId, isMoveAfter) => {
+  if (arr_.indexOf(id) > -1) {
     const arr = arr_.splice(0);
-    arr.splice(arr.indexOf(taskId), 1);
+    arr.splice(arr.indexOf(id), 1);
     const targetIndex = targetId ? arr.indexOf(targetId) : 0;
-    arr.splice(targetIndex, 0, taskId);
+    arr.splice(targetIndex + (isMoveAfter ? 1 : 0), 0, id);
     return arr;
   } else {
     return arr_;
@@ -204,24 +204,25 @@ export function taskReducer(
       };
     }
 
-    case TaskActionTypes.MoveAfter: {
-      const taskId = action.payload.taskId;
+    case TaskActionTypes.Move: {
+      const id = action.payload.id;
       const targetId = action.payload.targetItemId;
+      const isMoveAfter = action.payload.isMoveAfter;
       // TODO handle sub task case
       return {
         ...state,
-        ids: moveTaskInArray(state.ids, taskId, targetId),
-        backlogTaskIds: moveTaskInArray(state.backlogTaskIds, taskId, targetId),
-        todaysTaskIds: moveTaskInArray(state.todaysTaskIds, taskId, targetId),
+        ids: moveTaskInArray(state.ids, id, targetId, isMoveAfter),
+        backlogTaskIds: moveTaskInArray(state.backlogTaskIds, id, targetId, isMoveAfter),
+        todaysTaskIds: moveTaskInArray(state.todaysTaskIds, id, targetId, isMoveAfter),
       };
     }
 
     case TaskActionTypes.AddTimeSpent: {
       let stateCopy;
-      const taskToUpdate = state.entities[action.payload.taskId];
+      const taskToUpdate = state.entities[action.payload.id];
       const updateTimeSpentOnDay = addTimeSpentToTask(taskToUpdate, action.payload.tick.duration, action.payload.tick.date);
       stateCopy = taskAdapter.updateOne({
-        id: action.payload.taskId,
+        id: action.payload.id,
         changes: {
           timeSpentOnDay: updateTimeSpentOnDay,
           timeSpent: calcTotalTimeSpent(updateTimeSpentOnDay)
