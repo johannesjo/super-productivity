@@ -8,6 +8,7 @@ import { MatDialog } from '@angular/material';
 import { DialogTimeEstimateComponent } from '../dialogs/dialog-time-estimate/dialog-time-estimate.component';
 import { expandAnimation } from '../../ui/animations/expand.ani';
 import { ConfigService } from '../../core/config/config.service';
+import { checkKeyCombo } from '../../core/util/check-key-combo';
 
 // import {Task} from './task'
 
@@ -117,98 +118,108 @@ export class TaskComponent implements OnInit {
   }
 
   private _handleKeyboardShortcuts(ev: KeyboardEvent) {
-    // const keyboardCfg = this._configService.cfg.keyboard;
-    //
-    // if (checkKeyCombo(ev, keyboardCfg.taskEditTitle) || ev.key === 'Enter') {
-    //   // this.$scope.$broadcast(this.EDIT_ON_CLICK_TOGGLE_EV, task.id);
-    // }
-    // if (checkKeyCombo(ev, keyboardCfg.taskToggleNotes)) {
-    //  this.toggleShowNotes()
-    // }
-    // if (checkKeyCombo(ev, keyboardCfg.taskOpenEstimationDialog)) {
-    //   this.estimateTime(task);
-    // }
-    // if (checkKeyCombo(ev, keyboardCfg.taskToggleDone)) {
-    //   task.isDone = !task.isDone;
-    //   this.onTaskDoneChanged(task);
-    // }
-    // if (checkKeyCombo(ev, keyboardCfg.taskAddSubTask)) {
-    //   // allow for same keyboard shortcut with the global add task
-    //   this.addSubTask(task);
-    // }
-    //
-    // if (checkKeyCombo(ev, keyboardCfg.taskOpenOriginalLink)) {
-    //   this.Util.openExternalUrl(task.originalLink);
-    // }
-    //
-    // if (checkKeyCombo(ev, keyboardCfg.togglePlay)) {
-    //   this.expandSubTasks(task);
-    //   this.togglePlay(task);
-    // }
-    //
-    // if (checkKeyCombo(ev, keyboardCfg.taskDelete)) {
-    //   this.deleteTask(task);
-    // }
-    //
-    // if (checkKeyCombo(ev, keyboardCfg.moveToBacklog)) {
-    //   this.Tasks.moveTaskFromTodayToBackLog(task);
-    //   this.focusClosestTask(taskEl);
-    // }
-    //
-    // if (checkKeyCombo(ev, keyboardCfg.moveToTodaysTasks)) {
-    //   this.Tasks.moveTaskFromBackLogToToday(task);
-    //   this.focusClosestTask(taskEl);
-    // }
-    //
-    // // move focus up
-    // if ((isShiftOrCtrlPressed && ev.keyCode === KEY_UP) || checkKeyCombo(ev, keyboardCfg.selectPreviousTask)) {
-    //   this.focusPrevTask(taskEl);
-    // }
-    // // move focus down
-    // if ((isShiftOrCtrlPressed && ev.keyCode === KEY_DOWN) || checkKeyCombo(ev, keyboardCfg.selectNextTask)) {
-    //   this.focusNextTask(taskEl);
-    // }
-    //
-    // // expand sub tasks
-    // if ((ev.keyCode === KEY_RIGHT) || checkKeyCombo(ev, keyboardCfg.expandSubTasks)) {
-    //   // if already opened or is sub task select next task
-    //   if ((task.subTasks && task.subTasks.length > 0 && task.isHideSubTasks === false) || this.parentTask) {
-    //     this.focusNextTask(taskEl);
-    //   }
-    //
-    //   this.expandSubTasks(task);
-    // }
-    //
-    // // collapse sub tasks
-    // if ((ev.keyCode === KEY_LEFT) || checkKeyCombo(ev, keyboardCfg.collapseSubTasks)) {
-    //   if (task.subTasks && task.subTasks.length > 0) {
-    //     this.collapseSubTasks(task);
-    //   }
-    //   if (this.parentTask) {
-    //     this.focusPrevTask(taskEl);
-    //   }
-    // }
-    //
-    // // moving items
-    // // move task up
-    // if (checkKeyCombo(ev, keyboardCfg.moveTaskUp)) {
-    //   const taskIndex = getTaskIndex();
-    //   if (taskIndex > 0) {
-    //     TaskListCtrl.moveItem(this.tasks, taskIndex, taskIndex - 1);
-    //
-    //     // we need to manually re-add focus after timeout
-    //     this.$timeout(() => {
-    //       taskEl.focus();
-    //     });
-    //   }
-    // }
-    // // move task down
-    // if (checkKeyCombo(ev, keyboardCfg.moveTaskDown)) {
+    const keys = this._configService.cfg.keyboard;
+    const isShiftAndCtrlPressed = (ev.shiftKey === false && ev.ctrlKey === false);
+
+    if (checkKeyCombo(ev, keys.taskEditTitle) || ev.key === 'Enter') {
+      // TODO
+      // this.$scope.$broadcast(this.EDIT_ON_CLICK_TOGGLE_EV, task.id);
+    }
+    if (checkKeyCombo(ev, keys.taskToggleNotes)) {
+      this.toggleShowNotes();
+    }
+    if (checkKeyCombo(ev, keys.taskOpenEstimationDialog)) {
+      this.estimateTime();
+    }
+    if (checkKeyCombo(ev, keys.taskToggleDone)) {
+      this.toggleTaskDone();
+    }
+    if (checkKeyCombo(ev, keys.taskAddSubTask)) {
+      this.addSubTask();
+    }
+
+    if (checkKeyCombo(ev, keys.taskOpenOriginalLink)) {
+      // TODO
+      // this.Util.openExternalUrl(task.originalLink);
+    }
+
+    if (checkKeyCombo(ev, keys.togglePlay)) {
+      if (this.isCurrent) {
+        this._taskService.setCurrentId(null);
+      } else {
+        this.startTask();
+      }
+    }
+
+    if (checkKeyCombo(ev, keys.taskDelete)) {
+      this.deleteTask();
+    }
+
+    if (checkKeyCombo(ev, keys.moveToBacklog)) {
+      // this.Tasks.moveTaskFromTodayToBackLog(task);
+      // this.focusClosestTask(taskEl);
+    }
+
+    if (checkKeyCombo(ev, keys.moveToTodaysTasks)) {
+      // TODO
+      // this.Tasks.moveTaskFromBackLogToToday(task);
+      // this.focusClosestTask(taskEl);
+    }
+
+    // move focus up
+    if ((isShiftAndCtrlPressed && ev.key === 'ArrowUp') || checkKeyCombo(ev, keys.selectPreviousTask)) {
+      // TODO
+      // this.focusPrevTask(taskEl);
+    }
+    // move focus down
+    if ((isShiftAndCtrlPressed && ev.key === 'ArrowDown') || checkKeyCombo(ev, keys.selectNextTask)) {
+      // TODO
+      // this.focusNextTask(taskEl);
+    }
+
+    // expand sub tasks
+    if ((ev.key === 'ArrowRight') || checkKeyCombo(ev, keys.expandSubTasks)) {
+      // if already opened or is sub task select next task
+      // TODO
+      // if ((task.subTasks && task.subTasks.length > 0 && task.isHideSubTasks === false) || this.parentTask) {
+      //   this.focusNextTask(taskEl);
+      // }
+      //
+      // this.expandSubTasks(task);
+    }
+
+    // collapse sub tasks
+    if ((ev.key === 'ArrowLeft') || checkKeyCombo(ev, keys.collapseSubTasks)) {
+      // TODO
+      // if (task.subTasks && task.subTasks.length > 0) {
+      //   this.collapseSubTasks(task);
+      // }
+      // if (this.parentTask) {
+      //   this.focusPrevTask(taskEl);
+      // }
+    }
+
+    // moving items
+    // move task up
+    if (checkKeyCombo(ev, keys.moveTaskUp)) {
+      // TODO
+      // const taskIndex = getTaskIndex();
+      // if (taskIndex > 0) {
+      //   TaskListCtrl.moveItem(this.tasks, taskIndex, taskIndex - 1);
+      //
+      //   // we need to manually re-add focus after timeout
+      //   this.$timeout(() => {
+      //     taskEl.focus();
+      //   });
+      // }
+    }
+    // move task down
+    // TODO
+    // if (checkKeyCombo(ev, keys.moveTaskDown)) {
     //   const taskIndex = getTaskIndex();
     //   if (taskIndex < this.tasks.length - 1) {
     //     TaskListCtrl.moveItem(this.tasks, taskIndex, taskIndex + 1);
     //   }
     // }
-
   }
 }
