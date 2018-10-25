@@ -56,6 +56,12 @@ export class EditOnClickDirective implements OnInit, OnChanges {
       el.setAttribute('contenteditable', 'true');
     }
 
+    el.addEventListener('focus', (ev: Event) => {
+      // setTimeout(() => {
+      //   document.execCommand('selectAll', false, null);
+      // });
+    });
+
     el.addEventListener('input', () => {
       this.setValueFromElement();
     });
@@ -66,11 +72,11 @@ export class EditOnClickDirective implements OnInit, OnChanges {
     });
 
     // prevent keyboard shortcuts from firing when here
-    el.addEventListener('keydown', (ev) => {
+    el.addEventListener('keydown', (ev: KeyboardEvent) => {
       ev.stopPropagation();
 
       // blur on escape
-      if (ev.keyCode === 13 || ev.keyCode === 27) {
+      if (ev.key === 'Enter' || ev.key === 'Escape') {
         ev.preventDefault();
         setTimeout(() => {
           el.blur();
@@ -79,8 +85,8 @@ export class EditOnClickDirective implements OnInit, OnChanges {
     });
 
     // blur on enter
-    el.addEventListener('keypress', function (ev) {
-      if (ev.keyCode === 13) {
+    el.addEventListener('keypress', function (ev: KeyboardEvent) {
+      if (ev.key === 'Enter') {
         // prevent keyboard shortcuts from firing when here
         ev.preventDefault();
         setTimeout(() => {
@@ -137,15 +143,5 @@ export class EditOnClickDirective implements OnInit, OnChanges {
     let curVal = this.el.innerText;
     curVal = removeTags(curVal);
     this.value = curVal;
-  }
-
-  toggleFromOutside(ev, eventId) {
-    if (eventId === this.eventId) {
-      setTimeout(() => {
-        this.el.focus();
-        // select all when doing this
-        document.execCommand('selectAll', false, null);
-      });
-    }
   }
 }

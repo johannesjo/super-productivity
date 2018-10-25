@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, HostBinding, HostListener, Input, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, HostBinding, HostListener, Input, OnInit, ViewChild } from '@angular/core';
 import { TaskService } from '../task.service';
 import { Observable } from 'rxjs';
 import { DragulaService } from 'ng2-dragula';
@@ -36,6 +36,8 @@ export class TaskComponent implements OnInit {
   @HostListener('keydown', ['$event']) onKeyDown(ev: KeyboardEvent) {
     this._handleKeyboardShortcuts(ev);
   }
+
+  @ViewChild('editOnClickEl') editOnClickEl: ElementRef;
 
   constructor(
     private readonly _taskService: TaskService,
@@ -122,8 +124,9 @@ export class TaskComponent implements OnInit {
     const isShiftAndCtrlPressed = (ev.shiftKey === false && ev.ctrlKey === false);
 
     if (checkKeyCombo(ev, keys.taskEditTitle) || ev.key === 'Enter') {
-      // TODO
-      // this.$scope.$broadcast(this.EDIT_ON_CLICK_TOGGLE_EV, task.id);
+      this.editOnClickEl.nativeElement.focus();
+      // prevent blur
+      ev.preventDefault();
     }
     if (checkKeyCombo(ev, keys.taskToggleNotes)) {
       this.toggleShowNotes();
@@ -136,11 +139,6 @@ export class TaskComponent implements OnInit {
     }
     if (checkKeyCombo(ev, keys.taskAddSubTask)) {
       this.addSubTask();
-    }
-
-    if (checkKeyCombo(ev, keys.taskOpenOriginalLink)) {
-      // TODO
-      // this.Util.openExternalUrl(task.originalLink);
     }
 
     if (checkKeyCombo(ev, keys.togglePlay)) {
