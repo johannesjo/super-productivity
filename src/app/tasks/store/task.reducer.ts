@@ -102,7 +102,7 @@ const updateTimeEstimateForParentIfParent = (parentId, state: TaskState): TaskSt
 
 // TODO unit test the shit out of this once the model is settled
 export function taskReducer(
-  state = initialTaskState,
+  state: TaskState = initialTaskState,
   action: TaskActions
 ): TaskState {
   // console.log(state.entities, state, action);

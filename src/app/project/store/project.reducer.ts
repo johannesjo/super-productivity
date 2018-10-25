@@ -1,10 +1,7 @@
-import { createEntityAdapter, EntityAdapter, EntityState } from '@ngrx/entity';
-import { Update } from '@ngrx/entity';
+import { createEntityAdapter, EntityAdapter, EntityState, Update } from '@ngrx/entity';
 import { Project } from '../project';
-import { ProjectActions } from './project.actions';
-import { ProjectActionTypes } from './project.actions';
-import { createFeatureSelector } from '@ngrx/store';
-import { createSelector } from '@ngrx/store';
+import { ProjectActions, ProjectActionTypes } from './project.actions';
+import { createFeatureSelector, createSelector } from '@ngrx/store';
 import { FIRST_PROJECT } from '../project.const';
 
 export const PROJECT_FEATURE_NAME = 'projects';
@@ -42,7 +39,7 @@ export const initialState: ProjectState = projectAdapter.getInitialState({
 // REDUCER
 // -------
 export function projectReducer(
-  state = initialState,
+  state: ProjectState = initialState,
   action: ProjectActions
 ): ProjectState {
   // console.log(state.entities, state, action);

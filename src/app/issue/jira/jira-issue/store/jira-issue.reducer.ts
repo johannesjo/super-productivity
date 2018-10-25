@@ -37,7 +37,7 @@ export const initialJiraIssueState: JiraIssueState = jiraIssueAdapter.getInitial
 });
 
 export function jiraIssueReducer(
-  state = initialJiraIssueState,
+  state: JiraIssueState = initialJiraIssueState,
   action: JiraIssueActions
 ): JiraIssueState {
   // console.log(state.entities, state, action);
