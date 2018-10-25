@@ -203,14 +203,14 @@ export class TaskComponent implements OnInit {
     // moving items
     // move task up
     if (checkKeyCombo(ev, keys.moveTaskUp)) {
-      if (this.prevId) {
-        this._taskService.move(this.task.id, this.prevId);
-      }
+      this._taskService.moveUp(this.task.id);
+      ev.stopPropagation();
+      ev.preventDefault();
     }
     if (checkKeyCombo(ev, keys.moveTaskDown)) {
-      if (this.nextId) {
-        this._taskService.move(this.task.id, this.nextId, true);
-      }
+      this._taskService.moveDown(this.task.id);
+      ev.stopPropagation();
+      ev.preventDefault();
     }
   }
 }

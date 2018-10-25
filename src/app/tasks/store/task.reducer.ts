@@ -3,6 +3,7 @@ import { TaskActions, TaskActionTypes } from './task.actions';
 import { Task, TimeSpentOnDay } from '../task.model';
 import { calcTotalTimeSpent } from '../util/calc-total-time-spent';
 import { tasks } from 'googleapis/build/src/apis/tasks';
+import { arrayMoveLeft, arrayMoveRight } from '../../core/util/array-move';
 
 export const TASK_FEATURE_NAME = 'tasks';
 export const taskAdapter: EntityAdapter<Task> = createEntityAdapter<Task>();
@@ -29,8 +30,8 @@ export const initialTaskState: TaskState = taskAdapter.getInitialState({
   backlogTaskIds: [],
 });
 
-const moveTaskInArray = (arr_, id, targetId, isMoveAfter) => {
-  if (arr_.indexOf(id) > -1) {
+const moveTaskInArrayByIds = (arr_, id, targetId, isMoveAfter) => {
+  if (arr_.includes(id)) {
     const arr = arr_.splice(0);
     arr.splice(arr.indexOf(id), 1);
     const targetIndex = targetId ? arr.indexOf(targetId) : 0;
@@ -211,11 +212,57 @@ export function taskReducer(
       // TODO handle sub task case
       return {
         ...state,
-        ids: moveTaskInArray(state.ids, id, targetId, isMoveAfter),
-        backlogTaskIds: moveTaskInArray(state.backlogTaskIds, id, targetId, isMoveAfter),
-        todaysTaskIds: moveTaskInArray(state.todaysTaskIds, id, targetId, isMoveAfter),
+        ids: moveTaskInArrayByIds(state.ids, id, targetId, isMoveAfter),
+        backlogTaskIds: moveTaskInArrayByIds(state.backlogTaskIds, id, targetId, isMoveAfter),
+        todaysTaskIds: moveTaskInArrayByIds(state.todaysTaskIds, id, targetId, isMoveAfter),
       };
     }
+
+    case TaskActionTypes.MoveUp: {
+      let updatedState = state;
+      const id = action.payload.id;
+      const taskToMove = state.entities[id];
+      if (taskToMove.parentId) {
+        const parentSubTasks = state.entities[taskToMove.parentId].subTaskIds;
+        updatedState = taskAdapter.updateOne({
+          id: taskToMove.parentId,
+          changes: {
+            subTaskIds: arrayMoveLeft(parentSubTasks, id)
+          }
+        }, updatedState);
+      }
+
+      return {
+        ...updatedState,
+        ids: arrayMoveLeft(state.ids, id),
+        backlogTaskIds: arrayMoveLeft(state.backlogTaskIds, id),
+        todaysTaskIds: arrayMoveLeft(state.todaysTaskIds, id),
+      };
+    }
+
+
+    case TaskActionTypes.MoveDown: {
+      let updatedState = state;
+      const id = action.payload.id;
+      const taskToMove = state.entities[id];
+      if (taskToMove.parentId) {
+        const parentSubTasks = state.entities[taskToMove.parentId].subTaskIds;
+        updatedState = taskAdapter.updateOne({
+          id: taskToMove.parentId,
+          changes: {
+            subTaskIds: arrayMoveRight(parentSubTasks, id)
+          }
+        }, updatedState);
+      }
+
+      return {
+        ...updatedState,
+        ids: arrayMoveRight(state.ids, id),
+        backlogTaskIds: arrayMoveRight(state.backlogTaskIds, id),
+        todaysTaskIds: arrayMoveRight(state.todaysTaskIds, id),
+      };
+    }
+
 
     case TaskActionTypes.AddTimeSpent: {
       let stateCopy;
@@ -234,6 +281,7 @@ export function taskReducer(
 
       return stateCopy;
     }
+
 
     case TaskActionTypes.AddSubTask: {
       // add item1

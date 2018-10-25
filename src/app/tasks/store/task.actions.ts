@@ -83,14 +83,14 @@ export class Move implements Action {
 }
 
 export class MoveUp implements Action {
-  readonly type = TaskActionTypes.Move;
+  readonly type = TaskActionTypes.MoveUp;
 
   constructor(public payload: { id: string }) {
   }
 }
 
 export class MoveDown implements Action {
-  readonly type = TaskActionTypes.Move;
+  readonly type = TaskActionTypes.MoveDown;
 
   constructor(public payload: { id: string }) {
   }
@@ -140,6 +140,8 @@ export type TaskActions
   | UpdateTasks
   | DeleteTask
   | Move
+  | MoveUp
+  | MoveDown
   | AddTimeSpent
   | AddSubTask
   | MoveToBacklog
