@@ -1,11 +1,11 @@
 import { Injectable } from '@angular/core';
 import { Actions, Effect, ofType } from '@ngrx/effects';
 import { TaskActionTypes } from './task.actions';
-import { Store } from '@ngrx/store';
+import { select, Store } from '@ngrx/store';
 import { tap, withLatestFrom } from 'rxjs/operators';
-import { PROJECT_FEATURE_NAME } from '../../project/store/project.reducer';
 import { PersistenceService } from '../../core/persistence/persistence.service';
-import { TASK_FEATURE_NAME } from './task.reducer';
+import { selectTaskFeatureState } from './task.selectors';
+import { selectCurrentProjectId } from '../../project/store/project.reducer';
 
 // TODO send message to electron when current task changes here
 
@@ -21,7 +21,10 @@ export class TaskEffects {
         TaskActionTypes.UnsetCurrentTask,
         TaskActionTypes.UpdateTask,
       ),
-      withLatestFrom(this._store$),
+      withLatestFrom(
+        this._store$.pipe(select(selectCurrentProjectId)),
+        this._store$.pipe(select(selectTaskFeatureState)),
+      ),
       tap(this._saveToLs.bind(this))
     );
 
@@ -30,11 +33,9 @@ export class TaskEffects {
               private _persistenceService: PersistenceService) {
   }
 
-  private _saveToLs(state) {
-    const tasksFeatureState = state[1][TASK_FEATURE_NAME];
-    const projectId = state[1][PROJECT_FEATURE_NAME].currentId;
-    if (projectId) {
-      this._persistenceService.saveTasksForProject(projectId, tasksFeatureState);
+  private _saveToLs([action, currentProjectId, taskState]) {
+    if (currentProjectId) {
+      this._persistenceService.saveTasksForProject(currentProjectId, taskState);
     } else {
       throw new Error('No current project id');
     }
