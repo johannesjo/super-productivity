@@ -108,7 +108,18 @@ export function taskReducer(
     }
 
     case TaskActionTypes.SetCurrentTask: {
-      return {...state, currentTaskId: action.payload};
+      return (action.payload && state.entities[action.payload])
+        ? {
+          ...(taskAdapter.updateOne({
+            id: action.payload,
+            changes: {isDone: false}
+          }, state)),
+          currentTaskId: action.payload,
+        }
+        : {
+          ...state,
+          currentTaskId: action.payload,
+        };
     }
 
     case TaskActionTypes.UnsetCurrentTask: {
