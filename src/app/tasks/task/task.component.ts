@@ -154,23 +154,24 @@ export class TaskComponent implements OnInit {
     }
 
     if (checkKeyCombo(ev, keys.moveToBacklog)) {
-      // this.Tasks.moveTaskFromTodayToBackLog(task);
+      this._taskService.moveToBacklog(this.task.id);
+      // TODO
       // this.focusClosestTask(taskEl);
     }
 
     if (checkKeyCombo(ev, keys.moveToTodaysTasks)) {
+      this._taskService.moveToToday(this.task.id);
       // TODO
-      // this.Tasks.moveTaskFromBackLogToToday(task);
       // this.focusClosestTask(taskEl);
     }
 
     // move focus up
-    if ((isShiftAndCtrlPressed && ev.key === 'ArrowUp') || checkKeyCombo(ev, keys.selectPreviousTask)) {
+    if ((!isShiftAndCtrlPressed && ev.key === 'ArrowUp') || checkKeyCombo(ev, keys.selectPreviousTask)) {
       // TODO
       // this.focusPrevTask(taskEl);
     }
     // move focus down
-    if ((isShiftAndCtrlPressed && ev.key === 'ArrowDown') || checkKeyCombo(ev, keys.selectNextTask)) {
+    if ((!isShiftAndCtrlPressed && ev.key === 'ArrowDown') || checkKeyCombo(ev, keys.selectNextTask)) {
       // TODO
       // this.focusNextTask(taskEl);
     }

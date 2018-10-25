@@ -247,6 +247,27 @@ export function taskReducer(
       return stateCopy;
     }
 
+    case TaskActionTypes.MoveToToday: {
+      return {
+        ...state,
+        backlogTaskIds: state.backlogTaskIds.filter((id) => id !== action.payload.id),
+        todaysTaskIds: [...state.todaysTaskIds, action.payload.id],
+      };
+    }
+
+    case TaskActionTypes.MoveToBacklog: {
+      return {
+        ...state,
+        todaysTaskIds: state.todaysTaskIds.filter((id) => id !== action.payload.id),
+        backlogTaskIds: [action.payload.id, ...state.backlogTaskIds],
+      };
+    }
+
+    case TaskActionTypes.MoveToArchive: {
+      return state;
+    }
+
+
     default: {
       return state;
     }

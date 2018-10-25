@@ -1,6 +1,6 @@
 import { Action } from '@ngrx/store';
 import { Update } from '@ngrx/entity';
-import { Task, TaskWithSubTasks, TimeSpentOnDay } from '../task.model';
+import { Task } from '../task.model';
 import { TaskState } from './task.reducer';
 import { Tick } from '../../core/time-tracking/time-tracking';
 import { JiraIssue } from '../../issue/jira/jira-issue/jira-issue.model';
@@ -20,6 +20,11 @@ export enum TaskActionTypes {
 
   // Sub Task Actions
   AddSubTask = '[Task] Add SubTask',
+
+  // Other
+  MoveToBacklog = '[Task] Move to backlog',
+  MoveToToday = '[Task] Move to today',
+  MoveToArchive = '[Task] Move to archive',
 }
 
 export class LoadState implements Action {
@@ -32,7 +37,7 @@ export class LoadState implements Action {
 export class SetCurrentTask implements Action {
   readonly type = TaskActionTypes.SetCurrentTask;
 
-  constructor(public payload: any) {
+  constructor(public payload: string) {
   }
 }
 
@@ -71,7 +76,7 @@ export class DeleteTask implements Action {
 export class MoveAfter implements Action {
   readonly type = TaskActionTypes.MoveAfter;
 
-  constructor(public payload: { taskId: string, targetItemId }) {
+  constructor(public payload: { taskId: string, targetItemId: string }) {
   }
 }
 
@@ -89,6 +94,27 @@ export class AddSubTask implements Action {
   }
 }
 
+export class MoveToBacklog implements Action {
+  readonly type = TaskActionTypes.MoveToBacklog;
+
+  constructor(public payload: { id: string }) {
+  }
+}
+
+export class MoveToToday implements Action {
+  readonly type = TaskActionTypes.MoveToToday;
+
+  constructor(public payload: { id: string }) {
+  }
+}
+
+export class MoveToArchive implements Action {
+  readonly type = TaskActionTypes.MoveToArchive;
+
+  constructor(public payload: { id: string }) {
+  }
+}
+
 export type TaskActions
   = LoadState
   | SetCurrentTask
@@ -99,5 +125,8 @@ export type TaskActions
   | DeleteTask
   | MoveAfter
   | AddTimeSpent
-  | AddSubTask;
+  | AddSubTask
+  | MoveToBacklog
+  | MoveToToday
+  | MoveToArchive;
 

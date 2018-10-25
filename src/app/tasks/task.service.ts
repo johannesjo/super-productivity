@@ -203,6 +203,34 @@ export class TaskService {
     });
   }
 
+  moveToToday(taskId) {
+    this._store.dispatch({
+      type: TaskActionTypes.MoveToToday,
+      payload: {
+        id: taskId,
+      }
+    });
+  }
+
+  moveToBacklog(taskId) {
+    console.log(taskId);
+    this._store.dispatch({
+      type: TaskActionTypes.MoveToBacklog,
+      payload: {
+        id: taskId,
+      }
+    });
+  }
+
+  moveToArchive(taskId) {
+    this._store.dispatch({
+      type: TaskActionTypes.MoveToArchive,
+      payload: {
+        id: taskId,
+      }
+    });
+  }
+
   // HELPER
   // ------
   setDone(taskId: string) {
