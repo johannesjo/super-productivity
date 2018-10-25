@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
 import { Actions, Effect, ofType } from '@ngrx/effects';
-import { Store } from '@ngrx/store';
+import { select, Store } from '@ngrx/store';
 import { tap, withLatestFrom } from 'rxjs/operators';
 import { ProjectActionTypes } from './project.actions';
-import { PROJECT_FEATURE_NAME } from './project.reducer';
+import { selectProjectFeatureState } from './project.reducer';
 import { PersistenceService } from '../../core/persistence/persistence.service';
 
 @Injectable()
@@ -17,7 +17,9 @@ export class ProjectEffects {
         ProjectActionTypes.UpdateProject,
         ProjectActionTypes.SaveProjectIssueConfig,
       ),
-      withLatestFrom(this._store$),
+      withLatestFrom(
+        this._store$.pipe(select(selectProjectFeatureState))
+      ),
       tap(this._saveToLs.bind(this))
     );
 
@@ -28,11 +30,8 @@ export class ProjectEffects {
   ) {
   }
 
-  private _saveToLs(state) {
-    const projectsFeatureState = state[1][PROJECT_FEATURE_NAME];
-    const currentId = projectsFeatureState.currentId;
-    console.log('SYNC', projectsFeatureState, currentId);
-    this._persistenceService.saveProjectsMeta(projectsFeatureState);
+  private _saveToLs([action, projectFeatureState]) {
+    this._persistenceService.saveProjectsMeta(projectFeatureState);
   }
 }
 
