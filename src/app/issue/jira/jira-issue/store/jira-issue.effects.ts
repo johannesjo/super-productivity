@@ -1,12 +1,12 @@
 import { Injectable } from '@angular/core';
 import { Actions, Effect, ofType } from '@ngrx/effects';
 import { JiraIssueActionTypes } from './jira-issue.actions';
-import { Store } from '@ngrx/store';
+import { select, Store } from '@ngrx/store';
 import { tap, withLatestFrom } from 'rxjs/operators';
 import { TaskActionTypes } from '../../../../tasks/store/task.actions';
 import { PersistenceService } from '../../../../core/persistence/persistence.service';
-import { JIRA_ISSUE_FEATURE_NAME } from './jira-issue.reducer';
-import { PROJECT_FEATURE_NAME } from '../../../../project/store/project.reducer';
+import { selectJiraIssueFeatureState } from './jira-issue.reducer';
+import { selectCurrentProjectId } from '../../../../project/store/project.reducer';
 
 @Injectable()
 export class JiraIssueEffects {
@@ -19,7 +19,10 @@ export class JiraIssueEffects {
         JiraIssueActionTypes.AddSubJiraIssue,
         JiraIssueActionTypes.UpdateJiraIssue,
       ),
-      withLatestFrom(this._store$),
+      withLatestFrom(
+        this._store$.pipe(select(selectCurrentProjectId)),
+        this._store$.pipe(select(selectJiraIssueFeatureState)),
+      ),
       tap(this._saveToLs.bind(this))
     );
 
@@ -29,11 +32,9 @@ export class JiraIssueEffects {
   ) {
   }
 
-  private _saveToLs(state) {
-    const jiraIssuesFeatureState = state[1][JIRA_ISSUE_FEATURE_NAME];
-    const projectId = state[1][PROJECT_FEATURE_NAME].currentId;
-    if (projectId) {
-      this._persistenceService.saveIssuesForProject(projectId, 'JIRA', jiraIssuesFeatureState);
+  private _saveToLs([action, currentProjectId, jiraIssueFeatureState]) {
+    if (currentProjectId) {
+      this._persistenceService.saveIssuesForProject(currentProjectId, 'JIRA', jiraIssueFeatureState);
     } else {
       throw new Error('No current project id');
     }
