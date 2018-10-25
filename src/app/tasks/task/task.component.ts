@@ -7,7 +7,6 @@ import shortid from 'shortid';
 import { MatDialog } from '@angular/material';
 import { DialogTimeEstimateComponent } from '../dialogs/dialog-time-estimate/dialog-time-estimate.component';
 import { expandAnimation } from '../../ui/animations/expand.ani';
-import { checkKeyCombo } from '../../core/util/check-key-combo';
 
 // import {Task} from './task'
 
@@ -32,7 +31,7 @@ export class TaskComponent implements OnInit {
   currentTaskId$: Observable<string>;
   subTaskListId: string;
 
-  @HostListener('keyup', ['$event']) onKeyDown(ev) {
+  @HostListener('keydown', ['$event']) onKeyDown(ev) {
     console.log(ev);
   }
 
@@ -100,21 +99,16 @@ export class TaskComponent implements OnInit {
     this._taskService.addSubTask(task);
   }
 
-  // TODO refactor to action ?
   toggleTaskDone(taskId: string, isDone: boolean) {
-    if (!isDone) {
-      this._taskService.setDone(taskId);
-    } else {
-      this._taskService.setUnDone(taskId);
-    }
+    isDone
+      ? this._taskService.setUnDone(taskId)
+      : this._taskService.setDone(taskId);
   }
 
   toggleShowNotes(taskId: string, isShowNotes: boolean) {
-    if (!isShowNotes) {
-      this._taskService.showNotes(taskId);
-    } else {
-      this._taskService.hideNotes(taskId);
-    }
+    isShowNotes
+      ? this._taskService.hideNotes(taskId)
+      : this._taskService.showNotes(taskId);
   }
 
   focusTask() {
