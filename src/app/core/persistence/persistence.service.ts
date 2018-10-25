@@ -3,6 +3,9 @@ import { LS_GLOBAL_CFG, LS_ISSUE_STATE, LS_PROJECT_META_LIST, LS_PROJECT_PREFIX,
 import { GlobalConfig } from '../config/config.model';
 import { loadFromLs, saveToLs } from './local-storage';
 import { IssueProviderKey } from '../../issue/issue';
+import { ProjectState } from '../../project/store/project.reducer';
+import { TaskState } from '../../tasks/store/task.reducer';
+import { JiraIssueState } from '../../issue/jira/jira-issue/store/jira-issue.reducer';
 
 @Injectable({
   providedIn: 'root'
@@ -21,22 +24,20 @@ export class PersistenceService {
     return loadFromLs(LS_PROJECT_META_LIST);
   }
 
-  saveProjectsMeta(projectData) {
+  saveProjectsMeta(projectData: ProjectState) {
     saveToLs(LS_PROJECT_META_LIST, projectData);
   }
 
-  // TODO check naming
-  saveTasksForProject(projectId, data) {
-    saveToLs(PersistenceService._makeProjectKey(projectId, LS_TASK_STATE), data);
+  saveTasksForProject(projectId, taskState: TaskState) {
+    saveToLs(PersistenceService._makeProjectKey(projectId, LS_TASK_STATE), taskState);
   }
 
-  // TODO add correct type
-  loadTasksForProject(projectId): any {
+  loadTasksForProject(projectId): TaskState {
     return loadFromLs(PersistenceService._makeProjectKey(projectId, LS_TASK_STATE));
   }
 
 
-  saveIssuesForProject(projectId, issueType: IssueProviderKey, data) {
+  saveIssuesForProject(projectId, issueType: IssueProviderKey, data: JiraIssueState) {
     saveToLs(PersistenceService._makeProjectKey(projectId, LS_ISSUE_STATE, issueType), data);
   }
 
