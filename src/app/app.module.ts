@@ -20,6 +20,7 @@ import { MainHeaderModule } from './main-header/main-header.module';
 import { HttpClientModule } from '@angular/common/http';
 import { MatSidenavModule } from '@angular/material';
 import { TasksModule } from './tasks/tasks.module';
+import { SpeedDialMenuModule } from './speed-dial-menu/speed-dial-menu.module';
 
 @NgModule({
   declarations: [
@@ -31,6 +32,7 @@ import { TasksModule } from './tasks/tasks.module';
     CoreModule,
     PagesModule,
     MainHeaderModule,
+    SpeedDialMenuModule,
     MatSidenavModule,
     TasksModule,
 
