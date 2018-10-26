@@ -1,12 +1,14 @@
-<h1 class="mat-headline">Plan your day!</h1>
+<header>
+  <h1 class="mat-headline">Plan your day!</h1>
+  <add-task-bar></add-task-bar>
+</header>
 
-<add-task-bar></add-task-bar>
-
-<div class="wrapper page-wrapper">
-  <task-list [tasks]="todaysTasks$|async"
-             [filterArgs]="{'isDone':false}"></task-list>
-
-  <div class="backlog">
+<div class="page-wrapper">
+  <div class="today component-wrapper">
+    <task-list [tasks]="todaysTasks$|async"
+               [filterArgs]="{'isDone':false}"></task-list>
+  </div>
+  <div class="backlog component-wrapper">
     <h2 class="mat-h2">Backlog ~{{estimateRemainingBacklog$|async|msToString}}</h2>
     <task-list [tasks]="backlogTasks$|async"
                [filterArgs]="{'isDone':true}"></task-list>

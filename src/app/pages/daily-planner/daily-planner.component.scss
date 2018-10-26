@@ -5,7 +5,7 @@ add-task-bar {
   max-width: 628px;
 
   ::ng-deep input {
-    box-shadow: none!important;
+    box-shadow: none !important;
   }
 }
 
@@ -16,6 +16,10 @@ h1 {
 
 h2 {
   text-align: center;
+}
+
+.today {
+
 }
 
 .backlog {

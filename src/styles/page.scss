@@ -14,3 +14,8 @@ app-root,
 .page-wrapper {
   padding: $s 2*$s $s*6;
 }
+
+.component-wrapper {
+  max-width: $component-max-width;
+  margin: auto;
+}
