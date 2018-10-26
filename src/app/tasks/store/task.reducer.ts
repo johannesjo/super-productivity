@@ -94,6 +94,18 @@ const updateTimeEstimateForParentIfParent = (parentId, state: TaskState): TaskSt
   }
 };
 
+const updateTotalTimeSpentIfChanged = (partialTask: Partial<Task>): Partial<Task> => {
+  if (!partialTask.timeSpentOnDay) {
+    return partialTask;
+  }
+
+  return {
+    ...partialTask,
+    timeSpentOnDay: partialTask.timeSpentOnDay,
+    timeSpent: calcTotalTimeSpent(partialTask.timeSpentOnDay)
+  };
+};
+
 // TODO unit test the shit out of this once the model is settled
 export function taskReducer(
   state: TaskState = initialTaskState,
@@ -146,22 +158,9 @@ export function taskReducer(
       // NOTE needs to b first to include the current changes for the other calculations
       let stateCopy: TaskState = taskAdapter.updateOne(action.payload.task, state);
 
-      // TIME SPENT side effects
-      if (action.payload.task.changes.timeSpentOnDay) {
-        // also adjust total time spent
-        action.payload.task.changes = {
-          ...action.payload.task.changes,
-          timeSpent: calcTotalTimeSpent(action.payload.task.changes.timeSpentOnDay)
-        };
-        // also update time spent for parent
-        stateCopy = updateTimeSpentForParentIfParent(state.entities[action.payload.task.id].parentId, stateCopy);
-      }
-
-      // TIME ESTIMATE side effects
-      if (action.payload.task.changes.timeEstimate) {
-        // also adjust for parent
-        stateCopy = updateTimeEstimateForParentIfParent(state.entities[action.payload.task.id].parentId, stateCopy);
-      }
+      action.payload.task.changes = updateTotalTimeSpentIfChanged(action.payload.task.changes);
+      stateCopy = updateTimeSpentForParentIfParent(state.entities[action.payload.task.id].parentId, stateCopy);
+      stateCopy = updateTimeEstimateForParentIfParent(state.entities[action.payload.task.id].parentId, stateCopy);
 
       return stateCopy;
     }
@@ -270,10 +269,7 @@ export function taskReducer(
       const updateTimeSpentOnDay = addTimeSpentToTask(taskToUpdate, action.payload.tick.duration, action.payload.tick.date);
       stateCopy = taskAdapter.updateOne({
         id: action.payload.id,
-        changes: {
-          timeSpentOnDay: updateTimeSpentOnDay,
-          timeSpent: calcTotalTimeSpent(updateTimeSpentOnDay)
-        }
+        changes: updateTotalTimeSpentIfChanged({timeSpentOnDay: updateTimeSpentOnDay})
       }, state);
 
       // also update time spent for parent
