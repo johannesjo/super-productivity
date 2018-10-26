@@ -109,7 +109,7 @@ export function taskReducer(
     }
 
     case TaskActionTypes.SetCurrentTask: {
-      return (action.payload && state.entities[action.payload])
+      return (action.payload)
         ? {
           ...(taskAdapter.updateOne({
             id: action.payload,

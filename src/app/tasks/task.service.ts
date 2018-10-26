@@ -1,4 +1,4 @@
-import { distinctUntilChanged, map, withLatestFrom } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, map, withLatestFrom } from 'rxjs/operators';
 import { Injectable } from '@angular/core';
 import { combineLatest, Observable } from 'rxjs';
 import { Task, TaskWithSubTasks } from './task.model';
@@ -17,8 +17,10 @@ import {
   selectBacklogTasksWithSubTasks,
   selectCurrentTaskId,
   selectEstimateRemainingForBacklog,
-  selectEstimateRemainingForToday, selectFocusIdsForDailyPlanner,
+  selectEstimateRemainingForToday,
+  selectFocusIdsForDailyPlanner,
   selectFocusIdsForWorkView,
+  selectMissingIssueIds,
   selectTodaysDoneTasksWithSubTasks,
   selectTodaysTasksWithSubTasks,
   selectTodaysUnDoneTasksWithSubTasks
@@ -46,8 +48,15 @@ export class TaskService {
   estimateRemainingBacklog$: Observable<any> = this._store.pipe(select(selectEstimateRemainingForBacklog), distinctUntilChanged());
   // throttleTime(50)
 
+  missingIssuesForTasks$ = this._store.pipe(
+    // wait for issue model to be loaded
+    debounceTime(1000),
+    select(selectMissingIssueIds),
+    distinctUntilChanged()
+  );
+
   // TODO could be more efficient than using combine latest
-  workingToday$: Observable<any> = combineLatest(this.tasks$, this._timeTrackingService.tick$).pipe(
+  workingToday$: Observable<any> = combineLatest(this.todaysTasks$, this._timeTrackingService.tick$).pipe(
     map(([tasks, tick]) => tasks && tasks.length && tasks.reduce((acc, task) => {
         return acc + (
           (task.timeSpentOnDay && +task.timeSpentOnDay[tick.date])
@@ -58,14 +67,6 @@ export class TaskService {
     // throttleTime(50)
   );
 
-
-  missingIssuesForTasks$ = this.tasks$.pipe(map(
-    (tasks) => tasks && tasks.filter((task: TaskWithSubTasks) => (!task.issueData && (task.issueType || task.issueId)))
-      .map(task => task.issueId)
-  ));
-
-
-  // tasksId$: Observable<string[] | number[]> = this._store.pipe(select(selectTaskIds));
 
   constructor(
     private readonly _store: Store<any>,
@@ -98,10 +99,7 @@ export class TaskService {
   // META
   // ----
   setCurrentId(id: string) {
-    this._store.dispatch({
-      type: TaskActionTypes.SetCurrentTask,
-      payload: id,
-    });
+    this._storeDispatch(TaskActionTypes.SetCurrentTask, id);
   }
 
   loadStateForProject(projectId) {
@@ -110,141 +108,82 @@ export class TaskService {
   }
 
   loadState(state) {
-    this._store.dispatch({
-      type: TaskActionTypes.LoadState,
-      payload: {
-        state: state,
-      }
-    });
+    this._storeDispatch(TaskActionTypes.LoadState, {state});
   }
 
   pauseCurrent() {
-    this._store.dispatch({
-      type: TaskActionTypes.UnsetCurrentTask,
-    });
+    this._storeDispatch(TaskActionTypes.UnsetCurrentTask);
   }
 
   // Tasks
   // -----
   add(title: string, isAddToBacklog = false) {
-    this._store.dispatch({
-      type: TaskActionTypes.AddTask,
-      payload: {
-        task: this._createNewTask(title),
-        isAddToBacklog
-      }
+    this._storeDispatch(TaskActionTypes.AddTask, {
+      task: this._createNewTask(title),
+      isAddToBacklog
     });
   }
 
 
   addWithIssue(title: string, issueType: IssueProviderKey, issue: any, isAddToBacklog = false) {
-    this._store.dispatch({
-      type: TaskActionTypes.AddTask,
-      payload: {
-        task: this._createNewTask(title, {
-          issueId: issue.id,
-          issueType: issueType,
-        }),
-        issue,
-        isAddToBacklog
-      }
+    this._storeDispatch(TaskActionTypes.AddTask, {
+      task: this._createNewTask(title, {
+        issueId: issue.id,
+        issueType: issueType,
+      }),
+      issue,
+      isAddToBacklog
     });
   }
 
   remove(id: string) {
-    this._store.dispatch({
-      type: TaskActionTypes.DeleteTask,
-      payload: {id: id}
-    });
+    this._storeDispatch(TaskActionTypes.DeleteTask, {id});
   }
 
 
   update(id: string, changedFields: Partial<Task>) {
-    this._store.dispatch({
-      type: TaskActionTypes.UpdateTask,
-      payload: {
-        task: {
-          id: id,
-          changes: changedFields
-        }
-      }
+    this._storeDispatch(TaskActionTypes.UpdateTask, {
+      task: {id, changes: changedFields}
     });
   }
 
   move(id: string, targetItemId: string, isMoveAfter = false) {
-    this._store.dispatch({
-      type: TaskActionTypes.Move,
-      payload: {
-        id,
-        targetItemId,
-        isMoveAfter,
-      }
+    this._storeDispatch(TaskActionTypes.Move, {
+      id,
+      targetItemId,
+      isMoveAfter,
     });
   }
 
   moveUp(id: string) {
-    this._store.dispatch({
-      type: TaskActionTypes.MoveUp,
-      payload: {
-        id,
-      }
-    });
+    this._storeDispatch(TaskActionTypes.MoveUp, {id});
   }
 
   moveDown(id: string) {
-    this._store.dispatch({
-      type: TaskActionTypes.MoveDown,
-      payload: {
-        id,
-      }
-    });
+    this._storeDispatch(TaskActionTypes.MoveDown, {id});
   }
 
   addSubTaskTo(parentId) {
-    this._store.dispatch({
-      type: TaskActionTypes.AddSubTask,
-      payload: {
-        task: this._createNewTask(''),
-        parentId: parentId
-      }
+    this._storeDispatch(TaskActionTypes.AddSubTask, {
+      task: this._createNewTask(''),
+      parentId: parentId
     });
   }
 
   addTimeSpent(id: string, tick: Tick) {
-    this._store.dispatch({
-      type: TaskActionTypes.AddTimeSpent,
-      payload: {
-        id: id,
-        tick: tick,
-      }
-    });
+    this._storeDispatch(TaskActionTypes.AddTimeSpent, {id, tick,});
   }
 
   moveToToday(id) {
-    this._store.dispatch({
-      type: TaskActionTypes.MoveToToday,
-      payload: {
-        id: id,
-      }
-    });
+    this._storeDispatch(TaskActionTypes.MoveToToday, {id});
   }
 
   moveToBacklog(id) {
-    this._store.dispatch({
-      type: TaskActionTypes.MoveToBacklog,
-      payload: {
-        id: id,
-      }
-    });
+    this._storeDispatch(TaskActionTypes.MoveToBacklog, {id});
   }
 
   moveToArchive(id) {
-    this._store.dispatch({
-      type: TaskActionTypes.MoveToArchive,
-      payload: {
-        id: id,
-      }
-    });
+    this._storeDispatch(TaskActionTypes.MoveToArchive, {id});
   }
 
   // HELPER
@@ -263,6 +202,14 @@ export class TaskService {
 
   hideNotes(id: string) {
     this.update(id, {isNotesOpen: false});
+  }
+
+
+  private _storeDispatch(action: TaskActionTypes, payload?: any) {
+    this._store.dispatch({
+      type: action,
+      payload: payload
+    });
   }
 
   private _createNewTask(title: string, additional: Partial<Task> = {}): Partial<Task> {

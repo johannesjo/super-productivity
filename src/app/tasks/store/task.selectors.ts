@@ -1,6 +1,7 @@
 import { createFeatureSelector, createSelector } from '@ngrx/store';
 import { TASK_FEATURE_NAME, taskAdapter, TaskState } from './task.reducer';
 import { selectIssueEntityMap } from '../../issue/issue.selector';
+import { TaskWithSubTasks } from '../task.model';
 
 const mapIssueDataToTask = (tasks_, issueEntityMap) => {
   return tasks_ && tasks_.map((task) => {
@@ -82,4 +83,12 @@ export const selectFocusIdsForDailyPlanner = createSelector(
   selectTodaysTasksWithSubTasks,
   selectBacklogTasksWithSubTasks,
   (todaysTasks, backlogTasks) => getFlatIdList([...todaysTasks, ...backlogTasks])
+);
+export const selectMissingIssueIds = createSelector(
+  selectAllTasksWithIssueData,
+  (tasks) => tasks && tasks
+    .filter(
+      (task: TaskWithSubTasks) => (!task.issueData && (task.issueType || task.issueId))
+    )
+    .map(task => task.issueId)
 );
