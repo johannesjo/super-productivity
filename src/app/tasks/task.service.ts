@@ -1,4 +1,4 @@
-import { map, withLatestFrom } from 'rxjs/operators';
+import { distinctUntilChanged, map, withLatestFrom } from 'rxjs/operators';
 import { Injectable } from '@angular/core';
 import { combineLatest, Observable } from 'rxjs';
 import { Task, TaskWithSubTasks } from './task.model';
@@ -15,7 +15,10 @@ import { Tick } from '../core/time-tracking/time-tracking';
 import {
   selectAllTasksWithSubTasks,
   selectBacklogTasksWithSubTasks,
-  selectCurrentTask, selectEstimateRemainingForBacklog, selectEstimateRemainingForToday,
+  selectCurrentTaskId,
+  selectEstimateRemainingForBacklog,
+  selectEstimateRemainingForToday, selectFocusIdsForDailyPlanner,
+  selectFocusIdsForWorkView,
   selectTodaysDoneTasksWithSubTasks,
   selectTodaysTasksWithSubTasks,
   selectTodaysUnDoneTasksWithSubTasks
@@ -24,22 +27,24 @@ import {
 
 @Injectable()
 export class TaskService {
-  currentTaskId$: Observable<string> = this._store.pipe(select(selectCurrentTask));
+  currentTaskId$: Observable<string> = this._store.pipe(select(selectCurrentTaskId), distinctUntilChanged());
 
-  tasks$: Observable<TaskWithSubTasks[]> = this._store.pipe(select(selectAllTasksWithSubTasks));
-  todaysTasks$: Observable<TaskWithSubTasks[]> = this._store.pipe(select(selectTodaysTasksWithSubTasks));
-  backlogTasks$: Observable<TaskWithSubTasks[]> = this._store.pipe(select(selectBacklogTasksWithSubTasks));
+  tasks$: Observable<TaskWithSubTasks[]> = this._store.pipe(select(selectAllTasksWithSubTasks), distinctUntilChanged());
+  todaysTasks$: Observable<TaskWithSubTasks[]> = this._store.pipe(select(selectTodaysTasksWithSubTasks), distinctUntilChanged());
+  backlogTasks$: Observable<TaskWithSubTasks[]> = this._store.pipe(select(selectBacklogTasksWithSubTasks), distinctUntilChanged());
 
-  undoneTasks$: Observable<TaskWithSubTasks[]> = this._store.pipe(select(selectTodaysUnDoneTasksWithSubTasks));
-  doneTasks$: Observable<TaskWithSubTasks[]> = this._store.pipe(select(selectTodaysDoneTasksWithSubTasks));
+  undoneTasks$: Observable<TaskWithSubTasks[]> = this._store.pipe(select(selectTodaysUnDoneTasksWithSubTasks), distinctUntilChanged());
+  doneTasks$: Observable<TaskWithSubTasks[]> = this._store.pipe(select(selectTodaysDoneTasksWithSubTasks), distinctUntilChanged());
 
+  focusIdsForWorkView$: Observable<string[]> = this._store.pipe(select(selectFocusIdsForWorkView), distinctUntilChanged());
+  focusIdsForDailyPlanner$: Observable<string[]> = this._store.pipe(select(selectFocusIdsForDailyPlanner, distinctUntilChanged()));
 
   // META FIELDS
   // -----------
-  estimateRemainingToday$: Observable<any> = this._store.pipe(select(selectEstimateRemainingForToday));
-    // throttleTime(50)
-  estimateRemainingBacklog$: Observable<any> = this._store.pipe(select(selectEstimateRemainingForBacklog));
-    // throttleTime(50)
+  estimateRemainingToday$: Observable<any> = this._store.pipe(select(selectEstimateRemainingForToday), distinctUntilChanged());
+  // throttleTime(50)
+  estimateRemainingBacklog$: Observable<any> = this._store.pipe(select(selectEstimateRemainingForBacklog), distinctUntilChanged());
+  // throttleTime(50)
 
   // TODO could be more efficient than using combine latest
   workingToday$: Observable<any> = combineLatest(this.tasks$, this._timeTrackingService.tick$).pipe(
@@ -52,7 +57,6 @@ export class TaskService {
     )),
     // throttleTime(50)
   );
-
 
 
   missingIssuesForTasks$ = this.tasks$.pipe(map(

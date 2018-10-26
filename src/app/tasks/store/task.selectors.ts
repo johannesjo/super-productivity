@@ -30,6 +30,15 @@ const mapEstimateRemaining = (tasks) => tasks && tasks.length && tasks.reduce((a
   return acc + ((isTrackVal) ? estimateRemaining : 0);
 }, 0);
 
+export const getFlatIdList = (arr) => {
+  let ids = [];
+  arr.forEach(task => {
+    ids.push(task.id);
+    ids = ids.concat(task.subTaskIds);
+  });
+  return ids;
+};
+
 const mapTasksFromIds = (tasks__, ids) => {
   return ids.map(id => tasks__.find(task => task.id === id));
 };
@@ -40,8 +49,7 @@ const {selectIds, selectEntities, selectAll, selectTotal} = taskAdapter.getSelec
 export const selectTaskFeatureState = createFeatureSelector<TaskState>(TASK_FEATURE_NAME);
 export const selectBacklogTaskIds = createSelector(selectTaskFeatureState, state => state.backlogTaskIds);
 export const selectTodaysTaskIds = createSelector(selectTaskFeatureState, state => state.todaysTaskIds);
-export const selectCurrentTask = createSelector(selectTaskFeatureState, state => state.currentTaskId);
-
+export const selectCurrentTaskId = createSelector(selectTaskFeatureState, state => state.currentTaskId);
 
 export const selectAllTasks = createSelector(selectTaskFeatureState, selectAll);
 export const selectAllTasksWithIssueData = createSelector(selectAllTasks, selectIssueEntityMap, mapIssueDataToTask);
@@ -49,7 +57,6 @@ export const selectAllTasksWithIssueData = createSelector(selectAllTasks, select
 export const selectAllTasksWithSubTasks = createSelector(selectAllTasksWithIssueData, mapSubTasksToTasks);
 
 export const selectTodaysTasksWithSubTasks = createSelector(selectAllTasksWithSubTasks, selectTodaysTaskIds, mapTasksFromIds);
-
 export const selectBacklogTasksWithSubTasks = createSelector(selectAllTasksWithSubTasks, selectBacklogTaskIds, mapTasksFromIds);
 
 
@@ -57,14 +64,22 @@ export const selectTodaysUnDoneTasksWithSubTasks = createSelector(
   selectTodaysTasksWithSubTasks,
   (tasks) => tasks.filter(task => !task.isDone)
 );
-
-
 export const selectTodaysDoneTasksWithSubTasks = createSelector(
   selectTodaysTasksWithSubTasks,
   (tasks) => tasks.filter(task => task.isDone)
 );
 
 export const selectEstimateRemainingForToday = createSelector(selectTodaysTasksWithSubTasks, mapEstimateRemaining);
-
-
 export const selectEstimateRemainingForBacklog = createSelector(selectBacklogTasksWithSubTasks, mapEstimateRemaining);
+
+export const selectFocusIdsForWorkView = createSelector(
+  selectTodaysUnDoneTasksWithSubTasks,
+  selectTodaysDoneTasksWithSubTasks,
+  (undoneTasks, doneTasks) => getFlatIdList([...undoneTasks, ...doneTasks])
+);
+
+export const selectFocusIdsForDailyPlanner = createSelector(
+  selectTodaysTasksWithSubTasks,
+  selectBacklogTasksWithSubTasks,
+  (todaysTasks, backlogTasks) => getFlatIdList([...todaysTasks, ...backlogTasks])
+);
