@@ -24,6 +24,12 @@ const mapSubTasksToTasks = (tasks__) => {
     });
 };
 
+const mapEstimateRemaining = (tasks) => tasks && tasks.length && tasks.reduce((acc, task) => {
+  const estimateRemaining = (+task.timeEstimate) - (+task.timeSpent);
+  const isTrackVal = (estimateRemaining > 0) && !task.isDone;
+  return acc + ((isTrackVal) ? estimateRemaining : 0);
+}, 0);
+
 const mapTasksFromIds = (tasks__, ids) => {
   return ids.map(id => tasks__.find(task => task.id === id));
 };
@@ -57,3 +63,8 @@ export const selectTodaysDoneTasksWithSubTasks = createSelector(
   selectTodaysTasksWithSubTasks,
   (tasks) => tasks.filter(task => task.isDone)
 );
+
+export const selectEstimateRemainingForToday = createSelector(selectTodaysTasksWithSubTasks, mapEstimateRemaining);
+
+
+export const selectEstimateRemainingForBacklog = createSelector(selectBacklogTasksWithSubTasks, mapEstimateRemaining);

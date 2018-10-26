@@ -13,7 +13,7 @@ export class WorkViewPageComponent implements OnInit {
   doneTasks$: Observable<TaskWithSubTasks[]> = this._taskService.doneTasks$;
   undoneTasks$: Observable<TaskWithSubTasks[]> = this._taskService.undoneTasks$;
   workingToday$: Observable<number> = this._taskService.workingToday$;
-  estimateRemaining$: Observable<number> = this._taskService.estimateRemaining$;
+  estimateRemaining$: Observable<number> = this._taskService.estimateRemainingToday$;
 
   // todo move to selector
   focusTaskIdList$: Observable<string[]> = combineLatest(

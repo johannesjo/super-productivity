@@ -12,6 +12,7 @@ import { TaskService } from '../../tasks/task.service';
 export class DailyPlannerComponent implements OnInit {
   todaysTasks$: Observable<TaskWithSubTasks[]> = this._taskService.todaysTasks$;
   backlogTasks$: Observable<TaskWithSubTasks[]> = this._taskService.backlogTasks$;
+  estimateRemainingBacklog$: Observable<number> = this._taskService.estimateRemainingBacklog$;
 
   constructor(private _taskService: TaskService) {
   }

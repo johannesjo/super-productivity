@@ -15,7 +15,7 @@ import { Tick } from '../core/time-tracking/time-tracking';
 import {
   selectAllTasksWithSubTasks,
   selectBacklogTasksWithSubTasks,
-  selectCurrentTask,
+  selectCurrentTask, selectEstimateRemainingForBacklog, selectEstimateRemainingForToday,
   selectTodaysDoneTasksWithSubTasks,
   selectTodaysTasksWithSubTasks,
   selectTodaysUnDoneTasksWithSubTasks
@@ -36,11 +36,10 @@ export class TaskService {
 
   // META FIELDS
   // -----------
-  missingIssuesForTasks$ = this.tasks$.pipe(map(
-    (tasks) => tasks && tasks.filter((task: TaskWithSubTasks) => (!task.issueData && (task.issueType || task.issueId)))
-      .map(task => task.issueId)
-  ));
-
+  estimateRemainingToday$: Observable<any> = this._store.pipe(select(selectEstimateRemainingForToday));
+    // throttleTime(50)
+  estimateRemainingBacklog$: Observable<any> = this._store.pipe(select(selectEstimateRemainingForBacklog));
+    // throttleTime(50)
 
   // TODO could be more efficient than using combine latest
   workingToday$: Observable<any> = combineLatest(this.tasks$, this._timeTrackingService.tick$).pipe(
@@ -54,16 +53,12 @@ export class TaskService {
     // throttleTime(50)
   );
 
-  // TODO refactor to selector
-  estimateRemaining$: Observable<any> = this.tasks$.pipe(
-    map((tasks) => tasks && tasks.length && tasks.reduce((acc, task) => {
-        const estimateRemaining = (+task.timeEstimate) - (+task.timeSpent);
-        const isTrackVal = (estimateRemaining > 0) && !task.isDone;
-        return acc + ((isTrackVal) ? estimateRemaining : 0);
-      }, 0
-    ))
-    // throttleTime(50)
-  );
+
+
+  missingIssuesForTasks$ = this.tasks$.pipe(map(
+    (tasks) => tasks && tasks.filter((task: TaskWithSubTasks) => (!task.issueData && (task.issueType || task.issueId)))
+      .map(task => task.issueId)
+  ));
 
 
   // tasksId$: Observable<string[] | number[]> = this._store.pipe(select(selectTaskIds));
