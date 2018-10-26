@@ -16,7 +16,9 @@ import {
   selectAllTasksWithSubTasks,
   selectBacklogTasksWithSubTasks,
   selectCurrentTask,
-  selectTodaysTasksWithSubTasks
+  selectTodaysDoneTasksWithSubTasks,
+  selectTodaysTasksWithSubTasks,
+  selectTodaysUnDoneTasksWithSubTasks
 } from './store/task.selectors';
 
 
@@ -28,12 +30,8 @@ export class TaskService {
   todaysTasks$: Observable<TaskWithSubTasks[]> = this._store.pipe(select(selectTodaysTasksWithSubTasks));
   backlogTasks$: Observable<TaskWithSubTasks[]> = this._store.pipe(select(selectBacklogTasksWithSubTasks));
 
-  undoneTasks$: Observable<TaskWithSubTasks[]> = this.todaysTasks$.pipe(map(
-    (tasks) => tasks && tasks.filter((task: TaskWithSubTasks) => !task.isDone)
-  ));
-  doneTasks$: Observable<TaskWithSubTasks[]> = this.todaysTasks$.pipe(map(
-    (tasks) => tasks && tasks.filter((task: TaskWithSubTasks) => task.isDone)
-  ));
+  undoneTasks$: Observable<TaskWithSubTasks[]> = this._store.pipe(select(selectTodaysUnDoneTasksWithSubTasks));
+  doneTasks$: Observable<TaskWithSubTasks[]> = this._store.pipe(select(selectTodaysDoneTasksWithSubTasks));
 
 
   // META FIELDS
@@ -56,6 +54,7 @@ export class TaskService {
     // throttleTime(50)
   );
 
+  // TODO refactor to selector
   estimateRemaining$: Observable<any> = this.tasks$.pipe(
     map((tasks) => tasks && tasks.length && tasks.reduce((acc, task) => {
         const estimateRemaining = (+task.timeEstimate) - (+task.timeSpent);
@@ -79,7 +78,7 @@ export class TaskService {
     this.todaysTasks$.subscribe((val) => console.log(val));
     this.missingIssuesForTasks$.subscribe((val) => {
       if (val && val.length > 0) {
-        console.error('MISSING ISSUE', val);
+        console.warn('MISSING ISSUE', val);
       }
     });
 

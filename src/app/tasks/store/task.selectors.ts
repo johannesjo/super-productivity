@@ -45,3 +45,15 @@ export const selectAllTasksWithSubTasks = createSelector(selectAllTasksWithIssue
 export const selectTodaysTasksWithSubTasks = createSelector(selectAllTasksWithSubTasks, selectTodaysTaskIds, mapTasksFromIds);
 
 export const selectBacklogTasksWithSubTasks = createSelector(selectAllTasksWithSubTasks, selectBacklogTaskIds, mapTasksFromIds);
+
+
+export const selectTodaysUnDoneTasksWithSubTasks = createSelector(
+  selectTodaysTasksWithSubTasks,
+  (tasks) => tasks.filter(task => !task.isDone)
+);
+
+
+export const selectTodaysDoneTasksWithSubTasks = createSelector(
+  selectTodaysTasksWithSubTasks,
+  (tasks) => tasks.filter(task => task.isDone)
+);
