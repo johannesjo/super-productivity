@@ -19,6 +19,7 @@ export enum TaskActionTypes {
   MoveUp = '[Task] Move up',
   MoveDown = '[Task] Move down',
   AddTimeSpent = '[Task] Add time spent',
+  FocusTask = '[Task] Focus Task',
 
   // Sub Task Actions
   AddSubTask = '[Task] Add SubTask',
@@ -103,6 +104,13 @@ export class AddTimeSpent implements Action {
   }
 }
 
+export class FocusTask implements Action {
+  readonly type = TaskActionTypes.FocusTask;
+
+  constructor(public payload: { id: string }) {
+  }
+}
+
 export class AddSubTask implements Action {
   readonly type = TaskActionTypes.AddSubTask;
 
@@ -143,6 +151,7 @@ export type TaskActions
   | MoveUp
   | MoveDown
   | AddTimeSpent
+  | FocusTask
   | AddSubTask
   | MoveToBacklog
   | MoveToToday

@@ -11,6 +11,7 @@ export const taskAdapter: EntityAdapter<Task> = createEntityAdapter<Task>();
 export interface TaskState extends EntityState<Task> {
   // additional entities state properties
   currentTaskId: string | null;
+  focusTaskId: string | null;
 
   // NOTE: but it is not needed currently
   todaysTaskIds: string[];
@@ -28,6 +29,7 @@ export const initialTaskState: TaskState = taskAdapter.getInitialState({
   currentTaskId: null,
   todaysTaskIds: [],
   backlogTaskIds: [],
+  focusTaskId: null,
 });
 
 // HELPER
@@ -322,6 +324,10 @@ export function taskReducer(
       );
     }
 
+
+    case TaskActionTypes.FocusTask: {
+      return {...state, currentTaskId: action.payload.id};
+    }
 
     case TaskActionTypes.AddSubTask: {
       // add item1

@@ -73,12 +73,12 @@ export const selectTodaysDoneTasksWithSubTasks = createSelector(
 export const selectEstimateRemainingForToday = createSelector(selectTodaysTasksWithSubTasks, mapEstimateRemaining);
 export const selectEstimateRemainingForBacklog = createSelector(selectBacklogTasksWithSubTasks, mapEstimateRemaining);
 
+export const selectFocusTaskId = createSelector(selectTaskFeatureState, state => state.focusTaskId);
 export const selectFocusIdsForWorkView = createSelector(
   selectTodaysUnDoneTasksWithSubTasks,
   selectTodaysDoneTasksWithSubTasks,
   (undoneTasks, doneTasks) => getFlatIdList([...undoneTasks, ...doneTasks])
 );
-
 export const selectFocusIdsForDailyPlanner = createSelector(
   selectTodaysTasksWithSubTasks,
   selectBacklogTasksWithSubTasks,

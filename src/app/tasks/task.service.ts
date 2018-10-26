@@ -19,7 +19,7 @@ import {
   selectEstimateRemainingForBacklog,
   selectEstimateRemainingForToday,
   selectFocusIdsForDailyPlanner,
-  selectFocusIdsForWorkView,
+  selectFocusIdsForWorkView, selectFocusTaskId,
   selectMissingIssueIds,
   selectTodaysDoneTasksWithSubTasks,
   selectTodaysTasksWithSubTasks,
@@ -38,6 +38,7 @@ export class TaskService {
   undoneTasks$: Observable<TaskWithSubTasks[]> = this._store.pipe(select(selectTodaysUnDoneTasksWithSubTasks), distinctUntilChanged());
   doneTasks$: Observable<TaskWithSubTasks[]> = this._store.pipe(select(selectTodaysDoneTasksWithSubTasks), distinctUntilChanged());
 
+  focusTaskId$: Observable<string> = this._store.pipe(select(selectFocusTaskId), distinctUntilChanged());
   focusIdsForWorkView$: Observable<string[]> = this._store.pipe(select(selectFocusIdsForWorkView), distinctUntilChanged());
   focusIdsForDailyPlanner$: Observable<string[]> = this._store.pipe(select(selectFocusIdsForDailyPlanner, distinctUntilChanged()));
 
@@ -171,7 +172,11 @@ export class TaskService {
   }
 
   addTimeSpent(id: string, tick: Tick) {
-    this._storeDispatch(TaskActionTypes.AddTimeSpent, {id, tick,});
+    this._storeDispatch(TaskActionTypes.AddTimeSpent, {id, tick});
+  }
+
+  focusTask(id: string) {
+    this._storeDispatch(TaskActionTypes.FocusTask, {id});
   }
 
   moveToToday(id) {
