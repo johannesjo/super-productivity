@@ -1,11 +1,9 @@
 <main-header class="mat-typography"></main-header>
 
-<mat-sidenav-container>
-  <div class="page-wrapper mat-typography">
-    <add-task-bar class="global"
-                  [@blendInOut]
-                  (blur)="isShowAddTaskBar=false;"
-                  *ngIf="isShowAddTaskBar"></add-task-bar>
-    <router-outlet></router-outlet>
-  </div>
+<mat-sidenav-container class="mat-typography">
+  <add-task-bar class="global"
+                [@blendInOut]
+                (blur)="isShowAddTaskBar=false;"
+                *ngIf="isShowAddTaskBar"></add-task-bar>
+  <router-outlet></router-outlet>
 </mat-sidenav-container>

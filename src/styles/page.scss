@@ -1,3 +1,4 @@
+@import '../_variables.scss';
 
 html,
 body,
@@ -10,3 +11,6 @@ app-root,
   color: #e0e0e0;
 }
 
+.page-wrapper {
+  padding: $s 2*$s $s*6;
+}

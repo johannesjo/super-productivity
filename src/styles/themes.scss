@@ -5,6 +5,11 @@
   .bg-primary {
     background-color: mat-color($primary);
   }
+
+  .bg-900 {
+    background-color: mat-color($primary, 800);
+  }
+
   .color-primary {
     color: mat-color($primary);
   }

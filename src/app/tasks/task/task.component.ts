@@ -122,7 +122,9 @@ export class TaskComponent implements OnInit {
 
   private _handleKeyboardShortcuts(ev: KeyboardEvent) {
     const keys = this._configService.cfg.keyboard;
-    const isShiftAndCtrlPressed = (ev.shiftKey === false && ev.ctrlKey === false);
+    const isShiftOrCtrlPressed = (ev.shiftKey === true || ev.ctrlKey === true);
+    // do not bubble up to parent
+    ev.stopPropagation();
 
     if (checkKeyCombo(ev, keys.taskEditTitle) || ev.key === 'Enter') {
       this.editOnClickEl.nativeElement.focus();
@@ -165,17 +167,24 @@ export class TaskComponent implements OnInit {
       // TODO
       // this.focusClosestTask(taskEl);
     }
+    console.log(isShiftOrCtrlPressed);
 
-    // move focus up
-    if ((!isShiftAndCtrlPressed && ev.key === 'ArrowUp') || checkKeyCombo(ev, keys.selectPreviousTask)) {
-      // TODO
-      // this.focusPrevTask(taskEl);
-    }
-    // move focus down
-    if ((!isShiftAndCtrlPressed && ev.key === 'ArrowDown') || checkKeyCombo(ev, keys.selectNextTask)) {
-      // TODO
-      // this.focusNextTask(taskEl);
-    }
+    // // move focus up
+    // if ((!isShiftOrCtrlPressed && ev.key === 'ArrowUp') || checkKeyCombo(ev, keys.selectPreviousTask)) {
+    //   const prev = new ElementRef(ev.target.previousSibling);
+    //   console.log(prev, ev);
+    //   if (prev.nativeElement && prev.nativeElement.focus) {
+    //     prev.nativeElement.focus();
+    //   }
+    // }
+    // // move focus down
+    // if ((!isShiftOrCtrlPressed && ev.key === 'ArrowDown') || checkKeyCombo(ev, keys.selectNextTask)) {
+    //   // TODO
+    //   const next = new ElementRef(ev.target.nextSibling);
+    //   if (next.nativeElement && next.nativeElement.focus) {
+    //     next.nativeElement.focus();
+    //   }
+    // }
 
     // expand sub tasks
     if ((ev.key === 'ArrowRight') || checkKeyCombo(ev, keys.expandSubTasks)) {

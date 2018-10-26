@@ -5,8 +5,10 @@
   margin: auto;
 }
 
-
 .work-view-header {
+  color: #ffffff;
+  margin-bottom: $s;
+
   @media(max-width: $layout-xs) {
     .label {
       display: none;
@@ -22,14 +24,14 @@
   align-items: center;
   flex-direction: row;
   justify-content: center;
-  margin-top: -4px;
-  padding: 10px 0;
+  padding: 5px 0;
+  user-select: none;
 
   .item {
     margin: 0 12px;
   }
 
-  .label{
+  .label {
     margin-right: $s;
   }
 

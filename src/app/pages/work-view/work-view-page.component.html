@@ -1,45 +1,44 @@
-<div class="wrapper">
-  <header class="work-view-header">
-    <div class="status-bar">
-      <div class="item"><span class="label">Working today:</span>
-        <span class="no-wrap">
+<header class="work-view-header bg-900">
+  <div class="status-bar">
+    <div class="item"><span class="label">Working today:</span>
+      <span class="no-wrap">
       <strong>{{workingToday$|async|msToString}}</strong>
       <mat-icon aria-label="timer icon">timer</mat-icon>
       </span>
-      </div>
+    </div>
 
-      <div class="item">
-        <span class="label">Estimate remaining:</span>
-        <span class="no-wrap">
+    <div class="item">
+      <span class="label">Estimate remaining:</span>
+      <span class="no-wrap">
       ~<strong>{{estimateRemaining$|async|msToString}}</strong>
       <mat-icon>timer</mat-icon>
       </span>
-      </div>
+    </div>
 
-      <div class="item"
-           *ngIf="isShowTimeWorkedWithoutBreak">
-        <span class="label">Without break: </span>
-        <span class="no-wrap">
+    <div class="item"
+         *ngIf="isShowTimeWorkedWithoutBreak">
+      <span class="label">Without break: </span>
+      <span class="no-wrap">
         <strong>{{workedWithoutABreak}}</strong><mat-icon>timer</mat-icon>
       </span>
-      </div>
-      <button mat-mini-fab
-              color="primary"
-              (click)="isHideControls = !(isHideControls);"
-              aria-label="collapse sub tasks and notes">
-        <mat-icon class="hide-controls-icon">vertical_align_center</mat-icon>
-      </button>
-
-      <button mat-mini-fab
-              color="primary"
-              (click)="collapseAllNotesAndSubTasks()"
-              aria-label="collapse sub tasks and notes">
-        <mat-icon>vertical_align_center</mat-icon>
-      </button>
     </div>
-  </header>
+    <button mat-mini-fab
+            color="primary"
+            (click)="isHideControls = !(isHideControls);"
+            aria-label="collapse sub tasks and notes">
+      <mat-icon class="hide-controls-icon">vertical_align_center</mat-icon>
+    </button>
 
+    <button mat-mini-fab
+            color="primary"
+            (click)="collapseAllNotesAndSubTasks()"
+            aria-label="collapse sub tasks and notes">
+      <mat-icon>vertical_align_center</mat-icon>
+    </button>
+  </div>
+</header>
 
+<div class="wrapper page-wrapper">
   <task-list [tasks]="undoneTasks$|async"
              [filterArgs]="{'isDone':false}"></task-list>
 
