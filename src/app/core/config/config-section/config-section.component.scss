@@ -1,3 +1,9 @@
 .form-wrapper{
   overflow: hidden;
 }
+
+.keyboard ::ng-deep formly-field {
+  width: 50%;
+  display: block;
+  float: left;
+}

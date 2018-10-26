@@ -1,7 +1,7 @@
 <mat-card>
   <h3 class="title"
       (click)="showSection=!showSection">{{section.title}}</h3>
-  <div class="form-wrapper"
+  <div class="form-wrapper {{section.key}}"
        *ngIf="showSection"
        [@expand]>
     <config-form
