@@ -6,7 +6,7 @@
       <mat-icon aria-label="timer icon">timer</mat-icon>
       </span>
     </div>
-
+S
     <div class="item">
       <span class="label">Estimate remaining:</span>
       <span class="no-wrap">
@@ -40,9 +40,12 @@
 
 <div class="component-wrapper page-wrapper">
   <task-list [tasks]="undoneTasks$|async"
+             [focusIdList]="focusTaskIdList$|async"
              [filterArgs]="{'isDone':false}"></task-list>
 
   <h2 class="mat-h2">Completed Tasks</h2>
   <task-list [tasks]="doneTasks$|async"
+             [focusIdList]="focusTaskIdList$|async"
              [filterArgs]="{'isDone':true}"></task-list>
 </div>
+<pre><code>{{focusTaskIdList$|async}}</code></pre>

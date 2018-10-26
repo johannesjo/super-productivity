@@ -19,7 +19,8 @@ import {
   selectEstimateRemainingForBacklog,
   selectEstimateRemainingForToday,
   selectFocusIdsForDailyPlanner,
-  selectFocusIdsForWorkView, selectFocusTaskId,
+  selectFocusIdsForWorkView,
+  selectFocusTaskId,
   selectMissingIssueIds,
   selectTodaysDoneTasksWithSubTasks,
   selectTodaysTasksWithSubTasks,
@@ -38,7 +39,8 @@ export class TaskService {
   undoneTasks$: Observable<TaskWithSubTasks[]> = this._store.pipe(select(selectTodaysUnDoneTasksWithSubTasks), distinctUntilChanged());
   doneTasks$: Observable<TaskWithSubTasks[]> = this._store.pipe(select(selectTodaysDoneTasksWithSubTasks), distinctUntilChanged());
 
-  focusTaskId$: Observable<string> = this._store.pipe(select(selectFocusTaskId), distinctUntilChanged());
+  // NOTE: don't use distinct until changed here
+  focusTaskId$: Observable<string> = this._store.pipe(select(selectFocusTaskId));
   focusIdsForWorkView$: Observable<string[]> = this._store.pipe(select(selectFocusIdsForWorkView), distinctUntilChanged());
   focusIdsForDailyPlanner$: Observable<string[]> = this._store.pipe(select(selectFocusIdsForDailyPlanner, distinctUntilChanged()));
 
@@ -76,7 +78,8 @@ export class TaskService {
     private readonly _persistenceService: PersistenceService,
     private readonly _timeTrackingService: TimeTrackingService,
   ) {
-    this.todaysTasks$.subscribe((val) => console.log(val));
+    // this.todaysTasks$.subscribe((val) => console.log(val));
+    this.focusTaskId$.subscribe((val) => console.log('SVC',val));
     this.missingIssuesForTasks$.subscribe((val) => {
       if (val && val.length > 0) {
         console.warn('MISSING ISSUE', val);
@@ -176,6 +179,8 @@ export class TaskService {
   }
 
   focusTask(id: string) {
+    console.log('FOCUS SERVICE', id);
+
     this._storeDispatch(TaskActionTypes.FocusTask, {id});
   }
 
@@ -207,6 +212,23 @@ export class TaskService {
 
   hideNotes(id: string) {
     this.update(id, {isNotesOpen: false});
+  }
+
+  focusInList(id: string, idList: string[], offset) {
+    console.log(idList);
+
+    const currentIndex = idList.indexOf(id);
+    if (idList[currentIndex + offset]) {
+      this.focusTask(idList[currentIndex + offset]);
+    }
+  }
+
+  focusNextInList(id: string, idList: string[]) {
+    this.focusInList(id, idList, 1);
+  }
+
+  focusPreviousInList(id: string, idList: string[]) {
+    this.focusInList(id, idList, -1);
   }
 
 

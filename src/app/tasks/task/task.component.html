@@ -138,6 +138,7 @@
 
   <div class="sub-tasks"
        *ngIf="task.subTasks">
-    <task-list [tasks]="task.subTasks"></task-list>
+    <task-list [tasks]="task.subTasks"
+               [focusIdList]="focusIdList"></task-list>
   </div>
 </div>

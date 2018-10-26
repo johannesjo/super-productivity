@@ -324,9 +324,8 @@ export function taskReducer(
       );
     }
 
-
     case TaskActionTypes.FocusTask: {
-      return {...state, currentTaskId: action.payload.id};
+      return {...state, focusTaskId: action.payload.id};
     }
 
     case TaskActionTypes.AddSubTask: {
@@ -343,6 +342,10 @@ export function taskReducer(
     }
 
     case TaskActionTypes.MoveToToday: {
+      if (state.todaysTaskIds.includes(action.payload.id)) {
+        return state;
+      }
+
       return {
         ...state,
         backlogTaskIds: state.backlogTaskIds.filter(filterOutId(action.payload.id)),
@@ -351,6 +354,10 @@ export function taskReducer(
     }
 
     case TaskActionTypes.MoveToBacklog: {
+      if (state.backlogTaskIds.includes(action.payload.id)) {
+        return state;
+      }
+
       return {
         ...state,
         todaysTaskIds: state.todaysTaskIds.filter(filterOutId(action.payload.id)),

@@ -1,6 +1,17 @@
-import { ChangeDetectionStrategy, Component, ElementRef, HostBinding, HostListener, Input, OnInit, ViewChild } from '@angular/core';
+import {
+  AfterViewInit,
+  ChangeDetectionStrategy,
+  Component,
+  ElementRef,
+  HostBinding,
+  HostListener,
+  Input,
+  OnDestroy,
+  OnInit,
+  ViewChild
+} from '@angular/core';
 import { TaskService } from '../task.service';
-import { Observable } from 'rxjs';
+import { Subject } from 'rxjs';
 import { DragulaService } from 'ng2-dragula';
 import { TaskWithSubTasks } from '../task.model';
 import shortid from 'shortid';
@@ -9,6 +20,7 @@ import { DialogTimeEstimateComponent } from '../dialogs/dialog-time-estimate/dia
 import { expandAnimation } from '../../ui/animations/expand.ani';
 import { ConfigService } from '../../core/config/config.service';
 import { checkKeyCombo } from '../../core/util/check-key-combo';
+import { takeUntil } from 'rxjs/operators';
 
 // import {Task} from './task'
 
@@ -19,32 +31,43 @@ import { checkKeyCombo } from '../../core/util/check-key-combo';
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [expandAnimation]
 })
-export class TaskComponent implements OnInit {
+export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   // @Input() task: Task;
   @Input() task: TaskWithSubTasks;
+  @Input() focusIdList: string[];
+
+  subTaskListId: string;
+  private _currentFocusId: string;
+
+  @HostBinding('class.is-current') isCurrent = false;
+
+  @ViewChild('editOnClickEl') editOnClickEl: ElementRef;
 
   @HostBinding('tabindex') tabIndex = 1;
+  private _destroy$: Subject<boolean> = new Subject<boolean>();
 
   @HostBinding('class.is-done')
   private get _isDone() {
     return this.task.isDone;
   }
 
-  @HostBinding('class.is-current') isCurrent = false;
-  currentTaskId$: Observable<string>;
-  subTaskListId: string;
-
+  // methods come last
   @HostListener('keydown', ['$event']) onKeyDown(ev: KeyboardEvent) {
     this._handleKeyboardShortcuts(ev);
   }
 
-  @ViewChild('editOnClickEl') editOnClickEl: ElementRef;
+  @HostListener('focus', ['$event']) onFocus(ev: Event) {
+    if (ev.target === this._elementRef.nativeElement && this._currentFocusId !== this.task.id) {
+      this._taskService.focusTask(this.task.id);
+    }
+  }
 
   constructor(
     private readonly _taskService: TaskService,
     private readonly _dragulaService: DragulaService,
     private readonly _matDialog: MatDialog,
     private readonly _configService: ConfigService,
+    private readonly _elementRef: ElementRef,
   ) {
   }
 
@@ -53,17 +76,36 @@ export class TaskComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.currentTaskId$ = this._taskService.currentTaskId$;
-    this.currentTaskId$.subscribe((val) => {
-      this.isCurrent = (this.task && val === this.task.id);
-    });
-
     this.subTaskListId = shortid();
     this._dragulaService.createGroup(this.subTaskListId, {
       moves: function (el, container, handle) {
         return handle.className.indexOf('handle-sub') > -1;
       }
     });
+  }
+
+  ngAfterViewInit() {
+    this._taskService.currentTaskId$
+      .pipe(takeUntil(this._destroy$))
+      .subscribe((id) => {
+        this.isCurrent = (this.task && id === this.task.id);
+      });
+
+    this._taskService.focusTaskId$
+      .pipe(takeUntil(this._destroy$))
+      .subscribe((id) => {
+        console.log('ID UPDATED');
+
+        this._currentFocusId = id;
+        if (id === this.task.id && document.activeElement !== this._elementRef.nativeElement) {
+          this.focusSelfElement();
+        }
+      });
+  }
+
+  ngOnDestroy() {
+    this._destroy$.next(true);
+    this._destroy$.unsubscribe();
   }
 
   deleteTask() {
@@ -83,6 +125,7 @@ export class TaskComponent implements OnInit {
     if (isChanged) {
       this._taskService.update(this.task.id, {title: newTitle});
     }
+    this.focusSelf();
   }
 
   estimateTime() {
@@ -92,7 +135,7 @@ export class TaskComponent implements OnInit {
       })
       .afterClosed()
       .subscribe(result => {
-        console.log(result);
+        this.focusSelf();
       });
   }
 
@@ -104,20 +147,29 @@ export class TaskComponent implements OnInit {
     this.task.isDone
       ? this._taskService.setUnDone(this.task.id)
       : this._taskService.setDone(this.task.id);
+    this.focusSelf();
   }
 
   toggleShowNotes() {
     this.task.isNotesOpen
       ? this._taskService.hideNotes(this.task.id)
       : this._taskService.showNotes(this.task.id);
+    this.focusSelf();
   }
 
-  focusTask() {
+  focusSelf() {
+    this.focusSelfElement();
+    this._taskService.focusTask(this.task.id);
+  }
+
+  focusSelfElement() {
+    this._elementRef.nativeElement.focus();
   }
 
 
   onTaskNotesChanged($event) {
     this._taskService.update(this.task.id, {notes: $event.newVal});
+    this.focusSelf();
   }
 
   private _handleKeyboardShortcuts(ev: KeyboardEvent) {
@@ -157,34 +209,27 @@ export class TaskComponent implements OnInit {
     }
 
     if (checkKeyCombo(ev, keys.moveToBacklog)) {
-      this._taskService.moveToBacklog(this.task.id);
-      // TODO
-      // this.focusClosestTask(taskEl);
+      if (!this.task.parentId) {
+        this._taskService.moveToBacklog(this.task.id);
+        this.focusSelf();
+      }
     }
 
     if (checkKeyCombo(ev, keys.moveToTodaysTasks)) {
-      this._taskService.moveToToday(this.task.id);
-      // TODO
-      // this.focusClosestTask(taskEl);
+      if (!this.task.parentId) {
+        this._taskService.moveToToday(this.task.id);
+        this.focusSelf();
+      }
     }
-    console.log(isShiftOrCtrlPressed);
 
-    // // move focus up
-    // if ((!isShiftOrCtrlPressed && ev.key === 'ArrowUp') || checkKeyCombo(ev, keys.selectPreviousTask)) {
-    //   const prev = new ElementRef(ev.target.previousSibling);
-    //   console.log(prev, ev);
-    //   if (prev.nativeElement && prev.nativeElement.focus) {
-    //     prev.nativeElement.focus();
-    //   }
-    // }
-    // // move focus down
-    // if ((!isShiftOrCtrlPressed && ev.key === 'ArrowDown') || checkKeyCombo(ev, keys.selectNextTask)) {
-    //   // TODO
-    //   const next = new ElementRef(ev.target.nextSibling);
-    //   if (next.nativeElement && next.nativeElement.focus) {
-    //     next.nativeElement.focus();
-    //   }
-    // }
+    // move focus up
+    if ((!isShiftOrCtrlPressed && ev.key === 'ArrowUp') || checkKeyCombo(ev, keys.selectPreviousTask)) {
+      this._taskService.focusPreviousInList(this.task.id, this.focusIdList);
+    }
+    // move focus down
+    if ((!isShiftOrCtrlPressed && ev.key === 'ArrowDown') || checkKeyCombo(ev, keys.selectNextTask)) {
+      this._taskService.focusNextInList(this.task.id, this.focusIdList);
+    }
 
     // expand sub tasks
     if ((ev.key === 'ArrowRight') || checkKeyCombo(ev, keys.expandSubTasks)) {

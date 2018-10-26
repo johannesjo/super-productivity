@@ -1,5 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input, OnInit } from '@angular/core';
-import { OnDestroy } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { TaskService } from '../task.service';
 import { Task } from '../task.model';
@@ -16,6 +15,8 @@ import shortid from 'shortid';
 export class TaskListComponent implements OnInit, OnDestroy {
   @Input() tasks: Task[];
   @Input() filterArgs: string;
+  @Input() focusIdList: string[];
+
   taskListId: string;
   private subs: Subscription[] = [];
 
