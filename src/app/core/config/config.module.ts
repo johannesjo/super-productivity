@@ -11,12 +11,20 @@ import { FormlyModule } from '@ngx-formly/core';
 import { FormlyMaterialModule } from '@ngx-formly/material';
 import { ConfigService } from './config.service';
 import { UiModule } from '../../ui/ui.module';
+import { KeyboardInputComponent } from './keyboard-input/keyboard-input.component';
 
 @NgModule({
   imports: [
     UiModule,
     ReactiveFormsModule,
-    FormlyModule.forChild(),
+    FormlyModule.forChild({
+      types: [{
+        name: 'keyboard',
+        component: KeyboardInputComponent,
+        extends: 'input',
+        wrappers: ['form-field'],
+      }]
+    }),
     FormlyMaterialModule,
     CommonModule,
     StoreModule.forFeature(CONFIG_FEATURE_NAME, configReducer),
@@ -24,7 +32,8 @@ import { UiModule } from '../../ui/ui.module';
   ],
   declarations: [
     ConfigSectionComponent,
-    ConfigFormComponent
+    ConfigFormComponent,
+    KeyboardInputComponent
   ],
   exports: [
     ConfigSectionComponent,

@@ -1,5 +1,12 @@
-<h3 class="title">{{section.title}}</h3>
-<config-form [formCfg]="section.items"
-             [sectionKey]="section.key"
-             [cfg]="cfg"></config-form>
-
+<mat-card>
+  <h3 class="title"
+      (click)="showSection=!showSection">{{section.title}}</h3>
+  <div class="form-wrapper"
+       *ngIf="showSection"
+       [@expand]>
+    <config-form
+      [formCfg]="section.items"
+      [sectionKey]="section.key"
+      [cfg]="cfg"></config-form>
+  </div>
+</mat-card>
