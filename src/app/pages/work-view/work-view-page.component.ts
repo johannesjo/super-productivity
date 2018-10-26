@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { TaskService } from '../../tasks/task.service';
-import { Observable } from 'rxjs';
+import { combineLatest, Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { TaskWithSubTasks } from '../../tasks/task.model';
 
 @Component({
@@ -14,11 +15,27 @@ export class WorkViewPageComponent implements OnInit {
   workingToday$: Observable<number> = this._taskService.workingToday$;
   estimateRemaining$: Observable<number> = this._taskService.estimateRemaining$;
 
+  // todo move to selector
+  focusTaskIdList$: Observable<string[]> = combineLatest(
+    this.undoneTasks$.pipe(map(task => task)),
+    this.doneTasks$.pipe(map(task => task)),
+  ).pipe(map((arrs) => {
+    let ids = [];
+    arrs.forEach(arr => {
+      arr.forEach(task => {
+        ids.push(task.id);
+        ids = ids.concat(task.subTaskIds);
+      });
+    });
+    return ids;
+  }));
+
   isHideControls: boolean;
   workedWithoutABreak = '-';
   isShowTimeWorkedWithoutBreak = true;
 
   constructor(private _taskService: TaskService) {
+    this.focusTaskIdList$.subscribe(v => console.log(v));
   }
 
   ngOnInit() {

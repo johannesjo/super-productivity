@@ -1,6 +1,9 @@
-<div class="wrapper">
-  <add-task-bar></add-task-bar>
 
+<h1 class="mat-headline">Plan your day!</h1>
+
+<add-task-bar></add-task-bar>
+
+<div class="wrapper page-wrapper">
   <task-list [tasks]="todaysTasks$|async"
              [filterArgs]="{'isDone':false}"></task-list>
 

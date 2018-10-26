@@ -23,7 +23,6 @@
     position: relative;
 
     input {
-      box-shadow: $shadow-bottom;
       display: block;
       width: 100%;
       font-size: 16px;
@@ -31,7 +30,6 @@
       border-style: solid;
       border-width: 3px;
       //border-bottom-width: 4px;
-      border-radius: 4px;
       outline: 0;
       background: #ffffff;
 
