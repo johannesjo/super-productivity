@@ -6,11 +6,13 @@
 <div class="page-wrapper">
   <div class="today component-wrapper">
     <task-list [tasks]="todaysTasks$|async"
+               [focusIdList]="focusTaskIdList$|async"
                [filterArgs]="{'isDone':false}"></task-list>
   </div>
   <div class="backlog component-wrapper">
     <h2 class="mat-h2">Backlog ~{{estimateRemainingBacklog$|async|msToString}}</h2>
     <task-list [tasks]="backlogTasks$|async"
+               [focusIdList]="focusTaskIdList$|async"
                [filterArgs]="{'isDone':true}"></task-list>
   </div>
 </div>

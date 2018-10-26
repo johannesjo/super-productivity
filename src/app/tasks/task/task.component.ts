@@ -94,8 +94,6 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     this._taskService.focusTaskId$
       .pipe(takeUntil(this._destroy$))
       .subscribe((id) => {
-        console.log('ID UPDATED');
-
         this._currentFocusId = id;
         if (id === this.task.id && document.activeElement !== this._elementRef.nativeElement) {
           this.focusSelfElement();
@@ -110,11 +108,13 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
 
   deleteTask() {
     this._taskService.remove(this.task.id);
+    this.focusNext();
   }
 
 
   startTask() {
     this._taskService.setCurrentId(this.task.id);
+    this.focusSelf();
   }
 
   pauseTask() {
@@ -147,14 +147,20 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     this.task.isDone
       ? this._taskService.setUnDone(this.task.id)
       : this._taskService.setDone(this.task.id);
-    this.focusSelf();
   }
 
   toggleShowNotes() {
     this.task.isNotesOpen
       ? this._taskService.hideNotes(this.task.id)
       : this._taskService.showNotes(this.task.id);
-    this.focusSelf();
+  }
+
+  focusPrevious() {
+    this._taskService.focusPreviousInList(this.task.id, this.focusIdList);
+  }
+
+  focusNext() {
+    this._taskService.focusNextInList(this.task.id, this.focusIdList);
   }
 
   focusSelf() {
@@ -185,12 +191,14 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     }
     if (checkKeyCombo(ev, keys.taskToggleNotes)) {
       this.toggleShowNotes();
+      this.focusSelf();
     }
     if (checkKeyCombo(ev, keys.taskOpenEstimationDialog)) {
       this.estimateTime();
     }
     if (checkKeyCombo(ev, keys.taskToggleDone)) {
       this.toggleTaskDone();
+      this.focusSelf();
     }
     if (checkKeyCombo(ev, keys.taskAddSubTask)) {
       this.addSubTask();
@@ -198,7 +206,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
 
     if (checkKeyCombo(ev, keys.togglePlay)) {
       if (this.isCurrent) {
-        this._taskService.setCurrentId(null);
+        this.pauseTask();
       } else {
         this.startTask();
       }
@@ -206,6 +214,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
 
     if (checkKeyCombo(ev, keys.taskDelete)) {
       this.deleteTask();
+      this.focusSelf();
     }
 
     if (checkKeyCombo(ev, keys.moveToBacklog)) {
@@ -224,11 +233,11 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
 
     // move focus up
     if ((!isShiftOrCtrlPressed && ev.key === 'ArrowUp') || checkKeyCombo(ev, keys.selectPreviousTask)) {
-      this._taskService.focusPreviousInList(this.task.id, this.focusIdList);
+      this.focusPrevious();
     }
     // move focus down
     if ((!isShiftOrCtrlPressed && ev.key === 'ArrowDown') || checkKeyCombo(ev, keys.selectNextTask)) {
-      this._taskService.focusNextInList(this.task.id, this.focusIdList);
+      this.focusNext();
     }
 
     // expand sub tasks

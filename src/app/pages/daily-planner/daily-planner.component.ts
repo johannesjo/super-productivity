@@ -13,6 +13,7 @@ export class DailyPlannerComponent implements OnInit {
   todaysTasks$: Observable<TaskWithSubTasks[]> = this._taskService.todaysTasks$;
   backlogTasks$: Observable<TaskWithSubTasks[]> = this._taskService.backlogTasks$;
   estimateRemainingBacklog$: Observable<number> = this._taskService.estimateRemainingBacklog$;
+  focusTaskIdList$: Observable<string[]> = this._taskService.focusIdsForDailyPlanner$;
 
   constructor(private _taskService: TaskService) {
   }
