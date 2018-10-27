@@ -7,45 +7,6 @@
     position: relative;
   }
 
-  $this-panel-padding-left-right: 12px;
-
-  ::ng-deep .collapsible-title {
-    font-size: 17px;
-    margin-top: 0;
-    display: block;
-    padding: 10px $this-panel-padding-left-right;
-  }
-
-  ::ng-deep .collapsible-panel {
-    //border-top: 1px solid black;
-    overflow: visible;
-
-    > * {
-      // for help icon positioning
-      // does not work because of translate on the slide down ani element
-      // position: static;
-
-      // add a padding
-      padding: 10px $this-panel-padding-left-right;
-    }
-
-    md-switch:first-of-type {
-      margin-top: 0;
-    }
-  }
-
-  ::ng-deep .help-btn {
-    display: none;
-    position: absolute;
-    top: -40px;
-    right: -2px;
-  }
-
-  ::ng-deep .help-btn {
-    display: block;
-    animation: $transition-duration-m help-ico-animation $ani-standard-timing;
-  }
-
   .config-section {
     margin-bottom: 10px;
     background: #ffffff;

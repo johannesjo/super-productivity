@@ -1,12 +1,13 @@
-<mat-card>
-  <h3 class="title"
-      (click)="showSection=!showSection">{{section.title}}</h3>
-  <div class="form-wrapper {{section.key}}"
-       *ngIf="showSection"
-       [@expand]>
+<collapsible [title]="section.title"
+             [icon]="section.icon">
+  <help-section>
+    <div [innerHtml]="section.help"></div>
+  </help-section>
+  <div class="form-wrapper {{section.key}}">
     <config-form
       [formCfg]="section.items"
       [sectionKey]="section.key"
       [cfg]="cfg"></config-form>
   </div>
-</mat-card>
+</collapsible>
+

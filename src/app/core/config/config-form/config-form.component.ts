@@ -1,14 +1,12 @@
-import { Component } from '@angular/core';
-import { Input } from '@angular/core';
-import { FormlyFieldConfig } from '@ngx-formly/core';
-import { FormlyFormOptions } from '@ngx-formly/core';
+import { Component, Input } from '@angular/core';
+import { FormlyFieldConfig, FormlyFormOptions } from '@ngx-formly/core';
 import { FormGroup } from '@angular/forms';
 import { ConfigService } from '../config.service';
 
 @Component({
   selector: 'config-form',
   templateUrl: './config-form.component.html',
-  styleUrls: ['./config-form.component.css']
+  styleUrls: ['./config-form.component.scss']
 })
 export class ConfigFormComponent {
 
@@ -17,7 +15,7 @@ export class ConfigFormComponent {
 
   // somehow needed for the form to work
   @Input() set formCfg(val_: FormlyFieldConfig[]) {
-    this.fields = val_;
+    this.fields =  val_ && [...val_];
   }
 
   fields: FormlyFieldConfig[];

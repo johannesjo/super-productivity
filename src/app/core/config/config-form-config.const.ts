@@ -1,3 +1,6 @@
+import { template } from '@angular/core/src/render3';
+import { type } from 'os';
+
 export const GLOBAL_CONFIG_FORM_CONFIG = [
   // MISC SETTINGS
   // -------------
@@ -40,7 +43,7 @@ export const GLOBAL_CONFIG_FORM_CONFIG = [
   {
     title: 'Keyboard Shortcuts',
     key: 'keyboard',
-    // ts-lint-ignore-next-line
+    /* tslint:disable */
     help: `  <p>Here you can configure all keyboard shortcuts.</p>
   <p>Click on the text input and enter the desired keyboard combination. Hit enter to save and Escape to abort.</p>
   <p>There are three types of shortcuts:</p>
@@ -55,8 +58,13 @@ export const GLOBAL_CONFIG_FORM_CONFIG = [
       <strong>Task level shortcuts:</strong> They will only trigger if you have selected a task via mouse or keyboard and usually trigger an action specifically related to that one task.
     </li>
   </ul>`,
+    /* tslint:enable */
     items: [
       // SYSTEM WIDE
+      {
+        className: 'tpl',
+        template: ' <h3 class="md-caption">Global Shortcuts (system wide)</h3>',
+      },
       {
         key: 'globalShowHide',
         type: 'keyboard',
@@ -65,6 +73,10 @@ export const GLOBAL_CONFIG_FORM_CONFIG = [
         },
       },
       // APP WIDE
+      {
+        className: 'tpl',
+        template: `<h3 class="md-caption">Global Shortcuts (application wide)</h3>`,
+      },
       {
         key: 'addNewTask',
         type: 'keyboard',
@@ -129,6 +141,10 @@ export const GLOBAL_CONFIG_FORM_CONFIG = [
         },
       },
       // TASKS
+      {
+        className: 'tpl',
+        template: '<h3 class="md-caption">Tasks</h3>\n<p>The following shortcuts apply for the currently selected task (selected via tab or mouse).</p>',
+      },
       {
         key: 'taskEditTitle',
         type: 'keyboard',

@@ -8,10 +8,8 @@ import { expandAnimation } from '../../../ui/animations/expand.ani';
   animations: expandAnimation,
 })
 export class ConfigSectionComponent implements OnInit {
-
   @Input() section;
   @Input() cfg;
-  showSection = false;
 
   constructor() {
   }
