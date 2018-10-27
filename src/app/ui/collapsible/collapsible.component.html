@@ -1,0 +1,20 @@
+<div class="collapsible-title md-caption"
+     (click)="toggleExpand();">
+  <mat-icon class="collapsible-expand-icon">expand_more</mat-icon>
+  <span>{{title}}</span>
+  <span *ngIf="counter!==null">(<span>{{counter||0}}</span>)</span>
+  <mat-icon *ngIf="icon"
+            class="collapsible-icon">{{icon}}
+  </mat-icon>
+  <button *ngIf="btnIcon"
+          aria-label="Button action"
+          class="md-icon-button"
+          (click)="execAction($event)">
+    <mat-icon>{{btnIcon}}</mat-icon>
+  </button>
+</div>
+<div class="collapsible-panel ani-expand-collapse"
+     *ngIf="isExpanded"
+     [@expand]>
+  <ng-content></ng-content>
+</div>

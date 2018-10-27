@@ -38,6 +38,7 @@ import { MsToStringPipe } from './duration/ms-to-string.pipe';
 import { StringToMsPipe } from './duration/string-to-ms.pipe';
 import { ProgressBarComponent } from './progress-bar/progress-bar.component';
 import { MsToStringPipe$ } from './duration/ms-to-string$.pipe';
+import { CollapsibleComponent } from './collapsible/collapsible.component';
 
 @NgModule({
   imports: [
@@ -83,6 +84,7 @@ import { MsToStringPipe$ } from './duration/ms-to-string$.pipe';
     MsToStringPipe$,
     StringToMsPipe,
     ProgressBarComponent,
+    CollapsibleComponent,
   ],
   exports: [
     DurationFromStringPipe,
@@ -92,6 +94,7 @@ import { MsToStringPipe$ } from './duration/ms-to-string$.pipe';
     InlineMarkdownComponent,
     ThemeSelectComponent,
     ProgressBarComponent,
+    CollapsibleComponent,
 
     MsToStringPipe,
     MsToStringPipe$,
