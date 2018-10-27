@@ -39,6 +39,7 @@ import { StringToMsPipe } from './duration/string-to-ms.pipe';
 import { ProgressBarComponent } from './progress-bar/progress-bar.component';
 import { MsToStringPipe$ } from './duration/ms-to-string$.pipe';
 import { CollapsibleComponent } from './collapsible/collapsible.component';
+import { HelpSectionComponent } from './help-section/help-section.component';
 
 @NgModule({
   imports: [
@@ -85,6 +86,7 @@ import { CollapsibleComponent } from './collapsible/collapsible.component';
     StringToMsPipe,
     ProgressBarComponent,
     CollapsibleComponent,
+    HelpSectionComponent,
   ],
   exports: [
     DurationFromStringPipe,
@@ -95,6 +97,7 @@ import { CollapsibleComponent } from './collapsible/collapsible.component';
     ThemeSelectComponent,
     ProgressBarComponent,
     CollapsibleComponent,
+    HelpSectionComponent,
 
     MsToStringPipe,
     MsToStringPipe$,
