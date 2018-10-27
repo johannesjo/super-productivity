@@ -13,3 +13,16 @@ export const expandAnimation = [
     ])
   ])
 ];
+
+export const expandFadeAnimation = [
+  trigger('expandFade', [
+    transition(':enter', [
+      style({height: 0, opacity: 0, overflow: 'hidden'}),
+      animate(ANI_ENTER_TIMING, style({height: '*', opacity: 1}))
+    ]), // void => *
+    transition(':leave', [
+      style({overflow: 'hidden', opacity: 1}),
+      animate(ANI_LEAVE_TIMING, style({height: 0, opacity: 0}))
+    ])
+  ])
+];
