@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { combineLatest, Observable } from 'rxjs';
 import { Task, TaskWithSubTasks } from './task.model';
 import { select, Store } from '@ngrx/store';
-import { TaskActionTypes } from './store/task.actions';
+import { AddTask, TaskActionTypes } from './store/task.actions';
 import shortid from 'shortid';
 import { initialTaskState, } from './store/task.reducer';
 import { ProjectService } from '../project/project.service';
@@ -79,7 +79,7 @@ export class TaskService {
     private readonly _timeTrackingService: TimeTrackingService,
   ) {
     // this.todaysTasks$.subscribe((val) => console.log(val));
-    this.focusTaskId$.subscribe((val) => console.log('SVC',val));
+    this.focusTaskId$.subscribe((val) => console.log('SVC', val));
     this.missingIssuesForTasks$.subscribe((val) => {
       if (val && val.length > 0) {
         console.warn('MISSING ISSUE', val);
@@ -122,10 +122,15 @@ export class TaskService {
   // Tasks
   // -----
   add(title: string, isAddToBacklog = false) {
-    this._storeDispatch(TaskActionTypes.AddTask, {
+    // TODO decide which syntax to use
+    this._store.dispatch(new AddTask({
       task: this._createNewTask(title),
-      isAddToBacklog
-    });
+      isAddToBacklog: isAddToBacklog
+    }));
+    // this._storeDispatch(TaskActionTypes.AddTask, {
+    //   task: this._createNewTask(title),
+    //   isAddToBacklog
+    // });
   }
 
 
@@ -247,7 +252,7 @@ export class TaskService {
     });
   }
 
-  private _createNewTask(title: string, additional: Partial<Task> = {}): Partial<Task> {
+  private _createNewTask(title: string, additional: Partial<Task> = {}): Task {
     return {
       // NOTE needs to be created every time
       subTaskIds: [],
