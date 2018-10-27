@@ -136,8 +136,8 @@
   <div class="sub-tasks"
        *ngIf="task.subTasks">
     <button (click)="toggleHideSubTasks()"
-            mat-mini-fab=""
-            [color]="null"
+            mat-icon-button
+            tabindex="2"
             class="toggle-sub-tasks-btn ico-btn">
       <mat-icon *ngIf="task.isHideSubTasks">add</mat-icon>
       <mat-icon *ngIf="!task.isHideSubTasks">remove</mat-icon>

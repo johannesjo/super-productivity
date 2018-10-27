@@ -10,7 +10,7 @@ $this-task-text-color: #333333;
 $this-task-text-color-dark: #dddddd;
 $this-task-text-color-done: #aaaaaa;
 $task-inner-padding-left-right: 6px;
-$this-active-shadow:  0 5px 5px -3px rgba(0, 0, 0, 0.2),
+$this-active-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2),
 0 8px 10px 1px rgba(0, 0, 0, 0.14),
 0 3px 14px 2px rgba(0, 0, 0, 0.12);
 
@@ -137,6 +137,43 @@ $this-active-shadow:  0 5px 5px -3px rgba(0, 0, 0, 0.2),
       font-weight: bold;
     }
   }
+
+  $this-button-spacer: 1px;
+  $this-button-spacer-mobile: 1px;
+  $this-button-size: 34px;
+  $this-button-size-mobile: 34px;
+  $this-icon-color: #545454;
+  .toggle-sub-tasks-btn,
+  .first-line .ico-btn {
+    margin: $this-button-spacer;
+    height: $this-button-size;
+    width: $this-button-size;
+    min-width: $this-button-size;
+    min-height: $this-button-size;
+    // this fixes the original link button icon for some reason
+    line-height: $this-button-size + -1;
+    padding: 0;
+    box-shadow: $shadow-icon-button;
+    border-radius: 100%;
+    text-align: center;
+    overflow: hidden;
+    position: relative;
+    z-index: 4;
+
+    // theming
+    border: 1px solid #dddddd;
+    background: #ffffff !important;
+
+    transition: transform $transition-standard;
+    &:hover {
+      z-index: 5;
+      transform: scale(1.15);
+    }
+    &:focus {
+      outline: none;
+    }
+  }
+
   .first-line {
     display: flex;
     flex-wrap: nowrap;
@@ -148,54 +185,7 @@ $this-active-shadow:  0 5px 5px -3px rgba(0, 0, 0, 0.2),
       flex-wrap: wrap;
     }
 
-    $this-button-spacer: 1px;
-    $this-button-spacer-mobile: 1px;
-    $this-button-size: 34px;
-    $this-button-size-mobile: 34px;
-    $this-icon-color: #545454;
     .ico-btn {
-      margin: $this-button-spacer;
-      height: $this-button-size;
-      width: $this-button-size;
-      min-width: $this-button-size;
-      min-height: $this-button-size;
-      // this fixes the original link button icon for some reason
-      line-height: $this-button-size + -1;
-      padding: 0;
-      box-shadow: $shadow-icon-button;
-      border-radius: 100%;
-      text-align: center;
-      overflow: hidden;
-      position: relative;
-      z-index: 4;
-
-      // theming
-      border: 1px solid #dddddd;
-      background: #ffffff !important;
-
-      transition: transform $transition-standard;
-      &:hover {
-        z-index: 5;
-        transform: scale(1.15);
-      }
-      &:focus {
-        outline: none;
-      }
-
-      // somehow the icons are a little of so we move them
-      mat-icon {
-        // only affects linux for some reason
-        // margin-top: -3px !important;
-        //display: block;
-        //text-align: center;
-        //svg {
-        //  position: absolute;
-        //  left: 50%;
-        //  top: 50%;
-        //  transform: translate(-50%, -50%);
-        //}
-      }
-
       &.update-indicator-btn {
         margin-left: 12px;
 
@@ -416,7 +406,8 @@ $this-active-shadow:  0 5px 5px -3px rgba(0, 0, 0, 0.2),
 }
 
 .toggle-sub-tasks-btn {
-  position: absolute;
+  position: absolute !important;
+  transform: scale(0.8);
   left: -23px;
   top: 1px;
   z-index: 2;

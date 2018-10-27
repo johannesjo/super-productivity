@@ -215,11 +215,11 @@ export class TaskService {
   }
 
   showSubTasks(id: string) {
-    this.update(id, {isHideSubTasks: true});
+    this.update(id, {isHideSubTasks: false});
   }
 
   hideSubTasks(id: string) {
-    this.update(id, {isHideSubTasks: false});
+    this.update(id, {isHideSubTasks: true});
   }
 
   focusInList(id: string, idList: string[], offset) {

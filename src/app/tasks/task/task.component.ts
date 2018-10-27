@@ -157,8 +157,8 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
 
   toggleHideSubTasks() {
     this.task.isHideSubTasks
-      ? this._taskService.hideSubTasks(this.task.id)
-      : this._taskService.showSubTasks(this.task.id);
+      ? this._taskService.showSubTasks(this.task.id)
+      : this._taskService.hideSubTasks(this.task.id);
   }
 
   focusPrevious() {
@@ -248,24 +248,28 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
 
     // expand sub tasks
     if ((ev.key === 'ArrowRight') || checkKeyCombo(ev, keys.expandSubTasks)) {
+      if (this.task.subTasks && this.task.subTasks.length > 0) {
+        this._taskService.showSubTasks(this.task.id);
+      }
       // if already opened or is sub task select next task
-      // TODO
-      // if ((task.subTasks && task.subTasks.length > 0 && task.isHideSubTasks === false) || this.parentTask) {
-      //   this.focusNextTask(taskEl);
-      // }
-      //
-      // this.expandSubTasks(task);
+      if ((this.task.subTasks && this.task.subTasks.length > 0 && this.task.isHideSubTasks === false)) {
+        this.focusNext();
+      }
     }
 
     // collapse sub tasks
     if ((ev.key === 'ArrowLeft') || checkKeyCombo(ev, keys.collapseSubTasks)) {
-      // TODO
-      // if (task.subTasks && task.subTasks.length > 0) {
-      //   this.collapseSubTasks(task);
-      // }
-      // if (this.parentTask) {
-      //   this.focusPrevTask(taskEl);
-      // }
+
+      if (this.task.subTasks && this.task.subTasks.length > 0) {
+        this._taskService.hideSubTasks(this.task.id);
+      }
+      // if already collapsed
+      if (this.task.isHideSubTasks === true) {
+        this.focusPrevious();
+      }
+      if (this.task.parentId) {
+        this._taskService.focusTask(this.task.parentId);
+      }
     }
 
     // moving items
