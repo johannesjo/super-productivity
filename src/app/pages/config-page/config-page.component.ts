@@ -6,7 +6,7 @@ import { ProjectService } from '../../project/project.service';
 @Component({
   selector: 'config-page',
   templateUrl: './config-page.component.html',
-  styleUrls: ['./config-page.component.css']
+  styleUrls: ['./config-page.component.scss']
 })
 export class ConfigPageComponent implements OnInit {
   globalConfigFormCfg = GLOBAL_CONFIG_FORM_CONFIG;

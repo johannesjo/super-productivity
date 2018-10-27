@@ -1,15 +1,88 @@
-<div class="page-wrapper">
-  <h2>Project Settings</h2>
+<!--<div class="page-wrapper">-->
+  <!--<h2>Project Settings</h2>-->
 
-  <div *ngFor="let section of projectConfigFormCfg">
-    <config-section [section]="section"
-                    [cfg]="(configService.cfg$|async)[section.key]"></config-section>
-  </div>
+  <!--<div *ngFor="let section of projectConfigFormCfg">-->
+  <!--<config-section [section]="section"-->
+  <!--[cfg]="(configService.cfg$|async)[section.key]"></config-section>-->
+  <!--</div>-->
 
-  <h2>Global Config</h2>
-  <div *ngFor="let section of globalConfigFormCfg">
-    <config-section [section]="section"
-                    [cfg]="(configService.cfg$|async)[section.key]"></config-section>
+  <!--<h2>Global Config</h2>-->
+  <!--<div *ngFor="let section of globalConfigFormCfg">-->
+  <!--<config-section [section]="section"-->
+  <!--[cfg]="(configService.cfg$|async)[section.key]"></config-section>-->
+  <!--</div>-->
+<!--</div>-->
+
+<div class="page-settings page-wrapper">
+
+  <div class="row">
+    <div class="settings-col">
+
+      <h1 class="md-subhead">Project Specific Settings</h1>
+
+      <section class="config-section mat-elevation-z2">
+        <collapsible title="Theme Settings"
+                     icon="color_lens">
+          <theme-settings current-theme="r.theme"
+                          is-current-project-theme="true"></theme-settings>
+        </collapsible>
+      </section>
+
+      <section class="config-section mat-elevation-z2">
+        <collapsible title="Jira-Integration">
+
+          <jira-settings settings="r.jiraSettings"></jira-settings>
+        </collapsible>
+      </section>
+
+
+      <section class="config-section mat-elevation-z2">
+        <collapsible title="Git Integration"
+                     icon="github-circle">
+
+          <git-settings settings="r.git"></git-settings>
+        </collapsible>
+      </section>
+    </div>
+
+
+    <div class="settings-col">
+      <h1 class="md-subhead">Global Settings</h1>
+
+      <section class="config-section mat-elevation-z2">
+        <collapsible title="Backup and Sync"
+                     icon="swap_vert">
+
+          <backup-settings settings="r.config"></backup-settings>
+        </collapsible>
+      </section>
+
+
+      <section class="config-section keyboard-settings mat-elevation-z2">
+        <collapsible title="Keyboard Shortcuts"
+                     icon="keyboard">
+
+          <keyboard-settings keys="r.keys"></keyboard-settings>
+        </collapsible>
+      </section>
+
+
+      <section class="config-section mat-elevation-z2">
+        <collapsible title="Misc Settings"
+                     icon="settings">
+
+          <misc-settings settings="r.config"></misc-settings>
+        </collapsible>
+      </section>
+
+      <section class="config-section mat-elevation-z2">
+        <collapsible title="Pomodoro Timer"
+                     icon="add_alert">
+          <pomodoro-settings settings="r.config.pomodoro"></pomodoro-settings>
+        </collapsible>
+      </section>
+    </div>
+
+
   </div>
 </div>
-
