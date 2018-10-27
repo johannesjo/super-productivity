@@ -15,6 +15,7 @@ export type Task = Readonly<{
 
   isDone?: boolean;
   isNotesOpen?: boolean;
+  isHideSubTasks?: boolean;
   notes?: string;
   issueId?: string;
   issueType?: IssueProviderKey;

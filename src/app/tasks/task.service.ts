@@ -214,6 +214,14 @@ export class TaskService {
     this.update(id, {isNotesOpen: false});
   }
 
+  showSubTasks(id: string) {
+    this.update(id, {isHideSubTasks: true});
+  }
+
+  hideSubTasks(id: string) {
+    this.update(id, {isHideSubTasks: false});
+  }
+
   focusInList(id: string, idList: string[], offset) {
     console.log(idList);
 

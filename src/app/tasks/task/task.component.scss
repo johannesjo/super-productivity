@@ -18,7 +18,6 @@ $this-active-shadow:  0 5px 5px -3px rgba(0, 0, 0, 0.2),
   display: block;
 
   > .inner-wrapper {
-
     padding: 2px 0;
     margin-bottom: 7px;
     background-color: #ffffff;
@@ -46,7 +45,7 @@ $this-active-shadow:  0 5px 5px -3px rgba(0, 0, 0, 0.2),
     margin-bottom: 0;
   }
   .sub-tasks {
-    margin: $s;
+    margin: 0 $s;
   }
 
   &:focus {
@@ -90,7 +89,7 @@ $this-active-shadow:  0 5px 5px -3px rgba(0, 0, 0, 0.2),
       .task-title {
         color: $dark-theme-text-color;
       }
-      .material-icons {
+      mat-icon {
         color: $dark-theme-text-color;
       }
     }
@@ -99,7 +98,7 @@ $this-active-shadow:  0 5px 5px -3px rgba(0, 0, 0, 0.2),
   &.is-done {
     //opacity: 0.8;
 
-    .material-icons {
+    mat-icon {
       color: $this-task-text-color-done !important;
     }
 
@@ -184,7 +183,7 @@ $this-active-shadow:  0 5px 5px -3px rgba(0, 0, 0, 0.2),
       }
 
       // somehow the icons are a little of so we move them
-      .material-icons {
+      mat-icon {
         // only affects linux for some reason
         // margin-top: -3px !important;
         //display: block;
@@ -225,7 +224,7 @@ $this-active-shadow:  0 5px 5px -3px rgba(0, 0, 0, 0.2),
               background: #ffffff !important;
             }
 
-            > .material-icons {
+            > mat-icon {
               color: #ffffff !important;
               @include dark-theme {
                 color: #000000 !important;
@@ -235,7 +234,7 @@ $this-active-shadow:  0 5px 5px -3px rgba(0, 0, 0, 0.2),
         }
       }
 
-      .material-icons {
+      mat-icon {
         color: $this-icon-color;
         margin: 0;
         padding: 0;
@@ -246,7 +245,7 @@ $this-active-shadow:  0 5px 5px -3px rgba(0, 0, 0, 0.2),
       }
 
       &.delete-btn {
-        .material-icons.delete-icon {
+        mat-icon.delete-icon {
           color: $red !important;
           @include dark-theme {
             color: $red !important;
@@ -255,7 +254,7 @@ $this-active-shadow:  0 5px 5px -3px rgba(0, 0, 0, 0.2),
 
         &:hover {
           background: $red-danger !important;
-          .material-icons.delete-icon {
+          mat-icon.delete-icon {
             color: #ffffff !important;
             @include dark-theme {
               color: #ffffff !important;
@@ -275,7 +274,7 @@ $this-active-shadow:  0 5px 5px -3px rgba(0, 0, 0, 0.2),
     }
 
     // Button Stuff
-    .material-icons {
+    mat-icon {
       color: #545454;
     }
 
@@ -289,12 +288,12 @@ $this-active-shadow:  0 5px 5px -3px rgba(0, 0, 0, 0.2),
     }
 
     .show-notes-btn {
-      .material-icons {
+      mat-icon {
         transition: $transition-standard;
         backface-visibility: hidden;
       }
 
-      &.is-active .material-icons {
+      &.is-active mat-icon {
         transform: rotate(45deg);
       }
     }
@@ -416,3 +415,13 @@ $this-active-shadow:  0 5px 5px -3px rgba(0, 0, 0, 0.2),
   }
 }
 
+.toggle-sub-tasks-btn {
+  position: absolute;
+  left: -23px;
+  top: 1px;
+  z-index: 2;
+  min-width: 0;
+  min-height: 0;
+
+  // overwrite ripple transparency
+}

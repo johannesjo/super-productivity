@@ -1,7 +1,3 @@
-<!--<div class="first-line"-->
-<!--layout="row"-->
-<!--as-sortable-item-handle-->
-<!--layout-align="space-between center"> -->
 <div class="inner-wrapper"
      [class.isNotesOpen]="task.isNotesOpen">
   <div class="first-line">
@@ -13,13 +9,14 @@
       <!--<mat-tooltip>-->
       <!--Click to show updates-->
       <!--</mat-tooltip>-->
-      <i class="material-icons update update-icon">update</i>
+      <mat-icon class="material-icons update update-icon">update</mat-icon>
     </button>
 
 
-    <i class="material-icons handle"
-       [class.handle-par]="!task.parentId"
-       [class.handle-sub]="task.parentId">drag_handle</i>
+    <mat-icon class="material-icons handle"
+              [class.handle-par]="!task.parentId"
+              [class.handle-sub]="task.parentId">drag_handle
+    </mat-icon>
 
 
     <button mat-icon-button
@@ -28,7 +25,7 @@
             aria-label="mark as current"
             tabindex="2"
             *ngIf="!isDone && !isCurrent && !task.subTasks">
-      <i class="material-icons">play_circle_filled</i>
+      <mat-icon class="material-icons">play_circle_filled</mat-icon>
     </button>
 
     <button mat-icon-button
@@ -36,7 +33,7 @@
             (click)="pauseTask()"
             tabindex="2"
             *ngIf="!isDone && isCurrent && !task.subTasks">
-      <i class="material-icons">pause_circle_filled</i>
+      <mat-icon class="material-icons">pause_circle_filled</mat-icon>
     </button>
 
 
@@ -78,8 +75,7 @@
               aria-label="time estimation"
               (click)="estimateTime()">
 
-        <i class="material-icons"
-           aria-label="time estimation">access_time</i>
+        <mat-icon aria-label="time estimation">access_time</mat-icon>
       </button>
       <button mat-icon-button
               class="ico-btn"
@@ -88,8 +84,7 @@
               tabindex="2"
               (click)="addSubTask($event);">
 
-        <i class="material-icons"
-           aria-label="add sub task">playlist_add</i>
+        <mat-icon aria-label="add sub task">playlist_add</mat-icon>
       </button>
       <button mat-icon-button
               class="ico-btn"
@@ -98,11 +93,10 @@
               [class.is-active]="task.isNotesOpen"
               (click)="toggleShowNotes()">
 
-        <i class="material-icons"
-           *ngIf="task.notes||task.issueData"
-           aria-label="notes">insert_comment</i>
-        <i class="material-icons"
-           *ngIf="!task.notes&&!task.issueData">mode_comment</i>
+        <mat-icon *ngIf="task.notes||task.issueData"
+                  aria-label="notes">insert_comment
+        </mat-icon>
+        <mat-icon *ngIf="!task.notes&&!task.issueData">mode_comment</mat-icon>
       </button>
       <button mat-icon-button
               tabindex="2"
@@ -110,20 +104,23 @@
               class="ico-btn"
               (click)="deleteTask()">
 
-        <i class="material-icons delete-icon"
-           aria-label="delete">delete_forever</i>
+        <mat-icon class="material-icons delete-icon"
+                  aria-label="delete">delete_forever
+        </mat-icon>
       </button>
       <button mat-icon-button
               (click)="toggleTaskDone()"
               class="ico-btn mark-as-done-btn"
               tabindex="2"
               aria-label="un-/mark as done">
-        <i class="material-icons delete-icon"
-           *ngIf="task.isDone"
-           aria-label="Mark as undone">undo</i>
-        <i class="material-icons delete-icon"
-           *ngIf="!task.isDone"
-           aria-label="Mark as done">check</i>
+        <mat-icon class="material-icons delete-icon"
+                  *ngIf="task.isDone"
+                  aria-label="Mark as undone">undo
+        </mat-icon>
+        <mat-icon class="material-icons delete-icon"
+                  *ngIf="!task.isDone"
+                  aria-label="Mark as done">check
+        </mat-icon>
       </button>
     </div>
   </div>
@@ -138,7 +135,16 @@
 
   <div class="sub-tasks"
        *ngIf="task.subTasks">
+    <button (click)="toggleHideSubTasks()"
+            mat-mini-fab=""
+            [color]="null"
+            class="toggle-sub-tasks-btn ico-btn">
+      <mat-icon *ngIf="task.isHideSubTasks">add</mat-icon>
+      <mat-icon *ngIf="!task.isHideSubTasks">remove</mat-icon>
+    </button>
     <task-list [tasks]="task.subTasks"
+               [@expand]
+               *ngIf="!task.isHideSubTasks"
                [focusIdList]="focusIdList"></task-list>
   </div>
 </div>

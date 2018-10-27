@@ -155,6 +155,12 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
       : this._taskService.showNotes(this.task.id);
   }
 
+  toggleHideSubTasks() {
+    this.task.isHideSubTasks
+      ? this._taskService.hideSubTasks(this.task.id)
+      : this._taskService.showSubTasks(this.task.id);
+  }
+
   focusPrevious() {
     this._taskService.focusPreviousInList(this.task.id, this.focusIdList);
   }
