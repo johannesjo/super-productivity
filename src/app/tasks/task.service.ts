@@ -79,7 +79,7 @@ export class TaskService {
     private readonly _timeTrackingService: TimeTrackingService,
   ) {
     // this.todaysTasks$.subscribe((val) => console.log(val));
-    this.focusTaskId$.subscribe((val) => console.log('SVC', val));
+    // this.focusTaskId$.subscribe((val) => console.log('SVC', val));
     this.missingIssuesForTasks$.subscribe((val) => {
       if (val && val.length > 0) {
         console.warn('MISSING ISSUE', val);
@@ -184,8 +184,6 @@ export class TaskService {
   }
 
   focusTask(id: string) {
-    console.log('FOCUS SERVICE', id);
-
     this._storeDispatch(TaskActionTypes.FocusTask, {id});
   }
 

@@ -22,7 +22,7 @@ export class WorkViewPageComponent implements OnInit {
   isShowTimeWorkedWithoutBreak = true;
 
   constructor(private _taskService: TaskService) {
-    this.focusTaskIdList$.subscribe(v => console.log(v));
+    // this.focusTaskIdList$.subscribe(v => console.log(v));
   }
 
   ngOnInit() {
