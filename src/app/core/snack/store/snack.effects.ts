@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
 import { Actions, Effect, ofType } from '@ngrx/effects';
 import { SnackActionTypes, SnackClose, SnackOpen } from './snack.actions';
-import { Observable } from 'rxjs';
-import { delay, map, tap } from 'rxjs/operators';
+import { Observable, Subject } from 'rxjs';
+import { delay, map, takeUntil, tap } from 'rxjs/operators';
 import { MatSnackBar } from '@angular/material';
+import { Store } from '@ngrx/store';
 
 @Injectable()
 export class SnackEffects {
@@ -26,17 +27,33 @@ export class SnackEffects {
     );
 
   constructor(private actions$: Actions,
+              private store$: Store,
               private matSnackBar: MatSnackBar) {
   }
 
-  private _openSnack(action_: SnackOpen) {
-    const {message, action, config} = action_.payload;
-    const ref = this.matSnackBar.open(message, action, config);
-    if (action) {
-      // TODO cleanup sub
-      ref.onAction().subscribe(() => {
+  private _openSnack(action: SnackOpen) {
+    const destroySubs = () => {
+      _destroy$.next(true);
+      _destroy$.unsubscribe();
+    };
+    const _destroy$: Subject<boolean> = new Subject<boolean>();
+    const {message, actionStr, actionId, config} = action.payload;
+    const ref = this.matSnackBar.open(message, actionStr, config);
 
-      });
+    if (actionStr && actionId) {
+      ref.onAction()
+        .pipe(takeUntil(_destroy$))
+        .subscribe(() => {
+          this.store$.dispatch({
+            type: actionId
+          });
+          destroySubs();
+        });
+      ref.afterDismissed()
+        .pipe(takeUntil(_destroy$))
+        .subscribe(() => {
+          destroySubs();
+        });
     }
   }
 }

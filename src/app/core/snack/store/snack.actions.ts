@@ -11,12 +11,11 @@ export class SnackOpen implements Action {
 
   constructor(public payload: {
     message: string,
-    action?: string,
+    actionStr?: string,
+    actionId?: string;
     delay?: number,
     config?: MatSnackBarConfig
   }) {
-    console.log('SNACK');
-
   }
 }
 

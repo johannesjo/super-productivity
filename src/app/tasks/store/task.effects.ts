@@ -17,6 +17,7 @@ export class TaskEffects {
       ofType(
         TaskActionTypes.AddTask,
         TaskActionTypes.DeleteTask,
+        TaskActionTypes.UndoDeleteTask,
         TaskActionTypes.AddSubTask,
         TaskActionTypes.SetCurrentTask,
         TaskActionTypes.UnsetCurrentTask,
@@ -34,9 +35,13 @@ export class TaskEffects {
       ofType(
         TaskActionTypes.DeleteTask,
       ),
-      map(() => new SnackOpen({
-        message: 'Deleted task',
-        action: 'Undo'
+      withLatestFrom(
+        this._store$.pipe(select(selectTaskFeatureState)),
+      ),
+      map(([action, state]) => new SnackOpen({
+        message: `Deleted task "${state.stateBeforeDeletion.entities[action.payload.id].title}"`,
+        actionStr: 'Undo',
+        actionId: TaskActionTypes.UndoDeleteTask
       }))
     );
 

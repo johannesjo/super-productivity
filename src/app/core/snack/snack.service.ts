@@ -10,12 +10,14 @@ export class SnackService {
   constructor(private _store$: Store) {
   }
 
-  open(message: string, action?: string, config?: MatSnackBarConfig) {
-    this._store$.dispatch(new SnackOpen({
-      message,
-      action,
-      config,
-    }));
+  open(params: {
+    message: string,
+    actionStr?: string,
+    actionId?: string,
+    delay?: number,
+    config?: MatSnackBarConfig
+  }) {
+    this._store$.dispatch(new SnackOpen(params));
   }
 
   close() {

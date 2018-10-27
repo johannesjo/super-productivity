@@ -16,6 +16,7 @@ export interface TaskState extends EntityState<Task> {
   // NOTE: but it is not needed currently
   todaysTaskIds: string[];
   backlogTaskIds: string[];
+  stateBeforeDeletion: TaskState;
 
   // TODO though this not so much maybe
   // todayDoneTasks: string[];
@@ -30,6 +31,7 @@ export const initialTaskState: TaskState = taskAdapter.getInitialState({
   todaysTaskIds: [],
   backlogTaskIds: [],
   focusTaskId: null,
+  stateBeforeDeletion: null
 });
 
 // HELPER
@@ -244,8 +246,13 @@ export function taskReducer(
         // finally delete from backlog or todays tasks
         backlogTaskIds: state.backlogTaskIds.filter(filterOutId(action.payload.id)),
         todaysTaskIds: state.todaysTaskIds.filter(filterOutId(action.payload.id)),
-        currentTaskId
+        currentTaskId,
+        stateBeforeDeletion: state
       };
+    }
+
+    case TaskActionTypes.UndoDeleteTask: {
+      return state.stateBeforeDeletion || state;
     }
 
     case TaskActionTypes.Move: {

@@ -15,6 +15,7 @@ export enum TaskActionTypes {
   UpdateTask = '[Task] Update Task',
   UpdateTasks = '[Task] Update Tasks',
   DeleteTask = '[Task] Delete Task',
+  UndoDeleteTask = '[Task] Undo Delete Task',
   Move = '[Task] Move task',
   MoveUp = '[Task] Move up',
   MoveDown = '[Task] Move down',
@@ -74,6 +75,10 @@ export class DeleteTask implements Action {
 
   constructor(public payload: { id: string }) {
   }
+}
+
+export class UndoDeleteTask implements Action {
+  readonly type = TaskActionTypes.UndoDeleteTask;
 }
 
 export class Move implements Action {
@@ -147,6 +152,7 @@ export type TaskActions
   | UpdateTask
   | UpdateTasks
   | DeleteTask
+  | UndoDeleteTask
   | Move
   | MoveUp
   | MoveDown
