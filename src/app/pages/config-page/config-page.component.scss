@@ -1,0 +1,114 @@
+@import "../../../variables";
+
+.page-settings {
+  text-align: left;
+
+  collapsible {
+    position: relative;
+  }
+
+  $this-panel-padding-left-right: 12px;
+
+  ::ng-deep .collapsible-title {
+    font-size: 17px;
+    margin-top: 0;
+    display: block;
+    padding: 10px $this-panel-padding-left-right;
+  }
+
+  ::ng-deep .collapsible-panel {
+    //border-top: 1px solid black;
+    overflow: visible;
+
+    > * {
+      // for help icon positioning
+      // does not work because of translate on the slide down ani element
+      // position: static;
+
+      // add a padding
+      padding: 10px $this-panel-padding-left-right;
+    }
+
+    md-switch:first-of-type {
+      margin-top: 0;
+    }
+  }
+
+  ::ng-deep .help-btn {
+    display: none;
+    position: absolute;
+    top: -40px;
+    right: -2px;
+  }
+
+  ::ng-deep .help-btn {
+    display: block;
+    animation: $transition-duration-m help-ico-animation $ani-standard-timing;
+  }
+
+  .config-section {
+    margin-bottom: 10px;
+    background: #ffffff;
+
+    //@include dark-theme {
+    //  background-color: $dark-theme-bg-lighter;
+    //}
+    .md-title {
+      margin-top: 0;
+    }
+  }
+
+  .settings-col {
+    margin-bottom: 30px;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  @media(min-width: $layout-gt-sm) {
+    .row {
+      display: flex;
+      flex-direction: row;
+    }
+    .settings-col {
+      width: 50%;
+      &:first-child {
+        margin-right: 10px;
+      }
+      &:last-child {
+        margin-left: 10px;
+      }
+    }
+  }
+
+  @media(max-width: $layout-xs) {
+    .keyboard-settings {
+      display: none;
+    }
+
+    //.md-button,
+    //button {
+    //  &:not(.md-icon-button) {
+    //    width: 100%;
+    //    max-width: 100%;
+    //    overflow: hidden;
+    //    text-overflow: ellipsis;
+    //    margin-left: 0;
+    //    margin-right: 0;
+    //  }
+    //}
+  }
+}
+
+@keyframes help-ico-animation {
+  0% {
+    transform: scale(0);
+  }
+  50% {
+    transform: scale(1.4);
+  }
+  100% {
+    transform: scale(1);
+  }
+}

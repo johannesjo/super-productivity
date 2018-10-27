@@ -12,6 +12,9 @@ $this-button-size: 34px;
   .collapsible-title {
     cursor: pointer;
     user-select: none;
+    > * {
+      vertical-align: middle;
+    }
 
     &:focus {
       outline: none;
@@ -21,7 +24,7 @@ $this-button-size: 34px;
       transition: all $transition-standard;
     }
 
-    .md-button {
+    button {
       margin-left: auto;
       padding: 0;
       height: $this-button-size;
