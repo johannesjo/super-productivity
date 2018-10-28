@@ -1,0 +1,31 @@
+<div class="wrapper mat-typography">
+  <mat-icon>error</mat-icon>
+  <span class="message">{{data.message}}</span>
+  <button class="action"
+          (click)="loginToGoogle()"
+          mat-raised-button>
+    Login
+  </button>
+</div>
+
+
+
+<!--//     this.$mdToast.show({-->
+<!--//       hideDelay: 20 * 1000,-->
+<!--//       /* @ngInject */-->
+<!--//       controller: ($scope, $mdToast, GoogleApi) => {-->
+<!--//         $scope.login = () => {-->
+<!--//           GoogleApi.login();-->
+<!--//           $mdToast.hide();-->
+<!--//         };-->
+<!--//       },-->
+<!--//       template: `-->
+<!--// <md-toast>-->
+  <!--//   <div class="md-toast-content">-->
+  <!--//     <div class="icon-wrapper">-->
+  <!--//       <ng-md-icon icon="${icon}" style="fill:${iconColor}"></ng-md-icon>-->
+  <!--//     </div>-->
+  <!--//     <div class="toast-text">${msg}</div>-->
+  <!--//     <md-button ng-click="login()">Login</md-button>-->
+  <!--//   </div>-->
+  <!--// </md-toast>`-->

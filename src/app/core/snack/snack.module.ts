@@ -5,15 +5,20 @@ import * as fromSnack from './store/snack.reducer';
 import { EffectsModule } from '@ngrx/effects';
 import { SnackEffects } from './store/snack.effects';
 import { MatSnackBarModule } from '@angular/material';
+import { SnackCustomComponent } from './snack-custom/snack-custom.component';
+import { UiModule } from '../../ui/ui.module';
+import { SnackGoogleLoginComponent } from './snack-google-login/snack-google-login.component';
 
 @NgModule({
   imports: [
+    UiModule,
     CommonModule,
     MatSnackBarModule,
     StoreModule.forFeature('snack', fromSnack.reducer),
     EffectsModule.forFeature([SnackEffects])
   ],
-  declarations: []
+  declarations: [SnackCustomComponent, SnackGoogleLoginComponent],
+  entryComponents: [SnackCustomComponent],
 })
 export class SnackModule {
 

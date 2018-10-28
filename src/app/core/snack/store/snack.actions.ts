@@ -1,5 +1,5 @@
 import { Action } from '@ngrx/store';
-import { MatSnackBarConfig } from '@angular/material';
+import { SnackParams } from '../snack.model';
 
 export enum SnackActionTypes {
   SnackOpen = '[Snack] SnackOpen',
@@ -9,13 +9,7 @@ export enum SnackActionTypes {
 export class SnackOpen implements Action {
   readonly type = SnackActionTypes.SnackOpen;
 
-  constructor(public payload: {
-    message: string,
-    actionStr?: string,
-    actionId?: string;
-    delay?: number,
-    config?: MatSnackBarConfig
-  }) {
+  constructor(public payload: SnackParams) {
   }
 }
 

@@ -1,0 +1,18 @@
+@import '../../../../variables';
+
+.wrapper {
+  display: flex;
+  align-items: center;
+}
+
+mat-icon {
+  margin-right: $s;
+
+  .success & {
+    color: $green;
+  }
+
+  .error & {
+    color: $red;
+  }
+}

@@ -4,6 +4,7 @@ import * as moment from 'moment';
 import { IS_ELECTRON } from '../../app.constants';
 import { MultiPartBuilder } from './util/multi-part-builder';
 import { HttpClient } from '@angular/common/http';
+import { SnackService } from '../snack/snack.service';
 
 
 @Injectable({
@@ -20,7 +21,8 @@ export class GoogleApiService {
   };
   private _gapi: any;
 
-  constructor(private readonly _http: HttpClient) {
+  constructor(private readonly _http: HttpClient,
+              private readonly _snackService: SnackService) {
   }
 
 
@@ -57,7 +59,7 @@ export class GoogleApiService {
       });
     } else {
       return this._initClientLibraryIfNotDone()
-        .then((user) => {
+        .then((user: any) => {
           if (user && user.Zi && user.Zi.access_token) {
             this._isLoggedIn = true;
             this._saveToken(user);
@@ -65,7 +67,6 @@ export class GoogleApiService {
           } else {
             return this._gapi.auth2.getAuthInstance().signIn()
               .then((res) => {
-                console.log(res);
                 this._isLoggedIn = true;
                 this._saveToken(res);
                 this._snackIt('SUCCESS', 'GoogleApi: Login successful');
@@ -135,7 +136,7 @@ export class GoogleApiService {
   getSpreadsheetHeadingsAndLastRow(spreadsheetId) {
     return this._requestWrapper(new Promise((resolve, reject) => {
       this.getSpreadsheetData(spreadsheetId, 'A1:Z99')
-        .then((response) => {
+        .then((response: any) => {
           const range = response.result || response.data;
 
           if (range.values && range.values[0]) {
@@ -299,31 +300,7 @@ export class GoogleApiService {
   private _handleUnAuthenticated(err) {
     console.error(err);
     this.logout();
-
-    const icon = 'error';
-    const iconColor = '#e15d63';
-    const msg = 'GoogleApi: Failed to authenticate please try logging in again!';
-    // TODO implement this
-//     this.$mdToast.show({
-//       hideDelay: 20 * 1000,
-//       /* @ngInject */
-//       controller: ($scope, $mdToast, GoogleApi) => {
-//         $scope.login = () => {
-//           GoogleApi.login();
-//           $mdToast.hide();
-//         };
-//       },
-//       template: `
-// <md-toast>
-//   <div class="md-toast-content">
-//     <div class="icon-wrapper">
-//       <ng-md-icon icon="${icon}" style="fill:${iconColor}"></ng-md-icon>
-//     </div>
-//     <div class="toast-text">${msg}</div>
-//     <md-button ng-click="login()">Login</md-button>
-//   </div>
-// </md-toast>`
-//     });
+    this._snackIt('GOOGLE_LOGIN', 'GoogleApi: Failed to authenticate please try logging in again!');
   }
 
   private _handleError(err) {
@@ -352,6 +329,10 @@ export class GoogleApiService {
   private _requestWrapper(request) {
     return new Promise((resolve, reject) => {
       request.then((res) => {
+        // this._handleUnAuthenticated(res);
+        // reject(res);
+        // return;
+
         if (res && res.status < 300) {
           resolve(res);
         } else if (!res) {
@@ -376,6 +357,10 @@ export class GoogleApiService {
 
   private _snackIt(snackType, msg) {
     console.log('SNACK', arguments);
+    this._snackService.open({
+      type: snackType,
+      message: msg,
+    });
   }
 
   private _mapHttp(params: any): Promise<any> {

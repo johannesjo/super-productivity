@@ -1,30 +1,36 @@
 import { Injectable } from '@angular/core';
 import { Actions, Effect, ofType } from '@ngrx/effects';
-import { SnackActionTypes, SnackClose, SnackOpen } from './snack.actions';
+import { SnackActionTypes, SnackOpen } from './snack.actions';
 import { Observable, Subject } from 'rxjs';
-import { delay, map, takeUntil, tap } from 'rxjs/operators';
-import { MatSnackBar } from '@angular/material';
+import { takeUntil, tap } from 'rxjs/operators';
+import { MatSnackBar, MatSnackBarRef } from '@angular/material';
 import { Store } from '@ngrx/store';
+import { SnackCustomComponent } from '../snack-custom/snack-custom.component';
+import { DEFAULT_SNACK_CFG } from '../snack.const';
 
 @Injectable()
 export class SnackEffects {
+  // TODO implement this way
+  // @Effect({
+  //   dispatch: false
+  // })
+  // closeSnack: Observable<any> = this.actions$
+  //   .pipe(
+  //     ofType(SnackActionTypes.SnackClose),
+  //     tap(() => this.matSnackBar.dismiss())
+  //   );
+
   @Effect({
     dispatch: false
   })
-  closeSnack: Observable<any> = this.actions$
-    .pipe(
-      ofType(SnackActionTypes.SnackOpen),
-      tap(() => this.matSnackBar.dismiss())
-    );
-
-  @Effect()
   showSnack: Observable<any> = this.actions$
     .pipe(
       ofType(SnackActionTypes.SnackOpen),
       tap(this._openSnack.bind(this)),
-      delay(2000),
-      map(() => new SnackClose())
     );
+
+
+  private _ref: MatSnackBarRef;
 
   constructor(private actions$: Actions,
               private store$: Store<any>,
@@ -37,11 +43,26 @@ export class SnackEffects {
       _destroy$.unsubscribe();
     };
     const _destroy$: Subject<boolean> = new Subject<boolean>();
-    const {message, actionStr, actionId, config} = action.payload;
-    const ref = this.matSnackBar.open(message, actionStr, config);
+    const {message, actionStr, actionId, config, type} = action.payload;
+    const cfg = {...DEFAULT_SNACK_CFG, ...config};
+
+    switch (type) {
+      case 'CUSTOM':
+      case 'ERROR':
+      case 'SUCCESS':
+        this._ref = this.matSnackBar.openFromComponent(SnackCustomComponent, {
+          ...cfg,
+          data: action.payload
+        });
+        break;
+
+      default: {
+        this._ref = this.matSnackBar.open(message, actionStr, cfg);
+      }
+    }
 
     if (actionStr && actionId) {
-      ref.onAction()
+      this._ref.onAction()
         .pipe(takeUntil(_destroy$))
         .subscribe(() => {
           this.store$.dispatch({
@@ -49,7 +70,7 @@ export class SnackEffects {
           });
           destroySubs();
         });
-      ref.afterDismissed()
+      this._ref.afterDismissed()
         .pipe(takeUntil(_destroy$))
         .subscribe(() => {
           destroySubs();
