@@ -36,6 +36,20 @@
       </td>
     </tr>
     <tr>
+      <th>Attachments</th>
+      <td>
+        <div class="attachments">
+          <div class="attachment"
+               *ngFor="let attachment of task.issueData.attachments">
+
+            <div class="file-name">{{attachment.filename}}</div>
+            <img *ngIf="attachment.thumbnail"
+                 [src]="attachment.thumbnail">
+          </div>
+        </div>
+      </td>
+    </tr>
+    <tr>
       <th>Comments</th>
       <td>
         <div class="comment"
