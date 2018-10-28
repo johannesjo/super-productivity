@@ -5,14 +5,15 @@ import { IS_ELECTRON } from '../../app.constants';
 import { MultiPartBuilder } from './util/multi-part-builder';
 import { HttpClient } from '@angular/common/http';
 import { SnackService } from '../snack/snack.service';
+import { SnackType } from '../snack/snack.model';
 
 
 @Injectable({
   providedIn: 'root'
 })
 export class GoogleApiService {
+  public isLoggedIn = false;
   private _isScriptLoaded = false;
-  private _isLoggedIn = false;
   // TODO save and load tokens
   private _data = {
     accessToken: undefined,
@@ -37,7 +38,7 @@ export class GoogleApiService {
     }
 
     if (this._data.accessToken && !isExpired) {
-      this._isLoggedIn = true;
+      this.isLoggedIn = true;
       return new Promise((resolve) => resolve());
     }
 
@@ -48,7 +49,7 @@ export class GoogleApiService {
           this._data.accessToken = data.access_token;
           this._data.expiresAt = (data.expires_in * 1000) + moment().valueOf();
           this._data.refreshToken = data.refresh_token;
-          this._isLoggedIn = true;
+          this.isLoggedIn = true;
           this._snackIt('SUCCESS', 'GoogleApi: Login successful');
 
           resolve();
@@ -61,13 +62,13 @@ export class GoogleApiService {
       return this._initClientLibraryIfNotDone()
         .then((user: any) => {
           if (user && user.Zi && user.Zi.access_token) {
-            this._isLoggedIn = true;
+            this.isLoggedIn = true;
             this._saveToken(user);
             this._snackIt('SUCCESS', 'GoogleApi: Login successful');
           } else {
             return this._gapi.auth2.getAuthInstance().signIn()
               .then((res) => {
-                this._isLoggedIn = true;
+                this.isLoggedIn = true;
                 this._saveToken(res);
                 this._snackIt('SUCCESS', 'GoogleApi: Login successful');
               });
@@ -79,7 +80,7 @@ export class GoogleApiService {
 
 
   logout() {
-    this._isLoggedIn = false;
+    this.isLoggedIn = false;
     this._data.accessToken = undefined;
     this._data.expiresAt = undefined;
     this._data.refreshToken = undefined;
@@ -355,11 +356,11 @@ export class GoogleApiService {
     });
   }
 
-  private _snackIt(snackType, msg) {
+  private _snackIt(snackType: SnackType, msg: string) {
     console.log('SNACK', arguments);
     this._snackService.open({
-      type: snackType,
       message: msg,
+      type: snackType,
     });
   }
 

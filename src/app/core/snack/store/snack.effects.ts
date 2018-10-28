@@ -3,10 +3,11 @@ import { Actions, Effect, ofType } from '@ngrx/effects';
 import { SnackActionTypes, SnackOpen } from './snack.actions';
 import { Observable, Subject } from 'rxjs';
 import { takeUntil, tap } from 'rxjs/operators';
-import { MatSnackBar, MatSnackBarRef } from '@angular/material';
+import { MatSnackBar, MatSnackBarRef, SimpleSnackBar } from '@angular/material';
 import { Store } from '@ngrx/store';
 import { SnackCustomComponent } from '../snack-custom/snack-custom.component';
 import { DEFAULT_SNACK_CFG } from '../snack.const';
+import { SnackGoogleLoginComponent } from '../snack-google-login/snack-google-login.component';
 
 @Injectable()
 export class SnackEffects {
@@ -30,7 +31,7 @@ export class SnackEffects {
     );
 
 
-  private _ref: MatSnackBarRef;
+  private _ref: MatSnackBarRef<SnackCustomComponent | SnackGoogleLoginComponent | SimpleSnackBar>;
 
   constructor(private actions$: Actions,
               private store$: Store<any>,
@@ -44,17 +45,20 @@ export class SnackEffects {
     };
     const _destroy$: Subject<boolean> = new Subject<boolean>();
     const {message, actionStr, actionId, config, type} = action.payload;
-    const cfg = {...DEFAULT_SNACK_CFG, ...config};
+    const cfg = {
+      ...DEFAULT_SNACK_CFG, ...config, data: action.payload
+    };
 
     switch (type) {
-      case 'CUSTOM':
       case 'ERROR':
       case 'SUCCESS':
-        this._ref = this.matSnackBar.openFromComponent(SnackCustomComponent, {
-          ...cfg,
-          data: action.payload
-        });
+        this._ref = this.matSnackBar.openFromComponent(SnackCustomComponent, cfg);
         break;
+
+      case 'GOOGLE_LOGIN':
+        this._ref = this.matSnackBar.openFromComponent(SnackGoogleLoginComponent, cfg);
+        break;
+
 
       default: {
         this._ref = this.matSnackBar.open(message, actionStr, cfg);

@@ -4,6 +4,7 @@ import { ConfigPageComponent } from './config-page.component';
 import { ConfigModule } from '../../core/config/config.module';
 import { UiModule } from '../../ui/ui.module';
 import { CoreModule } from '../../core/core.module';
+import { GoogleModule } from '../../core/google/google.module';
 
 @NgModule({
   imports: [
@@ -11,6 +12,7 @@ import { CoreModule } from '../../core/core.module';
     CoreModule,
     ConfigModule,
     UiModule,
+    GoogleModule,
   ],
   declarations: [ConfigPageComponent]
 })
