@@ -1,14 +1,57 @@
-<button mat-raised-button
-        color="primary"
-(click)="hideUpdates()">
-  Hide Updates
-</button>
-<h3 class="mat-h3">Status</h3>
-<h3 class="mat-h3">Summary</h3>
-<h3 class="mat-h3">Description</h3>
-<h3 class="mat-h3">Comments</h3>
-<h3 class="mat-h3">Later Write Comment</h3>
+<div style="text-align: center;">
+  <button mat-raised-button
+          *ngIf="task.issueData.wasUpdated"
+          color="accent"
+          (click)="hideUpdates()">
+    Mark updates as checked
+  </button>
+</div>
+<!-- TODO list changes -->
 
-<pre><code>
-        {{task.issueData|json}}
-      </code></pre>
+
+<div class="wrapper">
+  <table class="issue-table">
+    <tr>
+      <th>Summary</th>
+      <th>{{task.issueData.key}} {{task.issueData.summary}}</th>
+    </tr>
+    <tr>
+      <th>Status</th>
+      <td>{{task.issueData.status.name}}</td>
+    </tr>
+    <tr>
+      <th>Components</th>
+      <td>
+        <mat-chip-list>
+          <mat-chip *ngFor="let component of task.issueData.components"
+                    title="{{component.description}}">{{component.name}}
+          </mat-chip>
+        </mat-chip-list>
+      </td>
+    </tr>
+    <tr>
+      <th>Description</th>
+      <td>
+        <inline-markdown [model]="task.issueData.description"></inline-markdown>
+      </td>
+    </tr>
+    <tr>
+      <th>Comments</th>
+      <td>
+        <div class="comment"
+             *ngFor="let comment of task.issueData.comments">
+          <div class="author">
+            <img [src]="comment.author.avatarUrl">
+            <div class="author-name">{{comment.author.displayName}}</div>
+          </div>
+          <div>{{comment.body}}</div>
+        </div>
+      </td>
+    </tr>
+  </table>
+
+  <!--<pre><code>-->
+  <!--{{task.issueData|json}}-->
+  <!--</code></pre>-->
+
+</div>

@@ -21,13 +21,27 @@ import { IssueService } from '../../issue/issue.service';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TaskAdditionalInfoComponent implements OnInit, AfterViewInit {
-  @Input() task: TaskWithSubTasks;
+  @Input() set task(val: TaskWithSubTasks) {
+    this.taskData = val;
+
+    if (this._issueHeaderRef) {
+      this._issueHeaderRef.instance.task = val;
+    }
+    if (this._issueContentRef) {
+      this._issueContentRef.instance.task = val;
+    }
+  };
+
+  taskData: TaskWithSubTasks;
   @Input() selectedIndex: number;
 
 
   @Output() onTaskNotesChanged: EventEmitter<string> = new EventEmitter();
   @ViewChild('issueHeader', {read: ViewContainerRef}) issueHeaderEl: ViewContainerRef;
   @ViewChild('issueContent', {read: ViewContainerRef}) issueContentEl: ViewContainerRef;
+
+  private _issueHeaderRef;
+  private _issueContentRef;
 
 
   constructor(private _resolver: ComponentFactoryResolver,
@@ -39,8 +53,8 @@ export class TaskAdditionalInfoComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit() {
-    if (this.task.issueData && this.task.issueType) {
-      this._loadIssueTemplates(this.task);
+    if (this.taskData.issueData && this.taskData.issueType) {
+      this._loadIssueTemplates(this.taskData);
     }
   }
 
@@ -49,13 +63,13 @@ export class TaskAdditionalInfoComponent implements OnInit, AfterViewInit {
   }
 
   private _loadIssueTemplates(task: TaskWithSubTasks) {
-    this._renderComponent(
+    this._issueContentRef = this._renderComponent(
       this._issueService.getTabContent(task.issueType),
       this.issueContentEl,
       task
     );
 
-    this._renderComponent(
+    this._issueHeaderRef = this._renderComponent(
       this._issueService.getTabHeader(task.issueType),
       this.issueHeaderEl,
       task
@@ -67,6 +81,7 @@ export class TaskAdditionalInfoComponent implements OnInit, AfterViewInit {
       const factory: ComponentFactory<any> = this._resolver.resolveComponentFactory(componentToRender);
       const ref = targetEl.createComponent(factory);
       ref.instance.task = task;
+      return ref;
     }
   }
 }

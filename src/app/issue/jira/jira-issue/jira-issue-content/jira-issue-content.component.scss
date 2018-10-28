@@ -1,0 +1,24 @@
+@import '../../../../../variables';
+
+.issue-table {
+  width: 100%;
+}
+
+.wrapper {
+  margin: $s*2;
+}
+
+.comment {
+  display: block;
+
+  .author {
+    display: flex;
+    align-items: center;
+    margin-bottom: $s;
+
+    img {
+      margin-right: $s;
+    }
+  }
+  margin-bottom: $s*2;
+}

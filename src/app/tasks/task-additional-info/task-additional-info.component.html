@@ -3,6 +3,13 @@
                  [selectedIndex]="selectedIndex"
                  color="primary"
                  style="">
+    <mat-tab *ngIf="taskData.issueData">
+      <ng-template mat-tab-label>
+        <div #issueHeader></div>
+      </ng-template>
+      <div #issueContent></div>
+    </mat-tab>
+
     <mat-tab>
       <ng-template mat-tab-label>
         <mat-icon class="tab-header-icon">notes</mat-icon>
@@ -11,16 +18,9 @@
 
       <div class="mat-elevation-z4"
            style="margin:10px;">
-        <inline-markdown [model]="task.notes"
+        <inline-markdown [model]="taskData.notes"
                          (onChanged)="changeTaskNotes($event)"></inline-markdown>
       </div>
-    </mat-tab>
-
-    <mat-tab *ngIf="task.issueData">
-      <ng-template mat-tab-label>
-        <div #issueHeader></div>
-      </ng-template>
-      <div #issueContent></div>
     </mat-tab>
 
     <mat-tab>

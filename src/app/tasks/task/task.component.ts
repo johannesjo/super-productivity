@@ -36,7 +36,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   @Input() task: TaskWithSubTasks;
   @Input() focusIdList: string[];
 
-  additionalTabsIndex: number;
+  additionalTabsIndex = 0;
 
   subTaskListId: string;
   private _currentFocusId: string;
@@ -109,7 +109,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   handleUpdateBtnClick() {
-    this.additionalTabsIndex = 1;
+    this.additionalTabsIndex = 0;
     this._taskService.showNotes(this.task.id);
   }
 

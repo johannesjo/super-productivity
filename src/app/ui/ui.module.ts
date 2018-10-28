@@ -9,7 +9,7 @@ import {
   MatAutocompleteModule,
   MatButtonModule,
   MatCardModule,
-  MatCheckboxModule,
+  MatCheckboxModule, MatChipsModule,
   MatDatepickerModule,
   MatDialogModule,
   MatExpansionModule,
@@ -75,6 +75,7 @@ import { HelpSectionComponent } from './help-section/help-section.component';
     MatTabsModule,
     MatToolbarModule,
     MatTooltipModule,
+    MatChipsModule,
   ],
   declarations: [
     DurationFromStringPipe,
@@ -129,6 +130,7 @@ import { HelpSectionComponent } from './help-section/help-section.component';
     MatTabsModule,
     MatToolbarModule,
     MatTooltipModule,
+    MatChipsModule,
 
     ReactiveFormsModule,
     FormlyModule,
