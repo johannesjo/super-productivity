@@ -6,6 +6,7 @@ import { ChromeExtensionInterfaceModule } from './chrome-extension-interface/chr
 import { TimeTrackingModule } from './time-tracking/time-tracking.module';
 import { ShortcutModule } from './shortcut/shortcut.module';
 import { SnackModule } from './snack/snack.module';
+import { GoogleModule } from './google/google.module';
 
 @NgModule({
   imports: [
@@ -16,6 +17,7 @@ import { SnackModule } from './snack/snack.module';
     TimeTrackingModule,
     ShortcutModule,
     SnackModule,
+    GoogleModule,
   ],
   declarations: []
 })
