@@ -272,7 +272,11 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
       }
       // if already collapsed
       if (this.task.isHideSubTasks === true) {
-        this.focusPrevious();
+        if (this.task.isNotesOpen) {
+          this.toggleShowNotes();
+        } else {
+          this.focusPrevious();
+        }
       }
       if (this.task.parentId) {
         this._taskService.focusTask(this.task.parentId);
