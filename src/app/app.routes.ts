@@ -3,12 +3,14 @@ import { WorkViewPageComponent } from './pages/work-view/work-view-page.componen
 import { ConfigPageComponent } from './pages/config-page/config-page.component';
 import { ProjectPageComponent } from './pages/project-page/project-page.component';
 import { DailyPlannerComponent } from './pages/daily-planner/daily-planner.component';
+import { DailySummaryComponent } from './pages/daily-summary/daily-summary.component';
 
 export const APP_ROUTES: Routes = [
   {path: 'work-view', component: WorkViewPageComponent},
   {path: 'daily-planner', component: DailyPlannerComponent},
   {path: 'config', component: ConfigPageComponent},
   {path: 'projects', component: ProjectPageComponent},
+  {path: 'daily-summary', component: DailySummaryComponent},
   // {path: 'hero/:id', component: HeroDetailComponent},
   // {
   //   path: 'heroes',

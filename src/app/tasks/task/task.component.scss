@@ -57,8 +57,8 @@ $this-active-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2),
     color: #000000;
 
     // outline
-    outline: 1px solid #000000;
-    box-shadow: $this-active-shadow;
+    outline: 2px solid #000000;
+    //box-shadow: $this-active-shadow;
   }
 
   @include dark-theme {
