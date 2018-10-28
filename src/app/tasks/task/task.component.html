@@ -1,18 +1,6 @@
 <div class="inner-wrapper"
      [class.isNotesOpen]="task.isNotesOpen">
   <div class="first-line">
-    <button mat-icon-button
-            aria-label="is updated"
-            tabindex="2"
-            (click)="toggleShowNotes()"
-            *ngIf="task.issueData?.wasUpdated">
-      <!--<mat-tooltip>-->
-      <!--Click to show updates-->
-      <!--</mat-tooltip>-->
-      <mat-icon class="material-icons update update-icon">update</mat-icon>
-    </button>
-
-
     <mat-icon class="material-icons handle"
               [class.handle-par]="!task.parentId"
               [class.handle-sub]="task.parentId">drag_handle
@@ -36,6 +24,16 @@
       <mat-icon class="material-icons">pause_circle_filled</mat-icon>
     </button>
 
+
+    <button mat-icon-button
+            aria-label="is updated"
+            tabindex="2"
+            color="primary"
+            (click)="handleUpdateBtnClick()"
+            class="ico-btn"
+            *ngIf="task.issueData?.wasUpdated">
+      <mat-icon class="material-icons update update-icon">update</mat-icon>
+    </button>
 
     <a mat-icon-button
        class="ico-btn original-link-btn"
@@ -128,6 +126,7 @@
   <progress-bar [progress]="progress"></progress-bar>
 
   <task-additional-info class="notes"
+                        [selectedIndex]="additionalTabsIndex"
                         *ngIf="task.isNotesOpen"
                         (onTaskNotesChanged)="onTaskNotesChanged($event)"
                         [@expand]

@@ -1,12 +1,16 @@
-import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
-import { Input } from '@angular/core';
-import { Output } from '@angular/core';
-import { EventEmitter } from '@angular/core';
-import { ViewChild } from '@angular/core';
-import { ComponentFactory } from '@angular/core';
-import { ComponentFactoryResolver } from '@angular/core';
-import { ViewContainerRef } from '@angular/core';
-import { AfterViewInit } from '@angular/core';
+import {
+  AfterViewInit,
+  ChangeDetectionStrategy,
+  Component,
+  ComponentFactory,
+  ComponentFactoryResolver,
+  EventEmitter,
+  Input,
+  OnInit,
+  Output,
+  ViewChild,
+  ViewContainerRef
+} from '@angular/core';
 import { TaskWithSubTasks } from '../task.model';
 import { IssueService } from '../../issue/issue.service';
 
@@ -18,10 +22,13 @@ import { IssueService } from '../../issue/issue.service';
 })
 export class TaskAdditionalInfoComponent implements OnInit, AfterViewInit {
   @Input() task: TaskWithSubTasks;
+  @Input() selectedIndex: number;
+
 
   @Output() onTaskNotesChanged: EventEmitter<string> = new EventEmitter();
   @ViewChild('issueHeader', {read: ViewContainerRef}) issueHeaderEl: ViewContainerRef;
   @ViewChild('issueContent', {read: ViewContainerRef}) issueContentEl: ViewContainerRef;
+
 
   constructor(private _resolver: ComponentFactoryResolver,
               private _issueService: IssueService) {

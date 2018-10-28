@@ -36,6 +36,8 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   @Input() task: TaskWithSubTasks;
   @Input() focusIdList: string[];
 
+  additionalTabsIndex: number;
+
   subTaskListId: string;
   private _currentFocusId: string;
 
@@ -104,6 +106,11 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   ngOnDestroy() {
     this._destroy$.next(true);
     this._destroy$.unsubscribe();
+  }
+
+  handleUpdateBtnClick() {
+    this.additionalTabsIndex = 1;
+    this._taskService.showNotes(this.task.id);
   }
 
   deleteTask() {

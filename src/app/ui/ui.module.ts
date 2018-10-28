@@ -28,6 +28,7 @@ import {
   MatTableModule,
   MatTabsModule,
   MatToolbarModule,
+  MatTooltipModule,
 } from '@angular/material';
 import { MarkdownModule } from 'ngx-markdown';
 import { ReactiveFormsModule } from '@angular/forms';
@@ -73,6 +74,7 @@ import { HelpSectionComponent } from './help-section/help-section.component';
     MatTableModule,
     MatTabsModule,
     MatToolbarModule,
+    MatTooltipModule,
   ],
   declarations: [
     DurationFromStringPipe,
@@ -126,6 +128,7 @@ import { HelpSectionComponent } from './help-section/help-section.component';
     MatTableModule,
     MatTabsModule,
     MatToolbarModule,
+    MatTooltipModule,
 
     ReactiveFormsModule,
     FormlyModule,
