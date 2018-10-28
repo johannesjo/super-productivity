@@ -38,6 +38,9 @@ export const DEFAULT_JIRA_CFG: JiraCfg = {
 export const IPC_JIRA_CB_EVENT = 'JIRA_RESPONSE';
 export const IPC_JIRA_MAKE_REQUEST_EVENT = 'JIRA';
 
+// export const JIRA_POLL_INTERVAL = 5 * 60 * 1000;
+export const JIRA_POLL_INTERVAL = 5 * 1000;
+
 // it's weird!!
 export const JIRA_DATE_FORMAT = 'YYYY-MM-DDTHH:mm:ss.SSZZ';
 export const JIRA_ISSUE_TYPE = 'JIRA';

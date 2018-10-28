@@ -17,9 +17,6 @@ export enum JiraIssueActionTypes {
   DeleteJiraIssue = '[JiraIssue] Delete JiraIssue',
   DeleteJiraIssues = '[JiraIssue] Delete JiraIssues',
   ClearJiraIssues = '[JiraIssue] Clear JiraIssues',
-
-  // Sub JiraIssue Actions
-  AddSubJiraIssue = '[JiraIssue] Add SubIssue',
 }
 
 export class LoadState implements Action {

@@ -2,8 +2,8 @@ import { Injectable } from '@angular/core';
 import { JiraIssue } from './jira-issue.model';
 import { Store } from '@ngrx/store';
 import { JiraIssueActionTypes } from './store/jira-issue.actions';
-import { ProjectService } from '../../../project/project.service';
 import { PersistenceService } from '../../../core/persistence/persistence.service';
+import { JiraIssueState } from './store/jira-issue.reducer';
 
 
 @Injectable()
@@ -19,14 +19,14 @@ export class JiraIssueService {
 
   // META
   // ----
-  loadStateForProject(projectId) {
+  loadStateForProject(projectId: string) {
     const lsJiraIssueState = this._persistenceService.loadIssuesForProject(projectId, 'JIRA');
     if (lsJiraIssueState) {
       this.loadState(lsJiraIssueState);
     }
   }
 
-  loadState(state) {
+  loadState(state: JiraIssueState) {
     this._store.dispatch({
       type: JiraIssueActionTypes.LoadState,
       payload: {
@@ -37,7 +37,7 @@ export class JiraIssueService {
 
   // CRUD
   // ----
-  add(jiraIssue) {
+  add(jiraIssue: JiraIssue) {
     this._store.dispatch({
       type: JiraIssueActionTypes.AddJiraIssue,
       payload: {
@@ -46,7 +46,7 @@ export class JiraIssueService {
     });
   }
 
-  upsert(jiraIssue) {
+  upsert(jiraIssue: JiraIssue) {
     this._store.dispatch({
       type: JiraIssueActionTypes.UpsertJiraIssue,
       payload: {

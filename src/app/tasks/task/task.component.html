@@ -5,7 +5,7 @@
             aria-label="is updated"
             tabindex="2"
             (click)="toggleShowNotes()"
-            *ngIf="task.isUpdated">
+            *ngIf="task.issueData?.wasUpdated">
       <!--<mat-tooltip>-->
       <!--Click to show updates-->
       <!--</mat-tooltip>-->

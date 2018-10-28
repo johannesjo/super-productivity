@@ -61,5 +61,6 @@ export type JiraIssue = Readonly<{
   // new properties
   url: string;
   comments: JiraComment[];
+  wasUpdated?: boolean;
 }>;
 
