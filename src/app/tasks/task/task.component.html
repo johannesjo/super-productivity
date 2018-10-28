@@ -125,7 +125,7 @@
 
   <progress-bar [progress]="progress"></progress-bar>
 
-  <task-additional-info class="notes"
+  <task-additional-info class="notes mat-elevation-z3"
                         [selectedIndex]="additionalTabsIndex"
                         *ngIf="task.isNotesOpen"
                         (onTaskNotesChanged)="onTaskNotesChanged($event)"

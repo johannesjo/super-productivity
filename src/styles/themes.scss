@@ -2,6 +2,12 @@
 
 @mixin color-helper($theme) {
   $primary: map-get($theme, primary);
+  $background: map-get($theme, background);
+  $standardBackground: map-get($background, card);
+
+  .bg-standard {
+    background: $standardBackground;
+  }
   .bg-primary {
     background-color: mat-color($primary);
   }
