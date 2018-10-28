@@ -27,7 +27,7 @@ export class SnackEffects {
     );
 
   constructor(private actions$: Actions,
-              private store$: Store,
+              private store$: Store<any>,
               private matSnackBar: MatSnackBar) {
   }
 

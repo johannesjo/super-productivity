@@ -7,7 +7,7 @@ import { MatSnackBarConfig } from '@angular/material';
   providedIn: 'root'
 })
 export class SnackService {
-  constructor(private _store$: Store) {
+  constructor(private _store$: Store<any>) {
   }
 
   open(params: {
