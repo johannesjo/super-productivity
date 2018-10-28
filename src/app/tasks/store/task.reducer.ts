@@ -207,9 +207,8 @@ export function taskReducer(
       const timeEstimate = action.payload.task.changes.timeEstimate;
       let stateCopy = updateTimeSpentForTask(taskId, timeSpentOnDay, state);
       stateCopy = updateTimeEstimateForTask(taskId, timeEstimate, stateCopy);
-      return taskAdapter.updateOne(action.payload.task, state);
+      return taskAdapter.updateOne(action.payload.task, stateCopy);
     }
-
 
     // TODO also delete related issue :(
     case TaskActionTypes.DeleteTask: {
