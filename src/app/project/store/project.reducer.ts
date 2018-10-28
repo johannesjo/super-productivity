@@ -22,6 +22,8 @@ export const selectAllProjects = createSelector(selectProjectFeatureState, selec
 export const selectCurrentProject = createSelector(selectProjectFeatureState,
   (state) => state.entities[state.currentId]
 );
+export const selectProjectIssueCfgs = createSelector(selectCurrentProject, (project) => project.issueIntegrationCfgs);
+export const selectProjectJiraCfg = createSelector(selectProjectIssueCfgs, (issueProviderCfgs) => issueProviderCfgs.JIRA);
 
 
 // DEFAULT
@@ -47,7 +49,7 @@ export function projectReducer(
   switch (action.type) {
     // Meta Actions
     // ------------
-    case ProjectActionTypes.LoadState: {
+    case ProjectActionTypes.LoadProjectState: {
       return Object.assign({}, action.payload.state);
     }
 

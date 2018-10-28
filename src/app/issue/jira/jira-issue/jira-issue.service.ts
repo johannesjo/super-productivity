@@ -1,27 +1,20 @@
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
 import { JiraIssue } from './jira-issue.model';
-import { select, Store } from '@ngrx/store';
+import { Store } from '@ngrx/store';
 import { JiraIssueActionTypes } from './store/jira-issue.actions';
-import { selectAllJiraIssues, selectJiraIssueEntities } from './store/jira-issue.reducer';
 import { ProjectService } from '../../../project/project.service';
 import { PersistenceService } from '../../../core/persistence/persistence.service';
-import { Dictionary } from '@ngrx/entity';
 
 
 @Injectable()
 export class JiraIssueService {
-  jiraIssues$: Observable<JiraIssue[]> = this._store.pipe(select(selectAllJiraIssues));
-  jiraIssuesEntities$: Observable<Dictionary<JiraIssue>> = this._store.pipe(select(selectJiraIssueEntities));
+  // jiraIssues$: Observable<JiraIssue[]> = this._store.pipe(select(selectAllJiraIssues));
+  // jiraIssuesEntities$: Observable<Dictionary<JiraIssue>> = this._store.pipe(select(selectJiraIssueEntities));
 
   constructor(
     private readonly _store: Store<any>,
-    private readonly _projectService: ProjectService,
     private readonly _persistenceService: PersistenceService,
   ) {
-    this._projectService.currentId$.subscribe((projectId) => {
-      this.loadStateForProject(projectId);
-    });
   }
 
   // META

@@ -5,29 +5,26 @@ import { PersistenceService } from '../core/persistence/persistence.service';
 import { select, Store } from '@ngrx/store';
 import { ProjectActionTypes } from './store/project.actions';
 import shortid from 'shortid';
-import { selectAllProjects, selectCurrentProject, selectCurrentProjectId } from './store/project.reducer';
+import { selectAllProjects, selectCurrentProject, selectCurrentProjectId, selectProjectJiraCfg } from './store/project.reducer';
 import { IssueIntegrationCfg, IssueProviderKey } from '../issue/issue';
 import { JiraCfg } from '../issue/jira/jira';
-import { map } from 'rxjs/operators';
 
 @Injectable()
 export class ProjectService {
   list$: Observable<Project[]> = this._store.pipe(select(selectAllProjects));
   currentProject$: Observable<Project> = this._store.pipe(select(selectCurrentProject));
   currentId$: Observable<string> = this._store.pipe(select(selectCurrentProjectId));
-  currentJiraCfg$: Observable<JiraCfg> = this.currentProject$.pipe(
-    map((project: Project) => {
-      return project && project.issueIntegrationCfgs && project.issueIntegrationCfgs.JIRA;
-    }));
-
+  currentJiraCfg$: Observable<JiraCfg> = this._store.pipe(select(selectProjectJiraCfg));
 
   constructor(
     private readonly _persistenceService: PersistenceService,
     // TODO correct type?
     private readonly _store: Store<any>,
   ) {
-    this.load();
-    // this.currentProject$.subscribe((x) => console.log(x));
+    // dirty trick to make effect catch up :/
+    setTimeout(() => {
+      this.load();
+    });
   }
 
   load() {
@@ -37,7 +34,7 @@ export class ProjectService {
         projectState.currentId = projectState.ids[0];
       }
       this._store.dispatch({
-        type: ProjectActionTypes.LoadState,
+        type: ProjectActionTypes.LoadProjectState,
         payload: {state: projectState}
       });
     }

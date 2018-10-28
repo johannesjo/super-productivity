@@ -6,7 +6,7 @@ import { IssueProviderKey } from '../../issue/issue';
 import { IssueIntegrationCfg } from '../../issue/issue';
 
 export enum ProjectActionTypes {
-  LoadState = '[Project] Load Project State',
+  LoadProjectState = '[Project] Load Project State',
   SetCurrentProject = '[Project] SetCurrentProject',
 
   // Project Actions
@@ -20,8 +20,8 @@ export enum ProjectActionTypes {
   SaveProjectIssueConfig = '[Project] Save Issue Config for Project',
 }
 
-export class LoadState implements Action {
-  readonly type = ProjectActionTypes.LoadState;
+export class LoadProjectState implements Action {
+  readonly type = ProjectActionTypes.LoadProjectState;
 
   constructor(public payload: { state: ProjectState }) {
   }
@@ -93,7 +93,7 @@ export class SaveProjectIssueConfig implements Action {
 
 export type ProjectActions
   = LoadProjects
-  | LoadState
+  | LoadProjectState
   | SetCurrentProject
   | AddProject
   | AddProjects

@@ -73,7 +73,6 @@ export class TaskService {
 
   constructor(
     private readonly _store: Store<any>,
-    private readonly _projectService: ProjectService,
     private readonly _persistenceService: PersistenceService,
     private readonly _timeTrackingService: TimeTrackingService,
   ) {
@@ -83,10 +82,6 @@ export class TaskService {
       if (val && val.length > 0) {
         console.warn('MISSING ISSUE', val);
       }
-    });
-
-    this._projectService.currentId$.subscribe((projectId) => {
-      this.loadStateForProject(projectId);
     });
 
     // time tracking
@@ -111,7 +106,7 @@ export class TaskService {
   }
 
   loadState(state) {
-    this._storeDispatch(TaskActionTypes.LoadState, {state});
+    this._storeDispatch(TaskActionTypes.LoadTaskState, {state});
   }
 
   pauseCurrent() {

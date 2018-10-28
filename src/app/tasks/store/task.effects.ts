@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Actions, Effect, ofType } from '@ngrx/effects';
-import { DeleteTask, TaskActions, TaskActionTypes } from './task.actions';
+import { DeleteTask, TaskActionTypes } from './task.actions';
 import { select, Store } from '@ngrx/store';
 import { map, tap, withLatestFrom } from 'rxjs/operators';
 import { PersistenceService } from '../../core/persistence/persistence.service';

@@ -6,7 +6,7 @@ import { Tick } from '../../core/time-tracking/time-tracking';
 import { JiraIssue } from '../../issue/jira/jira-issue/jira-issue.model';
 
 export enum TaskActionTypes {
-  LoadState = '[Task] Load Task State',
+  LoadTaskState = '[Task] Load Task State',
   SetCurrentTask = '[Task] SetCurrentTask',
   UnsetCurrentTask = '[Task] UnsetCurrentTask',
 
@@ -31,8 +31,8 @@ export enum TaskActionTypes {
   MoveToArchive = '[Task] Move to archive',
 }
 
-export class LoadState implements Action {
-  readonly type = TaskActionTypes.LoadState;
+export class LoadTaskState implements Action {
+  readonly type = TaskActionTypes.LoadTaskState;
 
   constructor(public payload: { state: TaskState }) {
   }
@@ -145,7 +145,7 @@ export class MoveToArchive implements Action {
 }
 
 export type TaskActions
-  = LoadState
+  = LoadTaskState
   | SetCurrentTask
   | UnsetCurrentTask
   | AddTask

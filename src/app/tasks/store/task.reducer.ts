@@ -163,7 +163,7 @@ export function taskReducer(
   switch (action.type) {
     // Meta Actions
     // ------------
-    case TaskActionTypes.LoadState: {
+    case TaskActionTypes.LoadTaskState: {
       return {...action.payload.state};
     }
 
