@@ -4,21 +4,7 @@ import * as moment from 'moment';
 import { IS_ELECTRON } from '../../app.constants';
 import { MultiPartBuilder } from './util/multi-part-builder';
 import { HttpClient } from '@angular/common/http';
-import { toPromise } from 'rxjs/operator/toPromise';
 
-const gapi: any = window['gapi'];
-const mapQDefer = () => {
-  const defer = {
-    reject: undefined,
-    resolve: undefined,
-    promise: undefined,
-  };
-  defer.promise = new Promise((reject, resolve) => {
-    defer.reject = reject;
-    defer.resolve = resolve;
-  });
-  return defer;
-};
 
 @Injectable({
   providedIn: 'root'
@@ -26,68 +12,17 @@ const mapQDefer = () => {
 export class GoogleApiService {
   private _isScriptLoaded = false;
   private _isLoggedIn = false;
-  // TODO saved tokens
+  // TODO save and load tokens
   private _data = {
     accessToken: undefined,
     refreshToken: undefined,
     expiresAt: undefined,
   };
+  private _gapi: any;
 
   constructor(private readonly _http: HttpClient) {
   }
 
-
-  initClientLibraryIfNotDone() {
-    const defer = mapQDefer();
-    this.loadLib(() => {
-      gapi.load('client:auth2', () => {
-        this.initClient()
-          .then(() => {
-            const GoogleAuth = gapi.auth2.getAuthInstance();
-            // used to determine and handle if user is already signed in
-            const user = GoogleAuth.currentUser.get();
-            defer.resolve(user);
-          });
-      });
-    });
-
-    return defer.promise;
-  }
-
-  loadJs(url, cb) {
-    const that = this;
-    const script = document.createElement('script');
-    script.setAttribute('src', url);
-    script.setAttribute('type', 'text/javascript');
-
-    this._isScriptLoaded = false;
-    const loadFunction = () => {
-      if (that._isScriptLoaded) {
-        return;
-      }
-      that._isScriptLoaded = true;
-      if (cb) {
-        cb();
-      }
-    };
-    script.onload = loadFunction.bind(that);
-    script['onreadystatechange'] = loadFunction.bind(that);
-    document.getElementsByTagName('head')[0].appendChild(script);
-  }
-
-  loadLib(cb) {
-    this.loadJs('https://apis.google.com/js/api.js', cb);
-  }
-
-  initClient() {
-    return gapi.client.init({
-      apiKey: GOOGLE_SETTINGS.API_KEY,
-      clientId: GOOGLE_SETTINGS.CLIENT_ID,
-      discoveryDocs: GOOGLE_DISCOVERY_DOCS,
-      scope: GOOGLE_SCOPES
-    });
-
-  }
 
   login() {
     /*jshint camelcase: false */
@@ -121,18 +56,18 @@ export class GoogleApiService {
         window.ipcRenderer.on('GOOGLE_AUTH_TOKEN_ERROR', reject);
       });
     } else {
-      return this.initClientLibraryIfNotDone()
+      return this._initClientLibraryIfNotDone()
         .then((user) => {
           if (user && user.Zi && user.Zi.access_token) {
             this._isLoggedIn = true;
-            this.saveToken(user);
+            this._saveToken(user);
             this._snackIt('SUCCESS', 'GoogleApi: Login successful');
           } else {
-            return gapi.auth2.getAuthInstance().signIn()
+            return this._gapi.auth2.getAuthInstance().signIn()
               .then((res) => {
                 console.log(res);
                 this._isLoggedIn = true;
-                this.saveToken(res);
+                this._saveToken(res);
                 this._snackIt('SUCCESS', 'GoogleApi: Login successful');
               });
           }
@@ -141,12 +76,6 @@ export class GoogleApiService {
     /*jshint camelcase: true */
   }
 
-  saveToken(res) {
-    /*jshint camelcase: false */
-    this._data.accessToken = res.Zi.access_token;
-    this._data.expiresAt = res.Zi.expires_at;
-    /*jshint camelcase: true */
-  }
 
   logout() {
     this._isLoggedIn = false;
@@ -159,8 +88,8 @@ export class GoogleApiService {
         resolve();
       });
     } else {
-      if (gapi) {
-        return gapi.auth2.getAuthInstance().signOut();
+      if (this._gapi) {
+        return this._gapi.auth2.getAuthInstance().signOut();
       } else {
         return new Promise((resolve) => {
           resolve();
@@ -174,7 +103,7 @@ export class GoogleApiService {
   appendRow(spreadsheetId, row) {
     // @see: https://developers.google.com/sheets/api/reference/rest/
     const range = 'A1:Z99';
-    return this.requestWrapper(this._mapHttp({
+    return this._requestWrapper(this._mapHttp({
       method: 'POST',
       url: `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${range}:append`,
       params: {
@@ -191,7 +120,7 @@ export class GoogleApiService {
 
   getSpreadsheetData(spreadsheetId, range) {
     // @see: https://developers.google.com/sheets/api/reference/rest/
-    return this.requestWrapper(this._mapHttp({
+    return this._requestWrapper(this._mapHttp({
       method: 'GET',
       url: `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${range}`,
       params: {
@@ -204,24 +133,22 @@ export class GoogleApiService {
   }
 
   getSpreadsheetHeadingsAndLastRow(spreadsheetId) {
-    const defer = mapQDefer();
+    return this._requestWrapper(new Promise((resolve, reject) => {
+      this.getSpreadsheetData(spreadsheetId, 'A1:Z99')
+        .then((response) => {
+          const range = response.result || response.data;
 
-    this.getSpreadsheetData(spreadsheetId, 'A1:Z99')
-      .then((response) => {
-        const range = response.result || response.data;
-
-        if (range.values && range.values[0]) {
-          defer.resolve({
-            headings: range.values[0],
-            lastRow: range.values[range.values.length - 1],
-          });
-        } else {
-          defer.reject('No data found');
-          this.handleError('No data found');
-        }
-      });
-
-    return this.requestWrapper(defer.promise);
+          if (range.values && range.values[0]) {
+            resolve({
+              headings: range.values[0],
+              lastRow: range.values[range.values.length - 1],
+            });
+          } else {
+            reject('No data found');
+            this._handleError('No data found');
+          }
+        });
+    }));
   }
 
   getFileInfo(fileId) {
@@ -230,7 +157,7 @@ export class GoogleApiService {
       return Promise.reject('No file id given');
     }
 
-    return this.requestWrapper(this._mapHttp({
+    return this._requestWrapper(this._mapHttp({
       method: 'GET',
       url: `https://content.googleapis.com/drive/v2/files/${encodeURIComponent(fileId)}`,
       params: {
@@ -250,7 +177,7 @@ export class GoogleApiService {
       return Promise.reject('No file name given');
     }
 
-    return this.requestWrapper(this._mapHttp({
+    return this._requestWrapper(this._mapHttp({
       method: 'GET',
       url: `https://content.googleapis.com/drive/v2/files`,
       params: {
@@ -271,7 +198,7 @@ export class GoogleApiService {
     }
 
     const metaData = this.getFileInfo(fileId);
-    const fileContents = this.requestWrapper(this._mapHttp({
+    const fileContents = this._requestWrapper(this._mapHttp({
       method: 'GET',
       url: `https://content.googleapis.com/drive/v2/files/${encodeURIComponent(fileId)}`,
       params: {
@@ -319,7 +246,7 @@ export class GoogleApiService {
       .append(metadata.mimeType, content)
       .finish();
 
-    return this.requestWrapper(this._mapHttp({
+    return this._requestWrapper(this._mapHttp({
       method: method,
       url: `https://content.googleapis.com${path}`,
       params: {
@@ -336,7 +263,40 @@ export class GoogleApiService {
     }));
   }
 
-  handleUnAuthenticated(err) {
+  private initClient() {
+    return this._gapi.client.init({
+      apiKey: GOOGLE_SETTINGS.API_KEY,
+      clientId: GOOGLE_SETTINGS.CLIENT_ID,
+      discoveryDocs: GOOGLE_DISCOVERY_DOCS,
+      scope: GOOGLE_SCOPES
+    });
+  }
+
+  private _initClientLibraryIfNotDone() {
+    return new Promise((resolve, reject) => {
+      this._loadJs(() => {
+        this._gapi = window['gapi'];
+        this._gapi.load('client:auth2', () => {
+          this.initClient()
+            .then(() => {
+              const GoogleAuth = this._gapi.auth2.getAuthInstance();
+              // used to determine and handle if user is already signed in
+              const user = GoogleAuth.currentUser.get();
+              resolve(user);
+            });
+        });
+      });
+    });
+  }
+
+  private _saveToken(res) {
+    /*jshint camelcase: false */
+    this._data.accessToken = res.Zi.access_token;
+    this._data.expiresAt = res.Zi.expires_at;
+    /*jshint camelcase: true */
+  }
+
+  private _handleUnAuthenticated(err) {
     console.error(err);
     this.logout();
 
@@ -366,7 +326,7 @@ export class GoogleApiService {
 //     });
   }
 
-  handleError(err) {
+  private _handleError(err) {
     let errStr = '';
 
     if (typeof err === 'string') {
@@ -382,36 +342,36 @@ export class GoogleApiService {
     console.error(err);
 
     if (err && err.status === 401) {
-      this.handleUnAuthenticated(err);
+      this._handleUnAuthenticated(err);
     } else {
       console.error(err);
       this._snackIt('ERROR', 'GoogleApi Error' + errStr);
     }
   }
 
-  requestWrapper(request) {
-    const defer = mapQDefer();
-    request.then((res) => {
-      if (res && res.status < 300) {
-        defer.resolve(res);
-      } else if (!res) {
-        this.handleError('No response body');
-        defer.reject(res);
-      } else if (res && res.status >= 300) {
-        this.handleError(res);
-      } else if (res && res.status === 401) {
-        this.handleUnAuthenticated(res);
-        defer.reject(res);
-      } else {
-        // in dubio pro reo
-        defer.resolve(res);
-      }
+  private _requestWrapper(request) {
+    return new Promise((resolve, reject) => {
+      request.then((res) => {
+        if (res && res.status < 300) {
+          resolve(res);
+        } else if (!res) {
+          this._handleError('No response body');
+          reject(res);
+        } else if (res && res.status >= 300) {
+          this._handleError(res);
+        } else if (res && res.status === 401) {
+          this._handleUnAuthenticated(res);
+          reject(res);
+        } else {
+          // in dubio pro reo
+          resolve(res);
+        }
 
-    }).catch((err) => {
-      this.handleError(err);
-      defer.reject(err);
+      }).catch((err) => {
+        this._handleError(err);
+        reject(err);
+      });
     });
-    return defer.promise;
   }
 
   private _snackIt(snackType, msg) {
@@ -420,5 +380,28 @@ export class GoogleApiService {
 
   private _mapHttp(params: any): Promise<any> {
     return this._http.request(params).toPromise();
+  }
+
+
+  private _loadJs(cb) {
+    const url = 'https://apis.google.com/js/api.js';
+    const that = this;
+    const script = document.createElement('script');
+    script.setAttribute('src', url);
+    script.setAttribute('type', 'text/javascript');
+
+    this._isScriptLoaded = false;
+    const loadFunction = () => {
+      if (that._isScriptLoaded) {
+        return;
+      }
+      that._isScriptLoaded = true;
+      if (cb) {
+        cb();
+      }
+    };
+    script.onload = loadFunction.bind(that);
+    // script['onreadystatechange'] = loadFunction.bind(that);
+    document.getElementsByTagName('head')[0].appendChild(script);
   }
 }
