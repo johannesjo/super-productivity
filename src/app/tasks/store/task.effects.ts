@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Actions, Effect, ofType } from '@ngrx/effects';
-import { TaskActionTypes } from './task.actions';
+import { DeleteTask, TaskActions, TaskActionTypes } from './task.actions';
 import { select, Store } from '@ngrx/store';
 import { map, tap, withLatestFrom } from 'rxjs/operators';
 import { PersistenceService } from '../../core/persistence/persistence.service';
@@ -38,11 +38,14 @@ export class TaskEffects {
       withLatestFrom(
         this._store$.pipe(select(selectTaskFeatureState)),
       ),
-      map(([action, state]) => new SnackOpen({
-        message: `Deleted task "${state.stateBeforeDeletion.entities[action.payload.id].title}"`,
-        actionStr: 'Undo',
-        actionId: TaskActionTypes.UndoDeleteTask
-      }))
+      map(([action_, state]) => {
+        const action = action_ as DeleteTask;
+        return new SnackOpen({
+          message: `Deleted task "${state.stateBeforeDeletion.entities[action.payload.id].title}"`,
+          actionStr: 'Undo',
+          actionId: TaskActionTypes.UndoDeleteTask
+        });
+      })
     );
 
   constructor(private _actions$: Actions,
