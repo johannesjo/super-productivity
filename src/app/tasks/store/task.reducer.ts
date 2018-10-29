@@ -168,18 +168,26 @@ export function taskReducer(
     }
 
     case TaskActionTypes.SetCurrentTask: {
-      return (action.payload)
-        ? {
+      if (action.payload) {
+        const subTaskIds = state.entities[action.payload].subTaskIds;
+        let taskToStartId = action.payload;
+        if (subTaskIds && subTaskIds.length) {
+          const undoneTasks = subTaskIds.map(id => state.entities[id]).filter(task => !task.isDone);
+          taskToStartId = undoneTasks.length ? undoneTasks[0].id : subTaskIds[0];
+        }
+        return {
           ...(taskAdapter.updateOne({
-            id: action.payload,
+            id: taskToStartId,
             changes: {isDone: false}
           }, state)),
-          currentTaskId: action.payload,
-        }
-        : {
+          currentTaskId: taskToStartId,
+        };
+      } else {
+        return {
           ...state,
           currentTaskId: action.payload,
         };
+      }
     }
 
     case TaskActionTypes.UnsetCurrentTask: {
