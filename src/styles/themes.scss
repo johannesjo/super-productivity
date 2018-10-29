@@ -8,6 +8,7 @@
   .bg-standard {
     background: $standardBackground;
   }
+
   .bg-primary {
     background-color: mat-color($primary);
   }
@@ -15,7 +16,9 @@
   .bg-900 {
     background-color: mat-color($primary, 800);
   }
-
+  .color-primary-after:after {
+    color: mat-color($primary);
+  }
   .color-primary {
     color: mat-color($primary);
   }
