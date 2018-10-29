@@ -2,6 +2,8 @@ import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { TaskService } from '../../tasks/task.service';
 import { getTodayStr } from '../../tasks/util/get-today-str';
 import { TaskWithSubTasks } from '../../tasks/task.model';
+import { Router } from '@angular/router';
+import { IS_ELECTRON } from '../../app.constants';
 
 // TODO MOVE TO DEDICATED FILE
 const IPC_EVENT_SHUTDOWN = 'SHUTDOWN';
@@ -37,7 +39,10 @@ export class DailySummaryComponent implements OnInit {
   // use mysql date as it is sortable
   workingToday$ = this._taskService.workingToday$;
 
-  constructor(private readonly _taskService: TaskService) {
+  constructor(
+    private readonly _taskService: TaskService,
+    private readonly _router: Router
+  ) {
   }
 
   ngOnInit() {
@@ -68,38 +73,37 @@ export class DailySummaryComponent implements OnInit {
     // Tasks.finishDay(clearDoneTasks, moveUnfinishedToBacklog);
     const idsToMove = this._doneTasks.map((task) => task.id);
     this._taskService.moveToArchive(idsToMove);
-    // save everything
-
-    // if (IS_ELECTRON) {
-    // NOTE: syncing for electron is done in a before unload action
-    //   $mdDialog.show(
-    //     $mdDialog.confirm()
-    //       .clickOutsideToClose(false)
-    //       .title('All Done! Shutting down now..')
-    //       .textContent('You work is done. Time to go home!')
-    //       .ariaLabel('Alert Shutdown')
-    //       .ok('Aye aye! Shutdown!')
-    //       .cancel('No, just clear the tasks')
-    //   )
-    //     .then(() => {
-    //         initSuccessAnimation(() => {
-    //           window.ipcRenderer.send(IPC_EVENT_SHUTDOWN);
-    //         });
-    //       },
-    //       () => {
-    //         initSuccessAnimation(() => {
-    //           $state.go('daily-planner');
-    //         });
-    //       });
-    // } else {
-    //   if (GoogleDriveSync.config && GoogleDriveSync.config.isAutoSyncToRemote) {
-    //     SimpleToast('CUSTOM', `Syncing Data to Google Drive.`, 'file_upload');
-    //     GoogleDriveSync.saveTo();
-    //   }
-    this._initSuccessAnimation(() => {
-      // $state.go('daily-planner');
-    });
-    // }
+    if (IS_ELECTRON) {
+      // NOTE: syncing for electron is done in a before unload action
+      //   $mdDialog.show(
+      //     $mdDialog.confirm()
+      //       .clickOutsideToClose(false)
+      //       .title('All Done! Shutting down now..')
+      //       .textContent('You work is done. Time to go home!')
+      //       .ariaLabel('Alert Shutdown')
+      //       .ok('Aye aye! Shutdown!')
+      //       .cancel('No, just clear the tasks')
+      //   )
+      //     .then(() => {
+      //         initSuccessAnimation(() => {
+      //           window.ipcRenderer.send(IPC_EVENT_SHUTDOWN);
+      //         });
+      //       },
+      //       () => {
+      //         initSuccessAnimation(() => {
+      //           $state.go('daily-planner');
+      //         });
+      //       });
+    } else {
+      //   if (GoogleDriveSync.config && GoogleDriveSync.config.isAutoSyncToRemote) {
+      //     SimpleToast('CUSTOM', `Syncing Data to Google Drive.`, 'file_upload');
+      //     GoogleDriveSync.saveTo();
+      //   }
+      this._initSuccessAnimation(() => {
+        // $state.go('daily-planner');
+        this._router.navigate(['/daily-planner']);
+      });
+    }
   }
 
 
