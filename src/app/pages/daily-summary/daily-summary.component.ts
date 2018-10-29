@@ -4,6 +4,8 @@ import { getTodayStr } from '../../tasks/util/get-today-str';
 import { TaskWithSubTasks } from '../../tasks/task.model';
 import { Router } from '@angular/router';
 import { IS_ELECTRON } from '../../app.constants';
+import { DialogGoogleExportTimeComponent } from '../../core/google/dialog-google-export-time/dialog-google-export-time.component';
+import { MatDialog } from '@angular/material';
 
 // TODO MOVE TO DEDICATED FILE
 const IPC_EVENT_SHUTDOWN = 'SHUTDOWN';
@@ -41,7 +43,8 @@ export class DailySummaryComponent implements OnInit {
 
   constructor(
     private readonly _taskService: TaskService,
-    private readonly _router: Router
+    private readonly _router: Router,
+    private readonly _matDialog: MatDialog
   ) {
   }
 
@@ -58,15 +61,11 @@ export class DailySummaryComponent implements OnInit {
     //   finishDayFn: finishDay,
     //   tasks: Tasks.getToday()
     // }, true);
-  };
+  }
 
   showTimeSheetExportModal() {
-    // Dialogs('TIME_SHEET_EXPORT', {
-    //   settings: $rootScope.r.uiHelper.dailyTaskExportSettings,
-    //   finishDayFn: finishDay,
-    //   tasks: Tasks.getToday()
-    // }, true);
-  };
+    this._matDialog.open(DialogGoogleExportTimeComponent);
+  }
 
   finishDay() {
     // $rootScope.r.tomorrowsNote = tomorrowsNote;

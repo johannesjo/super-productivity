@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { GoogleSyncCfgComponent } from './google-sync-cfg/google-sync-cfg.component';
 import { FormsModule } from '@angular/forms';
 import { UiModule } from '../../ui/ui.module';
+import { DialogGoogleExportTimeComponent } from './dialog-google-export-time/dialog-google-export-time.component';
 
 @NgModule({
   imports: [
@@ -10,7 +11,9 @@ import { UiModule } from '../../ui/ui.module';
     FormsModule,
     UiModule,
   ],
-  declarations: [GoogleSyncCfgComponent],
-  exports: [GoogleSyncCfgComponent]
+  declarations: [GoogleSyncCfgComponent, DialogGoogleExportTimeComponent],
+  exports: [GoogleSyncCfgComponent],
+  entryComponents: [DialogGoogleExportTimeComponent]
 })
-export class GoogleModule { }
+export class GoogleModule {
+}

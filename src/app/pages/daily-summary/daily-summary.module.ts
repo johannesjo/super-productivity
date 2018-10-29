@@ -4,6 +4,7 @@ import { DailySummaryComponent } from './daily-summary.component';
 import { FormsModule } from '@angular/forms';
 import { UiModule } from '../../ui/ui.module';
 import { RouterModule } from '@angular/router';
+import { GoogleModule } from '../../core/google/google.module';
 
 @NgModule({
   imports: [
@@ -11,6 +12,7 @@ import { RouterModule } from '@angular/router';
     FormsModule,
     UiModule,
     RouterModule,
+    GoogleModule,
   ],
   declarations: [DailySummaryComponent]
 })
