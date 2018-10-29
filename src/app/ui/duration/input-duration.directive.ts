@@ -114,7 +114,7 @@ export class InputDurationDirective<D> implements ControlValueAccessor,
     if (!value) {
       value = '';
     }
-    const toStr = this._msToString.transform(value);
+    const toStr = this._msToString.transform(value, false, true);
     this._renderer.setProperty(this._elementRef.nativeElement, 'value', toStr);
   }
 
@@ -122,7 +122,7 @@ export class InputDurationDirective<D> implements ControlValueAccessor,
   // ------------------
   _onInput(value: string) {
     const msVal = this._stringToMs.transform(value);
-    this._value = this._msToString.transform(msVal);
+    this._value = this._msToString.transform(msVal, false, true);
     this._onChangeCallback(msVal);
   }
 }

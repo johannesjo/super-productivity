@@ -5,6 +5,7 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { FormsModule } from '@angular/forms';
 import { UiModule } from '../../ui/ui.module';
 import { TasksModule } from '../../tasks/tasks.module';
+import { RouterModule } from '@angular/router';
 
 @NgModule({
   imports: [
@@ -12,6 +13,7 @@ import { TasksModule } from '../../tasks/tasks.module';
     UiModule,
     FormsModule,
     ReactiveFormsModule,
+    RouterModule,
     TasksModule,
   ],
   declarations: [WorkViewPageComponent],

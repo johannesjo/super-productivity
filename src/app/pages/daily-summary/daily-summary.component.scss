@@ -1,9 +1,37 @@
 @import '../../../variables';
 
 .page-wrapper {
-  display: flex;
+  //display: flex;
+  //align-items: center;
+  //flex-direction: column;
+  text-align: center;
+}
+
+.done-headline {
+  margin-top: $s*2;
+}
+
+.summary-point {
+  vertical-align: center;
+  display: inline-block;
   align-items: center;
-  flex-direction: column;
+  text-align: center;
+  margin: $s;
+}
+
+.summary-text {
+}
+
+.summary-val {
+  font-weight: bold;
+}
+
+::ng-deep collapsible {
+  text-align: center;
+}
+
+::ng-deep .collapsible-title {
+  font-size: 18px;
 }
 
 textarea {
@@ -13,10 +41,11 @@ textarea {
   border-right-width: 1px !important;
 }
 
-
-
 .finish-day-opts {
   margin-top: 10px;
+  mat-checkbox {
+    display: block;
+  }
 }
 
 .daily-summary-summary {
@@ -83,8 +112,9 @@ textarea {
   margin-top: 30px;
 
   button {
-    ng-md-icon + ng-md-icon {
-      margin-left: -7px;
+    margin: 0 $s/2;
+    mat-icon + mat-icon {
+      //margin-left: -$s;
     }
   }
 }

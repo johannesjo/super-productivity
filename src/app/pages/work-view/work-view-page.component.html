@@ -43,6 +43,16 @@
              [focusIdList]="focusTaskIdList$|async"
              [filterArgs]="{'isDone':false}"></task-list>
 
+  <div class="button-controls">
+    <button routerLink="/daily-summary"
+            mat-raised-button=""
+            color="primary">
+      <mat-icon>done_all</mat-icon>
+      Finish working
+    </button>
+
+  </div>
+
   <h2 class="mat-h2">Completed Tasks</h2>
   <task-list [tasks]="doneTasks$|async"
              [focusIdList]="focusTaskIdList$|async"

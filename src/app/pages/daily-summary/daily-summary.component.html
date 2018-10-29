@@ -3,26 +3,36 @@
     <button mat-raised-button=""
             color="accent"
             aria-label="Work View"
-            ui-sref="work-view">
+            routerLink="/work-view">
       <mat-icon>chevron_left</mat-icon>
       Wait I forgot something!
       <mat-icon>playlist_play</mat-icon>
     </button>
   </div>
 
-  <h2>Done for today! Take a moment to celebrate!</h2>
+  <h1 class="done-headline mat-headline mat-h1">Done for today!<br> Take a moment to <i>celebrate!</i></h1>
   <div class="daily-summary-summary">
-    <p>
+    <div class="summary-point">
       <mat-icon>check</mat-icon>
-      Tasks completed:
-      <strong><span [innerHtml]="doneTasks.length"></span>/<span [innerHtml]="tasks.length"></span></strong>
-    </p>
-    <p>
+      <div class="summary-text">Tasks completed:
+        <div class="summary-val"><span [innerHtml]="doneTasks.length"></span>/<span [innerHtml]="tasks.length"></span>
+        </div>
+      </div>
+    </div>
+    <div class="summary-point">
       <mat-icon>timer</mat-icon>
-      Total time spent on today's task: <strong [innerHtml]="totalTimeSpentTasks|msToString"></strong></p>
-    <p>
+      <div class="summary-text">Total time spent on today's task:
+        <div class="summary-val"
+             [innerHtml]="totalTimeSpentTasks|msToString"></div>
+      </div>
+    </div>
+    <div class="summary-point">
       <mat-icon>timer</mat-icon>
-      Total time spent today: <strong [innerHtml]="totalTimeSpentToday|msToString"></strong></p>
+      <div class="summary-text">Total time spent today:
+        <div class="summary-val"
+             [innerHtml]="totalTimeSpentToday|msToString"></div>
+      </div>
+    </div>
   </div>
 
 
@@ -88,7 +98,7 @@
 
 
   <section class="daily-summary-actions">
-    <div>
+    <div class="bottom-buttons">
       <button mat-raised-button=""
               color="primary"
               (click)="showExportModal()">
@@ -109,7 +119,7 @@
               [disabled]="cfg.isBlockFinishDayUntilTimeTimeTracked && !currentSession.isTimeSheetExported"
               (click)="finishDay()">
         <mat-icon>wb_sunny</mat-icon>
-        <span>Save and go home</span>
+        Save and go home
       </button>
     </div>
     <div class="finish-day-opts">
