@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
-import { IS_ELECTRON } from '../../app.constants';
+import { TaskService } from '../../tasks/task.service';
+import { getTodayStr } from '../../tasks/util/get-today-str';
 
 // TODO MOVE TO DEDICATED FILE
 const IPC_EVENT_SHUTDOWN = 'SHUTDOWN';
@@ -14,25 +15,25 @@ const SUCCESS_ANIMATION_MAX_DURATION = 10000;
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DailySummaryComponent implements OnInit {
-  public IS;
-  public ELECTRON = IS_ELECTRON;
   public commitLog;
   public cfg: any = {};
-  public doneTasks = [];
-  public tasks = [];
+  public doneTasks$ = this._taskService.doneTasks$;
+  public todaysTasks$ = this._taskService.todaysTasks$;
+  public todayStr = getTodayStr();
+  public tomorrowsNote: string;
 
   private successAnimationTimeout;
   private showSuccessAnimation;
   private successAnimationMaxTimeout;
 
   // calc total time spent on todays tasks
-  totalTimeSpentTasks = null;
+  totalTimeSpentTasks$ = this._taskService.totalTimeWorkedOnTodaysTasks$;
 
   // calc time spent on todays tasks today
   // use mysql date as it is sortable
-  totalTimeSpentToday = null;
+  workingToday$ = this._taskService.workingToday$;
 
-  constructor() {
+  constructor(private readonly _taskService: TaskService) {
   }
 
   ngOnInit() {

@@ -44,6 +44,8 @@ const mapTasksFromIds = (tasks__, ids) => {
   return ids.map(id => tasks__.find(task => task.id === id));
 };
 
+const mapTotalTimeWorked = (tasks) => tasks.reduce((acc, task) => acc + task.timeSpent, 0);
+
 // SELECTORS
 // ---------
 const {selectIds, selectEntities, selectAll, selectTotal} = taskAdapter.getSelectors();
@@ -72,6 +74,7 @@ export const selectTodaysDoneTasksWithSubTasks = createSelector(
 
 export const selectEstimateRemainingForToday = createSelector(selectTodaysTasksWithSubTasks, mapEstimateRemaining);
 export const selectEstimateRemainingForBacklog = createSelector(selectBacklogTasksWithSubTasks, mapEstimateRemaining);
+export const selectTotalTimeWorkedOnTodaysTasks = createSelector(selectTodaysTasksWithSubTasks, mapTotalTimeWorked);
 
 export const selectFocusTaskId = createSelector(selectTaskFeatureState, state => state.focusTaskId);
 export const selectFocusIdsForWorkView = createSelector(

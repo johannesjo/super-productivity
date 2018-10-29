@@ -15,7 +15,7 @@
     <div class="summary-point">
       <mat-icon>check</mat-icon>
       <div class="summary-text">Tasks completed:
-        <div class="summary-val"><span [innerHtml]="doneTasks.length"></span>/<span [innerHtml]="tasks.length"></span>
+        <div class="summary-val"><span [innerHtml]="(doneTasks$|async).length"></span>/<span [innerHtml]="(todaysTasks$|async).length"></span>
         </div>
       </div>
     </div>
@@ -23,14 +23,14 @@
       <mat-icon>timer</mat-icon>
       <div class="summary-text">Total time spent on today's task:
         <div class="summary-val"
-             [innerHtml]="totalTimeSpentTasks|msToString"></div>
+             [innerHtml]="totalTimeSpentTasks$|async|msToString"></div>
       </div>
     </div>
     <div class="summary-point">
       <mat-icon>timer</mat-icon>
       <div class="summary-text">Total time spent today:
         <div class="summary-val"
-             [innerHtml]="totalTimeSpentToday|msToString"></div>
+             [innerHtml]="workingToday$|async|msToString"></div>
       </div>
     </div>
   </div>
@@ -49,7 +49,7 @@
         <th></th>
       </tr>
 
-      <tr *ngFor="let task of tasks"
+      <tr *ngFor="let task of todaysTasks$|async"
           ng-class="{'is-done': task.isDone}">
         <td [innerHtml]="task.title"></td>
         <td>
@@ -87,8 +87,7 @@
     <p>This is meant to be a takeaway to be even more productive and happy tomorrow. E.g.: What did you learn today? What do you want to do better/smarter tomorrow? What do you want to achieve and why?</p>
     <p>Think a second and reflect on the day.</p>
 
-    <mat-form-field class="md-block"
-                    flex-gt-sm>
+    <mat-form-field class="md-block">
       <label>Your personal tomorrow's note</label>
       <textarea [(ngModel)]="tomorrowsNote"
                 matInput=""

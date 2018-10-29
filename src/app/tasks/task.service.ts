@@ -6,9 +6,7 @@ import { select, Store } from '@ngrx/store';
 import { AddTask, TaskActionTypes } from './store/task.actions';
 import shortid from 'shortid';
 import { initialTaskState, } from './store/task.reducer';
-import { ProjectService } from '../project/project.service';
 import { PersistenceService } from '../core/persistence/persistence.service';
-import { IssueService } from '../issue/issue.service';
 import { IssueProviderKey } from '../issue/issue';
 import { TimeTrackingService } from '../core/time-tracking/time-tracking.service';
 import { Tick } from '../core/time-tracking/time-tracking';
@@ -24,7 +22,8 @@ import {
   selectMissingIssueIds,
   selectTodaysDoneTasksWithSubTasks,
   selectTodaysTasksWithSubTasks,
-  selectTodaysUnDoneTasksWithSubTasks
+  selectTodaysUnDoneTasksWithSubTasks,
+  selectTotalTimeWorkedOnTodaysTasks
 } from './store/task.selectors';
 
 
@@ -47,16 +46,8 @@ export class TaskService {
   // META FIELDS
   // -----------
   estimateRemainingToday$: Observable<any> = this._store.pipe(select(selectEstimateRemainingForToday), distinctUntilChanged());
-  // throttleTime(50)
   estimateRemainingBacklog$: Observable<any> = this._store.pipe(select(selectEstimateRemainingForBacklog), distinctUntilChanged());
-  // throttleTime(50)
-
-  missingIssuesForTasks$ = this._store.pipe(
-    // wait for issue model to be loaded
-    debounceTime(1000),
-    select(selectMissingIssueIds),
-    distinctUntilChanged()
-  );
+  totalTimeWorkedOnTodaysTasks$: Observable<any> = this._store.pipe(select(selectTotalTimeWorkedOnTodaysTasks), distinctUntilChanged());
 
   // TODO could be more efficient than using combine latest
   workingToday$: Observable<any> = combineLatest(this.todaysTasks$, this._timeTrackingService.tick$).pipe(
@@ -68,6 +59,12 @@ export class TaskService {
       }, 0
     )),
     // throttleTime(50)
+  );
+  missingIssuesForTasks$ = this._store.pipe(
+    // wait for issue model to be loaded
+    debounceTime(1000),
+    select(selectMissingIssueIds),
+    distinctUntilChanged()
   );
 
 
