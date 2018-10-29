@@ -1,11 +1,13 @@
 import { Injectable } from '@angular/core';
-import { LS_GLOBAL_CFG, LS_ISSUE_STATE, LS_PROJECT_META_LIST, LS_PROJECT_PREFIX, LS_TASK_STATE } from './ls-keys.const';
+import { LS_GLOBAL_CFG, LS_ISSUE_STATE, LS_PROJECT_META_LIST, LS_PROJECT_PREFIX, LS_TASK_ARCHIVE, LS_TASK_STATE } from './ls-keys.const';
 import { GlobalConfig } from '../config/config.model';
 import { loadFromLs, saveToLs } from './local-storage';
 import { IssueProviderKey } from '../../issue/issue';
 import { ProjectState } from '../../project/store/project.reducer';
 import { TaskState } from '../../tasks/store/task.reducer';
 import { JiraIssueState } from '../../issue/jira/jira-issue/store/jira-issue.reducer';
+import { EntityState } from '@ngrx/entity';
+import { Task } from '../../tasks/task.model';
 
 @Injectable({
   providedIn: 'root'
@@ -34,6 +36,26 @@ export class PersistenceService {
 
   loadTasksForProject(projectId): TaskState {
     return loadFromLs(PersistenceService._makeProjectKey(projectId, LS_TASK_STATE));
+  }
+
+  saveToTaskArchiveForProject(projectId, tasksToArchive: EntityState<Task>) {
+    const lsKey = PersistenceService._makeProjectKey(projectId, LS_TASK_ARCHIVE);
+    const currentArchive: EntityState<Task> = loadFromLs(lsKey);
+    if (currentArchive) {
+      const mergedEntities = {
+        ids: [
+          ...tasksToArchive.ids,
+          ...currentArchive.ids
+        ],
+        entities: {
+          ...currentArchive.entities,
+          ...tasksToArchive.entities
+        }
+      };
+      saveToLs(lsKey, mergedEntities);
+    } else {
+      saveToLs(lsKey, tasksToArchive);
+    }
   }
 
 

@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { TaskService } from '../../tasks/task.service';
 import { getTodayStr } from '../../tasks/util/get-today-str';
+import { TaskWithSubTasks } from '../../tasks/task.model';
 
 // TODO MOVE TO DEDICATED FILE
 const IPC_EVENT_SHUTDOWN = 'SHUTDOWN';
@@ -15,16 +16,19 @@ const SUCCESS_ANIMATION_MAX_DURATION = 10000;
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DailySummaryComponent implements OnInit {
-  public commitLog;
   public cfg: any = {};
   public doneTasks$ = this._taskService.doneTasks$;
   public todaysTasks$ = this._taskService.todaysTasks$;
   public todayStr = getTodayStr();
   public tomorrowsNote: string;
+  public clearDoneTasks: boolean;
+  public moveUnfinishedToBacklog: boolean;
+  public commitLog;
 
   private successAnimationTimeout;
   private showSuccessAnimation;
   private successAnimationMaxTimeout;
+  private _doneTasks: TaskWithSubTasks[];
 
   // calc total time spent on todays tasks
   totalTimeSpentTasks$ = this._taskService.totalTimeWorkedOnTodaysTasks$;
@@ -37,6 +41,9 @@ export class DailySummaryComponent implements OnInit {
   }
 
   ngOnInit() {
+    this.doneTasks$.subscribe((val) => {
+      this._doneTasks = val;
+    });
   }
 
 
@@ -59,6 +66,8 @@ export class DailySummaryComponent implements OnInit {
   finishDay() {
     // $rootScope.r.tomorrowsNote = tomorrowsNote;
     // Tasks.finishDay(clearDoneTasks, moveUnfinishedToBacklog);
+    const idsToMove = this._doneTasks.map((task) => task.id);
+    this._taskService.moveToArchive(idsToMove);
     // save everything
 
     // if (IS_ELECTRON) {
@@ -87,14 +96,14 @@ export class DailySummaryComponent implements OnInit {
     //     SimpleToast('CUSTOM', `Syncing Data to Google Drive.`, 'file_upload');
     //     GoogleDriveSync.saveTo();
     //   }
-    //   initSuccessAnimation(() => {
-    //     $state.go('daily-planner');
-    //   });
+    this._initSuccessAnimation(() => {
+      // $state.go('daily-planner');
+    });
     // }
   }
 
 
-  private initSuccessAnimation(cb) {
+  private _initSuccessAnimation(cb) {
     this.showSuccessAnimation = true;
     this.successAnimationTimeout = window.setTimeout(() => {
       if (cb) {

@@ -130,12 +130,12 @@ textarea {
   transform: translate(-50%, -50%);
   backface-visibility: hidden;
 
-  ng-md-icon {
+  mat-icon {
     width: $this-ico-size;
     height: $this-ico-size;
     display: block;
     font-size: 30px;
-    fill: $yellow;
+    color: $yellow;
     transform-origin: center center;
     animation: success-animation-sun #{$this-ani-style};
     backface-visibility: hidden;

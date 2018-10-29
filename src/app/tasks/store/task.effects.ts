@@ -7,11 +7,25 @@ import { PersistenceService } from '../../core/persistence/persistence.service';
 import { selectTaskFeatureState } from './task.selectors';
 import { selectCurrentProjectId } from '../../project/store/project.reducer';
 import { SnackOpen } from '../../core/snack/store/snack.actions';
+import { TaskState } from './task.reducer';
 
 // TODO send message to electron when current task changes here
 
 @Injectable()
 export class TaskEffects {
+  @Effect({dispatch: false}) moveToArchive$: any = this._actions$
+    .pipe(
+      ofType(
+        TaskActionTypes.MoveToArchive,
+      ),
+      withLatestFrom(
+        this._store$.pipe(select(selectCurrentProjectId)),
+        this._store$.pipe(select(selectTaskFeatureState)),
+      ),
+      tap(this._moveToArchive.bind(this))
+    );
+
+
   @Effect({dispatch: false}) updateTask$: any = this._actions$
     .pipe(
       ofType(
@@ -22,6 +36,7 @@ export class TaskEffects {
         TaskActionTypes.SetCurrentTask,
         TaskActionTypes.UnsetCurrentTask,
         TaskActionTypes.UpdateTask,
+        TaskActionTypes.MoveToArchive,
       ),
       withLatestFrom(
         this._store$.pipe(select(selectCurrentProjectId)),
@@ -41,7 +56,7 @@ export class TaskEffects {
       map(([action_, state]) => {
         const action = action_ as DeleteTask;
         return new SnackOpen({
-          message: `Deleted task "${state.stateBeforeDeletion.entities[action.payload.id].title}"`,
+          message: `Deleted task "${state.stateBefore.entities[action.payload.id].title}"`,
           actionStr: 'Undo',
           actionId: TaskActionTypes.UndoDeleteTask
         });
@@ -59,6 +74,26 @@ export class TaskEffects {
     } else {
       throw new Error('No current project id');
     }
+  }
+
+  private _moveToArchive([action, currentProjectId, taskState]) {
+    const mainTaskIds = action.payload.ids;
+    const stateBefore: TaskState = taskState.stateBefore;
+    const archive = {
+      entities: {},
+      ids: []
+    };
+    mainTaskIds.forEach((id) => {
+      const task = stateBefore.entities[id];
+      archive.entities[id] = task;
+      archive.ids.push(id);
+      task.subTaskIds.forEach((subId) => {
+        archive.entities[subId] = stateBefore.entities[subId];
+        archive.ids.push(subId);
+      });
+    });
+
+    this._persistenceService.saveToTaskArchiveForProject(currentProjectId, archive);
   }
 }
 

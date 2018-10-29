@@ -1,5 +1,5 @@
 import { createEntityAdapter, EntityAdapter, EntityState } from '@ngrx/entity';
-import { TaskActions, TaskActionTypes } from './task.actions';
+import { DeleteTask, TaskActions, TaskActionTypes } from './task.actions';
 import { Task, TimeSpentOnDay } from '../task.model';
 import { calcTotalTimeSpent } from '../util/calc-total-time-spent';
 import { tasks } from 'googleapis/build/src/apis/tasks';
@@ -16,7 +16,7 @@ export interface TaskState extends EntityState<Task> {
   // NOTE: but it is not needed currently
   todaysTaskIds: string[];
   backlogTaskIds: string[];
-  stateBeforeDeletion: TaskState;
+  stateBefore: TaskState;
 
   // TODO though this not so much maybe
   // todayDoneTasks: string[];
@@ -31,7 +31,7 @@ export const initialTaskState: TaskState = taskAdapter.getInitialState({
   todaysTaskIds: [],
   backlogTaskIds: [],
   focusTaskId: null,
-  stateBeforeDeletion: null
+  stateBefore: null
 });
 
 // HELPER
@@ -152,6 +152,46 @@ const updateTimeEstimateForTask = (
     : stateAfterUpdate;
 };
 
+const deleteTask = (state: TaskState,
+                    action: DeleteTask | { payload: { id: string } }): TaskState => {
+  let stateCopy: TaskState = taskAdapter.removeOne(action.payload.id, state);
+
+  const taskToDelete: Task = state.entities[action.payload.id];
+  let currentTaskId = (state.currentTaskId === action.payload.id) ? null : state.currentTaskId;
+
+  // PARENT TASK side effects
+  // also delete from parent task if any
+  if (taskToDelete.parentId) {
+    stateCopy = taskAdapter.updateOne({
+      id: taskToDelete.parentId,
+      changes: {
+        subTaskIds: stateCopy.entities[taskToDelete.parentId].subTaskIds
+          .filter(filterOutId(action.payload.id)),
+      }
+    }, stateCopy);
+    // also update time spent for parent
+    stateCopy = reCalcTimeSpentForParentIfParent(taskToDelete.parentId, stateCopy);
+    stateCopy = reCalcTimeEstimateForParentIfParent(taskToDelete.parentId, stateCopy);
+  }
+
+  // SUB TASK side effects
+  // also delete all sub tasks if any
+  if (taskToDelete.subTaskIds) {
+    stateCopy = taskAdapter.removeMany(taskToDelete.subTaskIds, stateCopy);
+    // unset current if one of them is the current task
+    currentTaskId = taskToDelete.subTaskIds.includes(currentTaskId) ? null : currentTaskId;
+  }
+
+  return {
+    ...stateCopy,
+    // finally delete from backlog or todays tasks
+    backlogTaskIds: state.backlogTaskIds.filter(filterOutId(action.payload.id)),
+    todaysTaskIds: state.todaysTaskIds.filter(filterOutId(action.payload.id)),
+    currentTaskId,
+    stateBefore: {...state, stateBefore: null}
+  };
+};
+
 
 // TODO unit test the shit out of this once the model is settled
 export function taskReducer(
@@ -220,46 +260,11 @@ export function taskReducer(
 
     // TODO also delete related issue :(
     case TaskActionTypes.DeleteTask: {
-      let stateCopy: TaskState = taskAdapter.removeOne(action.payload.id, state);
-
-      const taskToDelete: Task = state.entities[action.payload.id];
-      let currentTaskId = (state.currentTaskId === action.payload.id) ? null : state.currentTaskId;
-
-      // PARENT TASK side effects
-      // also delete from parent task if any
-      if (taskToDelete.parentId) {
-        stateCopy = taskAdapter.updateOne({
-          id: taskToDelete.parentId,
-          changes: {
-            subTaskIds: stateCopy.entities[taskToDelete.parentId].subTaskIds
-              .filter(filterOutId(action.payload.id)),
-          }
-        }, stateCopy);
-        // also update time spent for parent
-        stateCopy = reCalcTimeSpentForParentIfParent(taskToDelete.parentId, stateCopy);
-        stateCopy = reCalcTimeEstimateForParentIfParent(taskToDelete.parentId, stateCopy);
-      }
-
-      // SUB TASK side effects
-      // also delete all sub tasks if any
-      if (taskToDelete.subTaskIds) {
-        stateCopy = taskAdapter.removeMany(taskToDelete.subTaskIds, stateCopy);
-        // unset current if one of them is the current task
-        currentTaskId = taskToDelete.subTaskIds.includes(currentTaskId) ? null : currentTaskId;
-      }
-
-      return {
-        ...stateCopy,
-        // finally delete from backlog or todays tasks
-        backlogTaskIds: state.backlogTaskIds.filter(filterOutId(action.payload.id)),
-        todaysTaskIds: state.todaysTaskIds.filter(filterOutId(action.payload.id)),
-        currentTaskId,
-        stateBeforeDeletion: state
-      };
+      return deleteTask(state, action);
     }
 
     case TaskActionTypes.UndoDeleteTask: {
-      return state.stateBeforeDeletion || state;
+      return state.stateBefore || state;
     }
 
     case TaskActionTypes.Move: {
@@ -380,9 +385,16 @@ export function taskReducer(
     }
 
     case TaskActionTypes.MoveToArchive: {
-      return state;
+      const stateBeforeMovingToArchive = {...state, stateBefore: null};
+      let copyState = state;
+      action.payload.ids.forEach((id) => {
+        copyState = deleteTask(copyState, {payload: {id}});
+      });
+      return {
+        ...({...copyState, stateBefore: null}),
+        stateBefore: stateBeforeMovingToArchive
+      };
     }
-
 
     default: {
       return state;

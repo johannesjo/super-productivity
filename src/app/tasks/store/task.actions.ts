@@ -140,7 +140,7 @@ export class MoveToToday implements Action {
 export class MoveToArchive implements Action {
   readonly type = TaskActionTypes.MoveToArchive;
 
-  constructor(public payload: { id: string }) {
+  constructor(public payload: { ids: string[] }) {
   }
 }
 

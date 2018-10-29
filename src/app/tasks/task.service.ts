@@ -186,9 +186,13 @@ export class TaskService {
     this._storeDispatch(TaskActionTypes.MoveToBacklog, {id});
   }
 
-  moveToArchive(id) {
-    this._storeDispatch(TaskActionTypes.MoveToArchive, {id});
+  moveToArchive(ids: string | string[]) {
+    if (typeof ids === 'string') {
+      ids = [ids];
+    }
+    this._storeDispatch(TaskActionTypes.MoveToArchive, {ids});
   }
+
 
   // HELPER
   // ------
