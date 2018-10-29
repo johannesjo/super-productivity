@@ -15,7 +15,7 @@ const SUCCESS_ANIMATION_MAX_DURATION = 10000;
 })
 export class DailySummaryComponent implements OnInit {
   public IS;
-  ELECTRON = IS_ELECTRON;
+  public ELECTRON = IS_ELECTRON;
   public commitLog;
   public cfg: any = {};
   public doneTasks = [];
@@ -24,7 +24,6 @@ export class DailySummaryComponent implements OnInit {
   private successAnimationTimeout;
   private showSuccessAnimation;
   private successAnimationMaxTimeout;
-  doneTasks = [];
 
   // calc total time spent on todays tasks
   totalTimeSpentTasks = null;

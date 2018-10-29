@@ -24,7 +24,7 @@ export class ProjectService {
     // dirty trick to make effect catch up :/
     setTimeout(() => {
       this.load();
-    });
+    }, 50);
   }
 
   load() {
