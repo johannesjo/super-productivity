@@ -3,6 +3,7 @@
 .work-view-header {
   color: #ffffff;
   margin-bottom: $s;
+  box-shadow: $header-inset-shadow;
 
   @media(max-width: $layout-xs) {
     .label {
