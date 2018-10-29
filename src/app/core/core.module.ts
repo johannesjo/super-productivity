@@ -7,7 +7,6 @@ import { TimeTrackingModule } from './time-tracking/time-tracking.module';
 import { ShortcutModule } from './shortcut/shortcut.module';
 import { SnackModule } from './snack/snack.module';
 import { GoogleModule } from './google/google.module';
-import { DialogModule } from './dialog/dialog.module';
 
 @NgModule({
   imports: [
@@ -19,8 +18,8 @@ import { DialogModule } from './dialog/dialog.module';
     ShortcutModule,
     SnackModule,
     GoogleModule,
-    DialogModule,
   ],
   declarations: []
 })
-export class CoreModule { }
+export class CoreModule {
+}
