@@ -221,8 +221,6 @@ export class TaskService {
   }
 
   focusInList(id: string, idList: string[], offset) {
-    console.log(idList);
-
     const currentIndex = idList.indexOf(id);
     if (idList[currentIndex + offset]) {
       this.focusTask(idList[currentIndex + offset]);
