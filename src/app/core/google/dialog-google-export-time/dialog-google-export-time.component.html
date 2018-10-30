@@ -3,7 +3,7 @@
       style="text-align: center;">Google Time Sheet Export</h1>
 
   <div class="loading-spinner"
-       *ngIf="googleApiService.isLoading && !googleApiService.isLoggedIn">
+       *ngIf="googleApiService.isLoading && !(googleApiService.isLoggedIn$|async)">
     <mat-progress-spinner mode="indeterminate"></mat-progress-spinner>
   </div>
 
@@ -16,14 +16,14 @@
               color="primary"
               type="button"
               promise-btn
-              *ngIf="!googleApiService.isLoggedIn"
+              *ngIf="!(googleApiService.isLoggedIn$|async)"
               (click)="login()">Login to Google
       </button>
       <button mat-raised-button=""
               color="primary"
               type="button"
               promise-btn
-              *ngIf="googleApiService.isLoggedIn"
+              *ngIf="(googleApiService.isLoggedIn$|async)"
               (click)="logout()">Logout
       </button>
       <button mat-raised-button=""
@@ -31,20 +31,20 @@
               type="button"
               promise-btn
               [disabled]="!opts.spreadsheetId"
-              *ngIf="googleApiService.isLoggedIn"
+              *ngIf="(googleApiService.isLoggedIn$|async)"
               (click)="readSpreadsheet()">Read spreadsheet
       </button>
       <a mat-raised-button=""
          color="primary"
          external-link
          target="_blank"
-         *ngIf="googleApiService.isLoggedIn && opts.spreadsheetId"
+         *ngIf="(googleApiService.isLoggedIn$|async) && opts.spreadsheetId"
          href="https://docs.google.com/spreadsheets/d/{{opts.spreadsheetId}}">Edit spreadsheet
       </a>
 
       <!--<a mat-raised-button=""-->
       <!--color="primary"-->
-      <!--*ngIf="googleApiService.isLoggedIn"-->
+      <!--*ngIf="(googleApiService.isLoggedIn$|async)"-->
       <!--external-link-->
       <!--target="_blank"-->
       <!--href="https://myaccount.google.com/permissions">Revoke permissions-->
@@ -52,7 +52,7 @@
     </div>
 
 
-    <section *ngIf="googleApiService.isLoggedIn">
+    <section *ngIf="(googleApiService.isLoggedIn$|async)">
       <div>
         <mat-form-field style="width: 100%;">
           <label>Spreadsheet ID</label>
@@ -200,7 +200,7 @@
   <div mat-dialog-actions
        align="end">
     <button (click)="save()"
-            *ngIf="actualValues.length > 0 &&  googleApiService.isLoggedIn"
+            *ngIf="actualValues.length > 0 &&  (googleApiService.isLoggedIn$|async)"
             type="button"
             mat-raised-button=""
             color="primary"

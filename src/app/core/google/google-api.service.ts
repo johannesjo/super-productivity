@@ -7,15 +7,26 @@ import { HttpClient, HttpRequest } from '@angular/common/http';
 import { SnackService } from '../snack/snack.service';
 import { SnackType } from '../snack/snack.model';
 import { ConfigService } from '../config/config.service';
-import { GoogleSession } from '../config/config.model';
-import { catchError } from 'rxjs/operators';
+import { GlobalConfig, GoogleSession } from '../config/config.model';
+import { catchError, map } from 'rxjs/operators';
 import { EmptyObservable } from 'rxjs-compat/observable/EmptyObservable';
+import { Observable } from 'rxjs';
 
 
 @Injectable({
   providedIn: 'root'
 })
 export class GoogleApiService {
+  public isLoggedIn$: Observable<boolean> = this._configService.cfg$
+    .pipe(map((cfg: GlobalConfig) => {
+      const session = cfg && cfg._googleSession;
+      const EXPIRES_SAFETY_MARGIN = 30000;
+      const isExpired = (!session.expiresAt || moment()
+        .valueOf() + EXPIRES_SAFETY_MARGIN > session.expiresAt);
+      return session && session.accessToken && !isExpired;
+    }));
+  public isLoggedIn: boolean;
+
   private _isScriptLoaded = false;
   // TODO save and load tokens
 
@@ -24,15 +35,8 @@ export class GoogleApiService {
   constructor(private readonly _http: HttpClient,
               private readonly _configService: ConfigService,
               private readonly _snackService: SnackService) {
+    this.isLoggedIn$.subscribe((isLoggedIn) => this.isLoggedIn = isLoggedIn);
   }
-
-  public get isLoggedIn() {
-    const EXPIRES_SAFETY_MARGIN = 30000;
-    const isExpired = (!this._session.expiresAt || moment()
-      .valueOf() + EXPIRES_SAFETY_MARGIN > this._session.expiresAt);
-
-    return this._session && this._session.accessToken && !isExpired;
-  };
 
   private get _session(): GoogleSession {
     return this._configService.cfg && this._configService.cfg._googleSession;
@@ -330,35 +334,6 @@ export class GoogleApiService {
       console.warn(err);
       this._snackIt('ERROR', 'GoogleApi Error' + errStr);
     }
-  }
-
-  private _requestWrapper(request) {
-    return new Promise((resolve, reject) => {
-      request.then((res) => {
-        // this._handleUnAuthenticated(res);
-        // reject(res);
-        // return;
-
-        if (res && res.status < 300) {
-          resolve(res);
-        } else if (!res) {
-          this._handleError('No response body');
-          reject(res);
-        } else if (res && res.status >= 300) {
-          this._handleError(res);
-        } else if (res && res.status === 401) {
-          this._handleUnAuthenticated(res);
-          reject(res);
-        } else {
-          // in dubio pro reo
-          resolve(res);
-        }
-
-      }).catch((err) => {
-        this._handleError(err);
-        reject(err);
-      });
-    });
   }
 
   private _snackIt(snackType: SnackType, msg: string) {

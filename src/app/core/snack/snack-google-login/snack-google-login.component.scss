@@ -5,6 +5,10 @@
   align-items: center;
 }
 
+.action {
+  align-self: flex-end;
+}
+
 mat-icon {
   margin-right: $s;
   color: $red;
