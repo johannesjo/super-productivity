@@ -3,7 +3,7 @@ import { MatIconRegistry } from '@angular/material';
 import { DomSanitizer } from '@angular/platform-browser';
 import { OverlayContainer } from '@angular/cdk/overlay';
 import { ProjectService } from './project/project.service';
-import { Project } from './project/project';
+import { Project } from './project/project.model';
 import { ChromeExtensionInterfaceService } from './core/chrome-extension-interface/chrome-extension-interface.service';
 import { ShortcutService } from './core/shortcut/shortcut.service';
 import { checkKeyCombo } from './core/util/check-key-combo';

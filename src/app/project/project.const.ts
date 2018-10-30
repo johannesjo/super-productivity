@@ -1,4 +1,4 @@
-import { Project } from './project';
+import { Project } from './project.model';
 
 export const DEFAULT_PROJECT: Partial<Project> = {
   title: '',

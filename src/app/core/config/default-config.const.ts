@@ -115,8 +115,7 @@ export const DEFAULT_CFG: GlobalConfig = {
     isTimeSpentAsMilliseconds: true,
     showDate: false
   },
-  _dailyAgenda: {
-  },
+  _dailyAgenda: {},
   _googleSession: {
     accessToken: undefined,
     refreshToken: undefined,

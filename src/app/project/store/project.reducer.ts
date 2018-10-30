@@ -1,5 +1,5 @@
 import { createEntityAdapter, EntityAdapter, EntityState, Update } from '@ngrx/entity';
-import { Project } from '../project';
+import { Project } from '../project.model';
 import { ProjectActions, ProjectActionTypes } from './project.actions';
 import { createFeatureSelector, createSelector } from '@ngrx/store';
 import { FIRST_PROJECT } from '../project.const';

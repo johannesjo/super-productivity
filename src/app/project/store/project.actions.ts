@@ -1,7 +1,7 @@
 import { Action } from '@ngrx/store';
 import { Update } from '@ngrx/entity';
 import { ProjectState } from './project.reducer';
-import { Project } from '../project';
+import { Project } from '../project.model';
 import { IssueProviderKey } from '../../issue/issue';
 import { IssueIntegrationCfg } from '../../issue/issue';
 
