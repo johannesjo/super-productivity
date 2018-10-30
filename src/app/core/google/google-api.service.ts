@@ -3,7 +3,7 @@ import { GOOGLE_DEFAULT_FIELDS_FOR_DRIVE, GOOGLE_DISCOVERY_DOCS, GOOGLE_SCOPES, 
 import * as moment from 'moment';
 import { IS_ELECTRON } from '../../app.constants';
 import { MultiPartBuilder } from './util/multi-part-builder';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpRequest } from '@angular/common/http';
 import { SnackService } from '../snack/snack.service';
 import { SnackType } from '../snack/snack.model';
 
@@ -138,9 +138,9 @@ export class GoogleApiService {
     return this._requestWrapper(new Promise((resolve, reject) => {
       this.getSpreadsheetData(spreadsheetId, 'A1:Z99')
         .then((response: any) => {
-          const range = response.result || response.data;
+          const range = response.result || response.data || response;
 
-          if (range.values && range.values[0]) {
+          if (range && range.values && range.values[0]) {
             resolve({
               headings: range.values[0],
               lastRow: range.values[range.values.length - 1],
@@ -364,8 +364,8 @@ export class GoogleApiService {
     });
   }
 
-  private _mapHttp(params: any): Promise<any> {
-    return this._http.request(params).toPromise();
+  private _mapHttp(p: HttpRequest | any): Promise<any> {
+    return this._http[p.method.toLowerCase()](p.url, p).toPromise();
   }
 
 

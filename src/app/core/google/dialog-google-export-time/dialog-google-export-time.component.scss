@@ -1,0 +1,52 @@
+.help-collapsible {
+  ::ng-deep.collapsible-title {
+    font-size: 20px;
+  }
+}
+
+.options-collapsible {
+  ::ng-deep .collapsible-title {
+    font-size: 20px;
+    margin-top: 0;
+  }
+}
+
+.export-input-table {
+  th {
+    font-weight: bold;
+  }
+
+  input {
+    width: 100%;
+    min-width: 40px;
+  }
+}
+
+.possible-properties {
+  dt {
+    margin-bottom: 4px;
+  }
+  dd {
+    margin-bottom: 10px;
+  }
+}
+
+.loading-spinner {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  background: rgba(0, 0, 0, 0.3);
+
+  mat-progress-spinner {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%, 0);
+  }
+}
+
+mat-input-container {
+  min-width: 150px;
+}

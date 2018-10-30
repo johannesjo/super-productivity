@@ -13,6 +13,9 @@
     "typeRoots": [
       "node_modules/@types"
     ],
+    "types": [
+      "@types/moment-duration-format"
+    ],
     "lib": [
       "es2017",
       "dom"

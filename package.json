@@ -77,6 +77,7 @@
     "@ngrx/schematics": "^6.1.0",
     "@types/jasmine": "~2.8.6",
     "@types/jasminewd2": "~2.0.3",
+    "@types/moment-duration-format": "^2.2.2",
     "@types/node": "~8.9.4",
     "codelyzer": "~4.2.1",
     "dbus-native": "^0.2.5",

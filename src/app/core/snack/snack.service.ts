@@ -10,7 +10,10 @@ export class SnackService {
   constructor(private _store$: Store<any>) {
   }
 
-  open(params: SnackParams) {
+  open(params: SnackParams | string) {
+    if (typeof params === 'string') {
+      params = {message: params};
+    }
     this._store$.dispatch(new SnackOpen(params));
   }
 
