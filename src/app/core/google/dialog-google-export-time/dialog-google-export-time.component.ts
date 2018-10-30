@@ -1,9 +1,13 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import * as moment from 'moment';
 import { Duration, Moment } from 'moment';
 import { GoogleApiService } from '../google-api.service';
 import { SnackService } from '../../snack/snack.service';
 import { MatDialogRef } from '@angular/material';
+import { ProjectService } from '../../../project/project.service';
+import { Subject } from 'rxjs';
+import { GoogleTimeSheetExportSettings, Project } from '../../../project/project.model';
+import { takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'dialog-google-export-time',
@@ -11,8 +15,8 @@ import { MatDialogRef } from '@angular/material';
   styleUrls: ['./dialog-google-export-time.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class DialogGoogleExportTimeComponent implements OnInit {
-  opts: any = {
+export class DialogGoogleExportTimeComponent implements OnInit, OnDestroy {
+  opts: GoogleTimeSheetExportSettings = {
     spreadsheetId: undefined,
     isAutoLogin: false,
     isAutoFocusEmpty: false,
@@ -20,9 +24,7 @@ export class DialogGoogleExportTimeComponent implements OnInit {
     roundStartTimeTo: undefined,
     roundEndTimeTo: undefined,
     roundWorkTimeTo: undefined,
-    defaultValues: [
-      ''
-    ]
+    defaultValues: []
   };
   // $rootScope.r.uiHelper.timeSheetExportSettings;
   actualValues = [];
@@ -42,27 +44,46 @@ export class DialogGoogleExportTimeComponent implements OnInit {
     {id: 'HOUR', title: 'full hours'},
   ];
 
+  private _projectId: string;
+  private _destroy$: Subject<boolean> = new Subject<boolean>();
+
 
   constructor(
     public googleApiService: GoogleApiService,
+    private _projectService: ProjectService,
     private _snackService: SnackService,
     private _cd: ChangeDetectorRef,
     private _matDialogRef: MatDialogRef<DialogGoogleExportTimeComponent>,
   ) {
+    this._projectService.currentProject$
+      .pipe(takeUntil(this._destroy$))
+      .subscribe((project: Project) => {
+        this.opts = project.googleTimeSheetExportSettings;
+        this._projectId = project.id;
+      });
   }
 
   ngOnInit() {
     if (this.opts.isAutoLogin) {
+      this.isLoading = true;
       this.login()
         .then(() => {
           if (this.opts.spreadsheetId) {
-            this.readSpreadsheet();
+            this.readSpreadsheet()
+              .then(() => {
+                this.isLoading = false;
+              });
           }
         })
         .then(() => {
           this.updateDefaults();
         }).catch(this._handleError.bind(this));
     }
+  }
+
+  ngOnDestroy() {
+    this._destroy$.next(true);
+    this._destroy$.unsubscribe();
   }
 
   cancel() {
@@ -103,6 +124,7 @@ export class DialogGoogleExportTimeComponent implements OnInit {
   }
 
   save() {
+    this._projectService.updateTimeSheetExportSettings(this._projectId, this.opts);
     this.isLoading = true;
     const arraysEqual = (arr1, arr2) => {
       if (arr1.length !== arr2.length) {

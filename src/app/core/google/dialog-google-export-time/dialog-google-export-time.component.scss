@@ -1,5 +1,10 @@
 @import '../../../../variables';
 
+:host {
+  position: relative;
+  display: block;
+}
+
 .help-collapsible {
   ::ng-deep.collapsible-title {
     font-size: 20px;
@@ -50,7 +55,8 @@
     position: absolute;
     top: 50%;
     left: 50%;
-    transform: translate(-50%, -50%, 0);
+    margin-left: -50px;
+    margin-top: -50px;
   }
 }
 
@@ -63,4 +69,8 @@
   mat-form-field {
     margin: $s;
   }
+}
+
+.export-main {
+  min-height: 100px;
 }

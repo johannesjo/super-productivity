@@ -1,10 +1,26 @@
 import { Project } from './project.model';
 
-export const DEFAULT_PROJECT: Partial<Project> = {
+export const DEFAULT_PROJECT: Project = {
+  id: null,
   title: '',
   themeColor: '',
   isDarkTheme: false,
   issueIntegrationCfgs: {},
+  googleTimeSheetExportSettings: {
+    spreadsheetId: null,
+    isAutoLogin: false,
+    isAutoFocusEmpty: false,
+    isRoundWorkTimeUp: null,
+    roundStartTimeTo: null,
+    roundEndTimeTo: null,
+    roundWorkTimeTo: null,
+    defaultValues: [
+      '{date}',
+      '{startTime}',
+      '{currentTime}',
+      '{totalTime}',
+    ]
+  }
 };
 
 export const FIRST_PROJECT: Project = {
@@ -12,5 +28,15 @@ export const FIRST_PROJECT: Project = {
   title: 'Super Productivity',
   themeColor: 'light-blue',
   isDarkTheme: false,
-  issueIntegrationCfgs: {}
+  issueIntegrationCfgs: {},
+  googleTimeSheetExportSettings: {
+    spreadsheetId: null,
+    isAutoLogin: false,
+    isAutoFocusEmpty: false,
+    isRoundWorkTimeUp: null,
+    roundStartTimeTo: null,
+    roundEndTimeTo: null,
+    roundWorkTimeTo: null,
+    defaultValues: []
+  }
 };

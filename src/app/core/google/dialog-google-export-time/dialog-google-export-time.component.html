@@ -3,7 +3,7 @@
       style="text-align: center;">Google Time Sheet Export</h1>
 
   <div class="loading-spinner"
-       *ngIf="googleApiService.isLoading && !(googleApiService.isLoggedIn$|async)">
+       *ngIf="isLoading">
     <mat-progress-spinner mode="indeterminate"></mat-progress-spinner>
   </div>
 
@@ -52,7 +52,8 @@
     </div>
 
 
-    <section *ngIf="(googleApiService.isLoggedIn$|async)">
+    <section *ngIf="(googleApiService.isLoggedIn$|async)"
+             class="export-main">
       <div>
         <mat-form-field style="width: 100%;">
           <label>Spreadsheet ID</label>

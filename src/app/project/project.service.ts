@@ -1,13 +1,21 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { Project } from './project.model';
+import { GoogleTimeSheetExportSettings, Project } from './project.model';
 import { PersistenceService } from '../core/persistence/persistence.service';
 import { select, Store } from '@ngrx/store';
 import { ProjectActionTypes } from './store/project.actions';
 import shortid from 'shortid';
-import { selectAllProjects, selectCurrentProject, selectCurrentProjectId, selectProjectJiraCfg } from './store/project.reducer';
+import {
+  ProjectState,
+  selectAllProjects,
+  selectCurrentProject,
+  selectCurrentProjectId,
+  selectProjectJiraCfg
+} from './store/project.reducer';
 import { IssueIntegrationCfg, IssueProviderKey } from '../issue/issue';
 import { JiraCfg } from '../issue/jira/jira';
+import { DEFAULT_PROJECT } from './project.const';
+import { Dictionary } from '@ngrx/entity';
 
 @Injectable()
 export class ProjectService {
@@ -28,7 +36,9 @@ export class ProjectService {
   }
 
   load() {
-    const projectState = this._persistenceService.loadProjectsMeta();
+    const projectState_ = this._persistenceService.loadProjectsMeta();
+    const projectState = this._extendProjectDefaults(projectState_);
+
     if (projectState) {
       if (!projectState.currentId) {
         projectState.currentId = projectState.ids[0];
@@ -88,5 +98,26 @@ export class ProjectService {
       type: ProjectActionTypes.SetCurrentProject,
       payload: projectId,
     });
+  }
+
+  // HELPER
+  updateTimeSheetExportSettings(projectId: string, settings: GoogleTimeSheetExportSettings) {
+    this.update(projectId, {
+      googleTimeSheetExportSettings: settings
+    });
+  }
+
+
+  // we need to make sure our model stays compatible with new props added
+  private _extendProjectDefaults(projectState: ProjectState): ProjectState {
+    const projectEntities: Dictionary<Project> = {...projectState.entities};
+    Object.keys(projectEntities).forEach((key) => {
+      // we possibly need to extend this
+      projectEntities[key] = {
+        ...DEFAULT_PROJECT,
+        ...projectEntities[key]
+      };
+    });
+    return {...projectState, entities: projectEntities};
   }
 }
