@@ -72,8 +72,10 @@ export type DailyAgendaSettings = Readonly<{
 }>;
 
 
-export type GoogleTokensSettings = Readonly<{
-  [key: string]: any;
+export type GoogleSession = Readonly<{
+  accessToken: string,
+  refreshToken: string,
+  expiresAt: number,
 }>;
 
 
@@ -82,16 +84,27 @@ export type GlobalConfig = Readonly<{
   pomodoro: PomodoroConfig;
   // googleDriveSync: GoogleDriveSyncConfig;
   keyboard: KeyboardConfig;
+  _googleSession: GoogleSession;
   _uiHelper: UiHelperSettings;
   _dailyTaskExportSettings: DailyTaskExportSettings;
   _timeSheetExportSettings: TimeSheetExportSettings;
   _timeTrackingHistoryExportSettings: TimeTrackingHistoryExportSettings;
   _csvExportSettings: CsvExportSettings;
   _dailyAgenda: DailyAgendaSettings;
-  _googleTokens: GoogleTokensSettings;
 }>;
+
+
+export type ConfigSectionKey = keyof GlobalConfig;
 
 export type SectionConfig
   = MiscConfig
   | PomodoroConfig
-  | KeyboardConfig;
+  | KeyboardConfig
+  | GoogleSession
+  | UiHelperSettings
+  | DailyTaskExportSettings
+  | TimeSheetExportSettings
+  | TimeTrackingHistoryExportSettings
+  | CsvExportSettings
+  | DailyAgendaSettings
+  ;

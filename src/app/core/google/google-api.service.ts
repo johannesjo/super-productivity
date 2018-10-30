@@ -6,50 +6,58 @@ import { MultiPartBuilder } from './util/multi-part-builder';
 import { HttpClient, HttpRequest } from '@angular/common/http';
 import { SnackService } from '../snack/snack.service';
 import { SnackType } from '../snack/snack.model';
+import { ConfigService } from '../config/config.service';
+import { GoogleSession } from '../config/config.model';
+import { catchError } from 'rxjs/operators';
+import { EmptyObservable } from 'rxjs-compat/observable/EmptyObservable';
 
 
 @Injectable({
   providedIn: 'root'
 })
 export class GoogleApiService {
-  public isLoggedIn = false;
   private _isScriptLoaded = false;
   // TODO save and load tokens
-  private _data = {
-    accessToken: undefined,
-    refreshToken: undefined,
-    expiresAt: undefined,
-  };
+
   private _gapi: any;
 
   constructor(private readonly _http: HttpClient,
+              private readonly _configService: ConfigService,
               private readonly _snackService: SnackService) {
   }
 
+  public get isLoggedIn() {
+    const EXPIRES_SAFETY_MARGIN = 30000;
+    const isExpired = (!this._session.expiresAt || moment()
+      .valueOf() + EXPIRES_SAFETY_MARGIN > this._session.expiresAt);
+
+    return this._session && this._session.accessToken && !isExpired;
+  };
+
+  private get _session(): GoogleSession {
+    return this._configService.cfg && this._configService.cfg._googleSession;
+  }
+
+  private _updateSession(sessionData: Partial<GoogleSession>) {
+    console.log('update', sessionData);
+    this._configService.updateSection('_googleSession', sessionData);
+  }
 
   login() {
     /*jshint camelcase: false */
-    const EXPIRES_SAFETY_MARGIN = 30000;
-    const isExpired = (!this._data.expiresAt || moment()
-      .valueOf() + EXPIRES_SAFETY_MARGIN > this._data.expiresAt);
-
-    if (isExpired) {
-      this._data.accessToken = undefined;
-    }
-
-    if (this._data.accessToken && !isExpired) {
-      this.isLoggedIn = true;
+    if (this.isLoggedIn) {
       return new Promise((resolve) => resolve());
     }
 
     if (IS_ELECTRON) {
-      window.ipcRenderer.send('TRIGGER_GOOGLE_AUTH', this._data.refreshToken);
+      window.ipcRenderer.send('TRIGGER_GOOGLE_AUTH', this._session.refreshToken);
       return new Promise((resolve, reject) => {
-        window.ipcRenderer.on('GOOGLE_AUTH_TOKEN', (ev, data) => {
-          this._data.accessToken = data.access_token;
-          this._data.expiresAt = (data.expires_in * 1000) + moment().valueOf();
-          this._data.refreshToken = data.refresh_token;
-          this.isLoggedIn = true;
+        window.ipcRenderer.on('GOOGLE_AUTH_TOKEN', (ev, data: any) => {
+          this._updateSession({
+            accessToken: data.access_token,
+            expiresAt: (data.expires_in * 1000) + moment().valueOf(),
+            refreshToken: data.refresh_token,
+          });
           this._snackIt('SUCCESS', 'GoogleApi: Login successful');
 
           resolve();
@@ -62,13 +70,11 @@ export class GoogleApiService {
       return this._initClientLibraryIfNotDone()
         .then((user: any) => {
           if (user && user.Zi && user.Zi.access_token) {
-            this.isLoggedIn = true;
             this._saveToken(user);
             this._snackIt('SUCCESS', 'GoogleApi: Login successful');
           } else {
             return this._gapi.auth2.getAuthInstance().signIn()
               .then((res) => {
-                this.isLoggedIn = true;
                 this._saveToken(res);
                 this._snackIt('SUCCESS', 'GoogleApi: Login successful');
               });
@@ -80,10 +86,11 @@ export class GoogleApiService {
 
 
   logout() {
-    this.isLoggedIn = false;
-    this._data.accessToken = undefined;
-    this._data.expiresAt = undefined;
-    this._data.refreshToken = undefined;
+    this._updateSession({
+      accessToken: null,
+      expiresAt: null,
+      refreshToken: null,
+    });
 
     if (IS_ELECTRON) {
       return new Promise((resolve) => {
@@ -105,7 +112,7 @@ export class GoogleApiService {
   appendRow(spreadsheetId, row) {
     // @see: https://developers.google.com/sheets/api/reference/rest/
     const range = 'A1:Z99';
-    return this._requestWrapper(this._mapHttp({
+    return this._mapHttp({
       method: 'POST',
       url: `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${range}:append`,
       params: {
@@ -114,28 +121,28 @@ export class GoogleApiService {
         valueInputOption: 'USER_ENTERED'
       },
       headers: {
-        'Authorization': `Bearer ${this._data.accessToken}`
+        'Authorization': `Bearer ${this._session.accessToken}`
       },
       data: {values: [row]}
-    }));
+    });
   }
 
   getSpreadsheetData(spreadsheetId, range) {
     // @see: https://developers.google.com/sheets/api/reference/rest/
-    return this._requestWrapper(this._mapHttp({
+    return this._mapHttp({
       method: 'GET',
       url: `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${range}`,
       params: {
         'key': GOOGLE_SETTINGS.API_KEY,
       },
       headers: {
-        'Authorization': `Bearer ${this._data.accessToken}`
+        'Authorization': `Bearer ${this._session.accessToken}`
       }
-    }));
+    });
   }
 
   getSpreadsheetHeadingsAndLastRow(spreadsheetId) {
-    return this._requestWrapper(new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => {
       this.getSpreadsheetData(spreadsheetId, 'A1:Z99')
         .then((response: any) => {
           const range = response.result || response.data || response;
@@ -150,7 +157,7 @@ export class GoogleApiService {
             this._handleError('No data found');
           }
         });
-    }));
+    });
   }
 
   getFileInfo(fileId) {
@@ -159,7 +166,7 @@ export class GoogleApiService {
       return Promise.reject('No file id given');
     }
 
-    return this._requestWrapper(this._mapHttp({
+    return this._mapHttp({
       method: 'GET',
       url: `https://content.googleapis.com/drive/v2/files/${encodeURIComponent(fileId)}`,
       params: {
@@ -168,9 +175,9 @@ export class GoogleApiService {
         fields: GOOGLE_DEFAULT_FIELDS_FOR_DRIVE
       },
       headers: {
-        'Authorization': `Bearer ${this._data.accessToken}`,
+        'Authorization': `Bearer ${this._session.accessToken}`,
       },
-    }));
+    });
   }
 
   findFile(fileName) {
@@ -179,7 +186,7 @@ export class GoogleApiService {
       return Promise.reject('No file name given');
     }
 
-    return this._requestWrapper(this._mapHttp({
+    return this._mapHttp({
       method: 'GET',
       url: `https://content.googleapis.com/drive/v2/files`,
       params: {
@@ -188,9 +195,9 @@ export class GoogleApiService {
         q: `title='${fileName}' and trashed=false`,
       },
       headers: {
-        'Authorization': `Bearer ${this._data.accessToken}`,
+        'Authorization': `Bearer ${this._session.accessToken}`,
       },
-    }));
+    });
   }
 
   loadFile(fileId) {
@@ -200,7 +207,7 @@ export class GoogleApiService {
     }
 
     const metaData = this.getFileInfo(fileId);
-    const fileContents = this._requestWrapper(this._mapHttp({
+    const fileContents = this._mapHttp({
       method: 'GET',
       url: `https://content.googleapis.com/drive/v2/files/${encodeURIComponent(fileId)}`,
       params: {
@@ -209,9 +216,9 @@ export class GoogleApiService {
         alt: 'media'
       },
       headers: {
-        'Authorization': `Bearer ${this._data.accessToken}`,
+        'Authorization': `Bearer ${this._session.accessToken}`,
       },
-    }));
+    });
 
     // TODO think of something
     // return this.$q.all([this.$q.when(metaData), this.$q.when(fileContents)])
@@ -248,7 +255,7 @@ export class GoogleApiService {
       .append(metadata.mimeType, content)
       .finish();
 
-    return this._requestWrapper(this._mapHttp({
+    return this._mapHttp({
       method: method,
       url: `https://content.googleapis.com${path}`,
       params: {
@@ -258,11 +265,11 @@ export class GoogleApiService {
         fields: GOOGLE_DEFAULT_FIELDS_FOR_DRIVE
       },
       headers: {
-        'Authorization': `Bearer ${this._data.accessToken}`,
+        'Authorization': `Bearer ${this._session.accessToken}`,
         'Content-Type': multipart.type
       },
       data: multipart.body
-    }));
+    });
   }
 
   private initClient() {
@@ -292,10 +299,10 @@ export class GoogleApiService {
   }
 
   private _saveToken(res) {
-    /*jshint camelcase: false */
-    this._data.accessToken = res.Zi.access_token;
-    this._data.expiresAt = res.Zi.expires_at;
-    /*jshint camelcase: true */
+    this._updateSession({
+      accessToken: res.accessToken || res.Zi.access_token,
+      expiresAt: res.expiresAt || res.Zi.expires_at,
+    });
   }
 
   private _handleUnAuthenticated(err) {
@@ -309,20 +316,18 @@ export class GoogleApiService {
 
     if (typeof err === 'string') {
       errStr = err;
-    } else if (err && err.data && err.data.error) {
-      errStr = err.data.error.message;
+    } else if (err && err.error && err.error.error) {
+      errStr = err.error.error.message;
     }
 
     if (errStr) {
       errStr = ': ' + errStr;
     }
 
-    console.error(err);
-
     if (err && err.status === 401) {
       this._handleUnAuthenticated(err);
     } else {
-      console.error(err);
+      console.warn(err);
       this._snackIt('ERROR', 'GoogleApi Error' + errStr);
     }
   }
@@ -364,8 +369,20 @@ export class GoogleApiService {
     });
   }
 
-  private _mapHttp(p: HttpRequest | any): Promise<any> {
-    return this._http[p.method.toLowerCase()](p.url, p).toPromise();
+  private _mapHttp(p: HttpRequest<string> | any): Promise<any> {
+    const sub = this._http[p.method.toLowerCase()](p.url, p)
+      .pipe(catchError((res) => {
+        console.log(res);
+        if (!res) {
+          this._handleError('No response body');
+        } else if (res && res.status >= 300) {
+          this._handleError(res);
+        } else if (res && res.status === 401) {
+          this._handleUnAuthenticated(res);
+        }
+        return new EmptyObservable<Response>();
+      }));
+    return sub.toPromise();
   }
 
 

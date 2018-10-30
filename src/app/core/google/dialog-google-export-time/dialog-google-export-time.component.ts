@@ -3,6 +3,7 @@ import * as moment from 'moment';
 import { Duration, Moment } from 'moment';
 import { GoogleApiService } from '../google-api.service';
 import { SnackService } from '../../snack/snack.service';
+import { MatDialogRef } from '@angular/material';
 
 @Component({
   selector: 'dialog-google-export-time',
@@ -45,7 +46,8 @@ export class DialogGoogleExportTimeComponent implements OnInit {
   constructor(
     public googleApiService: GoogleApiService,
     private _snackService: SnackService,
-    private _cd: ChangeDetectorRef
+    private _cd: ChangeDetectorRef,
+    private _matDialogRef: MatDialogRef<DialogGoogleExportTimeComponent>,
   ) {
   }
 
@@ -59,12 +61,12 @@ export class DialogGoogleExportTimeComponent implements OnInit {
         })
         .then(() => {
           this.updateDefaults();
-        });
+        }).catch(this._handleError.bind(this));
     }
   }
 
   cancel() {
-    // $mdDialog.hide();
+    this._matDialogRef.close();
   }
 
   login() {
@@ -74,7 +76,7 @@ export class DialogGoogleExportTimeComponent implements OnInit {
         this.isLoading = false;
         this.isLoggedIn = true;
         this._cd.detectChanges();
-      });
+      }).catch(this._handleError.bind(this));
   }
 
   readSpreadsheet() {
@@ -87,7 +89,7 @@ export class DialogGoogleExportTimeComponent implements OnInit {
         this.updateDefaults();
         this.isLoading = false;
         this._cd.detectChanges();
-      });
+      }).catch(this._handleError.bind(this));
   }
 
   logout() {
@@ -97,7 +99,7 @@ export class DialogGoogleExportTimeComponent implements OnInit {
         this.isLoading = false;
         this.isLoggedIn = false;
         this._cd.detectChanges();
-      });
+      }).catch(this._handleError.bind(this));
   }
 
   save() {
@@ -128,7 +130,7 @@ export class DialogGoogleExportTimeComponent implements OnInit {
           // $mdDialog.hide();
           // $rootScope.r.currentSession.isTimeSheetExported = true;
           this.isLoading = false;
-        });
+        }).catch(this._handleError.bind(this));
     }
   }
 
@@ -254,8 +256,10 @@ export class DialogGoogleExportTimeComponent implements OnInit {
     const val = moment.duration(this.MISSING.getTimeWorkedToday);
 
     const roundTo = this.opts.roundWorkTimeTo;
-    const dur = this.roundDuration(val, roundTo, this.opts.isRoundWorkTimeUp) as any;
-    return dur.format('HH:mm');
+    const dur = this.roundDuration(val, roundTo, this.opts.isRoundWorkTimeUp) as Duration;
+    if (dur.format) {
+      return dur.format('HH:mm');
+    }
   }
 
   private getTaskTitles(): string {
@@ -282,4 +286,7 @@ export class DialogGoogleExportTimeComponent implements OnInit {
     return titleStr.substring(0, titleStr.length - 2);
   }
 
+  private _handleError() {
+    this.isLoading = false;
+  }
 }

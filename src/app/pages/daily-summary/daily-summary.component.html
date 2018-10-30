@@ -15,7 +15,8 @@
     <div class="summary-point">
       <mat-icon>check</mat-icon>
       <div class="summary-text">Tasks completed:
-        <div class="summary-val"><span [innerHtml]="(doneTasks$|async).length"></span>/<span [innerHtml]="(todaysTasks$|async).length"></span>
+        <div class="summary-val">
+          <span [innerHtml]="(doneTasks$|async).length"></span>/<span [innerHtml]="(todaysTasks$|async).length"></span>
         </div>
       </div>
     </div>
@@ -50,7 +51,7 @@
       </tr>
 
       <tr *ngFor="let task of todaysTasks$|async"
-          ng-class="{'is-done': task.isDone}">
+          [class.is-done]="task.isDone">
         <td [innerHtml]="task.title"></td>
         <td>
           <span *ngFor="let task of task.subTasks"><span [innerHtml]="task.title"></span>: <span [innerHtml]="task.timeSpentOnDay[todayStr]|msToString"></span><br></span>

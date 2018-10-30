@@ -117,7 +117,7 @@ export const DEFAULT_CFG: GlobalConfig = {
   },
   _dailyAgenda: {
   },
-  _googleTokens: {
+  _googleSession: {
     accessToken: undefined,
     refreshToken: undefined,
     expiresAt: undefined

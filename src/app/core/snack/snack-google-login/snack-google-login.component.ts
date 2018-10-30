@@ -1,6 +1,7 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
 import { GoogleApiService } from '../../google/google-api.service';
-import { MatSnackBarRef } from '@angular/material';
+import { MAT_SNACK_BAR_DATA, MatSnackBarRef } from '@angular/material';
+import { SnackParams } from '../snack.model';
 
 @Component({
   selector: 'snack-google-login',
@@ -11,7 +12,10 @@ import { MatSnackBarRef } from '@angular/material';
 export class SnackGoogleLoginComponent {
   public snackBarRef: MatSnackBarRef<SnackGoogleLoginComponent>;
 
-  constructor(private readonly _googleApiService: GoogleApiService) {
+  constructor(
+    @Inject(MAT_SNACK_BAR_DATA) public data: SnackParams,
+    private readonly _googleApiService: GoogleApiService
+  ) {
   }
 
   loginToGoogle() {

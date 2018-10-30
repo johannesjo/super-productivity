@@ -1,159 +1,161 @@
 @import '../../../variables';
 
-.page-wrapper {
-  //display: flex;
-  //align-items: center;
-  //flex-direction: column;
-  text-align: center;
-}
-
-.done-headline {
-  margin-top: $s*2;
-}
-
-.summary-point {
-  vertical-align: center;
-  display: inline-block;
-  align-items: center;
-  text-align: center;
-  margin: $s;
-}
-
-.summary-text {
-}
-
-.summary-val {
-  font-weight: bold;
-}
-
-::ng-deep collapsible {
-  text-align: center;
-}
-
-::ng-deep .collapsible-title {
-  font-size: 18px;
-}
-
-textarea {
-  border: 1px solid #cccccc;
-  border-top-width: 1px !important;
-  border-left-width: 1px !important;
-  border-right-width: 1px !important;
-}
-
-.finish-day-opts {
-  margin-top: 10px;
-  mat-checkbox {
-    display: block;
+:host {
+  .page-wrapper {
+    //display: flex;
+    //align-items: center;
+    //flex-direction: column;
+    text-align: center;
   }
-}
 
-.daily-summary-summary {
-  margin-bottom: 30px;
-  p {
-    margin: 5px;
+  .done-headline {
+    margin-top: $s*2;
   }
-}
 
-.daily-summary-collapsible {
-  margin-bottom: 15px;
-  margin-top: 20px;
-
-  .collapsible-title {
-    font-size: 19px;
+  .summary-point {
+    vertical-align: center;
+    display: inline-block;
+    align-items: center;
+    text-align: center;
+    margin: $s;
   }
-}
 
-.task-summary-table {
-  width: 100%;
-  margin: auto;
-  border-collapse: collapse;
-  tr {
-    &.is-done {
-      text-decoration: line-through;
+  .summary-text {
+  }
+
+  .summary-val {
+    font-weight: bold;
+  }
+
+  ::ng-deep collapsible {
+    text-align: center;
+  }
+
+  ::ng-deep .collapsible-title {
+    font-size: 18px;
+  }
+
+  textarea {
+    border: 1px solid #cccccc;
+    border-top-width: 1px !important;
+    border-left-width: 1px !important;
+    border-right-width: 1px !important;
+  }
+
+  .finish-day-opts {
+    margin-top: 10px;
+    mat-checkbox {
+      display: block;
     }
+  }
 
-    &:first-child {
-      td,
-      th {
-        border-top: 0;
+  .daily-summary-summary {
+    margin-bottom: 30px;
+    p {
+      margin: 5px;
+    }
+  }
+
+  .daily-summary-collapsible {
+    margin-bottom: 15px;
+    margin-top: 20px;
+
+    .collapsible-title {
+      font-size: 19px;
+    }
+  }
+
+  .task-summary-table {
+    width: 100%;
+    margin: auto;
+    border-collapse: collapse;
+    tr {
+      &.is-done {
+        text-decoration: line-through;
+      }
+
+      &:first-child {
+        td,
+        th {
+          border-top: 0;
+        }
+      }
+      &:last-child {
+        td,
+        th {
+          border-bottom: 0;
+        }
       }
     }
-    &:last-child {
-      td,
-      th {
-        border-bottom: 0;
+
+    th,
+    td {
+      border: 1px solid #dddddd;
+      padding: 4px 8px;
+
+      &:first-child {
+        border-left: 0;
+      }
+      &:last-child {
+        border-right: 0;
+      }
+    }
+
+    td:nth-child(2),
+    td:nth-child(3),
+    td:nth-child(4),
+    td:nth-child(5) {
+      text-align: right;
+    }
+  }
+
+  .daily-summary-actions {
+    margin-top: 30px;
+
+    button {
+      margin: 0 $s/2;
+      mat-icon + mat-icon {
+        //margin-left: -$s;
       }
     }
   }
 
-  th,
-  td {
-    border: 1px solid #dddddd;
-    padding: 4px 8px;
-
-    &:first-child {
-      border-left: 0;
-    }
-    &:last-child {
-      border-right: 0;
-    }
-  }
-
-  td:nth-child(2),
-  td:nth-child(3),
-  td:nth-child(4),
-  td:nth-child(5) {
-    text-align: right;
-  }
-}
-
-.daily-summary-actions {
-  margin-top: 30px;
-
-  button {
-    margin: 0 $s/2;
-    mat-icon + mat-icon {
-      //margin-left: -$s;
-    }
-  }
-}
-
-.success-animation-wrapper {
-  $this-ani-style: 1s linear infinite;
-  $this-ico-size: 128px;
-  clear: both;
-  display: block;
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  backface-visibility: hidden;
-
-  mat-icon {
-    width: $this-ico-size;
-    height: $this-ico-size;
+  .success-animation-wrapper {
+    $this-ani-style: 1s linear infinite;
+    $this-ico-size: 128px;
+    clear: both;
     display: block;
-    font-size: 30px;
-    color: $yellow;
-    transform-origin: center center;
-    animation: success-animation-sun #{$this-ani-style};
-    backface-visibility: hidden;
-
-    svg {
-      width: $this-ico-size;
-      height: $this-ico-size;
-    }
-  }
-  .unicorn-wrapper {
-    position: absolute;
+    position: fixed;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-  }
-  .unicorn {
-    transform-origin: center center;
-    animation: success-animation-unicorn #{$this-ani-style};
+    backface-visibility: hidden;
+
+    mat-icon {
+      width: $this-ico-size;
+      height: $this-ico-size;
+      display: block;
+      font-size: 30px;
+      color: $yellow;
+      transform-origin: center center;
+      animation: success-animation-sun #{$this-ani-style};
+      backface-visibility: hidden;
+
+      svg {
+        width: $this-ico-size;
+        height: $this-ico-size;
+      }
+    }
+    .unicorn-wrapper {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+    .unicorn {
+      transform-origin: center center;
+      animation: success-animation-unicorn #{$this-ani-style};
+    }
   }
 }
 

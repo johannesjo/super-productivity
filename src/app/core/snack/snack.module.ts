@@ -17,8 +17,14 @@ import { SnackGoogleLoginComponent } from './snack-google-login/snack-google-log
     StoreModule.forFeature('snack', fromSnack.reducer),
     EffectsModule.forFeature([SnackEffects])
   ],
-  declarations: [SnackCustomComponent, SnackGoogleLoginComponent],
-  entryComponents: [SnackCustomComponent],
+  declarations: [
+    SnackCustomComponent,
+    SnackGoogleLoginComponent
+  ],
+  entryComponents: [
+    SnackCustomComponent,
+    SnackGoogleLoginComponent
+  ],
 })
 export class SnackModule {
 

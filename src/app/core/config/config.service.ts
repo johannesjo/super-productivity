@@ -2,9 +2,10 @@ import { Injectable } from '@angular/core';
 import { select, Store } from '@ngrx/store';
 import { ConfigActionTypes } from './store/config.actions';
 import { Observable } from 'rxjs';
-import { GlobalConfig } from './config.model';
+import { ConfigSectionKey, GlobalConfig, SectionConfig } from './config.model';
 import { selectConfigFeatureState } from './store/config.reducer';
 import { PersistenceService } from '../persistence/persistence.service';
+import { DEFAULT_CFG } from './default-config.const';
 
 @Injectable({
   providedIn: 'root'
@@ -27,14 +28,15 @@ export class ConfigService {
     if (cfg && Object.keys(cfg).length > 0) {
       this._store.dispatch({
         type: ConfigActionTypes.LoadConfig,
-        payload: cfg,
+        // always extend default config
+        payload: {...DEFAULT_CFG, ...cfg},
       });
     } else {
       console.log('ConfigService No config found in ls');
     }
   }
 
-  updateSection(sectionKey, sectionCfg) {
+  updateSection(sectionKey: ConfigSectionKey, sectionCfg: Partial<SectionConfig>) {
     this._store.dispatch({
       type: ConfigActionTypes.UpdateConfigSection,
       payload: {
