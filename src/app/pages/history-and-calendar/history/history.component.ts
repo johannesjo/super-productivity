@@ -37,21 +37,25 @@ const mapArchiveToWorklog = (taskState: EntityState<Task>) => {
           // id: this.Uid()
         };
       }
-      worklog[year].ent[month].ent[day].timeSpent
-        = worklog[year].ent[month].ent[day].timeSpent
-        + task.timeSpentOnDay[dateStr];
-      worklog[year].ent[month].timeSpent
-        = worklog[year].ent[month].timeSpent
-        + task.timeSpentOnDay[dateStr];
-      worklog[year].timeSpent
-        = worklog[year].timeSpent
-        + task.timeSpentOnDay[dateStr];
+      if (task.subTaskIds.length === 0) {
+        worklog[year].ent[month].ent[day].timeSpent
+          = worklog[year].ent[month].ent[day].timeSpent
+          + task.timeSpentOnDay[dateStr];
+        worklog[year].ent[month].timeSpent
+          = worklog[year].ent[month].timeSpent
+          + task.timeSpentOnDay[dateStr];
+        worklog[year].timeSpent
+          = worklog[year].timeSpent
+          + task.timeSpentOnDay[dateStr];
 
-      worklog[year].ent[month].ent[day].ent.push({
-        task: task,
-        isVisible: true,
-        timeSpent: task.timeSpentOnDay[dateStr]
-      });
+        worklog[year].ent[month].ent[day].ent.push({
+          task: task,
+          parentTitle: task.parentId ? entities[task.parentId].title : null,
+          parentId: task.parentId,
+          isVisible: true,
+          timeSpent: task.timeSpentOnDay[dateStr]
+        });
+      }
     });
   });
   return worklog;
@@ -75,10 +79,7 @@ export class HistoryComponent implements OnInit {
 
   ngOnInit() {
     const completeState = this._persistenceService.loadTaskArchiveForProject(this._projectService.currentId);
-    console.log(completeState);
     this.worklog = mapArchiveToWorklog(completeState);
-    console.log(this.worklog);
-
   }
 
   exportData(type, data) {

@@ -124,7 +124,7 @@ export class TaskService {
     // });
   }
 
-
+  // TODO merge with add
   addWithIssue(title: string, issueType: IssueProviderKey, issue: any, isAddToBacklog = false) {
     this._storeDispatch(TaskActionTypes.AddTask, {
       task: this._createNewTask(title, {

@@ -7,7 +7,7 @@
   <div *ngFor="let month of year.value.ent|keyvalue"
        class="month">
     <h2 class="month-title mat-headline">
-      <span [innerHtml]="month.key"></span>
+      <span [innerHtml]="month.key|numberToMonth"></span>
       <button mat-mini-fab=""
               color="primary"
               aria-label="export data"
@@ -34,7 +34,7 @@
            *ngIf="worklogForDay.value.isVisible">
         <table class="task-summary-table">
           <tr *ngFor="let logEntry of worklogForDay.value.ent">
-            <td [innerHtml]="logEntry.task.title"></td>
+            <td [innerHtml]="(logEntry.parentTitle ? logEntry.parentTitle +' / ': '') + logEntry.task.title"></td>
             <td [innerHtml]="logEntry.task.timeSpentOnDay[worklogForDay.value.dateStr]|msToString"></td>
           </tr>
         </table>

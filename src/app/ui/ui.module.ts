@@ -43,6 +43,7 @@ import { ProgressBarComponent } from './progress-bar/progress-bar.component';
 import { MsToStringPipe$ } from './duration/ms-to-string$.pipe';
 import { CollapsibleComponent } from './collapsible/collapsible.component';
 import { HelpSectionComponent } from './help-section/help-section.component';
+import { NumberToMonthPipe } from './duration/number-to-month.pipe';
 
 @NgModule({
   imports: [
@@ -93,6 +94,7 @@ import { HelpSectionComponent } from './help-section/help-section.component';
     ProgressBarComponent,
     CollapsibleComponent,
     HelpSectionComponent,
+    NumberToMonthPipe,
   ],
   exports: [
     DurationFromStringPipe,
@@ -108,6 +110,7 @@ import { HelpSectionComponent } from './help-section/help-section.component';
     MsToStringPipe,
     MsToStringPipe$,
     StringToMsPipe,
+    NumberToMonthPipe,
 
     // material2
     MatAutocompleteModule,
