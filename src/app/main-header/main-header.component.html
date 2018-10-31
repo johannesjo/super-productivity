@@ -44,7 +44,10 @@
       <mat-icon>playlist_play</mat-icon>
     </button>
     <button mat-mini-fab
-            color="">
+            routerLink="history-and-calendar"
+            routerLinkActive
+            #rlHA="routerLinkActive"
+            [color]="rlHA.isActive ? 'accent' : null">
       <mat-icon>today</mat-icon>
     </button>
   </nav>

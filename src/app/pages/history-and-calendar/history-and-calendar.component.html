@@ -1,0 +1,18 @@
+<nav mat-tab-nav-bar
+     class="links bg-900 mat-elevation-z3">
+  <a mat-tab-link
+     routerLink="calendar"
+     routerLinkActive
+     #rlaCal="routerLinkActive">
+    <mat-icon>today</mat-icon>
+    Calendar
+  </a>
+  <a mat-tab-link
+     routerLink="history"
+     routerLinkActive
+     #rlaHistory="routerLinkActive">
+    <mat-icon>history</mat-icon>
+    Calendar
+  </a>
+</nav>
+<router-outlet></router-outlet>

@@ -5,6 +5,7 @@ import { ProjectPageModule } from './project-page/project-page.module';
 import { WorkViewPageModule } from './work-view/work-view-page.module';
 import { DailyPlannerModule } from './daily-planner/daily-planner.module';
 import { DailySummaryModule } from './daily-summary/daily-summary.module';
+import { HistoryAndCalendarModule } from './history-and-calendar/history-and-calendar.module';
 
 @NgModule({
   imports: [
@@ -14,6 +15,7 @@ import { DailySummaryModule } from './daily-summary/daily-summary.module';
     WorkViewPageModule,
     DailyPlannerModule,
     DailySummaryModule,
+    HistoryAndCalendarModule,
   ],
   declarations: []
 })

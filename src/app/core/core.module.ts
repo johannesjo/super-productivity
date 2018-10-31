@@ -7,6 +7,7 @@ import { TimeTrackingModule } from './time-tracking/time-tracking.module';
 import { ShortcutModule } from './shortcut/shortcut.module';
 import { SnackModule } from './snack/snack.module';
 import { GoogleModule } from './google/google.module';
+import { RouterModule } from '@angular/router';
 
 @NgModule({
   imports: [
@@ -18,8 +19,19 @@ import { GoogleModule } from './google/google.module';
     ShortcutModule,
     SnackModule,
     GoogleModule,
+    RouterModule,
   ],
-  declarations: []
+  declarations: [],
+  exports: [
+    ConfigModule,
+    PersistenceModule,
+    ChromeExtensionInterfaceModule,
+    TimeTrackingModule,
+    ShortcutModule,
+    SnackModule,
+    GoogleModule,
+    RouterModule,
+  ]
 })
 export class CoreModule {
 }
