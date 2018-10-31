@@ -1,65 +1,8 @@
 import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { PersistenceService } from '../../../core/persistence/persistence.service';
 import { ProjectService } from '../../../project/project.service';
-import { EntityState } from '@ngrx/entity';
-import { Task } from '../../../tasks/task.model';
 import { expandFadeAnimation } from '../../../ui/animations/expand.ani';
-
-const mapArchiveToWorklog = (taskState: EntityState<Task>) => {
-  const entities = taskState.entities;
-  const worklog = {};
-
-  Object.keys(entities).forEach(id => {
-    const task = entities[id];
-
-    Object.keys(task.timeSpentOnDay).forEach(dateStr => {
-      const split = dateStr.split('-');
-      const year = parseInt(split[0], 10);
-      const month = parseInt(split[1], 10);
-      const day = parseInt(split[2], 10);
-      if (!worklog[year]) {
-        worklog[year] = {
-          timeSpent: 0,
-          ent: {}
-        };
-      }
-      if (!worklog[year].ent[month]) {
-        worklog[year].ent[month] = {
-          timeSpent: 0,
-          ent: {}
-        };
-      }
-      if (!worklog[year].ent[month].ent[day]) {
-        worklog[year].ent[month].ent[day] = {
-          timeSpent: 0,
-          ent: [],
-          dateStr: dateStr,
-          // id: this.Uid()
-        };
-      }
-      if (task.subTaskIds.length === 0) {
-        worklog[year].ent[month].ent[day].timeSpent
-          = worklog[year].ent[month].ent[day].timeSpent
-          + task.timeSpentOnDay[dateStr];
-        worklog[year].ent[month].timeSpent
-          = worklog[year].ent[month].timeSpent
-          + task.timeSpentOnDay[dateStr];
-        worklog[year].timeSpent
-          = worklog[year].timeSpent
-          + task.timeSpentOnDay[dateStr];
-
-        worklog[year].ent[month].ent[day].ent.push({
-          task: task,
-          parentTitle: task.parentId ? entities[task.parentId].title : null,
-          parentId: task.parentId,
-          isVisible: true,
-          timeSpent: task.timeSpentOnDay[dateStr]
-        });
-      }
-    });
-  });
-  return worklog;
-};
+import { mapArchiveToWorklog, WorklogDay, WorklogMonth } from '../../../core/util/map-archive-to-worklog';
 
 
 @Component({
@@ -93,11 +36,11 @@ export class HistoryComponent implements OnInit {
     }
   }
 
-  createTasksForDay(data: any) {
+  private _createTasksForDay(data: { [key: number]: WorklogDay }) {
     const tasks = [];
     const dayData = {...data};
 
-    dayData.entries.forEach((entry) => {
+    dayData.ent.forEach((entry) => {
       const task = entry.task;
       task.timeSpent = entry.timeSpent;
       task.dateStr = dayData.dateStr;
@@ -107,10 +50,10 @@ export class HistoryComponent implements OnInit {
     return tasks;
   }
 
-  createTasksForMonth(data: any) {
+  private _createTasksForMonth(data: { [key: number]: WorklogMonth }) {
     let tasks = [];
     const monthData = {...data};
-    monthData.entries.forEach((entry) => {
+    monthData.ent.forEach((entry) => {
       tasks = tasks.concat(this.createTasksForDay(entry));
     });
     return tasks;
