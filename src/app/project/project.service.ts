@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { GoogleTimeSheetExportSettings, Project } from './project.model';
+import { GoogleTimeSheetExport, Project } from './project.model';
 import { PersistenceService } from '../core/persistence/persistence.service';
 import { select, Store } from '@ngrx/store';
 import { ProjectActionTypes } from './store/project.actions';
@@ -16,6 +16,7 @@ import { IssueIntegrationCfg, IssueProviderKey } from '../issue/issue';
 import { JiraCfg } from '../issue/jira/jira';
 import { DEFAULT_PROJECT } from './project.const';
 import { Dictionary } from '@ngrx/entity';
+import { formatWorklogDateStr } from '../core/util/format-worklog-date-str';
 
 @Injectable()
 export class ProjectService {
@@ -41,7 +42,7 @@ export class ProjectService {
 
     if (projectState) {
       if (!projectState.currentId) {
-        projectState.currentId = projectState.ids[0];
+        projectState.currentId = projectState.ids[0] as string;
       }
       this._store.dispatch({
         type: ProjectActionTypes.LoadProjectState,
@@ -101,9 +102,12 @@ export class ProjectService {
   }
 
   // HELPER
-  updateTimeSheetExportSettings(projectId: string, settings: GoogleTimeSheetExportSettings) {
+  updateTimeSheetExportSettings(projectId: string, data: GoogleTimeSheetExport, isExport = false) {
     this.update(projectId, {
-      googleTimeSheetExportSettings: settings
+      googleTimeSheetExport: {
+        ...data,
+        ...(isExport ? {lastExported: formatWorklogDateStr(new Date())} : {})
+      }
     });
   }
 

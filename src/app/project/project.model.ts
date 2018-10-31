@@ -9,7 +9,8 @@ export interface IssueIntegrationCfgs {
 
 export type RoundTimeOption = 'QUARTER' | 'HALF' | 'HOUR';
 
-export type GoogleTimeSheetExportSettings = Readonly<{
+
+export type GoogleTimeSheetExport = Readonly<{
   spreadsheetId: string,
   isAutoLogin: false,
   isAutoFocusEmpty: false,
@@ -17,7 +18,8 @@ export type GoogleTimeSheetExportSettings = Readonly<{
   roundStartTimeTo: RoundTimeOption,
   roundEndTimeTo: RoundTimeOption,
   roundWorkTimeTo: RoundTimeOption,
-  defaultValues: string[]
+  defaultValues: string[],
+  lastExported: string,
 }>;
 
 export type Project = Readonly<{
@@ -26,6 +28,6 @@ export type Project = Readonly<{
   themeColor: string;
   isDarkTheme: boolean;
   issueIntegrationCfgs: IssueIntegrationCfgs;
-  googleTimeSheetExportSettings: GoogleTimeSheetExportSettings;
+  googleTimeSheetExport: GoogleTimeSheetExport;
 }>;
 

@@ -3,7 +3,7 @@ import { GOOGLE_DEFAULT_FIELDS_FOR_DRIVE, GOOGLE_DISCOVERY_DOCS, GOOGLE_SCOPES, 
 import * as moment from 'moment';
 import { IS_ELECTRON } from '../../app.constants';
 import { MultiPartBuilder } from './util/multi-part-builder';
-import { HttpClient, HttpRequest } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams, HttpRequest } from '@angular/common/http';
 import { SnackService } from '../snack/snack.service';
 import { SnackType } from '../snack/snack.model';
 import { ConfigService } from '../config/config.service';
@@ -17,6 +17,7 @@ import { Observable } from 'rxjs';
   providedIn: 'root'
 })
 export class GoogleApiService {
+  public isLoggedIn: boolean;
   public isLoggedIn$: Observable<boolean> = this._configService.cfg$
     .pipe(map((cfg: GlobalConfig) => {
       const session = cfg && cfg._googleSession;
@@ -25,11 +26,8 @@ export class GoogleApiService {
         .valueOf() + EXPIRES_SAFETY_MARGIN > session.expiresAt);
       return session && session.accessToken && !isExpired;
     }));
-  public isLoggedIn: boolean;
 
   private _isScriptLoaded = false;
-  // TODO save and load tokens
-
   private _gapi: any;
 
   constructor(private readonly _http: HttpClient,
@@ -38,17 +36,7 @@ export class GoogleApiService {
     this.isLoggedIn$.subscribe((isLoggedIn) => this.isLoggedIn = isLoggedIn);
   }
 
-  private get _session(): GoogleSession {
-    return this._configService.cfg && this._configService.cfg._googleSession;
-  }
-
-  private _updateSession(sessionData: Partial<GoogleSession>) {
-    console.log('update', sessionData);
-    this._configService.updateSection('_googleSession', sessionData);
-  }
-
   login() {
-    /*jshint camelcase: false */
     if (this.isLoggedIn) {
       return new Promise((resolve) => resolve());
     }
@@ -85,7 +73,6 @@ export class GoogleApiService {
           }
         });
     }
-    /*jshint camelcase: true */
   }
 
 
@@ -124,9 +111,6 @@ export class GoogleApiService {
         insertDataOption: 'INSERT_ROWS',
         valueInputOption: 'USER_ENTERED'
       },
-      headers: {
-        'Authorization': `Bearer ${this._session.accessToken}`
-      },
       data: {values: [row]}
     });
   }
@@ -139,9 +123,6 @@ export class GoogleApiService {
       params: {
         'key': GOOGLE_SETTINGS.API_KEY,
       },
-      headers: {
-        'Authorization': `Bearer ${this._session.accessToken}`
-      }
     });
   }
 
@@ -149,7 +130,9 @@ export class GoogleApiService {
     return new Promise((resolve, reject) => {
       this.getSpreadsheetData(spreadsheetId, 'A1:Z99')
         .then((response: any) => {
-          const range = response.result || response.data || response;
+          console.log(response);
+
+          const range = response.body || response;
 
           if (range && range.values && range.values[0]) {
             resolve({
@@ -178,9 +161,6 @@ export class GoogleApiService {
         supportsTeamDrives: true,
         fields: GOOGLE_DEFAULT_FIELDS_FOR_DRIVE
       },
-      headers: {
-        'Authorization': `Bearer ${this._session.accessToken}`,
-      },
     });
   }
 
@@ -197,9 +177,6 @@ export class GoogleApiService {
         'key': GOOGLE_SETTINGS.API_KEY,
         // should be called name officially instead of title
         q: `title='${fileName}' and trashed=false`,
-      },
-      headers: {
-        'Authorization': `Bearer ${this._session.accessToken}`,
       },
     });
   }
@@ -218,9 +195,6 @@ export class GoogleApiService {
         'key': GOOGLE_SETTINGS.API_KEY,
         supportsTeamDrives: true,
         alt: 'media'
-      },
-      headers: {
-        'Authorization': `Bearer ${this._session.accessToken}`,
       },
     });
 
@@ -269,11 +243,19 @@ export class GoogleApiService {
         fields: GOOGLE_DEFAULT_FIELDS_FOR_DRIVE
       },
       headers: {
-        'Authorization': `Bearer ${this._session.accessToken}`,
         'Content-Type': multipart.type
       },
       data: multipart.body
     });
+  }
+
+  private get _session(): GoogleSession {
+    return this._configService.cfg && this._configService.cfg._googleSession;
+  }
+
+  private _updateSession(sessionData: Partial<GoogleSession>) {
+    console.log('update', sessionData);
+    this._configService.updateSection('_googleSession', sessionData);
   }
 
   private initClient() {
@@ -344,8 +326,24 @@ export class GoogleApiService {
     });
   }
 
-  private _mapHttp(p: HttpRequest<string> | any): Promise<any> {
-    const sub = this._http[p.method.toLowerCase()](p.url, p)
+  private _mapHttp(params_: HttpRequest<string> | any): Promise<any> {
+    const p = {
+      ...params_,
+      headers: {
+        ...(params_.headers || {}),
+        'Authorization': `Bearer ${this._session.accessToken}`,
+      }
+    };
+    const bodyArg = p.data ? [p.data] : [];
+    const allArgs = [...bodyArg, {
+      headers: new HttpHeaders(p.headers),
+      params: new HttpParams({fromObject: p.params}),
+    }];
+    console.log(allArgs);
+    const req = new HttpRequest(p.method, p.url, ...allArgs);
+
+    // const sub = this._http[p.method.toLowerCase()](p.url, p.data, p)
+    const sub = this._http.request(req)
       .pipe(catchError((res) => {
         console.log(res);
         if (!res) {

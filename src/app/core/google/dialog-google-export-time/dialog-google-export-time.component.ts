@@ -6,7 +6,7 @@ import { SnackService } from '../../snack/snack.service';
 import { MatDialogRef } from '@angular/material';
 import { ProjectService } from '../../../project/project.service';
 import { Subject } from 'rxjs';
-import { GoogleTimeSheetExportSettings, Project } from '../../../project/project.model';
+import { GoogleTimeSheetExport, Project } from '../../../project/project.model';
 import { takeUntil } from 'rxjs/operators';
 
 @Component({
@@ -16,7 +16,7 @@ import { takeUntil } from 'rxjs/operators';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DialogGoogleExportTimeComponent implements OnInit, OnDestroy {
-  opts: GoogleTimeSheetExportSettings = {
+  opts: GoogleTimeSheetExport = {
     spreadsheetId: undefined,
     isAutoLogin: false,
     isAutoFocusEmpty: false,
@@ -24,6 +24,7 @@ export class DialogGoogleExportTimeComponent implements OnInit, OnDestroy {
     roundStartTimeTo: undefined,
     roundEndTimeTo: undefined,
     roundWorkTimeTo: undefined,
+    lastExported: undefined,
     defaultValues: []
   };
   // $rootScope.r.uiHelper.timeSheetExportSettings;
@@ -58,7 +59,7 @@ export class DialogGoogleExportTimeComponent implements OnInit, OnDestroy {
     this._projectService.currentProject$
       .pipe(takeUntil(this._destroy$))
       .subscribe((project: Project) => {
-        this.opts = project.googleTimeSheetExportSettings;
+        this.opts = project.googleTimeSheetExport;
         this._projectId = project.id;
       });
   }
@@ -149,8 +150,8 @@ export class DialogGoogleExportTimeComponent implements OnInit, OnDestroy {
             type: 'SUCCESS'
           });
 
-          // $mdDialog.hide();
-          // $rootScope.r.currentSession.isTimeSheetExported = true;
+          this._matDialogRef.close();
+          this._projectService.updateTimeSheetExportSettings(this._projectId, this.opts, true);
           this.isLoading = false;
         }).catch(this._handleError.bind(this));
     }
@@ -278,7 +279,7 @@ export class DialogGoogleExportTimeComponent implements OnInit, OnDestroy {
     const val = moment.duration(this.MISSING.getTimeWorkedToday);
 
     const roundTo = this.opts.roundWorkTimeTo;
-    const dur = this.roundDuration(val, roundTo, this.opts.isRoundWorkTimeUp) as Duration;
+    const dur = this.roundDuration(val, roundTo, this.opts.isRoundWorkTimeUp) as any;
     if (dur.format) {
       return dur.format('HH:mm');
     }

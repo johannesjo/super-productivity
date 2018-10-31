@@ -6,7 +6,7 @@ export const DEFAULT_PROJECT: Project = {
   themeColor: '',
   isDarkTheme: false,
   issueIntegrationCfgs: {},
-  googleTimeSheetExportSettings: {
+  googleTimeSheetExport: {
     spreadsheetId: null,
     isAutoLogin: false,
     isAutoFocusEmpty: false,
@@ -14,6 +14,7 @@ export const DEFAULT_PROJECT: Project = {
     roundStartTimeTo: null,
     roundEndTimeTo: null,
     roundWorkTimeTo: null,
+    lastExported: null,
     defaultValues: [
       '{date}',
       '{startTime}',
@@ -29,7 +30,7 @@ export const FIRST_PROJECT: Project = {
   themeColor: 'light-blue',
   isDarkTheme: false,
   issueIntegrationCfgs: {},
-  googleTimeSheetExportSettings: {
+  googleTimeSheetExport: {
     spreadsheetId: null,
     isAutoLogin: false,
     isAutoFocusEmpty: false,
@@ -37,6 +38,7 @@ export const FIRST_PROJECT: Project = {
     roundStartTimeTo: null,
     roundEndTimeTo: null,
     roundWorkTimeTo: null,
-    defaultValues: []
+    defaultValues: [],
+    lastExported: null,
   }
 };
