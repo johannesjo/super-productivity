@@ -1,3 +1,45 @@
-<p>
-  history works!
-</p>
+<div *ngFor="let year of worklog|keyvalue"
+     class="year">
+  <h1 class="year-title mat-headline"
+      [innerHtml]="year.key"></h1>
+  <div class="year-time-spent">Time spent total: <strong [innerHtml]="year.value.timeSpent|msToString"></strong></div>
+
+  <div *ngFor="let month of year.value.ent|keyvalue"
+       class="month">
+    <h2 class="month-title mat-headline">
+      <span [innerHtml]="month.key"></span>
+      <button mat-mini-fab=""
+              color="primary"
+              aria-label="export data"
+              (click)="exportData('MONTH',month.value)">
+        <mat-icon>call_made</mat-icon>
+      </button>
+    </h2>
+    <div class="month-time-spent">Time spent total: <strong [innerHtml]="month.value.timeSpent|msToString"></strong>
+    </div>
+    <div *ngFor="let worklogForDay of month.value.ent|keyvalue"
+         class="day">
+
+      <div class="day-title">
+        <button mat-mini-fab=""
+                aria-label="export data"
+                (click)="worklogForDay.value.isVisible=!worklogForDay.value.isVisible;">
+          <mat-icon>list</mat-icon>
+        </button>
+        <span [innerHtml]="worklogForDay.value.dateStr"></span>:
+        <strong [innerHtml]="worklogForDay.value.timeSpent|msToString"></strong>
+      </div>
+
+      <div [@expandFade]
+           *ngIf="worklogForDay.value.isVisible">
+        <table class="task-summary-table">
+          <tr *ngFor="let logEntry of worklogForDay.value.ent">
+            <td [innerHtml]="logEntry.task.title"></td>
+            <td [innerHtml]="logEntry.task.timeSpentOnDay[worklogForDay.value.dateStr]|msToString"></td>
+          </tr>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+

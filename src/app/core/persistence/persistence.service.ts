@@ -16,9 +16,6 @@ export class PersistenceService {
   constructor() {
   }
 
-  private static _makeProjectKey(projectId, subKey, additional?) {
-    return LS_PROJECT_PREFIX + projectId + '_' + subKey + (additional ? '_' + additional : '');
-  }
 
   // PROJECT DATA
   // -------------
@@ -31,15 +28,15 @@ export class PersistenceService {
   }
 
   saveTasksForProject(projectId, taskState: TaskState) {
-    saveToLs(PersistenceService._makeProjectKey(projectId, LS_TASK_STATE), taskState);
+    saveToLs(this._makeProjectKey(projectId, LS_TASK_STATE), taskState);
   }
 
   loadTasksForProject(projectId): TaskState {
-    return loadFromLs(PersistenceService._makeProjectKey(projectId, LS_TASK_STATE));
+    return loadFromLs(this._makeProjectKey(projectId, LS_TASK_STATE));
   }
 
   saveToTaskArchiveForProject(projectId, tasksToArchive: EntityState<Task>) {
-    const lsKey = PersistenceService._makeProjectKey(projectId, LS_TASK_ARCHIVE);
+    const lsKey = this._makeProjectKey(projectId, LS_TASK_ARCHIVE);
     const currentArchive: EntityState<Task> = loadFromLs(lsKey);
     if (currentArchive) {
       const mergedEntities = {
@@ -58,14 +55,17 @@ export class PersistenceService {
     }
   }
 
+  loadTaskArchiveForProject(projectId: string): EntityState<Task> {
+    return loadFromLs(this._makeProjectKey(projectId, LS_TASK_ARCHIVE));
+  }
 
   saveIssuesForProject(projectId, issueType: IssueProviderKey, data: JiraIssueState) {
-    saveToLs(PersistenceService._makeProjectKey(projectId, LS_ISSUE_STATE, issueType), data);
+    saveToLs(this._makeProjectKey(projectId, LS_ISSUE_STATE, issueType), data);
   }
 
   // TODO add correct type
   loadIssuesForProject(projectId, issueType: IssueProviderKey): any {
-    return loadFromLs(PersistenceService._makeProjectKey(projectId, LS_ISSUE_STATE, issueType));
+    return loadFromLs(this._makeProjectKey(projectId, LS_ISSUE_STATE, issueType));
   }
 
 
@@ -86,5 +86,9 @@ export class PersistenceService {
 
   saveGlobalConfig(globalConfig: GlobalConfig) {
     saveToLs(LS_GLOBAL_CFG, globalConfig);
+  }
+
+  private _makeProjectKey(projectId, subKey, additional?) {
+    return LS_PROJECT_PREFIX + projectId + '_' + subKey + (additional ? '_' + additional : '');
   }
 }

@@ -22,8 +22,9 @@ import { formatWorklogDateStr } from '../core/util/format-worklog-date-str';
 export class ProjectService {
   list$: Observable<Project[]> = this._store.pipe(select(selectAllProjects));
   currentProject$: Observable<Project> = this._store.pipe(select(selectCurrentProject));
-  currentId$: Observable<string> = this._store.pipe(select(selectCurrentProjectId));
   currentJiraCfg$: Observable<JiraCfg> = this._store.pipe(select(selectProjectJiraCfg));
+  currentId$: Observable<string> = this._store.pipe(select(selectCurrentProjectId));
+  currentId: string;
 
   constructor(
     private readonly _persistenceService: PersistenceService,
@@ -34,6 +35,8 @@ export class ProjectService {
     setTimeout(() => {
       this.load();
     }, 50);
+
+    this.currentId$.subscribe((id) => this.currentId = id);
   }
 
   load() {
