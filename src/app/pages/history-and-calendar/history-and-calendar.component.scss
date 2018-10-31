@@ -4,6 +4,10 @@
   justify-content: center;
   width: 50%;
   color: #ffffff;
+
+  &.mat-tab-label-active {
+    opacity: 1;
+  }
 }
 
 .links {

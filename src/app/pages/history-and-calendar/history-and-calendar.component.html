@@ -3,6 +3,7 @@
   <a mat-tab-link
      routerLink="calendar"
      routerLinkActive
+     [active]="rlaCal.isActive"
      #rlaCal="routerLinkActive">
     <mat-icon>today</mat-icon>
     Calendar
@@ -10,9 +11,11 @@
   <a mat-tab-link
      routerLink="history"
      routerLinkActive
+     [active]="rlaHistory.isActive"
      #rlaHistory="routerLinkActive">
     <mat-icon>history</mat-icon>
-    Calendar
+    History
   </a>
 </nav>
+
 <router-outlet></router-outlet>
