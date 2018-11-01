@@ -11,7 +11,7 @@ export interface WorklogDataForDay {
 
 export interface WorklogDay {
   timeSpent: number;
-  ent: WorklogDataForDay[];
+  logEntries: WorklogDataForDay[];
   dateStr: string;
 }
 
@@ -60,7 +60,7 @@ export const mapArchiveToWorklog = (taskState: EntityState<Task>): Worklog => {
       if (!worklog[year].ent[month].ent[day]) {
         worklog[year].ent[month].ent[day] = {
           timeSpent: 0,
-          ent: [],
+          logEntries: [],
           dateStr: dateStr,
           // id: this.Uid()
         };
@@ -76,7 +76,7 @@ export const mapArchiveToWorklog = (taskState: EntityState<Task>): Worklog => {
           = worklog[year].timeSpent
           + task.timeSpentOnDay[dateStr];
 
-        worklog[year].ent[month].ent[day].ent.push({
+        worklog[year].ent[month].ent[day].logEntries.push({
           task: task,
           parentTitle: task.parentId ? entities[task.parentId].title : null,
           parentId: task.parentId,

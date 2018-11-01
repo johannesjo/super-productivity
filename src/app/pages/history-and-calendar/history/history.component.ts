@@ -40,7 +40,7 @@ export class HistoryComponent implements OnInit {
     const tasks = [];
     const dayData = {...data};
 
-    dayData.ent.forEach((entry) => {
+    dayData.logEntries.forEach((entry) => {
       const task: any = {...entry.task};
       task.timeSpent = entry.timeSpent;
       task.dateStr = dayData.dateStr;
