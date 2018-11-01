@@ -4,9 +4,9 @@ import { ConfigPageComponent } from './pages/config-page/config-page.component';
 import { ProjectPageComponent } from './pages/project-page/project-page.component';
 import { DailyPlannerComponent } from './pages/daily-planner/daily-planner.component';
 import { DailySummaryComponent } from './pages/daily-summary/daily-summary.component';
-import { HistoryAndCalendarComponent } from './pages/history-and-calendar/history-and-calendar.component';
-import { HistoryComponent } from './pages/history-and-calendar/history/history.component';
-import { CalendarComponent } from './pages/history-and-calendar/calendar/calendar.component';
+import { WorklogAndCalendarComponent } from './pages/worklog-and-calendar/worklog-and-calendar.component';
+import { WorklogComponent } from './pages/worklog-and-calendar/worklog/worklog.component';
+import { CalendarComponent } from './pages/worklog-and-calendar/calendar/calendar.component';
 
 export const APP_ROUTES: Routes = [
   {path: 'work-view', component: WorkViewPageComponent},
@@ -15,12 +15,12 @@ export const APP_ROUTES: Routes = [
   {path: 'projects', component: ProjectPageComponent},
   {path: 'daily-summary', component: DailySummaryComponent},
   {
-    path: 'history-and-calendar',
-    component: HistoryAndCalendarComponent,
+    path: 'worklog-and-calendar',
+    component: WorklogAndCalendarComponent,
     children: [
-      {path: '', redirectTo: 'history', pathMatch: 'full'},
+      {path: '', redirectTo: 'worklog', pathMatch: 'full'},
       {path: 'calendar', component: CalendarComponent},
-      {path: 'history', component: HistoryComponent},
+      {path: 'worklog', component: WorklogComponent},
     ]
   },
   // {path: 'hero/:id', component: HeroDetailComponent},

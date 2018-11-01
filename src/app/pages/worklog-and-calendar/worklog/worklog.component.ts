@@ -6,13 +6,13 @@ import { mapArchiveToWorklog, WorklogDay, WorklogMonth } from '../../../core/uti
 
 
 @Component({
-  selector: 'history',
-  templateUrl: './history.component.html',
-  styleUrls: ['./history.component.scss'],
+  selector: 'worklog',
+  templateUrl: './worklog.component.html',
+  styleUrls: ['./worklog.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [expandFadeAnimation]
 })
-export class HistoryComponent implements OnInit {
+export class WorklogComponent implements OnInit {
   worklog: any = {};
   totalTimeSpent: number;
 
@@ -32,7 +32,7 @@ export class HistoryComponent implements OnInit {
     if (type === 'MONTH') {
       // const tasks = vm.createTasksForMonth(data);
       // Dialogs('SIMPLE_TASK_SUMMARY', {
-      //   settings: $rootScope.r.uiHelper.timeTrackingHistoryExportSettings,
+      //   settings: $rootScope.r.uiHelper.timeTrackingWorklogExportSettings,
       //   tasks: tasks,
       //   finishDayFn: false
       // }, true);

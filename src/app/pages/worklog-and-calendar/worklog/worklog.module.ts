@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { HistoryComponent } from './history.component';
+import { WorklogComponent } from './worklog.component';
 import { CoreModule } from '../../../core/core.module';
 import { UiModule } from '../../../ui/ui.module';
 
@@ -10,7 +10,7 @@ import { UiModule } from '../../../ui/ui.module';
     CoreModule,
     UiModule,
   ],
-  declarations: [HistoryComponent],
-  exports: [HistoryComponent],
+  declarations: [WorklogComponent],
+  exports: [WorklogComponent],
 })
-export class HistoryModule { }
+export class WorklogModule { }

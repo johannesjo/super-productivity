@@ -1,20 +1,20 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { HistoryAndCalendarComponent } from './history-and-calendar.component';
+import { WorklogAndCalendarComponent } from './worklog-and-calendar.component';
 
-describe('HistoryAndCalendarComponent', () => {
-  let component: HistoryAndCalendarComponent;
-  let fixture: ComponentFixture<HistoryAndCalendarComponent>;
+describe('WorklogAndCalendarComponent', () => {
+  let component: WorklogAndCalendarComponent;
+  let fixture: ComponentFixture<WorklogAndCalendarComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ HistoryAndCalendarComponent ]
+      declarations: [ WorklogAndCalendarComponent ]
     })
     .compileComponents();
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(HistoryAndCalendarComponent);
+    fixture = TestBed.createComponent(WorklogAndCalendarComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

@@ -1,8 +1,8 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { HistoryAndCalendarComponent } from './history-and-calendar.component';
+import { WorklogAndCalendarComponent } from './worklog-and-calendar.component';
 import { CalendarModule } from './calendar/calendar.module';
-import { HistoryModule } from './history/history.module';
+import { WorklogModule } from './worklog/worklog.module';
 import { CoreModule } from '../../core/core.module';
 import { UiModule } from '../../ui/ui.module';
 import { RouterModule } from '@angular/router';
@@ -11,12 +11,12 @@ import { RouterModule } from '@angular/router';
   imports: [
     CommonModule,
     CalendarModule,
-    HistoryModule,
+    WorklogModule,
     CoreModule,
     UiModule,
     RouterModule,
   ],
-  declarations: [HistoryAndCalendarComponent],
-  exports: [HistoryAndCalendarComponent],
+  declarations: [WorklogAndCalendarComponent],
+  exports: [WorklogAndCalendarComponent],
 })
-export class HistoryAndCalendarModule { }
+export class WorklogAndCalendarModule { }
