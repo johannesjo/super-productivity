@@ -37,6 +37,8 @@ export class TaskEffects {
         TaskActionTypes.UnsetCurrentTask,
         TaskActionTypes.UpdateTask,
         TaskActionTypes.MoveToArchive,
+        TaskActionTypes.MoveToBacklog,
+        TaskActionTypes.MoveToToday,
       ),
       withLatestFrom(
         this._store$.pipe(select(selectCurrentProjectId)),
