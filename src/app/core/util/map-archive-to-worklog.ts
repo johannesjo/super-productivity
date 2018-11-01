@@ -1,33 +1,37 @@
 import { EntityState } from '@ngrx/entity';
 import { Task } from '../../tasks/task.model';
 
-export type WorklogDataForDay = Readonly<{
+export interface WorklogDataForDay {
   timeSpent: number;
-  task: Task,
-  parentTitle: string,
-  parentId: string,
-  isVisible: boolean,
-  timeSpent: number;
-}>;
-export type WorklogDay = Readonly<{
+  task: Task;
+  parentTitle: string;
+  parentId: string;
+  isVisible: boolean;
+}
+
+export interface WorklogDay {
   timeSpent: number;
   ent: WorklogDataForDay[];
-}>;
-export type WorklogMonth = Readonly<{
+  dateStr: string;
+}
+
+export interface WorklogMonth {
   timeSpent: number;
   ent: {
     [key: number]: WorklogDay;
-  }
-}>;
-export type WorklogYear = Readonly<{
+  };
+}
+
+export interface WorklogYear {
   timeSpent: number;
   ent: {
     [key: number]: WorklogMonth;
-  }
-}>;
-export type Worklog = Readonly<{
+  };
+}
+
+export interface Worklog {
   [key: number]: WorklogYear;
-}>;
+}
 
 export const mapArchiveToWorklog = (taskState: EntityState<Task>): Worklog => {
   const entities = taskState.entities;

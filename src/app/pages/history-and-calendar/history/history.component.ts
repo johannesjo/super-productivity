@@ -36,12 +36,12 @@ export class HistoryComponent implements OnInit {
     }
   }
 
-  private _createTasksForDay(data: { [key: number]: WorklogDay }) {
+  private _createTasksForDay(data: WorklogDay) {
     const tasks = [];
     const dayData = {...data};
 
     dayData.ent.forEach((entry) => {
-      const task = entry.task;
+      const task: any = {...entry.task};
       task.timeSpent = entry.timeSpent;
       task.dateStr = dayData.dateStr;
       tasks.push(task);
@@ -50,11 +50,12 @@ export class HistoryComponent implements OnInit {
     return tasks;
   }
 
-  private _createTasksForMonth(data: { [key: number]: WorklogMonth }) {
+  private _createTasksForMonth(data: WorklogMonth) {
     let tasks = [];
     const monthData = {...data};
-    monthData.ent.forEach((entry) => {
-      tasks = tasks.concat(this.createTasksForDay(entry));
+    Object.keys(monthData.ent).forEach(dayDateStr => {
+      const entry: WorklogDay = monthData[dayDateStr];
+      tasks = tasks.concat(this._createTasksForDay(entry));
     });
     return tasks;
   }
