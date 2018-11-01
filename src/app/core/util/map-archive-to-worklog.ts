@@ -33,10 +33,10 @@ export interface Worklog {
   [key: number]: WorklogYear;
 }
 
-export const mapArchiveToWorklog = (taskState: EntityState<Task>): Worklog => {
+export const mapArchiveToWorklog = (taskState: EntityState<Task>): { worklog: Worklog, totalTimeSpent } => {
   const entities = taskState.entities;
   const worklog: Worklog = {};
-
+  let totalTimeSpent = 0;
   Object.keys(entities).forEach(id => {
     const task = entities[id];
 
@@ -66,15 +66,17 @@ export const mapArchiveToWorklog = (taskState: EntityState<Task>): Worklog => {
         };
       }
       if (task.subTaskIds.length === 0) {
+        const timeSpentForTask = task.timeSpentOnDay[dateStr];
         worklog[year].ent[month].ent[day].timeSpent
           = worklog[year].ent[month].ent[day].timeSpent
-          + task.timeSpentOnDay[dateStr];
+          + timeSpentForTask;
         worklog[year].ent[month].timeSpent
           = worklog[year].ent[month].timeSpent
-          + task.timeSpentOnDay[dateStr];
+          + timeSpentForTask;
         worklog[year].timeSpent
           = worklog[year].timeSpent
-          + task.timeSpentOnDay[dateStr];
+          + timeSpentForTask;
+        totalTimeSpent += timeSpentForTask;
 
         worklog[year].ent[month].ent[day].logEntries.push({
           task: task,
@@ -86,5 +88,5 @@ export const mapArchiveToWorklog = (taskState: EntityState<Task>): Worklog => {
       }
     });
   });
-  return worklog;
+  return {worklog, totalTimeSpent};
 };

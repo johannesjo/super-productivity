@@ -6,7 +6,7 @@ import { DurationToStringPipe } from './duration/duration-to-string.pipe';
 import { EditOnClickDirective } from './edit-on-click/edit-on-click.directive';
 import { InlineMarkdownComponent } from './inline-markdown/inline-markdown.component';
 import {
-  MatAutocompleteModule,
+  MatAutocompleteModule, MatBadgeModule,
   MatButtonModule,
   MatCardModule,
   MatCheckboxModule,
@@ -80,6 +80,7 @@ import { NumberToMonthPipe } from './duration/number-to-month.pipe';
     MatTooltipModule,
     MatChipsModule,
     MatSlideToggleModule,
+    MatBadgeModule,
   ],
   declarations: [
     DurationFromStringPipe,
@@ -138,6 +139,7 @@ import { NumberToMonthPipe } from './duration/number-to-month.pipe';
     MatTooltipModule,
     MatChipsModule,
     MatSlideToggleModule,
+    MatBadgeModule,
 
     ReactiveFormsModule,
     FormlyModule,

@@ -1,31 +1,28 @@
+@import "../../../../variables";
+
 :host {
   text-align: center;
 
+  .total-time {
+    margin-top: $s*4;
+  }
+
   .year {
     &-title {
-      margin-top: 30px;
+      margin-top: 3*$s;
     }
     &-time-spent {
       font-size: 21px;
     }
   }
 
-  .task-summary-table {
-    width: 100%;
-  }
-
   .month {
-    .md-icon-button {
-      width: 30px;
-      height: 30px;
-      line-height: 30px;
-      min-height: 30px;
-      padding: 0;
-    }
-
+    margin-top: 3*$s;
+    margin-bottom: $s;
     &-title {
-      margin-top: 30px;
-      margin-bottom: 8px;
+      button {
+        margin-left: $s;
+      }
     }
     &-time-spent {
       font-size: 18px;
@@ -33,9 +30,25 @@
   }
 
   .day {
+    margin-top: 2*$s;
+    margin-bottom: $s;
     &-title {
-      margin-top: 20px;
-      margin-bottom: 10px;
+
+      button {
+        margin-left: $s;
+      }
+    }
+  }
+
+  .summary-table-wrapper {
+    display: inline-block;
+    > table {
+      width: 100%;
+      text-align: left;
+      td:first-of-type {
+        padding-right: $s;
+      }
     }
   }
 }
+

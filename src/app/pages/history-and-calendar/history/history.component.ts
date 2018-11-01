@@ -14,6 +14,7 @@ import { mapArchiveToWorklog, WorklogDay, WorklogMonth } from '../../../core/uti
 })
 export class HistoryComponent implements OnInit {
   worklog: any = {};
+  totalTimeSpent: number;
 
   constructor(
     private _persistenceService: PersistenceService,
@@ -22,7 +23,9 @@ export class HistoryComponent implements OnInit {
 
   ngOnInit() {
     const completeState = this._persistenceService.loadTaskArchiveForProject(this._projectService.currentId);
-    this.worklog = mapArchiveToWorklog(completeState);
+    const {worklog, totalTimeSpent} = mapArchiveToWorklog(completeState);
+    this.worklog = worklog;
+    this.totalTimeSpent = totalTimeSpent;
   }
 
   exportData(type, data) {
@@ -34,6 +37,9 @@ export class HistoryComponent implements OnInit {
       //   finishDayFn: false
       // }, true);
     }
+  }
+
+  restoreTask() {
   }
 
   private _createTasksForDay(data: WorklogDay) {
