@@ -44,6 +44,7 @@ import { MsToStringPipe$ } from './duration/ms-to-string$.pipe';
 import { CollapsibleComponent } from './collapsible/collapsible.component';
 import { HelpSectionComponent } from './help-section/help-section.component';
 import { NumberToMonthPipe } from './duration/number-to-month.pipe';
+import { SplitModule } from './split/split.module';
 
 @NgModule({
   imports: [
@@ -53,6 +54,7 @@ import { NumberToMonthPipe } from './duration/number-to-month.pipe';
     ReactiveFormsModule,
     FormlyModule.forChild(),
     FormlyMaterialModule,
+    SplitModule,
 
     // material2
     MatAutocompleteModule,
@@ -98,6 +100,7 @@ import { NumberToMonthPipe } from './duration/number-to-month.pipe';
     NumberToMonthPipe,
   ],
   exports: [
+    SplitModule,
     DurationFromStringPipe,
     DurationToStringPipe,
     InputDurationDirective,

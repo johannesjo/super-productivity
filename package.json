@@ -44,6 +44,7 @@
     "@angular/common": "^7.0.0",
     "@angular/compiler": "^7.0.0",
     "@angular/core": "^7.0.0",
+    "@angular/flex-layout": "^7.0.0-beta.19",
     "@angular/forms": "^7.0.0",
     "@angular/http": "^7.0.0",
     "@angular/material": "^7.0.2",
