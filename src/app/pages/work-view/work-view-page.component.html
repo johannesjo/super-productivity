@@ -1,60 +1,93 @@
-<header class="work-view-header bg-900">
-  <div class="status-bar">
-    <div class="item"><span class="label">Working today:</span>
-      <span class="no-wrap">
+<div class="wrapper"
+     style="overflow:hidden;height:100%; width: 100%; position: absolute; top: 0; left: 0;">
+  <div [fxLayout]="isVertical?'row':'column'"
+       fxFlexFill
+       [ngxSplit]="isVertical?'row':'column'">
+    <div class="today"
+         fxFlex="1 1 100%"
+         ngxSplitArea>
+
+      <header class="work-view-header bg-900">
+        <div class="status-bar">
+          <div class="item"><span class="label">Working today:</span>
+            <span class="no-wrap">
       <strong>{{workingToday$|async|msToString}}</strong>
       <mat-icon aria-label="timer icon">timer</mat-icon>
       </span>
-    </div>
+          </div>
 
-    <div class="item">
-      <span class="label">Estimate remaining:</span>
-      <span class="no-wrap">
+          <div class="item">
+            <span class="label">Estimate remaining:</span>
+            <span class="no-wrap">
       ~<strong>{{estimateRemaining$|async|msToString}}</strong>
       <mat-icon>timer</mat-icon>
       </span>
-    </div>
+          </div>
 
-    <div class="item"
-         *ngIf="isShowTimeWorkedWithoutBreak">
-      <span class="label">Without break: </span>
-      <span class="no-wrap">
+          <div class="item"
+               *ngIf="isShowTimeWorkedWithoutBreak">
+            <span class="label">Without break: </span>
+            <span class="no-wrap">
         <strong>{{workedWithoutABreak}}</strong><mat-icon>timer</mat-icon>
       </span>
+          </div>
+          <button mat-mini-fab
+                  color="primary"
+                  (click)="isHideControls = !(isHideControls);"
+                  aria-label="collapse sub tasks and notes">
+            <mat-icon class="hide-controls-icon">vertical_align_center</mat-icon>
+          </button>
+          <button mat-mini-fab
+                  color="primary"
+                  (click)="collapseAllNotesAndSubTasks()"
+                  aria-label="collapse sub tasks and notes">
+            <mat-icon>vertical_align_center</mat-icon>
+          </button>
+        </div>
+      </header>
+
+      <div class="component-wrapper page-wrapper">
+        <task-list [tasks]="undoneTasks$|async"
+                   [focusIdList]="focusTaskIdList$|async"
+                   [filterArgs]="{'isDone':false}"></task-list>
+        <button (click)="isShowBacklog=!isShowBacklog">Show {{isShowBacklog}}</button>
+        <button (click)="isVertical=!isVertical">Vertical {{isVertical}}</button>
+
+        <!--<div *ngIf="!isShowBacklog"-->
+        <div
+             [@expandFade]>
+          <div class="button-controls">
+            <button routerLink="/daily-summary"
+                    mat-raised-button=""
+                    color="primary">
+              <mat-icon>done_all</mat-icon>
+              Finish working
+            </button>
+          </div>
+
+          <h2 class="mat-h2">Completed Tasks</h2>
+          <task-list [tasks]="doneTasks$|async"
+                     [focusIdList]="focusTaskIdList$|async"
+                     [filterArgs]="{'isDone':true}"></task-list>
+        </div>
+      </div>
+
     </div>
-    <button mat-mini-fab
-            color="primary"
-            (click)="isHideControls = !(isHideControls);"
-            aria-label="collapse sub tasks and notes">
-      <mat-icon class="hide-controls-icon">vertical_align_center</mat-icon>
-    </button>
+    <div fxFlex="0 0 0"
+         ngxSplitHandle></div>
+    <div class="backlog"
+         fxFlex="1 1 100px"
+         ngxSplitArea>
 
-    <button mat-mini-fab
-            color="primary"
-            (click)="collapseAllNotesAndSubTasks()"
-            aria-label="collapse sub tasks and notes">
-      <mat-icon>vertical_align_center</mat-icon>
-    </button>
+      <div class="component-wrapper page-wrapper">
+        <h2 class="mat-h2">Backlog ~{{estimateRemainingBacklog$|async|msToString}}</h2>
+        <task-list [tasks]="backlogTasks$|async"
+                   [focusIdList]="focusTaskIdList$|async"
+                   [filterArgs]="{'isDone':true}"></task-list>
+      </div>
+
+    </div>
   </div>
-</header>
-
-<div class="component-wrapper page-wrapper">
-  <task-list [tasks]="undoneTasks$|async"
-             [focusIdList]="focusTaskIdList$|async"
-             [filterArgs]="{'isDone':false}"></task-list>
-
-  <div class="button-controls">
-    <button routerLink="/daily-summary"
-            mat-raised-button=""
-            color="primary">
-      <mat-icon>done_all</mat-icon>
-      Finish working
-    </button>
-
-  </div>
-
-  <h2 class="mat-h2">Completed Tasks</h2>
-  <task-list [tasks]="doneTasks$|async"
-             [focusIdList]="focusTaskIdList$|async"
-             [filterArgs]="{'isDone':true}"></task-list>
 </div>
+
+

@@ -44,7 +44,14 @@
   transform: rotate(90deg);
 }
 
-.button-controls{
+.button-controls {
   text-align: center;
   margin: $s 0;
+}
+
+.backlog,
+.today {
+  //transition: max-height, min-height 500ms ease-in-out;
+  overflow-y: scroll !important;
+  //transition: all 500ms linear;
 }

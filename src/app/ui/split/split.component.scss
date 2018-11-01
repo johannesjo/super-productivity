@@ -5,6 +5,7 @@
       left: 50%;
       cursor: col-resize;
       transform: translate(-50%, -50%);
+      background: red;
     }
   }
 
@@ -14,6 +15,7 @@
       cursor: row-resize;
       top: -3px;
       transform: translateX(-50%) rotate(270deg);
+      background: blue;
     }
   }
 
@@ -23,8 +25,12 @@
 
   .ngx-split-handle {
     position: relative;
+    background: orange;
 
     .ngx-split-button {
+      min-height: 50px;
+      min-width: 50px;
+
       line-height: 0;
       font-size: 32px;
       position: absolute;

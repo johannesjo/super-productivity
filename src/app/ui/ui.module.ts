@@ -6,7 +6,8 @@ import { DurationToStringPipe } from './duration/duration-to-string.pipe';
 import { EditOnClickDirective } from './edit-on-click/edit-on-click.directive';
 import { InlineMarkdownComponent } from './inline-markdown/inline-markdown.component';
 import {
-  MatAutocompleteModule, MatBadgeModule,
+  MatAutocompleteModule,
+  MatBadgeModule,
   MatButtonModule,
   MatCardModule,
   MatCheckboxModule,
@@ -45,6 +46,7 @@ import { CollapsibleComponent } from './collapsible/collapsible.component';
 import { HelpSectionComponent } from './help-section/help-section.component';
 import { NumberToMonthPipe } from './duration/number-to-month.pipe';
 import { SplitModule } from './split/split.module';
+import { FlexLayoutModule } from '@angular/flex-layout';
 
 @NgModule({
   imports: [
@@ -83,6 +85,7 @@ import { SplitModule } from './split/split.module';
     MatChipsModule,
     MatSlideToggleModule,
     MatBadgeModule,
+    FlexLayoutModule,
   ],
   declarations: [
     DurationFromStringPipe,
@@ -143,6 +146,8 @@ import { SplitModule } from './split/split.module';
     MatChipsModule,
     MatSlideToggleModule,
     MatBadgeModule,
+
+    FlexLayoutModule,
 
     ReactiveFormsModule,
     FormlyModule,
