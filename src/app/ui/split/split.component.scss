@@ -1,41 +1,27 @@
-.ngx-split {
-  &.row-split {
-    > .ngx-split-handle .ngx-split-button {
-      top: 50%;
-      left: 50%;
-      cursor: col-resize;
-      transform: translate(-50%, -50%);
-      background: red;
-    }
+@import '../../../variables';
+
+:host {
+  z-index: 100;
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 100%;
+  cursor: row-resize;
+
+  .handle {
+    position: absolute;
+    background: red;
+    width: 100%;
+    height: 4px;
+    top: -2px;
+    display: block;
+    box-shadow: 0 -3px 12px 1px rgba(0, 0, 0, .3);
+
   }
 
-  &.column-split {
-    > .ngx-split-handle .ngx-split-button {
-      left: 50%;
-      cursor: row-resize;
-      top: -3px;
-      transform: translateX(-50%) rotate(270deg);
-      background: blue;
-    }
-  }
-
-  .ngx-split-area {
-    overflow: auto;
-  }
-
-  .ngx-split-handle {
-    position: relative;
-    background: orange;
-
-    .ngx-split-button {
-      min-height: 50px;
-      min-width: 50px;
-
-      line-height: 0;
-      font-size: 32px;
-      position: absolute;
-      display: block;
-      padding: 0;
-    }
+  button {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    left: 50%;
   }
 }

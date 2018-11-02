@@ -1,179 +1,93 @@
-import {
-  AfterContentInit,
-  ChangeDetectionStrategy,
-  Component,
-  ContentChildren,
-  ElementRef,
-  HostBinding,
-  Input,
-  QueryList,
-  ViewEncapsulation
-} from '@angular/core';
-import { SplitAreaDirective } from './split-area.directive';
-import { SplitHandleComponent } from './split-handle.component';
-import { FlexDirective, validateBasis } from '@angular/flex-layout';
-
-const toValue = SplitAreaDirective.basisToValue;
-const isBasisPecent = SplitAreaDirective.isPercent;
-
-function getMinMaxPct(minBasis, maxBasis, grow, shrink, baseBasisPct, basisToPx) {
-  // minimum and maximum basis determined by max/min inputs
-  let minBasisPct = toValue(minBasis) / (isBasisPecent(minBasis) ? 1 : basisToPx);
-  let maxBasisPct = toValue(maxBasis) / (isBasisPecent(maxBasis) ? 1 : basisToPx);
-
-  // minimum and maximum basis determined by flex inputs
-  minBasisPct = Math.max(minBasisPct || 0, shrink === '0' ? baseBasisPct : 0);
-  maxBasisPct = Math.min(maxBasisPct || 100, grow === '0' ? baseBasisPct : 100);
-
-  return [minBasisPct, maxBasisPct];
-}
+import { ChangeDetectionStrategy, Component, ElementRef, Input, OnInit, Renderer2, ViewChild } from '@angular/core';
+import { fromEvent, Subscription } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
 @Component({
-  selector: '[ngxSplit]',
-  template: `
-    <ng-content></ng-content>`,
+  selector: 'split',
+  templateUrl: './split.component.html',
   styleUrls: ['./split.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  encapsulation: ViewEncapsulation.None
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class SplitComponent implements AfterContentInit {
-  /*tslint:disable*/
-  @Input('ngxSplit') direction: string = 'row';
+export class SplitComponent implements OnInit {
+  @Input() splitEl1;
+  @Input() splitEl2;
+  @Input() containerEl;
 
-  /*tslint:enable*/
+  pos: number;
+  subscription: Subscription;
+  @ViewChild('buttonEl') buttonEl;
 
-  @HostBinding('class.ngx-split')
-  get mainCss() {
-    return true;
+
+  @Input() set splitPos(pos: number) {
+    this._updatePos(pos);
   }
 
-  @HostBinding('class.row-split')
-  get rowCss() {
-    return this.direction === 'row';
+  constructor(private _renderer: Renderer2,
+              private _el: ElementRef) {
   }
 
-  @HostBinding('class.column-split')
-  get columnCss() {
-    return this.direction === 'column';
+  ngOnInit() {
+    console.log(this.splitEl1);
+    console.log(this.containerEl);
+    console.log(this.splitEl2);
+    console.log(this.buttonEl);
   }
 
-  @ContentChildren(SplitHandleComponent, {descendants: false})
-  handles: QueryList<SplitHandleComponent>;
-  @ContentChildren(SplitAreaDirective) areas: QueryList<SplitAreaDirective>;
+  onMouseDown(ev) {
+    console.log('onMouseDown', ev);
+    const mouseup$ = fromEvent(document, 'mouseup');
+    this.subscription = mouseup$.subscribe((e: MouseEvent) => this.onMouseUp(e));
 
-  constructor(private elementRef: ElementRef) {
+    const mousemove$ = fromEvent(document, 'mousemove')
+      .pipe(takeUntil(mouseup$))
+      .subscribe((e: MouseEvent) => this.onMouseMove(e));
+
+    this.subscription.add(mousemove$);
   }
 
-  ngAfterContentInit(): void {
-    this.handles.forEach(d => d.drag.subscribe(ev => this.onDrag(ev)));
-    this.handles.forEach(d => d.dblclick.subscribe(ev => this.onDblClick(ev)));
+  onMouseUp(ev): void {
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+      this.subscription = undefined;
+    }
   }
 
-  onDblClick(ev): void {
-    const basisToPx =
-      (this.direction === 'row'
-        ? this.elementRef.nativeElement.clientWidth
-        : this.elementRef.nativeElement.clientHeight) / 100;
+  onMouseMove(ev) {
+    console.log('onMouseDown', ev);
+    const h = this.containerEl.offsetHeight;
+    const handleHeight = this.buttonEl._elementRef.nativeElement.offsetHeight * 3 / 2;
+    console.log(handleHeight);
 
-    const area = this.areas.first;
-    if (!area) return;
+    let percentage = (ev.clientY - handleHeight) / h * 100;
+    if (percentage > 100) {
+      percentage = 100;
+    }
+    if (percentage < 0) {
+      percentage = 0;
+    }
+    console.log(percentage, h, ev.clientY);
 
-    const [grow, shrink, basis] = area.getFlexParts();
-    const isPercent = isBasisPecent(basis);
-    const basisValue = toValue(basis);
-
-    // get basis in px and %
-    const basisPx = isPercent ? basisValue * basisToPx : basisValue;
-    const basisPct = basisPx / basisToPx;
-
-    // get baseBasis in percent
-    const baseBasis = area.getInputFlexParts()[2];
-    const baseBasisPct = toValue(baseBasis) / (isBasisPecent(baseBasis) ? basisToPx : 1);
-
-    const [minBasisPct, maxBasisPct] = getMinMaxPct(
-      area.minBasis,
-      area.maxBasis,
-      grow,
-      shrink,
-      baseBasisPct,
-      basisToPx
-    );
-
-    // max and min deltas
-    const deltaMin = basisPct - minBasisPct;
-    const deltaMax = maxBasisPct - basisPct;
-
-    const delta = deltaMin < deltaMax ? deltaMax : -deltaMin;
-    const deltaPx = delta * basisToPx;
-
-    this.resize(deltaPx);
+    this._updatePos(percentage);
   }
 
-  onDrag({movementX, movementY}): void {
-    const deltaPx = this.direction === 'row' ? movementX : movementY;
-    this.resize(deltaPx);
-  }
-
-  resize(delta: number): void {
-    const basisToPx =
-      (this.direction === 'row'
-        ? this.elementRef.nativeElement.clientWidth
-        : this.elementRef.nativeElement.clientHeight) / 100;
-
-    const areas = this.areas.toArray();
-
-    // for now assuming splitter is after first area
-    const [first, ...rest] = areas;
-    [first].forEach(area => (delta = resizeAreaBy(area, delta)));
-
-    // delta is distributed left to right
-    return rest.forEach(area => (delta += resizeAreaBy(area, -delta)));
-
-    function resizeAreaBy(area: SplitAreaDirective, _delta: number) {
-      const flex = area.flexDirective as FlexDirective;
-
-      if (area.fxFlexFill) {
-        // area is fxFlexFill, distribute delta right
-        return _delta;
-      }
-
-      const [grow, shrink, basis] = area.getFlexParts();
-      const isPercent = isBasisPecent(basis);
-      const basisValue = toValue(basis);
-
-      // get baseBasis in percent
-      const baseBasis = area.getInputFlexParts()[2];
-      const baseBasisPct = toValue(baseBasis) / (isBasisPecent(baseBasis) ? basisToPx : 1);
-
-      // get basis in px and %
-      const basisPx = isPercent ? basisValue * basisToPx : basisValue;
-      const basisPct = basisPx / basisToPx;
-
-      // determine which dir and calc the diff
-      let newBasisPx = basisPx + _delta;
-      let newBasisPct = newBasisPx / basisToPx;
-
-      const [minBasisPct, maxBasisPct] = getMinMaxPct(
-        area.minBasis,
-        area.maxBasis,
-        grow,
-        shrink,
-        baseBasisPct,
-        basisToPx
+  private _updatePos(pos: number) {
+    this.pos = pos;
+    if (this.splitEl1 && this.splitEl2) {
+      this._renderer.setStyle(
+        this.splitEl1,
+        'height',
+        `${pos}%`,
       );
-
-      // obey max and min
-      newBasisPct = Math.max(newBasisPct, minBasisPct);
-      newBasisPct = Math.min(newBasisPct, maxBasisPct);
-
-      // calculate new basis on px
-      newBasisPx = newBasisPct * basisToPx;
-
-      // update flexlayout
-      area.updateStyle(isPercent ? newBasisPct : newBasisPx);
-
-      // return actual change in px
-      return newBasisPx - basisPx;
+      this._renderer.setStyle(
+        this.splitEl2,
+        'height',
+        `${100 - pos}%`,
+      );
+      this._renderer.setStyle(
+        this._el.nativeElement,
+        'top',
+        `${pos}%`,
+      );
     }
   }
 }

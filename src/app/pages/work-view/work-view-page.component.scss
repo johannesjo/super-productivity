@@ -51,7 +51,18 @@
 
 .backlog,
 .today {
+  position: absolute;
+  left: 0;
   //transition: max-height, min-height 500ms ease-in-out;
   overflow-y: scroll !important;
   //transition: all 500ms linear;
+  width: 100%;
+}
+
+.today {
+  top: 0;
+}
+
+.backlog {
+  bottom: 0;
 }
