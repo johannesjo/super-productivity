@@ -1,5 +1,23 @@
 @import './../../../_variables';
 
+add-task-bar {
+  margin: 0 auto $s*2;
+  max-width: 628px;
+
+  ::ng-deep input {
+    box-shadow: none !important;
+  }
+}
+
+h1 {
+  margin: $s*2 0;
+  text-align: center;
+}
+
+h2 {
+  text-align: center;
+}
+
 .work-view-header {
   color: #ffffff;
   margin-bottom: $s;
