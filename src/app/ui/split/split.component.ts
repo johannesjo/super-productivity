@@ -34,6 +34,14 @@ export class SplitComponent implements OnInit {
     console.log(this.buttonEl);
   }
 
+  toggle() {
+    let newPos = 50;
+    if (this.pos === 50) {
+      newPos = 100;
+    }
+    this._updatePos(newPos);
+  }
+
   onMouseDown(ev) {
     console.log('onMouseDown', ev);
     const mouseup$ = fromEvent(document, 'mouseup');

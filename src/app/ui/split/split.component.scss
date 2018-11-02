@@ -8,6 +8,10 @@
   width: 100%;
   cursor: row-resize;
 
+  &:hover {
+    //transform: translateY(-$s);
+  }
+
   .handle {
     position: absolute;
     width: 100%;
