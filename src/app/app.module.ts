@@ -32,7 +32,6 @@ import { SpeedDialMenuModule } from './speed-dial-menu/speed-dial-menu.module';
     CoreModule,
     PagesModule,
     MainHeaderModule,
-    SpeedDialMenuModule,
     MatSidenavModule,
     TasksModule,
 

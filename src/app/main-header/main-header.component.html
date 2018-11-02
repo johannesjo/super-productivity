@@ -50,5 +50,30 @@
             [color]="rlHA.isActive ? 'accent' : null">
       <mat-icon>today</mat-icon>
     </button>
+    <eco-fab-speed-dial [(open)]="open"
+                        (mouseenter)="open = true"
+                        (mouseleave)="open = false"
+                        [animationMode]="'fling'"
+                        [direction]="'down'">
+      <eco-fab-speed-dial-trigger>
+        <button mat-fab>
+          <mat-icon>navigation</mat-icon>
+        </button>
+      </eco-fab-speed-dial-trigger>
+
+      <eco-fab-speed-dial-actions>
+        <!--<button mat-mini-fab>-->
+        <!--<mat-icon>add</mat-icon>-->
+        <!--</button>-->
+        <!--<button mat-mini-fab>-->
+        <!--<mat-icon>edit</mat-icon>-->
+        <!--</button>-->
+        <button mat-mini-fab
+                [routerLink]="'config'">
+          <mat-icon>settings</mat-icon>
+        </button>
+      </eco-fab-speed-dial-actions>
+    </eco-fab-speed-dial>
+
   </nav>
 </mat-toolbar>

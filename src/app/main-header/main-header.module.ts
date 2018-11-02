@@ -5,6 +5,7 @@ import { CoreModule } from '../core/core.module';
 import { UiModule } from '../ui/ui.module';
 import { ProjectModule } from '../project/project.module';
 import { RouterModule } from '@angular/router';
+import { EcoFabSpeedDialModule } from '@ecodev/fab-speed-dial';
 
 @NgModule({
   imports: [
@@ -13,6 +14,7 @@ import { RouterModule } from '@angular/router';
     UiModule,
     ProjectModule,
     RouterModule,
+    EcoFabSpeedDialModule,
   ],
   declarations: [MainHeaderComponent],
   exports: [MainHeaderComponent],
