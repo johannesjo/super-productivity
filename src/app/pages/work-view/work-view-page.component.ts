@@ -29,7 +29,7 @@ export class WorkViewPageComponent implements OnInit {
 
   // TODO
   isPlanYourDay = false; // = first start in day or no todays tasks at all (session needed)
-  isShowBacklog = true; // if isPlanYourDay and  show only if there are actually some
+  isShowBacklog = false; // if isPlanYourDay and  show only if there are actually some
 
   constructor(private _taskService: TaskService) {
     // this.focusTaskIdList$.subscribe(v => console.log(v));
