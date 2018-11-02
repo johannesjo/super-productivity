@@ -42,6 +42,7 @@
         </button>
       </div>
     </header>
+    <button (click)="isShowBacklog=!isShowBacklog">XXXXX {{isShowBacklog}}</button>
 
     <div class="component-wrapper page-wrapper">
       <task-list [tasks]="undoneTasks$|async"
@@ -68,12 +69,12 @@
                    [filterArgs]="{'isDone':true}"></task-list>
       </div>
     </div>
-
   </div>
   <split [containerEl]="containerEl"
-         [splitPos]="50"
+         [splitPos]="isShowBacklog ? 50 : 100"
          [splitEl1]="split1"
-         [splitEl2]="split2"></split>
+         [splitEl2]="split2"
+         (onHide)="($event==='BOTTOM') ? isShowBacklog=false :isShowBacklog=true"></split>
   <div class="backlog"
        #split2>
     <div class="component-wrapper page-wrapper">

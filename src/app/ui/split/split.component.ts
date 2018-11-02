@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, ElementRef, Input, OnInit, Renderer2, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, EventEmitter, Input, OnInit, Output, Renderer2, ViewChild } from '@angular/core';
 import { fromEvent, Subscription } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
@@ -12,6 +12,7 @@ export class SplitComponent implements OnInit {
   @Input() splitEl1;
   @Input() splitEl2;
   @Input() containerEl;
+  @Output() onHide: EventEmitter<'TOP' | 'BOTTOM'> = new EventEmitter();
 
   pos: number;
   subscription: Subscription;
@@ -60,10 +61,12 @@ export class SplitComponent implements OnInit {
 
     let percentage = (ev.clientY - handleHeight) / h * 100;
     if (percentage > 100) {
+      this.onHide.emit('BOTTOM');
       percentage = 100;
     }
     if (percentage < 0) {
       percentage = 0;
+      this.onHide.emit('TOP');
     }
     console.log(percentage, h, ev.clientY);
 
@@ -72,6 +75,10 @@ export class SplitComponent implements OnInit {
 
   private _updatePos(pos: number) {
     this.pos = pos;
+    if (pos === 100) {
+
+    }
+
     if (this.splitEl1 && this.splitEl2) {
       this._renderer.setStyle(
         this.splitEl1,
