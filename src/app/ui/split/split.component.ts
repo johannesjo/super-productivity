@@ -34,6 +34,7 @@ export class SplitComponent implements OnInit {
   }
 
   @Input() set splitPos(pos: number) {
+    // TODO activate transition here
     this._updatePos(pos);
   }
 
@@ -49,6 +50,7 @@ export class SplitComponent implements OnInit {
   }
 
   toggle() {
+    // TODO activate transition here
     let newPos = 50;
     if (this.pos === 50) {
       newPos = 100;
@@ -57,6 +59,7 @@ export class SplitComponent implements OnInit {
   }
 
   onMouseDown(ev) {
+    // TODO deactivate transition here
     console.log('onMouseDown', ev);
     const mouseup$ = fromEvent(document, 'mouseup');
     this.subscription = mouseup$.subscribe((e: MouseEvent) => this.onMouseUp(e));
