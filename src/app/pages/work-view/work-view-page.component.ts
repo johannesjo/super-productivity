@@ -19,7 +19,6 @@ export class WorkViewPageComponent implements OnInit {
   // todo move to selector
   focusTaskIdList$: Observable<string[]> = this._taskService.focusIdsForWorkView$;
 
-  isShowBacklog = true;
   isVertical = false;
   isHideControls: boolean;
   workedWithoutABreak = '-';
@@ -28,6 +27,9 @@ export class WorkViewPageComponent implements OnInit {
   backlogTasks$: Observable<TaskWithSubTasks[]> = this._taskService.backlogTasks$;
   estimateRemainingBacklog$: Observable<number> = this._taskService.estimateRemainingBacklog$;
 
+  // TODO
+  isPlanYourDay = false; // = first start in day or no todays tasks at all (session needed)
+  isShowBacklog = true; // if isPlanYourDay and  show only if there are actually some
 
   constructor(private _taskService: TaskService) {
     // this.focusTaskIdList$.subscribe(v => console.log(v));
