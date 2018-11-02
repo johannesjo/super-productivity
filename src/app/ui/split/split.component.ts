@@ -1,4 +1,15 @@
-import { ChangeDetectionStrategy, Component, ElementRef, EventEmitter, Input, OnInit, Output, Renderer2, ViewChild } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  ElementRef,
+  EventEmitter,
+  HostBinding,
+  Input,
+  OnInit,
+  Output,
+  Renderer2,
+  ViewChild
+} from '@angular/core';
 import { fromEvent, Subscription } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
@@ -18,6 +29,9 @@ export class SplitComponent implements OnInit {
   subscription: Subscription;
   @ViewChild('buttonEl') buttonEl;
 
+  @HostBinding('class.is2Visible') get is2Visible() {
+    return this.pos !== 100;
+  }
 
   @Input() set splitPos(pos: number) {
     this._updatePos(pos);
@@ -98,11 +112,11 @@ export class SplitComponent implements OnInit {
         'height',
         `${100 - pos}%`,
       );
-      this._renderer.setStyle(
-        this._el.nativeElement,
-        'top',
-        `${pos}%`,
-      );
+      // this._renderer.setStyle(
+      //   this._el.nativeElement,
+      //   'top',
+      //   `${pos}%`,
+      // );
     }
   }
 }

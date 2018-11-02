@@ -70,20 +70,23 @@
       </div>
     </div>
   </div>
-  <split [containerEl]="containerEl"
-         [splitPos]="isShowBacklog ? 50 : 100"
-         [splitEl1]="split1"
-         [splitEl2]="split2"
-         (onHide)="($event==='BOTTOM') ? isShowBacklog=false :isShowBacklog=true"></split>
+
   <div class="backlog"
        #split2>
-    <div class="component-wrapper page-wrapper">
-      <h2 class="mat-h2">Backlog ~{{estimateRemainingBacklog$|async|msToString}}</h2>
-      <task-list [tasks]="backlogTasks$|async"
-                 [focusIdList]="focusTaskIdList$|async"
-                 [filterArgs]="{'isDone':true}"></task-list>
+    <split [containerEl]="containerEl"
+           [splitPos]="isShowBacklog ? 50 : 100"
+           [splitEl1]="split1"
+           [splitEl2]="split2"
+           (onHide)="($event==='BOTTOM') ? isShowBacklog=false :isShowBacklog=true"></split>
+    <div class="inner-wrapper">
+      <div class="component-wrapper page-wrapper">
+        <h2 class="mat-h2"
+            style="text-align: center; margin-top: 20px;">Backlog ~{{estimateRemainingBacklog$|async|msToString}}</h2>
+        <task-list [tasks]="backlogTasks$|async"
+                   [focusIdList]="focusTaskIdList$|async"
+                   [filterArgs]="{'isDone':true}"></task-list>
+      </div>
     </div>
-
   </div>
 </div>
 
