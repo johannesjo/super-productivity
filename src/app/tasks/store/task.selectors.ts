@@ -82,10 +82,9 @@ export const selectFocusIdsForWorkView = createSelector(
   selectTodaysDoneTasksWithSubTasks,
   (undoneTasks, doneTasks) => getFlatIdList([...undoneTasks, ...doneTasks])
 );
-export const selectFocusIdsForDailyPlanner = createSelector(
-  selectTodaysTasksWithSubTasks,
+export const selectFocusIdsForBacklog = createSelector(
   selectBacklogTasksWithSubTasks,
-  (todaysTasks, backlogTasks) => getFlatIdList([...todaysTasks, ...backlogTasks])
+  (backlogTasks) => getFlatIdList(backlogTasks)
 );
 export const selectMissingIssueIds = createSelector(
   selectAllTasksWithIssueData,

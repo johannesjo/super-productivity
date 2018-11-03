@@ -50,7 +50,7 @@
 
     <div class="component-wrapper page-wrapper">
       <task-list [tasks]="undoneTasks$|async"
-                 [focusIdList]="focusTaskIdList$|async"
+                 [focusIdList]="focusTaskIdListToday$|async"
                  [filterArgs]="{'isDone':false}"></task-list>
       <button (click)="isShowBacklog=!isShowBacklog">Show {{isShowBacklog}}</button>
       <button (click)="isVertical=!isVertical">Vertical {{isVertical}}</button>
@@ -69,7 +69,7 @@
 
         <h2 class="mat-h2">Completed Tasks</h2>
         <task-list [tasks]="doneTasks$|async"
-                   [focusIdList]="focusTaskIdList$|async"
+                   [focusIdList]="focusTaskIdListToday$|async"
                    [filterArgs]="{'isDone':true}"></task-list>
       </div>
     </div>
@@ -87,7 +87,7 @@
         <h2 class="mat-h2"
             style="text-align: center; margin-top: 20px;">Backlog ~{{estimateRemainingBacklog$|async|msToString}}</h2>
         <task-list [tasks]="backlogTasks$|async"
-                   [focusIdList]="focusTaskIdList$|async"
+                   [focusIdList]="focusTaskIdListBacklog$|async"
                    [filterArgs]="{'isDone':true}"></task-list>
       </div>
     </div>

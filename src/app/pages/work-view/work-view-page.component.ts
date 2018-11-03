@@ -1,9 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { TaskService } from '../../tasks/task.service';
-import { Observable } from 'rxjs';
+import { combineLatest, Observable } from 'rxjs';
 import { TaskWithSubTasks } from '../../tasks/task.model';
 import { expandFadeAnimation } from '../../ui/animations/expand.ani';
 import { LayoutService } from '../../core/layout/layout.service';
+import { map } from 'rxjs/operators';
 
 @Component({
   selector: 'work-view',
@@ -18,7 +19,9 @@ export class WorkViewPageComponent implements OnInit {
   estimateRemaining$: Observable<number> = this._taskService.estimateRemainingToday$;
 
   // todo move to selector
-  focusTaskIdList$: Observable<string[]> = this._taskService.focusIdsForWorkView$;
+  focusTaskIdListToday$: Observable<string[]> = this._taskService.focusIdsForWorkView$;
+  focusTaskIdListBacklog$: Observable<string[]> = this._taskService.focusIdsForBacklog$;
+
 
   isVertical = false;
   isHideControls: boolean;

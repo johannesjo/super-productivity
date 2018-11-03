@@ -16,7 +16,7 @@ import {
   selectCurrentTaskId,
   selectEstimateRemainingForBacklog,
   selectEstimateRemainingForToday,
-  selectFocusIdsForDailyPlanner,
+  selectFocusIdsForBacklog,
   selectFocusIdsForWorkView,
   selectFocusTaskId,
   selectMissingIssueIds,
@@ -41,7 +41,7 @@ export class TaskService {
   // NOTE: don't use distinct until changed here
   focusTaskId$: Observable<string> = this._store.pipe(select(selectFocusTaskId));
   focusIdsForWorkView$: Observable<string[]> = this._store.pipe(select(selectFocusIdsForWorkView), distinctUntilChanged());
-  focusIdsForDailyPlanner$: Observable<string[]> = this._store.pipe(select(selectFocusIdsForDailyPlanner, distinctUntilChanged()));
+  focusIdsForBacklog$: Observable<string[]> = this._store.pipe(select(selectFocusIdsForBacklog), distinctUntilChanged());
 
   // META FIELDS
   // -----------
