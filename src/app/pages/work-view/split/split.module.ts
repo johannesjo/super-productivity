@@ -9,7 +9,8 @@ import { MatButtonModule, MatIconModule } from '@angular/material';
     MatIconModule,
     MatButtonModule,
   ],
-  exports:[SplitComponent],
+  exports: [SplitComponent],
   declarations: [SplitComponent]
 })
-export class SplitModule { }
+export class SplitModule {
+}

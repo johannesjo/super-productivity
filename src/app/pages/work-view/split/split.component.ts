@@ -29,6 +29,10 @@ export class SplitComponent implements OnInit {
   subscription: Subscription;
   @ViewChild('buttonEl') buttonEl;
 
+  constructor(private _renderer: Renderer2,
+              private _el: ElementRef) {
+  }
+
   @HostBinding('class.is2Visible') get is2Visible() {
     return this.pos !== 100;
   }
@@ -36,10 +40,6 @@ export class SplitComponent implements OnInit {
   @Input() set splitPos(pos: number) {
     // TODO activate transition here
     this._updatePos(pos);
-  }
-
-  constructor(private _renderer: Renderer2,
-              private _el: ElementRef) {
   }
 
   ngOnInit() {
