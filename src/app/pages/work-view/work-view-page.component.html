@@ -28,17 +28,22 @@
         <strong>{{workedWithoutABreak}}</strong><mat-icon>timer</mat-icon>
       </span>
         </div>
+        <button mat-mini-fab
+                color="primary"
+                (click)="showAddTaskBar()">
+          <mat-icon class="hide-controls-icon">add</mat-icon>
+        </button>
         <!--<button mat-mini-fab-->
-                <!--color="primary"-->
-                <!--(click)="isHideControls = !(isHideControls);"-->
-                <!--aria-label="collapse sub tasks and notes">-->
-          <!--<mat-icon class="hide-controls-icon">vertical_align_center</mat-icon>-->
+        <!--color="primary"-->
+        <!--(click)="isHideControls = !(isHideControls);"-->
+        <!--aria-label="collapse sub tasks and notes">-->
+        <!--<mat-icon class="hide-controls-icon">vertical_align_center</mat-icon>-->
         <!--</button>-->
         <!--<button mat-mini-fab-->
-                <!--color="primary"-->
-                <!--(click)="collapseAllNotesAndSubTasks()"-->
-                <!--aria-label="collapse sub tasks and notes">-->
-          <!--<mat-icon>vertical_align_center</mat-icon>-->
+        <!--color="primary"-->
+        <!--(click)="collapseAllNotesAndSubTasks()"-->
+        <!--aria-label="collapse sub tasks and notes">-->
+        <!--<mat-icon>vertical_align_center</mat-icon>-->
         <!--</button>-->
       </div>
     </header>

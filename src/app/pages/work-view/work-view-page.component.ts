@@ -3,6 +3,7 @@ import { TaskService } from '../../tasks/task.service';
 import { Observable } from 'rxjs';
 import { TaskWithSubTasks } from '../../tasks/task.model';
 import { expandFadeAnimation } from '../../ui/animations/expand.ani';
+import { LayoutService } from '../../core/layout/layout.service';
 
 @Component({
   selector: 'work-view',
@@ -31,11 +32,19 @@ export class WorkViewPageComponent implements OnInit {
   isPlanYourDay = false; // = first start in day or no todays tasks at all (session needed)
   isShowBacklog = false; // if isPlanYourDay and  show only if there are actually some
 
-  constructor(private _taskService: TaskService) {
+  constructor(
+    private _taskService: TaskService,
+    private _layoutService: LayoutService
+  ) {
     // this.focusTaskIdList$.subscribe(v => console.log(v));
   }
 
   ngOnInit() {
+  }
+
+
+  showAddTaskBar(){
+    this._layoutService.showAddTaskBar();
   }
 
   collapseAllNotesAndSubTasks() {
