@@ -78,11 +78,10 @@
   <div class="backlog"
        #splitBottomEl>
     <split [containerEl]="containerEl"
-           [splitPos]="isShowBacklog ? 50 : 100"
+           [splitPos]="splitInputPos"
            [counter]="(backlogTasks$|async).length"
            [splitTopEl]="splitTopEl"
-           [splitBottomEl]="splitBottomEl"
-           (onHide)="($event==='BOTTOM') ? isShowBacklog=false :isShowBacklog=true"></split>
+           [splitBottomEl]="splitBottomEl"></split>
     <div class="inner-wrapper">
       <div class="component-wrapper page-wrapper">
         <h2 class="mat-h2"

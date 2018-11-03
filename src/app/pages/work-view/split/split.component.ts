@@ -1,17 +1,8 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  ElementRef,
-  EventEmitter,
-  HostBinding,
-  Input,
-  OnInit,
-  Output,
-  Renderer2,
-  ViewChild
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, HostBinding, Input, OnInit, Output, Renderer2, ViewChild } from '@angular/core';
 import { fromEvent, Subscription } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
+
+const ANIMATABLE_CLASS = 'isAnimatable';
 
 @Component({
   selector: 'split',
@@ -24,10 +15,11 @@ export class SplitComponent implements OnInit {
   @Input() splitBottomEl;
   @Input() containerEl;
   @Input() counter;
-  @Output() onHide: EventEmitter<'TOP' | 'BOTTOM'> = new EventEmitter();
+  @Output() onPosChanged: EventEmitter<number> = new EventEmitter();
 
   pos: number;
   subscription: Subscription;
+  private _isDrag = false;
   @ViewChild('buttonEl') buttonEl;
 
   constructor(private _renderer: Renderer2) {
@@ -38,19 +30,19 @@ export class SplitComponent implements OnInit {
   }
 
   @Input() set splitPos(pos: number) {
-    // TODO activate transition here
-    this._updatePos(pos);
+    this._updatePos(pos, true);
   }
 
   ngOnInit() {
-    console.log(this.splitTopEl);
-    console.log(this.containerEl);
-    console.log(this.splitBottomEl);
-    console.log(this.buttonEl);
+    // console.log(this.splitTopEl);
+    // console.log(this.containerEl);
+    // console.log(this.splitBottomEl);
+    // console.log(this.buttonEl);
   }
 
   toggle() {
-    // TODO activate transition here
+    this._renderer.addClass(this.splitTopEl, ANIMATABLE_CLASS);
+    this._renderer.addClass(this.splitBottomEl, ANIMATABLE_CLASS);
     let newPos = 50;
     if (this.pos === 50) {
       newPos = 100;
@@ -59,8 +51,8 @@ export class SplitComponent implements OnInit {
   }
 
   onMouseDown(ev) {
-    // TODO deactivate transition here
-    console.log('onMouseDown', ev);
+    this._isDrag = false;
+    // console.log('onMouseDown', ev);
     const mouseup$ = fromEvent(document, 'mouseup');
     this.subscription = mouseup$.subscribe((e: MouseEvent) => this.onMouseUp(e));
 
@@ -76,35 +68,36 @@ export class SplitComponent implements OnInit {
       this.subscription.unsubscribe();
       this.subscription = undefined;
     }
+
+    if (!this._isDrag) {
+      this.toggle();
+    }
   }
 
   onMouseMove(ev) {
-    console.log('onMouseDown', ev);
+    this._renderer.removeClass(this.splitTopEl, ANIMATABLE_CLASS);
+    this._renderer.removeClass(this.splitBottomEl, ANIMATABLE_CLASS);
+    this._isDrag = true;
+    // console.log('onMouseDown', ev);
     const h = this.containerEl.offsetHeight;
     // const handleHeight = this.buttonEl._elementRef.nativeElement.offsetHeight * 3 / 2;
     const handleHeight = this.buttonEl._elementRef.nativeElement.offsetHeight * 2 / 2;
-    console.log(handleHeight);
+    // console.log(handleHeight);
 
     let percentage = (ev.clientY - handleHeight) / h * 100;
     if (percentage > 100) {
-      this.onHide.emit('BOTTOM');
       percentage = 100;
     }
     if (percentage < 0) {
       percentage = 0;
-      this.onHide.emit('TOP');
     }
-    console.log(percentage, h, ev.clientY);
+    // console.log(percentage, h, ev.clientY);
 
     this._updatePos(percentage);
   }
 
-  private _updatePos(pos: number) {
+  private _updatePos(pos: number, isWasOutsideChange = false) {
     this.pos = pos;
-    if (pos === 100) {
-
-    }
-
     if (this.splitTopEl && this.splitBottomEl) {
       this._renderer.setStyle(
         this.splitTopEl,
@@ -121,6 +114,10 @@ export class SplitComponent implements OnInit {
       //   'top',
       //   `${pos}%`,
       // );
+
+      if (!isWasOutsideChange) {
+        this.onPosChanged.emit(pos);
+      }
     }
   }
 }

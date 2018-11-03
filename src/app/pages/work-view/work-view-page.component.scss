@@ -75,6 +75,10 @@ h2 {
   //transition: max-height, min-height 500ms ease-in-out;
   //transition: all 500ms linear;
   width: 100%;
+
+  &.isAnimatable {
+    transition: $transition-standard;
+  }
 }
 
 .today,

@@ -31,6 +31,7 @@ export class WorkViewPageComponent implements OnInit {
   // TODO
   isPlanYourDay = false; // = first start in day or no todays tasks at all (session needed)
   isShowBacklog = false; // if isPlanYourDay and  show only if there are actually some
+  splitInputPos = 0;
 
   constructor(
     private _taskService: TaskService,
@@ -40,12 +41,18 @@ export class WorkViewPageComponent implements OnInit {
   }
 
   ngOnInit() {
+    if (this.isShowBacklog) {
+      this.splitInputPos = 50;
+    } else {
+      this.splitInputPos = 100;
+    }
   }
 
 
-  showAddTaskBar(){
+  showAddTaskBar() {
     this._layoutService.showAddTaskBar();
   }
+
 
   collapseAllNotesAndSubTasks() {
 
