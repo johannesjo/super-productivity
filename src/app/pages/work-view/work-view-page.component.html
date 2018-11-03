@@ -8,7 +8,7 @@
       <div class="status-bar">
         <div class="item"><span class="label">Working today:</span>
           <span class="no-wrap">
-      <strong>{{workingToday$|async|msToString}}</strong>
+      <strong>{{taskService.workingToday$|async|msToString}}</strong>
       <mat-icon aria-label="timer icon">timer</mat-icon>
       </span>
         </div>
@@ -16,7 +16,7 @@
         <div class="item">
           <span class="label">Estimate remaining:</span>
           <span class="no-wrap">
-      ~<strong>{{estimateRemaining$|async|msToString}}</strong>
+      ~<strong>{{taskService.estimateRemainingToday$|async|msToString}}</strong>
       <mat-icon>timer</mat-icon>
       </span>
         </div>
@@ -49,8 +49,8 @@
     </header>
 
     <div class="component-wrapper page-wrapper">
-      <task-list [tasks]="undoneTasks$|async"
-                 [focusIdList]="focusTaskIdListToday$|async"
+      <task-list [tasks]="taskService.undoneTasks$|async"
+                 [focusIdList]="taskService.focusIdsForWorkView$|async"
                  [filterArgs]="{'isDone':false}"></task-list>
       <button (click)="isShowBacklog=!isShowBacklog">Show {{isShowBacklog}}</button>
       <button (click)="isVertical=!isVertical">Vertical {{isVertical}}</button>
@@ -68,8 +68,8 @@
         </div>
 
         <h2 class="mat-h2">Completed Tasks</h2>
-        <task-list [tasks]="doneTasks$|async"
-                   [focusIdList]="focusTaskIdListToday$|async"
+        <task-list [tasks]="taskService.doneTasks$|async"
+                   [focusIdList]="taskService.focusIdsForWorkView$|async"
                    [filterArgs]="{'isDone':true}"></task-list>
       </div>
     </div>
@@ -79,15 +79,15 @@
        #splitBottomEl>
     <split [containerEl]="containerEl"
            [splitPos]="splitInputPos"
-           [counter]="(backlogTasks$|async).length"
+           [counter]="(taskService.backlogTasks$|async).length"
            [splitTopEl]="splitTopEl"
            [splitBottomEl]="splitBottomEl"></split>
     <div class="inner-wrapper">
       <div class="component-wrapper page-wrapper">
         <h2 class="mat-h2"
-            style="text-align: center; margin-top: 20px;">Backlog ~{{estimateRemainingBacklog$|async|msToString}}</h2>
-        <task-list [tasks]="backlogTasks$|async"
-                   [focusIdList]="focusTaskIdListBacklog$|async"
+            style="text-align: center; margin-top: 20px;">Backlog ~{{taskService.estimateRemainingBacklog$|async|msToString}}</h2>
+        <task-list [tasks]="taskService.backlogTasks$|async"
+                   [focusIdList]="taskService.focusIdsForBacklog$|async"
                    [filterArgs]="{'isDone':true}"></task-list>
       </div>
     </div>

@@ -1,10 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { TaskService } from '../../tasks/task.service';
-import { combineLatest, Observable } from 'rxjs';
-import { TaskWithSubTasks } from '../../tasks/task.model';
 import { expandFadeAnimation } from '../../ui/animations/expand.ani';
 import { LayoutService } from '../../core/layout/layout.service';
-import { map } from 'rxjs/operators';
 
 @Component({
   selector: 'work-view',
@@ -13,31 +10,19 @@ import { map } from 'rxjs/operators';
   animations: [expandFadeAnimation]
 })
 export class WorkViewPageComponent implements OnInit {
-  doneTasks$: Observable<TaskWithSubTasks[]> = this._taskService.doneTasks$;
-  undoneTasks$: Observable<TaskWithSubTasks[]> = this._taskService.undoneTasks$;
-  workingToday$: Observable<number> = this._taskService.workingToday$;
-  estimateRemaining$: Observable<number> = this._taskService.estimateRemainingToday$;
-
-  // todo move to selector
-  focusTaskIdListToday$: Observable<string[]> = this._taskService.focusIdsForWorkView$;
-  focusTaskIdListBacklog$: Observable<string[]> = this._taskService.focusIdsForBacklog$;
-
-
   isVertical = false;
   isHideControls: boolean;
   workedWithoutABreak = '-';
   isShowTimeWorkedWithoutBreak = true;
 
-  backlogTasks$: Observable<TaskWithSubTasks[]> = this._taskService.backlogTasks$;
-  estimateRemainingBacklog$: Observable<number> = this._taskService.estimateRemainingBacklog$;
-
   // TODO
   isPlanYourDay = false; // = first start in day or no todays tasks at all (session needed)
+  // close when starting a task
   isShowBacklog = false; // if isPlanYourDay and  show only if there are actually some
   splitInputPos = 0;
 
   constructor(
-    private _taskService: TaskService,
+    public taskService: TaskService,
     private _layoutService: LayoutService
   ) {
     // this.focusTaskIdList$.subscribe(v => console.log(v));
