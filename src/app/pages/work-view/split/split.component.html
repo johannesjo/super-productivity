@@ -4,6 +4,8 @@
   <button mat-fab=""
           #buttonEl
   >
+    <span class="counter"
+          *ngIf="counter">{{counter}}</span>
     <mat-icon>border_color</mat-icon>
   </button>
 </div>

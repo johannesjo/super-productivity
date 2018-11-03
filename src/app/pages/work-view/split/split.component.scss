@@ -27,4 +27,11 @@
     transform: translate(-50%, -50%);
     left: 50%;
   }
+
+  .counter {
+    position: absolute;
+    top: -2px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
 }

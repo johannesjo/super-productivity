@@ -20,17 +20,17 @@ import { takeUntil } from 'rxjs/operators';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SplitComponent implements OnInit {
-  @Input() splitEl1;
-  @Input() splitEl2;
+  @Input() splitTopEl;
+  @Input() splitBottomEl;
   @Input() containerEl;
+  @Input() counter;
   @Output() onHide: EventEmitter<'TOP' | 'BOTTOM'> = new EventEmitter();
 
   pos: number;
   subscription: Subscription;
   @ViewChild('buttonEl') buttonEl;
 
-  constructor(private _renderer: Renderer2,
-              private _el: ElementRef) {
+  constructor(private _renderer: Renderer2) {
   }
 
   @HostBinding('class.is2Visible') get is2Visible() {
@@ -43,9 +43,9 @@ export class SplitComponent implements OnInit {
   }
 
   ngOnInit() {
-    console.log(this.splitEl1);
+    console.log(this.splitTopEl);
     console.log(this.containerEl);
-    console.log(this.splitEl2);
+    console.log(this.splitBottomEl);
     console.log(this.buttonEl);
   }
 
@@ -81,7 +81,8 @@ export class SplitComponent implements OnInit {
   onMouseMove(ev) {
     console.log('onMouseDown', ev);
     const h = this.containerEl.offsetHeight;
-    const handleHeight = this.buttonEl._elementRef.nativeElement.offsetHeight * 3 / 2;
+    // const handleHeight = this.buttonEl._elementRef.nativeElement.offsetHeight * 3 / 2;
+    const handleHeight = this.buttonEl._elementRef.nativeElement.offsetHeight * 2 / 2;
     console.log(handleHeight);
 
     let percentage = (ev.clientY - handleHeight) / h * 100;
@@ -104,14 +105,14 @@ export class SplitComponent implements OnInit {
 
     }
 
-    if (this.splitEl1 && this.splitEl2) {
+    if (this.splitTopEl && this.splitBottomEl) {
       this._renderer.setStyle(
-        this.splitEl1,
+        this.splitTopEl,
         'height',
         `${pos}%`,
       );
       this._renderer.setStyle(
-        this.splitEl2,
+        this.splitBottomEl,
         'height',
         `${100 - pos}%`,
       );

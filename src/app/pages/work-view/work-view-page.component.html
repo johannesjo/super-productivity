@@ -2,7 +2,7 @@
      #containerEl
      style="overflow:hidden;height:100%; width: 100%; position: absolute; top: 0; left: 0;">
   <div class="today"
-       #split1>
+       #splitTopEl>
 
     <header class="work-view-header bg-900">
       <div class="status-bar">
@@ -74,11 +74,12 @@
   </div>
 
   <div class="backlog"
-       #split2>
+       #splitBottomEl>
     <split [containerEl]="containerEl"
            [splitPos]="isShowBacklog ? 50 : 100"
-           [splitEl1]="split1"
-           [splitEl2]="split2"
+           [counter]="(backlogTasks$|async).length"
+           [splitTopEl]="splitTopEl"
+           [splitBottomEl]="splitBottomEl"
            (onHide)="($event==='BOTTOM') ? isShowBacklog=false :isShowBacklog=true"></split>
     <div class="inner-wrapper">
       <div class="component-wrapper page-wrapper">
