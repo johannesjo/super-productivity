@@ -246,10 +246,12 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
 
     // move focus up
     if ((!isShiftOrCtrlPressed && ev.key === 'ArrowUp') || checkKeyCombo(ev, keys.selectPreviousTask)) {
+      ev.preventDefault();
       this.focusPrevious();
     }
     // move focus down
     if ((!isShiftOrCtrlPressed && ev.key === 'ArrowDown') || checkKeyCombo(ev, keys.selectNextTask)) {
+      ev.preventDefault();
       this.focusNext();
     }
 

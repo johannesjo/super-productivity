@@ -25,10 +25,6 @@ export class SplitComponent implements OnInit {
   constructor(private _renderer: Renderer2) {
   }
 
-  @HostBinding('class.is2Visible') get is2Visible() {
-    return this.pos !== 100;
-  }
-
   @Input() set splitPos(pos: number) {
     this._updatePos(pos, true);
   }
