@@ -2,7 +2,6 @@ import { Routes } from '@angular/router';
 import { WorkViewPageComponent } from './pages/work-view/work-view-page.component';
 import { ConfigPageComponent } from './pages/config-page/config-page.component';
 import { ProjectPageComponent } from './pages/project-page/project-page.component';
-import { DailyPlannerComponent } from './pages/daily-planner/daily-planner.component';
 import { DailySummaryComponent } from './pages/daily-summary/daily-summary.component';
 import { WorklogAndCalendarComponent } from './pages/worklog-and-calendar/worklog-and-calendar.component';
 import { WorklogComponent } from './pages/worklog-and-calendar/worklog/worklog.component';
