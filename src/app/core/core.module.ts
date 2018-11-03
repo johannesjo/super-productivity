@@ -8,6 +8,7 @@ import { ShortcutModule } from './shortcut/shortcut.module';
 import { SnackModule } from './snack/snack.module';
 import { GoogleModule } from './google/google.module';
 import { RouterModule } from '@angular/router';
+import { LayoutModule } from './layout/layout.module';
 
 @NgModule({
   imports: [
@@ -20,6 +21,7 @@ import { RouterModule } from '@angular/router';
     SnackModule,
     GoogleModule,
     RouterModule,
+    LayoutModule,
   ],
   declarations: [],
   exports: [

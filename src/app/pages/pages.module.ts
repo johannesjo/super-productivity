@@ -13,7 +13,6 @@ import { WorklogAndCalendarModule } from './worklog-and-calendar/worklog-and-cal
     ConfigPageModule,
     ProjectPageModule,
     WorkViewPageModule,
-    DailyPlannerModule,
     DailySummaryModule,
     WorklogAndCalendarModule,
   ],

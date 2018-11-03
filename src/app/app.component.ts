@@ -9,6 +9,7 @@ import { ShortcutService } from './core/shortcut/shortcut.service';
 import { checkKeyCombo } from './core/util/check-key-combo';
 import { ConfigService } from './core/config/config.service';
 import { blendInOutAnimation } from './ui/animations/blend-in-out.ani';
+import { LayoutService } from './core/layout/layout.service';
 
 @Component({
   selector: 'app-root',
@@ -19,8 +20,6 @@ import { blendInOutAnimation } from './ui/animations/blend-in-out.ani';
 export class AppComponent implements OnInit {
   @HostBinding('class') private _currentTheme: string;
 
-  public isShowAddTaskBar = false;
-
 
   constructor(
     private _configService: ConfigService,
@@ -30,6 +29,7 @@ export class AppComponent implements OnInit {
     private _overlayContainer: OverlayContainer,
     private _projectService: ProjectService,
     private _chromeExtensionInterface: ChromeExtensionInterfaceService,
+    public layoutService: LayoutService,
   ) {
     this._matIconRegistry.addSvgIcon(
       `sp`,
@@ -41,7 +41,7 @@ export class AppComponent implements OnInit {
   @HostListener('document:keydown', ['$event']) onKeyDown(ev: KeyboardEvent) {
     this._shortcutService.handleKeyDown(ev);
     if (checkKeyCombo(ev, this._configService.cfg.keyboard.addNewTask)) {
-      this.isShowAddTaskBar = !this.isShowAddTaskBar;
+      this.layoutService.toggleAddTaskBar();
       ev.preventDefault();
     }
   }

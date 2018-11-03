@@ -42,10 +42,7 @@
         <!--</button>-->
       </div>
     </header>
-    <header>
-      <h1 class="mat-headline">Plan your day!</h1>
-      <add-task-bar></add-task-bar>
-    </header>
+
     <div class="component-wrapper page-wrapper">
       <task-list [tasks]="undoneTasks$|async"
                  [focusIdList]="focusTaskIdList$|async"

@@ -10,7 +10,6 @@ import { CalendarComponent } from './pages/worklog-and-calendar/calendar/calenda
 
 export const APP_ROUTES: Routes = [
   {path: 'work-view', component: WorkViewPageComponent},
-  {path: 'daily-planner', component: DailyPlannerComponent},
   {path: 'config', component: ConfigPageComponent},
   {path: 'projects', component: ProjectPageComponent},
   {path: 'daily-summary', component: DailySummaryComponent},

@@ -4,8 +4,8 @@
   <div class="mat-typography">
     <add-task-bar class="global"
                   [@blendInOut]
-                  (blur)="isShowAddTaskBar=false;"
-                  *ngIf="isShowAddTaskBar"></add-task-bar>
+                  (blur)="layoutService.hideAddTaskBar()"
+                  *ngIf="layoutService.isShowAddTaskBar$|async"></add-task-bar>
     <router-outlet></router-outlet>
   </div>
 </mat-sidenav-container>
