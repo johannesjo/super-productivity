@@ -18,10 +18,14 @@ h2 {
   text-align: center;
 }
 
-.work-view-header {
-  color: #ffffff;
-  margin-bottom: $s;
+.work-view-header,
+.backlog-header {
   box-shadow: $header-inset-shadow;
+  color: #ffffff;
+}
+
+.work-view-header {
+  margin-bottom: $s;
 
   @media(max-width: $layout-xs) {
     .label {
@@ -31,6 +35,10 @@ h2 {
       margin: 0;
     }
   }
+}
+
+.backlog-header {
+  padding-top: 2*$s;
 }
 
 .status-bar {

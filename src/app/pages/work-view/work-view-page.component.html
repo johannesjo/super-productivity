@@ -52,10 +52,9 @@
       <task-list [tasks]="taskService.undoneTasks$|async"
                  [focusIdList]="taskService.focusIdsForWorkView$|async"
                  [filterArgs]="{'isDone':false}"></task-list>
-      <button (click)="isShowBacklog=!isShowBacklog">Show {{isShowBacklog}}</button>
-      <button (click)="isVertical=!isVertical">Vertical {{isVertical}}</button>
+      <!--<button (click)="isShowBacklog=!isShowBacklog">Show {{isShowBacklog}}</button>-->
+      <!--<button (click)="isVertical=!isVertical">Vertical {{isVertical}}</button>-->
 
-      <!--<div *ngIf="!isShowBacklog"-->
       <div
         [@expandFade]>
         <div class="button-controls">
@@ -83,9 +82,25 @@
            [splitTopEl]="splitTopEl"
            [splitBottomEl]="splitBottomEl"></split>
     <div class="inner-wrapper">
+      <header class="backlog-header bg-900">
+        <div class="status-bar">
+          <div class="item">
+            <span class="label">Estimate:</span>
+            <span class="no-wrap">
+      ~<strong>{{taskService.estimateRemainingBacklog$|async|msToString}}</strong>
+      <mat-icon>timer</mat-icon>
+      </span>
+          </div>
+          <button mat-mini-fab
+                  color="primary"
+                  (click)="showAddTaskBar()">
+            <mat-icon class="hide-controls-icon">add</mat-icon>
+          </button>
+        </div>
+      </header>
+
       <div class="component-wrapper page-wrapper">
-        <h2 class="mat-h2"
-            style="text-align: center; margin-top: 20px;">Backlog ~{{taskService.estimateRemainingBacklog$|async|msToString}}</h2>
+        <h2 class="mat-h2">Backlog</h2>
         <task-list [tasks]="taskService.backlogTasks$|async"
                    [focusIdList]="taskService.focusIdsForBacklog$|async"
                    [filterArgs]="{'isDone':true}"></task-list>
