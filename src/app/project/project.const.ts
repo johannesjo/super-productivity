@@ -5,6 +5,8 @@ export const DEFAULT_PROJECT: Project = {
   title: '',
   themeColor: '',
   isDarkTheme: false,
+  startedTimeToday: null,
+  timeWorkedWithoutBreak: null,
   issueIntegrationCfgs: {},
   googleTimeSheetExport: {
     spreadsheetId: null,
@@ -29,6 +31,8 @@ export const FIRST_PROJECT: Project = {
   title: 'Super Productivity',
   themeColor: 'light-blue',
   isDarkTheme: false,
+  startedTimeToday: null,
+  timeWorkedWithoutBreak: null,
   issueIntegrationCfgs: {},
   googleTimeSheetExport: {
     spreadsheetId: null,

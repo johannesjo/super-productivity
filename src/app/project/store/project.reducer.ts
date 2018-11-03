@@ -18,6 +18,7 @@ export const projectAdapter: EntityAdapter<Project> = createEntityAdapter<Projec
 export const selectProjectFeatureState = createFeatureSelector<ProjectState>(PROJECT_FEATURE_NAME);
 const {selectIds, selectEntities, selectAll, selectTotal} = projectAdapter.getSelectors();
 export const selectCurrentProjectId = createSelector(selectProjectFeatureState, state => state.currentId);
+export const selectProjectEntities = createSelector(selectProjectFeatureState, selectEntities);
 export const selectAllProjects = createSelector(selectProjectFeatureState, selectAll);
 export const selectCurrentProject = createSelector(selectProjectFeatureState,
   (state) => state.entities[state.currentId]
@@ -38,6 +39,25 @@ export const initialState: ProjectState = projectAdapter.getInitialState({
   }
 });
 
+const addStartedTimeToday = (state, currentProjectId): ProjectState => {
+  const curProject: Project = state.entities[currentProjectId];
+  const oldDate = new Date(curProject.startedTimeToday);
+  const now = new Date();
+
+  // if same day just keep the old string
+  if (curProject.startedTimeToday && oldDate.setHours(0, 0, 0, 0) === now.setHours(0, 0, 0, 0)) {
+    return state;
+  } else {
+    return projectAdapter.updateOne({
+      id: currentProjectId,
+      changes: {
+        startedTimeToday: new Date().toString()
+      }
+    }, state);
+  }
+
+};
+
 // REDUCER
 // -------
 export function projectReducer(
@@ -50,11 +70,17 @@ export function projectReducer(
     // Meta Actions
     // ------------
     case ProjectActionTypes.LoadProjectState: {
-      return Object.assign({}, action.payload.state);
+      return addStartedTimeToday(
+        Object.assign({}, action.payload.state),
+        action.payload.state.currentId
+      );
     }
 
     case ProjectActionTypes.SetCurrentProject: {
-      return Object.assign({}, state, {currentId: action.payload});
+      return addStartedTimeToday(
+        Object.assign({}, state, {currentId: action.payload}),
+        action.payload
+      );
     }
 
     // Project Actions

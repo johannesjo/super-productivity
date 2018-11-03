@@ -27,6 +27,8 @@ export type Project = Readonly<{
   title: string;
   themeColor: string;
   isDarkTheme: boolean;
+  startedTimeToday: string;
+  timeWorkedWithoutBreak: number;
   issueIntegrationCfgs: IssueIntegrationCfgs;
   googleTimeSheetExport: GoogleTimeSheetExport;
 }>;
