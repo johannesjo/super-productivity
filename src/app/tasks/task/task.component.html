@@ -66,7 +66,8 @@
     </div>
 
     <div class="controls">
-      <button mat-icon-button
+      <button *ngIf="!task.subTasks || !task.subTasks.length"
+              mat-icon-button
               tabindex="2"
               class="ico-btn"
               [disabled]="task.subTasks && task.subTasks.length>0"
@@ -133,7 +134,7 @@
                         [task]="task"></task-additional-info>
 
   <div class="sub-tasks"
-       *ngIf="task.subTasks">
+       *ngIf="task.subTasks && task.subTasks.length">
     <button (click)="toggleHideSubTasks()"
             mat-icon-button
             tabindex="2"
