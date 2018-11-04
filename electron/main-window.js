@@ -39,32 +39,28 @@ function createWindow(params) {
   const nestedWinParams = params.nestedWinParams;
   indicatorMod = params.indicatorMod;
 
-  let frontendDir;
+  // Create the browser window.
+  mainWin = new BrowserWindow({ width: 800, height: 600 });
 
   if (IS_DEV) {
-    frontendDir = 'dist/sp2';
-  } else {
-    frontendDir = 'dist/sp2';
-  }
-
-  // Create the browser window.
-  mainWin = new BrowserWindow({width: 800, height: 600});
-
-  // and load the index.html of the app.
-  mainWin.loadURL(url.format({
-    pathname: path.join(__dirname, '../' + frontendDir + '/index.html'),
-    protocol: 'file:',
-    slashes: true,
-    webPreferences: {
-      scrollBounce: true
-    },
-    icon: ICONS_FOLDER + '/app-icons/icon_256x256.png'
-  }));
-
-  // Open the DevTools if starting with -- DEV
-  //if (process.argv && process.argv.indexOf('DEV') > -1) {
+    require('electron-reload')(__dirname, {
+      electron: require(`${__dirname}/../node_modules/electron`)
+    });
+    mainWin.loadURL('http://localhost:4200');
     mainWin.webContents.openDevTools();
-  //}
+  } else {
+    mainWin.loadURL(url.format({
+      pathname: IS_DEV
+        ? 'http://localhost:4200'
+        : path.join(__dirname, '../dist/sp2/index.html'),
+      protocol: 'file:',
+      slashes: true,
+      webPreferences: {
+        scrollBounce: true
+      },
+      icon: ICONS_FOLDER + '/app-icons/icon_256x256.png'
+    }));
+  }
 
   initWinEventListeners(app, IS_MAC, nestedWinParams, indicatorMod);
 
@@ -133,8 +129,8 @@ function createMenu(quitApp) {
   const menuTpl = [{
     label: 'Application',
     submenu: [
-      {label: 'About Application', selector: 'orderFrontStandardAboutPanel:'},
-      {type: 'separator'},
+      { label: 'About Application', selector: 'orderFrontStandardAboutPanel:' },
+      { type: 'separator' },
       {
         label: 'Quit', click: quitApp
       }
@@ -142,13 +138,13 @@ function createMenu(quitApp) {
   }, {
     label: 'Edit',
     submenu: [
-      {label: 'Undo', accelerator: 'CmdOrCtrl+Z', selector: 'undo:'},
-      {label: 'Redo', accelerator: 'Shift+CmdOrCtrl+Z', selector: 'redo:'},
-      {type: 'separator'},
-      {label: 'Cut', accelerator: 'CmdOrCtrl+X', selector: 'cut:'},
-      {label: 'Copy', accelerator: 'CmdOrCtrl+C', selector: 'copy:'},
-      {label: 'Paste', accelerator: 'CmdOrCtrl+V', selector: 'paste:'},
-      {label: 'Select All', accelerator: 'CmdOrCtrl+A', selector: 'selectAll:'}
+      { label: 'Undo', accelerator: 'CmdOrCtrl+Z', selector: 'undo:' },
+      { label: 'Redo', accelerator: 'Shift+CmdOrCtrl+Z', selector: 'redo:' },
+      { type: 'separator' },
+      { label: 'Cut', accelerator: 'CmdOrCtrl+X', selector: 'cut:' },
+      { label: 'Copy', accelerator: 'CmdOrCtrl+C', selector: 'copy:' },
+      { label: 'Paste', accelerator: 'CmdOrCtrl+V', selector: 'paste:' },
+      { label: 'Select All', accelerator: 'CmdOrCtrl+A', selector: 'selectAll:' }
     ]
   }
   ];
