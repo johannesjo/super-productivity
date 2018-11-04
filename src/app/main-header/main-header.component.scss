@@ -10,6 +10,9 @@
 }
 
 nav {
+  display: flex;
+  align-items: center;
+
   button {
     margin-left: $s;
   }
@@ -19,4 +22,16 @@ nav {
   position: relative;
   z-index: 3;
   display: block;
+}
+
+mat-toolbar {
+  height: $s*7;
+}
+
+.mat-fab {
+  height: 52px;
+  width: 52px;
+  ::ng-deep .mat-button-wrapper {
+    padding: 0 !important;
+  }
 }

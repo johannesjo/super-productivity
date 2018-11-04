@@ -2,7 +2,6 @@ import { createEntityAdapter, EntityAdapter, EntityState } from '@ngrx/entity';
 import { DeleteTask, TaskActions, TaskActionTypes } from './task.actions';
 import { Task, TimeSpentOnDay } from '../task.model';
 import { calcTotalTimeSpent } from '../util/calc-total-time-spent';
-import { tasks } from 'googleapis/build/src/apis/tasks';
 import { arrayMoveLeft, arrayMoveRight } from '../../core/util/array-move';
 
 export const TASK_FEATURE_NAME = 'tasks';
@@ -36,18 +35,6 @@ export const initialTaskState: TaskState = taskAdapter.getInitialState({
 
 // HELPER
 // ------
-const moveTaskInArrayByIds = (arr_, id, targetId, isMoveAfter) => {
-  if (arr_.includes(id)) {
-    const arr = arr_.splice(0);
-    arr.splice(arr.indexOf(id), 1);
-    const targetIndex = targetId ? arr.indexOf(targetId) : 0;
-    arr.splice(targetIndex + (isMoveAfter ? 1 : 0), 0, id);
-    return arr;
-  } else {
-    return arr_;
-  }
-};
-
 const getTaskById = (taskId: string, state: TaskState) => {
   if (!state.entities[taskId]) {
     throw new Error('Task not found');
@@ -361,7 +348,7 @@ export function taskReducer(
 
     case TaskActionTypes.MoveUp: {
       let updatedState = state;
-      const id = action.payload.id;
+      const {id} = action.payload;
       const taskToMove = state.entities[id];
       if (taskToMove.parentId) {
         const parentSubTasks = state.entities[taskToMove.parentId].subTaskIds;
