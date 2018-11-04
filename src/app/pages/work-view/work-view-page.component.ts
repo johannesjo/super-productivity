@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { TaskService } from '../../tasks/task.service';
 import { expandFadeAnimation } from '../../ui/animations/expand.ani';
 import { LayoutService } from '../../core/layout/layout.service';
+import { DragulaService } from 'ng2-dragula';
 
 @Component({
   selector: 'work-view',
@@ -23,7 +24,8 @@ export class WorkViewPageComponent implements OnInit {
 
   constructor(
     public taskService: TaskService,
-    private _layoutService: LayoutService
+    private _layoutService: LayoutService,
+    private _dragulaService: DragulaService,
   ) {
     // this.focusTaskIdList$.subscribe(v => console.log(v));
   }
@@ -34,6 +36,23 @@ export class WorkViewPageComponent implements OnInit {
     } else {
       this.splitInputPos = 100;
     }
+
+
+    this._dragulaService.createGroup('PARENT', {
+      direction: 'vertical',
+      moves: function (el, container, handle) {
+        // console.log('moves par', handle.className, handle.className.indexOf('handle-par') > -1);
+        return handle.className.indexOf('handle-par') > -1;
+      }
+    });
+
+    this._dragulaService.createGroup('SUB', {
+      direction: 'vertical',
+      moves: function (el, container, handle) {
+        // console.log('moves sub', handle.className, handle.className.indexOf('handle-sub') > -1);
+        return handle.className.indexOf('handle-sub') > -1;
+      }
+    });
   }
 
 

@@ -1,9 +1,6 @@
-import { ChangeDetectionStrategy, Component, Input, OnDestroy, OnInit } from '@angular/core';
-import { Subscription } from 'rxjs';
-import { TaskService } from '../task.service';
+import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { Task } from '../task.model';
-import { DragulaService } from 'ng2-dragula';
-import shortid from 'shortid';
+import { TaskService } from '../task.service';
 
 @Component({
   selector: 'task-list',
@@ -12,45 +9,23 @@ import shortid from 'shortid';
   changeDetection: ChangeDetectionStrategy.OnPush
 
 })
-export class TaskListComponent implements OnInit, OnDestroy {
+export class TaskListComponent {
   @Input() tasks: Task[];
   @Input() filterArgs: string;
   @Input() focusIdList: string[];
+  @Input() parentId: string;
+  @Input() listId: string;
+  @Input() listModelId: string;
 
-  taskListId: string;
-  private subs: Subscription[] = [];
-
-  constructor(private _taskService: TaskService,
-              private _dragulaService: DragulaService) {
+  constructor(private _taskService: TaskService) {
   }
 
-  ngOnInit() {
-    this.taskListId = shortid();
-    this._dragulaService.createGroup(this.taskListId, {
-      moves: function (el, container, handle) {
-        return handle.className.indexOf('handle-par') > -1;
-      }
-    });
-    this.subs.push(this._dragulaService.dropModel(this.taskListId)
-      .subscribe((dm) => {
-        const targetItemId = dm.targetModel[dm.targetIndex].id;
-        // const sourceItemId = dm.sourceModel[dm.sourceIndex].id;
-        const sourceItemId = dm.item.id;
-        console.log(dm.item, sourceItemId, targetItemId);
-        if (sourceItemId !== targetItemId) {
-          // this._taskService.moveAfter(sourceItemId, targetItemId);
-        }
-      }));
-  }
-
-  ngOnDestroy() {
-    this.subs.forEach((sub) => sub && sub.unsubscribe());
-  }
 
   trackByFn(i: number, task: Task) {
     return task.id;
   }
 
-  focusLastFocusedTaskEl() {
+  updateList(ev) {
+    console.log(this.listId, this.parentId, ev);
   }
 }

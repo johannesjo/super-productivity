@@ -29,7 +29,7 @@ import { TaskAdditionalInfoComponent } from './task-additional-info/task-additio
     UiModule,
     FormsModule,
     ReactiveFormsModule,
-    DragulaModule,
+    DragulaModule.forRoot(),
     StoreModule.forFeature(TASK_FEATURE_NAME, taskReducer),
     EffectsModule.forFeature([TaskEffects]),
   ],

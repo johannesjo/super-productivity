@@ -315,6 +315,18 @@ $this-active-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2),
 
   .handle {
     margin: 0 4px 0 9px;
+    position: relative;
+    z-index: 3;
+    cursor: grab;
+
+    &:after {
+      content: '';
+      top: -$s;
+      bottom: -$s;
+      left: -$s;
+      right: 0;
+      position: absolute;
+    }
   }
 
   .task-title {

@@ -12,9 +12,7 @@ import {
 } from '@angular/core';
 import { TaskService } from '../task.service';
 import { Subject } from 'rxjs';
-import { DragulaService } from 'ng2-dragula';
 import { TaskWithSubTasks } from '../task.model';
-import shortid from 'shortid';
 import { MatDialog } from '@angular/material';
 import { DialogTimeEstimateComponent } from '../dialogs/dialog-time-estimate/dialog-time-estimate.component';
 import { expandAnimation } from '../../ui/animations/expand.ani';
@@ -38,7 +36,6 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
 
   additionalTabsIndex = 0;
 
-  subTaskListId: string;
   private _currentFocusId: string;
 
   @HostBinding('class.is-current') isCurrent = false;
@@ -66,7 +63,6 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
 
   constructor(
     private readonly _taskService: TaskService,
-    private readonly _dragulaService: DragulaService,
     private readonly _matDialog: MatDialog,
     private readonly _configService: ConfigService,
     private readonly _elementRef: ElementRef,
@@ -78,12 +74,6 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   ngOnInit() {
-    this.subTaskListId = shortid();
-    this._dragulaService.createGroup(this.subTaskListId, {
-      moves: function (el, container, handle) {
-        return handle.className.indexOf('handle-sub') > -1;
-      }
-    });
   }
 
   ngAfterViewInit() {

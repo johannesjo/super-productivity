@@ -47,6 +47,7 @@ import { HelpSectionComponent } from './help-section/help-section.component';
 import { NumberToMonthPipe } from './duration/number-to-month.pipe';
 import { SplitModule } from '../pages/work-view/split/split.module';
 import { FlexLayoutModule } from '@angular/flex-layout';
+import { DragDropModule } from '@angular/cdk/drag-drop';
 
 @NgModule({
   imports: [
@@ -56,6 +57,8 @@ import { FlexLayoutModule } from '@angular/flex-layout';
     ReactiveFormsModule,
     FormlyModule.forChild(),
     FormlyMaterialModule,
+
+    DragDropModule,
 
     // material2
     MatAutocompleteModule,
@@ -117,6 +120,8 @@ import { FlexLayoutModule } from '@angular/flex-layout';
     MsToStringPipe$,
     StringToMsPipe,
     NumberToMonthPipe,
+
+    DragDropModule,
 
     // material2
     MatAutocompleteModule,

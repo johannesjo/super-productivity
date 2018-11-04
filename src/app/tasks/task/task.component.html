@@ -142,6 +142,8 @@
       <mat-icon *ngIf="!task.isHideSubTasks">remove</mat-icon>
     </button>
     <task-list [tasks]="task.subTasks"
+               listId="SUB"
+               [parentId]="task.id"
                [@expand]
                *ngIf="!task.isHideSubTasks"
                [focusIdList]="focusIdList"></task-list>

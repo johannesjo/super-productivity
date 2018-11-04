@@ -1,4 +1,8 @@
-<task *ngFor="let task of tasks; trackBy: trackByFn; let i = index;"
-      [task]="task"
-      [focusIdList]="focusIdList">
-</task>
+<div [dragula]="listId"
+     [dragulaModel]="tasks"
+     (dragulaModelChange)="updateList($event)">
+  <task *ngFor="let task of tasks; trackBy: trackByFn; let i = index;"
+        [task]="task"
+        [focusIdList]="focusIdList">
+  </task>
+</div>
