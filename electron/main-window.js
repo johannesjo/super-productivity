@@ -50,9 +50,7 @@ function createWindow(params) {
     mainWin.webContents.openDevTools();
   } else {
     mainWin.loadURL(url.format({
-      pathname: IS_DEV
-        ? 'http://localhost:4200'
-        : path.join(__dirname, '../dist/sp2/index.html'),
+      pathname: path.join(__dirname, '../dist/index.html'),
       protocol: 'file:',
       slashes: true,
       webPreferences: {
