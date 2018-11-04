@@ -6,6 +6,7 @@ import { select, Store } from '@ngrx/store';
 import { ProjectActionTypes } from './store/project.actions';
 import shortid from 'shortid';
 import {
+  initialProjectState,
   ProjectState,
   selectAllProjects,
   selectCurrentProject,
@@ -40,7 +41,7 @@ export class ProjectService {
   }
 
   load() {
-    const projectState_ = this._persistenceService.loadProjectsMeta();
+    const projectState_ = this._persistenceService.loadProjectsMeta() || initialProjectState;
     const projectState = this._extendProjectDefaults(projectState_);
 
     if (projectState) {

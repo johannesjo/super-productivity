@@ -29,7 +29,7 @@ export const selectProjectJiraCfg = createSelector(selectProjectIssueCfgs, (issu
 
 // DEFAULT
 // -------
-export const initialState: ProjectState = projectAdapter.getInitialState({
+export const initialProjectState: ProjectState = projectAdapter.getInitialState({
   currentId: FIRST_PROJECT.id,
   ids: [
     FIRST_PROJECT.id
@@ -61,7 +61,7 @@ const addStartedTimeToday = (state, currentProjectId): ProjectState => {
 // REDUCER
 // -------
 export function projectReducer(
-  state: ProjectState = initialState,
+  state: ProjectState = initialProjectState,
   action: ProjectActions
 ): ProjectState {
   // console.log(state.entities, state, action);
