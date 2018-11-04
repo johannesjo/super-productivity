@@ -179,6 +179,27 @@ const deleteTask = (state: TaskState,
   };
 };
 
+const setNextTask = (state: TaskState): TaskState => {
+  if (!state.currentTaskId) {
+    return state;
+  }
+  // TODO logic for parent sub tasks
+  // TODO add logic for next task
+
+  state.todaysTaskIds.forEach((id) => {
+    if (!state.entities[id].isDone) {
+      return {
+        ...state,
+        currentTaskId: id,
+      };
+    }
+  });
+  return {
+    ...state,
+    currentTaskId: null,
+  };
+};
+
 
 // TODO unit test the shit out of this once the model is settled
 export function taskReducer(
@@ -237,12 +258,14 @@ export function taskReducer(
     }
 
     case TaskActionTypes.UpdateTask: {
-      const taskId = action.payload.task.id as string;
-      const timeSpentOnDay = action.payload.task.changes.timeSpentOnDay;
-      const timeEstimate = action.payload.task.changes.timeEstimate;
-      let stateCopy = updateTimeSpentForTask(taskId, timeSpentOnDay, state);
-      stateCopy = updateTimeEstimateForTask(taskId, timeEstimate, stateCopy);
+      let stateCopy = state;
+      const id = action.payload.task.id as string;
+      const {timeSpentOnDay, timeEstimate, isDone} = action.payload.task.changes;
+      stateCopy = updateTimeSpentForTask(id, timeSpentOnDay, stateCopy);
+      stateCopy = updateTimeEstimateForTask(id, timeEstimate, stateCopy);
+      stateCopy = isDone ? setNextTask(stateCopy) : stateCopy;
       return taskAdapter.updateOne(action.payload.task, stateCopy);
+
     }
 
     // TODO also delete related issue :(
