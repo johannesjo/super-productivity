@@ -1,0 +1,17 @@
+@import '../../../variables';
+
+.dialog-content {
+}
+
+@media (min-width: $layout-gt-xs) {
+  .row {
+    display: flex;
+  }
+  .col {
+    width: 50%;
+  }
+}
+
+#task-textarea {
+  width: 100%;
+}

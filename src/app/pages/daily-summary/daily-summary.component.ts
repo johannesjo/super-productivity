@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy, OnInit } from '@angular/core';
 import { TaskService } from '../../tasks/task.service';
 import { getTodayStr } from '../../tasks/util/get-today-str';
 import { TaskWithSubTasks } from '../../tasks/task.model';
@@ -6,6 +6,8 @@ import { Router } from '@angular/router';
 import { IS_ELECTRON } from '../../app.constants';
 import { DialogGoogleExportTimeComponent } from '../../core/google/dialog-google-export-time/dialog-google-export-time.component';
 import { MatDialog } from '@angular/material';
+import { DialogSimpleTaskSummaryComponent } from '../../core/dialog-simple-task-summary/dialog-simple-task-summary.component';
+import { Subscription } from 'rxjs';
 
 // TODO MOVE TO DEDICATED FILE
 const IPC_EVENT_SHUTDOWN = 'SHUTDOWN';
@@ -19,7 +21,7 @@ const SUCCESS_ANIMATION_MAX_DURATION = 10000;
   styleUrls: ['./daily-summary.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class DailySummaryComponent implements OnInit {
+export class DailySummaryComponent implements OnInit, OnDestroy {
   public cfg: any = {};
   public doneTasks$ = this._taskService.doneTasks$;
   public todaysTasks$ = this._taskService.todaysTasks$;
@@ -33,7 +35,8 @@ export class DailySummaryComponent implements OnInit {
   private showSuccessAnimation;
   private successAnimationMaxTimeout;
   private _doneTasks: TaskWithSubTasks[];
-
+  private _todaysTasks: TaskWithSubTasks[];
+  private _subs: Subscription = new Subscription();
   // calc total time spent on todays tasks
   totalTimeSpentTasks$ = this._taskService.totalTimeWorkedOnTodaysTasks$;
 
@@ -49,13 +52,29 @@ export class DailySummaryComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.doneTasks$.subscribe((val) => {
+    this._subs.add(this.doneTasks$.subscribe((val) => {
       this._doneTasks = val;
-    });
+    }));
+
+    this._subs.add(this.todaysTasks$.subscribe((val) => {
+      this._todaysTasks = val;
+    }));
   }
 
+  ngOnDestroy() {
+    this._subs.unsubscribe();
+  }
 
   showExportModal() {
+    this._matDialog.open(DialogSimpleTaskSummaryComponent, {
+      data: {
+        settings: {},
+        tasks: this._todaysTasks,
+        // TODO this is not ideal
+        finishDayFn: this.finishDay.bind(this)
+      }
+    });
+
     // Dialogs('SIMPLE_TASK_SUMMARY', {
     //   settings: $rootScope.r.uiHelper.dailyTaskExportSettings,
     //   finishDayFn: finishDay,

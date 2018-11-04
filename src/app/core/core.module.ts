@@ -9,6 +9,7 @@ import { SnackModule } from './snack/snack.module';
 import { GoogleModule } from './google/google.module';
 import { RouterModule } from '@angular/router';
 import { LayoutModule } from './layout/layout.module';
+import { DialogSimpleTaskSummaryModule } from './dialog-simple-task-summary/dialog-simple-task-summary.module';
 
 @NgModule({
   imports: [
@@ -22,6 +23,7 @@ import { LayoutModule } from './layout/layout.module';
     GoogleModule,
     RouterModule,
     LayoutModule,
+    DialogSimpleTaskSummaryModule,
   ],
   declarations: [],
   exports: [
@@ -33,6 +35,7 @@ import { LayoutModule } from './layout/layout.module';
     SnackModule,
     GoogleModule,
     RouterModule,
+    DialogSimpleTaskSummaryModule,
   ]
 })
 export class CoreModule {
