@@ -58,6 +58,7 @@ function createWindow(params) {
       },
       icon: ICONS_FOLDER + '/app-icons/icon_256x256.png'
     }));
+    mainWin.webContents.openDevTools();
   }
 
   initWinEventListeners(app, IS_MAC, nestedWinParams, indicatorMod);

@@ -28,7 +28,7 @@
     "e2e": "ng e2e",
     "electron": "npm run buildElectron && ./node_modules/.bin/electron .",
     "pack": "electron-builder --dir",
-    "localInstall": "sudo echo 'Starting local install' && rm -Rf ./dist/ && npm run buildElectron && electron-builder --linux && sudo dpkg -i dist/sp2*.deb",
+    "localInstall": "sudo echo 'Starting local install' && rm -Rf ./dist/ && npm run buildElectron && electron-builder --linux && sudo dpkg -i app-builds/sp2*.deb",
     "dist": "run-s buildFrontend && electron-builder",
     "distLinuxAndWindows": "run-s buildFrontend && electron-builder --linux --win",
     "pub": "run-s buildFrontend && electron-builder -p always",
@@ -47,8 +47,11 @@
     "appId": "superProductivity",
     "files": [
       "electron/**/*",
-      "app/**/*"
+      "dist/**/*"
     ],
+    "directories": {
+      "output": "./app-builds"
+    },
     "mac": {
       "category": "productivity",
       "publish": [
@@ -69,8 +72,8 @@
       "category": "Utility",
       "target": [
         "AppImage",
-        "deb",
-        "snap"
+        "snap",
+        "deb"
       ],
       "publish": [
         "github",
