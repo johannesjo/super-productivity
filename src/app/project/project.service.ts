@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { GoogleTimeSheetExport, Project } from './project.model';
+import { GoogleTimeSheetExport, Project, SimpleSummarySettings } from './project.model';
 import { PersistenceService } from '../core/persistence/persistence.service';
 import { select, Store } from '@ngrx/store';
 import { ProjectActionTypes } from './store/project.actions';
@@ -114,12 +114,22 @@ export class ProjectService {
     });
   }
 
+  // HELPER
+  updateSimpleSummarySettings(projectId: string, data: SimpleSummarySettings) {
+    this.update(projectId, {
+      simpleSummarySettings: {
+        ...data,
+      }
+    });
+  }
+
 
   // we need to make sure our model stays compatible with new props added
   private _extendProjectDefaults(projectState: ProjectState): ProjectState {
     const projectEntities: Dictionary<Project> = {...projectState.entities};
     Object.keys(projectEntities).forEach((key) => {
       // we possibly need to extend this
+      // NOTE: check if we need a deep copy
       projectEntities[key] = {
         ...DEFAULT_PROJECT,
         ...projectEntities[key]

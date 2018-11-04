@@ -131,14 +131,6 @@
        align="end">
     <button mat-raised-button=""
             color="primary"
-            *ngIf="finishDayFn"
-            type="button"
-            (click)="cancel();finishDayFn()">
-      <mat-icon>wb_sunny</mat-icon>
-      Clear Done and go home
-    </button>
-    <button mat-raised-button=""
-            color="primary"
             id="clipboard-btn"
             data-clipboard-action="copy"
             data-clipboard-target="#task-textarea">

@@ -23,6 +23,18 @@ export const DEFAULT_PROJECT: Project = {
       '{currentTime}',
       '{totalTime}',
     ]
+  },
+  simpleSummarySettings: {
+    separateBy: '',
+    separateFieldsBy: ';',
+    isUseNewLine: true,
+    isListSubTasks: true,
+    isListDoneOnly: false,
+    isWorkedOnTodayOnly: true,
+    showTitle: true,
+    showTimeSpent: true,
+    isTimeSpentAsMilliseconds: false,
+    showDate: false
   }
 };
 
@@ -44,5 +56,17 @@ export const FIRST_PROJECT: Project = {
     roundWorkTimeTo: null,
     defaultValues: [],
     lastExported: null,
+  },
+  simpleSummarySettings: {
+    separateBy: '',
+    separateFieldsBy: ';',
+    isUseNewLine: true,
+    isListSubTasks: true,
+    isListDoneOnly: false,
+    isWorkedOnTodayOnly: true,
+    showTitle: true,
+    showTimeSpent: true,
+    isTimeSpentAsMilliseconds: false,
+    showDate: false
   }
 };

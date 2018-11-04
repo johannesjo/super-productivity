@@ -22,6 +22,19 @@ export type GoogleTimeSheetExport = Readonly<{
   lastExported: string,
 }>;
 
+export type SimpleSummarySettings = Readonly<{
+  separateBy: string,
+  separateFieldsBy: string,
+  isUseNewLine: boolean,
+  isListSubTasks: boolean,
+  isListDoneOnly: boolean,
+  isWorkedOnTodayOnly: boolean,
+  showTitle: boolean,
+  showTimeSpent: boolean,
+  isTimeSpentAsMilliseconds: boolean,
+  showDate: boolean
+}>;
+
 export type Project = Readonly<{
   id: string;
   title: string;
@@ -31,5 +44,6 @@ export type Project = Readonly<{
   timeWorkedWithoutBreak: number;
   issueIntegrationCfgs: IssueIntegrationCfgs;
   googleTimeSheetExport: GoogleTimeSheetExport;
+  simpleSummarySettings: SimpleSummarySettings;
 }>;
 

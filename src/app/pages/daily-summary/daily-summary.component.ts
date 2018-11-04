@@ -8,6 +8,8 @@ import { DialogGoogleExportTimeComponent } from '../../core/google/dialog-google
 import { MatDialog } from '@angular/material';
 import { DialogSimpleTaskSummaryComponent } from '../../core/dialog-simple-task-summary/dialog-simple-task-summary.component';
 import { Subscription } from 'rxjs';
+import { ProjectService } from '../../project/project.service';
+import { SimpleSummarySettings } from '../../project/project.model';
 
 // TODO MOVE TO DEDICATED FILE
 const IPC_EVENT_SHUTDOWN = 'SHUTDOWN';
@@ -36,6 +38,7 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
   private successAnimationMaxTimeout;
   private _doneTasks: TaskWithSubTasks[];
   private _todaysTasks: TaskWithSubTasks[];
+  private _simpleSummarySettings: SimpleSummarySettings;
   private _subs: Subscription = new Subscription();
   // calc total time spent on todays tasks
   totalTimeSpentTasks$ = this._taskService.totalTimeWorkedOnTodaysTasks$;
@@ -46,6 +49,7 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
 
   constructor(
     private readonly _taskService: TaskService,
+    private readonly _projectService: ProjectService,
     private readonly _router: Router,
     private readonly _matDialog: MatDialog
   ) {
@@ -59,6 +63,10 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
     this._subs.add(this.todaysTasks$.subscribe((val) => {
       this._todaysTasks = val;
     }));
+
+    this._subs.add(this._projectService.currentProject$.subscribe((val) => {
+      this._simpleSummarySettings = val.simpleSummarySettings;
+    }));
   }
 
   ngOnDestroy() {
@@ -68,10 +76,8 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
   showExportModal() {
     this._matDialog.open(DialogSimpleTaskSummaryComponent, {
       data: {
-        settings: {},
+        settings: this._simpleSummarySettings,
         tasks: this._todaysTasks,
-        // TODO this is not ideal
-        finishDayFn: this.finishDay.bind(this)
       }
     });
 

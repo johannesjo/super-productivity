@@ -3,6 +3,7 @@ import { msToString } from '../../ui/duration/ms-to-string.pipe';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material';
 import { TaskWithSubTasks } from '../../tasks/task.model';
 import { formatWorklogDateStr } from '../util/format-worklog-date-str';
+import { ProjectService } from '../../project/project.service';
 
 @Component({
   selector: 'dialog-simple-task-summary',
@@ -18,7 +19,8 @@ export class DialogSimpleTaskSummaryComponent implements OnInit {
 
   constructor(
     private _matDialogRef: MatDialogRef<DialogSimpleTaskSummaryComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: any
+    @Inject(MAT_DIALOG_DATA) public data: any,
+    private _projectService: ProjectService,
   ) {
   }
 
@@ -31,7 +33,6 @@ export class DialogSimpleTaskSummaryComponent implements OnInit {
     //   e.clearSelection();
     // });
 
-    this.finishDayFn = this.data.finishDayFn;
     this.options = this.data.settings;
     if (!this.options.separateBy) {
       this.options.separateBy = '';
@@ -40,8 +41,6 @@ export class DialogSimpleTaskSummaryComponent implements OnInit {
       this.options.separateFieldsBy = '';
     }
     this.tasksTxt = this._createTasksText(this.data.tasks);
-    console.log(this.tasksTxt, this.data.tasks, this.options);
-
   }
 
   close() {
@@ -50,6 +49,7 @@ export class DialogSimpleTaskSummaryComponent implements OnInit {
 
   onOptionsChange() {
     this.tasksTxt = this._createTasksText(this.data.tasks);
+    this._projectService.updateSimpleSummarySettings(this._projectService.currentId, this.options);
   }
 
   private _formatTask(task) {
@@ -128,6 +128,7 @@ export class DialogSimpleTaskSummaryComponent implements OnInit {
   }
 
   private _checkIsWorkedOnToday(task) {
-    return true;
+    const dateStr = formatWorklogDateStr(new Date());
+    return !!task.timeSpentOnDay[dateStr];
   }
 }

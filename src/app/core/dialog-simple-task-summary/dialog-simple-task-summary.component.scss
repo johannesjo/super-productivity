@@ -14,4 +14,7 @@
 
 #task-textarea {
   width: 100%;
+  @media (min-width: $layout-gt-xs) {
+    min-width: 70vw;
+  }
 }
