@@ -1,4 +1,18 @@
-import { Project } from './project.model';
+import { Project, SimpleSummarySettings } from './project.model';
+
+export const SIMPLE_SUMMARY_DEFAULTS: SimpleSummarySettings = {
+  separateBy: '',
+  separateFieldsBy: ';',
+  isUseNewLine: true,
+  isListSubTasks: true,
+  isListDoneOnly: false,
+  isWorkedOnTodayOnly: true,
+  showTitle: true,
+  showTimeSpent: true,
+  isTimeSpentAsMilliseconds: false,
+  showDate: false
+};
+
 
 export const DEFAULT_PROJECT: Project = {
   id: null,
@@ -24,19 +38,9 @@ export const DEFAULT_PROJECT: Project = {
       '{totalTime}',
     ]
   },
-  simpleSummarySettings: {
-    separateBy: '',
-    separateFieldsBy: ';',
-    isUseNewLine: true,
-    isListSubTasks: true,
-    isListDoneOnly: false,
-    isWorkedOnTodayOnly: true,
-    showTitle: true,
-    showTimeSpent: true,
-    isTimeSpentAsMilliseconds: false,
-    showDate: false
-  }
+  simpleSummarySettings: SIMPLE_SUMMARY_DEFAULTS
 };
+
 
 export const FIRST_PROJECT: Project = {
   id: 'DEFAULT',
@@ -57,16 +61,5 @@ export const FIRST_PROJECT: Project = {
     defaultValues: [],
     lastExported: null,
   },
-  simpleSummarySettings: {
-    separateBy: '',
-    separateFieldsBy: ';',
-    isUseNewLine: true,
-    isListSubTasks: true,
-    isListDoneOnly: false,
-    isWorkedOnTodayOnly: true,
-    showTitle: true,
-    showTimeSpent: true,
-    isTimeSpentAsMilliseconds: false,
-    showDate: false
-  }
+  simpleSummarySettings: SIMPLE_SUMMARY_DEFAULTS
 };

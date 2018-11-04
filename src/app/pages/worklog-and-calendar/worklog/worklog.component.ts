@@ -3,6 +3,8 @@ import { PersistenceService } from '../../../core/persistence/persistence.servic
 import { ProjectService } from '../../../project/project.service';
 import { expandFadeAnimation } from '../../../ui/animations/expand.ani';
 import { mapArchiveToWorklog, WorklogDay, WorklogMonth } from '../../../core/util/map-archive-to-worklog';
+import { DialogSimpleTaskSummaryComponent } from '../../../core/dialog-simple-task-summary/dialog-simple-task-summary.component';
+import { MatDialog } from '@angular/material';
 
 
 @Component({
@@ -17,8 +19,10 @@ export class WorklogComponent implements OnInit {
   totalTimeSpent: number;
 
   constructor(
-    private _persistenceService: PersistenceService,
-    private _projectService: ProjectService) {
+    private readonly _persistenceService: PersistenceService,
+    private readonly _projectService: ProjectService,
+    private readonly _matDialog: MatDialog
+  ) {
   }
 
   ngOnInit() {
@@ -28,14 +32,13 @@ export class WorklogComponent implements OnInit {
     this.totalTimeSpent = totalTimeSpent;
   }
 
-  exportData(type, data) {
+  exportData(type, monthData: WorklogMonth) {
     if (type === 'MONTH') {
-      // const tasks = vm.createTasksForMonth(data);
-      // Dialogs('SIMPLE_TASK_SUMMARY', {
-      //   settings: $rootScope.r.uiHelper.timeTrackingWorklogExportSettings,
-      //   tasks: tasks,
-      //   finishDayFn: false
-      // }, true);
+      this._matDialog.open(DialogSimpleTaskSummaryComponent, {
+        data: {
+          tasks: this._createTasksForMonth(monthData),
+        }
+      });
     }
   }
 
@@ -60,7 +63,7 @@ export class WorklogComponent implements OnInit {
     let tasks = [];
     const monthData = {...data};
     Object.keys(monthData.ent).forEach(dayDateStr => {
-      const entry: WorklogDay = monthData[dayDateStr];
+      const entry: WorklogDay = monthData.ent[dayDateStr];
       tasks = tasks.concat(this._createTasksForDay(entry));
     });
     return tasks;

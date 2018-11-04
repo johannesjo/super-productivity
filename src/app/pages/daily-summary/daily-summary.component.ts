@@ -63,10 +63,6 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
     this._subs.add(this.todaysTasks$.subscribe((val) => {
       this._todaysTasks = val;
     }));
-
-    this._subs.add(this._projectService.currentProject$.subscribe((val) => {
-      this._simpleSummarySettings = val.simpleSummarySettings;
-    }));
   }
 
   ngOnDestroy() {
@@ -76,7 +72,6 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
   showExportModal() {
     this._matDialog.open(DialogSimpleTaskSummaryComponent, {
       data: {
-        settings: this._simpleSummarySettings,
         tasks: this._todaysTasks,
       }
     });

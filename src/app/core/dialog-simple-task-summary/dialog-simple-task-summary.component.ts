@@ -1,9 +1,12 @@
-import { ChangeDetectionStrategy, Component, Inject, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Inject, OnDestroy, OnInit } from '@angular/core';
 import { msToString } from '../../ui/duration/ms-to-string.pipe';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material';
 import { TaskWithSubTasks } from '../../tasks/task.model';
 import { formatWorklogDateStr } from '../util/format-worklog-date-str';
 import { ProjectService } from '../../project/project.service';
+import { Subscription } from 'rxjs';
+import { SimpleSummarySettings } from '../../project/project.model';
+import { SIMPLE_SUMMARY_DEFAULTS } from '../../project/project.const';
 
 @Component({
   selector: 'dialog-simple-task-summary',
@@ -11,11 +14,13 @@ import { ProjectService } from '../../project/project.service';
   styleUrls: ['./dialog-simple-task-summary.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class DialogSimpleTaskSummaryComponent implements OnInit {
-  options: any = {};
+export class DialogSimpleTaskSummaryComponent implements OnInit, OnDestroy {
+  options: SimpleSummarySettings = SIMPLE_SUMMARY_DEFAULTS;
   finishDayFn: Function;
   isInvalidRegEx: boolean;
   tasksTxt: string;
+
+  private _subs: Subscription = new Subscription();
 
   constructor(
     private _matDialogRef: MatDialogRef<DialogSimpleTaskSummaryComponent>,
@@ -25,6 +30,12 @@ export class DialogSimpleTaskSummaryComponent implements OnInit {
   }
 
   ngOnInit() {
+    this._subs.add(this._projectService.currentProject$.subscribe((val) => {
+      console.log(val);
+
+      this.options = val.simpleSummarySettings;
+      this.tasksTxt = this._createTasksText(this.data.tasks);
+    }));
 
     // dirty but good enough for now
     // const clipboard = new window.Clipboard('#clipboard-btn');
@@ -32,15 +43,10 @@ export class DialogSimpleTaskSummaryComponent implements OnInit {
     //   SimpleToast('SUCCESS', 'Copied to clipboard');
     //   e.clearSelection();
     // });
+  }
 
-    this.options = this.data.settings;
-    if (!this.options.separateBy) {
-      this.options.separateBy = '';
-    }
-    if (!this.options.separateFieldsBy) {
-      this.options.separateFieldsBy = '';
-    }
-    this.tasksTxt = this._createTasksText(this.data.tasks);
+  ngOnDestroy() {
+    this._subs.unsubscribe();
   }
 
   close() {
@@ -48,7 +54,6 @@ export class DialogSimpleTaskSummaryComponent implements OnInit {
   }
 
   onOptionsChange() {
-    this.tasksTxt = this._createTasksText(this.data.tasks);
     this._projectService.updateSimpleSummarySettings(this._projectService.currentId, this.options);
   }
 
