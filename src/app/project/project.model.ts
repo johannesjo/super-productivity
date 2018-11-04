@@ -32,7 +32,8 @@ export type SimpleSummarySettings = Readonly<{
   showTitle: boolean,
   showTimeSpent: boolean,
   isTimeSpentAsMilliseconds: boolean,
-  showDate: boolean
+  showDate: boolean,
+  regExToRemove: string,
 }>;
 
 export type Project = Readonly<{

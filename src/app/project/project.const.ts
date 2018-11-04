@@ -10,7 +10,8 @@ export const SIMPLE_SUMMARY_DEFAULTS: SimpleSummarySettings = {
   showTitle: true,
   showTimeSpent: true,
   isTimeSpentAsMilliseconds: false,
-  showDate: false
+  showDate: false,
+  regExToRemove: '',
 };
 
 
