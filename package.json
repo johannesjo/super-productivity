@@ -36,6 +36,61 @@
     "release.changelog": "conventional-changelog -i CHANGELOG.md -s -p angular",
     "version": "run-s release.changelog && gulp versionConst && git add -A"
   },
+  "publish": [
+    {
+      "provider": "github",
+      "repo": "super-productivity",
+      "owner": "johannesjo"
+    }
+  ],
+  "build": {
+    "appId": "superProductivity",
+    "files": [
+      "electron/**/*",
+      "app/**/*"
+    ],
+    "mac": {
+      "category": "productivity",
+      "publish": [
+        "github"
+      ]
+    },
+    "win": {
+      "icon": "electron/assets/icons/app-icons/icon-win",
+      "target": [
+        "nsis",
+        "portable"
+      ],
+      "publish": [
+        "github"
+      ]
+    },
+    "linux": {
+      "category": "Utility",
+      "target": [
+        "AppImage",
+        "deb",
+        "snap"
+      ],
+      "publish": [
+        "github",
+        {
+          "provider": "bintray",
+          "package": "main",
+          "repo": "super-productivity",
+          "component": "super-productivity",
+          "owner": "johannesjo",
+          "distribution": "stable"
+        }
+      ],
+      "depends": [
+        "xprintidle"
+      ]
+    },
+    "snap": {
+      "grade": "stable"
+    }
+  },
   "private": true,
   "dependencies": {
     "@angular/animations": "^7.0.0",
