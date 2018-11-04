@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { TaskService } from '../../tasks/task.service';
 import { expandFadeAnimation } from '../../ui/animations/expand.ani';
 import { LayoutService } from '../../core/layout/layout.service';
@@ -10,7 +10,7 @@ import { DragulaService } from 'ng2-dragula';
   styleUrls: ['./work-view-page.component.scss'],
   animations: [expandFadeAnimation]
 })
-export class WorkViewPageComponent implements OnInit {
+export class WorkViewPageComponent implements OnInit, OnDestroy {
   isVertical = false;
   isHideControls: boolean;
   workedWithoutABreak = '-';
@@ -37,7 +37,6 @@ export class WorkViewPageComponent implements OnInit {
       this.splitInputPos = 100;
     }
 
-
     this._dragulaService.createGroup('PARENT', {
       direction: 'vertical',
       moves: function (el, container, handle) {
@@ -55,6 +54,11 @@ export class WorkViewPageComponent implements OnInit {
     });
   }
 
+
+  ngOnDestroy() {
+    this._dragulaService.destroy('PARENT');
+    this._dragulaService.destroy('SUB');
+  }
 
   showAddTaskBar() {
     this._layoutService.showAddTaskBar();

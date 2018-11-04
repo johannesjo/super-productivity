@@ -37,6 +37,10 @@ h2 {
   }
 }
 
+.completed-tasks-heading {
+  margin-top: $s;
+}
+
 .backlog-header {
   padding-top: 2*$s;
 }
@@ -51,8 +55,12 @@ h2 {
   min-height: 4*$s;
 
   .item {
-    margin: 0 12px;
+    margin: 0 1.5*$s;
   }
+  .controls button{
+    margin: 0 $s/2;
+  }
+
 
   .label {
     margin-right: $s;
@@ -86,6 +94,10 @@ h2 {
 
   &.isAnimatable {
     transition: $transition-standard;
+  }
+
+  task-list ::ng-deep > .task-list-inner {
+    min-height: 50px;
   }
 }
 

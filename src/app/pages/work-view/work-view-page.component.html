@@ -28,11 +28,18 @@
         <strong>{{workedWithoutABreak}}</strong><mat-icon>timer</mat-icon>
       </span>
         </div>
-        <button mat-mini-fab
-                color="primary"
-                (click)="showAddTaskBar()">
-          <mat-icon class="hide-controls-icon">add</mat-icon>
-        </button>
+        <div class="controls">
+          <button mat-mini-fab
+                  color="primary"
+                  (click)="showAddTaskBar()">
+            <mat-icon class="hide-controls-icon">add</mat-icon>
+          </button>
+          <button routerLink="/daily-summary"
+                  mat-mini-fab=""
+                  color="primary">
+            <mat-icon>done_all</mat-icon>
+          </button>
+        </div>
         <!--<button mat-mini-fab-->
         <!--color="primary"-->
         <!--(click)="isHideControls = !(isHideControls);"-->
@@ -54,26 +61,20 @@
                  listModelId="UNDONE"
                  [focusIdList]="taskService.focusIdsForWorkView$|async"
                  [filterArgs]="{'isDone':false}"></task-list>
-      <!--<button (click)="isShowBacklog=!isShowBacklog">Show {{isShowBacklog}}</button>-->
-      <!--<button (click)="isVertical=!isVertical">Vertical {{isVertical}}</button>-->
 
-      <div
-        [@expandFade]>
-        <div class="button-controls">
-          <button routerLink="/daily-summary"
-                  mat-raised-button=""
-                  color="primary">
-            <mat-icon>done_all</mat-icon>
-            Finish working
-          </button>
-        </div>
-{{taskService.todaysTaskIds$|async}}
-        <h2 class="mat-h2">Completed Tasks</h2>
-        <task-list [tasks]="taskService.doneTasks$|async"
-                   listId="PARENT"
-                   listModelId="DONE"
-                   [focusIdList]="taskService.focusIdsForWorkView$|async"
-                   [filterArgs]="{'isDone':true}"></task-list>
+      <h2 class="mat-h2 completed-tasks-heading">Completed Tasks</h2>
+      <task-list [tasks]="taskService.doneTasks$|async"
+                 listId="PARENT"
+                 listModelId="DONE"
+                 [focusIdList]="taskService.focusIdsForWorkView$|async"
+                 [filterArgs]="{'isDone':true}"></task-list>
+      <div class="button-controls">
+        <button routerLink="/daily-summary"
+                mat-raised-button=""
+                color="primary">
+          <mat-icon>done_all</mat-icon>
+          Finish working
+        </button>
       </div>
     </div>
   </div>
