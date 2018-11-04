@@ -138,7 +138,8 @@
   </button>
   <a mat-raised-button=""
      color="primary"
-     text-to-file-download="tasksTxt">
+     [simpleDownload]="'tasks.txt'"
+     [simpleDownloadData]="tasksTxt">
     <mat-icon>file_download</mat-icon>
     Save to file
   </a>

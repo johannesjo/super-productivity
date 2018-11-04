@@ -48,6 +48,7 @@ import { NumberToMonthPipe } from './duration/number-to-month.pipe';
 import { SplitModule } from '../pages/work-view/split/split.module';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { DragDropModule } from '@angular/cdk/drag-drop';
+import { SimpleDownloadDirective } from './simple-download/simple-download.directive';
 
 @NgModule({
   imports: [
@@ -103,6 +104,7 @@ import { DragDropModule } from '@angular/cdk/drag-drop';
     CollapsibleComponent,
     HelpSectionComponent,
     NumberToMonthPipe,
+    SimpleDownloadDirective,
   ],
   exports: [
     SplitModule,
@@ -115,6 +117,7 @@ import { DragDropModule } from '@angular/cdk/drag-drop';
     ProgressBarComponent,
     CollapsibleComponent,
     HelpSectionComponent,
+    SimpleDownloadDirective,
 
     MsToStringPipe,
     MsToStringPipe$,
