@@ -30,14 +30,13 @@ export class TaskListComponent implements OnDestroy, OnInit {
 
   ngOnInit() {
     this.subs.add(this._dragulaService.dropModel(this.listId)
-      .subscribe(({el, target, source, sourceModel, targetModel, item}) => {
-        console.log('---------', this.listEl.nativeElement === target);
+      .subscribe((params: any) => {
+        const {target, source, targetModel, item} = params;
         if (this.listEl.nativeElement === target) {
           const sourceModelId = source.dataset.id;
           const targetModelId = target.dataset.id;
           const targetNewIds = targetModel.map((task) => task.id);
           const movedTaskId = item.id;
-          console.log(sourceModelId, targetModelId, targetNewIds, movedTaskId);
           this._taskService.move(movedTaskId, sourceModelId, targetModelId, targetNewIds);
         }
       })
