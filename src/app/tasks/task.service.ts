@@ -20,11 +20,13 @@ import {
   selectFocusIdsForWorkView,
   selectFocusTaskId,
   selectMissingIssueIds,
-  selectTodaysDoneTasksWithSubTasks, selectTodaysTaskIds,
+  selectTodaysDoneTasksWithSubTasks,
+  selectTodaysTaskIds,
   selectTodaysTasksWithSubTasks,
   selectTodaysUnDoneTasksWithSubTasks,
   selectTotalTimeWorkedOnTodaysTasks
 } from './store/task.selectors';
+import { stringToMs } from '../ui/duration/string-to-ms.pipe';
 
 
 @Injectable()
@@ -145,7 +147,7 @@ export class TaskService {
 
   update(id: string, changedFields: Partial<Task>) {
     this._storeDispatch(TaskActionTypes.UpdateTask, {
-      task: {id, changes: changedFields}
+      task: {id, changes: this._shortSyntax(changedFields)}
     });
   }
 
@@ -247,7 +249,7 @@ export class TaskService {
   }
 
   private _createNewTask(title: string, additional: Partial<Task> = {}): Task {
-    return {
+    return this._shortSyntax({
       // NOTE needs to be created every time
       subTaskIds: [],
       timeSpentOnDay: {},
@@ -258,6 +260,25 @@ export class TaskService {
       title,
       id: shortid(),
       ...additional,
-    };
+    });
+  }
+
+  // NOTE: won't be static once we check for the settings
+  private _shortSyntax(task: Task | Partial<Task>): Task | Partial<Task> {
+    if (!task.title) {
+      return task;
+    }
+    const timeEstimateRegExp = / t[0-9]+(m|h|d)+ *$/i;
+    const matches = timeEstimateRegExp.exec(task.title);
+
+    if (matches) {
+      return {
+        ...task,
+        timeEstimate: stringToMs(matches[0].replace(' t', '')),
+        title: task.title.replace(matches[0], '')
+      };
+    } else {
+      return task;
+    }
   }
 }
