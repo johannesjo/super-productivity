@@ -7,6 +7,8 @@ import { ProjectService } from '../../project/project.service';
 import { Subscription } from 'rxjs';
 import { SimpleSummarySettings } from '../../project/project.model';
 import { SIMPLE_SUMMARY_DEFAULTS } from '../../project/project.const';
+import Clipboard from 'clipboard';
+import { SnackService } from '../snack/snack.service';
 
 @Component({
   selector: 'dialog-simple-task-summary',
@@ -26,6 +28,7 @@ export class DialogSimpleTaskSummaryComponent implements OnInit, OnDestroy {
     private _matDialogRef: MatDialogRef<DialogSimpleTaskSummaryComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,
     private _projectService: ProjectService,
+    private _snackService: SnackService,
   ) {
   }
 
@@ -38,11 +41,14 @@ export class DialogSimpleTaskSummaryComponent implements OnInit, OnDestroy {
     }));
 
     // dirty but good enough for now
-    // const clipboard = new window.Clipboard('#clipboard-btn');
-    // clipboard.on('success', function (e) {
-    //   SimpleToast('SUCCESS', 'Copied to clipboard');
-    //   e.clearSelection();
-    // });
+    const clipboard = new Clipboard('#clipboard-btn');
+    clipboard.on('success', (e: any) => {
+      this._snackService.open({
+        message: 'Copied to clipboard',
+        type: 'SUCCESS'
+      });
+      e.clearSelection();
+    });
   }
 
   ngOnDestroy() {

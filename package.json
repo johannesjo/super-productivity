@@ -60,6 +60,7 @@
     "@ngrx/store-devtools": "^6.1.0",
     "@ngx-formly/core": "^4.7.2",
     "@ngx-formly/material": "^4.7.2",
+    "clipboard": "^2.0.1",
     "core-js": "^2.5.4",
     "hammerjs": "^2.0.8",
     "ng2-dragula": "^2.1.1",
