@@ -1,6 +1,6 @@
 import { Action } from '@ngrx/store';
 import { Update } from '@ngrx/entity';
-import { Task } from '../task.model';
+import { DropListModelSource, Task } from '../task.model';
 import { TaskState } from './task.reducer';
 import { Tick } from '../../core/time-tracking/time-tracking';
 import { JiraIssue } from '../../issue/jira/jira-issue/jira-issue.model';
@@ -84,7 +84,12 @@ export class UndoDeleteTask implements Action {
 export class Move implements Action {
   readonly type = TaskActionTypes.Move;
 
-  constructor(public payload: { id: string, targetItemId: string, isMoveAfter: boolean }) {
+  constructor(public payload: {
+    taskId: string,
+    sourceModelId: DropListModelSource,
+    targetModelId: DropListModelSource,
+    newOrderedIds: string[]
+  }) {
   }
 }
 

@@ -36,6 +36,7 @@ export class TaskEffects {
         TaskActionTypes.SetCurrentTask,
         TaskActionTypes.UnsetCurrentTask,
         TaskActionTypes.UpdateTask,
+        TaskActionTypes.Move,
         TaskActionTypes.MoveToArchive,
         TaskActionTypes.MoveToBacklog,
         TaskActionTypes.MoveToToday,

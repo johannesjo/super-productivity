@@ -143,6 +143,7 @@
     </button>
     <task-list [tasks]="task.subTasks"
                listId="SUB"
+               [listModelId]="task.id"
                [parentId]="task.id"
                [@expand]
                *ngIf="!task.isHideSubTasks"

@@ -268,16 +268,95 @@ export function taskReducer(
     }
 
     case TaskActionTypes.Move: {
-      const id = action.payload.id;
-      const targetId = action.payload.targetItemId;
-      const isMoveAfter = action.payload.isMoveAfter;
-      // TODO handle sub task case
-      return {
-        ...state,
-        ids: moveTaskInArrayByIds(state.ids, id, targetId, isMoveAfter),
-        backlogTaskIds: moveTaskInArrayByIds(state.backlogTaskIds, id, targetId, isMoveAfter),
-        todaysTaskIds: moveTaskInArrayByIds(state.todaysTaskIds, id, targetId, isMoveAfter),
-      };
+      let newState = state;
+      const {taskId, sourceModelId, targetModelId, newOrderedIds} = action.payload;
+
+
+      switch (sourceModelId) {
+        case 'DONE':
+        case 'UNDONE':
+          newState = {
+            ...newState,
+            todaysTaskIds: newState.todaysTaskIds.filter(filterOutId(taskId)),
+          };
+          break;
+
+        case 'BACKLOG':
+          newState = {
+            ...newState,
+            backlogTaskIds: newState.backlogTaskIds.filter(filterOutId(taskId)),
+          };
+          break;
+
+        default:
+          // SUB TASK CASE
+          const oldPar = state.entities[sourceModelId];
+          console.log(oldPar.subTaskIds.filter(filterOutId(taskId)));
+
+          newState = reCalcTimeSpentForParentIfParent(oldPar.id, {
+            ...newState,
+            entities: {
+              ...newState.entities,
+              [oldPar.id]: {
+                ...oldPar,
+                subTaskIds: oldPar.subTaskIds.filter(filterOutId(taskId))
+              }
+            }
+          });
+      }
+
+      switch (targetModelId) {
+        case 'DONE':
+        case 'UNDONE':
+          let newIndex;
+          const curInUpdateListIndex = newOrderedIds.indexOf(taskId);
+          const prevItemId = newOrderedIds[curInUpdateListIndex - 1];
+          const nextItemId = newOrderedIds[curInUpdateListIndex + 1];
+          const taskToMove = state.entities[taskId];
+
+          if (prevItemId) {
+            newIndex = newState.todaysTaskIds.indexOf(prevItemId) + 1;
+          } else if (nextItemId) {
+            newIndex = newState.todaysTaskIds.indexOf(nextItemId);
+          } else if (targetModelId === 'DONE') {
+            newIndex = newState.todaysTaskIds.length;
+          } else if (targetModelId === 'UNDONE') {
+            newIndex = 0;
+          }
+          const newIds = [...newState.todaysTaskIds];
+          newIds.splice(newIndex, 0, taskId);
+          return {
+            ...newState,
+            todaysTaskIds: newIds,
+            entities: {
+              ...newState.entities,
+              [taskId]: {
+                ...taskToMove,
+                isDone: (targetModelId === 'DONE')
+              }
+            }
+          };
+
+        case 'BACKLOG':
+          return {
+            ...newState,
+            backlogTaskIds: newOrderedIds,
+          };
+
+        default:
+          // SUB TASK CASE
+          const newPar = state.entities[targetModelId];
+          return reCalcTimeSpentForParentIfParent(newPar.id, {
+            ...newState,
+            entities: {
+              ...newState.entities,
+              [newPar.id]: {
+                ...newPar,
+                subTaskIds: newOrderedIds
+              }
+            }
+          });
+      }
     }
 
     case TaskActionTypes.MoveUp: {

@@ -51,6 +51,7 @@
     <div class="component-wrapper page-wrapper">
       <task-list [tasks]="taskService.undoneTasks$|async"
                  listId="PARENT"
+                 listModelId="UNDONE"
                  [focusIdList]="taskService.focusIdsForWorkView$|async"
                  [filterArgs]="{'isDone':false}"></task-list>
       <!--<button (click)="isShowBacklog=!isShowBacklog">Show {{isShowBacklog}}</button>-->
@@ -66,10 +67,11 @@
             Finish working
           </button>
         </div>
-
+{{taskService.todaysTaskIds$|async}}
         <h2 class="mat-h2">Completed Tasks</h2>
         <task-list [tasks]="taskService.doneTasks$|async"
                    listId="PARENT"
+                   listModelId="DONE"
                    [focusIdList]="taskService.focusIdsForWorkView$|async"
                    [filterArgs]="{'isDone':true}"></task-list>
       </div>
@@ -105,6 +107,7 @@
         <h2 class="mat-h2">Backlog</h2>
         <task-list [tasks]="taskService.backlogTasks$|async"
                    listId="PARENT"
+                   listModelId="BACKLOG"
                    [focusIdList]="taskService.focusIdsForBacklog$|async"
                    [filterArgs]="{'isDone':true}"></task-list>
       </div>

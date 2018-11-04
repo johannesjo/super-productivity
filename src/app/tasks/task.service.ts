@@ -1,7 +1,7 @@
 import { debounceTime, distinctUntilChanged, map, withLatestFrom } from 'rxjs/operators';
 import { Injectable } from '@angular/core';
 import { combineLatest, Observable } from 'rxjs';
-import { Task, TaskWithSubTasks } from './task.model';
+import { DropListModelSource, Task, TaskWithSubTasks } from './task.model';
 import { select, Store } from '@ngrx/store';
 import { AddTask, TaskActionTypes } from './store/task.actions';
 import shortid from 'shortid';
@@ -20,7 +20,7 @@ import {
   selectFocusIdsForWorkView,
   selectFocusTaskId,
   selectMissingIssueIds,
-  selectTodaysDoneTasksWithSubTasks,
+  selectTodaysDoneTasksWithSubTasks, selectTodaysTaskIds,
   selectTodaysTasksWithSubTasks,
   selectTodaysUnDoneTasksWithSubTasks,
   selectTotalTimeWorkedOnTodaysTasks
@@ -33,6 +33,8 @@ export class TaskService {
 
   tasks$: Observable<TaskWithSubTasks[]> = this._store.pipe(select(selectAllTasksWithSubTasks), distinctUntilChanged());
   todaysTasks$: Observable<TaskWithSubTasks[]> = this._store.pipe(select(selectTodaysTasksWithSubTasks), distinctUntilChanged());
+  todaysTaskIds$: Observable<string[]> = this._store.pipe(select(selectTodaysTaskIds), distinctUntilChanged());
+
   backlogTasks$: Observable<TaskWithSubTasks[]> = this._store.pipe(select(selectBacklogTasksWithSubTasks), distinctUntilChanged());
 
   undoneTasks$: Observable<TaskWithSubTasks[]> = this._store.pipe(select(selectTodaysUnDoneTasksWithSubTasks), distinctUntilChanged());
@@ -147,11 +149,12 @@ export class TaskService {
     });
   }
 
-  move(id: string, targetItemId: string, isMoveAfter = false) {
+  move(taskId: string, sourceModelId: DropListModelSource, targetModelId: DropListModelSource, newOrderedIds: string[]) {
     this._storeDispatch(TaskActionTypes.Move, {
-      id,
-      targetItemId,
-      isMoveAfter,
+      taskId,
+      sourceModelId,
+      targetModelId,
+      newOrderedIds,
     });
   }
 

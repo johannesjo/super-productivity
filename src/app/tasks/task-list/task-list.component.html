@@ -1,6 +1,7 @@
 <div [dragula]="listId"
      [dragulaModel]="tasks"
-     (dragulaModelChange)="updateList($event)">
+     [attr.data-id]="listModelId"
+     #listEl>
   <task *ngFor="let task of tasks; trackBy: trackByFn; let i = index;"
         [task]="task"
         [focusIdList]="focusIdList">

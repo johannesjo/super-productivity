@@ -1,5 +1,7 @@
 import { IssueProviderKey } from '../issue/issue';
 
+export type DropListModelSource = 'UNDONE' | 'DONE' | 'BACKLOG';
+
 export type TimeSpentOnDay = Readonly<{
   [key: string]: number;
 }>;
