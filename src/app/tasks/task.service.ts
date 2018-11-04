@@ -147,7 +147,7 @@ export class TaskService {
 
   update(id: string, changedFields: Partial<Task>) {
     this._storeDispatch(TaskActionTypes.UpdateTask, {
-      task: {id, changes: this._shortSyntax(changedFields)}
+      task: {id, changes: this._shortSyntax(changedFields) as Partial<Task> }
     });
   }
 
@@ -260,7 +260,7 @@ export class TaskService {
       title,
       id: shortid(),
       ...additional,
-    });
+    }) as Task;
   }
 
   // NOTE: won't be static once we check for the settings
