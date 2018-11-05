@@ -67,12 +67,14 @@ $this-active-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2),
   }
   &.as-sortable-dragging,
   &:focus > .inner-wrapper {
-    color: #000000;
-
     &:after {
       opacity: 1;
     }
     // outline
+  }
+
+  &:focus.is-focused > .inner-wrapper {
+    //outline: 3px solid red;
   }
 
   @include dark-theme {

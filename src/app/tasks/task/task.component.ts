@@ -18,7 +18,7 @@ import { DialogTimeEstimateComponent } from '../dialogs/dialog-time-estimate/dia
 import { expandAnimation } from '../../ui/animations/expand.ani';
 import { ConfigService } from '../../core/config/config.service';
 import { checkKeyCombo } from '../../core/util/check-key-combo';
-import { takeUntil } from 'rxjs/operators';
+import { distinctUntilChanged, takeUntil } from 'rxjs/operators';
 
 // import {Task} from './task'
 
@@ -50,15 +50,31 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     return this.task.isDone;
   }
 
+  @HostBinding('class.is-focused')
+  private get _isFocused() {
+    return this.task.id === this._currentFocusId;
+  }
+
   // methods come last
   @HostListener('keydown', ['$event']) onKeyDown(ev: KeyboardEvent) {
     this._handleKeyboardShortcuts(ev);
   }
 
   @HostListener('focus', ['$event']) onFocus(ev: Event) {
-    if (ev.target === this._elementRef.nativeElement && this._currentFocusId !== this.task.id) {
+    if (this._currentFocusId !== this.task.id && ev.target === this._elementRef.nativeElement) {
       this._taskService.focusTask(this.task.id);
+      this._currentFocusId = this.task.id;
     }
+  }
+
+  @HostListener('blur', ['$event']) onBlur(ev: Event) {
+    //  @TODO replace: hacky way to wait for last update
+    setTimeout(() => {
+      if (this._currentFocusId === this.task.id) {
+        this._taskService.focusTask(null);
+        this._currentFocusId = null;
+      }
+    });
   }
 
   constructor(
@@ -74,17 +90,20 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   ngOnInit() {
-  }
-
-  ngAfterViewInit() {
     this._taskService.currentTaskId$
       .pipe(takeUntil(this._destroy$))
       .subscribe((id) => {
         this.isCurrent = (this.task && id === this.task.id);
       });
 
+  }
+
+  ngAfterViewInit() {
     this._taskService.focusTaskId$
-      .pipe(takeUntil(this._destroy$))
+      .pipe(
+        takeUntil(this._destroy$),
+        distinctUntilChanged()
+      )
       .subscribe((id) => {
         this._currentFocusId = id;
         if (id === this.task.id && document.activeElement !== this._elementRef.nativeElement) {
@@ -150,20 +169,22 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     this.task.isNotesOpen
       ? this._taskService.hideNotes(this.task.id)
       : this._taskService.showNotes(this.task.id);
+    this.focusSelf();
   }
 
   toggleHideSubTasks() {
     this.task.isHideSubTasks
       ? this._taskService.showSubTasks(this.task.id)
       : this._taskService.hideSubTasks(this.task.id);
+    this.focusSelf();
   }
 
-  focusPrevious() {
-    this._taskService.focusPreviousInList(this.task.id, this.focusIdList);
+  focusPrevious(isSelectReverseIfNotPossible = false) {
+    this._taskService.focusPreviousInList(this.task.id, this.focusIdList, isSelectReverseIfNotPossible);
   }
 
-  focusNext() {
-    this._taskService.focusNextInList(this.task.id, this.focusIdList);
+  focusNext(isSelectReverseIfNotPossible = false) {
+    this._taskService.focusNextInList(this.task.id, this.focusIdList, isSelectReverseIfNotPossible);
   }
 
   focusSelf() {
@@ -182,10 +203,12 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   private _handleKeyboardShortcuts(ev: KeyboardEvent) {
+    if (ev.target !== this._elementRef.nativeElement) {
+      return;
+    }
+
     const keys = this._configService.cfg.keyboard;
     const isShiftOrCtrlPressed = (ev.shiftKey === true || ev.ctrlKey === true);
-    // do not bubble up to parent
-    ev.stopPropagation();
 
     if (checkKeyCombo(ev, keys.taskEditTitle) || ev.key === 'Enter') {
       this.editOnClickEl.nativeElement.focus();
@@ -222,15 +245,15 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
 
     if (checkKeyCombo(ev, keys.moveToBacklog)) {
       if (!this.task.parentId) {
+        this.focusPrevious(true);
         this._taskService.moveToBacklog(this.task.id);
-        this.focusSelf();
       }
     }
 
     if (checkKeyCombo(ev, keys.moveToTodaysTasks)) {
       if (!this.task.parentId) {
+        this.focusNext(true);
         this._taskService.moveToToday(this.task.id);
-        this.focusSelf();
       }
     }
 
@@ -281,6 +304,8 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
       this._taskService.moveUp(this.task.id);
       ev.stopPropagation();
       ev.preventDefault();
+      // timeout required to let changes take place @TODO hacky
+      setTimeout(this.focusSelf.bind(this));
     }
     if (checkKeyCombo(ev, keys.moveTaskDown)) {
       this._taskService.moveDown(this.task.id);

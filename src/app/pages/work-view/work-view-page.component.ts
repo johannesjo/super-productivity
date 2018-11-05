@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, HostListener, OnDestroy, OnInit } from '@angular/core';
 import { TaskService } from '../../tasks/task.service';
 import { expandFadeAnimation } from '../../ui/animations/expand.ani';
 import { LayoutService } from '../../core/layout/layout.service';
@@ -28,6 +28,10 @@ export class WorkViewPageComponent implements OnInit, OnDestroy {
     private _dragulaService: DragulaService,
   ) {
     // this.focusTaskIdList$.subscribe(v => console.log(v));
+  }
+
+  @HostListener('blur', ['$event']) onBlur(ev: Event) {
+    console.log('BLUR', ev);
   }
 
   ngOnInit() {

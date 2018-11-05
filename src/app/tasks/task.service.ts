@@ -147,7 +147,7 @@ export class TaskService {
 
   update(id: string, changedFields: Partial<Task>) {
     this._storeDispatch(TaskActionTypes.UpdateTask, {
-      task: {id, changes: this._shortSyntax(changedFields) as Partial<Task> }
+      task: {id, changes: this._shortSyntax(changedFields) as Partial<Task>}
     });
   }
 
@@ -225,19 +225,27 @@ export class TaskService {
     this.update(id, {isHideSubTasks: true});
   }
 
-  focusInList(id: string, idList: string[], offset) {
+  focusInList(id: string, idList: string[], offset, isSelectReverseIfNotPossible) {
     const currentIndex = idList.indexOf(id);
     if (idList[currentIndex + offset]) {
-      this.focusTask(idList[currentIndex + offset]);
+      if (isSelectReverseIfNotPossible) {
+        if (idList[currentIndex + offset]) {
+          this.focusTask(idList[currentIndex + offset]);
+        } else {
+          this.focusTask(idList[currentIndex + (offset * -1)]);
+        }
+      } else {
+        this.focusTask(idList[currentIndex + offset]);
+      }
     }
   }
 
-  focusNextInList(id: string, idList: string[]) {
-    this.focusInList(id, idList, 1);
+  focusNextInList(id: string, idList: string[], isSelectReverseIfNotPossible) {
+    this.focusInList(id, idList, 1, isSelectReverseIfNotPossible);
   }
 
-  focusPreviousInList(id: string, idList: string[]) {
-    this.focusInList(id, idList, -1);
+  focusPreviousInList(id: string, idList: string[], isSelectReverseIfNotPossible) {
+    this.focusInList(id, idList, -1, isSelectReverseIfNotPossible);
   }
 
 
