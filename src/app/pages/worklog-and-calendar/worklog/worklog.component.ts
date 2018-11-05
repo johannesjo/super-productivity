@@ -27,9 +27,11 @@ export class WorklogComponent implements OnInit {
 
   ngOnInit() {
     const completeState = this._persistenceService.loadTaskArchiveForProject(this._projectService.currentId);
-    const {worklog, totalTimeSpent} = mapArchiveToWorklog(completeState);
-    this.worklog = worklog;
-    this.totalTimeSpent = totalTimeSpent;
+    if (completeState) {
+      const {worklog, totalTimeSpent} = mapArchiveToWorklog(completeState);
+      this.worklog = worklog;
+      this.totalTimeSpent = totalTimeSpent;
+    }
   }
 
   exportData(type, monthData: WorklogMonth) {
