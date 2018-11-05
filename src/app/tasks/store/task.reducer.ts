@@ -179,24 +179,41 @@ const deleteTask = (state: TaskState,
   };
 };
 
-const setNextTask = (state: TaskState): TaskState => {
-  if (!state.currentTaskId) {
+const setNextTask = (state: TaskState, updatedTaskId): TaskState => {
+  const {currentTaskId, entities, todaysTaskIds} = state;
+  if (!currentTaskId || currentTaskId !== updatedTaskId) {
     return state;
   }
-  // TODO logic for parent sub tasks
-  // TODO add logic for next task
+  let nextId = null;
+  const oldCurTask = entities[updatedTaskId];
+  if (oldCurTask.parentId) {
+    entities[oldCurTask.parentId].subTaskIds.some((id) => {
+      return (id !== updatedTaskId && entities[id].isDone === false)
+        ? (nextId = id) && true // assign !!!
+        : false;
+    });
+  }
 
-  state.todaysTaskIds.forEach((id) => {
-    if (!state.entities[id].isDone) {
-      return {
-        ...state,
-        currentTaskId: id,
-      };
-    }
-  });
+  if (!nextId) {
+    const filterUndoneNotCurrent = (id) => !entities[id].isDone && id !== updatedTaskId;
+    const flattenToSelectable = (arr: string[]) => arr.reduce((acc: string[], next: string) => {
+      return entities[next].subTaskIds.length > 0
+        ? acc.concat(entities[next].subTaskIds)
+        : acc.concat(next);
+    }, []);
+
+    const oldCurIndex = todaysTaskIds.indexOf(updatedTaskId);
+    const mainTasksBefore = todaysTaskIds.slice(0, oldCurIndex);
+    const mainTasksAfter = todaysTaskIds.slice(oldCurIndex + 1);
+    const selectableBefore = flattenToSelectable(mainTasksBefore);
+    const selectableAfter = flattenToSelectable(mainTasksAfter);
+    nextId = selectableAfter.find(filterUndoneNotCurrent)
+      || selectableBefore.reverse().find(filterUndoneNotCurrent);
+  }
+
   return {
     ...state,
-    currentTaskId: null,
+    currentTaskId: nextId,
   };
 };
 
@@ -263,7 +280,7 @@ export function taskReducer(
       const {timeSpentOnDay, timeEstimate, isDone} = action.payload.task.changes;
       stateCopy = updateTimeSpentForTask(id, timeSpentOnDay, stateCopy);
       stateCopy = updateTimeEstimateForTask(id, timeEstimate, stateCopy);
-      stateCopy = isDone ? setNextTask(stateCopy) : stateCopy;
+      stateCopy = isDone ? setNextTask(stateCopy, id) : stateCopy;
       return taskAdapter.updateOne(action.payload.task, stateCopy);
 
     }
