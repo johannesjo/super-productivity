@@ -18,6 +18,15 @@ h2 {
   text-align: center;
 }
 
+.wrapper {
+  overflow: hidden;
+  height: 100%;
+  width: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
 .work-view-header,
 .backlog-header {
   box-shadow: $header-inset-shadow;
@@ -57,10 +66,9 @@ h2 {
   .item {
     margin: 0 1.5*$s;
   }
-  .controls button{
+  .controls button {
     margin: 0 $s/2;
   }
-
 
   .label {
     margin-right: $s;
