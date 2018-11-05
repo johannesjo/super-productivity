@@ -10,12 +10,11 @@ import { DialogSimpleTaskSummaryComponent } from '../../core/dialog-simple-task-
 import { Subscription } from 'rxjs';
 import { ProjectService } from '../../project/project.service';
 import { SimpleSummarySettings } from '../../project/project.model';
+import { ElectronService } from 'ngx-electron';
+import { IPC_EVENT_SHUTDOWN } from '../../../ipc-events.const';
 
-// TODO MOVE TO DEDICATED FILE
-const IPC_EVENT_SHUTDOWN = 'SHUTDOWN';
 const SUCCESS_ANIMATION_DURATION = 500;
 const SUCCESS_ANIMATION_MAX_DURATION = 10000;
-
 
 @Component({
   selector: 'daily-summary',
@@ -51,7 +50,8 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
     private readonly _taskService: TaskService,
     private readonly _projectService: ProjectService,
     private readonly _router: Router,
-    private readonly _matDialog: MatDialog
+    private readonly _matDialog: MatDialog,
+    private readonly _electronService: ElectronService,
   ) {
   }
 
@@ -75,12 +75,6 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
         tasks: this._todaysTasks,
       }
     });
-
-    // Dialogs('SIMPLE_TASK_SUMMARY', {
-    //   settings: $rootScope.r.uiHelper.dailyTaskExportSettings,
-    //   finishDayFn: finishDay,
-    //   tasks: Tasks.getToday()
-    // }, true);
   }
 
   showTimeSheetExportModal() {
@@ -88,12 +82,9 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
   }
 
   finishDay() {
-    // $rootScope.r.tomorrowsNote = tomorrowsNote;
-    // Tasks.finishDay(clearDoneTasks, moveUnfinishedToBacklog);
     const idsToMove = this._doneTasks.map((task) => task.id);
     this._taskService.moveToArchive(idsToMove);
     if (IS_ELECTRON) {
-      // NOTE: syncing for electron is done in a before unload action
       //   $mdDialog.show(
       //     $mdDialog.confirm()
       //       .clickOutsideToClose(false)
@@ -113,14 +104,18 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
       //           $state.go('daily-planner');
       //         });
       //       });
+      // this._router.navigate(['/work-view']);
+      this._initSuccessAnimation(() => {
+        this._electronService.ipcRenderer.send(IPC_EVENT_SHUTDOWN);
+      });
     } else {
       //   if (GoogleDriveSync.config && GoogleDriveSync.config.isAutoSyncToRemote) {
       //     SimpleToast('CUSTOM', `Syncing Data to Google Drive.`, 'file_upload');
       //     GoogleDriveSync.saveTo();
       //   }
       this._initSuccessAnimation(() => {
-        // $state.go('daily-planner');
-        this._router.navigate(['/daily-planner']);
+        // $state.go('work-view');
+        this._router.navigate(['/work-view']);
       });
     }
   }
