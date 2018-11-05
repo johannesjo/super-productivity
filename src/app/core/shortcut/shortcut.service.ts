@@ -3,8 +3,9 @@ import { IS_ELECTRON } from '../../app.constants';
 import { checkKeyCombo } from '../util/check-key-combo';
 import { ConfigService } from '../config/config.service';
 import { Router } from '@angular/router';
+import { IPC_REGISTER_GLOBAL_SHORTCUT_EVENT } from '../../../ipc-events.const';
+import { ElectronService } from 'ngx-electron';
 
-// const IPC_REGISTER_GLOBAL_SHORTCUT_EVENT = 'REGISTER_GLOBAL_SHORTCUT';
 
 @Injectable({
   providedIn: 'root'
@@ -14,15 +15,17 @@ export class ShortcutService {
   constructor(
     private _configService: ConfigService,
     private _router: Router,
+    private _electronService: ElectronService,
   ) {
     //   // Register electron shortcut(s)
-    //   if (IS_ELECTRON && this._configService.cfg.keyboard.globalShowHide) {
-    //     window.ipcRenderer.send(IPC_REGISTER_GLOBAL_SHORTCUT_EVENT, $rootScope.r.keys.globalShowHide);
-    //   }
+      if (IS_ELECTRON && this._configService.cfg.keyboard.globalShowHide) {
+        _electronService.ipcRenderer.send(IPC_REGISTER_GLOBAL_SHORTCUT_EVENT, this._configService.cfg.keyboard.globalShowHide);
+      }
   }
 
   handleKeyDown(ev: KeyboardEvent) {
     const cfg = this._configService.cfg;
+    const keys = cfg.keyboard;
 
 
     // if (checkKeyCombo(ev, cfg.keyboard.openProjectNotes)) {
@@ -35,19 +38,19 @@ export class ShortcutService {
     //   Dialogs('HELP', {template: 'PAGE'}, true);
     // }
     //
-    if (checkKeyCombo(ev, cfg.keyboard.goToDailyPlanner)) {
+    if (checkKeyCombo(ev, keys.goToDailyPlanner)) {
       this._router.navigate(['/daily-planner']);
     }
-    if (checkKeyCombo(ev, cfg.keyboard.goToWorkView)) {
+    if (checkKeyCombo(ev, keys.goToWorkView)) {
       this._router.navigate(['/work-view']);
     }
-    if (checkKeyCombo(ev, cfg.keyboard.goToDailyAgenda)) {
+    if (checkKeyCombo(ev, keys.goToDailyAgenda)) {
       this._router.navigate(['/daily-agenda']);
     }
-    if (checkKeyCombo(ev, cfg.keyboard.goToSettings)) {
+    if (checkKeyCombo(ev, keys.goToSettings)) {
       this._router.navigate(['/settings']);
     }
-    if (checkKeyCombo(ev, cfg.keyboard.goToFocusMode)) {
+    if (checkKeyCombo(ev, keys.goToFocusMode)) {
       this._router.navigate(['/focus-view']);
     }
 

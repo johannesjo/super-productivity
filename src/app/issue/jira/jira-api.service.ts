@@ -1,21 +1,14 @@
 import { Injectable } from '@angular/core';
 import shortid from 'shortid';
 import { ChromeExtensionInterfaceService } from '../../core/chrome-extension-interface/chrome-extension-interface.service';
-import {
-  IPC_JIRA_CB_EVENT,
-  IPC_JIRA_MAKE_REQUEST_EVENT,
-  JIRA_ADDITIONAL_ISSUE_FIELDS,
-  JIRA_MAX_RESULTS,
-  JIRA_REDUCED_ISSUE_FIELDS,
-  JIRA_REQUEST_TIMEOUT_DURATION
-} from './jira.const';
+import { JIRA_ADDITIONAL_ISSUE_FIELDS, JIRA_MAX_RESULTS, JIRA_REDUCED_ISSUE_FIELDS, JIRA_REQUEST_TIMEOUT_DURATION } from './jira.const';
 import { ProjectService } from '../../project/project.service';
 import { mapIssueResponse, mapIssuesResponse, mapResponse } from './jira-issue/jira-issue-map.util';
 import { JiraOriginalStatus, JiraOriginalUser } from './jira-api-responses';
 import { JiraIssue } from './jira-issue/jira-issue.model';
 import { JiraCfg } from './jira';
 import { ElectronService } from 'ngx-electron';
-
+import { IPC_JIRA_CB_EVENT, IPC_JIRA_MAKE_REQUEST_EVENT } from '../../../ipc-events.const';
 
 @Injectable({
   providedIn: 'root'
