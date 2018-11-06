@@ -179,7 +179,7 @@ const deleteTask = (state: TaskState,
   };
 };
 
-const setNextTask = (state: TaskState, updatedTaskId): TaskState => {
+const setNextTaskIfCurrent = (state: TaskState, updatedTaskId): TaskState => {
   const {currentTaskId, entities, todaysTaskIds} = state;
   if (!currentTaskId || currentTaskId !== updatedTaskId) {
     return state;
@@ -280,7 +280,7 @@ export function taskReducer(
       const {timeSpentOnDay, timeEstimate, isDone} = action.payload.task.changes;
       stateCopy = updateTimeSpentForTask(id, timeSpentOnDay, stateCopy);
       stateCopy = updateTimeEstimateForTask(id, timeEstimate, stateCopy);
-      stateCopy = isDone ? setNextTask(stateCopy, id) : stateCopy;
+      stateCopy = isDone ? setNextTaskIfCurrent(stateCopy, id) : stateCopy;
       return taskAdapter.updateOne(action.payload.task, stateCopy);
 
     }
@@ -365,10 +365,10 @@ export function taskReducer(
           };
 
         case 'BACKLOG':
-          return {
+          return setNextTaskIfCurrent({
             ...newState,
             backlogTaskIds: newOrderedIds,
-          };
+          }, taskId);
 
         default:
           // SUB TASK CASE
@@ -494,11 +494,11 @@ export function taskReducer(
         return state;
       }
 
-      return {
+      return setNextTaskIfCurrent({
         ...state,
         todaysTaskIds: state.todaysTaskIds.filter(filterOutId(action.payload.id)),
         backlogTaskIds: [action.payload.id, ...state.backlogTaskIds],
-      };
+      }, action.payload.id);
     }
 
     case TaskActionTypes.MoveToArchive: {
