@@ -2,13 +2,13 @@ import { ChangeDetectionStrategy, Component, Inject, OnDestroy, OnInit } from '@
 import { msToString } from '../../ui/duration/ms-to-string.pipe';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material';
 import { TaskWithSubTasks } from '../../tasks/task.model';
-import { formatWorklogDateStr } from '../util/format-worklog-date-str';
 import { ProjectService } from '../../project/project.service';
 import { Subscription } from 'rxjs';
 import { SimpleSummarySettings } from '../../project/project.model';
 import { SIMPLE_SUMMARY_DEFAULTS } from '../../project/project.const';
 import Clipboard from 'clipboard';
 import { SnackService } from '../snack/snack.service';
+import { getWorklogStr } from '../util/get-work-log-str';
 
 @Component({
   selector: 'dialog-simple-task-summary',
@@ -66,7 +66,7 @@ export class DialogSimpleTaskSummaryComponent implements OnInit, OnDestroy {
   private _formatTask(task) {
     let taskTxt = '';
     if (this.options.showDate) {
-      taskTxt += task.dateStr || formatWorklogDateStr(new Date());
+      taskTxt += task.dateStr || getWorklogStr();
     }
     if (this.options.showTitle) {
       if (taskTxt.length > 0) {
@@ -139,7 +139,7 @@ export class DialogSimpleTaskSummaryComponent implements OnInit, OnDestroy {
   }
 
   private _checkIsWorkedOnToday(task) {
-    const dateStr = formatWorklogDateStr(new Date());
+    const dateStr = getWorklogStr();
     return !!task.timeSpentOnDay[dateStr];
   }
 }

@@ -9,7 +9,6 @@ import { initialTaskState, } from './store/task.reducer';
 import { PersistenceService } from '../core/persistence/persistence.service';
 import { IssueProviderKey } from '../issue/issue';
 import { TimeTrackingService } from '../core/time-tracking/time-tracking.service';
-import { Tick } from '../core/time-tracking/time-tracking';
 import {
   selectAllTasksWithSubTasks,
   selectBacklogTasksWithSubTasks,
@@ -27,11 +26,13 @@ import {
   selectTotalTimeWorkedOnTodaysTasks
 } from './store/task.selectors';
 import { stringToMs } from '../ui/duration/string-to-ms.pipe';
+import { getWorklogStr } from '../core/util/get-work-log-str';
 
 
 @Injectable()
 export class TaskService {
   currentTaskId$: Observable<string> = this._store.pipe(select(selectCurrentTaskId), distinctUntilChanged());
+  currentTaskId: string;
 
   tasks$: Observable<TaskWithSubTasks[]> = this._store.pipe(select(selectAllTasksWithSubTasks), distinctUntilChanged());
   todaysTasks$: Observable<TaskWithSubTasks[]> = this._store.pipe(select(selectTodaysTasksWithSubTasks), distinctUntilChanged());
@@ -85,12 +86,14 @@ export class TaskService {
       }
     });
 
+    this.currentTaskId$.subscribe((val) => this.currentTaskId = val);
+
     // time tracking
     this._timeTrackingService.tick$
       .pipe(withLatestFrom(this.currentTaskId$))
       .subscribe(([tick, currentId]) => {
         if (currentId) {
-          this.addTimeSpent(currentId, tick);
+          this.addTimeSpent(currentId, tick.duration, tick.date);
         }
       });
   }
@@ -175,8 +178,12 @@ export class TaskService {
     });
   }
 
-  addTimeSpent(id: string, tick: Tick) {
-    this._storeDispatch(TaskActionTypes.AddTimeSpent, {id, tick});
+  addTimeSpent(id: string, duration: number, date: string = getWorklogStr()) {
+    this._storeDispatch(TaskActionTypes.AddTimeSpent, {id, date, duration});
+  }
+
+  removeTimeSpent(id: string, duration: number, date: string = getWorklogStr()) {
+    this._storeDispatch(TaskActionTypes.RemoveTimeSpent, {id, date, duration});
   }
 
   focusTask(id: string) {

@@ -433,17 +433,28 @@ export function taskReducer(
 
 
     case TaskActionTypes.AddTimeSpent: {
-      const taskId = action.payload.id;
-      const date = action.payload.tick.date;
-      const timeSpent = action.payload.tick.duration;
-
-      const task = getTaskById(taskId, state);
+      const {id, date, duration} = action.payload;
+      const task = getTaskById(id, state);
       const currentTimeSpentForTickDay = task.timeSpentOnDay && +task.timeSpentOnDay[date] || 0;
 
       return updateTimeSpentForTask(
-        taskId, {
+        id, {
           ...task.timeSpentOnDay,
-          [date]: (currentTimeSpentForTickDay + timeSpent)
+          [date]: (currentTimeSpentForTickDay + duration)
+        },
+        state
+      );
+    }
+
+    case TaskActionTypes.RemoveTimeSpent: {
+      const {id, date, duration} = action.payload;
+      const task = getTaskById(id, state);
+      const currentTimeSpentForTickDay = task.timeSpentOnDay && +task.timeSpentOnDay[date] || 0;
+
+      return updateTimeSpentForTask(
+        id, {
+          ...task.timeSpentOnDay,
+          [date]: Math.max((currentTimeSpentForTickDay - duration), 0)
         },
         state
       );

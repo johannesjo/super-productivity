@@ -17,7 +17,7 @@ import { IssueIntegrationCfg, IssueProviderKey } from '../issue/issue';
 import { JiraCfg } from '../issue/jira/jira';
 import { DEFAULT_PROJECT } from './project.const';
 import { Dictionary } from '@ngrx/entity';
-import { formatWorklogDateStr } from '../core/util/format-worklog-date-str';
+import { getWorklogStr } from '../core/util/get-work-log-str';
 
 @Injectable()
 export class ProjectService {
@@ -110,7 +110,7 @@ export class ProjectService {
     this.update(projectId, {
       googleTimeSheetExport: {
         ...data,
-        ...(isExport ? {lastExported: formatWorklogDateStr(new Date())} : {})
+        ...(isExport ? {lastExported: getWorklogStr()} : {})
       }
     });
   }

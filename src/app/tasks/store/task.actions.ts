@@ -2,7 +2,6 @@ import { Action } from '@ngrx/store';
 import { Update } from '@ngrx/entity';
 import { DropListModelSource, Task } from '../task.model';
 import { TaskState } from './task.reducer';
-import { Tick } from '../../core/time-tracking/time-tracking';
 import { JiraIssue } from '../../issue/jira/jira-issue/jira-issue.model';
 
 export enum TaskActionTypes {
@@ -20,6 +19,7 @@ export enum TaskActionTypes {
   MoveUp = '[Task] Move up',
   MoveDown = '[Task] Move down',
   AddTimeSpent = '[Task] Add time spent',
+  RemoveTimeSpent = '[Task] Remove time spent',
   FocusTask = '[Task] Focus Task',
 
   // Sub Task Actions
@@ -110,7 +110,14 @@ export class MoveDown implements Action {
 export class AddTimeSpent implements Action {
   readonly type = TaskActionTypes.AddTimeSpent;
 
-  constructor(public payload: { id: string, tick: Tick }) {
+  constructor(public payload: { id: string, date: string, duration: number }) {
+  }
+}
+
+export class RemoveTimeSpent implements Action {
+  readonly type = TaskActionTypes.RemoveTimeSpent;
+
+  constructor(public payload: { id: string, date: string, duration: number }) {
   }
 }
 
@@ -162,6 +169,7 @@ export type TaskActions
   | MoveUp
   | MoveDown
   | AddTimeSpent
+  | RemoveTimeSpent
   | FocusTask
   | AddSubTask
   | MoveToBacklog

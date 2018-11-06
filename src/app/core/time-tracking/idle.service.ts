@@ -45,6 +45,8 @@ export class IdleService {
   }
 
   handleIdle(idleTimeInMs) {
+    console.log('IDLE_TIME', idleTimeInMs);
+
     // TODO CFG
     // don't run if option is not enabled
     // if (!this.$rootScope.r.config.isEnableIdleTimeTracking) {
@@ -56,15 +58,11 @@ export class IdleService {
 
     if (idleTimeInMs > MIN_IDLE_TIME) {
       this.isIdle = true;
-
       const initialIdleTime = idleTimeInMs;
-
-      // TODO
-      // if (this.$rootScope.r.currentTask) {
-      //   // remove idle time already tracked
-      //   this.Tasks.removeTimeSpent(this.$rootScope.r.currentTask.id, this.$window.moment.duration(initialIdleTime));
-      // }
-
+      if (this._taskService.currentTaskId) {
+        // remove idle time already tracked
+        this._taskService.removeTimeSpent(this._taskService.currentTaskId, initialIdleTime);
+      }
       this.isIdleDialogOpen = true;
       this.initIdlePoll(initialIdleTime);
       // this.Dialogs('WAS_IDLE', {

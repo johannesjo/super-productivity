@@ -3,7 +3,7 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material';
 import { Task } from '../../task.model';
 import { TaskService } from '../../task.service';
 import { getTodayStr } from '../../util/get-today-str';
-import { formatWorklogDateStr } from '../../../core/util/format-worklog-date-str';
+import { getWorklogStr } from '../../../core/util/get-work-log-str';
 
 @Component({
   selector: 'dialog-time-estimate',
@@ -56,7 +56,7 @@ export class DialogTimeEstimateComponent {
   }
 
   addNewEntry() {
-    const strDate = formatWorklogDateStr(this.newEntry.date);
+    const strDate = getWorklogStr(this.newEntry.date);
     this.timeSpentOnDayCopy[strDate] = this.newEntry.timeSpent;
     console.log(strDate, this.timeSpentOnDayCopy);
     this.isAddForAnotherDayFormVisible = false;
