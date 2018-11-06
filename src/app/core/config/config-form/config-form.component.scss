@@ -6,13 +6,6 @@
   float: none !important;
 }
 
-::ng-deep formly-field {
-  box-sizing: border-box;
-  padding: 0 $s;
-  width: 50%;
-  display: block;
-  float: left;
-}
 
 .controls {
   clear: both;

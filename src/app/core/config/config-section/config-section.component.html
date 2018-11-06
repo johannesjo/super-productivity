@@ -1,5 +1,6 @@
 <collapsible [title]="section.title"
-             [icon]="section.icon">
+             [icon]="section.icon"
+             [(isExpanded)]="isExpanded">
   <help-section>
     <div [innerHtml]="section.help"></div>
   </help-section>
@@ -7,7 +8,7 @@
     <config-form
       [formCfg]="section.items"
       [sectionKey]="section.key"
-      [cfg]="cfg"></config-form>
+      [cfg]="cfg"
+      (onSave)="onSave()"></config-form>
   </div>
 </collapsible>
-

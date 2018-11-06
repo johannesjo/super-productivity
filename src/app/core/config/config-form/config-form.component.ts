@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormlyFieldConfig, FormlyFormOptions } from '@ngx-formly/core';
 import { FormGroup } from '@angular/forms';
 import { ConfigService } from '../config.service';
@@ -15,8 +15,10 @@ export class ConfigFormComponent {
 
   // somehow needed for the form to work
   @Input() set formCfg(val_: FormlyFieldConfig[]) {
-    this.fields =  val_ && [...val_];
+    this.fields = val_ && [...val_];
   }
+
+  @Output() onSave: EventEmitter<any> = new EventEmitter<any>();
 
   fields: FormlyFieldConfig[];
   form = new FormGroup({});
@@ -34,6 +36,7 @@ export class ConfigFormComponent {
       throw new Error('No cfg for ' + this.sectionKey);
     } else {
       this._configService.updateSection(this.sectionKey, this.cfg);
+      this.onSave.emit();
     }
   }
 }

@@ -2,6 +2,15 @@
 
 .form-wrapper {
   overflow: hidden;
+  &.keyboard{
+    ::ng-deep formly-field {
+      box-sizing: border-box;
+      padding: 0 $s;
+      width: 50%;
+      display: block;
+      float: left;
+    }
+  }
 }
 
 :host{

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, HostBinding, Input, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, HostBinding, Input, OnInit, Output } from '@angular/core';
 import { expandAnimation } from '../animations/expand.ani';
 
 @Component({
@@ -12,11 +12,13 @@ export class CollapsibleComponent implements OnInit {
   @Input() title: string;
   @Input() icon: string;
   @Input() counter = null;
+  // TODO remove
   @Input() initiallyExpanded = false;
   @Input() btnIcon: string;
   @Input() btnAction: Function;
 
-  @HostBinding('class.isExpanded') isExpanded;
+  @HostBinding('class.isExpanded') @Input() isExpanded: boolean;
+  @Output() isExpandedChange: EventEmitter<boolean> = new EventEmitter();
 
   constructor() {
   }
@@ -26,6 +28,7 @@ export class CollapsibleComponent implements OnInit {
 
   toggleExpand() {
     this.isExpanded = !this.isExpanded;
+    this.isExpandedChange.emit(this.isExpanded);
   }
 
   execAction(ev) {

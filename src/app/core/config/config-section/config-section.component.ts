@@ -10,6 +10,7 @@ import { expandAnimation } from '../../../ui/animations/expand.ani';
 export class ConfigSectionComponent implements OnInit {
   @Input() section;
   @Input() cfg;
+  public isExpanded = false;
 
   constructor() {
   }
@@ -17,4 +18,7 @@ export class ConfigSectionComponent implements OnInit {
   ngOnInit() {
   }
 
+  onSave() {
+    this.isExpanded = false;
+  }
 }
