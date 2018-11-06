@@ -94,3 +94,10 @@ export const selectMissingIssueIds = createSelector(
     )
     .map(task => task.issueId)
 );
+
+// DYNAMIC SELECTORS
+// -----------------
+export const selectTaskById = createSelector(
+  selectTaskFeatureState,
+  (state, props: { id: string }) => state.entities[props.id]
+);

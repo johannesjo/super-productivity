@@ -7,8 +7,9 @@ import { TaskService } from '../../tasks/task.service';
 import { IPC_EVENT_IDLE_TIME } from '../../../ipc-events.const';
 import { MatDialog } from '@angular/material';
 import { BehaviorSubject, Observable } from 'rxjs';
+import { DialogIdleComponent } from './dialog-idle/dialog-idle.component';
 
-const MIN_IDLE_TIME = 5000;
+const MIN_IDLE_TIME = 60000;
 
 @Injectable({
   providedIn: 'root'
@@ -19,6 +20,7 @@ export class IdleService {
   private _idleTime$: BehaviorSubject<number> = new BehaviorSubject(0);
   public idleTime$: Observable<number> = this._idleTime$.asObservable();
 
+  private lastCurrentTaskId: string;
   private isIdleDialogOpen = false;
   private idlePollInterval: number;
 
@@ -42,6 +44,10 @@ export class IdleService {
         this.handleIdle(idleTimeInMs);
       });
     });
+
+    // window.setTimeout(() => {
+    //   this.handleIdle(8000);
+    // }, 300);
   }
 
   handleIdle(idleTimeInMs) {
@@ -57,37 +63,36 @@ export class IdleService {
     //   .asMilliseconds();
 
     if (idleTimeInMs > MIN_IDLE_TIME) {
-      this.isIdle = true;
       const initialIdleTime = idleTimeInMs;
-      if (this._taskService.currentTaskId) {
-        // remove idle time already tracked
-        this._taskService.removeTimeSpent(this._taskService.currentTaskId, initialIdleTime);
+      this.isIdle = true;
+
+      if (!this.isIdleDialogOpen) {
+        if (this._taskService.currentTaskId) {
+          // remove idle time already tracked
+          this._taskService.removeTimeSpent(this._taskService.currentTaskId, initialIdleTime);
+          this.lastCurrentTaskId = this._taskService.currentTaskId;
+          this._taskService.setCurrentId(null);
+        } else {
+          this.lastCurrentTaskId = null;
+        }
+
+        this.isIdleDialogOpen = true;
+        this.initIdlePoll(initialIdleTime);
+        this._matDialog.open(DialogIdleComponent, {
+          data: {
+            lastCurrentTaskId: this.lastCurrentTaskId,
+            idleTime$: this.idleTime$,
+          }
+        }).afterClosed()
+          .subscribe((taskToTrack) => {
+            if (taskToTrack) {
+              this._taskService.addTimeSpent(taskToTrack, this._idleTime$.getValue());
+              this._taskService.setCurrentId(taskToTrack);
+            }
+            this.cancelIdlePoll();
+            this.isIdleDialogOpen = false;
+          });
       }
-      this.isIdleDialogOpen = true;
-      this.initIdlePoll(initialIdleTime);
-      // this.Dialogs('WAS_IDLE', {
-      //   initialIdleTime: initialIdleTime,
-      // })
-      //   .then((res) => {
-      //     // if tracked
-      //     // ----------
-      //     // add the idle time in milliseconds + the minIdleTime that was
-      //     // not tracked or removed
-      //     if (res.selectedTask && res.selectedTask.id) {
-      //       this.Tasks.addTimeSpent(res.selectedTask, this.idleTime);
-      //       // set current task to the selected one
-      //       this.Tasks.updateCurrent(res.selectedTask);
-      //     } else {
-      //       console.error('No Task selected');
-      //     }
-      //
-      //     this.TakeABreakReminder.isShown = true;
-      //     this.isIdleDialogOpen = false;
-      //     this.cancelIdlePoll();
-      //   }, () => {
-      //     this.isIdleDialogOpen = false;
-      //     this.cancelIdlePoll();
-      //   });
     }
   }
 

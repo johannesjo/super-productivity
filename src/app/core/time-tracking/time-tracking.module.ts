@@ -3,15 +3,24 @@ import { CommonModule } from '@angular/common';
 import { TimeTrackingService } from './time-tracking.service';
 import { DialogIdleComponent } from './dialog-idle/dialog-idle.component';
 import { IdleService } from './idle.service';
+import { UiModule } from '../../ui/ui.module';
+import { FormsModule } from '@angular/forms';
 
 @NgModule({
   imports: [
-    CommonModule
+    CommonModule,
+    UiModule,
+    FormsModule,
   ],
-  declarations: [DialogIdleComponent],
+  declarations: [
+    DialogIdleComponent
+  ],
   providers: [
     TimeTrackingService,
     IdleService,
+  ],
+  entryComponents: [
+    DialogIdleComponent,
   ]
 })
 export class TimeTrackingModule {

@@ -1,4 +1,4 @@
-import { debounceTime, distinctUntilChanged, map, withLatestFrom } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, first, map, take, withLatestFrom } from 'rxjs/operators';
 import { Injectable } from '@angular/core';
 import { combineLatest, Observable } from 'rxjs';
 import { DropListModelSource, Task, TaskWithSubTasks } from './task.model';
@@ -19,6 +19,7 @@ import {
   selectFocusIdsForWorkView,
   selectFocusTaskId,
   selectMissingIssueIds,
+  selectTaskById,
   selectTodaysDoneTasksWithSubTasks,
   selectTodaysTaskIds,
   selectTodaysTasksWithSubTasks,
@@ -208,6 +209,10 @@ export class TaskService {
 
   // HELPER
   // ------
+  getById(id: string): Observable<Task> {
+    return this._store.pipe(select(selectTaskById, {id}), take(1));
+  }
+
   setDone(id: string) {
     this.update(id, {isDone: true});
   }
