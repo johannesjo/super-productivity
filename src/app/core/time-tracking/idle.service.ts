@@ -8,6 +8,7 @@ import { IPC_EVENT_IDLE_TIME } from '../../../ipc-events.const';
 import { MatDialog } from '@angular/material';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { DialogIdleComponent } from './dialog-idle/dialog-idle.component';
+import { ConfigService } from '../config/config.service';
 
 const MIN_IDLE_TIME = 60000;
 
@@ -29,6 +30,7 @@ export class IdleService {
     private _projectService: ProjectService,
     private _electronService: ElectronService,
     private _taskService: TaskService,
+    private _configService: ConfigService,
     private _matDialog: MatDialog,
   ) {
   }
@@ -52,17 +54,13 @@ export class IdleService {
 
   handleIdle(idleTimeInMs) {
     console.log('IDLE_TIME', idleTimeInMs);
-
-    // TODO CFG
     // don't run if option is not enabled
-    // if (!this.$rootScope.r.config.isEnableIdleTimeTracking) {
-    //   this.isIdle = false;
-    //   return;
-    // }
-    // const minIdleTimeInMs = moment.duration(this.$rootScope.r.config.minIdleTime)
-    //   .asMilliseconds();
-
-    if (idleTimeInMs > MIN_IDLE_TIME) {
+    if (!this._configService.cfg.misc.isEnableIdleTimeTracking) {
+      this.isIdle = false;
+      return;
+    }
+    const minIdleTime = this._configService.cfg.misc.minIdleTime || MIN_IDLE_TIME;
+    if (idleTimeInMs > minIdleTime) {
       const initialIdleTime = idleTimeInMs;
       this.isIdle = true;
 

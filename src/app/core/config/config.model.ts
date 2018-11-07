@@ -29,6 +29,8 @@ export type KeyboardConfig = Readonly<{
 
 export type MiscConfig = Readonly<{
   [key: string]: any;
+  isEnableIdleTimeTracking: boolean;
+  minIdleTime: number;
 }>;
 
 
