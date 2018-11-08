@@ -11,6 +11,7 @@ import { DialogIdleComponent } from './dialog-idle/dialog-idle.component';
 import { ConfigService } from '../config/config.service';
 
 const DEFAULT_MIN_IDLE_TIME = 60000;
+const IDLE_POLL_INTERVAL = 1000;
 
 @Injectable({
   providedIn: 'root'
@@ -52,22 +53,23 @@ export class IdleService {
     // }, 300);
   }
 
-  handleIdle(idleTimeInMs) {
-    console.log('IDLE_TIME', idleTimeInMs);
+  handleIdle(idleTime) {
+    console.log('IDLE_TIME', idleTime);
+    const cfg = this._configService.cfg.misc;
+    const minIdleTime = cfg.minIdleTime || DEFAULT_MIN_IDLE_TIME;
+
     // don't run if option is not enabled
-    if (!this._configService.cfg.misc.isEnableIdleTimeTracking) {
+    if (!cfg.isEnableIdleTimeTracking || !(cfg.isOnlyOpenIdleWhenCurrentTask && !this._taskService.currentTaskId)) {
       this.isIdle = false;
       return;
     }
-    const minIdleTime = this._configService.cfg.misc.minIdleTime || DEFAULT_MIN_IDLE_TIME;
-    if (idleTimeInMs > minIdleTime) {
-      const initialIdleTime = idleTimeInMs;
+    if (idleTime > minIdleTime) {
       this.isIdle = true;
 
       if (!this.isIdleDialogOpen) {
         if (this._taskService.currentTaskId) {
           // remove idle time already tracked
-          this._taskService.removeTimeSpent(this._taskService.currentTaskId, initialIdleTime);
+          this._taskService.removeTimeSpent(this._taskService.currentTaskId, idleTime);
           this.lastCurrentTaskId = this._taskService.currentTaskId;
           this._taskService.setCurrentId(null);
         } else {
@@ -75,7 +77,7 @@ export class IdleService {
         }
 
         this.isIdleDialogOpen = true;
-        this.initIdlePoll(initialIdleTime);
+        this.initIdlePoll(idleTime);
         this._matDialog.open(DialogIdleComponent, {
           data: {
             lastCurrentTaskId: this.lastCurrentTaskId,
@@ -96,13 +98,12 @@ export class IdleService {
 
 
   initIdlePoll(initialIdleTime) {
-    const POLL_INTERVAL = 1000;
     const idleStart = Date.now();
     this._idleTime$.next(initialIdleTime);
     this.idlePollInterval = window.setInterval(() => {
       const delta = Date.now() - idleStart;
       this._idleTime$.next(initialIdleTime + delta);
-    }, POLL_INTERVAL);
+    }, IDLE_POLL_INTERVAL);
   }
 
   cancelIdlePoll() {

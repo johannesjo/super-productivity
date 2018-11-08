@@ -40,8 +40,6 @@ export type MiscConfig = Readonly<{
   isTakeABreakEnabled: boolean;
   takeABreakMinWorkingTime: boolean;
   isAutoStartNextTask: boolean;
-  isEnableIdleTimeTracking: boolean;
-  isOnlyOpenIdleWhenCurrentTask: boolean;
   isShortSyntaxEnabled: boolean;
   takeABreakMessage: string;
 }>;

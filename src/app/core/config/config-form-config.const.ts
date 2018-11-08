@@ -1,6 +1,3 @@
-import { template } from '@angular/core/src/render3';
-import { type } from 'os';
-
 export const GLOBAL_CONFIG_FORM_CONFIG = [
   // MISC SETTINGS
   // -------------
@@ -38,7 +35,15 @@ export const GLOBAL_CONFIG_FORM_CONFIG = [
         templateOptions: {
           label: 'Trigger idle after x ms',
         },
-      },    {
+      },
+      {
+        key: 'isOnlyOpenIdleWhenCurrentTask',
+        type: 'checkbox',
+        templateOptions: {
+          label: 'Only trigger idle time dialog when a current task is selected',
+        },
+      },
+      {
         key: 'isDoNotMinimizeToTray',
         type: 'checkbox',
         templateOptions: {
