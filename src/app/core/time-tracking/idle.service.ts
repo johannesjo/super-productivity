@@ -10,7 +10,7 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { DialogIdleComponent } from './dialog-idle/dialog-idle.component';
 import { ConfigService } from '../config/config.service';
 
-const MIN_IDLE_TIME = 60000;
+const DEFAULT_MIN_IDLE_TIME = 60000;
 
 @Injectable({
   providedIn: 'root'
@@ -59,7 +59,7 @@ export class IdleService {
       this.isIdle = false;
       return;
     }
-    const minIdleTime = this._configService.cfg.misc.minIdleTime || MIN_IDLE_TIME;
+    const minIdleTime = this._configService.cfg.misc.minIdleTime || DEFAULT_MIN_IDLE_TIME;
     if (idleTimeInMs > minIdleTime) {
       const initialIdleTime = idleTimeInMs;
       this.isIdle = true;

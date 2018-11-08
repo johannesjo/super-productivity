@@ -28,9 +28,22 @@ export type KeyboardConfig = Readonly<{
 
 
 export type MiscConfig = Readonly<{
-  [key: string]: any;
   isEnableIdleTimeTracking: boolean;
   minIdleTime: number;
+  isOnlyOpenIdleWhenCurrentTask: boolean;
+
+  isDoNotMinimizeToTray: boolean;
+  isNotifyWhenTimeEstimateExceeded: boolean;
+  isBlockFinishDayUntilTimeTimeTracked: boolean;
+  isConfirmBeforeExit: boolean;
+  isShowTimeWorkedWithoutBreak: boolean;
+  isTakeABreakEnabled: boolean;
+  takeABreakMinWorkingTime: boolean;
+  isAutoStartNextTask: boolean;
+  isEnableIdleTimeTracking: boolean;
+  isOnlyOpenIdleWhenCurrentTask: boolean;
+  isShortSyntaxEnabled: boolean;
+  takeABreakMessage: string;
 }>;
 
 

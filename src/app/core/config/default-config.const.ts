@@ -12,6 +12,7 @@ export const DEFAULT_CFG: GlobalConfig = {
     takeABreakMinWorkingTime: undefined,
     isAutoStartNextTask: true,
     isEnableIdleTimeTracking: true,
+    isOnlyOpenIdleWhenCurrentTask: false,
     minIdleTime: 5 * 60 * 60,
     isShortSyntaxEnabled: true,
     /* tslint:disable-next-line */
