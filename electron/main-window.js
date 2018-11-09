@@ -47,7 +47,6 @@ function createWindow(params) {
       electron: require(`${__dirname}/../node_modules/electron`)
     });
     mainWin.loadURL('http://localhost:4200');
-    mainWin.webContents.openDevTools();
   } else {
     mainWin.loadURL(url.format({
       pathname: path.join(__dirname, '../dist/index.html'),
@@ -58,7 +57,7 @@ function createWindow(params) {
       },
       icon: ICONS_FOLDER + '/app-icons/icon_256x256.png'
     }));
-    mainWin.webContents.openDevTools();
+    // mainWin.webContents.openDevTools();
   }
 
   initWinEventListeners(app, IS_MAC, nestedWinParams, indicatorMod);

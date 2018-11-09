@@ -5,7 +5,9 @@ const localShortcut = require('electron-localshortcut');
 const { app, BrowserWindow } = electron;
 const isMacOS = process.platform === 'darwin';
 
-const devToolsOptions = {};
+const devToolsOptions = {
+  mode: 'bottom'
+};
 
 function toggleDevTools(win = BrowserWindow.getFocusedWindow()) {
   if (win) {
