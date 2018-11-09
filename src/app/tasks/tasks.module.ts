@@ -20,6 +20,7 @@ import { ProjectModule } from '../project/project.module';
 import { TASK_FEATURE_NAME } from './store/task.reducer';
 import { JiraIssueModule } from '../issue/jira/jira-issue/jira-issue.module';
 import { TaskAdditionalInfoComponent } from './task-additional-info/task-additional-info.component';
+import { SelectTaskComponent } from './select-task/select-task.component';
 
 @NgModule({
   imports: [
@@ -41,11 +42,13 @@ import { TaskAdditionalInfoComponent } from './task-additional-info/task-additio
     KeysPipe,
     ToArrayPipe,
     TaskAdditionalInfoComponent,
+    SelectTaskComponent,
   ],
   exports: [
     TaskComponent,
     TaskListComponent,
     AddTaskBarComponent,
+    SelectTaskComponent,
     DialogTimeEstimateComponent,
   ],
   providers: [

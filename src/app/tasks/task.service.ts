@@ -10,6 +10,7 @@ import { PersistenceService } from '../core/persistence/persistence.service';
 import { IssueProviderKey } from '../issue/issue';
 import { TimeTrackingService } from '../core/time-tracking/time-tracking.service';
 import {
+  selectAllStartableTasks,
   selectAllTasksWithSubTasks,
   selectBacklogTasksWithSubTasks,
   selectCurrentTaskId,
@@ -36,6 +37,7 @@ export class TaskService {
   currentTaskId: string;
 
   tasks$: Observable<TaskWithSubTasks[]> = this._store.pipe(select(selectAllTasksWithSubTasks), distinctUntilChanged());
+  startableTasks$: Observable<Task[]> = this._store.pipe(select(selectAllStartableTasks), distinctUntilChanged());
   todaysTasks$: Observable<TaskWithSubTasks[]> = this._store.pipe(select(selectTodaysTasksWithSubTasks), distinctUntilChanged());
   todaysTaskIds$: Observable<string[]> = this._store.pipe(select(selectTodaysTaskIds), distinctUntilChanged());
 

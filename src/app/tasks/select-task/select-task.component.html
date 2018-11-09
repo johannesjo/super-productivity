@@ -1,0 +1,23 @@
+<form (submit)="selectTask()"
+      class="add-task-form mat-elevation-z3">
+  <mat-form-field>
+    <mat-icon matPrefix="">track_changes</mat-icon>
+    <input matInput
+           #inputEl
+           placeholder="Select or create task"
+           aria-label="Select or create task"
+           autofocus="autofocus"
+           [matAutocomplete]="auto"
+           [formControl]="taskSelectCtrl">
+
+    <mat-autocomplete #auto="matAutocomplete"
+                      [displayWith]="displayWith"
+                      [autoActiveFirstOption]="true">
+      <mat-option *ngFor="let task of filteredTasks"
+                  [value]="task">
+        <span>{{ task?.title}}</span>
+      </mat-option>
+
+    </mat-autocomplete>
+  </mat-form-field>
+</form>
