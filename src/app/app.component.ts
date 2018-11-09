@@ -13,6 +13,7 @@ import { LayoutService } from './core/layout/layout.service';
 import { ElectronService } from 'ngx-electron';
 import { IPC_EVENT_APP_READY, IPC_EVENT_ERROR } from '../ipc-events.const';
 import { SnackService } from './core/snack/snack.service';
+import { IS_ELECTRON } from './app.constants';
 
 @Component({
   selector: 'app-root',
@@ -43,8 +44,10 @@ export class AppComponent implements OnInit {
 
     // INIT Services and global handlers
     this._chromeExtensionInterface.init();
-    this._initElectronErrorHandler();
-    this._electronService.ipcRenderer.send(IPC_EVENT_APP_READY);
+    if (IS_ELECTRON) {
+      this._electronService.ipcRenderer.send(IPC_EVENT_APP_READY);
+      this._initElectronErrorHandler();
+    }
   }
 
   @HostListener('document:keydown', ['$event']) onKeyDown(ev: KeyboardEvent) {
