@@ -79,8 +79,6 @@ export class AddTaskBarComponent implements OnInit, OnDestroy {
 
   addTask() {
     const issueOrTitle = this.taskSuggestionsCtrl.value;
-    console.log(issueOrTitle);
-
     if (typeof issueOrTitle === 'string') {
       if (issueOrTitle.length > 0) {
         this._taskService.add(issueOrTitle);
@@ -91,6 +89,7 @@ export class AddTaskBarComponent implements OnInit, OnDestroy {
         'JIRA',
         issueOrTitle,
       );
+      // TODO move to issue effect
       // get full data
       this._jiraApiService.getIssueById(issueOrTitle.id)
         .then((issue) => {

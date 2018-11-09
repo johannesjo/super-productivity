@@ -1,10 +1,27 @@
-import { debounceTime, distinctUntilChanged, first, map, take, withLatestFrom } from 'rxjs/operators';
+import shortid from 'shortid';
+import { debounceTime, distinctUntilChanged, map, take, withLatestFrom } from 'rxjs/operators';
 import { Injectable } from '@angular/core';
 import { combineLatest, Observable } from 'rxjs';
 import { DropListModelSource, Task, TaskWithSubTasks } from './task.model';
 import { select, Store } from '@ngrx/store';
-import { AddTask, TaskActionTypes } from './store/task.actions';
-import shortid from 'shortid';
+import {
+  AddSubTask,
+  AddTask,
+  AddTimeSpent,
+  DeleteTask,
+  FocusTask,
+  LoadTaskState,
+  Move,
+  MoveDown,
+  MoveToArchive,
+  MoveToBacklog,
+  MoveToToday,
+  MoveUp,
+  RemoveTimeSpent,
+  SetCurrentTask,
+  UnsetCurrentTask,
+  UpdateTask
+} from './store/task.actions';
 import { initialTaskState, } from './store/task.reducer';
 import { PersistenceService } from '../core/persistence/persistence.service';
 import { IssueProviderKey } from '../issue/issue';
@@ -104,7 +121,7 @@ export class TaskService {
   // META
   // ----
   setCurrentId(id: string) {
-    this._storeDispatch(TaskActionTypes.SetCurrentTask, id);
+    this._store.dispatch(new SetCurrentTask(id));
   }
 
   loadStateForProject(projectId) {
@@ -113,99 +130,107 @@ export class TaskService {
   }
 
   loadState(state) {
-    this._storeDispatch(TaskActionTypes.LoadTaskState, {state});
+    this._store.dispatch(new LoadTaskState({state}));
   }
 
   pauseCurrent() {
-    this._storeDispatch(TaskActionTypes.UnsetCurrentTask);
+    this._store.dispatch(new UnsetCurrentTask);
   }
 
   // Tasks
   // -----
-  add(title: string, isAddToBacklog = false, additionalFields?: Partial<Task>) {
-    // TODO decide which syntax to use
+  add(title: string,
+      isAddToBacklog = false,
+      additionalFields?: Partial<Task>,
+  ) {
     this._store.dispatch(new AddTask({
       task: this._createNewTask(title, additionalFields),
       isAddToBacklog: isAddToBacklog
     }));
-    // this._storeDispatch(TaskActionTypes.AddTask, {
-    //   task: this._createNewTask(title),
-    //   isAddToBacklog
-    // });
   }
 
-  // TODO merge with add
-  addWithIssue(title: string, issueType: IssueProviderKey, issue: any, isAddToBacklog = false) {
-    this._storeDispatch(TaskActionTypes.AddTask, {
+  addWithIssue(title: string,
+               issueType: IssueProviderKey,
+               issue: any,
+               isAddToBacklog = false
+  ) {
+    this._store.dispatch(new AddTask({
       task: this._createNewTask(title, {
         issueId: issue.id,
         issueType: issueType,
       }),
       issue,
       isAddToBacklog
-    });
+    }));
   }
 
   remove(id: string) {
-    this._storeDispatch(TaskActionTypes.DeleteTask, {id});
+    this._store.dispatch(new DeleteTask({id}));
   }
 
 
   update(id: string, changedFields: Partial<Task>) {
-    this._storeDispatch(TaskActionTypes.UpdateTask, {
+    this._store.dispatch(new UpdateTask({
       task: {id, changes: this._shortSyntax(changedFields) as Partial<Task>}
-    });
+    }));
   }
 
-  move(taskId: string, sourceModelId: DropListModelSource, targetModelId: DropListModelSource, newOrderedIds: string[]) {
-    this._storeDispatch(TaskActionTypes.Move, {
+  move(taskId: string,
+       sourceModelId: DropListModelSource,
+       targetModelId: DropListModelSource,
+       newOrderedIds: string[]) {
+    this._store.dispatch(new Move({
       taskId,
       sourceModelId,
       targetModelId,
       newOrderedIds,
-    });
+    }));
   }
 
   moveUp(id: string) {
-    this._storeDispatch(TaskActionTypes.MoveUp, {id});
+    this._store.dispatch(new MoveUp({id}));
   }
 
   moveDown(id: string) {
-    this._storeDispatch(TaskActionTypes.MoveDown, {id});
+    this._store.dispatch(new MoveDown({id}));
   }
 
   addSubTaskTo(parentId) {
-    this._storeDispatch(TaskActionTypes.AddSubTask, {
+    this._store.dispatch(new AddSubTask({
       task: this._createNewTask(''),
       parentId: parentId
-    });
+    }));
   }
 
-  addTimeSpent(id: string, duration: number, date: string = getWorklogStr()) {
-    this._storeDispatch(TaskActionTypes.AddTimeSpent, {id, date, duration});
+  addTimeSpent(id: string,
+               duration: number,
+               date: string = getWorklogStr()) {
+    this._store.dispatch(new AddTimeSpent({id, date, duration}));
   }
 
-  removeTimeSpent(id: string, duration: number, date: string = getWorklogStr()) {
-    this._storeDispatch(TaskActionTypes.RemoveTimeSpent, {id, date, duration});
+  removeTimeSpent(id: string,
+                  duration: number,
+                  date: string = getWorklogStr()) {
+    this._store.dispatch(new RemoveTimeSpent({id, date, duration}));
   }
 
   focusTask(id: string) {
-    this._storeDispatch(TaskActionTypes.FocusTask, {id});
+    this._store.dispatch(new FocusTask({id}));
   }
 
   moveToToday(id) {
-    this._storeDispatch(TaskActionTypes.MoveToToday, {id});
+    this._store.dispatch(new MoveToToday({id}));
   }
 
   moveToBacklog(id) {
-    this._storeDispatch(TaskActionTypes.MoveToBacklog, {id});
+    this._store.dispatch(new MoveToBacklog({id}));
   }
 
   moveToArchive(ids: string | string[]) {
     if (typeof ids === 'string') {
       ids = [ids];
     }
-    this._storeDispatch(TaskActionTypes.MoveToArchive, {ids});
+    this._store.dispatch(new MoveToArchive({ids}));
   }
 
 
@@ -260,14 +285,6 @@ export class TaskService {
 
   focusPreviousInList(id: string, idList: string[], isSelectReverseIfNotPossible) {
     this.focusInList(id, idList, -1, isSelectReverseIfNotPossible);
-  }
-
-
-  private _storeDispatch(action: TaskActionTypes, payload?: any) {
-    this._store.dispatch({
-      type: action,
-      payload: payload
-    });
   }
 
   private _createNewTask(title: string, additional: Partial<Task> = {}): Task {
