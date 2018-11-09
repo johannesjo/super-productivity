@@ -8,7 +8,7 @@ import shortid from 'shortid';
 import { initialTaskState, } from './store/task.reducer';
 import { PersistenceService } from '../core/persistence/persistence.service';
 import { IssueProviderKey } from '../issue/issue';
-import { TimeTrackingService } from '../core/time-tracking/time-tracking.service';
+import { TimeTrackingService } from '../time-tracking/time-tracking.service';
 import {
   selectAllStartableTasks,
   selectAllTasksWithSubTasks,
@@ -122,10 +122,10 @@ export class TaskService {
 
   // Tasks
   // -----
-  add(title: string, isAddToBacklog = false) {
+  add(title: string, isAddToBacklog = false, additionalFields?: Partial<Task>) {
     // TODO decide which syntax to use
     this._store.dispatch(new AddTask({
-      task: this._createNewTask(title),
+      task: this._createNewTask(title, additionalFields),
       isAddToBacklog: isAddToBacklog
     }));
     // this._storeDispatch(TaskActionTypes.AddTask, {

@@ -20,6 +20,7 @@ import { MainHeaderModule } from './main-header/main-header.module';
 import { HttpClientModule } from '@angular/common/http';
 import { MatSidenavModule } from '@angular/material';
 import { TasksModule } from './tasks/tasks.module';
+import { TimeTrackingModule } from './time-tracking/time-tracking.module';
 
 @NgModule({
   declarations: [
@@ -33,6 +34,7 @@ import { TasksModule } from './tasks/tasks.module';
     MainHeaderModule,
     MatSidenavModule,
     TasksModule,
+    TimeTrackingModule,
 
     // External
     BrowserModule,

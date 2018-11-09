@@ -1,10 +1,10 @@
 import { Injectable } from '@angular/core';
 import * as moment from 'moment';
-import { TRACKING_INTERVAL, WORKLOG_DATE_STR_FORMAT } from '../../app.constants';
+import { TRACKING_INTERVAL, WORKLOG_DATE_STR_FORMAT } from '../app.constants';
 import { interval, Observable } from 'rxjs';
 import { map, share } from 'rxjs/operators';
 import { Tick } from './time-tracking';
-import { getWorklogStr } from '../util/get-work-log-str';
+import { getWorklogStr } from '../core/util/get-work-log-str';
 
 @Injectable({
   providedIn: 'root'

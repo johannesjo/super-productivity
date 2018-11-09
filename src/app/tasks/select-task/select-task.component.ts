@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { Task } from '../task.model';
 import { map, startWith, takeUntil, withLatestFrom } from 'rxjs/operators';
@@ -14,6 +14,17 @@ import { Subject } from 'rxjs';
 export class SelectTaskComponent implements OnInit, OnDestroy {
   taskSelectCtrl: FormControl = new FormControl();
   filteredTasks: Task[];
+  isCreate = false;
+
+  @Input() set initialTask(task: Task) {
+    if (task && !this.taskSelectCtrl.value || this.taskSelectCtrl.value === '') {
+      this.isCreate = false;
+      this.taskSelectCtrl.setValue(task);
+    }
+  }
+
+  @Output() taskChange = new EventEmitter<Task | string>();
+
   private _destroy$: Subject<boolean> = new Subject<boolean>();
 
   constructor(private _taskService: TaskService) {
@@ -31,7 +42,10 @@ export class SelectTaskComponent implements OnInit, OnDestroy {
       takeUntil(this._destroy$)
     )
       .subscribe((filteredTasks) => {
-        this.filteredTasks = filteredTasks;
+        const taskOrTitle = this.taskSelectCtrl.value;
+        this.isCreate = (typeof taskOrTitle === 'string');
+        this.filteredTasks = this.isCreate ? filteredTasks : [];
+        this.taskChange.emit(taskOrTitle);
       });
   }
 
@@ -39,12 +53,6 @@ export class SelectTaskComponent implements OnInit, OnDestroy {
     this._destroy$.next(true);
     this._destroy$.unsubscribe();
   }
-
-  selectTask() {
-    this.taskSelectCtrl.setValue('');
-
-  }
-
 
   displayWith(task: Task) {
     return task && task.title;

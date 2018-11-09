@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { PersistenceModule } from './persistence/persistence.module';
 import { ConfigModule } from './config/config.module';
 import { ChromeExtensionInterfaceModule } from './chrome-extension-interface/chrome-extension-interface.module';
-import { TimeTrackingModule } from './time-tracking/time-tracking.module';
 import { ShortcutModule } from './shortcut/shortcut.module';
 import { SnackModule } from './snack/snack.module';
 import { GoogleModule } from './google/google.module';
@@ -14,10 +13,10 @@ import { DialogSimpleTaskSummaryModule } from './dialog-simple-task-summary/dial
 @NgModule({
   imports: [
     CommonModule,
+
     ConfigModule,
     PersistenceModule,
     ChromeExtensionInterfaceModule,
-    TimeTrackingModule,
     ShortcutModule,
     SnackModule,
     GoogleModule,
@@ -30,11 +29,11 @@ import { DialogSimpleTaskSummaryModule } from './dialog-simple-task-summary/dial
     ConfigModule,
     PersistenceModule,
     ChromeExtensionInterfaceModule,
-    TimeTrackingModule,
     ShortcutModule,
     SnackModule,
     GoogleModule,
     RouterModule,
+    LayoutModule,
     DialogSimpleTaskSummaryModule,
   ]
 })

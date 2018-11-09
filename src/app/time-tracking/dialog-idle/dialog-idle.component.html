@@ -6,10 +6,17 @@
        mat-dialog-content>
     <p>You have been idle for <strong>{{data.idleTime$|async|msToString:true}}</strong>.</p>
 
-    <p>Track to: <strong>{{(lastCurrentTask$|async)?.title}} {{!(lastCurrentTask$|async)&&'No task selected'}}</strong>
-    </p>
+    <select-task [initialTask]="selectedTask"
+                 (taskChange)="selectedTask=$event"></select-task>
     <!--<p>Select the task you want to track the time for, or just press cancel if you don't want to track the time.</p>-->
   </div>
+
+
+  <p>
+    <span *ngIf="!selectedTask?.title">Create and track to:</span>
+    <span *ngIf="selectedTask?.title">Track to:</span>
+    <br><strong>{{selectedTask?.title || selectedTask || 'No task selected'}} </strong>
+  </p>
 
 
   <div mat-dialog-actions
