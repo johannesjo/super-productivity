@@ -45,9 +45,9 @@ export class JiraApiService {
   }
 
 
-  search(searchTerm: string, isFetchAdditional?: boolean): Promise<JiraIssue[]> {
+  search(searchTerm: string, isFetchAdditional?: boolean, maxResults: number = JIRA_MAX_RESULTS): Promise<JiraIssue[]> {
     const options = {
-      maxResults: JIRA_MAX_RESULTS,
+      maxResults: maxResults,
       fields: isFetchAdditional ? JIRA_ADDITIONAL_ISSUE_FIELDS : JIRA_REDUCED_ISSUE_FIELDS,
     };
     const searchQuery = `summary ~ "${searchTerm}"${this.cfg.jqlQuery ? ' AND ' + this.cfg.jqlQuery : ''}`;
