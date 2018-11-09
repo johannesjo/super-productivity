@@ -52,10 +52,6 @@ export class AppComponent implements OnInit {
 
   @HostListener('document:keydown', ['$event']) onKeyDown(ev: KeyboardEvent) {
     this._shortcutService.handleKeyDown(ev);
-    if (checkKeyCombo(ev, this._configService.cfg.keyboard.addNewTask)) {
-      this.layoutService.toggleAddTaskBar();
-      ev.preventDefault();
-    }
   }
 
   ngOnInit() {

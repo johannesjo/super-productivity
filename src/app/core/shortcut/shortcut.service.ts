@@ -5,6 +5,7 @@ import { ConfigService } from '../config/config.service';
 import { Router } from '@angular/router';
 import { IPC_REGISTER_GLOBAL_SHORTCUT_EVENT } from '../../../ipc-events.const';
 import { ElectronService } from 'ngx-electron';
+import { LayoutService } from '../layout/layout.service';
 
 
 @Injectable({
@@ -16,17 +17,24 @@ export class ShortcutService {
     private _configService: ConfigService,
     private _router: Router,
     private _electronService: ElectronService,
+    private _layoutService: LayoutService,
   ) {
     //   // Register electron shortcut(s)
-      if (IS_ELECTRON && this._configService.cfg.keyboard.globalShowHide) {
-        _electronService.ipcRenderer.send(IPC_REGISTER_GLOBAL_SHORTCUT_EVENT, this._configService.cfg.keyboard.globalShowHide);
-      }
+    if (IS_ELECTRON && this._configService.cfg.keyboard.globalShowHide) {
+      _electronService.ipcRenderer.send(IPC_REGISTER_GLOBAL_SHORTCUT_EVENT, this._configService.cfg.keyboard.globalShowHide);
+    }
   }
 
   handleKeyDown(ev: KeyboardEvent) {
     const cfg = this._configService.cfg;
     const keys = cfg.keyboard;
+    const el = ev.target as HTMLElement;
 
+    // don't run when inside input or text area and if no special keys are used
+    if ((el && el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.getAttribute('contenteditable'))
+      && !ev.ctrlKey && !ev.metaKey) {
+      return;
+    }
 
     // if (checkKeyCombo(ev, cfg.keyboard.openProjectNotes)) {
     //   Dialogs('NOTES', undefined, true);
@@ -52,6 +60,10 @@ export class ShortcutService {
     }
     if (checkKeyCombo(ev, keys.goToFocusMode)) {
       this._router.navigate(['/focus-view']);
+    }
+    if (checkKeyCombo(ev, keys.addNewTask)) {
+      this._layoutService.toggleAddTaskBar();
+      ev.preventDefault();
     }
 
     // special hidden dev tools combo to use them for production
