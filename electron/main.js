@@ -5,7 +5,7 @@ const powerSaveBlocker = electron.powerSaveBlocker;
 const notifier = require('node-notifier');
 //const autoUpdater = require('electron-updater').autoUpdater;
 const log = require('electron-log');
-
+const electronLocalshortcut = require('electron-localshortcut');
 const CONFIG = require('./CONFIG');
 
 const indicatorMod = require('./indicator');
@@ -28,7 +28,7 @@ if (IS_DEV) {
 }
 
 const app = electron.app;
-
+require('./debug')();
 let mainWin;
 let nestedWinParams = { isDarwinForceQuit: false };
 

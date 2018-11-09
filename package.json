@@ -120,6 +120,7 @@
     "clipboard": "^2.0.1",
     "core-js": "^2.5.4",
     "dbus-native": "^0.2.5",
+    "electron-localshortcut": "^3.1.0",
     "electron-log": "^2.2.17",
     "googleapis": "^34.0.0",
     "hammerjs": "^2.0.8",
