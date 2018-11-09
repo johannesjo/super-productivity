@@ -8,18 +8,46 @@ import { TaskState } from '../../tasks/store/task.reducer';
 import { JiraIssueState } from '../../issue/jira/jira-issue/store/jira-issue.reducer';
 import { EntityState } from '@ngrx/entity';
 import { Task } from '../../tasks/task.model';
+import { AppDataComplete } from '../sync/sync.model';
 
 @Injectable({
   providedIn: 'root'
 })
 export class PersistenceService {
   constructor() {
+    console.log(this.loadComplete());
   }
 
+  loadComplete(): AppDataComplete {
+    const crateProjectIdObj = (getDataFn: Function, params = []) => {
+      return projectIds.reduce((acc, id) => {
+        return {
+          ...acc,
+          [id]: getDataFn(id, ...params)
+        };
+      }, {});
+    };
 
-  // PROJECT DATA
-  // -------------
-  loadProjectsMeta() {
+    const projectState = this.loadProjectsMeta();
+    const projectIds = projectState.ids as string[];
+
+    return {
+      project: this.loadProjectsMeta(),
+      globalConfig: this.loadGlobalConfig(),
+      task: crateProjectIdObj(this.loadTasksForProject.bind(this)),
+      taskArchive: crateProjectIdObj(this.loadTaskArchiveForProject.bind(this)),
+      issue: projectIds.reduce((acc, id) => {
+        return {
+          ...acc,
+          [id]: {
+            'JIRA': this.loadIssuesForProject.bind(this)(id, 'JIRA')
+          }
+        };
+      }, {}),
+    };
+  }
+
+  loadProjectsMeta(): ProjectState {
     return loadFromLs(LS_PROJECT_META_LIST);
   }
 
@@ -64,23 +92,14 @@ export class PersistenceService {
   }
 
   // TODO add correct type
-  loadIssuesForProject(projectId, issueType: IssueProviderKey): any {
+  loadIssuesForProject(projectId, issueType: IssueProviderKey): JiraIssueState {
     return loadFromLs(this._makeProjectKey(projectId, LS_ISSUE_STATE, issueType));
-  }
-
-
-  // do once on startup
-  updateProjectsMetaFromProjectData() {
-  }
-
-  deleteProject() {
-    // deletes meta and tasks
   }
 
 
   // GLOBAL CONFIG
   // -------------
-  loadGlobalConfig() {
+  loadGlobalConfig(): GlobalConfig {
     return loadFromLs(LS_GLOBAL_CFG);
   }
 
