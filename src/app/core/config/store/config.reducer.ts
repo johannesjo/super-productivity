@@ -6,7 +6,6 @@ import { DEFAULT_CFG } from '../default-config.const';
 export const CONFIG_FEATURE_NAME = 'globalConfig';
 export const selectConfigFeatureState = createFeatureSelector<GlobalConfig>(CONFIG_FEATURE_NAME);
 
-
 export const initialState: GlobalConfig = DEFAULT_CFG;
 
 export function configReducer(
@@ -20,9 +19,14 @@ export function configReducer(
       return Object.assign({}, action.payload);
 
     case ConfigActionTypes.UpdateConfigSection:
-      const newState = Object.assign({}, state);
-      newState[action.payload.sectionKey] = Object.assign(newState[action.payload.sectionKey], action.payload.sectionCfg);
-      return newState;
+      const {sectionKey, sectionCfg} = action.payload;
+      return {
+        ...state,
+        [sectionKey]: {
+          ...state[sectionKey],
+          ...sectionCfg
+        }
+      };
 
     default:
       return state;

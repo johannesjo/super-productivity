@@ -53,7 +53,6 @@ export type PomodoroConfig = Readonly<{
 export type GoogleDriveSyncConfig = Readonly<{
   isEnabled: boolean;
   isAutoSyncToRemote: boolean;
-  isAutoSyncToRemote: boolean;
   isNotifyOnSync: boolean;
   syncInterval: number;
   syncFileName: string;

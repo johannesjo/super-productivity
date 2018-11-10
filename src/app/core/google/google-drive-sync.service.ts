@@ -5,24 +5,33 @@ import { GoogleDriveSyncConfig } from '../config/config.model';
 import { GoogleApiService } from './google-api.service';
 import * as moment from 'moment';
 import { SnackService } from '../snack/snack.service';
+import { DEFAULT_SYNC_FILE_NAME } from './google.const';
 
 @Injectable({
   providedIn: 'root'
 })
 export class GoogleDriveSyncService {
   autoSyncInterval: number;
-  currentPromise: Promise;
+  currentPromise: Promise<any>;
 
   constructor(
     private _syncService: SyncService,
     private _configService: ConfigService,
     private _googleApiService: GoogleApiService,
-    private _snackServce: SnackService,
+    private _snackService: SnackService,
   ) {
   }
 
   get config(): GoogleDriveSyncConfig {
     return this._configService.cfg && this._configService.cfg.googleDriveSync;
+  }
+
+  updateConfig(data: Partial<GoogleDriveSyncConfig>) {
+    this._configService.updateSection('googleDriveSync', {
+      ...this.config,
+      ...data,
+      syncFileName: data.syncFileName || this.config.syncFileName || DEFAULT_SYNC_FILE_NAME
+    });
   }
 
 
@@ -51,7 +60,7 @@ export class GoogleDriveSyncService {
     }
   }
 
-  changeSyncFileName(newSyncFileName) {
+  changeSyncFileName(newSyncFileName): Promise<any> {
     return new Promise((resolve, reject) => {
       this._googleApiService.findFile(newSyncFileName)
         .then((res) => {
@@ -59,13 +68,15 @@ export class GoogleDriveSyncService {
           if (!filesFound || filesFound.length === 0) {
             this._confirmSaveNewFile(newSyncFileName)
               .then(() => {
-                this.config.syncFileName = newSyncFileName;
-                // we need to unset to save to a new file
-                this.config._backupDocId = undefined;
+                this.updateConfig({
+                  syncFileName: newSyncFileName,
+                  // we need to unset to save to a new file
+                  _backupDocId: null,
+                });
                 this._save().then(resolve);
               }, reject);
           } else if (filesFound.length > 1) {
-            this._snackServce.open({
+            this._snackService.open({
               type: 'ERROR',
               message: `Multiple files with the name "${newSyncFileName}" found. Please delete all but one or choose a different name.`
             });
@@ -74,22 +85,24 @@ export class GoogleDriveSyncService {
             this._confirmUsingExistingFileDialog(newSyncFileName)
               .then(() => {
                 const fileToUpdate = filesFound[0];
-                this.config._backupDocId = fileToUpdate.id;
-                this.config.syncFileName = newSyncFileName;
-                resolve(this.config._backupDocId);
+                this.updateConfig({
+                  syncFileName: newSyncFileName,
+                  _backupDocId: fileToUpdate.id,
+                });
+                resolve(fileToUpdate.id);
               }, reject);
           }
         });
     });
   }
 
-  saveForSyncIfEnabled() {
+  saveForSyncIfEnabled(): Promise<any> {
     if (!this.config.isAutoSyncToRemote || !this.config.isEnabled) {
       return Promise.resolve();
     }
 
     if (this._isCurrentPromisePending()) {
-      this._log('SYNC OMITTED because of promise', this.currentPromise, this.currentPromise.$$state.status);
+      // this._log('SYNC OMITTED because of promise', this.currentPromise, this.currentPromise.$$state.status);
       return Promise.reject();
     } else {
       this._log('SYNC');
@@ -101,10 +114,10 @@ export class GoogleDriveSyncService {
     }
   }
 
-  saveTo() {
+  saveTo(): Promise<any> {
     // don't execute sync interactions at the same time
     if (this._isCurrentPromisePending()) {
-      this._log('saveTo omitted because is in progress', this.currentPromise, this.currentPromise.$$state.status);
+      // this._log('saveTo omitted because is in progress', this.currentPromise, this.currentPromise.$$state.status);
       return Promise.reject('Something in progress');
     }
 
@@ -113,11 +126,7 @@ export class GoogleDriveSyncService {
       // ---------------------------
       // when we have no backup file we create one directly
       if (!this.config._backupDocId) {
-        if (!this.config.syncFileName) {
-          this.config.syncFileName = DEFAULT_SYNC_FILE_NAME;
-        }
-
-        this.changeSyncFileName(this.config.syncFileName)
+        this.changeSyncFileName(this.config.syncFileName || DEFAULT_SYNC_FILE_NAME)
           .then(() => {
             this._save().then(resolve);
           }, reject);
@@ -147,18 +156,23 @@ export class GoogleDriveSyncService {
     return promise;
   }
 
-  loadFrom(isSkipPromiseCheck = false) {
+  loadFrom(isSkipPromiseCheck = false): Promise<any> {
     const promise = new Promise((resolve, reject) => {
       const loadHandler = () => {
         this._load().then((loadRes) => {
           // const lastModifiedRemote = loadRes.meta.modifiedDate;
-          const lastActiveLocal = this.$rootScope.r.lastActiveTime;
+          // TODO create a solution for this
+          // const lastActiveLocal = this.$rootScope.r.lastActiveTime;
+          const lastActiveLocal = new Date();
           const lastActiveRemote = loadRes.backup.lastActiveTime;
 
           // no update required
           if (this._isEqual(lastActiveLocal, lastActiveRemote)) {
             this._log('date comparision isEqual', lastActiveLocal, lastActiveRemote);
-            this.SimpleToast('SUCCESS', `Data already up to date`);
+            this._snackService.open({
+              type: 'SUCCESS',
+              message: `Data already up to date`
+            });
             reject();
           } else {
             // update but ask if remote data is not newer than the last local update
@@ -181,7 +195,8 @@ export class GoogleDriveSyncService {
 
       // don't execute sync interactions at the same time
       if (!isSkipPromiseCheck && this._isCurrentPromisePending()) {
-        this._log('loadFrom omitted because is in progress', this.currentPromise, this.currentPromise.$$state.status);
+        // TODO a solution is needed
+        // this._log('loadFrom omitted because is in progress', this.currentPromise, this.currentPromise.$$state.status);
         return Promise.reject('Something in progress');
       }
       // only assign this after promise check
@@ -189,9 +204,6 @@ export class GoogleDriveSyncService {
 
       // when we have no backup file we create one directly
       if (!this.config._backupDocId) {
-        if (!this.config.syncFileName) {
-          this.config.syncFileName = DEFAULT_SYNC_FILE_NAME;
-        }
         this.changeSyncFileName(this.config.syncFileName)
           .then(() => {
             loadHandler();
@@ -205,30 +217,31 @@ export class GoogleDriveSyncService {
   }
 
 
-  private _log() {
-    console.log(this.constructor.name + ':', ...arguments);
+  private _log(...args) {
+    console.log(this.constructor.name + ':', ...args);
   }
 
   private _import(loadRes) {
-    if (this.LocalSync.isBackupsEnabled()) {
-      this.LocalSync.saveBackup();
-    }
-
     const backupData = loadRes.backup;
     const metaData = loadRes.meta;
 
     // we also need to update the backup to persist it also after the import
-    backupData.googleDriveSync.lastLocalUpdate = this.config._lastLocalUpdate = metaData.modifiedDate;
+    backupData.googleDriveSync.lastLocalUpdate = metaData.modifiedDate;
     // and we also need to update last sync to remote, as it kind of happened now
-    backupData.googleDriveSync.lastSyncToRemote = this.config._lastSyncToRemote = metaData.modifiedDate;
+    backupData.googleDriveSync.lastSyncToRemote = metaData.modifiedDate;
     // also needs to be set to prevent double upgrades
     backupData.lastActiveTime = new Date();
+
+    this.updateConfig({
+      _lastLocalUpdate: metaData.modifiedDate,
+      _lastSyncToRemote: metaData.modifiedDate,
+    });
 
     this._syncService.loadCompleteSyncData(backupData);
   }
 
 
-  private _checkForInitialUpdate() {
+  private _checkForInitialUpdate(): Promise<any> {
     this.currentPromise = this._googleApiService.getFileInfo(this.config._backupDocId)
       .then((res) => {
         const lastModifiedRemote = res.data.modifiedDate;
@@ -240,7 +253,10 @@ export class GoogleDriveSyncService {
         );
 
         if (this._isNewerThan(lastModifiedRemote, this.config._lastLocalUpdate)) {
-          this.SimpleToast('CUSTOM', `There is a remote update! Downloading...`, 'file_upload');
+          this._snackService.open({
+            message: `There is a remote update! Downloading...`,
+            icon: 'file_upload',
+          });
 
           this._log('HAS CHANGED (modified Date comparision), TRYING TO UPDATE');
           this.loadFrom(true);
@@ -275,7 +291,9 @@ export class GoogleDriveSyncService {
 //     });
   }
 
-  private _confirmSaveDialog(remoteModified) {
+  private _confirmSaveDialog(remoteModified): Promise<any> {
+    return Promise.resolve();
+
 //     const lastActiveLocal = this.$rootScope.r.lastActiveTime;
 //
 //     return this.$mdDialog.show({
@@ -338,7 +356,8 @@ export class GoogleDriveSyncService {
 //     });
   }
 
-  private _confirmLoadDialog(remoteModified, lastActiveLocal) {
+  private _confirmLoadDialog(remoteModified, lastActiveLocal): Promise<any> {
+    return Promise.resolve();
 //     return this.$mdDialog.show({
 //       template: `
 // <md-dialog>
@@ -395,7 +414,9 @@ export class GoogleDriveSyncService {
 //     });
   }
 
-  private _confirmUsingExistingFileDialog(fileName) {
+  private _confirmUsingExistingFileDialog(fileName): Promise<any> {
+    return Promise.resolve();
+
     // const confirm = this.$mdDialog.confirm()
     //   .title(`Use existing file "${fileName}" as sync file?`)
     //   .textContent(`
@@ -406,7 +427,9 @@ export class GoogleDriveSyncService {
     // return this.$mdDialog.show(confirm);
   }
 
-  private _confirmSaveNewFile(fileName) {
+  private _confirmSaveNewFile(fileName): Promise<any> {
+    return Promise.resolve();
+
     // const confirm = this.$mdDialog.confirm()
     //   .title(`Create "${fileName}" as sync file on Google Drive?`)
     //   .textContent(`
@@ -417,7 +440,7 @@ export class GoogleDriveSyncService {
     // return this.$mdDialog.show(confirm);
   }
 
-  private _save() {
+  private _save(): Promise<any> {
     const completeData = this._getLocalAppData();
 
     return this._googleApiService.saveFile(completeData, {
@@ -426,26 +449,21 @@ export class GoogleDriveSyncService {
       editable: true
     })
       .then((res) => {
-        this.config._backupDocId = res.data.id;
-        this.config._lastSyncToRemote = res.data.modifiedDate;
-        // also needs to be updated
-        this.config._lastLocalUpdate = res.data.modifiedDate;
-
-        // directly save app storage to minify the risk of getting conflicts
-        // TODO sync of solution
-        // this.AppStorage.saveToLs();
+        this.updateConfig({
+          _backupDocId: res.data.id,
+          _lastSyncToRemote: res.data.modifiedDate,
+          // also needs to be updated
+          _lastLocalUpdate: res.data.modifiedDate,
+        });
       });
   }
 
-  private _load() {
+  private _load(): Promise<any> {
     if (!this.config.syncFileName) {
       return Promise.reject('No file name specified');
     }
 
-    return this._googleApiService.loadFile(this.config._backupDocId)
-      .then((res) => {
-        return this.$q.when(res);
-      });
+    return this._googleApiService.loadFile(this.config._backupDocId);
   }
 
 
@@ -464,7 +482,9 @@ export class GoogleDriveSyncService {
   }
 
   private _isCurrentPromisePending() {
-    return (this.currentPromise && this.currentPromise.$$state.status === 0);
+    return false;
+    // TODO solution for this
+    // return (this.currentPromise && this.currentPromise.$$state.status === 0);
   }
 
   private _getLocalAppData() {

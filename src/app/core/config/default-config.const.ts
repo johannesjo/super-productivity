@@ -64,6 +64,16 @@ export const DEFAULT_CFG: GlobalConfig = {
     collapseSubTasks: '',
     togglePlay: 'y',
   },
+  googleDriveSync: {
+    isEnabled: false,
+    isAutoSyncToRemote: false,
+    isNotifyOnSync: false,
+    syncInterval: 60 * 1000,
+    syncFileName: 'SUPER_PRODUCTIVITY_SYNC.json',
+    _lastLocalUpdate: null,
+    _lastSyncToRemote: null,
+    _backupDocId: null,
+  },
   _uiHelper: {
     isShowWelcomeDialog: true,
     isShowBookmarkBar: false,
