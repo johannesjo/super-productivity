@@ -3,13 +3,14 @@ import {
   LS_BACKUP,
   LS_GLOBAL_CFG,
   LS_ISSUE_STATE,
+  LS_LAST_ACTIVE,
   LS_PROJECT_META_LIST,
   LS_PROJECT_PREFIX,
   LS_TASK_ARCHIVE,
   LS_TASK_STATE
 } from './ls-keys.const';
 import { GlobalConfig } from '../config/config.model';
-import { loadFromLs, saveToLs } from './local-storage';
+import { loadFromLs, saveToLsWithLastActive } from './local-storage';
 import { IssueProviderKey } from '../../issue/issue';
 import { ProjectState } from '../../project/store/project.reducer';
 import { TaskState } from '../../tasks/store/task.reducer';
@@ -30,11 +31,11 @@ export class PersistenceService {
   }
 
   saveProjectsMeta(projectData: ProjectState) {
-    saveToLs(LS_PROJECT_META_LIST, projectData);
+    saveToLsWithLastActive(LS_PROJECT_META_LIST, projectData);
   }
 
   saveTasksForProject(projectId, taskState: TaskState) {
-    saveToLs(this._makeProjectKey(projectId, LS_TASK_STATE), taskState);
+    saveToLsWithLastActive(this._makeProjectKey(projectId, LS_TASK_STATE), taskState);
   }
 
   loadTasksForProject(projectId): TaskState {
@@ -55,9 +56,9 @@ export class PersistenceService {
           ...tasksToArchive.entities
         }
       };
-      saveToLs(lsKey, mergedEntities);
+      saveToLsWithLastActive(lsKey, mergedEntities);
     } else {
-      saveToLs(lsKey, tasksToArchive);
+      saveToLsWithLastActive(lsKey, tasksToArchive);
     }
   }
 
@@ -66,7 +67,7 @@ export class PersistenceService {
   }
 
   saveIssuesForProject(projectId, issueType: IssueProviderKey, data: JiraIssueState) {
-    saveToLs(this._makeProjectKey(projectId, LS_ISSUE_STATE, issueType), data);
+    saveToLsWithLastActive(this._makeProjectKey(projectId, LS_ISSUE_STATE, issueType), data);
   }
 
   // TODO add correct type
@@ -82,17 +83,21 @@ export class PersistenceService {
   }
 
   saveGlobalConfig(globalConfig: GlobalConfig) {
-    saveToLs(LS_GLOBAL_CFG, globalConfig);
+    saveToLsWithLastActive(LS_GLOBAL_CFG, globalConfig);
   }
 
   // BACKUP AND SYNC RELATED
   // -----------------------
+  getLastActive(): string {
+    return loadFromLs(LS_LAST_ACTIVE);
+  }
+
   loadBackup(): AppDataComplete {
     return loadFromLs(LS_BACKUP);
   }
 
   saveBackup() {
-    saveToLs(LS_BACKUP, this.loadComplete());
+    saveToLsWithLastActive(LS_BACKUP, this.loadComplete());
   }
 
   loadComplete(): AppDataComplete {

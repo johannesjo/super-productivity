@@ -163,7 +163,7 @@ export class GoogleDriveSyncService {
           // const lastModifiedRemote = loadRes.meta.modifiedDate;
           // TODO create a solution for this
           // const lastActiveLocal = this.$rootScope.r.lastActiveTime;
-          const lastActiveLocal = new Date();
+          const lastActiveLocal = this._syncService.getLastActive();
           const lastActiveRemote = loadRes.backup.lastActiveTime;
 
           // no update required

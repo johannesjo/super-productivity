@@ -21,6 +21,10 @@ export class SyncService {
   ) {
   }
 
+  getLastActive(): Date {
+    return new Date(this._persistenceService.getLastActive());
+  }
+
   getCompleteSyncData(): AppDataComplete {
     return this._persistenceService.loadComplete();
   }
