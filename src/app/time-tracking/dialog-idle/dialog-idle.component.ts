@@ -13,6 +13,7 @@ import { Task } from '../../tasks/task.model';
 export class DialogIdleComponent implements OnInit {
   public lastCurrentTask$: Observable<Task> = this._taskService.getById(this.data.lastCurrentTaskId);
   public selectedTask: Task | string;
+  public isCreate: boolean;
 
   constructor(
     private _taskService: TaskService,
@@ -23,8 +24,17 @@ export class DialogIdleComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.lastCurrentTask$.subscribe((task) => this.selectedTask = task);
+    this.lastCurrentTask$.subscribe((task) => {
+      this.selectedTask = task;
+      this.isCreate = false;
+    });
   }
+
+  onTaskChange(taskOrTaskTitle: Task | string) {
+    this.selectedTask = taskOrTaskTitle;
+    this.isCreate = (typeof taskOrTaskTitle === 'string');
+  }
+
 
   close() {
     this._matDialogRef.close(null);
@@ -33,7 +43,6 @@ export class DialogIdleComponent implements OnInit {
   track() {
     this._matDialogRef.close(this.selectedTask);
   }
-
 
   trackButResetBreakTimer() {
     this._matDialogRef.close(this.data.lastCurrentTaskId);

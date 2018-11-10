@@ -1,16 +1,16 @@
 <mat-form-field>
-  <mat-icon matPrefix
-            *ngIf="!isCreate">track_changes
-  </mat-icon>
-  <mat-icon matPrefix
-            *ngIf="isCreate">add
-  </mat-icon>
   <input matInput
          required
          placeholder="Select or create task"
          aria-label="Select or create task"
          [matAutocomplete]="auto"
          [formControl]="taskSelectCtrl">
+  <mat-icon matSuffix=""
+            *ngIf="!isCreate">track_changes
+  </mat-icon>
+  <mat-icon matSuffix=""
+            *ngIf="isCreate">add
+  </mat-icon>
 
   <mat-autocomplete #auto="matAutocomplete"
                     [displayWith]="displayWith"
