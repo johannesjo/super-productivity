@@ -51,7 +51,15 @@ export type PomodoroConfig = Readonly<{
 
 
 export type GoogleDriveSyncConfig = Readonly<{
-  [key: string]: any;
+  isEnabled: boolean;
+  isAutoSyncToRemote: boolean;
+  isAutoSyncToRemote: boolean;
+  isNotifyOnSync: boolean;
+  syncInterval: number;
+  syncFileName: string;
+  _lastLocalUpdate: string;
+  _lastSyncToRemote: string;
+  _backupDocId: string;
 }>;
 
 
@@ -95,7 +103,7 @@ export type GoogleSession = Readonly<{
 export type GlobalConfig = Readonly<{
   misc: MiscConfig;
   pomodoro: PomodoroConfig;
-  // googleDriveSync: GoogleDriveSyncConfig;
+  googleDriveSync: GoogleDriveSyncConfig;
   keyboard: KeyboardConfig;
   _googleSession: GoogleSession;
   _uiHelper: UiHelperSettings;
