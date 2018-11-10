@@ -1,140 +1,148 @@
+<button type="button"
+        mat-raised-button=""
+        class="md-raised sync-from-btn"
+        promise-btn
+        *ngIf="googleApiService.isLoggedIn"
+        (click)="loadRemoteData()">
+  <mat-icon>backup</mat-icon>
+  Load From GDrive
+</button>
+
+<!--<section>-->
+  <!--<h3 class="md-subtitle">Sync via Google Drive</h3>-->
+
+  <!--<form (submit)="save()">-->
+    <!--<mat-slide-toggle [(ngModel)]="cfg.isEnabled"-->
+                      <!--name="isEnabled"-->
+                      <!--(change)="onGoogleDriveSyncToggle(cfg.isEnabled)"-->
+                      <!--aria-label="Enable syncing via Google Drive">-->
+      <!--Enable syncing via Google Drive-->
+    <!--</mat-slide-toggle>-->
+
+    <!--<div *ngIf="cfg?.isEnabled"-->
+         <!--class="ani-expand-collapse">-->
+      <!--<div>-->
+        <!--<button type="button"-->
+                <!--mat-raised-button=""-->
+                <!--class="md-raised"-->
+                <!--promise-btn-->
+                <!--*ngIf="!googleApiService.isLoggedIn"-->
+                <!--(click)="login()">-->
+          <!--<mat-icon>exit_to_app</mat-icon>-->
+          <!--Login-->
+        <!--</button>-->
+        <!--<button type="button"-->
+                <!--mat-raised-button=""-->
+                <!--class="md-raised"-->
+                <!--*ngIf="googleApiService.isLoggedIn"-->
+                <!--(click)="logout()">-->
+          <!--<mat-icon>logout</mat-icon>-->
+          <!--Logout-->
+        <!--</button>-->
+
+        <!--<button type="button"-->
+                <!--mat-raised-button=""-->
+                <!--class="md-raised"-->
+                <!--promise-btn-->
+                <!--*ngIf="googleApiService.isLoggedIn"-->
+                <!--(click)="backupNow()">-->
+          <!--<mat-icon>backup</mat-icon>-->
+          <!--Backup now-->
+        <!--</button>-->
+        <!--<button type="button"-->
+                <!--mat-raised-button=""-->
+                <!--class="md-raised sync-from-btn"-->
+                <!--promise-btn-->
+                <!--*ngIf="googleApiService.isLoggedIn"-->
+                <!--(click)="loadRemoteData()">-->
+          <!--<mat-icon>backup</mat-icon>-->
+          <!--Load From GDrive-->
+        <!--</button>-->
+        <!--<button type="button"-->
+                <!--mat-raised-button=""-->
+                <!--class="md-raised"-->
+                <!--*ngIf="googleApiService.isLoggedIn"-->
+                <!--external-link-->
+                <!--target="_blank"-->
+                <!--href="https://myaccount.google.com/permissions">-->
+          <!--<mat-icon icon="remove_circle"></mat-icon>-->
+          <!--Revoke permissions-->
+        <!--</button>-->
+      <!--</div>-->
+
+      <!--<div *ngIf="googleApiService.isLoggedIn"-->
+           <!--class="sync-file-wrapper">-->
+        <!--<mat-form-field class="md-block md-icon-float">-->
+          <!--<label>Sync file name</label>-->
+          <!--<input type="text"-->
+                 <!--matInput=""-->
+                 <!--[ngModelOptions]="{standalone: true}"-->
+                 <!--[(ngModel)]="tmpSyncFile">-->
+          <!--<mat-icon matSuffix="">file_upload</mat-icon>-->
+        <!--</mat-form-field>-->
+
+        <!--<button type="button"-->
+                <!--mat-raised-button=""-->
+                <!--class="md-raised md-primary md-icon-button"-->
+                <!--aria-label="Save changed sync file name"-->
+                <!--(click)="changeSyncFileName(tmpSyncFile)">-->
+          <!--<mat-icon>save</mat-icon>-->
+        <!--</button>-->
+      <!--</div>-->
+
+      <!--<div>-->
+        <!--<mat-slide-toggle [(ngModel)]="cfg.isAutoLogin"-->
+                          <!--name="isAutoLogin"-->
+                          <!--aria-label="Auto login at when starting app">-->
+          <!--Auto login at when starting app-->
+        <!--</mat-slide-toggle>-->
+      <!--</div>-->
+      <!--<div *ngIf="cfg?.isAutoLogin">-->
+        <!--<mat-slide-toggle [(ngModel)]="cfg.isLoadRemoteDataOnStartup"-->
+                          <!--name="isLoadRemoteDataOnStartup"-->
+                          <!--aria-label="Load remote data on startup">-->
+          <!--Load remote data on startup-->
+        <!--</mat-slide-toggle>-->
+      <!--</div>-->
+      <!--<div *ngIf="cfg?.isAutoLogin">-->
+        <!--<mat-slide-toggle [(ngModel)]="cfg.isAutoSyncToRemote"-->
+                          <!--name="isAutoSyncToRemote"-->
+                          <!--(change)="resetSync();"-->
+                          <!--aria-label="Auto sync data TO remote">-->
+          <!--Auto sync data TO remote-->
+        <!--</mat-slide-toggle>-->
+      <!--</div>-->
+
+      <!--<div *ngIf="cfg?.isAutoLogin">-->
+        <!--<mat-slide-toggle [(ngModel)]="cfg.isNotifyOnSync"-->
+                          <!--name="isNotifyOnSync"-->
+                          <!--aria-label="Notify when syncing">-->
+          <!--Notify when syncing-->
+        <!--</mat-slide-toggle>-->
+      <!--</div>-->
+
+      <!--<mat-form-field class="md-block md-icon-float"-->
+                      <!--*ngIf="cfg?.isAutoLogin && cfg.isAutoSyncToRemote">-->
+        <!--<label>Sync interval (sync every x)</label>-->
+        <!--<input type="text"-->
+               <!--matInput=""-->
+               <!--input-duration-->
+               <!--(change)="resetSync();"-->
+               <!--name="syncInterval"-->
+               <!--[(ngModel)]="cfg.syncInterval">-->
+        <!--<mat-icon matSuffix="">timer</mat-icon>-->
+      <!--</mat-form-field>-->
+    <!--</div>-->
 
 
-<section>
-  <h3 class="md-subtitle">Sync via Google Drive</h3>
-
-  <form (submit)="save()">
-    <mat-slide-toggle [(ngModel)]="cfg.isEnabled"
-                      name="isEnabled"
-                      (change)="onGoogleDriveSyncToggle(cfg.isEnabled)"
-                      aria-label="Enable syncing via Google Drive">
-      Enable syncing via Google Drive
-    </mat-slide-toggle>
-
-    <div *ngIf="cfg?.isEnabled"
-         class="ani-expand-collapse">
-      <div>
-        <button type="button"
-                mat-raised-button=""
-                class="md-raised"
-                promise-btn
-                *ngIf="!googleApiService.isLoggedIn"
-                (click)="login()">
-          <mat-icon>exit_to_app</mat-icon>
-          Login
-        </button>
-        <button type="button"
-                mat-raised-button=""
-                class="md-raised"
-                *ngIf="googleApiService.isLoggedIn"
-                (click)="logout()">
-          <mat-icon>logout</mat-icon>
-          Logout
-        </button>
-
-        <button type="button"
-                mat-raised-button=""
-                class="md-raised"
-                promise-btn
-                *ngIf="googleApiService.isLoggedIn"
-                (click)="backupNow()">
-          <mat-icon>backup</mat-icon>
-          Backup now
-        </button>
-        <button type="button"
-                mat-raised-button=""
-                class="md-raised sync-from-btn"
-                promise-btn
-                *ngIf="googleApiService.isLoggedIn"
-                (click)="loadRemoteData()">
-          <mat-icon>backup</mat-icon>
-          Load From GDrive
-        </button>
-        <button type="button"
-                mat-raised-button=""
-                class="md-raised"
-                *ngIf="googleApiService.isLoggedIn"
-                external-link
-                target="_blank"
-                href="https://myaccount.google.com/permissions">
-          <mat-icon icon="remove_circle"></mat-icon>
-          Revoke permissions
-        </button>
-      </div>
-
-      <div *ngIf="googleApiService.isLoggedIn"
-           class="sync-file-wrapper">
-        <mat-form-field class="md-block md-icon-float">
-          <label>Sync file name</label>
-          <input type="text"
-                 matInput=""
-                 [ngModelOptions]="{standalone: true}"
-                 [(ngModel)]="tmpSyncFile">
-          <mat-icon matSuffix="">file_upload</mat-icon>
-        </mat-form-field>
-
-        <button type="button"
-                mat-raised-button=""
-                class="md-raised md-primary md-icon-button"
-                aria-label="Save changed sync file name"
-                (click)="changeSyncFileName(tmpSyncFile)">
-          <mat-icon>save</mat-icon>
-        </button>
-      </div>
-
-      <div>
-        <mat-slide-toggle [(ngModel)]="cfg.isAutoLogin"
-                          name="isAutoLogin"
-                          aria-label="Auto login at when starting app">
-          Auto login at when starting app
-        </mat-slide-toggle>
-      </div>
-      <div *ngIf="cfg?.isAutoLogin">
-        <mat-slide-toggle [(ngModel)]="cfg.isLoadRemoteDataOnStartup"
-                          name="isLoadRemoteDataOnStartup"
-                          aria-label="Load remote data on startup">
-          Load remote data on startup
-        </mat-slide-toggle>
-      </div>
-      <div *ngIf="cfg?.isAutoLogin">
-        <mat-slide-toggle [(ngModel)]="cfg.isAutoSyncToRemote"
-                          name="isAutoSyncToRemote"
-                          (change)="resetSync();"
-                          aria-label="Auto sync data TO remote">
-          Auto sync data TO remote
-        </mat-slide-toggle>
-      </div>
-
-      <div *ngIf="cfg?.isAutoLogin">
-        <mat-slide-toggle [(ngModel)]="cfg.isNotifyOnSync"
-                          name="isNotifyOnSync"
-                          aria-label="Notify when syncing">
-          Notify when syncing
-        </mat-slide-toggle>
-      </div>
-
-      <mat-form-field class="md-block md-icon-float"
-                      *ngIf="cfg?.isAutoLogin && cfg.isAutoSyncToRemote">
-        <label>Sync interval (sync every x)</label>
-        <input type="text"
-               matInput=""
-               input-duration
-               (change)="resetSync();"
-               name="syncInterval"
-               [(ngModel)]="cfg.syncInterval">
-        <mat-icon matSuffix="">timer</mat-icon>
-      </mat-form-field>
-    </div>
-
-
-    <div class="controls">
-      <button type="submit"
-              color="primary"
-              class="btn btn-primary submit-button"
-              mat-raised-button>
-        <mat-icon>save</mat-icon>
-        Save
-      </button>
-    </div>
-  </form>
-</section>
+    <!--<div class="controls">-->
+      <!--<button type="submit"-->
+              <!--color="primary"-->
+              <!--class="btn btn-primary submit-button"-->
+              <!--mat-raised-button>-->
+        <!--<mat-icon>save</mat-icon>-->
+        <!--Save-->
+      <!--</button>-->
+    <!--</div>-->
+  <!--</form>-->
+<!--</section>-->

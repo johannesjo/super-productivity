@@ -18,7 +18,7 @@ export class ConfigFormComponent {
     this.fields = val_ && [...val_];
   }
 
-  @Output() onSave: EventEmitter<any> = new EventEmitter<any>();
+  @Output() save: EventEmitter<any> = new EventEmitter<any>();
 
   fields: FormlyFieldConfig[];
   form = new FormGroup({});
@@ -36,7 +36,7 @@ export class ConfigFormComponent {
       throw new Error('No cfg for ' + this.sectionKey);
     } else {
       this._configService.updateSection(this.sectionKey, this.cfg);
-      this.onSave.emit();
+      this.save.emit();
     }
   }
 }
