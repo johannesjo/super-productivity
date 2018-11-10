@@ -1,6 +1,8 @@
 import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { GoogleApiService } from '../google-api.service';
 import { ConfigService } from '../../config/config.service';
+import { GoogleDriveSyncService } from '../google-drive-sync.service';
+import { GoogleDriveSyncConfig } from '../../config/config.model';
 
 @Component({
   selector: 'google-sync-cfg',
@@ -9,11 +11,15 @@ import { ConfigService } from '../../config/config.service';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class GoogleSyncCfgComponent implements OnInit {
-  public cfg: any = {};
+  public cfg: GoogleDriveSyncConfig = {};
+  // TODO get current value
   public tmpSyncFile: any;
 
-  constructor(public readonly googleApiService: GoogleApiService,
-              private readonly _configService: ConfigService) {
+  constructor(
+    public readonly googleApiService: GoogleApiService,
+    private readonly _googleDriveSyncService: GoogleDriveSyncService,
+    private readonly _configService: ConfigService,
+  ) {
   }
 
   ngOnInit() {
@@ -21,6 +27,10 @@ export class GoogleSyncCfgComponent implements OnInit {
       console.log(cfg);
 
     });
+  }
+
+  save() {
+    this._configService.updateSection('googleDriveSync', this.cfg);
   }
 
   // import/export stuff
@@ -50,11 +60,11 @@ export class GoogleSyncCfgComponent implements OnInit {
 
   onGoogleDriveSyncToggle = (isEnabled) => {
     if (isEnabled) {
-      // GoogleDriveSync.resetAutoSyncToRemoteInterval();
+      this._googleDriveSyncService.resetAutoSyncToRemoteInterval();
     } else {
-      // GoogleDriveSync.cancelAutoSyncToRemoteIntervalIfSet();
+      this._googleDriveSyncService.cancelAutoSyncToRemoteIntervalIfSet();
     }
-  }
+  };
 
   onLocalSyncToggle = (isEnabled) => {
     if (isEnabled) {
@@ -62,13 +72,13 @@ export class GoogleSyncCfgComponent implements OnInit {
     } else {
       // AppStorage.cancelAutoSyncToRemoteIntervalIfSet();
     }
-  }
+  };
 
   resetSync() {
-    // GoogleDriveSync.resetAutoSyncToRemoteInterval();
+    this._googleDriveSyncService.resetAutoSyncToRemoteInterval();
   }
 
   changeSyncFileName = (newSyncFile) => {
-    // GoogleDriveSync.changeSyncFileName(newSyncFile);
-  }
+    this._googleDriveSyncService.changeSyncFileName(newSyncFile);
+  };
 }

@@ -54,6 +54,7 @@ export type GoogleDriveSyncConfig = Readonly<{
   isEnabled: boolean;
   isAutoSyncToRemote: boolean;
   isNotifyOnSync: boolean;
+  isLoadRemoteDataOnStartup: boolean;
   syncInterval: number;
   syncFileName: string;
   _lastLocalUpdate: string;
