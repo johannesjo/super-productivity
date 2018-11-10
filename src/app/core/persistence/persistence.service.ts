@@ -15,36 +15,6 @@ import { AppDataComplete } from '../sync/sync.model';
 })
 export class PersistenceService {
   constructor() {
-    console.log(this.loadComplete());
-  }
-
-  loadComplete(): AppDataComplete {
-    const crateProjectIdObj = (getDataFn: Function, params = []) => {
-      return projectIds.reduce((acc, id) => {
-        return {
-          ...acc,
-          [id]: getDataFn(id, ...params)
-        };
-      }, {});
-    };
-
-    const projectState = this.loadProjectsMeta();
-    const projectIds = projectState.ids as string[];
-
-    return {
-      project: this.loadProjectsMeta(),
-      globalConfig: this.loadGlobalConfig(),
-      task: crateProjectIdObj(this.loadTasksForProject.bind(this)),
-      taskArchive: crateProjectIdObj(this.loadTaskArchiveForProject.bind(this)),
-      issue: projectIds.reduce((acc, id) => {
-        return {
-          ...acc,
-          [id]: {
-            'JIRA': this.loadIssuesForProject.bind(this)(id, 'JIRA')
-          }
-        };
-      }, {}),
-    };
   }
 
   loadProjectsMeta(): ProjectState {
@@ -105,6 +75,56 @@ export class PersistenceService {
 
   saveGlobalConfig(globalConfig: GlobalConfig) {
     saveToLs(LS_GLOBAL_CFG, globalConfig);
+  }
+
+  // BACKUP AND SYNC RELATED
+  // -----------------------
+  loadComplete(): AppDataComplete {
+    const crateProjectIdObj = (getDataFn: Function) => {
+      return projectIds.reduce((acc, projectId) => {
+        return {
+          ...acc,
+          [projectId]: getDataFn(projectId)
+        };
+      }, {});
+    };
+
+    const projectState = this.loadProjectsMeta();
+    const projectIds = projectState.ids as string[];
+
+    return {
+      project: this.loadProjectsMeta(),
+      globalConfig: this.loadGlobalConfig(),
+      task: crateProjectIdObj(this.loadTasksForProject.bind(this)),
+      taskArchive: crateProjectIdObj(this.loadTaskArchiveForProject.bind(this)),
+      issue: projectIds.reduce((acc, projectId) => {
+        return {
+          ...acc,
+          [projectId]: {
+            'JIRA': this.loadIssuesForProject(projectId, 'JIRA')
+          }
+        };
+      }, {}),
+    };
+  }
+
+  saveComplete(data: AppDataComplete) {
+    const saveDataForProjectIds = (data_, saveDataFn: Function) => {
+      Object.keys(data_).forEach(projectId => {
+        saveDataFn(projectId, data[projectId]);
+      });
+    };
+
+    this.saveProjectsMeta(data.project);
+    this.saveGlobalConfig(data.globalConfig);
+    saveDataForProjectIds(data.task, this.saveTasksForProject.bind(this));
+    saveDataForProjectIds(data.taskArchive, this.saveToTaskArchiveForProject.bind(this));
+    Object.keys(data.issue).forEach(projectId => {
+      const issueData = data.issue[projectId];
+      Object.keys(issueData).forEach((issueProviderKey: IssueProviderKey) => {
+        this.saveIssuesForProject(projectId, issueProviderKey, issueData[issueProviderKey]);
+      });
+    });
   }
 
   private _makeProjectKey(projectId, subKey, additional?) {

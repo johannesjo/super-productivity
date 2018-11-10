@@ -2,14 +2,16 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ProjectModule } from '../../project/project.module';
 import { ConfigModule } from '../config/config.module';
-import { GoogleModule } from '../google/google.module';
+import { PersistenceModule } from '../persistence/persistence.module';
+import { TasksModule } from '../../tasks/tasks.module';
 
 @NgModule({
   imports: [
     CommonModule,
     ProjectModule,
+    TasksModule,
     ConfigModule,
-    GoogleModule,
+    PersistenceModule,
   ],
   declarations: []
 })
