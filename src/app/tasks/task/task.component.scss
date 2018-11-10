@@ -13,9 +13,11 @@ $task-inner-padding-left-right: 6px;
 $this-active-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2),
 0 8px 10px 1px rgba(0, 0, 0, 0.14),
 0 3px 14px 2px rgba(0, 0, 0, 0.12);
+//0 -8px 10px 1px rgba(0, 0, 0, 0.14);
 
 :host {
   display: block;
+  position: relative;
 
   > .inner-wrapper {
     padding: 2px 0;
@@ -48,7 +50,7 @@ $this-active-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2),
 
   > .inner-wrapper:after {
     content: '';
-    border-width: 2px;
+    border-width: 0 $s;
     position: absolute;
     top: 0;
     width: 100%;
@@ -59,11 +61,11 @@ $this-active-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2),
     opacity: 0;
     border-style: solid;
     box-shadow: $this-active-shadow;
-
+    //box-shadow: $whiteframe-shadow-24dp;
   }
   &:focus {
     outline: none;
-    z-index: 2;
+    z-index: 4;
   }
   &.as-sortable-dragging,
   &:focus > .inner-wrapper {

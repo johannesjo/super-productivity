@@ -24,6 +24,9 @@
   .color-primary-after:after {
     color: mat-color($primary);
   }
+  .color-accent-after:after {
+    color: mat-color($accent);
+  }
   .color-primary {
     color: mat-color($primary);
   }
