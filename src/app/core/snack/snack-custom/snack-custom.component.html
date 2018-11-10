@@ -2,9 +2,12 @@
      [class.error]="data.type==='ERROR'"
      [class.success]="data.type==='SUCCESS'"
 >
-  <mat-icon *ngIf="data.type==='SUCCESS'">check_circle</mat-icon>
-  <mat-icon *ngIf="data.type==='ERROR'">error</mat-icon>
-  <span class="message">{{data.message}}</span>
+  <ng-container *ngIf="!data.icon">
+    <mat-icon *ngIf="data.type==='SUCCESS'">check_circle</mat-icon>
+    <mat-icon *ngIf="data.type==='ERROR'">error</mat-icon>
+    <span class="message">{{data.message}}</span>
+  </ng-container>
+  <mat-icon *ngIf="data.icon">{{data.icon}}</mat-icon>
 
   <button class="action"
           (click)="actionClick()"
