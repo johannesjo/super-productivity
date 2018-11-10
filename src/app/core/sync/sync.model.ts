@@ -13,6 +13,7 @@ export interface SyncHandler {
 
 // NOTE: [key:string] always refers to projectId
 export interface AppDataComplete {
+  lastActiveTime: string;
   project: ProjectState;
   globalConfig: GlobalConfig;
   task?: {

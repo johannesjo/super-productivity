@@ -114,6 +114,7 @@ export class PersistenceService {
     const projectIds = projectState.ids as string[];
 
     return {
+      lastActiveTime: this.getLastActive(),
       project: this.loadProjectsMeta(),
       globalConfig: this.loadGlobalConfig(),
       task: crateProjectIdObj(this.loadTasksForProject.bind(this)),
@@ -129,10 +130,13 @@ export class PersistenceService {
     };
   }
 
+  // TODO what is missing is a total cleanup of the existing projects and their data
   saveComplete(data: AppDataComplete) {
     const saveDataForProjectIds = (data_, saveDataFn: Function) => {
       Object.keys(data_).forEach(projectId => {
-        saveDataFn(projectId, data[projectId]);
+        if (data[projectId]) {
+          saveDataFn(projectId, data[projectId]);
+        }
       });
     };
 

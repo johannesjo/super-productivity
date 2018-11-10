@@ -164,7 +164,7 @@ export class GoogleDriveSyncService {
           // TODO create a solution for this
           // const lastActiveLocal = this.$rootScope.r.lastActiveTime;
           const lastActiveLocal = this._syncService.getLastActive();
-          const lastActiveRemote = loadRes.backup.lastActiveTime;
+          const lastActiveRemote = loadRes.body.lastActiveTime;
 
           // no update required
           if (this._isEqual(lastActiveLocal, lastActiveRemote)) {
@@ -222,19 +222,19 @@ export class GoogleDriveSyncService {
   }
 
   private _import(loadRes) {
-    const backupData = loadRes.backup;
-    const metaData = loadRes.meta;
-
-    // we also need to update the backup to persist it also after the import
-    backupData.googleDriveSync.lastLocalUpdate = metaData.modifiedDate;
-    // and we also need to update last sync to remote, as it kind of happened now
-    backupData.googleDriveSync.lastSyncToRemote = metaData.modifiedDate;
-    // also needs to be set to prevent double upgrades
-    backupData.lastActiveTime = new Date();
+    const backupData = loadRes.body;
+    // const metaData = loadRes.meta;
+    // TODO check if needed
+    // // we also need to update the backup to persist it also after the import
+    // backupData.googleDriveSync.lastLocalUpdate = metaData.modifiedDate;
+    // // and we also need to update last sync to remote, as it kind of happened now
+    // backupData.googleDriveSync.lastSyncToRemote = metaData.modifiedDate;
+    // // also needs to be set to prevent double upgrades
+    // backupData.lastActiveTime = new Date();
 
     this.updateConfig({
-      _lastLocalUpdate: metaData.modifiedDate,
-      _lastSyncToRemote: metaData.modifiedDate,
+      _lastLocalUpdate: new Date().toString(),
+      _lastSyncToRemote: new Date().toString(),
     });
 
     this._syncService.loadCompleteSyncData(backupData);

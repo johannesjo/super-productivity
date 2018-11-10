@@ -30,13 +30,12 @@ export class SyncService {
   }
 
   loadCompleteSyncData(data: AppDataComplete) {
+    // save data to local storage
+    this._persistenceService.saveComplete(data);
     this._saveBackup();
 
     if (this._checkData(data)) {
       try {
-        // save data to local storage
-        this._persistenceService.saveComplete(data);
-
         // reload view model from ls
         this._configService.load();
         this._projectService.load();
