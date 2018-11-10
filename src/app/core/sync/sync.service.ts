@@ -36,6 +36,7 @@ export class SyncService {
       this._taskService.loadStateForProject(data.project.currentId);
     } else {
       this._snackService.open({type: 'ERROR', message: 'Error while syncing. Invalid data'});
+      console.error(data);
     }
   }
 
