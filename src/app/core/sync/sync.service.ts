@@ -26,14 +26,23 @@ export class SyncService {
   }
 
   loadCompleteSyncData(data: AppDataComplete) {
-    if (this._checkData(data)) {
-      // save data to local storage
-      this._persistenceService.saveComplete(data);
+    this._saveBackup();
 
-      // reload view model from ls
-      this._configService.load();
-      this._projectService.load();
-      this._taskService.loadStateForProject(data.project.currentId);
+    if (this._checkData(data)) {
+      try {
+        // save data to local storage
+        this._persistenceService.saveComplete(data);
+
+        // reload view model from ls
+        this._configService.load();
+        this._projectService.load();
+        this._taskService.loadStateForProject(data.project.currentId);
+      } catch (e) {
+        this._snackService.open({type: 'ERROR', message: 'Something went wrong while importing the data. Falling back to local backup'});
+        console.error(e);
+        this._loadBackup();
+      }
+
     } else {
       this._snackService.open({type: 'ERROR', message: 'Error while syncing. Invalid data'});
       console.error(data);
@@ -49,5 +58,14 @@ export class SyncService {
       && typeof data.issue === 'object'
       && typeof data.project.currentId === 'string'
       ;
+  }
+
+  private _saveBackup() {
+    this._persistenceService.saveBackup();
+  }
+
+  private _loadBackup() {
+    const data = this._persistenceService.loadBackup();
+    this.loadCompleteSyncData(data);
   }
 }

@@ -1,5 +1,13 @@
 import { Injectable } from '@angular/core';
-import { LS_GLOBAL_CFG, LS_ISSUE_STATE, LS_PROJECT_META_LIST, LS_PROJECT_PREFIX, LS_TASK_ARCHIVE, LS_TASK_STATE } from './ls-keys.const';
+import {
+  LS_BACKUP,
+  LS_GLOBAL_CFG,
+  LS_ISSUE_STATE,
+  LS_PROJECT_META_LIST,
+  LS_PROJECT_PREFIX,
+  LS_TASK_ARCHIVE,
+  LS_TASK_STATE
+} from './ls-keys.const';
 import { GlobalConfig } from '../config/config.model';
 import { loadFromLs, saveToLs } from './local-storage';
 import { IssueProviderKey } from '../../issue/issue';
@@ -79,6 +87,14 @@ export class PersistenceService {
 
   // BACKUP AND SYNC RELATED
   // -----------------------
+  loadBackup(): AppDataComplete {
+    return loadFromLs(LS_BACKUP);
+  }
+
+  saveBackup() {
+    saveToLs(LS_BACKUP, this.loadComplete());
+  }
+
   loadComplete(): AppDataComplete {
     const crateProjectIdObj = (getDataFn: Function) => {
       return projectIds.reduce((acc, projectId) => {
