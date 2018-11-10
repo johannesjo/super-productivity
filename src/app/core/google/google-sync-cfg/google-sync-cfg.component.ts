@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { GoogleApiService } from '../google-api.service';
 import { ConfigService } from '../../config/config.service';
 import { GoogleDriveSyncService } from '../google-drive-sync.service';
-import { GoogleDriveSyncConfig } from '../../config/config.model';
+import { SnackService } from '../../snack/snack.service';
 
 @Component({
   selector: 'google-sync-cfg',
@@ -11,7 +11,6 @@ import { GoogleDriveSyncConfig } from '../../config/config.model';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class GoogleSyncCfgComponent implements OnInit {
-  public cfg: GoogleDriveSyncConfig = {};
   // TODO get current value
   public tmpSyncFile: any;
 
@@ -19,14 +18,15 @@ export class GoogleSyncCfgComponent implements OnInit {
     public readonly googleApiService: GoogleApiService,
     private readonly _googleDriveSyncService: GoogleDriveSyncService,
     private readonly _configService: ConfigService,
+    private readonly _snackService: SnackService,
   ) {
   }
 
   ngOnInit() {
-    this._configService.cfg$.subscribe((cfg) => {
-      console.log(cfg);
+  }
 
-    });
+  get cfg() {
+    return this._configService.cfg && this._configService.cfg.googleDriveSync;
   }
 
   save() {
@@ -40,14 +40,17 @@ export class GoogleSyncCfgComponent implements OnInit {
   };
 
   backupNow() {
-    // return GoogleDriveSync.saveTo()
-    //   .then(() => {
-    //     SimpleToast('SUCCESS', 'Google Drive: Successfully saved backup');
-    //   });
+    return this._googleDriveSyncService.saveTo()
+      .then(() => {
+        this._snackService.open({
+          type: 'SUCCESS',
+          message: 'Google Drive: Successfully saved backup'
+        });
+      });
   }
 
   loadRemoteData() {
-    // return GoogleDriveSync.loadFrom();
+    return this._googleDriveSyncService.loadFrom();
   }
 
   login() {

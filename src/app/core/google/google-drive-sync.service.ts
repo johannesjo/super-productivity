@@ -64,7 +64,7 @@ export class GoogleDriveSyncService {
     return new Promise((resolve, reject) => {
       this._googleApiService.findFile(newSyncFileName)
         .then((res) => {
-          const filesFound = res.data.items;
+          const filesFound = res.body.items;
           if (!filesFound || filesFound.length === 0) {
             this._confirmSaveNewFile(newSyncFileName)
               .then(() => {
@@ -137,7 +137,7 @@ export class GoogleDriveSyncService {
       } else {
         this._googleApiService.getFileInfo(this.config._backupDocId)
           .then((res) => {
-            const lastModifiedRemote = res.data.modifiedDate;
+            const lastModifiedRemote = res.body.modifiedDate;
             if (this._isNewerThan(lastModifiedRemote, this.config._lastSyncToRemote)) {
               // remote has an update so prompt what to do
               this._confirmSaveDialog(lastModifiedRemote)
@@ -244,7 +244,7 @@ export class GoogleDriveSyncService {
   private _checkForInitialUpdate(): Promise<any> {
     this.currentPromise = this._googleApiService.getFileInfo(this.config._backupDocId)
       .then((res) => {
-        const lastModifiedRemote = res.data.modifiedDate;
+        const lastModifiedRemote = res.body.modifiedDate;
         this._log(
           this._formatDate(lastModifiedRemote),
           ' > ',
@@ -450,10 +450,10 @@ export class GoogleDriveSyncService {
     })
       .then((res) => {
         this.updateConfig({
-          _backupDocId: res.data.id,
-          _lastSyncToRemote: res.data.modifiedDate,
+          _backupDocId: res.body.id,
+          _lastSyncToRemote: res.body.modifiedDate,
           // also needs to be updated
-          _lastLocalUpdate: res.data.modifiedDate,
+          _lastLocalUpdate: res.body.modifiedDate,
         });
       });
   }

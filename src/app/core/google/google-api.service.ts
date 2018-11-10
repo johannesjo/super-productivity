@@ -182,7 +182,7 @@ export class GoogleApiService {
     });
   }
 
-  loadFile(fileId) {
+  loadFile(fileId): Promise<any> {
     if (!fileId) {
       this._snackIt('ERROR', 'GoogleApi: No file id specified');
       return Promise.reject('No file id given');
