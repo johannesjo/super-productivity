@@ -16,7 +16,8 @@ import { DialogConfirmDriveSyncSaveComponent } from './dialog-confirm-drive-sync
 })
 export class GoogleDriveSyncService {
   autoSyncInterval: number;
-  currentPromise: Promise<any>;
+
+  private _isSyncingInProgress = false;
 
   constructor(
     private _syncService: SyncService,
@@ -113,7 +114,7 @@ export class GoogleDriveSyncService {
       return Promise.resolve();
     }
 
-    if (this._isCurrentPromisePending()) {
+    if (this._isSyncingInProgress) {
       console.log('GoogleDriveSync', 'SYNC OMITTED because of promise');
       return Promise.reject();
     } else {
@@ -128,7 +129,7 @@ export class GoogleDriveSyncService {
 
   async saveTo(): Promise<any> {
     // don't execute sync interactions at the same time
-    if (this._isCurrentPromisePending()) {
+    if (this._isSyncingInProgress) {
       console.log('GoogleDriveSync', 'saveTo omitted because is in progress');
       return Promise.reject('Something in progress');
     }
@@ -164,7 +165,7 @@ export class GoogleDriveSyncService {
           .catch(reject);
       }
     });
-    this.currentPromise = promise;
+    this._handleInProgress(promise);
     return promise;
   }
 
@@ -203,13 +204,13 @@ export class GoogleDriveSyncService {
       };
 
       // don't execute sync interactions at the same time
-      if (!isSkipPromiseCheck && this._isCurrentPromisePending()) {
+      if (!isSkipPromiseCheck && this._isSyncingInProgress) {
         // TODO a solution is needed
         // console.log('GoogleDriveSync', 'loadFrom omitted because is in progress', this.currentPromise, this.currentPromise.$$state.status);
         return Promise.reject('Something in progress');
       }
       // only assign this after promise check
-      this.currentPromise = promise;
+      this._handleInProgress(promise);
 
       // when we have no backup file we create one directly
       if (!this.config._backupDocId) {
@@ -246,7 +247,7 @@ export class GoogleDriveSyncService {
 
 
   private _checkForInitialUpdate(): Promise<any> {
-    this.currentPromise = this._googleApiService.getFileInfo(this.config._backupDocId)
+    const promise = this._googleApiService.getFileInfo(this.config._backupDocId)
       .then((res) => {
         const lastModifiedRemote = res.body.modifiedDate;
         console.log('GoogleDriveSync',
@@ -267,7 +268,8 @@ export class GoogleDriveSyncService {
         }
       });
 
-    return this.currentPromise;
+    this._handleInProgress(promise);
+    return promise;
   }
 
   private _showAsyncToast(promise, msg) {
@@ -369,6 +371,12 @@ If not please change the Sync file name.`,
     return this._googleApiService.loadFile(this.config._backupDocId);
   }
 
+  private _handleInProgress(promise: Promise<any>) {
+    this._isSyncingInProgress = true;
+    promise
+      .then(() => this._isSyncingInProgress = false)
+      .catch(() => this._isSyncingInProgress = false);
+  }
 
   // UTIL
   // ----
@@ -382,12 +390,6 @@ If not please change the Sync file name.`,
     const d1 = new Date(strDate1);
     const d2 = new Date(strDate2);
     return (d1.getTime() === d2.getTime());
-  }
-
-  private _isCurrentPromisePending() {
-    return false;
-    // TODO solution for this
-    // return (this.currentPromise && this.currentPromise.$$state.status === 0);
   }
 
   private _getLocalAppData() {

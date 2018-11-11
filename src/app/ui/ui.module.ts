@@ -114,7 +114,7 @@ import { DialogConfirmComponent } from './dialog-confirm/dialog-confirm.componen
   ],
   entryComponents: [
     DialogConfirmComponent,
-  ]
+  ],
   exports: [
     SplitModule,
     DurationFromStringPipe,
