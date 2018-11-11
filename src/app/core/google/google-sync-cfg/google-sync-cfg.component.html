@@ -97,41 +97,46 @@
           Auto login at when starting app
         </mat-slide-toggle>
       </div>
-      <div *ngIf="cfg?.isAutoLogin">
-        <mat-slide-toggle [(ngModel)]="cfg.isLoadRemoteDataOnStartup"
-                          name="isLoadRemoteDataOnStartup"
-                          aria-label="Load remote data on startup">
-          Load remote data on startup
-        </mat-slide-toggle>
-      </div>
-      <div *ngIf="cfg?.isAutoLogin">
-        <mat-slide-toggle [(ngModel)]="cfg.isAutoSyncToRemote"
-                          name="isAutoSyncToRemote"
-                          (change)="resetSync();"
-                          aria-label="Auto sync data TO remote">
-          Auto sync data TO remote
-        </mat-slide-toggle>
-      </div>
 
-      <div *ngIf="cfg?.isAutoLogin">
-        <mat-slide-toggle [(ngModel)]="cfg.isNotifyOnSync"
-                          name="isNotifyOnSync"
-                          aria-label="Notify when syncing">
-          Notify when syncing
-        </mat-slide-toggle>
-      </div>
+      <section *ngIf="cfg?.isAutoLogin"
+               [@expandFade]>
+        <div>
+          <mat-slide-toggle [(ngModel)]="cfg.isLoadRemoteDataOnStartup"
+                            name="isLoadRemoteDataOnStartup"
+                            aria-label="Load remote data on startup">
+            Load remote data on startup
+          </mat-slide-toggle>
+        </div>
+        <div>
+          <mat-slide-toggle [(ngModel)]="cfg.isAutoSyncToRemote"
+                            name="isAutoSyncToRemote"
+                            (change)="resetSync();"
+                            aria-label="Auto sync data TO remote">
+            Auto sync data TO remote
+          </mat-slide-toggle>
+        </div>
 
-      <mat-form-field class="md-block md-icon-float"
-                      *ngIf="cfg?.isAutoLogin && cfg.isAutoSyncToRemote">
-        <label>Sync interval (sync every x)</label>
-        <input type="text"
-               matInput=""
-               input-duration
-               (change)="resetSync();"
-               name="syncInterval"
-               [(ngModel)]="cfg.syncInterval">
-        <mat-icon matSuffix="">timer</mat-icon>
-      </mat-form-field>
+        <div>
+          <mat-slide-toggle [(ngModel)]="cfg.isNotifyOnSync"
+                            name="isNotifyOnSync"
+                            aria-label="Notify when syncing">
+            Notify when syncing
+          </mat-slide-toggle>
+        </div>
+
+        <mat-form-field class="md-block md-icon-float"
+                        *ngIf="cfg?.isAutoLogin && cfg.isAutoSyncToRemote">
+          <label>Sync interval (sync every x)</label>
+          <input type="text"
+                 matInput=""
+                 input-duration
+                 (change)="resetSync();"
+                 name="syncInterval"
+                 [(ngModel)]="cfg.syncInterval">
+          <mat-icon matSuffix="">timer</mat-icon>
+        </mat-form-field>
+      </section>
+
     </div>
 
 

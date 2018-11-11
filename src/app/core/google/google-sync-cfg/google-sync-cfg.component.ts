@@ -5,12 +5,14 @@ import { GoogleDriveSyncService } from '../google-drive-sync.service';
 import { SnackService } from '../../snack/snack.service';
 import { GoogleDriveSyncConfig } from '../../config/config.model';
 import { Subscription } from 'rxjs';
+import { expandFadeAnimation } from '../../../ui/animations/expand.ani';
 
 @Component({
   selector: 'google-sync-cfg',
   templateUrl: './google-sync-cfg.component.html',
   styleUrls: ['./google-sync-cfg.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  animations: [expandFadeAnimation]
 })
 export class GoogleSyncCfgComponent implements OnInit, OnDestroy {
   // TODO get current value
