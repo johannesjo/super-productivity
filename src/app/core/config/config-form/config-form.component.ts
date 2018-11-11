@@ -10,7 +10,12 @@ import { ConfigService } from '../config.service';
 })
 export class ConfigFormComponent {
 
-  @Input() cfg;
+  config: any;
+
+  @Input() set cfg(cfg) {
+    this.config = {...cfg};
+  }
+
   @Input() sectionKey;
 
   // somehow needed for the form to work
@@ -32,10 +37,10 @@ export class ConfigFormComponent {
   }
 
   submit() {
-    if (!this.cfg) {
-      throw new Error('No cfg for ' + this.sectionKey);
+    if (!this.config) {
+      throw new Error('No config for ' + this.sectionKey);
     } else {
-      this._configService.updateSection(this.sectionKey, this.cfg);
+      this._configService.updateSection(this.sectionKey, this.config);
       this.save.emit();
     }
   }
