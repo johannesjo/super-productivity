@@ -9,6 +9,7 @@ import { DEFAULT_SYNC_FILE_NAME } from './google.const';
 import { MatDialog } from '@angular/material';
 import { DialogConfirmComponent } from '../../ui/dialog-confirm/dialog-confirm.component';
 import { DialogConfirmDriveSyncLoadComponent } from './dialog-confirm-drive-sync-load/dialog-confirm-drive-sync-load.component';
+import { DialogConfirmDriveSyncSaveComponent } from './dialog-confirm-drive-sync-save/dialog-confirm-drive-sync-save.component';
 
 @Injectable({
   providedIn: 'root'
@@ -198,7 +199,7 @@ export class GoogleDriveSyncService {
               this._import(loadRes);
               resolve(loadRes);
             } else {
-              this._confirmLoadDialog(lastActiveRemote, lastActiveLocal)
+              this._confirmLoadDialog(lastActiveRemote)
                 .then(() => {
                   this._import(loadRes);
                   resolve(loadRes);
@@ -288,71 +289,26 @@ export class GoogleDriveSyncService {
   }
 
   private _confirmSaveDialog(remoteModified): Promise<any> {
-    return Promise.resolve();
-
-//     const lastActiveLocal = this.$rootScope.r.lastActiveTime;
-//
-//     return this.$mdDialog.show({
-//       template: `
-// <md-dialog>
-//   <md-dialog-content>
-//     <div class="md-dialog-content">
-//       <h2 class="md-title" style="margin-top: 0">Overwrite unsaved data on Google Drive?</h2>
-//       <p>There seem to be some changes on Google Drive, that you don't have locally. Do you want to overwrite them anyway?</p>
-//       <table>
-//         <tr>
-//           <td>Last modification of remote data:</td>
-//           <td> ${this._formatDate(remoteModified)}</td>
-//         </tr>
-//         <tr>
-//           <td>Last modification of local data:</td>
-//           <td> ${this._formatDate(lastActiveLocal)}</td>
-//         </tr>
-//         <tr>
-//           <td>Last sync to remote from this app instance:</td>
-//           <td> ${this._formatDate(this.config._lastSyncToRemote)}</td>
-//         </tr>
-//       </table>
-//     </div>
-//   </md-dialog-content>
-//
-//   <md-dialog-actions>
-//     <md-button ng-click="saveToRemote()" class="md-primary">
-//         <ng-md-icon icon="file_upload"
-//                     aria-label="file_upload"></ng-md-icon> Overwrite remote data
-//     </md-button>
-//     <md-button ng-click="loadFromRemote()" class="md-primary">
-//       <ng-md-icon icon="file_download"
-//                     aria-label="file_download"></ng-md-icon> Overwrite local data
-//     </md-button>
-//     <md-button ng-click="cancel()" class="md-primary md-warn">
-//       Abort
-//     </md-button>
-//   </md-dialog-actions>
-// </md-dialog>`,
-//       controller:
-//       /* @ngInject */
-//         ($mdDialog, $scope, GoogleDriveSync) => {
-//           $scope.saveToRemote = () => {
-//             $mdDialog.hide();
-//           };
-//
-//           $scope.loadFromRemote = () => {
-//             $mdDialog.cancel();
-//             // we need some time so the promise is canceled
-//             setTimeout(() => {
-//               GoogleDriveSync.loadFrom();
-//             }, 100);
-//           };
-//
-//           $scope.cancel = () => {
-//             $mdDialog.cancel();
-//           };
-//         },
-//     });
+    const lastActiveLocal = this._syncService.getLastActive();
+    return new Promise((resolve, reject) => {
+      this._matDialog.open(DialogConfirmDriveSyncSaveComponent, {
+        data: {
+          loadFromRemote: () => {
+            this.loadFrom();
+            reject();
+          },
+          saveToRemote: resolve.bind(this),
+          cancel: reject.bind(this),
+          lastSyncToRemote: this._formatDate(this.config._lastSyncToRemote),
+          remoteModified: this._formatDate(remoteModified),
+          lastActiveLocal: this._formatDate(lastActiveLocal),
+        }
+      });
+    });
   }
 
-  private _confirmLoadDialog(remoteModified, lastActiveLocal): Promise<any> {
+  private _confirmLoadDialog(remoteModified): Promise<any> {
+    const lastActiveLocal = this._syncService.getLastActive();
     return new Promise((resolve, reject) => {
       this._matDialog.open(DialogConfirmDriveSyncLoadComponent, {
         data: {

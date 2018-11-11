@@ -6,29 +6,31 @@
   <table>
     <tr>
       <td>Last modification of remote data:</td>
-      <td>{{remoteModified}}</td>
+      <td>{{data.remoteModified}}</td>
     </tr>
     <tr>
       <td>Last modification of local data:</td>
-      <td>{{lastActiveLocal}}</td>
+      <td>{{data.lastActiveLocal}}</td>
     </tr>
   </table>
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">
   <div class="wrap-buttons">
-    <button (click)="data.saveToRemote()"
-            class="md-primary">
+    <button mat-raised-button=""
+            color="primary"
+            (click)="data.saveToRemote()">
       <mat-icon aria-label="file_upload">file_upload</mat-icon>
       Overwrite remote data
     </button>
-    <button (click)="data.loadFromRemote()"
-            class="md-primary">
+    <button mat-raised-button=""
+            (click)="data.loadFromRemote()">
       <mat-icon aria-label="file_download">file_download</mat-icon>
       Overwrite local data
     </button>
-    <button (click)="cancel()"
-            class="md-primary md-warn">
+    <button mat-raised-button=""
+            color="warn"
+            (click)="data.cancel();cancel()">
       Cancel
     </button>
   </div>
