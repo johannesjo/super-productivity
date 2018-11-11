@@ -3,6 +3,7 @@
 .wrapper {
   display: flex;
   align-items: center;
+  position: relative;
 }
 
 mat-icon {
@@ -15,4 +16,11 @@ mat-icon {
   .error & {
     color: $red;
   }
+}
+
+mat-progress-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
 }

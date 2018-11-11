@@ -1,0 +1,19 @@
+<mat-dialog-content>
+  <div [innerHtml]="data.message"
+       class="content"></div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <div class="wrap-buttons">
+    <button color="primary"
+            (click)="close(true)"
+            class="btn btn-primary submit-button"
+            mat-raised-button>{{data.okTxt||'Ok'}}
+    </button>
+    <button type="button"
+            (click)="close(false)"
+            class="btn btn-primary submit-button"
+            mat-raised-button>{{data.cancelTxt||'Cancel'}}
+    </button>
+  </div>
+</mat-dialog-actions>

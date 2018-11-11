@@ -6,6 +6,8 @@ import { GoogleApiService } from './google-api.service';
 import * as moment from 'moment';
 import { SnackService } from '../snack/snack.service';
 import { DEFAULT_SYNC_FILE_NAME } from './google.const';
+import { MatDialog } from '@angular/material';
+import { DialogConfirmComponent } from '../../ui/dialog-confirm/dialog-confirm.component';
 
 @Injectable({
   providedIn: 'root'
@@ -19,6 +21,7 @@ export class GoogleDriveSyncService {
     private _configService: ConfigService,
     private _googleApiService: GoogleApiService,
     private _snackService: SnackService,
+    private _matDialog: MatDialog,
   ) {
     this._checkForInitialUpdate();
   }
@@ -402,29 +405,27 @@ export class GoogleDriveSyncService {
   }
 
   private _confirmUsingExistingFileDialog(fileName): Promise<any> {
-    return Promise.resolve();
-
-    // const confirm = this.$mdDialog.confirm()
-    //   .title(`Use existing file "${fileName}" as sync file?`)
-    //   .textContent(`
-    //     We found a file with the name you specified. Do you want to use it as your sync file? If not please change the Sync file name.`)
-    //   .ok('Please do it!')
-    //   .cancel('Abort');
-    //
-    // return this.$mdDialog.show(confirm);
+    return new Promise((resolve, reject) => {
+      this._matDialog.open(DialogConfirmComponent, {
+        data: {
+          message: `
+Use <strong>existing</strong> file <strong>"${fileName}"</strong> as sync file?
+If not please change the Sync file name.`,
+        }
+      }).afterClosed()
+        .subscribe((isConfirm: boolean) => isConfirm ? resolve() : reject());
+    });
   }
 
   private _confirmSaveNewFile(fileName): Promise<any> {
-    return Promise.resolve();
-
-    // const confirm = this.$mdDialog.confirm()
-    //   .title(`Create "${fileName}" as sync file on Google Drive?`)
-    //   .textContent(`
-    //     No file with the name you specified was found. Do you want to create it?`)
-    //   .ok('Please do it!')
-    //   .cancel('Abort');
-    //
-    // return this.$mdDialog.show(confirm);
+    return new Promise((resolve, reject) => {
+      this._matDialog.open(DialogConfirmComponent, {
+        data: {
+          message: `No file with the name <strong>"${fileName}"</strong> was found. <strong>Create</strong> it as sync file on Google Drive?`,
+        }
+      }).afterClosed()
+        .subscribe((isConfirm: boolean) => isConfirm ? resolve() : reject());
+    });
   }
 
   private _save(): Promise<any> {

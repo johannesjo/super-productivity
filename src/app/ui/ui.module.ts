@@ -50,6 +50,7 @@ import { FlexLayoutModule } from '@angular/flex-layout';
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { SimpleDownloadDirective } from './simple-download/simple-download.directive';
 import { Angular2PromiseButtonModule } from 'angular2-promise-buttons';
+import { DialogConfirmComponent } from './dialog-confirm/dialog-confirm.component';
 
 @NgModule({
   imports: [
@@ -109,7 +110,11 @@ import { Angular2PromiseButtonModule } from 'angular2-promise-buttons';
     HelpSectionComponent,
     NumberToMonthPipe,
     SimpleDownloadDirective,
+    DialogConfirmComponent,
   ],
+  entryComponents: [
+    DialogConfirmComponent,
+  ]
   exports: [
     SplitModule,
     DurationFromStringPipe,
@@ -122,6 +127,7 @@ import { Angular2PromiseButtonModule } from 'angular2-promise-buttons';
     CollapsibleComponent,
     HelpSectionComponent,
     SimpleDownloadDirective,
+    DialogConfirmComponent,
 
     MsToStringPipe,
     MsToStringPipe$,
