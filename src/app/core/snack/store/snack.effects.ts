@@ -50,18 +50,16 @@ export class SnackEffects {
     };
 
     switch (type) {
-      case 'ERROR':
-      case 'SUCCESS':
-        this._ref = this.matSnackBar.openFromComponent(SnackCustomComponent, cfg);
-        break;
-
       case 'GOOGLE_LOGIN':
         this._ref = this.matSnackBar.openFromComponent(SnackGoogleLoginComponent, cfg);
         break;
 
-
+      case 'ERROR':
+      case 'CUSTOM':
+      case 'SUCCESS':
       default: {
-        this._ref = this.matSnackBar.open(message, actionStr, cfg);
+        this._ref = this.matSnackBar.openFromComponent(SnackCustomComponent, cfg);
+        break;
       }
     }
 

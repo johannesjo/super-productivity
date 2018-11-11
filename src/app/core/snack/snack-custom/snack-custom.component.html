@@ -15,4 +15,7 @@
           mat-raised-button>
     {{data.actionStr}}
   </button>
+
+  <mat-progress-bar *ngIf="promise"
+                    mode="indeterminate"></mat-progress-bar>
 </div>

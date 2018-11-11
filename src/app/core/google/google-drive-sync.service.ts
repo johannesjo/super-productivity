@@ -20,6 +20,7 @@ export class GoogleDriveSyncService {
     private _googleApiService: GoogleApiService,
     private _snackService: SnackService,
   ) {
+    this._checkForInitialUpdate();
   }
 
   get config(): GoogleDriveSyncConfig {
@@ -267,28 +268,14 @@ export class GoogleDriveSyncService {
   }
 
   private _showAsyncToast(promise, msg) {
-//     const icon = 'file_upload';
-//     this.$mdToast.show({
-//       hideDelay: (promise ? (15 * 1000) : (5 * 1000)),
-//       controller:
-//       /* @ngInject */
-//         ($mdToast) => {
-//           if (promise) {
-//             promise.then($mdToast.hide, $mdToast.hide);
-//           }
-//         },
-//       template: `
-// <md-toast>
-//   <div class="md-toast-content" flex>
-//     <div class="icon-wrapper">
-//       <ng-md-icon icon="${icon}"></ng-md-icon>
-//     </div>
-//     <div class="toast-text">${msg}</div>
-//     <md-progress-linear md-mode="indeterminate"
-//       style="position: absolute; top: 0; left: 0;"></md-progress-linear>
-//   </div>
-// </md-toast>`
-//     });
+    console.log('XXXX Show async toast');
+    this._snackService.open({
+      type: 'CUSTOM',
+      icon: 'file_upload',
+      message: msg,
+      duration: 30000,
+      promise,
+    });
   }
 
   private _confirmSaveDialog(remoteModified): Promise<any> {
