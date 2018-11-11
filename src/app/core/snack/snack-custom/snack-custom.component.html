@@ -7,7 +7,8 @@
     <mat-icon *ngIf="data.type==='ERROR'">error</mat-icon>
   </ng-container>
   <mat-icon *ngIf="data.icon">{{data.icon}}</mat-icon>
-  <span class="message">{{data.message}}</span>
+  <span class="message"
+        [innerHtml]="data.message"></span>
 
   <button class="action"
           color="accent"

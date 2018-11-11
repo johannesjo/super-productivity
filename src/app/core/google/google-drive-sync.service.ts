@@ -212,8 +212,6 @@ export class GoogleDriveSyncService {
         // console.log('GoogleDriveSync', 'loadFrom omitted because is in progress', this.currentPromise, this.currentPromise.$$state.status);
         return Promise.reject('Something in progress');
       }
-      // only assign this after promise check
-      this._handleInProgress(promise);
 
       // when we have no backup file we create one directly
       if (!this.config._backupDocId) {
@@ -225,6 +223,9 @@ export class GoogleDriveSyncService {
         loadHandler();
       }
     });
+
+    // only assign this after promise check
+    this._handleInProgress(promise);
 
     return promise;
   }

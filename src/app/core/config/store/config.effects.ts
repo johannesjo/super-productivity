@@ -5,6 +5,7 @@ import { ConfigActionTypes } from './config.actions';
 import { Store } from '@ngrx/store';
 import { CONFIG_FEATURE_NAME } from './config.reducer';
 import { PersistenceService } from '../../persistence/persistence.service';
+import { SnackOpen } from '../../snack/store/snack.actions';
 
 @Injectable()
 export class ConfigEffects {
@@ -16,6 +17,21 @@ export class ConfigEffects {
       ),
       withLatestFrom(this._store),
       tap(this._saveToLs.bind(this))
+    );
+
+  @Effect({dispatch: false}) snackUpdate$: any = this._actions$
+    .pipe(
+      ofType(
+        ConfigActionTypes.UpdateConfigSection,
+      ),
+      tap((action) => {
+        const {sectionKey, sectionCfg} = action.payload;
+        // TODO check if only private properties (_prefix) were updated
+        this._store.dispatch(new SnackOpen({
+          type: 'SUCCESS',
+          message: `Updated settings for <strong>${sectionKey}</strong>`,
+        }));
+      })
     );
 
   constructor(
