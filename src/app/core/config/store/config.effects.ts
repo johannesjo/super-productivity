@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Actions, Effect, ofType } from '@ngrx/effects';
 import { tap, withLatestFrom } from 'rxjs/operators';
-import { ConfigActionTypes } from './config.actions';
+import { ConfigActionTypes, UpdateConfigSection } from './config.actions';
 import { Store } from '@ngrx/store';
 import { CONFIG_FEATURE_NAME } from './config.reducer';
 import { PersistenceService } from '../../persistence/persistence.service';
@@ -24,7 +24,7 @@ export class ConfigEffects {
       ofType(
         ConfigActionTypes.UpdateConfigSection,
       ),
-      tap((action) => {
+      tap((action: UpdateConfigSection) => {
         const {sectionKey, sectionCfg} = action.payload;
         const isPublicPropUpdated = Object.keys(sectionCfg).find((key) => key.charAt(0) !== '_');
         if (isPublicPropUpdated) {
