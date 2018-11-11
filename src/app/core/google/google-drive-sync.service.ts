@@ -295,7 +295,7 @@ export class GoogleDriveSyncService {
         data: {
           loadFromRemote: () => {
             this.loadFrom();
-            reject();
+            reject.bind(this)();
           },
           saveToRemote: resolve.bind(this),
           cancel: reject.bind(this),
@@ -315,7 +315,7 @@ export class GoogleDriveSyncService {
           loadFromRemote: resolve.bind(this),
           saveToRemote: () => {
             this.saveTo();
-            reject();
+            reject.bind(this)();
           },
           cancel: reject,
           remoteModified: this._formatDate(remoteModified),

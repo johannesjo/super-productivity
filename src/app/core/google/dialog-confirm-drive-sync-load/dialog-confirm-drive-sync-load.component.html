@@ -19,18 +19,18 @@
   <div class="wrap-buttons">
     <button mat-raised-button=""
             color="primary"
-            (click)="data.saveToRemote()">
+            (click)="data.saveToRemote();close()">
       <mat-icon aria-label="file_upload">file_upload</mat-icon>
       Overwrite remote data
     </button>
     <button mat-raised-button=""
-            (click)="data.loadFromRemote()">
+            (click)="data.loadFromRemote();close()">
       <mat-icon aria-label="file_download">file_download</mat-icon>
       Overwrite local data
     </button>
     <button mat-raised-button=""
             color="warn"
-            (click)="data.cancel();cancel()">
+            (click)="data.cancel();close()">
       Cancel
     </button>
   </div>

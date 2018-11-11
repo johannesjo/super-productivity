@@ -15,7 +15,7 @@ export class DialogConfirmDriveSyncLoadComponent {
   ) {
   }
 
-  cancel() {
+  close() {
     this._matDialogRef.close();
   }
 }

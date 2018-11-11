@@ -20,20 +20,20 @@
   </div>
 </mat-dialog-content>
 
-<mat-dialog-actions>
+<mat-dialog-actions align="end">
   <button mat-raised-button=""
-          (click)="data.saveToRemote()"
+          (click)="data.saveToRemote();close()"
           color="primary">
     <mat-icon>file_upload</mat-icon>
     Overwrite remote data
   </button>
   <button mat-raised-button=""
-          (click)="data.loadFromRemote()">
+          (click)="data.loadFromRemote();close()">
     <mat-icon>file_download</mat-icon>
     Overwrite local data
   </button>
   <button mat-raised-button=""
-          (click)="data.cancel();cancel()"
+          (click)="data.cancel();close()"
           color="warn">
     Cancel
   </button>
