@@ -20,13 +20,13 @@
     </mat-slide-toggle>
 
     <div *ngIf="cfg?.isEnabled"
-         class="ani-expand-collapse">
-      <div>
+         [@expandFade]>
+      <section class="btns">
         <button type="button"
                 mat-raised-button=""
                 class="md-raised"
                 promise-btn
-                *ngIf="!googleApiService.isLoggedIn$|async"
+                *ngIf="!(googleApiService.isLoggedIn$|async)"
                 (click)="login()">
           <mat-icon>exit_to_app</mat-icon>
           Login
@@ -34,7 +34,7 @@
         <button type="button"
                 mat-raised-button=""
                 class="md-raised"
-                *ngIf="googleApiService.isLoggedIn$|async"
+                *ngIf="(googleApiService.isLoggedIn$|async)"
                 (click)="logout()">
           <mat-icon>logout</mat-icon>
           Logout
@@ -44,7 +44,7 @@
                 mat-raised-button=""
                 class="md-raised"
                 promise-btn
-                *ngIf="googleApiService.isLoggedIn$|async"
+                *ngIf="(googleApiService.isLoggedIn$|async)"
                 (click)="backupNow()">
           <mat-icon>backup</mat-icon>
           Backup now
@@ -53,7 +53,7 @@
                 mat-raised-button=""
                 class="md-raised sync-from-btn"
                 promise-btn
-                *ngIf="googleApiService.isLoggedIn$|async"
+                *ngIf="(googleApiService.isLoggedIn$|async)"
                 (click)="loadRemoteData()">
           <mat-icon>backup</mat-icon>
           Load From GDrive
@@ -61,16 +61,16 @@
         <button type="button"
                 mat-raised-button=""
                 class="md-raised"
-                *ngIf="googleApiService.isLoggedIn$|async"
+                *ngIf="(googleApiService.isLoggedIn$|async)"
                 external-link
                 target="_blank"
                 href="https://myaccount.google.com/permissions">
           <mat-icon icon="remove_circle"></mat-icon>
           Revoke permissions
         </button>
-      </div>
+      </section>
 
-      <div *ngIf="googleApiService.isLoggedIn$|async"
+      <div *ngIf="(googleApiService.isLoggedIn$|async)"
            class="sync-file-wrapper">
         <mat-form-field class="md-block md-icon-float">
           <label>Sync file name</label>

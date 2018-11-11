@@ -10,18 +10,18 @@ import { SnackParams } from '../snack.model';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SnackGoogleLoginComponent {
-  public snackBarRef: MatSnackBarRef<SnackGoogleLoginComponent>;
 
   constructor(
     @Inject(MAT_SNACK_BAR_DATA) public data: SnackParams,
-    private readonly _googleApiService: GoogleApiService
+    private readonly _googleApiService: GoogleApiService,
+    private readonly _snackBarRef: MatSnackBarRef<SnackGoogleLoginComponent>,
   ) {
   }
 
   loginToGoogle() {
     this._googleApiService.login()
       .then(() => {
-        this.snackBarRef.dismiss();
+        this._snackBarRef.dismiss();
       });
   }
 }
