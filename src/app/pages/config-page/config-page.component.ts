@@ -2,7 +2,6 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ConfigService } from '../../core/config/config.service';
 import { GLOBAL_CONFIG_FORM_CONFIG } from '../../core/config/config-form-config.const';
 import { ProjectService } from '../../project/project.service';
-import { GoogleApiService } from '../../core/google/google-api.service';
 import { GlobalConfig } from '../../core/config/config.model';
 import { Subscription } from 'rxjs';
 
@@ -20,7 +19,6 @@ export class ConfigPageComponent implements OnInit, OnDestroy {
   constructor(
     public readonly configService: ConfigService,
     public readonly projectService: ProjectService,
-    public readonly googleApiService: GoogleApiService,
   ) {
   }
 
@@ -32,9 +30,5 @@ export class ConfigPageComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this._subs.unsubscribe();
-  }
-
-  testLogin() {
-    this.googleApiService.login();
   }
 }

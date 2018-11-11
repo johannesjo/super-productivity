@@ -5,7 +5,11 @@
     <div [innerHtml]="section.help"></div>
   </help-section>
   <div class="form-wrapper {{section.key}}">
+    <google-sync-cfg *ngIf="section.customSection==='GOOGLE_SYNC'"
+                     (save)="onSave()"></google-sync-cfg>
+
     <config-form
+      *ngIf="section.items"
       [formCfg]="section.items"
       [sectionKey]="section.key"
       [cfg]="cfg"

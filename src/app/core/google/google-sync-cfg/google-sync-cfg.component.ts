@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { GoogleApiService } from '../google-api.service';
 import { ConfigService } from '../../config/config.service';
 import { GoogleDriveSyncService } from '../google-drive-sync.service';
@@ -15,9 +15,11 @@ import { expandFadeAnimation } from '../../../ui/animations/expand.ani';
   animations: [expandFadeAnimation]
 })
 export class GoogleSyncCfgComponent implements OnInit, OnDestroy {
-  // TODO get current value
-  public tmpSyncFile: any;
-  public cfg: GoogleDriveSyncConfig;
+  tmpSyncFile: any;
+  cfg: GoogleDriveSyncConfig;
+
+  @Output() save = new EventEmitter<any>();
+
   private _subs = new Subscription();
 
   constructor(
@@ -39,8 +41,9 @@ export class GoogleSyncCfgComponent implements OnInit, OnDestroy {
     this._subs.unsubscribe();
   }
 
-  save() {
+  submit() {
     this._configService.updateSection('googleDriveSync', this.cfg);
+    this.save.emit();
   }
 
   // import/export stuff

@@ -12,6 +12,7 @@ import { FormlyMaterialModule } from '@ngx-formly/material';
 import { ConfigService } from './config.service';
 import { UiModule } from '../../ui/ui.module';
 import { KeyboardInputComponent } from './keyboard-input/keyboard-input.component';
+import { GoogleModule } from '../google/google.module';
 
 @NgModule({
   imports: [
@@ -27,6 +28,7 @@ import { KeyboardInputComponent } from './keyboard-input/keyboard-input.componen
     }),
     FormlyMaterialModule,
     CommonModule,
+    GoogleModule,
     StoreModule.forFeature(CONFIG_FEATURE_NAME, configReducer),
     EffectsModule.forFeature([ConfigEffects])
   ],
