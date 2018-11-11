@@ -4,6 +4,7 @@
   display: flex;
   align-items: center;
   position: relative;
+  justify-content: stretch;
 }
 
 mat-icon {
@@ -16,6 +17,10 @@ mat-icon {
   .error & {
     color: $red;
   }
+}
+
+button {
+  margin-left: auto;
 }
 
 mat-progress-bar {

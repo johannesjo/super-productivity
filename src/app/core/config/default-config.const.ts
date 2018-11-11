@@ -66,6 +66,7 @@ export const DEFAULT_CFG: GlobalConfig = {
   },
   googleDriveSync: {
     isEnabled: false,
+    isAutoLogin: false,
     isAutoSyncToRemote: false,
     isNotifyOnSync: false,
     isLoadRemoteDataOnStartup: false,

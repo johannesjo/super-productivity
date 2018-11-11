@@ -278,7 +278,7 @@ export class GoogleDriveSyncService {
       type: 'CUSTOM',
       icon: 'file_upload',
       message: msg,
-      duration: 30000,
+      config: {duration: 60000},
       promise,
     });
   }

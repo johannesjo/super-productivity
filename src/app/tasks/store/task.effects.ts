@@ -60,6 +60,7 @@ export class TaskEffects {
         const action = action_ as DeleteTask;
         return new SnackOpen({
           message: `Deleted task "${state.stateBefore.entities[action.payload.id].title}"`,
+          config: {duration: 5000},
           actionStr: 'Undo',
           actionId: TaskActionTypes.UndoDeleteTask
         });
