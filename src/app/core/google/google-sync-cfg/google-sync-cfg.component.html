@@ -13,7 +13,7 @@
       <button type="button"
               mat-raised-button=""
               class="md-raised"
-              promise-btn
+              [promiseBtn]="loginPromise"
               *ngIf="!(googleApiService.isLoggedIn$|async)"
               (click)="login()">
         <mat-icon>exit_to_app</mat-icon>
@@ -31,7 +31,7 @@
       <button type="button"
               mat-raised-button=""
               class="md-raised"
-              promise-btn
+              [promiseBtn]="backupPromise"
               *ngIf="(googleApiService.isLoggedIn$|async)"
               (click)="backupNow()">
         <mat-icon>backup</mat-icon>
@@ -40,7 +40,7 @@
       <button type="button"
               mat-raised-button=""
               class="md-raised sync-from-btn"
-              promise-btn
+              [promiseBtn]="loadRemotePromise"
               *ngIf="(googleApiService.isLoggedIn$|async)"
               (click)="loadRemoteData()">
         <mat-icon>backup</mat-icon>
@@ -86,8 +86,7 @@
       </mat-slide-toggle>
     </div>
 
-    <section *ngIf="cfg.isAutoLogin"
-             [@expandFade]>
+    <section *ngIf="cfg.isAutoLogin">
       <div>
         <mat-slide-toggle [(ngModel)]="cfg.isLoadRemoteDataOnStartup"
                           name="isLoadRemoteDataOnStartup"
@@ -113,7 +112,7 @@
       </div>
 
       <mat-form-field *ngIf="cfg.isAutoLogin && cfg.isAutoSyncToRemote">
-        <label>Sync interval (sync every x)</label>
+        <label>Sync interval (sync every X ms)</label>
         <input type="text"
                matInput=""
                input-duration

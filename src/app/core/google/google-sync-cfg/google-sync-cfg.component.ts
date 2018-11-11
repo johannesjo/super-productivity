@@ -1,10 +1,10 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, OnDestroy, OnInit, Output } from '@angular/core';
 import { GoogleApiService } from '../google-api.service';
 import { ConfigService } from '../../config/config.service';
 import { GoogleDriveSyncService } from '../google-drive-sync.service';
 import { SnackService } from '../../snack/snack.service';
 import { GoogleDriveSyncConfig } from '../../config/config.model';
-import { Subscription } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 import { expandFadeAnimation } from '../../../ui/animations/expand.ani';
 
 @Component({
@@ -17,6 +17,9 @@ import { expandFadeAnimation } from '../../../ui/animations/expand.ani';
 export class GoogleSyncCfgComponent implements OnInit, OnDestroy {
   tmpSyncFile: any;
   cfg: GoogleDriveSyncConfig;
+  backupPromise: Promise<any>;
+  loadRemotePromise: Promise<any>;
+  loginPromise: Promise<any>;
 
   @Output() save = new EventEmitter<any>();
 
@@ -53,7 +56,7 @@ export class GoogleSyncCfgComponent implements OnInit, OnDestroy {
   }
 
   backupNow() {
-    return this._googleDriveSyncService.saveTo()
+    this.backupPromise = this._googleDriveSyncService.saveTo()
       .then(() => {
         this._snackService.open({
           type: 'SUCCESS',
@@ -63,15 +66,15 @@ export class GoogleSyncCfgComponent implements OnInit, OnDestroy {
   }
 
   loadRemoteData() {
-    return this._googleDriveSyncService.loadFrom();
+    this.loadRemotePromise = this._googleDriveSyncService.loadFrom();
   }
 
   login() {
-    return this.googleApiService.login();
+    this.loginPromise = this.googleApiService.login();
   }
 
   logout() {
-    return this.googleApiService.logout();
+    this.googleApiService.logout();
   }
 
   onGoogleDriveSyncToggle(isEnabled) {

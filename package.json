@@ -117,6 +117,7 @@
     "@ngrx/store-devtools": "^6.1.0",
     "@ngx-formly/core": "^4.8.2",
     "@ngx-formly/material": "^4.8.2",
+    "angular2-promise-buttons": "^3.0.0",
     "clipboard": "^2.0.1",
     "core-js": "^2.5.4",
     "dbus-native": "^0.2.5",

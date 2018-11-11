@@ -49,6 +49,7 @@ import { SplitModule } from '../pages/work-view/split/split.module';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { SimpleDownloadDirective } from './simple-download/simple-download.directive';
+import { Angular2PromiseButtonModule } from 'angular2-promise-buttons';
 
 @NgModule({
   imports: [
@@ -60,6 +61,9 @@ import { SimpleDownloadDirective } from './simple-download/simple-download.direc
     FormlyMaterialModule,
 
     DragDropModule,
+    Angular2PromiseButtonModule.forRoot({
+      // handleCurrentBtnOnly: true,
+    }),
 
     // material2
     MatAutocompleteModule,
@@ -125,6 +129,7 @@ import { SimpleDownloadDirective } from './simple-download/simple-download.direc
     NumberToMonthPipe,
 
     DragDropModule,
+    Angular2PromiseButtonModule,
 
     // material2
     MatAutocompleteModule,
