@@ -4,7 +4,7 @@ export const GLOBAL_CONFIG_FORM_CONFIG = [
   {
     title: 'Misc Settings',
     key: 'misc',
-    help: `  <div class="mat-caption">Auto-start next task on done</div>
+    help: `<div class="mat-caption">Auto-start next task on done</div>
   <p>Decide if you want to automatically start the next task, once you mark a task as done.</p>
 
   <div class="mat-caption">Use short syntax</div>
