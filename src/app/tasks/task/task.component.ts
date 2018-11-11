@@ -156,7 +156,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   addSubTask() {
-    this._taskService.addSubTaskTo(this.task.id);
+    this._taskService.addSubTaskTo(this.task.parentId || this.task.id);
   }
 
   toggleTaskDone() {
@@ -240,7 +240,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
 
     if (checkKeyCombo(ev, keys.taskDelete)) {
       this.deleteTask();
-      this.focusSelf();
+      this.focusPrevious(true);
     }
 
     if (checkKeyCombo(ev, keys.moveToBacklog)) {
