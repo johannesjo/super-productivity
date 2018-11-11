@@ -76,40 +76,36 @@ export class GoogleDriveSyncService {
     }
   }
 
-  changeSyncFileName(newSyncFileName): Promise<any> {
-    return new Promise((resolve, reject) => {
-      this._googleApiService.findFile(newSyncFileName)
-        .then((res) => {
-          const filesFound = res.body.items;
-          if (!filesFound || filesFound.length === 0) {
-            this._confirmSaveNewFile(newSyncFileName)
-              .then(() => {
-                this.updateConfig({
-                  syncFileName: newSyncFileName,
-                  // we need to unset to save to a new file
-                  _backupDocId: null,
-                });
-                this._save().then(resolve);
-              }, reject);
-          } else if (filesFound.length > 1) {
-            this._snackService.open({
-              type: 'ERROR',
-              message: `Multiple files with the name "${newSyncFileName}" found. Please delete all but one or choose a different name.`
-            });
-            reject();
-          } else if (filesFound.length === 1) {
-            this._confirmUsingExistingFileDialog(newSyncFileName)
-              .then(() => {
-                const fileToUpdate = filesFound[0];
-                this.updateConfig({
-                  syncFileName: newSyncFileName,
-                  _backupDocId: fileToUpdate.id,
-                });
-                resolve(fileToUpdate.id);
-              }, reject);
-          }
+  async changeSyncFileName(newSyncFileName): Promise<any> {
+    const res = await this._googleApiService.findFile(newSyncFileName);
+    const filesFound = res.body.items;
+    if (!filesFound || filesFound.length === 0) {
+      const isSave = await this._confirmSaveNewFile(newSyncFileName);
+      if (isSave) {
+        this.updateConfig({
+          syncFileName: newSyncFileName,
+          // we need to unset to save to a new file
+          _backupDocId: null,
         });
-    });
+        await this._save();
+      }
+    } else if (filesFound.length > 1) {
+      this._snackService.open({
+        type: 'ERROR',
+        message: `Multiple files with the name "${newSyncFileName}" found. Please delete all but one or choose a different name.`
+      });
+      throw new Error('Multiple files with the name same name found');
+    } else if (filesFound.length === 1) {
+      const isConfirmUseExisting = await this._confirmUsingExistingFileDialog(newSyncFileName);
+      if (isConfirmUseExisting) {
+        const fileToUpdate = filesFound[0];
+        this.updateConfig({
+          syncFileName: newSyncFileName,
+          _backupDocId: fileToUpdate.id,
+        });
+        return fileToUpdate.id;
+      }
+    }
   }
 
   saveForSyncIfEnabled(): Promise<any> {
@@ -118,7 +114,7 @@ export class GoogleDriveSyncService {
     }
 
     if (this._isCurrentPromisePending()) {
-      // console.log('GoogleDriveSync', 'SYNC OMITTED because of promise', this.currentPromise, this.currentPromise.$$state.status);
+      console.log('GoogleDriveSync', 'SYNC OMITTED because of promise');
       return Promise.reject();
     } else {
       console.log('GoogleDriveSync', 'SYNC');
@@ -130,10 +126,10 @@ export class GoogleDriveSyncService {
     }
   }
 
-  saveTo(): Promise<any> {
+  async saveTo(): Promise<any> {
     // don't execute sync interactions at the same time
     if (this._isCurrentPromisePending()) {
-      // console.log('GoogleDriveSync', 'saveTo omitted because is in progress', this.currentPromise, this.currentPromise.$$state.status);
+      console.log('GoogleDriveSync', 'saveTo omitted because is in progress');
       return Promise.reject('Something in progress');
     }
 
@@ -176,9 +172,6 @@ export class GoogleDriveSyncService {
     const promise = new Promise((resolve, reject) => {
       const loadHandler = () => {
         this._load().then((loadRes) => {
-          // const lastModifiedRemote = loadRes.meta.modifiedDate;
-          // TODO create a solution for this
-          // const lastActiveLocal = this.$rootScope.r.lastActiveTime;
           const lastActiveLocal = this._syncService.getLastActive();
           const lastActiveRemote = loadRes.body.lastActiveTime;
 
@@ -334,7 +327,7 @@ Use <strong>existing</strong> file <strong>"${fileName}"</strong> as sync file?
 If not please change the Sync file name.`,
         }
       }).afterClosed()
-        .subscribe((isConfirm: boolean) => isConfirm ? resolve() : reject());
+        .subscribe((isConfirm: boolean) => isConfirm ? resolve(true) : resolve(false));
     });
   }
 
@@ -342,10 +335,11 @@ If not please change the Sync file name.`,
     return new Promise((resolve, reject) => {
       this._matDialog.open(DialogConfirmComponent, {
         data: {
-          message: `No file with the name <strong>"${fileName}"</strong> was found. <strong>Create</strong> it as sync file on Google Drive?`,
+          message: `No file with the name <strong>"${fileName}"</strong> was found.
+<strong>Create</strong> it as sync file on Google Drive?`,
         }
       }).afterClosed()
-        .subscribe((isConfirm: boolean) => isConfirm ? resolve() : reject());
+        .subscribe((isConfirm: boolean) => isConfirm ? resolve(true) : resolve(false));
     });
   }
 
