@@ -26,8 +26,11 @@ export class GoogleDriveSyncService {
     private _snackService: SnackService,
     private _matDialog: MatDialog,
   ) {
+  }
+
+  init() {
     if (this.config.isEnabled && this.config.isAutoLogin) {
-      _googleApiService.login().then(() => {
+      this._googleApiService.login().then(() => {
         if (this.config.isAutoSyncToRemote) {
           this.resetAutoSyncToRemoteInterval();
         }

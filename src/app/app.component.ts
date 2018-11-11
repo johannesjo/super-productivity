@@ -6,7 +6,6 @@ import { ProjectService } from './project/project.service';
 import { Project } from './project/project.model';
 import { ChromeExtensionInterfaceService } from './core/chrome-extension-interface/chrome-extension-interface.service';
 import { ShortcutService } from './core/shortcut/shortcut.service';
-import { checkKeyCombo } from './core/util/check-key-combo';
 import { ConfigService } from './core/config/config.service';
 import { blendInOutAnimation } from './ui/animations/blend-in-out.ani';
 import { LayoutService } from './core/layout/layout.service';
@@ -14,6 +13,7 @@ import { ElectronService } from 'ngx-electron';
 import { IPC_EVENT_APP_READY, IPC_EVENT_ERROR } from '../ipc-events.const';
 import { SnackService } from './core/snack/snack.service';
 import { IS_ELECTRON } from './app.constants';
+import { GoogleDriveSyncService } from './core/google/google-drive-sync.service';
 
 @Component({
   selector: 'app-root',
@@ -33,6 +33,7 @@ export class AppComponent implements OnInit {
     private _overlayContainer: OverlayContainer,
     private _projectService: ProjectService,
     private _electronService: ElectronService,
+    private _googleDriveSyncService: GoogleDriveSyncService,
     private _snackService: SnackService,
     private _chromeExtensionInterface: ChromeExtensionInterfaceService,
     public layoutService: LayoutService,
@@ -43,6 +44,7 @@ export class AppComponent implements OnInit {
     );
 
     // INIT Services and global handlers
+    this._googleDriveSyncService.init();
     this._chromeExtensionInterface.init();
     if (IS_ELECTRON) {
       this._electronService.ipcRenderer.send(IPC_EVENT_APP_READY);

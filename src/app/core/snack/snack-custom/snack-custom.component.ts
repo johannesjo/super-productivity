@@ -19,7 +19,9 @@ export class SnackCustomComponent implements OnInit {
   ngOnInit() {
     if (this.data.promise) {
       this.data.promise.then(() => {
-        // this.snackBarRef.dismiss();
+        this.snackBarRef.dismiss();
+      }).catch(() => {
+        this.snackBarRef.dismiss();
       });
     }
   }
