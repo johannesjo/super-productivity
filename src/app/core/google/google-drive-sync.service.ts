@@ -47,11 +47,7 @@ export class GoogleDriveSyncService {
   }
 
   updateConfig(data: Partial<GoogleDriveSyncConfig>) {
-    this._configService.updateSection('googleDriveSync', {
-      ...this.config,
-      ...data,
-      syncFileName: data.syncFileName || this.config.syncFileName || DEFAULT_SYNC_FILE_NAME
-    });
+    this._configService.updateSection('googleDriveSync', data);
   }
 
 
@@ -119,7 +115,7 @@ export class GoogleDriveSyncService {
 
     if (this._isSyncingInProgress) {
       console.log('GoogleDriveSync', 'SYNC OMITTED because of promise');
-      return Promise.reject();
+      return Promise.resolve();
     } else {
       console.log('GoogleDriveSync', 'SYNC');
       const promise = this.saveTo();

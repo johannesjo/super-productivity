@@ -26,11 +26,13 @@ export class ConfigEffects {
       ),
       tap((action) => {
         const {sectionKey, sectionCfg} = action.payload;
-        // TODO check if only private properties (_prefix) were updated
-        this._store.dispatch(new SnackOpen({
-          type: 'SUCCESS',
-          message: `Updated settings for <strong>${sectionKey}</strong>`,
-        }));
+        const isPublicPropUpdated = Object.keys(sectionCfg).find((key) => key.charAt(0) !== '_');
+        if (isPublicPropUpdated) {
+          this._store.dispatch(new SnackOpen({
+            type: 'SUCCESS',
+            message: `Updated settings for <strong>${sectionKey}</strong>`,
+          }));
+        }
       })
     );
 
