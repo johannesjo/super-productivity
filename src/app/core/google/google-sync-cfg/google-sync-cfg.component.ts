@@ -1,9 +1,10 @@
-import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy, OnInit } from '@angular/core';
 import { GoogleApiService } from '../google-api.service';
 import { ConfigService } from '../../config/config.service';
 import { GoogleDriveSyncService } from '../google-drive-sync.service';
 import { SnackService } from '../../snack/snack.service';
 import { GoogleDriveSyncConfig } from '../../config/config.model';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'google-sync-cfg',
@@ -11,10 +12,11 @@ import { GoogleDriveSyncConfig } from '../../config/config.model';
   styleUrls: ['./google-sync-cfg.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class GoogleSyncCfgComponent implements OnInit {
+export class GoogleSyncCfgComponent implements OnInit, OnDestroy {
   // TODO get current value
   public tmpSyncFile: any;
   public cfg: GoogleDriveSyncConfig;
+  private _subs = new Subscription();
 
   constructor(
     public readonly googleApiService: GoogleApiService,
@@ -25,9 +27,14 @@ export class GoogleSyncCfgComponent implements OnInit {
   }
 
   ngOnInit() {
-    this._configService.cfg$.subscribe((cfg) => {
-      this.cfg = cfg;
-    });
+    this._subs.add(this._configService.cfg$.subscribe((cfg) => {
+      this.cfg = cfg.googleDriveSync;
+      this.tmpSyncFile = cfg.googleDriveSync.syncFileName;
+    }));
+  }
+
+  ngOnDestroy() {
+    this._subs.unsubscribe();
   }
 
   save() {
