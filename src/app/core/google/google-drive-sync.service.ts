@@ -8,6 +8,7 @@ import { SnackService } from '../snack/snack.service';
 import { DEFAULT_SYNC_FILE_NAME } from './google.const';
 import { MatDialog } from '@angular/material';
 import { DialogConfirmComponent } from '../../ui/dialog-confirm/dialog-confirm.component';
+import { DialogConfirmDriveSyncLoadComponent } from './dialog-confirm-drive-sync-load/dialog-confirm-drive-sync-load.component';
 
 @Injectable({
   providedIn: 'root'
@@ -23,7 +24,17 @@ export class GoogleDriveSyncService {
     private _snackService: SnackService,
     private _matDialog: MatDialog,
   ) {
-    this._checkForInitialUpdate();
+    if (this.config.isEnabled && this.config.isAutoLogin) {
+      _googleApiService.login().then(() => {
+        if (this.config.isAutoSyncToRemote) {
+          this.resetAutoSyncToRemoteInterval();
+        }
+
+        if (this.config.isLoadRemoteDataOnStartup) {
+          this._checkForInitialUpdate();
+        }
+      });
+    }
   }
 
   get config(): GoogleDriveSyncConfig {
@@ -48,7 +59,7 @@ export class GoogleDriveSyncService {
     const interval = this.config.syncInterval;
 
     if (interval < 5000) {
-      this._log('Interval too low');
+      console.log('GoogleDriveSync', 'Interval too low');
       return;
     }
 
@@ -106,10 +117,10 @@ export class GoogleDriveSyncService {
     }
 
     if (this._isCurrentPromisePending()) {
-      // this._log('SYNC OMITTED because of promise', this.currentPromise, this.currentPromise.$$state.status);
+      // console.log('GoogleDriveSync', 'SYNC OMITTED because of promise', this.currentPromise, this.currentPromise.$$state.status);
       return Promise.reject();
     } else {
-      this._log('SYNC');
+      console.log('GoogleDriveSync', 'SYNC');
       const promise = this.saveTo();
       if (this.config.isNotifyOnSync) {
         this._showAsyncToast(promise, 'Syncing to google drive');
@@ -121,7 +132,7 @@ export class GoogleDriveSyncService {
   saveTo(): Promise<any> {
     // don't execute sync interactions at the same time
     if (this._isCurrentPromisePending()) {
-      // this._log('saveTo omitted because is in progress', this.currentPromise, this.currentPromise.$$state.status);
+      // console.log('GoogleDriveSync', 'saveTo omitted because is in progress', this.currentPromise, this.currentPromise.$$state.status);
       return Promise.reject('Something in progress');
     }
 
@@ -172,7 +183,7 @@ export class GoogleDriveSyncService {
 
           // no update required
           if (this._isEqual(lastActiveLocal, lastActiveRemote)) {
-            this._log('date comparision isEqual', lastActiveLocal, lastActiveRemote);
+            console.log('GoogleDriveSync', 'date comparision isEqual', lastActiveLocal, lastActiveRemote);
             this._snackService.open({
               type: 'SUCCESS',
               message: `Data already up to date`
@@ -181,7 +192,7 @@ export class GoogleDriveSyncService {
           } else {
             // update but ask if remote data is not newer than the last local update
             const isSkipConfirm = lastActiveRemote && this._isNewerThan(lastActiveRemote, lastActiveLocal);
-            this._log('date comparision skipConfirm', isSkipConfirm, lastActiveLocal, lastActiveRemote);
+            console.log('GoogleDriveSync', 'date comparision skipConfirm', isSkipConfirm, lastActiveLocal, lastActiveRemote);
 
             if (isSkipConfirm) {
               this._import(loadRes);
@@ -200,7 +211,7 @@ export class GoogleDriveSyncService {
       // don't execute sync interactions at the same time
       if (!isSkipPromiseCheck && this._isCurrentPromisePending()) {
         // TODO a solution is needed
-        // this._log('loadFrom omitted because is in progress', this.currentPromise, this.currentPromise.$$state.status);
+        // console.log('GoogleDriveSync', 'loadFrom omitted because is in progress', this.currentPromise, this.currentPromise.$$state.status);
         return Promise.reject('Something in progress');
       }
       // only assign this after promise check
@@ -218,11 +229,6 @@ export class GoogleDriveSyncService {
     });
 
     return promise;
-  }
-
-
-  private _log(...args) {
-    console.log(this.constructor.name + ':', ...args);
   }
 
   private _import(loadRes) {
@@ -249,7 +255,7 @@ export class GoogleDriveSyncService {
     this.currentPromise = this._googleApiService.getFileInfo(this.config._backupDocId)
       .then((res) => {
         const lastModifiedRemote = res.body.modifiedDate;
-        this._log(
+        console.log('GoogleDriveSync',
           this._formatDate(lastModifiedRemote),
           ' > ',
           this._formatDate(this.config._lastLocalUpdate),
@@ -262,7 +268,7 @@ export class GoogleDriveSyncService {
             icon: 'file_upload',
           });
 
-          this._log('HAS CHANGED (modified Date comparision), TRYING TO UPDATE');
+          console.log('GoogleDriveSync', 'HAS CHANGED (modified Date comparision), TRYING TO UPDATE');
           this.loadFrom(true);
         }
       });
@@ -347,61 +353,20 @@ export class GoogleDriveSyncService {
   }
 
   private _confirmLoadDialog(remoteModified, lastActiveLocal): Promise<any> {
-    return Promise.resolve();
-//     return this.$mdDialog.show({
-//       template: `
-// <md-dialog>
-//   <md-dialog-content>
-//     <div class="md-dialog-content">
-//       <h2 class="md-title" style="margin-top: 0">Overwrite local data with GDrive Update?</h2>
-//       <p>Update from Google Drive Backup. <strong>Local data seems to be newer</strong> than the remote data.  Overwrite unsaved local changes? <strong>All data will be lost forever</strong>.</p>
-//       <table>
-//         <tr>
-//           <td>Last modification of remote data:</td>
-//           <td> ${this._formatDate(remoteModified)}</td>
-//         </tr>
-//         <tr>
-//           <td>Last modification of local data:</td>
-//           <td> ${this._formatDate(lastActiveLocal)}</td>
-//         </tr>
-//       </table>
-//     </div>
-//   </md-dialog-content>
-//
-//   <md-dialog-actions>
-//     <md-button ng-click="saveToRemote()" class="md-primary">
-//       <ng-md-icon icon="file_upload"
-//                     aria-label="file_upload"></ng-md-icon> Overwrite remote data
-//     </md-button>
-//     <md-button ng-click="loadFromRemote()" class="md-primary">
-//         <ng-md-icon icon="file_download"
-//                     aria-label="file_download"></ng-md-icon> Overwrite local data
-//     </md-button>
-//     <md-button ng-click="cancel()" class="md-primary md-warn">
-//       Abort
-//     </md-button>
-//   </md-dialog-actions>
-// </md-dialog>`,
-//       controller:
-//       /* @ngInject */
-//         ($mdDialog, $scope, GoogleDriveSync) => {
-//           $scope.loadFromRemote = () => {
-//             $mdDialog.hide();
-//           };
-//
-//           $scope.saveToRemote = () => {
-//             $mdDialog.cancel();
-//             // we need some time so the promise is canceled
-//             setTimeout(() => {
-//               GoogleDriveSync.saveTo();
-//             }, 100);
-//           };
-//
-//           $scope.cancel = () => {
-//             $mdDialog.cancel();
-//           };
-//         },
-//     });
+    return new Promise((resolve, reject) => {
+      this._matDialog.open(DialogConfirmDriveSyncLoadComponent, {
+        data: {
+          loadFromRemote: resolve.bind(this),
+          saveToRemote: () => {
+            this.saveTo();
+            reject();
+          },
+          cancel: reject,
+          remoteModified: this._formatDate(remoteModified),
+          lastActiveLocal: this._formatDate(lastActiveLocal),
+        }
+      });
+    });
   }
 
   private _confirmUsingExistingFileDialog(fileName): Promise<any> {

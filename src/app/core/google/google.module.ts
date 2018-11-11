@@ -4,6 +4,8 @@ import { GoogleSyncCfgComponent } from './google-sync-cfg/google-sync-cfg.compon
 import { FormsModule } from '@angular/forms';
 import { UiModule } from '../../ui/ui.module';
 import { DialogGoogleExportTimeComponent } from './dialog-google-export-time/dialog-google-export-time.component';
+import { DialogConfirmDriveSyncLoadComponent } from './dialog-confirm-drive-sync-load/dialog-confirm-drive-sync-load.component';
+import { DialogConfirmDriveSyncSaveComponent } from './dialog-confirm-drive-sync-save/dialog-confirm-drive-sync-save.component';
 
 @NgModule({
   imports: [
@@ -11,9 +13,18 @@ import { DialogGoogleExportTimeComponent } from './dialog-google-export-time/dia
     FormsModule,
     UiModule,
   ],
-  declarations: [GoogleSyncCfgComponent, DialogGoogleExportTimeComponent],
+  declarations: [
+    GoogleSyncCfgComponent,
+    DialogGoogleExportTimeComponent,
+    DialogConfirmDriveSyncLoadComponent,
+    DialogConfirmDriveSyncSaveComponent,
+  ],
   exports: [GoogleSyncCfgComponent],
-  entryComponents: [DialogGoogleExportTimeComponent]
+  entryComponents: [
+    DialogGoogleExportTimeComponent,
+    DialogConfirmDriveSyncLoadComponent,
+    DialogConfirmDriveSyncSaveComponent,
+  ]
 })
 export class GoogleModule {
 }
