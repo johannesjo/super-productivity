@@ -58,6 +58,13 @@ export class AppComponent implements OnInit {
       this._electronService.ipcRenderer.on(IPC_TRANSFER_SETTINGS_REQUESTED, () => {
         this._electronService.ipcRenderer.send(IPC_TRANSFER_SETTINGS_TO_ELECTRON, this._configService.cfg);
       });
+    } else {
+      window.addEventListener('beforeunload', (e) => {
+        if (this._configService.cfg.misc.isConfirmBeforeExit) {
+          e.preventDefault();
+          e.returnValue = '';
+        }
+      });
     }
   }
 
