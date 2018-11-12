@@ -131,7 +131,7 @@ electron.ipcMain.on('GIT_LOG', (ev, cwd) => {
 });
 
 electron.ipcMain.on('NOTIFY', (ev, notification) => {
-  notifier.notify(notification);
+  notifier.notify({...notification, message: notification.body});
 });
 
 electron.ipcMain.on('SHOW_OR_FOCUS', () => {

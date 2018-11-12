@@ -10,15 +10,11 @@ import { ConfigService } from './core/config/config.service';
 import { blendInOutAnimation } from './ui/animations/blend-in-out.ani';
 import { LayoutService } from './core/layout/layout.service';
 import { ElectronService } from 'ngx-electron';
-import {
-  IPC_APP_READY,
-  IPC_ERROR,
-  IPC_TRANSFER_SETTINGS_REQUESTED,
-  IPC_TRANSFER_SETTINGS_TO_ELECTRON
-} from '../ipc-events.const';
+import { IPC_APP_READY, IPC_ERROR, IPC_TRANSFER_SETTINGS_REQUESTED, IPC_TRANSFER_SETTINGS_TO_ELECTRON } from '../ipc-events.const';
 import { SnackService } from './core/snack/snack.service';
 import { IS_ELECTRON } from './app.constants';
 import { GoogleDriveSyncService } from './core/google/google-drive-sync.service';
+import { SwUpdate } from '@angular/service-worker';
 
 @Component({
   selector: 'app-root',
@@ -41,6 +37,7 @@ export class AppComponent implements OnInit {
     private _googleDriveSyncService: GoogleDriveSyncService,
     private _snackService: SnackService,
     private _chromeExtensionInterface: ChromeExtensionInterfaceService,
+    private _swUpdate: SwUpdate,
     public layoutService: LayoutService,
   ) {
     this._matIconRegistry.addSvgIcon(
@@ -59,6 +56,14 @@ export class AppComponent implements OnInit {
         this._electronService.ipcRenderer.send(IPC_TRANSFER_SETTINGS_TO_ELECTRON, this._configService.cfg);
       });
     } else {
+      if (this._swUpdate.isEnabled) {
+        this._swUpdate.available.subscribe(() => {
+          if (confirm('New version available. Load New Version?')) {
+            window.location.reload();
+          }
+        });
+      }
+
       window.addEventListener('beforeunload', (e) => {
         if (this._configService.cfg.misc.isConfirmBeforeExit) {
           e.preventDefault();
