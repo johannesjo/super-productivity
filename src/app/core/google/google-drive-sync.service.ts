@@ -273,7 +273,6 @@ export class GoogleDriveSyncService {
   }
 
   private _showAsyncToast(promise, msg) {
-    console.log('XXXX Show async toast');
     this._snackService.open({
       type: 'CUSTOM',
       icon: 'file_upload',

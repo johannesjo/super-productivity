@@ -341,7 +341,6 @@ export class GoogleApiService {
       headers: new HttpHeaders(p.headers),
       params: new HttpParams({fromObject: p.params}),
     }];
-    console.log(allArgs);
     const req = new HttpRequest(p.method, p.url, ...allArgs);
 
     // const sub = this._http[p.method.toLowerCase()](p.url, p.data, p)
