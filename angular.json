@@ -36,7 +36,6 @@
               "src/styles.scss"
             ],
             "scripts": [
-              "src/service-workers/notifications.js"
             ]
           },
           "configurations": {
@@ -88,7 +87,6 @@
               "src/styles.scss"
             ],
             "scripts": [
-              "src/service-workers/notifications.js"
             ],
             "assets": [
               "src/favicon.ico",
