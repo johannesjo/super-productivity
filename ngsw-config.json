@@ -12,7 +12,8 @@
           "/*.js"
         ]
       }
-    }, {
+    },
+    {
       "name": "assets",
       "installMode": "lazy",
       "updateMode": "prefetch",
@@ -22,5 +23,12 @@
         ]
       }
     }
-  ]
+  ],
+  "external": {
+    "urls": [
+      {
+        "url": "https://fonts.googleapis.com/icon?family=Material+Icons"
+      }
+    ]
+  }
 }

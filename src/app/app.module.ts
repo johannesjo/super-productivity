@@ -41,7 +41,6 @@ import { TimeTrackingModule } from './time-tracking/time-tracking.module';
     BrowserAnimationsModule,
     HttpClientModule,
     RouterModule.forRoot(APP_ROUTES, {useHash: true}),
-    ServiceWorkerModule.register('ngsw-worker.js', {enabled: environment.production}),
     // NOTE: both need to be present to use forFeature stores
     StoreModule.forRoot(reducers),
     EffectsModule.forRoot([]),
@@ -49,6 +48,7 @@ import { TimeTrackingModule } from './time-tracking/time-tracking.module';
     ReactiveFormsModule,
     FormlyModule.forRoot(),
     FormlyMaterialModule,
+    ServiceWorkerModule.register('ngsw-worker.js', {enabled: environment.production}),
   ],
   providers: [],
   bootstrap: [AppComponent]
