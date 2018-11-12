@@ -94,7 +94,20 @@ function initWinEventListeners(app, IS_MAC, nestedWinParams) {
       event.preventDefault();
 
       getSettings(mainWin, (appCfg) => {
-        if (appCfg && appCfg.isDontMinimizeToTray) {
+        if (appCfg && appCfg.isConfirmBeforeExit) {
+          const choice = require('electron').dialog.showMessageBox(this,
+            {
+              type: 'question',
+              buttons: ['Yes', 'No'],
+              title: 'Confirm',
+              message: 'Are you sure you want to quit?'
+            });
+          if (choice === 1) {
+            return;
+          }
+        }
+
+        if (!appCfg || !appCfg.isMinimizeToTrayOnExit) {
           app.isQuiting = true;
           app.quit();
         } else {

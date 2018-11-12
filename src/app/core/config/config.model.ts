@@ -32,16 +32,13 @@ export type MiscConfig = Readonly<{
   minIdleTime: number;
   isOnlyOpenIdleWhenCurrentTask: boolean;
 
-  isDoNotMinimizeToTray: boolean;
+  isMinimizeToTrayOnExit: boolean;
+  isConfirmBeforeExit: boolean;
   isNotifyWhenTimeEstimateExceeded: boolean;
   isBlockFinishDayUntilTimeTimeTracked: boolean;
-  isConfirmBeforeExit: boolean;
-  isShowTimeWorkedWithoutBreak: boolean;
   isTakeABreakEnabled: boolean;
-  takeABreakMinWorkingTime: boolean;
-  isAutoStartNextTask: boolean;
-  isShortSyntaxEnabled: boolean;
   takeABreakMessage: string;
+  takeABreakMinWorkingTime: number;
 }>;
 
 

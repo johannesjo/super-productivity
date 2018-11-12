@@ -3,20 +3,17 @@ import * as moment from 'moment';
 
 export const DEFAULT_CFG: GlobalConfig = {
   misc: {
-    isDoNotMinimizeToTray: false,
+    isMinimizeToTrayOnExit: false,
+    isConfirmBeforeExit: false,
     isNotifyWhenTimeEstimateExceeded: false,
     isBlockFinishDayUntilTimeTimeTracked: false,
-    isConfirmBeforeExit: false,
-    isShowTimeWorkedWithoutBreak: false,
-    isTakeABreakEnabled: false,
-    takeABreakMinWorkingTime: undefined,
-    isAutoStartNextTask: true,
-    isEnableIdleTimeTracking: true,
     isOnlyOpenIdleWhenCurrentTask: false,
-    minIdleTime: 5 * 60 * 60,
-    isShortSyntaxEnabled: true,
+    isEnableIdleTimeTracking: true,
+    minIdleTime: 5 * 60 * 1000,
+    isTakeABreakEnabled: false,
     /* tslint:disable-next-line */
     takeABreakMessage: 'Take a break! You have been working for ${duration} without one. Go away from the computer! Take a short walk! Makes you more productive in the long run!',
+    takeABreakMinWorkingTime: 60 * 60 * 1000,
   },
   pomodoro: {
     isEnabled: true,

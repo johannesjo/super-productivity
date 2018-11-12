@@ -51,6 +51,7 @@ import { DragDropModule } from '@angular/cdk/drag-drop';
 import { SimpleDownloadDirective } from './simple-download/simple-download.directive';
 import { Angular2PromiseButtonModule } from 'angular2-promise-buttons';
 import { DialogConfirmComponent } from './dialog-confirm/dialog-confirm.component';
+import { FormlyMatToggleModule } from '@ngx-formly/material/toggle';
 
 @NgModule({
   imports: [
@@ -60,6 +61,7 @@ import { DialogConfirmComponent } from './dialog-confirm/dialog-confirm.componen
     ReactiveFormsModule,
     FormlyModule.forChild(),
     FormlyMaterialModule,
+    FormlyMatToggleModule,
 
     DragDropModule,
     Angular2PromiseButtonModule.forRoot({

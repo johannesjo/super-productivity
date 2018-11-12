@@ -1,8 +1,9 @@
+// tslint:disable:max-line-length
 export const KEYBOARD_SETTINGS_FORM_CFG = {
   title: 'Keyboard Shortcuts',
   key: 'keyboard',
   /* tslint:disable */
-  help: `  <p>Here you can configure all keyboard shortcuts.</p>
+  help: `<p>Here you can configure all keyboard shortcuts.</p>
   <p>Click on the text input and enter the desired keyboard combination. Hit enter to save and Escape to abort.</p>
   <p>There are three types of shortcuts:</p>
   <ul>
@@ -210,3 +211,4 @@ export const KEYBOARD_SETTINGS_FORM_CFG = {
     },
   ]
 };
+// tslint:enable:max-line-length
