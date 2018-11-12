@@ -12,7 +12,7 @@
             (click)="startTask()"
             aria-label="mark as current"
             tabindex="2"
-            *ngIf="!isDone && !isCurrent && !task.subTasks">
+            *ngIf="!task.isDone && !isCurrent && !task.subTasks">
       <mat-icon class="material-icons">play_circle_filled</mat-icon>
     </button>
 
@@ -20,7 +20,7 @@
             class="play-btn ico-btn"
             (click)="pauseTask()"
             tabindex="2"
-            *ngIf="!isDone && isCurrent && !task.subTasks">
+            *ngIf="!task.isDone && isCurrent && !task.subTasks">
       <mat-icon class="material-icons">pause_circle_filled</mat-icon>
     </button>
 
@@ -79,7 +79,7 @@
       <button mat-icon-button
               class="ico-btn"
               aria-label="add sub task"
-              *ngIf="!task.parentId&&!isDone"
+              *ngIf="!task.parentId&&!task.isDone"
               tabindex="2"
               (click)="addSubTask($event);">
 

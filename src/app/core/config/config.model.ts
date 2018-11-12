@@ -46,8 +46,8 @@ export type PomodoroConfig = Readonly<{
   [key: string]: any;
 }>;
 
-
-export type GoogleDriveSyncConfig = Readonly<{
+// NOTE: needs to be writable due to how we use it
+export interface GoogleDriveSyncConfig {
   isEnabled: boolean;
   isAutoLogin: boolean;
   isAutoSyncToRemote: boolean;
@@ -58,7 +58,7 @@ export type GoogleDriveSyncConfig = Readonly<{
   _lastLocalUpdate: string;
   _lastSyncToRemote: string;
   _backupDocId: string;
-}>;
+}
 
 
 // SETTINGS (not configurable under config)

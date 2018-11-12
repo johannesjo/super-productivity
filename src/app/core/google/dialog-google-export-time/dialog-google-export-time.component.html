@@ -83,7 +83,7 @@
           <input type="text"
                  (change)="updateDefaults()"
                  [ngModelOptions]="{standalone: true}"
-                 [(ngModel)]="opts.defaultValues[i]">
+                 [ngModel]="opts.defaultValues[i]">
         </td>
       </tr>
       <tr>
@@ -106,19 +106,19 @@
 
       <mat-slide-toggle
         [ngModelOptions]="{standalone: true}"
-        [(ngModel)]="opts.isAutoLogin">Auto-login and load data next time
+        [ngModel]="opts.isAutoLogin">Auto-login and load data next time
       </mat-slide-toggle>
-      <!--<mat-slide-toggle [(ngModel)]="optsname="".is.isAutoFocusEmpty">Auto-focus first empty field after loading table headings</mat-slide-toggle>-->
+      <!--<mat-slide-toggle [ngModel]="optsname="".is.isAutoFocusEmpty">Auto-focus first empty field after loading table headings</mat-slide-toggle>-->
       <mat-slide-toggle
         [ngModelOptions]="{standalone: true}"
-        [(ngModel)]="opts.isRoundWorkTimeUp"
+        [ngModel]="opts.isRoundWorkTimeUp"
         (change)="updateDefaults()">Always round work time up
       </mat-slide-toggle>
       <mat-form-field>
         <label>Round start time to</label>
         <mat-select (change)="updateDefaults()"
                     [ngModelOptions]="{standalone: true}"
-                    [(ngModel)]="opts.roundStartTimeTo">
+                    [ngModel]="opts.roundStartTimeTo">
           <mat-option><em>don't round</em></mat-option>
           <mat-option *ngFor="let roundOption of roundTimeOptions"
                       [value]="roundOption.id">
@@ -131,7 +131,7 @@
         <label>Round end time to</label>
         <mat-select (change)="updateDefaults()"
                     [ngModelOptions]="{standalone: true}"
-                    [(ngModel)]="opts.roundEndTimeTo">
+                    [ngModel]="opts.roundEndTimeTo">
           <mat-option><em>don't round</em></mat-option>
           <mat-option *ngFor="let roundOption of roundTimeOptions"
                       [value]="roundOption.id">
@@ -144,7 +144,7 @@
         <label>Round time worked to</label>
         <mat-select (change)="updateDefaults()"
                     [ngModelOptions]="{standalone: true}"
-                    [(ngModel)]="opts.roundWorkTimeTo">
+                    [ngModel]="opts.roundWorkTimeTo">
           <mat-option><em>don't round</em></mat-option>
           <mat-option *ngFor="let roundOption of roundTimeOptions"
                       [value]="roundOption.id">

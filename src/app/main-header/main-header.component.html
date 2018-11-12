@@ -42,9 +42,9 @@
             [color]="rlHA.isActive ? 'accent' : null">
       <mat-icon>today</mat-icon>
     </button>
-    <eco-fab-speed-dial [(open)]="open"
-                        (mouseenter)="open = true"
-                        (mouseleave)="open = false"
+    <eco-fab-speed-dial [(open)]="isSpeedDialOpen"
+                        (mouseenter)="isSpeedDialOpen = true"
+                        (mouseleave)="isSpeedDialOpen = false"
                         [animationMode]="'fling'"
                         [direction]="'down'">
       <eco-fab-speed-dial-trigger>

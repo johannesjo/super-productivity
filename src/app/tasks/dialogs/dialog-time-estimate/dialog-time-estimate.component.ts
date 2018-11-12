@@ -1,6 +1,6 @@
 import { Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material';
-import { Task } from '../../task.model';
+import { Task, TaskCopy } from '../../task.model';
 import { TaskService } from '../../task.service';
 import { getTodayStr } from '../../util/get-today-str';
 import { getWorklogStr } from '../../../core/util/get-work-log-str';
@@ -13,7 +13,7 @@ import { getWorklogStr } from '../../../core/util/get-work-log-str';
 export class DialogTimeEstimateComponent {
   todayStr: string;
   task: Task;
-  taskCopy: Task;
+  taskCopy: TaskCopy;
   isAddForAnotherDayFormVisible: boolean;
   timeSpentOnDayCopy: any;
   newEntry: any;

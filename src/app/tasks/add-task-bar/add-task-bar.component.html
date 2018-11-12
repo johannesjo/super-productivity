@@ -9,7 +9,7 @@
          autofocus="autofocus"
          [matAutocomplete]="auto"
          [formControl]="taskSuggestionsCtrl"
-         (blur)="onBlur()">
+         (blur)="onBlur($event)">
 
   <mat-autocomplete #auto="matAutocomplete"
                     [displayWith]="displayWith"

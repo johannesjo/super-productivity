@@ -10,6 +10,8 @@ import { LayoutService } from '../core/layout/layout.service';
   styleUrls: ['./main-header.component.scss']
 })
 export class MainHeaderComponent implements OnInit {
+  isSpeedDialOpen: boolean;
+
   constructor(
     public readonly projectService: ProjectService,
     private readonly _matDialog: MatDialog,

@@ -15,7 +15,7 @@
   <p>
     <span *ngIf="!isCreate">Track to:</span>
     <span *ngIf="isCreate">Create and track to:</span>
-    <br><strong>{{selectedTask?.title || selectedTask || 'No task selected'}} </strong>
+    <br><strong>{{selectedTask?.title || newTaskTitle || 'No task selected'}} </strong>
   </p>
 
   <div mat-dialog-actions

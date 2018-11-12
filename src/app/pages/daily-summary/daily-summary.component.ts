@@ -31,9 +31,10 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
   public clearDoneTasks: boolean;
   public moveUnfinishedToBacklog: boolean;
   public commitLog;
+  public isTimeSheetExported = true;
+  public showSuccessAnimation;
 
   private successAnimationTimeout;
-  private showSuccessAnimation;
   private successAnimationMaxTimeout;
   private _doneTasks: TaskWithSubTasks[];
   private _todaysTasks: TaskWithSubTasks[];

@@ -108,7 +108,7 @@
       </button>
 
       <button mat-raised-button=""
-              [color]="cfg.isBlockFinishDayUntilTimeTimeTracked && !currentSession.isTimeSheetExported && 'accent' ||'primary'"
+              [color]="cfg.isBlockFinishDayUntilTimeTimeTracked && !isTimeSheetExported && 'accent' ||'primary'"
               (click)="showTimeSheetExportModal()">
         <mat-icon>call_made</mat-icon>
         <mat-icon>timer</mat-icon>
@@ -116,7 +116,7 @@
       </button>
       <button mat-raised-button=""
               color="primary"
-              [disabled]="cfg.isBlockFinishDayUntilTimeTimeTracked && !currentSession.isTimeSheetExported"
+              [disabled]="cfg.isBlockFinishDayUntilTimeTimeTracked && !isTimeSheetExported"
               (click)="finishDay()">
         <mat-icon>wb_sunny</mat-icon>
         Save and go home

@@ -12,7 +12,8 @@ import { Task } from '../../tasks/task.model';
 })
 export class DialogIdleComponent implements OnInit {
   public lastCurrentTask$: Observable<Task> = this._taskService.getById(this.data.lastCurrentTaskId);
-  public selectedTask: Task | string;
+  public selectedTask: Task;
+  public newTaskTitle: string;
   public isCreate: boolean;
 
   constructor(
@@ -31,8 +32,14 @@ export class DialogIdleComponent implements OnInit {
   }
 
   onTaskChange(taskOrTaskTitle: Task | string) {
-    this.selectedTask = taskOrTaskTitle;
     this.isCreate = (typeof taskOrTaskTitle === 'string');
+    if (this.isCreate) {
+      this.newTaskTitle = taskOrTaskTitle as string;
+      this.selectedTask = null;
+    } else {
+      this.selectedTask = taskOrTaskTitle as Task;
+      this.newTaskTitle = null;
+    }
   }
 
 

@@ -6,7 +6,7 @@ export type TimeSpentOnDay = Readonly<{
   [key: string]: number;
 }>;
 
-export type Task = Readonly<{
+export interface TaskCopy {
   id: string;
   title: string;
 
@@ -22,7 +22,9 @@ export type Task = Readonly<{
   issueId?: string;
   issueType?: IssueProviderKey;
   parentId?: string;
-}>;
+}
+
+export type Task = Readonly<TaskCopy>;
 
 export interface TaskWithIssueData extends Task {
   readonly issueData?: any;
