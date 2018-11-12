@@ -35,7 +35,9 @@
             "styles": [
               "src/styles.scss"
             ],
-            "scripts": []
+            "scripts": [
+              "src/service-workers/notifications.js"
+            ]
           },
           "configurations": {
             "production": {
@@ -85,7 +87,9 @@
             "styles": [
               "src/styles.scss"
             ],
-            "scripts": [],
+            "scripts": [
+              "src/service-workers/notifications.js"
+            ],
             "assets": [
               "src/favicon.ico",
               "src/assets",
