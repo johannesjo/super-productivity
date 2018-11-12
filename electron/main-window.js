@@ -94,8 +94,8 @@ function initWinEventListeners(app, IS_MAC, nestedWinParams) {
       event.preventDefault();
 
       getSettings(mainWin, (appCfg) => {
-        if (appCfg && appCfg.isConfirmBeforeExit) {
-          const choice = require('electron').dialog.showMessageBox(this,
+        if (appCfg && appCfg.misc.isConfirmBeforeExit) {
+          const choice = require('electron').dialog.showMessageBox(mainWin,
             {
               type: 'question',
               buttons: ['Yes', 'No'],
@@ -103,11 +103,12 @@ function initWinEventListeners(app, IS_MAC, nestedWinParams) {
               message: 'Are you sure you want to quit?'
             });
           if (choice === 1) {
+            event.preventDefault();
             return;
           }
         }
 
-        if (!appCfg || !appCfg.isMinimizeToTrayOnExit) {
+        if (!appCfg || !appCfg.misc.isMinimizeToTrayOnExit) {
           app.isQuiting = true;
           app.quit();
         } else {

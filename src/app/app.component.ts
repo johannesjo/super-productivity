@@ -10,7 +10,12 @@ import { ConfigService } from './core/config/config.service';
 import { blendInOutAnimation } from './ui/animations/blend-in-out.ani';
 import { LayoutService } from './core/layout/layout.service';
 import { ElectronService } from 'ngx-electron';
-import { IPC_EVENT_APP_READY, IPC_EVENT_ERROR } from '../ipc-events.const';
+import {
+  IPC_EVENT_APP_READY,
+  IPC_EVENT_ERROR,
+  IPC_TRANSFER_SETTINGS_REQUESTED,
+  IPC_TRANSFER_SETTINGS_TO_ELECTRON
+} from '../ipc-events.const';
 import { SnackService } from './core/snack/snack.service';
 import { IS_ELECTRON } from './app.constants';
 import { GoogleDriveSyncService } from './core/google/google-drive-sync.service';
@@ -49,6 +54,10 @@ export class AppComponent implements OnInit {
     if (IS_ELECTRON) {
       this._electronService.ipcRenderer.send(IPC_EVENT_APP_READY);
       this._initElectronErrorHandler();
+
+      this._electronService.ipcRenderer.on(IPC_TRANSFER_SETTINGS_REQUESTED, () => {
+        this._electronService.ipcRenderer.send(IPC_TRANSFER_SETTINGS_TO_ELECTRON, this._configService.cfg);
+      });
     }
   }
 
