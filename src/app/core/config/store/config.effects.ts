@@ -26,8 +26,9 @@ export class ConfigEffects {
       ),
       tap((action: UpdateConfigSection) => {
         const {sectionKey, sectionCfg} = action.payload;
+        const isPublicSection = sectionKey.charAt(0) !== '_';
         const isPublicPropUpdated = Object.keys(sectionCfg).find((key) => key.charAt(0) !== '_');
-        if (isPublicPropUpdated) {
+        if (isPublicPropUpdated && isPublicSection) {
           this._store.dispatch(new SnackOpen({
             type: 'SUCCESS',
             message: `Updated settings for <strong>${sectionKey}</strong>`,
