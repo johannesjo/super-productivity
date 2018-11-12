@@ -11,8 +11,8 @@ import { blendInOutAnimation } from './ui/animations/blend-in-out.ani';
 import { LayoutService } from './core/layout/layout.service';
 import { ElectronService } from 'ngx-electron';
 import {
-  IPC_EVENT_APP_READY,
-  IPC_EVENT_ERROR,
+  IPC_APP_READY,
+  IPC_ERROR,
   IPC_TRANSFER_SETTINGS_REQUESTED,
   IPC_TRANSFER_SETTINGS_TO_ELECTRON
 } from '../ipc-events.const';
@@ -52,7 +52,7 @@ export class AppComponent implements OnInit {
     this._googleDriveSyncService.init();
     this._chromeExtensionInterface.init();
     if (IS_ELECTRON) {
-      this._electronService.ipcRenderer.send(IPC_EVENT_APP_READY);
+      this._electronService.ipcRenderer.send(IPC_APP_READY);
       this._initElectronErrorHandler();
 
       this._electronService.ipcRenderer.on(IPC_TRANSFER_SETTINGS_REQUESTED, () => {
@@ -88,7 +88,7 @@ export class AppComponent implements OnInit {
   }
 
   private _initElectronErrorHandler() {
-    this._electronService.ipcRenderer.on(IPC_EVENT_ERROR, (ev, data: {
+    this._electronService.ipcRenderer.on(IPC_ERROR, (ev, data: {
       error: string,
       stack: any,
     }) => {

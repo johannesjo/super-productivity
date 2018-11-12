@@ -4,7 +4,7 @@ import { ChromeExtensionInterfaceService } from '../core/chrome-extension-interf
 import { ProjectService } from '../project/project.service';
 import { ElectronService } from 'ngx-electron';
 import { TaskService } from '../tasks/task.service';
-import { IPC_EVENT_IDLE_TIME } from '../../ipc-events.const';
+import { IPC_IDLE_TIME } from '../../ipc-events.const';
 import { MatDialog } from '@angular/material';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { DialogIdleComponent } from './dialog-idle/dialog-idle.component';
@@ -40,12 +40,12 @@ export class IdleService {
 
   init() {
     if (IS_ELECTRON) {
-      this._electronService.ipcRenderer.on(IPC_EVENT_IDLE_TIME, (ev, idleTimeInMs) => {
+      this._electronService.ipcRenderer.on(IPC_IDLE_TIME, (ev, idleTimeInMs) => {
         this.handleIdle(idleTimeInMs);
       });
     }
     this._chromeExtensionInterface.isReady$.subscribe(() => {
-      this._chromeExtensionInterface.addEventListener(IPC_EVENT_IDLE_TIME, (ev, idleTimeInMs) => {
+      this._chromeExtensionInterface.addEventListener(IPC_IDLE_TIME, (ev, idleTimeInMs) => {
         this.handleIdle(idleTimeInMs);
       });
     });

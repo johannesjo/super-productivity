@@ -11,7 +11,7 @@ import { Subscription } from 'rxjs';
 import { ProjectService } from '../../project/project.service';
 import { SimpleSummarySettings } from '../../project/project.model';
 import { ElectronService } from 'ngx-electron';
-import { IPC_EVENT_SHUTDOWN, IPC_EVENT_SHUTDOWN_NOW } from '../../../ipc-events.const';
+import { IPC_SHUTDOWN, IPC_SHUTDOWN_NOW } from '../../../ipc-events.const';
 
 const SUCCESS_ANIMATION_DURATION = 500;
 const SUCCESS_ANIMATION_MAX_DURATION = 10000;
@@ -96,7 +96,7 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
       //   )
       //     .then(() => {
       //         initSuccessAnimation(() => {
-      //           window.ipcRenderer.send(IPC_EVENT_SHUTDOWN);
+      //           window.ipcRenderer.send(IPC_SHUTDOWN);
       //         });
       //       },
       //       () => {
@@ -106,7 +106,7 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
       //       });
       // this._router.navigate(['/work-view']);
       this._initSuccessAnimation(() => {
-        this._electronService.ipcRenderer.send(IPC_EVENT_SHUTDOWN_NOW);
+        this._electronService.ipcRenderer.send(IPC_SHUTDOWN_NOW);
       });
     } else {
       //   if (GoogleDriveSync.config && GoogleDriveSync.config.isAutoSyncToRemote) {

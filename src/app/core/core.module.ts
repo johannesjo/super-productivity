@@ -9,6 +9,7 @@ import { GoogleModule } from './google/google.module';
 import { RouterModule } from '@angular/router';
 import { LayoutModule } from './layout/layout.module';
 import { DialogSimpleTaskSummaryModule } from './dialog-simple-task-summary/dialog-simple-task-summary.module';
+import { NotifyModule } from './notify/notify.module';
 
 @NgModule({
   imports: [
@@ -22,6 +23,7 @@ import { DialogSimpleTaskSummaryModule } from './dialog-simple-task-summary/dial
     GoogleModule,
     RouterModule,
     LayoutModule,
+    NotifyModule,
     DialogSimpleTaskSummaryModule,
   ],
   declarations: [],
@@ -34,6 +36,7 @@ import { DialogSimpleTaskSummaryModule } from './dialog-simple-task-summary/dial
     GoogleModule,
     RouterModule,
     LayoutModule,
+    NotifyModule,
     DialogSimpleTaskSummaryModule,
   ]
 })
