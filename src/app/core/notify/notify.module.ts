@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { SnackModule } from '../snack/snack.module';
-import { NotifyService, SERVICE_WORKER_URL } from './notify.service';
+import { NotifyService } from './notify.service';
 
 @NgModule({
   imports: [

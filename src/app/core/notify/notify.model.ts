@@ -1,3 +1,4 @@
-export interface NotifyModel extends Notification {
+export interface NotifyModel extends NotificationOptions {
+  title?: string;
   duration?: number;
 }

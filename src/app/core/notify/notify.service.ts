@@ -5,28 +5,30 @@ import { NotifyModel } from './notify.model';
   providedIn: 'root'
 })
 export class NotifyService {
-  async notify(notification: Partial<NotifyModel>) {
+  async notify(options: NotifyModel): Promise<Notification> {
     if (this._isServiceWorkerNotificationSupport()) {
       const permission = await Notification.requestPermission();
+
       if (permission === 'granted') {
-        const instance = new Notification(notification.title, {
-          body: notification.body,
-          icon: notification.icon || 'assets/icons/icon-128x128.png',
+        const instance = new Notification(options.title, {
+          icon: 'assets/icons/icon-128x128.png',
           vibrate: [100, 50, 100],
           data: {
             dateOfArrival: Date.now(),
             primaryKey: 1
           },
+          ...options,
         });
         instance.onclick = () => {
           instance.close();
         };
         setTimeout(() => {
           instance.close();
-        }, notification.duration || 10000);
+        }, options.duration || 10000);
         return instance;
       } else {
         console.warn('No notifications supported');
+        return null;
       }
     }
   }

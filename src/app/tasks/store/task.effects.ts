@@ -2,12 +2,15 @@ import { Injectable } from '@angular/core';
 import { Actions, Effect, ofType } from '@ngrx/effects';
 import { DeleteTask, TaskActionTypes } from './task.actions';
 import { select, Store } from '@ngrx/store';
-import { map, tap, withLatestFrom } from 'rxjs/operators';
+import { map, tap, throttleTime, withLatestFrom } from 'rxjs/operators';
 import { PersistenceService } from '../../core/persistence/persistence.service';
-import { selectTaskFeatureState } from './task.selectors';
+import { selectCurrentTask, selectTaskFeatureState } from './task.selectors';
 import { selectCurrentProjectId } from '../../project/store/project.reducer';
 import { SnackOpen } from '../../core/snack/store/snack.actions';
 import { TaskState } from './task.reducer';
+import { NotifyService } from '../../core/notify/notify.service';
+import { TaskService } from '../task.service';
+import { selectConfigFeatureState } from '../../core/config/store/config.reducer';
 
 // TODO send message to electron when current task changes here
 
@@ -30,6 +33,7 @@ export class TaskEffects {
     .pipe(
       ofType(
         TaskActionTypes.AddTask,
+        TaskActionTypes.AddTimeSpent,
         TaskActionTypes.DeleteTask,
         TaskActionTypes.UndoDeleteTask,
         TaskActionTypes.AddSubTask,
@@ -67,8 +71,25 @@ export class TaskEffects {
       })
     );
 
+  @Effect({dispatch: false}) timeEstimateExceeded$: any = this._actions$
+    .pipe(
+      ofType(
+        TaskActionTypes.AddTimeSpent,
+      ),
+      // show every 1 minute max
+      throttleTime(60000),
+      withLatestFrom(
+        this._store$.pipe(select(selectCurrentTask)),
+        this._store$.pipe(select(selectConfigFeatureState)),
+      ),
+      tap(this._notifyAboutTimeEstimateExceeded.bind(this))
+    );
+
+
   constructor(private _actions$: Actions,
               private _store$: Store<any>,
+              private _notifyService: NotifyService,
+              private _taskService: TaskService,
               private _persistenceService: PersistenceService) {
   }
 
@@ -98,6 +119,31 @@ export class TaskEffects {
     });
 
     this._persistenceService.saveToTaskArchiveForProject(currentProjectId, archive);
+  }
+
+  private async _notifyAboutTimeEstimateExceeded([action, ct, globalCfg]) {
+    if (globalCfg && globalCfg.misc.isNotifyWhenTimeEstimateExceeded
+      && ct && ct.timeEstimate > 0
+      && ct.timeSpent > ct.timeEstimate) {
+      this._notifyService.notify({
+        title: 'Time estimate exceeded!',
+        body: `You exceeded your estimated time for "${ct.title}".`,
+      });
+
+      this._store$.dispatch(new SnackOpen({
+        message: `You exceeded your estimated time for "${ct.title}"`,
+        actionStr: 'Add 1/2 hour',
+        actionId: TaskActionTypes.UpdateTask,
+        actionPayload: {
+          task: {
+            id: ct.id,
+            changes: {
+              timeEstimate: (ct.timeSpent + 30 * 60000)
+            }
+          }
+        }
+      }));
+    }
   }
 }
 

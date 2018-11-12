@@ -44,7 +44,7 @@ export class SnackEffects {
       _destroy$.unsubscribe();
     };
     const _destroy$: Subject<boolean> = new Subject<boolean>();
-    const {message, actionStr, actionId, config, type} = action.payload;
+    const {message, actionStr, actionId, actionPayload, config, type} = action.payload;
     const cfg = {
       ...DEFAULT_SNACK_CFG, ...config, data: action.payload
     };
@@ -69,7 +69,8 @@ export class SnackEffects {
         .pipe(takeUntil(_destroy$))
         .subscribe(() => {
           this.store$.dispatch({
-            type: actionId
+            type: actionId,
+            payload: actionPayload
           });
           destroySubs();
         });

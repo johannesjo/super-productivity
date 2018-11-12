@@ -8,6 +8,7 @@ export interface SnackParams {
   icon?: string;
   actionStr?: string;
   actionId?: string;
+  actionPayload?: any;
   duration?: number;
   delay?: number;
   config?: MatSnackBarConfig;
