@@ -12,6 +12,7 @@ import { catchError, map } from 'rxjs/operators';
 import { EmptyObservable } from 'rxjs-compat/observable/EmptyObservable';
 import { Observable } from 'rxjs';
 import { IPC_GOOGLE_AUTH_TOKEN, IPC_GOOGLE_AUTH_TOKEN_ERROR, IPC_TRIGGER_GOOGLE_AUTH } from '../../../ipc-events.const';
+import { ElectronService } from 'ngx-electron';
 
 
 @Injectable({
@@ -33,6 +34,7 @@ export class GoogleApiService {
 
   constructor(private readonly _http: HttpClient,
               private readonly _configService: ConfigService,
+              private readonly _electronService: ElectronService,
               private readonly _snackService: SnackService) {
     this.isLoggedIn$.subscribe((isLoggedIn) => this.isLoggedIn = isLoggedIn);
   }
@@ -43,9 +45,9 @@ export class GoogleApiService {
     }
 
     if (IS_ELECTRON) {
-      window.ipcRenderer.send(IPC_TRIGGER_GOOGLE_AUTH, this._session.refreshToken);
+      this._electronService.ipcRenderer.send(IPC_TRIGGER_GOOGLE_AUTH, this._session.refreshToken);
       return new Promise((resolve, reject) => {
-        window.ipcRenderer.on(IPC_GOOGLE_AUTH_TOKEN, (ev, data: any) => {
+        this._electronService.ipcRenderer.on(IPC_GOOGLE_AUTH_TOKEN, (ev, data: any) => {
           this._updateSession({
             accessToken: data.access_token,
             expiresAt: (data.expires_in * 1000) + moment().valueOf(),
@@ -57,7 +59,7 @@ export class GoogleApiService {
           // TODO remove
           // mainWindow.webContents.removeListener('did-finish-load', handler);
         });
-        window.ipcRenderer.on(IPC_GOOGLE_AUTH_TOKEN_ERROR, reject);
+        this._electronService.ipcRenderer.on(IPC_GOOGLE_AUTH_TOKEN_ERROR, reject);
       });
     } else {
       return this._initClientLibraryIfNotDone()
