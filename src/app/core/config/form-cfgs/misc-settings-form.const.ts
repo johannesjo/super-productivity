@@ -52,10 +52,10 @@ export const MISC_SETTINGS_FORM_CFG = {
     },
     {
       key: 'minIdleTime',
-      type: 'input',
+      type: 'duration',
       hideExpression: '!model.isEnableIdleTimeTracking',
       templateOptions: {
-        label: 'Trigger idle after x ms',
+        label: 'Trigger idle after X',
       },
     },
     {
@@ -76,10 +76,10 @@ export const MISC_SETTINGS_FORM_CFG = {
     },
     {
       key: 'takeABreakMinWorkingTime',
-      type: 'input',
+      type: 'duration',
       hideExpression: '!model.isTakeABreakEnabled',
       templateOptions: {
-        label: 'Trigger take a break notification after X milliseconds working without one',
+        label: 'Trigger take a break notification after X working without one',
       },
     },   {
       key: 'takeABreakMessage',

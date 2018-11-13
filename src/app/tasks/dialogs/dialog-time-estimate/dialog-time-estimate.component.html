@@ -7,7 +7,7 @@
     <mat-form-field>
       <input matInput
              placeholder="Estimated Duration"
-             supInputDuration
+             inputDuration
              name="estimate"
              [(ngModel)]="taskCopy.timeEstimate">
       <mat-icon matPrefix>timer</mat-icon>
@@ -18,7 +18,7 @@
       <input matInput
              placeholder="Time Spent Today"
              type="text"
-             supInputDuration="optional"
+             inputDuration="optional"
              name="timeSpendToday"
              [(ngModel)]="timeSpentOnDayCopy[todayStr]">
       <mat-icon matPrefix>timer</mat-icon>
@@ -29,7 +29,7 @@
       <mat-form-field class="mat-icon-float mat-block">
         <input matInput
                placeholder="Time Spent on {{strDate}}"
-               supInputDuration="optional"
+               inputDuration="optional"
                type="text"
                name="timeSpentOnDay{{strDate}}"
                [(ngModel)]="timeSpentOnDayCopy[strDate]"
@@ -81,7 +81,7 @@
              type="text"
              name="timeSpentNew"
              required
-             supInputDuration
+             inputDuration
              [(ngModel)]="newEntry.timeSpent"
              aria-label="Time Spent for new entry">
       <mat-icon matPrefix>timer</mat-icon>

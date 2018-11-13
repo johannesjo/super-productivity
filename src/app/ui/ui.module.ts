@@ -52,6 +52,7 @@ import { SimpleDownloadDirective } from './simple-download/simple-download.direc
 import { Angular2PromiseButtonModule } from 'angular2-promise-buttons';
 import { DialogConfirmComponent } from './dialog-confirm/dialog-confirm.component';
 import { FormlyMatToggleModule } from '@ngx-formly/material/toggle';
+import { InputDurationFormlyComponent } from './duration/input-duration-formly/input-duration-formly.component';
 
 @NgModule({
   imports: [
@@ -59,7 +60,14 @@ import { FormlyMatToggleModule } from '@ngx-formly/material/toggle';
     MarkdownModule.forRoot(),
 
     ReactiveFormsModule,
-    FormlyModule.forChild(),
+    FormlyModule.forChild({
+      types: [{
+        name: 'duration',
+        component: InputDurationFormlyComponent,
+        extends: 'input',
+        wrappers: ['form-field'],
+      }]
+    }),
     FormlyMaterialModule,
     FormlyMatToggleModule,
 
@@ -101,6 +109,7 @@ import { FormlyMatToggleModule } from '@ngx-formly/material/toggle';
     DurationFromStringPipe,
     DurationToStringPipe,
     InputDurationDirective,
+    InputDurationFormlyComponent,
     EditOnClickDirective,
     InlineMarkdownComponent,
     ThemeSelectComponent,
@@ -122,6 +131,7 @@ import { FormlyMatToggleModule } from '@ngx-formly/material/toggle';
     DurationFromStringPipe,
     DurationToStringPipe,
     InputDurationDirective,
+    InputDurationFormlyComponent,
     EditOnClickDirective,
     InlineMarkdownComponent,
     ThemeSelectComponent,

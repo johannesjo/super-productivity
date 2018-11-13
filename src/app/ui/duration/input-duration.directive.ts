@@ -1,4 +1,4 @@
-import { Attribute, Directive, ElementRef, forwardRef, Renderer2 } from '@angular/core';
+import { AfterViewChecked, Attribute, Directive, ElementRef, forwardRef, Renderer2 } from '@angular/core';
 import {
   AbstractControl,
   ControlValueAccessor,
@@ -29,7 +29,7 @@ export const INPUT_DURATION_VALIDATORS: any = {
 
 
 @Directive({
-  selector: 'input[supInputDuration][ngModel]',
+  selector: 'input[inputDuration]',
   providers: [
     StringToMsPipe,
     MsToStringPipe,
@@ -42,8 +42,7 @@ export const INPUT_DURATION_VALIDATORS: any = {
 })
 
 
-export class InputDurationDirective<D> implements ControlValueAccessor,
-  Validator {
+export class InputDurationDirective<D> implements ControlValueAccessor, Validator, AfterViewChecked {
 
   // by the Control Value Accessor
   private _onTouchedCallback: () => void = noop;
@@ -52,19 +51,10 @@ export class InputDurationDirective<D> implements ControlValueAccessor,
   private _validatorOnChange: (_: any) => void = noop;
   private _onChangeCallback: (_: any) => void = noop;
   // -----------
-  private _parseValidator: ValidatorFn = (): ValidationErrors | null => {
-    return this._value ?
-      null : {'inputDurationParse': {'text': this._elementRef.nativeElement.value}};
-  };
+  private _parseValidator: ValidatorFn = this._parseValidatorFn.bind(this);
+  private _validator: ValidatorFn | null;
 
-
-  // @Input('value') value: string = '';
-  /* tslint:disable */
-  private _validator: ValidatorFn | null =
-    Validators.compose(
-      [this._parseValidator]);
-
-  constructor(@Attribute('supInputDuration') public supInputDuration,
+  constructor(@Attribute('inputDuration') public inputDuration,
               private _elementRef: ElementRef,
               private _stringToMs: StringToMsPipe,
               private _msToString: MsToStringPipe,
@@ -73,9 +63,11 @@ export class InputDurationDirective<D> implements ControlValueAccessor,
 
   private _value;
 
+  ngAfterViewChecked() {
+    this._validator = Validators.compose([this._parseValidator]);
+  }
 
   // Validations
-
   get value() {
     return this._value;
   }
@@ -124,5 +116,11 @@ export class InputDurationDirective<D> implements ControlValueAccessor,
     const msVal = this._stringToMs.transform(value);
     this._value = this._msToString.transform(msVal, false, true);
     this._onChangeCallback(msVal);
+  }
+
+  private _parseValidatorFn(): ValidationErrors | null {
+    return this._value
+      ? null
+      : {'inputDurationParse': {'text': this._elementRef.nativeElement.value}};
   }
 }
