@@ -6,13 +6,6 @@ import { distinctUntilChanged, scan } from 'rxjs/operators';
 
 const BREAK_TRIGGER_DURATION = 5 * 60 * 1000;
 
-// required because typescript freaks out
-const reduceBreak = (acc, [currentTaskId, tick]) => {
-  return currentTaskId ? 0 : acc + tick.duration;
-};
-const reduceTimeWorked = (acc, [breakDuration, tick]) => {
-  return (breakDuration > BREAK_TRIGGER_DURATION) ? 0 : this.timeWorkedWithoutABreakAcc + tick.duration;
-};
 
 @Injectable({
   providedIn: 'root'
@@ -23,14 +16,14 @@ export class TakeABreakService {
     this._taskService.currentTaskId$,
     this._timeTrackingService.tick$
   ).pipe(
-    scan(reduceBreak, 0)
+    scan(this.reduceBreak.bind(this), 0)
   );
   public timeWorkingWithoutABreak$: Observable<number> = combineLatest(
     this._breakDuration$,
     this._timeTrackingService.tick$
   )
     .pipe(
-      scan(reduceTimeWorked, 0),
+      scan(this.reduceTimeWorked.bind(this), 0),
       distinctUntilChanged()
     );
   /* tslint:enable*/
@@ -75,4 +68,14 @@ export class TakeABreakService {
     this.timeWorkedWithoutABreakAcc = this.timeWorkedWithoutABreakLastOverZero + valToAdd;
     this.isBlockByIdle = false;
   }
+
+  private reduceTimeWorked(acc, [breakDuration, tick]) {
+    return (breakDuration > BREAK_TRIGGER_DURATION) ? 0 : this.timeWorkedWithoutABreakAcc + tick.duration;
+  }
+
+  // required because typescript freaks out
+  private reduceBreak(acc, [currentTaskId, tick]) {
+    return currentTaskId ? 0 : acc + tick.duration;
+  };
+
 }
