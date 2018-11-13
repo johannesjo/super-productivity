@@ -63,8 +63,10 @@ export class TakeABreakService {
       .pipe(throttleTime(60 * 1000))
       // .pipe(throttleTime(5 * 1000))
       .subscribe(timeWithoutBreak => {
-        if (timeWithoutBreak > this._configService.cfg.misc.takeABreakMinWorkingTime) {
+        const cfg = this._configService.cfg.misc;
+        if (cfg.isTakeABreakEnabled && timeWithoutBreak > cfg.takeABreakMinWorkingTime) {
           const msg = this._getMessage(timeWithoutBreak);
+          console.log(cfg, timeWithoutBreak, msg);
           this._snackService.open({
             message: msg,
             icon: 'free_breakfast',
