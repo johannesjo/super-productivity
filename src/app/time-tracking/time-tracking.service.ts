@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
-import * as moment from 'moment';
-import { TRACKING_INTERVAL, WORKLOG_DATE_STR_FORMAT } from '../app.constants';
+import { TRACKING_INTERVAL } from '../app.constants';
 import { interval, Observable } from 'rxjs';
 import { map, share } from 'rxjs/operators';
 import { Tick } from './time-tracking';
@@ -17,7 +16,8 @@ export class TimeTrackingService {
       this._currentTrackingStart = Date.now();
       return {
         duration: delta,
-        date: getWorklogStr()
+        date: getWorklogStr(),
+        timestamp: Date.now(),
       };
     }),
     // important because we want the same interval for everyone

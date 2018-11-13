@@ -7,6 +7,7 @@ import { UiModule } from '../../ui/ui.module';
 import { TasksModule } from '../../tasks/tasks.module';
 import { RouterModule } from '@angular/router';
 import { SplitModule } from './split/split.module';
+import { TimeTrackingModule } from '../../time-tracking/time-tracking.module';
 
 @NgModule({
   imports: [
@@ -17,6 +18,7 @@ import { SplitModule } from './split/split.module';
     RouterModule,
     TasksModule,
     SplitModule,
+    TimeTrackingModule,
   ],
   declarations: [WorkViewPageComponent],
   exports: [WorkViewPageComponent],

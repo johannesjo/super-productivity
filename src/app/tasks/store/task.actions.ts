@@ -110,7 +110,7 @@ export class MoveDown implements Action {
 export class AddTimeSpent implements Action {
   readonly type = TaskActionTypes.AddTimeSpent;
 
-  constructor(public payload: { id: string, date: string, duration: number }) {
+  constructor(public payload: { id: string, date: string, duration: number, timestamp: number }) {
   }
 }
 

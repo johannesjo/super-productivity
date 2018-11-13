@@ -11,6 +11,7 @@ import { DialogIdleComponent } from './dialog-idle/dialog-idle.component';
 import { ConfigService } from '../core/config/config.service';
 import { Task } from '../tasks/task.model';
 import { getWorklogStr } from '../core/util/get-work-log-str';
+import { TakeABreakService } from './take-a-break/take-a-break.service';
 
 const DEFAULT_MIN_IDLE_TIME = 60000;
 const IDLE_POLL_INTERVAL = 1000;
@@ -35,6 +36,7 @@ export class IdleService {
     private _taskService: TaskService,
     private _configService: ConfigService,
     private _matDialog: MatDialog,
+    private _takeABreakService: TakeABreakService,
   ) {
   }
 
@@ -69,6 +71,7 @@ export class IdleService {
       this.isIdle = true;
 
       if (!this.isIdleDialogOpen) {
+        this._takeABreakService.blockByIdle(idleTime);
         if (this._taskService.currentTaskId) {
           // remove idle time already tracked
           this._taskService.removeTimeSpent(this._taskService.currentTaskId, idleTime);
@@ -89,7 +92,7 @@ export class IdleService {
           .subscribe((taskToTrack: Task | string) => {
             if (taskToTrack) {
               const timeSpent = this._idleTime$.getValue();
-              console.log(taskToTrack);
+              this._takeABreakService.continue(timeSpent);
               if (typeof taskToTrack === 'string') {
                 this._taskService.add(taskToTrack, false, {
                   timeSpent: timeSpent,
@@ -101,7 +104,10 @@ export class IdleService {
                 this._taskService.addTimeSpent(taskToTrack.id, timeSpent);
                 this._taskService.setCurrentId(taskToTrack.id);
               }
+            } else {
+              this._takeABreakService.reset();
             }
+
             this.cancelIdlePoll();
             this.isIdleDialogOpen = false;
           });

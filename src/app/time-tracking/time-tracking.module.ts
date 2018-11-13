@@ -6,6 +6,7 @@ import { IdleService } from './idle.service';
 import { UiModule } from '../ui/ui.module';
 import { FormsModule } from '@angular/forms';
 import { TasksModule } from '../tasks/tasks.module';
+import { TakeABreakModule } from './take-a-break/take-a-break.module';
 
 @NgModule({
   imports: [
@@ -13,6 +14,7 @@ import { TasksModule } from '../tasks/tasks.module';
     UiModule,
     FormsModule,
     TasksModule,
+    TakeABreakModule,
   ],
   declarations: [
     DialogIdleComponent
@@ -23,6 +25,9 @@ import { TasksModule } from '../tasks/tasks.module';
   ],
   entryComponents: [
     DialogIdleComponent,
+  ],
+  exports: [
+    TakeABreakModule,
   ]
 })
 export class TimeTrackingModule {

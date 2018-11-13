@@ -113,7 +113,7 @@ export class TaskService {
       .pipe(withLatestFrom(this.currentTaskId$))
       .subscribe(([tick, currentId]) => {
         if (currentId) {
-          this.addTimeSpent(currentId, tick.duration, tick.date);
+          this.addTimeSpent(currentId, tick.duration, tick.date, tick.timestamp);
         }
       });
   }
@@ -204,8 +204,9 @@ export class TaskService {
 
   addTimeSpent(id: string,
                duration: number,
-               date: string = getWorklogStr()) {
-    this._store.dispatch(new AddTimeSpent({id, date, duration}));
+               date: string = getWorklogStr(),
+               timestamp: number) {
+    this._store.dispatch(new AddTimeSpent({id, date, duration, timestamp}));
   }
 
   removeTimeSpent(id: string,

@@ -3,6 +3,7 @@ import { TaskService } from '../../tasks/task.service';
 import { expandFadeAnimation } from '../../ui/animations/expand.ani';
 import { LayoutService } from '../../core/layout/layout.service';
 import { DragulaService } from 'ng2-dragula';
+import { TakeABreakService } from '../../time-tracking/take-a-break/take-a-break.service';
 
 @Component({
   selector: 'work-view',
@@ -24,6 +25,7 @@ export class WorkViewPageComponent implements OnInit, OnDestroy {
 
   constructor(
     public taskService: TaskService,
+    public takeABreakService: TakeABreakService,
     private _layoutService: LayoutService,
     private _dragulaService: DragulaService,
   ) {

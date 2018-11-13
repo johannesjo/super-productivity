@@ -1,3 +1,4 @@
+
 <div class="wrapper"
      #containerEl>
   <div class="today"
@@ -24,7 +25,7 @@
              *ngIf="isShowTimeWorkedWithoutBreak">
           <span class="label">Without break: </span>
           <span class="no-wrap">
-        <strong>{{workedWithoutABreak}}</strong><mat-icon>timer</mat-icon>
+        <strong>{{takeABreakService.timeWorkingWithoutABreak$|async|msToString}}</strong><mat-icon>timer</mat-icon>
       </span>
         </div>
         <div class="controls">
