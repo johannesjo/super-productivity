@@ -66,31 +66,6 @@ export type UiHelperSettings = Readonly<{
   [key: string]: any;
 }>;
 
-
-export type DailyTaskExportSettings = Readonly<{
-  [key: string]: any;
-}>;
-
-
-export type TimeSheetExportSettings = Readonly<{
-  [key: string]: any;
-}>;
-
-
-export type TimeTrackingHistoryExportSettings = Readonly<{
-  [key: string]: any;
-}>;
-
-
-export type CsvExportSettings = Readonly<{
-  [key: string]: any;
-}>;
-
-export type DailyAgendaSettings = Readonly<{
-  [key: string]: any;
-}>;
-
-
 export type GoogleSession = Readonly<{
   accessToken: string,
   refreshToken: string,
@@ -105,11 +80,6 @@ export type GlobalConfig = Readonly<{
   keyboard: KeyboardConfig;
   _googleSession: GoogleSession;
   _uiHelper: UiHelperSettings;
-  _dailyTaskExportSettings: DailyTaskExportSettings;
-  _timeSheetExportSettings: TimeSheetExportSettings;
-  _timeTrackingHistoryExportSettings: TimeTrackingHistoryExportSettings;
-  _csvExportSettings: CsvExportSettings;
-  _dailyAgenda: DailyAgendaSettings;
 }>;
 
 
@@ -121,9 +91,4 @@ export type SectionConfig
   | KeyboardConfig
   | GoogleSession
   | UiHelperSettings
-  | DailyTaskExportSettings
-  | TimeSheetExportSettings
-  | TimeTrackingHistoryExportSettings
-  | CsvExportSettings
-  | DailyAgendaSettings
   ;

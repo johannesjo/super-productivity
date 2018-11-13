@@ -29,11 +29,6 @@ export const DEFAULT_CFG: GlobalConfig = {
     isGoToWorkView: false,
     isPlayTick: false,
   },
-  // googleDriveSync: {
-  //   backupDocId: undefined,
-  //   lastLocalUpdate: undefined,
-  //   lastSyncToRemote: undefined,
-  // },
   keyboard: {
     globalShowHide: 'Ctrl+Shift+X',
     addNewTask: '*',
@@ -78,57 +73,9 @@ export const DEFAULT_CFG: GlobalConfig = {
     isShowBookmarkBar: false,
     showSubTasks: true
   },
-  _dailyTaskExportSettings: {
-    separateBy: ', ',
-    separateFieldsBy: '',
-    isUseNewLine: false,
-    isListSubTasks: true,
-    isListDoneOnly: false,
-    isWorkedOnTodayOnly: true,
-    showTitle: true,
-    showTime: false,
-    showDate: false
-  },
-  _timeSheetExportSettings: {
-    spreadsheetId: undefined,
-    isAutoLogin: false,
-    isAutoFocusEmpty: false,
-    isRoundWorkTimeUp: undefined,
-    roundStartTimeTo: undefined,
-    roundEndTimeTo: undefined,
-    roundWorkTimeTo: undefined,
-    defaultValues: [
-      'AASDAS'
-    ]
-  },
-  _timeTrackingHistoryExportSettings: {
-    separateBy: '',
-    separateFieldsBy: ';',
-    isUseNewLine: true,
-    isListSubTasks: true,
-    isListDoneOnly: false,
-    isWorkedOnTodayOnly: true,
-    showTitle: true,
-    showTimeSpent: true,
-    isTimeSpentAsMilliseconds: true,
-    showDate: false
-  },
-  _csvExportSettings: {
-    separateBy: '',
-    separateFieldsBy: ';',
-    isUseNewLine: true,
-    isListSubTasks: true,
-    isListDoneOnly: false,
-    isWorkedOnTodayOnly: true,
-    showTitle: true,
-    showTimeSpent: true,
-    isTimeSpentAsMilliseconds: true,
-    showDate: false
-  },
-  _dailyAgenda: {},
   _googleSession: {
-    accessToken: undefined,
-    refreshToken: undefined,
-    expiresAt: undefined
+    accessToken: null,
+    refreshToken: null,
+    expiresAt: null
   },
 };

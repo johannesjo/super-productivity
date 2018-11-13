@@ -10,6 +10,19 @@ import Clipboard from 'clipboard';
 import { SnackService } from '../snack/snack.service';
 import { getWorklogStr } from '../util/get-work-log-str';
 
+const CSV_EXPORT_SETTINGS = {
+  separateBy: '',
+  separateFieldsBy: ';',
+  isUseNewLine: true,
+  isListSubTasks: true,
+  isListDoneOnly: false,
+  isWorkedOnTodayOnly: true,
+  showTitle: true,
+  showTimeSpent: true,
+  isTimeSpentAsMilliseconds: true,
+  showDate: false
+};
+
 @Component({
   selector: 'dialog-simple-task-summary',
   templateUrl: './dialog-simple-task-summary.component.html',
