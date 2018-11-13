@@ -35,6 +35,7 @@ export class ShortcutService {
       && !ev.ctrlKey && !ev.metaKey) {
       return;
     }
+    console.log(checkKeyCombo(ev, keys.toggleBacklog), ev);
 
     // if (checkKeyCombo(ev, cfg.keyboard.openProjectNotes)) {
     //   Dialogs('NOTES', undefined, true);
@@ -46,8 +47,8 @@ export class ShortcutService {
     //   Dialogs('HELP', {template: 'PAGE'}, true);
     // }
     //
-    if (checkKeyCombo(ev, keys.goToDailyPlanner)) {
-      this._router.navigate(['/daily-planner']);
+    if (checkKeyCombo(ev, keys.toggleBacklog)) {
+      this._router.navigate(['/work-view/50']);
     }
     if (checkKeyCombo(ev, keys.goToWorkView)) {
       this._router.navigate(['/work-view']);
