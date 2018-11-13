@@ -48,9 +48,9 @@ $this-active-shadow: $whiteframe-shadow-6dp;
   //}
   &:focus {
     z-index: 4;
+    outline: none;
     > .inner-wrapper {
       outline: 2px dashed $c-accent;
-      outline-style: dashed !important;
     }
   }
 
@@ -196,120 +196,150 @@ $this-active-shadow: $whiteframe-shadow-6dp;
     }
   }
 
-  .handle {
-    margin: 0 4px 0 9px;
-    position: relative;
-    z-index: 3;
-    cursor: grab;
-
-    &:after {
-      content: '';
-      top: -$s;
-      bottom: -$s;
-      left: -$s;
-      right: 0;
-      position: absolute;
+  // transparent controls for desktop
+  @media(min-width: $layout-xs) {
+    .controls {
+      opacity: 1;
+      // TODO maybe opacity 0.1 just an option
+      position: relative;
+      transition: $transition-fast;
+      // hitarea
+      &:after {
+        position: absolute;
+        top: -$s;
+        right: -2*$s;
+        left: -2*$s;
+        bottom: -$s;
+        content: '';
+      }
+    }
+    .first-line:hover {
+      > .controls {
+        opacity: 1;
+        z-index: 12;
+      }
+    }
+    .controls:hover {
+      opacity: 1;
+      z-index: 12;
+      transform: scale(1.15);
     }
   }
+}
 
-  .task-title {
-    flex-direction: row;
-    align-items: center;
-    align-content: center;
-    flex: 1 1 auto;
-    flex-grow: 1;
-    text-align: left;
-    outline: none;
-    margin-left: 4px;
-    padding: 4px 0 4px 6px;
-    line-height: 1.5;
-    min-height: 20px;
-    text-overflow: ellipsis;
-    cursor: text;
+.handle {
+  margin: 0 4px 0 9px;
+  position: relative;
+  z-index: 3;
+  cursor: grab;
+
+  &:after {
+    content: '';
+    top: -$s;
+    bottom: -$s;
+    left: -$s;
+    right: 0;
+    position: absolute;
+  }
+}
+
+.task-title {
+  flex-direction: row;
+  align-items: center;
+  align-content: center;
+  flex: 1 1 auto;
+  flex-grow: 1;
+  text-align: left;
+  outline: none;
+  margin-left: 4px;
+  padding: 4px 0 4px 6px;
+  line-height: 1.5;
+  min-height: 20px;
+  text-overflow: ellipsis;
+  cursor: text;
+  transition: $transition-leave;
+  transition-property: opacity, transform;
+  display: block;
+  background: inherit;
+  position: relative;
+  overflow: visible;
+  user-select: none;
+  caret-color: #000000;
+  z-index: 4;
+
+  @include dark-theme() {
+    caret-color: #ffffff;
+  }
+
+  &:after {
+    background: #ffffff;
     transition: $transition-leave;
-    transition-property: opacity, transform;
-    display: block;
-    background: inherit;
-    position: relative;
-    overflow: visible;
-    user-select: none;
-    caret-color: #000000;
-    z-index: 4;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    content: '';
+    box-shadow: $shadow-edit-on-click;
+    opacity: 0;
+    z-index: -1;
+    border: 1px solid black;
+    pointer-events: none;
 
     @include dark-theme() {
-      caret-color: #ffffff;
+      background: $dark-theme-bg-darker;
+      border: 1px solid #ffffff;
+      box-shadow: 0 0 4px 0 rgba(255, 255, 255, 0.8), $whiteframe-shadow-13dp;
+    }
+  }
+
+  &:focus {
+    z-index: 5;
+    user-select: all;
+    // thee magic number is 16/14 so we scale to whole pixels
+    transform: scale(1.142857143);
+    transition: $transition-standard;
+
+    .is-hide-controls & {
+      transform-origin: center center;
+      transform: scale(1.142857143) translateX(20px);
     }
 
     &:after {
-      background: #ffffff;
-      transition: $transition-leave;
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      top: 0;
-      right: 0;
-      bottom: 0;
-      left: 0;
-      content: '';
-      box-shadow: $shadow-edit-on-click;
-      opacity: 0;
-      z-index: -1;
-      border: 1px solid black;
-      pointer-events: none;
-
-      @include dark-theme() {
-        background: $dark-theme-bg-darker;
-        border: 1px solid #ffffff;
-        box-shadow: 0 0 4px 0 rgba(255, 255, 255, 0.8), $whiteframe-shadow-13dp;
-      }
-    }
-
-    &:focus {
-      z-index: 5;
-      user-select: all;
-      // thee magic number is 16/14 so we scale to whole pixels
-      transform: scale(1.142857143);
+      opacity: 1;
       transition: $transition-standard;
-
-      .is-hide-controls & {
-        transform-origin: center center;
-        transform: scale(1.142857143) translateX(20px);
-      }
-
-      &:after {
-        opacity: 1;
-        transition: $transition-standard;
-      }
-      @media(max-width: $layout-xs) {
-        transform: scale(1);
-      }
     }
-  }
-
-  input {
-    width: 100%;
-    display: block;
-    box-sizing: border-box;
-    height: 30px;
-    padding: 4px 10px;
-    border: none;
-  }
-
-  .time {
-    font-style: italic;
-    white-space: nowrap;
-    margin-left: 10px;
-    margin-right: 10px;
     @media(max-width: $layout-xs) {
-      margin-left: 8px;
-      font-size: 13px;
+      transform: scale(1);
     }
   }
+}
 
-  .notes {
-    display: block;
-    overflow: hidden;
+input {
+  width: 100%;
+  display: block;
+  box-sizing: border-box;
+  height: 30px;
+  padding: 4px 10px;
+  border: none;
+}
+
+.time {
+  font-style: italic;
+  white-space: nowrap;
+  margin-left: 10px;
+  margin-right: 10px;
+  @media(max-width: $layout-xs) {
+    margin-left: 8px;
+    font-size: 13px;
   }
+}
+
+.notes {
+  display: block;
+  overflow: hidden;
 }
 
 .toggle-sub-tasks-btn {
