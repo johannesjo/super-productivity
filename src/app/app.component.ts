@@ -91,13 +91,17 @@ export class AppComponent implements OnInit {
     this._overlayContainer.getContainerElement().classList.add(theme);
     this._el.nativeElement.classList.add(theme);
 
-    isDarkTheme
-      ? this._el.nativeElement.classList.add('isDarkTheme')
-      : this._el.nativeElement.classList.remove('isDarkTheme');
-
-    isDarkTheme
-      ? this._overlayContainer.getContainerElement().classList.add('isDarkTheme')
-      : this._overlayContainer.getContainerElement().classList.remove('isDarkTheme');
+    if (isDarkTheme) {
+      this._el.nativeElement.classList.remove('isLightTheme');
+      this._overlayContainer.getContainerElement().classList.remove('isLightTheme');
+      this._el.nativeElement.classList.add('isDarkTheme');
+      this._overlayContainer.getContainerElement().classList.add('isDarkTheme');
+    } else {
+      this._el.nativeElement.classList.remove('isDarkTheme');
+      this._overlayContainer.getContainerElement().classList.remove('isDarkTheme');
+      this._el.nativeElement.classList.add('isLightTheme');
+      this._overlayContainer.getContainerElement().classList.add('isLightTheme');
+    }
     this._currentTheme = theme;
   }
 
