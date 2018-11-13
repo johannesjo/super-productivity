@@ -55,7 +55,7 @@ $bl-theme-dark: mat-dark-theme($bl-primary, $accent);
 @include angular-material-theme($bl-theme);
 @include color-helper($bl-theme);
 
-.blue-dark {
+.blue.isDarkTheme {
   @include angular-material-theme($bl-theme-dark);
   @include color-helper($bl-theme-dark);
 }
@@ -70,7 +70,7 @@ $indigo-theme-dark: mat-dark-theme($indigo-primary, $accent);
   @include color-helper($indigo-theme);
 }
 
-.indigo-dark {
+.indigo.isDarkTheme {
   @include angular-material-theme($indigo-theme-dark);
   @include color-helper($indigo-theme-dark);
 }
@@ -85,7 +85,7 @@ $purple-theme-dark: mat-dark-theme($purple-primary, $accent);
   @include color-helper($purple-theme);
 }
 
-.purple-dark {
+.purple.isDarkTheme {
   @include angular-material-theme($purple-theme-dark);
   @include color-helper($purple-theme-dark);
 }
@@ -100,7 +100,7 @@ $deep-purple-theme-dark: mat-dark-theme($deep-purple-primary, $accent);
   @include color-helper($deep-purple-theme);
 }
 
-.deep-purple-dark {
+.deep-purple.isDarkTheme {
   @include angular-material-theme($deep-purple-theme-dark);
   @include color-helper($deep-purple-theme-dark);
 }
@@ -115,7 +115,7 @@ $light-blue-theme-dark: mat-dark-theme($light-blue-primary, $accent);
   @include color-helper($light-blue-theme);
 }
 
-.light-blue-dark {
+.light-blue.isDarkTheme {
   @include angular-material-theme($light-blue-theme-dark);
   @include color-helper($light-blue-theme-dark);
 }
@@ -130,7 +130,7 @@ $cyan-theme-dark: mat-dark-theme($cyan-primary, $accent);
   @include color-helper($cyan-theme);
 }
 
-.cyan-dark {
+.cyan.isDarkTheme {
   @include angular-material-theme($cyan-theme-dark);
   @include color-helper($cyan-theme-dark);
 }
@@ -145,7 +145,7 @@ $teal-theme-dark: mat-dark-theme($teal-primary, $accent);
   @include color-helper($teal-theme);
 }
 
-.teal-dark {
+.teal.isDarkTheme {
   @include angular-material-theme($teal-theme-dark);
   @include color-helper($teal-theme-dark);
 }
@@ -160,7 +160,7 @@ $green-theme-dark: mat-dark-theme($green-primary, $accent);
   @include color-helper($green-theme);
 }
 
-.green-dark {
+.green.isDarkTheme {
   @include angular-material-theme($green-theme-dark);
   @include color-helper($green-theme-dark);
 }
@@ -175,7 +175,7 @@ $light-green-theme-dark: mat-dark-theme($light-green-primary, $accent);
   @include color-helper($light-green-theme);
 }
 
-.light-green-dark {
+.light-green.isDarkTheme {
   @include angular-material-theme($light-green-theme-dark);
   @include color-helper($light-green-theme-dark);
 }
@@ -190,7 +190,7 @@ $indigo-theme-dark: mat-dark-theme($indigo-primary, $accent);
   @include color-helper($indigo-theme);
 }
 
-.indigo-dark {
+.indigo.isDarkTheme {
   @include angular-material-theme($indigo-theme-dark);
   @include color-helper($indigo-theme-dark);
 }
@@ -205,7 +205,7 @@ $lime-theme-dark: mat-dark-theme($lime-primary, $accent);
   @include color-helper($lime-theme);
 }
 
-.lime-dark {
+.lime.isDarkTheme {
   @include angular-material-theme($lime-theme-dark);
   @include color-helper($lime-theme-dark);
 }
@@ -220,7 +220,7 @@ $yellow-theme-dark: mat-dark-theme($yellow-primary, $accent);
   @include color-helper($yellow-theme);
 }
 
-.yellow-dark {
+.yellow.isDarkTheme {
   @include angular-material-theme($yellow-theme-dark);
   @include color-helper($yellow-theme-dark);
 }
@@ -235,7 +235,7 @@ $amber-theme-dark: mat-dark-theme($amber-primary, $accent);
   @include color-helper($amber-theme);
 }
 
-.amber-dark {
+.amber.isDarkTheme {
   @include angular-material-theme($amber-theme-dark);
   @include color-helper($amber-theme-dark);
 }
@@ -250,7 +250,7 @@ $deep-orange-theme-dark: mat-dark-theme($deep-orange-primary, $accent);
   @include color-helper($deep-orange-theme);
 }
 
-.deep-orange-dark {
+.deep-orange.isDarkTheme {
   @include angular-material-theme($deep-orange-theme-dark);
   @include color-helper($deep-orange-theme-dark);
 }
@@ -265,7 +265,7 @@ $grey-theme-dark: mat-dark-theme($grey-primary, $accent);
   @include color-helper($grey-theme);
 }
 
-.grey-dark {
+.grey.isDarkTheme {
   @include angular-material-theme($grey-theme-dark);
   @include color-helper($grey-theme-dark);
 }
@@ -280,7 +280,7 @@ $blue-grey-theme-dark: mat-dark-theme($blue-grey-primary, $accent);
   @include color-helper($blue-grey-theme);
 }
 
-.blue-grey-dark {
+.blue-grey.isDarkTheme {
   @include angular-material-theme($blue-grey-theme-dark);
   @include color-helper($blue-grey-theme-dark);
 }

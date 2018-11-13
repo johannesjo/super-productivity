@@ -1,19 +1,16 @@
 @import '../../../_variables.scss';
 
 @mixin dark-theme {
-  body.dark-theme & {
+  :host-context(.isDarkTheme) {
     @content;
   }
 }
 
-$this-task-text-color: #333333;
-$this-task-text-color-dark: #dddddd;
+//$this-task-text-color: #333333;
+//$this-task-text-color-dark: #dddddd;
 $this-task-text-color-done: #aaaaaa;
 $task-inner-padding-left-right: 6px;
-$this-active-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2),
-0 8px 10px 1px rgba(0, 0, 0, 0.14),
-0 3px 14px 2px rgba(0, 0, 0, 0.12);
-//0 -8px 10px 1px rgba(0, 0, 0, 0.14);
+$this-active-shadow: $whiteframe-shadow-6dp;
 
 :host {
   display: block;
@@ -22,8 +19,7 @@ $this-active-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2),
   > .inner-wrapper {
     padding: 2px 0;
     margin-bottom: 7px;
-    background-color: #ffffff;
-    color: $this-task-text-color;
+    //color: $this-task-text-color;
     position: relative;
     box-shadow: $shadow-card-shadow;
     //box-shadow: $shadow-bottom-boxed;
@@ -31,13 +27,6 @@ $this-active-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2),
     .title-bar-wrapper,
     .first-line {
       background: inherit;
-    }
-
-    @include dark-theme {
-      border-color: rgb(60, 60, 60);
-      background-color: $dark-theme-bg-lighter;
-      color: $this-task-text-color-dark;
-      box-shadow: $whiteframe-shadow-6dp;
     }
   }
 
@@ -50,7 +39,7 @@ $this-active-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2),
 
   > .inner-wrapper:after {
     content: '';
-    border-width: 0 $s;
+    border-width: 2px;
     position: absolute;
     top: 0;
     width: 100%;
@@ -66,59 +55,25 @@ $this-active-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2),
   &:focus {
     outline: none;
     z-index: 4;
-  }
-  &.as-sortable-dragging,
-  &:focus > .inner-wrapper {
-    &:after {
+    > .inner-wrapper:after {
       opacity: 1;
     }
-    // outline
+
   }
 
-  &:focus.is-focused > .inner-wrapper {
-    //outline: 3px solid red;
-  }
-
-  @include dark-theme {
-    &:focus > .inner-wrapper {
-      background-color: $dark-theme-bg-darker;
-      color: #dddddd;
-
-      // outline
-      outline: 1px solid #ffffff;
-    }
-  }
-
-  &.is-current > .inner-wrapper {
-    background: $light-green;
-    color: #000000;
+  &.isCurrent > .inner-wrapper {
+    //background: $light-green;
+    //color: #000000;
   }
   @include dark-theme {
-    &.is-current > .inner-wrapper {
+    &.isCurrent > .inner-wrapper {
       background-color: $dark-green;
       color: #ffffff;
     }
   }
 
-  @include dark-theme {
-    &.is-done {
-      .time,
-      .task-title {
-        color: $dark-theme-text-color;
-      }
-      mat-icon {
-        color: $dark-theme-text-color;
-      }
-    }
-  }
-
   &.is-done {
     //opacity: 0.8;
-
-    mat-icon {
-      color: $this-task-text-color-done !important;
-    }
-
     .time,
     .task-title {
       color: $this-task-text-color-done;
@@ -149,7 +104,6 @@ $this-active-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2),
   }
 
   .isNotesOpen > .first-line {
-    //padding: 5px 0;
     .title {
       font-weight: bold;
     }
@@ -162,33 +116,28 @@ $this-active-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2),
   $this-icon-color: #545454;
   .toggle-sub-tasks-btn,
   .first-line .ico-btn {
-    margin: $this-button-spacer;
-    height: $this-button-size;
-    width: $this-button-size;
-    min-width: $this-button-size;
-    min-height: $this-button-size;
-    // this fixes the original link button icon for some reason
-    line-height: $this-button-size + -1;
+    margin: 0 $this-button-spacer;
     padding: 0;
-    box-shadow: $shadow-icon-button;
-    border-radius: 100%;
-    text-align: center;
-    overflow: hidden;
-    position: relative;
     z-index: 4;
-
-    // theming
-    border: 1px solid #dddddd;
-    background: #ffffff !important;
-
     transition: transform $transition-standard;
     &:hover {
       z-index: 5;
-      transform: scale(1.15);
+      transform: scale(1.1);
     }
     &:focus {
       outline: none;
     }
+
+    //&:after {
+    //  position: absolute;
+    //  top: 0;
+    //  right: 0;
+    //  bottom: 0;
+    //  left: 0;
+    //  content: '';
+    //  border: 1px solid #dddddd;
+    //  border-radius: 100%;
+    //}
   }
 
   .first-line {
@@ -201,108 +150,56 @@ $this-active-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2),
     @media(max-width: $layout-xs) {
       flex-wrap: wrap;
     }
+  }
 
-    .ico-btn {
-      &.update-indicator-btn {
-        margin-left: 12px;
-
-        // TODO make it work
-        .task-list .task-list & {
-          margin: $this-button-spacer;
-          margin-right: -2px;
-        }
-      }
-
-      @include dark-theme {
-        background: $dark-theme-bg-darker !important;
-        border: 1px solid $dark-theme-bg;
-      }
-
-      @at-root {
-        .task {
-          .ico-btn:hover,
-          .ico-btn.is-active,
-          &.is-current .ico-btn.play-btn {
-            background: #000000 !important;
-            background: $this-icon-color !important;
-            border-color: transparent;
-
-            @include dark-theme {
-              background: #ffffff !important;
-            }
-
-            > mat-icon {
-              color: #ffffff !important;
-              @include dark-theme {
-                color: #000000 !important;
-              }
-            }
-          }
-        }
-      }
-
-      mat-icon {
-        color: $this-icon-color;
-        margin: 0;
-        padding: 0;
-        line-height: 1;
+  .ico-btn {
+    &.delete-btn {
+      mat-icon.delete-icon {
+        color: $red !important;
         @include dark-theme {
-          color: $dark-theme-text-color-lighter;
-        }
-      }
-
-      &.delete-btn {
-        mat-icon.delete-icon {
           color: $red !important;
+        }
+      }
+
+      &:hover {
+        background: $red-danger !important;
+        mat-icon.delete-icon {
+          color: #ffffff !important;
           @include dark-theme {
-            color: $red !important;
-          }
-        }
-
-        &:hover {
-          background: $red-danger !important;
-          mat-icon.delete-icon {
             color: #ffffff !important;
-            @include dark-theme {
-              color: #ffffff !important;
-            }
           }
         }
       }
-
-      @media(max-width: $layout-xs) {
-        margin: $this-button-spacer-mobile;
-        height: $this-button-size-mobile;
-        width: $this-button-size-mobile;
-        min-width: $this-button-size-mobile;
-        min-height: $this-button-size-mobile;
-        line-height: $this-button-size-mobile + -1;
-      }
     }
+  }
 
-    // Button Stuff
+  // Button Stuff
+  .play-btn {
+    padding-left: 0;
+    margin-left: -2px;
+    margin-right: 3px;
+    // move over original link btn
+    position: relative;
+    z-index: 1;
+  }
+  &.isCurrent .play-btn {
+    background: $c-accent !important;
     mat-icon {
-      color: #545454;
+      color: #ffffff !important;
+      @include dark-theme {
+        color: #ffffff !important;
+      }
+    }
+  }
+
+  .show-notes-btn {
+    mat-icon {
+      transition: $transition-standard;
+      backface-visibility: hidden;
     }
 
-    .play-btn {
-      padding-left: 0;
-      margin-left: -2px;
-      margin-right: 3px;
-      // move over original link btn
-      position: relative;
-      z-index: 1;
-    }
-
-    .show-notes-btn {
-      mat-icon {
-        transition: $transition-standard;
-        backface-visibility: hidden;
-      }
-
-      &.is-active mat-icon {
-        transform: rotate(45deg);
-      }
+    &.isActive mat-icon {
+      transform: rotate(45deg);
     }
   }
 
@@ -344,7 +241,6 @@ $this-active-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2),
     margin-left: 4px;
     padding: 4px 0 4px 6px;
     line-height: 1.5;
-    display: block;
     min-height: 20px;
     text-overflow: ellipsis;
     cursor: text;

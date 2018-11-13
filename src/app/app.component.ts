@@ -1,4 +1,4 @@
-import { Component, HostBinding, HostListener, OnInit } from '@angular/core';
+import { Component, ElementRef, HostListener, OnInit } from '@angular/core';
 import { MatIconRegistry } from '@angular/material';
 import { DomSanitizer } from '@angular/platform-browser';
 import { OverlayContainer } from '@angular/cdk/overlay';
@@ -23,8 +23,7 @@ import { SwUpdate } from '@angular/service-worker';
   animations: [blendInOutAnimation]
 })
 export class AppComponent implements OnInit {
-  @HostBinding('class') private _currentTheme: string;
-
+  private _currentTheme: string;
 
   constructor(
     private _configService: ConfigService,
@@ -38,6 +37,7 @@ export class AppComponent implements OnInit {
     private _snackService: SnackService,
     private _chromeExtensionInterface: ChromeExtensionInterfaceService,
     private _swUpdate: SwUpdate,
+    private _el: ElementRef,
     public layoutService: LayoutService,
   ) {
     this._matIconRegistry.addSvgIcon(
@@ -79,16 +79,25 @@ export class AppComponent implements OnInit {
 
   ngOnInit() {
     this._projectService.currentProject$.subscribe((currentProject: Project) => {
-      this._setTheme(currentProject.themeColor + (currentProject.isDarkTheme ? '-dark' : ''));
+      this._setTheme(currentProject.isDarkTheme, currentProject.themeColor);
     });
   }
 
-  private _setTheme(theme) {
+  private _setTheme(isDarkTheme: boolean, theme: string) {
     if (this._currentTheme) {
       this._overlayContainer.getContainerElement().classList.remove(this._currentTheme);
+      this._el.nativeElement.classList.remove(this._currentTheme);
     }
-
     this._overlayContainer.getContainerElement().classList.add(theme);
+    this._el.nativeElement.classList.add(theme);
+
+    isDarkTheme
+      ? this._el.nativeElement.classList.add('isDarkTheme')
+      : this._el.nativeElement.classList.remove('isDarkTheme');
+
+    isDarkTheme
+      ? this._overlayContainer.getContainerElement().classList.add('isDarkTheme')
+      : this._overlayContainer.getContainerElement().classList.remove('isDarkTheme');
     this._currentTheme = theme;
   }
 

@@ -38,7 +38,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
 
   private _currentFocusId: string;
 
-  @HostBinding('class.is-current') isCurrent = false;
+  @HostBinding('class.isCurrent') isCurrent = false;
 
   @ViewChild('editOnClickEl') editOnClickEl: ElementRef;
 

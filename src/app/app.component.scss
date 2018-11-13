@@ -14,3 +14,10 @@ app-root,
 mat-sidenav-container {
   height: calc(100% - #{$main-header-height});
 }
+
+:host.isLightTheme {
+  .mat-drawer-content,
+  ::ng-deep mat-sidenav-content {
+    background: #eeeeee !important;
+  }
+}
