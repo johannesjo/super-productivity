@@ -2,10 +2,23 @@ import { Injectable } from '@angular/core';
 import { TaskService } from '../../tasks/task.service';
 import { TimeTrackingService } from '../time-tracking.service';
 import { combineLatest, Observable } from 'rxjs';
-import { distinctUntilChanged, scan } from 'rxjs/operators';
+import { distinctUntilChanged, scan, throttleTime } from 'rxjs/operators';
+import { SnackService } from '../../core/snack/snack.service';
+import { ConfigService } from '../../core/config/config.service';
+import { msToString } from '../../ui/duration/ms-to-string.pipe';
 
 const BREAK_TRIGGER_DURATION = 5 * 60 * 1000;
 
+// required because typescript freaks out
+const reduceBreak = (acc, [currentTaskId, tick]) => {
+  return currentTaskId ? 0 : acc + tick.duration;
+};
+// required because typescript freaks out
+const createReduceTimeWorked = (obj, key) => {
+  return (acc, [breakDuration, tick]) => {
+    return (breakDuration > BREAK_TRIGGER_DURATION) ? 0 : obj[key] + tick.duration;
+  };
+};
 
 @Injectable({
   providedIn: 'root'
@@ -16,14 +29,14 @@ export class TakeABreakService {
     this._taskService.currentTaskId$,
     this._timeTrackingService.tick$
   ).pipe(
-    scan(this.reduceBreak.bind(this), 0)
+    scan(reduceBreak, 0)
   );
   public timeWorkingWithoutABreak$: Observable<number> = combineLatest(
     this._breakDuration$,
     this._timeTrackingService.tick$
   )
     .pipe(
-      scan(this.reduceTimeWorked.bind(this), 0),
+      scan(createReduceTimeWorked(this, 'timeWorkedWithoutABreakAcc'), 0),
       distinctUntilChanged()
     );
   /* tslint:enable*/
@@ -35,6 +48,8 @@ export class TakeABreakService {
   constructor(
     private _taskService: TaskService,
     private _timeTrackingService: TimeTrackingService,
+    private _configService: ConfigService,
+    private _snackService: SnackService,
   ) {
     this.timeWorkingWithoutABreak$.subscribe(val => {
       if (!this.isBlockByIdle) {
@@ -44,6 +59,24 @@ export class TakeABreakService {
         }
       }
     });
+    this.timeWorkingWithoutABreak$
+      .pipe(throttleTime(60 * 1000))
+      // .pipe(throttleTime(5 * 1000))
+      .subscribe(timeWithoutBreak => {
+        if (timeWithoutBreak > this._configService.cfg.misc.takeABreakMinWorkingTime) {
+          const msg = this._getMessage(timeWithoutBreak);
+          this._snackService.open({
+            message: msg,
+            icon: 'free_breakfast',
+            actionStr: 'I already did',
+            config: {duration: 60 * 1000},
+            actionFn: () => {
+              this.timeWorkedWithoutABreakLastOverZero = 0;
+              this.timeWorkedWithoutABreakAcc = 0;
+            }
+          });
+        }
+      });
   }
 
   blockByIdle(initialidleTime) {
@@ -73,9 +106,11 @@ export class TakeABreakService {
     return (breakDuration > BREAK_TRIGGER_DURATION) ? 0 : this.timeWorkedWithoutABreakAcc + tick.duration;
   }
 
-  // required because typescript freaks out
-  private reduceBreak(acc, [currentTaskId, tick]) {
-    return currentTaskId ? 0 : acc + tick.duration;
-  };
-
+  private _getMessage(duration) {
+    if (this._configService.cfg && this._configService.cfg.misc.takeABreakMessage) {
+      const durationStr = msToString(duration);
+      return this._configService.cfg.misc.takeABreakMessage
+        .replace(/\$\{duration\}/gi, durationStr);
+    }
+  }
 }

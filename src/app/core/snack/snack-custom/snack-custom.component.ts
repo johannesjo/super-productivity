@@ -27,6 +27,9 @@ export class SnackCustomComponent implements OnInit {
   }
 
   actionClick() {
+    if (this.data.actionFn) {
+      this.data.actionFn();
+    }
     this.snackBarRef.dismissWithAction();
   }
 }

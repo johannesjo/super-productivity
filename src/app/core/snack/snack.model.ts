@@ -8,9 +8,8 @@ export interface SnackParams {
   icon?: string;
   actionStr?: string;
   actionId?: string;
+  actionFn?: Function;
   actionPayload?: any;
-  duration?: number;
-  delay?: number;
   config?: MatSnackBarConfig;
   promise?: Promise<any>;
 }
