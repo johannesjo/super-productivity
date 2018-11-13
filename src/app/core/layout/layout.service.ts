@@ -1,14 +1,22 @@
 import { Injectable } from '@angular/core';
-import { HideAddTaskBar, ShowAddTaskBar, ToggleAddTaskBar } from './store/layout.actions';
+import {
+  HideAddTaskBar,
+  HideBookmarkBar,
+  ShowAddTaskBar,
+  ShowBookmarkBar,
+  ToggleAddTaskBar,
+  ToggleBookmarkBar
+} from './store/layout.actions';
 import { Observable } from 'rxjs';
 import { select, Store } from '@ngrx/store';
-import { LayoutState, selectIsShowAddTaskBar } from './store/layout.reducer';
+import { LayoutState, selectIsShowAddTaskBar, selectIsShowBookmarkBar } from './store/layout.reducer';
 
 @Injectable({
   providedIn: 'root'
 })
 export class LayoutService {
   isShowAddTaskBar$: Observable<boolean> = this._store$.pipe(select(selectIsShowAddTaskBar));
+  isShowBookmarkBar$: Observable<boolean> = this._store$.pipe(select(selectIsShowBookmarkBar));
 
   constructor(private _store$: Store<LayoutState>) {
   }
@@ -23,5 +31,18 @@ export class LayoutService {
 
   toggleAddTaskBar() {
     this._store$.dispatch(new ToggleAddTaskBar());
+  }
+
+
+  showBookmarkBar() {
+    this._store$.dispatch(new ShowBookmarkBar());
+  }
+
+  hideBookmarkBar() {
+    this._store$.dispatch(new HideBookmarkBar());
+  }
+
+  toggleBookmarkBar() {
+    this._store$.dispatch(new ToggleBookmarkBar());
   }
 }

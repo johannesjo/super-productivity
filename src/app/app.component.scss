@@ -12,7 +12,8 @@ app-root,
 }
 
 mat-sidenav-container {
-  height: calc(100% - #{$main-header-height});
+  //height: calc(100% - #{$main-header-height});
+  height: 100%;
 }
 
 :host.isLightTheme {
@@ -20,4 +21,9 @@ mat-sidenav-container {
   ::ng-deep mat-sidenav-content {
     background: #eeeeee !important;
   }
+}
+
+:host {
+  display: flex;
+  flex-direction: column;
 }
