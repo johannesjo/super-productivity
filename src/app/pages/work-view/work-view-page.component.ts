@@ -4,6 +4,7 @@ import { expandFadeAnimation } from '../../ui/animations/expand.ani';
 import { LayoutService } from '../../core/layout/layout.service';
 import { DragulaService } from 'ng2-dragula';
 import { TakeABreakService } from '../../time-tracking/take-a-break/take-a-break.service';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'work-view',
@@ -28,6 +29,7 @@ export class WorkViewPageComponent implements OnInit, OnDestroy {
     public takeABreakService: TakeABreakService,
     private _layoutService: LayoutService,
     private _dragulaService: DragulaService,
+    private _activatedRoute: ActivatedRoute,
   ) {
     // this.focusTaskIdList$.subscribe(v => console.log(v));
   }
@@ -58,6 +60,14 @@ export class WorkViewPageComponent implements OnInit, OnDestroy {
         return handle.className.indexOf('handle-sub') > -1;
       }
     });
+
+    this._activatedRoute.queryParams
+      .subscribe((params) => {
+        console.log(params);
+        if (params && params.backlogPos) {
+          this.splitInputPos = params.backlogPos;
+        }
+      });
   }
 
 

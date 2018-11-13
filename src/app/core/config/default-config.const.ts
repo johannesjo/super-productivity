@@ -1,6 +1,6 @@
 import { GlobalConfig } from './config.model';
-import * as moment from 'moment';
 
+const minute = 60 * 1000;
 export const DEFAULT_CFG: GlobalConfig = {
   misc: {
     isMinimizeToTrayOnExit: false,
@@ -9,17 +9,17 @@ export const DEFAULT_CFG: GlobalConfig = {
     isBlockFinishDayUntilTimeTimeTracked: false,
     isOnlyOpenIdleWhenCurrentTask: false,
     isEnableIdleTimeTracking: true,
-    minIdleTime: 5 * 60 * 1000,
+    minIdleTime: 5 * minute,
     isTakeABreakEnabled: false,
     /* tslint:disable-next-line */
     takeABreakMessage: 'Take a break! You have been working for ${duration} without one. Go away from the computer! Take a short walk! Makes you more productive in the long run!',
-    takeABreakMinWorkingTime: 60 * 60 * 1000,
+    takeABreakMinWorkingTime: 60 * minute,
   },
   pomodoro: {
     isEnabled: true,
-    duration: moment.duration(45, 'minutes'),
-    breakDuration: moment.duration(5, 'minutes'),
-    longerBreakDuration: moment.duration(15, 'minutes'),
+    duration: 45 * minute,
+    breakDuration: 5 * minute,
+    longerBreakDuration: 15 * minute,
     cyclesBeforeLongerBreak: 4,
     isStopTrackingOnBreak: true,
     isStopTrackingOnLongBreak: true,
@@ -35,7 +35,7 @@ export const DEFAULT_CFG: GlobalConfig = {
     openProjectNotes: 'N',
     openDistractionPanel: 'D',
     showHelp: '?',
-    goToDailyPlanner: 'p',
+    toggleBacklog: 'p',
     goToWorkView: 'w',
     goToDailyAgenda: '',
     goToFocusMode: 'F',
@@ -62,7 +62,7 @@ export const DEFAULT_CFG: GlobalConfig = {
     isAutoSyncToRemote: false,
     isNotifyOnSync: false,
     isLoadRemoteDataOnStartup: false,
-    syncInterval: 60 * 1000,
+    syncInterval: minute,
     syncFileName: 'SUPER_PRODUCTIVITY_SYNC.json',
     _lastLocalUpdate: null,
     _lastSyncToRemote: null,

@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { IS_ELECTRON } from '../../app.constants';
 import { checkKeyCombo } from '../util/check-key-combo';
 import { ConfigService } from '../config/config.service';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { IPC_REGISTER_GLOBAL_SHORTCUT_EVENT } from '../../../ipc-events.const';
 import { ElectronService } from 'ngx-electron';
 import { LayoutService } from '../layout/layout.service';
@@ -12,17 +12,26 @@ import { LayoutService } from '../layout/layout.service';
   providedIn: 'root'
 })
 export class ShortcutService {
+  backlogPos: number;
 
   constructor(
     private _configService: ConfigService,
     private _router: Router,
     private _electronService: ElectronService,
     private _layoutService: LayoutService,
+    private _activatedRoute: ActivatedRoute,
   ) {
     //   // Register electron shortcut(s)
     if (IS_ELECTRON && this._configService.cfg.keyboard.globalShowHide) {
       _electronService.ipcRenderer.send(IPC_REGISTER_GLOBAL_SHORTCUT_EVENT, this._configService.cfg.keyboard.globalShowHide);
     }
+
+    this._activatedRoute.queryParams
+      .subscribe((params) => {
+        if (params && params.backlogPos) {
+          this.backlogPos = +params.backlogPos;
+        }
+      });
   }
 
   handleKeyDown(ev: KeyboardEvent) {
@@ -35,7 +44,6 @@ export class ShortcutService {
       && !ev.ctrlKey && !ev.metaKey) {
       return;
     }
-    console.log(checkKeyCombo(ev, keys.toggleBacklog), ev);
 
     // if (checkKeyCombo(ev, cfg.keyboard.openProjectNotes)) {
     //   Dialogs('NOTES', undefined, true);
@@ -48,7 +56,20 @@ export class ShortcutService {
     // }
     //
     if (checkKeyCombo(ev, keys.toggleBacklog)) {
-      this._router.navigate(['/work-view/50']);
+      let backlogPos = 0;
+      switch (this.backlogPos) {
+        case 50:
+          backlogPos = 0;
+          break;
+        case 0:
+          backlogPos = 100;
+          break;
+        default:
+          backlogPos = 50;
+      }
+      this._router.navigate(['/work-view'], {
+        queryParams: {backlogPos: backlogPos}
+      });
     }
     if (checkKeyCombo(ev, keys.goToWorkView)) {
       this._router.navigate(['/work-view']);

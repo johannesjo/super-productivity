@@ -65,10 +65,10 @@ export const KEYBOARD_SETTINGS_FORM_CFG = {
       },
     },
     {
-      key: 'goToDailyPlanner',
+      key: 'toggleBacklog',
       type: 'keyboard',
       templateOptions: {
-        label: 'Go to Daily Planner',
+        label: 'Show Task Backlog',
       },
     },
     {

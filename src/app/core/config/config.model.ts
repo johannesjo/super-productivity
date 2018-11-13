@@ -1,6 +1,6 @@
 export type KeyboardConfig = Readonly<{
   globalShowHide: string,
-  goToDailyPlanner: string,
+  toggleBacklog: string,
   goToWorkView: string,
   goToFocusMode: string,
   goToDailyAgenda: string,

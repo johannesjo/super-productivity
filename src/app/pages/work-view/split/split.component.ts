@@ -26,6 +26,8 @@ export class SplitComponent implements OnInit {
   }
 
   @Input() set splitPos(pos: number) {
+    this._renderer.addClass(this.splitTopEl, ANIMATABLE_CLASS);
+    this._renderer.addClass(this.splitBottomEl, ANIMATABLE_CLASS);
     this._updatePos(pos, true);
   }
 
