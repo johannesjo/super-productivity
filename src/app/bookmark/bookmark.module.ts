@@ -6,14 +6,14 @@ import { EffectsModule } from '@ngrx/effects';
 import { BookmarkEffects } from './store/bookmark.effects';
 import { CoreModule } from '../core/core.module';
 import { UiModule } from '../ui/ui.module';
-import { bookmarkReducer } from './store/bookmark.reducer';
+import { BOOKMARK_FEATURE_NAME, bookmarkReducer } from './store/bookmark.reducer';
 
 @NgModule({
   imports: [
     CommonModule,
     CoreModule,
     UiModule,
-    StoreModule.forFeature('bookmark', bookmarkReducer),
+    StoreModule.forFeature(BOOKMARK_FEATURE_NAME, bookmarkReducer),
     EffectsModule.forFeature([BookmarkEffects])
   ],
   declarations: [BookmarkBarComponent]
