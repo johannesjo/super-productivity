@@ -21,6 +21,7 @@ import { HttpClientModule } from '@angular/common/http';
 import { MatSidenavModule } from '@angular/material';
 import { TasksModule } from './tasks/tasks.module';
 import { TimeTrackingModule } from './time-tracking/time-tracking.module';
+import { BookmarkModule } from './bookmark/bookmark.module';
 
 @NgModule({
   declarations: [
@@ -32,6 +33,7 @@ import { TimeTrackingModule } from './time-tracking/time-tracking.module';
     CoreModule,
     PagesModule,
     MainHeaderModule,
+    BookmarkModule,
     MatSidenavModule,
     TasksModule,
     TimeTrackingModule,

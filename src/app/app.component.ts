@@ -77,6 +77,18 @@ export class AppComponent implements OnInit {
     this._shortcutService.handleKeyDown(ev);
   }
 
+  @HostListener('document:ondragover', ['$event']) onDragOver(ev: Event) {
+    ev.preventDefault();
+  }
+
+  @HostListener('document:ondrop', ['$event']) onDrop(ev: Event) {
+    ev.preventDefault();
+  }
+
+  @HostListener('document:onpaste', ['$event']) onPaste(ev: Event) {
+    ev.preventDefault();
+  }
+
   ngOnInit() {
     this._projectService.currentProject$.subscribe((currentProject: Project) => {
       this._setTheme(currentProject.isDarkTheme, currentProject.themeColor);
