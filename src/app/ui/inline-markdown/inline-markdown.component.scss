@@ -39,7 +39,8 @@
   height: 100%;
   box-sizing: border-box;
   background: #fbfbfb;
-  body.dark-theme & {
+
+  @include dark-theme {
     background-color: $dark-theme-bg;
     color: #eeeeee;
   }

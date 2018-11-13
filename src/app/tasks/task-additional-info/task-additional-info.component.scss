@@ -5,6 +5,13 @@
 
 .wrapper {
   margin: $s;
+  border-radius: $card-border-radius;
+  border: 1px solid #dddddd;
+
+  @include dark-theme {
+    border-color: #333333;
+  }
+
   @media (max-width: $layout-xs) {
     margin: $s/2;
   }

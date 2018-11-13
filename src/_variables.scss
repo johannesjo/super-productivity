@@ -1,5 +1,5 @@
 $s: 8px;
-
+$card-border-radius: 4px;
 $dark-theme-bg-darker: rgb(39, 39, 39);
 $dark-theme-bg-lighter: rgb(70, 70, 70);
 $dark-theme-bg: rgb(48, 48, 48);
@@ -88,3 +88,10 @@ $transition-leave: $transition-duration--leave $ani-leave-timing;
 $transition-standard: $transition-duration-m $ani-standard-timing;
 
 $page-transition-duration: $transition-duration-m;
+
+
+@mixin dark-theme {
+  :host-context(.isDarkTheme) & {
+    @content;
+  }
+}

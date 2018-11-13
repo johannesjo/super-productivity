@@ -1,11 +1,5 @@
 @import '../../../_variables.scss';
 
-@mixin dark-theme {
-  :host-context(.isDarkTheme) {
-    @content;
-  }
-}
-
 //$this-task-text-color: #333333;
 //$this-task-text-color-dark: #dddddd;
 $this-task-text-color-done: #aaaaaa;
@@ -23,7 +17,7 @@ $this-active-shadow: $whiteframe-shadow-6dp;
     position: relative;
     box-shadow: $shadow-card-shadow;
     //box-shadow: $shadow-bottom-boxed;
-
+    border-radius: $card-border-radius;
     .title-bar-wrapper,
     .first-line {
       background: inherit;
@@ -37,37 +31,34 @@ $this-active-shadow: $whiteframe-shadow-6dp;
     margin: 0 $s;
   }
 
-  > .inner-wrapper:after {
-    content: '';
-    border-width: 2px;
-    position: absolute;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    box-sizing: border-box;
-    //transition:  $transition-standard;
-    transition-property: opacity;
-    opacity: 0;
-    border-style: solid;
-    box-shadow: $this-active-shadow;
-    //box-shadow: $whiteframe-shadow-24dp;
-  }
+  //> .inner-wrapper:after {
+  //content: '';
+  //border-width: 2px;
+  //position: absolute;
+  //top: 0;
+  //width: 100%;
+  //height: 100%;
+  //box-sizing: border-box;
+  ////transition:  $transition-standard;
+  //transition-property: opacity;
+  //opacity: 0;
+  //border-style: solid;
+  //box-shadow: $this-active-shadow;
+  ////box-shadow: $whiteframe-shadow-24dp;
+  //}
   &:focus {
-    outline: none;
     z-index: 4;
-    > .inner-wrapper:after {
-      opacity: 1;
+    > .inner-wrapper {
+      outline: 2px dashed $c-accent;
+      outline-style: dashed !important;
     }
-
   }
 
   &.isCurrent > .inner-wrapper {
-    //background: $light-green;
-    //color: #000000;
-  }
-  @include dark-theme {
-    &.isCurrent > .inner-wrapper {
-      background-color: $dark-green;
+    background: $c-accent;
+    box-shadow: $this-active-shadow;
+
+    .first-line {
       color: #ffffff;
     }
   }
@@ -181,15 +172,6 @@ $this-active-shadow: $whiteframe-shadow-6dp;
     // move over original link btn
     position: relative;
     z-index: 1;
-  }
-  &.isCurrent .play-btn {
-    background: $c-accent !important;
-    mat-icon {
-      color: #ffffff !important;
-      @include dark-theme {
-        color: #ffffff !important;
-      }
-    }
   }
 
   .show-notes-btn {
