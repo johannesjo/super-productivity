@@ -288,7 +288,7 @@ export class GoogleDriveSyncService {
       this._matDialog.open(DialogConfirmDriveSyncSaveComponent, {
         data: {
           loadFromRemote: () => {
-            this.loadFrom();
+            this._load();
             reject.bind(this)();
           },
           saveToRemote: resolve.bind(this),
@@ -308,7 +308,7 @@ export class GoogleDriveSyncService {
         data: {
           loadFromRemote: resolve.bind(this),
           saveToRemote: () => {
-            this.saveTo();
+            this._save();
             reject.bind(this)();
           },
           cancel: reject,
