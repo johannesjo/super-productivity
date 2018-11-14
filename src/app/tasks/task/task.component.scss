@@ -203,11 +203,12 @@ $this-active-shadow: $whiteframe-shadow-6dp;
       // TODO maybe opacity 0.1 just an option
       position: relative;
       transition: $transition-fast;
+
       // hitarea
       &:after {
         position: absolute;
         top: -$s;
-        right: -2*$s;
+        right: -$s;
         left: -2*$s;
         bottom: -$s;
         content: '';
@@ -222,7 +223,7 @@ $this-active-shadow: $whiteframe-shadow-6dp;
     .controls:hover {
       opacity: 1;
       z-index: 12;
-      transform: scale(1.15);
+      transform: scale(1.0714285714);
     }
   }
 }
