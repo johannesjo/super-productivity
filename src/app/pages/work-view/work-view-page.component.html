@@ -1,23 +1,23 @@
-
 <div class="wrapper"
      #containerEl>
   <div class="today"
        #splitTopEl>
 
-    <header class="work-view-header bg-800">
+    <header class="work-view-header bg-800 color-contrast">
       <div class="status-bar">
-        <div class="item"><span class="label">Working today:</span>
-          <span class="no-wrap">
-      <strong>{{taskService.workingToday$|async|msToString}}</strong>
-      <mat-icon aria-label="timer icon">timer</mat-icon>
-      </span>
-        </div>
 
         <div class="item">
           <span class="label">Estimate remaining:</span>
           <span class="no-wrap">
       ~<strong>{{taskService.estimateRemainingToday$|async|msToString}}</strong>
       <mat-icon>timer</mat-icon>
+      </span>
+        </div>
+
+        <div class="item"><span class="label">Working today:</span>
+          <span class="no-wrap">
+      <strong>{{taskService.workingToday$|async|msToString}}</strong>
+      <mat-icon aria-label="timer icon">timer</mat-icon>
       </span>
         </div>
 
@@ -87,7 +87,7 @@
            [splitTopEl]="splitTopEl"
            [splitBottomEl]="splitBottomEl"></split>
     <div class="inner-wrapper">
-      <header class="backlog-header bg-800">
+      <header class="backlog-header bg-800 color-contrast">
         <div class="status-bar">
           <div class="item">
             <span class="label">Estimate:</span>

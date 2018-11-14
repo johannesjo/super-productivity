@@ -5,7 +5,7 @@
   $accent: map-get($theme, accent);
   $background: map-get($theme, background);
   $standardBackground: map-get($background, card);
-
+  @debug $primary;
   .bg-standard {
     background: $standardBackground;
   }
@@ -29,6 +29,11 @@
   .bg-800 {
     background-color: mat-color($primary, 800);
   }
+
+  .color-contrast {
+    color: mat-color($primary, default-contrast);
+  }
+
   .color-primary-after:after {
     color: mat-color($primary);
   }

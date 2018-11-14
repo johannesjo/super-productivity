@@ -31,6 +31,15 @@ h2 {
 .backlog-header {
   box-shadow: $header-inset-shadow;
   color: #ffffff;
+  padding: 0.5*$s;
+
+  @media(min-width: $layout-xs) {
+    padding: 1*$s;
+  }
+}
+
+.backlog-header {
+  padding-top: 2*$s;
 }
 
 .work-view-header {
@@ -48,10 +57,6 @@ h2 {
 
 .completed-tasks-heading {
   margin-top: $s;
-}
-
-.backlog-header {
-  padding-top: 2*$s;
 }
 
 .status-bar {
