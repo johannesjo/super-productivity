@@ -16,12 +16,14 @@ import { IS_ELECTRON } from './app.constants';
 import { GoogleDriveSyncService } from './core/google/google-drive-sync.service';
 import { SwUpdate } from '@angular/service-worker';
 import { BookmarkService } from './bookmark/bookmark.service';
+import { slideAnimation } from './ui/animations/slide.ani';
+import { expandAnimation } from './ui/animations/expand.ani';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss'],
-  animations: [blendInOutAnimation]
+  animations: [blendInOutAnimation, slideAnimation, expandAnimation]
 })
 export class AppComponent implements OnInit {
   private _currentTheme: string;

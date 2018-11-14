@@ -1,5 +1,8 @@
 <main-header></main-header>
-<bookmark-bar *ngIf="bookmarkService.isShowBookmarks$|async"></bookmark-bar>
+<!--<bookmark-bar *ngIf="bookmarkService.isShowBookmarks$|async"-->
+<!--[@slide]="{value:'r',params:{elHeight: 50}}"></bookmark-bar>-->
+<bookmark-bar *ngIf="bookmarkService.isShowBookmarks$|async"
+              [@expand]></bookmark-bar>
 <mat-sidenav-container>
   <add-task-bar class="global"
                 [@blendInOut]
