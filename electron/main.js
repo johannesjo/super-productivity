@@ -114,6 +114,8 @@ electron.ipcMain.on('SHUTDOWN_NOW', quitAppNow);
 
 electron.ipcMain.on('SHUTDOWN', quitApp);
 
+electron.ipcMain.on('EXEC', exec);
+
 electron.ipcMain.on('REGISTER_GLOBAL_SHORTCUT', (ev, shortcutPassed) => {
   registerShowAppShortCut(shortcutPassed);
 });
@@ -131,7 +133,7 @@ electron.ipcMain.on('GIT_LOG', (ev, cwd) => {
 });
 
 electron.ipcMain.on('NOTIFY', (ev, notification) => {
-  notifier.notify({...notification, message: notification.body});
+  notifier.notify({ ...notification, message: notification.body });
 });
 
 electron.ipcMain.on('SHOW_OR_FOCUS', () => {
@@ -239,3 +241,12 @@ function idleChecker() {
   });
 }
 
+function exec(ev, command) {
+  console.log('running command ' + command);
+  const exec = require('child_process').exec;
+  exec(command, (error) => {
+    if (error) {
+      errorHandler(error);
+    }
+  });
+}
