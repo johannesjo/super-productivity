@@ -21,6 +21,10 @@ export class BookmarkLinkDirective {
   }
 
   @HostListener('click', ['$event']) onClick(ev: Event) {
+    if (ev.target) {
+      const el = ev.target as HTMLElement;
+      el.blur();
+    }
     if (IS_ELECTRON) {
       ev.preventDefault();
       if (!this.type || this.type === 'LINK') {
