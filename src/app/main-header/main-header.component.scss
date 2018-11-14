@@ -35,3 +35,25 @@ mat-toolbar {
     padding: 0 !important;
   }
 }
+
+.show-bookmarks-btn {
+  position: absolute;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 2;
+  top: 100%;
+  transition: $transition-standard !important;
+  transition-property: transform !important;
+  margin: 0 !important;
+  @media(max-width: $layout-xs) {
+    height: 30px !important;
+    min-height: 30px !important;
+    padding: 0 !important;
+  }
+
+  &.is-open {
+    transition-property: transform !important;
+    transition: $transition-standard !important;
+    transform: translate(-50%, -75%);
+  }
+}

@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
+import { BookmarkService } from '../bookmark.service';
 
 @Component({
   selector: 'bookmark-bar',
@@ -14,7 +15,9 @@ export class BookmarkBarComponent implements OnInit {
     {title: 'very long', icon: 'pause', type: 'LINK'},
   ];
 
-  constructor() {
+  constructor(
+    public readonly bookmarkService: BookmarkService,
+  ) {
   }
 
   ngOnInit() {

@@ -1,5 +1,5 @@
 <main-header></main-header>
-<bookmark-bar></bookmark-bar>
+<bookmark-bar *ngIf="bookmarkService.isShowBookmarks$|async"></bookmark-bar>
 <mat-sidenav-container>
   <add-task-bar class="global"
                 [@blendInOut]

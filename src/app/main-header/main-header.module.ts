@@ -6,6 +6,7 @@ import { UiModule } from '../ui/ui.module';
 import { ProjectModule } from '../project/project.module';
 import { RouterModule } from '@angular/router';
 import { EcoFabSpeedDialModule } from '@ecodev/fab-speed-dial';
+import { BookmarkModule } from '../bookmark/bookmark.module';
 
 @NgModule({
   imports: [
@@ -15,6 +16,7 @@ import { EcoFabSpeedDialModule } from '@ecodev/fab-speed-dial';
     ProjectModule,
     RouterModule,
     EcoFabSpeedDialModule,
+    BookmarkModule,
   ],
   declarations: [MainHeaderComponent],
   exports: [MainHeaderComponent],

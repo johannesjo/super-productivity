@@ -61,7 +61,7 @@
         <!--<mat-icon>edit</mat-icon>-->
         <!--</button>-->
         <button mat-mini-fab
-        (click)="showAddTaskBar()">
+                (click)="showAddTaskBar()">
           <mat-icon>add</mat-icon>
         </button>
         <button mat-mini-fab
@@ -70,6 +70,14 @@
         </button>
       </eco-fab-speed-dial-actions>
     </eco-fab-speed-dial>
-
   </nav>
+
+  <button mat-mini-fab=""
+          class="show-bookmarks-btn"
+          color="primary"
+          aria-label="Show Help for section"
+          [class.is-open]="bookmarkService.isShowBookmarks$|async"
+          (click)="bookmarkService.toggleBookmarks()">
+    <mat-icon>bookmark</mat-icon>
+  </button>
 </mat-toolbar>

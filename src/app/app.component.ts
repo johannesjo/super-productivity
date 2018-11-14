@@ -15,6 +15,7 @@ import { SnackService } from './core/snack/snack.service';
 import { IS_ELECTRON } from './app.constants';
 import { GoogleDriveSyncService } from './core/google/google-drive-sync.service';
 import { SwUpdate } from '@angular/service-worker';
+import { BookmarkService } from './bookmark/bookmark.service';
 
 @Component({
   selector: 'app-root',
@@ -38,7 +39,8 @@ export class AppComponent implements OnInit {
     private _chromeExtensionInterface: ChromeExtensionInterfaceService,
     private _swUpdate: SwUpdate,
     private _el: ElementRef,
-    public layoutService: LayoutService,
+    public readonly layoutService: LayoutService,
+    public readonly bookmarkService: BookmarkService,
   ) {
     this._matIconRegistry.addSvgIcon(
       `sp`,
