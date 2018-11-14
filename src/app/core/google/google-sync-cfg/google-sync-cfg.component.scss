@@ -4,3 +4,20 @@
   text-align: right;
   margin-bottom: $s;
 }
+
+.form-inputs {
+  display: flex;
+  flex-direction: column;
+}
+
+.btns {
+  margin-bottom: 2*$s;
+  margin-top: $s;
+  display: flex;
+  flex-direction: row;
+}
+
+.auto-sync-settings {
+  display: flex;
+  flex-direction: column;
+}

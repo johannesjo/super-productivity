@@ -47,82 +47,75 @@
         Load From GDrive
       </button>
       <!--<button type="button"-->
-              <!--mat-raised-button=""-->
-              <!--class="md-raised"-->
-              <!--*ngIf="(googleApiService.isLoggedIn$|async)"-->
-              <!--external-link-->
-              <!--target="_blank"-->
-              <!--href="https://myaccount.google.com/permissions">-->
-        <!--<mat-icon>remove_circle</mat-icon>-->
-        <!--Revoke permissions-->
+      <!--mat-raised-button=""-->
+      <!--class="md-raised"-->
+      <!--*ngIf="(googleApiService.isLoggedIn$|async)"-->
+      <!--external-link-->
+      <!--target="_blank"-->
+      <!--href="https://myaccount.google.com/permissions">-->
+      <!--<mat-icon>remove_circle</mat-icon>-->
+      <!--Revoke permissions-->
       <!--</button>-->
     </section>
 
-    <div *ngIf="(googleApiService.isLoggedIn$|async)"
-         class="sync-file-wrapper">
-      <mat-form-field>
-        <label>Sync file name</label>
-        <input type="text"
-               matInput=""
-               name="tmpSyncFile"
-               [(ngModel)]="tmpSyncFile">
-        <mat-icon matSuffix="">file_upload</mat-icon>
-      </mat-form-field>
+    <section *ngIf="(googleApiService.isLoggedIn$|async)"
+             class="form-inputs">
+      <div class="sync-file-wrapper">
+        <mat-form-field>
+          <input type="text"
+                 matInput=""
+                 placeholder="Sync file name"
+                 name="tmpSyncFile"
+                 [(ngModel)]="tmpSyncFile">
+          <mat-icon matSuffix="">file_upload</mat-icon>
+        </mat-form-field>
 
-      <button type="button"
-              mat-raised-button=""
-              class="md-raised md-primary md-icon-button"
-              aria-label="Save changed sync file name"
-              (click)="changeSyncFileName(tmpSyncFile)">
-        <mat-icon>save</mat-icon>
-      </button>
-    </div>
+        <button type="button"
+                mat-raised-button=""
+                class="md-raised md-primary md-icon-button"
+                aria-label="Save changed sync file name"
+                (click)="changeSyncFileName(tmpSyncFile)">
+          <mat-icon>save</mat-icon>
+        </button>
+      </div>
 
-    <div>
       <mat-slide-toggle [(ngModel)]="cfg.isAutoLogin"
                         name="isAutoLogin"
                         aria-label="Auto login at when starting app">
         Auto login at when starting app
       </mat-slide-toggle>
-    </div>
 
-    <section *ngIf="cfg.isAutoLogin">
-      <div>
+      <section *ngIf="cfg.isAutoLogin"
+               class="auto-sync-settings">
         <mat-slide-toggle [(ngModel)]="cfg.isLoadRemoteDataOnStartup"
                           name="isLoadRemoteDataOnStartup"
                           aria-label="Load remote data on startup">
           Load remote data on startup
         </mat-slide-toggle>
-      </div>
-      <div>
         <mat-slide-toggle [(ngModel)]="cfg.isAutoSyncToRemote"
                           name="isAutoSyncToRemote"
                           (change)="resetSync();"
                           aria-label="Auto sync data TO remote">
           Auto sync data TO remote
         </mat-slide-toggle>
-      </div>
-
-      <div>
         <mat-slide-toggle [(ngModel)]="cfg.isNotifyOnSync"
                           name="isNotifyOnSync"
                           aria-label="Notify when syncing">
           Notify when syncing
         </mat-slide-toggle>
-      </div>
 
-      <mat-form-field *ngIf="cfg.isAutoLogin && cfg.isAutoSyncToRemote">
-        <label>Sync interval (sync every X ms)</label>
-        <input type="text"
-               matInput=""
-               inputDuration=""
-               (change)="resetSync();"
-               name="syncInterval"
-               [(ngModel)]="cfg.syncInterval">
-        <mat-icon matSuffix="">timer</mat-icon>
-      </mat-form-field>
+        <mat-form-field *ngIf="cfg.isAutoLogin && cfg.isAutoSyncToRemote">
+          <input type="text"
+                 matInput=""
+                 inputDuration=""
+                 placeholder="Sync interval (sync every X ms)"
+                 (change)="resetSync();"
+                 name="syncInterval"
+                 [(ngModel)]="cfg.syncInterval">
+          <mat-icon matSuffix="">timer</mat-icon>
+        </mat-form-field>
+      </section>
     </section>
-
   </div>
 
 

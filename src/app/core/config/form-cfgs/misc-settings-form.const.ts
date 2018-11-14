@@ -16,28 +16,28 @@ export const MISC_SETTINGS_FORM_CFG = {
   items: [
     {
       key: 'isConfirmBeforeExit',
-      type: 'toggle',
+      type: 'checkbox',
       templateOptions: {
         label: 'Confirm before exiting the app',
       },
     },
     {
       key: 'isMinimizeToTrayOnExit',
-      type: 'toggle',
+      type: 'checkbox',
       templateOptions: {
         label: 'Minimize to tray instead of closing',
       },
     },
     {
       key: 'isNotifyWhenTimeEstimateExceeded',
-      type: 'toggle',
+      type: 'checkbox',
       templateOptions: {
         label: 'Notify when time estimate was exceeded',
       },
     },
     {
       key: 'isBlockFinishDayUntilTimeTimeTracked',
-      type: 'toggle',
+      type: 'checkbox',
       templateOptions: {
         label: 'Disable the finish day button until task list has been exported',
       },
@@ -45,7 +45,7 @@ export const MISC_SETTINGS_FORM_CFG = {
 
     {
       key: 'isEnableIdleTimeTracking',
-      type: 'toggle',
+      type: 'checkbox',
       templateOptions: {
         label: 'Enable idle time handling',
       },
@@ -60,7 +60,7 @@ export const MISC_SETTINGS_FORM_CFG = {
     },
     {
       key: 'isOnlyOpenIdleWhenCurrentTask',
-      type: 'toggle',
+      type: 'checkbox',
       hideExpression: '!model.isEnableIdleTimeTracking',
       templateOptions: {
         label: 'Only trigger idle time dialog when a current task is selected',
@@ -69,7 +69,7 @@ export const MISC_SETTINGS_FORM_CFG = {
 
     {
       key: 'isTakeABreakEnabled',
-      type: 'toggle',
+      type: 'checkbox',
       templateOptions: {
         label: 'Enable take a break reminder',
       },
