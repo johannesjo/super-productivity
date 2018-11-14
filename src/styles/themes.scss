@@ -18,7 +18,15 @@
     background-color: mat-color($accent);
   }
 
-  .bg-900 {
+  .bg-400 {
+    background-color: mat-color($primary, 400);
+  }
+
+  .bg-400i {
+    background-color: mat-color($primary, 400) !important;
+  }
+
+  .bg-800 {
     background-color: mat-color($primary, 800);
   }
   .color-primary-after:after {

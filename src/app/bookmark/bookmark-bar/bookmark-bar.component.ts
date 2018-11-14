@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 
 @Component({
   selector: 'bookmark-bar',
@@ -7,8 +7,15 @@ import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class BookmarkBarComponent implements OnInit {
+  bookmarks = [
+    {title: 'asd', icon: 'pause', type: 'LINK'},
+    {title: 'Something else', icon: 'pause', type: 'LINK'},
+    {title: 'very long', icon: 'pause', type: 'LINK'},
+    {title: 'very long', icon: 'pause', type: 'LINK'},
+  ];
 
-  constructor() { }
+  constructor() {
+  }
 
   ngOnInit() {
   }

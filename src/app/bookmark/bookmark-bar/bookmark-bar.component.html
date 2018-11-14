@@ -1,3 +1,64 @@
-<p>
-  bookmark-bar works!
-</p>
+<div class="global-link-list-outer bg-800">
+  <div class="global-link-list-inner">
+    <div class="global-link">
+      <button mat-raised-button=""
+              color="primary"
+              (click)="addLink()"
+              tabindex="1"
+              aria-label="add global link">
+        <mat-icon>add</mat-icon>
+      </button>
+    </div>
+
+    <div class="msg"
+         *ngIf="!bookmarks.length">You have no project bookmarks. Add one via drag and drop or by clicking on the '+' icon.
+    </div>
+
+    <div class="global-link"
+         *ngFor="let link of bookmarks"
+         draggable="false">
+      <a external-link
+         mat-raised-button=""
+         color="primary"
+         class="bg-400i"
+         [href]="link.path"
+         type="{{link.type}}"
+         target="_blank"
+         tabindex="1"
+         draggable="false"
+         aria-label="open global link">
+        <mat-icon *ngIf="!link.customIcon && link.type === 'LINK'"
+                  aria-label="Open link">link
+        </mat-icon>
+        <mat-icon *ngIf="!link.customIcon && link.type === 'FILE'"
+                  aria-label="Open file">insert_drive_file
+        </mat-icon>
+        <mat-icon *ngIf="!link.customIcon && link.type === 'COMMAND'"
+                  aria-label="Exec command">laptop_windows
+        </mat-icon>
+        <mat-icon *ngIf="link.customIcon"
+                  aria-label="Open">{{link.customIcon}}
+        </mat-icon>
+
+        <span [innerHtml]="link.title"></span>
+      </a>
+
+      <div class="controls">
+        <button class="edit-btn"
+                mat-mini-fab=""
+                color="primary"
+                aria-label="open edit dialog"
+                (click)="openEditDialog(link)">
+          <mat-icon>edit</mat-icon>
+        </button>
+        <button class="trash-btn"
+                mat-mini-fab=""
+                color="warn"
+                (click)="remove($index)"
+                aria-label="remove link">
+          <mat-icon>delete_forever</mat-icon>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

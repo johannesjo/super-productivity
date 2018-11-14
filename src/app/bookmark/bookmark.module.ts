@@ -16,7 +16,8 @@ import { BOOKMARK_FEATURE_NAME, bookmarkReducer } from './store/bookmark.reducer
     StoreModule.forFeature(BOOKMARK_FEATURE_NAME, bookmarkReducer),
     EffectsModule.forFeature([BookmarkEffects])
   ],
-  declarations: [BookmarkBarComponent]
+  declarations: [BookmarkBarComponent],
+  exports: [BookmarkBarComponent]
 })
 export class BookmarkModule {
 }
