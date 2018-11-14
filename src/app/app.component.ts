@@ -81,16 +81,18 @@ export class AppComponent implements OnInit {
     this._shortcutService.handleKeyDown(ev);
   }
 
-  @HostListener('document:ondragover', ['$event']) onDragOver(ev: Event) {
+  @HostListener('document:dragover', ['$event']) onDragOver(ev: Event) {
     ev.preventDefault();
   }
 
-  @HostListener('document:ondrop', ['$event']) onDrop(ev: Event) {
+  @HostListener('document:drop', ['$event']) onDrop(ev: Event) {
     ev.preventDefault();
+    this.bookmarkService.createFromDrop(ev);
   }
 
-  @HostListener('document:onpaste', ['$event']) onPaste(ev: Event) {
+  @HostListener('document:paste', ['$event']) onPaste(ev: Event) {
     ev.preventDefault();
+    this.bookmarkService.createFromPaste(ev);
   }
 
   ngOnInit() {

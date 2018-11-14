@@ -10,37 +10,37 @@
       </button>
     </div>
 
-    <div class="msg"
-         *ngIf="!bookmarks.length">You have no project bookmarks. Add one via drag and drop or by clicking on the '+' icon.
+    <div class="msg color-contrast"
+         *ngIf="!(bookmarkService.bookmarks$|async).length">You have no project bookmarks. Add one via drag and drop or by clicking on the '+' icon.
     </div>
 
     <div class="global-link"
-         *ngFor="let link of bookmarks"
+         *ngFor="let bookmark of bookmarkService.bookmarks$|async"
          draggable="false">
       <a external-link
          mat-raised-button=""
          color="primary"
          class="bg-400i"
-         [href]="link.path"
-         type="{{link.type}}"
+         [href]="bookmark.path"
+         type="{{bookmark.type}}"
          target="_blank"
          tabindex="1"
          draggable="false"
-         aria-label="open global link">
-        <mat-icon *ngIf="!link.customIcon && link.type === 'LINK'"
-                  aria-label="Open link">link
+         aria-label="open global bookmark">
+        <mat-icon *ngIf="!bookmark.icon && bookmark.type === 'LINK'"
+                  aria-label="Open bookmark">bookmark
         </mat-icon>
-        <mat-icon *ngIf="!link.customIcon && link.type === 'FILE'"
+        <mat-icon *ngIf="!bookmark.icon && bookmark.type === 'FILE'"
                   aria-label="Open file">insert_drive_file
         </mat-icon>
-        <mat-icon *ngIf="!link.customIcon && link.type === 'COMMAND'"
+        <mat-icon *ngIf="!bookmark.icon && bookmark.type === 'COMMAND'"
                   aria-label="Exec command">laptop_windows
         </mat-icon>
-        <mat-icon *ngIf="link.customIcon"
-                  aria-label="Open">{{link.customIcon}}
+        <mat-icon *ngIf="bookmark.icon"
+                  aria-label="Open">{{bookmark.icon}}
         </mat-icon>
 
-        <span [innerHtml]="link.title"></span>
+        <span [innerHtml]="bookmark.title"></span>
       </a>
 
       <div class="controls">
@@ -48,14 +48,14 @@
                 mat-mini-fab=""
                 color="primary"
                 aria-label="open edit dialog"
-                (click)="openEditDialog(link)">
+                (click)="openEditDialog(bookmark)">
           <mat-icon>edit</mat-icon>
         </button>
         <button class="trash-btn"
                 mat-mini-fab=""
                 color="warn"
                 (click)="remove($index)"
-                aria-label="remove link">
+                aria-label="remove bookmark">
           <mat-icon>delete_forever</mat-icon>
         </button>
       </div>

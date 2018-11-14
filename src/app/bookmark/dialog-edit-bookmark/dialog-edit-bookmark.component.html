@@ -3,15 +3,17 @@
     <h2 class="mat-title">Global link</h2>
 
     <p *ngIf="selectedTask"><strong>Add link to task:<br>{{selectedTask.title}}</strong><br><br></p>
-    <mat-form-field class="mat-block">
+    <mat-form-field>
       <label>Title</label>
       <input type="text"
              [(ngModel)]="bookmarkCopy.title"
+             name="title"
+             matInput=""
              autofocus="autofocus"
              tabindex="1"
              aria-label="Title">
     </mat-form-field>
-    <mat-form-field class="mat-block">
+    <mat-form-field>
       <label>
         <span *ngIf="bookmarkCopy.type ==='LINK' || !bookmarkCopy.type">Url</span>
         <span *ngIf="bookmarkCopy.type ==='FILE'">File Path</span>
@@ -20,12 +22,15 @@
       </label>
       <input type="text"
              [(ngModel)]="bookmarkCopy.path"
+             name="path"
+             matInput=""
              required
              tabindex="1"
              aria-label="Path/Url">
     </mat-form-field>
 
     <mat-select [(ngModel)]="bookmarkCopy.type"
+                name="type"
                 required="true"
                 tabindex="1"
                 placeholder="Select a type">

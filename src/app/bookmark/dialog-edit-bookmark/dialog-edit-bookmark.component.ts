@@ -3,7 +3,6 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material';
 import { IS_ELECTRON } from '../../app.constants';
 import { Task } from '../../tasks/task.model';
 import { MATERIAL_ICONS } from './material-icons.const';
-import { BookmarkService } from '../bookmark.service';
 
 @Component({
   selector: 'dialog-edit-bookmark',
@@ -18,14 +17,13 @@ export class DialogEditBookmarkComponent implements OnInit {
   customIcons: string [] = MATERIAL_ICONS;
 
   constructor(
-    private _bookmarkService: BookmarkService,
     private _matDialogRef: MatDialogRef<DialogEditBookmarkComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any
   ) {
   }
 
   ngOnInit() {
-    this.bookmarkCopy = this.data.bookmarkCopy;
+    this.bookmarkCopy = {...this.data.bookmark};
 
     if (!this.bookmarkCopy.type) {
       this.bookmarkCopy.type = 'LINK';
@@ -40,26 +38,14 @@ export class DialogEditBookmarkComponent implements OnInit {
     }
   }
 
-  close() {
-    this._matDialogRef.close();
+  close(bookmark?) {
+    this._matDialogRef.close(bookmark);
   }
 
   submit() {
     if (this.bookmarkCopy.type === 'LINK' && !this.bookmarkCopy.path.match(/(https?|ftp|file):\/\//)) {
       this.bookmarkCopy.path = 'http://' + this.bookmarkCopy.path;
     }
-
-    if (this.data.isNew && !this.bookmarkCopy.id) {
-      // CREATE
-      if (this.selectedTask) {
-        // ADD TO TASK TODO
-      } else {
-        // ADD TO BOOKMARK BAR
-      }
-    } else {
-      // UPDATE
-    }
-
-    this.close();
+    this.close(this.bookmarkCopy);
   }
 }
