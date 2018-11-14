@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { TaskService } from '../../tasks/task.service';
 import { TimeTrackingService } from '../time-tracking.service';
-import { combineLatest, Observable } from 'rxjs';
-import { distinctUntilChanged, scan, throttleTime } from 'rxjs/operators';
+import { Observable } from 'rxjs';
+import { distinctUntilChanged, scan, throttleTime, withLatestFrom } from 'rxjs/operators';
 import { SnackService } from '../../core/snack/snack.service';
 import { ConfigService } from '../../core/config/config.service';
 import { msToString } from '../../ui/duration/ms-to-string.pipe';
@@ -10,12 +10,12 @@ import { msToString } from '../../ui/duration/ms-to-string.pipe';
 const BREAK_TRIGGER_DURATION = 5 * 60 * 1000;
 
 // required because typescript freaks out
-const reduceBreak = (acc, [currentTaskId, tick]) => {
+const reduceBreak = (acc, [tick, currentTaskId]) => {
   return currentTaskId ? 0 : acc + tick.duration;
 };
 // required because typescript freaks out
 const createReduceTimeWorked = (obj, key) => {
-  return (acc, [breakDuration, tick]) => {
+  return (acc, [tick, breakDuration]) => {
     return (breakDuration > BREAK_TRIGGER_DURATION) ? 0 : obj[key] + tick.duration;
   };
 };
@@ -25,20 +25,19 @@ const createReduceTimeWorked = (obj, key) => {
 })
 export class TakeABreakService {
   /* tslint:disable*/
-  private _breakDuration$: Observable<number> = combineLatest(
-    this._taskService.currentTaskId$,
-    this._timeTrackingService.tick$
-  ).pipe(
+  private _breakDuration$: Observable<number> = this._timeTrackingService.tick$.pipe(
+    withLatestFrom(
+      this._taskService.currentTaskId$,
+    ),
     scan(reduceBreak, 0)
   );
-  public timeWorkingWithoutABreak$: Observable<number> = combineLatest(
-    this._breakDuration$,
-    this._timeTrackingService.tick$
-  )
-    .pipe(
-      scan(createReduceTimeWorked(this, 'timeWorkedWithoutABreakAcc'), 0),
-      distinctUntilChanged()
-    );
+  public timeWorkingWithoutABreak$: Observable<number> = this._timeTrackingService.tick$.pipe(
+    withLatestFrom(
+      this._breakDuration$,
+    ),
+    scan(createReduceTimeWorked(this, 'timeWorkedWithoutABreakAcc'), 0),
+    distinctUntilChanged()
+  );
   /* tslint:enable*/
 
   private timeWorkedWithoutABreakAcc = 0;
