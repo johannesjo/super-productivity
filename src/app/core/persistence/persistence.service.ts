@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import {
   LS_BACKUP,
+  LS_BOOKMARK_STATE,
   LS_GLOBAL_CFG,
   LS_ISSUE_STATE,
   LS_LAST_ACTIVE,
@@ -18,6 +19,7 @@ import { JiraIssueState } from '../../issue/jira/jira-issue/store/jira-issue.red
 import { EntityState } from '@ngrx/entity';
 import { Task } from '../../tasks/task.model';
 import { AppDataComplete } from '../sync/sync.model';
+import { BookmarkState } from '../../bookmark/store/bookmark.reducer';
 
 @Injectable({
   providedIn: 'root'
@@ -75,6 +77,14 @@ export class PersistenceService {
     return loadFromLs(this._makeProjectKey(projectId, LS_ISSUE_STATE, issueType));
   }
 
+  saveBookmarksForProject(projectId, bookmarkState: BookmarkState) {
+    saveToLsWithLastActive(this._makeProjectKey(projectId, LS_BOOKMARK_STATE), bookmarkState);
+  }
+
+  loadBookmarksForProject(projectId): BookmarkState {
+    return loadFromLs(this._makeProjectKey(projectId, LS_BOOKMARK_STATE));
+  }
+
 
   // GLOBAL CONFIG
   // -------------
@@ -117,6 +127,7 @@ export class PersistenceService {
       lastActiveTime: this.getLastActive(),
       project: this.loadProjectsMeta(),
       globalConfig: this.loadGlobalConfig(),
+      bookmark: crateProjectIdObj(this.loadBookmarksForProject.bind(this)),
       task: crateProjectIdObj(this.loadTasksForProject.bind(this)),
       taskArchive: crateProjectIdObj(this.loadTaskArchiveForProject.bind(this)),
       issue: projectIds.reduce((acc, projectId) => {
@@ -142,6 +153,7 @@ export class PersistenceService {
 
     this.saveProjectsMeta(data.project);
     this.saveGlobalConfig(data.globalConfig);
+    saveDataForProjectIds(data.bookmark, this.saveBookmarksForProject.bind(this));
     saveDataForProjectIds(data.task, this.saveTasksForProject.bind(this));
     saveDataForProjectIds(data.taskArchive, this.saveToTaskArchiveForProject.bind(this));
     Object.keys(data.issue).forEach(projectId => {

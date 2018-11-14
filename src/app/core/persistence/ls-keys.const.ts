@@ -11,3 +11,4 @@ export const LS_PROJECT_CFG: ProjectDataLsKey = 'CFG';
 export const LS_TASK_ARCHIVE: ProjectDataLsKey = 'TASKS_ARCHIVE';
 export const LS_TASK_STATE: ProjectDataLsKey = 'TASKS_STATE';
 export const LS_ISSUE_STATE: ProjectDataLsKey = 'ISSUE_STATE';
+export const LS_BOOKMARK_STATE: ProjectDataLsKey = 'BOOKMARK_STATE';

@@ -16,13 +16,13 @@ export const {selectIds, selectEntities, selectAll, selectTotal} = adapter.getSe
 export const selectAllBookmarks = createSelector(selectBookmarkFeatureState, selectAll);
 export const selectIsShowBookmarkBar = createSelector(selectBookmarkFeatureState, state => state.isShowBookmarks);
 
-export const initialState: BookmarkState = adapter.getInitialState({
+export const initialBookmarkState: BookmarkState = adapter.getInitialState({
   // additional entity state properties
   isShowBookmarks: true
 });
 
 export function bookmarkReducer(
-  state = initialState,
+  state = initialBookmarkState,
   action: BookmarkActions
 ): BookmarkState {
   switch (action.type) {
@@ -66,6 +66,9 @@ export function bookmarkReducer(
       return adapter.removeAll(state);
     }
 
+
+    case BookmarkActionTypes.LoadBookmarkState:
+      return {...action.payload.state};
 
     case BookmarkActionTypes.ShowBookmarks:
       return {...state, isShowBookmarks: true};

@@ -4,18 +4,17 @@ import { GlobalConfig } from '../config/config.model';
 import { EntityState } from '@ngrx/entity';
 import { Task } from '../../tasks/task.model';
 import { IssueEntityMap } from '../../issue/issue';
+import { BookmarkState } from '../../bookmark/store/bookmark.reducer';
 
-export interface SyncHandler {
-  id: string;
-  syncToFn: Function;
-  syncFromFn: Function;
-}
 
 // NOTE: [key:string] always refers to projectId
 export interface AppDataComplete {
   lastActiveTime: string;
   project: ProjectState;
   globalConfig: GlobalConfig;
+  bookmark?: {
+    [key: string]: BookmarkState;
+  };
   task?: {
     [key: string]: TaskState;
   };

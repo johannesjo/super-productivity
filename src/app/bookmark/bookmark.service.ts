@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { select, Store } from '@ngrx/store';
-import { BookmarkState, selectAllBookmarks, selectIsShowBookmarkBar } from './store/bookmark.reducer';
+import { BookmarkState, initialBookmarkState, selectAllBookmarks, selectIsShowBookmarkBar } from './store/bookmark.reducer';
 import {
   AddBookmark,
   DeleteBookmark,
@@ -15,6 +15,7 @@ import { Bookmark } from './bookmark.model';
 import shortid from 'shortid';
 import { DialogEditBookmarkComponent } from './dialog-edit-bookmark/dialog-edit-bookmark.component';
 import { MatDialog } from '@angular/material';
+import { PersistenceService } from '../core/persistence/persistence.service';
 
 @Injectable({
   providedIn: 'root'
@@ -26,10 +27,16 @@ export class BookmarkService {
   constructor(
     private _store$: Store<BookmarkState>,
     private _matDialog: MatDialog,
+    private _persistenceService: PersistenceService,
   ) {
   }
 
-  loadBookmarkState(state: BookmarkState) {
+  loadStateForProject(projectId: string) {
+    const lsBookmarkState = this._persistenceService.loadBookmarksForProject(projectId);
+    this.loadState(lsBookmarkState || initialBookmarkState);
+  }
+
+  loadState(state: BookmarkState) {
     this._store$.dispatch(new LoadBookmarkState({state}));
   }
 
