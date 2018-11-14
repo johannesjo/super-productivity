@@ -1,4 +1,4 @@
-export type BookmarkType = 'FILE' | 'LINK' | 'TEXT' | 'NOTE';
+export type BookmarkType = 'FILE' | 'LINK' |  'IMG' | 'COMMAND' | 'NOTE';
 
 export type Bookmark = Readonly<{
   id: string;

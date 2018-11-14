@@ -26,11 +26,11 @@ $sLeftRight: $sTopBottom/2;
   }
 }
 
-.global-link-list-outer {
+.global-bookmark-list-outer {
   padding-bottom: $sTopBottom;
 }
 
-.global-link-list-inner {
+.global-bookmark-list-inner {
   display: flex;
   flex-flow: row;
   justify-content: center;
@@ -45,7 +45,7 @@ $sLeftRight: $sTopBottom/2;
     padding: $s;
     padding-top: $s+$sTopBottom;
   }
-  .global-link {
+  .global-bookmark {
     flex: 1 1 auto;
     margin: $sTopBottom $sLeftRight 0;
     position: relative;
@@ -72,7 +72,7 @@ $sLeftRight: $sTopBottom/2;
     }
   }
 
-  .global-link > a {
+  .global-bookmark > a {
     text-decoration: none;
     display: flex;
     align-items: flex-start;

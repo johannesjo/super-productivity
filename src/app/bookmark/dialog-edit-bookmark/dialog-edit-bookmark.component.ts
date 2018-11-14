@@ -3,6 +3,7 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material';
 import { IS_ELECTRON } from '../../app.constants';
 import { Task } from '../../tasks/task.model';
 import { MATERIAL_ICONS } from './material-icons.const';
+import { BookmarkType } from '../bookmark.model';
 
 @Component({
   selector: 'dialog-edit-bookmark',
@@ -47,5 +48,19 @@ export class DialogEditBookmarkComponent implements OnInit {
       this.bookmarkCopy.path = 'http://' + this.bookmarkCopy.path;
     }
     this.close(this.bookmarkCopy);
+  }
+
+  mapTypeToLabel(type: BookmarkType) {
+    switch (type) {
+      case 'FILE':
+        return 'File Path';
+      case 'IMG':
+        return 'Image';
+      case 'COMMAND':
+        return 'Command';
+      case 'LINK':
+      default:
+        return 'Url';
+    }
   }
 }

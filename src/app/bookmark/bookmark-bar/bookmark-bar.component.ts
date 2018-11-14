@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { BookmarkService } from '../bookmark.service';
 import { MatDialog } from '@angular/material';
 import { DialogEditBookmarkComponent } from '../dialog-edit-bookmark/dialog-edit-bookmark.component';
+import { Bookmark } from '../bookmark.model';
 
 @Component({
   selector: 'bookmark-bar',
@@ -26,7 +27,7 @@ export class BookmarkBarComponent implements OnInit {
   ngOnInit() {
   }
 
-  openEditDialog(bookmark) {
+  openEditDialog(bookmark?: Bookmark) {
     this._matDialog.open(DialogEditBookmarkComponent, {
       data: {
         bookmark: bookmark

@@ -1,11 +1,11 @@
-<div class="global-link-list-outer bg-800">
-  <div class="global-link-list-inner">
-    <div class="global-link">
+<div class="global-bookmark-list-outer bg-800">
+  <div class="global-bookmark-list-inner">
+    <div class="global-bookmark">
       <button mat-raised-button=""
               color="primary"
-              (click)="addLink()"
+              (click)="openEditDialog()"
               tabindex="1"
-              aria-label="add global link">
+              aria-label="add global bookmark">
         <mat-icon>add</mat-icon>
       </button>
     </div>
@@ -14,10 +14,10 @@
          *ngIf="!(bookmarkService.bookmarks$|async).length">You have no project bookmarks. Add one via drag and drop or by clicking on the '+' icon.
     </div>
 
-    <div class="global-link"
+    <div class="global-bookmark"
          *ngFor="let bookmark of bookmarkService.bookmarks$|async"
          draggable="false">
-      <a external-link
+      <a external-bookmark
          mat-raised-button=""
          color="primary"
          class="bg-400i"
