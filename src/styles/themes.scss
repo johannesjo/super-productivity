@@ -5,7 +5,7 @@
   $accent: map-get($theme, accent);
   $background: map-get($theme, background);
   $standardBackground: map-get($background, card);
-  @debug $primary;
+  // @debug $primary;
   .bg-standard {
     background: $standardBackground;
   }
