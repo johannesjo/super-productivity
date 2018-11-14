@@ -4,6 +4,7 @@ import { IS_ELECTRON } from '../../app.constants';
 import { Task } from '../../tasks/task.model';
 import { MATERIAL_ICONS } from './material-icons.const';
 import { BookmarkType } from '../bookmark.model';
+import { FormControl } from '@angular/forms';
 
 @Component({
   selector: 'dialog-edit-bookmark',
@@ -16,6 +17,7 @@ export class DialogEditBookmarkComponent implements OnInit {
   bookmarkCopy: any;
   selectedTask: Task;
   customIcons: string [] = MATERIAL_ICONS;
+  iconControl = new FormControl();
 
   constructor(
     private _matDialogRef: MatDialogRef<DialogEditBookmarkComponent>,

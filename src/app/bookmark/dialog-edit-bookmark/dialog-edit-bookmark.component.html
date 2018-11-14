@@ -37,27 +37,25 @@
         </mat-select>
       </mat-form-field>
 
-      <!--<div class="custom-icon-wrapper">-->
-      <!--<ng-mat-icon *ngIf="bookmarkCopy.customIcon"-->
-      <!--icon="{{bookmarkCopy.customIcon}}"></ng-mat-icon>-->
-      <!--<mat-autocomplete tabindex="1"-->
-      <!--mat-floating-label="Select custom icon (optional)"-->
-      <!--mat-selected-item="bookmarkCopy.customIcon"-->
-      <!--mat-search-text="searchIconTxt"-->
-      <!--mat-items="icon in getFilteredIconSuggestions(searchIconTxt)"-->
-      <!--mat-item-text="icon"-->
-      <!--mat-require-match="true"-->
-      <!--placeholder="Select custom icon">-->
-      <!--<mat-item-template>-->
-      <!--<ng-mat-icon icon="{{icon}}"></ng-mat-icon>-->
-      <!--<span mat-highlight-text="searchIconTxt"-->
-      <!--mat-highlight-flags="i">{{icon}}</span>-->
-      <!--</mat-item-template>-->
-      <!--<mat-not-found>-->
-      <!--No icon found-->
-      <!--</mat-not-found>-->
-      <!--</mat-autocomplete>-->
-      <!--</div>-->
+      <div class="custom-icon-wrapper">
+        <mat-form-field class="example-full-width">
+          <input type="text"
+                 placeholder="Pick one"
+                 aria-label="Number"
+                 matInput
+                 [(ngModel)]="bookmarkCopy.icon"
+                 [formControl]="iconControl"
+                 [matAutocomplete]="auto">
+          <mat-icon matPrefix="">{{bookmarkCopy.icon}}</mat-icon>
+          <mat-autocomplete #auto="matAutocomplete">
+            <mat-option *ngFor="let icon of customIcons"
+                        [value]="icon">
+              <mat-icon>{{icon}}</mat-icon>
+              <span>{{icon}}</span>
+            </mat-option>
+          </mat-autocomplete>
+        </mat-form-field>
+      </div>
 
       <!--<div *ngIf="isNew">-->
       <!--<mat-autocomplete-->
