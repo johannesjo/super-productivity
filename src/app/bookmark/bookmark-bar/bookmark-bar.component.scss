@@ -79,6 +79,8 @@ $sLeftRight: $sTopBottom/2;
     flex-direction: row;
     justify-content: center;
     text-transform: none;
+    background-size: cover;
+    background-position: center center;
   }
 
   .controls {

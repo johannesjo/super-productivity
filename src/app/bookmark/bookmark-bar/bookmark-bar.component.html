@@ -21,6 +21,7 @@
          mat-raised-button=""
          color="primary"
          class="bg-400i"
+         [style.background-image]="bookmark.type==='IMG'&& 'url('+bookmark.path+')'"
          [href]="bookmark.path"
          type="{{bookmark.type}}"
          target="_blank"
@@ -39,7 +40,6 @@
         <mat-icon *ngIf="bookmark.icon"
                   aria-label="Open">{{bookmark.icon}}
         </mat-icon>
-
         {{bookmark.title}}
       </a>
 
