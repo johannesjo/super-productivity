@@ -4,7 +4,7 @@
   display: block;
   //overflow: hidden;
 
-  &.global{
+  &.global {
     position: fixed;
     left: 50%;
     transform: translateX(-50%);
@@ -17,33 +17,46 @@
     max-width: 632px;
     transform-origin: left top;
   }
+}
 
-  .add-task-form {
+.add-task-form {
+  width: 100%;
+  position: relative;
+  color: #000000;
+
+  @include dark-theme {
+    color: #eeeeee;
+  }
+
+  input {
+    display: block;
     width: 100%;
-    position: relative;
+    font-size: 16px;
+    box-sizing: border-box;
+    border-style: solid;
+    border-width: 3px;
+    //border-bottom-width: 4px;
+    outline: 0;
 
-    input {
-      display: block;
-      width: 100%;
-      font-size: 16px;
-      box-sizing: border-box;
-      border-style: solid;
-      border-width: 3px;
-      //border-bottom-width: 4px;
-      outline: 0;
-      background: #ffffff;
+    padding-left: 40px !important;
+    line-height: 42px;
 
-      padding-left: 40px !important;
-      line-height: 42px;
+    color: #000000;
+    background: #ffffff;
+
+    @include dark-theme {
+      background-color: $dark-theme-bg;
+      color: #eeeeee;
     }
 
-    mat-icon{
-      position: absolute;
-      left: $s;
-      top: 50%;
-      transform: translateY(-50%);
-      z-index: 2;
-    }
+  }
+
+  mat-icon {
+    position: absolute;
+    left: $s;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 2;
   }
 }
 
