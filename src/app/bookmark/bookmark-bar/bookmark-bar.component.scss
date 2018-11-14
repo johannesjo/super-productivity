@@ -43,11 +43,7 @@ $sLeftRight: $sTopBottom/2;
     align-content: center;
     align-self: center;
     padding: $s;
-
-    color: $light-theme-text-color;
-    @include dark-theme() {
-      color: $dark-theme-text-color-lighter;
-    }
+    padding-top: $s+$sTopBottom;
   }
   .global-link {
     flex: 1 1 auto;
