@@ -2,7 +2,6 @@ import { Action } from '@ngrx/store';
 import { Update } from '@ngrx/entity';
 import { Bookmark } from '../bookmark.model';
 import { BookmarkState } from './bookmark.reducer';
-import { LayoutActionTypes } from '../../core/layout/store/layout.actions';
 
 export enum BookmarkActionTypes {
   LoadBookmarkState = '[Bookmark] Load Bookmark State',
@@ -25,7 +24,7 @@ export enum BookmarkActionTypes {
 export class LoadBookmarkState implements Action {
   readonly type = BookmarkActionTypes.LoadBookmarkState;
 
-  constructor(public payload: { state: BookmarkState}) {
+  constructor(public payload: { state: BookmarkState }) {
   }
 }
 

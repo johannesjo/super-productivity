@@ -9,6 +9,7 @@ import { UiModule } from '../ui/ui.module';
 import { BOOKMARK_FEATURE_NAME, bookmarkReducer } from './store/bookmark.reducer';
 import { DialogEditBookmarkComponent } from './dialog-edit-bookmark/dialog-edit-bookmark.component';
 import { FormsModule } from '@angular/forms';
+import { BookmarkLinkDirective } from './bookmark-link/bookmark-link.directive';
 
 @NgModule({
   imports: [
@@ -19,9 +20,18 @@ import { FormsModule } from '@angular/forms';
     StoreModule.forFeature(BOOKMARK_FEATURE_NAME, bookmarkReducer),
     EffectsModule.forFeature([BookmarkEffects])
   ],
-  declarations: [BookmarkBarComponent, DialogEditBookmarkComponent],
-  entryComponents: [DialogEditBookmarkComponent],
-  exports: [BookmarkBarComponent, DialogEditBookmarkComponent]
+  declarations: [
+    BookmarkBarComponent,
+    DialogEditBookmarkComponent,
+    BookmarkLinkDirective
+  ],
+  entryComponents: [
+    DialogEditBookmarkComponent
+  ],
+  exports: [
+    BookmarkBarComponent,
+    DialogEditBookmarkComponent
+  ]
 })
 export class BookmarkModule {
 }
