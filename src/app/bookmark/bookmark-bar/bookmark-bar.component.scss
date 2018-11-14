@@ -13,6 +13,19 @@ $sLeftRight: $sTopBottom/2;
   box-shadow: $whiteframe-shadow-3dp;
 }
 
+.note {
+  max-width: 30%;
+  padding: $s;
+  .content {
+    display: none;
+  }
+  &:hover {
+    .content {
+      display: block;
+    }
+  }
+}
+
 .global-link-list-outer {
   padding-bottom: $sTopBottom;
 }

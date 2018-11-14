@@ -2,6 +2,7 @@ import { Action } from '@ngrx/store';
 import { Update } from '@ngrx/entity';
 import { Bookmark } from '../bookmark.model';
 import { BookmarkState } from './bookmark.reducer';
+import { LayoutActionTypes } from '../../core/layout/store/layout.actions';
 
 export enum BookmarkActionTypes {
   LoadBookmarkState = '[Bookmark] Load Bookmark State',
@@ -14,7 +15,11 @@ export enum BookmarkActionTypes {
   UpdateBookmarks = '[Bookmark] Update Bookmarks',
   DeleteBookmark = '[Bookmark] Delete Bookmark',
   DeleteBookmarks = '[Bookmark] Delete Bookmarks',
-  ClearBookmarks = '[Bookmark] Clear Bookmarks'
+  ClearBookmarks = '[Bookmark] Clear Bookmarks',
+
+  ShowBookmarks = '[Bookmark] Show Bookmarks',
+  HideBookmarks = '[Bookmark] Hide Bookmarks',
+  ToggleBookmarks = '[Bookmark] Toggle Bookmarks',
 }
 
 export class LoadBookmarkState implements Action {
@@ -91,6 +96,19 @@ export class ClearBookmarks implements Action {
   readonly type = BookmarkActionTypes.ClearBookmarks;
 }
 
+export class ShowBookmarks implements Action {
+  readonly type = BookmarkActionTypes.ShowBookmarks;
+}
+
+export class HideBookmarks implements Action {
+  readonly type = BookmarkActionTypes.HideBookmarks;
+}
+
+export class ToggleBookmarks implements Action {
+  readonly type = BookmarkActionTypes.ToggleBookmarks;
+}
+
+
 export type BookmarkActions =
   LoadBookmarks
   | LoadBookmarkState
@@ -102,4 +120,8 @@ export type BookmarkActions =
   | UpdateBookmarks
   | DeleteBookmark
   | DeleteBookmarks
-  | ClearBookmarks;
+  | ClearBookmarks
+  | ShowBookmarks
+  | HideBookmarks
+  | ToggleBookmarks
+  ;

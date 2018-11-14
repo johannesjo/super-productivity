@@ -1,16 +1,26 @@
 import { Injectable } from '@angular/core';
 import { select, Store } from '@ngrx/store';
 import { BookmarkState, selectAllBookmarks } from './store/bookmark.reducer';
-import { AddBookmark, DeleteBookmark, LoadBookmarkState, UpdateBookmark } from './store/bookmark.actions';
+import {
+  AddBookmark,
+  DeleteBookmark,
+  HideBookmarks,
+  LoadBookmarkState,
+  ShowBookmarks,
+  ToggleBookmarks,
+  UpdateBookmark
+} from './store/bookmark.actions';
 import { Observable } from 'rxjs';
 import { Bookmark } from './bookmark.model';
 import shortid from 'shortid';
+import { selectIsShowBookmarkBar } from '../core/layout/store/layout.reducer';
 
 @Injectable({
   providedIn: 'root'
 })
 export class BookmarkService {
   bookmarks$: Observable<Bookmark[]> = this._store$.pipe(select(selectAllBookmarks));
+  isShowBookmarkBar$: Observable<boolean> = this._store$.pipe(select(selectIsShowBookmarkBar));
 
   constructor(private _store$: Store<BookmarkState>) {
   }
@@ -34,6 +44,19 @@ export class BookmarkService {
 
   updateBookmark(id: string, changes: Partial<Bookmark>) {
     this._store$.dispatch(new UpdateBookmark({bookmark: {id, changes}}));
+  }
+
+
+  showBookmarks() {
+    this._store$.dispatch(new ShowBookmarks());
+  }
+
+  hideBookmarks() {
+    this._store$.dispatch(new HideBookmarks());
+  }
+
+  toggleBookmarks() {
+    this._store$.dispatch(new ToggleBookmarks());
   }
 
   // loadBookmarks() {

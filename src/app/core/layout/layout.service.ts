@@ -16,7 +16,7 @@ import { LayoutState, selectIsShowAddTaskBar, selectIsShowBookmarkBar } from './
 })
 export class LayoutService {
   isShowAddTaskBar$: Observable<boolean> = this._store$.pipe(select(selectIsShowAddTaskBar));
-  isShowBookmarkBar$: Observable<boolean> = this._store$.pipe(select(selectIsShowBookmarkBar));
+  xxxxisShowBookmarkBar$: Observable<boolean> = this._store$.pipe(select(selectIsShowBookmarkBar));
 
   constructor(private _store$: Store<LayoutState>) {
   }
