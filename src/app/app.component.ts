@@ -86,12 +86,10 @@ export class AppComponent implements OnInit {
   }
 
   @HostListener('document:drop', ['$event']) onDrop(ev: Event) {
-    ev.preventDefault();
     this.bookmarkService.createFromDrop(ev);
   }
 
   @HostListener('document:paste', ['$event']) onPaste(ev: Event) {
-    ev.preventDefault();
     this.bookmarkService.createFromPaste(ev);
   }
 
