@@ -33,16 +33,17 @@
   width: 100%;
   word-wrap: break-word;
   display: block;
-  border: none;
   resize: none;
   overflow: auto;
   height: 100%;
   box-sizing: border-box;
   background: #fbfbfb;
+  border: 1px solid #dddddd;
 
   @include dark-theme {
     background-color: $dark-theme-bg;
     color: #eeeeee;
+    border-color: #333333;
   }
 }
 
