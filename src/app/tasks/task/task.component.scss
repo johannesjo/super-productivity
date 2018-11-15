@@ -13,11 +13,7 @@ $this-active-shadow: $whiteframe-shadow-6dp;
   > .inner-wrapper {
     padding: 2px 0;
     margin-bottom: 7px;
-    //color: $this-task-text-color;
-    position: relative;
-    box-shadow: $shadow-card-shadow;
-    //box-shadow: $shadow-bottom-boxed;
-    border-radius: $card-border-radius;
+
     .title-bar-wrapper,
     .first-line {
       background: inherit;
@@ -225,6 +221,19 @@ $this-active-shadow: $whiteframe-shadow-6dp;
       z-index: 12;
       transform: scale(1.0714285714);
     }
+  }
+}
+
+.inner-wrapper{
+  //color: $this-task-text-color;
+  position: relative;
+  box-shadow: $shadow-card-shadow;
+  //box-shadow: $shadow-bottom-boxed;
+  border-radius: $card-border-radius;
+  border: 1px solid #dddddd;
+
+  @include dark-theme {
+    border-color: #333333;
   }
 }
 
