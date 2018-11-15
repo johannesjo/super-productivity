@@ -18,12 +18,13 @@ import { SwUpdate } from '@angular/service-worker';
 import { BookmarkService } from './bookmark/bookmark.service';
 import { slideAnimation } from './ui/animations/slide.ani';
 import { expandAnimation } from './ui/animations/expand.ani';
+import { warpRouteAnimation } from './ui/animations/warp-route';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss'],
-  animations: [blendInOutAnimation, slideAnimation, expandAnimation]
+  animations: [blendInOutAnimation, slideAnimation, expandAnimation, warpRouteAnimation]
 })
 export class AppComponent implements OnInit {
   private _currentTheme: string;
@@ -97,6 +98,10 @@ export class AppComponent implements OnInit {
     this._projectService.currentProject$.subscribe((currentProject: Project) => {
       this._setTheme(currentProject.isDarkTheme, currentProject.themeColor);
     });
+  }
+
+  getPage(outlet) {
+    return outlet.activatedRouteData['page'] || 'one';
   }
 
   private _setTheme(isDarkTheme: boolean, theme: string) {

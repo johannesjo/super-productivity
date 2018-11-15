@@ -8,10 +8,10 @@ import { WorklogComponent } from './pages/worklog-and-calendar/worklog/worklog.c
 import { CalendarComponent } from './pages/worklog-and-calendar/calendar/calendar.component';
 
 export const APP_ROUTES: Routes = [
-  {path: 'work-view', component: WorkViewPageComponent},
-  {path: 'config', component: ConfigPageComponent},
-  {path: 'projects', component: ProjectPageComponent},
-  {path: 'daily-summary', component: DailySummaryComponent},
+  {path: 'work-view', component: WorkViewPageComponent, data: {page: 'work-view'}},
+  {path: 'config', component: ConfigPageComponent, data: {page: 'config'}},
+  {path: 'projects', component: ProjectPageComponent, data: {page: 'projects'}},
+  {path: 'daily-summary', component: DailySummaryComponent, data: {page: 'daily-summary'}},
   {
     path: 'worklog-and-calendar',
     component: WorklogAndCalendarComponent,

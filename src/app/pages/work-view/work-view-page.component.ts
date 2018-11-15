@@ -63,7 +63,6 @@ export class WorkViewPageComponent implements OnInit, OnDestroy {
 
     this._activatedRoute.queryParams
       .subscribe((params) => {
-        console.log(params);
         if (params && params.backlogPos) {
           this.splitInputPos = params.backlogPos;
         }

@@ -8,5 +8,8 @@
               (blur)="layoutService.hideAddTaskBar()"
               *ngIf="layoutService.isShowAddTaskBar$|async"></add-task-bar>
 <mat-sidenav-container>
-  <router-outlet></router-outlet>
+  <div class="route-wrapper"
+       [@warpRoute]="getPage(o)">
+    <router-outlet #o="outlet"></router-outlet>
+  </div>
 </mat-sidenav-container>

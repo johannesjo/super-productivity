@@ -117,6 +117,10 @@ h2 {
 .today,
 .backlog .inner-wrapper {
   overflow-y: scroll !important;
+  //-webkit-overflow-scrolling: touch;
+  //&::-webkit-scrollbar {
+  //  width: 0 !important
+  //}
 }
 
 .today {
