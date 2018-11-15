@@ -5,10 +5,11 @@ export const taskListAnimation = trigger('taskListAnimation', [
   transition('* => *', [
     query(':enter', style({opacity: 0, height: 0}), {optional: true}),
 
-    query(':enter', stagger(ANI_ENTER_TIMING, [
+    query(':enter', stagger('100ms', [
       animate(ANI_ENTER_TIMING, keyframes([
-        style({opacity: 0, height: 0, transform: 'scaleY(0)', zIndex: 4, offset: 0.4}),
-        style({opacity: 1, height: '*', transform: 'scaleY(1)', zIndex: 4, offset: 1.0}),
+        style({opacity: 0, height: 0, transform: 'scaleY(0)', offset: 0}),
+        style({opacity: 1, height: '*', transform: 'scaleY(1)', offset: 0.99}),
+        style({height: 'auto', offset: 1.0}),
       ]))]), {optional: true}
     ),
 
