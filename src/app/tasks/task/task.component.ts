@@ -68,6 +68,8 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   @HostListener('blur', ['$event']) onBlur(ev: Event) {
+    console.log('BLUR', this._currentFocusId, this.task.id);
+
     //  @TODO replace: hacky way to wait for last update
     setTimeout(() => {
       if (this._currentFocusId === this.task.id) {

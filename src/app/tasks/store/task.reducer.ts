@@ -11,6 +11,7 @@ export interface TaskState extends EntityState<Task> {
   // additional entities state properties
   currentTaskId: string | null;
   focusTaskId: string | null;
+  lastActiveFocusTaskId: string | null;
 
   // NOTE: but it is not needed currently
   todaysTaskIds: string[];
@@ -30,6 +31,7 @@ export const initialTaskState: TaskState = taskAdapter.getInitialState({
   todaysTaskIds: [],
   backlogTaskIds: [],
   focusTaskId: null,
+  lastActiveFocusTaskId: null,
   stateBefore: null
 });
 
@@ -460,8 +462,20 @@ export function taskReducer(
       );
     }
 
+    case TaskActionTypes.FocusLastActiveTask: {
+      return {
+        ...state,
+        focusTaskId: state.lastActiveFocusTaskId,
+        lastActiveFocusTaskId: state.lastActiveFocusTaskId,
+      };
+    }
+
     case TaskActionTypes.FocusTask: {
-      return {...state, focusTaskId: action.payload.id};
+      return {
+        ...state,
+        focusTaskId: action.payload.id,
+        lastActiveFocusTaskId: state.focusTaskId || state.lastActiveFocusTaskId,
+      };
     }
 
     case TaskActionTypes.AddSubTask: {

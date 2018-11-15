@@ -21,6 +21,7 @@ export enum TaskActionTypes {
   AddTimeSpent = '[Task] Add time spent',
   RemoveTimeSpent = '[Task] Remove time spent',
   FocusTask = '[Task] Focus Task',
+  FocusLastActiveTask = '[Task] Focus last active Task',
 
   // Sub Task Actions
   AddSubTask = '[Task] Add SubTask',
@@ -128,6 +129,10 @@ export class FocusTask implements Action {
   }
 }
 
+export class FocusLastActiveTask implements Action {
+  readonly type = TaskActionTypes.FocusLastActiveTask;
+}
+
 export class AddSubTask implements Action {
   readonly type = TaskActionTypes.AddSubTask;
 
@@ -171,6 +176,7 @@ export type TaskActions
   | AddTimeSpent
   | RemoveTimeSpent
   | FocusTask
+  | FocusLastActiveTask
   | AddSubTask
   | MoveToBacklog
   | MoveToToday

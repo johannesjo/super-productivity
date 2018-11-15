@@ -1,5 +1,8 @@
 import { Injectable } from '@angular/core';
-import { Actions } from '@ngrx/effects';
+import { Actions, Effect, ofType } from '@ngrx/effects';
+import { LayoutActionTypes } from './layout.actions';
+import { map } from 'rxjs/operators';
+import { FocusLastActiveTask } from '../../../tasks/store/task.actions';
 
 @Injectable()
 export class LayoutEffects {
@@ -7,6 +10,15 @@ export class LayoutEffects {
   // @Effect()
   // loadFoos$ = this.actions$.pipe(ofType(LayoutActionTypes.LoadLayouts));
   //
-  constructor(private actions$: Actions) {
+  @Effect() refocusTask$: any = this._actions$
+    .pipe(
+      ofType(
+        LayoutActionTypes.HideAddTaskBar,
+      ),
+      map(() => new FocusLastActiveTask()),
+    );
+
+
+  constructor(private _actions$: Actions) {
   }
 }
