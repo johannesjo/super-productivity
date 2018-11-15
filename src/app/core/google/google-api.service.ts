@@ -48,9 +48,11 @@ export class GoogleApiService {
       this._electronService.ipcRenderer.send(IPC_TRIGGER_GOOGLE_AUTH, this._session.refreshToken);
       return new Promise((resolve, reject) => {
         this._electronService.ipcRenderer.on(IPC_GOOGLE_AUTH_TOKEN, (ev, data: any) => {
+          console.log(data);
+
           this._updateSession({
             accessToken: data.access_token,
-            expiresAt: (data.expires_in * 1000) + moment().valueOf(),
+            expiresAt: data.expiry_date,
             refreshToken: data.refresh_token,
           });
           this._snackIt('SUCCESS', 'GoogleApi: Login successful');
