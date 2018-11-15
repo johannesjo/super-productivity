@@ -57,3 +57,18 @@ mat-toolbar {
     transform: translate(-50%, -75%);
   }
 }
+
+eco-fab-speed-dial-actions {
+  button {
+    position: relative;
+    // hover hitarea
+    &:after {
+      content: '';
+      position: absolute;
+      top: -$s;
+      bottom: -$s;
+      left: -$s;
+      right: -$s;
+    }
+  }
+}
