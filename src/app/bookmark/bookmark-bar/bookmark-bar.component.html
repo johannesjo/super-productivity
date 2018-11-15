@@ -1,4 +1,10 @@
 <div class="global-bookmark-list-outer bg-800">
+  <div class="bg-accent drag-over-msg"
+       *ngIf="isDragOver"
+       @fade>
+    <mat-icon>add</mat-icon>
+    Drop here to add a bookmark
+  </div>
   <div class="global-bookmark-list-inner">
     <div class="global-bookmark">
       <button mat-raised-button=""

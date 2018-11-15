@@ -1,22 +1,47 @@
-import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, HostListener, OnInit } from '@angular/core';
 import { BookmarkService } from '../bookmark.service';
 import { MatDialog } from '@angular/material';
 import { DialogEditBookmarkComponent } from '../dialog-edit-bookmark/dialog-edit-bookmark.component';
 import { Bookmark } from '../bookmark.model';
+import { fadeAnimation } from '../../ui/animations/fade.ani';
 
 @Component({
   selector: 'bookmark-bar',
   templateUrl: './bookmark-bar.component.html',
   styleUrls: ['./bookmark-bar.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  animations: [fadeAnimation],
 })
 export class BookmarkBarComponent implements OnInit {
-  bookmarks = [
-    {title: 'asd', icon: 'pause', type: 'LINK'},
-    {title: 'Something else', icon: 'pause', type: 'LINK'},
-    {title: 'very long', icon: 'pause', type: 'LINK'},
-    {title: 'very long', icon: 'pause', type: 'LINK'},
-  ];
+  isDragOver = false;
+  dragEnterTarget: HTMLElement;
+
+
+  @HostListener('document:dragover', ['$event']) onDragOver(ev: Event) {
+    ev.preventDefault();
+  }
+
+  @HostListener('dragenter', ['$event']) onDragEnter(ev: Event) {
+    this.dragEnterTarget = ev.target as HTMLElement;
+    ev.preventDefault();
+    this.isDragOver = true;
+  }
+
+  @HostListener('dragleave', ['$event']) onDragLeave(ev: Event) {
+    if (this.dragEnterTarget === (event.target as HTMLElement)) {
+      event.preventDefault();
+      this.isDragOver = false;
+    }
+  }
+
+  @HostListener('document:drop', ['$event']) onDrop(ev: Event) {
+    this.bookmarkService.createFromDrop(ev);
+    this.isDragOver = false;
+  }
+
+  @HostListener('document:paste', ['$event']) onPaste(ev: Event) {
+    this.bookmarkService.createFromPaste(ev);
+  }
 
   constructor(
     public readonly bookmarkService: BookmarkService,

@@ -29,6 +29,10 @@ import { warpRouteAnimation } from './ui/animations/warp-route';
 export class AppComponent implements OnInit {
   private _currentTheme: string;
 
+  @HostListener('document:keydown', ['$event']) onKeyDown(ev: KeyboardEvent) {
+    this._shortcutService.handleKeyDown(ev);
+  }
+
   constructor(
     private _configService: ConfigService,
     private _shortcutService: ShortcutService,
@@ -76,22 +80,6 @@ export class AppComponent implements OnInit {
         }
       });
     }
-  }
-
-  @HostListener('document:keydown', ['$event']) onKeyDown(ev: KeyboardEvent) {
-    this._shortcutService.handleKeyDown(ev);
-  }
-
-  @HostListener('document:dragover', ['$event']) onDragOver(ev: Event) {
-    ev.preventDefault();
-  }
-
-  @HostListener('document:drop', ['$event']) onDrop(ev: Event) {
-    this.bookmarkService.createFromDrop(ev);
-  }
-
-  @HostListener('document:paste', ['$event']) onPaste(ev: Event) {
-    this.bookmarkService.createFromPaste(ev);
   }
 
   ngOnInit() {
