@@ -6,4 +6,5 @@ export type Bookmark = Readonly<{
   icon: string;
   type: BookmarkType;
   path: string;
+  taskId?: string;
 }>;

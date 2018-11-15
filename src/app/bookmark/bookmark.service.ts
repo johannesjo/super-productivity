@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { select, Store } from '@ngrx/store';
-import { BookmarkState, initialBookmarkState, selectAllBookmarks, selectIsShowBookmarkBar } from './store/bookmark.reducer';
+import { BookmarkState, initialBookmarkState, selectAllGlobalBookmarks, selectIsShowBookmarkBar } from './store/bookmark.reducer';
 import {
   AddBookmark,
   DeleteBookmark,
@@ -21,7 +21,7 @@ import { PersistenceService } from '../core/persistence/persistence.service';
   providedIn: 'root'
 })
 export class BookmarkService {
-  bookmarks$: Observable<Bookmark[]> = this._store$.pipe(select(selectAllBookmarks));
+  bookmarks$: Observable<Bookmark[]> = this._store$.pipe(select(selectAllGlobalBookmarks));
   isShowBookmarks$: Observable<boolean> = this._store$.pipe(select(selectIsShowBookmarkBar));
 
   constructor(
@@ -41,7 +41,7 @@ export class BookmarkService {
   }
 
   addBookmark(bookmark: Bookmark) {
-    this._store$.dispatch(new AddBookmark({
+    this._store$.dispatch(new  AddBookmark({
       bookmark: {
         ...bookmark,
         id: shortid()
@@ -103,13 +103,15 @@ export class BookmarkService {
   // HANDLE LINK INPUT METHODS
   // -------------------------
 
-  createFromDrop(ev) {
+  createFromDrop(ev, taskId?) {
+    console.log(taskId);
+
     const text = ev.dataTransfer.getData('text');
     const bookmark =
       text
         ? (this._createTextBookmark(text))
         : (this._createFileBookmark(ev.dataTransfer));
-    this._handleLinkInput(bookmark, ev);
+    this._handleLinkInput(bookmark, ev, taskId);
   }
 
 
@@ -125,7 +127,7 @@ export class BookmarkService {
   }
 
 
-  private _handleLinkInput(bookmark, ev) {
+  private _handleLinkInput(bookmark, ev, taskId?) {
     // don't intervene with text inputs
     if (ev.target.tagName === 'INPUT' || ev.target.tagName === 'TEXTAREA') {
       return;
@@ -138,7 +140,7 @@ export class BookmarkService {
 
     this._matDialog.open(DialogEditBookmarkComponent, {
       data: {
-        bookmark: bookmark
+        bookmark: {...bookmark, taskId},
       },
     }).afterClosed()
       .subscribe((bookmark_) => {

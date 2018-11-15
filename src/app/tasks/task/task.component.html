@@ -1,5 +1,6 @@
 <div class="inner-wrapper bg-standard"
           [class.isNotesOpen]="task.isNotesOpen">
+
   <div class="first-line">
     <mat-icon class="material-icons handle"
               [class.handle-par]="!task.parentId"
@@ -158,5 +159,11 @@
                [@expand]
                *ngIf="!task.isHideSubTasks"
                [focusIdList]="focusIdList"></task-list>
+  </div>
+
+  <div class="bg-accent color-contrast drag-over-msg"
+       *ngIf="isDragOver">
+    <mat-icon>add</mat-icon>
+    Drop here to attach to "{{task.title}}"
   </div>
 </div>

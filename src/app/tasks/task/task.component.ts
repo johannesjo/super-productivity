@@ -19,6 +19,8 @@ import { expandAnimation } from '../../ui/animations/expand.ani';
 import { ConfigService } from '../../core/config/config.service';
 import { checkKeyCombo } from '../../core/util/check-key-combo';
 import { distinctUntilChanged, takeUntil } from 'rxjs/operators';
+import { fadeAnimation } from '../../ui/animations/fade.ani';
+import { BookmarkService } from '../../bookmark/bookmark.service';
 
 // import {Task} from './task'
 
@@ -27,7 +29,7 @@ import { distinctUntilChanged, takeUntil } from 'rxjs/operators';
   templateUrl: './task.component.html',
   styleUrls: ['./task.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  animations: [expandAnimation]
+  animations: [expandAnimation, fadeAnimation]
 })
 export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   // @Input() task: Task;
@@ -35,7 +37,9 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   @Input() focusIdList: string[];
 
   additionalTabsIndex = 0;
+  isDragOver: boolean;
 
+  private _dragEnterTarget: HTMLElement;
   private _currentFocusId: string;
 
   @HostBinding('class.isCurrent') isCurrent = false;
@@ -79,11 +83,33 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     });
   }
 
+  @HostListener('dragenter', ['$event']) onDragEnter(ev: Event) {
+    this._dragEnterTarget = ev.target as HTMLElement;
+    ev.preventDefault();
+    ev.stopPropagation();
+    this.isDragOver = true;
+  }
+
+  @HostListener('dragleave', ['$event']) onDragLeave(ev: Event) {
+    if (this._dragEnterTarget === (event.target as HTMLElement)) {
+      event.preventDefault();
+      ev.stopPropagation();
+      this.isDragOver = false;
+    }
+  }
+
+  @HostListener('drop', ['$event']) onDrop(ev: Event) {
+    this._bookmarkService.createFromDrop(ev, this.task.id);
+    ev.stopPropagation();
+    this.isDragOver = false;
+  }
+
   constructor(
     private readonly _taskService: TaskService,
     private readonly _matDialog: MatDialog,
     private readonly _configService: ConfigService,
     private readonly _elementRef: ElementRef,
+    private readonly _bookmarkService: BookmarkService,
   ) {
   }
 

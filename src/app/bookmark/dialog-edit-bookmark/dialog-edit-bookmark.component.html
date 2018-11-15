@@ -1,8 +1,7 @@
 <form (submit)="submit()">
   <mat-dialog-content>
-    <h2 class="mat-title">{{ bookmarkCopy.id ? 'Edit' : 'Add' }} Bookmark</h2>
+    <h2 class="mat-title">{{ bookmarkCopy.id ? 'Edit' : 'Add' }} {{bookmarkCopy.taskId ? 'attachment for task':'Bookmark'}}</h2>
 
-    <p *ngIf="selectedTask"><strong>Add bookmark to task:<br>{{selectedTask.title}}</strong><br><br></p>
     <div class="form-wrapper">
       <mat-form-field>
         <input type="text"
@@ -56,25 +55,6 @@
           </mat-autocomplete>
         </mat-form-field>
       </div>
-
-      <!--<div *ngIf="isNew">-->
-      <!--<mat-autocomplete-->
-      <!--mat-floating-label="Select task to add to (or leave empty to add to the global bookmark list)."-->
-      <!--mat-selected-item="selectedTask"-->
-      <!--mat-search-text="searchTaskText"-->
-      <!--mat-items="task in getFilteredTasks(searchTaskText)"-->
-      <!--mat-item-text="task.title"-->
-      <!--tabindex="1"-->
-      <!--placeholder="Select task">-->
-      <!--<mat-item-template>-->
-      <!--<span mat-highlight-text="searchTaskText"-->
-      <!--mat-highlight-flags="i">{{ task.title }}</span>-->
-      <!--</mat-item-template>-->
-      <!--<mat-not-found>-->
-      <!--No task found-->
-      <!--</mat-not-found>-->
-      <!--</mat-autocomplete>-->
-      <!--</div>-->
     </div>
   </mat-dialog-content>
 
