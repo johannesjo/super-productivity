@@ -16,11 +16,6 @@ export class BookmarkBarComponent implements OnInit {
   isDragOver = false;
   dragEnterTarget: HTMLElement;
 
-
-  @HostListener('document:dragover', ['$event']) onDragOver(ev: Event) {
-    ev.preventDefault();
-  }
-
   @HostListener('dragenter', ['$event']) onDragEnter(ev: Event) {
     this.dragEnterTarget = ev.target as HTMLElement;
     ev.preventDefault();
@@ -34,13 +29,9 @@ export class BookmarkBarComponent implements OnInit {
     }
   }
 
-  @HostListener('document:drop', ['$event']) onDrop(ev: Event) {
+  @HostListener('drop', ['$event']) onDrop(ev: Event) {
     this.bookmarkService.createFromDrop(ev);
     this.isDragOver = false;
-  }
-
-  @HostListener('document:paste', ['$event']) onPaste(ev: Event) {
-    this.bookmarkService.createFromPaste(ev);
   }
 
   constructor(

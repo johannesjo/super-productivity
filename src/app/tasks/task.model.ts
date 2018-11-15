@@ -22,6 +22,7 @@ export interface TaskCopy {
   issueId?: string;
   issueType?: IssueProviderKey;
   parentId?: string;
+  localAttachmentIds: string[];
 }
 
 export type Task = Readonly<TaskCopy>;
