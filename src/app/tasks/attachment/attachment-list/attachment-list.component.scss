@@ -1,0 +1,98 @@
+@import '../../../../_variables.scss';
+
+$thisHeight: 80px;
+
+.attachments {
+  list-style-type: none;
+  display: flex;
+  margin: 0;
+  padding: 0;
+  flex-flow: row;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.attachment {
+  margin: $s;
+  padding: 0;
+  border-radius: $card-border-radius;
+  position: relative;
+
+  > a:focus + .controls,
+  &.focus .controls,
+  &:hover .controls {
+    visibility: visible;
+
+    button {
+      opacity: 1;
+      transition: $transition-enter;
+    }
+    .edit-btn {
+      transform: translate(0, 0);
+    }
+    .trash-btn {
+      transform: translate(0, 0);
+    }
+  }
+}
+
+.attachment-link {
+  padding: $s;
+  height: $thisHeight;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  border-radius: $card-border-radius;
+  cursor: pointer;
+  box-sizing: border-box;
+
+  mat-icon {
+    font-size: $s*5;
+    height: $s*5;
+    width: $s*5;
+  }
+
+  &.isImage {
+    padding: 0;
+    img {
+      height: $thisHeight;
+      width: auto;
+    }
+  }
+}
+
+.controls {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-top: $s*-2;
+  z-index: 5;
+  visibility: hidden;
+  display: flex;
+  flex-direction: row;
+  // TODO fix that this causes an overflow
+  padding: 0 $s;
+  transform: translate(-50%, 0);
+
+  button {
+    transition: $transition-leave;
+    //border-radius: 0;
+    margin: 0;
+    padding: 0;
+    min-height: 0;
+    opacity: 0;
+  }
+}
+
+$this-distance: $s*4;
+.edit-btn {
+  // TODO fix that this causes an overflow
+  transform: translate(-$this-distance, $this-distance);
+}
+
+.trash-btn {
+  // TODO fix that this causes an overflow
+  transform: translate($this-distance, $this-distance);
+}

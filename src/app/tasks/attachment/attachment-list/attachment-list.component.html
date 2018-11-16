@@ -1,3 +1,42 @@
-<ul>
-  <li *ngFor="let attachment of attachments">{{attachment.title}}</li>
+<ul class="attachments">
+  <li class="attachment"
+       *ngFor="let attachment of attachments"
+       draggable="false">
+    <a attachmentLink
+       class="attachment-link mat-elevation-z3  bg-400i"
+       [class.isImage]="attachment.type==='IMG'"
+       [href]="attachment.path"
+       type="{{attachment.type}}"
+       target="_blank"
+       tabindex="1"
+       draggable="false"
+       aria-label="open global attachment">
+      <ng-container *ngIf="attachment.type!=='IMG'">
+        <mat-icon *ngIf="attachment.icon"
+                  aria-label="Open">{{attachment.icon}}
+        </mat-icon>
+        <div class="title">{{attachment.title}}</div>
+      </ng-container>
+      <ng-container *ngIf="attachment.type==='IMG'">
+        <img [src]="attachment.path">
+      </ng-container>
+    </a>
+
+    <div class="controls">
+      <button class="edit-btn"
+              mat-mini-fab=""
+              color="primary"
+              aria-label="open edit dialog"
+              (click)="openEditDialog(attachment)">
+        <mat-icon>edit</mat-icon>
+      </button>
+      <button class="trash-btn"
+              mat-mini-fab=""
+              color="warn"
+              (click)="remove(attachment.id)"
+              aria-label="remove attachment">
+        <mat-icon>delete_forever</mat-icon>
+      </button>
+    </div>
+  </li>
 </ul>

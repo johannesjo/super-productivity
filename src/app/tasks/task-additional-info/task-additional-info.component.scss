@@ -48,3 +48,11 @@
   align-items: center;
   white-space: nowrap;
 }
+
+.tab-content {
+  padding: $s;
+
+  h3 {
+    margin-bottom: $s;
+  }
+}

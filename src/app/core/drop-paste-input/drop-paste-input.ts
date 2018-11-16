@@ -48,11 +48,13 @@ const _createTextBookmark = (text): null | DropPasteInput => {
       if (!path.match(/^http/)) {
         path = '//' + path;
       }
+      const isImage = (path.match(/png$|jpg$/i));
+
       return {
         title: _baseName(text),
         path: path,
-        type: 'LINK',
-        icon: Icons.LINK,
+        type: isImage ? 'IMG' : 'LINK',
+        icon: isImage ? Icons.IMG : Icons.LINK,
       };
     }
   }

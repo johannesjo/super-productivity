@@ -36,7 +36,8 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   @Input() task: TaskWithSubTasks;
   @Input() focusIdList: string[];
 
-  additionalTabsIndex = 0;
+  // TODO also persist to task
+  additionalTabsIndex = 1;
   isDragOver: boolean;
 
   private _dragEnterTarget: HTMLElement;

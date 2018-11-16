@@ -3,7 +3,7 @@ import { DeleteTask, TaskActions, TaskActionTypes } from './task.actions';
 import { Task, TimeSpentOnDay } from '../task.model';
 import { calcTotalTimeSpent } from '../util/calc-total-time-spent';
 import { arrayMoveLeft, arrayMoveRight } from '../../core/util/array-move';
-import { AddAttachment, AttachmentActionTypes, DeleteAttachment, UpdateAttachment } from '../attachment/store/attachment.actions';
+import { AddAttachment, AttachmentActionTypes, DeleteAttachment } from '../attachment/store/attachment.actions';
 
 export const TASK_FEATURE_NAME = 'tasks';
 export const taskAdapter: EntityAdapter<Task> = createEntityAdapter<Task>();
@@ -251,7 +251,9 @@ export function taskReducer(
     case AttachmentActionTypes.DeleteAttachment: {
       const attachmentId = action.payload.id;
       const taskIds = state.ids as string[];
-      const affectedTaskId = taskIds.find(id => state.entities[id].attachmentIds.includes(attachmentId));
+      const affectedTaskId = taskIds.find(
+        id => state.entities[id].attachmentIds && state.entities[id].attachmentIds.includes(attachmentId)
+      );
       const affectedTask = state.entities[affectedTaskId];
       return {
         ...state,
