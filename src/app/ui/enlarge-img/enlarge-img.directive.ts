@@ -1,14 +1,18 @@
-import { Directive, ElementRef, HostListener, Renderer2 } from '@angular/core';
+import { Directive, ElementRef, HostListener, Input, Renderer2 } from '@angular/core';
 import { getCoords } from './get-coords';
 
 @Directive({
-  selector: 'img[enlargeImg]'
+  selector: '[enlargeImg]'
 })
 export class EnlargeImgDirective {
   imageEl: HTMLElement;
   newImageEl: HTMLElement;
   lightboxParentEl = document.body;
   enlargedImgWrapperEl: HTMLElement;
+  isImg: boolean;
+
+  @Input() enlargeImg: string;
+  @Input() isHideEl: boolean;
 
   constructor(
     private _renderer: Renderer2,
@@ -18,7 +22,11 @@ export class EnlargeImgDirective {
   }
 
   @HostListener('click', ['$event']) onClick(ev) {
-    this.showImg();
+    this.isImg = (this.imageEl.tagName.toLowerCase() === 'img');
+
+    if (this.isImg || this.enlargeImg) {
+      this.showImg();
+    }
   }
 
   private hideImg() {
@@ -28,7 +36,9 @@ export class EnlargeImgDirective {
 
     this.enlargedImgWrapperEl.addEventListener('transitionend', () => {
       this.enlargedImgWrapperEl.remove();
-      this.imageEl.setAttribute('style', `visibility: visible`);
+      if (this.isHideEl) {
+        this.imageEl.setAttribute('style', `visibility: visible`);
+      }
     });
   }
 
@@ -44,8 +54,9 @@ export class EnlargeImgDirective {
   }
 
   private showImg() {
+    const src = this.enlargeImg || this.imageEl.getAttribute('src');
     this.enlargedImgWrapperEl = this.htmlToElement(`<div class="enlarged-image-wrapper"></div>`);
-    this.newImageEl = this.htmlToElement(`<img src="${this.imageEl.getAttribute('src')}" class="enlarged-image">`);
+    this.newImageEl = this.htmlToElement(`<img src="${src}" class="enlarged-image">`);
     this._renderer.appendChild(this.enlargedImgWrapperEl, this.newImageEl);
     this._renderer.appendChild(this.lightboxParentEl, this.enlargedImgWrapperEl);
     this.setCoordsForImageAni();
@@ -57,7 +68,9 @@ export class EnlargeImgDirective {
     this.enlargedImgWrapperEl.addEventListener('click', () => {
       this.hideImg();
     });
-    this.imageEl.setAttribute('style', `visibility: hidden`);
+    if (this.isHideEl) {
+      this.imageEl.setAttribute('style', `visibility: hidden`);
+    }
 
   }
 

@@ -24,6 +24,7 @@
          *ngFor="let bookmark of bookmarkService.bookmarks$|async"
          draggable="false">
       <a bookmarkLink
+         [enlargeImg]="bookmark.type==='IMG'&& bookmark.path"
          mat-raised-button=""
          color="primary"
          class="bg-400i"
