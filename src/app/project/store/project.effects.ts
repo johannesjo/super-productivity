@@ -8,6 +8,7 @@ import { PersistenceService } from '../../core/persistence/persistence.service';
 import { TaskService } from '../../tasks/task.service';
 import { JiraIssueService } from '../../issue/jira/jira-issue/jira-issue.service';
 import { BookmarkService } from '../../bookmark/bookmark.service';
+import { AttachmentService } from '../../tasks/attachment/attachment.service';
 
 @Injectable()
 export class ProjectEffects {
@@ -46,6 +47,7 @@ export class ProjectEffects {
     private _taskService: TaskService,
     private _jiraIssueService: JiraIssueService,
     private _bookmarkService: BookmarkService,
+    private _attachmentService: AttachmentService,
   ) {
   }
 
@@ -57,6 +59,7 @@ export class ProjectEffects {
     this._taskService.loadStateForProject(projectId);
     this._jiraIssueService.loadStateForProject(projectId);
     this._bookmarkService.loadStateForProject(projectId);
+    this._attachmentService.loadStateForProject(projectId);
   }
 }
 

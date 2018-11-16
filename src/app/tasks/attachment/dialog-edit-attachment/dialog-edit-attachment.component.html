@@ -1,0 +1,75 @@
+<form (submit)="submit()">
+  <mat-dialog-content>
+    <h2 class="mat-title">{{ attachmentCopy.id ? 'Edit' : 'Add' }} Attachment</h2>
+
+    <div class="form-wrapper">
+      <mat-form-field>
+        <input type="text"
+               [(ngModel)]="attachmentCopy.title"
+               name="title"
+               matInput=""
+               placeholder="Title"
+               autofocus="autofocus"
+               tabindex="1"
+               aria-label="Title">
+      </mat-form-field>
+      <mat-form-field>
+        <input type="text"
+               [(ngModel)]="attachmentCopy.path"
+               name="path"
+               [placeholder]="mapTypeToLabel(attachmentCopy.type)"
+               matInput=""
+               required
+               tabindex="1">
+      </mat-form-field>
+
+      <mat-form-field>
+        <mat-select [(ngModel)]="attachmentCopy.type"
+                    name="type"
+                    required="true"
+                    tabindex="1"
+                    placeholder="Select a type">
+          <mat-option *ngFor="let type of types"
+                      [value]="type.type"
+                      [innerHtml]="type.title">
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <div class="custom-icon-wrapper">
+        <mat-form-field class="example-full-width">
+          <input type="text"
+                 placeholder="Select an icon"
+                 aria-label="Number"
+                 matInput
+                 [(ngModel)]="attachmentCopy.icon"
+                 [formControl]="iconControl"
+                 [matAutocomplete]="auto">
+          <mat-icon matPrefix="">{{attachmentCopy.icon}}</mat-icon>
+          <mat-autocomplete #auto="matAutocomplete">
+            <mat-option *ngFor="let icon of customIcons"
+                        [value]="icon">
+              <mat-icon>{{icon}}</mat-icon>
+              <span>{{icon}}</span>
+            </mat-option>
+          </mat-autocomplete>
+        </mat-form-field>
+      </div>
+    </div>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button type="submit"
+            mat-raised-button=""
+            color="primary">
+      Save
+    </button>
+
+    <button (click)="close()"
+            mat-raised-button=""
+            color="warn"
+            type="button">
+      Cancel
+    </button>
+  </mat-dialog-actions>
+</form>

@@ -7,7 +7,7 @@ import {
   LS_LAST_ACTIVE,
   LS_PROJECT_META_LIST,
   LS_PROJECT_PREFIX,
-  LS_TASK_ARCHIVE,
+  LS_TASK_ARCHIVE, LS_TASK_ATTACHMENT_STATE,
   LS_TASK_STATE
 } from './ls-keys.const';
 import { GlobalConfig } from '../config/config.model';
@@ -20,6 +20,7 @@ import { EntityState } from '@ngrx/entity';
 import { Task } from '../../tasks/task.model';
 import { AppDataComplete } from '../sync/sync.model';
 import { BookmarkState } from '../../bookmark/store/bookmark.reducer';
+import { AttachmentState } from '../../tasks/attachment/store/attachment.reducer';
 
 @Injectable({
   providedIn: 'root'
@@ -84,6 +85,15 @@ export class PersistenceService {
   loadBookmarksForProject(projectId): BookmarkState {
     return loadFromLs(this._makeProjectKey(projectId, LS_BOOKMARK_STATE));
   }
+
+  saveTaskAttachmentsForProject(projectId, attachmentState: AttachmentState) {
+    saveToLsWithLastActive(this._makeProjectKey(projectId, LS_TASK_ATTACHMENT_STATE), attachmentState);
+  }
+
+  loadTaskAttachmentsForProject(projectId): AttachmentState {
+    return loadFromLs(this._makeProjectKey(projectId, LS_TASK_ATTACHMENT_STATE));
+  }
+
 
 
   // GLOBAL CONFIG

@@ -21,6 +21,7 @@ import { TASK_FEATURE_NAME } from './store/task.reducer';
 import { JiraIssueModule } from '../issue/jira/jira-issue/jira-issue.module';
 import { TaskAdditionalInfoComponent } from './task-additional-info/task-additional-info.component';
 import { SelectTaskComponent } from './select-task/select-task.component';
+import { AttachmentModule } from './attachment/attachment.module';
 
 @NgModule({
   imports: [
@@ -29,6 +30,7 @@ import { SelectTaskComponent } from './select-task/select-task.component';
     JiraIssueModule,
     UiModule,
     FormsModule,
+    AttachmentModule,
     ReactiveFormsModule,
     DragulaModule.forRoot(),
     StoreModule.forFeature(TASK_FEATURE_NAME, taskReducer),
