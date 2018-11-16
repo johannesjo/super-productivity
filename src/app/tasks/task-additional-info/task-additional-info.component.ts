@@ -6,7 +6,6 @@ import {
   ComponentFactoryResolver,
   EventEmitter,
   Input,
-  OnInit,
   Output,
   ViewChild,
   ViewContainerRef
@@ -14,6 +13,8 @@ import {
 import { TaskWithSubTasks } from '../task.model';
 import { IssueService } from '../../issue/issue.service';
 import { AttachmentService } from '../attachment/attachment.service';
+import { Observable } from 'rxjs';
+import { Attachment } from '../attachment/attachment.model';
 
 @Component({
   selector: 'task-additional-info',
@@ -21,7 +22,7 @@ import { AttachmentService } from '../attachment/attachment.service';
   styleUrls: ['./task-additional-info.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class TaskAdditionalInfoComponent implements OnInit, AfterViewInit {
+export class TaskAdditionalInfoComponent implements AfterViewInit {
   @Input() set task(val: TaskWithSubTasks) {
     this.taskData = val;
 
@@ -31,8 +32,10 @@ export class TaskAdditionalInfoComponent implements OnInit, AfterViewInit {
     if (this._issueContentRef) {
       this._issueContentRef.instance.task = val;
     }
+    this.localAttachments$ = this.attachmentService.getByIds(this.taskData.attachmentIds);
   }
 
+  localAttachments$: Observable<Attachment[]>;
   taskData: TaskWithSubTasks;
   @Input() selectedIndex: number;
 
@@ -50,10 +53,6 @@ export class TaskAdditionalInfoComponent implements OnInit, AfterViewInit {
     private _issueService: IssueService,
     public attachmentService: AttachmentService,
   ) {
-  }
-
-  ngOnInit() {
-
   }
 
   ngAfterViewInit() {

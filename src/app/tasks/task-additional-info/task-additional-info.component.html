@@ -30,7 +30,7 @@
 
       <!--<h3 class="mat-h3">Jira Attachments</h3>-->
       <h3 class="mat-h3">Local Attachments</h3>
-      <attachment-list [attachments]="attachmentService.getByIds(taskData.attachmentIds)|async"></attachment-list>
+      <attachment-list [attachments]="localAttachments$|async"></attachment-list>
 
     </mat-tab>
 
