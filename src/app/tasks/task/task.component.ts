@@ -20,7 +20,6 @@ import { ConfigService } from '../../core/config/config.service';
 import { checkKeyCombo } from '../../core/util/check-key-combo';
 import { distinctUntilChanged, takeUntil } from 'rxjs/operators';
 import { fadeAnimation } from '../../ui/animations/fade.ani';
-import { BookmarkService } from '../../bookmark/bookmark.service';
 
 // import {Task} from './task'
 
@@ -99,7 +98,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   @HostListener('drop', ['$event']) onDrop(ev: Event) {
-    this._bookmarkService.createFromDrop(ev, this.task.id);
+    // this._bookmarkService.createFromDrop(ev, this.task.id);
     ev.stopPropagation();
     this.isDragOver = false;
   }
@@ -109,7 +108,6 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     private readonly _matDialog: MatDialog,
     private readonly _configService: ConfigService,
     private readonly _elementRef: ElementRef,
-    private readonly _bookmarkService: BookmarkService,
   ) {
   }
 

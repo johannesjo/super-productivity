@@ -14,14 +14,8 @@ export class BookmarkEffects {
     .pipe(
       ofType(
         BookmarkActionTypes.AddBookmark,
-        BookmarkActionTypes.AddBookmarks,
         BookmarkActionTypes.UpdateBookmark,
-        BookmarkActionTypes.UpdateBookmarks,
         BookmarkActionTypes.DeleteBookmark,
-        BookmarkActionTypes.DeleteBookmarks,
-        BookmarkActionTypes.ClearBookmarks,
-        BookmarkActionTypes.UpsertBookmark,
-        BookmarkActionTypes.UpsertBookmarks,
       ),
       withLatestFrom(
         this._store$.pipe(select(selectCurrentProjectId)),

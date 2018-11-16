@@ -1,10 +1,14 @@
 import { ChangeDetectionStrategy, Component, Inject, OnInit } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material';
 import { IS_ELECTRON } from '../../app.constants';
-import { Task } from '../../tasks/task.model';
-import { MATERIAL_ICONS } from './material-icons.const';
-import { BookmarkType } from '../bookmark.model';
+import { MATERIAL_ICONS } from '../../ui/material-icons.const';
+import { BookmarkCopy, BookmarkType } from '../bookmark.model';
 import { FormControl } from '@angular/forms';
+
+interface BookmarkSelectType {
+  type: BookmarkType;
+  title: string;
+}
 
 @Component({
   selector: 'dialog-edit-bookmark',
@@ -13,10 +17,9 @@ import { FormControl } from '@angular/forms';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DialogEditBookmarkComponent implements OnInit {
-  types: any[];
-  bookmarkCopy: any;
-  selectedTask: Task;
-  customIcons: string [] = MATERIAL_ICONS;
+  types: BookmarkSelectType[];
+  bookmarkCopy: BookmarkCopy;
+  customIcons: string[] = MATERIAL_ICONS;
   iconControl = new FormControl();
 
   constructor(
@@ -28,7 +31,7 @@ export class DialogEditBookmarkComponent implements OnInit {
   ngOnInit() {
     this.bookmarkCopy = {...this.data.bookmark};
     console.log(this.bookmarkCopy);
-    
+
     if (!this.bookmarkCopy.type) {
       this.bookmarkCopy.type = 'LINK';
     }

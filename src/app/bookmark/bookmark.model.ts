@@ -1,10 +1,12 @@
-export type BookmarkType = 'FILE' | 'LINK' |  'IMG' | 'COMMAND' | 'NOTE';
+export type BookmarkType = 'FILE' | 'LINK' | 'IMG' | 'COMMAND' | 'NOTE';
 
-export type Bookmark = Readonly<{
+export interface BookmarkCopy {
   id: string;
   title: string;
   icon: string;
   type: BookmarkType;
   path: string;
   taskId?: string;
-}>;
+};
+
+export type Bookmark = Readonly<BookmarkCopy>;

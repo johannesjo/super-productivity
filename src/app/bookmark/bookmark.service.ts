@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { select, Store } from '@ngrx/store';
-import { BookmarkState, initialBookmarkState, selectAllGlobalBookmarks, selectIsShowBookmarkBar } from './store/bookmark.reducer';
+import { BookmarkState, initialBookmarkState, selectAllBookmarks, selectIsShowBookmarkBar } from './store/bookmark.reducer';
 import {
   AddBookmark,
   DeleteBookmark,
@@ -21,7 +21,7 @@ import { PersistenceService } from '../core/persistence/persistence.service';
   providedIn: 'root'
 })
 export class BookmarkService {
-  bookmarks$: Observable<Bookmark[]> = this._store$.pipe(select(selectAllGlobalBookmarks));
+  bookmarks$: Observable<Bookmark[]> = this._store$.pipe(select(selectAllBookmarks));
   isShowBookmarks$: Observable<boolean> = this._store$.pipe(select(selectIsShowBookmarkBar));
 
   constructor(
@@ -41,7 +41,7 @@ export class BookmarkService {
   }
 
   addBookmark(bookmark: Bookmark) {
-    this._store$.dispatch(new  AddBookmark({
+    this._store$.dispatch(new AddBookmark({
       bookmark: {
         ...bookmark,
         id: shortid()
@@ -57,7 +57,6 @@ export class BookmarkService {
     this._store$.dispatch(new UpdateBookmark({bookmark: {id, changes}}));
   }
 
-
   showBookmarks() {
     this._store$.dispatch(new ShowBookmarks());
   }
@@ -70,48 +69,16 @@ export class BookmarkService {
     this._store$.dispatch(new ToggleBookmarks());
   }
 
-  // loadBookmarks() {
-  //   this._store$.dispatch(new LoadBookmarks());
-  // }
-  //
-  // upsertBookmark() {
-  //   this._store$.dispatch(new UpsertBookmark());
-  // }
-  //
-  // addBookmarks() {
-  //   this._store$.dispatch(new AddBookmarks());
-  // }
-  //
-  // upsertBookmarks() {
-  //   this._store$.dispatch(new UpsertBookmarks());
-  // }
-  //
-  //
-  // updateBookmarks() {
-  //   this._store$.dispatch(new UpdateBookmarks());
-  // }
-  //
-  //
-  // deleteBookmarks() {
-  //   this._store$.dispatch(new DeleteBookmarks());
-  // }
-  //
-  // clearBookmarks() {
-  //   this._store$.dispatch(new ClearBookmarks());
-  // }
 
   // HANDLE LINK INPUT METHODS
   // -------------------------
 
-  createFromDrop(ev, taskId?) {
-    console.log(taskId);
-
+  createFromDrop(ev) {
     const text = ev.dataTransfer.getData('text');
-    const bookmark =
-      text
-        ? (this._createTextBookmark(text))
-        : (this._createFileBookmark(ev.dataTransfer));
-    this._handleLinkInput(bookmark, ev, taskId);
+    const bookmark = text
+      ? (this._createTextBookmark(text))
+      : (this._createFileBookmark(ev.dataTransfer));
+    this._handleLinkInput(bookmark, ev);
   }
 
 
@@ -127,7 +94,7 @@ export class BookmarkService {
   }
 
 
-  private _handleLinkInput(bookmark, ev, taskId?) {
+  private _handleLinkInput(bookmark, ev) {
     // don't intervene with text inputs
     if (ev.target.tagName === 'INPUT' || ev.target.tagName === 'TEXTAREA') {
       return;
@@ -140,7 +107,7 @@ export class BookmarkService {
 
     this._matDialog.open(DialogEditBookmarkComponent, {
       data: {
-        bookmark: {...bookmark, taskId},
+        bookmark: {...bookmark},
       },
     }).afterClosed()
       .subscribe((bookmark_) => {
@@ -153,12 +120,11 @@ export class BookmarkService {
         }
       });
 
-    // TODO HANDLE TARGET BY USING THE HANDLERS IN THEIR RESPECTIVE ELEMENTS
     ev.preventDefault();
     ev.stopPropagation();
   }
 
-  private _createTextBookmark(text) {
+  private _createTextBookmark(text): null | Partial<Bookmark> {
     if (text) {
       if (text.match(/\n/)) {
         // this.addItem({
@@ -177,9 +143,10 @@ export class BookmarkService {
         };
       }
     }
+    return null;
   }
 
-  private _createFileBookmark(dataTransfer) {
+  private _createFileBookmark(dataTransfer): null | Partial<Bookmark> {
     const path = dataTransfer.files[0] && dataTransfer.files[0].path;
     if (path) {
       return {
@@ -188,6 +155,7 @@ export class BookmarkService {
         type: 'FILE'
       };
     }
+    return null;
   }
 
   private _baseName(passedStr) {

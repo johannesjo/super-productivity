@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, HostListener, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, HostListener } from '@angular/core';
 import { BookmarkService } from '../bookmark.service';
 import { MatDialog } from '@angular/material';
 import { DialogEditBookmarkComponent } from '../dialog-edit-bookmark/dialog-edit-bookmark.component';
@@ -12,7 +12,7 @@ import { fadeAnimation } from '../../ui/animations/fade.ani';
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [fadeAnimation],
 })
-export class BookmarkBarComponent implements OnInit {
+export class BookmarkBarComponent {
   isDragOver = false;
   dragEnterTarget: HTMLElement;
 
@@ -40,9 +40,6 @@ export class BookmarkBarComponent implements OnInit {
   ) {
   }
 
-  ngOnInit() {
-  }
-
   openEditDialog(bookmark?: Bookmark) {
     this._matDialog.open(DialogEditBookmarkComponent, {
       data: {
@@ -58,5 +55,9 @@ export class BookmarkBarComponent implements OnInit {
           }
         }
       });
+  }
+
+  remove(id) {
+    this.bookmarkService.deleteBookmark(id);
   }
 }

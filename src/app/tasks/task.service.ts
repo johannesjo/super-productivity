@@ -291,6 +291,7 @@ export class TaskService {
     return this._shortSyntax({
       // NOTE needs to be created every time
       subTaskIds: [],
+      localAttachmentIds: [],
       timeSpentOnDay: {},
       timeSpent: 0,
       timeEstimate: 0,
