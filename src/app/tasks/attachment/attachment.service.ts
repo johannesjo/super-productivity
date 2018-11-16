@@ -9,8 +9,6 @@ import { DialogEditAttachmentComponent } from './dialog-edit-attachment/dialog-e
 import { MatDialog } from '@angular/material';
 import { createFromDrop, createFromPaste, DropPasteInput } from '../../core/drop-paste-input/drop-paste-input';
 import { PersistenceService } from '../../core/persistence/persistence.service';
-import { Task } from '../task.model';
-import { selectTaskById } from '../store/task.selectors';
 import { take } from 'rxjs/operators';
 
 @Injectable({
@@ -53,9 +51,8 @@ export class AttachmentService {
   }
 
   getByIds(ids: string[]): Observable<Attachment[]> {
-    return this._store$.pipe(select(selectAttachmentByIds, {ids}), take(1));
+    return this._store$.pipe(select(selectAttachmentByIds, {ids}));
   }
-
 
 
   // HANDLE INPUT

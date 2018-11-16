@@ -3,6 +3,7 @@ import { DeleteTask, TaskActions, TaskActionTypes } from './task.actions';
 import { Task, TimeSpentOnDay } from '../task.model';
 import { calcTotalTimeSpent } from '../util/calc-total-time-spent';
 import { arrayMoveLeft, arrayMoveRight } from '../../core/util/array-move';
+import { AddAttachment, AttachmentActionTypes, DeleteAttachment, UpdateAttachment } from '../attachment/store/attachment.actions';
 
 export const TASK_FEATURE_NAME = 'tasks';
 export const taskAdapter: EntityAdapter<Task> = createEntityAdapter<Task>();
@@ -223,13 +224,49 @@ const setNextTaskIfCurrent = (state: TaskState, updatedTaskId): TaskState => {
 // TODO unit test the shit out of this once the model is settled
 export function taskReducer(
   state: TaskState = initialTaskState,
-  action: TaskActions
+  action: TaskActions | AddAttachment | DeleteAttachment
 ): TaskState {
   // console.log(state.entities, state, action);
 
   switch (action.type) {
     // Meta Actions
     // ------------
+    case AttachmentActionTypes.AddAttachment: {
+      const {taskId, id} = action.payload.attachment;
+      const task = state.entities[taskId];
+      return {
+        ...state,
+        entities:
+          {
+            ...state.entities,
+            [taskId]: {
+              ...task,
+              attachmentIds: task.attachmentIds ? [...task.attachmentIds, (id as string)] : [id as string],
+            }
+          },
+        focusTaskId: taskId
+      };
+    }
+
+    case AttachmentActionTypes.DeleteAttachment: {
+      const attachmentId = action.payload.id;
+      const taskIds = state.ids as string[];
+      const affectedTaskId = taskIds.find(id => state.entities[id].attachmentIds.includes(attachmentId));
+      const affectedTask = state.entities[affectedTaskId];
+      return {
+        ...state,
+        entities:
+          {
+            ...state.entities,
+            [affectedTaskId]: {
+              ...affectedTask,
+              attachmentIds: affectedTask.attachmentIds ? affectedTask.attachmentIds.filter(id_ => id_ !== attachmentId) : [],
+            }
+          },
+        focusTaskId: affectedTaskId
+      };
+    }
+
     case TaskActionTypes.LoadTaskState: {
       return {...action.payload.state};
     }
