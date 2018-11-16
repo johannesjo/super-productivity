@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { select, Store } from '@ngrx/store';
-import { AttachmentState, initialAttachmentState, selectAllAttachments } from './store/attachment.reducer';
+import { AttachmentState, initialAttachmentState, selectAllAttachments, selectAttachmentByIds } from './store/attachment.reducer';
 import { AddAttachment, DeleteAttachment, LoadAttachmentState, UpdateAttachment } from './store/attachment.actions';
 import { Observable } from 'rxjs';
 import { Attachment } from './attachment.model';
@@ -9,6 +9,9 @@ import { DialogEditAttachmentComponent } from './dialog-edit-attachment/dialog-e
 import { MatDialog } from '@angular/material';
 import { createFromDrop, createFromPaste, DropPasteInput } from '../../core/drop-paste-input/drop-paste-input';
 import { PersistenceService } from '../../core/persistence/persistence.service';
+import { Task } from '../task.model';
+import { selectTaskById } from '../store/task.selectors';
+import { take } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
@@ -49,20 +52,25 @@ export class AttachmentService {
     this._store$.dispatch(new UpdateAttachment({attachment: {id, changes}}));
   }
 
+  getByIds(ids: string[]): Observable<Attachment[]> {
+    return this._store$.pipe(select(selectAttachmentByIds, {ids}), take(1));
+  }
+
+
 
   // HANDLE INPUT
   // ------------
-  createFromDrop(ev) {
-    this._handleInput(createFromDrop(ev), ev);
+  createFromDrop(ev, taskId: string) {
+    this._handleInput(createFromDrop(ev), ev, taskId);
   }
 
 
-  createFromPaste(ev) {
-    this._handleInput(createFromPaste(ev), ev);
+  createFromPaste(ev, taskId: string) {
+    this._handleInput(createFromPaste(ev), ev, taskId);
   }
 
 
-  private _handleInput(attachment: DropPasteInput, ev) {
+  private _handleInput(attachment: DropPasteInput, ev, taskId) {
     // properly not intentional so we leave
     if (!attachment || !attachment.path) {
       return;
@@ -78,7 +86,7 @@ export class AttachmentService {
 
     this._matDialog.open(DialogEditAttachmentComponent, {
       data: {
-        attachment: {...attachment},
+        attachment: {...attachment, taskId},
       },
     }).afterClosed()
       .subscribe((attachment_) => {
@@ -90,6 +98,5 @@ export class AttachmentService {
           }
         }
       });
-
   }
 }

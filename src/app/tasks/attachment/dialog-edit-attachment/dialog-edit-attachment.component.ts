@@ -1,9 +1,7 @@
 import { ChangeDetectionStrategy, Component, Inject, OnInit } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material';
 import { IS_ELECTRON } from '../../../app.constants';
-import { MATERIAL_ICONS } from '../../../ui/material-icons.const';
 import { AttachmentCopy, AttachmentType } from '../attachment.model';
-import { FormControl } from '@angular/forms';
 
 interface AttachmentSelectType {
   type: AttachmentType;
@@ -19,8 +17,6 @@ interface AttachmentSelectType {
 export class DialogEditAttachmentComponent implements OnInit {
   types: AttachmentSelectType[];
   attachmentCopy: AttachmentCopy;
-  customIcons: string[] = MATERIAL_ICONS;
-  iconControl = new FormControl();
 
   constructor(
     private _matDialogRef: MatDialogRef<DialogEditAttachmentComponent>,
@@ -41,7 +37,6 @@ export class DialogEditAttachmentComponent implements OnInit {
     ];
     if (IS_ELECTRON) {
       this.types.push({type: 'FILE', title: 'File (opened by default system app)'});
-      this.types.push({type: 'COMMAND', title: 'Command (custom shell command)'});
     }
   }
 
@@ -62,8 +57,6 @@ export class DialogEditAttachmentComponent implements OnInit {
         return 'File Path';
       case 'IMG':
         return 'Image';
-      case 'COMMAND':
-        return 'Command';
       case 'LINK':
       default:
         return 'Url';

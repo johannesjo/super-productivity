@@ -12,6 +12,10 @@ export const adapter: EntityAdapter<Attachment> = createEntityAdapter<Attachment
 export const selectAttachmentFeatureState = createFeatureSelector<AttachmentState>(ATTACHMENT_FEATURE_NAME);
 export const {selectIds, selectEntities, selectAll, selectTotal} = adapter.getSelectors();
 export const selectAllAttachments = createSelector(selectAttachmentFeatureState, selectAll);
+export const selectAttachmentByIds = createSelector(
+  selectEntities,
+  (entities, props: { ids }) => props.ids ? props.ids.map(id => entities[id]) : []
+);
 
 export const initialAttachmentState: AttachmentState = adapter.getInitialState({});
 

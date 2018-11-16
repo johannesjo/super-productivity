@@ -9,6 +9,7 @@ import { ATTACHMENT_FEATURE_NAME, attachmentReducer } from './store/attachment.r
 import { DialogEditAttachmentComponent } from './dialog-edit-attachment/dialog-edit-attachment.component';
 import { FormsModule } from '@angular/forms';
 import { AttachmentLinkDirective } from './attachment-link/attachment-link.directive';
+import { AttachmentListComponent } from './attachment-list/attachment-list.component';
 
 @NgModule({
   imports: [
@@ -21,13 +22,15 @@ import { AttachmentLinkDirective } from './attachment-link/attachment-link.direc
   ],
   declarations: [
     DialogEditAttachmentComponent,
-    AttachmentLinkDirective
+    AttachmentLinkDirective,
+    AttachmentListComponent,
   ],
   entryComponents: [
     DialogEditAttachmentComponent
   ],
   exports: [
-    DialogEditAttachmentComponent
+    DialogEditAttachmentComponent,
+    AttachmentListComponent,
   ]
 })
 export class AttachmentModule {

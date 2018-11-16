@@ -13,6 +13,7 @@ import {
 } from '@angular/core';
 import { TaskWithSubTasks } from '../task.model';
 import { IssueService } from '../../issue/issue.service';
+import { AttachmentService } from '../attachment/attachment.service';
 
 @Component({
   selector: 'task-additional-info',
@@ -30,7 +31,7 @@ export class TaskAdditionalInfoComponent implements OnInit, AfterViewInit {
     if (this._issueContentRef) {
       this._issueContentRef.instance.task = val;
     }
-  };
+  }
 
   taskData: TaskWithSubTasks;
   @Input() selectedIndex: number;
@@ -44,8 +45,11 @@ export class TaskAdditionalInfoComponent implements OnInit, AfterViewInit {
   private _issueContentRef;
 
 
-  constructor(private _resolver: ComponentFactoryResolver,
-              private _issueService: IssueService) {
+  constructor(
+    private _resolver: ComponentFactoryResolver,
+    private _issueService: IssueService,
+    public attachmentService: AttachmentService,
+  ) {
   }
 
   ngOnInit() {
