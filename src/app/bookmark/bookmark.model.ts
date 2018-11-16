@@ -1,12 +1,9 @@
-export type BookmarkType = 'FILE' | 'LINK' | 'IMG' | 'COMMAND' | 'NOTE';
+import { DropPasteInput, DropPasteInputType } from '../core/drop-paste-input/drop-paste-input';
 
-export interface BookmarkCopy {
+export type BookmarkType = DropPasteInputType;
+
+export interface BookmarkCopy extends DropPasteInput {
   id: string;
-  title: string;
-  icon: string;
-  type: BookmarkType;
-  path: string;
-  taskId?: string;
-};
+}
 
 export type Bookmark = Readonly<BookmarkCopy>;

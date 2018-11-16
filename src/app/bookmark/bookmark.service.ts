@@ -16,6 +16,7 @@ import shortid from 'shortid';
 import { DialogEditBookmarkComponent } from './dialog-edit-bookmark/dialog-edit-bookmark.component';
 import { MatDialog } from '@angular/material';
 import { PersistenceService } from '../core/persistence/persistence.service';
+import { createFromDrop, createFromPaste, DropPasteInput } from '../core/drop-paste-input/drop-paste-input';
 
 @Injectable({
   providedIn: 'root'
@@ -70,40 +71,31 @@ export class BookmarkService {
   }
 
 
-  // HANDLE LINK INPUT METHODS
-  // -------------------------
-
+  // HANDLE INPUT
+  // ------------
   createFromDrop(ev) {
-    const text = ev.dataTransfer.getData('text');
-    const bookmark = text
-      ? (this._createTextBookmark(text))
-      : (this._createFileBookmark(ev.dataTransfer));
-    this._handleLinkInput(bookmark, ev);
+    this._handleInput(createFromDrop(ev), ev);
   }
 
 
   createFromPaste(ev) {
-    if (ev.target.getAttribute('contenteditable')) {
-      return;
-    }
-    const text = ev.clipboardData.getData('text/plain');
-    if (text) {
-      const bookmark = this._createTextBookmark(text);
-      this._handleLinkInput(bookmark, ev);
-    }
+    this._handleInput(createFromPaste(ev), ev);
   }
 
 
-  private _handleLinkInput(bookmark, ev) {
+  private _handleInput(bookmark: DropPasteInput, ev) {
+    // properly not intentional so we leave
+    if (!bookmark || !bookmark.path) {
+      return;
+    }
+
     // don't intervene with text inputs
     if (ev.target.tagName === 'INPUT' || ev.target.tagName === 'TEXTAREA') {
       return;
     }
 
-    // properly not intentional so we leave
-    if (!bookmark || !bookmark.path) {
-      return;
-    }
+    ev.preventDefault();
+    ev.stopPropagation();
 
     this._matDialog.open(DialogEditBookmarkComponent, {
       data: {
@@ -120,57 +112,5 @@ export class BookmarkService {
         }
       });
 
-    ev.preventDefault();
-    ev.stopPropagation();
-  }
-
-  private _createTextBookmark(text): null | Partial<Bookmark> {
-    if (text) {
-      if (text.match(/\n/)) {
-        // this.addItem({
-        //  title: text.substr(0, MAX_TITLE_LENGTH),
-        //  type: 'TEXT'
-        // });
-      } else {
-        let path = text;
-        if (!path.match(/^http/)) {
-          path = '//' + path;
-        }
-        return {
-          title: this._baseName(text),
-          path: path,
-          type: 'LINK'
-        };
-      }
-    }
-    return null;
-  }
-
-  private _createFileBookmark(dataTransfer): null | Partial<Bookmark> {
-    const path = dataTransfer.files[0] && dataTransfer.files[0].path;
-    if (path) {
-      return {
-        title: this._baseName(path),
-        path: path,
-        type: 'FILE'
-      };
-    }
-    return null;
-  }
-
-  private _baseName(passedStr) {
-    const str = passedStr.trim();
-    let base;
-    if (str[str.length - 1] === '/') {
-      const strippedStr = str.substring(0, str.length - 2);
-      base = strippedStr.substring(strippedStr.lastIndexOf('/') + 1);
-    } else {
-      base = str.substring(str.lastIndexOf('/') + 1);
-    }
-
-    if (base.lastIndexOf('.') !== -1) {
-      base = base.substring(0, base.lastIndexOf('.'));
-    }
-    return base;
   }
 }
