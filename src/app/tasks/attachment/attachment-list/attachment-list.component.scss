@@ -39,6 +39,7 @@ $thisHeight: 80px;
 .attachment-link {
   padding: $s;
   height: $thisHeight;
+  min-width: $thisHeight;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -56,6 +57,7 @@ $thisHeight: 80px;
 
   &.isImage {
     padding: 0;
+    cursor: zoom-in;
     img {
       height: $thisHeight;
       width: auto;

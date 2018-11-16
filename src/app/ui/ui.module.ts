@@ -53,6 +53,7 @@ import { Angular2PromiseButtonModule } from 'angular2-promise-buttons';
 import { DialogConfirmComponent } from './dialog-confirm/dialog-confirm.component';
 import { FormlyMatToggleModule } from '@ngx-formly/material/toggle';
 import { InputDurationFormlyComponent } from './duration/input-duration-formly/input-duration-formly.component';
+import { EnlargeImgDirective } from './enlarge-img/enlarge-img.directive';
 
 @NgModule({
   imports: [
@@ -122,6 +123,7 @@ import { InputDurationFormlyComponent } from './duration/input-duration-formly/i
     NumberToMonthPipe,
     SimpleDownloadDirective,
     DialogConfirmComponent,
+    EnlargeImgDirective,
   ],
   entryComponents: [
     DialogConfirmComponent,
@@ -140,6 +142,7 @@ import { InputDurationFormlyComponent } from './duration/input-duration-formly/i
     HelpSectionComponent,
     SimpleDownloadDirective,
     DialogConfirmComponent,
+    EnlargeImgDirective,
 
     MsToStringPipe,
     MsToStringPipe$,

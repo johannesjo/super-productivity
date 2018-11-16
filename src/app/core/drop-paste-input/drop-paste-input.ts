@@ -48,7 +48,7 @@ const _createTextBookmark = (text): null | DropPasteInput => {
       if (!path.match(/^http/)) {
         path = '//' + path;
       }
-      const isImage = (path.match(/png$|jpg$/i));
+      const isImage = (path.match(/png$|jpg$|jpeg$/i));
 
       return {
         title: _baseName(text),

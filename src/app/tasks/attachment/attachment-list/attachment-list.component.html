@@ -1,7 +1,7 @@
 <ul class="attachments">
   <li class="attachment"
-       *ngFor="let attachment of attachments"
-       draggable="false">
+      *ngFor="let attachment of attachments"
+      draggable="false">
     <a attachmentLink
        class="attachment-link mat-elevation-z3  bg-400i"
        [class.isImage]="attachment.type==='IMG'"
@@ -18,7 +18,8 @@
         <div class="title">{{attachment.title}}</div>
       </ng-container>
       <ng-container *ngIf="attachment.type==='IMG'">
-        <img [src]="attachment.path">
+        <img [src]="attachment.path"
+             enlargeImg>
       </ng-container>
     </a>
 
