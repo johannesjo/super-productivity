@@ -22,6 +22,7 @@ import { MatSidenavModule } from '@angular/material';
 import { TasksModule } from './tasks/tasks.module';
 import { TimeTrackingModule } from './time-tracking/time-tracking.module';
 import { BookmarkModule } from './bookmark/bookmark.module';
+import { NoteModule } from './note/note.module';
 
 @NgModule({
   declarations: [
@@ -51,6 +52,7 @@ import { BookmarkModule } from './bookmark/bookmark.module';
     FormlyModule.forRoot(),
     FormlyMaterialModule,
     ServiceWorkerModule.register('ngsw-worker.js', {enabled: environment.production}),
+    NoteModule,
   ],
   providers: [],
   bootstrap: [AppComponent]
