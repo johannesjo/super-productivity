@@ -19,9 +19,15 @@ mat-sidenav-container {
 
 :host.isLightTheme {
   .mat-drawer-content,
+  .route-wrapper,
+  ::ng-deep .mat-drawer-inner-container,
   ::ng-deep mat-sidenav-content {
     background: #eeeeee !important;
   }
+}
+
+:host ::ng-deep .mat-drawer-inner-container {
+  overflow-y: scroll;
 }
 
 :host {

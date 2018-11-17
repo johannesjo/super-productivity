@@ -5,7 +5,7 @@
               [@blendInOut]
               (blur)="layoutService.hideAddTaskBar()"
               *ngIf="layoutService.isShowAddTaskBar$|async"></add-task-bar>
-<mat-drawer-container autosize>
+<mat-drawer-container>
   <div class="route-wrapper"
        [@warpRoute]="getPage(o)">
     <router-outlet #o="outlet"></router-outlet>
@@ -13,7 +13,7 @@
   <mat-drawer #drawer
               position="end"
               mode="side">
-    TEST
+    <notes></notes>
   </mat-drawer>
 
 </mat-drawer-container>

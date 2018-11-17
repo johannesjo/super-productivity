@@ -1,0 +1,8 @@
+<div class="wrapper">
+  <button (click)="addNote()"
+          mat-raised-button="">Add new Note
+  </button>
+
+  <note *ngFor="let note of noteService.notes$|async"
+        [note]="note"></note>
+</div>

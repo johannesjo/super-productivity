@@ -38,6 +38,7 @@ import { NoteModule } from './note/note.module';
     MatSidenavModule,
     TasksModule,
     TimeTrackingModule,
+    NoteModule,
 
     // External
     BrowserModule,

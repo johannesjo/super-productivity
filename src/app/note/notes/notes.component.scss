@@ -1,0 +1,15 @@
+@import '../../../variables';
+
+.wrapper {
+  width: 25%;
+  min-width: 200px;
+  display: block;
+  text-align: center;
+  min-height: 100%;
+  padding: $s;
+  box-sizing: border-box;
+}
+
+note {
+  margin-bottom: $s;
+}

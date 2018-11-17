@@ -4,13 +4,22 @@ import { StoreModule } from '@ngrx/store';
 import * as fromNote from './store/note.reducer';
 import { EffectsModule } from '@ngrx/effects';
 import { NoteEffects } from './store/note.effects';
+import { NotesComponent } from './notes/notes.component';
+import { NoteComponent } from './note/note.component';
+import { UiModule } from '../ui/ui.module';
+import { NoteService } from './note.service';
+import { NOTE_FEATURE_NAME } from './store/note.reducer';
 
 @NgModule({
-  declarations: [],
+  declarations: [NotesComponent, NoteComponent],
   imports: [
     CommonModule,
-    StoreModule.forFeature('note', fromNote.reducer),
+    UiModule,
+    StoreModule.forFeature(NOTE_FEATURE_NAME, fromNote.reducer),
     EffectsModule.forFeature([NoteEffects]),
-  ]
+  ],
+  exports: [NotesComponent],
+  providers: [NoteService]
 })
-export class NoteModule { }
+export class NoteModule {
+}
