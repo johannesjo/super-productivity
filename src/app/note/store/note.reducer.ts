@@ -1,5 +1,5 @@
 import { EntityState, EntityAdapter, createEntityAdapter } from '@ngrx/entity';
-import { Note } from './note.model';
+import { Note } from '../note.model';
 import { NoteActions, NoteActionTypes } from './note.actions';
 
 export interface State extends EntityState<Note> {

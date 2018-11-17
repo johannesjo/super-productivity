@@ -1,25 +1,19 @@
-<main-header></main-header>
-<!--<bookmark-bar *ngIf="bookmarkService.isShowBookmarks$|async"-->
-<!--[@slide]="{value:'r',params:{elHeight: 50}}"></bookmark-bar>-->
+<main-header [drawer]="drawer"></main-header>
 <bookmark-bar *ngIf="bookmarkService.isShowBookmarks$|async"
               [@expand]></bookmark-bar>
 <add-task-bar class="global"
               [@blendInOut]
               (blur)="layoutService.hideAddTaskBar()"
               *ngIf="layoutService.isShowAddTaskBar$|async"></add-task-bar>
-<mat-sidenav-container>
-  <mat-sidenav-content>
-    <div class="route-wrapper"
-         [@warpRoute]="getPage(o)">
-      <router-outlet #o="outlet"></router-outlet>
-    </div>
-    <div style="width: 20%; min-width: 200px; border-left: 1px solid blue; position: absolute; right: 0;top: 0;bottom: 0; z-index: 10; background: #eeeeee;" class="">
-
-
-    </div>
-  </mat-sidenav-content>
-  <mat-sidenav>
+<mat-drawer-container autosize>
+  <div class="route-wrapper"
+       [@warpRoute]="getPage(o)">
+    <router-outlet #o="outlet"></router-outlet>
+  </div>
+  <mat-drawer #drawer
+              position="end"
+              mode="side">
     TEST
-  </mat-sidenav>
+  </mat-drawer>
 
-</mat-sidenav-container>
+</mat-drawer-container>

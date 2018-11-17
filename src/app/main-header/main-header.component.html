@@ -42,6 +42,13 @@
             [color]="rlHA.isActive ? 'accent' : null">
       <mat-icon>today</mat-icon>
     </button>
+
+    <button mat-mini-fab
+            (click)="drawer.toggle()"
+            [color]="drawer.opened ? 'accent' : null">
+      <mat-icon>note</mat-icon>
+    </button>
+
     <eco-fab-speed-dial [(open)]="isSpeedDialOpen"
                         (mouseenter)="isSpeedDialOpen = true"
                         (mouseleave)="isSpeedDialOpen = false"
