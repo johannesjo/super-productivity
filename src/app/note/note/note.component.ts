@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, Input, OnInit } from '@angular/core';
 import { Note } from '../note.model';
+import { NoteService } from '../note.service';
 
 @Component({
   selector: 'note',
@@ -10,10 +11,14 @@ import { Note } from '../note.model';
 export class NoteComponent implements OnInit {
   @Input() note: Note;
 
-  constructor() {
+  constructor(private _noteService: NoteService) {
   }
 
   ngOnInit() {
+  }
+
+  updateContent(newVal) {
+    this._noteService.update(this.note.id, {content: newVal.newVal});
   }
 
 }

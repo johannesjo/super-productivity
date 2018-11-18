@@ -58,6 +58,7 @@ export class InlineMarkdownComponent implements OnInit {
 
     if (this.modelCopy !== this.model) {
       this.model = this.modelCopy;
+      // TODO refactor this!!
       this.onChanged.emit({newVal: this.modelCopy});
     }
   }

@@ -1,6 +1,7 @@
-<mat-card>
-  <div class="title">{{note.title}}</div>
-  <div class="content">
-    <inline-markdown [model]="note.content"></inline-markdown>
-  </div>
-</mat-card>
+<!--<mat-card>-->
+<!--<div class="title">{{note.title}}</div>-->
+<div class="content">
+  <inline-markdown (onChanged)="updateContent($event)"
+                   [model]="note.content"></inline-markdown>
+</div>
+<!--</mat-card>-->
