@@ -297,6 +297,7 @@ export class TaskService {
       timeEstimate: 0,
       isDone: false,
       isNotesOpen: false,
+      created: Date.now(),
       title,
       id: shortid(),
       ...additional,

@@ -15,6 +15,7 @@ export interface TaskCopy {
   timeSpent: number;
   timeEstimate: number;
 
+  created: number;
   isDone?: boolean;
   isNotesOpen?: boolean;
   isHideSubTasks?: boolean;
