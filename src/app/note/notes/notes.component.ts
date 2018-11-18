@@ -1,5 +1,7 @@
-import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy, OnInit } from '@angular/core';
 import { NoteService } from '../note.service';
+import { DragulaService } from 'ng2-dragula';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'notes',
@@ -7,16 +9,28 @@ import { NoteService } from '../note.service';
   styleUrls: ['./notes.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class NotesComponent implements OnInit {
+export class NotesComponent implements OnInit, OnDestroy {
+  private _subs = new Subscription();
 
   constructor(
     public noteService: NoteService,
+    private _dragulaService: DragulaService,
   ) {
   }
 
   ngOnInit() {
     console.log(this.noteService);
+    this._subs.add(this._dragulaService.dropModel('NOTES')
+      .subscribe((params: any) => {
+        const {target, source, targetModel, item} = params;
+        const targetNewIds = targetModel.map((task) => task.id);
+        this.noteService.updateOrder(targetNewIds);
+      })
+    );
+  }
 
+  ngOnDestroy() {
+    this.subs.unsubscribe();
   }
 
   addNote() {

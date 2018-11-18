@@ -7,6 +7,7 @@ export enum NoteActionTypes {
   LoadNoteState = '[Note] Load Note State',
   ToggleShowNotes = '[Note] ToggleShow Notes',
 
+  UpdateNoteOrder = '[Note] Update Note Order',
   AddNote = '[Note] Add Note',
   UpsertNote = '[Note] Upsert Note',
   AddNotes = '[Note] Add Notes',
@@ -21,59 +22,75 @@ export enum NoteActionTypes {
 export class LoadNoteState implements Action {
   readonly type = NoteActionTypes.LoadNoteState;
 
-  constructor(public payload: { state: NoteState }) {}
+  constructor(public payload: { state: NoteState }) {
+  }
 }
 
 export class ToggleShowNotes implements Action {
   readonly type = NoteActionTypes.ToggleShowNotes;
 }
 
+export class UpdateNoteOrder implements Action {
+  readonly type = NoteActionTypes.UpdateNoteOrder;
+
+  constructor(public payload: { ids: string[] }) {
+  }
+}
+
 export class AddNote implements Action {
   readonly type = NoteActionTypes.AddNote;
 
-  constructor(public payload: { note: Note }) {}
+  constructor(public payload: { note: Note }) {
+  }
 }
 
 export class UpsertNote implements Action {
   readonly type = NoteActionTypes.UpsertNote;
 
-  constructor(public payload: { note: Note }) {}
+  constructor(public payload: { note: Note }) {
+  }
 }
 
 export class AddNotes implements Action {
   readonly type = NoteActionTypes.AddNotes;
 
-  constructor(public payload: { notes: Note[] }) {}
+  constructor(public payload: { notes: Note[] }) {
+  }
 }
 
 export class UpsertNotes implements Action {
   readonly type = NoteActionTypes.UpsertNotes;
 
-  constructor(public payload: { notes: Note[] }) {}
+  constructor(public payload: { notes: Note[] }) {
+  }
 }
 
 export class UpdateNote implements Action {
   readonly type = NoteActionTypes.UpdateNote;
 
-  constructor(public payload: { note: Update<Note> }) {}
+  constructor(public payload: { note: Update<Note> }) {
+  }
 }
 
 export class UpdateNotes implements Action {
   readonly type = NoteActionTypes.UpdateNotes;
 
-  constructor(public payload: { notes: Update<Note>[] }) {}
+  constructor(public payload: { notes: Update<Note>[] }) {
+  }
 }
 
 export class DeleteNote implements Action {
   readonly type = NoteActionTypes.DeleteNote;
 
-  constructor(public payload: { id: string }) {}
+  constructor(public payload: { id: string }) {
+  }
 }
 
 export class DeleteNotes implements Action {
   readonly type = NoteActionTypes.DeleteNotes;
 
-  constructor(public payload: { ids: string[] }) {}
+  constructor(public payload: { ids: string[] }) {
+  }
 }
 
 export class ClearNotes implements Action {
@@ -81,14 +98,15 @@ export class ClearNotes implements Action {
 }
 
 export type NoteActions =
- LoadNoteState
- | ToggleShowNotes
- | AddNote
- | UpsertNote
- | AddNotes
- | UpsertNotes
- | UpdateNote
- | UpdateNotes
- | DeleteNote
- | DeleteNotes
- | ClearNotes;
+  LoadNoteState
+  | ToggleShowNotes
+  | UpdateNoteOrder
+  | AddNote
+  | UpsertNote
+  | AddNotes
+  | UpsertNotes
+  | UpdateNote
+  | UpdateNotes
+  | DeleteNote
+  | DeleteNotes
+  | ClearNotes;

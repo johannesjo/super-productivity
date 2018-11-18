@@ -15,6 +15,7 @@ export class NoteEffects {
         NoteActionTypes.AddNote,
         NoteActionTypes.DeleteNote,
         NoteActionTypes.UpdateNote,
+        NoteActionTypes.UpdateNoteOrder,
       ),
       withLatestFrom(
         this._store$.pipe(select(selectCurrentProjectId)),

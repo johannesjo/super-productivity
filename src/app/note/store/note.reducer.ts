@@ -41,6 +41,10 @@ export function reducer(
       return {...state, isShowNotes: !state.isShowNotes};
     }
 
+    case NoteActionTypes.UpdateNoteOrder: {
+      return {...state, ids: action.payload.ids};
+    }
+
     case NoteActionTypes.AddNote: {
       return adapter.addOne(action.payload.note, state);
     }

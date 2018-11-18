@@ -47,13 +47,13 @@ import { HelpSectionComponent } from './help-section/help-section.component';
 import { NumberToMonthPipe } from './duration/number-to-month.pipe';
 import { SplitModule } from '../pages/work-view/split/split.module';
 import { FlexLayoutModule } from '@angular/flex-layout';
-import { DragDropModule } from '@angular/cdk/drag-drop';
 import { SimpleDownloadDirective } from './simple-download/simple-download.directive';
 import { Angular2PromiseButtonModule } from 'angular2-promise-buttons';
 import { DialogConfirmComponent } from './dialog-confirm/dialog-confirm.component';
 import { FormlyMatToggleModule } from '@ngx-formly/material/toggle';
 import { InputDurationFormlyComponent } from './duration/input-duration-formly/input-duration-formly.component';
 import { EnlargeImgDirective } from './enlarge-img/enlarge-img.directive';
+import { DragulaModule } from 'ng2-dragula';
 
 @NgModule({
   imports: [
@@ -72,10 +72,11 @@ import { EnlargeImgDirective } from './enlarge-img/enlarge-img.directive';
     FormlyMaterialModule,
     FormlyMatToggleModule,
 
-    DragDropModule,
     Angular2PromiseButtonModule.forRoot({
       // handleCurrentBtnOnly: true,
     }),
+
+    DragulaModule.forRoot(),
 
     // material2
     MatAutocompleteModule,
@@ -149,7 +150,7 @@ import { EnlargeImgDirective } from './enlarge-img/enlarge-img.directive';
     StringToMsPipe,
     NumberToMonthPipe,
 
-    DragDropModule,
+    DragulaModule,
     Angular2PromiseButtonModule,
 
     // material2
