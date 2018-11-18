@@ -4,5 +4,6 @@ export type ProjectDataLsKey
   | 'TASK_ATTACHMENT_STATE'
   | 'TASKS_ARCHIVE'
   | 'ISSUE_STATE'
+  | 'NOTE_STATE'
   | 'BOOKMARK_STATE'
   ;

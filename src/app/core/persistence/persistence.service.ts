@@ -5,13 +5,16 @@ import {
   LS_GLOBAL_CFG,
   LS_ISSUE_STATE,
   LS_LAST_ACTIVE,
+  LS_LAYOUT,
+  LS_NOTE_STATE,
   LS_PROJECT_META_LIST,
   LS_PROJECT_PREFIX,
-  LS_TASK_ARCHIVE, LS_TASK_ATTACHMENT_STATE,
+  LS_TASK_ARCHIVE,
+  LS_TASK_ATTACHMENT_STATE,
   LS_TASK_STATE
 } from './ls-keys.const';
 import { GlobalConfig } from '../config/config.model';
-import { loadFromLs, saveToLsWithLastActive } from './local-storage';
+import { loadFromLs, saveToLs, saveToLsWithLastActive } from './local-storage';
 import { IssueProviderKey } from '../../issue/issue';
 import { ProjectState } from '../../project/store/project.reducer';
 import { TaskState } from '../../tasks/store/task.reducer';
@@ -21,6 +24,8 @@ import { Task } from '../../tasks/task.model';
 import { AppDataComplete } from '../sync/sync.model';
 import { BookmarkState } from '../../bookmark/store/bookmark.reducer';
 import { AttachmentState } from '../../tasks/attachment/store/attachment.reducer';
+import { LayoutState } from '../layout/store/layout.reducer';
+import { NoteState } from '../../note/store/note.reducer';
 
 @Injectable({
   providedIn: 'root'
@@ -29,6 +34,8 @@ export class PersistenceService {
   constructor() {
   }
 
+  // PROJECT RELATED
+  // ---------------
   loadProjectsMeta(): ProjectState {
     return loadFromLs(LS_PROJECT_META_LIST);
   }
@@ -94,7 +101,14 @@ export class PersistenceService {
     return loadFromLs(this._makeProjectKey(projectId, LS_TASK_ATTACHMENT_STATE));
   }
 
+  // LS_NOTE_STATE
+  saveNotesForProject(projectId, noteState: NoteState) {
+    saveToLsWithLastActive(this._makeProjectKey(projectId, LS_NOTE_STATE), noteState);
+  }
 
+  loadNotesForProject(projectId): NoteState {
+    return loadFromLs(this._makeProjectKey(projectId, LS_NOTE_STATE));
+  }
 
   // GLOBAL CONFIG
   // -------------
@@ -104,6 +118,14 @@ export class PersistenceService {
 
   saveGlobalConfig(globalConfig: GlobalConfig) {
     saveToLsWithLastActive(LS_GLOBAL_CFG, globalConfig);
+  }
+
+  loadLayout(): LayoutState {
+    return loadFromLs(LS_LAYOUT);
+  }
+
+  saveLayout(layoutState: LayoutState) {
+    saveToLs(LS_LAYOUT, layoutState);
   }
 
   // BACKUP AND SYNC RELATED
@@ -138,6 +160,7 @@ export class PersistenceService {
       project: this.loadProjectsMeta(),
       globalConfig: this.loadGlobalConfig(),
       bookmark: crateProjectIdObj(this.loadBookmarksForProject.bind(this)),
+      note: crateProjectIdObj(this.loadNotesForProject.bind(this)),
       task: crateProjectIdObj(this.loadTasksForProject.bind(this)),
       taskArchive: crateProjectIdObj(this.loadTaskArchiveForProject.bind(this)),
       issue: projectIds.reduce((acc, projectId) => {
@@ -164,6 +187,7 @@ export class PersistenceService {
     this.saveProjectsMeta(data.project);
     this.saveGlobalConfig(data.globalConfig);
     saveDataForProjectIds(data.bookmark, this.saveBookmarksForProject.bind(this));
+    saveDataForProjectIds(data.note, this.saveNotesForProject.bind(this));
     saveDataForProjectIds(data.task, this.saveTasksForProject.bind(this));
     saveDataForProjectIds(data.taskArchive, this.saveToTaskArchiveForProject.bind(this));
     Object.keys(data.issue).forEach(projectId => {
