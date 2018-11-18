@@ -5,7 +5,7 @@
   display: block;
   text-align: center;
   min-height: 100%;
-  padding: 0 $s*2;
+  padding: 0 $s*1.5;
   box-sizing: border-box;
 
   :host-context(.isLightTheme) & {
@@ -15,5 +15,5 @@
 
 note {
   display: block;
-  margin-bottom: $s*2;
+  margin-bottom: $s*1.5;
 }
