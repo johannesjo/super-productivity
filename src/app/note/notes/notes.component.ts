@@ -19,7 +19,6 @@ export class NotesComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    console.log(this.noteService);
     this._subs.add(this._dragulaService.dropModel('NOTES')
       .subscribe((params: any) => {
         const {target, source, targetModel, item} = params;

@@ -1,4 +1,4 @@
-import { reducer, initialState } from './note.reducer';
+import { initialState, reducer } from './note.reducer';
 
 describe('Note Reducer', () => {
   describe('unknown action', () => {
