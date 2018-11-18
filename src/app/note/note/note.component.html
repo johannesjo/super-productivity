@@ -1,7 +1,22 @@
-<!--<mat-card>-->
-<!--<div class="title">{{note.title}}</div>-->
-<div class="content">
-  <inline-markdown (onChanged)="updateContent($event)"
-                   [model]="note.content"></inline-markdown>
+<div class="note">
+  <div class="content">
+    <inline-markdown (onChanged)="updateContent($event)"
+                     [model]="note.content"></inline-markdown>
+  </div>
+
+  <div class="controls">
+    <button mat-icon-button=""
+            [matMenuTriggerFor]="menu">
+      <mat-icon>more</mat-icon>
+    </button>
+
+    <mat-menu #menu="matMenu">
+      <button mat-menu-item>Nothing yet</button>
+      <button mat-menu-item
+              (click)="removeNote()">
+        <mat-icon style="color:#e15d63;">delete_forever</mat-icon>
+        Delete
+      </button>
+    </mat-menu>
+  </div>
 </div>
-<!--</mat-card>-->

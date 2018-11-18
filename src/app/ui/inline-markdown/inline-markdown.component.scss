@@ -8,19 +8,16 @@
 }
 
 .markdown-wrapper {
-  min-height: 160px;
-  max-height: 600px;
-  margin-bottom: 20px;
   display: block;
   box-sizing: border-box;
   height: 30px;
   border: none;
-  resize: both;
+  resize: vertical;
   overflow: auto;
   position: relative;
   .resize-to-fit {
     position: absolute;
-    right: 14px;
+    right: $s*2;
     top: 0;
     cursor: pointer;
   }
@@ -28,23 +25,17 @@
 
 .markdown-unparsed,
 .markdown-parsed {
-  padding: 10px 14px;
+  border: 0;
+  padding: $s $s*2;
   margin: 0;
   width: 100%;
+  box-sizing: border-box;
   word-wrap: break-word;
   display: block;
   resize: none;
   overflow: auto;
   height: 100%;
-  box-sizing: border-box;
-  background: #fbfbfb;
-  border: 1px solid #dddddd;
 
-  @include dark-theme {
-    background-color: $dark-theme-bg;
-    color: #eeeeee;
-    border-color: #333333;
-  }
 }
 
 .markdown-parsed {

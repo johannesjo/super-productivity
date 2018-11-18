@@ -1,4 +1,58 @@
+@import '../../../variables';
+
+.note {
+  background: #ffffff;
+  color: $standardNoteFgLight;
+  box-sizing: border-box;
+  position: relative;
+  border-radius: $card-border-radius;
+  box-shadow: $shadow-bottom-boxed;
+
+  @include dark-theme {
+    background: $standardNoteBgDark;
+    color: $standardNoteFgDark;
+    border-color: #333333;
+  }
+}
+
+.controls {
+  position: absolute;
+  top: 0;
+  right: 0;
+
+  @media(min-width: $layout-xs) {
+    opacity: 0;
+    transition: $transition-standard;
+
+    .note:focus &,
+    .note:hover & {
+      opacity: 1;
+    }
+  }
+}
+
 .content {
   text-align: left;
   font-size: 12px;
+
+  inline-markdown ::ng-deep {
+    .markdown-wrapper {
+      min-height: 60px;
+      max-height: 500px;
+    }
+
+    .markdown-unparsed,
+    .markdown-parsed {
+      border-radius: $card-border-radius;
+      background: #ffffff;
+      color: $standardNoteFgLight;
+      box-sizing: border-box;
+
+      @include dark-theme {
+        background: $standardNoteBgDark;
+        color: $standardNoteFgDark;
+        border-color: #333333;
+      }
+    }
+  }
 }

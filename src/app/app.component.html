@@ -11,9 +11,9 @@
     <router-outlet #o="outlet"></router-outlet>
   </div>
   <mat-drawer #drawer
+              [mode]="mobileQuery.matches ? 'over' : 'side'"
               [opened]="noteService.isShowNotes$|async"
-              position="end"
-              mode="side">
+              position="end">
     <notes></notes>
   </mat-drawer>
 

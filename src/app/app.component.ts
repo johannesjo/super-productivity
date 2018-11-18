@@ -1,4 +1,4 @@
-import { Component, ElementRef, HostListener, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, HostListener, OnInit } from '@angular/core';
 import { MatIconRegistry } from '@angular/material';
 import { DomSanitizer } from '@angular/platform-browser';
 import { OverlayContainer } from '@angular/cdk/overlay';
@@ -20,14 +20,18 @@ import { slideAnimation } from './ui/animations/slide.ani';
 import { expandAnimation } from './ui/animations/expand.ani';
 import { warpRouteAnimation } from './ui/animations/warp-route';
 import { NoteService } from './note/note.service';
+import { MediaMatcher } from '@angular/cdk/layout';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss'],
-  animations: [blendInOutAnimation, slideAnimation, expandAnimation, warpRouteAnimation]
+  animations: [blendInOutAnimation, slideAnimation, expandAnimation, warpRouteAnimation],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AppComponent implements OnInit {
+  mobileQuery: MediaQueryList;
+  private _mobileQueryListener: () => void;
   private _currentTheme: string;
 
   @HostListener('document:keydown', ['$event']) onKeyDown(ev: KeyboardEvent) {
@@ -60,6 +64,8 @@ export class AppComponent implements OnInit {
     private _chromeExtensionInterface: ChromeExtensionInterfaceService,
     private _swUpdate: SwUpdate,
     private _el: ElementRef,
+    private _cd: ChangeDetectorRef,
+    private _media: MediaMatcher,
     public readonly layoutService: LayoutService,
     public readonly bookmarkService: BookmarkService,
     public readonly noteService: NoteService,
@@ -101,6 +107,9 @@ export class AppComponent implements OnInit {
     this._projectService.currentProject$.subscribe((currentProject: Project) => {
       this._setTheme(currentProject.isDarkTheme, currentProject.themeColor);
     });
+
+    this.mobileQuery = this._media.matchMedia('(max-width: 950px)');
+    this.mobileQuery.addListener(this._mobileQueryListener);
   }
 
   getPage(outlet) {

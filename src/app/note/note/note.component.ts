@@ -21,4 +21,7 @@ export class NoteComponent implements OnInit {
     this._noteService.update(this.note.id, {content: newVal.newVal});
   }
 
+  removeNote() {
+    this._noteService.remove(this.note.id);
+  }
 }
