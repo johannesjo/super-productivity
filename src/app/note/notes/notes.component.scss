@@ -7,9 +7,14 @@
   min-height: 100%;
   padding: 0 $s*1.5;
   box-sizing: border-box;
+  overflow: hidden;
 
   :host-context(.isLightTheme) & {
     background: #eeeeee !important;
+  }
+
+  header {
+    display: block;
   }
 }
 
