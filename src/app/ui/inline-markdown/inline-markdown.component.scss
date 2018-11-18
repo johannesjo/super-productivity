@@ -38,11 +38,18 @@
 
 }
 
-.markdown-parsed {
-  p:first-child {
+.markdown-parsed ::ng-deep {
+  *:first-child {
     margin-top: 0;
+    padding-top: 0;
   }
   ul {
-    padding-left: 18px;
+    padding-left: $s*2;
+  }
+  > ul {
+    padding-left: $s*2;
+  }
+  ul ul {
+    padding-top: 0;
   }
 }

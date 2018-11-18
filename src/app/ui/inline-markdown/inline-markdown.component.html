@@ -1,13 +1,13 @@
 <div class="markdown-wrapper">
   <textarea *ngIf="isShowEdit"
-            tabindex="2"
+            tabindex="1"
             (input)="resizeTextareaToFit()"
             (blur)="untoggleShowEdit()"
             class="mat-body-1 markdown-unparsed"
             rows="5"></textarea>
 
   <div markdown
-       tabindex="2"
+       tabindex="1"
        [data]="model"
        [hidden]="isShowEdit"
        (click)="toggleShowEdit($event)"
