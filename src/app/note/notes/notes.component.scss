@@ -1,15 +1,19 @@
 @import '../../../variables';
 
 .wrapper {
-  width: 25%;
-  min-width: 200px;
+  width: $s*36;
   display: block;
   text-align: center;
   min-height: 100%;
   padding: $s;
   box-sizing: border-box;
+
+  :host-context(.isLightTheme) & {
+    background: #eeeeee !important;
+  }
 }
 
 note {
+  display: block;
   margin-bottom: $s;
 }
