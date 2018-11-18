@@ -5,12 +5,14 @@ import { createFeatureSelector, createSelector } from '@ngrx/store';
 
 export interface NoteState extends EntityState<Note> {
   // additional entities state properties
+  isShowNotes: boolean;
 }
 
 export const adapter: EntityAdapter<Note> = createEntityAdapter<Note>();
 
-export const initialState: NoteState = adapter.getInitialState({
+export const initialNoteState: NoteState = adapter.getInitialState({
   // additional entity state properties
+  isShowNotes: false,
 });
 
 export const {
@@ -23,13 +25,22 @@ export const NOTE_FEATURE_NAME = 'note';
 export const selectNoteFeatureState = createFeatureSelector<NoteState>(NOTE_FEATURE_NAME);
 
 export const selectAllNotes = createSelector(selectNoteFeatureState, selectAll);
+export const selectIsShowNotes = createSelector(selectNoteFeatureState, state => state.isShowNotes);
 
 
 export function reducer(
-  state = initialState,
+  state = initialNoteState,
   action: NoteActions
 ): NoteState {
   switch (action.type) {
+    case NoteActionTypes.LoadNoteState: {
+      return {...action.payload.state};
+    }
+
+    case NoteActionTypes.ToggleShowNotes: {
+      return {...state, isShowNotes: !state.isShowNotes};
+    }
+
     case NoteActionTypes.AddNote: {
       return adapter.addOne(action.payload.note, state);
     }
@@ -60,10 +71,6 @@ export function reducer(
 
     case NoteActionTypes.DeleteNotes: {
       return adapter.removeMany(action.payload.ids, state);
-    }
-
-    case NoteActionTypes.LoadNotes: {
-      return adapter.addAll(action.payload.notes, state);
     }
 
     case NoteActionTypes.ClearNotes: {

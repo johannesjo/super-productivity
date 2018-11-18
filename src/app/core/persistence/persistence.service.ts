@@ -101,7 +101,6 @@ export class PersistenceService {
     return loadFromLs(this._makeProjectKey(projectId, LS_TASK_ATTACHMENT_STATE));
   }
 
-  // LS_NOTE_STATE
   saveNotesForProject(projectId, noteState: NoteState) {
     saveToLsWithLastActive(this._makeProjectKey(projectId, LS_NOTE_STATE), noteState);
   }
@@ -118,14 +117,6 @@ export class PersistenceService {
 
   saveGlobalConfig(globalConfig: GlobalConfig) {
     saveToLsWithLastActive(LS_GLOBAL_CFG, globalConfig);
-  }
-
-  loadLayout(): LayoutState {
-    return loadFromLs(LS_LAYOUT);
-  }
-
-  saveLayout(layoutState: LayoutState) {
-    saveToLs(LS_LAYOUT, layoutState);
   }
 
   // BACKUP AND SYNC RELATED

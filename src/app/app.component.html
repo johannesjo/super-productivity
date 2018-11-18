@@ -1,4 +1,4 @@
-<main-header [drawer]="drawer"></main-header>
+<main-header></main-header>
 <bookmark-bar *ngIf="bookmarkService.isShowBookmarks$|async"
               [@expand]></bookmark-bar>
 <add-task-bar class="global"
@@ -11,6 +11,7 @@
     <router-outlet #o="outlet"></router-outlet>
   </div>
   <mat-drawer #drawer
+              [opened]="noteService.isShowNotes$|async"
               position="end"
               mode="side">
     <notes></notes>

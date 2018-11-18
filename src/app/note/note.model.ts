@@ -1,7 +1,8 @@
 export interface Note {
   id: string;
   title: string;
-  note: string;
+  content: string;
   backgroundColor?: string;
-
+  created: number;
+  modified: number;
 }

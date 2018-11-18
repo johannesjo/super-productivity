@@ -19,6 +19,7 @@ import { BookmarkService } from './bookmark/bookmark.service';
 import { slideAnimation } from './ui/animations/slide.ani';
 import { expandAnimation } from './ui/animations/expand.ani';
 import { warpRouteAnimation } from './ui/animations/warp-route';
+import { NoteService } from './note/note.service';
 
 @Component({
   selector: 'app-root',
@@ -61,6 +62,7 @@ export class AppComponent implements OnInit {
     private _el: ElementRef,
     public readonly layoutService: LayoutService,
     public readonly bookmarkService: BookmarkService,
+    public readonly noteService: NoteService,
   ) {
     this._matIconRegistry.addSvgIcon(
       `sp`,

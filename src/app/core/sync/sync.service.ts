@@ -5,6 +5,8 @@ import { SnackService } from '../snack/snack.service';
 import { ProjectService } from '../../project/project.service';
 import { ConfigService } from '../config/config.service';
 import { TaskService } from '../../tasks/task.service';
+import { BookmarkService } from '../../bookmark/bookmark.service';
+import { NoteService } from '../../note/note.service';
 
 // TODO some of this can be done in a background script
 
@@ -18,6 +20,8 @@ export class SyncService {
     private _projectService: ProjectService,
     private _configService: ConfigService,
     private _taskService: TaskService,
+    private _bookmarkService: BookmarkService,
+    private _noteService: NoteService,
   ) {
   }
 
@@ -40,6 +44,8 @@ export class SyncService {
         this._configService.load();
         this._projectService.load();
         this._taskService.loadStateForProject(data.project.currentId);
+        this._bookmarkService.loadStateForProject(data.project.currentId);
+        this._noteService.loadStateForProject(data.project.currentId);
       } catch (e) {
         this._snackService.open({type: 'ERROR', message: 'Something went wrong while importing the data. Falling back to local backup'});
         console.error(e);

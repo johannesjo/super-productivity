@@ -44,8 +44,8 @@
     </button>
 
     <button mat-mini-fab
-            (click)="drawer.toggle()"
-            [color]="drawer.opened ? 'accent' : null">
+            (click)="toggleShowNotes()"
+            [color]="(noteService.isShowNotes$|async) ? 'accent' : null">
       <mat-icon>note</mat-icon>
     </button>
 

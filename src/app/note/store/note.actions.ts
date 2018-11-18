@@ -1,9 +1,12 @@
 import { Action } from '@ngrx/store';
 import { Update } from '@ngrx/entity';
 import { Note } from '../note.model';
+import { NoteState } from './note.reducer';
 
 export enum NoteActionTypes {
-  LoadNotes = '[Note] Load Notes',
+  LoadNoteState = '[Note] Load Note State',
+  ToggleShowNotes = '[Note] ToggleShow Notes',
+
   AddNote = '[Note] Add Note',
   UpsertNote = '[Note] Upsert Note',
   AddNotes = '[Note] Add Notes',
@@ -15,10 +18,14 @@ export enum NoteActionTypes {
   ClearNotes = '[Note] Clear Notes'
 }
 
-export class LoadNotes implements Action {
-  readonly type = NoteActionTypes.LoadNotes;
+export class LoadNoteState implements Action {
+  readonly type = NoteActionTypes.LoadNoteState;
 
-  constructor(public payload: { notes: Note[] }) {}
+  constructor(public payload: { state: NoteState }) {}
+}
+
+export class ToggleShowNotes implements Action {
+  readonly type = NoteActionTypes.ToggleShowNotes;
 }
 
 export class AddNote implements Action {
@@ -74,7 +81,8 @@ export class ClearNotes implements Action {
 }
 
 export type NoteActions =
- LoadNotes
+ LoadNoteState
+ | ToggleShowNotes
  | AddNote
  | UpsertNote
  | AddNotes

@@ -20,6 +20,6 @@ export class NotesComponent implements OnInit {
   }
 
   addNote() {
-    this.noteService.addNote();
+    this.noteService.add();
   }
 }

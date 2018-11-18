@@ -5,6 +5,7 @@ import { EntityState } from '@ngrx/entity';
 import { Task } from '../../tasks/task.model';
 import { IssueEntityMap } from '../../issue/issue';
 import { BookmarkState } from '../../bookmark/store/bookmark.reducer';
+import { NoteState } from '../../note/store/note.reducer';
 
 
 // NOTE: [key:string] always refers to projectId
@@ -12,6 +13,9 @@ export interface AppDataComplete {
   lastActiveTime: string;
   project: ProjectState;
   globalConfig: GlobalConfig;
+  note?: {
+    [key: string]: NoteState;
+  };
   bookmark?: {
     [key: string]: BookmarkState;
   };

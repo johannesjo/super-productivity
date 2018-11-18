@@ -9,6 +9,7 @@ import { TaskService } from '../../tasks/task.service';
 import { JiraIssueService } from '../../issue/jira/jira-issue/jira-issue.service';
 import { BookmarkService } from '../../bookmark/bookmark.service';
 import { AttachmentService } from '../../tasks/attachment/attachment.service';
+import { NoteService } from '../../note/note.service';
 
 @Injectable()
 export class ProjectEffects {
@@ -47,6 +48,7 @@ export class ProjectEffects {
     private _taskService: TaskService,
     private _jiraIssueService: JiraIssueService,
     private _bookmarkService: BookmarkService,
+    private _noteService: NoteService,
     private _attachmentService: AttachmentService,
   ) {
   }
@@ -58,6 +60,7 @@ export class ProjectEffects {
   private _reloadRelatedStates([action, projectId]) {
     this._taskService.loadStateForProject(projectId);
     this._jiraIssueService.loadStateForProject(projectId);
+    this._noteService.loadStateForProject(projectId);
     this._bookmarkService.loadStateForProject(projectId);
     this._attachmentService.loadStateForProject(projectId);
   }
