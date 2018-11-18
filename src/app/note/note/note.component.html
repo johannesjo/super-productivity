@@ -20,7 +20,7 @@
               (click)="toggleLock()">
         <mat-icon *ngIf="note.isLock">lock</mat-icon>
         <mat-icon *ngIf="!note.isLock">lock_open</mat-icon>
-        {{note.isLock? 'Don`t parse markdown' : 'Parse markdown'}}
+        {{note.isLock? 'Enable markdown parse ' : 'Disable markdown parsing'}}
       </button>
       <button mat-menu-item
               (click)="removeNote()">

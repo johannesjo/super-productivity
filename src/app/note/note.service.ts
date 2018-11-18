@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Note } from './note.model';
 import { select, Store } from '@ngrx/store';
-import { AddNote, DeleteNote, LoadNoteState, ToggleShowNotes, UpdateNote, UpdateNoteOrder } from './store/note.actions';
+import { AddNote, DeleteNote, HideNotes, LoadNoteState, ToggleShowNotes, UpdateNote, UpdateNoteOrder } from './store/note.actions';
 import shortid from 'shortid';
 import { initialNoteState, selectAllNotes, selectIsShowNotes } from './store/note.reducer';
 import { PersistenceService } from '../core/persistence/persistence.service';
@@ -22,6 +22,10 @@ export class NoteService {
 
   public toggleShow() {
     this._store$.dispatch(new ToggleShowNotes());
+  }
+
+  public hide() {
+    this._store$.dispatch(new HideNotes());
   }
 
   public loadStateForProject(projectId) {

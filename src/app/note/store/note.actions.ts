@@ -6,6 +6,7 @@ import { NoteState } from './note.reducer';
 export enum NoteActionTypes {
   LoadNoteState = '[Note] Load Note State',
   ToggleShowNotes = '[Note] ToggleShow Notes',
+  HideNotes = '[Note] Hide Notes',
 
   UpdateNoteOrder = '[Note] Update Note Order',
   AddNote = '[Note] Add Note',
@@ -28,6 +29,10 @@ export class LoadNoteState implements Action {
 
 export class ToggleShowNotes implements Action {
   readonly type = NoteActionTypes.ToggleShowNotes;
+}
+
+export class HideNotes implements Action {
+  readonly type = NoteActionTypes.HideNotes;
 }
 
 export class UpdateNoteOrder implements Action {
@@ -100,6 +105,7 @@ export class ClearNotes implements Action {
 export type NoteActions =
   LoadNoteState
   | ToggleShowNotes
+  | HideNotes
   | UpdateNoteOrder
   | AddNote
   | UpsertNote
