@@ -9,8 +9,9 @@ import { ChangeDetectionStrategy, Component, ElementRef, EventEmitter, Input, On
 })
 export class InlineMarkdownComponent implements OnInit {
   @Input() model: string;
+  @Input() isLock = false;
   @Output() onChanged: EventEmitter<any> = new EventEmitter();
-  isShowEdit: boolean = false;
+  isShowEdit = false;
   modelCopy: string;
   el: HTMLElement;
   textareaEl: HTMLTextAreaElement;
@@ -20,7 +21,11 @@ export class InlineMarkdownComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.resizeToFit();
+    if (this.isLock) {
+      this.toggleShowEdit();
+    } else {
+      this.resizeParsedToFit();
+    }
     // if (IS_ELECTRON) {
     //   waitForMarkedTimeOut = $timeout(() => {
     //     makeLinksWorkForElectron();
@@ -32,11 +37,11 @@ export class InlineMarkdownComponent implements OnInit {
     if ($event.keyCode === 10 && $event.ctrlKey) {
       this.untoggleShowEdit();
     }
-  };
+  }
 
-  toggleShowEdit($event) {
+  toggleShowEdit($event?) {
     // check if anchor link was clicked
-    if ($event.target.tagName !== 'A') {
+    if (!$event || $event.target.tagName !== 'A') {
       this.isShowEdit = true;
       this.modelCopy = this.model || '';
 
@@ -46,15 +51,18 @@ export class InlineMarkdownComponent implements OnInit {
 
         this.textareaEl.value = this.modelCopy;
         this.textareaEl.focus();
+        this.resizeTextareaToFit();
       });
     }
   }
 
   untoggleShowEdit() {
-    this.modelCopy = this.textareaEl.value;
-    this.isShowEdit = false;
     // makeLinksWorkForElectron();
-    this.resizeToFit();
+    if (!this.isLock) {
+      this.resizeParsedToFit();
+      this.isShowEdit = false;
+    }
+    this.modelCopy = this.textareaEl.value;
 
     if (this.modelCopy !== this.model) {
       this.model = this.modelCopy;
@@ -64,7 +72,15 @@ export class InlineMarkdownComponent implements OnInit {
   }
 
 
-  resizeToFit() {
+  resizeTextareaToFit() {
+    const wrapperEl: HTMLElement = this.el.querySelectorAll('div')[0];
+    this.textareaEl.style.height = 'auto';
+    this.textareaEl.style.height = this.textareaEl.scrollHeight + 'px';
+    wrapperEl.style.height = this.textareaEl.offsetHeight + 'px';
+  }
+
+
+  resizeParsedToFit() {
     setTimeout(() => {
       const previewEl: any = this.el.querySelectorAll('.markdown-parsed')[0];
       const wrapperEl: HTMLElement = this.el.querySelectorAll('div')[0];
@@ -73,7 +89,7 @@ export class InlineMarkdownComponent implements OnInit {
       wrapperEl.style.height = previewEl.offsetHeight + 'px';
       previewEl.style.height = '';
     });
-  };
+  }
 
 
   // function makeLinksWorkForElectron() {

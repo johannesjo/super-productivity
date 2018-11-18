@@ -17,6 +17,10 @@ export class NoteComponent implements OnInit {
   ngOnInit() {
   }
 
+  toggleLock() {
+    this._noteService.update(this.note.id, {isLock: !this.note.isLock});
+  }
+
   updateContent(newVal) {
     this._noteService.update(this.note.id, {content: newVal.newVal});
   }

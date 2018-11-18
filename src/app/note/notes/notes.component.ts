@@ -29,7 +29,7 @@ export class NotesComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    this.subs.unsubscribe();
+    this._subs.unsubscribe();
   }
 
   addNote() {

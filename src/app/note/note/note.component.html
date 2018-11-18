@@ -1,6 +1,7 @@
 <div class="note">
   <div class="content">
     <inline-markdown (onChanged)="updateContent($event)"
+                     [isLock]="note.isLock"
                      [model]="note.content"></inline-markdown>
   </div>
 
@@ -14,6 +15,12 @@
       <button mat-menu-item>
         <mat-icon>schedule</mat-icon>
         Add reminder (not implemented)
+      </button>
+      <button mat-menu-item
+              (click)="toggleLock()">
+        <mat-icon *ngIf="note.isLock">lock</mat-icon>
+        <mat-icon *ngIf="!note.isLock">lock_open</mat-icon>
+        {{note.isLock? 'Don`t parse markdown' : 'Parse markdown'}}
       </button>
       <button mat-menu-item
               (click)="removeNote()">
