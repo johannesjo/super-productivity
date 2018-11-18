@@ -6,6 +6,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { IPC_REGISTER_GLOBAL_SHORTCUT_EVENT } from '../../../ipc-events.const';
 import { ElectronService } from 'ngx-electron';
 import { LayoutService } from '../layout/layout.service';
+import { NoteService } from '../../note/note.service';
 
 
 @Injectable({
@@ -19,6 +20,7 @@ export class ShortcutService {
     private _router: Router,
     private _electronService: ElectronService,
     private _layoutService: LayoutService,
+    private _noteService: NoteService,
     private _activatedRoute: ActivatedRoute,
   ) {
     //   // Register electron shortcut(s)
@@ -85,6 +87,10 @@ export class ShortcutService {
     }
     if (checkKeyCombo(ev, keys.addNewTask)) {
       this._layoutService.toggleAddTaskBar();
+      ev.preventDefault();
+    }
+    if (checkKeyCombo(ev, keys.openProjectNotes)) {
+      this._noteService.toggleShow();
       ev.preventDefault();
     }
 

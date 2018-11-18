@@ -1,10 +1,12 @@
 <div class="markdown-wrapper">
   <textarea *ngIf="isShowEdit"
+            tabindex="2"
             (blur)="untoggleShowEdit()"
             class="mat-body-1 markdown-unparsed"
             rows="5"></textarea>
 
   <div markdown
+       tabindex="2"
        [data]="model"
        [hidden]="isShowEdit"
        (click)="toggleShowEdit($event)"
