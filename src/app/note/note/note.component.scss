@@ -7,6 +7,7 @@
   position: relative;
   border-radius: $card-border-radius;
   box-shadow: $shadow-bottom-boxed;
+  transition: $transition-standard;
 
   @include dark-theme {
     background: $standardNoteBgDark;

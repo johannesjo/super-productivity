@@ -44,6 +44,8 @@
     </button>
 
     <button mat-mini-fab
+            matBadgeColor=""
+            [matBadge]="(noteService.notes$|async).length"
             (click)="toggleShowNotes()"
             [color]="(noteService.isShowNotes$|async) ? 'accent' : null">
       <mat-icon>note</mat-icon>
