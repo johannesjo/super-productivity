@@ -16,6 +16,9 @@ export class BookmarkEffects {
         BookmarkActionTypes.AddBookmark,
         BookmarkActionTypes.UpdateBookmark,
         BookmarkActionTypes.DeleteBookmark,
+        BookmarkActionTypes.ShowBookmarks,
+        BookmarkActionTypes.HideBookmarks,
+        BookmarkActionTypes.ToggleBookmarks,
       ),
       withLatestFrom(
         this._store$.pipe(select(selectCurrentProjectId)),
