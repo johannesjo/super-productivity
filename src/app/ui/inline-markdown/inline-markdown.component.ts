@@ -1,16 +1,20 @@
 import { ChangeDetectionStrategy, Component, ElementRef, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { fadeAnimation } from '../animations/fade.ani';
 
 
 @Component({
   selector: 'inline-markdown',
   templateUrl: './inline-markdown.component.html',
   styleUrls: ['./inline-markdown.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  animations: [fadeAnimation]
 })
 export class InlineMarkdownComponent implements OnInit {
   @Input() model: string;
   @Input() isLock = false;
   @Output() onChanged: EventEmitter<any> = new EventEmitter();
+  @Output() focus: EventEmitter<Event> = new EventEmitter();
+  @Output() blur: EventEmitter<Event> = new EventEmitter();
   isShowEdit = false;
   modelCopy: string;
   el: HTMLElement;
@@ -91,6 +95,14 @@ export class InlineMarkdownComponent implements OnInit {
     });
   }
 
+  setFocus(ev: Event) {
+    this.focus.emit(ev);
+  }
+
+
+  setBlur(ev: Event) {
+    this.blur.emit(ev);
+  }
 
   // function makeLinksWorkForElectron() {
   //   if (IS_ELECTRON) {

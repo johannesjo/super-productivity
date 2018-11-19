@@ -8,11 +8,19 @@
   border-radius: $card-border-radius;
   box-shadow: $shadow-bottom-boxed;
   transition: $transition-standard;
+  transition-property: transform;
 
   @include dark-theme {
     background: $standardNoteBgDark;
     color: $standardNoteFgDark;
     border-color: #333333;
+  }
+
+  &.isFocused {
+    transform: scale(1.04);
+    position: relative;
+    z-index: 4;
+    outline: 2px dashed $c-accent;
   }
 }
 

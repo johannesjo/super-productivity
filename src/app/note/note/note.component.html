@@ -1,6 +1,9 @@
-<div class="note">
+<div class="note"
+     [class.isFocused]="isFocus">
   <div class="content">
     <inline-markdown (onChanged)="updateContent($event)"
+                     (focus)="isFocus=true"
+                     (blur)="isFocus=false"
                      [isLock]="note.isLock"
                      [model]="note.content"></inline-markdown>
   </div>

@@ -10,6 +10,7 @@ import { NoteService } from '../note.service';
 })
 export class NoteComponent implements OnInit {
   @Input() note: Note;
+  isFocus = false;
 
   constructor(private _noteService: NoteService) {
   }

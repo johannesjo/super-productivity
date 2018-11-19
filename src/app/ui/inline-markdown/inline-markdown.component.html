@@ -1,8 +1,10 @@
 <div class="markdown-wrapper">
   <textarea *ngIf="isShowEdit"
             tabindex="1"
+            [@fade]
+            (focus)="setFocus($event)"
             (input)="resizeTextareaToFit()"
-            (blur)="untoggleShowEdit()"
+            (blur)="untoggleShowEdit(); setBlur($event)"
             class="mat-body-1 markdown-unparsed"
             rows="5"></textarea>
 
