@@ -55,15 +55,20 @@ export class EnlargeImgDirective {
 
   private showImg() {
     const src = this.enlargeImg || this.imageEl.getAttribute('src');
+
+    const img = new Image();
+    img.src = src;
+    img.onload = () => {
+      this.setCoordsForImageAni();
+      setTimeout(() => {
+        this._renderer.addClass(this.enlargedImgWrapperEl, 'ani-enter');
+      }, 10);
+    };
+
     this.enlargedImgWrapperEl = this.htmlToElement(`<div class="enlarged-image-wrapper"></div>`);
     this.newImageEl = this.htmlToElement(`<img src="${src}" class="enlarged-image">`);
     this._renderer.appendChild(this.enlargedImgWrapperEl, this.newImageEl);
     this._renderer.appendChild(this.lightboxParentEl, this.enlargedImgWrapperEl);
-    this.setCoordsForImageAni();
-
-    setTimeout(() => {
-      this._renderer.addClass(this.enlargedImgWrapperEl, 'ani-enter');
-    }, 10);
 
     this.enlargedImgWrapperEl.addEventListener('click', () => {
       this.hideImg();
