@@ -9,7 +9,7 @@ export const DEFAULT_JIRA_CFG: JiraCfg = {
   password: null,
 
   isAutoPollTickets: true,
-  searchJqlQuery: 'assignee = currentUser() AND resolution = Unresolved ORDER BY updatedDate DESC',
+  searchJqlQuery: 'resolution = Unresolved ORDER BY updatedDate DESC',
 
   isAutoAddToBacklog: true,
   autoAddBacklogJqlQuery: 'assignee = currentUser() AND sprint in openSprints() AND resolution = Unresolved ORDER BY updatedDate DESC',

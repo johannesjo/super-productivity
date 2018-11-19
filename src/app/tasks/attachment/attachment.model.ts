@@ -4,7 +4,8 @@ export type AttachmentType = DropPasteInputType;
 
 export interface AttachmentCopy extends DropPasteInput {
   id: string;
-  taskId: string;
+  taskId?: string;
+  originalImgPath?: string;
 }
 
 export type Attachment = Readonly<AttachmentCopy>;

@@ -12,6 +12,7 @@ import { DialogEditAttachmentComponent } from '../dialog-edit-attachment/dialog-
 })
 export class AttachmentListComponent implements OnInit {
   @Input() attachments: Attachment[];
+  @Input() isDisableControls = false;
 
   constructor(
     public readonly attachmentService: AttachmentService,

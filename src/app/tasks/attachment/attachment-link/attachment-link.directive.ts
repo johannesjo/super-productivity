@@ -44,6 +44,11 @@ export class AttachmentLinkDirective {
   }
 
   private _openExternalUrl(rawUrl) {
+    console.log(rawUrl);
+    if (!rawUrl) {
+      return;
+    }
+
     // try to account for jira(?) adding a second http to the url
     const url = rawUrl
       .replace('https://https://', 'https://')

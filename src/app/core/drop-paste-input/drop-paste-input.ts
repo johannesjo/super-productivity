@@ -7,7 +7,7 @@ export interface DropPasteInput {
   icon: string;
 }
 
-enum Icons {
+export enum DropPasteIcons {
   FILE = 'insert_drive_file',
   LINK = 'bookmark',
   IMG = 'image',
@@ -54,7 +54,7 @@ const _createTextBookmark = (text): null | DropPasteInput => {
         title: _baseName(text),
         path: path,
         type: isImage ? 'IMG' : 'LINK',
-        icon: isImage ? Icons.IMG : Icons.LINK,
+        icon: isImage ? DropPasteIcons.IMG : DropPasteIcons.LINK,
       };
     }
   }
@@ -68,7 +68,7 @@ const _createFileBookmark = (dataTransfer): null | DropPasteInput => {
       title: _baseName(path),
       path: path,
       type: 'FILE',
-      icon: Icons.FILE,
+      icon: DropPasteIcons.FILE,
     };
   }
   return null;

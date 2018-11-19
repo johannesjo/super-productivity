@@ -20,11 +20,12 @@
       <ng-container *ngIf="attachment.type==='IMG'">
         <img [src]="attachment.path"
              [isHideEl]="true"
-             enlargeImg>
+             [enlargeImg]="attachment.originalImgPath">
       </ng-container>
     </a>
 
-    <div class="controls">
+    <div class="controls"
+         *ngIf="!isDisableControls">
       <button class="edit-btn"
               mat-mini-fab=""
               color="primary"
@@ -42,3 +43,4 @@
     </div>
   </li>
 </ul>
+<p *ngIf="!attachments.length">There are currently no attachments</p>

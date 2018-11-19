@@ -42,6 +42,9 @@ export class JiraIssueEffects {
         JiraIssueActionTypes.AddJiraIssue,
         JiraIssueActionTypes.DeleteJiraIssue,
         JiraIssueActionTypes.UpdateJiraIssue,
+        JiraIssueActionTypes.AddJiraIssues,
+        JiraIssueActionTypes.DeleteJiraIssues,
+        JiraIssueActionTypes.UpsertJiraIssue,
       ),
       withLatestFrom(
         this._store$.pipe(select(selectCurrentProjectId)),

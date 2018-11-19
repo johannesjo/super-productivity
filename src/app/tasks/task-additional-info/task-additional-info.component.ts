@@ -33,8 +33,10 @@ export class TaskAdditionalInfoComponent implements AfterViewInit {
       this._issueContentRef.instance.task = val;
     }
     this.localAttachments$ = this.attachmentService.getByIds(this.taskData.attachmentIds);
+    this.issueAttachments = this._issueService.getMappedAttachments(this.taskData.issueType, this.taskData.issueData);
   }
 
+  issueAttachments: Attachment[];
   localAttachments$: Observable<Attachment[]>;
   taskData: TaskWithSubTasks;
   @Input() selectedIndex: number;

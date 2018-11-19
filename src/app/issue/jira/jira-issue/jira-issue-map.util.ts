@@ -1,6 +1,7 @@
 import { JiraAttachment, JiraAuthor, JiraComment, JiraIssue, } from './jira-issue.model';
 import { JiraIssueOriginal, JiraOriginalAttachment, JiraOriginalAuthor, JiraOriginalComment } from '../jira-api-responses';
 import { JiraCfg } from '../jira';
+import { DropPasteIcons, DropPasteInputType } from '../../../core/drop-paste-input/drop-paste-input';
 
 const matchProtocolRegEx = /(^[^:]+):\/\//;
 
@@ -69,3 +70,26 @@ export const mapComments = (comment: JiraOriginalComment): JiraComment => {
   });
 };
 
+export const mapJiraAttachmentToAttachment = (jiraAttachment: JiraAttachment) => {
+  const type = mapAttachmentType(jiraAttachment.mimeType);
+  return {
+    title: jiraAttachment.filename,
+    path: jiraAttachment.thumbnail || jiraAttachment.content,
+    originalImgPath: jiraAttachment.content,
+    type,
+    icon: DropPasteIcons[type]
+  };
+};
+
+const mapAttachmentType = (mimeType: string): DropPasteInputType => {
+  switch (mimeType) {
+    case 'image/gif':
+    case 'image/jpeg':
+    case 'image/png':
+      return 'IMG';
+
+    default:
+      return 'LINK';
+  }
+
+};
