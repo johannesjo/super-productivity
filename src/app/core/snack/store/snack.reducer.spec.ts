@@ -1,4 +1,4 @@
-import { reducer, initialState } from './snack.reducer';
+import { initialState, reducer } from './snack.reducer';
 
 describe('Snack Reducer', () => {
   describe('unknown action', () => {

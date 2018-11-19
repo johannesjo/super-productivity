@@ -16,6 +16,12 @@ export class BookmarkBarComponent {
   isDragOver = false;
   dragEnterTarget: HTMLElement;
 
+  constructor(
+    public readonly bookmarkService: BookmarkService,
+    private readonly _matDialog: MatDialog,
+  ) {
+  }
+
   @HostListener('dragenter', ['$event']) onDragEnter(ev: Event) {
     this.dragEnterTarget = ev.target as HTMLElement;
     ev.preventDefault();
@@ -32,12 +38,6 @@ export class BookmarkBarComponent {
   @HostListener('drop', ['$event']) onDrop(ev: Event) {
     this.bookmarkService.createFromDrop(ev);
     this.isDragOver = false;
-  }
-
-  constructor(
-    public readonly bookmarkService: BookmarkService,
-    private readonly _matDialog: MatDialog,
-  ) {
   }
 
   openEditDialog(bookmark?: Bookmark) {

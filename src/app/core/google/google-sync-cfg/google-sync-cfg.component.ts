@@ -4,7 +4,7 @@ import { ConfigService } from '../../config/config.service';
 import { GoogleDriveSyncService } from '../google-drive-sync.service';
 import { SnackService } from '../../snack/snack.service';
 import { GoogleDriveSyncConfig } from '../../config/config.model';
-import { Observable, Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { expandFadeAnimation } from '../../../ui/animations/expand.ani';
 
 @Component({

@@ -39,16 +39,25 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   // TODO also persist to task
   additionalTabsIndex = 0;
   isDragOver: boolean;
-
+  @HostBinding('class.isCurrent') isCurrent = false;
+  @ViewChild('editOnClickEl') editOnClickEl: ElementRef;
+  @HostBinding('tabindex') tabIndex = 1;
   private _dragEnterTarget: HTMLElement;
   private _currentFocusId: string;
-
-  @HostBinding('class.isCurrent') isCurrent = false;
-
-  @ViewChild('editOnClickEl') editOnClickEl: ElementRef;
-
-  @HostBinding('tabindex') tabIndex = 1;
   private _destroy$: Subject<boolean> = new Subject<boolean>();
+
+  constructor(
+    private readonly _taskService: TaskService,
+    private readonly _matDialog: MatDialog,
+    private readonly _configService: ConfigService,
+    private readonly _attachmentService: AttachmentService,
+    private readonly _elementRef: ElementRef,
+  ) {
+  }
+
+  public get progress() {
+    return this.task && this.task.timeEstimate && (this.task.timeSpent / this.task.timeEstimate) * 100;
+  }
 
   @HostBinding('class.is-done')
   private get _isDone() {
@@ -103,19 +112,6 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     this._attachmentService.createFromDrop(ev, this.task.id);
     ev.stopPropagation();
     this.isDragOver = false;
-  }
-
-  constructor(
-    private readonly _taskService: TaskService,
-    private readonly _matDialog: MatDialog,
-    private readonly _configService: ConfigService,
-    private readonly _attachmentService: AttachmentService,
-    private readonly _elementRef: ElementRef,
-  ) {
-  }
-
-  public get progress() {
-    return this.task && this.task.timeEstimate && (this.task.timeSpent / this.task.timeEstimate) * 100;
   }
 
   ngOnInit() {

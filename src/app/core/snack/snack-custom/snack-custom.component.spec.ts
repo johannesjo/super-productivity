@@ -8,9 +8,9 @@ describe('SnackCustomComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ SnackCustomComponent ]
+      declarations: [SnackCustomComponent]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

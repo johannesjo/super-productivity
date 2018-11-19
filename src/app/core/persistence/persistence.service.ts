@@ -5,7 +5,6 @@ import {
   LS_GLOBAL_CFG,
   LS_ISSUE_STATE,
   LS_LAST_ACTIVE,
-  LS_LAYOUT,
   LS_NOTE_STATE,
   LS_PROJECT_META_LIST,
   LS_PROJECT_PREFIX,
@@ -14,7 +13,7 @@ import {
   LS_TASK_STATE
 } from './ls-keys.const';
 import { GlobalConfig } from '../config/config.model';
-import { loadFromLs, saveToLs, saveToLsWithLastActive } from './local-storage';
+import { loadFromLs, saveToLsWithLastActive } from './local-storage';
 import { IssueProviderKey } from '../../issue/issue';
 import { ProjectState } from '../../project/store/project.reducer';
 import { TaskState } from '../../tasks/store/task.reducer';
@@ -24,7 +23,6 @@ import { Task } from '../../tasks/task.model';
 import { AppDataComplete } from '../sync/sync.model';
 import { BookmarkState } from '../../bookmark/store/bookmark.reducer';
 import { AttachmentState } from '../../tasks/attachment/store/attachment.reducer';
-import { LayoutState } from '../layout/store/layout.reducer';
 import { NoteState } from '../../note/store/note.reducer';
 
 @Injectable({

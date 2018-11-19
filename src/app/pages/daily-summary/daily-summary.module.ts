@@ -18,4 +18,5 @@ import { DialogSimpleTaskSummaryModule } from '../../core/dialog-simple-task-sum
   ],
   declarations: [DailySummaryComponent]
 })
-export class DailySummaryModule { }
+export class DailySummaryModule {
+}

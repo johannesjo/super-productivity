@@ -8,9 +8,9 @@ describe('WorklogAndCalendarComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ WorklogAndCalendarComponent ]
+      declarations: [WorklogAndCalendarComponent]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

@@ -13,8 +13,6 @@ import { JIRA_POLL_INTERVAL } from '../../jira.const';
 
 @Injectable()
 export class JiraIssueEffects {
-  private _pollingIntervalId: number;
-
   @Effect({dispatch: false}) issuePolling$: any = this._actions$
     .pipe(
       ofType(
@@ -34,7 +32,6 @@ export class JiraIssueEffects {
       // TODO should be done in a more modern way via switchmap and timer
       tap(this._reInitIssuePolling.bind(this))
     );
-
   @Effect({dispatch: false}) syncIssueStateToLs$: any = this._actions$
     .pipe(
       ofType(
@@ -52,6 +49,7 @@ export class JiraIssueEffects {
       ),
       tap(this._saveToLs.bind(this))
     );
+  private _pollingIntervalId: number;
 
   constructor(private readonly _actions$: Actions,
               private readonly _store$: Store<any>,

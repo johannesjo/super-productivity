@@ -54,7 +54,6 @@ import { FormlyMatToggleModule } from '@ngx-formly/material/toggle';
 import { InputDurationFormlyComponent } from './duration/input-duration-formly/input-duration-formly.component';
 import { EnlargeImgDirective } from './enlarge-img/enlarge-img.directive';
 import { DragulaModule } from 'ng2-dragula';
-import { CdkTextareaAutosize } from '@angular/cdk/text-field';
 
 @NgModule({
   imports: [

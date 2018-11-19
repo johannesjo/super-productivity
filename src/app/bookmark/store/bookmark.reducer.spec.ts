@@ -1,4 +1,4 @@
-import { reducer, initialState } from './bookmark.reducer';
+import { initialState, reducer } from './bookmark.reducer';
 
 describe('Bookmark Reducer', () => {
   describe('unknown action', () => {

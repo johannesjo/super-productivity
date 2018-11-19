@@ -8,9 +8,9 @@ describe('DialogConfirmDriveSyncLoadComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ DialogConfirmDriveSyncLoadComponent ]
+      declarations: [DialogConfirmDriveSyncLoadComponent]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

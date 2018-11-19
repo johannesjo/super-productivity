@@ -9,6 +9,9 @@ import { ChangeDetectionStrategy, Component, ElementRef, HostBinding, Input } fr
 export class ProgressBarComponent {
   @HostBinding('class') cssClass = 'bg-primary';
 
+  constructor(private _elRef: ElementRef) {
+  }
+
   @Input() set progress(_value) {
     let val;
     if (_value > 100) {
@@ -23,8 +26,5 @@ export class ProgressBarComponent {
     } else {
       this._elRef.nativeElement.style.visibility = 'hidden';
     }
-  }
-
-  constructor(private _elRef: ElementRef) {
   }
 }

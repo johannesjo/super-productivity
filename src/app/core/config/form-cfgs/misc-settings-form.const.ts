@@ -81,7 +81,7 @@ export const MISC_SETTINGS_FORM_CFG = {
       templateOptions: {
         label: 'Trigger take a break notification after X working without one',
       },
-    },   {
+    }, {
       key: 'takeABreakMessage',
       type: 'textarea',
       hideExpression: '!model.isTakeABreakEnabled',

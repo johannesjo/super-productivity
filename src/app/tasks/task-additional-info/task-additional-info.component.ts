@@ -23,6 +23,23 @@ import { Attachment } from '../attachment/attachment.model';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TaskAdditionalInfoComponent implements AfterViewInit {
+  issueAttachments: Attachment[];
+  localAttachments$: Observable<Attachment[]>;
+  taskData: TaskWithSubTasks;
+  @Input() selectedIndex: number;
+  @Output() onTaskNotesChanged: EventEmitter<string> = new EventEmitter();
+  @ViewChild('issueHeader', {read: ViewContainerRef}) issueHeaderEl: ViewContainerRef;
+  @ViewChild('issueContent', {read: ViewContainerRef}) issueContentEl: ViewContainerRef;
+  private _issueHeaderRef;
+  private _issueContentRef;
+
+  constructor(
+    private _resolver: ComponentFactoryResolver,
+    private _issueService: IssueService,
+    public attachmentService: AttachmentService,
+  ) {
+  }
+
   @Input() set task(val: TaskWithSubTasks) {
     this.taskData = val;
 
@@ -34,27 +51,6 @@ export class TaskAdditionalInfoComponent implements AfterViewInit {
     }
     this.localAttachments$ = this.attachmentService.getByIds(this.taskData.attachmentIds);
     this.issueAttachments = this._issueService.getMappedAttachments(this.taskData.issueType, this.taskData.issueData);
-  }
-
-  issueAttachments: Attachment[];
-  localAttachments$: Observable<Attachment[]>;
-  taskData: TaskWithSubTasks;
-  @Input() selectedIndex: number;
-
-
-  @Output() onTaskNotesChanged: EventEmitter<string> = new EventEmitter();
-  @ViewChild('issueHeader', {read: ViewContainerRef}) issueHeaderEl: ViewContainerRef;
-  @ViewChild('issueContent', {read: ViewContainerRef}) issueContentEl: ViewContainerRef;
-
-  private _issueHeaderRef;
-  private _issueContentRef;
-
-
-  constructor(
-    private _resolver: ComponentFactoryResolver,
-    private _issueService: IssueService,
-    public attachmentService: AttachmentService,
-  ) {
   }
 
   ngAfterViewInit() {

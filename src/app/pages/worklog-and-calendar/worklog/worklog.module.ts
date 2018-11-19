@@ -13,4 +13,5 @@ import { UiModule } from '../../../ui/ui.module';
   declarations: [WorklogComponent],
   exports: [WorklogComponent],
 })
-export class WorklogModule { }
+export class WorklogModule {
+}

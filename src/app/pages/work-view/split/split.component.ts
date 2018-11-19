@@ -19,8 +19,8 @@ export class SplitComponent implements OnInit {
 
   pos: number;
   subscription: Subscription;
-  private _isDrag = false;
   @ViewChild('buttonEl') buttonEl;
+  private _isDrag = false;
 
   constructor(private _renderer: Renderer2) {
   }

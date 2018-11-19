@@ -24,6 +24,13 @@ export class JiraCfgStepperComponent implements OnInit {
   public isTestCredentialsSuccess = false;
   public user: JiraOriginalUser;
   public jiraCfg: JiraCfg;
+  @Output() onSaveCfg: EventEmitter<JiraCfg> = new EventEmitter();
+
+  constructor(
+    private _jiraApiService: JiraApiService,
+    private _changeDetectorRef: ChangeDetectorRef,
+  ) {
+  }
 
   @Input() set cfg(cfg: JiraCfg) {
     if (cfg) {
@@ -31,14 +38,6 @@ export class JiraCfgStepperComponent implements OnInit {
     } else {
       this.jiraCfg = Object.assign({}, DEFAULT_JIRA_CFG);
     }
-  }
-
-  @Output() onSaveCfg: EventEmitter<JiraCfg> = new EventEmitter();
-
-  constructor(
-    private _jiraApiService: JiraApiService,
-    private _changeDetectorRef: ChangeDetectorRef,
-  ) {
   }
 
   ngOnInit() {

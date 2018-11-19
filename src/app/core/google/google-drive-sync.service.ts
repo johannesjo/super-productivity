@@ -28,6 +28,10 @@ export class GoogleDriveSyncService {
   ) {
   }
 
+  get config(): GoogleDriveSyncConfig {
+    return this._configService.cfg && this._configService.cfg.googleDriveSync;
+  }
+
   init() {
     if (this.config.isEnabled && this.config.isAutoLogin) {
       this._googleApiService.login().then(() => {
@@ -40,10 +44,6 @@ export class GoogleDriveSyncService {
         }
       });
     }
-  }
-
-  get config(): GoogleDriveSyncConfig {
-    return this._configService.cfg && this._configService.cfg.googleDriveSync;
   }
 
   updateConfig(data: Partial<GoogleDriveSyncConfig>) {

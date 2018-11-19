@@ -8,9 +8,9 @@ describe('WorklogComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ WorklogComponent ]
+      declarations: [WorklogComponent]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

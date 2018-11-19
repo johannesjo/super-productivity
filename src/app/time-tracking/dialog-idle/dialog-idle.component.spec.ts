@@ -8,9 +8,9 @@ describe('DialogIdleComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ DialogIdleComponent ]
+      declarations: [DialogIdleComponent]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

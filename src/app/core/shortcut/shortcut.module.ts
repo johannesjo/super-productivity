@@ -9,4 +9,5 @@ import { RouterModule } from '@angular/router';
   ],
   declarations: []
 })
-export class ShortcutModule { }
+export class ShortcutModule {
+}

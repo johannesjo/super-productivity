@@ -63,10 +63,6 @@ export class InputDurationDirective<D> implements ControlValueAccessor, Validato
 
   private _value;
 
-  ngAfterViewChecked() {
-    this._validator = Validators.compose([this._parseValidator]);
-  }
-
   // Validations
   get value() {
     return this._value;
@@ -77,6 +73,10 @@ export class InputDurationDirective<D> implements ControlValueAccessor, Validato
       this._value = value;
       this._onChangeCallback(this._value);
     }
+  }
+
+  ngAfterViewChecked() {
+    this._validator = Validators.compose([this._parseValidator]);
   }
 
   /* tslint:enable */

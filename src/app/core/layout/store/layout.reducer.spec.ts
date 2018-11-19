@@ -1,4 +1,4 @@
-import { reducer, initialState } from './layout.reducer';
+import { initialState, reducer } from './layout.reducer';
 
 describe('Layout Reducer', () => {
   describe('unknown action', () => {

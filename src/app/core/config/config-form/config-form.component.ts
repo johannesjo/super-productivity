@@ -11,20 +11,8 @@ import { ConfigService } from '../config.service';
 export class ConfigFormComponent {
 
   config: any;
-
-  @Input() set cfg(cfg) {
-    this.config = {...cfg};
-  }
-
   @Input() sectionKey;
-
-  // somehow needed for the form to work
-  @Input() set formCfg(val_: FormlyFieldConfig[]) {
-    this.fields = val_ && [...val_];
-  }
-
   @Output() save: EventEmitter<any> = new EventEmitter<any>();
-
   fields: FormlyFieldConfig[];
   form = new FormGroup({});
   options: FormlyFormOptions = {
@@ -34,6 +22,15 @@ export class ConfigFormComponent {
   };
 
   constructor(private readonly _configService: ConfigService) {
+  }
+
+  @Input() set cfg(cfg) {
+    this.config = {...cfg};
+  }
+
+  // somehow needed for the form to work
+  @Input() set formCfg(val_: FormlyFieldConfig[]) {
+    this.fields = val_ && [...val_];
   }
 
   submit() {

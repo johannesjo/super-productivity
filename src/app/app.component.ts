@@ -34,23 +34,6 @@ export class AppComponent implements OnInit {
   private _mobileQueryListener: () => void;
   private _currentTheme: string;
 
-  @HostListener('document:keydown', ['$event']) onKeyDown(ev: KeyboardEvent) {
-    this._shortcutService.handleKeyDown(ev);
-  }
-
-  // prevent page reloads on missed drops
-  @HostListener('document:dragover', ['$event']) onDragOver(ev: Event) {
-    ev.preventDefault();
-  }
-
-  @HostListener('document:drop', ['$event']) onDrop(ev: Event) {
-    ev.preventDefault();
-  }
-
-  @HostListener('document:paste', ['$event']) onPaste(ev: Event) {
-    this.bookmarkService.createFromPaste(ev);
-  }
-
   constructor(
     private _configService: ConfigService,
     private _shortcutService: ShortcutService,
@@ -103,6 +86,23 @@ export class AppComponent implements OnInit {
         }
       });
     }
+  }
+
+  @HostListener('document:keydown', ['$event']) onKeyDown(ev: KeyboardEvent) {
+    this._shortcutService.handleKeyDown(ev);
+  }
+
+  // prevent page reloads on missed drops
+  @HostListener('document:dragover', ['$event']) onDragOver(ev: Event) {
+    ev.preventDefault();
+  }
+
+  @HostListener('document:drop', ['$event']) onDrop(ev: Event) {
+    ev.preventDefault();
+  }
+
+  @HostListener('document:paste', ['$event']) onPaste(ev: Event) {
+    this.bookmarkService.createFromPaste(ev);
   }
 
   ngOnInit() {

@@ -1,4 +1,3 @@
-
 // Standard API responses
 export type JiraOriginalComponent = Readonly<{
   self: string;

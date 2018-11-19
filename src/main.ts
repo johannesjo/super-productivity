@@ -12,5 +12,7 @@ platformBrowserDynamic().bootstrapModule(AppModule)
   .catch(err => console.log(err));
 
 declare global {
-  interface Window { ipcRenderer: any; }
+  interface Window {
+    ipcRenderer: any;
+  }
 }

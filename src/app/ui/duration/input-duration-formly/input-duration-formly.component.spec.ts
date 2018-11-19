@@ -8,9 +8,9 @@ describe('InputDurationFormlyComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ InputDurationFormlyComponent ]
+      declarations: [InputDurationFormlyComponent]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

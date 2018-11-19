@@ -39,6 +39,10 @@ export class GoogleApiService {
     this.isLoggedIn$.subscribe((isLoggedIn) => this.isLoggedIn = isLoggedIn);
   }
 
+  private get _session(): GoogleSession {
+    return this._configService.cfg && this._configService.cfg._googleSession;
+  }
+
   login() {
     if (this.isLoggedIn) {
       return new Promise((resolve) => resolve());
@@ -80,6 +84,7 @@ export class GoogleApiService {
     }
   }
 
+  // Other interaction
 
   logout() {
     this._updateSession({
@@ -103,7 +108,6 @@ export class GoogleApiService {
     }
   }
 
-  // Other interaction
   // -----------------
   appendRow(spreadsheetId, row) {
     // @see: https://developers.google.com/sheets/api/reference/rest/
@@ -253,10 +257,6 @@ export class GoogleApiService {
       },
       data: multipart.body
     });
-  }
-
-  private get _session(): GoogleSession {
-    return this._configService.cfg && this._configService.cfg._googleSession;
   }
 
   private _updateSession(sessionData: Partial<GoogleSession>) {

@@ -8,9 +8,9 @@ describe('DialogSimpleTaskSummaryComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ DialogSimpleTaskSummaryComponent ]
+      declarations: [DialogSimpleTaskSummaryComponent]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

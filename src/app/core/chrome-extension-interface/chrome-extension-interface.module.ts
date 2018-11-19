@@ -7,4 +7,5 @@ import { CommonModule } from '@angular/common';
   ],
   declarations: []
 })
-export class ChromeExtensionInterfaceModule { }
+export class ChromeExtensionInterfaceModule {
+}

@@ -19,4 +19,5 @@ import { RouterModule } from '@angular/router';
   declarations: [WorklogAndCalendarComponent],
   exports: [WorklogAndCalendarComponent],
 })
-export class WorklogAndCalendarModule { }
+export class WorklogAndCalendarModule {
+}

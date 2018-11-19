@@ -2,7 +2,7 @@
 
 .form-wrapper {
   overflow: hidden;
-  &.keyboard{
+  &.keyboard {
     ::ng-deep formly-field {
       box-sizing: border-box;
       padding: 0 $s;
@@ -13,7 +13,7 @@
   }
 }
 
-:host{
+:host {
   position: relative;
   display: block;
 }

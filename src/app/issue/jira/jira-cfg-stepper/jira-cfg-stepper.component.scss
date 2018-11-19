@@ -1,12 +1,12 @@
 @import '../../../../variables';
 
-.welcome{
+.welcome {
   display: flex;
   justify-content: center;
   align-items: center;
   margin-top: $s;
   margin-bottom: $s;
-  img{
+  img {
     margin-right: $s;
   }
 }

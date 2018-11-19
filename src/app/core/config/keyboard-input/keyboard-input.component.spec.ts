@@ -8,9 +8,9 @@ describe('KeyboardInputComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ KeyboardInputComponent ]
+      declarations: [KeyboardInputComponent]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

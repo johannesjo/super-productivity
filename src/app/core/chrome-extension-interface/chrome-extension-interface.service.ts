@@ -10,10 +10,9 @@ const interfaceEl = window;
 })
 export class ChromeExtensionInterfaceService {
   private _isReady$: ReplaySubject<boolean> = new ReplaySubject();
-  private _isInterfaceReady = false;
-
   // we only every one to catch a single event
   public isReady$ = this._isReady$.pipe(first());
+  private _isInterfaceReady = false;
 
   init() {
     interfaceEl.addEventListener('SP_EXTENSION_READY', () => {

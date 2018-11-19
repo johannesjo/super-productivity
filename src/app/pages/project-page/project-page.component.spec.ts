@@ -8,9 +8,9 @@ describe('ProjectPageComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ ProjectPageComponent ]
+      declarations: [ProjectPageComponent]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

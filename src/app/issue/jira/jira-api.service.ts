@@ -83,6 +83,65 @@ export class JiraApiService {
 
 
   // INTERNAL
+
+  isSufficientJiraSettings(settingsToTest) {
+  }
+
+  transformIssues(response) {
+  }
+
+  showTryAuthAgainToast() {
+  }
+
+  // -------------------
+  _addWorklog(originalKey, started, timeSpent, comment) {
+  }
+
+  searchUsers(userNameQuery) {
+  }
+
+  getTransitionsForIssue(task) {
+  }
+
+
+  // Simple API Mappings
+
+  getAutoAddedIssues() {
+  }
+
+  // -----------------
+  updateStatus(task, localType) {
+  }
+
+  updateIssueDescription(task) {
+  }
+
+  updateAssignee(task, assignee) {
+  }
+
+  // Complex Functions
+
+  checkUpdatesForTicket(task, isNoNotify) {
+  }
+
+  addWorklog(originalTask) {
+  }
+
+  transitionIssue(task, transitionObj, localType) {
+  }
+
+  checkForNewAndAddToBacklog() {
+  }
+
+  checkForUpdates(tasks) {
+  }
+
+  taskIsUpdatedHandler(updatedTask, originalTask) {
+  }
+
+  checkAndHandleUpdatesForTicket(task) {
+  }
+
   // --------
   private _isMinimalSettings(settings) {
     return settings && settings.host && settings.userName && settings.password;
@@ -178,61 +237,5 @@ export class JiraApiService {
     } else {
       console.warn('Jira: Response Request ID not existing');
     }
-  }
-
-  isSufficientJiraSettings(settingsToTest) {
-  }
-
-  transformIssues(response) {
-  }
-
-  showTryAuthAgainToast() {
-  }
-
-
-  // Simple API Mappings
-  // -------------------
-  _addWorklog(originalKey, started, timeSpent, comment) {
-  }
-
-  searchUsers(userNameQuery) {
-  }
-
-  getTransitionsForIssue(task) {
-  }
-
-  getAutoAddedIssues() {
-  }
-
-  // Complex Functions
-  // -----------------
-  updateStatus(task, localType) {
-  }
-
-  updateIssueDescription(task) {
-  }
-
-  updateAssignee(task, assignee) {
-  }
-
-  checkUpdatesForTicket(task, isNoNotify) {
-  }
-
-  addWorklog(originalTask) {
-  }
-
-  transitionIssue(task, transitionObj, localType) {
-  }
-
-  checkForNewAndAddToBacklog() {
-  }
-
-  checkForUpdates(tasks) {
-  }
-
-  taskIsUpdatedHandler(updatedTask, originalTask) {
-  }
-
-  checkAndHandleUpdatesForTicket(task) {
   }
 }

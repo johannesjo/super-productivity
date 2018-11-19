@@ -11,7 +11,7 @@ import { Subscription } from 'rxjs';
 import { ProjectService } from '../../project/project.service';
 import { SimpleSummarySettings } from '../../project/project.model';
 import { ElectronService } from 'ngx-electron';
-import { IPC_SHUTDOWN, IPC_SHUTDOWN_NOW } from '../../../ipc-events.const';
+import { IPC_SHUTDOWN_NOW } from '../../../ipc-events.const';
 
 const SUCCESS_ANIMATION_DURATION = 500;
 const SUCCESS_ANIMATION_MAX_DURATION = 10000;
@@ -33,19 +33,18 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
   public commitLog;
   public isTimeSheetExported = true;
   public showSuccessAnimation;
-
+  // calc total time spent on todays tasks
+  totalTimeSpentTasks$ = this._taskService.totalTimeWorkedOnTodaysTasks$;
+  // use mysql date as it is sortable
+  workingToday$ = this._taskService.workingToday$;
   private successAnimationTimeout;
   private successAnimationMaxTimeout;
   private _doneTasks: TaskWithSubTasks[];
   private _todaysTasks: TaskWithSubTasks[];
   private _simpleSummarySettings: SimpleSummarySettings;
-  private _subs: Subscription = new Subscription();
-  // calc total time spent on todays tasks
-  totalTimeSpentTasks$ = this._taskService.totalTimeWorkedOnTodaysTasks$;
 
   // calc time spent on todays tasks today
-  // use mysql date as it is sortable
-  workingToday$ = this._taskService.workingToday$;
+  private _subs: Subscription = new Subscription();
 
   constructor(
     private readonly _taskService: TaskService,

@@ -9,4 +9,5 @@ import { CalendarComponent } from './calendar.component';
   declarations: [CalendarComponent],
   exports: [CalendarComponent],
 })
-export class CalendarModule { }
+export class CalendarModule {
+}

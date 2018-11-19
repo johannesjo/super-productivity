@@ -8,9 +8,9 @@ describe('SnackGoogleLoginComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ SnackGoogleLoginComponent ]
+      declarations: [SnackGoogleLoginComponent]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

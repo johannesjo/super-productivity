@@ -8,9 +8,9 @@ describe('TaskAdditionalInfoComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ TaskAdditionalInfoComponent ]
+      declarations: [TaskAdditionalInfoComponent]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

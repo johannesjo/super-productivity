@@ -1,6 +1,5 @@
 import { Action } from '@ngrx/store';
-import { GlobalConfig } from '../config.model';
-import { SectionConfig } from '../config.model';
+import { GlobalConfig, SectionConfig } from '../config.model';
 
 export enum ConfigActionTypes {
   LoadConfig = '[Config] Load Config',
