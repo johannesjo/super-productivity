@@ -1,5 +1,9 @@
 @import './../../../_variables';
 
+:host {
+  overflow: hidden !important;
+}
+
 add-task-bar {
   margin: 0 auto $s*2;
   max-width: 628px;
