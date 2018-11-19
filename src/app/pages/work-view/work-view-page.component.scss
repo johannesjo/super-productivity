@@ -38,7 +38,7 @@ h2 {
   padding: 0.5*$s;
 
   @media(min-width: $layout-xs) {
-    padding: 1*$s;
+    padding: 0.5*$s;
   }
 }
 
@@ -74,6 +74,7 @@ h2 {
 
   .item {
     margin: 0 1.5*$s;
+    text-align: center;
   }
   .controls button {
     margin: 0 $s/2;
@@ -96,9 +97,10 @@ h2 {
   transform: rotate(90deg);
 }
 
-.button-controls {
+.controls {
   text-align: center;
   margin: $s 0;
+  white-space: nowrap;
 }
 
 .backlog,
