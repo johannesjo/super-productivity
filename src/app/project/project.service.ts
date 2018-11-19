@@ -33,9 +33,9 @@ export class ProjectService {
     private readonly _store: Store<any>,
   ) {
     // dirty trick to make effect catch up :/
-    setTimeout(() => {
-      this.load();
-    }, 50);
+    // setTimeout(() => {
+    //   this.load();
+    // }, 50);
 
     this.currentId$.subscribe((id) => this.currentId = id);
   }

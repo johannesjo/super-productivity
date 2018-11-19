@@ -75,6 +75,8 @@ export class AppComponent implements OnInit {
       this._domSanitizer.bypassSecurityTrustResourceUrl(`assets/icons/sp.svg`)
     );
 
+    this._projectService.load();
+
     // INIT Services and global handlers
     this._googleDriveSyncService.init();
     this._chromeExtensionInterface.init();
