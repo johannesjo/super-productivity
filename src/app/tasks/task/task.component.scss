@@ -349,6 +349,8 @@ input {
 
 .notes {
   display: block;
+  // required as sort of a clearfix (fixes padding issue)
+  overflow: hidden;
 }
 
 .toggle-sub-tasks-btn {
