@@ -4,7 +4,6 @@ import { JiraIssueContentComponent } from './jira/jira-issue/jira-issue-content/
 import { JiraIssueHeaderComponent } from './jira/jira-issue/jira-issue-header/jira-issue-header.component';
 import { JiraIssue } from './jira/jira-issue/jira-issue.model';
 import { Attachment } from '../tasks/attachment/attachment.model';
-import { DropPasteInputType } from '../core/drop-paste-input/drop-paste-input';
 import { mapJiraAttachmentToAttachment } from './jira/jira-issue/jira-issue-map.util';
 
 @Injectable({

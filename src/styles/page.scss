@@ -23,3 +23,7 @@ app-root,
 [hidden] {
   visibility: hidden;
 }
+
+a[href] {
+  color: $c-accent;
+}
