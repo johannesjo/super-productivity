@@ -48,7 +48,7 @@ export class DialogIdleComponent implements OnInit {
   }
 
   track() {
-    this._matDialogRef.close(this.selectedTask);
+    this._matDialogRef.close(this.selectedTask || this.newTaskTitle);
   }
 
   trackButResetBreakTimer() {
