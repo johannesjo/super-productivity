@@ -2,10 +2,20 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Note } from './note.model';
 import { select, Store } from '@ngrx/store';
-import { AddNote, DeleteNote, HideNotes, LoadNoteState, ToggleShowNotes, UpdateNote, UpdateNoteOrder } from './store/note.actions';
+import {
+  AddNote,
+  DeleteNote,
+  HideNotes,
+  LoadNoteState,
+  NoteActionTypes,
+  ToggleShowNotes,
+  UpdateNote,
+  UpdateNoteOrder
+} from './store/note.actions';
 import shortid from 'shortid';
 import { initialNoteState, NoteState, selectAllNotes, selectIsShowNotes } from './store/note.reducer';
 import { PersistenceService } from '../core/persistence/persistence.service';
+import { Actions, ofType } from '@ngrx/effects';
 
 @Injectable({
   providedIn: 'root'
@@ -13,10 +23,12 @@ import { PersistenceService } from '../core/persistence/persistence.service';
 export class NoteService {
   public isShowNotes$: Observable<boolean> = this._store$.pipe(select(selectIsShowNotes));
   public notes$: Observable<Note[]> = this._store$.pipe(select(selectAllNotes));
+  public onNoteAdd$: Observable<any> = this._actions$.pipe(ofType(NoteActionTypes.AddNote));
 
   constructor(
     private _store$: Store<any>,
     private _persistenceService: PersistenceService,
+    private _actions$: Actions,
   ) {
   }
 

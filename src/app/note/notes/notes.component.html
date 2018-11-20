@@ -13,7 +13,8 @@
   <div class="notes"
        [dragulaModel]="noteService.notes$|async"
        dragula="NOTES">
-    <note *ngFor="let note of noteService.notes$|async"
+    <note *ngFor="let note of (noteService.notes$|async); let i = index;"
+          [isFocus]="isElementWasAdded && i==0"
           [note]="note"></note>
   </div>
 </div>

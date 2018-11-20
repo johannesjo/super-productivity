@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, OnInit, ViewChild } from '@angular/core';
 import { Note } from '../note.model';
 import { NoteService } from '../note.service';
 
@@ -10,7 +10,9 @@ import { NoteService } from '../note.service';
 })
 export class NoteComponent implements OnInit {
   @Input() note: Note;
-  isFocus = false;
+  @Input() isFocus: boolean;
+
+  @ViewChild('markdownEl') markdownEl: HTMLElement;
 
   constructor(private _noteService: NoteService) {
   }
