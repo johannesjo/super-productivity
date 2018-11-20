@@ -48,11 +48,15 @@ export class ProjectService {
       if (!projectState.currentId) {
         projectState.currentId = projectState.ids[0] as string;
       }
-      this._store.dispatch({
-        type: ProjectActionTypes.LoadProjectState,
-        payload: {state: projectState}
-      });
+      this.loadState(projectState);
     }
+  }
+
+  loadState(projectState: ProjectState) {
+    this._store.dispatch({
+      type: ProjectActionTypes.LoadProjectState,
+      payload: {state: projectState}
+    });
   }
 
   add(project: Partial<Project>) {

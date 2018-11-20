@@ -26,14 +26,18 @@ export class ConfigService {
   load() {
     const cfg = this._persistenceService.loadGlobalConfig();
     if (cfg && Object.keys(cfg).length > 0) {
-      this._store.dispatch({
-        type: ConfigActionTypes.LoadConfig,
-        // always extend default config
-        payload: {...DEFAULT_CFG, ...cfg},
-      });
+      this.loadState(cfg);
     } else {
       console.log('ConfigService No config found in ls');
     }
+  }
+
+  loadState(state: GlobalConfig) {
+    this._store.dispatch({
+      type: ConfigActionTypes.LoadConfig,
+      // always extend default config
+      payload: {...DEFAULT_CFG, ...state},
+    });
   }
 
   updateSection(sectionKey: ConfigSectionKey, sectionCfg: Partial<SectionConfig>) {

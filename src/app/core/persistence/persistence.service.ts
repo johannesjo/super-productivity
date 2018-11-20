@@ -143,7 +143,6 @@ export class PersistenceService {
 
     const projectState = this.loadProjectsMeta();
     const projectIds = projectState.ids as string[];
-
     return {
       lastActiveTime: this.getLastActive(),
       project: this.loadProjectsMeta(),
@@ -164,21 +163,18 @@ export class PersistenceService {
   }
 
   // TODO what is missing is a total cleanup of the existing projects and their data
-  saveComplete(data: AppDataComplete) {
-    const saveDataForProjectIds = (data_, saveDataFn: Function) => {
-      Object.keys(data_).forEach(projectId => {
-        if (data[projectId]) {
-          saveDataFn(projectId, data[projectId]);
-        }
-      });
-    };
+  importComplete(data: AppDataComplete) {
+    console.log('IMPORT');
+
+
+    console.log(data);
 
     this.saveProjectsMeta(data.project);
     this.saveGlobalConfig(data.globalConfig);
-    saveDataForProjectIds(data.bookmark, this.saveBookmarksForProject.bind(this));
-    saveDataForProjectIds(data.note, this.saveNotesForProject.bind(this));
-    saveDataForProjectIds(data.task, this.saveTasksForProject.bind(this));
-    saveDataForProjectIds(data.taskArchive, this.saveToTaskArchiveForProject.bind(this));
+    this._saveDataForProjectIds(data.bookmark, this.saveBookmarksForProject.bind(this));
+    this._saveDataForProjectIds(data.note, this.saveNotesForProject.bind(this));
+    this._saveDataForProjectIds(data.task, this.saveTasksForProject.bind(this));
+    this._saveDataForProjectIds(data.taskArchive, this.saveToTaskArchiveForProject.bind(this));
     Object.keys(data.issue).forEach(projectId => {
       const issueData = data.issue[projectId];
       Object.keys(issueData).forEach((issueProviderKey: IssueProviderKey) => {
@@ -186,6 +182,20 @@ export class PersistenceService {
       });
     });
   }
+
+  private _saveDataForProjectIds(data: any, saveDataFn: Function) {
+    console.log(data, saveDataFn);
+    console.log(data);
+
+
+    Object.keys(data).forEach(projectId => {
+      if (data[projectId]) {
+        console.log(saveDataFn, projectId, data[projectId]);
+        saveDataFn(projectId, data[projectId]);
+      }
+    });
+  }
+
 
   private _makeProjectKey(projectId, subKey, additional?) {
     return LS_PROJECT_PREFIX + projectId + '_' + subKey + (additional ? '_' + additional : '');

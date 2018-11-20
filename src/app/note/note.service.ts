@@ -4,7 +4,7 @@ import { Note } from './note.model';
 import { select, Store } from '@ngrx/store';
 import { AddNote, DeleteNote, HideNotes, LoadNoteState, ToggleShowNotes, UpdateNote, UpdateNoteOrder } from './store/note.actions';
 import shortid from 'shortid';
-import { initialNoteState, selectAllNotes, selectIsShowNotes } from './store/note.reducer';
+import { initialNoteState, NoteState, selectAllNotes, selectIsShowNotes } from './store/note.reducer';
 import { PersistenceService } from '../core/persistence/persistence.service';
 
 @Injectable({
@@ -30,7 +30,11 @@ export class NoteService {
 
   public loadStateForProject(projectId) {
     const notes = this._persistenceService.loadNotesForProject(projectId) || initialNoteState;
-    this._store$.dispatch(new LoadNoteState({state: notes}));
+    this.loadState(notes);
+  }
+
+  public loadState(state: NoteState) {
+    this._store$.dispatch(new LoadNoteState({state: state}));
   }
 
   public add(note: Partial<Note> = {}) {

@@ -7,6 +7,7 @@ import { ConfigService } from '../config/config.service';
 import { TaskService } from '../../tasks/task.service';
 import { BookmarkService } from '../../bookmark/bookmark.service';
 import { NoteService } from '../../note/note.service';
+import { JiraIssueService } from '../../issue/jira/jira-issue/jira-issue.service';
 
 // TODO some of this can be done in a background script
 
@@ -21,6 +22,7 @@ export class SyncService {
     private _configService: ConfigService,
     private _taskService: TaskService,
     private _bookmarkService: BookmarkService,
+    private _jiraIssueService: JiraIssueService,
     private _noteService: NoteService,
   ) {
   }
@@ -34,18 +36,23 @@ export class SyncService {
   }
 
   loadCompleteSyncData(data: AppDataComplete) {
-    // save data to local storage
-    this._persistenceService.saveComplete(data);
     this._saveBackup();
+    this._snackService.open({message: 'Importing data', icon: 'cloud_download'});
 
     if (this._checkData(data)) {
+      // save data to local storage
       try {
+        this._persistenceService.importComplete(data);
+        const curId = data.project.currentId;
         // reload view model from ls
         this._configService.load();
         this._projectService.load();
-        this._taskService.loadStateForProject(data.project.currentId);
-        this._bookmarkService.loadStateForProject(data.project.currentId);
-        this._noteService.loadStateForProject(data.project.currentId);
+        this._taskService.loadStateForProject(curId);
+        this._bookmarkService.loadStateForProject(curId);
+        this._noteService.loadStateForProject(curId);
+        this._jiraIssueService.loadStateForProject(curId);
+        this._snackService.open({type: 'SUCCESS', message: 'Data imported'});
+
       } catch (e) {
         this._snackService.open({type: 'ERROR', message: 'Something went wrong while importing the data. Falling back to local backup'});
         console.error(e);
