@@ -168,15 +168,15 @@ export class GoogleDriveSyncService {
     return promise;
   }
 
-  loadFrom(isSkipPromiseCheck = false): Promise<any> {
+  loadFrom(isSkipPromiseCheck = false, isForce = false): Promise<any> {
     const promise = new Promise((resolve, reject) => {
       const loadHandler = () => {
-        this._load().then((loadRes) => {
+        this._loadFile().then((loadRes) => {
           const lastActiveLocal = this._syncService.getLastActive();
           const lastActiveRemote = loadRes.body.lastActiveTime;
 
           // no update required
-          if (this._isEqual(lastActiveLocal, lastActiveRemote)) {
+          if (!isForce && this._isEqual(lastActiveLocal, lastActiveRemote)) {
             console.log('GoogleDriveSync', 'date comparision isEqual', lastActiveLocal, lastActiveRemote);
             this._snackService.open({
               type: 'SUCCESS',
@@ -185,7 +185,7 @@ export class GoogleDriveSyncService {
             reject();
           } else {
             // update but ask if remote data is not newer than the last local update
-            const isSkipConfirm = lastActiveRemote && this._isNewerThan(lastActiveRemote, lastActiveLocal);
+            const isSkipConfirm = isForce || (lastActiveRemote && this._isNewerThan(lastActiveRemote, lastActiveLocal));
             console.log('GoogleDriveSync', 'date comparision skipConfirm', isSkipConfirm, lastActiveLocal, lastActiveRemote);
 
             if (isSkipConfirm) {
@@ -288,7 +288,7 @@ export class GoogleDriveSyncService {
       this._matDialog.open(DialogConfirmDriveSyncSaveComponent, {
         data: {
           loadFromRemote: () => {
-            this._load();
+            this.loadFrom(true, true);
             reject.bind(this)();
           },
           saveToRemote: resolve.bind(this),
@@ -362,7 +362,7 @@ If not please change the Sync file name.`,
       });
   }
 
-  private _load(): Promise<any> {
+  private _loadFile(): Promise<any> {
     if (!this.config.syncFileName) {
       return Promise.reject('No file name specified');
     }
