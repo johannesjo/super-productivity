@@ -44,12 +44,12 @@ mat-drawer {
   left: 0;
   top: 0;
   overflow: hidden;
-  > ::ng-deep * {
+  > ::ng-deep router-outlet + * {
     position: absolute;
     width: 100%;
     height: 100%;
     left: 0;
     top: 0;
-    overflow: scroll;
+    overflow-y: scroll;
   }
 }

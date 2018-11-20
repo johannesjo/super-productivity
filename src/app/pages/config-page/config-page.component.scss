@@ -10,6 +10,9 @@
   .config-section {
     margin-bottom: 10px;
     background: #ffffff;
+    @include dark-theme {
+      background-color: $dark-theme-bg-lighter;
+    }
 
     //@include dark-theme {
     //  background-color: $dark-theme-bg-lighter;
