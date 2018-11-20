@@ -79,6 +79,8 @@ export class AddTaskBarComponent implements OnInit, OnDestroy {
 
   addTask() {
     const issueOrTitle = this.taskSuggestionsCtrl.value;
+    console.log(issueOrTitle);
+
     if (typeof issueOrTitle === 'string') {
       if (issueOrTitle.length > 0) {
         this._taskService.add(issueOrTitle);

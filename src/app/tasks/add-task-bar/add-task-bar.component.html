@@ -7,11 +7,11 @@
          placeholder="Select or create task"
          aria-label="Select or create task"
          autofocus="autofocus"
-         [matAutocomplete]="auto"
+         [matAutocomplete]="autoEl"
          [formControl]="taskSuggestionsCtrl"
          (blur)="onBlur($event)">
 
-  <mat-autocomplete #auto="matAutocomplete"
+  <mat-autocomplete #autoEl="matAutocomplete"
                     [displayWith]="displayWith"
                     [autoActiveFirstOption]="true">
     <mat-option *ngIf="isLoading"
