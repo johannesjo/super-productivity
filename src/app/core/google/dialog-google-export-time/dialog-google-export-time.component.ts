@@ -109,7 +109,7 @@ export class DialogGoogleExportTimeComponent implements OnInit, OnDestroy {
     this.isLoading = true;
     this.headings = undefined;
     this.readPromise = this.googleApiService.getSpreadsheetHeadingsAndLastRow(this.opts.spreadsheetId);
-    this.readPromise.then((data: any) => {
+    return this.readPromise.then((data: any) => {
       this.headings = data.headings;
       this.lastRow = data.lastRow;
       this.updateDefaults();
