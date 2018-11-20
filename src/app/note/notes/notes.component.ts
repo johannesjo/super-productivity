@@ -1,8 +1,8 @@
-import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, QueryList, ViewChildren } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { NoteService } from '../note.service';
 import { DragulaService } from 'ng2-dragula';
 import { Subscription } from 'rxjs';
-import { NoteComponent } from '../note/note.component';
+import { MatButton } from '@angular/material';
 
 @Component({
   selector: 'notes',
@@ -13,7 +13,7 @@ import { NoteComponent } from '../note/note.component';
 export class NotesComponent implements OnInit, OnDestroy {
   private _subs = new Subscription();
   isElementWasAdded = false;
-  @ViewChildren(NoteComponent) noteEls: QueryList<NoteComponent>;
+  @ViewChild('buttonEl') buttonEl: MatButton;
 
   constructor(
     public noteService: NoteService,
@@ -33,6 +33,17 @@ export class NotesComponent implements OnInit, OnDestroy {
     // Hacky but probably more performant
     this._subs.add(this.noteService.onNoteAdd$.subscribe((val) => {
       this.isElementWasAdded = true;
+    }));
+
+    let isFirst = true;
+    this._subs.add(this.noteService.isShowNotes$.subscribe((isShow) => {
+      if (isShow && !isFirst) {
+        // timeout needs to be longer than animation
+        setTimeout(() => {
+          this.buttonEl._elementRef.nativeElement.focus();
+        }, 200);
+      }
+      isFirst = false;
     }));
   }
 
