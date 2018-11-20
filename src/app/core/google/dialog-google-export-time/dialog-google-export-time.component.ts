@@ -45,6 +45,10 @@ export class DialogGoogleExportTimeComponent implements OnInit, OnDestroy {
     {id: 'HOUR', title: 'full hours'},
   ];
 
+  loginPromise: Promise<any>;
+  readPromise: Promise<any>;
+  savePromise: Promise<any>;
+
   private _projectId: string;
   private _destroy$: Subject<boolean> = new Subject<boolean>();
 
@@ -59,7 +63,7 @@ export class DialogGoogleExportTimeComponent implements OnInit, OnDestroy {
     this._projectService.currentProject$
       .pipe(takeUntil(this._destroy$))
       .subscribe((project: Project) => {
-        this.opts = project.googleTimeSheetExport;
+        this.opts = {...project.googleTimeSheetExport};
         this._projectId = project.id;
       });
   }
@@ -93,25 +97,25 @@ export class DialogGoogleExportTimeComponent implements OnInit, OnDestroy {
 
   login() {
     this.isLoading = true;
-    return this.googleApiService.login()
-      .then(() => {
-        this.isLoading = false;
-        this.isLoggedIn = true;
-        this._cd.detectChanges();
-      }).catch(this._handleError.bind(this));
+    this.loginPromise = this.googleApiService.login();
+    return this.loginPromise.then(() => {
+      this.isLoading = false;
+      this.isLoggedIn = true;
+      this._cd.detectChanges();
+    }).catch(this._handleError.bind(this));
   }
 
   readSpreadsheet() {
     this.isLoading = true;
     this.headings = undefined;
-    return this.googleApiService.getSpreadsheetHeadingsAndLastRow(this.opts.spreadsheetId)
-      .then((data: any) => {
-        this.headings = data.headings;
-        this.lastRow = data.lastRow;
-        this.updateDefaults();
-        this.isLoading = false;
-        this._cd.detectChanges();
-      }).catch(this._handleError.bind(this));
+    this.readPromise = this.googleApiService.getSpreadsheetHeadingsAndLastRow(this.opts.spreadsheetId);
+    this.readPromise.then((data: any) => {
+      this.headings = data.headings;
+      this.lastRow = data.lastRow;
+      this.updateDefaults();
+      this.isLoading = false;
+      this._cd.detectChanges();
+    }).catch(this._handleError.bind(this));
   }
 
   logout() {
@@ -143,17 +147,17 @@ export class DialogGoogleExportTimeComponent implements OnInit, OnDestroy {
       this._snackService.open('Current values and the last saved row have equal values, that is probably not what you want.');
     } else {
 
-      this.googleApiService.appendRow(this.opts.spreadsheetId, this.actualValues)
-        .then(() => {
-          this._snackService.open({
-            message: 'Row successfully appended',
-            type: 'SUCCESS'
-          });
+      this.savePromise = this.googleApiService.appendRow(this.opts.spreadsheetId, this.actualValues);
+      this.savePromise.then(() => {
+        this._snackService.open({
+          message: 'Row successfully appended',
+          type: 'SUCCESS'
+        });
 
-          this._matDialogRef.close();
-          this._projectService.updateTimeSheetExportSettings(this._projectId, this.opts, true);
-          this.isLoading = false;
-        }).catch(this._handleError.bind(this));
+        this._matDialogRef.close();
+        this._projectService.updateTimeSheetExportSettings(this._projectId, this.opts, true);
+        this.isLoading = false;
+      }).catch(this._handleError.bind(this));
     }
   }
 

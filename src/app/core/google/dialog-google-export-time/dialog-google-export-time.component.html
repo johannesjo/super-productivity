@@ -1,11 +1,6 @@
 <h1 mat-dialog-title=""
     style="text-align: center;">Google Time Sheet Export</h1>
 
-<div class="loading-spinner"
-     *ngIf="isLoading">
-  <mat-progress-spinner mode="indeterminate"></mat-progress-spinner>
-</div>
-
 
 <div mat-dialog-content=""
      class="dialog-content">
@@ -14,31 +9,38 @@
     <button mat-raised-button=""
             color="primary"
             type="button"
-            promiseBtn=""
+            [promiseBtn]="loginPromise"
             *ngIf="!(googleApiService.isLoggedIn$|async)"
-            (click)="login()">Login to Google
+            (click)="login()">
+      <mat-icon>exit_to_app</mat-icon>
+      Login to Google
     </button>
     <button mat-raised-button=""
             color="primary"
             type="button"
-            promiseBtn=""
             *ngIf="(googleApiService.isLoggedIn$|async)"
-            (click)="logout()">Logout
+            (click)="logout()">
+      <mat-icon>logout</mat-icon>
+      Logout
     </button>
     <button mat-raised-button=""
             color="primary"
             type="button"
-            promiseBtn=""
+            [promiseBtn]="readPromise"
             [disabled]="!opts.spreadsheetId"
             *ngIf="(googleApiService.isLoggedIn$|async)"
-            (click)="readSpreadsheet()">Read spreadsheet
+            (click)="readSpreadsheet()">
+      <mat-icon>chrome_reader_mode</mat-icon>
+      Read spreadsheet
     </button>
     <a mat-raised-button=""
        color="primary"
        external-link
        target="_blank"
        *ngIf="(googleApiService.isLoggedIn$|async) && opts.spreadsheetId"
-       href="https://docs.google.com/spreadsheets/d/{{opts.spreadsheetId}}">Edit spreadsheet
+       href="https://docs.google.com/spreadsheets/d/{{opts.spreadsheetId}}">
+      <mat-icon>link</mat-icon>
+      Open spreadsheet
     </a>
 
     <!--<a mat-raised-button=""-->
@@ -64,8 +66,14 @@
 
     </div>
 
+    <div class="loading-spinner"
+         *ngIf="isLoading">
+      <mat-progress-spinner mode="indeterminate"></mat-progress-spinner>
+    </div>
+
+
     <table class="export-input-table"
-           *ngIf="headings">
+           *ngIf="headings && !isLoading">
       <tr>
         <th></th>
         <th class="heading"
@@ -106,19 +114,19 @@
 
       <mat-slide-toggle
         [ngModelOptions]="{standalone: true}"
-        [ngModel]="opts.isAutoLogin">Auto-login and load data next time
+        [(ngModel)]="opts.isAutoLogin">Auto-login and load data next time
       </mat-slide-toggle>
-      <!--<mat-slide-toggle [ngModel]="optsname="".is.isAutoFocusEmpty">Auto-focus first empty field after loading table headings</mat-slide-toggle>-->
+      <!--<mat-slide-toggle [(ngModel)]="optsname="".is.isAutoFocusEmpty">Auto-focus first empty field after loading table headings</mat-slide-toggle>-->
       <mat-slide-toggle
         [ngModelOptions]="{standalone: true}"
-        [ngModel]="opts.isRoundWorkTimeUp"
+        [(ngModel)]="opts.isRoundWorkTimeUp"
         (change)="updateDefaults()">Always round work time up
       </mat-slide-toggle>
       <mat-form-field>
         <label>Round start time to</label>
         <mat-select (change)="updateDefaults()"
                     [ngModelOptions]="{standalone: true}"
-                    [ngModel]="opts.roundStartTimeTo">
+                    [(ngModel)]="opts.roundStartTimeTo">
           <mat-option><em>don't round</em></mat-option>
           <mat-option *ngFor="let roundOption of roundTimeOptions"
                       [value]="roundOption.id">
@@ -131,7 +139,7 @@
         <label>Round end time to</label>
         <mat-select (change)="updateDefaults()"
                     [ngModelOptions]="{standalone: true}"
-                    [ngModel]="opts.roundEndTimeTo">
+                    [(ngModel)]="opts.roundEndTimeTo">
           <mat-option><em>don't round</em></mat-option>
           <mat-option *ngFor="let roundOption of roundTimeOptions"
                       [value]="roundOption.id">
@@ -144,7 +152,7 @@
         <label>Round time worked to</label>
         <mat-select (change)="updateDefaults()"
                     [ngModelOptions]="{standalone: true}"
-                    [ngModel]="opts.roundWorkTimeTo">
+                    [(ngModel)]="opts.roundWorkTimeTo">
           <mat-option><em>don't round</em></mat-option>
           <mat-option *ngFor="let roundOption of roundTimeOptions"
                       [value]="roundOption.id">
@@ -204,7 +212,7 @@
           type="button"
           mat-raised-button=""
           color="primary"
-          promiseBtn="">
+          [promiseBtn]="savePromise">
     <mat-icon>save</mat-icon>
     Save row
   </button>
