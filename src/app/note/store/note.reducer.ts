@@ -50,7 +50,16 @@ export function reducer(
     }
 
     case NoteActionTypes.AddNote: {
-      return adapter.addOne(action.payload.note, state);
+      // return adapter.addOne(action.payload.note, state);
+      // add to top rather than bottom
+      return {
+        ...state,
+        entities: {
+          ...state.entities,
+          [action.payload.note.id]: action.payload.note
+        },
+        ids: [action.payload.note.id, ...state.ids]
+      };
     }
 
     case NoteActionTypes.UpsertNote: {
