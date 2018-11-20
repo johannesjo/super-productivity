@@ -58,7 +58,7 @@ export function reducer(
           ...state.entities,
           [action.payload.note.id]: action.payload.note
         },
-        ids: [action.payload.note.id, ...state.ids]
+        ids: [action.payload.note.id, ...state.ids] as string[] | number[]
       };
     }
 
