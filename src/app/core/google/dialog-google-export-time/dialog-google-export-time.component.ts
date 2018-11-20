@@ -158,12 +158,14 @@ export class DialogGoogleExportTimeComponent implements OnInit, OnDestroy {
   }
 
   updateDefaults() {
+    console.log('UPDATE');
+
     this.opts.defaultValues.forEach((val, index) => {
-      this.actualValues[index] = this.replaceVals(val);
+      this.actualValues[index] = this._replaceVals(val);
     });
   }
 
-  replaceVals(defaultVal: string): string {
+  private _replaceVals(defaultVal: string): string {
     if (!defaultVal) {
       return;
     }
@@ -171,28 +173,28 @@ export class DialogGoogleExportTimeComponent implements OnInit, OnDestroy {
     const dVal = defaultVal.trim();
 
     if (dVal.match(/\{date:/)) {
-      return this.getCustomDate(dVal);
+      return this._getCustomDate(dVal);
     }
 
     switch (dVal) {
       case '{startTime}':
-        return this.getStartTime();
+        return this._getStartTime();
       case '{currentTime}':
-        return this.getCurrentTime();
+        return this._getCurrentTime();
       case '{date}':
         return moment().format('MM/DD/YYYY');
       case '{taskTitles}':
-        return this.getTaskTitles();
+        return this._getTaskTitles();
       case '{subTaskTitles}':
-        return this.getSubTaskTitles();
+        return this._getSubTaskTitles();
       case '{totalTime}':
-        return this.getTotalTimeWorked();
+        return this._getTotalTimeWorked();
       default:
         return dVal;
     }
   }
 
-  private roundDuration(value: Duration, roundTo, isRoundUp): Duration {
+  private _roundDuration(value: Duration, roundTo, isRoundUp): Duration {
     let rounded;
 
     switch (roundTo) {
@@ -222,7 +224,7 @@ export class DialogGoogleExportTimeComponent implements OnInit, OnDestroy {
     }
   }
 
-  private roundTime(value: Moment, roundTo, isRoundUp = false): Moment {
+  private _roundTime(value: Moment, roundTo, isRoundUp = false): Moment {
     let rounded;
 
     switch (roundTo) {
@@ -252,7 +254,7 @@ export class DialogGoogleExportTimeComponent implements OnInit, OnDestroy {
     }
   }
 
-  private getCustomDate(dVal: string): string {
+  private _getCustomDate(dVal: string): string {
     const dateFormatStr = dVal
       .replace('{date:', '')
       .replace('}', '')
@@ -260,32 +262,32 @@ export class DialogGoogleExportTimeComponent implements OnInit, OnDestroy {
     return moment().format(dateFormatStr);
   }
 
-  private getStartTime() {
+  private _getStartTime() {
     const val = moment(this.MISSING.startedTimeToday);
     const roundTo = this.opts.roundStartTimeTo;
-    return this.roundTime(val, roundTo)
+    return this._roundTime(val, roundTo)
       .format('HH:mm');
   }
 
-  private getCurrentTime(): string {
+  private _getCurrentTime(): string {
     const val = moment();
     const roundTo = this.opts.roundEndTimeTo;
 
-    return this.roundTime(val, roundTo)
+    return this._roundTime(val, roundTo)
       .format('HH:mm');
   }
 
-  private getTotalTimeWorked(): string {
+  private _getTotalTimeWorked(): string {
     const val = moment.duration(this.MISSING.getTimeWorkedToday);
 
     const roundTo = this.opts.roundWorkTimeTo;
-    const dur = this.roundDuration(val, roundTo, this.opts.isRoundWorkTimeUp) as any;
+    const dur = this._roundDuration(val, roundTo, this.opts.isRoundWorkTimeUp) as any;
     if (dur.format) {
       return dur.format('HH:mm');
     }
   }
 
-  private getTaskTitles(): string {
+  private _getTaskTitles(): string {
     const tasks = this.MISSING.getToday;
     let titleStr = '';
     tasks.forEach((task) => {
@@ -294,7 +296,7 @@ export class DialogGoogleExportTimeComponent implements OnInit, OnDestroy {
     return titleStr.substring(0, titleStr.length - 2);
   }
 
-  private getSubTaskTitles(): string {
+  private _getSubTaskTitles(): string {
     const tasks = this.MISSING.getToday;
     let titleStr = '';
     tasks.forEach((task) => {

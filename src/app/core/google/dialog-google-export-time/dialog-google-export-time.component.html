@@ -14,21 +14,21 @@
     <button mat-raised-button=""
             color="primary"
             type="button"
-            promise-btn
+            promiseBtn=""
             *ngIf="!(googleApiService.isLoggedIn$|async)"
             (click)="login()">Login to Google
     </button>
     <button mat-raised-button=""
             color="primary"
             type="button"
-            promise-btn
+            promiseBtn=""
             *ngIf="(googleApiService.isLoggedIn$|async)"
             (click)="logout()">Logout
     </button>
     <button mat-raised-button=""
             color="primary"
             type="button"
-            promise-btn
+            promiseBtn=""
             [disabled]="!opts.spreadsheetId"
             *ngIf="(googleApiService.isLoggedIn$|async)"
             (click)="readSpreadsheet()">Read spreadsheet
@@ -83,7 +83,7 @@
           <input type="text"
                  (change)="updateDefaults()"
                  [ngModelOptions]="{standalone: true}"
-                 [ngModel]="opts.defaultValues[i]">
+                 [(ngModel)]="opts.defaultValues[i]">
         </td>
       </tr>
       <tr>
@@ -204,7 +204,7 @@
           type="button"
           mat-raised-button=""
           color="primary"
-          promise-btn>
+          promiseBtn="">
     <mat-icon>save</mat-icon>
     Save row
   </button>
