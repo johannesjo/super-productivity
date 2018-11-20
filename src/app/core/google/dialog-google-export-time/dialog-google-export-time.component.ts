@@ -6,7 +6,7 @@ import { SnackService } from '../../snack/snack.service';
 import { MatDialogRef } from '@angular/material';
 import { ProjectService } from '../../../project/project.service';
 import { Subject } from 'rxjs';
-import { GoogleTimeSheetExport, Project } from '../../../project/project.model';
+import { GoogleTimeSheetExportCopy, Project } from '../../../project/project.model';
 import { takeUntil } from 'rxjs/operators';
 
 @Component({
@@ -16,7 +16,7 @@ import { takeUntil } from 'rxjs/operators';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DialogGoogleExportTimeComponent implements OnInit, OnDestroy {
-  opts: GoogleTimeSheetExport = {
+  opts: GoogleTimeSheetExportCopy = {
     spreadsheetId: undefined,
     isAutoLogin: false,
     isAutoFocusEmpty: false,
