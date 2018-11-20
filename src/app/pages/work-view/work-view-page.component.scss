@@ -76,8 +76,14 @@ h2 {
     margin: 0 1.5*$s;
     text-align: center;
   }
-  .controls button {
-    margin: 0 $s/2;
+  .controls {
+    text-align: center;
+    margin: $s 0;
+    white-space: nowrap;
+
+    button {
+      margin: 0 $s/2;
+    }
   }
 
   .label {
@@ -97,7 +103,7 @@ h2 {
   transform: rotate(90deg);
 }
 
-.controls {
+.finish-day-button-wrapper {
   text-align: center;
   margin: $s 0;
   white-space: nowrap;
