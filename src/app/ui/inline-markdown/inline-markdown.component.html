@@ -1,5 +1,7 @@
-<div class="markdown-wrapper">
+<div class="markdown-wrapper"
+     #wrapperEl>
   <textarea *ngIf="isShowEdit"
+            #textareaEl
             tabindex="1"
             [@fade]
             (focus)="setFocus($event)"
@@ -9,6 +11,7 @@
             rows="5"></textarea>
 
   <div markdown
+       #previewEl
        tabindex="1"
        [data]="model"
        [hidden]="isShowEdit"

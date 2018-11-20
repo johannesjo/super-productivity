@@ -1,5 +1,6 @@
-import { ChangeDetectionStrategy, Component, ElementRef, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core';
 import { fadeAnimation } from '../animations/fade.ani';
+import { MarkdownComponent } from 'ngx-markdown';
 
 
 @Component({
@@ -15,10 +16,19 @@ export class InlineMarkdownComponent implements OnInit {
   @Output() onChanged: EventEmitter<any> = new EventEmitter();
   @Output() focus: EventEmitter<Event> = new EventEmitter();
   @Output() blur: EventEmitter<Event> = new EventEmitter();
+  @ViewChild('wrapperEl') wrapperEl: ElementRef;
+  @ViewChild('textareaEl') textareaEl: ElementRef;
+  @ViewChild('previewEl') previewEl: MarkdownComponent;
+
   isShowEdit = false;
   modelCopy: string;
   el: HTMLElement;
-  textareaEl: HTMLTextAreaElement;
+
+  @Input() set isFocus(val: boolean) {
+    if (!this.isShowEdit && val) {
+      this.toggleShowEdit();
+    }
+  }
 
   constructor(el: ElementRef) {
     this.el = el.nativeElement;
@@ -50,11 +60,8 @@ export class InlineMarkdownComponent implements OnInit {
       this.modelCopy = this.model || '';
 
       setTimeout(() => {
-        const textareaEls = this.el.querySelectorAll('textarea');
-        this.textareaEl = textareaEls[0];
-
-        this.textareaEl.value = this.modelCopy;
-        this.textareaEl.focus();
+        this.textareaEl.nativeElement.value = this.modelCopy;
+        this.textareaEl.nativeElement.focus();
         this.resizeTextareaToFit();
       });
     }
@@ -66,7 +73,7 @@ export class InlineMarkdownComponent implements OnInit {
       this.resizeParsedToFit();
       this.isShowEdit = false;
     }
-    this.modelCopy = this.textareaEl.value;
+    this.modelCopy = this.textareaEl.nativeElement.value;
 
     if (this.modelCopy !== this.model) {
       this.model = this.modelCopy;
@@ -77,21 +84,17 @@ export class InlineMarkdownComponent implements OnInit {
 
 
   resizeTextareaToFit() {
-    const wrapperEl: HTMLElement = this.el.querySelectorAll('div')[0];
-    this.textareaEl.style.height = 'auto';
-    this.textareaEl.style.height = this.textareaEl.scrollHeight + 'px';
-    wrapperEl.style.height = this.textareaEl.offsetHeight + 'px';
+    this.textareaEl.nativeElement.style.height = 'auto';
+    this.textareaEl.nativeElement.style.height = this.textareaEl.nativeElement.scrollHeight + 'px';
+    this.wrapperEl.nativeElement.style.height = this.textareaEl.nativeElement.offsetHeight + 'px';
   }
 
 
   resizeParsedToFit() {
     setTimeout(() => {
-      const previewEl: any = this.el.querySelectorAll('.markdown-parsed')[0];
-      const wrapperEl: HTMLElement = this.el.querySelectorAll('div')[0];
-
-      previewEl.style.height = 'auto';
-      wrapperEl.style.height = previewEl.offsetHeight + 'px';
-      previewEl.style.height = '';
+      this.previewEl.element.nativeElement.style.height = 'auto';
+      this.wrapperEl.nativeElement.style.height = this.previewEl.element.nativeElement.offsetHeight + 'px';
+      this.previewEl.element.nativeElement.style.height = '';
     });
   }
 
