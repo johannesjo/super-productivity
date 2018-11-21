@@ -1,4 +1,4 @@
-**Version 2.0 is on the way! You can [check it out here](https://super-productivity.com/app2/)
+**Version 2.0 is on the way! You can [check it out here](https://super-productivity.com/app2/)**
 
 # Super Productivity
 
