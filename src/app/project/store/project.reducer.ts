@@ -51,7 +51,7 @@ const addStartedTimeToday = (state, currentProjectId): ProjectState => {
     return projectAdapter.updateOne({
       id: currentProjectId,
       changes: {
-        startedTimeToday: new Date().toString()
+        startedTimeToday: Date.now()
       }
     }, state);
   }

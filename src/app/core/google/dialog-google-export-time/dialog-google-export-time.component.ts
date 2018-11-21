@@ -8,6 +8,8 @@ import { ProjectService } from '../../../project/project.service';
 import { Subject } from 'rxjs';
 import { GoogleTimeSheetExportCopy, Project } from '../../../project/project.model';
 import { takeUntil } from 'rxjs/operators';
+import { TaskService } from '../../../tasks/task.service';
+import { TaskWithSubTasks } from '../../../tasks/task.model';
 
 @Component({
   selector: 'dialog-google-export-time',
@@ -34,7 +36,6 @@ export class DialogGoogleExportTimeComponent implements OnInit, OnDestroy {
   headings: string[] = [];
   lastRow: string[] = [];
   MISSING = {
-    startedTimeToday: 'MISSING startedTimeToday',
     getTimeWorkedToday: 'MISSING getTimeWorkedToday',
     getToday: []
   };
@@ -49,13 +50,15 @@ export class DialogGoogleExportTimeComponent implements OnInit, OnDestroy {
   readPromise: Promise<any>;
   savePromise: Promise<any>;
 
+  private _startedTimeToday: number;
+  private _todaysTasks: TaskWithSubTasks[];
   private _projectId: string;
   private _destroy$: Subject<boolean> = new Subject<boolean>();
-
 
   constructor(
     public googleApiService: GoogleApiService,
     private _projectService: ProjectService,
+    private _taskService: TaskService,
     private _snackService: SnackService,
     private _cd: ChangeDetectorRef,
     private _matDialogRef: MatDialogRef<DialogGoogleExportTimeComponent>,
@@ -65,6 +68,12 @@ export class DialogGoogleExportTimeComponent implements OnInit, OnDestroy {
       .subscribe((project: Project) => {
         this.opts = {...project.googleTimeSheetExport};
         this._projectId = project.id;
+        this._startedTimeToday = project.startedTimeToday;
+      });
+    this._taskService.todaysTasks$
+      .pipe(takeUntil(this._destroy$))
+      .subscribe((tasks: TaskWithSubTasks[]) => {
+        this._todaysTasks = tasks;
       });
   }
 
@@ -267,7 +276,7 @@ export class DialogGoogleExportTimeComponent implements OnInit, OnDestroy {
   }
 
   private _getStartTime() {
-    const val = moment(this.MISSING.startedTimeToday);
+    const val = moment(this._startedTimeToday);
     const roundTo = this.opts.roundStartTimeTo;
     return this._roundTime(val, roundTo)
       .format('HH:mm');
@@ -292,7 +301,7 @@ export class DialogGoogleExportTimeComponent implements OnInit, OnDestroy {
   }
 
   private _getTaskTitles(): string {
-    const tasks = this.MISSING.getToday;
+    const tasks = this._todaysTasks || [];
     let titleStr = '';
     tasks.forEach((task) => {
       titleStr += task.title + ', ';
