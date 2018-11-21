@@ -309,15 +309,29 @@ export class TaskService {
     if (!task.title) {
       return task;
     }
-    const timeEstimateRegExp = / t[0-9]+(m|h|d)+ *$/i;
+    const timeEstimateRegExp = / t?(([0-9]+(m|h|d)+)? *\/ *)?([0-9]+(m|h|d)+) *$/i;
     const matches = timeEstimateRegExp.exec(task.title);
 
-    if (matches) {
+    if (matches && matches.length >= 3) {
+      let full;
+      let timeSpent;
+      let timeEstimate;
+      full = matches[0];
+      timeSpent = matches[2];
+      timeEstimate = matches[4];
+      const timeSpentOnDay = timeSpent
+        ? {
+          ...(task.timeSpentOnDay || {}),
+          [getWorklogStr()]: stringToMs(timeSpent)
+        } : task.timeSpentOnDay;
+
       return {
         ...task,
-        timeEstimate: stringToMs(matches[0].replace(' t', '')),
-        title: task.title.replace(matches[0], '')
+        timeSpentOnDay: timeSpentOnDay,
+        timeEstimate: stringToMs(timeEstimate),
+        title: task.title.replace(full, '')
       };
+
     } else {
       return task;
     }
