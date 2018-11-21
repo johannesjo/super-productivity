@@ -47,6 +47,10 @@ export class WorklogComponent implements OnInit {
   restoreTask() {
   }
 
+  sortWorklogItems(a, b) {
+    return b.key - a.key;
+  }
+
   private _createTasksForDay(data: WorklogDay) {
     const tasks = [];
     const dayData = {...data};
