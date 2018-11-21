@@ -5,6 +5,8 @@ import { LayoutService } from '../../core/layout/layout.service';
 import { DragulaService } from 'ng2-dragula';
 import { TakeABreakService } from '../../time-tracking/take-a-break/take-a-break.service';
 import { ActivatedRoute } from '@angular/router';
+import { Observable, Subscription } from 'rxjs';
+import { TaskWithSubTasks } from '../../tasks/task.model';
 
 @Component({
   selector: 'work-view',
@@ -23,6 +25,11 @@ export class WorkViewPageComponent implements OnInit, OnDestroy {
   // close when starting a task
   isShowBacklog = false; // if isPlanYourDay and  show only if there are actually some
   splitInputPos = 0;
+
+  // we do it here to have the tasks in memory all the time
+  backlogTasks: TaskWithSubTasks[];
+
+  private _subs = new Subscription();
 
   constructor(
     public taskService: TaskService,
@@ -44,6 +51,8 @@ export class WorkViewPageComponent implements OnInit, OnDestroy {
     } else {
       this.splitInputPos = 100;
     }
+
+    this._subs.add(this.taskService.backlogTasks$.subscribe(tasks => this.backlogTasks = tasks));
 
     this._dragulaService.createGroup('PARENT', {
       direction: 'vertical',

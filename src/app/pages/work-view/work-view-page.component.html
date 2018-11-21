@@ -108,7 +108,7 @@
 
       <div class="component-wrapper page-wrapper">
         <h2 class="mat-h2">Backlog</h2>
-        <task-list [tasks]="taskService.backlogTasks$|async"
+        <task-list [tasks]="backlogTasks"
                    listId="PARENT"
                    listModelId="BACKLOG"
                    [focusIdList]="taskService.focusIdsForBacklog$|async"
