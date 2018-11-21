@@ -1,3 +1,5 @@
+**Version 2.0 is on the way! You can [check it out here](https://super-productivity.com/app2/)
+
 # Super Productivity
 
 This is a ToDo List / Time Tracker / Personal Jira Task Manager for Linux, MacOS and Windows to make you work super productively. 
