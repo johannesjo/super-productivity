@@ -14,6 +14,19 @@ export const expandAnimation = [
   ])
 ];
 
+export const expandAnimationAllowOverflow = [
+  trigger('expandAllowOverflow', [
+    transition(':enter', [
+      style({height: 0}),
+      animate(ANI_ENTER_TIMING, style({height: '*'}))
+    ]), // void => *
+    transition(':leave', [
+      animate(ANI_LEAVE_TIMING, style({height: 0}))
+    ])
+  ])
+];
+
+
 export const expandFadeAnimation = [
   trigger('expandFade', [
     transition(':enter', [

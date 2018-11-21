@@ -27,3 +27,7 @@ app-root,
 a[href] {
   color: $c-accent;
 }
+
+*, *:after, *:before {
+  box-sizing: border-box;
+}

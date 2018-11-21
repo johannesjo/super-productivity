@@ -3,27 +3,10 @@
 $sTopBottom: $s/1.5;
 $sLeftRight: $sTopBottom/2;
 
-.bookmarks {
-  display: flex;
-}
-
 :host {
   position: relative;
   z-index: 2;
   box-shadow: $whiteframe-shadow-3dp;
-}
-
-.note {
-  max-width: 30%;
-  padding: $s;
-  .content {
-    display: none;
-  }
-  &:hover {
-    .content {
-      display: block;
-    }
-  }
 }
 
 .global-bookmark-list-outer {
