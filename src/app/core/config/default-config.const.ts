@@ -31,7 +31,7 @@ export const DEFAULT_CFG: GlobalConfig = {
   },
   keyboard: {
     globalShowHide: 'Ctrl+Shift+X',
-    addNewTask: '*',
+    addNewTask: 'Shift+A',
     openProjectNotes: 'N',
     openDistractionPanel: 'D',
     showHelp: '?',
@@ -44,7 +44,7 @@ export const DEFAULT_CFG: GlobalConfig = {
     taskToggleNotes: 'n',
     taskOpenEstimationDialog: 't',
     taskToggleDone: 'd',
-    taskAddSubTask: '+',
+    taskAddSubTask: 'a',
     taskDelete: 'Delete',
     selectPreviousTask: 'k',
     selectNextTask: 'j',
