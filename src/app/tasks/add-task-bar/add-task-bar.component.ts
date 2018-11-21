@@ -50,7 +50,10 @@ export class AddTaskBarComponent implements OnInit, OnDestroy {
       }),
       switchMap(([searchTerm, jiraCfg]) => {
         if (searchTerm && searchTerm.length > 1 && jiraCfg && jiraCfg.isEnabled) {
-          return this._jiraApiService.search(searchTerm, false, 50);
+          return this._jiraApiService.search(searchTerm, false, 50)
+            .catch(() => {
+              return [];
+            });
         } else {
           // Note: the outer array signifies the observable stream the other is the value
           return [[]];

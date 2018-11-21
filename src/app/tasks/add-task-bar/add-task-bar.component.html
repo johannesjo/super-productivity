@@ -12,16 +12,18 @@
          (blur)="onBlur($event)">
 
   <mat-autocomplete #autoEl="matAutocomplete"
+                    (optionSelected)="addTask()"
                     [displayWith]="displayWith"
                     [autoActiveFirstOption]="true">
     <mat-option *ngIf="isLoading"
+                [value]="taskSuggestionsCtrl.value"
                 class="is-loading">
       <mat-spinner diameter="50"></mat-spinner>
     </mat-option>
     <ng-container *ngIf="!isLoading">
       <mat-option *ngFor="let issue of filteredIssueSuggestions"
                   [value]="issue">
-        <span>{{ issue?.summary}}</span>
+        <span>{{issue?.key}} {{ issue?.summary}}</span>
       </mat-option>
     </ng-container>
 
