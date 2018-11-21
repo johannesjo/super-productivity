@@ -73,8 +73,8 @@
       box-sizing: border-box;
 
       @include dark-theme {
-        background: $standardNoteBgLight;
-        color: $standardNoteFgLight;
+        background: $standardNoteBgDark;
+        color: $standardNoteFgDark;
         border-color: #333333;
       }
     }
