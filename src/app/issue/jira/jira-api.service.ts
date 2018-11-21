@@ -179,6 +179,7 @@ export class JiraApiService {
       timeout: setTimeout(() => {
         console.log('ERROR', 'Jira Request timed out for ' + request.apiMethod);
         // delete entry for promise
+        this.requestsLog[request.requestId].reject('Request timed out');
         delete this.requestsLog[request.requestId];
       }, JIRA_REQUEST_TIMEOUT_DURATION)
     };
