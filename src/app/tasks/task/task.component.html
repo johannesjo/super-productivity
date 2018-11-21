@@ -8,7 +8,7 @@
     </mat-icon>
 
 
-    <button mat-mini-fab=""
+    <button mat-icon-button=""
             color=""
             class="play-btn ico-btn"
             (click)="startTask()"
@@ -18,7 +18,7 @@
       <mat-icon class="material-icons">play_arrow</mat-icon>
     </button>
 
-    <button mat-mini-fab=""
+    <button mat-icon-button=""
             color=""
             class="play-btn ico-btn"
             (click)="pauseTask()"
@@ -28,7 +28,7 @@
     </button>
 
 
-    <button mat-mini-fab=""
+    <button mat-icon-button=""
             aria-label="is updated"
             tabindex="2"
             color="primary"
@@ -38,7 +38,7 @@
       <mat-icon class="material-icons update update-icon">update</mat-icon>
     </button>
 
-    <a mat-mini-fab=""
+    <a mat-icon-button=""
        color=""
        class="ico-btn original-link-btn"
        aria-label="link"
@@ -71,7 +71,7 @@
 
     <div class="controls">
       <button *ngIf="!task.subTasks || !task.subTasks.length"
-              mat-mini-fab=""
+              mat-icon-button=""
               color=""
               tabindex="2"
               class="ico-btn"
@@ -81,17 +81,17 @@
 
         <mat-icon aria-label="time estimation">access_time</mat-icon>
       </button>
-      <button mat-mini-fab=""
-              color=""
-              class="ico-btn"
-              aria-label="add sub task"
-              *ngIf="!task.parentId&&!task.isDone"
-              tabindex="2"
-              (click)="addSubTask($event);">
+      <!--<button mat-icon-button=""-->
+      <!--color=""-->
+      <!--class="ico-btn"-->
+      <!--aria-label="add sub task"-->
+      <!--*ngIf="!task.parentId&&!task.isDone"-->
+      <!--tabindex="2"-->
+      <!--(click)="addSubTask($event);">-->
 
-        <mat-icon aria-label="add sub task">playlist_add</mat-icon>
-      </button>
-      <button mat-mini-fab=""
+      <!--<mat-icon aria-label="add sub task">playlist_add</mat-icon>-->
+      <!--</button>-->
+      <button mat-icon-button=""
               color=""
               class="ico-btn show-notes-btn"
               aria-label="notes"
@@ -104,32 +104,75 @@
         </mat-icon>
         <mat-icon *ngIf="!task.notes&&!task.issueData">mode_comment</mat-icon>
       </button>
-      <button mat-mini-fab=""
-              color=""
-              tabindex="2"
-              aria-label="delete"
-              class="ico-btn delete-btn"
-              (click)="deleteTask()">
+      <!--<button mat-icon-button=""-->
+      <!--color=""-->
+      <!--tabindex="2"-->
+      <!--aria-label="delete"-->
+      <!--class="ico-btn delete-btn"-->
+      <!--(click)="deleteTask()">-->
 
-        <mat-icon class="material-icons delete-icon"
-                  aria-label="delete">delete_forever
-        </mat-icon>
+      <!--<mat-icon class="material-icons delete-icon"-->
+      <!--aria-label="delete">delete_forever-->
+      <!--</mat-icon>-->
+      <!--</button>-->
+      <!--<button mat-icon-button=""-->
+      <!--color=""-->
+      <!--(click)="toggleTaskDone()"-->
+      <!--class="ico-btn mark-as-done-btn"-->
+      <!--tabindex="2"-->
+      <!--aria-label="un-/mark as done">-->
+      <!--<mat-icon class="material-icons delete-icon"-->
+      <!--*ngIf="task.isDone"-->
+      <!--aria-label="Mark as undone">undo-->
+      <!--</mat-icon>-->
+      <!--<mat-icon class="material-icons delete-icon"-->
+      <!--*ngIf="!task.isDone"-->
+      <!--aria-label="Mark as done">check-->
+      <!--</mat-icon>-->
+      <!--</button>-->
+      <button mat-icon-button=""
+              class="ico-btn"
+              [matMenuTriggerFor]="menu">
+        <mat-icon>more_vert</mat-icon>
       </button>
-      <button mat-mini-fab=""
-              color=""
-              (click)="toggleTaskDone()"
-              class="ico-btn mark-as-done-btn"
-              tabindex="2"
-              aria-label="un-/mark as done">
-        <mat-icon class="material-icons delete-icon"
-                  *ngIf="task.isDone"
-                  aria-label="Mark as undone">undo
-        </mat-icon>
-        <mat-icon class="material-icons delete-icon"
-                  *ngIf="!task.isDone"
-                  aria-label="Mark as done">check
-        </mat-icon>
-      </button>
+      <mat-menu #menu="matMenu">
+        <button mat-menu-item=""
+                aria-label="add sub task"
+                *ngIf="!task.parentId&&!task.isDone"
+                tabindex="2"
+                (click)="addSubTask($event);">
+          <mat-icon aria-label="add sub task">playlist_add</mat-icon>
+          Add sub task
+        </button>
+        <button mat-menu-item=""
+                tabindex="2"
+                aria-label="delete"
+                (click)="deleteTask()">
+
+          <mat-icon class="material-icons delete-icon"
+                    style="color:#e15d63;"
+                    aria-label="delete">delete_forever
+          </mat-icon>
+          Delete Task
+        </button>
+        <button mat-menu-item=""
+                (click)="toggleTaskDone()"
+                tabindex="2"
+                aria-label="un-/mark as done">
+          <ng-container *ngIf="task.isDone">
+            <mat-icon class="material-icons delete-icon"
+                      aria-label="Mark as undone">undo
+            </mat-icon>
+            Mark as undone
+          </ng-container>
+          <ng-container *ngIf="!task.isDone">
+            <mat-icon class="material-icons delete-icon"
+                      aria-label="Mark as done">check
+            </mat-icon>
+            Mark as done
+          </ng-container>
+        </button>
+      </mat-menu>
     </div>
   </div>
 

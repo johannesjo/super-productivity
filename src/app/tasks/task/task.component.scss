@@ -5,6 +5,7 @@
 $this-task-text-color-done: #aaaaaa;
 $task-inner-padding-left-right: 6px;
 $this-active-shadow: $whiteframe-shadow-6dp;
+$this-first-line-min-height: 40px;
 
 :host {
   display: block;
@@ -17,6 +18,10 @@ $this-active-shadow: $whiteframe-shadow-6dp;
     .title-bar-wrapper,
     .first-line {
       background: inherit;
+    }
+
+    .first-line {
+      min-height: $this-first-line-min-height;
     }
   }
 
@@ -107,8 +112,10 @@ $this-active-shadow: $whiteframe-shadow-6dp;
     padding: 0;
     z-index: 4;
     transition: transform $transition-standard;
+    opacity: 0.7;
     &:hover {
       z-index: 5;
+      opacity: 1;
       transform: scale(1.1);
     }
     &:focus {
@@ -219,7 +226,7 @@ $this-active-shadow: $whiteframe-shadow-6dp;
     .controls:hover {
       opacity: 1;
       z-index: 12;
-      transform: scale(1.0714285714);
+      //transform: scale(1.0714285714);
     }
   }
 }
