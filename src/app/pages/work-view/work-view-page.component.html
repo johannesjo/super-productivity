@@ -85,8 +85,10 @@
            [splitPos]="splitInputPos"
            [counter]="(taskService.backlogTasks$|async).length"
            [splitTopEl]="splitTopEl"
-           [splitBottomEl]="splitBottomEl"></split>
-    <div class="inner-wrapper">
+           [splitBottomEl]="splitBottomEl"
+           (posChanged)="splitInputPos=$event"></split>
+    <div class="inner-wrapper"
+         *ngIf="splitInputPos!==100">
       <header class="backlog-header bg-400 color-contrast">
         <div class="status-bar">
           <div class="item">

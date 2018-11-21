@@ -15,7 +15,7 @@ export class SplitComponent implements OnInit {
   @Input() splitBottomEl;
   @Input() containerEl;
   @Input() counter;
-  @Output() onPosChanged: EventEmitter<number> = new EventEmitter();
+  @Output() posChanged: EventEmitter<number> = new EventEmitter();
 
   pos: number;
   subscription: Subscription;
@@ -26,9 +26,11 @@ export class SplitComponent implements OnInit {
   }
 
   @Input() set splitPos(pos: number) {
-    this._renderer.addClass(this.splitTopEl, ANIMATABLE_CLASS);
-    this._renderer.addClass(this.splitBottomEl, ANIMATABLE_CLASS);
-    this._updatePos(pos, true);
+    if (pos !== this.pos) {
+      this._renderer.addClass(this.splitTopEl, ANIMATABLE_CLASS);
+      this._renderer.addClass(this.splitBottomEl, ANIMATABLE_CLASS);
+      this._updatePos(pos, true);
+    }
   }
 
   ngOnInit() {
@@ -112,7 +114,7 @@ export class SplitComponent implements OnInit {
       // );
 
       if (!isWasOutsideChange) {
-        this.onPosChanged.emit(pos);
+        this.posChanged.emit(pos);
       }
     }
   }
