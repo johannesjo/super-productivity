@@ -52,8 +52,8 @@ export class JiraApiService {
       maxResults: maxResults,
       fields: isFetchAdditional ? JIRA_ADDITIONAL_ISSUE_FIELDS : JIRA_REDUCED_ISSUE_FIELDS,
     };
-    const searchQuery = `(text ~ "${searchTerm}"  OR key = "${searchTerm}")`
-    + ' ' + this._cfg.searchJqlQuery ? ` AND ${this._cfg.searchJqlQuery}` : '';
+    const searchQuery = `text ~ "${searchTerm}"`
+      + ' ' + (this._cfg.searchJqlQuery ? ` AND ${this._cfg.searchJqlQuery}` : '');
 
     return this._sendRequest({
       apiMethod: 'searchJira',
