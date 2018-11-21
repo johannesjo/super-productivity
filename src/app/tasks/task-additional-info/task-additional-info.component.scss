@@ -51,7 +51,9 @@
 
 .tab-content {
   padding: $s;
-
+  @include dark-theme {
+    color: $dark-theme-text-color-lighter;
+  }
   h3 {
     margin-bottom: $s;
   }

@@ -56,7 +56,7 @@ $this-first-line-min-height: 40px;
   }
 
   &.isCurrent > .inner-wrapper {
-    background: $c-accent;
+    //background: $c-accent;
     box-shadow: $this-active-shadow;
 
     .first-line {
@@ -179,7 +179,7 @@ $this-first-line-min-height: 40px;
 
   .show-notes-btn {
     mat-icon {
-      transition: $transition-standard;
+      transition: transform $transition-standard;
       backface-visibility: hidden;
     }
 
