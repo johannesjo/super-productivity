@@ -6,6 +6,7 @@ $this-task-text-color-done: #aaaaaa;
 $task-inner-padding-left-right: 6px;
 $this-active-shadow: $whiteframe-shadow-6dp;
 $this-first-line-min-height: 40px;
+$thisIconDefaultOpacity: 0.7;
 
 :host {
   display: block;
@@ -115,7 +116,7 @@ $this-first-line-min-height: 40px;
     padding: 0;
     z-index: 4;
     transition: transform $transition-standard;
-    opacity: 0.7;
+    opacity: $thisIconDefaultOpacity;
     &:hover {
       z-index: 5;
       opacity: 1;
@@ -188,7 +189,7 @@ $this-first-line-min-height: 40px;
   .play-btn {
     transition: $transition-standard;
     opacity: 0.4 !important;
-    &:hover{
+    &:hover {
       opacity: 1 !important;
     }
   }
@@ -263,18 +264,24 @@ $this-first-line-min-height: 40px;
   }
 }
 
-.handle {
+.drag-handle {
   margin: 0 4px 0 9px;
   position: relative;
   z-index: 3;
   cursor: grab;
+  opacity: $thisIconDefaultOpacity;
+  transition: transform $transition-standard;
+
+  &:hover{
+    opacity: 1;
+  }
 
   &:after {
     content: '';
-    top: -$s;
-    bottom: -$s;
-    left: -$s;
-    right: 0;
+    top: -$s*2;
+    bottom: -$s*2;
+    left: -$s*2;
+    right: -$s*0.5;
     position: absolute;
   }
 }
