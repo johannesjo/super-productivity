@@ -9,5 +9,8 @@
 .mw {
   max-width: $component-max-width;
   margin: auto;
+}
 
+[hidden] {
+  visibility: hidden;
 }

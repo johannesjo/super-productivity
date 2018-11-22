@@ -1,0 +1,21 @@
+@mixin dark-theme {
+  :host-context(.isDarkTheme) & {
+    @content;
+  }
+}
+
+@mixin light-theme {
+  :host-context(.isLightTheme) & {
+    @content;
+  }
+}
+
+@mixin standardThemeTextColor {
+  @include dark-theme() {
+    color: $dark-theme-text-color;
+  }
+  @include light-theme() {
+    color: $light-theme-text-color;
+  }
+}
+

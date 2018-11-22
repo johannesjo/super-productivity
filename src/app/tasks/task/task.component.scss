@@ -6,7 +6,7 @@ $this-task-text-color-done: #aaaaaa;
 $task-inner-padding-left-right: 6px;
 $this-active-shadow: $whiteframe-shadow-6dp;
 $this-first-line-min-height: 40px;
-$thisIconDefaultOpacity: 0.7;
+$this-icon-default-opacity: 0.7;
 
 :host {
   display: block;
@@ -116,7 +116,7 @@ $thisIconDefaultOpacity: 0.7;
     padding: 0;
     z-index: 4;
     transition: transform $transition-standard;
-    opacity: $thisIconDefaultOpacity;
+    opacity: $this-icon-default-opacity;
     &:hover {
       z-index: 5;
       opacity: 1;
@@ -256,7 +256,7 @@ $thisIconDefaultOpacity: 0.7;
   position: relative;
   z-index: 3;
   cursor: grab;
-  opacity: $thisIconDefaultOpacity;
+  opacity: $this-icon-default-opacity;
   transition: transform $transition-standard;
 
   &:hover {

@@ -3,7 +3,7 @@
 .dialog-content {
 }
 
-@media (min-width: $layout-gt-xs) {
+@media (min-width: $layout-xs) {
   .row {
     display: flex;
   }
@@ -14,7 +14,7 @@
 
 #task-textarea {
   width: 100%;
-  @media (min-width: $layout-gt-xs) {
+  @media (min-width: $layout-xs) {
     min-width: 70vw;
   }
 }

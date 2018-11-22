@@ -30,7 +30,7 @@
     }
   }
 
-  @media(min-width: $layout-gt-sm) {
+  @media(min-width: $layout-sm) {
     .row {
       display: flex;
       flex-direction: row;

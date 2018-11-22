@@ -2,7 +2,7 @@
 
 .note {
   background: #ffffff;
-  color: $standardNoteFgLight;
+  color: $standard-note-fg-light;
   box-sizing: border-box;
   position: relative;
   border-radius: $card-border-radius;
@@ -11,8 +11,8 @@
   transition-property: transform;
 
   @include dark-theme {
-    background: $standardNoteBgDark;
-    color: $standardNoteFgDark;
+    background: $standard-note-bg-dark;
+    color: $standard-note-fg-dark;
     border-color: #333333;
   }
 
@@ -55,12 +55,12 @@
       font-size: 12px;
       border-radius: $card-border-radius;
       background: #ffffff;
-      color: $standardNoteFgLight;
+      color: $standard-note-fg-light;
       box-sizing: border-box;
 
       @include dark-theme {
-        background: $standardNoteBgDark;
-        color: $standardNoteFgDark;
+        background: $standard-note-bg-dark;
+        color: $standard-note-fg-dark;
         border-color: #333333;
       }
     }

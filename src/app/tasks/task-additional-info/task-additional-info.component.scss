@@ -71,13 +71,13 @@
     .markdown-parsed {
       @include standardThemeTextColor();
 
-      background: $standardNoteBgLight;
-      color: $standardNoteFgLight;
+      background: $standard-note-ng-light;
+      color: $standard-note-fg-light;
       box-sizing: border-box;
 
       @include dark-theme {
-        background: $standardNoteBgDark;
-        color: $standardNoteFgDark;
+        background: $standard-note-bg-dark;
+        color: $standard-note-fg-dark;
         border-color: #333333;
       }
     }
