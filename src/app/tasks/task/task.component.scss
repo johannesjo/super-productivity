@@ -136,6 +136,9 @@ $this-first-line-min-height: 40px;
     //  border-radius: 100%;
     //}
   }
+  &.isCurrent .first-line .ico-btn {
+    opacity: 1;
+  }
 
   .first-line {
     display: flex;
@@ -286,6 +289,10 @@ $this-first-line-min-height: 40px;
   user-select: none;
   caret-color: #000000;
   z-index: 4;
+
+  :host.isCurrent & {
+    font-weight: bold;
+  }
 
   @include dark-theme() {
     caret-color: #ffffff;
