@@ -185,7 +185,6 @@ $thisIconDefaultOpacity: 0.7;
   z-index: 1;
 }
 
-
 .show-notes-btn {
   mat-icon {
     transition: transform $transition-standard;
@@ -260,7 +259,7 @@ $thisIconDefaultOpacity: 0.7;
   opacity: $thisIconDefaultOpacity;
   transition: transform $transition-standard;
 
-  &:hover{
+  &:hover {
     opacity: 1;
   }
 
@@ -410,4 +409,18 @@ input {
   font-weight: bold;
   display: flex;
   z-index: 12;
+}
+
+.time-btn {
+  position: relative;
+  overflow: visible;
+  ::ng-deep .svg-wrapper {
+    z-index: 5455;
+    position: absolute;
+    width: 44px;
+    height: 44px;
+    top: 50%;
+    left: 50%;
+    transform: translate3d(-50%, -50%, 0);
+  }
 }

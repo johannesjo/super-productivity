@@ -52,6 +52,7 @@
   }
   .color-primary {
     color: mat-color($primary);
+    stroke: mat-color($primary);
   }
   .border-color-primary {
     border-color: mat-color($primary);
