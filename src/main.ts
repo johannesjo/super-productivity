@@ -20,3 +20,6 @@ declare global {
     ipcRenderer: any;
   }
 }
+// fix mobile scrolling while dragging
+window.addEventListener('touchmove', function () {
+});
