@@ -24,7 +24,7 @@
   position: relative;
   color: #000000;
 
-  @include dark-theme {
+  @include darkTheme {
     color: #eeeeee;
   }
 
@@ -44,7 +44,7 @@
     color: #000000;
     background: #ffffff;
 
-    @include dark-theme {
+    @include darkTheme {
       background-color: $dark-theme-bg;
       color: #eeeeee;
     }

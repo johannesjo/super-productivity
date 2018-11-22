@@ -8,7 +8,7 @@
   border-radius: $card-border-radius;
   border: 1px solid #dddddd;
 
-  @include dark-theme {
+  @include darkTheme {
     border-color: #333333;
   }
 
@@ -75,7 +75,7 @@
       color: $standard-note-fg-light;
       box-sizing: border-box;
 
-      @include dark-theme {
+      @include darkTheme {
         background: $standard-note-bg-dark;
         color: $standard-note-fg-dark;
         border-color: #333333;

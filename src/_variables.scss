@@ -2,6 +2,9 @@
 
 $s: 8px;
 $card-border-radius: 4px;
+
+// COLORS
+// ------
 $dark-theme-bg-darker: rgb(39, 39, 39);
 $dark-theme-bg-lighter: rgb(70, 70, 70);
 $dark-theme-bg: rgb(48, 48, 48);
@@ -14,23 +17,31 @@ $green: #4fa758;
 $light-green: #a9ed9f;
 $red: #e15d63;
 $red-danger: #e11826;
-$yellow: #fff400;
+$yellow: #fff400; // for sun
 $c-accent: #ff4081;
 
-$standard-note-ng-light: #ffffff;
-$standard-note-fg-light: #000000;
-$standard-note-bg-dark: $dark-theme-bg-darker;
-$standard-note-fg-dark: #eeeeee;
 
-$component-max-width: 900px;
-
+// LAYOUT
+// ------
 $layout-xs: 600px;
 $layout-sm: 960px;
 $layout-md: 1280px;
 $layout-lg: 1920px;
 
+$component-max-width: 900px;
 $main-header-height: $s*7;
 
+
+// COMPONENTS
+// ----------
+$standard-note-ng-light: #ffffff;
+$standard-note-fg-light: #000000;
+$standard-note-bg-dark: $dark-theme-bg-darker;
+$standard-note-fg-dark: #eeeeee;
+
+
+// ANIMATIONS
+// ----------
 // https://github.com/material-components/material-components-web/blob/master/packages/mdc-animation/_variables.scss
 $ani-standard-timing: cubic-bezier(.4, 0, .2, 1) !default;
 $ani-enter-timing: cubic-bezier(0, 0, .2, 1) !default;
@@ -53,3 +64,4 @@ $transition-fast: $transition-duration-s $ani-standard-timing;
 $page-transition-duration: $transition-duration-m;
 
 @import 'styles/mixins/mixins';
+@import 'styles/extends/extends';

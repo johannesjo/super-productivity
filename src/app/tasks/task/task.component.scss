@@ -157,7 +157,7 @@ $this-icon-default-opacity: 0.7;
     &.delete-btn {
       mat-icon.delete-icon {
         color: $red !important;
-        @include dark-theme {
+        @include darkTheme {
           color: $red !important;
         }
       }
@@ -166,7 +166,7 @@ $this-icon-default-opacity: 0.7;
         background: $red-danger !important;
         mat-icon.delete-icon {
           color: #ffffff !important;
-          @include dark-theme {
+          @include darkTheme {
             color: #ffffff !important;
           }
         }
@@ -246,7 +246,7 @@ $this-icon-default-opacity: 0.7;
   border-radius: $card-border-radius;
   border: 1px solid #dddddd;
 
-  @include dark-theme {
+  @include darkTheme {
     border-color: #333333;
   }
 }
@@ -301,7 +301,7 @@ $this-icon-default-opacity: 0.7;
     font-weight: bold;
   }
 
-  @include dark-theme() {
+  @include darkTheme() {
     caret-color: #ffffff;
   }
 
@@ -322,7 +322,7 @@ $this-icon-default-opacity: 0.7;
     border: 1px solid black;
     pointer-events: none;
 
-    @include dark-theme() {
+    @include darkTheme() {
       //background: $dark-theme-bg-darker;
       border: 1px solid #ffffff;
       box-shadow: 0 0 4px 0 rgba(255, 255, 255, 0.8), $whiteframe-shadow-13dp;
