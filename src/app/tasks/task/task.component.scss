@@ -185,18 +185,6 @@ $thisIconDefaultOpacity: 0.7;
   z-index: 1;
 }
 
-@media(min-width: $layout-xs) {
-  .play-btn {
-    transition: $transition-standard;
-    opacity: 0.4 !important;
-    &:hover {
-      opacity: 1 !important;
-    }
-  }
-  //:host:hover > .inner-wrapper > .first-line > .play-btn {
-  //  opacity: 1 !important;
-  //}
-}
 
 .show-notes-btn {
   mat-icon {
