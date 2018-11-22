@@ -50,10 +50,9 @@
 }
 
 .tab-content {
+  // needed to overstyle current task
+  @include standardThemeTextColor();
   padding: $s;
-  @include dark-theme {
-    color: $dark-theme-text-color-lighter;
-  }
   h3 {
     margin-bottom: $s;
   }
@@ -70,6 +69,8 @@
 
     .markdown-unparsed,
     .markdown-parsed {
+      @include standardThemeTextColor();
+
       background: $standardNoteBgLight;
       color: $standardNoteFgLight;
       box-sizing: border-box;

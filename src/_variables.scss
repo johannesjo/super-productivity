@@ -3,11 +3,10 @@ $card-border-radius: 4px;
 $dark-theme-bg-darker: rgb(39, 39, 39);
 $dark-theme-bg-lighter: rgb(70, 70, 70);
 $dark-theme-bg: rgb(48, 48, 48);
-$dark-theme-text-color: #777777;
-$dark-theme-text-color-lighter: #bdbdbd;
-
-$light-theme-text-color: #333333;
 $light-theme-bg: rgb(244, 244, 244);
+$dark-theme-text-color: #bdbdbd;
+$light-theme-text-color: #333333;
+
 
 $dark-green: #30412d;
 $green: #4fa758;
@@ -99,3 +98,21 @@ $page-transition-duration: $transition-duration-m;
     @content;
   }
 }
+
+@mixin light-theme {
+  :host-context(.isLightTheme) & {
+    @content;
+  }
+}
+
+
+
+@mixin standardThemeTextColor {
+  @include dark-theme(){
+    color: $dark-theme-text-color;
+  }
+  @include light-theme(){
+    color: $light-theme-text-color;
+  }
+}
+
