@@ -39,7 +39,8 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   // TODO also persist to task
   additionalTabsIndex = 0;
   isDragOver: boolean;
-  @HostBinding('class.isCurrent') isCurrent = false;
+  isCurrent: boolean;
+
   @ViewChild('editOnClickEl') editOnClickEl: ElementRef;
   @HostBinding('tabindex') tabIndex = 1;
   private _dragEnterTarget: HTMLElement;

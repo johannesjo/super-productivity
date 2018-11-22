@@ -8,6 +8,24 @@ $this-active-shadow: $whiteframe-shadow-6dp;
 $this-first-line-min-height: 40px;
 $this-icon-default-opacity: 0.7;
 
+%standardTaskHover {
+  opacity: $this-icon-default-opacity;
+  transition: transform $transition-standard;
+
+  .isCurrent &,
+  &:hover,
+  &:focus {
+    opacity: 1;
+  }
+}
+
+%standardTaskZoom {
+  &:hover,
+  &:focus {
+    transform: scale(1.1);
+  }
+}
+
 :host {
   display: block;
   position: relative;
@@ -30,59 +48,21 @@ $this-icon-default-opacity: 0.7;
   &:last-child > .inner-wrapper {
     margin-bottom: 0;
   }
+
   .sub-tasks {
     margin: 0 $s;
   }
 
-  //> .inner-wrapper:after {
-  //content: '';
-  //border-width: 2px;
-  //position: absolute;
-  //top: 0;
-  //width: 100%;
-  //height: 100%;
-  //box-sizing: border-box;
-  ////transition:  $transition-standard;
-  //transition-property: opacity;
-  //opacity: 0;
-  //border-style: solid;
-  //box-shadow: $this-active-shadow;
-  ////box-shadow: $whiteframe-shadow-24dp;
-  //}
   &:focus {
     z-index: 4;
     outline: none;
+
     > .inner-wrapper {
       outline: 2px dashed $c-accent;
     }
   }
 
-  &.isCurrent > .inner-wrapper {
-    //background: $c-accent;
-    transform: scale(1.0178571428);
-    box-shadow: $this-active-shadow;
-    backface-visibility: hidden;
 
-    .first-line {
-      //color: #ffffff;
-    }
-  }
-
-  &.is-done {
-    //opacity: 0.8;
-    .time,
-    .task-title {
-      color: $this-task-text-color-done;
-    }
-
-    .task-title {
-      text-decoration: line-through;
-    }
-
-    .play-btn {
-      display: none;
-    }
-  }
 
   .title-bar-wrapper {
     display: flex;
@@ -106,22 +86,18 @@ $this-icon-default-opacity: 0.7;
   }
 
   $this-button-spacer: 1px;
-  $this-button-spacer-mobile: 1px;
-  $this-button-size: 34px;
-  $this-button-size-mobile: 34px;
-  $this-icon-color: #545454;
   .toggle-sub-tasks-btn,
   .first-line .ico-btn {
     margin: 0 $this-button-spacer;
     padding: 0;
     z-index: 4;
-    transition: transform $transition-standard;
-    opacity: $this-icon-default-opacity;
+    @extend %standardTaskHover;
+    @extend %standardTaskZoom;
+
     &:hover {
       z-index: 5;
-      opacity: 1;
-      transform: scale(1.1);
     }
+
     &:focus {
       outline: none;
     }
@@ -137,9 +113,8 @@ $this-icon-default-opacity: 0.7;
     //  border-radius: 100%;
     //}
   }
-  &.isCurrent .first-line .ico-btn {
-    opacity: 1;
-  }
+
+
 
   .first-line {
     display: flex;
@@ -164,6 +139,7 @@ $this-icon-default-opacity: 0.7;
 
       &:hover {
         background: $red-danger !important;
+
         mat-icon.delete-icon {
           color: #ffffff !important;
           @include darkTheme {
@@ -211,7 +187,6 @@ $this-icon-default-opacity: 0.7;
 @include mq(xs) {
   .controls {
     opacity: 1;
-    // TODO maybe opacity 0.1 just an option
     position: relative;
     transition: $transition-fast;
 
@@ -245,9 +220,28 @@ $this-icon-default-opacity: 0.7;
   //box-shadow: $shadow-bottom-boxed;
   border-radius: $card-border-radius;
   border: 1px solid #dddddd;
-
   @include darkTheme {
     border-color: #333333;
+  }
+
+  &.isCurrent {
+    transform: scale(1.0178571428);
+    box-shadow: $this-active-shadow;
+  }
+
+  &.isDone {
+    .time,
+    .task-title {
+      color: $this-task-text-color-done;
+    }
+
+    .task-title {
+      text-decoration: line-through;
+    }
+
+    .play-btn {
+      display: none;
+    }
   }
 }
 
@@ -297,7 +291,7 @@ $this-icon-default-opacity: 0.7;
   caret-color: #000000;
   z-index: 4;
 
-  :host.isCurrent & {
+  .isCurrent & {
     font-weight: bold;
   }
 
@@ -306,7 +300,6 @@ $this-icon-default-opacity: 0.7;
   }
 
   &:after {
-    //background: #ffffff;
     transition: $transition-leave;
     position: absolute;
     width: 100%;
@@ -323,18 +316,11 @@ $this-icon-default-opacity: 0.7;
     pointer-events: none;
 
     @include darkTheme() {
-      //background: $dark-theme-bg-darker;
       border: 1px solid #ffffff;
       box-shadow: 0 0 4px 0 rgba(255, 255, 255, 0.8), $whiteframe-shadow-13dp;
     }
   }
 
-  //:host.isCurrent &:focus {
-  //  color: #000000;
-  //}
-  //:host-context(.isDarkTheme).isCurrent &:focus {
-  //  color: #ffffff;
-  //}
 
   &:focus {
     z-index: 5;
@@ -352,6 +338,7 @@ $this-icon-default-opacity: 0.7;
       opacity: 1;
       transition: $transition-standard;
     }
+
     @include mq(xs, max) {
       transform: scale(1);
     }
@@ -414,6 +401,7 @@ input {
 .time-btn {
   position: relative;
   overflow: visible;
+
   ::ng-deep .svg-wrapper {
     z-index: 5455;
     position: absolute;
