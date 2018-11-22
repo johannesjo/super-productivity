@@ -172,68 +172,81 @@ $this-first-line-min-height: 40px;
       }
     }
   }
+}
 
-  // Button Stuff
+// Button Stuff
+.play-btn {
+  padding-left: 0;
+  margin-left: -2px;
+  margin-right: 3px;
+  // move over original link btn
+  position: relative;
+  z-index: 1;
+}
+
+@media(min-width: $layout-xs) {
   .play-btn {
-    padding-left: 0;
-    margin-left: -2px;
-    margin-right: 3px;
-    // move over original link btn
-    position: relative;
-    z-index: 1;
-  }
-
-  .show-notes-btn {
-    mat-icon {
-      transition: transform $transition-standard;
-      backface-visibility: hidden;
-    }
-
-    &.isActive mat-icon {
-      transform: rotate(45deg);
+    transition: $transition-standard;
+    opacity: 0.4 !important;
+    &:hover{
+      opacity: 1 !important;
     }
   }
+  //:host:hover > .inner-wrapper > .first-line > .play-btn {
+  //  opacity: 1 !important;
+  //}
+}
 
+.show-notes-btn {
+  mat-icon {
+    transition: transform $transition-standard;
+    backface-visibility: hidden;
+  }
+
+  &.isActive mat-icon {
+    transform: rotate(45deg);
+  }
+}
+
+.controls {
+  white-space: nowrap;
+  text-align: right;
+  margin-right: 2px;
+
+  @media(max-width: $layout-xs) {
+    white-space: normal;
+    margin-left: 5px;
+  }
+}
+
+// transparent controls for desktop
+@media(min-width: $layout-xs) {
   .controls {
-    white-space: nowrap;
-    text-align: right;
-    margin-right: 2px;
+    opacity: 1;
+    // TODO maybe opacity 0.1 just an option
+    position: relative;
+    transition: $transition-fast;
 
-    @media(max-width: $layout-xs) {
-      white-space: normal;
-      margin-left: 5px;
+    // hitarea
+    &:after {
+      position: absolute;
+      top: -$s;
+      right: -$s;
+      left: -2*$s;
+      bottom: -$s;
+      content: '';
     }
   }
-
-  // transparent controls for desktop
-  @media(min-width: $layout-xs) {
-    .controls {
-      opacity: 1;
-      // TODO maybe opacity 0.1 just an option
-      position: relative;
-      transition: $transition-fast;
-
-      // hitarea
-      &:after {
-        position: absolute;
-        top: -$s;
-        right: -$s;
-        left: -2*$s;
-        bottom: -$s;
-        content: '';
-      }
-    }
-    .first-line:hover {
-      > .controls {
-        opacity: 1;
-        z-index: 12;
-      }
-    }
-    .controls:hover {
+  .first-line:hover {
+    > .controls {
       opacity: 1;
       z-index: 12;
-      //transform: scale(1.0714285714);
     }
+  }
+  .controls:hover {
+    opacity: 1;
+    z-index: 12;
+    //transform: scale(1.0714285714);
   }
 }
 
