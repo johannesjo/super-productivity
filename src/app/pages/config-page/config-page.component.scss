@@ -30,7 +30,7 @@
     }
   }
 
-  @media(min-width: $layout-sm) {
+  @include mq(sm) {
     .row {
       display: flex;
       flex-direction: row;
@@ -46,7 +46,7 @@
     }
   }
 
-  @media(max-width: $layout-xs) {
+  @include mq(xs, max) {
     .keyboard-settings {
       display: none;
     }

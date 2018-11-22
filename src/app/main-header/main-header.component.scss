@@ -45,7 +45,7 @@ mat-toolbar {
   transition: $transition-standard !important;
   transition-property: transform !important;
   margin: 0 !important;
-  @media(max-width: $layout-xs) {
+  @include mq(xs, max) {
     height: 30px !important;
     min-height: 30px !important;
     padding: 0 !important;

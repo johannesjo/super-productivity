@@ -29,7 +29,7 @@
   top: 0;
   right: 0;
 
-  @media(min-width: $layout-xs) {
+  @include mq(xs) {
     opacity: 0;
     transition: $transition-standard;
 

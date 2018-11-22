@@ -92,7 +92,7 @@ $this-icon-default-opacity: 0.7;
     min-height: 36px;
     flex-grow: 1;
     flex-basis: 70%;
-    @media(max-width: $layout-xs) {
+    @include mq(xs, max) {
       margin-bottom: 5px;
       flex-shrink: 0;
       flex-basis: 100%;
@@ -148,7 +148,7 @@ $this-icon-default-opacity: 0.7;
     justify-content: space-between;
     align-items: center;
 
-    @media(max-width: $layout-xs) {
+    @include mq(xs, max) {
       flex-wrap: wrap;
     }
   }
@@ -201,14 +201,14 @@ $this-icon-default-opacity: 0.7;
   text-align: right;
   margin-right: 2px;
 
-  @media(max-width: $layout-xs) {
+  @include mq(xs, max) {
     white-space: normal;
     margin-left: 5px;
   }
 }
 
 // transparent controls for desktop
-@media(min-width: $layout-xs) {
+@include mq(xs) {
   .controls {
     opacity: 1;
     // TODO maybe opacity 0.1 just an option
@@ -352,7 +352,7 @@ $this-icon-default-opacity: 0.7;
       opacity: 1;
       transition: $transition-standard;
     }
-    @media(max-width: $layout-xs) {
+    @include mq(xs, max) {
       transform: scale(1);
     }
   }
@@ -372,7 +372,7 @@ input {
   white-space: nowrap;
   margin-left: 10px;
   margin-right: 10px;
-  @media(max-width: $layout-xs) {
+  @include mq(xs, max) {
     margin-left: 8px;
     font-size: 13px;
   }

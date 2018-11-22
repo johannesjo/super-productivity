@@ -37,7 +37,7 @@ h2 {
   color: #ffffff;
   padding: 0.5*$s;
 
-  @media(min-width: $layout-xs) {
+  @include mq(xs) {
     padding: 0.5*$s;
   }
 }
@@ -49,7 +49,7 @@ h2 {
 .work-view-header {
   margin-bottom: $s;
 
-  @media(max-width: $layout-xs) {
+  @include mq(xs, max) {
     .label {
       display: none;
     }
