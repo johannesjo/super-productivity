@@ -10,17 +10,17 @@
     </mat-icon>
 
 
-    <button mat-icon-button=""
+    <button mat-icon-button
             color=""
             class="play-btn ico-btn"
             (click)="startTask()"
             aria-label="mark as current"
             tabindex="2"
             *ngIf="!task.isDone && !isCurrent && !task.subTasks">
-      <mat-icon class="material-icons">play_arrow</mat-icon>
+      <mat-icon class="material-icons">play_arrow_outline</mat-icon>
     </button>
 
-    <button mat-icon-button=""
+    <button mat-icon-button
             color=""
             class="play-btn ico-btn"
             (click)="pauseTask()"
@@ -30,7 +30,7 @@
     </button>
 
 
-    <button mat-icon-button=""
+    <button mat-icon-button
             aria-label="is updated"
             tabindex="2"
             color="primary"
@@ -40,7 +40,7 @@
       <mat-icon class="material-icons update update-icon">update</mat-icon>
     </button>
 
-    <a mat-icon-button=""
+    <a mat-icon-button
        color=""
        class="ico-btn original-link-btn"
        aria-label="link"
@@ -73,7 +73,7 @@
 
     <div class="controls">
       <button *ngIf="!task.subTasks || !task.subTasks.length"
-              mat-icon-button=""
+              mat-icon-button
               color=""
               tabindex="2"
               class="ico-btn"
@@ -83,7 +83,7 @@
 
         <mat-icon aria-label="time estimation">access_time</mat-icon>
       </button>
-      <!--<button mat-icon-button=""-->
+      <!--<button mat-icon-button-->
       <!--color=""-->
       <!--class="ico-btn"-->
       <!--aria-label="add sub task"-->
@@ -93,7 +93,7 @@
 
       <!--<mat-icon aria-label="add sub task">playlist_add</mat-icon>-->
       <!--</button>-->
-      <button mat-icon-button=""
+      <button mat-icon-button
               color=""
               class="ico-btn show-notes-btn"
               aria-label="notes"
@@ -102,11 +102,11 @@
               (click)="toggleShowNotes()">
 
         <mat-icon *ngIf="task.notes||task.issueData"
-                  aria-label="notes">insert_comment
+                  aria-label="notes">chat
         </mat-icon>
-        <mat-icon *ngIf="!task.notes&&!task.issueData">mode_comment</mat-icon>
+        <mat-icon *ngIf="!task.notes&&!task.issueData">chat_bubble_outline</mat-icon>
       </button>
-      <!--<button mat-icon-button=""-->
+      <!--<button mat-icon-button-->
       <!--color=""-->
       <!--tabindex="2"-->
       <!--aria-label="delete"-->
@@ -117,7 +117,7 @@
       <!--aria-label="delete">delete_forever-->
       <!--</mat-icon>-->
       <!--</button>-->
-      <!--<button mat-icon-button=""-->
+      <!--<button mat-icon-button-->
       <!--color=""-->
       <!--(click)="toggleTaskDone()"-->
       <!--class="ico-btn mark-as-done-btn"-->
@@ -132,8 +132,9 @@
       <!--aria-label="Mark as done">check-->
       <!--</mat-icon>-->
       <!--</button>-->
-      <button mat-icon-button=""
+      <button mat-icon-button
               class="ico-btn"
+              color=""
               [matMenuTriggerFor]="menu">
         <mat-icon>more_vert</mat-icon>
       </button>
