@@ -7,7 +7,7 @@ import { ChangeDetectionStrategy, Component, ElementRef, HostBinding, Input } fr
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ProgressBarComponent {
-  @HostBinding('class') cssClass = 'bg-primary';
+  @HostBinding('class') @Input() cssClass = 'bg-primary';
 
   constructor(private _elRef: ElementRef) {
   }

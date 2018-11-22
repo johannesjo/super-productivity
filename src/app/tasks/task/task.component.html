@@ -179,7 +179,8 @@
     </div>
   </div>
 
-  <progress-bar [progress]="progress"></progress-bar>
+  <progress-bar [progress]="progress"
+                [cssClass]="isCurrent?'bg-100':'bg-primary'"></progress-bar>
 
   <task-additional-info class="notes mat-elevation-z3"
                         [selectedIndex]="additionalTabsIndex"
