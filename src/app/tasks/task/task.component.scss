@@ -8,10 +8,11 @@ $this-active-shadow: $whiteframe-shadow-6dp;
 $this-first-line-min-height: 40px;
 $this-icon-default-opacity: 0.7;
 
-%standardTaskHover {
+%standardTaskOpacityChange {
   opacity: $this-icon-default-opacity;
   transition: transform $transition-standard;
 
+  :host:focus &,
   .isCurrent &,
   &:hover,
   &:focus {
@@ -63,7 +64,6 @@ $this-icon-default-opacity: 0.7;
   }
 
 
-
   .title-bar-wrapper {
     display: flex;
     flex-wrap: nowrap;
@@ -86,12 +86,13 @@ $this-icon-default-opacity: 0.7;
   }
 
   $this-button-spacer: 1px;
+
   .toggle-sub-tasks-btn,
   .first-line .ico-btn {
     margin: 0 $this-button-spacer;
     padding: 0;
     z-index: 4;
-    @extend %standardTaskHover;
+    @extend %standardTaskOpacityChange;
     @extend %standardTaskZoom;
 
     &:hover {
@@ -113,7 +114,6 @@ $this-icon-default-opacity: 0.7;
     //  border-radius: 100%;
     //}
   }
-
 
 
   .first-line {
@@ -250,12 +250,7 @@ $this-icon-default-opacity: 0.7;
   position: relative;
   z-index: 3;
   cursor: grab;
-  opacity: $this-icon-default-opacity;
-  transition: transform $transition-standard;
-
-  &:hover {
-    opacity: 1;
-  }
+  @extend %standardTaskOpacityChange;
 
   &:after {
     content: '';
@@ -359,6 +354,15 @@ input {
   white-space: nowrap;
   margin-left: 10px;
   margin-right: 10px;
+  opacity: 0.3;
+
+
+  :host:focus > .inner-wrapper > .first-line &,
+  //:host:hover > .inner-wrapper > .first-line &,
+  .inner-wrapper.isCurrent > .first-line & {
+    opacity: 1;
+  }
+
   @include mq(xs, max) {
     margin-left: 8px;
     font-size: 13px;
