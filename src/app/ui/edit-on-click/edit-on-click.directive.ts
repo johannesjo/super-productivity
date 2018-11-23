@@ -1,61 +1,39 @@
-import { Directive, ElementRef, EventEmitter, Input, OnChanges, OnInit, Output } from '@angular/core';
+import { Directive, ElementRef, EventEmitter, Input, OnInit, Output } from '@angular/core';
 
 
 // HELPER
 // -----------------------------------
-function insertAtCursor(el, newText) {
-  const sel = window.getSelection();
 
-  const start = sel.anchorOffset;
-  const end = sel.focusOffset;
-  const text = el.innerText;
-
-  const textBefore = text.substring(0, start);
-  const textAfter = text.substring(end, text.length);
-
-  const completeTextAfterInsert = (textBefore + newText + textAfter).trim();
-
-  el.innerText = completeTextAfterInsert;
-
-  // reset caret to proper offset
-  const range = document.createRange();
-  range.setStart(el.childNodes[0], start + newText.length);
-  range.collapse(true);
-  const sel2 = window.getSelection();
-
-  sel2.removeAllRanges();
-  sel2.addRange(range);
-}
-
-function removeTags(str) {
-  return str.replace(/<\/?[^`]+?\/?>/gmi, '\n') //replace all tags
-    .replace(/\n/gmi, '') // replace line breaks
-    .replace(/&nbsp;/gmi, '') // replace line breaks
-    .trim();
-}
 
 @Directive({
   selector: '[editOnClick]',
 })
-export class EditOnClickDirective implements OnInit, OnChanges {
-  @Input() value: string;
-  @Input() eventId: string;
+export class EditOnClickDirective implements OnInit {
   @Output() editFinished: EventEmitter<any> = new EventEmitter();
-  lastValue: string;
-  el: HTMLElement;
+  private _lastDomValue: string;
+  private readonly _el: HTMLElement;
 
+  @Input() set value(_val) {
+    this._value = _val;
+    // also update last dom value because that's how check for changes
+    this._lastDomValue = _val;
+    this._refreshView();
+  }
+
+  private _value: string;
 
   constructor(el: ElementRef) {
-    this.el = el.nativeElement;
+    this._el = el.nativeElement;
   }
 
   ngOnInit() {
-    const el = this.el;
+    const el = this._el;
 
     if (!(el.getAttribute('contenteditable'))) {
       el.setAttribute('contenteditable', 'true');
     }
 
+    // TODO move all ato host listener
     el.addEventListener('focus', (ev: Event) => {
       // setTimeout(() => {
       //   document.execCommand('selectAll', false, null);
@@ -63,12 +41,12 @@ export class EditOnClickDirective implements OnInit, OnChanges {
     });
 
     el.addEventListener('input', () => {
-      this.setValueFromElement();
+      this._setValueFromElement();
     });
 
     el.addEventListener('blur', (ev) => {
-      this.setValueFromElement();
-      this.onEditDone(ev);
+      this._setValueFromElement();
+      this._onEditDone(ev);
     });
 
     // prevent keyboard shortcuts from firing when here
@@ -100,48 +78,64 @@ export class EditOnClickDirective implements OnInit, OnChanges {
       ev.preventDefault();
       const text = ev.clipboardData.getData('text/plain')
         .trim();
-      insertAtCursor(el, text);
-      this.setValueFromElement();
+      this._insertAtCursor(el, text);
+      this._setValueFromElement();
     };
   }
 
-  ngOnChanges(changes) {
-    if (!changes.hasOwnProperty('value')) {
-      return false;
-    }
 
-    this.lastValue = changes.value.currentValue;
-
-    this.refreshView();
+  private _refreshView() {
+    this._el.innerText = this._value;
   }
 
-  refreshView() {
-    this.el.innerText = this.value;
-  }
-
-  onEditDone(event) {
+  private _onEditDone(event) {
     // deselect all text
     if (window.getSelection) {
       window.getSelection().removeAllRanges();
     }
 
-    const curVal = this.el.innerText;
-    const isChanged = (this.lastValue !== curVal);
+    const curVal = this._el.innerText;
+    const isChanged = (this._lastDomValue !== curVal);
+    this._lastDomValue = curVal;
 
-    if (this.editFinished) {
-      this.editFinished.emit({
-        isChanged,
-        newVal: curVal,
-        $taskEl: this.el.closest('.task'),
-        event,
-      });
-    }
-    this.lastValue = curVal;
+    this.editFinished.emit({
+      isChanged,
+      newVal: curVal,
+      $taskEl: this._el.closest('.task'),
+      event,
+    });
   }
 
-  setValueFromElement() {
-    let curVal = this.el.innerText;
-    curVal = removeTags(curVal);
-    this.value = curVal;
+  private _setValueFromElement() {
+    this._value = this._removeTags(this._el.innerText);
+  }
+
+  private _insertAtCursor(el, newText) {
+    const sel = window.getSelection();
+
+    const start = sel.anchorOffset;
+    const end = sel.focusOffset;
+    const text = el.innerText;
+
+    const textBefore = text.substring(0, start);
+    const textAfter = text.substring(end, text.length);
+
+    el.innerText = (textBefore + newText + textAfter).trim();
+
+    // reset caret to proper offset
+    const range = document.createRange();
+    range.setStart(el.childNodes[0], start + newText.length);
+    range.collapse(true);
+    const sel2 = window.getSelection();
+
+    sel2.removeAllRanges();
+    sel2.addRange(range);
+  }
+
+  private _removeTags(str) {
+    return str.replace(/<\/?[^`]+?\/?>/gmi, '\n') // replace all tags
+      .replace(/\n/gmi, '') // replace line breaks
+      .replace(/&nbsp;/gmi, '') // replace line breaks
+      .trim();
   }
 }
