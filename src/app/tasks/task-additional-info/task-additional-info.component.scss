@@ -50,13 +50,17 @@
 }
 
 .tab-content {
-  // needed to overstyle current task
-  @include standardThemeTextColor();
   padding: $s;
   h3 {
     margin-bottom: $s;
   }
 }
+.tab-content,
+.mat-tab-body {
+  // needed to overstyle current task
+  @include standardThemeTextColor();
+}
+
 
 .notes {
   margin: $s;
