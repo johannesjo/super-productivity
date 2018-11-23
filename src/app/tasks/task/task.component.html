@@ -68,14 +68,14 @@
          (editFinished)="updateTaskTitleIfChanged($event.isChanged, $event.newVal)"
          tabindex="2"></div>
 
-    <div class="time">
-      <span *ngIf="task.subTasks && task.subTasks.length>0">∑</span>
-      <span class="time-val">{{task.timeSpent|msToString}}</span>
-      <span class="separator">/</span>
-      <span class="time-val">{{task.timeEstimate|msToString}}</span>
-    </div>
+    <div class="time-wrapper">
 
-    <div class="controls">
+      <div class="time">
+        <span *ngIf="task.subTasks && task.subTasks.length>0">∑</span>
+        <span class="time-val">{{task.timeSpent|msToString}}</span>
+        <span class="separator">/</span>
+        <span class="time-val">{{task.timeEstimate|msToString}}</span>
+      </div>
       <button [hidden]="task.subTasks && task.subTasks.length"
               mat-icon-button
               color=""
@@ -85,23 +85,27 @@
               aria-label="time estimation"
               (click)="estimateTime()">
         <mat-icon aria-label="time estimation">access_time</mat-icon>
-        <!--<div class="svg-wrapper">-->
-        <!--<svg focusable="false"-->
-        <!--viewPort="0 0 50 50"-->
-        <!--width="44"-->
-        <!--height="44">-->
-        <!--<circle cx="50%"-->
-        <!--class="color-primary"-->
-        <!--cy="50%"-->
-        <!--r="19"-->
-        <!--stroke-dasharray="565.48"-->
-        <!--stroke-dashoffset="0"-->
-        <!--fill="transparent"-->
-        <!--stroke-width="3"-->
-        <!--stroke="black"></circle>-->
-        <!--</svg>-->
-        <!--</div>-->
       </button>
+    </div>
+
+    <div class="controls">
+
+      <!--<div class="svg-wrapper">-->
+      <!--<svg focusable="false"-->
+      <!--viewPort="0 0 50 50"-->
+      <!--width="44"-->
+      <!--height="44">-->
+      <!--<circle cx="50%"-->
+      <!--class="color-primary"-->
+      <!--cy="50%"-->
+      <!--r="19"-->
+      <!--stroke-dasharray="565.48"-->
+      <!--stroke-dashoffset="0"-->
+      <!--fill="transparent"-->
+      <!--stroke-width="3"-->
+      <!--stroke="black"></circle>-->
+      <!--</svg>-->
+      <!--</div>-->
       <!--<button mat-icon-button-->
       <!--color=""-->
       <!--class="ico-btn"-->

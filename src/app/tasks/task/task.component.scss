@@ -345,34 +345,48 @@ input {
   border: none;
 }
 
-.time {
-  white-space: nowrap;
-  margin-left: $s;
-  margin-right: $s;
-  opacity: 0.2;
-  font-style: italic;
+.time-wrapper {
+  position: relative;
   display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  margin-left: $s;
 
-  :host:focus > .inner-wrapper > .first-line &,
-    //:host:hover > .inner-wrapper > .first-line &,
-  .inner-wrapper.isCurrent > .first-line & {
-    opacity: 1;
+  button {
+    //@include center;
   }
 
-  @include mq(xs, max) {
-    margin-left: 8px;
-    font-size: 13px;
+  .time {
+    opacity: 0.25;
+    font-style: italic;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+
+    :host:focus > .inner-wrapper > .first-line &,
+      //:host:hover > .inner-wrapper > .first-line &,
+    .inner-wrapper.isCurrent > .first-line & {
+      opacity: 1;
+    }
+
+    @include mq(xs, max) {
+      font-size: 13px;
+    }
+
+    .time-val,
+    .separator {
+      display: block;
+    }
+
+    .separator {
+      padding: 0 $s/2;
+    }
   }
 
-  .time-val,
-  .separator {
-    display: block;
-  }
-
-  .separator {
-    padding: 0 $s/2;
-  }
 }
+
 
 .additional-info {
   display: block;
