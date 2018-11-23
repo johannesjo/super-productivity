@@ -18,6 +18,9 @@
     background-color: mat-color($accent);
   }
 
+  .bg-50 {
+    background-color: mat-color($primary, 50);
+  }
   .bg-100 {
     background-color: mat-color($primary, 100);
   }

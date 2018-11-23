@@ -202,7 +202,7 @@
                 *ngIf="isCurrent"
                 [cssClass]="isCurrent?'bg-100':'bg-primary'"></progress-bar>
 
-  <task-additional-info class="additional-info mat-elevation-z3"
+  <task-additional-info class="additional-info"
                         [selectedIndex]="additionalTabsIndex"
                         *ngIf="task.isAdditionalInfoOpen"
                         (onTaskAdditionalInfoOpenChanged)="onTaskAdditionalInfoOpenChanged($event)"
