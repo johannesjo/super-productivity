@@ -186,6 +186,11 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   toggleTaskDone() {
+    if (this.task.parentId) {
+      this.focusSelf();
+    } else {
+      this.focusNext(true);
+    }
     this.task.isDone
       ? this._taskService.setUnDone(this.task.id)
       : this._taskService.setDone(this.task.id);
@@ -205,12 +210,14 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     this.focusSelf();
   }
 
-  focusPrevious(isSelectReverseIfNotPossible = false) {
-    this._taskService.focusPreviousInList(this.task.id, this.focusIdList, isSelectReverseIfNotPossible);
+  focusPrevious(isFocusReverseIfNotPossible = false) {
+    console.log('FOCUS PREVIOUS');
+
+    this._taskService.focusPreviousInList(this.task.id, this.focusIdList, isFocusReverseIfNotPossible);
   }
 
-  focusNext(isSelectReverseIfNotPossible = false) {
-    this._taskService.focusNextInList(this.task.id, this.focusIdList, isSelectReverseIfNotPossible);
+  focusNext(isFocusReverseIfNotPossible = false) {
+    this._taskService.focusNextInList(this.task.id, this.focusIdList, isFocusReverseIfNotPossible);
   }
 
   focusSelf() {
@@ -243,14 +250,12 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     }
     if (checkKeyCombo(ev, keys.taskToggleAdditionalInfoOpen)) {
       this.toggleShowAdditionalInfoOpen();
-      this.focusSelf();
     }
     if (checkKeyCombo(ev, keys.taskOpenEstimationDialog)) {
       this.estimateTime();
     }
     if (checkKeyCombo(ev, keys.taskToggleDone)) {
       this.toggleTaskDone();
-      this.focusSelf();
     }
     if (checkKeyCombo(ev, keys.taskAddSubTask)) {
       this.addSubTask();

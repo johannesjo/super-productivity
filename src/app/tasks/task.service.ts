@@ -264,10 +264,10 @@ export class TaskService {
     this.update(id, {isHideSubTasks: true});
   }
 
-  focusInList(id: string, idList: string[], offset, isSelectReverseIfNotPossible) {
+  focusInList(id: string, idList: string[], offset, isFocusReverseIfNotPossible) {
     const currentIndex = idList.indexOf(id);
     if (idList[currentIndex + offset]) {
-      if (isSelectReverseIfNotPossible) {
+      if (isFocusReverseIfNotPossible) {
         if (idList[currentIndex + offset]) {
           this.focusTask(idList[currentIndex + offset]);
         } else {
@@ -279,12 +279,12 @@ export class TaskService {
     }
   }
 
-  focusNextInList(id: string, idList: string[], isSelectReverseIfNotPossible) {
-    this.focusInList(id, idList, 1, isSelectReverseIfNotPossible);
+  focusNextInList(id: string, idList: string[], isFocusReverseIfNotPossible) {
+    this.focusInList(id, idList, 1, isFocusReverseIfNotPossible);
   }
 
-  focusPreviousInList(id: string, idList: string[], isSelectReverseIfNotPossible) {
-    this.focusInList(id, idList, -1, isSelectReverseIfNotPossible);
+  focusPreviousInList(id: string, idList: string[], isFocusReverseIfNotPossible) {
+    this.focusInList(id, idList, -1, isFocusReverseIfNotPossible);
   }
 
   private _createNewTask(title: string, additional: Partial<Task> = {}): Task {
