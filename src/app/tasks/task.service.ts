@@ -19,7 +19,8 @@ import {
   MoveToToday,
   MoveUp,
   RemoveTimeSpent,
-  SetCurrentTask, TaskActionTypes,
+  SetCurrentTask,
+  TaskActionTypes,
   UnsetCurrentTask,
   UpdateTask
 } from './store/task.actions';
@@ -47,7 +48,7 @@ import {
 } from './store/task.selectors';
 import { stringToMs } from '../ui/duration/string-to-ms.pipe';
 import { getWorklogStr } from '../core/util/get-work-log-str';
-import { ofType, Actions } from '@ngrx/effects';
+import { Actions, ofType } from '@ngrx/effects';
 
 
 @Injectable()
@@ -331,15 +332,19 @@ export class TaskService {
       full = matches[0];
       timeSpent = matches[2];
       timeEstimate = matches[4];
-      const timeSpentOnDay = timeSpent
-        ? {
-          ...(task.timeSpentOnDay || {}),
-          [getWorklogStr()]: stringToMs(timeSpent)
-        } : task.timeSpentOnDay;
 
       return {
         ...task,
-        timeSpentOnDay: timeSpentOnDay,
+        ...(
+          timeSpent
+            ? {
+              timeSpentOnDay: {
+                ...(task.timeSpentOnDay || {}),
+                [getWorklogStr()]: stringToMs(timeSpent)
+              }
+            }
+            : {}
+        ),
         timeEstimate: stringToMs(timeEstimate),
         title: task.title.replace(full, '')
       };
