@@ -28,7 +28,7 @@ if (IS_DEV) {
 }
 
 const app = electron.app;
-require('./debug')();
+require('./debug')({ showDevTools: IS_DEV });
 let mainWin;
 let nestedWinParams = { isDarwinForceQuit: false };
 

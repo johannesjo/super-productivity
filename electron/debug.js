@@ -72,7 +72,7 @@ module.exports = opts => {
   opts = Object.assign({
     enabled: null,
     showDevTools: true,
-    devToolsMode: 'undocked'
+    devToolsMode: 'docked'
   }, opts);
 
   if (opts.enabled === false) {
