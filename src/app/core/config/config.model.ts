@@ -9,6 +9,7 @@ export type KeyboardConfig = Readonly<{
   showHelp: string,
   openProjectNotes: string,
   openDistractionPanel: string,
+  focusLastActiveTask: string,
   taskEditTitle: string,
   taskToggleAdditionalInfoOpen: string,
   taskOpenEstimationDialog: string,

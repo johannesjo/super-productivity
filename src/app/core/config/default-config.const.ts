@@ -40,6 +40,7 @@ export const DEFAULT_CFG: GlobalConfig = {
     goToDailyAgenda: '',
     goToFocusMode: 'F',
     goToSettings: '',
+    focusLastActiveTask: 'f',
     taskEditTitle: 'e',
     taskToggleAdditionalInfoOpen: 'n',
     taskOpenEstimationDialog: 't',

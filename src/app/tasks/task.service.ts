@@ -9,6 +9,7 @@ import {
   AddTask,
   AddTimeSpent,
   DeleteTask,
+  FocusLastActiveTask,
   FocusTask,
   LoadTaskState,
   Move,
@@ -216,6 +217,10 @@ export class TaskService {
 
   focusTask(id: string) {
     this._store.dispatch(new FocusTask({id}));
+  }
+
+  focusLastActiveTask() {
+    this._store.dispatch(new FocusLastActiveTask());
   }
 
   moveToToday(id) {

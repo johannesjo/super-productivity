@@ -99,6 +99,13 @@ export const KEYBOARD_SETTINGS_FORM_CFG = {
         label: 'Go to Settings',
       },
     },
+    {
+      key: 'focusLastActiveTask',
+      type: 'keyboard',
+      templateOptions: {
+        label: 'Focus last active task',
+      },
+    },
     // TASKS
     {
       className: 'tpl',

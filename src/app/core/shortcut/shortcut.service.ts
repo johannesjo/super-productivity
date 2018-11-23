@@ -7,6 +7,7 @@ import { IPC_REGISTER_GLOBAL_SHORTCUT_EVENT } from '../../../ipc-events.const';
 import { ElectronService } from 'ngx-electron';
 import { LayoutService } from '../layout/layout.service';
 import { NoteService } from '../../note/note.service';
+import { TaskService } from '../../tasks/task.service';
 
 
 @Injectable({
@@ -21,6 +22,7 @@ export class ShortcutService {
     private _electronService: ElectronService,
     private _layoutService: LayoutService,
     private _noteService: NoteService,
+    private _taskService: TaskService,
     private _activatedRoute: ActivatedRoute,
   ) {
     //   // Register electron shortcut(s)
@@ -84,6 +86,10 @@ export class ShortcutService {
     }
     if (checkKeyCombo(ev, keys.goToFocusMode)) {
       this._router.navigate(['/focus-view']);
+    }
+    if (checkKeyCombo(ev, keys.focusLastActiveTask)) {
+      this._router.navigate(['/work-view']);
+      this._taskService.focusLastActiveTask();
     }
     if (checkKeyCombo(ev, keys.addNewTask)) {
       this._layoutService.toggleAddTaskBar();
