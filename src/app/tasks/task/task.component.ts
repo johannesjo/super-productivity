@@ -60,16 +60,6 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     return this.task && this.task.timeEstimate && (this.task.timeSpent / this.task.timeEstimate) * 100;
   }
 
-  @HostBinding('class.is-done')
-  private get _isDone() {
-    return this.task.isDone;
-  }
-
-  @HostBinding('class.is-focused')
-  private get _isFocused() {
-    return this.task.id === this._currentFocusId;
-  }
-
   // methods come last
   @HostListener('keydown', ['$event']) onKeyDown(ev: KeyboardEvent) {
     this._handleKeyboardShortcuts(ev);

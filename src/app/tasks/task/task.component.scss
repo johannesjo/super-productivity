@@ -230,12 +230,8 @@ $this-icon-default-opacity: 0.7;
   }
 
   &.isDone {
-    .time,
-    .task-title {
+    > .first-line .task-title {
       color: $this-task-text-color-done;
-    }
-
-    .task-title {
       text-decoration: line-through;
     }
 
