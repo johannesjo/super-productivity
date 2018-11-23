@@ -6,7 +6,10 @@
 .wrapper {
   margin: $s;
   border-radius: $card-border-radius;
+  border-radius: 12px;
   border: 1px solid #dddddd;
+  //background: #efefef;
+  //background: #f2f2f2;
 
   @include darkTheme {
     border-color: #333333;
@@ -51,10 +54,12 @@
 
 .tab-content {
   padding: $s;
+
   h3 {
     margin-bottom: $s;
   }
 }
+
 .tab-content,
 .mat-tab-body {
   // needed to overstyle current task
@@ -74,8 +79,9 @@
     .markdown-unparsed,
     .markdown-parsed {
       @include standardThemeTextColor();
-
       background: $standard-note-ng-light;
+      background: #f2f2f2;
+
       color: $standard-note-fg-light;
       box-sizing: border-box;
 
