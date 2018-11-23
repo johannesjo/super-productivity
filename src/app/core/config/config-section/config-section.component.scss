@@ -52,3 +52,15 @@ $this-panel-padding-left-right: 12px;
   display: block;
   animation: $transition-duration-m help-ico-animation $ani-standard-timing;
 }
+
+@keyframes help-ico-animation {
+  0% {
+    transform: scale(0);
+  }
+  50% {
+    transform: scale(1.4);
+  }
+  100% {
+    transform: scale(1);
+  }
+}

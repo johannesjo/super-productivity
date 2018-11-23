@@ -3,6 +3,7 @@
      (mousedown)="onMouseDown($event)">
   <button mat-fab=""
           #buttonEl
+          [class.isAnimate]="isAnimateBtn"
   >
     <span class="counter"
           *ngIf="counter">{{counter}}</span>

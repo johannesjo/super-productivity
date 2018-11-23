@@ -1,12 +1,13 @@
-import { Component, HostListener, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, HostListener, OnDestroy, OnInit } from '@angular/core';
 import { TaskService } from '../../tasks/task.service';
 import { expandFadeAnimation } from '../../ui/animations/expand.ani';
 import { LayoutService } from '../../core/layout/layout.service';
 import { DragulaService } from 'ng2-dragula';
 import { TakeABreakService } from '../../time-tracking/take-a-break/take-a-break.service';
 import { ActivatedRoute } from '@angular/router';
-import { Observable, Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { TaskWithSubTasks } from '../../tasks/task.model';
+import { Actions } from '@ngrx/effects';
 
 @Component({
   selector: 'work-view',
@@ -29,6 +30,8 @@ export class WorkViewPageComponent implements OnInit, OnDestroy {
   // we do it here to have the tasks in memory all the time
   backlogTasks: TaskWithSubTasks[];
 
+  isTriggerSwitchListAni = false;
+
   private _subs = new Subscription();
 
   constructor(
@@ -37,6 +40,8 @@ export class WorkViewPageComponent implements OnInit, OnDestroy {
     private _layoutService: LayoutService,
     private _dragulaService: DragulaService,
     private _activatedRoute: ActivatedRoute,
+    private _actions$: Actions,
+    private _cd: ChangeDetectorRef,
   ) {
     // this.focusTaskIdList$.subscribe(v => console.log(v));
   }
@@ -53,6 +58,7 @@ export class WorkViewPageComponent implements OnInit, OnDestroy {
     }
 
     this._subs.add(this.taskService.backlogTasks$.subscribe(tasks => this.backlogTasks = tasks));
+    this._subs.add(this.taskService.onTaskSwitchList$.subscribe(() => this._triggerTaskSwitchListAnimation()));
 
     this._dragulaService.createGroup('PARENT', {
       direction: 'vertical',
@@ -90,6 +96,14 @@ export class WorkViewPageComponent implements OnInit, OnDestroy {
 
 
   collapseAllNotesAndSubTasks() {
+  }
 
+  private _triggerTaskSwitchListAnimation() {
+    this.isTriggerSwitchListAni = true;
+    this._cd.detectChanges();
+    setTimeout(() => {
+      this.isTriggerSwitchListAni = false;
+      this._cd.detectChanges();
+    }, 300);
   }
 }

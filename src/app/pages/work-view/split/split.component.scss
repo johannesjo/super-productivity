@@ -26,6 +26,11 @@
     position: absolute;
     transform: translate(-50%, -50%);
     left: 50%;
+    transform-origin: left center;
+
+    &.isAnimate {
+      animation: $transition-duration-m splitWiggleAni $ani-standard-timing;
+    }
   }
 
   .counter {
@@ -33,5 +38,17 @@
     top: -2px;
     left: 50%;
     transform: translateX(-50%);
+  }
+}
+
+@keyframes splitWiggleAni {
+  0% {
+    transform: scale(1) translate(-50%, -50%);
+  }
+  50% {
+    transform: scale(1.2) translate(-50%, -50%);
+  }
+  100% {
+    transform: scale(1) translate(-50%, -50%);
   }
 }

@@ -15,6 +15,7 @@ export class SplitComponent implements OnInit {
   @Input() splitBottomEl;
   @Input() containerEl;
   @Input() counter;
+  @Input() isAnimateBtn;
   @Output() posChanged: EventEmitter<number> = new EventEmitter();
 
   pos: number;

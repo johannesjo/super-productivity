@@ -19,7 +19,7 @@ import {
   MoveToToday,
   MoveUp,
   RemoveTimeSpent,
-  SetCurrentTask,
+  SetCurrentTask, TaskActionTypes,
   UnsetCurrentTask,
   UpdateTask
 } from './store/task.actions';
@@ -47,6 +47,7 @@ import {
 } from './store/task.selectors';
 import { stringToMs } from '../ui/duration/string-to-ms.pipe';
 import { getWorklogStr } from '../core/util/get-work-log-str';
+import { ofType, Actions } from '@ngrx/effects';
 
 
 @Injectable()
@@ -93,11 +94,17 @@ export class TaskService {
     distinctUntilChanged()
   );
 
+  onTaskSwitchList$: Observable<any> = this._actions$.pipe(ofType(
+    TaskActionTypes.MoveToBacklog,
+    TaskActionTypes.MoveToToday,
+    TaskActionTypes.AddTask,
+  ));
 
   constructor(
     private readonly _store: Store<any>,
     private readonly _persistenceService: PersistenceService,
     private readonly _timeTrackingService: TimeTrackingService,
+    private readonly _actions$: Actions,
   ) {
     // this.todaysTasks$.subscribe((val) => console.log(val));
     // this.focusTaskId$.subscribe((val) => console.log('SVC', val));
