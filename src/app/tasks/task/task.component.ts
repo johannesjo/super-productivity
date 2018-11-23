@@ -145,7 +145,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
 
   handleUpdateBtnClick() {
     this.additionalTabsIndex = 0;
-    this._taskService.showNotes(this.task.id);
+    this._taskService.showAdditionalInfoOpen(this.task.id);
   }
 
   deleteTask() {
@@ -191,10 +191,10 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
       : this._taskService.setDone(this.task.id);
   }
 
-  toggleShowNotes() {
-    this.task.isNotesOpen
-      ? this._taskService.hideNotes(this.task.id)
-      : this._taskService.showNotes(this.task.id);
+  toggleShowAdditionalInfoOpen() {
+    this.task.isAdditionalInfoOpen
+      ? this._taskService.hideAdditionalInfoOpen(this.task.id)
+      : this._taskService.showAdditionalInfoOpen(this.task.id);
     this.focusSelf();
   }
 
@@ -223,7 +223,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
 
-  onTaskNotesChanged($event) {
+  onTaskAdditionalInfoOpenChanged($event) {
     this._taskService.update(this.task.id, {notes: $event.newVal});
     this.focusSelf();
   }
@@ -241,8 +241,8 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
       // prevent blur
       ev.preventDefault();
     }
-    if (checkKeyCombo(ev, keys.taskToggleNotes)) {
-      this.toggleShowNotes();
+    if (checkKeyCombo(ev, keys.taskToggleAdditionalInfoOpen)) {
+      this.toggleShowAdditionalInfoOpen();
       this.focusSelf();
     }
     if (checkKeyCombo(ev, keys.taskOpenEstimationDialog)) {
@@ -313,8 +313,8 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
       }
       // if already collapsed
       if (this.task.isHideSubTasks === true) {
-        if (this.task.isNotesOpen) {
-          this.toggleShowNotes();
+        if (this.task.isAdditionalInfoOpen) {
+          this.toggleShowAdditionalInfoOpen();
         } else {
           this.focusPrevious();
         }

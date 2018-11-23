@@ -3,7 +3,7 @@
      [class.color-contrast]="isCurrent"
      [class.isCurrent]="isCurrent"
      [class.isDone]="task.isDone"
-     [class.isNotesOpen]="task.isNotesOpen">
+     [class.isAdditionalInfoOpen]="task.isAdditionalInfoOpen">
 
   <div class="first-line">
     <mat-icon class="material-icons drag-handle"
@@ -114,11 +114,11 @@
       <!--</button>-->
       <button mat-icon-button
               color=""
-              class="ico-btn show-notes-btn"
-              aria-label="notes"
+              class="ico-btn show-additional-info-btn"
+              aria-label="additional-info"
               tabindex="2"
-              [class.isActive]="task.isNotesOpen"
-              (click)="toggleShowNotes()">
+              [class.isActive]="task.isAdditionalInfoOpen"
+              (click)="toggleShowAdditionalInfoOpen()">
 
         <mat-icon *ngIf="task.notes||task.issueData"
                   aria-label="notes">chat
@@ -202,10 +202,10 @@
                 *ngIf="isCurrent"
                 [cssClass]="isCurrent?'bg-100':'bg-primary'"></progress-bar>
 
-  <task-additional-info class="notes mat-elevation-z3"
+  <task-additional-info class="additional-info mat-elevation-z3"
                         [selectedIndex]="additionalTabsIndex"
-                        *ngIf="task.isNotesOpen"
-                        (onTaskNotesChanged)="onTaskNotesChanged($event)"
+                        *ngIf="task.isAdditionalInfoOpen"
+                        (onTaskAdditionalInfoOpenChanged)="onTaskAdditionalInfoOpenChanged($event)"
                         [@expand]
                         [task]="task"></task-additional-info>
 

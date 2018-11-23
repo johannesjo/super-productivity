@@ -10,7 +10,7 @@ export type KeyboardConfig = Readonly<{
   openProjectNotes: string,
   openDistractionPanel: string,
   taskEditTitle: string,
-  taskToggleNotes: string,
+  taskToggleAdditionalInfoOpen: string,
   taskOpenEstimationDialog: string,
   taskToggleDone: string,
   taskAddSubTask: string,

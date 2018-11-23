@@ -17,7 +17,7 @@ export interface TaskCopy {
 
   created: number;
   isDone?: boolean;
-  isNotesOpen?: boolean;
+  isAdditionalInfoOpen?: boolean;
   isHideSubTasks?: boolean;
   notes?: string;
   issueId?: string;

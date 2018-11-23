@@ -248,12 +248,12 @@ export class TaskService {
     this.update(id, {isDone: false});
   }
 
-  showNotes(id: string) {
-    this.update(id, {isNotesOpen: true});
+  showAdditionalInfoOpen(id: string) {
+    this.update(id, {isAdditionalInfoOpen: true});
   }
 
-  hideNotes(id: string) {
-    this.update(id, {isNotesOpen: false});
+  hideAdditionalInfoOpen(id: string) {
+    this.update(id, {isAdditionalInfoOpen: false});
   }
 
   showSubTasks(id: string) {
@@ -296,7 +296,7 @@ export class TaskService {
       timeSpent: 0,
       timeEstimate: 0,
       isDone: false,
-      isNotesOpen: false,
+      isAdditionalInfoOpen: false,
       created: Date.now(),
       title,
       id: shortid(),

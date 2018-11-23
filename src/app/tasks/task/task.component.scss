@@ -79,7 +79,7 @@ $this-icon-default-opacity: 0.7;
     }
   }
 
-  .isNotesOpen > .first-line {
+  .isAdditionalInfoOpen > .first-line {
     .title {
       font-weight: bold;
     }
@@ -161,7 +161,7 @@ $this-icon-default-opacity: 0.7;
   z-index: 1;
 }
 
-.show-notes-btn {
+.show-additional-info-btn {
   mat-icon {
     transition: transform $transition-standard;
     backface-visibility: hidden;
@@ -378,7 +378,7 @@ input {
   }
 }
 
-.notes {
+.additional-info {
   display: block;
   // required as sort of a clearfix (fixes padding issue)
   overflow: hidden;
