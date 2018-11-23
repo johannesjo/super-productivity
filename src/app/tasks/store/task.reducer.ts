@@ -521,13 +521,18 @@ export function taskReducer(
       // add item1
       const stateCopy = taskAdapter.addOne({
         ...action.payload.task,
-        parentId: action.payload.parentId
+        parentId: action.payload.parentId,
       }, state);
 
       // also add to parent task
       const parentTask = stateCopy.entities[action.payload.parentId];
       parentTask.subTaskIds.push(action.payload.task.id);
-      return {...stateCopy, focusTaskId: action.payload.task.id};
+      return {
+        ...stateCopy,
+        focusTaskId: action.payload.task.id,
+        ...((state.currentTaskId === action.payload.parentId)
+          ? {currentTaskId: action.payload.task.id} : {})
+      };
     }
 
     case TaskActionTypes.MoveToToday: {
