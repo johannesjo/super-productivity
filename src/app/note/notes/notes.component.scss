@@ -1,7 +1,6 @@
 @import '../../../variables';
 
 .wrapper {
-  width: $s*36;
   display: block;
   text-align: center;
   min-height: 100%;
@@ -9,9 +8,11 @@
   padding-right: $s;
   box-sizing: border-box;
   overflow: hidden;
+  width: $s*36;
 
-  :host-context(.isLightTheme) & {
-    background: #eeeeee !important;
+  @media (min-width: 900px) and (max-width: 950px) {
+    width: $s*32;
+    padding: 0 $s*1;
   }
 
   header {

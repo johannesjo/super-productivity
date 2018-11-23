@@ -22,6 +22,8 @@ import { warpRouteAnimation } from './ui/animations/warp-route';
 import { NoteService } from './note/note.service';
 import { MediaMatcher } from '@angular/cdk/layout';
 
+const SIDE_PANEL_BREAKPOINT = 900;
+
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
@@ -115,7 +117,7 @@ export class AppComponent implements OnInit {
       this._setTheme(currentProject.isDarkTheme, currentProject.themeColor);
     });
 
-    this.mobileQuery = this._media.matchMedia('(max-width: 950px)');
+    this.mobileQuery = this._media.matchMedia(`(max-width: ${SIDE_PANEL_BREAKPOINT}px)`);
     this.mobileQuery.addListener(this._mobileQueryListener);
   }
 

@@ -43,6 +43,13 @@
     background-color: mat-color($primary, 800);
   }
 
+  &.isLightTheme .bg-accented-light-theme {
+    background-color: mat-color($primary, 100);
+  }
+  //&.isDarkTheme .bg-accented {
+  //  background-color: mat-color($primary, 900);
+  //}
+
   .color-contrast {
     color: mat-color($primary, default-contrast);
   }
