@@ -350,15 +350,15 @@ input {
 }
 
 .time {
-  font-style: italic;
   white-space: nowrap;
-  margin-left: 10px;
-  margin-right: 10px;
-  opacity: 0.3;
-
+  margin-left: $s;
+  margin-right: $s;
+  opacity: 0.2;
+  font-style: italic;
+  display: flex;
 
   :host:focus > .inner-wrapper > .first-line &,
-  //:host:hover > .inner-wrapper > .first-line &,
+    //:host:hover > .inner-wrapper > .first-line &,
   .inner-wrapper.isCurrent > .first-line & {
     opacity: 1;
   }
@@ -366,6 +366,15 @@ input {
   @include mq(xs, max) {
     margin-left: 8px;
     font-size: 13px;
+  }
+
+  .time-val,
+  .separator {
+    display: block;
+  }
+
+  .separator {
+    padding: 0 $s/2;
   }
 }
 

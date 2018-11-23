@@ -54,6 +54,7 @@ import { FormlyMatToggleModule } from '@ngx-formly/material/toggle';
 import { InputDurationFormlyComponent } from './duration/input-duration-formly/input-duration-formly.component';
 import { EnlargeImgDirective } from './enlarge-img/enlarge-img.directive';
 import { DragulaModule } from 'ng2-dragula';
+import { MsToClockStringPipe } from './duration/ms-to-clock-string.pipe';
 
 @NgModule({
   imports: [
@@ -115,6 +116,7 @@ import { DragulaModule } from 'ng2-dragula';
     EditOnClickDirective,
     InlineMarkdownComponent,
     ThemeSelectComponent,
+    MsToClockStringPipe,
     MsToStringPipe,
     MsToStringPipe$,
     StringToMsPipe,
@@ -145,6 +147,7 @@ import { DragulaModule } from 'ng2-dragula';
     DialogConfirmComponent,
     EnlargeImgDirective,
 
+    MsToClockStringPipe,
     MsToStringPipe,
     MsToStringPipe$,
     StringToMsPipe,
