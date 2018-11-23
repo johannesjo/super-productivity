@@ -219,9 +219,9 @@ $this-icon-default-opacity: 0.7;
   box-shadow: $shadow-card-shadow;
   //box-shadow: $shadow-bottom-boxed;
   border-radius: $card-border-radius;
-  border: 1px solid #dddddd;
+  border: 1px solid $light-theme-extra-border-color;
   @include darkTheme {
-    border-color: #333333;
+    border-color: $dark-theme-extra-border-color;
   }
 
   &.isCurrent {

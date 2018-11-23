@@ -71,10 +71,9 @@
     <div class="time-wrapper">
 
       <div class="time">
-        <span *ngIf="task.subTasks && task.subTasks.length>0">∑</span>
-        <span class="time-val">{{task.timeSpent|msToString}}</span>
-        <span class="separator">/</span>
-        <span class="time-val">{{task.timeEstimate|msToString}}</span>
+        <div class="time-val"><span *ngIf="task.subTasks && task.subTasks.length>0">∑</span> {{task.timeSpent|msToString}}</div>
+        <div class="separator">/</div>
+        <div class="time-val">{{task.timeEstimate|msToString}}</div>
       </div>
       <button [hidden]="task.subTasks && task.subTasks.length"
               mat-icon-button
