@@ -66,6 +66,7 @@ export class AppComponent implements OnInit {
     if (IS_ELECTRON) {
       this._electronService.ipcRenderer.send(IPC_APP_READY);
       this._initElectronErrorHandler();
+      this._initMousewheelZoomForElectron();
 
       this._electronService.ipcRenderer.on(IPC_TRANSFER_SETTINGS_REQUESTED, () => {
         this._electronService.ipcRenderer.send(IPC_TRANSFER_SETTINGS_TO_ELECTRON, this._configService.cfg);
@@ -151,5 +152,20 @@ export class AppComponent implements OnInit {
       });
       console.error(data);
     });
+  }
+
+  private _initMousewheelZoomForElectron() {
+    const ZOOM_DELTA = 0.05;
+    const webFrame = this._electronService.webFrame;
+    document.addEventListener('mousewheel', (event: MouseWheelEvent) => {
+      if (event && event.ctrlKey) {
+        const zoomFactor = webFrame.getZoomFactor();
+        if (event.deltaY > 0) {
+          webFrame.setZoomFactor(zoomFactor + ZOOM_DELTA);
+        } else if (event.deltaY < 0) {
+          webFrame.setZoomFactor(zoomFactor - ZOOM_DELTA);
+        }
+      }
+    }, false);
   }
 }
