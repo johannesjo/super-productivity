@@ -391,6 +391,7 @@ export function taskReducer(
           } else if (targetModelId === 'UNDONE') {
             newIndex = 0;
           }
+          const isDone = (targetModelId === 'DONE');
           const newIds = [...newState.todaysTaskIds];
           newIds.splice(newIndex, 0, taskId);
           return {
@@ -400,9 +401,11 @@ export function taskReducer(
               ...newState.entities,
               [taskId]: {
                 ...taskToMove,
-                isDone: (targetModelId === 'DONE')
+                isDone
               }
-            }
+            },
+            // unset current task if it was the task moved
+            ...((isDone && taskId === state.currentTaskId) ? {currentTaskId: null} : {})
           };
 
         case 'BACKLOG':
