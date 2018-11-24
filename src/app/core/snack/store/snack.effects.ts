@@ -48,8 +48,6 @@ export class SnackEffects {
     const cfg = {
       ...DEFAULT_SNACK_CFG, ...config, data: action.payload
     };
-    console.log('SNACK_EFFECT', cfg);
-
     switch (type) {
       case 'GOOGLE_LOGIN':
         this._ref = this.matSnackBar.openFromComponent(SnackGoogleLoginComponent, cfg);
