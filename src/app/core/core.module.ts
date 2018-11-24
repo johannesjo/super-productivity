@@ -10,7 +10,6 @@ import { RouterModule } from '@angular/router';
 import { LayoutModule } from './layout/layout.module';
 import { DialogSimpleTaskSummaryModule } from './dialog-simple-task-summary/dialog-simple-task-summary.module';
 import { NotifyModule } from './notify/notify.module';
-import { ReminderModule } from './reminder/reminder.module';
 
 @NgModule({
   imports: [
@@ -26,7 +25,6 @@ import { ReminderModule } from './reminder/reminder.module';
     LayoutModule,
     NotifyModule,
     DialogSimpleTaskSummaryModule,
-    ReminderModule,
   ],
   declarations: [],
   exports: [
@@ -39,7 +37,6 @@ import { ReminderModule } from './reminder/reminder.module';
     RouterModule,
     LayoutModule,
     NotifyModule,
-    ReminderModule,
     DialogSimpleTaskSummaryModule,
   ]
 })
