@@ -167,9 +167,9 @@ export class AppComponent implements OnInit {
       if (event && event.ctrlKey) {
         const zoomFactor = webFrame.getZoomFactor();
         if (event.deltaY > 0) {
-          webFrame.setZoomFactor(zoomFactor + ZOOM_DELTA);
-        } else if (event.deltaY < 0) {
           webFrame.setZoomFactor(zoomFactor - ZOOM_DELTA);
+        } else if (event.deltaY < 0) {
+          webFrame.setZoomFactor(zoomFactor + ZOOM_DELTA);
         }
       }
     }, false);
