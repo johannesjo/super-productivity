@@ -26,6 +26,7 @@ export class GoogleApiService {
       const EXPIRES_SAFETY_MARGIN = 30000;
       const isExpired = (!session.expiresAt || moment()
         .valueOf() + EXPIRES_SAFETY_MARGIN > session.expiresAt);
+      console.log('isLoggedIn check', (session && session.accessToken && !isExpired), isExpired, session);
       return session && session.accessToken && !isExpired;
     }));
 
@@ -52,8 +53,6 @@ export class GoogleApiService {
       this._electronService.ipcRenderer.send(IPC_TRIGGER_GOOGLE_AUTH, this._session.refreshToken);
       return new Promise((resolve, reject) => {
         this._electronService.ipcRenderer.on(IPC_GOOGLE_AUTH_TOKEN, (ev, data: any) => {
-          console.log(data);
-
           this._updateSession({
             accessToken: data.access_token,
             expiresAt: data.expiry_date,
@@ -70,6 +69,15 @@ export class GoogleApiService {
     } else {
       return this._initClientLibraryIfNotDone()
         .then((user: any) => {
+          // TODO implement offline access
+          // const authInstance = this._gapi.auth2.getAuthInstance();
+          // authInstance.grantOfflineAccess()
+          //   .then((res) => {
+          //     this._updateSession({
+          //       refreshToken: res.code
+          //     });
+          //   });
+
           if (user && user.Zi && user.Zi.access_token) {
             this._saveToken(user);
             this._snackIt('SUCCESS', 'GoogleApi: Login successful');
