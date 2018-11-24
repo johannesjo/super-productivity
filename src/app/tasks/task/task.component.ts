@@ -111,7 +111,6 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
       .subscribe((id) => {
         this.isCurrent = (this.task && id === this.task.id);
       });
-
   }
 
   ngAfterViewInit() {
@@ -126,6 +125,13 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
           this.focusSelfElement();
         }
       });
+
+    // hacky but relatively performant
+    if (this.task.parentId && Date.now() - 100 < this.task.created) {
+      setTimeout(() => {
+        this.focusTitleForEdit();
+      });
+    }
   }
 
   ngOnDestroy() {
@@ -219,6 +225,10 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     this._elementRef.nativeElement.focus();
   }
 
+  focusTitleForEdit() {
+    this.editOnClickEl.nativeElement.focus();
+  }
+
 
   onTaskAdditionalInfoOpenChanged($event) {
     this._taskService.update(this.task.id, {notes: $event.newVal});
@@ -234,7 +244,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     const isShiftOrCtrlPressed = (ev.shiftKey === true || ev.ctrlKey === true);
 
     if (checkKeyCombo(ev, keys.taskEditTitle) || ev.key === 'Enter') {
-      this.editOnClickEl.nativeElement.focus();
+      this.focusTitleForEdit();
       // prevent blur
       ev.preventDefault();
     }
