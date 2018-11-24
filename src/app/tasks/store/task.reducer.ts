@@ -521,20 +521,45 @@ export function taskReducer(
     }
 
     case TaskActionTypes.AddSubTask: {
+      const {task, parentId} = action.payload;
+      const parentTask = state.entities[parentId];
+
       // add item1
       const stateCopy = taskAdapter.addOne({
-        ...action.payload.task,
-        parentId: action.payload.parentId,
+        ...task,
+        parentId: parentId,
+        // update timeSpent if first sub task and non present
+        ...(
+          (parentTask.subTaskIds.length === 0 && Object.keys(task.timeSpentOnDay).length === 0)
+            ? {timeSpentOnDay: parentTask.timeSpentOnDay}
+            : {}
+        ),
+        // update timeEstimate if first sub task and non present
+        ...(
+          (parentTask.subTaskIds.length === 0 && !task.timeSpent)
+            ? {timeEstimate: parentTask.timeEstimate}
+            : {}
+        )
       }, state);
 
-      // also add to parent task
-      const parentTask = stateCopy.entities[action.payload.parentId];
-      parentTask.subTaskIds.push(action.payload.task.id);
       return {
         ...stateCopy,
-        focusTaskId: action.payload.task.id,
-        ...((state.currentTaskId === action.payload.parentId)
-          ? {currentTaskId: action.payload.task.id} : {})
+        // focus new task
+        focusTaskId: task.id,
+        // update current task to new sub task if parent was current before
+        ...(
+          (state.currentTaskId === parentId)
+            ? {currentTaskId: task.id}
+            : {}
+        ),
+        // also add to parent task
+        entities: {
+          ...stateCopy.entities,
+          [parentId]: {
+            ...parentTask,
+            subTaskIds: [...parentTask.subTaskIds, task.id]
+          }
+        }
       };
     }
 
