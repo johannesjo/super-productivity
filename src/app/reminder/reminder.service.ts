@@ -34,6 +34,7 @@ export class ReminderService {
           // TODO probably not the right way to do this
           // this._w.onerror = this._handleError.bind(this);
           this._w.addEventListener('message', this._onReminderActivated.bind(this));
+          this._updateRemindersInWorker(this._reminders);
         })
         .catch(this._handleError.bind(this));
     } else {
@@ -66,9 +67,8 @@ export class ReminderService {
   markAsChecked(reminderId: string) {
   }
 
-  private _onReminderActivated() {
-    console.log('ACTIVATE');
-
+  private _onReminderActivated(msg: MessageEvent) {
+    console.log('ACTIVATE', msg.data);
   }
 
   private _loadFromLs(): Reminder[] {
@@ -78,7 +78,19 @@ export class ReminderService {
       projectId: this._projectService.currentId,
       type: 'NOTE',
       relatedId: 'ASD',
-      remindAt: Date.now() + 10000,
+      remindAt: Date.now() - 15000,
+    }, {
+      id: shortid() as string,
+      projectId: this._projectService.currentId,
+      type: 'NOTE',
+      relatedId: 'aaaaa',
+      remindAt: Date.now() - 13000,
+    }, {
+      id: shortid() as string,
+      projectId: this._projectService.currentId,
+      type: 'NOTE',
+      relatedId: 'bvbdf',
+      remindAt: Date.now() - 10001,
     }];
   }
 
