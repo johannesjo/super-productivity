@@ -68,7 +68,7 @@ export class ReminderService {
   }
 
   private _onReminderActivated(msg: MessageEvent) {
-    console.log('ACTIVATE', msg.data);
+    // console.log('ACTIVATE', msg.data);
   }
 
   private _loadFromLs(): Reminder[] {
