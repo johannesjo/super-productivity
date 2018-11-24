@@ -24,7 +24,7 @@ mat-sidenav-container {
 }
 
 :host ::ng-deep .mat-drawer-inner-container {
-  overflow-y: scroll;
+  @include scrollY();
 }
 
 mat-drawer {
@@ -51,6 +51,6 @@ mat-drawer {
     height: 100%;
     left: 0;
     top: 0;
-    overflow-y: scroll;
+    @include scrollY();
   }
 }
