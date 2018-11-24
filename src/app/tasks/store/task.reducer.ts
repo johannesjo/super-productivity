@@ -152,16 +152,30 @@ const deleteTask = (state: TaskState,
   // PARENT TASK side effects
   // also delete from parent task if any
   if (taskToDelete.parentId) {
+    const parentTask = state.entities[taskToDelete.parentId];
+    const isWasLastSubTask = (parentTask.subTaskIds.length === 1);
     stateCopy = taskAdapter.updateOne({
       id: taskToDelete.parentId,
       changes: {
         subTaskIds: stateCopy.entities[taskToDelete.parentId].subTaskIds
           .filter(filterOutId(action.payload.id)),
+
+        // copy over sub task time stuff if it was the last sub task
+        ...(
+          (isWasLastSubTask)
+            ? {
+              timeSpentOnDay: taskToDelete.timeSpentOnDay,
+              timeEstimate: taskToDelete.timeEstimate,
+            }
+            : {}
+        )
       }
     }, stateCopy);
-    // also update time spent for parent
-    stateCopy = reCalcTimeSpentForParentIfParent(taskToDelete.parentId, stateCopy);
-    stateCopy = reCalcTimeEstimateForParentIfParent(taskToDelete.parentId, stateCopy);
+    // also update time spent for parent if it was not copied over from sub task
+    if (!isWasLastSubTask) {
+      stateCopy = reCalcTimeSpentForParentIfParent(taskToDelete.parentId, stateCopy);
+      stateCopy = reCalcTimeEstimateForParentIfParent(taskToDelete.parentId, stateCopy);
+    }
   }
 
   // SUB TASK side effects
