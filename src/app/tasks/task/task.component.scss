@@ -242,6 +242,7 @@ $this-icon-default-opacity: 0.7;
 }
 
 .drag-handle {
+  min-width: 24px;
   margin: 0 4px 0 9px;
   position: relative;
   z-index: 3;
