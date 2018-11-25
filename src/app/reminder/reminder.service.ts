@@ -5,38 +5,34 @@ import { NoteService } from '../note/note.service';
 import { RecurringConfig, Reminder, ReminderType } from './reminder.model';
 import { SnackService } from '../core/snack/snack.service';
 import shortid from 'shortid';
+import { NotifyService } from '../core/notify/notify.service';
 
-const WORKER_PATH = 'assets/service-workers/reminder.js';
+const WORKER_PATH = 'assets/web-workers/reminder.js';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ReminderService {
-  private _w;
+  private _w: Worker;
   private _reminders: Reminder[];
 
   constructor(
     private readonly _projectService: ProjectService,
     private readonly _persistenceService: PersistenceService,
     private readonly _noteService: NoteService,
+    private readonly _notifyService: NotifyService,
     private readonly _snackService: SnackService,
   ) {
   }
 
   init() {
-    if ('serviceWorker' in navigator) {
+    if ('Worker' in window) {
       this._reminders = this._loadFromLs();
-      console.log('initializing reminder service worker');
-      navigator.serviceWorker.register(WORKER_PATH)
-        .then(() => {
-          this._w = new Worker(WORKER_PATH);
-          console.log(this._w);
-          // TODO probably not the right way to do this
-          // this._w.onerror = this._handleError.bind(this);
-          this._w.addEventListener('message', this._onReminderActivated.bind(this));
-          this._updateRemindersInWorker(this._reminders);
-        })
-        .catch(this._handleError.bind(this));
+      this._w = new Worker(WORKER_PATH);
+      // this._w.onerror = this._handleError.bind(this);
+      this._w.addEventListener('message', this._onReminderActivated.bind(this));
+      this._w.addEventListener('error', this._handleError.bind(this));
+      this._updateRemindersInWorker(this._reminders);
     } else {
       console.error('No service workers supported :(');
     }
@@ -68,7 +64,13 @@ export class ReminderService {
   }
 
   private _onReminderActivated(msg: MessageEvent) {
+    // console.log(msg);
+    // TODO get related model here
     // console.log('ACTIVATE', msg.data);
+    this._notifyService.notify({
+      title: 'Title',
+      body: 'body',
+    });
   }
 
   private _loadFromLs(): Reminder[] {

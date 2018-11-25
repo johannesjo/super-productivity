@@ -6,9 +6,10 @@ import { NotifyModel } from './notify.model';
 })
 export class NotifyService {
   async notify(options: NotifyModel): Promise<Notification> {
-    if (this._isServiceWorkerNotificationSupport()) {
+    if (this._isBasicNotificationSupport()) {
       const permission = await Notification.requestPermission();
-
+      // not supported for basic notifications so we delete them
+      delete options.actions;
       if (permission === 'granted') {
         const instance = new Notification(options.title, {
           icon: 'assets/icons/icon-128x128.png',
@@ -33,7 +34,7 @@ export class NotifyService {
     }
   }
 
-  private _isServiceWorkerNotificationSupport() {
+  private _isBasicNotificationSupport() {
     return 'Notification' in window;
   }
 }

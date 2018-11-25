@@ -1,6 +1,6 @@
 const CHECK_INTERVAL_DURATION = 1000;
-const MESSAGE_INTERVAL_DURATION = 5000;
-let currentMessageTimerVal = MESSAGE_INTERVAL_DURATION;
+const MESSAGE_INTERVAL_DURATION = 60000;
+let currentMessageTimerVal = 0;
 let checkInterval;
 
 self.onmessage = function(msg) {
@@ -21,14 +21,11 @@ const reInitCheckInterval = (reminders) => {
         ? reminder
         : minReminder, reminders[0]
     );
-    console.log(oldestDueReminder);
 
     if (oldestDueReminder) {
-      self.postMessage(oldestDueReminder);
-      console.log(currentMessageTimerVal);
-
       if (currentMessageTimerVal <= 0) {
-        showMessage();
+        self.postMessage(oldestDueReminder);
+        console.log('Worker postMessage', oldestDueReminder);
         currentMessageTimerVal = MESSAGE_INTERVAL_DURATION;
       } else {
         currentMessageTimerVal -= CHECK_INTERVAL_DURATION;
@@ -36,20 +33,3 @@ const reInitCheckInterval = (reminders) => {
     }
   }, CHECK_INTERVAL_DURATION);
 };
-
-const showMessage = () => {
-  const title = 'Yay a message.';
-  const body = 'We have received a push message.';
-  const icon = 'icons/icon-128x128.png';
-  const tag = 'simple-push-demo-notification-tag';
-
-  console.log(self.registration);
-  if (self.registration) {
-    self.registration.showNotification(title, {
-      body: body,
-      icon: icon,
-      tag: tag
-    });
-  }
-};
-
