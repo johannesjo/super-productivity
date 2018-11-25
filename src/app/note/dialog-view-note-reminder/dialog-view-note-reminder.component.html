@@ -1,7 +1,6 @@
 <mat-dialog-content>
-  <h2 class="mat-h2">{{data.reminder.title}}</h2>
-
-
+  <!--<h2 class="mat-h2">{{data.reminder.title}}</h2>-->
+  <note [note]="note$|async"></note>
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">

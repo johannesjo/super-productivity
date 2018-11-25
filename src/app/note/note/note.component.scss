@@ -1,5 +1,9 @@
 @import '../../../variables';
 
+:host {
+  display: block;
+}
+
 .note {
   background: #ffffff;
   color: $standard-note-fg-light;

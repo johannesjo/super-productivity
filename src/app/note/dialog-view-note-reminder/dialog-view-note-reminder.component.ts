@@ -2,6 +2,9 @@ import { ChangeDetectionStrategy, Component, Inject, OnInit } from '@angular/cor
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material';
 import { Reminder } from '../../reminder/reminder.model';
 import { ReminderService } from '../../reminder/reminder.service';
+import { Note } from '../note.model';
+import { NoteService } from '../note.service';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'dialog-view-note-reminder',
@@ -10,13 +13,15 @@ import { ReminderService } from '../../reminder/reminder.service';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DialogViewNoteReminderComponent implements OnInit {
+  note$: Observable<Note> = this._noteService.getById(this.data.reminder.relatedId);
 
   constructor(
     private _matDialogRef: MatDialogRef<DialogViewNoteReminderComponent>,
     private _reminderService: ReminderService,
+    private _noteService: NoteService,
     @Inject(MAT_DIALOG_DATA) public data: { reminder: Reminder },
   ) {
-    _matDialogRef.disableClose = true;
+    this._matDialogRef.disableClose = true;
   }
 
   ngOnInit() {

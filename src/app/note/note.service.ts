@@ -13,9 +13,12 @@ import {
   UpdateNoteOrder
 } from './store/note.actions';
 import shortid from 'shortid';
-import { initialNoteState, NoteState, selectAllNotes, selectIsShowNotes } from './store/note.reducer';
+import { initialNoteState, NoteState, selectAllNotes, selectIsShowNotes, selectNoteById } from './store/note.reducer';
 import { PersistenceService } from '../core/persistence/persistence.service';
 import { Actions, ofType } from '@ngrx/effects';
+import { Task } from '../tasks/task.model';
+import { selectTaskById } from '../tasks/store/task.selectors';
+import { take } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
@@ -30,6 +33,10 @@ export class NoteService {
     private _persistenceService: PersistenceService,
     private _actions$: Actions,
   ) {
+  }
+
+  getById(id: string): Observable<Note> {
+    return this._store$.pipe(select(selectNoteById, {id}), take(1));
   }
 
   public toggleShow() {
