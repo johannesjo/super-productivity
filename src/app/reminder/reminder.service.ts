@@ -52,17 +52,20 @@ export class ReminderService {
     });
     // this._persistenceService
     this._updateRemindersInWorker(this._reminders);
+    this._saveToLS(this._reminders);
     console.log(this._reminders);
     return id;
   }
 
-  updateReminder(reminderChanges: Partial<Reminder>) {
+  updateReminder(reminderId: string, reminderChanges: Partial<Reminder>) {
+    this._saveToLS(this._reminders);
   }
 
   removeReminder(reminderIdToRemove: string) {
     const i = this._reminders.findIndex(reminder => reminder.id === reminderIdToRemove);
     if (i > -1) {
       this._reminders.splice(i, 1);
+      this._saveToLS(this._reminders);
     } else {
       throw new Error('Unable to find reminder with id ' + reminderIdToRemove);
     }
@@ -82,8 +85,11 @@ export class ReminderService {
   }
 
   private _loadFromLs(): Reminder[] {
-    // this._persistenceService.
-    return [];
+    return this._persistenceService.loadReminders() || [];
+  }
+
+  private _saveToLS(reminders: Reminder[]) {
+    this._persistenceService.saveReminders(reminders);
   }
 
   private _updateRemindersInWorker(reminders: Reminder[]) {

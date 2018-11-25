@@ -8,6 +8,7 @@ import {
   LS_NOTE_STATE,
   LS_PROJECT_META_LIST,
   LS_PROJECT_PREFIX,
+  LS_REMINDER,
   LS_TASK_ARCHIVE,
   LS_TASK_ATTACHMENT_STATE,
   LS_TASK_STATE
@@ -24,6 +25,7 @@ import { AppDataComplete } from '../sync/sync.model';
 import { BookmarkState } from '../../bookmark/store/bookmark.reducer';
 import { AttachmentState } from '../../tasks/attachment/store/attachment.reducer';
 import { NoteState } from '../../note/store/note.reducer';
+import { Reminder } from '../../reminder/reminder.model';
 
 @Injectable({
   providedIn: 'root'
@@ -40,6 +42,14 @@ export class PersistenceService {
 
   saveProjectsMeta(projectData: ProjectState) {
     saveToLsWithLastActive(LS_PROJECT_META_LIST, projectData);
+  }
+
+  loadReminders(): Reminder[] {
+    return loadFromLs(LS_REMINDER);
+  }
+
+  saveReminders(reminders: Reminder[]) {
+    saveToLsWithLastActive(LS_REMINDER, reminders);
   }
 
   saveTasksForProject(projectId, taskState: TaskState) {
