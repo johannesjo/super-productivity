@@ -22,7 +22,7 @@ const reInitCheckInterval = (reminders) => {
         : minReminder, reminders[0]
     );
 
-    if (oldestDueReminder) {
+    if (oldestDueReminder && oldestDueReminder.remindAt < Date.now()) {
       if (currentMessageTimerVal <= 0) {
         self.postMessage(oldestDueReminder);
         console.log('Worker postMessage', oldestDueReminder);
