@@ -3,6 +3,8 @@ import { Note } from '../note.model';
 import { NoteService } from '../note.service';
 import { MatDialog } from '@angular/material';
 import { DialogAddNoteReminderComponent } from '../dialog-add-note-reminder/dialog-add-note-reminder.component';
+import { ReminderService } from '../../reminder/reminder.service';
+import { SnackService } from '../../core/snack/snack.service';
 
 @Component({
   selector: 'note',
@@ -18,7 +20,9 @@ export class NoteComponent implements OnInit {
 
   constructor(
     private readonly _matDialog: MatDialog,
-    private readonly _noteService: NoteService
+    private readonly _noteService: NoteService,
+    private readonly _snackService: SnackService,
+    private readonly _reminderService: ReminderService,
   ) {
   }
 
@@ -43,5 +47,16 @@ export class NoteComponent implements OnInit {
         note: this.note,
       }
     });
+  }
+
+  removeReminder() {
+    this._reminderService.removeReminder(this.note.reminderId);
+    this._noteService.update(this.note.id, {reminderId: null});
+    this._snackService.open({
+      type: 'SUCCESS',
+      message: `Deleted reminder ${this.note.reminderId} for note`,
+      icon: 'schedule',
+    });
+
   }
 }

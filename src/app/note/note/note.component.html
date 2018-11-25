@@ -23,6 +23,12 @@
         {{note.reminderId ? 'Edit' : 'Add'}} reminder
       </button>
       <button mat-menu-item
+              *ngIf="note.reminderId"
+              (click)="removeReminder()">
+        <mat-icon style="color:#e15d63;">schedule</mat-icon>
+        Remove reminder
+      </button>
+      <button mat-menu-item
               (click)="toggleLock()">
         <mat-icon *ngIf="note.isLock">lock</mat-icon>
         <mat-icon *ngIf="!note.isLock">lock_open</mat-icon>
