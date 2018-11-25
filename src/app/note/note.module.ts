@@ -12,12 +12,16 @@ import { NoteService } from './note.service';
 import { DialogAddNoteReminderComponent } from './dialog-add-note-reminder/dialog-add-note-reminder.component';
 import { ReminderModule } from '../reminder/reminder.module';
 import { FormsModule } from '@angular/forms';
+import { ReminderService } from '../reminder/reminder.service';
+import { MatDialog } from '@angular/material';
+import { DialogViewNoteReminderComponent } from './dialog-view-note-reminder/dialog-view-note-reminder.component';
 
 @NgModule({
   declarations: [
     NotesComponent,
     NoteComponent,
-    DialogAddNoteReminderComponent
+    DialogAddNoteReminderComponent,
+    DialogViewNoteReminderComponent
   ],
   imports: [
     ReminderModule,
@@ -28,10 +32,25 @@ import { FormsModule } from '@angular/forms';
     EffectsModule.forFeature([NoteEffects]),
   ],
   entryComponents: [
-    DialogAddNoteReminderComponent
+    DialogAddNoteReminderComponent,
+    DialogViewNoteReminderComponent,
   ],
   exports: [NotesComponent],
   providers: [NoteService]
 })
 export class NoteModule {
+  constructor(
+    private readonly _reminderService: ReminderService,
+    private readonly _matDialog: MatDialog,
+  ) {
+    this._reminderService.onReminderActive$.subscribe(reminder => {
+      if (reminder && reminder.type === 'NOTE') {
+        this._matDialog.open(DialogViewNoteReminderComponent, {
+          data: {
+            reminder: reminder,
+          }
+        });
+      }
+    });
+  }
 }

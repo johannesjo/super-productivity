@@ -5,6 +5,7 @@ import { RecurringConfig, Reminder, ReminderType } from './reminder.model';
 import { SnackService } from '../core/snack/snack.service';
 import shortid from 'shortid';
 import { NotifyService } from '../core/notify/notify.service';
+import { BehaviorSubject, Observable } from 'rxjs';
 
 const WORKER_PATH = 'assets/web-workers/reminder.js';
 
@@ -14,6 +15,8 @@ const WORKER_PATH = 'assets/web-workers/reminder.js';
 export class ReminderService {
   private _w: Worker;
   private _reminders: Reminder[];
+
+  public onReminderActive$: BehaviorSubject<Reminder> = new BehaviorSubject(null);
 
   constructor(
     private readonly _projectService: ProjectService,
@@ -82,6 +85,7 @@ export class ReminderService {
     this._notifyService.notify({
       title: reminder.title,
     });
+    this.onReminderActive$.next(reminder);
   }
 
   private _loadFromLs(): Reminder[] {
