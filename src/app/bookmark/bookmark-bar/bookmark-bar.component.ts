@@ -42,6 +42,7 @@ export class BookmarkBarComponent {
 
   openEditDialog(bookmark?: Bookmark) {
     this._matDialog.open(DialogEditBookmarkComponent, {
+      restoreFocus: true,
       data: {
         bookmark: bookmark
       },

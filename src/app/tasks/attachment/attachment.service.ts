@@ -82,6 +82,7 @@ export class AttachmentService {
     ev.stopPropagation();
 
     this._matDialog.open(DialogEditAttachmentComponent, {
+      restoreFocus: true,
       data: {
         attachment: {...attachment, taskId},
       },

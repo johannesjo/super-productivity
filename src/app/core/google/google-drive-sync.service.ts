@@ -286,6 +286,7 @@ export class GoogleDriveSyncService {
     const lastActiveLocal = this._syncService.getLastActive();
     return new Promise((resolve, reject) => {
       this._matDialog.open(DialogConfirmDriveSyncSaveComponent, {
+        restoreFocus: true,
         data: {
           loadFromRemote: () => {
             this.loadFrom(true, true);
@@ -305,6 +306,7 @@ export class GoogleDriveSyncService {
     const lastActiveLocal = this._syncService.getLastActive();
     return new Promise((resolve, reject) => {
       this._matDialog.open(DialogConfirmDriveSyncLoadComponent, {
+        restoreFocus: true,
         data: {
           loadFromRemote: resolve.bind(this),
           saveToRemote: () => {
@@ -322,6 +324,7 @@ export class GoogleDriveSyncService {
   private _confirmUsingExistingFileDialog(fileName): Promise<any> {
     return new Promise((resolve, reject) => {
       this._matDialog.open(DialogConfirmComponent, {
+        restoreFocus: true,
         data: {
           message: `
 Use <strong>existing</strong> file <strong>"${fileName}"</strong> as sync file?
@@ -335,6 +338,7 @@ If not please change the Sync file name.`,
   private _confirmSaveNewFile(fileName): Promise<any> {
     return new Promise((resolve, reject) => {
       this._matDialog.open(DialogConfirmComponent, {
+        restoreFocus: true,
         data: {
           message: `No file with the name <strong>"${fileName}"</strong> was found.
 <strong>Create</strong> it as sync file on Google Drive?`,

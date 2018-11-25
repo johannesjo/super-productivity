@@ -14,7 +14,9 @@ export class ProjectPageComponent implements OnInit {
   }
 
   openCreateDialog() {
-    this._matDialog.open(DialogCreateProjectComponent, {});
+    this._matDialog.open(DialogCreateProjectComponent, {
+      restoreFocus: true,
+    });
   }
 
   ngOnInit() {
@@ -22,6 +24,7 @@ export class ProjectPageComponent implements OnInit {
 
   edit(project) {
     this._matDialog.open(DialogCreateProjectComponent, {
+      restoreFocus: true,
       data: Object.assign({}, project),
     });
   }

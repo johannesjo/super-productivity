@@ -98,6 +98,7 @@ export class BookmarkService {
     ev.stopPropagation();
 
     this._matDialog.open(DialogEditBookmarkComponent, {
+      restoreFocus: true,
       data: {
         bookmark: {...bookmark},
       },

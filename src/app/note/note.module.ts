@@ -57,6 +57,8 @@ export class NoteModule {
       if (!isDialogOpen && reminder && reminder.type === 'NOTE') {
         isDialogOpen = true;
         this._matDialog.open(DialogViewNoteReminderComponent, {
+          autoFocus: false,
+          restoreFocus: true,
           data: {
             reminder: reminder,
           }

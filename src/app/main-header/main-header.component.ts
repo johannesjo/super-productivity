@@ -33,7 +33,9 @@ export class MainHeaderComponent implements OnInit {
   }
 
   addProject() {
-    this._matDialog.open(DialogCreateProjectComponent);
+    this._matDialog.open(DialogCreateProjectComponent, {
+      restoreFocus: true,
+    });
   }
 
   showAddTaskBar() {

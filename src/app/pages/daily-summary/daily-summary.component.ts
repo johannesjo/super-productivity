@@ -71,6 +71,7 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
 
   showExportModal() {
     this._matDialog.open(DialogSimpleTaskSummaryComponent, {
+      restoreFocus: true,
       data: {
         tasks: this._todaysTasks,
       }
@@ -78,7 +79,9 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
   }
 
   showTimeSheetExportModal() {
-    this._matDialog.open(DialogGoogleExportTimeComponent);
+    this._matDialog.open(DialogGoogleExportTimeComponent, {
+      restoreFocus: true,
+    });
   }
 
   finishDay() {

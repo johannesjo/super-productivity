@@ -37,6 +37,7 @@ export class WorklogComponent implements OnInit {
   exportData(type, monthData: WorklogMonth) {
     if (type === 'MONTH') {
       this._matDialog.open(DialogSimpleTaskSummaryComponent, {
+        restoreFocus: true,
         data: {
           tasks: this._createTasksForMonth(monthData),
         }

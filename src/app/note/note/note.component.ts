@@ -36,6 +36,7 @@ export class NoteComponent {
 
   editReminder() {
     this._matDialog.open(DialogAddNoteReminderComponent, {
+      restoreFocus: true,
       data: {
         note: this.note,
       }

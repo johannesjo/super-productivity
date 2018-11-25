@@ -25,6 +25,7 @@ export class AttachmentListComponent implements OnInit {
 
   openEditDialog(attachment?: Attachment) {
     this._matDialog.open(DialogEditAttachmentComponent, {
+      restoreFocus: true,
       data: {
         attachment: attachment
       },
