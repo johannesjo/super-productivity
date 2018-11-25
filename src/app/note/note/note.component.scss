@@ -43,6 +43,9 @@
     .note:hover & {
       opacity: 1;
     }
+    .hasReminder & {
+      opacity: 0.3;
+    }
   }
 }
 

@@ -1,4 +1,5 @@
 <div class="note"
+     [class.hasReminder]="note.reminderId"
      [class.isFocused]="isFocus">
   <div class="content">
     <inline-markdown #markdownEl
@@ -13,7 +14,8 @@
   <div class="controls">
     <button mat-icon-button=""
             [matMenuTriggerFor]="menu">
-      <mat-icon>more_vert</mat-icon>
+      <mat-icon *ngIf="!note.reminderId">more_vert</mat-icon>
+      <mat-icon *ngIf="note.reminderId">schedule</mat-icon>
     </button>
 
     <mat-menu #menu="matMenu">
