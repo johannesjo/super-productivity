@@ -1,10 +1,8 @@
-import { ChangeDetectionStrategy, Component, Input, OnInit, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, ViewChild } from '@angular/core';
 import { Note } from '../note.model';
 import { NoteService } from '../note.service';
 import { MatDialog } from '@angular/material';
 import { DialogAddNoteReminderComponent } from '../dialog-add-note-reminder/dialog-add-note-reminder.component';
-import { ReminderService } from '../../reminder/reminder.service';
-import { SnackService } from '../../core/snack/snack.service';
 
 @Component({
   selector: 'note',
@@ -12,7 +10,7 @@ import { SnackService } from '../../core/snack/snack.service';
   styleUrls: ['./note.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class NoteComponent implements OnInit {
+export class NoteComponent {
   @Input() note: Note;
   @Input() isFocus: boolean;
 
@@ -21,12 +19,7 @@ export class NoteComponent implements OnInit {
   constructor(
     private readonly _matDialog: MatDialog,
     private readonly _noteService: NoteService,
-    private readonly _snackService: SnackService,
-    private readonly _reminderService: ReminderService,
   ) {
-  }
-
-  ngOnInit() {
   }
 
   toggleLock() {
