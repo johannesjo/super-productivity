@@ -136,6 +136,7 @@
     "rxjs": "^6.3.3",
     "rxjs-compat": "^6.3.3",
     "shortid": "^2.2.13",
+    "throttle-debounce": "^2.0.1",
     "zone.js": "~0.8.26"
   },
   "devDependencies": {

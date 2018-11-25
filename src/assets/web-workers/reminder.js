@@ -1,5 +1,5 @@
 const CHECK_INTERVAL_DURATION = 1000;
-const MESSAGE_INTERVAL_DURATION = 60000;
+const MESSAGE_INTERVAL_DURATION = 10000;
 let currentMessageTimerVal = 0;
 let checkInterval;
 
@@ -15,12 +15,14 @@ const reInitCheckInterval = (reminders) => {
     return;
   }
 
-  setInterval(() => {
+  checkInterval = setInterval(() => {
     const oldestDueReminder = reminders.reduce(
       (minReminder, reminder) => (reminder.remindAt < minReminder.remindAt)
         ? reminder
         : minReminder, reminders[0]
     );
+
+    console.log('oldestDueReminder in:', (oldestDueReminder.remindAt - Date.now()) / 1000, oldestDueReminder);
 
     if (oldestDueReminder && oldestDueReminder.remindAt < Date.now()) {
       if (currentMessageTimerVal <= 0) {

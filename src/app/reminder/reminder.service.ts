@@ -5,7 +5,8 @@ import { RecurringConfig, Reminder, ReminderType } from './reminder.model';
 import { SnackService } from '../core/snack/snack.service';
 import shortid from 'shortid';
 import { NotifyService } from '../core/notify/notify.service';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
+import { debounce, throttle } from 'throttle-debounce';
 
 const WORKER_PATH = 'assets/web-workers/reminder.js';
 
@@ -15,6 +16,7 @@ const WORKER_PATH = 'assets/web-workers/reminder.js';
 export class ReminderService {
   private _w: Worker;
   private _reminders: Reminder[];
+  private _throttledShowNotification = throttle(60000, this._showNotification.bind(this));
 
   public onReminderActive$: BehaviorSubject<Reminder> = new BehaviorSubject(null);
 
@@ -56,13 +58,11 @@ export class ReminderService {
     });
     // this._persistenceService
     this._saveModel(this._reminders);
-    console.log(this._reminders);
     return id;
   }
 
   updateReminder(reminderId: string, reminderChanges: Partial<Reminder>) {
     Object.assign(this.getById(reminderId), reminderChanges);
-    console.log(this._reminders);
     this._saveModel(this._reminders);
   }
 
@@ -82,10 +82,14 @@ export class ReminderService {
   private _onReminderActivated(msg: MessageEvent) {
     const reminder = msg.data as Reminder;
     // TODO get related model here
+    this.onReminderActive$.next(reminder);
+    this._throttledShowNotification(reminder);
+  }
+
+  private _showNotification(reminder: Reminder) {
     this._notifyService.notify({
       title: reminder.title,
     });
-    this.onReminderActive$.next(reminder);
   }
 
   private _loadFromLs(): Reminder[] {
@@ -93,6 +97,7 @@ export class ReminderService {
   }
 
   private _saveModel(reminders: Reminder[]) {
+    console.log('Reminder._saveModel', this._reminders);
     this._persistenceService.saveReminders(reminders);
     this._updateRemindersInWorker(this._reminders);
   }

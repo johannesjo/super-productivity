@@ -47,6 +47,7 @@ export class NoteModule {
 
     this._reminderService.onReminderActive$.subscribe(reminder => {
       if (!isDialogOpen && reminder && reminder.type === 'NOTE') {
+        isDialogOpen = true;
         this._matDialog.open(DialogViewNoteReminderComponent, {
           data: {
             reminder: reminder,
