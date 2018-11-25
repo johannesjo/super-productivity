@@ -88,6 +88,7 @@ export const JIRA_CREDENTIALS_FORM_CFG: FormlyFieldConfig[] = [
     templateOptions: {
       required: true,
       label: 'Password / Token',
+      type: 'password'
     },
   },
 ];
