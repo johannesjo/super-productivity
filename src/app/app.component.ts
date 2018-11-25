@@ -163,14 +163,25 @@ export class AppComponent implements OnInit {
   private _initMousewheelZoomForElectron() {
     const ZOOM_DELTA = 0.05;
     const webFrame = this._electronService.webFrame;
+
+    if (this._configService.cfg
+      && this._configService.cfg._uiHelper
+      && this._configService.cfg._uiHelper._zoomFactor > 0) {
+      webFrame.setZoomFactor(this._configService.cfg._uiHelper._zoomFactor);
+    }
+
     document.addEventListener('mousewheel', (event: MouseWheelEvent) => {
       if (event && event.ctrlKey) {
-        const zoomFactor = webFrame.getZoomFactor();
+        let zoomFactor = webFrame.getZoomFactor();
         if (event.deltaY > 0) {
-          webFrame.setZoomFactor(zoomFactor - ZOOM_DELTA);
+          zoomFactor -= ZOOM_DELTA;
         } else if (event.deltaY < 0) {
-          webFrame.setZoomFactor(zoomFactor + ZOOM_DELTA);
+          zoomFactor += ZOOM_DELTA;
         }
+        webFrame.setZoomFactor(zoomFactor);
+        this._configService.updateSection('_uiHelper', {
+          _zoomFactor: zoomFactor
+        });
       }
     }, false);
   }

@@ -64,7 +64,7 @@ export interface GoogleDriveSyncConfig {
 
 // SETTINGS (not configurable under config)
 export type UiHelperSettings = Readonly<{
-  [key: string]: any;
+  _zoomFactor: number;
 }>;
 
 export type GoogleSession = Readonly<{
