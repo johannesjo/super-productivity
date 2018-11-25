@@ -45,7 +45,9 @@ export class DialogAddNoteReminderComponent {
 
   save() {
     if (this.isEdit) {
-      this._reminderService.updateReminder(this.reminder);
+      this._reminderService.updateReminder(this.reminder.id, {
+        remindAt: new Date(this.date).getTime(),
+      });
       this._snackService.open({
         type: 'SUCCESS',
         message: `Updated reminder for note`,

@@ -58,6 +58,8 @@ export class ReminderService {
   }
 
   updateReminder(reminderId: string, reminderChanges: Partial<Reminder>) {
+    Object.assign(this.getById(reminderId), reminderChanges);
+    console.log(this._reminders);
     this._saveToLS(this._reminders);
   }
 
