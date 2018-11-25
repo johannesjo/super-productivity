@@ -1,20 +1,24 @@
 <mat-dialog-content>
-  <!--<h2 class="mat-h2">{{data.reminder.title}}</h2>-->
+  <h3 class="mat-h3">Reminder: {{data.reminder.title}}</h3>
   <note [note]="note$|async"></note>
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">
   <div class="wrap-buttons">
     <button color="primary"
-            type="submit"
-            class="btn btn-primary submit-button"
-            mat-raised-button>Dismiss
+            (click)="dismiss()"
+            type="button"
+            mat-raised-button>
+      <mat-icon>clear</mat-icon>
+      Dismiss
     </button>
 
     <button color="primary"
-            type="submit"
-            class="btn btn-primary submit-button"
-            mat-raised-button>Snooze for 10m
+            (click)="snooze()"
+            type="button"
+            mat-raised-button>
+      <mat-icon>snooze</mat-icon>
+      Snooze for 10m
     </button>
   </div>
 </mat-dialog-actions>
