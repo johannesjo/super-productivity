@@ -3,8 +3,6 @@ import { CommonModule } from '@angular/common';
 import { ReminderService } from './reminder.service';
 import { ProjectModule } from '../project/project.module';
 import { CoreModule } from '../core/core.module';
-import { TasksModule } from '../tasks/tasks.module';
-import { NoteModule } from '../note/note.module';
 
 @NgModule({
   declarations: [],
@@ -12,8 +10,6 @@ import { NoteModule } from '../note/note.module';
     CommonModule,
     CoreModule,
     ProjectModule,
-    TasksModule,
-    NoteModule,
   ],
   providers: [
     ReminderService,

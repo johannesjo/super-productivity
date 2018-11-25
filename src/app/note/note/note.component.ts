@@ -1,6 +1,8 @@
 import { ChangeDetectionStrategy, Component, Input, OnInit, ViewChild } from '@angular/core';
 import { Note } from '../note.model';
 import { NoteService } from '../note.service';
+import { MatDialog } from '@angular/material';
+import { DialogAddNoteReminderComponent } from '../dialog-add-note-reminder/dialog-add-note-reminder.component';
 
 @Component({
   selector: 'note',
@@ -14,7 +16,10 @@ export class NoteComponent implements OnInit {
 
   @ViewChild('markdownEl') markdownEl: HTMLElement;
 
-  constructor(private _noteService: NoteService) {
+  constructor(
+    private readonly _matDialog: MatDialog,
+    private readonly _noteService: NoteService
+  ) {
   }
 
   ngOnInit() {
@@ -30,5 +35,13 @@ export class NoteComponent implements OnInit {
 
   removeNote() {
     this._noteService.remove(this.note.id);
+  }
+
+  editReminder() {
+    this._matDialog.open(DialogAddNoteReminderComponent, {
+      data: {
+        note: this.note,
+      }
+    });
   }
 }

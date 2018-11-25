@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { ProjectService } from '../project/project.service';
 import { PersistenceService } from '../core/persistence/persistence.service';
-import { NoteService } from '../note/note.service';
 import { RecurringConfig, Reminder, ReminderType } from './reminder.model';
 import { SnackService } from '../core/snack/snack.service';
 import shortid from 'shortid';
@@ -19,7 +18,6 @@ export class ReminderService {
   constructor(
     private readonly _projectService: ProjectService,
     private readonly _persistenceService: PersistenceService,
-    private readonly _noteService: NoteService,
     private readonly _notifyService: NotifyService,
     private readonly _snackService: SnackService,
   ) {
@@ -36,6 +34,10 @@ export class ReminderService {
     } else {
       console.error('No service workers supported :(');
     }
+  }
+
+  getById(reminderId: string) {
+    return this._reminders.find(reminder => reminder.id === reminderId);
   }
 
   addReminder(type: ReminderType, relatedId: string, remindAt: number, recurringConfig?: RecurringConfig) {

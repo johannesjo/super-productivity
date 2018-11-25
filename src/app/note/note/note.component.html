@@ -17,15 +17,16 @@
     </button>
 
     <mat-menu #menu="matMenu">
-      <button mat-menu-item>
+      <button mat-menu-item
+              (click)="editReminder()">
         <mat-icon>schedule</mat-icon>
-        Add reminder (not implemented)
+        {{note.reminderId ? 'Edit' : 'Add'}} reminder
       </button>
       <button mat-menu-item
               (click)="toggleLock()">
         <mat-icon *ngIf="note.isLock">lock</mat-icon>
         <mat-icon *ngIf="!note.isLock">lock_open</mat-icon>
-        {{note.isLock? 'Enable markdown parse ' : 'Disable markdown parsing'}}
+        {{note.isLock ? 'Enable markdown parse ' : 'Disable markdown parsing'}}
       </button>
       <button mat-menu-item
               (click)="removeNote()">

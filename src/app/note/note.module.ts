@@ -9,14 +9,24 @@ import { NotesComponent } from './notes/notes.component';
 import { NoteComponent } from './note/note.component';
 import { UiModule } from '../ui/ui.module';
 import { NoteService } from './note.service';
+import { DialogAddNoteReminderComponent } from './dialog-add-note-reminder/dialog-add-note-reminder.component';
+import { ReminderModule } from '../reminder/reminder.module';
 
 @NgModule({
-  declarations: [NotesComponent, NoteComponent],
+  declarations: [
+    NotesComponent,
+    NoteComponent,
+    DialogAddNoteReminderComponent
+  ],
   imports: [
+    ReminderModule,
     CommonModule,
     UiModule,
     StoreModule.forFeature(NOTE_FEATURE_NAME, fromNote.reducer),
     EffectsModule.forFeature([NoteEffects]),
+  ],
+  entryComponents: [
+    DialogAddNoteReminderComponent
   ],
   exports: [NotesComponent],
   providers: [NoteService]
