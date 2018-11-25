@@ -40,19 +40,19 @@ export class ReminderService {
     return this._reminders.find(reminder => reminder.id === reminderId);
   }
 
-  addReminder(type: ReminderType, relatedId: string, remindAt: number, recurringConfig?: RecurringConfig): string {
+  addReminder(type: ReminderType, relatedId: string, title: string, remindAt: number, recurringConfig?: RecurringConfig): string {
     const id = shortid();
     this._reminders.push({
       id,
       projectId: this._projectService.currentId,
       relatedId,
+      title,
       remindAt,
       type,
       recurringConfig
     });
     // this._persistenceService
-    this._updateRemindersInWorker(this._reminders);
-    this._saveToLS(this._reminders);
+    this._saveModel(this._reminders);
     console.log(this._reminders);
     return id;
   }
@@ -60,14 +60,14 @@ export class ReminderService {
   updateReminder(reminderId: string, reminderChanges: Partial<Reminder>) {
     Object.assign(this.getById(reminderId), reminderChanges);
     console.log(this._reminders);
-    this._saveToLS(this._reminders);
+    this._saveModel(this._reminders);
   }
 
   removeReminder(reminderIdToRemove: string) {
     const i = this._reminders.findIndex(reminder => reminder.id === reminderIdToRemove);
     if (i > -1) {
       this._reminders.splice(i, 1);
-      this._saveToLS(this._reminders);
+      this._saveModel(this._reminders);
     } else {
       throw new Error('Unable to find reminder with id ' + reminderIdToRemove);
     }
@@ -77,12 +77,10 @@ export class ReminderService {
   }
 
   private _onReminderActivated(msg: MessageEvent) {
-    // console.log(msg);
+    const reminder = msg.data as Reminder;
     // TODO get related model here
-    // console.log('ACTIVATE', msg.data);
     this._notifyService.notify({
-      title: 'Title',
-      body: 'body',
+      title: reminder.title,
     });
   }
 
@@ -90,8 +88,9 @@ export class ReminderService {
     return this._persistenceService.loadReminders() || [];
   }
 
-  private _saveToLS(reminders: Reminder[]) {
+  private _saveModel(reminders: Reminder[]) {
     this._persistenceService.saveReminders(reminders);
+    this._updateRemindersInWorker(this._reminders);
   }
 
   private _updateRemindersInWorker(reminders: Reminder[]) {

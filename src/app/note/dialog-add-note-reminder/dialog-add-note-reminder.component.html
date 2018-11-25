@@ -5,16 +5,30 @@
     <mat-form-field>
       <!--[matDatepicker]="myDatepicker"-->
       <input
-             matInput
-             placeholder="Date for new entry"
-             type="datetime-local"
-             [(ngModel)]="date"
-             required
-             name="date">
+        matInput
+        placeholder="Title for notification"
+        type="text"
+        [(ngModel)]="title"
+        required
+        name="title">
+      <mat-error>You need to enter a title</mat-error>
+      <!--<mat-datepicker-toggle matPrefix-->
+      <!--[for]="myDatepicker"></mat-datepicker-toggle>-->
+      <!--<mat-datepicker #myDatepicker></mat-datepicker>-->
+    </mat-form-field>
+    <mat-form-field>
+      <!--[matDatepicker]="myDatepicker"-->
+      <input
+        matInput
+        placeholder="Datetime for reminder"
+        type="datetime-local"
+        [(ngModel)]="date"
+        required
+        name="date">
       <mat-error>The entered value is not a date!</mat-error>
       <mat-icon matPrefix="">schedule</mat-icon>
       <!--<mat-datepicker-toggle matPrefix-->
-                             <!--[for]="myDatepicker"></mat-datepicker-toggle>-->
+      <!--[for]="myDatepicker"></mat-datepicker-toggle>-->
       <!--<mat-datepicker #myDatepicker></mat-datepicker>-->
     </mat-form-field>
 

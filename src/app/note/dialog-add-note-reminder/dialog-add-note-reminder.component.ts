@@ -14,6 +14,7 @@ import { SnackService } from '../../core/snack/snack.service';
 })
 export class DialogAddNoteReminderComponent {
   public date: string;
+  public title: string;
   public isEdit: boolean;
   public reminder: ReminderCopy;
   public note: Note;
@@ -32,8 +33,10 @@ export class DialogAddNoteReminderComponent {
     this.isEdit = !!(this.reminder && this.reminder.id);
     if (this.isEdit) {
       this.date = this._convertDate(new Date(this.reminder.remindAt));
+      this.title = this.reminder.title;
     } else {
       this.date = this._convertDate(new Date());
+      this.title = this.note.content.substr(0, 40);
     }
   }
 
@@ -47,10 +50,11 @@ export class DialogAddNoteReminderComponent {
     if (this.isEdit) {
       this._reminderService.updateReminder(this.reminder.id, {
         remindAt: new Date(this.date).getTime(),
+        title: this.title,
       });
       this._snackService.open({
         type: 'SUCCESS',
-        message: `Updated reminder for note`,
+        message: `Updated reminder ${this.reminder.id} for note`,
         icon: 'schedule',
       });
       this.close();
@@ -58,12 +62,13 @@ export class DialogAddNoteReminderComponent {
       const reminderId = this._reminderService.addReminder(
         'NOTE',
         this.note.id,
+        this.title,
         new Date(this.date).getTime()
       );
       this._noteService.update(this.note.id, {reminderId});
       this._snackService.open({
         type: 'SUCCESS',
-        message: `Added reminder ${this.reminder.id} for note`,
+        message: `Added reminder ${reminderId} for note`,
         icon: 'schedule',
       });
       this.close();
