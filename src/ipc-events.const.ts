@@ -6,6 +6,7 @@ export const IPC_REGISTER_GLOBAL_SHORTCUT_EVENT = 'REGISTER_GLOBAL_SHORTCUT';
 export const IPC_IDLE_TIME = 'IDLE_TIME';
 
 export const IPC_NOTIFY = 'NOTIFY';
+export const IPC_SHOW_OR_FOCUS = 'SHOW_OR_FOCUS';
 
 export const IPC_APP_READY = 'APP_READY';
 export const IPC_ERROR = 'ELECTRON_ERROR';

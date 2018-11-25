@@ -15,6 +15,9 @@ import { FormsModule } from '@angular/forms';
 import { ReminderService } from '../reminder/reminder.service';
 import { MatDialog } from '@angular/material';
 import { DialogViewNoteReminderComponent } from './dialog-view-note-reminder/dialog-view-note-reminder.component';
+import { ElectronService } from 'ngx-electron';
+import { IPC_SHOW_OR_FOCUS } from '../../ipc-events.const';
+import { IS_ELECTRON } from '../app.constants';
 
 @NgModule({
   declarations: [
@@ -42,10 +45,15 @@ export class NoteModule {
   constructor(
     private readonly _reminderService: ReminderService,
     private readonly _matDialog: MatDialog,
+    private readonly _electronService: ElectronService,
   ) {
     let isDialogOpen = false;
 
     this._reminderService.onReminderActive$.subscribe(reminder => {
+      if (IS_ELECTRON) {
+        this._electronService.ipcRenderer.send(IPC_SHOW_OR_FOCUS);
+      }
+
       if (!isDialogOpen && reminder && reminder.type === 'NOTE') {
         isDialogOpen = true;
         this._matDialog.open(DialogViewNoteReminderComponent, {
