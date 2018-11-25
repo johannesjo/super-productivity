@@ -40,9 +40,10 @@ export class ReminderService {
     return this._reminders.find(reminder => reminder.id === reminderId);
   }
 
-  addReminder(type: ReminderType, relatedId: string, remindAt: number, recurringConfig?: RecurringConfig) {
+  addReminder(type: ReminderType, relatedId: string, remindAt: number, recurringConfig?: RecurringConfig): string {
+    const id = shortid();
     this._reminders.push({
-      id: shortid(),
+      id,
       projectId: this._projectService.currentId,
       relatedId,
       remindAt,
@@ -51,6 +52,11 @@ export class ReminderService {
     });
     // this._persistenceService
     this._updateRemindersInWorker(this._reminders);
+    console.log(this._reminders);
+    return id;
+  }
+
+  updateReminder(reminderChanges: Partial<Reminder>) {
   }
 
   removeReminder(reminderIdToRemove: string) {
@@ -77,25 +83,7 @@ export class ReminderService {
 
   private _loadFromLs(): Reminder[] {
     // this._persistenceService.
-    return [{
-      id: shortid() as string,
-      projectId: this._projectService.currentId,
-      type: 'NOTE',
-      relatedId: 'ASD',
-      remindAt: Date.now() - 15000,
-    }, {
-      id: shortid() as string,
-      projectId: this._projectService.currentId,
-      type: 'NOTE',
-      relatedId: 'aaaaa',
-      remindAt: Date.now() - 13000,
-    }, {
-      id: shortid() as string,
-      projectId: this._projectService.currentId,
-      type: 'NOTE',
-      relatedId: 'bvbdf',
-      remindAt: Date.now() - 10001,
-    }];
+    return [];
   }
 
   private _updateRemindersInWorker(reminders: Reminder[]) {

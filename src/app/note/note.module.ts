@@ -11,6 +11,7 @@ import { UiModule } from '../ui/ui.module';
 import { NoteService } from './note.service';
 import { DialogAddNoteReminderComponent } from './dialog-add-note-reminder/dialog-add-note-reminder.component';
 import { ReminderModule } from '../reminder/reminder.module';
+import { FormsModule } from '@angular/forms';
 
 @NgModule({
   declarations: [
@@ -21,6 +22,7 @@ import { ReminderModule } from '../reminder/reminder.module';
   imports: [
     ReminderModule,
     CommonModule,
+    FormsModule,
     UiModule,
     StoreModule.forFeature(NOTE_FEATURE_NAME, fromNote.reducer),
     EffectsModule.forFeature([NoteEffects]),
