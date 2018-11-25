@@ -70,9 +70,7 @@ export const DEFAULT_CFG: GlobalConfig = {
     _backupDocId: null,
   },
   _uiHelper: {
-    isShowWelcomeDialog: true,
-    isShowBookmarkBar: false,
-    showSubTasks: true
+    _zoomFactor: 1,
   },
   _googleSession: {
     accessToken: null,
