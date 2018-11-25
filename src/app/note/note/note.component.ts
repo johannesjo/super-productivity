@@ -50,13 +50,6 @@ export class NoteComponent implements OnInit {
   }
 
   removeReminder() {
-    this._reminderService.removeReminder(this.note.reminderId);
-    this._noteService.update(this.note.id, {reminderId: null});
-    this._snackService.open({
-      type: 'SUCCESS',
-      message: `Deleted reminder ${this.note.reminderId} for note`,
-      icon: 'schedule',
-    });
-
+    this._noteService.removeReminder(this.note.id, this.note.reminderId);
   }
 }

@@ -16,9 +16,9 @@ import shortid from 'shortid';
 import { initialNoteState, NoteState, selectAllNotes, selectIsShowNotes, selectNoteById } from './store/note.reducer';
 import { PersistenceService } from '../core/persistence/persistence.service';
 import { Actions, ofType } from '@ngrx/effects';
-import { Task } from '../tasks/task.model';
-import { selectTaskById } from '../tasks/store/task.selectors';
 import { take } from 'rxjs/operators';
+import { ReminderService } from '../reminder/reminder.service';
+import { SnackService } from '../core/snack/snack.service';
 
 @Injectable({
   providedIn: 'root'
@@ -31,6 +31,8 @@ export class NoteService {
   constructor(
     private _store$: Store<any>,
     private _persistenceService: PersistenceService,
+    private _reminderService: ReminderService,
+    private _snackService: SnackService,
     private _actions$: Actions,
   ) {
   }
@@ -84,5 +86,44 @@ export class NoteService {
 
   public updateOrder(ids: string[]) {
     this._store$.dispatch(new UpdateNoteOrder({ids}));
+  }
+
+  // REMINDER
+  // --------
+  public addReminder(noteId: string, remindAt: number, title: string) {
+    const reminderId = this._reminderService.addReminder(
+      'NOTE',
+      noteId,
+      title,
+      remindAt,
+    );
+    this.update(noteId, {reminderId});
+    this._snackService.open({
+      type: 'SUCCESS',
+      message: `Added reminder ${reminderId} for note`,
+      icon: 'schedule',
+    });
+  }
+
+  public updateReminder(noteId: string, reminderId: string, remindAt: number, title: string) {
+    this._reminderService.updateReminder(reminderId, {
+      remindAt,
+      title,
+    });
+    this._snackService.open({
+      type: 'SUCCESS',
+      message: `Updated reminder ${reminderId} for note`,
+      icon: 'schedule',
+    });
+  }
+
+  public removeReminder(noteId: string, reminderId: string) {
+    this._reminderService.removeReminder(reminderId);
+    this.update(noteId, {reminderId: null});
+    this._snackService.open({
+      type: 'SUCCESS',
+      message: `Deleted reminder ${reminderId} for note`,
+      icon: 'schedule',
+    });
   }
 }
