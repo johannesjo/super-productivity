@@ -33,6 +33,7 @@ export class WorkViewPageComponent implements OnInit, OnDestroy {
   isTriggerSwitchListAni = false;
 
   private _subs = new Subscription();
+  private _switchListAnimationTimeout: number;
 
   constructor(
     public taskService: TaskService,
@@ -64,7 +65,7 @@ export class WorkViewPageComponent implements OnInit, OnDestroy {
       direction: 'vertical',
       moves: function (el, container, handle) {
         // console.log('moves par', handle.className, handle.className.indexOf('handle-par') > -1);
-        return handle.className.indexOf('handle-par') > -1;
+        return handle.className.indexOf && handle.className.indexOf('handle-par') > -1;
       }
     });
 
@@ -72,7 +73,7 @@ export class WorkViewPageComponent implements OnInit, OnDestroy {
       direction: 'vertical',
       moves: function (el, container, handle) {
         // console.log('moves sub', handle.className, handle.className.indexOf('handle-sub') > -1);
-        return handle.className.indexOf('handle-sub') > -1;
+        return handle.className.indexOf && handle.className.indexOf('handle-sub') > -1;
       }
     });
 
@@ -88,6 +89,9 @@ export class WorkViewPageComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     this._dragulaService.destroy('PARENT');
     this._dragulaService.destroy('SUB');
+    if (this._switchListAnimationTimeout) {
+      window.clearTimeout(this._switchListAnimationTimeout);
+    }
   }
 
   showAddTaskBar() {
@@ -101,7 +105,7 @@ export class WorkViewPageComponent implements OnInit, OnDestroy {
   private _triggerTaskSwitchListAnimation() {
     this.isTriggerSwitchListAni = true;
     this._cd.detectChanges();
-    setTimeout(() => {
+    this._switchListAnimationTimeout = window.setTimeout(() => {
       this.isTriggerSwitchListAni = false;
       this._cd.detectChanges();
     }, 300);
