@@ -21,13 +21,20 @@
     <mat-menu #menu="matMenu">
       <button mat-menu-item
               (click)="editReminder()">
-        <mat-icon>schedule</mat-icon>
-        {{note.reminderId ? 'Edit' : 'Add'}} reminder
+        <ng-container *ngIf="!note.reminderId">
+          <mat-icon>alarm_add</mat-icon>
+          Add reminder
+        </ng-container>
+        <ng-container *ngIf="note.reminderId">
+          <mat-icon>alarm</mat-icon>
+          Edit reminder
+        </ng-container>
+
       </button>
       <button mat-menu-item
               *ngIf="note.reminderId"
               (click)="removeReminder()">
-        <mat-icon style="color:#e15d63;">schedule</mat-icon>
+        <mat-icon style="color:#e15d63;">alarm_off</mat-icon>
         Remove reminder
       </button>
       <button mat-menu-item
