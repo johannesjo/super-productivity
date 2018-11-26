@@ -24,6 +24,8 @@ export class TaskListComponent implements OnDestroy, OnInit {
   subs = new Subscription();
   isBlock = false;
 
+  private _blockAnimationTimeout: number;
+
   constructor(
     private _taskService: TaskService,
     private _dragulaService: DragulaService,
@@ -54,6 +56,9 @@ export class TaskListComponent implements OnDestroy, OnInit {
 
   ngOnDestroy() {
     this.subs.unsubscribe();
+    if (this._blockAnimationTimeout) {
+      clearTimeout(this._blockAnimationTimeout);
+    }
   }
 
   trackByFn(i: number, task: Task) {
@@ -63,9 +68,9 @@ export class TaskListComponent implements OnDestroy, OnInit {
   private _blockAnimation() {
     this.isBlock = true;
     this._cd.detectChanges();
-    setTimeout(() => {
+    this._blockAnimationTimeout = setTimeout(() => {
       this.isBlock = false;
       this._cd.detectChanges();
-    }, 150);
+    });
   }
 }
