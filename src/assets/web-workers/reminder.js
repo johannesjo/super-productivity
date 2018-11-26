@@ -22,7 +22,7 @@ const reInitCheckInterval = (reminders) => {
         : minReminder, reminders[0]
     );
 
-    console.log('oldestDueReminder in:', (oldestDueReminder.remindAt - Date.now()) / 1000, oldestDueReminder);
+    // console.log('oldestDueReminder in:', (oldestDueReminder.remindAt - Date.now()) / 1000, oldestDueReminder);
 
     if (oldestDueReminder && oldestDueReminder.remindAt < Date.now()) {
       if (currentMessageTimerVal <= 0) {
