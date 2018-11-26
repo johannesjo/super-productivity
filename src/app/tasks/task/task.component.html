@@ -6,7 +6,7 @@
      [class.isAdditionalInfoOpen]="task.isAdditionalInfoOpen">
 
   <div class="first-line">
-    <mat-icon class="material-icons drag-handle"
+    <mat-icon class="drag-handle"
               svgIcon="drag_handle"
               [class.handle-par]="!task.parentId"
               [class.handle-sub]="task.parentId">
@@ -20,7 +20,8 @@
             aria-label="mark as current"
             tabindex="2"
             *ngIf="!task.isDone && !isCurrent && !task.subTasks">
-      <mat-icon class="material-icons">play_arrow</mat-icon>
+      <mat-icon svgIcon="play"
+                class="play-icon"></mat-icon>
     </button>
 
     <button mat-icon-button
@@ -29,7 +30,7 @@
             (click)="pauseTask()"
             tabindex="2"
             *ngIf="!task.isDone && isCurrent && !task.subTasks">
-      <mat-icon class="material-icons">pause</mat-icon>
+      <mat-icon>pause</mat-icon>
     </button>
 
 
@@ -40,7 +41,7 @@
             (click)="handleUpdateBtnClick()"
             class="ico-btn"
             *ngIf="task.issueData?.wasUpdated">
-      <mat-icon class="material-icons update update-icon">update</mat-icon>
+      <mat-icon class="update update-icon">update</mat-icon>
     </button>
 
     <a mat-icon-button
@@ -72,7 +73,8 @@
     <div class="time-wrapper">
 
       <div class="time">
-        <div class="time-val"><span *ngIf="task.subTasks && task.subTasks.length>0">∑</span> {{task.timeSpent|msToString}}</div>
+        <div class="time-val">
+          <span *ngIf="task.subTasks && task.subTasks.length>0">∑</span> {{task.timeSpent|msToString}}</div>
         <div class="separator">/</div>
         <div class="time-val">{{task.timeEstimate|msToString}}</div>
       </div>
@@ -136,7 +138,7 @@
       <!--class="ico-btn delete-btn"-->
       <!--(click)="deleteTask()">-->
 
-      <!--<mat-icon class="material-icons delete-icon"-->
+      <!--<mat-icon class="delete-icon"-->
       <!--aria-label="delete">delete_forever-->
       <!--</mat-icon>-->
       <!--</button>-->
@@ -146,11 +148,11 @@
       <!--class="ico-btn mark-as-done-btn"-->
       <!--tabindex="2"-->
       <!--aria-label="un-/mark as done">-->
-      <!--<mat-icon class="material-icons delete-icon"-->
+      <!--<mat-icon class="delete-icon"-->
       <!--*ngIf="task.isDone"-->
       <!--aria-label="Mark as undone">undo-->
       <!--</mat-icon>-->
-      <!--<mat-icon class="material-icons delete-icon"-->
+      <!--<mat-icon class="delete-icon"-->
       <!--*ngIf="!task.isDone"-->
       <!--aria-label="Mark as done">check-->
       <!--</mat-icon>-->
@@ -175,7 +177,7 @@
                 aria-label="delete"
                 (click)="deleteTask()">
 
-          <mat-icon class="material-icons delete-icon"
+          <mat-icon class="delete-icon"
                     style="color:#e15d63;"
                     aria-label="delete">delete_forever
           </mat-icon>
@@ -186,13 +188,13 @@
                 tabindex="2"
                 aria-label="un-/mark as done">
           <ng-container *ngIf="task.isDone">
-            <mat-icon class="material-icons delete-icon"
+            <mat-icon class="delete-icon"
                       aria-label="Mark as undone">undo
             </mat-icon>
             Mark as undone
           </ng-container>
           <ng-container *ngIf="!task.isDone">
-            <mat-icon class="material-icons delete-icon"
+            <mat-icon class="delete-icon"
                       aria-label="Mark as done">check
             </mat-icon>
             Mark as done
