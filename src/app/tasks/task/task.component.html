@@ -6,70 +6,71 @@
      [class.isAdditionalInfoOpen]="task.isAdditionalInfoOpen">
 
   <div class="first-line">
-    <mat-icon class="drag-handle"
-              svgIcon="drag_handle"
-              [class.handle-par]="!task.parentId"
-              [class.handle-sub]="task.parentId">
-    </mat-icon>
-
-
-    <button mat-icon-button
-            color=""
-            class="play-btn ico-btn"
-            (click)="startTask()"
-            aria-label="mark as current"
-            tabindex="2"
-            *ngIf="!task.isDone && !isCurrent && !task.subTasks">
-      <mat-icon svgIcon="play"
-                class="play-icon"></mat-icon>
-    </button>
-
-    <button mat-icon-button
-            color=""
-            class="play-btn ico-btn"
-            (click)="pauseTask()"
-            tabindex="2"
-            *ngIf="!task.isDone && isCurrent && !task.subTasks">
-      <mat-icon>pause</mat-icon>
-    </button>
-
-
-    <button mat-icon-button
-            aria-label="is updated"
-            tabindex="2"
-            color="primary"
-            (click)="handleUpdateBtnClick()"
-            class="ico-btn"
-            *ngIf="task.issueData?.wasUpdated">
-      <mat-icon class="update update-icon">update</mat-icon>
-    </button>
-
-    <a mat-icon-button
-       color=""
-       class="ico-btn original-link-btn"
-       aria-label="link"
-       tabindex="2"
-       target="_blank"
-       external-link
-       *ngIf="task.issueData?.url"
-       [href]="task.issueData?.url">
-
-      <mat-icon *ngIf="task.issueType ==='JIRA'"
-                aria-label="explore">explore
+    <div class="title-bar-wrapper">
+      <mat-icon class="drag-handle"
+                svgIcon="drag_handle"
+                [class.handle-par]="!task.parentId"
+                [class.handle-sub]="task.parentId">
       </mat-icon>
-      <mat-icon *ngIf="task.issueType ==='GITHUB'"
-                aria-label="github">github_circle
-      </mat-icon>
-    </a>
 
-    <div editOnClick
-         #editOnClickEl
-         contenteditable="true"
-         class="title task-title"
-         [value]="task.title"
-         (editFinished)="updateTaskTitleIfChanged($event.isChanged, $event.newVal)"
-         tabindex="2"></div>
 
+      <button mat-icon-button
+              color=""
+              class="play-btn ico-btn"
+              (click)="startTask()"
+              aria-label="mark as current"
+              tabindex="2"
+              *ngIf="!task.isDone && !isCurrent && !task.subTasks">
+        <mat-icon svgIcon="play"
+                  class="play-icon"></mat-icon>
+      </button>
+
+      <button mat-icon-button
+              color=""
+              class="play-btn ico-btn"
+              (click)="pauseTask()"
+              tabindex="2"
+              *ngIf="!task.isDone && isCurrent && !task.subTasks">
+        <mat-icon>pause</mat-icon>
+      </button>
+
+
+      <button mat-icon-button
+              aria-label="is updated"
+              tabindex="2"
+              color="primary"
+              (click)="handleUpdateBtnClick()"
+              class="ico-btn"
+              *ngIf="task.issueData?.wasUpdated">
+        <mat-icon class="update update-icon">update</mat-icon>
+      </button>
+
+      <a mat-icon-button
+         color=""
+         class="ico-btn original-link-btn"
+         aria-label="link"
+         tabindex="2"
+         target="_blank"
+         external-link
+         *ngIf="task.issueData?.url"
+         [href]="task.issueData?.url">
+
+        <mat-icon *ngIf="task.issueType ==='JIRA'"
+                  aria-label="explore">explore
+        </mat-icon>
+        <mat-icon *ngIf="task.issueType ==='GITHUB'"
+                  aria-label="github">github_circle
+        </mat-icon>
+      </a>
+
+      <div editOnClick
+           #editOnClickEl
+           contenteditable="true"
+           class="title task-title"
+           [value]="task.title"
+           (editFinished)="updateTaskTitleIfChanged($event.isChanged, $event.newVal)"
+           tabindex="2"></div>
+    </div>
     <div class="time-wrapper">
 
       <div class="time">
