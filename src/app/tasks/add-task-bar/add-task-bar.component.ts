@@ -37,6 +37,9 @@ export class AddTaskBarComponent implements OnInit, OnDestroy {
       this.inputEl.nativeElement.addEventListener('keydown', (ev) => {
         if (ev.key === 'Escape') {
           this.blur.emit();
+        } else if (ev.key === '1' && ev.ctrlKey === true) {
+          this.isAddToBacklog = !this.isAddToBacklog;
+          ev.preventDefault();
         }
       });
     });
