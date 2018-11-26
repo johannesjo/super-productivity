@@ -19,7 +19,7 @@
       <th>Status</th>
       <td>{{task.issueData.status.name}}</td>
     </tr>
-    <tr>
+    <tr *ngIf="task.issueData.components?.length">
       <th>Components</th>
       <td>
         <mat-chip-list>
@@ -55,11 +55,15 @@
       <td>
         <div class="comment"
              *ngFor="let comment of task.issueData.comments">
-          <div class="author">
-            <img [src]="comment.author.avatarUrl">
-            <div class="author-name">{{comment.author.displayName}}</div>
+
+          <img [src]="comment.author.avatarUrl"
+               class="author-avatar">
+          <div class="name-and-comment-content">
+            <div><span class="author-name">{{comment.author.displayName}}</span>
+              <span class="when">at {{comment.created|date:'short'}}</span>
+            </div>
+            <div>{{comment.body}}</div>
           </div>
-          <div>{{comment.body}}</div>
         </div>
       </td>
     </tr>

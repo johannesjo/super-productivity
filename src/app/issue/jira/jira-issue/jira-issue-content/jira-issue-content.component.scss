@@ -2,6 +2,17 @@
 
 .issue-table {
   width: 100%;
+
+  td,
+  th {
+    vertical-align: top;
+    padding-bottom: $s;
+    padding-left: $s;
+
+    &:first-child {
+      padding-left: 0;
+    }
+  }
 }
 
 .wrapper {
@@ -9,18 +20,27 @@
 }
 
 .comment {
-  display: block;
-
-  .author {
-    display: flex;
-    align-items: center;
-    margin-bottom: $s;
-
-    img {
-      margin-right: $s;
-    }
-  }
+  display: flex;
   margin-bottom: $s*2;
+
+  .author-avatar {
+    margin-right: $s;
+    max-width: 48px;
+    border-radius: 50%;
+  }
+
+  .author-name {
+    font-weight: bold;
+  }
+
+  .when {
+    margin-left: $s;
+    opacity: 0.6;
+  }
+
+  .name-and-comment-content {
+  }
+
 }
 
 .attachment {
