@@ -50,14 +50,6 @@
     }
 
   }
-
-  mat-icon {
-    position: absolute;
-    left: $s;
-    top: 50%;
-    transform: translateY(-50%);
-    z-index: 2;
-  }
 }
 
 .is-loading {
@@ -66,5 +58,17 @@
   ::ng-deep .mat-option-text {
     display: flex;
     justify-content: center;
+  }
+}
+
+.switch-add-to-btn {
+  position: absolute;
+  left: $s;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  opacity: 0.4;
+  &:hover{
+    opacity: 1;
   }
 }

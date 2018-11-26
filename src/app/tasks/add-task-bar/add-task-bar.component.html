@@ -1,6 +1,12 @@
 <form (submit)="addTask()"
       class="add-task-form mat-elevation-z3 ">
-  <mat-icon>playlist_add</mat-icon>
+  <button mat-icon-button=""
+          type="button"
+          class="switch-add-to-btn"
+          (click)="isAddToBacklog=!isAddToBacklog">
+    <mat-icon *ngIf="isAddToBacklog">library_add</mat-icon>
+    <mat-icon *ngIf="!isAddToBacklog">playlist_add</mat-icon>
+  </button>
   <input matInput
          #inputEl
          class="border-color-primary"
@@ -28,4 +34,5 @@
     </ng-container>
 
   </mat-autocomplete>
+
 </form>

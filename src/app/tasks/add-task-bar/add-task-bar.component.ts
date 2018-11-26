@@ -1,4 +1,4 @@
-import { Component, EventEmitter, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
+import { Component, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { TaskService } from '../task.service';
 import { JiraApiService } from '../../issue/jira/jira-api.service';
@@ -18,6 +18,7 @@ export class AddTaskBarComponent implements OnInit, OnDestroy {
   taskSuggestionsCtrl: FormControl = new FormControl();
   filteredIssueSuggestions: any[];
   isLoading = false;
+  @Input() isAddToBacklog = false;
   @Output() blur: EventEmitter<any> = new EventEmitter();
   @ViewChild('inputEl') inputEl;
 
@@ -73,7 +74,11 @@ export class AddTaskBarComponent implements OnInit, OnDestroy {
   }
 
   onBlur(ev) {
-    this.blur.emit(ev);
+    if (ev.relatedTarget && ev.relatedTarget.className.includes('switch-add-to-btn')) {
+      this.inputEl.nativeElement.focus();
+    } else {
+      this.blur.emit(ev);
+    }
   }
 
   displayWith(issue: JiraIssue) {
@@ -86,13 +91,14 @@ export class AddTaskBarComponent implements OnInit, OnDestroy {
 
     if (typeof issueOrTitle === 'string') {
       if (issueOrTitle.length > 0) {
-        this._taskService.add(issueOrTitle);
+        this._taskService.add(issueOrTitle, this.isAddToBacklog);
       }
     } else {
       this._taskService.addWithIssue(
         issueOrTitle.summary,
         'JIRA',
         issueOrTitle,
+        this.isAddToBacklog,
       );
       // TODO move to issue effect
       // get full data
