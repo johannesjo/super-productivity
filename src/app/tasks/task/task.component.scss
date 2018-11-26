@@ -10,7 +10,7 @@ $this-icon-default-opacity: 0.7;
 
 %standardTaskOpacityChange {
   opacity: $this-icon-default-opacity;
-  transition: transform $transition-standard;
+  transition: transform $transition-fast;
 
   :host:focus &,
   .isCurrent &,
@@ -23,7 +23,7 @@ $this-icon-default-opacity: 0.7;
 %standardTaskZoom {
   &:hover,
   &:focus {
-    transform: scale(1.1);
+    transform: scale(1.2);
   }
 }
 
@@ -437,7 +437,7 @@ input {
   }
 }
 
-.play-icon{
+.play-icon {
   height: 24px;
   width: 24px;
 }
