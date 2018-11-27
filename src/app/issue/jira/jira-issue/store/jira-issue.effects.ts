@@ -6,10 +6,15 @@ import { tap, withLatestFrom } from 'rxjs/operators';
 import { TaskActionTypes } from '../../../../tasks/store/task.actions';
 import { PersistenceService } from '../../../../core/persistence/persistence.service';
 import { selectJiraIssueEntities, selectJiraIssueFeatureState, selectJiraIssueIds } from './jira-issue.reducer';
-import { selectCurrentProjectId } from '../../../../project/store/project.reducer';
+import { selectCurrentProjectId, selectProjectJiraCfg } from '../../../../project/store/project.reducer';
 import { JiraApiService } from '../../jira-api.service';
 import { JiraIssueService } from '../jira-issue.service';
 import { JIRA_POLL_INTERVAL } from '../../jira.const';
+import { ConfigService } from '../../../../core/config/config.service';
+import { Dictionary } from '@ngrx/entity';
+import { JiraIssue } from '../jira-issue.model';
+import { JiraCfg } from '../../jira';
+import { SnackService } from '../../../../core/snack/snack.service';
 
 @Injectable()
 export class JiraIssueEffects {
@@ -28,6 +33,7 @@ export class JiraIssueEffects {
       withLatestFrom(
         this._store$.pipe(select(selectJiraIssueIds)),
         this._store$.pipe(select(selectJiraIssueEntities)),
+        this._store$.pipe(select(selectProjectJiraCfg)),
       ),
       // TODO should be done in a more modern way via switchmap and timer
       tap(this._reInitIssuePolling.bind(this))
@@ -53,6 +59,8 @@ export class JiraIssueEffects {
 
   constructor(private readonly _actions$: Actions,
               private readonly _store$: Store<any>,
+              private readonly _configService: ConfigService,
+              private readonly _snackService: SnackService,
               private readonly _jiraApiService: JiraApiService,
               private readonly _jiraIssueService: JiraIssueService,
               private readonly _persistenceService: PersistenceService
@@ -67,13 +75,18 @@ export class JiraIssueEffects {
     }
   }
 
-  private _reInitIssuePolling([action, issueIds, entities]) {
+  private _reInitIssuePolling(
+    [action, issueIds, entities, jiraCfg]: [JiraIssueActionTypes, string[], Dictionary<JiraIssue>, JiraCfg]
+  ) {
     if (this._pollingIntervalId) {
       window.clearInterval(this._pollingIntervalId);
       this._pollingIntervalId = 0;
     }
-    if (issueIds && issueIds.length) {
+    const isPollingEnabled = jiraCfg.isEnabled && jiraCfg.isAutoPollTickets;
+    if (isPollingEnabled && issueIds && issueIds.length) {
       this._pollingIntervalId = window.setInterval(() => {
+        // TODO remove
+        this._snackService.open({message: 'Jira: Polling Changes for issues', icon: 'cloud_download'});
         issueIds.forEach((id) => this._updateIssueFromApi(id, entities[id]));
       }, JIRA_POLL_INTERVAL);
     }

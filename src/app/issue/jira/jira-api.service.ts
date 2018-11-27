@@ -224,7 +224,7 @@ export class JiraApiService {
         const errorTxt = (res && res.error && (typeof res.error === 'string' && res.error) || res.error.name);
         console.error(errorTxt);
 
-        this._snackService.open({type: 'ERROR', message: 'Jira request failed'});
+        this._snackService.open({type: 'ERROR', message: 'Jira request failed: ' + errorTxt});
         currentRequest.reject(res);
         if (res.error.statusCode && res.error.statusCode === 401) {
           this._isPreventNextRequestAfterFailedAuth = true;
