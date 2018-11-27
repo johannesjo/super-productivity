@@ -135,16 +135,11 @@
       width: $this-ico-size;
       height: $this-ico-size;
       display: block;
-      font-size: 30px;
+      font-size:  $this-ico-size;
       color: $yellow;
-      transform-origin: center center;
+      //transform-origin: center center;
       animation: success-animation-sun #{$this-ani-style};
       backface-visibility: hidden;
-
-      svg {
-        width: $this-ico-size;
-        height: $this-ico-size;
-      }
     }
     .unicorn-wrapper {
       position: absolute;

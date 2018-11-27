@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { TaskService } from '../../tasks/task.service';
 import { getTodayStr } from '../../tasks/util/get-today-str';
 import { TaskWithSubTasks } from '../../tasks/task.model';
@@ -14,7 +14,6 @@ import { ElectronService } from 'ngx-electron';
 import { IPC_SHUTDOWN_NOW } from '../../../ipc-events.const';
 
 const SUCCESS_ANIMATION_DURATION = 500;
-const SUCCESS_ANIMATION_MAX_DURATION = 10000;
 
 @Component({
   selector: 'daily-summary',
@@ -38,10 +37,8 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
   // use mysql date as it is sortable
   workingToday$ = this._taskService.workingToday$;
   private successAnimationTimeout;
-  private successAnimationMaxTimeout;
   private _doneTasks: TaskWithSubTasks[];
   private _todaysTasks: TaskWithSubTasks[];
-  private _simpleSummarySettings: SimpleSummarySettings;
 
   // calc time spent on todays tasks today
   private _subs: Subscription = new Subscription();
@@ -52,6 +49,7 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
     private readonly _router: Router,
     private readonly _matDialog: MatDialog,
     private readonly _electronService: ElectronService,
+    private readonly _cd: ChangeDetectorRef,
   ) {
   }
 
@@ -127,13 +125,11 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
   private _initSuccessAnimation(cb) {
     this.showSuccessAnimation = true;
     this.successAnimationTimeout = window.setTimeout(() => {
+      this.showSuccessAnimation = false;
+      this._cd.detectChanges();
       if (cb) {
         cb();
       }
     }, SUCCESS_ANIMATION_DURATION);
-
-    this.successAnimationMaxTimeout = window.setTimeout(() => {
-      this.showSuccessAnimation = false;
-    }, SUCCESS_ANIMATION_MAX_DURATION);
   }
 }
