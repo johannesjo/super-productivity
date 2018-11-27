@@ -13,7 +13,7 @@ import {
 import { fadeAnimation } from '../animations/fade.ani';
 import { MarkdownComponent } from 'ngx-markdown';
 
-const HIDE_OVERFLOW_TIMEOUT_DURATION = 200;
+const HIDE_OVERFLOW_TIMEOUT_DURATION = 300;
 
 @Component({
   selector: 'inline-markdown',
@@ -71,9 +71,14 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
     }
   }
 
-  keypressHandler($event) {
+  keypressHandler(ev: KeyboardEvent) {
     this.resizeTextareaToFit();
-    if ($event.keyCode === 10 && $event.ctrlKey) {
+    if (ev.keyCode === 10 && ev.ctrlKey) {
+      this.untoggleShowEdit();
+    }
+    console.log(ev.key, ev.ctrlKey);
+
+    if (ev.key === 'Enter' && ev.ctrlKey) {
       this.untoggleShowEdit();
     }
   }
@@ -118,9 +123,11 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
 
   resizeParsedToFit() {
     this._hideOverflow();
+
     setTimeout(() => {
       this.previewEl.element.nativeElement.style.height = 'auto';
-      this.wrapperEl.nativeElement.style.height = this.previewEl.element.nativeElement.offsetHeight + 'px';
+      // NOTE: somehow this pixel seem to help
+      this.wrapperEl.nativeElement.style.height = this.previewEl.element.nativeElement.offsetHeight + 1 + 'px';
       this.previewEl.element.nativeElement.style.height = '';
     });
   }

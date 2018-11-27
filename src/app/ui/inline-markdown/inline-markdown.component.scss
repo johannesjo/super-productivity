@@ -13,7 +13,6 @@
   box-sizing: border-box;
   height: 30px;
   border: none;
-  resize: vertical;
   overflow: auto;
   position: relative;
   transition: height $transition-fast;
@@ -42,7 +41,7 @@
   word-wrap: break-word;
   display: block;
   resize: none;
-  min-height: 100%;
+  //min-height: 100%;
   overflow: hidden;
 }
 

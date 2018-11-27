@@ -5,6 +5,7 @@
             #textareaEl
             tabindex="1"
             [@fade]
+            (keypress)="keypressHandler($event)"
             (focus)="setFocus($event)"
             (input)="resizeTextareaToFit()"
             (blur)="untoggleShowEdit(); setBlur($event)"
@@ -18,6 +19,5 @@
        [hidden]="isShowEdit"
        (click)="toggleShowEdit($event)"
        (focus)="toggleShowEdit($event)"
-       (keypress)="keypressHandler($event)"
        class="mat-body-1 markdown-parsed"></div>
 </div>
