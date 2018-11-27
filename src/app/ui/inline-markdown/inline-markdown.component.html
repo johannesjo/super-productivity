@@ -1,4 +1,5 @@
 <div class="markdown-wrapper"
+     [class.isHideOverflow]="isHideOverflow"
      #wrapperEl>
   <textarea *ngIf="isShowEdit"
             #textareaEl
@@ -8,7 +9,7 @@
             (input)="resizeTextareaToFit()"
             (blur)="untoggleShowEdit(); setBlur($event)"
             class="mat-body-1 markdown-unparsed"
-            rows="5"></textarea>
+            rows="2"></textarea>
 
   <div markdown
        #previewEl

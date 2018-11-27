@@ -26,7 +26,7 @@
     transform: scale(1.04);
     position: relative;
     z-index: 4;
-    outline: 2px dashed $c-accent;
+    //outline: 2px dashed $c-accent;
   }
 }
 
@@ -55,8 +55,8 @@
 
   inline-markdown ::ng-deep {
     .markdown-wrapper {
-      min-height: 60px;
-      max-height: 500px;
+      min-height: 30px;
+      max-height: 400px;
     }
 
     .markdown-unparsed,

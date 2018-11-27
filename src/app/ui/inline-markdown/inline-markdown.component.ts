@@ -1,7 +1,19 @@
-import { ChangeDetectionStrategy, Component, ElementRef, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  ElementRef,
+  EventEmitter,
+  Input,
+  OnDestroy,
+  OnInit,
+  Output,
+  ViewChild
+} from '@angular/core';
 import { fadeAnimation } from '../animations/fade.ani';
 import { MarkdownComponent } from 'ngx-markdown';
 
+const HIDE_OVERFLOW_TIMEOUT_DURATION = 200;
 
 @Component({
   selector: 'inline-markdown',
@@ -10,7 +22,7 @@ import { MarkdownComponent } from 'ngx-markdown';
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [fadeAnimation]
 })
-export class InlineMarkdownComponent implements OnInit {
+export class InlineMarkdownComponent implements OnInit, OnDestroy {
   @Input() model: string;
   @Input() isLock = false;
   @Output() onChanged: EventEmitter<any> = new EventEmitter();
@@ -20,9 +32,11 @@ export class InlineMarkdownComponent implements OnInit {
   @ViewChild('textareaEl') textareaEl: ElementRef;
   @ViewChild('previewEl') previewEl: MarkdownComponent;
 
+  isHideOverflow = false;
   isShowEdit = false;
   modelCopy: string;
   el: HTMLElement;
+  private _hideOverFlowTimeout: number;
 
   @Input() set isFocus(val: boolean) {
     if (!this.isShowEdit && val) {
@@ -30,8 +44,12 @@ export class InlineMarkdownComponent implements OnInit {
     }
   }
 
-  constructor(el: ElementRef) {
+  constructor(
+    el: ElementRef,
+    private _cd: ChangeDetectorRef,
+  ) {
     this.el = el.nativeElement;
+    this.resizeParsedToFit();
   }
 
   ngOnInit() {
@@ -47,7 +65,14 @@ export class InlineMarkdownComponent implements OnInit {
     // }
   }
 
+  ngOnDestroy(): void {
+    if (this._hideOverFlowTimeout) {
+      window.clearTimeout(this._hideOverFlowTimeout);
+    }
+  }
+
   keypressHandler($event) {
+    this.resizeTextareaToFit();
     if ($event.keyCode === 10 && $event.ctrlKey) {
       this.untoggleShowEdit();
     }
@@ -84,6 +109,7 @@ export class InlineMarkdownComponent implements OnInit {
 
 
   resizeTextareaToFit() {
+    this._hideOverflow();
     this.textareaEl.nativeElement.style.height = 'auto';
     this.textareaEl.nativeElement.style.height = this.textareaEl.nativeElement.scrollHeight + 'px';
     this.wrapperEl.nativeElement.style.height = this.textareaEl.nativeElement.offsetHeight + 'px';
@@ -91,6 +117,7 @@ export class InlineMarkdownComponent implements OnInit {
 
 
   resizeParsedToFit() {
+    this._hideOverflow();
     setTimeout(() => {
       this.previewEl.element.nativeElement.style.height = 'auto';
       this.wrapperEl.nativeElement.style.height = this.previewEl.element.nativeElement.offsetHeight + 'px';
@@ -105,6 +132,18 @@ export class InlineMarkdownComponent implements OnInit {
 
   setBlur(ev: Event) {
     this.blur.emit(ev);
+  }
+
+  private _hideOverflow() {
+    this.isHideOverflow = true;
+    if (this._hideOverFlowTimeout) {
+      window.clearTimeout(this._hideOverFlowTimeout);
+    }
+
+    this._hideOverFlowTimeout = window.setTimeout(() => {
+      this.isHideOverflow = false;
+      this._cd.detectChanges();
+    }, HIDE_OVERFLOW_TIMEOUT_DURATION);
   }
 
   // function makeLinksWorkForElectron() {

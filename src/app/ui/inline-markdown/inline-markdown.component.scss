@@ -2,6 +2,7 @@
 
 :host {
   display: block;
+
   [hidden] {
     display: none !important;
   }
@@ -15,16 +16,24 @@
   resize: vertical;
   overflow: auto;
   position: relative;
+  transition: height $transition-fast;
+  transform-origin: top;
+
   .resize-to-fit {
     position: absolute;
     right: $s*2;
     top: 0;
     cursor: pointer;
   }
+
+  &.isHideOverflow {
+    overflow: hidden;
+  }
 }
 
 .markdown-unparsed,
 .markdown-parsed {
+  //transition: height 1.3s;
   border: 0;
   padding: $s $s*2;
   margin: 0;
@@ -33,9 +42,8 @@
   word-wrap: break-word;
   display: block;
   resize: none;
-  overflow: auto;
-  height: 100%;
-
+  min-height: 100%;
+  overflow: hidden;
 }
 
 .markdown-parsed ::ng-deep {
@@ -49,13 +57,16 @@
   h3 {
     margin-bottom: $s;
   }
+
   ul {
     margin: 0 $s;
     padding-left: $s*2;
   }
+
   > ul {
     padding-left: $s*2;
   }
+
   ul ul {
     padding-top: 0;
   }
