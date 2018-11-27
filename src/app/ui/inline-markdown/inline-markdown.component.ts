@@ -49,7 +49,6 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
     private _cd: ChangeDetectorRef,
   ) {
     this.el = el.nativeElement;
-    this.resizeParsedToFit();
   }
 
   ngOnInit() {
@@ -127,7 +126,7 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
     setTimeout(() => {
       this.previewEl.element.nativeElement.style.height = 'auto';
       // NOTE: somehow this pixel seem to help
-      this.wrapperEl.nativeElement.style.height = this.previewEl.element.nativeElement.offsetHeight + 1 + 'px';
+      this.wrapperEl.nativeElement.style.height = this.previewEl.element.nativeElement.offsetHeight + 'px';
       this.previewEl.element.nativeElement.style.height = '';
     });
   }
