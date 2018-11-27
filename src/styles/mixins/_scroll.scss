@@ -1,25 +1,39 @@
-@mixin scrollY() {
-  overflow-y: hidden;
+@import 'media-queries';
 
-  &:hover {
-    overflow-y: scroll;
-    overflow-y: overlay;
+@mixin scrollY() {
+  overflow-y: scroll;
+
+  @include mq(xs) {
+    overflow-y: hidden;
+
+    &:hover {
+      overflow-y: scroll;
+      overflow-y: overlay;
+    }
   }
 }
 
 @mixin scrollYImportant() {
-  overflow-y: hidden !important;
-  &:hover {
-    overflow-y: scroll !important;
-    overflow-y: overlay !important;
+  overflow-y: scroll !important;
+
+  @include mq(xs) {
+    overflow-y: hidden !important;
+    &:hover {
+      overflow-y: scroll !important;
+      overflow-y: overlay !important;
+    }
   }
 }
 
 @mixin scrollX() {
-  overflow-x: hidden;
+  overflow-x: scroll;
 
-  &:hover {
-    overflow-x: scroll;
-    overflow-x: overlay;
+  @include mq(xs) {
+    overflow-x: hidden;
+
+    &:hover {
+      overflow-x: scroll;
+      overflow-x: overlay;
+    }
   }
 }
