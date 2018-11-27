@@ -82,7 +82,7 @@ export class JiraIssueEffects {
       window.clearInterval(this._pollingIntervalId);
       this._pollingIntervalId = 0;
     }
-    const isPollingEnabled = jiraCfg.isEnabled && jiraCfg.isAutoPollTickets;
+    const isPollingEnabled = jiraCfg && jiraCfg.isEnabled && jiraCfg.isAutoPollTickets;
     if (isPollingEnabled && issueIds && issueIds.length) {
       this._pollingIntervalId = window.setInterval(() => {
         // TODO remove
