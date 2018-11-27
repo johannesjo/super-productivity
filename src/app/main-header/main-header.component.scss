@@ -49,6 +49,11 @@ mat-toolbar {
     height: 30px !important;
     min-height: 30px !important;
     padding: 0 !important;
+    ::ng-deep .mat-button-wrapper{
+      padding: 0;
+      position: relative;
+      top: -3px;
+    }
   }
 
   &.is-open {
