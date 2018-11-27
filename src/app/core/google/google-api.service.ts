@@ -45,6 +45,8 @@ export class GoogleApiService {
   }
 
   login() {
+    console.log('GOOGLE_LOGIN', this._session);
+
     if (this.isLoggedIn) {
       return new Promise((resolve) => resolve());
     }
@@ -53,6 +55,7 @@ export class GoogleApiService {
       this._electronService.ipcRenderer.send(IPC_TRIGGER_GOOGLE_AUTH, this._session.refreshToken);
       return new Promise((resolve, reject) => {
         this._electronService.ipcRenderer.on(IPC_GOOGLE_AUTH_TOKEN, (ev, data: any) => {
+          console.log('ELECTRON GOOGLE LOGIN RESPONSE', data);
           this._updateSession({
             accessToken: data.access_token,
             expiresAt: data.expiry_date,
@@ -77,15 +80,18 @@ export class GoogleApiService {
           //       refreshToken: res.code
           //     });
           //   });
+          const successHandler = (res) => {
+            this._saveToken(res);
+            this._snackIt('SUCCESS', 'GoogleApi: Login successful');
+          };
 
           if (user && user.Zi && user.Zi.access_token) {
-            this._saveToken(user);
-            this._snackIt('SUCCESS', 'GoogleApi: Login successful');
+            successHandler(user);
           } else {
-            return this._gapi.auth2.getAuthInstance().signIn()
-              .then((res) => {
-                this._saveToken(res);
-                this._snackIt('SUCCESS', 'GoogleApi: Login successful');
+            return this._gapi.auth2.getAuthInstance().currentUser.get().reloadAuthResponse().then(successHandler.bind(this))
+              .catch(() => {
+                return this._gapi.auth2.getAuthInstance().signIn()
+                  .then(successHandler.bind(this));
               });
           }
         });
@@ -300,8 +306,8 @@ export class GoogleApiService {
 
   private _saveToken(res) {
     this._updateSession({
-      accessToken: res.accessToken || res.Zi.access_token,
-      expiresAt: res.expiresAt || res.Zi.expires_at,
+      accessToken: res.accessToken || res.access_token || res.Zi.access_token,
+      expiresAt: res.expiresAt || res.expires_at || res.Zi.expires_at,
     });
   }
 
