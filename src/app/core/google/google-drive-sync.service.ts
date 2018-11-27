@@ -11,6 +11,8 @@ import { DialogConfirmComponent } from '../../ui/dialog-confirm/dialog-confirm.c
 import { DialogConfirmDriveSyncLoadComponent } from './dialog-confirm-drive-sync-load/dialog-confirm-drive-sync-load.component';
 import { DialogConfirmDriveSyncSaveComponent } from './dialog-confirm-drive-sync-save/dialog-confirm-drive-sync-save.component';
 
+const MAX_REQUEST_DURATION = 15000;
+
 @Injectable({
   providedIn: 'root'
 })
@@ -18,6 +20,7 @@ export class GoogleDriveSyncService {
   autoSyncInterval: number;
 
   private _isSyncingInProgress = false;
+  private _inProgressTimeout: number;
 
   constructor(
     private _syncService: SyncService,
@@ -376,10 +379,30 @@ If not please change the Sync file name.`,
 
   private _handleInProgress(promise: Promise<any>) {
     this._isSyncingInProgress = true;
+
+    this._clearMaxRequestDurationTimeout();
+    // block other requests only for a specified amount of itme
+    this._inProgressTimeout = window.setTimeout(() => {
+      this._isSyncingInProgress = false;
+    }, MAX_REQUEST_DURATION);
     promise
-      .then(() => this._isSyncingInProgress = false)
-      .catch(() => this._isSyncingInProgress = false);
+      .then(() => {
+        this._isSyncingInProgress = false;
+        this._clearMaxRequestDurationTimeout();
+      })
+      .catch(() => {
+        this._isSyncingInProgress = false;
+        this._clearMaxRequestDurationTimeout();
+      })
+    ;
   }
+
+  private _clearMaxRequestDurationTimeout() {
+    if (this._inProgressTimeout) {
+      window.clearTimeout(this._inProgressTimeout);
+    }
+  }
+
 
   // UTIL
   // ----
