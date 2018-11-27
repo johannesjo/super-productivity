@@ -9,9 +9,9 @@ import { MatDialog } from '@angular/material';
 import { DialogSimpleTaskSummaryComponent } from '../../core/dialog-simple-task-summary/dialog-simple-task-summary.component';
 import { Subscription } from 'rxjs';
 import { ProjectService } from '../../project/project.service';
-import { SimpleSummarySettings } from '../../project/project.model';
 import { ElectronService } from 'ngx-electron';
-import { IPC_SHUTDOWN_NOW } from '../../../ipc-events.const';
+import { IPC_SHUTDOWN } from '../../../ipc-events.const';
+import { DialogConfirmComponent } from '../../ui/dialog-confirm/dialog-confirm.component';
 
 const SUCCESS_ANIMATION_DURATION = 500;
 
@@ -86,34 +86,30 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
     const idsToMove = this._doneTasks.map((task) => task.id);
     this._taskService.moveToArchive(idsToMove);
     if (IS_ELECTRON) {
-      //   $mdDialog.show(
-      //     $mdDialog.confirm()
-      //       .clickOutsideToClose(false)
-      //       .title('All Done! Shutting down now..')
-      //       .textContent('You work is done. Time to go home!')
-      //       .ariaLabel('Alert Shutdown')
-      //       .ok('Aye aye! Shutdown!')
-      //       .cancel('No, just clear the tasks')
-      //   )
-      //     .then(() => {
-      //         initSuccessAnimation(() => {
-      //           window.ipcRenderer.send(IPC_SHUTDOWN);
-      //         });
-      //       },
-      //       () => {
-      //         initSuccessAnimation(() => {
-      //           $state.go('daily-planner');
-      //         });
-      //       });
-      // this._router.navigate(['/work-view']);
-      this._initSuccessAnimation(() => {
-        this._electronService.ipcRenderer.send(IPC_SHUTDOWN_NOW);
-      });
+      this._matDialog.open(DialogConfirmComponent, {
+        restoreFocus: true,
+        data: {
+          okTxt: 'Aye aye! Shutdown!',
+          cancelTxt: 'No, just clear the tasks',
+          message: `You work is done. Time to go home!`,
+        }
+      }).afterClosed()
+        .subscribe((isConfirm: boolean) => {
+          if (isConfirm) {
+            this._initSuccessAnimation(() => {
+              window.ipcRenderer.send(IPC_SHUTDOWN);
+            });
+          } else if (isConfirm === false) {
+            this._initSuccessAnimation(() => {
+              this._router.navigate(['/work-view']);
+            });
+          }
+        });
     } else {
-      //   if (GoogleDriveSync.config && GoogleDriveSync.config.isAutoSyncToRemote) {
-      //     SimpleToast('CUSTOM', `Syncing Data to Google Drive.`, 'file_upload');
-      //     GoogleDriveSync.saveTo();
-      //   }
+      // if (this._projectService.current && GoogleDriveSync.config.isAutoSyncToRemote) {
+      //   SimpleToast('CUSTOM', `Syncing Data to Google Drive.`, 'file_upload');
+      //   GoogleDriveSync.saveTo();
+      // }
       this._initSuccessAnimation(() => {
         // $state.go('work-view');
         this._router.navigate(['/work-view']);
