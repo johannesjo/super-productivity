@@ -28,14 +28,16 @@
   <span class="spacer"></span>
 
   <nav>
-    <button mat-mini-fab
+    <button class="hide-xs"
+            mat-mini-fab
             routerLink="work-view"
             routerLinkActive
             #rlaWv="routerLinkActive"
             [color]="rlaWv.isActive ? 'accent' : null">
       <mat-icon>playlist_play</mat-icon>
     </button>
-    <button mat-mini-fab
+    <button class="hide-xs"
+            mat-mini-fab
             routerLink="worklog-and-calendar"
             routerLinkActive
             #rlHA="routerLinkActive"
@@ -70,12 +72,32 @@
         <!--<mat-icon>edit</mat-icon>-->
         <!--</button>-->
         <button mat-mini-fab
+                color=""
                 (click)="showAddTaskBar()">
           <mat-icon>add</mat-icon>
         </button>
         <button mat-mini-fab
+                routerLinkActive
+                #rlCfg="routerLinkActive"
+                [color]="rlCfg.isActive ? 'accent' : null"
                 [routerLink]="'config'">
           <mat-icon>settings</mat-icon>
+        </button>
+        <button class="show-xs-only"
+                mat-mini-fab
+                routerLink="work-view"
+                routerLinkActive
+                #rlaWv="routerLinkActive"
+                [color]="rlaWv.isActive ? 'accent' : null">
+          <mat-icon>playlist_play</mat-icon>
+        </button>
+        <button class="show-xs-only"
+                mat-mini-fab
+                routerLink="worklog-and-calendar"
+                routerLinkActive
+                #rlWC="routerLinkActive"
+                [color]="rlWC.isActive ? 'accent' : null">
+          <mat-icon>today</mat-icon>
         </button>
       </eco-fab-speed-dial-actions>
     </eco-fab-speed-dial>

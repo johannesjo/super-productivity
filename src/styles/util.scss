@@ -1,3 +1,5 @@
+@import "mixins/media-queries";
+
 .center-wrapper {
   text-align: center;
 }
@@ -13,4 +15,17 @@
 
 [hidden] {
   visibility: hidden;
+}
+
+.hide-xs {
+  @include mq(xs, max) {
+    display: none !important;
+  }
+
+}
+
+.show-xs-only {
+  @include mq(xs) {
+    display: none !important;
+  }
 }
