@@ -10,7 +10,7 @@ import { DialogSimpleTaskSummaryComponent } from '../../core/dialog-simple-task-
 import { Subscription } from 'rxjs';
 import { ProjectService } from '../../project/project.service';
 import { ElectronService } from 'ngx-electron';
-import { IPC_SHUTDOWN } from '../../../ipc-events.const';
+import { IPC_SHUTDOWN, IPC_SHUTDOWN_NOW } from '../../../ipc-events.const';
 import { DialogConfirmComponent } from '../../ui/dialog-confirm/dialog-confirm.component';
 
 const SUCCESS_ANIMATION_DURATION = 500;
@@ -97,7 +97,8 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
         .subscribe((isConfirm: boolean) => {
           if (isConfirm) {
             this._initSuccessAnimation(() => {
-              window.ipcRenderer.send(IPC_SHUTDOWN);
+              // this._electronService.ipcRenderer.send(IPC_SHUTDOWN);
+              this._electronService.ipcRenderer.send(IPC_SHUTDOWN_NOW);
             });
           } else if (isConfirm === false) {
             this._initSuccessAnimation(() => {
