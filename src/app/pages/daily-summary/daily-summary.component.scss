@@ -154,6 +154,14 @@
   }
 }
 
+.tomorrows-note{
+  border-radius: $card-border-radius;
+  display: inline-block;
+  width: 500px;
+  max-width: 100%;
+}
+
+
 @keyframes success-animation-sun {
   0% {
     transform: scale(0) rotate(-180deg);

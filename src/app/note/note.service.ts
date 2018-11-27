@@ -62,7 +62,6 @@ export class NoteService {
     this._store$.dispatch(new AddNote({
       note: {
         id: shortid(),
-        title: '',
         content: '',
         created: Date.now(),
         modified: Date.now(),

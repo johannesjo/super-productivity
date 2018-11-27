@@ -10,8 +10,9 @@ import { DialogSimpleTaskSummaryComponent } from '../../core/dialog-simple-task-
 import { Subscription } from 'rxjs';
 import { ProjectService } from '../../project/project.service';
 import { ElectronService } from 'ngx-electron';
-import { IPC_SHUTDOWN, IPC_SHUTDOWN_NOW } from '../../../ipc-events.const';
+import { IPC_SHUTDOWN_NOW } from '../../../ipc-events.const';
 import { DialogConfirmComponent } from '../../ui/dialog-confirm/dialog-confirm.component';
+import { NoteService } from '../../note/note.service';
 
 const SUCCESS_ANIMATION_DURATION = 500;
 
@@ -47,6 +48,7 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
     private readonly _taskService: TaskService,
     private readonly _projectService: ProjectService,
     private readonly _router: Router,
+    private readonly _noteService: NoteService,
     private readonly _matDialog: MatDialog,
     private readonly _electronService: ElectronService,
     private readonly _cd: ChangeDetectorRef,
@@ -96,12 +98,12 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
       }).afterClosed()
         .subscribe((isConfirm: boolean) => {
           if (isConfirm) {
-            this._initSuccessAnimation(() => {
+            this._finishDayForGood(() => {
               // this._electronService.ipcRenderer.send(IPC_SHUTDOWN);
               this._electronService.ipcRenderer.send(IPC_SHUTDOWN_NOW);
             });
           } else if (isConfirm === false) {
-            this._initSuccessAnimation(() => {
+            this._finishDayForGood(() => {
               this._router.navigate(['/work-view']);
             });
           }
@@ -111,7 +113,7 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
       //   SimpleToast('CUSTOM', `Syncing Data to Google Drive.`, 'file_upload');
       //   GoogleDriveSync.saveTo();
       // }
-      this._initSuccessAnimation(() => {
+      this._finishDayForGood(() => {
         // $state.go('work-view');
         this._router.navigate(['/work-view']);
       });
@@ -119,7 +121,16 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
   }
 
 
-  private _initSuccessAnimation(cb) {
+  private _finishDayForGood(cb?) {
+    if (this.tomorrowsNote && this.tomorrowsNote.trim().length > 0) {
+      this._noteService.add({
+        content: this.tomorrowsNote,
+      });
+    }
+    this._initSuccessAnimation(cb);
+  }
+
+  private _initSuccessAnimation(cb?) {
     this.showSuccessAnimation = true;
     this.successAnimationTimeout = window.setTimeout(() => {
       this.showSuccessAnimation = false;

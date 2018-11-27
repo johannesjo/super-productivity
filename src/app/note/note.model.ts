@@ -1,6 +1,5 @@
 export interface Note {
   id: string;
-  title: string;
   content: string;
   isLock?: boolean;
   backgroundColor?: string;
