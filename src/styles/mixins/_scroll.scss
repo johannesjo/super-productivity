@@ -1,5 +1,19 @@
 @import 'media-queries';
 
+@mixin scroll() {
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+
+  @include mq(xs) {
+    overflow: hidden;
+
+    &:hover {
+      overflow: auto;
+      overflow: overlay;
+    }
+  }
+}
+
 @mixin scrollY() {
   overflow-y: scroll;
   -webkit-overflow-scrolling: touch;
