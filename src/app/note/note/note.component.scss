@@ -73,5 +73,10 @@
         border-color: #333333;
       }
     }
+
+    .markdown-unparsed,
+    .markdown-parsed > *:first-child {
+      padding-right: $s*2;
+    }
   }
 }
