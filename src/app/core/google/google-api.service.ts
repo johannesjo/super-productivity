@@ -277,6 +277,10 @@ export class GoogleApiService {
 
   private _updateSession(sessionData: Partial<GoogleSession>) {
     console.log('GoogleApi: _updateSession', sessionData);
+    if (!sessionData.accessToken) {
+      console.warn('GoogleApiService: Logged out willingly???');
+    }
+
     if (!IS_ELECTRON && sessionData.accessToken && sessionData.expiresAt) {
       this._initRefreshTokenTimeoutForWeb(sessionData.expiresAt);
     } else if (this._refreshLoginTimeout) {
@@ -375,6 +379,11 @@ export class GoogleApiService {
   }
 
   private _mapHttp(params_: HttpRequest<string> | any): Promise<any> {
+    if (!this._session.accessToken) {
+      this._handleUnAuthenticated('GoogleApiService: Not logged in');
+      return Promise.reject('Not logged in');
+    }
+
     const p = {
       ...params_,
       headers: {
