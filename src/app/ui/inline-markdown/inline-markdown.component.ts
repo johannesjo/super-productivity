@@ -27,7 +27,7 @@ const HIDE_OVERFLOW_TIMEOUT_DURATION = 300;
 export class InlineMarkdownComponent implements OnInit, OnDestroy {
   @Input() model: string;
   @Input() isLock = false;
-  @Output() onChanged: EventEmitter<any> = new EventEmitter();
+  @Output() changed: EventEmitter<any> = new EventEmitter();
   @Output() focus: EventEmitter<Event> = new EventEmitter();
   @Output() blur: EventEmitter<Event> = new EventEmitter();
   @ViewChild('wrapperEl') wrapperEl: ElementRef;
@@ -107,8 +107,7 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
 
     if (this.modelCopy !== this.model) {
       this.model = this.modelCopy;
-      // TODO refactor this!!
-      this.onChanged.emit({newVal: this.modelCopy});
+      this.changed.emit(this.modelCopy);
     }
   }
 

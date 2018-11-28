@@ -230,8 +230,8 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
 
-  onTaskAdditionalInfoOpenChanged($event) {
-    this._taskService.update(this.task.id, {notes: $event.newVal});
+  onTaskNotesChanged(newVal) {
+    this._taskService.update(this.task.id, {notes: newVal});
     this.focusSelf();
   }
 

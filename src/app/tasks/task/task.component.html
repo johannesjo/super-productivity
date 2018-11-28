@@ -212,7 +212,7 @@
   <task-additional-info class="additional-info"
                         [selectedIndex]="additionalTabsIndex"
                         *ngIf="task.isAdditionalInfoOpen"
-                        (onTaskAdditionalInfoOpenChanged)="onTaskAdditionalInfoOpenChanged($event)"
+                        (taskNotesChanged)="onTaskNotesChanged($event)"
                         [@expand]
                         [task]="task"></task-additional-info>
 

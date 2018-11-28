@@ -27,7 +27,7 @@ export class TaskAdditionalInfoComponent implements AfterViewInit {
   localAttachments$: Observable<Attachment[]>;
   taskData: TaskWithSubTasks;
   @Input() selectedIndex: number;
-  @Output() onTaskAdditionalInfoOpenChanged: EventEmitter<string> = new EventEmitter();
+  @Output() taskNotesChanged: EventEmitter<string> = new EventEmitter();
   @ViewChild('issueHeader', {read: ViewContainerRef}) issueHeaderEl: ViewContainerRef;
   @ViewChild('issueContent', {read: ViewContainerRef}) issueContentEl: ViewContainerRef;
   private _issueHeaderRef;
@@ -60,7 +60,7 @@ export class TaskAdditionalInfoComponent implements AfterViewInit {
   }
 
   changeTaskNotes($event) {
-    this.onTaskAdditionalInfoOpenChanged.emit($event);
+    this.taskNotesChanged.emit($event);
   }
 
   private _loadIssueTemplates(task: TaskWithSubTasks) {

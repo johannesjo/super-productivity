@@ -3,7 +3,7 @@
      [class.isFocused]="isFocus">
   <div class="content">
     <inline-markdown #markdownEl
-                     (onChanged)="updateContent($event)"
+                     (changed)="updateContent($event)"
                      (focus)="isFocus=true"
                      (blur)="isFocus=false"
                      [isFocus]="isFocus"

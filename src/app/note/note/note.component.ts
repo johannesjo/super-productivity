@@ -27,7 +27,7 @@ export class NoteComponent {
   }
 
   updateContent(newVal) {
-    this._noteService.update(this.note.id, {content: newVal.newVal});
+    this._noteService.update(this.note.id, {content: newVal});
   }
 
   removeNote() {
