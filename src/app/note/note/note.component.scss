@@ -55,7 +55,7 @@
 
   inline-markdown ::ng-deep {
     .markdown-wrapper {
-      min-height: 30px;
+      min-height: 40px;
       max-height: 400px;
     }
 
@@ -77,6 +77,10 @@
     .markdown-unparsed,
     .markdown-parsed > *:first-child {
       padding-right: $s*2;
+    }
+
+    .markdown-parsed > *:last-child {
+      margin-bottom: 0;
     }
   }
 }

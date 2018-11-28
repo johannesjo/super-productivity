@@ -55,7 +55,11 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
     if (this.isLock) {
       this.toggleShowEdit();
     } else {
+
       this.resizeParsedToFit();
+      setTimeout(() => {
+        this.resizeParsedToFit();
+      });
     }
     if (IS_ELECTRON) {
       this._makeLinksWorkForElectron();
