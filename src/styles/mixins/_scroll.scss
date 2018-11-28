@@ -2,6 +2,7 @@
 
 @mixin scrollY() {
   overflow-y: scroll;
+  -webkit-overflow-scrolling: touch;
 
   @include mq(xs) {
     overflow-y: hidden;
@@ -15,6 +16,7 @@
 
 @mixin scrollYImportant() {
   overflow-y: scroll !important;
+  -webkit-overflow-scrolling: touch;
 
   @include mq(xs) {
     overflow-y: hidden !important;
@@ -27,6 +29,7 @@
 
 @mixin scrollX() {
   overflow-x: scroll;
+  -webkit-overflow-scrolling: touch;
 
   @include mq(xs) {
     overflow-x: hidden;
