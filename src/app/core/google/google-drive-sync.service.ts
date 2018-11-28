@@ -379,29 +379,29 @@ If not please change the Sync file name.`,
 
   private _handleInProgress(promise: Promise<any>) {
     this._isSyncingInProgress = true;
-
-    this._clearMaxRequestDurationTimeout();
-    // block other requests only for a specified amount of itme
-    this._inProgressTimeout = window.setTimeout(() => {
-      this._isSyncingInProgress = false;
-    }, MAX_REQUEST_DURATION);
+    //
+    // this._clearMaxRequestDurationTimeout();
+    // // block other requests only for a specified amount of itme
+    // this._inProgressTimeout = window.setTimeout(() => {
+    //   this._isSyncingInProgress = false;
+    // }, MAX_REQUEST_DURATION);
     promise
       .then(() => {
         this._isSyncingInProgress = false;
-        this._clearMaxRequestDurationTimeout();
+        // this._clearMaxRequestDurationTimeout();
       })
       .catch(() => {
         this._isSyncingInProgress = false;
-        this._clearMaxRequestDurationTimeout();
+        // this._clearMaxRequestDurationTimeout();
       })
     ;
   }
 
-  private _clearMaxRequestDurationTimeout() {
-    if (this._inProgressTimeout) {
-      window.clearTimeout(this._inProgressTimeout);
-    }
-  }
+  // private _clearMaxRequestDurationTimeout() {
+  //   if (this._inProgressTimeout) {
+  //     window.clearTimeout(this._inProgressTimeout);
+  //   }
+  // }
 
 
   // UTIL
