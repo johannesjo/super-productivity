@@ -37,7 +37,6 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
   isHideOverflow = false;
   isShowEdit = false;
   modelCopy: string;
-  el: HTMLElement;
   private _hideOverFlowTimeout: number;
 
   @Input() set isFocus(val: boolean) {
@@ -47,11 +46,9 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
   }
 
   constructor(
-    el: ElementRef,
     private _electronService: ElectronService,
     private _cd: ChangeDetectorRef,
   ) {
-    this.el = el.nativeElement;
   }
 
   ngOnInit() {
@@ -98,7 +95,6 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
   }
 
   untoggleShowEdit() {
-    // makeLinksWorkForElectron();
     if (!this.isLock) {
       this.resizeParsedToFit();
       this.isShowEdit = false;
