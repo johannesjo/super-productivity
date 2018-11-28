@@ -360,21 +360,25 @@ input {
   }
 
   .time {
-    opacity: 0.25;
     font-style: italic;
     display: flex;
     flex-direction: row;
     align-items: center;
     justify-content: center;
+    opacity: 0.8;
+
+    @include mq(xs) {
+      opacity: 0.3;
+    }
+
+    @include mq(xs, max) {
+      font-size: 13px;
+    }
 
     :host:focus > .inner-wrapper > .first-line &,
       //:host:hover > .inner-wrapper > .first-line &,
     .inner-wrapper.isCurrent > .first-line & {
       opacity: 1;
-    }
-
-    @include mq(xs, max) {
-      font-size: 13px;
     }
 
     .time-val,
