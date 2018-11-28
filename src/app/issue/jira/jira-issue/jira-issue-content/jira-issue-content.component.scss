@@ -1,5 +1,9 @@
 @import '../../../../../variables';
 
+:host {
+  @include standardThemeTextColor();
+}
+
 .issue-table {
   width: 100%;
 
