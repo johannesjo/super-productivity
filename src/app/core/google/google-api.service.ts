@@ -14,6 +14,7 @@ import { Observable } from 'rxjs';
 import { IPC_GOOGLE_AUTH_TOKEN, IPC_GOOGLE_AUTH_TOKEN_ERROR, IPC_TRIGGER_GOOGLE_AUTH } from '../../../ipc-events.const';
 import { ElectronService } from 'ngx-electron';
 
+const EXPIRES_SAFETY_MARGIN = 30000;
 
 @Injectable({
   providedIn: 'root'
@@ -23,15 +24,16 @@ export class GoogleApiService {
   public isLoggedIn$: Observable<boolean> = this._configService.cfg$
     .pipe(map((cfg: GlobalConfig) => {
       const session = cfg && cfg._googleSession;
-      const EXPIRES_SAFETY_MARGIN = 30000;
       const isExpired = (!session.expiresAt || moment()
         .valueOf() + EXPIRES_SAFETY_MARGIN > session.expiresAt);
-      console.log('isLoggedIn check', (session && session.accessToken && !isExpired), isExpired, session);
+      // console.log('isLoggedIn check', (session && session.accessToken && !isExpired), isExpired, session);
       return session && session.accessToken && !isExpired;
     }));
 
   private _isScriptLoaded = false;
+  private _isGapiInitialized = false;
   private _gapi: any;
+  private _refreshLoginTimeout: number;
 
   constructor(private readonly _http: HttpClient,
               private readonly _configService: ConfigService,
@@ -47,11 +49,11 @@ export class GoogleApiService {
   login() {
     console.log('GOOGLE_LOGIN', this._session);
 
-    if (this.isLoggedIn) {
-      return new Promise((resolve) => resolve());
-    }
-
     if (IS_ELECTRON) {
+      if (this.isLoggedIn) {
+        return new Promise((resolve) => resolve());
+      }
+
       this._electronService.ipcRenderer.send(IPC_TRIGGER_GOOGLE_AUTH, this._session.refreshToken);
       return new Promise((resolve, reject) => {
         this._electronService.ipcRenderer.on(IPC_GOOGLE_AUTH_TOKEN, (ev, data: any) => {
@@ -274,8 +276,26 @@ export class GoogleApiService {
   }
 
   private _updateSession(sessionData: Partial<GoogleSession>) {
-    console.log('update', sessionData);
+    console.log('GoogleApi: _updateSession', sessionData);
+    if (!IS_ELECTRON && sessionData.accessToken && sessionData.expiresAt) {
+      this._initRefreshTokenTimeoutForWeb(sessionData.expiresAt);
+    } else if (this._refreshLoginTimeout) {
+      window.clearTimeout(this._refreshLoginTimeout);
+    }
     this._configService.updateSection('_googleSession', sessionData);
+  }
+
+  private _initRefreshTokenTimeoutForWeb(expiresAt: number) {
+    if (this._refreshLoginTimeout) {
+      window.clearTimeout(this._refreshLoginTimeout);
+    }
+    this._refreshLoginTimeout = window.setTimeout(() => {
+      this._gapi.auth2.getAuthInstance().currentUser.get().reloadAuthResponse()
+        .then((res) => {
+          this._saveToken(res);
+          console.log(res);
+        });
+    }, expiresAt - (Date.now() + EXPIRES_SAFETY_MARGIN + 5000));
   }
 
   private initClient() {
@@ -288,16 +308,24 @@ export class GoogleApiService {
   }
 
   private _initClientLibraryIfNotDone() {
+    const getUser = () => {
+      const GoogleAuth = this._gapi.auth2.getAuthInstance();
+      this._isGapiInitialized = true;
+      // used to determine and handle if user is already signed in
+      return GoogleAuth.currentUser.get();
+    };
+
+    if (this._isGapiInitialized) {
+      return Promise.resolve(getUser());
+    }
+
     return new Promise((resolve, reject) => {
       this._loadJs(() => {
         this._gapi = window['gapi'];
         this._gapi.load('client:auth2', () => {
           this.initClient()
             .then(() => {
-              const GoogleAuth = this._gapi.auth2.getAuthInstance();
-              // used to determine and handle if user is already signed in
-              const user = GoogleAuth.currentUser.get();
-              resolve(user);
+              resolve(getUser());
             });
         });
       });
@@ -379,6 +407,11 @@ export class GoogleApiService {
 
 
   private _loadJs(cb) {
+    if (this._isScriptLoaded) {
+      cb();
+      return;
+    }
+
     const url = 'https://apis.google.com/js/api.js';
     const that = this;
     const script = document.createElement('script');
