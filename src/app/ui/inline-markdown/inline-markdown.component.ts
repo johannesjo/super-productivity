@@ -12,6 +12,8 @@ import {
 } from '@angular/core';
 import { fadeAnimation } from '../animations/fade.ani';
 import { MarkdownComponent } from 'ngx-markdown';
+import { IS_ELECTRON } from '../../app.constants';
+import { ElectronService } from 'ngx-electron';
 
 const HIDE_OVERFLOW_TIMEOUT_DURATION = 300;
 
@@ -46,6 +48,7 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
 
   constructor(
     el: ElementRef,
+    private _electronService: ElectronService,
     private _cd: ChangeDetectorRef,
   ) {
     this.el = el.nativeElement;
@@ -57,11 +60,9 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
     } else {
       this.resizeParsedToFit();
     }
-    // if (IS_ELECTRON) {
-    //   waitForMarkedTimeOut = $timeout(() => {
-    //     makeLinksWorkForElectron();
-    //   });
-    // }
+    if (IS_ELECTRON) {
+      this._makeLinksWorkForElectron();
+    }
   }
 
   ngOnDestroy(): void {
@@ -152,20 +153,17 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
     }, HIDE_OVERFLOW_TIMEOUT_DURATION);
   }
 
-  // function makeLinksWorkForElectron() {
-  //   if (IS_ELECTRON) {
-  //     const shell = require('electron').shell;
-  //     const links = $element.find('a');
-  //
-  //     links.on('click', (event) => {
-  //       let url = angular.element(event.target).attr('href');
-  //
-  //       if (!/^https?:\/\//i.test(url)) {
-  //         url = 'http://' + url;
-  //       }
-  //       event.preventDefault();
-  //       shell.openExternal(url);
-  //     });
-  //   }
-  // }
+  private _makeLinksWorkForElectron() {
+    const shell = this._electronService.shell;
+    this.wrapperEl.nativeElement.addEventListener('click', (ev) => {
+      const target = ev.target as HTMLElement;
+      if (target.tagName && target.tagName.toLowerCase() === 'a') {
+        const href = target.getAttribute('href');
+        if (href) {
+          ev.preventDefault();
+          shell.openExternal(href);
+        }
+      }
+    });
+  }
 }
