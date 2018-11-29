@@ -127,10 +127,6 @@ $this-icon-default-opacity: 0.7;
       flex-wrap: wrap;
       justify-content: flex-end;
     }
-
-    .check-done {
-      display: none;
-    }
   }
 
   .ico-btn {
@@ -246,38 +242,6 @@ $this-icon-default-opacity: 0.7;
 
       .time {
         opacity: 1;
-      }
-
-      .check-done {
-        opacity: 0.5;
-        position: absolute;
-        left: 50%;
-        top: 50%;
-        display: block;
-        z-index: 11;
-        transform: translate(-50%, -50%);
-
-        mat-icon {
-          $this-size: 40px;
-          font-size: $this-size;
-          height: $this-size;
-          width: $this-size;
-          line-height: $this-size;
-
-          &.undo {
-            display: none;
-          }
-        }
-
-        &:hover {
-          .check {
-            display: none;
-          }
-
-          .undo {
-            display: block;
-          }
-        }
       }
 
       .task-title {
@@ -489,5 +453,56 @@ input {
     top: 50%;
     left: 50%;
     transform: translate3d(-50%, -50%, 0);
+  }
+}
+
+.check-done {
+  opacity: 0.5;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  display: block;
+  z-index: 11;
+  transform: translate(-50%, -50%);
+  transition: $transition-standard;
+
+
+  &:hover {
+    opacity: 1 !important;
+  }
+
+  mat-icon {
+    animation: $transition-duration-m success-btn-ani linear;
+    $this-size: 40px;
+    font-size: $this-size;
+    height: $this-size;
+    width: $this-size;
+    line-height: $this-size;
+
+    &.undo {
+      display: none;
+    }
+  }
+
+  &:hover {
+    .check {
+      display: none;
+    }
+
+    .undo {
+      display: block;
+    }
+  }
+}
+
+@keyframes success-btn-ani {
+  0% {
+    transform: scale(0.5) rotate(-180deg);
+  }
+  50% {
+    transform: scale(1) rotate(-90deg);
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
   }
 }
