@@ -398,6 +398,7 @@ input {
     .time-val,
     .separator {
       display: block;
+      white-space: nowrap;
     }
 
     .separator {
