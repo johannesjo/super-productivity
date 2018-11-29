@@ -127,6 +127,10 @@ $this-icon-default-opacity: 0.7;
       flex-wrap: wrap;
       justify-content: flex-end;
     }
+
+    .check-done {
+      display: none;
+    }
   }
 
   .ico-btn {
@@ -231,9 +235,55 @@ $this-icon-default-opacity: 0.7;
   }
 
   &.isDone {
-    > .first-line .task-title {
-      color: $this-task-text-color-done;
-      text-decoration: line-through;
+    > .first-line {
+      position: relative;
+
+      .time-wrapper,
+      .controls,
+      .title-bar-wrapper {
+        opacity: 0.3;
+      }
+
+      .time {
+        opacity: 1;
+      }
+
+      .check-done {
+        opacity: 0.5;
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        display: block;
+        z-index: 11;
+        transform: translate(-50%, -50%);
+
+        mat-icon {
+          $this-size: 40px;
+          font-size: $this-size;
+          height: $this-size;
+          width: $this-size;
+          line-height: $this-size;
+
+          &.undo {
+            display: none;
+          }
+        }
+
+        &:hover {
+          .check {
+            display: none;
+          }
+
+          .undo {
+            display: block;
+          }
+        }
+      }
+
+      .task-title {
+        //color: $this-task-text-color-done;
+        //text-decoration: line-through;
+      }
     }
 
     .play-btn {

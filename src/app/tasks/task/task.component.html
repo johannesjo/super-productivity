@@ -6,6 +6,19 @@
      [class.isAdditionalInfoOpen]="task.isAdditionalInfoOpen">
 
   <div class="first-line">
+    <button mat-icon-button=""
+            class="check-done"
+            (click)="toggleTaskDone()"
+            tabindex="2"
+            aria-label="un-/mark as done">
+      <mat-icon aria-label="Mark as undone"
+                class="undo">undo
+      </mat-icon>
+      <mat-icon aria-label="Mark as done"
+                class="check">check
+      </mat-icon>
+    </button>
+
     <div class="title-bar-wrapper">
       <mat-icon class="drag-handle"
                 svgIcon="drag_handle"
@@ -139,7 +152,7 @@
       <!--class="ico-btn delete-btn"-->
       <!--(click)="deleteTask()">-->
 
-      <!--<mat-icon class="delete-icon"-->
+      <!--<mat-icon ->
       <!--aria-label="delete">delete_forever-->
       <!--</mat-icon>-->
       <!--</button>-->
@@ -149,11 +162,11 @@
       <!--class="ico-btn mark-as-done-btn"-->
       <!--tabindex="2"-->
       <!--aria-label="un-/mark as done">-->
-      <!--<mat-icon class="delete-icon"-->
+      <!--<mat-icon ->
       <!--*ngIf="task.isDone"-->
       <!--aria-label="Mark as undone">undo-->
       <!--</mat-icon>-->
-      <!--<mat-icon class="delete-icon"-->
+      <!--<mat-icon ->
       <!--*ngIf="!task.isDone"-->
       <!--aria-label="Mark as done">check-->
       <!--</mat-icon>-->
@@ -178,8 +191,7 @@
                 aria-label="delete"
                 (click)="deleteTask()">
 
-          <mat-icon class="delete-icon"
-                    style="color:#e15d63;"
+          <mat-icon style="color:#e15d63;"
                     aria-label="delete">delete_forever
           </mat-icon>
           Delete Task
@@ -189,14 +201,12 @@
                 tabindex="2"
                 aria-label="un-/mark as done">
           <ng-container *ngIf="task.isDone">
-            <mat-icon class="delete-icon"
-                      aria-label="Mark as undone">undo
+            <mat-icon aria-label="Mark as undone">undo
             </mat-icon>
             Mark as undone
           </ng-container>
           <ng-container *ngIf="!task.isDone">
-            <mat-icon class="delete-icon"
-                      aria-label="Mark as done">check
+            <mat-icon aria-label="Mark as done">check
             </mat-icon>
             Mark as done
           </ng-container>
