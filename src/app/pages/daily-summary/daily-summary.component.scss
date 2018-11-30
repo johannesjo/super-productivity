@@ -12,12 +12,24 @@
     margin-top: $s*2;
   }
 
+  .daily-summary-summary {
+    margin-bottom: 30px;
+    display: flex;
+    justify-content: center;
+
+    p {
+      margin: 5px;
+    }
+  }
+
   .summary-point {
     vertical-align: center;
     display: inline-block;
     align-items: center;
     text-align: center;
     margin: $s;
+    flex-grow: 1;
+    flex-basis: 0;
   }
 
   .summary-text {
@@ -44,17 +56,12 @@
 
   .finish-day-opts {
     margin-top: 10px;
+
     mat-checkbox {
       display: block;
     }
   }
 
-  .daily-summary-summary {
-    margin-bottom: 30px;
-    p {
-      margin: 5px;
-    }
-  }
 
   .daily-summary-collapsible {
     margin-bottom: 15px;
@@ -69,6 +76,7 @@
     width: 100%;
     margin: auto;
     border-collapse: collapse;
+
     tr {
       &.is-done {
         text-decoration: line-through;
@@ -80,6 +88,7 @@
           border-top: 0;
         }
       }
+
       &:last-child {
         td,
         th {
@@ -96,6 +105,7 @@
       &:first-child {
         border-left: 0;
       }
+
       &:last-child {
         border-right: 0;
       }
@@ -114,6 +124,7 @@
 
     button {
       margin: 0 $s/2;
+
       mat-icon + mat-icon {
         //margin-left: -$s;
       }
@@ -135,18 +146,20 @@
       width: $this-ico-size;
       height: $this-ico-size;
       display: block;
-      font-size:  $this-ico-size;
+      font-size: $this-ico-size;
       color: $yellow;
       //transform-origin: center center;
       animation: success-animation-sun #{$this-ani-style};
       backface-visibility: hidden;
     }
+
     .unicorn-wrapper {
       position: absolute;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
     }
+
     .unicorn {
       transform-origin: center center;
       animation: success-animation-unicorn #{$this-ani-style};
@@ -154,7 +167,7 @@
   }
 }
 
-.tomorrows-note{
+.tomorrows-note {
   border-radius: $card-border-radius;
   display: inline-block;
   width: 500px;

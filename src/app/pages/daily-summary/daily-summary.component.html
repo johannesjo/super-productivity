@@ -22,16 +22,16 @@
     </div>
     <div class="summary-point">
       <mat-icon>timer</mat-icon>
-      <div class="summary-text">Total time spent on today's task:
+      <div class="summary-text">Total time spent today:
         <div class="summary-val"
-             [innerHtml]="totalTimeSpentTasks$|async|msToString"></div>
+             [innerHtml]="workingToday$|async|msToString"></div>
       </div>
     </div>
     <div class="summary-point">
       <mat-icon>timer</mat-icon>
-      <div class="summary-text">Total time spent today:
+      <div class="summary-text">Total time spent on today's task:
         <div class="summary-val"
-             [innerHtml]="workingToday$|async|msToString"></div>
+             [innerHtml]="totalTimeSpentTasks$|async|msToString"></div>
       </div>
     </div>
   </div>
@@ -88,9 +88,9 @@
     <p>This is meant to be a takeaway to be even more productive and happy tomorrow. E.g.: What did you learn today? What do you want to do better/smarter tomorrow? What do you want to achieve and why?</p>
     <p>Think a second and reflect on the day.</p>
 
-      <textarea [(ngModel)]="tomorrowsNote"
-                class="tomorrows-note bg-standard mat-elevation-z3"
-                rows="5"></textarea>
+    <textarea [(ngModel)]="tomorrowsNote"
+              class="tomorrows-note bg-standard mat-elevation-z3"
+              rows="5"></textarea>
   </collapsible>
 
 
