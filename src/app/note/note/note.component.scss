@@ -15,7 +15,6 @@
   transition-property: transform;
   border: 1px solid #DADCE0;
 
-
   @include darkTheme {
     background: $standard-note-bg-dark;
     color: $standard-note-fg-dark;

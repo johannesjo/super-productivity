@@ -11,11 +11,16 @@
                      [model]="note.content"></inline-markdown>
   </div>
 
-  <div class="controls">
+  <div class="controls handle-drag">
     <button mat-icon-button=""
+            class="handle-drag"
             [matMenuTriggerFor]="menu">
-      <mat-icon *ngIf="!note.reminderId">more_vert</mat-icon>
-      <mat-icon *ngIf="note.reminderId">schedule</mat-icon>
+      <mat-icon *ngIf="!note.reminderId"
+                class="handle-drag">more_vert
+      </mat-icon>
+      <mat-icon *ngIf="note.reminderId"
+                class="handle-drag">schedule
+      </mat-icon>
     </button>
 
     <mat-menu #menu="matMenu">
