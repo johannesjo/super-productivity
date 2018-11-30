@@ -23,6 +23,14 @@ export class DialogAddNoteComponent {
     this.noteContent = sessionStorage.getItem(NOTE_TMP_STORAGE_KEY);
   }
 
+  keypressHandler(ev: KeyboardEvent) {
+    if (ev.key === 'Enter' && ev.ctrlKey) {
+      this.submit();
+    } else {
+      this._saveTmp();
+    }
+  }
+
   submit() {
     console.log(this.reminderDate);
     // TODO not working yet
@@ -37,12 +45,13 @@ export class DialogAddNoteComponent {
     this.close();
   }
 
-  saveTmp() {
-    sessionStorage.setItem(NOTE_TMP_STORAGE_KEY, this.noteContent);
-  }
 
   close() {
     this._matDialogRef.close();
+  }
+
+  private _saveTmp() {
+    sessionStorage.setItem(NOTE_TMP_STORAGE_KEY, this.noteContent);
   }
 
   private _clearSessionStorage() {

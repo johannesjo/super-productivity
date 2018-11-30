@@ -3,8 +3,8 @@
   <div class="form-wrapper">
 
   <textarea rows="6"
+            (keypress)="keypressHandler($event)"
             name="noteContent"
-            (input)="saveTmp()"
             [(ngModel)]="noteContent"
             placeholder="Enter some text to save as note..."></textarea>
     <mat-form-field>
