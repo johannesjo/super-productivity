@@ -2,7 +2,8 @@ import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, ViewChild } from
 import { NoteService } from '../note.service';
 import { DragulaService } from 'ng2-dragula';
 import { Subscription } from 'rxjs';
-import { MatButton } from '@angular/material';
+import { MatButton, MatDialog } from '@angular/material';
+import { DialogAddNoteComponent } from '../dialog-add-note/dialog-add-note.component';
 
 @Component({
   selector: 'notes',
@@ -18,6 +19,7 @@ export class NotesComponent implements OnInit, OnDestroy {
   constructor(
     public noteService: NoteService,
     private _dragulaService: DragulaService,
+    private _matDialog: MatDialog,
   ) {
   }
 
@@ -38,11 +40,6 @@ export class NotesComponent implements OnInit, OnDestroy {
       }
     });
 
-    // Hacky but probably more performant
-    this._subs.add(this.noteService.onNoteAdd$.subscribe((val) => {
-      this.isElementWasAdded = true;
-    }));
-
     let isFirst = true;
     this._subs.add(this.noteService.isShowNotes$.subscribe((isShow) => {
       if (isShow && !isFirst) {
@@ -60,6 +57,6 @@ export class NotesComponent implements OnInit, OnDestroy {
   }
 
   addNote() {
-    this.noteService.add();
+    this._matDialog.open(DialogAddNoteComponent);
   }
 }

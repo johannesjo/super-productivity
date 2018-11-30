@@ -58,7 +58,7 @@ export class NoteService {
     this._store$.dispatch(new LoadNoteState({state: state}));
   }
 
-  public add(note: Partial<Note> = {}, remindAt?: number) {
+  public add(note: Partial<Note> = {}, remindAt?: number, isPreventFocus = false) {
     const id = shortid();
 
     let reminderId = null;
@@ -74,7 +74,8 @@ export class NoteService {
         modified: Date.now(),
         ...note,
         reminderId,
-      }
+      },
+      isPreventFocus
     }));
   }
 

@@ -4,9 +4,6 @@
   <div class="content">
     <inline-markdown #markdownEl
                      (changed)="updateContent($event)"
-                     (focus)="isFocus=true"
-                     (blur)="isFocus=false"
-                     [isFocus]="isFocus"
                      [isLock]="note.isLock"
                      [model]="note.content"></inline-markdown>
   </div>

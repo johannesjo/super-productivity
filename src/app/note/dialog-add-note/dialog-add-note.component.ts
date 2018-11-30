@@ -29,6 +29,7 @@ export class DialogAddNoteComponent {
     this._noteService.add(
       {content: this.noteContent},
       remindAt,
+      true,
     );
     this.close();
   }

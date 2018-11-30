@@ -45,7 +45,7 @@ export class UpdateNoteOrder implements Action {
 export class AddNote implements Action {
   readonly type = NoteActionTypes.AddNote;
 
-  constructor(public payload: { note: Note }) {
+  constructor(public payload: { note: Note, isPreventFocus?: boolean }) {
   }
 }
 
