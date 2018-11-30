@@ -78,10 +78,12 @@ export class EnlargeImgDirective {
       if (this.zoomMode === 0) {
         this._zoomImg();
       } else {
+        this.newImageEl.addEventListener('transitionend', () => {
+          setTimeout(() => {
+            this._hideImg();
+          });
+        });
         this._zoomOutImg();
-        setTimeout(() => {
-          this._hideImg();
-        }, 200);
       }
       this.zoomMode++;
     });
