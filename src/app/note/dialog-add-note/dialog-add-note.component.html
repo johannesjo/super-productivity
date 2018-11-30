@@ -4,6 +4,7 @@
 
   <textarea rows="6"
             name="noteContent"
+            (input)="saveTmp()"
             [(ngModel)]="noteContent"
             placeholder="Enter some text to save as note..."></textarea>
     <mat-form-field>
