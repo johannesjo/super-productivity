@@ -4,7 +4,7 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material';
 import { TaskWithSubTasks } from '../../tasks/task.model';
 import { ProjectService } from '../../project/project.service';
 import { Subscription } from 'rxjs';
-import { SimpleSummarySettings } from '../../project/project.model';
+import { SimpleSummarySettings, SimpleSummarySettingsCopy } from '../../project/project.model';
 import { SIMPLE_SUMMARY_DEFAULTS } from '../../project/project.const';
 import Clipboard from 'clipboard';
 import { SnackService } from '../snack/snack.service';
@@ -30,8 +30,7 @@ const CSV_EXPORT_SETTINGS = {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DialogSimpleTaskSummaryComponent implements OnInit, OnDestroy {
-  options: SimpleSummarySettings = SIMPLE_SUMMARY_DEFAULTS;
-  finishDayFn: Function;
+  options: SimpleSummarySettingsCopy = SIMPLE_SUMMARY_DEFAULTS;
   isInvalidRegEx: boolean;
   tasksTxt: string;
 
@@ -47,8 +46,6 @@ export class DialogSimpleTaskSummaryComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this._subs.add(this._projectService.currentProject$.subscribe((val) => {
-      console.log(val);
-
       this.options = val.simpleSummarySettings;
       this.tasksTxt = this._createTasksText(this.data.tasks);
     }));
@@ -132,6 +129,7 @@ export class DialogSimpleTaskSummaryComponent implements OnInit, OnDestroy {
         }
       }
     }
+
     // cut off last separator
     tasksTxt = tasksTxt.substring(0, tasksTxt.length - this.options.separateBy.length);
     if (this.options.isUseNewLine) {

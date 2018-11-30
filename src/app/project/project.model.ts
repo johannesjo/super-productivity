@@ -23,7 +23,7 @@ export interface GoogleTimeSheetExportCopy {
 
 export type GoogleTimeSheetExport = Readonly<GoogleTimeSheetExportCopy>;
 
-export type SimpleSummarySettings = Readonly<{
+export interface SimpleSummarySettingsCopy {
   separateBy: string,
   separateFieldsBy: string,
   isUseNewLine: boolean,
@@ -35,7 +35,9 @@ export type SimpleSummarySettings = Readonly<{
   isTimeSpentAsMilliseconds: boolean,
   showDate: boolean,
   regExToRemove: string,
-}>;
+}
+
+export type SimpleSummarySettings = Readonly<SimpleSummarySettingsCopy>;
 
 export type Project = Readonly<{
   id: string;

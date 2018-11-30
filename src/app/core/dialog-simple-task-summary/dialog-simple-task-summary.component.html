@@ -18,7 +18,7 @@
              style="margin: 10px 0;">Options
         </div>
         <div>
-          <mat-slide-toggle [ngModel]="options.isUseNewLine"
+          <mat-slide-toggle [(ngModel)]="options.isUseNewLine"
                             (change)="onOptionsChange()"
                             name="isUseNewLine"
                             aria-label="Add new line">
@@ -26,7 +26,7 @@
           </mat-slide-toggle>
         </div>
         <div>
-          <mat-slide-toggle [ngModel]="options.isListSubTasks"
+          <mat-slide-toggle [(ngModel)]="options.isListSubTasks"
                             (change)="onOptionsChange()"
                             name="isListSubTasks"
                             aria-label="List sub tasks">
@@ -34,7 +34,7 @@
           </mat-slide-toggle>
         </div>
         <div>
-          <mat-slide-toggle [ngModel]="options.isWorkedOnTodayOnly"
+          <mat-slide-toggle [(ngModel)]="options.isWorkedOnTodayOnly"
                             (change)="onOptionsChange()"
                             name="isWorkedOnTodayOnly"
                             aria-label="List worked on today tasks only">
@@ -42,7 +42,7 @@
           </mat-slide-toggle>
         </div>
         <div>
-          <mat-slide-toggle [ngModel]="options.isListDoneOnly"
+          <mat-slide-toggle [(ngModel)]="options.isListDoneOnly"
                             (change)="onOptionsChange()"
                             name="isListDoneOnly"
                             aria-label="List done tasks only">
@@ -55,7 +55,7 @@
                  matInput=""
                  (change)="onOptionsChange()"
                  name="separateBy"
-                 [ngModel]="options.separateBy">
+                 [(ngModel)]="options.separateBy">
         </mat-form-field>
       </div>
 
@@ -66,7 +66,7 @@
         <div>
           <mat-slide-toggle (change)="onOptionsChange()"
                             name="showTitle"
-                            [ngModel]="options.showTitle"
+                            [(ngModel)]="options.showTitle"
                             aria-label="Title">
             Title
           </mat-slide-toggle>
@@ -74,13 +74,13 @@
         <div>
           <mat-slide-toggle (change)="onOptionsChange()"
                             name="showDate"
-                            [ngModel]="options.showDate"
+                            [(ngModel)]="options.showDate"
                             aria-label="Date">
             Date
           </mat-slide-toggle>
         </div>
         <div>
-          <mat-slide-toggle [ngModel]="options.showTimeSpent"
+          <mat-slide-toggle [(ngModel)]="options.showTimeSpent"
                             (change)="onOptionsChange()"
                             name="showTimeSpent"
                             aria-label="Time Spent">
@@ -88,7 +88,7 @@
           </mat-slide-toggle>
         </div>
         <div>
-          <mat-slide-toggle [ngModel]="options.isTimeSpentAsMilliseconds"
+          <mat-slide-toggle [(ngModel)]="options.isTimeSpentAsMilliseconds"
                             (change)="onOptionsChange()"
                             name="isTimeSpentAsMilliseconds"
                             [disabled]="!options.showTimeSpent"
@@ -102,7 +102,7 @@
                  matInput=""
                  (change)="onOptionsChange()"
                  name="separateFieldsBy"
-                 [ngModel]="options.separateFieldsBy">
+                 [(ngModel)]="options.separateFieldsBy">
         </mat-form-field>
       </div>
     </div>
@@ -114,7 +114,7 @@
                matInput=""
                (change)="onOptionsChange()"
                name="regExToRemove"
-               [ngModel]="options.regExToRemove">
+               [(ngModel)]="options.regExToRemove">
         <div class="validation-messages">
           <div *ngIf="isInvalidRegEx"
                class="error">Invalid Regular Expression
