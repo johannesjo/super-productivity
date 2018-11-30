@@ -77,7 +77,6 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
     if (ev.keyCode === 10 && ev.ctrlKey) {
       this.untoggleShowEdit();
     }
-    console.log(ev.key, ev.ctrlKey);
 
     if (ev.key === 'Enter' && ev.ctrlKey) {
       this.untoggleShowEdit();
