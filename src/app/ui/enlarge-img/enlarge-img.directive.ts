@@ -10,6 +10,7 @@ export class EnlargeImgDirective {
   lightboxParentEl = document.body;
   enlargedImgWrapperEl: HTMLElement;
   isImg: boolean;
+  zoomMode = 0;
 
   @Input() enlargeImg: string;
   @Input() isHideEl: boolean;
@@ -25,14 +26,14 @@ export class EnlargeImgDirective {
     this.isImg = (this.imageEl.tagName.toLowerCase() === 'img');
 
     if (this.isImg || this.enlargeImg) {
-      this.showImg();
+      this._showImg();
     }
   }
 
-  private hideImg() {
+  private _hideImg() {
     this._renderer.removeClass(this.enlargedImgWrapperEl, 'ani-enter');
     this._renderer.addClass(this.enlargedImgWrapperEl, 'ani-remove');
-    this.setCoordsForImageAni();
+    this._setCoordsForImageAni();
 
     this.enlargedImgWrapperEl.addEventListener('transitionend', () => {
       this.enlargedImgWrapperEl.remove();
@@ -42,7 +43,7 @@ export class EnlargeImgDirective {
     });
   }
 
-  private setCoordsForImageAni() {
+  private _setCoordsForImageAni() {
     const origImgCoords = getCoords(this.imageEl);
     const newImageCoords = getCoords(this.newImageEl);
 
@@ -53,33 +54,46 @@ export class EnlargeImgDirective {
     this.newImageEl.setAttribute('style', `transform: translate3d(${startLeft}px, ${startTop}px, 0) scale(${scale})`);
   }
 
-  private showImg() {
+  private _showImg() {
     const src = this.enlargeImg || this.imageEl.getAttribute('src');
 
     const img = new Image();
     img.src = src;
     img.onload = () => {
-      this.setCoordsForImageAni();
+      this._setCoordsForImageAni();
       setTimeout(() => {
         this._renderer.addClass(this.enlargedImgWrapperEl, 'ani-enter');
       }, 10);
     };
 
-    this.enlargedImgWrapperEl = this.htmlToElement(`<div class="enlarged-image-wrapper"></div>`);
-    this.newImageEl = this.htmlToElement(`<img src="${src}" class="enlarged-image">`);
+    this.enlargedImgWrapperEl = this._htmlToElement(`<div class="enlarged-image-wrapper"></div>`);
+    this.newImageEl = this._htmlToElement(`<img src="${src}" class="enlarged-image">`);
     this._renderer.appendChild(this.enlargedImgWrapperEl, this.newImageEl);
     this._renderer.appendChild(this.lightboxParentEl, this.enlargedImgWrapperEl);
-
+    this.zoomMode = 0;
     this.enlargedImgWrapperEl.addEventListener('click', () => {
-      this.hideImg();
+      if (this.zoomMode === 0) {
+        // this._zoomImg();
+      } else {
+        // this._zoomOutImg();
+        this._hideImg();
+      }
+      this.zoomMode++;
     });
     if (this.isHideEl) {
       this.imageEl.setAttribute('style', `visibility: hidden`);
     }
-
   }
 
-  private htmlToElement(html): HTMLElement {
+  private _zoomImg() {
+    this._renderer.addClass(this.enlargedImgWrapperEl, 'isZoomed');
+  }
+
+  private _zoomOutImg(){
+    this._renderer.removeClass(this.enlargedImgWrapperEl, 'isZoomed');
+  }
+
+  private _htmlToElement(html): HTMLElement {
     const template = document.createElement('template');
     html = html.trim(); // Never return a text node of whitespace as the result
     template.innerHTML = html;

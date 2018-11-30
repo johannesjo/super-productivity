@@ -11,7 +11,7 @@
   z-index: 12;
   width: 100%;
   height: 100%;
-  cursor: zoom-out;
+  cursor: zoom-in;
   display: flex; /* establish flex container */
   flex-direction: column; /* make main axis vertical */
   justify-content: center; /* center items vertically, in this case */
@@ -28,6 +28,10 @@
     opacity: 0;
   }
 
+  &.isZoomed {
+    cursor: zoom-out;
+  }
+
   &.ani-enter,
   &.ani-enter:after {
     transition: $transition-enter;
@@ -41,6 +45,7 @@
   &.ani-enter:after {
     opacity: 1;
   }
+
   &.ani-remove:after {
     opacity: 0;
   }
@@ -59,8 +64,14 @@
     transition: $transition-enter;
     transform: scale(1) translate3d(0, 0, 0) !important;
   }
+
   .ani-remove & {
     transition: $transition-leave;
+  }
+
+  .isZoomed & {
+    transform-origin: center center;
+    transform: scale(2) translate3d(0, 0, 0) !important;
   }
 }
 
