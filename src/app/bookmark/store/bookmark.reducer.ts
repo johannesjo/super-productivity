@@ -18,7 +18,7 @@ export const selectIsShowBookmarkBar = createSelector(selectBookmarkFeatureState
 
 export const initialBookmarkState: BookmarkState = adapter.getInitialState({
   // additional entity state properties
-  isShowBookmarks: true
+  isShowBookmarks: false
 });
 
 export function bookmarkReducer(
