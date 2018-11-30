@@ -32,6 +32,7 @@ export const DEFAULT_CFG: GlobalConfig = {
   keyboard: {
     globalShowHide: 'Ctrl+Shift+X',
     addNewTask: 'Shift+A',
+    addNewNote: 'n',
     openProjectNotes: 'N',
     openDistractionPanel: 'D',
     showHelp: '?',

@@ -44,6 +44,13 @@ export const KEYBOARD_SETTINGS_FORM_CFG = {
       },
     },
     {
+      key: 'addNewNote',
+      type: 'keyboard',
+      templateOptions: {
+        label: 'Add new note',
+      },
+    },
+    {
       key: 'openProjectNotes',
       type: 'keyboard',
       templateOptions: {
