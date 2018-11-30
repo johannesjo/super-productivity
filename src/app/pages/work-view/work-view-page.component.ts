@@ -1,19 +1,21 @@
 import { ChangeDetectorRef, Component, HostListener, OnDestroy, OnInit } from '@angular/core';
 import { TaskService } from '../../tasks/task.service';
-import { expandFadeAnimation } from '../../ui/animations/expand.ani';
+import { expandAnimation, expandFadeAnimation } from '../../ui/animations/expand.ani';
 import { LayoutService } from '../../core/layout/layout.service';
 import { DragulaService } from 'ng2-dragula';
 import { TakeABreakService } from '../../time-tracking/take-a-break/take-a-break.service';
 import { ActivatedRoute } from '@angular/router';
-import { Subscription } from 'rxjs';
+import { combineLatest, Subscription } from 'rxjs';
 import { TaskWithSubTasks } from '../../tasks/task.model';
 import { Actions } from '@ngrx/effects';
+import { take } from 'rxjs/operators';
+import { fadeAnimation } from '../../ui/animations/fade.ani';
 
 @Component({
   selector: 'work-view',
   templateUrl: './work-view-page.component.html',
   styleUrls: ['./work-view-page.component.scss'],
-  animations: [expandFadeAnimation]
+  animations: [expandFadeAnimation, expandAnimation, fadeAnimation]
 })
 export class WorkViewPageComponent implements OnInit, OnDestroy {
   isVertical = false;
@@ -24,7 +26,6 @@ export class WorkViewPageComponent implements OnInit, OnDestroy {
   // TODO
   isPlanYourDay = false; // = first start in day or no todays tasks at all (session needed)
   // close when starting a task
-  isShowBacklog = false; // if isPlanYourDay and  show only if there are actually some
   splitInputPos = 0;
 
   // we do it here to have the tasks in memory all the time
@@ -52,15 +53,6 @@ export class WorkViewPageComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    if (this.isShowBacklog) {
-      this.splitInputPos = 50;
-    } else {
-      this.splitInputPos = 100;
-    }
-
-    this._subs.add(this.taskService.backlogTasks$.subscribe(tasks => this.backlogTasks = tasks));
-    this._subs.add(this.taskService.onTaskSwitchList$.subscribe(() => this._triggerTaskSwitchListAnimation()));
-
     this._dragulaService.createGroup('PARENT', {
       direction: 'vertical',
       moves: function (el, container, handle) {
@@ -77,12 +69,33 @@ export class WorkViewPageComponent implements OnInit, OnDestroy {
       }
     });
 
-    this._activatedRoute.queryParams
+    this._subs.add(this.taskService.backlogTasks$.subscribe(tasks => this.backlogTasks = tasks));
+
+    this._subs.add(this.taskService.onTaskSwitchList$.subscribe(() => this._triggerTaskSwitchListAnimation()));
+
+    this._subs.add(
+      combineLatest(
+        this.taskService.isTriggerPlanningMode$,
+        this.taskService.backlogTasks$
+      )
+        .pipe(take(1))
+        .subscribe(([isPlanning, backlogTasks]) => {
+          this.isPlanYourDay = isPlanning;
+          if (isPlanning && backlogTasks && backlogTasks.length) {
+            this.splitInputPos = 50;
+          } else {
+            this.splitInputPos = 100;
+          }
+          this._cd.detectChanges();
+        })
+    );
+
+    this._subs.add(this._activatedRoute.queryParams
       .subscribe((params) => {
         if (params && params.backlogPos) {
           this.splitInputPos = params.backlogPos;
         }
-      });
+      }));
   }
 
 
@@ -98,8 +111,14 @@ export class WorkViewPageComponent implements OnInit, OnDestroy {
     this._layoutService.showAddTaskBar();
   }
 
-
-  collapseAllNotesAndSubTasks() {
+  // TODO not pretty
+  startWork() {
+    this.isPlanYourDay = false;
+    this._subs.add(this.taskService.startableTasks$
+      .pipe(take(1))
+      .subscribe(tasks => {
+        this.taskService.setCurrentId(tasks[0] && tasks[0].id);
+      }));
   }
 
   private _triggerTaskSwitchListAnimation() {

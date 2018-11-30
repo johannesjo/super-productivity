@@ -96,6 +96,10 @@ export const selectMissingIssueIds = createSelector(
     )
     .map(task => task.issueId)
 );
+export const selectIsTriggerPlanningMode = createSelector(
+  selectTodaysTasksWithSubTasks,
+  (tasks) => (!tasks || !tasks.length)
+);
 
 // DYNAMIC SELECTORS
 // -----------------

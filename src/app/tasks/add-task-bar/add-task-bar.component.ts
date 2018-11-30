@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { TaskService } from '../task.service';
 import { JiraApiService } from '../../issue/jira/jira-api.service';
@@ -13,12 +13,14 @@ import { JiraIssueService } from '../../issue/jira/jira-issue/jira-issue.service
   templateUrl: './add-task-bar.component.html',
   styleUrls: ['./add-task-bar.component.scss']
 })
-export class AddTaskBarComponent implements OnInit, OnDestroy {
+export class AddTaskBarComponent implements OnInit, OnDestroy, AfterViewInit {
   destroy$: Subject<boolean> = new Subject<boolean>();
   taskSuggestionsCtrl: FormControl = new FormControl();
   filteredIssueSuggestions: any[];
   isLoading = false;
   @Input() isAddToBacklog = false;
+  @Input() placeholderTxt: string;
+  @Input() isAutoFocus: boolean;
   @Output() blur: EventEmitter<any> = new EventEmitter();
   @ViewChild('inputEl') inputEl;
 
@@ -30,8 +32,7 @@ export class AddTaskBarComponent implements OnInit, OnDestroy {
   ) {
   }
 
-  ngOnInit() {
-    this.taskSuggestionsCtrl.setValue('');
+  ngAfterViewInit(): void {
     setTimeout(() => {
       this.inputEl.nativeElement.focus();
       this.inputEl.nativeElement.addEventListener('keydown', (ev) => {
@@ -43,6 +44,11 @@ export class AddTaskBarComponent implements OnInit, OnDestroy {
         }
       });
     });
+
+  }
+
+  ngOnInit() {
+    this.taskSuggestionsCtrl.setValue('');
 
     this.taskSuggestionsCtrl.valueChanges.pipe(
       withLatestFrom(this._projectService.currentJiraCfg$),

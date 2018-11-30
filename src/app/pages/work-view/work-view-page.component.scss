@@ -48,6 +48,10 @@ h2 {
 
 .work-view-header {
   margin-bottom: $s;
+  min-height: 64px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 
   @include mq(xs, max) {
     .label {
@@ -145,5 +149,29 @@ h2 {
     height: 100%;
     top: 0;
     left: 0;
+  }
+}
+
+// PLAN MODE
+.planning-mode-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  h1, h2 {
+    margin: 0;
+    padding: 0;
+  }
+}
+
+.planning-mode-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  add-task-bar {
+    width: 100%;
   }
 }

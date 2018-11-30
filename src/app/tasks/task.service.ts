@@ -37,7 +37,7 @@ import {
   selectEstimateRemainingForToday,
   selectFocusIdsForBacklog,
   selectFocusIdsForWorkView,
-  selectFocusTaskId,
+  selectFocusTaskId, selectIsTriggerPlanningMode,
   selectMissingIssueIds,
   selectTaskById,
   selectTodaysDoneTasksWithSubTasks,
@@ -53,6 +53,7 @@ import { Actions, ofType } from '@ngrx/effects';
 
 @Injectable()
 export class TaskService {
+  // TOOD find a smart way to determine this
   currentTaskId$: Observable<string> = this._store.pipe(select(selectCurrentTaskId), distinctUntilChanged());
   currentTaskId: string;
 
@@ -100,6 +101,9 @@ export class TaskService {
     TaskActionTypes.MoveToToday,
     TaskActionTypes.AddTask,
   ));
+
+  isTriggerPlanningMode$: Observable<boolean> = this._store.pipe(select(selectIsTriggerPlanningMode));
+
 
   constructor(
     private readonly _store: Store<any>,
