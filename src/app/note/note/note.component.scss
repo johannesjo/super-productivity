@@ -5,21 +5,7 @@
 }
 
 .note {
-  background: #ffffff;
-  color: $standard-note-fg-light;
-  box-sizing: border-box;
-  position: relative;
-  border-radius: $card-border-radius;
-  box-shadow: $shadow-bottom-boxed;
-  transition: $transition-standard;
-  transition-property: transform;
-  border: 1px solid #DADCE0;
-
-  @include darkTheme {
-    background: $standard-note-bg-dark;
-    color: $standard-note-fg-dark;
-    border-color: #333333;
-  }
+  @include noteStyle;
 
   &.isFocused {
     transform: scale(1.04);
