@@ -18,14 +18,9 @@ import { fadeAnimation } from '../../ui/animations/fade.ani';
   animations: [expandFadeAnimation, expandAnimation, fadeAnimation]
 })
 export class WorkViewPageComponent implements OnInit, OnDestroy {
-  isVertical = false;
-  isHideControls: boolean;
-  workedWithoutABreak = '-';
   isShowTimeWorkedWithoutBreak = true;
-
-  // TODO
-  isPlanYourDay = false; // = first start in day or no todays tasks at all (session needed)
-  // close when starting a task
+  // no todays tasks at all
+  isPlanYourDay = false;
   splitInputPos = 0;
 
   // we do it here to have the tasks in memory all the time
@@ -45,12 +40,8 @@ export class WorkViewPageComponent implements OnInit, OnDestroy {
     private _actions$: Actions,
     private _cd: ChangeDetectorRef,
   ) {
-    // this.focusTaskIdList$.subscribe(v => console.log(v));
   }
 
-  @HostListener('blur', ['$event']) onBlur(ev: Event) {
-    console.log('BLUR', ev);
-  }
 
   ngOnInit() {
     this._dragulaService.createGroup('PARENT', {
