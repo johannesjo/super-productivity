@@ -13,7 +13,6 @@ export class EnlargeImgDirective {
   zoomMode = 0;
 
   @Input() enlargeImg: string;
-  @Input() isHideEl: boolean;
 
   constructor(
     private _renderer: Renderer2,
@@ -37,9 +36,6 @@ export class EnlargeImgDirective {
 
     this.enlargedImgWrapperEl.addEventListener('transitionend', () => {
       this.enlargedImgWrapperEl.remove();
-      if (this.isHideEl) {
-        this.imageEl.setAttribute('style', `visibility: visible`);
-      }
     });
   }
 
@@ -80,9 +76,6 @@ export class EnlargeImgDirective {
       }
       this.zoomMode++;
     });
-    if (this.isHideEl) {
-      this.imageEl.setAttribute('style', `visibility: hidden`);
-    }
   }
 
   private _zoomImg() {

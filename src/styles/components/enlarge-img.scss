@@ -57,10 +57,11 @@
   pointer-events: none;
   max-width: 100%;
   max-height: 100%;
-  opacity: 1;
+  opacity: 0.3;
   transform-origin: top left;
 
   .ani-enter & {
+    opacity: 1;
     transition: $transition-enter;
     transform: scale(1) translate3d(0, 0, 0) !important;
   }
