@@ -53,7 +53,9 @@ export class UnsetCurrentTask implements Action {
 export class AddTask implements Action {
   readonly type = TaskActionTypes.AddTask;
 
-  constructor(public payload: { task: Task, issue?: JiraIssue, isAddToBacklog: boolean }) {
+  constructor(public payload: {
+    task: Task, issue?: JiraIssue, isAddToBacklog: boolean, isAddToBottom: boolean,
+  }) {
   }
 }
 

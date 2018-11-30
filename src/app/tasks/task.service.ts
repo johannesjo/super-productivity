@@ -37,7 +37,8 @@ import {
   selectEstimateRemainingForToday,
   selectFocusIdsForBacklog,
   selectFocusIdsForWorkView,
-  selectFocusTaskId, selectIsTriggerPlanningMode,
+  selectFocusTaskId,
+  selectIsTriggerPlanningMode,
   selectMissingIssueIds,
   selectTaskById,
   selectTodaysDoneTasksWithSubTasks,
@@ -155,17 +156,20 @@ export class TaskService {
   add(title: string,
       isAddToBacklog = false,
       additionalFields?: Partial<Task>,
+      isAddToBottom = false,
   ) {
     this._store.dispatch(new AddTask({
       task: this._createNewTask(title, additionalFields),
-      isAddToBacklog: isAddToBacklog
+      isAddToBacklog,
+      isAddToBottom
     }));
   }
 
   addWithIssue(title: string,
                issueType: IssueProviderKey,
                issue: any,
-               isAddToBacklog = false
+               isAddToBacklog = false,
+               isAddToBottom = false,
   ) {
     this._store.dispatch(new AddTask({
       task: this._createNewTask(title, {
@@ -173,7 +177,8 @@ export class TaskService {
         issueType: issueType,
       }),
       issue,
-      isAddToBacklog
+      isAddToBacklog,
+      isAddToBottom,
     }));
   }
 

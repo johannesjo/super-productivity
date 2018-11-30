@@ -320,11 +320,29 @@ export function taskReducer(
       return {
         ...taskAdapter.addOne(action.payload.task, state),
         ...(
-          action.payload.isAddToBacklog ? {
-            backlogTaskIds: [action.payload.task.id, ...state.backlogTaskIds]
-          } : {
-            todaysTaskIds: [action.payload.task.id, ...state.todaysTaskIds]
-          }
+          action.payload.isAddToBacklog
+            ? {
+              backlogTaskIds: action.payload.isAddToBottom
+                ? [
+                  action.payload.task.id,
+                  ...state.backlogTaskIds
+                ]
+                : [
+                  ...state.backlogTaskIds,
+                  action.payload.task.id,
+                ]
+            }
+            : {
+              todaysTaskIds: action.payload.isAddToBottom
+                ? [
+                  ...state.todaysTaskIds,
+                  action.payload.task.id,
+                ]
+                : [
+                  action.payload.task.id,
+                  ...state.todaysTaskIds
+                ]
+            }
         ),
       };
     }

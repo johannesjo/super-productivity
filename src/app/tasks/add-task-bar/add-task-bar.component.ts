@@ -19,7 +19,7 @@ export class AddTaskBarComponent implements OnInit, OnDestroy, AfterViewInit {
   filteredIssueSuggestions: any[];
   isLoading = false;
   @Input() isAddToBacklog = false;
-  @Input() placeholderTxt: string;
+  @Input() isAddToBottom;
   @Input() isAutoFocus: boolean;
   @Output() blur: EventEmitter<any> = new EventEmitter();
   @ViewChild('inputEl') inputEl;
@@ -100,7 +100,12 @@ export class AddTaskBarComponent implements OnInit, OnDestroy, AfterViewInit {
 
     if (typeof issueOrTitle === 'string') {
       if (issueOrTitle.length > 0) {
-        this._taskService.add(issueOrTitle, this.isAddToBacklog);
+        this._taskService.add(
+          issueOrTitle,
+          this.isAddToBacklog,
+          {},
+          this.isAddToBottom
+        );
       }
     } else {
       this._taskService.addWithIssue(
