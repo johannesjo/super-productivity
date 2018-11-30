@@ -32,8 +32,6 @@ export class DialogAddNoteComponent {
   }
 
   submit() {
-    console.log(this.reminderDate);
-    // TODO not working yet
     const remindAt = this.reminderDate && new Date(this.reminderDate).getTime();
 
     this._noteService.add(

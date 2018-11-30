@@ -36,7 +36,9 @@ export class DialogAddNoteReminderComponent {
       this.title = this.reminder.title;
     } else {
       const offset = new Date().getTimezoneOffset();
-      this.date = this._convertDate(new Date(Date.now() - (offset * 1000 * 60)));
+      const date = new Date(Date.now() - (offset * 1000 * 60));
+      date.setSeconds(0, 0);
+      this.date = this._convertDate(date);
       this.title = this.note.content.substr(0, 40);
     }
   }
@@ -46,6 +48,7 @@ export class DialogAddNoteReminderComponent {
     const isoStr = date.toISOString();
     return isoStr.substring(0, isoStr.length - 1);
   }
+
 
   save() {
     if (this.isEdit) {
