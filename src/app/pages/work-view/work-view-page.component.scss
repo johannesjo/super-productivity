@@ -64,7 +64,8 @@ h2 {
 }
 
 .completed-tasks-heading {
-  margin-top: $s;
+  margin: $s;
+  margin-top: $s*2;
 }
 
 .status-bar {
