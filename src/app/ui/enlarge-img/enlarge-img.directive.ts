@@ -60,6 +60,7 @@ export class EnlargeImgDirective {
       this._setCoordsForImageAni();
       this._waitForImgRender().then(() => {
         this._renderer.addClass(this.enlargedImgWrapperEl, 'ani-enter');
+        this._renderer.setStyle(this.newImageEl, 'transform', `translate3d(0, 0, 0) scale(1)`);
       });
     };
 
@@ -69,11 +70,18 @@ export class EnlargeImgDirective {
     this._renderer.appendChild(this.lightboxParentEl, this.enlargedImgWrapperEl);
     this.zoomMode = 0;
     this.enlargedImgWrapperEl.addEventListener('click', () => {
+      this._hideImg();
+    });
+    this.newImageEl.addEventListener('click', (ev) => {
+      ev.preventDefault();
+      ev.stopPropagation();
       if (this.zoomMode === 0) {
-        // this._zoomImg();
+        this._zoomImg();
       } else {
-        // this._zoomOutImg();
-        this._hideImg();
+        this._zoomOutImg();
+        setTimeout(() => {
+          this._hideImg();
+        }, 200);
       }
       this.zoomMode++;
     });
@@ -81,10 +89,12 @@ export class EnlargeImgDirective {
 
   private _zoomImg() {
     this._renderer.addClass(this.enlargedImgWrapperEl, 'isZoomed');
+    this._renderer.setStyle(this.newImageEl, 'transform', `scale(2) translate3d(-25%, -25%, 0)`);
   }
 
   private _zoomOutImg() {
     this._renderer.removeClass(this.enlargedImgWrapperEl, 'isZoomed');
+    this._renderer.setStyle(this.newImageEl, 'transform', `scale(1) translate3d(0, 0, 0)`);
   }
 
   private _htmlToElement(html): HTMLElement {
