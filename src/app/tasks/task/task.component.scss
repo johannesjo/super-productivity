@@ -73,9 +73,9 @@ $this-icon-default-opacity: 0.7;
     flex-grow: 1;
     flex-basis: 70%;
     @include mq(xs, max) {
-      margin-bottom: 5px;
-      flex-shrink: 0;
-      flex-basis: 100%;
+      //margin-bottom: 5px;
+      //flex-shrink: 0;
+      //flex-basis: 100%;
     }
   }
 
@@ -368,6 +368,7 @@ input {
   align-items: center;
   justify-content: center;
   margin-left: $s;
+  cursor: pointer;
 
   button {
     //@include center;
