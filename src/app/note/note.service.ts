@@ -58,14 +58,22 @@ export class NoteService {
     this._store$.dispatch(new LoadNoteState({state: state}));
   }
 
-  public add(note: Partial<Note> = {}) {
+  public add(note: Partial<Note> = {}, remindAt?: number) {
+    const id = shortid();
+
+    let reminderId = null;
+    if (remindAt) {
+      reminderId = this._addReminderForNewNote(id, remindAt, (note.content && note.content.substr(0, 40)));
+    }
+
     this._store$.dispatch(new AddNote({
       note: {
-        id: shortid(),
+        id,
         content: '',
         created: Date.now(),
         modified: Date.now(),
         ...note,
+        reminderId,
       }
     }));
   }
@@ -124,5 +132,15 @@ export class NoteService {
       message: `Deleted reminder ${reminderId} for note`,
       icon: 'schedule',
     });
+  }
+
+  private _addReminderForNewNote(noteId: string, remindAt: number, title: string): string {
+    const reminderId = this._reminderService.addReminder(
+      'NOTE',
+      noteId,
+      title,
+      remindAt,
+    );
+    return reminderId;
   }
 }

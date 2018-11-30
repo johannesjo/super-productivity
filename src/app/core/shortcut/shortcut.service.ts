@@ -8,6 +8,8 @@ import { ElectronService } from 'ngx-electron';
 import { LayoutService } from '../layout/layout.service';
 import { NoteService } from '../../note/note.service';
 import { TaskService } from '../../tasks/task.service';
+import { MatDialog } from '@angular/material';
+import { DialogAddNoteComponent } from '../../note/dialog-add-note/dialog-add-note.component';
 
 
 @Injectable({
@@ -21,6 +23,7 @@ export class ShortcutService {
     private _router: Router,
     private _electronService: ElectronService,
     private _layoutService: LayoutService,
+    private _matDialog: MatDialog,
     private _noteService: NoteService,
     private _taskService: TaskService,
     private _activatedRoute: ActivatedRoute,
@@ -94,6 +97,12 @@ export class ShortcutService {
     if (checkKeyCombo(ev, keys.addNewTask)) {
       this._layoutService.toggleAddTaskBar();
       ev.preventDefault();
+    }
+    if (checkKeyCombo(ev, keys.addNewNote)) {
+      if (this._matDialog.openDialogs.length === 0) {
+        this._matDialog.open(DialogAddNoteComponent);
+        ev.preventDefault();
+      }
     }
     if (checkKeyCombo(ev, keys.openProjectNotes)) {
       this._noteService.toggleShow();

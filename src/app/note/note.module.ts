@@ -18,13 +18,15 @@ import { DialogViewNoteReminderComponent } from './dialog-view-note-reminder/dia
 import { ElectronService } from 'ngx-electron';
 import { IPC_SHOW_OR_FOCUS } from '../../ipc-events.const';
 import { IS_ELECTRON } from '../app.constants';
+import { DialogAddNoteComponent } from './dialog-add-note/dialog-add-note.component';
 
 @NgModule({
   declarations: [
     NotesComponent,
     NoteComponent,
     DialogAddNoteReminderComponent,
-    DialogViewNoteReminderComponent
+    DialogViewNoteReminderComponent,
+    DialogAddNoteComponent
   ],
   imports: [
     ReminderModule,
@@ -37,6 +39,7 @@ import { IS_ELECTRON } from '../app.constants';
   entryComponents: [
     DialogAddNoteReminderComponent,
     DialogViewNoteReminderComponent,
+    DialogAddNoteComponent,
   ],
   exports: [NotesComponent],
   providers: [NoteService]

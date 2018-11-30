@@ -1,0 +1,43 @@
+<form (submit)="submit()">
+
+  <div class="form-wrapper">
+
+  <textarea rows="6"
+            name="noteContent"
+            [(ngModel)]="noteContent"
+            placeholder="Enter some text..."></textarea>
+    <mat-form-field>
+      <!--[matDatepicker]="myDatepicker"-->
+      <input
+        matInput
+        placeholder="Datetime for reminder (optional)"
+        type="datetime-local"
+        [(ngModel)]="reminderDate"
+        name="reminderDate">
+      <mat-error>The entered value is not a date!</mat-error>
+      <mat-icon matPrefix="">alarm</mat-icon>
+      <!--<mat-datepicker-toggle matPrefix-->
+      <!--[for]="myDatepicker"></mat-datepicker-toggle>-->
+      <!--<mat-datepicker #myDatepicker></mat-datepicker>-->
+    </mat-form-field>
+  </div>
+
+  <mat-dialog-actions align="center">
+    <div class="wrap-buttons">
+      <button color="primary"
+              type="submit"
+              class="btn btn-primary submit-button"
+              mat-raised-button>
+        <mat-icon>save</mat-icon>
+        Save
+      </button>
+
+      <button type="button"
+              (click)="close()"
+              class="btn btn-primary submit-button"
+              mat-raised-button>
+        Cancel
+      </button>
+    </div>
+  </mat-dialog-actions>
+</form>

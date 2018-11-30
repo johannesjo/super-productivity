@@ -1,0 +1,21 @@
+@import '../../../variables';
+
+textarea {
+  display: block;
+  width: 400px;
+  max-width: 100%;
+  @include noteStyle;
+  margin-bottom: $s*2;
+  padding: $s;
+
+  @include mq (sm) {
+    height: 300px;
+  }
+}
+
+.form-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
