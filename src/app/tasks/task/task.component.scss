@@ -264,6 +264,9 @@ $this-icon-default-opacity: 0.7;
   cursor: grab;
   @extend %standardTaskOpacityChange;
 
+  // fixes drag and drop on mobile
+  touch-action: none;
+
   &:after {
     content: '';
     top: -$s*2;
