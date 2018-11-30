@@ -104,6 +104,8 @@ export class WorkViewPageComponent implements OnInit, OnDestroy {
 
   // TODO not pretty
   startWork() {
+    console.log('START');
+
     this.isPlanYourDay = false;
     this._subs.add(this.taskService.startableTasks$
       .pipe(take(1))

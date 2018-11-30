@@ -10,7 +10,7 @@
   <input matInput
          #inputEl
          class="border-color-primary"
-         placeholder="Select or create task"
+         [placeholder]="(doubleEnterCount > 0) ? 'Press enter one more time to start':'Select or create task'"
          aria-label="Select or create task"
          autofocus="autofocus"
          [matAutocomplete]="autoEl"

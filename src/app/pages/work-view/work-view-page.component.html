@@ -77,7 +77,8 @@
       <div class="planning-mode-content"
            @expandFade
            *ngIf="isPlanYourDay">
-        <add-task-bar [isAddToBottom]="true"></add-task-bar>
+        <add-task-bar [isAddToBottom]="true"
+                      (done)="startWork()"></add-task-bar>
         <button mat-raised-button=""
                 class="read-to-work-btn"
                 (click)="startWork()"

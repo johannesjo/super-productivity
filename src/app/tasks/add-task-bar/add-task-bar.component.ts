@@ -18,10 +18,14 @@ export class AddTaskBarComponent implements OnInit, OnDestroy, AfterViewInit {
   taskSuggestionsCtrl: FormControl = new FormControl();
   filteredIssueSuggestions: any[];
   isLoading = false;
+  doubleEnterCount = 0;
+
   @Input() isAddToBacklog = false;
   @Input() isAddToBottom;
   @Input() isAutoFocus: boolean;
   @Output() blur: EventEmitter<any> = new EventEmitter();
+  @Output() done: EventEmitter<any> = new EventEmitter();
+
   @ViewChild('inputEl') inputEl;
 
   constructor(
@@ -96,16 +100,20 @@ export class AddTaskBarComponent implements OnInit, OnDestroy, AfterViewInit {
 
   addTask() {
     const issueOrTitle = this.taskSuggestionsCtrl.value;
-    console.log(issueOrTitle);
-
     if (typeof issueOrTitle === 'string') {
       if (issueOrTitle.length > 0) {
+        this.doubleEnterCount = 0;
         this._taskService.add(
           issueOrTitle,
           this.isAddToBacklog,
           {},
           this.isAddToBottom
         );
+      } else if (this.doubleEnterCount > 0) {
+        this.blur.emit();
+        this.done.emit();
+      } else {
+        this.doubleEnterCount++;
       }
     } else {
       this._taskService.addWithIssue(
