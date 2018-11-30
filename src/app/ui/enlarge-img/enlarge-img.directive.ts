@@ -1,6 +1,8 @@
 import { Directive, ElementRef, HostListener, Input, Renderer2 } from '@angular/core';
 import { getCoords } from './get-coords';
 
+const LARGE_IMG_ID = 'enlarged-img';
+
 @Directive({
   selector: '[enlargeImg]'
 })
@@ -42,12 +44,11 @@ export class EnlargeImgDirective {
   private _setCoordsForImageAni() {
     const origImgCoords = getCoords(this.imageEl);
     const newImageCoords = getCoords(this.newImageEl);
-
     const scale = this.imageEl.offsetWidth / this.newImageEl.offsetWidth || 0.01;
     const startLeft = origImgCoords.left - newImageCoords.left;
     const startTop = origImgCoords.top - newImageCoords.top;
 
-    this.newImageEl.setAttribute('style', `transform: translate3d(${startLeft}px, ${startTop}px, 0) scale(${scale})`);
+    this._renderer.setStyle(this.newImageEl, 'transform', `translate3d(${startLeft}px, ${startTop}px, 0) scale(${scale})`);
   }
 
   private _showImg() {
@@ -57,13 +58,13 @@ export class EnlargeImgDirective {
     img.src = src;
     img.onload = () => {
       this._setCoordsForImageAni();
-      setTimeout(() => {
+      this._waitForImgRender().then(() => {
         this._renderer.addClass(this.enlargedImgWrapperEl, 'ani-enter');
-      }, 10);
+      });
     };
 
     this.enlargedImgWrapperEl = this._htmlToElement(`<div class="enlarged-image-wrapper"></div>`);
-    this.newImageEl = this._htmlToElement(`<img src="${src}" class="enlarged-image">`);
+    this.newImageEl = this._htmlToElement(`<img src="${src}" class="enlarged-image" id=${LARGE_IMG_ID}>`);
     this._renderer.appendChild(this.enlargedImgWrapperEl, this.newImageEl);
     this._renderer.appendChild(this.lightboxParentEl, this.enlargedImgWrapperEl);
     this.zoomMode = 0;
@@ -82,7 +83,7 @@ export class EnlargeImgDirective {
     this._renderer.addClass(this.enlargedImgWrapperEl, 'isZoomed');
   }
 
-  private _zoomOutImg(){
+  private _zoomOutImg() {
     this._renderer.removeClass(this.enlargedImgWrapperEl, 'isZoomed');
   }
 
@@ -91,5 +92,24 @@ export class EnlargeImgDirective {
     html = html.trim(); // Never return a text node of whitespace as the result
     template.innerHTML = html;
     return template.content.firstChild as HTMLElement;
+  }
+
+  private _waitForImgRender() {
+    function rafAsync() {
+      return new Promise(resolve => {
+        requestAnimationFrame(resolve);
+      });
+    }
+
+    function checkElement(id) {
+      const el = document.getElementById(id);
+      if (el === null || !(el.offsetHeight > 1)) {
+        return rafAsync().then(() => checkElement(id));
+      } else {
+        return Promise.resolve(true);
+      }
+    }
+
+    return checkElement(LARGE_IMG_ID);
   }
 }
