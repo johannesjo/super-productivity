@@ -3,14 +3,14 @@ import { Task } from '../task.model';
 import { TaskService } from '../task.service';
 import { DragulaService } from 'ng2-dragula';
 import { Subscription } from 'rxjs';
-import { taskListAnimation } from './task-list.ani';
+import { standardListAnimation } from '../../ui/animations/standard-list.ani';
 
 @Component({
   selector: 'task-list',
   templateUrl: './task-list.component.html',
   styleUrls: ['./task-list.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  animations: [taskListAnimation],
+  animations: [standardListAnimation],
 
 })
 export class TaskListComponent implements OnDestroy, OnInit {
@@ -31,7 +31,6 @@ export class TaskListComponent implements OnDestroy, OnInit {
     private _dragulaService: DragulaService,
     private _cd: ChangeDetectorRef,
   ) {
-
   }
 
   ngOnInit() {

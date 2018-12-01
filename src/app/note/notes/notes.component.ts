@@ -4,14 +4,14 @@ import { DragulaService } from 'ng2-dragula';
 import { Subscription } from 'rxjs';
 import { MatButton, MatDialog } from '@angular/material';
 import { DialogAddNoteComponent } from '../dialog-add-note/dialog-add-note.component';
-import { taskListAnimation } from '../../tasks/task-list/task-list.ani';
+import { standardListAnimation } from '../../ui/animations/standard-list.ani';
 
 @Component({
   selector: 'notes',
   templateUrl: './notes.component.html',
   styleUrls: ['./notes.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  animations: [taskListAnimation]
+  animations: [standardListAnimation]
 })
 export class NotesComponent implements OnInit, OnDestroy {
   private _subs = new Subscription();
