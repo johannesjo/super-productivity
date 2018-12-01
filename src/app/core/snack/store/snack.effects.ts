@@ -8,6 +8,7 @@ import { Store } from '@ngrx/store';
 import { SnackCustomComponent } from '../snack-custom/snack-custom.component';
 import { DEFAULT_SNACK_CFG } from '../snack.const';
 import { SnackGoogleLoginComponent } from '../snack-google-login/snack-google-login.component';
+import { SnackJiraUnblockComponent } from '../snack-jira-unblock/snack-jira-unblock.component';
 
 @Injectable()
 export class SnackEffects {
@@ -31,7 +32,7 @@ export class SnackEffects {
     );
 
 
-  private _ref: MatSnackBarRef<SnackCustomComponent | SnackGoogleLoginComponent | SimpleSnackBar>;
+  private _ref: MatSnackBarRef<SnackCustomComponent | SnackJiraUnblockComponent | SnackGoogleLoginComponent | SimpleSnackBar>;
 
   constructor(private actions$: Actions,
               private store$: Store<any>,
@@ -51,6 +52,10 @@ export class SnackEffects {
     switch (type) {
       case 'GOOGLE_LOGIN':
         this._ref = this.matSnackBar.openFromComponent(SnackGoogleLoginComponent, cfg);
+        break;
+
+      case 'JIRA_UNBLOCK':
+        this._ref = this.matSnackBar.openFromComponent(SnackJiraUnblockComponent, cfg);
         break;
 
       case 'ERROR':

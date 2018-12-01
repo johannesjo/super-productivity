@@ -1,6 +1,6 @@
 import { MatSnackBarConfig } from '@angular/material';
 
-export type SnackType = 'ERROR' | 'SUCCESS' | 'CUSTOM' | 'GOOGLE_LOGIN';
+export type SnackType = 'ERROR' | 'SUCCESS' | 'CUSTOM' | 'GOOGLE_LOGIN' | 'JIRA_UNBLOCK';
 
 export interface SnackParams {
   message: string;

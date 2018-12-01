@@ -59,7 +59,7 @@ export class JiraApiService {
       if (!this._isHasCheckedConnection && this._isMinimalSettings(cfg)) {
         this.getCurrentUser()
           .then(() => {
-            this._unblockAccess();
+            this.unblockAccess();
             checkConnectionSub.unsubscribe();
           })
           .catch(() => {
@@ -70,6 +70,10 @@ export class JiraApiService {
     });
   }
 
+  unblockAccess() {
+    this._isBlockAccess = false;
+    saveToSessionStorage(BLOCK_ACCESS_KEY, false);
+  }
 
   search(searchTerm: string, isFetchAdditional?: boolean, maxResults: number = JIRA_MAX_RESULTS): Promise<JiraIssue[]> {
     const options = {
@@ -185,6 +189,7 @@ export class JiraApiService {
 
     if (this._isBlockAccess) {
       console.error('Blocked Jira Access to prevent being shut out');
+      this._snackService.open({type: 'JIRA_UNBLOCK', message: 'Jira: To prevent shut out from api, access has been blocked. Check your settings!'});
       return Promise.reject(new Error('Blocked access to prevent being shut out'));
     }
 
@@ -282,10 +287,5 @@ export class JiraApiService {
   private _blockAccess() {
     this._isBlockAccess = true;
     saveToSessionStorage(BLOCK_ACCESS_KEY, true);
-  }
-
-  private _unblockAccess() {
-    this._isBlockAccess = false;
-    saveToSessionStorage(BLOCK_ACCESS_KEY, false);
   }
 }
