@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, HostListener, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { TaskService } from '../../tasks/task.service';
 import { expandAnimation, expandFadeAnimation } from '../../ui/animations/expand.ani';
 import { LayoutService } from '../../core/layout/layout.service';
@@ -118,6 +118,11 @@ export class WorkViewPageComponent implements OnInit, OnDestroy {
   private _triggerTaskSwitchListAnimation() {
     this.isTriggerSwitchListAni = true;
     this._cd.detectChanges();
+
+    if (this._switchListAnimationTimeout) {
+      window.clearTimeout(this._switchListAnimationTimeout);
+    }
+
     this._switchListAnimationTimeout = window.setTimeout(() => {
       this.isTriggerSwitchListAni = false;
       this._cd.detectChanges();
