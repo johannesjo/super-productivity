@@ -62,6 +62,7 @@ export class WorkViewPageComponent implements OnInit, OnDestroy {
 
     this._subs.add(this.taskService.backlogTasks$.subscribe(tasks => this.backlogTasks = tasks));
 
+    // TODO fix detect changes error
     this._subs.add(this.taskService.onTaskSwitchList$.subscribe(() => this._triggerTaskSwitchListAnimation()));
 
     this._subs.add(

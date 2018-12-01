@@ -54,6 +54,7 @@ export class DatabaseService {
       storage.queryUsageAndQuota(
         function (usedBytes, grantedBytes) {
           console.log('webkitPersistentStorage: we are using ', usedBytes, ' of ', grantedBytes, 'bytes');
+          console.log('webkitPersistentStorage: storage left mb', (grantedBytes - usedBytes) / 1024 / 1024);
         },
         function (e) {
           console.log('webkitPersistentStorage: Error', e);
