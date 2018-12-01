@@ -1,10 +1,11 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { PersistenceService } from '../../../core/persistence/persistence.service';
 import { ProjectService } from '../../../project/project.service';
 import { expandFadeAnimation } from '../../../ui/animations/expand.ani';
 import { mapArchiveToWorklog, WorklogDay, WorklogMonth } from '../../../core/util/map-archive-to-worklog';
 import { DialogSimpleTaskSummaryComponent } from '../../../core/dialog-simple-task-summary/dialog-simple-task-summary.component';
 import { MatDialog } from '@angular/material';
+import { Subscription } from 'rxjs';
 
 
 @Component({
@@ -14,9 +15,11 @@ import { MatDialog } from '@angular/material';
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [expandFadeAnimation]
 })
-export class WorklogComponent implements OnInit {
+export class WorklogComponent implements OnInit, OnDestroy {
   worklog: any = {};
   totalTimeSpent: number;
+  private _isUnloaded = false;
+  private _subs = new Subscription();
 
   constructor(
     private readonly _persistenceService: PersistenceService,
@@ -27,15 +30,31 @@ export class WorklogComponent implements OnInit {
   }
 
   ngOnInit() {
-    this._importData();
+    this._subs.add(this._projectService.currentId$.subscribe((id) => {
+      this._loadData(id);
+    }));
   }
 
-  private async _importData() {
-    const completeState = await this._persistenceService.loadTaskArchiveForProject(this._projectService.currentId);
+  ngOnDestroy(): void {
+    // TODO better solution
+    this._isUnloaded = true;
+    this._subs.unsubscribe();
+  }
+
+  private async _loadData(projectId): Promise<any> {
+    const completeState = await this._persistenceService.loadTaskArchiveForProject(projectId);
+    if (this._isUnloaded) {
+      return;
+    }
+
     if (completeState) {
       const {worklog, totalTimeSpent} = mapArchiveToWorklog(completeState);
       this.worklog = worklog;
       this.totalTimeSpent = totalTimeSpent;
+      this._cd.detectChanges();
+    } else {
+      this.worklog = {};
+      this.totalTimeSpent = null;
       this._cd.detectChanges();
     }
   }
