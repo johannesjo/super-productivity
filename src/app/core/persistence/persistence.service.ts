@@ -32,6 +32,8 @@ import { Reminder } from '../../reminder/reminder.model';
 })
 export class PersistenceService {
   constructor() {
+    this._checkStorage();
+    this._increaseStorage();
   }
 
   // PROJECT RELATED
@@ -209,5 +211,50 @@ export class PersistenceService {
 
   private _makeProjectKey(projectId, subKey, additional?) {
     return LS_PROJECT_PREFIX + projectId + '_' + subKey + (additional ? '_' + additional : '');
+  }
+
+  private _checkStorage() {
+    const storage = navigator['webkitPersistentStorage'];
+    if (storage) {
+      storage.queryUsageAndQuota(
+        function (usedBytes, grantedBytes) {
+          console.log('webkitPersistentStorage: we are using ', usedBytes, ' of ', grantedBytes, 'bytes');
+        },
+        function (e) {
+          console.log('webkitPersistentStorage: Error', e);
+        }
+      );
+    }
+
+    if (navigator.storage) {
+      navigator.storage.estimate().then(
+        (value: StorageEstimate) => console.log(
+          `storage: using`, value
+        )
+      );
+    }
+  }
+
+  private _increaseStorage() {
+    if (navigator.storage && navigator.storage.persist)
+      navigator.storage.persist().then(granted => {
+        console.log('storage ', granted);
+        // if (granted) {
+        //
+        // }
+      });
+
+    const storage = navigator['webkitPersistentStorage'];
+    if (storage) {
+      // Request Quota (only for File System API)
+      const requestedBytes = 1024 * 1024 * 200; // 200MB
+      storage.requestQuota(
+        requestedBytes, function (grantedBytes) {
+          console.log('grantedBytes', grantedBytes);
+        }, function (e) {
+          console.log('Error', e);
+        }
+      );
+    }
   }
 }
