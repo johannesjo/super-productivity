@@ -301,6 +301,10 @@ $this-icon-default-opacity: 0.7;
   caret-color: #000000;
   z-index: 4;
 
+  &:first-letter {
+    text-transform: uppercase;
+  }
+
   .isCurrent & {
     font-weight: bold;
   }
