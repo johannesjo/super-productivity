@@ -36,31 +36,32 @@ export class SyncService {
   }
 
   async loadCompleteSyncData(data: AppDataComplete) {
-    this._saveBackup();
+    await this._saveBackup();
     this._snackService.open({message: 'Importing data', icon: 'cloud_download'});
 
     if (this._checkData(data)) {
       const curId = data.project.currentId;
 
-      // save data to local storage
-      return await Promise.all([
-        this._persistenceService.importComplete(data),
-        // reload view model from ls
-        this._configService.load(),
-        this._projectService.load(),
-        this._taskService.loadStateForProject(curId),
-        this._bookmarkService.loadStateForProject(curId),
-        this._noteService.loadStateForProject(curId),
-        this._jiraIssueService.loadStateForProject(curId),
-      ])
-        .then(() => {
-          this._snackService.open({type: 'SUCCESS', message: 'Data imported'});
-        })
-        .catch((e) => {
-          this._snackService.open({type: 'ERROR', message: 'Something went wrong while importing the data. Falling back to local backup'});
-          console.error(e);
-          this._loadBackup();
-        });
+      try {
+        await this._persistenceService.importComplete(data);
+
+        // save data to local storage
+        await Promise.all([
+          // reload view model from ls
+          this._configService.load(),
+          this._projectService.load(),
+          this._taskService.loadStateForProject(curId),
+          this._bookmarkService.loadStateForProject(curId),
+          this._noteService.loadStateForProject(curId),
+          this._jiraIssueService.loadStateForProject(curId),
+        ]);
+        this._snackService.open({type: 'SUCCESS', message: 'Data imported'});
+
+      } catch (e) {
+        this._snackService.open({type: 'ERROR', message: 'Something went wrong while importing the data. Falling back to local backup'});
+        console.error(e);
+        return await this._loadBackup();
+      }
     } else {
       this._snackService.open({type: 'ERROR', message: 'Error while syncing. Invalid data'});
       console.error(data);
