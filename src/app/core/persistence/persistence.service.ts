@@ -14,7 +14,6 @@ import {
   LS_TASK_STATE
 } from './ls-keys.const';
 import { GlobalConfig } from '../config/config.model';
-import { loadFromLs, loadFromSessionStorage, saveToLs, saveToLsWithLastActive, saveToSessionStorage } from './local-storage';
 import { IssueProviderKey } from '../../issue/issue';
 import { ProjectState } from '../../project/store/project.reducer';
 import { TaskState } from '../../tasks/store/task.reducer';
@@ -27,45 +26,47 @@ import { AttachmentState } from '../../tasks/attachment/store/attachment.reducer
 import { NoteState } from '../../note/store/note.reducer';
 import { Reminder } from '../../reminder/reminder.model';
 import { SnackService } from '../snack/snack.service';
+import { DatabaseService } from './database.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class PersistenceService {
-  constructor(private _snackService: SnackService) {
-    this._checkStorage();
-    this._increaseStorage();
+  constructor(
+    private _snackService: SnackService,
+    private _databaseService: DatabaseService,
+  ) {
   }
 
   // PROJECT RELATED
   // ---------------
-  loadProjectsMeta(): ProjectState {
-    return loadFromLs(LS_PROJECT_META_LIST);
+  async loadProjectsMeta(): Promise<ProjectState> {
+    return this._loadFromDb(LS_PROJECT_META_LIST);
   }
 
-  saveProjectsMeta(projectData: ProjectState) {
-    saveToLsWithLastActive(LS_PROJECT_META_LIST, projectData);
+  async saveProjectsMeta(projectData: ProjectState): Promise<any> {
+    return this._saveToDbWithLastActive(LS_PROJECT_META_LIST, projectData);
   }
 
-  loadReminders(): Reminder[] {
-    return loadFromLs(LS_REMINDER);
+  async loadReminders(): Promise<Reminder[]> {
+    return this._loadFromDb(LS_REMINDER);
   }
 
-  saveReminders(reminders: Reminder[]) {
-    saveToLsWithLastActive(LS_REMINDER, reminders);
+  async saveReminders(reminders: Reminder[]): Promise<any> {
+    return this._saveToDbWithLastActive(LS_REMINDER, reminders);
   }
 
-  saveTasksForProject(projectId, taskState: TaskState) {
-    saveToLsWithLastActive(this._makeProjectKey(projectId, LS_TASK_STATE), taskState);
+  async saveTasksForProject(projectId, taskState: TaskState): Promise<any> {
+    return this._saveToDbWithLastActive(this._makeProjectKey(projectId, LS_TASK_STATE), taskState);
   }
 
-  loadTasksForProject(projectId): TaskState {
-    return loadFromLs(this._makeProjectKey(projectId, LS_TASK_STATE));
+  async loadTasksForProject(projectId): Promise<TaskState> {
+    return this._loadFromDb(this._makeProjectKey(projectId, LS_TASK_STATE));
   }
 
-  saveToTaskArchiveForProject(projectId, tasksToArchive: EntityState<Task>) {
+  async saveToTaskArchiveForProject(projectId, tasksToArchive: EntityState<Task>) {
     const lsKey = this._makeProjectKey(projectId, LS_TASK_ARCHIVE);
-    const currentArchive: EntityState<Task> = loadFromLs(lsKey);
+    const currentArchive: EntityState<Task> = await this._loadFromDb(lsKey);
     if (currentArchive) {
       const mergedEntities = {
         ids: [
@@ -77,111 +78,109 @@ export class PersistenceService {
           ...tasksToArchive.entities
         }
       };
-      this._saveToLsWithLastActive(lsKey, mergedEntities);
+      return this._saveToDbWithLastActive(lsKey, mergedEntities);
     } else {
-      this._saveToLsWithLastActive(lsKey, tasksToArchive);
+      return this._saveToDbWithLastActive(lsKey, tasksToArchive);
     }
   }
 
-  loadTaskArchiveForProject(projectId: string): EntityState<Task> {
-    return this._loadFromLs(this._makeProjectKey(projectId, LS_TASK_ARCHIVE));
+  async loadTaskArchiveForProject(projectId: string): Promise<EntityState<Task>> {
+    return this._loadFromDb(this._makeProjectKey(projectId, LS_TASK_ARCHIVE));
   }
 
-  saveIssuesForProject(projectId, issueType: IssueProviderKey, data: JiraIssueState) {
-    this._saveToLsWithLastActive(this._makeProjectKey(projectId, LS_ISSUE_STATE, issueType), data);
+  async saveIssuesForProject(projectId, issueType: IssueProviderKey, data: JiraIssueState): Promise<any> {
+    return this._saveToDbWithLastActive(this._makeProjectKey(projectId, LS_ISSUE_STATE, issueType), data);
   }
 
   // TODO add correct type
-  loadIssuesForProject(projectId, issueType: IssueProviderKey): JiraIssueState {
-    return this._loadFromLs(this._makeProjectKey(projectId, LS_ISSUE_STATE, issueType));
+  async loadIssuesForProject(projectId, issueType: IssueProviderKey): Promise<JiraIssueState> {
+    return this._loadFromDb(this._makeProjectKey(projectId, LS_ISSUE_STATE, issueType));
   }
 
-  saveBookmarksForProject(projectId, bookmarkState: BookmarkState) {
-    this._saveToLsWithLastActive(this._makeProjectKey(projectId, LS_BOOKMARK_STATE), bookmarkState);
+  async saveBookmarksForProject(projectId, bookmarkState: BookmarkState) {
+    return this._saveToDbWithLastActive(this._makeProjectKey(projectId, LS_BOOKMARK_STATE), bookmarkState);
   }
 
-  loadBookmarksForProject(projectId): BookmarkState {
-    return this._loadFromLs(this._makeProjectKey(projectId, LS_BOOKMARK_STATE));
+  async loadBookmarksForProject(projectId): Promise<BookmarkState> {
+    return this._loadFromDb(this._makeProjectKey(projectId, LS_BOOKMARK_STATE));
   }
 
-  saveTaskAttachmentsForProject(projectId, attachmentState: AttachmentState) {
-    this._saveToLsWithLastActive(this._makeProjectKey(projectId, LS_TASK_ATTACHMENT_STATE), attachmentState);
+  async saveTaskAttachmentsForProject(projectId, attachmentState: AttachmentState) {
+    return this._saveToDbWithLastActive(this._makeProjectKey(projectId, LS_TASK_ATTACHMENT_STATE), attachmentState);
   }
 
-  loadTaskAttachmentsForProject(projectId): AttachmentState {
-    return this._loadFromLs(this._makeProjectKey(projectId, LS_TASK_ATTACHMENT_STATE));
+  async loadTaskAttachmentsForProject(projectId): Promise<AttachmentState> {
+    return this._loadFromDb(this._makeProjectKey(projectId, LS_TASK_ATTACHMENT_STATE));
   }
 
-  saveNotesForProject(projectId, noteState: NoteState) {
-    this._saveToLsWithLastActive(this._makeProjectKey(projectId, LS_NOTE_STATE), noteState);
+  async saveNotesForProject(projectId, noteState: NoteState) {
+    return this._saveToDbWithLastActive(this._makeProjectKey(projectId, LS_NOTE_STATE), noteState);
   }
 
-  loadNotesForProject(projectId): NoteState {
-    return this._loadFromLs(this._makeProjectKey(projectId, LS_NOTE_STATE));
+  async loadNotesForProject(projectId): Promise<NoteState> {
+    return this._loadFromDb(this._makeProjectKey(projectId, LS_NOTE_STATE));
   }
 
   // GLOBAL CONFIG
   // -------------
-  loadGlobalConfig(): GlobalConfig {
-    return this._loadFromLs(LS_GLOBAL_CFG);
+  async loadGlobalConfig(): Promise<GlobalConfig> {
+    return this._loadFromDb(LS_GLOBAL_CFG);
   }
 
-  saveGlobalConfig(globalConfig: GlobalConfig) {
-    this._saveToLsWithLastActive(LS_GLOBAL_CFG, globalConfig);
+  async saveGlobalConfig(globalConfig: GlobalConfig) {
+    return this._saveToDbWithLastActive(LS_GLOBAL_CFG, globalConfig);
   }
 
   // BACKUP AND SYNC RELATED
   // -----------------------
-  getLastActive(): string {
-    return this._loadFromLs(LS_LAST_ACTIVE);
+  async getLastActive(): Promise<string> {
+    return this._loadFromDb(LS_LAST_ACTIVE);
   }
 
-  loadBackup(): AppDataComplete {
-    return this._loadFromSessionStorage(LS_BACKUP);
+  async loadBackup(): Promise<AppDataComplete> {
+    return this._loadFromDb(LS_BACKUP);
   }
 
-  saveBackup() {
-    this._saveToSessionStorage(LS_BACKUP, this.loadComplete());
+  async saveBackup(): Promise<any> {
+    return this._saveToDbWithLastActive(LS_BACKUP, this.loadComplete());
   }
 
-  loadComplete(): AppDataComplete {
-    const crateProjectIdObj = (getDataFn: Function) => {
-      return projectIds.reduce((acc, projectId) => {
+  async loadComplete(): Promise<AppDataComplete> {
+    const crateProjectIdObj = async (getDataFn: Function) => {
+      return projectIds.reduce(async (acc, projectId) => {
         return {
           ...acc,
-          [projectId]: getDataFn(projectId)
+          [projectId]: await getDataFn(projectId)
         };
       }, {});
     };
 
-    const projectState = this.loadProjectsMeta();
+    const projectState = await this.loadProjectsMeta();
     const projectIds = projectState.ids as string[];
     return {
-      lastActiveTime: this.getLastActive(),
-      project: this.loadProjectsMeta(),
-      globalConfig: this.loadGlobalConfig(),
-      bookmark: crateProjectIdObj(this.loadBookmarksForProject.bind(this)),
-      note: crateProjectIdObj(this.loadNotesForProject.bind(this)),
-      task: crateProjectIdObj(this.loadTasksForProject.bind(this)),
-      taskArchive: crateProjectIdObj(this.loadTaskArchiveForProject.bind(this)),
-      issue: projectIds.reduce((acc, projectId) => {
+      lastActiveTime: await this.getLastActive(),
+      project: await this.loadProjectsMeta(),
+      globalConfig: await this.loadGlobalConfig(),
+      bookmark: await crateProjectIdObj(this.loadBookmarksForProject.bind(this)),
+      note: await crateProjectIdObj(this.loadNotesForProject.bind(this)),
+      task: await crateProjectIdObj(this.loadTasksForProject.bind(this)),
+      taskArchive: await crateProjectIdObj(this.loadTaskArchiveForProject.bind(this)),
+      issue: await projectIds.reduce(async (acc, projectId) => {
         return {
           ...acc,
           [projectId]: {
-            'JIRA': this.loadIssuesForProject(projectId, 'JIRA')
+            'JIRA': await this.loadIssuesForProject(projectId, 'JIRA')
           }
         };
       }, {}),
     };
   }
 
+  // TODO fix
   // TODO what is missing is a total cleanup of the existing projects and their data
-  importComplete(data: AppDataComplete) {
+  async importComplete(data: AppDataComplete) {
     console.log('IMPORT');
-
-
     console.log(data);
-
     this.saveProjectsMeta(data.project);
     this.saveGlobalConfig(data.globalConfig);
     this._saveDataForProjectIds(data.bookmark, this.saveBookmarksForProject.bind(this));
@@ -215,96 +214,14 @@ export class PersistenceService {
     return LS_PROJECT_PREFIX + projectId + '_' + subKey + (additional ? '_' + additional : '');
   }
 
-  private _checkStorage() {
-    const storage = navigator['webkitPersistentStorage'];
-    if (storage) {
-      storage.queryUsageAndQuota(
-        function (usedBytes, grantedBytes) {
-          console.log('webkitPersistentStorage: we are using ', usedBytes, ' of ', grantedBytes, 'bytes');
-        },
-        function (e) {
-          console.log('webkitPersistentStorage: Error', e);
-        }
-      );
-    }
-
-    if (navigator.storage) {
-      navigator.storage.estimate().then(
-        (value: StorageEstimate) => console.log(
-          `storage: using`, value
-        )
-      );
-    }
-  }
-
-  private _increaseStorage() {
-    if (navigator.storage && navigator.storage.persist) {
-      navigator.storage.persist().then(granted => {
-        console.log('storage ', granted);
-        // if (granted) {
-        //
-        // }
-      });
-    }
-
-    const storage = navigator['webkitPersistentStorage'];
-    if (storage) {
-      // Request Quota (only for File System API)
-      const requestedBytes = 1024 * 1024 * 200; // 200MB
-      storage.requestQuota(
-        requestedBytes, function (grantedBytes) {
-          console.log('grantedBytes', grantedBytes);
-        }, function (e) {
-          console.log('Error', e);
-        }
-      );
-    }
-  }
 
   // DATA STORAGE INTERFACE
   // ---------------------
-  private _saveToLs(key: string, data: any) {
-    try {
-      saveToLs(key, data);
-    } catch (e) {
-      console.error(e);
-      this._snackService.open({type: 'ERROR', message: 'Error while saving to local storage'});
-    }
+  private async _saveToDbWithLastActive(key: string, data: any): Promise<any> {
+    return this._databaseService.saveWithLastActive(key, data);
   }
 
-  private _saveToLsWithLastActive(key: string, data: any) {
-    try {
-      saveToLsWithLastActive(key, data);
-    } catch (e) {
-      console.error(e);
-      this._snackService.open({type: 'ERROR', message: 'Error while saving to local storage'});
-    }
-  }
-
-  private _loadFromLs(key: string) {
-    try {
-      return loadFromLs(key);
-    } catch (e) {
-      console.error(e);
-      this._snackService.open({type: 'ERROR', message: 'Error while loading from local storage'});
-    }
-  }
-
-  private _saveToSessionStorage(key: string, data: any) {
-    try {
-      saveToSessionStorage(key, data);
-    } catch (e) {
-      console.error(e);
-      this._snackService.open({type: 'ERROR', message: 'Error while saving to session storage'});
-    }
-  }
-
-  private _loadFromSessionStorage(key: string) {
-    try {
-      return loadFromSessionStorage(key);
-    } catch (e) {
-      console.error(e);
-      this._snackService.open({type: 'ERROR', message: 'Error while loading from session storage'});
-    }
+  private async _loadFromDb(key: string): Promise<any> {
+    return this._databaseService.load(key);
   }
 }

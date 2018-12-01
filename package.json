@@ -126,6 +126,7 @@
     "googleapis": "^34.0.0",
     "hammerjs": "^2.0.8",
     "jira-client-fork": "^4.2.0",
+    "localforage": "^1.7.3",
     "moment": "^2.22.2",
     "moment-duration-format": "^2.2.2",
     "ng2-dragula": "^2.1.1",
