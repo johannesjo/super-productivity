@@ -27,6 +27,7 @@ import { NoteState } from '../../note/store/note.reducer';
 import { Reminder } from '../../reminder/reminder.model';
 import { SnackService } from '../snack/snack.service';
 import { DatabaseService } from './database.service';
+import { loadFromLs, saveToLs } from './local-storage';
 
 @Injectable({
   providedIn: 'root'
@@ -133,8 +134,9 @@ export class PersistenceService {
 
   // BACKUP AND SYNC RELATED
   // -----------------------
-  async getLastActive(): Promise<string> {
-    return this._loadFromDb(LS_LAST_ACTIVE);
+  getLastActive(): string {
+    // TODO refactor to timestamp
+    return loadFromLs(LS_LAST_ACTIVE);
   }
 
   async loadBackup(): Promise<AppDataComplete> {
@@ -158,7 +160,7 @@ export class PersistenceService {
     const projectState = await this.loadProjectsMeta();
     const projectIds = projectState.ids as string[];
     return {
-      lastActiveTime: await this.getLastActive(),
+      lastActiveTime: this.getLastActive(),
       project: await this.loadProjectsMeta(),
       globalConfig: await this.loadGlobalConfig(),
       bookmark: await crateProjectIdObj(this.loadBookmarksForProject.bind(this)),
@@ -218,6 +220,8 @@ export class PersistenceService {
   // DATA STORAGE INTERFACE
   // ---------------------
   private async _saveToDbWithLastActive(key: string, data: any): Promise<any> {
+    // TODO refactor to timestamp
+    saveToLs(LS_LAST_ACTIVE, new Date().toString());
     return this._databaseService.saveWithLastActive(key, data);
   }
 

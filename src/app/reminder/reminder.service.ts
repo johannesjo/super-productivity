@@ -28,9 +28,9 @@ export class ReminderService {
   ) {
   }
 
-  init() {
+  async init() {
     if ('Worker' in window) {
-      this._reminders = this._loadFromLs();
+      this._reminders = await this._loadFromLs();
       this._w = new Worker(WORKER_PATH);
       // this._w.onerror = this._handleError.bind(this);
       this._w.addEventListener('message', this._onReminderActivated.bind(this));
@@ -76,9 +76,6 @@ export class ReminderService {
     }
   }
 
-  markAsChecked(reminderId: string) {
-  }
-
   private _onReminderActivated(msg: MessageEvent) {
     const reminder = msg.data as Reminder;
     // TODO get related model here
@@ -92,8 +89,8 @@ export class ReminderService {
     });
   }
 
-  private _loadFromLs(): Reminder[] {
-    return this._persistenceService.loadReminders() || [];
+  private async _loadFromLs(): Promise<Reminder[]> {
+    return await this._persistenceService.loadReminders() || [];
   }
 
   private _saveModel(reminders: Reminder[]) {

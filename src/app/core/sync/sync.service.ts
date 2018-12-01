@@ -31,34 +31,36 @@ export class SyncService {
     return new Date(this._persistenceService.getLastActive());
   }
 
-  getCompleteSyncData(): AppDataComplete {
-    return this._persistenceService.loadComplete();
+  async getCompleteSyncData(): Promise<AppDataComplete> {
+    return await this._persistenceService.loadComplete();
   }
 
-  loadCompleteSyncData(data: AppDataComplete) {
+  async loadCompleteSyncData(data: AppDataComplete) {
     this._saveBackup();
     this._snackService.open({message: 'Importing data', icon: 'cloud_download'});
 
     if (this._checkData(data)) {
+      const curId = data.project.currentId;
+
       // save data to local storage
-      try {
-        this._persistenceService.importComplete(data);
-        const curId = data.project.currentId;
+      return await Promise.all([
+        this._persistenceService.importComplete(data),
         // reload view model from ls
-        this._configService.load();
-        this._projectService.load();
-        this._taskService.loadStateForProject(curId);
-        this._bookmarkService.loadStateForProject(curId);
-        this._noteService.loadStateForProject(curId);
-        this._jiraIssueService.loadStateForProject(curId);
-        this._snackService.open({type: 'SUCCESS', message: 'Data imported'});
-
-      } catch (e) {
-        this._snackService.open({type: 'ERROR', message: 'Something went wrong while importing the data. Falling back to local backup'});
-        console.error(e);
-        this._loadBackup();
-      }
-
+        this._configService.load(),
+        this._projectService.load(),
+        this._taskService.loadStateForProject(curId),
+        this._bookmarkService.loadStateForProject(curId),
+        this._noteService.loadStateForProject(curId),
+        this._jiraIssueService.loadStateForProject(curId),
+      ])
+        .then(() => {
+          this._snackService.open({type: 'SUCCESS', message: 'Data imported'});
+        })
+        .catch((e) => {
+          this._snackService.open({type: 'ERROR', message: 'Something went wrong while importing the data. Falling back to local backup'});
+          console.error(e);
+          this._loadBackup();
+        });
     } else {
       this._snackService.open({type: 'ERROR', message: 'Error while syncing. Invalid data'});
       console.error(data);
@@ -76,12 +78,12 @@ export class SyncService {
       ;
   }
 
-  private _saveBackup() {
-    this._persistenceService.saveBackup();
+  private async _saveBackup(): Promise<any> {
+    return await this._persistenceService.saveBackup();
   }
 
-  private _loadBackup() {
-    const data = this._persistenceService.loadBackup();
-    this.loadCompleteSyncData(data);
+  private async _loadBackup(): Promise<any> {
+    const data = await this._persistenceService.loadBackup();
+    return this.loadCompleteSyncData(data);
   }
 }

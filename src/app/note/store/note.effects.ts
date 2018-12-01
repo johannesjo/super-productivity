@@ -46,7 +46,7 @@ export class NoteEffects {
   ) {
   }
 
-  private _saveToLs([action, currentProjectId, noteState]) {
+  private async _saveToLs([action, currentProjectId, noteState]) {
     if (currentProjectId) {
       this._persistenceService.saveNotesForProject(currentProjectId, noteState);
     } else {

@@ -23,8 +23,8 @@ export class ConfigService {
     this.cfg$.subscribe((cfg) => this.cfg = cfg);
   }
 
-  load() {
-    const cfg = this._persistenceService.loadGlobalConfig();
+  async load() {
+    const cfg = await this._persistenceService.loadGlobalConfig();
     if (cfg && Object.keys(cfg).length > 0) {
       this.loadState(cfg);
     } else {

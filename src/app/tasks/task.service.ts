@@ -138,8 +138,8 @@ export class TaskService {
     this._store.dispatch(new SetCurrentTask(id));
   }
 
-  loadStateForProject(projectId) {
-    const lsTaskState = this._persistenceService.loadTasksForProject(projectId);
+  async loadStateForProject(projectId) {
+    const lsTaskState = await this._persistenceService.loadTasksForProject(projectId);
     this.loadState(lsTaskState || initialTaskState);
   }
 

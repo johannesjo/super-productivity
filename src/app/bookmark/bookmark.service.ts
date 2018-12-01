@@ -32,8 +32,8 @@ export class BookmarkService {
   ) {
   }
 
-  loadStateForProject(projectId: string) {
-    const lsBookmarkState = this._persistenceService.loadBookmarksForProject(projectId);
+  async loadStateForProject(projectId: string) {
+    const lsBookmarkState = await this._persistenceService.loadBookmarksForProject(projectId);
     this.loadState(lsBookmarkState || initialBookmarkState);
   }
 

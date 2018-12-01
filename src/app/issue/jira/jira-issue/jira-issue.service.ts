@@ -19,8 +19,8 @@ export class JiraIssueService {
 
   // META
   // ----
-  loadStateForProject(projectId: string) {
-    const lsJiraIssueState = this._persistenceService.loadIssuesForProject(projectId, 'JIRA');
+  async loadStateForProject(projectId: string) {
+    const lsJiraIssueState = await this._persistenceService.loadIssuesForProject(projectId, 'JIRA');
     if (lsJiraIssueState) {
       this.loadState(lsJiraIssueState);
     }

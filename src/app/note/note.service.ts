@@ -49,8 +49,8 @@ export class NoteService {
     this._store$.dispatch(new HideNotes());
   }
 
-  public loadStateForProject(projectId) {
-    const notes = this._persistenceService.loadNotesForProject(projectId) || initialNoteState;
+  public async loadStateForProject(projectId) {
+    const notes = await this._persistenceService.loadNotesForProject(projectId) || initialNoteState;
     this.loadState(notes);
   }
 

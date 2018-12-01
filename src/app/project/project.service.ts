@@ -40,8 +40,8 @@ export class ProjectService {
     this.currentId$.subscribe((id) => this.currentId = id);
   }
 
-  load() {
-    const projectState_ = this._persistenceService.loadProjectsMeta() || initialProjectState;
+  async load() {
+    const projectState_ = await this._persistenceService.loadProjectsMeta() || initialProjectState;
     const projectState = this._extendProjectDefaults(projectState_);
 
     if (projectState) {
