@@ -10,14 +10,20 @@ import { JiraCfg } from './jira';
 import { ElectronService } from 'ngx-electron';
 import { IPC_JIRA_CB_EVENT, IPC_JIRA_MAKE_REQUEST_EVENT } from '../../../ipc-events.const';
 import { SnackService } from '../../core/snack/snack.service';
+import { IS_ELECTRON } from '../../app.constants';
+import { loadFromSessionStorage, saveToSessionStorage } from '../../core/persistence/local-storage';
+import { combineLatest } from 'rxjs';
+
+const BLOCK_ACCESS_KEY = 'SUP_BLOCK_JIRA_ACCESS';
 
 @Injectable({
   providedIn: 'root'
 })
 export class JiraApiService {
   private _requestsLog = {};
-  private _isPreventNextRequestAfterFailedAuth = false;
+  private _isBlockAccess = loadFromSessionStorage(BLOCK_ACCESS_KEY);
   private _isExtension = false;
+  private _isHasCheckedConnection = false;
   private _cfg: JiraCfg;
 
   constructor(
@@ -26,7 +32,7 @@ export class JiraApiService {
     private _electronService: ElectronService,
     private _snackService: SnackService,
   ) {
-    this._projectService.currentJiraCfg$.subscribe((cfg) => {
+    this._projectService.currentJiraCfg$.subscribe((cfg: JiraCfg) => {
       this._cfg = cfg;
     });
 
@@ -44,6 +50,24 @@ export class JiraApiService {
           this._handleResponse(data);
         });
       });
+
+    // fire a test request once there is enough config
+    const checkConnectionSub = combineLatest(
+      this._chromeExtensionInterface.isReady$,
+      this._projectService.currentJiraCfg$,
+    ).subscribe(([isExtensionReady, cfg]) => {
+      if (!this._isHasCheckedConnection && this._isMinimalSettings(cfg)) {
+        this.getCurrentUser()
+          .then(() => {
+            this._unblockAccess();
+            checkConnectionSub.unsubscribe();
+          })
+          .catch(() => {
+            this._blockAccess();
+            checkConnectionSub.unsubscribe();
+          });
+      }
+    });
   }
 
 
@@ -148,7 +172,8 @@ export class JiraApiService {
 
   // --------
   private _isMinimalSettings(settings) {
-    return settings && settings.host && settings.userName && settings.password;
+    return settings && settings.host && settings.userName && settings.password
+      && (IS_ELECTRON || this._isExtension);
   }
 
   // TODO refactor data madness of request and add types for everything
@@ -156,6 +181,11 @@ export class JiraApiService {
     if (!this._isMinimalSettings(cfg)) {
       console.error('Not enough Jira settings. This should not happen!!!');
       return Promise.reject(new Error('Insufficient Settings for Jira'));
+    }
+
+    if (this._isBlockAccess) {
+      console.error('Blocked Jira Access to prevent being shut out');
+      return Promise.reject(new Error('Blocked access to prevent being shut out'));
     }
 
     // assign uuid to request to know which responsive belongs to which promise
@@ -223,11 +253,14 @@ export class JiraApiService {
 
         const errorTxt = (res && res.error && (typeof res.error === 'string' && res.error) || res.error.name);
         console.error(errorTxt);
-
-        this._snackService.open({type: 'ERROR', message: 'Jira request failed: ' + errorTxt});
         currentRequest.reject(res);
-        if (res.error.statusCode && res.error.statusCode === 401) {
-          this._isPreventNextRequestAfterFailedAuth = true;
+        this._snackService.open({type: 'ERROR', message: 'Jira request failed: ' + errorTxt});
+
+        if (
+          (res.error.statusCode && res.error.statusCode === 401)
+          || (res.error && res.error === 401)
+        ) {
+          this._blockAccess();
         }
 
       } else {
@@ -244,5 +277,15 @@ export class JiraApiService {
     } else {
       console.warn('Jira: Response Request ID not existing');
     }
+  }
+
+  private _blockAccess() {
+    this._isBlockAccess = true;
+    saveToSessionStorage(BLOCK_ACCESS_KEY, true);
+  }
+
+  private _unblockAccess() {
+    this._isBlockAccess = false;
+    saveToSessionStorage(BLOCK_ACCESS_KEY, false);
   }
 }

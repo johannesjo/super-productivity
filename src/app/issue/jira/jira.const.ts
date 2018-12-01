@@ -4,6 +4,7 @@ import { FormlyFieldConfig } from '@ngx-formly/core';
 
 export const DEFAULT_JIRA_CFG: JiraCfg = {
   isEnabled: true,
+  _isBlockAccess: false,
   host: null,
   userName: null,
   password: null,

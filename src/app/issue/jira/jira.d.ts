@@ -8,6 +8,7 @@ export interface JiraTransitionOptions {
 
 export interface JiraCfg {
   isEnabled: boolean;
+  _isBlockAccess: boolean;
   host: string;
   userName: string;
   password?: string;
