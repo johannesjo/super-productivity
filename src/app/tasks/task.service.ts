@@ -1,7 +1,7 @@
 import shortid from 'shortid';
 import { debounceTime, distinctUntilChanged, map, take, withLatestFrom } from 'rxjs/operators';
 import { Injectable } from '@angular/core';
-import { combineLatest, Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 import { DropListModelSource, Task, TaskWithSubTasks } from './task.model';
 import { select, Store } from '@ngrx/store';
 import {
@@ -80,14 +80,17 @@ export class TaskService {
   totalTimeWorkedOnTodaysTasks$: Observable<any> = this._store.pipe(select(selectTotalTimeWorkedOnTodaysTasks), distinctUntilChanged());
 
   // TODO could be more efficient than using combine latest
-  workingToday$: Observable<any> = combineLatest(this.todaysTasks$, this._timeTrackingService.tick$).pipe(
-    map(([tasks, tick]) => tasks && tasks.length && tasks.reduce((acc, task) => {
-        return acc + (
-          (task.timeSpentOnDay && +task.timeSpentOnDay[tick.date])
-            ? +task.timeSpentOnDay[tick.date] : 0
-        );
-      }, 0
-    )),
+  workingToday$: Observable<any> = this.todaysTasks$.pipe(
+    map((tasks) => {
+      const date = getWorklogStr();
+      return tasks && tasks.length && tasks.reduce((acc, task) => {
+          return acc + (
+            (task.timeSpentOnDay && +task.timeSpentOnDay[date])
+              ? +task.timeSpentOnDay[date] : 0
+          );
+        }, 0
+      );
+    }),
     // throttleTime(50)
   );
   missingIssuesForTasks$ = this._store.pipe(
