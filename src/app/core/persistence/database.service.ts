@@ -11,7 +11,6 @@ export class DatabaseService {
     private _snackService: SnackService,
   ) {
     this._init();
-    this._checkStorage();
   }
 
   async load(key: string): Promise<any> {
@@ -48,26 +47,26 @@ export class DatabaseService {
     });
   }
 
-  private _checkStorage() {
-    const storage = navigator['webkitPersistentStorage'];
-    if (storage) {
-      storage.queryUsageAndQuota(
-        function (usedBytes, grantedBytes) {
-          console.log('webkitPersistentStorage: we are using ', usedBytes, ' of ', grantedBytes, 'bytes');
-          console.log('webkitPersistentStorage: storage left mb', (grantedBytes - usedBytes) / 1024 / 1024);
-        },
-        function (e) {
-          console.log('webkitPersistentStorage: Error', e);
-        }
-      );
-    }
-
-    if (navigator.storage) {
-      navigator.storage.estimate().then(
-        (value: StorageEstimate) => console.log(
-          `storage: using`, value
-        )
-      );
-    }
-  }
+  // private _checkStorage() {
+  //   const storage = navigator['webkitPersistentStorage'];
+  //   if (storage) {
+  //     storage.queryUsageAndQuota(
+  //       function (usedBytes, grantedBytes) {
+  //         console.log('webkitPersistentStorage: we are using ', usedBytes, ' of ', grantedBytes, 'bytes');
+  //         console.log('webkitPersistentStorage: storage left mb', (grantedBytes - usedBytes) / 1024 / 1024);
+  //       },
+  //       function (e) {
+  //         console.log('webkitPersistentStorage: Error', e);
+  //       }
+  //     );
+  //   }
+  //
+  //   if (navigator.storage) {
+  //     navigator.storage.estimate().then(
+  //       (value: StorageEstimate) => console.log(
+  //         `storage: using`, value
+  //       )
+  //     );
+  //   }
+  // }
 }
