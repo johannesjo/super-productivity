@@ -14,6 +14,7 @@ const NOTE_TMP_STORAGE_KEY = 'SP_NOTE_TMP_EDIT';
 export class DialogAddNoteComponent {
   noteContent: string;
   reminderDate: string;
+  isSubmitted = false;
 
   constructor(
     private _matDialogRef: MatDialogRef<DialogAddNoteComponent>,
@@ -34,11 +35,14 @@ export class DialogAddNoteComponent {
   submit() {
     const remindAt = this.reminderDate && new Date(this.reminderDate).getTime();
 
-    this._noteService.add(
-      {content: this.noteContent},
-      remindAt,
-      true,
-    );
+    if (!this.isSubmitted) {
+      this._noteService.add(
+        {content: this.noteContent},
+        remindAt,
+        true,
+      );
+    }
+    this.isSubmitted = true;
     this._clearSessionStorage();
     this.close();
   }
