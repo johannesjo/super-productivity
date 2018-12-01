@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { PersistenceService } from '../../../core/persistence/persistence.service';
 import { ProjectService } from '../../../project/project.service';
 import { expandFadeAnimation } from '../../../ui/animations/expand.ani';
@@ -21,7 +21,8 @@ export class WorklogComponent implements OnInit {
   constructor(
     private readonly _persistenceService: PersistenceService,
     private readonly _projectService: ProjectService,
-    private readonly _matDialog: MatDialog
+    private readonly _matDialog: MatDialog,
+    private readonly _cd: ChangeDetectorRef,
   ) {
   }
 
@@ -35,6 +36,7 @@ export class WorklogComponent implements OnInit {
       const {worklog, totalTimeSpent} = mapArchiveToWorklog(completeState);
       this.worklog = worklog;
       this.totalTimeSpent = totalTimeSpent;
+      this._cd.detectChanges();
     }
   }
 
