@@ -1,5 +1,5 @@
 import { animate, animateChild, group, query, style, transition, trigger } from '@angular/animations';
-import { ANI_ENTER_TIMING, ANI_LEAVE_TIMING } from './animation.const';
+import { ANI_ENTER_TIMING } from './animation.const';
 
 export const warpRouteAnimation =
   trigger('warpRoute', [
@@ -29,20 +29,24 @@ export const warpRouteAnimation =
     // ])
 
     transition('* <=> *', [
+
+      /* 1 */ query(':enter, :leave', style({position: 'absolute', width: '100%'})
+        , {optional: true}),
       group([
         query(
-          ':enter',
+          ':leave',
           [
-            style({opacity: 0, transform: 'scale(1.7)'}),
-            animate(ANI_ENTER_TIMING, style({opacity: 1, transform: 'scale(1)'})),
+            style({opacity: 1, transform: 'scale(1)'}),
+            animate(ANI_ENTER_TIMING, style({opacity: 0, transform: 'scale(0.5)'})),
             animateChild()
           ],
           {optional: true},
         ),
         query(
-          ':leave',
+          ':enter',
           [
-            animate(ANI_LEAVE_TIMING, style({opacity: 0})),
+            style({opacity: 0, transform: 'scale(1.7)'}),
+            animate(ANI_ENTER_TIMING, style({opacity: 1, transform: 'scale(1)'})),
             animateChild()
           ],
           {optional: true},

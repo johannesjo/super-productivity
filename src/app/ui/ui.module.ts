@@ -55,6 +55,7 @@ import { InputDurationFormlyComponent } from './duration/input-duration-formly/i
 import { EnlargeImgDirective } from './enlarge-img/enlarge-img.directive';
 import { DragulaModule } from 'ng2-dragula';
 import { MsToClockStringPipe } from './duration/ms-to-clock-string.pipe';
+import { DatetimeInputComponent } from './datetime-input/datetime-input.component';
 
 @NgModule({
   imports: [
@@ -127,6 +128,7 @@ import { MsToClockStringPipe } from './duration/ms-to-clock-string.pipe';
     SimpleDownloadDirective,
     DialogConfirmComponent,
     EnlargeImgDirective,
+    DatetimeInputComponent,
   ],
   entryComponents: [
     DialogConfirmComponent,
