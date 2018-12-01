@@ -5,6 +5,8 @@
     <inline-markdown #markdownEl
                      (changed)="updateContent($event)"
                      [isLock]="note.isLock"
+                     (focus)="isFocus=true"
+                     (blur)="isFocus=false"
                      [model]="note.content"></inline-markdown>
   </div>
 
