@@ -14,7 +14,7 @@ import {
   LS_TASK_STATE
 } from './ls-keys.const';
 import { GlobalConfig } from '../config/config.model';
-import { loadFromLs, saveToLsWithLastActive } from './local-storage';
+import { loadFromLs, loadFromSessionStorage, saveToLsWithLastActive, saveToSessionStorage } from './local-storage';
 import { IssueProviderKey } from '../../issue/issue';
 import { ProjectState } from '../../project/store/project.reducer';
 import { TaskState } from '../../tasks/store/task.reducer';
@@ -136,11 +136,11 @@ export class PersistenceService {
   }
 
   loadBackup(): AppDataComplete {
-    return loadFromLs(LS_BACKUP);
+    return loadFromSessionStorage(LS_BACKUP);
   }
 
   saveBackup() {
-    saveToLsWithLastActive(LS_BACKUP, this.loadComplete());
+    saveToSessionStorage(LS_BACKUP, this.loadComplete());
   }
 
   loadComplete(): AppDataComplete {

@@ -17,3 +17,16 @@ export const saveToLsWithLastActive = (key, state) => {
   saveToLs(key, state);
   saveToLs(LS_LAST_ACTIVE, new Date().toString());
 };
+
+export const loadFromSessionStorage = (key) => {
+  const serializedState = sessionStorage.getItem(key);
+  if (serializedState === null) {
+    return undefined;
+  }
+  return JSON.parse(serializedState);
+};
+
+export const saveToSessionStorage = (key, state) => {
+  const serializedState = JSON.stringify(state);
+  sessionStorage.setItem(key, serializedState);
+};
