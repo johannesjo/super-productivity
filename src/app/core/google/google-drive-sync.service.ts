@@ -351,8 +351,8 @@ If not please change the Sync file name.`,
     });
   }
 
-  private _save(): Promise<any> {
-    const completeData = this._getLocalAppData();
+  private async _save(): Promise<any> {
+    const completeData = await this._getLocalAppData();
 
     return this._googleApiService.saveFile(completeData, {
       title: this.config.syncFileName,
