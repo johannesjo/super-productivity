@@ -103,16 +103,13 @@ export class WorkViewPageComponent implements OnInit, OnDestroy {
     this._layoutService.showAddTaskBar();
   }
 
-  // TODO not pretty
   startWork() {
-    console.log('START');
-
     this.isPlanYourDay = false;
-    this._subs.add(this.taskService.startableTasks$
-      .pipe(take(1))
-      .subscribe(tasks => {
-        this.taskService.setCurrentId(tasks[0] && tasks[0].id);
-      }));
+    // this._subs.add(this.taskService.startableTasks$
+    //   .pipe(take(1))
+    //   .subscribe(tasks => {
+    //     this.taskService.setCurrentId(tasks[0] && tasks[0].id);
+    //   }));
   }
 
   private _triggerTaskSwitchListAnimation() {
