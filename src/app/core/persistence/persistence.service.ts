@@ -14,7 +14,7 @@ import {
   LS_TASK_STATE
 } from './ls-keys.const';
 import { GlobalConfig } from '../config/config.model';
-import { loadFromLs, loadFromSessionStorage, saveToLsWithLastActive, saveToSessionStorage } from './local-storage';
+import { loadFromLs, loadFromSessionStorage, saveToLs, saveToLsWithLastActive, saveToSessionStorage } from './local-storage';
 import { IssueProviderKey } from '../../issue/issue';
 import { ProjectState } from '../../project/store/project.reducer';
 import { TaskState } from '../../tasks/store/task.reducer';
@@ -26,12 +26,13 @@ import { BookmarkState } from '../../bookmark/store/bookmark.reducer';
 import { AttachmentState } from '../../tasks/attachment/store/attachment.reducer';
 import { NoteState } from '../../note/store/note.reducer';
 import { Reminder } from '../../reminder/reminder.model';
+import { SnackService } from '../snack/snack.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class PersistenceService {
-  constructor() {
+  constructor(private _snackService: SnackService) {
     this._checkStorage();
     this._increaseStorage();
   }
@@ -76,71 +77,71 @@ export class PersistenceService {
           ...tasksToArchive.entities
         }
       };
-      saveToLsWithLastActive(lsKey, mergedEntities);
+      this._saveToLsWithLastActive(lsKey, mergedEntities);
     } else {
-      saveToLsWithLastActive(lsKey, tasksToArchive);
+      this._saveToLsWithLastActive(lsKey, tasksToArchive);
     }
   }
 
   loadTaskArchiveForProject(projectId: string): EntityState<Task> {
-    return loadFromLs(this._makeProjectKey(projectId, LS_TASK_ARCHIVE));
+    return this._loadFromLs(this._makeProjectKey(projectId, LS_TASK_ARCHIVE));
   }
 
   saveIssuesForProject(projectId, issueType: IssueProviderKey, data: JiraIssueState) {
-    saveToLsWithLastActive(this._makeProjectKey(projectId, LS_ISSUE_STATE, issueType), data);
+    this._saveToLsWithLastActive(this._makeProjectKey(projectId, LS_ISSUE_STATE, issueType), data);
   }
 
   // TODO add correct type
   loadIssuesForProject(projectId, issueType: IssueProviderKey): JiraIssueState {
-    return loadFromLs(this._makeProjectKey(projectId, LS_ISSUE_STATE, issueType));
+    return this._loadFromLs(this._makeProjectKey(projectId, LS_ISSUE_STATE, issueType));
   }
 
   saveBookmarksForProject(projectId, bookmarkState: BookmarkState) {
-    saveToLsWithLastActive(this._makeProjectKey(projectId, LS_BOOKMARK_STATE), bookmarkState);
+    this._saveToLsWithLastActive(this._makeProjectKey(projectId, LS_BOOKMARK_STATE), bookmarkState);
   }
 
   loadBookmarksForProject(projectId): BookmarkState {
-    return loadFromLs(this._makeProjectKey(projectId, LS_BOOKMARK_STATE));
+    return this._loadFromLs(this._makeProjectKey(projectId, LS_BOOKMARK_STATE));
   }
 
   saveTaskAttachmentsForProject(projectId, attachmentState: AttachmentState) {
-    saveToLsWithLastActive(this._makeProjectKey(projectId, LS_TASK_ATTACHMENT_STATE), attachmentState);
+    this._saveToLsWithLastActive(this._makeProjectKey(projectId, LS_TASK_ATTACHMENT_STATE), attachmentState);
   }
 
   loadTaskAttachmentsForProject(projectId): AttachmentState {
-    return loadFromLs(this._makeProjectKey(projectId, LS_TASK_ATTACHMENT_STATE));
+    return this._loadFromLs(this._makeProjectKey(projectId, LS_TASK_ATTACHMENT_STATE));
   }
 
   saveNotesForProject(projectId, noteState: NoteState) {
-    saveToLsWithLastActive(this._makeProjectKey(projectId, LS_NOTE_STATE), noteState);
+    this._saveToLsWithLastActive(this._makeProjectKey(projectId, LS_NOTE_STATE), noteState);
   }
 
   loadNotesForProject(projectId): NoteState {
-    return loadFromLs(this._makeProjectKey(projectId, LS_NOTE_STATE));
+    return this._loadFromLs(this._makeProjectKey(projectId, LS_NOTE_STATE));
   }
 
   // GLOBAL CONFIG
   // -------------
   loadGlobalConfig(): GlobalConfig {
-    return loadFromLs(LS_GLOBAL_CFG);
+    return this._loadFromLs(LS_GLOBAL_CFG);
   }
 
   saveGlobalConfig(globalConfig: GlobalConfig) {
-    saveToLsWithLastActive(LS_GLOBAL_CFG, globalConfig);
+    this._saveToLsWithLastActive(LS_GLOBAL_CFG, globalConfig);
   }
 
   // BACKUP AND SYNC RELATED
   // -----------------------
   getLastActive(): string {
-    return loadFromLs(LS_LAST_ACTIVE);
+    return this._loadFromLs(LS_LAST_ACTIVE);
   }
 
   loadBackup(): AppDataComplete {
-    return loadFromSessionStorage(LS_BACKUP);
+    return this._loadFromSessionStorage(LS_BACKUP);
   }
 
   saveBackup() {
-    saveToSessionStorage(LS_BACKUP, this.loadComplete());
+    this._saveToSessionStorage(LS_BACKUP, this.loadComplete());
   }
 
   loadComplete(): AppDataComplete {
@@ -195,6 +196,7 @@ export class PersistenceService {
     });
   }
 
+
   private _saveDataForProjectIds(data: any, saveDataFn: Function) {
     console.log(data, saveDataFn);
     console.log(data);
@@ -236,13 +238,14 @@ export class PersistenceService {
   }
 
   private _increaseStorage() {
-    if (navigator.storage && navigator.storage.persist)
+    if (navigator.storage && navigator.storage.persist) {
       navigator.storage.persist().then(granted => {
         console.log('storage ', granted);
         // if (granted) {
         //
         // }
       });
+    }
 
     const storage = navigator['webkitPersistentStorage'];
     if (storage) {
@@ -255,6 +258,53 @@ export class PersistenceService {
           console.log('Error', e);
         }
       );
+    }
+  }
+
+  // DATA STORAGE INTERFACE
+  // ---------------------
+  private _saveToLs(key: string, data: any) {
+    try {
+      saveToLs(key, data);
+    } catch (e) {
+      console.error(e);
+      this._snackService.open({type: 'ERROR', message: 'Error while saving to local storage'});
+    }
+  }
+
+  private _saveToLsWithLastActive(key: string, data: any) {
+    try {
+      saveToLsWithLastActive(key, data);
+    } catch (e) {
+      console.error(e);
+      this._snackService.open({type: 'ERROR', message: 'Error while saving to local storage'});
+    }
+  }
+
+  private _loadFromLs(key: string) {
+    try {
+      return loadFromLs(key);
+    } catch (e) {
+      console.error(e);
+      this._snackService.open({type: 'ERROR', message: 'Error while loading from local storage'});
+    }
+  }
+
+  private _saveToSessionStorage(key: string, data: any) {
+    try {
+      saveToSessionStorage(key, data);
+    } catch (e) {
+      console.error(e);
+      this._snackService.open({type: 'ERROR', message: 'Error while saving to session storage'});
+    }
+  }
+
+  private _loadFromSessionStorage(key: string) {
+    try {
+      return loadFromSessionStorage(key);
+    } catch (e) {
+      console.error(e);
+      this._snackService.open({type: 'ERROR', message: 'Error while loading from session storage'});
     }
   }
 }
