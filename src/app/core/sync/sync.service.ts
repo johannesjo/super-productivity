@@ -8,6 +8,7 @@ import { TaskService } from '../../tasks/task.service';
 import { BookmarkService } from '../../bookmark/bookmark.service';
 import { NoteService } from '../../note/note.service';
 import { JiraIssueService } from '../../issue/jira/jira-issue/jira-issue.service';
+import { AttachmentService } from '../../tasks/attachment/attachment.service';
 
 // TODO some of this can be done in a background script
 
@@ -21,6 +22,7 @@ export class SyncService {
     private _projectService: ProjectService,
     private _configService: ConfigService,
     private _taskService: TaskService,
+    private _attachmentService: AttachmentService,
     private _bookmarkService: BookmarkService,
     private _jiraIssueService: JiraIssueService,
     private _noteService: NoteService,
@@ -54,6 +56,7 @@ export class SyncService {
           this._bookmarkService.loadStateForProject(curId),
           this._noteService.loadStateForProject(curId),
           this._jiraIssueService.loadStateForProject(curId),
+          this._attachmentService.loadStateForProject(curId),
         ]);
         this._snackService.open({type: 'SUCCESS', message: 'Data imported'});
 
@@ -72,6 +75,9 @@ export class SyncService {
     return typeof data === 'object'
       && typeof data.task === 'object'
       && typeof data.taskArchive === 'object'
+      && typeof data.note === 'object'
+      && typeof data.bookmark === 'object'
+      // && typeof data.taskAttachment === 'object'
       && typeof data.project === 'object'
       && typeof data.globalConfig === 'object'
       && typeof data.issue === 'object'

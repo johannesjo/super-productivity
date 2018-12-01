@@ -25,6 +25,9 @@ export interface AppDataComplete {
   taskArchive?: {
     [key: string]: EntityState<Task>;
   };
+  taskAttachment?: {
+    [key: string]: EntityState<Task>;
+  };
   issue?: {
     [key: string]: IssueEntityMap;
   };

@@ -169,6 +169,7 @@ export class PersistenceService {
       note: await crateProjectIdObj(this.loadNotesForProject.bind(this)),
       task: await crateProjectIdObj(this.loadTasksForProject.bind(this)),
       taskArchive: await crateProjectIdObj(this.loadTaskArchiveForProject.bind(this)),
+      taskAttachment: await crateProjectIdObj(this.loadTaskAttachmentsForProject.bind(this)),
       issue: await projectIds.reduce(async (acc, projectId) => {
         return {
           ...acc,
@@ -201,6 +202,7 @@ export class PersistenceService {
       this._saveForProjectIds(data.note, this.saveNotesForProject.bind(this), true),
       this._saveForProjectIds(data.task, this.saveTasksForProject.bind(this), true),
       this._saveForProjectIds(data.taskArchive, this.saveToTaskArchiveForProject.bind(this), true),
+      this._saveForProjectIds(data.taskAttachment, this.saveTaskAttachmentsForProject.bind(this), true),
     ])
       .then(() => {
         this._isBlockSaving = false;
