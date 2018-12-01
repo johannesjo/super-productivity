@@ -49,17 +49,14 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
     private _electronService: ElectronService,
     private _cd: ChangeDetectorRef,
   ) {
+    this.resizeParsedToFit();
   }
 
   ngOnInit() {
     if (this.isLock) {
       this.toggleShowEdit();
     } else {
-
       this.resizeParsedToFit();
-      setTimeout(() => {
-        this.resizeParsedToFit();
-      });
     }
     if (IS_ELECTRON) {
       this._makeLinksWorkForElectron();
