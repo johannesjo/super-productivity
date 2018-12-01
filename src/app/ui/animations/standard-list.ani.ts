@@ -1,7 +1,7 @@
 import { animate, keyframes, query, stagger, style, transition, trigger } from '@angular/animations';
 import { ANI_ENTER_TIMING, ANI_LEAVE_TIMING } from './animation.const';
 
-export const standardListAnimation = trigger('standardListAnimation', [
+export const standardListAnimation = trigger('standardList', [
   transition('* => *', [
     query(':enter', style({opacity: 0, height: 0}), {optional: true}),
 

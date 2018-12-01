@@ -1,4 +1,5 @@
-<ul class="attachments">
+<ul class="attachments"
+    [@standardList]="attachments?.length">
   <li class="attachment"
       *ngFor="let attachment of attachments"
       draggable="false">

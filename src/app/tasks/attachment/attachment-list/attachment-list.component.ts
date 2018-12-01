@@ -3,12 +3,14 @@ import { Attachment } from '../attachment.model';
 import { AttachmentService } from '../attachment.service';
 import { MatDialog } from '@angular/material';
 import { DialogEditAttachmentComponent } from '../dialog-edit-attachment/dialog-edit-attachment.component';
+import { standardListAnimation } from '../../../ui/animations/standard-list.ani';
 
 @Component({
   selector: 'attachment-list',
   templateUrl: './attachment-list.component.html',
   styleUrls: ['./attachment-list.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  animations: [standardListAnimation]
 })
 export class AttachmentListComponent implements OnInit {
   @Input() attachments: Attachment[];

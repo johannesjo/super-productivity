@@ -14,7 +14,7 @@
     <!--</button>-->
   </header>
   <div class="notes"
-       [@standardListAnimation]="(noteService.notes$|async)?.length"
+       [@standardList]="(noteService.notes$|async)?.length"
        [dragulaModel]="noteService.notes$|async"
        dragula="NOTES">
     <note *ngFor="let note of (noteService.notes$|async); let i = index;"
