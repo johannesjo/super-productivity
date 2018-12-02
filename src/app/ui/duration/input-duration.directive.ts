@@ -1,4 +1,4 @@
-import { AfterViewChecked, Attribute, Directive, ElementRef, forwardRef, HostListener, Renderer2 } from '@angular/core';
+import { AfterViewChecked, Attribute, Directive, ElementRef, forwardRef, HostListener, Input, Renderer2 } from '@angular/core';
 import {
   AbstractControl,
   ControlValueAccessor,
@@ -53,6 +53,13 @@ export class InputDurationDirective<D> implements ControlValueAccessor, Validato
 
   private _value;
 
+  // TODO all around dirty
+  @Input() set ngModel(msVal) {
+    if (msVal) {
+      this.writeValue(msVal);
+    }
+  }
+
   constructor(@Attribute('inputDuration') public inputDuration,
               private _elementRef: ElementRef,
               private _stringToMs: StringToMsPipe,
@@ -72,8 +79,6 @@ export class InputDurationDirective<D> implements ControlValueAccessor, Validato
   }
 
   set value(value) {
-    // console.log('SET', value);
-
     if (value !== this._value) {
       this._value = value;
       this._onChangeCallback(this._value);
@@ -119,6 +124,12 @@ export class InputDurationDirective<D> implements ControlValueAccessor, Validato
 
 
   private _parseValidatorFn(): ValidationErrors | null {
+    // TODO maximum dirty hackyness, but works for now :(
+    if (!this._value) {
+      const msVal = this._stringToMs.transform(this._elementRef.nativeElement.value);
+      this._value = this._msToString.transform(msVal, false, true);
+    }
+
     return this._value
       ? null
       : {'inputDurationParse': {'text': this._elementRef.nativeElement.value}};
