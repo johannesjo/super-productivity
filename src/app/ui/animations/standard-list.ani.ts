@@ -14,12 +14,12 @@ export const standardListAnimation = trigger('standardList', [
     ),
 
     query(
-      ':leave', [
-        style({transform: 'scale(1)', opacity: 1, height: '*'}),
-        animate(ANI_LEAVE_TIMING, style({transform: 'scale(0)', height: 0}))
-      ],
-      {optional: true},
-    ),
+      ':leave', stagger('100ms', [
+          style({transform: 'scale(1)', opacity: 1, height: '*'}),
+          animate(ANI_LEAVE_TIMING, style({transform: 'scale(0)', height: 0}))
+        ],
+      ), {optional: true}),
+
     query('.gu-transit', style({
         display: 'none',
         opacity: 0,
