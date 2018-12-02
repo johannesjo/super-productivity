@@ -212,7 +212,7 @@ export class GoogleApiService {
       return Promise.reject('No file id given');
     }
 
-    return this._mapHttp({
+    const loadFilePromise = this._mapHttp({
       method: 'GET',
       url: `https://content.googleapis.com/drive/v2/files/${encodeURIComponent(fileId)}`,
       params: {
@@ -221,17 +221,15 @@ export class GoogleApiService {
         alt: 'media'
       },
     });
-    // const metaData = this.getFileInfo(fileId);
-    // // TODO think of something
-    // return Promise.all(metaData, fileContents)
-    //   .then((res) => {
-    //     console.log(res);
-    //
-    //     return Promise.resolve({
-    //       backup: res[1].body,
-    //       meta: res[0].body,
-    //     });
-    //   });
+    const metaDataPromise = this.getFileInfo(fileId);
+    return Promise.all([metaDataPromise, loadFilePromise])
+      .then((res) => {
+        console.log(res);
+        return{
+          backup: res[1].body,
+          meta: res[0].body,
+        };
+      });
   }
 
   saveFile(content, metadata: any = {}) {

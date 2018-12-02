@@ -10,6 +10,7 @@ import { MatDialog } from '@angular/material';
 import { DialogConfirmComponent } from '../../ui/dialog-confirm/dialog-confirm.component';
 import { DialogConfirmDriveSyncLoadComponent } from './dialog-confirm-drive-sync-load/dialog-confirm-drive-sync-load.component';
 import { DialogConfirmDriveSyncSaveComponent } from './dialog-confirm-drive-sync-save/dialog-confirm-drive-sync-save.component';
+import { AppDataComplete } from '../sync/sync.model';
 
 const MAX_REQUEST_DURATION = 15000;
 
@@ -175,12 +176,13 @@ export class GoogleDriveSyncService {
     const promise = new Promise((resolve, reject) => {
       const loadHandler = () => {
         this._loadFile().then((loadRes) => {
+          const backup: AppDataComplete = loadRes.backup;
           const lastActiveLocal = this._syncService.getLastActive();
-          const lastActiveRemote = loadRes.body.lastActiveTime;
+          const lastActiveRemote = backup.lastActiveTime;
+          const lastUpdateFromRemote = this.config._lastSyncFromRemote;
 
           // no update required
-          if (!isForce && this._isEqual(lastActiveLocal, lastActiveRemote)) {
-            console.log('GoogleDriveSync', 'date comparision isEqual', lastActiveLocal, lastActiveRemote);
+          if (!isForce && this._isNewerThan(lastUpdateFromRemote, lastActiveRemote)) {
             this._snackService.open({
               type: 'SUCCESS',
               message: `Data already up to date`
@@ -207,8 +209,7 @@ export class GoogleDriveSyncService {
 
       // don't execute sync interactions at the same time
       if (!isSkipPromiseCheck && this._isSyncingInProgress) {
-        // TODO a solution is needed
-        // console.log('GoogleDriveSync', 'loadFrom omitted because is in progress', this.currentPromise, this.currentPromise.$$state.status);
+        // TODO a better solution is needed
         return Promise.reject('Something in progress');
       }
 
@@ -230,7 +231,7 @@ export class GoogleDriveSyncService {
   }
 
   private _import(loadRes) {
-    const backupData = loadRes.body;
+    const backupData: AppDataComplete = loadRes.backup;
     // const metaData = loadRes.meta;
     // TODO check if needed
     // // we also need to update the backup to persist it also after the import
@@ -239,13 +240,13 @@ export class GoogleDriveSyncService {
     // backupData.googleDriveSync.lastSyncToRemote = metaData.modifiedDate;
     // // also needs to be set to prevent double upgrades
     // backupData.lastActiveTime = new Date();
-
-    this.updateConfig({
-      _lastLocalUpdate: new Date().toString(),
-      _lastSyncToRemote: new Date().toString(),
-    });
-
-    this._syncService.loadCompleteSyncData(backupData);
+    this._syncService.loadCompleteSyncData(backupData)
+      .then(() => {
+        this.updateConfig({
+          _lastLocalUpdate: new Date().toString(),
+          _lastSyncFromRemote: new Date().toString(),
+        });
+      });
   }
 
 
@@ -298,6 +299,7 @@ export class GoogleDriveSyncService {
           saveToRemote: resolve.bind(this),
           cancel: reject.bind(this),
           lastSyncToRemote: this._formatDate(this.config._lastSyncToRemote),
+          lastSyncFromRemote: this._formatDate(this.config._lastSyncFromRemote),
           remoteModified: this._formatDate(remoteModified),
           lastActiveLocal: this._formatDate(lastActiveLocal),
         }
@@ -319,6 +321,8 @@ export class GoogleDriveSyncService {
           cancel: reject,
           remoteModified: this._formatDate(remoteModified),
           lastActiveLocal: this._formatDate(lastActiveLocal),
+          lastSyncToRemote: this._formatDate(this.config._lastSyncToRemote),
+          lastSyncFromRemote: this._formatDate(this.config._lastSyncFromRemote),
         }
       });
     });
@@ -365,6 +369,9 @@ If not please change the Sync file name.`,
           _lastSyncToRemote: res.body.modifiedDate,
           // also needs to be updated
           _lastLocalUpdate: res.body.modifiedDate,
+          // NOTE: we can assume that overwriting the remote data also counts
+          // as an update from there
+          _lastSyncFromRemote: res.body.modifiedDate,
         });
       });
   }

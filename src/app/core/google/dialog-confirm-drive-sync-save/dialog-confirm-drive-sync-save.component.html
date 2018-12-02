@@ -1,23 +1,29 @@
 <mat-dialog-content>
-  <div class="mat-dialog-content">
-    <h2 class="mat-title"
-        style="margin-top: 0">Overwrite unsaved data on Google Drive?</h2>
-    <p>There seem to be some changes on Google Drive, that you don't have locally. Do you want to overwrite them anyway?</p>
-    <table>
-      <tr>
-        <td>Last modification of remote data:</td>
-        <td>{{data.remoteModified}}</td>
-      </tr>
-      <tr>
-        <td>Last modification of local data:</td>
-        <td>{{data.lastActiveLocal}}</td>
-      </tr>
-      <tr>
-        <td>Last sync to remote from this app instance:</td>
-        <td>{{data.lastSyncToRemote}}</td>
-      </tr>
-    </table>
-  </div>
+  <h2 class="mat-title"
+      style="margin-top: 0">Overwrite unsaved data on Google Drive?</h2>
+  <p>There seem to be some changes on Google Drive, that you don't have locally. Do you want to overwrite them anyway?</p>
+  <table>
+    <tr>
+      <td>remote</td>
+      <td>last modification:</td>
+      <td>{{data.remoteModified}}</td>
+    </tr>
+    <tr>
+      <td>local</td>
+      <td>last modification:</td>
+      <td>{{data.lastActiveLocal}}</td>
+    </tr>
+    <tr>
+      <td>local => remote</td>
+      <td>last sync</td>
+      <td>{{data.lastSyncToRemote}}</td>
+    </tr>
+    <tr>
+      <td>remote => local</td>
+      <td>last sync</td>
+      <td>{{data.lastSyncFromRemote}}</td>
+    </tr>
+  </table>
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">

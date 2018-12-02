@@ -5,12 +5,24 @@
     <strong>All data will be lost forever</strong>.</p>
   <table>
     <tr>
-      <td>Last modification of remote data:</td>
+      <td>remote</td>
+      <td>last modification:</td>
       <td>{{data.remoteModified}}</td>
     </tr>
     <tr>
-      <td>Last modification of local data:</td>
+      <td>local</td>
+      <td>last modification:</td>
       <td>{{data.lastActiveLocal}}</td>
+    </tr>
+    <tr>
+      <td>local => remote</td>
+      <td>last sync</td>
+      <td>{{data.lastSyncToRemote}}</td>
+    </tr>
+    <tr>
+      <td>remote => local</td>
+      <td>last sync</td>
+      <td>{{data.lastSyncFromRemote}}</td>
     </tr>
   </table>
 </mat-dialog-content>

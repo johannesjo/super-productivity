@@ -59,6 +59,7 @@ export interface GoogleDriveSyncConfig {
   syncFileName: string;
   _lastLocalUpdate: string;
   _lastSyncToRemote: string;
+  _lastSyncFromRemote: string;
   _backupDocId: string;
 }
 
