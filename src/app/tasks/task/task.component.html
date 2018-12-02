@@ -80,7 +80,7 @@
       <div editOnClick
            #editOnClickEl
            contenteditable="true"
-           class="title task-title"
+           class="task-title"
            [value]="task.title"
            (editFinished)="updateTaskTitleIfChanged($event.isChanged, $event.newVal)"
            tabindex="2"></div>

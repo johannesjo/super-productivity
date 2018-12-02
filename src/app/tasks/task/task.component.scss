@@ -80,7 +80,7 @@ $this-icon-default-opacity: 0.7;
   }
 
   .isAdditionalInfoOpen > .first-line {
-    .title {
+    .task-title {
       font-weight: bold;
     }
   }
@@ -278,10 +278,6 @@ $this-icon-default-opacity: 0.7;
 }
 
 .task-title {
-  flex-direction: row;
-  align-items: center;
-  align-content: center;
-  flex: 1 1 auto;
   flex-grow: 1;
   text-align: left;
   outline: none;
@@ -293,7 +289,6 @@ $this-icon-default-opacity: 0.7;
   cursor: text;
   transition: $transition-leave;
   transition-property: opacity, transform;
-  display: block;
   background: inherit;
   position: relative;
   overflow: visible;
@@ -301,8 +296,11 @@ $this-icon-default-opacity: 0.7;
   caret-color: #000000;
   z-index: 4;
 
+  // needs to be block for it not to mess up
+  display: block !important;
+
   &:first-letter {
-    text-transform: uppercase;
+    //text-transform: uppercase;
   }
 
   .isCurrent & {
