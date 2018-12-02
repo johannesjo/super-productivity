@@ -2,13 +2,12 @@
 
 textarea {
   display: block;
-  width: 400px;
+  width: 100%;
   max-width: 100%;
   @include noteStyle;
   margin-bottom: $s*2;
   padding: $s;
   min-height: $s*5;
-
 
   @include mq (xs) {
     min-height: 220px;
@@ -26,4 +25,5 @@ textarea {
 .textarea-wrapper {
   margin: -16px;
   margin-bottom: 0;
+  align-self: stretch;
 }
