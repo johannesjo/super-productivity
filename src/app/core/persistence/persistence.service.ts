@@ -70,16 +70,15 @@ export class PersistenceService {
   async saveToTaskArchiveForProject(projectId, tasksToArchive: EntityState<Task>, isForce = false) {
     const lsKey = this._makeProjectKey(projectId, LS_TASK_ARCHIVE);
     const currentArchive: EntityState<Task> = await this._loadFromDb(lsKey);
+
     if (currentArchive) {
+      const entities = {
+        ...currentArchive.entities,
+        ...tasksToArchive.entities
+      };
       const mergedEntities = {
-        ids: [
-          ...tasksToArchive.ids,
-          ...currentArchive.ids
-        ],
-        entities: {
-          ...currentArchive.entities,
-          ...tasksToArchive.entities
-        }
+        ids: Object.keys(entities),
+        entities,
       };
       return this._saveToDbWithLastActive(lsKey, mergedEntities, isForce);
     } else {
