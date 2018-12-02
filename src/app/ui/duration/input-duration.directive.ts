@@ -1,4 +1,4 @@
-import { AfterViewChecked, Attribute, Directive, ElementRef, forwardRef, Renderer2 } from '@angular/core';
+import { AfterViewChecked, Attribute, Directive, ElementRef, forwardRef, HostListener, Renderer2 } from '@angular/core';
 import {
   AbstractControl,
   ControlValueAccessor,
@@ -36,9 +36,6 @@ export const INPUT_DURATION_VALIDATORS: any = {
     INPUT_DURATION_VALUE_ACCESSOR,
     INPUT_DURATION_VALIDATORS,
   ],
-  host: {
-    '(input)': '_onInput($event.target.value)',
-  },
 })
 
 
@@ -54,6 +51,8 @@ export class InputDurationDirective<D> implements ControlValueAccessor, Validato
   private _parseValidator: ValidatorFn = this._parseValidatorFn.bind(this);
   private _validator: ValidatorFn | null;
 
+  private _value;
+
   constructor(@Attribute('inputDuration') public inputDuration,
               private _elementRef: ElementRef,
               private _stringToMs: StringToMsPipe,
@@ -61,7 +60,11 @@ export class InputDurationDirective<D> implements ControlValueAccessor, Validato
               private _renderer: Renderer2) {
   }
 
-  private _value;
+  @HostListener('input', ['$event.target.value']) _onInput(value: string) {
+    const msVal = this._stringToMs.transform(value);
+    this._value = this._msToString.transform(msVal, false, true);
+    this._onChangeCallback(msVal);
+  }
 
   // Validations
   get value() {
@@ -69,9 +72,13 @@ export class InputDurationDirective<D> implements ControlValueAccessor, Validato
   }
 
   set value(value) {
+    // console.log('SET', value);
+
     if (value !== this._value) {
       this._value = value;
       this._onChangeCallback(this._value);
+      // console.log(value);
+
     }
   }
 
@@ -110,13 +117,6 @@ export class InputDurationDirective<D> implements ControlValueAccessor, Validato
     this._renderer.setProperty(this._elementRef.nativeElement, 'value', toStr);
   }
 
-  // host event handler
-  // ------------------
-  _onInput(value: string) {
-    const msVal = this._stringToMs.transform(value);
-    this._value = this._msToString.transform(msVal, false, true);
-    this._onChangeCallback(msVal);
-  }
 
   private _parseValidatorFn(): ValidationErrors | null {
     return this._value

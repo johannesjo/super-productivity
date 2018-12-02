@@ -11,7 +11,7 @@ export const stringToMs = (strValue: any, args?: any): any => {
   let seconds;
   let isValid;
 
-  const arrValue = strValue.split(' ');
+  const arrValue = strValue ? strValue.split(' ') : [];
 
   arrValue.forEach((val) => {
     if (val.length > 0) {
