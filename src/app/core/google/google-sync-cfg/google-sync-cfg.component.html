@@ -1,6 +1,7 @@
 <h3 class="md-subtitle">Sync via Google Drive</h3>
 
-<form (submit)="submit()">
+<form (submit)="submit()"
+      #formRef="ngForm">
   <mat-slide-toggle [(ngModel)]="cfg.isEnabled"
                     name="isEnabled"
                     (change)="onGoogleDriveSyncToggle(cfg.isEnabled)"

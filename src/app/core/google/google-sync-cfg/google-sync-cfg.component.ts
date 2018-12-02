@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, OnDestroy, OnInit, Output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
 import { GoogleApiService } from '../google-api.service';
 import { ConfigService } from '../../config/config.service';
 import { GoogleDriveSyncService } from '../google-drive-sync.service';
@@ -6,6 +6,7 @@ import { SnackService } from '../../snack/snack.service';
 import { GoogleDriveSyncConfig } from '../../config/config.model';
 import { Subscription } from 'rxjs';
 import { expandFadeAnimation } from '../../../ui/animations/expand.ani';
+import { FormGroup } from '@angular/forms';
 
 @Component({
   selector: 'google-sync-cfg',
@@ -20,6 +21,8 @@ export class GoogleSyncCfgComponent implements OnInit, OnDestroy {
   backupPromise: Promise<any>;
   loadRemotePromise: Promise<any>;
   loginPromise: Promise<any>;
+
+  @ViewChild('formRef') formRef: FormGroup;
 
   @Output() save = new EventEmitter<any>();
 
@@ -45,8 +48,15 @@ export class GoogleSyncCfgComponent implements OnInit, OnDestroy {
   }
 
   submit() {
-    this._configService.updateSection('googleDriveSync', this.cfg);
-    this.save.emit();
+    if (this.formRef.valid) {
+      this._configService.updateSection('googleDriveSync', this.cfg);
+      this.save.emit();
+    } else {
+      Object.keys(this.formRef.controls)
+        .forEach(fieldName =>
+          this.formRef.controls[fieldName].markAsDirty()
+        );
+    }
   }
 
   // import/export stuff
