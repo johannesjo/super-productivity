@@ -15,7 +15,7 @@ export class DatabaseService {
 
   async load(key: string): Promise<any> {
     try {
-      return localForage.getItem(key);
+      return localForage.ready().then(() => localForage.getItem(key));
     } catch (e) {
       this._snackService.open({type: 'ERROR', message: 'Error while loading data'});
     }
@@ -23,7 +23,7 @@ export class DatabaseService {
 
   async save(key: string, data: any): Promise<any> {
     try {
-      return localForage.setItem(key, data);
+      return localForage.ready().then(() => localForage.setItem(key, data));
     } catch (e) {
       this._snackService.open({type: 'ERROR', message: 'Error while saving data'});
     }
@@ -31,7 +31,7 @@ export class DatabaseService {
 
   async saveWithLastActive(key: string, data: any): Promise<any> {
     try {
-      return localForage.setItem(key, data);
+      return localForage.ready().then(() => localForage.setItem(key, data));
     } catch (e) {
       this._snackService.open({type: 'ERROR', message: 'Error while saving data'});
     }
