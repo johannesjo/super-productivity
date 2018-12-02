@@ -16,7 +16,7 @@ export class IssueService {
   public getMappedAttachments(issueType: IssueProviderKey, issueData: JiraIssue): Attachment[] {
     switch (issueType) {
       case 'JIRA': {
-        return issueData.attachments && issueData.attachments.map(mapJiraAttachmentToAttachment) as Attachment[];
+        return issueData && issueData.attachments && issueData.attachments.map(mapJiraAttachmentToAttachment) as Attachment[];
       }
     }
   }
