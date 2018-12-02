@@ -120,7 +120,7 @@ export class NoteService {
     });
     this._snackService.open({
       type: 'SUCCESS',
-      message: `Updated reminder ${reminderId} for note`,
+      message: `Updated reminder for note`,
       icon: 'schedule',
     });
   }
@@ -130,7 +130,7 @@ export class NoteService {
     this.update(noteId, {reminderId: null});
     this._snackService.open({
       type: 'SUCCESS',
-      message: `Deleted reminder ${reminderId} for note`,
+      message: `Deleted reminder for note`,
       icon: 'schedule',
     });
   }
