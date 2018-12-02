@@ -150,52 +150,57 @@ export class PersistenceService {
   }
 
   async loadComplete(): Promise<AppDataComplete> {
-    const crateProjectIdObj = async (getDataFn: Function) => {
-      return projectIds.reduce(async (acc, projectId) => {
-        return {
-          ...acc,
-          [projectId]: await getDataFn(projectId)
-        };
-      }, {});
-    };
+
 
     const projectState = await this.loadProjectsMeta();
-    const projectIds = projectState.ids as string[];
+    const pids = projectState.ids as string[];
     return {
       lastActiveTime: this.getLastActive(),
       project: await this.loadProjectsMeta(),
       globalConfig: await this.loadGlobalConfig(),
-      bookmark: await crateProjectIdObj(this.loadBookmarksForProject.bind(this)),
-      note: await crateProjectIdObj(this.loadNotesForProject.bind(this)),
-      task: await crateProjectIdObj(this.loadTasksForProject.bind(this)),
-      taskArchive: await crateProjectIdObj(this.loadTaskArchiveForProject.bind(this)),
-      taskAttachment: await crateProjectIdObj(this.loadTaskAttachmentsForProject.bind(this)),
-      issue: await projectIds.reduce(async (acc, projectId) => {
+      bookmark: await this._loadForProjectIds(pids, this.loadBookmarksForProject.bind(this)),
+      note: await this._loadForProjectIds(pids, this.loadNotesForProject.bind(this)),
+      task: await this._loadForProjectIds(pids, this.loadTasksForProject.bind(this)),
+      taskArchive: await this._loadForProjectIds(pids, this.loadTaskArchiveForProject.bind(this)),
+      taskAttachment: await this._loadForProjectIds(pids, this.loadTaskAttachmentsForProject.bind(this)),
+      issue: await pids.reduce(async (acc, projectId) => {
+        const prevAcc = await acc;
+        const dataForProject = await this.loadIssuesForProject(projectId, 'JIRA');
         return {
-          ...acc,
+          ...prevAcc,
           [projectId]: {
-            'JIRA': await this.loadIssuesForProject(projectId, 'JIRA')
+            'JIRA': dataForProject
           }
         };
-      }, {}),
+      }, Promise.resolve({})),
     };
   }
 
-  // TODO fix
-  // TODO what is missing is a total cleanup of the existing projects and their data
+  private async _loadForProjectIds(pids, getDataFn: Function) {
+    return await pids.reduce(async (acc, projectId) => {
+      const prevAcc = await acc;
+      const dataForProject = await getDataFn(projectId);
+      return {
+        ...prevAcc,
+        [projectId]: dataForProject
+      };
+    }, Promise.resolve({}));
+  }
+
   async importComplete(data: AppDataComplete) {
-    console.log('IMPORT');
-    console.log(data);
+    console.log('IMPORT--->', data);
     this._isBlockSaving = true;
 
-    await Object.keys(data.issue).forEach(async projectId => {
+    const issuePromises = [];
+    Object.keys(data.issue).forEach(projectId => {
       const issueData = data.issue[projectId];
-      Object.keys(issueData).forEach(async (issueProviderKey: IssueProviderKey) => {
-        await this.saveIssuesForProject(projectId, issueProviderKey, issueData[issueProviderKey], true);
+      Object.keys(issueData).forEach((issueProviderKey: IssueProviderKey) => {
+        issuePromises.push(this.saveIssuesForProject(projectId, issueProviderKey, issueData[issueProviderKey], true));
       });
     });
 
     return await Promise.all([
+      ...issuePromises,
       this.saveProjectsMeta(data.project, true),
       this.saveGlobalConfig(data.globalConfig, true),
       this._saveForProjectIds(data.bookmark, this.saveBookmarksForProject.bind(this), true),
@@ -214,11 +219,13 @@ export class PersistenceService {
 
 
   private async _saveForProjectIds(data: any, saveDataFn: Function, isForce = false) {
-    return await Object.keys(data).forEach(async projectId => {
+    const promises = [];
+    Object.keys(data).forEach(projectId => {
       if (data[projectId]) {
-        await saveDataFn(projectId, data[projectId], isForce);
+        promises.push(saveDataFn(projectId, data[projectId], isForce));
       }
     });
+    return await Promise.all(promises);
   }
 
   private _makeProjectKey(projectId, subKey, additional?) {
