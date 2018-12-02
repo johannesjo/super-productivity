@@ -36,6 +36,9 @@ export class DatetimeInputComponent {
     date.setSeconds(0, 0);
 
     switch (type) {
+      case '15M':
+        date.setMinutes(date.getMinutes() + 15);
+        break;
       case '1H':
         date.setHours(date.getHours() + 1);
         break;
