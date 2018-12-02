@@ -12,25 +12,13 @@
           required
           name="title">
         <mat-error>You need to enter a title</mat-error>
-        <!--<mat-datepicker-toggle matPrefix-->
-        <!--[for]="myDatepicker"></mat-datepicker-toggle>-->
-        <!--<mat-datepicker #myDatepicker></mat-datepicker>-->
       </mat-form-field>
-      <mat-form-field>
-        <!--[matDatepicker]="myDatepicker"-->
-        <input
-          matInput
-          placeholder="Datetime for reminder"
-          type="datetime-local"
-          [(ngModel)]="date"
-          required
-          name="date">
-        <mat-error>The entered value is not a date!</mat-error>
-        <mat-icon matPrefix="">alarm</mat-icon>
-        <!--<mat-datepicker-toggle matPrefix-->
-        <!--[for]="myDatepicker"></mat-datepicker-toggle>-->
-        <!--<mat-datepicker #myDatepicker></mat-datepicker>-->
-      </mat-form-field>
+
+      <datetime-input name="reminderDate"
+                      placeholder="Datetime for reminder"
+                      [required]="true"
+                      (modelChange)="date=$event"
+                      [model]="date"></datetime-input>
     </div>
   </mat-dialog-content>
 

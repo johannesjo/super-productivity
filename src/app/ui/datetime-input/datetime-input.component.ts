@@ -9,6 +9,7 @@ import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from 
 export class DatetimeInputComponent {
   @Input() name: string;
   @Input() placeholder: string;
+  @Input() required: boolean;
   @Output() modelChange = new EventEmitter();
 
   @Input() get model() {

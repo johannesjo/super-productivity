@@ -35,10 +35,6 @@ export class DialogAddNoteReminderComponent {
       this.date = this._convertDate(new Date(this.reminder.remindAt));
       this.title = this.reminder.title;
     } else {
-      const offset = new Date().getTimezoneOffset();
-      const date = new Date(Date.now() - (offset * 1000 * 60));
-      date.setSeconds(0, 0);
-      this.date = this._convertDate(date);
       this.title = this.note.content.substr(0, 40);
     }
   }
@@ -51,18 +47,24 @@ export class DialogAddNoteReminderComponent {
 
 
   save() {
+    const timestamp = this.date && new Date(this.date).getTime();
+
+    if (!timestamp || !this.title) {
+      return;
+    }
+
     if (this.isEdit) {
       this._noteService.updateReminder(
         this.note.id,
         this.reminder.id,
-        new Date(this.date).getTime(),
+        timestamp,
         this.title,
       );
       this.close();
     } else {
       this._noteService.addReminder(
         this.note.id,
-        new Date(this.date).getTime(),
+        timestamp,
         this.title,
       );
       this.close();
