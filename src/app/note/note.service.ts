@@ -108,7 +108,7 @@ export class NoteService {
     this.update(noteId, {reminderId});
     this._snackService.open({
       type: 'SUCCESS',
-      message: `Added reminder ${reminderId} for note`,
+      message: `Added reminder for note`,
       icon: 'schedule',
     });
   }

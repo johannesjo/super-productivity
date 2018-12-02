@@ -7,9 +7,12 @@ textarea {
   @include noteStyle;
   margin-bottom: $s*2;
   padding: $s;
+  min-height: $s*5;
 
-  @include mq (sm) {
-    height: 300px;
+
+  @include mq (xs) {
+    min-height: 220px;
+    width: 500px;
   }
 }
 
@@ -18,4 +21,9 @@ textarea {
   flex-direction: column;
   align-items: center;
   justify-content: center;
+}
+
+.textarea-wrapper {
+  margin: -16px;
+  margin-bottom: 0;
 }
