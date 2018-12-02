@@ -7,20 +7,11 @@
             name="noteContent"
             [(ngModel)]="noteContent"
             placeholder="Enter some text to save as note..."></textarea>
-    {{reminderDate}}
-    <mat-form-field>
-      <input
-        matInput
-        placeholder="Datetime for reminder (optional)"
-        type="datetime-local"
-        [(ngModel)]="reminderDate"
-        name="reminderDate">
-      <mat-error>The entered value is not a date!</mat-error>
-      <mat-icon matPrefix="">alarm</mat-icon>
-      <!--<mat-datepicker-toggle matPrefix-->
-      <!--[for]="myDatepicker"></mat-datepicker-toggle>-->
-      <!--<mat-datepicker #myDatepicker></mat-datepicker>-->
-    </mat-form-field>
+
+    <datetime-input name="reminderData"
+                    placeholder="Datetime for reminder (optional)"
+                    (modelChange)="reminderDate=$event"
+                    [model]="reminderDate"></datetime-input>
   </div>
 
   <mat-dialog-actions align="center">

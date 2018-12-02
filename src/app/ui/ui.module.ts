@@ -34,7 +34,7 @@ import {
   MatTooltipModule,
 } from '@angular/material';
 import { MarkdownModule } from 'ngx-markdown';
-import { ReactiveFormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { FormlyMaterialModule } from '@ngx-formly/material';
 import { FormlyModule } from '@ngx-formly/core';
 import { ThemeSelectComponent } from './theme-select/theme-select.component';
@@ -61,7 +61,7 @@ import { DatetimeInputComponent } from './datetime-input/datetime-input.componen
   imports: [
     CommonModule,
     MarkdownModule.forRoot(),
-
+    FormsModule,
     ReactiveFormsModule,
     FormlyModule.forChild({
       types: [{
@@ -148,6 +148,7 @@ import { DatetimeInputComponent } from './datetime-input/datetime-input.componen
     SimpleDownloadDirective,
     DialogConfirmComponent,
     EnlargeImgDirective,
+    DatetimeInputComponent,
 
     MsToClockStringPipe,
     MsToStringPipe,

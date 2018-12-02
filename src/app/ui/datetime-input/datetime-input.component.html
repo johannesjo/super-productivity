@@ -1,3 +1,19 @@
-<p>
-  datetime-input works!
-</p>
+<div class="wrapper">
+  <mat-form-field>
+    <input
+      matInput
+      [placeholder]="placeholder"
+      type="datetime-local"
+      [(ngModel)]="model"
+      [name]="name">
+    <mat-error>The entered value is not a datetime!</mat-error>
+    <mat-icon matPrefix="">alarm</mat-icon>
+  </mat-form-field>
+
+  <mat-chip-list>
+    <mat-chip (click)="setVal('1H')">in 1 h</mat-chip>
+    <mat-chip (click)="setVal('2H')">in 2 h</mat-chip>
+    <mat-chip (click)="setVal('5H')">in 5 h</mat-chip>
+    <mat-chip (click)="setVal('TOMORROW_11')">tomorrow 11:00</mat-chip>
+  </mat-chip-list>
+</div>
