@@ -1,7 +1,6 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, HostListener, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, HostListener, Inject, OnInit } from '@angular/core';
 import { MatIconRegistry } from '@angular/material';
 import { DomSanitizer } from '@angular/platform-browser';
-import { OverlayContainer } from '@angular/cdk/overlay';
 import { ProjectService } from './project/project.service';
 import { Project } from './project/project.model';
 import { ChromeExtensionInterfaceService } from './core/chrome-extension-interface/chrome-extension-interface.service';
@@ -21,6 +20,7 @@ import { expandAnimation } from './ui/animations/expand.ani';
 import { warpRouteAnimation } from './ui/animations/warp-route';
 import { NoteService } from './note/note.service';
 import { MediaMatcher } from '@angular/cdk/layout';
+import { DOCUMENT } from '@angular/common';
 
 const SIDE_PANEL_BREAKPOINT = 900;
 
@@ -37,11 +37,11 @@ export class AppComponent implements OnInit {
   private _currentTheme: string;
 
   constructor(
+    @Inject(DOCUMENT) private document: Document,
     private _configService: ConfigService,
     private _shortcutService: ShortcutService,
     private _matIconRegistry: MatIconRegistry,
     private _domSanitizer: DomSanitizer,
-    private _overlayContainer: OverlayContainer,
     private _projectService: ProjectService,
     private _electronService: ElectronService,
     private _googleDriveSyncService: GoogleDriveSyncService,
@@ -131,22 +131,16 @@ export class AppComponent implements OnInit {
 
   private _setTheme(isDarkTheme: boolean, theme: string) {
     if (this._currentTheme) {
-      this._overlayContainer.getContainerElement().classList.remove(this._currentTheme);
-      this._el.nativeElement.classList.remove(this._currentTheme);
+      this.document.body.classList.remove(this._currentTheme);
     }
-    this._overlayContainer.getContainerElement().classList.add(theme);
-    this._el.nativeElement.classList.add(theme);
+    this.document.body.classList.add(theme);
 
     if (isDarkTheme) {
-      this._el.nativeElement.classList.remove('isLightTheme');
-      this._overlayContainer.getContainerElement().classList.remove('isLightTheme');
-      this._el.nativeElement.classList.add('isDarkTheme');
-      this._overlayContainer.getContainerElement().classList.add('isDarkTheme');
+      this.document.body.classList.remove('isLightTheme');
+      this.document.body.classList.add('isDarkTheme');
     } else {
-      this._el.nativeElement.classList.remove('isDarkTheme');
-      this._overlayContainer.getContainerElement().classList.remove('isDarkTheme');
-      this._el.nativeElement.classList.add('isLightTheme');
-      this._overlayContainer.getContainerElement().classList.add('isLightTheme');
+      this.document.body.classList.remove('isDarkTheme');
+      this.document.body.classList.add('isLightTheme');
     }
     this._currentTheme = theme;
   }
