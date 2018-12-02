@@ -136,6 +136,7 @@ export class EditOnClickDirective implements OnInit {
     return str.replace(/<\/?[^`]+?\/?>/gmi, '\n') // replace all tags
       .replace(/\n/gmi, '') // replace line breaks
       .replace(/&nbsp;/gmi, '') // replace line breaks
+      .replace('&nbsp;', '') // replace line breaks again because sometimes it doesn't work
       .trim();
   }
 }
