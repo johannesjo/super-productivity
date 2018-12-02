@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
 import { GoogleApiService } from '../google-api.service';
 import { ConfigService } from '../../config/config.service';
 import { GoogleDriveSyncService } from '../google-drive-sync.service';
@@ -33,6 +33,7 @@ export class GoogleSyncCfgComponent implements OnInit, OnDestroy {
     private readonly _googleDriveSyncService: GoogleDriveSyncService,
     private readonly _configService: ConfigService,
     private readonly _snackService: SnackService,
+    private readonly _cd: ChangeDetectorRef,
   ) {
   }
 
@@ -40,6 +41,7 @@ export class GoogleSyncCfgComponent implements OnInit, OnDestroy {
     this._subs.add(this._configService.cfg$.subscribe((cfg) => {
       this.cfg = cfg.googleDriveSync;
       this.tmpSyncFile = cfg.googleDriveSync.syncFileName;
+      this._cd.detectChanges();
     }));
   }
 
