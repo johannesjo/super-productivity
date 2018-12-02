@@ -20,7 +20,11 @@ export class DatetimeInputComponent {
 
   set model(val) {
     this.modelValue = val;
-    this.modelChange.emit(this.modelValue);
+    const timestamp = val && new Date(val).getTime();
+    // TODO add real validation
+    if (timestamp) {
+      this.modelChange.emit(this.modelValue);
+    }
   }
 
   constructor() {
