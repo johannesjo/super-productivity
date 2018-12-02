@@ -17,7 +17,6 @@ export class ProjectEffects {
     .pipe(
       ofType(
         ProjectActionTypes.AddProject,
-        ProjectActionTypes.LoadProjectState,
         ProjectActionTypes.DeleteProject,
         ProjectActionTypes.SetCurrentProject,
         ProjectActionTypes.UpdateProject,
