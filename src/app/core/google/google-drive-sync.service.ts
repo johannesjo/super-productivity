@@ -111,17 +111,17 @@ export class GoogleDriveSyncService {
     }
   }
 
-  saveForSyncIfEnabled(): Promise<any> {
+  saveForSyncIfEnabled(isForce = false): Promise<any> {
     if (!this.config.isAutoSyncToRemote || !this.config.isEnabled) {
       return Promise.resolve();
     }
 
-    if (this._isSyncingInProgress) {
+    if (this._isSyncingInProgress && !isForce) {
       console.log('GoogleDriveSync', 'SYNC OMITTED because of promise');
       return Promise.resolve();
     } else {
       console.log('GoogleDriveSync', 'SYNC');
-      const promise = this.saveTo();
+      const promise = this.saveTo(isForce);
       if (this.config.isNotifyOnSync) {
         this._showAsyncToast(promise, 'Syncing to google drive');
       }
@@ -129,9 +129,9 @@ export class GoogleDriveSyncService {
     }
   }
 
-  async saveTo(): Promise<any> {
+  async saveTo(isForce = false): Promise<any> {
     // don't execute sync interactions at the same time
-    if (this._isSyncingInProgress) {
+    if (this._isSyncingInProgress && !isForce) {
       console.log('GoogleDriveSync', 'saveTo omitted because is in progress');
       return Promise.reject('Something in progress');
     }

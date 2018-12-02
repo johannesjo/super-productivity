@@ -132,7 +132,7 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
         content: this.tomorrowsNote,
       });
     }
-    this._googleDriveSync.saveForSyncIfEnabled()
+    this._googleDriveSync.saveForSyncIfEnabled(true)
       .then(() => {
         this._initSuccessAnimation(cb);
       });
