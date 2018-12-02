@@ -66,9 +66,7 @@ export const DEFAULT_CFG: GlobalConfig = {
     isLoadRemoteDataOnStartup: false,
     syncInterval: minute,
     syncFileName: 'SUPER_PRODUCTIVITY_SYNC.json',
-    _lastLocalUpdate: null,
-    _lastSyncToRemote: null,
-    _lastSyncFromRemote: null,
+    _lastSync: null,
     _backupDocId: null,
   },
   _uiHelper: {

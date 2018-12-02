@@ -12,8 +12,6 @@ import { DialogConfirmDriveSyncLoadComponent } from './dialog-confirm-drive-sync
 import { DialogConfirmDriveSyncSaveComponent } from './dialog-confirm-drive-sync-save/dialog-confirm-drive-sync-save.component';
 import { AppDataComplete } from '../sync/sync.model';
 
-const MAX_REQUEST_DURATION = 15000;
-
 @Injectable({
   providedIn: 'root'
 })
@@ -153,8 +151,17 @@ export class GoogleDriveSyncService {
       } else {
         this._googleApiService.getFileInfo(this.config._backupDocId)
           .then((res) => {
+            const lastActiveLocal = this._syncService.getLastActive();
             const lastModifiedRemote = res.body.modifiedDate;
-            if (this._isNewerThan(lastModifiedRemote, this.config._lastSyncToRemote)) {
+            console.log('saveTo Check', this._isEqual(lastActiveLocal, lastModifiedRemote), lastModifiedRemote, lastActiveLocal);
+
+            if (this._isEqual(lastActiveLocal, lastModifiedRemote)) {
+              this._snackService.open({
+                type: 'SUCCESS',
+                message: `GoogleDriveSync: Remote data already up to date`
+              });
+              reject();
+            } else if (this._isNewerThan(lastModifiedRemote, this.config._lastSync)) {
               // remote has an update so prompt what to do
               this._confirmSaveDialog(lastModifiedRemote)
                 .then(() => {
@@ -173,45 +180,46 @@ export class GoogleDriveSyncService {
   }
 
   loadFrom(isSkipPromiseCheck = false, isForce = false): Promise<any> {
+    // don't execute sync interactions at the same time
+    if (!isSkipPromiseCheck && this._isSyncingInProgress) {
+      return Promise.reject('Something in progress');
+    }
+
     const promise = new Promise((resolve, reject) => {
       const loadHandler = () => {
-        this._loadFile().then((loadRes) => {
-          const backup: AppDataComplete = loadRes.backup;
-          const lastActiveLocal = this._syncService.getLastActive();
-          const lastActiveRemote = backup.lastActiveTime;
-          const lastUpdateFromRemote = this.config._lastSyncFromRemote;
+        return this._checkIfRemoteUpdate().then((isUpdated) => {
+          if (isUpdated || isForce) {
+            return this._loadFile().then((loadRes) => {
+              const backup: AppDataComplete = loadRes.backup;
+              const lastActiveLocal = this._syncService.getLastActive();
+              const lastActiveRemote = backup.lastActiveTime;
 
-          // no update required
-          if (!isForce && this._isNewerThan(lastUpdateFromRemote, lastActiveRemote)) {
+              // update but ask if remote data is not newer than the last local update
+              const isSkipConfirm = isForce || (lastActiveRemote && this._isNewerThan(lastActiveRemote, lastActiveLocal));
+              console.log('GoogleDriveSync', 'date comparision skipConfirm', isSkipConfirm, lastActiveLocal, lastActiveRemote);
+
+              if (isSkipConfirm) {
+                this._import(loadRes);
+                resolve(loadRes);
+              } else {
+                this._confirmLoadDialog(lastActiveRemote)
+                  .then(() => {
+                    this._import(loadRes);
+                    resolve(loadRes);
+                  }, reject);
+              }
+
+            }, reject);
+            // no update required
+          } else {
             this._snackService.open({
               type: 'SUCCESS',
-              message: `Data already up to date`
+              message: `GoogleDriveSync: Local data already up to date`
             });
             reject();
-          } else {
-            // update but ask if remote data is not newer than the last local update
-            const isSkipConfirm = isForce || (lastActiveRemote && this._isNewerThan(lastActiveRemote, lastActiveLocal));
-            console.log('GoogleDriveSync', 'date comparision skipConfirm', isSkipConfirm, lastActiveLocal, lastActiveRemote);
-
-            if (isSkipConfirm) {
-              this._import(loadRes);
-              resolve(loadRes);
-            } else {
-              this._confirmLoadDialog(lastActiveRemote)
-                .then(() => {
-                  this._import(loadRes);
-                  resolve(loadRes);
-                }, reject);
-            }
           }
         }, reject);
       };
-
-      // don't execute sync interactions at the same time
-      if (!isSkipPromiseCheck && this._isSyncingInProgress) {
-        // TODO a better solution is needed
-        return Promise.reject('Something in progress');
-      }
 
       // when we have no backup file we create one directly
       if (!this.config._backupDocId) {
@@ -232,48 +240,40 @@ export class GoogleDriveSyncService {
 
   private _import(loadRes) {
     const backupData: AppDataComplete = loadRes.backup;
-    // const metaData = loadRes.meta;
-    // TODO check if needed
-    // // we also need to update the backup to persist it also after the import
-    // backupData.googleDriveSync.lastLocalUpdate = metaData.modifiedDate;
-    // // and we also need to update last sync to remote, as it kind of happened now
-    // backupData.googleDriveSync.lastSyncToRemote = metaData.modifiedDate;
-    // // also needs to be set to prevent double upgrades
-    // backupData.lastActiveTime = new Date();
-    this._syncService.loadCompleteSyncData(backupData)
+    return this._syncService.loadCompleteSyncData(backupData)
       .then(() => {
         this.updateConfig({
-          _lastLocalUpdate: new Date().toString(),
-          _lastSyncFromRemote: new Date().toString(),
+          _lastSync: loadRes.meta.modifiedDate,
         });
+        this._syncService.saveLastActive(loadRes.meta.modifiedDate);
       });
   }
 
 
-  private _checkForInitialUpdate(): Promise<any> {
+  private async _checkIfRemoteUpdate(): Promise<any> {
+    const lastActiveLocal = this._syncService.getLastActive();
     const promise = this._googleApiService.getFileInfo(this.config._backupDocId)
       .then((res) => {
         const lastModifiedRemote = res.body.modifiedDate;
-        console.log('GoogleDriveSync',
-          this._formatDate(lastModifiedRemote),
-          ' > ',
-          this._formatDate(this.config._lastLocalUpdate),
-          this._isNewerThan(lastModifiedRemote, this.config._lastLocalUpdate)
-        );
+        return this._isNewerThan(lastModifiedRemote, lastActiveLocal);
+      });
+    this._handleInProgress(promise);
+    return await promise;
+  }
 
-        if (this._isNewerThan(lastModifiedRemote, this.config._lastLocalUpdate)) {
+  private _checkForInitialUpdate() {
+    this._checkIfRemoteUpdate()
+      .then((isUpdate) => {
+        console.log('isUpdate', isUpdate);
+        if (isUpdate) {
           this._snackService.open({
             message: `There is a remote update! Downloading...`,
             icon: 'file_upload',
           });
-
           console.log('GoogleDriveSync', 'HAS CHANGED (modified Date comparision), TRYING TO UPDATE');
           this.loadFrom(true);
         }
       });
-
-    this._handleInProgress(promise);
-    return promise;
   }
 
   private _showAsyncToast(promise, msg) {
@@ -298,10 +298,9 @@ export class GoogleDriveSyncService {
           },
           saveToRemote: resolve.bind(this),
           cancel: reject.bind(this),
-          lastSyncToRemote: this._formatDate(this.config._lastSyncToRemote),
-          lastSyncFromRemote: this._formatDate(this.config._lastSyncFromRemote),
           remoteModified: this._formatDate(remoteModified),
           lastActiveLocal: this._formatDate(lastActiveLocal),
+          lastSync: this._formatDate(this.config._lastSync),
         }
       });
     });
@@ -321,8 +320,7 @@ export class GoogleDriveSyncService {
           cancel: reject,
           remoteModified: this._formatDate(remoteModified),
           lastActiveLocal: this._formatDate(lastActiveLocal),
-          lastSyncToRemote: this._formatDate(this.config._lastSyncToRemote),
-          lastSyncFromRemote: this._formatDate(this.config._lastSyncFromRemote),
+          lastSync: this._formatDate(this.config._lastSync),
         }
       });
     });
@@ -357,7 +355,6 @@ If not please change the Sync file name.`,
 
   private async _save(): Promise<any> {
     const completeData = await this._getLocalAppData();
-
     return this._googleApiService.saveFile(completeData, {
       title: this.config.syncFileName,
       id: this.config._backupDocId,
@@ -366,13 +363,11 @@ If not please change the Sync file name.`,
       .then((res) => {
         this.updateConfig({
           _backupDocId: res.body.id,
-          _lastSyncToRemote: res.body.modifiedDate,
-          // also needs to be updated
-          _lastLocalUpdate: res.body.modifiedDate,
-          // NOTE: we can assume that overwriting the remote data also counts
-          // as an update from there
-          _lastSyncFromRemote: res.body.modifiedDate,
+          _lastSync: res.body.modifiedDate,
         });
+        console.log('google sync save:', res.body.modifiedDate);
+
+        this._syncService.saveLastActive(res.body.modifiedDate);
       });
   }
 

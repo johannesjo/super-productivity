@@ -136,6 +136,13 @@ export class PersistenceService {
 
   // BACKUP AND SYNC RELATED
   // -----------------------
+  saveLastActive(date: string) {
+    // TODO refactor to timestamp
+    console.log('SAVE LAST ACTIVE', date);
+
+    saveToLs(LS_LAST_ACTIVE, date);
+  }
+
   getLastActive(): string {
     // TODO refactor to timestamp
     return loadFromLs(LS_LAST_ACTIVE);
@@ -239,7 +246,7 @@ export class PersistenceService {
     // console.log('save', key, this._isBlockSaving);
     if (!this._isBlockSaving || isForce === true) {
       // TODO refactor to timestamp
-      saveToLs(LS_LAST_ACTIVE, new Date().toString());
+      this.saveLastActive(new Date().toString());
       return this._databaseService.saveWithLastActive(key, data);
     } else {
       console.warn('BLOCKED SAVING for ', key);

@@ -29,6 +29,10 @@ export class SyncService {
   ) {
   }
 
+  saveLastActive(date: string) {
+    this._persistenceService.saveLastActive(date);
+  }
+
   getLastActive(): Date {
     return new Date(this._persistenceService.getLastActive());
   }

@@ -57,9 +57,7 @@ export interface GoogleDriveSyncConfig {
   isLoadRemoteDataOnStartup: boolean;
   syncInterval: number;
   syncFileName: string;
-  _lastLocalUpdate: string;
-  _lastSyncToRemote: string;
-  _lastSyncFromRemote: string;
+  _lastSync: string;
   _backupDocId: string;
 }
 
