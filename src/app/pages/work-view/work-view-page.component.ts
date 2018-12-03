@@ -105,11 +105,13 @@ export class WorkViewPageComponent implements OnInit, OnDestroy {
 
   startWork() {
     this.isPlanYourDay = false;
-    // this._subs.add(this.taskService.startableTasks$
-    //   .pipe(take(1))
-    //   .subscribe(tasks => {
-    //     this.taskService.setCurrentId(tasks[0] && tasks[0].id);
-    //   }));
+    this._subs.add(this.taskService.focusIdsForWorkView$
+      .pipe(take(1))
+      .subscribe(ids => {
+        // this works because we set the current task
+        // to the parent tasks first subtask in the reducer
+        this.taskService.setCurrentId(ids[0]);
+      }));
   }
 
   private _triggerTaskSwitchListAnimation() {
