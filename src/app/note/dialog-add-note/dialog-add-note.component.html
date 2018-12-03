@@ -4,9 +4,10 @@
     <div class="textarea-wrapper">
       <textarea rows="6"
                 matTextareaAutosize
-                (keypress)="keypressHandler($event)"
+                (keydown)="keydownHandler($event)"
                 name="noteContent"
                 [(ngModel)]="noteContent"
+                (ngModelChange)="saveTmp()"
                 placeholder="Enter some text to save as note..."></textarea>
     </div>
     <datetime-input name="reminderData"

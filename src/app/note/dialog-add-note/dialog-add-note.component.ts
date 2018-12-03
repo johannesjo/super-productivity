@@ -21,30 +21,31 @@ export class DialogAddNoteComponent {
     private _noteService: NoteService,
     @Inject(MAT_DIALOG_DATA) public data: { reminder: Reminder },
   ) {
-    this.noteContent = sessionStorage.getItem(NOTE_TMP_STORAGE_KEY);
+    this.noteContent = sessionStorage.getItem(NOTE_TMP_STORAGE_KEY) || '';
   }
 
-  keypressHandler(ev: KeyboardEvent) {
+  keydownHandler(ev: KeyboardEvent) {
     if (ev.key === 'Enter' && ev.ctrlKey) {
       this.submit();
-    } else {
-      this._saveTmp();
     }
   }
 
   submit() {
     const remindAt = this.reminderDate && new Date(this.reminderDate).getTime();
 
-    if (!this.isSubmitted) {
+    if (!this.isSubmitted
+      && (this.noteContent && this.noteContent.trim().length > 0
+        || remindAt)) {
       this._noteService.add(
         {content: this.noteContent},
         remindAt,
         true,
       );
+
+      this.isSubmitted = true;
+      this._clearSessionStorage();
+      this.close();
     }
-    this.isSubmitted = true;
-    this._clearSessionStorage();
-    this.close();
   }
 
 
@@ -52,8 +53,8 @@ export class DialogAddNoteComponent {
     this._matDialogRef.close();
   }
 
-  private _saveTmp() {
-    sessionStorage.setItem(NOTE_TMP_STORAGE_KEY, this.noteContent);
+  saveTmp(val = this.noteContent || '') {
+    sessionStorage.setItem(NOTE_TMP_STORAGE_KEY, val);
   }
 
   private _clearSessionStorage() {
