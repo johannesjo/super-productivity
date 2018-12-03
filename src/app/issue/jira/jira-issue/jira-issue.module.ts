@@ -25,15 +25,13 @@ import { JiraIssueContentComponent } from './jira-issue-content/jira-issue-conte
     JiraIssueHeaderComponent,
     JiraIssueContentComponent,
   ],
-  exports: [],
-  providers: [
-    JiraIssueService,
-  ],
-  entryComponents: [
+  exports: [
     JiraIssueHeaderComponent,
     JiraIssueContentComponent,
   ],
-
+  providers: [
+    JiraIssueService,
+  ],
 })
 export class JiraIssueModule {
 }

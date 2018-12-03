@@ -3,7 +3,7 @@ import { TaskWithSubTasks } from '../../../../tasks/task.model';
 import { JiraIssueService } from '../jira-issue.service';
 
 @Component({
-  selector: 'issue-content',
+  selector: 'jira-issue-content',
   templateUrl: './jira-issue-content.component.html',
   styleUrls: ['./jira-issue-content.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

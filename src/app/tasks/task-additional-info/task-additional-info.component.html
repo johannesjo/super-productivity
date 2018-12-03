@@ -4,9 +4,9 @@
                  color="accent">
     <mat-tab *ngIf="taskData.issueData">
       <ng-template mat-tab-label>
-        <div #issueHeader></div>
+        <issue-header [task]="taskData"></issue-header>
       </ng-template>
-      <div #issueContent></div>
+      <issue-content [task]="taskData"></issue-content>
     </mat-tab>
 
     <mat-tab>

@@ -19,12 +19,14 @@ import { JiraIssueModule } from '../issue/jira/jira-issue/jira-issue.module';
 import { TaskAdditionalInfoComponent } from './task-additional-info/task-additional-info.component';
 import { SelectTaskComponent } from './select-task/select-task.component';
 import { AttachmentModule } from './attachment/attachment.module';
+import { IssueModule } from '../issue/issue.module';
 
 @NgModule({
   imports: [
     CommonModule,
     ProjectModule,
     JiraIssueModule,
+    IssueModule,
     UiModule,
     FormsModule,
     AttachmentModule,

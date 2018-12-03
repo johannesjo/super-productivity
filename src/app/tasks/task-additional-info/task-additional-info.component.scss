@@ -45,7 +45,7 @@
   }
 }
 
-::ng-deep .issue-tab-header {
+::ng-deep issue-header > * {
   display: inline-flex;
   justify-content: center;
   align-items: center;
