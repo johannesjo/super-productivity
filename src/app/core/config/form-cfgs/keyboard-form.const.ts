@@ -57,18 +57,25 @@ export const KEYBOARD_SETTINGS_FORM_CFG = {
         label: 'Open Project Notes',
       },
     },
-    {
-      key: 'openDistractionPanel',
-      type: 'keyboard',
-      templateOptions: {
-        label: 'Open Distraction Panel',
-      },
-    },
+    // {
+    //   key: 'openDistractionPanel',
+    //   type: 'keyboard',
+    //   templateOptions: {
+    //     label: 'Open Distraction Panel',
+    //   },
+    // },
     {
       key: 'showHelp',
       type: 'keyboard',
       templateOptions: {
         label: 'Show Help',
+      },
+    },
+    {
+      key: 'toggleBookmarks',
+      type: 'keyboard',
+      templateOptions: {
+        label: 'Show/Hide Bookmark Bar',
       },
     },
     {

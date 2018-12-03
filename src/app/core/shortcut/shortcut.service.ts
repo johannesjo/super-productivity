@@ -10,6 +10,7 @@ import { NoteService } from '../../note/note.service';
 import { TaskService } from '../../tasks/task.service';
 import { MatDialog } from '@angular/material';
 import { DialogAddNoteComponent } from '../../note/dialog-add-note/dialog-add-note.component';
+import { BookmarkService } from '../../bookmark/bookmark.service';
 
 
 @Injectable({
@@ -27,6 +28,7 @@ export class ShortcutService {
     private _noteService: NoteService,
     private _taskService: TaskService,
     private _activatedRoute: ActivatedRoute,
+    private _bookmarkService: BookmarkService,
   ) {
     //   // Register electron shortcut(s)
     if (IS_ELECTRON && this._configService.cfg.keyboard.globalShowHide) {
@@ -106,6 +108,10 @@ export class ShortcutService {
     }
     if (checkKeyCombo(ev, keys.openProjectNotes)) {
       this._noteService.toggleShow();
+      ev.preventDefault();
+    }
+    if (checkKeyCombo(ev, keys.toggleBookmarks)) {
+      this._bookmarkService.toggleBookmarks();
       ev.preventDefault();
     }
 
