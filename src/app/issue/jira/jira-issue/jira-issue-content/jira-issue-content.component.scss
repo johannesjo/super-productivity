@@ -1,9 +1,5 @@
 @import '../../../../../variables';
 
-:host {
-  @include standardThemeTextColor();
-}
-
 .issue-table {
   width: 100%;
 
@@ -21,6 +17,7 @@
 
 .wrapper {
   margin: $s*2;
+  @include standardThemeTextColor();
 }
 
 .comment {
@@ -29,7 +26,9 @@
 
   .author-avatar {
     margin-right: $s;
-    max-width: 48px;
+    width: 48px;
+    height: 48px;
+    min-width: 48px;
     border-radius: 50%;
   }
 
