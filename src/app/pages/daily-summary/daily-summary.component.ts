@@ -68,6 +68,9 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
     this._subs.add(this.todaysTasks$.subscribe((val) => {
       this._todaysTasks = val;
     }));
+
+    // stop tracking once we're here
+    this._taskService.setCurrentId(null);
   }
 
   ngOnDestroy() {
