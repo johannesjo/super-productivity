@@ -90,12 +90,11 @@ export class JiraApiService {
     });
   }
 
-  getIssueById(issueId) {
+  getIssueById(issueId, isGetChangelog = false) {
     return this._sendRequest({
       apiMethod: 'findIssue',
       transform: mapIssueResponse,
-      // arguments: [issueId, 'changelog']
-      arguments: [issueId]
+      arguments: [issueId, ...(isGetChangelog ? ['changelog'] : [])]
     });
   }
 
@@ -189,7 +188,10 @@ export class JiraApiService {
 
     if (this._isBlockAccess) {
       console.error('Blocked Jira Access to prevent being shut out');
-      this._snackService.open({type: 'JIRA_UNBLOCK', message: 'Jira: To prevent shut out from api, access has been blocked. Check your settings!'});
+      this._snackService.open({
+        type: 'JIRA_UNBLOCK',
+        message: 'Jira: To prevent shut out from api, access has been blocked. Check your settings!'
+      });
       return Promise.reject(new Error('Blocked access to prevent being shut out'));
     }
 

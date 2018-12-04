@@ -108,10 +108,33 @@ export type JiraIssueOriginalReduced = Readonly<{
   self: string;
 }>;
 
+
+export type JiraOriginalChangelog = Readonly<{
+  histories: {
+    author: JiraOriginalAuthor;
+    created: string;
+    id: string;
+    items: {
+      field: string;
+      fieldId: string;
+      fieldtype: string;
+      from: any;
+      fromString: string;
+      to: any;
+      toString: string;
+    }[];
+  }[];
+  maxResults: number;
+  startAt: number;
+  total: number;
+}>;
+
+
 export type JiraIssueOriginal = Readonly<{
   key: string;
   id: string;
   expand: string;
   self: string;
   fields: JiraOriginalFields;
+  changelog?: JiraOriginalChangelog;
 }>;

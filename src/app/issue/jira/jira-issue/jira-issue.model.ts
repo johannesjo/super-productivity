@@ -1,6 +1,11 @@
 // Mapped Data Types
 // -----------------
-import { JiraIssueOriginalReduced, JiraOriginalComment, JiraOriginalComponent, JiraOriginalStatus } from '../jira-api-responses';
+import {
+  JiraIssueOriginalReduced,
+  JiraOriginalComment,
+  JiraOriginalComponent,
+  JiraOriginalStatus
+} from '../jira-api-responses';
 
 export type JiraAuthor = Readonly<{
   id: string;
@@ -34,6 +39,10 @@ export type JiraComment = Readonly<{
   jsdPublic: boolean;
 }>;
 
+export type JiraChangelogEntry = Readonly<{
+
+}>;
+
 
 export interface JiraIssueReduced extends JiraIssueOriginalReduced {
   // new properties
@@ -57,6 +66,7 @@ export type JiraIssue = Readonly<{
   // mapped data
   attachments: JiraAttachment[];
   assignee: JiraAuthor;
+  changelog?: JiraChangelogEntry;
 
   // new properties
   url: string;

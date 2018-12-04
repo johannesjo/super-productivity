@@ -1,5 +1,11 @@
-import { JiraAttachment, JiraAuthor, JiraComment, JiraIssue, } from './jira-issue.model';
-import { JiraIssueOriginal, JiraOriginalAttachment, JiraOriginalAuthor, JiraOriginalComment } from '../jira-api-responses';
+import { JiraAttachment, JiraAuthor, JiraChangelogEntry, JiraComment, JiraIssue, } from './jira-issue.model';
+import {
+  JiraIssueOriginal,
+  JiraOriginalAttachment,
+  JiraOriginalAuthor,
+  JiraOriginalChangelog,
+  JiraOriginalComment
+} from '../jira-api-responses';
 import { JiraCfg } from '../jira';
 import { DropPasteIcons, DropPasteInputType } from '../../../core/drop-paste-input/drop-paste-input';
 
@@ -20,7 +26,6 @@ export const mapIssue = (issue: JiraIssueOriginal, cfg: JiraCfg): JiraIssue => {
   return {
     key: issueCopy.key,
     id: issueCopy.id,
-
     components: fields.components,
     timeestimate: fields.timeestimate,
     timespent: fields.timespent,
@@ -30,6 +35,7 @@ export const mapIssue = (issue: JiraIssueOriginal, cfg: JiraCfg): JiraIssue => {
     status: fields.status,
     attachments: fields.attachment && fields.attachment.map(mapAttachment),
     comments: fields.comment && fields.comment.comments.map(mapComments),
+    changelog: mapChangelog(issueCopy.changelog),
     assignee: mapAuthor(fields.assignee),
     url: makeIssueUrl(cfg.host, issueCopy.key)
   };
@@ -79,6 +85,10 @@ export const mapJiraAttachmentToAttachment = (jiraAttachment: JiraAttachment) =>
     type,
     icon: DropPasteIcons[type]
   };
+};
+
+export const mapChangelog = (changelog: JiraOriginalChangelog): JiraChangelogEntry[] => {
+  return [];
 };
 
 const mapAttachmentType = (mimeType: string): DropPasteInputType => {

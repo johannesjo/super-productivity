@@ -93,7 +93,7 @@ export class JiraIssueEffects {
   }
 
   private _updateIssueFromApi(issueId, oldIssueData) {
-    this._jiraApiService.getIssueById(issueId)
+    this._jiraApiService.getIssueById(issueId, true)
       .then((res) => {
         if (res.updated !== oldIssueData.updated) {
           this._jiraIssueService.update(issueId, {...res, wasUpdated: true});
