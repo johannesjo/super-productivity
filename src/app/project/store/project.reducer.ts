@@ -25,6 +25,7 @@ export const selectCurrentProject = createSelector(selectProjectFeatureState,
 );
 export const selectProjectIssueCfgs = createSelector(selectCurrentProject, (project) => project.issueIntegrationCfgs);
 export const selectProjectJiraCfg = createSelector(selectProjectIssueCfgs, (issueProviderCfgs) => issueProviderCfgs.JIRA);
+export const selectAdvancedProjectCfg = createSelector(selectCurrentProject, (project) => project.advancedCfg);
 
 
 // DEFAULT
@@ -66,58 +67,79 @@ export function projectReducer(
 ): ProjectState {
   // console.log(state.entities, state, action);
 
+  const {payload} = action;
+
+
   switch (action.type) {
     // Meta Actions
     // ------------
     case ProjectActionTypes.LoadProjectState: {
       return addStartedTimeToday(
-        Object.assign({}, action.payload.state),
-        action.payload.state.currentId
+        {...action.payload.state},
+        payload.state.currentId
       );
     }
 
     case ProjectActionTypes.SetCurrentProject: {
       return addStartedTimeToday(
-        Object.assign({}, state, {currentId: action.payload}),
-        action.payload
+        {
+          ...state,
+          currentId: payload,
+        },
+        payload
       );
     }
 
     // Project Actions
     // ------------
     case ProjectActionTypes.AddProject: {
-      return projectAdapter.addOne(action.payload.project, state);
+      return projectAdapter.addOne(payload.project, state);
     }
 
     case ProjectActionTypes.AddProjects: {
-      return projectAdapter.addMany(action.payload.projects, state);
+      return projectAdapter.addMany(payload.projects, state);
     }
 
     case ProjectActionTypes.UpdateProject: {
-      return projectAdapter.updateOne(action.payload.project, state);
+      return projectAdapter.updateOne(payload.project, state);
     }
 
-    case ProjectActionTypes.UpdateProjects: {
-      return projectAdapter.updateMany(action.payload.projects, state);
-    }
 
     case ProjectActionTypes.DeleteProject: {
-      return projectAdapter.removeOne(action.payload.id, state);
+      return projectAdapter.removeOne(payload.id, state);
     }
 
     case ProjectActionTypes.DeleteProjects: {
-      return projectAdapter.removeMany(action.payload.ids, state);
+      return projectAdapter.removeMany(payload.ids, state);
     }
 
     case ProjectActionTypes.LoadProjects: {
-      return projectAdapter.addAll(action.payload.projects, state);
+      return projectAdapter.addAll(payload.projects, state);
+    }
+
+    case ProjectActionTypes.UpdateProjectAdvancedCfg: {
+      const {projectId, sectionKey, data} = payload;
+      const currentProject = state.entities[projectId];
+      const advancedCfg = Object.assign({}, currentProject.advancedCfg);
+      return projectAdapter.updateOne({
+        id: projectId,
+        changes: {
+          advancedCfg: {
+            ...advancedCfg,
+            [sectionKey]: {
+              ...advancedCfg[sectionKey],
+              ...data,
+            }
+          }
+        }
+      }, state);
     }
 
     case ProjectActionTypes.SaveProjectIssueConfig: {
-      const currentProject = state.entities[action.payload.projectId];
+      const currentProject = state.entities[payload.projectId];
       const issueProviderCfg = Object.assign({}, currentProject.issueIntegrationCfgs);
       const update = {
-        id: action.payload.projectId,
+        id: payload.projectId,
         changes: {
           issueProviderCfg: issueProviderCfg
         }

@@ -66,7 +66,7 @@ export class DialogGoogleExportTimeComponent implements OnInit, OnDestroy {
     this._projectService.currentProject$
       .pipe(takeUntil(this._destroy$))
       .subscribe((project: Project) => {
-        this.opts = {...project.googleTimeSheetExport};
+        this.opts = {...project.advancedCfg.googleTimeSheetExport};
         this._projectId = project.id;
         this._startedTimeToday = project.startedTimeToday;
       });

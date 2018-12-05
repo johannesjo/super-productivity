@@ -45,7 +45,7 @@ export class DialogSimpleTaskSummaryComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    this._subs.add(this._projectService.currentProject$.subscribe((val) => {
+    this._subs.add(this._projectService.advancedCfg$.subscribe((val) => {
       this.options = val.simpleSummarySettings;
       this.tasksTxt = this._createTasksText(this.data.tasks);
     }));

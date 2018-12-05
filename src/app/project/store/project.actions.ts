@@ -1,7 +1,7 @@
 import { Action } from '@ngrx/store';
 import { Update } from '@ngrx/entity';
 import { ProjectState } from './project.reducer';
-import { Project } from '../project.model';
+import { Project, ProjectAdvancedCfgKey } from '../project.model';
 import { IssueIntegrationCfg, IssueProviderKey } from '../../issue/issue';
 
 export enum ProjectActionTypes {
@@ -13,7 +13,8 @@ export enum ProjectActionTypes {
   AddProject = '[Project] Add Project',
   AddProjects = '[Project] Add Projects',
   UpdateProject = '[Project] Update Project',
-  UpdateProjects = '[Project] Update Projects',
+  UpdateProjectAdvancedCfg = '[Project] Update Project Advanced Cfg',
+  UpdateProjectIssueProviderCfg = '[Project] Update Project Issue Provider Cfg',
   DeleteProject = '[Project] Delete Project',
   DeleteProjects = '[Project] Delete Projects',
   SaveProjectIssueConfig = '[Project] Save Issue Config for Project',
@@ -61,13 +62,19 @@ export class UpdateProject implements Action {
   }
 }
 
-export class UpdateProjects implements Action {
-  readonly type = ProjectActionTypes.UpdateProjects;
+export class UpdateProjectAdvancedCfg implements Action {
+  readonly type = ProjectActionTypes.UpdateProjectAdvancedCfg;
 
-  constructor(public payload: { projects: Update<Project>[] }) {
+  constructor(public payload: { projectId: string; sectionKey: ProjectAdvancedCfgKey; data: any }) {
   }
 }
 
+export class UpdateProjectIssueProviderCfg implements Action {
+  readonly type = ProjectActionTypes.UpdateProjectIssueProviderCfg;
+
+  constructor(public payload: { projectId: string; issueProviderKey: IssueProviderKey; providerCfg: IssueIntegrationCfg }) {
+  }
+}
 
 export class DeleteProject implements Action {
   readonly type = ProjectActionTypes.DeleteProject;
@@ -97,7 +104,8 @@ export type ProjectActions
   | AddProject
   | AddProjects
   | UpdateProject
-  | UpdateProjects
+  | UpdateProjectAdvancedCfg
+  | UpdateProjectIssueProviderCfg
   | DeleteProject
   | DeleteProjects
   | SaveProjectIssueConfig

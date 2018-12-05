@@ -1,4 +1,4 @@
-import { Project, SimpleSummarySettings } from './project.model';
+import { GoogleTimeSheetExport, Project, SimpleSummarySettings } from './project.model';
 
 export const SIMPLE_SUMMARY_DEFAULTS: SimpleSummarySettings = {
   separateBy: '',
@@ -14,6 +14,23 @@ export const SIMPLE_SUMMARY_DEFAULTS: SimpleSummarySettings = {
   regExToRemove: '',
 };
 
+export const GOOGLE_TIME_SHEET_EXPORT_DEFAULTS: GoogleTimeSheetExport = {
+  spreadsheetId: null,
+  isAutoLogin: false,
+  isAutoFocusEmpty: false,
+  isRoundWorkTimeUp: null,
+  roundStartTimeTo: null,
+  roundEndTimeTo: null,
+  roundWorkTimeTo: null,
+  lastExported: null,
+  defaultValues: [
+    '{date}',
+    '{startTime}',
+    '{currentTime}',
+    '{totalTime}',
+  ]
+};
+
 
 export const DEFAULT_PROJECT: Project = {
   id: null,
@@ -23,23 +40,10 @@ export const DEFAULT_PROJECT: Project = {
   startedTimeToday: null,
   timeWorkedWithoutBreak: null,
   issueIntegrationCfgs: {},
-  googleTimeSheetExport: {
-    spreadsheetId: null,
-    isAutoLogin: false,
-    isAutoFocusEmpty: false,
-    isRoundWorkTimeUp: null,
-    roundStartTimeTo: null,
-    roundEndTimeTo: null,
-    roundWorkTimeTo: null,
-    lastExported: null,
-    defaultValues: [
-      '{date}',
-      '{startTime}',
-      '{currentTime}',
-      '{totalTime}',
-    ]
+  advancedCfg: {
+    googleTimeSheetExport: GOOGLE_TIME_SHEET_EXPORT_DEFAULTS,
+    simpleSummarySettings: SIMPLE_SUMMARY_DEFAULTS
   },
-  simpleSummarySettings: SIMPLE_SUMMARY_DEFAULTS
 };
 
 

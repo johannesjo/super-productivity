@@ -39,6 +39,13 @@ export interface SimpleSummarySettingsCopy {
 
 export type SimpleSummarySettings = Readonly<SimpleSummarySettingsCopy>;
 
+export type ProjectAdvancedCfg = Readonly<{
+  googleTimeSheetExport: GoogleTimeSheetExport;
+  simpleSummarySettings: SimpleSummarySettings;
+}>;
+
+export type ProjectAdvancedCfgKey = keyof ProjectAdvancedCfg;
+
 export type Project = Readonly<{
   id: string;
   title: string;
@@ -47,7 +54,6 @@ export type Project = Readonly<{
   startedTimeToday: number;
   timeWorkedWithoutBreak: number;
   issueIntegrationCfgs: IssueIntegrationCfgs;
-  googleTimeSheetExport: GoogleTimeSheetExport;
-  simpleSummarySettings: SimpleSummarySettings;
+  advancedCfg: ProjectAdvancedCfg;
 }>;
 

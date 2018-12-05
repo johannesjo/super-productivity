@@ -20,6 +20,7 @@ export class ProjectEffects {
         ProjectActionTypes.DeleteProject,
         ProjectActionTypes.SetCurrentProject,
         ProjectActionTypes.UpdateProject,
+        ProjectActionTypes.UpdateProjectAdvancedCfg,
         ProjectActionTypes.SaveProjectIssueConfig,
       ),
       withLatestFrom(

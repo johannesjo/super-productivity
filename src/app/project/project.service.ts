@@ -1,13 +1,13 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { GoogleTimeSheetExport, Project, SimpleSummarySettings } from './project.model';
+import { GoogleTimeSheetExport, Project, ProjectAdvancedCfg, ProjectAdvancedCfgKey, SimpleSummarySettings } from './project.model';
 import { PersistenceService } from '../core/persistence/persistence.service';
 import { select, Store } from '@ngrx/store';
 import { ProjectActionTypes } from './store/project.actions';
 import shortid from 'shortid';
 import {
   initialProjectState,
-  ProjectState,
+  ProjectState, selectAdvancedProjectCfg,
   selectAllProjects,
   selectCurrentProject,
   selectCurrentProjectId,
@@ -24,6 +24,7 @@ export class ProjectService {
   list$: Observable<Project[]> = this._store.pipe(select(selectAllProjects));
   currentProject$: Observable<Project> = this._store.pipe(select(selectCurrentProject));
   currentJiraCfg$: Observable<JiraCfg> = this._store.pipe(select(selectProjectJiraCfg));
+  advancedCfg$: Observable<ProjectAdvancedCfg> = this._store.pipe(select(selectAdvancedProjectCfg));
   currentId$: Observable<string> = this._store.pipe(select(selectCurrentProjectId));
   currentId: string;
 
@@ -89,10 +90,20 @@ export class ProjectService {
     });
   }
 
+  updateAdvancedCfg(projectId: string, sectionKey: ProjectAdvancedCfgKey, data: any) {
+    this._store.dispatch({
+      type: ProjectActionTypes.UpdateProjectAdvancedCfg,
+      payload: {
+        projectId,
+        sectionKey,
+        data,
+      }
+    });
+  }
 
   updateIssueProviderConfig(projectId: string, issueProviderKey: IssueProviderKey, providerCfg: IssueIntegrationCfg) {
     this._store.dispatch({
-      type: ProjectActionTypes.SaveProjectIssueConfig,
+      type: ProjectActionTypes.UpdateProjectIssueProviderCfg,
       payload: {
         projectId,
         issueProviderKey,
@@ -100,7 +111,6 @@ export class ProjectService {
       }
     });
   }
-
 
   setCurrentId(projectId: string) {
     this._store.dispatch({
@@ -111,20 +121,16 @@ export class ProjectService {
 
   // HELPER
   updateTimeSheetExportSettings(projectId: string, data: GoogleTimeSheetExport, isExport = false) {
-    this.update(projectId, {
-      googleTimeSheetExport: {
-        ...data,
-        ...(isExport ? {lastExported: getWorklogStr()} : {})
-      }
+    this.updateAdvancedCfg(projectId, 'googleTimeSheetExport', {
+      ...data,
+      ...(isExport ? {lastExported: getWorklogStr()} : {})
     });
   }
 
   // HELPER
   updateSimpleSummarySettings(projectId: string, data: SimpleSummarySettings) {
-    this.update(projectId, {
-      simpleSummarySettings: {
-        ...data,
-      }
+    this.updateAdvancedCfg(projectId, 'simpleSummarySettings', {
+      ...data,
     });
   }
 
