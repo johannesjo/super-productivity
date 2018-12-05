@@ -18,6 +18,7 @@ export const LS_NOTE_STATE: ProjectDataLsKey = 'NOTE_STATE';
 export const LS_BOOKMARK_STATE: ProjectDataLsKey = 'BOOKMARK_STATE';
 
 // SESSION STORAGE
-const SS_PREFIX = 'SUP_SS';
+const SS_PREFIX = 'SUP_SS_';
 export const SS_NOTE_TMP = SS_PREFIX + 'NOTE_TMP_EDIT';
+export const SS_PROJECT_TMP = SS_PREFIX + 'PROJECT_TMP_EDIT';
 

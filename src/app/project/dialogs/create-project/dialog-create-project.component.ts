@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, Inject, OnDestroy, OnInit } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material';
 import { Project } from '../../project.model';
 import { FormGroup } from '@angular/forms';
@@ -8,17 +8,20 @@ import { DEFAULT_PROJECT } from '../../project.const';
 import { JiraCfg } from '../../../issue/jira/jira';
 import { BASIC_PROJECT_CONFIG_FORM_CONFIG } from '../../project-form-cfg.const';
 import { IssueIntegrationCfgs } from '../../../issue/issue';
+import { SS_PROJECT_TMP } from '../../../core/persistence/ls-keys.const';
+import { Subscription } from 'rxjs/Subscription';
+import { loadFromSessionStorage, saveToSessionStorage } from '../../../core/persistence/local-storage';
 
 @Component({
   selector: 'dialog-create-project',
   templateUrl: './dialog-create-project.component.html',
   styleUrls: ['./dialog-create-project.component.scss'],
 })
-export class DialogCreateProjectComponent implements OnInit {
-  public projectData: Project | Partial<Project> = DEFAULT_PROJECT;
-  public jiraCfg: JiraCfg;
+export class DialogCreateProjectComponent implements OnInit, OnDestroy {
+  projectData: Project | Partial<Project> = DEFAULT_PROJECT;
+  jiraCfg: JiraCfg;
 
-  public openPanelId: string;
+  openPanelId: string;
 
   form = new FormGroup({});
   formOptions: FormlyFormOptions = {
@@ -27,6 +30,8 @@ export class DialogCreateProjectComponent implements OnInit {
     },
   };
   formCfg: FormlyFieldConfig[] = BASIC_PROJECT_CONFIG_FORM_CONFIG.items;
+
+  private _subs = new Subscription();
 
   constructor(
     @Inject(MAT_DIALOG_DATA) private _project: Project,
@@ -38,7 +43,17 @@ export class DialogCreateProjectComponent implements OnInit {
   ngOnInit() {
     if (this._project) {
       this.projectData = Object.assign({}, this._project);
+    } else if (loadFromSessionStorage(SS_PROJECT_TMP)) {
+      this.projectData = loadFromSessionStorage(SS_PROJECT_TMP);
     }
+
+    this._subs.add(this._matDialogRef.afterClosed().subscribe(() => {
+      saveToSessionStorage(SS_PROJECT_TMP, this.projectData);
+    }));
+  }
+
+  ngOnDestroy() {
+    this._subs.unsubscribe();
   }
 
   submit() {
