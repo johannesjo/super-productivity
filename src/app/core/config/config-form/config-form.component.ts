@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormlyFieldConfig, FormlyFormOptions } from '@ngx-formly/core';
 import { FormGroup } from '@angular/forms';
-import { ConfigService } from '../config.service';
+import { ConfigSectionKey } from '../config.model';
 
 @Component({
   selector: 'config-form',
@@ -12,7 +12,7 @@ export class ConfigFormComponent {
 
   config: any;
   @Input() sectionKey;
-  @Output() save: EventEmitter<any> = new EventEmitter<any>();
+  @Output() save: EventEmitter<{ sectionKey: ConfigSectionKey, config: any }> = new EventEmitter();
   fields: FormlyFieldConfig[];
   form = new FormGroup({});
   options: FormlyFormOptions = {
@@ -21,7 +21,7 @@ export class ConfigFormComponent {
     },
   };
 
-  constructor(private readonly _configService: ConfigService) {
+  constructor() {
   }
 
   @Input() set cfg(cfg) {
@@ -37,8 +37,10 @@ export class ConfigFormComponent {
     if (!this.config) {
       throw new Error('No config for ' + this.sectionKey);
     } else {
-      this._configService.updateSection(this.sectionKey, this.config);
-      this.save.emit();
+      this.save.emit({
+        sectionKey: this.sectionKey,
+        config: this.config,
+      });
     }
   }
 }

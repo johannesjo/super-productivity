@@ -2,7 +2,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ConfigService } from '../../core/config/config.service';
 import { GLOBAL_CONFIG_FORM_CONFIG } from '../../core/config/config-form-config.const';
 import { ProjectService } from '../../project/project.service';
-import { GlobalConfig } from '../../core/config/config.model';
+import { ConfigSectionKey, GlobalConfig } from '../../core/config/config.model';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -31,4 +31,14 @@ export class ConfigPageComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     this._subs.unsubscribe();
   }
+
+  saveGlobalCfg(ev: { sectionKey: ConfigSectionKey, config: any }) {
+    const {sectionKey, config} = ev;
+    if (!sectionKey || !config) {
+      throw new Error('Not enough data');
+    } else {
+      this.configService.updateSection(sectionKey, config);
+    }
+  }
+
 }

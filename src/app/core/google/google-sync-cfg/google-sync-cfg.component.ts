@@ -53,8 +53,10 @@ export class GoogleSyncCfgComponent implements OnInit, OnDestroy {
 
   submit() {
     if (this.formRef.valid) {
-      this._configService.updateSection('googleDriveSync', this.cfg);
-      this.save.emit();
+      this.save.emit({
+        sectionKey: 'googleDriveSync',
+        config: this.cfg,
+      });
     } else {
       Object.keys(this.formRef.controls)
         .forEach(fieldName =>
