@@ -1,5 +1,7 @@
 // tslint:disable:max-line-length
-export const KEYBOARD_SETTINGS_FORM_CFG = {
+import { ConfigFormSection } from '../config.model';
+
+export const KEYBOARD_SETTINGS_FORM_CFG: ConfigFormSection = {
   title: 'Keyboard Shortcuts',
   key: 'keyboard',
   /* tslint:disable */

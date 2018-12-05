@@ -1,3 +1,5 @@
+import { FormlyFieldConfig } from '@ngx-formly/core';
+
 export type KeyboardConfig = Readonly<{
   globalShowHide: string,
   toggleBacklog: string,
@@ -94,3 +96,16 @@ export type SectionConfig
   | GoogleSession
   | UiHelperSettings
   ;
+
+// Intermediate model
+export interface ConfigFormSection {
+  title: string;
+  key: ConfigSectionKey;
+  help?: string;
+  customSection?: string;
+  items?: FormlyFieldConfig[];
+}
+
+export type ConfigFormConfig = Readonly<ConfigFormSection[]>;
+
+
