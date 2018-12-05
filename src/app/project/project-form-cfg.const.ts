@@ -62,13 +62,5 @@ export const BASIC_PROJECT_CONFIG_FORM_CONFIG: ConfigFormSection = {
 };
 
 export const PROJECT_CONFIG_FORM_CONFIG: ConfigFormConfig = [
-  {
-    title: 'Basic Settings',
-    key: 'keyboard',
-    /* tslint:disable */
-    help: `Yadda yada yada`,
-    /* tslint:enable */
-    customSection: 'GOOGLE_SYNC',
-  },
 ];
 

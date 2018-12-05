@@ -18,6 +18,14 @@
                           [cfg]="projectCfg[section.key]"></config-section>
         </section>
       </div>
+
+      <div *ngFor="let section of issueIntegrationFormCfg">
+        <section class="config-section mat-elevation-z2">
+          <config-section [section]="section"
+                          [cfg]="issueIntegrationCfgs[section.key]"></config-section>
+        </section>
+      </div>
+
     </div>
 
     <div class="settings-col"

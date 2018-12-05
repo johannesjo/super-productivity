@@ -6,6 +6,8 @@ import { ConfigSectionKey, GlobalConfig } from '../../core/config/config.model';
 import { Subscription } from 'rxjs';
 import { Project, ProjectAdvancedCfg, ProjectCfgFormKey } from '../../project/project.model';
 import { BASIC_PROJECT_CONFIG_FORM_CONFIG, PROJECT_CONFIG_FORM_CONFIG } from '../../project/project-form-cfg.const';
+import { IssueIntegrationCfgs } from '../../issue/issue';
+import { ISSUE_PROVIDER_FORM_CFGS } from '../../issue/issue.const';
 
 @Component({
   selector: 'config-page',
@@ -15,10 +17,12 @@ import { BASIC_PROJECT_CONFIG_FORM_CONFIG, PROJECT_CONFIG_FORM_CONFIG } from '..
 export class ConfigPageComponent implements OnInit, OnDestroy {
   basicProjectSettingsFormCfg = BASIC_PROJECT_CONFIG_FORM_CONFIG;
   projectConfigFormCfg = PROJECT_CONFIG_FORM_CONFIG;
+  issueIntegrationFormCfg = ISSUE_PROVIDER_FORM_CFGS;
   globalConfigFormCfg = GLOBAL_CONFIG_FORM_CONFIG;
 
   currentProject: Project;
   projectCfg: ProjectAdvancedCfg;
+  issueIntegrationCfgs: IssueIntegrationCfgs;
   globalCfg: GlobalConfig;
 
   private _subs = new Subscription();
@@ -36,6 +40,7 @@ export class ConfigPageComponent implements OnInit, OnDestroy {
     this._subs.add(this.projectService.currentProject$.subscribe((project) => {
       this.currentProject = project;
       this.projectCfg = project.advancedCfg;
+      this.issueIntegrationCfgs = project.issueIntegrationCfgs;
     }));
   }
 

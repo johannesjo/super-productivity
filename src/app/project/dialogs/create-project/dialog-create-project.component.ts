@@ -1,12 +1,13 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material';
-import { IssueIntegrationCfgs, Project } from '../../project.model';
+import { Project } from '../../project.model';
 import { FormGroup } from '@angular/forms';
 import { FormlyFieldConfig, FormlyFormOptions } from '@ngx-formly/core';
 import { ProjectService } from '../../project.service';
 import { DEFAULT_PROJECT } from '../../project.const';
 import { JiraCfg } from '../../../issue/jira/jira';
 import { BASIC_PROJECT_CONFIG_FORM_CONFIG } from '../../project-form-cfg.const';
+import { IssueIntegrationCfgs } from '../../../issue/issue';
 
 @Component({
   selector: 'dialog-create-project',

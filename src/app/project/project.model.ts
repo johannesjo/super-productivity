@@ -1,11 +1,5 @@
-import { IssueIntegrationCfg } from '../issue/issue';
-import { JiraCfg } from '../issue/jira/jira';
+import { IssueIntegrationCfgs, IssueProviderKey } from '../issue/issue';
 
-export interface IssueIntegrationCfgs {
-  // should be the same as key IssueProviderKey
-  JIRA?: JiraCfg;
-  GIT?: IssueIntegrationCfg;
-}
 
 export type RoundTimeOption = 'QUARTER' | 'HALF' | 'HOUR';
 
@@ -57,6 +51,6 @@ export type Project = Readonly<{
   advancedCfg: ProjectAdvancedCfg;
 }>;
 
-export type ProjectCfgFormKey = ProjectAdvancedCfgKey | 'basic';
+export type ProjectCfgFormKey = ProjectAdvancedCfgKey | IssueProviderKey | 'basic';
 
 

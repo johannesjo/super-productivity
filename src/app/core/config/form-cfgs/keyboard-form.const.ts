@@ -24,7 +24,7 @@ export const KEYBOARD_SETTINGS_FORM_CFG: ConfigFormSection = {
     // SYSTEM WIDE
     {
       className: 'tpl',
-      template: ' <h3 class="md-caption">Global Shortcuts (system wide)</h3>',
+      template: ' <h3 class="sub-section-heading">Global Shortcuts (system wide)</h3>',
     },
     {
       key: 'globalShowHide',
@@ -36,7 +36,7 @@ export const KEYBOARD_SETTINGS_FORM_CFG: ConfigFormSection = {
     // APP WIDE
     {
       className: 'tpl',
-      template: `<h3 class="md-caption">Global Shortcuts (application wide)</h3>`,
+      template: `<h3 class="sub-section-heading">Global Shortcuts (application wide)</h3>`,
     },
     {
       key: 'addNewTask',
@@ -125,7 +125,7 @@ export const KEYBOARD_SETTINGS_FORM_CFG: ConfigFormSection = {
     // TASKS
     {
       className: 'tpl',
-      template: '<h3 class="md-caption">Tasks</h3>\n<p>The following shortcuts apply for the currently selected task (selected via tab or mouse).</p>',
+      template: '<h3 class="sub-section-heading">Tasks</h3>\n<p>The following shortcuts apply for the currently selected task (selected via tab or mouse).</p>',
     },
     {
       key: 'taskEditTitle',

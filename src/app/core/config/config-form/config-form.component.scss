@@ -6,6 +6,11 @@
   float: none !important;
 }
 
+::ng-deep .sub-section-heading {
+  margin-top: $s*3 !important;
+  margin-bottom: $s;
+}
+
 .controls {
   clear: both;
   text-align: right;
