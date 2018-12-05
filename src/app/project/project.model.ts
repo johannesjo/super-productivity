@@ -24,17 +24,17 @@ export interface GoogleTimeSheetExportCopy {
 export type GoogleTimeSheetExport = Readonly<GoogleTimeSheetExportCopy>;
 
 export interface SimpleSummarySettingsCopy {
-  separateBy: string,
-  separateFieldsBy: string,
-  isUseNewLine: boolean,
-  isListSubTasks: boolean,
-  isListDoneOnly: boolean,
-  isWorkedOnTodayOnly: boolean,
-  showTitle: boolean,
-  showTimeSpent: boolean,
-  isTimeSpentAsMilliseconds: boolean,
-  showDate: boolean,
-  regExToRemove: string,
+  separateBy: string;
+  separateFieldsBy: string;
+  isUseNewLine: boolean;
+  isListSubTasks: boolean;
+  isListDoneOnly: boolean;
+  isWorkedOnTodayOnly: boolean;
+  showTitle: boolean;
+  showTimeSpent: boolean;
+  isTimeSpentAsMilliseconds: boolean;
+  showDate: boolean;
+  regExToRemove: string;
 }
 
 export type SimpleSummarySettings = Readonly<SimpleSummarySettingsCopy>;
