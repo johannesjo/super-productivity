@@ -44,23 +44,9 @@ export const DEFAULT_PROJECT: Project = {
 
 
 export const FIRST_PROJECT: Project = {
+  ...DEFAULT_PROJECT,
   id: 'DEFAULT',
   title: 'Super Productivity',
   themeColor: 'light-blue',
   isDarkTheme: false,
-  startedTimeToday: null,
-  timeWorkedWithoutBreak: null,
-  issueIntegrationCfgs: {},
-  googleTimeSheetExport: {
-    spreadsheetId: null,
-    isAutoLogin: false,
-    isAutoFocusEmpty: false,
-    isRoundWorkTimeUp: null,
-    roundStartTimeTo: null,
-    roundEndTimeTo: null,
-    roundWorkTimeTo: null,
-    defaultValues: [],
-    lastExported: null,
-  },
-  simpleSummarySettings: SIMPLE_SUMMARY_DEFAULTS
 };
