@@ -1,40 +1,41 @@
-<h2 class="mat-h2">Projects</h2>
+<div class="page-wrapper">
+  <h2 class="mat-h2">Projects</h2>
 
+  <div class="project-list">
+    <mat-card class="project"
+              *ngFor="let project of projectService.list$|async">
 
-<div class="project-list">
-  <mat-card class="project"
-            *ngFor="let project of projectService.list$|async">
+      <div class="title"
+           [class.isCurrent]="project.id === (projectService.currentId$|async)">{{project.title}}
+      </div>
 
-    <div class="title"
-         [class.isCurrent]="project.id === (projectService.currentId$|async)">{{project.title}}
-    </div>
+      <div class="issue-providers">
+        <mat-icon *ngIf="project.issueIntegrationCfgs?.JIRA?.isEnabled">explore</mat-icon>
+        <mat-icon *ngIf="project.issueIntegrationCfgs?.GIT?.isEnabled">github_circle</mat-icon>
+      </div>
 
-    <div class="issue-providers">
-      <mat-icon *ngIf="project.issueIntegrationCfgs?.JIRA?.isEnabled">explore</mat-icon>
-      <mat-icon *ngIf="project.issueIntegrationCfgs?.GIT?.isEnabled">github_circle</mat-icon>
-    </div>
+      <div class="controls">
+        <button mat-raised-button
+                (click)="edit(project)"
+                color="primary">
+          <mat-icon aria-label="Edit">edit</mat-icon>
+          Edit
+        </button>
+        <button mat-raised-button
+                *ngIf="project.id !== (projectService.currentId$|async)"
+                (click)="remove(project.id)"
+                color="warn">
+          <mat-icon aria-label="Delete">delete</mat-icon>
+          Delet
+        </button>
+      </div>
 
-    <div class="controls">
-      <button mat-raised-button
-              (click)="edit(project)"
-              color="primary">
-        <mat-icon aria-label="Edit">edit</mat-icon>
-        Edit
-      </button>
-      <button mat-raised-button
-              *ngIf="project.id !== (projectService.currentId$|async)"
-              (click)="remove(project.id)"
-              color="warn">
-        <mat-icon aria-label="Delete">delete</mat-icon>
-        Delet
-      </button>
-    </div>
-
-  </mat-card>
+    </mat-card>
+  </div>
+  <button (click)="openCreateDialog()"
+          mat-raised-button
+          color="primary">
+    <mat-icon aria-label="Add">add</mat-icon>
+    Create New
+  </button>
 </div>
-<button (click)="openCreateDialog()"
-        mat-raised-button
-        color="primary">
-  <mat-icon aria-label="Add">add</mat-icon>
-  Create New
-</button>
