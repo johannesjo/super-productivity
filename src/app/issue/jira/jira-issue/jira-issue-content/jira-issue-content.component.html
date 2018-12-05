@@ -50,7 +50,7 @@
         </div>
       </td>
     </tr>
-    <tr>
+    <tr *ngIf="task.issueData.comments">
       <th>Comments</th>
       <td>
         <div class="comment"
@@ -65,6 +65,10 @@
             <div>{{comment.body}}</div>
           </div>
         </div>
+
+        <a [href]="task.issueData.url"
+           mat-raised-button=""
+           target="_blank"><mat-icon>textsms</mat-icon> Write a comment</a>
       </td>
     </tr>
   </table>

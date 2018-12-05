@@ -16,3 +16,5 @@ export type IssueProviderKey = 'JIRA' | 'GIT';
 export interface IssueEntityMap {
   JIRA: Dictionary<JiraIssue>;
 }
+
+export type IssueData = Readonly<JiraIssue>;

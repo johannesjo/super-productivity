@@ -1,4 +1,4 @@
-import { IssueProviderKey } from '../issue/issue';
+import { IssueData, IssueProviderKey } from '../issue/issue';
 
 export type DropListModelSource = 'UNDONE' | 'DONE' | 'BACKLOG';
 
@@ -29,7 +29,7 @@ export interface TaskCopy {
 export type Task = Readonly<TaskCopy>;
 
 export interface TaskWithIssueData extends Task {
-  readonly issueData?: any;
+  readonly issueData?: IssueData;
 }
 
 
