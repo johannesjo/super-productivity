@@ -3,10 +3,19 @@
   <div class="row">
     <div class="settings-col">
       <h1 class="md-subhead">Project Specific Settings</h1>
+
+      <div>
+        <section class="config-section mat-elevation-z2">
+          <config-section [section]="basicProjectSettingsFormCfg"
+                          [cfg]="currentProject"
+                          (save)="saveProjectBasicCfg($event)"></config-section>
+        </section>
+      </div>
+
       <div *ngFor="let section of projectConfigFormCfg">
         <section class="config-section mat-elevation-z2">
           <config-section [section]="section"
-                          [cfg]="globalCfg[section.key]"></config-section>
+                          [cfg]="projectCfg[section.key]"></config-section>
         </section>
       </div>
     </div>

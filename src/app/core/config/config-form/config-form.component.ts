@@ -2,6 +2,7 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormlyFieldConfig, FormlyFormOptions } from '@ngx-formly/core';
 import { FormGroup } from '@angular/forms';
 import { ConfigSectionKey } from '../config.model';
+import { ProjectCfgFormKey } from '../../../project/project.model';
 
 @Component({
   selector: 'config-form',
@@ -12,7 +13,7 @@ export class ConfigFormComponent {
 
   config: any;
   @Input() sectionKey;
-  @Output() save: EventEmitter<{ sectionKey: ConfigSectionKey, config: any }> = new EventEmitter();
+  @Output() save: EventEmitter<{ sectionKey: ConfigSectionKey | ProjectCfgFormKey, config: any }> = new EventEmitter();
   fields: FormlyFieldConfig[];
   form = new FormGroup({});
   options: FormlyFormOptions = {

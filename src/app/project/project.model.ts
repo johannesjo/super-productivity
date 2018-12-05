@@ -57,3 +57,6 @@ export type Project = Readonly<{
   advancedCfg: ProjectAdvancedCfg;
 }>;
 
+export type ProjectCfgFormKey = ProjectAdvancedCfgKey | 'basic';
+
+

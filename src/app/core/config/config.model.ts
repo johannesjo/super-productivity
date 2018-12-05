@@ -1,4 +1,5 @@
 import { FormlyFieldConfig } from '@ngx-formly/core';
+import { ProjectCfgFormKey } from '../../project/project.model';
 
 export type KeyboardConfig = Readonly<{
   globalShowHide: string,
@@ -100,7 +101,7 @@ export type SectionConfig
 // Intermediate model
 export interface ConfigFormSection {
   title: string;
-  key: ConfigSectionKey;
+  key: ConfigSectionKey | ProjectCfgFormKey;
   help?: string;
   customSection?: string;
   items?: FormlyFieldConfig[];

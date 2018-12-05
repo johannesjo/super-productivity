@@ -6,30 +6,7 @@ import { FormlyFieldConfig, FormlyFormOptions } from '@ngx-formly/core';
 import { ProjectService } from '../../project.service';
 import { DEFAULT_PROJECT } from '../../project.const';
 import { JiraCfg } from '../../../issue/jira/jira';
-
-const ALL_THEMES = [
-  'blue',
-  'indigo',
-  'purple',
-  'deep-purple',
-  'light-blue',
-  'cyan',
-  'teal',
-  'green',
-  'light-green',
-  'indigo',
-  'lime',
-  'yellow',
-  'amber',
-  'deep-orange',
-  'grey',
-  'blue-grey',
-  'indigo',
-  'indigo',
-];
-const themeOpts = ALL_THEMES.map((theme) => {
-  return {label: theme, value: theme};
-});
+import { BASIC_PROJECT_CONFIG_FORM_CONFIG } from '../../project-form-cfg.const';
 
 @Component({
   selector: 'dialog-create-project',
@@ -48,34 +25,7 @@ export class DialogCreateProjectComponent implements OnInit {
       awesomeIsForced: false,
     },
   };
-  formCfg: FormlyFieldConfig[] = [
-    {
-      key: 'title',
-      type: 'input',
-      templateOptions: {
-        required: true,
-        label: 'Title',
-      },
-    },
-    {
-      key: 'themeColor',
-      type: 'select',
-      templateOptions: {
-        label: 'Theme Color',
-        options: themeOpts,
-        valueProp: 'value',
-        labelProp: 'label',
-        placeholder: 'Theme Color'
-      },
-    },
-    {
-      key: 'isDarkTheme',
-      type: 'checkbox',
-      templateOptions: {
-        label: 'Use Dark Theme',
-      },
-    },
-  ];
+  formCfg: FormlyFieldConfig[] = BASIC_PROJECT_CONFIG_FORM_CONFIG.items;
 
   constructor(
     @Inject(MAT_DIALOG_DATA) private _project: Project,

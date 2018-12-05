@@ -1,6 +1,7 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { expandAnimation } from '../../../ui/animations/expand.ani';
 import { ConfigSectionKey } from '../config.model';
+import { ProjectCfgFormKey } from '../../../project/project.model';
 
 @Component({
   selector: 'config-section',
@@ -11,7 +12,7 @@ import { ConfigSectionKey } from '../config.model';
 export class ConfigSectionComponent implements OnInit {
   @Input() section;
   @Input() cfg;
-  @Output() save: EventEmitter<{sectionKey: ConfigSectionKey, config: any}> = new EventEmitter();
+  @Output() save: EventEmitter<{ sectionKey: ConfigSectionKey | ProjectCfgFormKey, config: any }> = new EventEmitter();
 
   public isExpanded = false;
 
