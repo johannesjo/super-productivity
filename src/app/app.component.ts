@@ -21,6 +21,7 @@ import { warpRouteAnimation } from './ui/animations/warp-route';
 import { NoteService } from './note/note.service';
 import { MediaMatcher } from '@angular/cdk/layout';
 import { DOCUMENT } from '@angular/common';
+import { take } from 'rxjs/operators';
 
 const SIDE_PANEL_BREAKPOINT = 900;
 
@@ -73,6 +74,8 @@ export class AppComponent implements OnInit {
     // INIT Services and global handlers
     this._googleDriveSyncService.init();
     this._chromeExtensionInterface.init();
+    this._initHandlersForOtherBodyClasses();
+
     if (IS_ELECTRON) {
       this._electronService.ipcRenderer.send(IPC_APP_READY);
       this._initElectronErrorHandler();
@@ -127,6 +130,20 @@ export class AppComponent implements OnInit {
 
   getPage(outlet) {
     return outlet.activatedRouteData['page'] || 'one';
+  }
+
+  private _initHandlersForOtherBodyClasses() {
+    this.document.body.classList.add('isNoJira');
+
+    if (IS_ELECTRON) {
+      this.document.body.classList.add('isElectron');
+      this.document.body.classList.remove('isNoJira');
+    } else {
+      this._chromeExtensionInterface.isReady$.pipe(take(1)).subscribe(() => {
+        this.document.body.classList.add('isExtension');
+        this.document.body.classList.remove('isNoJira');
+      });
+    }
   }
 
   private _setTheme(isDarkTheme: boolean, theme: string) {
