@@ -2,8 +2,8 @@ import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material';
 import { NoteService } from '../note.service';
 import { Reminder } from '../../reminder/reminder.model';
+import { SS_NOTE_TMP } from '../../core/persistence/ls-keys.const';
 
-const NOTE_TMP_STORAGE_KEY = 'SP_NOTE_TMP_EDIT';
 
 @Component({
   selector: 'dialog-add-note',
@@ -21,7 +21,7 @@ export class DialogAddNoteComponent {
     private _noteService: NoteService,
     @Inject(MAT_DIALOG_DATA) public data: { reminder: Reminder },
   ) {
-    this.noteContent = sessionStorage.getItem(NOTE_TMP_STORAGE_KEY) || '';
+    this.noteContent = sessionStorage.getItem(SS_NOTE_TMP) || '';
   }
 
   keydownHandler(ev: KeyboardEvent) {
@@ -54,10 +54,10 @@ export class DialogAddNoteComponent {
   }
 
   saveTmp(val = this.noteContent || '') {
-    sessionStorage.setItem(NOTE_TMP_STORAGE_KEY, val);
+    sessionStorage.setItem(SS_NOTE_TMP, val);
   }
 
   private _clearSessionStorage() {
-    sessionStorage.setItem(NOTE_TMP_STORAGE_KEY, '');
+    sessionStorage.setItem(SS_NOTE_TMP, '');
   }
 }

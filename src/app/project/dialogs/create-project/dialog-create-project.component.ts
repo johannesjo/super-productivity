@@ -9,7 +9,9 @@ import { JiraCfg } from '../../../issue/jira/jira';
 import { BASIC_PROJECT_CONFIG_FORM_CONFIG } from '../../project-form-cfg.const';
 import { IssueIntegrationCfgs } from '../../../issue/issue';
 import { DialogJiraInitialSetupComponent } from '../../../issue/jira/dialog-jira-initial-setup/dialog-jira-initial-setup.component';
-import { Subscription } from 'rxjs';
+import { SS_PROJECT_TMP } from '../../../core/persistence/ls-keys.const';
+import { Subscription } from 'rxjs/Subscription';
+import { loadFromSessionStorage, saveToSessionStorage } from '../../../core/persistence/local-storage';
 
 @Component({
   selector: 'dialog-create-project',
@@ -42,11 +44,29 @@ export class DialogCreateProjectComponent implements OnInit, OnDestroy {
   ngOnInit() {
     if (this._project) {
       this.projectData = Object.assign({}, this._project);
+    } else {
+      if (loadFromSessionStorage(SS_PROJECT_TMP)) {
+        this.projectData = loadFromSessionStorage(SS_PROJECT_TMP);
+      }
 
-      if (this.projectData.issueIntegrationCfgs) {
-        if (this.projectData.issueIntegrationCfgs.JIRA) {
-          this.jiraCfg = this.projectData.issueIntegrationCfgs.JIRA;
-        }
+      // save tmp data if adding a new project
+      // NOTE won't be properly executed if added to subs
+      this._matDialogRef.afterClosed().subscribe(() => {
+        const issueIntegrationCfgs: IssueIntegrationCfgs = Object.assign(this.projectData.issueIntegrationCfgs, {
+          JIRA: this.jiraCfg,
+          GIT: undefined,
+        });
+        const projectDataToSave: Project | Partial<Project> = {
+          ...this.projectData,
+          issueIntegrationCfgs,
+        };
+        saveToSessionStorage(SS_PROJECT_TMP, projectDataToSave);
+      });
+    }
+
+    if (this.projectData.issueIntegrationCfgs) {
+      if (this.projectData.issueIntegrationCfgs.JIRA) {
+        this.jiraCfg = this.projectData.issueIntegrationCfgs.JIRA;
       }
     }
   }
