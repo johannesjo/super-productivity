@@ -254,11 +254,11 @@ export class GoogleDriveSyncService {
 
 
   private async _checkIfRemoteUpdate(): Promise<any> {
-    const lastActiveLocal = this._syncService.getLastActive();
+    const lastSync = this._config._lastSync;
     const promise = this._googleApiService.getFileInfo(this._config._backupDocId)
       .then((res) => {
         const lastModifiedRemote = res.body.modifiedDate;
-        return this._isNewerThan(lastModifiedRemote, lastActiveLocal);
+        return this._isNewerThan(lastModifiedRemote, lastSync);
       });
     this._handleInProgress(promise);
     return await promise;
