@@ -17,13 +17,17 @@ export interface TaskCopy {
 
   created: number;
   isDone?: boolean;
-  isAdditionalInfoOpen?: boolean;
-  isHideSubTasks?: boolean;
+
   notes?: string;
   issueId?: string;
   issueType?: IssueProviderKey;
   parentId?: string;
   attachmentIds: string[];
+
+  // ui model
+  _isAdditionalInfoOpen?: boolean;
+  _isHideSubTasks?: boolean;
+  _currentTab: number;
 }
 
 export type Task = Readonly<TaskCopy>;

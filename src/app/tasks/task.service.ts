@@ -196,6 +196,12 @@ export class TaskService {
     }));
   }
 
+  updateUi(id: string, changes: Partial<Task>) {
+    this._store.dispatch(new UpdateTask({
+      task: {id, changes}
+    }));
+  }
+
   move(taskId: string,
        sourceModelId: DropListModelSource,
        targetModelId: DropListModelSource,
@@ -274,19 +280,19 @@ export class TaskService {
   }
 
   showAdditionalInfoOpen(id: string) {
-    this.update(id, {isAdditionalInfoOpen: true});
+    this.updateUi(id, {_isAdditionalInfoOpen: true});
   }
 
   hideAdditionalInfoOpen(id: string) {
-    this.update(id, {isAdditionalInfoOpen: false});
+    this.updateUi(id, {_isAdditionalInfoOpen: false});
   }
 
   showSubTasks(id: string) {
-    this.update(id, {isHideSubTasks: false});
+    this.updateUi(id, {_isHideSubTasks: false});
   }
 
   hideSubTasks(id: string) {
-    this.update(id, {isHideSubTasks: true});
+    this.updateUi(id, {_isHideSubTasks: true});
   }
 
   focusInList(id: string, idList: string[], offset, isFocusReverseIfNotPossible) {
@@ -321,10 +327,11 @@ export class TaskService {
       timeSpent: 0,
       timeEstimate: 0,
       isDone: false,
-      isAdditionalInfoOpen: false,
       created: Date.now(),
       title,
       id: shortid(),
+      _isAdditionalInfoOpen: false,
+      _currentTab: 0,
       ...additional,
     }) as Task;
   }

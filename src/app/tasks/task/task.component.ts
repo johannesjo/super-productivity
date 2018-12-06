@@ -193,14 +193,14 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   toggleShowAdditionalInfoOpen() {
-    this.task.isAdditionalInfoOpen
+    this.task._isAdditionalInfoOpen
       ? this._taskService.hideAdditionalInfoOpen(this.task.id)
       : this._taskService.showAdditionalInfoOpen(this.task.id);
     this.focusSelf();
   }
 
   toggleHideSubTasks() {
-    this.task.isHideSubTasks
+    this.task._isHideSubTasks
       ? this._taskService.showSubTasks(this.task.id)
       : this._taskService.hideSubTasks(this.task.id);
     this.focusSelf();
@@ -305,7 +305,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
         this._taskService.showSubTasks(this.task.id);
       }
       // if already opened or is sub task select next task
-      if ((this.task.subTasks && this.task.subTasks.length > 0 && this.task.isHideSubTasks === false)) {
+      if ((this.task.subTasks && this.task.subTasks.length > 0 && this.task._isHideSubTasks === false)) {
         this.focusNext();
       }
     }
@@ -317,8 +317,8 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
         this._taskService.hideSubTasks(this.task.id);
       }
       // if already collapsed
-      if (this.task.isHideSubTasks === true) {
-        if (this.task.isAdditionalInfoOpen) {
+      if (this.task._isHideSubTasks === true) {
+        if (this.task._isAdditionalInfoOpen) {
           this.toggleShowAdditionalInfoOpen();
         } else {
           this.focusPrevious();

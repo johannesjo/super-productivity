@@ -3,7 +3,7 @@
      [class.color-contrast]="isCurrent"
      [class.isCurrent]="isCurrent"
      [class.isDone]="task.isDone"
-     [class.isAdditionalInfoOpen]="task.isAdditionalInfoOpen">
+     [class.isAdditionalInfoOpen]="task._isAdditionalInfoOpen">
 
   <div class="first-line">
     <button mat-icon-button=""
@@ -138,7 +138,7 @@
               class="ico-btn show-additional-info-btn hide-xs"
               aria-label="additional-info"
               tabindex="2"
-              [class.isActive]="task.isAdditionalInfoOpen"
+              [class.isActive]="task._isAdditionalInfoOpen"
               (click)="toggleShowAdditionalInfoOpen()">
 
         <mat-icon *ngIf="task.notes||task.issueData"
@@ -203,7 +203,7 @@
                 class="show-xs-only"
                 aria-label="additional-info"
                 tabindex="2"
-                [class.isActive]="task.isAdditionalInfoOpen"
+                [class.isActive]="task._isAdditionalInfoOpen"
                 (click)="toggleShowAdditionalInfoOpen()">
 
           <mat-icon *ngIf="task.notes||task.issueData"
@@ -256,7 +256,7 @@
 
   <task-additional-info class="additional-info"
                         [selectedIndex]="additionalTabsIndex"
-                        *ngIf="task.isAdditionalInfoOpen"
+                        *ngIf="task._isAdditionalInfoOpen"
                         (taskNotesChanged)="onTaskNotesChanged($event)"
                         [@expand]
                         [task]="task"></task-additional-info>
@@ -268,15 +268,15 @@
             color=""
             tabindex="2"
             class="toggle-sub-tasks-btn ico-btn">
-      <mat-icon *ngIf="task.isHideSubTasks">add</mat-icon>
-      <mat-icon *ngIf="!task.isHideSubTasks">remove</mat-icon>
+      <mat-icon *ngIf="task._isHideSubTasks">add</mat-icon>
+      <mat-icon *ngIf="!task._isHideSubTasks">remove</mat-icon>
     </button>
     <task-list [tasks]="task.subTasks"
                listId="SUB"
                [listModelId]="task.id"
                [parentId]="task.id"
                [@expand]
-               *ngIf="!task.isHideSubTasks"
+               *ngIf="!task._isHideSubTasks"
                [focusIdList]="focusIdList"></task-list>
   </div>
 
