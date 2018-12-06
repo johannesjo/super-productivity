@@ -44,8 +44,10 @@ export class ConfigEffects {
   ) {
   }
 
-  private async _saveToLs(state) {
-    const globalConfig = state[1][CONFIG_FEATURE_NAME];
+  private async _saveToLs([action, state]) {
+    console.log(action);
+
+    const globalConfig = state[CONFIG_FEATURE_NAME];
     await this._persistenceService.saveGlobalConfig(globalConfig);
   }
 }

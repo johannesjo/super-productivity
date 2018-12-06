@@ -48,7 +48,7 @@ export class PersistenceService {
   }
 
   async saveProjectsMeta(projectData: ProjectState, isForce = false): Promise<any> {
-    return this._saveToDbWithLastActive(LS_PROJECT_META_LIST, projectData, isForce);
+    return this._saveToDb(LS_PROJECT_META_LIST, projectData, isForce);
   }
 
   async loadReminders(): Promise<Reminder[]> {
@@ -56,11 +56,11 @@ export class PersistenceService {
   }
 
   async saveReminders(reminders: Reminder[], isForce = false): Promise<any> {
-    return this._saveToDbWithLastActive(LS_REMINDER, reminders, isForce);
+    return this._saveToDb(LS_REMINDER, reminders, isForce);
   }
 
   async saveTasksForProject(projectId, taskState: TaskState, isForce = false): Promise<any> {
-    return this._saveToDbWithLastActive(this._makeProjectKey(projectId, LS_TASK_STATE), taskState, isForce);
+    return this._saveToDb(this._makeProjectKey(projectId, LS_TASK_STATE), taskState, isForce);
   }
 
   async loadTasksForProject(projectId): Promise<TaskState> {
@@ -80,9 +80,9 @@ export class PersistenceService {
         ids: Object.keys(entities),
         entities,
       };
-      return this._saveToDbWithLastActive(lsKey, mergedEntities, isForce);
+      return this._saveToDb(lsKey, mergedEntities, isForce);
     } else {
-      return this._saveToDbWithLastActive(lsKey, tasksToArchive, isForce);
+      return this._saveToDb(lsKey, tasksToArchive, isForce);
     }
   }
 
@@ -91,7 +91,7 @@ export class PersistenceService {
   }
 
   async saveIssuesForProject(projectId, issueType: IssueProviderKey, data: JiraIssueState, isForce = false): Promise<any> {
-    return this._saveToDbWithLastActive(this._makeProjectKey(projectId, LS_ISSUE_STATE, issueType), data, isForce);
+    return this._saveToDb(this._makeProjectKey(projectId, LS_ISSUE_STATE, issueType), data, isForce);
   }
 
   // TODO add correct type
@@ -100,7 +100,7 @@ export class PersistenceService {
   }
 
   async saveBookmarksForProject(projectId, bookmarkState: BookmarkState, isForce = false) {
-    return this._saveToDbWithLastActive(this._makeProjectKey(projectId, LS_BOOKMARK_STATE), bookmarkState, isForce);
+    return this._saveToDb(this._makeProjectKey(projectId, LS_BOOKMARK_STATE), bookmarkState, isForce);
   }
 
   async loadBookmarksForProject(projectId): Promise<BookmarkState> {
@@ -108,7 +108,7 @@ export class PersistenceService {
   }
 
   async saveTaskAttachmentsForProject(projectId, attachmentState: AttachmentState, isForce = false) {
-    return this._saveToDbWithLastActive(this._makeProjectKey(projectId, LS_TASK_ATTACHMENT_STATE), attachmentState, isForce);
+    return this._saveToDb(this._makeProjectKey(projectId, LS_TASK_ATTACHMENT_STATE), attachmentState, isForce);
   }
 
   async loadTaskAttachmentsForProject(projectId): Promise<AttachmentState> {
@@ -116,7 +116,7 @@ export class PersistenceService {
   }
 
   async saveNotesForProject(projectId, noteState: NoteState, isForce = false) {
-    return this._saveToDbWithLastActive(this._makeProjectKey(projectId, LS_NOTE_STATE), noteState, isForce);
+    return this._saveToDb(this._makeProjectKey(projectId, LS_NOTE_STATE), noteState, isForce);
   }
 
   async loadNotesForProject(projectId): Promise<NoteState> {
@@ -130,12 +130,12 @@ export class PersistenceService {
   }
 
   async saveGlobalConfig(globalConfig: GlobalConfig, isForce = false) {
-    return this._saveToDbWithLastActive(LS_GLOBAL_CFG, globalConfig, isForce);
+    return this._saveToDb(LS_GLOBAL_CFG, globalConfig, isForce);
   }
 
   // BACKUP AND SYNC RELATED
   // -----------------------
-  saveLastActive(date: string) {
+  saveLastActive(date: string = new Date().toString()) {
     // TODO refactor to timestamp
     console.log('SAVE LAST ACTIVE', date);
 
@@ -152,7 +152,7 @@ export class PersistenceService {
   }
 
   async saveBackup(): Promise<any> {
-    return this._saveToDbWithLastActive(LS_BACKUP, this.loadComplete(), true);
+    return this._saveToDb(LS_BACKUP, this.loadComplete(), true);
   }
 
   async loadComplete(): Promise<AppDataComplete> {
@@ -241,11 +241,9 @@ export class PersistenceService {
 
   // DATA STORAGE INTERFACE
   // ---------------------
-  private async _saveToDbWithLastActive(key: string, data: any, isForce = false): Promise<any> {
+  private async _saveToDb(key: string, data: any, isForce = false): Promise<any> {
     // console.log('save', key, this._isBlockSaving);
     if (!this._isBlockSaving || isForce === true) {
-      // TODO refactor to timestamp
-      this.saveLastActive(new Date().toString());
       return this._databaseService.saveWithLastActive(key, data);
     } else {
       console.warn('BLOCKED SAVING for ', key);

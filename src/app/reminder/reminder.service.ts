@@ -95,6 +95,7 @@ export class ReminderService {
 
   private _saveModel(reminders: Reminder[]) {
     console.log('Reminder._saveModel', this._reminders);
+    this._persistenceService.saveLastActive();
     this._persistenceService.saveReminders(reminders);
     this._updateRemindersInWorker(this._reminders);
   }

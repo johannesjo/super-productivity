@@ -54,6 +54,7 @@ export class ProjectEffects {
   }
 
   private _saveToLs([action, projectFeatureState]) {
+    this._persistenceService.saveLastActive();
     this._persistenceService.saveProjectsMeta(projectFeatureState);
   }
 

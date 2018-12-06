@@ -69,6 +69,7 @@ export class JiraIssueEffects {
 
   private _saveToLs([action, currentProjectId, jiraIssueFeatureState]) {
     if (currentProjectId) {
+      this._persistenceService.saveLastActive();
       this._persistenceService.saveIssuesForProject(currentProjectId, 'JIRA', jiraIssueFeatureState);
     } else {
       throw new Error('No current project id');

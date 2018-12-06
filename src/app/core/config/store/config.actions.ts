@@ -19,7 +19,8 @@ export class UpdateConfigSection implements Action {
 
   constructor(public payload: {
     sectionKey: string
-    sectionCfg: Partial<SectionConfig>
+    sectionCfg: Partial<SectionConfig>,
+    isSkipLastActive: boolean,
   }) {
   }
 }

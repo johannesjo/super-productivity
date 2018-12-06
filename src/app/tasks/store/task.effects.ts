@@ -99,6 +99,7 @@ export class TaskEffects {
 
   private _saveToLs([action, currentProjectId, taskState]) {
     if (currentProjectId) {
+      this._persistenceService.saveLastActive();
       this._persistenceService.saveTasksForProject(currentProjectId, taskState);
     } else {
       throw new Error('No current project id');
@@ -122,6 +123,7 @@ export class TaskEffects {
       });
     });
 
+    this._persistenceService.saveLastActive();
     this._persistenceService.saveToTaskArchiveForProject(currentProjectId, archive);
   }
 
