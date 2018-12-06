@@ -56,6 +56,18 @@ export class TaskEffects {
       tap(this._saveToLs.bind(this))
     );
 
+  @Effect({dispatch: false}) updateTaskUi$: any = this._actions$
+    .pipe(
+      ofType(
+        TaskActionTypes.UpdateTaskUi,
+      ),
+      withLatestFrom(
+        this._store$.pipe(select(selectCurrentProjectId)),
+        this._store$.pipe(select(selectTaskFeatureState)),
+      ),
+      tap(this._saveToLsNoUpdateForLastActive.bind(this))
+    );
+
   @Effect() snackDelete$: any = this._actions$
     .pipe(
       ofType(
@@ -98,8 +110,12 @@ export class TaskEffects {
   }
 
   private _saveToLs([action, currentProjectId, taskState]) {
+    this._persistenceService.saveLastActive();
+    this._saveToLsNoUpdateForLastActive([action, currentProjectId, taskState]);
+  }
+
+  private _saveToLsNoUpdateForLastActive([action, currentProjectId, taskState]) {
     if (currentProjectId) {
-      this._persistenceService.saveLastActive();
       this._persistenceService.saveTasksForProject(currentProjectId, taskState);
     } else {
       throw new Error('No current project id');

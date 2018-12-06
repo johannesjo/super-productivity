@@ -22,7 +22,7 @@ import {
   SetCurrentTask,
   TaskActionTypes,
   UnsetCurrentTask,
-  UpdateTask
+  UpdateTask, UpdateTaskUi
 } from './store/task.actions';
 import { initialTaskState, } from './store/task.reducer';
 import { PersistenceService } from '../core/persistence/persistence.service';
@@ -197,7 +197,7 @@ export class TaskService {
   }
 
   updateUi(id: string, changes: Partial<Task>) {
-    this._store.dispatch(new UpdateTask({
+    this._store.dispatch(new UpdateTaskUi({
       task: {id, changes}
     }));
   }

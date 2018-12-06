@@ -355,7 +355,10 @@ export function taskReducer(
       stateCopy = updateTimeEstimateForTask(id, timeEstimate, stateCopy);
       stateCopy = isDone ? setNextTaskIfCurrent(stateCopy, id) : stateCopy;
       return taskAdapter.updateOne(action.payload.task, stateCopy);
+    }
 
+    case TaskActionTypes.UpdateTaskUi: {
+      return taskAdapter.updateOne(action.payload.task, state);
     }
 
     // TODO also delete related issue :(
