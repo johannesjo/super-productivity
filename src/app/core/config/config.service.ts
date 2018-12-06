@@ -45,13 +45,13 @@ export class ConfigService {
     });
   }
 
-  updateSection(sectionKey: ConfigSectionKey, sectionCfg: Partial<SectionConfig>, isSkipLastActiveUpdated = false) {
+  updateSection(sectionKey: ConfigSectionKey, sectionCfg: Partial<SectionConfig>, isSkipLastActiveUpdate = false) {
     this._store.dispatch({
       type: ConfigActionTypes.UpdateConfigSection,
       payload: {
         sectionKey,
         sectionCfg,
-        isSkipLastActiveUpdated,
+        isSkipLastActiveUpdate,
       },
     });
   }

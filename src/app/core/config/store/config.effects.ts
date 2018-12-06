@@ -46,6 +46,10 @@ export class ConfigEffects {
 
   private async _saveToLs([action, state]) {
     console.log(action);
+    const isSkipLastActiveUpdate = action.payload && action.payload.isSkipLastActiveUpdate;
+    if (!isSkipLastActiveUpdate) {
+      this._persistenceService.saveLastActive();
+    }
 
     const globalConfig = state[CONFIG_FEATURE_NAME];
     await this._persistenceService.saveGlobalConfig(globalConfig);
