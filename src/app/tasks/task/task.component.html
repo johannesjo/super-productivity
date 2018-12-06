@@ -255,9 +255,10 @@
                 [cssClass]="isCurrent?'bg-100':'bg-primary'"></progress-bar>
 
   <task-additional-info class="additional-info"
-                        [selectedIndex]="additionalTabsIndex"
+                        [selectedIndex]="task._currentTab"
                         *ngIf="task._isAdditionalInfoOpen"
                         (taskNotesChanged)="onTaskNotesChanged($event)"
+                        (tabIndexChange)="onTabIndexChange($event)"
                         [@expand]
                         [task]="task"></task-additional-info>
 

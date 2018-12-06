@@ -24,13 +24,13 @@ export class TaskAdditionalInfoComponent {
   issueAttachments: Attachment[];
   localAttachments$: Observable<Attachment[]>;
   taskData: TaskWithSubTasks;
-  @Input() selectedIndex: number;
+  @Input() selectedIndex = 0;
   @Output() taskNotesChanged: EventEmitter<string> = new EventEmitter();
+  @Output() tabIndexChange: EventEmitter<number> = new EventEmitter();
   @ViewChild('issueHeader', {read: ViewContainerRef}) issueHeaderEl: ViewContainerRef;
   @ViewChild('issueContent', {read: ViewContainerRef}) issueContentEl: ViewContainerRef;
   private _issueHeaderRef;
   private _issueContentRef;
-  private _isIssueTplLoaded;
 
   constructor(
     private _resolver: ComponentFactoryResolver,
@@ -50,40 +50,13 @@ export class TaskAdditionalInfoComponent {
     }
     this.localAttachments$ = this.attachmentService.getByIds(this.taskData.attachmentIds);
     this.issueAttachments = this._issueService.getMappedAttachments(this.taskData.issueType, this.taskData.issueData);
-
-    // if (!this._isIssueTplLoaded && this.taskData.issueData && this.taskData.issueType) {
-    //   // delay until other content is ready
-    //   requestAnimationFrame(() => {
-    //     this._loadIssueTemplates(this.taskData);
-    //   });
-    // }
   }
 
-  changeTaskNotes($event) {
+  changeTaskNotes($event: string) {
     this.taskNotesChanged.emit($event);
   }
 
-  // private _loadIssueTemplates(task: TaskWithSubTasks) {
-  //   this._issueContentRef = this._renderComponent(
-  //     this._issueService.getTabContent(task.issueType),
-  //     this.issueContentEl,
-  //     task
-  //   );
-  //
-  //   this._issueHeaderRef = this._renderComponent(
-  //     this._issueService.getTabHeader(task.issueType),
-  //     this.issueHeaderEl,
-  //     task
-  //   );
-  //   this._isIssueTplLoaded = true;
-  // }
-  //
-  // private _renderComponent(componentToRender, targetEl, task: TaskWithSubTasks) {
-  //   if (componentToRender) {
-  //     const factory: ComponentFactory<any> = this._resolver.resolveComponentFactory(componentToRender);
-  //     const ref = targetEl.createComponent(factory);
-  //     ref.instance.task = task;
-  //     return ref;
-  //   }
-  // }
+  indexChange($event: number) {
+    this.tabIndexChange.emit($event);
+  }
 }

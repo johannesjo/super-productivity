@@ -207,8 +207,6 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   focusPrevious(isFocusReverseIfNotPossible = false) {
-    console.log('FOCUS PREVIOUS');
-
     this._taskService.focusPreviousInList(this.task.id, this.focusIdList, isFocusReverseIfNotPossible);
   }
 
@@ -233,6 +231,10 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   onTaskNotesChanged(newVal) {
     this._taskService.update(this.task.id, {notes: newVal});
     this.focusSelf();
+  }
+
+  onTabIndexChange(newVal) {
+    this._taskService.updateUi(this.task.id, {_currentTab: newVal || 0});
   }
 
   private _handleKeyboardShortcuts(ev: KeyboardEvent) {
