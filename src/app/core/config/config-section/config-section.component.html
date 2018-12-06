@@ -6,7 +6,7 @@
   </help-section>
   <div class="form-wrapper {{section.key}}">
     <google-sync-cfg *ngIf="section.customSection==='GOOGLE_SYNC'"
-                     (save)="onSave()"></google-sync-cfg>
+                     (save)="onSave($event)"></google-sync-cfg>
 
     <config-form
       *ngIf="section.items"
