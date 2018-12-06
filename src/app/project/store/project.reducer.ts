@@ -1,4 +1,4 @@
-import { createEntityAdapter, EntityAdapter, EntityState, Update } from '@ngrx/entity';
+import { createEntityAdapter, EntityAdapter, EntityState } from '@ngrx/entity';
 import { Project } from '../project.model';
 import { ProjectActions, ProjectActionTypes } from './project.actions';
 import { createFeatureSelector, createSelector } from '@ngrx/store';
@@ -135,16 +135,22 @@ export function projectReducer(
       }, state);
     }
 
-    case ProjectActionTypes.SaveProjectIssueConfig: {
-      const currentProject = state.entities[payload.projectId];
-      const issueProviderCfg = Object.assign({}, currentProject.issueIntegrationCfgs);
-      const update = {
-        id: payload.projectId,
+    case ProjectActionTypes.UpdateProjectIssueProviderCfg: {
+      const {projectId, providerCfg, issueProviderKey} = action.payload;
+      const currentProject = state.entities[projectId];
+
+      return projectAdapter.updateOne({
+        id: projectId,
         changes: {
-          issueProviderCfg: issueProviderCfg
+          issueIntegrationCfgs: {
+            ...currentProject.issueIntegrationCfgs,
+            [issueProviderKey]: {
+              ...currentProject.issueIntegrationCfgs[issueProviderKey],
+              ...providerCfg,
+            }
+          }
         }
-      } as Update<Project>;
-      return projectAdapter.updateOne(update, state);
+      }, state);
     }
 
     default: {

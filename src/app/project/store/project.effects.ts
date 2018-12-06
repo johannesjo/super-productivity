@@ -21,7 +21,7 @@ export class ProjectEffects {
         ProjectActionTypes.SetCurrentProject,
         ProjectActionTypes.UpdateProject,
         ProjectActionTypes.UpdateProjectAdvancedCfg,
-        ProjectActionTypes.SaveProjectIssueConfig,
+        ProjectActionTypes.UpdateProjectIssueProviderCfg,
       ),
       withLatestFrom(
         this._store$.pipe(select(selectProjectFeatureState))

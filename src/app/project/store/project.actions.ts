@@ -17,7 +17,6 @@ export enum ProjectActionTypes {
   UpdateProjectIssueProviderCfg = '[Project] Update Project Issue Provider Cfg',
   DeleteProject = '[Project] Delete Project',
   DeleteProjects = '[Project] Delete Projects',
-  SaveProjectIssueConfig = '[Project] Save Issue Config for Project',
 }
 
 export class LoadProjectState implements Action {
@@ -90,12 +89,6 @@ export class DeleteProjects implements Action {
   }
 }
 
-export class SaveProjectIssueConfig implements Action {
-  readonly type = ProjectActionTypes.SaveProjectIssueConfig;
-
-  constructor(public payload: { projectId: string, issueProviderKey: IssueProviderKey, providerCfg: IssueIntegrationCfg }) {
-  }
-}
 
 export type ProjectActions
   = LoadProjects
@@ -108,6 +101,5 @@ export type ProjectActions
   | UpdateProjectIssueProviderCfg
   | DeleteProject
   | DeleteProjects
-  | SaveProjectIssueConfig
   ;
 

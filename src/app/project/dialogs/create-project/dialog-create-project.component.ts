@@ -1,5 +1,5 @@
-import { Component, Inject, OnInit } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material';
+import { ChangeDetectorRef, Component, Inject, OnDestroy, OnInit } from '@angular/core';
+import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material';
 import { Project } from '../../project.model';
 import { FormGroup } from '@angular/forms';
 import { FormlyFieldConfig, FormlyFormOptions } from '@ngx-formly/core';
@@ -8,17 +8,17 @@ import { DEFAULT_PROJECT } from '../../project.const';
 import { JiraCfg } from '../../../issue/jira/jira';
 import { BASIC_PROJECT_CONFIG_FORM_CONFIG } from '../../project-form-cfg.const';
 import { IssueIntegrationCfgs } from '../../../issue/issue';
+import { DialogJiraInitialSetupComponent } from '../../../issue/jira/dialog-jira-initial-setup/dialog-jira-initial-setup.component';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'dialog-create-project',
   templateUrl: './dialog-create-project.component.html',
   styleUrls: ['./dialog-create-project.component.scss'],
 })
-export class DialogCreateProjectComponent implements OnInit {
-  public projectData: Project | Partial<Project> = DEFAULT_PROJECT;
-  public jiraCfg: JiraCfg;
-
-  public openPanelId: string;
+export class DialogCreateProjectComponent implements OnInit, OnDestroy {
+  projectData: Project | Partial<Project> = DEFAULT_PROJECT;
+  jiraCfg: JiraCfg;
 
   form = new FormGroup({});
   formOptions: FormlyFormOptions = {
@@ -28,17 +28,31 @@ export class DialogCreateProjectComponent implements OnInit {
   };
   formCfg: FormlyFieldConfig[] = BASIC_PROJECT_CONFIG_FORM_CONFIG.items;
 
+  private _subs = new Subscription();
+
   constructor(
     @Inject(MAT_DIALOG_DATA) private _project: Project,
     private _projectService: ProjectService,
+    private _matDialog: MatDialog,
     private _matDialogRef: MatDialogRef<DialogCreateProjectComponent>,
+    private _cd: ChangeDetectorRef,
   ) {
   }
 
   ngOnInit() {
     if (this._project) {
       this.projectData = Object.assign({}, this._project);
+
+      if (this.projectData.issueIntegrationCfgs) {
+        if (this.projectData.issueIntegrationCfgs.JIRA) {
+          this.jiraCfg = this.projectData.issueIntegrationCfgs.JIRA;
+        }
+      }
     }
+  }
+
+  ngOnDestroy(): void {
+    this._subs.unsubscribe();
   }
 
   submit() {
@@ -60,16 +74,33 @@ export class DialogCreateProjectComponent implements OnInit {
     this._matDialogRef.close();
   }
 
-  saveJiraCfg(jiraCfg: JiraCfg) {
+  cancelEdit() {
+    this._matDialogRef.close();
+  }
+
+  openJiraCfg() {
+    this._subs.add(this._matDialog.open(DialogJiraInitialSetupComponent, {
+      restoreFocus: true,
+      data: {
+        jiraCfg: this.projectData.issueIntegrationCfgs.JIRA,
+      }
+    }).afterClosed().subscribe((jiraCfg: JiraCfg) => {
+      console.log('afterClosed', jiraCfg);
+
+      if (jiraCfg) {
+        this._saveJiraCfg(jiraCfg);
+      }
+    }));
+  }
+
+  private _saveJiraCfg(jiraCfg: JiraCfg) {
     this.jiraCfg = jiraCfg;
 
+    console.log(this.projectData.id);
+
+    // if we're editing save right away
     if (this.projectData.id) {
       this._projectService.updateIssueProviderConfig(this.projectData.id, 'JIRA', this.jiraCfg);
     }
-    this.openPanelId = undefined;
-  }
-
-  cancelEdit() {
-    this._matDialogRef.close();
   }
 }

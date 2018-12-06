@@ -12,42 +12,30 @@
                  [fields]="formCfg"
                  [options]="formOptions"
                  [form]="form">
-
-      <mat-accordion>
-        <mat-expansion-panel [expanded]="openPanelId==='JIRA'"
-                             (opened)="openPanelId='JIRA'">
-          <mat-expansion-panel-header>
-            <mat-panel-title>
-              <mat-icon *ngIf="!projectData?.issueIntegrationCfgs?.JIRA">explore</mat-icon>
-              <mat-icon *ngIf="projectData?.issueIntegrationCfgs?.JIRA">checkmark</mat-icon>
-              Jira
-            </mat-panel-title>
-            <mat-panel-description>
-              Set up jira issue integration
-            </mat-panel-description>
-          </mat-expansion-panel-header>
-
-          <!--Todo show stepper for first setup, show config section when editing afterwards -->
-          <jira-cfg-stepper (onSaveCfg)="saveJiraCfg($event)"
-                            [cfg]="projectData?.issueIntegrationCfgs?.JIRA"></jira-cfg-stepper>
-        </mat-expansion-panel>
-
-        <mat-expansion-panel [expanded]="openPanelId==='GIT'"
-                             (opened)="openPanelId='GIT'">
-          <mat-expansion-panel-header>
-            <mat-panel-title>
-              <mat-icon *ngIf="!projectData?.issueIntegrationCfgs?.GIT">card_giftcard</mat-icon>
-              <mat-icon *ngIf="projectData?.issueIntegrationCfgs?.GIT">checkmark</mat-icon>
-              GitHub
-            </mat-panel-title>
-            <mat-panel-description>
-              Set up github issue integration
-            </mat-panel-description>
-          </mat-expansion-panel-header>
-        </mat-expansion-panel>
-      </mat-accordion>
-      <br>
     </formly-form>
+
+
+    <div class="issue-provider-cfg">
+      <h3>Issue Provider Configs (optional)</h3>
+      <div class="item">
+        <button mat-raised-button=""
+                color="primary"
+                (click)="openJiraCfg()"
+                type="button">
+          <mat-icon *ngIf="!jiraCfg">explore</mat-icon>
+          <mat-icon *ngIf="jiraCfg">checkmark</mat-icon>
+          Setup Jira Integration
+        </button>
+      </div>
+      <!--<div class="item">-->
+      <!--<button mat-raised-button="" color=primary-->
+      <!--type="button">-->
+      <!--<mat-icon *ngIf="!projectData?.issueIntegrationCfgs?.GIT">card_giftcard</mat-icon>-->
+      <!--<mat-icon *ngIf="projectData?.issueIntegrationCfgs?.GIT">checkmark</mat-icon>-->
+      <!--Setup Github Issue Integration-->
+      <!--</button>-->
+      <!--</div>-->
+    </div>
   </mat-dialog-content>
 
 

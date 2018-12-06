@@ -4,6 +4,7 @@ import { JiraCfgStepperComponent } from './jira-cfg-stepper/jira-cfg-stepper.com
 import { UiModule } from '../../ui/ui.module';
 import { CoreModule } from '../../core/core.module';
 import { NgxElectronModule } from 'ngx-electron';
+import { DialogJiraInitialSetupComponent } from './dialog-jira-initial-setup/dialog-jira-initial-setup.component';
 
 @NgModule({
   imports: [
@@ -12,7 +13,8 @@ import { NgxElectronModule } from 'ngx-electron';
     UiModule,
     NgxElectronModule,
   ],
-  declarations: [JiraCfgStepperComponent],
+  declarations: [JiraCfgStepperComponent, DialogJiraInitialSetupComponent],
+  entryComponents: [DialogJiraInitialSetupComponent],
   exports: [JiraCfgStepperComponent],
 })
 export class JiraModule {
