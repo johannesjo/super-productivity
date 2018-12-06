@@ -32,16 +32,16 @@ export class EnlargeImgDirective {
   }
 
   private _hideImg() {
-    this._renderer.removeClass(this.enlargedImgWrapperEl, 'ani-enter');
+    this._setOriginCoordsForImageAni();
     this._renderer.addClass(this.enlargedImgWrapperEl, 'ani-remove');
-    this._setCoordsForImageAni();
+    this._renderer.removeClass(this.enlargedImgWrapperEl, 'ani-enter');
 
     this.enlargedImgWrapperEl.addEventListener('transitionend', () => {
       this.enlargedImgWrapperEl.remove();
     });
   }
 
-  private _setCoordsForImageAni() {
+  private _setOriginCoordsForImageAni() {
     const origImgCoords = getCoords(this.imageEl);
     const newImageCoords = getCoords(this.newImageEl);
     const scale = this.imageEl.offsetWidth / this.newImageEl.offsetWidth || 0.01;
@@ -57,7 +57,7 @@ export class EnlargeImgDirective {
     const img = new Image();
     img.src = src;
     img.onload = () => {
-      this._setCoordsForImageAni();
+      this._setOriginCoordsForImageAni();
       this._waitForImgRender().then(() => {
         this._renderer.addClass(this.enlargedImgWrapperEl, 'ani-enter');
         this._renderer.setStyle(this.newImageEl, 'transform', `translate3d(0, 0, 0) scale(1)`);
