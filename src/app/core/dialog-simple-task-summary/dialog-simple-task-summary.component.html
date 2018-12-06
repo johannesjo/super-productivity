@@ -33,7 +33,7 @@
             List sub tasks
           </mat-slide-toggle>
         </div>
-        <div>
+        <div *ngIf="!isWorklogExport">
           <mat-slide-toggle [(ngModel)]="options.isWorkedOnTodayOnly"
                             (change)="onOptionsChange()"
                             name="isWorkedOnTodayOnly"
@@ -41,7 +41,7 @@
             List worked on today tasks only
           </mat-slide-toggle>
         </div>
-        <div>
+        <div *ngIf="!isWorklogExport">
           <mat-slide-toggle [(ngModel)]="options.isListDoneOnly"
                             (change)="onOptionsChange()"
                             name="isListDoneOnly"
@@ -108,7 +108,7 @@
     </div>
 
     <div class="row">
-      <mat-form-field class="md-block">
+      <mat-form-field style="width: 100%">
         <label>Regular Expression to remove</label>
         <input type="text"
                matInput=""

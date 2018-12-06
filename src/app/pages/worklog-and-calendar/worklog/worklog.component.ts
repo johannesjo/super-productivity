@@ -65,6 +65,7 @@ export class WorklogComponent implements OnInit, OnDestroy {
         restoreFocus: true,
         data: {
           tasks: this._createTasksForMonth(monthData),
+          isWorklogExport: true,
         }
       });
     }

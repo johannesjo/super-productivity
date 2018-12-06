@@ -4,7 +4,7 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material';
 import { TaskWithSubTasks } from '../../tasks/task.model';
 import { ProjectService } from '../../project/project.service';
 import { Subscription } from 'rxjs';
-import { SimpleSummarySettings, SimpleSummarySettingsCopy } from '../../project/project.model';
+import { SimpleSummarySettingsCopy } from '../../project/project.model';
 import { SIMPLE_SUMMARY_DEFAULTS } from '../../project/project.const';
 import Clipboard from 'clipboard';
 import { SnackService } from '../snack/snack.service';
@@ -33,6 +33,7 @@ export class DialogSimpleTaskSummaryComponent implements OnInit, OnDestroy {
   options: SimpleSummarySettingsCopy = SIMPLE_SUMMARY_DEFAULTS;
   isInvalidRegEx: boolean;
   tasksTxt: string;
+  isWorklogExport = this.data.isWorklogExport;
 
   private _subs: Subscription = new Subscription();
 
@@ -107,7 +108,11 @@ export class DialogSimpleTaskSummaryComponent implements OnInit, OnDestroy {
     if (tasks) {
       for (let i = 0; i < tasks.length; i++) {
         const task = tasks[i];
-        if ((!this.options.isListDoneOnly || task.isDone) && (!this.options.isWorkedOnTodayOnly || this._checkIsWorkedOnToday(task))) {
+        if (
+          (this.isWorklogExport)
+          || (!this.options.isListDoneOnly || task.isDone)
+          && (!this.options.isWorkedOnTodayOnly || this._checkIsWorkedOnToday(task))
+        ) {
           tasksTxt += this._formatTask(task);
           if (this.options.isUseNewLine) {
             tasksTxt += newLineSeparator;
