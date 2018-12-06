@@ -11,6 +11,7 @@ import { DialogConfirmComponent } from '../../ui/dialog-confirm/dialog-confirm.c
 import { DialogConfirmDriveSyncLoadComponent } from './dialog-confirm-drive-sync-load/dialog-confirm-drive-sync-load.component';
 import { DialogConfirmDriveSyncSaveComponent } from './dialog-confirm-drive-sync-save/dialog-confirm-drive-sync-save.component';
 import { AppDataComplete } from '../sync/sync.model';
+import { take } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
@@ -19,7 +20,7 @@ export class GoogleDriveSyncService {
   autoSyncInterval: number;
 
   private _isSyncingInProgress = false;
-  private _inProgressTimeout: number;
+  private _config: GoogleDriveSyncConfig;
 
   constructor(
     private _syncService: SyncService,
@@ -30,22 +31,24 @@ export class GoogleDriveSyncService {
   ) {
   }
 
-  get config(): GoogleDriveSyncConfig {
-    return this._configService.cfg && this._configService.cfg.googleDriveSync;
-  }
-
   init() {
-    if (this.config.isEnabled && this.config.isAutoLogin) {
-      this._googleApiService.login().then(() => {
-        if (this.config.isAutoSyncToRemote) {
-          this.resetAutoSyncToRemoteInterval();
-        }
+    this._configService.cfg$.subscribe((cfg) => {
+      this._config = cfg.googleDriveSync;
+    });
 
-        if (this.config.isLoadRemoteDataOnStartup) {
-          this._checkForInitialUpdate();
-        }
-      });
-    }
+    this._configService.onCfgLoaded$.pipe(take(1)).subscribe(() => {
+      if (this._config.isEnabled && this._config.isAutoLogin) {
+        this._googleApiService.login().then(() => {
+          if (this._config.isAutoSyncToRemote) {
+            this.resetAutoSyncToRemoteInterval();
+          }
+
+          if (this._config.isLoadRemoteDataOnStartup) {
+            this._checkForInitialUpdate();
+          }
+        });
+      }
+    });
   }
 
   updateConfig(data: Partial<GoogleDriveSyncConfig>) {
@@ -56,10 +59,10 @@ export class GoogleDriveSyncService {
   resetAutoSyncToRemoteInterval() {
     // always unset if set
     this.cancelAutoSyncToRemoteIntervalIfSet();
-    if (!this.config.isAutoSyncToRemote || !this.config.isEnabled) {
+    if (!this._config.isAutoSyncToRemote || !this._config.isEnabled) {
       return;
     }
-    const interval = this.config.syncInterval;
+    const interval = this._config.syncInterval;
 
     if (interval < 5000) {
       console.log('GoogleDriveSync', 'Interval too low');
@@ -111,7 +114,7 @@ export class GoogleDriveSyncService {
   }
 
   saveForSyncIfEnabled(isForce = false): Promise<any> {
-    if (!this.config.isAutoSyncToRemote || !this.config.isEnabled) {
+    if (!this._config.isAutoSyncToRemote || !this._config.isEnabled) {
       return Promise.resolve();
     }
 
@@ -121,7 +124,7 @@ export class GoogleDriveSyncService {
     } else {
       console.log('GoogleDriveSync', 'SYNC');
       const promise = this.saveTo(isForce);
-      if (this.config.isNotifyOnSync) {
+      if (this._config.isNotifyOnSync) {
         this._showAsyncToast(promise, 'Syncing to google drive');
       }
       return promise;
@@ -139,8 +142,8 @@ export class GoogleDriveSyncService {
       // CREATE OR FIND
       // ---------------------------
       // when we have no backup file we create one directly
-      if (!this.config._backupDocId) {
-        this.changeSyncFileName(this.config.syncFileName || DEFAULT_SYNC_FILE_NAME)
+      if (!this._config._backupDocId) {
+        this.changeSyncFileName(this._config.syncFileName || DEFAULT_SYNC_FILE_NAME)
           .then(() => {
             this._save().then(resolve);
           }, reject);
@@ -149,7 +152,7 @@ export class GoogleDriveSyncService {
         // ---------------------------
         // otherwise update
       } else {
-        this._googleApiService.getFileInfo(this.config._backupDocId)
+        this._googleApiService.getFileInfo(this._config._backupDocId)
           .then((res) => {
             const lastActiveLocal = this._syncService.getLastActive();
             const lastModifiedRemote = res.body.modifiedDate;
@@ -161,7 +164,7 @@ export class GoogleDriveSyncService {
                 message: `GoogleDriveSync: Remote data already up to date`
               });
               reject();
-            } else if (this._isNewerThan(lastModifiedRemote, this.config._lastSync)) {
+            } else if (this._isNewerThan(lastModifiedRemote, this._config._lastSync)) {
               // remote has an update so prompt what to do
               this._confirmSaveDialog(lastModifiedRemote)
                 .then(() => {
@@ -222,8 +225,8 @@ export class GoogleDriveSyncService {
       };
 
       // when we have no backup file we create one directly
-      if (!this.config._backupDocId) {
-        this.changeSyncFileName(this.config.syncFileName)
+      if (!this._config._backupDocId) {
+        this.changeSyncFileName(this._config.syncFileName)
           .then(() => {
             loadHandler();
           }, reject);
@@ -252,7 +255,7 @@ export class GoogleDriveSyncService {
 
   private async _checkIfRemoteUpdate(): Promise<any> {
     const lastActiveLocal = this._syncService.getLastActive();
-    const promise = this._googleApiService.getFileInfo(this.config._backupDocId)
+    const promise = this._googleApiService.getFileInfo(this._config._backupDocId)
       .then((res) => {
         const lastModifiedRemote = res.body.modifiedDate;
         return this._isNewerThan(lastModifiedRemote, lastActiveLocal);
@@ -300,7 +303,7 @@ export class GoogleDriveSyncService {
           cancel: reject.bind(this),
           remoteModified: this._formatDate(remoteModified),
           lastActiveLocal: this._formatDate(lastActiveLocal),
-          lastSync: this._formatDate(this.config._lastSync),
+          lastSync: this._formatDate(this._config._lastSync),
         }
       });
     });
@@ -320,7 +323,7 @@ export class GoogleDriveSyncService {
           cancel: reject,
           remoteModified: this._formatDate(remoteModified),
           lastActiveLocal: this._formatDate(lastActiveLocal),
-          lastSync: this._formatDate(this.config._lastSync),
+          lastSync: this._formatDate(this._config._lastSync),
         }
       });
     });
@@ -356,8 +359,8 @@ If not please change the Sync file name.`,
   private async _save(): Promise<any> {
     const completeData = await this._getLocalAppData();
     return this._googleApiService.saveFile(completeData, {
-      title: this.config.syncFileName,
-      id: this.config._backupDocId,
+      title: this._config.syncFileName,
+      id: this._config._backupDocId,
       editable: true
     })
       .then((res) => {
@@ -372,11 +375,11 @@ If not please change the Sync file name.`,
   }
 
   private _loadFile(): Promise<any> {
-    if (!this.config.syncFileName) {
+    if (!this._config.syncFileName) {
       return Promise.reject('No file name specified');
     }
 
-    return this._googleApiService.loadFile(this.config._backupDocId);
+    return this._googleApiService.loadFile(this._config._backupDocId);
   }
 
   private _handleInProgress(promise: Promise<any>) {

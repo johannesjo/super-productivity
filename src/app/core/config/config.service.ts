@@ -6,25 +6,30 @@ import { ConfigSectionKey, GlobalConfig, SectionConfig } from './config.model';
 import { selectConfigFeatureState } from './store/config.reducer';
 import { PersistenceService } from '../persistence/persistence.service';
 import { DEFAULT_CFG } from './default-config.const';
+import { Actions, ofType } from '@ngrx/effects';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ConfigService {
-  public cfg$: Observable<GlobalConfig> = this._store.pipe(select(selectConfigFeatureState));
-  public cfg: GlobalConfig;
+  cfg$: Observable<GlobalConfig> = this._store.pipe(select(selectConfigFeatureState));
+  cfg: GlobalConfig;
+
+  onCfgLoaded$: Observable<any> = this._actions$.pipe(ofType(ConfigActionTypes.LoadConfig));
 
   constructor(
     private readonly _store: Store<any>,
+    private readonly _actions$: Actions,
     private readonly _persistenceService: PersistenceService
   ) {
-    this.load();
     // this.cfg$.subscribe((val) => console.log(val));
     this.cfg$.subscribe((cfg) => this.cfg = cfg);
+    this.load();
   }
 
   async load() {
     const cfg = await this._persistenceService.loadGlobalConfig();
+
     if (cfg && Object.keys(cfg).length > 0) {
       this.loadState(cfg);
     } else {

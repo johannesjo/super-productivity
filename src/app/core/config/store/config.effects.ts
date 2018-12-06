@@ -9,7 +9,7 @@ import { SnackOpen } from '../../snack/store/snack.actions';
 
 @Injectable()
 export class ConfigEffects {
-  @Effect({dispatch: false}) updateTask$: any = this._actions$
+  @Effect({dispatch: false}) updateConfig$: any = this._actions$
     .pipe(
       ofType(
         ConfigActionTypes.UpdateConfigSection,
