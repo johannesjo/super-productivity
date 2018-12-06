@@ -71,7 +71,16 @@ export class EnlargeImgDirective {
     this._renderer.appendChild(this.lightboxParentEl, this.enlargedImgWrapperEl);
     this.zoomMode = 0;
     this.enlargedImgWrapperEl.addEventListener('click', () => {
-      this._hideImg();
+      if (this.zoomMode === 0) {
+        this._hideImg();
+      } else {
+        this.newImageEl.addEventListener('transitionend', () => {
+          setTimeout(() => {
+            this._hideImg();
+          });
+        });
+        this._zoomOutImg();
+      }
     });
     this.newImageEl.addEventListener('click', (ev) => {
       ev.preventDefault();
