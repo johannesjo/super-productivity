@@ -72,8 +72,9 @@ module.exports = opts => {
   opts = Object.assign({
     enabled: null,
     showDevTools: true,
-    devToolsMode: 'docked'
+    ...devToolsOptions,
   }, opts);
+  console.log(opts);
 
   if (opts.enabled === false) {
     return;

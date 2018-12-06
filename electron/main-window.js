@@ -39,15 +39,14 @@ function createWindow(params) {
   const nestedWinParams = params.nestedWinParams;
   indicatorMod = params.indicatorMod;
 
-  // Create the browser window.
-  mainWin = new BrowserWindow({ width: 800, height: 600 });
-
   if (IS_DEV) {
+    mainWin = new BrowserWindow({ width: 800, height: 800 });
     require('electron-reload')(__dirname, {
       electron: require(`${__dirname}/../node_modules/electron`)
     });
     mainWin.loadURL('http://localhost:4200');
   } else {
+    mainWin = new BrowserWindow({ width: 800, height: 600 });
     mainWin.loadURL(url.format({
       pathname: path.join(__dirname, '../dist/index.html'),
       protocol: 'file:',
