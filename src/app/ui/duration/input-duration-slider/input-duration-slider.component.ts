@@ -166,17 +166,18 @@ export class InputDurationSliderComponent implements OnInit, OnDestroy {
 
     this.minutesBefore = minutesFromDegrees;
     this.setDots(hours);
-    // this.$scope.$evalAsync(() => {
     this.ngModel = moment.duration({
       hours: hours,
       minutes: minutesFromDegrees
-    });
+    }).asMilliseconds();
     this._cd.detectChanges();
-    // });
   }
 
-  setRotationFromValue() {
-    const momentVal = moment.duration(this.ngModel);
+  setRotationFromValue(val = this.ngModel) {
+    const momentVal = moment.duration({
+      milliseconds: val
+    });
+    console.log(momentVal);
     const minutes = momentVal.minutes();
     this.setDots(Math.floor(momentVal.asHours()));
     const degrees = minutes * 360 / 60;
