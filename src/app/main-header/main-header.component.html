@@ -33,6 +33,8 @@
   <nav>
     <button class="hide-xs"
             mat-mini-fab
+            [matBadge]="(taskService.undoneTasks$|async)?.length||''"
+            matBadgeColor=""
             routerLink="work-view"
             routerLinkActive
             #rlaWv="routerLinkActive"
@@ -49,8 +51,6 @@
     </button>
 
     <button mat-mini-fab
-            matBadgeColor=""
-            [matBadge]="(noteService.notes$|async).length"
             (click)="toggleShowNotes()"
             [color]="(noteService.isShowNotes$|async) ? 'accent' : null">
       <mat-icon>note</mat-icon>
