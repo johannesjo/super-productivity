@@ -25,7 +25,7 @@ export class InputDurationSliderComponent implements OnInit, OnDestroy {
   el: HTMLElement;
 
   startHandler: (ev: any) => void;
-  endHandler: (ev: any) => void;
+  endHandler: () => void;
   moveHandler: (ev: any) => void;
 
   @ViewChild('circleEl') circleEl: ElementRef;
@@ -88,7 +88,7 @@ export class InputDurationSliderComponent implements OnInit, OnDestroy {
 
       const theta = Math.atan2(y, x) * (180 / Math.PI);
 
-      const cssDegrees = parseInt(convertThetaToCssDegrees(theta), 10);
+      const cssDegrees = Math.round(convertThetaToCssDegrees(theta));
 
       this.setValueFromRotation(cssDegrees);
     };
@@ -142,7 +142,7 @@ export class InputDurationSliderComponent implements OnInit, OnDestroy {
       minutesFromDegrees = ((degrees + 360) / 360 * 60);
     }
 
-    minutesFromDegrees = parseInt(minutesFromDegrees, 10);
+    minutesFromDegrees = Math.round(minutesFromDegrees);
     //// should be 5 min values
     // minutesFromDegrees = Math.round(minutesFromDegrees / 5) * 5;
 
