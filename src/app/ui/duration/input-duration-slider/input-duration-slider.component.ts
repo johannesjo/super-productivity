@@ -56,8 +56,8 @@ export class InputDurationSliderComponent implements OnInit, OnDestroy {
 
     this.moveHandler = (ev) => {
       if (ev.type === 'click' &&
-        ev.target.tagName === 'LABEL' ||
-        ev.target.tagName === 'INPUT') {
+        (ev.target.tagName === 'LABEL' ||
+        ev.target.tagName === 'INPUT')) {
         return;
       }
 
@@ -174,10 +174,10 @@ export class InputDurationSliderComponent implements OnInit, OnDestroy {
   }
 
   setRotationFromValue(val = this.ngModel) {
+    this.ngModel = val;
     const momentVal = moment.duration({
       milliseconds: val
     });
-    console.log(momentVal);
     const minutes = momentVal.minutes();
     this.setDots(Math.floor(momentVal.asHours()));
     const degrees = minutes * 360 / 60;
