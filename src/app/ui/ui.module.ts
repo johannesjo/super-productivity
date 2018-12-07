@@ -56,6 +56,7 @@ import { EnlargeImgDirective } from './enlarge-img/enlarge-img.directive';
 import { DragulaModule } from 'ng2-dragula';
 import { MsToClockStringPipe } from './duration/ms-to-clock-string.pipe';
 import { DatetimeInputComponent } from './datetime-input/datetime-input.component';
+import { InputDurationSliderComponent } from './duration/input-duration-slider/input-duration-slider.component';
 
 @NgModule({
   imports: [
@@ -114,6 +115,7 @@ import { DatetimeInputComponent } from './datetime-input/datetime-input.componen
     DurationToStringPipe,
     InputDurationDirective,
     InputDurationFormlyComponent,
+    InputDurationSliderComponent,
     EditOnClickDirective,
     InlineMarkdownComponent,
     ThemeSelectComponent,
@@ -139,6 +141,7 @@ import { DatetimeInputComponent } from './datetime-input/datetime-input.componen
     DurationToStringPipe,
     InputDurationDirective,
     InputDurationFormlyComponent,
+    InputDurationSliderComponent,
     EditOnClickDirective,
     InlineMarkdownComponent,
     ThemeSelectComponent,
