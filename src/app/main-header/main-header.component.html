@@ -1,6 +1,9 @@
 <mat-toolbar color="primary"
              class="mat-elevation-z3">
-  <mat-icon svgIcon="sp">sp</mat-icon>
+  <button mat-icon-button=""
+          routerLink="work-view">
+    <mat-icon svgIcon="sp">sp</mat-icon>
+  </button>
   <button mat-button
           class="current-project-title"
           [matMenuTriggerFor]="menu">{{(projectService.currentProject$|async).title}}
