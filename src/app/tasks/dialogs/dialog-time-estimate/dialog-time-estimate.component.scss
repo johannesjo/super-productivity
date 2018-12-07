@@ -1,4 +1,7 @@
+@import '../../../../variables';
+
 .wrap-time{
   display: flex;
-  justify-content: center;
+  justify-content: space-around;
+  margin-bottom: $s;
 }
