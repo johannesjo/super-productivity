@@ -46,10 +46,8 @@ $this-dot-size: 10px;
     position: relative;
     box-shadow: 1px 2px 2px 0 rgba(0, 0, 0, 0.26);
     cursor: grab;
-    background: #ffffff;
 
     @include darkTheme() {
-      background: $dark-theme-bg;
       border-color: transparent;
     }
 
@@ -90,8 +88,8 @@ $this-dot-size: 10px;
     }
 
     .dot {
-      background: lighten($this-handle-color, 11);
-      background: #eeeeee;
+      //background: lighten($this-handle-color, 11);
+      //background: #eeeeee;
       box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.3);
       height: 8px;
       width: 8px;
@@ -101,7 +99,7 @@ $this-dot-size: 10px;
       animation: $transition-duration-l ani-circle-reveal $ani-enter-timing;
 
       @include darkTheme() {
-        background: #cccccc;
+        //background: #cccccc;
       }
 
       &.ng-leave,
