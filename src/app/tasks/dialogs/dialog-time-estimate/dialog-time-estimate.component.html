@@ -4,25 +4,36 @@
         class="mat-body"
         name="time-estimate-form">
 
-    <mat-form-field>
-      <input matInput
-             placeholder="Estimated Duration"
-             inputDuration
-             name="estimate"
-             [(ngModel)]="taskCopy.timeEstimate">
-      <mat-icon matPrefix>timer</mat-icon>
-    </mat-form-field>
-    <h3 class="mat-caption">Time Spent</h3>
+    <div class="wrap-time">
+      <input-duration-slider label="Estimated"
+                             (change)="taskCopy.timeEstimate=$event"
+                             [model]="taskCopy.timeEstimate"
+      ></input-duration-slider>
+      <input-duration-slider label="Time Spent"
+                             (change)="timeSpentOnDayCopy[todayStr]=$event"
+                             [model]="timeSpentOnDayCopy[todayStr]">
+      </input-duration-slider>
+    </div>
 
-    <mat-form-field>
-      <input matInput
-             placeholder="Time Spent Today"
-             type="text"
-             inputDuration="optional"
-             name="timeSpendToday"
-             [(ngModel)]="timeSpentOnDayCopy[todayStr]">
-      <mat-icon matPrefix>timer</mat-icon>
-    </mat-form-field>
+    <!--<mat-form-field>-->
+    <!--<input matInput-->
+    <!--placeholder="Estimated Duration"-->
+    <!--inputDuration-->
+    <!--name="estimate"-->
+    <!--[(ngModel)]="taskCopy.timeEstimate">-->
+    <!--<mat-icon matPrefix>timer</mat-icon>-->
+    <!--</mat-form-field>-->
+    <!--<h3 class="mat-caption">Time Spent</h3>-->
+
+    <!--<mat-form-field>-->
+    <!--<input matInput-->
+    <!--placeholder="Time Spent Today"-->
+    <!--type="text"-->
+    <!--inputDuration="optional"-->
+    <!--name="timeSpendToday"-->
+    <!--[(ngModel)]="timeSpentOnDayCopy[todayStr]">-->
+    <!--<mat-icon matPrefix>timer</mat-icon>-->
+    <!--</mat-form-field>-->
 
 
     <div *ngFor="let strDate of timeSpentOnDayCopy|keys:'reverse':todayStr">
@@ -44,11 +55,13 @@
     </div>
 
     <button type="button"
-            mat-mini-fab
+            mat-raised-button=""
+            color="primary"
             aria-label="add for another day"
             [hidden]="isAddForAnotherDayFormVisible"
             (click)="showAddForAnotherDayForm()">
       <mat-icon>add</mat-icon>
+      Add time spent for other day
     </button>
     <button type="submit"
             style="width: 0;height: 0; font-size: 0;border: 0;background: transparent;"

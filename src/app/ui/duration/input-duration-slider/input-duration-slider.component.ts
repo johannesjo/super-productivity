@@ -3,9 +3,11 @@ import {
   ChangeDetectorRef,
   Component,
   ElementRef,
+  EventEmitter,
   Input,
   OnDestroy,
   OnInit,
+  Output,
   ViewChild
 } from '@angular/core';
 import shortid from 'shortid';
@@ -18,7 +20,16 @@ import * as moment from 'moment';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class InputDurationSliderComponent implements OnInit, OnDestroy {
-  @Input() ngModel;
+  @Input() set model(val) {
+    if (this.ngModel !== val) {
+      this.ngModel = val;
+      this.setRotationFromValue(val);
+    }
+  }
+
+  ngModel: number;
+  @Input() label: string;
+  @Output() change: EventEmitter<number> = new EventEmitter();
   minutesBefore = 0;
   dots: any[];
   uid: string = 'duration-input-slider' + shortid();
@@ -57,7 +68,7 @@ export class InputDurationSliderComponent implements OnInit, OnDestroy {
     this.moveHandler = (ev) => {
       if (ev.type === 'click' &&
         (ev.target.tagName === 'LABEL' ||
-        ev.target.tagName === 'INPUT')) {
+          ev.target.tagName === 'INPUT')) {
         return;
       }
 
@@ -170,11 +181,14 @@ export class InputDurationSliderComponent implements OnInit, OnDestroy {
       hours: hours,
       minutes: minutesFromDegrees
     }).asMilliseconds();
+    this.change.emit(this.ngModel);
     this._cd.detectChanges();
   }
 
   setRotationFromValue(val = this.ngModel) {
     this.ngModel = val;
+    this.change.emit(this.ngModel);
+
     const momentVal = moment.duration({
       milliseconds: val
     });
