@@ -9,7 +9,7 @@ $this-handle-color: rgb(255, 64, 129);
 $this-handle-border-color: rgba(255, 64, 129, 0.5);
 $this-circle-width: 2px;
 $this-text-color: #222222;
-$this-dot-size: 10px;
+$this-dot-size: 14px;
 
 @mixin onCircle($item-count, $circle-size, $item-size, $start-rotation: -90) {
   display: block;
@@ -85,6 +85,8 @@ $this-dot-size: 10px;
       bottom: 0;
       width: $this-size;
       height: $this-size;
+      z-index: 4;
+      pointer-events: none;
     }
 
     .dot {
@@ -96,7 +98,7 @@ $this-dot-size: 10px;
       border-radius: 100%;
       cursor: grabbing;
       @include onCircle(12, $this-size - $this-circle-width, $this-dot-size);
-      animation: $transition-duration-l ani-circle-reveal $ani-enter-timing;
+      //animation: $transition-duration-l ani-circle-reveal $ani-enter-timing;
 
       @include darkTheme() {
         //background: #cccccc;
@@ -104,7 +106,8 @@ $this-dot-size: 10px;
 
       &.ng-leave,
       &.ng-leave-active {
-        animation: $transition-duration-l ani-circle-remove $ani-leave-timing;
+        // TODO make this work
+        //animation: $transition-duration-l ani-circle-remove $ani-leave-timing;
       }
     }
   }
@@ -244,19 +247,5 @@ $this-dot-size: 10px;
     @include darkTheme() {
       color: #ffffff;
     }
-  }
-}
-
-@keyframes ani-circle-reveal {
-  from {
-    opacity: 0;
-    transform: translate(0);
-  }
-}
-
-@keyframes ani-circle-remove {
-  to {
-    opacity: 0;
-    transform: translate(0);
   }
 }

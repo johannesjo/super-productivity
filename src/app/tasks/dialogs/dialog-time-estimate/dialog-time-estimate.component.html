@@ -5,11 +5,12 @@
         name="time-estimate-form">
 
     <div class="wrap-time">
-      <input-duration-slider label="Estimated"
-                             [(model)]="taskCopy.timeEstimate"
-      ></input-duration-slider>
       <input-duration-slider label="Time Spent"
                              [(model)]="timeSpentOnDayCopy[todayStr]">
+      </input-duration-slider>
+      <input-duration-slider label="Estimated"
+                             [(model)]="taskCopy.timeEstimate">
+
       </input-duration-slider>
     </div>
 

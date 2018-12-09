@@ -12,12 +12,14 @@ import {
 } from '@angular/core';
 import shortid from 'shortid';
 import * as moment from 'moment';
+import { dotAnimation } from './dot.ani';
 
 @Component({
   selector: 'input-duration-slider',
   templateUrl: './input-duration-slider.component.html',
   styleUrls: ['./input-duration-slider.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  animations:[dotAnimation],
 })
 export class InputDurationSliderComponent implements OnInit, OnDestroy {
   minutesBefore = 0;
