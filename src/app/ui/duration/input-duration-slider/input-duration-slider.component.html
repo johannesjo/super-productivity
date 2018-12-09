@@ -5,7 +5,7 @@
          *ngFor="let hour of dots"></div>
   </div>
   <div class="handle-wrapper"
-#circleEl>
+       #circleEl>
     <div class="handle"></div>
   </div>
   <div class="value-wrapper">
@@ -18,7 +18,7 @@
            [id]="uid"
            placeholder="click to edit"
            spellcheck="false"
-           [ngModel]="ngModel"
-           (ngModelChange)="ngModel=$event;">
+           [(ngModel)]="_model"
+           (ngModelChange)="onInputChange()">
   </div>
 </div>

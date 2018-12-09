@@ -20,17 +20,6 @@ import * as moment from 'moment';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class InputDurationSliderComponent implements OnInit, OnDestroy {
-  @Input() set model(val) {
-    if (this.ngModel !== val) {
-      console.log('set', val);
-      this.ngModel = val;
-      this.setRotationFromValue(val);
-    }
-  }
-
-  ngModel: number;
-  @Input() label: string;
-  @Output() change: EventEmitter<number> = new EventEmitter();
   minutesBefore = 0;
   dots: any[];
   uid: string = 'duration-input-slider' + shortid();
@@ -41,6 +30,21 @@ export class InputDurationSliderComponent implements OnInit, OnDestroy {
   moveHandler: (ev: any) => void;
 
   @ViewChild('circleEl') circleEl: ElementRef;
+
+  @Input() label: string;
+
+  @Input() set model(val) {
+    if (this._model !== val) {
+      console.log('set', val);
+      this._model = val;
+      this.setRotationFromValue(val);
+    }
+  }
+
+  @Output() modelChange: EventEmitter<number> = new EventEmitter();
+
+  _model: number;
+
 
   constructor(
     private _el: ElementRef,
@@ -158,7 +162,7 @@ export class InputDurationSliderComponent implements OnInit, OnDestroy {
     //// should be 5 min values
     // minutesFromDegrees = Math.round(minutesFromDegrees / 5) * 5;
 
-    let hours = Math.floor(moment.duration(this.ngModel).asHours());
+    let hours = Math.floor(moment.duration(this._model).asHours());
 
     const minuteDelta = minutesFromDegrees - this.minutesBefore;
     const threshold = 40;
@@ -178,23 +182,20 @@ export class InputDurationSliderComponent implements OnInit, OnDestroy {
 
     this.minutesBefore = minutesFromDegrees;
     this.setDots(hours);
-    this.ngModel = moment.duration({
+    this._model = moment.duration({
       hours: hours,
       minutes: minutesFromDegrees
     }).asMilliseconds();
-    console.log('emit setValueFromRotation', this.ngModel);
-    this.change.emit(this.ngModel);
+    this.modelChange.emit(this._model);
     this._cd.detectChanges();
   }
 
-  setRotationFromValue(val = this.ngModel) {
-    console.log('setRotationFromValue', val);
-    if (val !== this.ngModel) {
-      this.ngModel = val;
-      console.log('emit setRotationFromValue', this.ngModel);
-      this.change.emit(this.ngModel);
-    }
+  onInputChange() {
+    this.modelChange.emit(this._model);
+    this.setRotationFromValue();
+  }
 
+  setRotationFromValue(val = this._model) {
     const momentVal = moment.duration({
       milliseconds: val
     });

@@ -6,12 +6,10 @@
 
     <div class="wrap-time">
       <input-duration-slider label="Estimated"
-                             (change)="taskCopy.timeEstimate=$event"
-                             [model]="taskCopy.timeEstimate"
+                             [(model)]="taskCopy.timeEstimate"
       ></input-duration-slider>
       <input-duration-slider label="Time Spent"
-                             (change)="timeSpentOnDayCopy[todayStr]=$event"
-                             [model]="timeSpentOnDayCopy[todayStr]">
+                             [(model)]="timeSpentOnDayCopy[todayStr]">
       </input-duration-slider>
     </div>
 
