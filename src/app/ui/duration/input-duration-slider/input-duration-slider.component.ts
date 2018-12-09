@@ -35,7 +35,6 @@ export class InputDurationSliderComponent implements OnInit, OnDestroy {
 
   @Input() set model(val) {
     if (this._model !== val) {
-      console.log('set', val);
       this._model = val;
       this.setRotationFromValue(val);
     }
@@ -150,6 +149,8 @@ export class InputDurationSliderComponent implements OnInit, OnDestroy {
   }
 
   setValueFromRotation(degrees) {
+    const THRESHOLD = 40;
+
     let minutesFromDegrees;
     // NOTE: values are negative for the last quadrant
     if (degrees >= 0) {
@@ -158,19 +159,22 @@ export class InputDurationSliderComponent implements OnInit, OnDestroy {
       minutesFromDegrees = ((degrees + 360) / 360 * 60);
     }
 
-    minutesFromDegrees = Math.round(minutesFromDegrees);
-    //// should be 5 min values
-    // minutesFromDegrees = Math.round(minutesFromDegrees / 5) * 5;
+    minutesFromDegrees = parseInt(minutesFromDegrees, 10);
 
-    let hours = Math.floor(moment.duration(this._model).asHours());
+    let hours = Math.floor(moment.duration({
+      milliseconds: this._model
+    }).asHours());
+
 
     const minuteDelta = minutesFromDegrees - this.minutesBefore;
-    const threshold = 40;
-    if (minuteDelta > threshold) {
+
+
+    if (minuteDelta > THRESHOLD) {
       hours--;
-    } else if (-1 * minuteDelta > threshold) {
+    } else if (-1 * minuteDelta > THRESHOLD) {
       hours++;
     }
+
 
     if (hours < 0) {
       hours = 0;
@@ -186,6 +190,7 @@ export class InputDurationSliderComponent implements OnInit, OnDestroy {
       hours: hours,
       minutes: minutesFromDegrees
     }).asMilliseconds();
+
     this.modelChange.emit(this._model);
     this._cd.detectChanges();
   }
@@ -199,7 +204,6 @@ export class InputDurationSliderComponent implements OnInit, OnDestroy {
     const momentVal = moment.duration({
       milliseconds: val
     });
-    console.log(val, momentVal);
 
     const minutes = momentVal.minutes();
     this.setDots(Math.floor(momentVal.asHours()));
