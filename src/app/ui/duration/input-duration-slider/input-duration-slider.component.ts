@@ -22,6 +22,7 @@ import * as moment from 'moment';
 export class InputDurationSliderComponent implements OnInit, OnDestroy {
   @Input() set model(val) {
     if (this.ngModel !== val) {
+      console.log('set', val);
       this.ngModel = val;
       this.setRotationFromValue(val);
     }
@@ -137,7 +138,7 @@ export class InputDurationSliderComponent implements OnInit, OnDestroy {
     this.circleEl.nativeElement.style.transform = 'rotate(' + cssDegrees + 'deg)';
   }
 
-  setDots(hours) {
+  setDots(hours = 0) {
     if (hours > 12) {
       hours = 12;
     }
@@ -181,17 +182,24 @@ export class InputDurationSliderComponent implements OnInit, OnDestroy {
       hours: hours,
       minutes: minutesFromDegrees
     }).asMilliseconds();
+    console.log('emit setValueFromRotation', this.ngModel);
     this.change.emit(this.ngModel);
     this._cd.detectChanges();
   }
 
   setRotationFromValue(val = this.ngModel) {
-    this.ngModel = val;
-    this.change.emit(this.ngModel);
+    console.log('setRotationFromValue', val);
+    if (val !== this.ngModel) {
+      this.ngModel = val;
+      console.log('emit setRotationFromValue', this.ngModel);
+      this.change.emit(this.ngModel);
+    }
 
     const momentVal = moment.duration({
       milliseconds: val
     });
+    console.log(val, momentVal);
+
     const minutes = momentVal.minutes();
     this.setDots(Math.floor(momentVal.asHours()));
     const degrees = minutes * 360 / 60;

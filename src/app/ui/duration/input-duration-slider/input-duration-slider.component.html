@@ -18,7 +18,7 @@
            [id]="uid"
            placeholder="click to edit"
            spellcheck="false"
-           (ngModelChange)="setRotationFromValue($event);"
-           [ngModel]="ngModel">
+           [ngModel]="ngModel"
+           (ngModelChange)="ngModel=$event;">
   </div>
 </div>
