@@ -2,7 +2,7 @@ import { animate, keyframes, query, stagger, style, transition, trigger } from '
 import { ANI_ENTER_TIMING, ANI_LEAVE_TIMING } from './animation.const';
 
 export const standardListAnimation = trigger('standardList', [
-  transition('* => *', [
+  transition(':increment, :decrement', [
     query(':enter', style({opacity: 0, height: 0}), {optional: true}),
 
     query(':enter', stagger('100ms', [
@@ -29,6 +29,5 @@ export const standardListAnimation = trigger('standardList', [
       {optional: true}
     ),
   ]),
-  transition('* => BLOCK', []),
-  transition('BLOCK => *', [])
+  transition('* <=> BLOCK', []),
 ]);

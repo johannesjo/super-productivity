@@ -2,7 +2,7 @@
      [dragula]="listId"
      [dragulaModel]="tasks"
      [attr.data-id]="listModelId"
-     [@standardList]="isBlock ? 'BLOCK' : tasks.length"
+     [@standardList]="isBlockAni ? 'BLOCK' : tasks.length"
      #listEl>
   <task *ngFor="let task of tasks; trackBy: trackByFn; let i = index;"
         [task]="task"
