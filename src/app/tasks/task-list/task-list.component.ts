@@ -24,18 +24,21 @@ export class TaskListComponent implements OnDestroy, OnInit {
   subs = new Subscription();
   isBlock = false;
 
-  private _blockAnimationTimeout: number;
+  private _blockAnimationAniFrame: number;
 
   constructor(
     private _taskService: TaskService,
     private _dragulaService: DragulaService,
     private _cd: ChangeDetectorRef,
   ) {
+    console.log('TL CONSTR');
+
   }
 
   ngOnInit() {
     // block initial animation (method could be also used to set an initial animation)
     this._blockAnimation();
+    console.log('TL ON_INIT');
 
     this.subs.add(this._dragulaService.dropModel(this.listId)
       .subscribe((params: any) => {
@@ -55,8 +58,8 @@ export class TaskListComponent implements OnDestroy, OnInit {
 
   ngOnDestroy() {
     this.subs.unsubscribe();
-    if (this._blockAnimationTimeout) {
-      clearTimeout(this._blockAnimationTimeout);
+    if (this._blockAnimationAniFrame) {
+      cancelAnimationFrame(this._blockAnimationAniFrame);
     }
   }
 
@@ -67,7 +70,7 @@ export class TaskListComponent implements OnDestroy, OnInit {
   private _blockAnimation() {
     this.isBlock = true;
     this._cd.detectChanges();
-    this._blockAnimationTimeout = setTimeout(() => {
+    this._blockAnimationAniFrame = requestAnimationFrame(() => {
       this.isBlock = false;
       this._cd.detectChanges();
     });
