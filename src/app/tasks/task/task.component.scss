@@ -386,9 +386,10 @@ input {
     align-items: center;
     justify-content: center;
     opacity: 0.8;
+    font-weight: 300;
 
     @include mq(xs) {
-      opacity: 0.3;
+      opacity: 0.35;
     }
 
     @include mq(xs, max) {

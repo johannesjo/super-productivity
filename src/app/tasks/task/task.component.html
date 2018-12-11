@@ -90,9 +90,9 @@
 
       <div class="time">
         <div class="time-val">
-          <span *ngIf="task.subTasks && task.subTasks.length>0">∑</span> {{task.timeSpent|msToString}}</div>
+          <span *ngIf="task.subTasks && task.subTasks.length>0">∑</span> <span [innerHTML]="task.timeSpent|msToString"></span></div>
         <div class="separator">/</div>
-        <div class="time-val">{{task.timeEstimate|msToString}}</div>
+        <div class="time-val" [innerHTML]="task.timeEstimate|msToString"></div>
       </div>
       <button [hidden]="task.subTasks && task.subTasks.length"
               mat-icon-button
