@@ -61,6 +61,10 @@
     color: mat-color($primary, default-contrast);
   }
 
+  .color-accent {
+    color: mat-color($accent)
+  }
+
   .color-light-primary {
     color: mat-color($primary, 400);
     stroke: mat-color($primary, 400);

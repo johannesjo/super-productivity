@@ -92,30 +92,52 @@
               [color]="(taskService.currentTaskId$|async)? 'accent': 'lighter'">
         <mat-icon *ngIf="!(taskService.currentTaskId$|async)">play_arrow</mat-icon>
         <mat-icon *ngIf="(taskService.currentTaskId$|async)">pause</mat-icon>
+        <svg focusable="false"
+             class="circle-svg"
+             width="52"
+             height="52">
+          <!--<circle cx="50%"-->
+          <!--class="color-light-primary"-->
+          <!--cy="50%"-->
+          <!--r="24"-->
+          <!--fill="none"-->
+          <!--stroke-width="4"-->
+          <!--stroke="black"></circle>-->
+
+          <circle cx="50%"
+                  cy="50%"
+                  r="13"
+                  class=""
+                  fill="none"
+                  stroke-dasharray="81.6814089933"
+                  stroke-dashoffset="-25.725635973"
+                  stroke-width="26"
+                  stroke="#000"></circle>
+        </svg>
       </button>
 
-      <svg focusable="false"
-           class="circle-svg"
-           width="52"
-           height="52">
-        <!--<circle cx="50%"-->
-                <!--class="color-light-primary"-->
-                <!--cy="50%"-->
-                <!--r="24"-->
-                <!--fill="none"-->
-                <!--stroke-width="4"-->
-                <!--stroke="black"></circle>-->
+      <!--<svg focusable="false"-->
+      <!--class="circle-svg"-->
+      <!--width="52"-->
+      <!--height="52">-->
+      <!--&lt;!&ndash;<circle cx="50%"&ndash;&gt;-->
+      <!--&lt;!&ndash;class="color-light-primary"&ndash;&gt;-->
+      <!--&lt;!&ndash;cy="50%"&ndash;&gt;-->
+      <!--&lt;!&ndash;r="24"&ndash;&gt;-->
+      <!--&lt;!&ndash;fill="none"&ndash;&gt;-->
+      <!--&lt;!&ndash;stroke-width="4"&ndash;&gt;-->
+      <!--&lt;!&ndash;stroke="black"></circle>&ndash;&gt;-->
 
-
-        <circle cx="50%"
-                cy="50%"
-                r="20"
-                fill="none"
-                stroke-dasharray="100.530964915"
-                stroke-dashoffset="55.725635973"
-                stroke-width="12"
-                stroke="#fff"></circle>
-      </svg>
+      <!--<circle cx="50%"-->
+      <!--cy="50%"-->
+      <!--r="13"-->
+      <!--class=""-->
+      <!--fill="none"-->
+      <!--stroke-dasharray="81.6814089933"-->
+      <!--stroke-dashoffset="-25.725635973"-->
+      <!--stroke-width="26"-->
+      <!--stroke="#000"></circle>-->
+      <!--</svg>-->
     </div>
     <!--<svg width="52"-->
     <!--height="52"-->

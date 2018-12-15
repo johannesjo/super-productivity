@@ -80,7 +80,7 @@ eco-fab-speed-dial-actions {
 }
 
 
-.svg-wrapper {
+.play-btn {
   $circleOverflow: 5px;
   position: relative;
 
@@ -94,10 +94,15 @@ eco-fab-speed-dial-actions {
     //height: calc(100% + #{$circleOverflow*2});
     //top: -2px;
     //left: -2px;
-    opacity: 0.2;
+    opacity: 0.15;
     top: 0;
     right: 0;
     pointer-events: none;
+  }
+
+  .mat-icon {
+    position: relative;
+    z-index: 2;
   }
 }
 
