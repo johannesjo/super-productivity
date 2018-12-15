@@ -31,6 +31,7 @@ mat-toolbar {
 .mat-fab {
   height: 52px;
   width: 52px;
+
   ::ng-deep .mat-button-wrapper {
     padding: 0 !important;
   }
@@ -49,7 +50,7 @@ mat-toolbar {
     height: 30px !important;
     min-height: 30px !important;
     padding: 0 !important;
-    ::ng-deep .mat-button-wrapper{
+    ::ng-deep .mat-button-wrapper {
       padding: 0;
       position: relative;
       top: -3px;
@@ -75,5 +76,24 @@ eco-fab-speed-dial-actions {
       left: -$s;
       right: -$s;
     }
+  }
+}
+
+.play-btn.pulse {
+  animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1);
+  }
+  75% {
+    transform: scale(1.05);
+  }
+  90% {
+    transform: scale(1);
   }
 }

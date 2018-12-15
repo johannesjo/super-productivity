@@ -83,6 +83,8 @@
     </button>
 
     <button mat-fab
+            class="play-btn"
+            [class.pulse]="(taskService.currentTaskId$|async)"
             (click)="togglePlay()"
             [color]="(taskService.currentTaskId$|async)? 'accent': 'lighter'">
       <mat-icon *ngIf="!(taskService.currentTaskId$|async)">play_arrow</mat-icon>
