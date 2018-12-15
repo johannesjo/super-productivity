@@ -44,9 +44,10 @@
     background-color: mat-color($primary, 800);
   }
 
+  // for buttons
   .mat-lighter {
     color: mat-color($primary, default-contrast);
-    background-color: mat-color($primary, 400);
+    background-color: mat-color($primary, 300);
   }
 
   &.isLightTheme .bg-accented-light-theme {

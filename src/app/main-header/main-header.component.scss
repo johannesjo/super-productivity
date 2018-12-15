@@ -83,6 +83,14 @@ eco-fab-speed-dial-actions {
   animation: pulse 1s infinite;
 }
 
+.note-ico {
+  transition: $transition-standard;
+
+  &.rotate {
+    transform: rotate(90deg);
+  }
+}
+
 @keyframes pulse {
   0% {
     transform: scale(1);

@@ -78,13 +78,14 @@
 
     <button mat-mini-fab
             (click)="toggleShowNotes()"
-            [color]="(noteService.isShowNotes$|async)? 'accent': 'lighter'">
-      <mat-icon>note</mat-icon>
+            color="lighter">
+      <mat-icon class="note-ico"
+                [class.rotate]="(noteService.isShowNotes$|async)">note
+      </mat-icon>
     </button>
 
-    <button mat-fab
+    <button mat-mini-fab
             class="play-btn"
-            [class.pulse]="(taskService.currentTaskId$|async)"
             (click)="togglePlay()"
             [color]="(taskService.currentTaskId$|async)? 'accent': 'lighter'">
       <mat-icon *ngIf="!(taskService.currentTaskId$|async)">play_arrow</mat-icon>
