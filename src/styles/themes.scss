@@ -61,6 +61,11 @@
     color: mat-color($primary, default-contrast);
   }
 
+  .color-light-primary {
+    color: mat-color($primary, 400);
+    stroke: mat-color($primary, 400);
+  }
+
   .color-primary-after:after {
     color: mat-color($primary);
   }

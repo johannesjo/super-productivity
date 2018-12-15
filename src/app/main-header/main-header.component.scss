@@ -79,6 +79,28 @@ eco-fab-speed-dial-actions {
   }
 }
 
+
+.svg-wrapper {
+  $circleOverflow: 5px;
+  position: relative;
+
+
+  .circle-svg {
+    transform: rotate(-90deg);
+    position: absolute;
+    //top: -1* $circleOverflow;
+    //left: -1* $circleOverflow;
+    //width: calc(100% + #{$circleOverflow*2});
+    //height: calc(100% + #{$circleOverflow*2});
+    //top: -2px;
+    //left: -2px;
+    opacity: 0.2;
+    top: 0;
+    right: 0;
+    pointer-events: none;
+  }
+}
+
 .play-btn.pulse {
   animation: pulse 1s infinite;
 }

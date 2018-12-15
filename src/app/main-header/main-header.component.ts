@@ -14,6 +14,8 @@ import { TaskService } from '../tasks/task.service';
 })
 export class MainHeaderComponent implements OnInit {
   isSpeedDialOpen: boolean;
+  progressCircleRadius = 20;
+  circumference = this.progressCircleRadius * Math.PI * 2;
 
   @Input() drawer: MatDrawer;
 
