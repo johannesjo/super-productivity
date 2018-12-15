@@ -238,8 +238,8 @@ const setNextTask = (state: TaskState, oldCurrentId?): TaskState => {
         || selectableBefore.reverse().find(filterUndoneNotCurrent);
     }
   } else {
-    const selectable = flattenToSelectable(todaysTaskIds);
-    nextId = selectable[0];
+    const selectable = flattenToSelectable(todaysTaskIds).find(filterUndoneNotCurrent);
+    nextId = selectable ? selectable[0] : null;
   }
 
   return {
