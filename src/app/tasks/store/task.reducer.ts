@@ -11,6 +11,7 @@ export const taskAdapter: EntityAdapter<Task> = createEntityAdapter<Task>();
 export interface TaskState extends EntityState<Task> {
   // additional entities state properties
   currentTaskId: string | null;
+  lastCurrentTaskId: string | null;
   focusTaskId: string | null;
   lastActiveFocusTaskId: string | null;
 
@@ -29,6 +30,7 @@ export interface TaskState extends EntityState<Task> {
 // -------
 export const initialTaskState: TaskState = taskAdapter.getInitialState({
   currentTaskId: null,
+  lastCurrentTaskId: null,
   todaysTaskIds: [],
   backlogTaskIds: [],
   focusTaskId: null,
@@ -206,8 +208,6 @@ const setNextTaskIfCurrent = (state: TaskState, updatedTaskId): TaskState => {
 
 
 const setNextTask = (state: TaskState, oldCurrentId?): TaskState => {
-  console.log('setnext task');
-
   let nextId = null;
   const {currentTaskId, entities, todaysTaskIds} = state;
 
@@ -238,8 +238,14 @@ const setNextTask = (state: TaskState, oldCurrentId?): TaskState => {
         || selectableBefore.reverse().find(filterUndoneNotCurrent);
     }
   } else {
-    const selectable = flattenToSelectable(todaysTaskIds).find(filterUndoneNotCurrent);
-    nextId = selectable ? selectable[0] : null;
+    const lastTask = entities[state.lastCurrentTaskId];
+    const isLastSelectable = state.lastCurrentTaskId && lastTask && !lastTask.isDone && !lastTask.subTaskIds.length;
+    if (isLastSelectable) {
+      nextId = state.lastCurrentTaskId;
+    } else {
+      const selectable = flattenToSelectable(todaysTaskIds).find(filterUndoneNotCurrent);
+      nextId = selectable ? selectable : null;
+    }
   }
 
   return {

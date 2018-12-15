@@ -110,7 +110,6 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     this._taskService.currentTaskId$
       .pipe(takeUntil(this._destroy$))
       .subscribe((id) => {
-        console.log(id, this.task);
         this.isCurrent = (this.task && id === this.task.id);
         this._cd.detectChanges();
       });
