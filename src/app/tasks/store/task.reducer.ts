@@ -236,6 +236,8 @@ const setNextTask = (state: TaskState, oldCurrentId?): TaskState => {
       const selectableAfter = flattenToSelectable(mainTasksAfter);
       nextId = selectableAfter.find(filterUndoneNotCurrent)
         || selectableBefore.reverse().find(filterUndoneNotCurrent);
+      nextId = (Array.isArray(nextId)) ? nextId[0] : nextId;
+
     }
   } else {
     const lastTask = entities[state.lastCurrentTaskId];
@@ -244,7 +246,7 @@ const setNextTask = (state: TaskState, oldCurrentId?): TaskState => {
       nextId = state.lastCurrentTaskId;
     } else {
       const selectable = flattenToSelectable(todaysTaskIds).find(filterUndoneNotCurrent);
-      nextId = selectable ? selectable : null;
+      nextId = (Array.isArray(selectable)) ? selectable[0] : selectable;
     }
   }
 
