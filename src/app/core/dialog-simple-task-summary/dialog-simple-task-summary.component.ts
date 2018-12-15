@@ -76,28 +76,39 @@ export class DialogSimpleTaskSummaryComponent implements OnInit, OnDestroy {
 
   private _formatTask(task) {
     let taskTxt = '';
-    if (this.options.showDate) {
+    if (this.options.isShowDate) {
       taskTxt += task.dateStr || getWorklogStr();
     }
-    if (this.options.showTitle) {
-      if (taskTxt.length > 0) {
-        taskTxt += this.options.separateFieldsBy;
-      }
+
+    if (this.options.isShowTitle) {
+      taskTxt = this._addSeparator(taskTxt);
       taskTxt += task.title;
     }
-    if (this.options.showTimeSpent) {
-      if (taskTxt.length > 0) {
-        taskTxt += this.options.separateFieldsBy;
-      }
 
-      if (this.options.isTimeSpentAsMilliseconds) {
-        taskTxt += task.timeSpent;
-      } else {
-        taskTxt += msToString(task.timeSpent);
-      }
+    if (this.options.isShowTimeSpent) {
+      taskTxt = this._addSeparator(taskTxt);
+
+      taskTxt += this.options.isTimesAsMilliseconds
+        ? task.timeSpent
+        : msToString(task.timeSpent, false, true);
+    }
+
+    if (this.options.isShowTimeEstimate) {
+      taskTxt = this._addSeparator(taskTxt);
+
+      taskTxt += this.options.isTimesAsMilliseconds
+        ? task.timeEstimate
+        : msToString(task.timeEstimate, false, true);
     }
 
     taskTxt += this.options.separateBy;
+    return taskTxt;
+  }
+
+  private _addSeparator(taskTxt) {
+    if (taskTxt.length > 0) {
+      taskTxt += this.options.separateFieldsBy;
+    }
     return taskTxt;
   }
 

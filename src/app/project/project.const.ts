@@ -7,10 +7,11 @@ export const SIMPLE_SUMMARY_DEFAULTS: SimpleSummarySettings = {
   isListSubTasks: true,
   isListDoneOnly: false,
   isWorkedOnTodayOnly: true,
-  showTitle: true,
-  showTimeSpent: true,
-  isTimeSpentAsMilliseconds: false,
-  showDate: false,
+  isShowTitle: true,
+  isShowTimeSpent: true,
+  isShowTimeEstimate: true,
+  isTimesAsMilliseconds: false,
+  isShowDate: false,
   regExToRemove: '',
 };
 

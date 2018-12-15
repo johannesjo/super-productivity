@@ -66,7 +66,7 @@
         <div>
           <mat-slide-toggle (change)="onOptionsChange()"
                             name="showTitle"
-                            [(ngModel)]="options.showTitle"
+                            [(ngModel)]="options.isShowTitle"
                             aria-label="Title">
             Title
           </mat-slide-toggle>
@@ -74,13 +74,13 @@
         <div>
           <mat-slide-toggle (change)="onOptionsChange()"
                             name="showDate"
-                            [(ngModel)]="options.showDate"
+                            [(ngModel)]="options.isShowDate"
                             aria-label="Date">
             Date
           </mat-slide-toggle>
         </div>
         <div>
-          <mat-slide-toggle [(ngModel)]="options.showTimeSpent"
+          <mat-slide-toggle [(ngModel)]="options.isShowTimeSpent"
                             (change)="onOptionsChange()"
                             name="showTimeSpent"
                             aria-label="Time Spent">
@@ -88,12 +88,20 @@
           </mat-slide-toggle>
         </div>
         <div>
-          <mat-slide-toggle [(ngModel)]="options.isTimeSpentAsMilliseconds"
+          <mat-slide-toggle [(ngModel)]="options.isShowTimeEstimate"
+                            (change)="onOptionsChange()"
+                            name="showTimeSpent"
+                            aria-label="Time Estimate">
+            Time Estimate
+          </mat-slide-toggle>
+        </div>
+        <div>
+          <mat-slide-toggle [(ngModel)]="options.isTimesAsMilliseconds"
                             (change)="onOptionsChange()"
                             name="isTimeSpentAsMilliseconds"
-                            [disabled]="!options.showTimeSpent"
-                            aria-label="Show time spent as milliseconds">
-            Time Spent in milliseconds
+                            [disabled]="!options.isShowTimeSpent"
+                            aria-label="Show time as milliseconds">
+            Time as milliseconds
           </mat-slide-toggle>
         </div>
         <mat-form-field class="md-block">

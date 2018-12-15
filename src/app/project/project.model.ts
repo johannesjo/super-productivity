@@ -24,10 +24,11 @@ export interface SimpleSummarySettingsCopy {
   isListSubTasks: boolean;
   isListDoneOnly: boolean;
   isWorkedOnTodayOnly: boolean;
-  showTitle: boolean;
-  showTimeSpent: boolean;
-  isTimeSpentAsMilliseconds: boolean;
-  showDate: boolean;
+  isShowTitle: boolean;
+  isShowTimeSpent: boolean;
+  isShowTimeEstimate: boolean;
+  isTimesAsMilliseconds: boolean;
+  isShowDate: boolean;
   regExToRemove: string;
 }
 
