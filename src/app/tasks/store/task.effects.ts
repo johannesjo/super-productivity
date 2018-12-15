@@ -45,6 +45,7 @@ export class TaskEffects {
         TaskActionTypes.MoveToArchive,
         TaskActionTypes.MoveToBacklog,
         TaskActionTypes.MoveToToday,
+        TaskActionTypes.ToggleStart,
 
         AttachmentActionTypes.DeleteAttachment,
         AttachmentActionTypes.AddAttachment,

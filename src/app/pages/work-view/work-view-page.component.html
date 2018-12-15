@@ -117,7 +117,7 @@
     <split [containerEl]="containerEl"
            [splitPos]="splitInputPos"
            [isAnimateBtn]="isTriggerSwitchListAni"
-           [counter]="(taskService.backlogTasks$|async).length"
+           [counter]="(taskService.backlogTasks$|async)?.length"
            [splitTopEl]="splitTopEl"
            [splitBottomEl]="splitBottomEl"
            (posChanged)="splitInputPos=$event"></split>

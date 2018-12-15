@@ -1,6 +1,6 @@
 import {
   AfterViewInit,
-  ChangeDetectionStrategy,
+  ChangeDetectionStrategy, ChangeDetectorRef,
   Component,
   ElementRef,
   HostBinding,
@@ -53,6 +53,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     private readonly _configService: ConfigService,
     private readonly _attachmentService: AttachmentService,
     private readonly _elementRef: ElementRef,
+    private readonly _cd: ChangeDetectorRef,
   ) {
   }
 
@@ -109,7 +110,9 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     this._taskService.currentTaskId$
       .pipe(takeUntil(this._destroy$))
       .subscribe((id) => {
+        console.log(id, this.task);
         this.isCurrent = (this.task && id === this.task.id);
+        this._cd.detectChanges();
       });
   }
 
@@ -124,6 +127,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
         if (id === this.task.id && document.activeElement !== this._elementRef.nativeElement) {
           this.focusSelfElement();
         }
+        this._cd.detectChanges();
       });
 
     // hacky but relatively performant

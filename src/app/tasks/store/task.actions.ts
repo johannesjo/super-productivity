@@ -21,16 +21,17 @@ export enum TaskActionTypes {
   MoveDown = '[Task] Move down',
   AddTimeSpent = '[Task] Add time spent',
   RemoveTimeSpent = '[Task] Remove time spent',
-  FocusTask = '[Task] Focus Task',
-  FocusLastActiveTask = '[Task] Focus last active Task',
 
   // Sub Task Actions
   AddSubTask = '[Task] Add SubTask',
 
   // Other
+  FocusTask = '[Task] Focus Task',
+  FocusLastActiveTask = '[Task] Focus last active Task',
   MoveToBacklog = '[Task] Move to backlog',
   MoveToToday = '[Task] Move to today',
   MoveToArchive = '[Task] Move to archive',
+  ToggleStart = '[Task] Toggle start',
 }
 
 export class LoadTaskState implements Action {
@@ -170,6 +171,9 @@ export class MoveToArchive implements Action {
   constructor(public payload: { ids: string[] }) {
   }
 }
+export class ToggleStart implements Action {
+  readonly type = TaskActionTypes.ToggleStart;
+}
 
 export type TaskActions
   = LoadTaskState
@@ -191,5 +195,6 @@ export type TaskActions
   | AddSubTask
   | MoveToBacklog
   | MoveToToday
+  | ToggleStart
   | MoveToArchive;
 

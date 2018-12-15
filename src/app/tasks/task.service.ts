@@ -1,5 +1,5 @@
 import shortid from 'shortid';
-import { debounceTime, distinctUntilChanged, map, take, withLatestFrom } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, map, share, take, withLatestFrom } from 'rxjs/operators';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { DropListModelSource, Task, TaskWithSubTasks } from './task.model';
@@ -21,8 +21,10 @@ import {
   RemoveTimeSpent,
   SetCurrentTask,
   TaskActionTypes,
+  ToggleStart,
   UnsetCurrentTask,
-  UpdateTask, UpdateTaskUi
+  UpdateTask,
+  UpdateTaskUi
 } from './store/task.actions';
 import { initialTaskState, } from './store/task.reducer';
 import { PersistenceService } from '../core/persistence/persistence.service';
@@ -30,7 +32,6 @@ import { IssueProviderKey } from '../issue/issue';
 import { TimeTrackingService } from '../time-tracking/time-tracking.service';
 import {
   selectAllStartableTasks,
-  selectAllTasksWithSubTasks,
   selectBacklogTasksWithSubTasks,
   selectCurrentTaskId,
   selectEstimateRemainingForBacklog,
@@ -42,7 +43,6 @@ import {
   selectMissingIssueIds,
   selectTaskById,
   selectTodaysDoneTasksWithSubTasks,
-  selectTodaysTaskIds,
   selectTodaysTasksWithSubTasks,
   selectTodaysUnDoneTasksWithSubTasks,
   selectTotalTimeWorkedOnTodaysTasks
@@ -54,30 +54,60 @@ import { Actions, ofType } from '@ngrx/effects';
 
 @Injectable()
 export class TaskService {
-  // TOOD find a smart way to determine this
-  currentTaskId$: Observable<string> = this._store.pipe(select(selectCurrentTaskId), distinctUntilChanged());
   currentTaskId: string;
+  currentTaskId$: Observable<string> = this._store.pipe(
+    select(selectCurrentTaskId),
+    // NOTE: we can't use share here, as we need the last emitted value
+  );
 
-  tasks$: Observable<TaskWithSubTasks[]> = this._store.pipe(select(selectAllTasksWithSubTasks), distinctUntilChanged());
-  startableTasks$: Observable<Task[]> = this._store.pipe(select(selectAllStartableTasks), distinctUntilChanged());
-  todaysTasks$: Observable<TaskWithSubTasks[]> = this._store.pipe(select(selectTodaysTasksWithSubTasks), distinctUntilChanged());
-  todaysTaskIds$: Observable<string[]> = this._store.pipe(select(selectTodaysTaskIds), distinctUntilChanged());
+  startableTasks$: Observable<Task[]> = this._store.pipe(
+    select(selectAllStartableTasks),
+    distinctUntilChanged(),
+  );
+  todaysTasks$: Observable<TaskWithSubTasks[]> = this._store.pipe(
+    select(selectTodaysTasksWithSubTasks),
+    distinctUntilChanged(),
+  );
+  backlogTasks$: Observable<TaskWithSubTasks[]> = this._store.pipe(
+    select(selectBacklogTasksWithSubTasks),
+    distinctUntilChanged(),
+  );
+  undoneTasks$: Observable<TaskWithSubTasks[]> = this._store.pipe(
+    select(selectTodaysUnDoneTasksWithSubTasks),
+    distinctUntilChanged(),
+  );
 
-  backlogTasks$: Observable<TaskWithSubTasks[]> = this._store.pipe(select(selectBacklogTasksWithSubTasks), distinctUntilChanged());
+  doneTasks$: Observable<TaskWithSubTasks[]> = this._store.pipe(
+    select(selectTodaysDoneTasksWithSubTasks), distinctUntilChanged(), share());
 
-  undoneTasks$: Observable<TaskWithSubTasks[]> = this._store.pipe(select(selectTodaysUnDoneTasksWithSubTasks), distinctUntilChanged());
-  doneTasks$: Observable<TaskWithSubTasks[]> = this._store.pipe(select(selectTodaysDoneTasksWithSubTasks), distinctUntilChanged());
-
-  // NOTE: don't use distinct until changed here
-  focusTaskId$: Observable<string> = this._store.pipe(select(selectFocusTaskId));
-  focusIdsForWorkView$: Observable<string[]> = this._store.pipe(select(selectFocusIdsForWorkView), distinctUntilChanged());
-  focusIdsForBacklog$: Observable<string[]> = this._store.pipe(select(selectFocusIdsForBacklog), distinctUntilChanged());
+  focusTaskId$: Observable<string> = this._store.pipe(
+    select(selectFocusTaskId),
+    distinctUntilChanged(),
+    // NOTE: we can't use share here, as we need the last emitted value
+  );
+  focusIdsForWorkView$: Observable<string[]> = this._store.pipe(
+    select(selectFocusIdsForWorkView),
+    distinctUntilChanged(),
+  );
+  focusIdsForBacklog$: Observable<string[]> = this._store.pipe(
+    select(selectFocusIdsForBacklog),
+    distinctUntilChanged(),
+  );
 
   // META FIELDS
   // -----------
-  estimateRemainingToday$: Observable<any> = this._store.pipe(select(selectEstimateRemainingForToday), distinctUntilChanged());
-  estimateRemainingBacklog$: Observable<any> = this._store.pipe(select(selectEstimateRemainingForBacklog), distinctUntilChanged());
-  totalTimeWorkedOnTodaysTasks$: Observable<any> = this._store.pipe(select(selectTotalTimeWorkedOnTodaysTasks), distinctUntilChanged());
+  estimateRemainingToday$: Observable<any> = this._store.pipe(
+    select(selectEstimateRemainingForToday),
+    distinctUntilChanged(),
+  );
+  estimateRemainingBacklog$: Observable<any> = this._store.pipe(
+    select(selectEstimateRemainingForBacklog),
+    distinctUntilChanged(),
+  );
+  totalTimeWorkedOnTodaysTasks$: Observable<any> = this._store.pipe(
+    select(selectTotalTimeWorkedOnTodaysTasks),
+    distinctUntilChanged(),
+  );
 
   // TODO could be more efficient than using combine latest
   workingToday$: Observable<any> = this.todaysTasks$.pipe(
@@ -97,7 +127,7 @@ export class TaskService {
     // wait for issue model to be loaded
     debounceTime(1000),
     select(selectMissingIssueIds),
-    distinctUntilChanged()
+    distinctUntilChanged(),
   );
 
   onTaskSwitchList$: Observable<any> = this._actions$.pipe(ofType(
@@ -262,6 +292,10 @@ export class TaskService {
       ids = [ids];
     }
     this._store.dispatch(new MoveToArchive({ids}));
+  }
+
+  toggleStartTask() {
+    this._store.dispatch(new ToggleStart());
   }
 
 

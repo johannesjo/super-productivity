@@ -5,7 +5,7 @@ import { MatDialog, MatDrawer } from '@angular/material';
 import { LayoutService } from '../core/layout/layout.service';
 import { BookmarkService } from '../bookmark/bookmark.service';
 import { NoteService } from '../note/note.service';
-import { TaskService } from "../tasks/task.service";
+import { TaskService } from '../tasks/task.service';
 
 @Component({
   selector: 'main-header',
@@ -46,5 +46,9 @@ export class MainHeaderComponent implements OnInit {
 
   toggleShowNotes() {
     this.noteService.toggleShow();
+  }
+
+  togglePlay() {
+    this.taskService.toggleStartTask();
   }
 }

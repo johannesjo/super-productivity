@@ -201,31 +201,45 @@ const setNextTaskIfCurrent = (state: TaskState, updatedTaskId): TaskState => {
   if (!currentTaskId || currentTaskId !== updatedTaskId) {
     return state;
   }
+  return setNextTask(state, updatedTaskId);
+};
+
+
+const setNextTask = (state: TaskState, oldCurrentId?): TaskState => {
+  console.log('setnext task');
+
   let nextId = null;
-  const oldCurTask = entities[updatedTaskId];
-  if (oldCurTask.parentId) {
-    entities[oldCurTask.parentId].subTaskIds.some((id) => {
-      return (id !== updatedTaskId && entities[id].isDone === false)
-        ? (nextId = id) && true // assign !!!
-        : false;
-    });
-  }
+  const {currentTaskId, entities, todaysTaskIds} = state;
 
-  if (!nextId) {
-    const filterUndoneNotCurrent = (id) => !entities[id].isDone && id !== updatedTaskId;
-    const flattenToSelectable = (arr: string[]) => arr.reduce((acc: string[], next: string) => {
-      return entities[next].subTaskIds.length > 0
-        ? acc.concat(entities[next].subTaskIds)
-        : acc.concat(next);
-    }, []);
+  const filterUndoneNotCurrent = (id) => !entities[id].isDone && id !== oldCurrentId;
+  const flattenToSelectable = (arr: string[]) => arr.reduce((acc: string[], next: string) => {
+    return entities[next].subTaskIds.length > 0
+      ? acc.concat(entities[next].subTaskIds)
+      : acc.concat(next);
+  }, []);
 
-    const oldCurIndex = todaysTaskIds.indexOf(updatedTaskId);
-    const mainTasksBefore = todaysTaskIds.slice(0, oldCurIndex);
-    const mainTasksAfter = todaysTaskIds.slice(oldCurIndex + 1);
-    const selectableBefore = flattenToSelectable(mainTasksBefore);
-    const selectableAfter = flattenToSelectable(mainTasksAfter);
-    nextId = selectableAfter.find(filterUndoneNotCurrent)
-      || selectableBefore.reverse().find(filterUndoneNotCurrent);
+  if (oldCurrentId) {
+    const oldCurTask = entities[oldCurrentId];
+    if (oldCurTask && oldCurTask.parentId) {
+      entities[oldCurTask.parentId].subTaskIds.some((id) => {
+        return (id !== oldCurrentId && entities[id].isDone === false)
+          ? (nextId = id) && true // assign !!!
+          : false;
+      });
+    }
+
+    if (!nextId) {
+      const oldCurIndex = todaysTaskIds.indexOf(oldCurrentId);
+      const mainTasksBefore = todaysTaskIds.slice(0, oldCurIndex);
+      const mainTasksAfter = todaysTaskIds.slice(oldCurIndex + 1);
+      const selectableBefore = flattenToSelectable(mainTasksBefore);
+      const selectableAfter = flattenToSelectable(mainTasksAfter);
+      nextId = selectableAfter.find(filterUndoneNotCurrent)
+        || selectableBefore.reverse().find(filterUndoneNotCurrent);
+    }
+  } else {
+    const selectable = flattenToSelectable(todaysTaskIds);
+    nextId = selectable[0];
   }
 
   return {
@@ -632,6 +646,17 @@ export function taskReducer(
         ...({...copyState, stateBefore: null}),
         stateBefore: stateBeforeMovingToArchive
       };
+    }
+
+    case TaskActionTypes.ToggleStart: {
+      if (state.currentTaskId) {
+        return {
+          ...state,
+          currentTaskId: null,
+        };
+      } else {
+        return setNextTask(state);
+      }
     }
 
     default: {
