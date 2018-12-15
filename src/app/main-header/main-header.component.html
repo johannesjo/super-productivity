@@ -1,14 +1,52 @@
 <mat-toolbar color="primary"
              class="mat-elevation-z3">
+  <button mat-icon-button
+          class="show-xs-only"
+          [matMenuTriggerFor]="mainMenu">
+    <mat-icon>menu</mat-icon>
+  </button>
+
   <button mat-icon-button=""
+          class="hide-xs"
           routerLink="work-view">
     <mat-icon svgIcon="sp">sp</mat-icon>
   </button>
+
+  <mat-menu #mainMenu="matMenu">
+
+    <button mat-menu-item
+            routerLink="work-view">
+      <mat-icon>playlist_play</mat-icon>
+      Task List ({{(taskService.undoneTasks$|async)?.length || 0}})
+    </button>
+    <button mat-menu-item
+            routerLink="worklog-and-calendar">
+      <mat-icon>today</mat-icon>
+      Worklog
+    </button>
+
+    <button mat-menu-item
+            [routerLink]="'projects'">
+      <mat-icon>list</mat-icon>
+      Manage Projects
+    </button>
+
+    <button mat-menu-item
+            routerLinkActive
+            [routerLink]="'config'">
+      <mat-icon>settings</mat-icon>
+      Settings
+    </button>
+
+  </mat-menu>
+
   <button mat-button
           class="current-project-title"
-          [matMenuTriggerFor]="menu">{{(projectService.currentProject$|async).title}}
+          [matMenuTriggerFor]="projectMenu">
+    {{(projectService.currentProject$|async).title}}
+    <mat-icon aria-hidden="true">arrow_drop_down</mat-icon>
   </button>
-  <mat-menu #menu="matMenu">
+  <mat-menu #projectMenu="matMenu">
     <button mat-menu-item
             (click)="switchProject(project.id)"
             *ngFor="let project of projectService.list$|async">
@@ -31,79 +69,31 @@
   <span class="spacer"></span>
 
   <nav>
-    <button class="hide-xs"
-            mat-mini-fab
-            [matBadge]="(taskService.undoneTasks$|async)?.length||''"
-            matBadgeColor=""
-            routerLink="work-view"
-            routerLinkActive
-            #rlaWv="routerLinkActive"
-            [color]="rlaWv.isActive ? 'accent' : null">
-      <mat-icon>playlist_play</mat-icon>
-    </button>
-    <button class="hide-xs"
-            mat-mini-fab
-            routerLink="worklog-and-calendar"
-            routerLinkActive
-            #rlHA="routerLinkActive"
-            [color]="rlHA.isActive ? 'accent' : null">
-      <mat-icon>today</mat-icon>
+    <button mat-mini-fab
+            class="hide-xs bg-200"
+            color="lighter"
+            (click)="showAddTaskBar()">
+      <mat-icon>add</mat-icon>
     </button>
 
     <button mat-mini-fab
             (click)="toggleShowNotes()"
-            [color]="(noteService.isShowNotes$|async) ? 'accent' : null">
+            [color]="(noteService.isShowNotes$|async)? 'accent': 'lighter'">
       <mat-icon>note</mat-icon>
     </button>
 
-    <eco-fab-speed-dial [(open)]="isSpeedDialOpen"
-                        (mouseenter)="isSpeedDialOpen = true"
-                        (mouseleave)="isSpeedDialOpen = false"
-                        [animationMode]="'fling'"
-                        [direction]="'down'">
-      <eco-fab-speed-dial-trigger>
-        <button mat-fab>
-          <mat-icon>navigation</mat-icon>
-        </button>
-      </eco-fab-speed-dial-trigger>
+    <button mat-fab
+            [color]="(taskService.currentTaskId$|async)? 'accent': 'lighter'">
+      <mat-icon *ngIf="!(taskService.currentTaskId$|async)">play_arrow</mat-icon>
+      <mat-icon *ngIf="(taskService.currentTaskId$|async)">pause</mat-icon>
+    </button>
 
-      <eco-fab-speed-dial-actions>
-        <!--<button mat-mini-fab>-->
-        <!--<mat-icon>add</mat-icon>-->
-        <!--</button>-->
-        <!--<button mat-mini-fab>-->
-        <!--<mat-icon>edit</mat-icon>-->
-        <!--</button>-->
-        <button mat-mini-fab
-                color=""
-                (click)="showAddTaskBar()">
-          <mat-icon>add</mat-icon>
-        </button>
-        <button mat-mini-fab
-                routerLinkActive
-                #rlCfg="routerLinkActive"
-                [color]="rlCfg.isActive ? 'accent' : null"
-                [routerLink]="'config'">
-          <mat-icon>settings</mat-icon>
-        </button>
-        <button class="show-xs-only"
-                mat-mini-fab
-                routerLink="work-view"
-                routerLinkActive
-                #rlaWv="routerLinkActive"
-                [color]="rlaWv.isActive ? 'accent' : null">
-          <mat-icon>playlist_play</mat-icon>
-        </button>
-        <button class="show-xs-only"
-                mat-mini-fab
-                routerLink="worklog-and-calendar"
-                routerLinkActive
-                #rlWC="routerLinkActive"
-                [color]="rlWC.isActive ? 'accent' : null">
-          <mat-icon>today</mat-icon>
-        </button>
-      </eco-fab-speed-dial-actions>
-    </eco-fab-speed-dial>
+    <button mat-mini-fab
+            class="hide-xs"
+            color="lighter"
+            [matMenuTriggerFor]="mainMenu">
+      <mat-icon>menu</mat-icon>
+    </button>
   </nav>
 
   <button mat-mini-fab=""
