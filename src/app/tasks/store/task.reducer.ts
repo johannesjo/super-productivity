@@ -331,7 +331,7 @@ export function taskReducer(
     }
 
     case TaskActionTypes.UnsetCurrentTask: {
-      return {...state, currentTaskId: null};
+      return {...state, currentTaskId: null, lastCurrentTaskId: state.currentTaskId};
     }
 
     // Task Actions
@@ -659,6 +659,7 @@ export function taskReducer(
         return {
           ...state,
           currentTaskId: null,
+          lastCurrentTaskId: state.currentTaskId,
         };
       } else {
         return setNextTask(state);
