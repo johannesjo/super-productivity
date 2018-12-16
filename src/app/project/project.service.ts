@@ -71,6 +71,17 @@ export class ProjectService {
     });
   }
 
+  upsert(project: Partial<Project>) {
+    this._store.dispatch({
+      type: ProjectActionTypes.AddProject,
+      payload: {
+        project: Object.assign(project, {
+          id: shortid(),
+        })
+      }
+    });
+  }
+
   remove(projectId) {
     this._store.dispatch({
       type: ProjectActionTypes.DeleteProject,

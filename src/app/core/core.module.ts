@@ -10,6 +10,7 @@ import { RouterModule } from '@angular/router';
 import { LayoutModule } from './layout/layout.module';
 import { DialogSimpleTaskSummaryModule } from './dialog-simple-task-summary/dialog-simple-task-summary.module';
 import { NotifyModule } from './notify/notify.module';
+import { MigrateModule } from './migrate/migrate.module';
 
 @NgModule({
   imports: [
@@ -24,6 +25,7 @@ import { NotifyModule } from './notify/notify.module';
     RouterModule,
     LayoutModule,
     NotifyModule,
+    MigrateModule,
     DialogSimpleTaskSummaryModule,
   ],
   declarations: [],
@@ -37,6 +39,7 @@ import { NotifyModule } from './notify/notify.module';
     RouterModule,
     LayoutModule,
     NotifyModule,
+    MigrateModule,
     DialogSimpleTaskSummaryModule,
   ]
 })

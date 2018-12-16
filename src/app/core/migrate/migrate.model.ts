@@ -1,4 +1,6 @@
-import { TimeSpentOnDay } from '../../tasks/task.model';
+export interface OldTimeSpentOnDay {
+  [key: string]: string;
+}
 
 export interface OldTask {
   title: string;
@@ -7,7 +9,8 @@ export interface OldTask {
   subTasks: OldTask[];
   timeEstimate: string;
   timeSpent: string;
-  timeSpentOnDay: TimeSpentOnDay;
+  timeSpentOnDay: OldTimeSpentOnDay;
+  created?: string;
 
   originalId?: string;
   originalType?: 'JIRA' | 'GIT';
@@ -28,13 +31,12 @@ export interface OldTask {
   progress?: any;
   mainTaskTimeEstimate?: string;
   mainTaskTimeSpent?: string;
-  mainTaskTimeSpentOnDay?: TimeSpentOnDay;
+  mainTaskTimeSpentOnDay?: OldTimeSpentOnDay;
   doneDate?: string;
   lastWorkedOn?: string;
   showNotes?: false;
   started?: string;
   status?: string;
-  created?: string;
 }
 
 export interface OldJiraSettings {

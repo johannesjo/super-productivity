@@ -156,10 +156,9 @@ export class PersistenceService {
   }
 
   async loadComplete(): Promise<AppDataComplete> {
-
-
     const projectState = await this.loadProjectsMeta();
-    const pids = projectState.ids as string[];
+    const pids = projectState ? projectState.ids as string[] : [];
+
     return {
       lastActiveTime: this.getLastActive(),
       project: await this.loadProjectsMeta(),

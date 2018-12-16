@@ -96,6 +96,10 @@ export function projectReducer(
       return projectAdapter.addOne(payload.project, state);
     }
 
+    case ProjectActionTypes.UpsertProject: {
+      return projectAdapter.upsertOne(payload.project, state);
+    }
+
     case ProjectActionTypes.AddProjects: {
       return projectAdapter.addMany(payload.projects, state);
     }

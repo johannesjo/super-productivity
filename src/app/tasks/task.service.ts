@@ -2,7 +2,7 @@ import shortid from 'shortid';
 import { debounceTime, distinctUntilChanged, map, share, take, withLatestFrom } from 'rxjs/operators';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { DropListModelSource, Task, TaskWithSubTasks } from './task.model';
+import { DEFAULT_TASK, DropListModelSource, Task, TaskWithSubTasks } from './task.model';
 import { select, Store } from '@ngrx/store';
 import {
   AddSubTask,
@@ -364,17 +364,10 @@ export class TaskService {
   private _createNewTask(title: string, additional: Partial<Task> = {}): Task {
     return this._shortSyntax({
       // NOTE needs to be created every time
-      subTaskIds: [],
-      attachmentIds: [],
-      timeSpentOnDay: {},
-      timeSpent: 0,
-      timeEstimate: 0,
-      isDone: false,
+      ...DEFAULT_TASK,
       created: Date.now(),
       title,
       id: shortid(),
-      _isAdditionalInfoOpen: false,
-      _currentTab: 0,
       ...additional,
     }) as Task;
   }

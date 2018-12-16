@@ -12,6 +12,7 @@ export enum ProjectActionTypes {
   LoadProjects = '[Project] Load Projects',
   AddProject = '[Project] Add Project',
   AddProjects = '[Project] Add Projects',
+  UpsertProject = '[Project] Upsert Project',
   UpdateProject = '[Project] Update Project',
   UpdateProjectAdvancedCfg = '[Project] Update Project Advanced Cfg',
   UpdateProjectIssueProviderCfg = '[Project] Update Project Issue Provider Cfg',
@@ -49,6 +50,12 @@ export class AddProject implements Action {
 
 export class AddProjects implements Action {
   readonly type = ProjectActionTypes.AddProjects;
+
+  constructor(public payload: { projects: Project[] }) {
+  }
+}
+export class UpsertProject implements Action {
+  readonly type = ProjectActionTypes.UpsertProject;
 
   constructor(public payload: { projects: Project[] }) {
   }
@@ -96,6 +103,7 @@ export type ProjectActions
   | SetCurrentProject
   | AddProject
   | AddProjects
+  | UpsertProject
   | UpdateProject
   | UpdateProjectAdvancedCfg
   | UpdateProjectIssueProviderCfg

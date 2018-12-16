@@ -22,6 +22,7 @@ import { NoteService } from './note/note.service';
 import { MediaMatcher } from '@angular/cdk/layout';
 import { DOCUMENT } from '@angular/common';
 import { take } from 'rxjs/operators';
+import { MigrateService } from './core/migrate/migrate.service';
 
 const SIDE_PANEL_BREAKPOINT = 900;
 
@@ -48,6 +49,7 @@ export class AppComponent implements OnInit {
     private _googleDriveSyncService: GoogleDriveSyncService,
     private _snackService: SnackService,
     private _chromeExtensionInterface: ChromeExtensionInterfaceService,
+    private _migrateService: MigrateService,
     private _swUpdate: SwUpdate,
     private _el: ElementRef,
     private _cd: ChangeDetectorRef,
@@ -70,6 +72,8 @@ export class AppComponent implements OnInit {
     );
 
     this._projectService.load();
+
+    this._migrateService.checkForUpdate();
 
     // INIT Services and global handlers
     this._googleDriveSyncService.init();

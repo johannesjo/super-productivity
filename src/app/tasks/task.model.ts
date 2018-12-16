@@ -40,3 +40,16 @@ export interface TaskWithIssueData extends Task {
 export interface TaskWithSubTasks extends TaskWithIssueData {
   readonly subTasks?: TaskWithIssueData[];
 }
+
+
+export const DEFAULT_TASK: Partial<Task> = {
+  subTaskIds: [],
+  attachmentIds: [],
+  timeSpentOnDay: {},
+  timeSpent: 0,
+  timeEstimate: 0,
+  isDone: false,
+  created: Date.now(),
+  _isAdditionalInfoOpen: false,
+  _currentTab: 0,
+};
