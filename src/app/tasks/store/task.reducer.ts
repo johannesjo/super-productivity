@@ -306,7 +306,8 @@ export function taskReducer(
     }
 
     case TaskActionTypes.LoadTaskState: {
-      return {...action.payload.state};
+      const newState = action.payload.state;
+      return {...newState, currentTaskId: null, lastCurrentTaskId: newState.currentTaskId};
     }
 
     case TaskActionTypes.SetCurrentTask: {
