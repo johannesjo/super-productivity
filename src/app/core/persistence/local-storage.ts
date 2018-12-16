@@ -2,7 +2,7 @@ import { LS_LAST_ACTIVE } from './ls-keys.const';
 
 export const loadFromLs = (key) => {
   const serializedState = localStorage.getItem(key);
-  if (serializedState === null) {
+  if (!serializedState || serializedState === '') {
     return undefined;
   }
   return JSON.parse(serializedState);
@@ -20,7 +20,7 @@ export const saveToLsWithLastActive = (key, state) => {
 
 export const loadFromSessionStorage = (key) => {
   const serializedState = sessionStorage.getItem(key);
-  if (serializedState === null) {
+  if (!serializedState || serializedState === '') {
     return undefined;
   }
   return JSON.parse(serializedState);

@@ -33,6 +33,7 @@ export class MigrateService {
 
   checkForUpdate() {
     const isMigrated = loadFromLs(LS_IS_V1_MIGRATE);
+    // const isMigrated = localStorage.getItem(LS_IS_V1_MIGRATE);
 
     if (!isMigrated && loadFromLs(STORAGE_CURRENT_PROJECT)) {
       this._matDialog.open(DialogConfirmComponent, {
