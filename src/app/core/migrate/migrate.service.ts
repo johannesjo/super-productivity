@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { loadFromLs } from '../persistence/local-storage';
+import { loadFromLs, saveToLs } from '../persistence/local-storage';
 import { STORAGE_CURRENT_PROJECT, STORAGE_PROJECTS } from './migrate.const';
 import { DialogConfirmComponent } from '../../ui/dialog-confirm/dialog-confirm.component';
 import { MatDialog } from '@angular/material';
@@ -33,9 +33,8 @@ export class MigrateService {
 
   checkForUpdate() {
     const isMigrated = loadFromLs(LS_IS_V1_MIGRATE);
-    const currentProjectData = loadFromLs(STORAGE_CURRENT_PROJECT);
 
-    if (currentProjectData) {
+    if (!isMigrated && loadFromLs(STORAGE_CURRENT_PROJECT)) {
       this._matDialog.open(DialogConfirmComponent, {
         restoreFocus: true,
         data: {
@@ -69,6 +68,9 @@ export class MigrateService {
         await this._importProject(currentProjectData);
       }
       this._snackService.open({type: 'SUCCESS', message: 'Data imported'});
+
+      // set flag to not ask again
+      saveToLs(LS_IS_V1_MIGRATE, true);
 
     } catch (e) {
       this._snackService.open({type: 'ERROR', message: 'Something went wrong while importing the data. Falling back to local backup'});
