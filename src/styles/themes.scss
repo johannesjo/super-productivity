@@ -336,3 +336,19 @@ $blue-grey-theme-dark: mat-dark-theme($blue-grey-primary, $accent);
 }
 
 
+$pink-primary: mat-palette($mat-pink);
+$pink-accent: mat-palette($mat-pink, A200, A100, A400);
+$pink-warn: mat-palette($mat-red);
+
+$pink-theme: mat-light-theme($pink-primary, $pink-accent, $pink-warn);
+$pink-dark-theme: mat-dark-theme($pink-primary, $pink-accent, $pink-warn);
+
+.pink {
+  @include angular-material-theme($pink-theme);
+  @include color-helper($pink-theme);
+}
+
+.pink.isDarkTheme {
+  @include angular-material-theme($pink-dark-theme);
+  @include color-helper($pink-dark-theme);
+}

@@ -18,7 +18,7 @@ const ALL_THEMES = [
   'grey',
   'blue-grey',
   'indigo',
-  'indigo',
+  'pink',
 ];
 
 @Component({
