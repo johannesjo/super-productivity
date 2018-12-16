@@ -1,8 +1,9 @@
-<div class="handle bg-accent"
+<div class="handle bg-600"
      (dblclick)="toggle()"
      (touchstart)="onTouchStart($event)"
      (mousedown)="onMouseDown($event)">
   <button mat-fab=""
+          color="primary"
           #buttonEl
           [class.isAnimate]="isAnimateBtn"
   >
