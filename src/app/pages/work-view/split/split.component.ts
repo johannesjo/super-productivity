@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnInit, Output, Renderer2, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output, Renderer2, ViewChild } from '@angular/core';
 import { fromEvent, Subscription } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
@@ -10,7 +10,7 @@ const ANIMATABLE_CLASS = 'isAnimatable';
   styleUrls: ['./split.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class SplitComponent implements OnInit {
+export class SplitComponent {
   @Input() splitTopEl;
   @Input() splitBottomEl;
   @Input() containerEl;
@@ -19,7 +19,7 @@ export class SplitComponent implements OnInit {
   @Output() posChanged: EventEmitter<number> = new EventEmitter();
 
   pos: number;
-  subscription: Subscription;
+  eventSubs: Subscription;
   @ViewChild('buttonEl') buttonEl;
   private _isDrag = false;
 
@@ -34,13 +34,6 @@ export class SplitComponent implements OnInit {
     }
   }
 
-  ngOnInit() {
-    // console.log(this.splitTopEl);
-    // console.log(this.containerEl);
-    // console.log(this.splitBottomEl);
-    // console.log(this.buttonEl);
-  }
-
   toggle() {
     this._renderer.addClass(this.splitTopEl, ANIMATABLE_CLASS);
     this._renderer.addClass(this.splitBottomEl, ANIMATABLE_CLASS);
@@ -51,23 +44,35 @@ export class SplitComponent implements OnInit {
     this._updatePos(newPos);
   }
 
+  onTouchStart(ev) {
+    this._isDrag = false;
+    const touchend$ = fromEvent(document, 'touchend');
+    this.eventSubs = touchend$.subscribe((e: TouchEvent) => this.onMoveEnd(e));
+
+    const touchmove$ = fromEvent(document, 'touchmove')
+      .pipe(takeUntil(touchend$))
+      .subscribe((e: TouchEvent) => this.onMove(e));
+
+    this.eventSubs.add(touchmove$);
+  }
+
   onMouseDown(ev) {
     this._isDrag = false;
     // console.log('onMouseDown', ev);
     const mouseup$ = fromEvent(document, 'mouseup');
-    this.subscription = mouseup$.subscribe((e: MouseEvent) => this.onMouseUp(e));
+    this.eventSubs = mouseup$.subscribe((e: MouseEvent) => this.onMoveEnd(e));
 
     const mousemove$ = fromEvent(document, 'mousemove')
       .pipe(takeUntil(mouseup$))
-      .subscribe((e: MouseEvent) => this.onMouseMove(e));
+      .subscribe((e: MouseEvent) => this.onMove(e));
 
-    this.subscription.add(mousemove$);
+    this.eventSubs.add(mousemove$);
   }
 
-  onMouseUp(ev): void {
-    if (this.subscription) {
-      this.subscription.unsubscribe();
-      this.subscription = undefined;
+  onMoveEnd(ev): void {
+    if (this.eventSubs) {
+      this.eventSubs.unsubscribe();
+      this.eventSubs = undefined;
     }
 
     if (!this._isDrag) {
@@ -75,7 +80,8 @@ export class SplitComponent implements OnInit {
     }
   }
 
-  onMouseMove(ev) {
+  onMove(ev) {
+    const clientY = ev.clientY || ev.touches[0].clientY;
     this._renderer.removeClass(this.splitTopEl, ANIMATABLE_CLASS);
     this._renderer.removeClass(this.splitBottomEl, ANIMATABLE_CLASS);
     this._isDrag = true;
@@ -83,7 +89,7 @@ export class SplitComponent implements OnInit {
     const h = this.containerEl.offsetHeight;
     const headerHeight = bounds.top;
 
-    let percentage = (ev.clientY - headerHeight) / h * 100;
+    let percentage = (clientY - headerHeight) / h * 100;
     if (percentage > 100) {
       percentage = 100;
     }

@@ -1,5 +1,6 @@
 <div class="handle bg-accent"
      (dblclick)="toggle()"
+     (touchstart)="onTouchStart($event)"
      (mousedown)="onMouseDown($event)">
   <button mat-fab=""
           #buttonEl
