@@ -284,7 +284,7 @@ export class GoogleApiService {
     } else if (this._refreshLoginTimeout) {
       window.clearTimeout(this._refreshLoginTimeout);
     }
-    this._configService.updateSection('_googleSession', sessionData);
+    this._configService.updateSection('_googleSession', sessionData, true);
   }
 
   private _initRefreshTokenTimeoutForWeb(expiresAt: number) {
