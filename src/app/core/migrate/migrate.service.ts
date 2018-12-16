@@ -33,7 +33,6 @@ export class MigrateService {
   checkForUpdate() {
     const isMigrated = loadFromLs(LS_IS_V1_MIGRATE);
     const currentProjectData = loadFromLs(STORAGE_CURRENT_PROJECT);
-    console.log(currentProjectData);
 
     if (currentProjectData) {
       this._matDialog.open(DialogConfirmComponent, {
@@ -110,7 +109,6 @@ export class MigrateService {
   private _transformTasks(oldTasks: OldTask[]): EntityState<Task> {
     // remove null entries
     const cleanOldTasks = oldTasks.filter(ot => !!ot);
-    console.log(cleanOldTasks);
 
     const transformedSubTasks = [];
     const transformedMainTasks = cleanOldTasks.map((ot, i) => {
@@ -141,6 +139,8 @@ export class MigrateService {
 
       title: ot.title,
       id: ot.id,
+      issueId: ot.originalId,
+      issueType: ot.originalType,
       isDone: ot.isDone,
       notes: ot.notes,
       subTaskIds: (ot.subTasks && ot.subTasks.length > 0) ? ot.subTasks.map(t => t.id) : [],

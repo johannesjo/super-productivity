@@ -5,7 +5,7 @@ import { TaskWithSubTasks } from '../task.model';
 
 const mapIssueDataToTask = (tasks_, issueEntityMap) => {
   return tasks_ && tasks_.map((task) => {
-    const issueData = (task.issueId && task.issueType) && issueEntityMap[task.issueType][task.issueId];
+    const issueData = (task.issueId && task.issueType) && issueEntityMap[task.issueType] && issueEntityMap[task.issueType][task.issueId];
     return issueData ? {...task, issueData: issueData} : task;
   });
 };
