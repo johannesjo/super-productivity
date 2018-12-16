@@ -15,6 +15,7 @@ import { initialTaskState } from '../../tasks/store/task.reducer';
 import { EntityState } from '@ngrx/entity';
 import { DEFAULT_TASK, Task } from '../../tasks/task.model';
 import * as moment from 'moment';
+import { JiraIssue } from '../../issue/jira/jira-issue/jira-issue.model';
 
 @Injectable({
   providedIn: 'root'
@@ -101,9 +102,61 @@ export class MigrateService {
     });
 
     const doneTaskState = this._transformTasks(op.data.doneBacklogTasks);
-    await this._persistenceService.saveToTaskArchiveForProject(op.id, {
-      ...doneTaskState,
-    });
+    await this._persistenceService.saveToTaskArchiveForProject(op.id, doneTaskState);
+
+    const issueState = this._getJiraIssuesFromTasks(op.data.tasks.concat(op.data.backlogTasks, op.data.doneBacklogTasks));
+    if (issueState) {
+      await this._persistenceService.saveIssuesForProject(op.id, 'JIRA', issueState);
+    }
+  }
+
+  private _getJiraIssuesFromTasks(oldTasks: OldTask[]): EntityState<JiraIssue> | null {
+    const flatTasks = oldTasks
+      .filter(t => !!t)
+      .reduce((acc, t) => acc.concat(t.subTasks), [])
+      .filter(t => !!t);
+    const transformedIssues = flatTasks
+      .filter(t => t.orignalId && t.originalType === 'JIRA')
+      .map(this._transformJiraIssue);
+
+    if (!transformedIssues || !transformedIssues.length) {
+      return null;
+    }
+
+    return {
+      entities: transformedIssues.reduce((acc, issue) => {
+        return {
+          ...acc,
+          [issue.id]: issue
+        };
+      }, {}),
+      ids: transformedIssues.map(issue => issue.id),
+    };
+  }
+
+  private _transformJiraIssue(ot: OldTask): JiraIssue {
+    return {
+      // copied data
+      key: ot.originalKey,
+      id: ot.originalId,
+      summary: ot.title,
+      timeestimate: ot.originalEstimate,
+      timespent: 0,
+      description: ot.notes,
+      updated: ot.originalUpdated,
+      url: ot.originalLink,
+
+      // not enough data on old model
+      components: [],
+      status: null,
+      attachments: [],
+      assignee: null,
+      changelog: null,
+
+      // new properties
+      comments: [],
+      wasUpdated: false,
+    };
   }
 
   private _transformTasks(oldTasks: OldTask[]): EntityState<Task> {

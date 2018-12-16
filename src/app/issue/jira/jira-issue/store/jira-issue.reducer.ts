@@ -8,8 +8,6 @@ import { IssueProviderKey } from '../../../issue';
 export const JIRA_ISSUE_FEATURE_NAME: IssueProviderKey = 'JIRA';
 
 export interface JiraIssueState extends EntityState<JiraIssue> {
-  // additional entities state properties
-  currentJiraIssueId: string | null;
 }
 
 export const jiraIssueAdapter: EntityAdapter<JiraIssue> = createEntityAdapter<JiraIssue>();
@@ -27,14 +25,10 @@ export const selectAllJiraIssues = createSelector(selectJiraIssueFeatureState, s
 // select the total user count
 export const selectJiraIssueTotal = createSelector(selectJiraIssueFeatureState, selectTotal);
 
-export const selectCurrentJiraIssue = createSelector(selectJiraIssueFeatureState, state => state.currentJiraIssueId);
-
 
 // REDUCER
 // -------
-export const initialJiraIssueState: JiraIssueState = jiraIssueAdapter.getInitialState({
-  currentJiraIssueId: null,
-});
+export const initialJiraIssueState: JiraIssueState = jiraIssueAdapter.getInitialState({});
 
 export function jiraIssueReducer(
   state: JiraIssueState = initialJiraIssueState,
