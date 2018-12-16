@@ -41,7 +41,7 @@ export class MigrateService {
         data: {
           okTxt: 'Do it!',
           /* tslint:disable */
-          message: `<h2>Super Productivity V1 Data found</h2><p>Do you want to migrate it? Please note that only projects and tasks are migrated, but not your project configuration.</p>`,
+          message: `<h2>Super Productivity V1 Data found</h2><p>Do you want to migrate it? Please note that only projects and tasks are migrated, but not your project configuration.</p><p>Please also note that the migration process might not be working as you would expect. There is probably a lot you need to tweak afterwards and it might even happen that the process fails completely, so making a backup of your data is highly recommended.</p>`,
           /* tslint:enable */
         }
       }).afterClosed()
@@ -68,7 +68,6 @@ export class MigrateService {
         const currentProjectData = loadFromLs(STORAGE_CURRENT_PROJECT);
         await this._importProject(currentProjectData);
       }
-      // await this._persistenceService.importComplete(data);
       this._snackService.open({type: 'SUCCESS', message: 'Data imported'});
 
     } catch (e) {
@@ -82,7 +81,7 @@ export class MigrateService {
     this._projectService.upsert({
       id: op.id,
       title: op.title,
-      themeColor: op.data.theme.replace('-theme', ''),
+      themeColor: op.data.theme.replace('-theme', '').replace('-dark', ''),
       isDarkTheme: !!op.data.theme.match(/dark/),
       issueIntegrationCfgs: {
         JIRA: (op.data.jiraSettings && op.data.jiraSettings.isJiraEnabled)
@@ -143,24 +142,28 @@ export class MigrateService {
       title: ot.title,
       id: ot.id,
       isDone: ot.isDone,
+      notes: ot.notes,
       subTaskIds: (ot.subTasks && ot.subTasks.length > 0) ? ot.subTasks.map(t => t.id) : [],
       timeSpentOnDay: ot.timeSpentOnDay
         ? Object.keys(ot.timeSpentOnDay).reduce((acc, key) => {
           return {
             ...acc,
-            [key]: this._transformMomentStrToTimeStamp(ot.timeSpentOnDay[key]),
+            [key]: this._transformMomentDurationStrToMs(ot.timeSpentOnDay[key]),
           };
         }, {})
         : {},
-      timeEstimate: this._transformMomentStrToTimeStamp(ot.timeEstimate),
-      timeSpent: this._transformMomentStrToTimeStamp(ot.timeEstimate),
+      timeEstimate: this._transformMomentDurationStrToMs(ot.timeEstimate),
+      timeSpent: this._transformMomentDurationStrToMs(ot.timeSpent),
       created: this._transformMomentStrToTimeStamp(ot.created),
     };
   }
 
   private _transformMomentStrToTimeStamp(momStr: string): number {
     return moment(momStr).unix();
+  }
 
+  private _transformMomentDurationStrToMs(momStr: string): number {
+    return moment.duration(momStr).asMilliseconds();
   }
 
   private _transformJiraCfg(oldCfg: OldJiraSettings): JiraCfg {

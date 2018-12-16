@@ -75,9 +75,10 @@ export class ProjectService {
     this._store.dispatch({
       type: ProjectActionTypes.AddProject,
       payload: {
-        project: Object.assign(project, {
+        project: {
           id: shortid(),
-        })
+          ...project
+        }
       }
     });
   }

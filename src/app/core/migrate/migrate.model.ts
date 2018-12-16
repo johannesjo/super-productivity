@@ -11,6 +11,7 @@ export interface OldTask {
   timeSpent: string;
   timeSpentOnDay: OldTimeSpentOnDay;
   created?: string;
+  notes?: string;
 
   originalId?: string;
   originalType?: 'JIRA' | 'GIT';
