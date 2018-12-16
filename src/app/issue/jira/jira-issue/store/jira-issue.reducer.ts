@@ -44,8 +44,13 @@ export function jiraIssueReducer(
     }
 
     case TaskActionTypes.AddTask: {
+      if (!action.payload.issue) {
+        console.warn('No issue data provided, on adding task. (Only ok if getting an issue from archive)');
+        return state;
+      }
+
       if (action.payload.task.issueType === 'JIRA') {
-        return jiraIssueAdapter.addOne(action.payload.issue, state);
+        return jiraIssueAdapter.upsertOne(action.payload.issue, state);
       }
       return state;
     }

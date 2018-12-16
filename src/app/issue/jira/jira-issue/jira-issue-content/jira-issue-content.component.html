@@ -17,7 +17,7 @@
     </tr>
     <tr>
       <th>Status</th>
-      <td>{{task.issueData.status.name}}</td>
+      <td>{{task.issueData.status?.name}}</td>
     </tr>
     <tr *ngIf="task.issueData.components?.length">
       <th>Components</th>

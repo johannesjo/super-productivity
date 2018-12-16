@@ -87,6 +87,7 @@ export class MigrateService {
         JIRA: (op.data.jiraSettings && op.data.jiraSettings.isJiraEnabled)
           ? this._transformJiraCfg(op.data.jiraSettings)
           : null,
+        // GIT: {},
       }
     });
 
@@ -113,10 +114,10 @@ export class MigrateService {
   private _getJiraIssuesFromTasks(oldTasks: OldTask[]): EntityState<JiraIssue> | null {
     const flatTasks = oldTasks
       .filter(t => !!t)
-      .reduce((acc, t) => acc.concat(t.subTasks), [])
+      .reduce((acc, t) => acc.concat(t.subTasks, [t]), [])
       .filter(t => !!t);
     const transformedIssues = flatTasks
-      .filter(t => t.orignalId && t.originalType === 'JIRA')
+      .filter(t => t.originalId && t.originalType === 'JIRA')
       .map(this._transformJiraIssue);
 
     if (!transformedIssues || !transformedIssues.length) {

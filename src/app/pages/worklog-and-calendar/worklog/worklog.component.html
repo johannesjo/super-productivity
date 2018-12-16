@@ -48,7 +48,7 @@
                 *matHeaderCellDef> Title
             </th>
             <td mat-cell
-                *matCellDef="let logEntry"> {{logEntry.task.title}}
+                *matCellDef="let logEntry"> {{(logEntry.parentTitle ? logEntry.parentTitle +' / ': '') + logEntry.task.title}}
             </td>
           </ng-container>
 
@@ -67,11 +67,11 @@
             </th>
             <td mat-cell
                 *matCellDef="let logEntry">
-              <!--<button mat-mini-fab=""-->
-                      <!--aria-label="restore"-->
-                      <!--(click)="restoreTask();">-->
-                <!--<mat-icon>settings_backup_restore</mat-icon>-->
-              <!--</button>-->
+              <button mat-mini-fab=""
+                      aria-label="restore"
+                      (click)="restoreTask(year.key, month.key, worklogForDay.key,logEntry.task);">
+                <mat-icon>settings_backup_restore</mat-icon>
+              </button>
             </td>
           </ng-container>
 

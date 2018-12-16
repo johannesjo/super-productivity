@@ -2,10 +2,14 @@ import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnIni
 import { PersistenceService } from '../../../core/persistence/persistence.service';
 import { ProjectService } from '../../../project/project.service';
 import { expandFadeAnimation } from '../../../ui/animations/expand.ani';
-import { mapArchiveToWorklog, WorklogDay, WorklogMonth } from '../../../core/util/map-archive-to-worklog';
+import { mapArchiveToWorklog, Worklog, WorklogDay, WorklogMonth } from '../../../core/util/map-archive-to-worklog';
 import { DialogSimpleTaskSummaryComponent } from '../../../core/dialog-simple-task-summary/dialog-simple-task-summary.component';
 import { MatDialog } from '@angular/material';
 import { Subscription } from 'rxjs';
+import { TaskCopy } from '../../../tasks/task.model';
+import { TaskService } from '../../../tasks/task.service';
+import { Router } from '@angular/router';
+import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confirm.component';
 
 
 @Component({
@@ -16,21 +20,25 @@ import { Subscription } from 'rxjs';
   animations: [expandFadeAnimation]
 })
 export class WorklogComponent implements OnInit, OnDestroy {
-  worklog: any = {};
+  worklog: Worklog = {};
   totalTimeSpent: number;
+  private _projectId: string;
   private _isUnloaded = false;
   private _subs = new Subscription();
 
   constructor(
     private readonly _persistenceService: PersistenceService,
     private readonly _projectService: ProjectService,
+    private readonly _taskService: TaskService,
     private readonly _matDialog: MatDialog,
     private readonly _cd: ChangeDetectorRef,
+    private readonly _router: Router,
   ) {
   }
 
   ngOnInit() {
     this._subs.add(this._projectService.currentId$.subscribe((id) => {
+      this._projectId = id;
       this._loadData(id);
     }));
   }
@@ -71,7 +79,34 @@ export class WorklogComponent implements OnInit, OnDestroy {
     }
   }
 
-  restoreTask() {
+  restoreTask(yearKey, monthKey, dayKey, task: TaskCopy) {
+    console.log(yearKey, monthKey, dayKey, task);
+
+
+    this._matDialog.open(DialogConfirmComponent, {
+      restoreFocus: true,
+      data: {
+        okTxt: 'Do it!',
+        message: `Are you sure you want to move the task <strong>"${task.title}"</strong> into your todays task list?`,
+      }
+    }).afterClosed()
+      .subscribe((isConfirm: boolean) => {
+        if (isConfirm) {
+          const worklogDay: WorklogDay = this.worklog[yearKey].ent[monthKey].ent[dayKey];
+          const index = worklogDay.logEntries.findIndex(ent => ent.task === task);
+
+          if (index > -1) {
+            // TODO refactor to task action!!!
+            worklogDay.logEntries.splice(index, 1);
+            this.worklog = {...this.worklog};
+            this._taskService.add(task.title, false, task);
+            this._persistenceService.removeTaskFromArchive(this._projectId, task.id)
+              .then(() => {
+                this._router.navigate(['/work-view']);
+              });
+          }
+        }
+      });
   }
 
   sortWorklogItems(a, b) {

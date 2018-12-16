@@ -19,13 +19,13 @@ export class JiraIssueContentComponent implements OnInit {
   }
 
   ngOnInit() {
-    console.log(this.task);
-    this._jiraApiService.getIssueById(this.task.issueId, true)
-      .then((res) => {
-        if (res.updated !== this.task.issueData.updated) {
-          this._jiraIssueService.update(this.task.issueId, {...res, wasUpdated: true});
-        }
-      });
+    // TODO find better solution
+    // this._jiraApiService.getIssueById(this.task.issueId, true)
+    //   .then((res) => {
+    //     if (res.updated !== this.task.issueData.updated) {
+    //       this._jiraIssueService.update(this.task.issueId, {...res, wasUpdated: true});
+    //     }
+    //   });
   }
 
   hideUpdates() {

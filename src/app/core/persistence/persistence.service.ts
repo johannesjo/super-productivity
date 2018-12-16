@@ -90,6 +90,17 @@ export class PersistenceService {
     return this._loadFromDb(this._makeProjectKey(projectId, LS_TASK_ARCHIVE));
   }
 
+  async removeTaskFromArchive(projectId: string, taskId: string) {
+    const lsKey = this._makeProjectKey(projectId, LS_TASK_ARCHIVE);
+    const currentArchive: EntityState<Task> = await this._loadFromDb(lsKey);
+    const ids = currentArchive.ids as string[] || [];
+    if (ids.indexOf(taskId) > -1) {
+      delete currentArchive.entities[taskId];
+      ids.splice(ids.indexOf(taskId), 1);
+    }
+    return this._saveToDb(lsKey, currentArchive, true);
+  }
+
   async saveIssuesForProject(projectId, issueType: IssueProviderKey, data: JiraIssueState, isForce = false): Promise<any> {
     return this._saveToDb(this._makeProjectKey(projectId, LS_ISSUE_STATE, issueType), data, isForce);
   }
