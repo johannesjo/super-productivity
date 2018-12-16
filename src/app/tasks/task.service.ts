@@ -33,6 +33,7 @@ import { TimeTrackingService } from '../time-tracking/time-tracking.service';
 import {
   selectAllStartableTasks,
   selectBacklogTasksWithSubTasks,
+  selectCurrentTask,
   selectCurrentTaskId,
   selectEstimateRemainingForBacklog,
   selectEstimateRemainingForToday,
@@ -57,6 +58,11 @@ export class TaskService {
   currentTaskId: string;
   currentTaskId$: Observable<string> = this._store.pipe(
     select(selectCurrentTaskId),
+    // NOTE: we can't use share here, as we need the last emitted value
+  );
+
+  currentTask$: Observable<Task> = this._store.pipe(
+    select(selectCurrentTask),
     // NOTE: we can't use share here, as we need the last emitted value
   );
 
@@ -107,6 +113,9 @@ export class TaskService {
   totalTimeWorkedOnTodaysTasks$: Observable<any> = this._store.pipe(
     select(selectTotalTimeWorkedOnTodaysTasks),
     distinctUntilChanged(),
+  );
+  currentTaskProgress$: Observable<number> = this.currentTask$.pipe(
+    map((task) => task && task.timeEstimate > 0 && task.timeSpent / task.timeEstimate)
   );
 
   // TODO could be more efficient than using combine latest

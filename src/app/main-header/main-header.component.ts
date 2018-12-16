@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, ElementRef, Input, OnInit, Renderer2, ViewChild } from '@angular/core';
 import { ProjectService } from '../project/project.service';
 import { DialogCreateProjectComponent } from '../project/dialogs/create-project/dialog-create-project.component';
 import { MatDialog, MatDrawer } from '@angular/material';
@@ -13,11 +13,11 @@ import { TaskService } from '../tasks/task.service';
   styleUrls: ['./main-header.component.scss']
 })
 export class MainHeaderComponent implements OnInit {
-  isSpeedDialOpen: boolean;
-  progressCircleRadius = 20;
+  progressCircleRadius = 13;
   circumference = this.progressCircleRadius * Math.PI * 2;
 
   @Input() drawer: MatDrawer;
+  @ViewChild('circleSvg') circleSvg: ElementRef;
 
   constructor(
     public readonly projectService: ProjectService,
@@ -26,10 +26,19 @@ export class MainHeaderComponent implements OnInit {
     public readonly taskService: TaskService,
     private readonly _matDialog: MatDialog,
     private readonly _layoutService: LayoutService,
+    private readonly _renderer: Renderer2,
   ) {
   }
 
   ngOnInit() {
+    this.taskService.currentTaskProgress$.subscribe((progress_) => {
+      let progress = progress_ || 1;
+      if (progress > 1) {
+        progress = 1;
+      }
+      const dashOffset = this.circumference * -1 * progress;
+      this._renderer.setStyle(this.circleSvg.nativeElement, 'stroke-dashoffset', dashOffset);
+    });
   }
 
   switchProject(projectId) {
