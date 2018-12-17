@@ -10,6 +10,7 @@ export const DEFAULT_GIT_CFG: GitCfg = {
 };
 
 export const GIT_POLL_INTERVAL = 5 * 60 * 1000;
+export const GIT_API_BASE_URL = 'https://api.github.com/';
 
 export const GIT_CONFIG_FORM: FormlyFieldConfig[] = [
   {
