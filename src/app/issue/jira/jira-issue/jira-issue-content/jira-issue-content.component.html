@@ -1,6 +1,6 @@
 <div style="text-align: center;">
   <button mat-raised-button
-          *ngIf="task.issueData.wasUpdated"
+          *ngIf="issueData.wasUpdated"
           color="accent"
           (click)="hideUpdates()">
     Mark updates as checked
@@ -13,17 +13,17 @@
   <table class="issue-table">
     <tr>
       <th>Summary</th>
-      <th>{{task.issueData.key}} {{task.issueData.summary}}</th>
+      <th>{{issueData.key}} {{issueData.summary}}</th>
     </tr>
     <tr>
       <th>Status</th>
-      <td>{{task.issueData.status?.name}}</td>
+      <td>{{issueData.status?.name}}</td>
     </tr>
-    <tr *ngIf="task.issueData.components?.length">
+    <tr *ngIf="issueData.components?.length">
       <th>Components</th>
       <td>
         <mat-chip-list>
-          <mat-chip *ngFor="let component of task.issueData.components"
+          <mat-chip *ngFor="let component of issueData.components"
                     title="{{component.description}}">{{component.name}}
           </mat-chip>
         </mat-chip-list>
@@ -32,7 +32,7 @@
     <tr>
       <th>Description</th>
       <td>
-        <inline-markdown [model]="task.issueData.description"></inline-markdown>
+        <inline-markdown [model]="issueData.description"></inline-markdown>
       </td>
     </tr>
     <tr>
@@ -40,7 +40,7 @@
       <td>
         <div class="attachments">
           <div class="attachment"
-               *ngFor="let attachment of task.issueData.attachments">
+               *ngFor="let attachment of issueData.attachments">
             <!--<a [href]="attachment.content">-->
             <!--<img *ngIf="attachment.thumbnail"-->
             <!--[src]="attachment.thumbnail">-->
@@ -53,11 +53,11 @@
         </div>
       </td>
     </tr>
-    <tr *ngIf="task.issueData.comments">
+    <tr *ngIf="issueData.comments">
       <th>Comments</th>
       <td>
         <div class="comment"
-             *ngFor="let comment of task.issueData.comments">
+             *ngFor="let comment of issueData.comments">
 
           <img [src]="comment.author.avatarUrl"
                class="author-avatar">
@@ -69,7 +69,7 @@
           </div>
         </div>
 
-        <a [href]="task.issueData.url"
+        <a [href]="issueData.url"
            mat-raised-button=""
            target="_blank">
           <mat-icon>textsms</mat-icon>
@@ -79,7 +79,7 @@
   </table>
 
   <!--<pre><code>-->
-  <!--{{task.issueData|json}}-->
+  <!--{{issueData|json}}-->
   <!--</code></pre>-->
 
 </div>

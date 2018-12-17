@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, Input, OnInit } from '@angular/core
 import { TaskWithSubTasks } from '../../../../tasks/task.model';
 import { JiraIssueService } from '../jira-issue.service';
 import { JiraApiService } from '../../jira-api.service';
+import { JiraIssue } from '../jira-issue.model';
 
 @Component({
   selector: 'jira-issue-content',
@@ -10,7 +11,13 @@ import { JiraApiService } from '../../jira-api.service';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class JiraIssueContentComponent implements OnInit {
-  @Input() public task: TaskWithSubTasks;
+  taskData: TaskWithSubTasks;
+  issueData: JiraIssue;
+
+  @Input() set task(task: TaskWithSubTasks) {
+    this.taskData = task;
+    this.issueData = task.issueData as JiraIssue;
+  }
 
   constructor(
     private readonly  _jiraIssueService: JiraIssueService,
