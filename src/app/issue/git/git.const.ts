@@ -2,49 +2,22 @@
 import { GitCfg } from './git';
 import { FormlyFieldConfig } from '@ngx-formly/core';
 
-export const DEFAULT_JIRA_CFG: GitCfg = {
-  isEnabled: true,
-  _isBlockAccess: false,
-  host: null,
-  userName: null,
-  password: null,
-
-  isAutoPollTickets: true,
-  searchJqlQuery: 'resolution = Unresolved ORDER BY updatedDate DESC',
-
-  isAutoAddToBacklog: true,
-  autoAddBacklogJqlQuery: 'assignee = currentUser() AND sprint in openSprints() AND resolution = Unresolved ORDER BY updatedDate DESC',
-
-  isWorklogEnabled: true,
-  isAutoWorklog: false,
-  isAddWorklogOnSubTaskDone: true,
-
-  isUpdateIssueFromLocal: false,
-
-  isShowComponents: true,
-
-  isCheckToReAssignTicketOnTaskStart: true,
-  userAssigneeName: null,
-
-  isTransitionIssuesEnabled: true,
-  availableTransitions: {
-    OPEN: 'ALWAYS_ASK',
-    IN_PROGRESS: 'ALWAYS_ASK',
-    DONE: 'ALWAYS_ASK'
-  },
-  userToAssignOnDone: null
+export const DEFAULT_GIT_CFG: GitCfg = {
+  isShowIssuesFromGit: false,
+  isAutoPoll: false,
+  isAutoImportToBacklog: false,
+  repo: null,
 };
 
 
-export const JIRA_POLL_INTERVAL = 5 * 60 * 1000;
-// export const JIRA_POLL_INTERVAL = 5 * 1000;
+export const GIT_POLL_INTERVAL = 5 * 60 * 1000;
 
 // it's weird!!
-export const JIRA_DATE_FORMAT = 'YYYY-MM-DDTHH:mm:ss.SSZZ';
-export const JIRA_ISSUE_TYPE = 'JIRA';
-export const JIRA_REQUEST_TIMEOUT_DURATION = 12000;
-export const JIRA_MAX_RESULTS = 100;
-export const JIRA_ADDITIONAL_ISSUE_FIELDS = [
+export const GIT_DATE_FORMAT = 'YYYY-MM-DDTHH:mm:ss.SSZZ';
+export const GIT_ISSUE_TYPE = 'GIT';
+export const GIT_REQUEST_TIMEOUT_DURATION = 12000;
+export const GIT_MAX_RESULTS = 100;
+export const GIT_ADDITIONAL_ISSUE_FIELDS = [
   'assignee',
   'summary',
   'description',
@@ -59,14 +32,14 @@ export const JIRA_ADDITIONAL_ISSUE_FIELDS = [
 ];
 
 // there has to be one field otherwise we get all...
-export const JIRA_REDUCED_ISSUE_FIELDS = [
+export const GIT_REDUCED_ISSUE_FIELDS = [
   'summary',
   'updated',
   'timeestimate',
   'timespent',
 ];
 
-export const JIRA_CREDENTIALS_FORM_CFG: FormlyFieldConfig[] = [
+export const GIT_CREDENTIALS_FORM_CFG: FormlyFieldConfig[] = [
   {
     key: 'host',
     type: 'input',
@@ -94,7 +67,7 @@ export const JIRA_CREDENTIALS_FORM_CFG: FormlyFieldConfig[] = [
   },
 ];
 
-export const JIRA_ADVANCED_FORM_CFG: FormlyFieldConfig[] = [
+export const GIT_ADVANCED_FORM_CFG: FormlyFieldConfig[] = [
   {
     key: 'isAutoPollTickets',
     type: 'checkbox',

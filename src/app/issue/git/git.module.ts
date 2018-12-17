@@ -1,6 +1,5 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { GitCfgStepperComponent } from './git-cfg-stepper/git-cfg-stepper.component';
 import { UiModule } from '../../ui/ui.module';
 import { CoreModule } from '../../core/core.module';
 import { NgxElectronModule } from 'ngx-electron';
@@ -13,9 +12,9 @@ import { DialogGitInitialSetupComponent } from './dialog-git-initial-setup/dialo
     UiModule,
     NgxElectronModule,
   ],
-  declarations: [GitCfgStepperComponent, DialogGitInitialSetupComponent],
+  declarations: [DialogGitInitialSetupComponent],
   entryComponents: [DialogGitInitialSetupComponent],
-  exports: [GitCfgStepperComponent],
+  exports: [],
 })
 export class GitModule {
 }

@@ -9,7 +9,7 @@ import { selectGitIssueEntities, selectGitIssueFeatureState, selectGitIssueIds }
 import { selectCurrentProjectId, selectProjectGitCfg } from '../../../../project/store/project.reducer';
 import { GitApiService } from '../../git-api.service';
 import { GitIssueService } from '../git-issue.service';
-import { JIRA_POLL_INTERVAL } from '../../git.const';
+import { GIT_POLL_INTERVAL } from '../../git.const';
 import { ConfigService } from '../../../../core/config/config.service';
 import { Dictionary } from '@ngrx/entity';
 import { GitIssue } from '../git-issue.model';
@@ -70,7 +70,7 @@ export class GitIssueEffects {
   private _saveToLs([action, currentProjectId, gitIssueFeatureState]) {
     if (currentProjectId) {
       this._persistenceService.saveLastActive();
-      this._persistenceService.saveIssuesForProject(currentProjectId, 'JIRA', gitIssueFeatureState);
+      this._persistenceService.saveIssuesForProject(currentProjectId, 'GIT', gitIssueFeatureState);
     } else {
       throw new Error('No current project id');
     }
@@ -83,23 +83,23 @@ export class GitIssueEffects {
       window.clearInterval(this._pollingIntervalId);
       this._pollingIntervalId = 0;
     }
-    const isPollingEnabled = gitCfg && gitCfg.isEnabled && gitCfg.isAutoPollTickets;
+    const isPollingEnabled = gitCfg && gitCfg.isAutoPoll;
     if (isPollingEnabled && issueIds && issueIds.length) {
       this._pollingIntervalId = window.setInterval(() => {
-        // TODO remove
         this._snackService.open({message: 'Git: Polling Changes for issues', icon: 'cloud_download'});
         issueIds.forEach((id) => this._updateIssueFromApi(id, entities[id]));
-      }, JIRA_POLL_INTERVAL);
+      }, GIT_POLL_INTERVAL);
     }
   }
 
   private _updateIssueFromApi(issueId, oldIssueData) {
-    this._gitApiService.getIssueById(issueId, true)
-      .then((res) => {
-        if (res.updated !== oldIssueData.updated) {
-          this._gitIssueService.update(issueId, {...res, wasUpdated: true});
-        }
-      });
+    // TODO enable
+    // this._gitApiService.getIssueById(issueId, true)
+    //   .then((res) => {
+    //     if (res.updated !== oldIssueData.updated) {
+    //       this._gitIssueService.update(issueId, {...res, wasUpdated: true});
+    //     }
+    //   });
   }
 }
 

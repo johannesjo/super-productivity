@@ -3,6 +3,7 @@ import { Update } from '@ngrx/entity';
 import { DropListModelSource, Task } from '../task.model';
 import { TaskState } from './task.reducer';
 import { JiraIssue } from '../../issue/jira/jira-issue/jira-issue.model';
+import { IssueData } from '../../issue/issue';
 
 export enum TaskActionTypes {
   LoadTaskState = '[Task] Load Task State',
@@ -56,7 +57,7 @@ export class AddTask implements Action {
   readonly type = TaskActionTypes.AddTask;
 
   constructor(public payload: {
-    task: Task, issue?: JiraIssue, isAddToBacklog: boolean, isAddToBottom: boolean,
+    task: Task, issue?: IssueData, isAddToBacklog: boolean, isAddToBottom: boolean,
   }) {
   }
 }

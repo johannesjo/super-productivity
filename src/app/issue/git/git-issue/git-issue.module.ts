@@ -6,7 +6,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { StoreModule } from '@ngrx/store';
 import { EffectsModule } from '@ngrx/effects';
 import { GitIssueEffects } from './store/git-issue.effects';
-import { JIRA_ISSUE_FEATURE_NAME, gitIssueReducer } from './store/git-issue.reducer';
+import { GIT_ISSUE_FEATURE_NAME, gitIssueReducer } from './store/git-issue.reducer';
 import { GitIssueService } from './git-issue.service';
 import { GitIssueHeaderComponent } from './git-issue-header/git-issue-header.component';
 import { GitIssueContentComponent } from './git-issue-content/git-issue-content.component';
@@ -18,7 +18,7 @@ import { GitIssueContentComponent } from './git-issue-content/git-issue-content.
     UiModule,
     FormsModule,
     ReactiveFormsModule,
-    StoreModule.forFeature(JIRA_ISSUE_FEATURE_NAME, gitIssueReducer),
+    StoreModule.forFeature(GIT_ISSUE_FEATURE_NAME, gitIssueReducer),
     EffectsModule.forFeature([GitIssueEffects]),
   ],
   declarations: [

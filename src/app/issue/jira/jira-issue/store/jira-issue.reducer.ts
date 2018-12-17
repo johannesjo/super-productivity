@@ -50,7 +50,8 @@ export function jiraIssueReducer(
       }
 
       if (action.payload.task.issueType === 'JIRA') {
-        return jiraIssueAdapter.upsertOne(action.payload.issue, state);
+        const issue = action.payload.issue as JiraIssue;
+        return jiraIssueAdapter.upsertOne(issue, state);
       }
       return state;
     }

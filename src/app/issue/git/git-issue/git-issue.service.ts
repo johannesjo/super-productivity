@@ -20,7 +20,7 @@ export class GitIssueService {
   // META
   // ----
   async loadStateForProject(projectId: string) {
-    const lsGitIssueState = await this._persistenceService.loadIssuesForProject(projectId, 'JIRA');
+    const lsGitIssueState = await this._persistenceService.loadIssuesForProject(projectId, 'GIT') as GitIssueState;
     if (lsGitIssueState) {
       this.loadState(lsGitIssueState);
     }

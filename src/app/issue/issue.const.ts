@@ -1,5 +1,9 @@
 import { ConfigFormConfig } from '../core/config/config.model';
 import { JIRA_ADVANCED_FORM_CFG, JIRA_CREDENTIALS_FORM_CFG } from './jira/jira.const';
+import { IssueProviderKey } from './issue';
+
+export const issueProviderKeys: IssueProviderKey[] = ['JIRA', 'GIT'];
+
 
 export const ISSUE_PROVIDER_FORM_CFGS: ConfigFormConfig = [
   {

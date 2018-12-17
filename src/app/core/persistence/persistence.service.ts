@@ -14,10 +14,9 @@ import {
   LS_TASK_STATE
 } from './ls-keys.const';
 import { GlobalConfig } from '../config/config.model';
-import { IssueProviderKey } from '../../issue/issue';
+import { IssueProviderKey, IssueState } from '../../issue/issue';
 import { ProjectState } from '../../project/store/project.reducer';
 import { TaskState } from '../../tasks/store/task.reducer';
-import { JiraIssueState } from '../../issue/jira/jira-issue/store/jira-issue.reducer';
 import { EntityState } from '@ngrx/entity';
 import { Task } from '../../tasks/task.model';
 import { AppDataComplete } from '../sync/sync.model';
@@ -28,6 +27,7 @@ import { Reminder } from '../../reminder/reminder.model';
 import { SnackService } from '../snack/snack.service';
 import { DatabaseService } from './database.service';
 import { loadFromLs, saveToLs } from './local-storage';
+import { issueProviderKeys } from '../../issue/issue.const';
 
 @Injectable({
   providedIn: 'root'
@@ -101,12 +101,12 @@ export class PersistenceService {
     return this._saveToDb(lsKey, currentArchive, true);
   }
 
-  async saveIssuesForProject(projectId, issueType: IssueProviderKey, data: JiraIssueState, isForce = false): Promise<any> {
+  async saveIssuesForProject(projectId, issueType: IssueProviderKey, data: IssueState, isForce = false): Promise<any> {
     return this._saveToDb(this._makeProjectKey(projectId, LS_ISSUE_STATE, issueType), data, isForce);
   }
 
   // TODO add correct type
-  async loadIssuesForProject(projectId, issueType: IssueProviderKey): Promise<JiraIssueState> {
+  async loadIssuesForProject(projectId, issueType: IssueProviderKey): Promise<IssueState> {
     return this._loadFromDb(this._makeProjectKey(projectId, LS_ISSUE_STATE, issueType));
   }
 
@@ -181,12 +181,14 @@ export class PersistenceService {
       taskAttachment: await this._loadForProjectIds(pids, this.loadTaskAttachmentsForProject.bind(this)),
       issue: await pids.reduce(async (acc, projectId) => {
         const prevAcc = await acc;
-        const dataForProject = await this.loadIssuesForProject(projectId, 'JIRA');
+        const issueStateMap = {};
+        await Promise.all(issueProviderKeys.map(async (key) => {
+          issueStateMap[key] = await this.loadIssuesForProject(projectId, key);
+        }));
+
         return {
           ...prevAcc,
-          [projectId]: {
-            'JIRA': dataForProject
-          }
+          [projectId]: issueStateMap
         };
       }, Promise.resolve({})),
     };

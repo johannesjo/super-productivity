@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { IssueProviderKey } from './issue';
+import { IssueData, IssueProviderKey } from './issue';
 import { JiraIssueContentComponent } from './jira/jira-issue/jira-issue-content/jira-issue-content.component';
 import { JiraIssueHeaderComponent } from './jira/jira-issue/jira-issue-header/jira-issue-header.component';
 import { JiraIssue } from './jira/jira-issue/jira-issue.model';
@@ -13,9 +13,10 @@ export class IssueService {
   constructor() {
   }
 
-  public getMappedAttachments(issueType: IssueProviderKey, issueData: JiraIssue): Attachment[] {
+  public getMappedAttachments(issueType: IssueProviderKey, issueData_: IssueData): Attachment[] {
     switch (issueType) {
       case 'JIRA': {
+        const issueData = issueData_ as JiraIssue;
         return issueData && issueData.attachments && issueData.attachments.map(mapJiraAttachmentToAttachment) as Attachment[];
       }
     }

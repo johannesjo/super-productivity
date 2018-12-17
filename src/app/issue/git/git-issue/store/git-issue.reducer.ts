@@ -5,7 +5,7 @@ import { createFeatureSelector, createSelector } from '@ngrx/store';
 import { TaskActionTypes } from '../../../../tasks/store/task.actions';
 import { IssueProviderKey } from '../../../issue';
 
-export const JIRA_ISSUE_FEATURE_NAME: IssueProviderKey = 'JIRA';
+export const GIT_ISSUE_FEATURE_NAME: IssueProviderKey = 'GIT';
 
 export interface GitIssueState extends EntityState<GitIssue> {
 }
@@ -14,7 +14,7 @@ export const gitIssueAdapter: EntityAdapter<GitIssue> = createEntityAdapter<GitI
 
 // SELECTORS
 // ---------
-export const selectGitIssueFeatureState = createFeatureSelector<GitIssueState>(JIRA_ISSUE_FEATURE_NAME);
+export const selectGitIssueFeatureState = createFeatureSelector<GitIssueState>(GIT_ISSUE_FEATURE_NAME);
 
 const {selectIds, selectEntities, selectAll, selectTotal} = gitIssueAdapter.getSelectors();
 
@@ -49,8 +49,9 @@ export function gitIssueReducer(
         return state;
       }
 
-      if (action.payload.task.issueType === 'JIRA') {
-        return gitIssueAdapter.upsertOne(action.payload.issue, state);
+      if (action.payload.task.issueType === 'GIT') {
+        const issue = action.payload.issue as GitIssue;
+        return gitIssueAdapter.upsertOne(issue, state);
       }
       return state;
     }

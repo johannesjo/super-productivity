@@ -1,76 +1,41 @@
-// Mapped Data Types
-// -----------------
-import {
-  GitIssueOriginalReduced,
-  GitOriginalComment,
-  GitOriginalComponent,
-  GitOriginalStatus
-} from '../git-api-responses';
+import { GitOriginalLabel, GitOriginalMileStone, GitOriginalPullRequest, GitOriginalState, GitOriginalUser } from '../git-api-responses';
 
-export type GitAuthor = Readonly<{
-  id: string;
-  name: string;
-  key: string;
-  accountId: string;
-  emailAddress: string;
-  avatarUrl: string;
-  displayName: string;
-  active: boolean;
-  timeZone: string;
-}>;
-
-export type GitAttachment = Readonly<{
-  id: string;
-  filename: string;
-  created: string;
-  size: number;
-  mimeType: string;
-  content: string;
-  thumbnail?: string;
-}>;
-
-export type GitComment = Readonly<{
-  id: string;
-  author: GitAuthor;
-  body: string;
-  updateAuthor: GitAuthor;
-  created: string;
-  update: string;
-  jsdPublic: boolean;
-}>;
-
-export type GitChangelogEntry = Readonly<{
-
-}>;
-
-
-export interface GitIssueReduced extends GitIssueOriginalReduced {
-  // new properties
-  readonly url: string;
-  readonly comments: GitOriginalComment[];
-}
+export type GitState = GitOriginalState;
+export type GitUser = GitOriginalUser;
+export type GitLabel = GitOriginalLabel;
+export type GitMileStone = GitOriginalMileStone;
+export type GitPullRequest = GitOriginalPullRequest;
 
 export type GitIssue = Readonly<{
-  // copied data
-  key: string;
-  id: string;
-  summary: string;
-  components: GitOriginalComponent[];
-  timeestimate: number;
-  timespent: number;
-  description: string | null;
-
-  updated: string;
-  status: GitOriginalStatus;
-
-  // mapped data
-  attachments: GitAttachment[];
-  assignee: GitAuthor;
-  changelog?: GitChangelogEntry;
-
-  // new properties
+  id: number;
   url: string;
-  comments: GitComment[];
-  wasUpdated?: boolean;
+  repository_url: string;
+  labels_url: string;
+  comments_url: string;
+  events_url: string;
+  html_url: string;
+  number: number;
+  state: GitState;
+  title: string;
+  body: string;
+  user: GitUser;
+  labels: GitLabel[];
+  assignee: GitUser;
+  milestone: GitMileStone;
+  locked: boolean;
+  active_lock_reason: string;
+  comments: number;
+  pull_request: GitPullRequest;
+  closed_at: string;
+  created_at: string;
+  updated_at: string;
+
+  // added
+  wasUpdated: boolean;
+
+  // removed
+  // node_id: string;
+  // assignees: GitOriginalUser[];
+  // repository: GitOriginalRepository;
 }>;
 

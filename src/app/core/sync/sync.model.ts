@@ -3,7 +3,7 @@ import { TaskState } from '../../tasks/store/task.reducer';
 import { GlobalConfig } from '../config/config.model';
 import { EntityState } from '@ngrx/entity';
 import { Task } from '../../tasks/task.model';
-import { IssueEntityMap } from '../../issue/issue';
+import { IssueEntityMap, IssueStateMap } from '../../issue/issue';
 import { BookmarkState } from '../../bookmark/store/bookmark.reducer';
 import { NoteState } from '../../note/store/note.reducer';
 
@@ -29,6 +29,6 @@ export interface AppDataComplete {
     [key: string]: EntityState<Task>;
   };
   issue?: {
-    [key: string]: IssueEntityMap;
+    [key: string]: IssueStateMap;
   };
 }
