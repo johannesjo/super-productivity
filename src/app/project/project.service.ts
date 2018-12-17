@@ -10,7 +10,7 @@ import {
   ProjectState, selectAdvancedProjectCfg,
   selectAllProjects,
   selectCurrentProject,
-  selectCurrentProjectId,
+  selectCurrentProjectId, selectProjectGitCfg,
   selectProjectJiraCfg
 } from './store/project.reducer';
 import { IssueIntegrationCfg, IssueProviderKey } from '../issue/issue';
@@ -18,12 +18,14 @@ import { JiraCfg } from '../issue/jira/jira';
 import { DEFAULT_PROJECT } from './project.const';
 import { Dictionary } from '@ngrx/entity';
 import { getWorklogStr } from '../core/util/get-work-log-str';
+import { GitCfg } from '../issue/git/git';
 
 @Injectable()
 export class ProjectService {
   list$: Observable<Project[]> = this._store.pipe(select(selectAllProjects));
   currentProject$: Observable<Project> = this._store.pipe(select(selectCurrentProject));
   currentJiraCfg$: Observable<JiraCfg> = this._store.pipe(select(selectProjectJiraCfg));
+  currentGitCfg$: Observable<GitCfg> = this._store.pipe(select(selectProjectGitCfg));
   advancedCfg$: Observable<ProjectAdvancedCfg> = this._store.pipe(select(selectAdvancedProjectCfg));
   currentId$: Observable<string> = this._store.pipe(select(selectCurrentProjectId));
   currentId: string;

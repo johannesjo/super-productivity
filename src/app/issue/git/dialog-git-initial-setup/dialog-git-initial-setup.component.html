@@ -1,0 +1,7 @@
+<h2 mat-dialog-title>
+  Setup Git for Project
+</h2>
+<mat-dialog-content>
+  <git-cfg-stepper (onSaveCfg)="saveGitCfg($event)"
+                    [cfg]="gitCfg"></git-cfg-stepper>
+</mat-dialog-content>
