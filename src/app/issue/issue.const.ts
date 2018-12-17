@@ -1,6 +1,7 @@
 import { ConfigFormConfig } from '../core/config/config.model';
 import { JIRA_ADVANCED_FORM_CFG, JIRA_CREDENTIALS_FORM_CFG } from './jira/jira.const';
 import { IssueProviderKey } from './issue';
+import { GIT_CONFIG_FORM } from './git/git.const';
 
 export const issueProviderKeys: IssueProviderKey[] = ['JIRA', 'GIT'];
 
@@ -26,6 +27,11 @@ download the chrome extension</a> in order to allow communication with the Jira 
       },
       ...JIRA_ADVANCED_FORM_CFG,
     ]
+  },
+  {
+    title: 'GitHub',
+    key: 'GIT',
+    items: GIT_CONFIG_FORM
   }
 
 ];

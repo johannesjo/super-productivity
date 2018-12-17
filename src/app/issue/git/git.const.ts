@@ -3,113 +3,41 @@ import { GitCfg } from './git';
 import { FormlyFieldConfig } from '@ngx-formly/core';
 
 export const DEFAULT_GIT_CFG: GitCfg = {
+  repo: null,
   isShowIssuesFromGit: false,
   isAutoPoll: false,
   isAutoImportToBacklog: false,
-  repo: null,
 };
-
 
 export const GIT_POLL_INTERVAL = 5 * 60 * 1000;
 
-// it's weird!!
-export const GIT_DATE_FORMAT = 'YYYY-MM-DDTHH:mm:ss.SSZZ';
-export const GIT_ISSUE_TYPE = 'GIT';
-export const GIT_REQUEST_TIMEOUT_DURATION = 12000;
-export const GIT_MAX_RESULTS = 100;
-export const GIT_ADDITIONAL_ISSUE_FIELDS = [
-  'assignee',
-  'summary',
-  'description',
-  'timeestimate',
-  'timespent',
-  'status',
-  'attachment',
-  'comment',
-  'updated',
-  'components',
-  'subtasks',
-];
-
-// there has to be one field otherwise we get all...
-export const GIT_REDUCED_ISSUE_FIELDS = [
-  'summary',
-  'updated',
-  'timeestimate',
-  'timespent',
-];
-
-export const GIT_CREDENTIALS_FORM_CFG: FormlyFieldConfig[] = [
+export const GIT_CONFIG_FORM: FormlyFieldConfig[] = [
   {
-    key: 'host',
+    key: 'repo',
     type: 'input',
     templateOptions: {
-      required: true,
-      label: 'Host',
+      label: 'Url to git repository you want to track',
     },
   },
   {
-    key: 'userName',
-    type: 'input',
-    templateOptions: {
-      required: true,
-      label: 'Email / Username',
-    },
-  },
-  {
-    key: 'password',
-    type: 'input',
-    templateOptions: {
-      required: true,
-      label: 'Password / Token',
-      type: 'password'
-    },
-  },
-];
-
-export const GIT_ADVANCED_FORM_CFG: FormlyFieldConfig[] = [
-  {
-    key: 'isAutoPollTickets',
+    key: 'isShowIssuesFromGit',
     type: 'checkbox',
     templateOptions: {
-      label: 'Check imported issues for changes automatically and notify',
+      label: 'Show issues from git as suggestions when adding new tasks',
     },
   },
   {
-    key: 'isCheckToReAssignTicketOnTaskStart',
+    key: 'isAutoPoll',
     type: 'checkbox',
     templateOptions: {
-      label: 'Check if the currently worked on issue is assigned to current user',
+      label: 'Automatically poll imported git issues for changes',
     },
-  },
-  {
-    key: 'userAssigneeName',
-    type: 'input',
-    templateOptions: {
-      label: 'Assignee name to check for',
-    },
-    hideExpression: '!model.isCheckToReAssignTicketOnTaskStart',
   },
   {
     key: 'isAutoAddToBacklog',
     type: 'checkbox',
     templateOptions: {
-      label: 'Automatically add issues to Git backlog',
+      label: 'Automatically add unresolved issues from Git to backlog',
     },
   },
-  {
-    key: 'autoAddBacklogJqlQuery',
-    type: 'input',
-    templateOptions: {
-      label: 'JQL used for adding tasks automatically to backlog',
-    },
-  },
-  {
-    key: 'searchJqlQuery',
-    type: 'input',
-    templateOptions: {
-      label: 'JQL Query for to limit the searcher tasks',
-    },
-  },
-
 ];
