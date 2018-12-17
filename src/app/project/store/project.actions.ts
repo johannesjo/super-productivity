@@ -54,6 +54,7 @@ export class AddProjects implements Action {
   constructor(public payload: { projects: Project[] }) {
   }
 }
+
 export class UpsertProject implements Action {
   readonly type = ProjectActionTypes.UpsertProject;
 
@@ -78,7 +79,12 @@ export class UpdateProjectAdvancedCfg implements Action {
 export class UpdateProjectIssueProviderCfg implements Action {
   readonly type = ProjectActionTypes.UpdateProjectIssueProviderCfg;
 
-  constructor(public payload: { projectId: string; issueProviderKey: IssueProviderKey; providerCfg: IssueIntegrationCfg }) {
+  constructor(public payload: {
+    projectId: string;
+    issueProviderKey: IssueProviderKey;
+    providerCfg: IssueIntegrationCfg,
+    isOverwrite: boolean
+  }) {
   }
 }
 

@@ -7,10 +7,12 @@ import { ProjectActionTypes } from './store/project.actions';
 import shortid from 'shortid';
 import {
   initialProjectState,
-  ProjectState, selectAdvancedProjectCfg,
+  ProjectState,
+  selectAdvancedProjectCfg,
   selectAllProjects,
   selectCurrentProject,
-  selectCurrentProjectId, selectProjectGitCfg,
+  selectCurrentProjectId,
+  selectProjectGitCfg,
   selectProjectJiraCfg
 } from './store/project.reducer';
 import { IssueIntegrationCfg, IssueProviderKey } from '../issue/issue';
@@ -115,13 +117,19 @@ export class ProjectService {
     });
   }
 
-  updateIssueProviderConfig(projectId: string, issueProviderKey: IssueProviderKey, providerCfg: IssueIntegrationCfg) {
+  updateIssueProviderConfig(
+    projectId: string,
+    issueProviderKey: IssueProviderKey,
+    providerCfg: IssueIntegrationCfg,
+    isOverwrite = false
+  ) {
     this._store.dispatch({
       type: ProjectActionTypes.UpdateProjectIssueProviderCfg,
       payload: {
         projectId,
         issueProviderKey,
-        providerCfg
+        providerCfg,
+        isOverwrite
       }
     });
   }

@@ -22,7 +22,8 @@
       <div *ngFor="let section of issueIntegrationFormCfg">
         <section class="config-section mat-elevation-z2">
           <config-section [section]="section"
-                          [cfg]="issueIntegrationCfgs[section.key]"></config-section>
+                          [cfg]="issueIntegrationCfgs[section.key]"
+                          (save)="saveIssueProviderCfg($event)"></config-section>
         </section>
       </div>
 

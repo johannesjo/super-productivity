@@ -1,5 +1,6 @@
 <form [formGroup]="form"
       (ngSubmit)="submit()">
+
   <formly-form [model]="config"
                [fields]="fields"
                [options]="options"
@@ -17,4 +18,4 @@
   </formly-form>
 </form>
 
-<!--<div>{{config|json}}</div>-->
+<!--<pre><code>{{config|json}}</code></pre>-->

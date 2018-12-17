@@ -141,16 +141,15 @@ export function projectReducer(
     }
 
     case ProjectActionTypes.UpdateProjectIssueProviderCfg: {
-      const {projectId, providerCfg, issueProviderKey} = action.payload;
+      const {projectId, providerCfg, issueProviderKey, isOverwrite} = action.payload;
       const currentProject = state.entities[projectId];
-
       return projectAdapter.updateOne({
         id: projectId,
         changes: {
           issueIntegrationCfgs: {
             ...currentProject.issueIntegrationCfgs,
             [issueProviderKey]: {
-              ...currentProject.issueIntegrationCfgs[issueProviderKey],
+              ...(isOverwrite ? {} : currentProject.issueIntegrationCfgs[issueProviderKey]),
               ...providerCfg,
             }
           }

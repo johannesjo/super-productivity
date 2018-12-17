@@ -6,7 +6,7 @@ import { ConfigSectionKey, GlobalConfig } from '../../core/config/config.model';
 import { Subscription } from 'rxjs';
 import { Project, ProjectAdvancedCfg, ProjectCfgFormKey } from '../../project/project.model';
 import { BASIC_PROJECT_CONFIG_FORM_CONFIG, PROJECT_CONFIG_FORM_CONFIG } from '../../project/project-form-cfg.const';
-import { IssueIntegrationCfgs } from '../../issue/issue';
+import { IssueIntegrationCfg, IssueIntegrationCfgs, IssueProviderKey } from '../../issue/issue';
 import { ISSUE_PROVIDER_FORM_CFGS } from '../../issue/issue.const';
 
 @Component({
@@ -56,6 +56,14 @@ export class ConfigPageComponent implements OnInit, OnDestroy {
         ...$event.config,
       });
     }
+  }
+
+  saveIssueProviderCfg($event: { sectionKey: ConfigSectionKey | ProjectCfgFormKey, config: IssueIntegrationCfg }) {
+   const {sectionKey, config} = $event;
+   const sectionKey_ = sectionKey as IssueProviderKey;
+    this.projectService.updateIssueProviderConfig(this.currentProject.id, sectionKey_, {
+      ...config,
+    }, true);
   }
 
   saveGlobalCfg($event: { sectionKey: ConfigSectionKey | ProjectCfgFormKey, config: any }) {
