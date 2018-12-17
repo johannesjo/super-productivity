@@ -44,6 +44,13 @@ export const MISC_SETTINGS_FORM_CFG: ConfigFormSection = {
         label: 'Disable the finish day button until task list has been exported',
       },
     },
+    {
+      key: 'isHideNav',
+      type: 'checkbox',
+      templateOptions: {
+        label: 'Hide navigation until main header is hovered (desktop only)',
+      },
+    },
 
     {
       key: 'isEnableIdleTimeTracking',

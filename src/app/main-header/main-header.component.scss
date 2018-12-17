@@ -43,12 +43,13 @@ $mobileHorizontalPadding: 8px;
     text-align: center;
   }
 
-  @media(min-width: $navBp2Lines) {
-    transition: $transition-standard;
-    opacity: 0;
-
-    .wrapper:hover & {
-      opacity: 1;
+  &.isHideNav {
+    @media(min-width: $navBp2Lines) {
+      transition: $transition-standard;
+      opacity: 0;
+      .wrapper:hover & {
+        opacity: 1;
+      }
     }
   }
 

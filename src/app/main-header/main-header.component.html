@@ -30,7 +30,8 @@
     </button>
   </mat-menu>
 
-  <nav class="main-nav">
+  <nav class="main-nav"
+       [class.isHideNav]="(configService.cfg$|async)?.misc.isHideNav">
     <button mat-button
             routerLink="work-view">
       <mat-icon>playlist_play</mat-icon>
