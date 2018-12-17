@@ -2,7 +2,7 @@
 
 $navBpUltraSmall: 360px;
 $navBpIconInsteadOfText: 420px;
-$navBp2Lines: 800px;
+$navBp2Lines: 780px;
 $navBpShrinking: 900px;
 
 .project-btn {
@@ -38,7 +38,7 @@ $navBpShrinking: 900px;
   display: flex;
   flex: 1;
 
-  @include mq(xs) {
+  @media(min-width: $navBp2Lines) {
     transition: $transition-standard;
     opacity: 0;
 
@@ -77,6 +77,10 @@ $navBpShrinking: 900px;
   }
 }
 
+.action-nav {
+  margin-left: auto;
+}
+
 .wrapper {
   display: flex;
   align-items: center;
@@ -86,6 +90,7 @@ $navBpShrinking: 900px;
 
 
 .spacer {
+  display: none;
   flex: 1 1 auto;
 
   @media(max-width: $navBpShrinking) and (min-width: $navBp2Lines) {
