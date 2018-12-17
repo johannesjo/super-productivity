@@ -16,7 +16,7 @@
       <mat-icon>check</mat-icon>
       <div class="summary-text">Tasks completed:
         <div class="summary-val">
-          <span [innerHtml]="(doneTasks$|async).length"></span>/<span [innerHtml]="(todaysTasks$|async).length"></span>
+          <span [innerHtml]="(doneTasks$|async)?.length"></span>/<span [innerHtml]="(todaysTasks$|async)?.length"></span>
         </div>
       </div>
     </div>

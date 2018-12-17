@@ -1,49 +1,13 @@
-<mat-toolbar color="primary"
-             class="mat-elevation-z3">
+<div class="wrapper bg-primary color-contrast mat-elevation-z3">
   <button mat-icon-button
-          class="show-xs-only"
-          [matMenuTriggerFor]="mainMenu">
-    <mat-icon>menu</mat-icon>
-  </button>
-
-  <button mat-icon-button=""
-          class="hide-xs"
           routerLink="work-view">
     <mat-icon svgIcon="sp">sp</mat-icon>
   </button>
 
-  <mat-menu #mainMenu="matMenu">
-
-    <button mat-menu-item
-            routerLink="work-view">
-      <mat-icon>playlist_play</mat-icon>
-      Task List ({{(taskService.undoneTasks$|async)?.length || 0}})
-    </button>
-    <button mat-menu-item
-            routerLink="worklog-and-calendar">
-      <mat-icon>today</mat-icon>
-      Worklog
-    </button>
-
-    <button mat-menu-item
-            [routerLink]="'projects'">
-      <mat-icon>list</mat-icon>
-      Manage Projects
-    </button>
-
-    <button mat-menu-item
-            routerLinkActive
-            [routerLink]="'config'">
-      <mat-icon>settings</mat-icon>
-      Settings
-    </button>
-
-  </mat-menu>
-
   <button mat-button
-          class="current-project-title"
+          class="project-btn"
           [matMenuTriggerFor]="projectMenu">
-    {{(projectService.currentProject$|async).title}}
+    <span class="current-project-title">{{(projectService.currentProject$|async).title}}</span>
     <mat-icon aria-hidden="true">arrow_drop_down</mat-icon>
   </button>
   <mat-menu #projectMenu="matMenu">
@@ -66,9 +30,34 @@
     </button>
   </mat-menu>
 
+  <nav class="main-nav">
+    <button mat-button
+            routerLink="work-view">
+      <mat-icon>playlist_play</mat-icon>
+      <span class="text">Tasks ({{(taskService.undoneTasks$|async)?.length || 0}})</span>
+    </button>
+    <button mat-button
+            routerLink="worklog-and-calendar">
+      <mat-icon>today</mat-icon>
+      <span class="text">Worklog</span>
+    </button>
+
+    <button mat-button
+            [routerLink]="'projects'">
+      <mat-icon>list</mat-icon>
+      <span class="text">Projects</span>
+    </button>
+
+    <button mat-button
+            routerLinkActive
+            [routerLink]="'config'">
+      <mat-icon>settings</mat-icon>
+      <span class="text">Settings</span>
+    </button>
+  </nav>
   <span class="spacer"></span>
 
-  <nav>
+  <nav class="action-nav">
     <button mat-mini-fab
             class="hide-xs bg-200"
             color="lighter"
@@ -96,14 +85,6 @@
              class="circle-svg"
              width="52"
              height="52">
-          <!--<circle cx="50%"-->
-          <!--class="color-light-primary"-->
-          <!--cy="50%"-->
-          <!--r="24"-->
-          <!--fill="none"-->
-          <!--stroke-width="4"-->
-          <!--stroke="black"></circle>-->
-
           <circle cx="50%"
                   #circleSvg
                   cy="50%"
@@ -116,56 +97,7 @@
                   stroke="#000"></circle>
         </svg>
       </button>
-
-      <!--<svg focusable="false"-->
-      <!--class="circle-svg"-->
-      <!--width="52"-->
-      <!--height="52">-->
-      <!--&lt;!&ndash;<circle cx="50%"&ndash;&gt;-->
-      <!--&lt;!&ndash;class="color-light-primary"&ndash;&gt;-->
-      <!--&lt;!&ndash;cy="50%"&ndash;&gt;-->
-      <!--&lt;!&ndash;r="24"&ndash;&gt;-->
-      <!--&lt;!&ndash;fill="none"&ndash;&gt;-->
-      <!--&lt;!&ndash;stroke-width="4"&ndash;&gt;-->
-      <!--&lt;!&ndash;stroke="black"></circle>&ndash;&gt;-->
-
-      <!--<circle cx="50%"-->
-      <!--cy="50%"-->
-      <!--r="13"-->
-      <!--class=""-->
-      <!--fill="none"-->
-      <!--stroke-dasharray="81.6814089933"-->
-      <!--stroke-dashoffset="-25.725635973"-->
-      <!--stroke-width="26"-->
-      <!--stroke="#000"></circle>-->
-      <!--</svg>-->
     </div>
-    <!--<svg width="52"-->
-    <!--height="52"-->
-    <!--viewBox="0 0 52 52">-->
-    <!--<circle cx="60"-->
-    <!--cy="60"-->
-    <!--r="54"-->
-    <!--fill="none"-->
-    <!--stroke="#e6e6e6"-->
-    <!--stroke-width="12"/>-->
-    <!--<circle cx="60"-->
-    <!--cy="60"-->
-    <!--r="54"-->
-    <!--fill="none"-->
-    <!--stroke="#f77a52"-->
-    <!--stroke-width="12"-->
-    <!--stroke-dasharray="339.292"-->
-    <!--stroke-dashoffset="339.292"/>-->
-    <!--</svg>-->
-
-
-    <button mat-mini-fab
-            class="hide-xs"
-            color="lighter"
-            [matMenuTriggerFor]="mainMenu">
-      <mat-icon>menu</mat-icon>
-    </button>
   </nav>
 
   <button mat-mini-fab=""
@@ -176,4 +108,4 @@
           (click)="bookmarkService.toggleBookmarks()">
     <mat-icon>bookmark</mat-icon>
   </button>
-</mat-toolbar>
+</div>

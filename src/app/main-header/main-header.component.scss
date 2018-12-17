@@ -1,12 +1,96 @@
 @import '../../variables';
 
-.current-project-title {
-  text-transform: uppercase;
-  font-weight: normal;
+$navBpUltraSmall: 360px;
+$navBpIconInsteadOfText: 420px;
+$navBp2Lines: 800px;
+$navBpShrinking: 900px;
+
+.project-btn {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  max-width: 200px;
+
+  ::ng-deep .mat-button-wrapper {
+    display: flex;
+    align-items: center;
+  }
+
+
+  .current-project-title {
+    text-transform: uppercase;
+    font-weight: normal;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: inline-block;
+    max-width: 150px;
+    @media (max-width: $navBpIconInsteadOfText) {
+      max-width: 120px;
+    }
+    @media (max-width: $navBpUltraSmall) {
+      max-width: 70px;
+    }
+  }
 }
+
+.main-nav {
+  display: flex;
+  flex: 1;
+
+  @include mq(xs) {
+    transition: $transition-standard;
+    opacity: 0;
+
+    .wrapper:hover & {
+      opacity: 1;
+    }
+  }
+
+  mat-icon {
+    display: none;
+  }
+
+  .text {
+    text-align: center;
+  }
+
+  @media (max-width: $navBp2Lines) {
+    flex-basis: 100%;
+    order: 3;
+    justify-content: stretch;
+
+    button {
+      flex: 1;
+      text-align: center;
+    }
+  }
+
+  @media (max-width: $navBpIconInsteadOfText) {
+    .text {
+      display: none;
+    }
+
+    mat-icon {
+      display: block;
+    }
+  }
+}
+
+.wrapper {
+  display: flex;
+  align-items: center;
+  padding: 4px 16px;
+  flex-wrap: wrap;
+}
+
 
 .spacer {
   flex: 1 1 auto;
+
+  @media(max-width: $navBpShrinking) and (min-width: $navBp2Lines) {
+    display: none;
+  }
 }
 
 nav {
@@ -22,10 +106,6 @@ nav {
   position: relative;
   z-index: 3;
   display: block;
-}
-
-mat-toolbar {
-  height: $main-header-height;
 }
 
 .mat-fab {
@@ -46,36 +126,23 @@ mat-toolbar {
   transition: $transition-standard !important;
   transition-property: transform !important;
   margin: 0 !important;
-  @include mq(xs, max) {
-    height: 30px !important;
-    min-height: 30px !important;
-    padding: 0 !important;
-    ::ng-deep .mat-button-wrapper {
-      padding: 0;
-      position: relative;
-      top: -3px;
-    }
+  //@include mq(xs, max) {
+  height: 30px !important;
+  min-height: 30px !important;
+  padding: 0 !important;
+
+  ::ng-deep .mat-button-wrapper {
+    padding: 0;
+    position: relative;
+    top: -3px;
   }
+
+  //}
 
   &.is-open {
     transition-property: transform !important;
     transition: $transition-standard !important;
-    transform: translate(-50%, -75%);
-  }
-}
-
-eco-fab-speed-dial-actions {
-  button {
-    position: relative;
-    // hover hitarea
-    &:after {
-      content: '';
-      position: absolute;
-      top: -$s;
-      bottom: -$s;
-      left: -$s;
-      right: -$s;
-    }
+    //transform: translate(-50%, -75%);
   }
 }
 
@@ -106,29 +173,10 @@ eco-fab-speed-dial-actions {
   }
 }
 
-.play-btn.pulse {
-  animation: pulse 1s infinite;
-}
-
 .note-ico {
   transition: $transition-standard;
 
   &.rotate {
     transform: rotate(90deg);
-  }
-}
-
-@keyframes pulse {
-  0% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1);
-  }
-  75% {
-    transform: scale(1.05);
-  }
-  90% {
-    transform: scale(1);
   }
 }
