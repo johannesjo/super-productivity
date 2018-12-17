@@ -1,9 +1,12 @@
 @import '../../variables';
 
 $navBpUltraSmall: 360px;
-$navBpIconInsteadOfText: 420px;
+$navBpIconInsteadOfText: 374px;
+$navBpIconInsteadOfText: 374px;
+$navBpMainNavReduceButtonSize: 420px;
 $navBp2Lines: 780px;
 $navBpShrinking: 900px;
+$mobileHorizontalPadding: 8px;
 
 .project-btn {
   flex: 1;
@@ -24,19 +27,21 @@ $navBpShrinking: 900px;
     text-overflow: ellipsis;
     white-space: nowrap;
     display: inline-block;
-    max-width: 150px;
-    @media (max-width: $navBpIconInsteadOfText) {
-      max-width: 120px;
-    }
-    @media (max-width: $navBpUltraSmall) {
-      max-width: 70px;
-    }
+    max-width: 200px;
   }
 }
 
 .main-nav {
   display: flex;
   flex: 1;
+
+  mat-icon {
+    display: none;
+  }
+
+  .text {
+    text-align: center;
+  }
 
   @media(min-width: $navBp2Lines) {
     transition: $transition-standard;
@@ -47,12 +52,14 @@ $navBpShrinking: 900px;
     }
   }
 
-  mat-icon {
-    display: none;
-  }
+  @media (max-width: $navBpMainNavReduceButtonSize) {
+    // reduce outer padding
+    margin: 0 -1 *$mobileHorizontalPadding;
 
-  .text {
-    text-align: center;
+    button {
+      // reduce button padding
+      padding: 0;
+    }
   }
 
   @media (max-width: $navBp2Lines) {
@@ -63,6 +70,10 @@ $navBpShrinking: 900px;
     button {
       flex: 1;
       text-align: center;
+    }
+    ::ng-deep .mat-button-wrapper {
+      display: flex;
+      justify-content: center;
     }
   }
 
@@ -79,13 +90,23 @@ $navBpShrinking: 900px;
 
 .action-nav {
   margin-left: auto;
+  display: flex;
+  align-items: center;
+
+  button {
+    margin-left: $s;
+  }
 }
 
 .wrapper {
   display: flex;
   align-items: center;
-  padding: 4px 16px;
+  padding: 4px $mobileHorizontalPadding;
   flex-wrap: wrap;
+
+  @include mq(xs) {
+    padding: 4px 16px;
+  }
 }
 
 
@@ -98,14 +119,6 @@ $navBpShrinking: 900px;
   }
 }
 
-nav {
-  display: flex;
-  align-items: center;
-
-  button {
-    margin-left: $s;
-  }
-}
 
 :host {
   position: relative;
