@@ -26,7 +26,8 @@ export class TaskEffects {
         this._store$.pipe(select(selectCurrentProjectId)),
         this._store$.pipe(select(selectTaskFeatureState)),
       ),
-      tap(this._moveToArchive.bind(this))
+      tap(this._moveToArchive.bind(this)),
+      tap(this._updateLastActive.bind(this)),
     );
 
 
@@ -54,7 +55,8 @@ export class TaskEffects {
         this._store$.pipe(select(selectCurrentProjectId)),
         this._store$.pipe(select(selectTaskFeatureState)),
       ),
-      tap(this._saveToLs.bind(this))
+      tap(this._saveToLs.bind(this)),
+      tap(this._updateLastActive.bind(this)),
     );
 
   @Effect({dispatch: false}) updateTaskUi$: any = this._actions$
@@ -66,7 +68,7 @@ export class TaskEffects {
         this._store$.pipe(select(selectCurrentProjectId)),
         this._store$.pipe(select(selectTaskFeatureState)),
       ),
-      tap(this._saveToLsNoUpdateForLastActive.bind(this))
+      tap(this._saveToLs.bind(this))
     );
 
   @Effect() snackDelete$: any = this._actions$
@@ -110,12 +112,11 @@ export class TaskEffects {
               private _persistenceService: PersistenceService) {
   }
 
-  private _saveToLs([action, currentProjectId, taskState]) {
+  private _updateLastActive() {
     this._persistenceService.saveLastActive();
-    this._saveToLsNoUpdateForLastActive([action, currentProjectId, taskState]);
   }
 
-  private _saveToLsNoUpdateForLastActive([action, currentProjectId, taskState]) {
+  private _saveToLs([action, currentProjectId, taskState]) {
     if (currentProjectId) {
       this._persistenceService.saveTasksForProject(currentProjectId, taskState);
     } else {
@@ -140,7 +141,6 @@ export class TaskEffects {
       });
     });
 
-    this._persistenceService.saveLastActive();
     this._persistenceService.saveToTaskArchiveForProject(currentProjectId, archive);
   }
 

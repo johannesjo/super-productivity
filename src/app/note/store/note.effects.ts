@@ -7,6 +7,7 @@ import { selectCurrentProjectId } from '../../project/store/project.reducer';
 import { NoteActionTypes } from './note.actions';
 import { selectNoteFeatureState } from './note.reducer';
 import { ReminderService } from '../../reminder/reminder.service';
+import { selectTaskFeatureState } from '../../tasks/store/task.selectors';
 
 @Injectable()
 export class NoteEffects {
@@ -17,15 +18,28 @@ export class NoteEffects {
         NoteActionTypes.DeleteNote,
         NoteActionTypes.UpdateNote,
         NoteActionTypes.UpdateNoteOrder,
-        NoteActionTypes.ToggleShowNotes,
-        NoteActionTypes.HideNotes,
       ),
       withLatestFrom(
         this._store$.pipe(select(selectCurrentProjectId)),
         this._store$.pipe(select(selectNoteFeatureState)),
       ),
+      tap(this._saveToLs.bind(this)),
+      tap(this._updateLastActive.bind(this)),
+    );
+
+  @Effect({dispatch: false}) updateNoteUi$: any = this._actions$
+    .pipe(
+      ofType(
+        NoteActionTypes.ToggleShowNotes,
+        NoteActionTypes.HideNotes,
+      ),
+      withLatestFrom(
+        this._store$.pipe(select(selectCurrentProjectId)),
+        this._store$.pipe(select(selectTaskFeatureState)),
+      ),
       tap(this._saveToLs.bind(this))
     );
+
 
   @Effect({dispatch: false}) deleteNote$: any = this._actions$
     .pipe(
@@ -46,9 +60,12 @@ export class NoteEffects {
   ) {
   }
 
+  private _updateLastActive() {
+    this._persistenceService.saveLastActive();
+  }
+
   private async _saveToLs([action, currentProjectId, noteState]) {
     if (currentProjectId) {
-      this._persistenceService.saveLastActive();
       this._persistenceService.saveNotesForProject(currentProjectId, noteState);
     } else {
       throw new Error('No current project id');
