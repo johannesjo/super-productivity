@@ -11,7 +11,7 @@
 
       <div class="issue-providers">
         <mat-icon *ngIf="project.issueIntegrationCfgs?.JIRA?.isEnabled">explore</mat-icon>
-        <mat-icon *ngIf="project.issueIntegrationCfgs?.GIT?.isEnabled">github_circle</mat-icon>
+        <mat-icon *ngIf="project.issueIntegrationCfgs?.GIT?.repo">card_giftcard</mat-icon>
       </div>
 
       <div class="controls">
@@ -26,7 +26,7 @@
                 (click)="remove(project.id)"
                 color="warn">
           <mat-icon aria-label="Delete">delete</mat-icon>
-          Delet
+          Delete
         </button>
       </div>
 

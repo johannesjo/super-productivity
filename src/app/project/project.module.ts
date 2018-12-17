@@ -9,6 +9,7 @@ import { ProjectService } from './project.service';
 import { DialogCreateProjectComponent } from './dialogs/create-project/dialog-create-project.component';
 import { UiModule } from '../ui/ui.module';
 import { JiraModule } from '../issue/jira/jira.module';
+import { GitModule } from '../issue/git/git.module';
 
 @NgModule({
   imports: [
@@ -16,6 +17,7 @@ import { JiraModule } from '../issue/jira/jira.module';
     CoreModule,
     UiModule,
     JiraModule,
+    GitModule,
     StoreModule.forFeature(PROJECT_FEATURE_NAME, projectReducer),
     EffectsModule.forFeature([ProjectEffects]),
   ],

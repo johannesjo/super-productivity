@@ -6,7 +6,7 @@ export const DEFAULT_GIT_CFG: GitCfg = {
   repo: null,
   isShowIssuesFromGit: false,
   isAutoPoll: false,
-  isAutoImportToBacklog: false,
+  isAutoAddToBacklog: false,
 };
 
 export const GIT_POLL_INTERVAL = 5 * 60 * 1000;

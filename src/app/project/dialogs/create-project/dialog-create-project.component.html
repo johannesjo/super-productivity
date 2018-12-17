@@ -27,6 +27,16 @@
           Setup Jira Integration
         </button>
       </div>
+      <div class="item">
+        <button mat-raised-button=""
+                color="primary"
+                (click)="openGitCfg()"
+                type="button">
+          <mat-icon *ngIf="!gitCfg">card_giftcard</mat-icon>
+          <mat-icon *ngIf="gitCfg">checkmark</mat-icon>
+          Setup Git Integration
+        </button>
+      </div>
       <!--<div class="item">-->
       <!--<button mat-raised-button="" color=primary-->
       <!--type="button">-->

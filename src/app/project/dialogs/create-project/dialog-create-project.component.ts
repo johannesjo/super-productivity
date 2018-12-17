@@ -12,6 +12,8 @@ import { DialogJiraInitialSetupComponent } from '../../../issue/jira/dialog-jira
 import { SS_PROJECT_TMP } from '../../../core/persistence/ls-keys.const';
 import { Subscription } from 'rxjs/Subscription';
 import { loadFromSessionStorage, saveToSessionStorage } from '../../../core/persistence/local-storage';
+import { GitCfg } from '../../../issue/git/git';
+import { DialogGitInitialSetupComponent } from '../../../issue/git/dialog-git-initial-setup/dialog-git-initial-setup.component';
 
 @Component({
   selector: 'dialog-create-project',
@@ -21,6 +23,7 @@ import { loadFromSessionStorage, saveToSessionStorage } from '../../../core/pers
 export class DialogCreateProjectComponent implements OnInit, OnDestroy {
   projectData: Project | Partial<Project> = DEFAULT_PROJECT;
   jiraCfg: JiraCfg;
+  gitCfg: GitCfg;
 
   form = new FormGroup({});
   formOptions: FormlyFormOptions = {
@@ -54,7 +57,7 @@ export class DialogCreateProjectComponent implements OnInit, OnDestroy {
       this._matDialogRef.afterClosed().subscribe(() => {
         const issueIntegrationCfgs: IssueIntegrationCfgs = Object.assign(this.projectData.issueIntegrationCfgs, {
           JIRA: this.jiraCfg,
-          GIT: undefined,
+          GIT: this.gitCfg,
         });
         const projectDataToSave: Project | Partial<Project> = {
           ...this.projectData,
@@ -68,6 +71,9 @@ export class DialogCreateProjectComponent implements OnInit, OnDestroy {
       if (this.projectData.issueIntegrationCfgs.JIRA) {
         this.jiraCfg = this.projectData.issueIntegrationCfgs.JIRA;
       }
+      if (this.projectData.issueIntegrationCfgs.GIT) {
+        this.gitCfg = this.projectData.issueIntegrationCfgs.GIT;
+      }
     }
   }
 
@@ -78,7 +84,7 @@ export class DialogCreateProjectComponent implements OnInit, OnDestroy {
   submit() {
     const issueIntegrationCfgs: IssueIntegrationCfgs = Object.assign(this.projectData.issueIntegrationCfgs, {
       JIRA: this.jiraCfg,
-      GIT: undefined,
+      GIT: this.gitCfg,
     });
 
     const projectDataToSave: Project | Partial<Project> = {
@@ -121,6 +127,32 @@ export class DialogCreateProjectComponent implements OnInit, OnDestroy {
     // if we're editing save right away
     if (this.projectData.id) {
       this._projectService.updateIssueProviderConfig(this.projectData.id, 'JIRA', this.jiraCfg);
+    }
+  }
+
+  openGitCfg() {
+    this._subs.add(this._matDialog.open(DialogGitInitialSetupComponent, {
+      restoreFocus: true,
+      data: {
+        gitCfg: this.projectData.issueIntegrationCfgs.JIRA,
+      }
+    }).afterClosed().subscribe((gitCfg: GitCfg) => {
+      console.log('afterClosed', gitCfg);
+
+      if (gitCfg) {
+        this._saveGitCfg(gitCfg);
+      }
+    }));
+  }
+
+  private _saveGitCfg(gitCfg: GitCfg) {
+    this.gitCfg = gitCfg;
+
+    console.log(this.projectData.id);
+
+    // if we're editing save right away
+    if (this.projectData.id) {
+      this._projectService.updateIssueProviderConfig(this.projectData.id, 'GIT', this.gitCfg);
     }
   }
 }
