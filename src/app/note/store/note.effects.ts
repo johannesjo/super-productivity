@@ -7,7 +7,6 @@ import { selectCurrentProjectId } from '../../project/store/project.reducer';
 import { NoteActionTypes } from './note.actions';
 import { selectNoteFeatureState } from './note.reducer';
 import { ReminderService } from '../../reminder/reminder.service';
-import { selectTaskFeatureState } from '../../tasks/store/task.selectors';
 
 @Injectable()
 export class NoteEffects {
@@ -35,7 +34,7 @@ export class NoteEffects {
       ),
       withLatestFrom(
         this._store$.pipe(select(selectCurrentProjectId)),
-        this._store$.pipe(select(selectTaskFeatureState)),
+        this._store$.pipe(select(selectNoteFeatureState)),
       ),
       tap(this._saveToLs.bind(this))
     );

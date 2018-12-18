@@ -2,7 +2,6 @@ import { Action } from '@ngrx/store';
 import { Update } from '@ngrx/entity';
 import { DropListModelSource, Task } from '../task.model';
 import { TaskState } from './task.reducer';
-import { JiraIssue } from '../../issue/jira/jira-issue/jira-issue.model';
 import { IssueData } from '../../issue/issue';
 
 export enum TaskActionTypes {
@@ -172,6 +171,7 @@ export class MoveToArchive implements Action {
   constructor(public payload: { ids: string[] }) {
   }
 }
+
 export class ToggleStart implements Action {
   readonly type = TaskActionTypes.ToggleStart;
 }
