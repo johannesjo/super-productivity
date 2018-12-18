@@ -52,6 +52,11 @@ const filterOutId = (idToFilterOut) => (id) => id !== idToFilterOut;
 
 // SHARED REDUCER ACTIONS
 // ----------------------
+const reCalcTimesForParentIfParent = (parentId, state: TaskState): TaskState => {
+  const stateWithTimeEstimate = reCalcTimeEstimateForParentIfParent(parentId, state);
+  return reCalcTimeSpentForParentIfParent(parentId, stateWithTimeEstimate);
+};
+
 const reCalcTimeSpentForParentIfParent = (parentId, state: TaskState): TaskState => {
   if (parentId) {
     const parentTask: Task = getTaskById(parentId, state);
@@ -420,7 +425,7 @@ export function taskReducer(
           const oldPar = state.entities[sourceModelId];
           console.log(oldPar.subTaskIds.filter(filterOutId(taskId)));
 
-          newState = reCalcTimeSpentForParentIfParent(oldPar.id, {
+          newState = reCalcTimesForParentIfParent(oldPar.id, {
             ...newState,
             entities: {
               ...newState.entities,
@@ -478,7 +483,7 @@ export function taskReducer(
         default:
           // SUB TASK CASE
           const newPar = state.entities[targetModelId];
-          return reCalcTimeSpentForParentIfParent(newPar.id, {
+          return reCalcTimesForParentIfParent(newPar.id, {
             ...newState,
             entities: {
               ...newState.entities,
