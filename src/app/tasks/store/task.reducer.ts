@@ -396,6 +396,7 @@ export function taskReducer(
     case TaskActionTypes.Move: {
       let newState = state;
       const {taskId, sourceModelId, targetModelId, newOrderedIds} = action.payload;
+      const taskToMove = state.entities[taskId];
 
 
       switch (sourceModelId) {
@@ -431,6 +432,9 @@ export function taskReducer(
           });
       }
 
+      console.log('after Source', newState);
+
+
       switch (targetModelId) {
         case 'DONE':
         case 'UNDONE':
@@ -438,7 +442,6 @@ export function taskReducer(
           const curInUpdateListIndex = newOrderedIds.indexOf(taskId);
           const prevItemId = newOrderedIds[curInUpdateListIndex - 1];
           const nextItemId = newOrderedIds[curInUpdateListIndex + 1];
-          const taskToMove = state.entities[taskId];
 
           if (prevItemId) {
             newIndex = newState.todaysTaskIds.indexOf(prevItemId) + 1;
@@ -482,7 +485,11 @@ export function taskReducer(
               [newPar.id]: {
                 ...newPar,
                 subTaskIds: newOrderedIds
-              }
+              },
+              [taskId]: {
+                ...taskToMove,
+                parentId: newPar.id
+              },
             }
           });
       }
