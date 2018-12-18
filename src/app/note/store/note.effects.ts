@@ -56,7 +56,7 @@ export class NoteEffects {
     private _actions$: Actions,
     private _store$: Store<any>,
     private _persistenceService: PersistenceService,
-    private _reminderSerivce: ReminderService,
+    private _reminderService: ReminderService,
   ) {
   }
 
@@ -75,7 +75,7 @@ export class NoteEffects {
   private _removeRemindersIfAny([action, noteState]) {
     const note = noteState.entities[action.payload.id];
     if (note && note.reminderId) {
-      this._reminderSerivce.removeReminder(note.reminderId);
+      this._reminderService.removeReminder(note.reminderId);
     }
   }
 }
