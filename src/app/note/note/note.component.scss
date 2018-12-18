@@ -1,4 +1,5 @@
 @import '../../../variables';
+$noteFontSize: 14px;
 
 :host {
   display: block;
@@ -36,7 +37,7 @@
 
 .content {
   text-align: left;
-  font-size: 12px;
+  font-size: $noteFontSize;
 
   inline-markdown ::ng-deep {
     .markdown-wrapper {
@@ -46,7 +47,7 @@
 
     .markdown-unparsed,
     .markdown-parsed {
-      font-size: 12px;
+      font-size: $noteFontSize;
       border-radius: $card-border-radius;
       background: #ffffff;
       color: $standard-note-fg-light;
