@@ -45,7 +45,7 @@ export const DEFAULT_CFG: GlobalConfig = {
     goToSettings: '',
     focusLastActiveTask: 'f',
     taskEditTitle: 'e',
-    taskToggleAdditionalInfoOpen: 'n',
+    taskToggleAdditionalInfoOpen: 'i',
     taskOpenEstimationDialog: 't',
     taskToggleDone: 'd',
     taskAddSubTask: 'a',

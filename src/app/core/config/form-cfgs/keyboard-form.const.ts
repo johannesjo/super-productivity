@@ -56,7 +56,7 @@ export const KEYBOARD_SETTINGS_FORM_CFG: ConfigFormSection = {
       key: 'openProjectNotes',
       type: 'keyboard',
       templateOptions: {
-        label: 'Open Project Notes',
+        label: 'Show/Hide Project Notes',
       },
     },
     // {
@@ -84,7 +84,7 @@ export const KEYBOARD_SETTINGS_FORM_CFG: ConfigFormSection = {
       key: 'toggleBacklog',
       type: 'keyboard',
       templateOptions: {
-        label: 'Show Task Backlog',
+        label: 'Show/Hide Task Backlog',
       },
     },
     {
@@ -135,10 +135,10 @@ export const KEYBOARD_SETTINGS_FORM_CFG: ConfigFormSection = {
       },
     },
     {
-      key: 'taskToggleNotes',
+      key: 'taskToggleAdditionalInfoOpen',
       type: 'keyboard',
       templateOptions: {
-        label: 'Show/Hide Notes',
+        label: 'Show/Hide additional task info',
       },
     },
     {
