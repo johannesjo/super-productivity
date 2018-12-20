@@ -37,7 +37,7 @@ export const DEFAULT_CFG: GlobalConfig = {
     openProjectNotes: 'N',
     openDistractionPanel: 'D',
     showHelp: '?',
-    toggleBookmarks: 'B',
+    toggleBookmarks: 'V',
     toggleBacklog: 'b',
     goToWorkView: 'w',
     goToDailyAgenda: '',
