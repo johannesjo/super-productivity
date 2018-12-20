@@ -46,8 +46,10 @@
 
 }
 
-.attachment {
+.attachments {
   //margin-bottom: $s;
+  // because they have an inner padding
+  margin-top: -$s;
 }
 
 .updates {
