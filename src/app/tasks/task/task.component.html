@@ -68,7 +68,7 @@
          external-link
          *ngIf="task.issueData?.url"
          [href]="task.issueData?.url">
-        <mat-icon aria-label="explore">{{task.issueType|issueIcon}}</mat-icon>
+        <mat-icon [svgIcon]="task.issueType|issueIcon"></mat-icon>
       </a>
 
       <div editOnClick

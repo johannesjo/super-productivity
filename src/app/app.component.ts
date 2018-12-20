@@ -67,6 +67,14 @@ export class AppComponent implements OnInit {
       this._domSanitizer.bypassSecurityTrustResourceUrl(`assets/icons/play.svg`)
     );
     this._matIconRegistry.addSvgIcon(
+      `github`,
+      this._domSanitizer.bypassSecurityTrustResourceUrl(`assets/icons/github.svg`)
+    );
+    this._matIconRegistry.addSvgIcon(
+      `jira`,
+      this._domSanitizer.bypassSecurityTrustResourceUrl(`assets/icons/jira.svg`)
+    );
+    this._matIconRegistry.addSvgIcon(
       `drag_handle`,
       this._domSanitizer.bypassSecurityTrustResourceUrl(`assets/icons/drag-handle.svg`)
     );

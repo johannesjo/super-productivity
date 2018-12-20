@@ -6,12 +6,20 @@ import { GIT_CONFIG_FORM } from './git/git.const';
 export const issueProviderKeys: IssueProviderKey[] = ['JIRA', 'GIT'];
 
 export const issueProviderIconMap = {
-  'JIRA': 'explore',
-  'GIT': 'card_giftcard'
+  'JIRA': 'jira',
+  'GIT': 'github'
 };
 
 
 export const ISSUE_PROVIDER_FORM_CFGS: ConfigFormConfig = [
+  // GIT
+  {
+    title: 'GitHub',
+    key: 'GIT',
+    items: GIT_CONFIG_FORM
+  },
+
+  // JIRA
   {
     title: 'Jira',
     key: 'JIRA',
@@ -33,10 +41,4 @@ download the chrome extension</a> in order to allow communication with the Jira 
       ...JIRA_ADVANCED_FORM_CFG,
     ]
   },
-  {
-    title: 'GitHub',
-    key: 'GIT',
-    items: GIT_CONFIG_FORM
-  }
-
 ];
