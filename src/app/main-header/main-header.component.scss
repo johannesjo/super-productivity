@@ -82,6 +82,9 @@ $mobileHorizontalPadding: 8px;
     .text {
       display: none;
     }
+    button {
+      min-height: 40px;
+    }
 
     mat-icon {
       display: block;
@@ -107,6 +110,10 @@ $mobileHorizontalPadding: 8px;
 
   @include mq(xs) {
     padding: 4px 16px;
+  }
+
+  @media (max-width: $navBp2Lines) {
+    padding-bottom: 0;
   }
 }
 
