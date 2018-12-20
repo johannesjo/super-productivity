@@ -122,6 +122,7 @@ export class JiraIssueEffects {
             lastUpdateFromRemote: updatedIssue.updated,
             wasUpdated: true
           });
+          this._snackService.open({message: `Jira: ${updatedIssue.key} was updated`, icon: 'cloud_download'});
         }
       });
   }
