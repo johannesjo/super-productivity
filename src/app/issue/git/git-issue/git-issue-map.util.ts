@@ -1,10 +1,12 @@
 import { GitIssue } from './git-issue.model';
 import { GitOriginalIssue } from '../git-api-responses';
+import { IssueProviderKey, SearchResultItem } from '../../issue';
 
 export const mapGitIssue = (issue: GitOriginalIssue): GitIssue => {
   return {
     id: issue.id,
-    url: issue.url,
+    // NOTE: url: issue.url,
+    url: issue.html_url,
     repository_url: issue.repository_url,
     labels_url: issue.labels_url,
     comments_url: issue.comments_url,
@@ -28,3 +30,12 @@ export const mapGitIssue = (issue: GitOriginalIssue): GitIssue => {
     wasUpdated: false,
   };
 };
+
+export const mapGitIssueToSearchResult = (issue: GitIssue): SearchResultItem => {
+  return {
+    title: '#' + issue.number + ' ' + issue.title,
+    issueType: 'GIT' as IssueProviderKey,
+    issueData: issue,
+  };
+};
+

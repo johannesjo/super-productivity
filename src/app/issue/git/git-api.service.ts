@@ -8,7 +8,7 @@ import { Observable } from 'rxjs';
 import { GitIssueSearchResult, GitOriginalIssue } from './git-api-responses';
 import { map } from 'rxjs/operators';
 import { IssueProviderKey, SearchResultItem } from '../issue';
-import { mapGitIssue } from './git-issue/git-issue-map.util';
+import { mapGitIssue, mapGitIssueToSearchResult } from './git-issue/git-issue-map.util';
 
 const BASE = GIT_API_BASE_URL;
 
@@ -34,7 +34,7 @@ export class GitApiService {
       .pipe(
         map((res: GitIssueSearchResult) => {
           if (res && res.items) {
-            return this._mapIssuesToSearchResults(res.items);
+            return res.items.map(mapGitIssue).map(mapGitIssueToSearchResult);
           } else {
             return [];
           }
@@ -52,16 +52,5 @@ export class GitApiService {
 
   private _isValidSettings(): boolean {
     return true;
-  }
-
-  // TODO move to map util
-  private _mapIssuesToSearchResults(issues: GitOriginalIssue[]): SearchResultItem[] {
-    return issues.map(issue => {
-      return {
-        title: '#' + issue.number + ' ' + issue.title,
-        issueType: 'GIT' as IssueProviderKey,
-        issueData: mapGitIssue(issue),
-      };
-    });
   }
 }
