@@ -71,7 +71,7 @@ export class IssueService {
     switch (issueType) {
       case 'JIRA': {
         const issueData = issueData_ as JiraIssue;
-        return issueData && issueData.attachments && issueData.attachments.map(mapJiraAttachmentToAttachment) as Attachment[];
+        return this._jiraIssueService.getMappedAttachmentsFromIssue(issueData);
       }
     }
   }

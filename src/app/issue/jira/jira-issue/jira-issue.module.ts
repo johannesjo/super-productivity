@@ -10,6 +10,7 @@ import { JIRA_ISSUE_FEATURE_NAME, jiraIssueReducer } from './store/jira-issue.re
 import { JiraIssueService } from './jira-issue.service';
 import { JiraIssueHeaderComponent } from './jira-issue-header/jira-issue-header.component';
 import { JiraIssueContentComponent } from './jira-issue-content/jira-issue-content.component';
+import { AttachmentModule } from '../../../tasks/attachment/attachment.module';
 
 @NgModule({
   imports: [
@@ -17,6 +18,7 @@ import { JiraIssueContentComponent } from './jira-issue-content/jira-issue-conte
     ProjectModule,
     UiModule,
     FormsModule,
+    AttachmentModule,
     ReactiveFormsModule,
     StoreModule.forFeature(JIRA_ISSUE_FEATURE_NAME, jiraIssueReducer),
     EffectsModule.forFeature([JiraIssueEffects]),

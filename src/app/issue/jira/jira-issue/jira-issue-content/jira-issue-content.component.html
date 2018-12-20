@@ -16,7 +16,8 @@
     <h3 class="mat-h3">List of changes</h3>
     <ul class="changelog">
       <li *ngFor="let entry of issueData.changelog">
-        <em *ngIf="entry.author">{{entry.author.displayName}}</em> changed <strong>{{entry.field}}</strong> on {{entry.created|date:'short'}}
+        <em *ngIf="entry.author">{{entry.author.displayName}}</em> changed
+        <strong>{{entry.field}}</strong> on {{entry.created|date:'short'}}
       </li>
     </ul>
   </div>
@@ -59,17 +60,15 @@
       <th>Attachments</th>
       <td>
         <div class="attachments">
-          <div class="attachment"
-               *ngFor="let attachment of issueData.attachments">
-            <!--<a [href]="attachment.content">-->
-            <!--<img *ngIf="attachment.thumbnail"-->
-            <!--[src]="attachment.thumbnail">-->
-            <!--</a>-->
-            <div class="file-name">
-              <a [href]="attachment.content"
-                 target="_blank">{{attachment.filename}}</a>
-            </div>
-          </div>
+          <attachment-list [attachments]="attachments"
+                           [isDisableControls]="true"></attachment-list>
+          <!--<div class="attachment"-->
+          <!--*ngFor="let attachment of issueData.attachments">-->
+          <!--<div class="file-name">-->
+          <!--<a [href]="attachment.content"-->
+          <!--target="_blank">{{attachment.filename}}</a>-->
+          <!--</div>-->
+          <!--</div>-->
         </div>
       </td>
     </tr>

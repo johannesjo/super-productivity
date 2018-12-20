@@ -4,6 +4,8 @@ import { Store } from '@ngrx/store';
 import { JiraIssueActionTypes } from './store/jira-issue.actions';
 import { PersistenceService } from '../../../core/persistence/persistence.service';
 import { JiraIssueState } from './store/jira-issue.reducer';
+import { mapJiraAttachmentToAttachment } from './jira-issue-map.util';
+import { Attachment } from '../../../tasks/attachment/attachment.model';
 
 
 @Injectable()
@@ -73,5 +75,10 @@ export class JiraIssueService {
         }
       }
     });
+  }
+
+  // HELPER
+  getMappedAttachmentsFromIssue(issueData: JiraIssue) {
+    return issueData && issueData.attachments && issueData.attachments.map(mapJiraAttachmentToAttachment) as Attachment[];
   }
 }
