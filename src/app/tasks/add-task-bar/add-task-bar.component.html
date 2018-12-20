@@ -29,7 +29,7 @@
     <ng-container *ngIf="!isLoading">
       <mat-option *ngFor="let issue of filteredIssueSuggestions"
                   [value]="issue">
-        <span>{{issue?.key}} {{ issue?.summary}}</span>
+        <span>{{issue?.title}}</span>
       </mat-option>
     </ng-container>
 

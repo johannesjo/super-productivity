@@ -4,6 +4,11 @@ import { GitCfg } from './git';
 import { SnackService } from '../../core/snack/snack.service';
 import { HttpClient } from '@angular/common/http';
 import { GIT_API_BASE_URL } from './git.const';
+import { Observable } from 'rxjs';
+import { GitIssueSearchResult, GitOriginalIssue } from './git-api-responses';
+import { map } from 'rxjs/operators';
+import { IssueProviderKey, SearchResultItem } from '../issue';
+import { mapGitIssue } from './git-issue/git-issue-map.util';
 
 const BASE = GIT_API_BASE_URL;
 
@@ -23,6 +28,20 @@ export class GitApiService {
     });
   }
 
+
+  searchIssue(searchText: string): Observable<SearchResultItem[]> {
+    return this._http.get(`${BASE}search/issues?q=${encodeURI(searchText)}`)
+      .pipe(
+        map((res: GitIssueSearchResult) => {
+          if (res && res.items) {
+            return this._mapIssuesToSearchResults(res.items);
+          } else {
+            return [];
+          }
+        }),
+      );
+  }
+
   getIssueById(issueNumber: number) {
     return this._http.get(`${BASE}repos/${this._cfg.repo}/issues/${issueNumber}`);
   }
@@ -33,5 +52,15 @@ export class GitApiService {
 
   private _isValidSettings(): boolean {
     return true;
+  }
+
+  private _mapIssuesToSearchResults(issues: GitOriginalIssue[]): SearchResultItem[] {
+    return issues.map(issue => {
+      return {
+        title: issue.title,
+        issueType: 'GIT' as IssueProviderKey,
+        issueData: mapGitIssue(issue),
+      };
+    });
   }
 }

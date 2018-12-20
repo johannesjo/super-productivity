@@ -1,12 +1,11 @@
 import { AfterViewInit, Component, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { TaskService } from '../task.service';
-import { JiraApiService } from '../../issue/jira/jira-api.service';
-import { debounceTime, switchMap, takeUntil, tap, withLatestFrom } from 'rxjs/operators';
-import { ProjectService } from '../../project/project.service';
+import { debounceTime, switchMap, takeUntil, tap } from 'rxjs/operators';
 import { JiraIssue } from '../../issue/jira/jira-issue/jira-issue.model';
 import { Subject } from 'rxjs';
-import { JiraIssueService } from '../../issue/jira/jira-issue/jira-issue.service';
+import { IssueService } from '../../issue/issue.service';
+import { SearchResultItem } from '../../issue/issue';
 
 @Component({
   selector: 'add-task-bar',
@@ -16,7 +15,7 @@ import { JiraIssueService } from '../../issue/jira/jira-issue/jira-issue.service
 export class AddTaskBarComponent implements OnInit, OnDestroy, AfterViewInit {
   destroy$: Subject<boolean> = new Subject<boolean>();
   taskSuggestionsCtrl: FormControl = new FormControl();
-  filteredIssueSuggestions: any[];
+  filteredIssueSuggestions: SearchResultItem[];
   isLoading = false;
   doubleEnterCount = 0;
 
@@ -30,9 +29,7 @@ export class AddTaskBarComponent implements OnInit, OnDestroy, AfterViewInit {
 
   constructor(
     private _taskService: TaskService,
-    private _projectService: ProjectService,
-    private _jiraApiService: JiraApiService,
-    private _jiraIssueService: JiraIssueService,
+    private _issueService: IssueService,
   ) {
   }
 
@@ -55,19 +52,15 @@ export class AddTaskBarComponent implements OnInit, OnDestroy, AfterViewInit {
     this.taskSuggestionsCtrl.setValue('');
 
     this.taskSuggestionsCtrl.valueChanges.pipe(
-      withLatestFrom(this._projectService.currentJiraCfg$),
       debounceTime(400),
-      tap(([searchTerm, jiraCfg]) => {
-        if (jiraCfg && jiraCfg.isEnabled) {
+      tap(() => {
+        if (this._issueService.isRemoteSearchEnabled) {
           this.isLoading = true;
         }
       }),
-      switchMap(([searchTerm, jiraCfg]) => {
-        if (searchTerm && searchTerm.length > 1 && jiraCfg && jiraCfg.isEnabled) {
-          return this._jiraApiService.search(searchTerm, false, 50)
-            .catch(() => {
-              return [];
-            });
+      switchMap((searchTerm) => {
+        if (searchTerm && searchTerm.length > 1 && this._issueService.isRemoteSearchEnabled) {
+          return this._issueService.searchIssues(searchTerm);
         } else {
           // Note: the outer array signifies the observable stream the other is the value
           return [[]];
@@ -99,7 +92,7 @@ export class AddTaskBarComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   addTask() {
-    const issueOrTitle = this.taskSuggestionsCtrl.value;
+    const issueOrTitle = this.taskSuggestionsCtrl.value as string | SearchResultItem;
     if (typeof issueOrTitle === 'string') {
       if (issueOrTitle.length > 0) {
         this.doubleEnterCount = 0;
@@ -117,17 +110,17 @@ export class AddTaskBarComponent implements OnInit, OnDestroy, AfterViewInit {
       }
     } else {
       this._taskService.addWithIssue(
-        issueOrTitle.summary,
-        'JIRA',
-        issueOrTitle,
+        issueOrTitle.title,
+        issueOrTitle.issueType,
+        issueOrTitle.issueData,
         this.isAddToBacklog,
       );
-      // TODO move to issue effect
-      // get full data
-      this._jiraApiService.getIssueById(issueOrTitle.id)
-        .then((issue) => {
-          this._jiraIssueService.upsert(issue);
-        });
+      // // TODO move to issue effect
+      // // get full data
+      // this._jiraApiService.getIssueById(issueOrTitle.id)
+      //   .then((issue) => {
+      //     this._jiraIssueService.upsert(issue);
+      //   });
     }
 
     this.taskSuggestionsCtrl.setValue('');

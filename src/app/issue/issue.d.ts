@@ -33,3 +33,9 @@ export interface IssueStateMap {
 export type IssueState = JiraIssueState | GitIssueState;
 
 export type IssueData = JiraIssue | GitIssue;
+
+export interface SearchResultItem {
+  title: string;
+  issueType: IssueProviderKey;
+  issueData: IssueData;
+}

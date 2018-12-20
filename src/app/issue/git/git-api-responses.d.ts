@@ -167,3 +167,10 @@ export type GitOriginalIssue = Readonly<{
   updated_at: string;
   repository: GitOriginalRepository;
 }>;
+
+
+export type GitIssueSearchResult = Readonly<{
+  total_count: number;
+  incomplete_results: boolean;
+  items: GitOriginalIssue[];
+}>;

@@ -8,16 +8,28 @@ import {
 } from '../jira-api-responses';
 import { JiraCfg } from '../jira';
 import { DropPasteIcons, DropPasteInputType } from '../../../core/drop-paste-input/drop-paste-input';
+import { IssueProviderKey, SearchResultItem } from '../../issue';
 
 const matchProtocolRegEx = /(^[^:]+):\/\//;
 
-export const mapIssuesResponse = (res, cfg: JiraCfg) => res.response.issues.map((issue) => {
+export const mapToSearchResults = (res, cfg: JiraCfg): SearchResultItem[] => {
+  const issues = mapIssuesResponse(res, cfg);
+  return issues.map(issue => {
+    return {
+      title: issue.summary,
+      issueType: 'JIRA' as IssueProviderKey,
+      issueData: issue,
+    };
+  });
+};
+
+export const mapIssuesResponse = (res, cfg: JiraCfg): JiraIssue[] => res.response.issues.map((issue) => {
   return mapIssue(issue, cfg);
 });
 
 export const mapResponse = (res) => res.response;
 
-export const mapIssueResponse = (res, cfg: JiraCfg) => mapIssue(res.response, cfg);
+export const mapIssueResponse = (res, cfg: JiraCfg): JiraIssue => mapIssue(res.response, cfg);
 
 export const mapIssue = (issue: JiraIssueOriginal, cfg: JiraCfg): JiraIssue => {
   const issueCopy = Object.assign({}, issue);

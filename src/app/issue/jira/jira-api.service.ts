@@ -3,9 +3,8 @@ import shortid from 'shortid';
 import { ChromeExtensionInterfaceService } from '../../core/chrome-extension-interface/chrome-extension-interface.service';
 import { JIRA_ADDITIONAL_ISSUE_FIELDS, JIRA_MAX_RESULTS, JIRA_REDUCED_ISSUE_FIELDS, JIRA_REQUEST_TIMEOUT_DURATION } from './jira.const';
 import { ProjectService } from '../../project/project.service';
-import { mapIssueResponse, mapIssuesResponse, mapResponse } from './jira-issue/jira-issue-map.util';
+import { mapIssueResponse, mapResponse, mapToSearchResults } from './jira-issue/jira-issue-map.util';
 import { JiraOriginalStatus, JiraOriginalUser } from './jira-api-responses';
-import { JiraIssue } from './jira-issue/jira-issue.model';
 import { JiraCfg } from './jira';
 import { ElectronService } from 'ngx-electron';
 import { IPC_JIRA_CB_EVENT, IPC_JIRA_MAKE_REQUEST_EVENT } from '../../../ipc-events.const';
@@ -13,6 +12,7 @@ import { SnackService } from '../../core/snack/snack.service';
 import { IS_ELECTRON } from '../../app.constants';
 import { loadFromSessionStorage, saveToSessionStorage } from '../../core/persistence/local-storage';
 import { combineLatest } from 'rxjs';
+import { SearchResultItem } from '../issue';
 
 const BLOCK_ACCESS_KEY = 'SUP_BLOCK_JIRA_ACCESS';
 
@@ -75,7 +75,7 @@ export class JiraApiService {
     saveToSessionStorage(BLOCK_ACCESS_KEY, false);
   }
 
-  search(searchTerm: string, isFetchAdditional?: boolean, maxResults: number = JIRA_MAX_RESULTS): Promise<JiraIssue[]> {
+  search(searchTerm: string, isFetchAdditional?: boolean, maxResults: number = JIRA_MAX_RESULTS): Promise<SearchResultItem[]> {
     const options = {
       maxResults: maxResults,
       fields: isFetchAdditional ? JIRA_ADDITIONAL_ISSUE_FIELDS : JIRA_REDUCED_ISSUE_FIELDS,
@@ -86,7 +86,7 @@ export class JiraApiService {
     return this._sendRequest({
       apiMethod: 'searchJira',
       arguments: [searchQuery, options],
-      transform: mapIssuesResponse
+      transform: mapToSearchResults
     });
   }
 
