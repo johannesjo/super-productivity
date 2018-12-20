@@ -36,6 +36,6 @@ export class JiraIssueContentComponent implements OnInit {
   }
 
   hideUpdates() {
-    this._jiraIssueService.update(this.task.issueId, {wasUpdated: false});
+    this._jiraIssueService.update(this.taskData.issueId, {wasUpdated: false});
   }
 }
