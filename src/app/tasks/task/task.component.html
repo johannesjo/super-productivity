@@ -68,13 +68,7 @@
          external-link
          *ngIf="task.issueData?.url"
          [href]="task.issueData?.url">
-
-        <mat-icon *ngIf="task.issueType ==='JIRA'"
-                  aria-label="explore">explore
-        </mat-icon>
-        <mat-icon *ngIf="task.issueType ==='GIT'"
-                  aria-label="github">card_giftcard
-        </mat-icon>
+        <mat-icon aria-label="explore">{{task.issueType|issueIcon}}</mat-icon>
       </a>
 
       <div editOnClick

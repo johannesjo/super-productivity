@@ -5,6 +5,11 @@ import { GIT_CONFIG_FORM } from './git/git.const';
 
 export const issueProviderKeys: IssueProviderKey[] = ['JIRA', 'GIT'];
 
+export const issueProviderIconMap = {
+  'JIRA': 'explore',
+  'GIT': 'card_giftcard'
+};
+
 
 export const ISSUE_PROVIDER_FORM_CFGS: ConfigFormConfig = [
   {
