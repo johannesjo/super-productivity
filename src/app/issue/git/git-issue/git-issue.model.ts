@@ -24,7 +24,6 @@ export type GitIssue = Readonly<{
   milestone: GitMileStone;
   locked: boolean;
   active_lock_reason: string;
-  comments: number;
   pull_request: GitPullRequest;
   closed_at: string;
   created_at: string;
@@ -32,6 +31,10 @@ export type GitIssue = Readonly<{
 
   // added
   wasUpdated: boolean;
+  commentsNr: number;
+
+  // transformed
+  comments?: any[];
 
   // removed
   // node_id: string;

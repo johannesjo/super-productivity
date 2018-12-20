@@ -22,12 +22,17 @@ export const mapGitIssue = (issue: GitOriginalIssue): GitIssue => {
     milestone: issue.milestone,
     locked: issue.locked,
     active_lock_reason: issue.active_lock_reason,
-    comments: issue.comments,
     pull_request: issue.pull_request,
     closed_at: issue.closed_at,
     created_at: issue.created_at,
     updated_at: issue.updated_at,
+
+    // new
+    commentsNr: issue.comments,
     wasUpdated: false,
+
+    // transformed
+    comments: []
   };
 };
 

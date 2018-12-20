@@ -1,8 +1,9 @@
-<mat-icon *ngIf="task.issueData.wasUpdated"
-          style="margin-right: 8px; transform: scale(1.2)"
+<mat-icon *ngIf="task.issueData?.wasUpdated"
+          style="margin-right: 8px;"
           color="accent">update
 </mat-icon>
-<mat-icon *ngIf="!task.issueData.wasUpdated"
-          style="margin-right: 8px; transform: scale(1.2)">explore
+<mat-icon *ngIf="!task.issueData?.wasUpdated"
+          svgIcon="github"
+          style="margin-right: 8px; ">
 </mat-icon>
 <span class="tab-label-text">Git</span>
