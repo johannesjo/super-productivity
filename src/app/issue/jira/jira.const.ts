@@ -36,8 +36,8 @@ export const DEFAULT_JIRA_CFG: JiraCfg = {
 };
 
 
-// export const JIRA_POLL_INTERVAL = 5 * 60 * 1000;
-export const JIRA_POLL_INTERVAL = 30 * 1000;
+export const JIRA_POLL_INTERVAL = 5 * 60 * 1000;
+// export const JIRA_POLL_INTERVAL = 30 * 1000;
 
 // it's weird!!
 export const JIRA_DATE_FORMAT = 'YYYY-MM-DDTHH:mm:ss.SSZZ';
