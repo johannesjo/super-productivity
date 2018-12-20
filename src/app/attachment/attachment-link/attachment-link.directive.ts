@@ -1,9 +1,9 @@
 import { Directive, HostListener, Input } from '@angular/core';
-import { IS_ELECTRON } from '../../../app.constants';
+import { IS_ELECTRON } from '../../app.constants';
 import { AttachmentType } from '../attachment.model';
 import { ElectronService } from 'ngx-electron';
-import { SnackService } from '../../../core/snack/snack.service';
-import { IPC_EXEC } from '../../../../ipc-events.const';
+import { SnackService } from '../../core/snack/snack.service';
+import { IPC_EXEC } from '../../../ipc-events.const';
 
 
 @Directive({

@@ -7,8 +7,8 @@ import { Attachment } from './attachment.model';
 import shortid from 'shortid';
 import { DialogEditAttachmentComponent } from './dialog-edit-attachment/dialog-edit-attachment.component';
 import { MatDialog } from '@angular/material';
-import { createFromDrop, createFromPaste, DropPasteInput } from '../../core/drop-paste-input/drop-paste-input';
-import { PersistenceService } from '../../core/persistence/persistence.service';
+import { createFromDrop, createFromPaste, DropPasteInput } from '../core/drop-paste-input/drop-paste-input';
+import { PersistenceService } from '../core/persistence/persistence.service';
 import { take } from 'rxjs/operators';
 
 @Injectable({

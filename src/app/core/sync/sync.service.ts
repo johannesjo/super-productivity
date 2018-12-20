@@ -8,7 +8,7 @@ import { TaskService } from '../../tasks/task.service';
 import { BookmarkService } from '../../bookmark/bookmark.service';
 import { NoteService } from '../../note/note.service';
 import { JiraIssueService } from '../../issue/jira/jira-issue/jira-issue.service';
-import { AttachmentService } from '../../tasks/attachment/attachment.service';
+import { AttachmentService } from '../../attachment/attachment.service';
 
 // TODO some of this can be done in a background script
 

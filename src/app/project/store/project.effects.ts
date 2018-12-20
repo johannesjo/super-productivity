@@ -8,7 +8,7 @@ import { PersistenceService } from '../../core/persistence/persistence.service';
 import { TaskService } from '../../tasks/task.service';
 import { JiraIssueService } from '../../issue/jira/jira-issue/jira-issue.service';
 import { BookmarkService } from '../../bookmark/bookmark.service';
-import { AttachmentService } from '../../tasks/attachment/attachment.service';
+import { AttachmentService } from '../../attachment/attachment.service';
 import { NoteService } from '../../note/note.service';
 import { IssueService } from '../../issue/issue.service';
 

@@ -5,7 +5,7 @@ import { JiraIssueActionTypes } from './store/jira-issue.actions';
 import { PersistenceService } from '../../../core/persistence/persistence.service';
 import { JiraIssueState } from './store/jira-issue.reducer';
 import { mapJiraAttachmentToAttachment } from './jira-issue-map.util';
-import { Attachment } from '../../../tasks/attachment/attachment.model';
+import { Attachment } from '../../../attachment/attachment.model';
 
 
 @Injectable()

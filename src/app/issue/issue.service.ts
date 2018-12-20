@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { IssueData, IssueProviderKey, SearchResultItem } from './issue';
 import { JiraIssue } from './jira/jira-issue/jira-issue.model';
-import { Attachment } from '../tasks/attachment/attachment.model';
+import { Attachment } from '../attachment/attachment.model';
 import { mapJiraAttachmentToAttachment } from './jira/jira-issue/jira-issue-map.util';
 import { JiraApiService } from './jira/jira-api.service';
 import { GitApiService } from './git/git-api.service';

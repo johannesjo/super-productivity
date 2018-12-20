@@ -2,10 +2,10 @@ import { Injectable } from '@angular/core';
 import { Actions, Effect, ofType } from '@ngrx/effects';
 import { tap, withLatestFrom } from 'rxjs/operators';
 import { select, Store } from '@ngrx/store';
-import { selectCurrentProjectId } from '../../../project/store/project.reducer';
+import { selectCurrentProjectId } from '../../project/store/project.reducer';
 import { AttachmentActionTypes } from './attachment.actions';
 import { selectAttachmentFeatureState } from './attachment.reducer';
-import { PersistenceService } from '../../../core/persistence/persistence.service';
+import { PersistenceService } from '../../core/persistence/persistence.service';
 
 @Injectable()
 export class AttachmentEffects {

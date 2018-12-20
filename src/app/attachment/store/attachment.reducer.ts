@@ -2,7 +2,7 @@ import { createEntityAdapter, EntityAdapter, EntityState } from '@ngrx/entity';
 import { AttachmentActions, AttachmentActionTypes } from './attachment.actions';
 import { Attachment } from '../attachment.model';
 import { createFeatureSelector, createSelector } from '@ngrx/store';
-import { DeleteTask, TaskActionTypes } from '../../store/task.actions';
+import { DeleteTask, TaskActionTypes } from '../../tasks/store/task.actions';
 
 export const ATTACHMENT_FEATURE_NAME = 'attachment';
 

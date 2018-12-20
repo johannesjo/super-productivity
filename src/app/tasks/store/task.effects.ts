@@ -11,7 +11,7 @@ import { TaskState } from './task.reducer';
 import { NotifyService } from '../../core/notify/notify.service';
 import { TaskService } from '../task.service';
 import { selectConfigFeatureState } from '../../core/config/store/config.reducer';
-import { AttachmentActionTypes } from '../attachment/store/attachment.actions';
+import { AttachmentActionTypes } from '../../attachment/store/attachment.actions';
 
 // TODO send message to electron when current task changes here
 

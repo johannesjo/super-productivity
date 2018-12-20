@@ -21,7 +21,7 @@ import { EntityState } from '@ngrx/entity';
 import { Task } from '../../tasks/task.model';
 import { AppDataComplete } from '../sync/sync.model';
 import { BookmarkState } from '../../bookmark/store/bookmark.reducer';
-import { AttachmentState } from '../../tasks/attachment/store/attachment.reducer';
+import { AttachmentState } from '../../attachment/store/attachment.reducer';
 import { NoteState } from '../../note/store/note.reducer';
 import { Reminder } from '../../reminder/reminder.model';
 import { SnackService } from '../snack/snack.service';

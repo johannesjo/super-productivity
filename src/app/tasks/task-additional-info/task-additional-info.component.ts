@@ -10,9 +10,9 @@ import {
 } from '@angular/core';
 import { TaskWithSubTasks } from '../task.model';
 import { IssueService } from '../../issue/issue.service';
-import { AttachmentService } from '../attachment/attachment.service';
+import { AttachmentService } from '../../attachment/attachment.service';
 import { Observable } from 'rxjs';
-import { Attachment } from '../attachment/attachment.model';
+import { Attachment } from '../../attachment/attachment.model';
 
 @Component({
   selector: 'task-additional-info',

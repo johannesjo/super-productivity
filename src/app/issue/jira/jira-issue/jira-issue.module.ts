@@ -10,7 +10,7 @@ import { JIRA_ISSUE_FEATURE_NAME, jiraIssueReducer } from './store/jira-issue.re
 import { JiraIssueService } from './jira-issue.service';
 import { JiraIssueHeaderComponent } from './jira-issue-header/jira-issue-header.component';
 import { JiraIssueContentComponent } from './jira-issue-content/jira-issue-content.component';
-import { AttachmentModule } from '../../../tasks/attachment/attachment.module';
+import { AttachmentModule } from '../../../attachment/attachment.module';
 
 @NgModule({
   imports: [

@@ -20,7 +20,7 @@ import { ConfigService } from '../../core/config/config.service';
 import { checkKeyCombo } from '../../core/util/check-key-combo';
 import { distinctUntilChanged, takeUntil } from 'rxjs/operators';
 import { fadeAnimation } from '../../ui/animations/fade.ani';
-import { AttachmentService } from '../attachment/attachment.service';
+import { AttachmentService } from '../../attachment/attachment.service';
 
 // import {Task} from './task'
 
