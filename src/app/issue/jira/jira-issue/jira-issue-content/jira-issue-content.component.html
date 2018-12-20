@@ -32,7 +32,8 @@
     <tr>
       <th>Description</th>
       <td>
-        <inline-markdown [model]="issueData.description"></inline-markdown>
+        <!--<inline-markdown [model]="issueData.description"></inline-markdown>-->
+        <div [innerHTML]="issueData.body|markdown"></div>
       </td>
     </tr>
     <tr>

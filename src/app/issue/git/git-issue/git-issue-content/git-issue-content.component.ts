@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, Input, OnInit } from '@angular/core
 import { TaskWithSubTasks } from '../../../../tasks/task.model';
 import { GitIssueService } from '../git-issue.service';
 import { GitApiService } from '../../git-api.service';
+import { GitIssue } from '../git-issue.model';
 
 @Component({
   selector: 'git-issue-content',
@@ -10,7 +11,13 @@ import { GitApiService } from '../../git-api.service';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class GitIssueContentComponent implements OnInit {
-  @Input() public task: TaskWithSubTasks;
+  taskData: TaskWithSubTasks;
+  issueData: GitIssue;
+
+  @Input() set task(task: TaskWithSubTasks) {
+    this.taskData = task;
+    this.issueData = task.issueData as GitIssue;
+  }
 
   constructor(
     private readonly  _gitIssueService: GitIssueService,

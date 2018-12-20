@@ -1,85 +1,68 @@
-<!--<div style="text-align: center;">-->
-  <!--<button mat-raised-button-->
-          <!--*ngIf="task.issueData.wasUpdated"-->
-          <!--color="accent"-->
-          <!--(click)="hideUpdates()">-->
-    <!--Mark updates as checked-->
-  <!--</button>-->
-<!--</div>-->
-<!--&lt;!&ndash; TODO list changes &ndash;&gt;-->
+<div style="text-align: center;">
+  <button mat-raised-button
+          *ngIf="issueData.wasUpdated"
+          color="accent"
+          (click)="hideUpdates()">
+    Mark updates as checked
+  </button>
+</div>
 
 
-<!--<div class="wrapper">-->
-  <!--<table class="issue-table">-->
-    <!--<tr>-->
-      <!--<th>Summary</th>-->
-      <!--<th>{{task.issueData.key}} {{task.issueData.summary}}</th>-->
-    <!--</tr>-->
-    <!--<tr>-->
-      <!--<th>Status</th>-->
-      <!--<td>{{task.issueData.status?.name}}</td>-->
-    <!--</tr>-->
-    <!--<tr *ngIf="task.issueData.components?.length">-->
-      <!--<th>Components</th>-->
-      <!--<td>-->
-        <!--<mat-chip-list>-->
-          <!--<mat-chip *ngFor="let component of task.issueData.components"-->
-                    <!--title="{{component.description}}">{{component.name}}-->
-          <!--</mat-chip>-->
-        <!--</mat-chip-list>-->
-      <!--</td>-->
-    <!--</tr>-->
-    <!--<tr>-->
-      <!--<th>Description</th>-->
-      <!--<td>-->
-        <!--<inline-markdown [model]="task.issueData.description"></inline-markdown>-->
-      <!--</td>-->
-    <!--</tr>-->
-    <!--<tr>-->
-      <!--<th>Attachments</th>-->
-      <!--<td>-->
-        <!--<div class="attachments">-->
-          <!--<div class="attachment"-->
-               <!--*ngFor="let attachment of task.issueData.attachments">-->
-            <!--&lt;!&ndash;<a [href]="attachment.content">&ndash;&gt;-->
-            <!--&lt;!&ndash;<img *ngIf="attachment.thumbnail"&ndash;&gt;-->
-            <!--&lt;!&ndash;[src]="attachment.thumbnail">&ndash;&gt;-->
-            <!--&lt;!&ndash;</a>&ndash;&gt;-->
-            <!--<div class="file-name">-->
-              <!--<a [href]="attachment.content"-->
-                 <!--target="_blank">{{attachment.filename}}</a>-->
-            <!--</div>-->
-          <!--</div>-->
-        <!--</div>-->
-      <!--</td>-->
-    <!--</tr>-->
-    <!--<tr *ngIf="task.issueData.comments">-->
-      <!--<th>Comments</th>-->
-      <!--<td>-->
-        <!--<div class="comment"-->
-             <!--*ngFor="let comment of task.issueData.comments">-->
+<div class="wrapper">
+  <table class="issue-table">
+    <tr>
+      <th>Summary</th>
+      <th>{{issueData.title}} #{{issueData.number}}</th>
+    </tr>
+    <tr>
+      <th>Status</th>
+      <td>{{issueData.state}}</td>
+    </tr>
+    <tr *ngIf="issueData.labels?.length">
+      <th>Labels</th>
+      <td>
+        <mat-chip-list>
+          <mat-chip *ngFor="let label of issueData.labels"
+                    title="{{label.description}}">{{label.name}}
+          </mat-chip>
+        </mat-chip-list>
+      </td>
+    </tr>
+    <tr>
+      <th>Description</th>
+      <td>
+        <!--<inline-markdown [model]="issueData.body"></inline-markdown>-->
+        <div [innerHTML]="issueData.body|markdown"></div>
+      </td>
+    </tr>
 
-          <!--<img [src]="comment.author.avatarUrl"-->
-               <!--class="author-avatar">-->
-          <!--<div class="name-and-comment-content">-->
-            <!--<div><span class="author-name">{{comment.author.displayName}}</span>-->
-              <!--<span class="when">at {{comment.created|date:'short'}}</span>-->
-            <!--</div>-->
-            <!--<div>{{comment.body}}</div>-->
-          <!--</div>-->
-        <!--</div>-->
+    <tr *ngIf="issueData.comments">
+      <th>Comments</th>
+      <td>
+        <div class="comment"
+             *ngFor="let comment of issueData.comments">
 
-        <!--<a [href]="task.issueData.url"-->
-           <!--mat-raised-button=""-->
-           <!--target="_blank">-->
-          <!--<mat-icon>textsms</mat-icon>-->
-          <!--Write a comment</a>-->
-      <!--</td>-->
-    <!--</tr>-->
-  <!--</table>-->
+          <img [src]="comment.author.avatarUrl"
+               class="author-avatar">
+          <div class="name-and-comment-content">
+            <div><span class="author-name">{{comment.author.displayName}}</span>
+              <span class="when">at {{comment.created|date:'short'}}</span>
+            </div>
+            <div>{{comment.body}}</div>
+          </div>
+        </div>
 
-  <!--&lt;!&ndash;<pre><code>&ndash;&gt;-->
-  <!--&lt;!&ndash;{{task.issueData|json}}&ndash;&gt;-->
-  <!--&lt;!&ndash;</code></pre>&ndash;&gt;-->
+        <a [href]="issueData.url"
+           mat-raised-button=""
+           target="_blank">
+          <mat-icon>textsms</mat-icon>
+          Write a comment</a>
+      </td>
+    </tr>
+  </table>
 
-<!--</div>-->
+  <!--<pre><code>-->
+  <!--{{issueData|json}}-->
+  <!--</code></pre>-->
+
+</div>

@@ -195,6 +195,7 @@ import { InputDurationSliderComponent } from './duration/input-duration-slider/i
     ReactiveFormsModule,
     FormlyModule,
     FormlyMaterialModule,
+    MarkdownModule,
   ]
 })
 export class UiModule {
