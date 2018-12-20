@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Actions, Effect, ofType } from '@ngrx/effects';
 import { GitIssueActionTypes } from './git-issue.actions';
 import { select, Store } from '@ngrx/store';
-import { tap, withLatestFrom } from 'rxjs/operators';
+import { take, tap, withLatestFrom } from 'rxjs/operators';
 import { TaskActionTypes } from '../../../../tasks/store/task.actions';
 import { PersistenceService } from '../../../../core/persistence/persistence.service';
 import { selectGitIssueEntities, selectGitIssueFeatureState, selectGitIssueIds } from './git-issue.reducer';
@@ -93,13 +93,17 @@ export class GitIssueEffects {
   }
 
   private _updateIssueFromApi(issueId, oldIssueData) {
-    // TODO enable
-    // this._gitApiService.getIssueById(issueId, true)
-    //   .then((res) => {
-    //     if (res.updated !== oldIssueData.updated) {
-    //       this._gitIssueService.update(issueId, {...res, wasUpdated: true});
-    //     }
-    //   });
+    console.log('UPDATE ISSUE FROM API');
+    // this._gitApiService.getIssueById(issueId)
+    //   .pipe(
+    //     take(1)
+    //   ).subscribe(issueData => {
+    //   console.log(issueData);
+    //   // if (res.updated !== oldIssueData.updated) {
+    //   //   this._gitIssueService.update(issueId, {...res, wasUpdated: true});
+    //   // }
+    //
+    // });
   }
 }
 
