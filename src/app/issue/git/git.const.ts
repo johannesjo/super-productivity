@@ -19,7 +19,7 @@ export const GIT_CONFIG_FORM: FormlyFieldConfig[] = [
     key: 'repo',
     type: 'input',
     templateOptions: {
-      label: 'Url to git repository you want to track',
+      label: '"username/repositoryName" for the git repository you want to track',
     },
   },
   {
