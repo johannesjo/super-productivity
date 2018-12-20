@@ -16,7 +16,7 @@ export const mapToSearchResults = (res, cfg: JiraCfg): SearchResultItem[] => {
   const issues = mapIssuesResponse(res, cfg);
   return issues.map(issue => {
     return {
-      title: issue.summary,
+      title: issue.key + ' ' + issue.summary,
       issueType: 'JIRA' as IssueProviderKey,
       issueData: issue,
     };

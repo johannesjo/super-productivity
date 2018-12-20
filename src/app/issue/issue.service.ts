@@ -1,7 +1,5 @@
 import { Injectable } from '@angular/core';
 import { IssueData, IssueProviderKey, SearchResultItem } from './issue';
-import { JiraIssueContentComponent } from './jira/jira-issue/jira-issue-content/jira-issue-content.component';
-import { JiraIssueHeaderComponent } from './jira/jira-issue/jira-issue-header/jira-issue-header.component';
 import { JiraIssue } from './jira/jira-issue/jira-issue.model';
 import { Attachment } from '../tasks/attachment/attachment.model';
 import { mapJiraAttachmentToAttachment } from './jira/jira-issue/jira-issue-map.util';
@@ -10,6 +8,8 @@ import { GitApiService } from './git/git-api.service';
 import { combineLatest, from, Observable, zip } from 'rxjs';
 import { ProjectService } from '../project/project.service';
 import { map, switchMap } from 'rxjs/operators';
+import { JiraIssueService } from './jira/jira-issue/jira-issue.service';
+import { GitIssueService } from './git/git-issue/git-issue.service';
 
 @Injectable({
   providedIn: 'root'
@@ -24,11 +24,20 @@ export class IssueService {
   constructor(
     private _jiraApiService: JiraApiService,
     private _gitApiService: GitApiService,
+    private _jiraIssueService: JiraIssueService,
+    private _gitIssueService: GitIssueService,
     private _projectService: ProjectService,
   ) {
     this.isRemoteSearchEnabled$.subscribe(val => this.isRemoteSearchEnabled = val);
   }
 
+
+  public async loadStatesForProject(projectId) {
+    return Promise.all([
+      this._jiraIssueService.loadStateForProject(projectId),
+      this._gitIssueService.loadStateForProject(projectId),
+    ]);
+  }
 
   public searchIssues(searchTerm: string): Observable<SearchResultItem[]> {
     if (!this.isRemoteSearchEnabled) {
@@ -63,23 +72,6 @@ export class IssueService {
       case 'JIRA': {
         const issueData = issueData_ as JiraIssue;
         return issueData && issueData.attachments && issueData.attachments.map(mapJiraAttachmentToAttachment) as Attachment[];
-      }
-    }
-  }
-
-  public getTabHeader(issueType: IssueProviderKey) {
-    switch (issueType) {
-      case 'JIRA': {
-        return JiraIssueHeaderComponent;
-      }
-    }
-  }
-
-
-  public getTabContent(issueType: IssueProviderKey) {
-    switch (issueType) {
-      case 'JIRA': {
-        return JiraIssueContentComponent;
       }
     }
   }

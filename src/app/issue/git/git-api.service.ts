@@ -54,10 +54,11 @@ export class GitApiService {
     return true;
   }
 
+  // TODO move to map util
   private _mapIssuesToSearchResults(issues: GitOriginalIssue[]): SearchResultItem[] {
     return issues.map(issue => {
       return {
-        title: issue.title,
+        title: '#' + issue.number + ' ' + issue.title,
         issueType: 'GIT' as IssueProviderKey,
         issueData: mapGitIssue(issue),
       };
