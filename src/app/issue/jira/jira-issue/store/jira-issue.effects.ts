@@ -12,7 +12,7 @@ import { JiraIssueService } from '../jira-issue.service';
 import { JIRA_POLL_INTERVAL } from '../../jira.const';
 import { ConfigService } from '../../../../core/config/config.service';
 import { Dictionary } from '@ngrx/entity';
-import { JiraIssue } from '../jira-issue.model';
+import { JiraChangelogEntry, JiraIssue } from '../jira-issue.model';
 import { JiraCfg } from '../../jira';
 import { SnackService } from '../../../../core/snack/snack.service';
 
@@ -93,11 +93,35 @@ export class JiraIssueEffects {
     }
   }
 
-  private _updateIssueFromApi(issueId, oldIssueData) {
+  private _updateIssueFromApi(issueId, oldIssueData: JiraIssue) {
     this._jiraApiService.getIssueById(issueId, true)
-      .then((res) => {
-        if (res.updated !== oldIssueData.updated) {
-          this._jiraIssueService.update(issueId, {...res, wasUpdated: true});
+      .then((updatedIssue) => {
+        const oldCommentLength = oldIssueData && oldIssueData.comments && oldIssueData.comments.length;
+        const newCommentLength = updatedIssue && updatedIssue.comments && updatedIssue.comments.length;
+        const isCommentsChanged = (oldCommentLength !== newCommentLength);
+
+        if (updatedIssue.updated !== oldIssueData.updated || isCommentsChanged) {
+          const lastUpdate = oldIssueData.lastUpdateFromRemote && new Date(oldIssueData.lastUpdateFromRemote);
+          const changelog: JiraChangelogEntry[] = updatedIssue.changelog.filter(
+            entry => !lastUpdate || new Date(entry.created) > lastUpdate
+          );
+
+          if (isCommentsChanged) {
+            changelog.unshift({
+              created: lastUpdate.toISOString(),
+              author: null,
+              field: 'Comments',
+              from: oldCommentLength.toString(),
+              to: newCommentLength.toString(),
+            });
+          }
+
+          this._jiraIssueService.update(issueId, {
+            ...updatedIssue,
+            changelog,
+            lastUpdateFromRemote: updatedIssue.updated,
+            wasUpdated: true
+          });
         }
       });
   }

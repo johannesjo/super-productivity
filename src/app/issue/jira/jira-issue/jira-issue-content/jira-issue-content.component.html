@@ -1,15 +1,26 @@
-<div style="text-align: center;">
-  <button mat-raised-button
-          *ngIf="issueData.wasUpdated"
-          color="accent"
-          (click)="hideUpdates()">
-    Mark updates as checked
-  </button>
-</div>
 <!-- TODO list changes -->
 
-
 <div class="wrapper">
+
+  <div class="updates"
+       *ngIf="issueData.wasUpdated"
+       [@expand]>
+    <div>
+      <button mat-raised-button
+              color="accent"
+              (click)="hideUpdates()">
+        Mark updates as checked
+      </button>
+    </div>
+
+    <h3 class="mat-h3">List of changes</h3>
+    <ul class="changelog">
+      <li *ngFor="let entry of issueData.changelog">
+        <em *ngIf="entry.author">{{entry.author.displayName}}</em> changed <strong>{{entry.field}}</strong> on {{entry.created|date:'short'}}
+      </li>
+    </ul>
+  </div>
+
   <table class="issue-table">
     <tr>
       <th>Summary</th>
@@ -17,7 +28,14 @@
     </tr>
     <tr>
       <th>Status</th>
-      <td>{{issueData.status?.name}}</td>
+      <td>
+        <!--<img [src]="issueData?.status?.iconUrl"-->
+        <!--*ngIf="issueData?.status?.iconUrl">-->
+        {{issueData.status?.name}}</td>
+    </tr>
+    <tr>
+      <th>Assignee</th>
+      <td>{{issueData.assignee?.displayName}}</td>
     </tr>
     <tr *ngIf="issueData.components?.length">
       <th>Components</th>
@@ -33,7 +51,8 @@
       <th>Description</th>
       <td>
         <!--<inline-markdown [model]="issueData.description"></inline-markdown>-->
-        <div [innerHTML]="issueData.body|markdown"></div>
+        <div [innerHTML]="issueData.description|markdown"
+             *ngIf="issueData.description"></div>
       </td>
     </tr>
     <tr>

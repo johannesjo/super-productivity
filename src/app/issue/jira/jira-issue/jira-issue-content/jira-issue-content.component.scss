@@ -49,3 +49,24 @@
 .attachment {
   //margin-bottom: $s;
 }
+
+.updates {
+  text-align: center;
+
+  h3 {
+    margin-top: $s;
+    margin-bottom: 0;
+  }
+}
+
+.changelog {
+  list-style: none;
+  margin: 0;
+  padding: 0 0 $s*2;
+  display: block;
+
+  li {
+    padding: 0;
+    margin: 0;
+  }
+}

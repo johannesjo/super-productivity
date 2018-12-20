@@ -100,7 +100,19 @@ export const mapJiraAttachmentToAttachment = (jiraAttachment: JiraAttachment) =>
 };
 
 export const mapChangelog = (changelog: JiraOriginalChangelog): JiraChangelogEntry[] => {
-  return [];
+  const newChangelog = [];
+  changelog.histories.forEach(entry => {
+    entry.items.forEach(item => {
+      newChangelog.push({
+        author: mapAuthor(entry.author),
+        created: entry.created,
+        field: item.field,
+        from: item.fromString,
+        to: item.toString,
+      });
+    });
+  });
+  return newChangelog;
 };
 
 const mapAttachmentType = (mimeType: string): DropPasteInputType => {

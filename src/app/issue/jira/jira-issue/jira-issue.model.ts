@@ -40,7 +40,11 @@ export type JiraComment = Readonly<{
 }>;
 
 export type JiraChangelogEntry = Readonly<{
-
+  author: JiraAuthor;
+  created: string;
+  field: string;
+  from: string;
+  to: string;
 }>;
 
 
@@ -66,11 +70,12 @@ export type JiraIssue = Readonly<{
   // mapped data
   attachments: JiraAttachment[];
   assignee: JiraAuthor;
-  changelog?: JiraChangelogEntry;
+  changelog?: JiraChangelogEntry[];
 
   // new properties
   url: string;
   comments: JiraComment[];
   wasUpdated?: boolean;
+  lastUpdateFromRemote?: number;
 }>;
 

@@ -3,12 +3,14 @@ import { TaskWithSubTasks } from '../../../../tasks/task.model';
 import { JiraIssueService } from '../jira-issue.service';
 import { JiraApiService } from '../../jira-api.service';
 import { JiraIssue } from '../jira-issue.model';
+import { expandAnimation } from '../../../../ui/animations/expand.ani';
 
 @Component({
   selector: 'jira-issue-content',
   templateUrl: './jira-issue-content.component.html',
   styleUrls: ['./jira-issue-content.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  animations: [expandAnimation]
 })
 export class JiraIssueContentComponent implements OnInit {
   taskData: TaskWithSubTasks;
