@@ -2,11 +2,11 @@ import { Injectable } from '@angular/core';
 import { ProjectService } from '../../project/project.service';
 import { GitCfg } from './git';
 import { SnackService } from '../../core/snack/snack.service';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { GIT_API_BASE_URL } from './git.const';
-import { Observable, throwError } from 'rxjs';
+import { Observable, ObservableInput, throwError } from 'rxjs';
 import { GitIssueSearchResult } from './git-api-responses';
-import { map } from 'rxjs/operators';
+import { catchError, map } from 'rxjs/operators';
 import { SearchResultItem } from '../issue';
 import { mapGitIssue, mapGitIssueToSearchResult } from './git-issue/git-issue-map.util';
 
@@ -28,11 +28,11 @@ export class GitApiService {
     });
   }
 
-
   searchIssue(searchText: string): Observable<SearchResultItem[]> {
     this._checkSettings();
     return this._http.get(`${BASE}search/issues?q=${encodeURI(searchText)}`)
       .pipe(
+        catchError(this._handleRequestError.bind(this)),
         map((res: GitIssueSearchResult) => {
           if (res && res.items) {
             return res.items.map(mapGitIssue).map(mapGitIssueToSearchResult);
@@ -43,14 +43,20 @@ export class GitApiService {
       );
   }
 
-  getIssueById(issueNumber: number) {
+  getIssueById(issueId: number) {
     this._checkSettings();
-    return this._http.get(`${BASE}repos/${this._cfg.repo}/issues/${issueNumber}`);
+    return this._http.get(`${BASE}repos/${this._cfg.repo}/issues/${issueId}`)
+      .pipe(
+        catchError(this._handleRequestError.bind(this)),
+      );
   }
 
-  getCommentListForIssue(issueNumber: number) {
+  getCommentListForIssue(issueId: number) {
     this._checkSettings();
-    return this._http.get(BASE + `${BASE}repos/${this._cfg.repo}/issues/${issueNumber}/comments`);
+    return this._http.get(BASE + `${BASE}repos/${this._cfg.repo}/issues/${issueId}/comments`)
+      .pipe(
+        catchError(this._handleRequestError.bind(this)),
+      );
   }
 
   private _checkSettings() {
@@ -58,6 +64,18 @@ export class GitApiService {
       this._snackService.open({type: 'ERROR', message: 'Git is not properly configured'});
       throw throwError('Not enough settings');
     }
+  }
+
+  private _handleRequestError(error: HttpErrorResponse, caught: Observable<Object>): ObservableInput<{}> {
+    console.error(error);
+    if (error.error instanceof ErrorEvent) {
+      // A client-side or network error occurred. Handle it accordingly.
+      this._snackService.open({type: 'ERROR', message: 'GitHub: Request failed because of a client side network error'});
+    } else {
+      // The backend returned an unsuccessful response code.
+      this._snackService.open({type: 'ERROR', message: `GitHub: API returned ${error.status}. ${error.error && error.error.message}`});
+    }
+    return throwError('GitHub: Api request failed.');
   }
 
   private _isValidSettings(): boolean {
