@@ -4,7 +4,6 @@
   $fg: map-get($theme, foreground);
   $fgStandard: map-get($fg, text);
 
-  @debug $fgStandard;
   $primary: map-get($theme, primary);
   $accent: map-get($theme, accent);
   $background: map-get($theme, background);
