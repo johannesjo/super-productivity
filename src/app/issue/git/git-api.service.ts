@@ -52,7 +52,10 @@ export class GitApiService {
       .pipe(
         catchError(this._handleRequestError.bind(this)),
         map((issues: GitIssue[]) =>
-          issues.filter(issue => issue.title.match(searchText))
+          issues.filter(issue =>
+            issue.title.toLowerCase().match(searchText.toLowerCase())
+            || issue.body.toLowerCase().match(searchText.toLowerCase())
+          )
             .map(mapGitIssueToSearchResult)
         ),
         // tap(issues => console.log(issues)),
@@ -103,9 +106,6 @@ export class GitApiService {
       return {
         ...issue,
         comments: comments.filter(comment => {
-          console.log(comment.issue_url === issue.apiUrl, comment.issue_url, issue.apiUrl);
-
-
           return (comment.issue_url === issue.apiUrl);
         }),
       };
