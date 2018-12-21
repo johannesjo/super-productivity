@@ -64,7 +64,7 @@ export class GitApiService {
 
   private _getAllIssuesForRepo(repo = this._cfg.repo): Observable<GitIssue[]> {
     this._checkSettings();
-    return this._http.get(`${BASE}repos/${repo}/issues?per_page=240`)
+    return this._http.get(`${BASE}repos/${repo}/issues?per_page=100`)
       .pipe(
         catchError(this._handleRequestError.bind(this)),
         map((issues: GitOriginalIssue[]) => issues ? issues.map(mapGitIssue) : []),
@@ -73,7 +73,23 @@ export class GitApiService {
 
   private _getAllCommentsForRepo(repo = this._cfg.repo): Observable<GitComment[]> {
     this._checkSettings();
-    return this._http.get(`${BASE}repos/${repo}/issues/comments?sort=created&direction=desc&per_page=240`)
+    return combineLatest(
+      // the last 500 should hopefully be enough
+      this._getCommentsPageForRepo(1, repo),
+      this._getCommentsPageForRepo(2, repo),
+      this._getCommentsPageForRepo(3, repo),
+      this._getCommentsPageForRepo(4, repo),
+      this._getCommentsPageForRepo(5, repo),
+    )
+      .pipe(
+        catchError(this._handleRequestError.bind(this)),
+        map(([p1, p2, p3, p4, p5]) => [].concat(p1, p2, p3, p4, p5))
+      );
+  }
+
+  private _getCommentsPageForRepo(page = 1, repo = this._cfg.repo): Observable<GitComment[]> {
+    this._checkSettings();
+    return this._http.get(`${BASE}repos/${repo}/issues/comments?sort=created&direction=desc&per_page=100&page=${page}`)
       .pipe(
         catchError(this._handleRequestError.bind(this)),
         map(res => res as GitComment[])
