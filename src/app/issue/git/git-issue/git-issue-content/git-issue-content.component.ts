@@ -36,6 +36,6 @@ export class GitIssueContentComponent implements OnInit {
   }
 
   hideUpdates() {
-    this._gitIssueService.update(this.task.issueId, {wasUpdated: false});
+    this._gitIssueService.update(+this.task.issueId, {wasUpdated: false});
   }
 }

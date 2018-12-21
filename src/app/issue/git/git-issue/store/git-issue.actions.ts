@@ -71,14 +71,14 @@ export class UpdateGitIssues implements Action {
 export class DeleteGitIssue implements Action {
   readonly type = GitIssueActionTypes.DeleteGitIssue;
 
-  constructor(public payload: { id: string }) {
+  constructor(public payload: { id: number }) {
   }
 }
 
 export class DeleteGitIssues implements Action {
   readonly type = GitIssueActionTypes.DeleteGitIssues;
 
-  constructor(public payload: { ids: string[] }) {
+  constructor(public payload: { ids: number[] }) {
   }
 }
 

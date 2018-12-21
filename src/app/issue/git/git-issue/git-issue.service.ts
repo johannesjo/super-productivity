@@ -55,7 +55,7 @@ export class GitIssueService {
     });
   }
 
-  remove(gitIssueId: string) {
+  remove(gitIssueId: number) {
     this._store.dispatch({
       type: GitIssueActionTypes.DeleteGitIssue,
       payload: {id: gitIssueId}
@@ -63,7 +63,7 @@ export class GitIssueService {
   }
 
 
-  update(gitIssueId: string, changedFields: Partial<GitIssue>) {
+  update(gitIssueId: number, changedFields: Partial<GitIssue>) {
     this._store.dispatch({
       type: GitIssueActionTypes.UpdateGitIssue,
       payload: {

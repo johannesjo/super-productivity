@@ -5,13 +5,12 @@ import { select, Store } from '@ngrx/store';
 import { take, tap, withLatestFrom } from 'rxjs/operators';
 import { TaskActionTypes } from '../../../../tasks/store/task.actions';
 import { PersistenceService } from '../../../../core/persistence/persistence.service';
-import { selectGitIssueEntities, selectGitIssueFeatureState, selectGitIssueIds } from './git-issue.reducer';
+import { selectAllGitIssues, selectGitIssueFeatureState } from './git-issue.reducer';
 import { selectCurrentProjectId, selectProjectGitCfg } from '../../../../project/store/project.reducer';
 import { GitApiService } from '../../git-api.service';
 import { GitIssueService } from '../git-issue.service';
 import { GIT_POLL_INTERVAL } from '../../git.const';
 import { ConfigService } from '../../../../core/config/config.service';
-import { Dictionary } from '@ngrx/entity';
 import { GitIssue } from '../git-issue.model';
 import { GitCfg } from '../../git';
 import { SnackService } from '../../../../core/snack/snack.service';
@@ -31,8 +30,7 @@ export class GitIssueEffects {
         GitIssueActionTypes.UpdateGitIssue,
       ),
       withLatestFrom(
-        this._store$.pipe(select(selectGitIssueIds)),
-        this._store$.pipe(select(selectGitIssueEntities)),
+        this._store$.pipe(select(selectAllGitIssues)),
         this._store$.pipe(select(selectProjectGitCfg)),
       ),
       // TODO should be done in a more modern way via switchmap and timer
@@ -77,33 +75,56 @@ export class GitIssueEffects {
   }
 
   private _reInitIssuePolling(
-    [action, issueIds, entities, gitCfg]: [GitIssueActionTypes, string[], Dictionary<GitIssue>, GitCfg]
+    [action, issues, gitCfg]: [GitIssueActionTypes, GitIssue[], GitCfg]
   ) {
     if (this._pollingIntervalId) {
       window.clearInterval(this._pollingIntervalId);
       this._pollingIntervalId = 0;
     }
     const isPollingEnabled = gitCfg && gitCfg.isAutoPoll;
-    if (isPollingEnabled && issueIds && issueIds.length) {
+    if (isPollingEnabled) {
       this._pollingIntervalId = window.setInterval(() => {
         this._snackService.open({message: 'Git: Polling Changes for issues', icon: 'cloud_download'});
-        issueIds.forEach((id) => this._updateIssueFromApi(id, entities[id]));
+        this._updateIssuesFromApi(issues);
       }, GIT_POLL_INTERVAL);
     }
   }
 
-  private _updateIssueFromApi(issueId, oldIssueData) {
+  private _updateIssuesFromApi(oldIssues: GitIssue[]) {
     console.log('UPDATE ISSUE FROM API');
-    // this._gitApiService.getIssueById(issueId)
-    //   .pipe(
-    //     take(1)
-    //   ).subscribe(issueData => {
-    //   console.log(issueData);
-    //   // if (res.updated !== oldIssueData.updated) {
-    //   //   this._gitIssueService.update(issueId, {...res, wasUpdated: true});
-    //   // }
-    //
-    // });
+    this._gitApiService.getCompleteIssueDataForRepo()
+      .pipe(
+        take(1)
+      ).subscribe(newIssues => {
+      oldIssues.forEach((oldIssue: GitIssue) => {
+        const matchingNewIssue: GitIssue = newIssues.find(newIssue => newIssue.id === oldIssue.id);
+        if (!matchingNewIssue) {
+          this._snackService.open({
+            type: 'ERROR',
+            message: `Git: Issue ${matchingNewIssue.number} "${matchingNewIssue.title}" seems to be deleted on git`
+          });
+        } else {
+          const isNewComment = matchingNewIssue.comments.length !== (oldIssue.comments && oldIssue.comments.length);
+          const isIssueChanged = (matchingNewIssue.updated_at !== oldIssue.updated_at);
+          const wasUpdated = isNewComment || isIssueChanged;
+          if (isNewComment) {
+            this._snackService.open({
+              icon: 'cloud_download',
+              message: `Git: New comment for ${matchingNewIssue.number} "${matchingNewIssue.title}"`
+            });
+          } else if (isIssueChanged) {
+            this._snackService.open({
+              icon: 'cloud_download',
+              message: `Git: Update for ${matchingNewIssue.number} "${matchingNewIssue.title}"`
+            });
+          }
+
+          if (wasUpdated) {
+            this._gitIssueService.update(oldIssue.id, {...matchingNewIssue, wasUpdated: true});
+          }
+        }
+      });
+    });
   }
 }
 
