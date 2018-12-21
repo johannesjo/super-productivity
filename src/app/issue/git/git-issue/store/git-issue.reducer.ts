@@ -8,6 +8,7 @@ import { IssueProviderKey } from '../../../issue';
 export const GIT_ISSUE_FEATURE_NAME: IssueProviderKey = 'GIT';
 
 export interface GitIssueState extends EntityState<GitIssue> {
+  cachedIssues: GitIssue[];
 }
 
 export const gitIssueAdapter: EntityAdapter<GitIssue> = createEntityAdapter<GitIssue>();
@@ -28,7 +29,9 @@ export const selectGitIssueTotal = createSelector(selectGitIssueFeatureState, se
 
 // REDUCER
 // -------
-export const initialGitIssueState: GitIssueState = gitIssueAdapter.getInitialState({});
+export const initialGitIssueState: GitIssueState = gitIssueAdapter.getInitialState({
+  cachedIssues: [],
+});
 
 export function gitIssueReducer(
   state: GitIssueState = initialGitIssueState,

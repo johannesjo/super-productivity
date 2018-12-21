@@ -30,6 +30,7 @@ export const mapGitIssue = (issue: GitOriginalIssue): GitIssue => {
     // new
     commentsNr: issue.comments,
     wasUpdated: false,
+    apiUrl: issue.url,
 
     // transformed
     comments: []

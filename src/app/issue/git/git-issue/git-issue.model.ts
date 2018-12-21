@@ -1,14 +1,22 @@
-import { GitOriginalLabel, GitOriginalMileStone, GitOriginalPullRequest, GitOriginalState, GitOriginalUser } from '../git-api-responses';
+import {
+  GitOriginalComment,
+  GitOriginalLabel,
+  GitOriginalMileStone,
+  GitOriginalPullRequest,
+  GitOriginalState,
+  GitOriginalUser
+} from '../git-api-responses';
 
 export type GitState = GitOriginalState;
 export type GitUser = GitOriginalUser;
 export type GitLabel = GitOriginalLabel;
 export type GitMileStone = GitOriginalMileStone;
 export type GitPullRequest = GitOriginalPullRequest;
+export type GitComment = GitOriginalComment;
+
 
 export type GitIssue = Readonly<{
   id: number;
-  url: string;
   repository_url: string;
   labels_url: string;
   comments_url: string;
@@ -32,9 +40,11 @@ export type GitIssue = Readonly<{
   // added
   wasUpdated: boolean;
   commentsNr: number;
+  apiUrl: string;
 
   // transformed
-  comments?: any[];
+  comments?: GitComment[];
+  url: string;
 
   // removed
   // node_id: string;

@@ -58,7 +58,7 @@ export class IssueService {
             }));
         }
         if (gitCfg.isShowIssuesFromGit) {
-          obs.push(this._gitApiService.searchIssue(searchTerm));
+          obs.push(this._gitApiService.searchIssueForRepo(searchTerm));
         }
         console.log(obs);
 

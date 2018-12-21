@@ -4,11 +4,12 @@ import { GitCfg } from './git';
 import { SnackService } from '../../core/snack/snack.service';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { GIT_API_BASE_URL } from './git.const';
-import { Observable, ObservableInput, throwError } from 'rxjs';
-import { GitIssueSearchResult } from './git-api-responses';
-import { catchError, map } from 'rxjs/operators';
+import { combineLatest, Observable, ObservableInput, throwError } from 'rxjs';
+import { GitIssueSearchResult, GitOriginalIssue } from './git-api-responses';
+import { catchError, map, take } from 'rxjs/operators';
 import { SearchResultItem } from '../issue';
 import { mapGitIssue, mapGitIssueToSearchResult } from './git-issue/git-issue-map.util';
+import { GitComment, GitIssue } from './git-issue/git-issue.model';
 
 const BASE = GIT_API_BASE_URL;
 
@@ -17,6 +18,7 @@ const BASE = GIT_API_BASE_URL;
 })
 export class GitApiService {
   private _cfg: GitCfg;
+  private _chachedIssuesForRepo: any[];
 
   constructor(
     private _projectService: ProjectService,
@@ -25,12 +27,28 @@ export class GitApiService {
   ) {
     this._projectService.currentGitCfg$.subscribe((cfg: GitCfg) => {
       this._cfg = cfg;
+      if (this._cfg) {
+        // this.getCompleteIssueDataForRepo().subscribe(res => console.log(res));
+        // this.getAllIssuesForRepo();
+      }
     });
   }
 
-  searchIssue(searchText: string): Observable<SearchResultItem[]> {
+  getCompleteIssueDataForRepo(repo = this._cfg.repo): Observable<any> {
     this._checkSettings();
-    return this._http.get(`${BASE}search/issues?q=${encodeURI(searchText)}`)
+    return combineLatest(
+      this._getAllIssuesForRepo(repo),
+      this._getAllCommentsForRepo(repo),
+    ).pipe(
+      take(1),
+      map(([issues, comments]) => this._mergeIssuesAndComments(issues, comments)),
+    );
+  }
+
+
+  searchIssueForRepo(searchText: string, repo = this._cfg.repo): Observable<SearchResultItem[]> {
+    this._checkSettings();
+    return this._http.get(`${BASE}repos/${repo}/issues`)
       .pipe(
         catchError(this._handleRequestError.bind(this)),
         map((res: GitIssueSearchResult) => {
@@ -43,19 +61,21 @@ export class GitApiService {
       );
   }
 
-  getIssueById(issueId: number) {
+  private _getAllIssuesForRepo(repo = this._cfg.repo): Observable<GitIssue[]> {
     this._checkSettings();
-    return this._http.get(`${BASE}repos/${this._cfg.repo}/issues/${issueId}`)
+    return this._http.get(`${BASE}repos/${repo}/issues`)
       .pipe(
         catchError(this._handleRequestError.bind(this)),
+        map((issues: GitOriginalIssue[]) => issues ? issues.map(mapGitIssue) : []),
       );
   }
 
-  getCommentListForIssue(issueId: number) {
+  private _getAllCommentsForRepo(repo = this._cfg.repo): Observable<GitComment[]> {
     this._checkSettings();
-    return this._http.get(BASE + `${BASE}repos/${this._cfg.repo}/issues/${issueId}/comments`)
+    return this._http.get(`${BASE}repos/${repo}/issues/comments`)
       .pipe(
         catchError(this._handleRequestError.bind(this)),
+        map(res => res as GitComment[])
       );
   }
 
@@ -78,8 +98,54 @@ export class GitApiService {
     return throwError('GitHub: Api request failed.');
   }
 
+  private _mergeIssuesAndComments(issues: GitIssue[], comments: GitComment[]): GitIssue[] {
+    return issues.map(issue => {
+      return {
+        ...issue,
+        comments: comments.filter(comment => comment.issue_url === issue.apiUrl),
+      };
+    });
+  }
+
   private _isValidSettings(): boolean {
     const cfg = this._cfg;
     return cfg && cfg.repo && cfg.repo.length > 0;
   }
 }
+
+//
+// searchIssue(searchText: string): Observable<SearchResultItem[]> {
+//   this._checkSettings();
+// return this._http.get(`${BASE}search/issues?q=${encodeURI(searchText)}`)
+//   .pipe(
+//     catchError(this._handleRequestError.bind(this)),
+//     map((res: GitIssueSearchResult) => {
+//       if (res && res.items) {
+//         return res.items.map(mapGitIssue).map(mapGitIssueToSearchResult);
+//       } else {
+//         return [];
+//       }
+//     }),
+//   );
+// }
+//
+//
+// getIssueById(issueId: number): Observable<any> {
+//   this._checkSettings();
+// return this._http.get(`${BASE}repos/${this._cfg.repo}/issues/${issueId}`)
+//   .pipe(
+//     catchError(this._handleRequestError.bind(this)),
+//     map((res: any) => {
+//       console.log('GITHBU GET ISSUE BY ID RES', res);
+//       return res;
+//     }),
+//   );
+// }
+//
+// getCommentsForIssue(issueId: number): Observable<any> {
+//   this._checkSettings();
+// return this._http.get(BASE + `${BASE}repos/${this._cfg.repo}/issues/${issueId}/comments`)
+//   .pipe(
+//     catchError(this._handleRequestError.bind(this)),
+//   );
+// }

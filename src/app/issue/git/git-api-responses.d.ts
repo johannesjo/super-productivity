@@ -168,6 +168,20 @@ export type GitOriginalIssue = Readonly<{
   repository: GitOriginalRepository;
 }>;
 
+export type GitOriginalComment = Readonly<{
+  author_association: string;
+  body: string;
+  created_at: string;
+  html_url: string;
+  id: number;
+  issue_url: string;
+  node_id: string;
+  updated_at: string;
+  url: string;
+  user: GitOriginalUser;
+}>;
+
+
 
 export type GitIssueSearchResult = Readonly<{
   total_count: number;
