@@ -6,7 +6,7 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { GIT_API_BASE_URL } from './git.const';
 import { combineLatest, Observable, ObservableInput, throwError } from 'rxjs';
 import { GitOriginalIssue } from './git-api-responses';
-import { catchError, map, take, tap } from 'rxjs/operators';
+import { catchError, map, take } from 'rxjs/operators';
 import { mapGitIssue, mapGitIssueToSearchResult } from './git-issue/git-issue-map.util';
 import { GitComment, GitIssue } from './git-issue/git-issue.model';
 import { SearchResultItem } from '../issue';
@@ -18,7 +18,6 @@ const BASE = GIT_API_BASE_URL;
 })
 export class GitApiService {
   private _cfg: GitCfg;
-  private _chachedIssuesForRepo: any[];
 
   constructor(
     private _projectService: ProjectService,
@@ -46,6 +45,7 @@ export class GitApiService {
   }
 
 
+  // TODO move to jira-issue-service
   searchIssueForRepo(searchText: string, repo = this._cfg.repo): Observable<SearchResultItem[]> {
     this._checkSettings();
     return this.getCompleteIssueDataForRepo(repo)
@@ -61,7 +61,7 @@ export class GitApiService {
 
   private _getAllIssuesForRepo(repo = this._cfg.repo): Observable<GitIssue[]> {
     this._checkSettings();
-    return this._http.get(`${BASE}repos/${repo}/issues`)
+    return this._http.get(`${BASE}repos/${repo}/issues?per_page=240`)
       .pipe(
         catchError(this._handleRequestError.bind(this)),
         map((issues: GitOriginalIssue[]) => issues ? issues.map(mapGitIssue) : []),
@@ -70,7 +70,7 @@ export class GitApiService {
 
   private _getAllCommentsForRepo(repo = this._cfg.repo): Observable<GitComment[]> {
     this._checkSettings();
-    return this._http.get(`${BASE}repos/${repo}/issues/comments`)
+    return this._http.get(`${BASE}repos/${repo}/issues/comments?sort=created&direction=desc&per_page=240`)
       .pipe(
         catchError(this._handleRequestError.bind(this)),
         map(res => res as GitComment[])
@@ -97,10 +97,17 @@ export class GitApiService {
   }
 
   private _mergeIssuesAndComments(issues: GitIssue[], comments: GitComment[]): GitIssue[] {
+    console.log(issues, comments);
+
     return issues.map(issue => {
       return {
         ...issue,
-        comments: comments.filter(comment => comment.issue_url === issue.apiUrl),
+        comments: comments.filter(comment => {
+          console.log(comment.issue_url === issue.apiUrl, comment.issue_url, issue.apiUrl);
+
+
+          return (comment.issue_url === issue.apiUrl);
+        }),
       };
     });
   }

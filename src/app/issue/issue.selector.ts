@@ -8,8 +8,6 @@ export const selectIssueEntityMap = createSelector(
   selectGitIssueEntities,
   (
     (jiraIssues, gitIssues) => {
-      console.log(jiraIssues, gitIssues);
-
       return {
         JIRA: jiraIssues,
         GIT: gitIssues,

@@ -46,14 +46,14 @@
       <td>
         <div class="comment"
              *ngFor="let comment of issueData?.comments">
-
-          <img [src]="comment.author.avatarUrl"
-               class="author-avatar">
+          <!--<img [src]="comment.author.avatarUrl"-->
+               <!--class="author-avatar">-->
           <div class="name-and-comment-content">
-            <div><span class="author-name">{{comment.author.displayName}}</span>
-              <span class="when">at {{comment.created|date:'short'}}</span>
+            <div><span class="author-name">{{comment.user?.login}}</span>
+              <span class="when">at {{comment.created_at|date:'short'}}</span>
             </div>
-            <div>{{comment.body}}</div>
+            <div [innerHTML]="comment?.body|markdown"
+                 *ngIf="comment.body"></div>
           </div>
         </div>
 
