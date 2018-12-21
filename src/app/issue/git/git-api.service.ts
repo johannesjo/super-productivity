@@ -5,11 +5,11 @@ import { SnackService } from '../../core/snack/snack.service';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { GIT_API_BASE_URL } from './git.const';
 import { combineLatest, Observable, ObservableInput, throwError } from 'rxjs';
-import { GitIssueSearchResult, GitOriginalIssue } from './git-api-responses';
-import { catchError, map, take } from 'rxjs/operators';
-import { SearchResultItem } from '../issue';
+import { GitOriginalIssue } from './git-api-responses';
+import { catchError, map, take, tap } from 'rxjs/operators';
 import { mapGitIssue, mapGitIssueToSearchResult } from './git-issue/git-issue-map.util';
 import { GitComment, GitIssue } from './git-issue/git-issue.model';
+import { SearchResultItem } from '../issue';
 
 const BASE = GIT_API_BASE_URL;
 
@@ -34,7 +34,7 @@ export class GitApiService {
     });
   }
 
-  getCompleteIssueDataForRepo(repo = this._cfg.repo): Observable<any> {
+  getCompleteIssueDataForRepo(repo = this._cfg.repo): Observable<GitIssue[]> {
     this._checkSettings();
     return combineLatest(
       this._getAllIssuesForRepo(repo),
@@ -48,16 +48,14 @@ export class GitApiService {
 
   searchIssueForRepo(searchText: string, repo = this._cfg.repo): Observable<SearchResultItem[]> {
     this._checkSettings();
-    return this._http.get(`${BASE}repos/${repo}/issues`)
+    return this.getCompleteIssueDataForRepo(repo)
       .pipe(
         catchError(this._handleRequestError.bind(this)),
-        map((res: GitIssueSearchResult) => {
-          if (res && res.items) {
-            return res.items.map(mapGitIssue).map(mapGitIssueToSearchResult);
-          } else {
-            return [];
-          }
-        }),
+        map((issues: GitIssue[]) =>
+          issues.filter(issue => issue.title.match(searchText))
+            .map(mapGitIssueToSearchResult)
+        ),
+        // tap(issues => console.log(issues)),
       );
   }
 

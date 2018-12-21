@@ -2,7 +2,6 @@ import { Injectable } from '@angular/core';
 import { IssueData, IssueProviderKey, SearchResultItem } from './issue';
 import { JiraIssue } from './jira/jira-issue/jira-issue.model';
 import { Attachment } from '../attachment/attachment.model';
-import { mapJiraAttachmentToAttachment } from './jira/jira-issue/jira-issue-map.util';
 import { JiraApiService } from './jira/jira-api.service';
 import { GitApiService } from './git/git-api.service';
 import { combineLatest, from, Observable, zip } from 'rxjs';
@@ -51,13 +50,13 @@ export class IssueService {
       switchMap(([jiraCfg, gitCfg]) => {
         const obs = [];
 
-        if (jiraCfg.isEnabled) {
+        if (jiraCfg && jiraCfg.isEnabled) {
           obs.push(this._jiraApiService.search(searchTerm, false, 50)
             .catch(() => {
               return [];
             }));
         }
-        if (gitCfg.isShowIssuesFromGit) {
+        if (gitCfg && gitCfg.isShowIssuesFromGit) {
           obs.push(this._gitApiService.searchIssueForRepo(searchTerm));
         }
         console.log(obs);
