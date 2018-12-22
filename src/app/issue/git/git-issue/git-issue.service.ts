@@ -74,4 +74,10 @@ export class GitIssueService {
       }
     });
   }
+
+  addOpenIssuesToBacklog() {
+    this._store.dispatch({
+      type: GitIssueActionTypes.AddOpenGitIssuesToBacklog,
+    });
+  }
 }

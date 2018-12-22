@@ -29,15 +29,7 @@ export class GitApiService {
   ) {
     this._projectService.currentGitCfg$.subscribe((cfg: GitCfg) => {
       this._cfg = cfg;
-      // this.getCompleteIssueDataForRepo().subscribe(issues => {
-      // console.log(issues);
-      // });
     });
-    // TODO move to project effect?
-    this._projectService.currentId$.subscribe(() => {
-      this.refreshIssuesCache();
-    });
-
   }
 
   getCompleteIssueDataForRepo(repo = this._cfg.repo): Observable<GitIssue[]> {
@@ -52,7 +44,6 @@ export class GitApiService {
   }
 
 
-  // TODO move to jira-issue-service
   searchIssueForRepo(searchText: string, repo = this._cfg.repo): Observable<SearchResultItem[]> {
     this._checkSettings();
     if (this._cachedIssues && this._cachedIssues.length && (this._lastCacheUpdate + MAX_CACHE_AGE > Date.now())) {

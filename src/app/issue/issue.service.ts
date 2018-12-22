@@ -17,10 +17,18 @@ export class IssueService {
   public isJiraSearchEnabled$: Observable<boolean> = this._projectService.currentJiraCfg$.pipe(
     map(jiraCfg => jiraCfg && jiraCfg.isEnabled)
   );
+  public isJiraAddToBacklog$: Observable<boolean> = this._projectService.currentJiraCfg$.pipe(
+    map(jiraCfg => jiraCfg && jiraCfg.isAutoAddToBacklog)
+  );
+
+
   public isGitSearchEnabled$: Observable<boolean> = this._projectService.currentGitCfg$.pipe(
     map(gitCfg => gitCfg && gitCfg.isSearchIssuesFromGit)
   );
-  public isRefreshIssueDataForGit$: Observable<boolean> = this._projectService.currentGitCfg$.pipe(
+  public isGitAddToBacklog$: Observable<boolean> = this._projectService.currentGitCfg$.pipe(
+    map(gitCfg => gitCfg && gitCfg.isAutoAddToBacklog)
+  );
+  public isGitRefreshIssueData$: Observable<boolean> = this._projectService.currentGitCfg$.pipe(
     map(gitCfg => gitCfg && (gitCfg.isSearchIssuesFromGit || gitCfg.isAutoAddToBacklog || gitCfg.isAutoPoll))
   );
 
@@ -41,15 +49,6 @@ export class IssueService {
     ]);
   }
 
-  public refreshIssueData() {
-    this.isRefreshIssueDataForGit$.pipe(
-      take(1),
-    ).subscribe((isRefreshGit) => {
-      if (isRefreshGit) {
-        this._gitApiService.refreshIssuesCache();
-      }
-    });
-  }
 
   public searchIssues(searchTerm: string): Observable<SearchResultItem[]> {
     return combineLatest(
@@ -74,6 +73,37 @@ export class IssueService {
         return zip(...obs, (...allResults) => [].concat(...(allResults)));
       })
     );
+  }
+
+  public refreshIssueData() {
+    this.isGitRefreshIssueData$.pipe(
+      take(1),
+    ).subscribe((isRefreshGit) => {
+      if (isRefreshGit) {
+        this._gitApiService.refreshIssuesCache();
+      }
+    });
+  }
+
+  public refreshBacklog() {
+    console.log('REFRESH BACKLOG');
+
+    this.isGitAddToBacklog$.pipe(
+      take(1),
+    ).subscribe((isGitAddToBacklog) => {
+
+      if (isGitAddToBacklog) {
+        this._gitIssueService.addOpenIssuesToBacklog();
+      }
+    });
+
+    this.isJiraAddToBacklog$.pipe(
+      take(1),
+    ).subscribe((isJiraAddToBacklog) => {
+      if (isJiraAddToBacklog) {
+        // this._gitApiService.refreshIssuesCache();
+      }
+    });
   }
 
   public getMappedAttachments(issueType: IssueProviderKey, issueData_: IssueData): Attachment[] {

@@ -6,6 +6,7 @@ import { AddTask } from '../../../../tasks/store/task.actions';
 
 export enum GitIssueActionTypes {
   LoadState = '[GitIssue] Load GitIssue State',
+  AddOpenGitIssuesToBacklog = '[GitIssue] Add open issues to backlog',
 
   // GitIssue Actions
   LoadGitIssues = '[GitIssue] Load GitIssues',
@@ -24,6 +25,10 @@ export class LoadState implements Action {
 
   constructor(public payload: { state: GitIssueState }) {
   }
+}
+
+export class AddOpenGitIssuesToBacklog implements Action {
+  readonly type = GitIssueActionTypes.AddOpenGitIssuesToBacklog;
 }
 
 export class LoadGitIssues implements Action {
@@ -88,6 +93,7 @@ export class ClearGitIssues implements Action {
 
 export type GitIssueActions
   = LoadGitIssues
+  | AddOpenGitIssuesToBacklog
   | LoadState
   | UpsertGitIssue
   | AddGitIssue

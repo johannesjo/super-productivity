@@ -14,6 +14,9 @@ import { ConfigService } from '../../../../core/config/config.service';
 import { GitIssue } from '../git-issue.model';
 import { GitCfg } from '../../git';
 import { SnackService } from '../../../../core/snack/snack.service';
+import { selectAllTasks } from '../../../../tasks/store/task.selectors';
+import { TaskService } from '../../../../tasks/task.service';
+import { Task } from '../../../../tasks/task.model';
 
 @Injectable()
 export class GitIssueEffects {
@@ -53,6 +56,18 @@ export class GitIssueEffects {
       ),
       tap(this._saveToLs.bind(this))
     );
+
+  @Effect({dispatch: false}) addOpenIssuesToBacklog$: any = this._actions$
+    .pipe(
+      ofType(
+        GitIssueActionTypes.AddOpenGitIssuesToBacklog,
+      ),
+      withLatestFrom(
+        this._store$.pipe(select(selectAllTasks)),
+      ),
+      tap(this._addNewIssuesToBacklog.bind(this))
+    );
+
   private _pollingIntervalId: number;
 
   constructor(private readonly _actions$: Actions,
@@ -60,6 +75,7 @@ export class GitIssueEffects {
               private readonly _configService: ConfigService,
               private readonly _snackService: SnackService,
               private readonly _gitApiService: GitApiService,
+              private readonly _taskService: TaskService,
               private readonly _gitIssueService: GitIssueService,
               private readonly _persistenceService: PersistenceService
   ) {
@@ -72,6 +88,27 @@ export class GitIssueEffects {
     } else {
       throw new Error('No current project id');
     }
+  }
+
+  private _addNewIssuesToBacklog([action, allTasks]: [Actions, Task[]]) {
+
+    this._gitApiService.getCompleteIssueDataForRepo().subscribe(issues => {
+      issues.forEach(issue => {
+        const isIssueAlreadyImported = allTasks.find(task => {
+          return task.issueType === 'GIT' && task.issueId.toString() === issue.id.toString();
+        });
+
+        if (!isIssueAlreadyImported) {
+          console.log('add ', issue.id, issue);
+          this._taskService.addWithIssue(
+            `#${issue.number} ${issue.title}`,
+            'GIT',
+            issue,
+            true,
+          );
+        }
+      });
+    });
   }
 
   private _reInitIssuePolling(

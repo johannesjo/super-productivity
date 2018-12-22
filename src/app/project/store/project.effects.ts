@@ -72,12 +72,14 @@ export class ProjectEffects {
   }
 
   private _reloadRelatedStates([action, projectId]) {
-    this._issueService.loadStatesForProject(projectId);
-    this._issueService.refreshIssueData();
-    this._taskService.loadStateForProject(projectId);
     this._noteService.loadStateForProject(projectId);
     this._bookmarkService.loadStateForProject(projectId);
     this._attachmentService.loadStateForProject(projectId);
+    this._issueService.loadStatesForProject(projectId);
+    this._taskService.loadStateForProject(projectId).then(() => {
+      this._issueService.refreshIssueData();
+      this._issueService.refreshBacklog();
+    });
   }
 }
 
