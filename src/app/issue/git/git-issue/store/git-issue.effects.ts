@@ -136,46 +136,11 @@ export class GitIssueEffects {
     if (isPollingEnabled) {
       this._pollingIntervalId = window.setInterval(() => {
         this._snackService.open({message: 'Git: Polling Changes for issues', icon: 'cloud_download'});
-        this._updateIssuesFromApi(issues);
+        this._gitIssueService.updateIssuesFromApi(issues);
       }, GIT_POLL_INTERVAL);
     }
   }
 
-  private _updateIssuesFromApi(oldIssues: GitIssue[]) {
-    console.log('UPDATE ISSUE FROM API');
-    this._gitApiService.getCompleteIssueDataForRepo()
-      .pipe(
-        take(1)
-      ).subscribe(newIssues => {
-      oldIssues.forEach((oldIssue: GitIssue) => {
-        const matchingNewIssue: GitIssue = newIssues.find(newIssue => newIssue.id === oldIssue.id);
-        if (!matchingNewIssue) {
-          this._snackService.open({
-            type: 'ERROR',
-            message: `Git: Issue ${oldIssue.number} "${oldIssue.title}" seems to be deleted on git`
-          });
-        } else {
-          const isNewComment = matchingNewIssue.comments.length !== (oldIssue.comments && oldIssue.comments.length);
-          const isIssueChanged = (matchingNewIssue.updated_at !== oldIssue.updated_at);
-          const wasUpdated = isNewComment || isIssueChanged;
-          if (isNewComment) {
-            this._snackService.open({
-              icon: 'cloud_download',
-              message: `Git: New comment for ${matchingNewIssue.number} "${matchingNewIssue.title}"`
-            });
-          } else if (isIssueChanged) {
-            this._snackService.open({
-              icon: 'cloud_download',
-              message: `Git: Update for ${matchingNewIssue.number} "${matchingNewIssue.title}"`
-            });
-          }
 
-          if (wasUpdated) {
-            this._gitIssueService.update(oldIssue.id, {...matchingNewIssue, wasUpdated: true});
-          }
-        }
-      });
-    });
-  }
 }
 

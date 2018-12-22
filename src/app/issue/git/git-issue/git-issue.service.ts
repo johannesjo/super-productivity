@@ -4,6 +4,10 @@ import { Store } from '@ngrx/store';
 import { GitIssueActionTypes } from './store/git-issue.actions';
 import { PersistenceService } from '../../../core/persistence/persistence.service';
 import { GitIssueState } from './store/git-issue.reducer';
+import { take } from 'rxjs/operators';
+import { GitApiService } from '../git-api.service';
+import { SnackService } from '../../../core/snack/snack.service';
+import { GitCfg } from '../git';
 
 
 @Injectable()
@@ -14,6 +18,8 @@ export class GitIssueService {
   constructor(
     private readonly _store: Store<any>,
     private readonly _persistenceService: PersistenceService,
+    private readonly _gitApiService: GitApiService,
+    private readonly _snackService: SnackService,
   ) {
   }
 
@@ -78,6 +84,45 @@ export class GitIssueService {
   addOpenIssuesToBacklog() {
     this._store.dispatch({
       type: GitIssueActionTypes.AddOpenGitIssuesToBacklog,
+    });
+  }
+
+  updateIssuesFromApi(oldIssues: GitIssue[], cfg?: GitCfg, isNotify = true) {
+    console.log('UPDATE ISSUE FROM API');
+    this._gitApiService.getCompleteIssueDataForRepo(cfg.repo)
+      .pipe(
+        take(1)
+      ).subscribe(newIssues => {
+      oldIssues.forEach((oldIssue: GitIssue) => {
+        const matchingNewIssue: GitIssue = newIssues.find(newIssue => newIssue.id === oldIssue.id);
+        if (matchingNewIssue) {
+          const isNewComment = matchingNewIssue.comments.length !== (oldIssue.comments && oldIssue.comments.length);
+          const isIssueChanged = (matchingNewIssue.updated_at !== oldIssue.updated_at);
+          const wasUpdated = isNewComment || isIssueChanged;
+          if (isNewComment && isNotify) {
+            this._snackService.open({
+              icon: 'cloud_download',
+              message: `Git: New comment for ${matchingNewIssue.number} "${matchingNewIssue.title}"`
+            });
+          } else if (isIssueChanged && isNotify) {
+            this._snackService.open({
+              icon: 'cloud_download',
+              message: `Git: Update for ${matchingNewIssue.number} "${matchingNewIssue.title}"`
+            });
+          }
+
+          if (wasUpdated) {
+            this.update(oldIssue.id, {...matchingNewIssue, wasUpdated: true});
+          }
+        }
+
+        if (!matchingNewIssue && isNotify) {
+          this._snackService.open({
+            type: 'ERROR',
+            message: `Git: Issue ${oldIssue.number} "${oldIssue.title}" seems to be deleted on git`
+          });
+        }
+      });
     });
   }
 }

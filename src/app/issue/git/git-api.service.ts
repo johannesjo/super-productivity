@@ -32,11 +32,13 @@ export class GitApiService {
     });
   }
 
-  getCompleteIssueDataForRepo(repo = this._cfg.repo): Observable<GitIssue[]> {
-    this._checkSettings();
+  getCompleteIssueDataForRepo(repo = this._cfg.repo, isSkipCheck = false): Observable<GitIssue[]> {
+    if (!isSkipCheck) {
+      this._checkSettings();
+    }
     return combineLatest(
-      this._getAllIssuesForRepo(repo),
-      this._getAllCommentsForRepo(repo),
+      this._getAllIssuesForRepo(repo, isSkipCheck),
+      this._getAllCommentsForRepo(repo, isSkipCheck),
     ).pipe(
       take(1),
       map(([issues, comments]) => this._mergeIssuesAndComments(issues, comments)),
@@ -84,8 +86,10 @@ export class GitApiService {
     this._lastCacheUpdate = Date.now();
   }
 
-  private _getAllIssuesForRepo(repo = this._cfg.repo): Observable<GitIssue[]> {
-    this._checkSettings();
+  private _getAllIssuesForRepo(repo = this._cfg.repo, isSkipCheck = false): Observable<GitIssue[]> {
+    if (!isSkipCheck) {
+      this._checkSettings();
+    }
     return this._http.get(`${BASE}repos/${repo}/issues?per_page=100`)
       .pipe(
         catchError(this._handleRequestError.bind(this)),
@@ -93,15 +97,17 @@ export class GitApiService {
       );
   }
 
-  private _getAllCommentsForRepo(repo = this._cfg.repo): Observable<GitComment[]> {
-    this._checkSettings();
+  private _getAllCommentsForRepo(repo = this._cfg.repo, isSkipCheck = false): Observable<GitComment[]> {
+    if (!isSkipCheck) {
+      this._checkSettings();
+    }
     return combineLatest(
       // the last 500 should hopefully be enough
-      this._getCommentsPageForRepo(1, repo),
-      this._getCommentsPageForRepo(2, repo),
-      this._getCommentsPageForRepo(3, repo),
-      this._getCommentsPageForRepo(4, repo),
-      this._getCommentsPageForRepo(5, repo),
+      this._getCommentsPageForRepo(1, repo, isSkipCheck),
+      this._getCommentsPageForRepo(2, repo, isSkipCheck),
+      this._getCommentsPageForRepo(3, repo, isSkipCheck),
+      this._getCommentsPageForRepo(4, repo, isSkipCheck),
+      this._getCommentsPageForRepo(5, repo, isSkipCheck),
     )
       .pipe(
         catchError(this._handleRequestError.bind(this)),
@@ -109,8 +115,10 @@ export class GitApiService {
       );
   }
 
-  private _getCommentsPageForRepo(page = 1, repo = this._cfg.repo): Observable<GitComment[]> {
-    this._checkSettings();
+  private _getCommentsPageForRepo(page = 1, repo = this._cfg.repo, isSkipCheck = false): Observable<GitComment[]> {
+    if (!isSkipCheck) {
+      this._checkSettings();
+    }
     return this._http.get(`${BASE}repos/${repo}/issues/comments?sort=created&direction=desc&per_page=100&page=${page}`)
       .pipe(
         catchError(this._handleRequestError.bind(this)),

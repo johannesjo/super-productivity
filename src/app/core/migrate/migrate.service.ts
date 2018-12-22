@@ -20,6 +20,8 @@ import { GitIssue } from '../../issue/git/git-issue/git-issue.model';
 import { IssueProviderKey } from '../../issue/issue';
 import { GitCfg } from '../../issue/git/git';
 import { DEFAULT_GIT_CFG } from '../../issue/git/git.const';
+import { GitApiService } from '../../issue/git/git-api.service';
+import { first } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
@@ -37,6 +39,7 @@ export class MigrateService {
     private _persistenceService: PersistenceService,
     private _syncService: SyncService,
     private _projectService: ProjectService,
+    private _gitApiService: GitApiService,
   ) {
   }
 
@@ -105,8 +108,36 @@ export class MigrateService {
       }
     });
 
+    const allTasks = op.data.tasks.concat(op.data.backlogTasks, op.data.doneBacklogTasks);
+
+    const jiraIssueState = this._getJiraIssuesFromTasks(allTasks);
+    if (jiraIssueState) {
+      await this._persistenceService.saveIssuesForProject(op.id, 'JIRA', jiraIssueState);
+    }
+    let gitIssueState = this._getGitIssuesFromTasks(allTasks);
+    let freshIssues;
+
+    if (gitIssueState) {
+      const issueNumbers = gitIssueState.ids as number[];
+      if (op.data.git.repo) {
+        try {
+          gitIssueState = await this._getFreshIssueState(op.data.git.repo, issueNumbers);
+          const ids = gitIssueState.ids as number[];
+          freshIssues = ids.map(id => gitIssueState.entities[id]);
+        } catch (e) {
+          console.error('unable to refresh issue data', e);
+        }
+        await this._persistenceService.saveIssuesForProject(op.id, 'GIT', gitIssueState);
+      }
+    }
+
+    // TASKS
     const todayIds = op.data.tasks.map(t => t.id);
     const backlogIds = op.data.backlogTasks.map(t => t.id);
+
+    if (freshIssues) {
+      this._remapGitIssueIds(allTasks, freshIssues);
+    }
 
     const taskState = this._transformTasks(op.data.tasks.concat(op.data.backlogTasks));
     await this._persistenceService.saveTasksForProject(op.id, {
@@ -118,18 +149,32 @@ export class MigrateService {
 
     const doneTaskState = this._transformTasks(op.data.doneBacklogTasks);
     await this._persistenceService.saveToTaskArchiveForProject(op.id, doneTaskState);
-
-    const jiraIssueState = this._getJiraIssuesFromTasks(op.data.tasks.concat(op.data.backlogTasks, op.data.doneBacklogTasks));
-    if (jiraIssueState) {
-      await this._persistenceService.saveIssuesForProject(op.id, 'JIRA', jiraIssueState);
-    }
-    const gitIssueState = this._getGitIssuesFromTasks(op.data.tasks.concat(op.data.backlogTasks, op.data.doneBacklogTasks));
-    if (gitIssueState) {
-      await this._persistenceService.saveIssuesForProject(op.id, 'GIT', gitIssueState);
-    }
   }
 
-  private _getGitIssuesFromTasks(oldTasks: OldTask[]): EntityState<JiraIssue> | null {
+  private _remapGitIssueIds(tasks: OldTask[], freshIssues: GitIssue[]) {
+    tasks.forEach((task) => {
+      if (task && task.originalId && task.originalType === 'GITHUB') {
+        task.originalId = freshIssues.find(issue => issue.number.toString() === task.originalId.toString()).id.toString();
+      }
+    });
+  }
+
+  private async _getFreshIssueState(repo: string, issueNumbers: number[]): Promise<EntityState<GitIssue>> {
+    const refreshedIssues = await this._gitApiService.getCompleteIssueDataForRepo(repo, true).pipe(first()).toPromise();
+    const freshMappedIssues = refreshedIssues.filter(issue => issueNumbers.includes(issue.number));
+
+    return {
+      entities: freshMappedIssues.reduce((acc, issue) => {
+        return {
+          ...acc,
+          [issue.id]: issue
+        };
+      }, {}),
+      ids: freshMappedIssues.map(issue => issue.id),
+    };
+  }
+
+  private _getGitIssuesFromTasks(oldTasks: OldTask[]): EntityState<GitIssue> | null {
     const flatTasks = oldTasks
       .filter(t => !!t)
       .reduce((acc, t) => acc.concat(t.subTasks, [t]), [])
