@@ -65,7 +65,7 @@ export class GitIssueEffects {
       withLatestFrom(
         this._store$.pipe(select(selectAllTasks)),
       ),
-      tap(this._addNewIssuesToBacklog.bind(this))
+      tap(this._importNewIssuesToBacklog.bind(this))
     );
 
   private _pollingIntervalId: number;
@@ -90,16 +90,18 @@ export class GitIssueEffects {
     }
   }
 
-  private _addNewIssuesToBacklog([action, allTasks]: [Actions, Task[]]) {
-
+  private _importNewIssuesToBacklog([action, allTasks]: [Actions, Task[]]) {
     this._gitApiService.getCompleteIssueDataForRepo().subscribe(issues => {
+      let count = 0;
+      let lastImportedIssue;
       issues.forEach(issue => {
         const isIssueAlreadyImported = allTasks.find(task => {
           return task.issueType === 'GIT' && task.issueId.toString() === issue.id.toString();
         });
 
         if (!isIssueAlreadyImported) {
-          console.log('add ', issue.id, issue);
+          count++;
+          lastImportedIssue = issue;
           this._taskService.addWithIssue(
             `#${issue.number} ${issue.title}`,
             'GIT',
@@ -108,6 +110,18 @@ export class GitIssueEffects {
           );
         }
       });
+
+      if (count === 1) {
+        this._snackService.open({
+          message: `Git: Imported issue "#${lastImportedIssue.number} ${lastImportedIssue.title}" from git to backlog`,
+          icon: 'cloud_download'
+        });
+      } else if (count > 1) {
+        this._snackService.open({
+          message: `Git: Imported ${count} new issues from git to backlog`,
+          icon: 'cloud_download'
+        });
+      }
     });
   }
 
