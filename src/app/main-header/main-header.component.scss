@@ -9,10 +9,13 @@ $navBpShrinking: 900px;
 $mobileHorizontalPadding: 8px;
 
 .project-btn {
-  flex: 1;
   min-width: 0;
   overflow: hidden;
   max-width: 200px;
+
+  @media (max-width: $navBp2Lines) {
+    flex: 1;
+  }
 
   ::ng-deep .mat-button-wrapper {
     display: flex;
