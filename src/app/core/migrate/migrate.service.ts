@@ -7,7 +7,7 @@ import { LS_IS_V1_MIGRATE } from '../persistence/ls-keys.const';
 import { SnackService } from '../snack/snack.service';
 import { PersistenceService } from '../persistence/persistence.service';
 import { SyncService } from '../sync/sync.service';
-import { OldJiraSettings, OldProject, OldTask } from './migrate.model';
+import { OldGitSettings, OldJiraSettings, OldProject, OldTask } from './migrate.model';
 import { ProjectService } from '../../project/project.service';
 import { JiraCfg } from '../../issue/jira/jira';
 import { DEFAULT_JIRA_CFG } from '../../issue/jira/jira.const';
@@ -16,11 +16,20 @@ import { EntityState } from '@ngrx/entity';
 import { DEFAULT_TASK, Task } from '../../tasks/task.model';
 import * as moment from 'moment';
 import { JiraIssue } from '../../issue/jira/jira-issue/jira-issue.model';
+import { GitIssue } from '../../issue/git/git-issue/git-issue.model';
+import { IssueProviderKey } from '../../issue/issue';
+import { GitCfg } from '../../issue/git/git';
+import { DEFAULT_GIT_CFG } from '../../issue/git/git.const';
 
 @Injectable({
   providedIn: 'root'
 })
 export class MigrateService {
+
+  private _issueTypeMap = {
+    'GITHUB': 'GIT',
+    'JIRA': 'JIRA',
+  };
 
   constructor(
     private _matDialog: MatDialog,
@@ -90,7 +99,9 @@ export class MigrateService {
         JIRA: (op.data.jiraSettings && op.data.jiraSettings.isJiraEnabled)
           ? this._transformJiraCfg(op.data.jiraSettings)
           : null,
-        // GIT: {},
+        GIT: (op.data.git && op.data.git.repo)
+          ? this._transformGitCfg(op.data.git)
+          : null,
       }
     });
 
@@ -108,10 +119,40 @@ export class MigrateService {
     const doneTaskState = this._transformTasks(op.data.doneBacklogTasks);
     await this._persistenceService.saveToTaskArchiveForProject(op.id, doneTaskState);
 
-    const issueState = this._getJiraIssuesFromTasks(op.data.tasks.concat(op.data.backlogTasks, op.data.doneBacklogTasks));
-    if (issueState) {
-      await this._persistenceService.saveIssuesForProject(op.id, 'JIRA', issueState);
+    const jiraIssueState = this._getJiraIssuesFromTasks(op.data.tasks.concat(op.data.backlogTasks, op.data.doneBacklogTasks));
+    if (jiraIssueState) {
+      await this._persistenceService.saveIssuesForProject(op.id, 'JIRA', jiraIssueState);
     }
+    const gitIssueState = this._getGitIssuesFromTasks(op.data.tasks.concat(op.data.backlogTasks, op.data.doneBacklogTasks));
+    if (gitIssueState) {
+      await this._persistenceService.saveIssuesForProject(op.id, 'GIT', gitIssueState);
+    }
+  }
+
+  private _getGitIssuesFromTasks(oldTasks: OldTask[]): EntityState<JiraIssue> | null {
+    const flatTasks = oldTasks
+      .filter(t => !!t)
+      .reduce((acc, t) => acc.concat(t.subTasks, [t]), [])
+      .filter(t => !!t);
+    const transformedIssues = flatTasks
+      .filter(t => {
+        return t.originalId && t.originalType === 'GITHUB';
+      })
+      .map(this._transformGitIssue);
+
+    if (!transformedIssues || !transformedIssues.length) {
+      return null;
+    }
+
+    return {
+      entities: transformedIssues.reduce((acc, issue) => {
+        return {
+          ...acc,
+          [issue.id]: issue
+        };
+      }, {}),
+      ids: transformedIssues.map(issue => issue.id),
+    };
   }
 
   private _getJiraIssuesFromTasks(oldTasks: OldTask[]): EntityState<JiraIssue> | null {
@@ -138,6 +179,40 @@ export class MigrateService {
     };
   }
 
+
+  private _transformGitIssue(ot: OldTask): GitIssue {
+    return {
+      // copied data
+      id: +ot.originalId,
+      number: +ot.originalId,
+      title: ot.title,
+      body: ot.notes,
+      url: ot.originalLink,
+      state: ot.originalStatus,
+      repository_url: null,
+      labels_url: null,
+      comments_url: null,
+      events_url: null,
+      html_url: null,
+      user: null,
+      labels: [],
+      assignee: null,
+      milestone: null,
+      locked: false,
+      active_lock_reason: null,
+      pull_request: null,
+      closed_at: null,
+      created_at: null,
+      updated_at: null,
+
+      // added
+      wasUpdated: false,
+      commentsNr: 0,
+      apiUrl: null,
+      comments: [],
+    };
+  }
+
   private _transformJiraIssue(ot: OldTask): JiraIssue {
     return {
       // copied data
@@ -159,7 +234,6 @@ export class MigrateService {
 
       // new properties
       comments: [],
-      wasUpdated: false,
     };
   }
 
@@ -197,7 +271,7 @@ export class MigrateService {
       title: ot.title,
       id: ot.id,
       issueId: ot.originalId,
-      issueType: ot.originalType,
+      issueType: this._issueTypeMap[ot.originalType] as IssueProviderKey,
       isDone: ot.isDone,
       notes: ot.notes,
       subTaskIds: (ot.subTasks && ot.subTasks.length > 0) ? ot.subTasks.map(t => t.id) : [],
@@ -221,6 +295,16 @@ export class MigrateService {
 
   private _transformMomentDurationStrToMs(momStr: string): number {
     return moment.duration(momStr).asMilliseconds();
+  }
+
+  private _transformGitCfg(oldCfg: OldGitSettings): GitCfg {
+    return {
+      ...DEFAULT_GIT_CFG,
+      repo: oldCfg.repo,
+      isSearchIssuesFromGit: oldCfg.isShowIssuesFromGit,
+      isAutoPoll: oldCfg.isAutoImportToBacklog,
+      isAutoAddToBacklog: oldCfg.isAutoImportToBacklog,
+    };
   }
 
   private _transformJiraCfg(oldCfg: OldJiraSettings): JiraCfg {

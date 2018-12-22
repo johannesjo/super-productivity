@@ -14,7 +14,7 @@ export interface OldTask {
   notes?: string;
 
   originalId?: string;
-  originalType?: 'JIRA' | 'GIT';
+  originalType?: 'JIRA' | 'GITHUB';
 
   // NOT MIGRATED
   originalAssigneeKey?: string;
@@ -38,6 +38,15 @@ export interface OldTask {
   showNotes?: false;
   started?: string;
   status?: string;
+}
+
+
+export interface OldGitSettings {
+  isShowIssuesFromGit: boolean;
+  isAutoImportToBacklog: boolean;
+  repo: string;
+  projectDir: string;
+  prPrefix: string;
 }
 
 export interface OldJiraSettings {
