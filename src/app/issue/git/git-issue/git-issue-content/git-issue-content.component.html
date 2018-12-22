@@ -1,6 +1,8 @@
-<div style="text-align: center;">
+<div style="text-align: center;"
+     *ngIf="issueData?.wasUpdated"
+     @expand>
   <button mat-raised-button
-          *ngIf="issueData?.wasUpdated"
+
           color="accent"
           (click)="hideUpdates()">
     Mark updates as checked
@@ -47,7 +49,7 @@
         <div class="comment"
              *ngFor="let comment of issueData?.comments">
           <!--<img [src]="comment.author.avatarUrl"-->
-               <!--class="author-avatar">-->
+          <!--class="author-avatar">-->
           <div class="name-and-comment-content">
             <div><span class="author-name">{{comment.user?.login}}</span>
               <span class="when">at {{comment.created_at|date:'short'}}</span>

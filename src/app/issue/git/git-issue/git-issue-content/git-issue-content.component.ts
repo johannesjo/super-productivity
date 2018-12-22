@@ -3,12 +3,14 @@ import { TaskWithSubTasks } from '../../../../tasks/task.model';
 import { GitIssueService } from '../git-issue.service';
 import { GitApiService } from '../../git-api.service';
 import { GitIssue } from '../git-issue.model';
+import { expandAnimation } from '../../../../ui/animations/expand.ani';
 
 @Component({
   selector: 'git-issue-content',
   templateUrl: './git-issue-content.component.html',
   styleUrls: ['./git-issue-content.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  animations: [expandAnimation]
 })
 export class GitIssueContentComponent implements OnInit {
   taskData: TaskWithSubTasks;
@@ -36,6 +38,6 @@ export class GitIssueContentComponent implements OnInit {
   }
 
   hideUpdates() {
-    this._gitIssueService.update(+this.task.issueId, {wasUpdated: false});
+    this._gitIssueService.update(+this.taskData.issueId, {wasUpdated: false});
   }
 }

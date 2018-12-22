@@ -101,7 +101,7 @@ export class GitIssueEffects {
         if (!matchingNewIssue) {
           this._snackService.open({
             type: 'ERROR',
-            message: `Git: Issue ${matchingNewIssue.number} "${matchingNewIssue.title}" seems to be deleted on git`
+            message: `Git: Issue ${oldIssue.number} "${oldIssue.title}" seems to be deleted on git`
           });
         } else {
           const isNewComment = matchingNewIssue.comments.length !== (oldIssue.comments && oldIssue.comments.length);
