@@ -8,7 +8,6 @@ import { IssueProviderKey } from '../../../issue';
 export const GIT_ISSUE_FEATURE_NAME: IssueProviderKey = 'GIT';
 
 export interface GitIssueState extends EntityState<GitIssue> {
-  cachedIssues: GitIssue[];
 }
 
 export const gitIssueAdapter: EntityAdapter<GitIssue> = createEntityAdapter<GitIssue>();
@@ -30,7 +29,6 @@ export const selectGitIssueTotal = createSelector(selectGitIssueFeatureState, se
 // REDUCER
 // -------
 export const initialGitIssueState: GitIssueState = gitIssueAdapter.getInitialState({
-  cachedIssues: [],
 });
 
 export function gitIssueReducer(
@@ -58,6 +56,17 @@ export function gitIssueReducer(
       }
       return state;
     }
+
+
+    // case TaskActionTypes.DeleteTask: {
+    //   // const taskId = action.payload.
+    //
+    //   if (action.payload.task.issueType === 'GIT') {
+    //     const issue = action.payload.issue as GitIssue;
+    //     return gitIssueAdapter.upsertOne({...issue, taskId: action.payload.task.id}, state);
+    //   }
+    //   return state;
+    // }
 
     // GitIssue Actions
     // ------------

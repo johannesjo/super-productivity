@@ -4,20 +4,23 @@ import { GitCfg } from './git';
 import { SnackService } from '../../core/snack/snack.service';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { GIT_API_BASE_URL } from './git.const';
-import { combineLatest, Observable, ObservableInput, throwError } from 'rxjs';
+import { combineLatest, from, Observable, ObservableInput, throwError } from 'rxjs';
 import { GitOriginalIssue } from './git-api-responses';
-import { catchError, map, take } from 'rxjs/operators';
+import { catchError, map, share, take } from 'rxjs/operators';
 import { mapGitIssue, mapGitIssueToSearchResult } from './git-issue/git-issue-map.util';
 import { GitComment, GitIssue } from './git-issue/git-issue.model';
 import { SearchResultItem } from '../issue';
 
 const BASE = GIT_API_BASE_URL;
+const MAX_CACHE_AGE = 60 * 5 * 1000;
 
 @Injectable({
   providedIn: 'root'
 })
 export class GitApiService {
   private _cfg: GitCfg;
+  private _cachedIssues: GitIssue[];
+  private _lastCacheUpdate: number;
 
   constructor(
     private _projectService: ProjectService,
@@ -26,11 +29,15 @@ export class GitApiService {
   ) {
     this._projectService.currentGitCfg$.subscribe((cfg: GitCfg) => {
       this._cfg = cfg;
-      if (this._cfg) {
-        // this.getCompleteIssueDataForRepo().subscribe(res => console.log(res));
-        // this.getAllIssuesForRepo();
-      }
+      // this.getCompleteIssueDataForRepo().subscribe(issues => {
+      // console.log(issues);
+      // });
     });
+    // TODO move to project effect?
+    this._projectService.currentId$.subscribe(() => {
+      this._refreshIssuesCache();
+    });
+
   }
 
   getCompleteIssueDataForRepo(repo = this._cfg.repo): Observable<GitIssue[]> {
@@ -48,18 +55,42 @@ export class GitApiService {
   // TODO move to jira-issue-service
   searchIssueForRepo(searchText: string, repo = this._cfg.repo): Observable<SearchResultItem[]> {
     this._checkSettings();
-    return this.getCompleteIssueDataForRepo(repo)
-      .pipe(
-        catchError(this._handleRequestError.bind(this)),
-        map((issues: GitIssue[]) =>
+    if (this._cachedIssues && this._cachedIssues.length && (this._lastCacheUpdate + MAX_CACHE_AGE > Date.now())) {
+      return from([this._cachedIssues.map(mapGitIssueToSearchResult)]);
+    } else {
+      const completeIssues$ = this.getCompleteIssueDataForRepo(repo)
+        .pipe(
+          catchError(this._handleRequestError.bind(this)),
+          // a single request should suffice
+          share(),
+          // tap(issues => console.log(issues)),
+        );
+
+      // update cache
+      completeIssues$.pipe(take(1)).subscribe(issues => this._updateIssueCache(issues));
+
+      return completeIssues$.pipe(map((issues: GitIssue[]) =>
           issues.filter(issue =>
             issue.title.toLowerCase().match(searchText.toLowerCase())
             || issue.body.toLowerCase().match(searchText.toLowerCase())
           )
             .map(mapGitIssueToSearchResult)
         ),
-        // tap(issues => console.log(issues)),
       );
+    }
+  }
+
+  private _refreshIssuesCache() {
+    if (this._isValidSettings()) {
+      this.getCompleteIssueDataForRepo().subscribe(issues => {
+        this._updateIssueCache(issues);
+      });
+    }
+  }
+
+  private _updateIssueCache(issues: GitIssue[]) {
+    this._cachedIssues = issues;
+    this._lastCacheUpdate = Date.now();
   }
 
   private _getAllIssuesForRepo(repo = this._cfg.repo): Observable<GitIssue[]> {
