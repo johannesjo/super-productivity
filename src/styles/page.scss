@@ -20,7 +20,7 @@ app-root,
 }
 
 
-a[href] {
+a[href]:not(.mat-icon-button) {
   color: $c-accent;
 }
 

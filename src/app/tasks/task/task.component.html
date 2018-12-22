@@ -1,11 +1,12 @@
 <div class="inner-wrapper bg-standard"
      [class.bg-600]="isCurrent"
      [class.color-contrast]="isCurrent"
+     [class.fg-standard]="!isCurrent"
      [class.isCurrent]="isCurrent"
      [class.isDone]="task.isDone"
      [class.isAdditionalInfoOpen]="task._isAdditionalInfoOpen">
 
-  <div class="first-line fg-standard">
+  <div class="first-line">
     <button mat-icon-button=""
             class="check-done"
             *ngIf="task.isDone"
