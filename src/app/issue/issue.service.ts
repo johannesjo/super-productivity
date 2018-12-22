@@ -6,7 +6,7 @@ import { JiraApiService } from './jira/jira-api.service';
 import { GitApiService } from './git/git-api.service';
 import { combineLatest, from, Observable, zip } from 'rxjs';
 import { ProjectService } from '../project/project.service';
-import { map, switchMap } from 'rxjs/operators';
+import { map, switchMap, take } from 'rxjs/operators';
 import { JiraIssueService } from './jira/jira-issue/jira-issue.service';
 import { GitIssueService } from './git/git-issue/git-issue.service';
 
@@ -14,11 +14,15 @@ import { GitIssueService } from './git/git-issue/git-issue.service';
   providedIn: 'root'
 })
 export class IssueService {
-  public isRemoteSearchEnabled: boolean;
-  public isRemoteSearchEnabled$: Observable<boolean> = combineLatest(
-    this._projectService.currentJiraCfg$,
-    this._projectService.currentGitCfg$,
-  ).pipe(map(([jiraCfg, gitCfg]) => (jiraCfg && jiraCfg.isEnabled) || (gitCfg && gitCfg.isShowIssuesFromGit)));
+  public isJiraSearchEnabled$: Observable<boolean> = this._projectService.currentJiraCfg$.pipe(
+    map(jiraCfg => jiraCfg && jiraCfg.isEnabled)
+  );
+  public isGitSearchEnabled$: Observable<boolean> = this._projectService.currentGitCfg$.pipe(
+    map(gitCfg => gitCfg && gitCfg.isSearchIssuesFromGit)
+  );
+  public isRefreshIssueDataForGit$: Observable<boolean> = this._projectService.currentGitCfg$.pipe(
+    map(gitCfg => gitCfg && (gitCfg.isSearchIssuesFromGit || gitCfg.isAutoAddToBacklog || gitCfg.isAutoPoll))
+  );
 
   constructor(
     private _jiraApiService: JiraApiService,
@@ -27,7 +31,6 @@ export class IssueService {
     private _gitIssueService: GitIssueService,
     private _projectService: ProjectService,
   ) {
-    this.isRemoteSearchEnabled$.subscribe(val => this.isRemoteSearchEnabled = val);
   }
 
 
@@ -38,28 +41,35 @@ export class IssueService {
     ]);
   }
 
+  public refreshIssueData() {
+    this.isRefreshIssueDataForGit$.pipe(
+      take(1),
+    ).subscribe((isRefreshGit) => {
+      if (isRefreshGit) {
+        this._gitApiService.refreshIssuesCache();
+      }
+    });
+  }
+
   public searchIssues(searchTerm: string): Observable<SearchResultItem[]> {
-    if (!this.isRemoteSearchEnabled) {
-      return from([[]]);
-    }
-
     return combineLatest(
-      this._projectService.currentJiraCfg$,
-      this._projectService.currentGitCfg$,
+      this.isJiraSearchEnabled$,
+      this.isGitSearchEnabled$,
     ).pipe(
-      switchMap(([jiraCfg, gitCfg]) => {
+      switchMap(([isSearchJira, isSearchGit]) => {
         const obs = [];
+        obs.push(from([[]]));
 
-        if (jiraCfg && jiraCfg.isEnabled) {
+        if (isSearchJira) {
           obs.push(this._jiraApiService.search(searchTerm, false, 50)
             .catch(() => {
               return [];
             }));
         }
-        if (gitCfg && gitCfg.isShowIssuesFromGit && gitCfg.repo) {
+
+        if (isSearchGit) {
           obs.push(this._gitApiService.searchIssueForRepo(searchTerm));
         }
-        console.log(obs);
 
         return zip(...obs, (...allResults) => [].concat(...(allResults)));
       })

@@ -1,5 +1,5 @@
 export interface GitCfg {
-  isShowIssuesFromGit: boolean;
+  isSearchIssuesFromGit: boolean;
   isAutoAddToBacklog: boolean;
   isAutoPoll: boolean;
   repo: string;

@@ -35,7 +35,7 @@ export class GitApiService {
     });
     // TODO move to project effect?
     this._projectService.currentId$.subscribe(() => {
-      this._refreshIssuesCache();
+      this.refreshIssuesCache();
     });
 
   }
@@ -80,7 +80,7 @@ export class GitApiService {
     }
   }
 
-  private _refreshIssuesCache() {
+  refreshIssuesCache() {
     if (this._isValidSettings()) {
       this.getCompleteIssueDataForRepo().subscribe(issues => {
         this._updateIssueCache(issues);

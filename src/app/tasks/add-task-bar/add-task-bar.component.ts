@@ -1,7 +1,7 @@
 import { AfterViewInit, Component, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { TaskService } from '../task.service';
-import { debounceTime, switchMap, takeUntil, tap } from 'rxjs/operators';
+import { debounceTime, switchMap, takeUntil } from 'rxjs/operators';
 import { JiraIssue } from '../../issue/jira/jira-issue/jira-issue.model';
 import { Subject } from 'rxjs';
 import { IssueService } from '../../issue/issue.service';
@@ -53,13 +53,9 @@ export class AddTaskBarComponent implements OnInit, OnDestroy, AfterViewInit {
 
     this.taskSuggestionsCtrl.valueChanges.pipe(
       debounceTime(400),
-      tap(() => {
-        if (this._issueService.isRemoteSearchEnabled) {
-          this.isLoading = true;
-        }
-      }),
       switchMap((searchTerm) => {
-        if (searchTerm && searchTerm.length > 1 && this._issueService.isRemoteSearchEnabled) {
+        if (searchTerm && searchTerm.length > 1) {
+          this.isLoading = true;
           return this._issueService.searchIssues(searchTerm);
         } else {
           // Note: the outer array signifies the observable stream the other is the value
@@ -69,6 +65,8 @@ export class AddTaskBarComponent implements OnInit, OnDestroy, AfterViewInit {
       takeUntil(this.destroy$)
     )
       .subscribe((val) => {
+        console.log('sub', val);
+
         this.isLoading = false;
         this.filteredIssueSuggestions = val;
       });

@@ -4,7 +4,7 @@ import { FormlyFieldConfig } from '@ngx-formly/core';
 
 export const DEFAULT_GIT_CFG: GitCfg = {
   repo: null,
-  isShowIssuesFromGit: false,
+  isSearchIssuesFromGit: false,
   isAutoPoll: false,
   isAutoAddToBacklog: false,
 };
@@ -23,7 +23,7 @@ export const GIT_CONFIG_FORM: FormlyFieldConfig[] = [
     },
   },
   {
-    key: 'isShowIssuesFromGit',
+    key: 'isSearchIssuesFromGit',
     type: 'checkbox',
     templateOptions: {
       label: 'Show issues from git as suggestions when adding new tasks',
