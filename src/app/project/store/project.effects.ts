@@ -6,7 +6,6 @@ import { ProjectActionTypes } from './project.actions';
 import { selectCurrentProjectId, selectProjectFeatureState } from './project.reducer';
 import { PersistenceService } from '../../core/persistence/persistence.service';
 import { TaskService } from '../../tasks/task.service';
-import { JiraIssueService } from '../../issue/jira/jira-issue/jira-issue.service';
 import { BookmarkService } from '../../bookmark/bookmark.service';
 import { AttachmentService } from '../../attachment/attachment.service';
 import { NoteService } from '../../note/note.service';
@@ -29,6 +28,20 @@ export class ProjectEffects {
       ),
       tap(this._saveToLs.bind(this))
     );
+
+
+  @Effect({dispatch: false}) updateLastActive$: any = this._actions$
+    .pipe(
+      ofType(
+        ProjectActionTypes.AddProject,
+        ProjectActionTypes.DeleteProject,
+        ProjectActionTypes.UpdateProject,
+        ProjectActionTypes.UpdateProjectAdvancedCfg,
+        ProjectActionTypes.UpdateProjectIssueProviderCfg,
+      ),
+      tap(this._persistenceService.saveLastActive.bind(this))
+    );
+
 
   @Effect({dispatch: false}) onProjectIdChange$: any = this._actions$
     .pipe(
@@ -55,12 +68,12 @@ export class ProjectEffects {
   }
 
   private _saveToLs([action, projectFeatureState]) {
-    this._persistenceService.saveLastActive();
     this._persistenceService.saveProjectsMeta(projectFeatureState);
   }
 
   private _reloadRelatedStates([action, projectId]) {
     this._issueService.loadStatesForProject(projectId);
+    this._issueService.refreshIssueData();
     this._taskService.loadStateForProject(projectId);
     this._noteService.loadStateForProject(projectId);
     this._bookmarkService.loadStateForProject(projectId);
