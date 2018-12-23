@@ -88,43 +88,10 @@ export class JiraIssueEffects {
       this._pollingIntervalId = window.setInterval(() => {
         // TODO remove
         this._snackService.open({message: 'Jira: Polling Changes for issues', icon: 'cloud_download'});
-        issueIds.forEach((id) => this._updateIssueFromApi(id, entities[id]));
+        issueIds.forEach((id) => this._jiraIssueService.updateIssueFromApi(id, entities[id]));
       }, JIRA_POLL_INTERVAL);
     }
   }
 
-  private _updateIssueFromApi(issueId, oldIssueData: JiraIssue) {
-    this._jiraApiService.getIssueById(issueId, true)
-      .then((updatedIssue) => {
-        const oldCommentLength = oldIssueData && oldIssueData.comments && oldIssueData.comments.length;
-        const newCommentLength = updatedIssue && updatedIssue.comments && updatedIssue.comments.length;
-        const isCommentsChanged = (oldCommentLength !== newCommentLength);
-
-        if (updatedIssue.updated !== oldIssueData.updated || isCommentsChanged) {
-          const lastUpdate = oldIssueData.lastUpdateFromRemote && new Date(oldIssueData.lastUpdateFromRemote);
-          const changelog: JiraChangelogEntry[] = updatedIssue.changelog.filter(
-            entry => !lastUpdate || new Date(entry.created) > lastUpdate
-          );
-
-          if (isCommentsChanged) {
-            changelog.unshift({
-              created: lastUpdate.toISOString(),
-              author: null,
-              field: 'Comments',
-              from: oldCommentLength.toString(),
-              to: newCommentLength.toString(),
-            });
-          }
-
-          this._jiraIssueService.update(issueId, {
-            ...updatedIssue,
-            changelog,
-            lastUpdateFromRemote: updatedIssue.updated,
-            wasUpdated: true
-          });
-          this._snackService.open({message: `Jira: ${updatedIssue.key} was updated`, icon: 'cloud_download'});
-        }
-      });
-  }
 }
 

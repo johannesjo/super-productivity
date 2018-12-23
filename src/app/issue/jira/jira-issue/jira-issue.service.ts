@@ -1,11 +1,14 @@
 import { Injectable } from '@angular/core';
-import { JiraIssue } from './jira-issue.model';
+import { JiraChangelogEntry, JiraIssue } from './jira-issue.model';
 import { Store } from '@ngrx/store';
 import { JiraIssueActionTypes } from './store/jira-issue.actions';
 import { PersistenceService } from '../../../core/persistence/persistence.service';
 import { JiraIssueState } from './store/jira-issue.reducer';
 import { mapJiraAttachmentToAttachment } from './jira-issue-map.util';
 import { Attachment } from '../../../attachment/attachment.model';
+import { JiraApiService } from '../jira-api.service';
+import { SnackService } from '../../../core/snack/snack.service';
+import { IssueData } from '../../issue';
 
 
 @Injectable()
@@ -16,6 +19,8 @@ export class JiraIssueService {
   constructor(
     private readonly _store: Store<any>,
     private readonly _persistenceService: PersistenceService,
+    private readonly _jiraApiService: JiraApiService,
+    private readonly _snackService: SnackService,
   ) {
   }
 
@@ -78,6 +83,42 @@ export class JiraIssueService {
   }
 
   // HELPER
+  updateIssueFromApi(issueId, oldIssueData_: IssueData) {
+    const oldIssueData = oldIssueData_ as JiraIssue;
+
+    this._jiraApiService.getIssueById(issueId, true)
+      .then((updatedIssue) => {
+        const oldCommentLength = oldIssueData && oldIssueData.comments && oldIssueData.comments.length;
+        const newCommentLength = updatedIssue && updatedIssue.comments && updatedIssue.comments.length;
+        const isCommentsChanged = (oldCommentLength !== newCommentLength);
+
+        if (updatedIssue.updated !== oldIssueData.updated || isCommentsChanged) {
+          const lastUpdate = oldIssueData.lastUpdateFromRemote && new Date(oldIssueData.lastUpdateFromRemote);
+          const changelog: JiraChangelogEntry[] = updatedIssue.changelog.filter(
+            entry => !lastUpdate || new Date(entry.created) > lastUpdate
+          );
+
+          if (isCommentsChanged) {
+            changelog.unshift({
+              created: lastUpdate.toISOString(),
+              author: null,
+              field: 'Comments',
+              from: oldCommentLength.toString(),
+              to: newCommentLength.toString(),
+            });
+          }
+
+          this.update(issueId, {
+            ...updatedIssue,
+            changelog,
+            lastUpdateFromRemote: updatedIssue.updated,
+            wasUpdated: true
+          });
+          this._snackService.open({message: `Jira: ${updatedIssue.key} was updated`, icon: 'cloud_download'});
+        }
+      });
+  }
+
   getMappedAttachmentsFromIssue(issueData: JiraIssue) {
     return issueData && issueData.attachments && issueData.attachments.map(mapJiraAttachmentToAttachment) as Attachment[];
   }

@@ -78,12 +78,11 @@ export class IssueService {
   }
 
 
-  public refreshIssue(issueType: IssueProviderKey, issueId: string | number) {
+  public refreshIssue(issueType: IssueProviderKey, issueId: string | number, issueData: IssueData) {
     switch (issueType) {
-      // case 'JIRA': {
-      //   const issueData = issueData_ as JiraIssue;
-      //   return this._jiraIssueService.getMappedAttachmentsFromIssue(issueData);
-      // }
+      case 'JIRA': {
+        return this._jiraIssueService.updateIssueFromApi(issueId, issueData);
+      }
       case 'GIT': {
         this._gitIssueService.updateIssueFromApi(issueId);
       }

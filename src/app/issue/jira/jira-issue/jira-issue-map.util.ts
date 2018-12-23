@@ -44,6 +44,7 @@ export const mapIssue = (issue: JiraIssueOriginal, cfg: JiraCfg): JiraIssue => {
     description: fields.description,
     summary: fields.summary,
     updated: fields.updated,
+    lastUpdateFromRemote: Date.now(),
     status: fields.status,
     attachments: fields.attachment && fields.attachment.map(mapAttachment),
     comments: fields.comment && fields.comment.comments.map(mapComments),
@@ -101,6 +102,10 @@ export const mapJiraAttachmentToAttachment = (jiraAttachment: JiraAttachment) =>
 
 export const mapChangelog = (changelog: JiraOriginalChangelog): JiraChangelogEntry[] => {
   const newChangelog = [];
+  if (!changelog) {
+    return [];
+  }
+
   changelog.histories.forEach(entry => {
     entry.items.forEach(item => {
       newChangelog.push({
