@@ -193,6 +193,16 @@
           <mat-icon aria-label="add sub task">playlist_add</mat-icon>
           Add sub task
         </button>
+
+        <button mat-menu-item=""
+                tabindex="2"
+                aria-label="update issue data"
+                *ngIf="task.issueId"
+                (click)="updateIssueData()">
+          <mat-icon>cloud_download</mat-icon>
+          Update issue data
+        </button>
+
         <button mat-menu-item=""
                 tabindex="2"
                 aria-label="delete"

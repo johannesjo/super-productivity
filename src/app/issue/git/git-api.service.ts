@@ -5,7 +5,7 @@ import { SnackService } from '../../core/snack/snack.service';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { GIT_API_BASE_URL } from './git.const';
 import { combineLatest, from, Observable, ObservableInput, throwError } from 'rxjs';
-import { GitOriginalIssue } from './git-api-responses';
+import { GitOriginalComment, GitOriginalIssue } from './git-api-responses';
 import { catchError, map, share, take } from 'rxjs/operators';
 import { mapGitIssue, mapGitIssueToSearchResult } from './git-issue/git-issue-map.util';
 import { GitComment, GitIssue } from './git-issue/git-issue.model';
@@ -79,6 +79,23 @@ export class GitApiService {
         this._updateIssueCache(issues);
       });
     }
+  }
+
+  getIssueWithCommentsByIssueNumber(issueNumber: number): Observable<GitIssue> {
+    this._checkSettings();
+    return combineLatest(
+      this._http.get(`${BASE}repos/${this._cfg.repo}/issues/${issueNumber}`),
+      this._http.get(`${BASE}repos/${this._cfg.repo}/issues/${issueNumber}/comments`),
+    ).pipe(
+      catchError(this._handleRequestError.bind(this)),
+      map(([issue, comments]: [GitOriginalIssue, GitOriginalComment[]]) => {
+        console.log('GITHBU GET ISSUE BY ID RES', issue, comments);
+        return {
+          ...mapGitIssue(issue),
+          comments: comments,
+        };
+      }),
+    );
   }
 
   private _updateIssueCache(issues: GitIssue[]) {
@@ -181,17 +198,7 @@ export class GitApiService {
 // }
 //
 //
-// getIssueById(issueId: number): Observable<any> {
-//   this._checkSettings();
-// return this._http.get(`${BASE}repos/${this._cfg.repo}/issues/${issueId}`)
-//   .pipe(
-//     catchError(this._handleRequestError.bind(this)),
-//     map((res: any) => {
-//       console.log('GITHBU GET ISSUE BY ID RES', res);
-//       return res;
-//     }),
-//   );
-// }
+
 //
 // getCommentsForIssue(issueId: number): Observable<any> {
 //   this._checkSettings();

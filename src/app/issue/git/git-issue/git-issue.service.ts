@@ -1,13 +1,14 @@
 import { Injectable } from '@angular/core';
 import { GitIssue } from './git-issue.model';
-import { Store } from '@ngrx/store';
+import { select, Store } from '@ngrx/store';
 import { GitIssueActionTypes } from './store/git-issue.actions';
 import { PersistenceService } from '../../../core/persistence/persistence.service';
-import { GitIssueState } from './store/git-issue.reducer';
-import { take } from 'rxjs/operators';
+import { GitIssueState, selectGitIssueById } from './store/git-issue.reducer';
+import { switchMap, take } from 'rxjs/operators';
 import { GitApiService } from '../git-api.service';
 import { SnackService } from '../../../core/snack/snack.service';
 import { GitCfg } from '../git';
+import { Observable } from 'rxjs';
 
 
 @Injectable()
@@ -84,6 +85,29 @@ export class GitIssueService {
   addOpenIssuesToBacklog() {
     this._store.dispatch({
       type: GitIssueActionTypes.AddOpenGitIssuesToBacklog,
+    });
+  }
+
+
+  // NON ACTION CALLS
+  // ----------------
+  getById(id: number): Observable<GitIssue> {
+    return this._store.pipe(select(selectGitIssueById, {id}), take(1));
+  }
+
+  updateIssueFromApi(issueId_: number | string) {
+    const issueId = issueId_ as number;
+    this.getById(issueId)
+      .pipe(
+        switchMap((issue: GitIssue) => {
+          return this._gitApiService.getIssueWithCommentsByIssueNumber(issue.number).pipe(take(1));
+        })
+      ).subscribe((issue) => {
+      this.upsert(issue);
+      this._snackService.open({
+        icon: 'cloud_download',
+        message: `Git: Updated data for ${issue.number} "${issue.title}"`
+      });
     });
   }
 

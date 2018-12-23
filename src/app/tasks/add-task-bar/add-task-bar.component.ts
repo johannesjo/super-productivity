@@ -19,6 +19,7 @@ export class AddTaskBarComponent implements OnInit, OnDestroy, AfterViewInit {
   isLoading = false;
   doubleEnterCount = 0;
 
+
   @Input() isAddToBacklog = false;
   @Input() isAddToBottom;
   @Input() isAutoFocus: boolean;

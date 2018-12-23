@@ -1,6 +1,7 @@
 import {
   AfterViewInit,
-  ChangeDetectionStrategy, ChangeDetectorRef,
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
   ElementRef,
   HostBinding,
@@ -21,6 +22,7 @@ import { checkKeyCombo } from '../../core/util/check-key-combo';
 import { distinctUntilChanged, takeUntil } from 'rxjs/operators';
 import { fadeAnimation } from '../../ui/animations/fade.ani';
 import { AttachmentService } from '../../attachment/attachment.service';
+import { IssueService } from '../../issue/issue.service';
 
 // import {Task} from './task'
 
@@ -51,6 +53,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     private readonly _taskService: TaskService,
     private readonly _matDialog: MatDialog,
     private readonly _configService: ConfigService,
+    private readonly _issueService: IssueService,
     private readonly _attachmentService: AttachmentService,
     private readonly _elementRef: ElementRef,
     private readonly _cd: ChangeDetectorRef,
@@ -140,6 +143,10 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   ngOnDestroy() {
     this._destroy$.next(true);
     this._destroy$.unsubscribe();
+  }
+
+  updateIssueData() {
+    this._issueService.refreshIssue(this.task.issueType, this.task.issueId);
   }
 
   handleUpdateBtnClick() {

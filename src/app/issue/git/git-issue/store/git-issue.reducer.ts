@@ -4,6 +4,7 @@ import { GitIssue } from '../git-issue.model';
 import { createFeatureSelector, createSelector } from '@ngrx/store';
 import { TaskActionTypes } from '../../../../tasks/store/task.actions';
 import { IssueProviderKey } from '../../../issue';
+import { selectTaskFeatureState } from '../../../../tasks/store/task.selectors';
 
 export const GIT_ISSUE_FEATURE_NAME: IssueProviderKey = 'GIT';
 
@@ -24,7 +25,12 @@ export const selectAllGitIssues = createSelector(selectGitIssueFeatureState, sel
 
 // select the total user count
 export const selectGitIssueTotal = createSelector(selectGitIssueFeatureState, selectTotal);
-
+// DYNAMIC SELECTORS
+// -----------------
+export const selectGitIssueById = createSelector(
+  selectGitIssueFeatureState,
+  (state, props: { id: number }) => state.entities[props.id]
+);
 
 // REDUCER
 // -------
