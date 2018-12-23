@@ -109,8 +109,13 @@ $bl-primary: mat-palette($mat-blue);
 $bl-theme: mat-light-theme($bl-primary, $accent);
 $bl-theme-dark: mat-dark-theme($bl-primary, $accent);
 
-@include angular-material-theme($bl-theme);
-@include color-helper($bl-theme);
+//@include angular-material-theme($bl-theme);
+//@include color-helper($bl-theme);
+
+.blue {
+  @include angular-material-theme($bl-theme);
+  @include color-helper($bl-theme);
+}
 
 .blue.isDarkTheme {
   @include angular-material-theme($bl-theme-dark);
