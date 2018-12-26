@@ -60,4 +60,5 @@ export type AttachmentActions =
   | UpdateAttachment
   | DeleteAttachment
   | DeleteAttachments
+  | DeleteAttachmentsForTasks
   ;
