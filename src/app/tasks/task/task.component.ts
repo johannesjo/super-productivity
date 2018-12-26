@@ -23,8 +23,7 @@ import { distinctUntilChanged, takeUntil } from 'rxjs/operators';
 import { fadeAnimation } from '../../ui/animations/fade.ani';
 import { AttachmentService } from '../../attachment/attachment.service';
 import { IssueService } from '../../issue/issue.service';
-
-// import {Task} from './task'
+import { DialogEditAttachmentComponent } from "../../attachment/dialog-edit-attachment/dialog-edit-attachment.component";
 
 @Component({
   selector: 'task',
@@ -34,7 +33,6 @@ import { IssueService } from '../../issue/issue.service';
   animations: [expandAnimation, fadeAnimation]
 })
 export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
-  // @Input() task: Task;
   @Input() task: TaskWithSubTasks;
   @Input() focusIdList: string[];
 
@@ -184,6 +182,23 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
       .afterClosed()
       .subscribe(result => {
         this.focusSelf();
+      });
+  }
+
+  addAttachment() {
+    this._matDialog
+      .open(DialogEditAttachmentComponent, {
+        data: {},
+      })
+      .afterClosed()
+      .subscribe(result => {
+        this.focusSelf();
+        if (result) {
+          this._attachmentService.addAttachment({
+            ...result,
+            taskId: this.task.id,
+          });
+        }
       });
   }
 

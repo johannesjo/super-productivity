@@ -170,7 +170,6 @@
           Pause tracking task
         </button>
 
-
         <button mat-menu-item
                 class="show-xs-only"
                 aria-label="additional-info"
@@ -186,12 +185,36 @@
         </button>
 
         <button mat-menu-item=""
+                (click)="toggleTaskDone()"
+                tabindex="2"
+                aria-label="un-/mark as done">
+          <ng-container *ngIf="task.isDone">
+            <mat-icon aria-label="Mark as undone">undo
+            </mat-icon>
+            Mark as undone
+          </ng-container>
+          <ng-container *ngIf="!task.isDone">
+            <mat-icon aria-label="Mark as done">check
+            </mat-icon>
+            Mark as done
+          </ng-container>
+        </button>
+
+        <button mat-menu-item=""
                 aria-label="add sub task"
                 *ngIf="!task.parentId&&!task.isDone"
                 tabindex="2"
                 (click)="addSubTask($event);">
           <mat-icon aria-label="add sub task">playlist_add</mat-icon>
           Add sub task
+        </button>
+
+        <button mat-menu-item=""
+                aria-label="add attachment"
+                tabindex="2"
+                (click)="addAttachment($event);">
+          <mat-icon aria-label="add sub task">attachment</mat-icon>
+          Attach file or link
         </button>
 
         <button mat-menu-item=""
@@ -212,21 +235,6 @@
                     aria-label="delete">delete_forever
           </mat-icon>
           Delete Task
-        </button>
-        <button mat-menu-item=""
-                (click)="toggleTaskDone()"
-                tabindex="2"
-                aria-label="un-/mark as done">
-          <ng-container *ngIf="task.isDone">
-            <mat-icon aria-label="Mark as undone">undo
-            </mat-icon>
-            Mark as undone
-          </ng-container>
-          <ng-container *ngIf="!task.isDone">
-            <mat-icon aria-label="Mark as done">check
-            </mat-icon>
-            Mark as done
-          </ng-container>
         </button>
       </mat-menu>
     </div>
