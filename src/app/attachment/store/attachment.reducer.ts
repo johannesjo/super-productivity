@@ -25,12 +25,12 @@ export function attachmentReducer(
   action: AttachmentActions | DeleteTask
 ): AttachmentState {
   switch (action.type) {
-    case TaskActionTypes.DeleteTask: {
-      const taskId = action.payload.id;
-      const attachmentIds = state.ids as string[];
-      const idsToRemove = attachmentIds.filter(id => state.entities[id].taskId === taskId);
-      return adapter.removeMany(idsToRemove, state);
-    }
+    // case TaskActionTypes.DeleteTask: {
+    //   const taskId = action.payload.id;
+    //   const attachmentIds = state.ids as string[];
+    //   const idsToRemove = attachmentIds.filter(id => state.entities[id].taskId === taskId);
+    //   return adapter.removeMany(idsToRemove, state);
+    // }
 
     case AttachmentActionTypes.AddAttachment: {
       return adapter.addOne(action.payload.attachment, state);
@@ -42,6 +42,20 @@ export function attachmentReducer(
 
     case AttachmentActionTypes.DeleteAttachment: {
       return adapter.removeOne(action.payload.id, state);
+    }
+
+    case AttachmentActionTypes.DeleteAttachments: {
+      return adapter.removeMany(action.payload.ids, state);
+    }
+
+    case AttachmentActionTypes.DeleteAttachmentsForTasks: {
+      const taskIds = action.payload.taskIds;
+      const ids = state.ids as string[];
+      const allAttachments = ids.map(id => state.entities[id]);
+      const attachmentsToDelete = allAttachments.filter(attachment => taskIds.includes(attachment.taskId));
+
+      const attachmentIds = attachmentsToDelete.map(attachment => attachment.id);
+      return adapter.removeMany(attachmentIds, state);
     }
 
     case AttachmentActionTypes.LoadAttachmentState:

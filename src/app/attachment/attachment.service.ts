@@ -1,7 +1,19 @@
 import { Injectable } from '@angular/core';
 import { select, Store } from '@ngrx/store';
-import { AttachmentState, initialAttachmentState, selectAllAttachments, selectAttachmentByIds } from './store/attachment.reducer';
-import { AddAttachment, DeleteAttachment, LoadAttachmentState, UpdateAttachment } from './store/attachment.actions';
+import {
+  AttachmentState,
+  initialAttachmentState,
+  selectAllAttachments,
+  selectAttachmentByIds
+} from './store/attachment.reducer';
+import {
+  AddAttachment,
+  DeleteAttachment,
+  DeleteAttachments,
+  DeleteAttachmentsForTasks,
+  LoadAttachmentState,
+  UpdateAttachment
+} from './store/attachment.actions';
 import { Observable } from 'rxjs';
 import { Attachment } from './attachment.model';
 import shortid from 'shortid';
@@ -44,6 +56,14 @@ export class AttachmentService {
 
   deleteAttachment(id: string) {
     this._store$.dispatch(new DeleteAttachment({id}));
+  }
+
+  deleteAttachments(ids: string[]) {
+    this._store$.dispatch(new DeleteAttachments({ids}));
+  }
+
+  deleteAttachmentsForTasks(taskIds: string[]) {
+    this._store$.dispatch(new DeleteAttachmentsForTasks({taskIds}));
   }
 
   updateAttachment(id: string, changes: Partial<Attachment>) {
