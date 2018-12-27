@@ -4,9 +4,9 @@ import { GitIssue } from '../git-issue.model';
 import { createFeatureSelector, createSelector } from '@ngrx/store';
 import { TaskActionTypes } from '../../../../tasks/store/task.actions';
 import { IssueProviderKey } from '../../../issue';
-import { selectTaskFeatureState } from '../../../../tasks/store/task.selectors';
+import { GIT_TYPE } from '../../../issue.const';
 
-export const GIT_ISSUE_FEATURE_NAME: IssueProviderKey = 'GIT';
+export const GIT_ISSUE_FEATURE_NAME: IssueProviderKey = GIT_TYPE;
 
 export interface GitIssueState extends EntityState<GitIssue> {
 }
@@ -34,8 +34,7 @@ export const selectGitIssueById = createSelector(
 
 // REDUCER
 // -------
-export const initialGitIssueState: GitIssueState = gitIssueAdapter.getInitialState({
-});
+export const initialGitIssueState: GitIssueState = gitIssueAdapter.getInitialState({});
 
 export function gitIssueReducer(
   state: GitIssueState = initialGitIssueState,
@@ -51,28 +50,48 @@ export function gitIssueReducer(
     }
 
     case TaskActionTypes.AddTask: {
+      // TODO check if this still is a valid check
       if (!action.payload.issue) {
         console.warn('No issue data provided, on adding task. (Only ok if getting an issue from archive)');
         return state;
       }
 
-      if (action.payload.task.issueType === 'GIT') {
+      if (action.payload.task.issueType === GIT_TYPE) {
         const issue = action.payload.issue as GitIssue;
         return gitIssueAdapter.upsertOne(issue, state);
       }
       return state;
     }
 
+    case TaskActionTypes.DeleteTask: {
+      if (action.payload.task.issueType === GIT_TYPE) {
+        const issue = action.payload.task.issueData as GitIssue;
+        return gitIssueAdapter.removeOne(issue.id, state);
+        // TODO sub task case if we need it in the future
+      }
+      return state;
+    }
 
-    // case TaskActionTypes.DeleteTask: {
-    //   // const taskId = action.payload.
-    //
-    //   if (action.payload.task.issueType === 'GIT') {
-    //     const issue = action.payload.issue as GitIssue;
-    //     return gitIssueAdapter.upsertOne({...issue, taskId: action.payload.task.id}, state);
-    //   }
-    //   return state;
-    // }
+    case TaskActionTypes.MoveToArchive: {
+      const tasksWithGitIssue = action.payload.tasks.filter(task => task.issueType === GIT_TYPE);
+
+      if (tasksWithGitIssue && tasksWithGitIssue.length > 0) {
+        const issueIds = tasksWithGitIssue.map(task => task.issueId);
+        return gitIssueAdapter.removeMany(issueIds, state);
+      }
+
+      return state;
+    }
+
+    case TaskActionTypes.RestoreTask: {
+      if (action.payload.task.issueType === GIT_TYPE) {
+        const issue = action.payload.task.issueData as GitIssue;
+        return gitIssueAdapter.upsertOne(issue, state);
+        // TODO sub task case if we need it in the future
+      }
+      return state;
+    }
+
 
     // GitIssue Actions
     // ------------

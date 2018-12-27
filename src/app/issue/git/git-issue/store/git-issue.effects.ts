@@ -24,6 +24,9 @@ export class GitIssueEffects {
     .pipe(
       ofType(
         TaskActionTypes.AddTask,
+        TaskActionTypes.RestoreTask,
+        TaskActionTypes.DeleteTask,
+        TaskActionTypes.MoveToArchive,
         GitIssueActionTypes.LoadState,
         GitIssueActionTypes.LoadGitIssues,
         GitIssueActionTypes.AddGitIssue,
@@ -43,6 +46,9 @@ export class GitIssueEffects {
     .pipe(
       ofType(
         TaskActionTypes.AddTask,
+        TaskActionTypes.RestoreTask,
+        TaskActionTypes.DeleteTask,
+        TaskActionTypes.MoveToArchive,
         GitIssueActionTypes.AddGitIssue,
         GitIssueActionTypes.DeleteGitIssue,
         GitIssueActionTypes.UpdateGitIssue,
@@ -82,6 +88,7 @@ export class GitIssueEffects {
   }
 
   private _saveToLs([action, currentProjectId, gitIssueFeatureState]) {
+    console.log('SAVE GIT ISSUES');
     if (currentProjectId) {
       this._persistenceService.saveLastActive();
       this._persistenceService.saveIssuesForProject(currentProjectId, 'GIT', gitIssueFeatureState);

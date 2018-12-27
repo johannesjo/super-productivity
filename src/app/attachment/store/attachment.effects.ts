@@ -6,6 +6,7 @@ import { selectCurrentProjectId } from '../../project/store/project.reducer';
 import { AttachmentActionTypes } from './attachment.actions';
 import { selectAttachmentFeatureState } from './attachment.reducer';
 import { PersistenceService } from '../../core/persistence/persistence.service';
+import { TaskActionTypes } from '../../tasks/store/task.actions';
 
 @Injectable()
 export class AttachmentEffects {
@@ -13,6 +14,10 @@ export class AttachmentEffects {
   @Effect({dispatch: false}) updateAttachments$: any = this._actions$
     .pipe(
       ofType(
+        TaskActionTypes.AddTask,
+        TaskActionTypes.RestoreTask,
+        TaskActionTypes.DeleteTask,
+        TaskActionTypes.MoveToArchive,
         AttachmentActionTypes.AddAttachment,
         AttachmentActionTypes.UpdateAttachment,
         AttachmentActionTypes.DeleteAttachment,

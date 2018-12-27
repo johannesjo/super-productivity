@@ -8,8 +8,6 @@ import { GitIssueState } from './git/git-issue/store/git-issue.reducer';
 
 
 export type IssueProviderKey = 'JIRA' | 'GIT';
-
-
 export type IssueIntegrationCfg = JiraCfg | GitCfg;
 
 export interface IssueIntegrationCfgs {

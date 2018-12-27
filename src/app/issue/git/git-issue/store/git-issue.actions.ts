@@ -2,7 +2,7 @@ import { Action } from '@ngrx/store';
 import { Update } from '@ngrx/entity';
 import { GitIssue } from '../git-issue.model';
 import { GitIssueState } from './git-issue.reducer';
-import { AddTask } from '../../../../tasks/store/task.actions';
+import { AddTask, DeleteTask, MoveToArchive, RestoreTask, TaskActionTypes } from '../../../../tasks/store/task.actions';
 
 export enum GitIssueActionTypes {
   LoadState = '[GitIssue] Load GitIssue State',
@@ -105,5 +105,8 @@ export type GitIssueActions
   | ClearGitIssues
   // From tasks model
   | AddTask
+  | DeleteTask
+  | RestoreTask
+  | MoveToArchive
   ;
 

@@ -3,11 +3,14 @@ import { JIRA_ADVANCED_FORM_CFG, JIRA_CREDENTIALS_FORM_CFG } from './jira/jira.c
 import { IssueProviderKey } from './issue';
 import { GIT_CONFIG_FORM } from './git/git.const';
 
-export const issueProviderKeys: IssueProviderKey[] = ['JIRA', 'GIT'];
+export const GIT_TYPE: IssueProviderKey = 'GIT';
+export const JIRA_TYPE: IssueProviderKey = 'JIRA';
+
+export const issueProviderKeys: IssueProviderKey[] = [JIRA_TYPE, GIT_TYPE];
 
 export const issueProviderIconMap = {
-  'JIRA': 'jira',
-  'GIT': 'github'
+  [JIRA_TYPE]: 'jira',
+  [GIT_TYPE]: 'github'
 };
 
 
@@ -15,14 +18,14 @@ export const ISSUE_PROVIDER_FORM_CFGS: ConfigFormConfig = [
   // GIT
   {
     title: 'GitHub',
-    key: 'GIT',
+    key: GIT_TYPE,
     items: GIT_CONFIG_FORM
   },
 
   // JIRA
   {
     title: 'Jira',
-    key: 'JIRA',
+    key: JIRA_TYPE,
     items: [
       {
         className: 'tpl isHideWhenJiraSupport',
