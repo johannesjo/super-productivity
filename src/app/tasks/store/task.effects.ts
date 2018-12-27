@@ -7,11 +7,11 @@ import { PersistenceService } from '../../core/persistence/persistence.service';
 import { selectCurrentTask, selectTaskFeatureState } from './task.selectors';
 import { selectCurrentProjectId } from '../../project/store/project.reducer';
 import { SnackOpen } from '../../core/snack/store/snack.actions';
-import { TaskState } from './task.reducer';
 import { NotifyService } from '../../core/notify/notify.service';
 import { TaskService } from '../task.service';
 import { selectConfigFeatureState } from '../../core/config/store/config.reducer';
 import { AttachmentActionTypes } from '../../attachment/store/attachment.actions';
+import { TaskWithSubTasks } from '../task.model';
 
 // TODO send message to electron when current task changes here
 
@@ -24,7 +24,6 @@ export class TaskEffects {
       ),
       withLatestFrom(
         this._store$.pipe(select(selectCurrentProjectId)),
-        this._store$.pipe(select(selectTaskFeatureState)),
       ),
       tap(this._moveToArchive.bind(this)),
       tap(this._updateLastActive.bind(this)),
@@ -122,21 +121,21 @@ export class TaskEffects {
     }
   }
 
-  private _moveToArchive([action, currentProjectId, taskState]) {
-    const mainTaskIds = action.payload.ids;
-    const stateBefore: TaskState = taskState.stateBefore;
+  private _moveToArchive([action, currentProjectId]) {
+    const mainTasks = action.payload.tasks as TaskWithSubTasks[];
     const archive = {
       entities: {},
       ids: []
     };
-    mainTaskIds.forEach((id) => {
-      const task = stateBefore.entities[id];
-      archive.entities[id] = task;
-      archive.ids.push(id);
-      task.subTaskIds.forEach((subId) => {
-        archive.entities[subId] = stateBefore.entities[subId];
-        archive.ids.push(subId);
-      });
+    mainTasks.forEach((task: TaskWithSubTasks) => {
+      archive.entities[task.id] = task;
+      archive.ids.push(task.id);
+      if (task.subTasks) {
+        task.subTasks.forEach((subTask) => {
+          archive.entities[subTask.id] = subTask;
+          archive.ids.push(subTask.id);
+        });
+      }
     });
 
     this._persistenceService.saveToTaskArchiveForProject(currentProjectId, archive);

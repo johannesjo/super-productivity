@@ -97,8 +97,7 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
   }
 
   finishDay() {
-    const idsToMove = this._doneTasks.map((task) => task.id);
-    this._taskService.moveToArchive(idsToMove);
+    this._taskService.moveToArchive(this._doneTasks);
     if (IS_ELECTRON) {
       this._matDialog.open(DialogConfirmComponent, {
         restoreFocus: true,

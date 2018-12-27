@@ -296,11 +296,11 @@ export class TaskService {
     this._store.dispatch(new MoveToBacklog({id}));
   }
 
-  moveToArchive(ids: string | string[]) {
-    if (typeof ids === 'string') {
-      ids = [ids];
+  moveToArchive(tasks: TaskWithSubTasks | TaskWithSubTasks[]) {
+    if (!Array.isArray(tasks)) {
+      tasks = [tasks];
     }
-    this._store.dispatch(new MoveToArchive({ids}));
+    this._store.dispatch(new MoveToArchive({tasks}));
   }
 
   toggleStartTask() {

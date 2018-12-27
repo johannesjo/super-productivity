@@ -18,7 +18,7 @@ import { IssueProviderKey, IssueState } from '../../issue/issue';
 import { ProjectState } from '../../project/store/project.reducer';
 import { TaskState } from '../../tasks/store/task.reducer';
 import { EntityState } from '@ngrx/entity';
-import { Task } from '../../tasks/task.model';
+import { Task, TaskWithSubTasks } from '../../tasks/task.model';
 import { AppDataComplete } from '../sync/sync.model';
 import { BookmarkState } from '../../bookmark/store/bookmark.reducer';
 import { AttachmentState } from '../../attachment/store/attachment.reducer';
@@ -67,7 +67,7 @@ export class PersistenceService {
     return this._loadFromDb(this._makeProjectKey(projectId, LS_TASK_STATE));
   }
 
-  async saveToTaskArchiveForProject(projectId, tasksToArchive: EntityState<Task>, isForce = false) {
+  async saveToTaskArchiveForProject(projectId, tasksToArchive: EntityState<TaskWithSubTasks>, isForce = false) {
     const lsKey = this._makeProjectKey(projectId, LS_TASK_ARCHIVE);
     const currentArchive: EntityState<Task> = await this._loadFromDb(lsKey);
 

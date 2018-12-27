@@ -657,14 +657,12 @@ export function taskReducer(
     }
 
     case TaskActionTypes.MoveToArchive: {
-      const stateBeforeMovingToArchive = {...state, stateBefore: null};
       let copyState = state;
-      action.payload.ids.forEach((id) => {
-        copyState = deleteTask(copyState, state.entities[id]);
+      action.payload.tasks.forEach((task) => {
+        copyState = deleteTask(copyState, task);
       });
       return {
-        ...({...copyState, stateBefore: null}),
-        stateBefore: stateBeforeMovingToArchive
+       ...copyState
       };
     }
 
