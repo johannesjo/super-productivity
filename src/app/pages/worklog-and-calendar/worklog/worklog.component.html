@@ -48,7 +48,10 @@
                 *matHeaderCellDef> Title
             </th>
             <td mat-cell
-                *matCellDef="let logEntry"> {{(logEntry.parentTitle ? logEntry.parentTitle +' / ': '') + logEntry.task.title}}
+                [class.isSubTask]="logEntry.task.parentId"
+                *matCellDef="let logEntry">
+              <!--{{(logEntry.task.parentId ?  ' /': '')}}-->
+              {{logEntry.task.title}}
             </td>
           </ng-container>
 
@@ -57,6 +60,7 @@
                 *matHeaderCellDef> Time Spent
             </th>
             <td mat-cell
+                [class.isSubTask]="logEntry.task.parentId"
                 *matCellDef="let logEntry"> {{logEntry.task.timeSpentOnDay[worklogForDay.value.dateStr]|msToString}}
             </td>
           </ng-container>
@@ -68,6 +72,7 @@
             <td mat-cell
                 *matCellDef="let logEntry">
               <button mat-mini-fab=""
+                      *ngIf="!logEntry.task?.parentId"
                       aria-label="restore"
                       (click)="restoreTask(year.key, month.key, worklogForDay.key,logEntry.task);">
                 <mat-icon>settings_backup_restore</mat-icon>

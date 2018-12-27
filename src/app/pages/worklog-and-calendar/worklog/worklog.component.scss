@@ -11,6 +11,7 @@
     &-title {
       margin-top: 3*$s;
     }
+
     &-time-spent {
       font-size: 21px;
     }
@@ -19,11 +20,13 @@
   .month {
     margin-top: 3*$s;
     margin-bottom: $s;
+
     &-title {
       button {
         margin-left: $s;
       }
     }
+
     &-time-spent {
       font-size: 18px;
     }
@@ -32,6 +35,7 @@
   .day {
     margin-top: 2*$s;
     margin-bottom: $s;
+
     &-title {
 
       button {
@@ -42,11 +46,21 @@
 
   .summary-table-wrapper {
     display: inline-block;
+
     > table {
       width: 100%;
       text-align: left;
+
       td:first-of-type {
         padding-right: $s;
+      }
+    }
+
+    td.isSubTask {
+      font-style: italic;
+
+      &:first-of-type {
+        padding-left: $s*5;
       }
     }
   }

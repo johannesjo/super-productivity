@@ -4,7 +4,6 @@ import { Task } from '../../tasks/task.model';
 export interface WorklogDataForDay {
   timeSpent: number;
   task: Task;
-  parentTitle: string;
   parentId: string;
   isVisible: boolean;
 }
@@ -77,15 +76,14 @@ export const mapArchiveToWorklog = (taskState: EntityState<Task>): { worklog: Wo
           = worklog[year].timeSpent
           + timeSpentForTask;
         totalTimeSpent += timeSpentForTask;
-
-        worklog[year].ent[month].ent[day].logEntries.push({
-          task: task,
-          parentTitle: task.parentId ? entities[task.parentId].title : null,
-          parentId: task.parentId,
-          isVisible: true,
-          timeSpent: task.timeSpentOnDay[dateStr]
-        });
       }
+
+      worklog[year].ent[month].ent[day].logEntries.push({
+        task: task,
+        parentId: task.parentId,
+        isVisible: true,
+        timeSpent: task.timeSpentOnDay[dateStr]
+      });
     });
   });
   return {worklog, totalTimeSpent};
