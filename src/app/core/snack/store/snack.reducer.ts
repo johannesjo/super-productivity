@@ -1,5 +1,7 @@
 import { SnackActions, SnackActionTypes } from './snack.actions';
 
+export const SNACK_FEATURE_NAME = 'snack';
+
 export interface SnackState {
   show: boolean;
 }

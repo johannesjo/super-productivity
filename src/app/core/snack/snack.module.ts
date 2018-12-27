@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { StoreModule } from '@ngrx/store';
 import * as fromSnack from './store/snack.reducer';
+import { SNACK_FEATURE_NAME } from './store/snack.reducer';
 import { EffectsModule } from '@ngrx/effects';
 import { SnackEffects } from './store/snack.effects';
 import { MatSnackBarModule } from '@angular/material';
@@ -15,7 +16,7 @@ import { SnackJiraUnblockComponent } from './snack-jira-unblock/snack-jira-unblo
     UiModule,
     CommonModule,
     MatSnackBarModule,
-    StoreModule.forFeature('snack', fromSnack.reducer),
+    StoreModule.forFeature(SNACK_FEATURE_NAME, fromSnack.reducer),
     EffectsModule.forFeature([SnackEffects])
   ],
   declarations: [
