@@ -2,7 +2,7 @@ import { createEntityAdapter, EntityAdapter, EntityState } from '@ngrx/entity';
 import { AttachmentActions, AttachmentActionTypes } from './attachment.actions';
 import { Attachment } from '../attachment.model';
 import { createFeatureSelector, createSelector } from '@ngrx/store';
-import { DeleteTask, TaskActionTypes } from '../../tasks/store/task.actions';
+import { DeleteTask, TaskActionTypes, UndoDeleteTask } from '../../tasks/store/task.actions';
 
 export const ATTACHMENT_FEATURE_NAME = 'attachment';
 
@@ -25,15 +25,22 @@ export const initialAttachmentState: AttachmentState = adapter.getInitialState({
 
 export function attachmentReducer(
   state = initialAttachmentState,
-  action: AttachmentActions | DeleteTask
+  action: AttachmentActions | DeleteTask | UndoDeleteTask
 ): AttachmentState {
   switch (action.type) {
-    // case TaskActionTypes.DeleteTask: {
-    //   const taskId = action.payload.id;
-    //   const attachmentIds = state.ids as string[];
-    //   const idsToRemove = attachmentIds.filter(id => state.entities[id].taskId === taskId);
-    //   return adapter.removeMany(idsToRemove, state);
-    // }
+    case TaskActionTypes.DeleteTask: {
+      const task = action.payload.task;
+      const taskIds: string[] = [task.id, ...task.subTaskIds];
+      const attachmentIds = state.ids as string[];
+      const idsToRemove = attachmentIds.filter(id => taskIds.includes(state.entities[id].taskId));
+      return {
+        ...adapter.removeMany(idsToRemove, state),
+        stateBeforeDeletingTask: {
+          ...state,
+          stateBeforeDeletingTask: null
+        },
+      };
+    }
 
     case TaskActionTypes.UndoDeleteTask: {
       return state.stateBeforeDeletingTask || state;
@@ -53,22 +60,6 @@ export function attachmentReducer(
 
     case AttachmentActionTypes.DeleteAttachments: {
       return adapter.removeMany(action.payload.ids, state);
-    }
-
-    case AttachmentActionTypes.DeleteAttachmentsForTasks: {
-      const taskIds = action.payload.taskIds;
-      const ids = state.ids as string[];
-      const allAttachments = ids.map(id => state.entities[id]);
-      const attachmentsToDelete = allAttachments.filter(attachment => taskIds.includes(attachment.taskId));
-
-      const attachmentIds = attachmentsToDelete.map(attachment => attachment.id);
-      return {
-        ...adapter.removeMany(attachmentIds, state),
-        stateBeforeDeletingTask: {
-          ...state,
-          stateBeforeDeletingTask: null
-        },
-      };
     }
 
     case AttachmentActionTypes.LoadAttachmentState:

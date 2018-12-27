@@ -1,6 +1,6 @@
 import { createEntityAdapter, EntityAdapter, EntityState } from '@ngrx/entity';
-import { DeleteTask, TaskActions, TaskActionTypes } from './task.actions';
-import { Task, TimeSpentOnDay } from '../task.model';
+import { TaskActions, TaskActionTypes } from './task.actions';
+import { Task, TaskWithSubTasks, TimeSpentOnDay } from '../task.model';
 import { calcTotalTimeSpent } from '../util/calc-total-time-spent';
 import { arrayMoveLeft, arrayMoveRight } from '../../core/util/array-move';
 import { AddAttachment, AttachmentActionTypes, DeleteAttachment } from '../../attachment/store/attachment.actions';
@@ -150,11 +150,10 @@ const updateTimeEstimateForTask = (
 };
 
 const deleteTask = (state: TaskState,
-                    action: DeleteTask | { payload: { id: string } }): TaskState => {
-  let stateCopy: TaskState = taskAdapter.removeOne(action.payload.id, state);
+                    taskToDelete: TaskWithSubTasks | Task): TaskState => {
+  let stateCopy: TaskState = taskAdapter.removeOne(taskToDelete.id, state);
 
-  const taskToDelete: Task = state.entities[action.payload.id];
-  let currentTaskId = (state.currentTaskId === action.payload.id) ? null : state.currentTaskId;
+  let currentTaskId = (state.currentTaskId === taskToDelete.id) ? null : state.currentTaskId;
 
   // PARENT TASK side effects
   // also delete from parent task if any
@@ -165,7 +164,7 @@ const deleteTask = (state: TaskState,
       id: taskToDelete.parentId,
       changes: {
         subTaskIds: stateCopy.entities[taskToDelete.parentId].subTaskIds
-          .filter(filterOutId(action.payload.id)),
+          .filter(filterOutId(taskToDelete.id)),
 
         // copy over sub task time stuff if it was the last sub task
         ...(
@@ -196,8 +195,8 @@ const deleteTask = (state: TaskState,
   return {
     ...stateCopy,
     // finally delete from backlog or todays tasks
-    backlogTaskIds: state.backlogTaskIds.filter(filterOutId(action.payload.id)),
-    todaysTaskIds: state.todaysTaskIds.filter(filterOutId(action.payload.id)),
+    backlogTaskIds: state.backlogTaskIds.filter(filterOutId(taskToDelete.id)),
+    todaysTaskIds: state.todaysTaskIds.filter(filterOutId(taskToDelete.id)),
     currentTaskId,
     stateBefore: {...state, stateBefore: null}
   };
@@ -391,7 +390,7 @@ export function taskReducer(
 
     // TODO also delete related issue :(
     case TaskActionTypes.DeleteTask: {
-      return deleteTask(state, action);
+      return deleteTask(state, action.payload.task);
     }
 
     case TaskActionTypes.UndoDeleteTask: {
@@ -661,7 +660,7 @@ export function taskReducer(
       const stateBeforeMovingToArchive = {...state, stateBefore: null};
       let copyState = state;
       action.payload.ids.forEach((id) => {
-        copyState = deleteTask(copyState, {payload: {id}});
+        copyState = deleteTask(copyState, state.entities[id]);
       });
       return {
         ...({...copyState, stateBefore: null}),

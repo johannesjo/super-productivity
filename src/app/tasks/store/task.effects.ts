@@ -11,7 +11,7 @@ import { TaskState } from './task.reducer';
 import { NotifyService } from '../../core/notify/notify.service';
 import { TaskService } from '../task.service';
 import { selectConfigFeatureState } from '../../core/config/store/config.reducer';
-import { AttachmentActionTypes, DeleteAttachmentsForTasks } from '../../attachment/store/attachment.actions';
+import { AttachmentActionTypes } from '../../attachment/store/attachment.actions';
 
 // TODO send message to electron when current task changes here
 
@@ -76,40 +76,17 @@ export class TaskEffects {
       ofType(
         TaskActionTypes.DeleteTask,
       ),
-      withLatestFrom(
-        this._store$.pipe(select(selectTaskFeatureState)),
-      ),
-      map(([action_, state]) => {
+      map((action_: DeleteTask) => {
+        console.log(action_);
         const action = action_ as DeleteTask;
         return new SnackOpen({
-          message: `Deleted task "${state.stateBefore.entities[action.payload.id].title}"`,
+          message: `Deleted task "${action.payload.task.title}"`,
           config: {duration: 5000},
           actionStr: 'Undo',
           actionId: TaskActionTypes.UndoDeleteTask
         });
       })
     );
-
-  @Effect() cleanUpAfterTask$: any = this._actions$
-    .pipe(
-      ofType(
-        TaskActionTypes.DeleteTask,
-      ),
-      withLatestFrom(
-        this._store$.pipe(select(selectTaskFeatureState)),
-      ),
-      map(([action_, state]) => {
-        const action = action_ as DeleteTask;
-        const taskToDelete = state.stateBefore.entities[action.payload.id];
-        let taskIds: string[] = [action.payload.id];
-
-        if (taskToDelete.subTaskIds) {
-          taskIds = taskIds.concat(taskToDelete.subTaskIds);
-        }
-        return new DeleteAttachmentsForTasks({taskIds});
-      })
-    );
-
 
   @Effect({dispatch: false}) timeEstimateExceeded$: any = this._actions$
     .pipe(

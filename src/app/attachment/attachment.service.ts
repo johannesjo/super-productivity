@@ -10,7 +10,6 @@ import {
   AddAttachment,
   DeleteAttachment,
   DeleteAttachments,
-  DeleteAttachmentsForTasks,
   LoadAttachmentState,
   UpdateAttachment
 } from './store/attachment.actions';
@@ -60,10 +59,6 @@ export class AttachmentService {
 
   deleteAttachments(ids: string[]) {
     this._store$.dispatch(new DeleteAttachments({ids}));
-  }
-
-  deleteAttachmentsForTasks(taskIds: string[]) {
-    this._store$.dispatch(new DeleteAttachmentsForTasks({taskIds}));
   }
 
   updateAttachment(id: string, changes: Partial<Attachment>) {

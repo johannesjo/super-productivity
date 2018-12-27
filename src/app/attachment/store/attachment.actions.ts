@@ -9,7 +9,6 @@ export enum AttachmentActionTypes {
   UpdateAttachment = '[Attachment] Update Attachment',
   DeleteAttachment = '[Attachment] Delete Attachment',
   DeleteAttachments = '[Attachment] Delete Attachments',
-  DeleteAttachmentsForTasks = '[Attachment] Delete Attachments for tasks',
 }
 
 export class LoadAttachmentState implements Action {
@@ -47,18 +46,10 @@ export class DeleteAttachments implements Action {
   }
 }
 
-export class DeleteAttachmentsForTasks implements Action {
-  readonly type = AttachmentActionTypes.DeleteAttachmentsForTasks;
-
-  constructor(public payload: { taskIds: string[] }) {
-  }
-}
-
 export type AttachmentActions =
   LoadAttachmentState
   | AddAttachment
   | UpdateAttachment
   | DeleteAttachment
   | DeleteAttachments
-  | DeleteAttachmentsForTasks
   ;

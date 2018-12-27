@@ -153,7 +153,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   deleteTask() {
-    this._taskService.remove(this.task.id);
+    this._taskService.remove(this.task);
     this.focusNext();
   }
 

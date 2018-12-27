@@ -2,7 +2,7 @@ import shortid from 'shortid';
 import { debounceTime, distinctUntilChanged, map, share, take, withLatestFrom } from 'rxjs/operators';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { DEFAULT_TASK, DropListModelSource, Task, TaskWithSubTasks } from './task.model';
+import { DEFAULT_TASK, DropListModelSource, Task, TaskWithIssueData, TaskWithSubTasks } from './task.model';
 import { select, Store } from '@ngrx/store';
 import {
   AddSubTask,
@@ -224,8 +224,8 @@ export class TaskService {
     }));
   }
 
-  remove(id: string) {
-    this._store.dispatch(new DeleteTask({id}));
+  remove(task: TaskWithSubTasks) {
+    this._store.dispatch(new DeleteTask({task}));
   }
 
 

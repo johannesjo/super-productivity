@@ -1,6 +1,6 @@
 import { Action } from '@ngrx/store';
 import { Update } from '@ngrx/entity';
-import { DropListModelSource, Task } from '../task.model';
+import { DropListModelSource, Task, TaskWithSubTasks } from '../task.model';
 import { TaskState } from './task.reducer';
 import { IssueData } from '../../issue/issue';
 
@@ -85,7 +85,7 @@ export class UpdateTasks implements Action {
 export class DeleteTask implements Action {
   readonly type = TaskActionTypes.DeleteTask;
 
-  constructor(public payload: { id: string }) {
+  constructor(public payload: { task: TaskWithSubTasks }) {
   }
 }
 
