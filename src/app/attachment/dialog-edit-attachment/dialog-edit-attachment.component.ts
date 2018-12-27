@@ -45,9 +45,15 @@ export class DialogEditAttachmentComponent implements OnInit {
   }
 
   submit() {
-    if (this.attachmentCopy.type === 'LINK' && !this.attachmentCopy.path.match(/(https?|ftp|file):\/\//)) {
+    // don't submit invalid data
+    if (!this.attachmentCopy.path || !this.attachmentCopy.type) {
+      return;
+    }
+
+    if (this.attachmentCopy.type === 'LINK' && this.attachmentCopy.path && !this.attachmentCopy.path.match(/(https?|ftp|file):\/\//)) {
       this.attachmentCopy.path = 'http://' + this.attachmentCopy.path;
     }
+
     this.close(this.attachmentCopy);
   }
 
