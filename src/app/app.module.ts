@@ -24,6 +24,7 @@ import { TimeTrackingModule } from './time-tracking/time-tracking.module';
 import { BookmarkModule } from './bookmark/bookmark.module';
 import { NoteModule } from './note/note.module';
 import { ReminderModule } from './reminder/reminder.module';
+import { metaReducers } from './root-store/meta.reducer';
 
 @NgModule({
   declarations: [
@@ -48,7 +49,7 @@ import { ReminderModule } from './reminder/reminder.module';
     HttpClientModule,
     RouterModule.forRoot(APP_ROUTES, {useHash: true}),
     // NOTE: both need to be present to use forFeature stores
-    StoreModule.forRoot(reducers),
+    StoreModule.forRoot(reducers, {metaReducers}),
     EffectsModule.forRoot([]),
     !environment.production ? StoreDevtoolsModule.instrument() : [],
     ReactiveFormsModule,
