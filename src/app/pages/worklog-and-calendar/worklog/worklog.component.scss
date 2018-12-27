@@ -57,10 +57,19 @@
     }
 
     td.isSubTask {
-      font-style: italic;
+      .task-title {
+        font-style: italic;
+        padding-left: $s*2;
+        position: relative;
+        display: inline-block;
 
-      &:first-of-type {
-        padding-left: $s*5;
+        &:before {
+          content: '–';
+          position: absolute;
+          top: 50%;
+          left: 0;
+          transform: translateY(-50%);
+        }
       }
     }
   }

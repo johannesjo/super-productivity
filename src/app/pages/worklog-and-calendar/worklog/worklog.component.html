@@ -50,8 +50,9 @@
             <td mat-cell
                 [class.isSubTask]="logEntry.task.parentId"
                 *matCellDef="let logEntry">
-              <!--{{(logEntry.task.parentId ?  ' /': '')}}-->
-              {{logEntry.task.title}}
+              <div class="task-title">
+                {{logEntry.task.title}}
+              </div>
             </td>
           </ng-container>
 
