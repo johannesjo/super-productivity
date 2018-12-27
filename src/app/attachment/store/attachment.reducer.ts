@@ -7,6 +7,7 @@ import { DeleteTask, TaskActionTypes } from '../../tasks/store/task.actions';
 export const ATTACHMENT_FEATURE_NAME = 'attachment';
 
 export interface AttachmentState extends EntityState<Attachment> {
+  stateBeforeDeletingTask: AttachmentState;
 }
 
 export const adapter: EntityAdapter<Attachment> = createEntityAdapter<Attachment>();
@@ -18,7 +19,9 @@ export const selectAttachmentByIds = createSelector(
   (state, props: { ids }) => props.ids ? props.ids.map(id => state.entities[id]) : []
 );
 
-export const initialAttachmentState: AttachmentState = adapter.getInitialState({});
+export const initialAttachmentState: AttachmentState = adapter.getInitialState({
+  stateBeforeDeletingTask: null
+});
 
 export function attachmentReducer(
   state = initialAttachmentState,
@@ -31,6 +34,10 @@ export function attachmentReducer(
     //   const idsToRemove = attachmentIds.filter(id => state.entities[id].taskId === taskId);
     //   return adapter.removeMany(idsToRemove, state);
     // }
+
+    case TaskActionTypes.UndoDeleteTask: {
+      return state.stateBeforeDeletingTask || state;
+    }
 
     case AttachmentActionTypes.AddAttachment: {
       return adapter.addOne(action.payload.attachment, state);
@@ -55,7 +62,13 @@ export function attachmentReducer(
       const attachmentsToDelete = allAttachments.filter(attachment => taskIds.includes(attachment.taskId));
 
       const attachmentIds = attachmentsToDelete.map(attachment => attachment.id);
-      return adapter.removeMany(attachmentIds, state);
+      return {
+        ...adapter.removeMany(attachmentIds, state),
+        stateBeforeDeletingTask: {
+          ...state,
+          stateBeforeDeletingTask: null
+        },
+      };
     }
 
     case AttachmentActionTypes.LoadAttachmentState:

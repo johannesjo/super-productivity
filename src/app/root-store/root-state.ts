@@ -10,6 +10,7 @@ import { GIT_ISSUE_FEATURE_NAME, GitIssueState } from '../issue/git/git-issue/st
 import { GlobalConfig } from '../core/config/config.model';
 import { SNACK_FEATURE_NAME, SnackState } from '../core/snack/store/snack.reducer';
 
+
 export interface RootState {
   [TASK_FEATURE_NAME]: TaskState;
   [JIRA_ISSUE_FEATURE_NAME]: JiraIssueState;
