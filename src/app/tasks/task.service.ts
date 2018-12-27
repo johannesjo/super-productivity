@@ -2,7 +2,7 @@ import shortid from 'shortid';
 import { debounceTime, distinctUntilChanged, map, share, take, withLatestFrom } from 'rxjs/operators';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { DEFAULT_TASK, DropListModelSource, Task, TaskWithIssueData, TaskWithSubTasks } from './task.model';
+import { DEFAULT_TASK, DropListModelSource, Task, TaskWithSubTasks } from './task.model';
 import { select, Store } from '@ngrx/store';
 import {
   AddSubTask,
@@ -19,6 +19,7 @@ import {
   MoveToToday,
   MoveUp,
   RemoveTimeSpent,
+  RestoreTask,
   SetCurrentTask,
   TaskActionTypes,
   ToggleStart,
@@ -305,6 +306,10 @@ export class TaskService {
 
   toggleStartTask() {
     this._store.dispatch(new ToggleStart());
+  }
+
+  restoreTask(task: TaskWithSubTasks) {
+    this._store.dispatch(new RestoreTask({task}));
   }
 
 

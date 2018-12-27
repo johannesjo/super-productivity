@@ -99,11 +99,8 @@ export class WorklogComponent implements OnInit, OnDestroy {
             // TODO refactor to task action!!!
             worklogDay.logEntries.splice(index, 1);
             this.worklog = {...this.worklog};
-            this._taskService.add(task.title, false, task);
-            this._persistenceService.removeTaskFromArchive(this._projectId, task.id)
-              .then(() => {
-                this._router.navigate(['/work-view']);
-              });
+            this._taskService.restoreTask(task);
+            this._router.navigate(['/work-view']);
           }
         }
       });

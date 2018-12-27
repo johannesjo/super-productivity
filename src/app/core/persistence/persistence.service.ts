@@ -90,15 +90,22 @@ export class PersistenceService {
     return this._loadFromDb(this._makeProjectKey(projectId, LS_TASK_ARCHIVE));
   }
 
-  async removeTaskFromArchive(projectId: string, taskId: string) {
+  async removeTasksFromArchive(projectId: string, taskIds: string[]) {
     const lsKey = this._makeProjectKey(projectId, LS_TASK_ARCHIVE);
     const currentArchive: EntityState<Task> = await this._loadFromDb(lsKey);
-    const ids = currentArchive.ids as string[] || [];
-    if (ids.indexOf(taskId) > -1) {
-      delete currentArchive.entities[taskId];
-      ids.splice(ids.indexOf(taskId), 1);
-    }
-    return this._saveToDb(lsKey, currentArchive, true);
+    const allIds = currentArchive.ids as string[] || [];
+    const idsToRemove = [];
+    taskIds.forEach((taskId) => {
+      if (allIds.indexOf(taskId) > -1) {
+        delete currentArchive.entities[taskId];
+        idsToRemove.push(taskId);
+      }
+    });
+
+    return this._saveToDb(lsKey, {
+      ...currentArchive,
+      ids: allIds.filter((id) => !idsToRemove.includes(id)),
+    }, true);
   }
 
   async saveIssuesForProject(projectId, issueType: IssueProviderKey, data: IssueState, isForce = false): Promise<any> {

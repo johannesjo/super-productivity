@@ -26,6 +26,7 @@ export enum TaskActionTypes {
   AddSubTask = '[Task] Add SubTask',
 
   // Other
+  RestoreTask = '[Task] Restore Task',
   FocusTask = '[Task] Focus Task',
   FocusLastActiveTask = '[Task] Focus last active Task',
   MoveToBacklog = '[Task] Move to backlog',
@@ -133,6 +134,13 @@ export class RemoveTimeSpent implements Action {
   }
 }
 
+export class RestoreTask implements Action {
+  readonly type = TaskActionTypes.RestoreTask;
+
+  constructor(public payload: { task: TaskWithSubTasks }) {
+  }
+}
+
 export class FocusTask implements Action {
   readonly type = TaskActionTypes.FocusTask;
 
@@ -191,6 +199,7 @@ export type TaskActions
   | MoveDown
   | AddTimeSpent
   | RemoveTimeSpent
+  | RestoreTask
   | FocusTask
   | FocusLastActiveTask
   | AddSubTask

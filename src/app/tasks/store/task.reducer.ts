@@ -1,6 +1,6 @@
 import { createEntityAdapter, EntityAdapter, EntityState } from '@ngrx/entity';
 import { TaskActions, TaskActionTypes } from './task.actions';
-import { Task, TaskWithSubTasks, TimeSpentOnDay } from '../task.model';
+import { DEFAULT_TASK, Task, TaskWithSubTasks, TimeSpentOnDay } from '../task.model';
 import { calcTotalTimeSpent } from '../util/calc-total-time-spent';
 import { arrayMoveLeft, arrayMoveRight } from '../../core/util/array-move';
 import { AddAttachment, AttachmentActionTypes, DeleteAttachment } from '../../attachment/store/attachment.actions';
@@ -49,6 +49,13 @@ const getTaskById = (taskId: string, state: TaskState) => {
 };
 
 const filterOutId = (idToFilterOut) => (id) => id !== idToFilterOut;
+
+const mapTaskWithSubTasksToTask = (task: TaskWithSubTasks): Task => {
+  const copy = {...DEFAULT_TASK, ...task};
+  delete copy.subTasks;
+  delete copy.issueData;
+  return copy;
+};
 
 // SHARED REDUCER ACTIONS
 // ----------------------
@@ -581,6 +588,26 @@ export function taskReducer(
       };
     }
 
+    case TaskActionTypes.RestoreTask: {
+      const task = action.payload.task;
+      const tasksToAdd = [mapTaskWithSubTasksToTask(task)];
+
+      if (task.subTasks) {
+        task.subTasks.forEach((subTask: TaskWithSubTasks) => {
+          if (subTask && subTask.id) {
+            tasksToAdd.push(mapTaskWithSubTasksToTask(subTask));
+          }
+        });
+      }
+      return {
+        ...taskAdapter.addMany(tasksToAdd, state),
+        todaysTaskIds: [
+          task.id,
+          ...state.todaysTaskIds
+        ]
+      };
+    }
+
     case TaskActionTypes.FocusTask: {
       return {
         ...state,
@@ -662,7 +689,7 @@ export function taskReducer(
         copyState = deleteTask(copyState, task);
       });
       return {
-       ...copyState
+        ...copyState
       };
     }
 

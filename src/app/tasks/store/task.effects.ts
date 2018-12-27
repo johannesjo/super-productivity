@@ -101,6 +101,17 @@ export class TaskEffects {
       tap(this._notifyAboutTimeEstimateExceeded.bind(this))
     );
 
+  @Effect({dispatch: false}) restoreTask$: any = this._actions$
+    .pipe(
+      ofType(
+        TaskActionTypes.RestoreTask,
+      ),
+      withLatestFrom(
+        this._store$.pipe(select(selectCurrentProjectId)),
+      ),
+      tap(this._removeFromArchive.bind(this))
+    );
+
 
   constructor(private _actions$: Actions,
               private _store$: Store<any>,
@@ -119,6 +130,12 @@ export class TaskEffects {
     } else {
       throw new Error('No current project id');
     }
+  }
+
+  private _removeFromArchive([action, currentProjectId]) {
+    const task = action.payload.task;
+    const taskIds = [task.id, ...task.subTaskIds];
+    this._persistenceService.removeTasksFromArchive(currentProjectId, taskIds);
   }
 
   private _moveToArchive([action, currentProjectId]) {
