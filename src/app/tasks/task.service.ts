@@ -201,11 +201,7 @@ export class TaskService {
       additionalFields?: Partial<Task>,
       isAddToBottom = false,
   ) {
-    this._store.dispatch(new AddTask({
-      task: this._createNewTask(title, additionalFields),
-      isAddToBacklog,
-      isAddToBottom
-    }));
+    this.addWithIssue(title, null, null, isAddToBacklog, isAddToBottom);
   }
 
   addWithIssue(title: string,
