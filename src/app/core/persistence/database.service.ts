@@ -29,14 +29,6 @@ export class DatabaseService {
     }
   }
 
-  async saveWithLastActive(key: string, data: any): Promise<any> {
-    try {
-      return localForage.ready().then(() => localForage.setItem(key, data));
-    } catch (e) {
-      this._snackService.open({type: 'ERROR', message: 'Error while saving data'});
-    }
-  }
-
   private _init() {
     localForage.config({
       driver: localForage.INDEXEDDB, // Force WebSQL; same as using setDriver()

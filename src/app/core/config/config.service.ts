@@ -27,21 +27,24 @@ export class ConfigService {
     this.load();
   }
 
-  async load() {
+  async load(isOmitTokens = false) {
     const cfg = await this._persistenceService.loadGlobalConfig();
 
     if (cfg && Object.keys(cfg).length > 0) {
-      this.loadState(cfg);
+      this.loadState(cfg, isOmitTokens);
     } else {
       console.log('ConfigService No config found in ls');
     }
   }
 
-  loadState(state: GlobalConfig) {
+  loadState(state: GlobalConfig, isOmitTokens = false) {
     this._store.dispatch({
       type: ConfigActionTypes.LoadConfig,
       // always extend default config
-      payload: {...DEFAULT_CFG, ...state},
+      payload: {
+        cfg: {...DEFAULT_CFG, ...state},
+        isOmitTokens
+      },
     });
   }
 

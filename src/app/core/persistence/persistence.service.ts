@@ -263,7 +263,7 @@ export class PersistenceService {
   private async _saveToDb(key: string, data: any, isForce = false): Promise<any> {
     // console.log('save', key, this._isBlockSaving);
     if (!this._isBlockSaving || isForce === true) {
-      return this._databaseService.saveWithLastActive(key, data);
+      return this._databaseService.save(key, data);
     } else {
       console.warn('BLOCKED SAVING for ', key);
       return Promise.reject('Data import currently in progress. Saving disabled');

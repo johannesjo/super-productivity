@@ -15,8 +15,26 @@ export function configReducer(
   // console.log(action, state);
 
   switch (action.type) {
-    case ConfigActionTypes.LoadConfig:
-      return Object.assign({}, action.payload);
+    case ConfigActionTypes.LoadConfig: {
+      const {cfg, isOmitTokens} = action.payload;
+      if (isOmitTokens) {
+        const currentGoogleSession = state._googleSession
+          ? state._googleSession
+          : {};
+
+        return {
+          ...cfg,
+          _googleSession: {
+            ...cfg._googleSession,
+            ...currentGoogleSession
+          },
+        };
+      } else {
+        return {
+          ...cfg
+        };
+      }
+    }
 
     case ConfigActionTypes.UpdateConfigSection:
       const {sectionKey, sectionCfg} = action.payload;
