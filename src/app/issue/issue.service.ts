@@ -9,7 +9,7 @@ import { ProjectService } from '../project/project.service';
 import { map, switchMap, take } from 'rxjs/operators';
 import { JiraIssueService } from './jira/jira-issue/jira-issue.service';
 import { GitIssueService } from './git/git-issue/git-issue.service';
-import { SnackService } from '../core/snack/snack.service';
+import { GIT_TYPE, JIRA_TYPE } from './issue.const';
 
 @Injectable({
   providedIn: 'root'
@@ -39,7 +39,6 @@ export class IssueService {
     private _jiraIssueService: JiraIssueService,
     private _gitIssueService: GitIssueService,
     private _projectService: ProjectService,
-    private _snackService: SnackService,
   ) {
   }
 
@@ -80,10 +79,11 @@ export class IssueService {
 
   public refreshIssue(issueType: IssueProviderKey, issueId: string | number, issueData: IssueData) {
     switch (issueType) {
-      case 'JIRA': {
-        return this._jiraIssueService.updateIssueFromApi(issueId, issueData);
+      case JIRA_TYPE: {
+        this._jiraIssueService.updateIssueFromApi(issueId, issueData);
+        break;
       }
-      case 'GIT': {
+      case GIT_TYPE: {
         this._gitIssueService.updateIssueFromApi(issueId);
       }
     }
@@ -122,7 +122,7 @@ export class IssueService {
 
   public getMappedAttachments(issueType: IssueProviderKey, issueData_: IssueData): Attachment[] {
     switch (issueType) {
-      case 'JIRA': {
+      case JIRA_TYPE: {
         const issueData = issueData_ as JiraIssue;
         return this._jiraIssueService.getMappedAttachmentsFromIssue(issueData);
       }

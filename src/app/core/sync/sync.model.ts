@@ -3,7 +3,7 @@ import { TaskState } from '../../tasks/store/task.reducer';
 import { GlobalConfig } from '../config/config.model';
 import { EntityState } from '@ngrx/entity';
 import { Task } from '../../tasks/task.model';
-import { IssueEntityMap, IssueStateMap } from '../../issue/issue';
+import { IssueStateMap } from '../../issue/issue';
 import { BookmarkState } from '../../bookmark/store/bookmark.reducer';
 import { NoteState } from '../../note/store/note.reducer';
 

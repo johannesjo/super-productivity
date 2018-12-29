@@ -22,6 +22,8 @@ import { GitCfg } from '../../issue/git/git';
 import { DEFAULT_GIT_CFG } from '../../issue/git/git.const';
 import { GitApiService } from '../../issue/git/git-api.service';
 import { first } from 'rxjs/operators';
+import { JiraIssueState } from '../../issue/jira/jira-issue/store/jira-issue.reducer';
+import { GitIssueState } from '../../issue/git/git-issue/store/git-issue.reducer';
 
 @Injectable({
   providedIn: 'root'
@@ -134,6 +136,7 @@ export class MigrateService {
     // TASKS
     const todayIds = op.data.tasks.map(t => t.id);
     const backlogIds = op.data.backlogTasks.map(t => t.id);
+    const doneBacklogIds = op.data.doneBacklogTasks.map(t => t.id);
 
     if (freshIssues) {
       this._remapGitIssueIds(allTasks, freshIssues);
@@ -174,7 +177,7 @@ export class MigrateService {
     };
   }
 
-  private _getGitIssuesFromTasks(oldTasks: OldTask[]): EntityState<GitIssue> | null {
+  private _getGitIssuesFromTasks(oldTasks: OldTask[]): GitIssueState | null {
     const flatTasks = oldTasks
       .filter(t => !!t)
       .reduce((acc, t) => acc.concat(t.subTasks, [t]), [])
@@ -200,7 +203,7 @@ export class MigrateService {
     };
   }
 
-  private _getJiraIssuesFromTasks(oldTasks: OldTask[]): EntityState<JiraIssue> | null {
+  private _getJiraIssuesFromTasks(oldTasks: OldTask[]): JiraIssueState | null {
     const flatTasks = oldTasks
       .filter(t => !!t)
       .reduce((acc, t) => acc.concat(t.subTasks, [t]), [])
