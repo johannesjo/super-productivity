@@ -1,8 +1,8 @@
 import shortid from 'shortid';
-import { debounceTime, distinctUntilChanged, map, share, take, withLatestFrom } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, first, map, share, take, withLatestFrom } from 'rxjs/operators';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { DEFAULT_TASK, DropListModelSource, Task, TaskWithSubTasks } from './task.model';
+import { DEFAULT_TASK, DropListModelSource, Task, TaskWithIssueData, TaskWithSubTasks } from './task.model';
 import { select, Store } from '@ngrx/store';
 import {
   AddSubTask,
@@ -33,6 +33,7 @@ import { IssueData, IssueProviderKey } from '../issue/issue';
 import { TimeTrackingService } from '../time-tracking/time-tracking.service';
 import {
   selectAllStartableTasks,
+  selectAllTasksWithIssueData,
   selectBacklogTasksWithSubTasks,
   selectCurrentTask,
   selectCurrentTaskId,
@@ -52,6 +53,7 @@ import {
 import { stringToMs } from '../ui/duration/string-to-ms.pipe';
 import { getWorklogStr } from '../core/util/get-work-log-str';
 import { Actions, ofType } from '@ngrx/effects';
+import { ProjectService } from '../project/project.service';
 
 
 @Injectable()
@@ -148,10 +150,13 @@ export class TaskService {
 
   isTriggerPlanningMode$: Observable<boolean> = this._store.pipe(select(selectIsTriggerPlanningMode));
 
+  private _allTasksWithIssueData$: Observable<TaskWithIssueData[]> = this._store.pipe(select(selectAllTasksWithIssueData));
+
 
   constructor(
     private readonly _store: Store<any>,
     private readonly _persistenceService: PersistenceService,
+    private readonly _projectService: ProjectService,
     private readonly _timeTrackingService: TimeTrackingService,
     private readonly _actions$: Actions,
   ) {
@@ -201,7 +206,11 @@ export class TaskService {
       additionalFields?: Partial<Task>,
       isAddToBottom = false,
   ) {
-    this.addWithIssue(title, null, null, isAddToBacklog, isAddToBottom);
+    this._store.dispatch(new AddTask({
+      task: this._createNewTask(title, additionalFields),
+      isAddToBacklog,
+      isAddToBottom
+    }));
   }
 
   addWithIssue(title: string,
@@ -407,6 +416,25 @@ export class TaskService {
 
     } else {
       return task;
+    }
+  }
+
+  async checkForTaskWithIssue(issue: IssueData): Promise<{
+    task: TaskWithIssueData | TaskWithSubTasks,
+    isFromArchive: boolean,
+  }> {
+    const allTasks = await this._allTasksWithIssueData$.pipe(first()).toPromise();
+    const taskWithSameIssue: TaskWithIssueData = allTasks.find(task => task.issueId === issue.id);
+
+    if (taskWithSameIssue) {
+      return {task: taskWithSameIssue, isFromArchive: false};
+    } else {
+      const allArchiveTasks = await this._persistenceService.loadTaskArchiveForProject(this._projectService.currentId);
+      const ids = allArchiveTasks && allArchiveTasks.ids as string[];
+      if (ids) {
+        const archiveTaskWithSameIssue = ids.map(id => allArchiveTasks.entities[id]).find(task => task.issueId === issue.id);
+        return {task: archiveTaskWithSameIssue, isFromArchive: true};
+      }
     }
   }
 }

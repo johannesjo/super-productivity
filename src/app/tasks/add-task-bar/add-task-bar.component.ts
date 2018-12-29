@@ -6,6 +6,8 @@ import { JiraIssue } from '../../issue/jira/jira-issue/jira-issue.model';
 import { Subject } from 'rxjs';
 import { IssueService } from '../../issue/issue.service';
 import { SearchResultItem } from '../../issue/issue';
+import { DialogConfirmComponent } from '../../ui/dialog-confirm/dialog-confirm.component';
+import { MatDialog } from '@angular/material';
 
 @Component({
   selector: 'add-task-bar',
@@ -31,6 +33,7 @@ export class AddTaskBarComponent implements OnInit, OnDestroy, AfterViewInit {
   constructor(
     private _taskService: TaskService,
     private _issueService: IssueService,
+    private _matDialog: MatDialog,
   ) {
   }
 
@@ -90,7 +93,7 @@ export class AddTaskBarComponent implements OnInit, OnDestroy, AfterViewInit {
     return issue && issue.summary;
   }
 
-  addTask() {
+  async addTask() {
     const issueOrTitle = this.taskSuggestionsCtrl.value as string | SearchResultItem;
     if (typeof issueOrTitle === 'string') {
       if (issueOrTitle.length > 0) {
@@ -108,18 +111,53 @@ export class AddTaskBarComponent implements OnInit, OnDestroy, AfterViewInit {
         this.doubleEnterCount++;
       }
     } else {
-      this._taskService.addWithIssue(
-        issueOrTitle.title,
-        issueOrTitle.issueType,
-        issueOrTitle.issueData,
-        this.isAddToBacklog,
-      );
-      // // TODO move to issue effect
-      // // get full data
-      // this._jiraApiService.getIssueById(issueOrTitle.id)
-      //   .then((issue) => {
-      //     this._jiraIssueService.upsert(issue);
-      //   });
+      const res = await this._taskService.checkForTaskWithIssue(issueOrTitle.issueData);
+      if (!res) {
+        this._taskService.addWithIssue(
+          issueOrTitle.title,
+          issueOrTitle.issueType,
+          issueOrTitle.issueData,
+          this.isAddToBacklog,
+        );
+      } else if (res.isFromArchive) {
+        this._matDialog.open(DialogConfirmComponent, {
+          restoreFocus: true,
+          data: {
+            okTxt: 'Do it!',
+            message: `The issue <strong>${issueOrTitle.title}</strong> was already imported before
+to a task that is now archived. Do you still want to import it again?`,
+          }
+        }).afterClosed()
+          .subscribe((isConfirm: boolean) => {
+            if (isConfirm) {
+              this._taskService.addWithIssue(
+                issueOrTitle.title,
+                issueOrTitle.issueType,
+                issueOrTitle.issueData,
+                this.isAddToBacklog,
+              );
+            }
+          });
+      } else {
+        this._matDialog.open(DialogConfirmComponent, {
+          restoreFocus: true,
+          data: {
+            okTxt: 'Do it!',
+            message: `There is already a task with the same issue (<strong>${issueOrTitle.title}</strong>) present.
+ Do you still want to import it again?`,
+          }
+        }).afterClosed()
+          .subscribe((isConfirm: boolean) => {
+            if (isConfirm) {
+              this._taskService.addWithIssue(
+                issueOrTitle.title,
+                issueOrTitle.issueType,
+                issueOrTitle.issueData,
+                this.isAddToBacklog,
+              );
+            }
+          });
+      }
     }
 
     this.taskSuggestionsCtrl.setValue('');

@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Actions, Effect, ofType } from '@ngrx/effects';
 import { GitIssueActionTypes } from './git-issue.actions';
 import { select, Store } from '@ngrx/store';
-import { take, tap, withLatestFrom } from 'rxjs/operators';
+import { tap, withLatestFrom } from 'rxjs/operators';
 import { TaskActionTypes } from '../../../../tasks/store/task.actions';
 import { PersistenceService } from '../../../../core/persistence/persistence.service';
 import { selectAllGitIssues, selectGitIssueFeatureState } from './git-issue.reducer';
@@ -68,9 +68,6 @@ export class GitIssueEffects {
       ofType(
         GitIssueActionTypes.AddOpenGitIssuesToBacklog,
       ),
-      withLatestFrom(
-        this._store$.pipe(select(selectAllTasks)),
-      ),
       tap(this._importNewIssuesToBacklog.bind(this))
     );
 
@@ -97,18 +94,17 @@ export class GitIssueEffects {
     }
   }
 
-  private _importNewIssuesToBacklog([action, allTasks]: [Actions, Task[]]) {
+  private _importNewIssuesToBacklog([action]: [Actions, Task[]]) {
     this._gitApiService.getCompleteIssueDataForRepo().subscribe(issues => {
       let count = 0;
       let lastImportedIssue;
-      issues.forEach(issue => {
-        const isIssueAlreadyImported = allTasks.find(task => {
-          return task.issueType === 'GIT' && task.issueId.toString() === issue.id.toString();
-        });
+      issues.forEach(async issue => {
+        const res = await this._taskService.checkForTaskWithIssue(issue);
 
-        if (!isIssueAlreadyImported) {
+        if (!res) {
           count++;
           lastImportedIssue = issue;
+
           this._taskService.addWithIssue(
             `#${issue.number} ${issue.title}`,
             'GIT',
