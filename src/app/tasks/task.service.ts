@@ -29,7 +29,7 @@ import {
 } from './store/task.actions';
 import { initialTaskState, } from './store/task.reducer';
 import { PersistenceService } from '../core/persistence/persistence.service';
-import { IssueProviderKey } from '../issue/issue';
+import { IssueData, IssueProviderKey } from '../issue/issue';
 import { TimeTrackingService } from '../time-tracking/time-tracking.service';
 import {
   selectAllStartableTasks,
@@ -206,13 +206,13 @@ export class TaskService {
 
   addWithIssue(title: string,
                issueType: IssueProviderKey,
-               issue: any,
+               issue: IssueData,
                isAddToBacklog = false,
                isAddToBottom = false,
   ) {
     this._store.dispatch(new AddTask({
       task: this._createNewTask(title, {
-        issueId: issue.id,
+        issueId: issue && issue.id as string,
         issueType: issueType,
       }),
       issue,
