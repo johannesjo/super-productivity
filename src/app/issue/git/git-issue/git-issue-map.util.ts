@@ -4,7 +4,8 @@ import { IssueProviderKey, SearchResultItem } from '../../issue';
 
 export const mapGitIssue = (issue: GitOriginalIssue): GitIssue => {
   return {
-    id: issue.id,
+    id: issue.number,
+    _id: issue.id,
     // NOTE: url: issue.url,
     url: issue.html_url,
     repository_url: issue.repository_url,

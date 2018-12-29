@@ -4,7 +4,7 @@ import { select, Store } from '@ngrx/store';
 import { GitIssueActionTypes } from './store/git-issue.actions';
 import { PersistenceService } from '../../../core/persistence/persistence.service';
 import { GitIssueState, selectGitIssueById } from './store/git-issue.reducer';
-import { switchMap, take } from 'rxjs/operators';
+import { take } from 'rxjs/operators';
 import { GitApiService } from '../git-api.service';
 import { SnackService } from '../../../core/snack/snack.service';
 import { GitCfg } from '../git';
@@ -96,13 +96,10 @@ export class GitIssueService {
   }
 
   updateIssueFromApi(issueId_: number | string) {
-    const issueId = issueId_ as number;
-    this.getById(issueId)
-      .pipe(
-        switchMap((issue: GitIssue) => {
-          return this._gitApiService.getIssueWithCommentsByIssueNumber(issue.number).pipe(take(1));
-        })
-      ).subscribe((issue) => {
+    const issueNumber = issueId_ as number;
+    this._gitApiService.getIssueWithCommentsByIssueNumber(issueNumber).pipe(
+      take(1)
+    ).subscribe((issue) => {
       this.upsert(issue);
       this._snackService.open({
         icon: 'cloud_download',

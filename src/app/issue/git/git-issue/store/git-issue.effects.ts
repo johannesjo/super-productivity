@@ -14,7 +14,6 @@ import { ConfigService } from '../../../../core/config/config.service';
 import { GitIssue } from '../git-issue.model';
 import { GitCfg } from '../../git';
 import { SnackService } from '../../../../core/snack/snack.service';
-import { selectAllTasks } from '../../../../tasks/store/task.selectors';
 import { TaskService } from '../../../../tasks/task.service';
 import { Task } from '../../../../tasks/task.model';
 

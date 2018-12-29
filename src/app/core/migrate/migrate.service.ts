@@ -232,6 +232,7 @@ export class MigrateService {
     return {
       // copied data
       id: +ot.originalId,
+      _id: +ot.originalId,
       number: +ot.originalId,
       title: ot.title,
       body: ot.notes,
