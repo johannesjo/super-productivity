@@ -433,7 +433,7 @@ export class TaskService {
       const ids = allArchiveTasks && allArchiveTasks.ids as string[];
       if (ids) {
         const archiveTaskWithSameIssue = ids.map(id => allArchiveTasks.entities[id]).find(task => task.issueId === issue.id);
-        return {task: archiveTaskWithSameIssue, isFromArchive: true};
+        return archiveTaskWithSameIssue && {task: archiveTaskWithSameIssue, isFromArchive: true};
       }
     }
   }

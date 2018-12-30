@@ -6,8 +6,7 @@ import { JiraIssue } from '../../issue/jira/jira-issue/jira-issue.model';
 import { Subject } from 'rxjs';
 import { IssueService } from '../../issue/issue.service';
 import { SearchResultItem } from '../../issue/issue';
-import { DialogConfirmComponent } from '../../ui/dialog-confirm/dialog-confirm.component';
-import { MatDialog } from '@angular/material';
+import { SnackService } from '../../core/snack/snack.service';
 
 @Component({
   selector: 'add-task-bar',
@@ -33,7 +32,7 @@ export class AddTaskBarComponent implements OnInit, OnDestroy, AfterViewInit {
   constructor(
     private _taskService: TaskService,
     private _issueService: IssueService,
-    private _matDialog: MatDialog,
+    private _snackService: SnackService,
   ) {
   }
 
@@ -112,6 +111,8 @@ export class AddTaskBarComponent implements OnInit, OnDestroy, AfterViewInit {
       }
     } else {
       const res = await this._taskService.checkForTaskWithIssue(issueOrTitle.issueData);
+      console.log(res);
+
       if (!res) {
         this._taskService.addWithIssue(
           issueOrTitle.title,
@@ -120,43 +121,17 @@ export class AddTaskBarComponent implements OnInit, OnDestroy, AfterViewInit {
           this.isAddToBacklog,
         );
       } else if (res.isFromArchive) {
-        this._matDialog.open(DialogConfirmComponent, {
-          restoreFocus: true,
-          data: {
-            okTxt: 'Do it!',
-            message: `The issue <strong>${issueOrTitle.title}</strong> was already imported before
-to a task that is now archived. Do you still want to import it again?`,
-          }
-        }).afterClosed()
-          .subscribe((isConfirm: boolean) => {
-            if (isConfirm) {
-              this._taskService.addWithIssue(
-                issueOrTitle.title,
-                issueOrTitle.issueType,
-                issueOrTitle.issueData,
-                this.isAddToBacklog,
-              );
-            }
-          });
+        this._taskService.restoreTask(res.task);
+        this._snackService.open({
+          icon: 'info',
+          message: `Restored task <strong>${res.task.title}</strong> related to issue from archive`
+        });
       } else {
-        this._matDialog.open(DialogConfirmComponent, {
-          restoreFocus: true,
-          data: {
-            okTxt: 'Do it!',
-            message: `There is already a task with the same issue (<strong>${issueOrTitle.title}</strong>) present.
- Do you still want to import it again?`,
-          }
-        }).afterClosed()
-          .subscribe((isConfirm: boolean) => {
-            if (isConfirm) {
-              this._taskService.addWithIssue(
-                issueOrTitle.title,
-                issueOrTitle.issueType,
-                issueOrTitle.issueData,
-                this.isAddToBacklog,
-              );
-            }
-          });
+        this._taskService.moveToToday(res.task.id);
+        this._snackService.open({
+          icon: 'info',
+          message: `Moved existing task <strong>${res.task.title}</strong> to todays task list`
+        });
       }
     }
 
