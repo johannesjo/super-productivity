@@ -18,6 +18,7 @@ import { selectAllTasks } from '../../../../tasks/store/task.selectors';
 import { TaskService } from '../../../../tasks/task.service';
 import { Task } from '../../../../tasks/task.model';
 import { ProjectActionTypes } from '../../../../project/store/project.actions';
+import { GIT_TYPE } from '../../../issue.const';
 
 @Injectable()
 export class GitIssueEffects {
@@ -93,7 +94,7 @@ export class GitIssueEffects {
     console.log('SAVE GIT ISSUES');
     if (currentProjectId) {
       this._persistenceService.saveLastActive();
-      this._persistenceService.saveIssuesForProject(currentProjectId, 'GIT', gitIssueFeatureState);
+      this._persistenceService.saveIssuesForProject(currentProjectId, GIT_TYPE, gitIssueFeatureState);
     } else {
       throw new Error('No current project id');
     }
@@ -105,15 +106,16 @@ export class GitIssueEffects {
       let lastImportedIssue;
       issues.forEach(issue => {
         const isIssueAlreadyImported = allTasks.find(task => {
-          return task.issueType === 'GIT' && task.issueId.toString() === issue.id.toString();
+          return task.issueType === GIT_TYPE && task.issueId.toString() === issue.id.toString();
         });
 
+        console.log(isIssueAlreadyImported);
         if (!isIssueAlreadyImported) {
           count++;
           lastImportedIssue = issue;
           this._taskService.addWithIssue(
             `#${issue.number} ${issue.title}`,
-            'GIT',
+            GIT_TYPE,
             issue,
             true,
           );
