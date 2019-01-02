@@ -6,7 +6,7 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { GIT_API_BASE_URL } from './git.const';
 import { combineLatest, from, Observable, ObservableInput, throwError } from 'rxjs';
 import { GitOriginalComment, GitOriginalIssue } from './git-api-responses';
-import { catchError, map, share, take } from 'rxjs/operators';
+import { catchError, map, share, switchMap, take } from 'rxjs/operators';
 import { mapGitIssue, mapGitIssueToSearchResult } from './git-issue/git-issue-map.util';
 import { GitComment, GitIssue } from './git-issue/git-issue.model';
 import { SearchResultItem } from '../issue';
@@ -30,6 +30,13 @@ export class GitApiService {
     this._projectService.currentGitCfg$.subscribe((cfg: GitCfg) => {
       this._cfg = cfg;
     });
+  }
+
+  getById(id: number): Observable<GitIssue> {
+    this._checkSettings();
+
+    return this.getCompleteIssueDataForRepo()
+      .pipe(switchMap(issues => issues.filter(issue => issue.id === id)));
   }
 
   getCompleteIssueDataForRepo(repo = this._cfg.repo, isSkipCheck = false): Observable<GitIssue[]> {

@@ -80,6 +80,18 @@ export class IssueService {
     );
   }
 
+  public loadMissingIssueData(issueType: IssueProviderKey, issueId: string | number) {
+    console.log('LOADING MISSING ISSUE DATA', issueType, issueId);
+    switch (issueType) {
+      case JIRA_TYPE: {
+        this._jiraIssueService.loadMissingIssueData(issueId);
+        break;
+      }
+      case GIT_TYPE: {
+        this._gitIssueService.loadMissingIssueData(issueId);
+      }
+    }
+  }
 
   public refreshIssue(issueType: IssueProviderKey, issueId: string | number, issueData: IssueData) {
     switch (issueType) {

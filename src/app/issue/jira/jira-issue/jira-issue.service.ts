@@ -9,6 +9,7 @@ import { Attachment } from '../../../attachment/attachment.model';
 import { JiraApiService } from '../jira-api.service';
 import { SnackService } from '../../../core/snack/snack.service';
 import { IssueData } from '../../issue';
+import { take } from 'rxjs/operators';
 
 
 @Injectable()
@@ -87,6 +88,15 @@ export class JiraIssueService {
   }
 
   // HELPER
+  loadMissingIssueData(issueId) {
+    return this._jiraApiService.getIssueById(issueId, true)
+      .pipe(take(1))
+      .subscribe(issueData => {
+        this.add(issueData);
+      });
+
+  }
+
   updateIssueFromApi(issueId, oldIssueData_: IssueData, isUpdateWasUpdated = true) {
     const oldIssueData = oldIssueData_ as JiraIssue;
 

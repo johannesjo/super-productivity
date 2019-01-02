@@ -1,5 +1,5 @@
 import shortid from 'shortid';
-import { debounceTime, distinctUntilChanged, first, map, share, take, withLatestFrom } from 'rxjs/operators';
+import { debounceTime, delay, distinctUntilChanged, first, map, share, take, withLatestFrom } from 'rxjs/operators';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { DEFAULT_TASK, DropListModelSource, Task, TaskWithIssueData, TaskWithSubTasks } from './task.model';
@@ -164,14 +164,17 @@ export class TaskService {
   ) {
     // this.todaysTasks$.subscribe((val) => console.log(val));
     // this.focusTaskId$.subscribe((val) => console.log('SVC', val));
-    this.tasksWithMissingIssueData$.subscribe((tasks) => {
-      if (tasks && tasks.length > 0) {
-        console.warn('MISSING ISSUE', tasks);
-        tasks.forEach(task => {
-          // this._issueService.refreshIssue(task.issueType, task.issueId, undefined);
-        });
-      }
-    });
+    this.tasksWithMissingIssueData$
+      .pipe(delay(5000))
+      .subscribe((tasks) => {
+        if (tasks && tasks.length > 0) {
+          console.warn('MISSING ISSUE', tasks);
+          // TODO find a better solution for this
+          tasks.forEach(task => {
+            this._issueService.loadMissingIssueData(task.issueType, task.issueId);
+          });
+        }
+      });
 
     this.currentTaskId$.subscribe((val) => this.currentTaskId = val);
 
