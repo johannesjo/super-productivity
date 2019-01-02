@@ -1,7 +1,14 @@
 import { Injectable } from '@angular/core';
 import { loadFromLs, saveToLs } from '../persistence/local-storage';
-import { STORAGE_CURRENT_PROJECT, STORAGE_PROJECTS } from './migrate.const';
-import { DialogConfirmComponent } from '../../ui/dialog-confirm/dialog-confirm.component';
+import {
+  STORAGE_BACKLOG_TASKS,
+  STORAGE_CURRENT_PROJECT,
+  STORAGE_DONE_BACKLOG_TASKS,
+  STORAGE_JIRA_SETTINGS,
+  STORAGE_PROJECTS,
+  STORAGE_TASKS,
+  STORAGE_THEME
+} from './migrate.const';
 import { MatDialog } from '@angular/material';
 import { LS_IS_V1_MIGRATE } from '../persistence/ls-keys.const';
 import { SnackService } from '../snack/snack.service';
@@ -22,6 +29,7 @@ import { GitCfg } from '../../issue/git/git';
 import { DEFAULT_GIT_CFG } from '../../issue/git/git.const';
 import { GitApiService } from '../../issue/git/git-api.service';
 import { first } from 'rxjs/operators';
+import { DialogMigrateComponent } from './dialog-migrate/dialog-migrate.component';
 
 @Injectable({
   providedIn: 'root'
@@ -46,22 +54,19 @@ export class MigrateService {
   checkForUpdate() {
     const isMigrated = loadFromLs(LS_IS_V1_MIGRATE);
     // const isMigrated = localStorage.getItem(LS_IS_V1_MIGRATE);
-
-    if (!isMigrated && loadFromLs(STORAGE_CURRENT_PROJECT)) {
-      this._matDialog.open(DialogConfirmComponent, {
+    if (!isMigrated && loadFromLs(STORAGE_TASKS)) {
+      this._matDialog.open(DialogMigrateComponent, {
         restoreFocus: true,
-        data: {
-          okTxt: 'Do it!',
-          /* tslint:disable */
-          message: `<h2>Super Productivity V1 Data found</h2><p>Do you want to migrate it? Please note that only projects and tasks are migrated, but not your project configuration.</p><p>Please also note that the migration process might not be working as you would expect. There is probably a lot you need to tweak afterwards and it might even happen that the process fails completely, so making a backup of your data is highly recommended.</p>`,
-          /* tslint:enable */
-        }
       }).afterClosed()
-        .subscribe((isConfirm: boolean) => {
-          if (isConfirm) {
+        .subscribe((res: any) => {
+          if (res === 1) {
             this._migrateData().then(() => {
-
+              // set flag to not ask again
+              saveToLs(LS_IS_V1_MIGRATE, true);
             });
+          } else if (res === 2) {
+            // set flag to not ask again
+            saveToLs(LS_IS_V1_MIGRATE, true);
           }
         });
     }
@@ -76,17 +81,28 @@ export class MigrateService {
       if (allProjects && allProjects.length > 0) {
         const importPromises: Promise<any>[] = allProjects.map((projectData: OldProject) => this._importProject(projectData));
         await Promise.all(importPromises);
-      } else {
+      } else if (loadFromLs(STORAGE_CURRENT_PROJECT)) {
         const currentProjectData = loadFromLs(STORAGE_CURRENT_PROJECT);
         await this._importProject(currentProjectData);
+      } else {
+        await this._importProject({
+          title: 'Imported Default Project',
+          id: 'OLD_DEFAULT',
+          data: {
+            tasks: loadFromLs(STORAGE_TASKS) || [],
+            backlogTasks: loadFromLs(STORAGE_BACKLOG_TASKS) || [],
+            doneBacklogTasks: loadFromLs(STORAGE_DONE_BACKLOG_TASKS) || [],
+            theme: loadFromLs(STORAGE_THEME) || 'blue',
+            jiraSettings: loadFromLs(STORAGE_JIRA_SETTINGS) || {},
+          }
+        });
       }
       this._snackService.open({type: 'SUCCESS', message: 'Data imported'});
-
-      // set flag to not ask again
-      saveToLs(LS_IS_V1_MIGRATE, true);
-
     } catch (e) {
-      this._snackService.open({type: 'ERROR', message: 'Something went wrong while importing the data. Falling back to local backup'});
+      this._snackService.open({
+        type: 'ERROR',
+        message: 'Something went wrong while importing the data. Falling back to local backup'
+      });
       console.error(e);
       return await this._loadBackup();
     }

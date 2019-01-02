@@ -1,0 +1,27 @@
+<mat-dialog-content>
+  <div class="content">
+    <h2>Super Productivity V1 Data found</h2>
+    <p>Do you want to migrate it? Please note that only projects and tasks are migrated, but not your project
+      configuration.</p>
+    <p>Please also note that the migration process might not be working as you would expect. There is probably a lot you
+      need to tweak afterwards and it might even happen that the process fails completely, so making a backup of your
+      data is highly recommended.</p>
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <div class="wrap-buttons">
+    <button color="primary"
+            (click)="close(1)"
+            mat-raised-button>Do it!
+    </button>
+    <button color="warn"
+            (click)="close(2)"
+            mat-raised-button>Never!
+    </button>
+    <button type="button"
+            (click)="close()"
+            mat-raised-button>Cancel
+    </button>
+  </div>
+</mat-dialog-actions>
