@@ -15,12 +15,14 @@ import { Dictionary } from '@ngrx/entity';
 import { JiraChangelogEntry, JiraIssue } from '../jira-issue.model';
 import { JiraCfg } from '../../jira';
 import { SnackService } from '../../../../core/snack/snack.service';
+import { ProjectActionTypes } from '../../../../project/store/project.actions';
 
 @Injectable()
 export class JiraIssueEffects {
   @Effect({dispatch: false}) issuePolling$: any = this._actions$
     .pipe(
       ofType(
+        ProjectActionTypes.SetCurrentProject,
         TaskActionTypes.AddTask,
         JiraIssueActionTypes.LoadState,
         JiraIssueActionTypes.LoadJiraIssues,

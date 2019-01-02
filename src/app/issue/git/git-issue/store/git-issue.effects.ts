@@ -17,12 +17,14 @@ import { SnackService } from '../../../../core/snack/snack.service';
 import { selectAllTasks } from '../../../../tasks/store/task.selectors';
 import { TaskService } from '../../../../tasks/task.service';
 import { Task } from '../../../../tasks/task.model';
+import { ProjectActionTypes } from '../../../../project/store/project.actions';
 
 @Injectable()
 export class GitIssueEffects {
   @Effect({dispatch: false}) issuePolling$: any = this._actions$
     .pipe(
       ofType(
+        ProjectActionTypes.SetCurrentProject,
         TaskActionTypes.AddTask,
         TaskActionTypes.RestoreTask,
         TaskActionTypes.DeleteTask,
@@ -143,7 +145,7 @@ export class GitIssueEffects {
     if (isPollingEnabled) {
       this._pollingIntervalId = window.setInterval(() => {
         this._snackService.open({message: 'Git: Polling Changes for issues', icon: 'cloud_download'});
-        this._gitIssueService.updateIssuesFromApi(issues);
+        this._gitIssueService.updateIssuesFromApi(issues, gitCfg);
       }, GIT_POLL_INTERVAL);
     }
   }
