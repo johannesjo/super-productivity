@@ -9,7 +9,6 @@ import { ProjectService } from '../project/project.service';
 import { catchError, map, switchMap, take } from 'rxjs/operators';
 import { JiraIssueService } from './jira/jira-issue/jira-issue.service';
 import { GitIssueService } from './git/git-issue/git-issue.service';
-import { SnackService } from '../core/snack/snack.service';
 
 @Injectable({
   providedIn: 'root'
@@ -39,7 +38,6 @@ export class IssueService {
     private _jiraIssueService: JiraIssueService,
     private _gitIssueService: GitIssueService,
     private _projectService: ProjectService,
-    private _snackService: SnackService,
   ) {
   }
 
@@ -60,7 +58,7 @@ export class IssueService {
       switchMap(([isSearchJira, isSearchGit]) => {
         const obs = [];
         obs.push(from([[]]));
-console.log(isSearchJira);
+        console.log(isSearchJira);
         if (isSearchJira) {
           obs.push(
             this._jiraApiService.search(searchTerm, false, 50)
@@ -119,7 +117,7 @@ console.log(isSearchJira);
       take(1),
     ).subscribe((isJiraAddToBacklog) => {
       if (isJiraAddToBacklog) {
-        // this._gitApiService.refreshIssuesCache();
+        this._jiraIssueService.addOpenIssuesToBacklog();
       }
     });
   }

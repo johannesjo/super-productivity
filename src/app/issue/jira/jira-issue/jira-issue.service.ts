@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { JiraChangelogEntry, JiraIssue } from './jira-issue.model';
 import { Store } from '@ngrx/store';
-import { JiraIssueActionTypes } from './store/jira-issue.actions';
+import { AddOpenJiraIssuesToBacklog, JiraIssueActionTypes } from './store/jira-issue.actions';
 import { PersistenceService } from '../../../core/persistence/persistence.service';
 import { JiraIssueState } from './store/jira-issue.reducer';
 import { mapJiraAttachmentToAttachment } from './jira-issue-map.util';
@@ -82,12 +82,16 @@ export class JiraIssueService {
     });
   }
 
+  addOpenIssuesToBacklog() {
+    this._store.dispatch(new AddOpenJiraIssuesToBacklog());
+  }
+
   // HELPER
   updateIssueFromApi(issueId, oldIssueData_: IssueData) {
     const oldIssueData = oldIssueData_ as JiraIssue;
 
     this._jiraApiService.getIssueById(issueId, true)
-      .then((updatedIssue) => {
+      .subscribe((updatedIssue) => {
         const oldCommentLength = oldIssueData && oldIssueData.comments && oldIssueData.comments.length;
         const newCommentLength = updatedIssue && updatedIssue.comments && updatedIssue.comments.length;
         const isCommentsChanged = (oldCommentLength !== newCommentLength);
@@ -111,7 +115,9 @@ export class JiraIssueService {
           this.update(issueId, {
             ...updatedIssue,
             changelog,
-            lastUpdateFromRemote: updatedIssue.updated,
+            // TODO fix
+            // lastUpdateFromRemote: updatedIssue.updated,
+            lastUpdateFromRemote: Date.now(),
             wasUpdated: true
           });
           this._snackService.open({message: `Jira: ${updatedIssue.key} was updated`, icon: 'cloud_download'});

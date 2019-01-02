@@ -12,10 +12,14 @@ import { JiraIssueService } from '../jira-issue.service';
 import { JIRA_POLL_INTERVAL } from '../../jira.const';
 import { ConfigService } from '../../../../core/config/config.service';
 import { Dictionary } from '@ngrx/entity';
-import { JiraChangelogEntry, JiraIssue } from '../jira-issue.model';
+import { JiraIssue } from '../jira-issue.model';
 import { JiraCfg } from '../../jira';
 import { SnackService } from '../../../../core/snack/snack.service';
 import { ProjectActionTypes } from '../../../../project/store/project.actions';
+import { Task } from '../../../../tasks/task.model';
+import { JIRA_TYPE } from '../../../issue.const';
+import { selectAllTasks } from '../../../../tasks/store/task.selectors';
+import { TaskService } from '../../../../tasks/task.service';
 
 @Injectable()
 export class JiraIssueEffects {
@@ -57,12 +61,25 @@ export class JiraIssueEffects {
       ),
       tap(this._saveToLs.bind(this))
     );
+
+  @Effect({dispatch: false}) addOpenIssuesToBacklog$: any = this._actions$
+    .pipe(
+      ofType(
+        JiraIssueActionTypes.AddOpenJiraIssuesToBacklog,
+      ),
+      withLatestFrom(
+        this._store$.pipe(select(selectAllTasks)),
+      ),
+      tap(this._importNewIssuesToBacklog.bind(this))
+    );
+
   private _pollingIntervalId: number;
 
   constructor(private readonly _actions$: Actions,
               private readonly _store$: Store<any>,
               private readonly _configService: ConfigService,
               private readonly _snackService: SnackService,
+              private readonly _taskService: TaskService,
               private readonly _jiraApiService: JiraApiService,
               private readonly _jiraIssueService: JiraIssueService,
               private readonly _persistenceService: PersistenceService
@@ -95,5 +112,41 @@ export class JiraIssueEffects {
     }
   }
 
+  private _importNewIssuesToBacklog([action, allTasks]: [Actions, Task[]]) {
+    this._jiraApiService.findAutoImportIssues().subscribe((issues: JiraIssue[]) => {
+      let count = 0;
+      console.log(issues);
+      let lastImportedIssue;
+      issues.forEach(issue => {
+        const isIssueAlreadyImported = allTasks.find(task => {
+          return task.issueType === JIRA_TYPE && task.issueId === issue.id;
+        });
+
+        console.log(isIssueAlreadyImported, issue);
+        if (!isIssueAlreadyImported) {
+          count++;
+          lastImportedIssue = issue;
+          this._taskService.addWithIssue(
+            `${issue.key} ${issue.summary}`,
+            JIRA_TYPE,
+            issue,
+            true,
+          );
+        }
+      });
+
+      if (count === 1) {
+        this._snackService.open({
+          message: `Jira: Imported issue "${lastImportedIssue.key} ${lastImportedIssue.title}" from git to backlog`,
+          icon: 'cloud_download'
+        });
+      } else if (count > 1) {
+        this._snackService.open({
+          message: `Jira: Imported ${count} new issues from Jira to backlog`,
+          icon: 'cloud_download'
+        });
+      }
+    });
+  }
 }
 

@@ -6,6 +6,7 @@ import { AddTask } from '../../../../tasks/store/task.actions';
 
 export enum JiraIssueActionTypes {
   LoadState = '[JiraIssue] Load JiraIssue State',
+  AddOpenJiraIssuesToBacklog = '[JiraIssue] Add open issues to backlog',
 
   // JiraIssue Actions
   LoadJiraIssues = '[JiraIssue] Load JiraIssues',
@@ -24,6 +25,10 @@ export class LoadState implements Action {
 
   constructor(public payload: { state: JiraIssueState }) {
   }
+}
+
+export class AddOpenJiraIssuesToBacklog implements Action {
+  readonly type = JiraIssueActionTypes.AddOpenJiraIssuesToBacklog;
 }
 
 export class LoadJiraIssues implements Action {
@@ -89,6 +94,7 @@ export class ClearJiraIssues implements Action {
 export type JiraIssueActions
   = LoadJiraIssues
   | LoadState
+  | AddOpenJiraIssuesToBacklog
   | UpsertJiraIssue
   | AddJiraIssue
   | AddJiraIssues

@@ -8,7 +8,7 @@ import {
   JIRA_REQUEST_TIMEOUT_DURATION
 } from './jira.const';
 import { ProjectService } from '../../project/project.service';
-import { mapIssueResponse, mapResponse, mapToSearchResults } from './jira-issue/jira-issue-map.util';
+import { mapIssueResponse, mapIssuesResponse, mapResponse, mapToSearchResults } from './jira-issue/jira-issue-map.util';
 import { JiraOriginalStatus, JiraOriginalUser } from './jira-api-responses';
 import { JiraCfg } from './jira';
 import { ElectronService } from 'ngx-electron';
@@ -96,6 +96,24 @@ export class JiraApiService {
       apiMethod: 'searchJira',
       arguments: [searchQuery, options],
       transform: mapToSearchResults
+    });
+  }
+
+  findAutoImportIssues(isFetchAdditional?: boolean, maxResults: number = JIRA_MAX_RESULTS): Observable<JiraIssue[]> {
+    const options = {
+      maxResults: maxResults,
+      fields: isFetchAdditional ? JIRA_ADDITIONAL_ISSUE_FIELDS : JIRA_REDUCED_ISSUE_FIELDS,
+    };
+    const searchQuery = this._cfg.autoAddBacklogJqlQuery;
+
+    if (!searchQuery) {
+      return throwError('JiraApi: No search query for auto import');
+    }
+
+    return this._sendRequest({
+      apiMethod: 'searchJira',
+      arguments: [searchQuery, options],
+      transform: mapIssuesResponse
     });
   }
 

@@ -77,8 +77,10 @@ export class ProjectEffects {
     this._attachmentService.loadStateForProject(projectId);
     this._issueService.loadStatesForProject(projectId);
     this._taskService.loadStateForProject(projectId).then(() => {
-      this._issueService.refreshIssueData();
-      this._issueService.refreshBacklog();
+      setTimeout(() => {
+        this._issueService.refreshIssueData();
+        this._issueService.refreshBacklog();
+      }, 2000);
     });
   }
 }
