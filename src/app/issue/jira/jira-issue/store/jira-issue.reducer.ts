@@ -4,8 +4,9 @@ import { JiraIssue } from '../jira-issue.model';
 import { createFeatureSelector, createSelector } from '@ngrx/store';
 import { TaskActionTypes } from '../../../../tasks/store/task.actions';
 import { IssueProviderKey } from '../../../issue';
+import { JIRA_TYPE } from '../../../issue.const';
 
-export const JIRA_ISSUE_FEATURE_NAME: IssueProviderKey = 'JIRA';
+export const JIRA_ISSUE_FEATURE_NAME: IssueProviderKey = JIRA_TYPE;
 
 export interface JiraIssueState extends EntityState<JiraIssue> {
 }
@@ -44,12 +45,7 @@ export function jiraIssueReducer(
     }
 
     case TaskActionTypes.AddTask: {
-      if (!action.payload.issue) {
-        console.warn('No issue data provided, on adding task. (Only ok if getting an issue from archive)');
-        return state;
-      }
-
-      if (action.payload.task.issueType === 'JIRA') {
+      if (action.payload.issue && action.payload.task.issueType === JIRA_TYPE) {
         const issue = action.payload.issue as JiraIssue;
         return jiraIssueAdapter.upsertOne(issue, state);
       }
