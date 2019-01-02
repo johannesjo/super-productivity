@@ -33,6 +33,13 @@ export const ISSUE_PROVIDER_FORM_CFGS: ConfigFormConfig = [
 download the chrome extension</a> in order to allow communication with the Jira Api. Note that this doesn\'t work for mobile.</p>`,
       },
       {
+        key: 'isEnabled',
+        type: 'checkbox',
+        templateOptions: {
+          label: 'Enable jira integration',
+        },
+      },
+      {
         className: 'tpl',
         template: ' <h3 class="sub-section-heading">Credentials</h3>',
       },

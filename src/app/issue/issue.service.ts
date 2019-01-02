@@ -6,7 +6,7 @@ import { JiraApiService } from './jira/jira-api.service';
 import { GitApiService } from './git/git-api.service';
 import { combineLatest, from, Observable, zip } from 'rxjs';
 import { ProjectService } from '../project/project.service';
-import { map, switchMap, take } from 'rxjs/operators';
+import { catchError, map, switchMap, take } from 'rxjs/operators';
 import { JiraIssueService } from './jira/jira-issue/jira-issue.service';
 import { GitIssueService } from './git/git-issue/git-issue.service';
 import { SnackService } from '../core/snack/snack.service';
@@ -60,12 +60,16 @@ export class IssueService {
       switchMap(([isSearchJira, isSearchGit]) => {
         const obs = [];
         obs.push(from([[]]));
-
+console.log(isSearchJira);
         if (isSearchJira) {
-          obs.push(this._jiraApiService.search(searchTerm, false, 50)
-            .catch(() => {
-              return [];
-            }));
+          obs.push(
+            this._jiraApiService.search(searchTerm, false, 50)
+              .pipe(
+                catchError(() => {
+                  return [];
+                })
+              )
+          );
         }
 
         if (isSearchGit) {
