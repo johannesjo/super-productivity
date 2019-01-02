@@ -47,26 +47,31 @@ export class GitApiService {
 
 
   searchIssueForRepo(searchText: string, repo = this._cfg.repo): Observable<SearchResultItem[]> {
+    const filterFn = issue =>
+      issue.title.toLowerCase().match(searchText.toLowerCase())
+      || issue.body.toLowerCase().match(searchText.toLowerCase());
+
     this._checkSettings();
+
     if (this._cachedIssues && this._cachedIssues.length && (this._lastCacheUpdate + MAX_CACHE_AGE > Date.now())) {
-      return from([this._cachedIssues.map(mapGitIssueToSearchResult)]);
+      return from([
+        this._cachedIssues
+          .filter(filterFn)
+          .map(mapGitIssueToSearchResult)
+      ]);
     } else {
       const completeIssues$ = this.getCompleteIssueDataForRepo(repo)
         .pipe(
           catchError(this._handleRequestError.bind(this)),
           // a single request should suffice
           share(),
-          // tap(issues => console.log(issues)),
         );
 
       // update cache
       completeIssues$.pipe(take(1)).subscribe(issues => this._updateIssueCache(issues));
 
       return completeIssues$.pipe(map((issues: GitIssue[]) =>
-          issues.filter(issue =>
-            issue.title.toLowerCase().match(searchText.toLowerCase())
-            || issue.body.toLowerCase().match(searchText.toLowerCase())
-          )
+          issues.filter(filterFn)
             .map(mapGitIssueToSearchResult)
         ),
       );
@@ -154,10 +159,16 @@ export class GitApiService {
     console.error(error);
     if (error.error instanceof ErrorEvent) {
       // A client-side or network error occurred. Handle it accordingly.
-      this._snackService.open({type: 'ERROR', message: 'GitHub: Request failed because of a client side network error'});
+      this._snackService.open({
+        type: 'ERROR',
+        message: 'GitHub: Request failed because of a client side network error'
+      });
     } else {
       // The backend returned an unsuccessful response code.
-      this._snackService.open({type: 'ERROR', message: `GitHub: API returned ${error.status}. ${error.error && error.error.message}`});
+      this._snackService.open({
+        type: 'ERROR',
+        message: `GitHub: API returned ${error.status}. ${error.error && error.error.message}`
+      });
     }
     return throwError('GitHub: Api request failed.');
   }
