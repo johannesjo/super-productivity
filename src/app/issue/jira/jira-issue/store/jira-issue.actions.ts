@@ -97,7 +97,5 @@ export type JiraIssueActions
   | DeleteJiraIssue
   | DeleteJiraIssues
   | ClearJiraIssues
-  // From tasks model
-  | AddTask
   ;
 
