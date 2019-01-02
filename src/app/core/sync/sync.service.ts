@@ -54,7 +54,7 @@ export class SyncService {
         // save data to local storage
         await Promise.all([
           // reload view model from ls
-          this._configService.load(),
+          this._configService.load(true),
           this._projectService.load(),
           this._taskService.loadStateForProject(curId),
           this._bookmarkService.loadStateForProject(curId),

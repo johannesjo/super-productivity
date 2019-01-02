@@ -6,6 +6,7 @@ import { JiraIssue } from '../../issue/jira/jira-issue/jira-issue.model';
 import { Subject } from 'rxjs';
 import { IssueService } from '../../issue/issue.service';
 import { SearchResultItem } from '../../issue/issue';
+import { SnackService } from '../../core/snack/snack.service';
 
 @Component({
   selector: 'add-task-bar',
@@ -31,6 +32,7 @@ export class AddTaskBarComponent implements OnInit, OnDestroy, AfterViewInit {
   constructor(
     private _taskService: TaskService,
     private _issueService: IssueService,
+    private _snackService: SnackService,
   ) {
   }
 
@@ -90,7 +92,7 @@ export class AddTaskBarComponent implements OnInit, OnDestroy, AfterViewInit {
     return issue && issue.summary;
   }
 
-  addTask() {
+  async addTask() {
     const issueOrTitle = this.taskSuggestionsCtrl.value as string | SearchResultItem;
     if (typeof issueOrTitle === 'string') {
       if (issueOrTitle.length > 0) {
@@ -108,18 +110,29 @@ export class AddTaskBarComponent implements OnInit, OnDestroy, AfterViewInit {
         this.doubleEnterCount++;
       }
     } else {
-      this._taskService.addWithIssue(
-        issueOrTitle.title,
-        issueOrTitle.issueType,
-        issueOrTitle.issueData,
-        this.isAddToBacklog,
-      );
-      // // TODO move to issue effect
-      // // get full data
-      // this._jiraApiService.getIssueById(issueOrTitle.id)
-      //   .then((issue) => {
-      //     this._jiraIssueService.upsert(issue);
-      //   });
+      const res = await this._taskService.checkForTaskWithIssue(issueOrTitle.issueData);
+      console.log(res);
+
+      if (!res) {
+        this._taskService.addWithIssue(
+          issueOrTitle.title,
+          issueOrTitle.issueType,
+          issueOrTitle.issueData,
+          this.isAddToBacklog,
+        );
+      } else if (res.isFromArchive) {
+        this._taskService.restoreTask(res.task);
+        this._snackService.open({
+          icon: 'info',
+          message: `Restored task <strong>${res.task.title}</strong> related to issue from archive`
+        });
+      } else {
+        this._taskService.moveToToday(res.task.id);
+        this._snackService.open({
+          icon: 'info',
+          message: `Moved existing task <strong>${res.task.title}</strong> to todays task list`
+        });
+      }
     }
 
     this.taskSuggestionsCtrl.setValue('');

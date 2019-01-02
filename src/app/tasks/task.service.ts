@@ -1,8 +1,8 @@
 import shortid from 'shortid';
-import { debounceTime, distinctUntilChanged, map, share, take, withLatestFrom } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, first, map, share, take, withLatestFrom } from 'rxjs/operators';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { DEFAULT_TASK, DropListModelSource, Task, TaskWithSubTasks } from './task.model';
+import { DEFAULT_TASK, DropListModelSource, Task, TaskWithIssueData, TaskWithSubTasks } from './task.model';
 import { select, Store } from '@ngrx/store';
 import {
   AddSubTask,
@@ -29,10 +29,11 @@ import {
 } from './store/task.actions';
 import { initialTaskState, } from './store/task.reducer';
 import { PersistenceService } from '../core/persistence/persistence.service';
-import { IssueProviderKey } from '../issue/issue';
+import { IssueData, IssueProviderKey } from '../issue/issue';
 import { TimeTrackingService } from '../time-tracking/time-tracking.service';
 import {
   selectAllStartableTasks,
+  selectAllTasksWithIssueData,
   selectBacklogTasksWithSubTasks,
   selectCurrentTask,
   selectCurrentTaskId,
@@ -53,6 +54,7 @@ import { stringToMs } from '../ui/duration/string-to-ms.pipe';
 import { getWorklogStr } from '../core/util/get-work-log-str';
 import { Actions, ofType } from '@ngrx/effects';
 import { IssueService } from '../issue/issue.service';
+import { ProjectService } from '../project/project.service';
 
 
 @Injectable()
@@ -149,11 +151,14 @@ export class TaskService {
 
   isTriggerPlanningMode$: Observable<boolean> = this._store.pipe(select(selectIsTriggerPlanningMode));
 
+  private _allTasksWithIssueData$: Observable<TaskWithIssueData[]> = this._store.pipe(select(selectAllTasksWithIssueData));
+
 
   constructor(
     private readonly _store: Store<any>,
     private readonly _persistenceService: PersistenceService,
     private readonly _issueService: IssueService,
+    private readonly _projectService: ProjectService,
     private readonly _timeTrackingService: TimeTrackingService,
     private readonly _actions$: Actions,
   ) {
@@ -215,13 +220,13 @@ export class TaskService {
 
   addWithIssue(title: string,
                issueType: IssueProviderKey,
-               issue: any,
+               issue: IssueData,
                isAddToBacklog = false,
                isAddToBottom = false,
   ) {
     this._store.dispatch(new AddTask({
       task: this._createNewTask(title, {
-        issueId: issue.id,
+        issueId: issue && issue.id as string,
         issueType: issueType,
       }),
       issue,
@@ -416,6 +421,25 @@ export class TaskService {
 
     } else {
       return task;
+    }
+  }
+
+  async checkForTaskWithIssue(issue: IssueData): Promise<{
+    task: TaskWithIssueData | TaskWithSubTasks,
+    isFromArchive: boolean,
+  }> {
+    const allTasks = await this._allTasksWithIssueData$.pipe(first()).toPromise();
+    const taskWithSameIssue: TaskWithIssueData = allTasks.find(task => task.issueId === issue.id);
+
+    if (taskWithSameIssue) {
+      return {task: taskWithSameIssue, isFromArchive: false};
+    } else {
+      const allArchiveTasks = await this._persistenceService.loadTaskArchiveForProject(this._projectService.currentId);
+      const ids = allArchiveTasks && allArchiveTasks.ids as string[];
+      if (ids) {
+        const archiveTaskWithSameIssue = ids.map(id => allArchiveTasks.entities[id]).find(task => task.issueId === issue.id);
+        return archiveTaskWithSameIssue && {task: archiveTaskWithSameIssue, isFromArchive: true};
+      }
     }
   }
 }

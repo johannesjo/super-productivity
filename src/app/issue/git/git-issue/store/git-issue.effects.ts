@@ -13,7 +13,6 @@ import { ConfigService } from '../../../../core/config/config.service';
 import { GitIssue } from '../git-issue.model';
 import { GitCfg } from '../../git';
 import { SnackService } from '../../../../core/snack/snack.service';
-import { selectAllTasks } from '../../../../tasks/store/task.selectors';
 import { TaskService } from '../../../../tasks/task.service';
 import { Task } from '../../../../tasks/task.model';
 import { ProjectActionTypes } from '../../../../project/store/project.actions';
@@ -72,9 +71,6 @@ export class GitIssueEffects {
       ofType(
         GitIssueActionTypes.AddOpenGitIssuesToBacklog,
       ),
-      withLatestFrom(
-        this._store$.pipe(select(selectAllTasks)),
-      ),
       tap(this._importNewIssuesToBacklog.bind(this))
     );
 
@@ -100,18 +96,17 @@ export class GitIssueEffects {
     }
   }
 
-  private _importNewIssuesToBacklog([action, allTasks]: [Actions, Task[]]) {
+  private _importNewIssuesToBacklog([action]: [Actions, Task[]]) {
     this._gitApiService.getCompleteIssueDataForRepo().subscribe(issues => {
       let count = 0;
       let lastImportedIssue;
-      issues.forEach(issue => {
-        const isIssueAlreadyImported = allTasks.find(task => {
-          return task.issueType === GIT_TYPE && task.issueId.toString() === issue.id.toString();
-        });
+      issues.forEach(async issue => {
+        const res = await this._taskService.checkForTaskWithIssue(issue);
 
-        if (!isIssueAlreadyImported) {
+        if (!res) {
           count++;
           lastImportedIssue = issue;
+
           this._taskService.addWithIssue(
             `#${issue.number} ${issue.title}`,
             GIT_TYPE,

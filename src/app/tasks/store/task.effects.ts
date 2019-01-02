@@ -34,6 +34,7 @@ export class TaskEffects {
     .pipe(
       ofType(
         TaskActionTypes.AddTask,
+        TaskActionTypes.RestoreTask,
         TaskActionTypes.AddTimeSpent,
         TaskActionTypes.DeleteTask,
         TaskActionTypes.UndoDeleteTask,

@@ -10,7 +10,7 @@ export enum ConfigActionTypes {
 export class LoadConfig implements Action {
   readonly type = ConfigActionTypes.LoadConfig;
 
-  constructor(public payload: GlobalConfig) {
+  constructor(public payload: { cfg: GlobalConfig, isOmitTokens: boolean }) {
   }
 }
 

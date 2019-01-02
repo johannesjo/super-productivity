@@ -16,12 +16,6 @@ export interface IssueIntegrationCfgs {
   GIT?: GitCfg;
 }
 
-export interface IssueEntityMap {
-  JIRA: Dictionary<JiraIssue>;
-  GIT: Dictionary<GitIssue>;
-}
-
-
 export interface IssueStateMap {
   JIRA: JiraIssueState;
   GIT: GitIssueState;

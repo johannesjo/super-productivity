@@ -16,7 +16,6 @@ export type GitComment = GitOriginalComment;
 
 
 export type GitIssue = Readonly<{
-  id: number;
   repository_url: string;
   labels_url: string;
   comments_url: string;
@@ -41,10 +40,13 @@ export type GitIssue = Readonly<{
   wasUpdated: boolean;
   commentsNr: number;
   apiUrl: string;
+  _id: number;
 
   // transformed
   comments?: GitComment[];
   url: string;
+  // NOTE: we use the issue number as id as well, as it there is not much to be done with the id with the api
+  id: number;
 
   // removed
   // node_id: string;

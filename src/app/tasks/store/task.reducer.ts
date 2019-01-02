@@ -589,7 +589,7 @@ export function taskReducer(
     }
 
     case TaskActionTypes.RestoreTask: {
-      const task = action.payload.task;
+      const task = {...action.payload.task, isDone: false};
       const tasksToAdd = [mapTaskWithSubTasksToTask(task)];
 
       if (task.subTasks) {
