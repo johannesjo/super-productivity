@@ -107,8 +107,8 @@ export class JiraIssueService {
               created: lastUpdate.toISOString(),
               author: null,
               field: 'Comments',
-              from: oldCommentLength.toString(),
-              to: newCommentLength.toString(),
+              from: oldCommentLength ? oldCommentLength.toString() : '0',
+              to: newCommentLength ? newCommentLength.toString() : '0',
             });
           }
 
