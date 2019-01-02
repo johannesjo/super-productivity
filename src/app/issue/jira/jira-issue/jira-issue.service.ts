@@ -87,13 +87,13 @@ export class JiraIssueService {
   }
 
   // HELPER
-  updateIssueFromApi(issueId, oldIssueData_: IssueData) {
+  updateIssueFromApi(issueId, oldIssueData_: IssueData, isUpdateWasUpdated = true) {
     const oldIssueData = oldIssueData_ as JiraIssue;
 
-    this._jiraApiService.getIssueById(issueId, true)
+    return this._jiraApiService.getIssueById(issueId, true)
       .subscribe((updatedIssue) => {
-        const oldCommentLength = oldIssueData && oldIssueData.comments && oldIssueData.comments.length;
-        const newCommentLength = updatedIssue && updatedIssue.comments && updatedIssue.comments.length;
+        const oldCommentLength = oldIssueData && oldIssueData.comments && oldIssueData.comments.length || 0;
+        const newCommentLength = updatedIssue && updatedIssue.comments && updatedIssue.comments.length || 0;
         const isCommentsChanged = (oldCommentLength !== newCommentLength);
 
         if (updatedIssue.updated !== oldIssueData.updated || isCommentsChanged) {
@@ -118,7 +118,7 @@ export class JiraIssueService {
             // TODO fix
             // lastUpdateFromRemote: updatedIssue.updated,
             lastUpdateFromRemote: Date.now(),
-            wasUpdated: true
+            wasUpdated: isUpdateWasUpdated
           });
           this._snackService.open({message: `Jira: ${updatedIssue.key} was updated`, icon: 'cloud_download'});
         }

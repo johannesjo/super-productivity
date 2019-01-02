@@ -58,7 +58,7 @@ export class IssueService {
       switchMap(([isSearchJira, isSearchGit]) => {
         const obs = [];
         obs.push(from([[]]));
-        console.log(isSearchJira);
+
         if (isSearchJira) {
           obs.push(
             this._jiraApiService.search(searchTerm, false, 50)
@@ -74,7 +74,7 @@ export class IssueService {
           obs.push(this._gitApiService.searchIssueForRepo(searchTerm));
         }
 
-        return zip(...obs, (...allResults) => [].concat(...(allResults)));
+        return zip(...obs, (...allResults) => [].concat(...allResults));
       })
     );
   }
@@ -86,7 +86,7 @@ export class IssueService {
         return this._jiraIssueService.updateIssueFromApi(issueId, issueData);
       }
       case 'GIT': {
-        this._gitIssueService.updateIssueFromApi(issueId);
+        return this._gitIssueService.updateIssueFromApi(issueId);
       }
     }
   }

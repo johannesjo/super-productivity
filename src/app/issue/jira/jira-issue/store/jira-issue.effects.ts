@@ -9,7 +9,7 @@ import { selectJiraIssueEntities, selectJiraIssueFeatureState, selectJiraIssueId
 import { selectCurrentProjectId, selectProjectJiraCfg } from '../../../../project/store/project.reducer';
 import { JiraApiService } from '../../jira-api.service';
 import { JiraIssueService } from '../jira-issue.service';
-import { JIRA_POLL_INTERVAL } from '../../jira.const';
+import { JIRA_INITIAL_POLL_DELAY, JIRA_POLL_INTERVAL } from '../../jira.const';
 import { ConfigService } from '../../../../core/config/config.service';
 import { Dictionary } from '@ngrx/entity';
 import { JiraIssue } from '../jira-issue.model';
@@ -20,6 +20,7 @@ import { Task } from '../../../../tasks/task.model';
 import { JIRA_TYPE } from '../../../issue.const';
 import { selectAllTasks } from '../../../../tasks/store/task.selectors';
 import { TaskService } from '../../../../tasks/task.service';
+import { Subscription, timer } from 'rxjs';
 
 @Injectable()
 export class JiraIssueEffects {
@@ -28,6 +29,9 @@ export class JiraIssueEffects {
       ofType(
         ProjectActionTypes.SetCurrentProject,
         TaskActionTypes.AddTask,
+        TaskActionTypes.DeleteTask,
+        TaskActionTypes.RestoreTask,
+        TaskActionTypes.MoveToArchive,
         JiraIssueActionTypes.LoadState,
         JiraIssueActionTypes.LoadJiraIssues,
         JiraIssueActionTypes.AddJiraIssue,
@@ -48,6 +52,9 @@ export class JiraIssueEffects {
     .pipe(
       ofType(
         TaskActionTypes.AddTask,
+        TaskActionTypes.DeleteTask,
+        TaskActionTypes.RestoreTask,
+        TaskActionTypes.MoveToArchive,
         JiraIssueActionTypes.AddJiraIssue,
         JiraIssueActionTypes.DeleteJiraIssue,
         JiraIssueActionTypes.UpdateJiraIssue,
@@ -73,7 +80,7 @@ export class JiraIssueEffects {
       tap(this._importNewIssuesToBacklog.bind(this))
     );
 
-  private _pollingIntervalId: number;
+  private _pollSub: Subscription;
 
   constructor(private readonly _actions$: Actions,
               private readonly _store$: Store<any>,
@@ -98,17 +105,21 @@ export class JiraIssueEffects {
   private _reInitIssuePolling(
     [action, issueIds, entities, jiraCfg]: [JiraIssueActionTypes, string[], Dictionary<JiraIssue>, JiraCfg]
   ) {
-    if (this._pollingIntervalId) {
-      window.clearInterval(this._pollingIntervalId);
-      this._pollingIntervalId = 0;
+
+    if (this._pollSub) {
+      this._pollSub.unsubscribe();
     }
+
     const isPollingEnabled = jiraCfg && jiraCfg.isEnabled && jiraCfg.isAutoPollTickets;
+
     if (isPollingEnabled && issueIds && issueIds.length) {
-      this._pollingIntervalId = window.setInterval(() => {
-        // TODO remove
-        this._snackService.open({message: 'Jira: Polling Changes for issues', icon: 'cloud_download'});
-        issueIds.forEach((id) => this._jiraIssueService.updateIssueFromApi(id, entities[id]));
-      }, JIRA_POLL_INTERVAL);
+      this._pollSub = timer(JIRA_INITIAL_POLL_DELAY, JIRA_POLL_INTERVAL)
+        .pipe(
+          tap(() => {
+            this._snackService.open({message: 'Jira: Polling Changes for issues', icon: 'cloud_download'});
+            issueIds.forEach((id) => this._jiraIssueService.updateIssueFromApi(id, entities[id]));
+          })
+        ).subscribe();
     }
   }
 
@@ -122,7 +133,6 @@ export class JiraIssueEffects {
           return task.issueType === JIRA_TYPE && task.issueId === issue.id;
         });
 
-        console.log(isIssueAlreadyImported, issue);
         if (!isIssueAlreadyImported) {
           count++;
           lastImportedIssue = issue;
