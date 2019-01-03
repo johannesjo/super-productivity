@@ -64,7 +64,6 @@ export class ProjectEffects {
         ]);
       }),
       map(data => {
-        console.log(data);
         return new LoadProjectRelatedDataSuccess();
       })
     );

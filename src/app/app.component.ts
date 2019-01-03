@@ -1,4 +1,12 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, HostListener, Inject, OnInit } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  ElementRef,
+  HostListener,
+  Inject,
+  OnInit
+} from '@angular/core';
 import { MatIconRegistry } from '@angular/material';
 import { DomSanitizer } from '@angular/platform-browser';
 import { ProjectService } from './project/project.service';
@@ -9,7 +17,12 @@ import { ConfigService } from './core/config/config.service';
 import { blendInOutAnimation } from './ui/animations/blend-in-out.ani';
 import { LayoutService } from './core/layout/layout.service';
 import { ElectronService } from 'ngx-electron';
-import { IPC_APP_READY, IPC_ERROR, IPC_TRANSFER_SETTINGS_REQUESTED, IPC_TRANSFER_SETTINGS_TO_ELECTRON } from '../ipc-events.const';
+import {
+  IPC_APP_READY,
+  IPC_ERROR,
+  IPC_TRANSFER_SETTINGS_REQUESTED,
+  IPC_TRANSFER_SETTINGS_TO_ELECTRON
+} from '../ipc-events.const';
 import { SnackService } from './core/snack/snack.service';
 import { IS_ELECTRON } from './app.constants';
 import { GoogleDriveSyncService } from './core/google/google-drive-sync.service';
@@ -23,6 +36,9 @@ import { MediaMatcher } from '@angular/cdk/layout';
 import { DOCUMENT } from '@angular/common';
 import { take } from 'rxjs/operators';
 import { MigrateService } from './core/migrate/migrate.service';
+import { Observable } from 'rxjs';
+import { selectIsAllProjectDataLoaded } from './project/store/project.reducer';
+import { Store } from '@ngrx/store';
 
 const SIDE_PANEL_BREAKPOINT = 900;
 
@@ -35,6 +51,8 @@ const SIDE_PANEL_BREAKPOINT = 900;
 })
 export class AppComponent implements OnInit {
   mobileQuery: MediaQueryList;
+  isAllDataLoaded$: Observable<boolean> = this._store.select(selectIsAllProjectDataLoaded);
+
   private _mobileQueryListener: () => void;
   private _currentTheme: string;
 
@@ -54,6 +72,7 @@ export class AppComponent implements OnInit {
     private _el: ElementRef,
     private _cd: ChangeDetectorRef,
     private _media: MediaMatcher,
+    private _store: Store<any>,
     public readonly layoutService: LayoutService,
     public readonly bookmarkService: BookmarkService,
     public readonly noteService: NoteService,

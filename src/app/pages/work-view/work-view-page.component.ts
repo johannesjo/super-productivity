@@ -21,7 +21,7 @@ export class WorkViewPageComponent implements OnInit, OnDestroy {
   isShowTimeWorkedWithoutBreak = true;
   // no todays tasks at all
   isPlanYourDay = false;
-  splitInputPos = 0;
+  splitInputPos = 100;
 
   // we do it here to have the tasks in memory all the time
   backlogTasks: TaskWithSubTasks[];
@@ -73,12 +73,9 @@ export class WorkViewPageComponent implements OnInit, OnDestroy {
         withLatestFrom(this.taskService.backlogTasks$),
       )
         .subscribe(([isPlanning, backlogTasks]) => {
-          console.log('XXX', isPlanning, backlogTasks);
           this.isPlanYourDay = isPlanning;
           if (isPlanning && backlogTasks && backlogTasks.length) {
             this.splitInputPos = 50;
-          } else {
-            this.splitInputPos = 100;
           }
           this._cd.detectChanges();
         })
