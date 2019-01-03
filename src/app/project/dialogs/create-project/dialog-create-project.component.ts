@@ -34,6 +34,7 @@ export class DialogCreateProjectComponent implements OnInit, OnDestroy {
   formCfg: FormlyFieldConfig[] = BASIC_PROJECT_CONFIG_FORM_CONFIG.items;
 
   private _subs = new Subscription();
+  private _isSaveTmpProject: boolean;
 
   constructor(
     @Inject(MAT_DIALOG_DATA) private _project: Project,
@@ -50,6 +51,7 @@ export class DialogCreateProjectComponent implements OnInit, OnDestroy {
       if (loadFromSessionStorage(SS_PROJECT_TMP)) {
         this.projectData = loadFromSessionStorage(SS_PROJECT_TMP);
       }
+      this._isSaveTmpProject = true;
 
       // save tmp data if adding a new project
       // NOTE won't be properly executed if added to subs
@@ -62,7 +64,9 @@ export class DialogCreateProjectComponent implements OnInit, OnDestroy {
           ...this.projectData,
           issueIntegrationCfgs,
         };
-        saveToSessionStorage(SS_PROJECT_TMP, projectDataToSave);
+        if (this._isSaveTmpProject) {
+          saveToSessionStorage(SS_PROJECT_TMP, projectDataToSave);
+        }
       });
     }
 
@@ -96,6 +100,9 @@ export class DialogCreateProjectComponent implements OnInit, OnDestroy {
     } else {
       this._projectService.add(projectDataToSave);
     }
+    this._isSaveTmpProject = false;
+    saveToSessionStorage(SS_PROJECT_TMP, null);
+
     this._matDialogRef.close();
   }
 
