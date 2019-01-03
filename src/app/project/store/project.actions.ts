@@ -6,6 +6,7 @@ import { IssueIntegrationCfg, IssueProviderKey } from '../../issue/issue';
 
 export enum ProjectActionTypes {
   LoadProjectState = '[Project] Load Project State',
+  LoadProjectRelatedDataSuccess = '[Project] Load Project related Data Success',
   SetCurrentProject = '[Project] SetCurrentProject',
 
   // Project Actions
@@ -25,6 +26,9 @@ export class LoadProjectState implements Action {
 
   constructor(public payload: { state: ProjectState }) {
   }
+}
+export class LoadProjectRelatedDataSuccess implements Action {
+  readonly type = ProjectActionTypes.LoadProjectRelatedDataSuccess;
 }
 
 export class SetCurrentProject implements Action {
@@ -106,6 +110,7 @@ export class DeleteProjects implements Action {
 export type ProjectActions
   = LoadProjects
   | LoadProjectState
+  | LoadProjectRelatedDataSuccess
   | SetCurrentProject
   | AddProject
   | AddProjects

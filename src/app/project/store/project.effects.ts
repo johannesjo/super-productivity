@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { Actions, Effect, ofType } from '@ngrx/effects';
 import { select, Store } from '@ngrx/store';
-import { map, tap, withLatestFrom } from 'rxjs/operators';
-import { AddProject, DeleteProject, ProjectActionTypes } from './project.actions';
+import { map, switchMap, tap, withLatestFrom } from 'rxjs/operators';
+import { AddProject, DeleteProject, LoadProjectRelatedDataSuccess, ProjectActionTypes } from './project.actions';
 import { selectCurrentProjectId, selectProjectFeatureState } from './project.reducer';
 import { PersistenceService } from '../../core/persistence/persistence.service';
 import { TaskService } from '../../tasks/task.service';
@@ -45,7 +45,7 @@ export class ProjectEffects {
     );
 
 
-  @Effect({dispatch: false}) onProjectIdChange$: any = this._actions$
+  @Effect() onProjectIdChange$: any = this._actions$
     .pipe(
       ofType(
         ProjectActionTypes.LoadProjectState,
@@ -54,7 +54,32 @@ export class ProjectEffects {
       withLatestFrom(
         this._store$.pipe(select(selectCurrentProjectId))
       ),
-      tap(this._reloadRelatedStates.bind(this)),
+      switchMap(([action, projectId]) => {
+        return Promise.all([
+          this._noteService.loadStateForProject(projectId),
+          this._bookmarkService.loadStateForProject(projectId),
+          this._attachmentService.loadStateForProject(projectId),
+          this._issueService.loadStatesForProject(projectId),
+          this._taskService.loadStateForProject(projectId),
+        ]);
+      }),
+      map(data => {
+        console.log(data);
+        return new LoadProjectRelatedDataSuccess();
+      })
+    );
+
+  @Effect({dispatch: false}) onProjectRelatedDataLoaded$: any = this._actions$
+    .pipe(
+      ofType(
+        ProjectActionTypes.LoadProjectRelatedDataSuccess,
+      ),
+      tap(() => {
+        setTimeout(() => {
+          this._issueService.refreshIssueData();
+          this._issueService.refreshBacklog();
+        }, 2000);
+      })
     );
 
   @Effect() onProjectCreated: any = this._actions$
@@ -99,19 +124,6 @@ export class ProjectEffects {
 
   private _saveToLs([action, projectFeatureState]) {
     this._persistenceService.saveProjectsMeta(projectFeatureState);
-  }
-
-  private _reloadRelatedStates([action, projectId]) {
-    this._noteService.loadStateForProject(projectId);
-    this._bookmarkService.loadStateForProject(projectId);
-    this._attachmentService.loadStateForProject(projectId);
-    this._issueService.loadStatesForProject(projectId);
-    this._taskService.loadStateForProject(projectId).then(() => {
-      setTimeout(() => {
-        this._issueService.refreshIssueData();
-        this._issueService.refreshBacklog();
-      }, 2000);
-    });
   }
 }
 
