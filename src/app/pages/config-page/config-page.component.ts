@@ -8,6 +8,7 @@ import { Project, ProjectAdvancedCfg, ProjectCfgFormKey } from '../../project/pr
 import { BASIC_PROJECT_CONFIG_FORM_CONFIG, PROJECT_CONFIG_FORM_CONFIG } from '../../project/project-form-cfg.const';
 import { IssueIntegrationCfg, IssueIntegrationCfgs, IssueProviderKey } from '../../issue/issue';
 import { ISSUE_PROVIDER_FORM_CFGS } from '../../issue/issue.const';
+import { dirtyDeepCopy } from '../../core/util/dirtyDeepCopy';
 
 @Component({
   selector: 'config-page',
@@ -15,10 +16,10 @@ import { ISSUE_PROVIDER_FORM_CFGS } from '../../issue/issue.const';
   styleUrls: ['./config-page.component.scss']
 })
 export class ConfigPageComponent implements OnInit, OnDestroy {
-  basicProjectSettingsFormCfg = BASIC_PROJECT_CONFIG_FORM_CONFIG;
-  projectConfigFormCfg = PROJECT_CONFIG_FORM_CONFIG;
-  issueIntegrationFormCfg = ISSUE_PROVIDER_FORM_CFGS;
-  globalConfigFormCfg = GLOBAL_CONFIG_FORM_CONFIG;
+  basicProjectSettingsFormCfg = dirtyDeepCopy(BASIC_PROJECT_CONFIG_FORM_CONFIG);
+  projectConfigFormCfg = dirtyDeepCopy(PROJECT_CONFIG_FORM_CONFIG);
+  issueIntegrationFormCfg = dirtyDeepCopy(ISSUE_PROVIDER_FORM_CFGS);
+  globalConfigFormCfg = dirtyDeepCopy(GLOBAL_CONFIG_FORM_CONFIG);
 
   currentProject: Project;
   projectCfg: ProjectAdvancedCfg;
@@ -59,8 +60,8 @@ export class ConfigPageComponent implements OnInit, OnDestroy {
   }
 
   saveIssueProviderCfg($event: { sectionKey: ConfigSectionKey | ProjectCfgFormKey, config: IssueIntegrationCfg }) {
-   const {sectionKey, config} = $event;
-   const sectionKey_ = sectionKey as IssueProviderKey;
+    const {sectionKey, config} = $event;
+    const sectionKey_ = sectionKey as IssueProviderKey;
     this.projectService.updateIssueProviderConfig(this.currentProject.id, sectionKey_, {
       ...config,
     }, true);
