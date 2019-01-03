@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { Actions, Effect, ofType } from '@ngrx/effects';
 import { select, Store } from '@ngrx/store';
-import { tap, withLatestFrom } from 'rxjs/operators';
-import { ProjectActionTypes } from './project.actions';
+import { map, tap, withLatestFrom } from 'rxjs/operators';
+import { AddProject, DeleteProject, ProjectActionTypes } from './project.actions';
 import { selectCurrentProjectId, selectProjectFeatureState } from './project.reducer';
 import { PersistenceService } from '../../core/persistence/persistence.service';
 import { TaskService } from '../../tasks/task.service';
@@ -10,6 +10,8 @@ import { BookmarkService } from '../../bookmark/bookmark.service';
 import { AttachmentService } from '../../attachment/attachment.service';
 import { NoteService } from '../../note/note.service';
 import { IssueService } from '../../issue/issue.service';
+import { SnackService } from '../../core/snack/snack.service';
+import { SnackOpen } from '../../core/snack/store/snack.actions';
 
 @Injectable()
 export class ProjectEffects {
@@ -55,9 +57,37 @@ export class ProjectEffects {
       tap(this._reloadRelatedStates.bind(this)),
     );
 
+  @Effect() onProjectCreated: any = this._actions$
+    .pipe(
+      ofType(
+        ProjectActionTypes.AddProject,
+      ),
+      map((action: AddProject) => {
+        return new SnackOpen({
+          icon: 'add',
+          type: 'SUCCESS',
+          message: `Created project <strong>${action.payload.project.title}</strong>. You can select it from the menu on the top left.`
+        });
+      }),
+    );
+
+  @Effect() onProjectDeleted: any = this._actions$
+    .pipe(
+      ofType(
+        ProjectActionTypes.DeleteProject,
+      ),
+      map((action: DeleteProject) => {
+        return new SnackOpen({
+          icon: 'delete_forever',
+          message: `Deleted project <strong>${action.payload.id}</strong>`
+        });
+      }),
+    );
+
   constructor(
     private _actions$: Actions,
     private _store$: Store<any>,
+    private _snackService: SnackService,
     private _persistenceService: PersistenceService,
     private _taskService: TaskService,
     private _issueService: IssueService,
