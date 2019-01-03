@@ -126,7 +126,6 @@ export class JiraIssueEffects {
   private _importNewIssuesToBacklog([action, allTasks]: [Actions, Task[]]) {
     this._jiraApiService.findAutoImportIssues().subscribe((issues: JiraIssue[]) => {
       let count = 0;
-      console.log(issues);
       let lastImportedIssue;
       issues.forEach(issue => {
         const isIssueAlreadyImported = allTasks.find(task => {

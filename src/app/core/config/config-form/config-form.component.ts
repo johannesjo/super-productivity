@@ -16,11 +16,7 @@ export class ConfigFormComponent {
   @Output() save: EventEmitter<{ sectionKey: ConfigSectionKey | ProjectCfgFormKey, config: any }> = new EventEmitter();
   fields: FormlyFieldConfig[];
   form = new FormGroup({});
-  options: FormlyFormOptions = {
-    formState: {
-      awesomeIsForced: false,
-    },
-  };
+  options: FormlyFormOptions = {};
 
   constructor() {
   }

@@ -101,7 +101,6 @@ export class GitApiService {
     ).pipe(
       catchError(this._handleRequestError.bind(this)),
       map(([issue, comments]: [GitOriginalIssue, GitOriginalComment[]]) => {
-        console.log('GITHBU GET ISSUE BY ID RES', issue, comments);
         return {
           ...mapGitIssue(issue),
           comments: comments,
@@ -181,8 +180,6 @@ export class GitApiService {
   }
 
   private _mergeIssuesAndComments(issues: GitIssue[], comments: GitComment[]): GitIssue[] {
-    console.log(issues, comments);
-
     return issues.map(issue => {
       return {
         ...issue,

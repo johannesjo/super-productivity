@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { expandAnimation } from '../../../ui/animations/expand.ani';
 import { ConfigSectionKey } from '../config.model';
 import { ProjectCfgFormKey } from '../../../project/project.model';
@@ -9,7 +9,7 @@ import { ProjectCfgFormKey } from '../../../project/project.model';
   styleUrls: ['./config-section.component.scss'],
   animations: expandAnimation,
 })
-export class ConfigSectionComponent implements OnInit {
+export class ConfigSectionComponent {
   @Input() section;
   @Input() cfg;
   @Output() save: EventEmitter<{ sectionKey: ConfigSectionKey | ProjectCfgFormKey, config: any }> = new EventEmitter();
@@ -17,9 +17,6 @@ export class ConfigSectionComponent implements OnInit {
   public isExpanded = false;
 
   constructor() {
-  }
-
-  ngOnInit() {
   }
 
   onSave($event) {

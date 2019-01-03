@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, Inject, OnDestroy, OnInit } from '@angular/core';
+import { Component, Inject, OnDestroy, OnInit } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material';
 import { Project } from '../../project.model';
 import { FormGroup } from '@angular/forms';
@@ -40,7 +40,6 @@ export class DialogCreateProjectComponent implements OnInit, OnDestroy {
     private _projectService: ProjectService,
     private _matDialog: MatDialog,
     private _matDialogRef: MatDialogRef<DialogCreateProjectComponent>,
-    private _cd: ChangeDetectorRef,
   ) {
   }
 
