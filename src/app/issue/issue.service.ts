@@ -6,7 +6,7 @@ import { JiraApiService } from './jira/jira-api.service';
 import { GitApiService } from './git/git-api.service';
 import { combineLatest, from, Observable, zip } from 'rxjs';
 import { ProjectService } from '../project/project.service';
-import { map, switchMap, take } from 'rxjs/operators';
+import { catchError, map, switchMap, take } from 'rxjs/operators';
 import { JiraIssueService } from './jira/jira-issue/jira-issue.service';
 import { GitIssueService } from './git/git-issue/git-issue.service';
 import { GIT_TYPE, JIRA_TYPE } from './issue.const';
@@ -61,21 +61,37 @@ export class IssueService {
         obs.push(from([[]]));
 
         if (isSearchJira) {
-          obs.push(this._jiraApiService.search(searchTerm, false, 50)
-            .catch(() => {
-              return [];
-            }));
+          obs.push(
+            this._jiraApiService.search(searchTerm, false, 50)
+              .pipe(
+                catchError(() => {
+                  return [];
+                })
+              )
+          );
         }
 
         if (isSearchGit) {
           obs.push(this._gitApiService.searchIssueForRepo(searchTerm));
         }
 
-        return zip(...obs, (...allResults) => [].concat(...(allResults)));
+        return zip(...obs, (...allResults) => [].concat(...allResults));
       })
     );
   }
 
+  public loadMissingIssueData(issueType: IssueProviderKey, issueId: string | number) {
+    console.log('LOADING MISSING ISSUE DATA', issueType, issueId);
+    switch (issueType) {
+      case JIRA_TYPE: {
+        this._jiraIssueService.loadMissingIssueData(issueId);
+        break;
+      }
+      case GIT_TYPE: {
+        this._gitIssueService.loadMissingIssueData(issueId);
+      }
+    }
+  }
 
   public refreshIssue(issueType: IssueProviderKey, issueId: string | number, issueData: IssueData) {
     switch (issueType) {
@@ -115,7 +131,7 @@ export class IssueService {
       take(1),
     ).subscribe((isJiraAddToBacklog) => {
       if (isJiraAddToBacklog) {
-        // this._gitApiService.refreshIssuesCache();
+        this._jiraIssueService.addOpenIssuesToBacklog();
       }
     });
   }

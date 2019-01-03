@@ -88,13 +88,12 @@ export const selectFocusIdsForBacklog = createSelector(
   selectBacklogTasksWithSubTasks,
   (backlogTasks) => getFlatIdList(backlogTasks)
 );
-export const selectMissingIssueIds = createSelector(
+export const selectTasksWithMissingIssueData = createSelector(
   selectAllTasksWithIssueData,
   (tasks) => tasks && tasks
     .filter(
       (task: TaskWithSubTasks) => (!task.issueData && (task.issueType || task.issueId))
     )
-    .map(task => task.issueId)
 );
 export const selectIsTriggerPlanningMode = createSelector(
   selectTodaysTasksWithSubTasks,

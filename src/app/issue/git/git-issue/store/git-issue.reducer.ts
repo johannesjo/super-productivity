@@ -50,13 +50,7 @@ export function gitIssueReducer(
     }
 
     case TaskActionTypes.AddTask: {
-      // TODO check if this still is a valid check
-      if (!action.payload.issue) {
-        console.warn('No issue data provided, on adding task. (Only ok if getting an issue from archive)');
-        return state;
-      }
-
-      if (action.payload.task.issueType === GIT_TYPE) {
+      if (action.payload.issue && action.payload.task.issueType === GIT_TYPE) {
         const issue = action.payload.issue as GitIssue;
         return gitIssueAdapter.upsertOne(issue, state);
       }

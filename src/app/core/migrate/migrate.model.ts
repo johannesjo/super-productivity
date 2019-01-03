@@ -78,12 +78,12 @@ export interface OldProjectData {
   jiraSettings: OldJiraSettings;
 
   // not migrated
-  currentSession: any;
-  distractions: any;
-  git: any;
-  lastActiveTaskTask: any;
-  note: any;
-  startedTimeToday: any;
+  currentSession?: any;
+  distractions?: any;
+  git?: any;
+  lastActiveTaskTask?: any;
+  note?: any;
+  startedTimeToday?: any;
 }
 
 export interface OldProject {

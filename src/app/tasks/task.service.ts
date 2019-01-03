@@ -1,5 +1,5 @@
 import shortid from 'shortid';
-import { debounceTime, distinctUntilChanged, first, map, share, take, withLatestFrom } from 'rxjs/operators';
+import { debounceTime, delay, distinctUntilChanged, first, map, share, take, withLatestFrom } from 'rxjs/operators';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { DEFAULT_TASK, DropListModelSource, Task, TaskWithIssueData, TaskWithSubTasks } from './task.model';
@@ -43,8 +43,8 @@ import {
   selectFocusIdsForWorkView,
   selectFocusTaskId,
   selectIsTriggerPlanningMode,
-  selectMissingIssueIds,
   selectTaskById,
+  selectTasksWithMissingIssueData,
   selectTodaysDoneTasksWithSubTasks,
   selectTodaysTasksWithSubTasks,
   selectTodaysUnDoneTasksWithSubTasks,
@@ -53,6 +53,7 @@ import {
 import { stringToMs } from '../ui/duration/string-to-ms.pipe';
 import { getWorklogStr } from '../core/util/get-work-log-str';
 import { Actions, ofType } from '@ngrx/effects';
+import { IssueService } from '../issue/issue.service';
 import { ProjectService } from '../project/project.service';
 
 
@@ -135,10 +136,10 @@ export class TaskService {
     }),
     // throttleTime(50)
   );
-  missingIssuesForTasks$ = this._store.pipe(
+  tasksWithMissingIssueData$ = this._store.pipe(
     // wait for issue model to be loaded
     debounceTime(1000),
-    select(selectMissingIssueIds),
+    select(selectTasksWithMissingIssueData),
     distinctUntilChanged(),
   );
 
@@ -156,17 +157,24 @@ export class TaskService {
   constructor(
     private readonly _store: Store<any>,
     private readonly _persistenceService: PersistenceService,
+    private readonly _issueService: IssueService,
     private readonly _projectService: ProjectService,
     private readonly _timeTrackingService: TimeTrackingService,
     private readonly _actions$: Actions,
   ) {
     // this.todaysTasks$.subscribe((val) => console.log(val));
     // this.focusTaskId$.subscribe((val) => console.log('SVC', val));
-    this.missingIssuesForTasks$.subscribe((val) => {
-      if (val && val.length > 0) {
-        console.warn('MISSING ISSUE', val);
-      }
-    });
+    this.tasksWithMissingIssueData$
+      .pipe(delay(5000))
+      .subscribe((tasks) => {
+        if (tasks && tasks.length > 0) {
+          console.warn('MISSING ISSUE', tasks);
+          // TODO find a better solution for this
+          tasks.forEach(task => {
+            this._issueService.loadMissingIssueData(task.issueType, task.issueId);
+          });
+        }
+      });
 
     this.currentTaskId$.subscribe((val) => this.currentTaskId = val);
 

@@ -9,19 +9,29 @@ import { selectJiraIssueEntities, selectJiraIssueFeatureState, selectJiraIssueId
 import { selectCurrentProjectId, selectProjectJiraCfg } from '../../../../project/store/project.reducer';
 import { JiraApiService } from '../../jira-api.service';
 import { JiraIssueService } from '../jira-issue.service';
-import { JIRA_POLL_INTERVAL } from '../../jira.const';
+import { JIRA_INITIAL_POLL_DELAY, JIRA_POLL_INTERVAL } from '../../jira.const';
 import { ConfigService } from '../../../../core/config/config.service';
 import { Dictionary } from '@ngrx/entity';
-import { JiraChangelogEntry, JiraIssue } from '../jira-issue.model';
+import { JiraIssue } from '../jira-issue.model';
 import { JiraCfg } from '../../jira';
 import { SnackService } from '../../../../core/snack/snack.service';
+import { ProjectActionTypes } from '../../../../project/store/project.actions';
+import { Task } from '../../../../tasks/task.model';
+import { JIRA_TYPE } from '../../../issue.const';
+import { selectAllTasks } from '../../../../tasks/store/task.selectors';
+import { TaskService } from '../../../../tasks/task.service';
+import { Subscription, timer } from 'rxjs';
 
 @Injectable()
 export class JiraIssueEffects {
   @Effect({dispatch: false}) issuePolling$: any = this._actions$
     .pipe(
       ofType(
+        ProjectActionTypes.SetCurrentProject,
         TaskActionTypes.AddTask,
+        TaskActionTypes.DeleteTask,
+        TaskActionTypes.RestoreTask,
+        TaskActionTypes.MoveToArchive,
         JiraIssueActionTypes.LoadState,
         JiraIssueActionTypes.LoadJiraIssues,
         JiraIssueActionTypes.AddJiraIssue,
@@ -42,6 +52,9 @@ export class JiraIssueEffects {
     .pipe(
       ofType(
         TaskActionTypes.AddTask,
+        TaskActionTypes.DeleteTask,
+        TaskActionTypes.RestoreTask,
+        TaskActionTypes.MoveToArchive,
         JiraIssueActionTypes.AddJiraIssue,
         JiraIssueActionTypes.DeleteJiraIssue,
         JiraIssueActionTypes.UpdateJiraIssue,
@@ -55,12 +68,25 @@ export class JiraIssueEffects {
       ),
       tap(this._saveToLs.bind(this))
     );
-  private _pollingIntervalId: number;
+
+  @Effect({dispatch: false}) addOpenIssuesToBacklog$: any = this._actions$
+    .pipe(
+      ofType(
+        JiraIssueActionTypes.AddOpenJiraIssuesToBacklog,
+      ),
+      withLatestFrom(
+        this._store$.pipe(select(selectAllTasks)),
+      ),
+      tap(this._importNewIssuesToBacklog.bind(this))
+    );
+
+  private _pollSub: Subscription;
 
   constructor(private readonly _actions$: Actions,
               private readonly _store$: Store<any>,
               private readonly _configService: ConfigService,
               private readonly _snackService: SnackService,
+              private readonly _taskService: TaskService,
               private readonly _jiraApiService: JiraApiService,
               private readonly _jiraIssueService: JiraIssueService,
               private readonly _persistenceService: PersistenceService
@@ -79,19 +105,58 @@ export class JiraIssueEffects {
   private _reInitIssuePolling(
     [action, issueIds, entities, jiraCfg]: [JiraIssueActionTypes, string[], Dictionary<JiraIssue>, JiraCfg]
   ) {
-    if (this._pollingIntervalId) {
-      window.clearInterval(this._pollingIntervalId);
-      this._pollingIntervalId = 0;
+
+    if (this._pollSub) {
+      this._pollSub.unsubscribe();
     }
+
     const isPollingEnabled = jiraCfg && jiraCfg.isEnabled && jiraCfg.isAutoPollTickets;
+
     if (isPollingEnabled && issueIds && issueIds.length) {
-      this._pollingIntervalId = window.setInterval(() => {
-        // TODO remove
-        this._snackService.open({message: 'Jira: Polling Changes for issues', icon: 'cloud_download'});
-        issueIds.forEach((id) => this._jiraIssueService.updateIssueFromApi(id, entities[id]));
-      }, JIRA_POLL_INTERVAL);
+      this._pollSub = timer(JIRA_INITIAL_POLL_DELAY, JIRA_POLL_INTERVAL)
+        .pipe(
+          tap(() => {
+            this._snackService.open({message: 'Jira: Polling Changes for issues', icon: 'cloud_download'});
+            issueIds.forEach((id) => this._jiraIssueService.updateIssueFromApi(id, entities[id]));
+          })
+        ).subscribe();
     }
   }
 
+  private _importNewIssuesToBacklog([action, allTasks]: [Actions, Task[]]) {
+    this._jiraApiService.findAutoImportIssues().subscribe((issues: JiraIssue[]) => {
+      let count = 0;
+      console.log(issues);
+      let lastImportedIssue;
+      issues.forEach(issue => {
+        const isIssueAlreadyImported = allTasks.find(task => {
+          return task.issueType === JIRA_TYPE && task.issueId === issue.id;
+        });
+
+        if (!isIssueAlreadyImported) {
+          count++;
+          lastImportedIssue = issue;
+          this._taskService.addWithIssue(
+            `${issue.key} ${issue.summary}`,
+            JIRA_TYPE,
+            issue,
+            true,
+          );
+        }
+      });
+
+      if (count === 1) {
+        this._snackService.open({
+          message: `Jira: Imported issue "${lastImportedIssue.key} ${lastImportedIssue.title}" from git to backlog`,
+          icon: 'cloud_download'
+        });
+      } else if (count > 1) {
+        this._snackService.open({
+          message: `Jira: Imported ${count} new issues from Jira to backlog`,
+          icon: 'cloud_download'
+        });
+      }
+    });
+  }
 }
 

@@ -9,6 +9,7 @@ import { GitApiService } from '../git-api.service';
 import { SnackService } from '../../../core/snack/snack.service';
 import { GitCfg } from '../git';
 import { Observable } from 'rxjs';
+import { GIT_TYPE } from '../../issue.const';
 
 
 @Injectable()
@@ -27,7 +28,7 @@ export class GitIssueService {
   // META
   // ----
   async loadStateForProject(projectId: string) {
-    const lsGitIssueState = await this._persistenceService.loadIssuesForProject(projectId, 'GIT') as GitIssueState;
+    const lsGitIssueState = await this._persistenceService.loadIssuesForProject(projectId, GIT_TYPE) as GitIssueState;
     if (lsGitIssueState) {
       this.loadState(lsGitIssueState);
     }
@@ -95,6 +96,16 @@ export class GitIssueService {
     return this._store.pipe(select(selectGitIssueById, {id}), take(1));
   }
 
+  loadMissingIssueData(issueId) {
+    return this._gitApiService.getById(issueId)
+      .pipe(take(1))
+      .subscribe(issueData => {
+        this.add(issueData);
+      });
+
+  }
+
+
   updateIssueFromApi(issueId_: number | string) {
     const issueNumber = issueId_ as number;
     this._gitApiService.getIssueWithCommentsByIssueNumber(issueNumber).pipe(
@@ -108,7 +119,7 @@ export class GitIssueService {
     });
   }
 
-  updateIssuesFromApi(oldIssues: GitIssue[], cfg?: GitCfg, isNotify = true) {
+  updateIssuesFromApi(oldIssues: GitIssue[], cfg: GitCfg, isNotify = true) {
     console.log('UPDATE ISSUE FROM API');
     this._gitApiService.getCompleteIssueDataForRepo(cfg.repo)
       .pipe(

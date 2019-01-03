@@ -10,8 +10,10 @@
       </div>
 
       <div class="issue-providers">
-        <mat-icon *ngIf="project.issueIntegrationCfgs?.JIRA?.isEnabled">explore</mat-icon>
-        <mat-icon *ngIf="project.issueIntegrationCfgs?.GIT?.repo">card_giftcard</mat-icon>
+        <mat-icon *ngIf="project.issueIntegrationCfgs?.JIRA?.isEnabled"
+                  svgIcon="jira"></mat-icon>
+        <mat-icon *ngIf="project.issueIntegrationCfgs?.GIT?.repo"
+                  svgIcon="github"></mat-icon>
       </div>
 
       <div class="controls">

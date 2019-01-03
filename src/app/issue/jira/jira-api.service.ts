@@ -1,9 +1,14 @@
 import { Injectable } from '@angular/core';
 import shortid from 'shortid';
 import { ChromeExtensionInterfaceService } from '../../core/chrome-extension-interface/chrome-extension-interface.service';
-import { JIRA_ADDITIONAL_ISSUE_FIELDS, JIRA_MAX_RESULTS, JIRA_REDUCED_ISSUE_FIELDS, JIRA_REQUEST_TIMEOUT_DURATION } from './jira.const';
+import {
+  JIRA_ADDITIONAL_ISSUE_FIELDS,
+  JIRA_MAX_RESULTS,
+  JIRA_REDUCED_ISSUE_FIELDS,
+  JIRA_REQUEST_TIMEOUT_DURATION
+} from './jira.const';
 import { ProjectService } from '../../project/project.service';
-import { mapIssueResponse, mapResponse, mapToSearchResults } from './jira-issue/jira-issue-map.util';
+import { mapIssueResponse, mapIssuesResponse, mapResponse, mapToSearchResults } from './jira-issue/jira-issue-map.util';
 import { JiraOriginalStatus, JiraOriginalUser } from './jira-api-responses';
 import { JiraCfg } from './jira';
 import { ElectronService } from 'ngx-electron';
@@ -11,8 +16,11 @@ import { IPC_JIRA_CB_EVENT, IPC_JIRA_MAKE_REQUEST_EVENT } from '../../../ipc-eve
 import { SnackService } from '../../core/snack/snack.service';
 import { IS_ELECTRON } from '../../app.constants';
 import { loadFromSessionStorage, saveToSessionStorage } from '../../core/persistence/local-storage';
-import { combineLatest } from 'rxjs';
+import { combineLatest, Observable, throwError } from 'rxjs';
 import { SearchResultItem } from '../issue';
+import { fromPromise } from 'rxjs/internal-compatibility';
+import { catchError, share, take } from 'rxjs/operators';
+import { JiraIssue } from './jira-issue/jira-issue.model';
 
 const BLOCK_ACCESS_KEY = 'SUP_BLOCK_JIRA_ACCESS';
 
@@ -58,12 +66,13 @@ export class JiraApiService {
     ).subscribe(([isExtensionReady, cfg]) => {
       if (!this._isHasCheckedConnection && this._isMinimalSettings(cfg)) {
         this.getCurrentUser()
-          .then(() => {
-            this.unblockAccess();
-            checkConnectionSub.unsubscribe();
-          })
-          .catch(() => {
+          .pipe(catchError((err) => {
             this._blockAccess();
+            checkConnectionSub.unsubscribe();
+            return throwError(err);
+          }))
+          .subscribe(() => {
+            this.unblockAccess();
             checkConnectionSub.unsubscribe();
           });
       }
@@ -75,7 +84,7 @@ export class JiraApiService {
     saveToSessionStorage(BLOCK_ACCESS_KEY, false);
   }
 
-  search(searchTerm: string, isFetchAdditional?: boolean, maxResults: number = JIRA_MAX_RESULTS): Promise<SearchResultItem[]> {
+  search(searchTerm: string, isFetchAdditional?: boolean, maxResults: number = JIRA_MAX_RESULTS): Observable<SearchResultItem[]> {
     const options = {
       maxResults: maxResults,
       fields: isFetchAdditional ? JIRA_ADDITIONAL_ISSUE_FIELDS : JIRA_REDUCED_ISSUE_FIELDS,
@@ -90,7 +99,25 @@ export class JiraApiService {
     });
   }
 
-  getIssueById(issueId, isGetChangelog = false) {
+  findAutoImportIssues(isFetchAdditional?: boolean, maxResults: number = JIRA_MAX_RESULTS): Observable<JiraIssue[]> {
+    const options = {
+      maxResults: maxResults,
+      fields: JIRA_ADDITIONAL_ISSUE_FIELDS,
+    };
+    const searchQuery = this._cfg.autoAddBacklogJqlQuery;
+
+    if (!searchQuery) {
+      return throwError('JiraApi: No search query for auto import');
+    }
+
+    return this._sendRequest({
+      apiMethod: 'searchJira',
+      arguments: [searchQuery, options],
+      transform: mapIssuesResponse
+    });
+  }
+
+  getIssueById(issueId, isGetChangelog = false): Observable<JiraIssue> {
     return this._sendRequest({
       apiMethod: 'findIssue',
       transform: mapIssueResponse,
@@ -98,18 +125,18 @@ export class JiraApiService {
     });
   }
 
-  getCurrentUser(cfg?: JiraCfg): Promise<JiraOriginalUser> {
+  getCurrentUser(cfg?: JiraCfg): Observable<JiraOriginalUser> {
     return this._sendRequest({
       apiMethod: 'getCurrentUser',
       transform: mapResponse,
     }, cfg);
   }
 
-  listStatus(cfg?: JiraCfg): Promise<JiraOriginalStatus[]> {
+  listStatus(): Observable<JiraOriginalStatus[]> {
     return this._sendRequest({
       apiMethod: 'listStatus',
       transform: mapResponse,
-    }, cfg);
+    });
   }
 
 
@@ -180,10 +207,10 @@ export class JiraApiService {
   }
 
   // TODO refactor data madness of request and add types for everything
-  private _sendRequest(request, cfg = this._cfg): Promise<any> {
+  private _sendRequest(request, cfg = this._cfg): Observable<any> {
     if (!this._isMinimalSettings(cfg)) {
       console.error('Not enough Jira settings. This should not happen!!!');
-      return Promise.reject(new Error('Insufficient Settings for Jira'));
+      return throwError(new Error('Insufficient Settings for Jira'));
     }
 
     if (this._isBlockAccess) {
@@ -192,7 +219,7 @@ export class JiraApiService {
         type: 'JIRA_UNBLOCK',
         message: 'Jira: To prevent shut out from api, access has been blocked. Check your settings!'
       });
-      return Promise.reject(new Error('Blocked access to prevent being shut out'));
+      return throwError(new Error('Blocked access to prevent being shut out'));
     }
 
     // assign uuid to request to know which responsive belongs to which promise
@@ -243,7 +270,11 @@ export class JiraApiService {
       });
     }
 
-    return promise;
+    return fromPromise(promise)
+      .pipe(
+        share(),
+        take(1),
+      );
   }
 
   private _handleResponse(res) {

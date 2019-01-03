@@ -14,7 +14,7 @@ export class DialogConfirmComponent {
   ) {
   }
 
-  close(isConfirm: boolean) {
-    this._matDialogRef.close(isConfirm);
+  close(res: any) {
+    this._matDialogRef.close(res);
   }
 }

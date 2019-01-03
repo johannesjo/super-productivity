@@ -6,7 +6,7 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { GIT_API_BASE_URL } from './git.const';
 import { combineLatest, from, Observable, ObservableInput, throwError } from 'rxjs';
 import { GitOriginalComment, GitOriginalIssue } from './git-api-responses';
-import { catchError, map, share, take } from 'rxjs/operators';
+import { catchError, map, share, switchMap, take } from 'rxjs/operators';
 import { mapGitIssue, mapGitIssueToSearchResult } from './git-issue/git-issue-map.util';
 import { GitComment, GitIssue } from './git-issue/git-issue.model';
 import { SearchResultItem } from '../issue';
@@ -32,6 +32,13 @@ export class GitApiService {
     });
   }
 
+  getById(id: number): Observable<GitIssue> {
+    this._checkSettings();
+
+    return this.getCompleteIssueDataForRepo()
+      .pipe(switchMap(issues => issues.filter(issue => issue.id === id)));
+  }
+
   getCompleteIssueDataForRepo(repo = this._cfg.repo, isSkipCheck = false): Observable<GitIssue[]> {
     if (!isSkipCheck) {
       this._checkSettings();
@@ -47,26 +54,31 @@ export class GitApiService {
 
 
   searchIssueForRepo(searchText: string, repo = this._cfg.repo): Observable<SearchResultItem[]> {
+    const filterFn = issue =>
+      issue.title.toLowerCase().match(searchText.toLowerCase())
+      || issue.body.toLowerCase().match(searchText.toLowerCase());
+
     this._checkSettings();
+
     if (this._cachedIssues && this._cachedIssues.length && (this._lastCacheUpdate + MAX_CACHE_AGE > Date.now())) {
-      return from([this._cachedIssues.map(mapGitIssueToSearchResult)]);
+      return from([
+        this._cachedIssues
+          .filter(filterFn)
+          .map(mapGitIssueToSearchResult)
+      ]);
     } else {
       const completeIssues$ = this.getCompleteIssueDataForRepo(repo)
         .pipe(
           catchError(this._handleRequestError.bind(this)),
           // a single request should suffice
           share(),
-          // tap(issues => console.log(issues)),
         );
 
       // update cache
       completeIssues$.pipe(take(1)).subscribe(issues => this._updateIssueCache(issues));
 
       return completeIssues$.pipe(map((issues: GitIssue[]) =>
-          issues.filter(issue =>
-            issue.title.toLowerCase().match(searchText.toLowerCase())
-            || issue.body.toLowerCase().match(searchText.toLowerCase())
-          )
+          issues.filter(filterFn)
             .map(mapGitIssueToSearchResult)
         ),
       );
@@ -154,10 +166,16 @@ export class GitApiService {
     console.error(error);
     if (error.error instanceof ErrorEvent) {
       // A client-side or network error occurred. Handle it accordingly.
-      this._snackService.open({type: 'ERROR', message: 'GitHub: Request failed because of a client side network error'});
+      this._snackService.open({
+        type: 'ERROR',
+        message: 'GitHub: Request failed because of a client side network error'
+      });
     } else {
       // The backend returned an unsuccessful response code.
-      this._snackService.open({type: 'ERROR', message: `GitHub: API returned ${error.status}. ${error.error && error.error.message}`});
+      this._snackService.open({
+        type: 'ERROR',
+        message: `GitHub: API returned ${error.status}. ${error.error && error.error.message}`
+      });
     }
     return throwError('GitHub: Api request failed.');
   }
