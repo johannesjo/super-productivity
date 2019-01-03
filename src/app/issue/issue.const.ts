@@ -36,7 +36,7 @@ download the chrome extension</a> in order to allow communication with the Jira 
         key: 'isEnabled',
         type: 'checkbox',
         templateOptions: {
-          label: 'Enable jira integration',
+          label: 'Enable Jira integration',
         },
       },
       {
