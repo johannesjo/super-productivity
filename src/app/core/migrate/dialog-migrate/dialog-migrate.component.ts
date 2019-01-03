@@ -14,8 +14,7 @@ export class DialogMigrateComponent {
   ) {
   }
 
-  close(isConfirm: boolean) {
-    this._matDialogRef.close(isConfirm);
+  close(selection?: any) {
+    this._matDialogRef.close(selection);
   }
-
 }
