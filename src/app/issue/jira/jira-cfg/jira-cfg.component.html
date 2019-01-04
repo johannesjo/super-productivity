@@ -22,6 +22,34 @@
                [form]="form">
   </formly-form>
 
+
+  <h3 class="sub-section-heading">Transition Handling</h3>
+  <section>
+    <input matInput
+           #inputEl
+           class="border-color-primary"
+           placeholder="Search Issues"
+           aria-label="Search Issues"
+           [matAutocomplete]="autoEl"
+           [formControl]="issueSuggestionsCtrl">
+
+    <mat-autocomplete #autoEl="matAutocomplete"
+                      (optionSelected)="updateTransitionOptions()"
+                      [autoActiveFirstOption]="true">
+      <mat-option *ngIf="isLoading"
+                  [value]="issueSuggestionsCtrl.value"
+                  class="is-loading">
+        <mat-spinner diameter="50"></mat-spinner>
+      </mat-option>
+      <ng-container *ngIf="!isLoading">
+        <mat-option *ngFor="let issue of filteredIssueSuggestions"
+                    [value]="issue"><span>{{issue?.title}}</span>
+        </mat-option>
+      </ng-container>
+
+    </mat-autocomplete>
+  </section>
+
   <div class="controls">
     <button type="submit"
             color="primary"
