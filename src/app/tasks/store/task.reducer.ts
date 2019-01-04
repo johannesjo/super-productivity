@@ -394,7 +394,6 @@ export function taskReducer(
       const {timeSpentOnDay, timeEstimate, isDone} = action.payload.task.changes;
       stateCopy = updateTimeSpentForTask(id, timeSpentOnDay, stateCopy);
       stateCopy = updateTimeEstimateForTask(id, timeEstimate, stateCopy);
-      stateCopy = isDone ? setNextTaskIfCurrent(stateCopy, id) : stateCopy;
       return taskAdapter.updateOne(action.payload.task, stateCopy);
     }
 

@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { Actions, Effect, ofType } from '@ngrx/effects';
-import { DeleteTask, SetCurrentTask, TaskActionTypes } from './task.actions';
+import { DeleteTask, SetCurrentTask, TaskActionTypes, UpdateTask } from './task.actions';
 import { select, Store } from '@ngrx/store';
-import { map, tap, throttleTime, withLatestFrom } from 'rxjs/operators';
+import { map, mergeMap, tap, throttleTime, withLatestFrom } from 'rxjs/operators';
 import { PersistenceService } from '../../core/persistence/persistence.service';
 import { selectCurrentTask, selectTaskFeatureState } from './task.selectors';
 import { selectCurrentProjectId } from '../../project/store/project.reducer';
@@ -13,6 +13,7 @@ import { selectConfigFeatureState } from '../../core/config/store/config.reducer
 import { AttachmentActionTypes } from '../../attachment/store/attachment.actions';
 import { TaskWithSubTasks } from '../task.model';
 import { TaskState } from './task.reducer';
+import { EMPTY, of } from 'rxjs';
 
 // TODO send message to electron when current task changes here
 
@@ -114,7 +115,7 @@ export class TaskEffects {
       tap(this._removeFromArchive.bind(this))
     );
 
-  @Effect({dispatch: false}) autoSetNextTask$: any = this._actions$
+  @Effect() autoSetNextTask$: any = this._actions$
     .pipe(
       ofType(
         TaskActionTypes.MoveToBacklog,
@@ -126,13 +127,21 @@ export class TaskEffects {
       ),
       withLatestFrom(
         this._store$.pipe(select(selectTaskFeatureState)),
+        (action, state) => ({action, state})
       ),
-      map(([action, state]) => {
+      mergeMap(({action, state}) => {
         let nextId: false | string | null;
 
         switch (action.type) {
           case TaskActionTypes.ToggleStart:
             nextId = state.currentTaskId ? null : this.findNextTask(state);
+            break;
+
+          case TaskActionTypes.UpdateTask:
+            const {isDone} = (<UpdateTask>action).payload.task.changes;
+            const isCurrent = (<UpdateTask>action).payload.task.id === state.currentTaskId;
+
+            nextId = (isDone && isCurrent) ? this.findNextTask(state) : false;
             break;
         }
         /*
@@ -143,8 +152,10 @@ export class TaskEffects {
         Delete
         Move to archive
          */
-        if (nextId !== false) {
-          this._store$.dispatch(new SetCurrentTask(nextId));
+        if (nextId === false) {
+          return EMPTY;
+        } else {
+          return of(new SetCurrentTask(nextId));
         }
       })
     );
