@@ -1,7 +1,20 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  ComponentFactory,
+  ComponentFactoryResolver,
+  EventEmitter,
+  Input,
+  OnInit,
+  Output,
+  ViewChild,
+  ViewContainerRef
+} from '@angular/core';
 import { expandAnimation } from '../../../ui/animations/expand.ani';
-import { ConfigSectionKey } from '../config.model';
+import { ConfigFormSection, ConfigSectionKey } from '../config.model';
 import { ProjectCfgFormKey } from '../../../project/project.model';
+import { GoogleSyncCfgComponent } from '../../google/google-sync-cfg/google-sync-cfg.component';
+import { JiraCfgComponent } from '../../../issue/jira/jira-cfg/jira-cfg.component';
 
 @Component({
   selector: 'config-section',
@@ -9,18 +22,54 @@ import { ProjectCfgFormKey } from '../../../project/project.model';
   styleUrls: ['./config-section.component.scss'],
   animations: expandAnimation,
 })
-export class ConfigSectionComponent {
-  @Input() section;
-  @Input() cfg;
+export class ConfigSectionComponent implements OnInit {
+  @Input() section: ConfigFormSection;
+  @Input() cfg: any;
   @Output() save: EventEmitter<{ sectionKey: ConfigSectionKey | ProjectCfgFormKey, config: any }> = new EventEmitter();
 
-  public isExpanded = false;
+  @ViewChild('customForm', {read: ViewContainerRef}) customFormRef: ViewContainerRef;
 
-  constructor() {
+  isExpanded = false;
+
+  constructor(
+    private _cd: ChangeDetectorRef,
+    private _componentFactoryResolver: ComponentFactoryResolver,
+  ) {
+  }
+
+  ngOnInit(): void {
+    if (this.section && this.section.customSection) {
+      this._loadCustomSection(this.section.customSection);
+    }
   }
 
   onSave($event) {
     this.isExpanded = false;
     this.save.emit($event);
+  }
+
+  private _loadCustomSection(customSection) {
+    let componentToRender;
+
+    switch (customSection) {
+      case 'GOOGLE_SYNC':
+        componentToRender = GoogleSyncCfgComponent;
+        break;
+
+      case 'JIRA_CFG':
+        componentToRender = JiraCfgComponent;
+        break;
+    }
+
+    if (componentToRender) {
+      const factory: ComponentFactory<any> = this._componentFactoryResolver.resolveComponentFactory(componentToRender);
+      const ref = this.customFormRef.createComponent(factory);
+      ref.instance.cfg = this.cfg;
+      ref.instance.section = this.section;
+      ref.instance.save.subscribe(v => {
+        this.onSave(v);
+        this._cd.detectChanges();
+      });
+    }
   }
 }

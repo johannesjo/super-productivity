@@ -5,6 +5,8 @@ import { ConfigModule } from '../../core/config/config.module';
 import { UiModule } from '../../ui/ui.module';
 import { CoreModule } from '../../core/core.module';
 import { GoogleModule } from '../../core/google/google.module';
+import { IssueModule } from '../../issue/issue.module';
+import { JiraModule } from '../../issue/jira/jira.module';
 
 @NgModule({
   imports: [
@@ -13,6 +15,7 @@ import { GoogleModule } from '../../core/google/google.module';
     ConfigModule,
     UiModule,
     GoogleModule,
+    JiraModule,
   ],
   declarations: [ConfigPageComponent]
 })

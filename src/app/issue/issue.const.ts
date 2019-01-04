@@ -26,6 +26,7 @@ export const ISSUE_PROVIDER_FORM_CFGS: ConfigFormConfig = [
   {
     title: 'Jira',
     key: JIRA_TYPE,
+    customSection: 'JIRA_CFG',
     items: [
       {
         className: 'tpl isHideWhenJiraSupport',

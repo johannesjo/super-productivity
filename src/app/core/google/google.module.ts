@@ -26,6 +26,7 @@ import { GoogleApiService } from './google-api.service';
     DialogGoogleExportTimeComponent,
     DialogConfirmDriveSyncLoadComponent,
     DialogConfirmDriveSyncSaveComponent,
+    GoogleSyncCfgComponent,
   ],
   providers: [
     GoogleDriveSyncService,

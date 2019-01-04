@@ -1,0 +1,22 @@
+<form [formGroup]="form"
+      (ngSubmit)="submit()">
+
+  <formly-form [model]="config"
+               [fields]="fields"
+               [options]="options"
+               [form]="form">
+  </formly-form>
+
+  <div class="controls">
+    <button type="submit"
+            color="primary"
+            class="btn btn-primary submit-button"
+            mat-raised-button
+            [disabled]="!form.valid">
+      <mat-icon>save</mat-icon>
+      Save
+    </button>
+  </div>
+</form>
+
+<!--<pre><code>{{config|json}}</code></pre>-->

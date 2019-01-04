@@ -5,14 +5,14 @@
     <div [innerHtml]="section.help"></div>
   </help-section>
   <div class="form-wrapper {{section.key}}">
-    <google-sync-cfg *ngIf="section.customSection==='GOOGLE_SYNC'"
-                     (save)="onSave($event)"></google-sync-cfg>
-
     <config-form
-      *ngIf="section.items"
+      *ngIf="section.items && !section.customSection"
       [formCfg]="section.items"
       [sectionKey]="section.key"
       [cfg]="cfg"
       (save)="onSave($event)"></config-form>
+
+    <div class="custom-form"
+         #customForm></div>
   </div>
 </collapsible>
