@@ -9,6 +9,8 @@ import { BASIC_PROJECT_CONFIG_FORM_CONFIG, PROJECT_CONFIG_FORM_CONFIG } from '..
 import { IssueIntegrationCfg, IssueIntegrationCfgs, IssueProviderKey } from '../../issue/issue';
 import { ISSUE_PROVIDER_FORM_CFGS } from '../../issue/issue.const';
 import { dirtyDeepCopy } from '../../core/util/dirtyDeepCopy';
+import { DEFAULT_JIRA_CFG } from '../../issue/jira/jira.const';
+import { DEFAULT_GIT_CFG } from '../../issue/git/git.const';
 
 @Component({
   selector: 'config-page',
@@ -42,6 +44,15 @@ export class ConfigPageComponent implements OnInit, OnDestroy {
       this.currentProject = project;
       this.projectCfg = project.advancedCfg;
       this.issueIntegrationCfgs = project.issueIntegrationCfgs;
+
+      // Unfortunately needed, to make sure we have no empty configs
+      // TODO maybe think of a better solution for the defaults
+      if (!this.issueIntegrationCfgs.JIRA) {
+        this.issueIntegrationCfgs.JIRA = DEFAULT_JIRA_CFG;
+      }
+      if (!this.issueIntegrationCfgs.GIT) {
+        this.issueIntegrationCfgs.GIT = DEFAULT_GIT_CFG;
+      }
     }));
   }
 
@@ -77,5 +88,4 @@ export class ConfigPageComponent implements OnInit, OnDestroy {
       this.configService.updateSection(sectionKey, config);
     }
   }
-
 }

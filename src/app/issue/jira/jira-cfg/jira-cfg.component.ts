@@ -9,6 +9,7 @@ import { Subject } from 'rxjs';
 import { SearchResultItem } from '../../issue';
 import { catchError, debounceTime, switchMap, takeUntil } from 'rxjs/operators';
 import { JiraApiService } from '../jira-api.service';
+import { DEFAULT_JIRA_CFG } from '../jira.const';
 
 @Component({
   selector: 'jira-cfg',
@@ -19,7 +20,8 @@ import { JiraApiService } from '../jira-api.service';
 })
 export class JiraCfgComponent implements OnInit {
   @Input() section: ConfigFormSection;
-  @Input() cfg: JiraCfg;
+  // NOTE: this is legit because it might be that there is no issue provider cfg yet
+  @Input() cfg: JiraCfg = DEFAULT_JIRA_CFG;
 
   @Output() save: EventEmitter<{ sectionKey: ConfigSectionKey | ProjectCfgFormKey, config: any }> = new EventEmitter();
 
@@ -82,7 +84,5 @@ export class JiraCfgComponent implements OnInit {
       this.issueSuggestionsCtrl.setValue('');
       return;
     }
-
   }
-
 }
