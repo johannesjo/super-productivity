@@ -24,7 +24,17 @@
 
 
   <h3 class="sub-section-heading">Transition Handling</h3>
-  <section>
+  <mat-slide-toggle [(ngModel)]="cfg.isTransitionIssuesEnabled"
+                    style="margin-bottom: 8px;"
+                    name="isTransitionIssuesEnabled"
+                    [ngModelOptions]="{standalone: true}"
+                    aria-label="Enable Transition Handling">
+    Enable Transition Handling
+  </mat-slide-toggle>
+
+
+  <section *ngIf="cfg.isTransitionIssuesEnabled"
+           @expand>
     <input matInput
            #inputEl
            class="border-color-primary"

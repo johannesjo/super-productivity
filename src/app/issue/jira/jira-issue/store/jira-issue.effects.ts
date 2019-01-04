@@ -3,7 +3,7 @@ import { Actions, Effect, ofType } from '@ngrx/effects';
 import { JiraIssueActionTypes } from './jira-issue.actions';
 import { select, Store } from '@ngrx/store';
 import { tap, withLatestFrom } from 'rxjs/operators';
-import { TaskActionTypes } from '../../../../tasks/store/task.actions';
+import { TaskActionTypes, UpdateTask } from '../../../../tasks/store/task.actions';
 import { PersistenceService } from '../../../../core/persistence/persistence.service';
 import { selectJiraIssueEntities, selectJiraIssueFeatureState, selectJiraIssueIds } from './jira-issue.reducer';
 import { selectCurrentProjectId, selectProjectJiraCfg } from '../../../../project/store/project.reducer';
@@ -18,9 +18,10 @@ import { SnackService } from '../../../../core/snack/snack.service';
 import { ProjectActionTypes } from '../../../../project/store/project.actions';
 import { Task } from '../../../../tasks/task.model';
 import { JIRA_TYPE } from '../../../issue.const';
-import { selectAllTasks } from '../../../../tasks/store/task.selectors';
+import { selectAllTasks, selectCurrentTask, selectTaskFeatureState } from '../../../../tasks/store/task.selectors';
 import { TaskService } from '../../../../tasks/task.service';
 import { Subscription, timer } from 'rxjs';
+import { TaskState } from '../../../../tasks/store/task.reducer';
 
 @Injectable()
 export class JiraIssueEffects {
@@ -79,6 +80,43 @@ export class JiraIssueEffects {
       ),
       tap(this._importNewIssuesToBacklog.bind(this))
     );
+
+
+  @Effect({dispatch: false}) checkForStartTransition$: any = this._actions$
+    .pipe(
+      ofType(
+        TaskActionTypes.SetCurrentTask,
+      ),
+      withLatestFrom(
+        this._store$.pipe(select(selectProjectJiraCfg)),
+        this._store$.pipe(select(selectCurrentTask)),
+      ),
+      tap(([action, jiraCfg, currentTask]) => {
+        if (jiraCfg.isTransitionIssuesEnabled && currentTask && currentTask.issueType === 'JIRA') {
+          console.log('YEAH STARTED');
+          // open dialog ....
+        }
+      })
+    );
+
+  @Effect({dispatch: false}) checkForDoneTransition$: any = this._actions$
+    .pipe(
+      ofType(
+        TaskActionTypes.UpdateTask,
+      ),
+      withLatestFrom(
+        this._store$.pipe(select(selectProjectJiraCfg)),
+        this._store$.pipe(select(selectTaskFeatureState)),
+      ),
+      tap(([action, jiraCfg, taskState]: [UpdateTask, JiraCfg, TaskState]) => {
+        const task = taskState.entities[action.payload.task.id];
+        if (jiraCfg.isTransitionIssuesEnabled && task && task.issueType === 'JIRA' && task.isDone) {
+          console.log('YEAH DONE');
+          // open dialog ....
+        }
+      })
+    );
+
 
   private _pollSub: Subscription;
 
