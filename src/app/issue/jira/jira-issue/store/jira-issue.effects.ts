@@ -22,6 +22,9 @@ import { selectAllTasks, selectCurrentTask, selectTaskFeatureState } from '../..
 import { TaskService } from '../../../../tasks/task.service';
 import { Subscription, timer } from 'rxjs';
 import { TaskState } from '../../../../tasks/store/task.reducer';
+import { MatDialog } from '@angular/material';
+import { DialogJiraTransitionComponent } from '../../dialog-jira-transition/dialog-jira-transition.component';
+import { IssueLocalState } from '../../../issue';
 
 @Injectable()
 export class JiraIssueEffects {
@@ -93,8 +96,8 @@ export class JiraIssueEffects {
       ),
       tap(([action, jiraCfg, currentTask]) => {
         if (jiraCfg.isTransitionIssuesEnabled && currentTask && currentTask.issueType === 'JIRA') {
-          console.log('YEAH STARTED');
-          // open dialog ....
+          this._openTransitionDialog(currentTask.issueId, currentTask.title, 'IN_PROGRESS');
+          // TODO transition directly if option is set
         }
       })
     );
@@ -111,8 +114,8 @@ export class JiraIssueEffects {
       tap(([action, jiraCfg, taskState]: [UpdateTask, JiraCfg, TaskState]) => {
         const task = taskState.entities[action.payload.task.id];
         if (jiraCfg.isTransitionIssuesEnabled && task && task.issueType === 'JIRA' && task.isDone) {
-          console.log('YEAH DONE');
-          // open dialog ....
+          this._openTransitionDialog(task.issueId, task.title, 'DONE');
+          // TODO transition directly if option is set
         }
       })
     );
@@ -127,7 +130,8 @@ export class JiraIssueEffects {
               private readonly _taskService: TaskService,
               private readonly _jiraApiService: JiraApiService,
               private readonly _jiraIssueService: JiraIssueService,
-              private readonly _persistenceService: PersistenceService
+              private readonly _persistenceService: PersistenceService,
+              private readonly _matDialog: MatDialog,
   ) {
   }
 
@@ -159,6 +163,18 @@ export class JiraIssueEffects {
           })
         ).subscribe();
     }
+  }
+
+  private _openTransitionDialog(issueId, issueTitle, localState: IssueLocalState) {
+    this._matDialog.open(DialogJiraTransitionComponent, {
+      restoreFocus: true,
+      data: {
+        issueTitle,
+        issueId,
+        localState,
+      }
+    }).afterClosed()
+      .subscribe();
   }
 
   private _importNewIssuesToBacklog([action, allTasks]: [Actions, Task[]]) {

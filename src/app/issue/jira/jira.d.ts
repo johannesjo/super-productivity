@@ -1,6 +1,7 @@
 export type JiraTransitionOption = 'ALWAYS_ASK' | 'DO_NOT' | string;
 
 export interface JiraTransitionOptions {
+  // NOTE: keys mirror IssueLocalState type
   OPEN: JiraTransitionOption;
   IN_PROGRESS: JiraTransitionOption;
   DONE: JiraTransitionOption;

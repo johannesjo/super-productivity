@@ -7,6 +7,7 @@ import { NgxElectronModule } from 'ngx-electron';
 import { DialogJiraInitialSetupComponent } from './dialog-jira-initial-setup/dialog-jira-initial-setup.component';
 import { JiraCfgComponent } from './jira-cfg/jira-cfg.component';
 import { FormsModule } from '@angular/forms';
+import { DialogJiraTransitionComponent } from './dialog-jira-transition/dialog-jira-transition.component';
 
 @NgModule({
   imports: [
@@ -16,9 +17,20 @@ import { FormsModule } from '@angular/forms';
     NgxElectronModule,
     FormsModule,
   ],
-  declarations: [JiraCfgStepperComponent, DialogJiraInitialSetupComponent, JiraCfgComponent],
-  entryComponents: [DialogJiraInitialSetupComponent, JiraCfgComponent],
-  exports: [JiraCfgStepperComponent],
+  declarations: [
+    JiraCfgStepperComponent,
+    JiraCfgComponent,
+    DialogJiraInitialSetupComponent,
+    DialogJiraTransitionComponent
+  ],
+  entryComponents: [
+    DialogJiraTransitionComponent,
+    DialogJiraInitialSetupComponent,
+    JiraCfgComponent
+  ],
+  exports: [
+    JiraCfgStepperComponent
+  ],
 })
 export class JiraModule {
 }

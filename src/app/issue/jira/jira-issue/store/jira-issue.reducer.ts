@@ -25,6 +25,12 @@ export const selectAllJiraIssues = createSelector(selectJiraIssueFeatureState, s
 
 // select the total user count
 export const selectJiraIssueTotal = createSelector(selectJiraIssueFeatureState, selectTotal);
+// DYNAMIC SELECTORS
+// -----------------
+export const selectJiraIssueById = createSelector(
+  selectJiraIssueFeatureState,
+  (state, props: { id: string }) => state.entities[props.id]
+);
 
 
 // REDUCER

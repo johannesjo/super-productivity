@@ -1,4 +1,3 @@
-import { Dictionary } from '@ngrx/entity';
 import { JiraIssue } from './jira/jira-issue/jira-issue.model';
 import { JiraCfg } from './jira/jira';
 import { GitCfg } from './git/git';
@@ -9,6 +8,7 @@ import { GitIssueState } from './git/git-issue/store/git-issue.reducer';
 
 export type IssueProviderKey = 'JIRA' | 'GIT';
 export type IssueIntegrationCfg = JiraCfg | GitCfg;
+export type IssueLocalState = 'OPEN' | 'IN_PROGRESS' | 'DONE';
 
 export interface IssueIntegrationCfgs {
   // should be the same as key IssueProviderKey

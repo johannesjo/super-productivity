@@ -1,15 +1,16 @@
 import { Injectable } from '@angular/core';
 import shortid from 'shortid';
 import { ChromeExtensionInterfaceService } from '../../core/chrome-extension-interface/chrome-extension-interface.service';
-import {
-  JIRA_ADDITIONAL_ISSUE_FIELDS,
-  JIRA_MAX_RESULTS,
-  JIRA_REDUCED_ISSUE_FIELDS,
-  JIRA_REQUEST_TIMEOUT_DURATION
-} from './jira.const';
+import { JIRA_ADDITIONAL_ISSUE_FIELDS, JIRA_MAX_RESULTS, JIRA_REDUCED_ISSUE_FIELDS, JIRA_REQUEST_TIMEOUT_DURATION } from './jira.const';
 import { ProjectService } from '../../project/project.service';
-import { mapIssueResponse, mapIssuesResponse, mapResponse, mapToSearchResults } from './jira-issue/jira-issue-map.util';
-import { JiraOriginalStatus, JiraOriginalUser } from './jira-api-responses';
+import {
+  mapIssueResponse,
+  mapIssuesResponse,
+  mapResponse,
+  mapToSearchResults,
+  mapTransitionResponse
+} from './jira-issue/jira-issue-map.util';
+import { JiraOriginalStatus, JiraOriginalTransition, JiraOriginalUser } from './jira-api-responses';
 import { JiraCfg } from './jira';
 import { ElectronService } from 'ngx-electron';
 import { IPC_JIRA_CB_EVENT, IPC_JIRA_MAKE_REQUEST_EVENT } from '../../../ipc-events.const';
@@ -140,6 +141,15 @@ export class JiraApiService {
   }
 
 
+  getTransitionsForIssue(issueId: string): Observable<JiraOriginalTransition[]> {
+    return this._sendRequest({
+      apiMethod: 'listTransitions',
+      transform: mapTransitionResponse,
+      arguments: [issueId]
+    });
+  }
+
+
   // INTERNAL
 
   isSufficientJiraSettings(settingsToTest) {
@@ -156,9 +166,6 @@ export class JiraApiService {
   }
 
   searchUsers(userNameQuery) {
-  }
-
-  getTransitionsForIssue(task) {
   }
 
 

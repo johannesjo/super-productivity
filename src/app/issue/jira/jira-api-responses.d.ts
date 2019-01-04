@@ -130,6 +130,30 @@ export type JiraOriginalChangelog = Readonly<{
 }>;
 
 
+export type JiraOriginalTransition = Readonly<{
+  id: string;
+  name: string;
+  to: {
+    self: string;
+    description: string;
+    iconUrl: string;
+    name: string;
+    id: string;
+    statusCategory: {
+      self: string;
+      id: 2,
+      key: string;
+      colorName: string;
+      name: string;
+    }
+  },
+  hasScreen: false,
+  isGlobal: true,
+  isInitial: false,
+  isConditional: false,
+  fields: {}
+}>;
+
 export type JiraIssueOriginal = Readonly<{
   key: string;
   id: string;

@@ -1,0 +1,37 @@
+<mat-dialog-content>
+  <h2>
+    <mat-icon svgIcon="jira"></mat-icon>
+    Update Status on Jira
+  </h2>
+  <p><strong>Current Status:</strong> {{(issueData$|async)?.status?.name}}</p>
+  <p><strong>Current Assignee:</strong> {{(issueData$|async)?.assignee?.displayName}}</p>
+
+  <mat-form-field>
+    <label>Choose a transition</label>
+    <mat-select [(ngModel)]="chosenTransitionId">
+      <!--<mat-option value="DO_NOT">Don't transition</mat-option>-->
+      <!--<mat-option value="ALWAYS_ASK">Always open dialog</mat-option>-->
+      <mat-option *ngFor="let transition of (availableTransitions$|async)"
+                  [value]="transition.id">
+        <!--<img [src]="transition.to.iconUrl">-->
+        {{transition.name}}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <div class="wrap-buttons">
+    <button color="primary"
+            (click)="close(true)"
+            class="btn btn-primary submit-button"
+            mat-raised-button>Update Status
+    </button>
+    <button type="button"
+            (click)="close(false)"
+            class="btn btn-primary submit-button"
+            mat-raised-button>Cancel
+    </button>
+  </div>
+</mat-dialog-actions>

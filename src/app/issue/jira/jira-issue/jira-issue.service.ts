@@ -1,15 +1,16 @@
 import { Injectable } from '@angular/core';
 import { JiraChangelogEntry, JiraIssue } from './jira-issue.model';
-import { Store } from '@ngrx/store';
+import { select, Store } from '@ngrx/store';
 import { AddOpenJiraIssuesToBacklog, JiraIssueActionTypes } from './store/jira-issue.actions';
 import { PersistenceService } from '../../../core/persistence/persistence.service';
-import { JiraIssueState } from './store/jira-issue.reducer';
+import { JiraIssueState, selectJiraIssueById } from './store/jira-issue.reducer';
 import { mapJiraAttachmentToAttachment } from './jira-issue-map.util';
 import { Attachment } from '../../../attachment/attachment.model';
 import { JiraApiService } from '../jira-api.service';
 import { SnackService } from '../../../core/snack/snack.service';
 import { IssueData } from '../../issue';
 import { take } from 'rxjs/operators';
+import { Observable } from 'rxjs';
 
 
 @Injectable()
@@ -88,6 +89,10 @@ export class JiraIssueService {
   }
 
   // HELPER
+  getById(id: string): Observable<JiraIssue> {
+    return this._store.pipe(select(selectJiraIssueById, {id}), take(1));
+  }
+
   loadMissingIssueData(issueId) {
     return this._jiraApiService.getIssueById(issueId, true)
       .pipe(take(1))
