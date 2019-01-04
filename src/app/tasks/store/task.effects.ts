@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Actions, Effect, ofType } from '@ngrx/effects';
-import { DeleteTask, TaskActionTypes } from './task.actions';
+import { DeleteTask, SetCurrentTask, TaskActionTypes } from './task.actions';
 import { select, Store } from '@ngrx/store';
 import { map, tap, throttleTime, withLatestFrom } from 'rxjs/operators';
 import { PersistenceService } from '../../core/persistence/persistence.service';
@@ -12,6 +12,7 @@ import { TaskService } from '../task.service';
 import { selectConfigFeatureState } from '../../core/config/store/config.reducer';
 import { AttachmentActionTypes } from '../../attachment/store/attachment.actions';
 import { TaskWithSubTasks } from '../task.model';
+import { TaskState } from './task.reducer';
 
 // TODO send message to electron when current task changes here
 
@@ -113,6 +114,41 @@ export class TaskEffects {
       tap(this._removeFromArchive.bind(this))
     );
 
+  @Effect({dispatch: false}) autoSetNextTask$: any = this._actions$
+    .pipe(
+      ofType(
+        TaskActionTypes.MoveToBacklog,
+        TaskActionTypes.MoveToArchive,
+        TaskActionTypes.DeleteTask,
+        TaskActionTypes.UpdateTask,
+        TaskActionTypes.Move,
+        TaskActionTypes.ToggleStart,
+      ),
+      withLatestFrom(
+        this._store$.pipe(select(selectTaskFeatureState)),
+      ),
+      map(([action, state]) => {
+        let nextId: false | string | null;
+
+        switch (action.type) {
+          case TaskActionTypes.ToggleStart:
+            nextId = state.currentTaskId ? null : this.findNextTask(state);
+            break;
+        }
+        /*
+        Cases to consider:
+        Toggle Start _/
+        Move: To backlog, to done list
+        Update, all sorts
+        Delete
+        Move to archive
+         */
+        if (nextId !== false) {
+          this._store$.dispatch(new SetCurrentTask(nextId));
+        }
+      })
+    );
+
 
   constructor(private _actions$: Actions,
               private _store$: Store<any>,
@@ -183,6 +219,53 @@ export class TaskEffects {
         }
       }));
     }
+  }
+
+
+  private findNextTask(state: TaskState, oldCurrentId?): string {
+    let nextId = null;
+    const {entities, todaysTaskIds} = state;
+
+    const filterUndoneNotCurrent = (id) => !entities[id].isDone && id !== oldCurrentId;
+    const flattenToSelectable = (arr: string[]) => arr.reduce((acc: string[], next: string) => {
+      return entities[next].subTaskIds.length > 0
+        ? acc.concat(entities[next].subTaskIds)
+        : acc.concat(next);
+    }, []);
+
+    if (oldCurrentId) {
+      const oldCurTask = entities[oldCurrentId];
+      if (oldCurTask && oldCurTask.parentId) {
+        entities[oldCurTask.parentId].subTaskIds.some((id) => {
+          return (id !== oldCurrentId && entities[id].isDone === false)
+            ? (nextId = id) && true // assign !!!
+            : false;
+        });
+      }
+
+      if (!nextId) {
+        const oldCurIndex = todaysTaskIds.indexOf(oldCurrentId);
+        const mainTasksBefore = todaysTaskIds.slice(0, oldCurIndex);
+        const mainTasksAfter = todaysTaskIds.slice(oldCurIndex + 1);
+        const selectableBefore = flattenToSelectable(mainTasksBefore);
+        const selectableAfter = flattenToSelectable(mainTasksAfter);
+        nextId = selectableAfter.find(filterUndoneNotCurrent)
+          || selectableBefore.reverse().find(filterUndoneNotCurrent);
+        nextId = (Array.isArray(nextId)) ? nextId[0] : nextId;
+
+      }
+    } else {
+      const lastTask = entities[state.lastCurrentTaskId];
+      const isLastSelectable = state.lastCurrentTaskId && lastTask && !lastTask.isDone && !lastTask.subTaskIds.length;
+      if (isLastSelectable) {
+        nextId = state.lastCurrentTaskId;
+      } else {
+        const selectable = flattenToSelectable(todaysTaskIds).find(filterUndoneNotCurrent);
+        nextId = (Array.isArray(selectable)) ? selectable[0] : selectable;
+      }
+    }
+
+    return nextId;
   }
 }
 

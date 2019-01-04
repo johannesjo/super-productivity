@@ -704,12 +704,10 @@ export function taskReducer(
       if (state.currentTaskId) {
         return {
           ...state,
-          currentTaskId: null,
           lastCurrentTaskId: state.currentTaskId,
         };
-      } else {
-        return setNextTask(state);
       }
+      return state;
     }
 
     default: {
