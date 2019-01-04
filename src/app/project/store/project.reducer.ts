@@ -9,6 +9,7 @@ export const PROJECT_FEATURE_NAME = 'projects';
 export interface ProjectState extends EntityState<Project> {
   // additional entities state properties
   currentId: string | null;
+  isDataLoaded: boolean;
 }
 
 export const projectAdapter: EntityAdapter<Project> = createEntityAdapter<Project>();
@@ -20,6 +21,7 @@ const {selectIds, selectEntities, selectAll, selectTotal} = projectAdapter.getSe
 export const selectCurrentProjectId = createSelector(selectProjectFeatureState, state => state.currentId);
 export const selectProjectEntities = createSelector(selectProjectFeatureState, selectEntities);
 export const selectAllProjects = createSelector(selectProjectFeatureState, selectAll);
+export const selectIsAllProjectDataLoaded = createSelector(selectProjectFeatureState, state => state.isDataLoaded);
 export const selectCurrentProject = createSelector(selectProjectFeatureState,
   (state) => state.entities[state.currentId]
 );
@@ -38,7 +40,8 @@ export const initialProjectState: ProjectState = projectAdapter.getInitialState(
   ],
   entities: {
     [FIRST_PROJECT.id]: FIRST_PROJECT
-  }
+  },
+  isDataLoaded: false,
 });
 
 const addStartedTimeToday = (state, currentProjectId): ProjectState => {
@@ -68,7 +71,7 @@ export function projectReducer(
 ): ProjectState {
   // console.log(state.entities, state, action);
 
-  const {payload} = action;
+  const payload = action['payload'];
 
 
   switch (action.type) {
@@ -79,6 +82,13 @@ export function projectReducer(
         {...action.payload.state},
         payload.state.currentId
       );
+    }
+
+    case ProjectActionTypes.LoadProjectRelatedDataSuccess: {
+      return {
+        ...state,
+        isDataLoaded: true,
+      };
     }
 
     case ProjectActionTypes.SetCurrentProject: {

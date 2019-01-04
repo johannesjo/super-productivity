@@ -19,6 +19,7 @@ export interface TaskState extends EntityState<Task> {
   todaysTaskIds: string[];
   backlogTaskIds: string[];
   stateBefore: TaskState;
+  isDataLoaded: boolean;
 
   // TODO though this not so much maybe
   // todayDoneTasks: string[];
@@ -35,7 +36,8 @@ export const initialTaskState: TaskState = taskAdapter.getInitialState({
   backlogTaskIds: [],
   focusTaskId: null,
   lastActiveFocusTaskId: null,
-  stateBefore: null
+  stateBefore: null,
+  isDataLoaded: false,
 });
 
 // HELPER
@@ -318,7 +320,12 @@ export function taskReducer(
 
     case TaskActionTypes.LoadTaskState: {
       const newState = action.payload.state;
-      return {...newState, currentTaskId: null, lastCurrentTaskId: newState.currentTaskId};
+      return {
+        ...newState,
+        currentTaskId: null,
+        lastCurrentTaskId: newState.currentTaskId,
+        isDataLoaded: true,
+      };
     }
 
     case TaskActionTypes.SetCurrentTask: {

@@ -5,10 +5,10 @@ import { LayoutService } from '../../core/layout/layout.service';
 import { DragulaService } from 'ng2-dragula';
 import { TakeABreakService } from '../../time-tracking/take-a-break/take-a-break.service';
 import { ActivatedRoute } from '@angular/router';
-import { combineLatest, Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { TaskWithSubTasks } from '../../tasks/task.model';
 import { Actions } from '@ngrx/effects';
-import { take } from 'rxjs/operators';
+import { skip, take, withLatestFrom } from 'rxjs/operators';
 import { fadeAnimation } from '../../ui/animations/fade.ani';
 
 @Component({
@@ -21,7 +21,7 @@ export class WorkViewPageComponent implements OnInit, OnDestroy {
   isShowTimeWorkedWithoutBreak = true;
   // no todays tasks at all
   isPlanYourDay = false;
-  splitInputPos = 0;
+  splitInputPos = 100;
 
   // we do it here to have the tasks in memory all the time
   backlogTasks: TaskWithSubTasks[];
@@ -66,17 +66,16 @@ export class WorkViewPageComponent implements OnInit, OnDestroy {
     this._subs.add(this.taskService.onTaskSwitchList$.subscribe(() => this._triggerTaskSwitchListAnimation()));
 
     this._subs.add(
-      combineLatest(
-        this.taskService.isTriggerPlanningMode$,
-        this.taskService.backlogTasks$
+      this.taskService.isTriggerPlanningMode$.pipe(
+        // skip default
+        skip(1),
+        take(1),
+        withLatestFrom(this.taskService.backlogTasks$),
       )
-        .pipe(take(1))
         .subscribe(([isPlanning, backlogTasks]) => {
           this.isPlanYourDay = isPlanning;
           if (isPlanning && backlogTasks && backlogTasks.length) {
             this.splitInputPos = 50;
-          } else {
-            this.splitInputPos = 100;
           }
           this._cd.detectChanges();
         })
