@@ -29,18 +29,6 @@ export const ISSUE_PROVIDER_FORM_CFGS: ConfigFormConfig = [
     customSection: 'JIRA_CFG',
     items: [
       {
-        className: 'tpl isHideWhenJiraSupport',
-        template: `<p>Please <a href="https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb">
-download the chrome extension</a> in order to allow communication with the Jira Api. Note that this doesn\'t work for mobile.</p>`,
-      },
-      {
-        key: 'isEnabled',
-        type: 'checkbox',
-        templateOptions: {
-          label: 'Enable Jira integration',
-        },
-      },
-      {
         className: 'tpl',
         template: ' <h3 class="sub-section-heading">Credentials</h3>',
       },

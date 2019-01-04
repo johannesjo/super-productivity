@@ -6,6 +6,7 @@ import { CoreModule } from '../../core/core.module';
 import { NgxElectronModule } from 'ngx-electron';
 import { DialogJiraInitialSetupComponent } from './dialog-jira-initial-setup/dialog-jira-initial-setup.component';
 import { JiraCfgComponent } from './jira-cfg/jira-cfg.component';
+import { FormsModule } from '@angular/forms';
 
 @NgModule({
   imports: [
@@ -13,6 +14,7 @@ import { JiraCfgComponent } from './jira-cfg/jira-cfg.component';
     CoreModule,
     UiModule,
     NgxElectronModule,
+    FormsModule,
   ],
   declarations: [JiraCfgStepperComponent, DialogJiraInitialSetupComponent, JiraCfgComponent],
   entryComponents: [DialogJiraInitialSetupComponent, JiraCfgComponent],

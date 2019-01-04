@@ -66,6 +66,7 @@ export class ConfigSectionComponent implements OnInit {
       const ref = this.customFormRef.createComponent(factory);
       ref.instance.cfg = this.cfg;
       ref.instance.section = this.section;
+
       ref.instance.save.subscribe(v => {
         this.onSave(v);
         this._cd.detectChanges();

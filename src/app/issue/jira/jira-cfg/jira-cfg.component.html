@@ -1,8 +1,23 @@
+<div class="isHideWhenJiraSupport">
+  <p>Please <a href="https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb">
+    download the chrome extension</a> in order to allow communication with the Jira Api. Note that this doesn\'t work for mobile.
+  </p>
+</div>
+
+<mat-slide-toggle [(ngModel)]="cfg.isEnabled"
+                  style="margin-bottom: 8px;"
+                  name="isEnabled"
+                  aria-label="Enable Jira integration">
+  Enable Jira integration
+</mat-slide-toggle>
+
 <form [formGroup]="form"
+      class="isShowWhenJiraSupport"
+      *ngIf="cfg.isEnabled"
       (ngSubmit)="submit()">
 
-  <formly-form [model]="config"
-               [fields]="fields"
+  <formly-form [model]="cfg"
+               [fields]="section.items"
                [options]="options"
                [form]="form">
   </formly-form>
