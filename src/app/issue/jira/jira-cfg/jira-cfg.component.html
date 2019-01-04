@@ -4,7 +4,7 @@
   </p>
 </div>
 
-<mat-slide-toggle [(ngModel)]="cfg.isEnabled"
+<mat-slide-toggle [(ngModel)]="cfg?.isEnabled"
                   style="margin-bottom: 8px;"
                   name="isEnabled"
                   aria-label="Enable Jira integration">
@@ -13,7 +13,7 @@
 
 <form [formGroup]="form"
       class="isShowWhenJiraSupport"
-      *ngIf="cfg.isEnabled"
+      *ngIf="cfg?.isEnabled"
       (ngSubmit)="submit()">
 
   <formly-form [model]="cfg"
@@ -24,7 +24,7 @@
 
 
   <h3 class="sub-section-heading">Transition Handling</h3>
-  <mat-slide-toggle [(ngModel)]="cfg.isTransitionIssuesEnabled"
+  <mat-slide-toggle [(ngModel)]="cfg?.isTransitionIssuesEnabled"
                     style="margin-bottom: 8px;"
                     name="isTransitionIssuesEnabled"
                     [ngModelOptions]="{standalone: true}"
@@ -33,7 +33,7 @@
   </mat-slide-toggle>
 
 
-  <section *ngIf="cfg.isTransitionIssuesEnabled"
+  <section *ngIf="cfg?.isTransitionIssuesEnabled"
            @expand>
     <input matInput
            #inputEl
