@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Actions, Effect, ofType } from '@ngrx/effects';
-import { DeleteTask, SetCurrentTask, TaskActionTypes, UpdateTask } from './task.actions';
+import { DeleteTask, MoveToBacklog, SetCurrentTask, TaskActionTypes, UpdateTask } from './task.actions';
 import { select, Store } from '@ngrx/store';
 import { map, mergeMap, tap, throttleTime, withLatestFrom } from 'rxjs/operators';
 import { PersistenceService } from '../../core/persistence/persistence.service';
@@ -118,12 +118,12 @@ export class TaskEffects {
   @Effect() autoSetNextTask$: any = this._actions$
     .pipe(
       ofType(
+        TaskActionTypes.ToggleStart,
+        TaskActionTypes.UpdateTask,
         TaskActionTypes.MoveToBacklog,
         TaskActionTypes.MoveToArchive,
         TaskActionTypes.DeleteTask,
-        TaskActionTypes.UpdateTask,
         TaskActionTypes.Move,
-        TaskActionTypes.ToggleStart,
       ),
       withLatestFrom(
         this._store$.pipe(select(selectTaskFeatureState)),
@@ -137,12 +137,18 @@ export class TaskEffects {
             nextId = state.currentTaskId ? null : this.findNextTask(state);
             break;
 
-          case TaskActionTypes.UpdateTask:
+          case TaskActionTypes.UpdateTask: {
             const {isDone} = (<UpdateTask>action).payload.task.changes;
             const isCurrent = (<UpdateTask>action).payload.task.id === state.currentTaskId;
-
             nextId = (isDone && isCurrent) ? this.findNextTask(state) : false;
             break;
+          }
+
+          case TaskActionTypes.MoveToBacklog: {
+            const isCurrent = state.currentTaskId === (<MoveToBacklog>action).payload.id;
+            nextId = (isCurrent) ? null : false;
+            break;
+          }
         }
         /*
         Cases to consider:
