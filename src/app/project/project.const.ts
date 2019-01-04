@@ -1,4 +1,5 @@
 import { GoogleTimeSheetExport, Project, SimpleSummarySettings } from './project.model';
+import { DEFAULT_ISSUE_PROVIDER_CFGS } from '../issue/issue.const';
 
 export const SIMPLE_SUMMARY_DEFAULTS: SimpleSummarySettings = {
   separateBy: '',
@@ -40,7 +41,7 @@ export const DEFAULT_PROJECT: Project = {
   isDarkTheme: false,
   startedTimeToday: null,
   timeWorkedWithoutBreak: null,
-  issueIntegrationCfgs: {},
+  issueIntegrationCfgs: DEFAULT_ISSUE_PROVIDER_CFGS,
   advancedCfg: {
     googleTimeSheetExport: GOOGLE_TIME_SHEET_EXPORT_DEFAULTS,
     simpleSummarySettings: SIMPLE_SUMMARY_DEFAULTS
