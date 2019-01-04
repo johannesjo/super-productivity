@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, OnInit, Output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { ConfigFormSection, ConfigSectionKey } from '../../../core/config/config.model';
 import { ProjectCfgFormKey } from '../../../project/project.model';
 import { FormlyFieldConfig, FormlyFormOptions } from '@ngx-formly/core';
@@ -18,6 +18,9 @@ import { JiraApiService } from '../jira-api.service';
   animations: [expandAnimation]
 })
 export class JiraCfgComponent implements OnInit {
+  @Input() section: ConfigFormSection;
+  @Input() cfg: JiraCfg;
+
   @Output() save: EventEmitter<{ sectionKey: ConfigSectionKey | ProjectCfgFormKey, config: any }> = new EventEmitter();
 
   destroy$: Subject<boolean> = new Subject<boolean>();
@@ -25,8 +28,6 @@ export class JiraCfgComponent implements OnInit {
   filteredIssueSuggestions: SearchResultItem[];
   isLoading = false;
 
-  section: ConfigFormSection;
-  cfg: JiraCfg;
   fields: FormlyFieldConfig[];
   form = new FormGroup({});
   options: FormlyFormOptions = {};
