@@ -2,7 +2,13 @@ import { Injectable } from '@angular/core';
 import { Actions, Effect, ofType } from '@ngrx/effects';
 import { select, Store } from '@ngrx/store';
 import { delay, map, switchMap, tap, withLatestFrom } from 'rxjs/operators';
-import { AddProject, DeleteProject, LoadProjectRelatedDataSuccess, ProjectActionTypes } from './project.actions';
+import {
+  AddProject,
+  DeleteProject,
+  LoadProjectRelatedDataSuccess,
+  ProjectActionTypes,
+  UpdateProjectIssueProviderCfg
+} from './project.actions';
 import { selectCurrentProjectId, selectProjectFeatureState } from './project.reducer';
 import { PersistenceService } from '../../core/persistence/persistence.service';
 import { TaskService } from '../../tasks/task.service';
@@ -78,8 +84,8 @@ export class ProjectEffects {
       ),
       delay(ISSUE_REFRESH_DELAY),
       tap(() => {
-          this._issueService.refreshIssueData();
-          this._issueService.refreshBacklog();
+        this._issueService.refreshIssueData();
+        this._issueService.refreshBacklog();
       })
     );
 
@@ -108,6 +114,19 @@ export class ProjectEffects {
           message: `Deleted project <strong>${action.payload.id}</strong>`
         });
       }),
+    );
+
+  @Effect() snackUpdate$: any = this._actions$
+    .pipe(
+      ofType(
+        ProjectActionTypes.UpdateProjectIssueProviderCfg,
+      ),
+      map((action: UpdateProjectIssueProviderCfg) => {
+        return new SnackOpen({
+          type: 'SUCCESS',
+          message: `Updated project settings for <strong>${action.payload.issueProviderKey}</strong>`,
+        });
+      })
     );
 
   constructor(
