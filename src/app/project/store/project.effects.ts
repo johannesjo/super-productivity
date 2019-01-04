@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Actions, Effect, ofType } from '@ngrx/effects';
 import { select, Store } from '@ngrx/store';
-import { map, switchMap, tap, withLatestFrom } from 'rxjs/operators';
+import { delay, map, switchMap, tap, withLatestFrom } from 'rxjs/operators';
 import { AddProject, DeleteProject, LoadProjectRelatedDataSuccess, ProjectActionTypes } from './project.actions';
 import { selectCurrentProjectId, selectProjectFeatureState } from './project.reducer';
 import { PersistenceService } from '../../core/persistence/persistence.service';
@@ -12,6 +12,9 @@ import { NoteService } from '../../note/note.service';
 import { IssueService } from '../../issue/issue.service';
 import { SnackService } from '../../core/snack/snack.service';
 import { SnackOpen } from '../../core/snack/store/snack.actions';
+
+// needed because we always want the check request to the jira api to finish first
+const ISSUE_REFRESH_DELAY = 10000;
 
 @Injectable()
 export class ProjectEffects {
@@ -73,11 +76,10 @@ export class ProjectEffects {
       ofType(
         ProjectActionTypes.LoadProjectRelatedDataSuccess,
       ),
+      delay(ISSUE_REFRESH_DELAY),
       tap(() => {
-        setTimeout(() => {
           this._issueService.refreshIssueData();
           this._issueService.refreshBacklog();
-        }, 2000);
       })
     );
 
