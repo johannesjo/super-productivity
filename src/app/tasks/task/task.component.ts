@@ -23,7 +23,7 @@ import { distinctUntilChanged, takeUntil } from 'rxjs/operators';
 import { fadeAnimation } from '../../ui/animations/fade.ani';
 import { AttachmentService } from '../../attachment/attachment.service';
 import { IssueService } from '../../issue/issue.service';
-import { DialogEditAttachmentComponent } from "../../attachment/dialog-edit-attachment/dialog-edit-attachment.component";
+import { DialogEditAttachmentComponent } from '../../attachment/dialog-edit-attachment/dialog-edit-attachment.component';
 
 @Component({
   selector: 'task',
