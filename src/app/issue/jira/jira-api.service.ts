@@ -149,18 +149,20 @@ export class JiraApiService {
     });
   }
 
+  transitionIssue(issueId, transitionId): Observable<any> {
+    return this._sendRequest({
+      apiMethod: 'transitionIssue',
+      transform: mapResponse,
+      arguments: [issueId, {
+        transition: {
+          id: transitionId,
+        }
+      }]
+    });
+  }
+
 
   // INTERNAL
-
-  isSufficientJiraSettings(settingsToTest) {
-  }
-
-  transformIssues(response) {
-  }
-
-  showTryAuthAgainToast() {
-  }
-
   // -------------------
   _addWorklog(originalKey, started, timeSpent, comment) {
   }
@@ -171,13 +173,7 @@ export class JiraApiService {
 
   // Simple API Mappings
 
-  getAutoAddedIssues() {
-  }
-
   // -----------------
-  updateStatus(task, localType) {
-  }
-
   updateIssueDescription(task) {
   }
 
@@ -185,26 +181,7 @@ export class JiraApiService {
   }
 
   // Complex Functions
-
-  checkUpdatesForTicket(task, isNoNotify) {
-  }
-
   addWorklog(originalTask) {
-  }
-
-  transitionIssue(task, transitionObj, localType) {
-  }
-
-  checkForNewAndAddToBacklog() {
-  }
-
-  checkForUpdates(tasks) {
-  }
-
-  taskIsUpdatedHandler(updatedTask, originalTask) {
-  }
-
-  checkAndHandleUpdatesForTicket(task) {
   }
 
   // --------
@@ -280,6 +257,10 @@ export class JiraApiService {
     return fromPromise(promise)
       .pipe(
         share(),
+        catchError((err) => {
+          this._snackService.open({type: 'ERROR', message: 'Jira: Something went wrong'});
+          return err;
+        }),
         take(1),
       );
   }

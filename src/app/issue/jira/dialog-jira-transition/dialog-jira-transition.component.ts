@@ -7,6 +7,7 @@ import { Observable } from 'rxjs';
 import { JiraTransitionOption } from '../jira';
 import { JiraApiService } from '../jira-api.service';
 import { JiraOriginalTransition } from '../jira-api-responses';
+import { SnackService } from '../../../core/snack/snack.service';
 
 @Component({
   selector: 'dialog-jira-transition',
@@ -23,6 +24,7 @@ export class DialogJiraTransitionComponent {
     private _jiraIssueService: JiraIssueService,
     private _jiraApiService: JiraApiService,
     private _matDialogRef: MatDialogRef<DialogJiraTransitionComponent>,
+    private _snackService: SnackService,
     @Inject(MAT_DIALOG_DATA) public data: {
       issueId: string,
       issueTitle: string,
@@ -31,13 +33,18 @@ export class DialogJiraTransitionComponent {
   ) {
   }
 
-  close(res: any) {
-    this._matDialogRef.close(res);
+  close() {
+    this._matDialogRef.close();
   }
 
   transitionIssue() {
-    console.log();
-    
+    if (this.chosenTransitionId) {
+      this._jiraApiService.transitionIssue(this.data.issueId, this.chosenTransitionId)
+        .pipe()
+        .subscribe(() => {
+          this._snackService.open({type: 'SUCCESS', message: 'Jira: Successfully transitioned issue'});
+          this.close();
+        });
+    }
   }
-
 }
