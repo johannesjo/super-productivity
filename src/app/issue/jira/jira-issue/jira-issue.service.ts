@@ -133,7 +133,7 @@ export class JiraIssueService {
             // TODO fix
             // lastUpdateFromRemote: updatedIssue.updated,
             lastUpdateFromRemote: Date.now(),
-            wasUpdated: isUpdateWasUpdated
+            ...(isUpdateWasUpdated ? {wasUpdated: true} : {})
           });
           this._snackService.open({message: `Jira: ${updatedIssue.key} was updated`, icon: 'cloud_download'});
         }

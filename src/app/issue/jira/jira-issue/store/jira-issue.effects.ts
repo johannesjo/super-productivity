@@ -93,10 +93,12 @@ export class JiraIssueEffects {
       withLatestFrom(
         this._store$.pipe(select(selectProjectJiraCfg)),
         this._store$.pipe(select(selectCurrentTask)),
+        this._store$.pipe(select(selectJiraIssueEntities)),
       ),
-      tap(([action, jiraCfg, currentTask]) => {
+      tap(([action, jiraCfg, currentTask, issueEntities]) => {
         if (jiraCfg.isTransitionIssuesEnabled && currentTask && currentTask.issueType === 'JIRA') {
-          this._openTransitionDialog(currentTask.issueId, currentTask.title, 'IN_PROGRESS');
+          const issueData = issueEntities[currentTask.issueId];
+          this._openTransitionDialog(issueData, 'IN_PROGRESS');
           // TODO transition directly if option is set
         }
       })
@@ -110,11 +112,13 @@ export class JiraIssueEffects {
       withLatestFrom(
         this._store$.pipe(select(selectProjectJiraCfg)),
         this._store$.pipe(select(selectTaskFeatureState)),
+        this._store$.pipe(select(selectJiraIssueEntities)),
       ),
-      tap(([action, jiraCfg, taskState]: [UpdateTask, JiraCfg, TaskState]) => {
+      tap(([action, jiraCfg, taskState, issueEntities]: [UpdateTask, JiraCfg, TaskState, Dictionary<JiraIssue>]) => {
         const task = taskState.entities[action.payload.task.id];
         if (jiraCfg.isTransitionIssuesEnabled && task && task.issueType === 'JIRA' && task.isDone) {
-          this._openTransitionDialog(task.issueId, task.title, 'DONE');
+          const issueData = issueEntities[task.issueId];
+          this._openTransitionDialog(issueData, 'DONE');
           // TODO transition directly if option is set
         }
       })
@@ -165,12 +169,11 @@ export class JiraIssueEffects {
     }
   }
 
-  private _openTransitionDialog(issueId, issueTitle, localState: IssueLocalState) {
+  private _openTransitionDialog(issue: JiraIssue, localState: IssueLocalState) {
     this._matDialog.open(DialogJiraTransitionComponent, {
       restoreFocus: true,
       data: {
-        issueTitle,
-        issueId,
+        issue,
         localState,
       }
     }).afterClosed()

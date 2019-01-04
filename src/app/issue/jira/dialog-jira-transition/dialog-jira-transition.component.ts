@@ -8,6 +8,7 @@ import { JiraTransitionOption } from '../jira';
 import { JiraApiService } from '../jira-api.service';
 import { JiraOriginalTransition } from '../jira-api-responses';
 import { SnackService } from '../../../core/snack/snack.service';
+import { take } from 'rxjs/operators';
 
 @Component({
   selector: 'dialog-jira-transition',
@@ -16,9 +17,10 @@ import { SnackService } from '../../../core/snack/snack.service';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DialogJiraTransitionComponent {
-  issueData$: Observable<JiraIssue> = this._jiraIssueService.getById(this.data.issueId);
-  chosenTransitionId: JiraTransitionOption | string;
-  availableTransitions$: Observable<JiraOriginalTransition[]> = this._jiraApiService.getTransitionsForIssue(this.data.issueId);
+  availableTransitions$: Observable<JiraOriginalTransition[]> = this._jiraApiService.getTransitionsForIssue(this.data.issue.id);
+
+  // TODO this doesn't work as the ids don't match :(
+  chosenTransitionId: JiraTransitionOption | string = this.data.issue.status && this.data.issue.status.id;
 
   constructor(
     private _jiraIssueService: JiraIssueService,
@@ -26,8 +28,7 @@ export class DialogJiraTransitionComponent {
     private _matDialogRef: MatDialogRef<DialogJiraTransitionComponent>,
     private _snackService: SnackService,
     @Inject(MAT_DIALOG_DATA) public data: {
-      issueId: string,
-      issueTitle: string,
+      issue: JiraIssue,
       localState: IssueLocalState
     }
   ) {
@@ -39,9 +40,10 @@ export class DialogJiraTransitionComponent {
 
   transitionIssue() {
     if (this.chosenTransitionId) {
-      this._jiraApiService.transitionIssue(this.data.issueId, this.chosenTransitionId)
-        .pipe()
+      this._jiraApiService.transitionIssue(this.data.issue.id, this.chosenTransitionId)
+        .pipe(take(1))
         .subscribe(() => {
+          this._jiraIssueService.updateIssueFromApi(this.data.issue.id, this.data.issue, false);
           this._snackService.open({type: 'SUCCESS', message: 'Jira: Successfully transitioned issue'});
           this.close();
         });

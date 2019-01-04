@@ -3,8 +3,8 @@
     <mat-icon svgIcon="jira"></mat-icon>
     Update Status on Jira
   </h2>
-  <p><strong>Current Status:</strong> {{(issueData$|async)?.status?.name}}</p>
-  <p><strong>Current Assignee:</strong> {{(issueData$|async)?.assignee?.displayName}}</p>
+  <p><strong>Current Status:</strong> {{data.issue?.status?.name}}</p>
+  <p><strong>Current Assignee:</strong> {{data.issue?.assignee?.displayName}}</p>
 
   <mat-form-field>
     <label>Choose a transition</label>
