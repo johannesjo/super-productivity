@@ -1,6 +1,7 @@
 <collapsible [title]="section.title"
-             [icon]="section.icon"
              [isExpanded]="isExpanded">
+  <!--[icon]="section.icon"-->
+
   <help-section>
     <div [innerHtml]="section.help"></div>
   </help-section>
@@ -12,7 +13,7 @@
       [cfg]="cfg"
       (save)="onSave($event)"></config-form>
 
-    <div class="custom-form"
-         #customForm></div>
+    <ng-template class="custom-form"
+                 #customForm></ng-template>
   </div>
 </collapsible>
