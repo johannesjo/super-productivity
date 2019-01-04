@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Actions, Effect, ofType } from '@ngrx/effects';
-import { DeleteTask, MoveToBacklog, SetCurrentTask, TaskActionTypes, UpdateTask } from './task.actions';
+import { DeleteTask, Move, MoveToBacklog, SetCurrentTask, TaskActionTypes, UpdateTask } from './task.actions';
 import { select, Store } from '@ngrx/store';
 import { map, mergeMap, tap, throttleTime, withLatestFrom } from 'rxjs/operators';
 import { PersistenceService } from '../../core/persistence/persistence.service';
@@ -120,9 +120,9 @@ export class TaskEffects {
       ofType(
         TaskActionTypes.ToggleStart,
         TaskActionTypes.UpdateTask,
+        TaskActionTypes.DeleteTask,
         TaskActionTypes.MoveToBacklog,
         TaskActionTypes.MoveToArchive,
-        TaskActionTypes.DeleteTask,
         TaskActionTypes.Move,
       ),
       withLatestFrom(
@@ -130,35 +130,48 @@ export class TaskEffects {
         (action, state) => ({action, state})
       ),
       mergeMap(({action, state}) => {
-        let nextId: false | string | null;
+        const currentId = state.currentTaskId;
+        let nextId: 'NO_UPDATE' | string | null;
 
         switch (action.type) {
-          case TaskActionTypes.ToggleStart:
+          case TaskActionTypes.ToggleStart: {
             nextId = state.currentTaskId ? null : this.findNextTask(state);
             break;
+          }
 
           case TaskActionTypes.UpdateTask: {
             const {isDone} = (<UpdateTask>action).payload.task.changes;
-            const isCurrent = (<UpdateTask>action).payload.task.id === state.currentTaskId;
-            nextId = (isDone && isCurrent) ? this.findNextTask(state) : false;
+            const isCurrent = (<UpdateTask>action).payload.task.id === currentId;
+            nextId = (isDone && isCurrent) ? this.findNextTask(state) : 'NO_UPDATE';
             break;
           }
 
           case TaskActionTypes.MoveToBacklog: {
-            const isCurrent = state.currentTaskId === (<MoveToBacklog>action).payload.id;
-            nextId = (isCurrent) ? null : false;
+            const isCurrent = (currentId === (<MoveToBacklog>action).payload.id);
+            nextId = (isCurrent) ? null : 'NO_UPDATE';
             break;
           }
+
+          case TaskActionTypes.Move: {
+            const isCurrent = (currentId === (<Move>action).payload.taskId);
+            const isMovedToBacklog = ((<Move>action).payload.targetModelId === 'BACKLOG');
+            nextId = (isCurrent && isMovedToBacklog) ? null : 'NO_UPDATE';
+            break;
+          }
+
+          // QUICK FIX FOR THE ISSUE
+          // TODO better solution
+          case TaskActionTypes.DeleteTask: {
+            nextId = state.currentTaskId;
+            break;
+          }
+
+          // NOTE: currently no solution for this, but we're probably fine, as the current task
+          // gets unset every time we go to the finish day view
+          // case TaskActionTypes.MoveToArchive: {}
         }
-        /*
-        Cases to consider:
-        Toggle Start _/
-        Move: To backlog, to done list
-        Update, all sorts
-        Delete
-        Move to archive
-         */
-        if (nextId === false) {
+
+        if (nextId === 'NO_UPDATE') {
           return EMPTY;
         } else {
           return of(new SetCurrentTask(nextId));
