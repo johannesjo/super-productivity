@@ -85,6 +85,7 @@ export class JiraIssueEffects {
     );
 
 
+
   @Effect({dispatch: false}) checkForStartTransition$: any = this._actions$
     .pipe(
       ofType(
@@ -161,7 +162,7 @@ export class JiraIssueEffects {
         .pipe(
           tap(() => {
             this._snackService.open({message: 'Jira: Polling Changes for issues', icon: 'cloud_download'});
-            issueIds.forEach((id) => this._jiraIssueService.updateIssueFromApi(id, entities[id]));
+            issueIds.forEach((id) => this._jiraIssueService.updateIssueFromApi(id, entities[id], true, false));
           })
         ).subscribe();
     }
@@ -184,7 +185,7 @@ export class JiraIssueEffects {
         this._jiraApiService.transitionIssue(issue.id, chosenTransition)
           .pipe(take(1))
           .subscribe(() => {
-            this._jiraIssueService.updateIssueFromApi(issue.id, issue, false);
+            this._jiraIssueService.updateIssueFromApi(issue.id, issue, false, false);
             this._snackService.open({type: 'SUCCESS', message: 'Jira: Successfully transitioned issue'});
           });
     }

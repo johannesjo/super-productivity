@@ -102,45 +102,59 @@ export class JiraIssueService {
 
   }
 
-  updateIssueFromApi(issueId, oldIssueData_: IssueData, isUpdateWasUpdated = true) {
+  updateIssueFromApi(issueId, oldIssueData_?: IssueData, isNotifyOnUpdate = true, isNotifyOnNoUpdateRequired = false) {
     const oldIssueData = oldIssueData_ as JiraIssue;
 
     return this._jiraApiService.getIssueById(issueId, true)
       .subscribe((updatedIssue) => {
-        const oldCommentLength = oldIssueData && oldIssueData.comments && oldIssueData.comments.length || 0;
-        const newCommentLength = updatedIssue && updatedIssue.comments && updatedIssue.comments.length || 0;
-        const isCommentsChanged = (oldCommentLength !== newCommentLength);
+        const changelog = oldIssueData_
+          ? this._createChangelog(updatedIssue, oldIssueData)
+          : [];
+        const wasUpdated = (isNotifyOnUpdate && changelog.length > 0);
 
-        if (updatedIssue.updated !== oldIssueData.updated || isCommentsChanged) {
-          const lastUpdate = oldIssueData.lastUpdateFromRemote && new Date(oldIssueData.lastUpdateFromRemote);
-          const changelog: JiraChangelogEntry[] = updatedIssue.changelog.filter(
-            entry => !lastUpdate || new Date(entry.created) > lastUpdate
-          );
+        this.update(issueId, {
+          ...updatedIssue,
+          changelog,
+          lastUpdateFromRemote: Date.now(),
+          ...(wasUpdated
+            ? {wasUpdated: true}
+            : {})
+        });
 
-          if (isCommentsChanged) {
-            changelog.unshift({
-              created: lastUpdate.toISOString(),
-              author: null,
-              field: 'Comments',
-              from: oldCommentLength ? oldCommentLength.toString() : '0',
-              to: newCommentLength ? newCommentLength.toString() : '0',
-            });
-          }
-
-          this.update(issueId, {
-            ...updatedIssue,
-            changelog,
-            // TODO fix
-            // lastUpdateFromRemote: updatedIssue.updated,
-            lastUpdateFromRemote: Date.now(),
-            ...(isUpdateWasUpdated ? {wasUpdated: true} : {})
-          });
+        if (wasUpdated && isNotifyOnUpdate) {
           this._snackService.open({message: `Jira: ${updatedIssue.key} was updated`, icon: 'cloud_download'});
+        } else if (isNotifyOnNoUpdateRequired) {
+          this._snackService.open({message: `Jira: ${updatedIssue.key} already up to date`, icon: 'cloud_download'});
         }
       });
   }
 
   getMappedAttachmentsFromIssue(issueData: JiraIssue) {
     return issueData && issueData.attachments && issueData.attachments.map(mapJiraAttachmentToAttachment) as Attachment[];
+  }
+
+  private _createChangelog(updatedIssue: JiraIssue, oldIssue: JiraIssue): JiraChangelogEntry[] {
+    let changelog: JiraChangelogEntry[] = [];
+    const oldCommentLength = oldIssue && oldIssue.comments && oldIssue.comments.length || 0;
+    const newCommentLength = updatedIssue && updatedIssue.comments && updatedIssue.comments.length || 0;
+    const isCommentsChanged = (oldCommentLength !== newCommentLength);
+
+    if (updatedIssue.updated !== oldIssue.updated || isCommentsChanged) {
+      const lastUpdate = oldIssue.lastUpdateFromRemote && new Date(oldIssue.lastUpdateFromRemote);
+      changelog = updatedIssue.changelog.filter(
+        entry => !lastUpdate || new Date(entry.created) > lastUpdate
+      );
+
+      if (isCommentsChanged) {
+        changelog.unshift({
+          created: lastUpdate.toISOString(),
+          author: null,
+          field: 'Comments',
+          from: oldCommentLength ? oldCommentLength.toString() : '0',
+          to: newCommentLength ? newCommentLength.toString() : '0',
+        });
+      }
+    }
+    return changelog;
   }
 }

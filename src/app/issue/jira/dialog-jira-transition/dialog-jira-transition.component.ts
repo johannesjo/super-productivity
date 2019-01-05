@@ -43,7 +43,7 @@ export class DialogJiraTransitionComponent {
       this._jiraApiService.transitionIssue(this.data.issue.id, this.chosenTransitionId)
         .pipe(take(1))
         .subscribe(() => {
-          this._jiraIssueService.updateIssueFromApi(this.data.issue.id, this.data.issue, false);
+          this._jiraIssueService.updateIssueFromApi(this.data.issue.id, this.data.issue, false, false);
           this._snackService.open({type: 'SUCCESS', message: 'Jira: Successfully transitioned issue'});
           this.close();
         });

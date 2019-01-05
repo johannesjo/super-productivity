@@ -93,10 +93,16 @@ export class IssueService {
     }
   }
 
-  public refreshIssue(issueType: IssueProviderKey, issueId: string | number, issueData: IssueData) {
+  public refreshIssue(
+    issueType: IssueProviderKey,
+    issueId: string | number,
+    issueData: IssueData,
+    isNotifySuccess = true,
+    isNotifyNoUpdateRequired = false
+  ) {
     switch (issueType) {
       case JIRA_TYPE: {
-        this._jiraIssueService.updateIssueFromApi(issueId, issueData);
+        this._jiraIssueService.updateIssueFromApi(issueId, issueData, isNotifySuccess, isNotifyNoUpdateRequired);
         break;
       }
       case GIT_TYPE: {
