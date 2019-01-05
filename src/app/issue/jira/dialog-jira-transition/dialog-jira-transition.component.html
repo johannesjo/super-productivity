@@ -16,11 +16,11 @@
 
   <mat-form-field>
     <label>Choose status to assign</label>
-    <mat-select [(ngModel)]="chosenTransitionId">
+    <mat-select [(ngModel)]="chosenTransition">
       <!--<mat-option value="DO_NOT">Don't transition</mat-option>-->
       <!--<mat-option value="ALWAYS_ASK">Always open dialog</mat-option>-->
       <mat-option *ngFor="let transition of (availableTransitions$|async)"
-                  [value]="transition.id">
+                  [value]="transition">
         <!--<img [src]="transition.to.iconUrl">-->
         {{transition.name}}
       </mat-option>

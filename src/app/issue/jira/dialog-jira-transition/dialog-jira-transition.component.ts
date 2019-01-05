@@ -4,7 +4,6 @@ import { IssueLocalState } from '../../issue';
 import { JiraIssue } from '../jira-issue/jira-issue.model';
 import { JiraIssueService } from '../jira-issue/jira-issue.service';
 import { Observable } from 'rxjs';
-import { JiraTransitionOption } from '../jira';
 import { JiraApiService } from '../jira-api.service';
 import { JiraOriginalTransition } from '../jira-api-responses';
 import { SnackService } from '../../../core/snack/snack.service';
@@ -19,8 +18,7 @@ import { take } from 'rxjs/operators';
 export class DialogJiraTransitionComponent {
   availableTransitions$: Observable<JiraOriginalTransition[]> = this._jiraApiService.getTransitionsForIssue(this.data.issue.id);
 
-  // TODO this doesn't work as the ids don't match :(
-  chosenTransitionId: JiraTransitionOption | string = this.data.issue.status && this.data.issue.status.id;
+  chosenTransition: JiraOriginalTransition;
 
   constructor(
     private _jiraIssueService: JiraIssueService,
@@ -39,12 +37,15 @@ export class DialogJiraTransitionComponent {
   }
 
   transitionIssue() {
-    if (this.chosenTransitionId) {
-      this._jiraApiService.transitionIssue(this.data.issue.id, this.chosenTransitionId)
+    if (this.chosenTransition && this.chosenTransition.id) {
+      this._jiraApiService.transitionIssue(this.data.issue.id, this.chosenTransition.id)
         .pipe(take(1))
         .subscribe(() => {
           this._jiraIssueService.updateIssueFromApi(this.data.issue.id, this.data.issue, false, false);
-          this._snackService.open({type: 'SUCCESS', message: 'Jira: Successfully transitioned issue'});
+          this._snackService.open({
+            type: 'SUCCESS',
+            message: `Jira: Set issue ${this.data.issue.key} to <strong>${this.chosenTransition.name}</strong>`
+          });
           this.close();
         });
     }

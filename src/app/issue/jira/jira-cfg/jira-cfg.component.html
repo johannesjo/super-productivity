@@ -72,7 +72,7 @@
           <mat-option value="DO_NOT">Don't transition</mat-option>
           <mat-option value="ALWAYS_ASK">Always open dialog</mat-option>
           <mat-option *ngFor="let transition of cfg.availableTransitions"
-                      [value]="transition.id">
+                      [value]="transition">
             {{transition.name}}
           </mat-option>
         </mat-select>

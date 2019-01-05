@@ -1,6 +1,6 @@
 import { JiraOriginalTransition } from './jira-api-responses';
 
-export type JiraTransitionOption = 'ALWAYS_ASK' | 'DO_NOT' | string;
+export type JiraTransitionOption = 'ALWAYS_ASK' | 'DO_NOT' | JiraOriginalTransition;
 
 export interface JiraTransitionConfig {
   // NOTE: keys mirror IssueLocalState type

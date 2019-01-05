@@ -13,7 +13,7 @@ import { JIRA_INITIAL_POLL_DELAY, JIRA_POLL_INTERVAL } from '../../jira.const';
 import { ConfigService } from '../../../../core/config/config.service';
 import { Dictionary } from '@ngrx/entity';
 import { JiraIssue } from '../jira-issue.model';
-import { JiraCfg } from '../../jira';
+import { JiraCfg, JiraTransitionOption } from '../../jira';
 import { SnackService } from '../../../../core/snack/snack.service';
 import { ProjectActionTypes } from '../../../../project/store/project.actions';
 import { Task } from '../../../../tasks/task.model';
@@ -208,7 +208,7 @@ export class JiraIssueEffects {
   }
 
   private _handleTransitionForIssue(localState: IssueLocalState, jiraCfg: JiraCfg, issue: JiraIssue) {
-    const chosenTransition = jiraCfg.transitionConfig[localState];
+    const chosenTransition: JiraTransitionOption = jiraCfg.transitionConfig[localState];
 
     if (!chosenTransition) {
       this._snackService.open({type: 'ERROR', message: 'Jira: No transition configured'});
@@ -221,11 +221,14 @@ export class JiraIssueEffects {
       case 'ALWAYS_ASK':
         return this._openTransitionDialog(issue, localState);
       default:
-        this._jiraApiService.transitionIssue(issue.id, chosenTransition)
+        this._jiraApiService.transitionIssue(issue.id, chosenTransition.id)
           .pipe(take(1))
           .subscribe(() => {
             this._jiraIssueService.updateIssueFromApi(issue.id, issue, false, false);
-            this._snackService.open({type: 'SUCCESS', message: 'Jira: Successfully transitioned issue'});
+            this._snackService.open({
+              type: 'SUCCESS',
+              message: `Jira: Set issue ${issue.key} to <strong>${chosenTransition.name}</strong>`
+            });
           });
     }
   }
