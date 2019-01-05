@@ -1,3 +1,7 @@
+## [0.1.1](https://github.com/johannesjo/sp2/compare/v0.1.0...v0.1.1) (2019-01-05)
+
+
+
 # 0.1.0 (2019-01-05)
 
 
