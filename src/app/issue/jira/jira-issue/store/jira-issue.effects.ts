@@ -36,26 +36,32 @@ export class JiraIssueEffects {
   @Effect({dispatch: false}) issuePolling$: any = this._actions$
     .pipe(
       ofType(
-        ProjectActionTypes.SetCurrentProject,
-        TaskActionTypes.AddTask,
-        TaskActionTypes.DeleteTask,
-        TaskActionTypes.RestoreTask,
-        TaskActionTypes.MoveToArchive,
         JiraIssueActionTypes.LoadState,
-        JiraIssueActionTypes.LoadJiraIssues,
-        JiraIssueActionTypes.AddJiraIssue,
-        JiraIssueActionTypes.DeleteJiraIssue,
-
-        // also needs to be here to reinit entity data
-        JiraIssueActionTypes.UpdateJiraIssue,
+        ProjectActionTypes.UpdateProjectIssueProviderCfg,
       ),
       withLatestFrom(
-        this._store$.pipe(select(selectJiraIssueIds)),
-        this._store$.pipe(select(selectJiraIssueEntities)),
         this._store$.pipe(select(selectProjectJiraCfg)),
       ),
-      // TODO should be done in a more modern way via switchmap and timer
-      tap(this._reInitIssuePolling.bind(this))
+      switchMap(([a, jiraCfg]) => {
+        const isPollingEnabled = jiraCfg && jiraCfg.isEnabled && jiraCfg.isAutoPollTickets;
+        if (isPollingEnabled) {
+          return timer(JIRA_INITIAL_POLL_DELAY, JIRA_POLL_INTERVAL)
+            .pipe(
+              withLatestFrom(
+                this._store$.pipe(select(selectJiraIssueIds)),
+                this._store$.pipe(select(selectJiraIssueEntities)),
+              ),
+              tap(([x, issueIds, entities]: [number, string[], Dictionary<JiraIssue>]) => {
+                if (issueIds && issueIds.length > 0) {
+                  this._snackService.open({message: 'Jira: Polling Changes for issues', icon: 'cloud_download'});
+                  issueIds.forEach((id) => this._jiraIssueService.updateIssueFromApi(id, entities[id], true, false));
+                }
+              })
+            );
+        } else {
+          return EMPTY;
+        }
+      })
     );
   @Effect({dispatch: false}) syncIssueStateToLs$: any = this._actions$
     .pipe(
@@ -196,27 +202,6 @@ export class JiraIssueEffects {
       this._persistenceService.saveIssuesForProject(currentProjectId, 'JIRA', jiraIssueFeatureState);
     } else {
       throw new Error('No current project id');
-    }
-  }
-
-  private _reInitIssuePolling(
-    [action, issueIds, entities, jiraCfg]: [JiraIssueActionTypes, string[], Dictionary<JiraIssue>, JiraCfg]
-  ) {
-
-    if (this._pollSub) {
-      this._pollSub.unsubscribe();
-    }
-
-    const isPollingEnabled = jiraCfg && jiraCfg.isEnabled && jiraCfg.isAutoPollTickets;
-
-    if (isPollingEnabled && issueIds && issueIds.length) {
-      this._pollSub = timer(JIRA_INITIAL_POLL_DELAY, JIRA_POLL_INTERVAL)
-        .pipe(
-          tap(() => {
-            this._snackService.open({message: 'Jira: Polling Changes for issues', icon: 'cloud_download'});
-            issueIds.forEach((id) => this._jiraIssueService.updateIssueFromApi(id, entities[id], true, false));
-          })
-        ).subscribe();
     }
   }
 
