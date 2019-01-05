@@ -96,7 +96,7 @@ export class JiraIssueEffects {
         this._store$.pipe(select(selectJiraIssueEntities)),
       ),
       tap(([action, jiraCfg, currentTask, issueEntities]) => {
-        if (jiraCfg.isTransitionIssuesEnabled && currentTask && currentTask.issueType === 'JIRA') {
+        if (jiraCfg && jiraCfg.isTransitionIssuesEnabled && currentTask && currentTask.issueType === 'JIRA') {
           const issueData = issueEntities[currentTask.issueId];
           this._handleTransitionForIssue('IN_PROGRESS', jiraCfg, issueData);
         }
@@ -115,7 +115,7 @@ export class JiraIssueEffects {
       ),
       tap(([action, jiraCfg, taskState, issueEntities]: [UpdateTask, JiraCfg, TaskState, Dictionary<JiraIssue>]) => {
         const task = taskState.entities[action.payload.task.id];
-        if (jiraCfg.isTransitionIssuesEnabled && task && task.issueType === 'JIRA' && task.isDone) {
+        if (jiraCfg && jiraCfg.isTransitionIssuesEnabled && task && task.issueType === 'JIRA' && task.isDone) {
           const issueData = issueEntities[task.issueId];
           this._handleTransitionForIssue('DONE', jiraCfg, issueData);
         }

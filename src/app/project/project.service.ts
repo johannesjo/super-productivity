@@ -1,6 +1,12 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { GoogleTimeSheetExport, Project, ProjectAdvancedCfg, ProjectAdvancedCfgKey, SimpleSummarySettings } from './project.model';
+import {
+  GoogleTimeSheetExport,
+  Project,
+  ProjectAdvancedCfg,
+  ProjectAdvancedCfgKey,
+  SimpleSummarySettings
+} from './project.model';
 import { PersistenceService } from '../core/persistence/persistence.service';
 import { select, Store } from '@ngrx/store';
 import { ProjectActionTypes } from './store/project.actions';
@@ -21,6 +27,7 @@ import { DEFAULT_PROJECT } from './project.const';
 import { Dictionary } from '@ngrx/entity';
 import { getWorklogStr } from '../core/util/get-work-log-str';
 import { GitCfg } from '../issue/git/git';
+import { DEFAULT_ISSUE_PROVIDER_CFGS } from '../issue/issue.const';
 
 @Injectable()
 export class ProjectService {
@@ -165,7 +172,12 @@ export class ProjectService {
       // NOTE: check if we need a deep copy
       projectEntities[key] = {
         ...DEFAULT_PROJECT,
-        ...projectEntities[key]
+        ...projectEntities[key],
+        // also add missing issue integration cfgs
+        issueIntegrationCfgs: {
+          ...DEFAULT_ISSUE_PROVIDER_CFGS,
+          ...projectEntities[key].issueIntegrationCfgs,
+        }
       };
     });
     return {...projectState, entities: projectEntities};
