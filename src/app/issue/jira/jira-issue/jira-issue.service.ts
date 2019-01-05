@@ -111,14 +111,15 @@ export class JiraIssueService {
           ? this._createChangelog(updatedIssue, oldIssueData)
           : [];
         const wasUpdated = (isNotifyOnUpdate && changelog.length > 0);
+        // used for the case when there is already a changelist shown
+        const isNoUpdateChangelog = (oldIssueData && oldIssueData.wasUpdated && changelog.length === 0);
 
         this.update(issueId, {
           ...updatedIssue,
-          changelog,
           lastUpdateFromRemote: Date.now(),
-          ...(wasUpdated
-            ? {wasUpdated: true}
-            : {})
+          // only update those if we want to
+          ...(wasUpdated ? {wasUpdated} : {}),
+          ...(isNoUpdateChangelog ? {} : {changelog}),
         });
 
         if (wasUpdated && isNotifyOnUpdate) {
