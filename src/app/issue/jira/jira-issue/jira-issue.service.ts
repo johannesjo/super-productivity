@@ -102,6 +102,8 @@ export class JiraIssueService {
 
   }
 
+  // TODO there is probably a better way to to do this
+  // TODO refactor to actions
   updateIssueFromApi(issueId, oldIssueData_?: IssueData, isNotifyOnUpdate = true, isNotifyOnNoUpdateRequired = false) {
     const oldIssueData = oldIssueData_ as JiraIssue;
 

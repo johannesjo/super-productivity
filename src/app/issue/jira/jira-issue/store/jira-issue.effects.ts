@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Actions, Effect, ofType } from '@ngrx/effects';
 import { JiraIssueActionTypes } from './jira-issue.actions';
 import { select, Store } from '@ngrx/store';
-import { filter, take, tap, throttleTime, withLatestFrom } from 'rxjs/operators';
+import { filter, switchMap, take, tap, throttleTime, withLatestFrom } from 'rxjs/operators';
 import { TaskActionTypes, UpdateTask } from '../../../../tasks/store/task.actions';
 import { PersistenceService } from '../../../../core/persistence/persistence.service';
 import { selectJiraIssueEntities, selectJiraIssueFeatureState, selectJiraIssueIds } from './jira-issue.reducer';
@@ -24,7 +24,7 @@ import {
   selectTaskFeatureState
 } from '../../../../tasks/store/task.selectors';
 import { TaskService } from '../../../../tasks/task.service';
-import { Subscription, timer } from 'rxjs';
+import { EMPTY, Subscription, timer } from 'rxjs';
 import { TaskState } from '../../../../tasks/store/task.reducer';
 import { MatDialog } from '@angular/material';
 import { DialogJiraTransitionComponent } from '../../dialog-jira-transition/dialog-jira-transition.component';
@@ -105,13 +105,13 @@ export class JiraIssueEffects {
       // show every 15s max to give time for updates
       throttleTime(15000),
       // TODO there is probably a better way to to do this
-      tap(([action, jiraCfg, currentTaskOrParent, issueEntities]) => {
+      // TODO refactor to actions
+      switchMap(([action, jiraCfg, currentTaskOrParent, issueEntities]) => {
         const issue = issueEntities[currentTaskOrParent.issueId];
         const assignee = issue.assignee;
         const currentUserName = jiraCfg.userAssigneeName || jiraCfg.userName;
-
-        if (!issue.assignee) {
-          this._matDialog.open(DialogConfirmComponent, {
+        if (!issue.assignee || issue.assignee.name !== currentUserName) {
+          return this._matDialog.open(DialogConfirmComponent, {
             restoreFocus: true,
             data: {
               okTxt: 'Do it!',
@@ -119,14 +119,21 @@ export class JiraIssueEffects {
               message: `<strong>${issue.summary}</strong> is currently assigned to <strong>${assignee ? assignee.displayName : 'nobody'}</strong>. Do you want to assign it to yourself?`,
             }
           }).afterClosed()
-            .subscribe(isConfirm => {
-              if (isConfirm) {
-                this._jiraApiService.updateAssignee(issue.id, currentUserName)
-                  .subscribe(() => {
+            .pipe(
+              switchMap((isConfirm) => {
+                if (isConfirm) {
+                  const obs = this._jiraApiService.updateAssignee(issue.id, currentUserName);
+                  obs.subscribe(() => {
                     this._jiraIssueService.updateIssueFromApi(issue.id, issue, false, false);
                   });
-              }
-            });
+                  return obs;
+                } else {
+                  return EMPTY;
+                }
+              })
+            );
+        } else {
+          return EMPTY;
         }
       })
     );
