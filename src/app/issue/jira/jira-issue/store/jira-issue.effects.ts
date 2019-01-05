@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Actions, Effect, ofType } from '@ngrx/effects';
 import { JiraIssueActionTypes } from './jira-issue.actions';
 import { select, Store } from '@ngrx/store';
-import { tap, withLatestFrom } from 'rxjs/operators';
+import { take, tap, withLatestFrom } from 'rxjs/operators';
 import { TaskActionTypes, UpdateTask } from '../../../../tasks/store/task.actions';
 import { PersistenceService } from '../../../../core/persistence/persistence.service';
 import { selectJiraIssueEntities, selectJiraIssueFeatureState, selectJiraIssueIds } from './jira-issue.reducer';
@@ -98,8 +98,7 @@ export class JiraIssueEffects {
       tap(([action, jiraCfg, currentTask, issueEntities]) => {
         if (jiraCfg.isTransitionIssuesEnabled && currentTask && currentTask.issueType === 'JIRA') {
           const issueData = issueEntities[currentTask.issueId];
-          this._openTransitionDialog(issueData, 'IN_PROGRESS');
-          // TODO transition directly if option is set
+          this._handleTransitionForIssue('IN_PROGRESS', jiraCfg, issueData);
         }
       })
     );
@@ -118,8 +117,7 @@ export class JiraIssueEffects {
         const task = taskState.entities[action.payload.task.id];
         if (jiraCfg.isTransitionIssuesEnabled && task && task.issueType === 'JIRA' && task.isDone) {
           const issueData = issueEntities[task.issueId];
-          this._openTransitionDialog(issueData, 'DONE');
-          // TODO transition directly if option is set
+          this._handleTransitionForIssue('DONE', jiraCfg, issueData);
         }
       })
     );
@@ -166,6 +164,29 @@ export class JiraIssueEffects {
             issueIds.forEach((id) => this._jiraIssueService.updateIssueFromApi(id, entities[id]));
           })
         ).subscribe();
+    }
+  }
+
+  private _handleTransitionForIssue(localState: IssueLocalState, jiraCfg: JiraCfg, issue: JiraIssue) {
+    const chosenTransition = jiraCfg.transitionConfig[localState];
+
+    if (!chosenTransition) {
+      this._snackService.open({type: 'ERROR', message: 'Jira: No transition configured'});
+      throw new Error('Jira: No transition configured');
+    }
+
+    switch (chosenTransition) {
+      case 'DO_NOT':
+        return;
+      case 'ALWAYS_ASK':
+        return this._openTransitionDialog(issue, localState);
+      default:
+        this._jiraApiService.transitionIssue(issue.id, chosenTransition)
+          .pipe(take(1))
+          .subscribe(() => {
+            this._jiraIssueService.updateIssueFromApi(issue.id, issue, false);
+            this._snackService.open({type: 'SUCCESS', message: 'Jira: Successfully transitioned issue'});
+          });
     }
   }
 
