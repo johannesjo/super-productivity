@@ -45,7 +45,15 @@ export class JiraCfgComponent implements OnInit {
     this.fields = this.section.items;
     if (!this.cfg.transitionConfig) {
       this.cfg.transitionConfig = DEFAULT_JIRA_CFG.transitionConfig;
+    } else {
+      // CLEANUP keys that we're not using
+      Object.keys(this.cfg.transitionConfig).forEach((key) => {
+        if (!(key in DEFAULT_JIRA_CFG.transitionConfig)) {
+          delete this.cfg.transitionConfig[key];
+        }
+      });
     }
+
     if (!this.cfg.availableTransitions) {
       this.cfg.availableTransitions = DEFAULT_JIRA_CFG.availableTransitions;
     }
