@@ -29,10 +29,10 @@ export class ConfigService {
 
   async load(isOmitTokens = false) {
     const cfg = await this._persistenceService.loadGlobalConfig();
-
     if (cfg && Object.keys(cfg).length > 0) {
       this.loadState(cfg, isOmitTokens);
     } else {
+      // NOTE: this happens if there never have been any changes to the default cfg
       console.log('ConfigService No config found in ls');
     }
   }
