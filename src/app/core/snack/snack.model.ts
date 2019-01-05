@@ -6,6 +6,7 @@ export interface SnackParams {
   message: string;
   type?: SnackType;
   icon?: string;
+  svgIcon?: string;
   actionStr?: string;
   actionId?: string;
   actionFn?: Function;

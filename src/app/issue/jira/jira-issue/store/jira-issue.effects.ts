@@ -52,8 +52,10 @@ export class JiraIssueEffects {
                 this._store$.pipe(select(selectJiraIssueEntities)),
               ),
               tap(([x, issueIds, entities]: [number, string[], Dictionary<JiraIssue>]) => {
+                console.log('jira TAP poll', issueIds, entities);
                 if (issueIds && issueIds.length > 0) {
-                  this._snackService.open({message: 'Jira: Polling Changes for issues', icon: 'cloud_download'});
+                  console.log('SHOW toast???');
+                  this._snackService.open({message: 'Jira: Polling Changes for issues', svgIcon: 'jira'});
                   issueIds.forEach((id) => this._jiraIssueService.updateIssueFromApi(id, entities[id], true, false));
                 }
               })
