@@ -1,6 +1,8 @@
+import { JiraOriginalTransition } from './jira-api-responses';
+
 export type JiraTransitionOption = 'ALWAYS_ASK' | 'DO_NOT' | string;
 
-export interface JiraTransitionOptions {
+export interface JiraTransitionConfig {
   // NOTE: keys mirror IssueLocalState type
   OPEN: JiraTransitionOption;
   IN_PROGRESS: JiraTransitionOption;
@@ -31,7 +33,8 @@ export interface JiraCfg {
   userAssigneeName: string;
 
   isTransitionIssuesEnabled: boolean;
-  availableTransitions: JiraTransitionOptions;
+  transitionConfig: JiraTransitionConfig;
+  availableTransitions: JiraOriginalTransition[];
   userToAssignOnDone: string;
 }
 

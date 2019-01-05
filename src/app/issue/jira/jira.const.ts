@@ -27,8 +27,10 @@ export const DEFAULT_JIRA_CFG: JiraCfg = {
   userAssigneeName: null,
 
   isTransitionIssuesEnabled: true,
-  availableTransitions: {
-    OPEN: 'ALWAYS_ASK',
+
+  availableTransitions: [],
+  transitionConfig: {
+    OPEN: 'DO_NOT',
     IN_PROGRESS: 'ALWAYS_ASK',
     DONE: 'ALWAYS_ASK'
   },
