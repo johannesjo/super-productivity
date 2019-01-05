@@ -1,3 +1,19 @@
+## [0.1.2](https://github.com/johannesjo/sp2/compare/v0.1.1...v0.1.2) (2019-01-05)
+
+
+### Bug Fixes
+
+* **jira:** issue polling happening quite too often ([dd5f217](https://github.com/johannesjo/sp2/commit/dd5f217))
+
+
+### Features
+
+* **jira:** improve transition notifications ([1ede100](https://github.com/johannesjo/sp2/commit/1ede100))
+* **jira:** only transition if needed ([cc59f73](https://github.com/johannesjo/sp2/commit/cc59f73))
+* **jira, git:** improve polling behaviour ([9d21739](https://github.com/johannesjo/sp2/commit/9d21739))
+
+
+
 ## [0.1.1](https://github.com/johannesjo/sp2/compare/v0.1.0...v0.1.1) (2019-01-05)
 
 
