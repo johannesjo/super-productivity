@@ -1,27 +1,62 @@
-# Sp2
+# Super Productivity 2
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 6.1.5.
+This is a ToDo List / Time Tracker / Personal Jira Task Manager for Linux, MacOS and Windows to make you work super productively. 
 
-## Development server
+![Work View with global links](screens/screen_standard.png)
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
+## Features
+* Time Tracking 
+* **Full control over your data**, no tracking, no user accounts, no cloud
+* Sub Tasks
+* Sexy global bookmark bar to add quick links, project related files and even commands and applications
+* Sexy note functionality with custom reminders 
+* Export your time sheets to Google Sheets 
+* 'Take a break' reminder
+* Full Keyboard Support
+* Different Themes!
+* Sync data between multiple instances 
+* Mobile support
+* Configurable and automatable Jira integration for: 
+  * searching and adding tasks from jira
+  * creating (local/personal) sub tasks for your jira tickets
+  * Setting transitions aka setting tickets to in progress or done
+  * Automatic notifications once your (current) task has changed or been commented on jira => no messy email notifications required any more
+* Configurable and automatable Git integration for:
+  * searching and adding tasks from jira 
+  
+And much more!
 
-## Code scaffolding
+## Web Version
+Check out the [web-version](http://super-productivity.com). It is a little bit more limited (time tracking only works if the app is open and idle time tracking is disabled).
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+If you want the Jira Integration to work you have also to download and install the [Super Productivity Chrome Extension](https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb).
 
-## Build
+## Downloads & Install
+[Install from the releases page](https://github.com/johannesjo/super-productivity/releases).
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory. Use the `--prod` flag for a production build.
+## More Screenshots
+![bookmarks](screens/screen_bookmarks.png)
+![notes](screens/screen_notes.png)
+![issue](screens/screen_issue.png)
+![backlog](screens/screen_backlog.png)
+![mobile](screens/screen_mobile.png)
+![worklog](screens/screen_worklog.png)
 
-## Running unit tests
+## Build and run for yourself
+```
+git clone https://github.com/johannesjo/super-productivity.git
+cd super-productivity
+# install electron, gulp, bower and node gyp globally
+npm install -g electron node-gyp gulp bower
+npm install && bower install
+gulp build # or for dev run 'gulp'/'gulp serve' in a separate tab
+npm start # on windows use "set NODE_ENV=DEV electron ./electron/main.js" instead
+```
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+## Contributing
+There are several ways to help. Publishing a bug or a feature request is a good first step. Also making it more popular by posting it on social media etc. is great, because it means more users, which in turn leads to more people testing the app and also more people contributing code.
 
-## Running end-to-end tests
+**Pull requests** are of course also very welcome. Please make sure that you're following the [angular commit guidelines](https://github.com/angular/angular.js/blob/master/DEVELOPERS.md#commits) and to also include the issue number in your commit message, if you're fixing a particular issue (e.g.: `feat: add nice feature with the number #31`).
 
-Run `ng e2e` to execute the end-to-end tests via [Protractor](http://www.protractortest.org/).
-
-## Further help
-
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI README](https://github.com/angular/angular-cli/blob/master/README.md).
+### Packaging the app
+Packaging the app is done via [electron-builder](https://github.com/electron-userland/electron-builder). To start packaging run `npm run dist`. If you want to add new platforms and experiment with the build options the easiest way to do so is manipulating the `build` property in the [package.json](https://github.com/johannesjo/super-productivity/blob/develop/package.json), but you can also the [command line interface of electron builder](https://www.electron.build/cli).
