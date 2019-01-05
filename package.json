@@ -29,12 +29,12 @@
     "electron": "npm run buildElectron && ./node_modules/.bin/electron .",
     "pack": "electron-builder --dir",
     "localInstall": "sudo echo 'Starting local install' && rm -Rf ./dist/ && npm run buildElectron && electron-builder --linux && sudo dpkg -i app-builds/sp2*.deb",
-    "dist": "run-s buildFrontend && electron-builder",
-    "distLinuxAndWindows": "run-s buildFrontend && electron-builder --linux --win",
-    "pub": "run-s buildFrontend && electron-builder -p always",
-    "release": "run-s release.changelog dist",
+    "dist": "npm run buildElectron && electron-builder",
+    "distLinuxAndWindows": "npm run buildElectron && electron-builder --linux --win",
+    "pub": "npm run buildElectron && electron-builder -p always",
+    "release": "npm run release.changelog && npm run dist",
     "release.changelog": "conventional-changelog -i CHANGELOG.md -s -p angular",
-    "version": "run-s release.changelog && gulp versionConst && git add -A"
+    "version": "npm run release.changelog && git add -A"
   },
   "publish": [
     {
