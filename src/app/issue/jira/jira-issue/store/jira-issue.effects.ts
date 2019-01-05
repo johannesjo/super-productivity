@@ -221,15 +221,17 @@ export class JiraIssueEffects {
       case 'ALWAYS_ASK':
         return this._openTransitionDialog(issue, localState);
       default:
-        this._jiraApiService.transitionIssue(issue.id, chosenTransition.id)
-          .pipe(take(1))
-          .subscribe(() => {
-            this._jiraIssueService.updateIssueFromApi(issue.id, issue, false, false);
-            this._snackService.open({
-              type: 'SUCCESS',
-              message: `Jira: Set issue ${issue.key} to <strong>${chosenTransition.name}</strong>`
+        if (!issue.status || issue.status.name !== chosenTransition.name) {
+          this._jiraApiService.transitionIssue(issue.id, chosenTransition.id)
+            .pipe(take(1))
+            .subscribe(() => {
+              this._jiraIssueService.updateIssueFromApi(issue.id, issue, false, false);
+              this._snackService.open({
+                type: 'SUCCESS',
+                message: `Jira: Set issue ${issue.key} to <strong>${chosenTransition.name}</strong>`
+              });
             });
-          });
+        }
     }
   }
 
