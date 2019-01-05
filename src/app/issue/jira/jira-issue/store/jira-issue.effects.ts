@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Actions, Effect, ofType } from '@ngrx/effects';
 import { JiraIssueActionTypes } from './jira-issue.actions';
 import { select, Store } from '@ngrx/store';
-import { take, tap, withLatestFrom } from 'rxjs/operators';
+import { filter, take, tap, throttleTime, withLatestFrom } from 'rxjs/operators';
 import { TaskActionTypes, UpdateTask } from '../../../../tasks/store/task.actions';
 import { PersistenceService } from '../../../../core/persistence/persistence.service';
 import { selectJiraIssueEntities, selectJiraIssueFeatureState, selectJiraIssueIds } from './jira-issue.reducer';
@@ -18,13 +18,18 @@ import { SnackService } from '../../../../core/snack/snack.service';
 import { ProjectActionTypes } from '../../../../project/store/project.actions';
 import { Task } from '../../../../tasks/task.model';
 import { JIRA_TYPE } from '../../../issue.const';
-import { selectAllTasks, selectCurrentTask, selectTaskFeatureState } from '../../../../tasks/store/task.selectors';
+import {
+  selectAllTasks,
+  selectCurrentTaskParentOrCurrent,
+  selectTaskFeatureState
+} from '../../../../tasks/store/task.selectors';
 import { TaskService } from '../../../../tasks/task.service';
 import { Subscription, timer } from 'rxjs';
 import { TaskState } from '../../../../tasks/store/task.reducer';
 import { MatDialog } from '@angular/material';
 import { DialogJiraTransitionComponent } from '../../dialog-jira-transition/dialog-jira-transition.component';
 import { IssueLocalState } from '../../../issue';
+import { DialogConfirmComponent } from '../../../../ui/dialog-confirm/dialog-confirm.component';
 
 @Injectable()
 export class JiraIssueEffects {
@@ -84,7 +89,47 @@ export class JiraIssueEffects {
       tap(this._importNewIssuesToBacklog.bind(this))
     );
 
+  @Effect({dispatch: false}) checkForReassignment: any = this._actions$
+    .pipe(
+      ofType(
+        TaskActionTypes.SetCurrentTask,
+        JiraIssueActionTypes.UpdateJiraIssue,
+      ),
+      withLatestFrom(
+        this._store$.pipe(select(selectProjectJiraCfg)),
+        this._store$.pipe(select(selectCurrentTaskParentOrCurrent)),
+        this._store$.pipe(select(selectJiraIssueEntities)),
+      ),
+      filter(([action, jiraCfg, currentTaskOrParent, issueEntities]) => jiraCfg && jiraCfg.isCheckToReAssignTicketOnTaskStart
+        && currentTaskOrParent && currentTaskOrParent.issueType === 'JIRA'),
+      // show every 15s max to give time for updates
+      throttleTime(15000),
+      // TODO there is probably a better way to to do this
+      tap(([action, jiraCfg, currentTaskOrParent, issueEntities]) => {
+        const issue = issueEntities[currentTaskOrParent.issueId];
+        const assignee = issue.assignee;
+        const currentUserName = jiraCfg.userAssigneeName || jiraCfg.userName;
 
+        if (!issue.assignee) {
+          this._matDialog.open(DialogConfirmComponent, {
+            restoreFocus: true,
+            data: {
+              okTxt: 'Do it!',
+              // tslint:disable-next-line
+              message: `<strong>${issue.summary}</strong> is currently assigned to <strong>${assignee ? assignee.displayName : 'nobody'}</strong>. Do you want to assign it to yourself?`,
+            }
+          }).afterClosed()
+            .subscribe(isConfirm => {
+              if (isConfirm) {
+                this._jiraApiService.updateAssignee(issue.id, currentUserName)
+                  .subscribe(() => {
+                    this._jiraIssueService.updateIssueFromApi(issue.id, issue, false, false);
+                  });
+              }
+            });
+        }
+      })
+    );
 
   @Effect({dispatch: false}) checkForStartTransition$: any = this._actions$
     .pipe(
@@ -93,12 +138,12 @@ export class JiraIssueEffects {
       ),
       withLatestFrom(
         this._store$.pipe(select(selectProjectJiraCfg)),
-        this._store$.pipe(select(selectCurrentTask)),
+        this._store$.pipe(select(selectCurrentTaskParentOrCurrent)),
         this._store$.pipe(select(selectJiraIssueEntities)),
       ),
-      tap(([action, jiraCfg, currentTask, issueEntities]) => {
-        if (jiraCfg && jiraCfg.isTransitionIssuesEnabled && currentTask && currentTask.issueType === 'JIRA') {
-          const issueData = issueEntities[currentTask.issueId];
+      tap(([action, jiraCfg, curOrParTask, issueEntities]) => {
+        if (jiraCfg && jiraCfg.isTransitionIssuesEnabled && curOrParTask && curOrParTask.issueType === 'JIRA') {
+          const issueData = issueEntities[curOrParTask.issueId];
           this._handleTransitionForIssue('IN_PROGRESS', jiraCfg, issueData);
         }
       })

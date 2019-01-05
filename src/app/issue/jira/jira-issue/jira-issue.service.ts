@@ -114,13 +114,15 @@ export class JiraIssueService {
         // used for the case when there is already a changelist shown
         const isNoUpdateChangelog = (oldIssueData && oldIssueData.wasUpdated && changelog.length === 0);
 
-        this.update(issueId, {
+        const changedFields = {
           ...updatedIssue,
           lastUpdateFromRemote: Date.now(),
           // only update those if we want to
           ...(wasUpdated ? {wasUpdated} : {}),
           ...(isNoUpdateChangelog ? {} : {changelog}),
-        });
+        };
+
+        this.update(issueId, changedFields);
 
         if (wasUpdated && isNotifyOnUpdate) {
           this._snackService.open({message: `Jira: ${updatedIssue.key} was updated`, icon: 'cloud_download'});

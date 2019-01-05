@@ -1,7 +1,12 @@
 import { Injectable } from '@angular/core';
 import shortid from 'shortid';
 import { ChromeExtensionInterfaceService } from '../../core/chrome-extension-interface/chrome-extension-interface.service';
-import { JIRA_ADDITIONAL_ISSUE_FIELDS, JIRA_MAX_RESULTS, JIRA_REDUCED_ISSUE_FIELDS, JIRA_REQUEST_TIMEOUT_DURATION } from './jira.const';
+import {
+  JIRA_ADDITIONAL_ISSUE_FIELDS,
+  JIRA_MAX_RESULTS,
+  JIRA_REDUCED_ISSUE_FIELDS,
+  JIRA_REQUEST_TIMEOUT_DURATION
+} from './jira.const';
 import { ProjectService } from '../../project/project.service';
 import {
   mapIssueResponse,
@@ -17,7 +22,7 @@ import { IPC_JIRA_CB_EVENT, IPC_JIRA_MAKE_REQUEST_EVENT } from '../../../ipc-eve
 import { SnackService } from '../../core/snack/snack.service';
 import { IS_ELECTRON } from '../../app.constants';
 import { loadFromSessionStorage, saveToSessionStorage } from '../../core/persistence/local-storage';
-import { combineLatest, Observable, throwError } from 'rxjs';
+import { BehaviorSubject, combineLatest, Observable, throwError } from 'rxjs';
 import { SearchResultItem } from '../issue';
 import { fromPromise } from 'rxjs/internal-compatibility';
 import { catchError, share, take } from 'rxjs/operators';
@@ -161,6 +166,18 @@ export class JiraApiService {
     });
   }
 
+  updateAssignee(issueId, assignee) {
+    return this._sendRequest({
+      apiMethod: 'updateIssue',
+      arguments: [issueId, {
+        fields: {
+          assignee: {
+            name: assignee
+          }
+        }
+      }]
+    });
+  }
 
   // INTERNAL
   // -------------------
@@ -177,8 +194,6 @@ export class JiraApiService {
   updateIssueDescription(task) {
   }
 
-  updateAssignee(task, assignee) {
-  }
 
   // Complex Functions
   addWorklog(originalTask) {

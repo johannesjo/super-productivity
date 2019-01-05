@@ -55,6 +55,19 @@ export const selectBacklogTaskIds = createSelector(selectTaskFeatureState, state
 export const selectTodaysTaskIds = createSelector(selectTaskFeatureState, state => state.todaysTaskIds);
 export const selectCurrentTaskId = createSelector(selectTaskFeatureState, state => state.currentTaskId);
 export const selectCurrentTask = createSelector(selectTaskFeatureState, s => s.currentTaskId && s.entities[s.currentTaskId]);
+export const selectCurrentTaskParent = createSelector(selectTaskFeatureState, s =>
+  s.currentTaskId
+  && s.entities[s.currentTaskId] && s.entities[s.currentTaskId].parentId
+  && s.entities[s.entities[s.currentTaskId].parentId]
+);
+
+export const selectCurrentTaskParentOrCurrent = createSelector(selectTaskFeatureState, s =>
+  s.currentTaskId
+  && s.entities[s.currentTaskId] && s.entities[s.currentTaskId].parentId
+  && s.entities[s.entities[s.currentTaskId].parentId]
+  || s.entities[s.currentTaskId]
+);
+
 
 export const selectAllTasks = createSelector(selectTaskFeatureState, selectAll);
 export const selectAllTasksWithIssueData = createSelector(selectAllTasks, selectIssueEntityMap, mapIssueDataToTask);
