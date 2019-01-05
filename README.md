@@ -44,13 +44,10 @@ If you want the Jira Integration to work you have also to download and install t
 
 ## Build and run for yourself
 ```
-git clone https://github.com/johannesjo/super-productivity.git
+git clone https://github.com/johannesjo/sp2.git
 cd super-productivity
-# install electron, gulp, bower and node gyp globally
-npm install -g electron node-gyp gulp bower
-npm install && bower install
-gulp build # or for dev run 'gulp'/'gulp serve' in a separate tab
-npm start # on windows use "set NODE_ENV=DEV electron ./electron/main.js" instead
+npm install
+ng serve
 ```
 
 ## Contributing
