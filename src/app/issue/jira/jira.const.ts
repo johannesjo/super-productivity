@@ -3,6 +3,8 @@ import { JiraCfg } from './jira';
 import { FormlyFieldConfig } from '@ngx-formly/core';
 import { GIT_INITIAL_POLL_DELAY } from '../git/git.const';
 
+export const JIRA_DATETIME_FORMAT = 'YYYY-MM-DDTHH:mm:ss.SSZZ';
+
 export const DEFAULT_JIRA_CFG: JiraCfg = {
   isEnabled: true,
   _isBlockAccess: false,

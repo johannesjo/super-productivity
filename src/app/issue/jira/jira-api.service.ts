@@ -3,6 +3,7 @@ import shortid from 'shortid';
 import { ChromeExtensionInterfaceService } from '../../core/chrome-extension-interface/chrome-extension-interface.service';
 import {
   JIRA_ADDITIONAL_ISSUE_FIELDS,
+  JIRA_DATETIME_FORMAT,
   JIRA_MAX_RESULTS,
   JIRA_REDUCED_ISSUE_FIELDS,
   JIRA_REQUEST_TIMEOUT_DURATION
@@ -22,11 +23,12 @@ import { IPC_JIRA_CB_EVENT, IPC_JIRA_MAKE_REQUEST_EVENT } from '../../../ipc-eve
 import { SnackService } from '../../core/snack/snack.service';
 import { IS_ELECTRON } from '../../app.constants';
 import { loadFromSessionStorage, saveToSessionStorage } from '../../core/persistence/local-storage';
-import { combineLatest, Observable, of, throwError } from 'rxjs';
+import { combineLatest, Observable, throwError } from 'rxjs';
 import { SearchResultItem } from '../issue';
 import { fromPromise } from 'rxjs/internal-compatibility';
 import { catchError, share, take } from 'rxjs/operators';
 import { JiraIssue } from './jira-issue/jira-issue.model';
+import * as moment from 'moment';
 
 const BLOCK_ACCESS_KEY = 'SUP_BLOCK_JIRA_ACCESS';
 
@@ -179,16 +181,20 @@ export class JiraApiService {
     });
   }
 
-  // INTERNAL
-  // -------------------
-  _addWorklog(originalKey, started, timeSpent, comment) {
+  addWorklog(issueId: string, started: string, timeSpent: number, comment: string) {
+    return this._sendRequest({
+      apiMethod: 'addWorklog',
+      transform: mapResponse,
+      arguments: [
+        issueId,
+        {
+          started: moment(started).format(JIRA_DATETIME_FORMAT),
+          timeSpentSeconds: Math.floor(timeSpent / 1000),
+          comment: comment,
+        }
+      ]
+    });
   }
-
-  searchUsers(userNameQuery) {
-  }
-
-
-  // Simple API Mappings
 
   // -----------------
   updateIssueDescription(task) {
@@ -196,8 +202,7 @@ export class JiraApiService {
 
 
   // Complex Functions
-  addWorklog(originalTask) {
-  }
+
 
   // --------
   private _isMinimalSettings(settings) {
@@ -273,7 +278,7 @@ export class JiraApiService {
       .pipe(
         catchError((err) => {
           this._snackService.open({type: 'ERROR', message: 'Jira: Something went wrong'});
-          return of(err);
+          return throwError(err);
         }),
         share(),
 

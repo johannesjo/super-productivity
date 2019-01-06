@@ -8,7 +8,7 @@
       Jira: Submit Worklog
     </h2>
     <p>Submit a worklog to Jira for <strong>{{issue.key}} {{issue.summary}}</strong>.</p>
-    <p>Currently logged time: <strong>{{issue.timespent}}</strong></p>
+    <p>Currently logged time: <strong>{{(issue.timespent*1000)|msToString}}</strong></p>
 
     <div class="form-wrapper">
       <mat-form-field>
@@ -25,17 +25,13 @@
       </mat-form-field>
 
       <mat-form-field>
-        <input [matDatepicker]="myDatepicker"
-               matInput
+        <input matInput
                placeholder="Started"
-               type="text"
+               type="datetime-local"
                [(ngModel)]="started"
                required
                name="date">
         <mat-error>The entered value is not a date!</mat-error>
-        <mat-datepicker-toggle matPrefix
-                               [for]="myDatepicker"></mat-datepicker-toggle>
-        <mat-datepicker #myDatepicker></mat-datepicker>
       </mat-form-field>
       <mat-form-field>
         <mat-label>Comment</mat-label>

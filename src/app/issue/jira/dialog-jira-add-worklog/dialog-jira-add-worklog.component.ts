@@ -5,7 +5,6 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material';
 import { SnackService } from '../../../core/snack/snack.service';
 import { JiraIssue } from '../jira-issue/jira-issue.model';
 import { Task } from '../../../tasks/task.model';
-import { getWorklogStr } from '../../../core/util/get-work-log-str';
 
 @Component({
   selector: 'dialog-jira-add-worklog',
@@ -31,7 +30,8 @@ export class DialogJiraAddWorklogComponent {
   ) {
     this.timeSpent = this.data.task.timeSpent;
     this.issue = this.data.issue;
-    this.started = getWorklogStr(this.data.task.created);
+    this.started = this._convertTimestamp(this.data.task.created);
+    this.comment = this.data.task.title;
   }
 
   close() {
@@ -39,6 +39,28 @@ export class DialogJiraAddWorklogComponent {
   }
 
   submitWorklog() {
+    if (this.issue.id && this.started && this.timeSpent) {
+      this._jiraApiService.addWorklog(
+        this.issue.id,
+        this.started,
+        this.timeSpent,
+        this.comment,
+      ).subscribe(res => {
+        this._snackService.open({
+          type: 'SUCCESS',
+          message: `Jira: Added worklog for ${this.issue.key}`,
+        });
+        // TODO not ideal...
+        this._jiraIssueService.updateIssueFromApi(this.issue.id, this.issue, false, false);
+        this.close();
+      });
+    }
+  }
 
+  private _convertTimestamp(timestamp: number): string {
+    const date = new Date(timestamp);
+    date.setSeconds(0, 0);
+    const isoStr = date.toISOString();
+    return isoStr.substring(0, isoStr.length - 1);
   }
 }
