@@ -14,6 +14,7 @@ import { DialogConfirmComponent } from '../../ui/dialog-confirm/dialog-confirm.c
 import { NoteService } from '../../note/note.service';
 import { ConfigService } from '../../core/config/config.service';
 import { GoogleDriveSyncService } from '../../core/google/google-drive-sync.service';
+import { SnackService } from '../../core/snack/snack.service';
 
 const SUCCESS_ANIMATION_DURATION = 500;
 
@@ -55,6 +56,7 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
     private readonly _router: Router,
     private readonly _noteService: NoteService,
     private readonly _matDialog: MatDialog,
+    private readonly _snackService: SnackService,
     private readonly _electronService: ElectronService,
     private readonly _cd: ChangeDetectorRef,
   ) {
@@ -137,6 +139,12 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
     this._googleDriveSync.saveForSyncIfEnabled(true)
       .then(() => {
         this._initSuccessAnimation(cb);
+      })
+      .catch(() => {
+        this._snackService.open({
+          type: 'ERROR',
+          message: 'GoogleSync: Unable to finish day, because syncing throw an error',
+        });
       });
   }
 
