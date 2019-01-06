@@ -24,10 +24,9 @@ export const DEFAULT_CFG: GlobalConfig = {
     cyclesBeforeLongerBreak: 4,
     isStopTrackingOnBreak: true,
     isStopTrackingOnLongBreak: true,
-    isShowDistractionsOnBreak: true,
     isManualContinue: false,
     isPlaySound: true,
-    isGoToWorkView: false,
+    // isGoToWorkView: false,
     isPlayTick: false,
   },
   keyboard: {
