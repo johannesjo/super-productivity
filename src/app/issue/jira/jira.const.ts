@@ -11,10 +11,10 @@ export const DEFAULT_JIRA_CFG: JiraCfg = {
   password: null,
 
   isAutoPollTickets: true,
-  searchJqlQuery: 'resolution = Unresolved ORDER BY updatedDate DESC',
+  searchJqlQuery: '',
 
   isAutoAddToBacklog: true,
-  autoAddBacklogJqlQuery: 'assignee = currentUser() AND sprint in openSprints() AND resolution = Unresolved ORDER BY updatedDate DESC',
+  autoAddBacklogJqlQuery: 'assignee = currentUser() AND sprint in openSprints()',
 
   isWorklogEnabled: true,
   isAutoWorklog: false,
@@ -141,5 +141,18 @@ export const JIRA_ADVANCED_FORM_CFG: FormlyFieldConfig[] = [
       label: 'JQL Query for to limit the searcher tasks',
     },
   },
-
+  {
+    key: 'isWorklogEnabled',
+    type: 'checkbox',
+    templateOptions: {
+      label: 'Open dialog to submit worklog to jira when task is done',
+    },
+  },
+  {
+    key: 'isAddWorklogOnSubTaskDone',
+    type: 'checkbox',
+    templateOptions: {
+      label: 'Open dialog to submit worklog to jira when sub task is done',
+    },
+  },
 ];
