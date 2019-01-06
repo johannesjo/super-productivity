@@ -129,16 +129,13 @@ export class JiraIssueEffects {
           }).afterClosed()
             .pipe(
               switchMap((isConfirm) => {
-                if (isConfirm) {
-                  const obs = this._jiraApiService.updateAssignee(issue.id, currentUserName);
-                  obs.subscribe(() => {
-                    this._jiraIssueService.updateIssueFromApi(issue.id, issue, false, false);
-                  });
-                  return obs;
-                } else {
-                  return EMPTY;
-                }
-              })
+                return isConfirm
+                  ? this._jiraApiService.updateAssignee(issue.id, currentUserName)
+                  : EMPTY;
+              }),
+              tap(() => {
+                this._jiraIssueService.updateIssueFromApi(issue.id, issue, false, false);
+              }),
             );
         } else {
           return EMPTY;
@@ -182,9 +179,6 @@ export class JiraIssueEffects {
         }
       })
     );
-
-
-  private _pollSub: Subscription;
 
   constructor(private readonly _actions$: Actions,
               private readonly _store$: Store<any>,
