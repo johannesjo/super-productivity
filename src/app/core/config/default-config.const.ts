@@ -17,7 +17,7 @@ export const DEFAULT_CFG: GlobalConfig = {
     takeABreakMinWorkingTime: 60 * minute,
   },
   pomodoro: {
-    isEnabled: true,
+    isEnabled: false,
     duration: 45 * minute,
     breakDuration: 5 * minute,
     longerBreakDuration: 15 * minute,

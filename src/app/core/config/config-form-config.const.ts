@@ -7,7 +7,7 @@ import { POMODORO_FORM_CFG } from './form-cfgs/pomodoro-form.const';
 export const GLOBAL_CONFIG_FORM_CONFIG: ConfigFormConfig = [
   MISC_SETTINGS_FORM_CFG,
   KEYBOARD_SETTINGS_FORM_CFG,
-  POMODORO_FORM_CFG,
+  // POMODORO_FORM_CFG,
   {
     title: 'Sync Settings',
     key: 'keyboard',

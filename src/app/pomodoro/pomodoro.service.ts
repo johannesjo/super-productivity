@@ -27,7 +27,7 @@ export class PomodoroService {
     private _configService: ConfigService,
     private _timeTrackingService: TimeTrackingService,
   ) {
-    this.cfg$.subscribe(val => console.log(val));
+    // this.cfg$.subscribe(val => console.log(val));
   }
 
   skipBreak() {
