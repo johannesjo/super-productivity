@@ -24,7 +24,7 @@ import {
   selectTaskFeatureState
 } from '../../../../tasks/store/task.selectors';
 import { TaskService } from '../../../../tasks/task.service';
-import { EMPTY, Subscription, timer } from 'rxjs';
+import { EMPTY, timer } from 'rxjs';
 import { TaskState } from '../../../../tasks/store/task.reducer';
 import { MatDialog } from '@angular/material';
 import { DialogJiraTransitionComponent } from '../../dialog-jira-transition/dialog-jira-transition.component';
@@ -242,6 +242,10 @@ export class JiraIssueEffects {
 
   private _importNewIssuesToBacklog([action, allTasks]: [Actions, Task[]]) {
     this._jiraApiService.findAutoImportIssues().subscribe((issues: JiraIssue[]) => {
+      if (!Array.isArray(issues)) {
+        return;
+      }
+
       let count = 0;
       let lastImportedIssue;
       issues.forEach(issue => {

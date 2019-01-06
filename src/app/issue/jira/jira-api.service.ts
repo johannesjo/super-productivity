@@ -22,7 +22,7 @@ import { IPC_JIRA_CB_EVENT, IPC_JIRA_MAKE_REQUEST_EVENT } from '../../../ipc-eve
 import { SnackService } from '../../core/snack/snack.service';
 import { IS_ELECTRON } from '../../app.constants';
 import { loadFromSessionStorage, saveToSessionStorage } from '../../core/persistence/local-storage';
-import { BehaviorSubject, combineLatest, Observable, throwError } from 'rxjs';
+import { combineLatest, Observable, of, throwError } from 'rxjs';
 import { SearchResultItem } from '../issue';
 import { fromPromise } from 'rxjs/internal-compatibility';
 import { catchError, share, take } from 'rxjs/operators';
@@ -271,11 +271,12 @@ export class JiraApiService {
 
     return fromPromise(promise)
       .pipe(
-        share(),
         catchError((err) => {
           this._snackService.open({type: 'ERROR', message: 'Jira: Something went wrong'});
-          return err;
+          return of(err);
         }),
+        share(),
+
         take(1),
       );
   }
@@ -289,15 +290,15 @@ export class JiraApiService {
 
       // resolve saved promise
       if (!res || res.error) {
-        console.log('FRONTEND_REQUEST', currentRequest);
-        console.log('RESPONSE', res);
+        console.log('JIRA_RESPONSE_ERROR', res);
+        console.log('FRONTEND_REQUEST_FOR_ERROR', currentRequest);
 
-        const errorTxt = (res && res.error && (typeof res.error === 'string' && res.error) || res.error.name);
+        const errorTxt = (res && res.error && (typeof res.error === 'string' && res.error || res.error.name || res.error));
         console.error(errorTxt);
-        currentRequest.reject(res);
         this._snackService.open({type: 'ERROR', message: 'Jira request failed: ' + errorTxt});
+        currentRequest.reject(res);
 
-        if (
+        if (res.error &&
           (res.error.statusCode && res.error.statusCode === 401)
           || (res.error && res.error === 401)
         ) {
