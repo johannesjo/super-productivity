@@ -82,7 +82,6 @@ export class TaskEffects {
         TaskActionTypes.DeleteTask,
       ),
       map((action_: DeleteTask) => {
-        console.log(action_);
         const action = action_ as DeleteTask;
         return new SnackOpen({
           message: `Deleted task "${action.payload.task.title}"`,
