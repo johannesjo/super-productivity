@@ -45,7 +45,9 @@ function init(params) {
     // switch tray icon based on
     let trayIcoFile;
     if (IS_MAC) {
-      trayIcoFile = 'tray-ico-dark.png'
+      trayIcoFile = electron.systemPreferences.isDarkMode()
+        ? 'tray-ico.png'
+        : 'tray-ico-dark.png';
     } else {
       trayIcoFile = 'tray-ico.png'
     }
