@@ -73,7 +73,6 @@
       </mat-icon>
     </button>
 
-
     <div class="svg-wrapper">
       <button mat-fab
               class="play-btn"
@@ -96,6 +95,9 @@
                   stroke-width="26"
                   stroke="#000"></circle>
         </svg>
+        <div class="pomodoro-label"
+             *ngIf="(pomodoroService.cfg$|async)?.isEnabled">{{(pomodoroService.currentSessionTime$|async|msToMinuteClockString)}}
+        </div>
       </button>
     </div>
   </nav>

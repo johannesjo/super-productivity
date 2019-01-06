@@ -7,6 +7,7 @@ import { BookmarkService } from '../bookmark/bookmark.service';
 import { NoteService } from '../note/note.service';
 import { TaskService } from '../tasks/task.service';
 import { ConfigService } from '../core/config/config.service';
+import { PomodoroService } from '../pomodoro/pomodoro.service';
 
 @Component({
   selector: 'main-header',
@@ -26,6 +27,7 @@ export class MainHeaderComponent implements OnInit {
     public readonly noteService: NoteService,
     public readonly taskService: TaskService,
     public readonly configService: ConfigService,
+    public readonly pomodoroService: PomodoroService,
     private readonly _matDialog: MatDialog,
     private readonly _layoutService: LayoutService,
     private readonly _renderer: Renderer2,

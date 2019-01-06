@@ -57,6 +57,7 @@ import { DragulaModule } from 'ng2-dragula';
 import { MsToClockStringPipe } from './duration/ms-to-clock-string.pipe';
 import { DatetimeInputComponent } from './datetime-input/datetime-input.component';
 import { InputDurationSliderComponent } from './duration/input-duration-slider/input-duration-slider.component';
+import { MsToMinuteClockStringPipe } from './duration/ms-to-minute-clock-string.pipe';
 
 @NgModule({
   imports: [
@@ -120,6 +121,7 @@ import { InputDurationSliderComponent } from './duration/input-duration-slider/i
     InlineMarkdownComponent,
     ThemeSelectComponent,
     MsToClockStringPipe,
+    MsToMinuteClockStringPipe,
     MsToStringPipe,
     MsToStringPipe$,
     StringToMsPipe,
@@ -154,6 +156,7 @@ import { InputDurationSliderComponent } from './duration/input-duration-slider/i
     DatetimeInputComponent,
 
     MsToClockStringPipe,
+    MsToMinuteClockStringPipe,
     MsToStringPipe,
     MsToStringPipe$,
     StringToMsPipe,
