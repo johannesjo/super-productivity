@@ -1,3 +1,14 @@
+## [0.1.3](https://github.com/johannesjo/sp2/compare/v0.1.2...v0.1.3) (2019-01-06)
+
+
+### Features
+
+* **jira:** minor refactor for effects ([ac19b7e](https://github.com/johannesjo/sp2/commit/ac19b7e))
+* handle error when syncing on daily summary fails ([3af8bda](https://github.com/johannesjo/sp2/commit/3af8bda))
+* limit min max zoom ([7928c10](https://github.com/johannesjo/sp2/commit/7928c10))
+
+
+
 ## [0.1.2](https://github.com/johannesjo/sp2/compare/v0.1.1...v0.1.2) (2019-01-05)
 
 
