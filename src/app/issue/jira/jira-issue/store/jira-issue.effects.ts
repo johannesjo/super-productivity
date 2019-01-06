@@ -20,7 +20,7 @@ import { Task } from '../../../../tasks/task.model';
 import { JIRA_TYPE } from '../../../issue.const';
 import {
   selectAllTasks,
-  selectCurrentTaskParentOrCurrent,
+  selectCurrentTaskParentOrCurrent, selectTaskEntities,
   selectTaskFeatureState
 } from '../../../../tasks/store/task.selectors';
 import { TaskService } from '../../../../tasks/task.service';
@@ -97,6 +97,32 @@ export class JiraIssueEffects {
       tap(this._importNewIssuesToBacklog.bind(this))
     );
 
+
+  @Effect({dispatch: false}) addWorklog$: any = this._actions$
+    .pipe(
+      ofType(
+        TaskActionTypes.UpdateTask,
+      ),
+      withLatestFrom(
+        this._store$.pipe(select(selectProjectJiraCfg)),
+        this._store$.pipe(select(selectJiraIssueEntities)),
+        this._store$.pipe(select(selectTaskEntities)),
+      ),
+      tap(([act_, jiraCfg, jiraEntities, taskEntities]) => {
+        const act = act_ as UpdateTask;
+        const taskId = act.payload.task.id;
+        const isDone = act.payload.task.changes.isDone;
+        const task = taskEntities[taskId];
+
+        if (isDone && jiraCfg && jiraCfg.isWorklogEnabled && task && task.issueType === JIRA_TYPE) {
+        }
+
+        const parent = task.parentId && taskEntities[task.parentId];
+        if (parent && parent.isDone && jiraCfg.isAddWorklogOnSubTaskDone) {
+        }
+      })
+    );
+
   @Effect({dispatch: false}) checkForReassignment: any = this._actions$
     .pipe(
       ofType(
@@ -109,7 +135,7 @@ export class JiraIssueEffects {
         this._store$.pipe(select(selectJiraIssueEntities)),
       ),
       filter(([action, jiraCfg, currentTaskOrParent, issueEntities]) => jiraCfg && jiraCfg.isCheckToReAssignTicketOnTaskStart
-        && currentTaskOrParent && currentTaskOrParent.issueType === 'JIRA'),
+        && currentTaskOrParent && currentTaskOrParent.issueType === JIRA_TYPE),
       // show every 15s max to give time for updates
       throttleTime(15000),
       // TODO there is probably a better way to to do this
@@ -154,7 +180,7 @@ export class JiraIssueEffects {
         this._store$.pipe(select(selectJiraIssueEntities)),
       ),
       tap(([action, jiraCfg, curOrParTask, issueEntities]) => {
-        if (jiraCfg && jiraCfg.isTransitionIssuesEnabled && curOrParTask && curOrParTask.issueType === 'JIRA') {
+        if (jiraCfg && jiraCfg.isTransitionIssuesEnabled && curOrParTask && curOrParTask.issueType === JIRA_TYPE) {
           const issueData = issueEntities[curOrParTask.issueId];
           this._handleTransitionForIssue('IN_PROGRESS', jiraCfg, issueData);
         }
@@ -173,7 +199,7 @@ export class JiraIssueEffects {
       ),
       tap(([action, jiraCfg, taskState, issueEntities]: [UpdateTask, JiraCfg, TaskState, Dictionary<JiraIssue>]) => {
         const task = taskState.entities[action.payload.task.id];
-        if (jiraCfg && jiraCfg.isTransitionIssuesEnabled && task && task.issueType === 'JIRA' && task.isDone) {
+        if (jiraCfg && jiraCfg.isTransitionIssuesEnabled && task && task.issueType === JIRA_TYPE && task.isDone) {
           const issueData = issueEntities[task.issueId];
           this._handleTransitionForIssue('DONE', jiraCfg, issueData);
         }
@@ -195,7 +221,7 @@ export class JiraIssueEffects {
   private _saveToLs([action, currentProjectId, jiraIssueFeatureState]) {
     if (currentProjectId) {
       this._persistenceService.saveLastActive();
-      this._persistenceService.saveIssuesForProject(currentProjectId, 'JIRA', jiraIssueFeatureState);
+      this._persistenceService.saveIssuesForProject(currentProjectId, JIRA_TYPE, jiraIssueFeatureState);
     } else {
       throw new Error('No current project id');
     }

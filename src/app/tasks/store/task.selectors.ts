@@ -50,6 +50,7 @@ const mapTotalTimeWorked = (tasks) => tasks.reduce((acc, task) => acc + task.tim
 // ---------
 const {selectIds, selectEntities, selectAll, selectTotal} = taskAdapter.getSelectors();
 export const selectTaskFeatureState = createFeatureSelector<TaskState>(TASK_FEATURE_NAME);
+export const selectTaskEntities = createSelector(selectTaskFeatureState, selectEntities);
 export const selectIsTasksLoaded = createSelector(selectTaskFeatureState, state => state.isDataLoaded);
 export const selectBacklogTaskIds = createSelector(selectTaskFeatureState, state => state.backlogTaskIds);
 export const selectTodaysTaskIds = createSelector(selectTaskFeatureState, state => state.todaysTaskIds);

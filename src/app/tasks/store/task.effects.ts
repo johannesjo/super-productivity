@@ -147,7 +147,7 @@ export class TaskEffects {
       mergeMap(({action, state}) => {
         const currentId = state.currentTaskId;
         let nextId: 'NO_UPDATE' | string | null;
-
+console.log('AUTO_SET_NEXT');
         switch (action.type) {
           case TaskActionTypes.ToggleStart: {
             nextId = state.currentTaskId ? null : this.findNextTask(state);
