@@ -38,6 +38,10 @@
       <th>Assignee</th>
       <td>{{issueData.assignee?.displayName}}</td>
     </tr>
+    <tr>
+      <th>Worklog</th>
+      <td>{{(issueData.timespent*1000)|msToString}} / {{(issueData.timeestimate*1000)|msToString}}</td>
+    </tr>
     <tr *ngIf="issueData.components?.length">
       <th>Components</th>
       <td>
