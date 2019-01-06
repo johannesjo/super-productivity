@@ -14,6 +14,8 @@ import { AttachmentActionTypes } from '../../attachment/store/attachment.actions
 import { TaskWithSubTasks } from '../task.model';
 import { TaskState } from './task.reducer';
 import { EMPTY, of } from 'rxjs';
+import { ElectronService } from 'ngx-electron';
+import { IPC_CURRENT_TASK_UPDATED } from '../../../ipc-events.const';
 
 // TODO send message to electron when current task changes here
 
@@ -104,6 +106,17 @@ export class TaskEffects {
       tap(this._notifyAboutTimeEstimateExceeded.bind(this))
     );
 
+  @Effect({dispatch: false}) taskChangeElectron$: any = this._actions$
+    .pipe(
+      ofType(
+        TaskActionTypes.SetCurrentTask,
+      ),
+      withLatestFrom(this._store$.pipe(select(selectCurrentTask))),
+      tap(([action, current]) => {
+        this._electronService.ipcRenderer.send(IPC_CURRENT_TASK_UPDATED, {current});
+      })
+    );
+
   @Effect({dispatch: false}) restoreTask$: any = this._actions$
     .pipe(
       ofType(
@@ -184,6 +197,7 @@ export class TaskEffects {
               private _store$: Store<any>,
               private _notifyService: NotifyService,
               private _taskService: TaskService,
+              private _electronService: ElectronService,
               private _persistenceService: PersistenceService) {
   }
 

@@ -146,11 +146,12 @@ function createIndicatorStr(task) {
       title = title.substring(0, 47) + '...';
     }
 
-    if (task.timeSpent && task.timeSpent._data) {
-      task.timeSpent = moment.duration(task.timeSpent._data);
+    // TODO replace with our format helpers once we have ts support
+    if (task.timeSpent && task.timeSpent) {
+      task.timeSpent = moment.duration({milliseconds:task.timeSpent});
       timeStr += parseInt(task.timeSpent.asMinutes()).toString();
     }
-    task.timeEstimate = task.timeEstimate && moment.duration(task.timeEstimate._data);
+    task.timeEstimate = task.timeEstimate && moment.duration({milliseconds:task.timeEstimate});
     const timeEstimateAsMin = moment.duration(task.timeEstimate).asMinutes();
     if (task.timeEstimate && timeEstimateAsMin > 0) {
       timeStr += '/' + timeEstimateAsMin;
