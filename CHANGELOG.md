@@ -1,3 +1,31 @@
+## [0.1.4](https://github.com/johannesjo/sp2/compare/v0.1.3...v0.1.4) (2019-01-06)
+
+
+### Bug Fixes
+
+* **electron:** tray dark mode icon ([cabd99c](https://github.com/johannesjo/sp2/commit/cabd99c))
+* ipc send breaking web ([af8353b](https://github.com/johannesjo/sp2/commit/af8353b))
+* **jira:** error handling ([d8fcb67](https://github.com/johannesjo/sp2/commit/d8fcb67))
+* work around ngrx formly issues :( ([1fab8ef](https://github.com/johannesjo/sp2/commit/1fab8ef))
+
+
+### Features
+
+* **electron:** make indicator work again ([9d3d544](https://github.com/johannesjo/sp2/commit/9d3d544))
+* **jira:** add submit worklog dialog ([78977ab](https://github.com/johannesjo/sp2/commit/78977ab))
+* **jira:** add worklog data to jira issue content ([774deaa](https://github.com/johannesjo/sp2/commit/774deaa))
+* **jira:** adjust default settings ([5148a72](https://github.com/johannesjo/sp2/commit/5148a72))
+* **jira:** auto assign userAssignee to current user when test credentials was clicked ([7a414bf](https://github.com/johannesjo/sp2/commit/7a414bf))
+* **jira:** change default query for backlog ([ab21e59](https://github.com/johannesjo/sp2/commit/ab21e59))
+* **jira:** make submitting worklogs work ([df6bffc](https://github.com/johannesjo/sp2/commit/df6bffc))
+* **jira:** prepare effect for opening worklog dialog ([09e4230](https://github.com/johannesjo/sp2/commit/09e4230))
+* **pomodoro:** add config and outline pomodoro service ([4e893da](https://github.com/johannesjo/sp2/commit/4e893da))
+* **pomodoro:** add more outline code ([f8908a7](https://github.com/johannesjo/sp2/commit/f8908a7))
+* **pomodoro:** add very basic timer to header ([719398b](https://github.com/johannesjo/sp2/commit/719398b))
+* **pomodoro:** hide pomodoro functionality for now ([1d94ca9](https://github.com/johannesjo/sp2/commit/1d94ca9))
+
+
+
 ## [0.1.3](https://github.com/johannesjo/sp2/compare/v0.1.2...v0.1.3) (2019-01-06)
 
 
