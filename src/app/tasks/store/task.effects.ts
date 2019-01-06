@@ -16,6 +16,7 @@ import { TaskState } from './task.reducer';
 import { EMPTY, of } from 'rxjs';
 import { ElectronService } from 'ngx-electron';
 import { IPC_CURRENT_TASK_UPDATED } from '../../../ipc-events.const';
+import { IS_ELECTRON } from '../../app.constants';
 
 // TODO send message to electron when current task changes here
 
@@ -113,7 +114,9 @@ export class TaskEffects {
       ),
       withLatestFrom(this._store$.pipe(select(selectCurrentTask))),
       tap(([action, current]) => {
-        this._electronService.ipcRenderer.send(IPC_CURRENT_TASK_UPDATED, {current});
+        if (IS_ELECTRON) {
+          this._electronService.ipcRenderer.send(IPC_CURRENT_TASK_UPDATED, {current});
+        }
       })
     );
 
