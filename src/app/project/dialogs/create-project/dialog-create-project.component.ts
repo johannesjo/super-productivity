@@ -14,6 +14,7 @@ import { Subscription } from 'rxjs/Subscription';
 import { loadFromSessionStorage, saveToSessionStorage } from '../../../core/persistence/local-storage';
 import { GitCfg } from '../../../issue/git/git';
 import { DialogGitInitialSetupComponent } from '../../../issue/git/dialog-git-initial-setup/dialog-git-initial-setup.component';
+import { dirtyDeepCopy } from '../../../core/util/dirtyDeepCopy';
 
 @Component({
   selector: 'dialog-create-project',
@@ -31,7 +32,7 @@ export class DialogCreateProjectComponent implements OnInit, OnDestroy {
       awesomeIsForced: false,
     },
   };
-  formCfg: FormlyFieldConfig[] = BASIC_PROJECT_CONFIG_FORM_CONFIG.items;
+  formCfg: FormlyFieldConfig[] = [];
 
   private _subs = new Subscription();
   private _isSaveTmpProject: boolean;
@@ -42,6 +43,9 @@ export class DialogCreateProjectComponent implements OnInit, OnDestroy {
     private _matDialog: MatDialog,
     private _matDialogRef: MatDialogRef<DialogCreateProjectComponent>,
   ) {
+    // somehow they are only unproblematic if assigned here,
+    // not even sure how this is possible. ngrx formly sucks :/
+    this.formCfg = dirtyDeepCopy(BASIC_PROJECT_CONFIG_FORM_CONFIG.items);
   }
 
   ngOnInit() {
