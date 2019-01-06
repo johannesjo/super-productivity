@@ -14,7 +14,7 @@ export const DEFAULT_JIRA_CFG: JiraCfg = {
   searchJqlQuery: '',
 
   isAutoAddToBacklog: true,
-  autoAddBacklogJqlQuery: 'assignee = currentUser() AND sprint in openSprints()',
+  autoAddBacklogJqlQuery: 'assignee = currentUser() AND sprint in openSprints() AND resolution = Unresolved',
 
   isWorklogEnabled: true,
   isAutoWorklog: false,
