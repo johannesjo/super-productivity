@@ -20,7 +20,8 @@ import { Task } from '../../../../tasks/task.model';
 import { JIRA_TYPE } from '../../../issue.const';
 import {
   selectAllTasks,
-  selectCurrentTaskParentOrCurrent, selectTaskEntities,
+  selectCurrentTaskParentOrCurrent,
+  selectTaskEntities,
   selectTaskFeatureState
 } from '../../../../tasks/store/task.selectors';
 import { TaskService } from '../../../../tasks/task.service';
@@ -30,6 +31,7 @@ import { MatDialog } from '@angular/material';
 import { DialogJiraTransitionComponent } from '../../dialog-jira-transition/dialog-jira-transition.component';
 import { IssueLocalState } from '../../../issue';
 import { DialogConfirmComponent } from '../../../../ui/dialog-confirm/dialog-confirm.component';
+import { DialogJiraAddWorklogComponent } from '../../dialog-jira-add-worklog/dialog-jira-add-worklog.component';
 
 @Injectable()
 export class JiraIssueEffects {
@@ -114,11 +116,17 @@ export class JiraIssueEffects {
         const isDone = act.payload.task.changes.isDone;
         const task = taskEntities[taskId];
 
-        if (isDone && jiraCfg && jiraCfg.isWorklogEnabled && task && task.issueType === JIRA_TYPE) {
-        }
+        if (isDone && jiraCfg && jiraCfg.isWorklogEnabled
+          && task && task.issueType === JIRA_TYPE
+          && !(jiraCfg.isAddWorklogOnSubTaskDone && task.subTaskIds.length > 0)) {
+          this._openWorklogDialog(task, jiraEntities[task.issueId]);
 
-        const parent = task.parentId && taskEntities[task.parentId];
-        if (parent && parent.isDone && jiraCfg.isAddWorklogOnSubTaskDone) {
+        } else {
+          const parent = task.parentId && taskEntities[task.parentId];
+          if (isDone && parent && jiraCfg.isAddWorklogOnSubTaskDone && parent.issueType === JIRA_TYPE) {
+            // NOTE we're still sending the sub task for the meta data we need
+            this._openWorklogDialog(task, jiraEntities[parent.issueId]);
+          }
         }
       })
     );
@@ -253,6 +261,17 @@ export class JiraIssueEffects {
             });
         }
     }
+  }
+
+  private _openWorklogDialog(task: Task, issue: JiraIssue) {
+    this._matDialog.open(DialogJiraAddWorklogComponent, {
+      restoreFocus: true,
+      data: {
+        issue,
+        task,
+      }
+    }).afterClosed()
+      .subscribe();
   }
 
   private _openTransitionDialog(issue: JiraIssue, localState: IssueLocalState) {

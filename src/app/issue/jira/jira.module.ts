@@ -8,6 +8,7 @@ import { DialogJiraInitialSetupComponent } from './dialog-jira-initial-setup/dia
 import { JiraCfgComponent } from './jira-cfg/jira-cfg.component';
 import { FormsModule } from '@angular/forms';
 import { DialogJiraTransitionComponent } from './dialog-jira-transition/dialog-jira-transition.component';
+import { DialogJiraAddWorklogComponent } from './dialog-jira-add-worklog/dialog-jira-add-worklog.component';
 
 @NgModule({
   imports: [
@@ -21,12 +22,14 @@ import { DialogJiraTransitionComponent } from './dialog-jira-transition/dialog-j
     JiraCfgStepperComponent,
     JiraCfgComponent,
     DialogJiraInitialSetupComponent,
-    DialogJiraTransitionComponent
+    DialogJiraTransitionComponent,
+    DialogJiraAddWorklogComponent,
   ],
   entryComponents: [
     DialogJiraTransitionComponent,
     DialogJiraInitialSetupComponent,
-    JiraCfgComponent
+    DialogJiraAddWorklogComponent,
+    JiraCfgComponent,
   ],
   exports: [
     JiraCfgStepperComponent
