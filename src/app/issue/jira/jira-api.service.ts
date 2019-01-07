@@ -72,7 +72,8 @@ export class JiraApiService {
       this._chromeExtensionInterface.isReady$,
       this._projectService.currentJiraCfg$,
     ).subscribe(([isExtensionReady, cfg]) => {
-      if (!this._isHasCheckedConnection && this._isMinimalSettings(cfg)) {
+      console.log(cfg);
+      if (!this._isHasCheckedConnection && this._isMinimalSettings(cfg) && cfg.isEnabled) {
         this.getCurrentUser()
           .pipe(catchError((err) => {
             this._blockAccess();
