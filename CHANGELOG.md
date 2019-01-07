@@ -1,3 +1,29 @@
+## [0.1.5](https://github.com/johannesjo/sp2/compare/v0.1.4...v0.1.5) (2019-01-07)
+
+
+### Bug Fixes
+
+* controls hitbox blocking time edit ([66fa902](https://github.com/johannesjo/sp2/commit/66fa902))
+* **jira:** don't refresh backlog if not enabled ([24e6ad6](https://github.com/johannesjo/sp2/commit/24e6ad6))
+* **jira:** no way to disable ([683e847](https://github.com/johannesjo/sp2/commit/683e847))
+* **jira:** only do initial request when enabled ([90c56b3](https://github.com/johannesjo/sp2/commit/90c56b3))
+
+
+### Features
+
+* add roboto sans ([a7565b5](https://github.com/johannesjo/sp2/commit/a7565b5))
+* **tasks:** add interactive attachment icon ([81632a5](https://github.com/johannesjo/sp2/commit/81632a5))
+* add subtle snack type to use it for syncing and polling ([c99329b](https://github.com/johannesjo/sp2/commit/c99329b))
+* declutter ui further by only showing timer icon on hover ([ba1b91f](https://github.com/johannesjo/sp2/commit/ba1b91f))
+* make active nav link bold ([72607d8](https://github.com/johannesjo/sp2/commit/72607d8))
+* move mark as done up, because it is more important ([adecf2f](https://github.com/johannesjo/sp2/commit/adecf2f))
+* only show hover styles for non parent tasks ([80dd325](https://github.com/johannesjo/sp2/commit/80dd325))
+* only show toggle show notes button when there are notes ([11dfb03](https://github.com/johannesjo/sp2/commit/11dfb03))
+* only show toggle show notes button when there are ntoes ([9da3e6c](https://github.com/johannesjo/sp2/commit/9da3e6c))
+* remove ui clutter ([8b2aba2](https://github.com/johannesjo/sp2/commit/8b2aba2))
+
+
+
 ## [0.1.4](https://github.com/johannesjo/sp2/compare/v0.1.3...v0.1.4) (2019-01-06)
 
 
