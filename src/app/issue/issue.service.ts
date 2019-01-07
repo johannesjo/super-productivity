@@ -19,7 +19,7 @@ export class IssueService {
     map(jiraCfg => jiraCfg && jiraCfg.isEnabled)
   );
   public isJiraAddToBacklog$: Observable<boolean> = this._projectService.currentJiraCfg$.pipe(
-    map(jiraCfg => jiraCfg && jiraCfg.isAutoAddToBacklog)
+    map(jiraCfg => jiraCfg && jiraCfg.isEnabled && jiraCfg.isAutoAddToBacklog)
   );
 
 
