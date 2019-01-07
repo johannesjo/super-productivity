@@ -112,9 +112,7 @@
               *ngIf="task.notes||task.issueData||task.attachmentIds?.length"
               [class.isActive]="task._isAdditionalInfoOpen"
               (click)="toggleShowAdditionalInfoOpen()">
-
         <mat-icon aria-label="notes">chat</mat-icon>
-        <!--<mat-icon *ngIf="!task.notes&&!task.issueData">chat_bubble_outline</mat-icon>-->
       </button>
 
       <button mat-icon-button
