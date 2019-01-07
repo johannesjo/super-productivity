@@ -29,31 +29,18 @@
         <strong>{{takeABreakService.timeWorkingWithoutABreak$|async|msToString}}</strong><mat-icon>timer</mat-icon>
       </span>
         </div>
-        <div class="controls">
+        <div class="controls show-xs-only">
           <button mat-mini-fab
-                  class="show-xs-only"
                   color="primary"
                   (click)="showAddTaskBar()">
-            <mat-icon class="hide-controls-icon">add</mat-icon>
+            <mat-icon>add</mat-icon>
           </button>
-          <button routerLink="/daily-summary"
-                  mat-mini-fab=""
-                  color="primary">
-            <mat-icon>done_all</mat-icon>
-          </button>
+          <!--<button routerLink="/daily-summary"-->
+                  <!--mat-mini-fab=""-->
+                  <!--color="primary">-->
+            <!--<mat-icon>done_all</mat-icon>-->
+          <!--</button>-->
         </div>
-        <!--<button mat-mini-fab-->
-        <!--color="primary"-->
-        <!--(click)="isHideControls = !(isHideControls);"-->
-        <!--aria-label="collapse sub tasks and notes">-->
-        <!--<mat-icon class="hide-controls-icon">vertical_align_center</mat-icon>-->
-        <!--</button>-->
-        <!--<button mat-mini-fab-->
-        <!--color="primary"-->
-        <!--(click)="collapseAllNotesAndSubTasks()"-->
-        <!--aria-label="collapse sub tasks and notes">-->
-        <!--<mat-icon>vertical_align_center</mat-icon>-->
-        <!--</button>-->
       </div>
 
       <div class="planning-mode-header"
