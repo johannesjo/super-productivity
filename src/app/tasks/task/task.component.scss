@@ -379,20 +379,24 @@ input {
   display: flex;
   flex-direction: row;
   align-items: center;
-  justify-content: center;
+  justify-content: stretch;
   padding-right: $s;
-  cursor: pointer;
 
-  button {
-    transition: $transition-standard !important;
-    opacity: 0 !important;
-  }
 
-  &:hover {
-    .time,
+  &.isEditable {
+    cursor: pointer;
+
     button {
-      transition: $transition-standard;
-      opacity: 1 !important;
+      transition: $transition-standard !important;
+      opacity: 0 !important;
+    }
+
+    &:hover {
+      .time,
+      button {
+        transition: $transition-standard;
+        opacity: 1 !important;
+      }
     }
   }
 

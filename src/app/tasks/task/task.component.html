@@ -80,7 +80,9 @@
            (editFinished)="updateTaskTitleIfChanged($event.isChanged, $event.newVal)"
            tabindex="2"></div>
     </div>
+
     <div class="time-wrapper"
+         [class.isEditable]="!task.subTasks?.length"
          (click)="estimateTime()">
       <button *ngIf="!task.subTasks?.length"
               mat-icon-button
