@@ -141,19 +141,6 @@
           Pause tracking task
         </button>
 
-        <button mat-menu-item
-                aria-label="additional-info"
-                tabindex="2"
-                [class.isActive]="task._isAdditionalInfoOpen"
-                (click)="toggleShowAdditionalInfoOpen()">
-
-          <mat-icon *ngIf="task.notes||task.issueData"
-                    aria-label="notes">chat
-          </mat-icon>
-          <mat-icon *ngIf="!task.notes&&!task.issueData">chat_bubble_outline</mat-icon>
-          Show/Hide additional info
-        </button>
-
         <button mat-menu-item=""
                 (click)="toggleTaskDone()"
                 tabindex="2"
@@ -168,6 +155,19 @@
             </mat-icon>
             Mark as done
           </ng-container>
+        </button>
+
+        <button mat-menu-item
+                aria-label="additional-info"
+                tabindex="2"
+                [class.isActive]="task._isAdditionalInfoOpen"
+                (click)="toggleShowAdditionalInfoOpen()">
+
+          <mat-icon *ngIf="task.notes||task.issueData"
+                    aria-label="notes">chat
+          </mat-icon>
+          <mat-icon *ngIf="!task.notes&&!task.issueData">chat_bubble_outline</mat-icon>
+          Show/Hide additional info
         </button>
 
         <button mat-menu-item=""
