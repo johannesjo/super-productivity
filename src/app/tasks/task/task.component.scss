@@ -196,7 +196,7 @@ $this-icon-default-opacity: 0.7;
       position: absolute;
       top: -$s;
       right: -$s;
-      left: -2*$s;
+      left: 0;
       bottom: -$s;
       content: '';
     }
