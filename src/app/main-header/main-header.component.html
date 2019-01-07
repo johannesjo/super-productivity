@@ -33,24 +33,27 @@
   <nav class="main-nav"
        [class.isHideNav]="(configService.cfg$|async)?.misc.isHideNav">
     <button mat-button
+            routerLinkActive="isActive"
             routerLink="work-view">
       <mat-icon>playlist_play</mat-icon>
       <span class="text">Tasks ({{(taskService.undoneTasks$|async)?.length || 0}})</span>
     </button>
     <button mat-button
+            routerLinkActive="isActive"
             routerLink="worklog-and-calendar">
       <mat-icon>today</mat-icon>
       <span class="text">Worklog</span>
     </button>
 
     <button mat-button
+            routerLinkActive="isActive"
             [routerLink]="'projects'">
       <mat-icon>list</mat-icon>
       <span class="text">Projects</span>
     </button>
 
     <button mat-button
-            routerLinkActive
+            routerLinkActive="isActive"
             [routerLink]="'config'">
       <mat-icon>settings</mat-icon>
       <span class="text">Settings</span>
@@ -96,7 +99,7 @@
                   stroke="#000"></circle>
         </svg>
         <!--<div class="pomodoro-label"-->
-             <!--*ngIf="(pomodoroService.cfg$|async)?.isEnabled">{{(pomodoroService.currentSessionTime$|async|msToMinuteClockString)}}-->
+        <!--*ngIf="(pomodoroService.cfg$|async)?.isEnabled">{{(pomodoroService.currentSessionTime$|async|msToMinuteClockString)}}-->
         <!--</div>-->
       </button>
     </div>

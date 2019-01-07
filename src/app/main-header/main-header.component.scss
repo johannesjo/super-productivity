@@ -38,6 +38,10 @@ $mobileHorizontalPadding: 8px;
   display: flex;
   flex: 1;
 
+  button.isActive {
+    font-weight: bold;
+  }
+
   mat-icon {
     display: none;
   }
