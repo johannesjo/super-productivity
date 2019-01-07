@@ -11,13 +11,12 @@ import { GitApiService } from '../../git-api.service';
 import { GitIssueService } from '../git-issue.service';
 import { ConfigService } from '../../../../core/config/config.service';
 import { GitIssue } from '../git-issue.model';
-import { GitCfg } from '../../git';
 import { SnackService } from '../../../../core/snack/snack.service';
 import { TaskService } from '../../../../tasks/task.service';
 import { Task } from '../../../../tasks/task.model';
 import { ProjectActionTypes } from '../../../../project/store/project.actions';
 import { GIT_TYPE } from '../../../issue.const';
-import { EMPTY, Subscription, timer } from 'rxjs';
+import { EMPTY, timer } from 'rxjs';
 import { GIT_INITIAL_POLL_DELAY, GIT_POLL_INTERVAL } from '../../git.const';
 
 @Injectable()
@@ -40,7 +39,11 @@ export class GitIssueEffects {
               ),
               tap(([x, issues]: [number, GitIssue[]]) => {
                 if (issues && issues.length > 0) {
-                  this._snackService.open({message: 'Git: Polling Changes for issues', svgIcon: 'github'});
+                  this._snackService.open({
+                    message: 'Git: Polling Changes for issues',
+                    svgIcon: 'github',
+                    isSubtle: true,
+                  });
                   this._gitIssueService.updateIssuesFromApi(issues, gitCfg);
                 }
               })
@@ -80,7 +83,6 @@ export class GitIssueEffects {
       tap(this._importNewIssuesToBacklog.bind(this))
     );
 
-  private _pollSub: Subscription;
 
   constructor(private readonly _actions$: Actions,
               private readonly _store$: Store<any>,
@@ -125,12 +127,14 @@ export class GitIssueEffects {
       if (count === 1) {
         this._snackService.open({
           message: `Git: Imported issue "#${lastImportedIssue.number} ${lastImportedIssue.title}" from git to backlog`,
-          icon: 'cloud_download'
+          icon: 'cloud_download',
+          isSubtle: true,
         });
       } else if (count > 1) {
         this._snackService.open({
           message: `Git: Imported ${count} new issues from git to backlog`,
-          icon: 'cloud_download'
+          icon: 'cloud_download',
+          isSubtle: true,
         });
       }
     });

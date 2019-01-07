@@ -45,10 +45,16 @@ export class SnackEffects {
       _destroy$.unsubscribe();
     };
     const _destroy$: Subject<boolean> = new Subject<boolean>();
-    const {message, actionStr, actionId, actionPayload, config, type} = action.payload;
+    const {message, actionStr, actionId, actionPayload, config, type, isSubtle} = action.payload;
     const cfg = {
-      ...DEFAULT_SNACK_CFG, ...config, data: action.payload
+      ...DEFAULT_SNACK_CFG,
+      ...config,
+      data: action.payload
     };
+    if (isSubtle) {
+      cfg.panelClass = 'subtle';
+    }
+
     switch (type) {
       case 'GOOGLE_LOGIN':
         this._ref = this.matSnackBar.openFromComponent(SnackGoogleLoginComponent, cfg);

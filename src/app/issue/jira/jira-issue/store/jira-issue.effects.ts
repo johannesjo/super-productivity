@@ -57,7 +57,11 @@ export class JiraIssueEffects {
                 console.log('jira TAP poll', issueIds, entities);
                 if (issueIds && issueIds.length > 0) {
                   console.log('SHOW toast???');
-                  this._snackService.open({message: 'Jira: Polling Changes for issues', svgIcon: 'jira'});
+                  this._snackService.open({
+                    message: 'Jira: Polling Changes for issues',
+                    svgIcon: 'jira',
+                    isSubtle: true,
+                  });
                   issueIds.forEach((id) => this._jiraIssueService.updateIssueFromApi(id, entities[id], true, false));
                 }
               })
@@ -256,7 +260,8 @@ export class JiraIssueEffects {
               this._jiraIssueService.updateIssueFromApi(issue.id, issue, false, false);
               this._snackService.open({
                 type: 'SUCCESS',
-                message: `Jira: Set issue ${issue.key} to <strong>${chosenTransition.name}</strong>`
+                message: `Jira: Set issue ${issue.key} to <strong>${chosenTransition.name}</strong>`,
+                isSubtle: true,
               });
             });
         }
@@ -313,12 +318,14 @@ export class JiraIssueEffects {
       if (count === 1) {
         this._snackService.open({
           message: `Jira: Imported issue "${lastImportedIssue.key} ${lastImportedIssue.title}" from git to backlog`,
-          icon: 'cloud_download'
+          icon: 'cloud_download',
+          isSubtle: true,
         });
       } else if (count > 1) {
         this._snackService.open({
           message: `Jira: Imported ${count} new issues from Jira to backlog`,
-          icon: 'cloud_download'
+          icon: 'cloud_download',
+          isSubtle: true,
         });
       }
     });
