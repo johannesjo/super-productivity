@@ -92,6 +92,7 @@
              [innerHTML]="task.timeEstimate|msToString"></div>
       </div>
       <button [hidden]="task.subTasks && task.subTasks.length"
+              *ngIf="!task.subTasks?.length"
               mat-icon-button
               color=""
               tabindex="2"
@@ -103,45 +104,17 @@
     </div>
 
     <div class="controls">
-
-      <!--<div class="svg-wrapper">-->
-      <!--<svg focusable="false"-->
-      <!--viewPort="0 0 50 50"-->
-      <!--width="44"-->
-      <!--height="44">-->
-      <!--<circle cx="50%"-->
-      <!--class="color-primary"-->
-      <!--cy="50%"-->
-      <!--r="19"-->
-      <!--stroke-dasharray="565.48"-->
-      <!--stroke-dashoffset="0"-->
-      <!--fill="transparent"-->
-      <!--stroke-width="3"-->
-      <!--stroke="black"></circle>-->
-      <!--</svg>-->
-      <!--</div>-->
-      <!--<button mat-icon-button-->
-      <!--color=""-->
-      <!--class="ico-btn"-->
-      <!--aria-label="add sub task"-->
-      <!--*ngIf="!task.parentId&&!task.isDone"-->
-      <!--tabindex="2"-->
-      <!--(click)="addSubTask($event);">-->
-
-      <!--<mat-icon aria-label="add sub task">playlist_add</mat-icon>-->
-      <!--</button>-->
       <button mat-icon-button
               color=""
               class="ico-btn show-additional-info-btn hide-xs"
               aria-label="additional-info"
               tabindex="2"
+              *ngIf="task.notes||task.issueData||task.attachmentIds?.length"
               [class.isActive]="task._isAdditionalInfoOpen"
               (click)="toggleShowAdditionalInfoOpen()">
 
-        <mat-icon *ngIf="task.notes||task.issueData"
-                  aria-label="notes">chat
-        </mat-icon>
-        <mat-icon *ngIf="!task.notes&&!task.issueData">chat_bubble_outline</mat-icon>
+        <mat-icon aria-label="notes">chat</mat-icon>
+        <!--<mat-icon *ngIf="!task.notes&&!task.issueData">chat_bubble_outline</mat-icon>-->
       </button>
 
       <button mat-icon-button
@@ -171,7 +144,6 @@
         </button>
 
         <button mat-menu-item
-                class="show-xs-only"
                 aria-label="additional-info"
                 tabindex="2"
                 [class.isActive]="task._isAdditionalInfoOpen"
