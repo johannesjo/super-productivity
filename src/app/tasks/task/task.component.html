@@ -82,6 +82,14 @@
     </div>
     <div class="time-wrapper"
          (click)="estimateTime()">
+      <button *ngIf="!task.subTasks?.length"
+              mat-icon-button
+              color=""
+              tabindex="2"
+              class="ico-btn time-btn hide-xs"
+              aria-label="time estimation">
+        <mat-icon aria-label="time estimation">access_time</mat-icon>
+      </button>
 
       <div class="time">
         <div class="time-val">
@@ -91,16 +99,6 @@
         <div class="time-val"
              [innerHTML]="task.timeEstimate|msToString"></div>
       </div>
-      <button [hidden]="task.subTasks && task.subTasks.length"
-              *ngIf="!task.subTasks?.length"
-              mat-icon-button
-              color=""
-              tabindex="2"
-              class="ico-btn time-btn hide-xs"
-              [disabled]="task.subTasks && task.subTasks.length>0"
-              aria-label="time estimation">
-        <mat-icon aria-label="time estimation">access_time</mat-icon>
-      </button>
     </div>
 
     <div class="controls">

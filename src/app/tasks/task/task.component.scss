@@ -380,11 +380,20 @@ input {
   flex-direction: row;
   align-items: center;
   justify-content: center;
-  margin-left: $s;
+  padding-right: $s;
   cursor: pointer;
 
   button {
-    //@include center;
+    transition: $transition-standard !important;
+    opacity: 0 !important;
+  }
+
+  &:hover {
+    .time,
+    button {
+      transition: $transition-standard;
+      opacity: 1 !important;
+    }
   }
 
   .time {
