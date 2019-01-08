@@ -147,7 +147,7 @@ export class TaskEffects {
       mergeMap(({action, state}) => {
         const currentId = state.currentTaskId;
         let nextId: 'NO_UPDATE' | string | null;
-console.log('AUTO_SET_NEXT');
+
         switch (action.type) {
           case TaskActionTypes.ToggleStart: {
             nextId = state.currentTaskId ? null : this.findNextTask(state);
@@ -156,8 +156,9 @@ console.log('AUTO_SET_NEXT');
 
           case TaskActionTypes.UpdateTask: {
             const {isDone} = (<UpdateTask>action).payload.task.changes;
-            const isCurrent = (<UpdateTask>action).payload.task.id === currentId;
-            nextId = (isDone && isCurrent) ? this.findNextTask(state) : 'NO_UPDATE';
+            const oldId = (<UpdateTask>action).payload.task.id ;
+            const isCurrent = (oldId === currentId);
+            nextId = (isDone && isCurrent) ? this.findNextTask(state, oldId) : 'NO_UPDATE';
             break;
           }
 
