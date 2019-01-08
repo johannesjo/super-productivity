@@ -1,3 +1,22 @@
+## [0.1.6](https://github.com/johannesjo/sp2/compare/v0.1.5...v0.1.6) (2019-01-08)
+
+
+### Bug Fixes
+
+* dirty fix for jira cfg issues ([0bd86c8](https://github.com/johannesjo/sp2/commit/0bd86c8))
+* typing error ([2d3200f](https://github.com/johannesjo/sp2/commit/2d3200f))
+* typing error ([5429541](https://github.com/johannesjo/sp2/commit/5429541))
+* **tasks:** next task selection on done ([b1c9a0a](https://github.com/johannesjo/sp2/commit/b1c9a0a))
+
+
+### Features
+
+* add backdrop for add task bar ([5302392](https://github.com/johannesjo/sp2/commit/5302392))
+* **jira:** add description focus mode ([a4b42a6](https://github.com/johannesjo/sp2/commit/a4b42a6))
+* **jira:** improve issue attachment styling and reduce th width ([09bcda1](https://github.com/johannesjo/sp2/commit/09bcda1))
+
+
+
 ## [0.1.5](https://github.com/johannesjo/sp2/compare/v0.1.4...v0.1.5) (2019-01-07)
 
 
