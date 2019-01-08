@@ -50,11 +50,25 @@ const mapTotalTimeWorked = (tasks) => tasks.reduce((acc, task) => acc + task.tim
 // ---------
 const {selectIds, selectEntities, selectAll, selectTotal} = taskAdapter.getSelectors();
 export const selectTaskFeatureState = createFeatureSelector<TaskState>(TASK_FEATURE_NAME);
+export const selectTaskEntities = createSelector(selectTaskFeatureState, selectEntities);
 export const selectIsTasksLoaded = createSelector(selectTaskFeatureState, state => state.isDataLoaded);
 export const selectBacklogTaskIds = createSelector(selectTaskFeatureState, state => state.backlogTaskIds);
 export const selectTodaysTaskIds = createSelector(selectTaskFeatureState, state => state.todaysTaskIds);
 export const selectCurrentTaskId = createSelector(selectTaskFeatureState, state => state.currentTaskId);
 export const selectCurrentTask = createSelector(selectTaskFeatureState, s => s.currentTaskId && s.entities[s.currentTaskId]);
+export const selectCurrentTaskParent = createSelector(selectTaskFeatureState, s =>
+  s.currentTaskId
+  && s.entities[s.currentTaskId] && s.entities[s.currentTaskId].parentId
+  && s.entities[s.entities[s.currentTaskId].parentId]
+);
+
+export const selectCurrentTaskParentOrCurrent = createSelector(selectTaskFeatureState, s =>
+  s.currentTaskId
+  && s.entities[s.currentTaskId] && s.entities[s.currentTaskId].parentId
+  && s.entities[s.entities[s.currentTaskId].parentId]
+  || s.entities[s.currentTaskId]
+);
+
 
 export const selectAllTasks = createSelector(selectTaskFeatureState, selectAll);
 export const selectAllTasksWithIssueData = createSelector(selectAllTasks, selectIssueEntityMap, mapIssueDataToTask);

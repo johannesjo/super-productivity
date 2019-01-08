@@ -50,7 +50,18 @@ export type MiscConfig = Readonly<{
 
 
 export type PomodoroConfig = Readonly<{
-  [key: string]: any;
+  isEnabled: boolean;
+  isStopTrackingOnBreak: boolean;
+  isStopTrackingOnLongBreak: boolean;
+  isManualContinue: boolean;
+  isPlaySound: boolean;
+  // isGoToWorkView: boolean;
+  isPlayTick: boolean;
+
+  duration: number;
+  breakDuration: number;
+  longerBreakDuration: number;
+  cyclesBeforeLongerBreak: number;
 }>;
 
 // NOTE: needs to be writable due to how we use it

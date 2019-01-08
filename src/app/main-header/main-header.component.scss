@@ -38,6 +38,10 @@ $mobileHorizontalPadding: 8px;
   display: flex;
   flex: 1;
 
+  button.isActive {
+    font-weight: bold;
+  }
+
   mat-icon {
     display: none;
   }
@@ -180,6 +184,17 @@ $mobileHorizontalPadding: 8px;
   $circleOverflow: 5px;
   position: relative;
 
+  .pomodoro-label {
+    position: absolute;
+    line-height: 1;
+    padding: 1px 0 1px;
+    background: #fff;
+    color: #000;
+    width: 100%;
+    left: 0;
+    bottom: 0;
+    box-shadow: $whiteframe-shadow-2dp;
+  }
 
   .circle-svg {
     transform: rotate(-90deg);

@@ -16,6 +16,7 @@ import { JiraOriginalUser } from '../jira-api-responses';
 import { expandAnimation } from '../../../ui/animations/expand.ani';
 import { catchError } from 'rxjs/operators';
 import { Subscription, throwError } from 'rxjs';
+import { dirtyDeepCopy } from '../../../core/util/dirtyDeepCopy';
 
 @Component({
   selector: 'jira-cfg-stepper',
@@ -26,10 +27,10 @@ import { Subscription, throwError } from 'rxjs';
 })
 export class JiraCfgStepperComponent implements OnDestroy {
   public credentialsFormGroup: FormGroup = new FormGroup({});
-  public credentialsFormConfig: FormlyFieldConfig[] = JIRA_CREDENTIALS_FORM_CFG;
+  public credentialsFormConfig: FormlyFieldConfig[] = [];
 
   public advancedSettingsFormGroup: FormGroup = new FormGroup({});
-  public advancedSettingsFormConfig: FormlyFieldConfig[] = JIRA_ADVANCED_FORM_CFG;
+  public advancedSettingsFormConfig: FormlyFieldConfig[] = [];
 
   public isTestCredentialsSuccess = false;
   public user: JiraOriginalUser;
@@ -42,6 +43,8 @@ export class JiraCfgStepperComponent implements OnDestroy {
     private _jiraApiService: JiraApiService,
     private _changeDetectorRef: ChangeDetectorRef,
   ) {
+    this.credentialsFormConfig = dirtyDeepCopy(JIRA_CREDENTIALS_FORM_CFG);
+    this.advancedSettingsFormConfig = dirtyDeepCopy(JIRA_ADVANCED_FORM_CFG);
   }
 
   @Input() set cfg(cfg: JiraCfg) {
@@ -77,6 +80,10 @@ export class JiraCfgStepperComponent implements OnDestroy {
         .subscribe((user: JiraOriginalUser) => {
           this.user = user;
           this.isTestCredentialsSuccess = true;
+          if (!this.jiraCfg.userAssigneeName) {
+            this.jiraCfg.userAssigneeName = user.name;
+          }
+
           this._changeDetectorRef.detectChanges();
         })
     );

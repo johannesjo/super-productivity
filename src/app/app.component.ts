@@ -224,6 +224,9 @@ export class AppComponent implements OnInit {
         } else if (event.deltaY < 0) {
           zoomFactor += ZOOM_DELTA;
         }
+
+        zoomFactor = Math.min(Math.max(zoomFactor, 0.1), 4);
+
         webFrame.setZoomFactor(zoomFactor);
         this._configService.updateSection('_uiHelper', {
           _zoomFactor: zoomFactor

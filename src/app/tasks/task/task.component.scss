@@ -196,7 +196,7 @@ $this-icon-default-opacity: 0.7;
       position: absolute;
       top: -$s;
       right: -$s;
-      left: -2*$s;
+      left: 0;
       bottom: -$s;
       content: '';
     }
@@ -379,12 +379,25 @@ input {
   display: flex;
   flex-direction: row;
   align-items: center;
-  justify-content: center;
-  margin-left: $s;
-  cursor: pointer;
+  justify-content: stretch;
+  padding-right: $s;
 
-  button {
-    //@include center;
+
+  &.isEditable {
+    cursor: pointer;
+
+    button {
+      transition: $transition-standard !important;
+      opacity: 0 !important;
+    }
+
+    &:hover {
+      .time,
+      button {
+        transition: $transition-standard;
+        opacity: 1 !important;
+      }
+    }
   }
 
   .time {

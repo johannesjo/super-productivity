@@ -224,6 +224,17 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     this.focusSelf();
   }
 
+  toggleShowAttachments() {
+    const attachmentTabIndex = this.task.issueData ? 2 : 1;
+    (this.task._isAdditionalInfoOpen && this.task._currentTab === attachmentTabIndex)
+      ? this._taskService.hideAdditionalInfoOpen(this.task.id)
+      : this._taskService.updateUi(this.task.id, {
+        _isAdditionalInfoOpen: true,
+        _currentTab: attachmentTabIndex,
+      });
+    this.focusSelf();
+  }
+
   toggleHideSubTasks() {
     this.task._isHideSubTasks
       ? this._taskService.showSubTasks(this.task.id)

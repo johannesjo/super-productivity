@@ -14,6 +14,9 @@ import { AttachmentActionTypes } from '../../attachment/store/attachment.actions
 import { TaskWithSubTasks } from '../task.model';
 import { TaskState } from './task.reducer';
 import { EMPTY, of } from 'rxjs';
+import { ElectronService } from 'ngx-electron';
+import { IPC_CURRENT_TASK_UPDATED } from '../../../ipc-events.const';
+import { IS_ELECTRON } from '../../app.constants';
 
 // TODO send message to electron when current task changes here
 
@@ -79,7 +82,6 @@ export class TaskEffects {
         TaskActionTypes.DeleteTask,
       ),
       map((action_: DeleteTask) => {
-        console.log(action_);
         const action = action_ as DeleteTask;
         return new SnackOpen({
           message: `Deleted task "${action.payload.task.title}"`,
@@ -102,6 +104,19 @@ export class TaskEffects {
         this._store$.pipe(select(selectConfigFeatureState)),
       ),
       tap(this._notifyAboutTimeEstimateExceeded.bind(this))
+    );
+
+  @Effect({dispatch: false}) taskChangeElectron$: any = this._actions$
+    .pipe(
+      ofType(
+        TaskActionTypes.SetCurrentTask,
+      ),
+      withLatestFrom(this._store$.pipe(select(selectCurrentTask))),
+      tap(([action, current]) => {
+        if (IS_ELECTRON) {
+          this._electronService.ipcRenderer.send(IPC_CURRENT_TASK_UPDATED, {current});
+        }
+      })
     );
 
   @Effect({dispatch: false}) restoreTask$: any = this._actions$
@@ -132,7 +147,7 @@ export class TaskEffects {
       mergeMap(({action, state}) => {
         const currentId = state.currentTaskId;
         let nextId: 'NO_UPDATE' | string | null;
-
+console.log('AUTO_SET_NEXT');
         switch (action.type) {
           case TaskActionTypes.ToggleStart: {
             nextId = state.currentTaskId ? null : this.findNextTask(state);
@@ -184,6 +199,7 @@ export class TaskEffects {
               private _store$: Store<any>,
               private _notifyService: NotifyService,
               private _taskService: TaskService,
+              private _electronService: ElectronService,
               private _persistenceService: PersistenceService) {
   }
 

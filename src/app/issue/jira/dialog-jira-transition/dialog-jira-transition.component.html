@@ -3,16 +3,24 @@
     <mat-icon svgIcon="jira"></mat-icon>
     Update Status on Jira
   </h2>
-  <p><strong>Current Status:</strong> {{data.issue?.status?.name}}</p>
-  <p><strong>Current Assignee:</strong> {{data.issue?.assignee?.displayName}}</p>
+  <table>
+    <tr>
+      <th>Current Status:</th>
+      <td>{{data.issue?.status ? data.issue?.status?.name : '–'}}</td>
+    </tr>
+    <tr>
+      <th>Current Assignee:</th>
+      <td>{{data.issue?.assignee ? data.issue?.assignee?.displayName : '–'}}</td>
+    </tr>
+  </table>
 
   <mat-form-field>
-    <label>Choose a transition</label>
-    <mat-select [(ngModel)]="chosenTransitionId">
+    <label>Choose status to assign</label>
+    <mat-select [(ngModel)]="chosenTransition">
       <!--<mat-option value="DO_NOT">Don't transition</mat-option>-->
       <!--<mat-option value="ALWAYS_ASK">Always open dialog</mat-option>-->
       <mat-option *ngFor="let transition of (availableTransitions$|async)"
-                  [value]="transition.id">
+                  [value]="transition">
         <!--<img [src]="transition.to.iconUrl">-->
         {{transition.name}}
       </mat-option>

@@ -80,8 +80,18 @@
            (editFinished)="updateTaskTitleIfChanged($event.isChanged, $event.newVal)"
            tabindex="2"></div>
     </div>
+
     <div class="time-wrapper"
+         [class.isEditable]="!task.subTasks?.length"
          (click)="estimateTime()">
+      <button *ngIf="!task.subTasks?.length"
+              mat-icon-button
+              color=""
+              tabindex="2"
+              class="ico-btn time-btn hide-xs"
+              aria-label="time estimation">
+        <mat-icon aria-label="time estimation">access_time</mat-icon>
+      </button>
 
       <div class="time">
         <div class="time-val">
@@ -91,57 +101,28 @@
         <div class="time-val"
              [innerHTML]="task.timeEstimate|msToString"></div>
       </div>
-      <button [hidden]="task.subTasks && task.subTasks.length"
-              mat-icon-button
-              color=""
-              tabindex="2"
-              class="ico-btn time-btn hide-xs"
-              [disabled]="task.subTasks && task.subTasks.length>0"
-              aria-label="time estimation">
-        <mat-icon aria-label="time estimation">access_time</mat-icon>
-      </button>
     </div>
 
     <div class="controls">
-
-      <!--<div class="svg-wrapper">-->
-      <!--<svg focusable="false"-->
-      <!--viewPort="0 0 50 50"-->
-      <!--width="44"-->
-      <!--height="44">-->
-      <!--<circle cx="50%"-->
-      <!--class="color-primary"-->
-      <!--cy="50%"-->
-      <!--r="19"-->
-      <!--stroke-dasharray="565.48"-->
-      <!--stroke-dashoffset="0"-->
-      <!--fill="transparent"-->
-      <!--stroke-width="3"-->
-      <!--stroke="black"></circle>-->
-      <!--</svg>-->
-      <!--</div>-->
-      <!--<button mat-icon-button-->
-      <!--color=""-->
-      <!--class="ico-btn"-->
-      <!--aria-label="add sub task"-->
-      <!--*ngIf="!task.parentId&&!task.isDone"-->
-      <!--tabindex="2"-->
-      <!--(click)="addSubTask($event);">-->
-
-      <!--<mat-icon aria-label="add sub task">playlist_add</mat-icon>-->
-      <!--</button>-->
       <button mat-icon-button
               color=""
               class="ico-btn show-additional-info-btn hide-xs"
               aria-label="additional-info"
               tabindex="2"
+              *ngIf="task.notes||task.issueData||task.attachmentIds?.length"
               [class.isActive]="task._isAdditionalInfoOpen"
               (click)="toggleShowAdditionalInfoOpen()">
+        <mat-icon >chat</mat-icon>
+      </button>
 
-        <mat-icon *ngIf="task.notes||task.issueData"
-                  aria-label="notes">chat
-        </mat-icon>
-        <mat-icon *ngIf="!task.notes&&!task.issueData">chat_bubble_outline</mat-icon>
+      <button mat-icon-button
+              color=""
+              class="ico-btn hide-xs"
+              aria-label="additional-info"
+              tabindex="2"
+              *ngIf="task.attachmentIds?.length"
+              (click)="toggleShowAttachments()">
+        <mat-icon>attach_file</mat-icon>
       </button>
 
       <button mat-icon-button
@@ -170,20 +151,6 @@
           Pause tracking task
         </button>
 
-        <button mat-menu-item
-                class="show-xs-only"
-                aria-label="additional-info"
-                tabindex="2"
-                [class.isActive]="task._isAdditionalInfoOpen"
-                (click)="toggleShowAdditionalInfoOpen()">
-
-          <mat-icon *ngIf="task.notes||task.issueData"
-                    aria-label="notes">chat
-          </mat-icon>
-          <mat-icon *ngIf="!task.notes&&!task.issueData">chat_bubble_outline</mat-icon>
-          Show/Hide additional info
-        </button>
-
         <button mat-menu-item=""
                 (click)="toggleTaskDone()"
                 tabindex="2"
@@ -198,6 +165,19 @@
             </mat-icon>
             Mark as done
           </ng-container>
+        </button>
+
+        <button mat-menu-item
+                aria-label="additional-info"
+                tabindex="2"
+                [class.isActive]="task._isAdditionalInfoOpen"
+                (click)="toggleShowAdditionalInfoOpen()">
+
+          <mat-icon *ngIf="task.notes||task.issueData"
+                    aria-label="notes">chat
+          </mat-icon>
+          <mat-icon *ngIf="!task.notes&&!task.issueData">chat_bubble_outline</mat-icon>
+          Show/Hide additional info
         </button>
 
         <button mat-menu-item=""

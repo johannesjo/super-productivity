@@ -1,7 +1,7 @@
 import { ConfigFormConfig } from '../core/config/config.model';
-import { JIRA_ADVANCED_FORM_CFG, JIRA_CREDENTIALS_FORM_CFG } from './jira/jira.const';
+import { DEFAULT_JIRA_CFG, JIRA_ADVANCED_FORM_CFG, JIRA_CREDENTIALS_FORM_CFG } from './jira/jira.const';
 import { IssueProviderKey } from './issue';
-import { GIT_CONFIG_FORM } from './git/git.const';
+import { DEFAULT_GIT_CFG, GIT_CONFIG_FORM } from './git/git.const';
 
 export const GIT_TYPE: IssueProviderKey = 'GIT';
 export const JIRA_TYPE: IssueProviderKey = 'JIRA';
@@ -13,6 +13,10 @@ export const issueProviderIconMap = {
   [GIT_TYPE]: 'github'
 };
 
+export const DEFAULT_ISSUE_PROVIDER_CFGS = {
+  [JIRA_TYPE]: DEFAULT_JIRA_CFG,
+  [GIT_TYPE]: DEFAULT_GIT_CFG,
+};
 
 export const ISSUE_PROVIDER_FORM_CFGS: ConfigFormConfig = [
   // GIT

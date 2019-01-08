@@ -11,7 +11,7 @@ export const DEFAULT_GIT_CFG: GitCfg = {
 
 // NOTE: we need a high limit because git has low usage limits :(
 export const GIT_POLL_INTERVAL = 5 * 60 * 1000;
-export const GIT_INITIAL_POLL_DELAY = 10 * 1000;
+export const GIT_INITIAL_POLL_DELAY = 15 * 1000;
 // export const GIT_POLL_INTERVAL = 15 * 1000;
 export const GIT_API_BASE_URL = 'https://api.github.com/';
 

@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Actions, Effect, ofType } from '@ngrx/effects';
 import { GitIssueActionTypes } from './git-issue.actions';
 import { select, Store } from '@ngrx/store';
-import { tap, withLatestFrom } from 'rxjs/operators';
+import { switchMap, tap, withLatestFrom } from 'rxjs/operators';
 import { TaskActionTypes } from '../../../../tasks/store/task.actions';
 import { PersistenceService } from '../../../../core/persistence/persistence.service';
 import { selectAllGitIssues, selectGitIssueFeatureState } from './git-issue.reducer';
@@ -11,13 +11,12 @@ import { GitApiService } from '../../git-api.service';
 import { GitIssueService } from '../git-issue.service';
 import { ConfigService } from '../../../../core/config/config.service';
 import { GitIssue } from '../git-issue.model';
-import { GitCfg } from '../../git';
 import { SnackService } from '../../../../core/snack/snack.service';
 import { TaskService } from '../../../../tasks/task.service';
 import { Task } from '../../../../tasks/task.model';
 import { ProjectActionTypes } from '../../../../project/store/project.actions';
 import { GIT_TYPE } from '../../../issue.const';
-import { Subscription, timer } from 'rxjs';
+import { EMPTY, timer } from 'rxjs';
 import { GIT_INITIAL_POLL_DELAY, GIT_POLL_INTERVAL } from '../../git.const';
 
 @Injectable()
@@ -25,26 +24,36 @@ export class GitIssueEffects {
   @Effect({dispatch: false}) issuePolling$: any = this._actions$
     .pipe(
       ofType(
-        ProjectActionTypes.SetCurrentProject,
-        TaskActionTypes.AddTask,
-        TaskActionTypes.RestoreTask,
-        TaskActionTypes.DeleteTask,
-        TaskActionTypes.MoveToArchive,
         GitIssueActionTypes.LoadState,
-        GitIssueActionTypes.LoadGitIssues,
-        GitIssueActionTypes.AddGitIssue,
-        GitIssueActionTypes.DeleteGitIssue,
-
-        // also needs to be here to reinit entity data
-        GitIssueActionTypes.UpdateGitIssue,
+        ProjectActionTypes.UpdateProjectIssueProviderCfg,
       ),
       withLatestFrom(
-        this._store$.pipe(select(selectAllGitIssues)),
         this._store$.pipe(select(selectProjectGitCfg)),
       ),
-      // TODO should be done in a more modern way via switchmap and timer
-      tap(this._reInitIssuePolling.bind(this))
+      switchMap(([a, gitCfg]) => {
+        if (gitCfg && gitCfg.isAutoPoll) {
+          return timer(GIT_INITIAL_POLL_DELAY, GIT_POLL_INTERVAL)
+            .pipe(
+              withLatestFrom(
+                this._store$.pipe(select(selectAllGitIssues)),
+              ),
+              tap(([x, issues]: [number, GitIssue[]]) => {
+                if (issues && issues.length > 0) {
+                  this._snackService.open({
+                    message: 'Git: Polling Changes for issues',
+                    svgIcon: 'github',
+                    isSubtle: true,
+                  });
+                  this._gitIssueService.updateIssuesFromApi(issues, gitCfg);
+                }
+              })
+            );
+        } else {
+          return EMPTY;
+        }
+      })
     );
+
   @Effect({dispatch: false}) syncIssueStateToLs$: any = this._actions$
     .pipe(
       ofType(
@@ -74,7 +83,6 @@ export class GitIssueEffects {
       tap(this._importNewIssuesToBacklog.bind(this))
     );
 
-  private _pollSub: Subscription;
 
   constructor(private readonly _actions$: Actions,
               private readonly _store$: Store<any>,
@@ -119,35 +127,17 @@ export class GitIssueEffects {
       if (count === 1) {
         this._snackService.open({
           message: `Git: Imported issue "#${lastImportedIssue.number} ${lastImportedIssue.title}" from git to backlog`,
-          icon: 'cloud_download'
+          icon: 'cloud_download',
+          isSubtle: true,
         });
       } else if (count > 1) {
         this._snackService.open({
           message: `Git: Imported ${count} new issues from git to backlog`,
-          icon: 'cloud_download'
+          icon: 'cloud_download',
+          isSubtle: true,
         });
       }
     });
   }
-
-  private _reInitIssuePolling(
-    [action, issues, gitCfg]: [GitIssueActionTypes, GitIssue[], GitCfg]
-  ) {
-    if (this._pollSub) {
-      this._pollSub.unsubscribe();
-    }
-    const isPollingEnabled = gitCfg && gitCfg.isAutoPoll;
-    if (isPollingEnabled) {
-      this._pollSub = timer(GIT_INITIAL_POLL_DELAY, GIT_POLL_INTERVAL)
-        .pipe(
-          tap(() => {
-            this._snackService.open({message: 'Git: Polling Changes for issues', icon: 'cloud_download'});
-            this._gitIssueService.updateIssuesFromApi(issues, gitCfg);
-          })
-        ).subscribe();
-    }
-  }
-
-
 }
 

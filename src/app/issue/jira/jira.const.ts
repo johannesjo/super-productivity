@@ -1,6 +1,9 @@
 // TODO use as a checklist
 import { JiraCfg } from './jira';
 import { FormlyFieldConfig } from '@ngx-formly/core';
+import { GIT_INITIAL_POLL_DELAY } from '../git/git.const';
+
+export const JIRA_DATETIME_FORMAT = 'YYYY-MM-DDTHH:mm:ss.SSZZ';
 
 export const DEFAULT_JIRA_CFG: JiraCfg = {
   isEnabled: true,
@@ -10,10 +13,10 @@ export const DEFAULT_JIRA_CFG: JiraCfg = {
   password: null,
 
   isAutoPollTickets: true,
-  searchJqlQuery: 'resolution = Unresolved ORDER BY updatedDate DESC',
+  searchJqlQuery: '',
 
   isAutoAddToBacklog: true,
-  autoAddBacklogJqlQuery: 'assignee = currentUser() AND sprint in openSprints() AND resolution = Unresolved ORDER BY updatedDate DESC',
+  autoAddBacklogJqlQuery: 'assignee = currentUser() AND sprint in openSprints() AND resolution = Unresolved',
 
   isWorklogEnabled: true,
   isAutoWorklog: false,
@@ -27,8 +30,10 @@ export const DEFAULT_JIRA_CFG: JiraCfg = {
   userAssigneeName: null,
 
   isTransitionIssuesEnabled: true,
-  availableTransitions: {
-    OPEN: 'ALWAYS_ASK',
+
+  availableTransitions: [],
+  transitionConfig: {
+    // OPEN: 'DO_NOT',
     IN_PROGRESS: 'ALWAYS_ASK',
     DONE: 'ALWAYS_ASK'
   },
@@ -37,7 +42,7 @@ export const DEFAULT_JIRA_CFG: JiraCfg = {
 
 
 export const JIRA_POLL_INTERVAL = 5 * 60 * 1000;
-export const JIRA_INITIAL_POLL_DELAY = 10 * 1000;
+export const JIRA_INITIAL_POLL_DELAY = GIT_INITIAL_POLL_DELAY + 2000;
 
 // it's weird!!
 export const JIRA_DATE_FORMAT = 'YYYY-MM-DDTHH:mm:ss.SSZZ';
@@ -138,5 +143,18 @@ export const JIRA_ADVANCED_FORM_CFG: FormlyFieldConfig[] = [
       label: 'JQL Query for to limit the searcher tasks',
     },
   },
-
+  {
+    key: 'isWorklogEnabled',
+    type: 'checkbox',
+    templateOptions: {
+      label: 'Open dialog to submit worklog to jira when task is done',
+    },
+  },
+  {
+    key: 'isAddWorklogOnSubTaskDone',
+    type: 'checkbox',
+    templateOptions: {
+      label: 'Open dialog to submit worklog to jira when sub task is done',
+    },
+  },
 ];

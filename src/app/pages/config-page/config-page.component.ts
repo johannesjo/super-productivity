@@ -8,6 +8,8 @@ import { Project, ProjectAdvancedCfg, ProjectCfgFormKey } from '../../project/pr
 import { BASIC_PROJECT_CONFIG_FORM_CONFIG, PROJECT_CONFIG_FORM_CONFIG } from '../../project/project-form-cfg.const';
 import { IssueIntegrationCfg, IssueIntegrationCfgs, IssueProviderKey } from '../../issue/issue';
 import { ISSUE_PROVIDER_FORM_CFGS } from '../../issue/issue.const';
+import { DEFAULT_JIRA_CFG } from '../../issue/jira/jira.const';
+import { DEFAULT_GIT_CFG } from '../../issue/git/git.const';
 import { dirtyDeepCopy } from '../../core/util/dirtyDeepCopy';
 
 @Component({
@@ -16,10 +18,10 @@ import { dirtyDeepCopy } from '../../core/util/dirtyDeepCopy';
   styleUrls: ['./config-page.component.scss']
 })
 export class ConfigPageComponent implements OnInit, OnDestroy {
-  basicProjectSettingsFormCfg = dirtyDeepCopy(BASIC_PROJECT_CONFIG_FORM_CONFIG);
-  projectConfigFormCfg = dirtyDeepCopy(PROJECT_CONFIG_FORM_CONFIG);
-  issueIntegrationFormCfg = dirtyDeepCopy(ISSUE_PROVIDER_FORM_CFGS);
-  globalConfigFormCfg = dirtyDeepCopy(GLOBAL_CONFIG_FORM_CONFIG);
+  basicProjectSettingsFormCfg;
+  projectConfigFormCfg;
+  issueIntegrationFormCfg;
+  globalConfigFormCfg;
 
   currentProject: Project;
   projectCfg: ProjectAdvancedCfg;
@@ -32,6 +34,12 @@ export class ConfigPageComponent implements OnInit, OnDestroy {
     public readonly configService: ConfigService,
     public readonly projectService: ProjectService,
   ) {
+    // somehow they are only unproblematic if assigned here,
+    // not even sure how this is possible. ngrx formly sucks :/
+    this.basicProjectSettingsFormCfg = dirtyDeepCopy(BASIC_PROJECT_CONFIG_FORM_CONFIG);
+    this.projectConfigFormCfg = dirtyDeepCopy(PROJECT_CONFIG_FORM_CONFIG);
+    this.issueIntegrationFormCfg = dirtyDeepCopy(ISSUE_PROVIDER_FORM_CFGS);
+    this.globalConfigFormCfg = dirtyDeepCopy(GLOBAL_CONFIG_FORM_CONFIG);
   }
 
   ngOnInit() {
@@ -42,6 +50,15 @@ export class ConfigPageComponent implements OnInit, OnDestroy {
       this.currentProject = project;
       this.projectCfg = project.advancedCfg;
       this.issueIntegrationCfgs = project.issueIntegrationCfgs;
+
+      // Unfortunately needed, to make sure we have no empty configs
+      // TODO maybe think of a better solution for the defaults
+      if (!this.issueIntegrationCfgs.JIRA) {
+        this.issueIntegrationCfgs.JIRA = DEFAULT_JIRA_CFG;
+      }
+      if (!this.issueIntegrationCfgs.GIT) {
+        this.issueIntegrationCfgs.GIT = DEFAULT_GIT_CFG;
+      }
     }));
   }
 
@@ -77,5 +94,4 @@ export class ConfigPageComponent implements OnInit, OnDestroy {
       this.configService.updateSection(sectionKey, config);
     }
   }
-
 }

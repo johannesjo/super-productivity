@@ -1,7 +1,13 @@
 import { Injectable } from '@angular/core';
 import shortid from 'shortid';
 import { ChromeExtensionInterfaceService } from '../../core/chrome-extension-interface/chrome-extension-interface.service';
-import { JIRA_ADDITIONAL_ISSUE_FIELDS, JIRA_MAX_RESULTS, JIRA_REDUCED_ISSUE_FIELDS, JIRA_REQUEST_TIMEOUT_DURATION } from './jira.const';
+import {
+  JIRA_ADDITIONAL_ISSUE_FIELDS,
+  JIRA_DATETIME_FORMAT,
+  JIRA_MAX_RESULTS,
+  JIRA_REDUCED_ISSUE_FIELDS,
+  JIRA_REQUEST_TIMEOUT_DURATION
+} from './jira.const';
 import { ProjectService } from '../../project/project.service';
 import {
   mapIssueResponse,
@@ -22,6 +28,7 @@ import { SearchResultItem } from '../issue';
 import { fromPromise } from 'rxjs/internal-compatibility';
 import { catchError, share, take } from 'rxjs/operators';
 import { JiraIssue } from './jira-issue/jira-issue.model';
+import * as moment from 'moment';
 
 const BLOCK_ACCESS_KEY = 'SUP_BLOCK_JIRA_ACCESS';
 
@@ -65,7 +72,7 @@ export class JiraApiService {
       this._chromeExtensionInterface.isReady$,
       this._projectService.currentJiraCfg$,
     ).subscribe(([isExtensionReady, cfg]) => {
-      if (!this._isHasCheckedConnection && this._isMinimalSettings(cfg)) {
+      if (!this._isHasCheckedConnection && this._isMinimalSettings(cfg) && cfg.isEnabled) {
         this.getCurrentUser()
           .pipe(catchError((err) => {
             this._blockAccess();
@@ -161,28 +168,41 @@ export class JiraApiService {
     });
   }
 
-
-  // INTERNAL
-  // -------------------
-  _addWorklog(originalKey, started, timeSpent, comment) {
+  updateAssignee(issueId, assignee) {
+    return this._sendRequest({
+      apiMethod: 'updateIssue',
+      arguments: [issueId, {
+        fields: {
+          assignee: {
+            name: assignee
+          }
+        }
+      }]
+    });
   }
 
-  searchUsers(userNameQuery) {
+  addWorklog(issueId: string, started: string, timeSpent: number, comment: string) {
+    return this._sendRequest({
+      apiMethod: 'addWorklog',
+      transform: mapResponse,
+      arguments: [
+        issueId,
+        {
+          started: moment(started).format(JIRA_DATETIME_FORMAT),
+          timeSpentSeconds: Math.floor(timeSpent / 1000),
+          comment: comment,
+        }
+      ]
+    });
   }
-
-
-  // Simple API Mappings
 
   // -----------------
   updateIssueDescription(task) {
   }
 
-  updateAssignee(task, assignee) {
-  }
 
   // Complex Functions
-  addWorklog(originalTask) {
-  }
+
 
   // --------
   private _isMinimalSettings(settings) {
@@ -256,11 +276,12 @@ export class JiraApiService {
 
     return fromPromise(promise)
       .pipe(
-        share(),
         catchError((err) => {
           this._snackService.open({type: 'ERROR', message: 'Jira: Something went wrong'});
-          return err;
+          return throwError(err);
         }),
+        share(),
+
         take(1),
       );
   }
@@ -274,15 +295,15 @@ export class JiraApiService {
 
       // resolve saved promise
       if (!res || res.error) {
-        console.log('FRONTEND_REQUEST', currentRequest);
-        console.log('RESPONSE', res);
+        console.log('JIRA_RESPONSE_ERROR', res);
+        console.log('FRONTEND_REQUEST_FOR_ERROR', currentRequest);
 
-        const errorTxt = (res && res.error && (typeof res.error === 'string' && res.error) || res.error.name);
+        const errorTxt = (res && res.error && (typeof res.error === 'string' && res.error || res.error.name || res.error));
         console.error(errorTxt);
-        currentRequest.reject(res);
         this._snackService.open({type: 'ERROR', message: 'Jira request failed: ' + errorTxt});
+        currentRequest.reject(res);
 
-        if (
+        if (res.error &&
           (res.error.statusCode && res.error.statusCode === 401)
           || (res.error && res.error === 401)
         ) {

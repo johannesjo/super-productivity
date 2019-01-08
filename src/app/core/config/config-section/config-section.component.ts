@@ -64,7 +64,13 @@ export class ConfigSectionComponent implements OnInit {
     if (componentToRender) {
       const factory: ComponentFactory<any> = this._componentFactoryResolver.resolveComponentFactory(componentToRender);
       const ref = this.customFormRef.createComponent(factory);
-      ref.instance.cfg = this.cfg;
+
+      // NOTE: important that this is set only if we actually have a value
+      // otherwise the default fallback will be overwritten
+      if (this.cfg) {
+        ref.instance.cfg = this.cfg;
+      }
+
       ref.instance.section = this.section;
 
       ref.instance.save.subscribe(v => {
