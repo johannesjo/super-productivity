@@ -45,6 +45,7 @@ mat-drawer {
   left: 0;
   top: 0;
   overflow: hidden;
+
   > ::ng-deep router-outlet + * {
     position: absolute;
     width: 100%;
@@ -53,4 +54,14 @@ mat-drawer {
     top: 0;
     @include scrollY();
   }
+}
+
+.backdrop {
+  position: fixed;
+  background: rgba(0, 0, 0, 0.4);
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  z-index: 220;
 }

@@ -1,12 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  ChangeDetectorRef,
-  Component,
-  ElementRef,
-  HostListener,
-  Inject,
-  OnInit
-} from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, HostListener, Inject, OnInit } from '@angular/core';
 import { MatIconRegistry } from '@angular/material';
 import { DomSanitizer } from '@angular/platform-browser';
 import { ProjectService } from './project/project.service';
@@ -17,12 +9,7 @@ import { ConfigService } from './core/config/config.service';
 import { blendInOutAnimation } from './ui/animations/blend-in-out.ani';
 import { LayoutService } from './core/layout/layout.service';
 import { ElectronService } from 'ngx-electron';
-import {
-  IPC_APP_READY,
-  IPC_ERROR,
-  IPC_TRANSFER_SETTINGS_REQUESTED,
-  IPC_TRANSFER_SETTINGS_TO_ELECTRON
-} from '../ipc-events.const';
+import { IPC_APP_READY, IPC_ERROR, IPC_TRANSFER_SETTINGS_REQUESTED, IPC_TRANSFER_SETTINGS_TO_ELECTRON } from '../ipc-events.const';
 import { SnackService } from './core/snack/snack.service';
 import { IS_ELECTRON } from './app.constants';
 import { GoogleDriveSyncService } from './core/google/google-drive-sync.service';
@@ -39,6 +26,7 @@ import { MigrateService } from './core/migrate/migrate.service';
 import { Observable } from 'rxjs';
 import { selectIsAllProjectDataLoaded } from './project/store/project.reducer';
 import { Store } from '@ngrx/store';
+import { fadeAnimation } from './ui/animations/fade.ani';
 
 const SIDE_PANEL_BREAKPOINT = 900;
 
@@ -46,7 +34,13 @@ const SIDE_PANEL_BREAKPOINT = 900;
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss'],
-  animations: [blendInOutAnimation, slideAnimation, expandAnimation, warpRouteAnimation],
+  animations: [
+    blendInOutAnimation,
+    slideAnimation,
+    expandAnimation,
+    warpRouteAnimation,
+    fadeAnimation
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AppComponent implements OnInit {

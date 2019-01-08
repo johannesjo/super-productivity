@@ -6,6 +6,10 @@
                 [@blendInOut]
                 (blur)="layoutService.hideAddTaskBar()"
                 *ngIf="layoutService.isShowAddTaskBar$|async"></add-task-bar>
+  <div class="backdrop"
+       @fade
+       *ngIf="(layoutService.isShowAddTaskBar$|async)"></div>
+
   <mat-drawer-container>
     <div class="route-wrapper"
          [@warpRoute]="getPage(o)">
