@@ -46,7 +46,6 @@ import { CollapsibleComponent } from './collapsible/collapsible.component';
 import { HelpSectionComponent } from './help-section/help-section.component';
 import { NumberToMonthPipe } from './duration/number-to-month.pipe';
 import { SplitModule } from '../pages/work-view/split/split.module';
-import { FlexLayoutModule } from '@angular/flex-layout';
 import { SimpleDownloadDirective } from './simple-download/simple-download.directive';
 import { Angular2PromiseButtonModule } from 'angular2-promise-buttons';
 import { DialogConfirmComponent } from './dialog-confirm/dialog-confirm.component';
@@ -109,7 +108,6 @@ import { MsToMinuteClockStringPipe } from './duration/ms-to-minute-clock-string.
     MatChipsModule,
     MatSlideToggleModule,
     MatBadgeModule,
-    FlexLayoutModule,
   ],
   declarations: [
     DurationFromStringPipe,
@@ -192,8 +190,6 @@ import { MsToMinuteClockStringPipe } from './duration/ms-to-minute-clock-string.
     MatChipsModule,
     MatSlideToggleModule,
     MatBadgeModule,
-
-    FlexLayoutModule,
 
     ReactiveFormsModule,
     FormlyModule,
