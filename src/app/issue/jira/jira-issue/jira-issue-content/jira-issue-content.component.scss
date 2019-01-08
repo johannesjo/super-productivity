@@ -13,6 +13,11 @@
       padding-left: 0;
     }
   }
+
+  // to shrink the th col to a min
+  td {
+    width: 100%;
+  }
 }
 
 .wrapper {
@@ -49,7 +54,9 @@
 .attachments {
   //margin-bottom: $s;
   // because they have an inner padding
-  margin-top: -$s;
+  &.hasAttachments {
+    margin-top: -$s;
+  }
 }
 
 .updates {

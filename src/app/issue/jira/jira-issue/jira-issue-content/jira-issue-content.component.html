@@ -40,7 +40,7 @@
     </tr>
     <tr>
       <th>Worklog</th>
-      <td>{{(issueData.timespent*1000)|msToString}} / {{(issueData.timeestimate*1000)|msToString}}</td>
+      <td>{{(issueData.timespent * 1000)|msToString}} / {{(issueData.timeestimate * 1000)|msToString}}</td>
     </tr>
     <tr *ngIf="issueData.components?.length">
       <th>Components</th>
@@ -63,7 +63,8 @@
     <tr>
       <th>Attachments</th>
       <td>
-        <div class="attachments">
+        <div class="attachments"
+             [class.hasAttachments]="attachments?.length">
           <attachment-list [attachments]="attachments"
                            [isDisableControls]="true"></attachment-list>
           <!--<div class="attachment"-->
