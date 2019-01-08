@@ -18,6 +18,22 @@
   td {
     width: 100%;
   }
+
+  .description-row {
+    th {
+      cursor: pointer;
+    }
+  }
+
+  &.isFocusDescription {
+    tr {
+      display: none;
+
+      &.description-row {
+        display: table-row;
+      }
+    }
+  }
 }
 
 .wrapper {

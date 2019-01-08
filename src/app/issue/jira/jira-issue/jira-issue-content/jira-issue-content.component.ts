@@ -17,6 +17,7 @@ export class JiraIssueContentComponent implements OnInit {
   taskData: TaskWithSubTasks;
   issueData: JiraIssue;
   attachments: Attachment[];
+  isFocusDescription = false;
 
   @Input() set task(task: TaskWithSubTasks) {
     this.taskData = task;

@@ -22,7 +22,8 @@
     </ul>
   </div>
 
-  <table class="issue-table">
+  <table class="issue-table"
+         [class.isFocusDescription]="isFocusDescription">
     <tr>
       <th>Summary</th>
       <th>{{issueData.key}} {{issueData.summary}}</th>
@@ -52,8 +53,8 @@
         </mat-chip-list>
       </td>
     </tr>
-    <tr>
-      <th>Description</th>
+    <tr class="description-row">
+      <th (click)="isFocusDescription=!isFocusDescription">Description</th>
       <td>
         <!--<inline-markdown [model]="issueData.description"></inline-markdown>-->
         <div [innerHTML]="issueData.description|markdown"
