@@ -1,18 +1,7 @@
 import { Injectable } from '@angular/core';
 import { select, Store } from '@ngrx/store';
-import {
-  AttachmentState,
-  initialAttachmentState,
-  selectAllAttachments,
-  selectAttachmentByIds
-} from './store/attachment.reducer';
-import {
-  AddAttachment,
-  DeleteAttachment,
-  DeleteAttachments,
-  LoadAttachmentState,
-  UpdateAttachment
-} from './store/attachment.actions';
+import { AttachmentState, initialAttachmentState, selectAllAttachments, selectAttachmentByIds } from './store/attachment.reducer';
+import { AddAttachment, DeleteAttachment, DeleteAttachments, LoadAttachmentState, UpdateAttachment } from './store/attachment.actions';
 import { Observable } from 'rxjs';
 import { Attachment } from './attachment.model';
 import shortid from 'shortid';
@@ -45,6 +34,11 @@ export class AttachmentService {
   }
 
   addAttachment(attachment: Attachment) {
+    if (!attachment) {
+      console.error('No valid attachment passed');
+      return;
+    }
+
     this._store$.dispatch(new AddAttachment({
       attachment: {
         ...attachment,
