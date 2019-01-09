@@ -1,3 +1,12 @@
+## [0.1.7](https://github.com/johannesjo/sp2/compare/v0.1.6...v0.1.7) (2019-01-09)
+
+
+### Bug Fixes
+
+* open not being present ([f519ee0](https://github.com/johannesjo/sp2/commit/f519ee0))
+
+
+
 ## [0.1.6](https://github.com/johannesjo/sp2/compare/v0.1.5...v0.1.6) (2019-01-08)
 
 
