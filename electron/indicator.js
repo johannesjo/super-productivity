@@ -105,17 +105,19 @@ function initListeners(isGnomeShellExtInstalled) {
       msg = createIndicatorStr(currentTask);
     }
 
-    if (isGnomeShellExtInstalled) {
-      // gnome indicator handling
-      if (currentTask && currentTask.title) {
-        dbus.setTask(currentTask.id, msg);
-      } else if (!currentTask && lastActiveTaskTask && !lastActiveTaskTask.isDone) {
-        const msg = createIndicatorStr(lastActiveTaskTask);
-        dbus.setTask('PAUSED', msg);
-      } else {
-        dbus.setTask('NONE', 'NONE');
-      }
-    } else if (tray) {
+    //if (isGnomeShellExtInstalled) {
+    //  // gnome indicator handling
+    //  if (currentTask && currentTask.title) {
+    //    dbus.setTask(currentTask.id, msg);
+    //  } else if (!currentTask && lastActiveTaskTask && !lastActiveTaskTask.isDone) {
+    //    const msg = createIndicatorStr(lastActiveTaskTask);
+    //    dbus.setTask('PAUSED', msg);
+    //  } else {
+    //    dbus.setTask('NONE', 'NONE');
+    //  }
+    //} else
+    //
+    if (tray) {
       // tray handling
       if (currentTask && currentTask.title) {
         tray.setTitle(msg);
@@ -130,9 +132,9 @@ function initListeners(isGnomeShellExtInstalled) {
     const currentSessionTime = params.currentSessionTime;
     const currentSessionInitialTime = params.currentSessionInitialTime;
 
-    if (isGnomeShellExtInstalled) {
-      dbus.updatePomodoro(isOnBreak, currentSessionTime, currentSessionInitialTime);
-    }
+    //if (isGnomeShellExtInstalled) {
+    //  dbus.updatePomodoro(isOnBreak, currentSessionTime, currentSessionInitialTime);
+    //}
   });
 }
 
@@ -148,10 +150,10 @@ function createIndicatorStr(task) {
 
     // TODO replace with our format helpers once we have ts support
     if (task.timeSpent && task.timeSpent) {
-      task.timeSpent = moment.duration({milliseconds:task.timeSpent});
+      task.timeSpent = moment.duration({ milliseconds: task.timeSpent });
       timeStr += parseInt(task.timeSpent.asMinutes()).toString();
     }
-    task.timeEstimate = task.timeEstimate && moment.duration({milliseconds:task.timeEstimate});
+    task.timeEstimate = task.timeEstimate && moment.duration({ milliseconds: task.timeEstimate });
     const timeEstimateAsMin = moment.duration(task.timeEstimate).asMinutes();
     if (task.timeEstimate && timeEstimateAsMin > 0) {
       timeStr += '/' + timeEstimateAsMin;
