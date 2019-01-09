@@ -14,7 +14,7 @@ export const standardListAnimation = trigger('standardList', [
     ),
 
     query(
-      ':leave', stagger('100ms', [
+      ':leave', stagger('-100ms', [
           style({transform: 'scale(1)', opacity: 1, height: '*'}),
           animate(ANI_LEAVE_TIMING, style({transform: 'scale(0)', height: 0}))
         ],
