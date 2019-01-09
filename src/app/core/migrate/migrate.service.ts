@@ -332,7 +332,7 @@ export class MigrateService {
       attachmentIds: [],
       _isAdditionalInfoOpen: false,
       _currentTab: 0,
-
+      parentId: ot.parentId,
       title: ot.title,
       id: ot.id,
       issueId: ot.originalId,

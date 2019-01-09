@@ -12,6 +12,7 @@ export interface OldTask {
   timeSpentOnDay: OldTimeSpentOnDay;
   created?: string;
   notes?: string;
+  parentId?: string;
 
   originalId?: string;
   originalType?: 'JIRA' | 'GITHUB';

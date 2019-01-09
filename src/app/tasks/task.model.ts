@@ -16,17 +16,17 @@ export interface TaskCopy {
   timeEstimate: number;
 
   created: number;
-  isDone?: boolean;
+  isDone: boolean;
 
-  notes?: string;
-  issueId?: string;
-  issueType?: IssueProviderKey;
-  parentId?: string;
+  notes: string;
+  issueId: string;
+  issueType: IssueProviderKey;
+  parentId: string;
   attachmentIds: string[];
 
   // ui model
-  _isAdditionalInfoOpen?: boolean;
-  _isHideSubTasks?: boolean;
+  _isAdditionalInfoOpen: boolean;
+  _isHideSubTasks: boolean;
   _currentTab: number;
 }
 
@@ -36,20 +36,25 @@ export interface TaskWithIssueData extends Task {
   readonly issueData?: IssueData;
 }
 
-
 export interface TaskWithSubTasks extends TaskWithIssueData {
   readonly subTasks?: TaskWithIssueData[];
 }
 
-
-export const DEFAULT_TASK: Partial<Task> = {
+export const DEFAULT_TASK: Task = {
+  id: null,
   subTaskIds: [],
   attachmentIds: [],
   timeSpentOnDay: {},
   timeSpent: 0,
   timeEstimate: 0,
   isDone: false,
+  title: '',
+  notes: '',
+  parentId: null,
+  issueId: null,
+  issueType: null,
   created: Date.now(),
   _isAdditionalInfoOpen: false,
+  _isHideSubTasks: false,
   _currentTab: 0,
 };
