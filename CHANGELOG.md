@@ -1,3 +1,17 @@
+## [0.1.8](https://github.com/johannesjo/sp2/compare/v0.1.7...v0.1.8) (2019-01-09)
+
+
+### Bug Fixes
+
+* **electron:** remove dbus related stuff for now ([8497d82](https://github.com/johannesjo/sp2/commit/8497d82))
+
+
+### Features
+
+* improve default task model and task type to be more performant ([668e846](https://github.com/johannesjo/sp2/commit/668e846))
+
+
+
 ## [0.1.7](https://github.com/johannesjo/sp2/compare/v0.1.6...v0.1.7) (2019-01-09)
 
 
