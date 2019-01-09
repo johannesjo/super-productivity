@@ -1,11 +1,20 @@
+<div *ngIf="isHideDone && doneTasksLength"
+     @expand
+     class="done-task-box">
+  <button mat-raised-button
+          (click)="expandDoneTasks()">
+    + {{doneTasksLength}} done sub tasks tasks
+    <mat-icon>expand_more</mat-icon>
+  </button>
+</div>
+
 <div class="task-list-inner"
      [dragula]="listId"
-     [dragulaModel]="tasks"
+     [dragulaModel]="tasks_"
      [attr.data-id]="listModelId"
-     [@standardList]="isBlockAni ? 'BLOCK' : tasks?.length"
+     [@standardList]="isBlockAni ? 'BLOCK' : (isHideDone? undoneTasksLength : tasks_.length)"
      #listEl>
-  <task *ngFor="let task of tasks; trackBy: trackByFn; let i = index;"
-        [class.isShrunk]="task.isDone && isHideDone"
+  <task *ngFor="let task of tasks_|filterDoneTasks:isHideDone; trackBy: trackByFn; let i = index;"
         [task]="task"
         [focusIdList]="focusIdList">
   </task>

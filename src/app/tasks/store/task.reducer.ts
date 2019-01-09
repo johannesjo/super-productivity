@@ -359,7 +359,7 @@ export function taskReducer(
         newVal = (newVal > 2) ? 2 : newVal;
         newVal = (newVal < 0) ? 0 : newVal;
       }
-      console.log(newVal);
+      newVal = (isNaN(newVal)) ? 0 : newVal;
 
       return taskAdapter.updateOne({
         id: taskId,

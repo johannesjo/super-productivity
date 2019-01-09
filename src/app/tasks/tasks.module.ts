@@ -20,6 +20,7 @@ import { TaskAdditionalInfoComponent } from './task-additional-info/task-additio
 import { SelectTaskComponent } from './select-task/select-task.component';
 import { AttachmentModule } from '../attachment/attachment.module';
 import { IssueModule } from '../issue/issue.module';
+import { FilterDoneTasksPipe } from './filter-done-tasks.pipe';
 
 @NgModule({
   imports: [
@@ -43,6 +44,7 @@ import { IssueModule } from '../issue/issue.module';
     ToArrayPipe,
     TaskAdditionalInfoComponent,
     SelectTaskComponent,
+    FilterDoneTasksPipe,
   ],
   exports: [
     TaskComponent,
