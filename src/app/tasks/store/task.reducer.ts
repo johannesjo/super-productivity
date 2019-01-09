@@ -353,11 +353,12 @@ export function taskReducer(
       const {taskId, isShowLess, isEndless} = action.payload;
       const task = state.entities[taskId];
       const subTasks = task.subTaskIds.map(id => state.entities[id]);
-      const isDoneSubTask = subTasks.filter(t => t.isDone).length;
+      const doneTasksLength = subTasks.filter(t => t.isDone).length;
+      const isDoneTaskCaseNeeded = doneTasksLength && (doneTasksLength < subTasks.length);
       const oldVal = +task._showSubTasksMode;
       let newVal;
 
-      if (isDoneSubTask) {
+      if (isDoneTaskCaseNeeded) {
         newVal = oldVal + (isShowLess ? -1 : 1);
         if (isEndless) {
           if (newVal > SHOW_SUB_TASKS) {
