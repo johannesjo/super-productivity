@@ -1,9 +1,9 @@
 <div *ngIf="isHideDone && doneTasksLength"
      @expand
      class="done-task-box">
-  <button mat-raised-button
+  <button mat-button
           (click)="expandDoneTasks()">
-    + {{doneTasksLength}} done sub tasks tasks
+    <em>+ {{doneTasksLength}} done sub tasks</em>
     <mat-icon>expand_more</mat-icon>
   </button>
 </div>
