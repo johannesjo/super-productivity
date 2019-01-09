@@ -24,13 +24,14 @@ import { fadeAnimation } from '../../ui/animations/fade.ani';
 import { AttachmentService } from '../../attachment/attachment.service';
 import { IssueService } from '../../issue/issue.service';
 import { DialogEditAttachmentComponent } from '../../attachment/dialog-edit-attachment/dialog-edit-attachment.component';
+import { swirlAnimation } from '../../ui/animations/swirl-in-out.ani';
 
 @Component({
   selector: 'task',
   templateUrl: './task.component.html',
   styleUrls: ['./task.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  animations: [expandAnimation, fadeAnimation]
+  animations: [expandAnimation, fadeAnimation, swirlAnimation]
 })
 export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   @Input() task: TaskWithSubTasks;

@@ -510,7 +510,6 @@ input {
   }
 
   mat-icon {
-    animation: $transition-duration-m success-btn-ani linear;
     $this-size: 40px;
     font-size: $this-size;
     height: $this-size;
@@ -523,6 +522,10 @@ input {
   }
 
   &:hover {
+    mat-icon {
+      animation: $transition-duration-m success-btn-ani linear;
+    }
+
     .check {
       display: none;
     }
