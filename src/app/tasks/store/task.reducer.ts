@@ -1,6 +1,6 @@
 import { createEntityAdapter, EntityAdapter, EntityState } from '@ngrx/entity';
 import { TaskActions, TaskActionTypes } from './task.actions';
-import { DEFAULT_TASK, Task, TaskWithSubTasks, TimeSpentOnDay } from '../task.model';
+import { DEFAULT_TASK, HIDE_SUB_TASKS, SHOW_SUB_TASKS, Task, TaskWithSubTasks, TimeSpentOnDay } from '../task.model';
 import { calcTotalTimeSpent } from '../util/calc-total-time-spent';
 import { arrayMoveLeft, arrayMoveRight } from '../../core/util/array-move';
 import { AddAttachment, AttachmentActionTypes, DeleteAttachment } from '../../attachment/store/attachment.actions';
@@ -348,18 +348,49 @@ export function taskReducer(
       return taskAdapter.updateOne(action.payload.task, state);
     }
 
+    // TODO simplify
     case TaskActionTypes.ToggleTaskShowSubTasks: {
       const {taskId, isShowLess, isEndless} = action.payload;
       const task = state.entities[taskId];
-      let newVal = +task._showSubTasksMode + (isShowLess ? -1 : +1);
-      if (isEndless) {
-        newVal = (newVal > 2) ? 0 : newVal;
-        newVal = (newVal < 0) ? 2 : newVal;
+      const subTasks = task.subTaskIds.map(id => state.entities[id]);
+      const isDoneSubTask = subTasks.filter(t => t.isDone).length;
+      const oldVal = +task._showSubTasksMode;
+      let newVal;
+
+      if (isDoneSubTask) {
+        newVal = oldVal + (isShowLess ? -1 : 1);
+        if (isEndless) {
+          if (newVal > SHOW_SUB_TASKS) {
+            newVal = HIDE_SUB_TASKS;
+          } else if (newVal < HIDE_SUB_TASKS) {
+            newVal = SHOW_SUB_TASKS;
+          }
+        } else {
+          if (newVal > SHOW_SUB_TASKS) {
+            newVal = SHOW_SUB_TASKS;
+          }
+          if (newVal < HIDE_SUB_TASKS) {
+            newVal = HIDE_SUB_TASKS;
+          }
+        }
+
       } else {
-        newVal = (newVal > 2) ? 2 : newVal;
-        newVal = (newVal < 0) ? 0 : newVal;
+        if (isEndless) {
+          if (oldVal === SHOW_SUB_TASKS) {
+            newVal = HIDE_SUB_TASKS;
+          }
+          if (oldVal !== SHOW_SUB_TASKS) {
+            newVal = SHOW_SUB_TASKS;
+          }
+        } else {
+          newVal = (isShowLess)
+            ? HIDE_SUB_TASKS
+            : SHOW_SUB_TASKS;
+        }
       }
-      newVal = (isNaN(newVal)) ? 0 : newVal;
+
+      // failsafe
+      newVal = (isNaN(newVal)) ? HIDE_SUB_TASKS : newVal;
 
       return taskAdapter.updateOne({
         id: taskId,
