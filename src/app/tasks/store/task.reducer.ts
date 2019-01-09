@@ -348,6 +348,27 @@ export function taskReducer(
       return taskAdapter.updateOne(action.payload.task, state);
     }
 
+    case TaskActionTypes.ToggleTaskShowSubTasks: {
+      const {taskId, isShowLess, isEndless} = action.payload;
+      const task = state.entities[taskId];
+      let newVal = +task._showSubTasksMode + (isShowLess ? -1 : +1);
+      if (isEndless) {
+        newVal = (newVal > 2) ? 0 : newVal;
+        newVal = (newVal < 0) ? 2 : newVal;
+      } else {
+        newVal = (newVal > 2) ? 2 : newVal;
+        newVal = (newVal < 0) ? 0 : newVal;
+      }
+      console.log(newVal);
+
+      return taskAdapter.updateOne({
+        id: taskId,
+        changes: {
+          _showSubTasksMode: newVal
+        }
+      }, state);
+    }
+
     // TODO also delete related issue :(
     case TaskActionTypes.DeleteTask: {
       return deleteTask(state, action.payload.task);

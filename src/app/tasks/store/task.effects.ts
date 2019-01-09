@@ -68,6 +68,7 @@ export class TaskEffects {
     .pipe(
       ofType(
         TaskActionTypes.UpdateTaskUi,
+        TaskActionTypes.ToggleTaskShowSubTasks,
       ),
       withLatestFrom(
         this._store$.pipe(select(selectCurrentProjectId)),
@@ -156,7 +157,7 @@ export class TaskEffects {
 
           case TaskActionTypes.UpdateTask: {
             const {isDone} = (<UpdateTask>action).payload.task.changes;
-            const oldId = (<UpdateTask>action).payload.task.id ;
+            const oldId = (<UpdateTask>action).payload.task.id;
             const isCurrent = (oldId === currentId);
             nextId = (isDone && isCurrent) ? this.findNextTask(state, oldId) : 'NO_UPDATE';
             break;

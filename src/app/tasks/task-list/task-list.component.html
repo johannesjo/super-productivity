@@ -5,6 +5,7 @@
      [@standardList]="isBlockAni ? 'BLOCK' : tasks?.length"
      #listEl>
   <task *ngFor="let task of tasks; trackBy: trackByFn; let i = index;"
+        [class.isShrunk]="task.isDone && isHideDone"
         [task]="task"
         [focusIdList]="focusIdList">
   </task>

@@ -19,6 +19,7 @@ export class TaskListComponent implements OnDestroy, OnInit {
   @Input() focusIdList: string[];
   @Input() parentId: string;
   @Input() listId: string;
+  @Input() isHideDone: string;
   @Input() listModelId: string;
   @ViewChild('listEl') listEl;
   subs = new Subscription();

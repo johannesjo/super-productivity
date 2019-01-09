@@ -2,7 +2,7 @@ import shortid from 'shortid';
 import { debounceTime, delay, distinctUntilChanged, first, map, share, take, withLatestFrom } from 'rxjs/operators';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { DEFAULT_TASK, DropListModelSource, Task, TaskWithIssueData, TaskWithSubTasks } from './task.model';
+import { DEFAULT_TASK, DropListModelSource, HIDE_SUB_TASKS, SHOW_SUB_TASKS, Task, TaskWithIssueData, TaskWithSubTasks } from './task.model';
 import { select, Store } from '@ngrx/store';
 import {
   AddSubTask,
@@ -22,7 +22,7 @@ import {
   RestoreTask,
   SetCurrentTask,
   TaskActionTypes,
-  ToggleStart,
+  ToggleStart, ToggleTaskShowSubTasks,
   UnsetCurrentTask,
   UpdateTask,
   UpdateTaskUi
@@ -349,11 +349,15 @@ export class TaskService {
   }
 
   showSubTasks(id: string) {
-    this.updateUi(id, {_isHideSubTasks: false});
+    this.updateUi(id, {_showSubTasksMode: SHOW_SUB_TASKS});
+  }
+
+  toggleSubTaskMode(taskId: string, isShowLess = true, isEndless = false) {
+    this._store.dispatch(new ToggleTaskShowSubTasks({taskId, isShowLess, isEndless}));
   }
 
   hideSubTasks(id: string) {
-    this.updateUi(id, {_isHideSubTasks: true});
+    this.updateUi(id, {_showSubTasksMode: HIDE_SUB_TASKS});
   }
 
   focusInList(id: string, idList: string[], offset, isFocusReverseIfNotPossible) {
