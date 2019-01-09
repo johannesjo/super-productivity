@@ -4,7 +4,6 @@ const errorHandler = require('./error-handler');
 const BrowserWindow = electron.BrowserWindow;
 const path = require('path');
 const url = require('url');
-const open = require('open');
 let mainWin;
 let indicatorMod;
 
@@ -83,7 +82,7 @@ function initWinEventListeners(app, IS_MAC, nestedWinParams) {
   // open new window links in browser
   mainWin.webContents.on('new-window', function(event, url) {
     event.preventDefault();
-    open(url);
+    electron.shell.openItem(url);
   });
 
   mainWin.on('close', function(event) {
