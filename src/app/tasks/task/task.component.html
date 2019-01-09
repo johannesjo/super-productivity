@@ -112,7 +112,7 @@
               *ngIf="task.notes||task.issueData||task.attachmentIds?.length"
               [class.isActive]="task._isAdditionalInfoOpen"
               (click)="toggleShowAdditionalInfoOpen()">
-        <mat-icon >chat</mat-icon>
+        <mat-icon>chat</mat-icon>
       </button>
 
       <button mat-icon-button
@@ -239,9 +239,11 @@
             color=""
             tabindex="2"
             class="toggle-sub-tasks-btn ico-btn">
-      <mat-icon *ngIf="task._showSubTasksMode===0">add</mat-icon>
-      <mat-icon *ngIf="task._showSubTasksMode===1">explore</mat-icon>
-      <mat-icon *ngIf="task._showSubTasksMode===2">remove</mat-icon>
+      <mat-icon *ngIf="task._showSubTasksMode===0">add
+      </mat-icon>
+      <mat-icon *ngIf="task._showSubTasksMode!==0"
+                [class.isHideDoneTasks]="task._showSubTasksMode===1">remove
+      </mat-icon>
     </button>
     <task-list [tasks]="task.subTasks"
                listId="SUB"

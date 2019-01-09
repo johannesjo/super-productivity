@@ -453,6 +453,14 @@ input {
   min-height: 0;
   opacity: 1 !important;
   // overwrite ripple transparency
+
+  mat-icon {
+    transition: $transition-standard;
+
+    &.isHideDoneTasks {
+      transform: rotate(-45deg);
+    }
+  }
 }
 
 .drag-over-msg {
