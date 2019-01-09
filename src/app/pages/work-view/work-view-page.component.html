@@ -77,7 +77,6 @@
       <task-list [tasks]="taskService.undoneTasks$|async"
                  listId="PARENT"
                  listModelId="UNDONE"
-                 [focusIdList]="taskService.focusIdsForWorkView$|async"
                  [filterArgs]="{'isDone':false}"></task-list>
 
       <div *ngIf="!isPlanYourDay"
@@ -86,7 +85,6 @@
         <task-list [tasks]="taskService.doneTasks$|async"
                    listId="PARENT"
                    listModelId="DONE"
-                   [focusIdList]="taskService.focusIdsForWorkView$|async"
                    [filterArgs]="{'isDone':true}"></task-list>
         <div class="finish-day-button-wrapper">
           <button routerLink="/daily-summary"
@@ -133,7 +131,6 @@
         <task-list [tasks]="backlogTasks"
                    listId="PARENT"
                    listModelId="BACKLOG"
-                   [focusIdList]="taskService.focusIdsForBacklog$|async"
                    [filterArgs]="{'isDone':true}"></task-list>
       </div>
     </div>

@@ -34,7 +34,6 @@ import { DialogEditAttachmentComponent } from '../../attachment/dialog-edit-atta
 })
 export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   @Input() task: TaskWithSubTasks;
-  @Input() focusIdList: string[];
 
   // TODO also persist to task
   additionalTabsIndex = 0;
@@ -241,11 +240,25 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   focusPrevious(isFocusReverseIfNotPossible = false) {
-    this._taskService.focusPreviousInList(this.task.id, this.focusIdList, isFocusReverseIfNotPossible);
+    const taskEls = Array.from(document.querySelectorAll('task'));
+    const currentIndex = taskEls.findIndex(el => document.activeElement === el);
+    const prevEl = taskEls[currentIndex - 1] as HTMLElement;
+    if (prevEl) {
+      prevEl.focus();
+    } else if (isFocusReverseIfNotPossible) {
+      this.focusNext();
+    }
   }
 
   focusNext(isFocusReverseIfNotPossible = false) {
-    this._taskService.focusNextInList(this.task.id, this.focusIdList, isFocusReverseIfNotPossible);
+    const taskEls = Array.from(document.querySelectorAll('task'));
+    const currentIndex = taskEls.findIndex(el => document.activeElement === el);
+    const nextEl = taskEls[currentIndex + 1] as HTMLElement;
+    if (nextEl) {
+      nextEl.focus();
+    } else if (isFocusReverseIfNotPossible) {
+      this.focusPrevious();
+    }
   }
 
   focusSelf() {

@@ -22,7 +22,8 @@ import {
   RestoreTask,
   SetCurrentTask,
   TaskActionTypes,
-  ToggleStart, ToggleTaskShowSubTasks,
+  ToggleStart,
+  ToggleTaskShowSubTasks,
   UnsetCurrentTask,
   UpdateTask,
   UpdateTaskUi
@@ -39,8 +40,6 @@ import {
   selectCurrentTaskId,
   selectEstimateRemainingForBacklog,
   selectEstimateRemainingForToday,
-  selectFocusIdsForBacklog,
-  selectFocusIdsForWorkView,
   selectFocusTaskId,
   selectIsTriggerPlanningMode,
   selectTaskById,
@@ -95,14 +94,7 @@ export class TaskService {
     distinctUntilChanged(),
     // NOTE: we can't use share here, as we need the last emitted value
   );
-  focusIdsForWorkView$: Observable<string[]> = this._store.pipe(
-    select(selectFocusIdsForWorkView),
-    distinctUntilChanged(),
-  );
-  focusIdsForBacklog$: Observable<string[]> = this._store.pipe(
-    select(selectFocusIdsForBacklog),
-    distinctUntilChanged(),
-  );
+
 
   // META FIELDS
   // -----------

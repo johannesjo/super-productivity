@@ -15,7 +15,6 @@
      [@standardList]="isBlockAni ? 'BLOCK' : (isHideDone? undoneTasksLength : tasks_.length)"
      #listEl>
   <task *ngFor="let task of tasks_|filterDoneTasks:isHideDone; trackBy: trackByFn; let i = index;"
-        [task]="task"
-        [focusIdList]="focusIdList">
+        [task]="task">
   </task>
 </div>

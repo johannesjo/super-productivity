@@ -24,7 +24,6 @@ export class TaskListComponent implements OnDestroy, OnInit {
   tasks_: TaskWithSubTasks[];
 
   @Input() filterArgs: string;
-  @Input() focusIdList: string[];
   @Input() parentId: string;
   @Input() listId: string;
   @Input() isHideDone: string;

@@ -249,8 +249,7 @@
                [listModelId]="task.id"
                [parentId]="task.id"
                [@expand]
-               *ngIf="task._showSubTasksMode!==0"
-               [focusIdList]="focusIdList"></task-list>
+               *ngIf="task._showSubTasksMode!==0"></task-list>
   </div>
 
   <div class="bg-accent color-contrast drag-over-msg"
