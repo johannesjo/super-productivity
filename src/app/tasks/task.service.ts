@@ -352,29 +352,6 @@ export class TaskService {
     this.updateUi(id, {_showSubTasksMode: HIDE_SUB_TASKS});
   }
 
-  focusInList(id: string, idList: string[], offset, isFocusReverseIfNotPossible) {
-    const currentIndex = idList.indexOf(id);
-    if (idList[currentIndex + offset]) {
-      if (isFocusReverseIfNotPossible) {
-        if (idList[currentIndex + offset]) {
-          this.focusTask(idList[currentIndex + offset]);
-        } else {
-          this.focusTask(idList[currentIndex + (offset * -1)]);
-        }
-      } else {
-        this.focusTask(idList[currentIndex + offset]);
-      }
-    }
-  }
-
-  focusNextInList(id: string, idList: string[], isFocusReverseIfNotPossible) {
-    this.focusInList(id, idList, 1, isFocusReverseIfNotPossible);
-  }
-
-  focusPreviousInList(id: string, idList: string[], isFocusReverseIfNotPossible) {
-    this.focusInList(id, idList, -1, isFocusReverseIfNotPossible);
-  }
-
   private _createNewTask(title: string, additional: Partial<Task> = {}): Task {
     return this._shortSyntax({
       // NOTE needs to be created every time
