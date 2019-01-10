@@ -5,6 +5,15 @@
     <div class="form-wrapper">
       <mat-form-field>
         <input type="text"
+               [(ngModel)]="attachmentCopy.path"
+               name="path"
+               [placeholder]="mapTypeToLabel(attachmentCopy.type)"
+               matInput=""
+               required
+               tabindex="1">
+      </mat-form-field>
+      <mat-form-field>
+        <input type="text"
                [(ngModel)]="attachmentCopy.title"
                name="title"
                matInput=""
@@ -12,15 +21,6 @@
                autofocus="autofocus"
                tabindex="1"
                aria-label="Title">
-      </mat-form-field>
-      <mat-form-field>
-        <input type="text"
-               [(ngModel)]="attachmentCopy.path"
-               name="path"
-               [placeholder]="mapTypeToLabel(attachmentCopy.type)"
-               matInput=""
-               required
-               tabindex="1">
       </mat-form-field>
 
       <mat-form-field>
