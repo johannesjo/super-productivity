@@ -1,3 +1,29 @@
+## [0.1.8](https://github.com/johannesjo/sp2/compare/v0.1.7...v0.1.8) (2019-01-10)
+
+
+### Bug Fixes
+
+* **electron:** remove dbus related stuff for now ([8497d82](https://github.com/johannesjo/sp2/commit/8497d82))
+* possible wrong data crashing app ([b74c82a](https://github.com/johannesjo/sp2/commit/b74c82a))
+* **tasks:** remove animation for checkmark  when list is animating ([7fc20d7](https://github.com/johannesjo/sp2/commit/7fc20d7))
+
+
+### Features
+
+* **tasks:** just switch between show and hide when there are no done sub tasks ([f25e69c](https://github.com/johannesjo/sp2/commit/f25e69c))
+* improve default task model and task type to be more performant ([668e846](https://github.com/johannesjo/sp2/commit/668e846))
+* **tasks:** add icon change for hide done sub tasks ([1568ba0](https://github.com/johannesjo/sp2/commit/1568ba0))
+* **tasks:** also handle case when there are only done tasks ([e110f4e](https://github.com/johannesjo/sp2/commit/e110f4e))
+* **tasks:** improve task list animation ([5cbd5f7](https://github.com/johannesjo/sp2/commit/5cbd5f7))
+* **tasks:** increase animation speed for task list ([a1e6cb9](https://github.com/johannesjo/sp2/commit/a1e6cb9))
+* **tasks:** less aggressive focus style ([ade9335](https://github.com/johannesjo/sp2/commit/ade9335))
+* **tasks:** make collapsing sub tasks work ([61a0305](https://github.com/johannesjo/sp2/commit/61a0305))
+* **tasks:** prepare collapsing sub tasks ([40aeb1d](https://github.com/johannesjo/sp2/commit/40aeb1d))
+* **tasks:** restyle done tasks button ([90a4c47](https://github.com/johannesjo/sp2/commit/90a4c47))
+* **tasks:** simplify focusing tasks ([dbe4770](https://github.com/johannesjo/sp2/commit/dbe4770))
+
+
+
 ## [0.1.7](https://github.com/johannesjo/sp2/compare/v0.1.6...v0.1.7) (2019-01-09)
 
 
