@@ -94,15 +94,7 @@ export const selectEstimateRemainingForBacklog = createSelector(selectBacklogTas
 export const selectTotalTimeWorkedOnTodaysTasks = createSelector(selectTodaysTasksWithSubTasks, mapTotalTimeWorked);
 
 export const selectFocusTaskId = createSelector(selectTaskFeatureState, state => state.focusTaskId);
-export const selectFocusIdsForWorkView = createSelector(
-  selectTodaysUnDoneTasksWithSubTasks,
-  selectTodaysDoneTasksWithSubTasks,
-  (undoneTasks, doneTasks) => getFlatIdList([...undoneTasks, ...doneTasks])
-);
-export const selectFocusIdsForBacklog = createSelector(
-  selectBacklogTasksWithSubTasks,
-  (backlogTasks) => getFlatIdList(backlogTasks)
-);
+
 export const selectTasksWithMissingIssueData = createSelector(
   selectAllTasksWithIssueData,
   (tasks) => tasks && tasks

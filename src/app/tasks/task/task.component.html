@@ -14,9 +14,11 @@
             tabindex="2"
             aria-label="un-/mark as done">
       <mat-icon aria-label="Mark as undone"
+                @swirl
                 class="undo">undo
       </mat-icon>
       <mat-icon aria-label="Mark as done"
+                @swirl
                 class="check">check
       </mat-icon>
     </button>
@@ -112,7 +114,7 @@
               *ngIf="task.notes||task.issueData||task.attachmentIds?.length"
               [class.isActive]="task._isAdditionalInfoOpen"
               (click)="toggleShowAdditionalInfoOpen()">
-        <mat-icon >chat</mat-icon>
+        <mat-icon>chat</mat-icon>
       </button>
 
       <button mat-icon-button
@@ -234,21 +236,24 @@
 
   <div class="sub-tasks"
        *ngIf="task.subTasks && task.subTasks.length">
-    <button (click)="toggleHideSubTasks()"
+    <button (click)="toggleSubTaskMode()"
             mat-mini-fab=""
             color=""
             tabindex="2"
             class="toggle-sub-tasks-btn ico-btn">
-      <mat-icon *ngIf="task._isHideSubTasks">add</mat-icon>
-      <mat-icon *ngIf="!task._isHideSubTasks">remove</mat-icon>
+      <mat-icon *ngIf="task._showSubTasksMode===0">add
+      </mat-icon>
+      <mat-icon *ngIf="task._showSubTasksMode!==0"
+                [class.isHideDoneTasks]="task._showSubTasksMode===1">remove
+      </mat-icon>
     </button>
     <task-list [tasks]="task.subTasks"
                listId="SUB"
+               [isHideDone]="task._showSubTasksMode===1"
                [listModelId]="task.id"
                [parentId]="task.id"
                [@expand]
-               *ngIf="!task._isHideSubTasks"
-               [focusIdList]="focusIdList"></task-list>
+               *ngIf="task._showSubTasksMode!==0"></task-list>
   </div>
 
   <div class="bg-accent color-contrast drag-over-msg"

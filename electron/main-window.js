@@ -47,16 +47,21 @@ function createWindow(params) {
   } else {
     mainWin = new BrowserWindow({ width: 800, height: 600 });
     mainWin.loadURL(url.format({
-      pathname: path.join(__dirname, '../dist/index.html'),
+      pathname: path.normalize(path.join(__dirname, '../dist/index.html')),
       protocol: 'file:',
       slashes: true,
+      show: false,
       webPreferences: {
         scrollBounce: true
       },
-      icon: ICONS_FOLDER + '/app-icons/icon_256x256.png'
+      icon: ICONS_FOLDER + '/icon_256x256.png'
     }));
     // mainWin.webContents.openDevTools();
   }
+  // show gracefully
+  mainWin.once('ready-to-show', () => {
+    mainWin.show()
+  });
 
   initWinEventListeners(app, IS_MAC, nestedWinParams, indicatorMod);
 

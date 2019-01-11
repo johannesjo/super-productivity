@@ -1,15 +1,17 @@
 @import '../../../_variables.scss';
 
 :host {
+  //margin-bottom: -2px;
 }
 
 .wrapper {
-  margin: $s;
+  margin: $s $s*2 $s*2;
   border-radius: $card-border-radius;
   border-radius: 12px;
   border: 1px solid #dddddd;
   //background: #efefef;
   //background: #f2f2f2;
+  overflow: hidden;
 
   @include darkTheme {
     border-color: #333333;
@@ -17,6 +19,7 @@
 
   @media (max-width: $layout-xs) {
     margin: $s/2;
+    margin-bottom: $s;
   }
 }
 
@@ -29,11 +32,12 @@
 
 ::ng-deep .mat-tab-labels {
   justify-content: stretch;
+  user-select: none;
 }
 
-::ng-deep .mat-tab-label {
+::ng-deep .mat-tab-labels .mat-tab-label {
   flex-grow: 1;
-  height: 30px;
+  height: 46px;
 }
 
 .tab-label-text {

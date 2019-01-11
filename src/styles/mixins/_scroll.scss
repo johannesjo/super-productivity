@@ -1,56 +1,76 @@
 @import 'media-queries';
 
 @mixin scroll() {
-  overflow: auto;
   -webkit-overflow-scrolling: touch;
+  overflow: auto;
 
-  @include mq(xs) {
-    overflow: hidden;
+  @supports (overflow:overlay) {
+    @include mq(xs) {
+      overflow: hidden;
 
-    &:hover {
-      overflow: auto;
-      overflow: overlay;
+      &:hover {
+        overflow: auto;
+        overflow: overlay;
+      }
+
+      @-moz-document url-prefix() {
+        overflow: auto;
+      }
     }
   }
 }
 
 @mixin scrollY() {
-  overflow-y: scroll;
   -webkit-overflow-scrolling: touch;
+  overflow-y: scroll;
 
-  @include mq(xs) {
-    overflow-y: hidden;
+  @supports (overflow:overlay) {
+    @include mq(xs) {
+      overflow-y: hidden;
 
-    &:hover {
-      overflow-y: scroll;
-      overflow-y: overlay;
+      &:hover {
+        overflow-y: scroll;
+        overflow-y: overlay;
+      }
+
+      @-moz-document url-prefix() {
+        overflow: auto;
+      }
     }
   }
 }
 
 @mixin scrollYImportant() {
-  overflow-y: scroll !important;
   -webkit-overflow-scrolling: touch;
+  overflow-y: scroll !important;
 
-  @include mq(xs) {
-    overflow-y: hidden !important;
-    &:hover {
-      overflow-y: scroll !important;
-      overflow-y: overlay !important;
+  @supports (overflow:overlay) {
+    @include mq(xs) {
+      overflow-y: hidden !important;
+      &:hover {
+        overflow-y: scroll !important;
+        overflow-y: overlay !important;
+      }
+
+      @-moz-document url-prefix() {
+        overflow: auto;
+      }
     }
   }
 }
 
 @mixin scrollX() {
-  overflow-x: scroll;
   -webkit-overflow-scrolling: touch;
+  overflow-x: scroll;
 
-  @include mq(xs) {
-    overflow-x: hidden;
+  @supports (overflow:overlay) {
+    @include mq(xs) {
+      overflow-x: hidden;
 
-    &:hover {
-      overflow-x: scroll;
-      overflow-x: overlay;
+      &:hover {
+        overflow-x: scroll;
+        overflow-x: overlay;
+      }
     }
   }
 }

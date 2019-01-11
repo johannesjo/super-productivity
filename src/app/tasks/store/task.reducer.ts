@@ -1,6 +1,6 @@
 import { createEntityAdapter, EntityAdapter, EntityState } from '@ngrx/entity';
 import { TaskActions, TaskActionTypes } from './task.actions';
-import { DEFAULT_TASK, Task, TaskWithSubTasks, TimeSpentOnDay } from '../task.model';
+import { DEFAULT_TASK, HIDE_SUB_TASKS, SHOW_SUB_TASKS, Task, TaskWithSubTasks, TimeSpentOnDay } from '../task.model';
 import { calcTotalTimeSpent } from '../util/calc-total-time-spent';
 import { arrayMoveLeft, arrayMoveRight } from '../../core/util/array-move';
 import { AddAttachment, AttachmentActionTypes, DeleteAttachment } from '../../attachment/store/attachment.actions';
@@ -346,6 +346,59 @@ export function taskReducer(
 
     case TaskActionTypes.UpdateTaskUi: {
       return taskAdapter.updateOne(action.payload.task, state);
+    }
+
+    // TODO simplify
+    case TaskActionTypes.ToggleTaskShowSubTasks: {
+      const {taskId, isShowLess, isEndless} = action.payload;
+      const task = state.entities[taskId];
+      const subTasks = task.subTaskIds.map(id => state.entities[id]);
+      const doneTasksLength = subTasks.filter(t => t.isDone).length;
+      const isDoneTaskCaseNeeded = doneTasksLength && (doneTasksLength < subTasks.length);
+      const oldVal = +task._showSubTasksMode;
+      let newVal;
+
+      if (isDoneTaskCaseNeeded) {
+        newVal = oldVal + (isShowLess ? -1 : 1);
+        if (isEndless) {
+          if (newVal > SHOW_SUB_TASKS) {
+            newVal = HIDE_SUB_TASKS;
+          } else if (newVal < HIDE_SUB_TASKS) {
+            newVal = SHOW_SUB_TASKS;
+          }
+        } else {
+          if (newVal > SHOW_SUB_TASKS) {
+            newVal = SHOW_SUB_TASKS;
+          }
+          if (newVal < HIDE_SUB_TASKS) {
+            newVal = HIDE_SUB_TASKS;
+          }
+        }
+
+      } else {
+        if (isEndless) {
+          if (oldVal === SHOW_SUB_TASKS) {
+            newVal = HIDE_SUB_TASKS;
+          }
+          if (oldVal !== SHOW_SUB_TASKS) {
+            newVal = SHOW_SUB_TASKS;
+          }
+        } else {
+          newVal = (isShowLess)
+            ? HIDE_SUB_TASKS
+            : SHOW_SUB_TASKS;
+        }
+      }
+
+      // failsafe
+      newVal = (isNaN(newVal)) ? HIDE_SUB_TASKS : newVal;
+
+      return taskAdapter.updateOne({
+        id: taskId,
+        changes: {
+          _showSubTasksMode: newVal
+        }
+      }, state);
     }
 
     // TODO also delete related issue :(

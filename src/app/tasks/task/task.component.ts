@@ -13,7 +13,7 @@ import {
 } from '@angular/core';
 import { TaskService } from '../task.service';
 import { Subject } from 'rxjs';
-import { TaskWithSubTasks } from '../task.model';
+import { HIDE_SUB_TASKS, SHOW_SUB_TASKS, TaskWithSubTasks } from '../task.model';
 import { MatDialog } from '@angular/material';
 import { DialogTimeEstimateComponent } from '../dialogs/dialog-time-estimate/dialog-time-estimate.component';
 import { expandAnimation } from '../../ui/animations/expand.ani';
@@ -24,17 +24,17 @@ import { fadeAnimation } from '../../ui/animations/fade.ani';
 import { AttachmentService } from '../../attachment/attachment.service';
 import { IssueService } from '../../issue/issue.service';
 import { DialogEditAttachmentComponent } from '../../attachment/dialog-edit-attachment/dialog-edit-attachment.component';
+import { swirlAnimation } from '../../ui/animations/swirl-in-out.ani';
 
 @Component({
   selector: 'task',
   templateUrl: './task.component.html',
   styleUrls: ['./task.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  animations: [expandAnimation, fadeAnimation]
+  animations: [expandAnimation, fadeAnimation, swirlAnimation]
 })
 export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   @Input() task: TaskWithSubTasks;
-  @Input() focusIdList: string[];
 
   // TODO also persist to task
   additionalTabsIndex = 0;
@@ -235,19 +235,31 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     this.focusSelf();
   }
 
-  toggleHideSubTasks() {
-    this.task._isHideSubTasks
-      ? this._taskService.showSubTasks(this.task.id)
-      : this._taskService.hideSubTasks(this.task.id);
+  toggleSubTaskMode() {
+    this._taskService.toggleSubTaskMode(this.task.id, true, true);
     this.focusSelf();
   }
 
   focusPrevious(isFocusReverseIfNotPossible = false) {
-    this._taskService.focusPreviousInList(this.task.id, this.focusIdList, isFocusReverseIfNotPossible);
+    const taskEls = Array.from(document.querySelectorAll('task'));
+    const currentIndex = taskEls.findIndex(el => document.activeElement === el);
+    const prevEl = taskEls[currentIndex - 1] as HTMLElement;
+    if (prevEl) {
+      prevEl.focus();
+    } else if (isFocusReverseIfNotPossible) {
+      this.focusNext();
+    }
   }
 
   focusNext(isFocusReverseIfNotPossible = false) {
-    this._taskService.focusNextInList(this.task.id, this.focusIdList, isFocusReverseIfNotPossible);
+    const taskEls = Array.from(document.querySelectorAll('task'));
+    const currentIndex = taskEls.findIndex(el => document.activeElement === el);
+    const nextEl = taskEls[currentIndex + 1] as HTMLElement;
+    if (nextEl) {
+      nextEl.focus();
+    } else if (isFocusReverseIfNotPossible) {
+      this.focusPrevious();
+    }
   }
 
   focusSelf() {
@@ -340,30 +352,28 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     // expand sub tasks
     if ((ev.key === 'ArrowRight') || checkKeyCombo(ev, keys.expandSubTasks)) {
       if (this.task.subTasks && this.task.subTasks.length > 0) {
-        this._taskService.showSubTasks(this.task.id);
-      }
-      // if already opened or is sub task select next task
-      if ((this.task.subTasks && this.task.subTasks.length > 0 && this.task._isHideSubTasks === false)) {
-        this.focusNext();
+        if (this.task._showSubTasksMode !== SHOW_SUB_TASKS) {
+          this._taskService.toggleSubTaskMode(this.task.id, false, false);
+        } else {
+          this.focusNext();
+        }
       }
     }
 
     // collapse sub tasks
     if ((ev.key === 'ArrowLeft') || checkKeyCombo(ev, keys.collapseSubTasks)) {
-
       if (this.task.subTasks && this.task.subTasks.length > 0) {
-        this._taskService.hideSubTasks(this.task.id);
-      }
-      // if already collapsed
-      if (this.task._isHideSubTasks === true) {
-        if (this.task._isAdditionalInfoOpen) {
-          this.toggleShowAdditionalInfoOpen();
+        if (this.task._showSubTasksMode !== HIDE_SUB_TASKS) {
+          this._taskService.toggleSubTaskMode(this.task.id, true, false);
         } else {
           this.focusPrevious();
         }
-      }
-      if (this.task.parentId) {
-        this._taskService.focusTask(this.task.parentId);
+      } else {
+        if (this.task.parentId) {
+          this._taskService.focusTask(this.task.parentId);
+        } else {
+          this.focusPrevious();
+        }
       }
     }
 

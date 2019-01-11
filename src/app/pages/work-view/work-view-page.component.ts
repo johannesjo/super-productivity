@@ -5,10 +5,10 @@ import { LayoutService } from '../../core/layout/layout.service';
 import { DragulaService } from 'ng2-dragula';
 import { TakeABreakService } from '../../time-tracking/take-a-break/take-a-break.service';
 import { ActivatedRoute } from '@angular/router';
-import { Subscription } from 'rxjs';
+import { from, Subscription, timer, zip } from 'rxjs';
 import { TaskWithSubTasks } from '../../tasks/task.model';
 import { Actions } from '@ngrx/effects';
-import { skip, take, withLatestFrom } from 'rxjs/operators';
+import { map, skip, switchMap, take, withLatestFrom } from 'rxjs/operators';
 import { fadeAnimation } from '../../ui/animations/fade.ani';
 
 @Component({
@@ -26,7 +26,16 @@ export class WorkViewPageComponent implements OnInit, OnDestroy {
   // we do it here to have the tasks in memory all the time
   backlogTasks: TaskWithSubTasks[];
 
-  isTriggerSwitchListAni = false;
+  // NOTE: not perfect but good enough for now
+  isTriggerSwitchListAni$ = this.taskService.onTaskSwitchList$.pipe(
+    switchMap(() =>
+      zip(
+        from([true, false]),
+        timer(1, 200),
+      ),
+    ),
+    map(v => v[0]),
+  );
 
   private _subs = new Subscription();
   private _switchListAnimationTimeout: number;
@@ -40,6 +49,7 @@ export class WorkViewPageComponent implements OnInit, OnDestroy {
     private _actions$: Actions,
     private _cd: ChangeDetectorRef,
   ) {
+    this.isTriggerSwitchListAni$.subscribe(val => console.log(val));
   }
 
 
@@ -61,9 +71,6 @@ export class WorkViewPageComponent implements OnInit, OnDestroy {
     });
 
     this._subs.add(this.taskService.backlogTasks$.subscribe(tasks => this.backlogTasks = tasks));
-
-    // TODO fix detect changes error
-    this._subs.add(this.taskService.onTaskSwitchList$.subscribe(() => this._triggerTaskSwitchListAnimation()));
 
     this._subs.add(
       this.taskService.isTriggerPlanningMode$.pipe(
@@ -104,26 +111,13 @@ export class WorkViewPageComponent implements OnInit, OnDestroy {
 
   startWork() {
     this.isPlanYourDay = false;
-    this._subs.add(this.taskService.focusIdsForWorkView$
+    this._subs.add(this.taskService.startableTasks$
       .pipe(take(1))
-      .subscribe(ids => {
-        // this works because we set the current task
-        // to the parent tasks first subtask in the reducer
-        this.taskService.setCurrentId(ids[0]);
+      .subscribe(tasks => {
+        const nextTaskId = tasks && tasks[0] && tasks[0].id;
+        if (nextTaskId) {
+          this.taskService.setCurrentId(tasks && tasks[0] && tasks[0].id);
+        }
       }));
-  }
-
-  private _triggerTaskSwitchListAnimation() {
-    this.isTriggerSwitchListAni = true;
-    this._cd.detectChanges();
-
-    if (this._switchListAnimationTimeout) {
-      window.clearTimeout(this._switchListAnimationTimeout);
-    }
-
-    this._switchListAnimationTimeout = window.setTimeout(() => {
-      this.isTriggerSwitchListAni = false;
-      this._cd.detectChanges();
-    }, 300);
   }
 }

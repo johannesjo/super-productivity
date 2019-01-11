@@ -26,9 +26,8 @@
   ],
   "external": {
     "urls": [
-      {
-        "url": "https://fonts.googleapis.com/css?family=Roboto"
-      }
+      "https://fonts.googleapis.com/**",
+      "https://fonts.gstatic.com/**"
     ]
   }
 }

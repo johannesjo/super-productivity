@@ -59,7 +59,8 @@ $this-icon-default-opacity: 0.7;
     outline: none;
 
     > .inner-wrapper {
-      outline: 2px dashed $c-accent;
+      border: 1px solid $c-accent !important;
+      box-shadow: $whiteframe-shadow-5dp;
     }
   }
 
@@ -453,6 +454,14 @@ input {
   min-height: 0;
   opacity: 1 !important;
   // overwrite ripple transparency
+
+  mat-icon {
+    transition: $transition-standard;
+
+    &.isHideDoneTasks {
+      transform: rotate(-45deg);
+    }
+  }
 }
 
 .drag-over-msg {
@@ -501,7 +510,6 @@ input {
   }
 
   mat-icon {
-    animation: $transition-duration-m success-btn-ani linear;
     $this-size: 40px;
     font-size: $this-size;
     height: $this-size;
@@ -514,6 +522,10 @@ input {
   }
 
   &:hover {
+    mat-icon {
+      animation: $transition-duration-m success-btn-ani linear;
+    }
+
     .check {
       display: none;
     }

@@ -2,7 +2,7 @@ import shortid from 'shortid';
 import { debounceTime, delay, distinctUntilChanged, first, map, share, take, withLatestFrom } from 'rxjs/operators';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { DEFAULT_TASK, DropListModelSource, Task, TaskWithIssueData, TaskWithSubTasks } from './task.model';
+import { DEFAULT_TASK, DropListModelSource, HIDE_SUB_TASKS, SHOW_SUB_TASKS, Task, TaskWithIssueData, TaskWithSubTasks } from './task.model';
 import { select, Store } from '@ngrx/store';
 import {
   AddSubTask,
@@ -23,6 +23,7 @@ import {
   SetCurrentTask,
   TaskActionTypes,
   ToggleStart,
+  ToggleTaskShowSubTasks,
   UnsetCurrentTask,
   UpdateTask,
   UpdateTaskUi
@@ -39,8 +40,6 @@ import {
   selectCurrentTaskId,
   selectEstimateRemainingForBacklog,
   selectEstimateRemainingForToday,
-  selectFocusIdsForBacklog,
-  selectFocusIdsForWorkView,
   selectFocusTaskId,
   selectIsTriggerPlanningMode,
   selectTaskById,
@@ -95,14 +94,7 @@ export class TaskService {
     distinctUntilChanged(),
     // NOTE: we can't use share here, as we need the last emitted value
   );
-  focusIdsForWorkView$: Observable<string[]> = this._store.pipe(
-    select(selectFocusIdsForWorkView),
-    distinctUntilChanged(),
-  );
-  focusIdsForBacklog$: Observable<string[]> = this._store.pipe(
-    select(selectFocusIdsForBacklog),
-    distinctUntilChanged(),
-  );
+
 
   // META FIELDS
   // -----------
@@ -349,34 +341,15 @@ export class TaskService {
   }
 
   showSubTasks(id: string) {
-    this.updateUi(id, {_isHideSubTasks: false});
+    this.updateUi(id, {_showSubTasksMode: SHOW_SUB_TASKS});
+  }
+
+  toggleSubTaskMode(taskId: string, isShowLess = true, isEndless = false) {
+    this._store.dispatch(new ToggleTaskShowSubTasks({taskId, isShowLess, isEndless}));
   }
 
   hideSubTasks(id: string) {
-    this.updateUi(id, {_isHideSubTasks: true});
-  }
-
-  focusInList(id: string, idList: string[], offset, isFocusReverseIfNotPossible) {
-    const currentIndex = idList.indexOf(id);
-    if (idList[currentIndex + offset]) {
-      if (isFocusReverseIfNotPossible) {
-        if (idList[currentIndex + offset]) {
-          this.focusTask(idList[currentIndex + offset]);
-        } else {
-          this.focusTask(idList[currentIndex + (offset * -1)]);
-        }
-      } else {
-        this.focusTask(idList[currentIndex + offset]);
-      }
-    }
-  }
-
-  focusNextInList(id: string, idList: string[], isFocusReverseIfNotPossible) {
-    this.focusInList(id, idList, 1, isFocusReverseIfNotPossible);
-  }
-
-  focusPreviousInList(id: string, idList: string[], isFocusReverseIfNotPossible) {
-    this.focusInList(id, idList, -1, isFocusReverseIfNotPossible);
+    this.updateUi(id, {_showSubTasksMode: HIDE_SUB_TASKS});
   }
 
   private _createNewTask(title: string, additional: Partial<Task> = {}): Task {
