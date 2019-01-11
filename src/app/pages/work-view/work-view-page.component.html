@@ -102,7 +102,7 @@
        #splitBottomEl>
     <split [containerEl]="containerEl"
            [splitPos]="splitInputPos"
-           [isAnimateBtn]="isTriggerSwitchListAni"
+           [isAnimateBtn]="isTriggerSwitchListAni$|async"
            [counter]="(taskService.backlogTasks$|async)?.length"
            [splitTopEl]="splitTopEl"
            [splitBottomEl]="splitBottomEl"
@@ -127,7 +127,7 @@
       </header>
 
       <div class="component-wrapper page-wrapper">
-        <h2 class="mat-h2 backlog-heading">Backlog</h2>
+        <h2 class="mat-h2 backlog-heading">Backlog  {{isTriggerSwitchListAni$|async}}</h2>
         <task-list [tasks]="backlogTasks"
                    listId="PARENT"
                    listModelId="BACKLOG"
