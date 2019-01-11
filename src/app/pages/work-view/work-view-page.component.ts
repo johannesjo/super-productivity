@@ -49,7 +49,6 @@ export class WorkViewPageComponent implements OnInit, OnDestroy {
     private _actions$: Actions,
     private _cd: ChangeDetectorRef,
   ) {
-    this.isTriggerSwitchListAni$.subscribe(val => console.log(val));
   }
 
 
