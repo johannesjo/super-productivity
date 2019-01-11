@@ -250,10 +250,11 @@
     <task-list [tasks]="task.subTasks"
                listId="SUB"
                [isHideDone]="task._showSubTasksMode===1"
+               [isHideAll]="task._showSubTasksMode!==2"
                [listModelId]="task.id"
                [parentId]="task.id"
                [@expand]
-               *ngIf="task._showSubTasksMode!==0"></task-list>
+               *ngIf="task.subTasks?.length"></task-list>
   </div>
 
   <div class="bg-accent color-contrast drag-over-msg"

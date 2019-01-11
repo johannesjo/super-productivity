@@ -6,9 +6,9 @@ import { TaskWithSubTasks } from './task.model';
 })
 export class FilterDoneTasksPipe implements PipeTransform {
 
-  transform(tasks: TaskWithSubTasks[], isFilter: boolean): any {
-    return isFilter
+  transform(tasks: TaskWithSubTasks[], isFilterDone: boolean, isFilterAll: boolean): any {
+    return isFilterDone
       ? tasks.filter(task => !task.isDone)
-      : tasks;
+      : isFilterAll ? [] : tasks;
   }
 }

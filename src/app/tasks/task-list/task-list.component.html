@@ -1,9 +1,9 @@
-<div *ngIf="isHideDone && doneTasksLength"
+<div *ngIf="isHideDone || isHideAll"
      @expand
      class="done-task-box">
   <button mat-button
           (click)="expandDoneTasks()">
-    <em>+ {{doneTasksLength}} done sub tasks</em>
+    <em>+ {{isHideDone? doneTasksLength + ' done ': allTasksLength}} sub tasks</em>
     <mat-icon>expand_more</mat-icon>
   </button>
 </div>
@@ -12,9 +12,9 @@
      [dragula]="listId"
      [dragulaModel]="tasks_"
      [attr.data-id]="listModelId"
-     [@standardList]="isBlockAni ? 'BLOCK' : (isHideDone? undoneTasksLength : tasks_.length)"
+     [@standardList]="isBlockAni ? 'BLOCK' : (isHideDone? undoneTasksLength : (isHideAll ? 0 : allTasksLength))"
      #listEl>
-  <task *ngFor="let task of tasks_|filterDoneTasks:isHideDone; trackBy: trackByFn; let i = index;"
+  <task *ngFor="let task of tasks_|filterDoneTasks:isHideDone:isHideAll; trackBy: trackByFn; let i = index;"
         [task]="task">
   </task>
 </div>

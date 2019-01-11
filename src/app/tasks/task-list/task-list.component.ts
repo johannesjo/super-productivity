@@ -18,6 +18,7 @@ export class TaskListComponent implements OnDestroy, OnInit {
   @Input() set tasks(tasks: TaskWithSubTasks[]) {
     this.tasks_ = tasks;
     this.doneTasksLength = this.tasks_.filter(task => task.isDone).length;
+    this.allTasksLength = this.tasks_.length;
     this.undoneTasksLength = this.tasks_.length - this.doneTasksLength;
   }
 
@@ -26,13 +27,15 @@ export class TaskListComponent implements OnDestroy, OnInit {
   @Input() filterArgs: string;
   @Input() parentId: string;
   @Input() listId: string;
-  @Input() isHideDone: string;
+  @Input() isHideDone: boolean;
+  @Input() isHideAll: boolean;
   @Input() listModelId: string;
   @ViewChild('listEl') listEl;
   subs = new Subscription();
   isBlockAni = true;
   doneTasksLength = 0;
   undoneTasksLength = 0;
+  allTasksLength = 0;
 
   private _blockAnimationTimeout: number;
 
