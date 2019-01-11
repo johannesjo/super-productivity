@@ -50,6 +50,7 @@ function createWindow(params) {
       pathname: path.join(__dirname, '../dist/index.html'),
       protocol: 'file:',
       slashes: true,
+      show: false,
       webPreferences: {
         scrollBounce: true
       },
@@ -57,6 +58,10 @@ function createWindow(params) {
     }));
     // mainWin.webContents.openDevTools();
   }
+  // show gracefully
+  mainWin.once('ready-to-show', () => {
+    mainWin.show()
+  });
 
   initWinEventListeners(app, IS_MAC, nestedWinParams, indicatorMod);
 
