@@ -1,3 +1,29 @@
+## [0.1.10](https://github.com/johannesjo/sp2/compare/v0.1.9...v0.1.10) (2019-01-11)
+
+
+### Bug Fixes
+
+* task list switch animation leading to errors sometimes ([8ed8d10](https://github.com/johannesjo/sp2/commit/8ed8d10))
+
+
+### Features
+
+* **electron:** disable reload shortcut for production build ([b2c4ab0](https://github.com/johannesjo/sp2/commit/b2c4ab0))
+* **electron:** show win gracefully ([a3734ba](https://github.com/johannesjo/sp2/commit/a3734ba))
+* **tasks:** change order for add attachment dialog ([77141bb](https://github.com/johannesjo/sp2/commit/77141bb))
+* **tasks:** improve additional notes styling ([ea8f678](https://github.com/johannesjo/sp2/commit/ea8f678))
+* **tasks:** improve done task box styling ([c7c2f96](https://github.com/johannesjo/sp2/commit/c7c2f96))
+* add icons ([15eb3a7](https://github.com/johannesjo/sp2/commit/15eb3a7))
+* cache all google fonts ([431dc0b](https://github.com/johannesjo/sp2/commit/431dc0b))
+* improve hide sub tasks animation ([7c0bd9a](https://github.com/johannesjo/sp2/commit/7c0bd9a))
+* only add overlay scrollbars to browsers that support them ([d1c4454](https://github.com/johannesjo/sp2/commit/d1c4454))
+
+
+
+## [0.1.8](https://github.com/johannesjo/sp2/compare/v0.1.7...v0.1.8) (2019-01-09)
+
+
+
 ## [0.1.9](https://github.com/johannesjo/sp2/compare/v0.1.7...v0.1.9) (2019-01-10)
 
 
