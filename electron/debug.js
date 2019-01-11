@@ -68,7 +68,7 @@ const addExtensionIfInstalled = (name, getPath) => {
   }
 };
 
-module.exports = opts => {
+module.exports = (opts, isAddReload) => {
   opts = Object.assign({
     enabled: null,
     showDevTools: true,
@@ -108,8 +108,10 @@ module.exports = opts => {
     localShortcut.register(isMacOS ? 'Cmd+Alt+I' : 'Ctrl+Shift+I', devTools);
     localShortcut.register('F12', devTools);
 
-    localShortcut.register('CmdOrCtrl+R', refresh);
-    localShortcut.register('F5', refresh);
+    if (isAddReload) {
+      localShortcut.register('CmdOrCtrl+R', refresh);
+      localShortcut.register('F5', refresh);
+    }
   });
 };
 

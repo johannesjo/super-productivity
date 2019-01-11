@@ -47,7 +47,7 @@ function createWindow(params) {
   } else {
     mainWin = new BrowserWindow({ width: 800, height: 600 });
     mainWin.loadURL(url.format({
-      pathname: path.join(__dirname, '../dist/index.html'),
+      pathname: path.normalize(path.join(__dirname, '../dist/index.html')),
       protocol: 'file:',
       slashes: true,
       show: false,
