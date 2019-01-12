@@ -16,9 +16,7 @@ import { TakeABreakService } from './take-a-break/take-a-break.service';
 const DEFAULT_MIN_IDLE_TIME = 60000;
 const IDLE_POLL_INTERVAL = 1000;
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable()
 export class IdleService {
   public isIdle = false;
 

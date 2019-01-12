@@ -5,9 +5,7 @@ import { map, share } from 'rxjs/operators';
 import { Tick } from './time-tracking';
 import { getWorklogStr } from '../../util/get-work-log-str';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable()
 export class TimeTrackingService {
   private _currentTrackingStart: number;
   public tick$: Observable<Tick> = interval(TRACKING_INTERVAL).pipe(

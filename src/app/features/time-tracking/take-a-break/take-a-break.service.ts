@@ -20,9 +20,7 @@ const createReduceTimeWorked = (obj, key) => {
   };
 };
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable()
 export class TakeABreakService {
   /* tslint:disable*/
   private _breakDuration$: Observable<number> = this._timeTrackingService.tick$.pipe(

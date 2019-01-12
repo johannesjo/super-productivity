@@ -6,9 +6,7 @@ import { PomodoroConfig } from '../config/config.model';
 import { DEFAULT_CFG } from '../config/default-config.const';
 import { TimeTrackingService } from '../time-tracking/time-tracking.service';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable()
 export class PomodoroService {
   cfg$: Observable<PomodoroConfig> = this._configService.cfg$.pipe(map(cfg => cfg && cfg.pomodoro));
   duration$ = this.cfg$.pipe(map(cfg => cfg.duration));
