@@ -17,7 +17,7 @@
      align="center">
   <button mat-raised-button
           color="primary"
-          (click)="finishBreak()">
+          (click)="skipBreak()">
     <mat-icon>skip_next</mat-icon>
     <span *ngIf="!(isBreakDone$|async)">But I want to work (skip break)!!</span>
     <span *ngIf="(isBreakDone$|async)">Go back to work!</span>

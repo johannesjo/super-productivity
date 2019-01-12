@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { MatDialogRef } from '@angular/material';
 import { PomodoroService } from '../pomodoro.service';
-import { map, takeUntil } from 'rxjs/operators';
+import { filter, map, mapTo, skip, takeUntil, withLatestFrom } from 'rxjs/operators';
 import { Observable, Subject, Subscription } from 'rxjs';
 
 @Component({
@@ -12,9 +12,17 @@ import { Observable, Subject, Subscription } from 'rxjs';
 })
 export class DialogPomodoroBreakComponent {
   isStopCurrentTime$ = new Subject();
-  currentTime$: Observable<number> = this.pomodoroService.currentSessionTime$.pipe(takeUntil(this.isStopCurrentTime$));
+  currentTime$: Observable<number> = this.pomodoroService.currentSessionTime$.pipe(
+    takeUntil(this.isStopCurrentTime$),
+  );
   isBreakDone$ = this.pomodoroService.isBreak$.pipe(map(v => !v));
   currentCycle$ = this.pomodoroService.currentCycle$;
+
+  private isCloseDialog$: Observable<boolean> = this.pomodoroService.isBreak$.pipe(
+    withLatestFrom(this.pomodoroService.cfg$),
+    filter(([isBreak, cfg]) => !cfg.isManualContinue && !isBreak),
+    mapTo(true),
+  );
   private _subs = new Subscription();
 
   constructor(
@@ -26,8 +34,11 @@ export class DialogPomodoroBreakComponent {
     this._subs.add(this.pomodoroService.isBreak$.subscribe((isBreak) => {
       if (!isBreak) {
         this.isStopCurrentTime$.next(true);
-        this.close();
       }
+    }));
+    this._subs.add(this.isCloseDialog$.subscribe(() => {
+      console.log('CLOSE');
+      this.close();
     }));
   }
 
@@ -35,9 +46,9 @@ export class DialogPomodoroBreakComponent {
     this._matDialogRef.close(null);
   }
 
-  finishBreak() {
+  skipBreak() {
     this.isStopCurrentTime$.next(true);
-    this.pomodoroService.skipBreak();
+    this.pomodoroService.finishPomodoroSession();
     this.close();
   }
 }

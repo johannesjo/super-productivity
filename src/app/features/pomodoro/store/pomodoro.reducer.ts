@@ -45,16 +45,7 @@ export function pomodoroReducer(state = initialPomodoroState, action: PomodoroAc
       };
     }
 
-    case  PomodoroActionTypes.SkipPomodoroBreak: {
-      return {
-        ...state,
-        isBreak: false,
-      };
-    }
-
     case  PomodoroActionTypes.FinishPomodoroSession: {
-      console.log('FINISH SESSION REDUCER');
-
       return {
         ...state,
         isBreak: !state.isBreak,

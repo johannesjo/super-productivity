@@ -5,7 +5,7 @@ import { filter, map, mapTo, scan, shareReplay, withLatestFrom } from 'rxjs/oper
 import { PomodoroConfig } from '../config/config.model';
 import { TimeTrackingService } from '../time-tracking/time-tracking.service';
 import { select, Store } from '@ngrx/store';
-import { FinishPomodoroSession, PausePomodoro, SkipPomodoroBreak, StartPomodoro, StopPomodoro } from './store/pomodoro.actions';
+import { FinishPomodoroSession, PausePomodoro, StartPomodoro, StopPomodoro } from './store/pomodoro.actions';
 import { selectCurrentCycle, selectIsBreak, selectIsManualPause } from './store/pomodoro.reducer';
 
 // Tick Duration
@@ -35,8 +35,8 @@ export class PomodoroService {
     this.isLongBreak$,
   ).pipe(map(([isBreak, isLongBreak]) => isBreak && !isLongBreak));
 
-  startTimer$ = this._timeTrackingService.globalInterval$;
-  tick$ = this.startTimer$.pipe(
+  timer$ = this._timeTrackingService.globalInterval$;
+  tick$ = this.timer$.pipe(
     withLatestFrom(this.isManualPause$),
     filter(([v, isManualPause]) => !isManualPause),
     mapTo(TD),
@@ -49,7 +49,7 @@ export class PomodoroService {
       this.cfg$
     ),
     map(([isBreak, isLong, isShort, cfg]) => {
-      return isBreak ? (isLong ? 20000 : 5000) : 10000;
+      return isBreak ? (isLong ? 20000 : 3000) : 5000;
       // if (!isBreak) {
       // return cfg.duration || DEFAULT_CFG.pomodoro.duration;
       // } else if (isShort) {
@@ -70,6 +70,7 @@ export class PomodoroService {
         ? acc + value
         : value;
     }),
+    shareReplay(),
   );
 
   sessionProgress$: Observable<number> = this.currentSessionTime$.pipe(
@@ -86,16 +87,20 @@ export class PomodoroService {
     private _timeTrackingService: TimeTrackingService,
   ) {
     this.currentSessionTime$
-      .pipe(withLatestFrom(this.cfg$))
+      .pipe(
+        filter(val => val === 0),
+        withLatestFrom(this.cfg$),
+      )
       .subscribe(([val, cfg]) => {
-        // TODO manual continue
-        if (val === 0) {
+        if (cfg.isManualContinue) {
+          this.pause();
+        } else {
           this.finishPomodoroSession();
         }
       });
 
-    this.isBreak$.subscribe(val => console.log(val));
-    this.sessionProgress$.subscribe(val => console.log(val));
+    // this.isBreak$.subscribe(val => console.log(val));
+    // this.sessionProgress$.subscribe(val => console.log(val));
   }
 
   start() {
@@ -108,10 +113,6 @@ export class PomodoroService {
 
   stop() {
     this._store$.dispatch(new StopPomodoro());
-  }
-
-  skipBreak() {
-    this._store$.dispatch(new SkipPomodoroBreak());
   }
 
   finishPomodoroSession() {
