@@ -24,6 +24,7 @@ import { TimeTrackingModule } from './features/time-tracking/time-tracking.modul
 import { BookmarkModule } from './features/bookmark/bookmark.module';
 import { NoteModule } from './features/note/note.module';
 import { ReminderModule } from './features/reminder/reminder.module';
+import { CoreUiModule } from './core-ui/core-ui.module';
 
 @NgModule({
   declarations: [
@@ -33,6 +34,7 @@ import { ReminderModule } from './features/reminder/reminder.module';
     // Local
     UiModule,
     CoreModule,
+    CoreUiModule,
     PagesModule,
     MainHeaderModule,
     BookmarkModule,
