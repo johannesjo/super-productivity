@@ -85,12 +85,14 @@ export class PomodoroService {
     private _store$: Store<any>,
     private _timeTrackingService: TimeTrackingService,
   ) {
-    this.currentSessionTime$.subscribe((val) => {
-      // console.log(val);
-      if (val === 0) {
-        this.finishPomodoroSession();
-      }
-    });
+    this.currentSessionTime$
+      .pipe(withLatestFrom(this.cfg$))
+      .subscribe(([val, cfg]) => {
+        // TODO manual continue
+        if (val === 0) {
+          this.finishPomodoroSession();
+        }
+      });
 
     this.isBreak$.subscribe(val => console.log(val));
     this.sessionProgress$.subscribe(val => console.log(val));

@@ -4,7 +4,9 @@ import { SetCurrentTask, TaskActionTypes } from '../../tasks/store/task.actions'
 import { filter, map, tap, withLatestFrom } from 'rxjs/operators';
 import { PomodoroService } from '../pomodoro.service';
 import { PomodoroConfig } from '../../config/config.model';
-import { PausePomodoro, PomodoroActionTypes, StartPomodoro } from './pomodoro.actions';
+import { FinishPomodoroSession, PausePomodoro, PomodoroActionTypes, StartPomodoro } from './pomodoro.actions';
+import { MatDialog } from '@angular/material';
+import { DialogPomodoroBreakComponent } from '../dialog-pomodoro-break/dialog-pomodoro-break.component';
 
 @Injectable()
 export class PomodoroEffects {
@@ -26,9 +28,23 @@ export class PomodoroEffects {
     }),
   );
 
+  @Effect({dispatch: false})
+  openBreakDialog = this._actions$.pipe(
+    ofType(PomodoroActionTypes.FinishPomodoroSession),
+    withLatestFrom(
+      this._pomodoroService.isBreak$,
+    ),
+    tap(([action, isBreak]: [FinishPomodoroSession, boolean]) => {
+      if (isBreak) {
+        this._matDialog.open(DialogPomodoroBreakComponent);
+      }
+    }),
+  );
+
   constructor(
     private _pomodoroService: PomodoroService,
     private _actions$: Actions,
+    private _matDialog: MatDialog,
   ) {
   }
 }

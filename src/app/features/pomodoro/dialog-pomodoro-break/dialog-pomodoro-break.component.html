@@ -1,0 +1,25 @@
+<div mat-dialog-content>
+  <div *ngIf="!(isBreakDone$|async)">
+    <p>You successfully finished session
+      <strong>{{(pomodoroService.currentCycle$|async) + 1}}</strong>! Enjoy yourself, get yourself moving, come back in:
+    </p>
+  </div>
+
+  <div *ngIf="(isBreakDone$|async)">
+    <p>Your break is done!</p>
+  </div>
+
+  <div class="timer">{{pomodoroService.currentSessionTime$|async|msToMinuteClockString}}</div>
+</div>
+
+
+<div mat-dialog-actions
+     align="center">
+  <button mat-raised-button
+          color="primary"
+          (click)="finishBreak()">
+    <mat-icon>skip_next</mat-icon>
+    <span *ngIf="!(isBreakDone$|async)">But I want to work (skip break)!!</span>
+    <span *ngIf="(isBreakDone$|async)">Go back to work!</span>
+  </button>
+</div>
