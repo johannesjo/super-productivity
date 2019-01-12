@@ -15,6 +15,7 @@ import { ConfigFormSection, ConfigSectionKey } from '../config.model';
 import { ProjectCfgFormKey } from '../../project/project.model';
 import { GoogleSyncCfgComponent } from '../../google/google-sync-cfg/google-sync-cfg.component';
 import { JiraCfgComponent } from '../../issue/jira/jira-cfg/jira-cfg.component';
+import { FileImexComponent } from '../../../imex/file-imex/file-imex.component';
 
 @Component({
   selector: 'config-section',
@@ -52,6 +53,11 @@ export class ConfigSectionComponent implements OnInit {
     let componentToRender;
 
     switch (customSection) {
+      case 'FILE_IMPORT_EXPORT':
+        componentToRender = FileImexComponent;
+        break;
+
+
       case 'GOOGLE_SYNC':
         componentToRender = GoogleSyncCfgComponent;
         break;
@@ -73,10 +79,12 @@ export class ConfigSectionComponent implements OnInit {
 
       ref.instance.section = this.section;
 
-      ref.instance.save.subscribe(v => {
-        this.onSave(v);
-        this._cd.detectChanges();
-      });
+      if (ref.instance.save) {
+        ref.instance.save.subscribe(v => {
+          this.onSave(v);
+          this._cd.detectChanges();
+        });
+      }
     }
   }
 }

@@ -100,7 +100,7 @@ export type GlobalConfig = Readonly<{
 }>;
 
 
-export type ConfigSectionKey = keyof GlobalConfig;
+export type ConfigSectionKey = keyof GlobalConfig | 'EMPTY';
 
 export type SectionConfig
   = MiscConfig

@@ -13,6 +13,7 @@ import { ConfigService } from './config.service';
 import { UiModule } from '../../ui/ui.module';
 import { KeyboardInputComponent } from './keyboard-input/keyboard-input.component';
 import { GoogleSyncCfgComponent } from '../google/google-sync-cfg/google-sync-cfg.component';
+import { FileImexModule } from '../../imex/file-imex/file-imex.module';
 
 @NgModule({
   imports: [
@@ -30,7 +31,8 @@ import { GoogleSyncCfgComponent } from '../google/google-sync-cfg/google-sync-cf
     FormlyMaterialModule,
     CommonModule,
     StoreModule.forFeature(CONFIG_FEATURE_NAME, configReducer),
-    EffectsModule.forFeature([ConfigEffects])
+    EffectsModule.forFeature([ConfigEffects]),
+    FileImexModule,
   ],
   declarations: [
     GoogleSyncCfgComponent,

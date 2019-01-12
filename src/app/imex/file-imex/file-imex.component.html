@@ -1,0 +1,22 @@
+<a mat-raised-button
+   color="primary"
+   #exportDataBtn
+   (click)="downloadBackup()">
+  <mat-icon>file_download</mat-icon>
+  Export Data
+</a>
+
+<section>
+  <h3>Copy the Data you want to import here</h3>
+  <form name="importForm"
+        (submit)="importData()">
+    <textarea class="import-text-area"
+              name="importDataString"
+              [(ngModel)]="importDataString"></textarea>
+    <button mat-raised-button
+            color="primary">
+      <mat-icon>file_upload</mat-icon>
+      Import Data
+    </button>
+  </form>
+</section>
