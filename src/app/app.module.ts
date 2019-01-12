@@ -45,6 +45,7 @@ import { MigrateModule } from './imex/migrate/migrate.module';
     NoteModule,
     ReminderModule,
     MigrateModule,
+    CoreUiModule,
 
     // External
     BrowserModule,

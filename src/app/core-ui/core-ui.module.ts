@@ -12,10 +12,11 @@ import { ShortcutModule } from './shortcut/shortcut.module';
     MainHeaderModule,
     ShortcutModule,
   ],
-  exports:[
+  exports: [
     LayoutModule,
     MainHeaderModule,
     ShortcutModule,
-  ]
+  ],
 })
-export class CoreUiModule { }
+export class CoreUiModule {
+}

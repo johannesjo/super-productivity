@@ -11,9 +11,7 @@ import { Observable } from 'rxjs';
 import { select, Store } from '@ngrx/store';
 import { LayoutState, selectIsShowAddTaskBar, selectIsShowBookmarkBar } from './store/layout.reducer';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable()
 export class LayoutService {
   isShowAddTaskBar$: Observable<boolean> = this._store$.pipe(select(selectIsShowAddTaskBar));
   xxxxisShowBookmarkBar$: Observable<boolean> = this._store$.pipe(select(selectIsShowBookmarkBar));

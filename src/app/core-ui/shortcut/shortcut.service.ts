@@ -13,9 +13,7 @@ import { DialogAddNoteComponent } from '../../features/note/dialog-add-note/dial
 import { BookmarkService } from '../../features/bookmark/bookmark.service';
 
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable()
 export class ShortcutService {
   backlogPos: number;
 
