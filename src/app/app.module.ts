@@ -25,6 +25,7 @@ import { BookmarkModule } from './features/bookmark/bookmark.module';
 import { NoteModule } from './features/note/note.module';
 import { ReminderModule } from './features/reminder/reminder.module';
 import { CoreUiModule } from './core-ui/core-ui.module';
+import { MigrateModule } from './imex/migrate/migrate.module';
 
 @NgModule({
   declarations: [
@@ -43,6 +44,7 @@ import { CoreUiModule } from './core-ui/core-ui.module';
     TimeTrackingModule,
     NoteModule,
     ReminderModule,
+    MigrateModule,
 
     // External
     BrowserModule,

@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DialogMigrateComponent } from './dialog-migrate/dialog-migrate.component';
 import { UiModule } from '../../ui/ui.module';
+import { MigrateService } from './migrate.service';
 
 @NgModule({
   declarations: [DialogMigrateComponent],
@@ -9,7 +10,8 @@ import { UiModule } from '../../ui/ui.module';
     UiModule,
     CommonModule
   ],
-  entryComponents: [DialogMigrateComponent]
+  entryComponents: [DialogMigrateComponent],
+  providers: [MigrateService],
 })
 export class MigrateModule {
 }

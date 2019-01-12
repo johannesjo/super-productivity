@@ -2,9 +2,7 @@ import { Injectable } from '@angular/core';
 import * as localForage from 'localforage';
 import { SnackService } from '../snack/snack.service';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable()
 export class DatabaseService {
 
   constructor(

@@ -1,9 +1,7 @@
 import { Injectable } from '@angular/core';
 import { NotifyModel } from './notify.model';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable()
 export class NotifyService {
   async notify(options: NotifyModel): Promise<Notification> {
     if (this._isBasicNotificationSupport()) {

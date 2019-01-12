@@ -5,9 +5,7 @@ import { first } from 'rxjs/operators';
 
 const interfaceEl = window;
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable()
 export class ChromeExtensionInterfaceService {
   private _isReady$: ReplaySubject<boolean> = new ReplaySubject();
   // we only every one to catch a single event
