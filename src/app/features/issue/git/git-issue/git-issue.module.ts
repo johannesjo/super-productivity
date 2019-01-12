@@ -14,7 +14,6 @@ import { GitIssueContentComponent } from './git-issue-content/git-issue-content.
 @NgModule({
   imports: [
     CommonModule,
-    ProjectModule,
     UiModule,
     FormsModule,
     ReactiveFormsModule,

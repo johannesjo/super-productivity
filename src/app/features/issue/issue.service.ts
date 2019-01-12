@@ -11,9 +11,7 @@ import { JiraIssueService } from './jira/jira-issue/jira-issue.service';
 import { GitIssueService } from './git/git-issue/git-issue.service';
 import { GIT_TYPE, JIRA_TYPE } from './issue.const';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable()
 export class IssueService {
   public isJiraSearchEnabled$: Observable<boolean> = this._projectService.currentJiraCfg$.pipe(
     map(jiraCfg => jiraCfg && jiraCfg.isEnabled)

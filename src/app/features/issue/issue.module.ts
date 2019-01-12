@@ -7,6 +7,7 @@ import { GitIssueModule } from './git/git-issue/git-issue.module';
 import { IssueIconPipe } from './issue-icon/issue-icon.pipe';
 import { JiraApiService } from './jira/jira-api.service';
 import { JiraIssueService } from './jira/jira-issue/jira-issue.service';
+import { IssueService } from './issue.service';
 
 @NgModule({
   imports: [
@@ -25,6 +26,7 @@ import { JiraIssueService } from './jira/jira-issue/jira-issue.service';
     IssueIconPipe,
   ],
   providers: [
+    IssueService,
     JiraApiService,
     JiraIssueService,
   ],

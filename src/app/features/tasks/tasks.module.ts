@@ -25,7 +25,6 @@ import { FilterDoneTasksPipe } from './filter-done-tasks.pipe';
 @NgModule({
   imports: [
     CommonModule,
-    ProjectModule,
     JiraIssueModule,
     IssueModule,
     UiModule,
