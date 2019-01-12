@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { ConfigFormSection, ConfigSectionKey } from '../../../core/config/config.model';
+import { ConfigFormSection, ConfigSectionKey } from '../../../config/config.model';
 import { ProjectCfgFormKey } from '../../../project/project.model';
 import { FormlyFieldConfig, FormlyFormOptions } from '@ngx-formly/core';
 import { FormControl, FormGroup } from '@angular/forms';

@@ -4,7 +4,7 @@ import { TimeTrackingService } from '../time-tracking.service';
 import { Observable } from 'rxjs';
 import { distinctUntilChanged, scan, throttleTime, withLatestFrom } from 'rxjs/operators';
 import { SnackService } from '../../core/snack/snack.service';
-import { ConfigService } from '../../core/config/config.service';
+import { ConfigService } from '../../config/config.service';
 import { msToString } from '../../ui/duration/ms-to-string.pipe';
 
 const BREAK_TRIGGER_DURATION = 5 * 60 * 1000;

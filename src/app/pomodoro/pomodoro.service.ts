@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { ConfigService } from '../core/config/config.service';
+import { ConfigService } from '../config/config.service';
 import { map } from 'rxjs/operators';
-import { PomodoroConfig } from '../core/config/config.model';
-import { DEFAULT_CFG } from '../core/config/default-config.const';
+import { PomodoroConfig } from '../config/config.model';
+import { DEFAULT_CFG } from '../config/default-config.const';
 import { TimeTrackingService } from '../time-tracking/time-tracking.service';
 
 @Injectable({

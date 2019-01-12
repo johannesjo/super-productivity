@@ -12,7 +12,7 @@ import { ElectronService } from 'ngx-electron';
 import { IPC_SHUTDOWN_NOW } from '../../../ipc-events.const';
 import { DialogConfirmComponent } from '../../ui/dialog-confirm/dialog-confirm.component';
 import { NoteService } from '../../note/note.service';
-import { ConfigService } from '../../core/config/config.service';
+import { ConfigService } from '../../config/config.service';
 import { GoogleDriveSyncService } from '../../core/google/google-drive-sync.service';
 import { SnackService } from '../../core/snack/snack.service';
 

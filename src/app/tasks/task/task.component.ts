@@ -17,7 +17,7 @@ import { HIDE_SUB_TASKS, SHOW_SUB_TASKS, TaskWithSubTasks } from '../task.model'
 import { MatDialog } from '@angular/material';
 import { DialogTimeEstimateComponent } from '../dialogs/dialog-time-estimate/dialog-time-estimate.component';
 import { expandAnimation } from '../../ui/animations/expand.ani';
-import { ConfigService } from '../../core/config/config.service';
+import { ConfigService } from '../../config/config.service';
 import { checkKeyCombo } from '../../core/util/check-key-combo';
 import { distinctUntilChanged, takeUntil } from 'rxjs/operators';
 import { fadeAnimation } from '../../ui/animations/fade.ani';

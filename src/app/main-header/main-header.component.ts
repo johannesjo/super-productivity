@@ -6,7 +6,7 @@ import { LayoutService } from '../core/layout/layout.service';
 import { BookmarkService } from '../bookmark/bookmark.service';
 import { NoteService } from '../note/note.service';
 import { TaskService } from '../tasks/task.service';
-import { ConfigService } from '../core/config/config.service';
+import { ConfigService } from '../config/config.service';
 import { PomodoroService } from '../pomodoro/pomodoro.service';
 
 @Component({

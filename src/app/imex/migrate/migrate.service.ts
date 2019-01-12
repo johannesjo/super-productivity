@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { loadFromLs, saveToLs } from '../persistence/local-storage';
+import { loadFromLs, saveToLs } from '../../core/persistence/local-storage';
 import {
   STORAGE_BACKLOG_TASKS,
   STORAGE_CURRENT_PROJECT,
@@ -10,10 +10,10 @@ import {
   STORAGE_THEME
 } from './migrate.const';
 import { MatDialog } from '@angular/material';
-import { LS_IS_V1_MIGRATE } from '../persistence/ls-keys.const';
-import { SnackService } from '../snack/snack.service';
-import { PersistenceService } from '../persistence/persistence.service';
-import { SyncService } from '../sync/sync.service';
+import { LS_IS_V1_MIGRATE } from '../../core/persistence/ls-keys.const';
+import { SnackService } from '../../core/snack/snack.service';
+import { PersistenceService } from '../../core/persistence/persistence.service';
+import { SyncService } from '../../imex/sync/sync.service';
 import { OldGitSettings, OldJiraSettings, OldProject, OldTask } from './migrate.model';
 import { ProjectService } from '../../project/project.service';
 import { JiraCfg } from '../../issue/jira/jira';

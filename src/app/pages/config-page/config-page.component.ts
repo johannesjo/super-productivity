@@ -1,8 +1,8 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { ConfigService } from '../../core/config/config.service';
-import { GLOBAL_CONFIG_FORM_CONFIG } from '../../core/config/config-form-config.const';
+import { ConfigService } from '../../config/config.service';
+import { GLOBAL_CONFIG_FORM_CONFIG } from '../../config/config-form-config.const';
 import { ProjectService } from '../../project/project.service';
-import { ConfigSectionKey, GlobalConfig } from '../../core/config/config.model';
+import { ConfigSectionKey, GlobalConfig } from '../../config/config.model';
 import { Subscription } from 'rxjs';
 import { Project, ProjectAdvancedCfg, ProjectCfgFormKey } from '../../project/project.model';
 import { BASIC_PROJECT_CONFIG_FORM_CONFIG, PROJECT_CONFIG_FORM_CONFIG } from '../../project/project-form-cfg.const';

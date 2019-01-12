@@ -41,6 +41,7 @@ export class JiraApiService {
   private _isExtension = false;
   private _isHasCheckedConnection = false;
   private _cfg: JiraCfg;
+  private _isReady$: Observable<boolean>;
 
   constructor(
     private _chromeExtensionInterface: ChromeExtensionInterfaceService,
@@ -72,6 +73,8 @@ export class JiraApiService {
       this._chromeExtensionInterface.isReady$,
       this._projectService.currentJiraCfg$,
     ).subscribe(([isExtensionReady, cfg]) => {
+      console.log('CHECK CON', isExtensionReady, cfg);
+
       if (!this._isHasCheckedConnection && this._isMinimalSettings(cfg) && cfg.isEnabled) {
         this.getCurrentUser()
           .pipe(catchError((err) => {

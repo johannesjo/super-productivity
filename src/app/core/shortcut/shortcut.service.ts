@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { IS_ELECTRON } from '../../app.constants';
 import { checkKeyCombo } from '../util/check-key-combo';
-import { ConfigService } from '../config/config.service';
+import { ConfigService } from '../../config/config.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { IPC_REGISTER_GLOBAL_SHORTCUT_EVENT } from '../../../ipc-events.const';
 import { ElectronService } from 'ngx-electron';

@@ -13,13 +13,13 @@ import {
   LS_TASK_ATTACHMENT_STATE,
   LS_TASK_STATE
 } from './ls-keys.const';
-import { GlobalConfig } from '../config/config.model';
+import { GlobalConfig } from '../../config/config.model';
 import { IssueProviderKey, IssueState } from '../../issue/issue';
 import { ProjectState } from '../../project/store/project.reducer';
 import { TaskState } from '../../tasks/store/task.reducer';
 import { EntityState } from '@ngrx/entity';
 import { Task, TaskWithSubTasks } from '../../tasks/task.model';
-import { AppDataComplete } from '../sync/sync.model';
+import { AppDataComplete } from '../../imex/sync/sync.model';
 import { BookmarkState } from '../../bookmark/store/bookmark.reducer';
 import { AttachmentState } from '../../attachment/store/attachment.reducer';
 import { NoteState } from '../../note/store/note.reducer';

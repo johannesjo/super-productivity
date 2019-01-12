@@ -9,7 +9,7 @@ import { selectAllGitIssues, selectGitIssueFeatureState } from './git-issue.redu
 import { selectCurrentProjectId, selectProjectGitCfg } from '../../../../project/store/project.reducer';
 import { GitApiService } from '../../git-api.service';
 import { GitIssueService } from '../git-issue.service';
-import { ConfigService } from '../../../../core/config/config.service';
+import { ConfigService } from '../../../../config/config.service';
 import { GitIssue } from '../git-issue.model';
 import { SnackService } from '../../../../core/snack/snack.service';
 import { TaskService } from '../../../../tasks/task.service';

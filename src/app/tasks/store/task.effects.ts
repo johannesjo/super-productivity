@@ -9,7 +9,7 @@ import { selectCurrentProjectId } from '../../project/store/project.reducer';
 import { SnackOpen } from '../../core/snack/store/snack.actions';
 import { NotifyService } from '../../core/notify/notify.service';
 import { TaskService } from '../task.service';
-import { selectConfigFeatureState } from '../../core/config/store/config.reducer';
+import { selectConfigFeatureState } from '../../config/store/config.reducer';
 import { AttachmentActionTypes } from '../../attachment/store/attachment.actions';
 import { TaskWithSubTasks } from '../task.model';
 import { TaskState } from './task.reducer';

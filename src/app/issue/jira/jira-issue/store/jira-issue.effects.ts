@@ -10,7 +10,7 @@ import { selectCurrentProjectId, selectProjectJiraCfg } from '../../../../projec
 import { JiraApiService } from '../../jira-api.service';
 import { JiraIssueService } from '../jira-issue.service';
 import { JIRA_INITIAL_POLL_DELAY, JIRA_POLL_INTERVAL } from '../../jira.const';
-import { ConfigService } from '../../../../core/config/config.service';
+import { ConfigService } from '../../../../config/config.service';
 import { Dictionary } from '@ngrx/entity';
 import { JiraIssue } from '../jira-issue.model';
 import { JiraCfg, JiraTransitionOption } from '../../jira';

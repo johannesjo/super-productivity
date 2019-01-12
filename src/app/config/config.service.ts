@@ -4,7 +4,7 @@ import { ConfigActionTypes } from './store/config.actions';
 import { Observable } from 'rxjs';
 import { ConfigSectionKey, GlobalConfig, SectionConfig } from './config.model';
 import { selectConfigFeatureState } from './store/config.reducer';
-import { PersistenceService } from '../persistence/persistence.service';
+import { PersistenceService } from '../core/persistence/persistence.service';
 import { DEFAULT_CFG } from './default-config.const';
 import { Actions, ofType } from '@ngrx/effects';
 

@@ -1,6 +1,6 @@
 import { ProjectState } from '../../project/store/project.reducer';
 import { TaskState } from '../../tasks/store/task.reducer';
-import { GlobalConfig } from '../config/config.model';
+import { GlobalConfig } from '../../config/config.model';
 import { EntityState } from '@ngrx/entity';
 import { Task } from '../../tasks/task.model';
 import { IssueStateMap } from '../../issue/issue';

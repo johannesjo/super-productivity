@@ -1,9 +1,9 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
 import { GoogleApiService } from '../google-api.service';
-import { ConfigService } from '../../config/config.service';
+import { ConfigService } from '../../../config/config.service';
 import { GoogleDriveSyncService } from '../google-drive-sync.service';
 import { SnackService } from '../../snack/snack.service';
-import { GoogleDriveSyncConfig } from '../../config/config.model';
+import { GoogleDriveSyncConfig } from '../../../config/config.model';
 import { Subscription } from 'rxjs';
 import { expandFadeAnimation } from '../../../ui/animations/expand.ani';
 import { FormGroup } from '@angular/forms';

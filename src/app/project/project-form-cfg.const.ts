@@ -1,4 +1,4 @@
-import { ConfigFormConfig, ConfigFormSection } from '../core/config/config.model';
+import { ConfigFormConfig, ConfigFormSection } from '../config/config.model';
 
 const ALL_THEMES = [
   'blue',

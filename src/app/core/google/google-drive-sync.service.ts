@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import { SyncService } from '../sync/sync.service';
-import { ConfigService } from '../config/config.service';
-import { GoogleDriveSyncConfig } from '../config/config.model';
+import { SyncService } from '../../imex/sync/sync.service';
+import { ConfigService } from '../../config/config.service';
+import { GoogleDriveSyncConfig } from '../../config/config.model';
 import { GoogleApiService } from './google-api.service';
 import * as moment from 'moment';
 import { SnackService } from '../snack/snack.service';
@@ -10,7 +10,7 @@ import { MatDialog } from '@angular/material';
 import { DialogConfirmComponent } from '../../ui/dialog-confirm/dialog-confirm.component';
 import { DialogConfirmDriveSyncLoadComponent } from './dialog-confirm-drive-sync-load/dialog-confirm-drive-sync-load.component';
 import { DialogConfirmDriveSyncSaveComponent } from './dialog-confirm-drive-sync-save/dialog-confirm-drive-sync-save.component';
-import { AppDataComplete } from '../sync/sync.model';
+import { AppDataComplete } from '../../imex/sync/sync.model';
 import { take } from 'rxjs/operators';
 
 @Injectable({

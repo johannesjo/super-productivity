@@ -10,9 +10,9 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { FormlyModule } from '@ngx-formly/core';
 import { FormlyMaterialModule } from '@ngx-formly/material';
 import { ConfigService } from './config.service';
-import { UiModule } from '../../ui/ui.module';
+import { UiModule } from '../ui/ui.module';
 import { KeyboardInputComponent } from './keyboard-input/keyboard-input.component';
-import { GoogleModule } from '../google/google.module';
+import { GoogleModule } from '../core/google/google.module';
 
 @NgModule({
   imports: [

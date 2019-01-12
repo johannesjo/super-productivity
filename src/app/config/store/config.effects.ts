@@ -4,8 +4,8 @@ import { tap, withLatestFrom } from 'rxjs/operators';
 import { ConfigActionTypes, UpdateConfigSection } from './config.actions';
 import { Store } from '@ngrx/store';
 import { CONFIG_FEATURE_NAME } from './config.reducer';
-import { PersistenceService } from '../../persistence/persistence.service';
-import { SnackOpen } from '../../snack/store/snack.actions';
+import { PersistenceService } from '../../core/persistence/persistence.service';
+import { SnackOpen } from '../../core/snack/store/snack.actions';
 
 @Injectable()
 export class ConfigEffects {

@@ -8,7 +8,7 @@ import { IPC_IDLE_TIME } from '../../ipc-events.const';
 import { MatDialog } from '@angular/material';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { DialogIdleComponent } from './dialog-idle/dialog-idle.component';
-import { ConfigService } from '../core/config/config.service';
+import { ConfigService } from '../config/config.service';
 import { Task } from '../tasks/task.model';
 import { getWorklogStr } from '../core/util/get-work-log-str';
 import { TakeABreakService } from './take-a-break/take-a-break.service';

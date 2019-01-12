@@ -2,7 +2,7 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormlyFieldConfig, FormlyFormOptions } from '@ngx-formly/core';
 import { FormGroup } from '@angular/forms';
 import { ConfigSectionKey } from '../config.model';
-import { ProjectCfgFormKey } from '../../../project/project.model';
+import { ProjectCfgFormKey } from '../../project/project.model';
 
 @Component({
   selector: 'config-form',

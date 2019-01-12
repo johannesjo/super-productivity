@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
 import { AppDataComplete } from './sync.model';
-import { PersistenceService } from '../persistence/persistence.service';
-import { SnackService } from '../snack/snack.service';
+import { PersistenceService } from '../../core/persistence/persistence.service';
+import { SnackService } from '../../core/snack/snack.service';
 import { ProjectService } from '../../project/project.service';
-import { ConfigService } from '../config/config.service';
+import { ConfigService } from '../../config/config.service';
 import { TaskService } from '../../tasks/task.service';
 import { BookmarkService } from '../../bookmark/bookmark.service';
 import { NoteService } from '../../note/note.service';

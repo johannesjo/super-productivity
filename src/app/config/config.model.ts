@@ -1,5 +1,5 @@
 import { FormlyFieldConfig } from '@ngx-formly/core';
-import { ProjectCfgFormKey } from '../../project/project.model';
+import { ProjectCfgFormKey } from '../project/project.model';
 
 export type KeyboardConfig = Readonly<{
   globalShowHide: string,
