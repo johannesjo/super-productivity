@@ -51,7 +51,7 @@ export class JiraCfgStepperComponent implements OnDestroy {
     if (cfg) {
       this.jiraCfg = cfg;
     } else {
-      this.jiraCfg = Object.assign({}, DEFAULT_JIRA_CFG);
+      this.jiraCfg = Object.assign({}, DEFAULT_JIRA_CFG, {isEnabled: true});
     }
   }
 

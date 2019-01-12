@@ -6,7 +6,7 @@ import { GIT_INITIAL_POLL_DELAY } from '../git/git.const';
 export const JIRA_DATETIME_FORMAT = 'YYYY-MM-DDTHH:mm:ss.SSZZ';
 
 export const DEFAULT_JIRA_CFG: JiraCfg = {
-  isEnabled: true,
+  isEnabled: false,
   _isBlockAccess: false,
   host: null,
   userName: null,
