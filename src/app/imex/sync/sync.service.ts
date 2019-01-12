@@ -47,19 +47,9 @@ export class SyncService {
       const curId = data.project.currentId;
 
       try {
+        // save data to database first then load to store from there
         await this._persistenceService.importComplete(data);
-
-        // save data to local storage
-        await Promise.all([
-          // reload view model from ls
-          this._configService.load(true),
-          this._projectService.load(),
-          this._taskService.loadStateForProject(curId),
-          this._bookmarkService.loadStateForProject(curId),
-          this._noteService.loadStateForProject(curId),
-          this._jiraIssueService.loadStateForProject(curId),
-          this._attachmentService.loadStateForProject(curId),
-        ]);
+        await this._loadAllFromDatabaseToStore(curId);
         this._snackService.open({type: 'SUCCESS', message: 'Data imported'});
 
       } catch (e) {
@@ -85,6 +75,19 @@ export class SyncService {
       && typeof data.issue === 'object'
       && typeof data.project.currentId === 'string'
       ;
+  }
+
+  private async _loadAllFromDatabaseToStore(curId: string): Promise<any> {
+    return await Promise.all([
+      // reload view model from ls
+      this._configService.load(true),
+      this._projectService.load(),
+      this._taskService.loadStateForProject(curId),
+      this._bookmarkService.loadStateForProject(curId),
+      this._noteService.loadStateForProject(curId),
+      this._jiraIssueService.loadStateForProject(curId),
+      this._attachmentService.loadStateForProject(curId),
+    ]);
   }
 
   private async _saveBackup(): Promise<any> {
