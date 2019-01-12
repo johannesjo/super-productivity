@@ -9,10 +9,10 @@ import { NotifyModule } from './notify/notify.module';
 @NgModule({
   imports: [
     CommonModule,
+    RouterModule,
     PersistenceModule,
     ChromeExtensionInterfaceModule,
     SnackModule,
-    RouterModule,
     NotifyModule,
   ],
   declarations: [],

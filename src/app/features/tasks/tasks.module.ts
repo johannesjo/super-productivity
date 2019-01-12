@@ -14,7 +14,6 @@ import { TaskEffects } from './store/task.effects';
 import { EffectsModule } from '@ngrx/effects';
 import { TaskService } from './task.service';
 import { TASK_FEATURE_NAME, taskReducer } from './store/task.reducer';
-import { ProjectModule } from '../project/project.module';
 import { JiraIssueModule } from '../issue/jira/jira-issue/jira-issue.module';
 import { TaskAdditionalInfoComponent } from './task-additional-info/task-additional-info.component';
 import { SelectTaskComponent } from './select-task/select-task.component';

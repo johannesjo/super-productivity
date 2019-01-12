@@ -18,9 +18,7 @@ import { MatDialog } from '@angular/material';
 import { PersistenceService } from '../../core/persistence/persistence.service';
 import { createFromDrop, createFromPaste, DropPasteInput } from '../../core/drop-paste-input/drop-paste-input';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable()
 export class BookmarkService {
   bookmarks$: Observable<Bookmark[]> = this._store$.pipe(select(selectAllBookmarks));
   isShowBookmarks$: Observable<boolean> = this._store$.pipe(select(selectIsShowBookmarkBar));

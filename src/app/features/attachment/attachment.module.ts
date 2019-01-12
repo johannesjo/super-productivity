@@ -10,6 +10,7 @@ import { DialogEditAttachmentComponent } from './dialog-edit-attachment/dialog-e
 import { FormsModule } from '@angular/forms';
 import { AttachmentLinkDirective } from './attachment-link/attachment-link.directive';
 import { AttachmentListComponent } from './attachment-list/attachment-list.component';
+import { AttachmentService } from './attachment.service';
 
 @NgModule({
   imports: [
@@ -31,7 +32,10 @@ import { AttachmentListComponent } from './attachment-list/attachment-list.compo
   exports: [
     DialogEditAttachmentComponent,
     AttachmentListComponent,
-  ]
+  ],
+  providers: [
+    AttachmentService,
+  ],
 })
 export class AttachmentModule {
 }

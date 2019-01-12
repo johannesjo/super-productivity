@@ -8,9 +8,7 @@ import { PersistenceService } from '../../core/persistence/persistence.service';
 import { DEFAULT_CFG } from './default-config.const';
 import { Actions, ofType } from '@ngrx/effects';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable()
 export class ConfigService {
   cfg$: Observable<GlobalConfig> = this._store.pipe(select(selectConfigFeatureState));
   cfg: GlobalConfig;

@@ -10,6 +10,7 @@ import { BOOKMARK_FEATURE_NAME, bookmarkReducer } from './store/bookmark.reducer
 import { DialogEditBookmarkComponent } from './dialog-edit-bookmark/dialog-edit-bookmark.component';
 import { FormsModule } from '@angular/forms';
 import { BookmarkLinkDirective } from './bookmark-link/bookmark-link.directive';
+import { BookmarkService } from './bookmark.service';
 
 @NgModule({
   imports: [
@@ -31,7 +32,10 @@ import { BookmarkLinkDirective } from './bookmark-link/bookmark-link.directive';
   exports: [
     BookmarkBarComponent,
     DialogEditBookmarkComponent
-  ]
+  ],
+  providers: [
+    BookmarkService,
+  ],
 })
 export class BookmarkModule {
 }

@@ -27,8 +27,6 @@ import { IssueService } from './issue.service';
   ],
   providers: [
     IssueService,
-    JiraApiService,
-    JiraIssueService,
   ],
 })
 export class IssueModule {

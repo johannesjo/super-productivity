@@ -13,9 +13,7 @@ import { DialogConfirmDriveSyncSaveComponent } from './dialog-confirm-drive-sync
 import { AppDataComplete } from '../../imex/sync/sync.model';
 import { take } from 'rxjs/operators';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable()
 export class GoogleDriveSyncService {
   autoSyncInterval: number;
 
