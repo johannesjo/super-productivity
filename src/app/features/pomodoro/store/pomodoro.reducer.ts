@@ -1,4 +1,4 @@
-import { PomodoroActions } from './pomodoro.actions';
+import { PomodoroActions, PomodoroActionTypes } from './pomodoro.actions';
 import { createFeatureSelector, createSelector } from '@ngrx/store';
 
 export const POMODORO_FEATURE_NAME = 'pomodoro';
@@ -10,8 +10,8 @@ export interface PomodoroState {
 }
 
 export const initialPomodoroState: PomodoroState = {
-  isManualPause: false,
-  isBreak: false,
+  isManualPause: true,
+  isBreak: undefined,
   currentCycle: 0,
 };
 
@@ -22,8 +22,38 @@ export const selectIsBreak = createSelector(selectPomodoroFeatureState, state =>
 export const selectCurrentCycle = createSelector(selectPomodoroFeatureState, state => state.currentCycle);
 
 
-export function reducer(state = initialPomodoroState, action: PomodoroActions): PomodoroState {
+export function pomodoroReducer(state = initialPomodoroState, action: PomodoroActions): PomodoroState {
   switch (action.type) {
+
+    case  PomodoroActionTypes.StartPomodoro: {
+      return {
+        ...state,
+        isManualPause: false,
+      };
+    }
+
+    case  PomodoroActionTypes.PausePomodoro: {
+      return {
+        ...state,
+        isManualPause: true,
+      };
+    }
+
+    case  PomodoroActionTypes.StopPomodoro: {
+      return {
+        ...initialPomodoroState
+      };
+    }
+
+    case  PomodoroActionTypes.FinishPomodoroSession: {
+      console.log('FINISH SESSION REDUCER');
+
+      return {
+        ...state,
+        isBreak: !state.isBreak,
+        currentCycle: (state.isBreak ? (state.currentCycle + 1) : state.currentCycle),
+      };
+    }
 
     default:
       return state;

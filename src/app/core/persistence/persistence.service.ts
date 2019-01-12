@@ -153,7 +153,7 @@ export class PersistenceService {
   // -----------------------
   saveLastActive(date: string = new Date().toString()) {
     // TODO refactor to timestamp
-    console.log('SAVE LAST ACTIVE', date);
+    // console.log('SAVE LAST ACTIVE', date);
 
     saveToLs(LS_LAST_ACTIVE, date);
   }

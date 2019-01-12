@@ -18,7 +18,7 @@ export const DEFAULT_CFG: GlobalConfig = {
   },
   pomodoro: {
     isEnabled: false,
-    duration: 45 * minute,
+    duration: 25 * minute,
     breakDuration: 5 * minute,
     longerBreakDuration: 15 * minute,
     cyclesBeforeLongerBreak: 4,

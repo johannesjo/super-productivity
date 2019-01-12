@@ -8,7 +8,8 @@ import { getWorklogStr } from '../../util/get-work-log-str';
 @Injectable()
 export class TimeTrackingService {
   private _currentTrackingStart: number;
-  public tick$: Observable<Tick> = interval(TRACKING_INTERVAL).pipe(
+  public globalInterval$: Observable<any> = interval(TRACKING_INTERVAL).pipe(share());
+  public tick$: Observable<Tick> = this.globalInterval$.pipe(
     map(() => {
       const delta = Date.now() - this._currentTrackingStart;
       this._currentTrackingStart = Date.now();
