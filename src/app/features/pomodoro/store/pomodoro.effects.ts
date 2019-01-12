@@ -47,4 +47,7 @@ export class PomodoroEffects {
     private _matDialog: MatDialog,
   ) {
   }
+
+  private _sendUpdateToRemoteInterface() {
+  }
 }

@@ -1,15 +1,15 @@
 <div mat-dialog-content>
   <div *ngIf="!(isBreakDone$|async)">
     <p>You successfully finished session
-      <strong>{{(pomodoroService.currentCycle$|async) + 1}}</strong>! Enjoy yourself, get yourself moving, come back in:
-    </p>
+      <strong>{{(currentCycle$|async) + 1}}</strong>!</p>
+    <p>Enjoy yourself, get yourself moving, come back in:</p>
   </div>
 
   <div *ngIf="(isBreakDone$|async)">
     <p>Your break is done!</p>
   </div>
 
-  <div class="timer">{{pomodoroService.currentSessionTime$|async|msToMinuteClockString}}</div>
+  <div class="timer">{{currentTime$|async|msToMinuteClockString}}</div>
 </div>
 
 

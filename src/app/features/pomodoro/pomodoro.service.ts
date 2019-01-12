@@ -5,7 +5,7 @@ import { filter, map, mapTo, scan, shareReplay, withLatestFrom } from 'rxjs/oper
 import { PomodoroConfig } from '../config/config.model';
 import { TimeTrackingService } from '../time-tracking/time-tracking.service';
 import { select, Store } from '@ngrx/store';
-import { FinishPomodoroSession, PausePomodoro, StartPomodoro, StopPomodoro } from './store/pomodoro.actions';
+import { FinishPomodoroSession, PausePomodoro, SkipPomodoroBreak, StartPomodoro, StopPomodoro } from './store/pomodoro.actions';
 import { selectCurrentCycle, selectIsBreak, selectIsManualPause } from './store/pomodoro.reducer';
 
 // Tick Duration
@@ -98,26 +98,23 @@ export class PomodoroService {
     this.sessionProgress$.subscribe(val => console.log(val));
   }
 
-  skipBreak() {
-  }
-
-
-  startPomodoro() {
+  start() {
     this._store$.dispatch(new StartPomodoro());
   }
 
-  pausePomodoro() {
+  pause() {
     this._store$.dispatch(new PausePomodoro());
   }
 
-  stopPomodoro() {
+  stop() {
     this._store$.dispatch(new StopPomodoro());
+  }
+
+  skipBreak() {
+    this._store$.dispatch(new SkipPomodoroBreak());
   }
 
   finishPomodoroSession() {
     this._store$.dispatch(new FinishPomodoroSession());
-  }
-
-  private sendUpdateToRemoteInterface() {
   }
 }
