@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
-import { GoogleApiService } from '../../google/google-api.service';
+import { GoogleApiService } from '../../../features/google/google-api.service';
 import { MAT_SNACK_BAR_DATA, MatSnackBarRef } from '@angular/material';
 import { SnackParams } from '../snack.model';
 

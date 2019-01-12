@@ -1,16 +1,16 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { ConfigService } from '../../config/config.service';
-import { GLOBAL_CONFIG_FORM_CONFIG } from '../../config/config-form-config.const';
-import { ProjectService } from '../../project/project.service';
-import { ConfigSectionKey, GlobalConfig } from '../../config/config.model';
+import { ConfigService } from '../../features/config/config.service';
+import { GLOBAL_CONFIG_FORM_CONFIG } from '../../features/config/config-form-config.const';
+import { ProjectService } from '../../features/project/project.service';
+import { ConfigSectionKey, GlobalConfig } from '../../features/config/config.model';
 import { Subscription } from 'rxjs';
-import { Project, ProjectAdvancedCfg, ProjectCfgFormKey } from '../../project/project.model';
-import { BASIC_PROJECT_CONFIG_FORM_CONFIG, PROJECT_CONFIG_FORM_CONFIG } from '../../project/project-form-cfg.const';
-import { IssueIntegrationCfg, IssueIntegrationCfgs, IssueProviderKey } from '../../issue/issue';
-import { ISSUE_PROVIDER_FORM_CFGS } from '../../issue/issue.const';
-import { DEFAULT_JIRA_CFG } from '../../issue/jira/jira.const';
-import { DEFAULT_GIT_CFG } from '../../issue/git/git.const';
-import { dirtyDeepCopy } from '../../core/util/dirtyDeepCopy';
+import { Project, ProjectAdvancedCfg, ProjectCfgFormKey } from '../../features/project/project.model';
+import { BASIC_PROJECT_CONFIG_FORM_CONFIG, PROJECT_CONFIG_FORM_CONFIG } from '../../features/project/project-form-cfg.const';
+import { IssueIntegrationCfg, IssueIntegrationCfgs, IssueProviderKey } from '../../features/issue/issue';
+import { ISSUE_PROVIDER_FORM_CFGS } from '../../features/issue/issue.const';
+import { DEFAULT_JIRA_CFG } from '../../features/issue/jira/jira.const';
+import { DEFAULT_GIT_CFG } from '../../features/issue/git/git.const';
+import { dirtyDeepCopy } from '../../util/dirtyDeepCopy';
 
 @Component({
   selector: 'config-page',

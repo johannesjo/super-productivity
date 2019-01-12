@@ -4,8 +4,8 @@ import { DailySummaryComponent } from './daily-summary.component';
 import { FormsModule } from '@angular/forms';
 import { UiModule } from '../../ui/ui.module';
 import { RouterModule } from '@angular/router';
-import { GoogleModule } from '../../core/google/google.module';
-import { DialogSimpleTaskSummaryModule } from '../../core/dialog-simple-task-summary/dialog-simple-task-summary.module';
+import { GoogleModule } from '../../features/google/google.module';
+import { DialogSimpleTaskSummaryModule } from '../../features/dialog-simple-task-summary/dialog-simple-task-summary.module';
 
 @NgModule({
   imports: [

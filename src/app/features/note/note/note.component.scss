@@ -1,0 +1,72 @@
+@import '../../../../variables';
+$noteFontSize: 14px;
+
+:host {
+  display: block;
+}
+
+.note {
+  @include noteStyle;
+
+  &.isFocused {
+    transform: scale(1.04);
+    position: relative;
+    z-index: 4;
+    //outline: 2px dashed $c-accent;
+  }
+}
+
+.controls {
+  position: absolute;
+  top: 0;
+  right: 0;
+
+  @include mq(xs) {
+    opacity: 0;
+    transition: $transition-standard;
+
+    .note:focus &,
+    .note:hover & {
+      opacity: 1;
+    }
+    .hasReminder & {
+      opacity: 0.3;
+    }
+  }
+}
+
+.content {
+  text-align: left;
+  font-size: $noteFontSize;
+
+  inline-markdown ::ng-deep {
+    .markdown-wrapper {
+      min-height: 40px;
+      max-height: 400px;
+    }
+
+    .markdown-unparsed,
+    .markdown-parsed {
+      font-size: $noteFontSize;
+      border-radius: $card-border-radius;
+      background: #ffffff;
+      color: $standard-note-fg-light;
+      box-sizing: border-box;
+
+      @include darkTheme {
+        background: $standard-note-bg-dark;
+        color: $standard-note-fg-dark;
+        border-color: #333333;
+      }
+    }
+
+    .markdown-unparsed,
+    .markdown-parsed > *:first-child {
+      padding-right: $s*2;
+    }
+
+    .markdown-parsed > *:last-child {
+      margin-bottom: 0;
+    }
+  }
+}

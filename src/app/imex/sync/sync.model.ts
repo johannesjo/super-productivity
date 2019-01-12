@@ -1,11 +1,11 @@
-import { ProjectState } from '../../project/store/project.reducer';
-import { TaskState } from '../../tasks/store/task.reducer';
-import { GlobalConfig } from '../../config/config.model';
+import { ProjectState } from '../../features/project/store/project.reducer';
+import { TaskState } from '../../features/tasks/store/task.reducer';
+import { GlobalConfig } from '../../features/config/config.model';
 import { EntityState } from '@ngrx/entity';
-import { Task } from '../../tasks/task.model';
-import { IssueStateMap } from '../../issue/issue';
-import { BookmarkState } from '../../bookmark/store/bookmark.reducer';
-import { NoteState } from '../../note/store/note.reducer';
+import { Task } from '../../features/tasks/task.model';
+import { IssueStateMap } from '../../features/issue/issue';
+import { BookmarkState } from '../../features/bookmark/store/bookmark.reducer';
+import { NoteState } from '../../features/note/store/note.reducer';
 
 
 // NOTE: [key:string] always refers to projectId

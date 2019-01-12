@@ -16,14 +16,14 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { FormlyModule } from '@ngx-formly/core';
 import { FormlyMaterialModule } from '@ngx-formly/material';
 import { PagesModule } from './pages/pages.module';
-import { MainHeaderModule } from './main-header/main-header.module';
+import { MainHeaderModule } from './core-ui/main-header/main-header.module';
 import { HttpClientModule } from '@angular/common/http';
 import { MatSidenavModule } from '@angular/material';
-import { TasksModule } from './tasks/tasks.module';
-import { TimeTrackingModule } from './time-tracking/time-tracking.module';
-import { BookmarkModule } from './bookmark/bookmark.module';
-import { NoteModule } from './note/note.module';
-import { ReminderModule } from './reminder/reminder.module';
+import { TasksModule } from './features/tasks/tasks.module';
+import { TimeTrackingModule } from './features/time-tracking/time-tracking.module';
+import { BookmarkModule } from './features/bookmark/bookmark.module';
+import { NoteModule } from './features/note/note.module';
+import { ReminderModule } from './features/reminder/reminder.module';
 
 @NgModule({
   declarations: [

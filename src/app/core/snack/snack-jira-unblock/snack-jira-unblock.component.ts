@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
 import { MAT_SNACK_BAR_DATA, MatSnackBarRef } from '@angular/material';
 import { SnackParams } from '../snack.model';
-import { JiraApiService } from '../../../issue/jira/jira-api.service';
+import { JiraApiService } from '../../../features/issue/jira/jira-api.service';
 
 @Component({
   selector: 'snack-jira-unblock',

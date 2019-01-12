@@ -1,19 +1,19 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
-import { TaskService } from '../../tasks/task.service';
-import { getTodayStr } from '../../tasks/util/get-today-str';
-import { TaskWithSubTasks } from '../../tasks/task.model';
+import { TaskService } from '../../features/tasks/task.service';
+import { getTodayStr } from '../../features/tasks/util/get-today-str';
+import { TaskWithSubTasks } from '../../features/tasks/task.model';
 import { Router } from '@angular/router';
 import { IS_ELECTRON } from '../../app.constants';
-import { DialogGoogleExportTimeComponent } from '../../core/google/dialog-google-export-time/dialog-google-export-time.component';
+import { DialogGoogleExportTimeComponent } from '../../features/google/dialog-google-export-time/dialog-google-export-time.component';
 import { MatDialog } from '@angular/material';
-import { DialogSimpleTaskSummaryComponent } from '../../core/dialog-simple-task-summary/dialog-simple-task-summary.component';
+import { DialogSimpleTaskSummaryComponent } from '../../features/dialog-simple-task-summary/dialog-simple-task-summary.component';
 import { Subscription } from 'rxjs';
 import { ElectronService } from 'ngx-electron';
 import { IPC_SHUTDOWN_NOW } from '../../../ipc-events.const';
 import { DialogConfirmComponent } from '../../ui/dialog-confirm/dialog-confirm.component';
-import { NoteService } from '../../note/note.service';
-import { ConfigService } from '../../config/config.service';
-import { GoogleDriveSyncService } from '../../core/google/google-drive-sync.service';
+import { NoteService } from '../../features/note/note.service';
+import { ConfigService } from '../../features/config/config.service';
+import { GoogleDriveSyncService } from '../../features/google/google-drive-sync.service';
 import { SnackService } from '../../core/snack/snack.service';
 
 const SUCCESS_ANIMATION_DURATION = 500;

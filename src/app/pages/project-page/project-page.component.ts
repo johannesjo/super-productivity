@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import { ProjectService } from '../../project/project.service';
+import { ProjectService } from '../../features/project/project.service';
 import { MatDialog } from '@angular/material';
-import { DialogCreateProjectComponent } from '../../project/dialogs/create-project/dialog-create-project.component';
+import { DialogCreateProjectComponent } from '../../features/project/dialogs/create-project/dialog-create-project.component';
 
 @Component({
   selector: 'project-page',

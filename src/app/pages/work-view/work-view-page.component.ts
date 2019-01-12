@@ -1,12 +1,12 @@
 import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
-import { TaskService } from '../../tasks/task.service';
+import { TaskService } from '../../features/tasks/task.service';
 import { expandAnimation, expandFadeAnimation } from '../../ui/animations/expand.ani';
-import { LayoutService } from '../../core/layout/layout.service';
+import { LayoutService } from '../../core-ui/layout/layout.service';
 import { DragulaService } from 'ng2-dragula';
-import { TakeABreakService } from '../../time-tracking/take-a-break/take-a-break.service';
+import { TakeABreakService } from '../../features/time-tracking/take-a-break/take-a-break.service';
 import { ActivatedRoute } from '@angular/router';
 import { from, Subscription, timer, zip } from 'rxjs';
-import { TaskWithSubTasks } from '../../tasks/task.model';
+import { TaskWithSubTasks } from '../../features/tasks/task.model';
 import { Actions } from '@ngrx/effects';
 import { map, skip, switchMap, take, withLatestFrom } from 'rxjs/operators';
 import { fadeAnimation } from '../../ui/animations/fade.ani';

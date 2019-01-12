@@ -1,0 +1,97 @@
+@import '../../../../../../variables';
+
+.issue-table {
+  width: 100%;
+
+  td,
+  th {
+    vertical-align: top;
+    padding-bottom: $s;
+    padding-left: $s;
+
+    &:first-child {
+      padding-left: 0;
+    }
+  }
+
+  // to shrink the th col to a min
+  td {
+    width: 100%;
+  }
+
+  .description-row {
+    th {
+      cursor: pointer;
+    }
+  }
+
+  &.isFocusDescription {
+    tr {
+      display: none;
+
+      &.description-row {
+        display: table-row;
+      }
+    }
+  }
+}
+
+.wrapper {
+  margin: $s*2;
+  @include standardThemeTextColor();
+}
+
+.comment {
+  display: flex;
+  margin-bottom: $s*2;
+
+  .author-avatar {
+    margin-right: $s;
+    width: 48px;
+    height: 48px;
+    min-width: 48px;
+    border-radius: 50%;
+  }
+
+  .author-name {
+    font-weight: bold;
+  }
+
+  .when {
+    margin-left: $s;
+    opacity: 0.6;
+  }
+
+  .name-and-comment-content {
+  }
+
+}
+
+.attachments {
+  //margin-bottom: $s;
+  // because they have an inner padding
+  &.hasAttachments {
+    margin-top: -$s;
+  }
+}
+
+.updates {
+  text-align: center;
+
+  h3 {
+    margin-top: $s;
+    margin-bottom: 0;
+  }
+}
+
+.changelog {
+  list-style: none;
+  margin: 0;
+  padding: 0 0 $s*2;
+  display: block;
+
+  li {
+    padding: 0;
+    margin: 0;
+  }
+}

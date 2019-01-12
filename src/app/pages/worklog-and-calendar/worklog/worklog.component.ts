@@ -1,13 +1,13 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { PersistenceService } from '../../../core/persistence/persistence.service';
-import { ProjectService } from '../../../project/project.service';
+import { ProjectService } from '../../../features/project/project.service';
 import { expandFadeAnimation } from '../../../ui/animations/expand.ani';
-import { mapArchiveToWorklog, Worklog, WorklogDay, WorklogMonth } from '../../../core/util/map-archive-to-worklog';
-import { DialogSimpleTaskSummaryComponent } from '../../../core/dialog-simple-task-summary/dialog-simple-task-summary.component';
+import { mapArchiveToWorklog, Worklog, WorklogDay, WorklogMonth } from '../../../util/map-archive-to-worklog';
+import { DialogSimpleTaskSummaryComponent } from '../../../features/dialog-simple-task-summary/dialog-simple-task-summary.component';
 import { MatDialog } from '@angular/material';
 import { Subscription } from 'rxjs';
-import { TaskCopy } from '../../../tasks/task.model';
-import { TaskService } from '../../../tasks/task.service';
+import { TaskCopy } from '../../../features/tasks/task.model';
+import { TaskService } from '../../../features/tasks/task.service';
 import { Router } from '@angular/router';
 import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confirm.component';
 

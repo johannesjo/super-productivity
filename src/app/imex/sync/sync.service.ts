@@ -2,13 +2,13 @@ import { Injectable } from '@angular/core';
 import { AppDataComplete } from './sync.model';
 import { PersistenceService } from '../../core/persistence/persistence.service';
 import { SnackService } from '../../core/snack/snack.service';
-import { ProjectService } from '../../project/project.service';
-import { ConfigService } from '../../config/config.service';
-import { TaskService } from '../../tasks/task.service';
-import { BookmarkService } from '../../bookmark/bookmark.service';
-import { NoteService } from '../../note/note.service';
-import { JiraIssueService } from '../../issue/jira/jira-issue/jira-issue.service';
-import { AttachmentService } from '../../attachment/attachment.service';
+import { ProjectService } from '../../features/project/project.service';
+import { ConfigService } from '../../features/config/config.service';
+import { TaskService } from '../../features/tasks/task.service';
+import { BookmarkService } from '../../features/bookmark/bookmark.service';
+import { NoteService } from '../../features/note/note.service';
+import { JiraIssueService } from '../../features/issue/jira/jira-issue/jira-issue.service';
+import { AttachmentService } from '../../features/attachment/attachment.service';
 
 // TODO some of this can be done in a background script
 

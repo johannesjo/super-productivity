@@ -1,0 +1,226 @@
+@import '../../../variables';
+
+$navBpUltraSmall: 360px;
+$navBpIconInsteadOfText: 374px;
+$navBpIconInsteadOfText: 374px;
+$navBpMainNavReduceButtonSize: 420px;
+$navBp2Lines: 780px;
+$navBpShrinking: 900px;
+$mobileHorizontalPadding: 8px;
+
+.project-btn {
+  min-width: 0;
+  overflow: hidden;
+  max-width: 200px;
+
+  @media (max-width: $navBp2Lines) {
+    flex: 1;
+  }
+
+  ::ng-deep .mat-button-wrapper {
+    display: flex;
+    align-items: center;
+  }
+
+
+  .current-project-title {
+    text-transform: uppercase;
+    font-weight: normal;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: inline-block;
+    max-width: 220px;
+  }
+}
+
+.main-nav {
+  display: flex;
+  flex: 1;
+
+  button.isActive {
+    font-weight: bold;
+  }
+
+  mat-icon {
+    display: none;
+  }
+
+  .text {
+    text-align: center;
+  }
+
+  &.isHideNav {
+    @media(min-width: $navBp2Lines) {
+      transition: $transition-standard;
+      opacity: 0;
+      .wrapper:hover & {
+        opacity: 1;
+      }
+    }
+  }
+
+  @media (max-width: $navBpMainNavReduceButtonSize) {
+    // reduce outer padding
+    margin: 0 -1 *$mobileHorizontalPadding;
+
+    button {
+      // reduce button padding
+      padding: 0;
+    }
+  }
+
+  @media (max-width: $navBp2Lines) {
+    flex-basis: 100%;
+    order: 3;
+    justify-content: stretch;
+
+    button {
+      flex: 1;
+      text-align: center;
+    }
+    ::ng-deep .mat-button-wrapper {
+      display: flex;
+      justify-content: center;
+    }
+  }
+
+  @media (max-width: $navBpIconInsteadOfText) {
+    .text {
+      display: none;
+    }
+    button {
+      min-height: 40px;
+    }
+
+    mat-icon {
+      display: block;
+    }
+  }
+}
+
+.action-nav {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+
+  button {
+    margin-left: $s;
+  }
+}
+
+.wrapper {
+  display: flex;
+  align-items: center;
+  padding: 4px $mobileHorizontalPadding;
+  flex-wrap: wrap;
+
+  @include mq(xs) {
+    padding: 4px 16px;
+  }
+
+  @media (max-width: $navBp2Lines) {
+    padding-bottom: 0;
+  }
+}
+
+
+.spacer {
+  display: none;
+  flex: 1 1 auto;
+
+  @media(max-width: $navBpShrinking) and (min-width: $navBp2Lines) {
+    display: none;
+  }
+}
+
+
+:host {
+  position: relative;
+  z-index: 3;
+  display: block;
+}
+
+.mat-fab {
+  height: 52px;
+  width: 52px;
+
+  ::ng-deep .mat-button-wrapper {
+    padding: 0 !important;
+  }
+}
+
+.show-bookmarks-btn {
+  position: absolute;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 2;
+  top: 100%;
+  transition: $transition-standard !important;
+  transition-property: transform !important;
+  margin: 0 !important;
+  //@include mq(xs, max) {
+  height: 30px !important;
+  min-height: 30px !important;
+  padding: 0 !important;
+
+  ::ng-deep .mat-button-wrapper {
+    padding: 0;
+    position: relative;
+    top: -3px;
+  }
+
+  //}
+
+  &.is-open {
+    transition-property: transform !important;
+    transition: $transition-standard !important;
+    //transform: translate(-50%, -75%);
+  }
+}
+
+
+.play-btn {
+  $circleOverflow: 5px;
+  position: relative;
+
+  .pomodoro-label {
+    position: absolute;
+    line-height: 1;
+    padding: 1px 0 1px;
+    background: #fff;
+    color: #000;
+    width: 100%;
+    left: 0;
+    bottom: 0;
+    box-shadow: $whiteframe-shadow-2dp;
+  }
+
+  .circle-svg {
+    transform: rotate(-90deg);
+    position: absolute;
+    //top: -1* $circleOverflow;
+    //left: -1* $circleOverflow;
+    //width: calc(100% + #{$circleOverflow*2});
+    //height: calc(100% + #{$circleOverflow*2});
+    //top: -2px;
+    //left: -2px;
+    opacity: 0.15;
+    top: 0;
+    right: 0;
+    pointer-events: none;
+  }
+
+  .mat-icon {
+    position: relative;
+    z-index: 2;
+  }
+}
+
+.note-ico {
+  transition: $transition-standard;
+
+  &.rotate {
+    transform: rotate(90deg);
+  }
+}

@@ -13,21 +13,21 @@ import {
   LS_TASK_ATTACHMENT_STATE,
   LS_TASK_STATE
 } from './ls-keys.const';
-import { GlobalConfig } from '../../config/config.model';
-import { IssueProviderKey, IssueState } from '../../issue/issue';
-import { ProjectState } from '../../project/store/project.reducer';
-import { TaskState } from '../../tasks/store/task.reducer';
+import { GlobalConfig } from '../../features/config/config.model';
+import { IssueProviderKey, IssueState } from '../../features/issue/issue';
+import { ProjectState } from '../../features/project/store/project.reducer';
+import { TaskState } from '../../features/tasks/store/task.reducer';
 import { EntityState } from '@ngrx/entity';
-import { Task, TaskWithSubTasks } from '../../tasks/task.model';
+import { Task, TaskWithSubTasks } from '../../features/tasks/task.model';
 import { AppDataComplete } from '../../imex/sync/sync.model';
-import { BookmarkState } from '../../bookmark/store/bookmark.reducer';
-import { AttachmentState } from '../../attachment/store/attachment.reducer';
-import { NoteState } from '../../note/store/note.reducer';
-import { Reminder } from '../../reminder/reminder.model';
+import { BookmarkState } from '../../features/bookmark/store/bookmark.reducer';
+import { AttachmentState } from '../../features/attachment/store/attachment.reducer';
+import { NoteState } from '../../features/note/store/note.reducer';
+import { Reminder } from '../../features/reminder/reminder.model';
 import { SnackService } from '../snack/snack.service';
 import { DatabaseService } from './database.service';
 import { loadFromLs, saveToLs } from './local-storage';
-import { issueProviderKeys } from '../../issue/issue.const';
+import { issueProviderKeys } from '../../features/issue/issue.const';
 
 @Injectable({
   providedIn: 'root'

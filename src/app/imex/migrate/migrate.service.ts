@@ -15,23 +15,23 @@ import { SnackService } from '../../core/snack/snack.service';
 import { PersistenceService } from '../../core/persistence/persistence.service';
 import { SyncService } from '../../imex/sync/sync.service';
 import { OldGitSettings, OldJiraSettings, OldProject, OldTask } from './migrate.model';
-import { ProjectService } from '../../project/project.service';
-import { JiraCfg } from '../../issue/jira/jira';
-import { DEFAULT_JIRA_CFG } from '../../issue/jira/jira.const';
-import { initialTaskState } from '../../tasks/store/task.reducer';
+import { ProjectService } from '../../features/project/project.service';
+import { JiraCfg } from '../../features/issue/jira/jira';
+import { DEFAULT_JIRA_CFG } from '../../features/issue/jira/jira.const';
+import { initialTaskState } from '../../features/tasks/store/task.reducer';
 import { EntityState } from '@ngrx/entity';
-import { DEFAULT_TASK, Task } from '../../tasks/task.model';
+import { DEFAULT_TASK, Task } from '../../features/tasks/task.model';
 import * as moment from 'moment';
-import { JiraIssue } from '../../issue/jira/jira-issue/jira-issue.model';
-import { GitIssue } from '../../issue/git/git-issue/git-issue.model';
-import { IssueProviderKey } from '../../issue/issue';
-import { GitCfg } from '../../issue/git/git';
-import { DEFAULT_GIT_CFG } from '../../issue/git/git.const';
-import { GitApiService } from '../../issue/git/git-api.service';
+import { JiraIssue } from '../../features/issue/jira/jira-issue/jira-issue.model';
+import { GitIssue } from '../../features/issue/git/git-issue/git-issue.model';
+import { IssueProviderKey } from '../../features/issue/issue';
+import { GitCfg } from '../../features/issue/git/git';
+import { DEFAULT_GIT_CFG } from '../../features/issue/git/git.const';
+import { GitApiService } from '../../features/issue/git/git-api.service';
 import { first } from 'rxjs/operators';
 import { DialogMigrateComponent } from './dialog-migrate/dialog-migrate.component';
-import { JiraIssueState } from '../../issue/jira/jira-issue/store/jira-issue.reducer';
-import { GitIssueState } from '../../issue/git/git-issue/store/git-issue.reducer';
+import { JiraIssueState } from '../../features/issue/jira/jira-issue/store/jira-issue.reducer';
+import { GitIssueState } from '../../features/issue/git/git-issue/store/git-issue.reducer';
 
 @Injectable({
   providedIn: 'root'

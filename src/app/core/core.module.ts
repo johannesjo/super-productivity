@@ -2,12 +2,12 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { PersistenceModule } from './persistence/persistence.module';
 import { ChromeExtensionInterfaceModule } from './chrome-extension-interface/chrome-extension-interface.module';
-import { ShortcutModule } from './shortcut/shortcut.module';
+import { ShortcutModule } from '../core-ui/shortcut/shortcut.module';
 import { SnackModule } from './snack/snack.module';
-import { GoogleModule } from './google/google.module';
+import { GoogleModule } from '../features/google/google.module';
 import { RouterModule } from '@angular/router';
-import { LayoutModule } from './layout/layout.module';
-import { DialogSimpleTaskSummaryModule } from './dialog-simple-task-summary/dialog-simple-task-summary.module';
+import { LayoutModule } from '../core-ui/layout/layout.module';
+import { DialogSimpleTaskSummaryModule } from '../features/dialog-simple-task-summary/dialog-simple-task-summary.module';
 import { NotifyModule } from './notify/notify.module';
 
 @NgModule({
