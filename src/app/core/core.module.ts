@@ -21,7 +21,7 @@ import { NotifyModule } from './notify/notify.module';
     ChromeExtensionInterfaceModule,
     SnackModule,
     NotifyModule,
-  ]
+  ],
 })
 export class CoreModule {
 }

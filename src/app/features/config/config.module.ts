@@ -6,17 +6,18 @@ import { EffectsModule } from '@ngrx/effects';
 import { ConfigEffects } from './store/config.effects';
 import { ConfigSectionComponent } from './config-section/config-section.component';
 import { ConfigFormComponent } from './config-form/config-form.component';
-import { ReactiveFormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { FormlyModule } from '@ngx-formly/core';
 import { FormlyMaterialModule } from '@ngx-formly/material';
 import { ConfigService } from './config.service';
 import { UiModule } from '../../ui/ui.module';
 import { KeyboardInputComponent } from './keyboard-input/keyboard-input.component';
-import { GoogleModule } from '../google/google.module';
+import { GoogleSyncCfgComponent } from '../google/google-sync-cfg/google-sync-cfg.component';
 
 @NgModule({
   imports: [
     UiModule,
+    FormsModule,
     ReactiveFormsModule,
     FormlyModule.forChild({
       types: [{
@@ -28,14 +29,17 @@ import { GoogleModule } from '../google/google.module';
     }),
     FormlyMaterialModule,
     CommonModule,
-    GoogleModule,
     StoreModule.forFeature(CONFIG_FEATURE_NAME, configReducer),
     EffectsModule.forFeature([ConfigEffects])
   ],
   declarations: [
+    GoogleSyncCfgComponent,
     ConfigSectionComponent,
     ConfigFormComponent,
     KeyboardInputComponent
+  ],
+  entryComponents: [
+    GoogleSyncCfgComponent,
   ],
   exports: [
     ConfigSectionComponent,

@@ -12,9 +12,7 @@ import { AttachmentService } from '../../features/attachment/attachment.service'
 
 // TODO some of this can be done in a background script
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable()
 export class SyncService {
   constructor(
     private _persistenceService: PersistenceService,

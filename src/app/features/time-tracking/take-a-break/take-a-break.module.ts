@@ -10,6 +10,4 @@ import { TakeABreakService } from './take-a-break.service';
   providers: [TakeABreakService]
 })
 export class TakeABreakModule {
-  constructor(_takeABreakService: TakeABreakService) {
-  }
 }
