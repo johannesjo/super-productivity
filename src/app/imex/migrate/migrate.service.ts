@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { loadFromLs, saveToLs } from '../../core/persistence/local-storage';
 import {
   STORAGE_BACKLOG_TASKS,
+  STORAGE_CONFIG,
   STORAGE_CURRENT_PROJECT,
   STORAGE_DONE_BACKLOG_TASKS,
   STORAGE_JIRA_SETTINGS,
@@ -14,7 +15,7 @@ import { LS_IS_V1_MIGRATE } from '../../core/persistence/ls-keys.const';
 import { SnackService } from '../../core/snack/snack.service';
 import { PersistenceService } from '../../core/persistence/persistence.service';
 import { SyncService } from '../../imex/sync/sync.service';
-import { OldGitSettings, OldJiraSettings, OldProject, OldTask } from './migrate.model';
+import { OldDataExport, OldGitSettings, OldJiraSettings, OldProject, OldTask } from './migrate.model';
 import { ProjectService } from '../../features/project/project.service';
 import { JiraCfg } from '../../features/issue/jira/jira';
 import { DEFAULT_JIRA_CFG } from '../../features/issue/jira/jira.const';
@@ -54,13 +55,13 @@ export class MigrateService {
   checkForUpdate() {
     const isMigrated = loadFromLs(LS_IS_V1_MIGRATE);
     // const isMigrated = localStorage.getItem(LS_IS_V1_MIGRATE);
-    if (!isMigrated && loadFromLs(STORAGE_TASKS)) {
+    if (!isMigrated && (loadFromLs(STORAGE_CONFIG))) {
       this._matDialog.open(DialogMigrateComponent, {
         restoreFocus: true,
       }).afterClosed()
         .subscribe((res: any) => {
           if (res === 1) {
-            this._migrateData().then(() => {
+            this._migrateDataFromLs().then(() => {
               // set flag to not ask again
               saveToLs(LS_IS_V1_MIGRATE, true);
             });
@@ -72,30 +73,18 @@ export class MigrateService {
     }
   }
 
-  private async _migrateData() {
+  async migrateData(oldData: OldDataExport) {
     this._snackService.open({message: 'Importing data', icon: 'cloud_download'});
     await this._saveBackup();
     try {
-      const allProjects = loadFromLs(STORAGE_PROJECTS);
-
-      if (allProjects && allProjects.length > 0) {
-        const importPromises: Promise<any>[] = allProjects.map((projectData: OldProject) => this._importProject(projectData));
+      if (oldData.projects && oldData.projects.length > 0) {
+        const importPromises: Promise<any>[] = oldData.projects.map((projectData: OldProject) => this._importProject(projectData));
         await Promise.all(importPromises);
-      } else if (loadFromLs(STORAGE_CURRENT_PROJECT)) {
-        const currentProjectData = loadFromLs(STORAGE_CURRENT_PROJECT);
-        await this._importProject(currentProjectData);
+      } else if (oldData.currentProject) {
+        const projectData = oldData.currentProject as OldProject;
+        await this._importProject(projectData);
       } else {
-        await this._importProject({
-          title: 'Imported Default Project',
-          id: 'OLD_DEFAULT',
-          data: {
-            tasks: loadFromLs(STORAGE_TASKS) || [],
-            backlogTasks: loadFromLs(STORAGE_BACKLOG_TASKS) || [],
-            doneBacklogTasks: loadFromLs(STORAGE_DONE_BACKLOG_TASKS) || [],
-            theme: loadFromLs(STORAGE_THEME) || 'blue',
-            jiraSettings: loadFromLs(STORAGE_JIRA_SETTINGS) || {},
-          }
-        });
+        throw new Error('no valid data');
       }
       this._snackService.open({type: 'SUCCESS', message: 'Data imported'});
     } catch (e) {
@@ -108,7 +97,37 @@ export class MigrateService {
     }
   }
 
-  private async _importProject(op: OldProject) {
+  private _getCompleteDataFromLs(): OldDataExport {
+    const oldData: OldDataExport = {
+      projects: null,
+      currentProject: null,
+    };
+    const allProjects = loadFromLs(STORAGE_PROJECTS);
+    if (allProjects && allProjects.length > 0) {
+      oldData.projects = allProjects;
+    } else if (loadFromLs(STORAGE_CURRENT_PROJECT)) {
+      oldData.currentProject = loadFromLs(STORAGE_CURRENT_PROJECT);
+    } else {
+      oldData.currentProject = {
+        title: 'Imported Default Project',
+        id: 'OLD_DEFAULT',
+        data: {
+          tasks: loadFromLs(STORAGE_TASKS) || [],
+          backlogTasks: loadFromLs(STORAGE_BACKLOG_TASKS) || [],
+          doneBacklogTasks: loadFromLs(STORAGE_DONE_BACKLOG_TASKS) || [],
+          theme: loadFromLs(STORAGE_THEME) || 'blue',
+          jiraSettings: loadFromLs(STORAGE_JIRA_SETTINGS) || {},
+        }
+      };
+    }
+    return oldData;
+  }
+
+  private async _migrateDataFromLs(): Promise<any> {
+    return this.migrateData(this._getCompleteDataFromLs());
+  }
+
+  private async _importProject(op: OldProject): Promise<any> {
     this._projectService.upsert({
       id: op.id,
       title: op.title,
@@ -148,9 +167,9 @@ export class MigrateService {
     }
 
     // TASKS
-    const todayIds = op.data.tasks.map(t => t.id);
-    const backlogIds = op.data.backlogTasks.map(t => t.id);
-    const doneBacklogIds = op.data.doneBacklogTasks.map(t => t.id);
+    const todayIds = op.data.tasks.map(t => t && t.id).filter(id => !id);
+    const backlogIds = op.data.backlogTasks.map(t => t && t.id).filter(id => !id);
+    const doneBacklogIds = op.data.doneBacklogTasks.map(t => t && t.id).filter(id => !id);
 
     if (freshIssues) {
       this._remapGitIssueIds(allTasks, freshIssues);

@@ -93,3 +93,12 @@ export interface OldProject {
   data: OldProjectData;
 }
 
+export interface OldDataExport {
+  tasks?: OldTask[];
+  backlogTasks?: OldTask[];
+  doneTasks?: OldTask[];
+  config?: any;
+  projects?: OldProject[];
+  currentProject: OldProject | { id: string; title: string; };
+}
+
