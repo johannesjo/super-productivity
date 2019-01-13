@@ -77,38 +77,38 @@ export class ShortcutService {
       this._router.navigate(['/work-view'], {
         queryParams: {backlogPos: backlogPos}
       });
-    }
-    if (checkKeyCombo(ev, keys.goToWorkView)) {
+
+    } else if (checkKeyCombo(ev, keys.goToWorkView)) {
       this._router.navigate(['/work-view']);
-    }
-    if (checkKeyCombo(ev, keys.goToDailyAgenda)) {
+
+    } else if (checkKeyCombo(ev, keys.goToDailyAgenda)) {
       this._router.navigate(['/daily-agenda']);
-    }
-    if (checkKeyCombo(ev, keys.goToSettings)) {
+
+    } else if (checkKeyCombo(ev, keys.goToSettings)) {
       this._router.navigate(['/settings']);
-    }
-    if (checkKeyCombo(ev, keys.goToFocusMode)) {
+
+    } else if (checkKeyCombo(ev, keys.goToFocusMode)) {
       this._router.navigate(['/focus-view']);
-    }
-    if (checkKeyCombo(ev, keys.focusLastActiveTask)) {
+
+    } else if (checkKeyCombo(ev, keys.focusLastActiveTask)) {
       this._router.navigate(['/work-view']);
       this._taskService.focusLastActiveTask();
-    }
-    if (checkKeyCombo(ev, keys.addNewTask)) {
+
+    } else if (checkKeyCombo(ev, keys.addNewTask)) {
       this._layoutService.toggleAddTaskBar();
       ev.preventDefault();
-    }
-    if (checkKeyCombo(ev, keys.addNewNote)) {
+
+    } else if (checkKeyCombo(ev, keys.addNewNote)) {
       if (this._matDialog.openDialogs.length === 0) {
         this._matDialog.open(DialogAddNoteComponent);
         ev.preventDefault();
       }
-    }
-    if (checkKeyCombo(ev, keys.openProjectNotes)) {
+
+    } else if (checkKeyCombo(ev, keys.openProjectNotes)) {
       this._noteService.toggleShow();
       ev.preventDefault();
-    }
-    if (checkKeyCombo(ev, keys.toggleBookmarks)) {
+
+    } else if (checkKeyCombo(ev, keys.toggleBookmarks)) {
       this._bookmarkService.toggleBookmarks();
       ev.preventDefault();
     }
