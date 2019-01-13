@@ -98,7 +98,7 @@
                   stroke-width="26"
                   stroke="#000"></circle>
         </svg>
-        <div class="pomodoro-label"
+        <div class="pomodoro-label border-color-primary"
              *ngIf="(pomodoroService.cfg$|async)?.isEnabled">{{(pomodoroService.currentSessionTime$|async|msToMinuteClockString)}}
         </div>
       </button>
