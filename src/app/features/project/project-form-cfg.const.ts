@@ -26,12 +26,12 @@ const themeOpts = ALL_THEMES.map((theme) => {
 
 
 export const BASIC_PROJECT_CONFIG_FORM_CONFIG: ConfigFormSection = {
-  title: 'Basic Settings',
+  title: 'Project Settings & Theme',
   key: 'basic',
   /* tslint:disable */
-  help: `Yadda yada yada`,
+  help: `Very basic settings for your project.`,
   /* tslint:enable */
-  items:[
+  items: [
     {
       key: 'title',
       type: 'input',
@@ -61,6 +61,5 @@ export const BASIC_PROJECT_CONFIG_FORM_CONFIG: ConfigFormSection = {
   ]
 };
 
-export const PROJECT_CONFIG_FORM_CONFIG: ConfigFormConfig = [
-];
+export const PROJECT_CONFIG_FORM_CONFIG: ConfigFormConfig = [];
 

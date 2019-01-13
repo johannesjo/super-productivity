@@ -4,7 +4,12 @@ import { ConfigFormSection } from '../config.model';
 export const POMODORO_FORM_CFG: ConfigFormSection = {
   title: 'Pomodoro Settings',
   key: 'pomodoro',
-  help: ``,
+  /* tslint:disable */
+  help: `<p>The pomodoro timer can be configured via a couple of settings. The duration of every work session, the duration of normal breaks, the number of work sessions to run before a longer break is started and the duration of this longer break.</p>
+  <p>You can also set if you want to display your distractions during your pomodoro breaks.</p>
+  <p>Setting "Pause time tracking on pomodoro break" will also track your breaks as work time spent on a task. </p>
+  <p>Enabling "Pause pomodoro session when no active task" will also pause the pomodoro session, when you pause a task.</p>`,
+  /* tslint:enable */
   items: [
     {
       key: 'isEnabled',

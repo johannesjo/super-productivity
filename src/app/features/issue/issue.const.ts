@@ -23,7 +23,11 @@ export const ISSUE_PROVIDER_FORM_CFGS: ConfigFormConfig = [
   {
     title: 'GitHub',
     key: GIT_TYPE,
-    items: GIT_CONFIG_FORM
+    items: GIT_CONFIG_FORM,
+    /* tslint:disable */
+    help: `<p>Here you can configure SuperProductivity to list open GithHub issues for a specific repository in the task creation panel in the daily planning view. They will be listed as suggestions and will provide a link to the issue as well as more information about it.</p>
+  <p>In addition you can automatically add and sync all open issues to your task backlog.</p>`,
+    /* tslint:enable */
   },
 
   // JIRA

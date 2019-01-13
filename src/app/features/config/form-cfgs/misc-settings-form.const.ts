@@ -5,7 +5,7 @@ export const MISC_SETTINGS_FORM_CFG: ConfigFormSection = {
   title: 'Misc Settings',
   key: 'misc',
   help: `
-  <div ng-if="vm.IS_ELECTRON">
+  <div>
     <div class="mat-caption">Enable idle time handling</div>
     <p>Open a dialog after a specified amount of time to check if and on which task you want to track your time, when
       you have been idle.</p>

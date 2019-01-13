@@ -12,7 +12,7 @@ export const GLOBAL_CONFIG_FORM_CONFIG: ConfigFormConfig = [
     title: 'Sync via Google Drive',
     key: 'keyboard',
     /* tslint:disable */
-    help: `Yadda yada yada`,
+    help: `Here you can configure your app to automatically sync to and from a single google drive file. All data will be saved unencrypted, so make sure you don't accidentally share this file with someone.`,
     /* tslint:enable */
     customSection: 'GOOGLE_SYNC',
   },
