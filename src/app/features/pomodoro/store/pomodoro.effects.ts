@@ -38,7 +38,7 @@ export class PomodoroEffects {
 
 
   @Effect()
-  updateCurrentTaskOnSessionStart$ = this._actions$.pipe(
+  autoStartNextOnSessionStartIfNotAlready$ = this._actions$.pipe(
     ofType(PomodoroActionTypes.FinishPomodoroSession),
     withLatestFrom(
       this._pomodoroService.cfg$,
@@ -46,11 +46,9 @@ export class PomodoroEffects {
       this._store$.pipe(select(selectCurrentTaskId)),
     ),
     filter(isEnabled),
-    filter(([action, cfg, isBreak, currentTaskId]: [FinishPomodoroSession, PomodoroConfig, boolean, string]) => {
-      console.log(isBreak, currentTaskId);
-
-      return !isBreak && !currentTaskId;
-    }),
+    filter(([action, cfg, isBreak, currentTaskId]: [FinishPomodoroSession, PomodoroConfig, boolean, string]) =>
+      (!isBreak && !currentTaskId)
+    ),
     mapTo(new ToggleStart()),
   );
 

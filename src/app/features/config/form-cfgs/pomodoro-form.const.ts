@@ -20,13 +20,13 @@ export const POMODORO_FORM_CFG: ConfigFormSection = {
         label: 'Stop time tracking for task on break',
       },
     },
-    {
-      key: 'isStopTrackingOnLongBreak',
-      type: 'checkbox',
-      templateOptions: {
-        label: 'Stop time tracking for task on a long break',
-      },
-    },
+    // {
+    //   key: 'isStopTrackingOnLongBreak',
+    //   type: 'checkbox',
+    //   templateOptions: {
+    //     label: 'Stop time tracking for task on a long break',
+    //   },
+    // },
     {
       key: 'isManualContinue',
       type: 'checkbox',
