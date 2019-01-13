@@ -16,6 +16,8 @@ import { NotifyService } from './notify.service';
 })
 export class NotifyModule {
   constructor() {
-    Notification.requestPermission();
+    if ('Notification' in window) {
+      Notification.requestPermission();
+    }
   }
 }
