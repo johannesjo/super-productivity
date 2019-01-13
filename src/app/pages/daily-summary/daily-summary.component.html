@@ -37,45 +37,45 @@
   </div>
 
   <mat-tab-group dynamicHeight>
-    <!--<mat-tab label="Note for tomorrow">-->
-      <!--<p>This is meant to be a takeaway to be even more productive and happy tomorrow. E.g.: What did you learn today? What do you want to do better/smarter tomorrow? What do you want to achieve and why?</p>-->
-      <!--<p>Think a second and reflect on the day.</p>-->
+    <mat-tab label="Note for tomorrow">
+      <p>This is meant to be a takeaway to be even more productive and happy tomorrow. E.g.: What did you learn today? What do you want to do better/smarter tomorrow? What do you want to achieve and why?</p>
+      <p>Think a second and reflect on the day.</p>
 
-      <!--<textarea [(ngModel)]="tomorrowsNote"-->
-                <!--class="tomorrows-note bg-standard mat-elevation-z3"-->
-                <!--rows="5"></textarea>-->
-    <!--</mat-tab>-->
+      <textarea [(ngModel)]="tomorrowsNote"
+                class="tomorrows-note bg-standard mat-elevation-z3"
+                rows="5"></textarea>
+    </mat-tab>
 
-    <!--<mat-tab label="Task List">-->
-      <!--<table class="task-summary-table bg-standard">-->
-        <!--<tr>-->
-          <!--<th>Title</th>-->
-          <!--<th>Sub-Tasks</th>-->
-          <!--<th>Time spent today</th>-->
-          <!--<th>Time spent total</th>-->
-          <!--<th>Time esti.</th>-->
-          <!--<th></th>-->
-        <!--</tr>-->
+    <mat-tab label="Task List">
+      <table class="task-summary-table bg-standard">
+        <tr>
+          <th>Title</th>
+          <th>Sub-Tasks</th>
+          <th>Time spent today</th>
+          <th>Time spent total</th>
+          <th>Time esti.</th>
+          <th></th>
+        </tr>
 
-        <!--<tr *ngFor="let task of todaysTasks$|async"-->
-            <!--[class.is-done]="task.isDone">-->
-          <!--<td [innerHtml]="task.title"></td>-->
-          <!--<td>-->
-            <!--<span *ngFor="let task of task.subTasks"><span [innerHtml]="task.title"></span>: <span [innerHtml]="task.timeSpentOnDay[todayStr]|msToString"></span><br></span>-->
-          <!--</td>-->
-          <!--<td [innerHtml]="task.timeSpentOnDay[todayStr] |msToString"></td>-->
-          <!--<td [innerHtml]="task.timeSpent |msToString"></td>-->
-          <!--<td [innerHtml]="task.timeEstimate |msToString"></td>-->
-          <!--<td>-->
-            <!--<mat-icon *ngIf="task.isDone"-->
-                      <!--style="fill:green;">check-->
-            <!--</mat-icon>-->
-          <!--</td>-->
-        <!--</tr>-->
-      <!--</table>-->
-    <!--</mat-tab>-->
+        <tr *ngFor="let task of todaysTasks$|async"
+            [class.is-done]="task.isDone">
+          <td [innerHtml]="task.title"></td>
+          <td>
+            <span *ngFor="let task of task.subTasks"><span [innerHtml]="task.title"></span>: <span [innerHtml]="task.timeSpentOnDay[todayStr]|msToString"></span><br></span>
+          </td>
+          <td [innerHtml]="task.timeSpentOnDay[todayStr] |msToString"></td>
+          <td [innerHtml]="task.timeSpent |msToString"></td>
+          <td [innerHtml]="task.timeEstimate |msToString"></td>
+          <td>
+            <mat-icon *ngIf="task.isDone"
+                      style="fill:green;">check
+            </mat-icon>
+          </td>
+        </tr>
+      </table>
+    </mat-tab>
 
-    <mat-tab label="Export Google Sheet">
+    <mat-tab label="Google Sheet Export">
       <google-export-time></google-export-time>
     </mat-tab>
     <mat-tab label="Simple Export">

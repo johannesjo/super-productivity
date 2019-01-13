@@ -9,12 +9,16 @@ import { SnackService } from '../../../core/snack/snack.service';
 import { takeUntil } from 'rxjs/operators';
 import * as moment from 'moment';
 import { Duration, Moment } from 'moment';
+import { expandAnimation } from '../../../ui/animations/expand.ani';
 
+
+// TODO refactor to Observables
 @Component({
   selector: 'google-export-time',
   templateUrl: './google-export-time.component.html',
   styleUrls: ['./google-export-time.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  animations: [expandAnimation]
 })
 export class GoogleExportTimeComponent implements OnInit, OnDestroy {
   @Output() saveData = new EventEmitter();
@@ -51,6 +55,9 @@ export class GoogleExportTimeComponent implements OnInit, OnDestroy {
   readPromise: Promise<any>;
   savePromise: Promise<any>;
 
+  isSpreadSheetConfigured = false;
+  isSpreadSheetRead = false;
+
   private _startedTimeToday: number;
   private _todaysTasks: TaskWithSubTasks[];
   private _projectId: string;
@@ -69,6 +76,7 @@ export class GoogleExportTimeComponent implements OnInit, OnDestroy {
         this.opts = {...project.advancedCfg.googleTimeSheetExport};
         this._projectId = project.id;
         this._startedTimeToday = project.startedTimeToday;
+        this.isSpreadSheetConfigured = this.opts.spreadsheetId && this.opts.spreadsheetId.length > 5;
       });
     this._taskService.todaysTasks$
       .pipe(takeUntil(this._destroy$))
@@ -113,13 +121,17 @@ export class GoogleExportTimeComponent implements OnInit, OnDestroy {
 
   readSpreadsheet() {
     this.isLoading = true;
+    this.isSpreadSheetRead = false;
     this.headings = undefined;
     this.readPromise = this.googleApiService.getSpreadsheetHeadingsAndLastRow(this.opts.spreadsheetId);
+    this._cd.detectChanges();
     return this.readPromise.then((data: any) => {
       this.headings = data.headings;
       this.lastRow = data.lastRow;
       this.updateDefaults();
       this.isLoading = false;
+      this.isSpreadSheetConfigured = true;
+      this.isSpreadSheetRead = true;
       this._cd.detectChanges();
     }).catch(this._handleError.bind(this));
   }

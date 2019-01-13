@@ -1,7 +1,9 @@
 <section *ngIf="(googleApiService.isLoggedIn$|async)"
+         @expand
          class="export-main">
-  <div *ngIf="!opts.spreadsheetId">
-    <mat-form-field style="width: 100%;">
+  <div *ngIf="!isSpreadSheetConfigured"
+       @expand>
+    <mat-form-field>
       <label>Spreadsheet ID</label>
       <input type="text"
              matInput=""
@@ -11,43 +13,48 @@
   </div>
 
   <div class="loading-spinner"
+       @expand
        *ngIf="isLoading">
     <mat-progress-spinner mode="indeterminate"></mat-progress-spinner>
   </div>
 
 
-  <table class="export-input-table"
-         *ngIf="headings && !isLoading">
-    <tr>
-      <th></th>
-      <th class="heading"
-          *ngFor="let heading of headings"
-          [innerHtml]="heading"></th>
-    </tr>
-    <tr>
-      <th>Last saved row</th>
-      <td *ngFor="let col of lastRow">{{col}}</td>
-    </tr>
-    <tr>
-      <th>Default</th>
-      <td class="default"
-          *ngFor="let heading of headings; let i = index;">
-        <input type="text"
-               (change)="updateDefaults()"
-               [ngModelOptions]="{standalone: true}"
-               [(ngModel)]="opts.defaultValues[i]">
-      </td>
-    </tr>
-    <tr>
-      <th>Actual</th>
-      <td class="actual"
-          *ngFor="let heading of headings; let i = index;">
-        <input type="text"
-               name="actualValues"
-               [(ngModel)]="actualValues[i]">
-      </td>
-    </tr>
-  </table>
+  <div class="table-wrapper"
+       @expand
+       *ngIf="headings && !isLoading && isSpreadSheetRead">
+    <table class="export-input-table">
+      <tr>
+        <th></th>
+        <th class="heading"
+            *ngFor="let heading of headings"
+            [innerHtml]="heading"></th>
+      </tr>
+      <tr>
+        <th>Last saved row</th>
+        <td *ngFor="let col of lastRow">{{col}}</td>
+      </tr>
+      <tr>
+        <th>Default</th>
+        <td class="default"
+            *ngFor="let heading of headings; let i = index;">
+          <input type="text"
+                 (change)="updateDefaults()"
+                 [ngModelOptions]="{standalone: true}"
+                 [(ngModel)]="opts.defaultValues[i]">
+        </td>
+      </tr>
+      <tr>
+        <th>Actual</th>
+        <td class="actual"
+            *ngFor="let heading of headings; let i = index;">
+          <input type="text"
+                 name="actualValues"
+                 [(ngModel)]="actualValues[i]">
+        </td>
+      </tr>
+    </table>
+  </div>
+
 </section>
 
 <div class="controls">
@@ -113,6 +120,16 @@
                class="options-collapsible"
                [initiallyExpanded]="opts.spreadsheetId">
     <div class="options-wrapper">
+      <div>
+        <mat-form-field>
+          <label>Spreadsheet ID</label>
+          <input type="text"
+                 matInput=""
+                 name="spreadsheetId"
+                 [(ngModel)]="opts.spreadsheetId">
+        </mat-form-field>
+      </div>
+
       <div class="toggle-wrapper">
         <mat-slide-toggle
           [ngModelOptions]="{standalone: true}"
@@ -167,44 +184,44 @@
     </div>
   </collapsible>
 
-  <!--<collapsible class="help-collapsible"-->
-  <!--title="What is this and how does it work?"-->
-  <!--[initiallyExpanded]="opts.spreadsheetId">-->
-  <!--<div class="info">-->
-  <!--<p>This view allows you to export your worked time to a google sheet. You need to allow for your Google Spreadsheets to be accessed by Super Productivity. You also need to create a spreadsheet with a headings in the first row nad specify it's ID in the input field (<a external-link-->
-  <!--target="_blank"-->
-  <!--href="https://stackoverflow.com/questions/36061433/how-to-do-i-locate-a-google-spreadsheet-id">Ho to find the id of a spreadsheet?</a>).-->
-  <!--</p>-->
-  <!--<p>After successfully loading your spreadsheet a table will show up with 4 rows. The first row shows the heading you specified in the spreadsheet itself.</p>-->
-  <!--<p>The second row is for informational purposes and shows the last row from the spreadsheet.</p>-->
-  <!--<p>The forth row is a list of values you can directly enter save to the spreadsheet.</p>-->
-  <!--<p>The third row is there to automatically define some values for the forth row. There are several special strings you can enter into the cells:</p>-->
-  <!--</div>-->
+  <collapsible class="help-collapsible"
+               title="Help"
+               [initiallyExpanded]="opts.spreadsheetId">
+    <div class="info">
+      <p>This view allows you to export your worked time to a google sheet. You need to allow for your Google Spreadsheets to be accessed by Super Productivity. You also need to create a spreadsheet with a headings in the first row nad specify it's ID in the input field (<a external-link
+                                                                                                                                                                                                                                                                                   target="_blank"
+                                                                                                                                                                                                                                                                                   href="https://stackoverflow.com/questions/36061433/how-to-do-i-locate-a-google-spreadsheet-id">Ho to find the id of a spreadsheet?</a>).
+      </p>
+      <p>After successfully loading your spreadsheet a table will show up with 4 rows. The first row shows the heading you specified in the spreadsheet itself.</p>
+      <p>The second row is for informational purposes and shows the last row from the spreadsheet.</p>
+      <p>The forth row is a list of values you can directly enter save to the spreadsheet.</p>
+      <p>The third row is there to automatically define some values for the forth row. There are several special strings you can enter into the cells:</p>
+    </div>
 
-  <!--<dl class="possible-properties">-->
-  <!--<dt>{{ '{' }}startTime}</dt>-->
-  <!--<dd>The time when you first used this app today. It's possible to round this via the options.</dd>-->
+    <dl class="possible-properties">
+      <dt>{{ '{' }}startTime}</dt>
+      <dd>The time when you first used this app today. It's possible to round this via the options.</dd>
 
-  <!--<dt>{{ '{' }}currentTime}</dt>-->
-  <!--<dd>The current time. Could be used for the for the end time of todays working day It's possible to round this via the options.</dd>-->
+      <dt>{{ '{' }}currentTime}</dt>
+      <dd>The current time. Could be used for the for the end time of todays working day It's possible to round this via the options.</dd>
 
-  <!--<dt>{{ '{' }}date}</dt>-->
-  <!--<dd>Todays date in standard format (mm/dd/yyyy)</dd>-->
+      <dt>{{ '{' }}date}</dt>
+      <dd>Todays date in standard format (mm/dd/yyyy)</dd>
 
-  <!--<dt>{{ '{' }}date:DD/MM/YYYY} (example)</dt>-->
-  <!--<dd>Date with a custom date format string.</dd>-->
+      <dt>{{ '{' }}date:DD/MM/YYYY} (example)</dt>
+      <dd>Date with a custom date format string.</dd>
 
-  <!--<dt>{{ '{' }}taskTitles}</dt>-->
-  <!--<dd>Comma separated (parent) task titles</dd>-->
+      <dt>{{ '{' }}taskTitles}</dt>
+      <dd>Comma separated (parent) task titles</dd>
 
-  <!--<dt>{{ '{' }}subTaskTitles}</dt>-->
-  <!--<dd>Comma separated sub task titles</dd>-->
+      <dt>{{ '{' }}subTaskTitles}</dt>
+      <dd>Comma separated sub task titles</dd>
 
-  <!--<dt>{{ '{' }}totalTime}</dt>-->
-  <!--<dd>The total time you spend working on your todays tasks.</dd>-->
-  <!--</dl>-->
+      <dt>{{ '{' }}totalTime}</dt>
+      <dd>The total time you spend working on your todays tasks.</dd>
+    </dl>
 
-  <!--<p>In addition to this there are several options you can use to modify the calculation of those values.</p>-->
-  <!--</collapsible>-->
+    <p>In addition to this there are several options you can use to modify the calculation of those values.</p>
+  </collapsible>
 </section>
 
