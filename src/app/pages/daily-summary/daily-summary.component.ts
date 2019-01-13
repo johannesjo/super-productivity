@@ -4,7 +4,6 @@ import { getTodayStr } from '../../features/tasks/util/get-today-str';
 import { TaskWithSubTasks } from '../../features/tasks/task.model';
 import { Router } from '@angular/router';
 import { IS_ELECTRON } from '../../app.constants';
-import { DialogGoogleExportTimeComponent } from '../../features/google/dialog-google-export-time/dialog-google-export-time.component';
 import { MatDialog } from '@angular/material';
 import { DialogSimpleTaskSummaryComponent } from '../../features/simple-task-summary/dialog-simple-task-summary/dialog-simple-task-summary.component';
 import { Subscription } from 'rxjs';
@@ -16,6 +15,8 @@ import { ConfigService } from '../../features/config/config.service';
 import { GoogleDriveSyncService } from '../../features/google/google-drive-sync.service';
 import { SnackService } from '../../core/snack/snack.service';
 import { takeUntil } from 'rxjs/operators';
+import { loadFromLs, saveToLs } from '../../core/persistence/local-storage';
+import { LS_DAILY_SUMMARY_TAB_INDEX } from '../../core/persistence/ls-keys.const';
 
 const SUCCESS_ANIMATION_DURATION = 500;
 
@@ -26,18 +27,20 @@ const SUCCESS_ANIMATION_DURATION = 500;
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DailySummaryComponent implements OnInit, OnDestroy {
-  public cfg = {
+  cfg = {
     isBlockFinishDayUntilTimeTimeTracked: false
   };
-  public doneTasks$ = this._taskService.doneTasks$;
-  public todaysTasks$ = this._taskService.todaysTasks$;
-  public todayStr = getTodayStr();
-  public tomorrowsNote: string;
-  public clearDoneTasks: boolean;
-  public moveUnfinishedToBacklog: boolean;
-  public commitLog;
-  public isTimeSheetExported = true;
-  public showSuccessAnimation;
+  doneTasks$ = this._taskService.doneTasks$;
+  todaysTasks$ = this._taskService.todaysTasks$;
+  todayStr = getTodayStr();
+  tomorrowsNote: string;
+  clearDoneTasks: boolean;
+  moveUnfinishedToBacklog: boolean;
+  commitLog;
+  isTimeSheetExported = true;
+  showSuccessAnimation;
+  selectedTabIndex = loadFromLs(LS_DAILY_SUMMARY_TAB_INDEX) || 0;
+
   // calc total time spent on todays tasks
   totalTimeSpentTasks$ = this._taskService.totalTimeWorkedOnTodaysTasks$;
   // use mysql date as it is sortable
@@ -61,6 +64,7 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
     private readonly _electronService: ElectronService,
     private readonly _cd: ChangeDetectorRef,
   ) {
+
   }
 
   ngOnInit() {
@@ -128,6 +132,9 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
     }
   }
 
+  onTabIndexChange(i) {
+    saveToLs(LS_DAILY_SUMMARY_TAB_INDEX, i);
+  }
 
   private _finishDayForGood(cb?) {
     if (this.tomorrowsNote && this.tomorrowsNote.trim().length > 0) {
