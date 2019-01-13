@@ -78,10 +78,6 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
     ).subscribe(() => {
       this._taskService.setCurrentId(null);
     }));
-
-    setTimeout(() => {
-      this.showExportModal();
-    }, 1000);
   }
 
   ngOnDestroy() {
@@ -98,12 +94,6 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
       data: {
         tasks: this._todaysTasks,
       }
-    });
-  }
-
-  showTimeSheetExportModal() {
-    this._matDialog.open(DialogGoogleExportTimeComponent, {
-      restoreFocus: true,
     });
   }
 

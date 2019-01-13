@@ -73,32 +73,29 @@
           </td>
         </tr>
       </table>
+
+      <div style="text-align: center; margin-top: 8px; margin-bottom: 16px;">
+        <button mat-raised-button=""
+                (click)="showExportModal()">
+          <mat-icon>call_made</mat-icon>
+          <mat-icon>playlist_play</mat-icon>
+          Export Task List
+        </button>
+      </div>
     </mat-tab>
 
     <mat-tab label="Google Sheet Export">
       <google-export-time></google-export-time>
     </mat-tab>
-    <mat-tab label="Simple Export">
-      <h1>Some tab content</h1>
-      <p>...</p>
-    </mat-tab>
-
-
-
+    <!--<mat-tab label="Simple Export">-->
+    <!--<h1>Some tab content</h1>-->
+    <!--<p>...</p>-->
+    <!--</mat-tab>-->
   </mat-tab-group>
-
 
 
   <section class="daily-summary-actions">
     <div class="bottom-buttons">
-      <button mat-raised-button=""
-      color="primary"
-      (click)="showExportModal()">
-      <mat-icon>call_made</mat-icon>
-      <mat-icon>playlist_play</mat-icon>
-      Export Task List
-      </button>
-
       <!--<button mat-raised-button=""-->
       <!--[color]="cfg.isBlockFinishDayUntilTimeTimeTracked && !isTimeSheetExported && 'accent' ||'primary'"-->
       <!--(click)="showTimeSheetExportModal()">-->
