@@ -1,0 +1,159 @@
+<div class="dialog-content"
+     mat-dialog-content="">
+
+        <textarea [(ngModel)]="tasksTxt"
+                  tabindex="-1"
+                  name="tasksTxt"
+                  rows="10"
+                  id="task-textarea"
+                  class="simple-textarea mat-elevation-z2"></textarea>
+
+
+  <section class="options">
+    <div class="row">
+      <div class="col">
+        <div class="md-caption"
+             style="margin: 10px 0;">Options
+        </div>
+        <div>
+          <mat-slide-toggle [(ngModel)]="options.isUseNewLine"
+                            (change)="onOptionsChange()"
+                            name="isUseNewLine"
+                            aria-label="Add new line">
+            Add new line after task
+          </mat-slide-toggle>
+        </div>
+        <div>
+          <mat-slide-toggle [(ngModel)]="options.isListSubTasks"
+                            (change)="onOptionsChange()"
+                            name="isListSubTasks"
+                            aria-label="List sub tasks">
+            List sub tasks
+          </mat-slide-toggle>
+        </div>
+        <div *ngIf="!isWorklogExport">
+          <mat-slide-toggle [(ngModel)]="options.isWorkedOnTodayOnly"
+                            (change)="onOptionsChange()"
+                            name="isWorkedOnTodayOnly"
+                            aria-label="List worked on today tasks only">
+            List worked on today tasks only
+          </mat-slide-toggle>
+        </div>
+        <div *ngIf="!isWorklogExport">
+          <mat-slide-toggle [(ngModel)]="options.isListDoneOnly"
+                            (change)="onOptionsChange()"
+                            name="isListDoneOnly"
+                            aria-label="List done tasks only">
+            List done tasks only
+          </mat-slide-toggle>
+        </div>
+        <mat-form-field class="md-block">
+          <label>Separate tasks by</label>
+          <input type="text"
+                 matInput=""
+                 (change)="onOptionsChange()"
+                 name="separateBy"
+                 [(ngModel)]="options.separateBy">
+        </mat-form-field>
+      </div>
+
+      <div class="col">
+        <div class="md-caption"
+             style="margin: 10px 0;">Fields to display
+        </div>
+        <div>
+          <mat-slide-toggle (change)="onOptionsChange()"
+                            name="showTitle"
+                            [(ngModel)]="options.isShowTitle"
+                            aria-label="Title">
+            Title
+          </mat-slide-toggle>
+        </div>
+        <div>
+          <mat-slide-toggle (change)="onOptionsChange()"
+                            name="showDate"
+                            [(ngModel)]="options.isShowDate"
+                            aria-label="Date">
+            Date
+          </mat-slide-toggle>
+        </div>
+        <div>
+          <mat-slide-toggle [(ngModel)]="options.isShowTimeSpent"
+                            (change)="onOptionsChange()"
+                            name="showTimeSpent"
+                            aria-label="Time Spent">
+            Time Spent
+          </mat-slide-toggle>
+        </div>
+        <div>
+          <mat-slide-toggle [(ngModel)]="options.isShowTimeEstimate"
+                            (change)="onOptionsChange()"
+                            name="showTimeSpent"
+                            aria-label="Time Estimate">
+            Time Estimate
+          </mat-slide-toggle>
+        </div>
+        <div>
+          <mat-slide-toggle [(ngModel)]="options.isTimesAsMilliseconds"
+                            (change)="onOptionsChange()"
+                            name="isTimeSpentAsMilliseconds"
+                            [disabled]="!options.isShowTimeSpent"
+                            aria-label="Show time as milliseconds">
+            Time as milliseconds
+          </mat-slide-toggle>
+        </div>
+        <mat-form-field class="md-block">
+          <label>Separate fields by</label>
+          <input type="text"
+                 matInput=""
+                 (change)="onOptionsChange()"
+                 name="separateFieldsBy"
+                 [(ngModel)]="options.separateFieldsBy">
+        </mat-form-field>
+      </div>
+    </div>
+
+    <div class="row">
+      <mat-form-field style="width: 100%">
+        <label>Regular Expression to remove</label>
+        <input type="text"
+               matInput=""
+               (change)="onOptionsChange()"
+               name="regExToRemove"
+               [(ngModel)]="options.regExToRemove">
+        <div class="validation-messages">
+          <div *ngIf="isInvalidRegEx"
+               class="error">Invalid Regular Expression
+          </div>
+        </div>
+      </mat-form-field>
+    </div>
+  </section>
+</div>
+
+
+<div mat-dialog-actions=""
+     align="center">
+  <button mat-raised-button=""
+          color="primary"
+          id="clipboard-btn"
+          data-clipboard-action="copy"
+          data-clipboard-target="#task-textarea">
+    <mat-icon>content_paste</mat-icon>
+    Copy to clipboard
+  </button>
+  <a mat-raised-button=""
+     color="primary"
+     [simpleDownload]="'tasks.txt'"
+     [simpleDownloadData]="tasksTxt">
+    <mat-icon>file_download</mat-icon>
+    Save to file
+  </a>
+  <button mat-raised-button=""
+          *ngIf="isShowClose"
+          (click)="onCancelClick()"
+          type="button">
+    <mat-icon>close</mat-icon>
+    Close
+  </button>
+</div>

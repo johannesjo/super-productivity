@@ -78,6 +78,10 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
     ).subscribe(() => {
       this._taskService.setCurrentId(null);
     }));
+
+    setTimeout(() => {
+      this.showExportModal();
+    }, 1000);
   }
 
   ngOnDestroy() {

@@ -4,6 +4,7 @@ import { DialogSimpleTaskSummaryComponent } from './dialog-simple-task-summary/d
 import { UiModule } from '../../ui/ui.module';
 import { FormsModule } from '@angular/forms';
 import { SnackModule } from '../../core/snack/snack.module';
+import { SimpleTaskSummaryComponent } from './simple-task-summary/simple-task-summary.component';
 
 @NgModule({
   imports: [
@@ -12,8 +13,9 @@ import { SnackModule } from '../../core/snack/snack.module';
     FormsModule,
     SnackModule,
   ],
-  declarations: [DialogSimpleTaskSummaryComponent],
-  entryComponents: [DialogSimpleTaskSummaryComponent]
+  declarations: [DialogSimpleTaskSummaryComponent, SimpleTaskSummaryComponent],
+  entryComponents: [DialogSimpleTaskSummaryComponent],
+  exports: [SimpleTaskSummaryComponent],
 })
 export class SimpleTaskSummaryModule {
 }
