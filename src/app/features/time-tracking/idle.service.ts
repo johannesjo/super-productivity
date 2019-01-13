@@ -12,6 +12,7 @@ import { ConfigService } from '../config/config.service';
 import { Task } from '../tasks/task.model';
 import { getWorklogStr } from '../../util/get-work-log-str';
 import { TakeABreakService } from './take-a-break/take-a-break.service';
+import { distinctUntilChanged, shareReplay } from 'rxjs/operators';
 
 const DEFAULT_MIN_IDLE_TIME = 60000;
 const IDLE_POLL_INTERVAL = 1000;
@@ -19,9 +20,12 @@ const IDLE_POLL_INTERVAL = 1000;
 @Injectable()
 export class IdleService {
   public isIdle = false;
+  private _isIdle$: BehaviorSubject<boolean> = new BehaviorSubject(false);
+  public isIdle$: Observable<boolean> = this._isIdle$.asObservable().pipe(distinctUntilChanged(), shareReplay());
 
   private _idleTime$: BehaviorSubject<number> = new BehaviorSubject(0);
   public idleTime$: Observable<number> = this._idleTime$.asObservable();
+
 
   private lastCurrentTaskId: string;
   private isIdleDialogOpen = false;
@@ -63,10 +67,12 @@ export class IdleService {
     // don't run if option is not enabled
     if (!cfg.isEnableIdleTimeTracking || (cfg.isOnlyOpenIdleWhenCurrentTask && !this._taskService.currentTaskId)) {
       this.isIdle = false;
+      this._isIdle$.next(false);
       return;
     }
     if (idleTime > minIdleTime) {
       this.isIdle = true;
+      this._isIdle$.next(true);
 
       if (!this.isIdleDialogOpen) {
         this._takeABreakService.blockByIdle(idleTime);

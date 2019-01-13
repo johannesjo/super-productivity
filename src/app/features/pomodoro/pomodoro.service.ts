@@ -8,6 +8,7 @@ import { select, Store } from '@ngrx/store';
 import { FinishPomodoroSession, PausePomodoro, StartPomodoro, StopPomodoro } from './store/pomodoro.actions';
 import { selectCurrentCycle, selectIsBreak, selectIsManualPause } from './store/pomodoro.reducer';
 import { DEFAULT_CFG } from '../config/default-config.const';
+import { IdleService } from '../time-tracking/idle.service';
 
 // Tick Duration
 const TD = -1000;
@@ -89,6 +90,7 @@ export class PomodoroService {
     private _store$: Store<any>,
     private _timeTrackingService: TimeTrackingService,
   ) {
+    // NOTE: idle handling is not required, as unsetting the task auto triggers pause
     this.currentSessionTime$
       .pipe(
         filter(val => (val <= 0)),
