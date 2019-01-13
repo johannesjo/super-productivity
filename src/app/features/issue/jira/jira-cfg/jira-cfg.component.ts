@@ -54,7 +54,7 @@ export class JiraCfgComponent implements OnInit {
       });
     }
 
-    if (!this.cfg.availableTransitions) {
+    if (!Array.isArray(this.cfg.availableTransitions)) {
       this.cfg.availableTransitions = DEFAULT_JIRA_CFG.availableTransitions;
     }
 
