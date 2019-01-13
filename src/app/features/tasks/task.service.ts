@@ -183,7 +183,11 @@ export class TaskService {
   // META
   // ----
   setCurrentId(id: string) {
-    this._store.dispatch(new SetCurrentTask(id));
+    if (id) {
+      this._store.dispatch(new SetCurrentTask(id));
+    } else {
+      this._store.dispatch(new UnsetCurrentTask());
+    }
   }
 
   async loadStateForProject(projectId) {

@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Actions, Effect, ofType } from '@ngrx/effects';
-import { SetCurrentTask, TaskActionTypes, ToggleStart } from '../../tasks/store/task.actions';
-import { filter, map, mapTo, tap, withLatestFrom } from 'rxjs/operators';
+import { SetCurrentTask, TaskActionTypes, ToggleStart, UnsetCurrentTask } from '../../tasks/store/task.actions';
+import { filter, flatMap, map, mapTo, tap, withLatestFrom } from 'rxjs/operators';
 import { PomodoroService } from '../pomodoro.service';
 import { PomodoroConfig } from '../../config/config.model';
 import { FinishPomodoroSession, PausePomodoro, PomodoroActionTypes, StartPomodoro } from './pomodoro.actions';
@@ -9,7 +9,7 @@ import { MatDialog } from '@angular/material';
 import { DialogPomodoroBreakComponent } from '../dialog-pomodoro-break/dialog-pomodoro-break.component';
 import { select, Store } from '@ngrx/store';
 import { selectCurrentTaskId } from '../../tasks/store/task.selectors';
-import { Observable } from 'rxjs';
+import { EMPTY, Observable, of } from 'rxjs';
 import { SnackOpen } from '../../../core/snack/store/snack.actions';
 import { NotifyService } from '../../../core/notify/notify.service';
 
@@ -21,21 +21,22 @@ export class PomodoroEffects {
 
   @Effect()
   startOnCurrentUpdate$ = this._actions$.pipe(
-    ofType(TaskActionTypes.SetCurrentTask),
+    ofType(
+      TaskActionTypes.SetCurrentTask,
+      TaskActionTypes.UnsetCurrentTask,
+    ),
     withLatestFrom(
       this._pomodoroService.cfg$,
       this._pomodoroService.isBreak$,
     ),
     filter(isEnabled),
-    filter(([action, cfg, isBreak]: [SetCurrentTask, PomodoroConfig, boolean]) =>
-      cfg && cfg.isEnabled
-      && !(!action.payload && cfg.isStopTrackingOnBreak && isBreak)
-    ),
-    map(([action]) => {
-      if (action.payload) {
-        return new StartPomodoro();
+    flatMap(([action, cfg, isBreak]: [SetCurrentTask | UnsetCurrentTask, PomodoroConfig, boolean]): Observable<any> => {
+      if (action['payload'] && action.type !== TaskActionTypes.UnsetCurrentTask) {
+        return of(new StartPomodoro());
+      } else if (isBreak && cfg.isStopTrackingOnBreak) {
+        return EMPTY;
       } else {
-        return new PausePomodoro();
+        return of(new PausePomodoro());
       }
     }),
   );
@@ -66,7 +67,7 @@ export class PomodoroEffects {
     filter(isEnabled),
     filter(([action, cfg, isBreak]: [FinishPomodoroSession, PomodoroConfig, boolean]) =>
       cfg.isStopTrackingOnBreak && isBreak),
-    mapTo(new SetCurrentTask(null)),
+    mapTo(new UnsetCurrentTask()),
   );
 
   @Effect({dispatch: false})
@@ -91,7 +92,7 @@ export class PomodoroEffects {
     ),
     filter(isEnabled),
     filter(([act, cfg, currentTaskId]) => !!currentTaskId),
-    mapTo(new SetCurrentTask(null)),
+    mapTo(new UnsetCurrentTask()),
   );
 
   @Effect({dispatch: false})

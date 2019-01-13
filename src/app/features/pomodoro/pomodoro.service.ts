@@ -52,7 +52,7 @@ export class PomodoroService {
       this.cfg$
     ),
     map(([isBreak, isLong, isShort, cfg]) => {
-      // return isBreak ? (isLong ? 20000 : 3000) : 5000;
+      return isBreak ? (isLong ? 20000 : 3000) : 5000;
       if (!isBreak) {
         return cfg.duration || DEFAULT_CFG.pomodoro.duration;
       } else if (isShort) {
