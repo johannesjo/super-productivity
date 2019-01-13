@@ -144,13 +144,6 @@ export class AppComponent implements OnInit {
     this.bookmarkService.createFromPaste(ev);
   }
 
-  @HostListener('window:hidekeyboard', ['$event']) onMobileKeyboardHide() {
-    const activeEl = document.activeElement as HTMLElement;
-    if (activeEl) {
-      activeEl.blur();
-    }
-  }
-
   ngOnInit() {
     this._projectService.currentProject$.subscribe((currentProject: Project) => {
       this._setTheme(currentProject.isDarkTheme, currentProject.themeColor);
