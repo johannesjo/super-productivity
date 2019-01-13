@@ -7,6 +7,7 @@ import { TimeTrackingService } from '../time-tracking/time-tracking.service';
 import { select, Store } from '@ngrx/store';
 import { FinishPomodoroSession, PausePomodoro, StartPomodoro, StopPomodoro } from './store/pomodoro.actions';
 import { selectCurrentCycle, selectIsBreak, selectIsManualPause } from './store/pomodoro.reducer';
+import { DEFAULT_CFG } from '../config/default-config.const';
 
 // Tick Duration
 const TD = -1000;
@@ -51,14 +52,14 @@ export class PomodoroService {
       this.cfg$
     ),
     map(([isBreak, isLong, isShort, cfg]) => {
-      return isBreak ? (isLong ? 20000 : 3000) : 5000;
-      // if (!isBreak) {
-      // return cfg.duration || DEFAULT_CFG.pomodoro.duration;
-      // } else if (isShort) {
-      //   return cfg.longerBreakDuration || DEFAULT_CFG.pomodoro.breakDuration;
-      // } else if (isLong) {
-      // return cfg.longerBreakDuration || DEFAULT_CFG.pomodoro.longerBreakDuration;
-      // }
+      // return isBreak ? (isLong ? 20000 : 3000) : 5000;
+      if (!isBreak) {
+        return cfg.duration || DEFAULT_CFG.pomodoro.duration;
+      } else if (isShort) {
+        return cfg.longerBreakDuration || DEFAULT_CFG.pomodoro.breakDuration;
+      } else if (isLong) {
+        return cfg.longerBreakDuration || DEFAULT_CFG.pomodoro.longerBreakDuration;
+      }
     }),
     shareReplay(),
   );

@@ -11,6 +11,7 @@ import { select, Store } from '@ngrx/store';
 import { selectCurrentTaskId } from '../../tasks/store/task.selectors';
 import { Observable } from 'rxjs';
 import { SnackOpen } from '../../../core/snack/store/snack.actions';
+import { NotifyService } from '../../../core/notify/notify.service';
 
 const isEnabled = ([action, cfg, ...v]) => cfg && cfg.isEnabled;
 
@@ -114,6 +115,13 @@ export class PomodoroEffects {
       this._pomodoroService.isManualPause$,
       this._pomodoroService.currentCycle$,
     ),
+    tap(([action, isBreak, isPause, currentCycle]: [FinishPomodoroSession, boolean, boolean, number]) =>
+      // TODO only notify if window is not currently focused
+      this._notifyService.notify({
+        title: isBreak
+          ? `Pomodoro: Break ${currentCycle + 1} started!`
+          : `Pomodoro: Session ${currentCycle + 1} started!`
+      })),
     filter(([action, isBreak, isPause, currentCycle]: [FinishPomodoroSession, boolean, boolean, number]) =>
       !isBreak && !isPause
     ),
@@ -130,6 +138,7 @@ export class PomodoroEffects {
   constructor(
     private _pomodoroService: PomodoroService,
     private _actions$: Actions,
+    private _notifyService: NotifyService,
     private _matDialog: MatDialog,
     private _store$: Store<any>,
   ) {
