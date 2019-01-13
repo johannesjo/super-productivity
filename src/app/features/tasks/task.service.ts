@@ -40,7 +40,7 @@ import {
   selectCurrentTaskId,
   selectEstimateRemainingForBacklog,
   selectEstimateRemainingForToday,
-  selectFocusTaskId,
+  selectFocusTaskId, selectIsTaskDataLoaded,
   selectIsTriggerPlanningMode,
   selectTaskById,
   selectTasksWithMissingIssueData,
@@ -58,6 +58,10 @@ import { ProjectService } from '../project/project.service';
 
 @Injectable()
 export class TaskService {
+  isDataLoaded$: Observable<boolean> = this._store.pipe(
+    select(selectIsTaskDataLoaded),
+  );
+
   currentTaskId: string;
   currentTaskId$: Observable<string> = this._store.pipe(
     select(selectCurrentTaskId),
@@ -186,6 +190,7 @@ export class TaskService {
   // META
   // ----
   setCurrentId(id: string) {
+    throw new Error('whoooo?');
     if (id) {
       this._store.dispatch(new SetCurrentTask(id));
     } else {
