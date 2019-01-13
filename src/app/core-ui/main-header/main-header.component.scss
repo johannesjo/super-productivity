@@ -3,7 +3,7 @@
 $navBpUltraSmall: 360px;
 $navBpIconInsteadOfText: 374px;
 $navBpIconInsteadOfText: 374px;
-$navBpMainNavReduceButtonSize: 420px;
+$navBpReduceToBurger: 420px;
 $navBp2Lines: 780px;
 $navBpShrinking: 900px;
 $mobileHorizontalPadding: 8px;
@@ -34,6 +34,13 @@ $mobileHorizontalPadding: 8px;
   }
 }
 
+
+.burger-trigger {
+  @media (min-width: $navBpReduceToBurger+1) {
+    display: none;
+  }
+}
+
 .main-nav {
   display: flex;
   flex: 1;
@@ -60,14 +67,8 @@ $mobileHorizontalPadding: 8px;
     }
   }
 
-  @media (max-width: $navBpMainNavReduceButtonSize) {
-    // reduce outer padding
-    margin: 0 -1 *$mobileHorizontalPadding;
-
-    button {
-      // reduce button padding
-      padding: 0;
-    }
+  @media (max-width: $navBpReduceToBurger) {
+    display: none;
   }
 
   @media (max-width: $navBp2Lines) {

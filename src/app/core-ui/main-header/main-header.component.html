@@ -4,6 +4,40 @@
     <mat-icon svgIcon="sp">sp</mat-icon>
   </button>
 
+  <button mat-icon-button
+          class="burger-trigger"
+          [matMenuTriggerFor]="mainMenu">
+    <mat-icon>menu</mat-icon>
+  </button>
+
+  <mat-menu #mainMenu="matMenu">
+
+    <button mat-menu-item
+            routerLink="work-view">
+      <mat-icon>playlist_play</mat-icon>
+      Task List ({{(taskService.undoneTasks$|async)?.length || 0}})
+    </button>
+    <button mat-menu-item
+            routerLink="worklog-and-calendar">
+      <mat-icon>today</mat-icon>
+      Worklog
+    </button>
+
+    <button mat-menu-item
+            [routerLink]="'projects'">
+      <mat-icon>list</mat-icon>
+      Manage Projects
+    </button>
+
+    <button mat-menu-item
+            routerLinkActive
+            [routerLink]="'config'">
+      <mat-icon>settings</mat-icon>
+      Settings
+    </button>
+
+  </mat-menu>
+
   <button mat-button
           class="project-btn"
           [matMenuTriggerFor]="projectMenu">
@@ -35,27 +69,23 @@
     <button mat-button
             routerLinkActive="isActive"
             routerLink="work-view">
-      <mat-icon>playlist_play</mat-icon>
       <span class="text">Tasks ({{(taskService.undoneTasks$|async)?.length || 0}})</span>
     </button>
     <button mat-button
             routerLinkActive="isActive"
             routerLink="worklog-and-calendar">
-      <mat-icon>today</mat-icon>
       <span class="text">Worklog</span>
     </button>
 
     <button mat-button
             routerLinkActive="isActive"
             [routerLink]="'projects'">
-      <mat-icon>list</mat-icon>
       <span class="text">Projects</span>
     </button>
 
     <button mat-button
             routerLinkActive="isActive"
             [routerLink]="'config'">
-      <mat-icon>settings</mat-icon>
       <span class="text">Settings</span>
     </button>
   </nav>
