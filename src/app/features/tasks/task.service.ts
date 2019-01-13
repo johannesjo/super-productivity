@@ -1,5 +1,5 @@
 import shortid from 'shortid';
-import { debounceTime, delay, distinctUntilChanged, first, map, share, take, withLatestFrom } from 'rxjs/operators';
+import { debounceTime, delay, distinctUntilChanged, first, map, shareReplay, take, withLatestFrom } from 'rxjs/operators';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { DEFAULT_TASK, DropListModelSource, HIDE_SUB_TASKS, SHOW_SUB_TASKS, Task, TaskWithIssueData, TaskWithSubTasks } from './task.model';
@@ -87,7 +87,10 @@ export class TaskService {
   );
 
   doneTasks$: Observable<TaskWithSubTasks[]> = this._store.pipe(
-    select(selectTodaysDoneTasksWithSubTasks), distinctUntilChanged(), share());
+    select(selectTodaysDoneTasksWithSubTasks),
+    distinctUntilChanged(),
+    shareReplay(),
+  );
 
   focusTaskId$: Observable<string> = this._store.pipe(
     select(selectFocusTaskId),

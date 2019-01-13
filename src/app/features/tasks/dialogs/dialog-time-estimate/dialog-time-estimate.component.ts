@@ -4,6 +4,7 @@ import { Task, TaskCopy } from '../../task.model';
 import { TaskService } from '../../task.service';
 import { getTodayStr } from '../../util/get-today-str';
 import { getWorklogStr } from '../../../../util/get-work-log-str';
+import { createTaskCopy } from '../../util/create-task-copy';
 
 @Component({
   selector: 'dialog-time-estimate',
@@ -25,9 +26,8 @@ export class DialogTimeEstimateComponent {
     this.task = this.data.task;
     this.todayStr = getTodayStr();
     this._taskService = _taskService;
-    this.taskCopy = Object.assign({}, this.task);
+    this.taskCopy = createTaskCopy(this.task);
     this.timeSpentOnDayCopy = this.taskCopy.timeSpentOnDay || {};
-    console.log(this.taskCopy);
   }
 
 
