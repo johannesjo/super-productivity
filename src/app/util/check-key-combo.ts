@@ -1,18 +1,19 @@
+const isSpecialKeyExactlyRight = (isKeyRequired: boolean, isKeyPressed: boolean): boolean => {
+  return (isKeyRequired && isKeyPressed) || (!isKeyRequired && !isKeyPressed);
+};
+
 export const checkKeyCombo = (ev: KeyboardEvent, comboToTest: string) => {
   if (comboToTest) {
-    let isConditionMatched = true;
     const comboKeys: string[] = comboToTest.split('+');
     const standardKey: string = comboKeys[comboKeys.length - 1];
-    const specialKeys = comboKeys.splice(0);
-    specialKeys.splice(-1, 1);
+    const sk = comboKeys.splice(0);
+    sk.splice(-1, 1);
 
-    isConditionMatched = isConditionMatched && ((specialKeys.indexOf('Ctrl') === -1) || ev.ctrlKey === true);
-    isConditionMatched = isConditionMatched && ((specialKeys.indexOf('Alt') === -1) || ev.altKey === true);
-    isConditionMatched = isConditionMatched && ((specialKeys.indexOf('Shift') === -1) || ev.shiftKey === true);
-    isConditionMatched = isConditionMatched && ((specialKeys.indexOf('Meta') === -1) || ev.metaKey === true);
-    isConditionMatched = isConditionMatched && ev.key === standardKey;
-
-    return isConditionMatched;
+    return isSpecialKeyExactlyRight(sk.includes('Ctrl'), ev.ctrlKey)
+      && isSpecialKeyExactlyRight(sk.includes('Alt'), ev.altKey)
+      && isSpecialKeyExactlyRight(sk.includes('Meta'), ev.metaKey)
+      && (!(sk.includes('Shift')) || ev.shiftKey === true)
+      && ev.key === standardKey;
   } else {
     return null;
   }
