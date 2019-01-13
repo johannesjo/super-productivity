@@ -9,11 +9,13 @@ import { MatDialog } from '@angular/material';
 import { DialogPomodoroBreakComponent } from '../dialog-pomodoro-break/dialog-pomodoro-break.component';
 import { select, Store } from '@ngrx/store';
 import { selectCurrentTaskId } from '../../tasks/store/task.selectors';
+import { Observable } from 'rxjs';
 
 const isEnabled = ([action, cfg, ...v]) => cfg && cfg.isEnabled;
 
 @Injectable()
 export class PomodoroEffects {
+  currentTaskId$: Observable<string> = this._store$.pipe(select(selectCurrentTaskId));
 
   @Effect()
   startOnCurrentUpdate$ = this._actions$.pipe(
@@ -43,17 +45,17 @@ export class PomodoroEffects {
     withLatestFrom(
       this._pomodoroService.cfg$,
       this._pomodoroService.isBreak$,
-      this._store$.pipe(select(selectCurrentTaskId)),
+      this.currentTaskId$,
     ),
     filter(isEnabled),
     filter(([action, cfg, isBreak, currentTaskId]: [FinishPomodoroSession, PomodoroConfig, boolean, string]) =>
-      (!isBreak && !currentTaskId)
+      (!isBreak && !currentTaskId && !action.payload.isDontResume)
     ),
     mapTo(new ToggleStart()),
   );
 
   @Effect()
-  pauseTimeTracking$ = this._actions$.pipe(
+  pauseTimeTrackingForOption$ = this._actions$.pipe(
     ofType(PomodoroActionTypes.FinishPomodoroSession),
     withLatestFrom(
       this._pomodoroService.cfg$,
@@ -62,6 +64,18 @@ export class PomodoroEffects {
     filter(isEnabled),
     filter(([action, cfg, isBreak]: [FinishPomodoroSession, PomodoroConfig, boolean]) =>
       cfg && cfg.isStopTrackingOnBreak && isBreak),
+    mapTo(new SetCurrentTask(null)),
+  );
+
+  @Effect()
+  pauseTimeTrackingForPause$ = this._actions$.pipe(
+    ofType(PomodoroActionTypes.PausePomodoro),
+    withLatestFrom(
+      this._pomodoroService.cfg$,
+      this.currentTaskId$,
+    ),
+    filter(isEnabled),
+    filter(([act, cfg, currentTaskId]) => !!currentTaskId),
     mapTo(new SetCurrentTask(null)),
   );
 
@@ -77,6 +91,7 @@ export class PomodoroEffects {
       }
     }),
   );
+
 
   constructor(
     private _pomodoroService: PomodoroService,

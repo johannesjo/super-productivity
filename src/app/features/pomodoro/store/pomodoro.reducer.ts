@@ -33,6 +33,8 @@ export function pomodoroReducer(state = initialPomodoroState, action: PomodoroAc
     }
 
     case  PomodoroActionTypes.PausePomodoro: {
+      console.log('PAUSE  POMODORO');
+
       return {
         ...state,
         isManualPause: true,

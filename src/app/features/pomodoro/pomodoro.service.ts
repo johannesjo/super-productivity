@@ -88,11 +88,11 @@ export class PomodoroService {
   ) {
     this.currentSessionTime$
       .pipe(
-        filter(val => val === 0),
-        withLatestFrom(this.cfg$),
+        filter(val => (val <= 0)),
+        withLatestFrom(this.cfg$, this.isBreak$),
       )
-      .subscribe(([val, cfg]) => {
-        if (cfg.isManualContinue) {
+      .subscribe(([val, cfg, isBreak]) => {
+        if (cfg.isManualContinue && isBreak) {
           this.pause();
         } else {
           this.finishPomodoroSession();
@@ -115,7 +115,7 @@ export class PomodoroService {
     this._store$.dispatch(new StopPomodoro());
   }
 
-  finishPomodoroSession() {
-    this._store$.dispatch(new FinishPomodoroSession());
+  finishPomodoroSession(isDontResume = false) {
+    this._store$.dispatch(new FinishPomodoroSession({isDontResume}));
   }
 }

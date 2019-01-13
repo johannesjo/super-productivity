@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { MatDialogRef } from '@angular/material';
 import { PomodoroService } from '../pomodoro.service';
-import { filter, map, mapTo, skip, takeUntil, withLatestFrom } from 'rxjs/operators';
+import { filter, mapTo, takeUntil, withLatestFrom } from 'rxjs/operators';
 import { Observable, Subject, Subscription } from 'rxjs';
 
 @Component({
@@ -15,7 +15,7 @@ export class DialogPomodoroBreakComponent {
   currentTime$: Observable<number> = this.pomodoroService.currentSessionTime$.pipe(
     takeUntil(this.isStopCurrentTime$),
   );
-  isBreakDone$ = this.pomodoroService.isBreak$.pipe(map(v => !v));
+  isBreakDone$ = this.pomodoroService.isManualPause$;
   currentCycle$ = this.pomodoroService.currentCycle$;
 
   private isCloseDialog$: Observable<boolean> = this.pomodoroService.isBreak$.pipe(
@@ -37,7 +37,6 @@ export class DialogPomodoroBreakComponent {
       }
     }));
     this._subs.add(this.isCloseDialog$.subscribe(() => {
-      console.log('CLOSE');
       this.close();
     }));
   }
@@ -46,9 +45,9 @@ export class DialogPomodoroBreakComponent {
     this._matDialogRef.close(null);
   }
 
-  skipBreak() {
+  nextSession(isDontResume = false) {
     this.isStopCurrentTime$.next(true);
-    this.pomodoroService.finishPomodoroSession();
+    this.pomodoroService.finishPomodoroSession(isDontResume);
     this.close();
   }
 }
