@@ -55,7 +55,7 @@ export class PomodoroEffects {
   );
 
   @Effect()
-  pauseTimeTrackingForOption$ = this._actions$.pipe(
+  pauseTimeTrackingIfOptionEnabled$ = this._actions$.pipe(
     ofType(PomodoroActionTypes.FinishPomodoroSession),
     withLatestFrom(
       this._pomodoroService.cfg$,
@@ -63,8 +63,21 @@ export class PomodoroEffects {
     ),
     filter(isEnabled),
     filter(([action, cfg, isBreak]: [FinishPomodoroSession, PomodoroConfig, boolean]) =>
-      cfg && cfg.isStopTrackingOnBreak && isBreak),
+      cfg.isStopTrackingOnBreak && isBreak),
     mapTo(new SetCurrentTask(null)),
+  );
+
+  @Effect({dispatch: false})
+  playSessionDoneSoundIfEnabled$ = this._actions$.pipe(
+    ofType(PomodoroActionTypes.FinishPomodoroSession),
+    withLatestFrom(
+      this._pomodoroService.cfg$,
+      this._pomodoroService.isBreak$,
+    ),
+    filter(isEnabled),
+    filter(([action, cfg, isBreak]: [FinishPomodoroSession, PomodoroConfig, boolean]) =>
+      cfg.isPlaySound && isBreak),
+    tap(() => this._pomodoroService.playSessionDoneSound()),
   );
 
   @Effect()

@@ -10,6 +10,8 @@ import { selectCurrentCycle, selectIsBreak, selectIsManualPause } from './store/
 
 // Tick Duration
 const TD = -1000;
+const DEFAULT_SOUND = 'assets/snd/positive.ogg';
+const DEFAULT_TICK_SOUND = 'assets/snd/tick.mp3';
 
 @Injectable()
 export class PomodoroService {
@@ -98,6 +100,11 @@ export class PomodoroService {
           this.finishPomodoroSession();
         }
       });
+
+    this.currentSessionTime$.pipe(
+      withLatestFrom(this.cfg$, this.isBreak$),
+      filter(([val, cfg, isBreak]) => cfg.isPlayTick),
+    ).subscribe(() => this._playTickSound());
   }
 
   start() {
@@ -114,5 +121,14 @@ export class PomodoroService {
 
   finishPomodoroSession(isDontResume = false) {
     this._store$.dispatch(new FinishPomodoroSession({isDontResume}));
+  }
+
+  // NON STORE ACTIONS
+  playSessionDoneSound() {
+    new Audio(DEFAULT_SOUND).play();
+  }
+
+  private _playTickSound() {
+    new Audio(DEFAULT_TICK_SOUND).play();
   }
 }
