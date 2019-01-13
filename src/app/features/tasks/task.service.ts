@@ -190,7 +190,6 @@ export class TaskService {
   // META
   // ----
   setCurrentId(id: string) {
-    throw new Error('whoooo?');
     if (id) {
       this._store.dispatch(new SetCurrentTask(id));
     } else {
