@@ -10,6 +10,7 @@ import { DialogPomodoroBreakComponent } from '../dialog-pomodoro-break/dialog-po
 import { select, Store } from '@ngrx/store';
 import { selectCurrentTaskId } from '../../tasks/store/task.selectors';
 import { Observable } from 'rxjs';
+import { SnackOpen } from '../../../core/snack/store/snack.actions';
 
 const isEnabled = ([action, cfg, ...v]) => cfg && cfg.isEnabled;
 
@@ -102,6 +103,26 @@ export class PomodoroEffects {
       if (isBreak) {
         this._matDialog.open(DialogPomodoroBreakComponent);
       }
+    }),
+  );
+
+  @Effect()
+  sessionStartSnack$ = this._actions$.pipe(
+    ofType(PomodoroActionTypes.FinishPomodoroSession),
+    withLatestFrom(
+      this._pomodoroService.isBreak$,
+      this._pomodoroService.isManualPause$,
+      this._pomodoroService.currentCycle$,
+    ),
+    filter(([action, isBreak, isPause, currentCycle]: [FinishPomodoroSession, boolean, boolean, number]) =>
+      !isBreak && !isPause
+    ),
+    map(([action, isBreak, isPause, currentCycle]: [FinishPomodoroSession, boolean, boolean, number]) => {
+      const cycle = currentCycle + 1;
+      return new SnackOpen({
+        icon: 'timer',
+        message: `Pomodoro: Session ${cycle} started!`,
+      });
     }),
   );
 
