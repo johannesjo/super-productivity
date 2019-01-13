@@ -1,3 +1,39 @@
+## [0.1.12](https://github.com/johannesjo/sp2/compare/v0.1.11...v0.1.12) (2019-01-13)
+
+
+### Bug Fixes
+
+* **jira:** cfg component throwing an error ([4a9a990](https://github.com/johannesjo/sp2/commit/4a9a990))
+* **tasks:** crucial bug where task state in db was overwritten ([9b7798f](https://github.com/johannesjo/sp2/commit/9b7798f))
+* **tasks:** time spent sometimes linking values ([c5d866c](https://github.com/johannesjo/sp2/commit/c5d866c))
+* cleanup debug error ([458be1d](https://github.com/johannesjo/sp2/commit/458be1d))
+* for older browsers ([dbb9311](https://github.com/johannesjo/sp2/commit/dbb9311))
+* keyboard shortcuts not working for edge case ([c5fc2f1](https://github.com/johannesjo/sp2/commit/c5fc2f1))
+* potential worklog error if there is nothing in the archive ([abc82ad](https://github.com/johannesjo/sp2/commit/abc82ad))
+* time worked without a break popping in ([a0ad47d](https://github.com/johannesjo/sp2/commit/a0ad47d))
+
+
+### Features
+
+* remove non working keyboard hide handler ([0c8543f](https://github.com/johannesjo/sp2/commit/0c8543f))
+* **pomodoro:** adjust timer styling ([c7ba50f](https://github.com/johannesjo/sp2/commit/c7ba50f))
+* **tasks:** improve arrow navigation ([8e191e5](https://github.com/johannesjo/sp2/commit/8e191e5))
+* add no archived tasks to worklog ([0500b96](https://github.com/johannesjo/sp2/commit/0500b96))
+* **tasks:** simplify keyboard left right actions ([1f20b0c](https://github.com/johannesjo/sp2/commit/1f20b0c))
+* add missing help texts ([8278458](https://github.com/johannesjo/sp2/commit/8278458))
+* add tabs to daily summary and most basic google time export component ([faa9ba1](https://github.com/johannesjo/sp2/commit/faa9ba1))
+* beautify daily summary ([d7ab2d7](https://github.com/johannesjo/sp2/commit/d7ab2d7))
+* bring back burger menu for smaller screens ([1207de9](https://github.com/johannesjo/sp2/commit/1207de9))
+* fine tune daily summary styling ([be11bfa](https://github.com/johannesjo/sp2/commit/be11bfa))
+* improve performance ([843685b](https://github.com/johannesjo/sp2/commit/843685b))
+* integrate export task list nicely into daily summary ([ecf92e8](https://github.com/johannesjo/sp2/commit/ecf92e8))
+* make google export time work for daily summary ([62d3410](https://github.com/johannesjo/sp2/commit/62d3410))
+* no focus for textarea in simple task summary ([f40b640](https://github.com/johannesjo/sp2/commit/f40b640))
+* persist daily summary tab index ([e19503b](https://github.com/johannesjo/sp2/commit/e19503b))
+* remove focus for time estimates on mobile ([eae41e9](https://github.com/johannesjo/sp2/commit/eae41e9))
+
+
+
 ## [0.1.11](https://github.com/johannesjo/sp2/compare/v0.1.10...v0.1.11) (2019-01-13)
 
 
