@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { TaskService } from '../../tasks/task.service';
 import { TimeTrackingService } from '../time-tracking.service';
 import { Observable } from 'rxjs';
-import { distinctUntilChanged, scan, throttleTime, withLatestFrom } from 'rxjs/operators';
+import { distinctUntilChanged, scan, shareReplay, throttleTime, withLatestFrom } from 'rxjs/operators';
 import { SnackService } from '../../../core/snack/snack.service';
 import { ConfigService } from '../../config/config.service';
 import { msToString } from '../../../ui/duration/ms-to-string.pipe';
@@ -34,7 +34,8 @@ export class TakeABreakService {
       this._breakDuration$,
     ),
     scan(createReduceTimeWorked(this, 'timeWorkedWithoutABreakAcc'), 0),
-    distinctUntilChanged()
+    distinctUntilChanged(),
+    shareReplay(),
   );
   /* tslint:enable*/
 
