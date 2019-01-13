@@ -1,14 +1,14 @@
 import { ChangeDetectionStrategy, Component, Inject, OnDestroy, OnInit } from '@angular/core';
-import { msToString } from '../../ui/duration/ms-to-string.pipe';
+import { msToString } from '../../../ui/duration/ms-to-string.pipe';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material';
-import { TaskWithSubTasks } from '../tasks/task.model';
-import { ProjectService } from '../project/project.service';
+import { TaskWithSubTasks } from '../../tasks/task.model';
+import { ProjectService } from '../../project/project.service';
 import { Subscription } from 'rxjs';
-import { SimpleSummarySettingsCopy } from '../project/project.model';
-import { SIMPLE_SUMMARY_DEFAULTS } from '../project/project.const';
+import { SimpleSummarySettingsCopy } from '../../project/project.model';
+import { SIMPLE_SUMMARY_DEFAULTS } from '../../project/project.const';
 import Clipboard from 'clipboard';
-import { SnackService } from '../../core/snack/snack.service';
-import { getWorklogStr } from '../../util/get-work-log-str';
+import { SnackService } from '../../../core/snack/snack.service';
+import { getWorklogStr } from '../../../util/get-work-log-str';
 
 const CSV_EXPORT_SETTINGS = {
   separateBy: '',

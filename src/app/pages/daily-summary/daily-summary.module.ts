@@ -5,7 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { UiModule } from '../../ui/ui.module';
 import { RouterModule } from '@angular/router';
 import { GoogleModule } from '../../features/google/google.module';
-import { DialogSimpleTaskSummaryModule } from '../../features/dialog-simple-task-summary/dialog-simple-task-summary.module';
+import { SimpleTaskSummaryModule } from '../../features/simple-task-summary/simple-task-summary.module';
 
 @NgModule({
   imports: [
@@ -14,7 +14,7 @@ import { DialogSimpleTaskSummaryModule } from '../../features/dialog-simple-task
     UiModule,
     RouterModule,
     GoogleModule,
-    DialogSimpleTaskSummaryModule,
+    SimpleTaskSummaryModule,
   ],
   declarations: [DailySummaryComponent]
 })

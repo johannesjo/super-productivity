@@ -6,7 +6,7 @@ import { Router } from '@angular/router';
 import { IS_ELECTRON } from '../../app.constants';
 import { DialogGoogleExportTimeComponent } from '../../features/google/dialog-google-export-time/dialog-google-export-time.component';
 import { MatDialog } from '@angular/material';
-import { DialogSimpleTaskSummaryComponent } from '../../features/dialog-simple-task-summary/dialog-simple-task-summary.component';
+import { DialogSimpleTaskSummaryComponent } from '../../features/simple-task-summary/dialog-simple-task-summary/dialog-simple-task-summary.component';
 import { Subscription } from 'rxjs';
 import { ElectronService } from 'ngx-electron';
 import { IPC_SHUTDOWN_NOW } from '../../../ipc-events.const';
