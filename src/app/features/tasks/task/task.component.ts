@@ -25,6 +25,7 @@ import { AttachmentService } from '../../attachment/attachment.service';
 import { IssueService } from '../../issue/issue.service';
 import { DialogEditAttachmentComponent } from '../../attachment/dialog-edit-attachment/dialog-edit-attachment.component';
 import { swirlAnimation } from '../../../ui/animations/swirl-in-out.ani';
+import { isTouch } from '../../../util/is-touch';
 
 @Component({
   selector: 'task',
@@ -175,9 +176,12 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   estimateTime() {
+    console.log(isTouch());
+
     this._matDialog
       .open(DialogTimeEstimateComponent, {
         data: {task: this.task},
+        autoFocus: !isTouch(),
       })
       .afterClosed()
       .subscribe(result => {
