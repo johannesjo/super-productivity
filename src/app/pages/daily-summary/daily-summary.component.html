@@ -27,88 +27,85 @@
              [innerHtml]="workingToday$|async|msToString"></div>
       </div>
     </div>
-    <!--<div class="summary-point">-->
-    <!--<mat-icon>timer</mat-icon>-->
-    <!--<div class="summary-text">Total time spent on today's task:-->
-    <!--<div class="summary-val"-->
-    <!--[innerHtml]="totalTimeSpentTasks$|async|msToString"></div>-->
-    <!--</div>-->
-    <!--</div>-->
+    <div class="summary-point">
+      <mat-icon>timer</mat-icon>
+      <div class="summary-text">Total time spent on today's task:
+        <div class="summary-val"
+             [innerHtml]="totalTimeSpentTasks$|async|msToString"></div>
+      </div>
+    </div>
   </div>
 
+  <mat-tab-group dynamicHeight>
+    <!--<mat-tab label="Note for tomorrow">-->
+      <!--<p>This is meant to be a takeaway to be even more productive and happy tomorrow. E.g.: What did you learn today? What do you want to do better/smarter tomorrow? What do you want to achieve and why?</p>-->
+      <!--<p>Think a second and reflect on the day.</p>-->
 
-  <collapsible title="Tasks worked on today"
-               class="daily-summary-collapsible">
-    <table class="task-summary-table bg-standard">
-      <tr>
-        <th>Title</th>
-        <th>Sub-Tasks</th>
-        <th>Time spent today</th>
-        <th>Time spent total</th>
-        <th>Time esti.</th>
-        <th></th>
-      </tr>
+      <!--<textarea [(ngModel)]="tomorrowsNote"-->
+                <!--class="tomorrows-note bg-standard mat-elevation-z3"-->
+                <!--rows="5"></textarea>-->
+    <!--</mat-tab>-->
 
-      <tr *ngFor="let task of todaysTasks$|async"
-          [class.is-done]="task.isDone">
-        <td [innerHtml]="task.title"></td>
-        <td>
-          <span *ngFor="let task of task.subTasks"><span [innerHtml]="task.title"></span>: <span [innerHtml]="task.timeSpentOnDay[todayStr]|msToString"></span><br></span>
-        </td>
-        <td [innerHtml]="task.timeSpentOnDay[todayStr] |msToString"></td>
-        <td [innerHtml]="task.timeSpent |msToString"></td>
-        <td [innerHtml]="task.timeEstimate |msToString"></td>
-        <td>
-          <mat-icon *ngIf="task.isDone"
-                    style="fill:green;">check
-          </mat-icon>
-        </td>
-      </tr>
-    </table>
-  </collapsible>
+    <!--<mat-tab label="Task List">-->
+      <!--<table class="task-summary-table bg-standard">-->
+        <!--<tr>-->
+          <!--<th>Title</th>-->
+          <!--<th>Sub-Tasks</th>-->
+          <!--<th>Time spent today</th>-->
+          <!--<th>Time spent total</th>-->
+          <!--<th>Time esti.</th>-->
+          <!--<th></th>-->
+        <!--</tr>-->
 
-  <!--<section class="distractions"-->
-  <!--*ngIf="distractions.length > 0">-->
-  <!--<distraction-list></distraction-list>-->
-  <!--</section>-->
+        <!--<tr *ngFor="let task of todaysTasks$|async"-->
+            <!--[class.is-done]="task.isDone">-->
+          <!--<td [innerHtml]="task.title"></td>-->
+          <!--<td>-->
+            <!--<span *ngFor="let task of task.subTasks"><span [innerHtml]="task.title"></span>: <span [innerHtml]="task.timeSpentOnDay[todayStr]|msToString"></span><br></span>-->
+          <!--</td>-->
+          <!--<td [innerHtml]="task.timeSpentOnDay[todayStr] |msToString"></td>-->
+          <!--<td [innerHtml]="task.timeSpent |msToString"></td>-->
+          <!--<td [innerHtml]="task.timeEstimate |msToString"></td>-->
+          <!--<td>-->
+            <!--<mat-icon *ngIf="task.isDone"-->
+                      <!--style="fill:green;">check-->
+            <!--</mat-icon>-->
+          <!--</td>-->
+        <!--</tr>-->
+      <!--</table>-->
+    <!--</mat-tab>-->
+
+    <mat-tab label="Export Google Sheet">
+      <google-export-time></google-export-time>
+    </mat-tab>
+    <mat-tab label="Simple Export">
+      <h1>Some tab content</h1>
+      <p>...</p>
+    </mat-tab>
 
 
-  <!--<collapsible title="Todays commits"-->
-  <!--*ngIf="commitLog"-->
-  <!--class="commits daily-summary-collapsible">-->
 
-  <!--<h2 class="md-title">Todays commits</h2>-->
-  <!--<pre><code [innerHtml]="::commitLog"></code></pre>-->
-  <!--</collapsible>-->
+  </mat-tab-group>
 
-  <collapsible title="Make a note for tomorrow"
-               class="daily-summary-collapsible">
-    <p>This is meant to be a takeaway to be even more productive and happy tomorrow. E.g.: What did you learn today? What do you want to do better/smarter tomorrow? What do you want to achieve and why?</p>
-    <p>Think a second and reflect on the day.</p>
-
-    <textarea [(ngModel)]="tomorrowsNote"
-              class="tomorrows-note bg-standard mat-elevation-z3"
-              rows="5"></textarea>
-  </collapsible>
 
 
   <section class="daily-summary-actions">
     <div class="bottom-buttons">
-      <button mat-raised-button=""
-              color="primary"
-              (click)="showExportModal()">
-        <mat-icon>call_made</mat-icon>
-        <mat-icon>playlist_play</mat-icon>
-        Export Task List
-      </button>
+      <!--<button mat-raised-button=""-->
+      <!--color="primary"-->
+      <!--(click)="showExportModal()">-->
+      <!--<mat-icon>call_made</mat-icon>-->
+      <!--<mat-icon>playlist_play</mat-icon>-->
+      <!--Export Task List-->
+      <!--</button>-->
 
-      <button mat-raised-button=""
-              [color]="cfg.isBlockFinishDayUntilTimeTimeTracked && !isTimeSheetExported && 'accent' ||'primary'"
-              (click)="showTimeSheetExportModal()">
-        <mat-icon>call_made</mat-icon>
-        <mat-icon>timer</mat-icon>
-        Export To Time Sheet
-      </button>
+      <!--<button mat-raised-button=""-->
+      <!--[color]="cfg.isBlockFinishDayUntilTimeTimeTracked && !isTimeSheetExported && 'accent' ||'primary'"-->
+      <!--(click)="showTimeSheetExportModal()">-->
+      <!--<mat-icon>call_made</mat-icon>-->
+      <!--<mat-icon>timer</mat-icon>-->
+      <!--Export To Time Sheet-->
+      <!--</button>-->
       <button mat-raised-button=""
               color="primary"
               [disabled]="cfg.isBlockFinishDayUntilTimeTimeTracked && !isTimeSheetExported"

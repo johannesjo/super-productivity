@@ -15,6 +15,7 @@ import { NoteService } from '../../features/note/note.service';
 import { ConfigService } from '../../features/config/config.service';
 import { GoogleDriveSyncService } from '../../features/google/google-drive-sync.service';
 import { SnackService } from '../../core/snack/snack.service';
+import { takeUntil } from 'rxjs/operators';
 
 const SUCCESS_ANIMATION_DURATION = 500;
 
@@ -71,8 +72,12 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
       this._todaysTasks = val;
     }));
 
-    // stop tracking once we're here
-    this._taskService.setCurrentId(null);
+    // we need to wait, otherwise data would get overwritten
+    this._subs.add(this._taskService.isDataLoaded$.pipe(
+      takeUntil(this._taskService.isDataLoaded$)
+    ).subscribe(() => {
+      this._taskService.setCurrentId(null);
+    }));
   }
 
   ngOnDestroy() {

@@ -9,6 +9,7 @@ import { GoogleDriveSyncService } from './google-drive-sync.service';
 import { GoogleApiService } from './google-api.service';
 import { SyncModule } from '../../imex/sync/sync.module';
 import { CoreModule } from '../../core/core.module';
+import { GoogleExportTimeComponent } from './google-export-time/google-export-time.component';
 
 @NgModule({
   imports: [
@@ -22,11 +23,15 @@ import { CoreModule } from '../../core/core.module';
     DialogGoogleExportTimeComponent,
     DialogConfirmDriveSyncLoadComponent,
     DialogConfirmDriveSyncSaveComponent,
+    GoogleExportTimeComponent,
   ],
   entryComponents: [
     DialogGoogleExportTimeComponent,
     DialogConfirmDriveSyncLoadComponent,
     DialogConfirmDriveSyncSaveComponent,
+  ],
+  exports:[
+    GoogleExportTimeComponent,
   ],
   providers: [
     GoogleDriveSyncService,

@@ -3,6 +3,11 @@
 $summary-point-inner-margin: $s;
 
 :host {
+  ::ng-deep .mat-tab-labels {
+    justify-content: center !important;
+    user-select: none;
+  }
+
   .page-wrapper {
     //display: flex;
     //align-items: center;
