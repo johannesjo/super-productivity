@@ -27,7 +27,7 @@ export class PomodoroService {
     this.currentCycle$,
     this.cfg$,
   ).pipe(map(([isBreak, currentCycle, cfg]) => {
-    return isBreak && cfg.cyclesBeforeLongerBreak && Number.isInteger((cfg.cyclesBeforeLongerBreak / currentCycle));
+    return isBreak && cfg.cyclesBeforeLongerBreak && Number.isInteger(((currentCycle + 1) / cfg.cyclesBeforeLongerBreak));
   }));
 
   isShortBreak$: Observable<boolean> = combineLatest(
@@ -98,9 +98,6 @@ export class PomodoroService {
           this.finishPomodoroSession();
         }
       });
-
-    // this.isBreak$.subscribe(val => console.log(val));
-    // this.sessionProgress$.subscribe(val => console.log(val));
   }
 
   start() {
