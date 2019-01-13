@@ -1,3 +1,34 @@
+## [0.1.11](https://github.com/johannesjo/sp2/compare/v0.1.10...v0.1.11) (2019-01-13)
+
+
+### Bug Fixes
+
+* **jira:** default jira config being enabled ([a563fbe](https://github.com/johannesjo/sp2/commit/a563fbe))
+* **pomodoro:** cycles not working as intended ([07c4527](https://github.com/johannesjo/sp2/commit/07c4527))
+* **pomodoro:** pausing tracking not working as intended ([50646b3](https://github.com/johannesjo/sp2/commit/50646b3))
+
+
+### Features
+
+* **pomodoro:** add skip break ([b80ba77](https://github.com/johannesjo/sp2/commit/b80ba77))
+* add isIdle$ as observable ([2fa90e4](https://github.com/johannesjo/sp2/commit/2fa90e4))
+* add simple file import export of app data ([b3c8b84](https://github.com/johannesjo/sp2/commit/b3c8b84))
+* hide calendar ([72da73b](https://github.com/johannesjo/sp2/commit/72da73b))
+* make static import of v1 exports work ([4c5a413](https://github.com/johannesjo/sp2/commit/4c5a413))
+* **pomodoro:** add basic dialog ([d0579a2](https://github.com/johannesjo/sp2/commit/d0579a2))
+* trigger blur when android keyboard closes ([74c3300](https://github.com/johannesjo/sp2/commit/74c3300))
+* **pomodoro:** add notifications ([2ca0b1d](https://github.com/johannesjo/sp2/commit/2ca0b1d))
+* **pomodoro:** add session started toast ([76a3bb0](https://github.com/johannesjo/sp2/commit/76a3bb0))
+* **pomodoro:** add sounds ([cf5e8c8](https://github.com/johannesjo/sp2/commit/cf5e8c8))
+* **pomodoro:** improve button styles a bit ([d943d50](https://github.com/johannesjo/sp2/commit/d943d50))
+* **pomodoro:** make disabled time tracking during breaks work ([bf33327](https://github.com/johannesjo/sp2/commit/bf33327))
+* **pomodoro:** make it work ([e1f062b](https://github.com/johannesjo/sp2/commit/e1f062b))
+* **pomodoro:** make manual resume work for cancel ([c99af17](https://github.com/johannesjo/sp2/commit/c99af17))
+* **pomodoro:** prepare store and actions ([49fad8b](https://github.com/johannesjo/sp2/commit/49fad8b))
+* **pomodoro:** remove extra long break config option for now ([796c5d5](https://github.com/johannesjo/sp2/commit/796c5d5))
+
+
+
 ## [0.1.10](https://github.com/johannesjo/sp2/compare/v0.1.9...v0.1.10) (2019-01-11)
 
 
