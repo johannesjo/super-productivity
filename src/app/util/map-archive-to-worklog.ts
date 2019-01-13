@@ -6,6 +6,7 @@ export interface WorklogDataForDay {
   task: Task;
   parentId: string;
   isVisible: boolean;
+  isNoRestore?: boolean;
 }
 
 export interface WorklogDay {
@@ -32,7 +33,7 @@ export interface Worklog {
   [key: number]: WorklogYear;
 }
 
-export const mapArchiveToWorklog = (taskState: EntityState<Task>): { worklog: Worklog, totalTimeSpent } => {
+export const mapArchiveToWorklog = (taskState: EntityState<Task>, noRestoreIds = []): { worklog: Worklog, totalTimeSpent } => {
   const entities = taskState.entities;
   const worklog: Worklog = {};
   let totalTimeSpent = 0;
@@ -82,6 +83,7 @@ export const mapArchiveToWorklog = (taskState: EntityState<Task>): { worklog: Wo
         task: task,
         parentId: task.parentId,
         isVisible: true,
+        isNoRestore: noRestoreIds.includes(task.id),
         timeSpent: task.timeSpentOnDay[dateStr]
       });
     });

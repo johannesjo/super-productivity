@@ -6,10 +6,11 @@ import { mapArchiveToWorklog, Worklog, WorklogDay, WorklogMonth } from '../../..
 import { DialogSimpleTaskSummaryComponent } from '../../../features/dialog-simple-task-summary/dialog-simple-task-summary.component';
 import { MatDialog } from '@angular/material';
 import { Subscription } from 'rxjs';
-import { TaskCopy } from '../../../features/tasks/task.model';
+import { Task, TaskCopy } from '../../../features/tasks/task.model';
 import { TaskService } from '../../../features/tasks/task.service';
 import { Router } from '@angular/router';
 import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confirm.component';
+import { EntityState } from '@ngrx/entity';
 
 
 @Component({
@@ -50,13 +51,23 @@ export class WorklogComponent implements OnInit, OnDestroy {
   }
 
   private async _loadData(projectId): Promise<any> {
-    const completeState = await this._persistenceService.loadTaskArchiveForProject(projectId);
+    const archive = await this._persistenceService.loadTaskArchiveForProject(projectId);
+    const taskState = await this._persistenceService.loadTasksForProject(projectId);
+
+    const completeState: EntityState<Task> = {
+      ids: [...archive.ids, ...taskState.ids] as string[],
+      entities: {
+        ...archive.entities,
+        ...taskState.entities
+      }
+    };
+
     if (this._isUnloaded) {
       return;
     }
 
     if (completeState) {
-      const {worklog, totalTimeSpent} = mapArchiveToWorklog(completeState);
+      const {worklog, totalTimeSpent} = mapArchiveToWorklog(completeState, taskState.ids);
       this.worklog = worklog;
       this.totalTimeSpent = totalTimeSpent;
       this._cd.detectChanges();

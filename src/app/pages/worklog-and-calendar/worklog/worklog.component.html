@@ -73,7 +73,7 @@
             <td mat-cell
                 *matCellDef="let logEntry">
               <button mat-mini-fab=""
-                      *ngIf="!logEntry.task?.parentId"
+                      *ngIf="!logEntry.task?.parentId && !logEntry.isNoRestore"
                       aria-label="restore"
                       (click)="restoreTask(year.key, month.key, worklogForDay.key,logEntry.task);">
                 <mat-icon>settings_backup_restore</mat-icon>
