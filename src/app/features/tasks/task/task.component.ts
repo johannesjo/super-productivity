@@ -371,14 +371,8 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
 
     // expand sub tasks
     if ((ev.key === 'ArrowRight') || checkKeyCombo(ev, keys.expandSubTasks)) {
-      if (this.task.subTasks && this.task.subTasks.length > 0) {
-        if (this.task._showSubTasksMode !== SHOW_SUB_TASKS) {
-          this._taskService.toggleSubTaskMode(this.task.id, false, false);
-        } else if (!this.task._isAdditionalInfoOpen) {
-          this.showAdditionalInfos();
-        } else {
-          this.focusNext();
-        }
+      if (this.task.subTasks && this.task.subTasks.length > 0 && this.task._showSubTasksMode !== SHOW_SUB_TASKS) {
+        this._taskService.toggleSubTaskMode(this.task.id, false, false);
       } else if (!this.task._isAdditionalInfoOpen) {
         this.showAdditionalInfos();
       } else {
@@ -388,20 +382,12 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
 
     // collapse sub tasks
     if ((ev.key === 'ArrowLeft') || checkKeyCombo(ev, keys.collapseSubTasks)) {
-      if (this.task.subTasks && this.task.subTasks.length > 0) {
-        if (this.task._isAdditionalInfoOpen) {
-          this.hideAdditionalInfos();
-        } else if (this.task._showSubTasksMode !== HIDE_SUB_TASKS) {
-          this._taskService.toggleSubTaskMode(this.task.id, true, false);
-        } else {
-          this.focusPrevious();
-        }
+      if (this.task._isAdditionalInfoOpen) {
+        this.hideAdditionalInfos();
+      } else if (this.task.subTasks && this.task.subTasks.length > 0 && this.task._showSubTasksMode !== HIDE_SUB_TASKS) {
+        this._taskService.toggleSubTaskMode(this.task.id, true, false);
       } else {
-        if (this.task._isAdditionalInfoOpen) {
-          this.hideAdditionalInfos();
-        } else {
-          this.focusPrevious();
-        }
+        this.focusPrevious();
       }
     }
 
