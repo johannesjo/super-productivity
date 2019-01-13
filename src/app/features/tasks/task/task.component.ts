@@ -221,6 +221,22 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
       : this._taskService.setDone(this.task.id);
   }
 
+
+  showAdditionalInfos() {
+    if (!this.task._isAdditionalInfoOpen) {
+      this._taskService.showAdditionalInfoOpen(this.task.id);
+      this.focusSelf();
+    }
+  }
+
+  hideAdditionalInfos() {
+    if (this.task._isAdditionalInfoOpen) {
+      this._taskService.hideAdditionalInfoOpen(this.task.id);
+      this.focusSelf();
+    }
+  }
+
+
   toggleShowAdditionalInfoOpen() {
     this.task._isAdditionalInfoOpen
       ? this._taskService.hideAdditionalInfoOpen(this.task.id)
@@ -358,23 +374,31 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
       if (this.task.subTasks && this.task.subTasks.length > 0) {
         if (this.task._showSubTasksMode !== SHOW_SUB_TASKS) {
           this._taskService.toggleSubTaskMode(this.task.id, false, false);
+        } else if (!this.task._isAdditionalInfoOpen) {
+          this.showAdditionalInfos();
         } else {
           this.focusNext();
         }
+      } else if (!this.task._isAdditionalInfoOpen) {
+        this.showAdditionalInfos();
+      } else {
+        this.focusNext();
       }
     }
 
     // collapse sub tasks
     if ((ev.key === 'ArrowLeft') || checkKeyCombo(ev, keys.collapseSubTasks)) {
       if (this.task.subTasks && this.task.subTasks.length > 0) {
-        if (this.task._showSubTasksMode !== HIDE_SUB_TASKS) {
+        if (this.task._isAdditionalInfoOpen) {
+          this.hideAdditionalInfos();
+        } else if (this.task._showSubTasksMode !== HIDE_SUB_TASKS) {
           this._taskService.toggleSubTaskMode(this.task.id, true, false);
         } else {
           this.focusPrevious();
         }
       } else {
-        if (this.task.parentId) {
-          this._taskService.focusTask(this.task.parentId);
+        if (this.task._isAdditionalInfoOpen) {
+          this.hideAdditionalInfos();
         } else {
           this.focusPrevious();
         }
