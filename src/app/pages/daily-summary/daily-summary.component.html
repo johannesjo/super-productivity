@@ -1,16 +1,16 @@
 <div class="page-wrapper">
   <div style="text-align: center;">
     <button mat-raised-button=""
-            color="accent"
+            class="back-btn"
             aria-label="Work View"
             routerLink="/work-view">
       <mat-icon>chevron_left</mat-icon>
       Wait I forgot something!
-      <mat-icon>playlist_play</mat-icon>
+      <!--<mat-icon>playlist_play</mat-icon>-->
     </button>
   </div>
 
-  <h1 class="done-headline mat-headline mat-h1">Done for today!<br> Take a moment to <i>celebrate!</i></h1>
+  <h1 class="done-headline mat-headline">Take a moment to <i class="TODO-animate">celebrate!</i></h1>
   <div class="daily-summary-summary">
     <div class="summary-point">
       <mat-icon>check</mat-icon>
@@ -27,18 +27,17 @@
              [innerHtml]="workingToday$|async|msToString"></div>
       </div>
     </div>
-    <div class="summary-point">
-      <mat-icon>timer</mat-icon>
-      <div class="summary-text">Total time spent on today's task:
-        <div class="summary-val"
-             [innerHtml]="totalTimeSpentTasks$|async|msToString"></div>
-      </div>
-    </div>
+    <!--<div class="summary-point">-->
+    <!--<mat-icon>timer</mat-icon>-->
+    <!--<div class="summary-text">Total time spent on today's task:-->
+    <!--<div class="summary-val"-->
+    <!--[innerHtml]="totalTimeSpentTasks$|async|msToString"></div>-->
+    <!--</div>-->
+    <!--</div>-->
   </div>
 
 
   <collapsible title="Tasks worked on today"
-               icon="playlist_play"
                class="daily-summary-collapsible">
     <table class="task-summary-table bg-standard">
       <tr>
@@ -83,7 +82,6 @@
   <!--</collapsible>-->
 
   <collapsible title="Make a note for tomorrow"
-               icon="speaker_notes"
                class="daily-summary-collapsible">
     <p>This is meant to be a takeaway to be even more productive and happy tomorrow. E.g.: What did you learn today? What do you want to do better/smarter tomorrow? What do you want to achieve and why?</p>
     <p>Think a second and reflect on the day.</p>
@@ -119,16 +117,16 @@
         Save and go home
       </button>
     </div>
-    <div class="finish-day-opts">
-      <mat-checkbox [(ngModel)]="clearDoneTasks"
-                    aria-label="Clear done tasks">
-        Clear done tasks (Move to Done-Backlog)
-      </mat-checkbox>
-      <mat-checkbox [(ngModel)]="moveUnfinishedToBacklog"
-                    aria-label="Move unfinished tasks to backlog">
-        Move unfinished tasks back to backlog
-      </mat-checkbox>
-    </div>
+    <!--<div class="finish-day-opts">-->
+    <!--<mat-checkbox [(ngModel)]="clearDoneTasks"-->
+    <!--aria-label="Clear done tasks">-->
+    <!--Clear done tasks (Move to Done-Backlog)-->
+    <!--</mat-checkbox>-->
+    <!--<mat-checkbox [(ngModel)]="moveUnfinishedToBacklog"-->
+    <!--aria-label="Move unfinished tasks to backlog">-->
+    <!--Move unfinished tasks back to backlog-->
+    <!--</mat-checkbox>-->
+    <!--</div>-->
 
     <div class="success-animation-wrapper"
          *ngIf="showSuccessAnimation">

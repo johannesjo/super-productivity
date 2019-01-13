@@ -1,5 +1,7 @@
 @import '../../../variables';
 
+$summary-point-inner-margin: $s;
+
 :host {
   .page-wrapper {
     //display: flex;
@@ -8,12 +10,17 @@
     text-align: center;
   }
 
-  .done-headline {
+  .back-btn {
     margin-top: $s*2;
   }
 
+  .done-headline {
+    margin-top: $s*2;
+    margin-bottom: $s*2 - $summary-point-inner-margin;
+  }
+
   .daily-summary-summary {
-    margin-bottom: 30px;
+    margin-bottom: $s*2;
     display: flex;
     justify-content: center;
 
@@ -27,9 +34,9 @@
     display: inline-block;
     align-items: center;
     text-align: center;
-    margin: $s;
-    flex-grow: 1;
-    flex-basis: 0;
+    margin: $summary-point-inner-margin;
+    //flex-grow: 1;
+    flex-basis: 200px;
   }
 
   .summary-text {
@@ -64,11 +71,11 @@
 
 
   .daily-summary-collapsible {
-    margin-bottom: 15px;
-    margin-top: 20px;
+    margin-bottom: $s*2;
+    margin-top: $s*2;
 
     .collapsible-title {
-      font-size: 19px;
+      font-size: 17px;
     }
   }
 
