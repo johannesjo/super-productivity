@@ -12,6 +12,11 @@ import { Router } from '@angular/router';
 import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confirm.component';
 import { EntityState } from '@ngrx/entity';
 
+const EMPTY_ENTITY = {
+  ids: [],
+  entities: {},
+};
+
 
 @Component({
   selector: 'worklog',
@@ -51,8 +56,8 @@ export class WorklogComponent implements OnInit, OnDestroy {
   }
 
   private async _loadData(projectId): Promise<any> {
-    const archive = await this._persistenceService.loadTaskArchiveForProject(projectId);
-    const taskState = await this._persistenceService.loadTasksForProject(projectId);
+    const archive = await this._persistenceService.loadTaskArchiveForProject(projectId) || EMPTY_ENTITY;
+    const taskState = await this._persistenceService.loadTasksForProject(projectId) || EMPTY_ENTITY;
 
     const completeState: EntityState<Task> = {
       ids: [...archive.ids, ...taskState.ids] as string[],
