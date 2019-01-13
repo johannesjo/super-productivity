@@ -15,6 +15,12 @@ $summary-point-inner-margin: $s;
     text-align: center;
   }
 
+  .tab-inner {
+    padding: $s;
+    margin: auto;
+    max-width: $component-max-width
+  }
+
   .back-btn {
     margin-top: $s*2;
   }
