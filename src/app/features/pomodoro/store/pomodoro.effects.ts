@@ -20,7 +20,7 @@ export class PomodoroEffects {
   currentTaskId$: Observable<string> = this._store$.pipe(select(selectCurrentTaskId));
 
   @Effect()
-  startOnCurrentUpdate$ = this._actions$.pipe(
+  playPauseOnCurrentUpdate$ = this._actions$.pipe(
     ofType(
       TaskActionTypes.SetCurrentTask,
       TaskActionTypes.UnsetCurrentTask,

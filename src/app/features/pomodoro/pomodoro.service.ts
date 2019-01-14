@@ -17,8 +17,6 @@ const DEFAULT_TICK_SOUND = 'assets/snd/tick.mp3';
 @Injectable()
 export class PomodoroService {
   cfg$: Observable<PomodoroConfig> = this._configService.cfg$.pipe(map(cfg => cfg && cfg.pomodoro));
-
-  // TODO use this somehow
   isEnabled$: Observable<boolean> = this.cfg$.pipe(map(cfg => cfg && cfg.isEnabled));
 
   isManualPause$: Observable<boolean> = this._store$.pipe(select(selectIsManualPause));
@@ -40,18 +38,22 @@ export class PomodoroService {
 
   timer$ = this._timeTrackingService.globalInterval$;
   tick$ = this.timer$.pipe(
-    withLatestFrom(this.isManualPause$),
-    filter(([v, isManualPause]) => !isManualPause),
+    withLatestFrom(this.isManualPause$, this.isEnabled$),
+    filter(([v, isManualPause, isEnabled]) => !isManualPause && isEnabled),
     mapTo(TD),
   );
 
-  nextSession$: Observable<number> = this.isBreak$.pipe(
+  // isManualPause$
+  nextSession$: Observable<number> = combineLatest(
+    this.isBreak$,
+    this.cfg$,
+  ).pipe(
     withLatestFrom(
       this.isLongBreak$,
       this.isShortBreak$,
-      this.cfg$
     ),
-    map(([isBreak, isLong, isShort, cfg]) => {
+    map(([combo, isLong, isShort]) => {
+      const [isBreak, cfg] = combo;
       // return isBreak ? (isLong ? 20000 : 3000) : 5000;
       if (!isBreak) {
         return cfg.duration || DEFAULT_CFG.pomodoro.duration;
@@ -64,7 +66,7 @@ export class PomodoroService {
     shareReplay(),
   );
 
-  currentSessionTime$: Observable<any> = merge(
+  currentSessionTime$: Observable<number> = merge(
     this.tick$,
     this.nextSession$
   ).pipe(
