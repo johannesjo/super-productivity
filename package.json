@@ -28,7 +28,7 @@
     "e2e": "ng e2e",
     "electron": "npm run buildElectron && ./node_modules/.bin/electron .",
     "pack": "electron-builder --dir",
-    "localInstall": "sudo echo 'Starting local install' && rm -Rf ./dist/ && npm run buildElectron && electron-builder --linux && sudo dpkg -i app-builds/sp2*.deb",
+    "localInstall": "sudo echo 'Starting local install' && rm -Rf ./dist/ && rm -Rf ./app-builds/ && npm run buildElectron && electron-builder --linux && sudo dpkg -i app-builds/sp2*.deb",
     "dist": "npm run buildElectron && electron-builder",
     "distLinuxAndWindows": "npm run buildElectron && electron-builder --linux --win",
     "pub": "npm run buildElectron && electron-builder -p always",
