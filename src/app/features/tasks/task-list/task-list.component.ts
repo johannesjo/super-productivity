@@ -4,8 +4,8 @@ import { TaskService } from '../task.service';
 import { DragulaService } from 'ng2-dragula';
 import { BehaviorSubject, combineLatest, Observable, of, Subscription } from 'rxjs';
 import { standardListAnimation } from '../../../ui/animations/standard-list.ani';
-import { expandAnimation } from '../../../ui/animations/expand.ani';
-import { flatMap, switchMap } from 'rxjs/operators';
+import { expandAnimation, expandFadeFastAnimation, expandFastAnimation } from '../../../ui/animations/expand.ani';
+import { flatMap } from 'rxjs/operators';
 import { FilterDoneTasksPipe } from '../filter-done-tasks.pipe';
 
 @Component({
@@ -13,7 +13,7 @@ import { FilterDoneTasksPipe } from '../filter-done-tasks.pipe';
   templateUrl: './task-list.component.html',
   styleUrls: ['./task-list.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  animations: [standardListAnimation, expandAnimation],
+  animations: [standardListAnimation, expandFadeFastAnimation],
 
 })
 export class TaskListComponent implements OnDestroy, OnInit {
