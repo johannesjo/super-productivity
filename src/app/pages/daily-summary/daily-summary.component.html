@@ -16,7 +16,8 @@
       <mat-icon>check</mat-icon>
       <div class="summary-text">Tasks completed:
         <div class="summary-val">
-          <span [innerHtml]="(doneTasks$|async)?.length"></span>/<span [innerHtml]="(todaysTasks$|async)?.length"></span>
+          <span [innerHtml]="(doneTasks$|async)?.length"></span>/<span
+          [innerHtml]="(todaysTasks$|async)?.length"></span>
         </div>
       </div>
     </div>
@@ -41,7 +42,8 @@
                  (selectedIndexChange)="onTabIndexChange($event)">
     <mat-tab label="Note for tomorrow">
       <section class="tab-inner">
-        <p>This is meant to be a takeaway to be even more productive and happy tomorrow. E.g.: What did you learn today? What do you want to do better/smarter tomorrow? What do you want to achieve and why?</p>
+        <p>This is meant to be a takeaway to be even more productive and happy tomorrow. E.g.: What did you learn today?
+          What do you want to do better/smarter tomorrow? What do you want to achieve and why?</p>
         <p>Think a second and reflect on the day.</p>
 
         <textarea [(ngModel)]="tomorrowsNote"
@@ -66,7 +68,8 @@
               [class.is-done]="task.isDone">
             <td [innerHtml]="task.title"></td>
             <td>
-              <span *ngFor="let task of task.subTasks"><span [innerHtml]="task.title"></span>: <span [innerHtml]="task.timeSpentOnDay[todayStr]|msToString"></span><br></span>
+              <span *ngFor="let task of task.subTasks"><span [innerHtml]="task.title"></span>: <span
+                [innerHtml]="task.timeSpentOnDay[todayStr]|msToString"></span><br></span>
             </td>
             <td [innerHtml]="task.timeSpentOnDay[todayStr] |msToString"></td>
             <td [innerHtml]="task.timeSpent |msToString"></td>
@@ -125,14 +128,15 @@
     <!--Move unfinished tasks back to backlog-->
     <!--</mat-checkbox>-->
     <!--</div>-->
-
-    <div class="success-animation-wrapper"
-         *ngIf="showSuccessAnimation">
-      <mat-icon>wb_sunny</mat-icon>
-      <div class="unicorn-wrapper">
-        <img src="assets/unicorn.png"
-             class="unicorn">
-      </div>
-    </div>
   </section>
+</div>
+
+
+<div class="success-animation-wrapper"
+     *ngIf="showSuccessAnimation">
+  <mat-icon>wb_sunny</mat-icon>
+  <div class="unicorn-wrapper">
+    <img src="assets/unicorn.png"
+         class="unicorn">
+  </div>
 </div>
