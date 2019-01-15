@@ -2,9 +2,11 @@ import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnDestroy
 import { Task, TaskWithSubTasks } from '../task.model';
 import { TaskService } from '../task.service';
 import { DragulaService } from 'ng2-dragula';
-import { Subscription } from 'rxjs';
+import { BehaviorSubject, combineLatest, Observable, of, Subscription } from 'rxjs';
 import { standardListAnimation } from '../../../ui/animations/standard-list.ani';
 import { expandAnimation } from '../../../ui/animations/expand.ani';
+import { flatMap, switchMap } from 'rxjs/operators';
+import { FilterDoneTasksPipe } from '../filter-done-tasks.pipe';
 
 @Component({
   selector: 'task-list',
@@ -17,25 +19,54 @@ import { expandAnimation } from '../../../ui/animations/expand.ani';
 export class TaskListComponent implements OnDestroy, OnInit {
   @Input() set tasks(tasks: TaskWithSubTasks[]) {
     this.tasks_ = tasks;
+    this.tasks$.next(tasks);
     this.doneTasksLength = this.tasks_.filter(task => task.isDone).length;
     this.allTasksLength = this.tasks_.length;
     this.undoneTasksLength = this.tasks_.length - this.doneTasksLength;
   }
 
   tasks_: TaskWithSubTasks[];
+  tasks$: BehaviorSubject<TaskWithSubTasks[]> = new BehaviorSubject([]);
 
-  @Input() filterArgs: string;
+  @Input() set isHideDone(val: boolean) {
+    this.isHideDone_ = val;
+    this.isHideDone$.next(val);
+  }
+
+  isHideDone_: boolean;
+  isHideDone$: BehaviorSubject<boolean> = new BehaviorSubject(false);
+
+
+  @Input() set isHideAll(val: boolean) {
+    this.isHideAll_ = val;
+    this.isHideAll$.next(val);
+  }
+
+  isHideAll_: boolean;
+  isHideAll$: BehaviorSubject<boolean> = new BehaviorSubject(false);
+
+  filteredTasks$: Observable<TaskWithSubTasks[]> = combineLatest(
+    this.tasks$,
+    this.isHideDone$,
+    this.isHideAll$,
+    this._taskService.currentTaskId$,
+  ).pipe(flatMap(([tasks, isHideDone, isHideAll, currentId]) => {
+    const filteredTasks = this._filterDoneTasks.transform(tasks, currentId, isHideDone, isHideAll);
+    return of(filteredTasks);
+  }));
+
   @Input() parentId: string;
   @Input() listId: string;
-  @Input() isHideDone: boolean;
-  @Input() isHideAll: boolean;
   @Input() listModelId: string;
+
+
   @ViewChild('listEl') listEl;
   subs = new Subscription();
   isBlockAni = true;
   doneTasksLength = 0;
   undoneTasksLength = 0;
   allTasksLength = 0;
+  currentTaskId: string;
 
   private _blockAnimationTimeout: number;
 
@@ -43,6 +74,7 @@ export class TaskListComponent implements OnDestroy, OnInit {
     private _taskService: TaskService,
     private _dragulaService: DragulaService,
     private _cd: ChangeDetectorRef,
+    private _filterDoneTasks: FilterDoneTasksPipe,
   ) {
   }
 
@@ -64,6 +96,8 @@ export class TaskListComponent implements OnDestroy, OnInit {
         }
       })
     );
+
+    this.subs.add(this._taskService.currentTaskId$.subscribe(val => this.currentTaskId = val));
   }
 
   ngOnDestroy() {

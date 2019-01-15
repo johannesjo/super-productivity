@@ -76,16 +76,14 @@
       </div>
       <task-list [tasks]="taskService.undoneTasks$|async"
                  listId="PARENT"
-                 listModelId="UNDONE"
-                 [filterArgs]="{'isDone':false}"></task-list>
+                 listModelId="UNDONE"></task-list>
 
       <div *ngIf="!isPlanYourDay"
            @expand>
         <h2 class="mat-h2 completed-tasks-heading">Completed Tasks</h2>
         <task-list [tasks]="taskService.doneTasks$|async"
                    listId="PARENT"
-                   listModelId="DONE"
-                   [filterArgs]="{'isDone':true}"></task-list>
+                   listModelId="DONE"></task-list>
         <div class="finish-day-button-wrapper">
           <button routerLink="/daily-summary"
                   mat-raised-button=""
@@ -130,8 +128,7 @@
         <h2 class="mat-h2 backlog-heading">Backlog  {{isTriggerSwitchListAni$|async}}</h2>
         <task-list [tasks]="backlogTasks"
                    listId="PARENT"
-                   listModelId="BACKLOG"
-                   [filterArgs]="{'isDone':true}"></task-list>
+                   listModelId="BACKLOG"></task-list>
       </div>
     </div>
   </div>
