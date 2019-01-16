@@ -369,25 +369,29 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
       this.focusNext();
     }
 
+    // collapse sub tasks
+    if ((ev.key === 'ArrowLeft') || checkKeyCombo(ev, keys.collapseSubTasks)) {
+      const hasSubTasks = this.task.subTasks && this.task.subTasks.length > 0;
+      if (this.task._isAdditionalInfoOpen) {
+        this.hideAdditionalInfos();
+      } else if (hasSubTasks && this.task._showSubTasksMode !== HIDE_SUB_TASKS) {
+        this._taskService.toggleSubTaskMode(this.task.id, true, false);
+      } else if (this.task.parentId) {
+        this._taskService.focusTask(this.task.parentId);
+      } else {
+        this.focusPrevious();
+      }
+    }
+
     // expand sub tasks
     if ((ev.key === 'ArrowRight') || checkKeyCombo(ev, keys.expandSubTasks)) {
-      if (this.task.subTasks && this.task.subTasks.length > 0 && this.task._showSubTasksMode !== SHOW_SUB_TASKS) {
+      const hasSubTasks = this.task.subTasks && this.task.subTasks.length > 0;
+      if (hasSubTasks && this.task._showSubTasksMode !== SHOW_SUB_TASKS) {
         this._taskService.toggleSubTaskMode(this.task.id, false, false);
       } else if (!this.task._isAdditionalInfoOpen) {
         this.showAdditionalInfos();
       } else {
         this.focusNext();
-      }
-    }
-
-    // collapse sub tasks
-    if ((ev.key === 'ArrowLeft') || checkKeyCombo(ev, keys.collapseSubTasks)) {
-      if (this.task._isAdditionalInfoOpen) {
-        this.hideAdditionalInfos();
-      } else if (this.task.subTasks && this.task.subTasks.length > 0 && this.task._showSubTasksMode !== HIDE_SUB_TASKS) {
-        this._taskService.toggleSubTaskMode(this.task.id, true, false);
-      } else {
-        this.focusPrevious();
       }
     }
 
