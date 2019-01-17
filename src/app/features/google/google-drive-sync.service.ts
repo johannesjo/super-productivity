@@ -80,7 +80,7 @@ export class GoogleDriveSyncService {
   }
 
   async changeSyncFileName(newSyncFileName): Promise<any> {
-    const res = await this._googleApiService.findFile(newSyncFileName);
+    const res = await this._googleApiService.findFile(newSyncFileName).toPromise();
     const filesFound = res.body.items;
     if (!filesFound || filesFound.length === 0) {
       const isSave = await this._confirmSaveNewFile(newSyncFileName);
@@ -150,7 +150,7 @@ export class GoogleDriveSyncService {
         // ---------------------------
         // otherwise update
       } else {
-        this._googleApiService.getFileInfo(this._config._backupDocId)
+        this._googleApiService.getFileInfo(this._config._backupDocId).toPromise()
           .then((res) => {
             const lastActiveLocal = this._syncService.getLastActive();
             const lastModifiedRemote = res.body.modifiedDate;
@@ -253,7 +253,7 @@ export class GoogleDriveSyncService {
 
   private async _checkIfRemoteUpdate(): Promise<any> {
     const lastSync = this._config._lastSync;
-    const promise = this._googleApiService.getFileInfo(this._config._backupDocId)
+    const promise = this._googleApiService.getFileInfo(this._config._backupDocId).toPromise()
       .then((res) => {
         const lastModifiedRemote = res.body.modifiedDate;
         console.log('CHECK_REMOTE_UPDATED', this._isNewerThan(lastModifiedRemote, lastSync), lastModifiedRemote, lastSync);
@@ -366,7 +366,7 @@ If not please change the Sync file name.`,
       title: this._config.syncFileName,
       id: this._config._backupDocId,
       editable: true
-    })
+    }).toPromise()
       .then((res) => {
         this.updateConfig({
           _backupDocId: res.body.id,
@@ -383,7 +383,7 @@ If not please change the Sync file name.`,
       return Promise.reject('No file name specified');
     }
 
-    return this._googleApiService.loadFile(this._config._backupDocId);
+    return this._googleApiService.loadFile(this._config._backupDocId).toPromise();
   }
 
   private _handleInProgress(promise: Promise<any>) {

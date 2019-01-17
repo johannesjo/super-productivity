@@ -123,7 +123,7 @@ export class GoogleExportTimeComponent implements OnInit, OnDestroy {
     this.isLoading = true;
     this.isSpreadSheetRead = false;
     this.headings = undefined;
-    this.readPromise = this.googleApiService.getSpreadsheetHeadingsAndLastRow(this.opts.spreadsheetId);
+    this.readPromise = this.googleApiService.getSpreadsheetHeadingsAndLastRow(this.opts.spreadsheetId).toPromise();
     this._cd.detectChanges();
     return this.readPromise.then((data: any) => {
       this.headings = data.headings;
@@ -165,7 +165,7 @@ export class GoogleExportTimeComponent implements OnInit, OnDestroy {
       this._snackService.open('Current values and the last saved row have equal values, that is probably not what you want.');
     } else {
 
-      this.savePromise = this.googleApiService.appendRow(this.opts.spreadsheetId, this.actualValues);
+      this.savePromise = this.googleApiService.appendRow(this.opts.spreadsheetId, this.actualValues).toPromise();
       this.savePromise.then(() => {
         this._snackService.open({
           message: 'Row successfully appended',
