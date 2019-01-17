@@ -28,14 +28,27 @@ import { Dictionary } from '@ngrx/entity';
 import { getWorklogStr } from '../../util/get-work-log-str';
 import { GitCfg } from '../issue/git/git';
 import { DEFAULT_ISSUE_PROVIDER_CFGS } from '../issue/issue.const';
+import { share, shareReplay } from 'rxjs/operators';
 
 @Injectable()
 export class ProjectService {
   list$: Observable<Project[]> = this._store.pipe(select(selectAllProjects));
-  currentProject$: Observable<Project> = this._store.pipe(select(selectCurrentProject));
-  currentJiraCfg$: Observable<JiraCfg> = this._store.pipe(select(selectProjectJiraCfg));
-  currentGitCfg$: Observable<GitCfg> = this._store.pipe(select(selectProjectGitCfg));
-  advancedCfg$: Observable<ProjectAdvancedCfg> = this._store.pipe(select(selectAdvancedProjectCfg));
+  currentProject$: Observable<Project> = this._store.pipe(
+    select(selectCurrentProject),
+    shareReplay(),
+  );
+  currentJiraCfg$: Observable<JiraCfg> = this._store.pipe(
+    select(selectProjectJiraCfg),
+    shareReplay(),
+  );
+  currentGitCfg$: Observable<GitCfg> = this._store.pipe(
+    select(selectProjectGitCfg),
+    shareReplay(),
+  );
+  advancedCfg$: Observable<ProjectAdvancedCfg> = this._store.pipe(
+    select(selectAdvancedProjectCfg),
+    shareReplay(),
+  );
   currentId$: Observable<string> = this._store.pipe(select(selectCurrentProjectId));
   currentId: string;
 

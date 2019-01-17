@@ -7,10 +7,14 @@ import { selectConfigFeatureState } from './store/config.reducer';
 import { PersistenceService } from '../../core/persistence/persistence.service';
 import { DEFAULT_CFG } from './default-config.const';
 import { Actions, ofType } from '@ngrx/effects';
+import { shareReplay } from 'rxjs/operators';
 
 @Injectable()
 export class ConfigService {
-  cfg$: Observable<GlobalConfig> = this._store.pipe(select(selectConfigFeatureState));
+  cfg$: Observable<GlobalConfig> = this._store.pipe(
+    select(selectConfigFeatureState),
+    shareReplay(),
+  );
   cfg: GlobalConfig;
 
   onCfgLoaded$: Observable<any> = this._actions$.pipe(ofType(ConfigActionTypes.LoadConfig));

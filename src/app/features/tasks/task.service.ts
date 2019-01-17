@@ -90,15 +90,17 @@ export class TaskService {
   todaysTasks$: Observable<TaskWithSubTasks[]> = this._store.pipe(
     select(selectTodaysTasksWithSubTasks),
     distinctUntilChanged(),
-    share(),
+    shareReplay(),
   );
   backlogTasks$: Observable<TaskWithSubTasks[]> = this._store.pipe(
     select(selectBacklogTasksWithSubTasks),
     distinctUntilChanged(),
+    shareReplay(),
   );
   undoneTasks$: Observable<TaskWithSubTasks[]> = this._store.pipe(
     select(selectTodaysUnDoneTasksWithSubTasks),
     distinctUntilChanged(),
+    shareReplay(),
   );
 
   doneTasks$: Observable<TaskWithSubTasks[]> = this._store.pipe(

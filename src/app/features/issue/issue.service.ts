@@ -122,6 +122,8 @@ export class IssueService {
   public refreshBacklog() {
     console.log('REFRESH BACKLOG');
 
+    // TODO refactor, so the old request is thrown away when the project is
+    // switched again
     this.isGitAddToBacklog$.pipe(
       take(1),
     ).subscribe((isGitAddToBacklog) => {
