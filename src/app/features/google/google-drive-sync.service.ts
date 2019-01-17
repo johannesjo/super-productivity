@@ -11,7 +11,8 @@ import { DialogConfirmComponent } from '../../ui/dialog-confirm/dialog-confirm.c
 import { DialogConfirmDriveSyncLoadComponent } from './dialog-confirm-drive-sync-load/dialog-confirm-drive-sync-load.component';
 import { DialogConfirmDriveSyncSaveComponent } from './dialog-confirm-drive-sync-save/dialog-confirm-drive-sync-save.component';
 import { AppDataComplete } from '../../imex/sync/sync.model';
-import { take } from 'rxjs/operators';
+import { flatMap, map, take, tap } from 'rxjs/operators';
+import { EMPTY, from, Observable, throwError } from 'rxjs';
 
 @Injectable()
 export class GoogleDriveSyncService {
@@ -42,7 +43,7 @@ export class GoogleDriveSyncService {
           }
 
           if (this._config.isLoadRemoteDataOnStartup) {
-            this._checkForInitialUpdate();
+            this._checkForInitialUpdate().subscribe();
           }
         });
       }
@@ -90,7 +91,7 @@ export class GoogleDriveSyncService {
           // we need to unset to save to a new file
           _backupDocId: null,
         });
-        await this._save();
+        this._save().toPromise();
       }
     } else if (filesFound.length > 1) {
       this._snackService.open({
@@ -99,7 +100,7 @@ export class GoogleDriveSyncService {
       });
       throw new Error('Multiple files with the name same name found');
     } else if (filesFound.length === 1) {
-      const isConfirmUseExisting = await this._confirmUsingExistingFileDialog(newSyncFileName);
+      const isConfirmUseExisting = await this._confirmUsingExistingFileDialog(newSyncFileName).toPromise();
       if (isConfirmUseExisting) {
         const fileToUpdate = filesFound[0];
         this.updateConfig({
@@ -143,7 +144,7 @@ export class GoogleDriveSyncService {
       if (!this._config._backupDocId) {
         this.changeSyncFileName(this._config.syncFileName || DEFAULT_SYNC_FILE_NAME)
           .then(() => {
-            this._save().then(resolve);
+            this._save().toPromise().then(resolve);
           }, reject);
 
         // JUST UPDATE
@@ -166,11 +167,11 @@ export class GoogleDriveSyncService {
               // remote has an update so prompt what to do
               this._confirmSaveDialog(lastModifiedRemote)
                 .then(() => {
-                  this._save().then(resolve);
+                  this._save().toPromise().then(resolve);
                 }, reject);
             } else {
               // all clear just save
-              this._save().then(resolve);
+              this._save().toPromise().then(resolve);
             }
           })
           .catch(reject);
@@ -188,9 +189,9 @@ export class GoogleDriveSyncService {
 
     const promise = new Promise((resolve, reject) => {
       const loadHandler = () => {
-        return this._checkIfRemoteUpdate().then((isUpdated) => {
+        return this._checkIfRemoteUpdate().toPromise().then((isUpdated) => {
           if (isUpdated || isForce) {
-            return this._loadFile().then((loadRes) => {
+            return this._loadFile().toPromise().then((loadRes) => {
               const backup: AppDataComplete = loadRes.backup;
               const lastActiveLocal = this._syncService.getLastActive();
               const lastActiveRemote = backup.lastActiveTime;
@@ -203,11 +204,7 @@ export class GoogleDriveSyncService {
                 this._import(loadRes);
                 resolve(loadRes);
               } else {
-                this._confirmLoadDialog(lastActiveRemote)
-                  .then(() => {
-                    this._import(loadRes);
-                    resolve(loadRes);
-                  }, reject);
+                this._openConfirmLoadDialog(lastActiveRemote);
               }
 
             }, reject);
@@ -239,7 +236,7 @@ export class GoogleDriveSyncService {
     return promise;
   }
 
-  private _import(loadRes) {
+  private _import(loadRes): Promise<any> {
     const backupData: AppDataComplete = loadRes.backup;
     return this._syncService.loadCompleteSyncData(backupData)
       .then(() => {
@@ -251,35 +248,39 @@ export class GoogleDriveSyncService {
   }
 
 
-  private async _checkIfRemoteUpdate(): Promise<any> {
+  private _checkIfRemoteUpdate(): Observable<any> {
     const lastSync = this._config._lastSync;
-    const promise = this._googleApiService.getFileInfo(this._config._backupDocId).toPromise()
-      .then((res) => {
-        const lastModifiedRemote = res.body.modifiedDate;
-        console.log('CHECK_REMOTE_UPDATED', this._isNewerThan(lastModifiedRemote, lastSync), lastModifiedRemote, lastSync);
-        return this._isNewerThan(lastModifiedRemote, lastSync);
-      });
-    this._handleInProgress(promise);
-    return await promise;
+    return this._googleApiService.getFileInfo(this._config._backupDocId)
+      .pipe(
+        tap((res) => {
+          const lastModifiedRemote = res.body.modifiedDate;
+          console.log('CHECK_REMOTE_UPDATED', this._isNewerThan(lastModifiedRemote, lastSync), lastModifiedRemote, lastSync);
+        }),
+        map((res) => this._isNewerThan(res.body.modifiedDate, lastSync)),
+      );
   }
 
-  private _checkForInitialUpdate() {
-    this._checkIfRemoteUpdate()
-      .then((isUpdate) => {
-        console.log('isUpdate', isUpdate);
-        if (isUpdate) {
-          this._snackService.open({
-            message: `DriveSync: There is a remote update! Downloading...`,
-            icon: 'file_download',
-          });
-          console.log('DriveSync', 'HAS CHANGED (modified Date comparision), TRYING TO UPDATE');
-          this.loadFrom(true);
-        } else {
-          this._snackService.open({
-            message: `DriveSync: No updated required`,
-          });
-        }
-      });
+  private _checkForInitialUpdate(): Observable<any> {
+    return this._checkIfRemoteUpdate()
+      .pipe(
+        take(1),
+        flatMap((isUpdate) => {
+          console.log('isUpdate', isUpdate);
+          if (isUpdate) {
+            this._snackService.open({
+              message: `DriveSync: There is a remote update! Downloading...`,
+              icon: 'file_download',
+            });
+            console.log('DriveSync', 'HAS CHANGED (modified Date comparision), TRYING TO UPDATE');
+            return this.loadFrom(true);
+          } else {
+            this._snackService.open({
+              message: `DriveSync: No updated required`,
+            });
+            return EMPTY;
+          }
+        }),
+      );
   }
 
   private _showAsyncToast(promise, msg) {
@@ -313,38 +314,32 @@ export class GoogleDriveSyncService {
     });
   }
 
-  private _confirmLoadDialog(remoteModified): Promise<any> {
+  private _openConfirmLoadDialog(remoteModified): void {
     const lastActiveLocal = this._syncService.getLastActive();
-    return new Promise((resolve, reject) => {
-      this._matDialog.open(DialogConfirmDriveSyncLoadComponent, {
-        restoreFocus: true,
-        data: {
-          loadFromRemote: resolve.bind(this),
-          saveToRemote: () => {
-            this._save();
-            reject.bind(this)();
-          },
-          cancel: reject,
-          remoteModified: this._formatDate(remoteModified),
-          lastActiveLocal: this._formatDate(lastActiveLocal),
-          lastSync: this._formatDate(this._config._lastSync),
-        }
-      });
+    this._matDialog.open(DialogConfirmDriveSyncLoadComponent, {
+      restoreFocus: true,
+      data: {
+        loadFromRemote: () => this.loadFrom()
+          .then(loadRes => this._import(loadRes)),
+        saveToRemote: () => this._save().toPromise(),
+        cancel: () => {
+        },
+        remoteModified: this._formatDate(remoteModified),
+        lastActiveLocal: this._formatDate(lastActiveLocal),
+        lastSync: this._formatDate(this._config._lastSync),
+      }
     });
   }
 
-  private _confirmUsingExistingFileDialog(fileName): Promise<any> {
-    return new Promise((resolve, reject) => {
-      this._matDialog.open(DialogConfirmComponent, {
-        restoreFocus: true,
-        data: {
-          message: `
+  private _confirmUsingExistingFileDialog(fileName): Observable<boolean> {
+    return this._matDialog.open(DialogConfirmComponent, {
+      restoreFocus: true,
+      data: {
+        message: `
 DriveSync: Use <strong>existing</strong> file <strong>"${fileName}"</strong> as sync file?
 If not please change the Sync file name.`,
-        }
-      }).afterClosed()
-        .subscribe((isConfirm: boolean) => isConfirm ? resolve(true) : resolve(false));
-    });
+      }
+    }).afterClosed();
   }
 
   private _confirmSaveNewFile(fileName): Promise<any> {
@@ -360,30 +355,34 @@ If not please change the Sync file name.`,
     });
   }
 
-  private async _save(): Promise<any> {
-    const completeData = await this._getLocalAppData();
-    return this._googleApiService.saveFile(completeData, {
-      title: this._config.syncFileName,
-      id: this._config._backupDocId,
-      editable: true
-    }).toPromise()
-      .then((res) => {
+  // TODO check if working
+  private _save(): Observable<any> {
+    return from(this._getLocalAppData()).pipe(
+      flatMap((completeData) => {
+        return this._googleApiService.saveFile(completeData, {
+          title: this._config.syncFileName,
+          id: this._config._backupDocId,
+          editable: true
+        });
+      }),
+      tap((res) => {
+        console.log(res);
         this.updateConfig({
           _backupDocId: res.body.id,
           _lastSync: res.body.modifiedDate,
         }, true);
         console.log('google sync save:', res.body.modifiedDate);
-
         this._syncService.saveLastActive(res.body.modifiedDate);
-      });
+      }),
+    );
   }
 
-  private _loadFile(): Promise<any> {
+  private _loadFile(): Observable<any> {
     if (!this._config.syncFileName) {
-      return Promise.reject('No file name specified');
+      return throwError('No file name specified');
     }
 
-    return this._googleApiService.loadFile(this._config._backupDocId).toPromise();
+    return this._googleApiService.loadFile(this._config._backupDocId);
   }
 
   private _handleInProgress(promise: Promise<any>) {
