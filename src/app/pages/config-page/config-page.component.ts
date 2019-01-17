@@ -2,10 +2,13 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ConfigService } from '../../features/config/config.service';
 import { GLOBAL_CONFIG_FORM_CONFIG } from '../../features/config/config-form-config.const';
 import { ProjectService } from '../../features/project/project.service';
-import { ConfigSectionKey, GlobalConfig } from '../../features/config/config.model';
+import { ConfigFormSection, ConfigSectionKey, GlobalConfig } from '../../features/config/config.model';
 import { Subscription } from 'rxjs';
 import { Project, ProjectAdvancedCfg, ProjectCfgFormKey } from '../../features/project/project.model';
-import { BASIC_PROJECT_CONFIG_FORM_CONFIG, PROJECT_CONFIG_FORM_CONFIG } from '../../features/project/project-form-cfg.const';
+import {
+  BASIC_PROJECT_CONFIG_FORM_CONFIG,
+  PROJECT_CONFIG_FORM_CONFIG
+} from '../../features/project/project-form-cfg.const';
 import { IssueIntegrationCfg, IssueIntegrationCfgs, IssueProviderKey } from '../../features/issue/issue';
 import { ISSUE_PROVIDER_FORM_CFGS } from '../../features/issue/issue.const';
 import { DEFAULT_JIRA_CFG } from '../../features/issue/jira/jira.const';
@@ -18,10 +21,10 @@ import { dirtyDeepCopy } from '../../util/dirtyDeepCopy';
   styleUrls: ['./config-page.component.scss']
 })
 export class ConfigPageComponent implements OnInit, OnDestroy {
-  basicProjectSettingsFormCfg;
-  projectConfigFormCfg;
-  issueIntegrationFormCfg;
-  globalConfigFormCfg;
+  basicProjectSettingsFormCfg: ConfigFormSection;
+  projectConfigFormCfg: ConfigFormSection;
+  issueIntegrationFormCfg: ConfigFormSection;
+  globalConfigFormCfg: ConfigFormSection;
 
   currentProject: Project;
   projectCfg: ProjectAdvancedCfg;

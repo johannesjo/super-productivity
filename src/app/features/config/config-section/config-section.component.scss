@@ -2,6 +2,7 @@
 
 .form-wrapper {
   overflow: hidden;
+
   &.keyboard {
     ::ng-deep formly-field {
       box-sizing: border-box;
@@ -21,10 +22,14 @@
 $this-panel-padding-left-right: 12px;
 
 ::ng-deep .collapsible-title {
-  font-size: 17px;
+  font-size: 16px;
   margin-top: 0;
   display: block;
   padding: 10px $this-panel-padding-left-right;
+
+}
+
+::ng-deep .collapsible-expand-icon {
 }
 
 ::ng-deep .collapsible-panel {

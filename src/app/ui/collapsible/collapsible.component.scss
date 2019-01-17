@@ -12,6 +12,7 @@ $this-button-size: 34px;
   .collapsible-title {
     cursor: pointer;
     user-select: none;
+
     > * {
       vertical-align: middle;
     }
@@ -21,6 +22,7 @@ $this-button-size: 34px;
     }
 
     .collapsible-expand-icon {
+      margin-right: $s;
       transition: all $transition-standard;
     }
 
