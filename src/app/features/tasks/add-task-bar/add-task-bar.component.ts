@@ -1,4 +1,14 @@
-import { AfterViewInit, Component, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
+import {
+  AfterViewInit,
+  ChangeDetectionStrategy,
+  Component,
+  EventEmitter,
+  Input,
+  OnDestroy,
+  OnInit,
+  Output,
+  ViewChild
+} from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { TaskService } from '../task.service';
 import { debounceTime, switchMap, takeUntil } from 'rxjs/operators';
@@ -11,7 +21,8 @@ import { SnackService } from '../../../core/snack/snack.service';
 @Component({
   selector: 'add-task-bar',
   templateUrl: './add-task-bar.component.html',
-  styleUrls: ['./add-task-bar.component.scss']
+  styleUrls: ['./add-task-bar.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AddTaskBarComponent implements OnInit, OnDestroy, AfterViewInit {
   destroy$: Subject<boolean> = new Subject<boolean>();

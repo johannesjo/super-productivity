@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy, OnInit } from '@angular/core';
 import { ConfigService } from '../../features/config/config.service';
 import { GLOBAL_CONFIG_FORM_CONFIG } from '../../features/config/config-form-config.const';
 import { ProjectService } from '../../features/project/project.service';
@@ -18,7 +18,8 @@ import { dirtyDeepCopy } from '../../util/dirtyDeepCopy';
 @Component({
   selector: 'config-page',
   templateUrl: './config-page.component.html',
-  styleUrls: ['./config-page.component.scss']
+  styleUrls: ['./config-page.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ConfigPageComponent implements OnInit, OnDestroy {
   basicProjectSettingsFormCfg: ConfigFormSection;

@@ -1,4 +1,4 @@
-import { Component, Inject, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Inject, OnDestroy, OnInit } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material';
 import { Project } from '../../project.model';
 import { FormGroup } from '@angular/forms';
@@ -20,6 +20,7 @@ import { dirtyDeepCopy } from '../../../../util/dirtyDeepCopy';
   selector: 'dialog-create-project',
   templateUrl: './dialog-create-project.component.html',
   styleUrls: ['./dialog-create-project.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DialogCreateProjectComponent implements OnInit, OnDestroy {
   projectData: Project | Partial<Project> = DEFAULT_PROJECT;

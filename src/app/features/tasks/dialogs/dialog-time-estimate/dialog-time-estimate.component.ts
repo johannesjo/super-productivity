@@ -1,4 +1,4 @@
-import { Component, Inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material';
 import { Task, TaskCopy } from '../../task.model';
 import { TaskService } from '../../task.service';
@@ -10,6 +10,7 @@ import { createTaskCopy } from '../../util/create-task-copy';
   selector: 'dialog-time-estimate',
   templateUrl: './dialog-time-estimate.component.html',
   styleUrls: ['./dialog-time-estimate.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DialogTimeEstimateComponent {
   todayStr: string;

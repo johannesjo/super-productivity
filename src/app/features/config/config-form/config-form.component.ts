@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormlyFieldConfig, FormlyFormOptions } from '@ngx-formly/core';
 import { FormGroup } from '@angular/forms';
 import { ConfigSectionKey } from '../config.model';
@@ -7,7 +7,8 @@ import { ProjectCfgFormKey } from '../../project/project.model';
 @Component({
   selector: 'config-form',
   templateUrl: './config-form.component.html',
-  styleUrls: ['./config-form.component.scss']
+  styleUrls: ['./config-form.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ConfigFormComponent {
 

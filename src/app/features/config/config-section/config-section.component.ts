@@ -1,4 +1,5 @@
 import {
+  ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
   ComponentFactory,
@@ -22,6 +23,7 @@ import { FileImexComponent } from '../../../imex/file-imex/file-imex.component';
   templateUrl: './config-section.component.html',
   styleUrls: ['./config-section.component.scss'],
   animations: expandAnimation,
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ConfigSectionComponent implements OnInit {
   @Input() section: ConfigFormSection;

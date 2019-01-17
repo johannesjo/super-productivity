@@ -19,7 +19,7 @@ import { dotAnimation } from './dot.ani';
   templateUrl: './input-duration-slider.component.html',
   styleUrls: ['./input-duration-slider.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  animations:[dotAnimation],
+  animations: [dotAnimation],
 })
 export class InputDurationSliderComponent implements OnInit, OnDestroy {
   minutesBefore = 0;

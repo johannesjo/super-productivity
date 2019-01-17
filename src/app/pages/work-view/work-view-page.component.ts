@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { TaskService } from '../../features/tasks/task.service';
 import { expandAnimation, expandFadeAnimation } from '../../ui/animations/expand.ani';
 import { LayoutService } from '../../core-ui/layout/layout.service';
@@ -15,7 +15,8 @@ import { fadeAnimation } from '../../ui/animations/fade.ani';
   selector: 'work-view',
   templateUrl: './work-view-page.component.html',
   styleUrls: ['./work-view-page.component.scss'],
-  animations: [expandFadeAnimation, expandAnimation, fadeAnimation]
+  animations: [expandFadeAnimation, expandAnimation, fadeAnimation],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class WorkViewPageComponent implements OnInit, OnDestroy {
   isShowTimeWorkedWithoutBreak = true;
@@ -83,7 +84,6 @@ export class WorkViewPageComponent implements OnInit, OnDestroy {
           if (isPlanning && backlogTasks && backlogTasks.length) {
             this.splitInputPos = 50;
           }
-          this._cd.detectChanges();
         })
     );
 
