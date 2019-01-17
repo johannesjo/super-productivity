@@ -93,8 +93,9 @@ export const JIRA_CREDENTIALS_FORM_CFG: FormlyFieldConfig[] = [
     type: 'input',
     templateOptions: {
       required: true,
-      label: 'Password / Token',
-      type: 'password'
+      label: 'Token / Password',
+      type: 'password',
+      description: 'See https://confluence.atlassian.com/cloud/api-tokens-938839638.html'
     },
   },
 ];
