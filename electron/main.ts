@@ -14,6 +14,7 @@ import { getGitLog } from './git-log';
 import { initGoogleAuth } from './google-auth';
 import { errorHandler } from './error-handler';
 import { initDebug } from './debug';
+import App = Electron.App;
 
 const ICONS_FOLDER = __dirname + '/assets/icons/';
 const IS_MAC = process.platform === 'darwin';
@@ -25,6 +26,11 @@ if (IS_DEV) {
   console.log('Starting in DEV Mode!!!');
 }
 
+interface MyApp extends App {
+  isQuiting?: boolean;
+}
+
+const app_: MyApp = app;
 
 initDebug({showDevTools: IS_DEV}, IS_DEV);
 
@@ -35,8 +41,8 @@ const nestedWinParams = {isDarwinForceQuit: false};
 powerSaveBlocker.start('prevent-app-suspension');
 
 // make it a single instance by closing other instances
-app.requestSingleInstanceLock();
-app.on('second-instance', () => {
+app_.requestSingleInstanceLock();
+app_.on('second-instance', () => {
   // the callback: only called only for first instance
   // we want to show it, when the other starts to try another
   if (mainWin) {
@@ -57,10 +63,10 @@ app.on('second-instance', () => {
 
 // APP EVENT LISTENERS
 // -------------------
-app.on('ready', createMainWin);
-app.on('ready', createIndicator);
+app_.on('ready', createMainWin);
+app_.on('ready', createIndicator);
 
-app.on('activate', function () {
+app_.on('activate', function () {
   // On OS X it's common to re-create a window in the app when the
   // dock icon is clicked and there are no other windows open.
   if (mainWin === null) {
@@ -71,12 +77,12 @@ app.on('activate', function () {
 });
 
 let idleInterval;
-app.on('ready', () => {
+app_.on('ready', () => {
   // init time tracking interval
   idleInterval = setInterval(idleChecker, CONFIG.IDLE_PING_INTERVAL);
 });
 
-app.on('before-quit', () => {
+app_.on('before-quit', () => {
   // handle darwin
   if (IS_MAC) {
     nestedWinParams.isDarwinForceQuit = true;
@@ -88,7 +94,7 @@ app.on('before-quit', () => {
 
 // AUTO-UPDATER
 // ------------
-// app.on('ready', () => {
+// app_.on('ready', () => {
 //  // init auto-updates
 //  log.info('INIT AUTO UPDATES');
 //  // log.info(autoUpdater.getFeedURL());
@@ -200,8 +206,8 @@ function quitApp() {
 
 function quitAppNow() {
   // tslint:disable-next-line
-  // app.isQuiting = true;
-  app.quit();
+  app_.isQuiting = true;
+  app_.quit();
 }
 
 function showOrFocus(passedWin) {
@@ -240,9 +246,9 @@ function idleChecker() {
 
     // don't update if the user is about to close
     // tslint:disable-next-line
-    // if (!app.isQuiting) {
-    //   mainWin.webContents.send('IDLE_TIME', idleTime);
-    // }
+    if (!app_.isQuiting) {
+      mainWin.webContents.send('IDLE_TIME', idleTime);
+    }
   });
 }
 

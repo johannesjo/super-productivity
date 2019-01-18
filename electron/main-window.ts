@@ -84,60 +84,73 @@ export const createWindow = function (params) {
   return mainWin;
 };
 
-function initWinEventListeners(app, IS_MAC, nestedWinParams) {
+function initWinEventListeners(app: any, IS_MAC, nestedWinParams) {
   // open new window links in browser
   mainWin.webContents.on('new-window', function (event, url) {
     event.preventDefault();
     shell.openItem(url);
   });
 
+  let isQuiting = false;
+
+  // TODO refactor quiting mess
+
   mainWin.on('close', function (event) {
-    // if (app.isQuiting) {
-    //   app.quit();
-    // } else {
-    event.preventDefault();
-
-    getSettings(mainWin, (appCfg) => {
-      if (appCfg && appCfg.misc.isConfirmBeforeExit) {
-        const choice = require('electron').dialog.showMessageBox(mainWin,
-          {
-            type: 'question',
-            buttons: ['Yes', 'No'],
-            title: 'Confirm',
-            message: 'Are you sure you want to quit?'
-          });
-        if (choice === 1) {
-          event.preventDefault();
-          return;
-        }
-      }
-
-      if (!appCfg || !appCfg.misc.isMinimizeToTrayOnExit) {
-        // app.isQuiting = true;
+      if (isQuiting) {
         app.quit();
       } else {
-        // handle darwin
-        if (IS_MAC) {
-          if (nestedWinParams.isDarwinForceQuit) {
-            // app.isQuiting = true;
+        event.preventDefault();
+
+        getSettings(mainWin, (appCfg) => {
+          if (appCfg && appCfg.misc.isConfirmBeforeExit) {
+            const choice = require('electron').dialog.showMessageBox(mainWin,
+              {
+                type: 'question',
+                buttons: ['Yes', 'No'],
+                title: 'Confirm',
+                message: 'Are you sure you want to quit?'
+              });
+            if (choice === 1) {
+              event.preventDefault();
+              return;
+            } else if (choice === 0) {
+              app.isQuiting = true;
+              isQuiting = true;
+              app.quit();
+              return;
+            }
+          }
+
+          if (!appCfg || !appCfg.misc.isMinimizeToTrayOnExit) {
+            app.isQuiting = true;
+            isQuiting = true;
             app.quit();
           } else {
-            event.preventDefault();
-            mainWin.hide();
+            // handle darwin
+            if (IS_MAC) {
+              if (nestedWinParams.isDarwinForceQuit) {
+                app.isQuiting = true;
+                isQuiting = true;
+                app.quit();
+              } else {
+                event.preventDefault();
+                mainWin.hide();
+              }
+            } else {
+              if (indicatorMod.isRunning()) {
+                event.preventDefault();
+                mainWin.hide();
+              } else {
+                app.isQuiting = true;
+                isQuiting = true;
+                app.quit();
+              }
+            }
           }
-        } else {
-          // if (indicatorMod.isRunning()) {
-          //   event.preventDefault();
-          //   mainWin.hide();
-          // } else {
-          // app.isQuiting = true;
-          app.quit();
-          // }
-        }
+        });
       }
-    });
-    // }
-  });
+    }
+  );
 }
 
 function createMenu(quitApp) {
