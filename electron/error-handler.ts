@@ -1,8 +1,9 @@
+import { getIsAppReady, getWin } from './main-window';
+
 const WAIT_FOR_WIN_TIMEOUT_DURATION = 4000;
 const ERROR_EV = 'ELECTRON_ERROR';
-const mainWinMod = require('./main-window');
 
-module.exports = (e = 'UNDEFINED ERROR', additionalLogInfo) => {
+export const errorHandler = (e = 'UNDEFINED ERROR', additionalLogInfo?) => {
   const errObj = new Error(e);
 
   if (_isReadyForFrontEndError()) {
@@ -16,13 +17,13 @@ module.exports = (e = 'UNDEFINED ERROR', additionalLogInfo) => {
 };
 
 function _isReadyForFrontEndError() {
-  const mainWin = mainWinMod.getWin();
-  const isAppReady = mainWinMod.getIsAppReady();
+  const mainWin = getWin();
+  const isAppReady = getIsAppReady();
   return mainWin && mainWin.webContents && isAppReady;
 }
 
 function _handleError(e, additionalLogInfo, errObj) {
-  const mainWin = mainWinMod.getWin();
+  const mainWin = getWin();
   const stack = errObj.stack;
 
   console.error('ERR', e);

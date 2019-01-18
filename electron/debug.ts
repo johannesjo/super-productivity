@@ -1,17 +1,19 @@
 'use strict';
+import OpenDevToolsOptions = Electron.OpenDevToolsOptions;
+
 const electron = require('electron');
 const localShortcut = require('electron-localshortcut');
 
-const { app, BrowserWindow } = electron;
+const {app, BrowserWindow} = electron;
 const isMacOS = process.platform === 'darwin';
 
-const devToolsOptions = {
+const devToolsOptions: OpenDevToolsOptions = {
   mode: 'bottom'
 };
 
 function toggleDevTools(win = BrowserWindow.getFocusedWindow()) {
   if (win) {
-    const { webContents } = win;
+    const {webContents} = win;
     if (webContents.isDevToolsOpened()) {
       webContents.closeDevTools();
     } else {
@@ -41,6 +43,8 @@ function refresh(win = BrowserWindow.getFocusedWindow()) {
 function inspectElements() {
   const win = BrowserWindow.getFocusedWindow();
   const inspect = () => {
+    // TODO check
+    // tslint:disable-next-line
     win.devToolsWebContents.executeJavaScript('DevToolsAPI.enterInspectElementMode()');
   };
 
@@ -49,7 +53,7 @@ function inspectElements() {
       inspect();
     } else {
       win.webContents.once('devtools-opened', inspect);
-      win.openDevTools();
+      win.webContents.openDevTools();
     }
   }
 }
@@ -68,7 +72,7 @@ const addExtensionIfInstalled = (name, getPath) => {
   }
 };
 
-module.exports = (opts, isAddReload) => {
+export const initDebug = (opts, isAddReload) => {
   opts = Object.assign({
     enabled: null,
     showDevTools: true,
@@ -95,7 +99,7 @@ module.exports = (opts, isAddReload) => {
 
       /// Workaround for https://github.com/electron/electron/issues/12438
       win.webContents.once('dom-ready', () => {
-        openDevTools(win, opts.showDevTools);
+        openDevTools(win);
       });
     }
   });
@@ -115,6 +119,4 @@ module.exports = (opts, isAddReload) => {
   });
 };
 
-module.exports.refresh = refresh;
-module.exports.devTools = devTools;
-module.exports.openDevTools = openDevTools;
+

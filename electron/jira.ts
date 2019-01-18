@@ -1,12 +1,12 @@
-const JiraApi = require('jira-client-fork');
-const mainWinMod = require('./main-window');
+import * as JiraApi from 'jira-client-fork';
+import { getWin } from './main-window';
 
-module.exports = (request) => {
-  const mainWin = mainWinMod.getWin();
-  let config = request.config;
-  let apiMethod = request.apiMethod;
-  let arguments = request.arguments;
-  let requestId = request.requestId;
+export const sendJiraRequest = (request) => {
+  const mainWin = getWin();
+  const config = request.config;
+  const apiMethod = request.apiMethod;
+  const args = request.arguments;
+  const requestId = request.requestId;
 
   const matchPortRegEx = /:\d{2,4}/;
 
@@ -44,9 +44,9 @@ module.exports = (request) => {
     strictSSL: false
   });
 
-  jira[apiMethod](...arguments)
+  jira[apiMethod](...args)
     .then(res => {
-      //console.log('JIRA_RESPONSE', error, res);
+      // console.log('JIRA_RESPONSE', error, res);
       mainWin.webContents.send('JIRA_RESPONSE', {
         response: res,
         requestId: requestId

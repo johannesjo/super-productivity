@@ -1,7 +1,6 @@
-const {google} = require('googleapis');
-const electron = require('electron');
-const mainWinMod = require('./main-window');
-const {BrowserWindow} = require('electron');
+import { google } from 'googleapis';
+import { BrowserWindow, ipcMain } from 'electron';
+import { getWin } from './main-window';
 
 const A = {
   CLIENT_ID: '37646582031-e281jj291amtk805td0hgfqss2jfkdcd.apps.googleusercontent.com',
@@ -10,7 +9,7 @@ const A = {
   EL_API_KEY: 'Er6sAwgXCDKPgw7y8jSuQQTv',
   DISCOVERY_DOCS: ['https://sheets.googleapis.com/$discovery/rest?version=v4'],
   SCOPES: 'https://www.googleapis.com/auth/spreadsheets.readonly' +
-  ' https://www.googleapis.com/auth/drive'
+    ' https://www.googleapis.com/auth/drive'
 };
 
 const clientId = A.EL_CLIENT_ID;
@@ -44,9 +43,11 @@ async function authenticate(refreshToken) {
       oauth2Client.setCredentials({
         refresh_token: `STORED_REFRESH_TOKEN`
       });
+      // TODO check
+      // tslint:disable-next-line
       oauth2Client.refreshToken(refreshToken)
         .then(resolve)
-        .catch(reject)
+        .catch(reject);
     } else {
       const authorizeUrl = oauth2Client.generateAuthUrl({
         access_type: 'offline',
@@ -55,7 +56,7 @@ async function authenticate(refreshToken) {
 
       // open the browser window to the authorize url to start the workflow
       openAuthWindow(authorizeUrl)
-        .then((code) => {
+        .then((code: any) => {
           oauth2Client.getToken(code)
             .then(resolve)
             .catch(reject);
@@ -76,6 +77,7 @@ function openAuthWindow(url) {
   };
 
   return new Promise((resolve, reject) => {
+    /* tslint:disable-next-line */
     const win = new BrowserWindow(browserWindowParams || {'use-content-size': true});
 
     win.loadURL(url);
@@ -112,17 +114,17 @@ function openAuthWindow(url) {
 //   console.log(tokens.access_token);
 // });
 
-module.exports = {
-  init: function() {
-    electron.ipcMain.on('TRIGGER_GOOGLE_AUTH', (ev, refreshToken) => {
-      console.log('TRIGGER_GOOGLE_AUTH, rt', refreshToken);
-      const mainWin = mainWinMod.getWin();
-      authenticate(refreshToken).then((res) => {
-        mainWin.webContents.send('GOOGLE_AUTH_TOKEN', res.tokens);
-      }).catch((err) => {
-        mainWin.webContents.send('GOOGLE_AUTH_TOKEN_ERROR');
-        console.log(err);
-      })
+
+export const initGoogleAuth = function () {
+  ipcMain.on('TRIGGER_GOOGLE_AUTH', (ev, refreshToken) => {
+    console.log('TRIGGER_GOOGLE_AUTH, rt', refreshToken);
+    const mainWin = getWin();
+    authenticate(refreshToken).then((res: any) => {
+      mainWin.webContents.send('GOOGLE_AUTH_TOKEN', res.tokens);
+    }).catch((err) => {
+      mainWin.webContents.send('GOOGLE_AUTH_TOKEN_ERROR');
+      console.log(err);
     });
-  }
+  });
 };
+
