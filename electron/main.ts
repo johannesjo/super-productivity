@@ -180,10 +180,13 @@ function registerShowAppShortCut(shortcutPassed) {
         showOrFocus(mainWin);
       }
     });
+    console.log(ret);
 
-    if (!ret) {
-      errorHandler('Key registration failed: ' + shortcutPassed, shortcutPassed);
-    }
+    // TODO make this work again
+    // tslint:disable-next-line
+    // if (!ret) {
+    //   errorHandler('Key registration failed: ' + shortcutPassed, shortcutPassed);
+    // }
   }
 }
 
@@ -196,7 +199,8 @@ function quitApp() {
 }
 
 function quitAppNow() {
-  app.isQuiting = true;
+  // tslint:disable-next-line
+  // app.isQuiting = true;
   app.quit();
 }
 
@@ -235,9 +239,10 @@ function idleChecker() {
     }
 
     // don't update if the user is about to close
-    if (!app.isQuiting) {
-      mainWin.webContents.send('IDLE_TIME', idleTime);
-    }
+    // tslint:disable-next-line
+    // if (!app.isQuiting) {
+    //   mainWin.webContents.send('IDLE_TIME', idleTime);
+    // }
   });
 }
 

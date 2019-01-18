@@ -19,7 +19,7 @@
   ],
   "scripts": {
     "ng": "ng",
-    "start": "NODE_ENV=DEV ./node_modules/.bin/electron ./electron/main.js",
+    "start": "NODE_ENV=DEV npm run electron:serve",
     "startFrontend": "ng serve",
     "buildFrontend": "ng build",
     "buildFrontendElectron": "ng build --base-href .",

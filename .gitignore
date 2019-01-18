@@ -43,3 +43,4 @@ Thumbs.db
 # added
 build/hub
 electron/**/*.js
+electron/**/*.js.map

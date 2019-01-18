@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg version="1.1" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" xmlns:cc="http://creativecommons.org/ns#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
-  <g>
-    <path d="m61.6 32.119a29.578 29.707 0 0 1 -29.578 29.707 29.578 29.707 0 0 1 -29.578 -29.707 29.578 29.707 0 0 1 29.578 -29.707 29.578 29.707 0 0 1 29.578 29.707z" fill="#03a9f4" stroke="#03a9f4" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="13.8" stroke-width="4.1943"/>
-    <path d="m8.8372 32.373 25.726 21.665 25.356-46.561-27.159 34.621z" fill-rule="evenodd"/>
-  </g>
+<svg version="1.1" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"
+>
+    <g>
+        <path d="m61.6 32.119a29.578 29.707 0 0 1 -29.578 29.707 29.578 29.707 0 0 1 -29.578 -29.707 29.578 29.707 0 0 1 29.578 -29.707 29.578 29.707 0 0 1 29.578 29.707z"
+              fill="#03a9f4" stroke="#03a9f4" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="13.8"
+              stroke-width="4.1943"/>
+        <path d="m8.8372 32.373 25.726 21.665 25.356-46.561-27.159 34.621z" fill-rule="evenodd"/>
+    </g>
 </svg>

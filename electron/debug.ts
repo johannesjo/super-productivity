@@ -44,8 +44,7 @@ function inspectElements() {
   const win = BrowserWindow.getFocusedWindow();
   const inspect = () => {
     // TODO check
-    // tslint:disable-next-line
-    win.devToolsWebContents.executeJavaScript('DevToolsAPI.enterInspectElementMode()');
+    // win.devToolsWebContents.executeJavaScript('DevToolsAPI.enterInspectElementMode()');
   };
 
   if (win) {
@@ -59,9 +58,9 @@ function inspectElements() {
 }
 
 const addExtensionIfInstalled = (name, getPath) => {
-  const isExtensionInstalled = name => {
+  const isExtensionInstalled = name_ => {
     return BrowserWindow.getDevToolsExtensions &&
-      {}.hasOwnProperty.call(BrowserWindow.getDevToolsExtensions(), name);
+      {}.hasOwnProperty.call(BrowserWindow.getDevToolsExtensions(), name_);
   };
 
   try {
@@ -105,9 +104,6 @@ export const initDebug = (opts, isAddReload) => {
   });
 
   app.on('ready', () => {
-    addExtensionIfInstalled('devtron', name => require(name).path);
-    addExtensionIfInstalled('electron-react-devtools', name => require(name).path);
-
     localShortcut.register('CmdOrCtrl+Shift+C', inspectElements);
     localShortcut.register(isMacOS ? 'Cmd+Alt+I' : 'Ctrl+Shift+I', devTools);
     localShortcut.register('F12', devTools);

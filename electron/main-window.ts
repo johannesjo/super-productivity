@@ -3,6 +3,7 @@ import { errorHandler } from './error-handler';
 import { join, normalize } from 'path';
 import { format } from 'url';
 import { getSettings } from './get-settings';
+import MenuItemConstructorOptions = Electron.MenuItemConstructorOptions;
 
 let mainWin;
 let indicatorMod;
@@ -44,17 +45,18 @@ export const createWindow = function (params) {
     mainWin.loadURL('http://localhost:4200');
   } else {
     mainWin = new BrowserWindow({width: 800, height: 600});
-    mainWin.loadURL(format({
+    const url = format({
       pathname: normalize(join(__dirname, '../dist/index.html')),
       protocol: 'file:',
       slashes: true,
-    }, {
+    });
+    mainWin.loadURL(url, {
       show: false,
       webPreferences: {
         scrollBounce: true
       },
       icon: ICONS_FOLDER + '/icon_256x256.png'
-    }));
+    });
     // mainWin.webContents.openDevTools();
   }
   // show gracefully
@@ -90,51 +92,51 @@ function initWinEventListeners(app, IS_MAC, nestedWinParams) {
   });
 
   mainWin.on('close', function (event) {
-    if (app.isQuiting) {
-      app.quit();
-    } else {
-      event.preventDefault();
+    // if (app.isQuiting) {
+    //   app.quit();
+    // } else {
+    event.preventDefault();
 
-      getSettings(mainWin, (appCfg) => {
-        if (appCfg && appCfg.misc.isConfirmBeforeExit) {
-          const choice = require('electron').dialog.showMessageBox(mainWin,
-            {
-              type: 'question',
-              buttons: ['Yes', 'No'],
-              title: 'Confirm',
-              message: 'Are you sure you want to quit?'
-            });
-          if (choice === 1) {
-            event.preventDefault();
-            return;
-          }
+    getSettings(mainWin, (appCfg) => {
+      if (appCfg && appCfg.misc.isConfirmBeforeExit) {
+        const choice = require('electron').dialog.showMessageBox(mainWin,
+          {
+            type: 'question',
+            buttons: ['Yes', 'No'],
+            title: 'Confirm',
+            message: 'Are you sure you want to quit?'
+          });
+        if (choice === 1) {
+          event.preventDefault();
+          return;
         }
+      }
 
-        if (!appCfg || !appCfg.misc.isMinimizeToTrayOnExit) {
-          app.isQuiting = true;
-          app.quit();
-        } else {
-          // handle darwin
-          if (IS_MAC) {
-            if (nestedWinParams.isDarwinForceQuit) {
-              app.isQuiting = true;
-              app.quit();
-            } else {
-              event.preventDefault();
-              mainWin.hide();
-            }
+      if (!appCfg || !appCfg.misc.isMinimizeToTrayOnExit) {
+        // app.isQuiting = true;
+        app.quit();
+      } else {
+        // handle darwin
+        if (IS_MAC) {
+          if (nestedWinParams.isDarwinForceQuit) {
+            // app.isQuiting = true;
+            app.quit();
           } else {
-            if (indicatorMod.isRunning()) {
-              event.preventDefault();
-              mainWin.hide();
-            } else {
-              app.isQuiting = true;
-              app.quit();
-            }
+            event.preventDefault();
+            mainWin.hide();
           }
+        } else {
+          // if (indicatorMod.isRunning()) {
+          //   event.preventDefault();
+          //   mainWin.hide();
+          // } else {
+          // app.isQuiting = true;
+          app.quit();
+          // }
         }
-      });
-    }
+      }
+    });
+    // }
   });
 }
 
@@ -162,8 +164,9 @@ function createMenu(quitApp) {
     ]
   }
   ];
+  const menuTpl_ = menuTpl as MenuItemConstructorOptions[];
 
   // we need to set a menu to get copy & paste working for mac os x
-  Menu.setApplicationMenu(Menu.buildFromTemplate(menuTpl));
+  Menu.setApplicationMenu(Menu.buildFromTemplate(menuTpl_));
 }
 

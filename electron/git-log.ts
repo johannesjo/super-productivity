@@ -1,6 +1,6 @@
 import { getWin } from './main-window';
 
-export const getGitLog = function(data) {
+export const getGitLog = function (data) {
   'use strict';
 
   const exec = require('child_process').exec;
@@ -8,7 +8,7 @@ export const getGitLog = function(data) {
 
   exec(cmd, {
     cwd: data.cwd
-  }, function(error, stdout) {
+  }, function (error, stdout) {
     const mainWin = getWin();
     mainWin.webContents.send('GIT_LOG_RESPONSE', {
       stdout: stdout,

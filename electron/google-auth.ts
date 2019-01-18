@@ -45,9 +45,9 @@ async function authenticate(refreshToken) {
       });
       // TODO check
       // tslint:disable-next-line
-      oauth2Client.refreshToken(refreshToken)
-        .then(resolve)
-        .catch(reject);
+      // oauth2Client.refreshToken(refreshToken)
+      //   .then(resolve)
+      //   .catch(reject);
     } else {
       const authorizeUrl = oauth2Client.generateAuthUrl({
         access_type: 'offline',
@@ -78,7 +78,7 @@ function openAuthWindow(url) {
 
   return new Promise((resolve, reject) => {
     /* tslint:disable-next-line */
-    const win = new BrowserWindow(browserWindowParams || {'use-content-size': true});
+    const win = new BrowserWindow(browserWindowParams || {useContentSize: true});
 
     win.loadURL(url);
 
