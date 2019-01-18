@@ -44,7 +44,7 @@ export class GoogleApiService {
     return this._configService.cfg && this._configService.cfg._googleSession;
   }
 
-  login() {
+  login(): Promise<any> {
     console.log('GOOGLE_LOGIN', this._session);
 
     if (IS_ELECTRON) {

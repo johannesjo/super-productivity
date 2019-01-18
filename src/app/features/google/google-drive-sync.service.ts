@@ -11,8 +11,8 @@ import { DialogConfirmComponent } from '../../ui/dialog-confirm/dialog-confirm.c
 import { DialogConfirmDriveSyncLoadComponent } from './dialog-confirm-drive-sync-load/dialog-confirm-drive-sync-load.component';
 import { DialogConfirmDriveSyncSaveComponent } from './dialog-confirm-drive-sync-save/dialog-confirm-drive-sync-save.component';
 import { AppDataComplete } from '../../imex/sync/sync.model';
-import { distinctUntilChanged, flatMap, map, switchMap, take, tap } from 'rxjs/operators';
-import { combineLatest, EMPTY, from, Observable, throwError, timer } from 'rxjs';
+import { flatMap, map, take, tap } from 'rxjs/operators';
+import { EMPTY, from, Observable, throwError } from 'rxjs';
 
 @Injectable()
 export class GoogleDriveSyncService {
@@ -34,16 +34,6 @@ export class GoogleDriveSyncService {
   init() {
     this._configService.cfg$.subscribe((cfg) => {
       this._config = cfg.googleDriveSync;
-    });
-
-    this._configService.onCfgLoaded$.pipe(take(1)).subscribe(() => {
-      if (this._config.isEnabled && this._config.isAutoLogin) {
-        this._googleApiService.login().then(() => {
-          if (this._config.isLoadRemoteDataOnStartup) {
-            this._checkForInitialUpdate().subscribe();
-          }
-        });
-      }
     });
   }
 
@@ -157,7 +147,7 @@ export class GoogleDriveSyncService {
 
     const promise = new Promise((resolve, reject) => {
       const loadHandler = () => {
-        return this._checkIfRemoteUpdate().toPromise().then((isUpdated) => {
+        return this.checkIfRemoteUpdate().toPromise().then((isUpdated) => {
           if (isUpdated || isForce) {
             return this._loadFile().toPromise().then((loadRes) => {
               const backup: AppDataComplete = loadRes.backup;
@@ -204,6 +194,19 @@ export class GoogleDriveSyncService {
     return promise;
   }
 
+  checkIfRemoteUpdate(): Observable<any> {
+    const lastSync = this._config._lastSync;
+    return this._googleApiService.getFileInfo(this._config._backupDocId)
+      .pipe(
+        tap((res) => {
+          const lastModifiedRemote = res.body.modifiedDate;
+          console.log('CHECK_REMOTE_UPDATED', this._isNewerThan(lastModifiedRemote, lastSync), lastModifiedRemote, lastSync);
+        }),
+        map((res) => this._isNewerThan(res.body.modifiedDate, lastSync)),
+      );
+  }
+
+
   private _import(loadRes): Promise<any> {
     const backupData: AppDataComplete = loadRes.backup;
     return this._syncService.loadCompleteSyncData(backupData)
@@ -216,40 +219,7 @@ export class GoogleDriveSyncService {
   }
 
 
-  private _checkIfRemoteUpdate(): Observable<any> {
-    const lastSync = this._config._lastSync;
-    return this._googleApiService.getFileInfo(this._config._backupDocId)
-      .pipe(
-        tap((res) => {
-          const lastModifiedRemote = res.body.modifiedDate;
-          console.log('CHECK_REMOTE_UPDATED', this._isNewerThan(lastModifiedRemote, lastSync), lastModifiedRemote, lastSync);
-        }),
-        map((res) => this._isNewerThan(res.body.modifiedDate, lastSync)),
-      );
-  }
 
-  private _checkForInitialUpdate(): Observable<any> {
-    return this._checkIfRemoteUpdate()
-      .pipe(
-        take(1),
-        flatMap((isUpdate) => {
-          console.log('isUpdate', isUpdate);
-          if (isUpdate) {
-            this._snackService.open({
-              message: `DriveSync: There is a remote update! Downloading...`,
-              icon: 'file_download',
-            });
-            console.log('DriveSync', 'HAS CHANGED (modified Date comparision), TRYING TO UPDATE');
-            return this.loadFrom(true);
-          } else {
-            this._snackService.open({
-              message: `DriveSync: No updated required`,
-            });
-            return EMPTY;
-          }
-        }),
-      );
-  }
 
   private _showAsyncToast(obs: Observable<any>, msg) {
     this._snackService.open({

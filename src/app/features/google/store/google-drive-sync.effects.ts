@@ -6,48 +6,70 @@ import { NotifyService } from '../../../core/notify/notify.service';
 
 import { ElectronService } from 'ngx-electron';
 import { ConfigActionTypes } from '../../config/store/config.actions';
-import { distinctUntilChanged, flatMap, map, switchMap, tap } from 'rxjs/operators';
-import { combineLatest, EMPTY, Observable, timer } from 'rxjs';
+import { distinctUntilChanged, filter, flatMap, map, switchMap, take, withLatestFrom } from 'rxjs/operators';
+import { combineLatest, EMPTY, from, interval, Observable } from 'rxjs';
 import { GoogleDriveSyncService } from '../google-drive-sync.service';
 import { GoogleApiService } from '../google-api.service';
-
-// TODO send message to electron when current task changes here
+import { ConfigService } from '../../config/config.service';
+import { SnackService } from '../../../core/snack/snack.service';
 
 @Injectable()
 export class GoogleDriveSyncEffects {
-  isAutoSyncToRemote$ = this._googleDriveSyncService.config$.pipe(
-    map(cfg => cfg.isAutoSyncToRemote), distinctUntilChanged()
-  );
-  syncInterval$ = this._googleDriveSyncService.config$.pipe(
-    map(cfg => cfg.syncInterval), distinctUntilChanged()
-  );
+  config$ = this._configService.cfg$.pipe(map(cfg => cfg.googleDriveSync));
 
-  sync$: Observable<any> = combineLatest(
-    this.isAutoSyncToRemote$,
-    this.syncInterval$,
-    this._googleApiService.isLoggedIn$,
-  ).pipe(
-    switchMap(([isEnabled, syncInterval, isLoggedIn]) => {
-      // TODO remove
-      syncInterval = 5000;
-      isLoggedIn = true;
-
-      return (isLoggedIn && isEnabled && syncInterval >= 5000)
-        ? timer(syncInterval, syncInterval).pipe(
-          flatMap(() => this._googleDriveSyncService.saveForSync()),
-        )
-        : EMPTY;
-    }),
-  );
+  // TODO check why distinct until changed not working as intended
+  isEnabled$ = this.config$.pipe(map(cfg => cfg.isEnabled), distinctUntilChanged());
+  isAutoSyncToRemote$ = this.config$.pipe(map(cfg => cfg.isAutoSyncToRemote), distinctUntilChanged());
+  syncInterval$ = this.config$.pipe(map(cfg => cfg.syncInterval), distinctUntilChanged());
 
   @Effect({dispatch: false}) triggerSync$: any = this._actions$
     .pipe(
       ofType(
         ConfigActionTypes.LoadConfig,
       ),
-      tap(v => this.sync$.subscribe()),
-      // TODO make this work
-      // map(v => this.sync$),
+      switchMap(() => combineLatest(
+        this._googleApiService.isLoggedIn$,
+        this.isEnabled$,
+        this.isAutoSyncToRemote$,
+        this.syncInterval$,
+      ).pipe(
+        switchMap(([isLoggedIn, isEnabled, isAutoSync, syncInterval]) => {
+          // syncInterval = 5000;
+          // isLoggedIn = true;
+          return (isLoggedIn && isEnabled && isAutoSync && syncInterval >= 5000)
+            ? interval(syncInterval).pipe(switchMap(() => this._googleDriveSyncService.saveForSync()))
+            : EMPTY;
+        }),
+      )),
+    );
+
+  // TODO check if working as intended
+  @Effect({dispatch: false}) initialImport$: any = this._actions$
+    .pipe(
+      ofType(
+        ConfigActionTypes.LoadConfig,
+      ),
+      take(1),
+      withLatestFrom(this.config$),
+      filter(([act, cfg]) => cfg.isEnabled && cfg.isAutoLogin),
+      switchMap(() => from(this._googleApiService.login())),
+      switchMap(() => this._googleDriveSyncService.checkIfRemoteUpdate()),
+      switchMap((isUpdate) => {
+        console.log('isUpdate', isUpdate);
+        if (isUpdate) {
+          this._snackService.open({
+            message: `DriveSync: There is a remote update! Downloading...`,
+            icon: 'file_download',
+          });
+          console.log('DriveSync', 'HAS CHANGED (modified Date comparision), TRYING TO UPDATE');
+          return this._googleDriveSyncService.loadFrom(true);
+        } else {
+          this._snackService.open({
+            message: `DriveSync: No updated required`,
+          });
+          return EMPTY;
+        }
+      }),
     );
 
 
@@ -56,12 +78,36 @@ export class GoogleDriveSyncEffects {
     private _store$: Store<any>,
     private _googleDriveSyncService: GoogleDriveSyncService,
     private _googleApiService: GoogleApiService,
+    private _configService: ConfigService,
+    private _snackService: SnackService,
     private _notifyService: NotifyService,
     private _electronService: ElectronService,
     private _persistenceService: PersistenceService,
   ) {
   }
 
+  private _checkForInitialUpdate(): Observable<any> {
+    return this._googleDriveSyncService.checkIfRemoteUpdate()
+      .pipe(
+        take(1),
+        flatMap((isUpdate) => {
+          console.log('isUpdate', isUpdate);
+          if (isUpdate) {
+            this._snackService.open({
+              message: `DriveSync: There is a remote update! Downloading...`,
+              icon: 'file_download',
+            });
+            console.log('DriveSync', 'HAS CHANGED (modified Date comparision), TRYING TO UPDATE');
+            return this._googleDriveSyncService.loadFrom(true);
+          } else {
+            this._snackService.open({
+              message: `DriveSync: No updated required`,
+            });
+            return EMPTY;
+          }
+        }),
+      );
+  }
 }
 
 
