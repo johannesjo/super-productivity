@@ -4,7 +4,6 @@
       #formRef="ngForm">
   <mat-slide-toggle [(ngModel)]="cfg.isEnabled"
                     name="isEnabled"
-                    (change)="onGoogleDriveSyncToggle(cfg.isEnabled)"
                     aria-label="Enable syncing via Google Drive">
     Enable syncing via Google Drive
   </mat-slide-toggle>
@@ -95,7 +94,6 @@
         </mat-slide-toggle>
         <mat-slide-toggle [(ngModel)]="cfg.isAutoSyncToRemote"
                           name="isAutoSyncToRemote"
-                          (change)="resetSync();"
                           aria-label="Auto sync data TO remote">
           Auto sync data TO remote
         </mat-slide-toggle>
@@ -110,7 +108,6 @@
                  matInput=""
                  inputDuration=""
                  placeholder="Sync interval (sync every X ms)"
-                 (change)="resetSync();"
                  name="syncInterval"
                  [(ngModel)]="cfg.syncInterval">
           <mat-icon matSuffix="">timer</mat-icon>

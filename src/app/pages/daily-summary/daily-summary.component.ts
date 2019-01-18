@@ -142,11 +142,10 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
         content: this.tomorrowsNote,
       });
     }
-    this._googleDriveSync.saveForSyncIfEnabled(true)
-      .then(() => {
+    this._googleDriveSync.saveForSync(true)
+      .subscribe(() => {
         this._initSuccessAnimation(cb);
-      })
-      .catch(() => {
+      }, () => {
         this._snackService.open({
           type: 'ERROR',
           message: 'GoogleSync: Unable to finish day, because syncing throw an error',

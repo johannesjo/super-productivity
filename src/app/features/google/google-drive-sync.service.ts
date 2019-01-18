@@ -11,12 +11,33 @@ import { DialogConfirmComponent } from '../../ui/dialog-confirm/dialog-confirm.c
 import { DialogConfirmDriveSyncLoadComponent } from './dialog-confirm-drive-sync-load/dialog-confirm-drive-sync-load.component';
 import { DialogConfirmDriveSyncSaveComponent } from './dialog-confirm-drive-sync-save/dialog-confirm-drive-sync-save.component';
 import { AppDataComplete } from '../../imex/sync/sync.model';
-import { flatMap, map, take, tap } from 'rxjs/operators';
-import { EMPTY, from, Observable, throwError } from 'rxjs';
+import { distinctUntilChanged, flatMap, map, switchMap, take, tap } from 'rxjs/operators';
+import { combineLatest, EMPTY, from, Observable, throwError, timer } from 'rxjs';
 
 @Injectable()
 export class GoogleDriveSyncService {
-  autoSyncInterval: number;
+  config$ = this._configService.cfg$.pipe(map(cfg => cfg.googleDriveSync));
+  isAutoSyncToRemote$ = this.config$.pipe(map(cfg => cfg.isAutoSyncToRemote), distinctUntilChanged());
+  syncInterval$ = this.config$.pipe(map(cfg => cfg.syncInterval), distinctUntilChanged());
+
+  // TODO move to effect??
+  triggerSync$: Observable<any> = combineLatest(
+    this.isAutoSyncToRemote$,
+    this.syncInterval$,
+    this._googleApiService.isLoggedIn$,
+  ).pipe(
+    switchMap(([isEnabled, syncInterval, isLoggedIn]) => {
+      // TODO remove
+      // syncInterval = 5000;
+      isLoggedIn = true;
+
+      return (isLoggedIn && isEnabled && syncInterval >= 5000)
+        ? timer(syncInterval, syncInterval).pipe(
+          flatMap(() => this.saveForSync()),
+        )
+        : EMPTY;
+    }),
+  );
 
   private _isSyncingInProgress = false;
   private _config: GoogleDriveSyncConfig;
@@ -28,6 +49,7 @@ export class GoogleDriveSyncService {
     private _snackService: SnackService,
     private _matDialog: MatDialog,
   ) {
+    this.triggerSync$.subscribe(v => console.log(v));
   }
 
   init() {
@@ -38,10 +60,6 @@ export class GoogleDriveSyncService {
     this._configService.onCfgLoaded$.pipe(take(1)).subscribe(() => {
       if (this._config.isEnabled && this._config.isAutoLogin) {
         this._googleApiService.login().then(() => {
-          if (this._config.isAutoSyncToRemote) {
-            this.resetAutoSyncToRemoteInterval();
-          }
-
           if (this._config.isLoadRemoteDataOnStartup) {
             this._checkForInitialUpdate().subscribe();
           }
@@ -54,31 +72,6 @@ export class GoogleDriveSyncService {
     this._configService.updateSection('googleDriveSync', data, isSkipLastActiveUpdate);
   }
 
-
-  resetAutoSyncToRemoteInterval() {
-    // always unset if set
-    this.cancelAutoSyncToRemoteIntervalIfSet();
-    if (!this._config.isAutoSyncToRemote || !this._config.isEnabled) {
-      return;
-    }
-    const interval = this._config.syncInterval;
-
-    if (interval < 5000) {
-      console.log('DriveSync', 'Interval too low');
-      return;
-    }
-
-    this.autoSyncInterval = window.setInterval(() => {
-      // only sync if not in the middle of something
-      this.saveForSyncIfEnabled();
-    }, interval);
-  }
-
-  cancelAutoSyncToRemoteIntervalIfSet() {
-    if (this.autoSyncInterval) {
-      window.clearInterval(this.autoSyncInterval);
-    }
-  }
 
   async changeSyncFileName(newSyncFileName): Promise<any> {
     const res = await this._googleApiService.findFile(newSyncFileName).toPromise();
@@ -112,21 +105,17 @@ export class GoogleDriveSyncService {
     }
   }
 
-  saveForSyncIfEnabled(isForce = false): Promise<any> {
-    if (!this._config.isAutoSyncToRemote || !this._config.isEnabled) {
-      return Promise.resolve();
-    }
-
+  saveForSync(isForce = false): Observable<any> {
+    console.log('save for sync', this._isSyncingInProgress, isForce);
     if (this._isSyncingInProgress && !isForce) {
       console.log('DriveSync', 'SYNC OMITTED because of promise');
-      return Promise.resolve();
+      return EMPTY;
     } else {
-      console.log('DriveSync', 'SYNC');
-      const promise = this.saveTo(isForce);
+      const saveObs = from(this.saveTo(isForce));
       if (this._config.isNotifyOnSync) {
-        this._showAsyncToast(promise, 'DriveSync: Syncing to google drive');
+        this._showAsyncToast(saveObs, 'DriveSync: Syncing to google drive');
       }
-      return promise;
+      return saveObs;
     }
   }
 
@@ -283,14 +272,14 @@ export class GoogleDriveSyncService {
       );
   }
 
-  private _showAsyncToast(promise, msg) {
+  private _showAsyncToast(obs: Observable<any>, msg) {
     this._snackService.open({
       type: 'CUSTOM',
       icon: 'file_upload',
       message: msg,
       isSubtle: true,
       config: {duration: 60000},
-      promise,
+      promise: obs.toPromise(),
     });
   }
 

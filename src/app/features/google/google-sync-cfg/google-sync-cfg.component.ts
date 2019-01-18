@@ -91,24 +91,12 @@ export class GoogleSyncCfgComponent implements OnInit, OnDestroy {
     this.googleApiService.logout();
   }
 
-  onGoogleDriveSyncToggle(isEnabled) {
-    if (isEnabled) {
-      this._googleDriveSyncService.resetAutoSyncToRemoteInterval();
-    } else {
-      this._googleDriveSyncService.cancelAutoSyncToRemoteIntervalIfSet();
-    }
-  }
-
   onLocalSyncToggle(isEnabled) {
     if (isEnabled) {
       // AppStorage.resetAutoSyncToRemoteInterval();
     } else {
       // AppStorage.cancelAutoSyncToRemoteIntervalIfSet();
     }
-  }
-
-  resetSync() {
-    this._googleDriveSyncService.resetAutoSyncToRemoteInterval();
   }
 
   changeSyncFileName(newSyncFile) {
