@@ -17,27 +17,7 @@ import { combineLatest, EMPTY, from, Observable, throwError, timer } from 'rxjs'
 @Injectable()
 export class GoogleDriveSyncService {
   config$ = this._configService.cfg$.pipe(map(cfg => cfg.googleDriveSync));
-  isAutoSyncToRemote$ = this.config$.pipe(map(cfg => cfg.isAutoSyncToRemote), distinctUntilChanged());
-  syncInterval$ = this.config$.pipe(map(cfg => cfg.syncInterval), distinctUntilChanged());
 
-  // TODO move to effect??
-  triggerSync$: Observable<any> = combineLatest(
-    this.isAutoSyncToRemote$,
-    this.syncInterval$,
-    this._googleApiService.isLoggedIn$,
-  ).pipe(
-    switchMap(([isEnabled, syncInterval, isLoggedIn]) => {
-      // TODO remove
-      // syncInterval = 5000;
-      isLoggedIn = true;
-
-      return (isLoggedIn && isEnabled && syncInterval >= 5000)
-        ? timer(syncInterval, syncInterval).pipe(
-          flatMap(() => this.saveForSync()),
-        )
-        : EMPTY;
-    }),
-  );
 
   private _isSyncingInProgress = false;
   private _config: GoogleDriveSyncConfig;
@@ -49,7 +29,6 @@ export class GoogleDriveSyncService {
     private _snackService: SnackService,
     private _matDialog: MatDialog,
   ) {
-    this.triggerSync$.subscribe(v => console.log(v));
   }
 
   init() {

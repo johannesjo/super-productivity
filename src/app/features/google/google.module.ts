@@ -10,6 +10,8 @@ import { GoogleApiService } from './google-api.service';
 import { SyncModule } from '../../imex/sync/sync.module';
 import { CoreModule } from '../../core/core.module';
 import { GoogleExportTimeComponent } from './google-export-time/google-export-time.component';
+import { EffectsModule } from '@ngrx/effects';
+import { GoogleDriveSyncEffects } from './store/google-drive-sync.effects';
 
 @NgModule({
   imports: [
@@ -18,6 +20,7 @@ import { GoogleExportTimeComponent } from './google-export-time/google-export-ti
     SyncModule,
     FormsModule,
     UiModule,
+    EffectsModule.forFeature([GoogleDriveSyncEffects]),
   ],
   declarations: [
     DialogGoogleExportTimeComponent,
@@ -30,7 +33,7 @@ import { GoogleExportTimeComponent } from './google-export-time/google-export-ti
     DialogConfirmDriveSyncLoadComponent,
     DialogConfirmDriveSyncSaveComponent,
   ],
-  exports:[
+  exports: [
     GoogleExportTimeComponent,
   ],
   providers: [
