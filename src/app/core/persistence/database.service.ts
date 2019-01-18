@@ -31,7 +31,7 @@ export class DatabaseService {
     localForage.config({
       driver: localForage.INDEXEDDB, // Force WebSQL; same as using setDriver()
       name: 'SUP',
-      version: 1.0,
+      // version: 1.0,
       storeName: 'SUP_STORE', // Should be alphanumeric, with underscores.
       description: 'All data for Super Productivity 2'
     });
