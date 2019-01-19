@@ -1,5 +1,5 @@
 'use strict';
-import { app, globalShortcut, ipcMain, powerSaveBlocker } from 'electron';
+import { App, app, globalShortcut, ipcMain, powerSaveBlocker } from 'electron';
 
 import * as notifier from 'node-notifier';
 import { info } from 'electron-log';
@@ -14,7 +14,6 @@ import { getGitLog } from './git-log';
 import { initGoogleAuth } from './google-auth';
 import { errorHandler } from './error-handler';
 import { initDebug } from './debug';
-import App = Electron.App;
 
 const ICONS_FOLDER = __dirname + '/assets/icons/';
 const IS_MAC = process.platform === 'darwin';
