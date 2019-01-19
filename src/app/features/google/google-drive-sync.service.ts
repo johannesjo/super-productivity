@@ -11,7 +11,7 @@ import { DialogConfirmComponent } from '../../ui/dialog-confirm/dialog-confirm.c
 import { DialogConfirmDriveSyncLoadComponent } from './dialog-confirm-drive-sync-load/dialog-confirm-drive-sync-load.component';
 import { DialogConfirmDriveSyncSaveComponent } from './dialog-confirm-drive-sync-save/dialog-confirm-drive-sync-save.component';
 import { AppDataComplete } from '../../imex/sync/sync.model';
-import { flatMap, map, tap } from 'rxjs/operators';
+import { flatMap, map, switchMap, tap } from 'rxjs/operators';
 import { EMPTY, from, Observable, throwError } from 'rxjs';
 
 @Injectable()
@@ -42,41 +42,39 @@ export class GoogleDriveSyncService {
   }
 
 
-  async changeSyncFileName(newSyncFileName): Promise<any> {
-    const res_ = await this._googleApiService.findFile(newSyncFileName).toPromise();
-
-    // TODO check
-    console.log(res_, 'UPDATE DATA STRUCTURE PLZ');
-    const res = res_.body || res_;
-    console.log(res);
-    const filesFound = res.body.items;
-    if (!filesFound || filesFound.length === 0) {
-      const isSave = await this._confirmSaveNewFile(newSyncFileName);
-      if (isSave) {
-        this.updateConfig({
-          syncFileName: newSyncFileName,
-          // we need to unset to save to a new file
-          _backupDocId: null,
-        });
-        this._save().toPromise();
-      }
-    } else if (filesFound.length > 1) {
-      this._snackService.open({
-        type: 'ERROR',
-        message: `Multiple files with the name "${newSyncFileName}" found. Please delete all but one or choose a different name.`
-      });
-      throw new Error('Multiple files with the name same name found');
-    } else if (filesFound.length === 1) {
-      const isConfirmUseExisting = await this._confirmUsingExistingFileDialog(newSyncFileName).toPromise();
-      if (isConfirmUseExisting) {
-        const fileToUpdate = filesFound[0];
-        this.updateConfig({
-          syncFileName: newSyncFileName,
-          _backupDocId: fileToUpdate.id,
-        });
-        return fileToUpdate.id;
-      }
-    }
+  changeSyncFileName(newSyncFileName): Observable<any> {
+    return this._googleApiService.findFile(newSyncFileName).pipe(
+      switchMap((res_) => {
+        const res = res_.body;
+        const filesFound = res.items;
+        if (filesFound.length && filesFound.length > 1) {
+          this._snackService.open({
+            type: 'ERROR',
+            message: `Multiple files with the name "${newSyncFileName}" found. Please delete all but one or choose a different name.`
+          });
+          throw throwError('Multiple files with the name same name found');
+        } else if (!filesFound || filesFound.length === 0) {
+          return this._confirmSaveNewFile(newSyncFileName).pipe(
+            switchMap((isSave) => {
+              return isSave
+                ? this._createEmptyFile(newSyncFileName)
+                : EMPTY;
+            })
+          );
+        } else if (filesFound.length === 1) {
+          return this._confirmUsingExistingFileDialog(newSyncFileName)
+            .pipe(tap((isConfirmUseExisting) => {
+              if (isConfirmUseExisting) {
+                const fileToUpdate = filesFound[0];
+                this.updateConfig({
+                  syncFileName: newSyncFileName,
+                  _backupDocId: fileToUpdate.id,
+                });
+              }
+            }));
+        }
+      }),
+    );
   }
 
   saveForSync(isForce = false): Observable<any> {
@@ -105,25 +103,23 @@ export class GoogleDriveSyncService {
       // ---------------------------
       // when we have no backup file we create one directly
       if (!this._config._backupDocId) {
-        this.changeSyncFileName(this._config.syncFileName || DEFAULT_SYNC_FILE_NAME)
-          .then(() => {
-            this._save().toPromise().then(resolve);
-          }, reject);
+        // TODO refactor
+        this.changeSyncFileName(this._config.syncFileName || DEFAULT_SYNC_FILE_NAME).subscribe();
+        // .then(() => {
+        //   console.log('saveTo after changing sync file name');
+        //   this._save().toPromise().then(resolve);
+        // }, reject);
 
         // JUST UPDATE
         // ---------------------------
         // otherwise update
       } else {
         this._googleApiService.getFileInfo(this._config._backupDocId).toPromise()
-          .then((res_) => {
-
-            // TODO check
-            console.log(res_, 'UPDATE DATA STRUCTURE PLZ');
-            const res = res_.body || res_;
+          .then((res) => {
             console.log(res);
 
             const lastActiveLocal = this._syncService.getLastActive();
-            const lastModifiedRemote = res.body.modifiedDate;
+            const lastModifiedRemote = res.modifiedDate;
             console.log('saveTo Check', this._isEqual(lastActiveLocal, lastModifiedRemote), lastModifiedRemote, lastActiveLocal);
 
             if (this._isEqual(lastActiveLocal, lastModifiedRemote)) {
@@ -189,11 +185,12 @@ export class GoogleDriveSyncService {
       };
 
       // when we have no backup file we create one directly
+      // TODO refactor
       if (!this._config._backupDocId) {
-        this.changeSyncFileName(this._config.syncFileName)
-          .then(() => {
-            loadHandler();
-          }, reject);
+        this.changeSyncFileName(this._config.syncFileName).subscribe();
+        // .then(() => {
+        //   loadHandler();
+        // }, reject);
       } else {
         loadHandler();
       }
@@ -209,14 +206,11 @@ export class GoogleDriveSyncService {
     const lastSync = this._config._lastSync;
     return this._googleApiService.getFileInfo(this._config._backupDocId)
       .pipe(
-        tap((res_) => {
-          // TODO check
-          console.log(res_, 'UPDATE DATA STRUCTURE PLZ');
-          const res = res_.body || res_;
-          const lastModifiedRemote = res.body.modifiedDate;
+        tap((res) => {
+          const lastModifiedRemote = res.modifiedDate;
           console.log('CHECK_REMOTE_UPDATED', this._isNewerThan(lastModifiedRemote, lastSync), lastModifiedRemote, lastSync);
         }),
-        map((res) => this._isNewerThan(res.body.modifiedDate, lastSync)),
+        map((res) => this._isNewerThan(res.modifiedDate, lastSync)),
       );
   }
 
@@ -292,40 +286,57 @@ If not please change the Sync file name.`,
     }).afterClosed();
   }
 
-  private _confirmSaveNewFile(fileName): Promise<any> {
-    return new Promise((resolve, reject) => {
-      this._matDialog.open(DialogConfirmComponent, {
-        restoreFocus: true,
-        data: {
-          message: `DriveSync: No file with the name <strong>"${fileName}"</strong> was found.
+  private _confirmSaveNewFile(fileName): Observable<boolean> {
+    return this._matDialog.open(DialogConfirmComponent, {
+      restoreFocus: true,
+      data: {
+        message: `DriveSync: No file with the name <strong>"${fileName}"</strong> was found.
 <strong>Create</strong> it as sync file on Google Drive?`,
-        }
-      }).afterClosed()
-        .subscribe((isConfirm: boolean) => isConfirm ? resolve(true) : resolve(false));
-    });
+      }
+    }).afterClosed();
   }
 
   // TODO check if working
+
+  private _createEmptyFile(syncFileName): Observable<any> {
+    console.log('_save');
+    return this._googleApiService.saveFile('', {
+      title: syncFileName,
+      editable: true
+    }).pipe(
+      tap((res) => {
+        console.log(res);
+        this.updateConfig({
+          syncFileName,
+          _backupDocId: res.id,
+          _lastSync: res.modifiedDate,
+        }, true);
+        console.log('google sync save:', res.modifiedDate);
+        this._syncService.saveLastActive(res.modifiedDate);
+      }),
+    );
+  }
+
   private _save(): Observable<any> {
+    console.log('_save');
     return from(this._getLocalAppData()).pipe(
       flatMap((completeData) => {
+        console.log('FLATMAP');
+
         return this._googleApiService.saveFile(completeData, {
           title: this._config.syncFileName,
           id: this._config._backupDocId,
           editable: true
         });
       }),
-      tap((res_) => {
-        // TODO check
-        console.log(res_, 'UPDATE DATA STRUCTURE PLZ');
-        const res = res_.body || res_;
+      tap((res) => {
         console.log(res);
         this.updateConfig({
-          _backupDocId: res.body.id,
-          _lastSync: res.body.modifiedDate,
+          _backupDocId: res.id,
+          _lastSync: res.modifiedDate,
         }, true);
-        console.log('google sync save:', res.body.modifiedDate);
-        this._syncService.saveLastActive(res.body.modifiedDate);
+        console.log('google sync save:', res.modifiedDate);
+        this._syncService.saveLastActive(res.modifiedDate);
       }),
     );
   }

@@ -8,7 +8,7 @@ import { SnackService } from '../../core/snack/snack.service';
 import { SnackType } from '../../core/snack/snack.model';
 import { ConfigService } from '../config/config.service';
 import { GlobalConfig, GoogleSession } from '../config/config.model';
-import { catchError, map } from 'rxjs/operators';
+import { catchError, map, skip } from 'rxjs/operators';
 import { EmptyObservable } from 'rxjs-compat/observable/EmptyObservable';
 import { combineLatest, Observable, throwError } from 'rxjs';
 import { IPC_GOOGLE_AUTH_TOKEN, IPC_GOOGLE_AUTH_TOKEN_ERROR, IPC_TRIGGER_GOOGLE_AUTH } from '../../../../electron/ipc-events.const';
@@ -232,7 +232,7 @@ export class GoogleApiService {
       );
   }
 
-  saveFile(content, metadata: any = {}): Observable<any> {
+  saveFile(content, metadata: any = {}): Observable<{}> {
     if ((typeof content !== 'string')) {
       content = JSON.stringify(content);
     }
@@ -398,17 +398,32 @@ export class GoogleApiService {
 
     // const sub = this._http[p.method.toLowerCase()](p.url, p.data, p)
     return this._http.request(req)
-      .pipe(catchError((res) => {
-        console.log(res);
-        if (!res) {
-          this._handleError('No response body');
-        } else if (res && res.status >= 300) {
-          this._handleError(res);
-        } else if (res && res.status === 401) {
-          this._handleUnAuthenticated(res);
-        }
-        return new EmptyObservable<Response>();
-      }));
+      .pipe(
+        // skip options request ???
+        skip(1),
+        catchError((res) => {
+          console.warn(res);
+          if (!res) {
+            this._handleError('No response body');
+          } else if (res && res.status >= 300) {
+            this._handleError(res);
+          } else if (res && res.status === 401) {
+            this._handleUnAuthenticated(res);
+            return new EmptyObservable<Response>();
+          }
+          return throwError(res);
+        }),
+        map((res) => {
+          console.log(res);
+
+          if (res && res.type === 0) {
+            this._handleError('type 0, request canceled');
+            return throwError(res);
+          } else {
+            return res;
+          }
+        }),
+      );
   }
 
 
