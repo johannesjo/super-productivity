@@ -11,7 +11,7 @@ import { DialogConfirmComponent } from '../../ui/dialog-confirm/dialog-confirm.c
 import { DialogConfirmDriveSyncLoadComponent } from './dialog-confirm-drive-sync-load/dialog-confirm-drive-sync-load.component';
 import { DialogConfirmDriveSyncSaveComponent } from './dialog-confirm-drive-sync-save/dialog-confirm-drive-sync-save.component';
 import { AppDataComplete } from '../../imex/sync/sync.model';
-import { flatMap, map, take, tap } from 'rxjs/operators';
+import { flatMap, map, tap } from 'rxjs/operators';
 import { EMPTY, from, Observable, throwError } from 'rxjs';
 
 @Injectable()
@@ -43,7 +43,12 @@ export class GoogleDriveSyncService {
 
 
   async changeSyncFileName(newSyncFileName): Promise<any> {
-    const res = await this._googleApiService.findFile(newSyncFileName).toPromise();
+    const res_ = await this._googleApiService.findFile(newSyncFileName).toPromise();
+
+    // TODO check
+    console.log(res_, 'UPDATE DATA STRUCTURE PLZ');
+    const res = res_.body || res_;
+    console.log(res);
     const filesFound = res.body.items;
     if (!filesFound || filesFound.length === 0) {
       const isSave = await this._confirmSaveNewFile(newSyncFileName);
@@ -110,7 +115,13 @@ export class GoogleDriveSyncService {
         // otherwise update
       } else {
         this._googleApiService.getFileInfo(this._config._backupDocId).toPromise()
-          .then((res) => {
+          .then((res_) => {
+
+            // TODO check
+            console.log(res_, 'UPDATE DATA STRUCTURE PLZ');
+            const res = res_.body || res_;
+            console.log(res);
+
             const lastActiveLocal = this._syncService.getLastActive();
             const lastModifiedRemote = res.body.modifiedDate;
             console.log('saveTo Check', this._isEqual(lastActiveLocal, lastModifiedRemote), lastModifiedRemote, lastActiveLocal);
@@ -198,7 +209,10 @@ export class GoogleDriveSyncService {
     const lastSync = this._config._lastSync;
     return this._googleApiService.getFileInfo(this._config._backupDocId)
       .pipe(
-        tap((res) => {
+        tap((res_) => {
+          // TODO check
+          console.log(res_, 'UPDATE DATA STRUCTURE PLZ');
+          const res = res_.body || res_;
           const lastModifiedRemote = res.body.modifiedDate;
           console.log('CHECK_REMOTE_UPDATED', this._isNewerThan(lastModifiedRemote, lastSync), lastModifiedRemote, lastSync);
         }),
@@ -217,8 +231,6 @@ export class GoogleDriveSyncService {
         this._syncService.saveLastActive(loadRes.meta.modifiedDate);
       });
   }
-
-
 
 
   private _showAsyncToast(obs: Observable<any>, msg) {
@@ -303,7 +315,10 @@ If not please change the Sync file name.`,
           editable: true
         });
       }),
-      tap((res) => {
+      tap((res_) => {
+        // TODO check
+        console.log(res_, 'UPDATE DATA STRUCTURE PLZ');
+        const res = res_.body || res_;
         console.log(res);
         this.updateConfig({
           _backupDocId: res.body.id,
