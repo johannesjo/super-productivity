@@ -15,7 +15,7 @@ import { TaskWithSubTasks } from '../task.model';
 import { TaskState } from './task.reducer';
 import { EMPTY, of } from 'rxjs';
 import { ElectronService } from 'ngx-electron';
-import { IPC_CURRENT_TASK_UPDATED } from '../../../../ipc-events.const';
+import { IPC_CURRENT_TASK_UPDATED } from '../../../../../electron/ipc-events.const';
 import { IS_ELECTRON } from '../../../app.constants';
 
 // TODO send message to electron when current task changes here

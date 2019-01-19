@@ -9,7 +9,7 @@ import { ConfigService } from './features/config/config.service';
 import { blendInOutAnimation } from './ui/animations/blend-in-out.ani';
 import { LayoutService } from './core-ui/layout/layout.service';
 import { ElectronService } from 'ngx-electron';
-import { IPC_APP_READY, IPC_ERROR, IPC_TRANSFER_SETTINGS_REQUESTED, IPC_TRANSFER_SETTINGS_TO_ELECTRON } from '../ipc-events.const';
+import { IPC_APP_READY, IPC_ERROR, IPC_TRANSFER_SETTINGS_REQUESTED, IPC_TRANSFER_SETTINGS_TO_ELECTRON } from '../../electron/ipc-events.const';
 import { SnackService } from './core/snack/snack.service';
 import { IS_ELECTRON } from './app.constants';
 import { GoogleDriveSyncService } from './features/google/google-drive-sync.service';

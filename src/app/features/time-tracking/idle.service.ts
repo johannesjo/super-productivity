@@ -4,7 +4,7 @@ import { ChromeExtensionInterfaceService } from '../../core/chrome-extension-int
 import { ProjectService } from '../project/project.service';
 import { ElectronService } from 'ngx-electron';
 import { TaskService } from '../tasks/task.service';
-import { IPC_IDLE_TIME } from '../../../ipc-events.const';
+import { IPC_IDLE_TIME } from '../../../../electron/ipc-events.const';
 import { MatDialog } from '@angular/material';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { DialogIdleComponent } from './dialog-idle/dialog-idle.component';

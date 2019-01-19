@@ -1,12 +1,13 @@
-const JiraApi = require('jira-client-fork');
-const mainWinMod = require('./main-window');
+import * as JiraApi from 'jira-client-fork';
+import { getWin } from './main-window';
+import { IPC_JIRA_CB_EVENT } from './ipc-events.const';
 
-module.exports = (request) => {
-  const mainWin = mainWinMod.getWin();
-  let config = request.config;
-  let apiMethod = request.apiMethod;
-  let arguments = request.arguments;
-  let requestId = request.requestId;
+export const sendJiraRequest = (request) => {
+  const mainWin = getWin();
+  const config = request.config;
+  const apiMethod = request.apiMethod;
+  const args = request.arguments;
+  const requestId = request.requestId;
 
   const matchPortRegEx = /:\d{2,4}/;
 
@@ -32,7 +33,7 @@ module.exports = (request) => {
     config.protocol = 'https';
   }
 
-  let jira = new JiraApi({
+  const jira = new JiraApi({
     protocol: config.protocol,
     host: config.host,
     port: config.port,
@@ -44,16 +45,16 @@ module.exports = (request) => {
     strictSSL: false
   });
 
-  jira[apiMethod](...arguments)
+  jira[apiMethod](...args)
     .then(res => {
-      //console.log('JIRA_RESPONSE', error, res);
-      mainWin.webContents.send('JIRA_RESPONSE', {
+      // console.log('JIRA_RESPONSE', error, res);
+      mainWin.webContents.send(IPC_JIRA_CB_EVENT, {
         response: res,
         requestId: requestId
       });
     })
     .catch(err => {
-      mainWin.webContents.send('JIRA_RESPONSE', {
+      mainWin.webContents.send(IPC_JIRA_CB_EVENT, {
         error: err,
         requestId: requestId
       });

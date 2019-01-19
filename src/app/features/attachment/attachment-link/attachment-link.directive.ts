@@ -3,7 +3,7 @@ import { IS_ELECTRON } from '../../../app.constants';
 import { AttachmentType } from '../attachment.model';
 import { ElectronService } from 'ngx-electron';
 import { SnackService } from '../../../core/snack/snack.service';
-import { IPC_EXEC } from '../../../../ipc-events.const';
+import { IPC_EXEC } from '../../../../../electron/ipc-events.const';
 
 
 @Directive({

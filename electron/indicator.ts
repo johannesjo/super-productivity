@@ -1,8 +1,9 @@
-const electron = require('electron');
-//const dbus = require('./dbus');
-const fs = require('fs');
-const moment = require('moment');
-const errorHandler = require('./error-handler');
+import { ipcMain, Menu, systemPreferences, Tray } from 'electron';
+import { existsSync, readFileSync } from 'fs';
+// const dbus = require('./dbus');
+import * as moment from 'moment';
+import { errorHandler } from './error-handler';
+import { IPC_CURRENT_TASK_UPDATED, IPC_POMODORO_UPDATE } from './ipc-events.const';
 
 const GNOME_SHELL_EXT_MIN_VERSION = 2;
 
@@ -10,7 +11,7 @@ let tray;
 let isIndicatorRunning = false;
 let isGnomeShellExtensionRunning = false;
 
-function init(params) {
+export const initIndicator = function (params) {
   const IS_LINUX = params.IS_LINUX;
   const IS_GNOME = params.IS_GNOME;
   const showApp = params.showApp;
@@ -26,33 +27,29 @@ function init(params) {
   // if we have the gnome shell extension installed set up bus
   if (IS_GNOME && isGnomeShellExtensionInstalled) {
     // TODO
-    //dbus.init({
+    // dbus.init({
     //  quitApp,
     //  showApp,
-    //});
+    // });
     isGnomeShellExtensionRunning = true;
     return;
-  }
-
-  // don't start anything on GNOME as the indicator might not be visible and
-  // the quiting behaviour confusing
-  else if (IS_GNOME) {
+  } else if (IS_GNOME) {
+    // don't start anything on GNOME as the indicator might not be visible and
+    // the quiting behaviour confusing
     return;
-  }
-
-  // otherwise create a regular tray icon
-  else {
+  } else {
+    // otherwise create a regular tray icon
     // switch tray icon based on
     let trayIcoFile;
     if (IS_MAC) {
-      trayIcoFile = electron.systemPreferences.isDarkMode()
+      trayIcoFile = systemPreferences.isDarkMode()
         ? 'tray-ico.png'
         : 'tray-ico-dark.png';
     } else {
-      trayIcoFile = 'tray-ico.png'
+      trayIcoFile = 'tray-ico.png';
     }
 
-    tray = new electron.Tray(ICONS_FOLDER + trayIcoFile);
+    tray = new Tray(ICONS_FOLDER + trayIcoFile);
 
     tray.setContextMenu(createContextMenu(showApp, quitApp));
 
@@ -62,7 +59,7 @@ function init(params) {
     isIndicatorRunning = true;
     return tray;
   }
-}
+};
 
 function isGnomeShellInstalled(IS_LINUX, IS_GNOME) {
   // check if shell extension is installed
@@ -71,13 +68,16 @@ function isGnomeShellInstalled(IS_LINUX, IS_GNOME) {
     const LINUX_HOME_DIR = process.env['HOME'];
     const EXTENSION_PATH = LINUX_HOME_DIR + '/.local/share/gnome-shell/extensions/indicator@johannes.super-productivity.com';
 
-    if (fs.existsSync(EXTENSION_PATH)) {
-      const metaData = fs.readFileSync(EXTENSION_PATH + '/metadata.json');
+    if (existsSync(EXTENSION_PATH)) {
+      const metaData = readFileSync(EXTENSION_PATH + '/metadata.json').toString();
       const version = JSON.parse(metaData).version;
       if (version >= GNOME_SHELL_EXT_MIN_VERSION) {
         isGnomeShellExtInstalled = true;
       } else {
-        errorHandler('Indicator: Outdated version ' + version + ' of Gnome Shell Extension installed. Please install at least version ' + GNOME_SHELL_EXT_MIN_VERSION + '.');
+        errorHandler('Indicator: Outdated version '
+          + version
+          + ' of Gnome Shell Extension installed. Please install at least version '
+          + GNOME_SHELL_EXT_MIN_VERSION + '.');
       }
     }
   }
@@ -95,7 +95,7 @@ function initAppListeners(app) {
 }
 
 function initListeners(isGnomeShellExtInstalled) {
-  electron.ipcMain.on('CHANGED_CURRENT_TASK', (ev, params) => {
+  ipcMain.on(IPC_CURRENT_TASK_UPDATED, (ev, params) => {
     const currentTask = params.current;
     const lastActiveTaskTask = params.lastActiveTask;
 
@@ -105,7 +105,7 @@ function initListeners(isGnomeShellExtInstalled) {
       msg = createIndicatorStr(currentTask);
     }
 
-    //if (isGnomeShellExtInstalled) {
+    // if (isGnomeShellExtInstalled) {
     //  // gnome indicator handling
     //  if (currentTask && currentTask.title) {
     //    dbus.setTask(currentTask.id, msg);
@@ -115,7 +115,7 @@ function initListeners(isGnomeShellExtInstalled) {
     //  } else {
     //    dbus.setTask('NONE', 'NONE');
     //  }
-    //} else
+    // } else
     //
     if (tray) {
       // tray handling
@@ -127,14 +127,14 @@ function initListeners(isGnomeShellExtInstalled) {
     }
   });
 
-  electron.ipcMain.on('IPC_EVENT_POMODORO_UPDATE', (ev, params) => {
+  ipcMain.on(IPC_POMODORO_UPDATE, (ev, params) => {
     const isOnBreak = params.isOnBreak;
     const currentSessionTime = params.currentSessionTime;
     const currentSessionInitialTime = params.currentSessionInitialTime;
 
-    //if (isGnomeShellExtInstalled) {
+    // if (isGnomeShellExtInstalled) {
     //  dbus.updatePomodoro(isOnBreak, currentSessionTime, currentSessionInitialTime);
-    //}
+    // }
   });
 }
 
@@ -150,10 +150,10 @@ function createIndicatorStr(task) {
 
     // TODO replace with our format helpers once we have ts support
     if (task.timeSpent && task.timeSpent) {
-      task.timeSpent = moment.duration({ milliseconds: task.timeSpent });
-      timeStr += parseInt(task.timeSpent.asMinutes()).toString();
+      task.timeSpent = moment.duration({milliseconds: task.timeSpent});
+      timeStr += parseInt(task.timeSpent.asMinutes(), 10).toString();
     }
-    task.timeEstimate = task.timeEstimate && moment.duration({ milliseconds: task.timeEstimate });
+    task.timeEstimate = task.timeEstimate && moment.duration({milliseconds: task.timeEstimate});
     const timeEstimateAsMin = moment.duration(task.timeEstimate).asMinutes();
     if (task.timeEstimate && timeEstimateAsMin > 0) {
       timeStr += '/' + timeEstimateAsMin;
@@ -165,7 +165,7 @@ function createIndicatorStr(task) {
 }
 
 function createContextMenu(showApp, quitApp) {
-  return electron.Menu.buildFromTemplate([
+  return Menu.buildFromTemplate([
     {
       label: 'Show App', click: showApp
     },
@@ -175,11 +175,7 @@ function createContextMenu(showApp, quitApp) {
   ]);
 }
 
-function isRunning() {
+export const isRunning = function () {
   return isIndicatorRunning || isGnomeShellExtensionRunning;
-}
-
-module.exports = {
-  init,
-  isRunning,
 };
+

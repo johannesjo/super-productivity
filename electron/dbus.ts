@@ -1,5 +1,7 @@
 'use strict';
 
+import { IPC_TASK_MARK_AS_DONE, IPC_TASK_PAUSE, IPC_TASK_START } from './ipc-events.const';
+
 const errorHandler = require('./error-handler');
 const mainWinMod = require('./main-window');
 
@@ -42,7 +44,7 @@ function init(params) {
 
     // Return code 0x1 means we successfully had the name
     if (retCode === 1) {
-      console.log(`Successfully requested service name '${serviceName}'!`)
+      console.log(`Successfully requested service name '${serviceName}'!`);
       proceed();
     }
     /* Other return codes means various errors, check here
@@ -84,28 +86,28 @@ function init(params) {
 
     // Then we need to create the interface implementation (with actual functions)
     iface = {
-      markAsDone: function() {
+      markAsDone: function () {
         checkMainWin();
         const mainWin = mainWinMod.getWin();
-        mainWin.webContents.send('TASK_MARK_AS_DONE');
+        mainWin.webContents.send(IPC_TASK_MARK_AS_DONE);
       },
-      startTask: function() {
+      startTask: function () {
         checkMainWin();
         const mainWin = mainWinMod.getWin();
-        mainWin.webContents.send('TASK_START');
+        mainWin.webContents.send(IPC_TASK_START);
       },
-      pauseTask: function() {
+      pauseTask: function () {
         checkMainWin();
         const mainWin = mainWinMod.getWin();
-        mainWin.webContents.send('TASK_PAUSE');
+        mainWin.webContents.send(IPC_TASK_PAUSE);
       },
-      showApp: function() {
+      showApp: function () {
         params.showApp();
       },
-      quitApp: function() {
+      quitApp: function () {
         params.quitApp();
       },
-      emit: function() {
+      emit: function () {
         // no nothing, as usual
       }
     };
@@ -133,7 +135,7 @@ if (!isDBusError) {
         errorHandler('DBus: interface not ready yet');
         isErrorShownOnce = true;
       } else {
-        iface.emit('taskChanged', taskId + '', taskText + '')
+        iface.emit('taskChanged', taskId + '', taskText + '');
       }
     },
     updatePomodoro: (isOnBreak, currentSessionTime, currentSessionInitialTime) => {
@@ -143,7 +145,7 @@ if (!isDBusError) {
       }
 
       if (iface) {
-        iface.emit('pomodoroUpdate', (isOnBreak ? 1 : 0), currentSessionTime, currentSessionInitialTime)
+        iface.emit('pomodoroUpdate', (isOnBreak ? 1 : 0), currentSessionTime, currentSessionInitialTime);
       } else {
         errorHandler('DBus: interface not ready yet');
         isErrorShownOnce = true;

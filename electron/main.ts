@@ -1,21 +1,26 @@
 'use strict';
+import { App, app, globalShortcut, ipcMain, powerSaveBlocker } from 'electron';
 
-const electron = require('electron');
-const powerSaveBlocker = electron.powerSaveBlocker;
-const notifier = require('node-notifier');
-//const autoUpdater = require('electron-updater').autoUpdater;
-const log = require('electron-log');
-const electronLocalshortcut = require('electron-localshortcut');
-const CONFIG = require('./CONFIG');
+import * as notifier from 'node-notifier';
+import { info } from 'electron-log';
+import { CONFIG } from './CONFIG';
 
-const indicatorMod = require('./indicator');
-const mainWinMod = require('./main-window');
+import { initIndicator } from './indicator';
+import { createWindow } from './main-window';
 
-const getIdleTime = require('./get-idle-time');
-const jira = require('./jira');
-const gitLog = require('./git-log');
-const googleAuth = require('./google-auth');
-const errorHandler = require('./error-handler');
+import { getIdleTime } from './get-idle-time';
+import { sendJiraRequest } from './jira';
+import { getGitLog } from './git-log';
+import { initGoogleAuth } from './google-auth';
+import { errorHandler } from './error-handler';
+import { initDebug } from './debug';
+import {
+  IPC_EXEC, IPC_GIT_LOG, IPC_IDLE_TIME,
+  IPC_JIRA_MAKE_REQUEST_EVENT, IPC_NOTIFY, IPC_ON_BEFORE_QUIT,
+  IPC_REGISTER_GLOBAL_SHORTCUT_EVENT, IPC_SHOW_OR_FOCUS,
+  IPC_SHUTDOWN,
+  IPC_SHUTDOWN_NOW
+} from './ipc-events.const';
 
 const ICONS_FOLDER = __dirname + '/assets/icons/';
 const IS_MAC = process.platform === 'darwin';
@@ -27,17 +32,23 @@ if (IS_DEV) {
   console.log('Starting in DEV Mode!!!');
 }
 
-const app = electron.app;
-require('./debug')({ showDevTools: IS_DEV }, IS_DEV);
+interface MyApp extends App {
+  isQuiting?: boolean;
+}
+
+const app_: MyApp = app;
+
+initDebug({showDevTools: IS_DEV}, IS_DEV);
+
 let mainWin;
-let nestedWinParams = { isDarwinForceQuit: false };
+const nestedWinParams = {isDarwinForceQuit: false};
 
 // keep app active to keep time tracking running
 powerSaveBlocker.start('prevent-app-suspension');
 
 // make it a single instance by closing other instances
-app.requestSingleInstanceLock();
-app.on('second-instance', () => {
+app_.requestSingleInstanceLock();
+app_.on('second-instance', () => {
   // the callback: only called only for first instance
   // we want to show it, when the other starts to try another
   if (mainWin) {
@@ -51,17 +62,17 @@ app.on('second-instance', () => {
   }
 });
 
-//if (shouldQuitBecauseAppIsAnotherInstance) {
+// if (shouldQuitBecauseAppIsAnotherInstance) {
 //  quitAppNow();
 //  return;
-//}
+// }
 
 // APP EVENT LISTENERS
 // -------------------
-app.on('ready', createMainWin);
-app.on('ready', createIndicator);
+app_.on('ready', createMainWin);
+app_.on('ready', createIndicator);
 
-app.on('activate', function() {
+app_.on('activate', function () {
   // On OS X it's common to re-create a window in the app when the
   // dock icon is clicked and there are no other windows open.
   if (mainWin === null) {
@@ -72,33 +83,33 @@ app.on('activate', function() {
 });
 
 let idleInterval;
-app.on('ready', () => {
+app_.on('ready', () => {
   // init time tracking interval
   idleInterval = setInterval(idleChecker, CONFIG.IDLE_PING_INTERVAL);
 });
 
-app.on('before-quit', () => {
+app_.on('before-quit', () => {
   // handle darwin
   if (IS_MAC) {
     nestedWinParams.isDarwinForceQuit = true;
   }
 
   // un-register all shortcuts.
-  electron.globalShortcut.unregisterAll();
+  globalShortcut.unregisterAll();
 });
 
 // AUTO-UPDATER
 // ------------
-//app.on('ready', () => {
+// app_.on('ready', () => {
 //  // init auto-updates
 //  log.info('INIT AUTO UPDATES');
 //  // log.info(autoUpdater.getFeedURL());
 //  autoUpdater.logger = log;
 //  autoUpdater.logger.transports.file.level = 'info';
 //  autoUpdater.checkForUpdatesAndNotify();
-//});
+// });
 //
-//autoUpdater.on('update-downloaded', (ev, info) => {
+// autoUpdater.on('update-downloaded', (ev, info) => {
 //  console.log(ev);
 //  // Wait 5 seconds, then quit and install
 //  // In your application, you don't need to wait 5 seconds.
@@ -106,44 +117,41 @@ app.on('before-quit', () => {
 //  setTimeout(function() {
 //    autoUpdater.quitAndInstall();
 //  }, 5000)
-//});
+// });
 
 // FRONTEND EVENTS
 // ---------------
-electron.ipcMain.on('SHUTDOWN_NOW', quitAppNow);
+ipcMain.on(IPC_SHUTDOWN_NOW, quitAppNow);
 
-electron.ipcMain.on('SHUTDOWN', quitApp);
+ipcMain.on(IPC_SHUTDOWN, quitApp);
 
-electron.ipcMain.on('EXEC', exec);
+ipcMain.on(IPC_EXEC, exec);
 
-electron.ipcMain.on('REGISTER_GLOBAL_SHORTCUT', (ev, shortcutPassed) => {
+ipcMain.on(IPC_REGISTER_GLOBAL_SHORTCUT_EVENT, (ev, shortcutPassed) => {
   registerShowAppShortCut(shortcutPassed);
 });
 
-electron.ipcMain.on('TOGGLE_DEV_TOOLS', () => {
-  mainWin.webContents.openDevTools();
+
+ipcMain.on(IPC_JIRA_MAKE_REQUEST_EVENT, (ev, request) => {
+  sendJiraRequest(request);
 });
 
-electron.ipcMain.on('JIRA', (ev, request) => {
-  jira(request);
+ipcMain.on(IPC_GIT_LOG, (ev, cwd) => {
+  getGitLog(cwd);
 });
 
-electron.ipcMain.on('GIT_LOG', (ev, cwd) => {
-  gitLog(cwd, mainWin);
+ipcMain.on(IPC_NOTIFY, (ev, notification) => {
+  notifier.notify({...notification, message: notification.body});
 });
 
-electron.ipcMain.on('NOTIFY', (ev, notification) => {
-  notifier.notify({ ...notification, message: notification.body });
-});
-
-electron.ipcMain.on('SHOW_OR_FOCUS', () => {
+ipcMain.on(IPC_SHOW_OR_FOCUS, () => {
   showOrFocus(mainWin);
 });
 
 // HELPER FUNCTIONS
 // ----------------
 function createIndicator() {
-  indicatorMod.init({
+  initIndicator({
     app,
     showApp,
     quitApp,
@@ -155,35 +163,39 @@ function createIndicator() {
 }
 
 function createMainWin() {
-  mainWin = mainWinMod.createWindow({
+  mainWin = createWindow({
     app,
     IS_DEV,
     ICONS_FOLDER,
     IS_MAC,
     quitApp,
     nestedWinParams,
-    indicatorMod,
+    // TODO fix
+    // indicatorMod,
   });
-  googleAuth.init();
+  initGoogleAuth();
 }
 
 function registerShowAppShortCut(shortcutPassed) {
   if (shortcutPassed) {
     // unregister all previous
-    electron.globalShortcut.unregisterAll();
+    globalShortcut.unregisterAll();
 
     // Register a shortcut listener.
-    const ret = electron.globalShortcut.register(shortcutPassed, () => {
+    const ret = globalShortcut.register(shortcutPassed, () => {
       if (mainWin.isFocused()) {
         mainWin.hide();
       } else {
         showOrFocus(mainWin);
       }
     });
+    console.log(ret);
 
-    if (!ret) {
-      errorHandler('Key registration failed: ' + shortcutPassed, shortcutPassed)
-    }
+    // TODO make this work again
+    // tslint:disable-next-line
+    // if (!ret) {
+    //   errorHandler('Key registration failed: ' + shortcutPassed, shortcutPassed);
+    // }
   }
 }
 
@@ -192,12 +204,13 @@ function showApp() {
 }
 
 function quitApp() {
-  mainWin.webContents.send('ON_BEFORE_QUIT');
+  mainWin.webContents.send(IPC_ON_BEFORE_QUIT);
 }
 
 function quitAppNow() {
-  app.isQuiting = true;
-  app.quit();
+  // tslint:disable-next-line
+  app_.isQuiting = true;
+  app_.quit();
 }
 
 function showOrFocus(passedWin) {
@@ -206,7 +219,7 @@ function showOrFocus(passedWin) {
 
   // sometimes when starting a second instance we get here although we don't want to
   if (!win) {
-    log.info('special case occurred when showOrFocus is called even though, this is a second instance of the app');
+    info('special case occurred when showOrFocus is called even though, this is a second instance of the app');
     return;
   }
 
@@ -230,21 +243,22 @@ function idleChecker() {
 
     // sometimes when starting a second instance we get here although we don't want to
     if (!mainWin) {
-      log.info('special case occurred when trackTimeFn is called even though, this is a second instance of the app');
+      info('special case occurred when trackTimeFn is called even though, this is a second instance of the app');
       return;
     }
 
     // don't update if the user is about to close
-    if (!app.isQuiting) {
-      mainWin.webContents.send('IDLE_TIME', idleTime);
+    // tslint:disable-next-line
+    if (!app_.isQuiting) {
+      mainWin.webContents.send(IPC_IDLE_TIME, idleTime);
     }
   });
 }
 
 function exec(ev, command) {
   console.log('running command ' + command);
-  const exec = require('child_process').exec;
-  exec(command, (error) => {
+  const exec_ = require('child_process').exec;
+  exec_(command, (error) => {
     if (error) {
       errorHandler(error);
     }

@@ -1,17 +1,19 @@
 'use strict';
+import OpenDevToolsOptions = Electron.OpenDevToolsOptions;
+
 const electron = require('electron');
 const localShortcut = require('electron-localshortcut');
 
-const { app, BrowserWindow } = electron;
+const {app, BrowserWindow} = electron;
 const isMacOS = process.platform === 'darwin';
 
-const devToolsOptions = {
+const devToolsOptions: OpenDevToolsOptions = {
   mode: 'bottom'
 };
 
 function toggleDevTools(win = BrowserWindow.getFocusedWindow()) {
   if (win) {
-    const { webContents } = win;
+    const {webContents} = win;
     if (webContents.isDevToolsOpened()) {
       webContents.closeDevTools();
     } else {
@@ -41,7 +43,8 @@ function refresh(win = BrowserWindow.getFocusedWindow()) {
 function inspectElements() {
   const win = BrowserWindow.getFocusedWindow();
   const inspect = () => {
-    win.devToolsWebContents.executeJavaScript('DevToolsAPI.enterInspectElementMode()');
+    // TODO check
+    // win.devToolsWebContents.executeJavaScript('DevToolsAPI.enterInspectElementMode()');
   };
 
   if (win) {
@@ -49,15 +52,15 @@ function inspectElements() {
       inspect();
     } else {
       win.webContents.once('devtools-opened', inspect);
-      win.openDevTools();
+      win.webContents.openDevTools();
     }
   }
 }
 
 const addExtensionIfInstalled = (name, getPath) => {
-  const isExtensionInstalled = name => {
+  const isExtensionInstalled = name_ => {
     return BrowserWindow.getDevToolsExtensions &&
-      {}.hasOwnProperty.call(BrowserWindow.getDevToolsExtensions(), name);
+      {}.hasOwnProperty.call(BrowserWindow.getDevToolsExtensions(), name_);
   };
 
   try {
@@ -68,7 +71,7 @@ const addExtensionIfInstalled = (name, getPath) => {
   }
 };
 
-module.exports = (opts, isAddReload) => {
+export const initDebug = (opts, isAddReload) => {
   opts = Object.assign({
     enabled: null,
     showDevTools: true,
@@ -95,15 +98,12 @@ module.exports = (opts, isAddReload) => {
 
       /// Workaround for https://github.com/electron/electron/issues/12438
       win.webContents.once('dom-ready', () => {
-        openDevTools(win, opts.showDevTools);
+        openDevTools(win);
       });
     }
   });
 
   app.on('ready', () => {
-    addExtensionIfInstalled('devtron', name => require(name).path);
-    addExtensionIfInstalled('electron-react-devtools', name => require(name).path);
-
     localShortcut.register('CmdOrCtrl+Shift+C', inspectElements);
     localShortcut.register(isMacOS ? 'Cmd+Alt+I' : 'Ctrl+Shift+I', devTools);
     localShortcut.register('F12', devTools);
@@ -115,6 +115,4 @@ module.exports = (opts, isAddReload) => {
   });
 };
 
-module.exports.refresh = refresh;
-module.exports.devTools = devTools;
-module.exports.openDevTools = openDevTools;
+

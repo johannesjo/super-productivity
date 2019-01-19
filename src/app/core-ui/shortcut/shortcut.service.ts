@@ -3,7 +3,7 @@ import { IS_ELECTRON } from '../../app.constants';
 import { checkKeyCombo } from '../../util/check-key-combo';
 import { ConfigService } from '../../features/config/config.service';
 import { ActivatedRoute, Router } from '@angular/router';
-import { IPC_REGISTER_GLOBAL_SHORTCUT_EVENT } from '../../../ipc-events.const';
+import { IPC_REGISTER_GLOBAL_SHORTCUT_EVENT } from '../../../../electron/ipc-events.const';
 import { ElectronService } from 'ngx-electron';
 import { LayoutService } from '../layout/layout.service';
 import { NoteService } from '../../features/note/note.service';
