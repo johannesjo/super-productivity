@@ -14,6 +14,13 @@ import { getGitLog } from './git-log';
 import { initGoogleAuth } from './google-auth';
 import { errorHandler } from './error-handler';
 import { initDebug } from './debug';
+import {
+  IPC_EXEC, IPC_GIT_LOG, IPC_IDLE_TIME,
+  IPC_JIRA_MAKE_REQUEST_EVENT, IPC_NOTIFY, IPC_ON_BEFORE_QUIT,
+  IPC_REGISTER_GLOBAL_SHORTCUT_EVENT, IPC_SHOW_OR_FOCUS,
+  IPC_SHUTDOWN,
+  IPC_SHUTDOWN_NOW
+} from './ipc-events.const';
 
 const ICONS_FOLDER = __dirname + '/assets/icons/';
 const IS_MAC = process.platform === 'darwin';
@@ -114,33 +121,30 @@ app_.on('before-quit', () => {
 
 // FRONTEND EVENTS
 // ---------------
-ipcMain.on('SHUTDOWN_NOW', quitAppNow);
+ipcMain.on(IPC_SHUTDOWN_NOW, quitAppNow);
 
-ipcMain.on('SHUTDOWN', quitApp);
+ipcMain.on(IPC_SHUTDOWN, quitApp);
 
-ipcMain.on('EXEC', exec);
+ipcMain.on(IPC_EXEC, exec);
 
-ipcMain.on('REGISTER_GLOBAL_SHORTCUT', (ev, shortcutPassed) => {
+ipcMain.on(IPC_REGISTER_GLOBAL_SHORTCUT_EVENT, (ev, shortcutPassed) => {
   registerShowAppShortCut(shortcutPassed);
 });
 
-ipcMain.on('TOGGLE_DEV_TOOLS', () => {
-  mainWin.webContents.openDevTools();
-});
 
-ipcMain.on('JIRA', (ev, request) => {
+ipcMain.on(IPC_JIRA_MAKE_REQUEST_EVENT, (ev, request) => {
   sendJiraRequest(request);
 });
 
-ipcMain.on('GIT_LOG', (ev, cwd) => {
+ipcMain.on(IPC_GIT_LOG, (ev, cwd) => {
   getGitLog(cwd);
 });
 
-ipcMain.on('NOTIFY', (ev, notification) => {
+ipcMain.on(IPC_NOTIFY, (ev, notification) => {
   notifier.notify({...notification, message: notification.body});
 });
 
-ipcMain.on('SHOW_OR_FOCUS', () => {
+ipcMain.on(IPC_SHOW_OR_FOCUS, () => {
   showOrFocus(mainWin);
 });
 
@@ -200,7 +204,7 @@ function showApp() {
 }
 
 function quitApp() {
-  mainWin.webContents.send('ON_BEFORE_QUIT');
+  mainWin.webContents.send(IPC_ON_BEFORE_QUIT);
 }
 
 function quitAppNow() {
@@ -246,7 +250,7 @@ function idleChecker() {
     // don't update if the user is about to close
     // tslint:disable-next-line
     if (!app_.isQuiting) {
-      mainWin.webContents.send('IDLE_TIME', idleTime);
+      mainWin.webContents.send(IPC_IDLE_TIME, idleTime);
     }
   });
 }

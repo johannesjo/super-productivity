@@ -11,7 +11,7 @@ import { GlobalConfig, GoogleSession } from '../config/config.model';
 import { catchError, map } from 'rxjs/operators';
 import { EmptyObservable } from 'rxjs-compat/observable/EmptyObservable';
 import { Observable } from 'rxjs';
-import { IPC_GOOGLE_AUTH_TOKEN, IPC_GOOGLE_AUTH_TOKEN_ERROR, IPC_TRIGGER_GOOGLE_AUTH } from '../../../ipc-events.const';
+import { IPC_GOOGLE_AUTH_TOKEN, IPC_GOOGLE_AUTH_TOKEN_ERROR, IPC_TRIGGER_GOOGLE_AUTH } from '../../../../electron/ipc-events.const';
 import { ElectronService } from 'ngx-electron';
 
 const EXPIRES_SAFETY_MARGIN = 30000;

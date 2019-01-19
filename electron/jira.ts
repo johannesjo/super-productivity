@@ -1,5 +1,6 @@
 import * as JiraApi from 'jira-client-fork';
 import { getWin } from './main-window';
+import { IPC_JIRA_CB_EVENT } from './ipc-events.const';
 
 export const sendJiraRequest = (request) => {
   const mainWin = getWin();
@@ -47,13 +48,13 @@ export const sendJiraRequest = (request) => {
   jira[apiMethod](...args)
     .then(res => {
       // console.log('JIRA_RESPONSE', error, res);
-      mainWin.webContents.send('JIRA_RESPONSE', {
+      mainWin.webContents.send(IPC_JIRA_CB_EVENT, {
         response: res,
         requestId: requestId
       });
     })
     .catch(err => {
-      mainWin.webContents.send('JIRA_RESPONSE', {
+      mainWin.webContents.send(IPC_JIRA_CB_EVENT, {
         error: err,
         requestId: requestId
       });

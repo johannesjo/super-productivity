@@ -8,7 +8,7 @@ import { MatDialog } from '@angular/material';
 import { DialogSimpleTaskSummaryComponent } from '../../features/simple-task-summary/dialog-simple-task-summary/dialog-simple-task-summary.component';
 import { Subscription } from 'rxjs';
 import { ElectronService } from 'ngx-electron';
-import { IPC_SHUTDOWN_NOW } from '../../../ipc-events.const';
+import { IPC_SHUTDOWN_NOW } from '../../../../electron/ipc-events.const';
 import { DialogConfirmComponent } from '../../ui/dialog-confirm/dialog-confirm.component';
 import { NoteService } from '../../features/note/note.service';
 import { ConfigService } from '../../features/config/config.service';

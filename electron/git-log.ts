@@ -1,4 +1,5 @@
 import { getWin } from './main-window';
+import { IPC_GIT_LOG_RESPONSE } from './ipc-events.const';
 
 export const getGitLog = function (data) {
   'use strict';
@@ -10,7 +11,7 @@ export const getGitLog = function (data) {
     cwd: data.cwd
   }, function (error, stdout) {
     const mainWin = getWin();
-    mainWin.webContents.send('GIT_LOG_RESPONSE', {
+    mainWin.webContents.send(IPC_GIT_LOG_RESPONSE, {
       stdout: stdout,
       requestId: data.requestId
     });

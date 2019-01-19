@@ -1,6 +1,7 @@
 import { google } from 'googleapis';
 import { BrowserWindow, ipcMain } from 'electron';
 import { getWin } from './main-window';
+import { IPC_GOOGLE_AUTH_TOKEN, IPC_GOOGLE_AUTH_TOKEN_ERROR, IPC_TRIGGER_GOOGLE_AUTH } from './ipc-events.const';
 
 const A = {
   CLIENT_ID: '37646582031-e281jj291amtk805td0hgfqss2jfkdcd.apps.googleusercontent.com',
@@ -114,13 +115,13 @@ function openAuthWindow(url) {
 
 
 export const initGoogleAuth = function () {
-  ipcMain.on('TRIGGER_GOOGLE_AUTH', (ev, refreshToken) => {
+  ipcMain.on(IPC_TRIGGER_GOOGLE_AUTH, (ev, refreshToken) => {
     console.log('TRIGGER_GOOGLE_AUTH, rt', refreshToken);
     const mainWin = getWin();
     authenticate(refreshToken).then((res: any) => {
-      mainWin.webContents.send('GOOGLE_AUTH_TOKEN', res.tokens);
+      mainWin.webContents.send(IPC_GOOGLE_AUTH_TOKEN, res.tokens);
     }).catch((err) => {
-      mainWin.webContents.send('GOOGLE_AUTH_TOKEN_ERROR');
+      mainWin.webContents.send(IPC_GOOGLE_AUTH_TOKEN_ERROR);
       console.log(err);
     });
   });

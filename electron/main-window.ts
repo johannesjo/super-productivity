@@ -4,6 +4,7 @@ import { join, normalize } from 'path';
 import { format } from 'url';
 import { getSettings } from './get-settings';
 import MenuItemConstructorOptions = Electron.MenuItemConstructorOptions;
+import { IPC_APP_READY } from './ipc-events.const';
 
 let mainWin;
 let indicatorMod;
@@ -76,8 +77,7 @@ export const createWindow = function (params) {
   mainWinModule.win = mainWin;
 
   // listen for app ready
-  const APP_READY = 'APP_READY';
-  ipcMain.on(APP_READY, () => {
+  ipcMain.on(IPC_APP_READY, () => {
     mainWinModule.isAppReady = true;
   });
 

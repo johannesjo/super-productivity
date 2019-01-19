@@ -1,5 +1,7 @@
 'use strict';
 
+import { IPC_TASK_MARK_AS_DONE, IPC_TASK_PAUSE, IPC_TASK_START } from './ipc-events.const';
+
 const errorHandler = require('./error-handler');
 const mainWinMod = require('./main-window');
 
@@ -87,17 +89,17 @@ function init(params) {
       markAsDone: function () {
         checkMainWin();
         const mainWin = mainWinMod.getWin();
-        mainWin.webContents.send('TASK_MARK_AS_DONE');
+        mainWin.webContents.send(IPC_TASK_MARK_AS_DONE);
       },
       startTask: function () {
         checkMainWin();
         const mainWin = mainWinMod.getWin();
-        mainWin.webContents.send('TASK_START');
+        mainWin.webContents.send(IPC_TASK_START);
       },
       pauseTask: function () {
         checkMainWin();
         const mainWin = mainWinMod.getWin();
-        mainWin.webContents.send('TASK_PAUSE');
+        mainWin.webContents.send(IPC_TASK_PAUSE);
       },
       showApp: function () {
         params.showApp();

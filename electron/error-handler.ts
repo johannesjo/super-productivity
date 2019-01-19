@@ -1,7 +1,8 @@
 import { getIsAppReady, getWin } from './main-window';
+import { IPC_ERROR } from './ipc-events.const';
 
 const WAIT_FOR_WIN_TIMEOUT_DURATION = 4000;
-const ERROR_EV = 'ELECTRON_ERROR';
+const ERROR_EV = IPC_ERROR;
 
 export const errorHandler = (e = 'UNDEFINED ERROR', additionalLogInfo?) => {
   const errObj = new Error(e);

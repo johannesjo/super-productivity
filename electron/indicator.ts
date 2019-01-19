@@ -3,6 +3,7 @@ import { existsSync, readFileSync } from 'fs';
 // const dbus = require('./dbus');
 import * as moment from 'moment';
 import { errorHandler } from './error-handler';
+import { IPC_CURRENT_TASK_UPDATED, IPC_POMODORO_UPDATE } from './ipc-events.const';
 
 const GNOME_SHELL_EXT_MIN_VERSION = 2;
 
@@ -94,7 +95,7 @@ function initAppListeners(app) {
 }
 
 function initListeners(isGnomeShellExtInstalled) {
-  ipcMain.on('CHANGED_CURRENT_TASK', (ev, params) => {
+  ipcMain.on(IPC_CURRENT_TASK_UPDATED, (ev, params) => {
     const currentTask = params.current;
     const lastActiveTaskTask = params.lastActiveTask;
 
@@ -126,7 +127,7 @@ function initListeners(isGnomeShellExtInstalled) {
     }
   });
 
-  ipcMain.on('IPC_EVENT_POMODORO_UPDATE', (ev, params) => {
+  ipcMain.on(IPC_POMODORO_UPDATE, (ev, params) => {
     const isOnBreak = params.isOnBreak;
     const currentSessionTime = params.currentSessionTime;
     const currentSessionInitialTime = params.currentSessionInitialTime;
