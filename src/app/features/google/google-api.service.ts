@@ -169,6 +169,8 @@ export class GoogleApiService {
   }
 
   getFileInfo(fileId): Observable<any> {
+    console.log(fileId);
+
     if (!fileId) {
       this._snackIt('ERROR', 'GoogleApi: No file id specified');
       throwError('No file id given');
@@ -199,10 +201,12 @@ export class GoogleApiService {
         // should be called name officially instead of title
         q: `title='${fileName}' and trashed=false`,
       },
-    });
+    }).pipe(
+      // No clue why this is necessary (options request maybe??)
+      skip(1),
+    );
   }
 
-  // TODO
   loadFile(fileId): Observable<any> {
     if (!fileId) {
       this._snackIt('ERROR', 'GoogleApi: No file id specified');
@@ -270,7 +274,10 @@ export class GoogleApiService {
         'Content-Type': multipart.type
       },
       data: multipart.body
-    });
+    }).pipe(
+      // No clue why this is necessary (options request maybe??)
+      skip(1),
+    );
   }
 
   private _updateSession(sessionData: Partial<GoogleSession>) {
@@ -399,8 +406,6 @@ export class GoogleApiService {
     // const sub = this._http[p.method.toLowerCase()](p.url, p.data, p)
     return this._http.request(req)
       .pipe(
-        // skip options request ???
-        skip(1),
         catchError((res) => {
           console.warn(res);
           if (!res) {
@@ -413,16 +418,16 @@ export class GoogleApiService {
           }
           return throwError(res);
         }),
-        map((res) => {
-          console.log(res);
-
-          if (res && res.type === 0) {
-            this._handleError('type 0, request canceled');
-            return throwError(res);
-          } else {
-            return res;
-          }
-        }),
+        // map((res) => {
+        //   console.log(res);
+        //
+        //   if (res && res.type === 0) {
+        //     this._handleError('type 0, request canceled');
+        //     return throwError(res);
+        //   } else {
+        //     return res;
+        //   }
+        // }),
       );
   }
 

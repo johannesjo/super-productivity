@@ -45,7 +45,7 @@ export class ConfigEffects {
   }
 
   private async _saveToLs([action, state]) {
-    console.log(action);
+    console.log('ConfigEffect:_saveToLs', action);
     const isSkipLastActiveUpdate = action.payload && action.payload.isSkipLastActiveUpdate;
     if (!isSkipLastActiveUpdate) {
       this._persistenceService.saveLastActive();

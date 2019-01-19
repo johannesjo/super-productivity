@@ -18,7 +18,7 @@ import { FormGroup } from '@angular/forms';
 export class GoogleSyncCfgComponent implements OnInit, OnDestroy {
   tmpSyncFile: any;
   cfg: GoogleDriveSyncConfig;
-  backupPromise: Promise<any>;
+  backupSub: Subscription;
   loadRemotePromise: Promise<any>;
   loginPromise: Promise<any>;
 
@@ -47,6 +47,9 @@ export class GoogleSyncCfgComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this._subs.unsubscribe();
+    if (this.backupSub) {
+      this.backupSub.unsubscribe();
+    }
   }
 
   submit() {
@@ -70,8 +73,7 @@ export class GoogleSyncCfgComponent implements OnInit, OnDestroy {
   }
 
   backupNow() {
-    this.backupPromise = this._googleDriveSyncService.saveTo()
-      .then(() => {
+    this.backupSub = this._googleDriveSyncService.saveTo().subscribe(() => {
         this._snackService.open({
           type: 'SUCCESS',
           message: 'Google Drive: Successfully saved backup'
@@ -101,7 +103,7 @@ export class GoogleSyncCfgComponent implements OnInit, OnDestroy {
 
   changeSyncFileName(newSyncFile) {
     console.log('CONFIG changeSyncFileName');
-    
+
     this._googleDriveSyncService.changeSyncFileName(newSyncFile).subscribe();
   }
 }

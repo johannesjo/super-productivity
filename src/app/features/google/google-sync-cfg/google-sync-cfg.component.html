@@ -31,7 +31,7 @@
       <button type="button"
               mat-raised-button=""
               class="md-raised"
-              [promiseBtn]="backupPromise"
+              [promiseBtn]="backupSub"
               *ngIf="(googleApiService.isLoggedIn$|async)"
               (click)="backupNow()">
         <mat-icon>backup</mat-icon>
