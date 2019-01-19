@@ -32,7 +32,7 @@ export const sendJiraRequest = (request) => {
     config.protocol = 'https';
   }
 
-  let jira = new JiraApi({
+  const jira = new JiraApi({
     protocol: config.protocol,
     host: config.host,
     port: config.port,
