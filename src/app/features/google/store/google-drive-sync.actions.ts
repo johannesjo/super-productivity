@@ -23,6 +23,9 @@ export class LoadFromGoogleDriveFlow implements Action {
 
 export class LoadFromGoogleDriveSuccess implements Action {
   readonly type = GoogleDriveSyncActionTypes.LoadFromGoogleDriveSuccess;
+
+  constructor(public payload: { modifiedDate: any }) {
+  }
 }
 
 export class SaveToGoogleDriveFlow implements Action {
