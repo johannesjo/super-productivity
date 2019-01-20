@@ -13,7 +13,6 @@ export class ConfigEffects {
     .pipe(
       ofType(
         ConfigActionTypes.UpdateConfigSection,
-        ConfigActionTypes.UpdateConfig,
       ),
       withLatestFrom(this._store),
       tap(this._saveToLs.bind(this))
