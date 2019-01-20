@@ -226,7 +226,9 @@ export class GoogleApiService {
         supportsTeamDrives: true,
         alt: 'media'
       },
-    });
+    }).pipe(
+      skip(1),
+    );
     const metaData = this.getFileInfo(fileId);
 
     return combineLatest(metaData, loadFile)
@@ -234,8 +236,8 @@ export class GoogleApiService {
         map((res) => {
           console.log(res);
           return {
-            backup: res[1].body,
-            meta: res[0].body,
+            backup: res[1],
+            meta: res[0],
           };
         }),
       );
@@ -433,6 +435,7 @@ export class GoogleApiService {
         //     return res;
         //   }
         // }),
+        map((res: any) => (res && res.body) ? res.body : res)
       );
   }
 

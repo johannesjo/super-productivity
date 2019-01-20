@@ -82,11 +82,13 @@ export class GoogleSyncCfgComponent implements OnInit, OnDestroy {
   }
 
   backupNow() {
+    // TODO fix promise stuff
     this._googleDriveSyncService.saveTo();
   }
 
   loadRemoteData() {
-    this.loadRemotePromise = this._googleDriveSyncService.loadFrom();
+    // TODO fix promise stuff
+    this._googleDriveSyncService.loadFrom();
   }
 
   login() {

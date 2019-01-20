@@ -3,7 +3,7 @@ import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { ConfigActionTypes, UpdateConfigSection } from '../../config/store/config.actions';
 import { distinctUntilChanged, filter, flatMap, map, switchMap, take, tap, withLatestFrom } from 'rxjs/operators';
-import { combineLatest, EMPTY, from, interval, Observable, of } from 'rxjs';
+import { combineLatest, EMPTY, from, interval, Observable, of, throwError } from 'rxjs';
 import { GoogleDriveSyncService } from '../google-drive-sync.service';
 import { GoogleApiService } from '../google-api.service';
 import { ConfigService } from '../../config/config.service';
@@ -25,6 +25,8 @@ import { SnackOpen } from '../../../core/snack/store/snack.actions';
 import { DEFAULT_SYNC_FILE_NAME } from '../google.const';
 import { DialogConfirmDriveSyncSaveComponent } from '../dialog-confirm-drive-sync-save/dialog-confirm-drive-sync-save.component';
 import * as moment from 'moment';
+import { DialogConfirmDriveSyncLoadComponent } from '../dialog-confirm-drive-sync-load/dialog-confirm-drive-sync-load.component';
+import { AppDataComplete } from '../../../imex/sync/sync.model';
 
 @Injectable()
 export class GoogleDriveSyncEffects {
@@ -98,7 +100,7 @@ export class GoogleDriveSyncEffects {
         return this._googleApiService.findFile(newFileName).pipe(
           // tslint:disable-next-line
           flatMap((res: any): any => {
-            const filesFound = res.body.items;
+            const filesFound = res.items;
             if (filesFound.length && filesFound.length > 1) {
               return of(new SnackOpen({
                 type: 'ERROR',
@@ -170,7 +172,7 @@ export class GoogleDriveSyncEffects {
             flatMap((res: any): Observable<any> => {
               console.log(res);
               const lastActiveLocal = this._syncService.getLastActive();
-              const lastModifiedRemote = res.body.modifiedDate;
+              const lastModifiedRemote = res.modifiedDate;
               console.log('saveTo Check', this._isEqual(lastActiveLocal, lastModifiedRemote), lastModifiedRemote, lastActiveLocal);
 
               if (this._isEqual(lastActiveLocal, lastModifiedRemote)) {
@@ -219,12 +221,12 @@ export class GoogleDriveSyncEffects {
         GoogleDriveSyncActionTypes.SaveToGoogleDriveSuccess,
       ),
       tap((action: SaveToGoogleDriveSuccess) =>
-        this._syncService.saveLastActive(action.payload.response.body.modifiedDate)),
+        this._syncService.saveLastActive(action.payload.response.modifiedDate)),
       switchMap((action: SaveToGoogleDriveSuccess): any => [
           // NOTE: last active needs to be set to exactly the value we get back
           this._updateConfig({
-            _backupDocId: action.payload.response.body.id,
-            _lastSync: action.payload.response.body.modifiedDate,
+            _backupDocId: action.payload.response.id,
+            _lastSync: action.payload.response.modifiedDate,
           }, true),
           new SnackOpen({
             type: 'SUCCESS',
@@ -241,7 +243,6 @@ export class GoogleDriveSyncEffects {
         GoogleDriveSyncActionTypes.LoadFromGoogleDriveFlow,
       ),
       withLatestFrom(this.config$),
-      // TODO filter for in progress and no force
       flatMap(([action, cfg]: [LoadFromGoogleDrive, GoogleDriveSyncConfig]): any => {
         // when we have no backup file we create one directly
         if (!cfg._backupDocId) {
@@ -250,7 +251,32 @@ export class GoogleDriveSyncEffects {
           // otherwise update
           return this._checkIfRemoteUpdate().pipe(
             flatMap((isUpdated: boolean): Observable<any> => {
+              if (isUpdated) {
+                return this._loadFile().pipe(
+                  flatMap((loadRes: any): any => {
+                    console.log(loadRes);
+                    const backup: AppDataComplete = loadRes.backup;
+                    const lastActiveLocal = this._syncService.getLastActive();
+                    const lastActiveRemote = backup.lastActiveTime;
 
+                    // update but ask if remote data is not newer than the last local update
+                    const isSkipConfirm = (lastActiveRemote && this._isNewerThan(lastActiveRemote, lastActiveLocal));
+                    console.log('DriveSync', 'date comparision skipConfirm load', isSkipConfirm, lastActiveLocal, lastActiveRemote);
+
+                    if (isSkipConfirm) {
+                      return this._import(loadRes);
+                    } else {
+                      this._openConfirmLoadDialog(lastActiveRemote);
+                      return EMPTY;
+                    }
+                  });
+                // no update required
+              } else {
+                return of(new SnackOpen({
+                  type: 'SUCCESS',
+                  message: `DriveSync: Local data already up to date`
+                }));
+              }
             }),
           );
         }
@@ -283,12 +309,12 @@ export class GoogleDriveSyncEffects {
         GoogleDriveSyncActionTypes.LoadFromGoogleDriveSuccess,
       ),
       tap((action: LoadFromGoogleDriveSuccess) =>
-        this._syncService.loadLastActive(action.payload.response.body.modifiedDate)),
+        this._syncService.loadLastActive(action.payload.response.modifiedDate)),
       switchMap((action: LoadFromGoogleDriveSuccess): any => [
           // NOTE: last active needs to be set to exactly the value we get back
           this._updateConfig({
-            _backupDocId: action.payload.response.body.id,
-            _lastSync: action.payload.response.body.modifiedDate,
+            _backupDocId: action.payload.response.id,
+            _lastSync: action.payload.response.modifiedDate,
           }, true),
           new SnackOpen({
             type: 'SUCCESS',
@@ -317,11 +343,11 @@ export class GoogleDriveSyncEffects {
     const lastSync = this._config._lastSync;
     return this._googleApiService.getFileInfo(this._config._backupDocId)
       .pipe(
-        tap((res) => {
+        tap((res: any) => {
           const lastModifiedRemote = res.modifiedDate;
           console.log('CHECK_REMOTE_UPDATED', this._isNewerThan(lastModifiedRemote, lastSync), lastModifiedRemote, lastSync);
         }),
-        map((res) => this._isNewerThan(res.modifiedDate, lastSync)),
+        map((res: any) => this._isNewerThan(res.modifiedDate, lastSync)),
       );
   }
 
@@ -359,20 +385,25 @@ export class GoogleDriveSyncEffects {
 
   // TODO refactor to effect
   private _openConfirmLoadDialog(remoteModified): void {
-    // const lastActiveLocal = this._syncService.getLastActive();
-    // this._matDialog.open(DialogConfirmDriveSyncLoadComponent, {
-    //   restoreFocus: true,
-    //   data: {
-    //     loadFromRemote: () => this.loadFrom(true, true)
-    //       .then(loadRes => this._import(loadRes)),
-    //     saveToRemote: () => this._save().toPromise(),
-    //     cancel: () => {
-    //     },
-    //     remoteModified: this._formatDate(remoteModified),
-    //     lastActiveLocal: this._formatDate(lastActiveLocal),
-    //     lastSync: this._formatDate(this._config._lastSync),
-    //   }
-    // });
+    const lastActiveLocal = this._syncService.getLastActive();
+    this._matDialog.open(DialogConfirmDriveSyncLoadComponent, {
+      restoreFocus: true,
+      data: {
+        loadFromRemote: () => this._store$.dispatch(new LoadFromGoogleDrive()),
+        saveToRemote: () => this._store$.dispatch(new SaveToGoogleDrive()),
+        remoteModified: this._formatDate(remoteModified),
+        lastActiveLocal: this._formatDate(lastActiveLocal),
+        lastSync: this._formatDate(this._config._lastSync),
+      }
+    });
+  }
+
+  private _loadFile(): Observable<any> {
+    if (!this._config.syncFileName) {
+      return throwError('No file name specified');
+    }
+
+    return this._googleApiService.loadFile(this._config._backupDocId);
   }
 
 
@@ -422,6 +453,16 @@ If not please change the Sync file name.`,
     return this._syncService.getCompleteSyncData();
   }
 
+  private _import(loadRes): Observable<any> {
+    const backupData: AppDataComplete = loadRes.backup;
+    return from(this._syncService.loadCompleteSyncData(backupData))
+      .pipe(map(() => {
+        this._syncService.saveLastActive(loadRes.meta.modifiedDate);
+        return this._updateConfig({
+          _lastSync: loadRes.meta.modifiedDate,
+        }, true);
+      }));
+  }
 
   private _formatDate(date) {
     return moment(date).format('DD-MM-YYYY --- hh:mm:ss');
