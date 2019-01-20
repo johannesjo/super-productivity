@@ -31,18 +31,18 @@
       <button type="button"
               mat-raised-button=""
               class="md-raised"
-              [promiseBtn]="backupSub"
+              [promiseBtn]="googleDriveSyncService.isSaveInProgress$|async"
               *ngIf="(googleApiService.isLoggedIn$|async)"
-              (click)="backupNow()">
+              (click)="saveToGoogleDrive()">
         <mat-icon>backup</mat-icon>
         Backup now
       </button>
       <button type="button"
               mat-raised-button=""
               class="md-raised sync-from-btn"
-              [promiseBtn]="loadRemotePromise"
+              [promiseBtn]="googleDriveSyncService.isLoadInProgress$|async"
               *ngIf="(googleApiService.isLoggedIn$|async)"
-              (click)="loadRemoteData()">
+              (click)="loadFromGoogleDrive()">
         <mat-icon>backup</mat-icon>
         Load From GDrive
       </button>

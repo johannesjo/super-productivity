@@ -1,9 +1,4 @@
 import { Injectable } from '@angular/core';
-import { SyncService } from '../../imex/sync/sync.service';
-import { ConfigService } from '../config/config.service';
-import { GoogleApiService } from './google-api.service';
-import { SnackService } from '../../core/snack/snack.service';
-import { MatDialog } from '@angular/material';
 import { Observable } from 'rxjs';
 import { Store } from '@ngrx/store';
 import {
@@ -12,16 +7,20 @@ import {
   SaveForSync,
   SaveToGoogleDriveFlow
 } from './store/google-drive-sync.actions';
+import {
+  selectIsGoogleDriveLoadInProgress,
+  selectIsGoogleDriveSaveInProgress
+} from './store/google-drive-sync.reducer';
+import { distinctUntilChanged } from 'rxjs/operators';
 
 @Injectable()
 export class GoogleDriveSyncService {
+  isLoadInProgress$: Observable<boolean> = this._store$.select(selectIsGoogleDriveLoadInProgress)
+    .pipe(distinctUntilChanged());
+  isSaveInProgress$: Observable<boolean> = this._store$.select(selectIsGoogleDriveSaveInProgress)
+    .pipe(distinctUntilChanged());
 
   constructor(
-    private _syncService: SyncService,
-    private _configService: ConfigService,
-    private _googleApiService: GoogleApiService,
-    private _snackService: SnackService,
-    private _matDialog: MatDialog,
     private _store$: Store<any>,
   ) {
   }

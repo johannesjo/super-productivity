@@ -16,6 +16,7 @@ import { GoogleDriveSyncConfig } from '../../config/config.model';
 import { Subscription } from 'rxjs';
 import { expandFadeAnimation } from '../../../ui/animations/expand.ani';
 import { FormGroup } from '@angular/forms';
+import { filter, skip, take, takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'google-sync-cfg',
@@ -27,8 +28,6 @@ import { FormGroup } from '@angular/forms';
 export class GoogleSyncCfgComponent implements OnInit, OnDestroy {
   tmpSyncFile: any;
   cfg: GoogleDriveSyncConfig;
-  backupSub: Subscription;
-  loadRemotePromise: Promise<any>;
   loginPromise: Promise<any>;
 
   @ViewChild('formRef') formRef: FormGroup;
@@ -39,7 +38,7 @@ export class GoogleSyncCfgComponent implements OnInit, OnDestroy {
 
   constructor(
     public readonly googleApiService: GoogleApiService,
-    private readonly _googleDriveSyncService: GoogleDriveSyncService,
+    private readonly googleDriveSyncService: GoogleDriveSyncService,
     private readonly _configService: ConfigService,
     private readonly _snackService: SnackService,
     private readonly _cd: ChangeDetectorRef,
@@ -56,9 +55,6 @@ export class GoogleSyncCfgComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this._subs.unsubscribe();
-    if (this.backupSub) {
-      this.backupSub.unsubscribe();
-    }
   }
 
   submit() {
@@ -81,14 +77,12 @@ export class GoogleSyncCfgComponent implements OnInit, OnDestroy {
     // AppStorage.importData(settings);
   }
 
-  backupNow() {
-    // TODO fix promise stuff
-    this._googleDriveSyncService.saveTo();
+  saveToGoogleDrive() {
+    this.googleDriveSyncService.saveTo();
   }
 
-  loadRemoteData() {
-    // TODO fix promise stuff
-    this._googleDriveSyncService.loadFrom();
+  loadFromGoogleDrive() {
+    this.googleDriveSyncService.loadFrom();
   }
 
   login() {
@@ -108,6 +102,6 @@ export class GoogleSyncCfgComponent implements OnInit, OnDestroy {
   }
 
   changeSyncFileName(newSyncFile) {
-    this._googleDriveSyncService.changeSyncFileName(newSyncFile);
+    this.googleDriveSyncService.changeSyncFileName(newSyncFile);
   }
 }

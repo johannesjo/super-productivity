@@ -4,9 +4,11 @@ export enum GoogleDriveSyncActionTypes {
   LoadFromGoogleDrive = '[GoogleDriveSync] Load From',
   LoadFromGoogleDriveFlow = '[GoogleDriveSync] Load From Flow',
   LoadFromGoogleDriveSuccess = '[GoogleDriveSync] Load From Success',
+  LoadFromGoogleDriveCancel = '[GoogleDriveSync] Load From Cancel',
   SaveToGoogleDriveFlow = '[GoogleDriveSync] Save To Flow',
   SaveToGoogleDrive = '[GoogleDriveSync] Save To',
   SaveToGoogleDriveSuccess = '[GoogleDriveSync] Save To Success',
+  SaveToGoogleDriveCancel = '[GoogleDriveSync] Save To Cancel',
   ChangeSyncFileName = '[GoogleDriveSync] Change Sync File Name',
   SaveForSync = '[GoogleDriveSync] Save For Sync',
   CreateSyncFile = '[GoogleDriveSync] Create Sync File',
@@ -30,6 +32,10 @@ export class LoadFromGoogleDriveSuccess implements Action {
   }
 }
 
+export class LoadFromGoogleDriveCancel implements Action {
+  readonly type = GoogleDriveSyncActionTypes.LoadFromGoogleDriveCancel;
+}
+
 export class SaveToGoogleDriveFlow implements Action {
   readonly type = GoogleDriveSyncActionTypes.SaveToGoogleDriveFlow;
 }
@@ -43,6 +49,9 @@ export class SaveToGoogleDriveSuccess implements Action {
 
   constructor(public payload: { response: any }) {
   }
+}
+export class SaveToGoogleDriveCancel implements Action {
+  readonly type = GoogleDriveSyncActionTypes.SaveToGoogleDriveCancel;
 }
 
 export class ChangeSyncFileName implements Action {
@@ -68,9 +77,11 @@ export type GoogleDriveSyncActions
   = LoadFromGoogleDrive
   | LoadFromGoogleDriveFlow
   | LoadFromGoogleDriveSuccess
+  | LoadFromGoogleDriveCancel
   | SaveToGoogleDrive
   | SaveToGoogleDriveFlow
   | SaveToGoogleDriveSuccess
+  | SaveToGoogleDriveCancel
   | ChangeSyncFileName
   | SaveForSync
   | CreateSyncFile

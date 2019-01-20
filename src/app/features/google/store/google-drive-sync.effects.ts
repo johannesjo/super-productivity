@@ -3,6 +3,7 @@ import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { ConfigActionTypes, UpdateConfigSection } from '../../config/store/config.actions';
 import {
+  catchError,
   distinctUntilChanged,
   filter,
   flatMap,
@@ -23,10 +24,12 @@ import {
   CreateSyncFile,
   GoogleDriveSyncActionTypes,
   LoadFromGoogleDrive,
+  LoadFromGoogleDriveCancel,
   LoadFromGoogleDriveFlow,
   LoadFromGoogleDriveSuccess,
   SaveForSync,
   SaveToGoogleDrive,
+  SaveToGoogleDriveCancel,
   SaveToGoogleDriveFlow,
   SaveToGoogleDriveSuccess
 } from './google-drive-sync.actions';
@@ -184,14 +187,16 @@ export class GoogleDriveSyncEffects {
             console.log('SaveTo Check', this._isEqual(lastActiveLocal, lastModifiedRemote), lastModifiedRemote, lastActiveLocal);
 
             if (this._isEqual(lastActiveLocal, lastModifiedRemote)) {
-              return of(new SnackOpen({
+              // TODO refactor optional message to cancel
+              this._snackService.open({
                 type: 'SUCCESS',
                 message: `DriveSync: Remote data already up to date`
-              }));
+              });
+              return of(new SaveToGoogleDriveCancel());
             } else if (this._isNewerThan(lastModifiedRemote, cfg._lastSync)) {
               // remote has an update so prompt what to do
               this._openConfirmSaveDialog(lastModifiedRemote);
-              return EMPTY;
+              return of(new SaveToGoogleDriveCancel());
             } else {
               // local is newer than remote so just save
               return of(new SaveToGoogleDrive());
@@ -200,6 +205,7 @@ export class GoogleDriveSyncEffects {
         );
       }
     }),
+    catchError(err => of(new SaveToGoogleDriveCancel())),
   );
 
   @Effect() save$: any = this._actions$.pipe(
@@ -215,6 +221,7 @@ export class GoogleDriveSyncEffects {
       })
     ),
     map((response: any) => new SaveToGoogleDriveSuccess({response})),
+    catchError(err => of(new SaveToGoogleDriveCancel())),
   );
 
   @Effect() saveSuccess$: any = this._actions$.pipe(
@@ -264,21 +271,24 @@ export class GoogleDriveSyncEffects {
                     return of(new LoadFromGoogleDrive({loadResponse}));
                   } else {
                     this._openConfirmLoadDialog(lastActiveRemote);
-                    return EMPTY;
+                    return of(new LoadFromGoogleDriveCancel());
                   }
                 }),
               );
               // no update required
             } else {
-              return of(new SnackOpen({
+              // TODO refactor optional message to cancel
+              this._snackService.open({
                 type: 'SUCCESS',
                 message: `DriveSync: Local data already up to date`
-              }));
+              });
+              return of(new LoadFromGoogleDriveCancel());
             }
           }),
         );
       }
     }),
+    catchError(err => of(new LoadFromGoogleDriveCancel())),
   );
 
   @Effect() load$: any = this._actions$.pipe(
@@ -293,6 +303,7 @@ export class GoogleDriveSyncEffects {
     }),
     flatMap((loadRes) => this._import(loadRes)),
     map((modifiedDate) => new LoadFromGoogleDriveSuccess({modifiedDate})),
+    catchError(err => of(new LoadFromGoogleDriveCancel())),
   );
 
   @Effect() loadSuccess$: any = this._actions$.pipe(
