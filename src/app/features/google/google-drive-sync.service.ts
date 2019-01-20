@@ -41,16 +41,4 @@ export class GoogleDriveSyncService {
   loadFrom(): void {
     this._store$.dispatch(new LoadFromGoogleDriveFlow());
   }
-
-
-  private _showAsyncToast(obs: Observable<any>, msg) {
-    this._snackService.open({
-      type: 'CUSTOM',
-      icon: 'file_upload',
-      message: msg,
-      isSubtle: true,
-      config: {duration: 60000},
-      promise: obs.toPromise(),
-    });
-  }
 }

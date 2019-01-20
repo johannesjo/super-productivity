@@ -1,4 +1,13 @@
-import { AfterViewChecked, Attribute, Directive, ElementRef, forwardRef, HostListener, Input, Renderer2 } from '@angular/core';
+import {
+  AfterViewChecked,
+  Attribute,
+  Directive,
+  ElementRef,
+  forwardRef,
+  HostListener,
+  Input,
+  Renderer2
+} from '@angular/core';
 import {
   AbstractControl,
   ControlValueAccessor,
@@ -60,6 +69,9 @@ export class InputDurationDirective<D> implements ControlValueAccessor, Validato
     }
   }
 
+  @Input() isAllowSeconds = false;
+
+
   constructor(@Attribute('inputDuration') public inputDuration,
               private _elementRef: ElementRef,
               private _stringToMs: StringToMsPipe,
@@ -69,7 +81,7 @@ export class InputDurationDirective<D> implements ControlValueAccessor, Validato
 
   @HostListener('input', ['$event.target.value']) _onInput(value: string) {
     const msVal = this._stringToMs.transform(value);
-    this._value = this._msToString.transform(msVal, false, true);
+    this._value = this._msToString.transform(msVal, this.isAllowSeconds, true);
     this._onChangeCallback(msVal);
   }
 
@@ -118,7 +130,7 @@ export class InputDurationDirective<D> implements ControlValueAccessor, Validato
     if (!value) {
       value = '';
     }
-    const toStr = this._msToString.transform(value, false, true);
+    const toStr = this._msToString.transform(value, this.isAllowSeconds, true);
     this._renderer.setProperty(this._elementRef.nativeElement, 'value', toStr);
   }
 
@@ -127,7 +139,7 @@ export class InputDurationDirective<D> implements ControlValueAccessor, Validato
     // TODO maximum dirty hackyness, but works for now :(
     if (!this._value) {
       const msVal = this._stringToMs.transform(this._elementRef.nativeElement.value);
-      this._value = this._msToString.transform(msVal, false, true);
+      this._value = this._msToString.transform(msVal, this.isAllowSeconds, true);
     }
 
     return this._value

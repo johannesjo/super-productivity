@@ -3,7 +3,6 @@ import { GlobalConfig, SectionConfig } from '../config.model';
 
 export enum ConfigActionTypes {
   LoadConfig = '[Config] Load Config',
-  UpdateConfig = '[Config] Update Config',
   UpdateConfigSection = '[Config] Update Config Section',
 }
 

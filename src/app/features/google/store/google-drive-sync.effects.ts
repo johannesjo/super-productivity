@@ -25,7 +25,9 @@ import {
   LoadFromGoogleDrive,
   LoadFromGoogleDriveFlow,
   LoadFromGoogleDriveSuccess,
+  SaveForSync,
   SaveToGoogleDrive,
+  SaveToGoogleDriveFlow,
   SaveToGoogleDriveSuccess
 } from './google-drive-sync.actions';
 import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confirm.component';
@@ -49,10 +51,11 @@ export class GoogleDriveSyncEffects {
   isAutoSyncToRemote$ = this.config$.pipe(map(cfg => cfg.isAutoSyncToRemote), distinctUntilChanged());
   syncInterval$ = this.config$.pipe(map(cfg => cfg.syncInterval), distinctUntilChanged());
 
-  @Effect({dispatch: false}) triggerSync$: any = this._actions$
+  @Effect() triggerSync$: any = this._actions$
     .pipe(
       ofType(
         ConfigActionTypes.LoadConfig,
+        ConfigActionTypes.UpdateConfigSection,
       ),
       switchMap(() => combineLatest(
         this._googleApiService.isLoggedIn$,
@@ -64,10 +67,19 @@ export class GoogleDriveSyncEffects {
           // syncInterval = 5000;
           // isLoggedIn = true;
           return (isLoggedIn && isEnabled && isAutoSync && syncInterval >= 5000)
-            ? interval(syncInterval).pipe(switchMap(() => this.saveForSync()))
+            ? interval(syncInterval).pipe(switchMap(() => of(new SaveForSync())))
             : EMPTY;
         }),
       )),
+    );
+
+  @Effect() saveForSync$: any = this._actions$
+    .pipe(
+      ofType(
+        GoogleDriveSyncActionTypes.SaveForSync,
+      ),
+      tap(() => this._showAsyncToast(undefined, 'Syncing to Google Drive')),
+      map(() => new SaveToGoogleDriveFlow()),
     );
 
   @Effect() initialImport$: any = this._actions$
@@ -170,7 +182,6 @@ export class GoogleDriveSyncEffects {
         GoogleDriveSyncActionTypes.SaveToGoogleDriveFlow,
       ),
       withLatestFrom(this.config$),
-      // TODO filter for in progress and no force
       flatMap(([action, cfg]: [SaveToGoogleDrive, GoogleDriveSyncConfig]): any => {
         // when we have no backup file we create one directly
         if (!cfg._backupDocId) {
@@ -346,23 +357,6 @@ export class GoogleDriveSyncEffects {
       );
   }
 
-
-  // TODO refactor to effect
-  saveForSync(isForce = false): Observable<any> {
-    // console.log('save for sync', this._isSyncingInProgress, isForce);
-    // if (this._isSyncingInProgress && !isForce) {
-    //   console.log('DriveSync', 'SYNC OMITTED because of promise');
-    //   return EMPTY;
-    // } else {
-    //   const saveObs = from(this.saveTo(isForce));
-    //   if (this._config.isNotifyOnSync) {
-    //     this._showAsyncToast(saveObs, 'DriveSync: Syncing to google drive');
-    //   }
-    //   return saveObs;
-    // }
-    return EMPTY;
-  }
-
   private _openConfirmSaveDialog(remoteModified): void {
     const lastActiveLocal = this._syncService.getLastActive();
     this._matDialog.open(DialogConfirmDriveSyncSaveComponent, {
@@ -388,6 +382,17 @@ export class GoogleDriveSyncEffects {
         lastActiveLocal: this._formatDate(lastActiveLocal),
         lastSync: this._formatDate(this._config._lastSync),
       }
+    });
+  }
+
+  private _showAsyncToast(obs: Observable<any> = EMPTY, msg) {
+    this._snackService.open({
+      type: 'CUSTOM',
+      icon: 'file_upload',
+      message: msg,
+      isSubtle: true,
+      config: {duration: 60000},
+      // promise: obs.toPromise(),
     });
   }
 

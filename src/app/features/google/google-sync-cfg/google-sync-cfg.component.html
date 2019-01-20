@@ -107,7 +107,8 @@
           <input type="text"
                  matInput=""
                  inputDuration=""
-                 placeholder="Sync interval (sync every X ms)"
+                 [isAllowSeconds]="true"
+                 placeholder="Sync interval"
                  name="syncInterval"
                  [(ngModel)]="cfg.syncInterval">
           <mat-icon matSuffix="">timer</mat-icon>

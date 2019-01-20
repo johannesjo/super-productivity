@@ -9,7 +9,6 @@ export enum GoogleDriveSyncActionTypes {
   SaveToGoogleDriveSuccess = '[GoogleDriveSync] Save To Success',
   ChangeSyncFileName = '[GoogleDriveSync] Change Sync File Name',
   SaveForSync = '[GoogleDriveSync] Save For Sync',
-  SaveForSyncSuccess = '[GoogleDriveSync] Save For Sync Success',
   CreateSyncFile = '[GoogleDriveSync] Create Sync File',
 }
 
@@ -54,10 +53,6 @@ export class SaveForSync implements Action {
   readonly type = GoogleDriveSyncActionTypes.SaveForSync;
 }
 
-export class SaveForSyncSuccess implements Action {
-  readonly type = GoogleDriveSyncActionTypes.SaveForSyncSuccess;
-}
-
 export class CreateSyncFile implements Action {
   readonly type = GoogleDriveSyncActionTypes.CreateSyncFile;
 
@@ -75,6 +70,5 @@ export type GoogleDriveSyncActions
   | SaveToGoogleDriveSuccess
   | ChangeSyncFileName
   | SaveForSync
-  | SaveForSyncSuccess
   | CreateSyncFile
   ;
