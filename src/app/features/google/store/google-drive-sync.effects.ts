@@ -46,283 +46,265 @@ export class GoogleDriveSyncEffects {
   config$ = this._configService.cfg$.pipe(map(cfg => cfg.googleDriveSync));
   private _config: GoogleDriveSyncConfig;
 
-  // TODO check why distinct until changed not working as intended
   isEnabled$ = this.config$.pipe(map(cfg => cfg.isEnabled), distinctUntilChanged());
   isAutoSyncToRemote$ = this.config$.pipe(map(cfg => cfg.isAutoSyncToRemote), distinctUntilChanged());
   syncInterval$ = this.config$.pipe(map(cfg => cfg.syncInterval), distinctUntilChanged());
 
-  @Effect() triggerSync$: any = this._actions$
-    .pipe(
-      ofType(
-        ConfigActionTypes.LoadConfig,
-        ConfigActionTypes.UpdateConfigSection,
-      ),
-      switchMap(() => combineLatest(
-        this._googleApiService.isLoggedIn$,
-        this.isEnabled$,
-        this.isAutoSyncToRemote$,
-        this.syncInterval$,
-      ).pipe(
-        switchMap(([isLoggedIn, isEnabled, isAutoSync, syncInterval]) => {
-          // syncInterval = 5000;
-          // isLoggedIn = true;
-          return (isLoggedIn && isEnabled && isAutoSync && syncInterval >= 5000)
-            ? interval(syncInterval).pipe(switchMap(() => of(new SaveForSync())))
-            : EMPTY;
-        }),
-      )),
-    );
-
-  @Effect() saveForSync$: any = this._actions$
-    .pipe(
-      ofType(
-        GoogleDriveSyncActionTypes.SaveForSync,
-      ),
-      tap(() => this._showAsyncToast(undefined, 'Syncing to Google Drive')),
-      map(() => new SaveToGoogleDriveFlow()),
-    );
-
-  @Effect() initialImport$: any = this._actions$
-    .pipe(
-      ofType(
-        ConfigActionTypes.LoadConfig,
-      ),
-      take(1),
-      withLatestFrom(this.config$),
-      filter(([act, cfg]) => cfg.isEnabled && cfg.isAutoLogin),
-      flatMap(() => from(this._googleApiService.login())),
-      flatMap(() => this._checkIfRemoteUpdate()),
-      flatMap((isUpdate): any => {
-        if (isUpdate) {
-          console.log('DriveSync', 'HAS CHANGED (modified Date comparision), TRYING TO UPDATE');
-
-          this._snackService.open({
-            message: `DriveSync: There is a remote update! Downloading...`,
-            icon: 'file_download',
-          });
-          return of(new LoadFromGoogleDriveFlow());
-        } else {
-          return of(new SnackOpen({
-            message: `DriveSync: No updated required`,
-          }));
-        }
+  @Effect() triggerSync$: any = this._actions$.pipe(
+    ofType(
+      ConfigActionTypes.LoadConfig,
+      ConfigActionTypes.UpdateConfigSection,
+    ),
+    switchMap(() => combineLatest(
+      this._googleApiService.isLoggedIn$,
+      this.isEnabled$,
+      this.isAutoSyncToRemote$,
+      this.syncInterval$,
+    ).pipe(
+      switchMap(([isLoggedIn, isEnabled, isAutoSync, syncInterval]) => {
+        // syncInterval = 5000;
+        // isLoggedIn = true;
+        return (isLoggedIn && isEnabled && isAutoSync && syncInterval >= 5000)
+          ? interval(syncInterval).pipe(switchMap(() => of(new SaveForSync())))
+          : EMPTY;
       }),
-    );
+    )),
+  );
+
+  @Effect() saveForSync$: any = this._actions$.pipe(
+    ofType(
+      GoogleDriveSyncActionTypes.SaveForSync,
+    ),
+    tap(() => this._showAsyncToast(undefined, 'Syncing to Google Drive')),
+    map(() => new SaveToGoogleDriveFlow()),
+  );
+
+  @Effect() initialImport$: any = this._actions$.pipe(
+    ofType(
+      ConfigActionTypes.LoadConfig,
+    ),
+    take(1),
+    withLatestFrom(this.config$),
+    filter(([act, cfg]) => cfg.isEnabled && cfg.isAutoLogin),
+    flatMap(() => from(this._googleApiService.login())),
+    flatMap(() => this._checkIfRemoteUpdate()),
+    flatMap((isUpdate): any => {
+      if (isUpdate) {
+        console.log('DriveSync', 'HAS CHANGED (modified Date comparision), TRYING TO UPDATE');
+
+        this._snackService.open({
+          message: `DriveSync: There is a remote update! Downloading...`,
+          icon: 'file_download',
+        });
+        return of(new LoadFromGoogleDriveFlow());
+      } else {
+        return of(new SnackOpen({
+          message: `DriveSync: No updated required`,
+        }));
+      }
+    }),
+  );
 
 
-  @Effect() changeSyncFile$: any = this._actions$
-    .pipe(
-      ofType(
-        GoogleDriveSyncActionTypes.ChangeSyncFileName,
-      ),
-      flatMap((action: ChangeSyncFileName) => {
-        const {newFileName} = action.payload;
-        return this._googleApiService.findFile(newFileName).pipe(
-          // tslint:disable-next-line
-          flatMap((res: any): any => {
-            const filesFound = res.items;
-            if (filesFound.length && filesFound.length > 1) {
+  @Effect() changeSyncFile$: any = this._actions$.pipe(
+    ofType(
+      GoogleDriveSyncActionTypes.ChangeSyncFileName,
+    ),
+    flatMap((action: ChangeSyncFileName) => {
+      const {newFileName} = action.payload;
+      return this._googleApiService.findFile(newFileName).pipe(
+        flatMap((res: any): any => {
+          const filesFound = res.items;
+          if (filesFound.length && filesFound.length > 1) {
+            return of(new SnackOpen({
+              type: 'ERROR',
+              message: `Multiple files with the name "${newFileName}" found. Please delete all but one or choose a different name.`
+            }));
+          } else if (!filesFound || filesFound.length === 0) {
+            return this._confirmSaveNewFile(newFileName).pipe(
+              flatMap((isSave) => {
+                return isSave
+                  ? of(new CreateSyncFile({newFileName}))
+                  : EMPTY;
+              })
+            );
+          } else if (filesFound.length === 1) {
+            return this._confirmUsingExistingFileDialog(newFileName).pipe(
+              flatMap((isConfirmUseExisting) => {
+                const fileToUpdate = filesFound[0];
+                return isConfirmUseExisting
+                  ? of(this._updateConfig({
+                    syncFileName: newFileName,
+                    _backupDocId: fileToUpdate.id,
+                  }))
+                  : EMPTY;
+              })
+            );
+          }
+        }),
+      );
+    }),
+  );
+
+  @Effect() createEmptySyncFile$: any = this._actions$.pipe(
+    ofType(
+      GoogleDriveSyncActionTypes.CreateSyncFile,
+    ),
+    flatMap((action: ChangeSyncFileName) => {
+      const {newFileName} = action.payload;
+      return this._googleApiService.saveFile('', {
+        title: newFileName,
+        editable: true
+      }).pipe(
+        map((res: any) => {
+          return this._updateConfig({
+            syncFileName: newFileName,
+            _backupDocId: res.id,
+            _lastSync: res.modifiedDate,
+          }, false);
+        }),
+      );
+    }),
+  );
+
+  @Effect() saveToFlow$: any = this._actions$.pipe(
+    ofType(
+      GoogleDriveSyncActionTypes.SaveToGoogleDriveFlow,
+    ),
+    withLatestFrom(this.config$),
+    flatMap(([action, cfg]: [SaveToGoogleDrive, GoogleDriveSyncConfig]): any => {
+      // when we have no backup file we create one directly
+      if (!cfg._backupDocId) {
+        return new ChangeSyncFileName({newFileName: cfg.syncFileName || DEFAULT_SYNC_FILE_NAME});
+      } else {
+        // otherwise update
+        return this._googleApiService.getFileInfo(cfg._backupDocId).pipe(
+          flatMap((res: any): Observable<any> => {
+            const lastActiveLocal = this._syncService.getLastActive();
+            const lastModifiedRemote = res.modifiedDate;
+            console.log('saveTo Check', this._isEqual(lastActiveLocal, lastModifiedRemote), lastModifiedRemote, lastActiveLocal);
+
+            if (this._isEqual(lastActiveLocal, lastModifiedRemote)) {
               return of(new SnackOpen({
-                type: 'ERROR',
-                message: `Multiple files with the name "${newFileName}" found. Please delete all but one or choose a different name.`
+                type: 'SUCCESS',
+                message: `DriveSync: Remote data already up to date`
               }));
-            } else if (!filesFound || filesFound.length === 0) {
-              return this._confirmSaveNewFile(newFileName).pipe(
-                flatMap((isSave) => {
-                  return isSave
-                    ? of(new CreateSyncFile({newFileName}))
-                    : EMPTY;
-                })
-              );
-            } else if (filesFound.length === 1) {
-              return this._confirmUsingExistingFileDialog(newFileName).pipe(
-                flatMap((isConfirmUseExisting) => {
-                  const fileToUpdate = filesFound[0];
-                  return isConfirmUseExisting
-                    ? of(this._updateConfig({
-                      syncFileName: newFileName,
-                      _backupDocId: fileToUpdate.id,
-                    }))
-                    : EMPTY;
-                })
-              );
+            } else if (this._isNewerThan(lastModifiedRemote, cfg._lastSync)) {
+              // remote has an update so prompt what to do
+              // TODO
+              this._openConfirmSaveDialog(lastModifiedRemote);
+              return EMPTY;
+            } else {
+              // local is newer than remote so just save
+              return of(new SaveToGoogleDrive());
             }
           }),
         );
-      }),
-    );
+      }
+    }),
+  );
+  @Effect() save$: any = this._actions$.pipe(
+    ofType(
+      GoogleDriveSyncActionTypes.SaveToGoogleDrive,
+    ),
+    flatMap((): any => from(this._getLocalAppData())),
+    withLatestFrom(this.config$),
+    flatMap(([completeData, cfg]) => this._googleApiService.saveFile(completeData, {
+        title: cfg.syncFileName,
+        id: cfg._backupDocId,
+        editable: true
+      })
+    ),
+    map((response: any) => new SaveToGoogleDriveSuccess({response})),
+  );
 
-  @Effect() createEmptySyncFile$: any = this._actions$
-    .pipe(
-      ofType(
-        GoogleDriveSyncActionTypes.CreateSyncFile,
-      ),
-      flatMap((action: ChangeSyncFileName) => {
-        const {newFileName} = action.payload;
-        return this._googleApiService.saveFile('', {
-          title: newFileName,
-          editable: true
-        }).pipe(
-          map((res: any) => {
-            return this._updateConfig({
-              syncFileName: newFileName,
-              _backupDocId: res.id,
-              _lastSync: res.modifiedDate,
-            }, false);
+  @Effect() saveSuccess$: any = this._actions$.pipe(
+    ofType(
+      GoogleDriveSyncActionTypes.SaveToGoogleDriveSuccess,
+    ),
+    tap((action: SaveToGoogleDriveSuccess) =>
+      this._syncService.saveLastActive(action.payload.response.modifiedDate)),
+    switchMap((action: SaveToGoogleDriveSuccess): any => [
+        // NOTE: last active needs to be set to exactly the value we get back
+        this._updateConfig({
+          _backupDocId: action.payload.response.id,
+          _lastSync: action.payload.response.modifiedDate,
+        }, true),
+        new SnackOpen({
+          type: 'SUCCESS',
+          message: 'Google Drive: Successfully saved backup'
+        }),
+      ]
+    ),
+  );
+
+
+  @Effect() loadFromFlow$: any = this._actions$.pipe(
+    ofType(
+      GoogleDriveSyncActionTypes.LoadFromGoogleDriveFlow,
+    ),
+    withLatestFrom(this.config$),
+    flatMap(([action, cfg]: [LoadFromGoogleDrive, GoogleDriveSyncConfig]): any => {
+      // when we have no backup file we create one directly
+      if (!cfg._backupDocId) {
+        return new ChangeSyncFileName({newFileName: cfg.syncFileName || DEFAULT_SYNC_FILE_NAME});
+      } else {
+        // otherwise update
+        return this._checkIfRemoteUpdate().pipe(
+          flatMap((isUpdated: boolean): Observable<any> => {
+            if (isUpdated) {
+              return this._loadFile().pipe(
+                flatMap((loadRes: any): any => {
+                  const backup: AppDataComplete = loadRes.backup;
+                  const lastActiveLocal = this._syncService.getLastActive();
+                  const lastActiveRemote = backup.lastActiveTime;
+
+                  // update but ask if remote data is not newer than the last local update
+                  const isSkipConfirm = (lastActiveRemote && this._isNewerThan(lastActiveRemote, lastActiveLocal));
+                  console.log('DriveSync', 'date comparision skipConfirm load', isSkipConfirm, lastActiveLocal, lastActiveRemote);
+
+                  if (isSkipConfirm) {
+                    return this._import(loadRes)
+                      .pipe(map((modifiedDate) =>
+                        new LoadFromGoogleDriveSuccess({modifiedDate})));
+                  } else {
+                    this._openConfirmLoadDialog(lastActiveRemote);
+                    return EMPTY;
+                  }
+                }),
+              );
+              // no update required
+            } else {
+              return of(new SnackOpen({
+                type: 'SUCCESS',
+                message: `DriveSync: Local data already up to date`
+              }));
+            }
           }),
         );
-      }),
-    );
-
-  @Effect() saveToFlow$: any = this._actions$
-    .pipe(
-      ofType(
-        GoogleDriveSyncActionTypes.SaveToGoogleDriveFlow,
-      ),
-      withLatestFrom(this.config$),
-      flatMap(([action, cfg]: [SaveToGoogleDrive, GoogleDriveSyncConfig]): any => {
-        // when we have no backup file we create one directly
-        if (!cfg._backupDocId) {
-          return new ChangeSyncFileName({newFileName: cfg.syncFileName || DEFAULT_SYNC_FILE_NAME});
-        } else {
-          // otherwise update
-          return this._googleApiService.getFileInfo(cfg._backupDocId).pipe(
-            flatMap((res: any): Observable<any> => {
-              const lastActiveLocal = this._syncService.getLastActive();
-              const lastModifiedRemote = res.modifiedDate;
-              console.log('saveTo Check', this._isEqual(lastActiveLocal, lastModifiedRemote), lastModifiedRemote, lastActiveLocal);
-
-              if (this._isEqual(lastActiveLocal, lastModifiedRemote)) {
-                return of(new SnackOpen({
-                  type: 'SUCCESS',
-                  message: `DriveSync: Remote data already up to date`
-                }));
-              } else if (this._isNewerThan(lastModifiedRemote, cfg._lastSync)) {
-                // remote has an update so prompt what to do
-                // TODO
-                this._openConfirmSaveDialog(lastModifiedRemote);
-                return EMPTY;
-              } else {
-                // local is newer than remote so just save
-                return of(new SaveToGoogleDrive());
-              }
-            }),
-          );
-        }
-      }),
-    );
-  @Effect() save$: any = this._actions$
-    .pipe(
-      ofType(
-        GoogleDriveSyncActionTypes.SaveToGoogleDrive,
-      ),
-      flatMap((): any => {
-        return from(this._getLocalAppData()).pipe(
-          withLatestFrom(this.config$),
-          flatMap(([completeData, cfg]) => {
-            return this._googleApiService.saveFile(completeData, {
-              title: cfg.syncFileName,
-              id: cfg._backupDocId,
-              editable: true
-            }).pipe(map(
-              (response: any) => new SaveToGoogleDriveSuccess({response})),
-            );
-          })
-        );
-      }),
-    );
-
-  @Effect() saveSuccess$: any = this._actions$
-    .pipe(
-      ofType(
-        GoogleDriveSyncActionTypes.SaveToGoogleDriveSuccess,
-      ),
-      tap((action: SaveToGoogleDriveSuccess) =>
-        this._syncService.saveLastActive(action.payload.response.modifiedDate)),
-      switchMap((action: SaveToGoogleDriveSuccess): any => [
-          // NOTE: last active needs to be set to exactly the value we get back
-          this._updateConfig({
-            _backupDocId: action.payload.response.id,
-            _lastSync: action.payload.response.modifiedDate,
-          }, true),
-          new SnackOpen({
-            type: 'SUCCESS',
-            message: 'Google Drive: Successfully saved backup'
-          }),
-        ]
-      ),
-    );
-
-
-  @Effect() loadFromFlow$: any = this._actions$
-    .pipe(
-      ofType(
-        GoogleDriveSyncActionTypes.LoadFromGoogleDriveFlow,
-      ),
-      withLatestFrom(this.config$),
-      flatMap(([action, cfg]: [LoadFromGoogleDrive, GoogleDriveSyncConfig]): any => {
-        // when we have no backup file we create one directly
-        if (!cfg._backupDocId) {
-          return new ChangeSyncFileName({newFileName: cfg.syncFileName || DEFAULT_SYNC_FILE_NAME});
-        } else {
-          // otherwise update
-          return this._checkIfRemoteUpdate().pipe(
-            flatMap((isUpdated: boolean): Observable<any> => {
-              if (isUpdated) {
-                return this._loadFile().pipe(
-                  flatMap((loadRes: any): any => {
-                    const backup: AppDataComplete = loadRes.backup;
-                    const lastActiveLocal = this._syncService.getLastActive();
-                    const lastActiveRemote = backup.lastActiveTime;
-
-                    // update but ask if remote data is not newer than the last local update
-                    const isSkipConfirm = (lastActiveRemote && this._isNewerThan(lastActiveRemote, lastActiveLocal));
-                    console.log('DriveSync', 'date comparision skipConfirm load', isSkipConfirm, lastActiveLocal, lastActiveRemote);
-
-                    if (isSkipConfirm) {
-                      return this._import(loadRes)
-                        .pipe(map((modifiedDate) =>
-                          new LoadFromGoogleDriveSuccess({modifiedDate})));
-                    } else {
-                      this._openConfirmLoadDialog(lastActiveRemote);
-                      return EMPTY;
-                    }
-                  }),
-                );
-                // no update required
-              } else {
-                return of(new SnackOpen({
-                  type: 'SUCCESS',
-                  message: `DriveSync: Local data already up to date`
-                }));
-              }
-            }),
-          );
-        }
-      }),
-    );
-  @Effect() load$: any = this._actions$
-    .pipe(
-      ofType(
-        GoogleDriveSyncActionTypes.LoadFromGoogleDrive,
-      ),
-      withLatestFrom(this.config$),
-      flatMap(([act, cfg]): any => this._googleApiService.loadFile(cfg._backupDocId)),
-      flatMap((loadRes) => this._import(loadRes)),
-      map((modifiedDate) => new LoadFromGoogleDriveSuccess({modifiedDate})),
-    );
+      }
+    }),
+  );
+  @Effect() load$: any = this._actions$.pipe(
+    ofType(
+      GoogleDriveSyncActionTypes.LoadFromGoogleDrive,
+    ),
+    withLatestFrom(this.config$),
+    flatMap(([act, cfg]): any => this._googleApiService.loadFile(cfg._backupDocId)),
+    flatMap((loadRes) => this._import(loadRes)),
+    map((modifiedDate) => new LoadFromGoogleDriveSuccess({modifiedDate})),
+  );
 
   // NOTE: not really needed atm
-  @Effect() loadSuccess$: any = this._actions$
-    .pipe(
-      ofType(
-        GoogleDriveSyncActionTypes.LoadFromGoogleDriveSuccess,
-      ),
-      // NOTE: last active needs to be set to exactly the value we get back
-      tap((action: LoadFromGoogleDriveSuccess) => this._syncService.saveLastActive(action.payload.modifiedDate)),
-      map((action: LoadFromGoogleDriveSuccess) =>
-        this._updateConfig({_lastSync: action.payload.modifiedDate})),
-    );
+  @Effect() loadSuccess$: any = this._actions$.pipe(
+    ofType(
+      GoogleDriveSyncActionTypes.LoadFromGoogleDriveSuccess,
+    ),
+    // NOTE: last active needs to be set to exactly the value we get back
+    tap((action: LoadFromGoogleDriveSuccess) => this._syncService.saveLastActive(action.payload.modifiedDate)),
+    map((action: LoadFromGoogleDriveSuccess) =>
+      this._updateConfig({_lastSync: action.payload.modifiedDate})),
+  );
 
   constructor(
     private _actions$: Actions,
