@@ -13,6 +13,8 @@ import { DialogConfirmDriveSyncSaveComponent } from './dialog-confirm-drive-sync
 import { AppDataComplete } from '../../imex/sync/sync.model';
 import { flatMap, map, switchMap, tap, withLatestFrom } from 'rxjs/operators';
 import { EMPTY, from, Observable, throwError } from 'rxjs';
+import { Store } from '@ngrx/store';
+import { ChangeSyncFileName } from './store/google-drive-sync.actions';
 
 @Injectable()
 export class GoogleDriveSyncService {
@@ -28,6 +30,7 @@ export class GoogleDriveSyncService {
     private _googleApiService: GoogleApiService,
     private _snackService: SnackService,
     private _matDialog: MatDialog,
+    private _store$: Store<any>,
   ) {
   }
 
@@ -44,41 +47,8 @@ export class GoogleDriveSyncService {
 
 
   // TODO refactor to effect
-  changeSyncFileName(newSyncFileName): Observable<any> {
-    return this._googleApiService.findFile(newSyncFileName).pipe(
-      switchMap((res_) => {
-        const res = res_.body;
-        const filesFound = res.items;
-        if (filesFound.length && filesFound.length > 1) {
-          this._snackService.open({
-            type: 'ERROR',
-            message: `Multiple files with the name "${newSyncFileName}" found. Please delete all but one or choose a different name.`
-          });
-          throw throwError('Multiple files with the name same name found');
-        } else if (!filesFound || filesFound.length === 0) {
-          return this._confirmSaveNewFile(newSyncFileName).pipe(
-            switchMap((isSave) => {
-              return isSave
-                ? this._createEmptyFile(newSyncFileName)
-                : EMPTY;
-            })
-          );
-        } else if (filesFound.length === 1) {
-          return this._confirmUsingExistingFileDialog(newSyncFileName)
-            .pipe(tap((isConfirmUseExisting) => {
-              console.log(newSyncFileName, filesFound);
-
-              if (isConfirmUseExisting) {
-                const fileToUpdate = filesFound[0];
-                this.updateConfig({
-                  syncFileName: newSyncFileName,
-                  _backupDocId: fileToUpdate.id,
-                });
-              }
-            }));
-        }
-      }),
-    );
+  changeSyncFileName(newFileName): void {
+    this._store$.dispatch(new ChangeSyncFileName({newFileName}));
   }
 
   // TODO refactor to effect
@@ -269,48 +239,6 @@ export class GoogleDriveSyncService {
         lastSync: this._formatDate(this._config._lastSync),
       }
     });
-  }
-
-  private _confirmUsingExistingFileDialog(fileName): Observable<boolean> {
-    return this._matDialog.open(DialogConfirmComponent, {
-      restoreFocus: true,
-      data: {
-        message: `
-DriveSync: Use <strong>existing</strong> file <strong>"${fileName}"</strong> as sync file?
-If not please change the Sync file name.`,
-      }
-    }).afterClosed();
-  }
-
-  private _confirmSaveNewFile(fileName): Observable<boolean> {
-    return this._matDialog.open(DialogConfirmComponent, {
-      restoreFocus: true,
-      data: {
-        message: `DriveSync: No file with the name <strong>"${fileName}"</strong> was found.
-<strong>Create</strong> it as sync file on Google Drive?`,
-      }
-    }).afterClosed();
-  }
-
-  // TODO check if working
-
-  private _createEmptyFile(syncFileName): Observable<any> {
-    console.log('_save');
-    return this._googleApiService.saveFile('', {
-      title: syncFileName,
-      editable: true
-    }).pipe(
-      tap((res) => {
-        console.log(res);
-        this.updateConfig({
-          syncFileName,
-          _backupDocId: res.id,
-          _lastSync: res.modifiedDate,
-        }, true);
-        console.log('google sync save:', res.modifiedDate);
-        this._syncService.saveLastActive(res.modifiedDate);
-      }),
-    );
   }
 
   private _save(): Observable<any> {

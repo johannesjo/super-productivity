@@ -102,8 +102,6 @@ export class GoogleSyncCfgComponent implements OnInit, OnDestroy {
   }
 
   changeSyncFileName(newSyncFile) {
-    console.log('CONFIG changeSyncFileName');
-
-    this._googleDriveSyncService.changeSyncFileName(newSyncFile).subscribe();
+    this._googleDriveSyncService.changeSyncFileName(newSyncFile);
   }
 }
