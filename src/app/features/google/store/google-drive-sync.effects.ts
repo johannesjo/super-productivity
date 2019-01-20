@@ -116,7 +116,6 @@ export class GoogleDriveSyncEffects {
         GoogleDriveSyncActionTypes.ChangeSyncFileName,
       ),
       flatMap((action: ChangeSyncFileName) => {
-        console.log(action);
         const {newFileName} = action.payload;
         return this._googleApiService.findFile(newFileName).pipe(
           // tslint:disable-next-line
