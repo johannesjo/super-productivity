@@ -46,7 +46,6 @@ export class GoogleDriveSyncService {
   }
 
 
-  // TODO refactor to effect
   changeSyncFileName(newFileName): void {
     this._store$.dispatch(new ChangeSyncFileName({newFileName}));
   }

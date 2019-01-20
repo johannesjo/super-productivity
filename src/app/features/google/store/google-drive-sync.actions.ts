@@ -2,7 +2,9 @@ import { Action } from '@ngrx/store';
 
 export enum GoogleDriveSyncActionTypes {
   LoadFromGoogleDrive = '[GoogleDriveSync] Load From',
+  LoadFromGoogleDriveFlow = '[GoogleDriveSync] Load From Flow',
   LoadFromGoogleDriveSuccess = '[GoogleDriveSync] Load From Success',
+  SaveToGoogleDriveFlow = '[GoogleDriveSync] Save To Flow',
   SaveToGoogleDrive = '[GoogleDriveSync] Save To',
   SaveToGoogleDriveSuccess = '[GoogleDriveSync] Save To Success',
   ChangeSyncFileName = '[GoogleDriveSync] Change Sync File Name',
@@ -15,8 +17,16 @@ export class LoadFromGoogleDrive implements Action {
   readonly type = GoogleDriveSyncActionTypes.LoadFromGoogleDrive;
 }
 
+export class LoadFromGoogleDriveFlow implements Action {
+  readonly type = GoogleDriveSyncActionTypes.LoadFromGoogleDriveFlow;
+}
+
 export class LoadFromGoogleDriveSuccess implements Action {
   readonly type = GoogleDriveSyncActionTypes.LoadFromGoogleDriveSuccess;
+}
+
+export class SaveToGoogleDriveFlow implements Action {
+  readonly type = GoogleDriveSyncActionTypes.SaveToGoogleDriveFlow;
 }
 
 export class SaveToGoogleDrive implements Action {
@@ -52,8 +62,10 @@ export class CreateSyncFile implements Action {
 
 export type GoogleDriveSyncActions
   = LoadFromGoogleDrive
+  | LoadFromGoogleDriveFlow
   | LoadFromGoogleDriveSuccess
   | SaveToGoogleDrive
+  | SaveToGoogleDriveFlow
   | SaveToGoogleDriveSuccess
   | ChangeSyncFileName
   | SaveForSync
