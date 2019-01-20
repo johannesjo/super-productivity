@@ -11,7 +11,11 @@ import { GlobalConfig, GoogleSession } from '../config/config.model';
 import { catchError, map, skip } from 'rxjs/operators';
 import { EmptyObservable } from 'rxjs-compat/observable/EmptyObservable';
 import { combineLatest, Observable, throwError } from 'rxjs';
-import { IPC_GOOGLE_AUTH_TOKEN, IPC_GOOGLE_AUTH_TOKEN_ERROR, IPC_TRIGGER_GOOGLE_AUTH } from '../../../../electron/ipc-events.const';
+import {
+  IPC_GOOGLE_AUTH_TOKEN,
+  IPC_GOOGLE_AUTH_TOKEN_ERROR,
+  IPC_TRIGGER_GOOGLE_AUTH
+} from '../../../../electron/ipc-events.const';
 import { ElectronService } from 'ngx-electron';
 
 const EXPIRES_SAFETY_MARGIN = 30000;
@@ -169,8 +173,6 @@ export class GoogleApiService {
   }
 
   getFileInfo(fileId): Observable<any> {
-    console.log(fileId);
-
     if (!fileId) {
       this._snackIt('ERROR', 'GoogleApi: No file id specified');
       throwError('No file id given');
@@ -184,7 +186,10 @@ export class GoogleApiService {
         supportsTeamDrives: true,
         fields: GOOGLE_DEFAULT_FIELDS_FOR_DRIVE
       },
-    });
+    }).pipe(
+      // No clue why this is necessary (options request maybe??)
+      skip(1),
+    );
   }
 
   findFile(fileName): Observable<any> {

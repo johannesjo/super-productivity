@@ -5,16 +5,14 @@ import { GoogleDriveSyncConfig } from '../config/config.model';
 import { GoogleApiService } from './google-api.service';
 import * as moment from 'moment';
 import { SnackService } from '../../core/snack/snack.service';
-import { DEFAULT_SYNC_FILE_NAME } from './google.const';
 import { MatDialog } from '@angular/material';
-import { DialogConfirmComponent } from '../../ui/dialog-confirm/dialog-confirm.component';
 import { DialogConfirmDriveSyncLoadComponent } from './dialog-confirm-drive-sync-load/dialog-confirm-drive-sync-load.component';
 import { DialogConfirmDriveSyncSaveComponent } from './dialog-confirm-drive-sync-save/dialog-confirm-drive-sync-save.component';
 import { AppDataComplete } from '../../imex/sync/sync.model';
-import { flatMap, map, switchMap, tap, withLatestFrom } from 'rxjs/operators';
-import { EMPTY, from, Observable, throwError } from 'rxjs';
+import { flatMap, map, tap, withLatestFrom } from 'rxjs/operators';
+import { from, Observable, throwError } from 'rxjs';
 import { Store } from '@ngrx/store';
-import { ChangeSyncFileName } from './store/google-drive-sync.actions';
+import { ChangeSyncFileName, SaveForSync, SaveToGoogleDriveFlow } from './store/google-drive-sync.actions';
 
 @Injectable()
 export class GoogleDriveSyncService {
@@ -36,13 +34,12 @@ export class GoogleDriveSyncService {
 
   init() {
     this._configService.cfg$.subscribe((cfg) => {
-      console.log(cfg.googleDriveSync);
       this._config = cfg.googleDriveSync;
     });
   }
 
-  updateConfig(data: Partial<GoogleDriveSyncConfig>, isSkipLastActiveUpdate = false) {
-    this._configService.updateSection('googleDriveSync', data, isSkipLastActiveUpdate);
+  updateConfig(data: Partial<GoogleDriveSyncConfig>, isSkipLastActive = false) {
+    this._configService.updateSection('googleDriveSync', data, isSkipLastActive);
   }
 
 
@@ -50,62 +47,14 @@ export class GoogleDriveSyncService {
     this._store$.dispatch(new ChangeSyncFileName({newFileName}));
   }
 
-  // TODO refactor to effect
-  saveForSync(isForce = false): Observable<any> {
-    console.log('save for sync', this._isSyncingInProgress, isForce);
-    if (this._isSyncingInProgress && !isForce) {
-      console.log('DriveSync', 'SYNC OMITTED because of promise');
-      return EMPTY;
-    } else {
-      const saveObs = from(this.saveTo(isForce));
-      if (this._config.isNotifyOnSync) {
-        this._showAsyncToast(saveObs, 'DriveSync: Syncing to google drive');
-      }
-      return saveObs;
-    }
+  saveForSync(): void {
+    this._store$.dispatch(new SaveForSync());
   }
 
+
   // TODO refactor to effect
-  saveTo(isForce = false): Observable<any> {
-    console.log('saveTo', this._isSyncingInProgress && !isForce, this._config, this._config._backupDocId);
-
-    // don't execute sync interactions at the same time
-    if (this._isSyncingInProgress && !isForce) {
-      console.log('DriveSync', 'saveTo omitted because is in progress');
-      return throwError('Something in progress');
-    }
-
-
-    // when we have no backup file we create one directly
-    if (!this._config._backupDocId) {
-      return this.changeSyncFileName(this._config.syncFileName || DEFAULT_SYNC_FILE_NAME);
-      // otherwise update
-    } else {
-      console.log('I am here!');
-
-      return this._googleApiService.getFileInfo(this._config._backupDocId).pipe(
-        switchMap((res: any) => {
-          console.log(res);
-          const lastActiveLocal = this._syncService.getLastActive();
-          const lastModifiedRemote = res.modifiedDate;
-          console.log('saveTo Check', this._isEqual(lastActiveLocal, lastModifiedRemote), lastModifiedRemote, lastActiveLocal);
-          if (this._isEqual(lastActiveLocal, lastModifiedRemote)) {
-            this._snackService.open({
-              type: 'SUCCESS',
-              message: `DriveSync: Remote data already up to date`
-            });
-            return EMPTY;
-          } else if (this._isNewerThan(lastModifiedRemote, this._config._lastSync)) {
-            // remote has an update so prompt what to do
-            this._openConfirmSaveDialog(lastModifiedRemote);
-            return EMPTY;
-          } else {
-            // all clear just save
-            return this._save();
-          }
-        }),
-      );
-    }
+  saveTo(isForce = false): void {
+    this._store$.dispatch(new SaveToGoogleDriveFlow());
   }
 
 
@@ -151,7 +100,7 @@ export class GoogleDriveSyncService {
       // when we have no backup file we create one directly
       // TODO refactor
       if (!this._config._backupDocId) {
-        this.changeSyncFileName(this._config.syncFileName).subscribe();
+        this.changeSyncFileName(this._config.syncFileName);
         // .then(() => {
         //   loadHandler();
         // }, reject);

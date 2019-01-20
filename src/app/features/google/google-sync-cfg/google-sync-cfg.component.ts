@@ -1,4 +1,13 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  EventEmitter,
+  OnDestroy,
+  OnInit,
+  Output,
+  ViewChild
+} from '@angular/core';
 import { GoogleApiService } from '../google-api.service';
 import { ConfigService } from '../../config/config.service';
 import { GoogleDriveSyncService } from '../google-drive-sync.service';
@@ -73,12 +82,7 @@ export class GoogleSyncCfgComponent implements OnInit, OnDestroy {
   }
 
   backupNow() {
-    this.backupSub = this._googleDriveSyncService.saveTo().subscribe(() => {
-        this._snackService.open({
-          type: 'SUCCESS',
-          message: 'Google Drive: Successfully saved backup'
-        });
-      });
+    this._googleDriveSyncService.saveTo();
   }
 
   loadRemoteData() {

@@ -35,6 +35,9 @@ export class SaveToGoogleDrive implements Action {
 
 export class SaveToGoogleDriveSuccess implements Action {
   readonly type = GoogleDriveSyncActionTypes.SaveToGoogleDriveSuccess;
+
+  constructor(public payload: { response: any }) {
+  }
 }
 
 export class ChangeSyncFileName implements Action {
