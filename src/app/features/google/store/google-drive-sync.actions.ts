@@ -14,6 +14,9 @@ export enum GoogleDriveSyncActionTypes {
 
 export class LoadFromGoogleDrive implements Action {
   readonly type = GoogleDriveSyncActionTypes.LoadFromGoogleDrive;
+
+  constructor(public payload?: { loadResponse?: any }) {
+  }
 }
 
 export class LoadFromGoogleDriveFlow implements Action {
