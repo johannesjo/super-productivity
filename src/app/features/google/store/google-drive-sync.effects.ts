@@ -165,7 +165,6 @@ export class GoogleDriveSyncEffects {
           editable: true
         }).pipe(
           map((res: any) => {
-            console.log(res);
             return this._updateConfig({
               syncFileName: newFileName,
               _backupDocId: res.id,
@@ -190,7 +189,6 @@ export class GoogleDriveSyncEffects {
           // otherwise update
           return this._googleApiService.getFileInfo(cfg._backupDocId).pipe(
             flatMap((res: any): Observable<any> => {
-              console.log(res);
               const lastActiveLocal = this._syncService.getLastActive();
               const lastModifiedRemote = res.modifiedDate;
               console.log('saveTo Check', this._isEqual(lastActiveLocal, lastModifiedRemote), lastModifiedRemote, lastActiveLocal);
@@ -264,7 +262,6 @@ export class GoogleDriveSyncEffects {
       ),
       withLatestFrom(this.config$),
       flatMap(([action, cfg]: [LoadFromGoogleDrive, GoogleDriveSyncConfig]): any => {
-        console.log('LOAD FROM FLOW FLATMAP');
         // when we have no backup file we create one directly
         if (!cfg._backupDocId) {
           return new ChangeSyncFileName({newFileName: cfg.syncFileName || DEFAULT_SYNC_FILE_NAME});
@@ -272,11 +269,9 @@ export class GoogleDriveSyncEffects {
           // otherwise update
           return this._checkIfRemoteUpdate().pipe(
             flatMap((isUpdated: boolean): Observable<any> => {
-              console.log(isUpdated);
               if (isUpdated) {
                 return this._loadFile().pipe(
                   flatMap((loadRes: any): any => {
-                    console.log(loadRes);
                     const backup: AppDataComplete = loadRes.backup;
                     const lastActiveLocal = this._syncService.getLastActive();
                     const lastActiveRemote = backup.lastActiveTime;
