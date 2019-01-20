@@ -23,6 +23,7 @@ import {
   CreateSyncFile,
   GoogleDriveSyncActionTypes,
   LoadFromGoogleDrive,
+  LoadFromGoogleDriveFlow,
   LoadFromGoogleDriveSuccess,
   SaveToGoogleDrive,
   SaveToGoogleDriveSuccess
@@ -69,8 +70,7 @@ export class GoogleDriveSyncEffects {
       )),
     );
 
-  // TODO check if working as intended
-  @Effect({dispatch: false}) initialImport$: any = this._actions$
+  @Effect() initialImport$: any = this._actions$
     .pipe(
       ofType(
         ConfigActionTypes.LoadConfig,
@@ -80,19 +80,19 @@ export class GoogleDriveSyncEffects {
       filter(([act, cfg]) => cfg.isEnabled && cfg.isAutoLogin),
       flatMap(() => from(this._googleApiService.login())),
       flatMap(() => this._checkIfRemoteUpdate()),
-      flatMap((isUpdate) => {
+      flatMap((isUpdate): any => {
         if (isUpdate) {
+          console.log('DriveSync', 'HAS CHANGED (modified Date comparision), TRYING TO UPDATE');
+
           this._snackService.open({
             message: `DriveSync: There is a remote update! Downloading...`,
             icon: 'file_download',
           });
-          console.log('DriveSync', 'HAS CHANGED (modified Date comparision), TRYING TO UPDATE');
-          return of(new LoadFromGoogleDrive());
+          return of(new LoadFromGoogleDriveFlow());
         } else {
-          this._snackService.open({
+          return of(new SnackOpen({
             message: `DriveSync: No updated required`,
-          });
-          return EMPTY;
+          }));
         }
       }),
     );
@@ -253,6 +253,7 @@ export class GoogleDriveSyncEffects {
       ),
       withLatestFrom(this.config$),
       flatMap(([action, cfg]: [LoadFromGoogleDrive, GoogleDriveSyncConfig]): any => {
+        console.log('LOAD FROM FLOW FLATMAP');
         // when we have no backup file we create one directly
         if (!cfg._backupDocId) {
           return new ChangeSyncFileName({newFileName: cfg.syncFileName || DEFAULT_SYNC_FILE_NAME});
