@@ -12,7 +12,12 @@ import { AppDataComplete } from '../../imex/sync/sync.model';
 import { flatMap, map, tap, withLatestFrom } from 'rxjs/operators';
 import { from, Observable, throwError } from 'rxjs';
 import { Store } from '@ngrx/store';
-import { ChangeSyncFileName, SaveForSync, SaveToGoogleDriveFlow } from './store/google-drive-sync.actions';
+import {
+  ChangeSyncFileName,
+  LoadFromGoogleDriveFlow,
+  SaveForSync,
+  SaveToGoogleDriveFlow
+} from './store/google-drive-sync.actions';
 
 @Injectable()
 export class GoogleDriveSyncService {
@@ -59,7 +64,10 @@ export class GoogleDriveSyncService {
 
 
   // TODO refactor to effect
-  loadFrom(isSkipPromiseCheck = false, isForce = false): Promise<any> {
+  loadFrom(isSkipPromiseCheck = false, isForce = false): void {
+    this._store$.dispatch(new LoadFromGoogleDriveFlow());
+
+
     // don't execute sync interactions at the same time
     if (!isSkipPromiseCheck && this._isSyncingInProgress) {
       return Promise.reject('Something in progress');

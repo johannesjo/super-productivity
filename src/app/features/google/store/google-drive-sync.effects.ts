@@ -11,7 +11,9 @@ import { SnackService } from '../../../core/snack/snack.service';
 import {
   ChangeSyncFileName,
   CreateSyncFile,
-  GoogleDriveSyncActionTypes, LoadFromGoogleDrive,
+  GoogleDriveSyncActionTypes,
+  LoadFromGoogleDrive,
+  LoadFromGoogleDriveSuccess,
   SaveToGoogleDrive,
   SaveToGoogleDriveSuccess
 } from './google-drive-sync.actions';
@@ -232,6 +234,70 @@ export class GoogleDriveSyncEffects {
       ),
     );
 
+
+  @Effect() loadFromFlow$: any = this._actions$
+    .pipe(
+      ofType(
+        GoogleDriveSyncActionTypes.LoadFromGoogleDriveFlow,
+      ),
+      withLatestFrom(this.config$),
+      // TODO filter for in progress and no force
+      flatMap(([action, cfg]: [LoadFromGoogleDrive, GoogleDriveSyncConfig]): any => {
+        // when we have no backup file we create one directly
+        if (!cfg._backupDocId) {
+          return new ChangeSyncFileName({newFileName: cfg.syncFileName || DEFAULT_SYNC_FILE_NAME});
+        } else {
+          // otherwise update
+          return this._checkIfRemoteUpdate().pipe(
+            flatMap((isUpdated: boolean): Observable<any> => {
+
+            }),
+          );
+        }
+      }),
+    );
+  @Effect() load$: any = this._actions$
+    .pipe(
+      ofType(
+        GoogleDriveSyncActionTypes.LoadFromGoogleDrive,
+      ),
+      flatMap((): any => {
+        return from(this._getLocalAppData()).pipe(
+          withLatestFrom(this.config$),
+          flatMap(([completeData, cfg]) => {
+            return this._googleApiService.loadFile(completeData, {
+              title: cfg.syncFileName,
+              id: cfg._backupDocId,
+              editable: true
+            }).pipe(map(
+              (response: any) => new LoadFromGoogleDriveSuccess({response})),
+            );
+          })
+        );
+      }),
+    );
+
+  @Effect() loadSuccess$: any = this._actions$
+    .pipe(
+      ofType(
+        GoogleDriveSyncActionTypes.LoadFromGoogleDriveSuccess,
+      ),
+      tap((action: LoadFromGoogleDriveSuccess) =>
+        this._syncService.loadLastActive(action.payload.response.body.modifiedDate)),
+      switchMap((action: LoadFromGoogleDriveSuccess): any => [
+          // NOTE: last active needs to be set to exactly the value we get back
+          this._updateConfig({
+            _backupDocId: action.payload.response.body.id,
+            _lastSync: action.payload.response.body.modifiedDate,
+          }, true),
+          new SnackOpen({
+            type: 'SUCCESS',
+            message: 'Google Drive: Successfully loadd backup'
+          }),
+        ]
+      ),
+    );
+
   constructor(
     private _actions$: Actions,
     private _store$: Store<any>,
@@ -247,50 +313,16 @@ export class GoogleDriveSyncEffects {
     });
   }
 
-  private _updateConfig(data: Partial<GoogleDriveSyncConfig>, isSkipLastActive = false): UpdateConfigSection {
-    console.log(isSkipLastActive);
-    return new UpdateConfigSection({
-      sectionKey: 'googleDriveSync',
-      sectionCfg: data,
-      isSkipLastActive,
-    });
-  }
-
-  private _confirmSaveNewFile(fileName): Observable<boolean> {
-    return this._matDialog.open(DialogConfirmComponent, {
-      restoreFocus: true,
-      data: {
-        message: `DriveSync: No file with the name <strong>"${fileName}"</strong> was found.
-<strong>Create</strong> it as sync file on Google Drive?`,
-      }
-    }).afterClosed();
-  }
-
-  private _confirmUsingExistingFileDialog(fileName): Observable<boolean> {
-    return this._matDialog.open(DialogConfirmComponent, {
-      restoreFocus: true,
-      data: {
-        message: `
-DriveSync: Use <strong>existing</strong> file <strong>"${fileName}"</strong> as sync file?
-If not please change the Sync file name.`,
-      }
-    }).afterClosed();
-  }
-
-  private _isNewerThan(strDate1, strDate2) {
-    const d1 = new Date(strDate1);
-    const d2 = new Date(strDate2);
-    return (d1.getTime() > d2.getTime());
-  }
-
-  private _isEqual(strDate1, strDate2) {
-    const d1 = new Date(strDate1);
-    const d2 = new Date(strDate2);
-    return (d1.getTime() === d2.getTime());
-  }
-
-  private _getLocalAppData() {
-    return this._syncService.getCompleteSyncData();
+  private _checkIfRemoteUpdate(): Observable<any> {
+    const lastSync = this._config._lastSync;
+    return this._googleApiService.getFileInfo(this._config._backupDocId)
+      .pipe(
+        tap((res) => {
+          const lastModifiedRemote = res.modifiedDate;
+          console.log('CHECK_REMOTE_UPDATED', this._isNewerThan(lastModifiedRemote, lastSync), lastModifiedRemote, lastSync);
+        }),
+        map((res) => this._isNewerThan(res.modifiedDate, lastSync)),
+      );
   }
 
 
@@ -342,6 +374,54 @@ If not please change the Sync file name.`,
     //   }
     // });
   }
+
+
+  private _confirmSaveNewFile(fileName): Observable<boolean> {
+    return this._matDialog.open(DialogConfirmComponent, {
+      restoreFocus: true,
+      data: {
+        message: `DriveSync: No file with the name <strong>"${fileName}"</strong> was found.
+<strong>Create</strong> it as sync file on Google Drive?`,
+      }
+    }).afterClosed();
+  }
+
+  private _confirmUsingExistingFileDialog(fileName): Observable<boolean> {
+    return this._matDialog.open(DialogConfirmComponent, {
+      restoreFocus: true,
+      data: {
+        message: `
+DriveSync: Use <strong>existing</strong> file <strong>"${fileName}"</strong> as sync file?
+If not please change the Sync file name.`,
+      }
+    }).afterClosed();
+  }
+
+  private _updateConfig(data: Partial<GoogleDriveSyncConfig>, isSkipLastActive = false): UpdateConfigSection {
+    console.log(isSkipLastActive);
+    return new UpdateConfigSection({
+      sectionKey: 'googleDriveSync',
+      sectionCfg: data,
+      isSkipLastActive,
+    });
+  }
+
+  private _isNewerThan(strDate1, strDate2) {
+    const d1 = new Date(strDate1);
+    const d2 = new Date(strDate2);
+    return (d1.getTime() > d2.getTime());
+  }
+
+  private _isEqual(strDate1, strDate2) {
+    const d1 = new Date(strDate1);
+    const d2 = new Date(strDate2);
+    return (d1.getTime() === d2.getTime());
+  }
+
+  private _getLocalAppData() {
+    return this._syncService.getCompleteSyncData();
+  }
+
 
   private _formatDate(date) {
     return moment(date).format('DD-MM-YYYY --- hh:mm:ss');
