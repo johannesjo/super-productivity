@@ -69,7 +69,7 @@ export class GoogleDriveSyncEffects {
         isLoggedIn && isEnabled && isAutoSync && syncInterval >= 5000),
       switchMap(([a, b, c, syncInterval]) =>
         interval(syncInterval).pipe(
-          filter(isOnline),
+          // filter(isOnline),
           mapTo(new SaveForSync())
         )
       ),
@@ -210,6 +210,7 @@ export class GoogleDriveSyncEffects {
               return of(new SaveToGoogleDrive({isSkipSnack: action.payload && action.payload.isSkipSnack}));
             }
           }),
+          catchError(err => of(new SaveToGoogleDriveCancel())),
         );
       }
     }),
@@ -290,6 +291,7 @@ export class GoogleDriveSyncEffects {
                     return of(new LoadFromGoogleDriveCancel());
                   }
                 }),
+                catchError(err => of(new LoadFromGoogleDriveCancel())),
               );
               // no update required
             } else {
@@ -301,6 +303,7 @@ export class GoogleDriveSyncEffects {
               return of(new LoadFromGoogleDriveCancel());
             }
           }),
+          catchError(err => of(new LoadFromGoogleDriveCancel())),
         );
       }
     }),

@@ -8,9 +8,9 @@ import { SnackService } from '../../core/snack/snack.service';
 import { SnackType } from '../../core/snack/snack.model';
 import { ConfigService } from '../config/config.service';
 import { GlobalConfig, GoogleSession } from '../config/config.model';
-import { catchError, map, skip } from 'rxjs/operators';
+import { catchError, filter, map, tap } from 'rxjs/operators';
 import { EmptyObservable } from 'rxjs-compat/observable/EmptyObservable';
-import { combineLatest, Observable, throwError } from 'rxjs';
+import { combineLatest, Observable, of, throwError } from 'rxjs';
 import { IPC_GOOGLE_AUTH_TOKEN, IPC_GOOGLE_AUTH_TOKEN_ERROR, IPC_TRIGGER_GOOGLE_AUTH } from '../../../../electron/ipc-events.const';
 import { ElectronService } from 'ngx-electron';
 
@@ -184,10 +184,7 @@ export class GoogleApiService {
         supportsTeamDrives: true,
         fields: GOOGLE_DEFAULT_FIELDS_FOR_DRIVE
       },
-    }).pipe(
-      // No clue why this is necessary (options request maybe??)
-      skip(1),
-    );
+    });
   }
 
   findFile(fileName): Observable<any> {
@@ -204,10 +201,7 @@ export class GoogleApiService {
         // should be called name officially instead of title
         q: `title='${fileName}' and trashed=false`,
       },
-    }).pipe(
-      // No clue why this is necessary (options request maybe??)
-      skip(1),
-    );
+    });
   }
 
   loadFile(fileId): Observable<any> {
@@ -224,9 +218,7 @@ export class GoogleApiService {
         supportsTeamDrives: true,
         alt: 'media'
       },
-    }).pipe(
-      skip(1),
-    );
+    });
     const metaData = this.getFileInfo(fileId);
 
     return combineLatest(metaData, loadFile)
@@ -279,10 +271,7 @@ export class GoogleApiService {
         'Content-Type': multipart.type
       },
       data: multipart.body
-    }).pipe(
-      // No clue why this is necessary (options request maybe??)
-      skip(1),
-    );
+    });
   }
 
   private _updateSession(sessionData: Partial<GoogleSession>) {
@@ -405,12 +394,18 @@ export class GoogleApiService {
     const allArgs = [...bodyArg, {
       headers: new HttpHeaders(p.headers),
       params: new HttpParams({fromObject: p.params}),
+      reportProgress: false,
     }];
     const req = new HttpRequest(p.method, p.url, ...allArgs);
 
     // const sub = this._http[p.method.toLowerCase()](p.url, p.data, p)
+    console.log('MAP HTTP');
+
     return this._http.request(req)
       .pipe(
+        // TODO remove type: 0 @see https://brianflove.com/2018/09/03/angular-http-client-observe-response/
+        filter(res => !(res && res.type && res.type === 0)),
+        map((res: any) => (res && res.body) ? res.body : res),
         catchError((res) => {
           console.warn(res);
           if (!res) {
@@ -423,17 +418,6 @@ export class GoogleApiService {
           }
           return throwError(res);
         }),
-        // map((res) => {
-        //   console.log(res);
-        //
-        //   if (res && res.type === 0) {
-        //     this._handleError('type 0, request canceled');
-        //     return throwError(res);
-        //   } else {
-        //     return res;
-        //   }
-        // }),
-        map((res: any) => (res && res.body) ? res.body : res)
       );
   }
 
