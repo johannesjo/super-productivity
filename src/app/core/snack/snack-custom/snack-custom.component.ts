@@ -1,6 +1,8 @@
-import { ChangeDetectionStrategy, Component, Inject, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Inject, OnDestroy, OnInit } from '@angular/core';
 import { MAT_SNACK_BAR_DATA, MatSnackBarRef } from '@angular/material';
 import { SnackParams } from '../snack.model';
+import { Subscription } from 'rxjs';
+import { debounceTime, delay } from 'rxjs/operators';
 
 @Component({
   selector: 'snack-custom',
@@ -8,7 +10,8 @@ import { SnackParams } from '../snack.model';
   styleUrls: ['./snack-custom.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class SnackCustomComponent implements OnInit {
+export class SnackCustomComponent implements OnInit, OnDestroy {
+  private _subs = new Subscription();
 
   constructor(
     @Inject(MAT_SNACK_BAR_DATA) public data: SnackParams,
@@ -24,6 +27,19 @@ export class SnackCustomComponent implements OnInit {
         this.snackBarRef.dismiss();
       });
     }
+    if (this.data.showWhile$) {
+      this._subs.add(
+        this.data.showWhile$.pipe(debounceTime(300)).subscribe((v) => {
+          if (!v) {
+            this.snackBarRef.dismiss();
+          }
+        })
+      );
+    }
+  }
+
+  ngOnDestroy(): void {
+    this._subs.unsubscribe();
   }
 
   actionClick() {

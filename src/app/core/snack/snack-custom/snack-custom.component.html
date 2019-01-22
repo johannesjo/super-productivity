@@ -23,6 +23,6 @@
     </button>
   </div>
 
-  <mat-progress-bar *ngIf="data.promise"
+  <mat-progress-bar *ngIf="data.promise||data.showWhile$"
                     mode="indeterminate"></mat-progress-bar>
 </div>

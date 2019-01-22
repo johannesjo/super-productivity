@@ -44,6 +44,7 @@ import { DialogConfirmDriveSyncSaveComponent } from '../dialog-confirm-drive-syn
 import * as moment from 'moment';
 import { DialogConfirmDriveSyncLoadComponent } from '../dialog-confirm-drive-sync-load/dialog-confirm-drive-sync-load.component';
 import { AppDataComplete } from '../../../imex/sync/sync.model';
+import { selectIsGoogleDriveSaveInProgress } from './google-drive-sync.reducer';
 
 @Injectable()
 export class GoogleDriveSyncEffects {
@@ -75,7 +76,11 @@ export class GoogleDriveSyncEffects {
     ofType(
       GoogleDriveSyncActionTypes.SaveForSync,
     ),
-    tap(() => this._showAsyncToast(undefined, 'Syncing to Google Drive')),
+    tap(() => this._showAsyncToast(
+      this._store$.select(selectIsGoogleDriveSaveInProgress),
+      'Syncing to Google Drive'
+      )
+    ),
     map(() => new SaveToGoogleDriveFlow()),
   );
 
@@ -370,14 +375,14 @@ export class GoogleDriveSyncEffects {
     });
   }
 
-  private _showAsyncToast(obs: Observable<any> = EMPTY, msg) {
+  private _showAsyncToast(showWhile$: Observable<any> = EMPTY, msg) {
     this._snackService.open({
       type: 'CUSTOM',
       icon: 'file_upload',
       message: msg,
       isSubtle: true,
       config: {duration: 60000},
-      // promise: obs.toPromise(),
+      showWhile$,
     });
   }
 

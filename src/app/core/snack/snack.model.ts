@@ -1,4 +1,5 @@
 import { MatSnackBarConfig } from '@angular/material';
+import { Observable } from 'rxjs';
 
 export type SnackType = 'ERROR' | 'SUCCESS' | 'CUSTOM' | 'GOOGLE_LOGIN' | 'JIRA_UNBLOCK';
 
@@ -14,4 +15,5 @@ export interface SnackParams {
   actionPayload?: any;
   config?: MatSnackBarConfig;
   promise?: Promise<any>;
+  showWhile$?: Observable<any>;
 }
