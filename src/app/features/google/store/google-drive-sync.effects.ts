@@ -45,6 +45,7 @@ import * as moment from 'moment';
 import { DialogConfirmDriveSyncLoadComponent } from '../dialog-confirm-drive-sync-load/dialog-confirm-drive-sync-load.component';
 import { AppDataComplete } from '../../../imex/sync/sync.model';
 import { selectIsGoogleDriveSaveInProgress } from './google-drive-sync.reducer';
+import { isOnline } from '../../../util/is-online';
 
 @Injectable()
 export class GoogleDriveSyncEffects {
@@ -67,7 +68,10 @@ export class GoogleDriveSyncEffects {
       filter(([isLoggedIn, isEnabled, isAutoSync, syncInterval]) =>
         isLoggedIn && isEnabled && isAutoSync && syncInterval >= 5000),
       switchMap(([a, b, c, syncInterval]) =>
-        interval(syncInterval).pipe(mapTo(new SaveForSync()))
+        interval(syncInterval).pipe(
+          filter(isOnline),
+          mapTo(new SaveForSync())
+        )
       ),
     )),
   );
