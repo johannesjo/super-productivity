@@ -195,7 +195,8 @@ export class InputDurationSliderComponent implements OnInit, OnDestroy {
     this._cd.detectChanges();
   }
 
-  onInputChange() {
+  onInputChange($event) {
+    this._model = $event;
     this.modelChange.emit(this._model);
     this.setRotationFromValue();
   }

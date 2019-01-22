@@ -60,6 +60,7 @@ export class InputDurationDirective<D> implements ControlValueAccessor, Validato
   }
 
   private _value;
+  private _msValue;
 
   // Validations
   get value() {
@@ -69,7 +70,7 @@ export class InputDurationDirective<D> implements ControlValueAccessor, Validato
   set value(value) {
     if (value !== this._value) {
       this._value = value;
-      this._onChangeCallback(this._value);
+      this._onChangeCallback(this._msValue);
       // console.log(value);
 
     }
@@ -77,15 +78,16 @@ export class InputDurationDirective<D> implements ControlValueAccessor, Validato
 
   // TODO all around dirty
   @Input() set ngModel(msVal) {
-    if (msVal) {
+    if (msVal && msVal !== this._msValue) {
+      this._msValue = msVal;
       this.writeValue(msVal);
     }
   }
 
   @HostListener('input', ['$event.target.value']) _onInput(value: string) {
-    const msVal = this._stringToMs.transform(value);
-    this._value = this._msToString.transform(msVal, false, true);
-    this._onChangeCallback(msVal);
+    this._msValue = this._stringToMs.transform(value);
+    this._value = this._msToString.transform(this._msValue, false, true);
+    this._onChangeCallback(this._msValue);
   }
 
   ngAfterViewChecked() {
@@ -127,10 +129,9 @@ export class InputDurationDirective<D> implements ControlValueAccessor, Validato
   private _parseValidatorFn(): ValidationErrors | null {
     // TODO maximum dirty hackyness, but works for now :(
     if (!this._value) {
-      const msVal = this._stringToMs.transform(this._elementRef.nativeElement.value);
-      this._value = this._msToString.transform(msVal, false, true);
+      this._msValue = this._stringToMs.transform(this._elementRef.nativeElement.value);
+      this._value = this._msToString.transform(this._msValue, false, true);
     }
-
     return this._value
       ? null
       : {'inputDurationParse': {'text': this._elementRef.nativeElement.value}};

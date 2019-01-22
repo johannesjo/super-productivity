@@ -13,8 +13,8 @@
     <label *ngIf="label"
            [for]="uid"
            [innerHtml]="label"></label>
-    <input (ngModelChange)="onInputChange()"
-           [(ngModel)]="_model"
+    <input (ngModelChange)="onInputChange($event)"
+           [ngModel]="_model"
            [id]="uid"
            class="value"
            inputDuration="optional"
