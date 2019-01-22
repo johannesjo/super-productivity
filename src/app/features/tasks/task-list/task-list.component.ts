@@ -2,10 +2,10 @@ import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnDestroy
 import { Task, TaskWithSubTasks } from '../task.model';
 import { TaskService } from '../task.service';
 import { DragulaService } from 'ng2-dragula';
-import { BehaviorSubject, combineLatest, Observable, of, Subscription } from 'rxjs';
+import { BehaviorSubject, combineLatest, Observable, Subscription } from 'rxjs';
 import { standardListAnimation } from '../../../ui/animations/standard-list.ani';
 import { expandFadeFastAnimation } from '../../../ui/animations/expand.ani';
-import { flatMap } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 import { filterDoneTasks } from '../filter-done-tasks.pipe';
 
 @Component({
@@ -28,10 +28,9 @@ export class TaskListComponent implements OnDestroy, OnInit {
     this.isHideDone$,
     this.isHideAll$,
     this._taskService.currentTaskId$,
-  ).pipe(flatMap(([tasks, isHideDone, isHideAll, currentId]) => {
-    const filteredTasks = filterDoneTasks(tasks, currentId, isHideDone, isHideAll);
-    return of(filteredTasks);
-  }));
+  ).pipe(map(([tasks, isHideDone, isHideAll, currentId]) =>
+    filterDoneTasks(tasks, currentId, isHideDone, isHideAll)
+  ));
   @Input() parentId: string;
   @Input() listId: string;
   @Input() listModelId: string;

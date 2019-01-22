@@ -2,7 +2,19 @@ import { Injectable } from '@angular/core';
 import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { ConfigActionTypes, UpdateConfigSection } from '../../config/store/config.actions';
-import { catchError, distinctUntilChanged, filter, flatMap, map, mapTo, switchMap, take, tap, withLatestFrom } from 'rxjs/operators';
+import {
+  catchError,
+  concatMap,
+  distinctUntilChanged,
+  exhaustMap,
+  filter,
+  map,
+  mapTo,
+  switchMap,
+  take,
+  tap,
+  withLatestFrom
+} from 'rxjs/operators';
 import { combineLatest, EMPTY, from, interval, Observable, of, throwError } from 'rxjs';
 import { GoogleDriveSyncService } from '../google-drive-sync.service';
 import { GoogleApiService } from '../google-api.service';
@@ -51,13 +63,11 @@ export class GoogleDriveSyncEffects {
       this.isAutoSyncToRemote$,
       this.syncInterval$,
     ).pipe(
-      switchMap(([isLoggedIn, isEnabled, isAutoSync, syncInterval]) => {
-        // syncInterval = 5000;
-        // isLoggedIn = true;
-        return (isLoggedIn && isEnabled && isAutoSync && syncInterval >= 5000)
-          ? interval(syncInterval).pipe(switchMap(() => of(new SaveForSync())))
-          : EMPTY;
-      }),
+      filter(([isLoggedIn, isEnabled, isAutoSync, syncInterval]) =>
+        isLoggedIn && isEnabled && isAutoSync && syncInterval >= 5000),
+      switchMap(([a, b, c, syncInterval]) =>
+        interval(syncInterval).pipe(mapTo(new SaveForSync()))
+      ),
     )),
   );
 
@@ -76,9 +86,9 @@ export class GoogleDriveSyncEffects {
     take(1),
     withLatestFrom(this.config$),
     filter(([act, cfg]) => cfg.isEnabled && cfg.isAutoLogin),
-    flatMap(() => from(this._googleApiService.login())),
-    flatMap(() => this._checkIfRemoteUpdate()),
-    flatMap((isUpdate): any => {
+    concatMap(() => from(this._googleApiService.login())),
+    concatMap(() => this._checkIfRemoteUpdate()),
+    concatMap((isUpdate): any => {
       if (isUpdate) {
         console.log('DriveSync', 'HAS CHANGED (modified Date comparision), TRYING TO UPDATE');
 
@@ -99,10 +109,11 @@ export class GoogleDriveSyncEffects {
     ofType(
       GoogleDriveSyncActionTypes.ChangeSyncFileName,
     ),
-    flatMap((action: ChangeSyncFileName) => {
+    // only deal with one change at a time
+    exhaustMap((action: ChangeSyncFileName) => {
       const {newFileName} = action.payload;
       return this._googleApiService.findFile(newFileName).pipe(
-        flatMap((res: any): any => {
+        concatMap((res: any): any => {
           const filesFound = res.items;
           if (filesFound.length && filesFound.length > 1) {
             return of(new SnackOpen({
@@ -111,7 +122,7 @@ export class GoogleDriveSyncEffects {
             }));
           } else if (!filesFound || filesFound.length === 0) {
             return this._confirmSaveNewFile(newFileName).pipe(
-              flatMap((isSave) => {
+              concatMap((isSave) => {
                 return isSave
                   ? of(new CreateSyncFile({newFileName}))
                   : EMPTY;
@@ -119,7 +130,7 @@ export class GoogleDriveSyncEffects {
             );
           } else if (filesFound.length === 1) {
             return this._confirmUsingExistingFileDialog(newFileName).pipe(
-              flatMap((isConfirmUseExisting) => {
+              concatMap((isConfirmUseExisting) => {
                 const fileToUpdate = filesFound[0];
                 return isConfirmUseExisting
                   ? of(this._updateConfig({
@@ -140,7 +151,7 @@ export class GoogleDriveSyncEffects {
       GoogleDriveSyncActionTypes.CreateSyncFile,
     ),
     map((action: ChangeSyncFileName) => action.payload.newFileName),
-    flatMap(newFileName =>
+    concatMap(newFileName =>
       this._googleApiService.saveFile('', {
         title: newFileName,
         editable: true
@@ -160,14 +171,14 @@ export class GoogleDriveSyncEffects {
       GoogleDriveSyncActionTypes.SaveToGoogleDriveFlow,
     ),
     withLatestFrom(this.config$),
-    flatMap(([action, cfg]: [SaveToGoogleDrive, GoogleDriveSyncConfig]): any => {
+    concatMap(([action, cfg]: [SaveToGoogleDrive, GoogleDriveSyncConfig]): any => {
       // when we have no backup file we create one directly
       if (!cfg._backupDocId) {
         return new ChangeSyncFileName({newFileName: cfg.syncFileName || DEFAULT_SYNC_FILE_NAME});
       } else {
         // otherwise update
         return this._googleApiService.getFileInfo(cfg._backupDocId).pipe(
-          flatMap((res: any): Observable<any> => {
+          concatMap((res: any): Observable<any> => {
             const lastActiveLocal = this._syncService.getLastActive();
             const lastModifiedRemote = res.modifiedDate;
 
@@ -199,9 +210,9 @@ export class GoogleDriveSyncEffects {
     ofType(
       GoogleDriveSyncActionTypes.SaveToGoogleDrive,
     ),
-    flatMap((): any => from(this._getLocalAppData())),
+    concatMap((): any => from(this._getLocalAppData())),
     withLatestFrom(this.config$),
-    flatMap(([completeData, cfg]) => this._googleApiService.saveFile(completeData, {
+    concatMap(([completeData, cfg]) => this._googleApiService.saveFile(completeData, {
         title: cfg.syncFileName,
         id: cfg._backupDocId,
         editable: true
@@ -235,17 +246,17 @@ export class GoogleDriveSyncEffects {
       GoogleDriveSyncActionTypes.LoadFromGoogleDriveFlow,
     ),
     withLatestFrom(this.config$),
-    flatMap(([action, cfg]: [LoadFromGoogleDrive, GoogleDriveSyncConfig]): any => {
+    concatMap(([action, cfg]: [LoadFromGoogleDrive, GoogleDriveSyncConfig]): any => {
       // when we have no backup file we create one directly
       if (!cfg._backupDocId) {
         return new ChangeSyncFileName({newFileName: cfg.syncFileName || DEFAULT_SYNC_FILE_NAME});
       } else {
         // otherwise update
         return this._checkIfRemoteUpdate().pipe(
-          flatMap((isUpdated: boolean): Observable<any> => {
+          concatMap((isUpdated: boolean): Observable<any> => {
             if (isUpdated) {
               return this._loadFile().pipe(
-                flatMap((loadResponse: any): any => {
+                concatMap((loadResponse: any): any => {
                   const backup: AppDataComplete = loadResponse.backup;
                   const lastActiveLocal = this._syncService.getLastActive();
                   const lastActiveRemote = backup.lastActiveTime;
@@ -283,12 +294,12 @@ export class GoogleDriveSyncEffects {
       GoogleDriveSyncActionTypes.LoadFromGoogleDrive,
     ),
     withLatestFrom(this.config$),
-    flatMap(([act, cfg]: [LoadFromGoogleDrive, GoogleDriveSyncConfig]) => {
+    concatMap(([act, cfg]: [LoadFromGoogleDrive, GoogleDriveSyncConfig]) => {
       return (act.payload && act.payload.loadResponse)
         ? of(act.payload.loadResponse)
         : this._googleApiService.loadFile(cfg._backupDocId);
     }),
-    flatMap((loadRes) => this._import(loadRes)),
+    concatMap((loadRes) => this._import(loadRes)),
     map((modifiedDate) => new LoadFromGoogleDriveSuccess({modifiedDate})),
     catchError(err => of(new LoadFromGoogleDriveCancel())),
   );

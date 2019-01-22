@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Actions, Effect, ofType } from '@ngrx/effects';
 import { SetCurrentTask, TaskActionTypes, ToggleStart, UnsetCurrentTask } from '../../tasks/store/task.actions';
-import { filter, flatMap, map, mapTo, tap, withLatestFrom } from 'rxjs/operators';
+import { filter, map, mapTo, tap, withLatestFrom } from 'rxjs/operators';
 import { PomodoroService } from '../pomodoro.service';
 import { PomodoroConfig } from '../../config/config.model';
 import { FinishPomodoroSession, PausePomodoro, PomodoroActionTypes, StartPomodoro } from './pomodoro.actions';
@@ -9,7 +9,7 @@ import { MatDialog } from '@angular/material';
 import { DialogPomodoroBreakComponent } from '../dialog-pomodoro-break/dialog-pomodoro-break.component';
 import { select, Store } from '@ngrx/store';
 import { selectCurrentTaskId } from '../../tasks/store/task.selectors';
-import { EMPTY, Observable, of } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { SnackOpen } from '../../../core/snack/store/snack.actions';
 import { NotifyService } from '../../../core/notify/notify.service';
 
@@ -30,11 +30,11 @@ export class PomodoroEffects {
       this._pomodoroService.isBreak$,
     ),
     filter(isEnabled),
-    flatMap(([action, cfg, isBreak]: [SetCurrentTask | UnsetCurrentTask, PomodoroConfig, boolean]): Observable<any> => {
+    // don't update when on break and stop time tracking is active
+    filter(([action, cfg, isBreak]) => !(isBreak && cfg.isStopTrackingOnBreak)),
+    map(([action, cfg, isBreak]: [SetCurrentTask | UnsetCurrentTask, PomodoroConfig, boolean]): Observable<any> => {
       if (action['payload'] && action.type !== TaskActionTypes.UnsetCurrentTask) {
         return of(new StartPomodoro());
-      } else if (isBreak && cfg.isStopTrackingOnBreak) {
-        return EMPTY;
       } else {
         return of(new PausePomodoro());
       }
