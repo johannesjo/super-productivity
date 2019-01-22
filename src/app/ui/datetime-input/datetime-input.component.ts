@@ -11,12 +11,14 @@ export class DatetimeInputComponent {
   @Input() placeholder: string;
   @Input() required: boolean;
   @Output() modelChange = new EventEmitter();
+  modelValue: string;
+
+  constructor() {
+  }
 
   @Input() get model() {
     return this.modelValue;
   }
-
-  modelValue: string;
 
   set model(val) {
     this.modelValue = val;
@@ -25,9 +27,6 @@ export class DatetimeInputComponent {
     if (timestamp) {
       this.modelChange.emit(this.modelValue);
     }
-  }
-
-  constructor() {
   }
 
   setVal(type: string) {

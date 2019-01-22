@@ -8,9 +8,9 @@ describe('DatetimeInputComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ DatetimeInputComponent ]
+      declarations: [DatetimeInputComponent]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

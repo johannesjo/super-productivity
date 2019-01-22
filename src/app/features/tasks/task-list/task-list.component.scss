@@ -42,10 +42,12 @@
 
   .task {
     transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+
     &.ng-enter {
       //opacity: 0;
       transform: scaleY(0);
     }
+
     &.ng-enter-active {
       //opacity: 1;
       transform: scale(1);
@@ -57,6 +59,7 @@
       opacity: 1;
       transform: scale(1);
     }
+
     &.ng-leave-active {
       display: block;
       opacity: 0;
@@ -80,6 +83,7 @@
       opacity: 1;
       max-height: 400px;
     }
+
     &.ng-leave {
       opacity: 1;
       max-height: 200px;

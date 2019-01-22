@@ -1,9 +1,9 @@
-<input matInput
-       [id]="id"
-       (keydown)="onKeyDown($event)"
-       [type]="'text'"
+<input (keydown)="onKeyDown($event)"
        [errorStateMatcher]="errorStateMatcher"
        [formControl]="formControl"
        [formlyAttributes]="field"
-       [placeholder]="to.placeholder">
+       [id]="id"
+       [placeholder]="to.placeholder"
+       [type]="'text'"
+       matInput>
 

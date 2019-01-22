@@ -1,23 +1,23 @@
-<div class="markdown-wrapper"
+<div #wrapperEl
      [class.isHideOverflow]="isHideOverflow"
-     #wrapperEl>
-  <textarea *ngIf="isShowEdit"
-            #textareaEl
-            tabindex="1"
-            [@fade]
-            (keypress)="keypressHandler($event)"
+     class="markdown-wrapper">
+  <textarea #textareaEl
+            (blur)="untoggleShowEdit(); setBlur($event)"
             (focus)="setFocus($event)"
             (input)="resizeTextareaToFit()"
-            (blur)="untoggleShowEdit(); setBlur($event)"
+            (keypress)="keypressHandler($event)"
+            *ngIf="isShowEdit"
+            [@fade]
             class="mat-body-1 markdown-unparsed"
-            rows="1"></textarea>
+            rows="1"
+            tabindex="1"></textarea>
 
-  <div markdown
-       #previewEl
-       tabindex="1"
-       [data]="model"
-       [hidden]="isShowEdit"
+  <div #previewEl
        (click)="toggleShowEdit($event)"
        (focus)="toggleShowEdit($event)"
-       class="mat-body-1 markdown-parsed"></div>
+       [data]="model"
+       [hidden]="isShowEdit"
+       class="mat-body-1 markdown-parsed"
+       markdown
+       tabindex="1"></div>
 </div>

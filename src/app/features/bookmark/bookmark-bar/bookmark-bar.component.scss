@@ -28,6 +28,7 @@ $sLeftRight: $sTopBottom/2;
     padding: $s;
     padding-top: $s+$sTopBottom;
   }
+
   .global-bookmark {
     flex: 1 1 auto;
     margin: $sTopBottom $sLeftRight 0;
@@ -42,9 +43,11 @@ $sLeftRight: $sTopBottom/2;
         opacity: 1;
         transition: $transition-enter;
       }
+
       .edit-btn {
         transform: translate(0, 0);
       }
+
       .trash-btn {
         transform: translate(0, 0);
       }
@@ -89,10 +92,12 @@ $sLeftRight: $sTopBottom/2;
   }
 
   $this-distance: $s*4;
+
   .edit-btn {
     // TODO fix that this causes an overflow
     transform: translate(-$this-distance, $this-distance);
   }
+
   .trash-btn {
     // TODO fix that this causes an overflow
     transform: translate($this-distance, $this-distance);

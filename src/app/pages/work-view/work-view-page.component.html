@@ -1,12 +1,12 @@
-<div class="wrapper"
-     #containerEl>
-  <div class="today"
-       #splitTopEl>
+<div #containerEl
+     class="wrapper">
+  <div #splitTopEl
+       class="today">
 
     <header class="work-view-header bg-800 color-contrast">
-      <div class="status-bar"
+      <div *ngIf="!isPlanYourDay"
            @fade
-           *ngIf="!isPlanYourDay">
+           class="status-bar">
         <div class="item">
           <span class="label">Estimate remaining:</span>
           <span class="no-wrap">
@@ -22,33 +22,33 @@
       </span>
         </div>
 
-        <div class="item"
-             *ngIf="isShowTimeWorkedWithoutBreak">
+        <div *ngIf="isShowTimeWorkedWithoutBreak"
+             class="item">
           <span class="label">Without break: </span>
           <span class="no-wrap">
         <strong>{{takeABreakService.timeWorkingWithoutABreak$|async|msToString}}</strong><mat-icon>timer</mat-icon>
       </span>
         </div>
         <div class="controls show-xs-only">
-          <button mat-mini-fab
+          <button (click)="showAddTaskBar()"
                   color="primary"
-                  (click)="showAddTaskBar()">
+                  mat-mini-fab>
             <mat-icon>add</mat-icon>
           </button>
           <!--<button routerLink="/daily-summary"-->
-                  <!--mat-mini-fab=""-->
-                  <!--color="primary">-->
-            <!--<mat-icon>done_all</mat-icon>-->
+          <!--mat-mini-fab=""-->
+          <!--color="primary">-->
+          <!--<mat-icon>done_all</mat-icon>-->
           <!--</button>-->
         </div>
       </div>
 
-      <div class="planning-mode-header"
-           *ngIf="isPlanYourDay">
-        <h2 class="planning-mode-header mat-h2"
-            *ngIf="!(taskService.undoneTasks$|async)?.length">Add some tasks to plan your day!</h2>
-        <div class="status-bar"
-             *ngIf="(taskService.undoneTasks$|async)?.length">
+      <div *ngIf="isPlanYourDay"
+           class="planning-mode-header">
+        <h2 *ngIf="!(taskService.undoneTasks$|async)?.length"
+            class="planning-mode-header mat-h2">Add some tasks to plan your day!</h2>
+        <div *ngIf="(taskService.undoneTasks$|async)?.length"
+             class="status-bar">
           <div class="item">
             <span class="label">Time Estimated:</span>
             <span class="no-wrap">
@@ -61,15 +61,15 @@
     </header>
 
     <div class="component-wrapper page-wrapper">
-      <div class="planning-mode-content"
+      <div *ngIf="isPlanYourDay"
            @expandFade
-           *ngIf="isPlanYourDay">
-        <add-task-bar [isAddToBottom]="true"
-                      (done)="startWork()"></add-task-bar>
-        <button mat-raised-button=""
+           class="planning-mode-content">
+        <add-task-bar (done)="startWork()"
+                      [isAddToBottom]="true"></add-task-bar>
+        <button (click)="startWork()"
                 class="read-to-work-btn"
-                (click)="startWork()"
-                color="primary">
+                color="primary"
+                mat-raised-button="">
           <mat-icon>check</mat-icon>
           Ready to work!
         </button>
@@ -85,9 +85,9 @@
                    listId="PARENT"
                    listModelId="DONE"></task-list>
         <div class="finish-day-button-wrapper">
-          <button routerLink="/daily-summary"
+          <button color="primary"
                   mat-raised-button=""
-                  color="primary">
+                  routerLink="/daily-summary">
             <mat-icon>done_all</mat-icon>
             Finish working
           </button>
@@ -96,17 +96,17 @@
     </div>
   </div>
 
-  <div class="backlog"
-       #splitBottomEl>
-    <split [containerEl]="containerEl"
-           [splitPos]="splitInputPos"
-           [isAnimateBtn]="isTriggerSwitchListAni$|async"
+  <div #splitBottomEl
+       class="backlog">
+    <split (posChanged)="splitInputPos=$event"
+           [containerEl]="containerEl"
            [counter]="(taskService.backlogTasks$|async)?.length"
-           [splitTopEl]="splitTopEl"
+           [isAnimateBtn]="isTriggerSwitchListAni$|async"
            [splitBottomEl]="splitBottomEl"
-           (posChanged)="splitInputPos=$event"></split>
-    <div class="inner-wrapper"
-         *ngIf="splitInputPos!==100">
+           [splitPos]="splitInputPos"
+           [splitTopEl]="splitTopEl"></split>
+    <div *ngIf="splitInputPos!==100"
+         class="inner-wrapper">
       <header class="backlog-header bg-400 color-contrast">
         <div class="status-bar">
           <div class="item">
@@ -116,9 +116,9 @@
       <mat-icon>timer</mat-icon>
       </span>
           </div>
-          <button mat-mini-fab
+          <button (click)="showAddTaskBar()"
                   color="primary"
-                  (click)="showAddTaskBar()">
+                  mat-mini-fab>
             <mat-icon class="hide-controls-icon">add</mat-icon>
           </button>
         </div>

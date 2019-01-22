@@ -2,34 +2,34 @@
 
   <div class="form-wrapper">
     <div class="textarea-wrapper">
-      <textarea rows="6"
-                matTextareaAutosize
-                (keydown)="keydownHandler($event)"
-                name="noteContent"
-                [(ngModel)]="noteContent"
+      <textarea (keydown)="keydownHandler($event)"
                 (ngModelChange)="saveTmp()"
-                placeholder="Enter some text to save as note..."></textarea>
+                [(ngModel)]="noteContent"
+                matTextareaAutosize
+                name="noteContent"
+                placeholder="Enter some text to save as note..."
+                rows="6"></textarea>
     </div>
-    <datetime-input name="reminderData"
-                    placeholder="Datetime for reminder (optional)"
-                    (modelChange)="reminderDate=$event"
-                    [model]="reminderDate"></datetime-input>
+    <datetime-input (modelChange)="reminderDate=$event"
+                    [model]="reminderDate"
+                    name="reminderData"
+                    placeholder="Datetime for reminder (optional)"></datetime-input>
   </div>
 
   <mat-dialog-actions align="center">
     <div class="wrap-buttons">
-      <button color="primary"
-              type="submit"
-              class="btn btn-primary submit-button"
-              mat-raised-button>
+      <button class="btn btn-primary submit-button"
+              color="primary"
+              mat-raised-button
+              type="submit">
         <mat-icon>save</mat-icon>
         Save
       </button>
 
-      <button type="button"
-              (click)="close()"
+      <button (click)="close()"
               class="btn btn-primary submit-button"
-              mat-raised-button>
+              mat-raised-button
+              type="button">
         Cancel
       </button>
     </div>

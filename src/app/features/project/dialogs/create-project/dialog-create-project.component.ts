@@ -130,17 +130,6 @@ export class DialogCreateProjectComponent implements OnInit, OnDestroy {
     }));
   }
 
-  private _saveJiraCfg(jiraCfg: JiraCfg) {
-    this.jiraCfg = jiraCfg;
-
-    console.log(this.projectData.id);
-
-    // if we're editing save right away
-    if (this.projectData.id) {
-      this._projectService.updateIssueProviderConfig(this.projectData.id, 'JIRA', this.jiraCfg);
-    }
-  }
-
   openGitCfg() {
     this._subs.add(this._matDialog.open(DialogGitInitialSetupComponent, {
       restoreFocus: true,
@@ -154,6 +143,17 @@ export class DialogCreateProjectComponent implements OnInit, OnDestroy {
         this._saveGitCfg(gitCfg);
       }
     }));
+  }
+
+  private _saveJiraCfg(jiraCfg: JiraCfg) {
+    this.jiraCfg = jiraCfg;
+
+    console.log(this.projectData.id);
+
+    // if we're editing save right away
+    if (this.projectData.id) {
+      this._projectService.updateIssueProviderConfig(this.projectData.id, 'JIRA', this.jiraCfg);
+    }
   }
 
   private _saveGitCfg(gitCfg: GitCfg) {

@@ -8,9 +8,9 @@ describe('DialogPomodoroBreakComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ DialogPomodoroBreakComponent ]
+      declarations: [DialogPomodoroBreakComponent]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

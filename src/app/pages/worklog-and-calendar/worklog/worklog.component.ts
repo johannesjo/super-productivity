@@ -55,34 +55,6 @@ export class WorklogComponent implements OnInit, OnDestroy {
     this._subs.unsubscribe();
   }
 
-  private async _loadData(projectId): Promise<any> {
-    const archive = await this._persistenceService.loadTaskArchiveForProject(projectId) || EMPTY_ENTITY;
-    const taskState = await this._persistenceService.loadTasksForProject(projectId) || EMPTY_ENTITY;
-
-    const completeState: EntityState<Task> = {
-      ids: [...archive.ids, ...taskState.ids] as string[],
-      entities: {
-        ...archive.entities,
-        ...taskState.entities
-      }
-    };
-
-    if (this._isUnloaded) {
-      return;
-    }
-
-    if (completeState) {
-      const {worklog, totalTimeSpent} = mapArchiveToWorklog(completeState, taskState.ids);
-      this.worklog = worklog;
-      this.totalTimeSpent = totalTimeSpent;
-      this._cd.detectChanges();
-    } else {
-      this.worklog = {};
-      this.totalTimeSpent = null;
-      this._cd.detectChanges();
-    }
-  }
-
   exportData(type, monthData: WorklogMonth) {
     if (type === 'MONTH') {
       this._matDialog.open(DialogSimpleTaskSummaryComponent, {
@@ -124,6 +96,34 @@ export class WorklogComponent implements OnInit, OnDestroy {
 
   sortWorklogItems(a, b) {
     return b.key - a.key;
+  }
+
+  private async _loadData(projectId): Promise<any> {
+    const archive = await this._persistenceService.loadTaskArchiveForProject(projectId) || EMPTY_ENTITY;
+    const taskState = await this._persistenceService.loadTasksForProject(projectId) || EMPTY_ENTITY;
+
+    const completeState: EntityState<Task> = {
+      ids: [...archive.ids, ...taskState.ids] as string[],
+      entities: {
+        ...archive.entities,
+        ...taskState.entities
+      }
+    };
+
+    if (this._isUnloaded) {
+      return;
+    }
+
+    if (completeState) {
+      const {worklog, totalTimeSpent} = mapArchiveToWorklog(completeState, taskState.ids);
+      this.worklog = worklog;
+      this.totalTimeSpent = totalTimeSpent;
+      this._cd.detectChanges();
+    } else {
+      this.worklog = {};
+      this.totalTimeSpent = null;
+      this._cd.detectChanges();
+    }
   }
 
   private _createTasksForDay(data: WorklogDay) {

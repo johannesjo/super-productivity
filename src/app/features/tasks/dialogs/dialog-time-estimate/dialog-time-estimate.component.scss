@@ -6,7 +6,7 @@
   flex-wrap: wrap;
   margin-bottom: $s;
 
-  @include mq(xs,max){
+  @include mq(xs, max) {
     margin-left: -20px;
     margin-right: -20px;
   }

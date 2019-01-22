@@ -51,15 +51,6 @@ export class InputDurationDirective<D> implements ControlValueAccessor, Validato
   private _parseValidator: ValidatorFn = this._parseValidatorFn.bind(this);
   private _validator: ValidatorFn | null;
 
-  private _value;
-
-  // TODO all around dirty
-  @Input() set ngModel(msVal) {
-    if (msVal) {
-      this.writeValue(msVal);
-    }
-  }
-
   constructor(@Attribute('inputDuration') public inputDuration,
               private _elementRef: ElementRef,
               private _stringToMs: StringToMsPipe,
@@ -67,11 +58,7 @@ export class InputDurationDirective<D> implements ControlValueAccessor, Validato
               private _renderer: Renderer2) {
   }
 
-  @HostListener('input', ['$event.target.value']) _onInput(value: string) {
-    const msVal = this._stringToMs.transform(value);
-    this._value = this._msToString.transform(msVal, false, true);
-    this._onChangeCallback(msVal);
-  }
+  private _value;
 
   // Validations
   get value() {
@@ -85,6 +72,19 @@ export class InputDurationDirective<D> implements ControlValueAccessor, Validato
       // console.log(value);
 
     }
+  }
+
+  // TODO all around dirty
+  @Input() set ngModel(msVal) {
+    if (msVal) {
+      this.writeValue(msVal);
+    }
+  }
+
+  @HostListener('input', ['$event.target.value']) _onInput(value: string) {
+    const msVal = this._stringToMs.transform(value);
+    this._value = this._msToString.transform(msVal, false, true);
+    this._onChangeCallback(msVal);
   }
 
   ngAfterViewChecked() {

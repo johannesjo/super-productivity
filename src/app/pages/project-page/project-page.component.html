@@ -2,11 +2,11 @@
   <h2 class="mat-h2">Projects</h2>
 
   <div class="project-list">
-    <mat-card class="project"
-              *ngFor="let project of projectService.list$|async">
+    <mat-card *ngFor="let project of projectService.list$|async"
+              class="project">
 
-      <div class="title"
-           [class.isCurrent]="project.id === (projectService.currentId$|async)">{{project.title}}
+      <div [class.isCurrent]="project.id === (projectService.currentId$|async)"
+           class="title">{{project.title}}
       </div>
 
       <div class="issue-providers">
@@ -17,16 +17,16 @@
       </div>
 
       <div class="controls">
-        <button mat-raised-button
-                (click)="edit(project)"
-                color="primary">
+        <button (click)="edit(project)"
+                color="primary"
+                mat-raised-button>
           <mat-icon aria-label="Edit">edit</mat-icon>
           Edit
         </button>
-        <button mat-raised-button
+        <button (click)="remove(project.id)"
                 *ngIf="project.id !== (projectService.currentId$|async)"
-                (click)="remove(project.id)"
-                color="warn">
+                color="warn"
+                mat-raised-button>
           <mat-icon aria-label="Delete">delete</mat-icon>
           Delete
         </button>
@@ -35,8 +35,8 @@
     </mat-card>
   </div>
   <button (click)="openCreateDialog()"
-          mat-raised-button
-          color="primary">
+          color="primary"
+          mat-raised-button>
     <mat-icon aria-label="Add">add</mat-icon>
     Create New
   </button>

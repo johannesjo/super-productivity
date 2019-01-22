@@ -34,24 +34,22 @@ export class InputDurationSliderComponent implements OnInit, OnDestroy {
   @ViewChild('circleEl') circleEl: ElementRef;
 
   @Input() label: string;
-
-  @Input() set model(val) {
-    if (this._model !== val) {
-      this._model = val;
-      this.setRotationFromValue(val);
-    }
-  }
-
   @Output() modelChange: EventEmitter<number> = new EventEmitter();
-
-  _model: number;
-
 
   constructor(
     private _el: ElementRef,
     private _cd: ChangeDetectorRef,
   ) {
     this.el = _el.nativeElement;
+  }
+
+  _model: number;
+
+  @Input() set model(val) {
+    if (this._model !== val) {
+      this._model = val;
+      this.setRotationFromValue(val);
+    }
   }
 
   ngOnInit() {

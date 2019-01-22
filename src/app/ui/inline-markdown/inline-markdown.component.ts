@@ -39,17 +39,17 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
   modelCopy: string;
   private _hideOverFlowTimeout: number;
 
-  @Input() set isFocus(val: boolean) {
-    if (!this.isShowEdit && val) {
-      this.toggleShowEdit();
-    }
-  }
-
   constructor(
     private _electronService: ElectronService,
     private _cd: ChangeDetectorRef,
   ) {
     this.resizeParsedToFit();
+  }
+
+  @Input() set isFocus(val: boolean) {
+    if (!this.isShowEdit && val) {
+      this.toggleShowEdit();
+    }
   }
 
   ngOnInit() {

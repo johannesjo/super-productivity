@@ -1,11 +1,11 @@
 <div class="wrapper bg-600">
   <header>
-    <button (click)="addNote()"
-            class="color-contrast"
+    <button #buttonEl
+            (click)="addNote()"
             autofocus="autofocus"
-            #buttonEl
-            tabindex="1"
-            mat-button="">
+            class="color-contrast"
+            mat-button=""
+            tabindex="1">
       <mat-icon>add</mat-icon>
       Add new Note
     </button>
@@ -13,9 +13,9 @@
     <!--<mat-icon>search</mat-icon>-->
     <!--</button>-->
   </header>
-  <div class="notes"
-       [@standardList]="(noteService.notes$|async)?.length"
+  <div [@standardList]="(noteService.notes$|async)?.length"
        [dragulaModel]="noteService.notes$|async"
+       class="notes"
        dragula="NOTES">
     <note *ngFor="let note of (noteService.notes$|async); let i = index;"
           [isFocus]="isElementWasAdded && i==0"

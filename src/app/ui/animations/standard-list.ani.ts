@@ -1,5 +1,5 @@
 import { animate, keyframes, query, stagger, style, transition, trigger } from '@angular/animations';
-import { ANI_ENTER_FAST_TIMING, ANI_FAST_TIMING, ANI_FASTEST_TIMING } from './animation.const';
+import { ANI_FAST_TIMING } from './animation.const';
 
 export const standardListAnimation = trigger('standardList', [
   transition(':increment, :decrement', [

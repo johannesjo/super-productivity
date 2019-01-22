@@ -1,6 +1,6 @@
-<div class="wrapper"
-     [class.error]="data.type==='ERROR'"
+<div [class.error]="data.type==='ERROR'"
      [class.success]="data.type==='SUCCESS'"
+     class="wrapper"
 >
   <ng-container *ngIf="!data.icon">
     <mat-icon *ngIf="data.type==='SUCCESS'">check_circle</mat-icon>
@@ -10,14 +10,14 @@
   <mat-icon *ngIf="data.svgIcon"
             [svgIcon]="data.svgIcon"></mat-icon>
 
-  <span class="message"
-        [innerHtml]="data.message"></span>
+  <span [innerHtml]="data.message"
+        class="message"></span>
 
   <div class="button-wrapper">
-    <button class="action"
-            color="accent"
-            (click)="actionClick()"
+    <button (click)="actionClick()"
             *ngIf="data.actionStr"
+            class="action"
+            color="accent"
             mat-raised-button>
       {{data.actionStr}}
     </button>

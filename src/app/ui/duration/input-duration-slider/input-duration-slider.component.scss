@@ -14,10 +14,10 @@ $this-dot-size: 14px;
 @mixin onCircle($item-count, $circle-size, $item-size, $start-rotation: -90) {
   display: block;
   position: absolute;
-  top:  50%;
+  top: 50%;
   left: 50%;
   margin: -($item-size / 2);
-  width:  $item-size;
+  width: $item-size;
   height: $item-size;
 
   $angle: (360 / $item-count);
@@ -117,6 +117,7 @@ $this-dot-size: 14px;
   }
 
   $this-handle-border-width: 4px;
+
   .handle-wrapper {
     cursor: grab;
     position: absolute;
@@ -137,11 +138,13 @@ $this-dot-size: 14px;
       bottom: -$this-extra-touch-space;
     }
   }
+
   &.is-dragging .handle-wrapper {
     transition: none;
   }
 
   $this-stroke-width: 4px;
+
   .handle {
     top: 0;
     background: $this-handle-color;
@@ -220,6 +223,7 @@ $this-dot-size: 14px;
       z-index: 5;
       user-select: all;
       transform: scale(1.2);
+
       &:after {
         opacity: 1;
       }

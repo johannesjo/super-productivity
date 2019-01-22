@@ -3,24 +3,19 @@
     @media screen and ($type + -width: $layout-xs) {
       @content;
     }
-  }
-  @else if $size == 'sm' {
+  } @else if $size == 'sm' {
     @media screen and ($type + -width: $layout-sm) {
       @content;
     }
-  }
-  @else if $size == 'md' {
+  } @else if $size == 'md' {
     @media screen and ($type + -width: $layout-md) {
       @content;
     }
-  }
-  @else if $size == 'lg' {
+  } @else if $size == 'lg' {
     @media screen and ($type + -width: $layout-lg) {
       @content;
     }
-  }
-
-  @else {
+  } @else {
     @content;
   }
 }

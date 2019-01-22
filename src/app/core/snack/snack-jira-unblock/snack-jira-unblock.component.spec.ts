@@ -8,9 +8,9 @@ describe('SnackJiraUnblockComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ SnackJiraUnblockComponent ]
+      declarations: [SnackJiraUnblockComponent]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

@@ -2,13 +2,13 @@
 
 <div class="wrapper">
 
-  <div class="updates"
-       *ngIf="issueData.wasUpdated"
-       [@expand]>
+  <div *ngIf="issueData.wasUpdated"
+       [@expand]
+       class="updates">
     <div>
-      <button mat-raised-button
+      <button (click)="hideUpdates()"
               color="accent"
-              (click)="hideUpdates()">
+              mat-raised-button>
         Mark updates as checked
       </button>
     </div>
@@ -22,8 +22,8 @@
     </ul>
   </div>
 
-  <table class="issue-table"
-         [class.isFocusDescription]="isFocusDescription">
+  <table [class.isFocusDescription]="isFocusDescription"
+         class="issue-table">
     <tr>
       <th>Summary</th>
       <th>{{issueData.key}} {{issueData.summary}}</th>
@@ -57,15 +57,15 @@
       <th (click)="isFocusDescription=!isFocusDescription">Description</th>
       <td>
         <!--<inline-markdown [model]="issueData.description"></inline-markdown>-->
-        <div [innerHTML]="issueData.description|markdown"
-             *ngIf="issueData.description"></div>
+        <div *ngIf="issueData.description"
+             [innerHTML]="issueData.description|markdown"></div>
       </td>
     </tr>
     <tr>
       <th>Attachments</th>
       <td>
-        <div class="attachments"
-             [class.hasAttachments]="attachments?.length">
+        <div [class.hasAttachments]="attachments?.length"
+             class="attachments">
           <attachment-list [attachments]="attachments"
                            [isDisableControls]="true"></attachment-list>
           <!--<div class="attachment"-->
@@ -81,8 +81,8 @@
     <tr *ngIf="issueData.comments">
       <th>Comments</th>
       <td>
-        <div class="comment"
-             *ngFor="let comment of issueData.comments">
+        <div *ngFor="let comment of issueData.comments"
+             class="comment">
 
           <img [src]="comment.author.avatarUrl"
                class="author-avatar">
@@ -90,8 +90,8 @@
             <div><span class="author-name">{{comment.author.displayName}}</span>
               <span class="when">at {{comment.created|date:'short'}}</span>
             </div>
-            <div [innerHTML]="comment.body|markdown"
-                 *ngIf="comment.body"></div>
+            <div *ngIf="comment.body"
+                 [innerHTML]="comment.body|markdown"></div>
           </div>
         </div>
 

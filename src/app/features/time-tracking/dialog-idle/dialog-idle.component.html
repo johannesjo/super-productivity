@@ -6,8 +6,8 @@
        mat-dialog-content>
     <p>You have been idle for <strong>{{data.idleTime$|async|msToString:true}}</strong>.</p>
 
-    <select-task [initialTask]="selectedTask"
-                 (taskChange)="onTaskChange($event)"></select-task>
+    <select-task (taskChange)="onTaskChange($event)"
+                 [initialTask]="selectedTask"></select-task>
     <!--<p>Select the task you want to track the time for, or just press cancel if you don't want to track the time.</p>-->
   </div>
 
@@ -18,11 +18,11 @@
     <br><strong>{{selectedTask?.title || newTaskTitle || 'No task selected'}} </strong>
   </p>
 
-  <div mat-dialog-actions
-       align="end">
-    <button mat-raised-button
-            type="submit"
-            color="primary">
+  <div align="end"
+       mat-dialog-actions>
+    <button color="primary"
+            mat-raised-button
+            type="submit">
       <mat-icon *ngIf="!isCreate">track_changes</mat-icon>
       <mat-icon *ngIf="isCreate">add</mat-icon>
       Track time
@@ -36,8 +36,8 @@
     <!--Track but reset break timer-->
     <!--</button>-->
 
-    <button mat-raised-button
-            (click)="close()"
+    <button (click)="close()"
+            mat-raised-button
             type="button">
       <mat-icon>close</mat-icon>
       Don't track

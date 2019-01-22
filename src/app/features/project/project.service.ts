@@ -1,12 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import {
-  GoogleTimeSheetExport,
-  Project,
-  ProjectAdvancedCfg,
-  ProjectAdvancedCfgKey,
-  SimpleSummarySettings
-} from './project.model';
+import { GoogleTimeSheetExport, Project, ProjectAdvancedCfg, ProjectAdvancedCfgKey, SimpleSummarySettings } from './project.model';
 import { PersistenceService } from '../../core/persistence/persistence.service';
 import { select, Store } from '@ngrx/store';
 import { ProjectActionTypes } from './store/project.actions';
@@ -28,7 +22,7 @@ import { Dictionary } from '@ngrx/entity';
 import { getWorklogStr } from '../../util/get-work-log-str';
 import { GitCfg } from '../issue/git/git';
 import { DEFAULT_ISSUE_PROVIDER_CFGS } from '../issue/issue.const';
-import { share, shareReplay } from 'rxjs/operators';
+import { shareReplay } from 'rxjs/operators';
 
 @Injectable()
 export class ProjectService {

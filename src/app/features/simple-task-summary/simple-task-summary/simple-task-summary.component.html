@@ -2,11 +2,11 @@
      mat-dialog-content="">
 
         <textarea [(ngModel)]="tasksTxt"
-                  tabindex="-1"
+                  class="simple-textarea mat-elevation-z2"
+                  id="task-textarea"
                   name="tasksTxt"
                   rows="10"
-                  id="task-textarea"
-                  class="simple-textarea mat-elevation-z2"></textarea>
+                  tabindex="-1"></textarea>
 
 
   <section class="options">
@@ -16,44 +16,44 @@
              style="margin: 10px 0;">Options
         </div>
         <div>
-          <mat-slide-toggle [(ngModel)]="options.isUseNewLine"
-                            (change)="onOptionsChange()"
-                            name="isUseNewLine"
-                            aria-label="Add new line">
+          <mat-slide-toggle (change)="onOptionsChange()"
+                            [(ngModel)]="options.isUseNewLine"
+                            aria-label="Add new line"
+                            name="isUseNewLine">
             Add new line after task
           </mat-slide-toggle>
         </div>
         <div>
-          <mat-slide-toggle [(ngModel)]="options.isListSubTasks"
-                            (change)="onOptionsChange()"
-                            name="isListSubTasks"
-                            aria-label="List sub tasks">
+          <mat-slide-toggle (change)="onOptionsChange()"
+                            [(ngModel)]="options.isListSubTasks"
+                            aria-label="List sub tasks"
+                            name="isListSubTasks">
             List sub tasks
           </mat-slide-toggle>
         </div>
         <div *ngIf="!isWorklogExport">
-          <mat-slide-toggle [(ngModel)]="options.isWorkedOnTodayOnly"
-                            (change)="onOptionsChange()"
-                            name="isWorkedOnTodayOnly"
-                            aria-label="List worked on today tasks only">
+          <mat-slide-toggle (change)="onOptionsChange()"
+                            [(ngModel)]="options.isWorkedOnTodayOnly"
+                            aria-label="List worked on today tasks only"
+                            name="isWorkedOnTodayOnly">
             List worked on today tasks only
           </mat-slide-toggle>
         </div>
         <div *ngIf="!isWorklogExport">
-          <mat-slide-toggle [(ngModel)]="options.isListDoneOnly"
-                            (change)="onOptionsChange()"
-                            name="isListDoneOnly"
-                            aria-label="List done tasks only">
+          <mat-slide-toggle (change)="onOptionsChange()"
+                            [(ngModel)]="options.isListDoneOnly"
+                            aria-label="List done tasks only"
+                            name="isListDoneOnly">
             List done tasks only
           </mat-slide-toggle>
         </div>
         <mat-form-field class="md-block">
           <label>Separate tasks by</label>
-          <input type="text"
+          <input (change)="onOptionsChange()"
+                 [(ngModel)]="options.separateBy"
                  matInput=""
-                 (change)="onOptionsChange()"
                  name="separateBy"
-                 [(ngModel)]="options.separateBy">
+                 type="text">
         </mat-form-field>
       </div>
 
@@ -63,52 +63,52 @@
         </div>
         <div>
           <mat-slide-toggle (change)="onOptionsChange()"
-                            name="showTitle"
                             [(ngModel)]="options.isShowTitle"
-                            aria-label="Title">
+                            aria-label="Title"
+                            name="showTitle">
             Title
           </mat-slide-toggle>
         </div>
         <div>
           <mat-slide-toggle (change)="onOptionsChange()"
-                            name="showDate"
                             [(ngModel)]="options.isShowDate"
-                            aria-label="Date">
+                            aria-label="Date"
+                            name="showDate">
             Date
           </mat-slide-toggle>
         </div>
         <div>
-          <mat-slide-toggle [(ngModel)]="options.isShowTimeSpent"
-                            (change)="onOptionsChange()"
-                            name="showTimeSpent"
-                            aria-label="Time Spent">
+          <mat-slide-toggle (change)="onOptionsChange()"
+                            [(ngModel)]="options.isShowTimeSpent"
+                            aria-label="Time Spent"
+                            name="showTimeSpent">
             Time Spent
           </mat-slide-toggle>
         </div>
         <div>
-          <mat-slide-toggle [(ngModel)]="options.isShowTimeEstimate"
-                            (change)="onOptionsChange()"
-                            name="showTimeSpent"
-                            aria-label="Time Estimate">
+          <mat-slide-toggle (change)="onOptionsChange()"
+                            [(ngModel)]="options.isShowTimeEstimate"
+                            aria-label="Time Estimate"
+                            name="showTimeSpent">
             Time Estimate
           </mat-slide-toggle>
         </div>
         <div>
-          <mat-slide-toggle [(ngModel)]="options.isTimesAsMilliseconds"
-                            (change)="onOptionsChange()"
-                            name="isTimeSpentAsMilliseconds"
+          <mat-slide-toggle (change)="onOptionsChange()"
+                            [(ngModel)]="options.isTimesAsMilliseconds"
                             [disabled]="!options.isShowTimeSpent"
-                            aria-label="Show time as milliseconds">
+                            aria-label="Show time as milliseconds"
+                            name="isTimeSpentAsMilliseconds">
             Time as milliseconds
           </mat-slide-toggle>
         </div>
         <mat-form-field class="md-block">
           <label>Separate fields by</label>
-          <input type="text"
+          <input (change)="onOptionsChange()"
+                 [(ngModel)]="options.separateFieldsBy"
                  matInput=""
-                 (change)="onOptionsChange()"
                  name="separateFieldsBy"
-                 [(ngModel)]="options.separateFieldsBy">
+                 type="text">
         </mat-form-field>
       </div>
     </div>
@@ -116,11 +116,11 @@
     <div class="row">
       <mat-form-field style="width: 100%">
         <label>Regular Expression to remove</label>
-        <input type="text"
+        <input (change)="onOptionsChange()"
+               [(ngModel)]="options.regExToRemove"
                matInput=""
-               (change)="onOptionsChange()"
                name="regExToRemove"
-               [(ngModel)]="options.regExToRemove">
+               type="text">
         <div class="validation-messages">
           <div *ngIf="isInvalidRegEx"
                class="error">Invalid Regular Expression

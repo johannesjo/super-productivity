@@ -14,9 +14,9 @@ import { standardListAnimation } from '../../../ui/animations/standard-list.ani'
   animations: [standardListAnimation]
 })
 export class NotesComponent implements OnInit, OnDestroy {
-  private _subs = new Subscription();
   isElementWasAdded = false;
   @ViewChild('buttonEl') buttonEl: MatButton;
+  private _subs = new Subscription();
 
   constructor(
     public noteService: NoteService,

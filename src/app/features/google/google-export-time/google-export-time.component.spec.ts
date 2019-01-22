@@ -8,9 +8,9 @@ describe('GoogleExportTimeComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ GoogleExportTimeComponent ]
+      declarations: [GoogleExportTimeComponent]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

@@ -38,6 +38,7 @@
   dt {
     margin-bottom: 4px;
   }
+
   dd {
     margin-bottom: 10px;
   }
@@ -55,6 +56,7 @@
 
 .help-and-opts {
   margin-top: 2*$s;
+
   mat-slide-toggle {
     width: 50%;
   }
@@ -80,6 +82,7 @@ table {
       padding-left: 0;
     }
   }
+
   th,
   td {
     &:last-child {

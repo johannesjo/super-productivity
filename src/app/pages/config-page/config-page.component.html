@@ -6,37 +6,37 @@
 
       <div>
         <section class="config-section mat-elevation-z2">
-          <config-section [section]="basicProjectSettingsFormCfg"
+          <config-section (save)="saveProjectBasicCfg($event)"
                           [cfg]="currentProject"
-                          (save)="saveProjectBasicCfg($event)"></config-section>
+                          [section]="basicProjectSettingsFormCfg"></config-section>
         </section>
       </div>
 
       <div *ngFor="let section of projectConfigFormCfg">
         <section class="config-section mat-elevation-z2">
-          <config-section [section]="section"
-                          [cfg]="projectCfg[section.key]"></config-section>
+          <config-section [cfg]="projectCfg[section.key]"
+                          [section]="section"></config-section>
         </section>
       </div>
 
       <div *ngFor="let section of issueIntegrationFormCfg">
         <section class="config-section mat-elevation-z2">
-          <config-section [section]="section"
+          <config-section (save)="saveIssueProviderCfg($event)"
                           [cfg]="issueIntegrationCfgs[section.key]"
-                          (save)="saveIssueProviderCfg($event)"></config-section>
+                          [section]="section"></config-section>
         </section>
       </div>
 
     </div>
 
-    <div class="settings-col"
-         *ngIf="globalCfg">
+    <div *ngIf="globalCfg"
+         class="settings-col">
       <h1 class="md-subhead">Global Config</h1>
       <div *ngFor="let section of globalConfigFormCfg">
         <section class="config-section mat-elevation-z2">
-          <config-section [section]="section"
+          <config-section (save)="saveGlobalCfg($event)"
                           [cfg]="globalCfg[section.key]"
-                          (save)="saveGlobalCfg($event)"></config-section>
+                          [section]="section"></config-section>
         </section>
       </div>
     </div>

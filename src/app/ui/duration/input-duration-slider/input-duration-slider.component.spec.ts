@@ -8,9 +8,9 @@ describe('InputDurationSliderComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ InputDurationSliderComponent ]
+      declarations: [InputDurationSliderComponent]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

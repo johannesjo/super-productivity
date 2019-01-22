@@ -1,8 +1,8 @@
 <div class="page-wrapper">
   <div style="text-align: center;">
-    <button mat-raised-button=""
+    <button aria-label="Work View"
             class="back-btn"
-            aria-label="Work View"
+            mat-raised-button=""
             routerLink="/work-view">
       <mat-icon>chevron_left</mat-icon>
       Wait I forgot something!
@@ -24,22 +24,22 @@
     <div class="summary-point">
       <mat-icon>timer</mat-icon>
       <div class="summary-text">Total time spent today:
-        <div class="summary-val"
-             [innerHtml]="workingToday$|async|msToString"></div>
+        <div [innerHtml]="workingToday$|async|msToString"
+             class="summary-val"></div>
       </div>
     </div>
     <div class="summary-point">
       <mat-icon>timer</mat-icon>
       <div class="summary-text">Total time spent on today's task:
-        <div class="summary-val"
-             [innerHtml]="totalTimeSpentTasks$|async|msToString"></div>
+        <div [innerHtml]="totalTimeSpentTasks$|async|msToString"
+             class="summary-val"></div>
       </div>
     </div>
   </div>
 
-  <mat-tab-group dynamicHeight
+  <mat-tab-group (selectedIndexChange)="onTabIndexChange($event)"
                  [selectedIndex]="selectedTabIndex"
-                 (selectedIndexChange)="onTabIndexChange($event)">
+                 dynamicHeight>
     <mat-tab label="Note for tomorrow">
       <section class="tab-inner">
         <p>This is meant to be a takeaway to be even more productive and happy tomorrow. E.g.: What did you learn today?
@@ -83,8 +83,8 @@
         </table>
 
         <div style="text-align: center; margin-top: 8px; margin-bottom: 16px;">
-          <button mat-raised-button=""
-                  (click)="showExportModal()">
+          <button (click)="showExportModal()"
+                  mat-raised-button="">
             <mat-icon>call_made</mat-icon>
             <mat-icon>playlist_play</mat-icon>
             Export Task List
@@ -110,10 +110,10 @@
       <!--<mat-icon>timer</mat-icon>-->
       <!--Export To Time Sheet-->
       <!--</button>-->
-      <button mat-raised-button=""
-              color="primary"
+      <button (click)="finishDay()"
               [disabled]="cfg.isBlockFinishDayUntilTimeTimeTracked && !isTimeSheetExported"
-              (click)="finishDay()">
+              color="primary"
+              mat-raised-button="">
         <mat-icon>wb_sunny</mat-icon>
         Save and go home
       </button>

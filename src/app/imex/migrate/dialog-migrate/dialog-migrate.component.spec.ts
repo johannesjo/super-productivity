@@ -8,9 +8,9 @@ describe('DialogMigrateComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ DialogMigrateComponent ]
+      declarations: [DialogMigrateComponent]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

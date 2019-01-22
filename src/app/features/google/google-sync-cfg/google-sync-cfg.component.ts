@@ -74,11 +74,11 @@ export class GoogleSyncCfgComponent implements OnInit, OnDestroy {
 
   backupNow() {
     this.backupSub = this._googleDriveSyncService.saveTo().subscribe(() => {
-        this._snackService.open({
-          type: 'SUCCESS',
-          message: 'Google Drive: Successfully saved backup'
-        });
+      this._snackService.open({
+        type: 'SUCCESS',
+        message: 'Google Drive: Successfully saved backup'
       });
+    });
   }
 
   loadRemoteData() {

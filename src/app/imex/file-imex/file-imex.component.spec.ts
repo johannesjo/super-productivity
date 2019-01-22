@@ -8,9 +8,9 @@ describe('FileImexComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ FileImexComponent ]
+      declarations: [FileImexComponent]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

@@ -1,12 +1,12 @@
 <div class="wrapper">
   <mat-form-field>
     <input
-      matInput
-      [placeholder]="placeholder"
-      type="datetime-local"
       [(ngModel)]="model"
+      [name]="name"
+      [placeholder]="placeholder"
       [required]="required"
-      [name]="name">
+      matInput
+      type="datetime-local">
     <mat-error>The entered value is not a datetime!</mat-error>
     <mat-icon matPrefix="">alarm</mat-icon>
   </mat-form-field>

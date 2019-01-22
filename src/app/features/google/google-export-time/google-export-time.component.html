@@ -5,29 +5,29 @@
        @expand>
     <mat-form-field>
       <label>Spreadsheet ID</label>
-      <input type="text"
+      <input [(ngModel)]="opts.spreadsheetId"
              matInput=""
              name="spreadsheetId"
-             [(ngModel)]="opts.spreadsheetId">
+             type="text">
     </mat-form-field>
   </div>
 
-  <div class="loading-spinner"
+  <div *ngIf="isLoading"
        @expand
-       *ngIf="isLoading">
+       class="loading-spinner">
     <mat-progress-spinner mode="indeterminate"></mat-progress-spinner>
   </div>
 
 
-  <div class="table-wrapper"
+  <div *ngIf="headings && !isLoading && isSpreadSheetRead"
        @expand
-       *ngIf="headings && !isLoading && isSpreadSheetRead">
+       class="table-wrapper">
     <table class="export-input-table">
       <tr>
         <th></th>
-        <th class="heading"
-            *ngFor="let heading of headings"
-            [innerHtml]="heading"></th>
+        <th *ngFor="let heading of headings"
+            [innerHtml]="heading"
+            class="heading"></th>
       </tr>
       <tr>
         <th>Last saved row</th>
@@ -35,21 +35,21 @@
       </tr>
       <tr>
         <th>Default</th>
-        <td class="default"
-            *ngFor="let heading of headings; let i = index;">
-          <input type="text"
-                 (change)="updateDefaults()"
+        <td *ngFor="let heading of headings; let i = index;"
+            class="default">
+          <input (change)="updateDefaults()"
+                 [(ngModel)]="opts.defaultValues[i]"
                  [ngModelOptions]="{standalone: true}"
-                 [(ngModel)]="opts.defaultValues[i]">
+                 type="text">
         </td>
       </tr>
       <tr>
         <th>Actual</th>
-        <td class="actual"
-            *ngFor="let heading of headings; let i = index;">
-          <input type="text"
+        <td *ngFor="let heading of headings; let i = index;"
+            class="actual">
+          <input [(ngModel)]="actualValues[i]"
                  name="actualValues"
-                 [(ngModel)]="actualValues[i]">
+                 type="text">
         </td>
       </tr>
     </table>

@@ -8,9 +8,9 @@ describe('DialogViewNoteReminderComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ DialogViewNoteReminderComponent ]
+      declarations: [DialogViewNoteReminderComponent]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

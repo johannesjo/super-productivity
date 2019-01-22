@@ -27,6 +27,7 @@ export class LoadProjectState implements Action {
   constructor(public payload: { state: ProjectState }) {
   }
 }
+
 export class LoadProjectRelatedDataSuccess implements Action {
   readonly type = ProjectActionTypes.LoadProjectRelatedDataSuccess;
 }

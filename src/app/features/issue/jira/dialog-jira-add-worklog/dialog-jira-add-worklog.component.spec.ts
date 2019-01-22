@@ -8,9 +8,9 @@ describe('DialogJiraAddWorklogComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ DialogJiraAddWorklogComponent ]
+      declarations: [DialogJiraAddWorklogComponent]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

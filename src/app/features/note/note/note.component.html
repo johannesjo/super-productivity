@@ -1,19 +1,19 @@
-<div class="note"
-     [class.hasReminder]="note.reminderId"
-     [class.isFocused]="isFocus">
+<div [class.hasReminder]="note.reminderId"
+     [class.isFocused]="isFocus"
+     class="note">
   <div class="content">
     <inline-markdown #markdownEl
-                     (changed)="updateContent($event)"
-                     [isLock]="note.isLock"
-                     (focus)="isFocus=true"
                      (blur)="isFocus=false"
+                     (changed)="updateContent($event)"
+                     (focus)="isFocus=true"
+                     [isLock]="note.isLock"
                      [model]="note.content"></inline-markdown>
   </div>
 
   <div class="controls handle-drag">
-    <button mat-icon-button=""
+    <button [matMenuTriggerFor]="menu"
             class="handle-drag"
-            [matMenuTriggerFor]="menu">
+            mat-icon-button="">
       <mat-icon *ngIf="!note.reminderId"
                 class="handle-drag">more_vert
       </mat-icon>
@@ -23,8 +23,8 @@
     </button>
 
     <mat-menu #menu="matMenu">
-      <button mat-menu-item
-              (click)="editReminder()">
+      <button (click)="editReminder()"
+              mat-menu-item>
         <ng-container *ngIf="!note.reminderId">
           <mat-icon>alarm_add</mat-icon>
           Add reminder
@@ -35,20 +35,20 @@
         </ng-container>
 
       </button>
-      <button mat-menu-item
+      <button (click)="removeReminder()"
               *ngIf="note.reminderId"
-              (click)="removeReminder()">
+              mat-menu-item>
         <mat-icon style="color:#e15d63;">alarm_off</mat-icon>
         Remove reminder
       </button>
-      <button mat-menu-item
-              (click)="toggleLock()">
+      <button (click)="toggleLock()"
+              mat-menu-item>
         <mat-icon *ngIf="note.isLock">lock</mat-icon>
         <mat-icon *ngIf="!note.isLock">lock_open</mat-icon>
         {{note.isLock ? 'Enable markdown parse ' : 'Disable markdown parsing'}}
       </button>
-      <button mat-menu-item
-              (click)="removeNote()">
+      <button (click)="removeNote()"
+              mat-menu-item>
         <mat-icon style="color:#e15d63;">delete_forever</mat-icon>
         Delete
       </button>

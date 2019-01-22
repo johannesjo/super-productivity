@@ -8,9 +8,9 @@ describe('DialogJiraInitialSetupComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ DialogJiraInitialSetupComponent ]
+      declarations: [DialogJiraInitialSetupComponent]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

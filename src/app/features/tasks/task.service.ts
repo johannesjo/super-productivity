@@ -1,15 +1,5 @@
 import shortid from 'shortid';
-import {
-  debounceTime,
-  delay,
-  distinctUntilChanged,
-  first,
-  map,
-  share,
-  shareReplay,
-  take,
-  withLatestFrom
-} from 'rxjs/operators';
+import { debounceTime, delay, distinctUntilChanged, first, map, shareReplay, take, withLatestFrom } from 'rxjs/operators';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { DEFAULT_TASK, DropListModelSource, HIDE_SUB_TASKS, SHOW_SUB_TASKS, Task, TaskWithIssueData, TaskWithSubTasks } from './task.model';
@@ -50,7 +40,8 @@ import {
   selectCurrentTaskId,
   selectEstimateRemainingForBacklog,
   selectEstimateRemainingForToday,
-  selectFocusTaskId, selectIsTaskDataLoaded,
+  selectFocusTaskId,
+  selectIsTaskDataLoaded,
   selectIsTriggerPlanningMode,
   selectTaskById,
   selectTasksWithMissingIssueData,
@@ -376,6 +367,25 @@ export class TaskService {
     this.updateUi(id, {_showSubTasksMode: HIDE_SUB_TASKS});
   }
 
+  async checkForTaskWithIssue(issue: IssueData): Promise<{
+    task: TaskWithIssueData | TaskWithSubTasks,
+    isFromArchive: boolean,
+  }> {
+    const allTasks = await this._allTasksWithIssueData$.pipe(first()).toPromise();
+    const taskWithSameIssue: TaskWithIssueData = allTasks.find(task => task.issueId === issue.id);
+
+    if (taskWithSameIssue) {
+      return {task: taskWithSameIssue, isFromArchive: false};
+    } else {
+      const allArchiveTasks = await this._persistenceService.loadTaskArchiveForProject(this._projectService.currentId);
+      const ids = allArchiveTasks && allArchiveTasks.ids as string[];
+      if (ids) {
+        const archiveTaskWithSameIssue = ids.map(id => allArchiveTasks.entities[id]).find(task => task.issueId === issue.id);
+        return archiveTaskWithSameIssue && {task: archiveTaskWithSameIssue, isFromArchive: true};
+      }
+    }
+  }
+
   private _createNewTask(title: string, additional: Partial<Task> = {}): Task {
     return this._shortSyntax({
       // NOTE needs to be created every time
@@ -421,25 +431,6 @@ export class TaskService {
 
     } else {
       return task;
-    }
-  }
-
-  async checkForTaskWithIssue(issue: IssueData): Promise<{
-    task: TaskWithIssueData | TaskWithSubTasks,
-    isFromArchive: boolean,
-  }> {
-    const allTasks = await this._allTasksWithIssueData$.pipe(first()).toPromise();
-    const taskWithSameIssue: TaskWithIssueData = allTasks.find(task => task.issueId === issue.id);
-
-    if (taskWithSameIssue) {
-      return {task: taskWithSameIssue, isFromArchive: false};
-    } else {
-      const allArchiveTasks = await this._persistenceService.loadTaskArchiveForProject(this._projectService.currentId);
-      const ids = allArchiveTasks && allArchiveTasks.ids as string[];
-      if (ids) {
-        const archiveTaskWithSameIssue = ids.map(id => allArchiveTasks.entities[id]).find(task => task.issueId === issue.id);
-        return archiveTaskWithSameIssue && {task: archiveTaskWithSameIssue, isFromArchive: true};
-      }
     }
   }
 }

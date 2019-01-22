@@ -21,12 +21,12 @@
 TODO configure more restrictive Content-Security-Policy
 @see http://content-security-policy.com/
 @see http://www.html5rocks.com/en/tutorials/security/content-security-policy/ -->
-  <meta http-equiv="Content-Security-Policy"
-        content="default-src *;
+  <meta content="default-src *;
           font-src * data:;
           img-src * data:;
           style-src * 'unsafe-inline' ;
-          script-src * 'self' 'unsafe-inline' 'unsafe-eval'">
+          script-src * 'self' 'unsafe-inline' 'unsafe-eval'"
+        http-equiv="Content-Security-Policy">
   <base href="./">
   <style type="text/css">
     .app-loading {
@@ -94,11 +94,11 @@ TODO configure more restrictive Content-Security-Policy
       <div class="double-bounce2"></div>
     </div>
 
-    <svg viewBox="0 0 64 64"
-         class="logo">
-      <path id="path3395"
-            style="fill:#000;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:1.46761858;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:13.80000019;stroke-dasharray:none;stroke-opacity:1"
-            d="M 0.65537046,34.582787 32.452267,63.855301 63.791548,0.94356422 30.222644,47.722023 Z"/>
+    <svg class="logo"
+         viewBox="0 0 64 64">
+      <path d="M 0.65537046,34.582787 32.452267,63.855301 63.791548,0.94356422 30.222644,47.722023 Z"
+            id="path3395"
+            style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:1.46761858;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:13.80000019;stroke-dasharray:none;stroke-opacity:1"/>
     </svg>
   </div>
 

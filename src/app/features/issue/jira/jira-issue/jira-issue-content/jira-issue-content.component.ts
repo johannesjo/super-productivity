@@ -19,16 +19,16 @@ export class JiraIssueContentComponent implements OnInit {
   attachments: Attachment[];
   isFocusDescription = false;
 
-  @Input() set task(task: TaskWithSubTasks) {
-    this.taskData = task;
-    this.issueData = task.issueData as JiraIssue;
-    this.attachments = this._jiraIssueService.getMappedAttachmentsFromIssue(this.issueData);
-  }
-
   constructor(
     private readonly  _jiraIssueService: JiraIssueService,
     private readonly  _jiraApiService: JiraApiService,
   ) {
+  }
+
+  @Input() set task(task: TaskWithSubTasks) {
+    this.taskData = task;
+    this.issueData = task.issueData as JiraIssue;
+    this.attachments = this._jiraIssueService.getMappedAttachmentsFromIssue(this.issueData);
   }
 
   ngOnInit() {

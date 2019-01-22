@@ -27,9 +27,11 @@ $thisHeight: 80px;
       opacity: 1;
       transition: $transition-enter;
     }
+
     .edit-btn {
       transform: translate(0, 0);
     }
+
     .trash-btn {
       transform: translate(0, 0);
     }
@@ -58,6 +60,7 @@ $thisHeight: 80px;
   &.isImage {
     padding: 0;
     cursor: zoom-in;
+
     img {
       height: $thisHeight;
       width: auto;

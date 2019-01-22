@@ -1,26 +1,26 @@
 <form (submit)="addTask()"
       class="add-task-form mat-elevation-z3 ">
-  <button mat-icon-button=""
-          type="button"
+  <button (click)="isAddToBacklog=!isAddToBacklog"
           class="switch-add-to-btn"
-          (click)="isAddToBacklog=!isAddToBacklog">
+          mat-icon-button=""
+          type="button">
     <mat-icon *ngIf="isAddToBacklog">library_add</mat-icon>
     <mat-icon *ngIf="!isAddToBacklog">playlist_add</mat-icon>
   </button>
-  <input matInput
-         #inputEl
-         class="border-color-primary"
+  <input #inputEl
+         (blur)="onBlur($event)"
+         [formControl]="taskSuggestionsCtrl"
+         [matAutocomplete]="autoEl"
          [placeholder]="(doubleEnterCount > 0) ? 'Press enter one more time to start':'Select or create task'"
          aria-label="Select or create task"
          autofocus="autofocus"
-         [matAutocomplete]="autoEl"
-         [formControl]="taskSuggestionsCtrl"
-         (blur)="onBlur($event)">
+         class="border-color-primary"
+         matInput>
 
   <mat-autocomplete #autoEl="matAutocomplete"
                     (optionSelected)="addTask()"
-                    [displayWith]="displayWith"
-                    [autoActiveFirstOption]="true">
+                    [autoActiveFirstOption]="true"
+                    [displayWith]="displayWith">
     <mat-option *ngIf="isLoading"
                 [value]="taskSuggestionsCtrl.value"
                 class="is-loading">
@@ -29,7 +29,8 @@
     <ng-container *ngIf="!isLoading">
       <mat-option *ngFor="let issue of filteredIssueSuggestions"
                   [value]="issue">
-        <mat-icon [svgIcon]="issue.issueType|issueIcon"></mat-icon> <span>{{issue?.title}}</span>
+        <mat-icon [svgIcon]="issue.issueType|issueIcon"></mat-icon>
+        <span>{{issue?.title}}</span>
       </mat-option>
     </ng-container>
 

@@ -199,17 +199,6 @@ export class PersistenceService {
     };
   }
 
-  private async _loadForProjectIds(pids, getDataFn: Function) {
-    return await pids.reduce(async (acc, projectId) => {
-      const prevAcc = await acc;
-      const dataForProject = await getDataFn(projectId);
-      return {
-        ...prevAcc,
-        [projectId]: dataForProject
-      };
-    }, Promise.resolve({}));
-  }
-
   async importComplete(data: AppDataComplete) {
     console.log('IMPORT--->', data);
     this._isBlockSaving = true;
@@ -240,6 +229,16 @@ export class PersistenceService {
       });
   }
 
+  private async _loadForProjectIds(pids, getDataFn: Function) {
+    return await pids.reduce(async (acc, projectId) => {
+      const prevAcc = await acc;
+      const dataForProject = await getDataFn(projectId);
+      return {
+        ...prevAcc,
+        [projectId]: dataForProject
+      };
+    }, Promise.resolve({}));
+  }
 
   private async _saveForProjectIds(data: any, saveDataFn: Function, isForce = false) {
     const promises = [];

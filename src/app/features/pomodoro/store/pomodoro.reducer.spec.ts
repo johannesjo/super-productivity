@@ -1,4 +1,4 @@
-import { reducer, initialState } from './pomodoro.reducer';
+import { initialState, reducer } from './pomodoro.reducer';
 
 describe('Pomodoro Reducer', () => {
   describe('an unknown action', () => {

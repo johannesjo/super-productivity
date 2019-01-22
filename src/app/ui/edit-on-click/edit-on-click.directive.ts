@@ -13,17 +13,17 @@ export class EditOnClickDirective implements OnInit {
   private _lastDomValue: string;
   private readonly _el: HTMLElement;
 
+  constructor(el: ElementRef) {
+    this._el = el.nativeElement;
+  }
+
+  private _value: string;
+
   @Input() set value(_val) {
     this._value = _val;
     // also update last dom value because that's how check for changes
     this._lastDomValue = _val;
     this._refreshView();
-  }
-
-  private _value: string;
-
-  constructor(el: ElementRef) {
-    this._el = el.nativeElement;
   }
 
   ngOnInit() {

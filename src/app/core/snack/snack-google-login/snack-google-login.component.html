@@ -1,9 +1,9 @@
 <div class="wrapper">
   <mat-icon>error</mat-icon>
   <span class="message">{{data.message}}</span>
-  <button class="action"
+  <button (click)="loginToGoogle()"
+          class="action"
           color="accent"
-          (click)="loginToGoogle()"
           mat-raised-button>
     Login
   </button>

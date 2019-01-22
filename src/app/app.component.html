@@ -2,17 +2,17 @@
   <main-header></main-header>
   <bookmark-bar *ngIf="bookmarkService.isShowBookmarks$|async"
                 [@expand]></bookmark-bar>
-  <add-task-bar class="global"
+  <add-task-bar (blur)="layoutService.hideAddTaskBar()"
+                *ngIf="layoutService.isShowAddTaskBar$|async"
                 [@blendInOut]
-                (blur)="layoutService.hideAddTaskBar()"
-                *ngIf="layoutService.isShowAddTaskBar$|async"></add-task-bar>
-  <div class="backdrop"
+                class="global"></add-task-bar>
+  <div *ngIf="(layoutService.isShowAddTaskBar$|async)"
        @fade
-       *ngIf="(layoutService.isShowAddTaskBar$|async)"></div>
+       class="backdrop"></div>
 
   <mat-drawer-container>
-    <div class="route-wrapper"
-         [@warpRoute]="getPage(o)">
+    <div [@warpRoute]="getPage(o)"
+         class="route-wrapper">
       <router-outlet #o="outlet"></router-outlet>
     </div>
     <mat-drawer (closedStart)="noteService.hide()"

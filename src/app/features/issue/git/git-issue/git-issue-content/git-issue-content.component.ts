@@ -16,15 +16,15 @@ export class GitIssueContentComponent implements OnInit {
   taskData: TaskWithSubTasks;
   issueData: GitIssue;
 
-  @Input() set task(task: TaskWithSubTasks) {
-    this.taskData = task;
-    this.issueData = task.issueData as GitIssue;
-  }
-
   constructor(
     private readonly  _gitIssueService: GitIssueService,
     private readonly  _gitApiService: GitApiService,
   ) {
+  }
+
+  @Input() set task(task: TaskWithSubTasks) {
+    this.taskData = task;
+    this.issueData = task.issueData as GitIssue;
   }
 
   ngOnInit() {

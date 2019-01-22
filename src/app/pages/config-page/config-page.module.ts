@@ -5,7 +5,6 @@ import { ConfigModule } from '../../features/config/config.module';
 import { UiModule } from '../../ui/ui.module';
 import { CoreModule } from '../../core/core.module';
 import { GoogleModule } from '../../features/google/google.module';
-import { IssueModule } from '../../features/issue/issue.module';
 import { JiraModule } from '../../features/issue/jira/jira.module';
 
 @NgModule({

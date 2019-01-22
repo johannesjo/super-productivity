@@ -182,7 +182,6 @@ export type GitOriginalComment = Readonly<{
 }>;
 
 
-
 export type GitIssueSearchResult = Readonly<{
   total_count: number;
   incomplete_results: boolean;

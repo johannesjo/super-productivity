@@ -1,5 +1,5 @@
 import { animate, animateChild, group, query, style, transition, trigger } from '@angular/animations';
-import { ANI_ENTER_TIMING, ANI_LONG_TIMING, ANI_STANDARD_TIMING } from './animation.const';
+import { ANI_ENTER_TIMING } from './animation.const';
 
 export const warpRouteAnimation =
   trigger('warpRoute', [

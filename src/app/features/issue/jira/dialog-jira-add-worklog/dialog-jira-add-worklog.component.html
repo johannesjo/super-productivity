@@ -8,39 +8,39 @@
       Jira: Submit Worklog
     </h2>
     <p>Submit a worklog to Jira for <strong>{{issue.key}} {{issue.summary}}</strong>.</p>
-    <p>Currently logged time: <strong>{{(issue.timespent*1000)|msToString}}</strong></p>
+    <p>Currently logged time: <strong>{{(issue.timespent * 1000)|msToString}}</strong></p>
 
     <div class="form-wrapper">
       <mat-form-field>
-        <input matInput
-               placeholder="Time Spent"
+        <input [(ngModel)]="timeSpent"
+               aria-label="Time Spent"
                inputDuration="optional"
-               type="text"
+               matInput
                name="timeSpent"
+               placeholder="Time Spent"
                required
-               [(ngModel)]="timeSpent"
-               aria-label="Time Spent">
+               type="text">
 
         <mat-icon matPrefix>timer</mat-icon>
       </mat-form-field>
 
       <mat-form-field>
-        <input matInput
+        <input [(ngModel)]="started"
+               matInput
+               name="date"
                placeholder="Started"
-               type="datetime-local"
-               [(ngModel)]="started"
                required
-               name="date">
+               type="datetime-local">
         <mat-error>The entered value is not a date!</mat-error>
       </mat-form-field>
       <mat-form-field>
         <mat-label>Comment</mat-label>
         <textarea [(ngModel)]="comment"
-                  name="comment"
-                  matInput
-                  cdkTextareaAutosize
+                  cdkAutosizeMaxRows="5"
                   cdkAutosizeMinRows="2"
-                  cdkAutosizeMaxRows="5"></textarea>
+                  cdkTextareaAutosize
+                  matInput
+                  name="comment"></textarea>
       </mat-form-field>
     </div>
 
@@ -48,16 +48,16 @@
 
   <mat-dialog-actions align="end">
     <div class="wrap-buttons">
-      <button color="primary"
-              type="submit"
-              (click)="submitWorklog()"
+      <button (click)="submitWorklog()"
               class="btn btn-primary submit-button"
-              mat-raised-button>Save Worklog
+              color="primary"
+              mat-raised-button
+              type="submit">Save Worklog
       </button>
-      <button type="button"
-              (click)="close()"
+      <button (click)="close()"
               class="btn btn-primary submit-button"
-              mat-raised-button>Cancel
+              mat-raised-button
+              type="button">Cancel
       </button>
     </div>
   </mat-dialog-actions>

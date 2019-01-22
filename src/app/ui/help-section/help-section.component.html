@@ -1,8 +1,8 @@
-<button mat-mini-fab=""
-        class="help-btn"
+<button (click)="isShowHelp =!isShowHelp;"
         aria-label="Show Help for section"
-        (click)="isShowHelp =!isShowHelp;">
-  <mat-icon>{{isShowHelp ? 'close':'help_outline'}}</mat-icon>
+        class="help-btn"
+        mat-mini-fab="">
+  <mat-icon>{{isShowHelp ? 'close' : 'help_outline'}}</mat-icon>
 </button>
 
 <div class="help-text"

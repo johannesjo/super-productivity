@@ -1,7 +1,7 @@
-<a mat-raised-button
+<a #exportDataBtn
+   (click)="downloadBackup()"
    color="primary"
-   #exportDataBtn
-   (click)="downloadBackup()">
+   mat-raised-button>
   <mat-icon>file_download</mat-icon>
   Export Data
 </a>

@@ -5,29 +5,29 @@
       <mat-form-field>
         <!--[matDatepicker]="myDatepicker"-->
         <input
-          matInput
-          placeholder="Title for notification"
-          type="text"
           [(ngModel)]="title"
+          matInput
+          name="title"
+          placeholder="Title for notification"
           required
-          name="title">
+          type="text">
         <mat-error>You need to enter a title</mat-error>
       </mat-form-field>
 
-      <datetime-input name="reminderDate"
-                      placeholder="Datetime for reminder"
+      <datetime-input (modelChange)="date=$event"
+                      [model]="date"
                       [required]="true"
-                      (modelChange)="date=$event"
-                      [model]="date"></datetime-input>
+                      name="reminderDate"
+                      placeholder="Datetime for reminder"></datetime-input>
     </div>
   </mat-dialog-content>
 
   <mat-dialog-actions align="end">
     <div class="wrap-buttons">
-      <button color="primary"
-              type="submit"
-              class="btn btn-primary submit-button"
-              mat-raised-button>
+      <button class="btn btn-primary submit-button"
+              color="primary"
+              mat-raised-button
+              type="submit">
         <ng-container *ngIf="!note.reminderId">
           <mat-icon>alarm_add</mat-icon>
           Add reminder
@@ -38,20 +38,20 @@
         </ng-container>
       </button>
 
-      <button type="button"
+      <button (click)="remove()"
               *ngIf="isEdit"
-              color="warn"
-              (click)="remove()"
               class="btn btn-primary submit-button"
-              mat-raised-button>
+              color="warn"
+              mat-raised-button
+              type="button">
         <mat-icon>alarm_off</mat-icon>
         Remove Reminder
       </button>
 
-      <button type="button"
-              (click)="close()"
+      <button (click)="close()"
               class="btn btn-primary submit-button"
-              mat-raised-button>
+              mat-raised-button
+              type="button">
         Cancel
       </button>
     </div>

@@ -4,7 +4,7 @@ import { TaskService } from '../task.service';
 import { DragulaService } from 'ng2-dragula';
 import { BehaviorSubject, combineLatest, Observable, of, Subscription } from 'rxjs';
 import { standardListAnimation } from '../../../ui/animations/standard-list.ani';
-import { expandAnimation, expandFadeFastAnimation, expandFastAnimation } from '../../../ui/animations/expand.ani';
+import { expandFadeFastAnimation } from '../../../ui/animations/expand.ani';
 import { flatMap } from 'rxjs/operators';
 import { FilterDoneTasksPipe } from '../filter-done-tasks.pipe';
 
@@ -17,34 +17,12 @@ import { FilterDoneTasksPipe } from '../filter-done-tasks.pipe';
 
 })
 export class TaskListComponent implements OnDestroy, OnInit {
-  @Input() set tasks(tasks: TaskWithSubTasks[]) {
-    this.tasks_ = tasks;
-    this.tasks$.next(tasks);
-    this.doneTasksLength = this.tasks_.filter(task => task.isDone).length;
-    this.allTasksLength = this.tasks_.length;
-    this.undoneTasksLength = this.tasks_.length - this.doneTasksLength;
-  }
-
   tasks_: TaskWithSubTasks[];
   tasks$: BehaviorSubject<TaskWithSubTasks[]> = new BehaviorSubject([]);
-
-  @Input() set isHideDone(val: boolean) {
-    this.isHideDone_ = val;
-    this.isHideDone$.next(val);
-  }
-
   isHideDone_: boolean;
   isHideDone$: BehaviorSubject<boolean> = new BehaviorSubject(false);
-
-
-  @Input() set isHideAll(val: boolean) {
-    this.isHideAll_ = val;
-    this.isHideAll$.next(val);
-  }
-
   isHideAll_: boolean;
   isHideAll$: BehaviorSubject<boolean> = new BehaviorSubject(false);
-
   filteredTasks$: Observable<TaskWithSubTasks[]> = combineLatest(
     this.tasks$,
     this.isHideDone$,
@@ -54,12 +32,9 @@ export class TaskListComponent implements OnDestroy, OnInit {
     const filteredTasks = this._filterDoneTasks.transform(tasks, currentId, isHideDone, isHideAll);
     return of(filteredTasks);
   }));
-
   @Input() parentId: string;
   @Input() listId: string;
   @Input() listModelId: string;
-
-
   @ViewChild('listEl') listEl;
   subs = new Subscription();
   isBlockAni = true;
@@ -67,7 +42,6 @@ export class TaskListComponent implements OnDestroy, OnInit {
   undoneTasksLength = 0;
   allTasksLength = 0;
   currentTaskId: string;
-
   private _blockAnimationTimeout: number;
 
   constructor(
@@ -76,6 +50,24 @@ export class TaskListComponent implements OnDestroy, OnInit {
     private _cd: ChangeDetectorRef,
     private _filterDoneTasks: FilterDoneTasksPipe,
   ) {
+  }
+
+  @Input() set tasks(tasks: TaskWithSubTasks[]) {
+    this.tasks_ = tasks;
+    this.tasks$.next(tasks);
+    this.doneTasksLength = this.tasks_.filter(task => task.isDone).length;
+    this.allTasksLength = this.tasks_.length;
+    this.undoneTasksLength = this.tasks_.length - this.doneTasksLength;
+  }
+
+  @Input() set isHideDone(val: boolean) {
+    this.isHideDone_ = val;
+    this.isHideDone$.next(val);
+  }
+
+  @Input() set isHideAll(val: boolean) {
+    this.isHideAll_ = val;
+    this.isHideAll$.next(val);
   }
 
   ngOnInit() {

@@ -8,9 +8,9 @@ describe('DialogJiraTransitionComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ DialogJiraTransitionComponent ]
+      declarations: [DialogJiraTransitionComponent]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

@@ -12,11 +12,10 @@ const WORKER_PATH = 'assets/web-workers/reminder.js';
 
 @Injectable()
 export class ReminderService {
+  public onReminderActive$: BehaviorSubject<Reminder> = new BehaviorSubject(null);
   private _w: Worker;
   private _reminders: Reminder[];
   private _throttledShowNotification = throttle(60000, this._showNotification.bind(this));
-
-  public onReminderActive$: BehaviorSubject<Reminder> = new BehaviorSubject(null);
 
   constructor(
     private readonly _projectService: ProjectService,

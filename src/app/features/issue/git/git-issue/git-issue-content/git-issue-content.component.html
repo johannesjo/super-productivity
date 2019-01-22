@@ -1,10 +1,10 @@
-<div style="text-align: center;"
-     *ngIf="issueData?.wasUpdated"
-     @expand>
-  <button mat-raised-button
+<div *ngIf="issueData?.wasUpdated"
+     @expand
+     style="text-align: center;">
+  <button (click)="hideUpdates()"
 
           color="accent"
-          (click)="hideUpdates()">
+          mat-raised-button>
     Mark updates as checked
   </button>
 </div>

@@ -1,25 +1,25 @@
 <div class="circle bg-primary">
   <div class="inner-circle"></div>
   <div class="dots">
-    <div class="dot bg-100"
+    <div *ngFor="let hour of dots"
          @dot
-         *ngFor="let hour of dots"></div>
+         class="dot bg-100"></div>
   </div>
-  <div class="handle-wrapper"
-       #circleEl>
+  <div #circleEl
+       class="handle-wrapper">
     <div class="handle"></div>
   </div>
   <div class="value-wrapper">
-    <label [for]="uid"
-           *ngIf="label"
+    <label *ngIf="label"
+           [for]="uid"
            [innerHtml]="label"></label>
-    <input type="text"
-           inputDuration="optional"
-           class="value"
+    <input (ngModelChange)="onInputChange()"
+           [(ngModel)]="_model"
            [id]="uid"
+           class="value"
+           inputDuration="optional"
            placeholder="click to edit"
            spellcheck="false"
-           [(ngModel)]="_model"
-           (ngModelChange)="onInputChange()">
+           type="text">
   </div>
 </div>

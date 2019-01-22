@@ -1,12 +1,12 @@
 <!--<pre><code>{{jiraCfg|json}}</code></pre>-->
 
 <div class="wrapper">
-  <mat-horizontal-stepper [linear]="true"
-                          dynamicHeight
-                          #stepper>
+  <mat-horizontal-stepper #stepper
+                          [linear]="true"
+                          dynamicHeight>
     <mat-step [stepControl]="credentialsFormGroup">
-      <form [formGroup]="credentialsFormGroup"
-            (submit)="saveStepForm(jiraCfg)">
+      <form (submit)="saveStepForm(jiraCfg)"
+            [formGroup]="credentialsFormGroup">
         <ng-template matStepLabel>Credentials</ng-template>
 
         <p class="isHideWhenJiraSupport">Please
@@ -14,32 +14,32 @@
             download the chrome extension</a> in order to allow communication with the Jira Api. Note that this doesn't work for mobile.
         </p>
 
-        <formly-form [model]="jiraCfg"
-                     [fields]="credentialsFormConfig"
-                     [form]="credentialsFormGroup">
+        <formly-form [fields]="credentialsFormConfig"
+                     [form]="credentialsFormGroup"
+                     [model]="jiraCfg">
 
-          <div class="welcome"
+          <div *ngIf="user"
                [@expand]
-               *ngIf="user">
+               class="welcome">
             <img [src]="user.avatarUrls['48x48']"
-                 class="user-avatar"
-                 alt="User Avatar">
+                 alt="User Avatar"
+                 class="user-avatar">
             <div class="welcome-txt">Login successful!<br>Welcome {{user.displayName}}!</div>
           </div>
 
           <div class="center-wrapper">
-            <button mat-raised-button
-                    (click)="testCredentials()"
-                    [disabled]="!credentialsFormGroup.valid">
+            <button (click)="testCredentials()"
+                    [disabled]="!credentialsFormGroup.valid"
+                    mat-raised-button>
               <mat-icon *ngIf="!isTestCredentialsSuccess">import_export</mat-icon>
               <mat-icon *ngIf="isTestCredentialsSuccess">checkmark</mat-icon>
               Test Credentials
             </button>
-            <button mat-raised-button
-                    type="submit"
+            <button [disabled]="!credentialsFormGroup.valid"
                     color="primary"
+                    mat-raised-button
                     matStepperNext
-                    [disabled]="!credentialsFormGroup.valid">
+                    type="submit">
               Next
               <mat-icon>arrow_forward</mat-icon>
             </button>
@@ -51,12 +51,12 @@
 
 
     <mat-step [stepControl]="advancedSettingsFormGroup">
-      <form [formGroup]="advancedSettingsFormGroup"
-            (submit)="saveStepForm(jiraCfg)">
+      <form (submit)="saveStepForm(jiraCfg)"
+            [formGroup]="advancedSettingsFormGroup">
         <ng-template matStepLabel>Advanced</ng-template>
-        <formly-form [model]="jiraCfg"
-                     [fields]="advancedSettingsFormConfig"
-                     [form]="advancedSettingsFormGroup">
+        <formly-form [fields]="advancedSettingsFormConfig"
+                     [form]="advancedSettingsFormGroup"
+                     [model]="jiraCfg">
 
           <div class="center-wrapper">
             <button mat-raised-button=""
@@ -64,11 +64,11 @@
               <mat-icon>arrow_backward</mat-icon>
               Back
             </button>
-            <button mat-raised-button
-                    type="submit"
-                    [disabled]="!advancedSettingsFormGroup.valid"
+            <button [disabled]="!advancedSettingsFormGroup.valid"
                     color="primary"
-                    matStepperNext>
+                    mat-raised-button
+                    matStepperNext
+                    type="submit">
               <mat-icon>arrow_forward</mat-icon>
               Next
             </button>
@@ -106,10 +106,10 @@
           <mat-icon>arrow_backward</mat-icon>
           Back
         </button>
-        <button mat-raised-button=""
+        <button (click)="saveCfg()"
                 color="primary"
-                type="button"
-                (click)="saveCfg()">
+                mat-raised-button=""
+                type="button">
           <mat-icon>save</mat-icon>
           Save
         </button>

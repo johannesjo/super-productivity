@@ -1,14 +1,14 @@
-<div class="handle bg-600"
-     (dblclick)="toggle()"
+<div (dblclick)="toggle()"
+     (mousedown)="onMouseDown($event)"
      (touchstart)="onTouchStart($event)"
-     (mousedown)="onMouseDown($event)">
-  <button mat-fab=""
-          color="primary"
-          #buttonEl
+     class="handle bg-600">
+  <button #buttonEl
           [class.isAnimate]="isAnimateBtn"
+          color="primary"
+          mat-fab=""
   >
-    <span class="counter"
-          *ngIf="counter">{{counter}}</span>
+    <span *ngIf="counter"
+          class="counter">{{counter}}</span>
     <mat-icon>library_books</mat-icon>
   </button>
 </div>

@@ -8,9 +8,9 @@ describe('DialogAddNoteComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ DialogAddNoteComponent ]
+      declarations: [DialogAddNoteComponent]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

@@ -8,9 +8,9 @@ describe('DialogGitInitialSetupComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ DialogGitInitialSetupComponent ]
+      declarations: [DialogGitInitialSetupComponent]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {
