@@ -33,9 +33,6 @@ import { AttachmentService } from './attachment.service';
     DialogEditAttachmentComponent,
     AttachmentListComponent,
   ],
-  providers: [
-    AttachmentService,
-  ],
 })
 export class AttachmentModule {
 }

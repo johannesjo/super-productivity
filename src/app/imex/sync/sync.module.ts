@@ -11,7 +11,6 @@ import { SyncService } from './sync.service';
     PersistenceModule,
   ],
   declarations: [],
-  providers: [SyncService]
 })
 export class SyncModule {
 }

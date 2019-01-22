@@ -36,10 +36,6 @@ import { GoogleDriveSyncEffects } from './store/google-drive-sync.effects';
   exports: [
     GoogleExportTimeComponent,
   ],
-  providers: [
-    GoogleDriveSyncService,
-    GoogleApiService,
-  ]
 })
 export class GoogleModule {
 }

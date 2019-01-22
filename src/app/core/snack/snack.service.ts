@@ -3,7 +3,9 @@ import { Store } from '@ngrx/store';
 import { SnackClose, SnackOpen } from './store/snack.actions';
 import { SnackParams } from './snack.model';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root',
+})
 export class SnackService {
   constructor(private _store$: Store<any>) {
   }

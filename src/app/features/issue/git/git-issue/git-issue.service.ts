@@ -12,7 +12,9 @@ import { Observable } from 'rxjs';
 import { GIT_TYPE } from '../../issue.const';
 
 
-@Injectable()
+@Injectable({
+  providedIn: 'root',
+})
 export class GitIssueService {
   // gitIssues$: Observable<GitIssue[]> = this._store.pipe(select(selectAllGitIssues));
   // gitIssuesEntities$: Observable<Dictionary<GitIssue>> = this._store.pipe(select(selectGitIssueEntities));

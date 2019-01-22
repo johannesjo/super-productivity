@@ -14,7 +14,9 @@ import { AppDataComplete } from '../../imex/sync/sync.model';
 import { flatMap, map, switchMap, tap, withLatestFrom } from 'rxjs/operators';
 import { EMPTY, from, Observable, throwError } from 'rxjs';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root',
+})
 export class GoogleDriveSyncService {
   config$ = this._configService.cfg$.pipe(map(cfg => cfg.googleDriveSync));
 

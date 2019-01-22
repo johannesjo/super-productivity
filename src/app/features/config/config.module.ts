@@ -47,9 +47,6 @@ import { FileImexModule } from '../../imex/file-imex/file-imex.module';
     ConfigSectionComponent,
     ConfigFormComponent
   ],
-  providers: [
-    ConfigService
-  ]
 })
 export class ConfigModule {
 }

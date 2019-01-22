@@ -30,9 +30,6 @@ import { SnackService } from './snack.service';
     SnackGoogleLoginComponent,
     SnackJiraUnblockComponent,
   ],
-  providers: [
-    SnackService,
-  ],
 })
 export class SnackModule {
 

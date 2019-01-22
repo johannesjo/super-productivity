@@ -9,9 +9,6 @@ import { CoreModule } from '../../core/core.module';
     CommonModule,
     CoreModule,
   ],
-  providers: [
-    ReminderService,
-  ]
 })
 export class ReminderModule {
   constructor(private _reminderService: ReminderService) {

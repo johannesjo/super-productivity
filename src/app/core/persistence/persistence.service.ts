@@ -29,7 +29,9 @@ import { DatabaseService } from './database.service';
 import { loadFromLs, saveToLs } from './local-storage';
 import { issueProviderKeys } from '../../features/issue/issue.const';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root',
+})
 export class PersistenceService {
   private _isBlockSaving = false;
 

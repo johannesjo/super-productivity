@@ -17,7 +17,6 @@ import { UiModule } from '../../ui/ui.module';
     EffectsModule.forFeature([PomodoroEffects]),
   ],
   entryComponents: [DialogPomodoroBreakComponent],
-  providers: [PomodoroService],
 })
 export class PomodoroModule {
 }

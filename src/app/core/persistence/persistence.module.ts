@@ -8,10 +8,6 @@ import { DatabaseService } from './database.service';
     CommonModule,
   ],
   declarations: [],
-  providers: [
-    PersistenceService,
-    DatabaseService,
-  ]
 })
 export class PersistenceModule {
 }

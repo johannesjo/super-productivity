@@ -32,7 +32,9 @@ import * as moment from 'moment';
 
 const BLOCK_ACCESS_KEY = 'SUP_BLOCK_JIRA_ACCESS';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root',
+})
 export class JiraApiService {
   private _requestsLog = {};
   private _isBlockAccess = loadFromSessionStorage(BLOCK_ACCESS_KEY);

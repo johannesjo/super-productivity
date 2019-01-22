@@ -30,6 +30,7 @@ export const INPUT_DURATION_VALIDATORS: any = {
 
 @Directive({
   selector: 'input[inputDuration]',
+  // TODO check if needed
   providers: [
     StringToMsPipe,
     MsToStringPipe,

@@ -11,7 +11,6 @@ import { MigrateService } from './migrate.service';
     CommonModule
   ],
   entryComponents: [DialogMigrateComponent],
-  providers: [MigrateService],
 })
 export class MigrateModule {
 }

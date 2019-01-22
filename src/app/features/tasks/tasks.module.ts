@@ -51,11 +51,6 @@ import { FilterDoneTasksPipe } from './filter-done-tasks.pipe';
     SelectTaskComponent,
     DialogTimeEstimateComponent,
   ],
-  providers: [
-    TaskService,
-    DragulaService,
-    FilterDoneTasksPipe,
-  ],
   entryComponents: [DialogTimeEstimateComponent]
 
 })

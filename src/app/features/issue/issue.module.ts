@@ -23,9 +23,6 @@ import { IssueService } from './issue.service';
     IssueContentComponent,
     IssueIconPipe,
   ],
-  providers: [
-    IssueService,
-  ],
 })
 export class IssueModule {
 }

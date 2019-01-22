@@ -10,7 +10,9 @@ import { debounce, throttle } from 'throttle-debounce';
 
 const WORKER_PATH = 'assets/web-workers/reminder.js';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root',
+})
 export class ReminderService {
   public onReminderActive$: BehaviorSubject<Reminder> = new BehaviorSubject(null);
   private _w: Worker;

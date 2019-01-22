@@ -4,8 +4,6 @@ import { UiModule } from '../../../ui/ui.module';
 import { CoreModule } from '../../../core/core.module';
 import { NgxElectronModule } from 'ngx-electron';
 import { DialogGitInitialSetupComponent } from './dialog-git-initial-setup/dialog-git-initial-setup.component';
-import { GitApiService } from './git-api.service';
-import { GitIssueService } from './git-issue/git-issue.service';
 
 @NgModule({
   imports: [
@@ -17,10 +15,6 @@ import { GitIssueService } from './git-issue/git-issue.service';
   declarations: [DialogGitInitialSetupComponent],
   entryComponents: [DialogGitInitialSetupComponent],
   exports: [],
-  providers: [
-    GitApiService,
-    GitIssueService,
-  ],
 })
 export class GitModule {
 }

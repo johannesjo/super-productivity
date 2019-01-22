@@ -11,7 +11,9 @@ import { createFromDrop, createFromPaste, DropPasteInput } from '../../core/drop
 import { PersistenceService } from '../../core/persistence/persistence.service';
 import { take } from 'rxjs/operators';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root',
+})
 export class AttachmentService {
   attachments$: Observable<Attachment[]> = this._store$.pipe(select(selectAllAttachments));
 

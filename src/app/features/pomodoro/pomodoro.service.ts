@@ -14,7 +14,9 @@ const TD = -1000;
 const DEFAULT_SOUND = 'assets/snd/positive.ogg';
 const DEFAULT_TICK_SOUND = 'assets/snd/tick.mp3';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root',
+})
 export class PomodoroService {
   cfg$: Observable<PomodoroConfig> = this._configService.cfg$.pipe(map(cfg => cfg && cfg.pomodoro));
   isEnabled$: Observable<boolean> = this.cfg$.pipe(map(cfg => cfg && cfg.isEnabled));

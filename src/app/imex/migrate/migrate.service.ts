@@ -34,7 +34,9 @@ import { DialogMigrateComponent } from './dialog-migrate/dialog-migrate.componen
 import { JiraIssueState } from '../../features/issue/jira/jira-issue/store/jira-issue.reducer';
 import { GitIssueState } from '../../features/issue/git/git-issue/store/git-issue.reducer';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root',
+})
 export class MigrateService {
 
   private _issueTypeMap = {

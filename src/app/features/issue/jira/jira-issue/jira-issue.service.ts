@@ -13,7 +13,9 @@ import { take } from 'rxjs/operators';
 import { Observable } from 'rxjs';
 
 
-@Injectable()
+@Injectable({
+  providedIn: 'root',
+})
 export class JiraIssueService {
   // jiraIssues$: Observable<JiraIssue[]> = this._store.pipe(select(selectAllJiraIssues));
   // jiraIssuesEntities$: Observable<Dictionary<JiraIssue>> = this._store.pipe(select(selectJiraIssueEntities));

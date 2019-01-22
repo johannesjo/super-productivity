@@ -21,10 +21,6 @@ import { CoreModule } from '../../core/core.module';
   declarations: [
     DialogIdleComponent
   ],
-  providers: [
-    TimeTrackingService,
-    IdleService,
-  ],
   entryComponents: [
     DialogIdleComponent,
   ],

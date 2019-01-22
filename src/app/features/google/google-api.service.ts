@@ -16,7 +16,9 @@ import { ElectronService } from 'ngx-electron';
 
 const EXPIRES_SAFETY_MARGIN = 30000;
 
-@Injectable()
+@Injectable({
+  providedIn: 'root',
+})
 export class GoogleApiService {
   public isLoggedIn: boolean;
   public isLoggedIn$: Observable<boolean> = this._configService.cfg$

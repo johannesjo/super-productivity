@@ -27,9 +27,6 @@ import { GitIssueContentComponent } from './git-issue-content/git-issue-content.
     GitIssueHeaderComponent,
     GitIssueContentComponent,
   ],
-  providers: [
-    GitIssueService,
-  ],
 })
 export class GitIssueModule {
 }

@@ -10,9 +10,6 @@ import { NotifyService } from './notify.service';
     // ServiceWorkerModule.register(SERVICE_WORKER_URL),
   ],
   declarations: [],
-  providers: [
-    NotifyService,
-  ]
 })
 export class NotifyModule {
   constructor() {

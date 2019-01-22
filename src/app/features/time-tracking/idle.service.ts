@@ -17,7 +17,9 @@ import { distinctUntilChanged, shareReplay } from 'rxjs/operators';
 const DEFAULT_MIN_IDLE_TIME = 60000;
 const IDLE_POLL_INTERVAL = 1000;
 
-@Injectable()
+@Injectable({
+  providedIn: 'root',
+})
 export class IdleService {
   public isIdle = false;
   private _isIdle$: BehaviorSubject<boolean> = new BehaviorSubject(false);

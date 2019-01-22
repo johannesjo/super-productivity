@@ -14,7 +14,6 @@ import { LayoutService } from './layout.service';
     EffectsModule.forFeature([LayoutEffects])
   ],
   declarations: [],
-  providers: [LayoutService]
 })
 export class LayoutModule {
 }

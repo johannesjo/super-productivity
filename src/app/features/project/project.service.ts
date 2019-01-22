@@ -24,7 +24,9 @@ import { GitCfg } from '../issue/git/git';
 import { DEFAULT_ISSUE_PROVIDER_CFGS } from '../issue/issue.const';
 import { shareReplay } from 'rxjs/operators';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root',
+})
 export class ProjectService {
   list$: Observable<Project[]> = this._store.pipe(select(selectAllProjects));
   currentProject$: Observable<Project> = this._store.pipe(

@@ -9,8 +9,6 @@ import { JiraCfgComponent } from './jira-cfg/jira-cfg.component';
 import { FormsModule } from '@angular/forms';
 import { DialogJiraTransitionComponent } from './dialog-jira-transition/dialog-jira-transition.component';
 import { DialogJiraAddWorklogComponent } from './dialog-jira-add-worklog/dialog-jira-add-worklog.component';
-import { JiraApiService } from './jira-api.service';
-import { JiraIssueService } from './jira-issue/jira-issue.service';
 
 @NgModule({
   imports: [
@@ -21,11 +19,11 @@ import { JiraIssueService } from './jira-issue/jira-issue.service';
     FormsModule,
   ],
   declarations: [
+    DialogJiraTransitionComponent,
+    DialogJiraInitialSetupComponent,
+    DialogJiraAddWorklogComponent,
     JiraCfgStepperComponent,
     JiraCfgComponent,
-    DialogJiraInitialSetupComponent,
-    DialogJiraTransitionComponent,
-    DialogJiraAddWorklogComponent,
   ],
   entryComponents: [
     DialogJiraTransitionComponent,
@@ -36,10 +34,6 @@ import { JiraIssueService } from './jira-issue/jira-issue.service';
   exports: [
     JiraCfgStepperComponent
   ],
-  providers: [
-    JiraApiService,
-    JiraIssueService,
-  ]
 })
 export class JiraModule {
 }

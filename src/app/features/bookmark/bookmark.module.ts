@@ -33,9 +33,6 @@ import { BookmarkService } from './bookmark.service';
     BookmarkBarComponent,
     DialogEditBookmarkComponent
   ],
-  providers: [
-    BookmarkService,
-  ],
 })
 export class BookmarkModule {
 }

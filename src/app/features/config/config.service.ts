@@ -9,7 +9,9 @@ import { DEFAULT_CFG } from './default-config.const';
 import { Actions, ofType } from '@ngrx/effects';
 import { shareReplay } from 'rxjs/operators';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root',
+})
 export class ConfigService {
   cfg$: Observable<GlobalConfig> = this._store.pipe(
     select(selectConfigFeatureState),

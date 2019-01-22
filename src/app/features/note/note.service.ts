@@ -20,7 +20,9 @@ import { take } from 'rxjs/operators';
 import { ReminderService } from '../reminder/reminder.service';
 import { SnackService } from '../../core/snack/snack.service';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root',
+})
 export class NoteService {
   public isShowNotes$: Observable<boolean> = this._store$.pipe(select(selectIsShowNotes));
   public notes$: Observable<Note[]> = this._store$.pipe(select(selectAllNotes));

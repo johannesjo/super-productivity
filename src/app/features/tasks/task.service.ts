@@ -57,7 +57,9 @@ import { IssueService } from '../issue/issue.service';
 import { ProjectService } from '../project/project.service';
 
 
-@Injectable()
+@Injectable({
+  providedIn: 'root',
+})
 export class TaskService {
   isDataLoaded$: Observable<boolean> = this._store.pipe(
     select(selectIsTaskDataLoaded),

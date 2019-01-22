@@ -14,7 +14,9 @@ import { SearchResultItem } from '../issue';
 const BASE = GIT_API_BASE_URL;
 const MAX_CACHE_AGE = 60 * 5 * 1000;
 
-@Injectable()
+@Injectable({
+  providedIn: 'root',
+})
 export class GitApiService {
   private _cfg: GitCfg;
   private _cachedIssues: GitIssue[];

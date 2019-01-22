@@ -29,9 +29,6 @@ import { AttachmentModule } from '../../../attachment/attachment.module';
     JiraIssueHeaderComponent,
     JiraIssueContentComponent,
   ],
-  providers: [
-    JiraIssueService,
-  ],
 })
 export class JiraIssueModule {
 }

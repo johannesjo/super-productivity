@@ -62,7 +62,6 @@ import { MigrateModule } from './imex/migrate/migrate.module';
     ServiceWorkerModule.register('ngsw-worker.js', {enabled: environment.production}),
     NoteModule,
   ],
-  providers: [],
   bootstrap: [AppComponent]
 })
 export class AppModule {
