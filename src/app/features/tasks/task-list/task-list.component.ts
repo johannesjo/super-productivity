@@ -6,7 +6,7 @@ import { BehaviorSubject, combineLatest, Observable, of, Subscription } from 'rx
 import { standardListAnimation } from '../../../ui/animations/standard-list.ani';
 import { expandFadeFastAnimation } from '../../../ui/animations/expand.ani';
 import { flatMap } from 'rxjs/operators';
-import { FilterDoneTasksPipe } from '../filter-done-tasks.pipe';
+import { filterDoneTasks } from '../filter-done-tasks.pipe';
 
 @Component({
   selector: 'task-list',
@@ -29,7 +29,7 @@ export class TaskListComponent implements OnDestroy, OnInit {
     this.isHideAll$,
     this._taskService.currentTaskId$,
   ).pipe(flatMap(([tasks, isHideDone, isHideAll, currentId]) => {
-    const filteredTasks = this._filterDoneTasks.transform(tasks, currentId, isHideDone, isHideAll);
+    const filteredTasks = filterDoneTasks(tasks, currentId, isHideDone, isHideAll);
     return of(filteredTasks);
   }));
   @Input() parentId: string;
@@ -48,7 +48,6 @@ export class TaskListComponent implements OnDestroy, OnInit {
     private _taskService: TaskService,
     private _dragulaService: DragulaService,
     private _cd: ChangeDetectorRef,
-    private _filterDoneTasks: FilterDoneTasksPipe,
   ) {
   }
 

@@ -15,7 +15,6 @@ import { NotifyModule } from './notify/notify.module';
     SnackModule,
     NotifyModule,
   ],
-  declarations: [],
   exports: [
     PersistenceModule,
     ChromeExtensionInterfaceModule,

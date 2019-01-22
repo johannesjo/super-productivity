@@ -57,6 +57,8 @@ import { MsToClockStringPipe } from './duration/ms-to-clock-string.pipe';
 import { DatetimeInputComponent } from './datetime-input/datetime-input.component';
 import { InputDurationSliderComponent } from './duration/input-duration-slider/input-duration-slider.component';
 import { MsToMinuteClockStringPipe } from './duration/ms-to-minute-clock-string.pipe';
+import { KeysPipe } from '../util/keys.pipe';
+import { ToArrayPipe } from '../util/to-array.pipe';
 
 @NgModule({
   imports: [
@@ -131,6 +133,8 @@ import { MsToMinuteClockStringPipe } from './duration/ms-to-minute-clock-string.
     DialogConfirmComponent,
     EnlargeImgDirective,
     DatetimeInputComponent,
+    KeysPipe,
+    ToArrayPipe,
   ],
   entryComponents: [
     DialogConfirmComponent,
@@ -159,6 +163,8 @@ import { MsToMinuteClockStringPipe } from './duration/ms-to-minute-clock-string.
     MsToStringPipe$,
     StringToMsPipe,
     NumberToMonthPipe,
+    KeysPipe,
+    ToArrayPipe,
 
     DragulaModule,
     Angular2PromiseButtonModule,

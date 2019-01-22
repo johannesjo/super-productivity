@@ -5,7 +5,6 @@ import * as fromLayout from './store/layout.reducer';
 import { LAYOUT_FEATURE_NAME } from './store/layout.reducer';
 import { EffectsModule } from '@ngrx/effects';
 import { LayoutEffects } from './store/layout.effects';
-import { LayoutService } from './layout.service';
 
 @NgModule({
   imports: [

@@ -9,7 +9,6 @@ import { ConfigFormComponent } from './config-form/config-form.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { FormlyModule } from '@ngx-formly/core';
 import { FormlyMaterialModule } from '@ngx-formly/material';
-import { ConfigService } from './config.service';
 import { UiModule } from '../../ui/ui.module';
 import { KeyboardInputComponent } from './keyboard-input/keyboard-input.component';
 import { GoogleSyncCfgComponent } from '../google/google-sync-cfg/google-sync-cfg.component';
@@ -17,7 +16,6 @@ import { FileImexModule } from '../../imex/file-imex/file-imex.module';
 
 @NgModule({
   imports: [
-    UiModule,
     FormsModule,
     ReactiveFormsModule,
     FormlyModule.forChild({
@@ -32,6 +30,7 @@ import { FileImexModule } from '../../imex/file-imex/file-imex.module';
     CommonModule,
     StoreModule.forFeature(CONFIG_FEATURE_NAME, configReducer),
     EffectsModule.forFeature([ConfigEffects]),
+    UiModule,
     FileImexModule,
   ],
   declarations: [

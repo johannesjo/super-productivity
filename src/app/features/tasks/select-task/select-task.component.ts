@@ -18,14 +18,14 @@ export class SelectTaskComponent implements OnInit, OnDestroy {
   @Output() taskChange = new EventEmitter<Task | string>();
   private _destroy$: Subject<boolean> = new Subject<boolean>();
 
-  constructor(private _taskService: TaskService) {
-  }
-
   @Input() set initialTask(task: Task) {
     if (task && !this.taskSelectCtrl.value || this.taskSelectCtrl.value === '') {
       this.isCreate = false;
       this.taskSelectCtrl.setValue(task);
     }
+  }
+
+  constructor(private _taskService: TaskService) {
   }
 
   ngOnInit() {

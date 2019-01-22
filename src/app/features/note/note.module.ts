@@ -21,6 +21,13 @@ import { IS_ELECTRON } from '../../app.constants';
 import { DialogAddNoteComponent } from './dialog-add-note/dialog-add-note.component';
 
 @NgModule({
+  imports: [
+    CommonModule,
+    FormsModule,
+    UiModule,
+    StoreModule.forFeature(NOTE_FEATURE_NAME, fromNote.reducer),
+    EffectsModule.forFeature([NoteEffects]),
+  ],
   declarations: [
     NotesComponent,
     NoteComponent,
@@ -28,21 +35,12 @@ import { DialogAddNoteComponent } from './dialog-add-note/dialog-add-note.compon
     DialogViewNoteReminderComponent,
     DialogAddNoteComponent
   ],
-  imports: [
-    ReminderModule,
-    CommonModule,
-    FormsModule,
-    UiModule,
-    StoreModule.forFeature(NOTE_FEATURE_NAME, fromNote.reducer),
-    EffectsModule.forFeature([NoteEffects]),
-  ],
   entryComponents: [
     DialogAddNoteReminderComponent,
     DialogViewNoteReminderComponent,
     DialogAddNoteComponent,
   ],
   exports: [NotesComponent],
-  providers: [NoteService]
 })
 export class NoteModule {
   constructor(

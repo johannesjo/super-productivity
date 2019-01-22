@@ -5,18 +5,15 @@ import { DialogIdleComponent } from './dialog-idle/dialog-idle.component';
 import { IdleService } from './idle.service';
 import { UiModule } from '../../ui/ui.module';
 import { FormsModule } from '@angular/forms';
-import { TasksModule } from '../tasks/tasks.module';
 import { TakeABreakModule } from './take-a-break/take-a-break.module';
-import { CoreModule } from '../../core/core.module';
+import { TasksModule } from '../tasks/tasks.module';
 
 @NgModule({
   imports: [
     CommonModule,
     UiModule,
-    CoreModule,
     FormsModule,
     TasksModule,
-    TakeABreakModule,
   ],
   declarations: [
     DialogIdleComponent

@@ -11,7 +11,6 @@ import { SimpleTaskSummaryComponent } from './simple-task-summary/simple-task-su
     CommonModule,
     UiModule,
     FormsModule,
-    SnackModule,
   ],
   declarations: [DialogSimpleTaskSummaryComponent, SimpleTaskSummaryComponent],
   entryComponents: [DialogSimpleTaskSummaryComponent],

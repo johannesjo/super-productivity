@@ -5,7 +5,6 @@ import { IssueHeaderComponent } from './issue-header/issue-header.component';
 import { IssueContentComponent } from './issue-content/issue-content.component';
 import { GitIssueModule } from './git/git-issue/git-issue.module';
 import { IssueIconPipe } from './issue-icon/issue-icon.pipe';
-import { IssueService } from './issue.service';
 
 @NgModule({
   imports: [

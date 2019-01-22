@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { WorklogAndCalendarComponent } from './worklog-and-calendar.component';
 import { CalendarModule } from './calendar/calendar.module';
 import { WorklogModule } from './worklog/worklog.module';
-import { CoreModule } from '../../core/core.module';
 import { UiModule } from '../../ui/ui.module';
 import { RouterModule } from '@angular/router';
 
@@ -12,7 +11,6 @@ import { RouterModule } from '@angular/router';
     CommonModule,
     CalendarModule,
     WorklogModule,
-    CoreModule,
     UiModule,
     RouterModule,
   ],

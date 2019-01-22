@@ -20,7 +20,6 @@ import { TimeTrackingModule } from '../../features/time-tracking/time-tracking.m
     TimeTrackingModule,
   ],
   declarations: [WorkViewPageComponent],
-  exports: [WorkViewPageComponent],
 })
 export class WorkViewPageModule {
 }

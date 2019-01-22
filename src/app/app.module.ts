@@ -33,8 +33,8 @@ import { MigrateModule } from './imex/migrate/migrate.module';
   ],
   imports: [
     // Local
-    UiModule,
     CoreModule,
+    UiModule,
     CoreUiModule,
     PagesModule,
     MainHeaderModule,
