@@ -395,6 +395,7 @@ export class GoogleApiService {
       headers: new HttpHeaders(p.headers),
       params: new HttpParams({fromObject: p.params}),
       reportProgress: false,
+      observe: 'response',
     }];
     const req = new HttpRequest(p.method, p.url, ...allArgs);
 
@@ -402,6 +403,7 @@ export class GoogleApiService {
     return this._http.request(req)
       .pipe(
         // TODO remove type: 0 @see https://brianflove.com/2018/09/03/angular-http-client-observe-response/
+        tap(res => console.log(res)),
         filter(res => !(res === Object(res) && res.type === 0)),
         take(1),
         map((res: any) => (res && res.body) ? res.body : res),
@@ -409,7 +411,9 @@ export class GoogleApiService {
           console.warn(res);
           if (!res) {
             this._handleError('No response body');
-          } else if (res && res.status >= 300) {
+          } else if (res && (res.status >= 0)) {
+            this._handleError('Could not connect to google. Check your internet connection.');
+          } else if (res && (res.status >= 300)) {
             this._handleError(res);
           } else if (res && res.status === 401) {
             this._handleUnAuthenticated(res);
