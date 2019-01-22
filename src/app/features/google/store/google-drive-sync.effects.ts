@@ -39,6 +39,7 @@ export class GoogleDriveSyncEffects {
   isEnabled$ = this.config$.pipe(map(cfg => cfg.isEnabled), distinctUntilChanged());
   isAutoSyncToRemote$ = this.config$.pipe(map(cfg => cfg.isAutoSyncToRemote), distinctUntilChanged());
   syncInterval$ = this.config$.pipe(map(cfg => cfg.syncInterval), distinctUntilChanged());
+
   @Effect() triggerSync$: any = this._actions$.pipe(
     ofType(
       ConfigActionTypes.LoadConfig,
@@ -59,6 +60,7 @@ export class GoogleDriveSyncEffects {
       }),
     )),
   );
+
   @Effect() saveForSync$: any = this._actions$.pipe(
     ofType(
       GoogleDriveSyncActionTypes.SaveForSync,
@@ -66,6 +68,7 @@ export class GoogleDriveSyncEffects {
     tap(() => this._showAsyncToast(undefined, 'Syncing to Google Drive')),
     map(() => new SaveToGoogleDriveFlow()),
   );
+
   @Effect() initialImport$: any = this._actions$.pipe(
     ofType(
       ConfigActionTypes.LoadConfig,
@@ -91,6 +94,7 @@ export class GoogleDriveSyncEffects {
       }
     }),
   );
+
   @Effect() changeSyncFile$: any = this._actions$.pipe(
     ofType(
       GoogleDriveSyncActionTypes.ChangeSyncFileName,
@@ -130,6 +134,7 @@ export class GoogleDriveSyncEffects {
       );
     }),
   );
+
   @Effect() createEmptySyncFile$: any = this._actions$.pipe(
     ofType(
       GoogleDriveSyncActionTypes.CreateSyncFile,
@@ -149,6 +154,7 @@ export class GoogleDriveSyncEffects {
       }, false);
     }),
   );
+
   @Effect() saveToFlow$: any = this._actions$.pipe(
     ofType(
       GoogleDriveSyncActionTypes.SaveToGoogleDriveFlow,
@@ -188,6 +194,7 @@ export class GoogleDriveSyncEffects {
     }),
     catchError(err => of(new SaveToGoogleDriveCancel())),
   );
+
   @Effect() save$: any = this._actions$.pipe(
     ofType(
       GoogleDriveSyncActionTypes.SaveToGoogleDrive,
@@ -203,6 +210,7 @@ export class GoogleDriveSyncEffects {
     map((response: any) => new SaveToGoogleDriveSuccess({response})),
     catchError(err => of(new SaveToGoogleDriveCancel())),
   );
+
   @Effect() saveSuccess$: any = this._actions$.pipe(
     ofType(
       GoogleDriveSyncActionTypes.SaveToGoogleDriveSuccess,
@@ -221,6 +229,7 @@ export class GoogleDriveSyncEffects {
       ]
     ),
   );
+
   @Effect() loadFromFlow$: any = this._actions$.pipe(
     ofType(
       GoogleDriveSyncActionTypes.LoadFromGoogleDriveFlow,
@@ -268,6 +277,7 @@ export class GoogleDriveSyncEffects {
     }),
     catchError(err => of(new LoadFromGoogleDriveCancel())),
   );
+
   @Effect() load$: any = this._actions$.pipe(
     ofType(
       GoogleDriveSyncActionTypes.LoadFromGoogleDrive,
@@ -282,6 +292,7 @@ export class GoogleDriveSyncEffects {
     map((modifiedDate) => new LoadFromGoogleDriveSuccess({modifiedDate})),
     catchError(err => of(new LoadFromGoogleDriveCancel())),
   );
+
   @Effect() loadSuccess$: any = this._actions$.pipe(
     ofType(
       GoogleDriveSyncActionTypes.LoadFromGoogleDriveSuccess,
