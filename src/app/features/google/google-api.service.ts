@@ -8,9 +8,9 @@ import { SnackService } from '../../core/snack/snack.service';
 import { SnackType } from '../../core/snack/snack.model';
 import { ConfigService } from '../config/config.service';
 import { GlobalConfig, GoogleSession } from '../config/config.model';
-import { catchError, filter, map, tap } from 'rxjs/operators';
+import { catchError, filter, map, take, tap } from 'rxjs/operators';
 import { EmptyObservable } from 'rxjs-compat/observable/EmptyObservable';
-import { combineLatest, Observable, of, throwError } from 'rxjs';
+import { combineLatest, Observable, throwError } from 'rxjs';
 import { IPC_GOOGLE_AUTH_TOKEN, IPC_GOOGLE_AUTH_TOKEN_ERROR, IPC_TRIGGER_GOOGLE_AUTH } from '../../../../electron/ipc-events.const';
 import { ElectronService } from 'ngx-electron';
 
@@ -399,12 +399,11 @@ export class GoogleApiService {
     const req = new HttpRequest(p.method, p.url, ...allArgs);
 
     // const sub = this._http[p.method.toLowerCase()](p.url, p.data, p)
-    console.log('MAP HTTP');
-
     return this._http.request(req)
       .pipe(
         // TODO remove type: 0 @see https://brianflove.com/2018/09/03/angular-http-client-observe-response/
-        filter(res => !(res && res.type && res.type === 0)),
+        filter(res => !(res === Object(res) && res.type === 0)),
+        take(1),
         map((res: any) => (res && res.body) ? res.body : res),
         catchError((res) => {
           console.warn(res);
