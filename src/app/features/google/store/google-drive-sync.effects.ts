@@ -45,7 +45,6 @@ import * as moment from 'moment';
 import { DialogConfirmDriveSyncLoadComponent } from '../dialog-confirm-drive-sync-load/dialog-confirm-drive-sync-load.component';
 import { AppDataComplete } from '../../../imex/sync/sync.model';
 import { selectIsGoogleDriveSaveInProgress } from './google-drive-sync.reducer';
-import { isOnline } from '../../../util/is-online';
 
 @Injectable()
 export class GoogleDriveSyncEffects {
@@ -187,7 +186,10 @@ export class GoogleDriveSyncEffects {
       } else {
         // otherwise update
         return this._googleApiService.getFileInfo(cfg._backupDocId).pipe(
+          catchError(err => of(new SaveToGoogleDriveCancel())),
           concatMap((res: any): Observable<any> => {
+            console.log('concat map response', res);
+
             const lastActiveLocal = this._syncService.getLastActive();
             const lastModifiedRemote = res.modifiedDate;
 
@@ -210,7 +212,6 @@ export class GoogleDriveSyncEffects {
               return of(new SaveToGoogleDrive({isSkipSnack: action.payload && action.payload.isSkipSnack}));
             }
           }),
-          catchError(err => of(new SaveToGoogleDriveCancel())),
         );
       }
     }),
