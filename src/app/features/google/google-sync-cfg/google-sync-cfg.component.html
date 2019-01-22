@@ -31,6 +31,7 @@
       <button type="button"
               mat-raised-button=""
               class="md-raised"
+              [disabled]="googleDriveSyncService.isLoadInProgress$|async"
               [promiseBtn]="googleDriveSyncService.isSaveInProgress$|async"
               *ngIf="(googleApiService.isLoggedIn$|async)"
               (click)="saveToGoogleDrive()">
@@ -40,6 +41,7 @@
       <button type="button"
               mat-raised-button=""
               class="md-raised sync-from-btn"
+              [disabled]="googleDriveSyncService.isSaveInProgress$|async"
               [promiseBtn]="googleDriveSyncService.isLoadInProgress$|async"
               *ngIf="(googleApiService.isLoggedIn$|async)"
               (click)="loadFromGoogleDrive()">
