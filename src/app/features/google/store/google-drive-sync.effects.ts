@@ -81,7 +81,7 @@ export class GoogleDriveSyncEffects {
       'Syncing to Google Drive'
       )
     ),
-    map(() => new SaveToGoogleDriveFlow()),
+    map(() => new SaveToGoogleDriveFlow({isSkipSnack: true})),
   );
 
   @Effect() initialImport$: any = this._actions$.pipe(
@@ -190,11 +190,12 @@ export class GoogleDriveSyncEffects {
             console.log('SaveTo Check', this._isEqual(lastActiveLocal, lastModifiedRemote), lastModifiedRemote, lastActiveLocal);
 
             if (this._isEqual(lastActiveLocal, lastModifiedRemote)) {
-              // TODO refactor optional message to cancel
-              this._snackService.open({
-                type: 'SUCCESS',
-                message: `DriveSync: Remote data already up to date`
-              });
+              if (!action.payload || !action.payload.isSkipSnack) {
+                this._snackService.open({
+                  type: 'SUCCESS',
+                  message: `DriveSync: Remote data already up to date`
+                });
+              }
               return of(new SaveToGoogleDriveCancel());
             } else if (this._isNewerThan(lastModifiedRemote, cfg._lastSync)) {
               // remote has an update so prompt what to do
@@ -202,7 +203,7 @@ export class GoogleDriveSyncEffects {
               return of(new SaveToGoogleDriveCancel());
             } else {
               // local is newer than remote so just save
-              return of(new SaveToGoogleDrive());
+              return of(new SaveToGoogleDrive({isSkipSnack: action.payload && action.payload.isSkipSnack}));
             }
           }),
         );
@@ -215,34 +216,42 @@ export class GoogleDriveSyncEffects {
     ofType(
       GoogleDriveSyncActionTypes.SaveToGoogleDrive,
     ),
-    concatMap((): any => from(this._getLocalAppData())),
-    withLatestFrom(this.config$),
-    concatMap(([completeData, cfg]) => this._googleApiService.saveFile(completeData, {
-        title: cfg.syncFileName,
-        id: cfg._backupDocId,
-        editable: true
-      })
+    concatMap((action: SaveToGoogleDrive): any =>
+      from(this._getLocalAppData()).pipe(
+        withLatestFrom(this.config$),
+        concatMap(([completeData, cfg]) => this._googleApiService.saveFile(completeData, {
+            title: cfg.syncFileName,
+            id: cfg._backupDocId,
+            editable: true
+          })
+        ),
+        map((response: any) => new SaveToGoogleDriveSuccess({
+          response,
+          isSkipSnack: action.payload && action.payload.isSkipSnack
+        })),
+        catchError(err => of(new SaveToGoogleDriveCancel())),
+      )
     ),
-    map((response: any) => new SaveToGoogleDriveSuccess({response})),
-    catchError(err => of(new SaveToGoogleDriveCancel())),
   );
 
   @Effect() saveSuccess$: any = this._actions$.pipe(
     ofType(
       GoogleDriveSyncActionTypes.SaveToGoogleDriveSuccess,
     ),
-    map((action: SaveToGoogleDriveSuccess) => action.payload.response.modifiedDate),
-    // NOTE: last active needs to be set to exactly the value we get back
-    tap((modifiedDate) => this._syncService.saveLastActive(modifiedDate)),
-    switchMap((modifiedDate) => [
-        this._updateConfig({
-          _lastSync: modifiedDate,
-        }, true),
-        new SnackOpen({
+    map((action: SaveToGoogleDriveSuccess) => action.payload),
+    tap((p) => {
+      if (!p.isSkipSnack) {
+        this._snackService.open({
           type: 'SUCCESS',
           message: 'Google Drive: Successfully saved backup'
-        }),
-      ]
+        });
+      }
+    }),
+    // NOTE: last active needs to be set to exactly the value we get back
+    tap((p) => this._syncService.saveLastActive(p.response.modifiedDate)),
+    map((p) => this._updateConfig({
+        _lastSync: p.response.modifiedDate,
+      }, true)
     ),
   );
 

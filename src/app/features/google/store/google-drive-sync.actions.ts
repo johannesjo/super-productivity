@@ -38,16 +38,22 @@ export class LoadFromGoogleDriveCancel implements Action {
 
 export class SaveToGoogleDriveFlow implements Action {
   readonly type = GoogleDriveSyncActionTypes.SaveToGoogleDriveFlow;
+
+  constructor(public payload?: { isSkipSnack?: boolean; }) {
+  }
 }
 
 export class SaveToGoogleDrive implements Action {
   readonly type = GoogleDriveSyncActionTypes.SaveToGoogleDrive;
+
+  constructor(public payload?: { isSkipSnack?: boolean; }) {
+  }
 }
 
 export class SaveToGoogleDriveSuccess implements Action {
   readonly type = GoogleDriveSyncActionTypes.SaveToGoogleDriveSuccess;
 
-  constructor(public payload: { response: any }) {
+  constructor(public payload: { response: any; isSkipSnack?: boolean; }) {
   }
 }
 
