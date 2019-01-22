@@ -41,6 +41,7 @@ export const INPUT_DURATION_VALIDATORS: any = {
 
 
 export class InputDurationDirective<D> implements ControlValueAccessor, Validator, AfterViewChecked {
+  @Input() isAllowSeconds = false;
 
   // by the Control Value Accessor
   private _onTouchedCallback: () => void = noop;
@@ -51,6 +52,8 @@ export class InputDurationDirective<D> implements ControlValueAccessor, Validato
   // -----------
   private _parseValidator: ValidatorFn = this._parseValidatorFn.bind(this);
   private _validator: ValidatorFn | null;
+  private _value;
+  private _msValue;
 
   constructor(@Attribute('inputDuration') public inputDuration,
               private _elementRef: ElementRef,
@@ -59,8 +62,6 @@ export class InputDurationDirective<D> implements ControlValueAccessor, Validato
               private _renderer: Renderer2) {
   }
 
-  private _value;
-  private _msValue;
 
   // Validations
   get value() {
@@ -75,6 +76,7 @@ export class InputDurationDirective<D> implements ControlValueAccessor, Validato
 
     }
   }
+
 
   // TODO all around dirty
   @Input() set ngModel(msVal) {
@@ -121,7 +123,7 @@ export class InputDurationDirective<D> implements ControlValueAccessor, Validato
     if (!value) {
       value = '';
     }
-    const toStr = this._msToString.transform(value, false, true);
+    const toStr = this._msToString.transform(value, this.isAllowSeconds, true);
     this._renderer.setProperty(this._elementRef.nativeElement, 'value', toStr);
   }
 
@@ -130,7 +132,7 @@ export class InputDurationDirective<D> implements ControlValueAccessor, Validato
     // TODO maximum dirty hackyness, but works for now :(
     if (!this._value) {
       this._msValue = this._stringToMs.transform(this._elementRef.nativeElement.value);
-      this._value = this._msToString.transform(this._msValue, false, true);
+      this._value = this._msToString.transform(this._msValue, this.isAllowSeconds, true);
     }
     return this._value
       ? null

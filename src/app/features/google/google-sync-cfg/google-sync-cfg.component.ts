@@ -18,8 +18,6 @@ import { FormGroup } from '@angular/forms';
 export class GoogleSyncCfgComponent implements OnInit, OnDestroy {
   tmpSyncFile: any;
   cfg: GoogleDriveSyncConfig;
-  backupSub: Subscription;
-  loadRemotePromise: Promise<any>;
   loginPromise: Promise<any>;
 
   @ViewChild('formRef') formRef: FormGroup;
@@ -30,7 +28,7 @@ export class GoogleSyncCfgComponent implements OnInit, OnDestroy {
 
   constructor(
     public readonly googleApiService: GoogleApiService,
-    private readonly _googleDriveSyncService: GoogleDriveSyncService,
+    private readonly googleDriveSyncService: GoogleDriveSyncService,
     private readonly _configService: ConfigService,
     private readonly _snackService: SnackService,
     private readonly _cd: ChangeDetectorRef,
@@ -47,9 +45,6 @@ export class GoogleSyncCfgComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this._subs.unsubscribe();
-    if (this.backupSub) {
-      this.backupSub.unsubscribe();
-    }
   }
 
   submit() {
@@ -66,23 +61,12 @@ export class GoogleSyncCfgComponent implements OnInit, OnDestroy {
     }
   }
 
-  // import/export stuff
-  importSettings(uploadSettingsTextarea) {
-    // let settings = JSON.parse(uploadSettingsTextarea);
-    // AppStorage.importData(settings);
+  saveToGoogleDrive() {
+    this.googleDriveSyncService.saveTo();
   }
 
-  backupNow() {
-    this.backupSub = this._googleDriveSyncService.saveTo().subscribe(() => {
-      this._snackService.open({
-        type: 'SUCCESS',
-        message: 'Google Drive: Successfully saved backup'
-      });
-    });
-  }
-
-  loadRemoteData() {
-    this.loadRemotePromise = this._googleDriveSyncService.loadFrom();
+  loadFromGoogleDrive() {
+    this.googleDriveSyncService.loadFrom();
   }
 
   login() {
@@ -93,17 +77,7 @@ export class GoogleSyncCfgComponent implements OnInit, OnDestroy {
     this.googleApiService.logout();
   }
 
-  onLocalSyncToggle(isEnabled) {
-    if (isEnabled) {
-      // AppStorage.resetAutoSyncToRemoteInterval();
-    } else {
-      // AppStorage.cancelAutoSyncToRemoteIntervalIfSet();
-    }
-  }
-
   changeSyncFileName(newSyncFile) {
-    console.log('CONFIG changeSyncFileName');
-
-    this._googleDriveSyncService.changeSyncFileName(newSyncFile).subscribe();
+    this.googleDriveSyncService.changeSyncFileName(newSyncFile);
   }
 }

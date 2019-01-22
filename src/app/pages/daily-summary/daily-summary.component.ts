@@ -142,15 +142,17 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
         content: this.tomorrowsNote,
       });
     }
-    this._googleDriveSync.saveForSync(true)
-      .subscribe(() => {
-        this._initSuccessAnimation(cb);
-      }, () => {
-        this._snackService.open({
-          type: 'ERROR',
-          message: 'GoogleSync: Unable to finish day, because syncing throw an error',
-        });
-      });
+
+    // TODO fix this by adding store with isSyncInProgress
+    // this._googleDriveSync.saveForSync()
+    //   .subscribe(() => {
+    //     this._initSuccessAnimation(cb);
+    //   }, () => {
+    //     this._snackService.open({
+    //       type: 'ERROR',
+    //       message: 'GoogleSync: Unable to finish day, because syncing throw an error',
+    //     });
+    //   });
   }
 
   private _initSuccessAnimation(cb?) {

@@ -102,7 +102,6 @@ export class AppComponent implements OnInit {
     this._migrateService.checkForUpdate();
 
     // INIT Services and global handlers
-    this._googleDriveSyncService.init();
     this._chromeExtensionInterface.init();
     this._initHandlersForOtherBodyClasses();
 

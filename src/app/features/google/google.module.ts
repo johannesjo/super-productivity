@@ -8,6 +8,9 @@ import { DialogConfirmDriveSyncSaveComponent } from './dialog-confirm-drive-sync
 import { GoogleExportTimeComponent } from './google-export-time/google-export-time.component';
 import { EffectsModule } from '@ngrx/effects';
 import { GoogleDriveSyncEffects } from './store/google-drive-sync.effects';
+import { StoreModule } from '@ngrx/store';
+import * as fromGoogleDriveSync from './store/google-drive-sync.reducer';
+import { GOOGLE_DRIVE_FEATURE_NAME } from './store/google-drive-sync.reducer';
 
 @NgModule({
   imports: [
@@ -15,6 +18,7 @@ import { GoogleDriveSyncEffects } from './store/google-drive-sync.effects';
     FormsModule,
     UiModule,
     EffectsModule.forFeature([GoogleDriveSyncEffects]),
+    StoreModule.forFeature(GOOGLE_DRIVE_FEATURE_NAME, fromGoogleDriveSync.reducer),
   ],
   declarations: [
     DialogGoogleExportTimeComponent,

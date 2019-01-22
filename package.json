@@ -130,7 +130,7 @@
     "@types/jasminewd2": "~2.0.3",
     "@types/moment-duration-format": "^2.2.2",
     "@types/node": "~8.9.4",
-    "angular2-promise-buttons": "^3.0.0",
+    "angular2-promise-buttons": "^3.0.1",
     "clipboard": "^2.0.1",
     "codelyzer": "^4.5.0",
     "core-js": "^2.5.4",
