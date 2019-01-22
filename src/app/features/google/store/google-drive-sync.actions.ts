@@ -50,6 +50,7 @@ export class SaveToGoogleDriveSuccess implements Action {
   constructor(public payload: { response: any }) {
   }
 }
+
 export class SaveToGoogleDriveCancel implements Action {
   readonly type = GoogleDriveSyncActionTypes.SaveToGoogleDriveCancel;
 }

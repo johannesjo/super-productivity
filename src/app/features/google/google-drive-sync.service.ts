@@ -1,16 +1,8 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Store } from '@ngrx/store';
-import {
-  ChangeSyncFileName,
-  LoadFromGoogleDriveFlow,
-  SaveForSync,
-  SaveToGoogleDriveFlow
-} from './store/google-drive-sync.actions';
-import {
-  selectIsGoogleDriveLoadInProgress,
-  selectIsGoogleDriveSaveInProgress
-} from './store/google-drive-sync.reducer';
+import { ChangeSyncFileName, LoadFromGoogleDriveFlow, SaveForSync, SaveToGoogleDriveFlow } from './store/google-drive-sync.actions';
+import { selectIsGoogleDriveLoadInProgress, selectIsGoogleDriveSaveInProgress } from './store/google-drive-sync.reducer';
 import { distinctUntilChanged } from 'rxjs/operators';
 
 @Injectable({

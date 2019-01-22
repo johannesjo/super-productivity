@@ -52,7 +52,6 @@ export class InputDurationDirective<D> implements ControlValueAccessor, Validato
   // -----------
   private _parseValidator: ValidatorFn = this._parseValidatorFn.bind(this);
   private _validator: ValidatorFn | null;
-  private _value;
   private _msValue;
 
   constructor(@Attribute('inputDuration') public inputDuration,
@@ -62,6 +61,7 @@ export class InputDurationDirective<D> implements ControlValueAccessor, Validato
               private _renderer: Renderer2) {
   }
 
+  private _value;
 
   // Validations
   get value() {

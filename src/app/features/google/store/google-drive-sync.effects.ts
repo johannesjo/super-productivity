@@ -2,18 +2,7 @@ import { Injectable } from '@angular/core';
 import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { ConfigActionTypes, UpdateConfigSection } from '../../config/store/config.actions';
-import {
-  catchError,
-  distinctUntilChanged,
-  filter,
-  flatMap,
-  map,
-  mapTo,
-  switchMap,
-  take,
-  tap,
-  withLatestFrom
-} from 'rxjs/operators';
+import { catchError, distinctUntilChanged, filter, flatMap, map, mapTo, switchMap, take, tap, withLatestFrom } from 'rxjs/operators';
 import { combineLatest, EMPTY, from, interval, Observable, of, throwError } from 'rxjs';
 import { GoogleDriveSyncService } from '../google-drive-sync.service';
 import { GoogleApiService } from '../google-api.service';
@@ -47,12 +36,9 @@ import { AppDataComplete } from '../../../imex/sync/sync.model';
 @Injectable()
 export class GoogleDriveSyncEffects {
   config$ = this._configService.cfg$.pipe(map(cfg => cfg.googleDriveSync));
-  private _config: GoogleDriveSyncConfig;
-
   isEnabled$ = this.config$.pipe(map(cfg => cfg.isEnabled), distinctUntilChanged());
   isAutoSyncToRemote$ = this.config$.pipe(map(cfg => cfg.isAutoSyncToRemote), distinctUntilChanged());
   syncInterval$ = this.config$.pipe(map(cfg => cfg.syncInterval), distinctUntilChanged());
-
   @Effect() triggerSync$: any = this._actions$.pipe(
     ofType(
       ConfigActionTypes.LoadConfig,
@@ -73,7 +59,6 @@ export class GoogleDriveSyncEffects {
       }),
     )),
   );
-
   @Effect() saveForSync$: any = this._actions$.pipe(
     ofType(
       GoogleDriveSyncActionTypes.SaveForSync,
@@ -81,7 +66,6 @@ export class GoogleDriveSyncEffects {
     tap(() => this._showAsyncToast(undefined, 'Syncing to Google Drive')),
     map(() => new SaveToGoogleDriveFlow()),
   );
-
   @Effect() initialImport$: any = this._actions$.pipe(
     ofType(
       ConfigActionTypes.LoadConfig,
@@ -107,7 +91,6 @@ export class GoogleDriveSyncEffects {
       }
     }),
   );
-
   @Effect() changeSyncFile$: any = this._actions$.pipe(
     ofType(
       GoogleDriveSyncActionTypes.ChangeSyncFileName,
@@ -147,7 +130,6 @@ export class GoogleDriveSyncEffects {
       );
     }),
   );
-
   @Effect() createEmptySyncFile$: any = this._actions$.pipe(
     ofType(
       GoogleDriveSyncActionTypes.CreateSyncFile,
@@ -167,7 +149,6 @@ export class GoogleDriveSyncEffects {
       }, false);
     }),
   );
-
   @Effect() saveToFlow$: any = this._actions$.pipe(
     ofType(
       GoogleDriveSyncActionTypes.SaveToGoogleDriveFlow,
@@ -207,7 +188,6 @@ export class GoogleDriveSyncEffects {
     }),
     catchError(err => of(new SaveToGoogleDriveCancel())),
   );
-
   @Effect() save$: any = this._actions$.pipe(
     ofType(
       GoogleDriveSyncActionTypes.SaveToGoogleDrive,
@@ -223,7 +203,6 @@ export class GoogleDriveSyncEffects {
     map((response: any) => new SaveToGoogleDriveSuccess({response})),
     catchError(err => of(new SaveToGoogleDriveCancel())),
   );
-
   @Effect() saveSuccess$: any = this._actions$.pipe(
     ofType(
       GoogleDriveSyncActionTypes.SaveToGoogleDriveSuccess,
@@ -242,7 +221,6 @@ export class GoogleDriveSyncEffects {
       ]
     ),
   );
-
   @Effect() loadFromFlow$: any = this._actions$.pipe(
     ofType(
       GoogleDriveSyncActionTypes.LoadFromGoogleDriveFlow,
@@ -290,7 +268,6 @@ export class GoogleDriveSyncEffects {
     }),
     catchError(err => of(new LoadFromGoogleDriveCancel())),
   );
-
   @Effect() load$: any = this._actions$.pipe(
     ofType(
       GoogleDriveSyncActionTypes.LoadFromGoogleDrive,
@@ -305,7 +282,6 @@ export class GoogleDriveSyncEffects {
     map((modifiedDate) => new LoadFromGoogleDriveSuccess({modifiedDate})),
     catchError(err => of(new LoadFromGoogleDriveCancel())),
   );
-
   @Effect() loadSuccess$: any = this._actions$.pipe(
     ofType(
       GoogleDriveSyncActionTypes.LoadFromGoogleDriveSuccess,
@@ -315,6 +291,7 @@ export class GoogleDriveSyncEffects {
     tap((modifiedDate) => this._syncService.saveLastActive(modifiedDate)),
     map((modifiedDate) => this._updateConfig({_lastSync: modifiedDate}, true)),
   );
+  private _config: GoogleDriveSyncConfig;
 
   constructor(
     private _actions$: Actions,

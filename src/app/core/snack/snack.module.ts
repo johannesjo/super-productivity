@@ -10,7 +10,6 @@ import { SnackCustomComponent } from './snack-custom/snack-custom.component';
 import { UiModule } from '../../ui/ui.module';
 import { SnackGoogleLoginComponent } from './snack-google-login/snack-google-login.component';
 import { SnackJiraUnblockComponent } from './snack-jira-unblock/snack-jira-unblock.component';
-import { SnackService } from './snack.service';
 
 @NgModule({
   imports: [

@@ -1,4 +1,9 @@
-Simport { TestBed } from '@angular/core/testing';
+Simport;
+{
+  TestBed;
+}
+from;
+'@angular/core/testing';
 
 import { GoogleApiService } from './google-api.service';
 
