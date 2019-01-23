@@ -54,27 +54,67 @@
 
     <mat-tab label="Task List">
       <section class="tab-inner">
-        <table class="task-summary-table bg-standard">
-          <tr>
-            <th>Title</th>
-            <th>Time spent today</th>
-            <th>Time spent total</th>
-            <th>Time esti.</th>
-            <th></th>
-          </tr>
+        <table mat-table
+               [dataSource]="todaysTasksFlat$|async"
+               class="mat-elevation-z2 summary-table">
+          <ng-container matColumnDef="title">
+            <th mat-header-cell
+                *matHeaderCellDef> Task
+            </th>
+            <td mat-cell
+                *matCellDef="let task">
+              <div class="task-title"
+                   [class.isSubTask]="task.parentId"
+                   [class.isDone]="task.isDone">
+                <span *ngIf="task.parentId">–</span> {{task.title}}
+              </div>
+            </td>
+          </ng-container>
 
-          <tr *ngFor="let task of todaysTasksFlat$|async"
-              [class.is-done]="task.isDone">
-            <td><span *ngIf="task.parentId">–</span> {{task.title}}></td>
-            <td [innerHtml]="task.timeSpentOnDay[todayStr] |msToString"></td>
-            <td [innerHtml]="task.timeSpent |msToString"></td>
-            <td [innerHtml]="task.timeEstimate |msToString"></td>
-            <td>
-              <mat-icon *ngIf="task.isDone"
-                        style="fill:green;">check
+          <ng-container matColumnDef="timeSpentToday">
+            <th mat-header-cell
+                *matHeaderCellDef> Spent Today
+            </th>
+            <td mat-cell
+                *matCellDef="let task"> {{task.timeSpentOnDay[todayStr]|msToString}}
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="timeSpentTotal">
+            <th mat-header-cell
+                *matHeaderCellDef> Spent Total
+            </th>
+            <td mat-cell
+                *matCellDef="let task">
+              {{task.timeSpent|msToString}}
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="timeEstimate">
+            <th mat-header-cell
+                *matHeaderCellDef> Estimate
+            </th>
+            <td mat-cell
+                *matCellDef="let task">
+              {{task.timeEstimate|msToString}}
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="done">
+            <th mat-header-cell
+                *matHeaderCellDef>
+            </th>
+            <td mat-cell
+                *matCellDef="let task">
+              <mat-icon *ngIf="task.isDone">check
               </mat-icon>
             </td>
-          </tr>
+          </ng-container>
+
+          <tr mat-header-row
+              *matHeaderRowDef="['title','timeSpentToday', 'timeSpentTotal', 'timeEstimate', 'done']"></tr>
+          <tr mat-row
+              *matRowDef="let row; columns: ['title','timeSpentToday', 'timeSpentToday','timeEstimate', 'done']"></tr>
         </table>
 
         <div style="text-align: center; margin-top: 8px; margin-bottom: 16px;">

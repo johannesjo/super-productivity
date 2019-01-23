@@ -90,54 +90,29 @@ $summary-point-inner-margin: $s;
     }
   }
 
-  .task-summary-table {
+  .summary-table {
     width: 100%;
-    margin: auto;
-    border-collapse: collapse;
 
     tr {
-      &.is-done {
+      height: 36px !important;
+    }
+
+    td {
+      .isDone {
         text-decoration: line-through;
       }
 
-      &:first-child {
-        td,
-        th {
-          border-top: 0;
-        }
-      }
-
-      &:last-child {
-        td,
-        th {
-          border-bottom: 0;
-        }
+      .isSubTask {
+        font-style: italic;
       }
     }
 
-    th,
-    td {
-      border: 1px solid #dddddd;
-      padding: 4px 8px;
-
-      &:first-child {
-        border-left: 0;
-      }
-
-      &:last-child {
-        border-right: 0;
-      }
+    th {
+      text-align: center;
     }
-    
-    td:first-child{
+
+    td:first-child {
       text-align: left;
-    }
-
-    td:nth-child(2),
-    td:nth-child(3),
-    td:nth-child(4),
-    td:nth-child(5) {
-      text-align: right;
     }
   }
 
