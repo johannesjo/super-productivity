@@ -44,6 +44,17 @@ const mapTasksFromIds = (tasks__, ids) => {
   return ids.map(id => tasks__.find(task => task.id === id));
 };
 
+const flattenTasks = (tasks___) => {
+  let flatTasks = [];
+  tasks___.forEach(task => {
+    flatTasks.push(task);
+    if (task.subTasks) {
+      flatTasks = flatTasks.concat(task.subTasks);
+    }
+  });
+  return flatTasks;
+};
+
 const mapTotalTimeWorked = (tasks) => tasks.reduce((acc, task) => acc + task.timeSpent, 0);
 
 // SELECTORS
@@ -77,8 +88,10 @@ export const selectAllStartableTasks = createSelector(selectAllTasks, tasks => t
 
 export const selectAllTasksWithSubTasks = createSelector(selectAllTasksWithIssueData, mapSubTasksToTasks);
 
+
 export const selectTodaysTasksWithSubTasks = createSelector(selectAllTasksWithSubTasks, selectTodaysTaskIds, mapTasksFromIds);
 export const selectBacklogTasksWithSubTasks = createSelector(selectAllTasksWithSubTasks, selectBacklogTaskIds, mapTasksFromIds);
+export const selectTodaysTasksFlat = createSelector(selectTodaysTasksWithSubTasks, flattenTasks);
 
 
 export const selectTodaysUnDoneTasksWithSubTasks = createSelector(

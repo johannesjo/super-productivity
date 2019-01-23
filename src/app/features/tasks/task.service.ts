@@ -1,8 +1,25 @@
 import shortid from 'shortid';
-import { debounceTime, delay, distinctUntilChanged, first, map, shareReplay, take, withLatestFrom } from 'rxjs/operators';
+import {
+  debounceTime,
+  delay,
+  distinctUntilChanged,
+  first,
+  map,
+  shareReplay,
+  take,
+  withLatestFrom
+} from 'rxjs/operators';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { DEFAULT_TASK, DropListModelSource, HIDE_SUB_TASKS, SHOW_SUB_TASKS, Task, TaskWithIssueData, TaskWithSubTasks } from './task.model';
+import {
+  DEFAULT_TASK,
+  DropListModelSource,
+  HIDE_SUB_TASKS,
+  SHOW_SUB_TASKS,
+  Task,
+  TaskWithIssueData,
+  TaskWithSubTasks
+} from './task.model';
 import { select, Store } from '@ngrx/store';
 import {
   AddSubTask,
@@ -45,7 +62,7 @@ import {
   selectIsTriggerPlanningMode,
   selectTaskById,
   selectTasksWithMissingIssueData,
-  selectTodaysDoneTasksWithSubTasks,
+  selectTodaysDoneTasksWithSubTasks, selectTodaysTasksFlat,
   selectTodaysTasksWithSubTasks,
   selectTodaysUnDoneTasksWithSubTasks,
   selectTotalTimeWorkedOnTodaysTasks
@@ -80,11 +97,20 @@ export class TaskService {
     select(selectAllStartableTasks),
     distinctUntilChanged(),
   );
+
+
+  // todays list flat + tasks worked on today
+  todaysTasksFlat$: Observable<TaskWithSubTasks[]> = this._store.pipe(
+    select(selectTodaysTasksFlat),
+  );
+
+  // only todays list
   todaysTasks$: Observable<TaskWithSubTasks[]> = this._store.pipe(
     select(selectTodaysTasksWithSubTasks),
     distinctUntilChanged(),
     shareReplay(),
   );
+
   backlogTasks$: Observable<TaskWithSubTasks[]> = this._store.pipe(
     select(selectBacklogTasksWithSubTasks),
     distinctUntilChanged(),

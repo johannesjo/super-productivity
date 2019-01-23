@@ -57,20 +57,15 @@
         <table class="task-summary-table bg-standard">
           <tr>
             <th>Title</th>
-            <th>Sub-Tasks</th>
             <th>Time spent today</th>
             <th>Time spent total</th>
             <th>Time esti.</th>
             <th></th>
           </tr>
 
-          <tr *ngFor="let task of todaysTasks$|async"
+          <tr *ngFor="let task of todaysTasksFlat$|async"
               [class.is-done]="task.isDone">
-            <td [innerHtml]="task.title"></td>
-            <td>
-              <span *ngFor="let task of task.subTasks"><span [innerHtml]="task.title"></span>: <span
-                [innerHtml]="task.timeSpentOnDay[todayStr]|msToString"></span><br></span>
-            </td>
+            <td><span *ngIf="task.parentId">–</span> {{task.title}}></td>
             <td [innerHtml]="task.timeSpentOnDay[todayStr] |msToString"></td>
             <td [innerHtml]="task.timeSpent |msToString"></td>
             <td [innerHtml]="task.timeEstimate |msToString"></td>
