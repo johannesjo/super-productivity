@@ -14,9 +14,10 @@ import { NoteService } from '../../features/note/note.service';
 import { ConfigService } from '../../features/config/config.service';
 import { GoogleDriveSyncService } from '../../features/google/google-drive-sync.service';
 import { SnackService } from '../../core/snack/snack.service';
-import { takeUntil } from 'rxjs/operators';
+import { take, takeUntil } from 'rxjs/operators';
 import { loadFromLs, saveToLs } from '../../core/persistence/local-storage';
 import { LS_DAILY_SUMMARY_TAB_INDEX } from '../../core/persistence/ls-keys.const';
+import { GoogleApiService } from '../../features/google/google-api.service';
 
 const SUCCESS_ANIMATION_DURATION = 500;
 
@@ -61,6 +62,7 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
     private readonly _noteService: NoteService,
     private readonly _matDialog: MatDialog,
     private readonly _snackService: SnackService,
+    private readonly _googleApiService: GoogleApiService,
     private readonly _electronService: ElectronService,
     private readonly _cd: ChangeDetectorRef,
   ) {
@@ -143,16 +145,25 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
       });
     }
 
-    // TODO fix this by adding store with isSyncInProgress
-    // this._googleDriveSync.saveForSync()
-    //   .subscribe(() => {
-    //     this._initSuccessAnimation(cb);
-    //   }, () => {
-    //     this._snackService.open({
-    //       type: 'ERROR',
-    //       message: 'GoogleSync: Unable to finish day, because syncing throw an error',
-    //     });
+    // TODO refactor to better solution with error handling
+
+    //   this._snackService.open({
+    //     type: 'ERROR',
+    //     message: 'GoogleSync: Unable to finish day, because syncing throw an error',
     //   });
+    if (this._configService.cfg
+      && this._configService.cfg.googleDriveSync.isEnabled
+      && this._configService.cfg.googleDriveSync.isAutoSyncToRemote) {
+      // login in again, will hopefully prevent google errors
+      this._googleApiService.login().then(() => {
+        this._googleDriveSync.saveForSync();
+        this._subs.add(this._googleDriveSync.onSaveEnd$.pipe(take(1)).subscribe(() => {
+          this._initSuccessAnimation(cb);
+        }));
+      });
+    } else {
+      this._initSuccessAnimation(cb);
+    }
   }
 
   private _initSuccessAnimation(cb?) {

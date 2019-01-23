@@ -403,7 +403,7 @@ export class GoogleApiService {
     return this._http.request(req)
       .pipe(
         // TODO remove type: 0 @see https://brianflove.com/2018/09/03/angular-http-client-observe-response/
-        tap(res => console.log(res)),
+        // tap(res => console.log(res)),
         filter(res => !(res === Object(res) && res.type === 0)),
         take(1),
         map((res: any) => (res && res.body) ? res.body : res),
