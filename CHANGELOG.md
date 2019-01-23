@@ -1,3 +1,53 @@
+## [0.1.13](https://github.com/johannesjo/sp2/compare/v0.1.12...v0.1.13) (2019-01-23)
+
+
+### Bug Fixes
+
+* **electron:** linting errors ([c2bce87](https://github.com/johannesjo/sp2/commit/c2bce87))
+* **electron:** type import ([4402eca](https://github.com/johannesjo/sp2/commit/4402eca))
+* **googleDriveSync:** error handling ([42e142a](https://github.com/johannesjo/sp2/commit/42e142a))
+* **googleDriveSync:** make change sync file work ([da094be](https://github.com/johannesjo/sp2/commit/da094be))
+* **googleDriveSync:** make it kinda work ([8e29afa](https://github.com/johannesjo/sp2/commit/8e29afa))
+* **googleDriveSync:** quick fix for data not found error ([6051e3b](https://github.com/johannesjo/sp2/commit/6051e3b))
+* **googleDriveSync:** request filter ([fa7b6ce](https://github.com/johannesjo/sp2/commit/fa7b6ce))
+* **pomodoro:** several issues ([c3fa7df](https://github.com/johannesjo/sp2/commit/c3fa7df))
+* app not quitting ([9414b60](https://github.com/johannesjo/sp2/commit/9414b60))
+* disable uppercasing the first task title character as it messes uo editing the titles ([c9e5189](https://github.com/johannesjo/sp2/commit/c9e5189))
+* google final sync ([dd75574](https://github.com/johannesjo/sp2/commit/dd75574))
+* google login for electron ([762efff](https://github.com/johannesjo/sp2/commit/762efff))
+* input duration slider not working as we want ([7d15ff3](https://github.com/johannesjo/sp2/commit/7d15ff3))
+* jira cfg form only being editable when host etc are present ([cd27dbf](https://github.com/johannesjo/sp2/commit/cd27dbf))
+* lint ([23c6db7](https://github.com/johannesjo/sp2/commit/23c6db7))
+* potential database error ([38edebf](https://github.com/johannesjo/sp2/commit/38edebf))
+* success animation ([a22c856](https://github.com/johannesjo/sp2/commit/a22c856))
+* typing error ([8c0c2f8](https://github.com/johannesjo/sp2/commit/8c0c2f8))
+
+
+### Features
+
+* **electron:** add basic setup and convert all files to typescript ([6796ca0](https://github.com/johannesjo/sp2/commit/6796ca0))
+* **electron:** make typescript for electron work ([b28f6eb](https://github.com/johannesjo/sp2/commit/b28f6eb))
+* improve jira credentials ([a203528](https://github.com/johannesjo/sp2/commit/a203528))
+* **googleDriveSync:** add proper error handling when being offline ([9ae7368](https://github.com/johannesjo/sp2/commit/9ae7368))
+* **googleDriveSync:** better error handling ([aaebc76](https://github.com/johannesjo/sp2/commit/aaebc76))
+* **googleDriveSync:** don't show other snacks when async toast is there ([8600200](https://github.com/johannesjo/sp2/commit/8600200))
+* **googleDriveSync:** don't sync if offline ([b1251c9](https://github.com/johannesjo/sp2/commit/b1251c9))
+* slightly improve styling for settings ([d2dfb15](https://github.com/johannesjo/sp2/commit/d2dfb15))
+* **googleDriveSync:** make async toast work again ([6040ca3](https://github.com/johannesjo/sp2/commit/6040ca3))
+* **googleDriveSync:** slightly improve ui ([ca08c24](https://github.com/johannesjo/sp2/commit/ca08c24))
+* **tasks:** bring back left arrow parent focus ([e0b48a4](https://github.com/johannesjo/sp2/commit/e0b48a4))
+* **tasks:** bring back tt uppercase for first letter ([0f53600](https://github.com/johannesjo/sp2/commit/0f53600))
+* remove background color from manifest ([cbd3f44](https://github.com/johannesjo/sp2/commit/cbd3f44))
+* **tasks:** don't filter out current task when collapsing sub tasks ([a95b81e](https://github.com/johannesjo/sp2/commit/a95b81e))
+* **tasks:** improve animations ([09ec103](https://github.com/johannesjo/sp2/commit/09ec103))
+* add better ios support ([e85d613](https://github.com/johannesjo/sp2/commit/e85d613))
+* add confirm dialog for deleting projects ([21543b9](https://github.com/johannesjo/sp2/commit/21543b9))
+* add missing on push change detection strategy ([5c1c58f](https://github.com/johannesjo/sp2/commit/5c1c58f))
+* improve pomodoro timer styling ([2e365aa](https://github.com/johannesjo/sp2/commit/2e365aa))
+* use appropriate operators ([4dc87e4](https://github.com/johannesjo/sp2/commit/4dc87e4))
+
+
+
 ## [0.1.12](https://github.com/johannesjo/sp2/compare/v0.1.11...v0.1.12) (2019-01-13)
 
 
