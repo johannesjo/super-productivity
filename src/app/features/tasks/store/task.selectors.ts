@@ -26,8 +26,18 @@ const mapSubTasksToTasks = (tasks__) => {
 };
 
 const mapEstimateRemaining = (tasks) => tasks && tasks.length && tasks.reduce((acc, task) => {
-  const estimateRemaining = (+task.timeEstimate) - (+task.timeSpent);
-  const isTrackVal = (estimateRemaining > 0) && !task.isDone;
+  let isTrackVal;
+  let estimateRemaining;
+  if (task.subTasks && task.subTasks.length > 0) {
+    estimateRemaining = task.subTasks.reduce((subAcc, subTask) => {
+      const estimateRemainingSub = (+subTask.timeEstimate) - (+subTask.timeSpent);
+      const isTrackValSub = (estimateRemainingSub > 0) && !subTask.isDone;
+      return acc + ((isTrackValSub) ? estimateRemainingSub : 0);
+    }, 0);
+  } else {
+    estimateRemaining = (+task.timeEstimate) - (+task.timeSpent);
+  }
+  isTrackVal = (estimateRemaining > 0) && !task.isDone;
   return acc + ((isTrackVal) ? estimateRemaining : 0);
 }, 0);
 
