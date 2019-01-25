@@ -28,5 +28,20 @@ export const GLOBAL_CONFIG_FORM_CONFIG: ConfigFormConfig = [
 `,
     /* tslint:enable */
     customSection: 'FILE_IMPORT_EXPORT',
+  },
+  {
+    isElectronOnly: true,
+    title: 'Automatic Backups',
+    key: 'localBackup',
+    help: `Auto save all data to your app folder in order to have it ready in case something goes wrong.`,
+    items: [
+      {
+        key: 'isEnabled',
+        type: 'toggle',
+        templateOptions: {
+          label: 'Enable automatic backups',
+        },
+      },
+    ]
   }
 ];

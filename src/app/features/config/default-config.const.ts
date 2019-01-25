@@ -70,6 +70,9 @@ export const DEFAULT_CFG: GlobalConfig = {
     _lastSync: null,
     _backupDocId: null,
   },
+  localBackup: {
+    isEnabled: true,
+  },
   _uiHelper: {
     _zoomFactor: 1,
   },

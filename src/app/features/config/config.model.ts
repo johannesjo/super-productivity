@@ -89,12 +89,17 @@ export type GoogleSession = Readonly<{
   expiresAt: number,
 }>;
 
+export type LocalBackupConfig = Readonly<{
+  isEnabled: boolean,
+}>;
+
 
 export type GlobalConfig = Readonly<{
   misc: MiscConfig;
   pomodoro: PomodoroConfig;
   googleDriveSync: GoogleDriveSyncConfig;
   keyboard: KeyboardConfig;
+  localBackup: LocalBackupConfig,
   _googleSession: GoogleSession;
   _uiHelper: UiHelperSettings;
 }>;
@@ -117,6 +122,7 @@ export interface ConfigFormSection {
   help?: string;
   customSection?: string;
   items?: FormlyFieldConfig[];
+  isElectronOnly?: boolean;
 }
 
 export type ConfigFormConfig = Readonly<ConfigFormSection[]>;

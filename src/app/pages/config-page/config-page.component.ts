@@ -11,6 +11,7 @@ import { ISSUE_PROVIDER_FORM_CFGS } from '../../features/issue/issue.const';
 import { DEFAULT_JIRA_CFG } from '../../features/issue/jira/jira.const';
 import { DEFAULT_GIT_CFG } from '../../features/issue/git/git.const';
 import { dirtyDeepCopy } from '../../util/dirtyDeepCopy';
+import { IS_ELECTRON } from '../../app.constants';
 
 @Component({
   selector: 'config-page',
@@ -22,7 +23,7 @@ export class ConfigPageComponent implements OnInit, OnDestroy {
   basicProjectSettingsFormCfg: ConfigFormSection;
   projectConfigFormCfg: ConfigFormSection;
   issueIntegrationFormCfg: ConfigFormSection;
-  globalConfigFormCfg: ConfigFormSection;
+  globalConfigFormCfg: ConfigFormSection[];
 
   currentProject: Project;
   projectCfg: ProjectAdvancedCfg;
@@ -41,6 +42,7 @@ export class ConfigPageComponent implements OnInit, OnDestroy {
     this.projectConfigFormCfg = dirtyDeepCopy(PROJECT_CONFIG_FORM_CONFIG);
     this.issueIntegrationFormCfg = dirtyDeepCopy(ISSUE_PROVIDER_FORM_CFGS);
     this.globalConfigFormCfg = dirtyDeepCopy(GLOBAL_CONFIG_FORM_CONFIG);
+    this.globalConfigFormCfg = this.globalConfigFormCfg.filter((cfg) => IS_ELECTRON || !cfg.isElectronOnly);
   }
 
   ngOnInit() {
