@@ -49,9 +49,11 @@ export const DEFAULT_PROJECT: Project = {
 };
 
 
+export const DEFAULT_PROJECT_ID = 'DEFAULT';
+
 export const FIRST_PROJECT: Project = {
   ...DEFAULT_PROJECT,
-  id: 'DEFAULT',
+  id: DEFAULT_PROJECT_ID,
   title: 'Super Productivity',
   themeColor: 'light-blue',
   isDarkTheme: false,

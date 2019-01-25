@@ -28,6 +28,7 @@ import { SnackService } from '../snack/snack.service';
 import { DatabaseService } from './database.service';
 import { loadFromLs, saveToLs } from './local-storage';
 import { issueProviderKeys } from '../../features/issue/issue.const';
+import { DEFAULT_PROJECT_ID } from '../../features/project/project.const';
 
 @Injectable({
   providedIn: 'root',
@@ -175,7 +176,7 @@ export class PersistenceService {
 
   async loadComplete(): Promise<AppDataComplete> {
     const projectState = await this.loadProjectsMeta();
-    const pids = projectState ? projectState.ids as string[] : [];
+    const pids = projectState ? projectState.ids as string[] : [DEFAULT_PROJECT_ID];
 
     return {
       lastActiveTime: this.getLastActive(),
