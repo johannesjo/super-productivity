@@ -8,9 +8,9 @@ import { SnackService } from '../../core/snack/snack.service';
 import { SnackType } from '../../core/snack/snack.model';
 import { ConfigService } from '../config/config.service';
 import { GlobalConfig, GoogleSession } from '../config/config.model';
-import { catchError, filter, map, take, tap } from 'rxjs/operators';
+import { catchError, concatMap, filter, map, take } from 'rxjs/operators';
 import { EmptyObservable } from 'rxjs-compat/observable/EmptyObservable';
-import { combineLatest, Observable, throwError } from 'rxjs';
+import { combineLatest, from, Observable, throwError } from 'rxjs';
 import { IPC_GOOGLE_AUTH_TOKEN, IPC_GOOGLE_AUTH_TOKEN_ERROR, IPC_TRIGGER_GOOGLE_AUTH } from '../../../../electron/ipc-events.const';
 import { ElectronService } from 'ngx-electron';
 
@@ -46,9 +46,7 @@ export class GoogleApiService {
     return this._configService.cfg && this._configService.cfg._googleSession;
   }
 
-  login(): Promise<any> {
-    console.log('GOOGLE_LOGIN', this._session, this.isLoggedIn, IS_ELECTRON);
-
+  login(isSkipSuccessMsg = false): Promise<any> {
     if (IS_ELECTRON) {
       if (this.isLoggedIn) {
         return new Promise((resolve) => resolve());
@@ -63,8 +61,9 @@ export class GoogleApiService {
             expiresAt: data.expiry_date,
             refreshToken: data.refresh_token,
           });
-          this._snackIt('SUCCESS', 'GoogleApi: Login successful');
-
+          if (!(isSkipSuccessMsg)) {
+            this._snackIt('SUCCESS', 'GoogleApi: Login successful');
+          }
           resolve(data);
           // TODO remove
           // mainWindow.webContents.removeListener('did-finish-load', handler);
@@ -84,7 +83,9 @@ export class GoogleApiService {
           //   });
           const successHandler = (res) => {
             this._saveToken(res);
-            this._snackIt('SUCCESS', 'GoogleApi: Login successful');
+            if (!(isSkipSuccessMsg)) {
+              this._snackIt('SUCCESS', 'GoogleApi: Login successful');
+            }
           };
 
           if (user && user.Zi && user.Zi.access_token) {
@@ -279,26 +280,7 @@ export class GoogleApiService {
     if (!sessionData.accessToken) {
       console.warn('GoogleApiService: Logged out willingly???');
     }
-
-    if (!IS_ELECTRON && sessionData.accessToken && sessionData.expiresAt) {
-      this._initRefreshTokenTimeoutForWeb(sessionData.expiresAt);
-    } else if (this._refreshLoginTimeout) {
-      window.clearTimeout(this._refreshLoginTimeout);
-    }
     this._configService.updateSection('_googleSession', sessionData, true);
-  }
-
-  private _initRefreshTokenTimeoutForWeb(expiresAt: number) {
-    if (this._refreshLoginTimeout) {
-      window.clearTimeout(this._refreshLoginTimeout);
-    }
-    this._refreshLoginTimeout = window.setTimeout(() => {
-      this._gapi.auth2.getAuthInstance().currentUser.get().reloadAuthResponse()
-        .then((res) => {
-          this._saveToken(res);
-          console.log(res);
-        });
-    }, expiresAt - (Date.now() + EXPIRES_SAFETY_MARGIN + 5000));
   }
 
   private initClient() {
@@ -400,8 +382,9 @@ export class GoogleApiService {
     const req = new HttpRequest(p.method, p.url, ...allArgs);
 
     // const sub = this._http[p.method.toLowerCase()](p.url, p.data, p)
-    return this._http.request(req)
+    return from(this.login(true))
       .pipe(
+        concatMap(() => this._http.request(req)),
         // TODO remove type: 0 @see https://brianflove.com/2018/09/03/angular-http-client-observe-response/
         // tap(res => console.log(res)),
         filter(res => !(res === Object(res) && res.type === 0)),
