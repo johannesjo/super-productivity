@@ -33,7 +33,6 @@ export class GoogleApiService {
   private _isScriptLoaded = false;
   private _isGapiInitialized = false;
   private _gapi: any;
-  private _refreshLoginTimeout: number;
 
   constructor(private readonly _http: HttpClient,
               private readonly _configService: ConfigService,

@@ -182,7 +182,10 @@ export class GoogleDriveSyncEffects {
     concatMap(([action, cfg]: [SaveToGoogleDrive, GoogleDriveSyncConfig]): any => {
       // when we have no backup file we create one directly
       if (!cfg._backupDocId) {
-        return new ChangeSyncFileName({newFileName: cfg.syncFileName || DEFAULT_SYNC_FILE_NAME});
+        return of(
+          new SaveToGoogleDriveCancel(),
+          new ChangeSyncFileName({newFileName: cfg.syncFileName || DEFAULT_SYNC_FILE_NAME}),
+        );
       } else {
         // otherwise update
         return this._googleApiService.getFileInfo(cfg._backupDocId).pipe(
@@ -269,7 +272,10 @@ export class GoogleDriveSyncEffects {
     concatMap(([action, cfg]: [LoadFromGoogleDrive, GoogleDriveSyncConfig]): any => {
       // when we have no backup file we create one directly
       if (!cfg._backupDocId) {
-        return new ChangeSyncFileName({newFileName: cfg.syncFileName || DEFAULT_SYNC_FILE_NAME});
+        return of(
+          new LoadFromGoogleDriveCancel(),
+          new ChangeSyncFileName({newFileName: cfg.syncFileName || DEFAULT_SYNC_FILE_NAME})
+        );
       } else {
         // otherwise update
         return this._checkIfRemoteUpdate().pipe(
