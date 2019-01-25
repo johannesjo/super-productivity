@@ -1,10 +1,15 @@
 import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { LocalBackupService } from './local-backup.service';
+import { IS_ELECTRON } from '../../app.constants';
 
 @NgModule({
-  declarations: [],
-  imports: [
-    CommonModule
-  ]
+  providers: [LocalBackupService],
 })
-export class LocalBackupModule { }
+export class LocalBackupModule {
+  constructor(private _localBackupService: LocalBackupService) {
+    if (IS_ELECTRON) {
+      this._localBackupService.init();
+    }
+  }
+
+}

@@ -28,6 +28,8 @@ export const IPC_GIT_LOG = 'GIT_LOG';
 export const IPC_GIT_LOG_RESPONSE = 'GIT_LOG_RESPONSE';
 export const IPC_EXEC = 'EXEC';
 
+export const IPC_BACKUP = 'BACKUP_APP_DATA';
+
 export const maybe_UPDATE_CURRENT_TASK = 'UPDATE_CURRENT_TASK';
 export const maybe_IS_IDLE = 'IS_IDLE';
 export const maybe_IS_BUSY = 'IS_BUSY';

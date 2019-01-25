@@ -5,6 +5,7 @@ import { ChromeExtensionInterfaceModule } from './chrome-extension-interface/chr
 import { SnackModule } from './snack/snack.module';
 import { RouterModule } from '@angular/router';
 import { NotifyModule } from './notify/notify.module';
+import { LocalBackupModule } from '../imex/local-backup/local-backup.module';
 
 @NgModule({
   imports: [
@@ -14,6 +15,7 @@ import { NotifyModule } from './notify/notify.module';
     ChromeExtensionInterfaceModule,
     SnackModule,
     NotifyModule,
+    LocalBackupModule,
   ],
   exports: [
     PersistenceModule,
