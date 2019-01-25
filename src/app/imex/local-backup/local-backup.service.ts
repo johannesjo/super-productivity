@@ -7,7 +7,7 @@ import { SyncService } from '../sync/sync.service';
 import { ElectronService } from 'ngx-electron';
 import { IPC_BACKUP } from '../../../../electron/ipc-events.const';
 
-const DEFAULT_BACKUP_INTERVAL = 60 * 1000;
+const DEFAULT_BACKUP_INTERVAL = 2 * 60 * 1000;
 
 // const DEFAULT_BACKUP_INTERVAL = 6 * 1000;
 

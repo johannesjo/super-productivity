@@ -1,6 +1,5 @@
 'use strict';
 import { App, app, globalShortcut, ipcMain, powerSaveBlocker } from 'electron';
-
 import * as notifier from 'node-notifier';
 import { info } from 'electron-log';
 import { CONFIG } from './CONFIG';
@@ -15,12 +14,19 @@ import { initGoogleAuth } from './google-auth';
 import { errorHandler } from './error-handler';
 import { initDebug } from './debug';
 import {
-  IPC_EXEC, IPC_GIT_LOG, IPC_IDLE_TIME,
-  IPC_JIRA_MAKE_REQUEST_EVENT, IPC_NOTIFY, IPC_ON_BEFORE_QUIT,
-  IPC_REGISTER_GLOBAL_SHORTCUT_EVENT, IPC_SHOW_OR_FOCUS,
+  IPC_BACKUP,
+  IPC_EXEC,
+  IPC_GIT_LOG,
+  IPC_IDLE_TIME,
+  IPC_JIRA_MAKE_REQUEST_EVENT,
+  IPC_NOTIFY,
+  IPC_ON_BEFORE_QUIT,
+  IPC_REGISTER_GLOBAL_SHORTCUT_EVENT,
+  IPC_SHOW_OR_FOCUS,
   IPC_SHUTDOWN,
   IPC_SHUTDOWN_NOW
 } from './ipc-events.const';
+import { backupData } from './backup';
 
 const ICONS_FOLDER = __dirname + '/assets/icons/';
 const IS_MAC = process.platform === 'darwin';
@@ -126,6 +132,9 @@ ipcMain.on(IPC_SHUTDOWN_NOW, quitAppNow);
 ipcMain.on(IPC_SHUTDOWN, quitApp);
 
 ipcMain.on(IPC_EXEC, exec);
+
+ipcMain.on(IPC_BACKUP, backupData);
+
 
 ipcMain.on(IPC_REGISTER_GLOBAL_SHORTCUT_EVENT, (ev, shortcutPassed) => {
   registerShowAppShortCut(shortcutPassed);
@@ -264,3 +273,4 @@ function exec(ev, command) {
     }
   });
 }
+
