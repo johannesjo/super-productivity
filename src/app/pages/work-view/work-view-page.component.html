@@ -4,7 +4,7 @@
        class="today">
 
     <header class="work-view-header bg-800 color-contrast">
-      <div *ngIf="!isPlanYourDay"
+      <div *ngIf="(!isPlanYourDay && (taskService.isTasksForToday$|async))||isPlanYourDay===false"
            @fade
            class="status-bar">
         <div class="item">

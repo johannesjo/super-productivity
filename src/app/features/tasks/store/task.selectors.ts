@@ -99,6 +99,10 @@ export const selectAllStartableTasks = createSelector(selectAllTasks, tasks => t
 export const selectAllTasksWithSubTasks = createSelector(selectAllTasksWithIssueData, mapSubTasksToTasks);
 
 
+export const selectIsTaskForTodayPlanned = createSelector(
+  selectTaskFeatureState,
+  (state) => !!state.todaysTaskIds && state.todaysTaskIds.length > 0,
+);
 export const selectTodaysTasksWithSubTasks = createSelector(selectAllTasksWithSubTasks, selectTodaysTaskIds, mapTasksFromIds);
 export const selectBacklogTasksWithSubTasks = createSelector(selectAllTasksWithSubTasks, selectBacklogTaskIds, mapTasksFromIds);
 export const selectTodaysTasksFlat = createSelector(selectTodaysTasksWithSubTasks, flattenTasks);

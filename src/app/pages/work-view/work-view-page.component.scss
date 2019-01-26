@@ -47,6 +47,7 @@ h2 {
 }
 
 .work-view-header {
+  position: relative;
   margin-bottom: $s;
   min-height: 56px;
   display: flex;
@@ -155,10 +156,12 @@ h2 {
 
 // PLAN MODE
 .planning-mode-header {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  position: absolute;
+  width: 100%;
+  top: 50%;
+  left: 0;
+  text-align: center;
+  transform: translateY(-50%);
 
   h1, h2 {
     margin: 0;

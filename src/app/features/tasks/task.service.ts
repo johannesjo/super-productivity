@@ -58,7 +58,7 @@ import {
   selectEstimateRemainingForBacklog,
   selectEstimateRemainingForToday,
   selectFocusTaskId,
-  selectIsTaskDataLoaded,
+  selectIsTaskDataLoaded, selectIsTaskForTodayPlanned,
   selectIsTriggerPlanningMode,
   selectTaskById,
   selectTasksWithMissingIssueData,
@@ -109,6 +109,10 @@ export class TaskService {
     select(selectTodaysTasksWithSubTasks),
     distinctUntilChanged(),
     shareReplay(),
+  );
+
+  isTasksForToday$: Observable<boolean> = this._store.pipe(
+    select(selectIsTaskForTodayPlanned),
   );
 
   backlogTasks$: Observable<TaskWithSubTasks[]> = this._store.pipe(

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy, OnInit } from '@angular/core';
 import { TaskService } from '../../features/tasks/task.service';
 import { expandAnimation, expandFadeAnimation } from '../../ui/animations/expand.ani';
 import { LayoutService } from '../../core-ui/layout/layout.service';
@@ -7,7 +7,6 @@ import { TakeABreakService } from '../../features/time-tracking/take-a-break/tak
 import { ActivatedRoute } from '@angular/router';
 import { from, Subscription, timer, zip } from 'rxjs';
 import { TaskWithSubTasks } from '../../features/tasks/task.model';
-import { Actions } from '@ngrx/effects';
 import { map, skip, switchMap, take, withLatestFrom } from 'rxjs/operators';
 import { fadeAnimation } from '../../ui/animations/fade.ani';
 
@@ -21,7 +20,7 @@ import { fadeAnimation } from '../../ui/animations/fade.ani';
 export class WorkViewPageComponent implements OnInit, OnDestroy {
   isShowTimeWorkedWithoutBreak = true;
   // no todays tasks at all
-  isPlanYourDay = false;
+  isPlanYourDay: boolean = undefined;
   splitInputPos = 100;
 
   // we do it here to have the tasks in memory all the time
@@ -47,8 +46,6 @@ export class WorkViewPageComponent implements OnInit, OnDestroy {
     private _layoutService: LayoutService,
     private _dragulaService: DragulaService,
     private _activatedRoute: ActivatedRoute,
-    private _actions$: Actions,
-    private _cd: ChangeDetectorRef,
   ) {
   }
 
@@ -72,6 +69,7 @@ export class WorkViewPageComponent implements OnInit, OnDestroy {
 
     this._subs.add(this.taskService.backlogTasks$.subscribe(tasks => this.backlogTasks = tasks));
 
+    // TODO improve
     this._subs.add(
       this.taskService.isTriggerPlanningMode$.pipe(
         // skip default
