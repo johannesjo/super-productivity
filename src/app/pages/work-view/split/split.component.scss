@@ -17,33 +17,37 @@ $splitLineHeight: 4px;
     height: $splitLineHeight;
     top: -0.5 * $splitLineHeight;
     display: block;
-    z-index: 2;
-    box-shadow: 0 -1px 8px rgba(0, 0, 0, .5);
+    z-index: 5;
 
-
-    button mat-icon {
-      transition: $transition-standard;
+    &:after {
+      content: '';
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      box-shadow: 0 -4px 10px 0 rgba(0, 0, 0, 0.5);
+      pointer-events: none;
     }
+  }
 
-    //&.isAtBottom {
-    //  button {
-    //    mat-icon {
-    //      transform: translateY(0);
-    //    }
-    //
-    //    &:hover mat-icon {
-    //      transform: translateY(-$s);
-    //    }
-    //  }
-    //}
+  .handle.isHideShadow button {
+    box-shadow: none !important;
   }
 
   button {
+    background-color: inherit !important;
     position: absolute;
     transform: translate(-50%, -50%);
     left: 50%;
     cursor: grab;
     transform-origin: left center;
+
+    //$this-size: 56px;
+    //transform: translate(-50%, -100%);
+    //height: $this-size/2;
+    //width: $this-size;
+    //border-bottom: 0;
+    //border-radius: $this-size $this-size 0 0;
+    //top: $splitLineHeight/2;
 
     &:active {
       cursor: grabbing;

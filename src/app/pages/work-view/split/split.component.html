@@ -1,13 +1,12 @@
-<div class="handle bg-400"
-     [class.isAtBottom]="pos>99">
+<div class="handle bg-600"
+     [class.isHideShadow]="pos>10">
   <button #buttonEl
           (dblclick)="toggle()"
           (mousedown)="onMouseDown($event)"
           (touchstart)="onTouchStart($event)"
           [class.isAnimate]="isAnimateBtn"
           color="primary"
-          mat-fab=""
-  >
+          mat-fab="">
     <span *ngIf="counter"
           class="counter">{{counter}}</span>
     <mat-icon>library_books</mat-icon>
