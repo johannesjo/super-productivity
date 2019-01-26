@@ -1,3 +1,18 @@
+## [0.1.18](https://github.com/johannesjo/sp2/compare/v0.1.17...v0.1.18) (2019-01-26)
+
+
+### Bug Fixes
+
+* planning mode popping in weirdly ([8b4cd69](https://github.com/johannesjo/sp2/commit/8b4cd69))
+* **tasks:** focusing after task deletion not working ([fcb0e8d](https://github.com/johannesjo/sp2/commit/fcb0e8d))
+
+
+### Features
+
+* add productivity tips on startup ([994ef3c](https://github.com/johannesjo/sp2/commit/994ef3c))
+
+
+
 ## [0.1.17](https://github.com/johannesjo/sp2/compare/v0.1.16...v0.1.17) (2019-01-26)
 
 
