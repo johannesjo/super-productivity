@@ -36,16 +36,15 @@ export const createWindow = function (params) {
   const app = params.app;
   const nestedWinParams = params.nestedWinParams;
   indicatorMod = params.indicatorMod;
+  mainWin = new BrowserWindow({width: 800, height: 800, titleBarStyle: 'hiddenInset'});
 
   if (IS_DEV) {
-    mainWin = new BrowserWindow({width: 800, height: 800});
     // TODO check
     // require('electron-reload')(__dirname, {
     //   electron: require(`${__dirname}/../node_modules/electron`)
     // });
     mainWin.loadURL('http://localhost:4200');
   } else {
-    mainWin = new BrowserWindow({width: 800, height: 600});
     const url = format({
       pathname: normalize(join(__dirname, '../dist/index.html')),
       protocol: 'file:',
@@ -56,6 +55,7 @@ export const createWindow = function (params) {
       webPreferences: {
         scrollBounce: true
       },
+      titleBarStyle: 'hiddenInset',
       icon: ICONS_FOLDER + '/icon_256x256.png'
     });
     // mainWin.webContents.openDevTools();

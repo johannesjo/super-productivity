@@ -8,6 +8,18 @@ $navBp2Lines: 780px;
 $navBpShrinking: 900px;
 $mobileHorizontalPadding: 8px;
 
+:host-context(.isMac) {
+  -webkit-app-region: drag;
+
+  .app-icon {
+    transform: translateY($s*0.5);
+  }
+
+  .project-btn {
+    margin-left: $s;
+  }
+}
+
 .project-btn {
   min-width: 0;
   overflow: hidden;

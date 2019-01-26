@@ -1,4 +1,12 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, HostListener, Inject, OnInit } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  ElementRef,
+  HostListener,
+  Inject,
+  OnInit
+} from '@angular/core';
 import { MatIconRegistry } from '@angular/material';
 import { DomSanitizer } from '@angular/platform-browser';
 import { ProjectService } from './features/project/project.service';
@@ -32,6 +40,7 @@ import { Observable } from 'rxjs';
 import { selectIsAllProjectDataLoaded } from './features/project/store/project.reducer';
 import { Store } from '@ngrx/store';
 import { fadeAnimation } from './ui/animations/fade.ani';
+import { IS_MAC } from './util/is-mac';
 
 const SIDE_PANEL_BREAKPOINT = 900;
 
@@ -109,6 +118,10 @@ export class AppComponent implements OnInit {
       this._electronService.ipcRenderer.send(IPC_APP_READY);
       this._initElectronErrorHandler();
       this._initMousewheelZoomForElectron();
+
+      if (IS_MAC) {
+        this.document.body.classList.add('isMac');
+      }
 
       this._electronService.ipcRenderer.on(IPC_TRANSFER_SETTINGS_REQUESTED, () => {
         this._electronService.ipcRenderer.send(IPC_TRANSFER_SETTINGS_TO_ELECTRON, this._configService.cfg);
