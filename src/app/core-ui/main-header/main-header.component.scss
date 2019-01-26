@@ -4,7 +4,7 @@ $navBpUltraSmall: 360px;
 $navBpIconInsteadOfText: 374px;
 $navBpIconInsteadOfText: 374px;
 $navBpReduceToBurger: 420px;
-$navBp2Lines: 780px;
+$navBp2Lines: 680px;
 $navBpShrinking: 900px;
 $mobileHorizontalPadding: 8px;
 
@@ -43,7 +43,7 @@ button {
   overflow: hidden;
   max-width: 200px;
 
-  @media (max-width: $navBp2Lines) {
+  @media (max-width: $navBpShrinking) {
     flex: 1;
   }
 
