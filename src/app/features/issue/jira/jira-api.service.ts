@@ -28,7 +28,7 @@ import { SearchResultItem } from '../issue';
 import { fromPromise } from 'rxjs/internal-compatibility';
 import { catchError, share, take } from 'rxjs/operators';
 import { JiraIssue } from './jira-issue/jira-issue.model';
-import * as moment from 'moment';
+import * as moment from 'moment-mini';
 
 const BLOCK_ACCESS_KEY = 'SUP_BLOCK_JIRA_ACCESS';
 

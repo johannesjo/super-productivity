@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { GOOGLE_DEFAULT_FIELDS_FOR_DRIVE, GOOGLE_DISCOVERY_DOCS, GOOGLE_SCOPES, GOOGLE_SETTINGS } from './google.const';
-import * as moment from 'moment';
+import * as moment from 'moment-mini';
 import { IS_ELECTRON } from '../../app.constants';
 import { MultiPartBuilder } from './util/multi-part-builder';
 import { HttpClient, HttpHeaders, HttpParams, HttpRequest } from '@angular/common/http';

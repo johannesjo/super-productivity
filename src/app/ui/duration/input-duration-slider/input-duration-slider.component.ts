@@ -11,7 +11,7 @@ import {
   ViewChild
 } from '@angular/core';
 import shortid from 'shortid';
-import * as moment from 'moment';
+import * as moment from 'moment-mini';
 import { dotAnimation } from './dot.ani';
 
 @Component({

@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
-import * as moment from 'moment';
-import { Duration, Moment } from 'moment';
+import * as moment from 'moment-mini';
+import { Duration, Moment } from 'moment-mini';
 import { GoogleApiService } from '../google-api.service';
 import { SnackService } from '../../../core/snack/snack.service';
 import { MatDialogRef } from '@angular/material';

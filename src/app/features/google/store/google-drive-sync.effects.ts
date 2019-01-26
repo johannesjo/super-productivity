@@ -41,7 +41,7 @@ import { SyncService } from '../../../imex/sync/sync.service';
 import { SnackOpen } from '../../../core/snack/store/snack.actions';
 import { DEFAULT_SYNC_FILE_NAME } from '../google.const';
 import { DialogConfirmDriveSyncSaveComponent } from '../dialog-confirm-drive-sync-save/dialog-confirm-drive-sync-save.component';
-import * as moment from 'moment';
+import * as moment from 'moment-mini';
 import { DialogConfirmDriveSyncLoadComponent } from '../dialog-confirm-drive-sync-load/dialog-confirm-drive-sync-load.component';
 import { AppDataComplete } from '../../../imex/sync/sync.model';
 import { selectIsGoogleDriveSaveInProgress } from './google-drive-sync.reducer';

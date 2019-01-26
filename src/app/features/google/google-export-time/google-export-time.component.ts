@@ -7,8 +7,8 @@ import { ProjectService } from '../../project/project.service';
 import { TaskService } from '../../tasks/task.service';
 import { SnackService } from '../../../core/snack/snack.service';
 import { takeUntil } from 'rxjs/operators';
-import * as moment from 'moment';
-import { Duration, Moment } from 'moment';
+import * as moment from 'moment-mini';
+import { Duration, Moment } from 'moment-mini';
 import { expandAnimation } from '../../../ui/animations/expand.ani';
 
 

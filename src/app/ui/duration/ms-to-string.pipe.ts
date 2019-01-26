@@ -1,5 +1,5 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import * as moment from 'moment';
+import * as moment from 'moment-mini';
 
 export const msToString = (value: any, showSeconds?: boolean, isHideEmptyPlaceholder?: boolean): string => {
   const md = moment.duration(value);
