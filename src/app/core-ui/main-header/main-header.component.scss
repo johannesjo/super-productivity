@@ -8,7 +8,7 @@ $navBp2Lines: 780px;
 $navBpShrinking: 900px;
 $mobileHorizontalPadding: 8px;
 
-:host-context(.isMac) {
+:host-context(.isMac.isElectron) {
   .wrapper {
     -webkit-app-region: drag;
     cursor: grab;

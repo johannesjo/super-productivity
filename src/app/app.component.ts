@@ -119,9 +119,6 @@ export class AppComponent implements OnInit {
       this._initElectronErrorHandler();
       this._initMousewheelZoomForElectron();
 
-      if (IS_MAC) {
-        this.document.body.classList.add('isMac');
-      }
 
       this._electronService.ipcRenderer.on(IPC_TRANSFER_SETTINGS_REQUESTED, () => {
         this._electronService.ipcRenderer.send(IPC_TRANSFER_SETTINGS_TO_ELECTRON, this._configService.cfg);
@@ -176,6 +173,12 @@ export class AppComponent implements OnInit {
 
   private _initHandlersForOtherBodyClasses() {
     this.document.body.classList.add('isNoJira');
+
+    if (IS_MAC) {
+      this.document.body.classList.add('isMac');
+    } else {
+      this.document.body.classList.add('isNoMac');
+    }
 
     if (IS_ELECTRON) {
       this.document.body.classList.add('isElectron');
