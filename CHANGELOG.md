@@ -1,3 +1,12 @@
+## [0.1.19](https://github.com/johannesjo/sp2/compare/v0.1.18...v0.1.19) (2019-01-26)
+
+
+### Bug Fixes
+
+* mat table throwing error because of es6 compilation ([8f68326](https://github.com/johannesjo/sp2/commit/8f68326))
+
+
+
 ## [0.1.18](https://github.com/johannesjo/sp2/compare/v0.1.17...v0.1.18) (2019-01-26)
 
 
