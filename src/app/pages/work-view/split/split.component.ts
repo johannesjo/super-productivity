@@ -81,7 +81,9 @@ export class SplitComponent {
   }
 
   onMove(ev) {
-    const clientY = ev.clientY || ev.touches[0].clientY;
+    const clientY = (typeof ev.clientY === 'number')
+      ? ev.clientY
+      : ev.touches[0].clientY;
     this._renderer.removeClass(this.splitTopEl, ANIMATABLE_CLASS);
     this._renderer.removeClass(this.splitBottomEl, ANIMATABLE_CLASS);
     this._isDrag = true;
