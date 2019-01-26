@@ -1,3 +1,12 @@
+## [0.1.17](https://github.com/johannesjo/sp2/compare/v0.1.16...v0.1.17) (2019-01-26)
+
+
+### Bug Fixes
+
+* es6 only not working for electron ([1bfd795](https://github.com/johannesjo/sp2/commit/1bfd795))
+
+
+
 ## [0.1.16](https://github.com/johannesjo/sp2/compare/v0.1.15...v0.1.16) (2019-01-26)
 
 
