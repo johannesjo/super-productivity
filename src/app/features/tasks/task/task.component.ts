@@ -260,25 +260,39 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     this.focusSelf();
   }
 
-  focusPrevious(isFocusReverseIfNotPossible = false) {
+  focusPrevious(isFocusReverseIfNotPossible = false, isTimeout = false) {
     const taskEls = Array.from(document.querySelectorAll('task'));
     const currentIndex = taskEls.findIndex(el => document.activeElement === el);
     const prevEl = taskEls[currentIndex - 1] as HTMLElement;
-    if (prevEl) {
-      prevEl.focus();
-    } else if (isFocusReverseIfNotPossible) {
-      this.focusNext();
+    const focus = () => {
+      if (prevEl) {
+        prevEl.focus();
+      } else if (isFocusReverseIfNotPossible) {
+        this.focusNext();
+      }
+    };
+    if (isTimeout) {
+      setTimeout(() => focus());
+    } else {
+      focus();
     }
   }
 
-  focusNext(isFocusReverseIfNotPossible = false) {
+  focusNext(isFocusReverseIfNotPossible = false, isTimeout = false) {
     const taskEls = Array.from(document.querySelectorAll('task'));
     const currentIndex = taskEls.findIndex(el => document.activeElement === el);
     const nextEl = taskEls[currentIndex + 1] as HTMLElement;
-    if (nextEl) {
-      nextEl.focus();
-    } else if (isFocusReverseIfNotPossible) {
-      this.focusPrevious();
+    const focus = () => {
+      if (nextEl) {
+        nextEl.focus();
+      } else if (isFocusReverseIfNotPossible) {
+        this.focusPrevious();
+      }
+    };
+    if (isTimeout) {
+      setTimeout(() => focus());
+    } else {
+      focus();
     }
   }
 
@@ -340,8 +354,8 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     if (checkKeyCombo(ev, keys.taskDelete)) {
+      this.focusPrevious(true, true);
       this.deleteTask();
-      this.focusPrevious(true);
     }
 
     if (checkKeyCombo(ev, keys.moveToBacklog)) {
