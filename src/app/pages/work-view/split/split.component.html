@@ -1,8 +1,8 @@
-<div (dblclick)="toggle()"
-     (mousedown)="onMouseDown($event)"
-     (touchstart)="onTouchStart($event)"
-     class="handle bg-600">
+<div class="handle bg-400">
   <button #buttonEl
+          (dblclick)="toggle()"
+          (mousedown)="onMouseDown($event)"
+          (touchstart)="onTouchStart($event)"
           [class.isAnimate]="isAnimateBtn"
           color="primary"
           mat-fab=""

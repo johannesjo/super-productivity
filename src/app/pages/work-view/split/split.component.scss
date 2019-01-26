@@ -1,12 +1,14 @@
 @import '../../../../variables';
 
+$splitLineHeight: 4px;
+
 :host {
   z-index: 100;
   position: absolute;
   left: 0;
   top: 0;
   width: 100%;
-  cursor: row-resize;
+  //cursor: row-resize;
 
   &:hover {
     //transform: translateY(-$s);
@@ -15,18 +17,23 @@
   .handle {
     position: absolute;
     width: 100%;
-    height: 6px;
-    top: -3px;
+    height: $splitLineHeight;
+    top: -0.5 * $splitLineHeight;
     display: block;
     //box-shadow: 0 -4px 12px 0 rgba(0, 0, 0, .3);
-    box-shadow: 0 -3px 12px 0 rgba(0, 0, 0, .4);
+    box-shadow: 0 -1px 8px rgba(0,0,0,.5);
   }
 
   button {
     position: absolute;
     transform: translate(-50%, -50%);
     left: 50%;
+    cursor: grab;
     transform-origin: left center;
+
+    &:active {
+      cursor: grabbing;
+    }
 
     &.isAnimate {
       animation: $transition-duration-m splitWiggleAni $ani-standard-timing;
