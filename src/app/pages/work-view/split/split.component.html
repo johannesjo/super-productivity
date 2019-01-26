@@ -1,4 +1,5 @@
-<div class="handle bg-400">
+<div class="handle bg-400"
+     [class.isAtBottom]="pos>99">
   <button #buttonEl
           (dblclick)="toggle()"
           (mousedown)="onMouseDown($event)"

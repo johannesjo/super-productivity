@@ -10,9 +10,6 @@ $splitLineHeight: 4px;
   width: 100%;
   //cursor: row-resize;
 
-  &:hover {
-    //transform: translateY(-$s);
-  }
 
   .handle {
     position: absolute;
@@ -20,8 +17,25 @@ $splitLineHeight: 4px;
     height: $splitLineHeight;
     top: -0.5 * $splitLineHeight;
     display: block;
-    //box-shadow: 0 -4px 12px 0 rgba(0, 0, 0, .3);
-    box-shadow: 0 -1px 8px rgba(0,0,0,.5);
+    z-index: 2;
+    box-shadow: 0 -1px 8px rgba(0, 0, 0, .5);
+
+
+    button mat-icon {
+      transition: $transition-standard;
+    }
+
+    &.isAtBottom {
+      button {
+        mat-icon {
+          transform: translateY(0);
+        }
+
+        &:hover mat-icon {
+          transform: translateY(-$s);
+        }
+      }
+    }
   }
 
   button {
