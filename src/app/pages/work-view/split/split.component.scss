@@ -25,17 +25,17 @@ $splitLineHeight: 4px;
       transition: $transition-standard;
     }
 
-    &.isAtBottom {
-      button {
-        mat-icon {
-          transform: translateY(0);
-        }
-
-        &:hover mat-icon {
-          transform: translateY(-$s);
-        }
-      }
-    }
+    //&.isAtBottom {
+    //  button {
+    //    mat-icon {
+    //      transform: translateY(0);
+    //    }
+    //
+    //    &:hover mat-icon {
+    //      transform: translateY(-$s);
+    //    }
+    //  }
+    //}
   }
 
   button {
