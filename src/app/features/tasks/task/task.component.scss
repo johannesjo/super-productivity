@@ -268,6 +268,10 @@ $this-icon-default-opacity: 0.7;
   // fixes drag and drop on mobile
   touch-action: none;
 
+  &:active {
+    cursor: grabbing;
+  }
+
   // hit area
   &:after {
     content: '';
