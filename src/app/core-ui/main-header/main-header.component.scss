@@ -9,7 +9,20 @@ $navBpShrinking: 900px;
 $mobileHorizontalPadding: 8px;
 
 :host-context(.isMac) {
-  -webkit-app-region: drag;
+  .wrapper {
+    -webkit-app-region: drag;
+    cursor: grab;
+    user-select: none;
+
+    &:active {
+      cursor: grabbing;
+    }
+
+    button,
+    a {
+      -webkit-app-region: no-drag;
+    }
+  }
 
   .app-icon {
     transform: translateY($s*0.5);
@@ -18,6 +31,11 @@ $mobileHorizontalPadding: 8px;
   .project-btn {
     margin-left: $s;
   }
+}
+
+a,
+button {
+  cursor: pointer;
 }
 
 .project-btn {
