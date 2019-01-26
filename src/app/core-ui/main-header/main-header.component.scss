@@ -36,6 +36,11 @@ button {
   cursor: pointer;
 }
 
+.project-btn,
+.main-nav button {
+  height: 36px;
+}
+
 .project-btn {
   min-width: 0;
   overflow: hidden;
