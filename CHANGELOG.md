@@ -1,3 +1,23 @@
+## [0.1.15](https://github.com/johannesjo/sp2/compare/v0.1.14...v0.1.15) (2019-01-26)
+
+
+### Bug Fixes
+
+* breakpoint 1px gap issue ([ab06521](https://github.com/johannesjo/sp2/commit/ab06521))
+* force same height for project and main nav buttons ([c98d4c0](https://github.com/johannesjo/sp2/commit/c98d4c0))
+
+
+### Features
+
+* add frameless window for mac ([75ba25b](https://github.com/johannesjo/sp2/commit/75ba25b))
+* add robot for tasks as well ([4cc7084](https://github.com/johannesjo/sp2/commit/4cc7084))
+* break to 2 line nav much later ([ee39fed](https://github.com/johannesjo/sp2/commit/ee39fed))
+* improve frameless window for mac ([03eff3c](https://github.com/johannesjo/sp2/commit/03eff3c))
+* improve split drag ([6e9c9e6](https://github.com/johannesjo/sp2/commit/6e9c9e6))
+* leave scrollbar alone for mac ([c81a921](https://github.com/johannesjo/sp2/commit/c81a921))
+
+
+
 ## [0.1.14](https://github.com/johannesjo/sp2/compare/v0.1.13...v0.1.14) (2019-01-26)
 
 
