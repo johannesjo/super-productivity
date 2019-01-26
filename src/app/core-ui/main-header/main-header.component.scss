@@ -1,8 +1,6 @@
 @import '../../../variables';
 
 $navBpUltraSmall: 360px;
-$navBpIconInsteadOfText: 374px;
-$navBpIconInsteadOfText: 374px;
 $navBpReduceToBurger: 420px;
 $navBp2Lines: 680px;
 $navBpShrinking: 900px;
@@ -113,19 +111,6 @@ button {
     ::ng-deep .mat-button-wrapper {
       display: flex;
       justify-content: center;
-    }
-  }
-
-  @media (max-width: $navBpIconInsteadOfText) {
-    .text {
-      display: none;
-    }
-    button {
-      min-height: 40px;
-    }
-
-    mat-icon {
-      display: block;
     }
   }
 }
