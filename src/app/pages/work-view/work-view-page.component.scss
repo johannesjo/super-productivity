@@ -48,7 +48,7 @@ h2 {
 
 .work-view-header {
   margin-bottom: $s;
-  min-height: 64px;
+  min-height: 56px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -90,10 +90,6 @@ h2 {
     text-align: center;
     margin: $s 0;
     white-space: nowrap;
-
-    button {
-      margin: 0 $s/2;
-    }
   }
 
   .label {
