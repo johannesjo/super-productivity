@@ -1,3 +1,26 @@
+## [0.1.14](https://github.com/johannesjo/sp2/compare/v0.1.13...v0.1.14) (2019-01-26)
+
+
+### Bug Fixes
+
+* **googleDriveSync:** case when there is no initial file id ([5c9f7e8](https://github.com/johannesjo/sp2/commit/5c9f7e8))
+* **tasks:** estimate remaining calculation ([130a1f2](https://github.com/johannesjo/sp2/commit/130a1f2))
+* backup & sync not working when there only is the default project and no project state ([eeae84f](https://github.com/johannesjo/sp2/commit/eeae84f))
+* disable service worker for electron, as it does not work ([f6dd283](https://github.com/johannesjo/sp2/commit/f6dd283))
+* make back button work again ([a3b5b17](https://github.com/johannesjo/sp2/commit/a3b5b17))
+
+
+### Features
+
+* beautify task summary table ([1efa03e](https://github.com/johannesjo/sp2/commit/1efa03e))
+* flatten daily summary table tasks ([3cdf0e1](https://github.com/johannesjo/sp2/commit/3cdf0e1))
+* login before every google request to avoid errors ([bd6946f](https://github.com/johannesjo/sp2/commit/bd6946f))
+* **localBackup:** add boilerplate ([1a9a46f](https://github.com/johannesjo/sp2/commit/1a9a46f))
+* **localBackup:** add frontend side of things ([e292422](https://github.com/johannesjo/sp2/commit/e292422))
+* **localBackup:** save simple backups from electron ([6cef8bf](https://github.com/johannesjo/sp2/commit/6cef8bf))
+
+
+
 ## [0.1.13](https://github.com/johannesjo/sp2/compare/v0.1.12...v0.1.13) (2019-01-23)
 
 
