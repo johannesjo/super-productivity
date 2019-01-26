@@ -95,7 +95,7 @@
   "private": true,
   "dependencies": {
     "node-notifier": "^5.3.0",
-    "moment": "^2.22.2",
+    "moment": "^2.24.0",
     "jira-client-fork": "^4.2.0",
     "googleapis": "^34.0.0",
     "electron-localshortcut": "^3.1.0",
