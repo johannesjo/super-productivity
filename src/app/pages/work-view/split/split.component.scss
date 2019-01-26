@@ -36,6 +36,7 @@ $splitLineHeight: 4px;
   button {
     background-color: inherit !important;
     position: absolute;
+    z-index: 2;
     transform: translate(-50%, -50%);
     left: 50%;
     cursor: grab;
