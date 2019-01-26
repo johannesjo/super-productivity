@@ -1,25 +1,6 @@
 import { ConfigFormConfig, ConfigFormSection } from '../config/config.model';
+import { ALL_THEMES } from '../../app.constants';
 
-const ALL_THEMES = [
-  'blue',
-  'indigo',
-  'purple',
-  'deep-purple',
-  'light-blue',
-  'cyan',
-  'teal',
-  'green',
-  'light-green',
-  'indigo',
-  'lime',
-  'yellow',
-  'amber',
-  'deep-orange',
-  'grey',
-  'blue-grey',
-  'indigo',
-  'indigo',
-];
 const themeOpts = ALL_THEMES.map((theme) => {
   return {label: theme, value: theme};
 });

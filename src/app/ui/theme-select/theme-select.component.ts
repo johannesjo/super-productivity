@@ -1,25 +1,7 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ALL_THEMES } from '../../app.constants';
 
-const ALL_THEMES = [
-  'blue',
-  'indigo',
-  'purple',
-  'deep-purple',
-  'light-blue',
-  'cyan',
-  'teal',
-  'green',
-  'light-green',
-  'indigo',
-  'lime',
-  'yellow',
-  'amber',
-  'deep-orange',
-  'grey',
-  'blue-grey',
-  'indigo',
-  'pink',
-];
+
 
 @Component({
   selector: 'theme-select',

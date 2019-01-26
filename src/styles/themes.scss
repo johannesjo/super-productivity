@@ -247,21 +247,6 @@ $light-green-theme-dark: mat-dark-theme($light-green-primary, $accent);
   @include color-helper($light-green-theme-dark);
 }
 
-// indigo
-$indigo-primary: mat-palette($mat-indigo);
-$indigo-theme: mat-light-theme($indigo-primary, $accent);
-$indigo-theme-dark: mat-dark-theme($indigo-primary, $accent);
-
-.indigo {
-  @include angular-material-theme($indigo-theme);
-  @include color-helper($indigo-theme);
-}
-
-.indigo.isDarkTheme {
-  @include angular-material-theme($indigo-theme-dark);
-  @include color-helper($indigo-theme-dark);
-}
-
 // lime
 $lime-primary: mat-palette($mat-lime);
 $lime-theme: mat-light-theme($lime-primary, $accent);
@@ -320,21 +305,6 @@ $deep-orange-theme-dark: mat-dark-theme($deep-orange-primary, $accent);
 .deep-orange.isDarkTheme {
   @include angular-material-theme($deep-orange-theme-dark);
   @include color-helper($deep-orange-theme-dark);
-}
-
-// grey
-$grey-primary: mat-palette($mat-grey);
-$grey-theme: mat-light-theme($grey-primary, $accent);
-$grey-theme-dark: mat-dark-theme($grey-primary, $accent);
-
-.grey {
-  @include angular-material-theme($grey-theme);
-  @include color-helper($grey-theme);
-}
-
-.grey.isDarkTheme {
-  @include angular-material-theme($grey-theme-dark);
-  @include color-helper($grey-theme-dark);
 }
 
 // blue-grey
