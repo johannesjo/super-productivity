@@ -74,6 +74,27 @@ TODO configure more restrictive Content-Security-Policy
       animation-delay: -1.0s;
     }
 
+    .productivity-tip {
+      text-align: center;
+      position: absolute;
+      width: 400px;
+      max-width: 80vw;
+      left: 50%;
+      transform: translate(-50%);
+      bottom: 70%;
+      padding-bottom: 10px;
+    }
+
+    .app-loading .productivity-tip h2 {
+      font: 500 20px/32px Roboto, "Helvetica Neue", sans-serif;
+      margin: 0 0 8px !important;
+    }
+
+    .app-loading .productivity-tip p {
+      font: 400 14px/20px Roboto, "Helvetica Neue", sans-serif;
+      margin: 0 0 8px !important;
+    }
+
 
     @keyframes sk-bounce {
       0%, 100% {
@@ -90,6 +111,11 @@ TODO configure more restrictive Content-Security-Policy
 <body class="mat-typography blue">
 <app-root>
   <div class="app-loading">
+    <div class="productivity-tip">
+      <h2 id="heading">Heading</h2>
+      <p id="text">Text</p>
+    </div>
+
     <div class="spinner">
       <div class="double-bounce1"></div>
       <div class="double-bounce2"></div>
@@ -102,8 +128,26 @@ TODO configure more restrictive Content-Security-Policy
             style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:1.46761858;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:13.80000019;stroke-dasharray:none;stroke-opacity:1"/>
     </svg>
   </div>
-
 </app-root>
 <noscript>Please enable JavaScript to continue using this application.</noscript>
+<script>
+  var productivityTips = [
+    ['Prioritize', 'Do first things first.'],
+    ['Be realistic', 'Almost everything will take longer than you think.'],
+    ['Good is good enough', 'Don`t aim for perfection. Focus on the important things.'],
+    ['Distractions', 'If something is distracting you, get rid of it. If you can`t get it out of your head and you can deal with it later, write it down.'],
+    ['Fun things first', 'The dopamine can get you through the rest.'],
+    ['Celebrate!', 'After completing a task, don`t rush to the next! Give yourself some time to feel good about yourself.'],
+    ['Establish Routines', 'Decisions cost time. So establishing routines can be very helpful.'],
+    ['Take breaks', 'They help you clear your mind and make you almost always more productive in the long run. Go! Take a walk!'],
+    ['Mess creates stress', 'Clean up your desk!'],
+    ['Focus on a single task', 'Multi-tasking is the worst.'],
+    ['Set your goals', 'Having a goal to aim for (or even some smaller ones) increases motivation and focus. Remind yourself why you are doing something.'],
+    ['Try to get it right the first time', 'This can help you to avoid dragging a task on forever.']
+  ];
+  var randomIndex = Math.floor(Math.random() * productivityTips.length);
+  document.getElementById('heading').innerText = productivityTips[randomIndex][0];
+  document.getElementById('text').innerText = productivityTips[randomIndex][1];
+</script>
 </body>
 </html>
