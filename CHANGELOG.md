@@ -1,3 +1,28 @@
+## [0.1.16](https://github.com/johannesjo/sp2/compare/v0.1.15...v0.1.16) (2019-01-26)
+
+
+### Bug Fixes
+
+* 0 bug ([b8621d4](https://github.com/johannesjo/sp2/commit/b8621d4))
+* remove debug val from tpl ([3e1f6ae](https://github.com/johannesjo/sp2/commit/3e1f6ae))
+
+
+### Features
+
+* add dragging cursor to drag handle ([46450ed](https://github.com/johannesjo/sp2/commit/46450ed))
+* adjust header shadow ([cafb505](https://github.com/johannesjo/sp2/commit/cafb505))
+* display worklog always again ([b8dd56b](https://github.com/johannesjo/sp2/commit/b8dd56b))
+* improve split handle by little animation ([df040c0](https://github.com/johannesjo/sp2/commit/df040c0))
+* improve split styling ([14b97c2](https://github.com/johannesjo/sp2/commit/14b97c2))
+* improve work-view and split styling ([650d357](https://github.com/johannesjo/sp2/commit/650d357))
+* reduce bundle size by only compiling to es6 ([8c2a71e](https://github.com/johannesjo/sp2/commit/8c2a71e))
+* reduce themes ([3dc7a86](https://github.com/johannesjo/sp2/commit/3dc7a86))
+* reduce work view header size ([6fb4240](https://github.com/johannesjo/sp2/commit/6fb4240))
+* remove ani for split component ([bba38b5](https://github.com/johannesjo/sp2/commit/bba38b5))
+* use moment-mini to reduce bundle size ([038ef51](https://github.com/johannesjo/sp2/commit/038ef51))
+
+
+
 ## [0.1.15](https://github.com/johannesjo/sp2/compare/v0.1.14...v0.1.15) (2019-01-26)
 
 

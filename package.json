@@ -1,6 +1,6 @@
 {
   "name": "sp2",
-  "version": "0.1.15",
+  "version": "0.1.16",
   "description": "Personal Task Management App to help you with your daily struggle with JIRA etc.",
   "main": "./electron/main.js",
   "author": "Johannes Millan <contact@super-productivity.com> (http://super-productivity.com)",
