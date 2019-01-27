@@ -1,6 +1,6 @@
 {
-  "name": "sp2",
-  "version": "0.1.19",
+  "name": "superProductivity",
+  "version": "1.999.999",
   "description": "Personal Task Management App to help you with your daily struggle with JIRA etc.",
   "main": "./electron/main.js",
   "author": "Johannes Millan <contact@super-productivity.com> (http://super-productivity.com)",
@@ -8,7 +8,7 @@
   "homepage": "http://super-productivity.com",
   "repository": {
     "type": "git",
-    "url": "git://github.com/johannesjo/sp2.git"
+    "url": "git://github.com/johannesjo/super-productivity.git"
   },
   "keywords": [
     "ToDo",
@@ -82,7 +82,15 @@
         "deb"
       ],
       "publish": [
-        "github"
+        "github",
+        {
+          "provider": "bintray",
+          "package": "main",
+          "repo": "super-productivity",
+          "component": "super-productivity",
+          "owner": "johannesjo",
+          "distribution": "stable"
+        }
       ],
       "depends": [
         "xprintidle"
@@ -92,7 +100,6 @@
       "grade": "stable"
     }
   },
-  "private": true,
   "dependencies": {
     "electron-localshortcut": "^3.1.0",
     "electron-log": "^2.2.17",
