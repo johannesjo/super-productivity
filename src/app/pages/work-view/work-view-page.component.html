@@ -1,0 +1,138 @@
+<div #containerEl
+     class="wrapper">
+  <div #splitTopEl
+       class="today">
+
+    <header class="work-view-header bg-800 color-contrast">
+      <div *ngIf="(!isPlanYourDay && (taskService.isTasksForToday$|async))||isPlanYourDay===false"
+           @fade
+           class="status-bar">
+        <div class="item">
+          <span class="label">Estimate remaining:</span>
+          <span class="no-wrap">
+      ~<strong>{{taskService.estimateRemainingToday$|async|msToString}}</strong>
+      <mat-icon>timer</mat-icon>
+      </span>
+        </div>
+
+        <div class="item"><span class="label">Working today:</span>
+          <span class="no-wrap">
+      <strong>{{taskService.workingToday$|async|msToString}}</strong>
+      <mat-icon aria-label="timer icon">timer</mat-icon>
+      </span>
+        </div>
+
+        <div *ngIf="isShowTimeWorkedWithoutBreak"
+             class="item">
+          <span class="label">Without break: </span>
+          <span class="no-wrap">
+        <strong>{{takeABreakService.timeWorkingWithoutABreak$|async|msToString}}</strong><mat-icon>timer</mat-icon>
+      </span>
+        </div>
+        <div class="controls show-xs-only">
+          <button (click)="showAddTaskBar()"
+                  color="primary"
+                  mat-mini-fab>
+            <mat-icon>add</mat-icon>
+          </button>
+          <!--<button routerLink="/daily-summary"-->
+          <!--mat-mini-fab=""-->
+          <!--color="primary">-->
+          <!--<mat-icon>done_all</mat-icon>-->
+          <!--</button>-->
+        </div>
+      </div>
+
+      <div *ngIf="isPlanYourDay"
+           class="planning-mode-header">
+        <h2 *ngIf="!(taskService.undoneTasks$|async)?.length"
+            class="planning-mode-header mat-h2">Add some tasks to plan your day!</h2>
+        <div *ngIf="(taskService.undoneTasks$|async)?.length"
+             class="status-bar">
+          <div class="item">
+            <span class="label">Time Estimated:</span>
+            <span class="no-wrap">
+      ~<strong>{{taskService.estimateRemainingToday$|async|msToString}}</strong>
+      <mat-icon>timer</mat-icon>
+      </span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div class="component-wrapper page-wrapper">
+      <div *ngIf="isPlanYourDay"
+           @expandFade
+           class="planning-mode-content">
+        <add-task-bar (done)="startWork()"
+                      [isAddToBottom]="true"></add-task-bar>
+        <button (click)="startWork()"
+                class="read-to-work-btn"
+                color="primary"
+                mat-raised-button="">
+          <mat-icon>check</mat-icon>
+          Ready to work!
+        </button>
+      </div>
+      <task-list [tasks]="taskService.undoneTasks$|async"
+                 listId="PARENT"
+                 listModelId="UNDONE"></task-list>
+
+      <div *ngIf="!isPlanYourDay"
+           @expand>
+        <h2 class="mat-h2 completed-tasks-heading">Completed Tasks</h2>
+        <task-list [tasks]="taskService.doneTasks$|async"
+                   listId="PARENT"
+                   listModelId="DONE"></task-list>
+        <div class="finish-day-button-wrapper">
+          <button color="primary"
+                  mat-raised-button=""
+                  routerLink="/daily-summary">
+            <mat-icon>done_all</mat-icon>
+            Finish working
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div #splitBottomEl
+       class="backlog">
+    <split (posChanged)="splitInputPos=$event"
+           [containerEl]="containerEl"
+           [counter]="(taskService.backlogTasks$|async)?.length"
+           [isAnimateBtn]="isTriggerSwitchListAni$|async"
+           [splitBottomEl]="splitBottomEl"
+           [splitPos]="splitInputPos"
+           [splitTopEl]="splitTopEl"></split>
+    <!--<div *ngIf="splitInputPos!==100"-->
+    <div
+      class="inner-wrapper">
+      <header class="backlog-header bg-600 color-contrast">
+        <div class="status-bar">
+          <div class="item">
+            <span class="label">Estimate:</span>
+            <span class="no-wrap">
+      ~<strong>{{taskService.estimateRemainingBacklog$|async|msToString}}</strong>
+      <mat-icon>timer</mat-icon>
+      </span>
+          </div>
+          <button (click)="showAddTaskBar()"
+                  color="lighter"
+                  mat-mini-fab>
+            <mat-icon class="hide-controls-icon">add</mat-icon>
+          </button>
+        </div>
+      </header>
+
+      <div class="component-wrapper page-wrapper">
+        <h2 class="mat-h2 backlog-heading">Backlog</h2>
+        <task-list [tasks]="backlogTasks"
+                   listId="PARENT"
+                   listModelId="BACKLOG"></task-list>
+      </div>
+    </div>
+  </div>
+</div>
+
+

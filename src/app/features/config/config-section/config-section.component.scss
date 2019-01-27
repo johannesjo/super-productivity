@@ -1,0 +1,71 @@
+@import '../../../../variables';
+
+.form-wrapper {
+  overflow: hidden;
+
+  &.keyboard {
+    ::ng-deep formly-field {
+      box-sizing: border-box;
+      padding: 0 $s;
+      width: 50%;
+      display: block;
+      float: left;
+    }
+  }
+}
+
+:host {
+  position: relative;
+  display: block;
+}
+
+$this-panel-padding-left-right: 12px;
+
+::ng-deep .collapsible-title {
+  font-size: 16px;
+  margin-top: 0;
+  display: block;
+  padding: 10px $this-panel-padding-left-right;
+
+}
+
+::ng-deep .collapsible-expand-icon {
+}
+
+::ng-deep .collapsible-panel {
+  //border-top: 1px solid black;
+  overflow: visible;
+
+  > * {
+    // for help icon positioning
+    // does not work because of translate on the slide down ani element
+    // position: static;
+
+    // add a padding
+    padding: 0 $this-panel-padding-left-right;
+  }
+}
+
+::ng-deep .help-btn {
+  display: none;
+  position: absolute;
+  top: -40px;
+  right: -2px;
+}
+
+::ng-deep .help-btn {
+  display: block;
+  animation: $transition-duration-m help-ico-animation $ani-standard-timing;
+}
+
+@keyframes help-ico-animation {
+  0% {
+    transform: scale(0);
+  }
+  50% {
+    transform: scale(1.4);
+  }
+  100% {
+    transform: scale(1);
+  }
+}

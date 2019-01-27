@@ -1,0 +1,15 @@
+@import '../../../variables';
+
+.mat-tab-link {
+  justify-content: center;
+  width: 50%;
+  color: #ffffff;
+
+  &.mat-tab-label-active {
+    opacity: 1;
+  }
+}
+
+.links {
+  //box-shadow: $header-inset-shadow;
+}

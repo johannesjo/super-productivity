@@ -1,0 +1,147 @@
+<div class="wrapper bg-primary color-contrast mat-elevation-z3">
+  <button mat-icon-button
+          class="app-icon"
+          routerLink="work-view">
+    <mat-icon svgIcon="sp">sp</mat-icon>
+  </button>
+
+  <button [matMenuTriggerFor]="mainMenu"
+          class="burger-trigger"
+          mat-icon-button>
+    <mat-icon>menu</mat-icon>
+  </button>
+
+  <mat-menu #mainMenu="matMenu">
+
+    <button mat-menu-item
+            routerLink="work-view">
+      <mat-icon>playlist_play</mat-icon>
+      Task List ({{(taskService.undoneTasks$|async)?.length || 0}})
+    </button>
+    <button mat-menu-item
+            routerLink="worklog-and-calendar">
+      <mat-icon>today</mat-icon>
+      Worklog
+    </button>
+
+    <button [routerLink]="'projects'"
+            mat-menu-item>
+      <mat-icon>list</mat-icon>
+      Manage Projects
+    </button>
+
+    <button [routerLink]="'config'"
+            mat-menu-item
+            routerLinkActive>
+      <mat-icon>settings</mat-icon>
+      Settings
+    </button>
+
+  </mat-menu>
+
+  <button [matMenuTriggerFor]="projectMenu"
+          class="project-btn"
+          mat-button>
+    <span class="current-project-title">{{(projectService.currentProject$|async).title}}</span>
+    <mat-icon aria-hidden="true">arrow_drop_down</mat-icon>
+  </button>
+  <mat-menu #projectMenu="matMenu">
+    <button (click)="switchProject(project.id)"
+            *ngFor="let project of projectService.list$|async"
+            mat-menu-item>
+      <mat-icon *ngIf="project.id===(projectService.currentId$|async)">radio_button_checked</mat-icon>
+      <mat-icon *ngIf="project.id!==(projectService.currentId$|async)">radio_button_unchecked</mat-icon>
+      {{project.title}}
+    </button>
+    <button [routerLink]="'projects'"
+            mat-menu-item>
+      <mat-icon>list</mat-icon>
+      Manage Projects
+    </button>
+    <button (click)="addProject()"
+            mat-menu-item>
+      <mat-icon>add</mat-icon>
+      Create Project
+    </button>
+  </mat-menu>
+
+  <nav [class.isHideNav]="(configService.cfg$|async)?.misc.isHideNav"
+       class="main-nav">
+    <button mat-button
+            routerLink="work-view"
+            routerLinkActive="isActive">
+      <span class="text">Tasks ({{(taskService.undoneTasks$|async)?.length || 0}})</span>
+    </button>
+    <button mat-button
+            routerLink="worklog-and-calendar"
+            routerLinkActive="isActive">
+      <span class="text">Worklog</span>
+    </button>
+
+    <button [routerLink]="'projects'"
+            mat-button
+            routerLinkActive="isActive">
+      <span class="text">Projects</span>
+    </button>
+
+    <button [routerLink]="'config'"
+            mat-button
+            routerLinkActive="isActive">
+      <span class="text">Settings</span>
+    </button>
+  </nav>
+
+  <nav class="action-nav">
+    <button (click)="showAddTaskBar()"
+            class="hide-xs bg-200"
+            color="lighter"
+            mat-mini-fab>
+      <mat-icon>add</mat-icon>
+    </button>
+
+    <button (click)="toggleShowNotes()"
+            color="lighter"
+            mat-mini-fab>
+      <mat-icon [class.rotate]="(noteService.isShowNotes$|async)"
+                class="note-ico">note
+      </mat-icon>
+    </button>
+
+    <div class="svg-wrapper">
+      <button (click)="togglePlay()"
+              [color]="(taskService.currentTaskId$|async)? 'accent': 'lighter'"
+              class="play-btn"
+              mat-fab>
+        <mat-icon *ngIf="!(taskService.currentTaskId$|async)">play_arrow</mat-icon>
+        <mat-icon *ngIf="(taskService.currentTaskId$|async)">pause</mat-icon>
+        <svg class="circle-svg"
+             focusable="false"
+             height="52"
+             width="52">
+          <circle #circleSvg
+                  class=""
+                  cx="50%"
+                  cy="50%"
+                  fill="none"
+                  r="13"
+                  stroke="#000"
+                  stroke-dasharray="81.6814089933"
+                  stroke-dashoffset="-81.6814089933"
+                  stroke-width="26"></circle>
+        </svg>
+        <div *ngIf="(pomodoroService.cfg$|async)?.isEnabled"
+             class="pomodoro-label">{{(pomodoroService.currentSessionTime$|async|msToMinuteClockString)}}
+        </div>
+      </button>
+    </div>
+  </nav>
+
+  <button (click)="bookmarkService.toggleBookmarks()"
+          [class.is-open]="bookmarkService.isShowBookmarks$|async"
+          aria-label="Show Help for section"
+          class="show-bookmarks-btn"
+          color="primary"
+          mat-mini-fab="">
+    <mat-icon>bookmark</mat-icon>
+  </button>
+</div>

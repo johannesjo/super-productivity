@@ -1,0 +1,36 @@
+@import '../../../_variables.scss';
+
+.controls {
+  margin-left: 2*$s;
+
+  button {
+    margin-left: $s;
+  }
+}
+
+.project-list {
+}
+
+.project {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: $s/2 2*$s;
+  margin-bottom: $s;
+
+  .title {
+    font-size: 16px;
+
+    &.isCurrent {
+      font-weight: bold;
+    }
+  }
+
+  .issue-providers {
+    margin-left: 2*$s;
+    margin-right: 2*$s;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+}

@@ -1,0 +1,182 @@
+@import './../../../_variables';
+
+:host {
+  overflow: hidden !important;
+}
+
+add-task-bar {
+  margin: 0 auto $s*2;
+  max-width: 628px;
+
+  ::ng-deep input {
+    box-shadow: none !important;
+  }
+}
+
+h1 {
+  margin: $s*2 0;
+  text-align: center;
+}
+
+h2 {
+  text-align: center;
+}
+
+.wrapper {
+  overflow: hidden;
+  height: 100%;
+  width: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.work-view-header,
+.backlog-header {
+  box-shadow: $whiteframe-shadow-3dp;
+  color: #ffffff;
+  padding: 0.5*$s;
+
+  @include mq(xs) {
+    padding: 0.5*$s;
+  }
+}
+
+.backlog-header {
+  padding: $s 0;
+}
+
+.work-view-header {
+  position: relative;
+  margin-bottom: $s;
+  min-height: 56px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  @include mq(xs, max) {
+    .label {
+      display: none;
+    }
+    p {
+      margin: 0;
+    }
+  }
+}
+
+.completed-tasks-heading {
+  margin: $s;
+  margin-top: $s*2;
+}
+
+.backlog-heading {
+  margin: $s;
+}
+
+.status-bar {
+  display: flex;
+  align-items: center;
+  flex-direction: row;
+  justify-content: center;
+  padding: 5px 0;
+  user-select: none;
+  min-height: 4*$s;
+
+  .item {
+    margin: 0 1.5*$s;
+    text-align: center;
+  }
+
+  .controls {
+    text-align: center;
+    margin: $s 0;
+    white-space: nowrap;
+  }
+
+  .label {
+    margin-right: $s;
+  }
+
+  .no-wrap {
+    display: inline-block;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+.hide-controls-icon {
+  transform: rotate(90deg);
+}
+
+.finish-day-button-wrapper {
+  text-align: center;
+  margin: $s 0;
+  white-space: nowrap;
+}
+
+.backlog,
+.today {
+  position: absolute;
+  left: 0;
+  //transition: max-height, min-height 500ms ease-in-out;
+  //transition: all 500ms linear;
+  width: 100%;
+
+  &.isAnimatable {
+    transition: $transition-standard;
+  }
+
+  task-list ::ng-deep > .task-list-inner {
+    min-height: 50px;
+  }
+}
+
+.today,
+.backlog .inner-wrapper {
+  @include scrollYImportant();
+}
+
+.today {
+  top: 0;
+}
+
+.backlog {
+  bottom: 0;
+
+  .inner-wrapper {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+  }
+}
+
+// PLAN MODE
+.planning-mode-header {
+  position: absolute;
+  width: 100%;
+  top: 50%;
+  left: 0;
+  text-align: center;
+  transform: translateY(-50%);
+
+  h1, h2 {
+    margin: 0;
+    padding: 0;
+  }
+}
+
+.planning-mode-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding-bottom: 2*$s;
+
+  add-task-bar {
+    width: 100%;
+  }
+}

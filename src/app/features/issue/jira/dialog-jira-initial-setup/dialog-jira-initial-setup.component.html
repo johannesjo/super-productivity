@@ -1,0 +1,8 @@
+<h2 mat-dialog-title>
+  <mat-icon svgIcon="jira"></mat-icon>
+  Setup Jira for Project
+</h2>
+<mat-dialog-content>
+  <jira-cfg-stepper (onSaveCfg)="saveJiraCfg($event)"
+                    [cfg]="jiraCfg"></jira-cfg-stepper>
+</mat-dialog-content>

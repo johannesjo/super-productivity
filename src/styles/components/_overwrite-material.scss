@@ -1,0 +1,14 @@
+body .mat-dialog-content {
+  @include scroll;
+}
+
+body .mat-snack-bar-container {
+  &.subtle {
+    margin-bottom: 0;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    min-height: 24px;
+    padding-top: 8px;
+    padding-bottom: 8px;
+  }
+}

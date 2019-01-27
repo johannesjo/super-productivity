@@ -1,0 +1,41 @@
+<mat-dialog-content>
+  <h2 class="mat-title"
+      style="margin-top: 0">Overwrite unsaved data on Google Drive?</h2>
+  <p>There seem to be some changes on Google Drive, that you don't have locally. Do you want to overwrite them anyway?</p>
+  <table>
+    <tr>
+      <td>remote</td>
+      <td>last modification:</td>
+      <td>{{data.remoteModified}}</td>
+    </tr>
+    <tr>
+      <td>local</td>
+      <td>last modification:</td>
+      <td>{{data.lastActiveLocal}}</td>
+    </tr>
+    <tr>
+      <td>local <=> remote</td>
+      <td>last sync</td>
+      <td>{{data.lastSync}}</td>
+    </tr>
+  </table>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-raised-button=""
+          (click)="data.saveToRemote();close()"
+          color="primary">
+    <mat-icon>file_upload</mat-icon>
+    Overwrite remote data
+  </button>
+  <button mat-raised-button=""
+          (click)="data.loadFromRemote();close()">
+    <mat-icon>file_download</mat-icon>
+    Overwrite local data
+  </button>
+  <button mat-raised-button=""
+          (click)="close()"
+          color="warn">
+    Cancel
+  </button>
+</mat-dialog-actions>

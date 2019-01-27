@@ -1,0 +1,47 @@
+<mat-dialog-content>
+  <h2 class="mat-title">Overwrite local data with GDrive Update?</h2>
+  <p>Update from Google Drive Backup.
+    <strong>Local data seems to be newer</strong> than the remote data. Overwrite unsaved local changes?
+    <strong>All data will be lost forever</strong>.</p>
+  <table>
+    <tr>
+      <td>remote</td>
+      <td>last modification:</td>
+      <td>{{data.remoteModified}}</td>
+    </tr>
+    <tr>
+      <td>local</td>
+      <td>last modification:</td>
+      <td>{{data.lastActiveLocal}}</td>
+    </tr>
+    <tr>
+      <td>local <=> remote</td>
+      <td>last sync</td>
+      <td>{{data.lastSync}}</td>
+    </tr>
+  </table>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <div class="wrap-buttons">
+    <button mat-raised-button=""
+            color="primary"
+            (click)="data.saveToRemote();close()">
+      <mat-icon aria-label="file_upload">file_upload</mat-icon>
+      Overwrite remote data
+    </button>
+    <button mat-raised-button=""
+            (click)="data.loadFromRemote();close()">
+      <mat-icon aria-label="file_download">file_download</mat-icon>
+      Overwrite local data
+    </button>
+    <button mat-raised-button=""
+            color="warn"
+            (click)="close()">
+      Cancel
+    </button>
+  </div>
+</mat-dialog-actions>
+
+
+

@@ -1,0 +1,30 @@
+<h2 mat-dialog-title>
+  <mat-icon svgIcon="github"></mat-icon>
+  Setup Git for Project
+</h2>
+
+<form [formGroup]="formGroup"
+      (submit)="saveGitCfg(gitCfg)">
+  <mat-dialog-content>
+    <formly-form [model]="gitCfg"
+                 [fields]="formConfig"
+                 [form]="formGroup">
+    </formly-form>
+  </mat-dialog-content>
+  <mat-dialog-actions align="center">
+    <button mat-raised-button=""
+            type="submit"
+            color="primary">
+      <mat-icon>save</mat-icon>
+      Save
+    </button>
+
+    <button mat-raised-button=""
+            type="button"
+            (click)="close()"
+            color="warn">
+      <mat-icon>cancel</mat-icon>
+      Cancel
+    </button>
+  </mat-dialog-actions>
+</form>

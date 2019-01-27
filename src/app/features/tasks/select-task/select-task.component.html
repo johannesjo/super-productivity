@@ -1,0 +1,25 @@
+<mat-form-field>
+  <input [formControl]="taskSelectCtrl"
+         [matAutocomplete]="auto"
+         aria-label="Select or create task"
+         matInput
+         placeholder="Select or create task"
+         required>
+  <mat-icon *ngIf="!isCreate"
+            matSuffix="">track_changes
+  </mat-icon>
+  <mat-icon *ngIf="isCreate"
+            matSuffix="">add
+  </mat-icon>
+
+  <mat-autocomplete #auto="matAutocomplete"
+                    [autoActiveFirstOption]="true"
+                    [displayWith]="displayWith">
+    <mat-option *ngFor="let task of filteredTasks"
+                [value]="task">
+      <span>{{ task?.title}}</span>
+    </mat-option>
+
+  </mat-autocomplete>
+</mat-form-field>
+

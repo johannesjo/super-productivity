@@ -1,0 +1,17 @@
+@import "../../../variables";
+
+.import-text-area {
+  width: 100%;
+  display: block;
+  margin-top: $s*2;
+  min-height: 90px;
+  margin-bottom: $s;
+}
+
+button {
+  margin-bottom: $s;
+}
+
+section {
+  margin-top: $s*2;
+}

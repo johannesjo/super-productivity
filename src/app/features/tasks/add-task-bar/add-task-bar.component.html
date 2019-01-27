@@ -1,0 +1,39 @@
+<form (submit)="addTask()"
+      class="add-task-form mat-elevation-z3 ">
+  <button (click)="isAddToBacklog=!isAddToBacklog"
+          class="switch-add-to-btn"
+          mat-icon-button=""
+          type="button">
+    <mat-icon *ngIf="isAddToBacklog">library_add</mat-icon>
+    <mat-icon *ngIf="!isAddToBacklog">playlist_add</mat-icon>
+  </button>
+  <input #inputEl
+         (blur)="onBlur($event)"
+         [formControl]="taskSuggestionsCtrl"
+         [matAutocomplete]="autoEl"
+         [placeholder]="(doubleEnterCount > 0) ? 'Press enter one more time to start':'Select or create task'"
+         aria-label="Select or create task"
+         autofocus="autofocus"
+         class="border-color-primary"
+         matInput>
+
+  <mat-autocomplete #autoEl="matAutocomplete"
+                    (optionSelected)="addTask()"
+                    [autoActiveFirstOption]="true"
+                    [displayWith]="displayWith">
+    <mat-option *ngIf="isLoading"
+                [value]="taskSuggestionsCtrl.value"
+                class="is-loading">
+      <mat-spinner diameter="50"></mat-spinner>
+    </mat-option>
+    <ng-container *ngIf="!isLoading">
+      <mat-option *ngFor="let issue of filteredIssueSuggestions"
+                  [value]="issue">
+        <mat-icon [svgIcon]="issue.issueType|issueIcon"></mat-icon>
+        <span>{{issue?.title}}</span>
+      </mat-option>
+    </ng-container>
+
+  </mat-autocomplete>
+
+</form>

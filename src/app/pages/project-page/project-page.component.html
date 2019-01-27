@@ -1,0 +1,43 @@
+<div class="page-wrapper">
+  <h2 class="mat-h2">Projects</h2>
+
+  <div class="project-list">
+    <mat-card *ngFor="let project of projectService.list$|async"
+              class="project">
+
+      <div [class.isCurrent]="project.id === (projectService.currentId$|async)"
+           class="title">{{project.title}}
+      </div>
+
+      <div class="issue-providers">
+        <mat-icon *ngIf="project.issueIntegrationCfgs?.JIRA?.isEnabled"
+                  svgIcon="jira"></mat-icon>
+        <mat-icon *ngIf="project.issueIntegrationCfgs?.GIT?.repo"
+                  svgIcon="github"></mat-icon>
+      </div>
+
+      <div class="controls">
+        <button (click)="edit(project)"
+                color="primary"
+                mat-raised-button>
+          <mat-icon aria-label="Edit">edit</mat-icon>
+          Edit
+        </button>
+        <button (click)="remove(project.id)"
+                *ngIf="project.id !== (projectService.currentId$|async)"
+                color="warn"
+                mat-raised-button>
+          <mat-icon aria-label="Delete">delete</mat-icon>
+          Delete
+        </button>
+      </div>
+
+    </mat-card>
+  </div>
+  <button (click)="openCreateDialog()"
+          color="primary"
+          mat-raised-button>
+    <mat-icon aria-label="Add">add</mat-icon>
+    Create New
+  </button>
+</div>

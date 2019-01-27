@@ -1,0 +1,119 @@
+<!--<pre><code>{{jiraCfg|json}}</code></pre>-->
+
+<div class="wrapper">
+  <mat-horizontal-stepper #stepper
+                          [linear]="true"
+                          dynamicHeight>
+    <mat-step [stepControl]="credentialsFormGroup">
+      <form (submit)="saveStepForm(jiraCfg)"
+            [formGroup]="credentialsFormGroup">
+        <ng-template matStepLabel>Credentials</ng-template>
+
+        <p class="isHideWhenJiraSupport">Please
+          <a href="https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb">
+            download the chrome extension</a> in order to allow communication with the Jira Api. Note that this doesn't work for mobile.
+        </p>
+
+        <formly-form [fields]="credentialsFormConfig"
+                     [form]="credentialsFormGroup"
+                     [model]="jiraCfg">
+
+          <div *ngIf="user"
+               [@expand]
+               class="welcome">
+            <img [src]="user.avatarUrls['48x48']"
+                 alt="User Avatar"
+                 class="user-avatar">
+            <div class="welcome-txt">Login successful!<br>Welcome {{user.displayName}}!</div>
+          </div>
+
+          <div class="center-wrapper">
+            <button (click)="testCredentials()"
+                    [disabled]="!credentialsFormGroup.valid"
+                    mat-raised-button>
+              <mat-icon *ngIf="!isTestCredentialsSuccess">import_export</mat-icon>
+              <mat-icon *ngIf="isTestCredentialsSuccess">checkmark</mat-icon>
+              Test Credentials
+            </button>
+            <button [disabled]="!credentialsFormGroup.valid"
+                    color="primary"
+                    mat-raised-button
+                    matStepperNext
+                    type="submit">
+              Next
+              <mat-icon>arrow_forward</mat-icon>
+            </button>
+          </div>
+        </formly-form>
+
+      </form>
+    </mat-step>
+
+
+    <mat-step [stepControl]="advancedSettingsFormGroup">
+      <form (submit)="saveStepForm(jiraCfg)"
+            [formGroup]="advancedSettingsFormGroup">
+        <ng-template matStepLabel>Advanced</ng-template>
+        <formly-form [fields]="advancedSettingsFormConfig"
+                     [form]="advancedSettingsFormGroup"
+                     [model]="jiraCfg">
+
+          <div class="center-wrapper">
+            <button mat-raised-button=""
+                    matStepperPrevious>
+              <mat-icon>arrow_backward</mat-icon>
+              Back
+            </button>
+            <button [disabled]="!advancedSettingsFormGroup.valid"
+                    color="primary"
+                    mat-raised-button
+                    matStepperNext
+                    type="submit">
+              <mat-icon>arrow_forward</mat-icon>
+              Next
+            </button>
+          </div>
+        </formly-form>
+      </form>
+    </mat-step>
+
+    <!--<mat-step [stepControl]="thirdFormGroup">-->
+    <!--<form [formGroup]="thirdFormGroup">-->
+    <!--<ng-template matStepLabel>Advanced</ng-template>-->
+    <!--<mat-form-field>-->
+    <!--&lt;!&ndash;<input matInput&ndash;&gt;-->
+    <!--&lt;!&ndash;placeholder="Address"&ndash;&gt;-->
+    <!--&lt;!&ndash;formControlName="secondCtrl"&ndash;&gt;-->
+    <!--&lt;!&ndash;required>&ndash;&gt;-->
+    <!--</mat-form-field>-->
+    <!--<div class="center-wrapper">-->
+    <!--<button mat-raised-button=""-->
+    <!--matStepperPrevious>Back-->
+    <!--</button>-->
+    <!--<button mat-raised-button=""-->
+    <!--matStepperNext>Save-->
+    <!--</button>-->
+    <!--</div>-->
+    <!--</form>-->
+    <!--</mat-step>
+  -->
+    <mat-step>
+      <ng-template matStepLabel>Done</ng-template>
+      You are now done.
+      <div class="center-wrapper">
+        <button mat-raised-button=""
+                matStepperPrevious>
+          <mat-icon>arrow_backward</mat-icon>
+          Back
+        </button>
+        <button (click)="saveCfg()"
+                color="primary"
+                mat-raised-button=""
+                type="button">
+          <mat-icon>save</mat-icon>
+          Save
+        </button>
+      </div>
+    </mat-step>
+  </mat-horizontal-stepper>
+</div>

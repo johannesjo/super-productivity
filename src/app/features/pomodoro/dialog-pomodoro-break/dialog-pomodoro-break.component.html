@@ -1,0 +1,41 @@
+<div mat-dialog-content>
+  <div *ngIf="!(isBreakDone$|async)">
+    <p>You successfully finished session
+      <strong>{{(currentCycle$|async) + 1}}</strong>!</p>
+    <p>Enjoy yourself, get yourself moving, come back in:</p>
+  </div>
+
+  <div *ngIf="(isBreakDone$|async)">
+    <p>Your break is done!</p>
+  </div>
+
+  <div class="timer">{{currentTime$|async|msToMinuteClockString}}</div>
+</div>
+
+
+<div mat-dialog-actions
+     align="center">
+  <button mat-raised-button
+          color="primary"
+          *ngIf="!(isBreakDone$|async)"
+          (click)="nextSession()">
+    <mat-icon>skip_next</mat-icon>
+    <span>But I want to work (skip break)!!</span>
+  </button>
+
+  <ng-container *ngIf="(isBreakDone$|async)">
+    <button mat-raised-button
+            color="primary"
+            (click)="nextSession()">
+      <mat-icon>play_arrow</mat-icon>
+      Go back to work!
+    </button>
+
+    <button mat-raised-button
+            color="warn"
+            (click)="nextSession(true)">
+      Cancel
+    </button>
+
+  </ng-container>
+</div>

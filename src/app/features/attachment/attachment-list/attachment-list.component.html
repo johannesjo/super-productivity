@@ -1,0 +1,46 @@
+<ul [@standardList]="attachments?.length"
+    class="attachments color-contrast">
+  <li *ngFor="let attachment of attachments"
+      class="attachment"
+      draggable="false">
+    <a [class.isImage]="attachment?.type==='IMG'"
+       [href]="attachment?.path"
+       aria-label="open global attachment"
+       attachmentLink
+       class="attachment-link mat-elevation-z3  bg-400i"
+       draggable="false"
+       tabindex="1"
+       target="_blank"
+       type="{{attachment?.type}}">
+      <ng-container *ngIf="attachment?.type!=='IMG'">
+        <mat-icon *ngIf="attachment?.icon"
+                  aria-label="Open">{{attachment?.icon}}
+        </mat-icon>
+        <div class="title">{{attachment?.title}}</div>
+      </ng-container>
+      <ng-container *ngIf="attachment?.type==='IMG'">
+        <img [enlargeImg]="attachment?.originalImgPath"
+             [src]="attachment?.path">
+      </ng-container>
+    </a>
+
+    <div *ngIf="!isDisableControls"
+         class="controls">
+      <button (click)="openEditDialog(attachment)"
+              aria-label="open edit dialog"
+              class="edit-btn"
+              color="primary"
+              mat-mini-fab="">
+        <mat-icon>edit</mat-icon>
+      </button>
+      <button (click)="remove(attachment?.id)"
+              aria-label="remove attachment"
+              class="trash-btn"
+              color="warn"
+              mat-mini-fab="">
+        <mat-icon>delete_forever</mat-icon>
+      </button>
+    </div>
+  </li>
+</ul>
+<div *ngIf="!attachments?.length">There are currently no attachments</div>

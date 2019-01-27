@@ -1,0 +1,55 @@
+<form (submit)="submit()">
+  <mat-dialog-content>
+    <h2 class="mat-title">{{ attachmentCopy.id ? 'Edit' : 'Add' }} Attachment</h2>
+
+    <div class="form-wrapper">
+      <mat-form-field>
+        <input [(ngModel)]="attachmentCopy.path"
+               [placeholder]="mapTypeToLabel(attachmentCopy.type)"
+               matInput=""
+               name="path"
+               required
+               tabindex="1"
+               type="text">
+      </mat-form-field>
+      <mat-form-field>
+        <input [(ngModel)]="attachmentCopy.title"
+               aria-label="Title"
+               autofocus="autofocus"
+               matInput=""
+               name="title"
+               placeholder="Title"
+               tabindex="1"
+               type="text">
+      </mat-form-field>
+
+      <mat-form-field>
+        <mat-select [(ngModel)]="attachmentCopy.type"
+                    name="type"
+                    placeholder="Select a type"
+                    required="true"
+                    tabindex="1">
+          <mat-option *ngFor="let type of types"
+                      [innerHtml]="type.title"
+                      [value]="type.type">
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button color="primary"
+            mat-raised-button=""
+            type="submit">
+      Save
+    </button>
+
+    <button (click)="close()"
+            color="warn"
+            mat-raised-button=""
+            type="button">
+      Cancel
+    </button>
+  </mat-dialog-actions>
+</form>

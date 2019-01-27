@@ -1,0 +1,17 @@
+@import '../../../variables';
+
+::ng-deep .mat-form-field-flex {
+  min-width: 250px;
+}
+
+mat-chip {
+  cursor: pointer;
+}
+
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: $s;
+}

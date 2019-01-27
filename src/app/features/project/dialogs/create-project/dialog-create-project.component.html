@@ -1,0 +1,67 @@
+<h2 mat-dialog-title>
+  <span *ngIf="projectData.id">Edit Project</span>
+  <span *ngIf="!projectData.id">Create Project</span>
+</h2>
+
+
+<form [formGroup]="form"
+      (ngSubmit)="submit()">
+  <mat-dialog-content>
+
+    <formly-form [model]="projectData"
+                 [fields]="formCfg"
+                 [options]="formOptions"
+                 [form]="form">
+    </formly-form>
+
+
+    <div class="issue-provider-cfg">
+      <h3>Issue Provider Configs (optional)</h3>
+      <div class="item">
+        <button mat-raised-button=""
+                color="primary"
+                (click)="openJiraCfg()"
+                type="button">
+          <mat-icon *ngIf="!jiraCfg">explore</mat-icon>
+          <mat-icon *ngIf="jiraCfg">checkmark</mat-icon>
+          Setup Jira Integration
+        </button>
+      </div>
+      <div class="item">
+        <button mat-raised-button=""
+                color="primary"
+                (click)="openGitCfg()"
+                type="button">
+          <mat-icon *ngIf="!gitCfg">card_giftcard</mat-icon>
+          <mat-icon *ngIf="gitCfg">checkmark</mat-icon>
+          Setup Git Integration
+        </button>
+      </div>
+      <!--<div class="item">-->
+      <!--<button mat-raised-button="" color=primary-->
+      <!--type="button">-->
+      <!--<mat-icon *ngIf="!projectData?.issueIntegrationCfgs?.GIT">card_giftcard</mat-icon>-->
+      <!--<mat-icon *ngIf="projectData?.issueIntegrationCfgs?.GIT">checkmark</mat-icon>-->
+      <!--Setup Github Issue Integration-->
+      <!--</button>-->
+      <!--</div>-->
+    </div>
+  </mat-dialog-content>
+
+
+  <mat-dialog-actions align="end">
+    <div class="wrap-buttons">
+      <button type="submit"
+              color="primary"
+              class="btn btn-primary submit-button"
+              mat-raised-button
+              [disabled]="!form.valid">Save
+      </button>
+      <button type="button"
+              (click)="cancelEdit()"
+              class="btn btn-primary submit-button"
+              mat-raised-button>Cancel
+      </button>
+    </div>
+  </mat-dialog-actions>
+</form>

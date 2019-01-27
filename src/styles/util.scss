@@ -1,0 +1,50 @@
+@import "mixins/media-queries";
+
+.center-wrapper {
+  text-align: center;
+}
+
+.align-right {
+  text-align: right;
+}
+
+.mw {
+  max-width: $component-max-width;
+  margin: auto;
+}
+
+[hidden] {
+  visibility: hidden;
+}
+
+.hide-xs {
+  @include mq(xs, max) {
+    display: none !important;
+  }
+
+}
+
+.show-xs-only {
+  @include mq(xs) {
+    display: none !important;
+  }
+}
+
+.hide-gt-sm {
+  @include mq(sm, max) {
+    display: none !important;
+  }
+
+}
+
+.show-xs-only {
+  @include mq(xs) {
+    display: none !important;
+  }
+}
+
+.show-gt-sm-only {
+  @include mq(sm) {
+    display: none !important;
+  }
+}

@@ -1,0 +1,265 @@
+<div [class.bg-600]="isCurrent"
+     [class.color-contrast]="isCurrent"
+     [class.fg-standard]="!isCurrent"
+     [class.isAdditionalInfoOpen]="task._isAdditionalInfoOpen"
+     [class.isCurrent]="isCurrent"
+     [class.isDone]="task.isDone"
+     class="inner-wrapper bg-standard">
+
+  <div class="first-line">
+    <button (click)="toggleTaskDone()"
+            *ngIf="task.isDone"
+            aria-label="un-/mark as done"
+            class="check-done"
+            mat-icon-button=""
+            tabindex="2">
+      <mat-icon @swirl
+                aria-label="Mark as undone"
+                class="undo">undo
+      </mat-icon>
+      <mat-icon @swirl
+                aria-label="Mark as done"
+                class="check">check
+      </mat-icon>
+    </button>
+
+    <div class="title-bar-wrapper">
+      <mat-icon [class.handle-par]="!task.parentId"
+                [class.handle-sub]="task.parentId"
+                class="drag-handle"
+                svgIcon="drag_handle">
+      </mat-icon>
+
+
+      <button (click)="startTask()"
+              *ngIf="!task.isDone && !isCurrent && !task.subTasks"
+              aria-label="mark as current"
+              class="play-btn ico-btn hide-xs"
+              color=""
+              mat-icon-button
+              tabindex="2">
+        <mat-icon class="play-icon"
+                  svgIcon="play"></mat-icon>
+      </button>
+
+      <button (click)="pauseTask()"
+              *ngIf="!task.isDone && isCurrent && !task.subTasks"
+              class="play-btn ico-btn"
+              color=""
+              mat-icon-button
+              tabindex="2">
+        <mat-icon>pause</mat-icon>
+      </button>
+
+
+      <button (click)="handleUpdateBtnClick()"
+              *ngIf="task.issueData?.wasUpdated"
+              aria-label="is updated"
+              class="ico-btn"
+              color="accent"
+              mat-icon-button
+              tabindex="2">
+        <mat-icon class="update update-icon">update</mat-icon>
+      </button>
+
+      <a *ngIf="task.issueData?.url"
+         [href]="task.issueData?.url"
+         aria-label="link"
+         class="ico-btn original-link-btn"
+         color=""
+         external-link
+         mat-icon-button
+         tabindex="2"
+         target="_blank">
+        <mat-icon [svgIcon]="task.issueType|issueIcon"></mat-icon>
+      </a>
+
+      <div #editOnClickEl
+           (editFinished)="updateTaskTitleIfChanged($event.isChanged, $event.newVal)"
+           [value]="task.title"
+           class="task-title"
+           contenteditable="true"
+           editOnClick
+           tabindex="2"></div>
+    </div>
+
+    <div (click)="estimateTime()"
+         [class.isEditable]="!task.subTasks?.length"
+         class="time-wrapper">
+      <button *ngIf="!task.subTasks?.length"
+              aria-label="time estimation"
+              class="ico-btn time-btn hide-xs"
+              color=""
+              mat-icon-button
+              tabindex="2">
+        <mat-icon aria-label="time estimation">access_time</mat-icon>
+      </button>
+
+      <div class="time">
+        <div class="time-val">
+          <span *ngIf="task.subTasks && task.subTasks.length>0">∑</span>
+          <span [innerHTML]="task.timeSpent|msToString"></span></div>
+        <div class="separator">/</div>
+        <div [innerHTML]="task.timeEstimate|msToString"
+             class="time-val"></div>
+      </div>
+    </div>
+
+    <div class="controls">
+      <button (click)="toggleShowAdditionalInfoOpen()"
+              *ngIf="task.notes||task.issueData||task.attachmentIds?.length"
+              [class.isActive]="task._isAdditionalInfoOpen"
+              aria-label="additional-info"
+              class="ico-btn show-additional-info-btn hide-xs"
+              color=""
+              mat-icon-button
+              tabindex="2">
+        <mat-icon>chat</mat-icon>
+      </button>
+
+      <button (click)="toggleShowAttachments()"
+              *ngIf="task.attachmentIds?.length"
+              aria-label="additional-info"
+              class="ico-btn hide-xs"
+              color=""
+              mat-icon-button
+              tabindex="2">
+        <mat-icon>attach_file</mat-icon>
+      </button>
+
+      <button [matMenuTriggerFor]="menu"
+              class="ico-btn"
+              color=""
+              mat-icon-button>
+        <mat-icon>more_vert</mat-icon>
+      </button>
+      <mat-menu #menu="matMenu">
+        <button (click)="startTask()"
+                *ngIf="!task.isDone && !isCurrent && !task.subTasks"
+                aria-label="mark as current"
+                class="show-xs-only"
+                mat-menu-item
+                tabindex="2">
+          <mat-icon class="play-icon"
+                    svgIcon="play"></mat-icon>
+          Start tracking task
+        </button>
+        <button (click)="pauseTask()"
+                *ngIf="!task.isDone && isCurrent && !task.subTasks"
+                class="show-xs-only"
+                mat-menu-item
+                tabindex="2">
+          <mat-icon>pause</mat-icon>
+          Pause tracking task
+        </button>
+
+        <button (click)="toggleTaskDone()"
+                aria-label="un-/mark as done"
+                mat-menu-item=""
+                tabindex="2">
+          <ng-container *ngIf="task.isDone">
+            <mat-icon aria-label="Mark as undone">undo
+            </mat-icon>
+            Mark as undone
+          </ng-container>
+          <ng-container *ngIf="!task.isDone">
+            <mat-icon aria-label="Mark as done">check
+            </mat-icon>
+            Mark as done
+          </ng-container>
+        </button>
+
+        <button (click)="toggleShowAdditionalInfoOpen()"
+                [class.isActive]="task._isAdditionalInfoOpen"
+                aria-label="additional-info"
+                mat-menu-item
+                tabindex="2">
+
+          <mat-icon *ngIf="task.notes||task.issueData"
+                    aria-label="notes">chat
+          </mat-icon>
+          <mat-icon *ngIf="!task.notes&&!task.issueData">chat_bubble_outline</mat-icon>
+          Show/Hide additional info
+        </button>
+
+        <button (click)="addSubTask($event);"
+                *ngIf="!task.parentId&&!task.isDone"
+                aria-label="add sub task"
+                mat-menu-item=""
+                tabindex="2">
+          <mat-icon aria-label="add sub task">playlist_add</mat-icon>
+          Add sub task
+        </button>
+
+        <button (click)="addAttachment();"
+                aria-label="add attachment"
+                mat-menu-item=""
+                tabindex="2">
+          <mat-icon aria-label="add sub task">attachment</mat-icon>
+          Attach file or link
+        </button>
+
+        <button (click)="updateIssueData()"
+                *ngIf="task.issueId"
+                aria-label="update issue data"
+                mat-menu-item=""
+                tabindex="2">
+          <mat-icon>cloud_download</mat-icon>
+          Update issue data
+        </button>
+
+        <button (click)="deleteTask()"
+                aria-label="delete"
+                mat-menu-item=""
+                tabindex="2">
+
+          <mat-icon aria-label="delete"
+                    style="color:#e15d63;">delete_forever
+          </mat-icon>
+          Delete Task
+        </button>
+      </mat-menu>
+    </div>
+  </div>
+
+  <progress-bar *ngIf="isCurrent"
+                [cssClass]="isCurrent?'bg-100':'bg-primary'"
+                [progress]="progress"></progress-bar>
+
+  <task-additional-info (tabIndexChange)="onTabIndexChange($event)"
+                        (taskNotesChanged)="onTaskNotesChanged($event)"
+                        *ngIf="task._isAdditionalInfoOpen"
+                        [@expand]
+                        [selectedIndex]="task._currentTab"
+                        [task]="task"
+                        class="additional-info"></task-additional-info>
+
+  <div *ngIf="task.subTasks && task.subTasks.length"
+       class="sub-tasks">
+    <button (click)="toggleSubTaskMode()"
+            class="toggle-sub-tasks-btn ico-btn"
+            color=""
+            mat-mini-fab=""
+            tabindex="2">
+      <mat-icon *ngIf="task._showSubTasksMode===0">add
+      </mat-icon>
+      <mat-icon *ngIf="task._showSubTasksMode!==0"
+                [class.isHideDoneTasks]="task._showSubTasksMode===1">remove
+      </mat-icon>
+    </button>
+    <task-list *ngIf="task.subTasks?.length"
+               [@expand]
+               [isHideAll]="task._showSubTasksMode!==2"
+               [isHideDone]="task._showSubTasksMode===1"
+               [listModelId]="task.id"
+               [parentId]="task.id"
+               [tasks]="task.subTasks"
+               listId="SUB"></task-list>
+  </div>
+
+  <div *ngIf="isDragOver"
+       class="bg-accent color-contrast drag-over-msg">
+    <mat-icon>add</mat-icon>
+    Drop here to attach to "{{task.title}}"
+  </div>
+</div>

@@ -1,0 +1,98 @@
+<div class="isHideWhenJiraSupport">
+  <p>Please <a href="https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb">
+    download the chrome extension</a> in order to allow communication with the Jira Api. Note that this doesn\'t work
+    for mobile.
+  </p>
+</div>
+
+<mat-slide-toggle [(ngModel)]="cfg.isEnabled"
+                  style="margin-bottom: 8px;"
+                  name="isEnabled"
+                  aria-label="Enable Jira integration">
+  Enable Jira integration
+</mat-slide-toggle>
+
+<form [formGroup]="form"
+      class="isShowWhenJiraSupport"
+      (ngSubmit)="submit()">
+
+  <div *ngIf="cfg.isEnabled">
+    <formly-form [model]="cfg"
+                 [fields]="section.items"
+                 [options]="options"
+                 [form]="form">
+    </formly-form>
+
+
+    <h3 class="sub-section-heading">Transition Handling</h3>
+    <mat-slide-toggle [(ngModel)]="cfg.isTransitionIssuesEnabled"
+                      style="margin-bottom: 8px;"
+                      name="isTransitionIssuesEnabled"
+                      [ngModelOptions]="{standalone: true}"
+                      aria-label="Enable Transition Handling">
+      Enable Transition Handling
+    </mat-slide-toggle>
+
+
+    <section *ngIf="cfg.isTransitionIssuesEnabled"
+             @expand>
+      <mat-form-field>
+        <input matInput
+               #inputEl
+               class="border-color-primary"
+               placeholder="Select issue to load available transitions"
+               aria-label="Select issue to load available transitions"
+               [matAutocomplete]="autoEl"
+               [formControl]="issueSuggestionsCtrl">
+
+        <mat-autocomplete #autoEl="matAutocomplete"
+                          (optionSelected)="updateTransitionOptions()"
+                          [displayWith]="displayWith"
+                          [autoActiveFirstOption]="true">
+          <mat-option *ngIf="isLoading"
+                      [value]="issueSuggestionsCtrl.value"
+                      class="is-loading">
+            <mat-spinner diameter="50"></mat-spinner>
+          </mat-option>
+          <ng-container *ngIf="!isLoading">
+            <mat-option *ngFor="let issue of filteredIssueSuggestions"
+                        [value]="issue"><span>{{issue?.title}}</span>
+            </mat-option>
+          </ng-container>
+        </mat-autocomplete>
+      </mat-form-field>
+
+      <div *ngFor="let opt of cfg.transitionConfig|keyvalue">
+        <mat-form-field>
+          <label *ngIf="opt.key==='OPEN'">Status for pausing task</label>
+          <label *ngIf="opt.key==='IN_PROGRESS'">Status for starting task</label>
+          <label *ngIf="opt.key==='DONE'">Status for completing task</label>
+          <mat-select [(ngModel)]="cfg.transitionConfig[opt.key]"
+                      [ngModelOptions]="{standalone: true}">
+            <mat-option value="DO_NOT">Don't transition</mat-option>
+            <mat-option value="ALWAYS_ASK">Always open dialog</mat-option>
+            <mat-option *ngFor="let transition of cfg.availableTransitions"
+                        [value]="transition">
+              {{transition.name}}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+      <!--<pre><code>{{availableTransitionsForIssue|json}}</code></pre>-->
+
+    </section>
+  </div>
+
+  <div class="controls">
+    <button type="submit"
+            color="primary"
+            class="btn btn-primary submit-button"
+            mat-raised-button
+            [disabled]="!form.valid && cfg.isEnabled">
+      <mat-icon>save</mat-icon>
+      Save
+    </button>
+  </div>
+</form>
+
+<!--<pre><code>{{cfg|json}}</code></pre>-->

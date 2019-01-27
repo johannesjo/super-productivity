@@ -1,0 +1,44 @@
+<div class="page-settings page-wrapper">
+
+  <div class="row">
+    <div class="settings-col">
+      <h1 class="md-subhead">Project Specific Settings</h1>
+
+      <div>
+        <section class="config-section mat-elevation-z2">
+          <config-section (save)="saveProjectBasicCfg($event)"
+                          [cfg]="currentProject"
+                          [section]="basicProjectSettingsFormCfg"></config-section>
+        </section>
+      </div>
+
+      <div *ngFor="let section of projectConfigFormCfg">
+        <section class="config-section mat-elevation-z2">
+          <config-section [cfg]="projectCfg[section.key]"
+                          [section]="section"></config-section>
+        </section>
+      </div>
+
+      <div *ngFor="let section of issueIntegrationFormCfg">
+        <section class="config-section mat-elevation-z2">
+          <config-section (save)="saveIssueProviderCfg($event)"
+                          [cfg]="issueIntegrationCfgs[section.key]"
+                          [section]="section"></config-section>
+        </section>
+      </div>
+
+    </div>
+
+    <div *ngIf="globalCfg"
+         class="settings-col">
+      <h1 class="md-subhead">Global Config</h1>
+      <div *ngFor="let section of globalConfigFormCfg">
+        <section class="config-section mat-elevation-z2">
+          <config-section (save)="saveGlobalCfg($event)"
+                          [cfg]="globalCfg[section.key]"
+                          [section]="section"></config-section>
+        </section>
+      </div>
+    </div>
+  </div>
+</div>

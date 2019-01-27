@@ -1,0 +1,32 @@
+@import '../_variables.scss';
+
+html,
+body,
+app-root,
+.app-frame {
+  overflow: hidden;
+  margin: 0;
+  height: 100%;
+  box-sizing: border-box;
+  //font-family: 'Montserrat', 'Roboto', sans-serif;
+  //font-family: 'Open Sans', sans-serif;
+  font-family: 'Roboto', sans-serif;
+}
+
+.page-wrapper {
+  padding: $s 2*$s $s*9;
+}
+
+.component-wrapper {
+  max-width: $component-max-width;
+  margin: auto;
+}
+
+
+a[href] {
+  color: $c-accent;
+}
+
+*, *:after, *:before {
+  box-sizing: border-box;
+}

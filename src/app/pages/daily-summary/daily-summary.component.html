@@ -1,0 +1,177 @@
+<div class="page-wrapper">
+  <div style="text-align: center;">
+    <a aria-label="Work View"
+            class="back-btn"
+            mat-raised-button=""
+            routerLink="/work-view">
+      <mat-icon>chevron_left</mat-icon>
+      Wait I forgot something!
+      <!--<mat-icon>playlist_play</mat-icon>-->
+    </a>
+  </div>
+
+  <h1 class="done-headline mat-headline">Take a moment to <i class="TODO-animate">celebrate!</i></h1>
+  <div class="daily-summary-summary">
+    <div class="summary-point">
+      <mat-icon>check</mat-icon>
+      <div class="summary-text">Tasks completed:
+        <div class="summary-val">
+          <span [innerHtml]="(doneTasks$|async)?.length"></span>/<span
+          [innerHtml]="(todaysTasks$|async)?.length"></span>
+        </div>
+      </div>
+    </div>
+    <div class="summary-point">
+      <mat-icon>timer</mat-icon>
+      <div class="summary-text">Total time spent today:
+        <div [innerHtml]="workingToday$|async|msToString"
+             class="summary-val"></div>
+      </div>
+    </div>
+    <div class="summary-point">
+      <mat-icon>timer</mat-icon>
+      <div class="summary-text">Total time spent on today's task:
+        <div [innerHtml]="totalTimeSpentTasks$|async|msToString"
+             class="summary-val"></div>
+      </div>
+    </div>
+  </div>
+
+  <mat-tab-group (selectedIndexChange)="onTabIndexChange($event)"
+                 [selectedIndex]="selectedTabIndex"
+                 dynamicHeight>
+    <mat-tab label="Note for tomorrow">
+      <section class="tab-inner">
+        <p>This is meant to be a takeaway to be even more productive and happy tomorrow. E.g.: What did you learn today?
+          What do you want to do better/smarter tomorrow? What do you want to achieve and why?</p>
+        <p>Think a second and reflect on the day.</p>
+
+        <textarea [(ngModel)]="tomorrowsNote"
+                  class="tomorrows-note bg-standard mat-elevation-z3"
+                  rows="5"></textarea>
+      </section>
+    </mat-tab>
+
+    <mat-tab label="Task List">
+      <section class="tab-inner">
+        <table mat-table
+               [dataSource]="todaysTasksFlat$|async"
+               class="mat-elevation-z2 summary-table">
+          <ng-container matColumnDef="title">
+            <th mat-header-cell
+                *matHeaderCellDef> Task
+            </th>
+            <td mat-cell
+                *matCellDef="let task">
+              <div class="task-title"
+                   [class.isSubTask]="task.parentId"
+                   [class.isDone]="task.isDone">
+                <span *ngIf="task.parentId">–</span> {{task.title}}
+              </div>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="timeSpentToday">
+            <th mat-header-cell
+                *matHeaderCellDef> Spent Today
+            </th>
+            <td mat-cell
+                *matCellDef="let task"> {{task.timeSpentOnDay[todayStr]|msToString}}
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="timeSpentTotal">
+            <th mat-header-cell
+                *matHeaderCellDef> Spent Total
+            </th>
+            <td mat-cell
+                *matCellDef="let task">
+              {{task.timeSpent|msToString}}
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="timeEstimate">
+            <th mat-header-cell
+                *matHeaderCellDef> Estimate
+            </th>
+            <td mat-cell
+                *matCellDef="let task">
+              {{task.timeEstimate|msToString}}
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="done">
+            <th mat-header-cell
+                *matHeaderCellDef>
+            </th>
+            <td mat-cell
+                *matCellDef="let task">
+              <mat-icon *ngIf="task.isDone">check
+              </mat-icon>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row
+              *matHeaderRowDef="['title','timeSpentToday', 'timeSpentTotal', 'timeEstimate', 'done']"></tr>
+          <tr mat-row
+              *matRowDef="let row; columns: ['title','timeSpentToday', 'timeSpentToday','timeEstimate', 'done']"></tr>
+        </table>
+
+        <div style="text-align: center; margin-top: 8px; margin-bottom: 16px;">
+          <button (click)="showExportModal()"
+                  mat-raised-button="">
+            <mat-icon>call_made</mat-icon>
+            <mat-icon>playlist_play</mat-icon>
+            Export Task List
+          </button>
+        </div>
+      </section>
+    </mat-tab>
+
+    <mat-tab label="Google Sheet Export">
+      <section class="tab-inner">
+        <google-export-time></google-export-time>
+      </section>
+    </mat-tab>
+  </mat-tab-group>
+
+
+  <section class="daily-summary-actions">
+    <div class="bottom-buttons">
+      <!--<button mat-raised-button=""-->
+      <!--[color]="cfg.isBlockFinishDayUntilTimeTimeTracked && !isTimeSheetExported && 'accent' ||'primary'"-->
+      <!--(click)="showTimeSheetExportModal()">-->
+      <!--<mat-icon>call_made</mat-icon>-->
+      <!--<mat-icon>timer</mat-icon>-->
+      <!--Export To Time Sheet-->
+      <!--</button>-->
+      <button (click)="finishDay()"
+              [disabled]="cfg.isBlockFinishDayUntilTimeTimeTracked && !isTimeSheetExported"
+              color="primary"
+              mat-raised-button="">
+        <mat-icon>wb_sunny</mat-icon>
+        Save and go home
+      </button>
+    </div>
+    <!--<div class="finish-day-opts">-->
+    <!--<mat-checkbox [(ngModel)]="clearDoneTasks"-->
+    <!--aria-label="Clear done tasks">-->
+    <!--Clear done tasks (Move to Done-Backlog)-->
+    <!--</mat-checkbox>-->
+    <!--<mat-checkbox [(ngModel)]="moveUnfinishedToBacklog"-->
+    <!--aria-label="Move unfinished tasks to backlog">-->
+    <!--Move unfinished tasks back to backlog-->
+    <!--</mat-checkbox>-->
+    <!--</div>-->
+  </section>
+</div>
+
+
+<div class="success-animation-wrapper"
+     *ngIf="showSuccessAnimation">
+  <mat-icon>wb_sunny</mat-icon>
+  <div class="unicorn-wrapper">
+    <img src="assets/unicorn.png"
+         class="unicorn">
+  </div>
+</div>

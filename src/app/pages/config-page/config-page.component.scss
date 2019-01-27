@@ -1,0 +1,69 @@
+@import "../../../variables";
+
+.page-settings {
+  text-align: left;
+
+  collapsible {
+    position: relative;
+  }
+
+  .config-section {
+    margin-bottom: 10px;
+    background: #ffffff;
+    @include darkTheme {
+      background-color: $dark-theme-bg-lighter;
+    }
+
+    //@include darkTheme {
+    //  background-color: $dark-theme-bg-lighter;
+    //}
+    .md-title {
+      margin-top: 0;
+    }
+  }
+
+  .settings-col {
+    margin-bottom: 30px;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  @include mq(sm) {
+    .row {
+      display: flex;
+      flex-direction: row;
+    }
+    .settings-col {
+      width: 50%;
+
+      &:first-child {
+        margin-right: 10px;
+      }
+
+      &:last-child {
+        margin-left: 10px;
+      }
+    }
+  }
+
+  @include mq(xs, max) {
+    .keyboard-settings {
+      display: none;
+    }
+
+    //.md-button,
+    //button {
+    //  &:not(.md-icon-button) {
+    //    width: 100%;
+    //    max-width: 100%;
+    //    overflow: hidden;
+    //    text-overflow: ellipsis;
+    //    margin-left: 0;
+    //    margin-right: 0;
+    //  }
+    //}
+  }
+}
+

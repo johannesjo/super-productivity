@@ -1,0 +1,37 @@
+<form (submit)="submit()">
+
+  <div class="form-wrapper">
+    <div class="textarea-wrapper">
+      <textarea (keydown)="keydownHandler($event)"
+                (ngModelChange)="saveTmp()"
+                [(ngModel)]="noteContent"
+                matTextareaAutosize
+                name="noteContent"
+                placeholder="Enter some text to save as note..."
+                rows="6"></textarea>
+    </div>
+    <datetime-input (modelChange)="reminderDate=$event"
+                    [model]="reminderDate"
+                    name="reminderData"
+                    placeholder="Datetime for reminder (optional)"></datetime-input>
+  </div>
+
+  <mat-dialog-actions align="center">
+    <div class="wrap-buttons">
+      <button class="btn btn-primary submit-button"
+              color="primary"
+              mat-raised-button
+              type="submit">
+        <mat-icon>save</mat-icon>
+        Save
+      </button>
+
+      <button (click)="close()"
+              class="btn btn-primary submit-button"
+              mat-raised-button
+              type="button">
+        Cancel
+      </button>
+    </div>
+  </mat-dialog-actions>
+</form>

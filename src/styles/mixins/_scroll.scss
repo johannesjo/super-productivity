@@ -1,0 +1,84 @@
+@import 'media-queries';
+
+@mixin scroll() {
+  -webkit-overflow-scrolling: touch;
+  overflow: auto;
+
+  :host-context(.isNoMac) & {
+    @supports (overflow:overlay) {
+      @include mq(xs) {
+        overflow: hidden;
+
+        &:hover {
+          overflow: auto;
+          overflow: overlay;
+        }
+
+        @-moz-document url-prefix() {
+          overflow: auto;
+        }
+      }
+    }
+  }
+}
+
+@mixin scrollY() {
+  -webkit-overflow-scrolling: touch;
+  overflow-y: scroll;
+
+  :host-context(.isNoMac) & {
+    @supports (overflow:overlay) {
+      @include mq(xs) {
+        overflow-y: hidden;
+
+        &:hover {
+          overflow-y: scroll;
+          overflow-y: overlay;
+        }
+
+        @-moz-document url-prefix() {
+          overflow: auto;
+        }
+      }
+    }
+  }
+}
+
+@mixin scrollYImportant() {
+  -webkit-overflow-scrolling: touch;
+  overflow-y: scroll !important;
+
+  :host-context(.isNoMac) & {
+    @supports (overflow:overlay) {
+      @include mq(xs) {
+        overflow-y: hidden !important;
+        &:hover {
+          overflow-y: scroll !important;
+          overflow-y: overlay !important;
+        }
+
+        @-moz-document url-prefix() {
+          overflow: auto;
+        }
+      }
+    }
+  }
+}
+
+@mixin scrollX() {
+  -webkit-overflow-scrolling: touch;
+  overflow-x: scroll;
+
+  :host-context(.isNoMac) & {
+    @supports (overflow:overlay) {
+      @include mq(xs) {
+        overflow-x: hidden;
+
+        &:hover {
+          overflow-x: scroll;
+          overflow-x: overlay;
+        }
+      }
+    }
+  }
+}

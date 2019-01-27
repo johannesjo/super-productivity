@@ -1,0 +1,24 @@
+<div class="wrapper bg-600">
+  <header>
+    <button #buttonEl
+            (click)="addNote()"
+            autofocus="autofocus"
+            class="color-contrast"
+            mat-button=""
+            tabindex="1">
+      <mat-icon>add</mat-icon>
+      Add new Note
+    </button>
+    <!--<button mat-icon-button="">-->
+    <!--<mat-icon>search</mat-icon>-->
+    <!--</button>-->
+  </header>
+  <div [@standardList]="(noteService.notes$|async)?.length"
+       [dragulaModel]="noteService.notes$|async"
+       class="notes"
+       dragula="NOTES">
+    <note *ngFor="let note of (noteService.notes$|async); let i = index;"
+          [isFocus]="isElementWasAdded && i==0"
+          [note]="note"></note>
+  </div>
+</div>

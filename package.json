@@ -1,0 +1,164 @@
+{
+  "name": "sp2",
+  "version": "0.1.19",
+  "description": "Personal Task Management App to help you with your daily struggle with JIRA etc.",
+  "main": "./electron/main.js",
+  "author": "Johannes Millan <contact@super-productivity.com> (http://super-productivity.com)",
+  "license": "MIT",
+  "homepage": "http://super-productivity.com",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/johannesjo/sp2.git"
+  },
+  "keywords": [
+    "ToDo",
+    "Task Management",
+    "Jira",
+    "GitHub",
+    "Time Tracking"
+  ],
+  "scripts": {
+    "ng": "ng",
+    "start": "npm run electron:build && NODE_ENV=DEV electron .",
+    "startFrontend": "ng serve",
+    "buildFrontend": "ng build",
+    "buildFrontendElectron": "ng build --base-href .",
+    "buildAllElectron": "npm run buildFrontendElectron && npm run electron:build",
+    "test": "ng test",
+    "lint": "ng lint",
+    "e2e": "ng e2e",
+    "electron": "NODE_ENV=PROD electron .",
+    "electron:build": "tsc -p tsconfig-electron.json",
+    "electron:watch": "tsc -p tsconfig-electron.json --watch",
+    "electronBuilderOnly": "electron-builder",
+    "pack": "electron-builder --dir",
+    "localInstall": "sudo echo 'Starting local install' && rm -Rf ./dist/ && rm -Rf ./app-builds/ && npm run buildAllElectron && electron-builder --linux && sudo dpkg -i app-builds/sp2*.deb",
+    "dist": "npm run buildAllElectron && electron-builder",
+    "distLinuxAndWindows": "npm run buildAllElectron && electron-builder --linux --win",
+    "pub": "npm run buildAllElectron && electron-builder -p always",
+    "release": "npm run release.changelog && npm run dist",
+    "release.changelog": "conventional-changelog -i CHANGELOG.md -s -p angular",
+    "version": "npm run release.changelog && git add -A"
+  },
+  "publish": [
+    {
+      "provider": "github",
+      "repo": "super-productivity",
+      "owner": "johannesjo"
+    }
+  ],
+  "build": {
+    "appId": "superProductivity",
+    "files": [
+      "electron/**/*",
+      "!electron/**/*.ts",
+      "!electron/**/*.js.map",
+      "dist/**/*"
+    ],
+    "directories": {
+      "output": "./app-builds"
+    },
+    "mac": {
+      "category": "productivity",
+      "publish": [
+        "github"
+      ]
+    },
+    "win": {
+      "icon": "electron/assets/icons/app-icons/icon-win",
+      "target": [
+        "nsis",
+        "portable"
+      ],
+      "publish": [
+        "github"
+      ]
+    },
+    "linux": {
+      "category": "Utility",
+      "target": [
+        "AppImage",
+        "snap",
+        "deb"
+      ],
+      "publish": [
+        "github"
+      ],
+      "depends": [
+        "xprintidle"
+      ]
+    },
+    "snap": {
+      "grade": "stable"
+    }
+  },
+  "private": true,
+  "dependencies": {
+    "electron-localshortcut": "^3.1.0",
+    "electron-log": "^2.2.17",
+    "googleapis": "^34.0.0",
+    "jira-client-fork": "^4.2.0",
+    "moment-mini": "^2.22.1",
+    "node-notifier": "^5.3.0"
+  },
+  "devDependencies": {
+    "@angular-devkit/build-angular": "~0.10.5",
+    "@angular/animations": "^7.2.0",
+    "@angular/cdk": "^7.2.1",
+    "@angular/cli": "~7.1.4",
+    "@angular/common": "^7.2.0",
+    "@angular/compiler": "^7.2.0",
+    "@angular/compiler-cli": "^7.1.4",
+    "@angular/core": "^7.2.0",
+    "@angular/forms": "^7.2.0",
+    "@angular/http": "^7.2.0",
+    "@angular/language-service": "^7.1.0",
+    "@angular/material": "^7.2.1",
+    "@angular/platform-browser": "^7.2.0",
+    "@angular/platform-browser-dynamic": "^7.2.0",
+    "@angular/pwa": "^0.10.5",
+    "@angular/router": "^7.2.0",
+    "@angular/service-worker": "^7.2.0",
+    "@ecodev/fab-speed-dial": "^3.0.0",
+    "@ngrx/effects": "^7.0.0",
+    "@ngrx/entity": "^7.0.0",
+    "@ngrx/schematics": "^7.0.0",
+    "@ngrx/store": "^7.0.0",
+    "@ngrx/store-devtools": "^7.0.0",
+    "@ngx-formly/core": "^4.8.2",
+    "@ngx-formly/material": "^4.8.2",
+    "@types/jasmine": "~2.8.6",
+    "@types/jasminewd2": "~2.0.3",
+    "@types/moment-duration-format": "^2.2.2",
+    "@types/node": "~8.9.4",
+    "angular2-promise-buttons": "^3.0.1",
+    "clipboard": "^2.0.1",
+    "codelyzer": "^4.5.0",
+    "core-js": "^2.5.4",
+    "electron": "4.0.1",
+    "electron-builder": "^20.38.5",
+    "electron-reload": "^1.2.5",
+    "hammerjs": "^2.0.8",
+    "jasmine-core": "~2.99.1",
+    "jasmine-spec-reporter": "~4.2.1",
+    "karma": "^3.1.1",
+    "karma-chrome-launcher": "~2.2.0",
+    "karma-coverage-istanbul-reporter": "~2.0.0",
+    "karma-jasmine": "~1.1.1",
+    "karma-jasmine-html-reporter": "^0.2.2",
+    "localforage": "^1.7.3",
+    "moment-duration-format": "^2.2.2",
+    "ng2-dragula": "^2.1.1",
+    "ngx-electron": "^2.0.0",
+    "ngx-markdown": "^7.0.3",
+    "protractor": "~5.4.0",
+    "rxjs": "^6.3.3",
+    "rxjs-compat": "^6.3.3",
+    "shortid": "^2.2.14",
+    "throttle-debounce": "^2.0.1",
+    "ts-node": "~5.0.1",
+    "tslint": "~5.9.1",
+    "typescript": "~3.1.6",
+    "zone.js": "~0.8.26"
+  }
+}

@@ -1,0 +1,19 @@
+<collapsible [isExpanded]="isExpanded"
+             [title]="section.title">
+  <!--[icon]="section.icon"-->
+
+  <help-section>
+    <div [innerHtml]="section.help"></div>
+  </help-section>
+  <div class="form-wrapper {{section.key}}">
+    <config-form
+      (save)="onSave($event)"
+      *ngIf="section.items && !section.customSection"
+      [cfg]="cfg"
+      [formCfg]="section.items"
+      [sectionKey]="section.key"></config-form>
+
+    <ng-template #customForm
+                 class="custom-form"></ng-template>
+  </div>
+</collapsible>

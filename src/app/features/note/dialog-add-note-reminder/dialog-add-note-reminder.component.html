@@ -1,0 +1,59 @@
+<form (submit)="save()">
+  <mat-dialog-content>
+    <h2 class="mat-h2">{{isEdit ? 'Edit' : 'Add'}} reminder for note</h2>
+    <div class="form-wrapper">
+      <mat-form-field>
+        <!--[matDatepicker]="myDatepicker"-->
+        <input
+          [(ngModel)]="title"
+          matInput
+          name="title"
+          placeholder="Title for notification"
+          required
+          type="text">
+        <mat-error>You need to enter a title</mat-error>
+      </mat-form-field>
+
+      <datetime-input (modelChange)="date=$event"
+                      [model]="date"
+                      [required]="true"
+                      name="reminderDate"
+                      placeholder="Datetime for reminder"></datetime-input>
+    </div>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <div class="wrap-buttons">
+      <button class="btn btn-primary submit-button"
+              color="primary"
+              mat-raised-button
+              type="submit">
+        <ng-container *ngIf="!note.reminderId">
+          <mat-icon>alarm_add</mat-icon>
+          Add reminder
+        </ng-container>
+        <ng-container *ngIf="note.reminderId">
+          <mat-icon>alarm</mat-icon>
+          Update reminder
+        </ng-container>
+      </button>
+
+      <button (click)="remove()"
+              *ngIf="isEdit"
+              class="btn btn-primary submit-button"
+              color="warn"
+              mat-raised-button
+              type="button">
+        <mat-icon>alarm_off</mat-icon>
+        Remove Reminder
+      </button>
+
+      <button (click)="close()"
+              class="btn btn-primary submit-button"
+              mat-raised-button
+              type="button">
+        Cancel
+      </button>
+    </div>
+  </mat-dialog-actions>
+</form>

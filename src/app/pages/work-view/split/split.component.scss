@@ -1,0 +1,80 @@
+@import '../../../../variables';
+
+$splitLineHeight: 4px;
+
+:host {
+  z-index: 100;
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  //cursor: row-resize;
+
+
+  .handle {
+    position: absolute;
+    width: 100%;
+    height: $splitLineHeight;
+    top: -0.5 * $splitLineHeight;
+    display: block;
+    z-index: 5;
+
+    &:after {
+      content: '';
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      box-shadow: 0 -4px 10px 0 rgba(0, 0, 0, 0.5);
+      pointer-events: none;
+    }
+  }
+
+  .handle.isHideShadow button {
+    box-shadow: none !important;
+  }
+
+  button {
+    background-color: inherit !important;
+    position: absolute;
+    z-index: 2;
+    transform: translate(-50%, -50%);
+    left: 50%;
+    cursor: grab;
+    transform-origin: left center;
+
+    //$this-size: 56px;
+    //transform: translate(-50%, -100%);
+    //height: $this-size/2;
+    //width: $this-size;
+    //border-bottom: 0;
+    //border-radius: $this-size $this-size 0 0;
+    //top: $splitLineHeight/2;
+
+    &:active {
+      cursor: grabbing;
+    }
+
+    &.isAnimate {
+      animation: $transition-duration-m splitWiggleAni $ani-standard-timing;
+    }
+  }
+
+  .counter {
+    position: absolute;
+    top: -2px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes splitWiggleAni {
+  0% {
+    transform: scale(1) translate(-50%, -50%);
+  }
+  50% {
+    transform: scale(1.2) translate(-50%, -50%);
+  }
+  100% {
+    transform: scale(1) translate(-50%, -50%);
+  }
+}

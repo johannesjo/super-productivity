@@ -1,0 +1,21 @@
+@mixin mq($size, $type: min) {
+  @if $size == 'xs' {
+    @media screen and ($type + -width: $layout-xs) {
+      @content;
+    }
+  } @else if $size == 'sm' {
+    @media screen and ($type + -width: $layout-sm) {
+      @content;
+    }
+  } @else if $size == 'md' {
+    @media screen and ($type + -width: $layout-md) {
+      @content;
+    }
+  } @else if $size == 'lg' {
+    @media screen and ($type + -width: $layout-lg) {
+      @content;
+    }
+  } @else {
+    @content;
+  }
+}

@@ -1,0 +1,25 @@
+<div class="circle bg-primary">
+  <div class="inner-circle"></div>
+  <div class="dots">
+    <div *ngFor="let hour of dots"
+         @dot
+         class="dot bg-100"></div>
+  </div>
+  <div #circleEl
+       class="handle-wrapper">
+    <div class="handle"></div>
+  </div>
+  <div class="value-wrapper">
+    <label *ngIf="label"
+           [for]="uid"
+           [innerHtml]="label"></label>
+    <input (ngModelChange)="onInputChange($event)"
+           [id]="uid"
+           [ngModel]="_model"
+           class="value"
+           inputDuration="optional"
+           placeholder="click to edit"
+           spellcheck="false"
+           type="text">
+  </div>
+</div>

@@ -1,0 +1,227 @@
+<section *ngIf="(googleApiService.isLoggedIn$|async)"
+         @expand
+         class="export-main">
+  <div *ngIf="!isSpreadSheetConfigured"
+       @expand>
+    <mat-form-field>
+      <label>Spreadsheet ID</label>
+      <input [(ngModel)]="opts.spreadsheetId"
+             matInput=""
+             name="spreadsheetId"
+             type="text">
+    </mat-form-field>
+  </div>
+
+  <div *ngIf="isLoading"
+       @expand
+       class="loading-spinner">
+    <mat-progress-spinner mode="indeterminate"></mat-progress-spinner>
+  </div>
+
+
+  <div *ngIf="headings && !isLoading && isSpreadSheetRead"
+       @expand
+       class="table-wrapper">
+    <table class="export-input-table">
+      <tr>
+        <th></th>
+        <th *ngFor="let heading of headings"
+            [innerHtml]="heading"
+            class="heading"></th>
+      </tr>
+      <tr>
+        <th>Last saved row</th>
+        <td *ngFor="let col of lastRow">{{col}}</td>
+      </tr>
+      <tr>
+        <th>Default</th>
+        <td *ngFor="let heading of headings; let i = index;"
+            class="default">
+          <input (change)="updateDefaults()"
+                 [(ngModel)]="opts.defaultValues[i]"
+                 [ngModelOptions]="{standalone: true}"
+                 type="text">
+        </td>
+      </tr>
+      <tr>
+        <th>Actual</th>
+        <td *ngFor="let heading of headings; let i = index;"
+            class="actual">
+          <input [(ngModel)]="actualValues[i]"
+                 name="actualValues"
+                 type="text">
+        </td>
+      </tr>
+    </table>
+  </div>
+
+</section>
+
+<div class="controls">
+  <button mat-raised-button=""
+          color=""
+          type="button"
+          [promiseBtn]="loginPromise"
+          *ngIf="!(googleApiService.isLoggedIn$|async)"
+          (click)="login()">
+    <mat-icon>exit_to_app</mat-icon>
+    Login to Google
+  </button>
+  <button mat-raised-button=""
+          color=""
+          type="button"
+          *ngIf="(googleApiService.isLoggedIn$|async)"
+          (click)="logout()">
+    <!--<mat-icon>no_meeting_room</mat-icon>-->
+    <!--<mat-icon>logout</mat-icon>-->
+    Logout
+  </button>
+  <button mat-raised-button=""
+          color=""
+          type="button"
+          [promiseBtn]="readPromise"
+          [disabled]="!opts.spreadsheetId"
+          *ngIf="(googleApiService.isLoggedIn$|async)"
+          (click)="readSpreadsheet()">
+    <mat-icon>chrome_reader_mode</mat-icon>
+    Read spreadsheet
+  </button>
+  <a mat-raised-button=""
+     color=""
+     external-link
+     target="_blank"
+     *ngIf="(googleApiService.isLoggedIn$|async) && opts.spreadsheetId"
+     href="https://docs.google.com/spreadsheets/d/{{opts.spreadsheetId}}">
+    <mat-icon>link</mat-icon>
+    Open spreadsheet
+  </a>
+  <button (click)="save()"
+          *ngIf="actualValues.length > 0 &&  (googleApiService.isLoggedIn$|async)"
+          type="button"
+          mat-raised-button=""
+          color="primary"
+          [promiseBtn]="savePromise">
+    <mat-icon>save</mat-icon>
+    Save row
+  </button>
+
+  <!--<a mat-raised-button=""-->
+  <!--color="primary"-->
+  <!--*ngIf="(googleApiService.isLoggedIn$|async)"-->
+  <!--external-link-->
+  <!--target="_blank"-->
+  <!--href="https://myaccount.google.com/permissions">Revoke permissions-->
+  <!--</a>-->
+</div>
+
+
+<section class="help-and-opts">
+  <collapsible title="Options"
+               class="options-collapsible"
+               [initiallyExpanded]="opts.spreadsheetId">
+    <div class="options-wrapper">
+      <div>
+        <mat-form-field>
+          <label>Spreadsheet ID</label>
+          <input type="text"
+                 matInput=""
+                 name="spreadsheetId"
+                 [(ngModel)]="opts.spreadsheetId">
+        </mat-form-field>
+      </div>
+
+      <div class="toggle-wrapper">
+        <mat-slide-toggle
+          [ngModelOptions]="{standalone: true}"
+          [(ngModel)]="opts.isAutoLogin">Auto-login and load data next time
+        </mat-slide-toggle>
+        <!--<mat-slide-toggle [(ngModel)]="optsname="".is.isAutoFocusEmpty">Auto-focus first empty field after loading table headings</mat-slide-toggle>-->
+        <mat-slide-toggle
+          [ngModelOptions]="{standalone: true}"
+          [(ngModel)]="opts.isRoundWorkTimeUp"
+          (change)="updateDefaults()">Always round work time up
+        </mat-slide-toggle>
+      </div>
+
+      <mat-form-field>
+        <label>Round start time to</label>
+        <mat-select (change)="updateDefaults()"
+                    [ngModelOptions]="{standalone: true}"
+                    [(ngModel)]="opts.roundStartTimeTo">
+          <mat-option><em>don't round</em></mat-option>
+          <mat-option *ngFor="let roundOption of roundTimeOptions"
+                      [value]="roundOption.id">
+            {{roundOption.title}}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field>
+        <label>Round end time to</label>
+        <mat-select (change)="updateDefaults()"
+                    [ngModelOptions]="{standalone: true}"
+                    [(ngModel)]="opts.roundEndTimeTo">
+          <mat-option><em>don't round</em></mat-option>
+          <mat-option *ngFor="let roundOption of roundTimeOptions"
+                      [value]="roundOption.id">
+            {{roundOption.title}}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field>
+        <label>Round time worked to</label>
+        <mat-select (change)="updateDefaults()"
+                    [ngModelOptions]="{standalone: true}"
+                    [(ngModel)]="opts.roundWorkTimeTo">
+          <mat-option><em>don't round</em></mat-option>
+          <mat-option *ngFor="let roundOption of roundTimeOptions"
+                      [value]="roundOption.id">
+            {{roundOption.title}}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+  </collapsible>
+
+  <collapsible class="help-collapsible"
+               title="Help"
+               [initiallyExpanded]="opts.spreadsheetId">
+    <div class="info">
+      <p>This view allows you to export your worked time to a google sheet. You need to allow for your Google Spreadsheets to be accessed by Super Productivity. You also need to create a spreadsheet with a headings in the first row nad specify it's ID in the input field (<a external-link
+                                                                                                                                                                                                                                                                                   target="_blank"
+                                                                                                                                                                                                                                                                                   href="https://stackoverflow.com/questions/36061433/how-to-do-i-locate-a-google-spreadsheet-id">Ho to find the id of a spreadsheet?</a>).
+      </p>
+      <p>After successfully loading your spreadsheet a table will show up with 4 rows. The first row shows the heading you specified in the spreadsheet itself.</p>
+      <p>The second row is for informational purposes and shows the last row from the spreadsheet.</p>
+      <p>The forth row is a list of values you can directly enter save to the spreadsheet.</p>
+      <p>The third row is there to automatically define some values for the forth row. There are several special strings you can enter into the cells:</p>
+    </div>
+
+    <dl class="possible-properties">
+      <dt>{{ '{' }}startTime}</dt>
+      <dd>The time when you first used this app today. It's possible to round this via the options.</dd>
+
+      <dt>{{ '{' }}currentTime}</dt>
+      <dd>The current time. Could be used for the for the end time of todays working day It's possible to round this via the options.</dd>
+
+      <dt>{{ '{' }}date}</dt>
+      <dd>Todays date in standard format (mm/dd/yyyy)</dd>
+
+      <dt>{{ '{' }}date:DD/MM/YYYY} (example)</dt>
+      <dd>Date with a custom date format string.</dd>
+
+      <dt>{{ '{' }}taskTitles}</dt>
+      <dd>Comma separated (parent) task titles</dd>
+
+      <dt>{{ '{' }}subTaskTitles}</dt>
+      <dd>Comma separated sub task titles</dd>
+
+      <dt>{{ '{' }}totalTime}</dt>
+      <dd>The total time you spend working on your todays tasks.</dd>
+    </dl>
+
+    <p>In addition to this there are several options you can use to modify the calculation of those values.</p>
+  </collapsible>
+</section>
+

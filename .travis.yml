@@ -19,7 +19,7 @@ matrix:
       dist: trusty
       language: generic
       services:
-       - docker
+        - docker
       before_install:
         - export CHROME_BIN=chromium-browser
         - export DISPLAY=:99.0
@@ -36,16 +36,11 @@ addons:
 cache:
   yarn: true
   directories:
-  - node_modules
-  - $HOME/.cache/electron
-  - $HOME/.cache/electron-builder
+    - node_modules
+    - $HOME/.cache/electron
+    - $HOME/.cache/electron-builder
 
 
-before_script:
-  - 'yarn global add bower gulp'
-  - 'bower install'
-
-# fixing travis; see: https://github.com/electron-userland/electron-builder/issues/2450#issuecomment-424972273
 script:
   - |
     if [ "$TRAVIS_OS_NAME" == "linux" ]; then
@@ -60,30 +55,13 @@ script:
         -v ~/.cache/electron:/root/.cache/electron \
         -v ~/.cache/electron-builder:/root/.cache/electron-builder \
         electronuserland/builder:wine-chrome \
-        /bin/bash -c "echo '____DOCKER_INNER_START____' && ls -l && yarn global add bower gulp && yarn --link-duplicates --pure-lockfile && yarn run distLinuxAndWindows && ls -l ./dist"
+        /bin/bash -c "echo '____DOCKER_INNER_START____' && ls -l &&  yarn --link-duplicates --pure-lockfile && yarn run distLinuxAndWindows && ls -l ./dist"
     else
       yarn install && yarn add 7zip-bin-mac && yarn run pub
     fi
-
 after_success:
   - 'echo "DIST-RESULT:"'
   - 'ls -l ./dist'
-  - |
-    if [ -n "$TRAVIS_TAG" ] && [ "$TRAVIS_OS_NAME" == "linux" ]; then
-      sshpass -p "$DEPLOY_PASS" rsync -avz ./app/ $DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH/app
-      openssl aes-256-cbc -K $encrypted_c04542ca1075_key -iv $encrypted_c04542ca1075_iv -in .snapcraft/travis_snapcraft.cfg -out .snapcraft/snapcraft.cfg -d
-      docker run -v $(pwd):$(pwd) -t snapcore/snapcraft sh -c "apt update -qq && cd $(pwd) && snapcraft push ./dist/*.snap --release stable"
-    fi
-  - |
-    if [ -n "$TRAVIS_TAG" ]; then
-      echo "UPLOADING BINARIES:"
-      rename "s/[0-9]+\.[0-9]+\.[0-9]+/latest/" ./dist/super*
-      rename "s/\s+/_/g" ./dist/super*
-      echo "RENAMED-DIST-RESULT:"
-      ls -l ./dist
-      sshpass -p "$DEPLOY_PASS" rsync -avz ./app/ $DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH/app
-      sshpass -p "$DEPLOY_PASS" scp dist/super* $DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH/downloads'
-    fi
   - |
     if [ -n "$TRAVIS_TAG" ] && [ "$TRAVIS_OS_NAME" == "osx" ]; then
       brew update
@@ -91,6 +69,9 @@ after_success:
       openssl aes-256-cbc -K $encrypted_c04542ca1075_key -iv $encrypted_c04542ca1075_iv -in build/hub.enc -out ~/.config/hub -d
       cask-repair -b -v $TRAVIS_TAG superproductivity
     fi
-
-#  - 'sshpass -p "$SFG_DEPLOY_PASS" scp dist/superProductivity* $SFG_DEPLOY_USER@$SFG_DEPLOY_HOST:$SFG_DEPLOY_PATH/downloads'
-#  - 'sshpass -p "$SFG_DEPLOY_PASS" scp dist/superproductivity* $SFG_DEPLOY_USER@$SFG_DEPLOY_HOST:$SFG_DEPLOY_PATH/downloads'
+#  - |
+#    if [ -n "$TRAVIS_TAG" ] && [ "$TRAVIS_OS_NAME" == "linux" ]; then
+#      sshpass -p "$DEPLOY_PASS" rsync -avz ./app2/ $DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH/app2
+#      openssl aes-256-cbc -K $encrypted_c04542ca1075_key -iv $encrypted_c04542ca1075_iv -in .snapcraft/travis_snapcraft.cfg -out .snapcraft/snapcraft.cfg -d
+#      docker run -v $(pwd):$(pwd) -t snapcore/snapcraft sh -c "apt update -qq && cd $(pwd) && snapcraft push ./dist/*.snap --release stable"
+#    fi

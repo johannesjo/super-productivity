@@ -1,0 +1,67 @@
+@import '../_variables.scss';
+
+html,
+body,
+app-root,
+.app-frame {
+  overflow: hidden;
+  margin: 0;
+  height: 100%;
+  box-sizing: border-box;
+  color: #e0e0e0;
+}
+
+mat-drawer-container,
+mat-sidenav-container {
+  //height: calc(100% - #{$main-header-height});
+  height: 100%;
+}
+
+:host.isLightTheme {
+  .route-wrapper {
+    background: #eeeeee !important;
+  }
+}
+
+:host ::ng-deep .mat-drawer-inner-container {
+  @include scrollY();
+}
+
+mat-drawer {
+  z-index: 3;
+  box-shadow: 0 8px 10px -5px rgba(0, 0, 0, 0.2), 0 16px 24px 2px rgba(0, 0, 0, 0.14), 0 6px 30px 5px rgba(0, 0, 0, 0.12);
+  border-left: 0 !important;
+}
+
+:host {
+  display: flex;
+  flex-direction: column;
+}
+
+.route-wrapper {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  left: 0;
+  top: 0;
+  overflow: hidden;
+
+  > ::ng-deep router-outlet + * {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    left: 0;
+    top: 0;
+    @include scrollY();
+  }
+}
+
+.backdrop {
+  position: fixed;
+  background: rgba(0, 0, 0, 0.4);
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  z-index: 220;
+}

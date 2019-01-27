@@ -1,0 +1,25 @@
+@import '../../../../variables';
+
+.wrapper {
+  display: block;
+  text-align: center;
+  min-height: 100%;
+  padding: 0 $s*2;
+  box-sizing: border-box;
+  overflow: hidden;
+  width: $s*36;
+
+  @media (min-width: 900px) and (max-width: 950px) {
+    width: $s*32;
+    padding: 0 $s*1;
+  }
+
+  header {
+    display: block;
+  }
+}
+
+note {
+  display: block;
+  margin-bottom: $s*1.5;
+}

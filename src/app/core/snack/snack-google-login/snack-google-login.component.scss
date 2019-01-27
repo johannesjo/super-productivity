@@ -1,0 +1,19 @@
+@import '../../../../variables';
+
+.wrapper {
+  display: flex;
+  align-items: center;
+}
+
+.action {
+  align-self: flex-end;
+}
+
+button {
+  margin-left: auto;
+}
+
+mat-icon {
+  margin-right: $s;
+  color: $red;
+}

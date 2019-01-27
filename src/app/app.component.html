@@ -1,0 +1,26 @@
+<ng-container *ngIf="isAllDataLoaded$|async">
+  <main-header></main-header>
+  <bookmark-bar *ngIf="bookmarkService.isShowBookmarks$|async"
+                [@expand]></bookmark-bar>
+  <add-task-bar (blur)="layoutService.hideAddTaskBar()"
+                *ngIf="layoutService.isShowAddTaskBar$|async"
+                [@blendInOut]
+                class="global"></add-task-bar>
+  <div *ngIf="(layoutService.isShowAddTaskBar$|async)"
+       @fade
+       class="backdrop"></div>
+
+  <mat-drawer-container>
+    <div [@warpRoute]="getPage(o)"
+         class="route-wrapper">
+      <router-outlet #o="outlet"></router-outlet>
+    </div>
+    <mat-drawer (closedStart)="noteService.hide()"
+                [mode]="mobileQuery.matches ? 'over' : 'side'"
+                [opened]="noteService.isShowNotes$|async"
+                position="end">
+      <notes></notes>
+    </mat-drawer>
+
+  </mat-drawer-container>
+</ng-container>

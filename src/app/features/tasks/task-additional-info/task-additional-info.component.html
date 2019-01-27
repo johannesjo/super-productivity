@@ -1,0 +1,46 @@
+<div class="wrapper mat-elevation-z3 bg-standard">
+  <mat-tab-group (selectedIndexChange)="indexChange($event)"
+                 [selectedIndex]="selectedIndex"
+                 color="accent"
+                 dynamicHeight>
+    <mat-tab *ngIf="taskData.issueData">
+      <ng-template mat-tab-label>
+        <issue-header [task]="taskData"></issue-header>
+      </ng-template>
+      <issue-content [task]="taskData"></issue-content>
+    </mat-tab>
+
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon class="tab-header-icon">notes</mat-icon>
+        <span class="tab-label-text">Notes</span>
+      </ng-template>
+
+      <div class="mat-elevation-z4 notes">
+        <inline-markdown (changed)="changeTaskNotes($event)"
+                         [model]="taskData.notes"></inline-markdown>
+      </div>
+    </mat-tab>
+
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon class="tab-header-icon">attachment</mat-icon>
+        <span class="tab-label-text">Attachments({{issueAttachments?.length + (localAttachments$|async)?.length}})</span>
+      </ng-template>
+
+      <div class="tab-content">
+        <ng-container *ngIf="taskData.issueType">
+          <h3 class="mat-h3"
+              style="margin-bottom: 0;">{{taskData.issueType}} Attachments</h3>
+          <attachment-list [attachments]="issueAttachments"
+                           [isDisableControls]="true"></attachment-list>
+        </ng-container>
+        <h3 class="mat-h3"
+            style="margin-bottom: 0;">Local Attachments</h3>
+        <attachment-list [attachments]="localAttachments$|async"></attachment-list>
+      </div>
+
+    </mat-tab>
+
+  </mat-tab-group>
+</div>
