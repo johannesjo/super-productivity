@@ -12,6 +12,7 @@ import { IssueData } from '../../issue';
 import { take } from 'rxjs/operators';
 import { Observable } from 'rxjs';
 import { DropPasteInputType } from '../../../../core/drop-paste-input/drop-paste-input';
+import { IS_ELECTRON } from '../../../../app.constants';
 
 
 @Injectable({
@@ -139,12 +140,14 @@ export class JiraIssueService {
 
   getMappedAttachmentsFromIssue(issueData: JiraIssue): Attachment[] {
     const attachments = issueData && issueData.attachments && issueData.attachments.map(mapJiraAttachmentToAttachment);
-    return attachments
-    // TODO remove once we have proper jira download files working
-      .map((attachment) => {
-        const link = 'LINK' as DropPasteInputType;
-        return {...attachment, type: link};
-      });
+    return (IS_ELECTRON)
+      ? attachments
+      // TODO remove once we have proper jira download files working
+        .map((attachment) => {
+          const link = 'LINK' as DropPasteInputType;
+          return {...attachment, type: link};
+        })
+      : attachments;
   }
 
   private _createChangelog(updatedIssue: JiraIssue, oldIssue: JiraIssue): JiraChangelogEntry[] {
