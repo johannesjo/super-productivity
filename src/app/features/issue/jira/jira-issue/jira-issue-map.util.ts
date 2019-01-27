@@ -7,8 +7,9 @@ import {
   JiraOriginalComment
 } from '../jira-api-responses';
 import { JiraCfg } from '../jira';
-import { DropPasteIcons, DropPasteInputType } from '../../../../core/drop-paste-input/drop-paste-input';
+import { DropPasteIcons, DropPasteInput, DropPasteInputType } from '../../../../core/drop-paste-input/drop-paste-input';
 import { IssueProviderKey, SearchResultItem } from '../../issue';
+import { Attachment } from '../../../attachment/attachment.model';
 
 const matchProtocolRegEx = /(^[^:]+):\/\//;
 
@@ -89,9 +90,10 @@ export const mapComments = (comment: JiraOriginalComment): JiraComment => {
   });
 };
 
-export const mapJiraAttachmentToAttachment = (jiraAttachment: JiraAttachment) => {
+export const mapJiraAttachmentToAttachment = (jiraAttachment: JiraAttachment): Attachment => {
   const type = mapAttachmentType(jiraAttachment.mimeType);
   return {
+    id: null,
     title: jiraAttachment.filename,
     path: jiraAttachment.thumbnail || jiraAttachment.content,
     originalImgPath: jiraAttachment.content,

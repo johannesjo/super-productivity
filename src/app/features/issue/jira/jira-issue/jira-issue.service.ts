@@ -11,6 +11,7 @@ import { SnackService } from '../../../../core/snack/snack.service';
 import { IssueData } from '../../issue';
 import { take } from 'rxjs/operators';
 import { Observable } from 'rxjs';
+import { DropPasteInputType } from '../../../../core/drop-paste-input/drop-paste-input';
 
 
 @Injectable({
@@ -136,8 +137,15 @@ export class JiraIssueService {
       });
   }
 
-  getMappedAttachmentsFromIssue(issueData: JiraIssue) {
-    return issueData && issueData.attachments && issueData.attachments.map(mapJiraAttachmentToAttachment) as Attachment[];
+  getMappedAttachmentsFromIssue(issueData: JiraIssue): Attachment[] {
+    const attachments = issueData && issueData.attachments && issueData.attachments.map(mapJiraAttachmentToAttachment);
+    console.log(attachments);
+    return attachments
+    // TODO remove once we have proper jira download files working
+      .map((attachment) => {
+        const link = 'LINK' as DropPasteInputType;
+        return {...attachment, type: link};
+      });
   }
 
   private _createChangelog(updatedIssue: JiraIssue, oldIssue: JiraIssue): JiraChangelogEntry[] {
