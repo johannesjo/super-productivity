@@ -27,7 +27,7 @@ export class JiraCfgStepperComponent implements OnDestroy {
   public isTestCredentialsSuccess = false;
   public user: JiraOriginalUser;
   public jiraCfg: JiraCfg;
-  @Output() onSaveCfg: EventEmitter<JiraCfg> = new EventEmitter();
+  @Output() saveCfg: EventEmitter<JiraCfg> = new EventEmitter();
 
   private _subs = new Subscription();
 
@@ -51,8 +51,8 @@ export class JiraCfgStepperComponent implements OnDestroy {
     this._subs.unsubscribe();
   }
 
-  saveCfg() {
-    this.onSaveCfg.emit(this.jiraCfg);
+  saveConfig() {
+    this.saveCfg.emit(this.jiraCfg);
   }
 
   saveStepForm(cfg: JiraCfg) {

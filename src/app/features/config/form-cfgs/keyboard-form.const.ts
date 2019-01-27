@@ -125,7 +125,9 @@ export const KEYBOARD_SETTINGS_FORM_CFG: ConfigFormSection = {
     // TASKS
     {
       className: 'tpl',
+      /* tslint:disable */
       template: '<h3 class="sub-section-heading">Tasks</h3>\n<p>The following shortcuts apply for the currently selected task (selected via tab or mouse).</p>',
+      /* tslint:enable */
     },
     {
       key: 'taskEditTitle',

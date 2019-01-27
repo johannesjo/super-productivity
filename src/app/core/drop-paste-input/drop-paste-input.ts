@@ -36,7 +36,7 @@ export const createFromPaste = (ev): null | DropPasteInput => {
 };
 
 
-const _createTextBookmark = (text): null | DropPasteInput => {
+function _createTextBookmark(text): null | DropPasteInput {
   if (text) {
     if (text.match(/\n/)) {
       // addItem({
@@ -59,9 +59,9 @@ const _createTextBookmark = (text): null | DropPasteInput => {
     }
   }
   return null;
-};
+}
 
-const _createFileBookmark = (dataTransfer): null | DropPasteInput => {
+function _createFileBookmark(dataTransfer): null | DropPasteInput {
   const path = dataTransfer.files[0] && dataTransfer.files[0].path;
   if (path) {
     return {
@@ -72,9 +72,9 @@ const _createFileBookmark = (dataTransfer): null | DropPasteInput => {
     };
   }
   return null;
-};
+}
 
-const _baseName = (passedStr) => {
+function _baseName(passedStr) {
   const str = passedStr.trim();
   let base;
   if (str[str.length - 1] === '/') {
@@ -88,4 +88,4 @@ const _baseName = (passedStr) => {
     base = base.substring(0, base.lastIndexOf('.'));
   }
   return base;
-};
+}

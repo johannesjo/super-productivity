@@ -40,11 +40,11 @@ export class SnackEffects {
   }
 
   private _openSnack(action: SnackOpen) {
+    const _destroy$: Subject<boolean> = new Subject<boolean>();
     const destroySubs = () => {
       _destroy$.next(true);
       _destroy$.unsubscribe();
     };
-    const _destroy$: Subject<boolean> = new Subject<boolean>();
     const {message, actionStr, actionId, actionPayload, config, type, isSubtle} = action.payload;
     const cfg = {
       ...DEFAULT_SNACK_CFG,

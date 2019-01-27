@@ -14,7 +14,7 @@ import { MsToStringPipe } from './ms-to-string.pipe';
 
 const noop = () => {
 };
-
+/* tslint:disable */
 export const INPUT_DURATION_VALUE_ACCESSOR: any = {
   provide: NG_VALUE_ACCESSOR,
   useExisting: forwardRef(() => InputDurationDirective),
@@ -26,7 +26,7 @@ export const INPUT_DURATION_VALIDATORS: any = {
   useExisting: forwardRef(() => InputDurationDirective),
   multi: true
 };
-
+/* tslint:enable */
 
 @Directive({
   selector: 'input[inputDuration]',
