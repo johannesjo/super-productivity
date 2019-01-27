@@ -35,7 +35,6 @@
     </button>
     <a mat-raised-button=""
        color="primary"
-       external-link
        target="_blank"
        *ngIf="(googleApiService.isLoggedIn$|async) && opts.spreadsheetId"
        href="https://docs.google.com/spreadsheets/d/{{opts.spreadsheetId}}">

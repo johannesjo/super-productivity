@@ -1,10 +1,10 @@
-import { BrowserWindow, ipcMain, Menu, shell } from 'electron';
-import { errorHandler } from './error-handler';
-import { join, normalize } from 'path';
-import { format } from 'url';
-import { getSettings } from './get-settings';
+import {BrowserWindow, ipcMain, Menu, shell} from 'electron';
+import {errorHandler} from './error-handler';
+import {join, normalize} from 'path';
+import {format} from 'url';
+import {getSettings} from './get-settings';
+import {IPC_APP_READY} from './ipc-events.const';
 import MenuItemConstructorOptions = Electron.MenuItemConstructorOptions;
-import { IPC_APP_READY } from './ipc-events.const';
 
 let mainWin;
 let indicatorMod;
@@ -151,6 +151,11 @@ function initWinEventListeners(app: any, IS_MAC, nestedWinParams) {
       }
     }
   );
+
+  mainWin.webContents.on('new-window', (e, url) => {
+    e.preventDefault();
+    shell.openExternal(url);
+  });
 }
 
 function createMenu(quitApp) {

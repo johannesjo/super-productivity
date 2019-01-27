@@ -88,7 +88,6 @@
   </button>
   <a mat-raised-button=""
      color=""
-     external-link
      target="_blank"
      *ngIf="(googleApiService.isLoggedIn$|async) && opts.spreadsheetId"
      href="https://docs.google.com/spreadsheets/d/{{opts.spreadsheetId}}">
@@ -108,7 +107,6 @@
   <!--<a mat-raised-button=""-->
   <!--color="primary"-->
   <!--*ngIf="(googleApiService.isLoggedIn$|async)"-->
-  <!--external-link-->
   <!--target="_blank"-->
   <!--href="https://myaccount.google.com/permissions">Revoke permissions-->
   <!--</a>-->
@@ -188,7 +186,7 @@
                title="Help"
                [initiallyExpanded]="opts.spreadsheetId">
     <div class="info">
-      <p>This view allows you to export your worked time to a google sheet. You need to allow for your Google Spreadsheets to be accessed by Super Productivity. You also need to create a spreadsheet with a headings in the first row nad specify it's ID in the input field (<a external-link
+      <p>This view allows you to export your worked time to a google sheet. You need to allow for your Google Spreadsheets to be accessed by Super Productivity. You also need to create a spreadsheet with a headings in the first row nad specify it's ID in the input field (<a
                                                                                                                                                                                                                                                                                    target="_blank"
                                                                                                                                                                                                                                                                                    href="https://stackoverflow.com/questions/36061433/how-to-do-i-locate-a-google-spreadsheet-id">Ho to find the id of a spreadsheet?</a>).
       </p>
