@@ -139,7 +139,6 @@ export class JiraIssueService {
 
   getMappedAttachmentsFromIssue(issueData: JiraIssue): Attachment[] {
     const attachments = issueData && issueData.attachments && issueData.attachments.map(mapJiraAttachmentToAttachment);
-    console.log(attachments);
     return attachments
     // TODO remove once we have proper jira download files working
       .map((attachment) => {
