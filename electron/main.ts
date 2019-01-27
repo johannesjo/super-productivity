@@ -258,7 +258,7 @@ function idleChecker() {
 
     // don't update if the user is about to close
     // tslint:disable-next-line
-    if (!app_.isQuiting) {
+    if (!app_.isQuiting && idleTime > CONFIG.MIN_IDLE_TIME) {
       mainWin.webContents.send(IPC_IDLE_TIME, idleTime);
     }
   });
