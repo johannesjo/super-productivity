@@ -1,7 +1,8 @@
 {
-  "name": "sp2",
-  "short_name": "sp2",
+  "name": "superProductivity",
+  "short_name": "sup",
   "theme_color": "#1976d2",
+  "background_color": "#fff",
   "start_url": "./index.html",
   "display": "standalone",
   "orientation": "portrait-primary",
