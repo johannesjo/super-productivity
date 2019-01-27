@@ -1,18 +1,19 @@
-# Super Productivity 2
+# Super Productivity
 
 This is a ToDo List / Time Tracker / Personal Jira Task Manager for Linux, MacOS and Windows to make you work super productively. 
 
 ![Work View with global links](screens/screen_standard.png)
 
 ## Features
-* Time Tracking 
 * **Full control over your data**, no tracking, no user accounts, no cloud
 * Sub Tasks
+* Time Tracking 
 * Sexy global bookmark bar to add quick links, project related files and even commands and applications
 * Sexy note functionality with custom reminders 
-* Export your time sheets to Google Sheets 
+* Pomodoro timer
+* Export your time sheets to Google Sheets  (optional of course)
 * 'Take a break' reminder
-* Full Keyboard Support
+* Full Keyboard interaction
 * Different Themes!
 * Sync data between multiple instances 
 * Mobile support
@@ -22,7 +23,7 @@ This is a ToDo List / Time Tracker / Personal Jira Task Manager for Linux, MacOS
   * Setting transitions aka setting tickets to in progress or done
   * Automatic notifications once your (current) task has changed or been commented on jira => no messy email notifications required any more
 * Configurable and automatable Git integration for:
-  * searching and adding tasks from jira 
+  * searching and adding tasks from git 
   
 And much more!
 
