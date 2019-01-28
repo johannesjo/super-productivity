@@ -31,7 +31,7 @@ export class SelectTaskComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.taskSelectCtrl.valueChanges.pipe(
       startWith(''),
-      withLatestFrom(this._taskService.startableTaskIds$),
+      withLatestFrom(this._taskService.startableTasks$),
       map(([str, tasks]) =>
         typeof str === 'string'
           ? tasks.filter(task => task.title.toLowerCase().includes(str.toLowerCase()))
