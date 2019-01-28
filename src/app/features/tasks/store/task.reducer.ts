@@ -64,6 +64,18 @@ const mapTaskWithSubTasksToTask = (task: TaskWithSubTasks): Task => {
   return copy;
 };
 
+export const filterStartableTasks = (s: TaskState): string[] => {
+  const ids = s.ids as string[];
+  return ids.filter((id) => {
+    const t = s.entities[id];
+    return !t.isDone && (
+      (t.parentId)
+        ? (s.todaysTaskIds.includes(t.parentId))
+        : (s.todaysTaskIds.includes(id) && (!t.subTaskIds || t.subTaskIds.length === 0))
+    );
+  });
+};
+
 // SHARED REDUCER ACTIONS
 // ----------------------
 const reCalcTimesForParentIfParent = (parentId, state: TaskState): TaskState => {
@@ -272,6 +284,14 @@ export function taskReducer(
         currentTaskId: null,
         lastCurrentTaskId: newState.currentTaskId,
         isDataLoaded: true,
+      };
+    }
+
+    case TaskActionTypes.StartFirstStartable: {
+      const startableTasks = filterStartableTasks(state);
+      return {
+        ...state,
+        currentTaskId: startableTasks && startableTasks[0] || null,
       };
     }
 

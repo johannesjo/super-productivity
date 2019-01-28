@@ -1,25 +1,8 @@
 import shortid from 'shortid';
-import {
-  debounceTime,
-  delay,
-  distinctUntilChanged,
-  first,
-  map,
-  shareReplay,
-  take,
-  withLatestFrom
-} from 'rxjs/operators';
+import { debounceTime, delay, distinctUntilChanged, first, map, shareReplay, take, withLatestFrom } from 'rxjs/operators';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import {
-  DEFAULT_TASK,
-  DropListModelSource,
-  HIDE_SUB_TASKS,
-  SHOW_SUB_TASKS,
-  Task,
-  TaskWithIssueData,
-  TaskWithSubTasks
-} from './task.model';
+import { DEFAULT_TASK, DropListModelSource, HIDE_SUB_TASKS, SHOW_SUB_TASKS, Task, TaskWithIssueData, TaskWithSubTasks } from './task.model';
 import { select, Store } from '@ngrx/store';
 import {
   AddSubTask,
@@ -50,7 +33,6 @@ import { PersistenceService } from '../../core/persistence/persistence.service';
 import { IssueData, IssueProviderKey } from '../issue/issue';
 import { TimeTrackingService } from '../time-tracking/time-tracking.service';
 import {
-  selectStartableTaskIds,
   selectAllTasksWithIssueData,
   selectBacklogTasksWithSubTasks,
   selectCurrentTask,
@@ -58,11 +40,15 @@ import {
   selectEstimateRemainingForBacklog,
   selectEstimateRemainingForToday,
   selectFocusTaskId,
-  selectIsTaskDataLoaded, selectIsTaskForTodayPlanned,
+  selectIsTaskDataLoaded,
+  selectIsTaskForTodayPlanned,
   selectIsTriggerPlanningMode,
+  selectStartableTaskIds,
+  selectStartableTasks,
   selectTaskById,
   selectTasksWithMissingIssueData,
-  selectTodaysDoneTasksWithSubTasks, selectTodaysTasksFlat,
+  selectTodaysDoneTasksWithSubTasks,
+  selectTodaysTasksFlat,
   selectTodaysTasksWithSubTasks,
   selectTodaysUnDoneTasksWithSubTasks,
   selectTotalTimeWorkedOnTodaysTasks
@@ -72,6 +58,7 @@ import { getWorklogStr } from '../../util/get-work-log-str';
 import { Actions, ofType } from '@ngrx/effects';
 import { IssueService } from '../issue/issue.service';
 import { ProjectService } from '../project/project.service';
+import { tasks_v1 } from 'googleapis';
 
 
 @Injectable({
@@ -95,6 +82,11 @@ export class TaskService {
 
   startableTaskIds$: Observable<string[]> = this._store.pipe(
     select(selectStartableTaskIds),
+    distinctUntilChanged(),
+  );
+
+  startableTasks$: Observable<Task[]> = this._store.pipe(
+    select(selectStartableTasks),
     distinctUntilChanged(),
   );
 

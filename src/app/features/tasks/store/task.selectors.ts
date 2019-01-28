@@ -1,5 +1,5 @@
 import { createFeatureSelector, createSelector } from '@ngrx/store';
-import { TASK_FEATURE_NAME, taskAdapter, TaskState } from './task.reducer';
+import { filterStartableTasks, TASK_FEATURE_NAME, taskAdapter, TaskState } from './task.reducer';
 import { selectIssueEntityMap } from '../../issue/issue.selector';
 import { TaskWithSubTasks } from '../task.model';
 
@@ -96,17 +96,12 @@ export const selectAllTasks = createSelector(selectTaskFeatureState, selectAll);
 export const selectAllTasksWithIssueData = createSelector(selectAllTasks, selectIssueEntityMap, mapIssueDataToTask);
 export const selectStartableTaskIds = createSelector(
   selectTaskFeatureState,
-  s => {
-    const ids = s.ids as string[];
-    return ids.filter((id) => {
-      const t = s.entities[id];
-      return !t.isDone && (
-        (t.parentId)
-          ? (s.todaysTaskIds.includes(t.parentId))
-          : (s.todaysTaskIds.includes(id) && (!t.subTaskIds || t.subTaskIds.length === 0))
-      );
-    });
-  },
+  filterStartableTasks,
+);
+export const selectStartableTasks = createSelector(
+  selectTaskFeatureState,
+  (s) =>
+    filterStartableTasks(s).map(id => s.entities[id])
 );
 
 export const selectAllTasksWithSubTasks = createSelector(selectAllTasksWithIssueData, mapSubTasksToTasks);

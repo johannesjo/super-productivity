@@ -27,6 +27,7 @@ export enum TaskActionTypes {
   AddSubTask = '[Task] Add SubTask',
 
   // Other
+  StartFirstStartable = '[Task] Start first startable Task',
   RestoreTask = '[Task] Restore Task',
   FocusTask = '[Task] Focus Task',
   FocusLastActiveTask = '[Task] Focus last active Task',
@@ -142,6 +143,10 @@ export class RemoveTimeSpent implements Action {
   }
 }
 
+export class StartFirstStartable implements Action {
+  readonly type = TaskActionTypes.StartFirstStartable;
+}
+
 export class RestoreTask implements Action {
   readonly type = TaskActionTypes.RestoreTask;
 
@@ -208,6 +213,7 @@ export type TaskActions
   | MoveDown
   | AddTimeSpent
   | RemoveTimeSpent
+  | StartFirstStartable
   | RestoreTask
   | FocusTask
   | FocusLastActiveTask

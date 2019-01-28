@@ -45,6 +45,7 @@ export class TaskEffects {
         TaskActionTypes.UndoDeleteTask,
         TaskActionTypes.AddSubTask,
         TaskActionTypes.SetCurrentTask,
+        TaskActionTypes.StartFirstStartable,
         TaskActionTypes.UnsetCurrentTask,
         TaskActionTypes.UpdateTask,
         TaskActionTypes.Move,
@@ -111,6 +112,7 @@ export class TaskEffects {
     .pipe(
       ofType(
         TaskActionTypes.SetCurrentTask,
+        TaskActionTypes.StartFirstStartable,
       ),
       withLatestFrom(this._store$.pipe(select(selectCurrentTask))),
       tap(([action, current]) => {
