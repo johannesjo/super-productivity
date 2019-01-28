@@ -30,6 +30,20 @@ TODO configure more restrictive Content-Security-Policy
         http-equiv="Content-Security-Policy">
   <base href="./">
   <style type="text/css">
+    .loading-full-page-wrapper {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      cursor: grab;
+      -webkit-app-region: drag;
+    }
+
+    .loading-full-page-wrapper:active {
+      cursor: grabbing;
+    }
+
     .app-loading {
       position: fixed;
       left: 50%;
@@ -110,23 +124,25 @@ TODO configure more restrictive Content-Security-Policy
 </head>
 <body class="mat-typography blue">
 <app-root>
-  <div class="app-loading">
-    <div class="productivity-tip">
-      <h2 id="heading">Heading</h2>
-      <p id="text">Text</p>
-    </div>
+  <div class="loading-full-page-wrapper">
+    <div class="app-loading">
+      <div class="productivity-tip">
+        <h2 id="heading">Heading</h2>
+        <p id="text">Text</p>
+      </div>
 
-    <div class="spinner">
-      <div class="double-bounce1"></div>
-      <div class="double-bounce2"></div>
-    </div>
+      <div class="spinner">
+        <div class="double-bounce1"></div>
+        <div class="double-bounce2"></div>
+      </div>
 
-    <svg class="logo"
-         viewBox="0 0 64 64">
-      <path d="M 0.65537046,34.582787 32.452267,63.855301 63.791548,0.94356422 30.222644,47.722023 Z"
-            id="path3395"
-            style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:1.46761858;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:13.80000019;stroke-dasharray:none;stroke-opacity:1"/>
-    </svg>
+      <svg class="logo"
+           viewBox="0 0 64 64">
+        <path d="M 0.65537046,34.582787 32.452267,63.855301 63.791548,0.94356422 30.222644,47.722023 Z"
+              id="path3395"
+              style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:1.46761858;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:13.80000019;stroke-dasharray:none;stroke-opacity:1"/>
+      </svg>
+    </div>
   </div>
 </app-root>
 <noscript>Please enable JavaScript to continue using this application.</noscript>
