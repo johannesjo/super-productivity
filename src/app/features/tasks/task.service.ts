@@ -21,6 +21,7 @@ import {
   RemoveTimeSpent,
   RestoreTask,
   SetCurrentTask,
+  StartFirstStartable,
   TaskActionTypes,
   ToggleStart,
   ToggleTaskShowSubTasks,
@@ -58,7 +59,6 @@ import { getWorklogStr } from '../../util/get-work-log-str';
 import { Actions, ofType } from '@ngrx/effects';
 import { IssueService } from '../issue/issue.service';
 import { ProjectService } from '../project/project.service';
-import { tasks_v1 } from 'googleapis';
 
 
 @Injectable({
@@ -222,6 +222,10 @@ export class TaskService {
     } else {
       this._store.dispatch(new UnsetCurrentTask());
     }
+  }
+
+  startFirstStartable() {
+    this._store.dispatch(new StartFirstStartable());
   }
 
   async loadStateForProject(projectId) {
