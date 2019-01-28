@@ -65,7 +65,6 @@
       ]
     },
     "win": {
-      "icon": "electron/assets/icons/app-icons/icon-win",
       "target": [
         "nsis",
         "portable"
