@@ -50,7 +50,7 @@ import { PersistenceService } from '../../core/persistence/persistence.service';
 import { IssueData, IssueProviderKey } from '../issue/issue';
 import { TimeTrackingService } from '../time-tracking/time-tracking.service';
 import {
-  selectAllStartableTasks,
+  selectStartableTaskIds,
   selectAllTasksWithIssueData,
   selectBacklogTasksWithSubTasks,
   selectCurrentTask,
@@ -93,11 +93,10 @@ export class TaskService {
     // NOTE: we can't use share here, as we need the last emitted value
   );
 
-  startableTasks$: Observable<Task[]> = this._store.pipe(
-    select(selectAllStartableTasks),
+  startableTaskIds$: Observable<string[]> = this._store.pipe(
+    select(selectStartableTaskIds),
     distinctUntilChanged(),
   );
-
 
   // todays list flat + tasks worked on today
   todaysTasksFlat$: Observable<TaskWithSubTasks[]> = this._store.pipe(

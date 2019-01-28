@@ -94,7 +94,20 @@ export const selectCurrentTaskParentOrCurrent = createSelector(selectTaskFeature
 
 export const selectAllTasks = createSelector(selectTaskFeatureState, selectAll);
 export const selectAllTasksWithIssueData = createSelector(selectAllTasks, selectIssueEntityMap, mapIssueDataToTask);
-export const selectAllStartableTasks = createSelector(selectAllTasks, tasks => tasks.filter(task => task.subTaskIds.length === 0));
+export const selectStartableTaskIds = createSelector(
+  selectTaskFeatureState,
+  s => {
+    const ids = s.ids as string[];
+    return ids.filter((id) => {
+      const t = s.entities[id];
+      return !t.isDone && (
+        (t.parentId)
+          ? (s.todaysTaskIds.includes(t.parentId))
+          : (s.todaysTaskIds.includes(id) && (!t.subTaskIds || t.subTaskIds.length === 0))
+      );
+    });
+  },
+);
 
 export const selectAllTasksWithSubTasks = createSelector(selectAllTasksWithIssueData, mapSubTasksToTasks);
 

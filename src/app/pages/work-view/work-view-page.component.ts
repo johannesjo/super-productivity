@@ -107,13 +107,14 @@ export class WorkViewPageComponent implements OnInit, OnDestroy {
   }
 
   startWork() {
+    // TODO refactor to action
     this.isPlanYourDay = false;
-    this._subs.add(this.taskService.startableTasks$
+    this._subs.add(this.taskService.startableTaskIds$
       .pipe(take(1))
-      .subscribe(tasks => {
-        const nextTaskId = tasks && tasks[0] && tasks[0].id;
+      .subscribe(taskIds => {
+        const nextTaskId = taskIds && taskIds[0];
         if (nextTaskId) {
-          this.taskService.setCurrentId(tasks && tasks[0] && tasks[0].id);
+          this.taskService.setCurrentId(nextTaskId);
         }
       }));
   }
