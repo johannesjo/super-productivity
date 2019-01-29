@@ -1,37 +1,37 @@
-import { Injectable } from '@angular/core';
-import { Actions, Effect, ofType } from '@ngrx/effects';
-import { JiraIssueActionTypes } from './jira-issue.actions';
-import { select, Store } from '@ngrx/store';
-import { filter, switchMap, take, tap, throttleTime, withLatestFrom } from 'rxjs/operators';
-import { TaskActionTypes, UpdateTask } from '../../../../tasks/store/task.actions';
-import { PersistenceService } from '../../../../../core/persistence/persistence.service';
-import { selectJiraIssueEntities, selectJiraIssueFeatureState, selectJiraIssueIds } from './jira-issue.reducer';
-import { selectCurrentProjectId, selectProjectJiraCfg } from '../../../../project/store/project.reducer';
-import { JiraApiService } from '../../jira-api.service';
-import { JiraIssueService } from '../jira-issue.service';
-import { JIRA_INITIAL_POLL_DELAY, JIRA_POLL_INTERVAL } from '../../jira.const';
-import { ConfigService } from '../../../../config/config.service';
-import { Dictionary } from '@ngrx/entity';
-import { JiraIssue } from '../jira-issue.model';
-import { JiraCfg, JiraTransitionOption } from '../../jira';
-import { SnackService } from '../../../../../core/snack/snack.service';
-import { ProjectActionTypes } from '../../../../project/store/project.actions';
-import { Task } from '../../../../tasks/task.model';
-import { JIRA_TYPE } from '../../../issue.const';
+import {Injectable} from '@angular/core';
+import {Actions, Effect, ofType} from '@ngrx/effects';
+import {JiraIssueActionTypes} from './jira-issue.actions';
+import {select, Store} from '@ngrx/store';
+import {filter, switchMap, take, tap, throttleTime, withLatestFrom} from 'rxjs/operators';
+import {TaskActionTypes, UpdateTask} from '../../../../tasks/store/task.actions';
+import {PersistenceService} from '../../../../../core/persistence/persistence.service';
+import {selectJiraIssueEntities, selectJiraIssueFeatureState, selectJiraIssueIds} from './jira-issue.reducer';
+import {selectCurrentProjectId, selectProjectJiraCfg} from '../../../../project/store/project.reducer';
+import {JiraApiService} from '../../jira-api.service';
+import {JiraIssueService} from '../jira-issue.service';
+import {JIRA_INITIAL_POLL_DELAY, JIRA_POLL_INTERVAL} from '../../jira.const';
+import {ConfigService} from '../../../../config/config.service';
+import {Dictionary} from '@ngrx/entity';
+import {JiraIssue} from '../jira-issue.model';
+import {JiraCfg, JiraTransitionOption} from '../../jira';
+import {SnackService} from '../../../../../core/snack/snack.service';
+import {ProjectActionTypes} from '../../../../project/store/project.actions';
+import {Task} from '../../../../tasks/task.model';
+import {JIRA_TYPE} from '../../../issue.const';
 import {
   selectAllTasks,
   selectCurrentTaskParentOrCurrent,
   selectTaskEntities,
   selectTaskFeatureState
 } from '../../../../tasks/store/task.selectors';
-import { TaskService } from '../../../../tasks/task.service';
-import { EMPTY, timer } from 'rxjs';
-import { TaskState } from '../../../../tasks/store/task.reducer';
-import { MatDialog } from '@angular/material';
-import { DialogJiraTransitionComponent } from '../../dialog-jira-transition/dialog-jira-transition.component';
-import { IssueLocalState } from '../../../issue';
-import { DialogConfirmComponent } from '../../../../../ui/dialog-confirm/dialog-confirm.component';
-import { DialogJiraAddWorklogComponent } from '../../dialog-jira-add-worklog/dialog-jira-add-worklog.component';
+import {TaskService} from '../../../../tasks/task.service';
+import {EMPTY, timer} from 'rxjs';
+import {TaskState} from '../../../../tasks/store/task.reducer';
+import {MatDialog} from '@angular/material';
+import {DialogJiraTransitionComponent} from '../../dialog-jira-transition/dialog-jira-transition.component';
+import {IssueLocalState} from '../../../issue';
+import {DialogConfirmComponent} from '../../../../../ui/dialog-confirm/dialog-confirm.component';
+import {DialogJiraAddWorklogComponent} from '../../dialog-jira-add-worklog/dialog-jira-add-worklog.component';
 
 @Injectable()
 export class JiraIssueEffects {
@@ -44,32 +44,25 @@ export class JiraIssueEffects {
       withLatestFrom(
         this._store$.pipe(select(selectProjectJiraCfg)),
       ),
-      switchMap(([a, jiraCfg]) => {
-        const isPollingEnabled = jiraCfg && jiraCfg.isEnabled && jiraCfg.isAutoPollTickets;
-        if (isPollingEnabled) {
-          return timer(JIRA_INITIAL_POLL_DELAY, JIRA_POLL_INTERVAL)
-            .pipe(
-              withLatestFrom(
-                this._store$.pipe(select(selectJiraIssueIds)),
-                this._store$.pipe(select(selectJiraIssueEntities)),
-              ),
-              tap(([x, issueIds, entities]: [number, string[], Dictionary<JiraIssue>]) => {
-                console.log('jira TAP poll', issueIds, entities);
-                if (issueIds && issueIds.length > 0) {
-                  console.log('SHOW toast???');
-                  this._snackService.open({
-                    message: 'Jira: Polling Changes for issues',
-                    svgIcon: 'jira',
-                    isSubtle: true,
-                  });
-                  issueIds.forEach((id) => this._jiraIssueService.updateIssueFromApi(id, entities[id], true, false));
-                }
-              })
-            );
-        } else {
-          return EMPTY;
-        }
-      })
+      filter(([a, jiraCfg]) => jiraCfg.isEnabled && jiraCfg.isAutoPollTickets),
+      switchMap(() => timer(JIRA_INITIAL_POLL_DELAY, JIRA_POLL_INTERVAL).pipe(
+        withLatestFrom(
+          this._store$.pipe(select(selectJiraIssueIds)),
+          this._store$.pipe(select(selectJiraIssueEntities)),
+        ),
+        tap(([x, issueIds, entities]: [number, string[], Dictionary<JiraIssue>]) => {
+          console.log('jira TAP poll', issueIds, entities);
+          if (issueIds && issueIds.length > 0) {
+            console.log('SHOW toast???');
+            this._snackService.open({
+              message: 'Jira: Polling Changes for issues',
+              svgIcon: 'jira',
+              isSubtle: true,
+            });
+            issueIds.forEach((id) => this._jiraIssueService.updateIssueFromApi(id, entities[id], true, false));
+          }
+        })
+      )),
     );
   @Effect({dispatch: false}) syncIssueStateToLs$: any = this._actions$
     .pipe(
