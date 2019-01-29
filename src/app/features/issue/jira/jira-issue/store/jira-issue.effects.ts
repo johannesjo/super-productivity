@@ -38,6 +38,8 @@ export class JiraIssueEffects {
   @Effect({dispatch: false}) issuePolling$: any = this._actions$
     .pipe(
       ofType(
+        // while load state should be enough this just might fix the error of polling for inactive projects?
+        ProjectActionTypes.SetCurrentProject,
         JiraIssueActionTypes.LoadState,
         ProjectActionTypes.UpdateProjectIssueProviderCfg,
       ),
