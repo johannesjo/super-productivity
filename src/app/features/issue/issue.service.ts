@@ -134,6 +134,7 @@ export class IssueService {
     this.isGitAddToBacklog$.pipe(
       take(1),
     ).subscribe((isGitAddToBacklog) => {
+      console.log('isGitAddToBacklog', isGitAddToBacklog);
 
       if (isGitAddToBacklog) {
         this._gitIssueService.addOpenIssuesToBacklog();
@@ -143,6 +144,8 @@ export class IssueService {
     this.isJiraAddToBacklog$.pipe(
       take(1),
     ).subscribe((isJiraAddToBacklog) => {
+      console.log('isJiraAddToBacklog', isJiraAddToBacklog);
+
       if (isJiraAddToBacklog) {
         this._jiraIssueService.addOpenIssuesToBacklog();
       }
