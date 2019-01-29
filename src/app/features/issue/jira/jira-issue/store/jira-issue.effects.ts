@@ -40,8 +40,8 @@ export class JiraIssueEffects {
       ofType(
         // while load state should be enough this just might fix the error of polling for inactive projects?
         ProjectActionTypes.SetCurrentProject,
-        JiraIssueActionTypes.LoadState,
         ProjectActionTypes.UpdateProjectIssueProviderCfg,
+        JiraIssueActionTypes.LoadState,
       ),
       withLatestFrom(
         this._store$.pipe(select(selectProjectJiraCfg)),
@@ -53,7 +53,7 @@ export class JiraIssueEffects {
           this._store$.pipe(select(selectJiraIssueEntities)),
         ),
         tap(([x, issueIds, entities]: [number, string[], Dictionary<JiraIssue>]) => {
-          console.log('jira TAP poll', issueIds, entities);
+          console.log('jira TAP poll', x, issueIds, entities);
           if (issueIds && issueIds.length > 0) {
             console.log('SHOW toast???');
             this._snackService.open({
