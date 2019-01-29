@@ -11,21 +11,21 @@ import {
   OnInit,
   ViewChild
 } from '@angular/core';
-import { TaskService } from '../task.service';
-import { Subject } from 'rxjs';
-import { HIDE_SUB_TASKS, SHOW_SUB_TASKS, TaskWithSubTasks } from '../task.model';
-import { MatDialog } from '@angular/material';
-import { DialogTimeEstimateComponent } from '../dialogs/dialog-time-estimate/dialog-time-estimate.component';
-import { expandAnimation } from '../../../ui/animations/expand.ani';
-import { ConfigService } from '../../config/config.service';
-import { checkKeyCombo } from '../../../util/check-key-combo';
-import { distinctUntilChanged, takeUntil } from 'rxjs/operators';
-import { fadeAnimation } from '../../../ui/animations/fade.ani';
-import { AttachmentService } from '../../attachment/attachment.service';
-import { IssueService } from '../../issue/issue.service';
-import { DialogEditAttachmentComponent } from '../../attachment/dialog-edit-attachment/dialog-edit-attachment.component';
-import { swirlAnimation } from '../../../ui/animations/swirl-in-out.ani';
-import { isTouch } from '../../../util/is-touch';
+import {TaskService} from '../task.service';
+import {Subject} from 'rxjs';
+import {HIDE_SUB_TASKS, SHOW_SUB_TASKS, TaskWithSubTasks} from '../task.model';
+import {MatDialog} from '@angular/material';
+import {DialogTimeEstimateComponent} from '../dialogs/dialog-time-estimate/dialog-time-estimate.component';
+import {expandAnimation} from '../../../ui/animations/expand.ani';
+import {ConfigService} from '../../config/config.service';
+import {checkKeyCombo} from '../../../util/check-key-combo';
+import {takeUntil} from 'rxjs/operators';
+import {fadeAnimation} from '../../../ui/animations/fade.ani';
+import {AttachmentService} from '../../attachment/attachment.service';
+import {IssueService} from '../../issue/issue.service';
+import {DialogEditAttachmentComponent} from '../../attachment/dialog-edit-attachment/dialog-edit-attachment.component';
+import {swirlAnimation} from '../../../ui/animations/swirl-in-out.ani';
+import {isTouch} from '../../../util/is-touch';
 
 @Component({
   selector: 'task',
@@ -68,24 +68,24 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     this._handleKeyboardShortcuts(ev);
   }
 
-  @HostListener('focus', ['$event']) onFocus(ev: Event) {
-    if (this._currentFocusId !== this.task.id && ev.target === this._elementRef.nativeElement) {
-      this._taskService.focusTask(this.task.id);
-      this._currentFocusId = this.task.id;
-    }
-  }
-
-  @HostListener('blur', ['$event']) onBlur(ev: Event) {
-    // console.log('BLUR', this._currentFocusId, this.task.id);
-
-    //  @TODO replace: hacky way to wait for last update
-    setTimeout(() => {
-      if (this._currentFocusId === this.task.id) {
-        this._taskService.focusTask(null);
-        this._currentFocusId = null;
-      }
-    });
-  }
+  // @HostListener('focus', ['$event']) onFocus(ev: Event) {
+  //   if (this._currentFocusId !== this.task.id && ev.target === this._elementRef.nativeElement) {
+  //     this._taskService.focusTask(this.task.id);
+  //     this._currentFocusId = this.task.id;
+  //   }
+  // }
+  //
+  // @HostListener('blur', ['$event']) onBlur(ev: Event) {
+  //   // console.log('BLUR', this._currentFocusId, this.task.id);
+  //
+  //   //  @TODO replace: hacky way to wait for last update
+  //   setTimeout(() => {
+  //     if (this._currentFocusId === this.task.id) {
+  //       this._taskService.focusTask(null);
+  //       this._currentFocusId = null;
+  //     }
+  //   });
+  // }
 
   @HostListener('dragenter', ['$event']) onDragEnter(ev: Event) {
     this._dragEnterTarget = ev.target as HTMLElement;
@@ -118,18 +118,18 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   ngAfterViewInit() {
-    this._taskService.focusTaskId$
-      .pipe(
-        takeUntil(this._destroy$),
-        distinctUntilChanged()
-      )
-      .subscribe((id) => {
-        this._currentFocusId = id;
-        if (id === this.task.id && document.activeElement !== this._elementRef.nativeElement) {
-          this.focusSelfElement();
-        }
-        this._cd.detectChanges();
-      });
+    // this._taskService.focusTaskId$
+    //   .pipe(
+    //     takeUntil(this._destroy$),
+    //     distinctUntilChanged()
+    //   )
+    //   .subscribe((id) => {
+    //     this._currentFocusId = id;
+    //     if (id === this.task.id && document.activeElement !== this._elementRef.nativeElement) {
+    //       this.focusSelfElement();
+    //     }
+    //     this._cd.markForCheck();
+    //   });
 
     // hacky but relatively performant
     if (this.task.parentId && Date.now() - 100 < this.task.created) {
@@ -176,8 +176,6 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   estimateTime() {
-    console.log(isTouch());
-
     this._matDialog
       .open(DialogTimeEstimateComponent, {
         data: {task: this.task},
@@ -260,45 +258,36 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     this.focusSelf();
   }
 
-  focusPrevious(isFocusReverseIfNotPossible = false, isTimeout = false) {
+  focusPrevious(isFocusReverseIfNotPossible = false) {
     const taskEls = Array.from(document.querySelectorAll('task'));
     const currentIndex = taskEls.findIndex(el => document.activeElement === el);
     const prevEl = taskEls[currentIndex - 1] as HTMLElement;
-    const focus = () => {
+
+    setTimeout(() => {
       if (prevEl) {
         prevEl.focus();
       } else if (isFocusReverseIfNotPossible) {
         this.focusNext();
       }
-    };
-    if (isTimeout) {
-      setTimeout(() => focus());
-    } else {
-      focus();
-    }
+    });
   }
 
-  focusNext(isFocusReverseIfNotPossible = false, isTimeout = false) {
+  focusNext(isFocusReverseIfNotPossible = false) {
     const taskEls = Array.from(document.querySelectorAll('task'));
     const currentIndex = taskEls.findIndex(el => document.activeElement === el);
     const nextEl = taskEls[currentIndex + 1] as HTMLElement;
-    const focus = () => {
+    setTimeout(() => {
       if (nextEl) {
         nextEl.focus();
       } else if (isFocusReverseIfNotPossible) {
         this.focusPrevious();
       }
-    };
-    if (isTimeout) {
-      setTimeout(() => focus());
-    } else {
-      focus();
-    }
+    });
   }
 
   focusSelf() {
     this.focusSelfElement();
-    this._taskService.focusTask(this.task.id);
+    // this._taskService.focusTask(this.task.id);
   }
 
   focusSelfElement() {
@@ -354,8 +343,8 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     if (checkKeyCombo(ev, keys.taskDelete)) {
-      this.focusPrevious(true, true);
       this.deleteTask();
+      this.focusNext(true);
     }
 
     if (checkKeyCombo(ev, keys.moveToBacklog)) {
@@ -390,8 +379,9 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
         this.hideAdditionalInfos();
       } else if (hasSubTasks && this.task._showSubTasksMode !== HIDE_SUB_TASKS) {
         this._taskService.toggleSubTaskMode(this.task.id, true, false);
-      } else if (this.task.parentId) {
-        this._taskService.focusTask(this.task.parentId);
+        // TODO find a solution
+        // } else if (this.task.parentId) {
+        // this._taskService.focusTask(this.task.parentId);
       } else {
         this.focusPrevious();
       }
