@@ -11,12 +11,15 @@ import {
   ViewChild,
   ViewContainerRef
 } from '@angular/core';
-import { expandAnimation } from '../../../ui/animations/expand.ani';
-import { ConfigFormSection, ConfigSectionKey } from '../config.model';
-import { ProjectCfgFormKey } from '../../project/project.model';
-import { GoogleSyncCfgComponent } from '../../google/google-sync-cfg/google-sync-cfg.component';
-import { JiraCfgComponent } from '../../issue/jira/jira-cfg/jira-cfg.component';
-import { FileImexComponent } from '../../../imex/file-imex/file-imex.component';
+import {OnDestroy} from "@angular/core";
+import {expandAnimation} from '../../../ui/animations/expand.ani';
+import {ConfigFormSection, ConfigSectionKey} from '../config.model';
+import {ProjectCfgFormKey} from '../../project/project.model';
+import {GoogleSyncCfgComponent} from '../../google/google-sync-cfg/google-sync-cfg.component';
+import {JiraCfgComponent} from '../../issue/jira/jira-cfg/jira-cfg.component';
+import {FileImexComponent} from '../../../imex/file-imex/file-imex.component';
+import {ProjectService} from "../../project/project.service";
+import {Subscription} from "rxjs";
 
 @Component({
   selector: 'config-section',
@@ -25,7 +28,7 @@ import { FileImexComponent } from '../../../imex/file-imex/file-imex.component';
   animations: expandAnimation,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ConfigSectionComponent implements OnInit {
+export class ConfigSectionComponent implements OnInit, OnDestroy {
   @Input() section: ConfigFormSection;
   @Input() cfg: any;
   @Output() save: EventEmitter<{ sectionKey: ConfigSectionKey | ProjectCfgFormKey, config: any }> = new EventEmitter();
@@ -34,9 +37,12 @@ export class ConfigSectionComponent implements OnInit {
 
   isExpanded = false;
 
+  private _subs = new Subscription();
+
   constructor(
     private _cd: ChangeDetectorRef,
     private _componentFactoryResolver: ComponentFactoryResolver,
+    private _projectService: ProjectService,
   ) {
   }
 
@@ -44,6 +50,15 @@ export class ConfigSectionComponent implements OnInit {
     if (this.section && this.section.customSection) {
       this._loadCustomSection(this.section.customSection);
     }
+
+    // mark for check manually to make it work with ngx formly
+    this._subs.add(this._projectService.onProjectChange$.subscribe(() => {
+      this._cd.markForCheck();
+    }));
+  }
+
+  ngOnDestroy(): void {
+    this._subs.unsubscribe();
   }
 
   onSave($event) {
