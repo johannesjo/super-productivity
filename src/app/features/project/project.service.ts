@@ -28,7 +28,6 @@ import {Dictionary} from '@ngrx/entity';
 import {getWorklogStr} from '../../util/get-work-log-str';
 import {GitCfg} from '../issue/git/git';
 import {DEFAULT_ISSUE_PROVIDER_CFGS} from '../issue/issue.const';
-import {shareReplay} from 'rxjs/operators';
 import {Actions} from "@ngrx/effects";
 import {ofType} from "@ngrx/effects";
 
@@ -39,19 +38,20 @@ export class ProjectService {
   list$: Observable<Project[]> = this._store.pipe(select(selectAllProjects));
   currentProject$: Observable<Project> = this._store.pipe(
     select(selectCurrentProject),
-    shareReplay(),
+    // TODO investigate share replay issues
+    // shareReplay(),
   );
   currentJiraCfg$: Observable<JiraCfg> = this._store.pipe(
     select(selectProjectJiraCfg),
-    shareReplay(),
+    // shareReplay(),
   );
   currentGitCfg$: Observable<GitCfg> = this._store.pipe(
     select(selectProjectGitCfg),
-    shareReplay(),
+    // shareReplay(),
   );
   advancedCfg$: Observable<ProjectAdvancedCfg> = this._store.pipe(
     select(selectAdvancedProjectCfg),
-    shareReplay(),
+    // shareReplay(),
   );
   currentId$: Observable<string> = this._store.pipe(select(selectCurrentProjectId));
   currentId: string;
