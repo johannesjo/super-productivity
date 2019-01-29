@@ -10,7 +10,7 @@ import { BASIC_PROJECT_CONFIG_FORM_CONFIG } from '../../project-form-cfg.const';
 import { IssueIntegrationCfgs } from '../../../issue/issue';
 import { DialogJiraInitialSetupComponent } from '../../../issue/jira/dialog-jira-initial-setup/dialog-jira-initial-setup.component';
 import { SS_PROJECT_TMP } from '../../../../core/persistence/ls-keys.const';
-import { Subscription } from 'rxjs/Subscription';
+import { Subscription } from 'rxjs';
 import { loadFromSessionStorage, saveToSessionStorage } from '../../../../core/persistence/local-storage';
 import { GitCfg } from '../../../issue/git/git';
 import { DialogGitInitialSetupComponent } from '../../../issue/git/dialog-git-initial-setup/dialog-git-initial-setup.component';
