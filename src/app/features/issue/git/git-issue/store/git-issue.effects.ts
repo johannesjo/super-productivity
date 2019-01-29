@@ -1,23 +1,26 @@
-import { Injectable } from '@angular/core';
-import { Actions, Effect, ofType } from '@ngrx/effects';
-import { GitIssueActionTypes } from './git-issue.actions';
-import { select, Store } from '@ngrx/store';
-import { switchMap, tap, withLatestFrom } from 'rxjs/operators';
-import { TaskActionTypes } from '../../../../tasks/store/task.actions';
-import { PersistenceService } from '../../../../../core/persistence/persistence.service';
-import { selectAllGitIssues, selectGitIssueFeatureState } from './git-issue.reducer';
-import { selectCurrentProjectId, selectProjectGitCfg } from '../../../../project/store/project.reducer';
-import { GitApiService } from '../../git-api.service';
-import { GitIssueService } from '../git-issue.service';
-import { ConfigService } from '../../../../config/config.service';
-import { GitIssue } from '../git-issue.model';
-import { SnackService } from '../../../../../core/snack/snack.service';
-import { TaskService } from '../../../../tasks/task.service';
-import { Task } from '../../../../tasks/task.model';
-import { ProjectActionTypes } from '../../../../project/store/project.actions';
-import { GIT_TYPE } from '../../../issue.const';
-import { EMPTY, timer } from 'rxjs';
-import { GIT_INITIAL_POLL_DELAY, GIT_POLL_INTERVAL } from '../../git.const';
+import {Injectable} from '@angular/core';
+import {Actions, Effect, ofType} from '@ngrx/effects';
+import {GitIssueActionTypes} from './git-issue.actions';
+import {select, Store} from '@ngrx/store';
+import {switchMap, tap, withLatestFrom} from 'rxjs/operators';
+import {filter} from "rxjs/operators";
+import {TaskActionTypes} from '../../../../tasks/store/task.actions';
+import {PersistenceService} from '../../../../../core/persistence/persistence.service';
+import {selectAllGitIssues, selectGitIssueFeatureState} from './git-issue.reducer';
+import {selectCurrentProjectId, selectProjectGitCfg} from '../../../../project/store/project.reducer';
+import {GitApiService} from '../../git-api.service';
+import {GitIssueService} from '../git-issue.service';
+import {ConfigService} from '../../../../config/config.service';
+import {GitIssue} from '../git-issue.model';
+import {SnackService} from '../../../../../core/snack/snack.service';
+import {TaskService} from '../../../../tasks/task.service';
+import {Task} from '../../../../tasks/task.model';
+import {ProjectActionTypes} from '../../../../project/store/project.actions';
+import {GIT_TYPE} from '../../../issue.const';
+import {timer} from 'rxjs';
+import {GIT_INITIAL_POLL_DELAY, GIT_POLL_INTERVAL} from '../../git.const';
+
+const isRepoConfigured = ([a, gitCfg]) => gitCfg && gitCfg.repo && gitCfg.repo.length > 2;
 
 @Injectable()
 export class GitIssueEffects {
@@ -30,27 +33,25 @@ export class GitIssueEffects {
       withLatestFrom(
         this._store$.pipe(select(selectProjectGitCfg)),
       ),
+      filter(isRepoConfigured),
+      filter(([a, gitCfg]) => gitCfg && gitCfg.isAutoPoll),
       switchMap(([a, gitCfg]) => {
-        if (gitCfg && gitCfg.isAutoPoll) {
-          return timer(GIT_INITIAL_POLL_DELAY, GIT_POLL_INTERVAL)
-            .pipe(
-              withLatestFrom(
-                this._store$.pipe(select(selectAllGitIssues)),
-              ),
-              tap(([x, issues]: [number, GitIssue[]]) => {
-                if (issues && issues.length > 0) {
-                  this._snackService.open({
-                    message: 'Git: Polling Changes for issues',
-                    svgIcon: 'github',
-                    isSubtle: true,
-                  });
-                  this._gitIssueService.updateIssuesFromApi(issues, gitCfg);
-                }
-              })
-            );
-        } else {
-          return EMPTY;
-        }
+        return timer(GIT_INITIAL_POLL_DELAY, GIT_POLL_INTERVAL)
+          .pipe(
+            withLatestFrom(
+              this._store$.pipe(select(selectAllGitIssues)),
+            ),
+            tap(([x, issues]: [number, GitIssue[]]) => {
+              if (issues && issues.length > 0) {
+                this._snackService.open({
+                  message: 'Git: Polling Changes for issues',
+                  svgIcon: 'github',
+                  isSubtle: true,
+                });
+                this._gitIssueService.updateIssuesFromApi(issues, gitCfg);
+              }
+            })
+          );
       })
     );
 
