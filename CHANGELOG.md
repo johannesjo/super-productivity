@@ -1,3 +1,18 @@
+## [2.0.1](https://github.com/johannesjo/super-productivity/compare/v2.0.0...v2.0.1) (2019-01-29)
+
+
+### Bug Fixes
+
+* wrong imports ([6a1e30a](https://github.com/johannesjo/super-productivity/commit/6a1e30a))
+
+
+### Features
+
+* **tasks:** detach whole focus logic from store ([a6fc59b](https://github.com/johannesjo/super-productivity/commit/a6fc59b))
+* improve performance when dragging up backlog ([e02c80e](https://github.com/johannesjo/super-productivity/commit/e02c80e))
+
+
+
 # [2.0.0](https://github.com/johannesjo/super-productivity/compare/v1.999.1000...v2.0.0) (2019-01-29)
 
 
