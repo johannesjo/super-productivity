@@ -19,11 +19,12 @@
   ],
   "scripts": {
     "ng": "ng",
-    "start": "npm run electron:build && NODE_ENV=DEV electron .",
+    "start": "yarn electron:build && NODE_ENV=DEV electron .",
     "startFrontend": "ng serve",
-    "buildFrontend": "ng build",
-    "buildFrontendElectron": "ng build --base-href .",
-    "buildAllElectron": "npm run buildFrontendElectron && npm run electron:build",
+    "buildFrontend": "ng build --aot --prod",
+    "buildFrontendElectron": "ng build --aot --prod --base-href .",
+    "buildAllElectron": "yarn buildFrontendElectron && yarn electron:build",
+    "buildApp": "yarn buildAllElectron && yarn electron-builder",
     "test": "ng test",
     "lint": "ng lint",
     "e2e": "ng e2e",
@@ -32,13 +33,13 @@
     "electron:watch": "tsc -p tsconfig-electron.json --watch",
     "electronBuilderOnly": "electron-builder",
     "pack": "electron-builder --dir",
-    "localInstall": "sudo echo 'Starting local install' && rm -Rf ./dist/ && rm -Rf ./app-builds/ && npm run buildAllElectron && electron-builder --linux && sudo dpkg -i app-builds/superProductivity*.deb",
-    "dist": "npm run buildAllElectron && electron-builder",
-    "distLinuxAndWindows": "npm run buildAllElectron && electron-builder --linux --win",
-    "pub": "npm run buildAllElectron && electron-builder -p always",
-    "release": "npm run release.changelog && npm run dist",
+    "localInstall": "sudo echo 'Starting local install' && rm -Rf ./dist/ && rm -Rf ./app-builds/ && yarn buildAllElectron && electron-builder --linux && sudo dpkg -i app-builds/superProductivity*.deb",
+    "dist": "yarn buildAllElectron && electron-builder",
+    "distLinuxAndWindows": "yarn buildAllElectron && electron-builder --linux --win",
+    "pub": "yarn buildAllElectron && electron-builder -p always",
+    "release": "yarn release.changelog && yarn dist",
     "release.changelog": "conventional-changelog -i CHANGELOG.md -s -p angular",
-    "version": "npm run release.changelog && git add -A"
+    "version": "yarn release.changelog && git add -A"
   },
   "publish": [
     {
