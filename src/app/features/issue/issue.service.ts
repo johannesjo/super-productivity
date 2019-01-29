@@ -30,7 +30,7 @@ export class IssueService {
     map(gitCfg => gitCfg && gitCfg.isAutoAddToBacklog)
   );
   public isGitRefreshIssueData$: Observable<boolean> = this._projectService.currentGitCfg$.pipe(
-    map(gitCfg => gitCfg && (gitCfg.isSearchIssuesFromGit || gitCfg.isAutoAddToBacklog || gitCfg.isAutoPoll))
+    map(gitCfg => gitCfg && gitCfg.repo && (gitCfg.isSearchIssuesFromGit || gitCfg.isAutoAddToBacklog || gitCfg.isAutoPoll))
   );
 
   constructor(
@@ -113,9 +113,13 @@ export class IssueService {
   }
 
   public refreshIssueData() {
+    console.log('refreshIssueData');
+
     this.isGitRefreshIssueData$.pipe(
       take(1),
     ).subscribe((isRefreshGit) => {
+      console.log('isRefreshGit', isRefreshGit);
+
       if (isRefreshGit) {
         this._gitApiService.refreshIssuesCache();
       }
