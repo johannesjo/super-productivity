@@ -169,9 +169,9 @@ export class MigrateService {
     }
 
     // TASKS
-    const todayIds = op.data.tasks.map(t => t && t.id).filter(id => !id);
-    const backlogIds = op.data.backlogTasks.map(t => t && t.id).filter(id => !id);
-    const doneBacklogIds = op.data.doneBacklogTasks.map(t => t && t.id).filter(id => !id);
+    const todayIds = op.data.tasks.map(t => t && t.id).filter(id => !!id);
+    const backlogIds = op.data.backlogTasks.map(t => t && t.id).filter(id => !!id);
+    const doneBacklogIds = op.data.doneBacklogTasks.map(t => t && t.id).filter(id => !!id);
 
     if (freshIssues) {
       this._remapGitIssueIds(allTasks, freshIssues);
