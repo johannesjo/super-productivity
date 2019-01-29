@@ -99,13 +99,15 @@
   <div #splitBottomEl
        class="backlog">
     <split (posChanged)="splitInputPos=$event"
+           (mouseenter)="isPreloadBacklog=true"
+           (mouseleave)="isPreloadBacklog=false"
            [containerEl]="containerEl"
            [counter]="(taskService.backlogTasks$|async)?.length"
            [isAnimateBtn]="isTriggerSwitchListAni$|async"
            [splitBottomEl]="splitBottomEl"
            [splitPos]="splitInputPos"
            [splitTopEl]="splitTopEl"></split>
-    <div *ngIf="splitInputPos!==100"
+    <div *ngIf="isPreloadBacklog || splitInputPos!==100"
          class="inner-wrapper">
       <header class="backlog-header bg-600 color-contrast">
         <div class="status-bar">

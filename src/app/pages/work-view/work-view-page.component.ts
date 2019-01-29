@@ -22,6 +22,7 @@ export class WorkViewPageComponent implements OnInit, OnDestroy {
   // no todays tasks at all
   isPlanYourDay: boolean = undefined;
   splitInputPos = 100;
+  isPreloadBacklog = false;
 
   // we do it here to have the tasks in memory all the time
   backlogTasks: TaskWithSubTasks[];
