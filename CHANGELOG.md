@@ -1,3 +1,31 @@
+# [2.0.0](https://github.com/johannesjo/super-productivity/compare/v1.999.1000...v2.0.0) (2019-01-29)
+
+
+### Bug Fixes
+
+* **config:** settings not updating when switching project ([27a3993](https://github.com/johannesjo/super-productivity/commit/27a3993))
+* typo in license ([9ad2dd0](https://github.com/johannesjo/super-productivity/commit/9ad2dd0))
+* **electron:** don't send idle time all the time ([dc164a9](https://github.com/johannesjo/super-productivity/commit/dc164a9))
+* **tasks:** select task ([1818290](https://github.com/johannesjo/super-productivity/commit/1818290))
+* auto polling issues to backlog not working ([5a632f8](https://github.com/johannesjo/super-productivity/commit/5a632f8))
+* background polling? ([7471c0c](https://github.com/johannesjo/super-productivity/commit/7471c0c))
+* lint ([f085f20](https://github.com/johannesjo/super-productivity/commit/f085f20))
+* migration leaving out backlog and todays task ids ([902c3ff](https://github.com/johannesjo/super-productivity/commit/902c3ff))
+* start day also starting backlog tasks ([85b2b59](https://github.com/johannesjo/super-productivity/commit/85b2b59))
+* windows icon ([431ffb0](https://github.com/johannesjo/super-productivity/commit/431ffb0))
+* **git:** don't refresh issues if invalid config ([323a210](https://github.com/johannesjo/super-productivity/commit/323a210))
+* **git:** throwing an error ([2a75ff9](https://github.com/johannesjo/super-productivity/commit/2a75ff9))
+* **jira:** limit issue to link transformation to electron context ([980aed2](https://github.com/johannesjo/super-productivity/commit/980aed2))
+* **jira:** switch map statement for polling ([38ef0d8](https://github.com/johannesjo/super-productivity/commit/38ef0d8))
+
+
+### Features
+
+* hide play btn for backlog tasks ([78e7626](https://github.com/johannesjo/super-productivity/commit/78e7626))
+* make whole page draggable for mac os while loading ([e84ae85](https://github.com/johannesjo/super-productivity/commit/e84ae85))
+
+
+
 ## [1.999.1000](https://github.com/johannesjo/super-productivity/compare/v1.10.56...v1.999.1000) (2019-01-27)
 
 
