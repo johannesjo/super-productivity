@@ -60,7 +60,16 @@ export function gitIssueReducer(
     case TaskActionTypes.DeleteTask: {
       if (action.payload.task.issueType === GIT_TYPE) {
         const issue = action.payload.task.issueData as GitIssue;
-        return gitIssueAdapter.removeOne(issue.id, state);
+        const ids = state.ids as number[];
+        if (issue.id && ids.includes(+issue.id)) {
+          return gitIssueAdapter.removeOne(issue.id, state);
+        } else {
+          // don't crash app but warn strongly
+          console.log('##########################################################');
+          console.warn(' THIS SHOULD NOT HAPPEN: Git Issue could not be found', issue, action, state);
+          console.log('##########################################################');
+          return state;
+        }
         // TODO sub task case if we need it in the future
       }
       return state;
@@ -70,8 +79,22 @@ export function gitIssueReducer(
       const tasksWithGitIssue = action.payload.tasks.filter(task => task.issueType === GIT_TYPE);
 
       if (tasksWithGitIssue && tasksWithGitIssue.length > 0) {
-        const issueIds = tasksWithGitIssue.map(task => task.issueId);
-        return gitIssueAdapter.removeMany(issueIds, state);
+        const issueIds = tasksWithGitIssue.map(task => task.issueId)
+        // only remove if data is there in the first place
+          .filter((issueId) => {
+            const ids = state.ids as number[];
+            const isInState = ids.includes(+issueId);
+            if (!isInState) {
+              // don't crash app but warn strongly
+              console.log('##########################################################');
+              console.warn(' THIS SHOULD NOT HAPPEN: Git Issue could not be found', issueId, action, state);
+              console.log('##########################################################');
+            }
+            return isInState;
+          });
+        return issueIds.length
+          ? gitIssueAdapter.removeMany(issueIds, state)
+          : state;
       }
 
       return state;
