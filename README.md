@@ -33,7 +33,23 @@ Check out the [web-version](http://super-productivity.com). It is a little bit m
 If you want the Jira Integration to work you have also to download and install the [Super Productivity Chrome Extension](https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb).
 
 ## Downloads & Install
+### All Platforms
 [Install from the releases page](https://github.com/johannesjo/super-productivity/releases).
+
+### Linux
+```
+# stable
+sudo snap install superproductivity
+
+# edge channel releases
+ sudo snap install --channel=beta superproductivity
+```
+
+### MacOS
+Install via [homebrew cask](https://github.com/caskroom/homebrew-cask) (project might not always be up to date):
+```
+brew cask install superProductivity
+```
 
 ## More Screenshots
 ![bookmarks](screens/screen_bookmarks.png)
