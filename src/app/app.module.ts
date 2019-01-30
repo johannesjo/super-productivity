@@ -1,5 +1,5 @@
 import { BrowserModule } from '@angular/platform-browser';
-import { NgModule } from '@angular/core';
+import { ErrorHandler, NgModule } from '@angular/core';
 import { AppComponent } from './app.component';
 import { ServiceWorkerModule } from '@angular/service-worker';
 import { environment } from '../environments/environment';
@@ -26,6 +26,7 @@ import { NoteModule } from './features/note/note.module';
 import { ReminderModule } from './features/reminder/reminder.module';
 import { CoreUiModule } from './core-ui/core-ui.module';
 import { MigrateModule } from './imex/migrate/migrate.module';
+import { CustomErrorHandler } from './core/error-handler/custom-error-handler.class';
 
 @NgModule({
   declarations: [
@@ -62,7 +63,8 @@ import { MigrateModule } from './imex/migrate/migrate.module';
     ServiceWorkerModule.register('ngsw-worker.js', {enabled: environment.production}),
     NoteModule,
   ],
-  bootstrap: [AppComponent]
+  bootstrap: [AppComponent],
+  providers: [{provide: ErrorHandler, useClass: CustomErrorHandler}]
 })
 export class AppModule {
 }
