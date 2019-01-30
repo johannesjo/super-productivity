@@ -11,21 +11,21 @@ import {
   OnInit,
   ViewChild
 } from '@angular/core';
-import {TaskService} from '../task.service';
-import {Subject} from 'rxjs';
-import {HIDE_SUB_TASKS, SHOW_SUB_TASKS, TaskWithSubTasks} from '../task.model';
-import {MatDialog} from '@angular/material';
-import {DialogTimeEstimateComponent} from '../dialogs/dialog-time-estimate/dialog-time-estimate.component';
-import {expandAnimation} from '../../../ui/animations/expand.ani';
-import {ConfigService} from '../../config/config.service';
-import {checkKeyCombo} from '../../../util/check-key-combo';
-import {takeUntil} from 'rxjs/operators';
-import {fadeAnimation} from '../../../ui/animations/fade.ani';
-import {AttachmentService} from '../../attachment/attachment.service';
-import {IssueService} from '../../issue/issue.service';
-import {DialogEditAttachmentComponent} from '../../attachment/dialog-edit-attachment/dialog-edit-attachment.component';
-import {swirlAnimation} from '../../../ui/animations/swirl-in-out.ani';
-import {isTouch} from '../../../util/is-touch';
+import { TaskService } from '../task.service';
+import { Subject } from 'rxjs';
+import { HIDE_SUB_TASKS, SHOW_SUB_TASKS, TaskWithSubTasks } from '../task.model';
+import { MatDialog } from '@angular/material';
+import { DialogTimeEstimateComponent } from '../dialogs/dialog-time-estimate/dialog-time-estimate.component';
+import { expandAnimation } from '../../../ui/animations/expand.ani';
+import { ConfigService } from '../../config/config.service';
+import { checkKeyCombo } from '../../../util/check-key-combo';
+import { takeUntil } from 'rxjs/operators';
+import { fadeAnimation } from '../../../ui/animations/fade.ani';
+import { AttachmentService } from '../../attachment/attachment.service';
+import { IssueService } from '../../issue/issue.service';
+import { DialogEditAttachmentComponent } from '../../attachment/dialog-edit-attachment/dialog-edit-attachment.component';
+import { swirlAnimation } from '../../../ui/animations/swirl-in-out.ani';
+import { isTouch } from '../../../util/is-touch';
 
 @Component({
   selector: 'task',
@@ -45,7 +45,6 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   @ViewChild('editOnClickEl') editOnClickEl: ElementRef;
   @HostBinding('tabindex') tabIndex = 1;
   private _dragEnterTarget: HTMLElement;
-  private _currentFocusId: string;
   private _destroy$: Subject<boolean> = new Subject<boolean>();
 
   constructor(
@@ -155,7 +154,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
 
   deleteTask() {
     this._taskService.remove(this.task);
-    this.focusNext();
+    this.focusNext(true);
   }
 
 
@@ -263,26 +262,37 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     const currentIndex = taskEls.findIndex(el => document.activeElement === el);
     const prevEl = taskEls[currentIndex - 1] as HTMLElement;
 
-    setTimeout(() => {
-      if (prevEl) {
-        prevEl.focus();
-      } else if (isFocusReverseIfNotPossible) {
-        this.focusNext();
-      }
-    });
+    if (prevEl) {
+      prevEl.focus();
+      // hacky but works
+      setTimeout(() => {
+        if (document.activeElement !== prevEl) {
+          prevEl.focus();
+        }
+      });
+    } else if (isFocusReverseIfNotPossible) {
+      this.focusNext();
+    }
+
   }
 
   focusNext(isFocusReverseIfNotPossible = false) {
     const taskEls = Array.from(document.querySelectorAll('task'));
     const currentIndex = taskEls.findIndex(el => document.activeElement === el);
     const nextEl = taskEls[currentIndex + 1] as HTMLElement;
-    setTimeout(() => {
-      if (nextEl) {
-        nextEl.focus();
-      } else if (isFocusReverseIfNotPossible) {
-        this.focusPrevious();
-      }
-    });
+
+    if (nextEl) {
+      nextEl.focus();
+      // hacky but works
+      setTimeout(() => {
+        if (document.activeElement !== nextEl) {
+          nextEl.focus();
+        }
+      });
+    } else if (isFocusReverseIfNotPossible) {
+      this.focusPrevious();
+    }
+
   }
 
   focusSelf() {
@@ -344,7 +354,6 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
 
     if (checkKeyCombo(ev, keys.taskDelete)) {
       this.deleteTask();
-      this.focusNext(true);
     }
 
     if (checkKeyCombo(ev, keys.moveToBacklog)) {
