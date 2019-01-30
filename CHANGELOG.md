@@ -1,3 +1,25 @@
+## [2.0.2](https://github.com/johannesjo/super-productivity/compare/v2.0.1...v2.0.2) (2019-01-30)
+
+
+### Bug Fixes
+
+* **git:** case when issue data could not be found and crashes app ([b1b0199](https://github.com/johannesjo/super-productivity/commit/b1b0199))
+* **jira:** case when issue data could not be found and crashes app ([fee2bee](https://github.com/johannesjo/super-productivity/commit/fee2bee))
+* case when issue data could not be found and crashes app ([43700dc](https://github.com/johannesjo/super-productivity/commit/43700dc))
+* error when no theme is provided ([edc06eb](https://github.com/johannesjo/super-productivity/commit/edc06eb))
+* linting errors ([eb17078](https://github.com/johannesjo/super-productivity/commit/eb17078))
+* require theme to be set, when project is created ([f149bbe](https://github.com/johannesjo/super-productivity/commit/f149bbe))
+* **jira:** cfg not being present in effect ([9804dc0](https://github.com/johannesjo/super-productivity/commit/9804dc0))
+* **tasks:** focus behavior ([aef88ef](https://github.com/johannesjo/super-productivity/commit/aef88ef))
+
+
+### Features
+
+* add global error handler ([c51234e](https://github.com/johannesjo/super-productivity/commit/c51234e))
+* **tasks:** focus first tab on update btn click ([b59eaf7](https://github.com/johannesjo/super-productivity/commit/b59eaf7))
+
+
+
 ## [2.0.1](https://github.com/johannesjo/super-productivity/compare/v2.0.0...v2.0.1) (2019-01-29)
 
 
