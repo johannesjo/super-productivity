@@ -25,6 +25,7 @@ export const BASIC_PROJECT_CONFIG_FORM_CONFIG: ConfigFormSection = {
       key: 'themeColor',
       type: 'select',
       templateOptions: {
+        required: true,
         label: 'Theme Color',
         options: themeOpts,
         valueProp: 'value',
