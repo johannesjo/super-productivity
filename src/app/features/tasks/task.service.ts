@@ -375,7 +375,7 @@ export class TaskService {
   }
 
   showAdditionalInfoOpen(id: string) {
-    this.updateUi(id, {_isAdditionalInfoOpen: true});
+    this.updateUi(id, {_isAdditionalInfoOpen: true, _currentTab: 0});
   }
 
   hideAdditionalInfoOpen(id: string) {

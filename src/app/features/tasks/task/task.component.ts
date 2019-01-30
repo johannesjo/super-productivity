@@ -36,9 +36,6 @@ import { isTouch } from '../../../util/is-touch';
 })
 export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   @Input() task: TaskWithSubTasks;
-
-  // TODO also persist to task
-  additionalTabsIndex = 0;
   isDragOver: boolean;
   isCurrent: boolean;
 
@@ -148,7 +145,6 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   handleUpdateBtnClick() {
-    this.additionalTabsIndex = 0;
     this._taskService.showAdditionalInfoOpen(this.task.id);
   }
 
