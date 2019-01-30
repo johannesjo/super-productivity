@@ -63,7 +63,7 @@ script:
 deploy:
   - provider: snap
     snap: ./app-builds/*.snap
-    channel: stable
+    channel: edge
     skip_cleanup: true
     on:
       branch: master
