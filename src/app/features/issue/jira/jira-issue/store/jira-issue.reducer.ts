@@ -61,7 +61,16 @@ export function jiraIssueReducer(
     case TaskActionTypes.DeleteTask: {
       if (action.payload.task.issueType === JIRA_TYPE) {
         const issue = action.payload.task.issueData as JiraIssue;
-        return jiraIssueAdapter.removeOne(issue.id, state);
+        const ids = state.ids as string[];
+        if (issue.id && ids.includes(issue.id)) {
+          return jiraIssueAdapter.removeOne(issue.id, state);
+        } else {
+          // don't crash app but warn strongly
+          console.log('##########################################################');
+          console.warn(' THIS SHOULD NOT HAPPEN: Jira Issue could not be found', issue, action, state);
+          console.log('##########################################################');
+          return state;
+        }
         // TODO sub task case if we need it in the future
       }
       return state;
@@ -71,8 +80,22 @@ export function jiraIssueReducer(
       const tasksWithJiraIssue = action.payload.tasks.filter(task => task.issueType === JIRA_TYPE);
 
       if (tasksWithJiraIssue && tasksWithJiraIssue.length > 0) {
-        const issueIds = tasksWithJiraIssue.map(task => task.issueId);
-        return jiraIssueAdapter.removeMany(issueIds, state);
+        const issueIds = tasksWithJiraIssue.map(task => task.issueId)
+          .filter((issueId) => {
+            const ids = state.ids as string[];
+            const isInState = ids.includes(issueId);
+            if (!isInState) {
+              // don't crash app but warn strongly
+              console.log('##########################################################');
+              console.warn(' THIS SHOULD NOT HAPPEN: Jira Issue could not be found', issueId, action, state);
+              console.log('##########################################################');
+            }
+            return isInState;
+          });
+
+        return issueIds.length
+          ? jiraIssueAdapter.removeMany(issueIds, state)
+          : state;
       }
 
       return state;
