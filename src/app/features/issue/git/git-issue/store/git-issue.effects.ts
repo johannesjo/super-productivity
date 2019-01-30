@@ -110,6 +110,8 @@ export class GitIssueEffects {
 
   private _importNewIssuesToBacklog([action]: [Actions, Task[]]) {
     this._gitApiService.getCompleteIssueDataForRepo().subscribe(issues => {
+      console.log('import issues');
+
       let count = 0;
       let lastImportedIssue;
       issues.forEach(async issue => {
@@ -127,6 +129,8 @@ export class GitIssueEffects {
           );
         }
       });
+
+      console.log('import issues count', count);
 
       if (count === 1) {
         this._snackService.open({
