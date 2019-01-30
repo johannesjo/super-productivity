@@ -46,7 +46,7 @@ export class JiraIssueEffects {
       withLatestFrom(
         this._store$.pipe(select(selectProjectJiraCfg)),
       ),
-      filter(([a, jiraCfg]) => jiraCfg.isEnabled && jiraCfg.isAutoPollTickets),
+      filter(([a, jiraCfg]) => jiraCfg && jiraCfg.isEnabled && jiraCfg.isAutoPollTickets),
       switchMap(() => timer(JIRA_INITIAL_POLL_DELAY, JIRA_POLL_INTERVAL).pipe(
         withLatestFrom(
           this._store$.pipe(select(selectJiraIssueIds)),
