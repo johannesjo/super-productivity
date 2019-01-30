@@ -195,7 +195,9 @@ export class AppComponent implements OnInit {
     if (this._currentTheme) {
       this.document.body.classList.remove(this._currentTheme);
     }
-    this.document.body.classList.add(theme);
+    if (theme) {
+      this.document.body.classList.add(theme);
+    }
 
     if (isDarkTheme) {
       this.document.body.classList.remove('isLightTheme');
