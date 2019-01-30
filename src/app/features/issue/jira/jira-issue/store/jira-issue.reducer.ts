@@ -62,12 +62,12 @@ export function jiraIssueReducer(
       if (action.payload.task.issueType === JIRA_TYPE) {
         const issue = action.payload.task.issueData as JiraIssue;
         const ids = state.ids as string[];
-        if (issue.id && ids.includes(issue.id)) {
+        if (issue && issue.id && ids.includes(issue.id)) {
           return jiraIssueAdapter.removeOne(issue.id, state);
         } else {
           // don't crash app but warn strongly
           console.log('##########################################################');
-          console.warn(' THIS SHOULD NOT HAPPEN: Jira Issue could not be found', issue, action, state);
+          console.warn(' THIS SHOULD NOT HAPPEN: Jira Issue Data could not be found', issue, action, state);
           console.log('##########################################################');
           return state;
         }

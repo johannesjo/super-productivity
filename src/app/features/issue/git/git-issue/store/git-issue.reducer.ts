@@ -61,12 +61,12 @@ export function gitIssueReducer(
       if (action.payload.task.issueType === GIT_TYPE) {
         const issue = action.payload.task.issueData as GitIssue;
         const ids = state.ids as number[];
-        if (issue.id && ids.includes(+issue.id)) {
+        if (issue && issue.id && ids.includes(+issue.id)) {
           return gitIssueAdapter.removeOne(issue.id, state);
         } else {
           // don't crash app but warn strongly
           console.log('##########################################################');
-          console.warn(' THIS SHOULD NOT HAPPEN: Git Issue could not be found', issue, action, state);
+          console.warn(' THIS SHOULD NOT HAPPEN: Git IssueData could not be found', issue, action, state);
           console.log('##########################################################');
           return state;
         }
