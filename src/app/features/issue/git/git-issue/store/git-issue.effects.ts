@@ -110,32 +110,28 @@ export class GitIssueEffects {
 
   private _importNewIssuesToBacklog([action]: [Actions, Task[]]) {
     this._gitApiService.getCompleteIssueDataForRepo().subscribe(async issues => {
-      let count = 0;
-      let lastImportedIssue;
-      await Promise.all(issues.map(async issue => {
-        const res = await this._taskService.checkForTaskWithIssue(issue);
-        if (!res) {
-          count++;
-          lastImportedIssue = issue;
-          this._taskService.addWithIssue(
-            `#${issue.number} ${issue.title}`,
-            GIT_TYPE,
-            issue,
-            true,
-          );
-        }
-        return res;
-      }));
+      const allConnectedGitIssueIds = await this._taskService.getAllIssueIds(GIT_TYPE) as number[];
+      console.log('_importNewIssuesToBacklog Git', allConnectedGitIssueIds, issues);
 
-      if (count === 1) {
+      const issuesToAdd = issues.filter(issue => !allConnectedGitIssueIds.includes(issue.id));
+      issuesToAdd.forEach((issue) => {
+        this._taskService.addWithIssue(
+          `#${issue.number} ${issue.title}`,
+          GIT_TYPE,
+          issue,
+          true,
+        );
+      });
+
+      if (issuesToAdd.length === 1) {
         this._snackService.open({
-          message: `Git: Imported issue "#${lastImportedIssue.number} ${lastImportedIssue.title}" from git to backlog`,
+          message: `Git: Imported issue "#${issuesToAdd[0].number} ${issuesToAdd[0].title}" from git to backlog`,
           icon: 'cloud_download',
           isSubtle: true,
         });
-      } else if (count > 1) {
+      } else if (issuesToAdd.length > 1) {
         this._snackService.open({
-          message: `Git: Imported ${count} new issues from git to backlog`,
+          message: `Git: Imported ${issuesToAdd.length} new issues from git to backlog`,
           icon: 'cloud_download',
           isSubtle: true,
         });

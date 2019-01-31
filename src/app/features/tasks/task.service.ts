@@ -394,6 +394,21 @@ export class TaskService {
     this.updateUi(id, {_showSubTasksMode: HIDE_SUB_TASKS});
   }
 
+  async getAllTasks(): Promise<TaskWithIssueData[]> {
+    const allTasks = await this._allTasksWithIssueData$.pipe(first()).toPromise();
+    const archiveTaskState = await this._persistenceService.loadTaskArchiveForProject(this._projectService.currentId);
+    const ids = archiveTaskState && archiveTaskState.ids as string[] || [];
+    const archiveTasks = ids.map(id => archiveTaskState.entities[id]);
+    return [...allTasks, ...archiveTasks];
+  }
+
+  async getAllIssueIds(issueProviderKey: IssueProviderKey): Promise<string[] | number[]> {
+    const allTasks = await this.getAllTasks();
+    return allTasks
+      .filter(task => task.issueType === issueProviderKey)
+      .map(task => task.issueId);
+  }
+
   async checkForTaskWithIssue(issue: IssueData): Promise<{
     task: TaskWithIssueData | TaskWithSubTasks,
     isFromArchive: boolean,
@@ -404,10 +419,10 @@ export class TaskService {
     if (taskWithSameIssue) {
       return {task: taskWithSameIssue, isFromArchive: false};
     } else {
-      const allArchiveTasks = await this._persistenceService.loadTaskArchiveForProject(this._projectService.currentId);
-      const ids = allArchiveTasks && allArchiveTasks.ids as string[];
+      const archiveTaskState = await this._persistenceService.loadTaskArchiveForProject(this._projectService.currentId);
+      const ids = archiveTaskState && archiveTaskState.ids as string[];
       if (ids) {
-        const archiveTaskWithSameIssue = ids.map(id => allArchiveTasks.entities[id]).find(task => task.issueId === issue.id);
+        const archiveTaskWithSameIssue = ids.map(id => archiveTaskState.entities[id]).find(task => task.issueId === issue.id);
         return archiveTaskWithSameIssue && {task: archiveTaskWithSameIssue, isFromArchive: true};
       }
     }
