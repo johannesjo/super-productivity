@@ -60,7 +60,7 @@ export class AttachmentService {
   }
 
   getByIds(ids: string[]): Observable<Attachment[]> {
-    return this._store$.pipe(select(selectAttachmentByIds, {ids}), take(1));
+    return this._store$.pipe(select(selectAttachmentByIds, {ids}));
   }
 
 
