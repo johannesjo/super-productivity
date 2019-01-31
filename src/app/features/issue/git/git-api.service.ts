@@ -176,6 +176,10 @@ export class GitApiService {
         message: `GitHub: API returned ${error.status}. ${error.error && error.error.message}`
       });
     }
+    if (error && error.message) {
+      return throwError('GitHub: ' + error.message);
+    }
+
     return throwError('GitHub: Api request failed.');
   }
 

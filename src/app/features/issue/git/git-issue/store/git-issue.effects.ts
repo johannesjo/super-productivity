@@ -124,7 +124,8 @@ export class GitIssueEffects {
             true,
           );
         }
-      });
+        return res;
+      }));
 
       if (count === 1) {
         this._snackService.open({
