@@ -109,18 +109,14 @@ export class GitIssueEffects {
   }
 
   private _importNewIssuesToBacklog([action]: [Actions, Task[]]) {
-    this._gitApiService.getCompleteIssueDataForRepo().subscribe(issues => {
-      console.log('import issues');
-
+    this._gitApiService.getCompleteIssueDataForRepo().subscribe(async issues => {
       let count = 0;
       let lastImportedIssue;
-      issues.forEach(async issue => {
+      await Promise.all(issues.map(async issue => {
         const res = await this._taskService.checkForTaskWithIssue(issue);
-
         if (!res) {
           count++;
           lastImportedIssue = issue;
-
           this._taskService.addWithIssue(
             `#${issue.number} ${issue.title}`,
             GIT_TYPE,
@@ -129,8 +125,6 @@ export class GitIssueEffects {
           );
         }
       });
-
-      console.log('import issues count', count);
 
       if (count === 1) {
         this._snackService.open({
