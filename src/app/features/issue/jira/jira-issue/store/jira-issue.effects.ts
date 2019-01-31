@@ -1,37 +1,37 @@
-import {Injectable} from '@angular/core';
-import {Actions, Effect, ofType} from '@ngrx/effects';
-import {JiraIssueActionTypes} from './jira-issue.actions';
-import {select, Store} from '@ngrx/store';
-import {filter, switchMap, take, tap, throttleTime, withLatestFrom} from 'rxjs/operators';
-import {TaskActionTypes, UpdateTask} from '../../../../tasks/store/task.actions';
-import {PersistenceService} from '../../../../../core/persistence/persistence.service';
-import {selectJiraIssueEntities, selectJiraIssueFeatureState, selectJiraIssueIds} from './jira-issue.reducer';
-import {selectCurrentProjectId, selectProjectJiraCfg} from '../../../../project/store/project.reducer';
-import {JiraApiService} from '../../jira-api.service';
-import {JiraIssueService} from '../jira-issue.service';
-import {JIRA_INITIAL_POLL_DELAY, JIRA_POLL_INTERVAL} from '../../jira.const';
-import {ConfigService} from '../../../../config/config.service';
-import {Dictionary} from '@ngrx/entity';
-import {JiraIssue} from '../jira-issue.model';
-import {JiraCfg, JiraTransitionOption} from '../../jira';
-import {SnackService} from '../../../../../core/snack/snack.service';
-import {ProjectActionTypes} from '../../../../project/store/project.actions';
-import {Task} from '../../../../tasks/task.model';
-import {JIRA_TYPE} from '../../../issue.const';
+import { Injectable } from '@angular/core';
+import { Actions, Effect, ofType } from '@ngrx/effects';
+import { JiraIssueActionTypes } from './jira-issue.actions';
+import { select, Store } from '@ngrx/store';
+import { filter, switchMap, take, tap, throttleTime, withLatestFrom } from 'rxjs/operators';
+import { TaskActionTypes, UpdateTask } from '../../../../tasks/store/task.actions';
+import { PersistenceService } from '../../../../../core/persistence/persistence.service';
+import { selectJiraIssueEntities, selectJiraIssueFeatureState, selectJiraIssueIds } from './jira-issue.reducer';
+import { selectCurrentProjectId, selectProjectJiraCfg } from '../../../../project/store/project.reducer';
+import { JiraApiService } from '../../jira-api.service';
+import { JiraIssueService } from '../jira-issue.service';
+import { JIRA_INITIAL_POLL_DELAY, JIRA_POLL_INTERVAL } from '../../jira.const';
+import { ConfigService } from '../../../../config/config.service';
+import { Dictionary } from '@ngrx/entity';
+import { JiraIssue } from '../jira-issue.model';
+import { JiraCfg, JiraTransitionOption } from '../../jira';
+import { SnackService } from '../../../../../core/snack/snack.service';
+import { ProjectActionTypes } from '../../../../project/store/project.actions';
+import { Task } from '../../../../tasks/task.model';
+import { JIRA_TYPE } from '../../../issue.const';
 import {
   selectAllTasks,
   selectCurrentTaskParentOrCurrent,
   selectTaskEntities,
   selectTaskFeatureState
 } from '../../../../tasks/store/task.selectors';
-import {TaskService} from '../../../../tasks/task.service';
-import {EMPTY, timer} from 'rxjs';
-import {TaskState} from '../../../../tasks/store/task.reducer';
-import {MatDialog} from '@angular/material';
-import {DialogJiraTransitionComponent} from '../../dialog-jira-transition/dialog-jira-transition.component';
-import {IssueLocalState} from '../../../issue';
-import {DialogConfirmComponent} from '../../../../../ui/dialog-confirm/dialog-confirm.component';
-import {DialogJiraAddWorklogComponent} from '../../dialog-jira-add-worklog/dialog-jira-add-worklog.component';
+import { TaskService } from '../../../../tasks/task.service';
+import { EMPTY, timer } from 'rxjs';
+import { TaskState } from '../../../../tasks/store/task.reducer';
+import { MatDialog } from '@angular/material';
+import { DialogJiraTransitionComponent } from '../../dialog-jira-transition/dialog-jira-transition.component';
+import { IssueLocalState } from '../../../issue';
+import { DialogConfirmComponent } from '../../../../../ui/dialog-confirm/dialog-confirm.component';
+import { DialogJiraAddWorklogComponent } from '../../dialog-jira-add-worklog/dialog-jira-add-worklog.component';
 
 @Injectable()
 export class JiraIssueEffects {
@@ -286,19 +286,16 @@ export class JiraIssueEffects {
   }
 
   private _importNewIssuesToBacklog([action, allTasks]: [Actions, Task[]]) {
-    this._jiraApiService.findAutoImportIssues().subscribe((issues: JiraIssue[]) => {
+    this._jiraApiService.findAutoImportIssues().subscribe(async (issues: JiraIssue[]) => {
       if (!Array.isArray(issues)) {
         return;
       }
 
       let count = 0;
       let lastImportedIssue;
-      issues.forEach(issue => {
-        const isIssueAlreadyImported = allTasks.find(task => {
-          return task.issueType === JIRA_TYPE && task.issueId === issue.id;
-        });
-
-        if (!isIssueAlreadyImported) {
+      await Promise.all(issues.map(async issue => {
+        const res = await this._taskService.checkForTaskWithIssue(issue);
+        if (!res) {
           count++;
           lastImportedIssue = issue;
           this._taskService.addWithIssue(
@@ -308,7 +305,8 @@ export class JiraIssueEffects {
             true,
           );
         }
-      });
+        return res;
+      }));
 
       if (count === 1) {
         this._snackService.open({
