@@ -290,33 +290,28 @@ export class JiraIssueEffects {
       if (!Array.isArray(issues)) {
         return;
       }
+      const allTaskJiraIssueIds = await this._taskService.getAllIssueIds(JIRA_TYPE) as string[];
+      console.log('_importNewIssuesToBacklog Jira', allTaskJiraIssueIds, issues);
 
-      let count = 0;
-      let lastImportedIssue;
-      await Promise.all(issues.map(async issue => {
-        const res = await this._taskService.checkForTaskWithIssue(issue);
-        if (!res) {
-          count++;
-          lastImportedIssue = issue;
-          this._taskService.addWithIssue(
-            `${issue.key} ${issue.summary}`,
-            JIRA_TYPE,
-            issue,
-            true,
-          );
-        }
-        return res;
-      }));
+      const issuesToAdd = issues.filter(issue => !allTaskJiraIssueIds.includes(issue.id));
+      issuesToAdd.forEach((issue) => {
+        this._taskService.addWithIssue(
+          `${issue.key} ${issue.summary}`,
+          JIRA_TYPE,
+          issue,
+          true,
+        );
+      });
 
-      if (count === 1) {
+      if (issuesToAdd.length === 1) {
         this._snackService.open({
-          message: `Jira: Imported issue "${lastImportedIssue.key} ${lastImportedIssue.title}" from git to backlog`,
+          message: `Jira: Imported issue "${issuesToAdd[0].key} ${issuesToAdd[0].summary}" from git to backlog`,
           icon: 'cloud_download',
           isSubtle: true,
         });
-      } else if (count > 1) {
+      } else if (issuesToAdd.length > 1) {
         this._snackService.open({
-          message: `Jira: Imported ${count} new issues from Jira to backlog`,
+          message: `Jira: Imported ${issuesToAdd.length} new issues from Jira to backlog`,
           icon: 'cloud_download',
           isSubtle: true,
         });

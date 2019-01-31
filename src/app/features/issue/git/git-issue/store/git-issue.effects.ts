@@ -110,10 +110,10 @@ export class GitIssueEffects {
 
   private _importNewIssuesToBacklog([action]: [Actions, Task[]]) {
     this._gitApiService.getCompleteIssueDataForRepo().subscribe(async issues => {
-      const allConnectedGitIssueIds = await this._taskService.getAllIssueIds(GIT_TYPE) as number[];
-      console.log('_importNewIssuesToBacklog Git', allConnectedGitIssueIds, issues);
+      const allTaskGitIssueIds = await this._taskService.getAllIssueIds(GIT_TYPE) as number[];
+      console.log('_importNewIssuesToBacklog Git', allTaskGitIssueIds, issues);
 
-      const issuesToAdd = issues.filter(issue => !allConnectedGitIssueIds.includes(issue.id));
+      const issuesToAdd = issues.filter(issue => !allTaskGitIssueIds.includes(issue.id));
       issuesToAdd.forEach((issue) => {
         this._taskService.addWithIssue(
           `#${issue.number} ${issue.title}`,
