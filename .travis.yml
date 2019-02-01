@@ -44,6 +44,12 @@ cache:
 script:
   - |
     if [ "$TRAVIS_OS_NAME" == "linux" ]; then
+      if [ -n "$TRAVIS_TAG" ]; then
+        $PUB_COMMAND=distLinuxAndWindows
+      else
+        $PUB_COMMAND=distLinuxAndWindowsNoPublish
+      fi
+
       echo '____RUNNING DOCKER____'
       docker run $ENVS --rm \
         $(env | \
@@ -55,9 +61,13 @@ script:
         -v ~/.cache/electron:/root/.cache/electron \
         -v ~/.cache/electron-builder:/root/.cache/electron-builder \
         electronuserland/builder:wine-chrome \
-        /bin/bash -c "echo '____DOCKER_INNER_START____' && ls -l &&  yarn --link-duplicates --pure-lockfile && yarn run distLinuxAndWindows && ls -l ./dist"
+        /bin/bash -c "echo '____DOCKER_INNER_START____' && ls -l &&  yarn --link-duplicates --pure-lockfile && yarn run ${$PUB_COMMAND} && ls -l ./dist"
     else
-      yarn install && yarn add 7zip-bin-mac && yarn run pub
+      if [ -n "$TRAVIS_TAG" ]; then
+        yarn install && yarn add 7zip-bin-mac && yarn run pub
+      else
+        yarn install && yarn add 7zip-bin-mac && yarn run dist
+      fi
     fi
 
 deploy:

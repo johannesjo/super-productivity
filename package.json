@@ -36,6 +36,7 @@
     "localInstall": "sudo echo 'Starting local install' && rm -Rf ./dist/ && rm -Rf ./app-builds/ && yarn buildAllElectron && electron-builder --linux && sudo dpkg -i app-builds/superProductivity*.deb",
     "dist": "yarn buildAllElectron && electron-builder",
     "distLinuxAndWindows": "yarn buildAllElectron && electron-builder --linux --win",
+    "distLinuxAndWindowsNoPublish": "yarn buildAllElectron && electron-builder --linux --win  -p never",
     "pub": "yarn buildAllElectron && electron-builder -p always",
     "release": "yarn release.changelog && yarn dist",
     "release.changelog": "conventional-changelog -i CHANGELOG.md -s -p angular",
