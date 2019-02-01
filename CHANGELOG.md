@@ -1,3 +1,28 @@
+## [2.0.3](https://github.com/johannesjo/super-productivity/compare/v2.0.2...v2.0.3) (2019-02-01)
+
+
+### Bug Fixes
+
+* don't init extension interface in electron context ([7d43df6](https://github.com/johannesjo/super-productivity/commit/7d43df6))
+* **electron:** app asking if you want to quit again on daily summary ([365ed34](https://github.com/johannesjo/super-productivity/commit/365ed34))
+* **git:** issue import showing message ([a9c3533](https://github.com/johannesjo/super-productivity/commit/a9c3533))
+* **pomodoro:** don't play tick sound on settings update ([8a5072b](https://github.com/johannesjo/super-productivity/commit/8a5072b))
+* **pomodoro:** improve tick sound logic ([f44e7f1](https://github.com/johannesjo/super-productivity/commit/f44e7f1))
+* **pomodoro:** task start/pause not working when pomodoro is enabled [#133](https://github.com/johannesjo/super-productivity/issues/133) [#134](https://github.com/johannesjo/super-productivity/issues/134) ([594d165](https://github.com/johannesjo/super-productivity/commit/594d165))
+* **pomodoro:** tick sound not working as expected when global config changes ([1380859](https://github.com/johannesjo/super-productivity/commit/1380859))
+* **tasks:** attachment title not being updated right away ([6acadd4](https://github.com/johannesjo/super-productivity/commit/6acadd4))
+
+
+### Features
+
+* **git:** improve error message for git api rate limit exceeded ([3a6ef57](https://github.com/johannesjo/super-productivity/commit/3a6ef57))
+* **git:** reduce api usage by caching issues to local storage ([de4851b](https://github.com/johannesjo/super-productivity/commit/de4851b))
+* **git:** simplify issue importing to backlog and make it more perfomant ([01ff113](https://github.com/johannesjo/super-productivity/commit/01ff113))
+* **jira:** improve import check for already imported issues ([55c160e](https://github.com/johannesjo/super-productivity/commit/55c160e))
+* **jira:** simplify issue importing to backlog and make it more perfomant ([91a9dfc](https://github.com/johannesjo/super-productivity/commit/91a9dfc))
+
+
+
 ## [2.0.2](https://github.com/johannesjo/super-productivity/compare/v2.0.1...v2.0.2) (2019-01-30)
 
 
