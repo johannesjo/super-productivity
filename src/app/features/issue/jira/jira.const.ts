@@ -42,7 +42,7 @@ export const DEFAULT_JIRA_CFG: JiraCfg = {
 
 
 export const JIRA_POLL_INTERVAL = 5 * 60 * 1000;
-export const JIRA_INITIAL_POLL_DELAY = GIT_INITIAL_POLL_DELAY + 2000;
+export const JIRA_INITIAL_POLL_DELAY = GIT_INITIAL_POLL_DELAY + 5000;
 
 // it's weird!!
 export const JIRA_DATE_FORMAT = 'YYYY-MM-DDTHH:mm:ss.SSZZ';
