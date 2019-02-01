@@ -61,7 +61,7 @@ script:
         -v ~/.cache/electron:/root/.cache/electron \
         -v ~/.cache/electron-builder:/root/.cache/electron-builder \
         electronuserland/builder:wine-chrome \
-        /bin/bash -c "echo '____DOCKER_INNER_START____' && ls -l &&  yarn --link-duplicates --pure-lockfile && yarn run $PUB_COMMAND && ls -l ./dist"
+        /bin/bash -c "echo '____DOCKER_INNER_START____' && ls -l &&  yarn --link-duplicates --pure-lockfile && yarn run ${PUB_COMMAND} && ls -l ./dist"
     else
       yarn install && yarn add 7zip-bin-mac
       if [ -n "$TRAVIS_TAG" ]; then
