@@ -32,9 +32,9 @@ import { slideAnimation } from './ui/animations/slide.ani';
 import { expandAnimation } from './ui/animations/expand.ani';
 import { warpRouteAnimation } from './ui/animations/warp-route';
 import { NoteService } from './features/note/note.service';
-import { MediaMatcher } from '@angular/cdk/layout';
+import { BreakpointObserver } from "@angular/cdk/layout";
 import { DOCUMENT } from '@angular/common';
-import { take } from 'rxjs/operators';
+import { map, take } from 'rxjs/operators';
 import { MigrateService } from './imex/migrate/migrate.service';
 import { Observable } from 'rxjs';
 import { selectIsAllProjectDataLoaded } from './features/project/store/project.reducer';
@@ -58,10 +58,11 @@ const SIDE_PANEL_BREAKPOINT = 900;
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AppComponent implements OnInit {
-  mobileQuery: MediaQueryList;
   isAllDataLoaded$: Observable<boolean> = this._store.select(selectIsAllProjectDataLoaded);
+  isSidePanelBp$: Observable<boolean> = this._breakPointObserver.observe([
+    `(max-width: ${SIDE_PANEL_BREAKPOINT}px)`,
+  ]).pipe(map(result => result.matches));
 
-  private _mobileQueryListener: () => void;
   private _currentTheme: string;
 
   constructor(
@@ -79,7 +80,7 @@ export class AppComponent implements OnInit {
     private _swUpdate: SwUpdate,
     private _el: ElementRef,
     private _cd: ChangeDetectorRef,
-    private _media: MediaMatcher,
+    private _breakPointObserver: BreakpointObserver,
     private _store: Store<any>,
     public readonly layoutService: LayoutService,
     public readonly bookmarkService: BookmarkService,
@@ -162,9 +163,6 @@ export class AppComponent implements OnInit {
     this._projectService.currentProject$.subscribe((currentProject: Project) => {
       this._setTheme(currentProject.isDarkTheme, currentProject.themeColor);
     });
-
-    this.mobileQuery = this._media.matchMedia(`(max-width: ${SIDE_PANEL_BREAKPOINT}px)`);
-    this.mobileQuery.addListener(this._mobileQueryListener);
   }
 
   getPage(outlet) {
