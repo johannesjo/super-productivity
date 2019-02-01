@@ -2,6 +2,8 @@ import { Injectable } from '@angular/core';
 import { combineLatest, merge, Observable } from 'rxjs';
 import { ConfigService } from '../config/config.service';
 import { filter, map, mapTo, scan, shareReplay, withLatestFrom } from 'rxjs/operators';
+import { tap } from "rxjs/operators";
+import { distinctUntilChanged } from "rxjs/operators";
 import { PomodoroConfig } from '../config/config.model';
 import { TimeTrackingService } from '../time-tracking/time-tracking.service';
 import { select, Store } from '@ngrx/store';
@@ -108,9 +110,14 @@ export class PomodoroService {
       });
 
     this.currentSessionTime$.pipe(
-      withLatestFrom(this.cfg$, this.isBreak$),
-      filter(([val, cfg, isBreak]) => cfg.isEnabled && cfg.isPlayTick),
-    ).subscribe(() => this._playTickSound());
+      withLatestFrom(this.cfg$),
+      filter(([val, cfg]) => cfg.isEnabled && cfg.isPlayTick),
+      map(([val]) => val),
+      // tap(v => console.log(v)),
+      distinctUntilChanged(),
+    ).subscribe(() => {
+      this._playTickSound()
+    });
   }
 
   start() {
