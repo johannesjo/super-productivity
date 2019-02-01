@@ -2,7 +2,6 @@ import { Injectable } from '@angular/core';
 import { combineLatest, merge, Observable } from 'rxjs';
 import { ConfigService } from '../config/config.service';
 import { filter, map, mapTo, scan, shareReplay, withLatestFrom } from 'rxjs/operators';
-import { tap } from "rxjs/operators";
 import { distinctUntilChanged } from "rxjs/operators";
 import { PomodoroConfig } from '../config/config.model';
 import { TimeTrackingService } from '../time-tracking/time-tracking.service';
@@ -68,6 +67,7 @@ export class PomodoroService {
       }
     }),
     shareReplay(),
+    distinctUntilChanged(),
   );
 
   currentSessionTime$: Observable<number> = merge(
@@ -113,7 +113,6 @@ export class PomodoroService {
       withLatestFrom(this.cfg$),
       filter(([val, cfg]) => cfg.isEnabled && cfg.isPlayTick),
       map(([val]) => val),
-      // tap(v => console.log(v)),
       distinctUntilChanged(),
     ).subscribe(() => {
       this._playTickSound()
