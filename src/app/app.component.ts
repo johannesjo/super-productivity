@@ -112,8 +112,11 @@ export class AppComponent implements OnInit {
     this._migrateService.checkForUpdate();
 
     // INIT Services and global handlers
-    this._chromeExtensionInterface.init();
     this._initHandlersForOtherBodyClasses();
+
+    if (!IS_ELECTRON) {
+      this._chromeExtensionInterface.init();
+    }
 
     if (IS_ELECTRON) {
       this._electronService.ipcRenderer.send(IPC_APP_READY);
