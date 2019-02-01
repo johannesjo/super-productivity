@@ -109,7 +109,7 @@ export class PomodoroService {
 
     this.currentSessionTime$.pipe(
       withLatestFrom(this.cfg$, this.isBreak$),
-      filter(([val, cfg, isBreak]) => cfg.isPlayTick),
+      filter(([val, cfg, isBreak]) => cfg.isEnabled && cfg.isPlayTick),
     ).subscribe(() => this._playTickSound());
   }
 
