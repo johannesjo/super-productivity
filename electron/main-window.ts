@@ -1,9 +1,9 @@
-import {BrowserWindow, ipcMain, Menu, shell} from 'electron';
-import {errorHandler} from './error-handler';
-import {join, normalize} from 'path';
-import {format} from 'url';
-import {getSettings} from './get-settings';
-import {IPC_APP_READY} from './ipc-events.const';
+import { BrowserWindow, ipcMain, Menu, shell } from 'electron';
+import { errorHandler } from './error-handler';
+import { join, normalize } from 'path';
+import { format } from 'url';
+import { getSettings } from './get-settings';
+import { IPC_APP_READY } from './ipc-events.const';
 import MenuItemConstructorOptions = Electron.MenuItemConstructorOptions;
 
 let mainWin;
@@ -65,7 +65,7 @@ export const createWindow = function (params) {
     mainWin.show();
   });
 
-  initWinEventListeners(app, IS_MAC, nestedWinParams);
+  initWinEventListeners(app);
 
   if (IS_MAC) {
     createMenu(quitApp);
@@ -84,7 +84,7 @@ export const createWindow = function (params) {
   return mainWin;
 };
 
-function initWinEventListeners(app: any, IS_MAC, nestedWinParams) {
+function initWinEventListeners(app: any) {
   // open new window links in browser
   mainWin.webContents.on('new-window', function (event, url) {
     event.preventDefault();
@@ -102,7 +102,7 @@ function initWinEventListeners(app: any, IS_MAC, nestedWinParams) {
         event.preventDefault();
 
         getSettings(mainWin, (appCfg) => {
-          if (appCfg && appCfg.misc.isConfirmBeforeExit) {
+          if (appCfg && appCfg.misc.isConfirmBeforeExit && !app.isQuiting) {
             const choice = require('electron').dialog.showMessageBox(mainWin,
               {
                 type: 'question',
@@ -119,33 +119,10 @@ function initWinEventListeners(app: any, IS_MAC, nestedWinParams) {
               app.quit();
               return;
             }
-          }
-
-          if (!appCfg || !appCfg.misc.isMinimizeToTrayOnExit) {
+          } else {
             app.isQuiting = true;
             isQuiting = true;
             app.quit();
-          } else {
-            // handle darwin
-            if (IS_MAC) {
-              if (nestedWinParams.isDarwinForceQuit) {
-                app.isQuiting = true;
-                isQuiting = true;
-                app.quit();
-              } else {
-                event.preventDefault();
-                mainWin.hide();
-              }
-            } else {
-              if (indicatorMod.isRunning()) {
-                event.preventDefault();
-                mainWin.hide();
-              } else {
-                app.isQuiting = true;
-                isQuiting = true;
-                app.quit();
-              }
-            }
           }
         });
       }
