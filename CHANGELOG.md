@@ -1,3 +1,22 @@
+## [2.0.4](https://github.com/johannesjo/super-productivity/compare/v2.0.3...v2.0.4) (2019-02-01)
+
+
+### Bug Fixes
+
+* **tasks:** weird undefined function issue ([a4c6a2b](https://github.com/johannesjo/super-productivity/commit/a4c6a2b))
+
+
+### Features
+
+* **git:** improve caching mechanism ([19a73f1](https://github.com/johannesjo/super-productivity/commit/19a73f1))
+* **jira:** increase initial poll delay ([fa08791](https://github.com/johannesjo/super-productivity/commit/fa08791))
+* add plan more or finish working box when there are no tasks left ([8dd1482](https://github.com/johannesjo/super-productivity/commit/8dd1482))
+* improve planning mode ([0128e63](https://github.com/johannesjo/super-productivity/commit/0128e63))
+* load app only after tasks are loaded ([ce1ef75](https://github.com/johannesjo/super-productivity/commit/ce1ef75))
+* move planing mode to its own service ([fcab193](https://github.com/johannesjo/super-productivity/commit/fcab193))
+
+
+
 ## [2.0.3](https://github.com/johannesjo/super-productivity/compare/v2.0.2...v2.0.3) (2019-02-01)
 
 
