@@ -50,12 +50,12 @@ export class GitApiService {
     const cachedIssues: GitIssue[] = cached && cached.issues;
     const lastUpdate: number = cached && cached.lastUpdate;
 
-    console.log('getCompleteIssueDataForRepo isRefresh',
-      cachedIssues && cachedIssues.length && (lastUpdate + MAX_CACHE_AGE > Date.now()));
+    console.log('getCompleteIssueDataForRepo isUseCached',
+      cachedIssues && Array.isArray(cachedIssues) && (lastUpdate + MAX_CACHE_AGE > Date.now()));
 
     if (
       !isForceRefresh &&
-      cachedIssues && cachedIssues.length && (lastUpdate + MAX_CACHE_AGE > Date.now())
+      cachedIssues && Array.isArray(cachedIssues) && (lastUpdate + MAX_CACHE_AGE > Date.now())
     ) {
       return from([cachedIssues]);
     } else {
@@ -66,7 +66,11 @@ export class GitApiService {
         take(1),
         map(([issues, comments]) => this._mergeIssuesAndComments(issues, comments)),
       );
-      completeIssues$.pipe(take(1)).subscribe(issues => this._updateIssueCache(issues));
+      completeIssues$.pipe(take(1)).subscribe(issues => {
+        if (Array.isArray(issues)) {
+          this._updateIssueCache(issues);
+        }
+      });
 
       return completeIssues$;
     }
