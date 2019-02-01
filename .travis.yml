@@ -43,40 +43,25 @@ cache:
 
 script:
   - |
+    if [ -n "$TRAVIS_TAG" ]; then
+      PUB=always
+    else
+      PUB=never
+    fi
     if [ "$TRAVIS_OS_NAME" == "linux" ]; then
       echo '____RUNNING DOCKER____'
-      if [ -n "$TRAVIS_TAG" ]; then
-        docker run $ENVS --rm \
-          $(env | \
-          grep -Eo '^[^\s=]*(DEBUG|NODE_|ELECTRON_|YARN_|NPM_|CI|CIRCLE|TRAVIS|APPVEYOR_|CSC_|_TOKEN|_KEY|AWS_|STRIP|BUILD_|PUB_COMMAND)[^\s=]*' | \
-          sed '/^$/d;s/^/-e /' | \
-          paste -sd ' ' \
-          ) \
-          -v ${PWD}:/project \
-          -v ~/.cache/electron:/root/.cache/electron \
-          -v ~/.cache/electron-builder:/root/.cache/electron-builder \
-          electronuserland/builder:wine-chrome \
-          /bin/bash -c "echo '____DOCKER_INNER_START____' && ls -l &&  yarn --link-duplicates --pure-lockfile && yarn run distLinuxAndWindows -p always && ls -l ./dist"
-      else
-        docker run $ENVS --rm \
-          $(env | \
-          grep -Eo '^[^\s=]*(DEBUG|NODE_|ELECTRON_|YARN_|NPM_|CI|CIRCLE|TRAVIS|APPVEYOR_|CSC_|_TOKEN|_KEY|AWS_|STRIP|BUILD_|PUB_COMMAND)[^\s=]*' | \
-          sed '/^$/d;s/^/-e /' | \
-          paste -sd ' ' \
-          ) \
-          -v ${PWD}:/project \
-          -v ~/.cache/electron:/root/.cache/electron \
-          -v ~/.cache/electron-builder:/root/.cache/electron-builder \
-          electronuserland/builder:wine-chrome \
-          /bin/bash -c "echo '____DOCKER_INNER_START____' && ls -l &&  yarn --link-duplicates --pure-lockfile && yarn run distLinuxAndWindows -p never && ls -l ./dist"
-      fi
+      docker run $ENVS --rm \
+        $(env | \
+        grep -Eo '^[^\s=]*(_TOKEN|_KEY)[^\s=]*' | \
+        sed '/^$/d;s/^/-e /' | \
+        paste -sd ' ' \
+        ) \
+        -v ${PWD}:/project \
+        -v ~/.cache/electron:/root/.cache/electron \
+        -v ~/.cache/electron-builder:/root/.cache/electron-builder \
+        electronuserland/builder:wine-chrome \
+        /bin/bash -c "echo '____DOCKER_INNER_START____' && ls -l &&  yarn --link-duplicates --pure-lockfile && yarn run distLinuxAndWindows -p ${PUB} && ls -l ./dist"
     else
-      if [ -n "$TRAVIS_TAG" ]; then
-        PUB=always
-      else
-        PUB=never
-      fi
-
       yarn install && yarn add 7zip-bin-mac
       yarn run dist -p $PUB
     fi
