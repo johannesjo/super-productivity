@@ -7,8 +7,9 @@ import { TakeABreakService } from '../../features/time-tracking/take-a-break/tak
 import { ActivatedRoute } from '@angular/router';
 import { from, Subscription, timer, zip } from 'rxjs';
 import { TaskWithSubTasks } from '../../features/tasks/task.model';
-import { map, skip, switchMap, take, withLatestFrom } from 'rxjs/operators';
+import { map, switchMap } from 'rxjs/operators';
 import { fadeAnimation } from '../../ui/animations/fade.ani';
+import { PlanningModeService } from "../../features/planning-mode/planning-mode.service";
 
 @Component({
   selector: 'work-view',
@@ -20,7 +21,6 @@ import { fadeAnimation } from '../../ui/animations/fade.ani';
 export class WorkViewPageComponent implements OnInit, OnDestroy {
   isShowTimeWorkedWithoutBreak = true;
   // no todays tasks at all
-  isPlanYourDay: boolean = undefined;
   splitInputPos = 100;
   isPreloadBacklog = false;
 
@@ -44,6 +44,7 @@ export class WorkViewPageComponent implements OnInit, OnDestroy {
   constructor(
     public taskService: TaskService,
     public takeABreakService: TakeABreakService,
+    public planningModeService: PlanningModeService,
     private _layoutService: LayoutService,
     private _dragulaService: DragulaService,
     private _activatedRoute: ActivatedRoute,
@@ -70,22 +71,6 @@ export class WorkViewPageComponent implements OnInit, OnDestroy {
 
     this._subs.add(this.taskService.backlogTasks$.subscribe(tasks => this.backlogTasks = tasks));
 
-    // TODO improve
-    this._subs.add(
-      this.taskService.isTriggerPlanningMode$.pipe(
-        // skip default
-        skip(1),
-        take(1),
-        withLatestFrom(this.taskService.backlogTasks$),
-      )
-        .subscribe(([isPlanning, backlogTasks]) => {
-          this.isPlanYourDay = isPlanning;
-          if (isPlanning && backlogTasks && backlogTasks.length) {
-            this.splitInputPos = 50;
-          }
-        })
-    );
-
     this._subs.add(this._activatedRoute.queryParams
       .subscribe((params) => {
         if (params && params.backlogPos) {
@@ -108,8 +93,7 @@ export class WorkViewPageComponent implements OnInit, OnDestroy {
   }
 
   startWork() {
-    // TODO refactor to action
-    this.isPlanYourDay = false;
     this.taskService.startFirstStartable();
+    this.planningModeService.leavePlanningMode();
   }
 }

@@ -4,7 +4,7 @@
        class="today">
 
     <header class="work-view-header bg-800 color-contrast">
-      <div *ngIf="(!isPlanYourDay && (taskService.isTasksForToday$|async))||isPlanYourDay===false"
+      <div *ngIf="!(planningModeService.isPlanningMode$|async)"
            @fade
            class="status-bar">
         <div class="item">
@@ -43,7 +43,7 @@
         </div>
       </div>
 
-      <div *ngIf="isPlanYourDay"
+      <div *ngIf="(planningModeService.isPlanningMode$|async)"
            class="planning-mode-header">
         <h2 *ngIf="!(taskService.undoneTasks$|async)?.length"
             class="planning-mode-header mat-h2">Add some tasks to plan your day!</h2>
@@ -61,7 +61,7 @@
     </header>
 
     <div class="component-wrapper page-wrapper">
-      <div *ngIf="isPlanYourDay"
+      <div *ngIf="(planningModeService.isPlanningMode$|async)"
            @expandFade
            class="planning-mode-content">
         <add-task-bar (done)="startWork()"
@@ -78,7 +78,7 @@
                  listId="PARENT"
                  listModelId="UNDONE"></task-list>
 
-      <div *ngIf="!isPlanYourDay"
+      <div *ngIf="!(planningModeService.isPlanningMode$|async) || (taskService.doneTasks$|async)?.length"
            @expand>
         <h2 class="mat-h2 completed-tasks-heading">Completed Tasks</h2>
         <task-list [tasks]="taskService.doneTasks$|async"

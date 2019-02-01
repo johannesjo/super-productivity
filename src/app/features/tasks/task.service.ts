@@ -60,7 +60,6 @@ import {
   selectFocusTaskId,
   selectIsTaskDataLoaded,
   selectIsTaskForTodayPlanned,
-  selectIsTriggerPlanningMode,
   selectStartableTaskIds,
   selectStartableTasks,
   selectTaskById,
@@ -71,6 +70,7 @@ import {
   selectTodaysUnDoneTasksWithSubTasks,
   selectTotalTimeWorkedOnTodaysTasks
 } from './store/task.selectors';
+import { selectHasTasksToWorkOn } from "./store/task.selectors";
 import { stringToMs } from '../../ui/duration/string-to-ms.pipe';
 import { getWorklogStr } from '../../util/get-work-log-str';
 import { Actions, ofType } from '@ngrx/effects';
@@ -192,7 +192,10 @@ export class TaskService {
     TaskActionTypes.AddTask,
   ));
 
-  isTriggerPlanningMode$: Observable<boolean> = this._store.pipe(select(selectIsTriggerPlanningMode));
+  isHasTasksToWorkOn$: Observable<boolean> = this._store.pipe(
+    select(selectHasTasksToWorkOn),
+    distinctUntilChanged(),
+  );
 
   private _allTasksWithIssueData$: Observable<TaskWithIssueData[]> = this._store.pipe(select(selectAllTasksWithIssueData));
 

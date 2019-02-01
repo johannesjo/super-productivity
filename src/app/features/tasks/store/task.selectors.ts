@@ -138,10 +138,16 @@ export const selectTasksWithMissingIssueData = createSelector(
       (task: TaskWithSubTasks) => (!task.issueData && (task.issueType || task.issueId))
     )
 );
-export const selectIsTriggerPlanningMode = createSelector(
+export const selectHasTasksToWorkOn = createSelector(
   selectIsTasksLoaded,
   selectTodaysTasksWithSubTasks,
-  (isTasksLoaded, tasks) => (isTasksLoaded && (!tasks || !tasks.length))
+  (isTasksLoaded, tasks) => {
+    const _tasksToWorkOn = tasks.filter((t) => {
+      return !t.isDone &&
+        ((!t.subTasks || t.subTasks.length === 0) || t.subTasks.filter(st => !st.isDone).length > 0);
+    });
+    return (_tasksToWorkOn && _tasksToWorkOn.length > 0);
+  }
 );
 
 // DYNAMIC SELECTORS
