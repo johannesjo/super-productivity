@@ -42,6 +42,11 @@ export class PlanningModeService {
     this.reCheckPlanningMode();
   }
 
+  enterPlanningMode() {
+    this._iPlanningModeEndedUser$.next(false);
+    this.reCheckPlanningMode();
+  }
+
   reCheckPlanningMode() {
     this._manualTriggerCheck$.next(true);
   }

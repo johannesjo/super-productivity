@@ -92,6 +92,10 @@ export class WorkViewPageComponent implements OnInit, OnDestroy {
     this._layoutService.showAddTaskBar();
   }
 
+  planMore() {
+    this.planningModeService.enterPlanningMode();
+  }
+
   startWork() {
     this.taskService.startFirstStartable();
     this.planningModeService.leavePlanningMode();

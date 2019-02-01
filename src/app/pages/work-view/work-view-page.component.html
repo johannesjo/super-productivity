@@ -61,6 +61,28 @@
     </header>
 
     <div class="component-wrapper page-wrapper">
+      <div *ngIf="!(planningModeService.isPlanningMode$|async) && !(taskService.isHasTasksToWorkOn$|async)"
+           class="add-more-or-finish"
+           @expandFade>
+        <h2>No planned tasks</h2>
+
+        <div class="btn-wrapper">
+          <button color=""
+                  (click)="planMore()"
+                  mat-raised-button="">
+            <mat-icon>playlist_add</mat-icon>
+            Plan more
+          </button>
+
+          <button color="primary"
+                  mat-raised-button=""
+                  routerLink="/daily-summary">
+            <mat-icon>done_all</mat-icon>
+            Finish working
+          </button>
+        </div>
+      </div>
+
       <div *ngIf="(planningModeService.isPlanningMode$|async)"
            @expandFade
            class="planning-mode-content">
