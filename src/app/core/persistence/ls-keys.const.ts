@@ -16,6 +16,9 @@ export const LS_ISSUE_STATE: ProjectDataLsKey = 'ISSUE_STATE';
 export const LS_NOTE_STATE: ProjectDataLsKey = 'NOTE_STATE';
 export const LS_BOOKMARK_STATE: ProjectDataLsKey = 'BOOKMARK_STATE';
 
+// REAL LS
+export const LS_GIT_ISSUE_CACHE_PREFIX = LS_PREFIX + 'GIT_ISSUE_CACHE_';
+
 // SESSION STORAGE
 const SS_PREFIX = 'SUP_SS_';
 export const SS_NOTE_TMP = SS_PREFIX + 'NOTE_TMP_EDIT';

@@ -4,23 +4,25 @@ import { GitCfg } from './git';
 import { SnackService } from '../../../core/snack/snack.service';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { GIT_API_BASE_URL } from './git.const';
-import { combineLatest, from, Observable, ObservableInput, throwError } from 'rxjs';
+import { combineLatest, Observable, ObservableInput, throwError } from 'rxjs';
+import { from } from "rxjs";
 import { GitOriginalComment, GitOriginalIssue } from './git-api-responses';
 import { catchError, map, share, switchMap, take } from 'rxjs/operators';
 import { mapGitIssue, mapGitIssueToSearchResult } from './git-issue/git-issue-map.util';
 import { GitComment, GitIssue } from './git-issue/git-issue.model';
 import { SearchResultItem } from '../issue';
+import { loadFromLs } from "../../../core/persistence/local-storage";
+import { saveToLs } from "../../../core/persistence/local-storage";
+import { LS_GIT_ISSUE_CACHE_PREFIX } from "../../../core/persistence/ls-keys.const";
 
 const BASE = GIT_API_BASE_URL;
-const MAX_CACHE_AGE = 60 * 5 * 1000;
+const MAX_CACHE_AGE = 60 * 10 * 1000;
 
 @Injectable({
   providedIn: 'root',
 })
 export class GitApiService {
   private _cfg: GitCfg;
-  private _cachedIssues: GitIssue[];
-  private _lastCacheUpdate: number;
 
   constructor(
     private _projectService: ProjectService,
@@ -39,17 +41,35 @@ export class GitApiService {
       .pipe(switchMap(issues => issues.filter(issue => issue.id === id)));
   }
 
-  getCompleteIssueDataForRepo(repo = this._cfg.repo, isSkipCheck = false): Observable<GitIssue[]> {
+  getCompleteIssueDataForRepo(repo = this._cfg.repo, isSkipCheck = false, isForceRefresh = false): Observable<GitIssue[]> {
     if (!isSkipCheck) {
       this._checkSettings();
     }
-    return combineLatest(
-      this._getAllIssuesForRepo(repo, isSkipCheck),
-      this._getAllCommentsForRepo(repo, isSkipCheck),
-    ).pipe(
-      take(1),
-      map(([issues, comments]) => this._mergeIssuesAndComments(issues, comments)),
-    );
+
+    const cached = loadFromLs(LS_GIT_ISSUE_CACHE_PREFIX + this._projectService.currentId);
+    const cachedIssues: GitIssue[] = cached && cached.issues;
+    const lastUpdate: number = cached && cached.lastUpdate;
+
+    console.log('getCompleteIssueDataForRepo isRefresh',
+      cachedIssues && cachedIssues.length && (lastUpdate + MAX_CACHE_AGE > Date.now()));
+
+    if (
+      !isForceRefresh &&
+      cachedIssues && cachedIssues.length && (lastUpdate + MAX_CACHE_AGE > Date.now())
+    ) {
+      return from([cachedIssues]);
+    } else {
+      const completeIssues$ = combineLatest(
+        this._getAllIssuesForRepo(repo, isSkipCheck),
+        this._getAllCommentsForRepo(repo, isSkipCheck),
+      ).pipe(
+        take(1),
+        map(([issues, comments]) => this._mergeIssuesAndComments(issues, comments)),
+      );
+      completeIssues$.pipe(take(1)).subscribe(issues => this._updateIssueCache(issues));
+
+      return completeIssues$;
+    }
   }
 
 
@@ -60,29 +80,16 @@ export class GitApiService {
 
     this._checkSettings();
 
-    if (this._cachedIssues && this._cachedIssues.length && (this._lastCacheUpdate + MAX_CACHE_AGE > Date.now())) {
-      return from([
-        this._cachedIssues
-          .filter(filterFn)
-          .map(mapGitIssueToSearchResult)
-      ]);
-    } else {
-      const completeIssues$ = this.getCompleteIssueDataForRepo(repo)
-        .pipe(
-          catchError(this._handleRequestError.bind(this)),
-          // a single request should suffice
-          share(),
-        );
-
-      // update cache
-      completeIssues$.pipe(take(1)).subscribe(issues => this._updateIssueCache(issues));
-
-      return completeIssues$.pipe(map((issues: GitIssue[]) =>
+    return this.getCompleteIssueDataForRepo(repo)
+      .pipe(
+        catchError(this._handleRequestError.bind(this)),
+        // a single request should suffice
+        share(),
+        map((issues: GitIssue[]) =>
           issues.filter(filterFn)
             .map(mapGitIssueToSearchResult)
         ),
       );
-    }
   }
 
   refreshIssuesCache() {
@@ -110,8 +117,10 @@ export class GitApiService {
   }
 
   private _updateIssueCache(issues: GitIssue[]) {
-    this._cachedIssues = issues;
-    this._lastCacheUpdate = Date.now();
+    saveToLs(LS_GIT_ISSUE_CACHE_PREFIX + this._projectService.currentId, {
+      issues,
+      lastUpdate: Date.now(),
+    })
   }
 
   private _getAllIssuesForRepo(repo = this._cfg.repo, isSkipCheck = false): Observable<GitIssue[]> {
