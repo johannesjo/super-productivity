@@ -114,10 +114,6 @@ export class AppComponent implements OnInit {
     // INIT Services and global handlers
     this._initHandlersForOtherBodyClasses();
 
-    if (!IS_ELECTRON) {
-      this._chromeExtensionInterface.init();
-    }
-
     if (IS_ELECTRON) {
       this._electronService.ipcRenderer.send(IPC_APP_READY);
       this._initElectronErrorHandler();
@@ -128,6 +124,8 @@ export class AppComponent implements OnInit {
         this._electronService.ipcRenderer.send(IPC_TRANSFER_SETTINGS_TO_ELECTRON, this._configService.cfg);
       });
     } else {
+      // WEB VERSION
+      this._chromeExtensionInterface.init();
       if (this._swUpdate.isEnabled) {
         this._swUpdate.available.subscribe(() => {
           if (confirm('New version available. Load New Version?')) {
