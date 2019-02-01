@@ -1,8 +1,25 @@
 import shortid from 'shortid';
-import { debounceTime, delay, distinctUntilChanged, first, map, shareReplay, take, withLatestFrom } from 'rxjs/operators';
+import {
+  debounceTime,
+  delay,
+  distinctUntilChanged,
+  first,
+  map,
+  shareReplay,
+  take,
+  withLatestFrom
+} from 'rxjs/operators';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { DEFAULT_TASK, DropListModelSource, HIDE_SUB_TASKS, SHOW_SUB_TASKS, Task, TaskWithIssueData, TaskWithSubTasks } from './task.model';
+import {
+  DEFAULT_TASK,
+  DropListModelSource,
+  HIDE_SUB_TASKS,
+  SHOW_SUB_TASKS,
+  Task,
+  TaskWithIssueData,
+  TaskWithSubTasks
+} from './task.model';
 import { select, Store } from '@ngrx/store';
 import {
   AddSubTask,
@@ -228,7 +245,7 @@ export class TaskService {
     this._store.dispatch(new StartFirstStartable());
   }
 
-  async loadStateForProject(projectId) {
+  public async loadStateForProject(projectId) {
     const lsTaskState = await this._persistenceService.loadTasksForProject(projectId);
     this.loadState(lsTaskState || initialTaskState);
   }
@@ -394,7 +411,7 @@ export class TaskService {
     this.updateUi(id, {_showSubTasksMode: HIDE_SUB_TASKS});
   }
 
-  async getAllTasks(): Promise<TaskWithIssueData[]> {
+  public async getAllTasks(): Promise<TaskWithIssueData[]> {
     const allTasks = await this._allTasksWithIssueData$.pipe(first()).toPromise();
     const archiveTaskState = await this._persistenceService.loadTaskArchiveForProject(this._projectService.currentId);
     const ids = archiveTaskState && archiveTaskState.ids as string[] || [];
@@ -402,14 +419,14 @@ export class TaskService {
     return [...allTasks, ...archiveTasks];
   }
 
-  async getAllIssueIds(issueProviderKey: IssueProviderKey): Promise<string[] | number[]> {
+  public async getAllIssueIds(issueProviderKey: IssueProviderKey): Promise<string[] | number[]> {
     const allTasks = await this.getAllTasks();
     return allTasks
       .filter(task => task.issueType === issueProviderKey)
       .map(task => task.issueId);
   }
 
-  async checkForTaskWithIssue(issue: IssueData): Promise<{
+  public async checkForTaskWithIssue(issue: IssueData): Promise<{
     task: TaskWithIssueData | TaskWithSubTasks,
     isFromArchive: boolean,
   }> {
