@@ -37,10 +37,12 @@ import { DOCUMENT } from '@angular/common';
 import { map, take } from 'rxjs/operators';
 import { MigrateService } from './imex/migrate/migrate.service';
 import { Observable } from 'rxjs';
+import { combineLatest } from "rxjs";
 import { selectIsAllProjectDataLoaded } from './features/project/store/project.reducer';
 import { Store } from '@ngrx/store';
 import { fadeAnimation } from './ui/animations/fade.ani';
 import { IS_MAC } from './util/is-mac';
+import { selectIsTaskDataLoaded } from "./features/tasks/store/task.selectors";
 
 const SIDE_PANEL_BREAKPOINT = 900;
 
@@ -58,7 +60,10 @@ const SIDE_PANEL_BREAKPOINT = 900;
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AppComponent implements OnInit {
-  isAllDataLoaded$: Observable<boolean> = this._store.select(selectIsAllProjectDataLoaded);
+  isAllDataLoaded$: Observable<boolean> = combineLatest(
+    this._store.select(selectIsAllProjectDataLoaded),
+    this._store.select(selectIsTaskDataLoaded),
+  ).pipe(map(([isProjectDataLoaded, isTaskDataLoaded]) => isProjectDataLoaded && isTaskDataLoaded));
   isSidePanelBp$: Observable<boolean> = this._breakPointObserver.observe([
     `(max-width: ${SIDE_PANEL_BREAKPOINT}px)`,
   ]).pipe(map(result => result.matches));

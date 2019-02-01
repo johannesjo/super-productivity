@@ -1,4 +1,4 @@
-<ng-container *ngIf="isAllDataLoaded$|async">
+<ng-container *ngIf="(isAllDataLoaded$|async)">
   <main-header></main-header>
   <bookmark-bar *ngIf="bookmarkService.isShowBookmarks$|async"
                 [@expand]></bookmark-bar>
