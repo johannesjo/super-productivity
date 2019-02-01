@@ -45,15 +45,15 @@ script:
   - |
     if [ "$TRAVIS_OS_NAME" == "linux" ]; then
       if [ -n "$TRAVIS_TAG" ]; then
-        $PUB_COMMAND=distLinuxAndWindows
+        PUB_COMMAND=distLinuxAndWindows
       else
-        $PUB_COMMAND=distLinuxAndWindowsNoPublish
+        PUB_COMMAND=distLinuxAndWindowsNoPublish
       fi
 
       echo '____RUNNING DOCKER____'
       docker run $ENVS --rm \
         $(env | \
-        grep -Eo '^[^\s=]*(DEBUG|NODE_|ELECTRON_|YARN_|NPM_|CI|CIRCLE|TRAVIS|APPVEYOR_|CSC_|_TOKEN|_KEY|AWS_|STRIP|BUILD_)[^\s=]*' | \
+        grep -Eo '^[^\s=]*(DEBUG|NODE_|ELECTRON_|YARN_|NPM_|CI|CIRCLE|TRAVIS|APPVEYOR_|CSC_|_TOKEN|_KEY|AWS_|STRIP|BUILD_|PUB_COMMAND)[^\s=]*' | \
         sed '/^$/d;s/^/-e /' | \
         paste -sd ' ' \
         ) \
