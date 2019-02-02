@@ -137,11 +137,13 @@
         <div class="pomodoro-controls">
           <button mat-mini-fab
                   color=""
+                  (click)="skipToNextPomodoroSession()"
                   class="pomodoro-btn">
             <mat-icon>skip_next</mat-icon>
           </button>
           <button mat-mini-fab
                   color=""
+                  (click)="stopPomodoro()"
                   class="pomodoro-btn">
             <mat-icon>stop</mat-icon>
           </button>

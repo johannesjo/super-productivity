@@ -5,9 +5,10 @@ import { distinctUntilChanged, filter, map, mapTo, scan, shareReplay, withLatest
 import { PomodoroConfig } from '../config/config.model';
 import { TimeTrackingService } from '../time-tracking/time-tracking.service';
 import { select, Store } from '@ngrx/store';
-import { FinishPomodoroSession, PausePomodoro, StartPomodoro, StopPomodoro } from './store/pomodoro.actions';
+import { FinishPomodoroSession, PausePomodoro, PomodoroActionTypes, StartPomodoro, StopPomodoro } from './store/pomodoro.actions';
 import { selectCurrentCycle, selectIsBreak, selectIsManualPause } from './store/pomodoro.reducer';
 import { DEFAULT_CFG } from '../config/default-config.const';
+import { Actions, ofType } from '@ngrx/effects';
 
 // Tick Duration
 const TD = -1000;
@@ -18,6 +19,8 @@ const DEFAULT_TICK_SOUND = 'assets/snd/tick.mp3';
   providedIn: 'root',
 })
 export class PomodoroService {
+  onStop$: Observable<any> = this._actions$.pipe(ofType(PomodoroActionTypes.StopPomodoro));
+
   cfg$: Observable<PomodoroConfig> = this._configService.cfg$.pipe(map(cfg => cfg && cfg.pomodoro));
   isEnabled$: Observable<boolean> = this.cfg$.pipe(map(cfg => cfg && cfg.isEnabled));
 
@@ -46,19 +49,21 @@ export class PomodoroService {
   );
 
   // isManualPause$
-  nextSession$: Observable<number> = combineLatest(
+  nextSession$: Observable<number> = merge(
     this.isBreak$,
     this.cfg$.pipe(distinctUntilChanged()),
+    this.onStop$,
   ).pipe(
     withLatestFrom(
       this.isLongBreak$,
       this.isShortBreak$,
+      this.isBreak$,
+      this.cfg$,
     ),
-    map(([combo, isLong, isShort]) => {
-      const [isBreak, cfg] = combo;
-      // cfg.duration = 5000;
-      // cfg.breakDuration = 5000;
-      // cfg.longerBreakDuration = 5000;
+    map(([trigger, isLong, isShort, isBreak, cfg]) => {
+      // cfg.duration = 6000;
+      // cfg.breakDuration = 3000;
+      // cfg.longerBreakDuration = 20000;
       if (!isBreak) {
         return cfg.duration || DEFAULT_CFG.pomodoro.duration;
       } else if (isShort) {
@@ -89,10 +94,10 @@ export class PomodoroService {
     })
   );
 
-
   constructor(
     private _configService: ConfigService,
     private _store$: Store<any>,
+    private _actions$: Actions,
     private _timeTrackingService: TimeTrackingService,
   ) {
     // NOTE: idle handling is not required, as unsetting the task auto triggers pause

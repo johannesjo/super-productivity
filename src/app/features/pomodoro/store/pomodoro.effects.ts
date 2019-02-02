@@ -4,8 +4,7 @@ import { SetCurrentTask, TaskActionTypes, ToggleStart, UnsetCurrentTask } from '
 import { filter, map, mapTo, tap, withLatestFrom } from 'rxjs/operators';
 import { PomodoroService } from '../pomodoro.service';
 import { PomodoroConfig } from '../../config/config.model';
-import { FinishPomodoroSession, PausePomodoro, PomodoroActionTypes, StartPomodoro } from './pomodoro.actions';
-import { PomodoroActions } from "./pomodoro.actions";
+import { FinishPomodoroSession, PausePomodoro, PomodoroActions, PomodoroActionTypes, StartPomodoro } from './pomodoro.actions';
 import { MatDialog } from '@angular/material';
 import { DialogPomodoroBreakComponent } from '../dialog-pomodoro-break/dialog-pomodoro-break.component';
 import { select, Store } from '@ngrx/store';
@@ -58,6 +57,12 @@ export class PomodoroEffects {
       (!isBreak && !currentTaskId && !action.payload.isDontResume)
     ),
     mapTo(new ToggleStart()),
+  );
+
+  @Effect()
+  stopPomodoro$ = this._actions$.pipe(
+    ofType(PomodoroActionTypes.StopPomodoro),
+    mapTo(new UnsetCurrentTask()),
   );
 
   @Effect()

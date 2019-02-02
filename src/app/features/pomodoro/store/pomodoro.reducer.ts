@@ -41,7 +41,9 @@ export function pomodoroReducer(state = initialPomodoroState, action: PomodoroAc
 
     case  PomodoroActionTypes.StopPomodoro: {
       return {
-        ...initialPomodoroState
+        isManualPause: true,
+        isBreak: false,
+        currentCycle: 0,
       };
     }
 

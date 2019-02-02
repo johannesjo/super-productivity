@@ -67,4 +67,12 @@ export class MainHeaderComponent implements OnInit {
   togglePlay() {
     this.taskService.toggleStartTask();
   }
+
+  skipToNextPomodoroSession() {
+    this.pomodoroService.finishPomodoroSession();
+  }
+
+  stopPomodoro() {
+    this.pomodoroService.stop();
+  }
 }
