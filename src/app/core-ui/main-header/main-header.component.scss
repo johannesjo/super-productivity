@@ -201,11 +201,42 @@ button {
 }
 
 
-.play-btn {
-  $circleOverflow: 5px;
+.note-ico {
+  transition: $transition-standard;
+
+  &.rotate {
+    transform: rotate(90deg);
+  }
+}
+
+.play-btn-wrapper {
   position: relative;
+  margin-left: $s;
+
+  .play-btn {
+    $circleOverflow: 5px;
+    position: relative;
+    margin-left: 0;
+    // needs to be above the rest
+    z-index: 2;
+
+    .circle-svg {
+      transform: rotate(-90deg);
+      position: absolute;
+      opacity: 0.15;
+      top: 0;
+      right: 0;
+      pointer-events: none;
+    }
+
+    .mat-icon {
+      position: relative;
+      z-index: 2;
+    }
+  }
 
   .pomodoro-label {
+    margin-left: 0;
     position: absolute;
     line-height: 1;
     padding: 2px 4px 1px;
@@ -219,6 +250,7 @@ button {
     border-radius: 8px;
     z-index: 4;
     pointer-events: none;
+    bottom: $s/-4;
 
     @include darkTheme {
       background: $dark-theme-bg-lighter;
@@ -226,31 +258,45 @@ button {
     }
   }
 
-  .circle-svg {
-    transform: rotate(-90deg);
-    position: absolute;
-    //top: -1* $circleOverflow;
-    //left: -1* $circleOverflow;
-    //width: calc(100% + #{$circleOverflow*2});
-    //height: calc(100% + #{$circleOverflow*2});
-    //top: -2px;
-    //left: -2px;
-    opacity: 0.15;
-    top: 0;
-    right: 0;
-    pointer-events: none;
+  &:hover .pomodoro-controls {
+    opacity: 1;
   }
 
-  .mat-icon {
+  .pomodoro-controls {
+    transition: $transition-standard;
+    position: absolute;
+    top: 100%;
+    display: flex;
+    flex-direction: column;
+    opacity: 0;
+    left: 50%;
+    transform: translateX(-50%);
+
+    // add a little bit of extra hover area
+    &:after {
+      content: '';
+      position: absolute;
+      top: $s*-1.25;
+      left: $s*-1.25;
+      right: $s*-1.25;
+      bottom: $s*-1.25;
+    }
+  }
+
+  &:hover .pomodoro-controls .pomodoro-btn {
+    transform: translateY(0);
+  }
+
+  .pomodoro-btn {
+    transition: $transition-standard;
+    transform: translateY(-100%);
     position: relative;
     z-index: 2;
-  }
-}
+    margin-top: $s/2;
+    margin-left: 0;
 
-.note-ico {
-  transition: $transition-standard;
-
-  &.rotate {
-    transform: rotate(90deg);
+    &:nth-child(2) {
+      transform: translateY(-200%);
+    }
   }
 }

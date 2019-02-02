@@ -107,7 +107,7 @@
       </mat-icon>
     </button>
 
-    <div class="svg-wrapper">
+    <div class="play-btn-wrapper">
       <button (click)="togglePlay()"
               [color]="(taskService.currentTaskId$|async)? 'accent': 'lighter'"
               class="play-btn"
@@ -129,10 +129,24 @@
                   stroke-dashoffset="-81.6814089933"
                   stroke-width="26"></circle>
         </svg>
-        <div *ngIf="(pomodoroService.cfg$|async)?.isEnabled"
-             class="pomodoro-label">{{(pomodoroService.currentSessionTime$|async|msToMinuteClockString)}}
-        </div>
       </button>
+
+      <ng-container *ngIf="(pomodoroService.cfg$|async)?.isEnabled">
+        <div class="pomodoro-label">{{(pomodoroService.currentSessionTime$|async|msToMinuteClockString)}}
+        </div>
+        <div class="pomodoro-controls">
+          <button mat-mini-fab
+                  color=""
+                  class="pomodoro-btn">
+            <mat-icon>skip_next</mat-icon>
+          </button>
+          <button mat-mini-fab
+                  color=""
+                  class="pomodoro-btn">
+            <mat-icon>stop</mat-icon>
+          </button>
+        </div>
+      </ng-container>
     </div>
   </nav>
 
