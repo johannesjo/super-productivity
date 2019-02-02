@@ -34,38 +34,39 @@
     <!--<mat-icon matPrefix>timer</mat-icon>-->
     <!--</mat-form-field>-->
 
+    <div class="other-days">
+      <div *ngFor="let strDate of timeSpentOnDayCopy|keys:'reverse':todayStr">
+        <mat-form-field class="mat-icon-float mat-block">
+          <input matInput
+                 placeholder="Time Spent on {{strDate}}"
+                 inputDuration="optional"
+                 type="text"
+                 name="timeSpentOnDay{{strDate}}"
+                 [(ngModel)]="timeSpentOnDayCopy[strDate]"
+                 aria-label="Time Spent">
 
-    <div *ngFor="let strDate of timeSpentOnDayCopy|keys:'reverse':todayStr">
-      <mat-form-field class="mat-icon-float mat-block">
-        <input matInput
-               placeholder="Time Spent on {{strDate}}"
-               inputDuration="optional"
-               type="text"
-               name="timeSpentOnDay{{strDate}}"
-               [(ngModel)]="timeSpentOnDayCopy[strDate]"
-               aria-label="Time Spent">
+          <mat-icon matPrefix>timer</mat-icon>
+        </mat-form-field>
+        <button mat-icon-button
+                type="button"
+                (click)="deleteValue(strDate)">
+          <mat-icon>delete_forever</mat-icon>
+        </button>
+      </div>
 
-        <mat-icon matPrefix>timer</mat-icon>
-      </mat-form-field>
-      <button mat-icon-button
-              type="button"
-              (click)="deleteValue(strDate)">
-        <mat-icon>delete_forever</mat-icon>
+      <button type="button"
+              mat-raised-button=""
+              color="primary"
+              aria-label="add for another day"
+              [hidden]="isAddForAnotherDayFormVisible"
+              (click)="showAddForAnotherDayForm()">
+        <mat-icon>add</mat-icon>
+        Add time spent for other day
       </button>
+      <button type="submit"
+              style="width: 0;height: 0; font-size: 0;border: 0;background: transparent;"
+              tabindex="-1"></button>
     </div>
-
-    <button type="button"
-            mat-raised-button=""
-            color="primary"
-            aria-label="add for another day"
-            [hidden]="isAddForAnotherDayFormVisible"
-            (click)="showAddForAnotherDayForm()">
-      <mat-icon>add</mat-icon>
-      Add time spent for other day
-    </button>
-    <button type="submit"
-            style="width: 0;height: 0; font-size: 0;border: 0;background: transparent;"
-            tabindex="-1"></button>
   </form>
 
 
