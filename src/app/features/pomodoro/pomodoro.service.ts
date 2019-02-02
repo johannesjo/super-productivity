@@ -1,8 +1,7 @@
 import { Injectable } from '@angular/core';
 import { combineLatest, merge, Observable } from 'rxjs';
 import { ConfigService } from '../config/config.service';
-import { filter, map, mapTo, scan, shareReplay, withLatestFrom } from 'rxjs/operators';
-import { distinctUntilChanged } from "rxjs/operators";
+import { distinctUntilChanged, filter, map, mapTo, scan, shareReplay, withLatestFrom } from 'rxjs/operators';
 import { PomodoroConfig } from '../config/config.model';
 import { TimeTrackingService } from '../time-tracking/time-tracking.service';
 import { select, Store } from '@ngrx/store';
@@ -49,7 +48,7 @@ export class PomodoroService {
   // isManualPause$
   nextSession$: Observable<number> = combineLatest(
     this.isBreak$,
-    this.cfg$,
+    this.cfg$.pipe(distinctUntilChanged()),
   ).pipe(
     withLatestFrom(
       this.isLongBreak$,
@@ -57,7 +56,9 @@ export class PomodoroService {
     ),
     map(([combo, isLong, isShort]) => {
       const [isBreak, cfg] = combo;
-      // return isBreak ? (isLong ? 20000 : 3000) : 5000;
+      // cfg.duration = 5000;
+      // cfg.breakDuration = 5000;
+      // cfg.longerBreakDuration = 5000;
       if (!isBreak) {
         return cfg.duration || DEFAULT_CFG.pomodoro.duration;
       } else if (isShort) {
@@ -67,7 +68,6 @@ export class PomodoroService {
       }
     }),
     shareReplay(),
-    distinctUntilChanged(),
   );
 
   currentSessionTime$: Observable<number> = merge(
@@ -102,6 +102,7 @@ export class PomodoroService {
         withLatestFrom(this.cfg$, this.isBreak$),
       )
       .subscribe(([val, cfg, isBreak]) => {
+        console.log('currentSessionTime$', val, isBreak, cfg);
         if (cfg.isManualContinue && isBreak) {
           this.pause();
         } else {
@@ -115,7 +116,7 @@ export class PomodoroService {
       map(([val]) => val),
       distinctUntilChanged(),
     ).subscribe(() => {
-      this._playTickSound()
+      this._playTickSound();
     });
   }
 
