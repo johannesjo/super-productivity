@@ -61,7 +61,7 @@ export class PomodoroService {
       if (!isBreak) {
         return cfg.duration || DEFAULT_CFG.pomodoro.duration;
       } else if (isShort) {
-        return cfg.longerBreakDuration || DEFAULT_CFG.pomodoro.breakDuration;
+        return cfg.breakDuration || DEFAULT_CFG.pomodoro.breakDuration;
       } else if (isLong) {
         return cfg.longerBreakDuration || DEFAULT_CFG.pomodoro.longerBreakDuration;
       }
