@@ -2,9 +2,11 @@ import { IssueData, IssueProviderKey } from '../issue/issue';
 
 export type DropListModelSource = 'UNDONE' | 'DONE' | 'BACKLOG';
 
-export type TimeSpentOnDay = Readonly<{
+export interface TimeSpentOnDayCopy {
   [key: string]: number;
-}>;
+}
+
+export type TimeSpentOnDay = Readonly<TimeSpentOnDayCopy>;
 
 export interface TaskCopy {
   id: string;

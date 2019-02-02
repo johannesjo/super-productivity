@@ -1,10 +1,15 @@
 import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material';
-import { Task, TaskCopy } from '../../task.model';
+import { Task, TaskCopy, TimeSpentOnDayCopy } from '../../task.model';
 import { TaskService } from '../../task.service';
 import { getTodayStr } from '../../util/get-today-str';
 import { getWorklogStr } from '../../../../util/get-work-log-str';
 import { createTaskCopy } from '../../util/create-task-copy';
+
+interface NewTimeEntry {
+  timeSpent: number;
+  date: string;
+}
 
 @Component({
   selector: 'dialog-time-estimate',
@@ -17,9 +22,8 @@ export class DialogTimeEstimateComponent {
   task: Task;
   taskCopy: TaskCopy;
   isAddForAnotherDayFormVisible: boolean;
-  timeSpentOnDayCopy: any;
-  newEntry: any;
-
+  timeSpentOnDayCopy: TimeSpentOnDayCopy;
+  newEntry: NewTimeEntry;
 
   constructor(private _matDialogRef: MatDialogRef<DialogTimeEstimateComponent>,
               private _taskService: TaskService,
@@ -44,10 +48,10 @@ export class DialogTimeEstimateComponent {
   }
 
 
-  createEmptyNewEntryForADay() {
+  createEmptyNewEntryForADay(): NewTimeEntry {
     return {
       date: '',
-      timeSpent: ''
+      timeSpent: 0
     };
   }
 
