@@ -1,4 +1,4 @@
-<h2 mat-dialog-title>Make an estimate / adjust time spent</h2>
+<h2 mat-dialog-title style="text-align:center;">Time estimated/spent</h2>
 <mat-dialog-content>
   <form (submit)="submit()"
         class="mat-body"
@@ -8,7 +8,7 @@
       <input-duration-slider label="Time Spent"
                              [(model)]="timeSpentOnDayCopy[todayStr]">
       </input-duration-slider>
-      <input-duration-slider label="Estimated"
+      <input-duration-slider label="Estimate"
                              [(model)]="taskCopy.timeEstimate">
       </input-duration-slider>
     </div>
