@@ -37,15 +37,15 @@ export class GitIssueEffects {
       filter(isRepoConfigured),
       filter(([a, gitCfg]) => gitCfg && gitCfg.isAutoPoll),
       switchMap(([a, gitCfg]) => {
+        console.log('INIT GIT POLL UPDATE TIMER');
         return timer(GIT_INITIAL_POLL_DELAY, GIT_POLL_INTERVAL)
           .pipe(
             withLatestFrom(
               this._store$.pipe(select(selectAllGitIssues)),
             ),
             tap(([x, issues]: [number, GitIssue[]]) => {
-              console.log('git tap poll', x, issues);
-
               if (issues && issues.length > 0) {
+                console.log('git tap poll', x, issues);
                 this._snackService.open({
                   message: 'Git: Polling Changes for issues',
                   svgIcon: 'github',

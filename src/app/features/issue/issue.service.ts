@@ -113,12 +113,9 @@ export class IssueService {
   }
 
   public refreshIssueData() {
-    console.log('refreshIssueData');
-
     this.isGitRefreshIssueData$.pipe(
       take(1),
     ).subscribe((isRefreshGit) => {
-      console.log('isRefreshGit', isRefreshGit);
 
       if (isRefreshGit) {
         this._gitApiService.refreshIssuesCache();

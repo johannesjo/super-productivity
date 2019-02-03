@@ -79,8 +79,6 @@ export class AddTaskBarComponent implements OnInit, OnDestroy, AfterViewInit {
       takeUntil(this.destroy$)
     )
       .subscribe((val) => {
-        console.log('sub', val);
-
         this.isLoading = false;
         this.filteredIssueSuggestions = val;
       });

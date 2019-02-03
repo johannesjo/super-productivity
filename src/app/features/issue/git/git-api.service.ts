@@ -4,16 +4,14 @@ import { GitCfg } from './git';
 import { SnackService } from '../../../core/snack/snack.service';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { GIT_API_BASE_URL } from './git.const';
-import { combineLatest, Observable, ObservableInput, throwError } from 'rxjs';
-import { from } from "rxjs";
+import { combineLatest, from, Observable, ObservableInput, throwError } from 'rxjs';
 import { GitOriginalComment, GitOriginalIssue } from './git-api-responses';
 import { catchError, map, share, switchMap, take } from 'rxjs/operators';
 import { mapGitIssue, mapGitIssueToSearchResult } from './git-issue/git-issue-map.util';
 import { GitComment, GitIssue } from './git-issue/git-issue.model';
 import { SearchResultItem } from '../issue';
-import { loadFromLs } from "../../../core/persistence/local-storage";
-import { saveToLs } from "../../../core/persistence/local-storage";
-import { LS_GIT_ISSUE_CACHE_PREFIX } from "../../../core/persistence/ls-keys.const";
+import { loadFromLs, saveToLs } from '../../../core/persistence/local-storage';
+import { LS_GIT_ISSUE_CACHE_PREFIX } from '../../../core/persistence/ls-keys.const';
 
 const BASE = GIT_API_BASE_URL;
 const MAX_CACHE_AGE = 60 * 10 * 1000;
@@ -124,7 +122,7 @@ export class GitApiService {
     saveToLs(LS_GIT_ISSUE_CACHE_PREFIX + this._projectService.currentId, {
       issues,
       lastUpdate: Date.now(),
-    })
+    });
   }
 
   private _getAllIssuesForRepo(repo = this._cfg.repo, isSkipCheck = false): Observable<GitIssue[]> {
