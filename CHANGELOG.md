@@ -1,3 +1,26 @@
+## [2.0.7](https://github.com/johannesjo/super-productivity/compare/v2.0.6...v2.0.7) (2019-02-03)
+
+
+### Bug Fixes
+
+* **pomodoro:** issue when break and work duration are the same ([ae38ce8](https://github.com/johannesjo/super-productivity/commit/ae38ce8))
+* **pomodoro:** short break using wrong value [#136](https://github.com/johannesjo/super-productivity/issues/136) ([13505c2](https://github.com/johannesjo/super-productivity/commit/13505c2))
+* time estimation dialog sometimes deleting values by accident ([a1ae38c](https://github.com/johannesjo/super-productivity/commit/a1ae38c))
+
+
+### Features
+
+* **pomodoro:** add buttons for skipping session and resetting it ([c363492](https://github.com/johannesjo/super-productivity/commit/c363492))
+* **pomodoro:** add buttons for skipping session and resetting it [#135](https://github.com/johannesjo/super-productivity/issues/135) ([5fba30d](https://github.com/johannesjo/super-productivity/commit/5fba30d))
+* **pomodoro:** add functionality for new pomodoro buttons [#135](https://github.com/johannesjo/super-productivity/issues/135) ([52ad063](https://github.com/johannesjo/super-productivity/commit/52ad063))
+* improve styling for dialog time estimate ([5ab5d3d](https://github.com/johannesjo/super-productivity/commit/5ab5d3d))
+* improve styling for dialog time estimate 2 ([bc12300](https://github.com/johannesjo/super-productivity/commit/bc12300))
+* move input duration slider pointer only in 5 minute steps too ([970d5fd](https://github.com/johannesjo/super-productivity/commit/970d5fd))
+* shorten header for dialog time estimate ([f1e3aea](https://github.com/johannesjo/super-productivity/commit/f1e3aea))
+* use 5 minute steps for input duration slider ([d1ba189](https://github.com/johannesjo/super-productivity/commit/d1ba189))
+
+
+
 ## [2.0.6](https://github.com/johannesjo/super-productivity/compare/v2.0.5...v2.0.6) (2019-02-01)
 
 
