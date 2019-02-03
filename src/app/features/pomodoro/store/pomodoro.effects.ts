@@ -35,7 +35,6 @@ export class PomodoroEffects {
       !(isBreak && cfg.isStopTrackingOnBreak)),
     map(([action]): PomodoroActions => {
       if (action['payload'] && action.type !== TaskActionTypes.UnsetCurrentTask) {
-        console.log('START');
         return new StartPomodoro();
       } else {
         return new PausePomodoro();
