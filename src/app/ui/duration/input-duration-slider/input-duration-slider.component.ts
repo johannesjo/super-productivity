@@ -183,7 +183,7 @@ export class InputDurationSliderComponent implements OnInit, OnDestroy {
       minutesFromDegrees = 0;
       this.setCircleRotation(0);
     } else {
-      this.setCircleRotation(degrees);
+      this.setCircleRotation(minutesFromDegrees * 6);
     }
 
     this.minutesBefore = minutesFromDegrees;
