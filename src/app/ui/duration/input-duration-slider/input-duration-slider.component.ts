@@ -104,7 +104,6 @@ export class InputDurationSliderComponent implements OnInit, OnDestroy {
       const theta = Math.atan2(y, x) * (180 / Math.PI);
 
       const cssDegrees = Math.round(convertThetaToCssDegrees(theta));
-
       this.setValueFromRotation(cssDegrees);
     };
 
@@ -160,18 +159,21 @@ export class InputDurationSliderComponent implements OnInit, OnDestroy {
     }
 
     minutesFromDegrees = parseInt(minutesFromDegrees, 10);
+    minutesFromDegrees = Math.round(minutesFromDegrees / 5) * 5;
+
+    if (minutesFromDegrees >= 60) {
+      minutesFromDegrees = 0;
+    }
 
     let hours = Math.floor(moment.duration({
       milliseconds: this._model
     }).asHours());
 
-
     const minuteDelta = minutesFromDegrees - this.minutesBefore;
-
 
     if (minuteDelta > THRESHOLD) {
       hours--;
-    } else if (-1 * minuteDelta > THRESHOLD) {
+    } else if ((-1 * minuteDelta) > THRESHOLD) {
       hours++;
     }
 
