@@ -1,19 +1,9 @@
-import {
-  AfterViewInit,
-  ChangeDetectionStrategy,
-  Component,
-  EventEmitter,
-  Input,
-  OnDestroy,
-  OnInit,
-  Output,
-  ViewChild
-} from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, Component, EventEmitter, Input, Output, ViewChild } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { TaskService } from '../task.service';
-import { debounceTime, switchMap, takeUntil } from 'rxjs/operators';
+import { debounceTime, switchMap, tap } from 'rxjs/operators';
 import { JiraIssue } from '../../issue/jira/jira-issue/jira-issue.model';
-import { Subject } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { IssueService } from '../../issue/issue.service';
 import { SearchResultItem } from '../../issue/issue';
 import { SnackService } from '../../../core/snack/snack.service';
@@ -24,14 +14,7 @@ import { SnackService } from '../../../core/snack/snack.service';
   styleUrls: ['./add-task-bar.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AddTaskBarComponent implements OnInit, OnDestroy, AfterViewInit {
-  destroy$: Subject<boolean> = new Subject<boolean>();
-  taskSuggestionsCtrl: FormControl = new FormControl();
-  filteredIssueSuggestions: SearchResultItem[];
-  isLoading = false;
-  doubleEnterCount = 0;
-
-
+export class AddTaskBarComponent implements AfterViewInit {
   @Input() isAddToBacklog = false;
   @Input() isAddToBottom;
   @Input() isAutoFocus: boolean;
@@ -39,6 +22,26 @@ export class AddTaskBarComponent implements OnInit, OnDestroy, AfterViewInit {
   @Output() done: EventEmitter<any> = new EventEmitter();
 
   @ViewChild('inputEl') inputEl;
+
+  isLoading$ = new BehaviorSubject(false);
+  doubleEnterCount = 0;
+
+  taskSuggestionsCtrl: FormControl = new FormControl();
+  filteredIssueSuggestions$: Observable<SearchResultItem[]> = this.taskSuggestionsCtrl.valueChanges.pipe(
+    debounceTime(300),
+    tap(() => this.isLoading$.next(true)),
+    switchMap((searchTerm) => {
+      if (searchTerm && searchTerm.length > 0) {
+        return this._issueService.searchIssues(searchTerm);
+      } else {
+        // Note: the outer array signifies the observable stream the other is the value
+        return [[]];
+      }
+    }),
+    tap(() => {
+      this.isLoading$.next(false);
+    }),
+  );
 
   constructor(
     private _taskService: TaskService,
@@ -60,33 +63,6 @@ export class AddTaskBarComponent implements OnInit, OnDestroy, AfterViewInit {
       });
     });
 
-  }
-
-  ngOnInit() {
-    this.taskSuggestionsCtrl.setValue('');
-
-    this.taskSuggestionsCtrl.valueChanges.pipe(
-      debounceTime(400),
-      switchMap((searchTerm) => {
-        if (searchTerm && searchTerm.length > 1) {
-          this.isLoading = true;
-          return this._issueService.searchIssues(searchTerm);
-        } else {
-          // Note: the outer array signifies the observable stream the other is the value
-          return [[]];
-        }
-      }),
-      takeUntil(this.destroy$)
-    )
-      .subscribe((val) => {
-        this.isLoading = false;
-        this.filteredIssueSuggestions = val;
-      });
-  }
-
-  ngOnDestroy() {
-    this.destroy$.next(true);
-    this.destroy$.unsubscribe();
   }
 
   onBlur(ev) {

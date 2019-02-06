@@ -1,5 +1,9 @@
 <form (submit)="addTask()"
-      class="add-task-form mat-elevation-z3 ">
+      class="add-task-form mat-elevation-z3">
+  <div class="spinner"
+       *ngIf="(isLoading$|async)">
+    <mat-spinner diameter="50"></mat-spinner>
+  </div>
   <button (click)="isAddToBacklog=!isAddToBacklog"
           class="switch-add-to-btn"
           mat-icon-button=""
@@ -21,18 +25,11 @@
                     (optionSelected)="addTask()"
                     [autoActiveFirstOption]="true"
                     [displayWith]="displayWith">
-    <mat-option *ngIf="isLoading"
-                [value]="taskSuggestionsCtrl.value"
-                class="is-loading">
-      <mat-spinner diameter="50"></mat-spinner>
+    <mat-option *ngFor="let issue of (filteredIssueSuggestions$|async)"
+                [value]="issue">
+      <mat-icon [svgIcon]="issue.issueType|issueIcon"></mat-icon>
+      <span>{{issue?.title}}</span>
     </mat-option>
-    <ng-container *ngIf="!isLoading">
-      <mat-option *ngFor="let issue of filteredIssueSuggestions"
-                  [value]="issue">
-        <mat-icon [svgIcon]="issue.issueType|issueIcon"></mat-icon>
-        <span>{{issue?.title}}</span>
-      </mat-option>
-    </ng-container>
 
   </mat-autocomplete>
 
