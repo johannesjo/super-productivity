@@ -168,7 +168,7 @@ export class GitApiService {
   private _checkSettings() {
     if (!this._isValidSettings()) {
       this._snackService.open({type: 'ERROR', message: 'Git is not properly configured'});
-      // throw new Error('Not enough settings');
+      throw new Error('Not enough settings');
     }
   }
 
