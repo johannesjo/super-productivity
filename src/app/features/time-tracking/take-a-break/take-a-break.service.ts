@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { TaskService } from '../../tasks/task.service';
 import { TimeTrackingService } from '../time-tracking.service';
-import { combineLatest, merge, Observable, Subject } from 'rxjs';
+import { combineLatest, from, merge, Observable, Subject } from 'rxjs';
 import { distinctUntilChanged, filter, map, mapTo, scan, shareReplay, switchMap, throttleTime, withLatestFrom } from 'rxjs/operators';
 import { SnackService } from '../../../core/snack/snack.service';
 import { ConfigService } from '../../config/config.service';
@@ -12,20 +12,20 @@ import { IdleService } from '../idle.service';
 const BREAK_TRIGGER_DURATION = 10 * 60 * 1000;
 
 // required because typescript freaks out
-const reduceBreak = (acc, [tick, currentTaskId]) => {
-  return currentTaskId ? 0 : acc + tick.duration;
+const reduceBreak = (acc, tick) => {
+  return acc + tick.duration;
 };
 
 @Injectable({
   providedIn: 'root',
 })
 export class TakeABreakService {
-  // TODO improve
-  private _timeWithNoCurrentTask$: Observable<number> = this._timeTrackingService.tick$.pipe(
-    withLatestFrom(
-      this._taskService.currentTaskId$,
-    ),
-    scan(reduceBreak, 0),
+  private _timeWithNoCurrentTask$: Observable<number> = this._taskService.currentTaskId$.pipe(
+    switchMap((currentId) => {
+      return currentId
+        ? from([0])
+        : this._timeTrackingService.tick$.pipe(scan(reduceBreak, 0));
+    }),
     shareReplay(),
   );
 
@@ -39,20 +39,15 @@ export class TakeABreakService {
     distinctUntilChanged(),
   );
 
-  // TODO refactor to be triggered by config and extension rather than interval
   private _triggerSimpleBreakReset$: Observable<any> = this._timeWithNoCurrentTask$.pipe(
     filter(timeWithNoTask => timeWithNoTask > BREAK_TRIGGER_DURATION),
-    withLatestFrom(
-      this._configService.misc$,
-      this._chromeExtensionInterfaceService.isReady$,
-    ),
   );
 
   private _tick$: Observable<number> = this._timeTrackingService.tick$.pipe(
     map(tick => tick.duration),
   );
 
-  private _triggerResetProgrammatic$: Observable<any> = this.isIdleResetEnabled$.pipe(
+  private _triggerProgrammaticReset$: Observable<any> = this.isIdleResetEnabled$.pipe(
     switchMap((isIdleResetEnabled) => {
       return isIdleResetEnabled
         ? this._idleService.wasLastSessionTracked$.pipe(
@@ -65,7 +60,7 @@ export class TakeABreakService {
   private _triggerManualReset$ = new Subject<number>();
 
   private _triggerReset$: Observable<number> = merge(
-    this._triggerResetProgrammatic$,
+    this._triggerProgrammaticReset$,
     this._triggerManualReset$,
   ).pipe(
     mapTo(0),
@@ -92,8 +87,8 @@ export class TakeABreakService {
     private _snackService: SnackService,
     private _chromeExtensionInterfaceService: ChromeExtensionInterfaceService,
   ) {
-    // this.timeWorkingWithoutABreak$.subscribe(val => {
-    //   console.log('timeWorkingWithoutABreak$', val);
+    // this._timeWithNoCurrentTask$.subscribe(val => {
+    //   console.log('_timeWithNoCurrentTask$', val);
     // });
 
     const RE_CHECK_DIALOG_INTERVAL = 30 * 1000;
