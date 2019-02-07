@@ -1,25 +1,8 @@
 import shortid from 'shortid';
-import {
-  debounceTime,
-  delay,
-  distinctUntilChanged,
-  first,
-  map,
-  shareReplay,
-  take,
-  withLatestFrom
-} from 'rxjs/operators';
+import { debounceTime, delay, distinctUntilChanged, first, map, shareReplay, take, withLatestFrom } from 'rxjs/operators';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import {
-  DEFAULT_TASK,
-  DropListModelSource,
-  HIDE_SUB_TASKS,
-  SHOW_SUB_TASKS,
-  Task,
-  TaskWithIssueData,
-  TaskWithSubTasks
-} from './task.model';
+import { DEFAULT_TASK, DropListModelSource, HIDE_SUB_TASKS, SHOW_SUB_TASKS, Task, TaskWithIssueData, TaskWithSubTasks } from './task.model';
 import { select, Store } from '@ngrx/store';
 import {
   AddSubTask,
@@ -58,6 +41,7 @@ import {
   selectEstimateRemainingForBacklog,
   selectEstimateRemainingForToday,
   selectFocusTaskId,
+  selectHasTasksToWorkOn,
   selectIsTaskDataLoaded,
   selectIsTaskForTodayPlanned,
   selectStartableTaskIds,
@@ -70,7 +54,6 @@ import {
   selectTodaysUnDoneTasksWithSubTasks,
   selectTotalTimeWorkedOnTodaysTasks
 } from './store/task.selectors';
-import { selectHasTasksToWorkOn } from "./store/task.selectors";
 import { stringToMs } from '../../ui/duration/string-to-ms.pipe';
 import { getWorklogStr } from '../../util/get-work-log-str';
 import { Actions, ofType } from '@ngrx/effects';

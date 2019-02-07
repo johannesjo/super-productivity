@@ -1,12 +1,8 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject } from "rxjs";
-import { Observable } from "rxjs";
-import { merge } from "rxjs";
-import { TaskService } from "../tasks/task.service";
-import { map } from "rxjs/operators";
-import { withLatestFrom } from "rxjs/operators";
-import { delay } from "rxjs/operators";
-import { ProjectService } from "../project/project.service";
+import { BehaviorSubject, merge, Observable } from 'rxjs';
+import { TaskService } from '../tasks/task.service';
+import { delay, map, withLatestFrom } from 'rxjs/operators';
+import { ProjectService } from '../project/project.service';
 
 @Injectable({
   providedIn: 'root'

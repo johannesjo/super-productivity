@@ -9,7 +9,7 @@ import { from, Subscription, timer, zip } from 'rxjs';
 import { TaskWithSubTasks } from '../../features/tasks/task.model';
 import { map, switchMap } from 'rxjs/operators';
 import { fadeAnimation } from '../../ui/animations/fade.ani';
-import { PlanningModeService } from "../../features/planning-mode/planning-mode.service";
+import { PlanningModeService } from '../../features/planning-mode/planning-mode.service';
 
 @Component({
   selector: 'work-view',

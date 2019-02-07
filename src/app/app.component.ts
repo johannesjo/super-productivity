@@ -32,17 +32,17 @@ import { slideAnimation } from './ui/animations/slide.ani';
 import { expandAnimation } from './ui/animations/expand.ani';
 import { warpRouteAnimation } from './ui/animations/warp-route';
 import { NoteService } from './features/note/note.service';
-import { BreakpointObserver } from "@angular/cdk/layout";
+import { BreakpointObserver } from '@angular/cdk/layout';
 import { DOCUMENT } from '@angular/common';
 import { map, take } from 'rxjs/operators';
 import { MigrateService } from './imex/migrate/migrate.service';
 import { Observable } from 'rxjs';
-import { combineLatest } from "rxjs";
+import { combineLatest } from 'rxjs';
 import { selectIsAllProjectDataLoaded } from './features/project/store/project.reducer';
 import { Store } from '@ngrx/store';
 import { fadeAnimation } from './ui/animations/fade.ani';
 import { IS_MAC } from './util/is-mac';
-import { selectIsTaskDataLoaded } from "./features/tasks/store/task.selectors";
+import { selectIsTaskDataLoaded } from './features/tasks/store/task.selectors';
 
 const SIDE_PANEL_BREAKPOINT = 900;
 
