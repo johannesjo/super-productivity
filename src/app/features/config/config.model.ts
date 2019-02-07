@@ -35,6 +35,7 @@ export type KeyboardConfig = Readonly<{
 
 export type MiscConfig = Readonly<{
   isEnableIdleTimeTracking: boolean;
+  isUnTrackedIdleResetsBreakTimer: boolean;
   isHideNav: boolean;
   minIdleTime: number;
   isOnlyOpenIdleWhenCurrentTask: boolean;

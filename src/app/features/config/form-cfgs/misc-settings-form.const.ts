@@ -75,7 +75,14 @@ export const MISC_SETTINGS_FORM_CFG: ConfigFormSection = {
         label: 'Only trigger idle time dialog when a current task is selected',
       },
     },
-
+    {
+      key: 'isUnTrackedIdleResetsBreakTimer',
+      type: 'checkbox',
+      hideExpression: '!model.isEnableIdleTimeTracking',
+      templateOptions: {
+        label: 'Untracked idle time resets take a break timer',
+      },
+    },
     {
       key: 'isTakeABreakEnabled',
       type: 'checkbox',

@@ -11,6 +11,7 @@ export const DEFAULT_CFG: GlobalConfig = {
     isOnlyOpenIdleWhenCurrentTask: false,
     isEnableIdleTimeTracking: true,
     minIdleTime: 5 * minute,
+    isUnTrackedIdleResetsBreakTimer: true,
     isTakeABreakEnabled: false,
     /* tslint:disable-next-line */
     takeABreakMessage: 'Take a break! You have been working for ${duration} without one. Go away from the computer! Take a short walk! Makes you more productive in the long run!',

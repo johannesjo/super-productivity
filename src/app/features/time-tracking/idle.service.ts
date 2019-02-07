@@ -6,7 +6,7 @@ import { ElectronService } from 'ngx-electron';
 import { TaskService } from '../tasks/task.service';
 import { IPC_IDLE_TIME } from '../../../../electron/ipc-events.const';
 import { MatDialog } from '@angular/material';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { DialogIdleComponent } from './dialog-idle/dialog-idle.component';
 import { ConfigService } from '../config/config.service';
 import { Task } from '../tasks/task.model';
@@ -27,6 +27,8 @@ export class IdleService {
 
   private _idleTime$: BehaviorSubject<number> = new BehaviorSubject(0);
   public idleTime$: Observable<number> = this._idleTime$.asObservable();
+  private _wasLastSessionTracked$ = new Subject<boolean>();
+  public wasLastSessionTracked$: Observable<boolean> = this._wasLastSessionTracked$.asObservable();
 
 
   private lastCurrentTaskId: string;
@@ -40,7 +42,6 @@ export class IdleService {
     private _taskService: TaskService,
     private _configService: ConfigService,
     private _matDialog: MatDialog,
-    private _takeABreakService: TakeABreakService,
   ) {
   }
 
@@ -58,7 +59,7 @@ export class IdleService {
 
     // window.setTimeout(() => {
     //   this.handleIdle(800000);
-    // }, 300);
+    // }, 700);
   }
 
   handleIdle(idleTime) {
@@ -77,7 +78,6 @@ export class IdleService {
       this._isIdle$.next(true);
 
       if (!this.isIdleDialogOpen) {
-        this._takeABreakService.blockByIdle(idleTime);
         if (this._taskService.currentTaskId) {
           // remove idle time already tracked
           this._taskService.removeTimeSpent(this._taskService.currentTaskId, idleTime);
@@ -99,7 +99,8 @@ export class IdleService {
           .subscribe((taskToTrack: Task | string) => {
             if (taskToTrack) {
               const timeSpent = this._idleTime$.getValue();
-              this._takeABreakService.continue(timeSpent);
+              this._wasLastSessionTracked$.next(true);
+
               if (typeof taskToTrack === 'string') {
                 this._taskService.add(taskToTrack, false, {
                   timeSpent: timeSpent,
@@ -112,7 +113,7 @@ export class IdleService {
                 this._taskService.setCurrentId(taskToTrack.id);
               }
             } else {
-              this._takeABreakService.reset();
+              this._wasLastSessionTracked$.next(false);
             }
 
             this.cancelIdlePoll();
