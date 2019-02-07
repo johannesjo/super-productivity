@@ -2,12 +2,12 @@ import { Injectable } from '@angular/core';
 import { select, Store } from '@ngrx/store';
 import { ConfigActionTypes } from './store/config.actions';
 import { Observable } from 'rxjs';
-import { ConfigSectionKey, GlobalConfig, SectionConfig } from './config.model';
-import { selectConfigFeatureState } from './store/config.reducer';
+import { ConfigSectionKey, GlobalConfig, MiscConfig, SectionConfig } from './config.model';
+import { selectConfigFeatureState, selectMiscConfig } from './store/config.reducer';
 import { PersistenceService } from '../../core/persistence/persistence.service';
 import { DEFAULT_CFG } from './default-config.const';
 import { Actions, ofType } from '@ngrx/effects';
-import { shareReplay } from 'rxjs/operators';
+import { distinctUntilChanged, shareReplay } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root',
@@ -15,8 +15,16 @@ import { shareReplay } from 'rxjs/operators';
 export class ConfigService {
   cfg$: Observable<GlobalConfig> = this._store.pipe(
     select(selectConfigFeatureState),
+    distinctUntilChanged(),
     shareReplay(),
   );
+
+  misc$: Observable<MiscConfig> = this._store.pipe(
+    select(selectMiscConfig),
+    distinctUntilChanged(),
+    shareReplay(),
+  );
+
   cfg: GlobalConfig;
 
   onCfgLoaded$: Observable<any> = this._actions$.pipe(ofType(ConfigActionTypes.LoadConfig));

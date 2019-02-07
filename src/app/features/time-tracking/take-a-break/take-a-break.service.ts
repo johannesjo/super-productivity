@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { TaskService } from '../../tasks/task.service';
 import { TimeTrackingService } from '../time-tracking.service';
-import { EMPTY, merge, Observable, Subject } from 'rxjs';
-import { filter, map, mapTo, scan, shareReplay, switchMap, tap, throttleTime, withLatestFrom } from 'rxjs/operators';
+import { combineLatest, merge, Observable, Subject } from 'rxjs';
+import { distinctUntilChanged, filter, map, mapTo, scan, shareReplay, switchMap, throttleTime, withLatestFrom } from 'rxjs/operators';
 import { SnackService } from '../../../core/snack/snack.service';
 import { ConfigService } from '../../config/config.service';
 import { msToString } from '../../../ui/duration/ms-to-string.pipe';
@@ -29,38 +29,44 @@ export class TakeABreakService {
     shareReplay(),
   );
 
+  private isIdleResetEnabled$ = combineLatest(
+    this._configService.misc$,
+    this._chromeExtensionInterfaceService.isReady$,
+  ).pipe(
+    map(([cfg, isExtension]) =>
+      cfg.isEnableIdleTimeTracking && cfg.isUnTrackedIdleResetsBreakTimer && isExtension
+    ),
+    distinctUntilChanged(),
+  );
+
   // TODO refactor to be triggered by config and extension rather than interval
   private _triggerSimpleBreakReset$: Observable<any> = this._timeWithNoCurrentTask$.pipe(
     filter(timeWithNoTask => timeWithNoTask > BREAK_TRIGGER_DURATION),
     withLatestFrom(
-      this._configService.cfg$,
+      this._configService.misc$,
       this._chromeExtensionInterfaceService.isReady$,
     ),
-    // only use break if normal idle time is not used for break handling
-    filter(([t, cfg, isExtension]) =>
-      !cfg.misc.isEnableIdleTimeTracking || !isExtension || !cfg.misc.isUnTrackedIdleResetsBreakTimer),
   );
 
   private _tick$: Observable<number> = this._timeTrackingService.tick$.pipe(
     map(tick => tick.duration),
   );
 
-  private _triggerIdleReset$: Observable<any> = this._configService.cfg$.pipe(
-    tap((cfg) => console.log(cfg.misc)),
-    switchMap((cfg) => {
-      return cfg.misc.isUnTrackedIdleResetsBreakTimer
-        ? this._idleService.wasLastSessionTracked$
-        : EMPTY;
+  private _triggerResetProgrammatic$: Observable<any> = this.isIdleResetEnabled$.pipe(
+    switchMap((isIdleResetEnabled) => {
+      return isIdleResetEnabled
+        ? this._idleService.wasLastSessionTracked$.pipe(
+          filter(wasTracked => !wasTracked)
+        )
+        : this._triggerSimpleBreakReset$;
     }),
-    filter(wasTracked => !wasTracked)
   );
 
   private _triggerManualReset$ = new Subject<number>();
 
   private _triggerReset$: Observable<number> = merge(
-    // this._triggerSimpleBreakReset$,
-    this._triggerIdleReset$,
-    // this._triggerManualReset$,
+    this._triggerResetProgrammatic$,
+    this._triggerManualReset$,
   ).pipe(
     mapTo(0),
   );
@@ -89,28 +95,26 @@ export class TakeABreakService {
     // this.timeWorkingWithoutABreak$.subscribe(val => {
     //   console.log('timeWorkingWithoutABreak$', val);
     // });
-    // this._timeWithNoCurrentTask$.subscribe(val => {
-    //   console.log('_timeWithNoCurrentTask$', val);
-    // });
-    this._triggerIdleReset$.subscribe(val => {
-      console.log('_triggerIdleReset$', val);
-    });
 
-    const DIALOG_DISPLAY_DURATION = 60 * 1000;
+    const RE_CHECK_DIALOG_INTERVAL = 30 * 1000;
     this.timeWorkingWithoutABreak$.pipe(
-      throttleTime(5 * 1000),
-      // throttleTime(DIALOG_DISPLAY_DURATION),
-      withLatestFrom(this._configService.cfg$),
-      filter(([timeWithoutBreak, cfg]) =>
-        cfg.misc && cfg.misc.isTakeABreakEnabled && timeWithoutBreak > cfg.misc.takeABreakMinWorkingTime),
-    ).subscribe(([timeWithoutBreak, cfg]) => {
-      console.log(timeWithoutBreak);
+      withLatestFrom(this._configService.misc$, this._idleService.isIdle$),
+      filter(([timeWithoutBreak, cfg, isIdle]) =>
+        cfg && cfg.isTakeABreakEnabled
+        && timeWithoutBreak > cfg.takeABreakMinWorkingTime
+        // we don't wanna show if idle to avoid conflicts with the idle modal
+        && (!isIdle || !cfg.isEnableIdleTimeTracking),
+      ),
+      // throttleTime(5 * 1000),
+      throttleTime(RE_CHECK_DIALOG_INTERVAL),
+    ).subscribe(([timeWithoutBreak, cfg, isIdle]) => {
+      console.log('timeWithoutBreak', timeWithoutBreak);
       const msg = this._createMessage(timeWithoutBreak, cfg);
       this._snackService.open({
         message: msg,
         icon: 'free_breakfast',
         actionStr: 'I already did',
-        config: {duration: DIALOG_DISPLAY_DURATION},
+        config: {duration: RE_CHECK_DIALOG_INTERVAL},
         actionFn: () => {
           this._triggerManualReset$.next(0);
         }
@@ -119,9 +123,9 @@ export class TakeABreakService {
   }
 
   private _createMessage(duration, cfg) {
-    if (cfg && cfg.misc.takeABreakMessage) {
+    if (cfg && cfg.takeABreakMessage) {
       const durationStr = msToString(duration);
-      return cfg.misc.takeABreakMessage
+      return cfg.takeABreakMessage
         .replace(/\$\{duration\}/gi, durationStr);
     }
   }

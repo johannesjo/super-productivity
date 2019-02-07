@@ -1,10 +1,11 @@
 import { ConfigActions, ConfigActionTypes } from './config.actions';
-import { createFeatureSelector } from '@ngrx/store';
+import { createFeatureSelector, createSelector } from '@ngrx/store';
 import { GlobalConfig } from '../config.model';
 import { DEFAULT_CFG } from '../default-config.const';
 
 export const CONFIG_FEATURE_NAME = 'globalConfig';
 export const selectConfigFeatureState = createFeatureSelector<GlobalConfig>(CONFIG_FEATURE_NAME);
+export const selectMiscConfig = createSelector(selectConfigFeatureState, (cfg) => cfg.misc);
 
 export const initialState: GlobalConfig = DEFAULT_CFG;
 
