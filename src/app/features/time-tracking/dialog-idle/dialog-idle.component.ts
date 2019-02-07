@@ -3,6 +3,7 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material';
 import { TaskService } from '../../tasks/task.service';
 import { Observable } from 'rxjs';
 import { Task } from '../../tasks/task.model';
+import { ConfigService } from '../../config/config.service';
 
 @Component({
   selector: 'dialog-idle',
@@ -17,6 +18,7 @@ export class DialogIdleComponent implements OnInit {
   public isCreate: boolean;
 
   constructor(
+    public configService: ConfigService,
     private _taskService: TaskService,
     private _matDialogRef: MatDialogRef<DialogIdleComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,
@@ -44,14 +46,16 @@ export class DialogIdleComponent implements OnInit {
 
 
   close() {
-    this._matDialogRef.close(null);
+    this._matDialogRef.close({
+      task: null,
+      isResetBreakTimer: false
+    });
   }
 
-  track() {
-    this._matDialogRef.close(this.selectedTask || this.newTaskTitle);
-  }
-
-  trackButResetBreakTimer() {
-    this._matDialogRef.close(this.data.lastCurrentTaskId);
+  track(isResetBreakTimer = false) {
+    this._matDialogRef.close({
+      task: this.selectedTask || this.newTaskTitle,
+      isResetBreakTimer,
+    });
   }
 }

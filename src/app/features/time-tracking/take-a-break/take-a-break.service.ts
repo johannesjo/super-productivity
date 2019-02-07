@@ -50,9 +50,7 @@ export class TakeABreakService {
   private _triggerProgrammaticReset$: Observable<any> = this.isIdleResetEnabled$.pipe(
     switchMap((isIdleResetEnabled) => {
       return isIdleResetEnabled
-        ? this._idleService.wasLastSessionTracked$.pipe(
-          filter(wasTracked => !wasTracked)
-        )
+        ? this._idleService.triggerResetBreakTimer$
         : this._triggerSimpleBreakReset$;
     }),
   );

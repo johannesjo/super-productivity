@@ -4,19 +4,18 @@
 <form (submit)="track()">
   <div class="dialog-content"
        mat-dialog-content>
-    <p>You have been idle for <strong>{{data.idleTime$|async|msToString:true}}</strong>.</p>
+    <p>You have been idle for:</p>
+    <div class="time">{{data.idleTime$|async|msToString:true}}</div>
 
     <select-task (taskChange)="onTaskChange($event)"
                  [initialTask]="selectedTask"></select-task>
-    <!--<p>Select the task you want to track the time for, or just press cancel if you don't want to track the time.</p>-->
+    <p>
+      <span *ngIf="!isCreate">Track to:</span>
+      <span *ngIf="isCreate">Create and track to:</span>
+      <br><strong>{{selectedTask?.title || newTaskTitle || 'No task selected'}} </strong>
+    </p>
   </div>
 
-
-  <p>
-    <span *ngIf="!isCreate">Track to:</span>
-    <span *ngIf="isCreate">Create and track to:</span>
-    <br><strong>{{selectedTask?.title || newTaskTitle || 'No task selected'}} </strong>
-  </p>
 
   <div align="end"
        mat-dialog-actions>
@@ -36,11 +35,21 @@
     <!--Track but reset break timer-->
     <!--</button>-->
 
+    <button *ngIf="(configService.misc$|async)?.isUnTrackedIdleResetsBreakTimer"
+            (click)="track(true)"
+            color="primary"
+            mat-raised-button
+            type="button">
+      <mat-icon *ngIf="!isCreate">track_changes</mat-icon>
+      <mat-icon *ngIf="isCreate">add</mat-icon>
+      Track but reset break timer
+    </button>
+
     <button (click)="close()"
             mat-raised-button
             type="button">
-      <mat-icon>close</mat-icon>
-      Don't track
+      <mat-icon>skip_next</mat-icon>
+      Skip track
     </button>
   </div>
 </form>

@@ -11,7 +11,6 @@ import { DialogIdleComponent } from './dialog-idle/dialog-idle.component';
 import { ConfigService } from '../config/config.service';
 import { Task } from '../tasks/task.model';
 import { getWorklogStr } from '../../util/get-work-log-str';
-import { TakeABreakService } from './take-a-break/take-a-break.service';
 import { distinctUntilChanged, shareReplay } from 'rxjs/operators';
 
 const DEFAULT_MIN_IDLE_TIME = 60000;
@@ -27,8 +26,8 @@ export class IdleService {
 
   private _idleTime$: BehaviorSubject<number> = new BehaviorSubject(0);
   public idleTime$: Observable<number> = this._idleTime$.asObservable();
-  private _wasLastSessionTracked$ = new Subject<boolean>();
-  public wasLastSessionTracked$: Observable<boolean> = this._wasLastSessionTracked$.asObservable();
+  private _triggerResetBreakTimer$ = new Subject<boolean>();
+  public triggerResetBreakTimer$: Observable<boolean> = this._triggerResetBreakTimer$.asObservable();
 
 
   private lastCurrentTaskId: string;
@@ -96,24 +95,27 @@ export class IdleService {
             idleTime$: this.idleTime$,
           }
         }).afterClosed()
-          .subscribe((taskToTrack: Task | string) => {
-            if (taskToTrack) {
+          .subscribe((res: { task: Task | string, isResetBreakTimer: boolean }) => {
+            const {task, isResetBreakTimer} = res;
+            if (task) {
               const timeSpent = this._idleTime$.getValue();
-              this._wasLastSessionTracked$.next(true);
+              if (isResetBreakTimer) {
+                this._triggerResetBreakTimer$.next(true);
+              }
 
-              if (typeof taskToTrack === 'string') {
-                this._taskService.add(taskToTrack, false, {
+              if (typeof task === 'string') {
+                this._taskService.add(task, false, {
                   timeSpent: timeSpent,
                   timeSpentOnDay: {
                     [getWorklogStr()]: timeSpent
                   }
                 });
               } else {
-                this._taskService.addTimeSpent(taskToTrack.id, timeSpent);
-                this._taskService.setCurrentId(taskToTrack.id);
+                this._taskService.addTimeSpent(task.id, timeSpent);
+                this._taskService.setCurrentId(task.id);
               }
             } else {
-              this._wasLastSessionTracked$.next(false);
+              this._triggerResetBreakTimer$.next(true);
             }
 
             this.cancelIdlePoll();
