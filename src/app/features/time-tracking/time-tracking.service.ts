@@ -9,7 +9,7 @@ import { getWorklogStr } from '../../util/get-work-log-str';
   providedIn: 'root',
 })
 export class TimeTrackingService {
-  public globalInterval$: Observable<any> = interval(TRACKING_INTERVAL).pipe(share());
+  public globalInterval$: Observable<number> = interval(TRACKING_INTERVAL).pipe(share());
   private _currentTrackingStart: number;
   public tick$: Observable<Tick> = this.globalInterval$.pipe(
     map(() => {

@@ -41,8 +41,8 @@ export class PomodoroService {
     this.isLongBreak$,
   ).pipe(map(([isBreak, isLongBreak]) => isBreak && !isLongBreak));
 
-  timer$ = this._timeTrackingService.globalInterval$;
-  tick$ = this.timer$.pipe(
+  timer$: Observable<number> = this._timeTrackingService.globalInterval$;
+  tick$: Observable<number> = this.timer$.pipe(
     withLatestFrom(this.isManualPause$, this.isEnabled$),
     filter(([v, isManualPause, isEnabled]) => !isManualPause && isEnabled),
     mapTo(TD),
