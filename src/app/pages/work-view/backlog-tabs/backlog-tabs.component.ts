@@ -3,13 +3,15 @@ import { TaskService } from '../../../features/tasks/task.service';
 import { ReminderService } from '../../../features/reminder/reminder.service';
 import { DialogAddTaskReminderComponent } from '../../../features/tasks/dialog-add-task-reminder/dialog-add-task-reminder.component';
 import { MatDialog } from '@angular/material';
-import { TaskWithReminderData } from '../../../features/tasks/task.model';
+import { Task, TaskWithReminderData } from '../../../features/tasks/task.model';
+import { standardListAnimation } from '../../../ui/animations/standard-list.ani';
 
 @Component({
   selector: 'backlog-tabs',
   templateUrl: './backlog-tabs.component.html',
   styleUrls: ['./backlog-tabs.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  animations: [standardListAnimation]
 })
 export class BacklogTabsComponent {
   selectedIndex = 1;
@@ -23,6 +25,10 @@ export class BacklogTabsComponent {
   }
 
   indexChange(index) {
+  }
+
+  trackByFn(i: number, task: TaskWithReminderData) {
+    return task.id;
   }
 
   startTask(task: TaskWithReminderData) {
