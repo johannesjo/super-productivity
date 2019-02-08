@@ -138,7 +138,7 @@
     "clipboard": "^2.0.1",
     "codelyzer": "^4.5.0",
     "core-js": "^2.5.4",
-    "electron": "4.0.1",
+    "electron": "4.0.4",
     "electron-builder": "^20.38.5",
     "electron-reload": "^1.2.5",
     "hammerjs": "^2.0.8",
