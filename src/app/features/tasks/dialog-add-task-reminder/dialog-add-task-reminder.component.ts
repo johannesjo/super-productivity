@@ -5,6 +5,7 @@ import { TaskService } from '../task.service';
 import { ReminderCopy } from '../../reminder/reminder.model';
 import { ReminderService } from '../../reminder/reminder.service';
 import { SnackService } from '../../../core/snack/snack.service';
+import { dirtyDeepCopy } from '../../../util/dirtyDeepCopy';
 
 @Component({
   selector: 'dialog-add-task-reminder',
@@ -13,13 +14,11 @@ import { SnackService } from '../../../core/snack/snack.service';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DialogAddTaskReminderComponent {
-  date: string;
   task: Task = this.data.task;
   title: string = this.task.title;
-  reminder: ReminderCopy = this.task.reminderId && {
-    ...this._reminderService.getById(this.data.task.reminderId)
-  };
+  reminder: ReminderCopy = this.task.reminderId && dirtyDeepCopy(this._reminderService.getById(this.data.task.reminderId));
   isEdit: boolean = !!(this.reminder && this.reminder.id);
+  date: string = this.reminder && this._convertDate(new Date(this.reminder.remindAt));
   isMoveToBacklogPossible: boolean = (!this.isEdit && !this.task.parentId);
   isMoveToBacklog: boolean = (this.isMoveToBacklogPossible);
 
