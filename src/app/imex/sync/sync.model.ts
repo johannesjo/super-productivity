@@ -6,6 +6,7 @@ import { Task } from '../../features/tasks/task.model';
 import { IssueStateMap } from '../../features/issue/issue';
 import { BookmarkState } from '../../features/bookmark/store/bookmark.reducer';
 import { NoteState } from '../../features/note/store/note.reducer';
+import { Reminder } from '../../features/reminder/reminder.model';
 
 
 // NOTE: [key:string] always refers to projectId
@@ -31,4 +32,5 @@ export interface AppDataComplete {
   issue?: {
     [key: string]: IssueStateMap;
   };
+  reminders?: Reminder[];
 }
