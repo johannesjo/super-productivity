@@ -1,5 +1,9 @@
 @import '../../../../variables';
 
+:host {
+  text-align: center;
+}
+
 .task-wrapper {
   margin-bottom: 0;
 }
