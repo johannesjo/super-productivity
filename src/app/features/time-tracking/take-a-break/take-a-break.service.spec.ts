@@ -4,12 +4,16 @@
 // import { reducers } from '../../../root-store';
 // import { EffectsModule } from '@ngrx/effects';
 // import { CoreModule } from '../../../core/core.module';
+// import { ElectronService } from 'ngx-electron';
 //
 // let service: TakeABreakService;
 //
 // describe('TakeABreakService', () => {
 //   beforeEach(() => TestBed.configureTestingModule({
-//     providers: [TakeABreakService],
+//     providers: [
+//       TakeABreakService,
+//       ElectronService,
+//     ],
 //     imports: [
 //       CoreModule,
 //       StoreModule.forRoot(reducers),
