@@ -90,7 +90,10 @@
       ]
     },
     "snap": {
-      "grade": "stable"
+      "grade": "stable",
+      "stagePackages": [
+        "xprintidle"
+      ]
     }
   },
   "dependencies": {
