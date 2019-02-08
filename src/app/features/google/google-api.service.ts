@@ -393,13 +393,13 @@ export class GoogleApiService {
           console.warn(res);
           if (!res) {
             this._handleError('No response body');
-          } else if (res && (res.status >= 0)) {
-            this._handleError('Could not connect to google. Check your internet connection.');
-          } else if (res && (res.status >= 300)) {
-            this._handleError(res);
           } else if (res && res.status === 401) {
             this._handleUnAuthenticated(res);
             return new EmptyObservable<Response>();
+          } else if (res && (res.status >= 300)) {
+            this._handleError(res);
+          } else if (res && (res.status >= 0)) {
+            this._handleError('Could not connect to google. Check your internet connection.');
           }
           return throwError(res);
         }),
