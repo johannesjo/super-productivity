@@ -46,11 +46,14 @@
 
   .mat-tab-labels .mat-tab-label {
     flex-grow: 1;
-    height: 46px;
 
     mat-icon {
       margin-right: $s;
     }
+  }
+
+  .mat-tab-body-content {
+    @include scrollY;
   }
 }
 
