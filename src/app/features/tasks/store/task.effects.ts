@@ -17,6 +17,7 @@ import { EMPTY, of } from 'rxjs';
 import { ElectronService } from 'ngx-electron';
 import { IPC_CURRENT_TASK_UPDATED } from '../../../../../electron/ipc-events.const';
 import { IS_ELECTRON } from '../../../app.constants';
+import { ReminderService } from '../../reminder/reminder.service';
 
 // TODO send message to electron when current task changes here
 
@@ -90,6 +91,26 @@ export class TaskEffects {
           config: {duration: 5000},
           actionStr: 'Undo',
           actionId: TaskActionTypes.UndoDeleteTask
+        });
+      })
+    );
+
+  @Effect({dispatch: false}) clearReminders: any = this._actions$
+    .pipe(
+      ofType(
+        TaskActionTypes.DeleteTask,
+      ),
+      withLatestFrom(
+        this._store$.pipe(select(selectTaskFeatureState)),
+      ),
+      map(([a, state]) => {
+        const ids = state.ids as string[];
+        const idsBefore = state.stateBefore.ids as string[];
+        const deletedTaskIds = idsBefore.filter((id) => !ids.includes(id));
+        const deletedTasks = deletedTaskIds.map(id => state.stateBefore.entities[id]);
+        const deletedReminderTasks = deletedTasks.filter(task => task.reminderId);
+        deletedReminderTasks.forEach((task) => {
+          this._reminderService.removeReminder(task.reminderId);
         });
       })
     );
@@ -203,6 +224,7 @@ export class TaskEffects {
               private _store$: Store<any>,
               private _notifyService: NotifyService,
               private _taskService: TaskService,
+              private _reminderService: ReminderService,
               private _electronService: ElectronService,
               private _persistenceService: PersistenceService) {
   }
