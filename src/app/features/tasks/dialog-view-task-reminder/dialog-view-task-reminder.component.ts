@@ -5,7 +5,9 @@ import { Task } from '../task.model';
 import { TaskService } from '../task.service';
 import { Observable, Subscription } from 'rxjs';
 import { ReminderService } from '../../reminder/reminder.service';
-import { take } from 'rxjs/operators';
+import { delay, switchMap, take } from 'rxjs/operators';
+import { ProjectService } from '../../project/project.service';
+import { Project } from '../../project/project.model';
 
 @Component({
   selector: 'dialog-view-task-reminder',
@@ -16,18 +18,19 @@ import { take } from 'rxjs/operators';
 export class DialogViewTaskReminderComponent implements OnDestroy {
   task$: Observable<Task> = this._taskService.getById(this.data.reminder.relatedId);
   task: Task;
-  reminder: Reminder;
-
+  reminder: Reminder = this.data.reminder;
+  isForCurrentProject = (this.reminder.projectId === this._projectService.currentId);
+  targetProject$: Observable<Project> = this._projectService.getById(this.reminder.projectId);
   private _subs = new Subscription();
 
   constructor(
     private _matDialogRef: MatDialogRef<DialogViewTaskReminderComponent>,
     private _taskService: TaskService,
+    private _projectService: ProjectService,
     private _reminderService: ReminderService,
     @Inject(MAT_DIALOG_DATA) public data: { reminder: Reminder },
   ) {
     this._matDialogRef.disableClose = true;
-    this.reminder = this.data.reminder;
     this._subs.add(this.task$.pipe(take(1)).subscribe(task => this.task = task));
   }
 
@@ -36,13 +39,23 @@ export class DialogViewTaskReminderComponent implements OnDestroy {
   }
 
   play() {
-    if (this.task.parentId) {
-      this._taskService.moveToToday(this.task.parentId, true);
+    if (this.isForCurrentProject) {
+      this._startTask();
+      this.dismiss();
     } else {
-      this._taskService.moveToToday(this.reminder.relatedId, true);
+      this._subs.add(
+        this._projectService.onProjectChange$.pipe(
+          // TODO less hacky way of waiting for data
+          delay(250),
+          switchMap(() => this.task$.pipe(take(1)))
+        ).subscribe(task => {
+          this.task = task;
+          this.isForCurrentProject = true;
+          this._startTask();
+          this.dismiss();
+        }));
+      this._projectService.setCurrentId(this.reminder.projectId);
     }
-    this._taskService.setCurrentId(this.reminder.relatedId);
-    this.dismiss();
   }
 
   dismiss() {
@@ -64,5 +77,14 @@ export class DialogViewTaskReminderComponent implements OnDestroy {
 
   close() {
     this._matDialogRef.close();
+  }
+
+  private _startTask() {
+    if (this.task.parentId) {
+      this._taskService.moveToToday(this.task.parentId, true);
+    } else {
+      this._taskService.moveToToday(this.reminder.relatedId, true);
+    }
+    this._taskService.setCurrentId(this.reminder.relatedId);
   }
 }

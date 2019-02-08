@@ -17,7 +17,7 @@ import {
   selectAdvancedProjectCfg,
   selectAllProjects,
   selectCurrentProject,
-  selectCurrentProjectId,
+  selectCurrentProjectId, selectProjectById,
   selectProjectGitCfg,
   selectProjectJiraCfg
 } from './store/project.reducer';
@@ -30,6 +30,9 @@ import { GitCfg } from '../issue/git/git';
 import { DEFAULT_ISSUE_PROVIDER_CFGS } from '../issue/issue.const';
 import { Actions } from '@ngrx/effects';
 import { ofType } from '@ngrx/effects';
+import { Task } from '../tasks/task.model';
+import { selectTaskById } from '../tasks/store/task.selectors';
+import { take } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root',
@@ -89,6 +92,10 @@ export class ProjectService {
       type: ProjectActionTypes.LoadProjectState,
       payload: {state: projectState}
     });
+  }
+
+  getById(id: string): Observable<Project> {
+    return this._store.pipe(select(selectProjectById, {id}), take(1));
   }
 
   add(project: Partial<Project>) {

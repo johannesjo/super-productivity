@@ -3,6 +3,7 @@ import { Project } from '../project.model';
 import { ProjectActions, ProjectActionTypes } from './project.actions';
 import { createFeatureSelector, createSelector } from '@ngrx/store';
 import { FIRST_PROJECT } from '../project.const';
+import { selectTaskFeatureState } from '../../tasks/store/task.selectors';
 
 export const PROJECT_FEATURE_NAME = 'projects';
 
@@ -30,6 +31,13 @@ export const selectProjectJiraCfg = createSelector(selectProjectIssueCfgs, (issu
 export const selectProjectGitCfg = createSelector(selectProjectIssueCfgs, (issueProviderCfgs) => issueProviderCfgs.GIT);
 export const selectAdvancedProjectCfg = createSelector(selectCurrentProject, (project) => project.advancedCfg);
 
+
+// DYNAMIC SELECTORS
+// -----------------
+export const selectProjectById = createSelector(
+  selectProjectFeatureState,
+  (state, props: { id: string }) => state.entities[props.id]
+);
 
 // DEFAULT
 // -------
