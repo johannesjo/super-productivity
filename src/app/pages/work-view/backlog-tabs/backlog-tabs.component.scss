@@ -98,8 +98,9 @@ task-list ::ng-deep > .task-list-inner {
     justify-content: space-between;
 
     .controls {
-      align-self: end;
+      align-self: center;
       display: flex;
+      justify-content: center;
 
       button {
         margin-left: $s;
