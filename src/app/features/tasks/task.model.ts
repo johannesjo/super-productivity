@@ -1,4 +1,5 @@
 import { IssueData, IssueProviderKey } from '../issue/issue';
+import { Reminder, ReminderCopy } from '../reminder/reminder.model';
 
 export type DropListModelSource = 'UNDONE' | 'DONE' | 'BACKLOG';
 
@@ -38,6 +39,10 @@ export type Task = Readonly<TaskCopy>;
 
 export interface TaskWithIssueData extends Task {
   readonly issueData?: IssueData;
+}
+
+export interface TaskWithReminderData extends Task {
+  readonly reminderData: Reminder;
 }
 
 export interface TaskWithSubTasks extends TaskWithIssueData {

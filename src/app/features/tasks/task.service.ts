@@ -18,6 +18,7 @@ import {
   SHOW_SUB_TASKS,
   Task,
   TaskWithIssueData,
+  TaskWithReminderData,
   TaskWithSubTasks
 } from './task.model';
 import { select, Store } from '@ngrx/store';
@@ -149,8 +150,14 @@ export class TaskService {
     // NOTE: we can't use share here, as we need the last emitted value
   );
 
-  scheduledTasks$: Observable<Task[]> = this._store.pipe(
+  scheduledTasks$: Observable<TaskWithReminderData[]> = this._store.pipe(
     select(selectScheduledTasks),
+    map((tasks) => tasks.map((task) => {
+      return {
+        ...task,
+        reminderData: this._reminderService.getById(task.reminderId),
+      };
+    })),
     distinctUntilChanged(),
   );
 

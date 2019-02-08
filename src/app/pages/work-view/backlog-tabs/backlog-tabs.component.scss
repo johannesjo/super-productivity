@@ -78,3 +78,28 @@
 task-list ::ng-deep > .task-list-inner {
   min-height: 50px;
 }
+
+
+.scheduled-task {
+  margin-bottom: $s;
+  padding: $s/2 $s*2;
+
+  .content {
+    .title {
+      flex: 1;
+    }
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    .controls {
+      align-self: end;
+      display: flex;
+
+      button {
+        margin-left: $s;
+      }
+    }
+  }
+}

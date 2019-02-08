@@ -40,7 +40,7 @@ export class ReminderService {
     }
   }
 
-  getById(reminderId: string) {
+  getById(reminderId: string): Reminder {
     return this._reminders.find(reminder => reminder.id === reminderId);
   }
 

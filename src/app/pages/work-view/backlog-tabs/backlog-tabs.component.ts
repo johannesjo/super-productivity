@@ -1,5 +1,6 @@
-import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
-import { TaskService } from "../../../features/tasks/task.service";
+import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
+import { TaskService } from '../../../features/tasks/task.service';
+import { ReminderService } from '../../../features/reminder/reminder.service';
 
 @Component({
   selector: 'backlog-tabs',
@@ -8,17 +9,21 @@ import { TaskService } from "../../../features/tasks/task.service";
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class BacklogTabsComponent implements OnInit {
-
-  selectedIndex = 0;
+  selectedIndex = 1;
 
   constructor(
     public taskService: TaskService,
-  ) { }
+    public reminderService: ReminderService,
+  ) {
+  }
 
   ngOnInit() {
   }
 
-  indexChange(index){
+  indexChange(index) {
 
+  }
+
+  editReminder() {
   }
 }

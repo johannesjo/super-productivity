@@ -27,15 +27,33 @@
 
     <div class="tab-wrapper bg-400">
       <div class="component-wrapper page-wrapper">
-        <pre>
-          <code>
-        {{(taskService.scheduledTasks$|async)|json}}
-            </code>
-        </pre>
-        <!--<task-list [tasks]="taskService.backlogTasks$|async"-->
-        <!--listId="PARENT"-->
-        <!--class="isHidePlayBtn"-->
-        <!--listModelId="BACKLOG"></task-list>-->
+        <mat-card *ngFor="let task of (taskService.scheduledTasks$|async)"
+                  class="scheduled-task">
+          <mat-card-content>
+            <div class="content">
+              <div class="title">{{task.title}}</div>
+              <div class="due-date">{{task.reminderData.remindAt}}</div>
+              <div class="controls">
+                <button mat-mini-fab
+                        color="primary"
+                        (click)="editReminder()">
+                  <mat-icon>play_arrow</mat-icon>
+                </button>
+                <button mat-mini-fab
+                        color=""
+                        (click)="editReminder()">
+                  <mat-icon>alarm</mat-icon>
+                </button>
+                <button mat-mini-fab
+                        color="warn"
+                        (click)="editReminder()">
+                  <mat-icon>alarm_off</mat-icon>
+                </button>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
       </div>
     </div>
   </mat-tab>
