@@ -143,12 +143,15 @@ export class TaskService {
 
   scheduledTasks$: Observable<TaskWithReminderData[]> = this._store.pipe(
     select(selectScheduledTasks),
-    map((tasks) => tasks.map((task) => {
-      return {
-        ...task,
-        reminderData: this._reminderService.getById(task.reminderId),
-      };
-    })),
+    map((tasks) => tasks
+      .map((task) => {
+        return {
+          ...task,
+          reminderData: this._reminderService.getById(task.reminderId),
+        };
+      })
+      .sort((a, b) => a.reminderData.remindAt - b.reminderData.remindAt)
+    ),
     distinctUntilChanged(),
   );
 
