@@ -1,14 +1,5 @@
 import shortid from 'shortid';
-import {
-  debounceTime,
-  delay,
-  distinctUntilChanged,
-  first,
-  map,
-  shareReplay,
-  take,
-  withLatestFrom
-} from 'rxjs/operators';
+import { debounceTime, delay, distinctUntilChanged, first, map, shareReplay, take, withLatestFrom } from 'rxjs/operators';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import {
@@ -428,6 +419,16 @@ export class TaskService {
       type: 'SUCCESS',
       // TODO add when
       message: `Updated reminder for task "${title}"`,
+      icon: 'schedule',
+    });
+  }
+
+  removeReminder(taskId: string, reminderId: string) {
+    this._reminderService.removeReminder(reminderId);
+    this.update(taskId, {reminderId: null});
+    this._snackService.open({
+      type: 'SUCCESS',
+      message: `Deleted reminder for task`,
       icon: 'schedule',
     });
   }

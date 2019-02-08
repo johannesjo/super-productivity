@@ -1,6 +1,9 @@
 import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { TaskService } from '../../../features/tasks/task.service';
 import { ReminderService } from '../../../features/reminder/reminder.service';
+import { DialogAddTaskReminderComponent } from '../../../features/tasks/dialog-add-task-reminder/dialog-add-task-reminder.component';
+import { MatDialog } from '@angular/material';
+import { TaskWithReminderData } from '../../../features/tasks/task.model';
 
 @Component({
   selector: 'backlog-tabs',
@@ -13,7 +16,8 @@ export class BacklogTabsComponent implements OnInit {
 
   constructor(
     public taskService: TaskService,
-    public reminderService: ReminderService,
+    private _reminderService: ReminderService,
+    private _matDialog: MatDialog,
   ) {
   }
 
@@ -24,6 +28,26 @@ export class BacklogTabsComponent implements OnInit {
 
   }
 
-  editReminder() {
+  startTask(task: TaskWithReminderData) {
+    if (task.parentId) {
+      this.taskService.moveToToday(task.parentId, true);
+    } else {
+      this.taskService.moveToToday(task.id, true);
+    }
+    this.taskService.removeReminder(task.id, task.reminderId);
+    this.taskService.setCurrentId(task.id);
+  }
+
+  removeReminder(task: TaskWithReminderData) {
+    this.taskService.removeReminder(task.id, task.reminderId);
+  }
+
+  editReminder(task: TaskWithReminderData) {
+    this._matDialog.open(DialogAddTaskReminderComponent, {
+      restoreFocus: true,
+      data: {
+        task: task,
+      }
+    });
   }
 }

@@ -36,17 +36,17 @@
               <div class="controls">
                 <button mat-mini-fab
                         color="primary"
-                        (click)="editReminder()">
+                        (click)="startTask(task)">
                   <mat-icon>play_arrow</mat-icon>
                 </button>
                 <button mat-mini-fab
                         color=""
-                        (click)="editReminder()">
+                        (click)="editReminder(task)">
                   <mat-icon>alarm</mat-icon>
                 </button>
                 <button mat-mini-fab
                         color="warn"
-                        (click)="editReminder()">
+                        (click)="removeReminder(task)">
                   <mat-icon>alarm_off</mat-icon>
                 </button>
               </div>
