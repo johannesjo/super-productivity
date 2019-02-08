@@ -1,9 +1,9 @@
-import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Inject, OnDestroy } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material';
 import { Reminder } from '../../reminder/reminder.model';
 import { Task } from '../task.model';
 import { TaskService } from '../task.service';
-import { Observable } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 import { ReminderService } from '../../reminder/reminder.service';
 import { take } from 'rxjs/operators';
 
@@ -13,10 +13,12 @@ import { take } from 'rxjs/operators';
   styleUrls: ['./dialog-view-task-reminder.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class DialogViewTaskReminderComponent {
+export class DialogViewTaskReminderComponent implements OnDestroy {
   task$: Observable<Task> = this._taskService.getById(this.data.reminder.relatedId);
+  task: Task;
+  reminder: Reminder;
 
-  private _reminder: Reminder;
+  private _subs = new Subscription();
 
   constructor(
     private _matDialogRef: MatDialogRef<DialogViewTaskReminderComponent>,
@@ -25,31 +27,36 @@ export class DialogViewTaskReminderComponent {
     @Inject(MAT_DIALOG_DATA) public data: { reminder: Reminder },
   ) {
     this._matDialogRef.disableClose = true;
-    this._reminder = this.data.reminder;
+    this.reminder = this.data.reminder;
+    this._subs.add(this.task$.pipe(take(1)).subscribe(task => this.task = task));
+  }
+
+  ngOnDestroy(): void {
+    this._subs.unsubscribe();
   }
 
   play() {
-    this.task$.pipe(take(1)).subscribe((task) => {
-      if (task.parentId) {
-        this._taskService.moveToToday(task.parentId, true);
-      } else {
-        this._taskService.moveToToday(this._reminder.relatedId, true);
-      }
-      this._taskService.setCurrentId(this._reminder.relatedId);
-      this.dismiss();
-    });
+    if (this.task.parentId) {
+      this._taskService.moveToToday(this.task.parentId, true);
+    } else {
+      this._taskService.moveToToday(this.reminder.relatedId, true);
+    }
+    this._taskService.setCurrentId(this.reminder.relatedId);
+    this.dismiss();
   }
 
   dismiss() {
-    this._taskService.update(this._reminder.relatedId, {
-      reminderId: null,
-    });
-    this._reminderService.removeReminder(this._reminder.id);
+    if (this.task) {
+      this._taskService.update(this.reminder.relatedId, {
+        reminderId: null,
+      });
+    }
+    this._reminderService.removeReminder(this.reminder.id);
     this.close();
   }
 
   snooze() {
-    this._reminderService.updateReminder(this._reminder.id, {
+    this._reminderService.updateReminder(this.reminder.id, {
       remindAt: Date.now() + (10 * 60 * 1000)
     });
     this.close();
