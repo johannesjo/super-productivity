@@ -13,12 +13,15 @@ import { SnackService } from '../../../core/snack/snack.service';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DialogAddTaskReminderComponent {
-  public date: string;
-  public title: string;
-  public isEdit: boolean;
-  public isMoveToBacklog: boolean;
-  public reminder: ReminderCopy;
-  public task: Task;
+  date: string;
+  task: Task = this.data.task;
+  title: string = this.task.title;
+  reminder: ReminderCopy = this.task.reminderId && {
+    ...this._reminderService.getById(this.data.task.reminderId)
+  };
+  isEdit: boolean = !!(this.reminder && this.reminder.id);
+  isMoveToBacklogPossible: boolean = (!this.isEdit && !this.task.parentId);
+  isMoveToBacklog: boolean = (this.isMoveToBacklogPossible);
 
   constructor(
     private _taskService: TaskService,
@@ -27,14 +30,6 @@ export class DialogAddTaskReminderComponent {
     private _matDialogRef: MatDialogRef<DialogAddTaskReminderComponent>,
     @Inject(MAT_DIALOG_DATA) public data: { task: Task },
   ) {
-    this.task = this.data.task;
-    this.reminder = this.task.reminderId && {
-      ...this._reminderService.getById(this.data.task.reminderId)
-    };
-    this.isEdit = !!(this.reminder && this.reminder.id);
-    this.isMoveToBacklog = !this.isEdit && !this.task.parentId;
-
-    this.title = this.task.title;
   }
 
   save() {

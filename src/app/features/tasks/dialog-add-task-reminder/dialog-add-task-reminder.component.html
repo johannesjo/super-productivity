@@ -4,7 +4,7 @@
     <h3 class="mat-h3">"{{task.title}}"</h3>
 
     <div class="form-wrapper">
-      <div *ngIf="!isEdit"
+      <div *ngIf="isMoveToBacklogPossible"
            style="margin-bottom: 16px;">
         <mat-slide-toggle [(ngModel)]="isMoveToBacklog"
                           name="isListSubTasks">
