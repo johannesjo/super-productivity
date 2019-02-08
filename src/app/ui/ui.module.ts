@@ -59,6 +59,7 @@ import { InputDurationSliderComponent } from './duration/input-duration-slider/i
 import { MsToMinuteClockStringPipe } from './duration/ms-to-minute-clock-string.pipe';
 import { KeysPipe } from '../util/keys.pipe';
 import { ToArrayPipe } from '../util/to-array.pipe';
+import { HumanizeTimestampPipe } from './pipes/humanize-timestamp.pipe';
 
 @NgModule({
   imports: [
@@ -135,6 +136,7 @@ import { ToArrayPipe } from '../util/to-array.pipe';
     DatetimeInputComponent,
     KeysPipe,
     ToArrayPipe,
+    HumanizeTimestampPipe,
   ],
   entryComponents: [
     DialogConfirmComponent,
@@ -165,6 +167,7 @@ import { ToArrayPipe } from '../util/to-array.pipe';
     NumberToMonthPipe,
     KeysPipe,
     ToArrayPipe,
+    HumanizeTimestampPipe,
 
     DragulaModule,
     Angular2PromiseButtonModule,

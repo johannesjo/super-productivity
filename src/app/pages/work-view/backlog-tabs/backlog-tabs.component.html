@@ -32,7 +32,7 @@
           <mat-card-content>
             <div class="content">
               <div class="title">{{task.title}}</div>
-              <div class="due-date">{{task.reminderData.remindAt}}</div>
+              <div class="due-date">{{task.reminderData.remindAt|humanizeTimestamp}}</div>
               <div class="controls">
                 <button mat-mini-fab
                         color="primary"
