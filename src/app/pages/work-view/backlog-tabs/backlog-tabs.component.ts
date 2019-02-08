@@ -14,7 +14,7 @@ import { standardListAnimation } from '../../../ui/animations/standard-list.ani'
   animations: [standardListAnimation]
 })
 export class BacklogTabsComponent {
-  selectedIndex = 1;
+  selectedIndex = 0;
 
   constructor(
     public taskService: TaskService,
