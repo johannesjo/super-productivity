@@ -266,6 +266,7 @@ button {
     flex-direction: column;
     left: 50%;
     transform: translateX(-50%);
+    pointer-events: none;
 
     // add a little bit of extra hover area
     &:after {
@@ -278,9 +279,13 @@ button {
     }
   }
 
-  &:hover .pomodoro-controls .pomodoro-btn {
-    transform: translateY(0);
-    opacity: 1;
+  &:hover .pomodoro-controls {
+    pointer-events: all;
+
+    .pomodoro-btn {
+      transform: translateY(0);
+      opacity: 1;
+    }
   }
 
   .pomodoro-btn {
