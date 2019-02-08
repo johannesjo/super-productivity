@@ -101,6 +101,11 @@ task-list ::ng-deep > .task-list-inner {
       align-self: center;
       display: flex;
       justify-content: center;
+      flex-direction: column;
+
+      @include mq(xs) {
+        flex-direction: row;
+      }
 
       button {
         margin-left: $s;
