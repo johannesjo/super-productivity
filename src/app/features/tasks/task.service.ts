@@ -1,7 +1,7 @@
 import shortid from 'shortid';
 import { debounceTime, delay, distinctUntilChanged, first, map, shareReplay, take, withLatestFrom } from 'rxjs/operators';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { combineLatest, Observable } from 'rxjs';
 import {
   DEFAULT_TASK,
   DropListModelSource,
@@ -141,15 +141,24 @@ export class TaskService {
     // NOTE: we can't use share here, as we need the last emitted value
   );
 
-  scheduledTasks$: Observable<TaskWithReminderData[]> = this._store.pipe(
+  private _scheduledTasksWOData$ = this._store.pipe(
     select(selectScheduledTasks),
-    map((tasks) => tasks
+    distinctUntilChanged(),
+  );
+
+  scheduledTasks$: Observable<TaskWithReminderData[]> = combineLatest(
+    this._scheduledTasksWOData$,
+    this._reminderService.reminders$,
+  ).pipe(
+    map(([tasks, reminders]) => tasks
       .map((task) => {
         return {
           ...task,
           reminderData: this._reminderService.getById(task.reminderId),
         };
       })
+      // models might not be in sync just yet :/
+      .filter(task => task.reminderData)
       .sort((a, b) => a.reminderData.remindAt - b.reminderData.remindAt)
     ),
     distinctUntilChanged(),

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { TaskService } from '../../../features/tasks/task.service';
 import { ReminderService } from '../../../features/reminder/reminder.service';
 import { DialogAddTaskReminderComponent } from '../../../features/tasks/dialog-add-task-reminder/dialog-add-task-reminder.component';
@@ -11,7 +11,7 @@ import { TaskWithReminderData } from '../../../features/tasks/task.model';
   styleUrls: ['./backlog-tabs.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class BacklogTabsComponent implements OnInit {
+export class BacklogTabsComponent {
   selectedIndex = 1;
 
   constructor(
@@ -19,13 +19,10 @@ export class BacklogTabsComponent implements OnInit {
     private _reminderService: ReminderService,
     private _matDialog: MatDialog,
   ) {
-  }
-
-  ngOnInit() {
+    // this.taskService.scheduledTasks$.subscribe((val) => console.log('taskService.scheduledTasks$', val));
   }
 
   indexChange(index) {
-
   }
 
   startTask(task: TaskWithReminderData) {

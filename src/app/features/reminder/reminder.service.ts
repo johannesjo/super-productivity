@@ -5,7 +5,7 @@ import { RecurringConfig, Reminder, ReminderType } from './reminder.model';
 import { SnackService } from '../../core/snack/snack.service';
 import shortid from 'shortid';
 import { NotifyService } from '../../core/notify/notify.service';
-import { BehaviorSubject } from 'rxjs';
+import { ReplaySubject, Subject } from 'rxjs';
 import { debounce, throttle } from 'throttle-debounce';
 
 const WORKER_PATH = 'assets/web-workers/reminder.js';
@@ -14,7 +14,9 @@ const WORKER_PATH = 'assets/web-workers/reminder.js';
   providedIn: 'root',
 })
 export class ReminderService {
-  public onReminderActive$: BehaviorSubject<Reminder> = new BehaviorSubject(null);
+  public onReminderActive$ = new Subject<Reminder>();
+  private _reminders$ = new ReplaySubject<Reminder[]>();
+  public reminders$ = this._reminders$.asObservable();
   private _w: Worker;
   private _reminders: Reminder[];
   private _throttledShowNotification = throttle(60000, this._showNotification.bind(this));
@@ -30,6 +32,7 @@ export class ReminderService {
   async init() {
     if ('Worker' in window) {
       this._reminders = await this._loadFromLs();
+      this._reminders$.next(this._reminders);
       this._w = new Worker(WORKER_PATH);
       // this._w.onerror = this._handleError.bind(this);
       this._w.addEventListener('message', this._onReminderActivated.bind(this));
@@ -97,6 +100,7 @@ export class ReminderService {
     this._persistenceService.saveLastActive();
     this._persistenceService.saveReminders(reminders);
     this._updateRemindersInWorker(this._reminders);
+    this._reminders$.next(this._reminders);
   }
 
   private _updateRemindersInWorker(reminders: Reminder[]) {
