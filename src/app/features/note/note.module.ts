@@ -40,32 +40,4 @@ import { DialogAddNoteComponent } from './dialog-add-note/dialog-add-note.compon
   ],
   exports: [NotesComponent],
 })
-export class NoteModule {
-  constructor(
-    private readonly _reminderService: ReminderService,
-    private readonly _matDialog: MatDialog,
-    private readonly _electronService: ElectronService,
-  ) {
-    let isDialogOpen = false;
-
-    this._reminderService.onReminderActive$.subscribe(reminder => {
-      if (IS_ELECTRON) {
-        this._electronService.ipcRenderer.send(IPC_SHOW_OR_FOCUS);
-      }
-
-      if (!isDialogOpen && reminder && reminder.type === 'NOTE') {
-        isDialogOpen = true;
-        this._matDialog.open(DialogViewNoteReminderComponent, {
-          autoFocus: false,
-          restoreFocus: true,
-          data: {
-            reminder: reminder,
-          }
-        }).afterClosed()
-          .subscribe(() => {
-            isDialogOpen = false;
-          });
-      }
-    });
-  }
-}
+export class NoteModule {}
