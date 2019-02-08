@@ -1,0 +1,26 @@
+<mat-dialog-content>
+  <!--<h3 class="mat-h3">Reminder: {{data.reminder.title}}</h3>-->
+  <div class="task">
+    {{(task$|async)?.content}}
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <div class="wrap-buttons">
+    <button color="primary"
+            (click)="dismiss()"
+            type="button"
+            mat-raised-button>
+      <mat-icon>clear</mat-icon>
+      Dismiss
+    </button>
+
+    <button color="primary"
+            (click)="snooze()"
+            type="button"
+            mat-raised-button>
+      <mat-icon>snooze</mat-icon>
+      Snooze for 10m
+    </button>
+  </div>
+</mat-dialog-actions>

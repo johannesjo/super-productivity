@@ -168,6 +168,26 @@
           </ng-container>
         </button>
 
+        <!-- Reminders -->
+        <button (click)="editReminder()"
+                mat-menu-item>
+          <ng-container *ngIf="!task.reminderId">
+            <mat-icon>alarm_add</mat-icon>
+            Schedule task
+          </ng-container>
+          <ng-container *ngIf="task.reminderId">
+            <mat-icon>alarm</mat-icon>
+            Edit reminder
+          </ng-container>
+        </button>
+        <!--<button (click)="removeReminder()"-->
+                <!--*ngIf="task.reminderId"-->
+                <!--mat-menu-item>-->
+          <!--<mat-icon style="color:#e15d63;">alarm_off</mat-icon>-->
+          <!--Remove reminder-->
+        <!--</button>-->
+        <!--/Reminders-->
+
         <button (click)="toggleShowAdditionalInfoOpen()"
                 [class.isActive]="task._isAdditionalInfoOpen"
                 aria-label="additional-info"

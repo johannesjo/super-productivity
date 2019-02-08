@@ -26,6 +26,8 @@ import { IssueService } from '../../issue/issue.service';
 import { DialogEditAttachmentComponent } from '../../attachment/dialog-edit-attachment/dialog-edit-attachment.component';
 import { swirlAnimation } from '../../../ui/animations/swirl-in-out.ani';
 import { isTouch } from '../../../util/is-touch';
+import { DialogAddNoteReminderComponent } from '../../note/dialog-add-note-reminder/dialog-add-note-reminder.component';
+import { DialogAddTaskReminderComponent } from '../dialog-add-task-reminder/dialog-add-task-reminder.component';
 
 @Component({
   selector: 'task',
@@ -138,6 +140,15 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   ngOnDestroy() {
     this._destroy$.next(true);
     this._destroy$.unsubscribe();
+  }
+
+  editReminder() {
+    this._matDialog.open(DialogAddTaskReminderComponent, {
+      restoreFocus: true,
+      data: {
+        task: this.task,
+      }
+    });
   }
 
   updateIssueData() {

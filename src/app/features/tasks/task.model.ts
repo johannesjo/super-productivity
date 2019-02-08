@@ -25,6 +25,7 @@ export interface TaskCopy {
   issueType: IssueProviderKey;
   parentId: string;
   attachmentIds: string[];
+  reminderId?: string;
 
   // ui model
   _isAdditionalInfoOpen: boolean;
@@ -60,6 +61,7 @@ export const DEFAULT_TASK: Task = {
   parentId: null,
   issueId: null,
   issueType: null,
+  reminderId: null,
   created: Date.now(),
   _isAdditionalInfoOpen: false,
   _showSubTasksMode: SHOW_SUB_TASKS,
