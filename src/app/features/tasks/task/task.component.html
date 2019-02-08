@@ -105,6 +105,14 @@
     </div>
 
     <div class="controls">
+      <button *ngIf="task.reminderId"
+              (click)="editReminder()"
+              color=""
+              class="ico-btn"
+              tabindex="2"
+              mat-icon-button>
+        <mat-icon>alarm</mat-icon>
+      </button>
       <button (click)="toggleShowAdditionalInfoOpen()"
               *ngIf="task.notes||task.issueData||task.attachmentIds?.length"
               [class.isActive]="task._isAdditionalInfoOpen"
@@ -181,10 +189,10 @@
           </ng-container>
         </button>
         <!--<button (click)="removeReminder()"-->
-                <!--*ngIf="task.reminderId"-->
-                <!--mat-menu-item>-->
-          <!--<mat-icon style="color:#e15d63;">alarm_off</mat-icon>-->
-          <!--Remove reminder-->
+        <!--*ngIf="task.reminderId"-->
+        <!--mat-menu-item>-->
+        <!--<mat-icon style="color:#e15d63;">alarm_off</mat-icon>-->
+        <!--Remove reminder-->
         <!--</button>-->
         <!--/Reminders-->
 
