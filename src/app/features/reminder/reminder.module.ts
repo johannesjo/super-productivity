@@ -8,6 +8,7 @@ import { IS_ELECTRON } from '../../app.constants';
 import { IPC_SHOW_OR_FOCUS } from '../../../../electron/ipc-events.const';
 import { DialogViewNoteReminderComponent } from '../note/dialog-view-note-reminder/dialog-view-note-reminder.component';
 import { TasksModule } from '../tasks/tasks.module';
+import { DialogViewTaskReminderComponent } from '../tasks/dialog-view-task-reminder/dialog-view-task-reminder.component';
 
 @NgModule({
   declarations: [],
@@ -46,8 +47,17 @@ export class ReminderModule {
               isDialogOpen = false;
             });
         } else if (reminder.type === 'TASK') {
-          console.log('TASSK REMINDER OPNED!!!!');
-
+          isDialogOpen = true;
+          this._matDialog.open(DialogViewTaskReminderComponent, {
+            autoFocus: false,
+            restoreFocus: true,
+            data: {
+              reminder: reminder,
+            }
+          }).afterClosed()
+            .subscribe(() => {
+              isDialogOpen = false;
+            });
         }
       }
     });

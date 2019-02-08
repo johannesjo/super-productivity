@@ -366,8 +366,8 @@ export class TaskService {
     this._store.dispatch(new FocusLastActiveTask());
   }
 
-  moveToToday(id) {
-    this._store.dispatch(new MoveToToday({id}));
+  moveToToday(id, isMoveToTop = false) {
+    this._store.dispatch(new MoveToToday({id, isMoveToTop}));
   }
 
   moveToBacklog(id) {

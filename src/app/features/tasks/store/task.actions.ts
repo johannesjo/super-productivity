@@ -182,7 +182,7 @@ export class MoveToBacklog implements Action {
 export class MoveToToday implements Action {
   readonly type = TaskActionTypes.MoveToToday;
 
-  constructor(public payload: { id: string }) {
+  constructor(public payload: { id: string, isMoveToTop: boolean }) {
   }
 }
 

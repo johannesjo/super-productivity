@@ -690,10 +690,18 @@ export function taskReducer(
         return state;
       }
 
+      const task = state.entities[action.payload.id];
+      if (!task || task.parentId) {
+        console.error('Trying to move sub task to todays list. This should not happen');
+        return state;
+      }
+
       return {
         ...state,
         backlogTaskIds: state.backlogTaskIds.filter(filterOutId(action.payload.id)),
-        todaysTaskIds: [...state.todaysTaskIds, action.payload.id],
+        todaysTaskIds: action.payload.isMoveToTop
+          ? [action.payload.id, ...state.todaysTaskIds]
+          : [...state.todaysTaskIds, action.payload.id]
       };
     }
 
