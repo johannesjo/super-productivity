@@ -1,9 +1,7 @@
 @import './../../../../_variables';
 
 
-:host,
-.bg-wrapper,
-::ng-deep .mat-tab-group {
+:host {
   position: absolute;
   width: 100%;
   height: 100%;
@@ -16,44 +14,51 @@
   flex: 1;
 }
 
-::ng-deep {
-  .mat-tab-link {
-    //justify-content: center;
-    //width: 50%;
-    //color: #ffffff;
-  }
+:host ::ng-deep {
+  > .mat-tab-group {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
 
-  .mat-tab-label-active {
-    opacity: 1 !important;
-  }
+    > .mat-tab-header {
+      position: relative;
+      z-index: 4;
+      box-shadow: $whiteframe-shadow-3dp;
 
-  .mat-tab-header {
-    position: relative;
-    z-index: 4;
-    box-shadow: $whiteframe-shadow-3dp;
+      .mat-tab-label-active {
+        opacity: 1 !important;
+      }
 
-  }
+      .mat-tab-labels {
+        justify-content: stretch;
+        user-select: none;
 
-  .mat-tab-labels {
-    justify-content: stretch;
-    user-select: none;
-  }
+        .mat-tab-label {
+          flex-grow: 1;
 
-  .mat-tab-body-wrapper {
-    // grow to parent height (at least)
-    flex: 1;
-  }
+          mat-icon {
+            margin-right: $s;
+          }
+        }
+      }
+    }
 
-  .mat-tab-labels .mat-tab-label {
-    flex-grow: 1;
-
-    mat-icon {
-      margin-right: $s;
+    > .mat-tab-body-wrapper {
+      // grow to parent height (at least)
+      flex: 1;
     }
   }
+}
 
-  .mat-tab-body-content {
-    @include scrollY;
+::ng-deep > .mat-tab-group > .mat-tab-body-wrapper {
+  > .mat-tab-body {
+    > .mat-tab-body-content {
+      // DON'T PUT OTHER STYLES HERE
+      // this is just required because we use host-context inside the mixin
+      @include scrollY;
+    }
   }
 }
 

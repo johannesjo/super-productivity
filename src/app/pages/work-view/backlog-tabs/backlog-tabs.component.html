@@ -5,8 +5,8 @@
   <mat-tab>
     <ng-template mat-tab-label>
       <mat-icon class="color-contrast">library_books</mat-icon>
-      <span class="tab-label-text color-contrast">Backlog ({{taskService.estimateRemainingBacklog$|async|msToString}}
-        )</span>
+      <span class="tab-label-text color-contrast">Backlog
+        ({{taskService.estimateRemainingBacklog$|async|msToString}})</span>
     </ng-template>
 
     <div class="tab-wrapper bg-400">
@@ -33,9 +33,9 @@
             </code>
         </pre>
         <!--<task-list [tasks]="taskService.backlogTasks$|async"-->
-                   <!--listId="PARENT"-->
-                   <!--class="isHidePlayBtn"-->
-                   <!--listModelId="BACKLOG"></task-list>-->
+        <!--listId="PARENT"-->
+        <!--class="isHidePlayBtn"-->
+        <!--listModelId="BACKLOG"></task-list>-->
       </div>
     </div>
   </mat-tab>
