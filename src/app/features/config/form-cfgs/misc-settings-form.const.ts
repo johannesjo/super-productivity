@@ -24,13 +24,6 @@ export const MISC_SETTINGS_FORM_CFG: ConfigFormSection = {
       },
     },
     {
-      key: 'isMinimizeToTrayOnExit',
-      type: 'checkbox',
-      templateOptions: {
-        label: 'Minimize to tray instead of closing',
-      },
-    },
-    {
       key: 'isNotifyWhenTimeEstimateExceeded',
       type: 'checkbox',
       templateOptions: {

@@ -3,7 +3,6 @@ import { GlobalConfig } from './config.model';
 const minute = 60 * 1000;
 export const DEFAULT_CFG: GlobalConfig = {
   misc: {
-    isMinimizeToTrayOnExit: false,
     isConfirmBeforeExit: false,
     isNotifyWhenTimeEstimateExceeded: false,
     isBlockFinishDayUntilTimeTimeTracked: false,

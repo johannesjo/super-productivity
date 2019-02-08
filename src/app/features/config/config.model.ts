@@ -40,7 +40,6 @@ export type MiscConfig = Readonly<{
   minIdleTime: number;
   isOnlyOpenIdleWhenCurrentTask: boolean;
 
-  isMinimizeToTrayOnExit: boolean;
   isConfirmBeforeExit: boolean;
   isNotifyWhenTimeEstimateExceeded: boolean;
   isBlockFinishDayUntilTimeTimeTracked: boolean;
