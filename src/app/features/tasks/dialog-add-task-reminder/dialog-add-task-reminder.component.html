@@ -4,7 +4,8 @@
     <h3 class="mat-h3">"{{task.title}}"</h3>
 
     <div class="form-wrapper">
-      <div style="margin-bottom: 16px;">
+      <div *ngIf="!isEdit"
+           style="margin-bottom: 16px;">
         <mat-slide-toggle [(ngModel)]="isMoveToBacklog"
                           name="isListSubTasks">
           Move task to backlog until scheduled

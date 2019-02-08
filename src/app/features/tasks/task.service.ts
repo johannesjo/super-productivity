@@ -1,8 +1,25 @@
 import shortid from 'shortid';
-import { debounceTime, delay, distinctUntilChanged, first, map, shareReplay, take, withLatestFrom } from 'rxjs/operators';
+import {
+  debounceTime,
+  delay,
+  distinctUntilChanged,
+  first,
+  map,
+  shareReplay,
+  take,
+  withLatestFrom
+} from 'rxjs/operators';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { DEFAULT_TASK, DropListModelSource, HIDE_SUB_TASKS, SHOW_SUB_TASKS, Task, TaskWithIssueData, TaskWithSubTasks } from './task.model';
+import {
+  DEFAULT_TASK,
+  DropListModelSource,
+  HIDE_SUB_TASKS,
+  SHOW_SUB_TASKS,
+  Task,
+  TaskWithIssueData,
+  TaskWithSubTasks
+} from './task.model';
 import { select, Store } from '@ngrx/store';
 import {
   AddSubTask,
@@ -44,6 +61,7 @@ import {
   selectHasTasksToWorkOn,
   selectIsTaskDataLoaded,
   selectIsTaskForTodayPlanned,
+  selectScheduledTasks,
   selectStartableTaskIds,
   selectStartableTasks,
   selectTaskById,
@@ -59,6 +77,8 @@ import { getWorklogStr } from '../../util/get-work-log-str';
 import { Actions, ofType } from '@ngrx/effects';
 import { IssueService } from '../issue/issue.service';
 import { ProjectService } from '../project/project.service';
+import { SnackService } from '../../core/snack/snack.service';
+import { ReminderService } from '../reminder/reminder.service';
 
 
 @Injectable({
@@ -129,6 +149,11 @@ export class TaskService {
     // NOTE: we can't use share here, as we need the last emitted value
   );
 
+  scheduledTasks$: Observable<Task[]> = this._store.pipe(
+    select(selectScheduledTasks),
+    distinctUntilChanged(),
+  );
+
 
   // META FIELDS
   // -----------
@@ -188,6 +213,8 @@ export class TaskService {
     private readonly _persistenceService: PersistenceService,
     private readonly _issueService: IssueService,
     private readonly _projectService: ProjectService,
+    private readonly _snackService: SnackService,
+    private readonly _reminderService: ReminderService,
     private readonly _timeTrackingService: TimeTrackingService,
     private readonly _actions$: Actions,
   ) {
@@ -362,6 +389,41 @@ export class TaskService {
     this._store.dispatch(new RestoreTask({task}));
   }
 
+
+  // REMINDER
+  // --------
+  addReminder(taskId: string, remindAt: number, title: string, isMoveToBacklog = false) {
+    const reminderId = this._reminderService.addReminder(
+      'TASK',
+      taskId,
+      title,
+      remindAt,
+    );
+    if (isMoveToBacklog) {
+      this.moveToBacklog(taskId);
+    }
+
+    this.update(taskId, {reminderId});
+    this._snackService.open({
+      type: 'SUCCESS',
+      // TODO add when
+      message: `Scheduled task "${title}"`,
+      icon: 'schedule',
+    });
+  }
+
+  updateReminder(taskId: string, reminderId: string, remindAt: number, title: string) {
+    this._reminderService.updateReminder(reminderId, {
+      remindAt,
+      title,
+    });
+    this._snackService.open({
+      type: 'SUCCESS',
+      // TODO add when
+      message: `Updated reminder for task "${title}"`,
+      icon: 'schedule',
+    });
+  }
 
   // HELPER
   // ------

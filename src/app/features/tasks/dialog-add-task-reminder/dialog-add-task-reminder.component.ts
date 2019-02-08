@@ -44,22 +44,23 @@ export class DialogAddTaskReminderComponent {
       return;
     }
 
-    // if (this.isEdit) {
-    //   this._taskService.updateReminder(
-    //     this.task.id,
-    //     this.reminder.id,
-    //     timestamp,
-    //     this.title,
-    //   );
-    //   this.close();
-    // } else {
-    //   this._taskService.addReminder(
-    //     this.task.id,
-    //     timestamp,
-    //     this.title,
-    //   );
-    //   this.close();
-    // }
+    if (this.isEdit) {
+      this._taskService.updateReminder(
+        this.task.id,
+        this.reminder.id,
+        timestamp,
+        this.title,
+      );
+      this.close();
+    } else {
+      this._taskService.addReminder(
+        this.task.id,
+        timestamp,
+        this.title,
+        this.isMoveToBacklog,
+      );
+      this.close();
+    }
   }
 
   remove() {

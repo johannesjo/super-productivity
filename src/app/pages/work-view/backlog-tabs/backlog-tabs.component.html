@@ -27,10 +27,15 @@
 
     <div class="tab-wrapper bg-400">
       <div class="component-wrapper page-wrapper">
-        <task-list [tasks]="taskService.backlogTasks$|async"
-                   listId="PARENT"
-                   class="isHidePlayBtn"
-                   listModelId="BACKLOG"></task-list>
+        <pre>
+          <code>
+        {{(taskService.scheduledTasks$|async)|json}}
+            </code>
+        </pre>
+        <!--<task-list [tasks]="taskService.backlogTasks$|async"-->
+                   <!--listId="PARENT"-->
+                   <!--class="isHidePlayBtn"-->
+                   <!--listModelId="BACKLOG"></task-list>-->
       </div>
     </div>
   </mat-tab>

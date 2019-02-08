@@ -93,6 +93,7 @@ export const selectCurrentTaskParentOrCurrent = createSelector(selectTaskFeature
 
 
 export const selectAllTasks = createSelector(selectTaskFeatureState, selectAll);
+export const selectScheduledTasks = createSelector(selectAllTasks, (tasks) => tasks.filter(task => task.reminderId));
 export const selectAllTasksWithIssueData = createSelector(selectAllTasks, selectIssueEntityMap, mapIssueDataToTask);
 export const selectStartableTaskIds = createSelector(
   selectTaskFeatureState,
