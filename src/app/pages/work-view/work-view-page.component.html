@@ -131,30 +131,7 @@
            [splitTopEl]="splitTopEl"></split>
     <div *ngIf="isPreloadBacklog || splitInputPos!==100"
          class="inner-wrapper">
-      <header class="backlog-header bg-600 color-contrast">
-        <div class="status-bar">
-          <div class="item">
-            <span class="label">Estimate:</span>
-            <span class="no-wrap">
-      ~<strong>{{taskService.estimateRemainingBacklog$|async|msToString}}</strong>
-      <mat-icon>timer</mat-icon>
-      </span>
-          </div>
-          <button (click)="showAddTaskBar()"
-                  color="lighter"
-                  mat-mini-fab>
-            <mat-icon class="hide-controls-icon">add</mat-icon>
-          </button>
-        </div>
-      </header>
-
-      <div class="component-wrapper page-wrapper">
-        <h2 class="mat-h2 backlog-heading">Backlog</h2>
-        <task-list [tasks]="backlogTasks"
-                   listId="PARENT"
-                   class="isHidePlayBtn"
-                   listModelId="BACKLOG"></task-list>
-      </div>
+      <backlog-tabs></backlog-tabs>
     </div>
   </div>
 </div>

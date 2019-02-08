@@ -56,11 +56,11 @@
     color: mat-color($primary, default-contrast);
     background-color: mat-color($primary, 300);
   }
-  //
-  //.mat-darker {
-  //  color: mat-color($primary, default-contrast);
-  //  background-color: mat-color($primary, 800);
-  //}
+
+  .mat-darker {
+    color: mat-color($primary, default-contrast);
+    background-color: mat-color($primary, 600);
+  }
 
   &.isLightTheme .bg-accented-light-theme {
     background-color: mat-color($primary, 100);

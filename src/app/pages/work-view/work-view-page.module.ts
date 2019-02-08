@@ -7,6 +7,7 @@ import { TasksModule } from '../../features/tasks/tasks.module';
 import { RouterModule } from '@angular/router';
 import { SplitModule } from './split/split.module';
 import { TimeTrackingModule } from '../../features/time-tracking/time-tracking.module';
+import { BacklogTabsComponent } from './backlog-tabs/backlog-tabs.component';
 
 @NgModule({
   imports: [
@@ -19,7 +20,7 @@ import { TimeTrackingModule } from '../../features/time-tracking/time-tracking.m
     SplitModule,
     TimeTrackingModule,
   ],
-  declarations: [WorkViewPageComponent],
+  declarations: [WorkViewPageComponent, BacklogTabsComponent],
 })
 export class WorkViewPageModule {
 }

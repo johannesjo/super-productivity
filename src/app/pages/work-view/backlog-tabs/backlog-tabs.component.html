@@ -1,0 +1,38 @@
+<mat-tab-group (selectedIndexChange)="indexChange($event)"
+               [selectedIndex]="selectedIndex"
+               color="darker"
+               class="tab-group">
+  <mat-tab>
+    <ng-template mat-tab-label>
+      <mat-icon class="color-contrast">library_books</mat-icon>
+      <span class="tab-label-text color-contrast">Backlog ({{taskService.estimateRemainingBacklog$|async|msToString}}
+        )</span>
+    </ng-template>
+
+    <div class="tab-wrapper bg-400">
+      <div class="component-wrapper page-wrapper">
+        <task-list [tasks]="taskService.backlogTasks$|async"
+                   listId="PARENT"
+                   class="isHidePlayBtn"
+                   listModelId="BACKLOG"></task-list>
+      </div>
+    </div>
+  </mat-tab>
+
+  <mat-tab>
+    <ng-template mat-tab-label>
+      <mat-icon class="color-contrast">alarm</mat-icon>
+      <span class="tab-label-text color-contrast">Scheduled</span>
+    </ng-template>
+
+    <div class="tab-wrapper bg-400">
+      <div class="component-wrapper page-wrapper">
+        <task-list [tasks]="taskService.backlogTasks$|async"
+                   listId="PARENT"
+                   class="isHidePlayBtn"
+                   listModelId="BACKLOG"></task-list>
+      </div>
+    </div>
+  </mat-tab>
+
+</mat-tab-group>

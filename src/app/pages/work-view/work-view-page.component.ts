@@ -20,8 +20,7 @@ import { PlanningModeService } from '../../features/planning-mode/planning-mode.
 })
 export class WorkViewPageComponent implements OnInit, OnDestroy {
   isShowTimeWorkedWithoutBreak = true;
-  // no todays tasks at all
-  splitInputPos = 100;
+  splitInputPos = 30;
   isPreloadBacklog = false;
 
   // we do it here to have the tasks in memory all the time
