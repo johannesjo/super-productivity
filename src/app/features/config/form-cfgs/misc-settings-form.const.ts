@@ -31,13 +31,6 @@ export const MISC_SETTINGS_FORM_CFG: ConfigFormSection = {
       },
     },
     {
-      key: 'isBlockFinishDayUntilTimeTimeTracked',
-      type: 'checkbox',
-      templateOptions: {
-        label: 'Disable the finish day button until task list has been exported',
-      },
-    },
-    {
       key: 'isHideNav',
       type: 'checkbox',
       templateOptions: {

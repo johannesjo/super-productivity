@@ -42,7 +42,6 @@ export type MiscConfig = Readonly<{
 
   isConfirmBeforeExit: boolean;
   isNotifyWhenTimeEstimateExceeded: boolean;
-  isBlockFinishDayUntilTimeTimeTracked: boolean;
   isTakeABreakEnabled: boolean;
   takeABreakMessage: string;
   takeABreakMinWorkingTime: number;

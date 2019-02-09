@@ -5,7 +5,6 @@ export const DEFAULT_CFG: GlobalConfig = {
   misc: {
     isConfirmBeforeExit: false,
     isNotifyWhenTimeEstimateExceeded: false,
-    isBlockFinishDayUntilTimeTimeTracked: false,
     isHideNav: false,
     isOnlyOpenIdleWhenCurrentTask: false,
     isEnableIdleTimeTracking: true,
