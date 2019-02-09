@@ -455,7 +455,6 @@ export function taskReducer(
         default:
           // SUB TASK CASE
           const oldPar = state.entities[sourceModelId];
-          console.log(oldPar.subTaskIds.filter(filterOutId(taskId)));
 
           newState = reCalcTimesForParentIfParent(oldPar.id, {
             ...newState,
@@ -468,9 +467,6 @@ export function taskReducer(
             }
           });
       }
-
-      console.log('after Source', newState);
-
 
       switch (targetModelId) {
         case 'DONE':

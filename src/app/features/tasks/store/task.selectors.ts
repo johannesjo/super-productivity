@@ -31,13 +31,13 @@ const mapEstimateRemaining = (tasks) => tasks && tasks.length && tasks.reduce((a
   if (task.subTasks && task.subTasks.length > 0) {
     estimateRemaining = task.subTasks.reduce((subAcc, subTask) => {
       const estimateRemainingSub = (+subTask.timeEstimate) - (+subTask.timeSpent);
-      const isTrackValSub = (estimateRemainingSub > 0) && !subTask.isDone;
-      return acc + ((isTrackValSub) ? estimateRemainingSub : 0);
+      const isTrackValSub = ((estimateRemainingSub > 0) && !subTask.isDone);
+      return subAcc + ((isTrackValSub) ? estimateRemainingSub : 0);
     }, 0);
   } else {
     estimateRemaining = (+task.timeEstimate) - (+task.timeSpent);
   }
-  isTrackVal = (estimateRemaining > 0) && !task.isDone;
+  isTrackVal = ((estimateRemaining > 0) && !task.isDone);
   return acc + ((isTrackVal) ? estimateRemaining : 0);
 }, 0);
 
