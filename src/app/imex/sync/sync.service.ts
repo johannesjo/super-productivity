@@ -9,6 +9,7 @@ import { BookmarkService } from '../../features/bookmark/bookmark.service';
 import { NoteService } from '../../features/note/note.service';
 import { JiraIssueService } from '../../features/issue/jira/jira-issue/jira-issue.service';
 import { AttachmentService } from '../../features/attachment/attachment.service';
+import { ReminderService } from '../../features/reminder/reminder.service';
 
 // TODO some of this can be done in a background script
 
@@ -26,6 +27,7 @@ export class SyncService {
     private _bookmarkService: BookmarkService,
     private _jiraIssueService: JiraIssueService,
     private _noteService: NoteService,
+    private _reminderService: ReminderService,
   ) {
   }
 
@@ -84,6 +86,7 @@ export class SyncService {
       // reload view model from ls
       this._configService.load(true),
       this._projectService.load(),
+      this._reminderService.reloadFromLs(),
       this._taskService.loadStateForProject(curId),
       this._bookmarkService.loadStateForProject(curId),
       this._noteService.loadStateForProject(curId),

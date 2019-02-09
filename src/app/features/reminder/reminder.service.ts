@@ -31,16 +31,22 @@ export class ReminderService {
 
   async init() {
     if ('Worker' in window) {
-      this._reminders = await this._loadFromLs();
-      this._reminders$.next(this._reminders);
+
       this._w = new Worker(WORKER_PATH);
       // this._w.onerror = this._handleError.bind(this);
       this._w.addEventListener('message', this._onReminderActivated.bind(this));
       this._w.addEventListener('error', this._handleError.bind(this));
-      this._updateRemindersInWorker(this._reminders);
+
+      await this.reloadFromLs();
     } else {
       console.error('No service workers supported :(');
     }
+  }
+
+  async reloadFromLs() {
+    this._reminders = await this._loadFromLs();
+    this._reminders$.next(this._reminders);
+    this._updateRemindersInWorker(this._reminders);
   }
 
   getById(reminderId: string): Reminder {
