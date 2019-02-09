@@ -44,10 +44,9 @@ export class DialogViewTaskReminderComponent implements OnDestroy {
       this.dismiss();
     } else {
       this._subs.add(
-        this._projectService.onProjectChange$.pipe(
-          // TODO less hacky way of waiting for data
-          delay(250),
-          switchMap(() => this.task$.pipe(take(1)))
+        this._projectService.onProjectRelatedDataLoaded$.pipe(
+          switchMap(() => this.task$.pipe(take(1))),
+          take(1),
         ).subscribe(task => {
           this.task = task;
           this.isForCurrentProject = true;

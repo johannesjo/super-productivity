@@ -61,6 +61,9 @@ export class ProjectService {
 
   onProjectChange$: Observable<any> = this._actions$.pipe(ofType(ProjectActionTypes.SetCurrentProject));
 
+  onProjectRelatedDataLoaded$: Observable<any> = this._actions$.pipe(ofType(ProjectActionTypes.LoadProjectRelatedDataSuccess));
+
+
   constructor(
     private readonly _persistenceService: PersistenceService,
     // TODO correct type?
