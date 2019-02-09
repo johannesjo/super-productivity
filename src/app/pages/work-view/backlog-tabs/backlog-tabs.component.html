@@ -12,6 +12,7 @@
     <div class="tab-wrapper bg-400">
       <div class="component-wrapper page-wrapper">
         <task-list [tasks]="taskService.backlogTasks$|async"
+                   [noTasksMsg]="'There are currently no tasks in your backlog'"
                    listId="PARENT"
                    class="isHidePlayBtn"
                    listModelId="BACKLOG"></task-list>
