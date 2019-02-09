@@ -1,0 +1,22 @@
+@import '../../../../variables';
+
+.wrapper {
+  display: flex;
+  align-items: center;
+  position: relative;
+  justify-content: stretch;
+}
+
+mat-icon {
+  margin-right: $s;
+  color: $red;
+}
+
+button {
+  margin: 0;
+  margin-left: 1.5* $s;
+}
+
+.button-wrapper {
+  margin-left: auto;
+}

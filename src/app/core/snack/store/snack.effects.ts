@@ -9,6 +9,7 @@ import { SnackCustomComponent } from '../snack-custom/snack-custom.component';
 import { DEFAULT_SNACK_CFG } from '../snack.const';
 import { SnackGoogleLoginComponent } from '../snack-google-login/snack-google-login.component';
 import { SnackJiraUnblockComponent } from '../snack-jira-unblock/snack-jira-unblock.component';
+import { SnackGlobalErrorComponent } from '../snack-global-error/snack-global-error.component';
 
 @Injectable()
 export class SnackEffects {
@@ -32,7 +33,7 @@ export class SnackEffects {
     );
 
 
-  private _ref: MatSnackBarRef<SnackCustomComponent | SnackJiraUnblockComponent | SnackGoogleLoginComponent | SimpleSnackBar>;
+  private _ref: MatSnackBarRef<SnackCustomComponent | SnackJiraUnblockComponent | SnackGoogleLoginComponent | SimpleSnackBar | SnackGlobalErrorComponent>;
 
   constructor(private actions$: Actions,
               private store$: Store<any>,
@@ -62,6 +63,10 @@ export class SnackEffects {
 
       case 'JIRA_UNBLOCK':
         this._ref = this.matSnackBar.openFromComponent(SnackJiraUnblockComponent, cfg);
+        break;
+
+      case 'GLOBAL_ERROR':
+        this._ref = this.matSnackBar.openFromComponent(SnackGlobalErrorComponent, cfg);
         break;
 
       case 'ERROR':
