@@ -1,26 +1,36 @@
 <mat-dialog-content>
-  <!--<h3 class="mat-h3">Reminder: {{data.reminder.title}}</h3>-->
-  <div class="note">
-    {{(note$|async)?.content}}
+  <h2 class="mat-h2">Note</h2>
+
+  <div class="note"
+       *ngIf="isForCurrentProject">
+    {{(note$|async)?.content }}
   </div>
+
+  <ng-container *ngIf="!isForCurrentProject">
+    <p>From Project</p>
+    <h3>{{(targetProject$|async)?.title}}</h3>
+    <div class="note">
+      {{reminder.title }}
+    </div>
+  </ng-container>
 </mat-dialog-content>
 
-<mat-dialog-actions align="end">
+<mat-dialog-actions align="center">
   <div class="wrap-buttons">
-    <button color="primary"
-            (click)="dismiss()"
-            type="button"
-            mat-raised-button>
-      <mat-icon>clear</mat-icon>
-      Dismiss
-    </button>
-
     <button color="primary"
             (click)="snooze()"
             type="button"
             mat-raised-button>
       <mat-icon>snooze</mat-icon>
       Snooze for 10m
+    </button>
+
+    <button color=""
+            (click)="dismiss()"
+            type="button"
+            mat-raised-button>
+      <mat-icon>clear</mat-icon>
+      Dismiss
     </button>
   </div>
 </mat-dialog-actions>
