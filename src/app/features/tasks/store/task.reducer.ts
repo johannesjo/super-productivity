@@ -653,12 +653,15 @@ export function taskReducer(
         // update timeSpent if first sub task and non present
         ...(
           (parentTask.subTaskIds.length === 0 && Object.keys(task.timeSpentOnDay).length === 0)
-            ? {timeSpentOnDay: parentTask.timeSpentOnDay}
+            ? {
+              timeSpentOnDay: parentTask.timeSpentOnDay,
+              timeSpent: calcTotalTimeSpent(parentTask.timeSpentOnDay)
+            }
             : {}
         ),
         // update timeEstimate if first sub task and non present
         ...(
-          (parentTask.subTaskIds.length === 0 && !task.timeSpent)
+          (parentTask.subTaskIds.length === 0 && !task.timeEstimate)
             ? {timeEstimate: parentTask.timeEstimate}
             : {}
         )
