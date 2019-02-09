@@ -27,6 +27,15 @@ a[href] {
   color: $c-accent;
 }
 
-*, *:after, *:before {
+*,
+*:after,
+*:before {
   box-sizing: border-box;
+}
+
+// make images responsive per default
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
 }

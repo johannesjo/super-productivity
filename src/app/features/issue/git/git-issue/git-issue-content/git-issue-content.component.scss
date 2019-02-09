@@ -8,14 +8,29 @@
     vertical-align: top;
     padding-bottom: $s;
     padding-left: $s;
+    overflow: hidden;
 
     &:first-child {
       padding-left: 0;
     }
   }
+
+  td {
+    width: 100%;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    word-break: break-word;
+
+    ::ng-deep img,
+    img {
+      max-width: 100%;
+      height: auto;
+      display: block;
+    }
+  }
 }
 
-.wrapper {
+.table-wrapper {
   margin: $s*2;
   @include standardThemeTextColor();
 }

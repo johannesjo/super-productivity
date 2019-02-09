@@ -10,7 +10,7 @@
 </div>
 
 
-<div class="wrapper">
+<div class="table-wrapper">
   <table class="issue-table">
     <tr>
       <th>Summary</th>
@@ -38,7 +38,8 @@
       <th>Description</th>
       <td>
         <!--<inline-markdown [model]="issueData?.body"></inline-markdown>-->
-        <div [innerHTML]="issueData?.body|markdown"
+        <div class="description"
+             [innerHTML]="issueData?.body|markdown"
              *ngIf="issueData.body"></div>
       </td>
     </tr>
