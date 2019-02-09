@@ -29,18 +29,6 @@
         <strong>{{takeABreakService.timeWorkingWithoutABreak$|async|msToString}}</strong><mat-icon>timer</mat-icon>
       </span>
         </div>
-        <div class="controls show-xs-only">
-          <button (click)="showAddTaskBar()"
-                  color="primary"
-                  mat-mini-fab>
-            <mat-icon>add</mat-icon>
-          </button>
-          <!--<button routerLink="/daily-summary"-->
-          <!--mat-mini-fab=""-->
-          <!--color="primary">-->
-          <!--<mat-icon>done_all</mat-icon>-->
-          <!--</button>-->
-        </div>
       </div>
 
       <div *ngIf="(planningModeService.isPlanningMode$|async)"

@@ -1,13 +1,20 @@
 <div class="wrapper bg-primary color-contrast mat-elevation-z3">
   <button mat-icon-button
-          class="app-icon"
+          class="app-icon hide-xs"
           routerLink="work-view">
     <mat-icon svgIcon="sp">sp</mat-icon>
   </button>
 
   <button [matMenuTriggerFor]="mainMenu"
-          class="burger-trigger"
+          class="burger-trigger hide-xs"
           mat-icon-button>
+    <mat-icon>menu</mat-icon>
+  </button>
+
+  <button [matMenuTriggerFor]="mainMenu"
+          class="burger-trigger bg-200 show-xs-only"
+          color="lighter"
+          mat-mini-fab>
     <mat-icon>menu</mat-icon>
   </button>
 
@@ -93,10 +100,17 @@
 
   <nav class="action-nav">
     <button (click)="showAddTaskBar()"
-            class="hide-xs bg-200"
+            class="bg-200"
             color="lighter"
             mat-mini-fab>
       <mat-icon>add</mat-icon>
+    </button>
+
+    <button (click)="bookmarkService.toggleBookmarks()"
+            class="bg-200 show-xs-only"
+            color="lighter"
+            mat-mini-fab>
+      <mat-icon>bookmark</mat-icon>
     </button>
 
     <button (click)="toggleShowNotes()"
@@ -155,7 +169,7 @@
   <button (click)="bookmarkService.toggleBookmarks()"
           [class.is-open]="bookmarkService.isShowBookmarks$|async"
           aria-label="Show Help for section"
-          class="show-bookmarks-btn"
+          class="show-bookmarks-btn hide-xs"
           color="primary"
           mat-mini-fab="">
     <mat-icon>bookmark</mat-icon>

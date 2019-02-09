@@ -126,7 +126,11 @@ button {
   align-items: center;
 
   button {
-    margin-left: $s;
+    margin-left: $s*0.5;
+
+    @include mq(xs) {
+      margin-left: $s;
+    }
   }
 }
 
@@ -135,6 +139,7 @@ button {
   align-items: center;
   padding: 4px $mobileHorizontalPadding;
   flex-wrap: wrap;
+  min-height: 56px;
 
   @include mq(xs) {
     padding: 4px 16px;
@@ -211,7 +216,11 @@ button {
 
 .play-btn-wrapper {
   position: relative;
-  margin-left: $s;
+  margin-left: $s*0.5;
+
+  @include mq(xs) {
+    margin-left: $s;
+  }
 
   .play-btn {
     $circleOverflow: 5px;
@@ -232,6 +241,14 @@ button {
     .mat-icon {
       position: relative;
       z-index: 2;
+    }
+
+    width: 40px;
+    height: 40px;
+
+    @include mq(xs, max) {
+      width: 40px;
+      height: 40px;
     }
   }
 
