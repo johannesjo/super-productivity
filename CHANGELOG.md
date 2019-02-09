@@ -1,3 +1,69 @@
+# [2.1.0](https://github.com/johannesjo/super-productivity/compare/v2.0.7...v2.1.0) (2019-02-09)
+
+
+### Bug Fixes
+
+* pomodoro hover area triggering not as intended ([e8065b5](https://github.com/johannesjo/super-productivity/commit/e8065b5))
+* **git:** enable settings check again ([25d6418](https://github.com/johannesjo/super-productivity/commit/25d6418))
+* **googleApi:** login snack not shown on disconnect ([57b579e](https://github.com/johannesjo/super-productivity/commit/57b579e))
+* **scheduleTasks:** add to backlog being shown when not possible ([30c17d0](https://github.com/johannesjo/super-productivity/commit/30c17d0))
+* **scheduleTasks:** nested tab styles for backlog tabs ([c93f249](https://github.com/johannesjo/super-productivity/commit/c93f249))
+* **scheduleTasks:** not correctly importing reminders ([0b20cc7](https://github.com/johannesjo/super-productivity/commit/0b20cc7))
+* **scheduleTasks:** reminder model not being up to date ([9fde7ca](https://github.com/johannesjo/super-productivity/commit/9fde7ca))
+* **scheduleTasks:** view task switch to other project sometimes not working ([a6e5bb6](https://github.com/johannesjo/super-productivity/commit/a6e5bb6))
+* **tasks:** not displaying time spent after creating first sub task ([3667c12](https://github.com/johannesjo/super-productivity/commit/3667c12))
+* **tasks:** time estimates not being calculated correctly [#139](https://github.com/johannesjo/super-productivity/issues/139) ([748471d](https://github.com/johannesjo/super-productivity/commit/748471d))
+* don't shrink play btn for mobile ([4e2b486](https://github.com/johannesjo/super-productivity/commit/4e2b486))
+* images being too big inside issue content ([e920d2d](https://github.com/johannesjo/super-productivity/commit/e920d2d))
+* lint ([cab9a8e](https://github.com/johannesjo/super-productivity/commit/cab9a8e))
+* remove debugging state ([7b4c2db](https://github.com/johannesjo/super-productivity/commit/7b4c2db))
+* remove minimize to tray option from settings [#140](https://github.com/johannesjo/super-productivity/issues/140) ([52b4243](https://github.com/johannesjo/super-productivity/commit/52b4243))
+
+
+### Features
+
+* add fallback error handler ([79ae667](https://github.com/johannesjo/super-productivity/commit/79ae667))
+* add no tasks message for backlog ([9e1bce4](https://github.com/johannesjo/super-productivity/commit/9e1bce4))
+* add no tasks message for done tasks ([d045f73](https://github.com/johannesjo/super-productivity/commit/d045f73))
+* add reload and dismiss actions for global error handler snack ([f34417c](https://github.com/johannesjo/super-productivity/commit/f34417c))
+* add reminders to global sync model ([a61ba62](https://github.com/johannesjo/super-productivity/commit/a61ba62))
+* display errors longer ([b15fc44](https://github.com/johannesjo/super-productivity/commit/b15fc44))
+* **scheduleTasks:** add track by ([303be3f](https://github.com/johannesjo/super-productivity/commit/303be3f))
+* improve add task bar ([bd2e022](https://github.com/johannesjo/super-productivity/commit/bd2e022))
+* **scheduleTasks:** improve ui ([bba78c3](https://github.com/johannesjo/super-productivity/commit/bba78c3))
+* improve global error handler ([da4302d](https://github.com/johannesjo/super-productivity/commit/da4302d))
+* improve global snack error ([3b7c1fc](https://github.com/johannesjo/super-productivity/commit/3b7c1fc))
+* improve mobile main nav ([a419209](https://github.com/johannesjo/super-productivity/commit/a419209))
+* **scheduleTasks:** connect actions ([fde747a](https://github.com/johannesjo/super-productivity/commit/fde747a))
+* improve mobile styling for scheduled tasks overview ([999ef35](https://github.com/johannesjo/super-productivity/commit/999ef35))
+* improve no issue found message for git ([dfda6a2](https://github.com/johannesjo/super-productivity/commit/dfda6a2))
+* **scheduleTasks:** add rudimentary ui for scheduled tasks ([ad727a4](https://github.com/johannesjo/super-productivity/commit/ad727a4))
+* improve project overview for mobile ([c887a97](https://github.com/johannesjo/super-productivity/commit/c887a97))
+* **notes:** make reminders work when another project is active ([a679f65](https://github.com/johannesjo/super-productivity/commit/a679f65))
+* **scheduleTasks:** account for reminders from other projects ([2966d8a](https://github.com/johannesjo/super-productivity/commit/2966d8a))
+* **scheduleTasks:** add animation for list ([025970b](https://github.com/johannesjo/super-productivity/commit/025970b))
+* **scheduleTasks:** add dialog for scheduling task ([a0171fe](https://github.com/johannesjo/super-productivity/commit/a0171fe))
+* **scheduleTasks:** add humanized timestamp ([76ca585](https://github.com/johannesjo/super-productivity/commit/76ca585))
+* **scheduleTasks:** add little alarm icon to scheduled tasks ([68c6e20](https://github.com/johannesjo/super-productivity/commit/68c6e20))
+* **scheduleTasks:** add service logic for scheduling tasks ([d19f33f](https://github.com/johannesjo/super-productivity/commit/d19f33f))
+* **scheduleTasks:** adjust mobile styling ([56e996c](https://github.com/johannesjo/super-productivity/commit/56e996c))
+* **scheduleTasks:** beautify ui ([213ee80](https://github.com/johannesjo/super-productivity/commit/213ee80))
+* **scheduleTasks:** clean up reminders on task deletion ([2bbb9c8](https://github.com/johannesjo/super-productivity/commit/2bbb9c8))
+* **scheduleTasks:** handle edge case when there is a reminder for a deleted task ([154ddac](https://github.com/johannesjo/super-productivity/commit/154ddac))
+* **scheduleTasks:** improve ui for notify and edit dialog ([409082a](https://github.com/johannesjo/super-productivity/commit/409082a))
+* **scheduleTasks:** improve waiting for other project data ([3665585](https://github.com/johannesjo/super-productivity/commit/3665585))
+* improve project overview styling ([6001000](https://github.com/johannesjo/super-productivity/commit/6001000))
+* **scheduleTasks:** make editing reminder work ([7165d50](https://github.com/johannesjo/super-productivity/commit/7165d50))
+* **scheduleTasks:** make starting tasks from reminder work ([31aea97](https://github.com/johannesjo/super-productivity/commit/31aea97))
+* **scheduleTasks:** prepare ui ([d7bb9e0](https://github.com/johannesjo/super-productivity/commit/d7bb9e0))
+* **scheduleTasks:** sort by due time ([b4dc74f](https://github.com/johannesjo/super-productivity/commit/b4dc74f))
+* **takeABreak:** add reset break timer button for idle dialog ([ba6a269](https://github.com/johannesjo/super-productivity/commit/ba6a269))
+* **takeABreak:** connect idle time again ([cc5349c](https://github.com/johannesjo/super-productivity/commit/cc5349c))
+* remove setting for isBlockFinishDayUntilTimeTimeTracked ([53e88b4](https://github.com/johannesjo/super-productivity/commit/53e88b4))
+* show message when there are no scheduled tasks ([0ef88fa](https://github.com/johannesjo/super-productivity/commit/0ef88fa))
+
+
+
 ## [2.0.7](https://github.com/johannesjo/super-productivity/compare/v2.0.6...v2.0.7) (2019-02-03)
 
 
