@@ -152,8 +152,9 @@ export class GitIssueService {
 
         if (!matchingNewIssue && isNotify) {
           this._snackService.open({
-            type: 'ERROR',
-            message: `Git: Issue ${oldIssue.number} "${oldIssue.title}" seems to be deleted on git`
+            type: 'CUSTOM',
+            svgIcon: 'github',
+            message: `Git: Issue ${oldIssue.number} "${oldIssue.title}" seems to be deleted or closed on git`
           });
         }
       });
