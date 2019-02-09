@@ -16,7 +16,7 @@
                   svgIcon="github"></mat-icon>
       </div>
 
-      <div class="controls">
+      <div class="controls hide-xs">
         <button (click)="edit(project)"
                 color="primary"
                 mat-raised-button>
@@ -29,6 +29,20 @@
                 mat-raised-button>
           <mat-icon aria-label="Delete">delete</mat-icon>
           Delete
+        </button>
+      </div>
+
+      <div class="controls show-xs-only">
+        <button (click)="edit(project)"
+                color="primary"
+                mat-mini-fab>
+          <mat-icon aria-label="Edit">edit</mat-icon>
+        </button>
+        <button (click)="remove(project.id)"
+                *ngIf="project.id !== (projectService.currentId$|async)"
+                color="warn"
+                mat-mini-fab>
+          <mat-icon aria-label="Delete">delete</mat-icon>
         </button>
       </div>
 

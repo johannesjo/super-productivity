@@ -2,6 +2,17 @@
 
 .controls {
   margin-left: 2*$s;
+  display: flex;
+  justify-content: end;
+  flex-direction: row;
+
+  @include mq(xs) {
+    min-width: 203px;
+  }
+
+  button:first-child {
+    margin-left: auto;
+  }
 
   button {
     margin-left: $s;
@@ -20,6 +31,7 @@
 
   .title {
     font-size: 16px;
+    flex: 1;
 
     &.isCurrent {
       font-weight: bold;
