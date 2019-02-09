@@ -92,6 +92,13 @@ export class NoteService {
     }));
   }
 
+  public async updateFromDifferentProject(projectId, id, updates: Partial<Note>) {
+    const noteState = await this._persistenceService.loadNotesForProject(projectId);
+    const noteToUpdate = noteState.entities[id];
+    Object.assign(noteToUpdate, updates);
+    return await this._persistenceService.saveNotesForProject(projectId, noteState);
+  }
+
   public updateOrder(ids: string[]) {
     this._store$.dispatch(new UpdateNoteOrder({ids}));
   }

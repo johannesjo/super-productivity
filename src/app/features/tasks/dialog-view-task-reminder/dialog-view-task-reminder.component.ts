@@ -5,7 +5,7 @@ import { Task } from '../task.model';
 import { TaskService } from '../task.service';
 import { Observable, Subscription } from 'rxjs';
 import { ReminderService } from '../../reminder/reminder.service';
-import { delay, switchMap, take } from 'rxjs/operators';
+import { switchMap, take } from 'rxjs/operators';
 import { ProjectService } from '../../project/project.service';
 import { Project } from '../../project/project.model';
 
@@ -21,6 +21,7 @@ export class DialogViewTaskReminderComponent implements OnDestroy {
   reminder: Reminder = this.data.reminder;
   isForCurrentProject = (this.reminder.projectId === this._projectService.currentId);
   targetProject$: Observable<Project> = this._projectService.getById(this.reminder.projectId);
+  isDisableControls = false;
   private _subs = new Subscription();
 
   constructor(
@@ -38,7 +39,13 @@ export class DialogViewTaskReminderComponent implements OnDestroy {
     this._subs.unsubscribe();
   }
 
+  get isError() {
+    // just for this dialog we make an exception about using getters
+    return !this.task && this.isForCurrentProject;
+  }
+
   play() {
+    this.isDisableControls = true;
     if (this.isForCurrentProject) {
       this._startTask();
       this.dismiss();
@@ -58,16 +65,22 @@ export class DialogViewTaskReminderComponent implements OnDestroy {
   }
 
   dismiss() {
-    if (this.task) {
-      this._taskService.update(this.reminder.relatedId, {
-        reminderId: null,
-      });
-    }
+    this.isDisableControls = true;
+    this._taskService.update(this.reminder.relatedId, {
+      reminderId: null,
+    });
+    this._reminderService.removeReminder(this.reminder.id);
+    this.close();
+  }
+
+  dismissReminderOnly() {
+    this.isDisableControls = true;
     this._reminderService.removeReminder(this.reminder.id);
     this.close();
   }
 
   snooze() {
+    this.isDisableControls = true;
     this._reminderService.updateReminder(this.reminder.id, {
       remindAt: Date.now() + (10 * 60 * 1000)
     });

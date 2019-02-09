@@ -1,7 +1,11 @@
 <mat-dialog-content>
   <h2 class="mat-h2">Scheduled Task</h2>
-  <div class="content">
+
+  <div *ngIf="!isError"
+       class="content">
     <h3>"{{task?.title || reminder.title}}"</h3>
+
+    <p *ngIf="isForCurrentProject">Task is due. Do you want to start working on it?</p>
 
     <div *ngIf="!isForCurrentProject"
          class="for-project">
@@ -9,12 +13,9 @@
       <h3>{{(targetProject$|async)?.title}}</h3>
       <p>Task is due. Do you want to start working on it?</p>
     </div>
-    <p *ngIf="isForCurrentProject">Task is due. Do you want to start working on it?</p>
   </div>
 
-  <div class="task-for-other-project"
-
-  <div *ngIf="!task && isForCurrentProject"
+  <div *ngIf="isError"
        style="color: red">
     There was a reminder scheduled for the task <strong>{{reminder.title}}</strong>, but it seems to be lost.
   </div>
@@ -22,30 +23,44 @@
 
 <mat-dialog-actions align="center">
   <div class="wrap-buttons">
-    <button color="primary"
-            (click)="play()"
-            type="button"
-            mat-raised-button>
-      <mat-icon>play_arrow</mat-icon>
-      {{!isForCurrentProject ? 'Switch Project &' : ''}} Start Task
-    </button>
+    <ng-container *ngIf="!isError">
+      <button color="primary"
+              [disabled]="isDisableControls"
+              (click)="play()"
+              type="button"
+              mat-raised-button>
+        <mat-icon>play_arrow</mat-icon>
+        {{!isForCurrentProject ? 'Switch Project &' : ''}} Start Task
+      </button>
 
-    <button color=""
-            *ngIf="task || !isForCurrentProject"
-            (click)="snooze()"
-            type="button"
-            mat-raised-button>
-      <mat-icon>snooze</mat-icon>
-      Snooze 10m
-    </button>
+      <button color=""
+              [disabled]="isDisableControls"
+              (click)="snooze()"
+              type="button"
+              mat-raised-button>
+        <mat-icon>snooze</mat-icon>
+        Snooze 10m
+      </button>
+
+      <button *ngIf="isForCurrentProject"
+              color="warn"
+              [disabled]="isDisableControls"
+              (click)="dismiss()"
+              type="button"
+              mat-raised-button>
+        <mat-icon>clear</mat-icon>
+        Dismiss
+      </button>
+    </ng-container>
 
     <button color="warn"
-            *ngIf="isForCurrentProject"
-            (click)="dismiss()"
+            *ngIf="isError"
+            [disabled]="isDisableControls"
+            (click)="dismissReminderOnly()"
             type="button"
             mat-raised-button>
       <mat-icon>clear</mat-icon>
-      Dismiss
+      Dismiss Reminder
     </button>
   </div>
 </mat-dialog-actions>
