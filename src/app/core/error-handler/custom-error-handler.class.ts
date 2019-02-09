@@ -2,7 +2,21 @@ import { ErrorHandler, Injectable } from '@angular/core';
 import { SnackService } from '../snack/snack.service';
 
 const _createErrorAlert = (error: Error) => {
-
+  console.log('CREATE ERROR ALERT');
+  const errorAlert = document.createElement('div');
+  errorAlert.classList.add('global-error-alert');
+  errorAlert.innerHTML = `
+    <h2>An error occurred<h2>
+    <p><a href="https://github.com/johannesjo/super-productivity/issues/new" target="_blank">Please Report</a></p>
+    <pre>${error.toString()}</pre>
+    `;
+  const btnReload = document.createElement('BUTTON');
+  btnReload.innerText = 'Reload App';
+  btnReload.addEventListener('click', () => {
+    window.location.reload();
+  });
+  errorAlert.append(btnReload);
+  document.body.append(errorAlert);
 };
 
 @Injectable()

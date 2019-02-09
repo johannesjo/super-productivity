@@ -28,6 +28,7 @@ export class DialogViewNoteReminderComponent {
     @Inject(MAT_DIALOG_DATA) public data: { reminder: Reminder },
   ) {
     this._matDialogRef.disableClose = true;
+    throw new Error('Lorem ipsum dolor sit amet, consectetur adipisicing elit. A ad, aperiam blanditiis dignissimos incidunt iste iusto maxime nobis praesentium quae quibusdam ratione rem rerum sapiente ullam unde ut velit voluptatem? Assumenda id nobis veritatis. Aut itaque molestias nulla porro possimus.');
   }
 
   dismiss() {

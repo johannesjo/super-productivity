@@ -1,0 +1,24 @@
+.global-error-alert {
+  position: fixed;
+  min-width: 300px;
+  border: 8px solid red;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 9999999999999;
+  text-align: center;
+  padding: 20px;
+  background: #fff;
+  max-width: 90%;
+  overflow: auto;
+
+  pre {
+    font-size: 14px;
+    max-width: 100%;
+    white-space: normal;
+  }
+
+  button {
+    font-size: 20px;
+  }
+}
