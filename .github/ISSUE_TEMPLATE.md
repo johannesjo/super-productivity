@@ -25,4 +25,4 @@ Please search the issues before creating one. -->
 4.
 
 ## Console Output
-<!--- Is there any output if you press Ctrl+Shift+J in the console tab? If so please post it here. -->
+<!--- Is there any output if you press Ctrl+Shift+i (Cmd+Alt+i for mac) in the console tab? If so please post it here. -->
