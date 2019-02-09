@@ -8,6 +8,7 @@
   // add a little padding to top and bottom, to make drag dropping easier
   padding: 5px 0;
   margin: 0;
+  position: relative;
 
   //.as-sortable-placeholder,
   //.dndPlaceholder {
@@ -105,5 +106,12 @@
   display: flex;
   align-items: center;
   justify-content: center;
+}
 
+.no-tasks {
+  position: absolute;
+  text-align: center;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }

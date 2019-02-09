@@ -104,6 +104,7 @@
            @expand>
         <h2 class="mat-h2 completed-tasks-heading">Completed Tasks</h2>
         <task-list [tasks]="taskService.doneTasks$|async"
+                   [noTasksMsg]="'There are currently no completed tasks'"
                    listId="PARENT"
                    listModelId="DONE"></task-list>
         <div class="finish-day-button-wrapper">
