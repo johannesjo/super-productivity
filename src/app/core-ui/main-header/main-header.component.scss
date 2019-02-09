@@ -243,12 +243,9 @@ button {
       z-index: 2;
     }
 
-    width: 40px;
-    height: 40px;
-
     @include mq(xs, max) {
-      width: 40px;
-      height: 40px;
+      //width: 40px;
+      //height: 40px;
     }
   }
 
