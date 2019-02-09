@@ -10,6 +10,10 @@ export class CustomErrorHandler implements ErrorHandler {
     console.error(error);
     this._snackService.open({
       type: 'ERROR',
+      config: {
+        // display basically forever
+        duration: 60 * 60 * 24 * 1000,
+      },
       message: error.toString().substring(0, 150),
     });
   }
