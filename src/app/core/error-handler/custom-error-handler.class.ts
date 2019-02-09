@@ -2,7 +2,6 @@ import { ErrorHandler, Injectable } from '@angular/core';
 import { SnackService } from '../snack/snack.service';
 
 const _createErrorAlert = (error: Error) => {
-  console.log('CREATE ERROR ALERT');
   const errorAlert = document.createElement('div');
   errorAlert.classList.add('global-error-alert');
   errorAlert.innerHTML = `
@@ -39,6 +38,7 @@ export class CustomErrorHandler implements ErrorHandler {
     } catch (e) {
       _createErrorAlert(error);
     }
+    console.log('GLOBAL_ERROR_HANDLER');
     console.error(error);
   }
 }
