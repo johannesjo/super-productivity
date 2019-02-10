@@ -7,28 +7,52 @@ import { HttpClient, HttpHeaders, HttpParams, HttpRequest } from '@angular/commo
 import { SnackService } from '../../core/snack/snack.service';
 import { SnackType } from '../../core/snack/snack.model';
 import { ConfigService } from '../config/config.service';
-import { GlobalConfig, GoogleSession } from '../config/config.model';
-import { catchError, concatMap, filter, map, take } from 'rxjs/operators';
+import { GoogleSession } from '../config/config.model';
+import { catchError, concatMap, distinctUntilChanged, filter, map, shareReplay, switchMap, take } from 'rxjs/operators';
 import { EmptyObservable } from 'rxjs-compat/observable/EmptyObservable';
-import { combineLatest, from, Observable, throwError } from 'rxjs';
-import { IPC_GOOGLE_AUTH_TOKEN, IPC_GOOGLE_AUTH_TOKEN_ERROR, IPC_TRIGGER_GOOGLE_AUTH } from '../../../../electron/ipc-events.const';
+import { combineLatest, EMPTY, from, merge, Observable, throwError, timer } from 'rxjs';
+import {
+  IPC_GOOGLE_AUTH_TOKEN,
+  IPC_GOOGLE_AUTH_TOKEN_ERROR,
+  IPC_TRIGGER_GOOGLE_AUTH
+} from '../../../../electron/ipc-events.const';
 import { ElectronService } from 'ngx-electron';
 
-const EXPIRES_SAFETY_MARGIN = 30000;
+const EXPIRES_SAFETY_MARGIN = 60000;
 
 @Injectable({
   providedIn: 'root',
 })
 export class GoogleApiService {
+  private _session$: Observable<GoogleSession> = this._configService.cfg$.pipe(
+    map(cfg => cfg && cfg._googleSession),
+    distinctUntilChanged(),
+  );
+
+  private _onTokenExpire$: Observable<number> = this._session$.pipe(
+    switchMap((session) => {
+      const expiresAt = session && session.expiresAt || 0;
+      const expiresIn = expiresAt - (moment().valueOf() + EXPIRES_SAFETY_MARGIN);
+      return expiresIn > 0
+        ? timer(expiresIn)
+        : EMPTY;
+    })
+  );
+
   public isLoggedIn: boolean;
-  public isLoggedIn$: Observable<boolean> = this._configService.cfg$
-    .pipe(map((cfg: GlobalConfig) => {
-      const session = cfg && cfg._googleSession;
-      const isExpired = (!session.expiresAt || moment()
-        .valueOf() + EXPIRES_SAFETY_MARGIN > session.expiresAt);
-      // console.log('isLoggedIn check', (session && session.accessToken && !isExpired), isExpired, session);
-      return session && session.accessToken && !isExpired;
-    }));
+  public isLoggedIn$: Observable<boolean> = merge(
+    this._session$,
+    this._onTokenExpire$,
+  ).pipe(
+    map((session_: GoogleSession | number) => {
+      if (session_ === 0) {
+        return false;
+      }
+      const session = session_ as GoogleSession;
+      return session && !!session.accessToken;
+    }),
+    shareReplay(),
+  );
 
   private _isScriptLoaded = false;
   private _isGapiInitialized = false;
@@ -39,6 +63,7 @@ export class GoogleApiService {
               private readonly _electronService: ElectronService,
               private readonly _snackService: SnackService) {
     this.isLoggedIn$.subscribe((isLoggedIn) => this.isLoggedIn = isLoggedIn);
+    this._onTokenExpire$.subscribe((val) => console.log('onTokenExpire$', val));
   }
 
   private get _session(): GoogleSession {
