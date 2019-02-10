@@ -20,6 +20,7 @@ import { take } from 'rxjs/operators';
 import { ReminderService } from '../reminder/reminder.service';
 import { SnackService } from '../../core/snack/snack.service';
 import { createFromDrop, DropPasteInput } from '../../core/drop-paste-input/drop-paste-input';
+import { isImageUrl, isImageUrlSimple } from '../../util/is-image-url';
 
 @Injectable({
   providedIn: 'root',
@@ -157,8 +158,7 @@ export class NoteService {
     return reminderId;
   }
 
-  private _handleInput(drop: DropPasteInput, ev) {
-    console.log(drop);
+  private async _handleInput(drop: DropPasteInput, ev) {
     // properly not intentional so we leave
     if (!drop || !drop.path) {
       return;
@@ -171,8 +171,12 @@ export class NoteService {
 
     const note: Partial<Note> = {
       content: drop.path,
-      imgUrl: drop.path,
     };
+
+    const isImg = isImageUrlSimple(drop.path) || await isImageUrl(drop.path);
+    if (isImg) {
+      note.imgUrl = drop.path;
+    }
 
     this.add(note);
 
