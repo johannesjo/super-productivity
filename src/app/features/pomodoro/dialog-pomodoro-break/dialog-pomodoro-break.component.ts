@@ -18,25 +18,25 @@ export class DialogPomodoroBreakComponent {
   isBreakDone$ = this.pomodoroService.isManualPause$;
   currentCycle$ = this.pomodoroService.currentCycle$;
 
-  private isCloseDialog$: Observable<boolean> = this.pomodoroService.isBreak$.pipe(
+  private _subs = new Subscription();
+  private _isCloseDialog$: Observable<boolean> = this.pomodoroService.isBreak$.pipe(
     withLatestFrom(this.pomodoroService.cfg$),
     filter(([isBreak, cfg]) => !cfg.isManualContinue && !isBreak),
     mapTo(true),
   );
-  private _subs = new Subscription();
 
   constructor(
     private _matDialogRef: MatDialogRef<DialogPomodoroBreakComponent>,
     public pomodoroService: PomodoroService,
   ) {
-    _matDialogRef.disableClose = true;
+    // _matDialogRef.disableClose = true;
 
     this._subs.add(this.pomodoroService.isBreak$.subscribe((isBreak) => {
       if (!isBreak) {
         this.isStopCurrentTime$.next(true);
       }
     }));
-    this._subs.add(this.isCloseDialog$.subscribe(() => {
+    this._subs.add(this._isCloseDialog$.subscribe(() => {
       this.close();
     }));
   }
