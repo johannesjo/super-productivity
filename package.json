@@ -90,7 +90,7 @@
       ]
     },
     "snap": {
-      "grade": "edge",
+      "grade": "devel",
       "stagePackages": [
         "default"
       ]
