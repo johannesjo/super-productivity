@@ -1,3 +1,12 @@
+## [2.2.2](https://github.com/johannesjo/super-productivity/compare/v2.2.1...v2.2.2) (2019-02-10)
+
+
+### Bug Fixes
+
+* **googleApi:** google token expiry handling ([3628032](https://github.com/johannesjo/super-productivity/commit/3628032))
+
+
+
 ## [2.2.1](https://github.com/johannesjo/super-productivity/compare/v2.2.0...v2.2.1) (2019-02-10)
 
 
