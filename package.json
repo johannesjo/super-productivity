@@ -92,7 +92,8 @@
     "snap": {
       "grade": "devel",
       "stagePackages": [
-        "default"
+        "default",
+        "xprintidle"
       ]
     }
   },
