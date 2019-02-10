@@ -47,6 +47,13 @@ export const POMODORO_FORM_CFG: ConfigFormSection = {
       },
     },
     {
+      key: 'isPlaySoundAfterBreak',
+      type: 'checkbox',
+      templateOptions: {
+        label: 'Play sound when break is done',
+      },
+    },
+    {
       key: 'isPlayTick',
       type: 'checkbox',
       templateOptions: {

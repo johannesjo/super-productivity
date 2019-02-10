@@ -86,7 +86,7 @@ export class PomodoroEffects {
     ),
     filter(isEnabled),
     filter(([action, cfg, isBreak]: [FinishPomodoroSession, PomodoroConfig, boolean]) =>
-      cfg.isPlaySound && isBreak),
+      (cfg.isPlaySound && isBreak) || (cfg.isPlaySoundAfterBreak && !isBreak)),
     tap(() => this._pomodoroService.playSessionDoneSound()),
   );
 

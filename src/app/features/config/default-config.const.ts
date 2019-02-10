@@ -25,6 +25,7 @@ export const DEFAULT_CFG: GlobalConfig = {
     isStopTrackingOnLongBreak: true,
     isManualContinue: false,
     isPlaySound: true,
+    isPlaySoundAfterBreak: false,
     // isGoToWorkView: false,
     isPlayTick: false,
   },
