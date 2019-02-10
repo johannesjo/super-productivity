@@ -1,4 +1,11 @@
 <div class="wrapper bg-600">
+  <div *ngIf="isDragOver"
+       @fade
+       class="bg-accent drag-over-msg color-contrast">
+    <mat-icon>add</mat-icon>
+    Drop here to add new note
+  </div>
+
   <header>
     <button #buttonEl
             (click)="addNote()"

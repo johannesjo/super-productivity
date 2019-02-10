@@ -15,6 +15,10 @@ $noteFontSize: 14px;
     z-index: 4;
     //outline: 2px dashed $c-accent;
   }
+
+  &.isImg {
+    border: 0;
+  }
 }
 
 .controls {
@@ -34,6 +38,11 @@ $noteFontSize: 14px;
       opacity: 1;
     }
   }
+}
+
+.note-img {
+  max-width: 100%;
+  border-radius: $card-border-radius;
 }
 
 .content {

@@ -1,20 +1,25 @@
-import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, HostListener, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { NoteService } from '../note.service';
 import { DragulaService } from 'ng2-dragula';
 import { Subscription } from 'rxjs';
 import { MatButton, MatDialog } from '@angular/material';
 import { DialogAddNoteComponent } from '../dialog-add-note/dialog-add-note.component';
 import { standardListAnimation } from '../../../ui/animations/standard-list.ani';
+import { fadeAnimation } from '../../../ui/animations/fade.ani';
 
 @Component({
   selector: 'notes',
   templateUrl: './notes.component.html',
   styleUrls: ['./notes.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  animations: [standardListAnimation]
+  animations: [standardListAnimation, fadeAnimation],
+
 })
 export class NotesComponent implements OnInit, OnDestroy {
   isElementWasAdded = false;
+  isDragOver = false;
+  dragEnterTarget: HTMLElement;
+
   @ViewChild('buttonEl') buttonEl: MatButton;
   private _subs = new Subscription();
 
@@ -23,6 +28,24 @@ export class NotesComponent implements OnInit, OnDestroy {
     private _dragulaService: DragulaService,
     private _matDialog: MatDialog,
   ) {
+  }
+
+  @HostListener('dragenter', ['$event']) onDragEnter(ev: Event) {
+    this.dragEnterTarget = ev.target as HTMLElement;
+    ev.preventDefault();
+    this.isDragOver = true;
+  }
+
+  @HostListener('dragleave', ['$event']) onDragLeave(ev: Event) {
+    if (this.dragEnterTarget === (event.target as HTMLElement)) {
+      event.preventDefault();
+      this.isDragOver = false;
+    }
+  }
+
+  @HostListener('drop', ['$event']) onDrop(ev: Event) {
+    this.isDragOver = false;
+    this.noteService.createFromDrop(ev);
   }
 
   ngOnInit() {

@@ -23,3 +23,17 @@ note {
   display: block;
   margin-bottom: $s*1.5;
 }
+
+.drag-over-msg {
+  pointer-events: none;
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  bottom: 0;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+  display: flex;
+  z-index: 2;
+}

@@ -1,7 +1,14 @@
 <div [class.hasReminder]="note.reminderId"
      [class.isFocused]="isFocus"
+     [class.isImg]="note.imgUrl"
      class="note">
-  <div class="content">
+  <img *ngIf="note.imgUrl"
+       [src]="note.imgUrl"
+       [enlargeImg]="note.imgUrl"
+       class="note-img">
+
+  <div *ngIf="!note.imgUrl"
+       class="content">
     <inline-markdown #markdownEl
                      (blur)="isFocus=false"
                      (changed)="updateContent($event)"

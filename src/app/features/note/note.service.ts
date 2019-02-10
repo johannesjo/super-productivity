@@ -19,6 +19,7 @@ import { Actions, ofType } from '@ngrx/effects';
 import { take } from 'rxjs/operators';
 import { ReminderService } from '../reminder/reminder.service';
 import { SnackService } from '../../core/snack/snack.service';
+import { createFromDrop, DropPasteInput } from '../../core/drop-paste-input/drop-paste-input';
 
 @Injectable({
   providedIn: 'root',
@@ -142,6 +143,10 @@ export class NoteService {
     });
   }
 
+  createFromDrop(ev) {
+    this._handleInput(createFromDrop(ev), ev);
+  }
+
   private _addReminderForNewNote(noteId: string, remindAt: number, title: string): string {
     const reminderId = this._reminderService.addReminder(
       'NOTE',
@@ -150,5 +155,28 @@ export class NoteService {
       remindAt,
     );
     return reminderId;
+  }
+
+  private _handleInput(drop: DropPasteInput, ev) {
+    console.log(drop);
+    // properly not intentional so we leave
+    if (!drop || !drop.path) {
+      return;
+    }
+
+    // don't intervene with text inputs
+    if (ev.target.tagName === 'INPUT' || ev.target.tagName === 'TEXTAREA') {
+      return;
+    }
+
+    const note: Partial<Note> = {
+      content: drop.path,
+      imgUrl: drop.path,
+    };
+
+    this.add(note);
+
+    ev.preventDefault();
+    ev.stopPropagation();
   }
 }
