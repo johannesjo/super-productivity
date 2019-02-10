@@ -49,7 +49,8 @@
         <mat-icon style="color:#e15d63;">alarm_off</mat-icon>
         Remove reminder
       </button>
-      <button (click)="toggleLock()"
+      <button *ngIf="!note.imgUrl"
+              (click)="toggleLock()"
               mat-menu-item>
         <mat-icon *ngIf="note.isLock">lock</mat-icon>
         <mat-icon *ngIf="!note.isLock">lock_open</mat-icon>
