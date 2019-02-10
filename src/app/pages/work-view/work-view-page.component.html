@@ -108,7 +108,8 @@
   </div>
 
   <div #splitBottomEl
-       class="backlog">
+       class="backlog"
+       tabindex="-1">
     <split (posChanged)="splitInputPos=$event"
            (mouseenter)="isPreloadBacklog=true"
            (mouseleave)="isPreloadBacklog=false"
@@ -117,9 +118,11 @@
            [isAnimateBtn]="isTriggerSwitchListAni$|async"
            [splitBottomEl]="splitBottomEl"
            [splitPos]="splitInputPos"
-           [splitTopEl]="splitTopEl"></split>
+           [splitTopEl]="splitTopEl"
+           tabindex="-1"></split>
     <div *ngIf="isPreloadBacklog || splitInputPos!==100"
-         class="inner-wrapper">
+         class="inner-wrapper"
+         tabindex="-1">
       <backlog-tabs></backlog-tabs>
     </div>
   </div>
