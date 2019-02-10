@@ -1,3 +1,30 @@
+# [2.2.0](https://github.com/johannesjo/super-productivity/compare/v2.1.0...v2.2.0) (2019-02-10)
+
+
+### Bug Fixes
+
+* error handler not rethrowing error ([d921ae9](https://github.com/johannesjo/super-productivity/commit/d921ae9))
+* reload issue for electron ([018a612](https://github.com/johannesjo/super-productivity/commit/018a612))
+* **googleDriveSync:** login snack not being shown ([9c8d6d5](https://github.com/johannesjo/super-productivity/commit/9c8d6d5))
+
+
+### Features
+
+* change page title ([3ae1976](https://github.com/johannesjo/super-productivity/commit/3ae1976))
+* try to prevent focus for backlog split ([306d89d](https://github.com/johannesjo/super-productivity/commit/306d89d))
+* wait initially before displaying reminders ([7d02a38](https://github.com/johannesjo/super-productivity/commit/7d02a38))
+* **googleDriveSync:** add error handling if initial login is aborted ([1cff87b](https://github.com/johannesjo/super-productivity/commit/1cff87b))
+* **googleDriveSync:** display google login snack for a longer time ([943f42b](https://github.com/johannesjo/super-productivity/commit/943f42b))
+* **notes:** add most basic image notes ([be119a7](https://github.com/johannesjo/super-productivity/commit/be119a7))
+* **notes:** fine tune drop items ([aa13968](https://github.com/johannesjo/super-productivity/commit/aa13968))
+* **notes:** improve note handle btn style ([a7ca114](https://github.com/johannesjo/super-productivity/commit/a7ca114))
+* **notes:** improve ui for image notes ([9d05d06](https://github.com/johannesjo/super-productivity/commit/9d05d06))
+* **notes:** make image recognition work ([80ab37c](https://github.com/johannesjo/super-productivity/commit/80ab37c))
+* **pomodoro:** add option to play sound when break ends [#138](https://github.com/johannesjo/super-productivity/issues/138) ([6ca5db2](https://github.com/johannesjo/super-productivity/commit/6ca5db2))
+* **pomodoro:** allow to hide dialog [#144](https://github.com/johannesjo/super-productivity/issues/144) ([c8e5632](https://github.com/johannesjo/super-productivity/commit/c8e5632))
+
+
+
 # [2.1.0](https://github.com/johannesjo/super-productivity/compare/v2.0.7...v2.1.0) (2019-02-09)
 
 
