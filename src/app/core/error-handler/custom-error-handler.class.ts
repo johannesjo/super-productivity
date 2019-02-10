@@ -24,7 +24,6 @@ export class CustomErrorHandler implements ErrorHandler {
   }
 
   handleError(error: Error) {
-    console.log('CREATE ERRORXXX');
     // NOTE: snack won't work most of the time
     try {
       this._snackService.open({
@@ -39,6 +38,7 @@ export class CustomErrorHandler implements ErrorHandler {
       _createErrorAlert(error);
     }
     console.log('GLOBAL_ERROR_HANDLER');
-    console.error(error);
+    // NOTE: rethrow the error otherwise it gets swallowed
+    throw error;
   }
 }
