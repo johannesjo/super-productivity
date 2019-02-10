@@ -160,7 +160,7 @@ export class NoteService {
 
   private async _handleInput(drop: DropPasteInput, ev) {
     // properly not intentional so we leave
-    if (!drop || !drop.path) {
+    if (!drop || !drop.path || drop.type === 'FILE') {
       return;
     }
 

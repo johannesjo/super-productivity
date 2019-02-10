@@ -1,3 +1,5 @@
+import { isImageUrlSimple } from '../../util/is-image-url';
+
 export type DropPasteInputType = 'FILE' | 'LINK' | 'IMG' | 'COMMAND' | 'NOTE';
 
 export interface DropPasteInput {
@@ -48,7 +50,7 @@ function _createTextBookmark(text): null | DropPasteInput {
       if (!path.match(/^http/)) {
         path = '//' + path;
       }
-      const isImage = (path.match(/png$|jpg$|jpeg$/i));
+      const isImage = isImageUrlSimple(path);
 
       return {
         title: _baseName(text),
