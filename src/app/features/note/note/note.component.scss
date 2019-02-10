@@ -19,8 +19,8 @@ $noteFontSize: 14px;
 
 .controls {
   position: absolute;
-  top: 0;
-  right: 0;
+  top: -$s*0.75;
+  right: -$s*0.75;
 
   @include mq(xs) {
     opacity: 0;
@@ -31,7 +31,7 @@ $noteFontSize: 14px;
       opacity: 1;
     }
     .hasReminder & {
-      opacity: 0.3;
+      opacity: 1;
     }
   }
 }
@@ -63,7 +63,7 @@ $noteFontSize: 14px;
 
     .markdown-unparsed,
     .markdown-parsed > *:first-child {
-      padding-right: $s*2;
+      padding-right: $s*1.25;
     }
 
     .markdown-parsed > *:last-child {
