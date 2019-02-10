@@ -1,3 +1,12 @@
+## [2.2.1](https://github.com/johannesjo/super-productivity/compare/v2.2.0...v2.2.1) (2019-02-10)
+
+
+### Bug Fixes
+
+* remove misguided tabindex -1 ([f5fd95c](https://github.com/johannesjo/super-productivity/commit/f5fd95c))
+
+
+
 # [2.2.0](https://github.com/johannesjo/super-productivity/compare/v2.1.0...v2.2.0) (2019-02-10)
 
 
