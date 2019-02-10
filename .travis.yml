@@ -72,6 +72,14 @@ deploy:
     channel: edge
     skip_cleanup: true
     on:
+      tags: false
+      branch: master
+      condition: $TRAVIS_OS_NAME = linux
+  - provider: snap
+    snap: ./app-builds/*.snap
+    channel: candidate
+    skip_cleanup: true
+    on:
       branch: master
       condition: $TRAVIS_OS_NAME = linux
       tags: true
