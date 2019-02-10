@@ -90,10 +90,9 @@
       ]
     },
     "snap": {
-      "grade": "stable",
+      "grade": "edge",
       "stagePackages": [
-        "default",
-        "xprintidle"
+        "default"
       ]
     }
   },
