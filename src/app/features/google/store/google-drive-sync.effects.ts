@@ -111,6 +111,10 @@ export class GoogleDriveSyncEffects {
         }));
       }
     }),
+    catchError(() => of(new SnackOpen({
+      type: 'ERROR',
+      message: `DriveSync: Error while trying to import data initially`,
+    }))),
   );
 
   @Effect() changeSyncFile$: any = this._actions$.pipe(
