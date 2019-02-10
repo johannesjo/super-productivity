@@ -7,6 +7,7 @@ import shortid from 'shortid';
 import { NotifyService } from '../../core/notify/notify.service';
 import { ReplaySubject, Subject } from 'rxjs';
 import { debounce, throttle } from 'throttle-debounce';
+import { promiseTimeout } from '../../util/promise-timeout';
 
 const WORKER_PATH = 'assets/web-workers/reminder.js';
 
@@ -31,6 +32,8 @@ export class ReminderService {
 
   async init() {
     if ('Worker' in window) {
+      // we do this to wait for syncing and the like
+      await promiseTimeout(1000 * 15);
 
       this._w = new Worker(WORKER_PATH);
       // this._w.onerror = this._handleError.bind(this);
