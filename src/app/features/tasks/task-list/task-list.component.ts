@@ -36,12 +36,13 @@ export class TaskListComponent implements OnDestroy, OnInit {
   @Input() listModelId: string;
   @Input() noTasksMsg: string;
   @ViewChild('listEl') listEl;
-  subs = new Subscription();
   isBlockAni = true;
   doneTasksLength = 0;
   undoneTasksLength = 0;
   allTasksLength = 0;
   currentTaskId: string;
+
+  private _subs = new Subscription();
   private _blockAnimationTimeout: number;
 
   constructor(
@@ -73,7 +74,7 @@ export class TaskListComponent implements OnDestroy, OnInit {
     // block initial animation (method could be also used to set an initial animation)
     this._blockAnimation();
 
-    this.subs.add(this._dragulaService.dropModel(this.listId)
+    this._subs.add(this._dragulaService.dropModel(this.listId)
       .subscribe((params: any) => {
         const {target, source, targetModel, item} = params;
         if (this.listEl.nativeElement === target) {
@@ -88,11 +89,11 @@ export class TaskListComponent implements OnDestroy, OnInit {
       })
     );
 
-    this.subs.add(this._taskService.currentTaskId$.subscribe(val => this.currentTaskId = val));
+    this._subs.add(this._taskService.currentTaskId$.subscribe(val => this.currentTaskId = val));
   }
 
   ngOnDestroy() {
-    this.subs.unsubscribe();
+    this._subs.unsubscribe();
     if (this._blockAnimationTimeout) {
       clearTimeout(this._blockAnimationTimeout);
     }

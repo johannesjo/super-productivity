@@ -59,7 +59,7 @@ export class DialogCreateProjectComponent implements OnInit, OnDestroy {
       this._isSaveTmpProject = true;
 
       // save tmp data if adding a new project
-      // NOTE won't be properly executed if added to subs
+      // NOTE won't be properly executed if added to _subs
       this._matDialogRef.afterClosed().subscribe(() => {
         const issueIntegrationCfgs: IssueIntegrationCfgs = Object.assign(this.projectData.issueIntegrationCfgs, {
           JIRA: this.jiraCfg,

@@ -6,6 +6,8 @@
     Drop here to add a bookmark
   </div>
   <div class="global-bookmark-list-inner"
+       [dragula]="LIST_ID"
+       [dragulaModel]="(bookmarkService.bookmarks$|async)"
        [class.isEditMode]="isEditMode">
     <div class="global-bookmark small-ui">
       <button (click)="openEditDialog()"
@@ -30,7 +32,7 @@
       icon.
     </div>
 
-    <div *ngFor="let bookmark of bookmarkService.bookmarks$|async"
+    <div *ngFor="let bookmark of (bookmarkService.bookmarks$|async); trackBy: trackByFn"
          class="global-bookmark"
          draggable="false">
       <a [enlargeImg]="bookmark.type==='IMG'&& bookmark.path"
