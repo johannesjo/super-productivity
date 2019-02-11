@@ -151,6 +151,13 @@ export const KEYBOARD_SETTINGS_FORM_CFG: ConfigFormSection = {
       },
     },
     {
+      key: 'taskSchedule',
+      type: 'keyboard',
+      templateOptions: {
+        label: 'Schedule Task',
+      },
+    },
+    {
       key: 'taskToggleDone',
       type: 'keyboard',
       templateOptions: {

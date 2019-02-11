@@ -46,6 +46,7 @@ export const DEFAULT_CFG: GlobalConfig = {
     taskEditTitle: 'e',
     taskToggleAdditionalInfoOpen: 'i',
     taskOpenEstimationDialog: 't',
+    taskSchedule: 's',
     taskToggleDone: 'd',
     taskAddSubTask: 'a',
     taskDelete: 'Delete',

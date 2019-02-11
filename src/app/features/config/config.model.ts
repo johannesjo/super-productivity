@@ -21,6 +21,7 @@ export type KeyboardConfig = Readonly<{
   taskToggleDone: string,
   taskAddSubTask: string,
   taskDelete: string,
+  taskSchedule: string,
   selectPreviousTask: string,
   selectNextTask: string,
   moveTaskUp: string,

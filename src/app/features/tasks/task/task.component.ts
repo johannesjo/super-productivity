@@ -26,7 +26,6 @@ import { IssueService } from '../../issue/issue.service';
 import { DialogEditAttachmentComponent } from '../../attachment/dialog-edit-attachment/dialog-edit-attachment.component';
 import { swirlAnimation } from '../../../ui/animations/swirl-in-out.ani';
 import { isTouch } from '../../../util/is-touch';
-import { DialogAddNoteReminderComponent } from '../../note/dialog-add-note-reminder/dialog-add-note-reminder.component';
 import { DialogAddTaskReminderComponent } from '../dialog-add-task-reminder/dialog-add-task-reminder.component';
 
 @Component({
@@ -343,6 +342,9 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     }
     if (checkKeyCombo(ev, keys.taskOpenEstimationDialog)) {
       this.estimateTime();
+    }
+    if (checkKeyCombo(ev, keys.taskSchedule)) {
+      this.editReminder();
     }
     if (checkKeyCombo(ev, keys.taskToggleDone)) {
       this.toggleTaskDone();
