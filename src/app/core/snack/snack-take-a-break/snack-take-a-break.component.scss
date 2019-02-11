@@ -1,0 +1,29 @@
+@import '../../../../variables';
+
+.wrapper {
+  display: flex;
+  align-items: center;
+  position: relative;
+  justify-content: stretch;
+}
+
+mat-icon {
+  margin-right: $s;
+}
+
+a,
+button {
+  margin: 0;
+  margin-top: $s;
+  margin-left: 1.5* $s;
+}
+
+.button-wrapper {
+  margin-left: auto;
+  display: flex;
+  flex-direction: column;
+
+  @include mq(sm) {
+    flex-direction: row;
+  }
+}

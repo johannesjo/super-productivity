@@ -11,6 +11,7 @@ import { UiModule } from '../../ui/ui.module';
 import { SnackGoogleLoginComponent } from './snack-google-login/snack-google-login.component';
 import { SnackJiraUnblockComponent } from './snack-jira-unblock/snack-jira-unblock.component';
 import { SnackGlobalErrorComponent } from './snack-global-error/snack-global-error.component';
+import { SnackTakeABreakComponent } from './snack-take-a-break/snack-take-a-break.component';
 
 @NgModule({
   imports: [
@@ -25,12 +26,14 @@ import { SnackGlobalErrorComponent } from './snack-global-error/snack-global-err
     SnackGoogleLoginComponent,
     SnackJiraUnblockComponent,
     SnackGlobalErrorComponent,
+    SnackTakeABreakComponent,
   ],
   entryComponents: [
     SnackCustomComponent,
     SnackGoogleLoginComponent,
     SnackJiraUnblockComponent,
     SnackGlobalErrorComponent,
+    SnackTakeABreakComponent,
   ],
 })
 export class SnackModule {

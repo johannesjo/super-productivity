@@ -10,6 +10,7 @@ import { DEFAULT_SNACK_CFG } from '../snack.const';
 import { SnackGoogleLoginComponent } from '../snack-google-login/snack-google-login.component';
 import { SnackJiraUnblockComponent } from '../snack-jira-unblock/snack-jira-unblock.component';
 import { SnackGlobalErrorComponent } from '../snack-global-error/snack-global-error.component';
+import { SnackTakeABreakComponent } from '../snack-take-a-break/snack-take-a-break.component';
 
 @Injectable()
 export class SnackEffects {
@@ -33,7 +34,12 @@ export class SnackEffects {
     );
 
 
-  private _ref: MatSnackBarRef<SnackCustomComponent | SnackJiraUnblockComponent | SnackGoogleLoginComponent | SimpleSnackBar | SnackGlobalErrorComponent>;
+  private _ref: MatSnackBarRef<SnackCustomComponent
+    | SnackJiraUnblockComponent
+    | SnackGoogleLoginComponent
+    | SimpleSnackBar
+    | SnackGlobalErrorComponent
+    | SnackTakeABreakComponent>;
 
   constructor(private actions$: Actions,
               private store$: Store<any>,
@@ -57,6 +63,10 @@ export class SnackEffects {
     }
 
     switch (type) {
+      case 'TAKE_A_BREAK':
+        this._ref = this.matSnackBar.openFromComponent(SnackTakeABreakComponent, cfg);
+        break;
+
       case 'GOOGLE_LOGIN':
         this._ref = this.matSnackBar.openFromComponent(SnackGoogleLoginComponent, cfg);
         break;

@@ -1,8 +1,19 @@
 import { Injectable } from '@angular/core';
 import { TaskService } from '../../tasks/task.service';
 import { TimeTrackingService } from '../time-tracking.service';
-import { combineLatest, from, merge, Observable, Subject } from 'rxjs';
-import { distinctUntilChanged, filter, map, mapTo, scan, shareReplay, switchMap, throttleTime, withLatestFrom } from 'rxjs/operators';
+import { combineLatest, from, merge, Observable, Subject, timer } from 'rxjs';
+import {
+  distinctUntilChanged,
+  filter,
+  map,
+  mapTo,
+  scan,
+  shareReplay,
+  startWith,
+  switchMap,
+  throttleTime,
+  withLatestFrom
+} from 'rxjs/operators';
 import { SnackService } from '../../../core/snack/snack.service';
 import { ConfigService } from '../../config/config.service';
 import { msToString } from '../../../ui/duration/ms-to-string.pipe';
@@ -47,6 +58,21 @@ export class TakeABreakService {
     map(tick => tick.duration),
   );
 
+  private _triggerSnooze$ = new Subject<number>();
+  private _snoozeActive$: Observable<boolean> = this._triggerSnooze$.pipe(
+    startWith(false),
+    switchMap((val: boolean | number) => {
+      if (val === false) {
+        return [false];
+      } else {
+        return timer(+val).pipe(
+          mapTo(false),
+          startWith(true),
+        );
+      }
+    }),
+  );
+
   private _triggerProgrammaticReset$: Observable<any> = this.isIdleResetEnabled$.pipe(
     switchMap((isIdleResetEnabled) => {
       return isIdleResetEnabled
@@ -85,34 +111,45 @@ export class TakeABreakService {
     private _snackService: SnackService,
     private _chromeExtensionInterfaceService: ChromeExtensionInterfaceService,
   ) {
-    // this._timeWithNoCurrentTask$.subscribe(val => {
-    //   console.log('_timeWithNoCurrentTask$', val);
+    // this._snoozeActive$.subscribe(val => {
+    //   console.log('_snoozeActive$', val);
     // });
 
-    const RE_CHECK_DIALOG_INTERVAL = 30 * 1000;
+    const RE_OPEN_SNACK_INTERVAL = 2 * 60 * 1000;
     this.timeWorkingWithoutABreak$.pipe(
-      withLatestFrom(this._configService.misc$, this._idleService.isIdle$),
-      filter(([timeWithoutBreak, cfg, isIdle]) =>
+      withLatestFrom(
+        this._configService.misc$,
+        this._idleService.isIdle$,
+        this._snoozeActive$,
+      ),
+      filter(([timeWithoutBreak, cfg, isIdle, isSnoozeActive]) =>
         cfg && cfg.isTakeABreakEnabled
-        && timeWithoutBreak > cfg.takeABreakMinWorkingTime
+        && !isSnoozeActive
+        && (timeWithoutBreak > cfg.takeABreakMinWorkingTime)
         // we don't wanna show if idle to avoid conflicts with the idle modal
-        && (!isIdle || !cfg.isEnableIdleTimeTracking),
+        && (!isIdle || !cfg.isEnableIdleTimeTracking)
       ),
       // throttleTime(5 * 1000),
-      throttleTime(RE_CHECK_DIALOG_INTERVAL),
+      throttleTime(RE_OPEN_SNACK_INTERVAL),
     ).subscribe(([timeWithoutBreak, cfg, isIdle]) => {
       console.log('timeWithoutBreak', timeWithoutBreak);
       const msg = this._createMessage(timeWithoutBreak, cfg);
       this._snackService.open({
+        type: 'TAKE_A_BREAK',
         message: msg,
-        icon: 'free_breakfast',
-        actionStr: 'I already did',
-        config: {duration: RE_CHECK_DIALOG_INTERVAL},
-        actionFn: () => {
-          this._triggerManualReset$.next(0);
+        config: {
+          duration: RE_OPEN_SNACK_INTERVAL,
         }
       });
     });
+  }
+
+  snooze(snoozeTime = 15 * 60 * 1000) {
+    this._triggerSnooze$.next(snoozeTime);
+  }
+
+  resetTimer() {
+    this._triggerManualReset$.next(0);
   }
 
   private _createMessage(duration, cfg) {

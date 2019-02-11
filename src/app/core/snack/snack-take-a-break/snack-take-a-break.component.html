@@ -1,0 +1,21 @@
+<div class="wrapper">
+  <mat-icon>free_breakfast</mat-icon>
+
+  <span [innerHtml]="data.message"
+        class="message"></span>
+
+  <div class="button-wrapper">
+    <button (click)="snooze()"
+            class="action"
+            color="accent"
+            mat-raised-button>
+      Snooze 15m
+    </button>
+    <button (click)="resetTimer()"
+            class="action"
+            color="accent"
+            mat-raised-button>
+      I already did
+    </button>
+  </div>
+</div>
