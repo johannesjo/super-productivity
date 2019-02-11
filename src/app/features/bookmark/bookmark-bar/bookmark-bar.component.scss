@@ -53,8 +53,15 @@ $sLeftRight: $sTopBottom/2;
       }
     }
 
-    &:first-child {
+
+    &.small-ui {
       flex: 0 0 auto;
+
+      > button {
+        min-width: 40px;
+        padding-left: 0;
+        padding-right: 0;
+      }
     }
   }
 
@@ -67,6 +74,11 @@ $sLeftRight: $sTopBottom/2;
     text-transform: none;
     background-size: cover;
     background-position: center center;
+
+    // allow them to be smaller to save space
+    min-width: 48px;
+    padding-left: $s;
+    padding-right: $s;
   }
 
   .controls {

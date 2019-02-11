@@ -3,6 +3,7 @@
   <li *ngFor="let attachment of attachments"
       class="attachment"
       draggable="false">
+    <!-- TODO check if bg-400i is needed-->
     <a [class.isImage]="attachment?.type==='IMG'"
        [href]="attachment?.path"
        aria-label="open global attachment"
