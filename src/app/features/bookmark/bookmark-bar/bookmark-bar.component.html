@@ -45,14 +45,15 @@
          target="_blank"
          type="{{bookmark.type}}">
         <mat-icon *ngIf="bookmark.icon"
+                  class="color-contrast"
                   aria-label="Open">{{bookmark.icon}}
         </mat-icon>
         {{bookmark.title}}
-        <mat-icon *ngIf="isEditMode"
-                  @fade
-                  svgIcon="drag_handle"
-                  class="drag-handle bg-400"></mat-icon>
       </a>
+      <mat-icon *ngIf="isEditMode"
+                @fade
+                svgIcon="drag_handle"
+                class="drag-handle bg-400 color-contrast"></mat-icon>
 
       <div class="controls"
            *ngIf="isEditMode">
@@ -60,14 +61,14 @@
                 aria-label="open edit dialog"
                 class="edit-btn"
                 color="primary"
-                mat-mini-fab="">
+                mat-raised-button="">
           <mat-icon>edit</mat-icon>
         </button>
         <button (click)="remove(bookmark.id)"
                 aria-label="remove bookmark"
                 class="trash-btn"
                 color="warn"
-                mat-mini-fab="">
+                mat-raised-button="">
           <mat-icon>delete_forever</mat-icon>
         </button>
       </div>

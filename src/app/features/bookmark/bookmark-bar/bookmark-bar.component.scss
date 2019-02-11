@@ -2,6 +2,7 @@
 
 $sTopBottom: $s/1.5;
 $sLeftRight: $sTopBottom/2;
+$dragHandleWidth: 36px;
 
 :host {
   position: relative;
@@ -40,7 +41,7 @@ $sLeftRight: $sTopBottom/2;
       left: 0;
       top: 0;
       bottom: 0;
-      width: 36px;
+      width: $dragHandleWidth;
       height: 100%;
       z-index: 2;
       border-top-left-radius: $card-border-radius;
@@ -70,7 +71,7 @@ $sLeftRight: $sTopBottom/2;
   &.isEditMode .global-bookmark {
     > a:focus + .controls,
     &.focus .controls,
-    &:hover .controls {
+    .controls:hover {
       visibility: visible;
 
       button {
@@ -106,23 +107,23 @@ $sLeftRight: $sTopBottom/2;
 
   .controls {
     position: absolute;
-    top: 100%;
-    left: 50%;
+    top: 0;
+    left: $dragHandleWidth;
+    right: 0;
+    bottom: 0;
     z-index: 5;
-    visibility: hidden;
     display: flex;
     flex-direction: row;
-    // TODO fix that this causes an overflow
-    padding: 0 $s;
-    transform: translate(-50%, 0);
 
     button {
+      flex-grow: 1;
       transition: $transition-leave;
       //border-radius: 0;
       margin: 0;
       padding: 0;
       min-height: 0;
       opacity: 0;
+      min-width: 20px;
     }
   }
 
