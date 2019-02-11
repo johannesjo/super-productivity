@@ -97,12 +97,13 @@ export class IdleService {
         }).afterClosed()
           .subscribe((res: { task: Task | string, isResetBreakTimer: boolean }) => {
             const {task, isResetBreakTimer} = res;
+
+            if (isResetBreakTimer) {
+              this._triggerResetBreakTimer$.next(true);
+            }
+
             if (task) {
               const timeSpent = this._idleTime$.getValue();
-              if (isResetBreakTimer) {
-                this._triggerResetBreakTimer$.next(true);
-              }
-
               if (typeof task === 'string') {
                 this._taskService.add(task, false, {
                   timeSpent: timeSpent,
@@ -114,8 +115,6 @@ export class IdleService {
                 this._taskService.addTimeSpent(task.id, timeSpent);
                 this._taskService.setCurrentId(task.id);
               }
-            } else {
-              this._triggerResetBreakTimer$.next(true);
             }
 
             this.cancelIdlePoll();
