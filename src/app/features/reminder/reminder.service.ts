@@ -1,13 +1,14 @@
 import { Injectable } from '@angular/core';
 import { ProjectService } from '../project/project.service';
 import { PersistenceService } from '../../core/persistence/persistence.service';
-import { RecurringConfig, Reminder, ReminderType } from './reminder.model';
+import { RecurringConfig, Reminder, ReminderCopy, ReminderType } from './reminder.model';
 import { SnackService } from '../../core/snack/snack.service';
 import shortid from 'shortid';
 import { NotifyService } from '../../core/notify/notify.service';
 import { ReplaySubject, Subject } from 'rxjs';
 import { debounce, throttle } from 'throttle-debounce';
 import { promiseTimeout } from '../../util/promise-timeout';
+import { dirtyDeepCopy } from '../../util/dirtyDeepCopy';
 
 const WORKER_PATH = 'assets/web-workers/reminder.js';
 
@@ -47,13 +48,13 @@ export class ReminderService {
   }
 
   async reloadFromLs() {
-    this._reminders = await this._loadFromLs();
-    this._reminders$.next(this._reminders);
-    this._updateRemindersInWorker(this._reminders);
+    this._reminders = await this._loadFromLs() || [];
+    this._saveModel(this._reminders);
   }
 
-  getById(reminderId: string): Reminder {
-    return this._reminders.find(reminder => reminder.id === reminderId);
+  getById(reminderId: string): ReminderCopy {
+    const _foundReminder = this._reminders.find(reminder => reminder.id === reminderId);
+    return _foundReminder && dirtyDeepCopy(_foundReminder);
   }
 
   addReminder(type: ReminderType, relatedId: string, title: string, remindAt: number, recurringConfig?: RecurringConfig): string {
