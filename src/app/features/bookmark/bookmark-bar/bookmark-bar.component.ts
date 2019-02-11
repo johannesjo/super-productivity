@@ -14,6 +14,7 @@ import { fadeAnimation } from '../../../ui/animations/fade.ani';
 })
 export class BookmarkBarComponent {
   isDragOver = false;
+  isEditMode = false;
   dragEnterTarget: HTMLElement;
 
   constructor(

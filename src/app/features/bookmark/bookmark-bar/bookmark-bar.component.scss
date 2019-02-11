@@ -34,6 +34,18 @@ $sLeftRight: $sTopBottom/2;
     margin: $sTopBottom $sLeftRight 0;
     position: relative;
 
+    &.small-ui {
+      flex: 0 0 auto;
+
+      > button {
+        min-width: 40px;
+        padding-left: 0;
+        padding-right: 0;
+      }
+    }
+  }
+
+  &.isEditMode .global-bookmark {
     > a:focus + .controls,
     &.focus .controls,
     &:hover .controls {
@@ -50,17 +62,6 @@ $sLeftRight: $sTopBottom/2;
 
       .trash-btn {
         transform: translate(0, 0);
-      }
-    }
-
-
-    &.small-ui {
-      flex: 0 0 auto;
-
-      > button {
-        min-width: 40px;
-        padding-left: 0;
-        padding-right: 0;
       }
     }
   }
