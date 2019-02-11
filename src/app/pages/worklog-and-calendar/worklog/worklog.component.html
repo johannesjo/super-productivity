@@ -5,7 +5,9 @@
      class="year">
   <h1 class="year-title mat-headline"
       [innerHtml]="year.key"></h1>
-  <div class="year-time-spent">Time spent total: <strong [innerHtml]="year.value.timeSpent|msToString"></strong></div>
+  <div class="year-time-spent">Days worked:
+    <strong>{{(year.value.ent|keys).length}}</strong>,
+    Time spent total: <strong [innerHtml]="year.value.timeSpent|msToString"></strong></div>
 
   <div *ngFor="let month of year.value.ent|keyvalue:sortWorklogItems"
        class="month">
@@ -18,7 +20,10 @@
         <mat-icon>call_made</mat-icon>
       </button>
     </h2>
-    <div class="month-time-spent">Time spent total: <strong [innerHtml]="month.value.timeSpent|msToString"></strong>
+    <div class="month-time-spent">Days worked:
+      <strong>{{(month.value.ent|keys).length}}</strong>,
+      Time spent total:
+      <strong [innerHtml]="month.value.timeSpent|msToString"></strong>
     </div>
     <div *ngFor="let worklogForDay of month.value.ent|keyvalue:sortWorklogItems"
          class="day">
