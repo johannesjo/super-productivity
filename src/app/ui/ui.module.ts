@@ -44,7 +44,7 @@ import { ProgressBarComponent } from './progress-bar/progress-bar.component';
 import { MsToStringPipe$ } from './duration/ms-to-string$.pipe';
 import { CollapsibleComponent } from './collapsible/collapsible.component';
 import { HelpSectionComponent } from './help-section/help-section.component';
-import { NumberToMonthPipe } from './duration/number-to-month.pipe';
+import { NumberToMonthPipe } from './pipes/number-to-month.pipe';
 import { SplitModule } from '../pages/work-view/split/split.module';
 import { SimpleDownloadDirective } from './simple-download/simple-download.directive';
 import { Angular2PromiseButtonModule } from 'angular2-promise-buttons';
@@ -57,9 +57,9 @@ import { MsToClockStringPipe } from './duration/ms-to-clock-string.pipe';
 import { DatetimeInputComponent } from './datetime-input/datetime-input.component';
 import { InputDurationSliderComponent } from './duration/input-duration-slider/input-duration-slider.component';
 import { MsToMinuteClockStringPipe } from './duration/ms-to-minute-clock-string.pipe';
-import { KeysPipe } from '../util/keys.pipe';
-import { ToArrayPipe } from '../util/to-array.pipe';
 import { HumanizeTimestampPipe } from './pipes/humanize-timestamp.pipe';
+import { KeysPipe } from './pipes/keys.pipe';
+import { ToArrayPipe } from './pipes/to-array.pipe';
 
 @NgModule({
   imports: [
