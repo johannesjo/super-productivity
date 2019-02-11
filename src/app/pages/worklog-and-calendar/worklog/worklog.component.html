@@ -5,8 +5,10 @@
      class="year">
   <h1 class="year-title mat-headline"
       [innerHtml]="year.key"></h1>
-  <div class="year-time-spent">Days worked:
-    <strong>{{(year.value.ent|keys).length}}</strong>,
+  <div class="year-time-spent">Month worked:
+    <strong>{{year.value.monthWorked}}</strong><br>
+    Days worked:
+    <strong>{{year.value.daysWorked}}</strong><br>
     Time spent total: <strong [innerHtml]="year.value.timeSpent|msToString"></strong></div>
 
   <div *ngFor="let month of year.value.ent|keyvalue:sortWorklogItems"
@@ -21,7 +23,7 @@
       </button>
     </h2>
     <div class="month-time-spent">Days worked:
-      <strong>{{(month.value.ent|keys).length}}</strong>,
+      <strong>{{month.value.daysWorked}}</strong><br>
       Time spent total:
       <strong [innerHtml]="month.value.timeSpent|msToString"></strong>
     </div>

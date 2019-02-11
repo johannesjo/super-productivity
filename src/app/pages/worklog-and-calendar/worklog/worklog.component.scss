@@ -13,7 +13,8 @@
     }
 
     &-time-spent {
-      font-size: 21px;
+      font-size: 20px;
+      line-height: 26px;
     }
   }
 
@@ -29,6 +30,8 @@
 
     &-time-spent {
       font-size: 18px;
+      line-height: 22px;
+      margin-bottom: $s*3;
     }
   }
 

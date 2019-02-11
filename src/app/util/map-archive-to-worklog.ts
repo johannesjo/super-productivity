@@ -17,6 +17,7 @@ export interface WorklogDay {
 
 export interface WorklogMonth {
   timeSpent: number;
+  daysWorked: number;
   ent: {
     [key: number]: WorklogDay;
   };
@@ -24,6 +25,9 @@ export interface WorklogMonth {
 
 export interface WorklogYear {
   timeSpent: number;
+  monthWorked: number;
+  daysWorked: number;
+
   ent: {
     [key: number]: WorklogMonth;
   };
@@ -48,11 +52,14 @@ export const mapArchiveToWorklog = (taskState: EntityState<Task>, noRestoreIds =
       if (!worklog[year]) {
         worklog[year] = {
           timeSpent: 0,
+          daysWorked: 0,
+          monthWorked: 0,
           ent: {}
         };
       }
       if (!worklog[year].ent[month]) {
         worklog[year].ent[month] = {
+          daysWorked: 0,
           timeSpent: 0,
           ent: {}
         };
@@ -88,5 +95,19 @@ export const mapArchiveToWorklog = (taskState: EntityState<Task>, noRestoreIds =
       });
     });
   });
+
+  Object.keys(worklog).forEach((year_) => {
+    const year: WorklogYear = worklog[year_];
+    const monthKeys = Object.keys(year.ent);
+    year.monthWorked = monthKeys.length;
+
+    monthKeys.forEach((month_) => {
+      const month: WorklogMonth = worklog[year_].ent[month_];
+      const days = Object.keys(month.ent);
+      month.daysWorked = days.length;
+      year.daysWorked += days.length;
+    });
+  });
+
   return {worklog, totalTimeSpent};
 };
