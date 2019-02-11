@@ -48,9 +48,14 @@
                   aria-label="Open">{{bookmark.icon}}
         </mat-icon>
         {{bookmark.title}}
+        <mat-icon *ngIf="isEditMode"
+                  @fade
+                  svgIcon="drag_handle"
+                  class="drag-handle bg-400"></mat-icon>
       </a>
 
-      <div class="controls">
+      <div class="controls"
+           *ngIf="isEditMode">
         <button (click)="openEditDialog(bookmark)"
                 aria-label="open edit dialog"
                 class="edit-btn"

@@ -34,6 +34,28 @@ $sLeftRight: $sTopBottom/2;
     margin: $sTopBottom $sLeftRight 0;
     position: relative;
 
+    .drag-handle {
+      transition: $transition-standard;
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 36px;
+      height: 100%;
+      z-index: 2;
+      border-top-left-radius: $card-border-radius;
+      border-bottom-left-radius: $card-border-radius;
+      box-shadow: $whiteframe-shadow-3dp;
+      cursor: grab;
+
+      // fixes drag and drop on mobile
+      touch-action: none;
+
+      &:active {
+        cursor: grabbing;
+      }
+    }
+
     &.small-ui {
       flex: 0 0 auto;
 
