@@ -57,7 +57,10 @@ export class SyncService {
         this._snackService.open({type: 'SUCCESS', message: 'Data imported'});
 
       } catch (e) {
-        this._snackService.open({type: 'ERROR', message: 'Something went wrong while importing the data. Falling back to local backup'});
+        this._snackService.open({
+          type: 'ERROR',
+          message: 'Something went wrong while importing the data. Falling back to local backup'
+        });
         console.error(e);
         return await this._loadBackup();
       }
