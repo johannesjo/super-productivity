@@ -75,6 +75,7 @@ export class TakeABreakService {
 
   private _triggerProgrammaticReset$: Observable<any> = this.isIdleResetEnabled$.pipe(
     switchMap((isIdleResetEnabled) => {
+      console.log('PROGRAMMATIC TAKE A BREAK RESET isCausedByIdle', isIdleResetEnabled);
       return isIdleResetEnabled
         ? this._idleService.triggerResetBreakTimer$
         : this._triggerSimpleBreakReset$;
@@ -111,9 +112,9 @@ export class TakeABreakService {
     private _snackService: SnackService,
     private _chromeExtensionInterfaceService: ChromeExtensionInterfaceService,
   ) {
-    // this._snoozeActive$.subscribe(val => {
-    //   console.log('_snoozeActive$', val);
-    // });
+    this._triggerManualReset$.subscribe(val => {
+      console.log('MANUAL TAKE A BREAK RESET', val);
+    });
 
     const RE_OPEN_SNACK_INTERVAL = 2 * 60 * 1000;
     this.timeWorkingWithoutABreak$.pipe(
