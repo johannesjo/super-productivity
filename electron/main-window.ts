@@ -128,12 +128,6 @@ function initWinEventListeners(app: any) {
       }
     }
   );
-
-  mainWin.webContents.on('new-window', (e, url) => {
-    e.preventDefault();
-    e.stopPropagation();
-    shell.openExternal(url);
-  });
 }
 
 function createMenu(quitApp) {
