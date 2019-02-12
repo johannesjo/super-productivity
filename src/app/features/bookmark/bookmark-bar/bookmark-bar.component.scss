@@ -25,7 +25,7 @@ $dragHandleWidth: 36px;
   flex-flow: row;
   flex-wrap: wrap;
   justify-content: stretch;
-  align-items: center;
+  align-items: stretch;
   flex: 1;
   flex-shrink: 10;
 
@@ -111,6 +111,12 @@ $dragHandleWidth: 36px;
   }
 }
 
+:host-context(.gu-unselectable) {
+  .controls {
+    display: none !important;
+  }
+}
+
 .global-bookmark > a {
   text-decoration: none;
   display: flex;
@@ -151,11 +157,15 @@ $dragHandleWidth: 36px;
 }
 
 .edit-btn {
-  transform: translate(-100%);
+  @include mq(xs) {
+    transform: translate(-100%);
+  }
 }
 
 .trash-btn {
-  transform: translate(100%);
+  @include mq(xs) {
+    transform: translate(100%);
+  }
 }
 
 
@@ -170,5 +180,5 @@ $dragHandleWidth: 36px;
   align-items: center;
   font-weight: bold;
   display: flex;
-  z-index: 2;
+  z-index: 5;
 }
