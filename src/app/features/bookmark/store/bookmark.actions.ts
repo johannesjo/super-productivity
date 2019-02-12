@@ -12,6 +12,7 @@ export enum BookmarkActionTypes {
   ShowBookmarks = '[Bookmark] Show Bookmarks',
   HideBookmarks = '[Bookmark] Hide Bookmarks',
   ToggleBookmarks = '[Bookmark] Toggle Bookmarks',
+  ReorderBookmarks = '[Bookmark] Reorder Bookmarks',
 }
 
 export class LoadBookmarkState implements Action {
@@ -54,6 +55,13 @@ export class ToggleBookmarks implements Action {
   readonly type = BookmarkActionTypes.ToggleBookmarks;
 }
 
+export class ReorderBookmarks implements Action {
+  readonly type = BookmarkActionTypes.ReorderBookmarks;
+
+  constructor(public payload: { ids: string[] }) {
+  }
+}
+
 
 export type BookmarkActions =
   LoadBookmarkState
@@ -63,4 +71,5 @@ export type BookmarkActions =
   | ShowBookmarks
   | HideBookmarks
   | ToggleBookmarks
+  | ReorderBookmarks
   ;

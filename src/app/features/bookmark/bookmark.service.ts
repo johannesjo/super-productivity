@@ -1,11 +1,17 @@
 import { Injectable } from '@angular/core';
 import { select, Store } from '@ngrx/store';
-import { BookmarkState, initialBookmarkState, selectAllBookmarks, selectIsShowBookmarkBar } from './store/bookmark.reducer';
+import {
+  BookmarkState,
+  initialBookmarkState,
+  selectAllBookmarks,
+  selectIsShowBookmarkBar
+} from './store/bookmark.reducer';
 import {
   AddBookmark,
   DeleteBookmark,
   HideBookmarks,
   LoadBookmarkState,
+  ReorderBookmarks,
   ShowBookmarks,
   ToggleBookmarks,
   UpdateBookmark
@@ -68,6 +74,10 @@ export class BookmarkService {
 
   toggleBookmarks() {
     this._store$.dispatch(new ToggleBookmarks());
+  }
+
+  reorderBookmarks(ids: string[]) {
+    this._store$.dispatch(new ReorderBookmarks({ids}));
   }
 
 

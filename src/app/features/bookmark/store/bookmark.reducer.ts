@@ -51,6 +51,22 @@ export function bookmarkReducer(
       return {...state, isShowBookmarks: !state.isShowBookmarks};
 
 
+    case BookmarkActionTypes.ReorderBookmarks: {
+      const oldIds = state.ids as string[];
+      const newIds = action.payload.ids as string[];
+      if (!oldIds || !newIds) {
+        return state;
+      }
+
+      // check if we have the same values inside the arrays
+      if (oldIds.slice(0).sort().join(',') === newIds.slice(0).sort().join(',')) {
+        return {...state, ids: newIds};
+      } else {
+        console.error('Bookmark lost while reordering. Not executing reorder');
+        return state;
+      }
+    }
+
     default: {
       return state;
     }

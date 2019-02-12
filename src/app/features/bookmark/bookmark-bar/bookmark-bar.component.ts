@@ -6,7 +6,6 @@ import { Bookmark } from '../bookmark.model';
 import { fadeAnimation } from '../../../ui/animations/fade.ani';
 import { DragulaService } from 'ng2-dragula';
 import { Subscription } from 'rxjs';
-import { Task } from '../../tasks/task.model';
 
 @Component({
   selector: 'bookmark-bar',
@@ -17,7 +16,7 @@ import { Task } from '../../tasks/task.model';
 })
 export class BookmarkBarComponent implements OnDestroy {
   isDragOver = false;
-  isEditMode = true;
+  isEditMode = false;
   dragEnterTarget: HTMLElement;
   LIST_ID = 'BOOKMARKS';
 
@@ -28,19 +27,18 @@ export class BookmarkBarComponent implements OnDestroy {
     private readonly _matDialog: MatDialog,
     private _dragulaService: DragulaService,
   ) {
+    // NOTE: not working because we have an svg
+    // this._dragulaService.createGroup(this.LIST_ID, {
+    // moves: function (el, container, handle) {
+    //   return handle.className.indexOf && handle.className.indexOf('drag-handle') > -1;
+    // }
+    // });
+
     this._subs.add(this._dragulaService.dropModel(this.LIST_ID)
       .subscribe((params: any) => {
         const {target, source, targetModel, item} = params;
-        console.log(target, source, targetModel, item);
-        // if (this.listEl.nativeElement === target) {
-        //   this._blockAnimation();
-        //
-        //   const sourceModelId = source.dataset.id;
-        //   const targetModelId = target.dataset.id;
-        //   const targetNewIds = targetModel.map((task) => task.id);
-        //   const movedTaskId = item.id;
-        //   this._taskService.move(movedTaskId, sourceModelId, targetModelId, targetNewIds);
-        // }
+        const newIds = targetModel.map(m => m.id);
+        this.bookmarkService.reorderBookmarks(newIds);
       })
     );
   }
