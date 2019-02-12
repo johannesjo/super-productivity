@@ -33,13 +33,14 @@ export class ReminderService {
 
   async init() {
     if ('Worker' in window) {
-      // we do this to wait for syncing and the like
-      await promiseTimeout(1000 * 15);
-
       this._w = new Worker(WORKER_PATH);
-      // this._w.onerror = this._handleError.bind(this);
+
+      // we do this to wait for syncing and the like
+      await promiseTimeout(1000 * 20);
       this._w.addEventListener('message', this._onReminderActivated.bind(this));
       this._w.addEventListener('error', this._handleError.bind(this));
+      console.log('WORKER INITIALIZED FOR REMINDERS');
+
 
       await this.reloadFromLs();
     } else {
