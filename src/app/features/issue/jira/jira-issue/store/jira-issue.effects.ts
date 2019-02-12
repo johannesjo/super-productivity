@@ -33,6 +33,8 @@ import { IssueLocalState } from '../../../issue';
 import { DialogConfirmComponent } from '../../../../../ui/dialog-confirm/dialog-confirm.component';
 import { DialogJiraAddWorklogComponent } from '../../dialog-jira-add-worklog/dialog-jira-add-worklog.component';
 
+const isEnabled = ([a, jiraCfg]: [any, JiraCfg, any?, any?, any?, any?]) => jiraCfg && jiraCfg.isEnabled;
+
 @Injectable()
 export class JiraIssueEffects {
   @Effect({dispatch: false}) issuePolling$: any = this._actions$
@@ -46,7 +48,8 @@ export class JiraIssueEffects {
       withLatestFrom(
         this._store$.pipe(select(selectProjectJiraCfg)),
       ),
-      filter(([a, jiraCfg]) => jiraCfg && jiraCfg.isEnabled && jiraCfg.isAutoPollTickets),
+      filter(isEnabled),
+      filter(([a, jiraCfg]) => jiraCfg.isAutoPollTickets),
       switchMap(() => timer(JIRA_INITIAL_POLL_DELAY, JIRA_POLL_INTERVAL).pipe(
         withLatestFrom(
           this._store$.pipe(select(selectJiraIssueIds)),
@@ -108,6 +111,7 @@ export class JiraIssueEffects {
         this._store$.pipe(select(selectJiraIssueEntities)),
         this._store$.pipe(select(selectTaskEntities)),
       ),
+      filter(isEnabled),
       tap(([act_, jiraCfg, jiraEntities, taskEntities]) => {
         const act = act_ as UpdateTask;
         const taskId = act.payload.task.id;
@@ -140,7 +144,9 @@ export class JiraIssueEffects {
         this._store$.pipe(select(selectCurrentTaskParentOrCurrent)),
         this._store$.pipe(select(selectJiraIssueEntities)),
       ),
-      filter(([action, jiraCfg, currentTaskOrParent, issueEntities]) => jiraCfg && jiraCfg.isCheckToReAssignTicketOnTaskStart
+      filter(isEnabled),
+      filter(([action, jiraCfg, currentTaskOrParent, issueEntities]) =>
+        jiraCfg.isCheckToReAssignTicketOnTaskStart
         && currentTaskOrParent && currentTaskOrParent.issueType === JIRA_TYPE),
       // show every 15s max to give time for updates
       throttleTime(15000),
@@ -185,6 +191,7 @@ export class JiraIssueEffects {
         this._store$.pipe(select(selectCurrentTaskParentOrCurrent)),
         this._store$.pipe(select(selectJiraIssueEntities)),
       ),
+      filter(isEnabled),
       tap(([action, jiraCfg, curOrParTask, issueEntities]) => {
         if (jiraCfg && jiraCfg.isTransitionIssuesEnabled && curOrParTask && curOrParTask.issueType === JIRA_TYPE) {
           const issueData = issueEntities[curOrParTask.issueId];
@@ -203,6 +210,7 @@ export class JiraIssueEffects {
         this._store$.pipe(select(selectTaskFeatureState)),
         this._store$.pipe(select(selectJiraIssueEntities)),
       ),
+      filter(isEnabled),
       tap(([action, jiraCfg, taskState, issueEntities]: [UpdateTask, JiraCfg, TaskState, Dictionary<JiraIssue>]) => {
         const task = taskState.entities[action.payload.task.id];
         if (jiraCfg && jiraCfg.isTransitionIssuesEnabled && task && task.issueType === JIRA_TYPE && task.isDone) {
