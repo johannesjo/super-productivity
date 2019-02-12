@@ -1,10 +1,13 @@
 <div class="wrapper">
   <mat-icon>error</mat-icon>
   <span class="message">{{data.message}}</span>
-  <button (click)="unblock()"
-          class="action"
-          color="accent"
-          mat-raised-button>
-    Unblock
-  </button>
+
+  <div class="button-wrapper">
+    <button (click)="unblock()"
+            class="action"
+            color="accent"
+            mat-raised-button>
+      Unblock
+    </button>
+  </div>
 </div>

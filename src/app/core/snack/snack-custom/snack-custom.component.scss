@@ -3,7 +3,6 @@
 .wrapper {
   display: flex;
   align-items: center;
-  position: relative;
   justify-content: stretch;
 }
 
@@ -17,6 +16,10 @@ mat-icon {
   .error & {
     color: $red;
   }
+}
+
+.message {
+  flex: 1;
 }
 
 button {
