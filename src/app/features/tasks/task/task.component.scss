@@ -227,7 +227,7 @@ $this-icon-default-opacity: 0.7;
     bottom: 0;
     top: 0;
     transition: $transition-standard;
-    //transition-property: all;
+    transition-property: transform;
     box-shadow: $shadow-card-shadow;
     border-radius: $card-border-radius;
     border: 1px solid $light-theme-extra-border-color;
