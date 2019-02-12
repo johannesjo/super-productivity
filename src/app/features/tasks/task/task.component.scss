@@ -8,6 +8,10 @@ $this-active-shadow: $whiteframe-shadow-6dp;
 $this-first-line-min-height: 40px;
 $this-icon-default-opacity: 0.7;
 
+$this-task-focus-zoom: 1.03;
+$this-task-current-zoom: 1.0178571428;
+//$this-task-focus-zoom: 1.0178571428;
+
 %standardTaskOpacityChange {
   opacity: $this-icon-default-opacity;
   transition: transform $transition-fast;
@@ -55,6 +59,7 @@ $this-icon-default-opacity: 0.7;
     > .inner-wrapper > .box {
       border: 1px solid $c-accent !important;
       box-shadow: $whiteframe-shadow-5dp;
+      transform: scale($this-task-focus-zoom);
     }
   }
 
@@ -238,9 +243,7 @@ $this-icon-default-opacity: 0.7;
   }
 
   &.isCurrent > .box {
-    $thisZoom: 1.0178571428;
-    //$thisZoom: 1.05;
-    transform: scale($thisZoom);
+    transform: scale($this-task-current-zoom);
     box-shadow: $this-active-shadow;
   }
 
