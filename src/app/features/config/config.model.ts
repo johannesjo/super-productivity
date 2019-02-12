@@ -14,6 +14,9 @@ export type KeyboardConfig = Readonly<{
   openProjectNotes: string,
   toggleBookmarks: string;
   openDistractionPanel: string,
+  zoomIn: string,
+  zoomOut: string,
+  zoomDefault: string,
   focusLastActiveTask: string,
   taskEditTitle: string,
   taskToggleAdditionalInfoOpen: string,

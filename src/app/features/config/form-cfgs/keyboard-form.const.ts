@@ -122,6 +122,27 @@ export const KEYBOARD_SETTINGS_FORM_CFG: ConfigFormSection = {
         label: 'Focus last active task',
       },
     },
+    {
+      key: 'zoomIn',
+      type: 'keyboard',
+      templateOptions: {
+        label: 'Zoom in (Desktop only)',
+      },
+    },
+    {
+      key: 'zoomOut',
+      type: 'keyboard',
+      templateOptions: {
+        label: 'Zoom out (Desktop only)',
+      },
+    },
+    {
+      key: 'zoomDefault',
+      type: 'keyboard',
+      templateOptions: {
+        label: 'Zoom default (Desktop only)',
+      },
+    },
     // TASKS
     {
       className: 'tpl',

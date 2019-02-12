@@ -119,7 +119,29 @@ export class ShortcutService {
     if (IS_ELECTRON) {
       if (checkKeyCombo(ev, 'Ctrl+Shift+J')) {
         window.ipcRenderer.send('TOGGLE_DEV_TOOLS');
+      } else if (checkKeyCombo(ev, keys.zoomIn)) {
+        this._zoom(0.05);
+      } else if (checkKeyCombo(ev, keys.zoomOut)) {
+        this._zoom(-0.05);
+      } else if (checkKeyCombo(ev, keys.zoomDefault)) {
+        this._zoom(0);
       }
     }
+  }
+
+  private _zoom(zoomDelta: number) {
+    const webFrame = this._electronService.webFrame;
+    let zoomFactor = webFrame.getZoomFactor();
+    zoomFactor += zoomDelta;
+    zoomFactor = Math.min(Math.max(zoomFactor, 0.1), 4);
+
+    if (zoomDelta === 0) {
+      webFrame.setZoomFactor(1);
+    } else {
+      webFrame.setZoomFactor(zoomFactor);
+    }
+    this._configService.updateSection('_uiHelper', {
+      _zoomFactor: zoomFactor
+    });
   }
 }

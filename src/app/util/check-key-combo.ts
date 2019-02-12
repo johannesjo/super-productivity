@@ -4,6 +4,7 @@ const isSpecialKeyExactlyRight = (isKeyRequired: boolean, isKeyPressed: boolean)
 
 export const checkKeyCombo = (ev: KeyboardEvent, comboToTest: string) => {
   if (comboToTest) {
+    const isPlusKey = comboToTest.includes('++');
     const comboKeys: string[] = comboToTest.split('+');
     const standardKey: string = comboKeys[comboKeys.length - 1];
     const sk = comboKeys.splice(0);
@@ -13,7 +14,7 @@ export const checkKeyCombo = (ev: KeyboardEvent, comboToTest: string) => {
       && isSpecialKeyExactlyRight(sk.includes('Alt'), ev.altKey)
       && isSpecialKeyExactlyRight(sk.includes('Meta'), ev.metaKey)
       && (!(sk.includes('Shift')) || ev.shiftKey === true)
-      && ev.key === standardKey;
+      && (ev.key === standardKey || isPlusKey && ev.key === '+');
   } else {
     return null;
   }
