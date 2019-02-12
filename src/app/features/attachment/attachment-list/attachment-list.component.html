@@ -1,6 +1,6 @@
 <ul [@standardList]="attachments?.length"
     class="attachments color-contrast">
-  <li *ngFor="let attachment of attachments"
+  <li *ngFor="let attachment of attachments; trackBy: trackByFn;"
       class="attachment"
       draggable="false">
     <!-- TODO check if bg-400i is needed-->

@@ -46,4 +46,10 @@ export class AttachmentListComponent implements OnInit {
   remove(id) {
     this.attachmentService.deleteAttachment(id);
   }
+
+  trackByFn(i: number, attachment: Attachment) {
+    return attachment
+      ? attachment.id
+      : i;
+  }
 }
