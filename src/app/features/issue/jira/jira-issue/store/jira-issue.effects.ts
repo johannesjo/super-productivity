@@ -53,9 +53,8 @@ export class JiraIssueEffects {
           this._store$.pipe(select(selectJiraIssueEntities)),
         ),
         tap(([x, issueIds, entities]: [number, string[], Dictionary<JiraIssue>]) => {
-          console.log('jira TAP poll', x, issueIds, entities);
+          console.log('JIRA TAP poll', x, issueIds, entities);
           if (issueIds && issueIds.length > 0) {
-            console.log('SHOW toast???');
             this._snackService.open({
               message: 'Jira: Polling Changes for issues',
               svgIcon: 'jira',

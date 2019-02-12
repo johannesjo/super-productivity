@@ -188,10 +188,10 @@ export class GitApiService {
       });
     }
     if (error && error.message) {
-      return throwError('GitHub: ' + error.message);
+      return throwError({handledError: 'GitHub: ' + error.message});
     }
 
-    return throwError('GitHub: Api request failed.');
+    return throwError({handledError: 'GitHub: Api request failed.'});
   }
 
   private _mergeIssuesAndComments(issues: GitIssue[], comments: GitComment[]): GitIssue[] {

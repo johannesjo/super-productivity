@@ -1,13 +1,15 @@
 import { ErrorHandler, Injectable } from '@angular/core';
 import { SnackService } from '../snack/snack.service';
+import { isObject } from '../../util/is-object';
+import { getJiraResponseErrorTxt } from '../../util/get-jira-response-error-text';
 
-const _createErrorAlert = (error: Error) => {
+const _createErrorAlert = (error: string) => {
   const errorAlert = document.createElement('div');
   errorAlert.classList.add('global-error-alert');
   errorAlert.innerHTML = `
     <h2>An error occurred<h2>
     <p><a href="https://github.com/johannesjo/super-productivity/issues/new" target="_blank">Please Report</a></p>
-    <pre>${error.toString()}</pre>
+    <pre>${error}</pre>
     `;
   const btnReload = document.createElement('BUTTON');
   btnReload.innerText = 'Reload App';
@@ -23,22 +25,34 @@ export class CustomErrorHandler implements ErrorHandler {
   constructor(private _snackService: SnackService) {
   }
 
-  handleError(error: Error) {
-    // NOTE: snack won't work most of the time
-    try {
-      this._snackService.open({
-        type: 'GLOBAL_ERROR',
-        config: {
-          // display basically forever
-          duration: 60 * 60 * 24 * 1000,
-        },
-        message: error.toString().substring(0, 150),
-      });
-    } catch (e) {
-      _createErrorAlert(error);
+  handleError(error: any) {
+    // if not our custom error handler we have a critical error on our hands
+    if (!error || typeof error === 'string' || !error.handledError) {
+      const errorStr = this._getErrorStr(error);
+      // NOTE: snack won't work most of the time
+      try {
+        this._snackService.open({
+          type: 'GLOBAL_ERROR',
+          config: {
+            // display basically forever
+            duration: 60 * 60 * 24 * 1000,
+          },
+          message: errorStr.substring(0, 150),
+        });
+      } catch (e) {
+        _createErrorAlert(errorStr);
+      }
     }
-    console.log('GLOBAL_ERROR_HANDLER');
+    console.error('GLOBAL_ERROR_HANDLER', error);
     // NOTE: rethrow the error otherwise it gets swallowed
     throw error;
+  }
+
+  private _getErrorStr(err: any): string {
+    if (isObject(err)) {
+      return getJiraResponseErrorTxt(err);
+    } else {
+      return err.toString();
+    }
   }
 }

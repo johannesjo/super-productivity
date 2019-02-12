@@ -437,7 +437,7 @@ If not please change the Sync file name.`,
   // DATE HELPER
   private _loadFile(): Observable<any> {
     if (!this._config.syncFileName) {
-      return throwError('No file name specified');
+      return throwError({handledError: 'No file name specified'});
     }
     return this._googleApiService.loadFile(this._config._backupDocId);
   }

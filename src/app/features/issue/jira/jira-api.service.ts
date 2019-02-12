@@ -26,9 +26,10 @@ import { loadFromSessionStorage, saveToSessionStorage } from '../../../core/pers
 import { combineLatest, Observable, throwError } from 'rxjs';
 import { SearchResultItem } from '../issue';
 import { fromPromise } from 'rxjs/internal-compatibility';
-import { catchError, share, take } from 'rxjs/operators';
+import { catchError, first } from 'rxjs/operators';
 import { JiraIssue } from './jira-issue/jira-issue.model';
 import * as moment from 'moment-mini';
+import { getJiraResponseErrorTxt } from '../../../util/get-jira-response-error-text';
 
 const BLOCK_ACCESS_KEY = 'SUP_BLOCK_JIRA_ACCESS';
 
@@ -80,7 +81,7 @@ export class JiraApiService {
           .pipe(catchError((err) => {
             this._blockAccess();
             checkConnectionSub.unsubscribe();
-            return throwError(err);
+            return throwError({handledError: err});
           }))
           .subscribe(() => {
             this.unblockAccess();
@@ -118,7 +119,7 @@ export class JiraApiService {
     const searchQuery = this._cfg.autoAddBacklogJqlQuery;
 
     if (!searchQuery) {
-      return throwError('JiraApi: No search query for auto import');
+      return throwError({handledError: 'JiraApi: No search query for auto import'});
     }
 
     return this._sendRequest({
@@ -217,7 +218,7 @@ export class JiraApiService {
   private _sendRequest(request, cfg = this._cfg): Observable<any> {
     if (!this._isMinimalSettings(cfg)) {
       console.error('Not enough Jira settings. This should not happen!!!');
-      return throwError(new Error('Insufficient Settings for Jira'));
+      return throwError({handledError: 'Insufficient Settings for Jira'});
     }
 
     if (this._isBlockAccess) {
@@ -226,7 +227,7 @@ export class JiraApiService {
         type: 'JIRA_UNBLOCK',
         message: 'Jira: To prevent shut out from api, access has been blocked. Check your settings!'
       });
-      return throwError(new Error('Blocked access to prevent being shut out'));
+      return throwError({handledError: 'Blocked access to prevent being shut out'});
     }
 
     // assign uuid to request to know which responsive belongs to which promise
@@ -280,12 +281,11 @@ export class JiraApiService {
     return fromPromise(promise)
       .pipe(
         catchError((err) => {
-          this._snackService.open({type: 'ERROR', message: 'Jira: Something went wrong'});
-          return throwError(err);
+          const errTxt = getJiraResponseErrorTxt(err);
+          this._snackService.open({type: 'ERROR', message: `Jira: ${errTxt}`});
+          return throwError({handledError: errTxt});
         }),
-        share(),
-
-        take(1),
+        first(),
       );
   }
 
@@ -298,12 +298,7 @@ export class JiraApiService {
 
       // resolve saved promise
       if (!res || res.error) {
-        console.log('JIRA_RESPONSE_ERROR', res);
-        console.log('FRONTEND_REQUEST_FOR_ERROR', currentRequest);
-
-        const errorTxt = (res && res.error && (typeof res.error === 'string' && res.error || res.error.name || res.error));
-        console.error(errorTxt);
-        this._snackService.open({type: 'ERROR', message: 'Jira request failed: ' + errorTxt});
+        console.log('JIRA_RESPONSE_ERROR', res, currentRequest);
         currentRequest.reject(res);
 
         if (res.error &&

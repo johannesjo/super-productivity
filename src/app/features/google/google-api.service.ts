@@ -190,7 +190,7 @@ export class GoogleApiService {
           };
         } else {
           this._handleError('No data found');
-          return throwError('No data found');
+          return throwError({handledError: 'No data found'});
         }
       }));
   }
@@ -198,7 +198,7 @@ export class GoogleApiService {
   getFileInfo(fileId): Observable<any> {
     if (!fileId) {
       this._snackIt('ERROR', 'GoogleApi: No file id specified');
-      throwError('No file id given');
+      throwError({handledError: 'No file id given'});
     }
 
     return this._mapHttp({
@@ -215,7 +215,7 @@ export class GoogleApiService {
   findFile(fileName): Observable<any> {
     if (!fileName) {
       this._snackIt('ERROR', 'GoogleApi: No file name specified');
-      return throwError('No file name given');
+      return throwError({handledError: 'No file name given'});
     }
 
     return this._mapHttp({
@@ -232,7 +232,7 @@ export class GoogleApiService {
   loadFile(fileId): Observable<any> {
     if (!fileId) {
       this._snackIt('ERROR', 'GoogleApi: No file id specified');
-      throwError('No file id given');
+      throwError({handledError: 'No file id given'});
     }
 
     const loadFile = this._mapHttp({
@@ -392,7 +392,7 @@ export class GoogleApiService {
   private _mapHttp(params_: HttpRequest<string> | any): Observable<any> {
     if (!this._session.accessToken) {
       this._handleUnAuthenticated('GoogleApiService: Not logged in');
-      return throwError('Not logged in');
+      return throwError({handledError: 'Not logged in'});
     }
 
     const p = {
@@ -432,7 +432,7 @@ export class GoogleApiService {
           } else if (res && (res.status >= 0)) {
             this._handleError('Could not connect to google. Check your internet connection.');
           }
-          return throwError(res);
+          return throwError({handledError: res});
         }),
       );
   }
