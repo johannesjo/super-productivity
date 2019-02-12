@@ -57,7 +57,6 @@ export class SnackEffects {
       ...DEFAULT_SNACK_CFG,
       ...config,
       data: action.payload,
-      duration: 90909090,
     };
     if (isSubtle) {
       cfg.panelClass = 'subtle';
