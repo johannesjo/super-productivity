@@ -29,6 +29,11 @@ $dragHandleWidth: 36px;
   flex: 1;
   flex-shrink: 10;
 
+  @include mq(xxs) {
+    flex-wrap: nowrap;
+    flex: 0;
+  }
+
   > button {
     display: flex;
     min-width: 40px;
