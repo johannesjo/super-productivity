@@ -14,132 +14,146 @@ $dragHandleWidth: 36px;
   padding-bottom: $sTopBottom;
 }
 
-.global-bookmark-list-inner {
+.controls-and-list {
   display: flex;
+  flex-flow: row;
+  flex-wrap: wrap;
+}
+
+.list-controls {
+  display: inline-flex;
+  flex-flow: row;
+  flex-wrap: wrap;
+}
+
+.global-bookmark-list-inner {
+  display: inline-flex;
   flex-flow: row;
   justify-content: center;
   flex-wrap: wrap;
+}
 
-  .msg {
-    flex: 1 1 auto;
-    display: flex;
-    justify-content: center;
-    align-content: center;
-    align-self: center;
-    padding: $s;
-    padding-top: $s+$sTopBottom;
-  }
+.msg {
+  flex: 1 1 auto;
+  display: flex;
+  justify-content: center;
+  align-content: center;
+  align-self: center;
+  padding: $s;
+  padding-top: $s+$sTopBottom;
+}
 
-  .global-bookmark {
-    flex: 1 1 auto;
-    margin: $sTopBottom $sLeftRight 0;
-    position: relative;
+.list-control,
+.global-bookmark {
+  flex: 1 1 auto;
+  margin: $sTopBottom $sLeftRight 0;
+  position: relative;
 
-    .drag-handle {
-      transition: $transition-standard;
-      position: absolute;
-      left: 0;
-      top: 0;
-      bottom: 0;
-      width: $dragHandleWidth;
-      height: 100%;
-      z-index: 2;
-      border-top-left-radius: $card-border-radius;
-      border-bottom-left-radius: $card-border-radius;
-      box-shadow: $whiteframe-shadow-3dp;
-      cursor: grab;
-
-      // fixes drag and drop on mobile
-      touch-action: none;
-
-      &:active {
-        cursor: grabbing;
-      }
-    }
-
-    &.small-ui {
-      flex: 0 0 auto;
-
-      > button {
-        min-width: 40px;
-        padding-left: 0;
-        padding-right: 0;
-      }
-    }
-  }
-
-  &.isEditMode .global-bookmark {
-    > a:focus + .controls,
-    &.focus .controls,
-    .controls:hover {
-      visibility: visible;
-
-      button {
-        opacity: 1;
-        transition: $transition-enter;
-      }
-
-      .edit-btn {
-        transform: translate(0, 0);
-      }
-
-      .trash-btn {
-        transform: translate(0, 0);
-      }
-    }
-  }
-
-  .global-bookmark > a {
-    text-decoration: none;
-    display: flex;
-    align-items: flex-start;
-    flex-direction: row;
-    justify-content: center;
-    text-transform: none;
-    background-size: cover;
-    background-position: center center;
-
-    // allow them to be smaller to save space
-    min-width: 48px;
-    padding-left: $s;
-    padding-right: $s;
-  }
-
-  .controls {
+  .drag-handle {
+    transition: $transition-standard;
     position: absolute;
+    left: 0;
     top: 0;
-    left: $dragHandleWidth;
-    right: 0;
     bottom: 0;
-    z-index: 5;
-    display: flex;
-    flex-direction: row;
-    overflow: hidden;
+    width: $dragHandleWidth;
+    height: 100%;
+    z-index: 2;
+    border-top-left-radius: $card-border-radius;
+    border-bottom-left-radius: $card-border-radius;
+    box-shadow: $whiteframe-shadow-3dp;
+    cursor: grab;
 
-    button {
-      flex-grow: 1;
-      transition: $transition-leave;
-      //border-radius: 0;
-      margin: 0;
-      padding: 0;
-      min-height: 0;
-      opacity: 1;
-      min-width: 20px;
+    // fixes drag and drop on mobile
+    touch-action: none;
+
+    &:active {
+      cursor: grabbing;
     }
   }
 
-  $this-distance: $s*4.5;
+  &.small-ui {
+    flex: 0 0 auto;
 
-  .edit-btn {
-    // TODO fix that this causes an overflow
-    transform: translate(-$this-distance, $this-distance);
-  }
-
-  .trash-btn {
-    // TODO fix that this causes an overflow
-    transform: translate($this-distance, $this-distance);
+    > button {
+      min-width: 40px;
+      padding-left: 0;
+      padding-right: 0;
+    }
   }
 }
+
+.global-bookmark-list-inner.isEditMode .global-bookmark {
+  > a:focus + .controls,
+  &.focus .controls,
+  .controls:hover {
+    visibility: visible;
+
+    button {
+      opacity: 1;
+      transition: $transition-enter;
+    }
+
+    .edit-btn {
+      transform: translate(0, 0);
+    }
+
+    .trash-btn {
+      transform: translate(0, 0);
+    }
+  }
+}
+
+.global-bookmark > a {
+  text-decoration: none;
+  display: flex;
+  align-items: flex-start;
+  flex-direction: row;
+  justify-content: center;
+  text-transform: none;
+  background-size: cover;
+  background-position: center center;
+
+  // allow them to be smaller to save space
+  min-width: 48px;
+  padding-left: $s;
+  padding-right: $s;
+}
+
+.controls {
+  position: absolute;
+  top: 0;
+  left: $dragHandleWidth;
+  right: 0;
+  bottom: 0;
+  z-index: 5;
+  display: flex;
+  flex-direction: row;
+  overflow: hidden;
+
+  button {
+    flex-grow: 1;
+    transition: $transition-leave;
+    //border-radius: 0;
+    margin: 0;
+    padding: 0;
+    min-height: 0;
+    opacity: 1;
+    min-width: 20px;
+  }
+}
+
+$this-distance: $s*4.5;
+
+.edit-btn {
+  // TODO fix that this causes an overflow
+  transform: translate(-$this-distance, $this-distance);
+}
+
+.trash-btn {
+  // TODO fix that this causes an overflow
+  transform: translate($this-distance, $this-distance);
+}
+
 
 .drag-over-msg {
   pointer-events: none;
