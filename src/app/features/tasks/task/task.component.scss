@@ -9,7 +9,6 @@ $this-first-line-min-height: 40px;
 $this-icon-default-opacity: 0.7;
 $this-task-focus-zoom: 1.03;
 $this-task-current-zoom: 1.0178571428;
-//$this-task-focus-zoom: 1.0178571428;
 
 %standardTaskOpacityChange {
   opacity: $this-icon-default-opacity;
@@ -58,7 +57,7 @@ $this-task-current-zoom: 1.0178571428;
     > .inner-wrapper > .box {
       border: 1px solid $c-accent !important;
       box-shadow: $whiteframe-shadow-5dp;
-      transform: scale($this-task-focus-zoom);
+      transform: scaleX($this-task-focus-zoom);
     }
   }
 
