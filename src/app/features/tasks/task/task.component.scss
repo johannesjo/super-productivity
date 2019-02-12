@@ -34,12 +34,6 @@ $this-icon-default-opacity: 0.7;
   > .inner-wrapper {
     padding: 2px 0;
     margin-bottom: 7px;
-    transition: transform $transition-standard;
-
-    .title-bar-wrapper,
-    .first-line {
-      background: inherit;
-    }
 
     .first-line {
       min-height: $this-first-line-min-height;
@@ -58,7 +52,7 @@ $this-icon-default-opacity: 0.7;
     z-index: 4;
     outline: none;
 
-    > .inner-wrapper {
+    > .inner-wrapper > .box {
       border: 1px solid $c-accent !important;
       box-shadow: $whiteframe-shadow-5dp;
     }
@@ -220,18 +214,32 @@ $this-icon-default-opacity: 0.7;
 }
 
 .inner-wrapper {
-  //color: $this-task-text-color;
   position: relative;
-  box-shadow: $shadow-card-shadow;
-  //box-shadow: $shadow-bottom-boxed;
-  border-radius: $card-border-radius;
-  border: 1px solid $light-theme-extra-border-color;
-  @include darkTheme {
-    border-color: $dark-theme-extra-border-color;
+
+  > .first-line {
+    position: relative;
   }
 
-  &.isCurrent {
-    transform: scale(1.0178571428);
+  > .box {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    top: 0;
+    transition: transform $transition-standard;
+    box-shadow: $shadow-card-shadow;
+    border-radius: $card-border-radius;
+    border: 1px solid $light-theme-extra-border-color;
+
+    @include darkTheme {
+      border-color: $dark-theme-extra-border-color;
+    }
+  }
+
+  &.isCurrent > .box {
+    $thisZoom: 1.0178571428;
+    //$thisZoom: 1.05;
+    transform: scale($thisZoom);
     box-shadow: $this-active-shadow;
   }
 
@@ -316,6 +324,10 @@ $this-icon-default-opacity: 0.7;
   // needs to be block for it not to mess up
   display: block !important;
 
+  @include darkTheme() {
+    caret-color: #ffffff;
+  }
+
   &:first-letter {
     // we can't do this, as this messes up text input :/
     // text-transform: uppercase;
@@ -323,10 +335,6 @@ $this-icon-default-opacity: 0.7;
 
   .isCurrent & {
     font-weight: bold;
-  }
-
-  @include darkTheme() {
-    caret-color: #ffffff;
   }
 
   &:after {
@@ -344,8 +352,10 @@ $this-icon-default-opacity: 0.7;
     z-index: -1;
     border: 1px solid black;
     pointer-events: none;
+    background: #fff;
 
     @include darkTheme() {
+      background: $dark-theme-bg-lighter;
       border: 1px solid #ffffff;
       box-shadow: 0 0 4px 0 rgba(255, 255, 255, 0.8), $whiteframe-shadow-13dp;
     }
@@ -358,6 +368,10 @@ $this-icon-default-opacity: 0.7;
     // thee magic number is 16/14 so we scale to whole pixels
     transform: scale(1.142857143);
     transition: $transition-standard;
+    color: #000;
+    @include darkTheme() {
+      color: #fff;
+    }
 
     .is-hide-controls & {
       transform-origin: center center;

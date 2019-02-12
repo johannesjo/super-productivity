@@ -1,15 +1,15 @@
-import {Injectable} from '@angular/core';
-import {IssueData, IssueProviderKey, SearchResultItem} from './issue';
-import {JiraIssue} from './jira/jira-issue/jira-issue.model';
-import {Attachment} from '../attachment/attachment.model';
-import {JiraApiService} from './jira/jira-api.service';
-import {GitApiService} from './git/git-api.service';
-import {combineLatest, from, Observable, zip} from 'rxjs';
-import {ProjectService} from '../project/project.service';
-import {catchError, map, switchMap, take} from 'rxjs/operators';
-import {JiraIssueService} from './jira/jira-issue/jira-issue.service';
-import {GitIssueService} from './git/git-issue/git-issue.service';
-import {GIT_TYPE, JIRA_TYPE} from './issue.const';
+import { Injectable } from '@angular/core';
+import { IssueData, IssueProviderKey, SearchResultItem } from './issue';
+import { JiraIssue } from './jira/jira-issue/jira-issue.model';
+import { Attachment } from '../attachment/attachment.model';
+import { JiraApiService } from './jira/jira-api.service';
+import { GitApiService } from './git/git-api.service';
+import { combineLatest, from, Observable, zip } from 'rxjs';
+import { ProjectService } from '../project/project.service';
+import { catchError, map, switchMap, take } from 'rxjs/operators';
+import { JiraIssueService } from './jira/jira-issue/jira-issue.service';
+import { GitIssueService } from './git/git-issue/git-issue.service';
+import { GIT_TYPE, JIRA_TYPE } from './issue.const';
 
 @Injectable({
   providedIn: 'root',
