@@ -6,25 +6,21 @@
     Drop here to add a bookmark
   </div>
 
-  <div class="controls-and-list">
+  <div class="controls-and-list-wrapper">
     <div class="list-controls">
-      <div class="list-control small-ui">
-        <button (click)="openEditDialog()"
-                aria-label="add global bookmark"
-                color="lighter"
-                mat-raised-button=""
-                tabindex="1">
-          <mat-icon>add</mat-icon>
-        </button>
-      </div>
-      <div class="list-control small-ui">
-        <button (click)="isEditMode=!isEditMode"
-                [color]="isEditMode?'accent':'lighter'"
-                mat-raised-button=""
-                tabindex="1">
-          <mat-icon>edit</mat-icon>
-        </button>
-      </div>
+      <button (click)="openEditDialog()"
+              aria-label="add global bookmark"
+              color="lighter"
+              mat-raised-button=""
+              tabindex="1">
+        <mat-icon>add</mat-icon>
+      </button>
+      <button (click)="isEditMode=!isEditMode"
+              [color]="isEditMode?'accent':'lighter'"
+              mat-raised-button=""
+              tabindex="1">
+        <mat-icon>edit</mat-icon>
+      </button>
     </div>
 
     <div class="global-bookmark-list-inner"

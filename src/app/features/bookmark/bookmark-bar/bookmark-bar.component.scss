@@ -14,23 +14,41 @@ $dragHandleWidth: 36px;
   padding-bottom: $sTopBottom;
 }
 
-.controls-and-list {
+.controls-and-list-wrapper {
   display: flex;
   flex-flow: row;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
 }
 
 .list-controls {
-  display: inline-flex;
+  display: flex;
   flex-flow: row;
   flex-wrap: wrap;
+  justify-content: stretch;
+  align-items: center;
+  flex: 1;
+  flex-shrink: 10;
+
+  > button {
+    display: flex;
+    min-width: 40px;
+    padding-left: 0;
+    padding-right: 0;
+    text-align: center;
+
+    ::ng-deep .mat-button-wrapper {
+      width: 100%;
+    }
+  }
 }
 
 .global-bookmark-list-inner {
-  display: inline-flex;
+  display: flex;
   flex-flow: row;
-  justify-content: center;
+  justify-content: stretch;
+  align-self: center;
   flex-wrap: wrap;
+  flex: 10;
 }
 
 .msg {
@@ -43,42 +61,32 @@ $dragHandleWidth: 36px;
   padding-top: $s+$sTopBottom;
 }
 
-.list-control,
+.list-controls button,
 .global-bookmark {
   flex: 1 1 auto;
   margin: $sTopBottom $sLeftRight 0;
   position: relative;
+}
 
-  .drag-handle {
-    transition: $transition-standard;
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    width: $dragHandleWidth;
-    height: 100%;
-    z-index: 2;
-    border-top-left-radius: $card-border-radius;
-    border-bottom-left-radius: $card-border-radius;
-    box-shadow: $whiteframe-shadow-3dp;
-    cursor: grab;
+.drag-handle {
+  transition: $transition-standard;
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: $dragHandleWidth;
+  height: 100%;
+  z-index: 2;
+  border-top-left-radius: $card-border-radius;
+  border-bottom-left-radius: $card-border-radius;
+  box-shadow: $whiteframe-shadow-3dp;
+  cursor: grab;
 
-    // fixes drag and drop on mobile
-    touch-action: none;
+  // fixes drag and drop on mobile
+  touch-action: none;
 
-    &:active {
-      cursor: grabbing;
-    }
-  }
-
-  &.small-ui {
-    flex: 0 0 auto;
-
-    > button {
-      min-width: 40px;
-      padding-left: 0;
-      padding-right: 0;
-    }
+  &:active {
+    cursor: grabbing;
   }
 }
 
@@ -142,16 +150,12 @@ $dragHandleWidth: 36px;
   }
 }
 
-$this-distance: $s*4.5;
-
 .edit-btn {
-  // TODO fix that this causes an overflow
-  transform: translate(-$this-distance, $this-distance);
+  transform: translate(-100%);
 }
 
 .trash-btn {
-  // TODO fix that this causes an overflow
-  transform: translate($this-distance, $this-distance);
+  transform: translate(100%);
 }
 
 
