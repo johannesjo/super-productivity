@@ -3,10 +3,10 @@ import { ProjectService } from '../../project/project.service';
 import { GitCfg } from './git';
 import { SnackService } from '../../../core/snack/snack.service';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { GIT_API_BASE_URL } from './git.const';
-import { combineLatest, from, Observable, ObservableInput, throwError } from 'rxjs';
+import { GIT_API_BASE_URL, GIT_MAX_CACHE_AGE } from './git.const';
+import { combineLatest, from, Observable, ObservableInput, Subject, throwError } from 'rxjs';
 import { GitOriginalComment, GitOriginalIssue } from './git-api-responses';
-import { catchError, map, share, switchMap, take } from 'rxjs/operators';
+import { catchError, map, share, switchMap, take, tap } from 'rxjs/operators';
 import { mapGitIssue, mapGitIssueToSearchResult } from './git-issue/git-issue-map.util';
 import { GitComment, GitIssue } from './git-issue/git-issue.model';
 import { SearchResultItem } from '../issue';
@@ -15,12 +15,13 @@ import { LS_GIT_ISSUE_CACHE_PREFIX } from '../../../core/persistence/ls-keys.con
 import { HANDLED_ERROR } from '../../../app.constants';
 
 const BASE = GIT_API_BASE_URL;
-const MAX_CACHE_AGE = 60 * 10 * 1000;
 
 @Injectable({
   providedIn: 'root',
 })
 export class GitApiService {
+  public onCacheRefresh$ = new Subject<boolean>();
+
   private _cfg: GitCfg;
 
   constructor(
@@ -50,28 +51,26 @@ export class GitApiService {
     const lastUpdate: number = cached && cached.lastUpdate;
 
     console.log('getCompleteIssueDataForRepo isUseCached',
-      cachedIssues && Array.isArray(cachedIssues) && (lastUpdate + MAX_CACHE_AGE > Date.now()));
+      cachedIssues && Array.isArray(cachedIssues) && (lastUpdate + GIT_MAX_CACHE_AGE > Date.now()));
 
     if (
       !isForceRefresh &&
-      cachedIssues && Array.isArray(cachedIssues) && (lastUpdate + MAX_CACHE_AGE > Date.now())
+      cachedIssues && Array.isArray(cachedIssues) && (lastUpdate + GIT_MAX_CACHE_AGE > Date.now())
     ) {
       return from([cachedIssues]);
     } else {
-      const completeIssues$ = combineLatest(
+      return combineLatest(
         this._getAllIssuesForRepo(repo, isSkipCheck),
         this._getAllCommentsForRepo(repo, isSkipCheck),
       ).pipe(
         take(1),
         map(([issues, comments]) => this._mergeIssuesAndComments(issues, comments)),
+        tap(issues => {
+          if (Array.isArray(issues)) {
+            this._updateIssueCache(issues);
+          }
+        }),
       );
-      completeIssues$.pipe(take(1)).subscribe(issues => {
-        if (Array.isArray(issues)) {
-          this._updateIssueCache(issues);
-        }
-      });
-
-      return completeIssues$;
     }
   }
 
@@ -95,12 +94,8 @@ export class GitApiService {
       );
   }
 
-  refreshIssuesCache() {
-    if (this._isValidSettings()) {
-      this.getCompleteIssueDataForRepo().subscribe(issues => {
-        this._updateIssueCache(issues);
-      });
-    }
+  refreshIssuesCacheIfOld(): void {
+    this.getCompleteIssueDataForRepo().subscribe();
   }
 
   getIssueWithCommentsByIssueNumber(issueNumber: number): Observable<GitIssue> {
@@ -124,6 +119,7 @@ export class GitApiService {
       issues,
       lastUpdate: Date.now(),
     });
+    this.onCacheRefresh$.next(true);
   }
 
   private _getAllIssuesForRepo(repo = this._cfg.repo, isSkipCheck = false): Observable<GitIssue[]> {

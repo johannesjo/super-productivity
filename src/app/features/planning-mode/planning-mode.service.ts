@@ -28,8 +28,8 @@ export class PlanningModeService {
     private _taskService: TaskService,
     private _projectService: ProjectService,
   ) {
-    this.isPlanningMode$.subscribe((v) => console.log('isPlanningMode$', v));
-    this._projectService.onProjectChange$.subscribe((v) => console.log('_projectService.onProjectChange$', v));
+    // this.isPlanningMode$.subscribe((v) => console.log('isPlanningMode$', v));
+    // this._projectService.onProjectChange$.subscribe((v) => console.log('_projectService.onProjectChange$', v));
     this.reCheckPlanningMode();
   }
 

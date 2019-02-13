@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Actions, Effect, ofType } from '@ngrx/effects';
 import { GitIssueActionTypes } from './git-issue.actions';
 import { select, Store } from '@ngrx/store';
-import { delay, filter, switchMap, tap, withLatestFrom } from 'rxjs/operators';
+import { delay, filter, switchMap, tap, throttleTime, withLatestFrom } from 'rxjs/operators';
 import { TaskActionTypes } from '../../../../tasks/store/task.actions';
 import { PersistenceService } from '../../../../../core/persistence/persistence.service';
 import { selectAllGitIssues, selectGitIssueFeatureState } from './git-issue.reducer';
@@ -10,23 +10,24 @@ import { selectCurrentProjectId, selectProjectGitCfg } from '../../../../project
 import { GitApiService } from '../../git-api.service';
 import { GitIssueService } from '../git-issue.service';
 import { ConfigService } from '../../../../config/config.service';
-import { GitIssue } from '../git-issue.model';
 import { SnackService } from '../../../../../core/snack/snack.service';
 import { TaskService } from '../../../../tasks/task.service';
 import { Task } from '../../../../tasks/task.model';
 import { ProjectActionTypes } from '../../../../project/store/project.actions';
 import { GIT_TYPE } from '../../../issue.const';
-import { timer } from 'rxjs';
-import { GIT_INITIAL_POLL_DELAY, GIT_POLL_INTERVAL, GIT_REFRESH_BACKLOG_DELAY } from '../../git.const';
+import { EMPTY, timer } from 'rxjs';
+import { GIT_INITIAL_POLL_DELAY, GIT_POLL_INTERVAL, } from '../../git.const';
+import { GitCfg } from '../../git';
+import { GitIssue } from '../git-issue.model';
 
-const isRepoConfigured = ([a, gitCfg]) => gitCfg && gitCfg.repo && gitCfg.repo.length > 2;
+const isRepoConfigured_ = (gitCfg) => gitCfg && gitCfg.repo && gitCfg.repo.length > 2;
+const isRepoConfigured = ([a, gitCfg]) => isRepoConfigured_(gitCfg);
 
 @Injectable()
 export class GitIssueEffects {
-  @Effect({dispatch: false}) pollIssueChanges$: any = this._actions$
+  @Effect({dispatch: false}) refreshCachePoll$: any = this._actions$
     .pipe(
       ofType(
-        // while load state should be enough this just might fix the error of polling for inactive projects?
         ProjectActionTypes.SetCurrentProject,
         ProjectActionTypes.UpdateProjectIssueProviderCfg,
         GitIssueActionTypes.LoadState,
@@ -34,46 +35,56 @@ export class GitIssueEffects {
       withLatestFrom(
         this._store$.pipe(select(selectProjectGitCfg)),
       ),
-      filter(isRepoConfigured),
-      filter(([a, gitCfg]) => gitCfg && gitCfg.isAutoPoll),
       switchMap(([a, gitCfg]) => {
-        console.log('INIT GIT POLL UPDATE TIMER');
-        return timer(GIT_INITIAL_POLL_DELAY, GIT_POLL_INTERVAL)
-          .pipe(
-            withLatestFrom(
-              this._store$.pipe(select(selectAllGitIssues)),
-            ),
-            tap(([x, issues]: [number, GitIssue[]]) => {
-              if (issues && issues.length > 0) {
-                console.log('git tap poll', x, issues);
-                this._snackService.open({
-                  message: 'Git: Polling Changes for issues',
-                  svgIcon: 'github',
-                  isSubtle: true,
-                });
-                this._gitIssueService.updateIssuesFromApi(issues, gitCfg);
-              }
-            })
-          );
+        console.log('CACHE REFRESH', isRepoConfigured_(gitCfg) && (gitCfg.isAutoAddToBacklog || gitCfg.isAutoPoll));
+        return (isRepoConfigured_(gitCfg) && (gitCfg.isAutoAddToBacklog || gitCfg.isAutoPoll))
+          ? timer(GIT_INITIAL_POLL_DELAY, GIT_POLL_INTERVAL)
+            .pipe(
+              tap(() => {
+                console.log('CACHE REFRESH TIMER');
+                this._gitApiService.refreshIssuesCacheIfOld();
+                // trigger fake refresh for when issues are deleted or cache is more up to date
+                // then the data
+                this._gitApiService.onCacheRefresh$.next(true);
+              })
+            )
+          : EMPTY;
       })
     );
 
-  @Effect({dispatch: false}) pollNewIssuesToBacklog$$: any = this._actions$
-    .pipe(
-      ofType(
-        ProjectActionTypes.LoadProjectRelatedDataSuccess,
-      ),
-      delay(GIT_REFRESH_BACKLOG_DELAY),
-      withLatestFrom(
-        this._store$.pipe(select(selectProjectGitCfg)),
-      ),
-      filter(isRepoConfigured),
-      filter(([a, gitCfg]) => gitCfg.isAutoAddToBacklog),
-      tap(() => {
-        this._gitApiService.refreshIssuesCache();
-        this._gitIssueService.addOpenIssuesToBacklog();
-      })
-    );
+  @Effect({dispatch: false}) refreshIssueData$: any = this._gitApiService.onCacheRefresh$.pipe(
+    delay(5000),
+    throttleTime(10000),
+    withLatestFrom(
+      this._store$.pipe(select(selectProjectGitCfg)),
+      this._store$.pipe(select(selectAllGitIssues)),
+    ),
+    filter(([a, gitCfg]) => gitCfg.isAutoPoll),
+    tap(([x, gitCfg, issues]: [any, GitCfg, GitIssue[]]) => {
+      console.log('GIT POLL ISSUE CHANGES', x, issues);
+      if (issues && issues.length > 0) {
+        this._snackService.open({
+          message: 'Git: Polling Changes for issues',
+          svgIcon: 'github',
+          isSubtle: true,
+        });
+        this._gitIssueService.updateIssuesFromApi(issues, gitCfg, true);
+      }
+    })
+  );
+
+  @Effect({dispatch: false}) refreshBacklog: any = this._gitApiService.onCacheRefresh$.pipe(
+    delay(10000),
+    throttleTime(10000),
+    withLatestFrom(
+      this._store$.pipe(select(selectProjectGitCfg)),
+    ),
+    filter(([a, gitCfg]) => gitCfg.isAutoAddToBacklog),
+    tap(() => {
+      console.log('GIT POLL BACKLOG');
+      this._gitIssueService.addOpenIssuesToBacklog();
+    })
+  );
 
 
   @Effect({dispatch: false}) syncIssueStateToLs$: any = this._actions$
