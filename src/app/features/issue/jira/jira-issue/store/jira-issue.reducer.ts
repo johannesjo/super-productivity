@@ -9,6 +9,7 @@ import { JIRA_TYPE } from '../../../issue.const';
 export const JIRA_ISSUE_FEATURE_NAME: IssueProviderKey = JIRA_TYPE;
 
 export interface JiraIssueState extends EntityState<JiraIssue> {
+  stateBefore: JiraIssueState;
 }
 
 export const jiraIssueAdapter: EntityAdapter<JiraIssue> = createEntityAdapter<JiraIssue>();
@@ -35,7 +36,9 @@ export const selectJiraIssueById = createSelector(
 
 // REDUCER
 // -------
-export const initialJiraIssueState: JiraIssueState = jiraIssueAdapter.getInitialState({});
+export const initialJiraIssueState: JiraIssueState = jiraIssueAdapter.getInitialState({
+  stateBefore: null
+});
 
 export function jiraIssueReducer(
   state: JiraIssueState = initialJiraIssueState,
@@ -48,6 +51,10 @@ export function jiraIssueReducer(
     // ------------
     case JiraIssueActionTypes.LoadState: {
       return Object.assign({}, action.payload.state);
+    }
+
+    case TaskActionTypes.UndoDeleteTask: {
+      return state.stateBefore || state;
     }
 
     case TaskActionTypes.AddTask: {
@@ -63,7 +70,10 @@ export function jiraIssueReducer(
         const issue = action.payload.task.issueData as JiraIssue;
         const ids = state.ids as string[];
         if (issue && issue.id && ids.includes(issue.id)) {
-          return jiraIssueAdapter.removeOne(issue.id, state);
+          return jiraIssueAdapter.removeOne(issue.id, {
+            ...state,
+            stateBefore: {...state, stateBefore: null}
+          });
         } else {
           // don't crash app but warn strongly
           console.log('##########################################################');
