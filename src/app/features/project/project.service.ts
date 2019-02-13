@@ -17,7 +17,8 @@ import {
   selectAdvancedProjectCfg,
   selectAllProjects,
   selectCurrentProject,
-  selectCurrentProjectId, selectProjectById,
+  selectCurrentProjectId,
+  selectProjectById,
   selectProjectGitCfg,
   selectProjectJiraCfg
 } from './store/project.reducer';
@@ -28,10 +29,7 @@ import { Dictionary } from '@ngrx/entity';
 import { getWorklogStr } from '../../util/get-work-log-str';
 import { GitCfg } from '../issue/git/git';
 import { DEFAULT_ISSUE_PROVIDER_CFGS } from '../issue/issue.const';
-import { Actions } from '@ngrx/effects';
-import { ofType } from '@ngrx/effects';
-import { Task } from '../tasks/task.model';
-import { selectTaskById } from '../tasks/store/task.selectors';
+import { Actions, ofType } from '@ngrx/effects';
 import { take } from 'rxjs/operators';
 
 @Injectable({
