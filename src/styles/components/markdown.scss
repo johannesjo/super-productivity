@@ -1,0 +1,19 @@
+.markdown {
+  @include scrollY;
+  word-wrap: break-word;
+
+  *:first-child {
+    margin-top: 0;
+    padding-top: 0;
+  }
+
+  img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  ul {
+    padding-left: 20px;
+  }
+}

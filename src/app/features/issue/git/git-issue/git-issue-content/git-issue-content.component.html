@@ -38,8 +38,9 @@
       <th>Description</th>
       <td>
         <!--<inline-markdown [model]="issueData?.body"></inline-markdown>-->
-        <div class="description"
-             [innerHTML]="issueData?.body|markdown"
+        <div class="description markdown"
+             markdown
+             [data]="issueData?.body"
              *ngIf="issueData.body"></div>
       </td>
     </tr>

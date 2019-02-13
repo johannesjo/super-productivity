@@ -57,8 +57,10 @@
       <th (click)="isFocusDescription=!isFocusDescription">Description</th>
       <td>
         <!--<inline-markdown [model]="issueData.description"></inline-markdown>-->
-        <div *ngIf="issueData.description"
-             [innerHTML]="issueData.description|markdown"></div>
+        <div class="description markdown"
+             markdown
+             [data]="issueData?.description"
+             *ngIf="issueData.description"></div>
       </td>
     </tr>
     <tr>

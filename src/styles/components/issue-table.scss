@@ -1,0 +1,29 @@
+.issue-table {
+  width: 100%;
+
+  td,
+  th {
+    vertical-align: top;
+    padding-bottom: $s;
+    padding-left: $s;
+
+    &:first-child {
+      padding-left: 0;
+    }
+  }
+
+  // to shrink the th col to a min
+  td {
+    width: 100%;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    word-break: break-word;
+
+    ::ng-deep img,
+    img {
+      max-width: 100%;
+      height: auto;
+      display: block;
+    }
+  }
+}
