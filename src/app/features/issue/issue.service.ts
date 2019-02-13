@@ -6,7 +6,7 @@ import { JiraApiService } from './jira/jira-api.service';
 import { GitApiService } from './git/git-api.service';
 import { combineLatest, from, Observable, zip } from 'rxjs';
 import { ProjectService } from '../project/project.service';
-import { catchError, map, switchMap, take } from 'rxjs/operators';
+import { catchError, map, switchMap } from 'rxjs/operators';
 import { JiraIssueService } from './jira/jira-issue/jira-issue.service';
 import { GitIssueService } from './git/git-issue/git-issue.service';
 import { GIT_TYPE, JIRA_TYPE } from './issue.const';
@@ -66,7 +66,7 @@ export class IssueService {
           obs.push(this._gitApiService.searchIssueForRepo(searchTerm));
         }
 
-        return zip(...obs, (...allResults) => [].concat(...allResults));
+        return zip(...obs, (...allResults) => [].concat(...allResults)) as Observable<SearchResultItem[]>;
       })
     );
   }
