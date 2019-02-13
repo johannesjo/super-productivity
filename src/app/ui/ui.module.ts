@@ -33,7 +33,7 @@ import {
   MatToolbarModule,
   MatTooltipModule,
 } from '@angular/material';
-import { MarkdownModule } from 'ngx-markdown';
+import { MarkdownModule, MarkdownService } from 'ngx-markdown';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { FormlyMaterialModule } from '@ngx-formly/material';
 import { FormlyModule } from '@ngx-formly/core';
@@ -207,4 +207,11 @@ import { ToArrayPipe } from './pipes/to-array.pipe';
   ]
 })
 export class UiModule {
+  constructor(private _markdownService: MarkdownService) {
+    const linkRenderer = _markdownService.renderer.link;
+    _markdownService.renderer.link = (href, title, text) => {
+      const html = linkRenderer.call(_markdownService.renderer, href, title, text);
+      return html.replace(/^<a /, '<a target="_blank" ');
+    };
+  }
 }
