@@ -26,6 +26,9 @@ $noteFontSize: 14px;
   top: -$s*0.75;
   right: -$s*0.75;
 
+  // fixes drag and drop on mobile
+  touch-action: none;
+
   @include mq(xs) {
     opacity: 0;
     transition: $transition-standard;
