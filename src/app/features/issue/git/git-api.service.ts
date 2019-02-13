@@ -12,6 +12,7 @@ import { GitComment, GitIssue } from './git-issue/git-issue.model';
 import { SearchResultItem } from '../issue';
 import { loadFromLs, saveToLs } from '../../../core/persistence/local-storage';
 import { LS_GIT_ISSUE_CACHE_PREFIX } from '../../../core/persistence/ls-keys.const';
+import { HANDLED_ERROR } from '../../../app.constants';
 
 const BASE = GIT_API_BASE_URL;
 const MAX_CACHE_AGE = 60 * 10 * 1000;
@@ -168,7 +169,7 @@ export class GitApiService {
   private _checkSettings() {
     if (!this._isValidSettings()) {
       this._snackService.open({type: 'ERROR', message: 'Git is not properly configured'});
-      throw new Error('Not enough settings');
+      throw new Error(`${HANDLED_ERROR} Not enough settings`);
     }
   }
 

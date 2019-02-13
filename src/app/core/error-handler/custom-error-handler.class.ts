@@ -2,6 +2,7 @@ import { ErrorHandler, Injectable } from '@angular/core';
 import { SnackService } from '../snack/snack.service';
 import { isObject } from '../../util/is-object';
 import { getJiraResponseErrorTxt } from '../../util/get-jira-response-error-text';
+import { HANDLED_ERROR } from '../../app.constants';
 
 const _createErrorAlert = (error: string) => {
   const errorAlert = document.createElement('div');
@@ -27,7 +28,7 @@ export class CustomErrorHandler implements ErrorHandler {
 
   handleError(error: any) {
     // if not our custom error handler we have a critical error on our hands
-    if (!error || typeof error === 'string' || !error.handledError) {
+    if (!error || (typeof error === 'string' && !error.match(HANDLED_ERROR)) || !error.handledError) {
       const errorStr = this._getErrorStr(error);
       // NOTE: snack won't work most of the time
       try {

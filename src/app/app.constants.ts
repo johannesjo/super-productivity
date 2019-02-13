@@ -19,3 +19,5 @@ export const ALL_THEMES = [
   'amber',
   'deep-orange',
 ];
+
+export const HANDLED_ERROR = '--HANDLED_ERROR--';
