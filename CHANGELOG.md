@@ -1,3 +1,66 @@
+## [2.2.3](https://github.com/johannesjo/super-productivity/compare/v2.2.2...v2.2.3) (2019-02-13)
+
+
+### Bug Fixes
+
+* **bookmarks:** drag handle pos ([96987a3](https://github.com/johannesjo/super-productivity/commit/96987a3))
+* **bookmarks:** icons not being centered ([2af6887](https://github.com/johannesjo/super-productivity/commit/2af6887))
+* **bookmarks:** not wrapping as intended ([ce47ba6](https://github.com/johannesjo/super-productivity/commit/ce47ba6))
+* **git:** crashing app when there are not enough settings ([113d64d](https://github.com/johannesjo/super-productivity/commit/113d64d))
+* **idle:** interaction with break timer ([4d60ead](https://github.com/johannesjo/super-productivity/commit/4d60ead))
+* **jira:** avatar image getting stretched ([26a6bb3](https://github.com/johannesjo/super-productivity/commit/26a6bb3))
+* **jira:** don't execute effect handlers when jira is disabled ([dc069d3](https://github.com/johannesjo/super-productivity/commit/dc069d3))
+* **jira:** issue transitions not working as expected [#147](https://github.com/johannesjo/super-productivity/issues/147) ([8929c44](https://github.com/johannesjo/super-productivity/commit/8929c44))
+* **jira:** make polling work as intended [#149](https://github.com/johannesjo/super-productivity/issues/149) ([8a3b844](https://github.com/johannesjo/super-productivity/commit/8a3b844))
+* **reminders:** causing error on importing data ([c3bfedd](https://github.com/johannesjo/super-productivity/commit/c3bfedd))
+* **scheduleTasks:** deleting and editing not working in modal ([ab04f44](https://github.com/johannesjo/super-productivity/commit/ab04f44))
+* data not being updated for custom section on project change ([5c162a0](https://github.com/johannesjo/super-productivity/commit/5c162a0))
+* links opening twice [#148](https://github.com/johannesjo/super-productivity/issues/148) ([575cba2](https://github.com/johannesjo/super-productivity/commit/575cba2))
+* missing word ([af4994e](https://github.com/johannesjo/super-productivity/commit/af4994e))
+* typing error ([65cd6ff](https://github.com/johannesjo/super-productivity/commit/65cd6ff))
+
+
+### Features
+
+* **bookmarks:** add edit mode ([4431bc4](https://github.com/johannesjo/super-productivity/commit/4431bc4))
+* **bookmarks:** add messy dragula drop ([b56a7c9](https://github.com/johannesjo/super-productivity/commit/b56a7c9))
+* **bookmarks:** fine tune list ui ([5a7d14f](https://github.com/johannesjo/super-productivity/commit/5a7d14f))
+* **bookmarks:** improve bookmark edit ui ([4eda2eb](https://github.com/johannesjo/super-productivity/commit/4eda2eb))
+* **bookmarks:** improve edit ui ([4432374](https://github.com/johannesjo/super-productivity/commit/4432374))
+* **bookmarks:** improve ui ([88f1ff4](https://github.com/johannesjo/super-productivity/commit/88f1ff4))
+* **bookmarks:** make different container layout work ([eb43864](https://github.com/johannesjo/super-productivity/commit/eb43864))
+* **bookmarks:** make sorting via drag and drop work [#54](https://github.com/johannesjo/super-productivity/issues/54) ([04491e3](https://github.com/johannesjo/super-productivity/commit/04491e3))
+* **bookmarks:** prepare edit mode ui for drag & drop ([885d6ba](https://github.com/johannesjo/super-productivity/commit/885d6ba))
+* **bookmarks:** separate into different containers ([21508bf](https://github.com/johannesjo/super-productivity/commit/21508bf))
+* **bookmarks:** slightly improve styling ([6fc1928](https://github.com/johannesjo/super-productivity/commit/6fc1928))
+* **git:** bind data and backlog updates to issue cache update ([c605d9f](https://github.com/johannesjo/super-productivity/commit/c605d9f))
+* **git:** slightly improve closed issue handling for git ([cf6113a](https://github.com/johannesjo/super-productivity/commit/cf6113a))
+* **jira:** add warning when their is no username given to check for assignee [#147](https://github.com/johannesjo/super-productivity/issues/147) ([8fa0709](https://github.com/johannesjo/super-productivity/commit/8fa0709))
+* **jira:** improve polling [#149](https://github.com/johannesjo/super-productivity/issues/149) ([2e4fba1](https://github.com/johannesjo/super-productivity/commit/2e4fba1))
+* **jira:** improve shut out modal styling ([a386540](https://github.com/johannesjo/super-productivity/commit/a386540))
+* **jira:** make issue assignee name a required field if option to reassign issues is selected [#147](https://github.com/johannesjo/super-productivity/issues/147) ([6e643b1](https://github.com/johannesjo/super-productivity/commit/6e643b1))
+* **jira,git:** reduce initial poll delay ([3377ff6](https://github.com/johannesjo/super-productivity/commit/3377ff6))
+* **scheduleTasks:** add keyboard shortcut ([bad3b3d](https://github.com/johannesjo/super-productivity/commit/bad3b3d))
+* **snack:** increase default duration ([4b60e9b](https://github.com/johannesjo/super-productivity/commit/4b60e9b))
+* **takeABreak:** add possibility to snooze reminder ([488270e](https://github.com/johannesjo/super-productivity/commit/488270e))
+* **takeABreak:** improve snack styling ([75149b9](https://github.com/johannesjo/super-productivity/commit/75149b9))
+* **tasks:** improve current task selection zoom ([a79a133](https://github.com/johannesjo/super-productivity/commit/a79a133))
+* **tasks:** limit zoom to x axis ([5339330](https://github.com/johannesjo/super-productivity/commit/5339330))
+* **tasks:** limit zoom to x axis ([3b4963e](https://github.com/johannesjo/super-productivity/commit/3b4963e))
+* **tasks:** prevent progress bar from causing height jump ([ea5eff5](https://github.com/johannesjo/super-productivity/commit/ea5eff5))
+* **tasks:** reduce focus zoom ([ee0a904](https://github.com/johannesjo/super-productivity/commit/ee0a904))
+* **tasks:** speed up current task selection ([2577f41](https://github.com/johannesjo/super-productivity/commit/2577f41))
+* **worklog:** add more statistics ([a8f4218](https://github.com/johannesjo/super-productivity/commit/a8f4218))
+* add keyboard shortcuts for zooming ([ab32d46](https://github.com/johannesjo/super-productivity/commit/ab32d46))
+* add take a break reset button ([b62d53c](https://github.com/johannesjo/super-productivity/commit/b62d53c))
+* add track by to attachment list to prevent constant re-render ([1314401](https://github.com/johannesjo/super-productivity/commit/1314401))
+* also display days worked in worklog ([e91f0eb](https://github.com/johannesjo/super-productivity/commit/e91f0eb))
+* improve error handling ([fa6f924](https://github.com/johannesjo/super-productivity/commit/fa6f924))
+* improve error handling [#146](https://github.com/johannesjo/super-productivity/issues/146) ([14d6df6](https://github.com/johannesjo/super-productivity/commit/14d6df6))
+* only trigger backlog wiggle ani when moving task to backlog via keyboard shortcut ([e551a2b](https://github.com/johannesjo/super-productivity/commit/e551a2b))
+
+
+
 ## [2.2.2](https://github.com/johannesjo/super-productivity/compare/v2.2.1...v2.2.2) (2019-02-10)
 
 
