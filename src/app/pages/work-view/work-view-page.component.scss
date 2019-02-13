@@ -85,6 +85,7 @@ h2 {
   .item {
     margin: 0 1.5*$s;
     text-align: center;
+    position: relative;
   }
 
   .controls {
@@ -104,6 +105,26 @@ h2 {
     align-items: center;
     justify-content: center;
   }
+}
+
+.take-a-break-reset-btn {
+  display: none;
+  position: absolute;
+  top: 50%;
+  right: -8px;
+  z-index: 4;
+  transform: translateY(-50%);
+  transition: $transition-standard;
+  opacity: 0;
+  visibility: hidden;
+  @include mq(xs) {
+    display: block;
+  }
+}
+
+.item:hover .take-a-break-reset-btn {
+  opacity: 1;
+  visibility: visible;
 }
 
 .hide-controls-icon {

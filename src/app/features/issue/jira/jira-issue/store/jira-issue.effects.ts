@@ -289,6 +289,7 @@ export class JiraIssueEffects {
 
   private _handleTransitionForIssue(localState: IssueLocalState, jiraCfg: JiraCfg, issue: JiraIssue) {
     const chosenTransition: JiraTransitionOption = jiraCfg.transitionConfig[localState];
+    console.log(chosenTransition);
 
     if (!chosenTransition) {
       this._snackService.open({type: 'ERROR', message: 'Jira: No transition configured'});

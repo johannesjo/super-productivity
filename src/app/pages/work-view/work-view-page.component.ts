@@ -99,4 +99,8 @@ export class WorkViewPageComponent implements OnInit, OnDestroy {
     this.taskService.startFirstStartable();
     this.planningModeService.leavePlanningMode();
   }
+
+  resetBreakTimer() {
+    this.takeABreakService.resetTimer();
+  }
 }
