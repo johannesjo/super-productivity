@@ -49,16 +49,14 @@
                           (optionSelected)="updateTransitionOptions()"
                           [displayWith]="displayWith"
                           [autoActiveFirstOption]="true">
-          <mat-option *ngIf="isLoading"
+          <mat-option *ngIf="(isLoading$|async)"
                       [value]="issueSuggestionsCtrl.value"
                       class="is-loading">
             <mat-spinner diameter="50"></mat-spinner>
           </mat-option>
-          <ng-container *ngIf="!isLoading">
-            <mat-option *ngFor="let issue of filteredIssueSuggestions"
-                        [value]="issue"><span>{{issue?.title}}</span>
-            </mat-option>
-          </ng-container>
+          <mat-option *ngFor="let issue of (filteredIssueSuggestions$|async)"
+                      [value]="issue"><span>{{issue?.title}}</span>
+          </mat-option>
         </mat-autocomplete>
       </mat-form-field>
 

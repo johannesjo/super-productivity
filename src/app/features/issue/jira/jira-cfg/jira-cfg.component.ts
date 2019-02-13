@@ -1,16 +1,17 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { ConfigFormSection, ConfigSectionKey } from '../../../config/config.model';
 import { ProjectCfgFormKey } from '../../../project/project.model';
 import { FormlyFieldConfig, FormlyFormOptions } from '@ngx-formly/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { JiraCfg } from '../jira';
 import { expandAnimation } from '../../../../ui/animations/expand.ani';
-import { Subject, Subscription } from 'rxjs';
+import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { SearchResultItem } from '../../issue';
-import { catchError, debounceTime, switchMap, takeUntil } from 'rxjs/operators';
+import { catchError, debounceTime, switchMap, tap } from 'rxjs/operators';
 import { JiraApiService } from '../jira-api.service';
 import { DEFAULT_JIRA_CFG } from '../jira.const';
 import { JiraIssue } from '../jira-issue/jira-issue.model';
+import { SnackService } from '../../../../core/snack/snack.service';
 
 @Component({
   selector: 'jira-cfg',
@@ -19,26 +20,47 @@ import { JiraIssue } from '../jira-issue/jira-issue.model';
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [expandAnimation]
 })
-export class JiraCfgComponent implements OnInit {
+export class JiraCfgComponent implements OnInit, OnDestroy {
   @Input() section: ConfigFormSection;
   // NOTE: this is legit because it might be that there is no issue provider cfg yet
   @Input() cfg: JiraCfg = DEFAULT_JIRA_CFG;
 
   @Output() save: EventEmitter<{ sectionKey: ConfigSectionKey | ProjectCfgFormKey, config: any }> = new EventEmitter();
 
-  destroy$: Subject<boolean> = new Subject<boolean>();
   issueSuggestionsCtrl: FormControl = new FormControl();
-  filteredIssueSuggestions: SearchResultItem[];
 
-  isLoading = false;
+  isLoading$ = new BehaviorSubject(false);
 
   fields: FormlyFieldConfig[];
   form = new FormGroup({});
   options: FormlyFormOptions = {};
 
+  filteredIssueSuggestions$: Observable<SearchResultItem[]> = this.issueSuggestionsCtrl.valueChanges.pipe(
+    debounceTime(300),
+    tap(() => this.isLoading$.next(true)),
+    switchMap((searchTerm) => {
+      return (searchTerm && searchTerm.length > 1)
+        ? this._jiraApiService.search(searchTerm, false, 50)
+          .pipe(
+            catchError(() => {
+              return [];
+            })
+          )
+        // Note: the outer array signifies the observable stream the other is the value
+        : [[]];
+    }),
+    tap((suggestions) => {
+      console.log(suggestions);
+      this.isLoading$.next(false);
+    }),
+  );
+
   private _subs = new Subscription();
 
-  constructor(private _jiraApiService: JiraApiService) {
+  constructor(
+    private _jiraApiService: JiraApiService,
+    private _snackService: SnackService,
+  ) {
   }
 
   ngOnInit(): void {
@@ -57,32 +79,10 @@ export class JiraCfgComponent implements OnInit {
     if (!Array.isArray(this.cfg.availableTransitions)) {
       this.cfg.availableTransitions = DEFAULT_JIRA_CFG.availableTransitions;
     }
+  }
 
-    this.issueSuggestionsCtrl.setValue('');
-
-    this.issueSuggestionsCtrl.valueChanges.pipe(
-      debounceTime(400),
-      switchMap((searchTerm) => {
-        if (searchTerm && searchTerm.length > 1) {
-          this.isLoading = true;
-          return this._jiraApiService.search(searchTerm).pipe(
-            catchError(() => {
-              return [];
-            })
-          );
-        } else {
-          // Note: the outer array signifies the observable stream the other is the value
-          return [[]];
-        }
-      }),
-      takeUntil(this.destroy$)
-    )
-      .subscribe((val) => {
-        console.log('sub', val);
-
-        this.isLoading = false;
-        this.filteredIssueSuggestions = val;
-      });
+  ngOnDestroy(): void {
+    this._subs.unsubscribe();
   }
 
   submit() {
@@ -111,6 +111,10 @@ export class JiraCfgComponent implements OnInit {
         this._jiraApiService.getTransitionsForIssue(issueId)
           .subscribe((val) => {
             this.cfg.availableTransitions = val;
+            this._snackService.open({
+              type: 'SUCCESS',
+              message: 'Jira: Transitions loaded. Use the selects below to assign them',
+            });
           })
       );
     }
