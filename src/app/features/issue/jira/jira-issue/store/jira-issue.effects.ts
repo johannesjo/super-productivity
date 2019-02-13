@@ -32,6 +32,7 @@ import { IssueLocalState } from '../../../issue';
 import { DialogConfirmComponent } from '../../../../../ui/dialog-confirm/dialog-confirm.component';
 import { DialogJiraAddWorklogComponent } from '../../dialog-jira-add-worklog/dialog-jira-add-worklog.component';
 import { JIRA_INITIAL_POLL_BACKLOG_DELAY, JIRA_INITIAL_POLL_DELAY, JIRA_POLL_INTERVAL } from '../../jira.const';
+import { isEmail } from '../../../../../util/is-email';
 
 const isEnabled_ = (jiraCfg) => jiraCfg && jiraCfg.isEnabled;
 const isEnabled = ([a, jiraCfg]: [any, JiraCfg, any?, any?, any?, any?]) => isEnabled_(jiraCfg);
@@ -164,7 +165,14 @@ export class JiraIssueEffects {
         const issue = issueEntities[currentTaskOrParent.issueId];
         const assignee = issue.assignee;
         const currentUserName = jiraCfg.userAssigneeName || jiraCfg.userName;
-        if (!issue.assignee || issue.assignee.name !== currentUserName) {
+
+        if (isEmail(currentUserName)) {
+          this._snackService.open({
+            svgIcon: 'jira',
+            message: 'Jira: Unable to reassign ticket to yourself, because you didn\'t specify a username. Please visit the settings.',
+          });
+          return EMPTY;
+        } else if (!issue.assignee || issue.assignee.name !== currentUserName) {
           return this._matDialog.open(DialogConfirmComponent, {
             restoreFocus: true,
             data: {
