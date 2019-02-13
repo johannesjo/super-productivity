@@ -88,10 +88,6 @@ export class JiraIssueService {
     });
   }
 
-  addOpenIssuesToBacklog() {
-    this._store.dispatch(new AddOpenJiraIssuesToBacklog());
-  }
-
   // HELPER
   getById(id: string): Observable<JiraIssue> {
     return this._store.pipe(select(selectJiraIssueById, {id}), take(1));

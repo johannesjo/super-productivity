@@ -9,7 +9,6 @@ import { selectJiraIssueEntities, selectJiraIssueFeatureState, selectJiraIssueId
 import { selectCurrentProjectId, selectProjectJiraCfg } from '../../../../project/store/project.reducer';
 import { JiraApiService } from '../../jira-api.service';
 import { JiraIssueService } from '../jira-issue.service';
-import { JIRA_INITIAL_POLL_BACKLOG_DELAY, JIRA_INITIAL_POLL_DELAY, JIRA_POLL_INTERVAL } from '../../jira.const';
 import { ConfigService } from '../../../../config/config.service';
 import { Dictionary } from '@ngrx/entity';
 import { JiraIssue } from '../jira-issue.model';
@@ -25,13 +24,14 @@ import {
   selectTaskFeatureState
 } from '../../../../tasks/store/task.selectors';
 import { TaskService } from '../../../../tasks/task.service';
-import { EMPTY, timer } from 'rxjs';
+import { EMPTY, Observable, timer } from 'rxjs';
 import { TaskState } from '../../../../tasks/store/task.reducer';
 import { MatDialog } from '@angular/material';
 import { DialogJiraTransitionComponent } from '../../dialog-jira-transition/dialog-jira-transition.component';
 import { IssueLocalState } from '../../../issue';
 import { DialogConfirmComponent } from '../../../../../ui/dialog-confirm/dialog-confirm.component';
 import { DialogJiraAddWorklogComponent } from '../../dialog-jira-add-worklog/dialog-jira-add-worklog.component';
+import { JIRA_INITIAL_POLL_BACKLOG_DELAY, JIRA_INITIAL_POLL_DELAY, JIRA_POLL_INTERVAL } from '../../jira.const';
 
 const isEnabled = ([a, jiraCfg]: [any, JiraCfg, any?, any?, any?, any?]) => jiraCfg && jiraCfg.isEnabled;
 
@@ -48,24 +48,11 @@ export class JiraIssueEffects {
       withLatestFrom(
         this._store$.pipe(select(selectProjectJiraCfg)),
       ),
-      filter(isEnabled),
-      filter(([a, jiraCfg]) => jiraCfg.isAutoPollTickets),
-      switchMap(() => timer(JIRA_INITIAL_POLL_DELAY, JIRA_POLL_INTERVAL)),
-      withLatestFrom(
-        this._store$.pipe(select(selectJiraIssueIds)),
-        this._store$.pipe(select(selectJiraIssueEntities)),
-      ),
-      tap(([x, issueIds, entities]: [number, string[], Dictionary<JiraIssue>]) => {
-        console.log('JIRA POLL CHANGES', x, issueIds, entities);
-        if (issueIds && issueIds.length > 0) {
-          this._snackService.open({
-            message: 'Jira: Polling Changes for issues',
-            svgIcon: 'jira',
-            isSubtle: true,
-          });
-          issueIds.forEach((id) => this._jiraIssueService.updateIssueFromApi(id, entities[id], true, false));
-        }
-      }),
+      switchMap(([a, jiraCfg]) => {
+        return (isEnabled([a, jiraCfg]) && jiraCfg.isAutoPollTickets)
+          ? this._pollChangesForIssues$
+          : EMPTY;
+      })
     );
 
   @Effect() pollNewIssuesToBacklog$: any = this._actions$
@@ -78,11 +65,14 @@ export class JiraIssueEffects {
       withLatestFrom(
         this._store$.pipe(select(selectProjectJiraCfg)),
       ),
-      filter(isEnabled),
-      filter(([a, jiraCfg]) => jiraCfg.isAutoAddToBacklog),
-      switchMap(() => timer(JIRA_INITIAL_POLL_BACKLOG_DELAY, JIRA_POLL_INTERVAL)),
-      tap(() => console.log('JIRA_POLL_BACKLOG_CHANGES')),
-      map(() => new AddOpenJiraIssuesToBacklog())
+      switchMap(([a, jiraCfg]) => {
+        return (isEnabled([a, jiraCfg]) && jiraCfg.isAutoAddToBacklog)
+          ? timer(JIRA_INITIAL_POLL_BACKLOG_DELAY, JIRA_POLL_INTERVAL).pipe(
+            tap(() => console.log('JIRA_POLL_BACKLOG_CHANGES')),
+            map(() => new AddOpenJiraIssuesToBacklog())
+          )
+          : EMPTY;
+      }),
     );
 
   @Effect({dispatch: false}) syncIssueStateToLs$: any = this._actions$
@@ -236,6 +226,24 @@ export class JiraIssueEffects {
         }
       })
     );
+
+  private _pollChangesForIssues$: Observable<any> = timer(JIRA_INITIAL_POLL_DELAY, JIRA_POLL_INTERVAL).pipe(
+    withLatestFrom(
+      this._store$.pipe(select(selectJiraIssueIds)),
+      this._store$.pipe(select(selectJiraIssueEntities)),
+    ),
+    tap(([x, issueIds, entities]: [number, string[], Dictionary<JiraIssue>]) => {
+      console.log('JIRA POLL CHANGES', x, issueIds, entities);
+      if (issueIds && issueIds.length > 0) {
+        this._snackService.open({
+          message: 'Jira: Polling Changes for issues',
+          svgIcon: 'jira',
+          isSubtle: true,
+        });
+        issueIds.forEach((id) => this._jiraIssueService.updateIssueFromApi(id, entities[id], true, false));
+      }
+    }),
+  );
 
   constructor(private readonly _actions$: Actions,
               private readonly _store$: Store<any>,
