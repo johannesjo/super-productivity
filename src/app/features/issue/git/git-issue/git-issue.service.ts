@@ -150,14 +150,21 @@ export class GitIssueService {
           }
         }
 
-        if (!matchingNewIssue && isNotify) {
+        if (!matchingNewIssue && isNotify && !this._fineWithDeletionIssueIds.includes(oldIssue.id)) {
           this._snackService.open({
             type: 'CUSTOM',
             svgIcon: 'github',
-            message: `Git: Issue ${oldIssue.number} "${oldIssue.title}" seems to be deleted or closed on git`
+            message: `Git: Issue ${oldIssue.number} "${oldIssue.title}" seems to be deleted or closed on git`,
+            actionStr: 'Show me',
+            actionFn: () => {
+              this._fineWithDeletionIssueIds.push(oldIssue.id);
+              window.open(oldIssue.url, '_blank');
+            }
           });
         }
       });
     });
   }
+
+  private _fineWithDeletionIssueIds = [];
 }
