@@ -206,10 +206,8 @@ export class TaskService {
     shareReplay(),
   );
 
-  onTaskSwitchList$: Observable<any> = this._actions$.pipe(ofType(
+  onMoveToBacklog$: Observable<any> = this._actions$.pipe(ofType(
     TaskActionTypes.MoveToBacklog,
-    TaskActionTypes.MoveToToday,
-    TaskActionTypes.AddTask,
   ));
 
   isHasTasksToWorkOn$: Observable<boolean> = this._store.pipe(

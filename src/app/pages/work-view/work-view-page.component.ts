@@ -27,7 +27,7 @@ export class WorkViewPageComponent implements OnInit, OnDestroy {
   backlogTasks: TaskWithSubTasks[];
 
   // NOTE: not perfect but good enough for now
-  isTriggerSwitchListAni$ = this.taskService.onTaskSwitchList$.pipe(
+  isTriggerBacklogIconAni$ = this.taskService.onMoveToBacklog$.pipe(
     switchMap(() =>
       zip(
         from([true, false]),

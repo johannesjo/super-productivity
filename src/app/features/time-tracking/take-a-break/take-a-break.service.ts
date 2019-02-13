@@ -75,7 +75,7 @@ export class TakeABreakService {
 
   private _triggerProgrammaticReset$: Observable<any> = this.isIdleResetEnabled$.pipe(
     switchMap((isIdleResetEnabled) => {
-      console.log('PROGRAMMATIC TAKE A BREAK RESET isCausedByIdle', isIdleResetEnabled);
+      console.log('PROGRAMMATIC Take a break – using Idle:', isIdleResetEnabled);
       return isIdleResetEnabled
         ? this._idleService.triggerResetBreakTimer$
         : this._triggerSimpleBreakReset$;

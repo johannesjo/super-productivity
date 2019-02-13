@@ -115,7 +115,7 @@
            (mouseleave)="isPreloadBacklog=false"
            [containerEl]="containerEl"
            [counter]="(taskService.backlogTasks$|async)?.length"
-           [isAnimateBtn]="isTriggerSwitchListAni$|async"
+           [isAnimateBtn]="isTriggerBacklogIconAni$|async"
            [splitBottomEl]="splitBottomEl"
            [splitPos]="splitInputPos"
            [splitTopEl]="splitTopEl"></split>
