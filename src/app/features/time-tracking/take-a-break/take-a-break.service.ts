@@ -95,6 +95,8 @@ export class TakeABreakService {
     this._tick$,
     this._triggerReset$,
   ).pipe(
+    // startWith(9999999),
+    // delay(1000),
     scan((acc, value) => {
       return (value > 0)
         ? acc + value
@@ -139,7 +141,7 @@ export class TakeABreakService {
         type: 'TAKE_A_BREAK',
         message: msg,
         config: {
-          duration: RE_OPEN_SNACK_INTERVAL,
+          duration: RE_OPEN_SNACK_INTERVAL - 1000,
         }
       });
     });

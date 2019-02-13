@@ -11,4 +11,11 @@ body .mat-snack-bar-container {
     padding-top: 8px;
     padding-bottom: 8px;
   }
+
+  @include mq(sm) {
+    max-width: 60vw;
+  }
+  @include mq(lg) {
+    max-width: 33vw;
+  }
 }
