@@ -33,7 +33,8 @@ import { DialogConfirmComponent } from '../../../../../ui/dialog-confirm/dialog-
 import { DialogJiraAddWorklogComponent } from '../../dialog-jira-add-worklog/dialog-jira-add-worklog.component';
 import { JIRA_INITIAL_POLL_BACKLOG_DELAY, JIRA_INITIAL_POLL_DELAY, JIRA_POLL_INTERVAL } from '../../jira.const';
 
-const isEnabled = ([a, jiraCfg]: [any, JiraCfg, any?, any?, any?, any?]) => jiraCfg && jiraCfg.isEnabled;
+const isEnabled_ = (jiraCfg) => jiraCfg && jiraCfg.isEnabled;
+const isEnabled = ([a, jiraCfg]: [any, JiraCfg, any?, any?, any?, any?]) => isEnabled_(jiraCfg);
 
 @Injectable()
 export class JiraIssueEffects {
@@ -224,6 +225,26 @@ export class JiraIssueEffects {
           const issueData = issueEntities[task.issueId];
           this._handleTransitionForIssue('DONE', jiraCfg, issueData);
         }
+      })
+    );
+
+  @Effect({dispatch: false}) loadMissingIssues$: any = this._taskService.tasksWithMissingIssueData$
+    .pipe(
+      withLatestFrom(
+        this._store$.pipe(select(selectProjectJiraCfg)),
+      ),
+      filter(([tasks, jiraCfg]) => isEnabled_(jiraCfg)),
+      throttleTime(60 * 1000),
+      map(([tasks, jiraCfg]) => tasks.filter(task => task.issueId && task.issueType === JIRA_TYPE)),
+      filter((tasks) => tasks && tasks.length > 0),
+      tap(tasks => {
+        console.warn('TASKS WITH MISSING ISSUE DATA FOR JIRA', tasks);
+        this._snackService.open({
+          message: 'Jira: Tasks with missing issue data found. Reloading',
+          svgIcon: 'jira',
+          isSubtle: true,
+        });
+        tasks.forEach((task) => this._jiraIssueService.loadMissingIssueData(task.issueId));
       })
     );
 

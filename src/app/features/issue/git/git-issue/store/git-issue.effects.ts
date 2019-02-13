@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Actions, Effect, ofType } from '@ngrx/effects';
 import { GitIssueActionTypes } from './git-issue.actions';
 import { select, Store } from '@ngrx/store';
-import { delay, filter, switchMap, tap, throttleTime, withLatestFrom } from 'rxjs/operators';
+import { delay, filter, map, switchMap, tap, throttleTime, withLatestFrom } from 'rxjs/operators';
 import { TaskActionTypes } from '../../../../tasks/store/task.actions';
 import { PersistenceService } from '../../../../../core/persistence/persistence.service';
 import { selectAllGitIssues, selectGitIssueFeatureState } from './git-issue.reducer';
@@ -116,6 +116,25 @@ export class GitIssueEffects {
       tap(this._importNewIssuesToBacklog.bind(this))
     );
 
+  @Effect({dispatch: false}) loadMissingIssues$: any = this._taskService.tasksWithMissingIssueData$
+    .pipe(
+      withLatestFrom(
+        this._store$.pipe(select(selectProjectGitCfg)),
+      ),
+      filter(([tasks, gitCfg]) => isRepoConfigured_(gitCfg)),
+      throttleTime(60 * 1000),
+      map(([tasks, gitCfg]) => tasks.filter(task => task.issueId && task.issueType === GIT_TYPE)),
+      filter((tasks) => tasks && tasks.length > 0),
+      tap(tasks => {
+        console.warn('TASKS WITH MISSING ISSUE DATA FOR GIT', tasks);
+        this._snackService.open({
+          message: 'Git: Tasks with missing issue data found. Reloading.',
+          svgIcon: 'github',
+          isSubtle: true,
+        });
+        tasks.forEach((task) => this._gitIssueService.loadMissingIssueData(task.issueId));
+      })
+    );
 
   constructor(private readonly _actions$: Actions,
               private readonly _store$: Store<any>,

@@ -81,6 +81,7 @@ export class TaskService {
     select(selectIsTaskDataLoaded),
   );
 
+  // Currently used in idle service
   currentTaskId: string;
   currentTaskId$: Observable<string> = this._store.pipe(
     select(selectCurrentTaskId),
@@ -197,11 +198,12 @@ export class TaskService {
     }),
     // throttleTime(50)
   );
-  tasksWithMissingIssueData$ = this._store.pipe(
+  tasksWithMissingIssueData$: Observable<TaskWithIssueData[]> = this._store.pipe(
     // wait for issue model to be loaded
     debounceTime(1000),
     select(selectTasksWithMissingIssueData),
     distinctUntilChanged(),
+    shareReplay(),
   );
 
   onTaskSwitchList$: Observable<any> = this._actions$.pipe(ofType(
@@ -228,20 +230,6 @@ export class TaskService {
     private readonly _timeTrackingService: TimeTrackingService,
     private readonly _actions$: Actions,
   ) {
-    // this.todaysTasks$.subscribe((val) => console.log(val));
-    // this.focusTaskId$.subscribe((val) => console.log('SVC', val));
-    this.tasksWithMissingIssueData$
-      .pipe(delay(5000))
-      .subscribe((tasks) => {
-        if (tasks && tasks.length > 0) {
-          console.warn('MISSING ISSUE', tasks);
-          // TODO find a better solution for this
-          tasks.forEach(task => {
-            this._issueService.loadMissingIssueData(task.issueType, task.issueId);
-          });
-        }
-      });
-
     this.currentTaskId$.subscribe((val) => this.currentTaskId = val);
 
     // time tracking
