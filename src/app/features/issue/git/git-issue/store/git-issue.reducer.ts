@@ -2,13 +2,14 @@ import { createEntityAdapter, EntityAdapter, EntityState } from '@ngrx/entity';
 import { GitIssueActions, GitIssueActionTypes } from './git-issue.actions';
 import { GitIssue } from '../git-issue.model';
 import { createFeatureSelector, createSelector } from '@ngrx/store';
-import { TaskActionTypes } from '../../../../tasks/store/task.actions';
+import { TaskActions, TaskActionTypes } from '../../../../tasks/store/task.actions';
 import { IssueProviderKey } from '../../../issue';
 import { GIT_TYPE } from '../../../issue.const';
 
 export const GIT_ISSUE_FEATURE_NAME: IssueProviderKey = GIT_TYPE;
 
 export interface GitIssueState extends EntityState<GitIssue> {
+  stateBefore: GitIssueState;
 }
 
 export const gitIssueAdapter: EntityAdapter<GitIssue> = createEntityAdapter<GitIssue>();
@@ -34,11 +35,13 @@ export const selectGitIssueById = createSelector(
 
 // REDUCER
 // -------
-export const initialGitIssueState: GitIssueState = gitIssueAdapter.getInitialState({});
+export const initialGitIssueState: GitIssueState = gitIssueAdapter.getInitialState({
+  stateBefore: null
+});
 
 export function gitIssueReducer(
   state: GitIssueState = initialGitIssueState,
-  action: GitIssueActions
+  action: GitIssueActions | TaskActions
 ): GitIssueState {
   // console.log(state.entities, state, action);
 
@@ -47,6 +50,10 @@ export function gitIssueReducer(
     // ------------
     case GitIssueActionTypes.LoadState: {
       return Object.assign({}, action.payload.state);
+    }
+
+    case TaskActionTypes.UndoDeleteTask: {
+      return state.stateBefore || state;
     }
 
     case TaskActionTypes.AddTask: {
@@ -62,7 +69,10 @@ export function gitIssueReducer(
         const issue = action.payload.task.issueData as GitIssue;
         const ids = state.ids as number[];
         if (issue && issue.id && ids.includes(+issue.id)) {
-          return gitIssueAdapter.removeOne(issue.id, state);
+          return gitIssueAdapter.removeOne(issue.id, {
+            ...state,
+            stateBefore: {...state, stateBefore: null}
+          });
         } else {
           // don't crash app but warn strongly
           console.log('##########################################################');

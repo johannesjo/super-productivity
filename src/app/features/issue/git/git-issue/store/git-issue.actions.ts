@@ -103,10 +103,5 @@ export type GitIssueActions
   | DeleteGitIssue
   | DeleteGitIssues
   | ClearGitIssues
-  // From tasks model
-  | AddTask
-  | DeleteTask
-  | RestoreTask
-  | MoveToArchive
   ;
 
