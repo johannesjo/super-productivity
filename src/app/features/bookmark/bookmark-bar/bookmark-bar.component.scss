@@ -73,7 +73,12 @@ $dragHandleWidth: 36px;
   position: relative;
 
   ::ng-deep mat-icon {
+    // center
     margin-top: -3px;
+  }
+
+  ::ng-deep .drag-handle {
+    margin-top: 0;
   }
 }
 
