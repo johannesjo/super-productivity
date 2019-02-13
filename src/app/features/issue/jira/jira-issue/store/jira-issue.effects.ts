@@ -1,15 +1,15 @@
 import { Injectable } from '@angular/core';
 import { Actions, Effect, ofType } from '@ngrx/effects';
-import { JiraIssueActionTypes } from './jira-issue.actions';
+import { AddOpenJiraIssuesToBacklog, JiraIssueActionTypes } from './jira-issue.actions';
 import { select, Store } from '@ngrx/store';
-import { delay, filter, switchMap, take, tap, throttleTime, withLatestFrom } from 'rxjs/operators';
+import { filter, map, switchMap, take, tap, throttleTime, withLatestFrom } from 'rxjs/operators';
 import { TaskActionTypes, UpdateTask } from '../../../../tasks/store/task.actions';
 import { PersistenceService } from '../../../../../core/persistence/persistence.service';
 import { selectJiraIssueEntities, selectJiraIssueFeatureState, selectJiraIssueIds } from './jira-issue.reducer';
 import { selectCurrentProjectId, selectProjectJiraCfg } from '../../../../project/store/project.reducer';
 import { JiraApiService } from '../../jira-api.service';
 import { JiraIssueService } from '../jira-issue.service';
-import { JIRA_INITIAL_POLL_DELAY, JIRA_POLL_INTERVAL } from '../../jira.const';
+import { JIRA_INITIAL_POLL_BACKLOG_DELAY, JIRA_INITIAL_POLL_DELAY, JIRA_POLL_INTERVAL } from '../../jira.const';
 import { ConfigService } from '../../../../config/config.service';
 import { Dictionary } from '@ngrx/entity';
 import { JiraIssue } from '../jira-issue.model';
@@ -33,17 +33,15 @@ import { IssueLocalState } from '../../../issue';
 import { DialogConfirmComponent } from '../../../../../ui/dialog-confirm/dialog-confirm.component';
 import { DialogJiraAddWorklogComponent } from '../../dialog-jira-add-worklog/dialog-jira-add-worklog.component';
 
-// needed because we always want the check request to the jira api to finish first
-const ISSUE_REFRESH_DELAY = 10000;
 const isEnabled = ([a, jiraCfg]: [any, JiraCfg, any?, any?, any?, any?]) => jiraCfg && jiraCfg.isEnabled;
 
 @Injectable()
 export class JiraIssueEffects {
-  @Effect({dispatch: false}) pollIssueChanges: any = this._actions$
+  @Effect({dispatch: false}) pollIssueChangesAndBacklogUpdates: any = this._actions$
     .pipe(
       ofType(
         // while load state should be enough this just might fix the error of polling for inactive projects?
-        ProjectActionTypes.SetCurrentProject,
+        ProjectActionTypes.LoadProjectRelatedDataSuccess,
         ProjectActionTypes.UpdateProjectIssueProviderCfg,
         JiraIssueActionTypes.LoadState,
       ),
@@ -52,39 +50,39 @@ export class JiraIssueEffects {
       ),
       filter(isEnabled),
       filter(([a, jiraCfg]) => jiraCfg.isAutoPollTickets),
-      switchMap(() => timer(JIRA_INITIAL_POLL_DELAY, JIRA_POLL_INTERVAL).pipe(
-        withLatestFrom(
-          this._store$.pipe(select(selectJiraIssueIds)),
-          this._store$.pipe(select(selectJiraIssueEntities)),
-        ),
-        tap(([x, issueIds, entities]: [number, string[], Dictionary<JiraIssue>]) => {
-          console.log('JIRA TAP poll', x, issueIds, entities);
-          if (issueIds && issueIds.length > 0) {
-            this._snackService.open({
-              message: 'Jira: Polling Changes for issues',
-              svgIcon: 'jira',
-              isSubtle: true,
-            });
-            issueIds.forEach((id) => this._jiraIssueService.updateIssueFromApi(id, entities[id], true, false));
-          }
-        })
-      )),
+      switchMap(() => timer(JIRA_INITIAL_POLL_DELAY, JIRA_POLL_INTERVAL)),
+      withLatestFrom(
+        this._store$.pipe(select(selectJiraIssueIds)),
+        this._store$.pipe(select(selectJiraIssueEntities)),
+      ),
+      tap(([x, issueIds, entities]: [number, string[], Dictionary<JiraIssue>]) => {
+        console.log('JIRA POLL CHANGES', x, issueIds, entities);
+        if (issueIds && issueIds.length > 0) {
+          this._snackService.open({
+            message: 'Jira: Polling Changes for issues',
+            svgIcon: 'jira',
+            isSubtle: true,
+          });
+          issueIds.forEach((id) => this._jiraIssueService.updateIssueFromApi(id, entities[id], true, false));
+        }
+      }),
     );
 
-  @Effect({dispatch: false}) pollNewIssuesToBacklog$: any = this._actions$
+  @Effect() pollNewIssuesToBacklog$: any = this._actions$
     .pipe(
       ofType(
         ProjectActionTypes.LoadProjectRelatedDataSuccess,
+        ProjectActionTypes.UpdateProjectIssueProviderCfg,
+        JiraIssueActionTypes.LoadState,
       ),
-      delay(ISSUE_REFRESH_DELAY),
       withLatestFrom(
         this._store$.pipe(select(selectProjectJiraCfg)),
       ),
       filter(isEnabled),
       filter(([a, jiraCfg]) => jiraCfg.isAutoAddToBacklog),
-      tap(() => {
-        this._jiraIssueService.addOpenIssuesToBacklog();
-      })
+      switchMap(() => timer(JIRA_INITIAL_POLL_BACKLOG_DELAY, JIRA_POLL_INTERVAL)),
+      tap(() => console.log('JIRA_POLL_BACKLOG_CHANGES')),
+      map(() => new AddOpenJiraIssuesToBacklog())
     );
 
   @Effect({dispatch: false}) syncIssueStateToLs$: any = this._actions$
