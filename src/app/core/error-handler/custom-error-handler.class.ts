@@ -28,7 +28,7 @@ export class CustomErrorHandler implements ErrorHandler {
 
   handleError(error: any) {
     // if not our custom error handler we have a critical error on our hands
-    if (!error || (typeof error === 'string' && !error.match(HANDLED_ERROR)) || !error.handledError) {
+    if (!error || (!error.handledError && (typeof error === 'string' && !error.match(HANDLED_ERROR)))) {
       const errorStr = this._getErrorStr(error);
       // NOTE: snack won't work most of the time
       try {

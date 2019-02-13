@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Actions, Effect, ofType } from '@ngrx/effects';
 import { AddOpenJiraIssuesToBacklog, JiraIssueActionTypes } from './jira-issue.actions';
 import { select, Store } from '@ngrx/store';
-import { filter, map, switchMap, take, tap, throttleTime, withLatestFrom } from 'rxjs/operators';
+import { concatMap, filter, map, switchMap, tap, throttleTime, withLatestFrom } from 'rxjs/operators';
 import { TaskActionTypes, UpdateTask } from '../../../../tasks/store/task.actions';
 import { PersistenceService } from '../../../../../core/persistence/persistence.service';
 import { selectJiraIssueEntities, selectJiraIssueFeatureState, selectJiraIssueIds } from './jira-issue.reducer';
@@ -189,7 +189,7 @@ export class JiraIssueEffects {
       })
     );
 
-  @Effect({dispatch: false}) checkForStartTransition$: any = this._actions$
+  @Effect({dispatch: false}) checkForStartTransition$: Observable<any> = this._actions$
     .pipe(
       ofType(
         TaskActionTypes.SetCurrentTask,
@@ -200,15 +200,16 @@ export class JiraIssueEffects {
         this._store$.pipe(select(selectJiraIssueEntities)),
       ),
       filter(isEnabled),
-      tap(([action, jiraCfg, curOrParTask, issueEntities]) => {
-        if (jiraCfg && jiraCfg.isTransitionIssuesEnabled && curOrParTask && curOrParTask.issueType === JIRA_TYPE) {
-          const issueData = issueEntities[curOrParTask.issueId];
-          this._handleTransitionForIssue('IN_PROGRESS', jiraCfg, issueData);
-        }
-      })
+      filter(([action, jiraCfg, curOrParTask, issueEntities]) =>
+        jiraCfg && jiraCfg.isTransitionIssuesEnabled && curOrParTask && curOrParTask.issueType === JIRA_TYPE),
+      concatMap(([action, jiraCfg, curOrParTask, issueEntities]) => {
+        const issueData = issueEntities[curOrParTask.issueId];
+        return this._handleTransitionForIssue('IN_PROGRESS', jiraCfg, issueData);
+      }),
     );
 
-  @Effect({dispatch: false}) checkForDoneTransition$: any = this._actions$
+  @Effect({dispatch: false})
+  checkForDoneTransition$: Observable<any> = this._actions$
     .pipe(
       ofType(
         TaskActionTypes.UpdateTask,
@@ -219,12 +220,14 @@ export class JiraIssueEffects {
         this._store$.pipe(select(selectJiraIssueEntities)),
       ),
       filter(isEnabled),
-      tap(([action, jiraCfg, taskState, issueEntities]: [UpdateTask, JiraCfg, TaskState, Dictionary<JiraIssue>]) => {
+      filter(([action, jiraCfg, taskState, issueEntities]: [UpdateTask, JiraCfg, TaskState, Dictionary<JiraIssue>]) => {
         const task = taskState.entities[action.payload.task.id];
-        if (jiraCfg && jiraCfg.isTransitionIssuesEnabled && task && task.issueType === JIRA_TYPE && task.isDone) {
-          const issueData = issueEntities[task.issueId];
-          this._handleTransitionForIssue('DONE', jiraCfg, issueData);
-        }
+        return jiraCfg && jiraCfg.isTransitionIssuesEnabled && task && task.issueType === JIRA_TYPE && task.isDone;
+      }),
+      concatMap(([action, jiraCfg, taskState, issueEntities]: [UpdateTask, JiraCfg, TaskState, Dictionary<JiraIssue>]) => {
+        const task = taskState.entities[action.payload.task.id];
+        const issueData = issueEntities[task.issueId];
+        return this._handleTransitionForIssue('DONE', jiraCfg, issueData);
       })
     );
 
@@ -253,7 +256,8 @@ export class JiraIssueEffects {
       this._store$.pipe(select(selectJiraIssueIds)),
       this._store$.pipe(select(selectJiraIssueEntities)),
     ),
-    tap(([x, issueIds, entities]: [number, string[], Dictionary<JiraIssue>]) => {
+    tap(([x, issueIds_, entities]: [number, string[], Dictionary<JiraIssue>]) => {
+      const issueIds = issueIds_ as string[];
       console.log('JIRA POLL CHANGES', x, issueIds, entities);
       if (issueIds && issueIds.length > 0) {
         this._snackService.open({
@@ -287,32 +291,37 @@ export class JiraIssueEffects {
     }
   }
 
-  private _handleTransitionForIssue(localState: IssueLocalState, jiraCfg: JiraCfg, issue: JiraIssue) {
+  private _handleTransitionForIssue(localState: IssueLocalState, jiraCfg: JiraCfg, issue: JiraIssue): Observable<any> {
     const chosenTransition: JiraTransitionOption = jiraCfg.transitionConfig[localState];
-    console.log(chosenTransition);
-
-    if (!chosenTransition) {
-      this._snackService.open({type: 'ERROR', message: 'Jira: No transition configured'});
-      throw new Error('Jira: No transition configured');
-    }
 
     switch (chosenTransition) {
       case 'DO_NOT':
-        return;
+        return EMPTY;
       case 'ALWAYS_ASK':
         return this._openTransitionDialog(issue, localState);
       default:
+        if (!chosenTransition || !chosenTransition.id) {
+          this._snackService.open({type: 'ERROR', message: 'Jira: No valid transition configured'});
+          // NOTE: we would kill the whole effect chain if we do this
+          // return throwError({handledError: 'Jira: No valid transition configured'});
+          return timer(2000).pipe(concatMap(() => this._openTransitionDialog(issue, localState)));
+        }
+
         if (!issue.status || issue.status.name !== chosenTransition.name) {
-          this._jiraApiService.transitionIssue(issue.id, chosenTransition.id)
-            .pipe(take(1))
-            .subscribe(() => {
-              this._jiraIssueService.updateIssueFromApi(issue.id, issue, false, false);
-              this._snackService.open({
-                type: 'SUCCESS',
-                message: `Jira: Set issue ${issue.key} to <strong>${chosenTransition.name}</strong>`,
-                isSubtle: true,
-              });
-            });
+          return this._jiraApiService.transitionIssue(issue.id, chosenTransition.id)
+            .pipe(
+              tap(() => {
+                this._snackService.open({
+                  type: 'SUCCESS',
+                  message: `Jira: Set issue ${issue.key} to <strong>${chosenTransition.name}</strong>`,
+                  isSubtle: true,
+                });
+                this._jiraIssueService.updateIssueFromApi(issue.id, issue, false, false);
+              })
+            );
+        } else {
+          // no transition required
+          return EMPTY;
         }
     }
   }
@@ -328,15 +337,14 @@ export class JiraIssueEffects {
       .subscribe();
   }
 
-  private _openTransitionDialog(issue: JiraIssue, localState: IssueLocalState) {
-    this._matDialog.open(DialogJiraTransitionComponent, {
+  private _openTransitionDialog(issue: JiraIssue, localState: IssueLocalState): Observable<any> {
+    return this._matDialog.open(DialogJiraTransitionComponent, {
       restoreFocus: true,
       data: {
         issue,
         localState,
       }
-    }).afterClosed()
-      .subscribe();
+    }).afterClosed();
   }
 
   private _importNewIssuesToBacklog([action, allTasks]: [Actions, Task[]]) {
