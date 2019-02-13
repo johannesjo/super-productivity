@@ -123,6 +123,7 @@ export const JIRA_ADVANCED_FORM_CFG: FormlyFieldConfig[] = [
     type: 'input',
     templateOptions: {
       label: 'Assignee name to check for',
+      required: true,
     },
     hideExpression: '!model.isCheckToReAssignTicketOnTaskStart',
   },
