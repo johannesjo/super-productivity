@@ -1,4 +1,4 @@
-<h3 class="md-subtitle">Sync via Google Drive</h3>
+<!--<h3 class="md-subtitle">Sync via Google Drive</h3>-->
 
 <form (submit)="submit()"
       #formRef="ngForm">
@@ -12,6 +12,7 @@
     <section class="btns">
       <button type="button"
               mat-raised-button=""
+              color="lighter"
               class="md-raised"
               [promiseBtn]="loginPromise"
               *ngIf="!(googleApiService.isLoggedIn$|async)"
@@ -21,35 +22,38 @@
       </button>
       <button type="button"
               mat-raised-button=""
+              color="lighter"
               class="md-raised"
               *ngIf="(googleApiService.isLoggedIn$|async)"
               (click)="logout()">
-        <mat-icon>logout</mat-icon>
+        <mat-icon>clear</mat-icon>
         Logout
       </button>
 
       <button type="button"
               mat-raised-button=""
+              color="lighter"
               class="md-raised"
               [disabled]="googleDriveSyncService.isLoadInProgress$|async"
               [promiseBtn]="googleDriveSyncService.isSaveInProgress$|async"
               *ngIf="(googleApiService.isLoggedIn$|async)"
               (click)="saveToGoogleDrive()">
-        <mat-icon>backup</mat-icon>
+        <mat-icon>arrow_upward</mat-icon>
         Backup now
       </button>
       <button type="button"
               mat-raised-button=""
+              color="lighter"
               class="md-raised sync-from-btn"
               [disabled]="googleDriveSyncService.isSaveInProgress$|async"
               [promiseBtn]="googleDriveSyncService.isLoadInProgress$|async"
               *ngIf="(googleApiService.isLoggedIn$|async)"
               (click)="loadFromGoogleDrive()">
-        <mat-icon>backup</mat-icon>
+        <mat-icon>arrow_downward</mat-icon>
         Load From GDrive
       </button>
       <!--<button type="button"-->
-      <!--mat-raised-button=""-->
+      <!--mat-raised-button=""color=lighter-->
       <!--class="md-raised"-->
       <!--*ngIf="(googleApiService.isLoggedIn$|async)"-->
       <!--external-link-->
@@ -62,25 +66,25 @@
 
     <section *ngIf="(googleApiService.isLoggedIn$|async)"
              class="form-inputs">
-      <div class="sync-file-wrapper">
-        <mat-form-field>
-          <input type="text"
-                 matInput=""
-                 placeholder="Sync file name"
-                 name="tmpSyncFile"
-                 [(ngModel)]="tmpSyncFile">
-          <mat-icon matSuffix="">file_upload</mat-icon>
-        </mat-form-field>
+      <mat-form-field>
+        <input type="text"
+               matInput=""
+               placeholder="Sync file name"
+               name="tmpSyncFile"
+               [(ngModel)]="tmpSyncFile">
+        <mat-icon matSuffix="">file_upload</mat-icon>
+      </mat-form-field>
 
-        <button type="button"
-                mat-raised-button=""
-                class="md-raised md-primary md-icon-button"
-                aria-label="Save changed sync file name"
-                (click)="changeSyncFileName(tmpSyncFile)">
-          <mat-icon>save</mat-icon>
-        </button>
-      </div>
-
+      <button type="button"
+              mat-raised-button=""
+              color="lighter"
+              class="md-raised md-primary md-icon-button"
+              aria-label="Save changed sync file name"
+              (click)="changeSyncFileName(tmpSyncFile)">
+        <mat-icon>save</mat-icon>
+        Update sync file
+      </button>
+      <br>
       <mat-slide-toggle [(ngModel)]="cfg.isAutoLogin"
                         name="isAutoLogin"
                         aria-label="Auto login at when starting app">

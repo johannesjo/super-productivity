@@ -15,9 +15,27 @@
   margin-top: $s;
   display: flex;
   flex-direction: row;
+
+  button {
+    flex: 1;
+    margin-left: $s;
+
+    &:first-child {
+      margin-left: 0;
+    }
+  }
+}
+
+mat-slide-toggle {
+  margin-top: $s;
+  margin-bottom: $s;
 }
 
 .auto-sync-settings {
   display: flex;
   flex-direction: column;
+}
+
+.sync-file-wrapper {
+  display: flex;
 }
