@@ -54,6 +54,7 @@
 .comment {
   display: flex;
   margin-bottom: $s*2;
+  align-items: flex-start;
 
   .author-avatar {
     margin-right: $s;
