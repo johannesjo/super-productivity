@@ -77,18 +77,6 @@ export class ProjectEffects {
       })
     );
 
-  @Effect({dispatch: false}) onProjectRelatedDataLoaded$: any = this._actions$
-    .pipe(
-      ofType(
-        ProjectActionTypes.LoadProjectRelatedDataSuccess,
-      ),
-      delay(ISSUE_REFRESH_DELAY),
-      tap(() => {
-        this._issueService.refreshIssueData();
-        this._issueService.refreshBacklog();
-      })
-    );
-
   @Effect() onProjectCreated: any = this._actions$
     .pipe(
       ofType(

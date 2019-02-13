@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Actions, Effect, ofType } from '@ngrx/effects';
 import { GitIssueActionTypes } from './git-issue.actions';
 import { select, Store } from '@ngrx/store';
-import { filter, switchMap, tap, withLatestFrom } from 'rxjs/operators';
+import { delay, filter, switchMap, tap, withLatestFrom } from 'rxjs/operators';
 import { TaskActionTypes } from '../../../../tasks/store/task.actions';
 import { PersistenceService } from '../../../../../core/persistence/persistence.service';
 import { selectAllGitIssues, selectGitIssueFeatureState } from './git-issue.reducer';
@@ -17,13 +17,13 @@ import { Task } from '../../../../tasks/task.model';
 import { ProjectActionTypes } from '../../../../project/store/project.actions';
 import { GIT_TYPE } from '../../../issue.const';
 import { timer } from 'rxjs';
-import { GIT_INITIAL_POLL_DELAY, GIT_POLL_INTERVAL } from '../../git.const';
+import { GIT_INITIAL_POLL_DELAY, GIT_POLL_INTERVAL, GIT_REFRESH_BACKLOG_DELAY } from '../../git.const';
 
 const isRepoConfigured = ([a, gitCfg]) => gitCfg && gitCfg.repo && gitCfg.repo.length > 2;
 
 @Injectable()
 export class GitIssueEffects {
-  @Effect({dispatch: false}) issuePolling$: any = this._actions$
+  @Effect({dispatch: false}) pollIssueChanges$: any = this._actions$
     .pipe(
       ofType(
         // while load state should be enough this just might fix the error of polling for inactive projects?
@@ -57,6 +57,24 @@ export class GitIssueEffects {
           );
       })
     );
+
+  @Effect({dispatch: false}) pollNewIssuesToBacklog$$: any = this._actions$
+    .pipe(
+      ofType(
+        ProjectActionTypes.LoadProjectRelatedDataSuccess,
+      ),
+      delay(GIT_REFRESH_BACKLOG_DELAY),
+      withLatestFrom(
+        this._store$.pipe(select(selectProjectGitCfg)),
+      ),
+      filter(isRepoConfigured),
+      filter(([a, gitCfg]) => gitCfg.isAutoAddToBacklog),
+      tap(() => {
+        this._gitApiService.refreshIssuesCache();
+        this._gitIssueService.addOpenIssuesToBacklog();
+      })
+    );
+
 
   @Effect({dispatch: false}) syncIssueStateToLs$: any = this._actions$
     .pipe(

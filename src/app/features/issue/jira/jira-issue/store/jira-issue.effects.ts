@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Actions, Effect, ofType } from '@ngrx/effects';
 import { JiraIssueActionTypes } from './jira-issue.actions';
 import { select, Store } from '@ngrx/store';
-import { filter, switchMap, take, tap, throttleTime, withLatestFrom } from 'rxjs/operators';
+import { delay, filter, switchMap, take, tap, throttleTime, withLatestFrom } from 'rxjs/operators';
 import { TaskActionTypes, UpdateTask } from '../../../../tasks/store/task.actions';
 import { PersistenceService } from '../../../../../core/persistence/persistence.service';
 import { selectJiraIssueEntities, selectJiraIssueFeatureState, selectJiraIssueIds } from './jira-issue.reducer';
@@ -33,11 +33,13 @@ import { IssueLocalState } from '../../../issue';
 import { DialogConfirmComponent } from '../../../../../ui/dialog-confirm/dialog-confirm.component';
 import { DialogJiraAddWorklogComponent } from '../../dialog-jira-add-worklog/dialog-jira-add-worklog.component';
 
+// needed because we always want the check request to the jira api to finish first
+const ISSUE_REFRESH_DELAY = 10000;
 const isEnabled = ([a, jiraCfg]: [any, JiraCfg, any?, any?, any?, any?]) => jiraCfg && jiraCfg.isEnabled;
 
 @Injectable()
 export class JiraIssueEffects {
-  @Effect({dispatch: false}) issuePolling$: any = this._actions$
+  @Effect({dispatch: false}) pollIssueChanges: any = this._actions$
     .pipe(
       ofType(
         // while load state should be enough this just might fix the error of polling for inactive projects?
@@ -68,6 +70,23 @@ export class JiraIssueEffects {
         })
       )),
     );
+
+  @Effect({dispatch: false}) pollNewIssuesToBacklog$: any = this._actions$
+    .pipe(
+      ofType(
+        ProjectActionTypes.LoadProjectRelatedDataSuccess,
+      ),
+      delay(ISSUE_REFRESH_DELAY),
+      withLatestFrom(
+        this._store$.pipe(select(selectProjectJiraCfg)),
+      ),
+      filter(isEnabled),
+      filter(([a, jiraCfg]) => jiraCfg.isAutoAddToBacklog),
+      tap(() => {
+        this._jiraIssueService.addOpenIssuesToBacklog();
+      })
+    );
+
   @Effect({dispatch: false}) syncIssueStateToLs$: any = this._actions$
     .pipe(
       ofType(
