@@ -7,161 +7,173 @@ $summary-point-inner-margin: $s;
     justify-content: center !important;
     user-select: none;
   }
+}
 
-  .page-wrapper {
-    //display: flex;
-    //align-items: center;
-    //flex-direction: column;
-    text-align: center;
+.page-wrapper {
+  //display: flex;
+  //align-items: center;
+  //flex-direction: column;
+  text-align: center;
+}
+
+.tab-inner {
+  padding: $s;
+  margin: auto;
+  max-width: $component-max-width
+}
+
+.back-btn {
+  margin-top: $s*2;
+}
+
+.done-headline {
+  margin-top: $s*2;
+  margin-bottom: $s*2 - $summary-point-inner-margin;
+}
+
+.daily-summary-summary {
+  margin-bottom: $s*2;
+  display: flex;
+  justify-content: center;
+
+  p {
+    margin: 5px;
+  }
+}
+
+.summary-point {
+  vertical-align: center;
+  display: inline-block;
+  align-items: center;
+  text-align: center;
+  margin: $summary-point-inner-margin;
+  //flex-grow: 1;
+  flex-basis: 200px;
+}
+
+.summary-text {
+}
+
+.summary-val {
+  font-weight: bold;
+}
+
+::ng-deep collapsible {
+  text-align: center;
+}
+
+::ng-deep .collapsible-title {
+  font-size: 18px;
+}
+
+textarea {
+  padding: $s;
+  border: 1px solid #cccccc;
+  border-radius: $card-border-radius;
+  border-top-width: 1px !important;
+  border-left-width: 1px !important;
+  border-right-width: 1px !important;
+  font-size: 14px;
+
+  &:focus {
+    outline: 1px solid $c-accent;
   }
 
-  .tab-inner {
-    padding: $s;
-    margin: auto;
-    max-width: $component-max-width
+  @include darkTheme {
+    color: #fff;
   }
 
-  .back-btn {
-    margin-top: $s*2;
-  }
+}
 
-  .done-headline {
-    margin-top: $s*2;
-    margin-bottom: $s*2 - $summary-point-inner-margin;
-  }
+.finish-day-opts {
+  margin-top: 10px;
 
-  .daily-summary-summary {
-    margin-bottom: $s*2;
-    display: flex;
-    justify-content: center;
-
-    p {
-      margin: 5px;
-    }
-  }
-
-  .summary-point {
-    vertical-align: center;
-    display: inline-block;
-    align-items: center;
-    text-align: center;
-    margin: $summary-point-inner-margin;
-    //flex-grow: 1;
-    flex-basis: 200px;
-  }
-
-  .summary-text {
-  }
-
-  .summary-val {
-    font-weight: bold;
-  }
-
-  ::ng-deep collapsible {
-    text-align: center;
-  }
-
-  ::ng-deep .collapsible-title {
-    font-size: 18px;
-  }
-
-  textarea {
-    border: 1px solid #cccccc;
-    border-top-width: 1px !important;
-    border-left-width: 1px !important;
-    border-right-width: 1px !important;
-  }
-
-  .finish-day-opts {
-    margin-top: 10px;
-
-    mat-checkbox {
-      display: block;
-    }
-  }
-
-
-  .daily-summary-collapsible {
-    margin-bottom: $s*2;
-    margin-top: $s*2;
-
-    .collapsible-title {
-      font-size: 17px;
-    }
-  }
-
-  .summary-table {
-    width: 100%;
-
-    tr {
-      height: 36px !important;
-    }
-
-    td {
-      .isDone {
-        text-decoration: line-through;
-      }
-
-      .isSubTask {
-        font-style: italic;
-      }
-    }
-
-    th {
-      text-align: center;
-    }
-
-    td:first-child {
-      text-align: left;
-    }
-  }
-
-  .daily-summary-actions {
-    margin-top: 30px;
-
-    button {
-      margin: 0 $s/2;
-
-      mat-icon + mat-icon {
-        //margin-left: -$s;
-      }
-    }
-  }
-
-  .success-animation-wrapper {
-    $this-ani-style: 1s linear infinite;
-    $this-ico-size: 128px;
-    clear: both;
+  mat-checkbox {
     display: block;
-    position: fixed;
-    z-index: 100;
+  }
+}
+
+
+.daily-summary-collapsible {
+  margin-bottom: $s*2;
+  margin-top: $s*2;
+
+  .collapsible-title {
+    font-size: 17px;
+  }
+}
+
+.summary-table {
+  width: 100%;
+
+  tr {
+    height: 36px !important;
+  }
+
+  td {
+    .isDone {
+      text-decoration: line-through;
+    }
+
+    .isSubTask {
+      font-style: italic;
+    }
+  }
+
+  th {
+    text-align: center;
+  }
+
+  td:first-child {
+    text-align: left;
+  }
+}
+
+.daily-summary-actions {
+  margin-top: 30px;
+
+  button {
+    margin: 0 $s/2;
+
+    mat-icon + mat-icon {
+      //margin-left: -$s;
+    }
+  }
+}
+
+.success-animation-wrapper {
+  $this-ani-style: 1s linear infinite;
+  $this-ico-size: 128px;
+  clear: both;
+  display: block;
+  position: fixed;
+  z-index: 100;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  backface-visibility: hidden;
+
+  mat-icon {
+    width: $this-ico-size;
+    height: $this-ico-size;
+    display: block;
+    font-size: $this-ico-size;
+    color: $yellow;
+    //transform-origin: center center;
+    animation: success-animation-sun #{$this-ani-style};
+    backface-visibility: hidden;
+  }
+
+  .unicorn-wrapper {
+    position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    backface-visibility: hidden;
+  }
 
-    mat-icon {
-      width: $this-ico-size;
-      height: $this-ico-size;
-      display: block;
-      font-size: $this-ico-size;
-      color: $yellow;
-      //transform-origin: center center;
-      animation: success-animation-sun #{$this-ani-style};
-      backface-visibility: hidden;
-    }
-
-    .unicorn-wrapper {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-    }
-
-    .unicorn {
-      transform-origin: center center;
-      animation: success-animation-unicorn #{$this-ani-style};
-    }
+  .unicorn {
+    transform-origin: center center;
+    animation: success-animation-unicorn #{$this-ani-style};
   }
 }
 

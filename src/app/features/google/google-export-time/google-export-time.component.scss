@@ -20,6 +20,17 @@
 
 .controls {
   padding: $s 0;
+  display: flex;
+  justify-content: center;
+
+  a,
+  button {
+    margin-left: $s;
+
+    &:first-child {
+      margin-left: 0;
+    }
+  }
 }
 
 .export-input-table {
