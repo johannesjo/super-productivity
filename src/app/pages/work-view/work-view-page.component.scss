@@ -113,7 +113,7 @@ h2 {
   top: 50%;
   right: -8px;
   z-index: 4;
-  transform: translateY(-50%);
+  transform: translateY(-50%) scale(0);
   transition: $transition-standard;
   opacity: 0;
   visibility: hidden;
@@ -124,6 +124,7 @@ h2 {
 
 .item:hover .take-a-break-reset-btn {
   opacity: 1;
+  transform: translateY(-50%) scale(1);
   visibility: visible;
 }
 
