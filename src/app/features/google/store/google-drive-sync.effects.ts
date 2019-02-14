@@ -193,9 +193,9 @@ export class GoogleDriveSyncEffects {
       } else {
         // otherwise update
         return this._googleApiService.getFileInfo(cfg._backupDocId).pipe(
-          catchError(err => of(new SaveToGoogleDriveCancel())),
+          catchError(err => this._handleError(err)),
           concatMap((res: any): Observable<any> => {
-            console.log('concat map response', res);
+            // console.log('concat map response', res);
 
             const lastActiveLocal = this._syncService.getLastActive();
             const lastModifiedRemote = res.modifiedDate;
@@ -222,7 +222,7 @@ export class GoogleDriveSyncEffects {
         );
       }
     }),
-    catchError(err => of(new SaveToGoogleDriveCancel())),
+    catchError(err => this._handleError(err)),
   );
 
   @Effect() save$: any = this._actions$.pipe(
@@ -242,7 +242,7 @@ export class GoogleDriveSyncEffects {
           response,
           isSkipSnack: action.payload && action.payload.isSkipSnack
         })),
-        catchError(err => of(new SaveToGoogleDriveCancel())),
+        catchError(err => this._handleError(err)),
       )
     ),
   );
@@ -302,7 +302,7 @@ export class GoogleDriveSyncEffects {
                     return of(new LoadFromGoogleDriveCancel());
                   }
                 }),
-                catchError(err => of(new LoadFromGoogleDriveCancel())),
+                catchError(err => this._handleError(err)),
               );
               // no update required
             } else {
@@ -314,11 +314,11 @@ export class GoogleDriveSyncEffects {
               return of(new LoadFromGoogleDriveCancel());
             }
           }),
-          catchError(err => of(new LoadFromGoogleDriveCancel())),
+          catchError(err => this._handleError(err)),
         );
       }
     }),
-    catchError(err => of(new LoadFromGoogleDriveCancel())),
+    catchError(err => this._handleError(err)),
   );
 
   @Effect() load$: any = this._actions$.pipe(
@@ -333,7 +333,7 @@ export class GoogleDriveSyncEffects {
     }),
     concatMap((loadRes) => this._import(loadRes)),
     map((modifiedDate) => new LoadFromGoogleDriveSuccess({modifiedDate})),
-    catchError(err => of(new LoadFromGoogleDriveCancel())),
+    catchError(err => this._handleError(err)),
   );
 
   @Effect() loadSuccess$: any = this._actions$.pipe(
@@ -360,6 +360,11 @@ export class GoogleDriveSyncEffects {
     this._configService.cfg$.subscribe((cfg) => {
       this._config = cfg.googleDriveSync;
     });
+  }
+
+  private _handleError(err): Observable<any> {
+    console.warn('Google Drive Sync Error:', err);
+    return of(new LoadFromGoogleDriveCancel());
   }
 
   private _checkIfRemoteUpdate(): Observable<any> {
