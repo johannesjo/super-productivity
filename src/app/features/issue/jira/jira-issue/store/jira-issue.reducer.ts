@@ -9,7 +9,7 @@ import { JIRA_TYPE } from '../../../issue.const';
 export const JIRA_ISSUE_FEATURE_NAME: IssueProviderKey = JIRA_TYPE;
 
 export interface JiraIssueState extends EntityState<JiraIssue> {
-  stateBefore: JiraIssueState;
+  stateBefore?: JiraIssueState;
 }
 
 export const jiraIssueAdapter: EntityAdapter<JiraIssue> = createEntityAdapter<JiraIssue>();

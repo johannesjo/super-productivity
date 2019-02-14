@@ -9,7 +9,7 @@ import { GIT_TYPE } from '../../../issue.const';
 export const GIT_ISSUE_FEATURE_NAME: IssueProviderKey = GIT_TYPE;
 
 export interface GitIssueState extends EntityState<GitIssue> {
-  stateBefore: GitIssueState;
+  stateBefore?: GitIssueState;
 }
 
 export const gitIssueAdapter: EntityAdapter<GitIssue> = createEntityAdapter<GitIssue>();
