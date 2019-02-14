@@ -364,6 +364,11 @@ export class GoogleDriveSyncEffects {
 
   private _handleError(err): Observable<any> {
     console.warn('Google Drive Sync Error:', err);
+    const errTxt = (typeof err === 'string' && err) || (err.toString && err.toString()) || 'Unknown';
+    this._snackService.open({
+      type: 'ERROR',
+      message: 'Google Drive Sync Error: ' + errTxt
+    });
     return of(new LoadFromGoogleDriveCancel());
   }
 
