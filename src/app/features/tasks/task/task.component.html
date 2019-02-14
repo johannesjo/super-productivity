@@ -16,7 +16,8 @@
        [class.isPreventPointerEvents]="isPreventPointerEvents">
     <div class="block-left bg-400"
          #blockLeft>
-      <mat-icon>check</mat-icon>
+      <mat-icon *ngIf="!task.isDone">check</mat-icon>
+      <mat-icon *ngIf="task.isDone">undo</mat-icon>
     </div>
 
     <div class="block-right bg-400"

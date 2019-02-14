@@ -40,8 +40,11 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   @Input() task: TaskWithSubTasks;
   isDragOver: boolean;
   isCurrent: boolean;
-  isShowLeft = false;
-  isShowRight = false;
+
+  isLockPanLeft = false;
+  isLockPanRight = false;
+  isPreventPointerEvents = false;
+  isActionTriggered = false;
 
   @ViewChild('editOnClickEl') editOnClickEl: ElementRef;
   @ViewChild('blockLeft') blockLeftEl: ElementRef;
@@ -330,10 +333,6 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     this._taskService.updateUi(this.task.id, {_currentTab: newVal || 0});
   }
 
-  isLockPanLeft = false;
-  isLockPanRight = false;
-  isPreventPointerEvents = false;
-  isActionTriggered = false;
 
   onPanLeft(ev) {
     if (!this.isLockPanRight) {
@@ -351,15 +350,18 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     this._handlePan(ev, el);
   }
 
-  onPanEnd(ev) {
-    console.log(this.isLockPanLeft, this.isLockPanRight);
+  onPanEnd() {
     this.isPreventPointerEvents = false;
+    this._renderer.removeStyle(this.blockLeftEl.nativeElement, 'transition');
+    this._renderer.removeStyle(this.blockRightEl.nativeElement, 'transition');
 
     if (this.isActionTriggered) {
       if (this.isLockPanLeft) {
         this._renderer.setStyle(this.blockRightEl.nativeElement, 'transform', `scaleX(1)`);
+        this.editReminder();
       } else if (this.isLockPanRight) {
         this._renderer.setStyle(this.blockLeftEl.nativeElement, 'transform', `scaleX(1)`);
+        this.toggleTaskDone();
       }
       setTimeout(() => this._resetAfterPan(), 400);
     } else {
@@ -375,9 +377,12 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     const scale = 0;
     this._renderer.setStyle(this.blockLeftEl.nativeElement, 'transform', `scaleX(${scale})`);
     this._renderer.setStyle(this.blockRightEl.nativeElement, 'transform', `scaleX(${scale})`);
+    this._renderer.removeClass(this.blockLeftEl.nativeElement, 'isActive');
+    this._renderer.removeClass(this.blockRightEl.nativeElement, 'isActive');
   }
 
   private _handlePan(ev, targetRef) {
+    const MAGIC_FACTOR = 1.5;
     this.isPreventPointerEvents = true;
     this.focusSelfElement();
     console.log(ev);
@@ -385,16 +390,20 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     ev.srcEvent.preventDefault();
     ev.srcEvent.stopPropagation();
     if (targetRef) {
-      console.log(ev, targetRef.nativeElement.offsetWidth, ev.deltaX);
-      let scale = ev.deltaX / targetRef.nativeElement.offsetWidth;
+      let scale = ev.deltaX / this._elementRef.nativeElement.offsetWidth * MAGIC_FACTOR;
       scale = this.isLockPanLeft ? scale * -1 : scale;
       scale = Math.min(1, Math.max(0, scale));
 
-      console.log(scale, Math.abs(ev.deltaX / targetRef.nativeElement.offsetWidth));
+      console.log(scale, Math.abs(ev.deltaX / this._elementRef.nativeElement.offsetWidth * MAGIC_FACTOR));
       if (scale > 0.5) {
         this.isActionTriggered = true;
+        this._renderer.addClass(targetRef.nativeElement, 'isActive');
+      } else {
+        this.isActionTriggered = false;
+        this._renderer.removeClass(targetRef.nativeElement, 'isActive');
       }
       this._renderer.setStyle(targetRef.nativeElement, 'transform', `scaleX(${scale})`);
+      this._renderer.setStyle(targetRef.nativeElement, 'transition', `none`);
     }
   }
 

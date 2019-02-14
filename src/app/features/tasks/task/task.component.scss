@@ -569,10 +569,13 @@ input {
   bottom: 0;
   width: 33%;
   min-width: 100px;
-  //background: $c-accent;
   z-index: 13;
   transition: $transition-standard;
   transform: scaleX(0);
+
+  &.isActive {
+    background: $c-accent;
+  }
 
   mat-icon {
     position: absolute;
@@ -608,5 +611,6 @@ input {
   * {
     user-select: none !important;
     pointer-events: none !important;
+    transition: none !important;
   }
 }
