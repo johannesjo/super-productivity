@@ -342,10 +342,12 @@ export class GoogleApiService {
   }
 
   private _saveToken(res) {
-    this._updateSession({
-      accessToken: res.accessToken || res.access_token || res.Zi.access_token,
-      expiresAt: res.expiresAt || res.expires_at || res.Zi.expires_at,
-    });
+    const accessToken = res.accessToken || res.access_token || res.Zi.access_token;
+    const expiresAt = res.expiresAt || res.expires_at || res.Zi.expires_at;
+
+    if (accessToken !== this._session.accessToken || expiresAt !== this._session.expiresAt) {
+      this._updateSession({accessToken, expiresAt});
+    }
   }
 
   private _handleUnAuthenticated(err) {
