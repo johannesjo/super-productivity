@@ -52,6 +52,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   @HostBinding('tabindex') tabIndex = 1;
   private _dragEnterTarget: HTMLElement;
   private _destroy$: Subject<boolean> = new Subject<boolean>();
+  private _currentPantimeout: number;
 
   constructor(
     private readonly _taskService: TaskService,
@@ -148,6 +149,10 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   ngOnDestroy() {
     this._destroy$.next(true);
     this._destroy$.unsubscribe();
+
+    if (this._currentPantimeout) {
+      window.clearTimeout(this._currentPantimeout);
+    }
   }
 
   editReminder() {
@@ -355,15 +360,24 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     this._renderer.removeStyle(this.blockLeftEl.nativeElement, 'transition');
     this._renderer.removeStyle(this.blockRightEl.nativeElement, 'transition');
 
+    if (this._currentPantimeout) {
+      window.clearTimeout(this._currentPantimeout);
+    }
+
     if (this.isActionTriggered) {
       if (this.isLockPanLeft) {
         this._renderer.setStyle(this.blockRightEl.nativeElement, 'transform', `scaleX(1)`);
-        this.editReminder();
+        this._currentPantimeout = window.setTimeout(() => {
+          this.editReminder();
+          this._resetAfterPan();
+        }, 300);
       } else if (this.isLockPanRight) {
         this._renderer.setStyle(this.blockLeftEl.nativeElement, 'transform', `scaleX(1)`);
-        this.toggleTaskDone();
+        this._currentPantimeout = window.setTimeout(() => {
+          this.toggleTaskDone();
+          this._resetAfterPan();
+        }, 300);
       }
-      setTimeout(() => this._resetAfterPan(), 400);
     } else {
       this._resetAfterPan();
     }
@@ -384,8 +398,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   private _handlePan(ev, targetRef) {
     const MAGIC_FACTOR = 1.5;
     this.isPreventPointerEvents = true;
-    this.focusSelfElement();
-    console.log(ev);
+    this.editOnClickEl.nativeElement.blur();
     ev.preventDefault();
     ev.srcEvent.preventDefault();
     ev.srcEvent.stopPropagation();
@@ -393,8 +406,8 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
       let scale = ev.deltaX / this._elementRef.nativeElement.offsetWidth * MAGIC_FACTOR;
       scale = this.isLockPanLeft ? scale * -1 : scale;
       scale = Math.min(1, Math.max(0, scale));
-
-      console.log(scale, Math.abs(ev.deltaX / this._elementRef.nativeElement.offsetWidth * MAGIC_FACTOR));
+      // console.log(ev);
+      // console.log(scale, Math.abs(ev.deltaX / this._elementRef.nativeElement.offsetWidth * MAGIC_FACTOR));
       if (scale > 0.5) {
         this.isActionTriggered = true;
         this._renderer.addClass(targetRef.nativeElement, 'isActive');
