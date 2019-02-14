@@ -13,7 +13,7 @@
        (panleft)="onPanLeft($event)"
        (panright)="onPanRight($event)"
        (panend)="onPanEnd($event)"
-       [class.isPreventPointerEvents]="isPreventPointerEvents">
+       [class.isPreventPointerEventsWhilePanning]="isPreventPointerEventsWhilePanning">
     <div class="block-left bg-400"
          #blockLeft>
       <mat-icon *ngIf="!task.isDone">check</mat-icon>

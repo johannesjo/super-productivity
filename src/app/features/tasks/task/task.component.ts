@@ -43,7 +43,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
 
   isLockPanLeft = false;
   isLockPanRight = false;
-  isPreventPointerEvents = false;
+  isPreventPointerEventsWhilePanning = false;
   isActionTriggered = false;
 
   @ViewChild('editOnClickEl') editOnClickEl: ElementRef;
@@ -356,7 +356,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   onPanEnd() {
-    this.isPreventPointerEvents = false;
+    this.isPreventPointerEventsWhilePanning = false;
     this._renderer.removeStyle(this.blockLeftEl.nativeElement, 'transition');
     this._renderer.removeStyle(this.blockRightEl.nativeElement, 'transition');
 
@@ -384,7 +384,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   private _resetAfterPan() {
-    this.isPreventPointerEvents = false;
+    this.isPreventPointerEventsWhilePanning = false;
     this.isActionTriggered = false;
     this.isLockPanLeft = false;
     this.isLockPanRight = false;
@@ -397,7 +397,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
 
   private _handlePan(ev, targetRef) {
     const MAGIC_FACTOR = 1.5;
-    this.isPreventPointerEvents = true;
+    this.isPreventPointerEventsWhilePanning = true;
     this.editOnClickEl.nativeElement.blur();
     ev.preventDefault();
     ev.srcEvent.preventDefault();

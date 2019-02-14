@@ -95,7 +95,7 @@ $this-task-focus-zoom: 1.0178571428, 1;
     @extend %standardTaskZoom;
 
     &:hover {
-      z-index: 5;
+      z-index: 6;
     }
 
     &:focus {
@@ -475,7 +475,7 @@ input {
   transform: scale(0.8);
   left: -23px;
   top: 1px;
-  z-index: 2;
+  z-index: 5;
   min-width: 0;
   min-height: 0;
   opacity: 1 !important;
@@ -569,7 +569,7 @@ input {
   bottom: 0;
   width: 33%;
   min-width: 100px;
-  z-index: 13;
+  z-index: 5;
   transition: $transition-standard;
   transform: scaleX(0);
 
@@ -607,7 +607,7 @@ input {
   }
 }
 
-.isPreventPointerEvents {
+.isPreventPointerEventsWhilePanning {
   * {
     user-select: none !important;
     pointer-events: none !important;
