@@ -12,7 +12,7 @@
   <div class="first-line"
        (panleft)="onPanLeft($event)"
        (panright)="onPanRight($event)"
-       (panend)="onPanEnd($event)"
+       (panend)="onPanEnd()"
        [class.isPreventPointerEventsWhilePanning]="isPreventPointerEventsWhilePanning">
     <div class="block-left bg-400"
          #blockLeft>
