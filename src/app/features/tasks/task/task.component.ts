@@ -9,6 +9,7 @@ import {
   Input,
   OnDestroy,
   OnInit,
+  Renderer2,
   ViewChild
 } from '@angular/core';
 import { TaskService } from '../task.service';
@@ -39,8 +40,12 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   @Input() task: TaskWithSubTasks;
   isDragOver: boolean;
   isCurrent: boolean;
+  isShowLeft = false;
+  isShowRight = false;
 
   @ViewChild('editOnClickEl') editOnClickEl: ElementRef;
+  @ViewChild('blockLeft') blockLeftEl: ElementRef;
+  @ViewChild('blockRight') blockRightEl: ElementRef;
   @HostBinding('tabindex') tabIndex = 1;
   private _dragEnterTarget: HTMLElement;
   private _destroy$: Subject<boolean> = new Subject<boolean>();
@@ -52,6 +57,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     private readonly _issueService: IssueService,
     private readonly _attachmentService: AttachmentService,
     private readonly _elementRef: ElementRef,
+    private readonly _renderer: Renderer2,
     private readonly _cd: ChangeDetectorRef,
   ) {
   }
@@ -322,6 +328,74 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
 
   onTabIndexChange(newVal) {
     this._taskService.updateUi(this.task.id, {_currentTab: newVal || 0});
+  }
+
+  isLockPanLeft = false;
+  isLockPanRight = false;
+  isPreventPointerEvents = false;
+  isActionTriggered = false;
+
+  onPanLeft(ev) {
+    if (!this.isLockPanRight) {
+      this.isLockPanLeft = true;
+    }
+    const el = this.isLockPanRight ? this.blockLeftEl : this.blockRightEl;
+    this._handlePan(ev, el);
+  }
+
+  onPanRight(ev) {
+    if (!this.isLockPanLeft) {
+      this.isLockPanRight = true;
+    }
+    const el = this.isLockPanLeft ? this.blockRightEl : this.blockLeftEl;
+    this._handlePan(ev, el);
+  }
+
+  onPanEnd(ev) {
+    console.log(this.isLockPanLeft, this.isLockPanRight);
+    this.isPreventPointerEvents = false;
+
+    if (this.isActionTriggered) {
+      if (this.isLockPanLeft) {
+        this._renderer.setStyle(this.blockRightEl.nativeElement, 'transform', `scaleX(1)`);
+      } else if (this.isLockPanRight) {
+        this._renderer.setStyle(this.blockLeftEl.nativeElement, 'transform', `scaleX(1)`);
+      }
+      setTimeout(() => this._resetAfterPan(), 400);
+    } else {
+      this._resetAfterPan();
+    }
+  }
+
+  private _resetAfterPan() {
+    this.isPreventPointerEvents = false;
+    this.isActionTriggered = false;
+    this.isLockPanLeft = false;
+    this.isLockPanRight = false;
+    const scale = 0;
+    this._renderer.setStyle(this.blockLeftEl.nativeElement, 'transform', `scaleX(${scale})`);
+    this._renderer.setStyle(this.blockRightEl.nativeElement, 'transform', `scaleX(${scale})`);
+  }
+
+  private _handlePan(ev, targetRef) {
+    this.isPreventPointerEvents = true;
+    this.focusSelfElement();
+    console.log(ev);
+    ev.preventDefault();
+    ev.srcEvent.preventDefault();
+    ev.srcEvent.stopPropagation();
+    if (targetRef) {
+      console.log(ev, targetRef.nativeElement.offsetWidth, ev.deltaX);
+      let scale = ev.deltaX / targetRef.nativeElement.offsetWidth;
+      scale = this.isLockPanLeft ? scale * -1 : scale;
+      scale = Math.min(1, Math.max(0, scale));
+
+      console.log(scale, Math.abs(ev.deltaX / targetRef.nativeElement.offsetWidth));
+      if (scale > 0.5) {
+        this.isActionTriggered = true;
+      }
+      this._renderer.setStyle(targetRef.nativeElement, 'transform', `scaleX(${scale})`);
+    }
   }
 
   private _handleKeyboardShortcuts(ev: KeyboardEvent) {

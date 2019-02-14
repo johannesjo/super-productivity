@@ -3,12 +3,27 @@
      [class.isAdditionalInfoOpen]="task._isAdditionalInfoOpen"
      [class.isCurrent]="isCurrent"
      [class.isDone]="task.isDone"
-     class="inner-wrapper ">
+     class="inner-wrapper">
 
   <div class="box bg-standard"
-       [class.bg-600]="isCurrent"></div>
+       [class.bg-600]="isCurrent">
+  </div>
 
-  <div class="first-line">
+  <div class="first-line"
+       (panleft)="onPanLeft($event)"
+       (panright)="onPanRight($event)"
+       (panend)="onPanEnd($event)"
+       [class.isPreventPointerEvents]="isPreventPointerEvents">
+    <div class="block-left bg-400"
+         #blockLeft>
+      <mat-icon>check</mat-icon>
+    </div>
+
+    <div class="block-right bg-400"
+         #blockRight>
+      <mat-icon>alarm_add</mat-icon>
+    </div>
+
     <button (click)="toggleTaskDone()"
             *ngIf="task.isDone"
             aria-label="un-/mark as done"

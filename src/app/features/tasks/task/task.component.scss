@@ -54,9 +54,11 @@ $this-task-focus-zoom: 1.0178571428, 1;
     outline: none;
 
     > .inner-wrapper > .box {
-      border: 1px solid $c-accent !important;
-      box-shadow: $whiteframe-shadow-5dp;
-      transform: scale($this-task-focus-zoom);
+      @include mq(xs, min) {
+        border: 1px solid $c-accent !important;
+        box-shadow: $whiteframe-shadow-5dp;
+        transform: scale($this-task-focus-zoom);
+      }
     }
   }
 
@@ -560,6 +562,36 @@ input {
   }
 }
 
+.block-left,
+.block-right {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 33%;
+  min-width: 100px;
+  //background: $c-accent;
+  z-index: 13;
+  transition: $transition-standard;
+  transform: scaleX(0);
+
+  mat-icon {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+}
+
+.block-left {
+  left: 0;
+  transform-origin: left center;
+}
+
+.block-right {
+  right: 0;
+  transform-origin: right center;
+}
+
 @keyframes success-btn-ani {
   0% {
     transform: scale(0.5) rotate(-180deg);
@@ -569,5 +601,12 @@ input {
   }
   100% {
     transform: scale(1) rotate(0deg);
+  }
+}
+
+.isPreventPointerEvents {
+  * {
+    user-select: none !important;
+    pointer-events: none !important;
   }
 }
