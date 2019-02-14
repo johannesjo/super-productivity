@@ -36,37 +36,33 @@ google.options({auth: oauth2Client});
 
 async function authenticate(refreshToken) {
   return new Promise((resolve, reject) => {
-    // grab the url that will be used for authorization
-    if (refreshToken) {
-      console.log('SETTING REFRESH TOKEN', refreshToken);
-      oauth2Client.setCredentials({
-        refresh_token: refreshToken
-      });
-    }
-    // TODO check repair
-      // tslint:disable-next-line
-      // const authorizeUrl = oauth2Client.generateAuthUrl({
-      //   access_type: 'offline',
-      //   scope: scopes.join(' ')
-      // });
-      // oauth2Client.refreshToken(refreshToken)
-      // oauth2Client.getRequestHeaders(authorizeUrl)
-      //   .then(resolve)
-      //   .catch(reject);
     const authorizeUrl = oauth2Client.generateAuthUrl({
       access_type: 'offline',
       scope: scopes.join(' ')
     });
 
-    // open the browser window to the authorize url to start the workflow
-    openAuthWindow(authorizeUrl)
-      .then((code: any) => {
-        oauth2Client.getToken(code)
-          .then(resolve)
-          .catch(reject);
-      })
-      .catch(reject);
-    // }
+    // grab the url that will be used for authorization
+    if (refreshToken) {
+      // console.log('SETTING REFRESH TOKEN', refreshToken);
+      oauth2Client.setCredentials({
+        refresh_token: refreshToken
+      });
+      oauth2Client.getAccessToken()
+        .then((res) => {
+          // console.log('TOKEN REFRESH ', res.res.data);
+          resolve(res.res.data);
+        })
+        .catch(reject);
+    } else {
+      // open the browser window to the authorize url to start the workflow
+      openAuthWindow(authorizeUrl)
+        .then((code: any) => {
+          oauth2Client.getToken(code)
+            .then((res) => resolve(res.tokens))
+            .catch(reject);
+        })
+        .catch(reject);
+    }
   });
 }
 
@@ -126,7 +122,7 @@ export const initGoogleAuth = function () {
     authenticate(refreshToken).then((res: any) => {
       console.log('authenticate');
 
-      mainWin.webContents.send(IPC_GOOGLE_AUTH_TOKEN, res.tokens);
+      mainWin.webContents.send(IPC_GOOGLE_AUTH_TOKEN, res);
     }).catch((err) => {
       mainWin.webContents.send(IPC_GOOGLE_AUTH_TOKEN_ERROR);
       console.log('error');

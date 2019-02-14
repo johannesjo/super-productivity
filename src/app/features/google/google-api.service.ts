@@ -75,6 +75,7 @@ export class GoogleApiService {
       if (this.isLoggedIn) {
         return new Promise((resolve) => resolve());
       }
+      console.log(this._session.refreshToken);
 
       this._electronService.ipcRenderer.send(IPC_TRIGGER_GOOGLE_AUTH, this._session.refreshToken);
       return new Promise((resolve, reject) => {
@@ -89,8 +90,6 @@ export class GoogleApiService {
             this._snackIt('SUCCESS', 'GoogleApi: Login successful');
           }
           resolve(data);
-          // TODO remove
-          // mainWindow.webContents.removeListener('did-finish-load', handler);
         });
         this._electronService.ipcRenderer.on(IPC_GOOGLE_AUTH_TOKEN_ERROR, reject);
       });
@@ -131,7 +130,7 @@ export class GoogleApiService {
     this._updateSession({
       accessToken: null,
       expiresAt: null,
-      refreshToken: null,
+      // refreshToken: null,
     });
 
     if (IS_ELECTRON) {
