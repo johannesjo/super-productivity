@@ -9,6 +9,22 @@ $this-first-line-min-height: 40px;
 $this-icon-default-opacity: 0.7;
 $this-task-focus-zoom: 1.0178571428, 1;
 
+// z-indexes
+$z-play-btn: 1;
+$z-drag-handle: 1;
+$z-task-title: 4;
+$z-focus: 4;
+$z-btn-standard: 4;
+$z-btn-hover: 5;
+$z-toggle-sub-task-btn: 6;
+$z-swipe-block: 6;
+$z-task-title-focus: 7;
+$z-check-done: 11;
+$z-first-line-controls-hover: 12;
+$z-drag-over-msg: 12;
+$z-time-btn-svg-wrapper: 5555;
+
+
 %standardTaskOpacityChange {
   opacity: $this-icon-default-opacity;
   transition: transform $transition-fast;
@@ -50,7 +66,7 @@ $this-task-focus-zoom: 1.0178571428, 1;
   }
 
   &:focus {
-    z-index: 4;
+    z-index: $z-focus;
     outline: none;
 
     > .inner-wrapper > .box {
@@ -90,12 +106,12 @@ $this-task-focus-zoom: 1.0178571428, 1;
   .first-line .ico-btn {
     margin: 0 $this-button-spacer;
     padding: 0;
-    z-index: 4;
+    z-index: $z-btn-standard;
     @extend %standardTaskOpacityChange;
     @extend %standardTaskZoom;
 
     &:hover {
-      z-index: 6;
+      z-index: $z-btn-hover;
     }
 
     &:focus {
@@ -159,7 +175,7 @@ $this-task-focus-zoom: 1.0178571428, 1;
   margin-right: 3px;
   // move over original link btn
   position: relative;
-  z-index: 1;
+  z-index: $z-play-btn;
 
   :host-context(.isHidePlayBtn) & {
     display: none;
@@ -208,12 +224,12 @@ $this-task-focus-zoom: 1.0178571428, 1;
   .first-line:hover {
     > .controls {
       opacity: 1;
-      z-index: 12;
+      z-index: $z-first-line-controls-hover;
     }
   }
   .controls:hover {
     opacity: 1;
-    z-index: 12;
+    z-index: $z-first-line-controls-hover;
     //transform: scale(1.0714285714);
   }
 }
@@ -277,7 +293,7 @@ $this-task-focus-zoom: 1.0178571428, 1;
   min-width: 24px;
   margin: 0 4px 0 9px;
   position: relative;
-  z-index: 3;
+  z-index: $z-drag-handle;
   cursor: grab;
   @extend %standardTaskOpacityChange;
 
@@ -323,7 +339,7 @@ $this-task-focus-zoom: 1.0178571428, 1;
   overflow: visible;
   user-select: none;
   caret-color: #000000;
-  z-index: 4;
+  z-index: $z-task-title;
 
   // needs to be block for it not to mess up
   display: block !important;
@@ -367,7 +383,7 @@ $this-task-focus-zoom: 1.0178571428, 1;
 
 
   &:focus {
-    z-index: 5;
+    z-index: $z-task-title-focus;
     user-select: all;
     // thee magic number is 16/14 so we scale to whole pixels
     transform: scale(1.142857143);
@@ -476,7 +492,7 @@ input {
   transform: scale(0.8);
   left: -23px;
   top: 1px;
-  z-index: 6 !important;
+  z-index: $z-toggle-sub-task-btn !important;
   min-width: 0;
   min-height: 0;
   opacity: 1 !important;
@@ -503,7 +519,7 @@ input {
   align-items: center;
   font-weight: bold;
   display: flex;
-  z-index: 12;
+  z-index: $z-drag-over-msg;
 }
 
 .time-btn {
@@ -511,7 +527,7 @@ input {
   overflow: visible;
 
   ::ng-deep .svg-wrapper {
-    z-index: 5455;
+    z-index: $z-time-btn-svg-wrapper;
     position: absolute;
     width: 44px;
     height: 44px;
@@ -527,7 +543,7 @@ input {
   left: 50%;
   top: 50%;
   display: block;
-  z-index: 11;
+  z-index: $z-check-done;
   transform: translate(-50%, -50%);
   transition: $transition-standard;
 
@@ -570,7 +586,7 @@ input {
   bottom: 0;
   width: 33%;
   min-width: 100px;
-  z-index: 5;
+  z-index: $z-swipe-block;
   transition: $transition-standard;
   transform: scaleX(0);
 
