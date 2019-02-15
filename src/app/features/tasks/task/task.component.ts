@@ -377,15 +377,19 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
       if (this.isLockPanLeft) {
         this._renderer.setStyle(this.blockRightEl.nativeElement, 'transform', `scaleX(1)`);
         this._currentPantimeout = window.setTimeout(() => {
-          this.editReminder();
+          if (this.task.isDone) {
+            this.toggleTaskDone();
+          } else {
+            this.editReminder();
+          }
           this._resetAfterPan();
-        }, 300);
+        }, 100);
       } else if (this.isLockPanRight) {
         this._renderer.setStyle(this.blockLeftEl.nativeElement, 'transform', `scaleX(1)`);
         this._currentPantimeout = window.setTimeout(() => {
           this.toggleTaskDone();
           this._resetAfterPan();
-        }, 300);
+        }, 100);
       }
     } else {
       this._resetAfterPan();

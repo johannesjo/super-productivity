@@ -23,7 +23,8 @@
 
     <div class="block-right bg-400"
          #blockRight>
-      <mat-icon>alarm_add</mat-icon>
+      <mat-icon *ngIf="!task.isDone">alarm_add</mat-icon>
+      <mat-icon *ngIf="task.isDone">undo</mat-icon>
     </div>
 
     <button (click)="toggleTaskDone()"
