@@ -121,6 +121,7 @@ $this-task-focus-zoom: 1.0178571428, 1;
     user-select: none;
     justify-content: space-between;
     align-items: center;
+    touch-action: pan-y;
 
     @include mq(xs, max) {
       flex-wrap: wrap;

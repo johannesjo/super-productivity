@@ -10,6 +10,7 @@
   </div>
 
   <div class="first-line"
+       (panstart)="onPanStart($event)"
        (panleft)="onPanLeft($event)"
        (panright)="onPanRight($event)"
        (panend)="onPanEnd()"

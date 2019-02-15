@@ -338,24 +338,33 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     this._taskService.updateUi(this.task.id, {_currentTab: newVal || 0});
   }
 
-
-  onPanLeft(ev) {
-    if (!this.isLockPanRight) {
+  onPanStart(ev) {
+    this._resetAfterPan();
+    if ((ev.target.className.indexOf && ev.target.className.indexOf('drag-handle') > -1) || Math.abs(ev.deltaY) > Math.abs(ev.deltaX)) {
+      return;
+    }
+    if (ev.deltaX > 0) {
+      this.isLockPanRight = true;
+    } else {
       this.isLockPanLeft = true;
     }
+  }
+
+  onPanLeft(ev) {
     const el = this.isLockPanRight ? this.blockLeftEl : this.blockRightEl;
     this._handlePan(ev, el);
   }
 
   onPanRight(ev) {
-    if (!this.isLockPanLeft) {
-      this.isLockPanRight = true;
-    }
     const el = this.isLockPanLeft ? this.blockRightEl : this.blockLeftEl;
     this._handlePan(ev, el);
   }
 
   onPanEnd() {
+    if (!this.isLockPanLeft && !this.isLockPanRight) {
+      return;
+    }
+
     this.isPreventPointerEventsWhilePanning = false;
     this._renderer.removeStyle(this.blockLeftEl.nativeElement, 'transition');
     this._renderer.removeStyle(this.blockRightEl.nativeElement, 'transition');
@@ -396,12 +405,17 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   private _handlePan(ev, targetRef) {
+    console.log('handlePan return', !this.isLockPanLeft && !this.isLockPanRight);
+    if (!this.isLockPanLeft && !this.isLockPanRight) {
+      return;
+    }
+
     const MAGIC_FACTOR = 2;
     this.isPreventPointerEventsWhilePanning = true;
     this.editOnClickEl.nativeElement.blur();
-    ev.preventDefault();
-    ev.srcEvent.preventDefault();
-    ev.srcEvent.stopPropagation();
+    // ev.preventDefault();
+    // ev.srcEvent.preventDefault();
+    // ev.srcEvent.stopPropagation();
     if (targetRef) {
       let scale = ev.deltaX / this._elementRef.nativeElement.offsetWidth * MAGIC_FACTOR;
       scale = this.isLockPanLeft ? scale * -1 : scale;
