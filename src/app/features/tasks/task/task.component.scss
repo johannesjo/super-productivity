@@ -13,15 +13,15 @@ $this-task-focus-zoom: 1.0178571428, 1;
 $z-play-btn: 1;
 $z-drag-handle: 1;
 $z-task-title: 4;
-$z-focus: 4;
-$z-btn-standard: 4;
+$z-focus-host: 4;
+$z-btn: 4;
 $z-btn-hover: 5;
-$z-toggle-sub-task-btn: 6;
-$z-swipe-block: 6;
-$z-task-title-focus: 7;
 $z-check-done: 11;
 $z-first-line-controls-hover: 12;
-$z-drag-over-msg: 12;
+$z-task-title-focus: 12;
+$z-swipe-block: 13;
+$z-toggle-sub-task-btn: 14;
+$z-drag-over-msg: 15;
 $z-time-btn-svg-wrapper: 5555;
 
 
@@ -66,7 +66,7 @@ $z-time-btn-svg-wrapper: 5555;
   }
 
   &:focus {
-    z-index: $z-focus;
+    z-index: $z-focus-host;
     outline: none;
 
     > .inner-wrapper > .box {
@@ -106,7 +106,7 @@ $z-time-btn-svg-wrapper: 5555;
   .first-line .ico-btn {
     margin: 0 $this-button-spacer;
     padding: 0;
-    z-index: $z-btn-standard;
+    z-index: $z-btn;
     @extend %standardTaskOpacityChange;
     @extend %standardTaskZoom;
 
