@@ -340,7 +340,11 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
 
   onPanStart(ev) {
     this._resetAfterPan();
-    if ((ev.target.className.indexOf && ev.target.className.indexOf('drag-handle') > -1) || Math.abs(ev.deltaY) > Math.abs(ev.deltaX)) {
+    if (
+      (ev.target.className.indexOf && ev.target.className.indexOf('drag-handle') > -1)
+      || Math.abs(ev.deltaY) > Math.abs(ev.deltaX)
+      || document.activeElement === this.editOnClickEl.nativeElement
+    ) {
       return;
     }
     if (ev.deltaX > 0) {
@@ -409,23 +413,18 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   private _handlePan(ev, targetRef) {
-    console.log('handlePan return', !this.isLockPanLeft && !this.isLockPanRight);
+    // console.log('handlePan return', !this.isLockPanLeft && !this.isLockPanRight);
     if (!this.isLockPanLeft && !this.isLockPanRight) {
       return;
     }
 
     const MAGIC_FACTOR = 2;
     this.isPreventPointerEventsWhilePanning = true;
-    this.editOnClickEl.nativeElement.blur();
-    // ev.preventDefault();
-    // ev.srcEvent.preventDefault();
-    // ev.srcEvent.stopPropagation();
+    // this.editOnClickEl.nativeElement.blur();
     if (targetRef) {
       let scale = ev.deltaX / this._elementRef.nativeElement.offsetWidth * MAGIC_FACTOR;
       scale = this.isLockPanLeft ? scale * -1 : scale;
       scale = Math.min(1, Math.max(0, scale));
-      // console.log(ev);
-      // console.log(scale, Math.abs(ev.deltaX / this._elementRef.nativeElement.offsetWidth * MAGIC_FACTOR));
       if (scale > 0.5) {
         this.isActionTriggered = true;
         this._renderer.addClass(targetRef.nativeElement, 'isActive');
