@@ -208,13 +208,23 @@ h2 {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding-bottom: 2*$s;
+  flex-wrap: wrap;
+  padding-bottom: $s;
 
   .btn-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
 
     button {
       width: 150px;
-      margin: 0 $s;
+      margin-left: $s;
+      margin-bottom: $s;
+
+      &:first-child {
+        margin-left: 0;
+      }
     }
   }
 }
