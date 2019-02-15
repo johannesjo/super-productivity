@@ -574,7 +574,7 @@ input {
   transform: scaleX(0);
 
   &.isActive {
-    background: $c-accent;
+    background-color: $c-accent;
   }
 
   mat-icon {

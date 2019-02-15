@@ -396,7 +396,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   private _handlePan(ev, targetRef) {
-    const MAGIC_FACTOR = 1.5;
+    const MAGIC_FACTOR = 2;
     this.isPreventPointerEventsWhilePanning = true;
     this.editOnClickEl.nativeElement.blur();
     ev.preventDefault();
