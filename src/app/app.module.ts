@@ -1,4 +1,4 @@
-import { BrowserModule } from '@angular/platform-browser';
+import { BrowserModule, HAMMER_GESTURE_CONFIG } from '@angular/platform-browser';
 import { ErrorHandler, NgModule } from '@angular/core';
 import { AppComponent } from './app.component';
 import { ServiceWorkerModule } from '@angular/service-worker';
@@ -27,6 +27,7 @@ import { ReminderModule } from './features/reminder/reminder.module';
 import { CoreUiModule } from './core-ui/core-ui.module';
 import { MigrateModule } from './imex/migrate/migrate.module';
 import { CustomErrorHandler } from './core/error-handler/custom-error-handler.class';
+import { MyHammerConfig } from '../hammer-config.class';
 
 @NgModule({
   declarations: [
@@ -64,7 +65,10 @@ import { CustomErrorHandler } from './core/error-handler/custom-error-handler.cl
     NoteModule,
   ],
   bootstrap: [AppComponent],
-  providers: [{provide: ErrorHandler, useClass: CustomErrorHandler}]
+  providers: [
+    {provide: ErrorHandler, useClass: CustomErrorHandler},
+    {provide: HAMMER_GESTURE_CONFIG, useClass: MyHammerConfig}
+  ],
 })
 export class AppModule {
 }
