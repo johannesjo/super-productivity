@@ -204,15 +204,11 @@ h2 {
 }
 
 .add-more-or-finish {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  flex-wrap: wrap;
+  text-align: center;
   padding-bottom: $s;
 
   .btn-wrapper {
-    display: flex;
+    display: block;
     align-items: center;
     justify-content: center;
     flex-wrap: wrap;
