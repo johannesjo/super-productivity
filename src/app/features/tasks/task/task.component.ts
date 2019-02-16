@@ -354,16 +354,6 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
-  onPanLeft(ev) {
-    const el = this.isLockPanRight ? this.blockLeftEl : this.blockRightEl;
-    this._handlePan(ev, el);
-  }
-
-  onPanRight(ev) {
-    const el = this.isLockPanLeft ? this.blockRightEl : this.blockLeftEl;
-    this._handlePan(ev, el);
-  }
-
   onPanEnd() {
     if (!this.isLockPanLeft && !this.isLockPanRight) {
       return;
@@ -400,24 +390,21 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
-  private _resetAfterPan() {
-    this.isPreventPointerEventsWhilePanning = false;
-    this.isActionTriggered = false;
-    this.isLockPanLeft = false;
-    this.isLockPanRight = false;
-    const scale = 0;
-    this._renderer.setStyle(this.blockLeftEl.nativeElement, 'transform', `scaleX(${scale})`);
-    this._renderer.setStyle(this.blockRightEl.nativeElement, 'transform', `scaleX(${scale})`);
-    this._renderer.removeClass(this.blockLeftEl.nativeElement, 'isActive');
-    this._renderer.removeClass(this.blockRightEl.nativeElement, 'isActive');
+  onPanLeft(ev) {
+    this._handlePan(ev);
   }
 
-  private _handlePan(ev, targetRef) {
+  onPanRight(ev) {
+    this._handlePan(ev);
+  }
+
+  private _handlePan(ev) {
     // console.log('handlePan return', !this.isLockPanLeft && !this.isLockPanRight);
     if (!this.isLockPanLeft && !this.isLockPanRight) {
       return;
     }
 
+    const targetRef = this.isLockPanRight ? this.blockLeftEl : this.blockRightEl;
     const MAGIC_FACTOR = 2;
     this.isPreventPointerEventsWhilePanning = true;
     // this.editOnClickEl.nativeElement.blur();
@@ -436,6 +423,19 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
       this._renderer.setStyle(targetRef.nativeElement, 'transition', `none`);
     }
   }
+
+  private _resetAfterPan() {
+    this.isPreventPointerEventsWhilePanning = false;
+    this.isActionTriggered = false;
+    this.isLockPanLeft = false;
+    this.isLockPanRight = false;
+    const scale = 0;
+    this._renderer.setStyle(this.blockLeftEl.nativeElement, 'transform', `scaleX(${scale})`);
+    this._renderer.setStyle(this.blockRightEl.nativeElement, 'transform', `scaleX(${scale})`);
+    this._renderer.removeClass(this.blockLeftEl.nativeElement, 'isActive');
+    this._renderer.removeClass(this.blockRightEl.nativeElement, 'isActive');
+  }
+
 
   private _handleKeyboardShortcuts(ev: KeyboardEvent) {
     if (ev.target !== this._elementRef.nativeElement) {
