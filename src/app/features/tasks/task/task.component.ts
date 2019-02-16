@@ -344,6 +344,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
       (ev.target.className.indexOf && ev.target.className.indexOf('drag-handle') > -1)
       || Math.abs(ev.deltaY) > Math.abs(ev.deltaX)
       || document.activeElement === this.editOnClickEl.nativeElement
+      || ev.isFinal
     ) {
       return;
     }
@@ -399,8 +400,8 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   private _handlePan(ev) {
-    // console.log('handlePan return', !this.isLockPanLeft && !this.isLockPanRight);
-    if (!this.isLockPanLeft && !this.isLockPanRight) {
+    if (!this.isLockPanLeft && !this.isLockPanRight
+      || ev.eventType === 8) {
       return;
     }
 
