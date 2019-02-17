@@ -8,7 +8,6 @@
 
 .wrapper {
   margin: $s $s*2 $s*2;
-  border-radius: $card-border-radius;
   border-radius: 12px;
   border: 1px solid #dddddd;
   //background: #efefef;
@@ -22,6 +21,10 @@
   @media (max-width: $layout-xs) {
     margin: $s/2;
     margin-bottom: $s;
+  }
+
+  :host-context(.isReducedTheme) & {
+    border-radius: $card-border-radius;
   }
 }
 
