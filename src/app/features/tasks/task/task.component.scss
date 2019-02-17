@@ -10,7 +10,6 @@ $this-icon-default-opacity: 0.7;
 $this-task-focus-zoom: 1.0178571428, 1;
 
 // z-indexes
-$z-play-btn: 1;
 $z-drag-handle: 1;
 $z-task-title: 4;
 $z-focus-host: 4;
@@ -157,19 +156,6 @@ $z-time-btn-svg-wrapper: 5555;
   }
 }
 
-// Button Stuff
-.play-btn {
-  padding-left: 0;
-  margin-left: -2px;
-  margin-right: 3px;
-  // move over original link btn
-  position: relative;
-  z-index: $z-play-btn;
-
-  :host-context(.isHidePlayBtn) & {
-    display: none;
-  }
-}
 
 .show-additional-info-btn {
   mat-icon {
@@ -271,10 +257,6 @@ $z-time-btn-svg-wrapper: 5555;
         //color: $this-task-text-color-done;
         //text-decoration: line-through;
       }
-    }
-
-    .play-btn {
-      display: none;
     }
   }
 }
