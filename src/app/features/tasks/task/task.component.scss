@@ -215,16 +215,6 @@ $z-time-btn-svg-wrapper: 5555;
   position: relative;
   margin-left: $s;
 
-  // extra hitarea
-  &:after {
-    position: absolute;
-    top: -$s;
-    right: -$s;
-    left: -$s;
-    bottom: -$s;
-    content: '';
-  }
-
   &:hover {
     .hover-controls {
       opacity: 1;
@@ -240,20 +230,43 @@ $z-time-btn-svg-wrapper: 5555;
   transform-origin: right center;
   opacity: 0;
   transition: $transition-fast;
-  border-left: 1px solid $light-theme-extra-border-color;
+  transition-property: transform, opacity;
   position: absolute;
   right: 100%;
   top: 0;
   z-index: $z-hover-controls;
 
+  :host-context(.isReducedTheme.isDarkTheme) & {
+    background-color: $dark-theme-bg;
+  }
+
+  :host-context(.isReducedTheme.isLightTheme) & {
+    background-color: $light-theme-bg;
+  }
+
+  .inner-wrapper.isCurrent > .first-line > .all-controls-wrapper > &:before {
+    border-left: 1px solid rgba(255, 255, 255, 0.9);
+  }
+
+
   // extra hitarea
   &:after {
     position: absolute;
-    top: -$s;
+    top: -$s*1.5;
     right: 0;
-    left: -$s;
-    bottom: -$s;
+    left: -$s*1.5;
+    bottom: -$s*1.5;
     content: '';
+  }
+
+  &:before {
+    content: '';
+    border-left: 1px solid rgba(200, 200, 200, 0.9);
+    width: 1px;
+    height: 90%;
+    position: absolute;
+    left: 0;
+    top: 5%;
   }
 }
 

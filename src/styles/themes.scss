@@ -43,6 +43,10 @@
     background-color: mat-color($primary, 600);
   }
 
+  .bg-600i {
+    background-color: mat-color($primary, 600) !important;
+  }
+
   .bg-800 {
     background-color: mat-color($primary, 800);
   }

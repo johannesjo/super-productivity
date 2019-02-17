@@ -95,7 +95,7 @@
 
     <div class="all-controls-wrapper">
       <div class="hover-controls hide-xs bg-standard"
-           [class.bg-600]="isCurrent">
+           [class.bg-600i]="isCurrent">
         <button (click)="startTask()"
                 *ngIf="!task.isDone && !isCurrent && !task.subTasks"
                 aria-label="mark as current"
