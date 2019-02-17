@@ -166,8 +166,8 @@ export class AppComponent implements OnInit {
   }
 
   ngOnInit() {
-    this._projectService.currentProject$.subscribe((currentProject: Project) => {
-      this._setTheme(currentProject.isDarkTheme, currentProject.themeColor);
+    this._projectService.currentProject$.subscribe((cp: Project) => {
+      this._setTheme(cp.themeColor, cp.isDarkTheme, cp.isReducedTheme);
     });
   }
 
@@ -201,7 +201,7 @@ export class AppComponent implements OnInit {
     }
   }
 
-  private _setTheme(isDarkTheme: boolean, theme: string) {
+  private _setTheme(theme: string, isDarkTheme: boolean, isReducedTheme: boolean) {
     if (this._currentTheme) {
       this.document.body.classList.remove(this._currentTheme);
     }
@@ -216,6 +216,15 @@ export class AppComponent implements OnInit {
       this.document.body.classList.remove('isDarkTheme');
       this.document.body.classList.add('isLightTheme');
     }
+
+    if (isReducedTheme) {
+      this.document.body.classList.remove('isNoReducedTheme');
+      this.document.body.classList.add('isReducedTheme');
+    } else {
+      this.document.body.classList.remove('isReducedTheme');
+      this.document.body.classList.add('isNoReducedTheme');
+    }
+
     this._currentTheme = theme;
   }
 

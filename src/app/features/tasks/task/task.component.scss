@@ -629,8 +629,25 @@ input {
 
 // DEBUGGING CODE TO CHECK WITH NO BOXES UI
 //
-//.box {
-//  box-shadow: none !important;
-//  border: none !important;
-//  background: transparent !important;
-//}
+:host-context(.isReducedTheme) {
+  > .inner-wrapper:not(.isCurrent) > .box {
+    box-shadow: none !important;
+    border-color: transparent;
+    background: transparent !important;
+  }
+
+  &.focus {
+    > .inner-wrapper:not(.isCurrent) > .box {
+      border-color: $c-accent !important;
+    }
+  }
+
+  .toggle-sub-tasks-btn {
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  .sub-tasks {
+    padding-left: $s*2;
+  }
+}

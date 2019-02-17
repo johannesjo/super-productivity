@@ -46,6 +46,7 @@ export type Project = Readonly<{
   title: string;
   themeColor: string;
   isDarkTheme: boolean;
+  isReducedTheme: boolean;
   startedTimeToday: number;
   timeWorkedWithoutBreak: number;
   issueIntegrationCfgs: IssueIntegrationCfgs;

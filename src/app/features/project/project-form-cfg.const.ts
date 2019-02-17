@@ -40,6 +40,13 @@ export const BASIC_PROJECT_CONFIG_FORM_CONFIG: ConfigFormSection = {
         label: 'Use Dark Theme',
       },
     },
+    {
+      key: 'isReducedTheme',
+      type: 'checkbox',
+      templateOptions: {
+        label: 'Use reduced UI (no boxes around tasks)',
+      },
+    },
   ]
 };
 
