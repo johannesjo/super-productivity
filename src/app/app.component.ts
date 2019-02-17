@@ -36,13 +36,13 @@ import { BreakpointObserver } from '@angular/cdk/layout';
 import { DOCUMENT } from '@angular/common';
 import { map, take } from 'rxjs/operators';
 import { MigrateService } from './imex/migrate/migrate.service';
-import { Observable } from 'rxjs';
-import { combineLatest } from 'rxjs';
+import { combineLatest, Observable } from 'rxjs';
 import { selectIsAllProjectDataLoaded } from './features/project/store/project.reducer';
 import { Store } from '@ngrx/store';
 import { fadeAnimation } from './ui/animations/fade.ani';
 import { IS_MAC } from './util/is-mac';
 import { selectIsTaskDataLoaded } from './features/tasks/store/task.selectors';
+import { isTouch } from './util/is-touch';
 
 const SIDE_PANEL_BREAKPOINT = 900;
 
@@ -192,6 +192,12 @@ export class AppComponent implements OnInit {
         this.document.body.classList.add('isExtension');
         this.document.body.classList.remove('isNoJira');
       });
+    }
+
+    if (isTouch()) {
+      this.document.body.classList.add('isTouchDevice');
+    } else {
+      this.document.body.classList.add('isNoTouchDevice');
     }
   }
 

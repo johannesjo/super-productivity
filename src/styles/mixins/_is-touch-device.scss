@@ -1,0 +1,11 @@
+@mixin touchDevice {
+  :host-context(.isTouchDevice) & {
+    @content;
+  }
+}
+
+@mixin noTouchDevice {
+  :host-context(.isNoTouchDevice) & {
+    @content;
+  }
+}
