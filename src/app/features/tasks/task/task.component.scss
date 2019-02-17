@@ -119,6 +119,43 @@ $z-time-btn-svg-wrapper: 5555;
   }
 }
 
+.toggle-sub-tasks-btn {
+  position: absolute !important;
+  transform: translateY(-50%);
+  left: -23px;
+  top: 50%;
+  z-index: $z-toggle-sub-task-btn !important;
+  min-width: 0;
+  min-height: 0;
+  width: 32px;
+  height: 32px;
+  margin-top: -1px !important;
+  transform-origin: left top;
+  opacity: 1 !important;
+
+  &:hover {
+    transform: scale(1.3) translateY(-50%) !important;
+
+    mat-icon {
+      opacity: 1;
+    }
+  }
+
+  &:hover {
+    opacity: 1 !important;
+  }
+
+  mat-icon {
+    transition: $transition-standard;
+    margin-top: -8px;
+    opacity: $this-icon-default-opacity;
+
+    &.isHideDoneTasks {
+      transform: rotate(-45deg);
+    }
+  }
+}
+
 
 .first-line {
   display: flex;
@@ -457,34 +494,6 @@ input {
   display: block;
   // required as sort of a clearfix (fixes padding issue)
   overflow: hidden;
-}
-
-.toggle-sub-tasks-btn {
-  position: absolute !important;
-  transform: translateY(-50%);
-  left: -23px;
-  top: 50%;
-  z-index: $z-toggle-sub-task-btn !important;
-  min-width: 0;
-  min-height: 0;
-  opacity: 1 !important;
-  width: 32px;
-  height: 32px;
-  margin-top: -1px !important;
-  transform-origin: left top;
-
-  &:hover {
-    transform: scale(1.3) translateY(-50%) !important;
-  }
-
-  mat-icon {
-    transition: $transition-standard;
-    margin-top: -8px;
-
-    &.isHideDoneTasks {
-      transform: rotate(-45deg);
-    }
-  }
 }
 
 .drag-over-msg {
