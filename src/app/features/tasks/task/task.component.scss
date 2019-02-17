@@ -250,6 +250,7 @@ $z-time-btn-svg-wrapper: 5555;
   &.isCurrent > .box {
     transform: scale($this-task-focus-zoom);
     box-shadow: $this-active-shadow;
+    border-color: transparent;
   }
 
   &.isDone {
