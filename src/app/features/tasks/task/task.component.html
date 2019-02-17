@@ -64,25 +64,25 @@
       </mat-icon>
 
 
-      <button (click)="startTask()"
-              *ngIf="!task.isDone && !isCurrent && !task.subTasks"
-              aria-label="mark as current"
-              class="play-btn ico-btn hide-xs"
-              color=""
-              mat-icon-button
-              tabindex="2">
-        <mat-icon class="play-icon"
-                  svgIcon="play"></mat-icon>
-      </button>
+      <!--<button (click)="startTask()"-->
+              <!--*ngIf="!task.isDone && !isCurrent && !task.subTasks"-->
+              <!--aria-label="mark as current"-->
+              <!--class="play-btn ico-btn hide-xs"-->
+              <!--color=""-->
+              <!--mat-icon-button-->
+              <!--tabindex="2">-->
+        <!--<mat-icon class="play-icon"-->
+                  <!--svgIcon="play"></mat-icon>-->
+      <!--</button>-->
 
-      <button (click)="pauseTask()"
-              *ngIf="!task.isDone && isCurrent && !task.subTasks"
-              class="play-btn ico-btn"
-              color=""
-              mat-icon-button
-              tabindex="2">
-        <mat-icon>pause</mat-icon>
-      </button>
+      <!--<button (click)="pauseTask()"-->
+              <!--*ngIf="!task.isDone && isCurrent && !task.subTasks"-->
+              <!--class="play-btn ico-btn"-->
+              <!--color=""-->
+              <!--mat-icon-button-->
+              <!--tabindex="2">-->
+        <!--<mat-icon>pause</mat-icon>-->
+      <!--</button>-->
 
 
       <button (click)="handleUpdateBtnClick()"
@@ -177,7 +177,6 @@
         <button (click)="startTask()"
                 *ngIf="!task.isDone && !isCurrent && !task.subTasks"
                 aria-label="mark as current"
-                class="show-xs-only"
                 mat-menu-item
                 tabindex="2">
           <mat-icon class="play-icon"
@@ -186,7 +185,6 @@
         </button>
         <button (click)="pauseTask()"
                 *ngIf="!task.isDone && isCurrent && !task.subTasks"
-                class="show-xs-only"
                 mat-menu-item
                 tabindex="2">
           <mat-icon>pause</mat-icon>
