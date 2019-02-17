@@ -39,6 +39,7 @@ export const DEFAULT_PROJECT: Project = {
   title: '',
   themeColor: '',
   isDarkTheme: false,
+  isReducedTheme: false,
   startedTimeToday: null,
   timeWorkedWithoutBreak: null,
   issueIntegrationCfgs: DEFAULT_ISSUE_PROVIDER_CFGS,
