@@ -654,10 +654,10 @@ input {
     background: transparent !important;
     box-shadow: none !important;
   }
-}
 
-@include mq(xs) {
-  .sub-tasks {
-    padding-left: $s*2;
+  @include mq(xs) {
+    .sub-tasks {
+      padding-left: $s*2;
+    }
   }
 }
