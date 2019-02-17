@@ -77,6 +77,10 @@ textarea {
 
   &:focus {
     outline: 1px solid $c-accent;
+
+    @include mobileTouchDevice{
+      outline: none;
+    }
   }
 
   @include darkTheme {

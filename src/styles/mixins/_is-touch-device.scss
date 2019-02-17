@@ -9,3 +9,11 @@
     @content;
   }
 }
+
+@mixin mobileTouchDevice {
+  @include mq(sm, max) {
+    :host-context(.isTouchDevice) & {
+      @content;
+    }
+  }
+}
