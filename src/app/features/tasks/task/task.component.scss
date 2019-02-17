@@ -14,7 +14,11 @@ $z-drag-handle: 1;
 $z-task-title: 4;
 $z-focus-host: 4;
 $z-btn: 4;
+$z-time-wrapper: 4;
 $z-btn-hover: 5;
+$z-hover-controls: 6;
+$z-progress-bar: 7;
+
 $z-check-done: 11;
 $z-first-line-controls-hover: 12;
 $z-swipe-block: 13;
@@ -205,6 +209,55 @@ $z-time-btn-svg-wrapper: 5555;
   }
 }
 
+.all-controls-wrapper {
+  display: flex;
+  flex-flow: row;
+  position: relative;
+  margin-left: $s;
+
+  // extra hitarea
+  &:after {
+    position: absolute;
+    top: -$s;
+    right: -$s;
+    left: -$s;
+    bottom: -$s;
+    content: '';
+  }
+
+  &:hover {
+    .hover-controls {
+      opacity: 1;
+      transform: scaleX(1);
+    }
+  }
+}
+
+.hover-controls {
+  display: flex;
+  flex-flow: row;
+  transform: scaleX(0);
+  transform-origin: right center;
+  opacity: 0;
+  transition: $transition-fast;
+  border-left: 1px solid $light-theme-extra-border-color;
+  position: absolute;
+  right: 100%;
+  top: 0;
+  z-index: $z-hover-controls;
+
+  // extra hitarea
+  &:after {
+    position: absolute;
+    top: -$s;
+    right: 0;
+    left: -$s;
+    bottom: -$s;
+    content: '';
+  }
+}
+
+
 .controls {
   white-space: nowrap;
   text-align: right;
@@ -216,35 +269,6 @@ $z-time-btn-svg-wrapper: 5555;
   }
 }
 
-// transparent controls for desktop
-@include mq(xs) {
-  .controls {
-    opacity: 1;
-    position: relative;
-    transition: $transition-fast;
-
-    // hitarea
-    &:after {
-      position: absolute;
-      top: -$s;
-      right: -$s;
-      left: 0;
-      bottom: -$s;
-      content: '';
-    }
-  }
-  .first-line:hover {
-    > .controls {
-      opacity: 1;
-      z-index: $z-first-line-controls-hover;
-    }
-  }
-  .controls:hover {
-    opacity: 1;
-    z-index: $z-first-line-controls-hover;
-    //transform: scale(1.0714285714);
-  }
-}
 
 .inner-wrapper {
   position: relative;
@@ -434,7 +458,7 @@ input {
   align-items: center;
   justify-content: stretch;
   padding-right: $s;
-
+  z-index: $z-time-wrapper;
 
   &.isEditable {
     cursor: pointer;
@@ -566,6 +590,10 @@ input {
       display: block;
     }
   }
+}
+
+progress-bar {
+  z-index: $z-progress-bar;
 }
 
 .block-left,

@@ -63,28 +63,6 @@
                 svgIcon="drag_handle">
       </mat-icon>
 
-
-      <!--<button (click)="startTask()"-->
-              <!--*ngIf="!task.isDone && !isCurrent && !task.subTasks"-->
-              <!--aria-label="mark as current"-->
-              <!--class="play-btn ico-btn hide-xs"-->
-              <!--color=""-->
-              <!--mat-icon-button-->
-              <!--tabindex="2">-->
-        <!--<mat-icon class="play-icon"-->
-                  <!--svgIcon="play"></mat-icon>-->
-      <!--</button>-->
-
-      <!--<button (click)="pauseTask()"-->
-              <!--*ngIf="!task.isDone && isCurrent && !task.subTasks"-->
-              <!--class="play-btn ico-btn"-->
-              <!--color=""-->
-              <!--mat-icon-button-->
-              <!--tabindex="2">-->
-        <!--<mat-icon>pause</mat-icon>-->
-      <!--</button>-->
-
-
       <button (click)="handleUpdateBtnClick()"
               *ngIf="task.issueData?.wasUpdated"
               aria-label="is updated"
@@ -115,168 +93,201 @@
            tabindex="2"></div>
     </div>
 
-    <div (click)="estimateTime()"
-         [class.isEditable]="!task.subTasks?.length"
-         class="time-wrapper">
-      <button *ngIf="!task.subTasks?.length"
-              aria-label="time estimation"
-              class="ico-btn time-btn hide-xs"
-              color=""
-              mat-icon-button
-              tabindex="2">
-        <mat-icon aria-label="time estimation">access_time</mat-icon>
-      </button>
-
-      <div class="time">
-        <div class="time-val">
-          <span *ngIf="task.subTasks && task.subTasks.length>0">∑</span>
-          <span [innerHTML]="task.timeSpent|msToString"></span></div>
-        <div class="separator">/</div>
-        <div [innerHTML]="task.timeEstimate|msToString"
-             class="time-val"></div>
-      </div>
-    </div>
-
-    <div class="controls">
-      <button *ngIf="task.reminderId"
-              (click)="editReminder()"
-              color=""
-              class="ico-btn"
-              tabindex="2"
-              mat-icon-button>
-        <mat-icon>alarm</mat-icon>
-      </button>
-      <button (click)="toggleShowAdditionalInfoOpen()"
-              *ngIf="task.notes||task.issueData||task.attachmentIds?.length"
-              [class.isActive]="task._isAdditionalInfoOpen"
-              aria-label="additional-info"
-              class="ico-btn show-additional-info-btn hide-xs"
-              color=""
-              mat-icon-button
-              tabindex="2">
-        <mat-icon>chat</mat-icon>
-      </button>
-
-      <button (click)="toggleShowAttachments()"
-              *ngIf="task.attachmentIds?.length"
-              aria-label="additional-info"
-              class="ico-btn hide-xs"
-              color=""
-              mat-icon-button
-              tabindex="2">
-        <mat-icon>attach_file</mat-icon>
-      </button>
-
-      <button [matMenuTriggerFor]="menu"
-              class="ico-btn"
-              color=""
-              mat-icon-button>
-        <mat-icon>more_vert</mat-icon>
-      </button>
-      <mat-menu #menu="matMenu">
+    <div class="all-controls-wrapper">
+      <div class="hover-controls hide-xs bg-standard"
+           [class.bg-600]="isCurrent">
         <button (click)="startTask()"
                 *ngIf="!task.isDone && !isCurrent && !task.subTasks"
                 aria-label="mark as current"
-                mat-menu-item
+                class="ico-btn"
+                color=""
+                mat-icon-button
                 tabindex="2">
           <mat-icon class="play-icon"
                     svgIcon="play"></mat-icon>
-          Start tracking task
         </button>
+
         <button (click)="pauseTask()"
                 *ngIf="!task.isDone && isCurrent && !task.subTasks"
-                mat-menu-item
+                class="ico-btn"
+                color=""
+                mat-icon-button
                 tabindex="2">
           <mat-icon>pause</mat-icon>
-          Pause tracking task
         </button>
-
         <button (click)="toggleTaskDone()"
-                aria-label="un-/mark as done"
-                mat-menu-item=""
+                class="ico-btn"
+                color=""
+                mat-icon-button
                 tabindex="2">
-          <ng-container *ngIf="task.isDone">
-            <mat-icon aria-label="Mark as undone">undo
-            </mat-icon>
-            Mark as undone
-          </ng-container>
-          <ng-container *ngIf="!task.isDone">
-            <mat-icon aria-label="Mark as done">check
-            </mat-icon>
-            Mark as done
-          </ng-container>
+          <mat-icon *ngIf="task.isDone">undo</mat-icon>
+          <mat-icon *ngIf="!task.isDone">check</mat-icon>
         </button>
-
-        <!-- Reminders -->
-        <button (click)="editReminder()"
-                mat-menu-item>
-          <ng-container *ngIf="!task.reminderId">
-            <mat-icon>alarm_add</mat-icon>
-            Schedule task
-          </ng-container>
-          <ng-container *ngIf="task.reminderId">
-            <mat-icon>alarm</mat-icon>
-            Edit reminder
-          </ng-container>
+        <button *ngIf="!task.subTasks?.length"
+                (click)="estimateTime()"
+                aria-label="time estimation"
+                class="ico-btn time-btn hide-xs"
+                color=""
+                mat-icon-button
+                tabindex="2">
+          <mat-icon aria-label="time estimation">access_time</mat-icon>
         </button>
-        <!--<button (click)="removeReminder()"-->
-        <!--*ngIf="task.reminderId"-->
-        <!--mat-menu-item>-->
-        <!--<mat-icon style="color:#e15d63;">alarm_off</mat-icon>-->
-        <!--Remove reminder-->
-        <!--</button>-->
-        <!--/Reminders-->
+      </div>
 
+      <div (click)="estimateTime()"
+           [class.isEditable]="!task.subTasks?.length"
+           class="time-wrapper">
+        <div class="time">
+          <div class="time-val">
+            <span *ngIf="task.subTasks && task.subTasks.length>0">∑</span>
+            <span [innerHTML]="task.timeSpent|msToString"></span></div>
+          <div class="separator">/</div>
+          <div [innerHTML]="task.timeEstimate|msToString"
+               class="time-val"></div>
+        </div>
+      </div>
+
+      <div class="controls">
+        <button *ngIf="task.reminderId"
+                (click)="editReminder()"
+                color=""
+                class="ico-btn"
+                tabindex="2"
+                mat-icon-button>
+          <mat-icon>alarm</mat-icon>
+        </button>
         <button (click)="toggleShowAdditionalInfoOpen()"
+                *ngIf="task.notes||task.issueData||task.attachmentIds?.length"
                 [class.isActive]="task._isAdditionalInfoOpen"
                 aria-label="additional-info"
-                mat-menu-item
+                class="ico-btn show-additional-info-btn hide-xs"
+                color=""
+                mat-icon-button
                 tabindex="2">
-
-          <mat-icon *ngIf="task.notes||task.issueData"
-                    aria-label="notes">chat
-          </mat-icon>
-          <mat-icon *ngIf="!task.notes&&!task.issueData">chat_bubble_outline</mat-icon>
-          Show/Hide additional info
+          <mat-icon>chat</mat-icon>
         </button>
 
-        <button (click)="addSubTask($event);"
-                *ngIf="!task.parentId&&!task.isDone"
-                aria-label="add sub task"
-                mat-menu-item=""
+        <button (click)="toggleShowAttachments()"
+                *ngIf="task.attachmentIds?.length"
+                aria-label="additional-info"
+                class="ico-btn hide-xs"
+                color=""
+                mat-icon-button
                 tabindex="2">
-          <mat-icon aria-label="add sub task">playlist_add</mat-icon>
-          Add sub task
+          <mat-icon>attach_file</mat-icon>
         </button>
 
-        <button (click)="addAttachment();"
-                aria-label="add attachment"
-                mat-menu-item=""
-                tabindex="2">
-          <mat-icon aria-label="add sub task">attachment</mat-icon>
-          Attach file or link
+        <button [matMenuTriggerFor]="menu"
+                class="ico-btn"
+                color=""
+                mat-icon-button>
+          <mat-icon>more_vert</mat-icon>
         </button>
+        <mat-menu #menu="matMenu">
+          <button (click)="startTask()"
+                  *ngIf="!task.isDone && !isCurrent && !task.subTasks"
+                  aria-label="mark as current"
+                  mat-menu-item
+                  tabindex="2">
+            <mat-icon class="play-icon"
+                      svgIcon="play"></mat-icon>
+            Start tracking task
+          </button>
+          <button (click)="pauseTask()"
+                  *ngIf="!task.isDone && isCurrent && !task.subTasks"
+                  mat-menu-item
+                  tabindex="2">
+            <mat-icon>pause</mat-icon>
+            Pause tracking task
+          </button>
 
-        <button (click)="updateIssueData()"
-                *ngIf="task.issueId"
-                aria-label="update issue data"
-                mat-menu-item=""
-                tabindex="2">
-          <mat-icon>cloud_download</mat-icon>
-          Update issue data
-        </button>
+          <button (click)="toggleTaskDone()"
+                  aria-label="un-/mark as done"
+                  mat-menu-item=""
+                  tabindex="2">
+            <ng-container *ngIf="task.isDone">
+              <mat-icon aria-label="Mark as undone">undo
+              </mat-icon>
+              Mark as undone
+            </ng-container>
+            <ng-container *ngIf="!task.isDone">
+              <mat-icon aria-label="Mark as done">check
+              </mat-icon>
+              Mark as done
+            </ng-container>
+          </button>
 
-        <button (click)="deleteTask()"
-                aria-label="delete"
-                mat-menu-item=""
-                tabindex="2">
+          <!-- Reminders -->
+          <button (click)="editReminder()"
+                  mat-menu-item>
+            <ng-container *ngIf="!task.reminderId">
+              <mat-icon>alarm_add</mat-icon>
+              Schedule task
+            </ng-container>
+            <ng-container *ngIf="task.reminderId">
+              <mat-icon>alarm</mat-icon>
+              Edit reminder
+            </ng-container>
+          </button>
+          <!--<button (click)="removeReminder()"-->
+          <!--*ngIf="task.reminderId"-->
+          <!--mat-menu-item>-->
+          <!--<mat-icon style="color:#e15d63;">alarm_off</mat-icon>-->
+          <!--Remove reminder-->
+          <!--</button>-->
+          <!--/Reminders-->
 
-          <mat-icon aria-label="delete"
-                    style="color:#e15d63;">delete_forever
-          </mat-icon>
-          Delete Task
-        </button>
-      </mat-menu>
+          <button (click)="toggleShowAdditionalInfoOpen()"
+                  [class.isActive]="task._isAdditionalInfoOpen"
+                  aria-label="additional-info"
+                  mat-menu-item
+                  tabindex="2">
+
+            <mat-icon *ngIf="task.notes||task.issueData"
+                      aria-label="notes">chat
+            </mat-icon>
+            <mat-icon *ngIf="!task.notes&&!task.issueData">chat_bubble_outline</mat-icon>
+            Show/Hide additional info
+          </button>
+
+          <button (click)="addSubTask($event);"
+                  *ngIf="!task.parentId&&!task.isDone"
+                  aria-label="add sub task"
+                  mat-menu-item=""
+                  tabindex="2">
+            <mat-icon aria-label="add sub task">playlist_add</mat-icon>
+            Add sub task
+          </button>
+
+          <button (click)="addAttachment();"
+                  aria-label="add attachment"
+                  mat-menu-item=""
+                  tabindex="2">
+            <mat-icon aria-label="add sub task">attachment</mat-icon>
+            Attach file or link
+          </button>
+
+          <button (click)="updateIssueData()"
+                  *ngIf="task.issueId"
+                  aria-label="update issue data"
+                  mat-menu-item=""
+                  tabindex="2">
+            <mat-icon>cloud_download</mat-icon>
+            Update issue data
+          </button>
+
+          <button (click)="deleteTask()"
+                  aria-label="delete"
+                  mat-menu-item=""
+                  tabindex="2">
+
+            <mat-icon aria-label="delete"
+                      style="color:#e15d63;">delete_forever
+            </mat-icon>
+            Delete Task
+          </button>
+        </mat-menu>
+      </div>
     </div>
   </div>
 
