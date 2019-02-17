@@ -61,9 +61,6 @@ $z-time-btn-svg-wrapper: 5555;
     margin-bottom: 0;
   }
 
-  .sub-tasks {
-    margin: 0 $s;
-  }
 
   &:focus {
     z-index: $z-focus-host;
@@ -77,91 +74,83 @@ $z-time-btn-svg-wrapper: 5555;
       }
     }
   }
+}
 
+.sub-tasks {
+  margin: 0 $s;
+}
 
-  .title-bar-wrapper {
-    display: flex;
-    flex-wrap: nowrap;
-    align-items: center;
-    justify-content: center;
-    min-height: 36px;
-    flex-grow: 1;
-    flex-basis: 70%;
-    @include mq(xs, max) {
-      //margin-bottom: 5px;
-      //flex-shrink: 0;
-      flex-basis: 50%;
-    }
+.title-bar-wrapper {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: center;
+  min-height: 36px;
+  flex-grow: 1;
+  flex-basis: 70%;
+  @include mq(xs, max) {
+    //margin-bottom: 5px;
+    //flex-shrink: 0;
+    flex-basis: 50%;
   }
+}
 
-  .isAdditionalInfoOpen > .first-line {
-    .task-title {
-      font-weight: bold;
-    }
+.isAdditionalInfoOpen > .first-line {
+  .task-title {
+    font-weight: bold;
   }
+}
 
+
+.toggle-sub-tasks-btn,
+.first-line .ico-btn {
   $this-button-spacer: 1px;
+  margin: 0 $this-button-spacer;
+  padding: 0;
+  z-index: $z-btn;
+  @extend %standardTaskOpacityChange;
+  @extend %standardTaskZoom;
 
-  .toggle-sub-tasks-btn,
-  .first-line .ico-btn {
-    margin: 0 $this-button-spacer;
-    padding: 0;
-    z-index: $z-btn;
-    @extend %standardTaskOpacityChange;
-    @extend %standardTaskZoom;
+  &:hover {
+    z-index: $z-btn-hover;
+  }
+
+  &:focus {
+    outline: none;
+  }
+}
+
+
+.first-line {
+  display: flex;
+  flex-wrap: nowrap;
+  user-select: none;
+  justify-content: space-between;
+  align-items: center;
+  touch-action: pan-y;
+
+  @include mq(xs, max) {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+}
+
+.ico-btn {
+  &.delete-btn {
+    mat-icon.delete-icon {
+      color: $red !important;
+      @include darkTheme {
+        color: $red !important;
+      }
+    }
 
     &:hover {
-      z-index: $z-btn-hover;
-    }
+      background: $red-danger !important;
 
-    &:focus {
-      outline: none;
-    }
-
-    //&:after {
-    //  position: absolute;
-    //  top: 0;
-    //  right: 0;
-    //  bottom: 0;
-    //  left: 0;
-    //  content: '';
-    //  border: 1px solid #dddddd;
-    //  border-radius: 100%;
-    //}
-  }
-
-
-  .first-line {
-    display: flex;
-    flex-wrap: nowrap;
-    user-select: none;
-    justify-content: space-between;
-    align-items: center;
-    touch-action: pan-y;
-
-    @include mq(xs, max) {
-      flex-wrap: wrap;
-      justify-content: flex-end;
-    }
-  }
-
-  .ico-btn {
-    &.delete-btn {
       mat-icon.delete-icon {
-        color: $red !important;
+        color: #ffffff !important;
         @include darkTheme {
-          color: $red !important;
-        }
-      }
-
-      &:hover {
-        background: $red-danger !important;
-
-        mat-icon.delete-icon {
           color: #ffffff !important;
-          @include darkTheme {
-            color: #ffffff !important;
-          }
         }
       }
     }
