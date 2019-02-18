@@ -4,6 +4,8 @@ import { IS_ELECTRON } from '../../../app.constants';
 import { MATERIAL_ICONS } from '../../../ui/material-icons.const';
 import { BookmarkCopy, BookmarkType } from '../bookmark.model';
 import { FormControl } from '@angular/forms';
+import { Observable } from 'rxjs';
+import { map, startWith } from 'rxjs/operators';
 
 interface BookmarkSelectType {
   type: BookmarkType;
@@ -21,6 +23,15 @@ export class DialogEditBookmarkComponent implements OnInit {
   bookmarkCopy: BookmarkCopy;
   customIcons: string[] = MATERIAL_ICONS;
   iconControl = new FormControl();
+  filteredIcons$: Observable<string[]> = this.iconControl.valueChanges.pipe(
+    startWith(''),
+    map((searchTerm) => {
+      // Note: the outer array signifies the observable stream the other is the value
+      return this.customIcons.filter((icoStr) =>
+        icoStr.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }),
+  );
 
   constructor(
     private _matDialogRef: MatDialogRef<DialogEditBookmarkComponent>,

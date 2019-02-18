@@ -46,8 +46,9 @@
                  placeholder="Select an icon"
                  type="text">
           <mat-icon matPrefix="">{{bookmarkCopy.icon}}</mat-icon>
-          <mat-autocomplete #auto="matAutocomplete">
-            <mat-option *ngFor="let icon of customIcons"
+          <mat-autocomplete #auto="matAutocomplete"
+                            [autoActiveFirstOption]="true">
+            <mat-option *ngFor="let icon of (filteredIcons$|async)"
                         [value]="icon">
               <mat-icon>{{icon}}</mat-icon>
               <span>{{icon}}</span>
