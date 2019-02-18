@@ -27,14 +27,6 @@
       Track time
     </button>
 
-    <!--<button mat-raised-button-->
-    <!--type="button"-->
-    <!--(click)="trackButResetBreakTimer()"-->
-    <!--color="primary">-->
-    <!--<mat-icon>timer</mat-icon>-->
-    <!--Track but reset break timer-->
-    <!--</button>-->
-
     <button *ngIf="(configService.misc$|async)?.isUnTrackedIdleResetsBreakTimer"
             (click)="track(true)"
             color="primary"
@@ -42,7 +34,7 @@
             type="button">
       <mat-icon *ngIf="!isCreate">track_changes</mat-icon>
       <mat-icon *ngIf="isCreate">add</mat-icon>
-      Track but reset break timer
+      Track and reset Break Timer
     </button>
 
     <button (click)="skipTrack()"
