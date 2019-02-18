@@ -1,3 +1,66 @@
+# [2.3.0](https://github.com/johannesjo/super-productivity/compare/v2.2.3...v2.3.0) (2019-02-18)
+
+
+### Bug Fixes
+
+* **bookmarks:** icon auto complete ([b8c0416](https://github.com/johannesjo/super-productivity/commit/b8c0416))
+* **idle:** skip break not resetting break timer ([7c5e041](https://github.com/johannesjo/super-productivity/commit/7c5e041))
+* **notes:** drag & drop for mobile ([60c1b67](https://github.com/johannesjo/super-productivity/commit/60c1b67))
+* **task:** z index issues ([2c4ae38](https://github.com/johannesjo/super-productivity/commit/2c4ae38))
+* **tasks:** pan conflict with page scrolling and dragging tasks ([2d37349](https://github.com/johannesjo/super-productivity/commit/2d37349))
+* animation issue for work view plan more or finish block ([5e1ac93](https://github.com/johannesjo/super-productivity/commit/5e1ac93))
+* missing default setting for projects ([0cd71d1](https://github.com/johannesjo/super-productivity/commit/0cd71d1))
+* plan more mobile styling ([146e0c4](https://github.com/johannesjo/super-productivity/commit/146e0c4))
+* typing error ([5898c58](https://github.com/johannesjo/super-productivity/commit/5898c58))
+* **tasks:** scrolling leading to weird pan trigger sometimes ([5169bb3](https://github.com/johannesjo/super-productivity/commit/5169bb3))
+* **tasks:** task title edit being under collapse sub tasks btn ([4147f7e](https://github.com/johannesjo/super-productivity/commit/4147f7e))
+* **tasks:** text not being selectable by drag click because of pan handler ([6a371d9](https://github.com/johannesjo/super-productivity/commit/6a371d9))
+* **tasks:** typing error ([56d8375](https://github.com/johannesjo/super-productivity/commit/56d8375))
+
+
+### Features
+
+* **bookmarks:** improve styling ([d814bef](https://github.com/johannesjo/super-productivity/commit/d814bef))
+* **bookmarks:** reduce drag handle size ([90b2f75](https://github.com/johannesjo/super-productivity/commit/90b2f75))
+* **git:** make delete undo work ([e1ad1a9](https://github.com/johannesjo/super-productivity/commit/e1ad1a9))
+* **google:** make refresh token work ([465d1c4](https://github.com/johannesjo/super-productivity/commit/465d1c4))
+* **googleDriveSync:** improve error handling ([cbd7190](https://github.com/johannesjo/super-productivity/commit/cbd7190))
+* **googleDriveSync:** only update token if changed ([052841b](https://github.com/johannesjo/super-productivity/commit/052841b))
+* **googleDriveSync:** show error to the user if any ([ea2dd2e](https://github.com/johannesjo/super-productivity/commit/ea2dd2e))
+* provide custom hammerjs config ([1b0f555](https://github.com/johannesjo/super-productivity/commit/1b0f555))
+* **googleExportTime:** make subTaskTitles and totalTime work ([da73b16](https://github.com/johannesjo/super-productivity/commit/da73b16))
+* **jira:** improve transition handling config ([3e98f22](https://github.com/johannesjo/super-productivity/commit/3e98f22))
+* **jira:** make delete undo work ([e5ec0b6](https://github.com/johannesjo/super-productivity/commit/e5ec0b6))
+* **jira,git:** improve issue table styling ([932bcf7](https://github.com/johannesjo/super-productivity/commit/932bcf7))
+* **tasks:** add most basic swipe gesture handlers ([3b0cc63](https://github.com/johannesjo/super-productivity/commit/3b0cc63))
+* **tasks:** add new cool hover control ([b344ad6](https://github.com/johannesjo/super-productivity/commit/b344ad6))
+* **tasks:** add reduced ui theme mode ([c5e6778](https://github.com/johannesjo/super-productivity/commit/c5e6778))
+* **tasks:** adjust swipe timing ([78e96c7](https://github.com/johannesjo/super-productivity/commit/78e96c7))
+* **tasks:** align toggle sub task button with first line center ([36976e2](https://github.com/johannesjo/super-productivity/commit/36976e2))
+* **tasks:** connect gestures to actions ([cb1b249](https://github.com/johannesjo/super-productivity/commit/cb1b249))
+* **tasks:** fine tune gestures ui ([0319f4c](https://github.com/johannesjo/super-productivity/commit/0319f4c))
+* **tasks:** fine tune gestures ui once more ([7970a83](https://github.com/johannesjo/super-productivity/commit/7970a83))
+* **tasks:** fine tune new cool hover control ([2d763d0](https://github.com/johannesjo/super-productivity/commit/2d763d0))
+* **tasks:** get rid of play button ([3ea2e28](https://github.com/johannesjo/super-productivity/commit/3ea2e28))
+* **tasks:** improve styling ([dc4c99a](https://github.com/johannesjo/super-productivity/commit/dc4c99a))
+* **tasks:** improve styling ([dde46fc](https://github.com/johannesjo/super-productivity/commit/dde46fc))
+* **tasks:** improve styling ([753ba90](https://github.com/johannesjo/super-productivity/commit/753ba90))
+* **tasks:** improve styling for reduced additional info ([ed89f6e](https://github.com/johannesjo/super-productivity/commit/ed89f6e))
+* **tasks:** improve toggle sub task btn styling ([3a52155](https://github.com/johannesjo/super-productivity/commit/3a52155))
+* improve mobile styling ([382c7a9](https://github.com/johannesjo/super-productivity/commit/382c7a9))
+* **tasks:** limit sub task list padding to reduced style ([1d1647b](https://github.com/johannesjo/super-productivity/commit/1d1647b))
+* add the magic formula ([fab5f46](https://github.com/johannesjo/super-productivity/commit/fab5f46))
+* **tasks:** make sub tasks a little bit more distinguishable as such ([80de265](https://github.com/johannesjo/super-productivity/commit/80de265))
+* **tasks:** switch out pan/swipe action for done tasks ([c567396](https://github.com/johannesjo/super-productivity/commit/c567396))
+* beautify daily summary ([9393e26](https://github.com/johannesjo/super-productivity/commit/9393e26))
+* beautify settings ([4c675d7](https://github.com/johannesjo/super-productivity/commit/4c675d7))
+* improve reset take a break button animation ([6088b8f](https://github.com/johannesjo/super-productivity/commit/6088b8f))
+* make mobile notifications work ([f485ae9](https://github.com/johannesjo/super-productivity/commit/f485ae9))
+* open markdown links in new tab ([5dc9c5d](https://github.com/johannesjo/super-productivity/commit/5dc9c5d))
+* prepare touch device helper mixins and classes ([f0caf18](https://github.com/johannesjo/super-productivity/commit/f0caf18))
+
+
+
 ## [2.2.3](https://github.com/johannesjo/super-productivity/compare/v2.2.2...v2.2.3) (2019-02-13)
 
 
