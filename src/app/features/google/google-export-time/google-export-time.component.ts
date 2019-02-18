@@ -1,4 +1,12 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, OnDestroy, OnInit, Output } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  EventEmitter,
+  OnDestroy,
+  OnInit,
+  Output
+} from '@angular/core';
 import { GoogleTimeSheetExportCopy, Project } from '../../project/project.model';
 import { TaskWithSubTasks } from '../../tasks/task.model';
 import { Subject } from 'rxjs';
@@ -10,7 +18,8 @@ import { takeUntil } from 'rxjs/operators';
 import * as moment from 'moment-mini';
 import { Duration, Moment } from 'moment-mini';
 import { expandAnimation } from '../../../ui/animations/expand.ani';
-
+import 'moment-duration-format';
+import { msToClockString } from '../../../ui/duration/ms-to-clock-string.pipe';
 
 // TODO refactor to Observables
 @Component({
@@ -34,16 +43,12 @@ export class GoogleExportTimeComponent implements OnInit, OnDestroy {
     lastExported: undefined,
     defaultValues: []
   };
-  // $rootScope.r.uiHelper.timeSheetExportSettings;
+
   actualValues = [];
   isLoading = false;
   isLoggedIn = false;
   headings: string[] = [];
   lastRow: string[] = [];
-  MISSING = {
-    getTimeWorkedToday: 'MISSING getTimeWorkedToday',
-    getToday: []
-  };
 
   roundTimeOptions = [
     {id: 'QUARTER', title: 'full quarters'},
@@ -59,6 +64,7 @@ export class GoogleExportTimeComponent implements OnInit, OnDestroy {
   isSpreadSheetRead = false;
 
   private _startedTimeToday: number;
+  private _totalTimeWorkedToday: number;
   private _todaysTasks: TaskWithSubTasks[];
   private _projectId: string;
   private _destroy$: Subject<boolean> = new Subject<boolean>();
@@ -82,6 +88,11 @@ export class GoogleExportTimeComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this._destroy$))
       .subscribe((tasks: TaskWithSubTasks[]) => {
         this._todaysTasks = tasks;
+      });
+    this._taskService.workingToday$
+      .pipe(takeUntil(this._destroy$))
+      .subscribe((timeWorked) => {
+        this._totalTimeWorkedToday = timeWorked;
       });
   }
 
@@ -171,7 +182,6 @@ export class GoogleExportTimeComponent implements OnInit, OnDestroy {
           message: 'Row successfully appended',
           type: 'SUCCESS'
         });
-        console.log('I am here!');
 
         this._projectService.updateTimeSheetExportSettings(this._projectId, this.opts, true);
         this.isLoading = false;
@@ -181,8 +191,6 @@ export class GoogleExportTimeComponent implements OnInit, OnDestroy {
   }
 
   updateDefaults() {
-    console.log('UPDATE');
-
     this.opts.defaultValues.forEach((val, index) => {
       this.actualValues[index] = this._replaceVals(val);
     });
@@ -301,13 +309,10 @@ export class GoogleExportTimeComponent implements OnInit, OnDestroy {
   }
 
   private _getTotalTimeWorked(): string {
-    const val = moment.duration(this.MISSING.getTimeWorkedToday);
-
+    const val = moment.duration(this._totalTimeWorkedToday);
     const roundTo = this.opts.roundWorkTimeTo;
     const dur = this._roundDuration(val, roundTo, this.opts.isRoundWorkTimeUp) as any;
-    if (dur.format) {
-      return dur.format('HH:mm');
-    }
+    return msToClockString(dur.as('milliseconds'));
   }
 
   private _getTaskTitles(): string {
@@ -320,7 +325,7 @@ export class GoogleExportTimeComponent implements OnInit, OnDestroy {
   }
 
   private _getSubTaskTitles(): string {
-    const tasks = this.MISSING.getToday;
+    const tasks = this._todaysTasks;
     let titleStr = '';
     tasks.forEach((task) => {
       if (task.subTasks) {
