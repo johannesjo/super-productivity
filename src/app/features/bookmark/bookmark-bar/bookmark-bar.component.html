@@ -53,13 +53,14 @@
           </mat-icon>
           {{bookmark.title}}
         </a>
-        <mat-icon *ngIf="isEditMode"
-                  @fade
-                  svgIcon="drag_handle"
-                  class="drag-handle bg-400 color-contrast"></mat-icon>
 
         <div class="controls"
              *ngIf="isEditMode">
+          <mat-icon *ngIf="isEditMode"
+                    @fade
+                    svgIcon="drag_handle"
+                    class="drag-handle bg-400 color-contrast"></mat-icon>
+
           <button (click)="openEditDialog(bookmark)"
                   aria-label="open edit dialog"
                   class="edit-btn"
