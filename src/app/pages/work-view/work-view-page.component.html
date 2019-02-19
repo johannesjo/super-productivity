@@ -8,16 +8,16 @@
            @fade
            class="status-bar">
         <div class="item">
-          <span class="label">Estimate remaining:</span>
+          <span class="label">Est. remaining:</span>
           <span class="no-wrap">
-      ~<strong>{{taskService.estimateRemainingToday$|async|msToString}}</strong>
+      ~<strong class="time-val">{{taskService.estimateRemainingToday$|async|msToString}}</strong>
       <mat-icon>timer</mat-icon>
       </span>
         </div>
 
         <div class="item"><span class="label">Working today:</span>
           <span class="no-wrap">
-      <strong>{{taskService.workingToday$|async|msToString}}</strong>
+      <strong class="time-val">{{taskService.workingToday$|async|msToString}}</strong>
       <mat-icon aria-label="timer icon">timer</mat-icon>
       </span>
         </div>
@@ -26,7 +26,7 @@
              class="item">
           <span class="label">Without break: </span>
           <span class="no-wrap">
-        <strong>{{takeABreakService.timeWorkingWithoutABreak$|async|msToString}}</strong><mat-icon>timer</mat-icon>
+        <strong class="time-val">{{takeABreakService.timeWorkingWithoutABreak$|async|msToString}}</strong><mat-icon>timer</mat-icon>
       </span>
           <div class="take-a-break-reset-btn">
             <button mat-mini-fab
@@ -47,7 +47,7 @@
           <div class="item">
             <span class="label">Time Estimated:</span>
             <span class="no-wrap">
-      ~<strong>{{taskService.estimateRemainingToday$|async|msToString}}</strong>
+      <strong class="time-val">~{{taskService.estimateRemainingToday$|async|msToString}}</strong>
       <mat-icon>timer</mat-icon>
       </span>
           </div>
