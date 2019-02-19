@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { ExtensionInterfaceEventName } from './chrome-extension-interface';
 import { ReplaySubject } from 'rxjs';
-import { first } from 'rxjs/operators';
+import { first, startWith } from 'rxjs/operators';
 
 const interfaceEl = window;
 
@@ -12,6 +12,7 @@ export class ChromeExtensionInterfaceService {
   private _onReady$: ReplaySubject<boolean> = new ReplaySubject();
   // we only every one to catch a single event
   public onReady$ = this._onReady$.pipe(first());
+  public isReady$ = this.onReady$.pipe(startWith(false));
   private _isInterfaceReady = false;
 
   init() {

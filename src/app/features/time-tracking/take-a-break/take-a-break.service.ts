@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { TaskService } from '../../tasks/task.service';
 import { TimeTrackingService } from '../time-tracking.service';
-import { combineLatest, from, merge, Observable, Subject, timer } from 'rxjs';
+import { from, merge, Observable, Subject, timer } from 'rxjs';
 import {
   distinctUntilChanged,
   filter,
@@ -19,6 +19,7 @@ import { ConfigService } from '../../config/config.service';
 import { msToString } from '../../../ui/duration/ms-to-string.pipe';
 import { ChromeExtensionInterfaceService } from '../../../core/chrome-extension-interface/chrome-extension-interface.service';
 import { IdleService } from '../idle.service';
+import { IS_ELECTRON } from '../../../app.constants';
 
 const BREAK_TRIGGER_DURATION = 10 * 60 * 1000;
 
@@ -40,12 +41,17 @@ export class TakeABreakService {
     shareReplay(),
   );
 
-  private isIdleResetEnabled$ = combineLatest(
-    this._configService.misc$,
-    this._chromeExtensionInterfaceService.onReady$,
-  ).pipe(
-    map(([cfg, isExtension]) =>
-      cfg.isEnableIdleTimeTracking && cfg.isUnTrackedIdleResetsBreakTimer && isExtension
+  private _isIdleResetEnabled$ = this._configService.misc$.pipe(
+    switchMap((cfg) => {
+        const isConfigured = (cfg.isEnableIdleTimeTracking && cfg.isUnTrackedIdleResetsBreakTimer);
+        if (IS_ELECTRON) {
+          return [isConfigured];
+        } else if (isConfigured) {
+          return this._chromeExtensionInterfaceService.isReady$;
+        } else {
+          return [false];
+        }
+      }
     ),
     distinctUntilChanged(),
   );
@@ -73,7 +79,7 @@ export class TakeABreakService {
     }),
   );
 
-  private _triggerProgrammaticReset$: Observable<any> = this.isIdleResetEnabled$.pipe(
+  private _triggerProgrammaticReset$: Observable<any> = this._isIdleResetEnabled$.pipe(
     switchMap((isIdleResetEnabled) => {
       console.log('PROGRAMMATIC Take a break – using Idle:', isIdleResetEnabled);
       return isIdleResetEnabled
