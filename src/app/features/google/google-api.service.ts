@@ -350,13 +350,15 @@ export class GoogleApiService {
 
   private _handleUnAuthenticated(err) {
     this.logout();
-    this._snackService.open({
-      message: 'GoogleApi: Failed to authenticate please try logging in again!',
-      type: 'GOOGLE_LOGIN',
-      config: {
-        duration: 20 * 1000
-      }
-    });
+    setTimeout(() => {
+      this._snackService.open({
+        message: 'GoogleApi: Failed to authenticate please try logging in again!',
+        type: 'GOOGLE_LOGIN',
+        config: {
+          duration: 20 * 1000
+        }
+      });
+    }, 2000);
     console.error(err);
   }
 
