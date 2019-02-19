@@ -188,7 +188,7 @@ export class AppComponent implements OnInit {
       this.document.body.classList.add('isElectron');
       this.document.body.classList.remove('isNoJira');
     } else {
-      this._chromeExtensionInterface.isReady$.pipe(take(1)).subscribe(() => {
+      this._chromeExtensionInterface.onReady$.pipe(take(1)).subscribe(() => {
         this.document.body.classList.add('isExtension');
         this.document.body.classList.remove('isNoJira');
       });

@@ -9,9 +9,9 @@ const interfaceEl = window;
   providedIn: 'root',
 })
 export class ChromeExtensionInterfaceService {
-  private _isReady$: ReplaySubject<boolean> = new ReplaySubject();
+  private _onReady$: ReplaySubject<boolean> = new ReplaySubject();
   // we only every one to catch a single event
-  public isReady$ = this._isReady$.pipe(first());
+  public onReady$ = this._onReady$.pipe(first());
   private _isInterfaceReady = false;
 
   init() {
@@ -20,7 +20,7 @@ export class ChromeExtensionInterfaceService {
       if (!this._isInterfaceReady) {
         console.log('SUCCESS', 'Super Productivity Extension found and loaded.');
         this._isInterfaceReady = true;
-        this._isReady$.next(true);
+        this._onReady$.next(true);
       }
     });
   }

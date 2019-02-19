@@ -50,7 +50,7 @@ export class IdleService {
         this.handleIdle(idleTimeInMs);
       });
     }
-    this._chromeExtensionInterface.isReady$.subscribe(() => {
+    this._chromeExtensionInterface.onReady$.subscribe(() => {
       this._chromeExtensionInterface.addEventListener(IPC_IDLE_TIME, (ev, idleTimeInMs) => {
         this.handleIdle(idleTimeInMs);
       });
@@ -97,6 +97,7 @@ export class IdleService {
         }).afterClosed()
           .subscribe((res: { task: Task | string, isResetBreakTimer: boolean }) => {
             const {task, isResetBreakTimer} = res;
+            // console.log('isResetBreakTimer', isResetBreakTimer);
 
             if (isResetBreakTimer) {
               this._triggerResetBreakTimer$.next(true);

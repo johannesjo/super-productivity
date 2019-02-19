@@ -61,7 +61,7 @@ export class JiraApiService {
       });
     }
 
-    this._chromeExtensionInterface.isReady$
+    this._chromeExtensionInterface.onReady$
       .subscribe(() => {
         this._isExtension = true;
         this._chromeExtensionInterface.addEventListener('SP_JIRA_RESPONSE', (ev, data) => {
@@ -71,7 +71,7 @@ export class JiraApiService {
 
     // fire a test request once there is enough config
     const checkConnectionSub = combineLatest(
-      this._chromeExtensionInterface.isReady$,
+      this._chromeExtensionInterface.onReady$,
       this._projectService.currentJiraCfg$,
     ).subscribe(([isExtensionReady, cfg]) => {
       console.log('CHECK CON', isExtensionReady, cfg);

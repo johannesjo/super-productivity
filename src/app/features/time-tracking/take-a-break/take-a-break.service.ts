@@ -42,7 +42,7 @@ export class TakeABreakService {
 
   private isIdleResetEnabled$ = combineLatest(
     this._configService.misc$,
-    this._chromeExtensionInterfaceService.isReady$,
+    this._chromeExtensionInterfaceService.onReady$,
   ).pipe(
     map(([cfg, isExtension]) =>
       cfg.isEnableIdleTimeTracking && cfg.isUnTrackedIdleResetsBreakTimer && isExtension
