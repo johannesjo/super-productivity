@@ -8,8 +8,7 @@ import { SnackService } from '../../core/snack/snack.service';
 import { SnackType } from '../../core/snack/snack.model';
 import { ConfigService } from '../config/config.service';
 import { GoogleSession } from '../config/config.model';
-import { catchError, concatMap, distinctUntilChanged, filter, map, shareReplay, switchMap, take } from 'rxjs/operators';
-import { EmptyObservable } from 'rxjs-compat/observable/EmptyObservable';
+import { catchError, concatMap, distinctUntilChanged, filter, map, shareReplay, switchMap } from 'rxjs/operators';
 import { combineLatest, EMPTY, from, merge, Observable, throwError, timer } from 'rxjs';
 import {
   IPC_GOOGLE_AUTH_TOKEN,
@@ -426,7 +425,6 @@ export class GoogleApiService {
             this._handleError('No response body');
           } else if (res && res.status === 401) {
             this._handleUnAuthenticated(res);
-            return new EmptyObservable<Response>();
           } else if (res && (res.status >= 300)) {
             this._handleError(res);
           } else if (res && (res.status >= 0)) {
