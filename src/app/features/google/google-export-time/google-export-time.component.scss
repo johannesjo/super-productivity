@@ -34,6 +34,8 @@
 }
 
 .export-input-table {
+  table-layout: fixed;
+
   th {
     font-weight: bold;
   }
@@ -76,10 +78,13 @@
 table {
   border-collapse: collapse;
 
+  th {
+    white-space: nowrap;
+  }
+
   th,
   td {
     padding: 0 1px;
-    white-space: nowrap;
   }
 
   th,
