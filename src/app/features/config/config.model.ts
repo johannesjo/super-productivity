@@ -44,6 +44,7 @@ export type MiscConfig = Readonly<{
   minIdleTime: number;
   isOnlyOpenIdleWhenCurrentTask: boolean;
 
+  isAutMarkParentAsDone: boolean;
   isConfirmBeforeExit: boolean;
   isNotifyWhenTimeEstimateExceeded: boolean;
   isTakeABreakEnabled: boolean;
