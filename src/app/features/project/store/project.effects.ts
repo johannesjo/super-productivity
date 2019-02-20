@@ -6,7 +6,7 @@ import {
   AddProject,
   DeleteProject,
   LoadProjectRelatedDataSuccess,
-  ProjectActionTypes,
+  ProjectActionTypes, UpdateProject,
   UpdateProjectIssueProviderCfg
 } from './project.actions';
 import { selectCurrentProjectId, selectProjectFeatureState } from './project.reducer';
@@ -104,7 +104,7 @@ export class ProjectEffects {
       }),
     );
 
-  @Effect() snackUpdate$: any = this._actions$
+  @Effect() snackUpdateIssueProvider$: any = this._actions$
     .pipe(
       ofType(
         ProjectActionTypes.UpdateProjectIssueProviderCfg,
@@ -113,6 +113,19 @@ export class ProjectEffects {
         return new SnackOpen({
           type: 'SUCCESS',
           message: `Updated project settings for <strong>${action.payload.issueProviderKey}</strong>`,
+        });
+      })
+    );
+
+  @Effect() snackUpdateBaseSettings$: any = this._actions$
+    .pipe(
+      ofType(
+        ProjectActionTypes.UpdateProject,
+      ),
+      map((action: UpdateProject) => {
+        return new SnackOpen({
+          type: 'SUCCESS',
+          message: `Updated project settings`,
         });
       })
     );
