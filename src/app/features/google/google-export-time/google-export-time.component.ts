@@ -20,6 +20,8 @@ import { Duration, Moment } from 'moment-mini';
 import { expandAnimation } from '../../../ui/animations/expand.ani';
 import 'moment-duration-format';
 import { msToClockString } from '../../../ui/duration/ms-to-clock-string.pipe';
+import { loadFromSessionStorage, saveToSessionStorage } from '../../../core/persistence/local-storage';
+import { SS_GOOGLE_TIME_SUBMITTED } from '../../../core/persistence/ls-keys.const';
 
 // TODO refactor to Observables
 @Component({
@@ -49,6 +51,7 @@ export class GoogleExportTimeComponent implements OnInit, OnDestroy {
   isLoggedIn = false;
   headings: string[] = [];
   lastRow: string[] = [];
+  isSubmitted = loadFromSessionStorage(SS_GOOGLE_TIME_SUBMITTED) || false;
 
   roundTimeOptions = [
     {id: 'QUARTER', title: 'full quarters'},
@@ -158,6 +161,7 @@ export class GoogleExportTimeComponent implements OnInit, OnDestroy {
   }
 
   save() {
+    this.isSubmitted = false;
     this._projectService.updateTimeSheetExportSettings(this._projectId, this.opts);
     this.isLoading = true;
     const arraysEqual = (arr1, arr2) => {
@@ -185,7 +189,9 @@ export class GoogleExportTimeComponent implements OnInit, OnDestroy {
 
         this._projectService.updateTimeSheetExportSettings(this._projectId, this.opts, true);
         this.isLoading = false;
+        this.isSubmitted = true;
         this._cd.detectChanges();
+        saveToSessionStorage(SS_GOOGLE_TIME_SUBMITTED, true);
       }).catch(this._handleError.bind(this));
     }
   }

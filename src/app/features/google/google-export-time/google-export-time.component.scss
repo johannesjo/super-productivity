@@ -111,3 +111,15 @@ table {
 .toggle-wrapper {
 
 }
+
+.submitted-ico {
+  mat-icon {
+    padding-top: $s;
+    padding-bottom: $s;
+    $this-size: 40px;
+    font-size: $this-size;
+    height: $this-size;
+    width: $this-size;
+    line-height: $this-size;
+  }
+}
