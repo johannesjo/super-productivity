@@ -434,7 +434,6 @@ $z-time-btn-svg-wrapper: 5555;
     // thee magic number is 16/14 so we scale to whole pixels
     transform: scale(1.142857143);
     transition: $transition-standard;
-    color: #000;
     @include darkTheme() {
       color: #fff;
     }

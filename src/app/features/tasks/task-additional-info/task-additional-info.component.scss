@@ -8,14 +8,19 @@
 
 .wrapper {
   margin: $s $s*2 $s*2;
-  border-radius: 12px;
-  border: 1px solid #dddddd;
-  //background: #efefef;
-  //background: #f2f2f2;
   overflow: hidden;
+  transition: $transition-standard;
+
+  border: 1px solid transparent;
+
+  @include lightTheme {
+    border-color: #ddd;
+    box-shadow: $whiteframe-shadow-1dp;
+    border-radius: $card-border-radius;
+  }
 
   @include darkTheme {
-    border-color: #333333;
+    //border-color: #333333;
   }
 
   @media (max-width: $layout-xs) {
@@ -23,8 +28,20 @@
     margin-bottom: $s;
   }
 
+  :host-context(.isCurrent) & {
+    border-radius: 12px;
+    border: 1px solid #ddd;
+    box-shadow: $whiteframe-shadow-1dp;
+  }
+
+  :host-context(.isDarkTheme .isCurrent) & {
+    border-color: #333333;
+  }
+
   :host-context(.isReducedTheme) & {
     border-radius: $card-border-radius;
+    border: 1px solid #ddd;
+    box-shadow: $whiteframe-shadow-1dp;
   }
 }
 
@@ -35,6 +52,10 @@
   }
 }
 
+::ng-deep .mat-tab-header {
+  //border-top: 1px solid rgba(0, 0, 0, 0.12);
+}
+
 ::ng-deep .mat-tab-labels {
   justify-content: stretch;
   user-select: none;
@@ -43,6 +64,8 @@
 ::ng-deep .mat-tab-labels .mat-tab-label {
   flex-grow: 1;
   height: 46px;
+  //text-transform: uppercase;
+  //font-weight: normal;
 }
 
 .tab-label-text {
@@ -78,6 +101,7 @@
 
 .notes {
   margin: $s;
+  border-radius: $card-border-radius;
 
   ::ng-deep {
     .markdown-wrapper {

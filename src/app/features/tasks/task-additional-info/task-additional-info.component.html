@@ -1,4 +1,4 @@
-<div class="wrapper mat-elevation-z3 bg-standard">
+<div class="wrapper bg-standard">
   <mat-tab-group (selectedIndexChange)="indexChange($event)"
                  [selectedIndex]="selectedIndex"
                  color="accent"
@@ -16,7 +16,7 @@
         <span class="tab-label-text">Notes</span>
       </ng-template>
 
-      <div class="mat-elevation-z4 notes">
+      <div class="mat-elevation-z2 notes">
         <inline-markdown (changed)="changeTaskNotes($event)"
                          [model]="taskData.notes"></inline-markdown>
       </div>
