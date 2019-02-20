@@ -101,14 +101,10 @@ export class GoogleExportTimeComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     if (this.opts.isAutoLogin) {
-      this.isLoading = true;
       this.login()
         .then(() => {
           if (this.opts.spreadsheetId) {
-            this.readSpreadsheet()
-              .then(() => {
-                this.isLoading = false;
-              });
+            return this.readSpreadsheet();
           }
         })
         .then(() => {
@@ -347,5 +343,6 @@ export class GoogleExportTimeComponent implements OnInit, OnDestroy {
 
   private _handleError() {
     this.isLoading = false;
+    this._cd.detectChanges();
   }
 }
