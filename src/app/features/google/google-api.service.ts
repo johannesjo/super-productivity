@@ -74,12 +74,12 @@ export class GoogleApiService {
       if (this.isLoggedIn) {
         return new Promise((resolve) => resolve());
       }
-      console.log(this._session.refreshToken);
+      console.log('GOOGLE: logging in via refresh token', this._session.refreshToken);
 
       this._electronService.ipcRenderer.send(IPC_TRIGGER_GOOGLE_AUTH, this._session.refreshToken);
       return new Promise((resolve, reject) => {
         this._electronService.ipcRenderer.on(IPC_GOOGLE_AUTH_TOKEN, (ev, data: any) => {
-          console.log('ELECTRON GOOGLE LOGIN RESPONSE', data);
+          console.log('GOOGLE: ELECTRON LOGIN RESPONSE', data);
           this._updateSession({
             accessToken: data.access_token,
             expiresAt: data.expiry_date,
@@ -90,7 +90,10 @@ export class GoogleApiService {
           }
           resolve(data);
         });
-        this._electronService.ipcRenderer.on(IPC_GOOGLE_AUTH_TOKEN_ERROR, reject);
+        this._electronService.ipcRenderer.on(IPC_GOOGLE_AUTH_TOKEN_ERROR, (err, hmm) => {
+          console.log('GOOGLE: ELECTRON ERROR', err, hmm);
+          reject(err);
+        });
       });
     } else {
       return this._initClientLibraryIfNotDone()
