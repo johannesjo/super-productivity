@@ -27,8 +27,7 @@ $z-task-title-focus: 15;
 $z-drag-over-msg: 16;
 $z-time-btn-svg-wrapper: 5555;
 
-
-%standardTaskOpacityChange {
+@mixin standardTaskOpacityChange {
   opacity: $this-icon-default-opacity;
   transition: transform $transition-fast;
 
@@ -38,6 +37,10 @@ $z-time-btn-svg-wrapper: 5555;
   &:focus {
     opacity: 1;
   }
+}
+
+%standardTaskOpacityChange {
+  @include standardTaskOpacityChange;
 }
 
 %standardTaskZoom {
@@ -111,7 +114,6 @@ $z-time-btn-svg-wrapper: 5555;
   padding: 0;
   z-index: $z-btn;
   @extend %standardTaskOpacityChange;
-  @extend %standardTaskZoom;
 
   &:hover {
     z-index: $z-btn-hover;
@@ -196,7 +198,7 @@ $z-time-btn-svg-wrapper: 5555;
   }
 }
 
-
+.attachment-btn,
 .show-additional-info-btn {
   mat-icon {
     transition: transform $transition-standard;
@@ -222,13 +224,39 @@ $z-time-btn-svg-wrapper: 5555;
   }
 }
 
+@include mq(xs) {
+  .first-line .menu-trigger {
+    opacity: 0;
+  }
+
+  .first-line:hover {
+    .hover-controls {
+      opacity: 1;
+      transform: scaleX(1);
+    }
+
+    .menu-trigger {
+      @include standardTaskOpacityChange;
+    }
+
+    .time-wrapper {
+      visibility: hidden;
+    }
+  }
+}
+
+
 .hover-controls {
+  @include mq(xs, max) {
+    display: none !important;
+  }
+
   display: flex;
   flex-flow: row;
   transform: scaleX(0);
   transform-origin: right center;
   opacity: 0;
-  transition: $transition-fast;
+  transition: $transition-ultra-fast;
   transition-property: transform, opacity;
   position: absolute;
   right: 100%;
@@ -274,6 +302,7 @@ $z-time-btn-svg-wrapper: 5555;
   white-space: nowrap;
   text-align: right;
   margin-right: 2px;
+  position: relative;
 
   @include mq(xs, max) {
     white-space: normal;

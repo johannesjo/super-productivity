@@ -94,46 +94,6 @@
     </div>
 
     <div class="all-controls-wrapper">
-      <div class="hover-controls hide-xs bg-standard"
-           [class.bg-600i]="isCurrent">
-        <button (click)="startTask()"
-                *ngIf="!task.isDone && !isCurrent && !task.subTasks"
-                aria-label="mark as current"
-                class="ico-btn"
-                color=""
-                mat-icon-button
-                tabindex="2">
-          <mat-icon class="play-icon"
-                    svgIcon="play"></mat-icon>
-        </button>
-
-        <button (click)="pauseTask()"
-                *ngIf="!task.isDone && isCurrent && !task.subTasks"
-                class="ico-btn"
-                color=""
-                mat-icon-button
-                tabindex="2">
-          <mat-icon>pause</mat-icon>
-        </button>
-        <button (click)="toggleTaskDone()"
-                class="ico-btn"
-                color=""
-                mat-icon-button
-                tabindex="2">
-          <mat-icon *ngIf="task.isDone">undo</mat-icon>
-          <mat-icon *ngIf="!task.isDone">check</mat-icon>
-        </button>
-        <button *ngIf="!task.subTasks?.length"
-                (click)="estimateTime()"
-                aria-label="time estimation"
-                class="ico-btn time-btn hide-xs"
-                color=""
-                mat-icon-button
-                tabindex="2">
-          <mat-icon aria-label="time estimation">access_time</mat-icon>
-        </button>
-      </div>
-
       <div (click)="estimateTime()"
            [class.isEditable]="!task.subTasks?.length"
            class="time-wrapper">
@@ -148,6 +108,46 @@
       </div>
 
       <div class="controls">
+        <div class="hover-controls bg-standard"
+             [class.bg-600i]="isCurrent">
+          <button (click)="startTask()"
+                  *ngIf="!task.isDone && !isCurrent && !task.subTasks"
+                  aria-label="mark as current"
+                  class="ico-btn"
+                  color=""
+                  mat-icon-button
+                  tabindex="2">
+            <mat-icon class="play-icon"
+                      svgIcon="play"></mat-icon>
+          </button>
+
+          <button (click)="pauseTask()"
+                  *ngIf="!task.isDone && isCurrent && !task.subTasks"
+                  class="ico-btn"
+                  color=""
+                  mat-icon-button
+                  tabindex="2">
+            <mat-icon>pause</mat-icon>
+          </button>
+          <button (click)="toggleTaskDone()"
+                  class="ico-btn"
+                  color=""
+                  mat-icon-button
+                  tabindex="2">
+            <mat-icon *ngIf="task.isDone">undo</mat-icon>
+            <mat-icon *ngIf="!task.isDone">check</mat-icon>
+          </button>
+          <button *ngIf="!task.subTasks?.length"
+                  (click)="estimateTime()"
+                  aria-label="time estimation"
+                  class="ico-btn time-btn hide-xs"
+                  color=""
+                  mat-icon-button
+                  tabindex="2">
+            <mat-icon aria-label="time estimation">access_time</mat-icon>
+          </button>
+        </div>
+
         <button *ngIf="task.reminderId"
                 (click)="editReminder()"
                 color=""
@@ -157,7 +157,7 @@
           <mat-icon>alarm</mat-icon>
         </button>
         <button (click)="toggleShowAdditionalInfoOpen()"
-                *ngIf="task.notes||task.issueData||task.attachmentIds?.length"
+                *ngIf="task.notes||task.issueData"
                 [class.isActive]="task._isAdditionalInfoOpen"
                 aria-label="additional-info"
                 class="ico-btn show-additional-info-btn hide-xs"
@@ -169,8 +169,9 @@
 
         <button (click)="toggleShowAttachments()"
                 *ngIf="task.attachmentIds?.length"
+                [class.isActive]="task._isAdditionalInfoOpen"
                 aria-label="additional-info"
-                class="ico-btn hide-xs"
+                class="ico-btn attachment-btn hide-xs"
                 color=""
                 mat-icon-button
                 tabindex="2">
@@ -178,7 +179,7 @@
         </button>
 
         <button [matMenuTriggerFor]="menu"
-                class="ico-btn"
+                class="ico-btn menu-trigger"
                 color=""
                 mat-icon-button>
           <mat-icon>more_vert</mat-icon>
