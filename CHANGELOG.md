@@ -1,3 +1,33 @@
+## [2.3.1](https://github.com/johannesjo/super-productivity/compare/v2.3.0...v2.3.1) (2019-02-21)
+
+
+### Bug Fixes
+
+* **google:** get rid of empty observable causing sync to go on forever ([a8a3b47](https://github.com/johannesjo/super-productivity/commit/a8a3b47))
+* **googleExport:** endless loading state ([01cc756](https://github.com/johannesjo/super-productivity/commit/01cc756))
+* **jira:** attachment mapping leading to error ([9d47a29](https://github.com/johannesjo/super-productivity/commit/9d47a29))
+* **takeABreak:** manual reset not working for electron ([8efca90](https://github.com/johannesjo/super-productivity/commit/8efca90))
+* scrollbars ([d7c7f50](https://github.com/johannesjo/super-productivity/commit/d7c7f50))
+* **tasks:** task title not legible when editing current task in light theme ([c9e5fd9](https://github.com/johannesjo/super-productivity/commit/c9e5fd9))
+
+
+### Features
+
+* **google:** better debugging for login problem ([518cd29](https://github.com/johannesjo/super-productivity/commit/518cd29))
+* **google:** give login snack a delay ([0f56b5c](https://github.com/johannesjo/super-productivity/commit/0f56b5c))
+* **googleExport:** add little success icon after submission ([ff51bbf](https://github.com/johannesjo/super-productivity/commit/ff51bbf))
+* **googleExport:** improve table styling ([87cb3b8](https://github.com/johannesjo/super-productivity/commit/87cb3b8))
+* **projects:** add toast when updating settings ([7bf6193](https://github.com/johannesjo/super-productivity/commit/7bf6193))
+* **tasks:** add option to mark parent as done when all sub tasks are ([c50ccb6](https://github.com/johannesjo/super-productivity/commit/c50ccb6))
+* **tasks:** add tooltips for buttons ([0ebad0a](https://github.com/johannesjo/super-productivity/commit/0ebad0a))
+* **tasks:** add tooltips for main header ([0628dd1](https://github.com/johannesjo/super-productivity/commit/0628dd1))
+* **tasks:** also hide drag handle if not needed ([051894c](https://github.com/johannesjo/super-productivity/commit/051894c))
+* **tasks:** improve additional info styling ([28ed3c2](https://github.com/johannesjo/super-productivity/commit/28ed3c2))
+* **tasks:** improve quick access menu ([cb8aad2](https://github.com/johannesjo/super-productivity/commit/cb8aad2))
+* **tasks:** slightly improve additional task info styling ([b0c8c03](https://github.com/johannesjo/super-productivity/commit/b0c8c03))
+
+
+
 # [2.3.0](https://github.com/johannesjo/super-productivity/compare/v2.2.3...v2.3.0) (2019-02-18)
 
 
