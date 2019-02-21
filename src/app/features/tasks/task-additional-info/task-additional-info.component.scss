@@ -8,19 +8,18 @@
 
 .wrapper {
   margin: $s $s*2 $s*2;
+  margin: $s 1px $s;
   overflow: hidden;
   transition: $transition-standard;
 
   border: 1px solid transparent;
 
   @include lightTheme {
-    border-color: #ddd;
-    box-shadow: $whiteframe-shadow-1dp;
-    border-radius: $card-border-radius;
+    border-top-color: #ddd;
   }
 
   @include darkTheme {
-    //border-color: #333333;
+    border-top-color: rgba(255, 255, 255, 0.12);
   }
 
   @media (max-width: $layout-xs) {
@@ -29,7 +28,7 @@
   }
 
   :host-context(.isCurrent) & {
-    border-radius: 12px;
+    border-radius: $card-border-radius;
     border: 1px solid #ddd;
     box-shadow: $whiteframe-shadow-1dp;
   }
@@ -42,6 +41,10 @@
     border-radius: $card-border-radius;
     border: 1px solid #ddd;
     box-shadow: $whiteframe-shadow-1dp;
+  }
+
+  :host-context(.isReducedTheme.isDarkTheme) & {
+    border-color: #333333;
   }
 }
 
@@ -85,7 +88,7 @@
 }
 
 .tab-content {
-  padding: $s;
+  padding: $s $s*2;
 
   h3 {
     margin-bottom: $s;
@@ -114,8 +117,8 @@
       border: 1px solid #dddddd;
       @include standardThemeTextColor();
       @include lightTheme {
-        background: $standard-note-ng-light;
-        background: #f2f2f2;
+        //background: $standard-note-bg-light;
+        background: #f1f1f1;
         color: $standard-note-fg-light;
       }
 

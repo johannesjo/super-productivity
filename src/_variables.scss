@@ -37,8 +37,8 @@ $component-max-width: 900px;
 
 // COMPONENTS
 // ----------
-$standard-note-ng-light: #ffffff;
-$standard-note-fg-light: #000000;
+$standard-note-bg-light: #ffffff;
+$standard-note-fg-light: $light-theme-text-color;
 $standard-note-bg-dark: $dark-theme-bg-darker;
 $standard-note-fg-dark: #eeeeee;
 

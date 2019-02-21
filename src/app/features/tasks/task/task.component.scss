@@ -7,7 +7,7 @@ $task-inner-padding-left-right: 6px;
 $this-active-shadow: $whiteframe-shadow-6dp;
 $this-first-line-min-height: 40px;
 $this-icon-default-opacity: 0.7;
-$this-task-focus-zoom: 1.0178571428, 1;
+$this-current-task-zoom: 1.0178571428, 1;
 
 // z-indexes
 $z-drag-handle: 1;
@@ -53,7 +53,7 @@ $z-time-btn-svg-wrapper: 5555;
 
   > .inner-wrapper {
     padding: 2px 0;
-    margin-bottom: 7px;
+    margin-bottom: 8px;
 
     .first-line {
       min-height: $this-first-line-min-height;
@@ -73,7 +73,6 @@ $z-time-btn-svg-wrapper: 5555;
       @include mq(xs, min) {
         border: 1px solid $c-accent !important;
         box-shadow: $whiteframe-shadow-5dp;
-        transform: scale($this-task-focus-zoom);
       }
     }
   }
@@ -100,7 +99,7 @@ $z-time-btn-svg-wrapper: 5555;
 
 .isAdditionalInfoOpen > .first-line {
   .task-title {
-    font-weight: bold;
+    //font-weight: bold;
   }
 }
 
@@ -308,7 +307,7 @@ $z-time-btn-svg-wrapper: 5555;
   }
 
   &.isCurrent > .box {
-    transform: scale($this-task-focus-zoom);
+    transform: scale($this-current-task-zoom);
     box-shadow: $this-active-shadow;
     border-color: transparent;
   }
@@ -692,4 +691,8 @@ progress-bar {
       padding-left: $s*2;
     }
   }
+}
+
+.sub-tasks {
+  //margin: $s 3*$s;
 }
