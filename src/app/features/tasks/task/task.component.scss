@@ -230,6 +230,10 @@ $z-time-btn-svg-wrapper: 5555;
   }
 
   .first-line:hover {
+    .drag-handle {
+      opacity: 1;
+    }
+
     .hover-controls {
       opacity: 1;
       transform: scaleX(1);
@@ -373,6 +377,10 @@ $z-time-btn-svg-wrapper: 5555;
 
   // fixes drag and drop on mobile
   touch-action: none;
+
+  @include mq(xs) {
+    opacity: 0;
+  }
 
   &:active {
     cursor: grabbing;
@@ -531,7 +539,7 @@ input {
     font-weight: 300;
 
     @include mq(xs) {
-      opacity: 0.35;
+      opacity: 0.4;
     }
 
     @include mq(xs, max) {
