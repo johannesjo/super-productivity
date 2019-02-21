@@ -433,6 +433,10 @@ $z-time-btn-svg-wrapper: 5555;
     // thee magic number is 16/14 so we scale to whole pixels
     transform: scale(1.142857143);
     transition: $transition-standard;
+
+    // NOTE: needed to overwrite color for current task
+    color: $light-theme-text-color;
+
     @include darkTheme() {
       color: #fff;
     }
