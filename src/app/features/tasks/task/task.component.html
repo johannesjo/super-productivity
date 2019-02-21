@@ -17,6 +17,7 @@
        [class.isPreventPointerEventsWhilePanning]="isPreventPointerEventsWhilePanning">
     <button (click)="toggleSubTaskMode()"
             *ngIf="task.subTasks && task.subTasks.length"
+            title="Toggle sub task visibility"
             class="toggle-sub-tasks-btn ico-btn"
             color=""
             mat-mini-fab=""
@@ -42,7 +43,7 @@
 
     <button (click)="toggleTaskDone()"
             *ngIf="task.isDone"
-            aria-label="un-/mark as done"
+            title="un-/mark as done"
             class="check-done"
             mat-icon-button=""
             tabindex="2">
@@ -65,7 +66,7 @@
 
       <button (click)="handleUpdateBtnClick()"
               *ngIf="task.issueData?.wasUpdated"
-              aria-label="is updated"
+              title="Show updates"
               class="ico-btn"
               color="accent"
               mat-icon-button
@@ -75,7 +76,7 @@
 
       <a *ngIf="task.issueData?.url"
          [href]="task.issueData?.url"
-         aria-label="link"
+         title="Open issue in a new browser tab"
          class="ico-btn original-link-btn"
          color=""
          mat-icon-button
@@ -112,7 +113,7 @@
              [class.bg-600i]="isCurrent">
           <button (click)="startTask()"
                   *ngIf="!task.isDone && !isCurrent && !task.subTasks"
-                  aria-label="mark as current"
+                  title="Start tracking time"
                   class="ico-btn"
                   color=""
                   mat-icon-button
@@ -123,6 +124,7 @@
 
           <button (click)="pauseTask()"
                   *ngIf="!task.isDone && isCurrent && !task.subTasks"
+                  title="Stop tracking time"
                   class="ico-btn"
                   color=""
                   mat-icon-button
@@ -130,6 +132,7 @@
             <mat-icon>pause</mat-icon>
           </button>
           <button (click)="toggleTaskDone()"
+                  title="Mark as done/undone"
                   class="ico-btn"
                   color=""
                   mat-icon-button
@@ -139,7 +142,7 @@
           </button>
           <button *ngIf="!task.subTasks?.length"
                   (click)="estimateTime()"
-                  aria-label="time estimation"
+                  title="Estimate time/Add time spent"
                   class="ico-btn time-btn hide-xs"
                   color=""
                   mat-icon-button
@@ -150,6 +153,7 @@
 
         <button *ngIf="task.reminderId"
                 (click)="editReminder()"
+                title="Edit reminder"
                 color=""
                 class="ico-btn"
                 tabindex="2"
@@ -159,7 +163,7 @@
         <button (click)="toggleShowAdditionalInfoOpen()"
                 *ngIf="task.notes||task.issueData"
                 [class.isActive]="task._isAdditionalInfoOpen"
-                aria-label="additional-info"
+                title="Show/Hide additional info"
                 class="ico-btn show-additional-info-btn hide-xs"
                 color=""
                 mat-icon-button
@@ -170,7 +174,7 @@
         <button (click)="toggleShowAttachments()"
                 *ngIf="task.attachmentIds?.length"
                 [class.isActive]="task._isAdditionalInfoOpen"
-                aria-label="additional-info"
+                title="Show/Hide attachments"
                 class="ico-btn attachment-btn hide-xs"
                 color=""
                 mat-icon-button
@@ -180,6 +184,7 @@
 
         <button [matMenuTriggerFor]="menu"
                 class="ico-btn menu-trigger"
+                title="Open task menu"
                 color=""
                 mat-icon-button>
           <mat-icon>more_vert</mat-icon>
