@@ -1,5 +1,6 @@
 <div class="wrapper bg-primary color-contrast mat-elevation-z3">
   <button mat-icon-button
+          title="Go to task list"
           class="app-icon hide-xs"
           routerLink="work-view">
     <mat-icon svgIcon="sp">sp</mat-icon>
@@ -47,6 +48,7 @@
   </mat-menu>
 
   <button [matMenuTriggerFor]="projectMenu"
+          title="Project Menu"
           class="project-btn"
           mat-button>
     <span class="current-project-title">{{(projectService.currentProject$|async).title}}</span>
@@ -100,6 +102,7 @@
 
   <nav class="action-nav">
     <button (click)="showAddTaskBar()"
+            title="Add new Task"
             class="bg-200"
             color="lighter"
             mat-mini-fab>
@@ -107,6 +110,7 @@
     </button>
 
     <button (click)="bookmarkService.toggleBookmarks()"
+            title="Show/Hide Bookmarks"
             class="bg-200 show-xs-only"
             color="lighter"
             mat-mini-fab>
@@ -114,6 +118,7 @@
     </button>
 
     <button (click)="toggleShowNotes()"
+            title="Show/Hide Project Notes"
             color="lighter"
             mat-mini-fab>
       <mat-icon [class.rotate]="(noteService.isShowNotes$|async)"
@@ -124,6 +129,7 @@
     <div class="play-btn-wrapper">
       <button (click)="togglePlay()"
               [color]="(taskService.currentTaskId$|async)? 'accent': 'lighter'"
+              title="Start/Stop tracking time"
               class="play-btn"
               mat-fab>
         <mat-icon *ngIf="!(taskService.currentTaskId$|async)">play_arrow</mat-icon>
@@ -168,6 +174,7 @@
 
   <button (click)="bookmarkService.toggleBookmarks()"
           [class.is-open]="bookmarkService.isShowBookmarks$|async"
+          title="Show/Hide Bookmarks"
           aria-label="Show Help for section"
           class="show-bookmarks-btn hide-xs"
           color="primary"
