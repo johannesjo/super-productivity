@@ -35,8 +35,9 @@ export class ReminderService {
     if ('Worker' in window) {
       this._w = new Worker(WORKER_PATH);
 
+      // TODO we need a better solution for this
       // we do this to wait for syncing and the like
-      await promiseTimeout(1000 * 20);
+      await promiseTimeout(1000 * 3);
       this._w.addEventListener('message', this._onReminderActivated.bind(this));
       this._w.addEventListener('error', this._handleError.bind(this));
       console.log('WORKER INITIALIZED FOR REMINDERS');
