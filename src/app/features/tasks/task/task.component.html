@@ -9,6 +9,7 @@
        [class.bg-600]="isCurrent">
   </div>
 
+  <!-- TODO only bind pan etc when touch is available-->
   <div class="first-line"
        (panstart)="onPanStart($event)"
        (panleft)="onPanLeft($event)"
@@ -29,17 +30,19 @@
       </mat-icon>
     </button>
 
-    <div class="block-left bg-400"
-         #blockLeft>
-      <mat-icon *ngIf="!task.isDone">check</mat-icon>
-      <mat-icon *ngIf="task.isDone">undo</mat-icon>
-    </div>
+    <ng-container *ngIf="isTouch">
+      <div class="block-left bg-400"
+           #blockLeft>
+        <mat-icon *ngIf="!task.isDone">check</mat-icon>
+        <mat-icon *ngIf="task.isDone">undo</mat-icon>
+      </div>
 
-    <div class="block-right bg-400"
-         #blockRight>
-      <mat-icon *ngIf="!task.isDone">alarm_add</mat-icon>
-      <mat-icon *ngIf="task.isDone">undo</mat-icon>
-    </div>
+      <div class="block-right bg-400"
+           #blockRight>
+        <mat-icon *ngIf="!task.isDone">alarm_add</mat-icon>
+        <mat-icon *ngIf="task.isDone">undo</mat-icon>
+      </div>
+    </ng-container>
 
     <button (click)="toggleTaskDone()"
             *ngIf="task.isDone"
