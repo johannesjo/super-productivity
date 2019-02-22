@@ -1,0 +1,22 @@
+@mixin standardTaskOpacityChange {
+  opacity: $this-icon-default-opacity;
+  transition: transform $transition-fast;
+
+  :host:focus &,
+  .isCurrent &,
+  &:hover,
+  &:focus {
+    opacity: 1;
+  }
+}
+
+%standardTaskOpacityChange {
+  @include standardTaskOpacityChange;
+}
+
+%standardTaskZoom {
+  &:hover,
+  &:focus {
+    transform: scale(1.2);
+  }
+}

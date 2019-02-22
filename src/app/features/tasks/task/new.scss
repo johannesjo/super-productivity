@@ -1,0 +1,762 @@
+@import '../../../../variables';
+
+//$this-task-text-color: #333333;
+//$this-task-text-color-dark: #dddddd;
+$this-task-text-color-done: #aaaaaa;
+$task-inner-padding-left-right: 6px;
+$this-active-shadow: $whiteframe-shadow-6dp;
+$this-first-line-min-height: 40px;
+$this-icon-default-opacity: 0.7;
+$this-current-task-zoom: 1.0178571428, 1;
+
+// z-indexes
+$z-drag-handle: 1;
+$z-task-title: 4;
+$z-btn: 4;
+$z-time-wrapper: 4;
+$z-btn-hover: 5;
+$z-hover-controls: 6;
+$z-progress-bar: 7;
+
+$z-check-done: 11;
+$z-first-line-controls-hover: 12;
+$z-swipe-block: 13;
+$z-toggle-sub-task-btn: 14;
+$z-task-title-focus: 15;
+
+$z-is-current-host: 20;
+$z-focus-host: 20;
+
+$z-drag-over-msg: 21;
+
+$z-time-btn-svg-wrapper: 5555;
+
+
+// TASK BOX STYLES
+// ---------------
+:host {
+  display: block;
+  position: relative;
+
+  > .inner-wrapper {
+    padding: 3px 0;
+    padding: 4px 0;
+    margin-bottom: 0;
+
+    .first-line {
+      min-height: $this-first-line-min-height;
+    }
+
+    //&.isCurrent,
+    &.isAdditionalInfoOpen {
+      margin-top: $s*2;
+      margin-bottom: $s*2;
+    }
+  }
+
+  &:last-child > .inner-wrapper {
+    margin-bottom: 0;
+  }
+
+  &.isCurrent {
+    z-index: $z-is-current-host;
+  }
+
+  &:focus {
+    z-index: $z-focus-host;
+    outline: none;
+
+    > .inner-wrapper > .box {
+      border-radius: $card-border-radius;
+
+      @include mq(xs, min) {
+        border: 1px solid $c-accent !important;
+        box-shadow: $whiteframe-shadow-5dp;
+      }
+    }
+  }
+}
+
+.inner-wrapper {
+  position: relative;
+
+  > .first-line {
+    position: relative;
+  }
+
+  > .box {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    top: 0;
+    transition: $transition-standard;
+    transition-property: transform;
+    box-shadow: $shadow-card-shadow;
+    //border-radius: $card-border-radius;
+    border: 1px solid $light-theme-extra-border-color;
+    border-bottom-color: transparent;
+
+    @include darkTheme {
+      border-color: $dark-theme-extra-border-color;
+      border-color: $dark-theme-bg;
+      //border-color: rgb(55, 55, 55);
+      border-bottom-color: transparent;
+    }
+
+    :host:first-child & {
+      border-top-left-radius: $card-border-radius;
+      border-top-right-radius: $card-border-radius;
+    }
+
+    :host:last-child & {
+      border-bottom-left-radius: $card-border-radius;
+      border-bottom-right-radius: $card-border-radius;
+    }
+
+    :host-context(.isLightTheme):last-child {
+      border-bottom-color: $light-theme-extra-border-color;
+    }
+
+    :host-context(.isDarkTheme):last-child {
+      border-bottom-color: $dark-theme-extra-border-color;
+      border-bottom-color: $dark-theme-bg;
+      //border-bottom-color: rgb(55, 55, 55);
+    }
+  }
+
+  &.isCurrent > .box {
+    transform: scale($this-current-task-zoom);
+    box-shadow: $this-active-shadow;
+    border-color: transparent;
+    border-radius: $card-border-radius;
+  }
+
+  &.isDone {
+    > .first-line {
+      position: relative;
+
+      .time-wrapper,
+      .controls,
+      .title-and-left-btns-wrapper {
+        opacity: 0.3;
+      }
+
+      .time {
+        opacity: 1;
+      }
+
+      .task-title {
+        //color: $this-task-text-color-done;
+        //text-decoration: line-through;
+      }
+    }
+  }
+}
+
+
+.sub-tasks {
+  margin: 0 $s;
+  @include mq(xs) {
+    //margin: $s $s*2 $s $s*3;
+    margin: $s;
+    margin-left: $s*3;
+    margin-right: 0;
+  }
+}
+
+
+
+
+.first-line {
+  display: flex;
+  flex-wrap: nowrap;
+  user-select: none;
+  justify-content: space-between;
+  align-items: center;
+  touch-action: pan-y;
+
+  @include mq(xs, max) {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+}
+
+
+.title-and-left-btns-wrapper {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: center;
+  min-height: 36px;
+  flex-grow: 1;
+  flex-basis: 70%;
+  @include mq(xs, max) {
+    //margin-bottom: 5px;
+    //flex-shrink: 0;
+    flex-basis: 50%;
+  }
+}
+
+// CONTROLS
+// --------
+.all-controls-wrapper {
+  display: flex;
+  flex-flow: row;
+  position: relative;
+  margin-left: $s;
+
+  &:hover {
+    .hover-controls {
+      opacity: 1;
+      transform: scaleX(1);
+    }
+  }
+}
+
+.controls {
+  white-space: nowrap;
+  text-align: right;
+  margin-right: 2px;
+  position: relative;
+
+  @include mq(xs, max) {
+    white-space: normal;
+    margin-left: 5px;
+  }
+}
+
+
+.hover-controls {
+  @include mq(xs, max) {
+    display: none !important;
+  }
+
+  display: flex;
+  flex-flow: row;
+  transform: scaleX(0);
+  transform-origin: right center;
+  opacity: 0;
+  transition: $transition-ultra-fast;
+  transition-property: transform, opacity;
+  position: absolute;
+  right: 100%;
+  top: 0;
+  z-index: $z-hover-controls;
+
+  :host-context(.isReducedTheme.isDarkTheme) & {
+    background-color: $dark-theme-bg;
+  }
+
+  :host-context(.isReducedTheme.isLightTheme) & {
+    background-color: $light-theme-bg;
+  }
+
+  .inner-wrapper.isCurrent > .first-line > .all-controls-wrapper > &:before {
+    border-left: 1px solid rgba(255, 255, 255, 0.9);
+  }
+
+
+  // extra hitarea
+  &:after {
+    position: absolute;
+    top: -$s*1.5;
+    right: 0;
+    left: -$s*1.5;
+    bottom: -$s*1.5;
+    content: '';
+  }
+
+  &:before {
+    content: '';
+    border-left: 1px solid rgba(200, 200, 200, 0.9);
+    width: 1px;
+    height: 90%;
+    position: absolute;
+    left: 0;
+    top: 5%;
+  }
+}
+
+
+// OTHER UI ELEMENTS
+// -----------------
+
+// TASK TITLE
+.task-title {
+  flex-grow: 1;
+  text-align: left;
+  outline: none;
+  margin-left: 2px;
+  padding: 4px 0 4px 6px;
+  line-height: 1.5;
+  min-height: 20px;
+  text-overflow: ellipsis;
+  cursor: text;
+  transition: $transition-leave;
+  transition-property: opacity, transform;
+  background: inherit;
+  position: relative;
+  overflow: visible;
+  user-select: none;
+  caret-color: #000000;
+  z-index: $z-task-title;
+
+  // needs to be block for it not to mess up
+  display: block !important;
+
+  @include darkTheme() {
+    caret-color: #ffffff;
+  }
+
+  &:first-letter {
+    // we can't do this, as this messes up text input :/
+    // text-transform: uppercase;
+  }
+
+  .isCurrent & {
+    //font-weight: bold;
+  }
+
+  &:after {
+    transition: $transition-leave;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    content: '';
+    box-shadow: $shadow-edit-on-click;
+    opacity: 0;
+    z-index: -1;
+    border: 1px solid black;
+    pointer-events: none;
+    background: #fff;
+
+    @include darkTheme() {
+      background: $dark-theme-bg-lighter;
+      border: 1px solid #ffffff;
+      box-shadow: 0 0 4px 0 rgba(255, 255, 255, 0.8), $whiteframe-shadow-13dp;
+    }
+  }
+
+
+  &:focus {
+    z-index: $z-task-title-focus;
+    user-select: all;
+    // thee magic number is 16/14 so we scale to whole pixels
+    transform: scale(1.142857143);
+    transition: $transition-standard;
+
+    // NOTE: needed to overwrite color for current task
+    color: $light-theme-text-color;
+
+    @include darkTheme() {
+      color: #fff;
+    }
+
+    .is-hide-controls & {
+      transform-origin: center center;
+      transform: scale(1.142857143) translateX(20px);
+    }
+
+    &:after {
+      opacity: 1;
+      transition: $transition-standard;
+    }
+
+    @include mq(xs, max) {
+      transform: scale(1);
+    }
+  }
+}
+
+
+// TIME
+.time-wrapper {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: stretch;
+  padding-right: $s;
+  z-index: $z-time-wrapper;
+
+  &.isEditable {
+    cursor: pointer;
+
+    button {
+      transition: $transition-standard !important;
+      opacity: 0 !important;
+    }
+
+    &:hover {
+      .time,
+      button {
+        transition: $transition-standard;
+        opacity: 1 !important;
+      }
+    }
+  }
+
+  .time {
+    font-style: italic;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.8;
+    font-weight: 300;
+
+    @include mq(xs) {
+      opacity: 0.4;
+    }
+
+    @include mq(xs, max) {
+      font-size: 13px;
+    }
+
+    :host:focus > .inner-wrapper > .first-line &,
+      //:host:hover > .inner-wrapper > .first-line &,
+    .inner-wrapper.isCurrent > .first-line & {
+      opacity: 1;
+    }
+
+    .time-val,
+    .separator {
+      display: block;
+      white-space: nowrap;
+    }
+
+    .separator {
+      padding: 0 $s/2;
+    }
+  }
+}
+
+
+.additional-info {
+  display: block;
+  // required as sort of a clearfix (fixes padding issue)
+  overflow: hidden;
+}
+
+
+.drag-over-msg {
+  pointer-events: none;
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  bottom: 0;
+  opacity: 1;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+  display: flex;
+  z-index: $z-drag-over-msg;
+}
+
+
+.check-done {
+  opacity: 0.5;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  display: block;
+  z-index: $z-check-done;
+  transform: translate(-50%, -50%);
+  transition: $transition-standard;
+
+
+  &:hover {
+    opacity: 1 !important;
+  }
+
+  mat-icon {
+    $this-size: 40px;
+    font-size: $this-size;
+    height: $this-size;
+    width: $this-size;
+    line-height: $this-size;
+
+    &.undo {
+      display: none;
+    }
+  }
+
+  &:hover {
+    mat-icon {
+      animation: $transition-duration-m success-btn-ani linear;
+    }
+
+    .check {
+      display: none;
+    }
+
+    .undo {
+      display: block;
+    }
+  }
+}
+
+
+// SWIPE BLOCKS
+.block-left,
+.block-right {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 33%;
+  min-width: 100px;
+  z-index: $z-swipe-block;
+  transition: $transition-standard;
+  transform: scaleX(0);
+
+  &.isActive {
+    background-color: $c-accent;
+  }
+
+  mat-icon {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scaleX(1.1);
+  }
+}
+
+
+.block-left {
+  pointer-events: none;
+  color: #fff;
+  left: 0;
+  transform-origin: left center;
+  box-shadow: $shadow-card-shadow;
+}
+
+.block-right {
+  pointer-events: none;
+  color: #fff;
+  right: 0;
+  transform-origin: right center;
+  box-shadow: $shadow-card-shadow;
+}
+
+progress-bar {
+  z-index: $z-progress-bar;
+}
+
+
+// BUTTON STYLES AND DRAG HANDLE
+// -----------------------------
+@include mq(xs) {
+  .first-line .menu-trigger {
+    opacity: 0;
+  }
+
+  .first-line:hover {
+    .drag-handle {
+      opacity: 1;
+    }
+
+    .hover-controls {
+      opacity: 1;
+      transform: scaleX(1);
+    }
+
+    .menu-trigger {
+      @include standardTaskOpacityChange;
+    }
+
+    .time-wrapper {
+      visibility: hidden;
+    }
+  }
+}
+
+.ico-btn {
+  &.delete-btn {
+    mat-icon.delete-icon {
+      color: $red !important;
+      @include darkTheme {
+        color: $red !important;
+      }
+    }
+
+    &:hover {
+      background: $red-danger !important;
+
+      mat-icon.delete-icon {
+        color: #ffffff !important;
+        @include darkTheme {
+          color: #ffffff !important;
+        }
+      }
+    }
+  }
+}
+
+.toggle-sub-tasks-btn,
+.first-line .ico-btn {
+  $this-button-spacer: 1px;
+  margin: 0 $this-button-spacer;
+  padding: 0;
+  z-index: $z-btn;
+  @extend %standardTaskOpacityChange;
+
+  &:hover {
+    z-index: $z-btn-hover;
+  }
+
+  &:focus {
+    outline: none;
+  }
+}
+
+
+.drag-handle {
+  min-width: 24px;
+  margin: 0 4px 0 9px;
+  position: relative;
+  z-index: $z-drag-handle;
+  cursor: grab;
+  @extend %standardTaskOpacityChange;
+
+  // fixes drag and drop on mobile
+  touch-action: none;
+
+  @include mq(xs) {
+    opacity: 0;
+  }
+
+  &:active {
+    cursor: grabbing;
+  }
+
+  // hit area
+  &:after {
+    content: '';
+    position: absolute;
+    top: -$s*0.25;
+    bottom: -$s*0.25;
+    left: -$s*0.25;
+    right: -$s*0.25;
+
+    @include mq(xs) {
+      top: -$s*2;
+      bottom: -$s*2;
+      left: -$s*2;
+      right: -$s*0.5;
+    }
+  }
+}
+
+
+
+.toggle-sub-tasks-btn,
+.first-line .ico-btn {
+  $this-button-spacer: 1px;
+  margin: 0 $this-button-spacer;
+  padding: 0;
+  z-index: $z-btn;
+  @extend %standardTaskOpacityChange;
+
+  &:hover {
+    z-index: $z-btn-hover;
+  }
+
+  &:focus {
+    outline: none;
+  }
+}
+
+.toggle-sub-tasks-btn {
+  position: absolute !important;
+  transform: translateY(-50%);
+  left: -23px;
+  top: 50%;
+  z-index: $z-toggle-sub-task-btn !important;
+  min-width: 0;
+  min-height: 0;
+  width: 32px;
+  height: 32px;
+  margin-top: -1px !important;
+  transform-origin: left top;
+  opacity: 1 !important;
+
+  &:hover {
+    transform: scale(1.3) translateY(-50%) !important;
+
+    mat-icon {
+      opacity: 1;
+    }
+  }
+
+  &:hover {
+    opacity: 1 !important;
+  }
+
+  mat-icon {
+    transition: $transition-standard;
+    margin-top: -8px;
+    opacity: $this-icon-default-opacity;
+
+    &.isHideDoneTasks {
+      transform: rotate(-45deg);
+    }
+  }
+}
+
+
+.attachment-btn,
+.show-additional-info-btn {
+  mat-icon {
+    transition: transform $transition-standard;
+    backface-visibility: hidden;
+  }
+
+  &.isActive mat-icon {
+    transform: rotate(45deg);
+  }
+}
+
+
+.time-btn {
+  position: relative;
+  overflow: visible;
+
+  ::ng-deep .svg-wrapper {
+    z-index: $z-time-btn-svg-wrapper;
+    position: absolute;
+    width: 44px;
+    height: 44px;
+    top: 50%;
+    left: 50%;
+    transform: translate3d(-50%, -50%, 0);
+  }
+}
+
+
+// ANIMATIONS ETC
+// --------------
+@keyframes success-btn-ani {
+  0% {
+    transform: scale(0.5) rotate(-180deg);
+  }
+  50% {
+    transform: scale(1) rotate(-90deg);
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+.isPreventPointerEventsWhilePanning {
+  * {
+    user-select: none !important;
+    pointer-events: none !important;
+    transition: none !important;
+  }
+}
