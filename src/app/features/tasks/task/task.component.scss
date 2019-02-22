@@ -141,12 +141,11 @@ $z-time-btn-svg-wrapper: 5555;
 
 
 .sub-tasks {
-  margin: 0 $s;
+  margin: $s 0 $s $s*2;
+
   @include mq(xs) {
     //margin: $s $s*2 $s $s*3;
-    margin: $s;
-    margin-left: $s*3;
-    margin-right: 0;
+    margin: $s 0 $s $s*3;
   }
 }
 
@@ -370,7 +369,7 @@ $z-time-btn-svg-wrapper: 5555;
   flex-direction: row;
   align-items: center;
   justify-content: stretch;
-  padding-right: $s;
+  margin-right: $s;
   z-index: $z-time-wrapper;
 
   &.isEditable {
@@ -384,10 +383,23 @@ $z-time-btn-svg-wrapper: 5555;
     }
   }
 
+  @include mq(xs, max) {
+    &:after {
+      content: '';
+      border-top: 1px solid;
+      opacity: 0.1;
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 50%;
+    }
+  }
+
+
   .time {
     font-style: italic;
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
     opacity: 0.8;
@@ -395,6 +407,7 @@ $z-time-btn-svg-wrapper: 5555;
 
     @include mq(xs) {
       opacity: 0.4;
+      flex-direction: row;
     }
 
     @include mq(xs, max) {
@@ -415,6 +428,9 @@ $z-time-btn-svg-wrapper: 5555;
 
     .separator {
       padding: 0 $s/2;
+      @include mq(xs, max) {
+        display: none;
+      }
     }
   }
 }
@@ -490,8 +506,8 @@ $z-time-btn-svg-wrapper: 5555;
 .block-left,
 .block-right {
   position: absolute;
-  top: 0;
-  bottom: 0;
+  top: -1* $task-inner-padding-top-bottom;
+  bottom: -1* $task-inner-padding-top-bottom;
   width: 33%;
   min-width: 100px;
   z-index: $z-swipe-block;
@@ -506,7 +522,7 @@ $z-time-btn-svg-wrapper: 5555;
     position: absolute;
     top: 50%;
     left: 50%;
-    transform: translate(-50%, -50%) scaleX(1.1);
+    transform: translate(-50%, -50%) scaleX(1);
   }
 }
 
