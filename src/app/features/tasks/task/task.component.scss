@@ -198,13 +198,6 @@ $z-time-btn-svg-wrapper: 5555;
   flex-flow: row;
   position: relative;
   margin-left: $s;
-
-  &:hover {
-    .hover-controls {
-      opacity: 1;
-      transform: scaleX(1);
-    }
-  }
 }
 
 .controls {
@@ -236,6 +229,15 @@ $z-time-btn-svg-wrapper: 5555;
   right: 100%;
   top: 0;
   z-index: $z-hover-controls;
+
+  @include mq(xs) {
+    opacity: 0;
+  }
+
+  .first-line:hover & {
+    opacity: 1;
+    transform: scaleX(1);
+  }
 
   :host-context(.isReducedTheme.isDarkTheme) & {
     background-color: $dark-theme-bg;
@@ -404,6 +406,12 @@ $z-time-btn-svg-wrapper: 5555;
     }
   }
 
+  @include mq(xs) {
+    .first-line:hover {
+      visibility: hidden;
+    }
+  }
+
 
   .time {
     font-style: italic;
@@ -553,38 +561,6 @@ progress-bar {
 
 // BUTTON STYLES AND DRAG HANDLE
 // -----------------------------
-@include mq(xs) {
-  .first-line .menu-trigger {
-    opacity: 0;
-  }
-
-  .first-line:hover {
-    .drag-handle {
-      opacity: 1;
-    }
-
-    .hover-controls {
-      opacity: 1;
-      transform: scaleX(1);
-    }
-
-    .menu-trigger {
-      @include standardTaskOpacityChange;
-    }
-
-    .time-wrapper {
-      visibility: hidden;
-    }
-  }
-}
-
-.delete-btn {
-  mat-icon.delete-icon {
-    color: $red !important;
-  }
-}
-
-
 .toggle-sub-tasks-btn,
 .first-line .ico-btn {
   $task-button-spacer: 1px;
@@ -602,6 +578,22 @@ progress-bar {
   }
 }
 
+.first-line .menu-trigger {
+  @include mq(xs) {
+    opacity: 0;
+  }
+}
+
+.first-line:hover .menu-trigger {
+  @include standardTaskOpacityChange;
+}
+
+.delete-btn {
+  mat-icon.delete-icon {
+    color: $red !important;
+  }
+}
+
 
 .drag-handle {
   min-width: 24px;
@@ -616,6 +608,9 @@ progress-bar {
 
   @include mq(xs) {
     opacity: 0;
+    .first-line:hover & {
+      opacity: 1;
+    }
   }
 
   &:active {
