@@ -23,11 +23,15 @@ app-root,
 }
 
 .task-list-wrapper {
-  padding: $s 0 $s*9;
+  padding: 0 0 $s*9;
   max-width: $component-max-width;
   margin: auto;
 
   @include mq(xs) {
+    padding: 0 2*$s $s*9;
+  }
+
+  @include mq(component) {
     padding: $s*2 3*$s $s*9;
   }
 }

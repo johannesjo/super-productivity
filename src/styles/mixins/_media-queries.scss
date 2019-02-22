@@ -19,6 +19,10 @@
     @media screen and ($type + -width: $layout-lg) {
       @content;
     }
+  } @else if $size == 'component' {
+    @media screen and ($type + -width: $component-max-width) {
+      @content;
+    }
   } @else {
     @error 'Invalid size for mq';
   }
