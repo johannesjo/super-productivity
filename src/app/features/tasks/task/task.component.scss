@@ -111,13 +111,17 @@ $z-time-btn-svg-wrapper: 5555;
   }
 
   :host-context(.isLightTheme):last-child > .inner-wrapper > & {
-    //border-bottom-color: $light-theme-extra-border-color;
+    @include mq(xs, max) {
+      border-bottom-color: $light-theme-extra-border-color;
+    }
   }
 
   :host-context(.isDarkTheme):last-child > .inner-wrapper > & {
-    //border-bottom-color: $dark-theme-extra-border-color;
-    //border-bottom-color: $dark-theme-bg;
-    //border-bottom-color: rgb(55, 55, 55);
+    @include mq(xs, max) {
+      //border-bottom-color: $dark-theme-extra-border-color;
+      //border-bottom-color: $dark-theme-bg;
+      border-bottom-color: rgb(55, 55, 55);
+    }
   }
 
   .inner-wrapper:not(.isCurrent) > .box {
@@ -218,13 +222,10 @@ $z-time-btn-svg-wrapper: 5555;
     display: none !important;
   }
 
-  display: flex;
+  display: none;
   flex-flow: row;
-  transform: scaleX(0);
   transform-origin: right center;
   opacity: 0;
-  transition: $transition-ultra-fast;
-  transition-property: transform, opacity;
   position: absolute;
   right: 100%;
   top: 0;
@@ -236,7 +237,7 @@ $z-time-btn-svg-wrapper: 5555;
 
   .first-line:hover & {
     opacity: 1;
-    transform: scaleX(1);
+    display: flex;
   }
 
   :host-context(.isReducedTheme.isDarkTheme) & {
@@ -264,12 +265,13 @@ $z-time-btn-svg-wrapper: 5555;
 
   &:before {
     content: '';
-    border-left: 1px solid rgba(200, 200, 200, 0.9);
+    border-left: 1px solid;
     width: 1px;
     height: 90%;
     position: absolute;
     left: 0;
     top: 5%;
+    opacity: 0.5;
   }
 }
 
@@ -405,13 +407,6 @@ $z-time-btn-svg-wrapper: 5555;
       top: 50%;
     }
   }
-
-  @include mq(xs) {
-    .first-line:hover {
-      visibility: hidden;
-    }
-  }
-
 
   .time {
     font-style: italic;
@@ -703,6 +698,12 @@ progress-bar {
   }
 }
 
+
+.start-task-btn {
+  :host-context(.isHidePlayBtn) & {
+    display: none !important;
+  }
+}
 
 // ANIMATIONS ETC
 // --------------

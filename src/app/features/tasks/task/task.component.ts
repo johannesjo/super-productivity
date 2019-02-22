@@ -347,10 +347,13 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   onPanStart(ev) {
+    if (!IS_TOUCH) {
+      return;
+    }
+
     this._resetAfterPan();
     if (
-      !IS_TOUCH
-      || (ev.target.className.indexOf && ev.target.className.indexOf('drag-handle') > -1)
+      (ev.target.className.indexOf && ev.target.className.indexOf('drag-handle') > -1)
       || Math.abs(ev.deltaY) > Math.abs(ev.deltaX)
       || document.activeElement === this.editOnClickEl.nativeElement
       || ev.isFinal
