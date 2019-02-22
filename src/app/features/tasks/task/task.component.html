@@ -16,19 +16,6 @@
        (panright)="onPanRight($event)"
        (panend)="onPanEnd()"
        [class.isPreventPointerEventsWhilePanning]="isPreventPointerEventsWhilePanning">
-    <button (click)="toggleSubTaskMode()"
-            *ngIf="task.subTasks && task.subTasks.length"
-            title="Toggle sub task visibility"
-            class="toggle-sub-tasks-btn ico-btn"
-            color=""
-            mat-mini-fab=""
-            tabindex="2">
-      <mat-icon *ngIf="task._showSubTasksMode===0">add
-      </mat-icon>
-      <mat-icon *ngIf="task._showSubTasksMode!==0"
-                [class.isHideDoneTasks]="task._showSubTasksMode===1">remove
-      </mat-icon>
-    </button>
 
     <ng-container *ngIf="isTouch">
       <div class="block-left bg-400"
@@ -314,6 +301,19 @@
 
   <div *ngIf="task.subTasks && task.subTasks.length"
        class="sub-tasks">
+    <button (click)="toggleSubTaskMode()"
+            *ngIf="task.subTasks && task.subTasks.length"
+            title="Toggle sub task visibility"
+            class="toggle-sub-tasks-btn ico-btn mat-elevation-z2"
+            color=""
+            mat-mini-fab=""
+            tabindex="2">
+      <mat-icon *ngIf="task._showSubTasksMode===0">add
+      </mat-icon>
+      <mat-icon *ngIf="task._showSubTasksMode!==0"
+                [class.isHideDoneTasks]="task._showSubTasksMode===1">remove
+      </mat-icon>
+    </button>
     <task-list *ngIf="task.subTasks?.length"
                [@expand]
                [isHideAll]="task._showSubTasksMode!==2"

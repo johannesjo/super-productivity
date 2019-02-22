@@ -55,7 +55,7 @@
       </div>
     </header>
 
-    <div class="component-wrapper page-wrapper">
+    <div class="task-list-wrapper">
       <div *ngIf="!(planningModeService.isPlanningMode$|async) && !(taskService.isHasTasksToWorkOn$|async)"
            class="add-more-or-finish"
            @expandFade>

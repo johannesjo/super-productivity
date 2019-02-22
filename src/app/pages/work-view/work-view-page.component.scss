@@ -4,14 +4,6 @@
   overflow: hidden !important;
 }
 
-.page-wrapper {
-  // overwrite
-  @include mq(xs, max) {
-    padding-left: 0;
-    padding-right: 0;
-  }
-}
-
 add-task-bar {
   margin: 0 auto $s*2;
   max-width: 628px;

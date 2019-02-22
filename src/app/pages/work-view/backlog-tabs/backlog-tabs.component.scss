@@ -9,14 +9,6 @@
   left: 0;
 }
 
-.page-wrapper {
-  // overwrite
-  @include mq(xs, max) {
-    padding-left: 0;
-    padding-right: 0;
-  }
-}
-
 .tab-wrapper {
   min-height: 100%;
   flex: 1;

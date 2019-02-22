@@ -22,6 +22,16 @@ app-root,
   margin: auto;
 }
 
+.task-list-wrapper {
+  padding: $s 0 $s*9;
+  max-width: $component-max-width;
+  margin: auto;
+
+  @include mq(xs) {
+    padding: $s*2 3*$s $s*9;
+  }
+}
+
 
 a[href] {
   color: $c-accent;
