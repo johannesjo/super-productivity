@@ -12,7 +12,6 @@ $this-current-task-zoom: 1.0178571428, 1;
 // z-indexes
 $z-drag-handle: 1;
 $z-task-title: 4;
-$z-focus-host: 4;
 $z-btn: 4;
 $z-time-wrapper: 4;
 $z-btn-hover: 5;
@@ -24,7 +23,12 @@ $z-first-line-controls-hover: 12;
 $z-swipe-block: 13;
 $z-toggle-sub-task-btn: 14;
 $z-task-title-focus: 15;
-$z-drag-over-msg: 16;
+
+$z-is-current-host: 20;
+$z-focus-host: 20;
+
+$z-drag-over-msg: 21;
+
 $z-time-btn-svg-wrapper: 5555;
 
 @mixin standardTaskOpacityChange {
@@ -55,11 +59,18 @@ $z-time-btn-svg-wrapper: 5555;
   position: relative;
 
   > .inner-wrapper {
-    padding: 2px 0;
-    margin-bottom: 8px;
+    padding: 3px 0;
+    padding: 4px 0;
+    margin-bottom: 0;
 
     .first-line {
       min-height: $this-first-line-min-height;
+    }
+
+    //&.isCurrent,
+    &.isAdditionalInfoOpen {
+      margin-top: $s*2;
+      margin-bottom: $s*2;
     }
   }
 
@@ -67,12 +78,17 @@ $z-time-btn-svg-wrapper: 5555;
     margin-bottom: 0;
   }
 
+  &.isCurrent {
+    z-index: $z-is-current-host;
+  }
 
   &:focus {
     z-index: $z-focus-host;
     outline: none;
 
     > .inner-wrapper > .box {
+      border-radius: $card-border-radius;
+
       @include mq(xs, min) {
         border: 1px solid $c-accent !important;
         box-shadow: $whiteframe-shadow-5dp;
@@ -83,6 +99,12 @@ $z-time-btn-svg-wrapper: 5555;
 
 .sub-tasks {
   margin: 0 $s;
+  @include mq(xs) {
+    //margin: $s $s*2 $s $s*3;
+    margin: $s;
+    margin-left: $s*3;
+    margin-right: 0;
+  }
 }
 
 .title-bar-wrapper {
@@ -331,11 +353,35 @@ $z-time-btn-svg-wrapper: 5555;
     transition: $transition-standard;
     transition-property: transform;
     box-shadow: $shadow-card-shadow;
-    border-radius: $card-border-radius;
+    //border-radius: $card-border-radius;
     border: 1px solid $light-theme-extra-border-color;
+    border-bottom-color: transparent;
 
     @include darkTheme {
       border-color: $dark-theme-extra-border-color;
+      border-color: $dark-theme-bg;
+      //border-color: rgb(55, 55, 55);
+      border-bottom-color: transparent;
+    }
+
+    :host:first-child & {
+      border-top-left-radius: $card-border-radius;
+      border-top-right-radius: $card-border-radius;
+    }
+
+    :host:last-child & {
+      border-bottom-left-radius: $card-border-radius;
+      border-bottom-right-radius: $card-border-radius;
+    }
+
+    :host-context(.isLightTheme):last-child {
+      border-bottom-color: $light-theme-extra-border-color;
+    }
+
+    :host-context(.isDarkTheme):last-child {
+      border-bottom-color: $dark-theme-extra-border-color;
+      border-bottom-color: $dark-theme-bg;
+      //border-bottom-color: rgb(55, 55, 55);
     }
   }
 
@@ -343,6 +389,7 @@ $z-time-btn-svg-wrapper: 5555;
     transform: scale($this-current-task-zoom);
     box-shadow: $this-active-shadow;
     border-color: transparent;
+    border-radius: $card-border-radius;
   }
 
   &.isDone {
@@ -436,7 +483,7 @@ $z-time-btn-svg-wrapper: 5555;
   }
 
   .isCurrent & {
-    font-weight: bold;
+    //font-weight: bold;
   }
 
   &:after {
@@ -734,6 +781,3 @@ progress-bar {
   }
 }
 
-.sub-tasks {
-  //margin: $s 3*$s;
-}

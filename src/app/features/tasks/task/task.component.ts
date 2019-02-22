@@ -50,6 +50,13 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   @ViewChild('blockLeft') blockLeftEl: ElementRef;
   @ViewChild('blockRight') blockRightEl: ElementRef;
   @HostBinding('tabindex') tabIndex = 1;
+
+  // TODO do via observable
+  @HostBinding('class.isCurrent')
+  private get _isCurrent() {
+    return this.isCurrent;
+  }
+
   private _dragEnterTarget: HTMLElement;
   private _destroy$: Subject<boolean> = new Subject<boolean>();
   private _currentPantimeout: number;
