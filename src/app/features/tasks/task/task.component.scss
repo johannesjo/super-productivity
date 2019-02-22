@@ -68,10 +68,13 @@ $z-time-btn-svg-wrapper: 5555;
   top: 0;
   transition: $transition-standard;
   transition-property: transform;
-  box-shadow: $shadow-card-shadow;
   //border-radius: $card-border-radius;
   border: 1px solid $light-theme-extra-border-color;
   border-bottom-color: transparent;
+
+  @include mq(xs) {
+    box-shadow: $shadow-card-shadow;
+  }
 
   @include darkTheme {
     border-color: $dark-theme-extra-border-color;
@@ -83,7 +86,7 @@ $z-time-btn-svg-wrapper: 5555;
   @include isHostFocus('.inner-wrapper') {
     border-radius: $card-border-radius;
 
-    @include mq(xs, min) {
+    @include mq(xs) {
       border: 1px solid $c-accent !important;
       box-shadow: $whiteframe-shadow-5dp;
     }
@@ -141,7 +144,7 @@ $z-time-btn-svg-wrapper: 5555;
 
 
 .sub-tasks {
-  margin: $s 0 $s $s*2;
+  margin: $s 0 $s $s*3;
 
   @include mq(xs) {
     //margin: $s $s*2 $s $s*3;
@@ -668,6 +671,10 @@ progress-bar {
   margin-top: -1px !important;
   transform-origin: left top;
   opacity: 1 !important;
+
+  @include mq(xs, max) {
+    display: none;
+  }
 
   &:hover {
     transform: scale(1.3) translateY(-50%) !important;

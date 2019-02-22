@@ -6,11 +6,11 @@
 
 @mixin isHostFocus($direct-parent-only-sel: false) {
   @if $direct-parent-only-sel {
-    :host:focus > #{$direct-parent-only-sel} > & {
+    :host-context(.isNoTouchDevice):focus > #{$direct-parent-only-sel} > & {
       @content;
     }
   } @else {
-    :host:focus & {
+    :host-context(.isNoTouchDevice):focus & {
       @content;
     }
   }
