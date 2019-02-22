@@ -1,3 +1,24 @@
+## [2.3.2](https://github.com/johannesjo/super-productivity/compare/v2.3.1...v2.3.2) (2019-02-22)
+
+
+### Bug Fixes
+
+* **reminder:** lower initial time limit to prevent problems at the start ([839a86f](https://github.com/johannesjo/super-productivity/commit/839a86f))
+
+
+### Features
+
+* **tasks:** complete redesign ([096f454](https://github.com/johannesjo/super-productivity/commit/096f454))
+* **tasks:** improve mobile task styles ([f23547c](https://github.com/johannesjo/super-productivity/commit/f23547c))
+* **tasks:** improve mobile task styles ([96fe247](https://github.com/johannesjo/super-productivity/commit/96fe247))
+* **tasks:** improve styling for task shadows and adjust z-index values ([b644d02](https://github.com/johannesjo/super-productivity/commit/b644d02))
+* **tasks:** improve styling for toggle sub tasks button and improve mobile ([366e03c](https://github.com/johannesjo/super-productivity/commit/366e03c))
+* **tasks:** only show swipe blocks when touch device ([f6fd35d](https://github.com/johannesjo/super-productivity/commit/f6fd35d))
+* **tasks:** various little improvements ([83544b5](https://github.com/johannesjo/super-productivity/commit/83544b5))
+* improve margins for task list wrapper ([2924164](https://github.com/johannesjo/super-productivity/commit/2924164))
+
+
+
 ## [2.3.1](https://github.com/johannesjo/super-productivity/compare/v2.3.0...v2.3.1) (2019-02-21)
 
 
