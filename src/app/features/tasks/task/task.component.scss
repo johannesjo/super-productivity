@@ -1,5 +1,6 @@
 @import '../../../../variables';
 
+$task-shadow: $shadow-card-shadow;
 $task-active-shadow: $whiteframe-shadow-6dp;
 $task-first-line-min-height: 40px;
 $task-icon-default-opacity: 0.7;
@@ -19,13 +20,13 @@ $z-progress-bar: 7;
 $z-check-done: 11;
 $z-first-line-controls-hover: 12;
 $z-swipe-block: 13;
-$z-toggle-sub-task-btn: 14;
-$z-task-title-focus: 15;
 
 $z-is-current-host: 20;
 $z-focus-host: 20;
 
-$z-drag-over-msg: 21;
+$z-toggle-sub-task-btn: 21;
+$z-drag-over-msg: 22;
+$z-task-title-focus: 23;
 
 $z-time-btn-svg-wrapper: 5555;
 
@@ -73,7 +74,7 @@ $z-time-btn-svg-wrapper: 5555;
   border-bottom-color: transparent;
 
   @include mq(xs) {
-    box-shadow: $shadow-card-shadow;
+    box-shadow: $task-shadow;
   }
 
   @include darkTheme {
@@ -99,23 +100,23 @@ $z-time-btn-svg-wrapper: 5555;
     border-radius: $card-border-radius;
   }
 
-  :host:first-child & {
+  :host:first-child > .inner-wrapper > & {
     border-top-left-radius: $card-border-radius;
     border-top-right-radius: $card-border-radius;
   }
 
-  :host:last-child & {
+  :host:last-child > .inner-wrapper > & {
     border-bottom-left-radius: $card-border-radius;
     border-bottom-right-radius: $card-border-radius;
   }
 
-  :host-context(.isLightTheme):last-child & {
-    border-bottom-color: $light-theme-extra-border-color;
+  :host-context(.isLightTheme):last-child > .inner-wrapper > & {
+    //border-bottom-color: $light-theme-extra-border-color;
   }
 
-  :host-context(.isDarkTheme):last-child & {
-    border-bottom-color: $dark-theme-extra-border-color;
-    border-bottom-color: $dark-theme-bg;
+  :host-context(.isDarkTheme):last-child > .inner-wrapper > & {
+    //border-bottom-color: $dark-theme-extra-border-color;
+    //border-bottom-color: $dark-theme-bg;
     //border-bottom-color: rgb(55, 55, 55);
   }
 
