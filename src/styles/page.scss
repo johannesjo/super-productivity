@@ -28,7 +28,7 @@ app-root,
   margin: auto;
 
   @include mq(xs) {
-    padding: 0 2*$s $s*9;
+    padding: $s 2*$s $s*9;
   }
 
   @include mq(component) {
