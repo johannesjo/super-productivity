@@ -1,9 +1,9 @@
 import { ErrorHandler, Injectable } from '@angular/core';
-import { SnackService } from '../snack/snack.service';
 import { isObject } from '../../util/is-object';
 import { getJiraResponseErrorTxt } from '../../util/get-jira-response-error-text';
 import { HANDLED_ERROR, IS_ELECTRON } from '../../app.constants';
 import { ElectronService } from 'ngx-electron';
+import { BannerService } from '../banner/banner.service';
 
 const _createErrorAlert = (err: string) => {
   const errorAlert = document.createElement('div');
@@ -35,7 +35,7 @@ export class GlobalErrorHandler implements ErrorHandler {
   private _electronLogger: any;
 
   constructor(
-    private _snackService: SnackService,
+    private _bannerService: BannerService,
     private _electronService: ElectronService,
   ) {
     if (IS_ELECTRON) {
@@ -50,13 +50,24 @@ export class GlobalErrorHandler implements ErrorHandler {
 
       // NOTE: snack won't work most of the time
       try {
-        this._snackService.open({
-          type: 'GLOBAL_ERROR',
-          config: {
-            // display basically forever
-            duration: 60 * 60 * 24 * 1000,
+        this._bannerService.open({
+          id: 'GLOBAL_ERROR',
+          type: 'ERROR',
+          ico: 'error',
+          msg: 'ERROR: ' + errorStr.substring(0, 300),
+          action: {
+            label: 'Report',
+            fn: () => window.open('https://github.com/johannesjo/super-productivity/issues/new'),
           },
-          message: errorStr.substring(0, 150),
+          action2: {
+            label: 'Reload App',
+            fn: () => window.location.reload()
+          },
+          action3: {
+            label: 'Dismiss',
+            fn: () => {
+            }
+          }
         });
       } catch (e) {
         _createErrorAlert(errorStr);

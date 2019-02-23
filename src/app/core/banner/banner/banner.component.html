@@ -1,6 +1,7 @@
 <div class="content-wrapper"
      @expand
-     *ngIf="(bannerService.activeBanner$|async) as banner">
+     *ngIf="(bannerService.activeBanner$|async) as banner"
+     [class.isError]="banner.type==='ERROR'">
   <div class="message-wrapper">
     <mat-icon *ngIf="banner.ico">{{banner.ico}}</mat-icon>
 
@@ -21,6 +22,10 @@
     <button mat-button
             (click)="action(banner.id, banner.action2)"
             *ngIf="banner.action2">{{banner.action2.label}}
+    </button>
+    <button mat-button
+            (click)="action(banner.id, banner.action3)"
+            *ngIf="banner.action3">{{banner.action3.label}}
     </button>
   </div>
 </div>
