@@ -6,6 +6,10 @@
   z-index: 2;
 }
 
+:host-context(.isDarkTheme) {
+  background-color: $dark-theme-bg-darker;
+}
+
 .content-wrapper {
   max-width: $component-max-width;
   margin: auto;
