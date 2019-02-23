@@ -1,5 +1,7 @@
 @import '../../../../variables';
 
+$vertical-button-margin: $s;
+
 :host {
   box-shadow: $shadow-card-shadow;
   position: relative;
@@ -14,8 +16,12 @@
   max-width: $component-max-width;
   margin: auto;
   padding: $s*2;
-  padding-top: $s*3;
-  padding-bottom: $s;
+  padding-top: $s*2;
+  padding-bottom: $s*2;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  margin-top: -1*$vertical-button-margin;
 
   @include mq(component) {
     // sync to task list padding
@@ -27,6 +33,7 @@
 .message-wrapper {
   display: flex;
   align-items: center;
+  margin-top: $vertical-button-margin;
 
   mat-icon {
     margin-right: $s*1.5;
@@ -34,6 +41,7 @@
 }
 
 .buttons {
-  margin-top: $s;
+  margin-top: $vertical-button-margin;
+  margin-left: auto;
   text-align: right;
 }

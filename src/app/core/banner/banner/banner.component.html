@@ -10,6 +10,11 @@
 
   <div class="buttons">
     <button mat-button
+            (click)="dismiss(banner.id)"
+            *ngIf="!banner.action2">Dismiss
+    </button>
+
+    <button mat-button
             (click)="action(banner.id, banner.action)"
             *ngIf="banner.action">{{banner.action.label}}
     </button>

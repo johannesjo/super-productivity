@@ -16,6 +16,7 @@ import {
   IPC_TRIGGER_GOOGLE_AUTH
 } from '../../../../electron/ipc-events.const';
 import { ElectronService } from 'ngx-electron';
+import { BannerService } from '../../core/banner/banner.service';
 
 const EXPIRES_SAFETY_MARGIN = 60000;
 
@@ -57,12 +58,19 @@ export class GoogleApiService {
   private _isGapiInitialized = false;
   private _gapi: any;
 
-  constructor(private readonly _http: HttpClient,
-              private readonly _configService: ConfigService,
-              private readonly _electronService: ElectronService,
-              private readonly _snackService: SnackService) {
+  constructor(
+    private readonly _http: HttpClient,
+    private readonly _configService: ConfigService,
+    private readonly _electronService: ElectronService,
+    private readonly _snackService: SnackService,
+    private readonly _bannerService: BannerService,
+  ) {
     this.isLoggedIn$.subscribe((isLoggedIn) => this.isLoggedIn = isLoggedIn);
     this._onTokenExpire$.subscribe((val) => console.log('onTokenExpire$', val));
+
+    // setTimeout(() => {
+    //   this._handleUnAuthenticated(null);
+    // }, 4000);
   }
 
   private get _session(): GoogleSession {
@@ -354,11 +362,13 @@ export class GoogleApiService {
   private _handleUnAuthenticated(err) {
     this.logout();
     setTimeout(() => {
-      this._snackService.open({
-        message: 'GoogleApi: Failed to authenticate please try logging in again!',
-        type: 'GOOGLE_LOGIN',
-        config: {
-          duration: 20 * 1000
+      this._bannerService.open({
+        msg: 'GoogleApi: Failed to authenticate please try logging in again!',
+        ico: 'cloud_off',
+        id: 'GOOGLE_LOGIN',
+        action: {
+          label: 'Login',
+          fn: () => this.login()
         }
       });
     }, 2000);

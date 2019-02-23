@@ -121,10 +121,6 @@ export class TakeABreakService {
     private _bannerService: BannerService,
     private _chromeExtensionInterfaceService: ChromeExtensionInterfaceService,
   ) {
-    this._triggerManualReset$.subscribe(val => {
-      console.log('MANUAL TAKE A BREAK RESET', val);
-    });
-
     const PING_UPDATE_BANNER_INTERVAL = 60 * 1000;
     this.timeWorkingWithoutABreak$.pipe(
       withLatestFrom(

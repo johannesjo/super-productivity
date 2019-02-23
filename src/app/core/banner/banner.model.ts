@@ -1,4 +1,4 @@
-export type BannerId = 'TAKE_A_BREAK';
+export type BannerId = 'TAKE_A_BREAK' | 'GOOGLE_LOGIN';
 
 export interface BannerAction {
   label: string;
