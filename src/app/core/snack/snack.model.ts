@@ -1,7 +1,7 @@
 import { MatSnackBarConfig } from '@angular/material';
 import { Observable } from 'rxjs';
 
-export type SnackType = 'ERROR' | 'SUCCESS' | 'CUSTOM' | 'GOOGLE_LOGIN' | 'GLOBAL_ERROR' | 'JIRA_UNBLOCK' | 'TAKE_A_BREAK';
+export type SnackType = 'ERROR' | 'SUCCESS' | 'CUSTOM' | 'GLOBAL_ERROR' | 'JIRA_UNBLOCK';
 
 export interface SnackParams {
   message: string;
