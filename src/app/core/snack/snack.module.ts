@@ -9,7 +9,6 @@ import { MatSnackBarModule } from '@angular/material';
 import { SnackCustomComponent } from './snack-custom/snack-custom.component';
 import { UiModule } from '../../ui/ui.module';
 import { SnackJiraUnblockComponent } from './snack-jira-unblock/snack-jira-unblock.component';
-import { SnackGlobalErrorComponent } from './snack-global-error/snack-global-error.component';
 
 @NgModule({
   imports: [
@@ -22,12 +21,10 @@ import { SnackGlobalErrorComponent } from './snack-global-error/snack-global-err
   declarations: [
     SnackCustomComponent,
     SnackJiraUnblockComponent,
-    SnackGlobalErrorComponent,
   ],
   entryComponents: [
     SnackCustomComponent,
     SnackJiraUnblockComponent,
-    SnackGlobalErrorComponent,
   ],
 })
 export class SnackModule {
