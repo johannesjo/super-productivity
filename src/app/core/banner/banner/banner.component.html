@@ -1,14 +1,21 @@
-<div class="content-wrapper">
+<div class="content-wrapper"
+     @expand
+     *ngIf="(bannerService.activeBanner$|async) as banner">
   <div class="message-wrapper">
-    <mat-icon>free_breakfast</mat-icon>
+    <mat-icon *ngIf="banner.ico">{{banner.ico}}</mat-icon>
 
-    <div class="message">Take a break! You have been working for 2h without one. Go away from the computer! Take a short
-      walk! Makes you more productive in the long run!
-    </div>
+    <div class="message"
+         [innerHTML]="banner.msg"></div>
   </div>
 
   <div class="buttons">
-    <button mat-button>I already did</button>
-    <button mat-button>Snooze for 15m</button>
+    <button mat-button
+            (click)="action(banner.id, banner.action)"
+            *ngIf="banner.action">{{banner.action.label}}
+    </button>
+    <button mat-button
+            (click)="action(banner.id, banner.action2)"
+            *ngIf="banner.action2">{{banner.action2.label}}
+    </button>
   </div>
 </div>
