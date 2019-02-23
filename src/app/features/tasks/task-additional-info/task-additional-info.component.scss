@@ -7,8 +7,8 @@
 }
 
 .wrapper {
-  margin: $s $s*2 $s*2;
-  margin: $s 1px $s;
+  // 1px for the border
+  margin: 0 1px 0;
   overflow: hidden;
   transition: $transition-standard;
 
@@ -87,7 +87,7 @@
   white-space: nowrap;
 }
 
-.tab-content {
+.attachment-list-tab {
   padding: $s $s*2;
 
   h3 {
@@ -95,15 +95,15 @@
   }
 }
 
-.tab-content,
+.attachment-list-tab,
 .mat-tab-body {
   // needed to overstyle current task
   @include standardThemeTextColor();
 }
 
 
-.notes {
-  margin: $s;
+.notes-tab {
+  margin: $s/2;
   border-radius: $card-border-radius;
 
   ::ng-deep {

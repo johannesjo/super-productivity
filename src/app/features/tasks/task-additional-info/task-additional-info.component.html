@@ -16,7 +16,7 @@
         <span class="tab-label-text">Notes</span>
       </ng-template>
 
-      <div class="mat-elevation-z2 notes">
+      <div class="mat-elevation-z1 notes-tab">
         <inline-markdown (changed)="changeTaskNotes($event)"
                          [model]="taskData.notes"></inline-markdown>
       </div>
@@ -28,7 +28,7 @@
         <span class="tab-label-text">Attachments({{issueAttachments?.length + (localAttachments$|async)?.length}})</span>
       </ng-template>
 
-      <div class="tab-content">
+      <div class="attachment-list-tab">
         <ng-container *ngIf="taskData.issueType">
           <h3 class="mat-h3"
               style="margin-bottom: 0;">{{taskData.issueType}} Attachments</h3>
