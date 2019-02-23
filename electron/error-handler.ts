@@ -1,5 +1,6 @@
 import { getIsAppReady, getWin } from './main-window';
 import { IPC_ERROR } from './ipc-events.const';
+import { error } from 'electron-log';
 
 const WAIT_FOR_WIN_TIMEOUT_DURATION = 4000;
 const ERROR_EV = IPC_ERROR;
@@ -29,6 +30,7 @@ function _handleError(e, additionalLogInfo, errObj) {
 
   console.error('ERR', e);
   console.log(stack);
+  error(e, stack);
 
   if (additionalLogInfo) {
     console.log('Additional Error info: ', additionalLogInfo);
@@ -40,7 +42,8 @@ function _handleError(e, additionalLogInfo, errObj) {
       stack: stack,
     });
   } else {
-    console.error('ERR', 'Frontend not loaded');
+    console.error('ERR', 'Electron Error: Frontend not loaded. Could not send error to renderer.');
+    error('Electron Error: Frontend not loaded. Could not send error to renderer.');
     throw errObj;
   }
 }
