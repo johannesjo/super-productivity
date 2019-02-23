@@ -2,15 +2,16 @@ import { ErrorHandler, Injectable } from '@angular/core';
 import { SnackService } from '../snack/snack.service';
 import { isObject } from '../../util/is-object';
 import { getJiraResponseErrorTxt } from '../../util/get-jira-response-error-text';
-import { HANDLED_ERROR } from '../../app.constants';
+import { HANDLED_ERROR, IS_ELECTRON } from '../../app.constants';
+import { ElectronService } from 'ngx-electron';
 
-const _createErrorAlert = (error: string) => {
+const _createErrorAlert = (err: string) => {
   const errorAlert = document.createElement('div');
   errorAlert.classList.add('global-error-alert');
   errorAlert.innerHTML = `
     <h2>An error occurred<h2>
     <p><a href="https://github.com/johannesjo/super-productivity/issues/new" target="_blank">Please Report</a></p>
-    <pre>${error}</pre>
+    <pre>${err}</pre>
     `;
   const btnReload = document.createElement('BUTTON');
   btnReload.innerText = 'Reload App';
@@ -21,15 +22,32 @@ const _createErrorAlert = (error: string) => {
   document.body.append(errorAlert);
 };
 
+// chrome only??
+const _getStackTrace = () => {
+  const obj: any = {};
+  Error.captureStackTrace(obj, _getStackTrace);
+  return obj.stack;
+};
+
+
 @Injectable()
 export class CustomErrorHandler implements ErrorHandler {
-  constructor(private _snackService: SnackService) {
+  private _electronLogger: any;
+
+  constructor(
+    private _snackService: SnackService,
+    private _electronService: ElectronService,
+  ) {
+    if (IS_ELECTRON) {
+      this._electronLogger = this._electronService.remote.require('electron-log');
+    }
   }
 
-  handleError(error: any) {
+  handleError(err: any) {
     // if not our custom error handler we have a critical error on our hands
-    if (!error || (!error.handledError && (typeof error === 'string' && !error.match(HANDLED_ERROR)))) {
-      const errorStr = this._getErrorStr(error);
+    if (!err || (!err.handledError && (typeof err === 'string' && !err.match(HANDLED_ERROR)))) {
+      const errorStr = this._getErrorStr(err);
+
       // NOTE: snack won't work most of the time
       try {
         this._snackService.open({
@@ -44,9 +62,19 @@ export class CustomErrorHandler implements ErrorHandler {
         _createErrorAlert(errorStr);
       }
     }
-    console.error('GLOBAL_ERROR_HANDLER', error);
+    console.error('GLOBAL_ERROR_HANDLER', err);
+    if (IS_ELECTRON) {
+      let stackTrace;
+      try {
+        stackTrace = _getStackTrace();
+      } catch (e) {
+        stackTrace = '';
+      }
+      this._electronLogger.error('Frontend Error:', err, stackTrace);
+    }
+
     // NOTE: rethrow the error otherwise it gets swallowed
-    throw error;
+    throw err;
   }
 
   private _getErrorStr(err: any): string {
