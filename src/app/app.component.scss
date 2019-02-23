@@ -65,3 +65,17 @@ mat-drawer {
   left: 0;
   z-index: 220;
 }
+
+add-task-bar {
+  z-index: 10000;
+}
+
+main-header {
+  position: relative;
+  z-index: 4;
+}
+
+bookmark-bar {
+  position: relative;
+  z-index: 3;
+}
