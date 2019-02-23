@@ -361,17 +361,15 @@ export class GoogleApiService {
 
   private _handleUnAuthenticated(err) {
     this.logout();
-    setTimeout(() => {
-      this._bannerService.open({
-        msg: 'GoogleApi: Failed to authenticate please try logging in again!',
-        ico: 'cloud_off',
-        id: 'GOOGLE_LOGIN',
-        action: {
-          label: 'Login',
-          fn: () => this.login()
-        }
-      });
-    }, 2000);
+    this._bannerService.open({
+      msg: 'GoogleApi: Failed to authenticate please try logging in again!',
+      ico: 'cloud_off',
+      id: 'GOOGLE_LOGIN',
+      action: {
+        label: 'Login',
+        fn: () => this.login()
+      }
+    });
     console.error(err);
   }
 
