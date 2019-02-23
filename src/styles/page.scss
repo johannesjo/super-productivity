@@ -13,6 +13,16 @@ app-root,
   font-family: 'Roboto', sans-serif;
 }
 
+body {
+  &.isLightTheme {
+    color: $light-theme-text-color;
+  }
+
+  &.isDarkTheme {
+    color: $dark-theme-text-color;
+  }
+}
+
 .page-wrapper {
   padding: $s 2*$s $s*9;
 }

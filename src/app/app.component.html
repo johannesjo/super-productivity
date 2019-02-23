@@ -2,6 +2,7 @@
   <main-header></main-header>
   <bookmark-bar *ngIf="bookmarkService.isShowBookmarks$|async"
                 [@expand]></bookmark-bar>
+  <banner></banner>
   <add-task-bar (blur)="layoutService.hideAddTaskBar()"
                 *ngIf="layoutService.isShowAddTaskBar$|async"
                 [@blendInOut]
