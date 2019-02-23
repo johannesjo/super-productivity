@@ -31,7 +31,7 @@ const _getStackTrace = () => {
 
 
 @Injectable()
-export class CustomErrorHandler implements ErrorHandler {
+export class GlobalErrorHandler implements ErrorHandler {
   private _electronLogger: any;
 
   constructor(
