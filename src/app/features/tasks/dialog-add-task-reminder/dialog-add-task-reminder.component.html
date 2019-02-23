@@ -1,22 +1,23 @@
 <form (submit)="save()">
   <mat-dialog-content>
-    <h2 class="mat-h2">{{isEdit ? 'Edit Reminder' : 'Schedule Task'}}</h2>
+    <h2 class="mat-h2"
+        style="margin-bottom: 0;">{{isEdit ? 'Edit Reminder' : 'Schedule Task'}}</h2>
     <h3 class="mat-h3">"{{task.title}}"</h3>
 
     <div class="form-wrapper">
-      <div *ngIf="isMoveToBacklogPossible"
-           style="margin-bottom: 16px;">
-        <mat-slide-toggle [(ngModel)]="isMoveToBacklog"
-                          name="isListSubTasks">
-          Move task to backlog until scheduled
-        </mat-slide-toggle>
-      </div>
-
       <datetime-input (modelChange)="date=$event"
                       [model]="date"
                       [required]="true"
                       name="reminderDate"
                       placeholder="Datetime for reminder"></datetime-input>
+
+      <div *ngIf="isMoveToBacklogPossible"
+           style="margin: 16px;">
+        <mat-slide-toggle [(ngModel)]="isMoveToBacklog"
+                          name="isListSubTasks">
+          Move task to backlog until scheduled
+        </mat-slide-toggle>
+      </div>
     </div>
   </mat-dialog-content>
 
