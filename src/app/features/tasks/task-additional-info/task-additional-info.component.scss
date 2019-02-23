@@ -9,7 +9,6 @@
 .wrapper {
   // 1px for the border
   margin: 0 1px 0;
-  overflow: hidden;
   transition: $transition-standard;
 
   border: 1px solid transparent;
@@ -104,6 +103,7 @@
 
 .notes-tab {
   margin: $s/2;
+  margin-bottom: 2px;
   border-radius: $card-border-radius;
 
   ::ng-deep {

@@ -2,6 +2,7 @@
 
 .table-wrapper {
   margin: $s*2;
+  margin-bottom: $s;
   @include standardThemeTextColor();
 }
 
