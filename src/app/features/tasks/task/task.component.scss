@@ -154,7 +154,7 @@ $z-time-btn-svg-wrapper: 5555;
 
   @include mq(xs) {
     //margin: $s $s*2 $s $s*3;
-    margin: $s 0 $s $s*3;
+    margin: $s 0 $s $s*5;
   }
 }
 
@@ -651,7 +651,7 @@ progress-bar {
 .toggle-sub-tasks-btn {
   position: absolute !important;
   transform: translateY(-50%);
-  left: -17px;
+  left: -24px;
   top: 50%;
   z-index: $z-toggle-sub-task-btn !important;
   min-width: 0;
