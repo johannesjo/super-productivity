@@ -7,7 +7,6 @@ import { MatSnackBar, MatSnackBarRef, SimpleSnackBar } from '@angular/material';
 import { Store } from '@ngrx/store';
 import { SnackCustomComponent } from '../snack-custom/snack-custom.component';
 import { DEFAULT_SNACK_CFG } from '../snack.const';
-import { SnackJiraUnblockComponent } from '../snack-jira-unblock/snack-jira-unblock.component';
 
 @Injectable()
 export class SnackEffects {
@@ -31,9 +30,7 @@ export class SnackEffects {
     );
 
 
-  private _ref: MatSnackBarRef<SnackCustomComponent
-    | SnackJiraUnblockComponent
-    | SimpleSnackBar>;
+  private _ref: MatSnackBarRef<SnackCustomComponent | SimpleSnackBar>;
 
   constructor(private actions$: Actions,
               private store$: Store<any>,
@@ -57,10 +54,6 @@ export class SnackEffects {
     }
 
     switch (type) {
-      case 'JIRA_UNBLOCK':
-        this._ref = this.matSnackBar.openFromComponent(SnackJiraUnblockComponent, cfg);
-        break;
-
       case 'ERROR':
       case 'CUSTOM':
       case 'SUCCESS':

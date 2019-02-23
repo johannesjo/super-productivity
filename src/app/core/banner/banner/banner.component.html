@@ -4,6 +4,8 @@
      [class.isError]="banner.type==='ERROR'">
   <div class="message-wrapper">
     <mat-icon *ngIf="banner.ico">{{banner.ico}}</mat-icon>
+    <mat-icon *ngIf="banner.svgIco"
+              [svgIcon]="banner.svgIco"></mat-icon>
 
     <div class="message"
          [innerHTML]="banner.msg"></div>

@@ -8,7 +8,6 @@ import { SnackEffects } from './store/snack.effects';
 import { MatSnackBarModule } from '@angular/material';
 import { SnackCustomComponent } from './snack-custom/snack-custom.component';
 import { UiModule } from '../../ui/ui.module';
-import { SnackJiraUnblockComponent } from './snack-jira-unblock/snack-jira-unblock.component';
 
 @NgModule({
   imports: [
@@ -20,11 +19,9 @@ import { SnackJiraUnblockComponent } from './snack-jira-unblock/snack-jira-unblo
   ],
   declarations: [
     SnackCustomComponent,
-    SnackJiraUnblockComponent,
   ],
   entryComponents: [
     SnackCustomComponent,
-    SnackJiraUnblockComponent,
   ],
 })
 export class SnackModule {

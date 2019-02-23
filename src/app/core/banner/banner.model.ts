@@ -1,4 +1,9 @@
-export type BannerId = 'TAKE_A_BREAK' | 'GOOGLE_LOGIN' | 'GLOBAL_ERROR';
+export type BannerId =
+  'TAKE_A_BREAK'
+  | 'GOOGLE_LOGIN'
+  | 'GLOBAL_ERROR'
+  | 'JIRA_UNBLOCK';
+
 export type BannerType = 'ERROR';
 
 export interface BannerAction {
@@ -10,6 +15,7 @@ export interface Banner {
   id: BannerId;
   msg: string;
   ico?: string;
+  svgIco?: string;
   type?: BannerType;
   action?: BannerAction;
   action2?: BannerAction;
