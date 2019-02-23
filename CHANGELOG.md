@@ -1,3 +1,21 @@
+# [2.4.0](https://github.com/johannesjo/super-productivity/compare/v2.3.2...v2.4.0) (2019-02-23)
+
+
+### Features
+
+* add logging to file error log from frontend ([1f06eda](https://github.com/johannesjo/super-productivity/commit/1f06eda))
+* make backlog shadow a little less intense ([c6ca87c](https://github.com/johannesjo/super-productivity/commit/c6ca87c))
+* **banners:** add dark theme ui ([7537e55](https://github.com/johannesjo/super-productivity/commit/7537e55))
+* **banners:** add for google login ([726bed0](https://github.com/johannesjo/super-productivity/commit/726bed0))
+* **banners:** add service logic and make banner dynamic ([50ebb9a](https://github.com/johannesjo/super-productivity/commit/50ebb9a))
+* **banners:** add ui and boilerplate ([cd0ccea](https://github.com/johannesjo/super-productivity/commit/cd0ccea))
+* **electron:** implement error logging ([8254567](https://github.com/johannesjo/super-productivity/commit/8254567))
+* **tasks:** adjust margin between sub tasks and note content ([cac010a](https://github.com/johannesjo/super-productivity/commit/cac010a))
+* **tasks:** adjust task list padding ([d65d598](https://github.com/johannesjo/super-productivity/commit/d65d598))
+* **tasks:** adjust task notes styling ([bd31bcb](https://github.com/johannesjo/super-productivity/commit/bd31bcb))
+
+
+
 ## [2.3.2](https://github.com/johannesjo/super-productivity/compare/v2.3.1...v2.3.2) (2019-02-22)
 
 
