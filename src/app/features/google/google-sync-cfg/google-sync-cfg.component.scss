@@ -19,9 +19,16 @@
   button {
     flex: 1;
     margin-left: $s;
+    text-overflow: ellipsis;
+    overflow: hidden;
 
     &:first-child {
       margin-left: 0;
+    }
+
+    ::ng-deep .mat-button-wrapper{
+      text-overflow: ellipsis;
+      overflow: hidden;
     }
   }
 }
@@ -34,8 +41,4 @@ mat-slide-toggle {
 .auto-sync-settings {
   display: flex;
   flex-direction: column;
-}
-
-.sync-file-wrapper {
-  display: flex;
 }
