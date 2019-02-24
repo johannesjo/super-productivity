@@ -16,12 +16,11 @@ $vertical-button-margin: $s;
   max-width: $component-max-width;
   margin: auto;
   padding: $s*2;
-  padding-top: $s*2;
-  padding-bottom: $s*2;
+  padding-top: $s;
+  padding-bottom: $s;
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
-  margin-top: -1*$vertical-button-margin;
 
   @include mq(component) {
     // sync to task list padding
@@ -33,7 +32,8 @@ $vertical-button-margin: $s;
 .message-wrapper {
   display: flex;
   align-items: center;
-  margin-top: $vertical-button-margin;
+  padding-top: $s;
+  padding-bottom: $s;
 
   mat-icon {
     margin-right: $s*1.5;
@@ -45,7 +45,7 @@ $vertical-button-margin: $s;
 }
 
 .buttons {
-  margin-top: $vertical-button-margin;
   margin-left: auto;
-  text-align: right;
+  display: flex;
+  align-items: center;
 }
