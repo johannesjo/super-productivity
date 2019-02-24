@@ -3,14 +3,19 @@ body .mat-dialog-content {
 }
 
 body .mat-snack-bar-container {
-  &.subtle {
-    margin-bottom: 0;
-    border-bottom-left-radius: 0;
-    border-bottom-right-radius: 0;
-    min-height: 24px;
-    padding-top: 8px;
-    padding-bottom: 8px;
-  }
+  padding: 0 16px !important;
+  pointer-events: all;
+  min-height: 48px;
+
+
+  //&.subtle {
+  //  margin-bottom: 0;
+  //  border-bottom-left-radius: 0;
+  //  border-bottom-right-radius: 0;
+  //  min-height: 24px;
+  //  padding-top: 8px;
+  //  padding-bottom: 8px;
+  //}
 
   @include mq(sm) {
     max-width: 60vw;
@@ -20,6 +25,11 @@ body .mat-snack-bar-container {
   }
 }
 
+body .mat-snack-bar-handset {
+  pointer-events: none;
+}
+
 body .mat-form-field {
   display: block;
 }
+
