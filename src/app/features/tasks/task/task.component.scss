@@ -481,7 +481,7 @@ $z-time-btn-svg-wrapper: 5555;
   z-index: $z-check-done;
   transform: translate(-50%, -50%);
   transition: $transition-standard;
-
+  border-radius: 50%;
 
   &:hover {
     opacity: 1 !important;
