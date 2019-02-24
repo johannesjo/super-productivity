@@ -33,7 +33,7 @@ export class GoogleApiService {
     switchMap((session) => {
       const expiresAt = session && session.expiresAt || 0;
       const expiresIn = expiresAt - (moment().valueOf() + EXPIRES_SAFETY_MARGIN);
-      return expiresIn > 0
+      return this._isTokenExpired(session)
         ? timer(expiresIn)
         : EMPTY;
     })
@@ -93,12 +93,13 @@ export class GoogleApiService {
     };
 
     if (IS_ELECTRON) {
-      if (this.isLoggedIn) {
+      const session = this._session;
+      if (this.isLoggedIn && !this._isTokenExpired(session)) {
         return new Promise((resolve) => resolve(true));
       }
-      console.log('GOOGLE_LOGIN: logging in via refresh token', this._session.refreshToken);
+      console.log('GOOGLE_LOGIN: logging in via refresh token', session.refreshToken);
 
-      this._electronService.ipcRenderer.send(IPC_TRIGGER_GOOGLE_AUTH, this._session.refreshToken);
+      this._electronService.ipcRenderer.send(IPC_TRIGGER_GOOGLE_AUTH, session.refreshToken);
       return new Promise((resolve, reject) => {
         this._electronService.ipcRenderer.on(IPC_GOOGLE_AUTH_TOKEN, (ev, data: any) => {
           console.log('GOOGLE_LOGIN: ELECTRON LOGIN RESPONSE', data);
@@ -480,5 +481,11 @@ export class GoogleApiService {
     script.onload = loadFunction.bind(that);
     // script['onreadystatechange'] = loadFunction.bind(that);
     document.getElementsByTagName('head')[0].appendChild(script);
+  }
+
+  private _isTokenExpired(session): boolean {
+    const expiresAt = session && session.expiresAt || 0;
+    const expiresIn = expiresAt - (moment().valueOf() + EXPIRES_SAFETY_MARGIN);
+    return expiresIn > 0;
   }
 }
