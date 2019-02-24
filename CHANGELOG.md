@@ -1,3 +1,21 @@
+## [2.4.2](https://github.com/johannesjo/super-productivity/compare/v2.4.1...v2.4.2) (2019-02-24)
+
+
+### Bug Fixes
+
+* **bookmarks:** slide animation flicker ([3d6bfb8](https://github.com/johannesjo/super-productivity/commit/3d6bfb8))
+* **tasks:** weird hover state for check done ([2d5fde4](https://github.com/johannesjo/super-productivity/commit/2d5fde4))
+
+
+### Features
+
+* **snack:** add close button ([c099dd5](https://github.com/johannesjo/super-productivity/commit/c099dd5))
+* **snack:** improve styling ([cfd9086](https://github.com/johannesjo/super-productivity/commit/cfd9086))
+* **tasks:** make sub tasks shadow less intense ([4d8761f](https://github.com/johannesjo/super-productivity/commit/4d8761f))
+* **tasks:** show attachment icon for jira attachments too ([906e9a2](https://github.com/johannesjo/super-productivity/commit/906e9a2))
+
+
+
 ## [2.4.1](https://github.com/johannesjo/super-productivity/compare/v2.4.0...v2.4.1) (2019-02-24)
 
 
