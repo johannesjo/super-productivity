@@ -1,3 +1,25 @@
+## [2.4.1](https://github.com/johannesjo/super-productivity/compare/v2.4.0...v2.4.1) (2019-02-24)
+
+
+### Bug Fixes
+
+* **banner:** overlapping bookmark bar ([c3fc765](https://github.com/johannesjo/super-productivity/commit/c3fc765))
+
+
+### Features
+
+* **banner:** add global error banner ([212a260](https://github.com/johannesjo/super-productivity/commit/212a260))
+* **banner:** add jira unblock as banner rather than as snack ([400640e](https://github.com/johannesjo/super-productivity/commit/400640e))
+* add dynamic height ani ([5a11809](https://github.com/johannesjo/super-productivity/commit/5a11809))
+* **banner:** handle banner transition if there are multiple ([00e488f](https://github.com/johannesjo/super-productivity/commit/00e488f))
+* **banner:** improve styling ([8b59888](https://github.com/johannesjo/super-productivity/commit/8b59888))
+* **banner:** remove timeout for google login banner ([cfaf75e](https://github.com/johannesjo/super-productivity/commit/cfaf75e))
+* **reminders:** improve add for task dialog ([125cb11](https://github.com/johannesjo/super-productivity/commit/125cb11))
+* **tasks:** move toggle sub tasks button out of the way ([7722794](https://github.com/johannesjo/super-productivity/commit/7722794))
+* add proper slide animation for bookmark bar and banner ([230a259](https://github.com/johannesjo/super-productivity/commit/230a259))
+
+
+
 # [2.4.0](https://github.com/johannesjo/super-productivity/compare/v2.3.2...v2.4.0) (2019-02-23)
 
 
