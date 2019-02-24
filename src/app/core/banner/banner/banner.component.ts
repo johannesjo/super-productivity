@@ -1,16 +1,16 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, ViewChild } from '@angular/core';
 import { BannerService } from '../banner.service';
-import { expandAnimation } from '../../../ui/animations/expand.ani';
 import { Banner, BannerAction } from '../banner.model';
 import { concatMap, mapTo } from 'rxjs/operators';
 import { merge, Observable, of, timer } from 'rxjs';
+import { slideAnimation } from '../../../ui/animations/slide.ani';
 
 @Component({
   selector: 'banner',
   templateUrl: './banner.component.html',
   styleUrls: ['./banner.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  animations: [expandAnimation]
+  animations: [slideAnimation]
 })
 export class BannerComponent {
   // TODO maybe improve if initial delay is annoying
@@ -26,6 +26,13 @@ export class BannerComponent {
       }
     })
   );
+  height = 120;
+
+  @ViewChild('wrapperEl') set wrapperEl(content: ElementRef) {
+    if (content && content.nativeElement) {
+      this.height = content.nativeElement.offsetHeight;
+    }
+  }
 
   constructor(
     public bannerService: BannerService,

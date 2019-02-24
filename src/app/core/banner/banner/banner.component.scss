@@ -37,6 +37,7 @@ $vertical-button-margin: $s;
 
   mat-icon {
     margin-right: $s*1.5;
+    min-width: 20px;
 
     .isError & {
       color: $red;

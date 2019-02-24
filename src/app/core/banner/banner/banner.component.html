@@ -1,5 +1,6 @@
 <div class="content-wrapper"
-     @expand
+     #wrapperEl
+     [@slide]="{value:'*',params:{elHeight:height}}"
      *ngIf="(activeBanner$|async) as banner"
      [class.isError]="banner.type==='ERROR'">
   <div class="message-wrapper">
