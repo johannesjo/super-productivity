@@ -184,7 +184,8 @@
                   *ngIf="!task.isDone && !isCurrent && !task.subTasks"
                   aria-label="mark as current"
                   mat-menu-item
-                  tabindex="2">
+                  tabindex="2"
+                  class="show-touch-only">
             <mat-icon class="play-icon"
                       svgIcon="play"></mat-icon>
             Start tracking task
@@ -192,12 +193,14 @@
           <button (click)="pauseTask()"
                   *ngIf="!task.isDone && isCurrent && !task.subTasks"
                   mat-menu-item
-                  tabindex="2">
+                  tabindex="2"
+                  class="show-touch-only">
             <mat-icon>pause</mat-icon>
             Pause tracking task
           </button>
 
           <button (click)="toggleTaskDone()"
+                  class="show-touch-only"
                   aria-label="un-/mark as done"
                   mat-menu-item=""
                   tabindex="2">
