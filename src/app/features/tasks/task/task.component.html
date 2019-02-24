@@ -162,7 +162,7 @@
         </button>
 
         <button (click)="toggleShowAttachments()"
-                *ngIf="task.attachmentIds?.length"
+                *ngIf="task.attachmentIds?.length || (task.issueType==='JIRA' && task.issueData && task.issueData['attachments']?.length)"
                 [class.isActive]="task._isAdditionalInfoOpen"
                 title="Show/Hide attachments"
                 class="ico-btn attachment-btn hide-xs"
