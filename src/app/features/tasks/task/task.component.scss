@@ -1,6 +1,7 @@
 @import '../../../../variables';
 
 $task-shadow: $shadow-card-shadow;
+$sub-task-shadow: $whiteframe-shadow-1dp;
 $task-active-shadow: $whiteframe-shadow-6dp;
 $task-first-line-min-height: 40px;
 $task-icon-default-opacity: 0.7;
@@ -75,6 +76,12 @@ $z-time-btn-svg-wrapper: 5555;
 
   @include mq(xs) {
     box-shadow: $task-shadow;
+  }
+
+  :host-context(.sub-tasks) & {
+    @include mq(xs) {
+      box-shadow: $sub-task-shadow;
+    }
   }
 
   @include darkTheme {
