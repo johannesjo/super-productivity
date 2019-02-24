@@ -237,8 +237,6 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
 
   toggleTaskDone() {
     if (this.task.parentId) {
-      this.focusSelf();
-    } else {
       this.focusNext(true);
     }
     this.task.isDone
