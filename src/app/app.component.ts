@@ -44,6 +44,7 @@ import { fadeAnimation } from './ui/animations/fade.ani';
 import { IS_MAC } from './util/is-mac';
 import { selectIsTaskDataLoaded } from './features/tasks/store/task.selectors';
 import { isTouch } from './util/is-touch';
+import { TaskActionTypes } from './features/tasks/store/task.actions';
 
 const SIDE_PANEL_BREAKPOINT = 900;
 

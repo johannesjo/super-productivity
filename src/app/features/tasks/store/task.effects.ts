@@ -307,7 +307,7 @@ export class TaskEffects {
       });
 
       this._store$.dispatch(new SnackOpen({
-        message: `You exceeded your estimated time for "${ct.title}"`,
+        message: `You exceeded your estimated time for "${ct.title.substr(0, 50)}"`,
         actionStr: 'Add 1/2 hour',
         config: {duration: 60 * 1000},
         actionId: TaskActionTypes.UpdateTask,

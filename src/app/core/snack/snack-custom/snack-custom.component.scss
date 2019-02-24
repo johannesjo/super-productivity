@@ -40,6 +40,11 @@ button {
   }
 }
 
+.close-btn {
+  margin-left: 0;
+  margin-right: -$s;
+}
+
 mat-progress-bar {
   position: absolute;
   bottom: -1* $s;
