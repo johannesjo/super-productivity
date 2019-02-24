@@ -14,6 +14,64 @@ export class BannerService {
   );
 
   constructor() {
+    // FOR DEBUGGING
+    // this.open({
+    //   id: 'JIRA_UNBLOCK',
+    //   msg: 'Jira: To prevent shut out from api, access has been blocked by Super Productivity. You probably should check your jira settings!',
+    //   svgIco: 'jira',
+    //   action: {
+    //     label: 'Unblock',
+    //     fn: () => {
+    //     }
+    //   }
+    // });
+    //
+    // this.open({
+    //   id: 'TAKE_A_BREAK',
+    //   ico: 'free_breakfast',
+    //   msg: 'You should take a break',
+    //   action: {
+    //     label: 'I already did',
+    //     fn: () => {
+    //     }
+    //   },
+    //   action2: {
+    //     label: 'Snooze 15m',
+    //     fn: () => {
+    //     }
+    //   },
+    // });
+    //
+    // this.open({
+    //   msg: 'GoogleApi: Failed to authenticate please try logging in again!',
+    //   ico: 'cloud_off',
+    //   id: 'GOOGLE_LOGIN',
+    //   action: {
+    //     label: 'Login',
+    //     fn: () => {
+    //     }
+    //   }
+    // });
+    //
+    // this.open({
+    //   id: 'GLOBAL_ERROR',
+    //   type: 'ERROR',
+    //   ico: 'error',
+    //   msg: 'ERROR: ' + 'Something broke',
+    //   action: {
+    //     label: 'Report',
+    //     fn: () => window.open('https://github.com/johannesjo/super-productivity/issues/new'),
+    //   },
+    //   action2: {
+    //     label: 'Reload App',
+    //     fn: () => window.location.reload()
+    //   },
+    //   action3: {
+    //     label: 'Dismiss',
+    //     fn: () => {
+    //     }
+    //   }
+    // });
   }
 
   open(banner: Banner) {
