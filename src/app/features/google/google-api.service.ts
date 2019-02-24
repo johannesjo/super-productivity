@@ -46,6 +46,7 @@ export class GoogleApiService {
   ).pipe(
     map((session_: GoogleSession | number) => {
       if (session_ === 0) {
+        console.log('GOOGLE API: SESSION EXPIRED, expiresAt', this._session.expiresAt);
         return false;
       }
       const session = session_ as GoogleSession;
@@ -68,6 +69,13 @@ export class GoogleApiService {
     this.isLoggedIn$.subscribe((isLoggedIn) => this.isLoggedIn = isLoggedIn);
     this._onTokenExpire$.subscribe((val) => console.log('onTokenExpire$', val));
 
+    if (IS_ELECTRON) {
+      this._onTokenExpire$.subscribe((val) => {
+        console.log('GOOGLE_LOGIN: onExpire trying to log in again');
+        this.login(true);
+      });
+    }
+
     // setTimeout(() => {
     //   this._handleUnAuthenticated(null);
     // }, 4000);
@@ -78,28 +86,32 @@ export class GoogleApiService {
   }
 
   login(isSkipSuccessMsg = false): Promise<any> {
+    const showSuccessMsg = () => {
+      if (!(isSkipSuccessMsg)) {
+        this._snackIt('SUCCESS', 'GoogleApi: Login successful');
+      }
+    };
+
     if (IS_ELECTRON) {
       if (this.isLoggedIn) {
-        return new Promise((resolve) => resolve());
+        return new Promise((resolve) => resolve(true));
       }
-      console.log('GOOGLE: logging in via refresh token', this._session.refreshToken);
+      console.log('GOOGLE_LOGIN: logging in via refresh token', this._session.refreshToken);
 
       this._electronService.ipcRenderer.send(IPC_TRIGGER_GOOGLE_AUTH, this._session.refreshToken);
       return new Promise((resolve, reject) => {
         this._electronService.ipcRenderer.on(IPC_GOOGLE_AUTH_TOKEN, (ev, data: any) => {
-          console.log('GOOGLE: ELECTRON LOGIN RESPONSE', data);
+          console.log('GOOGLE_LOGIN: ELECTRON LOGIN RESPONSE', data);
           this._updateSession({
             accessToken: data.access_token,
             expiresAt: data.expiry_date,
             refreshToken: data.refresh_token,
           });
-          if (!(isSkipSuccessMsg)) {
-            this._snackIt('SUCCESS', 'GoogleApi: Login successful');
-          }
+          showSuccessMsg();
           resolve(data);
         });
         this._electronService.ipcRenderer.on(IPC_GOOGLE_AUTH_TOKEN_ERROR, (err, hmm) => {
-          console.log('GOOGLE: ELECTRON ERROR', err, hmm);
+          console.log('GOOGLE_LOGIN: ELECTRON ERROR', err, hmm);
           reject(err);
         });
       });
@@ -116,9 +128,7 @@ export class GoogleApiService {
           //   });
           const successHandler = (res) => {
             this._saveToken(res);
-            if (!(isSkipSuccessMsg)) {
-              this._snackIt('SUCCESS', 'GoogleApi: Login successful');
-            }
+            showSuccessMsg();
           };
 
           if (user && user.Zi && user.Zi.access_token) {
@@ -403,37 +413,33 @@ export class GoogleApiService {
   }
 
   private _mapHttp(params_: HttpRequest<string> | any): Observable<any> {
-    if (!this._session.accessToken) {
-      this._handleUnAuthenticated('GoogleApiService: Not logged in');
-      return throwError({handledError: 'Not logged in'});
-    }
-
-    const p = {
-      ...params_,
-      headers: {
-        ...(params_.headers || {}),
-        'Authorization': `Bearer ${this._session.accessToken}`,
-      }
-    };
-    const bodyArg = p.data ? [p.data] : [];
-    const allArgs = [...bodyArg, {
-      headers: new HttpHeaders(p.headers),
-      params: new HttpParams({fromObject: p.params}),
-      reportProgress: false,
-      observe: 'response',
-    }];
-    const req = new HttpRequest(p.method, p.url, ...allArgs);
-
-    // const sub = this._http[p.method.toLowerCase()](p.url, p.data, p)
     return from(this.login(true))
       .pipe(
-        concatMap(() => this._http.request(req)),
+        concatMap(() => {
+          const p = {
+            ...params_,
+            headers: {
+              ...(params_.headers || {}),
+              'Authorization': `Bearer ${this._session.accessToken}`,
+            }
+          };
+          const bodyArg = p.data ? [p.data] : [];
+          const allArgs = [...bodyArg, {
+            headers: new HttpHeaders(p.headers),
+            params: new HttpParams({fromObject: p.params}),
+            reportProgress: false,
+            observe: 'response',
+          }];
+          const req = new HttpRequest(p.method, p.url, ...allArgs);
+          return this._http.request(req);
+        }),
+
         // TODO remove type: 0 @see https://brianflove.com/2018/09/03/angular-http-client-observe-response/
         // tap(res => console.log(res)),
         filter(res => !(res === Object(res) && res.type === 0)),
         map((res: any) => (res && res.body) ? res.body : res),
         catchError((res) => {
-          console.warn(res);
+          console.warn('GoogleApi Error:', res);
           if (!res) {
             this._handleError('No response body');
           } else if (res && res.status === 401) {
