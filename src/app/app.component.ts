@@ -155,22 +155,6 @@ export class AppComponent implements OnInit {
         }
       });
     }
-
-    setTimeout(() => {
-      this._snackService.open({
-        type: 'SUCCESS',
-        message: 'Jira: No valid transition configured Jira: No valid transition configuredJira: No valid transition configuredJira: No valid transition configured',
-        actionStr: 'Something',
-        config: {duration: 9999999999}
-      });
-    }, 2500);
-    setTimeout(() => {
-      this._snackService.open({
-        message: 'Jira: No valid transition configured',
-        config: {duration: 9999999999}
-      });
-    }, 10000);
-
   }
 
   @HostListener('document:keydown', ['$event']) onKeyDown(ev: KeyboardEvent) {

@@ -29,11 +29,11 @@
     </button>
   </div>
 
-  <!--<button mat-icon-button-->
-          <!--class="close-btn"-->
-          <!--(click)="close()">-->
-    <!--<mat-icon>close</mat-icon>-->
-  <!--</button>-->
+  <button mat-icon-button
+          class="close-btn"
+          (click)="close()">
+    <mat-icon>close</mat-icon>
+  </button>
 
   <mat-progress-bar *ngIf="data.promise||data.showWhile$"
                     mode="indeterminate"></mat-progress-bar>
