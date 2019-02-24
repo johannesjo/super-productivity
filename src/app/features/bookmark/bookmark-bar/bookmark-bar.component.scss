@@ -7,13 +7,12 @@ $listControlsWidth: 36px;
 $bookmarkMinWidth: 56px;
 
 :host {
-  position: relative;
-  z-index: 2;
-  box-shadow: $whiteframe-shadow-3dp;
+
 }
 
 .global-bookmark-list-outer {
   padding-bottom: $sTopBottom;
+  box-shadow: $whiteframe-shadow-3dp;
 }
 
 .controls-and-list-wrapper {
@@ -122,7 +121,7 @@ $bookmarkMinWidth: 56px;
   background-position: center center;
 
   // allow them to be smaller to save space
-  min-width:  $bookmarkMinWidth;
+  min-width: $bookmarkMinWidth;
   padding-left: $s;
   padding-right: $s;
 }

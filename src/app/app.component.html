@@ -1,9 +1,6 @@
 <ng-container *ngIf="(isAllDataLoaded$|async)">
   <main-header></main-header>
-  <bookmark-bar #bookmarkBar
-                *ngIf="bookmarkService.isShowBookmarks$|async"
-                [@slide]="{value:'*',params:{elHeight:(bookmarkBarHeight)}}"
-  ></bookmark-bar>
+  <bookmark-bar class="bg-800"></bookmark-bar>
   <!--TODO move inside page container somehow -->
   <banner></banner>
   <add-task-bar (blur)="layoutService.hideAddTaskBar()"

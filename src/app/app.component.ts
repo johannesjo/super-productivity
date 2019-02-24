@@ -53,7 +53,6 @@ const SIDE_PANEL_BREAKPOINT = 900;
   styleUrls: ['./app.component.scss'],
   animations: [
     blendInOutAnimation,
-    slideAnimation,
     expandAnimation,
     warpRouteAnimation,
     fadeAnimation
@@ -68,14 +67,6 @@ export class AppComponent implements OnInit {
   isSidePanelBp$: Observable<boolean> = this._breakPointObserver.observe([
     `(max-width: ${SIDE_PANEL_BREAKPOINT}px)`,
   ]).pipe(map(result => result.matches));
-
-  bookmarkBarHeight = 50;
-
-  @ViewChild('bookmarkBar', {read: ElementRef}) set bookmarkBarEl(content: ElementRef) {
-    if (content && content.nativeElement) {
-      this.bookmarkBarHeight = content.nativeElement.offsetHeight;
-    }
-  }
 
   private _currentTheme: string;
 

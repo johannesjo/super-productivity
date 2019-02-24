@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, HostListener, OnDestroy } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, HostListener, OnDestroy, ViewChild } from '@angular/core';
 import { BookmarkService } from '../bookmark.service';
 import { MatDialog } from '@angular/material';
 import { DialogEditBookmarkComponent } from '../dialog-edit-bookmark/dialog-edit-bookmark.component';
@@ -6,19 +6,31 @@ import { Bookmark } from '../bookmark.model';
 import { fadeAnimation } from '../../../ui/animations/fade.ani';
 import { DragulaService } from 'ng2-dragula';
 import { Subscription } from 'rxjs';
+import { slideAnimation } from '../../../ui/animations/slide.ani';
 
 @Component({
   selector: 'bookmark-bar',
   templateUrl: './bookmark-bar.component.html',
   styleUrls: ['./bookmark-bar.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  animations: [fadeAnimation],
+  animations: [
+    fadeAnimation,
+    slideAnimation,
+  ],
 })
 export class BookmarkBarComponent implements OnDestroy {
   isDragOver = false;
   isEditMode = false;
   dragEnterTarget: HTMLElement;
   LIST_ID = 'BOOKMARKS';
+
+  bookmarkBarHeight = 50;
+
+  @ViewChild('bookmarkBar', {read: ElementRef}) set bookmarkBarEl(content: ElementRef) {
+    if (content && content.nativeElement) {
+      this.bookmarkBarHeight = content.nativeElement.offsetHeight;
+    }
+  }
 
   private _subs = new Subscription();
 
