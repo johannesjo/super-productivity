@@ -8,8 +8,8 @@ import { SnackService } from '../../core/snack/snack.service';
 import { SnackType } from '../../core/snack/snack.model';
 import { ConfigService } from '../config/config.service';
 import { GoogleSession } from '../config/config.model';
-import { catchError, concatMap, distinctUntilChanged, filter, map, shareReplay, switchMap } from 'rxjs/operators';
-import { combineLatest, EMPTY, from, merge, Observable, throwError, timer } from 'rxjs';
+import { catchError, concatMap, filter, map, shareReplay, switchMap, take } from 'rxjs/operators';
+import { combineLatest, EMPTY, from, merge, Observable, of, throwError, timer } from 'rxjs';
 import {
   IPC_GOOGLE_AUTH_TOKEN,
   IPC_GOOGLE_AUTH_TOKEN_ERROR,
@@ -18,19 +18,20 @@ import {
 import { ElectronService } from 'ngx-electron';
 import { BannerService } from '../../core/banner/banner.service';
 
-const EXPIRES_SAFETY_MARGIN = 60000;
+const EXPIRES_SAFETY_MARGIN = 5 * 60 * 1000;
 
 @Injectable({
   providedIn: 'root',
 })
 export class GoogleApiService {
-  private _session$: Observable<GoogleSession> = this._configService.cfg$.pipe(
-    map(cfg => cfg && cfg._googleSession),
-    distinctUntilChanged(),
-  );
+  private _session$: Observable<GoogleSession> = this._configService.googleSession$;
 
   private _onTokenExpire$: Observable<number> = this._session$.pipe(
     switchMap((session) => {
+      if (!session.accessToken) {
+        return EMPTY;
+      }
+
       const expiresAt = session && session.expiresAt || 0;
       const expiresIn = expiresAt - (moment().valueOf() + EXPIRES_SAFETY_MARGIN);
       return this._isTokenExpired(session)
@@ -67,18 +68,6 @@ export class GoogleApiService {
     private readonly _bannerService: BannerService,
   ) {
     this.isLoggedIn$.subscribe((isLoggedIn) => this.isLoggedIn = isLoggedIn);
-    this._onTokenExpire$.subscribe((val) => console.log('onTokenExpire$', val));
-
-    if (IS_ELECTRON) {
-      this._onTokenExpire$.subscribe((val) => {
-        console.log('GOOGLE_LOGIN: onExpire trying to log in again');
-        this.login(true);
-      });
-    }
-
-    // setTimeout(() => {
-    //   this._handleUnAuthenticated(null);
-    // }, 4000);
   }
 
   private get _session(): GoogleSession {
@@ -406,7 +395,6 @@ export class GoogleApiService {
   }
 
   private _snackIt(snackType: SnackType, msg: string) {
-    console.log('SNACK', arguments);
     this._snackService.open({
       message: msg,
       type: snackType,
@@ -414,7 +402,20 @@ export class GoogleApiService {
   }
 
   private _mapHttp(params_: HttpRequest<string> | any): Observable<any> {
-    return from(this.login(true))
+    const loginObs = this._session$.pipe(
+      take(1),
+      concatMap((session) => {
+        const isRefreshNecessary = !session.accessToken || this._isTokenExpired(session);
+        console.log('isRefreshNecessary', isRefreshNecessary, !session.accessToken, this._isTokenExpired(session));
+        if (isRefreshNecessary) {
+          return this.login(true);
+        } else {
+          return of(true);
+        }
+      })
+    );
+
+    return from(loginObs)
       .pipe(
         concatMap(() => {
           const p = {
@@ -486,6 +487,6 @@ export class GoogleApiService {
   private _isTokenExpired(session): boolean {
     const expiresAt = session && session.expiresAt || 0;
     const expiresIn = expiresAt - (moment().valueOf() + EXPIRES_SAFETY_MARGIN);
-    return expiresIn > 0;
+    return expiresIn <= 0;
   }
 }

@@ -7,7 +7,7 @@ import { selectConfigFeatureState, selectGoogleSession, selectMiscConfig } from 
 import { PersistenceService } from '../../core/persistence/persistence.service';
 import { DEFAULT_CFG } from './default-config.const';
 import { Actions, ofType } from '@ngrx/effects';
-import { distinctUntilChanged, shareReplay } from 'rxjs/operators';
+import { distinctUntilChanged, shareReplay, skip } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root',
@@ -28,7 +28,6 @@ export class ConfigService {
   googleSession$: Observable<GoogleSession> = this._store.pipe(
     select(selectGoogleSession),
     distinctUntilChanged(),
-    shareReplay(),
   );
 
   cfg: GlobalConfig;
