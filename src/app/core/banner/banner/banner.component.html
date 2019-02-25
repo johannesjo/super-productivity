@@ -1,0 +1,34 @@
+<div class="content-wrapper"
+     #wrapperEl
+     [@slide]="{value:'*',params:{elHeight:height}}"
+     *ngIf="(activeBanner$|async) as banner"
+     [class.isError]="banner.type==='ERROR'">
+  <div class="message-wrapper">
+    <mat-icon *ngIf="banner.ico">{{banner.ico}}</mat-icon>
+    <mat-icon *ngIf="banner.svgIco"
+              [svgIcon]="banner.svgIco"></mat-icon>
+
+    <div class="message"
+         [innerHTML]="banner.msg"></div>
+  </div>
+
+  <div class="buttons">
+    <button mat-button
+            (click)="dismiss(banner.id)"
+            *ngIf="!banner.action2">Dismiss
+    </button>
+
+    <button mat-button
+            (click)="action(banner.id, banner.action)"
+            *ngIf="banner.action">{{banner.action.label}}
+    </button>
+    <button mat-button
+            (click)="action(banner.id, banner.action2)"
+            *ngIf="banner.action2">{{banner.action2.label}}
+    </button>
+    <button mat-button
+            (click)="action(banner.id, banner.action3)"
+            *ngIf="banner.action3">{{banner.action3.label}}
+    </button>
+  </div>
+</div>

@@ -24,6 +24,12 @@
 
 }
 
+.show-touch-only {
+  .isNoTouchDevice & {
+    display: none !important;
+  }
+}
+
 .show-xs-only {
   @include mq(xs) {
     display: none !important;

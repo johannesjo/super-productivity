@@ -10,7 +10,7 @@
     </ng-template>
 
     <div class="tab-wrapper bg-400">
-      <div class="component-wrapper page-wrapper">
+      <div class="task-list-wrapper">
         <task-list [tasks]="taskService.backlogTasks$|async"
                    [noTasksMsg]="'There are currently no tasks in your backlog'"
                    listId="PARENT"

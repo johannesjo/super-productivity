@@ -1,4 +1,7 @@
-<div class="global-bookmark-list-outer bg-800">
+<div class="global-bookmark-list-outer"
+     #bookmarkBar
+     *ngIf="bookmarkService.isShowBookmarks$|async"
+     [@slide]="{value:'*',params:{elHeight:(bookmarkBarHeight)}}">
   <div *ngIf="isDragOver"
        @fade
        class="bg-accent drag-over-msg">

@@ -55,6 +55,11 @@
     </table>
   </div>
 
+  <div class="submitted-ico"
+       *ngIf="isSubmitted"
+       @expand>
+    <mat-icon>check</mat-icon>
+  </div>
 </section>
 
 <div class="controls">
@@ -186,14 +191,19 @@
                title="Help"
                [initiallyExpanded]="opts.spreadsheetId">
     <div class="info">
-      <p>This view allows you to export your worked time to a google sheet. You need to allow for your Google Spreadsheets to be accessed by Super Productivity. You also need to create a spreadsheet with a headings in the first row nad specify it's ID in the input field (<a
-                                                                                                                                                                                                                                                                                   target="_blank"
-                                                                                                                                                                                                                                                                                   href="https://stackoverflow.com/questions/36061433/how-to-do-i-locate-a-google-spreadsheet-id">Ho to find the id of a spreadsheet?</a>).
+      <p>This view allows you to export your worked time to a google sheet. You need to allow for your Google
+        Spreadsheets to be accessed by Super Productivity. You also need to create a spreadsheet with a headings in the
+        first row nad specify it's ID in the input field (<a
+          target="_blank"
+          href="https://stackoverflow.com/questions/36061433/how-to-do-i-locate-a-google-spreadsheet-id">Ho to find the
+          id of a spreadsheet?</a>).
       </p>
-      <p>After successfully loading your spreadsheet a table will show up with 4 rows. The first row shows the heading you specified in the spreadsheet itself.</p>
+      <p>After successfully loading your spreadsheet a table will show up with 4 rows. The first row shows the heading
+        you specified in the spreadsheet itself.</p>
       <p>The second row is for informational purposes and shows the last row from the spreadsheet.</p>
       <p>The forth row is a list of values you can directly enter save to the spreadsheet.</p>
-      <p>The third row is there to automatically define some values for the forth row. There are several special strings you can enter into the cells:</p>
+      <p>The third row is there to automatically define some values for the forth row. There are several special strings
+        you can enter into the cells:</p>
     </div>
 
     <dl class="possible-properties">
@@ -201,7 +211,9 @@
       <dd>The time when you first used this app today. It's possible to round this via the options.</dd>
 
       <dt>{{ '{' }}currentTime}</dt>
-      <dd>The current time. Could be used for the for the end time of todays working day It's possible to round this via the options.</dd>
+      <dd>The current time. Could be used for the for the end time of todays working day It's possible to round this via
+        the options.
+      </dd>
 
       <dt>{{ '{' }}date}</dt>
       <dd>Todays date in standard format (mm/dd/yyyy)</dd>

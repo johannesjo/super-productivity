@@ -1,18 +1,17 @@
 @import '../../../../variables';
 
-//$this-task-text-color: #333333;
-//$this-task-text-color-dark: #dddddd;
-$this-task-text-color-done: #aaaaaa;
-$task-inner-padding-left-right: 6px;
-$this-active-shadow: $whiteframe-shadow-6dp;
-$this-first-line-min-height: 40px;
-$this-icon-default-opacity: 0.7;
-$this-task-focus-zoom: 1.0178571428, 1;
+$task-shadow: $shadow-card-shadow;
+$sub-task-shadow: $whiteframe-shadow-1dp;
+$task-active-shadow: $whiteframe-shadow-6dp;
+$task-first-line-min-height: 40px;
+$task-icon-default-opacity: 0.7;
+$task-current-task-zoom: 1.0178571428, 1;
+$task-inner-padding-top-bottom: 4px;
+$task-is-done-dim-opacity: 0.3;
 
 // z-indexes
 $z-drag-handle: 1;
 $z-task-title: 4;
-$z-focus-host: 4;
 $z-btn: 4;
 $z-time-wrapper: 4;
 $z-btn-hover: 5;
@@ -22,68 +21,169 @@ $z-progress-bar: 7;
 $z-check-done: 11;
 $z-first-line-controls-hover: 12;
 $z-swipe-block: 13;
-$z-toggle-sub-task-btn: 14;
-$z-task-title-focus: 15;
-$z-drag-over-msg: 16;
+
+$z-is-current-host: 20;
+$z-focus-host: 20;
+
+$z-toggle-sub-task-btn: 21;
+$z-drag-over-msg: 22;
+$z-task-title-focus: 23;
+
 $z-time-btn-svg-wrapper: 5555;
 
+@import './task.component.mixins';
 
-%standardTaskOpacityChange {
-  opacity: $this-icon-default-opacity;
-  transition: transform $transition-fast;
 
-  :host:focus &,
-  .isCurrent &,
-  &:hover,
-  &:focus {
-    opacity: 1;
-  }
-}
-
-%standardTaskZoom {
-  &:hover,
-  &:focus {
-    transform: scale(1.2);
-  }
-}
-
+// TASK BOX STYLES
+// ---------------
 :host {
   display: block;
   position: relative;
 
-  > .inner-wrapper {
-    padding: 2px 0;
-    margin-bottom: 7px;
-
-    .first-line {
-      min-height: $this-first-line-min-height;
-    }
+  &.isCurrent {
+    z-index: $z-is-current-host;
   }
-
-  &:last-child > .inner-wrapper {
-    margin-bottom: 0;
-  }
-
 
   &:focus {
     z-index: $z-focus-host;
     outline: none;
-
-    > .inner-wrapper > .box {
-      @include mq(xs, min) {
-        border: 1px solid $c-accent !important;
-        box-shadow: $whiteframe-shadow-5dp;
-        transform: scale($this-task-focus-zoom);
-      }
-    }
   }
 }
 
-.sub-tasks {
-  margin: 0 $s;
+.inner-wrapper {
+  position: relative;
+  padding: $task-inner-padding-top-bottom 0;
+  margin-bottom: 0;
+
+  //&.isCurrent,
+  &.isAdditionalInfoOpen {
+    margin-top: $s*2;
+    margin-bottom: $s*2;
+  }
 }
 
-.title-bar-wrapper {
+.box {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: 0;
+  transition: $transition-standard;
+  transition-property: transform;
+  //border-radius: $card-border-radius;
+  border: 1px solid $light-theme-extra-border-color;
+  border-bottom-color: transparent;
+
+  @include mq(xs) {
+    box-shadow: $task-shadow;
+  }
+
+  :host-context(.sub-tasks) & {
+    @include mq(xs) {
+      box-shadow: $sub-task-shadow;
+    }
+  }
+
+  @include darkTheme {
+    border-color: $dark-theme-extra-border-color;
+    border-color: $dark-theme-bg;
+    //border-color: rgb(55, 55, 55);
+    border-bottom-color: transparent;
+  }
+
+  @include isHostFocus('.inner-wrapper') {
+    border-radius: $card-border-radius;
+
+    @include mq(xs) {
+      border: 1px solid $c-accent !important;
+      box-shadow: $whiteframe-shadow-5dp;
+    }
+  }
+
+  @include isCurrent {
+    transform: scale($task-current-task-zoom);
+    box-shadow: $task-active-shadow;
+    border-color: transparent;
+    border-radius: $card-border-radius;
+  }
+
+  :host:first-child > .inner-wrapper > & {
+    border-top-left-radius: $card-border-radius;
+    border-top-right-radius: $card-border-radius;
+  }
+
+  :host:last-child > .inner-wrapper > & {
+    border-bottom-left-radius: $card-border-radius;
+    border-bottom-right-radius: $card-border-radius;
+  }
+
+  :host-context(.isLightTheme):last-child > .inner-wrapper > & {
+    @include mq(xs, max) {
+      border-bottom-color: $light-theme-extra-border-color;
+    }
+  }
+
+  :host-context(.isDarkTheme):last-child > .inner-wrapper > & {
+    @include mq(xs, max) {
+      //border-bottom-color: $dark-theme-extra-border-color;
+      //border-bottom-color: $dark-theme-bg;
+      border-bottom-color: rgb(55, 55, 55);
+    }
+  }
+
+  .inner-wrapper:not(.isCurrent) > .box {
+    box-shadow: none !important;
+    border-color: transparent;
+    background: transparent !important;
+  }
+
+  &.focus {
+    > .inner-wrapper:not(.isCurrent) > .box {
+      border-color: $c-accent !important;
+    }
+  }
+
+  :host-context(.isReducedTheme):focus > .inner-wrapper:not(.isCurrent) > & {
+    border-color: $c-accent !important;
+  }
+
+  :host-context(.isReducedTheme) > .inner-wrapper:not(.isCurrent) > & {
+    box-shadow: none !important;
+    border-color: transparent;
+    background: transparent !important;
+  }
+}
+
+
+.sub-tasks {
+  margin: $s 0 $s $s*3;
+  position: relative;
+
+  @include mq(xs) {
+    //margin: $s $s*2 $s $s*3;
+    margin: $s 0 $s $s*5;
+  }
+}
+
+
+.first-line {
+  position: relative;
+  display: flex;
+  flex-wrap: nowrap;
+  user-select: none;
+  justify-content: space-between;
+  align-items: center;
+  min-height: $task-first-line-min-height;
+  touch-action: pan-y;
+
+  @include mq(xs, max) {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+}
+
+
+.title-and-left-btns-wrapper {
   display: flex;
   flex-wrap: nowrap;
   align-items: center;
@@ -96,145 +196,56 @@ $z-time-btn-svg-wrapper: 5555;
     //flex-shrink: 0;
     flex-basis: 50%;
   }
-}
 
-.isAdditionalInfoOpen > .first-line {
-  .task-title {
-    font-weight: bold;
+  @include isDoneForFirstLine {
+    opacity: $task-is-done-dim-opacity;
   }
 }
 
-
-.toggle-sub-tasks-btn,
-.first-line .ico-btn {
-  $this-button-spacer: 1px;
-  margin: 0 $this-button-spacer;
-  padding: 0;
-  z-index: $z-btn;
-  @extend %standardTaskOpacityChange;
-  @extend %standardTaskZoom;
-
-  &:hover {
-    z-index: $z-btn-hover;
-  }
-
-  &:focus {
-    outline: none;
-  }
-}
-
-.toggle-sub-tasks-btn {
-  position: absolute !important;
-  transform: translateY(-50%);
-  left: -23px;
-  top: 50%;
-  z-index: $z-toggle-sub-task-btn !important;
-  min-width: 0;
-  min-height: 0;
-  width: 32px;
-  height: 32px;
-  margin-top: -1px !important;
-  transform-origin: left top;
-  opacity: 1 !important;
-
-  &:hover {
-    transform: scale(1.3) translateY(-50%) !important;
-
-    mat-icon {
-      opacity: 1;
-    }
-  }
-
-  &:hover {
-    opacity: 1 !important;
-  }
-
-  mat-icon {
-    transition: $transition-standard;
-    margin-top: -8px;
-    opacity: $this-icon-default-opacity;
-
-    &.isHideDoneTasks {
-      transform: rotate(-45deg);
-    }
-  }
-}
-
-
-.first-line {
-  display: flex;
-  flex-wrap: nowrap;
-  user-select: none;
-  justify-content: space-between;
-  align-items: center;
-  touch-action: pan-y;
-
-  @include mq(xs, max) {
-    flex-wrap: wrap;
-    justify-content: flex-end;
-  }
-}
-
-.ico-btn {
-  &.delete-btn {
-    mat-icon.delete-icon {
-      color: $red !important;
-      @include darkTheme {
-        color: $red !important;
-      }
-    }
-
-    &:hover {
-      background: $red-danger !important;
-
-      mat-icon.delete-icon {
-        color: #ffffff !important;
-        @include darkTheme {
-          color: #ffffff !important;
-        }
-      }
-    }
-  }
-}
-
-
-.show-additional-info-btn {
-  mat-icon {
-    transition: transform $transition-standard;
-    backface-visibility: hidden;
-  }
-
-  &.isActive mat-icon {
-    transform: rotate(45deg);
-  }
-}
-
+// CONTROLS
+// --------
 .all-controls-wrapper {
   display: flex;
   flex-flow: row;
   position: relative;
   margin-left: $s;
+}
 
-  &:hover {
-    .hover-controls {
-      opacity: 1;
-      transform: scaleX(1);
-    }
+.controls {
+  white-space: nowrap;
+  text-align: right;
+  margin-right: 2px;
+  position: relative;
+
+  @include mq(xs, max) {
+    white-space: normal;
+    margin-left: 5px;
   }
 }
 
+
 .hover-controls {
-  display: flex;
+  @include mq(xs, max) {
+    display: none !important;
+  }
+
+  display: none;
   flex-flow: row;
-  transform: scaleX(0);
   transform-origin: right center;
   opacity: 0;
-  transition: $transition-fast;
-  transition-property: transform, opacity;
   position: absolute;
   right: 100%;
   top: 0;
   z-index: $z-hover-controls;
+
+  @include mq(xs) {
+    opacity: 0;
+  }
+
+  .first-line:hover & {
+    opacity: 1;
+    display: flex;
+  }
 
   :host-context(.isReducedTheme.isDarkTheme) & {
     background-color: $dark-theme-bg;
@@ -261,113 +272,21 @@ $z-time-btn-svg-wrapper: 5555;
 
   &:before {
     content: '';
-    border-left: 1px solid rgba(200, 200, 200, 0.9);
+    border-left: 1px solid;
     width: 1px;
     height: 90%;
     position: absolute;
     left: 0;
     top: 5%;
+    opacity: 0.5;
   }
 }
 
 
-.controls {
-  white-space: nowrap;
-  text-align: right;
-  margin-right: 2px;
+// OTHER UI ELEMENTS
+// -----------------
 
-  @include mq(xs, max) {
-    white-space: normal;
-    margin-left: 5px;
-  }
-}
-
-
-.inner-wrapper {
-  position: relative;
-
-  > .first-line {
-    position: relative;
-  }
-
-  > .box {
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    top: 0;
-    transition: $transition-standard;
-    transition-property: transform;
-    box-shadow: $shadow-card-shadow;
-    border-radius: $card-border-radius;
-    border: 1px solid $light-theme-extra-border-color;
-
-    @include darkTheme {
-      border-color: $dark-theme-extra-border-color;
-    }
-  }
-
-  &.isCurrent > .box {
-    transform: scale($this-task-focus-zoom);
-    box-shadow: $this-active-shadow;
-    border-color: transparent;
-  }
-
-  &.isDone {
-    > .first-line {
-      position: relative;
-
-      .time-wrapper,
-      .controls,
-      .title-bar-wrapper {
-        opacity: 0.3;
-      }
-
-      .time {
-        opacity: 1;
-      }
-
-      .task-title {
-        //color: $this-task-text-color-done;
-        //text-decoration: line-through;
-      }
-    }
-  }
-}
-
-.drag-handle {
-  min-width: 24px;
-  margin: 0 4px 0 9px;
-  position: relative;
-  z-index: $z-drag-handle;
-  cursor: grab;
-  @extend %standardTaskOpacityChange;
-
-  // fixes drag and drop on mobile
-  touch-action: none;
-
-  &:active {
-    cursor: grabbing;
-  }
-
-  // hit area
-  &:after {
-    content: '';
-    position: absolute;
-    top: -$s*0.25;
-    bottom: -$s*0.25;
-    left: -$s*0.25;
-    right: -$s*0.25;
-
-    @include mq(xs) {
-      top: -$s*2;
-      bottom: -$s*2;
-      left: -$s*2;
-      right: -$s*0.5;
-    }
-  }
-}
-
+// TASK TITLE
 .task-title {
   flex-grow: 1;
   text-align: left;
@@ -400,7 +319,7 @@ $z-time-btn-svg-wrapper: 5555;
   }
 
   .isCurrent & {
-    font-weight: bold;
+    //font-weight: bold;
   }
 
   &:after {
@@ -434,7 +353,10 @@ $z-time-btn-svg-wrapper: 5555;
     // thee magic number is 16/14 so we scale to whole pixels
     transform: scale(1.142857143);
     transition: $transition-standard;
-    color: #000;
+
+    // NOTE: needed to overwrite color for current task
+    color: $light-theme-text-color;
+
     @include darkTheme() {
       color: #fff;
     }
@@ -455,62 +377,60 @@ $z-time-btn-svg-wrapper: 5555;
   }
 }
 
-input {
-  width: 100%;
-  display: block;
-  box-sizing: border-box;
-  height: 30px;
-  padding: 4px 10px;
-  border: none;
-}
 
+// TIME
 .time-wrapper {
   position: relative;
   display: flex;
   flex-direction: row;
   align-items: center;
   justify-content: stretch;
-  padding-right: $s;
+  margin-right: $s;
   z-index: $z-time-wrapper;
 
   &.isEditable {
     cursor: pointer;
 
-    button {
-      transition: $transition-standard !important;
-      opacity: 0 !important;
-    }
-
     &:hover {
-      .time,
-      button {
+      .time {
         transition: $transition-standard;
         opacity: 1 !important;
       }
     }
   }
 
+
+  @include mq(xs, max) {
+    @include isDoneForFirstLine {
+      opacity: $task-is-done-dim-opacity +0.1;
+    }
+    &:after {
+      content: '';
+      border-top: 1px solid;
+      opacity: 0.1;
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 50%;
+    }
+  }
+
   .time {
     font-style: italic;
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
     opacity: 0.8;
     font-weight: 300;
 
     @include mq(xs) {
-      opacity: 0.35;
+      opacity: 0.5;
+      flex-direction: row;
     }
 
     @include mq(xs, max) {
       font-size: 13px;
-    }
-
-    :host:focus > .inner-wrapper > .first-line &,
-      //:host:hover > .inner-wrapper > .first-line &,
-    .inner-wrapper.isCurrent > .first-line & {
-      opacity: 1;
     }
 
     .time-val,
@@ -521,9 +441,11 @@ input {
 
     .separator {
       padding: 0 $s/2;
+      @include mq(xs, max) {
+        display: none;
+      }
     }
   }
-
 }
 
 
@@ -532,6 +454,7 @@ input {
   // required as sort of a clearfix (fixes padding issue)
   overflow: hidden;
 }
+
 
 .drag-over-msg {
   pointer-events: none;
@@ -548,20 +471,6 @@ input {
   z-index: $z-drag-over-msg;
 }
 
-.time-btn {
-  position: relative;
-  overflow: visible;
-
-  ::ng-deep .svg-wrapper {
-    z-index: $z-time-btn-svg-wrapper;
-    position: absolute;
-    width: 44px;
-    height: 44px;
-    top: 50%;
-    left: 50%;
-    transform: translate3d(-50%, -50%, 0);
-  }
-}
 
 .check-done {
   opacity: 0.5;
@@ -572,18 +481,18 @@ input {
   z-index: $z-check-done;
   transform: translate(-50%, -50%);
   transition: $transition-standard;
-
+  border-radius: 50%;
 
   &:hover {
     opacity: 1 !important;
   }
 
   mat-icon {
-    $this-size: 40px;
-    font-size: $this-size;
-    height: $this-size;
-    width: $this-size;
-    line-height: $this-size;
+    $task-size: 40px;
+    font-size: $task-size;
+    height: $task-size;
+    width: $task-size;
+    line-height: $task-size;
 
     &.undo {
       display: none;
@@ -605,15 +514,13 @@ input {
   }
 }
 
-progress-bar {
-  z-index: $z-progress-bar;
-}
 
+// SWIPE BLOCKS
 .block-left,
 .block-right {
   position: absolute;
-  top: 0;
-  bottom: 0;
+  top: -1* $task-inner-padding-top-bottom;
+  bottom: -1* $task-inner-padding-top-bottom;
   width: 33%;
   min-width: 100px;
   z-index: $z-swipe-block;
@@ -628,9 +535,10 @@ progress-bar {
     position: absolute;
     top: 50%;
     left: 50%;
-    transform: translate(-50%, -50%) scaleX(1.1);
+    transform: translate(-50%, -50%) scaleX(1);
   }
 }
+
 
 .block-left {
   pointer-events: none;
@@ -648,6 +556,164 @@ progress-bar {
   box-shadow: $shadow-card-shadow;
 }
 
+progress-bar {
+  z-index: $z-progress-bar;
+}
+
+
+// BUTTON STYLES AND DRAG HANDLE
+// -----------------------------
+.toggle-sub-tasks-btn,
+.first-line .ico-btn {
+  $task-button-spacer: 1px;
+  margin: 0 $task-button-spacer;
+  padding: 0;
+  z-index: $z-btn;
+  @extend %standardTaskOpacityChange;
+
+  &:hover {
+    z-index: $z-btn-hover;
+  }
+
+  &:focus {
+    outline: none;
+  }
+}
+
+.first-line .menu-trigger {
+  @include mq(xs) {
+    opacity: 0;
+  }
+}
+
+.first-line:hover .menu-trigger {
+  @include standardTaskOpacityChange;
+}
+
+.delete-btn {
+  mat-icon.delete-icon {
+    color: $red !important;
+  }
+}
+
+
+.drag-handle {
+  min-width: 24px;
+  margin: 0 4px 0 9px;
+  position: relative;
+  z-index: $z-drag-handle;
+  cursor: grab;
+  @extend %standardTaskOpacityChange;
+
+  // fixes drag and drop on mobile
+  touch-action: none;
+
+  @include mq(xs) {
+    opacity: 0;
+    .first-line:hover & {
+      opacity: 1;
+    }
+  }
+
+  &:active {
+    cursor: grabbing;
+  }
+
+  // hit area
+  &:after {
+    content: '';
+    position: absolute;
+    top: -$s*0.25;
+    bottom: -$s*0.25;
+    left: -$s*0.25;
+    right: -$s*0.25;
+
+    @include mq(xs) {
+      top: -$s*2;
+      bottom: -$s*2;
+      left: -$s*2;
+      right: -$s*0.5;
+    }
+  }
+}
+
+
+.toggle-sub-tasks-btn,
+.first-line .ico-btn {
+  $task-button-spacer: 1px;
+  margin: 0 $task-button-spacer;
+  padding: 0;
+  z-index: $z-btn;
+  @extend %standardTaskOpacityChange;
+
+  &:hover {
+    z-index: $z-btn-hover;
+  }
+
+  &:focus {
+    outline: none;
+  }
+}
+
+.toggle-sub-tasks-btn {
+  position: absolute !important;
+  transform: translateY(-50%);
+  left: -24px;
+  top: 50%;
+  z-index: $z-toggle-sub-task-btn !important;
+  min-width: 0;
+  min-height: 0;
+  width: 32px;
+  height: 32px;
+  margin-top: -1px !important;
+  transform-origin: left top;
+  opacity: 1 !important;
+
+  @include mq(xs, max) {
+    //display: none;
+  }
+
+  &:hover {
+    opacity: 1 !important;
+  }
+
+  @include reducedTheme {
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  mat-icon {
+    transition: $transition-standard;
+    margin-top: -8px;
+    opacity: $task-icon-default-opacity;
+
+    &.isHideDoneTasks {
+      transform: rotate(-45deg);
+    }
+  }
+}
+
+.attachment-btn,
+.show-additional-info-btn {
+  mat-icon {
+    transition: transform $transition-standard;
+    backface-visibility: hidden;
+  }
+
+  &.isActive mat-icon {
+    transform: rotate(45deg);
+  }
+}
+
+
+.start-task-btn {
+  :host-context(.isHidePlayBtn) & {
+    display: none !important;
+  }
+}
+
+// ANIMATIONS ETC
+// --------------
 @keyframes success-btn-ani {
   0% {
     transform: scale(0.5) rotate(-180deg);
@@ -665,32 +731,5 @@ progress-bar {
     user-select: none !important;
     pointer-events: none !important;
     transition: none !important;
-  }
-}
-
-// DEBUGGING CODE TO CHECK WITH NO BOXES UI
-//
-:host-context(.isReducedTheme) {
-  > .inner-wrapper:not(.isCurrent) > .box {
-    box-shadow: none !important;
-    border-color: transparent;
-    background: transparent !important;
-  }
-
-  &.focus {
-    > .inner-wrapper:not(.isCurrent) > .box {
-      border-color: $c-accent !important;
-    }
-  }
-
-  .toggle-sub-tasks-btn {
-    background: transparent !important;
-    box-shadow: none !important;
-  }
-
-  @include mq(xs) {
-    .sub-tasks {
-      padding-left: $s*2;
-    }
   }
 }

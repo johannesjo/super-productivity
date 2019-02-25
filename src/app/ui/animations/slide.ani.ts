@@ -6,10 +6,23 @@ export const slideAnimation = [
     transition(':enter', [
       style({marginTop: '-{{elHeight}}px'}),
       animate(ANI_ENTER_TIMING, style({marginTop: '*'}))
-    ], {params: {elHeight: 0}}), // void => *
+    ]), // void => *
     transition(':leave', [
       style({marginTop: 0}),
       animate(ANI_LEAVE_TIMING, style({marginTop: '-{{elHeight}}px'}))
-    ], {params: {elHeight: 0}})
+    ])
   ])
 ];
+
+// export const slideAnimation = [
+//   trigger('slide', [
+//     transition(':enter', [
+//       style({height: 0, overflow: 'hidden', transform: 'translateY(-120%)'}),
+//       animate(ANI_ENTER_TIMING, style({height: '*', transform: 'translateY(0)'}))
+//     ]), // void => *
+//     transition(':leave', [
+//       style({overflow: 'hidden'}),
+//       animate(ANI_LEAVE_TIMING, style({height: 0, transform: 'translateY(-120%)'}))
+//     ])
+//   ])
+// ];

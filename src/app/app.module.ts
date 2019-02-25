@@ -26,7 +26,7 @@ import { NoteModule } from './features/note/note.module';
 import { ReminderModule } from './features/reminder/reminder.module';
 import { CoreUiModule } from './core-ui/core-ui.module';
 import { MigrateModule } from './imex/migrate/migrate.module';
-import { CustomErrorHandler } from './core/error-handler/custom-error-handler.class';
+import { GlobalErrorHandler } from './core/error-handler/global-error-handler.class';
 import { MyHammerConfig } from '../hammer-config.class';
 
 @NgModule({
@@ -66,7 +66,7 @@ import { MyHammerConfig } from '../hammer-config.class';
   ],
   bootstrap: [AppComponent],
   providers: [
-    {provide: ErrorHandler, useClass: CustomErrorHandler},
+    {provide: ErrorHandler, useClass: GlobalErrorHandler},
     {provide: HAMMER_GESTURE_CONFIG, useClass: MyHammerConfig}
   ],
 })

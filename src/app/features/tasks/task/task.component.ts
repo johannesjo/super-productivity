@@ -26,7 +26,7 @@ import { AttachmentService } from '../../attachment/attachment.service';
 import { IssueService } from '../../issue/issue.service';
 import { DialogEditAttachmentComponent } from '../../attachment/dialog-edit-attachment/dialog-edit-attachment.component';
 import { swirlAnimation } from '../../../ui/animations/swirl-in-out.ani';
-import { isTouch } from '../../../util/is-touch';
+import { IS_TOUCH, isTouch } from '../../../util/is-touch';
 import { DialogAddTaskReminderComponent } from '../dialog-add-task-reminder/dialog-add-task-reminder.component';
 
 @Component({
@@ -40,6 +40,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   @Input() task: TaskWithSubTasks;
   isDragOver: boolean;
   isCurrent: boolean;
+  isTouch: boolean = IS_TOUCH;
 
   isLockPanLeft = false;
   isLockPanRight = false;
@@ -50,6 +51,13 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   @ViewChild('blockLeft') blockLeftEl: ElementRef;
   @ViewChild('blockRight') blockRightEl: ElementRef;
   @HostBinding('tabindex') tabIndex = 1;
+
+  // TODO do via observable
+  @HostBinding('class.isCurrent')
+  private get _isCurrent() {
+    return this.isCurrent;
+  }
+
   private _dragEnterTarget: HTMLElement;
   private _destroy$: Subject<boolean> = new Subject<boolean>();
   private _currentPantimeout: number;
@@ -229,8 +237,6 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
 
   toggleTaskDone() {
     if (this.task.parentId) {
-      this.focusSelf();
-    } else {
       this.focusNext(true);
     }
     this.task.isDone
@@ -339,6 +345,10 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   onPanStart(ev) {
+    if (!IS_TOUCH) {
+      return;
+    }
+
     this._resetAfterPan();
     if (
       (ev.target.className.indexOf && ev.target.className.indexOf('drag-handle') > -1)
@@ -356,7 +366,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   onPanEnd() {
-    if (!this.isLockPanLeft && !this.isLockPanRight) {
+    if (!IS_TOUCH || !this.isLockPanLeft && !this.isLockPanRight) {
       return;
     }
 
@@ -400,7 +410,8 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   private _handlePan(ev) {
-    if (!this.isLockPanLeft && !this.isLockPanRight
+    if (!IS_TOUCH
+      || !this.isLockPanLeft && !this.isLockPanRight
       || ev.eventType === 8) {
       return;
     }

@@ -23,8 +23,8 @@ mat-sidenav-container {
   }
 }
 
-:host ::ng-deep .mat-drawer-inner-container {
-  @include scrollY();
+::ng-deep .mat-drawer-inner-container {
+  @include scrollYImportant();
 }
 
 mat-drawer {
@@ -64,4 +64,18 @@ mat-drawer {
   top: 0;
   left: 0;
   z-index: 220;
+}
+
+add-task-bar {
+  z-index: 10000;
+}
+
+main-header {
+  position: relative;
+  z-index: 4;
+}
+
+bookmark-bar {
+  position: relative;
+  z-index: 3;
 }

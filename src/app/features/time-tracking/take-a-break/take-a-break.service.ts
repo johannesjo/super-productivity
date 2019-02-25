@@ -3,6 +3,7 @@ import { TaskService } from '../../tasks/task.service';
 import { TimeTrackingService } from '../time-tracking.service';
 import { from, merge, Observable, Subject, timer } from 'rxjs';
 import {
+  delay,
   distinctUntilChanged,
   filter,
   map,
@@ -14,12 +15,12 @@ import {
   throttleTime,
   withLatestFrom
 } from 'rxjs/operators';
-import { SnackService } from '../../../core/snack/snack.service';
 import { ConfigService } from '../../config/config.service';
 import { msToString } from '../../../ui/duration/ms-to-string.pipe';
 import { ChromeExtensionInterfaceService } from '../../../core/chrome-extension-interface/chrome-extension-interface.service';
 import { IdleService } from '../idle.service';
 import { IS_ELECTRON } from '../../../app.constants';
+import { BannerService } from '../../../core/banner/banner.service';
 
 const BREAK_TRIGGER_DURATION = 10 * 60 * 1000;
 
@@ -102,7 +103,7 @@ export class TakeABreakService {
     this._triggerReset$,
   ).pipe(
     // startWith(9999999),
-    // delay(1000),
+    // delay(4000),
     scan((acc, value) => {
       return (value > 0)
         ? acc + value
@@ -117,14 +118,10 @@ export class TakeABreakService {
     private _timeTrackingService: TimeTrackingService,
     private _idleService: IdleService,
     private _configService: ConfigService,
-    private _snackService: SnackService,
+    private _bannerService: BannerService,
     private _chromeExtensionInterfaceService: ChromeExtensionInterfaceService,
   ) {
-    this._triggerManualReset$.subscribe(val => {
-      console.log('MANUAL TAKE A BREAK RESET', val);
-    });
-
-    const RE_OPEN_SNACK_INTERVAL = 2 * 60 * 1000;
+    const PING_UPDATE_BANNER_INTERVAL = 60 * 1000;
     this.timeWorkingWithoutABreak$.pipe(
       withLatestFrom(
         this._configService.misc$,
@@ -139,16 +136,22 @@ export class TakeABreakService {
         && (!isIdle || !cfg.isEnableIdleTimeTracking)
       ),
       // throttleTime(5 * 1000),
-      throttleTime(RE_OPEN_SNACK_INTERVAL),
+      throttleTime(PING_UPDATE_BANNER_INTERVAL),
     ).subscribe(([timeWithoutBreak, cfg, isIdle]) => {
       console.log('timeWithoutBreak', timeWithoutBreak);
       const msg = this._createMessage(timeWithoutBreak, cfg);
-      this._snackService.open({
-        type: 'TAKE_A_BREAK',
-        message: msg,
-        config: {
-          duration: RE_OPEN_SNACK_INTERVAL - 1000,
-        }
+      this._bannerService.open({
+        id: 'TAKE_A_BREAK',
+        ico: 'free_breakfast',
+        msg,
+        action: {
+          label: 'I already did',
+          fn: () => this.resetTimer()
+        },
+        action2: {
+          label: 'Snooze 15m',
+          fn: () => this.snooze()
+        },
       });
     });
   }

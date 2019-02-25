@@ -1,3 +1,112 @@
+## [2.4.2](https://github.com/johannesjo/super-productivity/compare/v2.4.1...v2.4.2) (2019-02-24)
+
+
+### Bug Fixes
+
+* **bookmarks:** slide animation flicker ([3d6bfb8](https://github.com/johannesjo/super-productivity/commit/3d6bfb8))
+* **tasks:** weird hover state for check done ([2d5fde4](https://github.com/johannesjo/super-productivity/commit/2d5fde4))
+
+
+### Features
+
+* **snack:** add close button ([c099dd5](https://github.com/johannesjo/super-productivity/commit/c099dd5))
+* **snack:** improve styling ([cfd9086](https://github.com/johannesjo/super-productivity/commit/cfd9086))
+* **tasks:** make sub tasks shadow less intense ([4d8761f](https://github.com/johannesjo/super-productivity/commit/4d8761f))
+* **tasks:** show attachment icon for jira attachments too ([906e9a2](https://github.com/johannesjo/super-productivity/commit/906e9a2))
+
+
+
+## [2.4.1](https://github.com/johannesjo/super-productivity/compare/v2.4.0...v2.4.1) (2019-02-24)
+
+
+### Bug Fixes
+
+* **banner:** overlapping bookmark bar ([c3fc765](https://github.com/johannesjo/super-productivity/commit/c3fc765))
+
+
+### Features
+
+* **banner:** add global error banner ([212a260](https://github.com/johannesjo/super-productivity/commit/212a260))
+* **banner:** add jira unblock as banner rather than as snack ([400640e](https://github.com/johannesjo/super-productivity/commit/400640e))
+* add dynamic height ani ([5a11809](https://github.com/johannesjo/super-productivity/commit/5a11809))
+* **banner:** handle banner transition if there are multiple ([00e488f](https://github.com/johannesjo/super-productivity/commit/00e488f))
+* **banner:** improve styling ([8b59888](https://github.com/johannesjo/super-productivity/commit/8b59888))
+* **banner:** remove timeout for google login banner ([cfaf75e](https://github.com/johannesjo/super-productivity/commit/cfaf75e))
+* **reminders:** improve add for task dialog ([125cb11](https://github.com/johannesjo/super-productivity/commit/125cb11))
+* **tasks:** move toggle sub tasks button out of the way ([7722794](https://github.com/johannesjo/super-productivity/commit/7722794))
+* add proper slide animation for bookmark bar and banner ([230a259](https://github.com/johannesjo/super-productivity/commit/230a259))
+
+
+
+# [2.4.0](https://github.com/johannesjo/super-productivity/compare/v2.3.2...v2.4.0) (2019-02-23)
+
+
+### Features
+
+* add logging to file error log from frontend ([1f06eda](https://github.com/johannesjo/super-productivity/commit/1f06eda))
+* make backlog shadow a little less intense ([c6ca87c](https://github.com/johannesjo/super-productivity/commit/c6ca87c))
+* **banners:** add dark theme ui ([7537e55](https://github.com/johannesjo/super-productivity/commit/7537e55))
+* **banners:** add for google login ([726bed0](https://github.com/johannesjo/super-productivity/commit/726bed0))
+* **banners:** add service logic and make banner dynamic ([50ebb9a](https://github.com/johannesjo/super-productivity/commit/50ebb9a))
+* **banners:** add ui and boilerplate ([cd0ccea](https://github.com/johannesjo/super-productivity/commit/cd0ccea))
+* **electron:** implement error logging ([8254567](https://github.com/johannesjo/super-productivity/commit/8254567))
+* **tasks:** adjust margin between sub tasks and note content ([cac010a](https://github.com/johannesjo/super-productivity/commit/cac010a))
+* **tasks:** adjust task list padding ([d65d598](https://github.com/johannesjo/super-productivity/commit/d65d598))
+* **tasks:** adjust task notes styling ([bd31bcb](https://github.com/johannesjo/super-productivity/commit/bd31bcb))
+
+
+
+## [2.3.2](https://github.com/johannesjo/super-productivity/compare/v2.3.1...v2.3.2) (2019-02-22)
+
+
+### Bug Fixes
+
+* **reminder:** lower initial time limit to prevent problems at the start ([839a86f](https://github.com/johannesjo/super-productivity/commit/839a86f))
+
+
+### Features
+
+* **tasks:** complete redesign ([096f454](https://github.com/johannesjo/super-productivity/commit/096f454))
+* **tasks:** improve mobile task styles ([f23547c](https://github.com/johannesjo/super-productivity/commit/f23547c))
+* **tasks:** improve mobile task styles ([96fe247](https://github.com/johannesjo/super-productivity/commit/96fe247))
+* **tasks:** improve styling for task shadows and adjust z-index values ([b644d02](https://github.com/johannesjo/super-productivity/commit/b644d02))
+* **tasks:** improve styling for toggle sub tasks button and improve mobile ([366e03c](https://github.com/johannesjo/super-productivity/commit/366e03c))
+* **tasks:** only show swipe blocks when touch device ([f6fd35d](https://github.com/johannesjo/super-productivity/commit/f6fd35d))
+* **tasks:** various little improvements ([83544b5](https://github.com/johannesjo/super-productivity/commit/83544b5))
+* improve margins for task list wrapper ([2924164](https://github.com/johannesjo/super-productivity/commit/2924164))
+
+
+
+## [2.3.1](https://github.com/johannesjo/super-productivity/compare/v2.3.0...v2.3.1) (2019-02-21)
+
+
+### Bug Fixes
+
+* **google:** get rid of empty observable causing sync to go on forever ([a8a3b47](https://github.com/johannesjo/super-productivity/commit/a8a3b47))
+* **googleExport:** endless loading state ([01cc756](https://github.com/johannesjo/super-productivity/commit/01cc756))
+* **jira:** attachment mapping leading to error ([9d47a29](https://github.com/johannesjo/super-productivity/commit/9d47a29))
+* **takeABreak:** manual reset not working for electron ([8efca90](https://github.com/johannesjo/super-productivity/commit/8efca90))
+* scrollbars ([d7c7f50](https://github.com/johannesjo/super-productivity/commit/d7c7f50))
+* **tasks:** task title not legible when editing current task in light theme ([c9e5fd9](https://github.com/johannesjo/super-productivity/commit/c9e5fd9))
+
+
+### Features
+
+* **google:** better debugging for login problem ([518cd29](https://github.com/johannesjo/super-productivity/commit/518cd29))
+* **google:** give login snack a delay ([0f56b5c](https://github.com/johannesjo/super-productivity/commit/0f56b5c))
+* **googleExport:** add little success icon after submission ([ff51bbf](https://github.com/johannesjo/super-productivity/commit/ff51bbf))
+* **googleExport:** improve table styling ([87cb3b8](https://github.com/johannesjo/super-productivity/commit/87cb3b8))
+* **projects:** add toast when updating settings ([7bf6193](https://github.com/johannesjo/super-productivity/commit/7bf6193))
+* **tasks:** add option to mark parent as done when all sub tasks are ([c50ccb6](https://github.com/johannesjo/super-productivity/commit/c50ccb6))
+* **tasks:** add tooltips for buttons ([0ebad0a](https://github.com/johannesjo/super-productivity/commit/0ebad0a))
+* **tasks:** add tooltips for main header ([0628dd1](https://github.com/johannesjo/super-productivity/commit/0628dd1))
+* **tasks:** also hide drag handle if not needed ([051894c](https://github.com/johannesjo/super-productivity/commit/051894c))
+* **tasks:** improve additional info styling ([28ed3c2](https://github.com/johannesjo/super-productivity/commit/28ed3c2))
+* **tasks:** improve quick access menu ([cb8aad2](https://github.com/johannesjo/super-productivity/commit/cb8aad2))
+* **tasks:** slightly improve additional task info styling ([b0c8c03](https://github.com/johannesjo/super-productivity/commit/b0c8c03))
+
+
+
 # [2.3.0](https://github.com/johannesjo/super-productivity/compare/v2.2.3...v2.3.0) (2019-02-18)
 
 

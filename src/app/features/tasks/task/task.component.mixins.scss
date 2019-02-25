@@ -1,0 +1,59 @@
+@mixin isCurrent {
+  .inner-wrapper.isCurrent & {
+    @content;
+  }
+}
+
+@mixin isHostFocus($direct-parent-only-sel: false) {
+  @if $direct-parent-only-sel {
+    :host-context(.isNoTouchDevice):focus > #{$direct-parent-only-sel} > & {
+      @content;
+    }
+  } @else {
+    :host-context(.isNoTouchDevice):focus & {
+      @content;
+    }
+  }
+}
+
+@mixin isDone($direct-parent-only-sel: false) {
+  @if $direct-parent-only-sel {
+    .inner-wrapper.isDone > #{$direct-parent-only-sel} > & {
+      @content;
+    }
+  } @else {
+    .inner-wrapper.isDone & {
+      @content;
+    }
+  }
+}
+
+@mixin isDoneForFirstLine($direct-parent-only-sel: false) {
+  .inner-wrapper.isDone > .first-line & {
+    @content;
+  }
+}
+
+
+@mixin standardTaskOpacityChange {
+  opacity: $task-icon-default-opacity;
+  transition: transform $transition-fast;
+
+  :host:focus &,
+  .isCurrent &,
+  &:hover,
+  &:focus {
+    opacity: 1;
+  }
+}
+
+%standardTaskOpacityChange {
+  @include standardTaskOpacityChange;
+}
+
+%standardTaskZoom {
+  &:hover,
+  &:focus {
+    transform: scale(1.2);
+  }
+}

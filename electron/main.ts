@@ -197,14 +197,12 @@ function registerShowAppShortCut(shortcutPassed) {
       } else {
         showOrFocus(mainWin);
       }
-    });
-    console.log(ret);
+      // circumvent wrong electron typing
+    }) as unknown;
 
-    // TODO make this work again
-    // tslint:disable-next-line
-    // if (!ret) {
-    //   errorHandler('Key registration failed: ' + shortcutPassed, shortcutPassed);
-    // }
+    if (!ret) {
+      errorHandler('Global Shortcut registration failed: ' + shortcutPassed, shortcutPassed);
+    }
   }
 }
 

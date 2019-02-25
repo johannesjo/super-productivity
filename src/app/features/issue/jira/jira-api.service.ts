@@ -30,6 +30,7 @@ import { catchError, first } from 'rxjs/operators';
 import { JiraIssue } from './jira-issue/jira-issue.model';
 import * as moment from 'moment-mini';
 import { getJiraResponseErrorTxt } from '../../../util/get-jira-response-error-text';
+import { BannerService } from '../../../core/banner/banner.service';
 
 const BLOCK_ACCESS_KEY = 'SUP_BLOCK_JIRA_ACCESS';
 
@@ -49,6 +50,7 @@ export class JiraApiService {
     private _projectService: ProjectService,
     private _electronService: ElectronService,
     private _snackService: SnackService,
+    private _bannerService: BannerService,
   ) {
     this._projectService.currentJiraCfg$.subscribe((cfg: JiraCfg) => {
       this._cfg = cfg;
@@ -223,9 +225,14 @@ export class JiraApiService {
 
     if (this._isBlockAccess) {
       console.error('Blocked Jira Access to prevent being shut out');
-      this._snackService.open({
-        type: 'JIRA_UNBLOCK',
-        message: 'Jira: To prevent shut out from api, access has been blocked. Check your settings!'
+      this._bannerService.open({
+        id: 'JIRA_UNBLOCK',
+        msg: 'Jira: To prevent shut out from api, access has been blocked by Super Productivity. You probably should check your jira settings!',
+        svgIco: 'jira',
+        action: {
+          label: 'Unblock',
+          fn: () => this.unblockAccess()
+        }
       });
       return throwError({handledError: 'Blocked access to prevent being shut out'});
     }

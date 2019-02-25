@@ -13,6 +13,16 @@ app-root,
   font-family: 'Roboto', sans-serif;
 }
 
+body {
+  &.isLightTheme {
+    color: $light-theme-text-color;
+  }
+
+  &.isDarkTheme {
+    color: $dark-theme-text-color;
+  }
+}
+
 .page-wrapper {
   padding: $s 2*$s $s*9;
 }
@@ -20,6 +30,20 @@ app-root,
 .component-wrapper {
   max-width: $component-max-width;
   margin: auto;
+}
+
+.task-list-wrapper {
+  padding: 0 0 $s*9;
+  max-width: $component-max-width;
+  margin: auto;
+
+  @include mq(xs) {
+    padding: $s 2*$s $s*9;
+  }
+
+  @include mq(component) {
+    padding: $s*2 3*$s $s*9;
+  }
 }
 
 

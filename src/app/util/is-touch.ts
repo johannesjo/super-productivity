@@ -6,3 +6,5 @@ export function isTouch() {
     return false;
   }
 }
+
+export const IS_TOUCH = isTouch();

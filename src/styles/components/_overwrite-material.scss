@@ -2,24 +2,20 @@ body .mat-dialog-content {
   @include scroll;
 }
 
-body .mat-snack-bar-container {
-  &.subtle {
-    margin-bottom: 0;
-    border-bottom-left-radius: 0;
-    border-bottom-right-radius: 0;
-    min-height: 24px;
-    padding-top: 8px;
-    padding-bottom: 8px;
-  }
+.mat-snack-bar-container.mat-snack-bar-container.mat-snack-bar-container {
+  padding: 0 16px !important;
+  pointer-events: all;
+  min-height: 48px;
+  width: auto;
+  margin-left: auto;
+  margin-right: auto;
+}
 
-  @include mq(sm) {
-    max-width: 60vw;
-  }
-  @include mq(lg) {
-    max-width: 33vw;
-  }
+body .mat-snack-bar-handset {
+  pointer-events: none;
 }
 
 body .mat-form-field {
   display: block;
 }
+

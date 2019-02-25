@@ -7,15 +7,18 @@
 }
 
 .wrapper {
-  margin: $s $s*2 $s*2;
-  border-radius: 12px;
-  border: 1px solid #dddddd;
-  //background: #efefef;
-  //background: #f2f2f2;
-  overflow: hidden;
+  // 1px for the border
+  margin: 0 1px 0;
+  transition: $transition-standard;
+
+  border: 1px solid transparent;
+
+  @include lightTheme {
+    border-top-color: #ddd;
+  }
 
   @include darkTheme {
-    border-color: #333333;
+    border-top-color: rgba(255, 255, 255, 0.12);
   }
 
   @media (max-width: $layout-xs) {
@@ -23,8 +26,24 @@
     margin-bottom: $s;
   }
 
+  :host-context(.isCurrent) & {
+    border-radius: $card-border-radius;
+    border: 1px solid #ddd;
+    box-shadow: $whiteframe-shadow-1dp;
+  }
+
+  :host-context(.isDarkTheme .isCurrent) & {
+    border-color: #333333;
+  }
+
   :host-context(.isReducedTheme) & {
     border-radius: $card-border-radius;
+    border: 1px solid #ddd;
+    box-shadow: $whiteframe-shadow-1dp;
+  }
+
+  :host-context(.isReducedTheme.isDarkTheme) & {
+    border-color: #333333;
   }
 }
 
@@ -35,6 +54,10 @@
   }
 }
 
+::ng-deep .mat-tab-header {
+  //border-top: 1px solid rgba(0, 0, 0, 0.12);
+}
+
 ::ng-deep .mat-tab-labels {
   justify-content: stretch;
   user-select: none;
@@ -43,6 +66,8 @@
 ::ng-deep .mat-tab-labels .mat-tab-label {
   flex-grow: 1;
   height: 46px;
+  //text-transform: uppercase;
+  //font-weight: normal;
 }
 
 .tab-label-text {
@@ -61,23 +86,25 @@
   white-space: nowrap;
 }
 
-.tab-content {
-  padding: $s;
+.attachment-list-tab {
+  padding: $s $s*2;
 
   h3 {
     margin-bottom: $s;
   }
 }
 
-.tab-content,
+.attachment-list-tab,
 .mat-tab-body {
   // needed to overstyle current task
   @include standardThemeTextColor();
 }
 
 
-.notes {
-  margin: $s;
+.notes-tab {
+  margin: $s/2;
+  margin-bottom: 2px;
+  border-radius: $card-border-radius;
 
   ::ng-deep {
     .markdown-wrapper {
@@ -90,8 +117,8 @@
       border: 1px solid #dddddd;
       @include standardThemeTextColor();
       @include lightTheme {
-        background: $standard-note-ng-light;
-        background: #f2f2f2;
+        //background: $standard-note-bg-light;
+        background: #f1f1f1;
         color: $standard-note-fg-light;
       }
 

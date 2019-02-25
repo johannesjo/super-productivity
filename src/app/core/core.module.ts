@@ -6,6 +6,7 @@ import { SnackModule } from './snack/snack.module';
 import { RouterModule } from '@angular/router';
 import { NotifyModule } from './notify/notify.module';
 import { LocalBackupModule } from '../imex/local-backup/local-backup.module';
+import { BannerModule } from './banner/banner.module';
 
 @NgModule({
   imports: [
@@ -14,6 +15,7 @@ import { LocalBackupModule } from '../imex/local-backup/local-backup.module';
     PersistenceModule,
     ChromeExtensionInterfaceModule,
     SnackModule,
+    BannerModule,
     NotifyModule,
     LocalBackupModule,
   ],
@@ -21,6 +23,7 @@ import { LocalBackupModule } from '../imex/local-backup/local-backup.module';
     PersistenceModule,
     ChromeExtensionInterfaceModule,
     SnackModule,
+    BannerModule,
     NotifyModule,
   ],
 })

@@ -16,6 +16,7 @@ import {
   IPC_TRIGGER_GOOGLE_AUTH
 } from '../../../../electron/ipc-events.const';
 import { ElectronService } from 'ngx-electron';
+import { BannerService } from '../../core/banner/banner.service';
 
 const EXPIRES_SAFETY_MARGIN = 60000;
 
@@ -32,7 +33,7 @@ export class GoogleApiService {
     switchMap((session) => {
       const expiresAt = session && session.expiresAt || 0;
       const expiresIn = expiresAt - (moment().valueOf() + EXPIRES_SAFETY_MARGIN);
-      return expiresIn > 0
+      return this._isTokenExpired(session)
         ? timer(expiresIn)
         : EMPTY;
     })
@@ -45,6 +46,7 @@ export class GoogleApiService {
   ).pipe(
     map((session_: GoogleSession | number) => {
       if (session_ === 0) {
+        console.log('GOOGLE API: SESSION EXPIRED, expiresAt', this._session.expiresAt);
         return false;
       }
       const session = session_ as GoogleSession;
@@ -57,12 +59,26 @@ export class GoogleApiService {
   private _isGapiInitialized = false;
   private _gapi: any;
 
-  constructor(private readonly _http: HttpClient,
-              private readonly _configService: ConfigService,
-              private readonly _electronService: ElectronService,
-              private readonly _snackService: SnackService) {
+  constructor(
+    private readonly _http: HttpClient,
+    private readonly _configService: ConfigService,
+    private readonly _electronService: ElectronService,
+    private readonly _snackService: SnackService,
+    private readonly _bannerService: BannerService,
+  ) {
     this.isLoggedIn$.subscribe((isLoggedIn) => this.isLoggedIn = isLoggedIn);
     this._onTokenExpire$.subscribe((val) => console.log('onTokenExpire$', val));
+
+    if (IS_ELECTRON) {
+      this._onTokenExpire$.subscribe((val) => {
+        console.log('GOOGLE_LOGIN: onExpire trying to log in again');
+        this.login(true);
+      });
+    }
+
+    // setTimeout(() => {
+    //   this._handleUnAuthenticated(null);
+    // }, 4000);
   }
 
   private get _session(): GoogleSession {
@@ -70,27 +86,35 @@ export class GoogleApiService {
   }
 
   login(isSkipSuccessMsg = false): Promise<any> {
-    if (IS_ELECTRON) {
-      if (this.isLoggedIn) {
-        return new Promise((resolve) => resolve());
+    const showSuccessMsg = () => {
+      if (!(isSkipSuccessMsg)) {
+        this._snackIt('SUCCESS', 'GoogleApi: Login successful');
       }
-      console.log(this._session.refreshToken);
+    };
 
-      this._electronService.ipcRenderer.send(IPC_TRIGGER_GOOGLE_AUTH, this._session.refreshToken);
+    if (IS_ELECTRON) {
+      const session = this._session;
+      if (this.isLoggedIn && !this._isTokenExpired(session)) {
+        return new Promise((resolve) => resolve(true));
+      }
+      console.log('GOOGLE_LOGIN: logging in via refresh token', session.refreshToken);
+
+      this._electronService.ipcRenderer.send(IPC_TRIGGER_GOOGLE_AUTH, session.refreshToken);
       return new Promise((resolve, reject) => {
         this._electronService.ipcRenderer.on(IPC_GOOGLE_AUTH_TOKEN, (ev, data: any) => {
-          console.log('ELECTRON GOOGLE LOGIN RESPONSE', data);
+          console.log('GOOGLE_LOGIN: ELECTRON LOGIN RESPONSE', data);
           this._updateSession({
             accessToken: data.access_token,
             expiresAt: data.expiry_date,
             refreshToken: data.refresh_token,
           });
-          if (!(isSkipSuccessMsg)) {
-            this._snackIt('SUCCESS', 'GoogleApi: Login successful');
-          }
+          showSuccessMsg();
           resolve(data);
         });
-        this._electronService.ipcRenderer.on(IPC_GOOGLE_AUTH_TOKEN_ERROR, reject);
+        this._electronService.ipcRenderer.on(IPC_GOOGLE_AUTH_TOKEN_ERROR, (err, hmm) => {
+          console.log('GOOGLE_LOGIN: ELECTRON ERROR', err, hmm);
+          reject(err);
+        });
       });
     } else {
       return this._initClientLibraryIfNotDone()
@@ -105,9 +129,7 @@ export class GoogleApiService {
           //   });
           const successHandler = (res) => {
             this._saveToken(res);
-            if (!(isSkipSuccessMsg)) {
-              this._snackIt('SUCCESS', 'GoogleApi: Login successful');
-            }
+            showSuccessMsg();
           };
 
           if (user && user.Zi && user.Zi.access_token) {
@@ -350,15 +372,15 @@ export class GoogleApiService {
 
   private _handleUnAuthenticated(err) {
     this.logout();
-    setTimeout(() => {
-      this._snackService.open({
-        message: 'GoogleApi: Failed to authenticate please try logging in again!',
-        type: 'GOOGLE_LOGIN',
-        config: {
-          duration: 20 * 1000
-        }
-      });
-    }, 2000);
+    this._bannerService.open({
+      msg: 'GoogleApi: Failed to authenticate please try logging in again!',
+      ico: 'cloud_off',
+      id: 'GOOGLE_LOGIN',
+      action: {
+        label: 'Login',
+        fn: () => this.login()
+      }
+    });
     console.error(err);
   }
 
@@ -392,37 +414,33 @@ export class GoogleApiService {
   }
 
   private _mapHttp(params_: HttpRequest<string> | any): Observable<any> {
-    if (!this._session.accessToken) {
-      this._handleUnAuthenticated('GoogleApiService: Not logged in');
-      return throwError({handledError: 'Not logged in'});
-    }
-
-    const p = {
-      ...params_,
-      headers: {
-        ...(params_.headers || {}),
-        'Authorization': `Bearer ${this._session.accessToken}`,
-      }
-    };
-    const bodyArg = p.data ? [p.data] : [];
-    const allArgs = [...bodyArg, {
-      headers: new HttpHeaders(p.headers),
-      params: new HttpParams({fromObject: p.params}),
-      reportProgress: false,
-      observe: 'response',
-    }];
-    const req = new HttpRequest(p.method, p.url, ...allArgs);
-
-    // const sub = this._http[p.method.toLowerCase()](p.url, p.data, p)
     return from(this.login(true))
       .pipe(
-        concatMap(() => this._http.request(req)),
+        concatMap(() => {
+          const p = {
+            ...params_,
+            headers: {
+              ...(params_.headers || {}),
+              'Authorization': `Bearer ${this._session.accessToken}`,
+            }
+          };
+          const bodyArg = p.data ? [p.data] : [];
+          const allArgs = [...bodyArg, {
+            headers: new HttpHeaders(p.headers),
+            params: new HttpParams({fromObject: p.params}),
+            reportProgress: false,
+            observe: 'response',
+          }];
+          const req = new HttpRequest(p.method, p.url, ...allArgs);
+          return this._http.request(req);
+        }),
+
         // TODO remove type: 0 @see https://brianflove.com/2018/09/03/angular-http-client-observe-response/
         // tap(res => console.log(res)),
         filter(res => !(res === Object(res) && res.type === 0)),
         map((res: any) => (res && res.body) ? res.body : res),
         catchError((res) => {
-          console.warn(res);
+          console.warn('GoogleApi Error:', res);
           if (!res) {
             this._handleError('No response body');
           } else if (res && res.status === 401) {
@@ -463,5 +481,11 @@ export class GoogleApiService {
     script.onload = loadFunction.bind(that);
     // script['onreadystatechange'] = loadFunction.bind(that);
     document.getElementsByTagName('head')[0].appendChild(script);
+  }
+
+  private _isTokenExpired(session): boolean {
+    const expiresAt = session && session.expiresAt || 0;
+    const expiresIn = expiresAt - (moment().valueOf() + EXPIRES_SAFETY_MARGIN);
+    return expiresIn > 0;
   }
 }

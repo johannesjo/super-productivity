@@ -4,9 +4,10 @@
   display: flex;
   align-items: center;
   justify-content: stretch;
+  min-height: 48px;
 }
 
-mat-icon {
+.snack-icon {
   margin-right: $s;
 
   .success & {
@@ -20,6 +21,10 @@ mat-icon {
 
 .message {
   flex: 1;
+  // icons all have there inner padding so we also move th message a little bit
+  padding-left: $s;
+  padding-top: $s;
+  padding-bottom: $s;
 }
 
 button {
@@ -29,6 +34,15 @@ button {
 
 .button-wrapper {
   margin-left: auto;
+
+  button {
+    text-transform: uppercase;
+  }
+}
+
+.close-btn {
+  margin-left: 0;
+  margin-right: -$s;
 }
 
 mat-progress-bar {

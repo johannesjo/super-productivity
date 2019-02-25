@@ -9,40 +9,31 @@
        [class.bg-600]="isCurrent">
   </div>
 
+  <!-- TODO only bind pan etc when touch is available-->
   <div class="first-line"
        (panstart)="onPanStart($event)"
        (panleft)="onPanLeft($event)"
        (panright)="onPanRight($event)"
        (panend)="onPanEnd()"
        [class.isPreventPointerEventsWhilePanning]="isPreventPointerEventsWhilePanning">
-    <button (click)="toggleSubTaskMode()"
-            *ngIf="task.subTasks && task.subTasks.length"
-            class="toggle-sub-tasks-btn ico-btn"
-            color=""
-            mat-mini-fab=""
-            tabindex="2">
-      <mat-icon *ngIf="task._showSubTasksMode===0">add
-      </mat-icon>
-      <mat-icon *ngIf="task._showSubTasksMode!==0"
-                [class.isHideDoneTasks]="task._showSubTasksMode===1">remove
-      </mat-icon>
-    </button>
 
-    <div class="block-left bg-400"
-         #blockLeft>
-      <mat-icon *ngIf="!task.isDone">check</mat-icon>
-      <mat-icon *ngIf="task.isDone">undo</mat-icon>
-    </div>
+    <ng-container *ngIf="isTouch">
+      <div class="block-left bg-400"
+           #blockLeft>
+        <mat-icon *ngIf="!task.isDone">check</mat-icon>
+        <mat-icon *ngIf="task.isDone">undo</mat-icon>
+      </div>
 
-    <div class="block-right bg-400"
-         #blockRight>
-      <mat-icon *ngIf="!task.isDone">alarm_add</mat-icon>
-      <mat-icon *ngIf="task.isDone">undo</mat-icon>
-    </div>
+      <div class="block-right bg-400"
+           #blockRight>
+        <mat-icon *ngIf="!task.isDone">alarm_add</mat-icon>
+        <mat-icon *ngIf="task.isDone">undo</mat-icon>
+      </div>
+    </ng-container>
 
     <button (click)="toggleTaskDone()"
             *ngIf="task.isDone"
-            aria-label="un-/mark as done"
+            title="un-/mark as done"
             class="check-done"
             mat-icon-button=""
             tabindex="2">
@@ -56,7 +47,7 @@
       </mat-icon>
     </button>
 
-    <div class="title-bar-wrapper">
+    <div class="title-and-left-btns-wrapper">
       <mat-icon [class.handle-par]="!task.parentId"
                 [class.handle-sub]="task.parentId"
                 class="drag-handle"
@@ -65,7 +56,7 @@
 
       <button (click)="handleUpdateBtnClick()"
               *ngIf="task.issueData?.wasUpdated"
-              aria-label="is updated"
+              title="Show updates"
               class="ico-btn"
               color="accent"
               mat-icon-button
@@ -75,7 +66,7 @@
 
       <a *ngIf="task.issueData?.url"
          [href]="task.issueData?.url"
-         aria-label="link"
+         title="Open issue in a new browser tab"
          class="ico-btn original-link-btn"
          color=""
          mat-icon-button
@@ -94,46 +85,6 @@
     </div>
 
     <div class="all-controls-wrapper">
-      <div class="hover-controls hide-xs bg-standard"
-           [class.bg-600i]="isCurrent">
-        <button (click)="startTask()"
-                *ngIf="!task.isDone && !isCurrent && !task.subTasks"
-                aria-label="mark as current"
-                class="ico-btn"
-                color=""
-                mat-icon-button
-                tabindex="2">
-          <mat-icon class="play-icon"
-                    svgIcon="play"></mat-icon>
-        </button>
-
-        <button (click)="pauseTask()"
-                *ngIf="!task.isDone && isCurrent && !task.subTasks"
-                class="ico-btn"
-                color=""
-                mat-icon-button
-                tabindex="2">
-          <mat-icon>pause</mat-icon>
-        </button>
-        <button (click)="toggleTaskDone()"
-                class="ico-btn"
-                color=""
-                mat-icon-button
-                tabindex="2">
-          <mat-icon *ngIf="task.isDone">undo</mat-icon>
-          <mat-icon *ngIf="!task.isDone">check</mat-icon>
-        </button>
-        <button *ngIf="!task.subTasks?.length"
-                (click)="estimateTime()"
-                aria-label="time estimation"
-                class="ico-btn time-btn hide-xs"
-                color=""
-                mat-icon-button
-                tabindex="2">
-          <mat-icon aria-label="time estimation">access_time</mat-icon>
-        </button>
-      </div>
-
       <div (click)="estimateTime()"
            [class.isEditable]="!task.subTasks?.length"
            class="time-wrapper">
@@ -148,8 +99,51 @@
       </div>
 
       <div class="controls">
+        <div class="hover-controls bg-standard"
+             [class.bg-600i]="isCurrent">
+          <button (click)="startTask()"
+                  *ngIf="!task.isDone && !isCurrent && !task.subTasks"
+                  title="Start tracking time"
+                  class="ico-btn start-task-btn"
+                  color=""
+                  mat-icon-button
+                  tabindex="2">
+            <mat-icon class="play-icon"
+                      svgIcon="play"></mat-icon>
+          </button>
+
+          <button (click)="pauseTask()"
+                  *ngIf="!task.isDone && isCurrent && !task.subTasks"
+                  title="Stop tracking time"
+                  class="ico-btn"
+                  color=""
+                  mat-icon-button
+                  tabindex="2">
+            <mat-icon>pause</mat-icon>
+          </button>
+          <button (click)="toggleTaskDone()"
+                  title="Mark as done/undone"
+                  class="ico-btn"
+                  color=""
+                  mat-icon-button
+                  tabindex="2">
+            <mat-icon *ngIf="task.isDone">undo</mat-icon>
+            <mat-icon *ngIf="!task.isDone">check</mat-icon>
+          </button>
+          <button *ngIf="!task.subTasks?.length"
+                  (click)="estimateTime()"
+                  title="Estimate time/Add time spent"
+                  class="ico-btn time-btn hide-xs"
+                  color=""
+                  mat-icon-button
+                  tabindex="2">
+            <mat-icon aria-label="time estimation">access_time</mat-icon>
+          </button>
+        </div>
+
         <button *ngIf="task.reminderId"
                 (click)="editReminder()"
+                title="Edit reminder"
                 color=""
                 class="ico-btn"
                 tabindex="2"
@@ -157,9 +151,9 @@
           <mat-icon>alarm</mat-icon>
         </button>
         <button (click)="toggleShowAdditionalInfoOpen()"
-                *ngIf="task.notes||task.issueData||task.attachmentIds?.length"
+                *ngIf="task.notes||task.issueData"
                 [class.isActive]="task._isAdditionalInfoOpen"
-                aria-label="additional-info"
+                title="Show/Hide additional info"
                 class="ico-btn show-additional-info-btn hide-xs"
                 color=""
                 mat-icon-button
@@ -168,9 +162,10 @@
         </button>
 
         <button (click)="toggleShowAttachments()"
-                *ngIf="task.attachmentIds?.length"
-                aria-label="additional-info"
-                class="ico-btn hide-xs"
+                *ngIf="task.attachmentIds?.length || (task.issueType==='JIRA' && task.issueData && task.issueData['attachments']?.length)"
+                [class.isActive]="task._isAdditionalInfoOpen"
+                title="Show/Hide attachments"
+                class="ico-btn attachment-btn hide-xs"
                 color=""
                 mat-icon-button
                 tabindex="2">
@@ -178,7 +173,8 @@
         </button>
 
         <button [matMenuTriggerFor]="menu"
-                class="ico-btn"
+                class="ico-btn menu-trigger"
+                title="Open task menu"
                 color=""
                 mat-icon-button>
           <mat-icon>more_vert</mat-icon>
@@ -188,7 +184,8 @@
                   *ngIf="!task.isDone && !isCurrent && !task.subTasks"
                   aria-label="mark as current"
                   mat-menu-item
-                  tabindex="2">
+                  tabindex="2"
+                  class="show-touch-only">
             <mat-icon class="play-icon"
                       svgIcon="play"></mat-icon>
             Start tracking task
@@ -196,12 +193,14 @@
           <button (click)="pauseTask()"
                   *ngIf="!task.isDone && isCurrent && !task.subTasks"
                   mat-menu-item
-                  tabindex="2">
+                  tabindex="2"
+                  class="show-touch-only">
             <mat-icon>pause</mat-icon>
             Pause tracking task
           </button>
 
           <button (click)="toggleTaskDone()"
+                  class="show-touch-only"
                   aria-label="un-/mark as done"
                   mat-menu-item=""
                   tabindex="2">
@@ -305,6 +304,19 @@
 
   <div *ngIf="task.subTasks && task.subTasks.length"
        class="sub-tasks">
+    <button (click)="toggleSubTaskMode()"
+            *ngIf="task.subTasks && task.subTasks.length"
+            title="Toggle sub task visibility"
+            class="toggle-sub-tasks-btn ico-btn mat-elevation-z2"
+            color=""
+            mat-mini-fab=""
+            tabindex="2">
+      <mat-icon *ngIf="task._showSubTasksMode===0">add
+      </mat-icon>
+      <mat-icon *ngIf="task._showSubTasksMode!==0"
+                [class.isHideDoneTasks]="task._showSubTasksMode===1">remove
+      </mat-icon>
+    </button>
     <task-list *ngIf="task.subTasks?.length"
                [@expand]
                [isHideAll]="task._showSubTasksMode!==2"

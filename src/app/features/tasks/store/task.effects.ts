@@ -2,14 +2,14 @@ import { Injectable } from '@angular/core';
 import { Actions, Effect, ofType } from '@ngrx/effects';
 import { DeleteTask, Move, MoveToBacklog, SetCurrentTask, TaskActionTypes, UpdateTask } from './task.actions';
 import { select, Store } from '@ngrx/store';
-import { map, mergeMap, tap, throttleTime, withLatestFrom } from 'rxjs/operators';
+import { filter, map, mergeMap, tap, throttleTime, withLatestFrom } from 'rxjs/operators';
 import { PersistenceService } from '../../../core/persistence/persistence.service';
 import { selectCurrentTask, selectTaskFeatureState } from './task.selectors';
 import { selectCurrentProjectId } from '../../project/store/project.reducer';
 import { SnackOpen } from '../../../core/snack/store/snack.actions';
 import { NotifyService } from '../../../core/notify/notify.service';
 import { TaskService } from '../task.service';
-import { selectConfigFeatureState } from '../../config/store/config.reducer';
+import { selectConfigFeatureState, selectMiscConfig } from '../../config/store/config.reducer';
 import { AttachmentActionTypes } from '../../attachment/store/attachment.actions';
 import { TaskWithSubTasks } from '../task.model';
 import { TaskState } from './task.reducer';
@@ -18,6 +18,7 @@ import { ElectronService } from 'ngx-electron';
 import { IPC_CURRENT_TASK_UPDATED } from '../../../../../electron/ipc-events.const';
 import { IS_ELECTRON } from '../../../app.constants';
 import { ReminderService } from '../../reminder/reminder.service';
+import { MiscConfig } from '../../config/config.model';
 
 // TODO send message to electron when current task changes here
 
@@ -142,6 +143,35 @@ export class TaskEffects {
         }
       })
     );
+
+  @Effect() onAllSubTasksDone$: any = this._actions$
+    .pipe(
+      ofType(
+        TaskActionTypes.UpdateTask,
+      ),
+      withLatestFrom(
+        this._store$.pipe(select(selectMiscConfig)),
+        this._store$.pipe(select(selectTaskFeatureState))
+      ),
+      filter(([action, miscCfg, state]: [UpdateTask, MiscConfig, TaskState]) =>
+        miscCfg && miscCfg.isAutMarkParentAsDone &&
+        action.payload.task.changes.isDone &&
+        !!(state.entities[action.payload.task.id].parentId)
+      ),
+      filter(([action, miscCfg, state]) => {
+        const task = state.entities[action.payload.task.id];
+        const parent = state.entities[task.parentId];
+        const undoneSubTasks = parent.subTaskIds.filter(id => !state.entities[id].isDone);
+        return undoneSubTasks.length === 0;
+      }),
+      map(([action, miscCfg, state]) => new UpdateTask({
+        task: {
+          id: state.entities[action.payload.task.id].parentId,
+          changes: {isDone: true},
+        }
+      })),
+    );
+
 
   @Effect({dispatch: false}) restoreTask$: any = this._actions$
     .pipe(
@@ -277,7 +307,7 @@ export class TaskEffects {
       });
 
       this._store$.dispatch(new SnackOpen({
-        message: `You exceeded your estimated time for "${ct.title}"`,
+        message: `You exceeded your estimated time for "${ct.title.substr(0, 50)}"`,
         actionStr: 'Add 1/2 hour',
         config: {duration: 60 * 1000},
         actionId: TaskActionTypes.UpdateTask,

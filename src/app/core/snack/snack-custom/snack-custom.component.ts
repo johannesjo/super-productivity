@@ -48,4 +48,8 @@ export class SnackCustomComponent implements OnInit, OnDestroy {
     }
     this.snackBarRef.dismissWithAction();
   }
+
+  close(){
+    this.snackBarRef.dismissWithAction();
+  }
 }

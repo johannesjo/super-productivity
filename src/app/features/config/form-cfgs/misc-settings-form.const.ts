@@ -37,6 +37,13 @@ export const MISC_SETTINGS_FORM_CFG: ConfigFormSection = {
         label: 'Hide navigation until main header is hovered (desktop only)',
       },
     },
+    {
+      key: 'isAutMarkParentAsDone',
+      type: 'checkbox',
+      templateOptions: {
+        label: 'Mark parent task as done, when all sub tasks are done',
+      },
+    },
 
     {
       key: 'isEnableIdleTimeTracking',

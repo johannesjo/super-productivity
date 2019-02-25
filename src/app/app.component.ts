@@ -5,7 +5,8 @@ import {
   ElementRef,
   HostListener,
   Inject,
-  OnInit
+  OnInit,
+  ViewChild
 } from '@angular/core';
 import { MatIconRegistry } from '@angular/material';
 import { DomSanitizer } from '@angular/platform-browser';
@@ -43,6 +44,7 @@ import { fadeAnimation } from './ui/animations/fade.ani';
 import { IS_MAC } from './util/is-mac';
 import { selectIsTaskDataLoaded } from './features/tasks/store/task.selectors';
 import { isTouch } from './util/is-touch';
+import { TaskActionTypes } from './features/tasks/store/task.actions';
 
 const SIDE_PANEL_BREAKPOINT = 900;
 
@@ -52,7 +54,6 @@ const SIDE_PANEL_BREAKPOINT = 900;
   styleUrls: ['./app.component.scss'],
   animations: [
     blendInOutAnimation,
-    slideAnimation,
     expandAnimation,
     warpRouteAnimation,
     fadeAnimation

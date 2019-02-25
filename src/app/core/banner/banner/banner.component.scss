@@ -1,0 +1,52 @@
+@import '../../../../variables';
+
+$vertical-button-margin: $s;
+
+:host {
+  box-shadow: $shadow-card-shadow;
+  position: relative;
+  z-index: 2;
+}
+
+:host-context(.isDarkTheme) {
+  background-color: $dark-theme-bg-darker;
+}
+
+.content-wrapper {
+  max-width: $component-max-width;
+  margin: auto;
+  padding: $s*2;
+  padding-top: $s;
+  padding-bottom: $s;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+
+  @include mq(component) {
+    // sync to task list padding
+    padding-left: 3*$s;
+    padding-right: 3*$s;
+  }
+}
+
+.message-wrapper {
+  display: flex;
+  align-items: center;
+  padding-top: $s;
+  padding-bottom: $s;
+
+  mat-icon {
+    margin-right: $s*1.5;
+    min-width: 20px;
+
+    .isError & {
+      color: $red;
+    }
+  }
+}
+
+.buttons {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+}
