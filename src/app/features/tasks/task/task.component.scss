@@ -169,10 +169,10 @@ $z-time-btn-svg-wrapper: 5555;
 .first-line {
   position: relative;
   display: flex;
+  align-items: stretch;
   flex-wrap: nowrap;
   user-select: none;
   justify-content: space-between;
-  align-items: center;
   min-height: $task-first-line-min-height;
   touch-action: pan-y;
 
@@ -209,13 +209,21 @@ $z-time-btn-svg-wrapper: 5555;
   flex-flow: row;
   position: relative;
   margin-left: $s;
+  align-items: stretch;
 }
 
 .controls {
-  white-space: nowrap;
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
   text-align: right;
   margin-right: 2px;
   position: relative;
+
+  button {
+    margin-top: auto;
+    margin-bottom: auto;
+  }
 
   @include mq(xs, max) {
     white-space: normal;
@@ -225,25 +233,28 @@ $z-time-btn-svg-wrapper: 5555;
 
 
 .hover-controls {
+  transform-origin: right center;
+  position: absolute;
+  right: 100%;
+  top: 0;
+  bottom: 0;
+  z-index: $z-hover-controls;
+
+
   @include mq(xs, max) {
     display: none !important;
   }
 
-  display: none;
-  flex-flow: row;
-  transform-origin: right center;
-  opacity: 0;
-  position: absolute;
-  right: 100%;
-  top: 0;
-  z-index: $z-hover-controls;
-
   @include mq(xs) {
-    opacity: 0;
+    display: none;
+  }
+
+  button {
+    margin-top: auto;
+    margin-bottom: auto;
   }
 
   .first-line:hover & {
-    opacity: 1;
     display: flex;
   }
 
@@ -641,7 +652,7 @@ progress-bar {
 .toggle-sub-tasks-btn,
 .first-line .ico-btn {
   $task-button-spacer: 1px;
-  margin: 0 $task-button-spacer;
+  margin: auto $task-button-spacer;
   padding: 0;
   z-index: $z-btn;
   @extend %standardTaskOpacityChange;
