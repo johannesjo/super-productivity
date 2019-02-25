@@ -3,7 +3,6 @@ import { TaskService } from '../../tasks/task.service';
 import { TimeTrackingService } from '../time-tracking.service';
 import { from, merge, Observable, Subject, timer } from 'rxjs';
 import {
-  delay,
   distinctUntilChanged,
   filter,
   map,
@@ -21,6 +20,7 @@ import { ChromeExtensionInterfaceService } from '../../../core/chrome-extension-
 import { IdleService } from '../idle.service';
 import { IS_ELECTRON } from '../../../app.constants';
 import { BannerService } from '../../../core/banner/banner.service';
+import { BannerId } from '../../../core/banner/banner.model';
 
 const BREAK_TRIGGER_DURATION = 10 * 60 * 1000;
 
@@ -28,6 +28,8 @@ const BREAK_TRIGGER_DURATION = 10 * 60 * 1000;
 const reduceBreak = (acc, tick) => {
   return acc + tick.duration;
 };
+
+const BANNER_ID: BannerId = 'TAKE_A_BREAK';
 
 @Injectable({
   providedIn: 'root',
@@ -121,6 +123,13 @@ export class TakeABreakService {
     private _bannerService: BannerService,
     private _chromeExtensionInterfaceService: ChromeExtensionInterfaceService,
   ) {
+    this._triggerReset$.pipe(
+      withLatestFrom(this._configService.misc$),
+      filter(([reset, cfg]) => cfg && cfg.isTakeABreakEnabled),
+    ).subscribe(() => {
+      this._bannerService.dismiss(BANNER_ID);
+    });
+
     const PING_UPDATE_BANNER_INTERVAL = 60 * 1000;
     this.timeWorkingWithoutABreak$.pipe(
       withLatestFrom(
@@ -141,7 +150,7 @@ export class TakeABreakService {
       console.log('timeWithoutBreak', timeWithoutBreak);
       const msg = this._createMessage(timeWithoutBreak, cfg);
       this._bannerService.open({
-        id: 'TAKE_A_BREAK',
+        id: BANNER_ID,
         ico: 'free_breakfast',
         msg,
         action: {
