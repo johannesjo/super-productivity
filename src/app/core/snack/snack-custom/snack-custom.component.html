@@ -1,6 +1,7 @@
 <div [class.error]="data.type==='ERROR'"
      [class.success]="data.type==='SUCCESS'"
      class="wrapper"
+     (click)="!data.actionStr && close()"
 >
   <ng-container *ngIf="!data.icon">
     <mat-icon *ngIf="data.type==='SUCCESS'"
@@ -30,8 +31,8 @@
   </div>
 
   <button mat-icon-button
-          class="close-btn"
-          (click)="close()">
+          *ngIf="!data.actionStr"
+          class="close-btn">
     <mat-icon>close</mat-icon>
   </button>
 

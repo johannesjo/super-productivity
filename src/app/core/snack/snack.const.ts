@@ -1,3 +1,3 @@
 export const DEFAULT_SNACK_CFG = {
-  duration: 4000,
+  duration: 3000,
 };

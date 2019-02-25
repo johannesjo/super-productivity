@@ -43,6 +43,12 @@ button {
 .close-btn {
   margin-left: 0;
   margin-right: -$s;
+  transition: $transition-fast;
+  opacity: 0;
+
+  .wrapper:hover & {
+    opacity: 1;
+  }
 }
 
 mat-progress-bar {
