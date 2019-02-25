@@ -18,6 +18,7 @@ import { take, takeUntil } from 'rxjs/operators';
 import { loadFromLs, saveToLs } from '../../core/persistence/local-storage';
 import { LS_DAILY_SUMMARY_TAB_INDEX } from '../../core/persistence/ls-keys.const';
 import { GoogleApiService } from '../../features/google/google-api.service';
+import { ProjectService } from '../../features/project/project.service';
 
 const SUCCESS_ANIMATION_DURATION = 500;
 
@@ -41,7 +42,7 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
   commitLog;
   isTimeSheetExported = true;
   showSuccessAnimation;
-  selectedTabIndex = loadFromLs(LS_DAILY_SUMMARY_TAB_INDEX) || 0;
+  selectedTabIndex = loadFromLs(this.getLsKeyForSummaryTabIndex()) || 0;
 
   // calc total time spent on todays tasks
   totalTimeSpentTasks$ = this._taskService.totalTimeWorkedOnTodaysTasks$;
@@ -63,6 +64,7 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
     private readonly _noteService: NoteService,
     private readonly _matDialog: MatDialog,
     private readonly _snackService: SnackService,
+    private readonly _projectService: ProjectService,
     private readonly _googleApiService: GoogleApiService,
     private readonly _electronService: ElectronService,
     private readonly _cd: ChangeDetectorRef,
@@ -136,7 +138,11 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
   }
 
   onTabIndexChange(i) {
-    saveToLs(LS_DAILY_SUMMARY_TAB_INDEX, i);
+    saveToLs(this.getLsKeyForSummaryTabIndex(), i);
+  }
+
+  private getLsKeyForSummaryTabIndex() {
+    return LS_DAILY_SUMMARY_TAB_INDEX + this._projectService.currentId;
   }
 
   private _finishDayForGood(cb?) {
