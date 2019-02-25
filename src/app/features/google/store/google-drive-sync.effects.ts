@@ -94,7 +94,7 @@ export class GoogleDriveSyncEffects {
     take(1),
     withLatestFrom(this.config$),
     filter(([act, cfg]) => cfg.isEnabled && cfg.isAutoLogin),
-    concatMap(() => from(this._googleApiService.login())),
+    concatMap(() => from(this._googleApiService.login(true))),
     concatMap(() => this._checkIfRemoteUpdate()),
     concatMap((isUpdate): any => {
       if (isUpdate) {

@@ -156,12 +156,12 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
       && this._configService.cfg.googleDriveSync.isEnabled
       && this._configService.cfg.googleDriveSync.isAutoSyncToRemote) {
       // login in again, will hopefully prevent google errors
-      this._googleApiService.login().then(() => {
-        this._googleDriveSync.saveForSync();
-        this._subs.add(this._googleDriveSync.onSaveEnd$.pipe(take(1)).subscribe(() => {
-          this._initSuccessAnimation(cb);
-        }));
-      });
+      // this._googleApiService.login().then(() => {
+      this._googleDriveSync.saveForSync();
+      this._subs.add(this._googleDriveSync.onSaveEnd$.pipe(take(1)).subscribe(() => {
+        this._initSuccessAnimation(cb);
+      }));
+      // });
     } else {
       this._initSuccessAnimation(cb);
     }
