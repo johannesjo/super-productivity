@@ -6,6 +6,7 @@ import { DEFAULT_CFG } from '../default-config.const';
 export const CONFIG_FEATURE_NAME = 'globalConfig';
 export const selectConfigFeatureState = createFeatureSelector<GlobalConfig>(CONFIG_FEATURE_NAME);
 export const selectMiscConfig = createSelector(selectConfigFeatureState, (cfg) => cfg.misc);
+export const selectGoogleSession = createSelector(selectConfigFeatureState, (cfg) => cfg._googleSession);
 
 export const initialState: GlobalConfig = DEFAULT_CFG;
 
