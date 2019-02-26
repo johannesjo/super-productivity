@@ -4,7 +4,13 @@ import { SetCurrentTask, TaskActionTypes, ToggleStart, UnsetCurrentTask } from '
 import { filter, map, mapTo, tap, withLatestFrom } from 'rxjs/operators';
 import { PomodoroService } from '../pomodoro.service';
 import { PomodoroConfig } from '../../config/config.model';
-import { FinishPomodoroSession, PausePomodoro, PomodoroActions, PomodoroActionTypes, StartPomodoro } from './pomodoro.actions';
+import {
+  FinishPomodoroSession,
+  PausePomodoro,
+  PomodoroActions,
+  PomodoroActionTypes,
+  StartPomodoro
+} from './pomodoro.actions';
 import { MatDialog } from '@angular/material';
 import { DialogPomodoroBreakComponent } from '../dialog-pomodoro-break/dialog-pomodoro-break.component';
 import { select, Store } from '@ngrx/store';
@@ -125,7 +131,7 @@ export class PomodoroEffects {
     ),
     tap(([action, isBreak, isPause, currentCycle]: [FinishPomodoroSession, boolean, boolean, number]) =>
       // TODO only notify if window is not currently focused
-      this._notifyService.notify({
+      this._notifyService.notifyDesktop({
         title: isBreak
           ? `Pomodoro: Break ${currentCycle + 1} started!`
           : `Pomodoro: Session ${currentCycle + 1} started!`

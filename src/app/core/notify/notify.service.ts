@@ -2,11 +2,18 @@ import { Injectable } from '@angular/core';
 import { NotifyModel } from './notify.model';
 import { environment } from '../../../environments/environment';
 import { IS_ELECTRON } from '../../app.constants';
+import { IS_MOBILE } from '../../util/is-mobile';
 
 @Injectable({
   providedIn: 'root',
 })
 export class NotifyService {
+  async notifyDesktop(options: NotifyModel) {
+    if (!IS_MOBILE) {
+      return this.notify(options);
+    }
+  }
+
   async notify(options: NotifyModel): Promise<Notification> {
     if (this._isServiceWorkerAvailable()) {
       const reg = await navigator.serviceWorker.getRegistration('ngsw-worker.js');
