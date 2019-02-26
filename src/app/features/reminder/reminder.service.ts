@@ -100,7 +100,10 @@ export class ReminderService {
   private _showNotification(reminder: Reminder) {
     this._notifyService.notify({
       title: reminder.title,
-    });
+      // prevents multiple notifications on mobile
+      tag: reminder.id,
+      requireInteraction: true,
+    }).then();
   }
 
   private async _loadFromLs(): Promise<Reminder[]> {
