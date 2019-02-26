@@ -3,7 +3,6 @@ import { Project } from '../project.model';
 import { ProjectActions, ProjectActionTypes } from './project.actions';
 import { createFeatureSelector, createSelector } from '@ngrx/store';
 import { FIRST_PROJECT } from '../project.const';
-import { selectTaskFeatureState } from '../../tasks/store/task.selectors';
 
 export const PROJECT_FEATURE_NAME = 'projects';
 
@@ -13,7 +12,13 @@ export interface ProjectState extends EntityState<Project> {
   isDataLoaded: boolean;
 }
 
-export const projectAdapter: EntityAdapter<Project> = createEntityAdapter<Project>();
+const sortByTitle = (p1: Project, p2: Project) => {
+  return p1.title.localeCompare(p2.title);
+};
+
+export const projectAdapter: EntityAdapter<Project> = createEntityAdapter<Project>({
+  sortComparer: sortByTitle,
+});
 
 // SELECTORS
 // ---------
