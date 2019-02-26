@@ -1,3 +1,29 @@
+## [2.4.3](https://github.com/johannesjo/super-productivity/compare/v2.4.2...v2.4.3) (2019-02-26)
+
+
+### Bug Fixes
+
+* **google:** another attempt to fix login ([af150b7](https://github.com/johannesjo/super-productivity/commit/af150b7))
+* **googleApi:** login handling and add better logging ([fc9855d](https://github.com/johannesjo/super-productivity/commit/fc9855d))
+* **googleDriveSync:** config btns ([ab9a90c](https://github.com/johannesjo/super-productivity/commit/ab9a90c))
+* **googleDriveSync:** remove login messages where they are not needed ([f229b66](https://github.com/johannesjo/super-productivity/commit/f229b66))
+* **googleDriveSync:** several issues ([0c27d21](https://github.com/johannesjo/super-productivity/commit/0c27d21))
+* **pomodoro:** don't show pomodoro notifications on mobile ([fbd8777](https://github.com/johannesjo/super-productivity/commit/fbd8777))
+* **reminders:** don't show multiple notifications for the same reminder on mobile ([51fccc6](https://github.com/johannesjo/super-productivity/commit/51fccc6))
+* **snacks:** styling ([4ec1b8c](https://github.com/johannesjo/super-productivity/commit/4ec1b8c))
+* **tasks:** focus next task after done toggle ([ee14af6](https://github.com/johannesjo/super-productivity/commit/ee14af6))
+* **tasks:** hover controls for multiline tasks ([ee47ec8](https://github.com/johannesjo/super-productivity/commit/ee47ec8))
+
+
+### Features
+
+* **snacks:** decrease display duration and only show close on hover ([2789211](https://github.com/johannesjo/super-productivity/commit/2789211))
+* **takeABreak:** auto close banner on reset ([770c89b](https://github.com/johannesjo/super-productivity/commit/770c89b))
+* **tasks:** remove double items for non touch devices ([64a05c1](https://github.com/johannesjo/super-productivity/commit/64a05c1))
+* save daily summary tab index on project basis ([c6f1386](https://github.com/johannesjo/super-productivity/commit/c6f1386))
+
+
+
 ## [2.4.2](https://github.com/johannesjo/super-productivity/compare/v2.4.1...v2.4.2) (2019-02-24)
 
 
