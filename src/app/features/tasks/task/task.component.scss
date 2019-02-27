@@ -666,7 +666,7 @@ progress-bar {
   }
 }
 
-.toggle-sub-tasks-btn {
+.toggle-sub-tasks-btn.toggle-sub-tasks-btn {
   position: absolute !important;
   transform: translateY(-50%);
   left: -24px;
@@ -678,14 +678,22 @@ progress-bar {
   height: 32px;
   margin-top: -1px !important;
   transform-origin: left top;
-  opacity: 1 !important;
+  transition-property: all;
 
   @include mq(xs, max) {
     //display: none;
   }
 
-  &:hover {
-    opacity: 1 !important;
+  :host-context(.isNoTouchDevice) & {
+    opacity: 0;
+  }
+
+  @include mq(xs, max) {
+    //display: none;
+  }
+
+  :host:hover & {
+    opacity: 1;
   }
 
   @include reducedTheme {
