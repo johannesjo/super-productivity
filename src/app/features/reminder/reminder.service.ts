@@ -75,13 +75,22 @@ export class ReminderService {
     return id;
   }
 
+  snooze(reminderId: string, snoozeTime: number) {
+    const remindAt = new Date().getTime() + snoozeTime;
+    this.updateReminder(reminderId, {remindAt});
+  }
+
   updateReminder(reminderId: string, reminderChanges: Partial<Reminder>) {
-    Object.assign(this.getById(reminderId), reminderChanges);
+    const i = this._reminders.findIndex(reminder => reminder.id === reminderId);
+    if (i > -1) {
+      this._reminders[i] = Object.assign(this._reminders[i], reminderChanges);
+    }
     this._saveModel(this._reminders);
   }
 
   removeReminder(reminderIdToRemove: string) {
     const i = this._reminders.findIndex(reminder => reminder.id === reminderIdToRemove);
+
     if (i > -1) {
       this._reminders.splice(i, 1);
       this._saveModel(this._reminders);

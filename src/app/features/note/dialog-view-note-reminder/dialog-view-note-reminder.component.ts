@@ -50,9 +50,7 @@ export class DialogViewNoteReminderComponent {
   }
 
   snooze() {
-    this._reminderService.updateReminder(this.reminder.id, {
-      remindAt: Date.now() + (10 * 60 * 1000)
-    });
+    this._reminderService.snooze(this.reminder.id, 10 * 60 * 1000);
     this.close();
   }
 
