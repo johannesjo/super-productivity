@@ -9,6 +9,7 @@ import { ReplaySubject, Subject } from 'rxjs';
 import { debounce, throttle } from 'throttle-debounce';
 import { promiseTimeout } from '../../util/promise-timeout';
 import { dirtyDeepCopy } from '../../util/dirtyDeepCopy';
+import { ImexMetaService } from '../../imex/imex-meta/imex-meta.service';
 
 const WORKER_PATH = 'assets/web-workers/reminder.js';
 
@@ -31,6 +32,7 @@ export class ReminderService {
     private readonly _persistenceService: PersistenceService,
     private readonly _notifyService: NotifyService,
     private readonly _snackService: SnackService,
+    private readonly _imexMetaService: ImexMetaService,
   ) {
   }
 
@@ -106,8 +108,12 @@ export class ReminderService {
   private _onReminderActivated(msg: MessageEvent) {
     const reminder = msg.data as Reminder;
     // TODO get related model here
-    this.onReminderActive$.next(reminder);
-    this._throttledShowNotification(reminder);
+
+    // only show when not currently syncing
+    if (!this._imexMetaService.isDataImportInProgress) {
+      this.onReminderActive$.next(reminder);
+      this._throttledShowNotification(reminder);
+    }
   }
 
   private _showNotification(reminder: Reminder) {
