@@ -33,6 +33,9 @@ export class DialogViewTaskReminderComponent implements OnDestroy {
   ) {
     this._matDialogRef.disableClose = true;
     this._subs.add(this.task$.pipe(take(1)).subscribe(task => this.task = task));
+    this._subs.add(this._reminderService.onReloadModel$.subscribe(() => {
+      this._close();
+    }));
   }
 
   ngOnDestroy(): void {
@@ -70,13 +73,13 @@ export class DialogViewTaskReminderComponent implements OnDestroy {
       reminderId: null,
     });
     this._reminderService.removeReminder(this.reminder.id);
-    this.close();
+    this._close();
   }
 
   dismissReminderOnly() {
     this.isDisableControls = true;
     this._reminderService.removeReminder(this.reminder.id);
-    this.close();
+    this._close();
   }
 
   snooze() {
@@ -84,10 +87,10 @@ export class DialogViewTaskReminderComponent implements OnDestroy {
     this._reminderService.updateReminder(this.reminder.id, {
       remindAt: Date.now() + (10 * 60 * 1000)
     });
-    this.close();
+    this._close();
   }
 
-  close() {
+  private _close() {
     this._matDialogRef.close();
   }
 

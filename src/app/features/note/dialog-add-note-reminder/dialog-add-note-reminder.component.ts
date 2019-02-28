@@ -53,23 +53,23 @@ export class DialogAddNoteReminderComponent {
         timestamp,
         this.title,
       );
-      this.close();
+      this._close();
     } else {
       this._noteService.addReminder(
         this.note.id,
         timestamp,
         this.title,
       );
-      this.close();
+      this._close();
     }
   }
 
   remove() {
     this._noteService.removeReminder(this.note.id, this.reminder.id);
-    this.close();
+    this._close();
   }
 
-  close() {
+  private _close() {
     this._matDialogRef.close();
   }
 

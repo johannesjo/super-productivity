@@ -3,7 +3,7 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material';
 import { Reminder } from '../../reminder/reminder.model';
 import { Note } from '../note.model';
 import { NoteService } from '../note.service';
-import { Observable } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 import { ReminderService } from '../../reminder/reminder.service';
 import { ProjectService } from '../../project/project.service';
 import { Project } from '../../project/project.model';
@@ -20,6 +20,8 @@ export class DialogViewNoteReminderComponent {
   isForCurrentProject = (this.reminder.projectId === this._projectService.currentId);
   targetProject$: Observable<Project> = this._projectService.getById(this.reminder.projectId);
 
+  private _subs = new Subscription();
+
   constructor(
     private _matDialogRef: MatDialogRef<DialogViewNoteReminderComponent>,
     private _noteService: NoteService,
@@ -28,6 +30,9 @@ export class DialogViewNoteReminderComponent {
     @Inject(MAT_DIALOG_DATA) public data: { reminder: Reminder },
   ) {
     this._matDialogRef.disableClose = true;
+    this._subs.add(this._reminderService.onReloadModel$.subscribe(() => {
+      this.close();
+    }));
   }
 
   dismiss() {

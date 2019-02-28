@@ -16,9 +16,12 @@ const WORKER_PATH = 'assets/web-workers/reminder.js';
   providedIn: 'root',
 })
 export class ReminderService {
-  public onReminderActive$ = new Subject<Reminder>();
+  onReminderActive$ = new Subject<Reminder>();
   private _reminders$ = new ReplaySubject<Reminder[]>();
-  public reminders$ = this._reminders$.asObservable();
+  reminders$ = this._reminders$.asObservable();
+  private _onReloadModel$ = new Subject<Reminder[]>();
+  onReloadModel$ = this._onReloadModel$.asObservable();
+
   private _w: Worker;
   private _reminders: Reminder[];
   private _throttledShowNotification = throttle(60000, this._showNotification.bind(this));
@@ -51,6 +54,7 @@ export class ReminderService {
 
   async reloadFromLs() {
     this._reminders = await this._loadFromLs() || [];
+    this._onReloadModel$.next(this._reminders);
     this._saveModel(this._reminders);
   }
 
