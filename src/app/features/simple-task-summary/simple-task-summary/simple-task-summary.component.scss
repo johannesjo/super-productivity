@@ -6,9 +6,10 @@
 @media (min-width: $layout-xs) {
   .row {
     display: flex;
+    justify-content: space-between;
   }
   .col {
-    width: 50%;
+    width: 49%;
   }
 }
 
