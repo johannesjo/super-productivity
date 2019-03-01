@@ -17,14 +17,6 @@
         </div>
         <div>
           <mat-slide-toggle (change)="onOptionsChange()"
-                            [(ngModel)]="options.isUseNewLine"
-                            aria-label="Add new line"
-                            name="isUseNewLine">
-            Add new line after task
-          </mat-slide-toggle>
-        </div>
-        <div>
-          <mat-slide-toggle (change)="onOptionsChange()"
                             [(ngModel)]="options.isListSubTasks"
                             aria-label="List sub tasks"
                             name="isListSubTasks">
@@ -55,12 +47,13 @@
             List done tasks only
           </mat-slide-toggle>
         </div>
-        <mat-form-field class="md-block">
+        <mat-form-field *ngIf="options.isMergeToDays"
+                        class="md-block">
           <label>Separate tasks by</label>
           <input (change)="onOptionsChange()"
-                 [(ngModel)]="options.separateBy"
+                 [(ngModel)]="options.separateTasksBy"
                  matInput=""
-                 name="separateBy"
+                 name="separateTasksBy"
                  type="text">
         </mat-form-field>
       </div>
@@ -68,14 +61,6 @@
       <div class="col">
         <div class="md-caption"
              style="margin: 10px 0;">Fields to display
-        </div>
-        <div>
-          <mat-slide-toggle (change)="onOptionsChange()"
-                            [(ngModel)]="options.isShowTitle"
-                            aria-label="Title"
-                            name="showTitle">
-            Title
-          </mat-slide-toggle>
         </div>
         <div>
           <mat-slide-toggle (change)="onOptionsChange()"
@@ -99,6 +84,14 @@
                             aria-label="Time Estimate"
                             name="showTimeSpent">
             Time Estimate
+          </mat-slide-toggle>
+        </div>
+        <div>
+          <mat-slide-toggle (change)="onOptionsChange()"
+                            [(ngModel)]="options.isShowTitle"
+                            aria-label="Title"
+                            name="showTitle">
+            Title
           </mat-slide-toggle>
         </div>
         <div>

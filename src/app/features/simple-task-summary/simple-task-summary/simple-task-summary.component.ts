@@ -8,9 +8,10 @@ import { SIMPLE_SUMMARY_DEFAULTS } from '../../project/project.const';
 import Clipboard from 'clipboard';
 import { SnackService } from '../../../core/snack/snack.service';
 import { getWorklogStr } from '../../../util/get-work-log-str';
+import { unqiue } from '../../../util/unique';
 
 const CSV_EXPORT_SETTINGS = {
-  separateBy: '',
+  separateTasksBy: '',
   separateFieldsBy: ';',
   isUseNewLine: true,
   isListSubTasks: true,
@@ -91,11 +92,6 @@ export class SimpleTaskSummaryComponent implements OnInit, OnDestroy {
       taskTxt += task.dateStr || getWorklogStr();
     }
 
-    if (this.options.isShowTitle) {
-      taskTxt = this._addSeparator(taskTxt);
-      taskTxt += task.title;
-    }
-
     if (this.options.isShowTimeSpent) {
       taskTxt = this._addSeparator(taskTxt);
 
@@ -112,7 +108,11 @@ export class SimpleTaskSummaryComponent implements OnInit, OnDestroy {
         : msToString(task.timeEstimate, false, true);
     }
 
-    taskTxt += this.options.separateBy;
+    if (this.options.isShowTitle) {
+      taskTxt = this._addSeparator(taskTxt);
+      taskTxt += task.title;
+    }
+
     return taskTxt;
   }
 
@@ -124,7 +124,7 @@ export class SimpleTaskSummaryComponent implements OnInit, OnDestroy {
   }
 
   private _createTasksTextMergedToDays(tasks: TaskWithSubTasks[]) {
-    const _mapTaskToDay = (task, dateStr) => {
+    const _mapTaskToDay = (task, dateStr, parentTitle?) => {
       const taskDate = new Date(dateStr);
       let day = days[dateStr];
       if (taskDate >= this.dateStart && taskDate < this.dateEnd) {
@@ -139,7 +139,7 @@ export class SimpleTaskSummaryComponent implements OnInit, OnDestroy {
         days[dateStr] = {
           timeSpent: day.timeSpent + task.timeSpentOnDay[dateStr],
           timeEstimate: day.timeSpent + task.timeEstimate,
-          tasks: [...day.tasks, task],
+          tasks: [...day.tasks, {...task, parentTitle}],
         };
       }
     };
@@ -147,39 +147,34 @@ export class SimpleTaskSummaryComponent implements OnInit, OnDestroy {
     const days = {};
     let tasksTxt = '';
     const newLineSeparator = '\n';
-    const taskSeparator = ' | ';
-
-    console.log(tasks);
 
     tasks.forEach(task => {
       if (task.subTasks && task.subTasks.length > 0) {
         task.subTasks.forEach((subTask) => {
-          console.log(subTask);
-
           if (subTask.timeSpentOnDay) {
             Object.keys(subTask.timeSpentOnDay).forEach(dateStr => {
-              console.log('ADD SUB');
-              _mapTaskToDay(subTask, dateStr);
+              _mapTaskToDay(subTask, dateStr, task.title);
             });
           }
         });
       } else {
         if (task.timeSpentOnDay) {
           Object.keys(task.timeSpentOnDay).forEach(dateStr => {
-            console.log('ADD PAR');
-
             _mapTaskToDay(task, dateStr);
           });
         }
       }
     });
-    console.log(days);
     Object.keys(days).sort().forEach(dateStr => {
       days[dateStr].dateStr = dateStr;
+      days[dateStr].title = unqiue(days[dateStr].tasks.map(t => {
+        return (!this.options.isListSubTasks && t.parentTitle)
+          ? t.parentTitle
+          : t.title;
+      }))
+        .join(this.options.separateTasksBy || '|');
       tasksTxt += this._formatTask(days[dateStr]);
-      if (this.options.isUseNewLine) {
-        tasksTxt += newLineSeparator;
-      }
+      tasksTxt += newLineSeparator;
     });
     return tasksTxt;
   }
@@ -197,9 +192,7 @@ export class SimpleTaskSummaryComponent implements OnInit, OnDestroy {
           && (!this.options.isWorkedOnTodayOnly || this._checkIsWorkedOnToday(task))
         ) {
           tasksTxt += this._formatTask(task);
-          if (this.options.isUseNewLine) {
-            tasksTxt += newLineSeparator;
-          }
+          tasksTxt += newLineSeparator;
         }
 
         if (this.options.isListSubTasks && task.subTasks && task.subTasks.length > 0) {
@@ -209,20 +202,15 @@ export class SimpleTaskSummaryComponent implements OnInit, OnDestroy {
               (!this.options.isListDoneOnly || subTask.isDone)
               && (!this.options.isWorkedOnTodayOnly || this._checkIsWorkedOnToday(subTask))) {
               tasksTxt += this._formatTask(subTask);
-              if (this.options.isUseNewLine) {
-                tasksTxt += newLineSeparator;
-              }
+              tasksTxt += newLineSeparator;
             }
           }
         }
       }
     }
 
-    // cut off last separator
-    tasksTxt = tasksTxt.substring(0, tasksTxt.length - this.options.separateBy.length);
-    if (this.options.isUseNewLine) {
-      tasksTxt = tasksTxt.substring(0, tasksTxt.length - newLineSeparator.length);
-    }
+    // remove last new line
+    tasksTxt = tasksTxt.substring(0, tasksTxt.length - newLineSeparator.length);
 
     if (this.options.regExToRemove) {
       this.isInvalidRegEx = false;
