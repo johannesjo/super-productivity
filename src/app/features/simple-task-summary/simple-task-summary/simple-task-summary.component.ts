@@ -41,6 +41,7 @@ export class SimpleTaskSummaryComponent implements OnInit, OnDestroy {
   options: SimpleSummarySettingsCopy = SIMPLE_SUMMARY_DEFAULTS;
   isInvalidRegEx: boolean;
   tasksTxt: string;
+  fileName = 'tasks.csv';
 
   private _subs: Subscription = new Subscription();
 
@@ -51,6 +52,16 @@ export class SimpleTaskSummaryComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
+    if (this.dateStart && this.dateEnd) {
+      this.fileName
+        = 'tasks'
+        + getWorklogStr(this.dateStart)
+        + '-'
+        + getWorklogStr(this.dateEnd)
+        + '.csv'
+      ;
+    }
+
     this._subs.add(this._projectService.advancedCfg$.subscribe((val) => {
       this.options = val.simpleSummarySettings;
 
