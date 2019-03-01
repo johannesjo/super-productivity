@@ -11,6 +11,7 @@ import { TaskService } from '../../../features/tasks/task.service';
 import { Router } from '@angular/router';
 import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confirm.component';
 import { EntityState } from '@ngrx/entity';
+import { dedupeByKey } from '../../../util/de-dupe-by-key';
 
 const EMPTY_ENTITY = {
   ids: [],
@@ -138,15 +139,14 @@ export class WorklogComponent implements OnInit, OnDestroy {
 
     dayData.logEntries.forEach((entry) => {
       const task: any = {...entry.task};
-      if (task.parentId) {
-        return;
+      if (!task.parentId) {
+        task.timeSpent = entry.timeSpent;
+        task.dateStr = dayData.dateStr;
+        tasks.push(task);
       }
-      task.timeSpent = entry.timeSpent;
-      task.dateStr = dayData.dateStr;
-      tasks.push(task);
     });
 
-    return tasks;
+    return dedupeByKey(tasks, 'id');
   }
 
   private _createTasksForMonth(data: WorklogMonth) {
@@ -156,6 +156,6 @@ export class WorklogComponent implements OnInit, OnDestroy {
       const entry: WorklogDay = monthData.ent[dayDateStr];
       tasks = tasks.concat(this._createTasksForDay(entry));
     });
-    return tasks;
+    return dedupeByKey(tasks, 'id');
   }
 }
