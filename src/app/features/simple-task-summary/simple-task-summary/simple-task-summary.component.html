@@ -2,11 +2,16 @@
      mat-dialog-content="">
 
         <textarea [(ngModel)]="tasksTxt"
+                  *ngIf="options.isShowAsText"
                   class="simple-textarea mat-elevation-z2"
                   id="task-textarea"
                   name="tasksTxt"
                   rows="10"
                   tabindex="-1"></textarea>
+
+  <div *ngIf="!options.isShowAsText"
+       class="table-wrapper"
+       [innerHTML]="tasksHtml"></div>
 
 
   <section class="options">
@@ -14,6 +19,14 @@
       <div class="col">
         <div class="md-caption"
              style="margin: 10px 0;">Options
+        </div>
+        <div>
+          <mat-slide-toggle (change)="onOptionsChange()"
+                            [(ngModel)]="options.isShowAsText"
+                            aria-label="Show as text"
+                            name="isShowAsText">
+            Show as text
+          </mat-slide-toggle>
         </div>
         <div>
           <mat-slide-toggle (change)="onOptionsChange()"

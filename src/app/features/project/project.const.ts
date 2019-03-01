@@ -5,6 +5,7 @@ export const SIMPLE_SUMMARY_DEFAULTS: SimpleSummarySettings = {
   roundWorkTimeTo: null,
   separateTasksBy: '|',
   separateFieldsBy: ';',
+  isShowAsText: false,
   isListSubTasks: true,
   isListDoneOnly: false,
   isMergeToDays: true,

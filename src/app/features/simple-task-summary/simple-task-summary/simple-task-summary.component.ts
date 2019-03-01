@@ -26,6 +26,9 @@ const CSV_EXPORT_SETTINGS = {
   showDate: false
 };
 
+const LINE_SEPARATOR = '\n';
+
+
 @Component({
   selector: 'simple-task-summary',
   templateUrl: './simple-task-summary.component.html',
@@ -43,6 +46,7 @@ export class SimpleTaskSummaryComponent implements OnInit, OnDestroy {
 
   options: SimpleSummarySettingsCopy = SIMPLE_SUMMARY_DEFAULTS;
   tasksTxt: string;
+  tasksHtml: string;
   fileName = 'tasks.csv';
   roundTimeOptions = [
     {id: 'QUARTER', title: 'full quarters'},
@@ -78,6 +82,10 @@ export class SimpleTaskSummaryComponent implements OnInit, OnDestroy {
         } else {
           this.tasksTxt = this._createTasksText(this.tasks);
         }
+
+        this.tasksHtml = this._parseToTable(this.tasksTxt);
+        console.log(this.tasksHtml);
+
       }
     }));
 
@@ -169,7 +177,6 @@ export class SimpleTaskSummaryComponent implements OnInit, OnDestroy {
 
     const days = {};
     let tasksTxt = '';
-    const newLineSeparator = '\n';
 
     tasks.forEach(task => {
       if (task.subTasks && task.subTasks.length > 0) {
@@ -198,14 +205,13 @@ export class SimpleTaskSummaryComponent implements OnInit, OnDestroy {
         .join(this.options.separateTasksBy || '|');
 
       tasksTxt += this._formatTask(days[dateStr]);
-      tasksTxt += newLineSeparator;
+      tasksTxt += LINE_SEPARATOR;
     });
     return tasksTxt;
   }
 
   private _createTasksText(tasks: TaskWithSubTasks[]) {
     let tasksTxt = '';
-    const newLineSeparator = '\n';
 
     if (tasks) {
       for (let i = 0; i < tasks.length; i++) {
@@ -216,7 +222,7 @@ export class SimpleTaskSummaryComponent implements OnInit, OnDestroy {
           && (!this.options.isWorkedOnTodayOnly || this._checkIsWorkedOnToday(task))
         ) {
           tasksTxt += this._formatTask(task);
-          tasksTxt += newLineSeparator;
+          tasksTxt += LINE_SEPARATOR;
         }
 
         if (this.options.isListSubTasks && task.subTasks && task.subTasks.length > 0) {
@@ -226,7 +232,7 @@ export class SimpleTaskSummaryComponent implements OnInit, OnDestroy {
               (!this.options.isListDoneOnly || subTask.isDone)
               && (!this.options.isWorkedOnTodayOnly || this._checkIsWorkedOnToday(subTask))) {
               tasksTxt += this._formatTask(subTask);
-              tasksTxt += newLineSeparator;
+              tasksTxt += LINE_SEPARATOR;
             }
           }
         }
@@ -234,7 +240,7 @@ export class SimpleTaskSummaryComponent implements OnInit, OnDestroy {
     }
 
     // remove last new line
-    tasksTxt = tasksTxt.substring(0, tasksTxt.length - newLineSeparator.length);
+    tasksTxt = tasksTxt.substring(0, tasksTxt.length - LINE_SEPARATOR.length);
 
     return tasksTxt;
   }
@@ -272,5 +278,15 @@ export class SimpleTaskSummaryComponent implements OnInit, OnDestroy {
       default:
         return value;
     }
+  }
+
+  private _parseToTable(tasksTxt) {
+    let html = '';
+    const rows = tasksTxt.split(LINE_SEPARATOR);
+    rows.forEach(row => {
+      const cols = row.split(this.options.separateFieldsBy);
+      html += `<tr><td>${cols.join('</td><td>')}</td></tr>`;
+    });
+    return `<table>${html}</table>`;
   }
 }

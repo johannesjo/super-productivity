@@ -21,6 +21,7 @@ export interface SimpleSummarySettingsCopy {
   roundWorkTimeTo: RoundTimeOption;
   separateTasksBy: string;
   separateFieldsBy: string;
+  isShowAsText: boolean;
   isListSubTasks: boolean;
   isListDoneOnly: boolean;
   isMergeToDays: boolean;
