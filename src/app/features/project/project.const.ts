@@ -14,7 +14,6 @@ export const SIMPLE_SUMMARY_DEFAULTS: SimpleSummarySettings = {
   isShowTimeEstimate: true,
   isTimesAsMilliseconds: false,
   isShowDate: false,
-  regExToRemove: '',
 };
 
 export const GOOGLE_TIME_SHEET_EXPORT_DEFAULTS: GoogleTimeSheetExport = {

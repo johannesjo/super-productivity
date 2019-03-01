@@ -42,7 +42,6 @@ export class SimpleTaskSummaryComponent implements OnInit, OnDestroy {
   @Output() cancel = new EventEmitter();
 
   options: SimpleSummarySettingsCopy = SIMPLE_SUMMARY_DEFAULTS;
-  isInvalidRegEx: boolean;
   tasksTxt: string;
   fileName = 'tasks.csv';
   roundTimeOptions = [
@@ -236,16 +235,6 @@ export class SimpleTaskSummaryComponent implements OnInit, OnDestroy {
 
     // remove last new line
     tasksTxt = tasksTxt.substring(0, tasksTxt.length - newLineSeparator.length);
-
-    if (this.options.regExToRemove) {
-      this.isInvalidRegEx = false;
-      try {
-        const regEx = new RegExp(this.options.regExToRemove, 'g');
-        tasksTxt = tasksTxt.replace(regEx, '');
-      } catch (e) {
-        this.isInvalidRegEx = true;
-      }
-    }
 
     return tasksTxt;
   }

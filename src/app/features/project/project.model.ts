@@ -30,7 +30,6 @@ export interface SimpleSummarySettingsCopy {
   isShowTimeEstimate: boolean;
   isTimesAsMilliseconds: boolean;
   isShowDate: boolean;
-  regExToRemove: string;
 }
 
 export type SimpleSummarySettings = Readonly<SimpleSummarySettingsCopy>;
