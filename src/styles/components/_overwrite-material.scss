@@ -19,3 +19,14 @@ body .mat-form-field {
   display: block;
 }
 
+
+.fullscreen {
+  height: 100vh;
+  width: 100vw !important;
+  max-width: none !important;
+
+  .dialog-content,
+  .mat-dialog-content {
+    max-height: 100%;
+  }
+}
