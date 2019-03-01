@@ -56,6 +56,18 @@
                  name="separateTasksBy"
                  type="text">
         </mat-form-field>
+
+        <mat-form-field>
+          <label>Round time worked to</label>
+          <mat-select (selectionChange)="onOptionsChange()"
+                      [(ngModel)]="options.roundWorkTimeTo">
+            <mat-option><em>don't round</em></mat-option>
+            <mat-option *ngFor="let roundOption of roundTimeOptions"
+                        [value]="roundOption.id">
+              {{roundOption.title}}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
       </div>
 
       <div class="col">
@@ -116,7 +128,7 @@
 
     <div class="row">
       <mat-form-field style="width: 100%">
-        <label>Regular Expression to remove</label>
+        <label>Regular Expression to remove from task title</label>
         <input (change)="onOptionsChange()"
                [(ngModel)]="options.regExToRemove"
                matInput=""

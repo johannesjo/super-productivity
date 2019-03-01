@@ -148,7 +148,7 @@
 
       <mat-form-field>
         <label>Round start time to</label>
-        <mat-select (change)="updateDefaults()"
+        <mat-select (selectionChange)="updateDefaults()"
                     [ngModelOptions]="{standalone: true}"
                     [(ngModel)]="opts.roundStartTimeTo">
           <mat-option><em>don't round</em></mat-option>
@@ -161,7 +161,7 @@
 
       <mat-form-field>
         <label>Round end time to</label>
-        <mat-select (change)="updateDefaults()"
+        <mat-select (selectionChange)="updateDefaults()"
                     [ngModelOptions]="{standalone: true}"
                     [(ngModel)]="opts.roundEndTimeTo">
           <mat-option><em>don't round</em></mat-option>
@@ -174,7 +174,7 @@
 
       <mat-form-field>
         <label>Round time worked to</label>
-        <mat-select (change)="updateDefaults()"
+        <mat-select (selectionChange)="updateDefaults()"
                     [ngModelOptions]="{standalone: true}"
                     [(ngModel)]="opts.roundWorkTimeTo">
           <mat-option><em>don't round</em></mat-option>

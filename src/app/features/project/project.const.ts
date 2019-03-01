@@ -2,11 +2,12 @@ import { GoogleTimeSheetExport, Project, SimpleSummarySettings } from './project
 import { DEFAULT_ISSUE_PROVIDER_CFGS } from '../issue/issue.const';
 
 export const SIMPLE_SUMMARY_DEFAULTS: SimpleSummarySettings = {
+  roundWorkTimeTo: null,
   separateTasksBy: '|',
   separateFieldsBy: ';',
   isListSubTasks: true,
   isListDoneOnly: false,
-  isMergeToDays: false,
+  isMergeToDays: true,
   isWorkedOnTodayOnly: true,
   isShowTitle: true,
   isShowTimeSpent: true,

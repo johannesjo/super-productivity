@@ -18,6 +18,7 @@ export interface GoogleTimeSheetExportCopy {
 export type GoogleTimeSheetExport = Readonly<GoogleTimeSheetExportCopy>;
 
 export interface SimpleSummarySettingsCopy {
+  roundWorkTimeTo: RoundTimeOption;
   separateTasksBy: string;
   separateFieldsBy: string;
   isListSubTasks: boolean;

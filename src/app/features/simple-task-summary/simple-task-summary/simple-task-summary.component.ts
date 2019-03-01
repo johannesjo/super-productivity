@@ -9,6 +9,9 @@ import Clipboard from 'clipboard';
 import { SnackService } from '../../../core/snack/snack.service';
 import { getWorklogStr } from '../../../util/get-work-log-str';
 import { unqiue } from '../../../util/unique';
+import * as moment from 'moment-mini';
+import { Duration } from 'moment-mini';
+import 'moment-duration-format';
 
 const CSV_EXPORT_SETTINGS = {
   separateTasksBy: '',
@@ -42,6 +45,11 @@ export class SimpleTaskSummaryComponent implements OnInit, OnDestroy {
   isInvalidRegEx: boolean;
   tasksTxt: string;
   fileName = 'tasks.csv';
+  roundTimeOptions = [
+    {id: 'QUARTER', title: 'full quarters'},
+    {id: 'HALF', title: 'full half hours'},
+    {id: 'HOUR', title: 'full hours'},
+  ];
 
   private _subs: Subscription = new Subscription();
 
@@ -105,10 +113,15 @@ export class SimpleTaskSummaryComponent implements OnInit, OnDestroy {
 
     if (this.options.isShowTimeSpent) {
       taskTxt = this._addSeparator(taskTxt);
+      let timeSpent = task.timeSpent;
+      if (this.options.roundWorkTimeTo) {
+        const val = moment.duration(task.timeSpent);
+        timeSpent = this._roundDuration(val, this.options.roundWorkTimeTo, true).asMilliseconds();
+      }
 
       taskTxt += this.options.isTimesAsMilliseconds
-        ? task.timeSpent
-        : msToString(task.timeSpent, false, true);
+        ? timeSpent
+        : msToString(timeSpent, false, true);
     }
 
     if (this.options.isShowTimeEstimate) {
@@ -184,6 +197,7 @@ export class SimpleTaskSummaryComponent implements OnInit, OnDestroy {
           : t.title;
       }))
         .join(this.options.separateTasksBy || '|');
+
       tasksTxt += this._formatTask(days[dateStr]);
       tasksTxt += newLineSeparator;
     });
@@ -239,5 +253,35 @@ export class SimpleTaskSummaryComponent implements OnInit, OnDestroy {
   private _checkIsWorkedOnToday(task) {
     const dateStr = getWorklogStr();
     return !!task.timeSpentOnDay[dateStr];
+  }
+
+  private _roundDuration(value: Duration, roundTo, isRoundUp): Duration {
+    let rounded;
+
+    switch (roundTo) {
+      case 'QUARTER':
+        rounded = Math.round(value.asMinutes() / 15) * 15;
+        if (isRoundUp) {
+          rounded = Math.ceil(value.asMinutes() / 15) * 15;
+        }
+        return moment.duration({minutes: rounded});
+
+      case 'HALF':
+        rounded = Math.round(value.asMinutes() / 30) * 30;
+        if (isRoundUp) {
+          rounded = Math.ceil(value.asMinutes() / 30) * 30;
+        }
+        return moment.duration({minutes: rounded});
+
+      case 'HOUR':
+        rounded = Math.round(value.asMinutes() / 60) * 60;
+        if (isRoundUp) {
+          rounded = Math.ceil(value.asMinutes() / 60) * 60;
+        }
+        return moment.duration({minutes: rounded});
+
+      default:
+        return value;
+    }
   }
 }
