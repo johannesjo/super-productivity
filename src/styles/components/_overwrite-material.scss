@@ -21,7 +21,8 @@ body .mat-form-field {
 
 
 .fullscreen {
-  height: 100vh;
+  height: auto;
+  max-height: 100vh!important;
   width: 100vw !important;
   max-width: none !important;
 
