@@ -202,7 +202,7 @@ export class SimpleTaskSummaryComponent implements OnInit, OnDestroy {
           ? t.parentTitle
           : t.title;
       }))
-        .join(this.options.separateTasksBy || '|');
+        .join(this.options.separateTasksBy || ' | ');
 
       tasksTxt += this._formatTask(days[dateStr]);
       tasksTxt += LINE_SEPARATOR;

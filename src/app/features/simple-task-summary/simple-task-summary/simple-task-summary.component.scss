@@ -21,5 +21,20 @@
 }
 
 .table-wrapper {
-  margin-bottom: $s*2;
+  padding-bottom: $s;
+
+  @include lightTheme {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+  }
+  @include darkTheme {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.4);
+  }
+
+  ::ng-deep td {
+    white-space: nowrap;
+
+    &:last-child {
+      white-space: normal;
+    }
+  }
 }
