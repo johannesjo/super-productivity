@@ -55,13 +55,19 @@ export class WorklogComponent implements OnInit, OnDestroy {
     this._subs.unsubscribe();
   }
 
-  exportData(type, monthData: WorklogMonth) {
+  exportData(type, monthData: WorklogMonth, year: number, month_: string | number) {
     if (type === 'MONTH') {
+      const month = +month_;
+      const firstDayOfMonth = new Date(year, month - 1, 1);
+      // using date: 0 would et the last day of the month
+      const firstDayOfNextMonth = new Date(year, month, 1);
       this._matDialog.open(DialogSimpleTaskSummaryComponent, {
         restoreFocus: true,
         data: {
           tasks: this._createTasksForMonth(monthData),
           isWorklogExport: true,
+          dateStart: firstDayOfMonth,
+          dateEnd: firstDayOfNextMonth,
         }
       });
     }
@@ -132,6 +138,9 @@ export class WorklogComponent implements OnInit, OnDestroy {
 
     dayData.logEntries.forEach((entry) => {
       const task: any = {...entry.task};
+      if (task.parentId) {
+        return;
+      }
       task.timeSpent = entry.timeSpent;
       task.dateStr = dayData.dateStr;
       tasks.push(task);

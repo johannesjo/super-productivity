@@ -30,6 +30,8 @@ const CSV_EXPORT_SETTINGS = {
 })
 export class SimpleTaskSummaryComponent implements OnInit, OnDestroy {
   @Input() tasks: any[];
+  @Input() dateStart: Date;
+  @Input() dateEnd: Date;
   @Input() isWorklogExport: boolean;
   @Input() isShowClose: boolean;
 
@@ -52,7 +54,11 @@ export class SimpleTaskSummaryComponent implements OnInit, OnDestroy {
       this.options = val.simpleSummarySettings;
 
       if (this.tasks) {
-        this.tasksTxt = this._createTasksText(this.tasks);
+        if (this.options.isMergeToDays) {
+          this.tasksTxt = this._createTasksTextMergedToDays(this.tasks);
+        } else {
+          this.tasksTxt = this._createTasksText(this.tasks);
+        }
       }
     }));
 
@@ -115,6 +121,67 @@ export class SimpleTaskSummaryComponent implements OnInit, OnDestroy {
       taskTxt += this.options.separateFieldsBy;
     }
     return taskTxt;
+  }
+
+  private _createTasksTextMergedToDays(tasks: TaskWithSubTasks[]) {
+    const _mapTaskToDay = (task, dateStr) => {
+      const taskDate = new Date(dateStr);
+      let day = days[dateStr];
+      if (taskDate >= this.dateStart && taskDate < this.dateEnd) {
+
+        if (!day) {
+          day = days[dateStr] = {
+            timeSpent: 0,
+            timeEstimate: 0,
+            tasks: []
+          };
+        }
+        days[dateStr] = {
+          timeSpent: day.timeSpent + task.timeSpentOnDay[dateStr],
+          timeEstimate: day.timeSpent + task.timeEstimate,
+          tasks: [...day.tasks, task],
+        };
+      }
+    };
+
+    const days = {};
+    let tasksTxt = '';
+    const newLineSeparator = '\n';
+    const taskSeparator = ' | ';
+
+    console.log(tasks);
+
+    tasks.forEach(task => {
+      if (task.subTasks && task.subTasks.length > 0) {
+        task.subTasks.forEach((subTask) => {
+          console.log(subTask);
+
+          if (subTask.timeSpentOnDay) {
+            Object.keys(subTask.timeSpentOnDay).forEach(dateStr => {
+              console.log('ADD SUB');
+              _mapTaskToDay(subTask, dateStr);
+            });
+          }
+        });
+      } else {
+        if (task.timeSpentOnDay) {
+          Object.keys(task.timeSpentOnDay).forEach(dateStr => {
+            console.log('ADD PAR');
+
+            _mapTaskToDay(task, dateStr);
+          });
+        }
+      }
+    });
+    console.log(days);
+    Object.keys(days).sort().forEach(dateStr => {
+      days[dateStr].dateStr = dateStr;
+      tasksTxt += this._formatTask(days[dateStr]);
+      if (this.options.isUseNewLine) {
+        tasksTxt += newLineSeparator;
+      }
+    });
+    return tasksTxt;
   }
 
   private _createTasksText(tasks: TaskWithSubTasks[]) {

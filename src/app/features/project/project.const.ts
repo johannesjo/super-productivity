@@ -7,6 +7,7 @@ export const SIMPLE_SUMMARY_DEFAULTS: SimpleSummarySettings = {
   isUseNewLine: true,
   isListSubTasks: true,
   isListDoneOnly: false,
+  isMergeToDays: false,
   isWorkedOnTodayOnly: true,
   isShowTitle: true,
   isShowTimeSpent: true,

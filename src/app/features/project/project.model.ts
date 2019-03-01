@@ -23,6 +23,7 @@ export interface SimpleSummarySettingsCopy {
   isUseNewLine: boolean;
   isListSubTasks: boolean;
   isListDoneOnly: boolean;
+  isMergeToDays: boolean;
   isWorkedOnTodayOnly: boolean;
   isShowTitle: boolean;
   isShowTimeSpent: boolean;
