@@ -51,6 +51,7 @@ table.material-table,
     border-bottom: 1px solid rgba(0, 0, 0, .12);
     padding: $s $s*2.25;
     box-sizing: border-box;
+    text-align: left;
 
     &:first-of-type {
       padding-left: $s*3;

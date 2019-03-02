@@ -145,8 +145,8 @@ export class WorklogComponent implements OnInit, OnDestroy {
       this.totalTimeSpent = null;
       this._cd.detectChanges();
     }
-    console.log(this.worklog);
-    this.exportData(this.worklog[2019].ent[3], 2019, 3);
+    // console.log(this.worklog);
+    // this.exportData(this.worklog[2019].ent[3], 2019, 3);
   }
 
   private _createTasksForDay(data: WorklogDay) {

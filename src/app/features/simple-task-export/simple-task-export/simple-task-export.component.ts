@@ -279,12 +279,36 @@ export class SimpleTaskExportComponent implements OnInit, OnDestroy {
   }
 
   private _parseToTable(tasksTxt) {
-    let html = '';
-    const rows = tasksTxt.split(LINE_SEPARATOR);
+    let rowsHtml = '';
+    const rows = tasksTxt.split(LINE_SEPARATOR).filter(row => row.length);
+
     rows.forEach(row => {
       const cols = row.split(this.options.separateFieldsBy);
-      html += `<tr><td>${cols.join('</td><td>')}</td></tr>`;
+      rowsHtml += `<tr><td>${cols.join('</td><td>')}</td></tr>`;
     });
-    return `<table>${html}</table>`;
+
+    const headerCols = [];
+    if (this.options.isShowDate) {
+      headerCols.push('Date');
+    }
+    if (this.options.isShowTimeSpent) {
+      headerCols.push('Time Spent');
+    }
+    if (this.options.isShowTimeEstimate) {
+      headerCols.push('Estimate');
+    }
+    if (this.options.isShowTitle) {
+      if (this.options.isMergeToDays) {
+        headerCols.push('Tasks');
+      } else {
+        headerCols.push('Title');
+      }
+    }
+    const headerColsHtml = `<tr><th>${headerCols.join('</th><th>')}</th></tr>`;
+    if (!rows.length) {
+      rowsHtml += `<tr><td>${Array(headerCols.length).fill('- No Data -').join('</td><td>')}</td></tr>`;
+    }
+
+    return `<table>${headerColsHtml}${rowsHtml}</table>`;
   }
 }
