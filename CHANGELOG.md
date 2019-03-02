@@ -1,3 +1,40 @@
+## [2.4.4](https://github.com/johannesjo/super-productivity/compare/v2.4.3...v2.4.4) (2019-03-02)
+
+
+### Bug Fixes
+
+* **notes:** add reminder dialog typing error ([a55fa34](https://github.com/johannesjo/super-productivity/commit/a55fa34))
+* **reminders:** not updating any more ([4118dac](https://github.com/johannesjo/super-productivity/commit/4118dac))
+* **taskExport:** wrong values being send to component ([3d8bda2](https://github.com/johannesjo/super-productivity/commit/3d8bda2))
+
+
+### Features
+
+* **projects:** sort alphabetically ([404375a](https://github.com/johannesjo/super-productivity/commit/404375a))
+* **reminders:** close all reminder dialogs when data was imported ([66cbbe0](https://github.com/johannesjo/super-productivity/commit/66cbbe0))
+* **reminders:** do not open up reminders when data import is in progress ([7c9a9de](https://github.com/johannesjo/super-productivity/commit/7c9a9de))
+* **taskExport:** add export for weeks ([01296df](https://github.com/johannesjo/super-productivity/commit/01296df))
+* **taskExport:** add get weeks in month helper ([9ce6332](https://github.com/johannesjo/super-productivity/commit/9ce6332))
+* **taskExport:** add html table ([0cd7b82](https://github.com/johannesjo/super-productivity/commit/0cd7b82))
+* **taskExport:** add round to option ([ee4b844](https://github.com/johannesjo/super-productivity/commit/ee4b844))
+* **taskExport:** add table headers ([0f10ebe](https://github.com/johannesjo/super-productivity/commit/0f10ebe))
+* **taskExport:** beautify styling just a little ([5a202bd](https://github.com/johannesjo/super-productivity/commit/5a202bd))
+* **taskExport:** save as csv with a nicer file name ([119a33a](https://github.com/johannesjo/super-productivity/commit/119a33a))
+* add electron-dl to save and open downloads right away ([c18fd3f](https://github.com/johannesjo/super-productivity/commit/c18fd3f))
+* **taskExport:** first attempt ([8d9e21a](https://github.com/johannesjo/super-productivity/commit/8d9e21a))
+* **taskExport:** improve data displayed for weeks and show only those with documented data ([5fd02ad](https://github.com/johannesjo/super-productivity/commit/5fd02ad))
+* **taskExport:** improve styling ([6fd0b0e](https://github.com/johannesjo/super-productivity/commit/6fd0b0e))
+* **taskExport:** improve styling ([9c22b25](https://github.com/johannesjo/super-productivity/commit/9c22b25))
+* **taskExport:** improve table styling ([64c0df8](https://github.com/johannesjo/super-productivity/commit/64c0df8))
+* **taskExport:** make fullscreen dialog just full width ([cd3715b](https://github.com/johannesjo/super-productivity/commit/cd3715b))
+* **taskExport:** make merge into days work ([8b6a009](https://github.com/johannesjo/super-productivity/commit/8b6a009))
+* **taskExport:** make task list export fullscreen ([91e2b97](https://github.com/johannesjo/super-productivity/commit/91e2b97))
+* **taskExport:** refactor simple task summary to simple task export ([28645a6](https://github.com/johannesjo/super-productivity/commit/28645a6))
+* **taskExport:** remove regex to remove ([9889cff](https://github.com/johannesjo/super-productivity/commit/9889cff))
+* **tasks:** show sub task toggle button only on hover ([fec3558](https://github.com/johannesjo/super-productivity/commit/fec3558))
+
+
+
 ## [2.4.3](https://github.com/johannesjo/super-productivity/compare/v2.4.2...v2.4.3) (2019-02-26)
 
 
