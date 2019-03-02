@@ -27,6 +27,7 @@ import {
   IPC_SHUTDOWN_NOW
 } from './ipc-events.const';
 import { backupData } from './backup';
+import electronDl from 'electron-dl';
 
 const ICONS_FOLDER = __dirname + '/assets/icons/';
 const IS_MAC = process.platform === 'darwin';
@@ -45,10 +46,10 @@ interface MyApp extends App {
 const app_: MyApp = app;
 
 initDebug({showDevTools: IS_DEV}, IS_DEV);
+electronDl({openFolderWhenDone: true});
 
 let mainWin;
 const nestedWinParams = {isDarwinForceQuit: false};
-
 // keep app active to keep time tracking running
 powerSaveBlocker.start('prevent-app-suspension');
 
