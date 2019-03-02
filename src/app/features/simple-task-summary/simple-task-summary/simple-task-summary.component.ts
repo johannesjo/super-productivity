@@ -84,8 +84,6 @@ export class SimpleTaskSummaryComponent implements OnInit, OnDestroy {
         }
 
         this.tasksHtml = this._parseToTable(this.tasksTxt);
-        console.log(this.tasksHtml);
-
       }
     }));
 

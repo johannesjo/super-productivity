@@ -1,5 +1,6 @@
 import { EntityState } from '@ngrx/entity';
 import { Task } from '../features/tasks/task.model';
+import { getWeeksInMonth, WeeksInMonth } from './get-weeks-in-month';
 
 export interface WorklogDataForDay {
   timeSpent: number;
@@ -21,6 +22,7 @@ export interface WorklogMonth {
   ent: {
     [key: number]: WorklogDay;
   };
+  weeks: WeeksInMonth[];
 }
 
 export interface WorklogYear {
@@ -58,10 +60,12 @@ export const mapArchiveToWorklog = (taskState: EntityState<Task>, noRestoreIds =
         };
       }
       if (!worklog[year].ent[month]) {
+        console.log(month);
         worklog[year].ent[month] = {
           daysWorked: 0,
           timeSpent: 0,
-          ent: {}
+          ent: {},
+          weeks: getWeeksInMonth(month - 1, year)
         };
       }
       if (!worklog[year].ent[month].ent[day]) {

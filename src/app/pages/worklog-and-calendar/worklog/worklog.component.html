@@ -15,13 +15,24 @@
        class="month">
     <h2 class="month-title mat-headline">
       <span [innerHtml]="month.key|numberToMonth"></span>
+    </h2>
+    <div class="export-btns">
       <button mat-mini-fab=""
               color="primary"
               aria-label="export data"
               (click)="exportData('MONTH',month.value,year.key, month.key)">
         <mat-icon>call_made</mat-icon>
       </button>
-    </h2>
+      <button *ngFor="let week of month.value.weeks; let i = index;"
+              [matTooltip]="week.start+'. - '+week.end+'.'"
+              mat-mini-fab=""
+              color=""
+              aria-label="export data"
+              (click)="exportData('WEEK',month.value,year.key, month.key, week)">
+        w{{i+1}}
+      </button>
+    </div>
+
     <div class="month-time-spent">Days worked:
       <strong>{{month.value.daysWorked}}</strong><br>
       Time spent total:

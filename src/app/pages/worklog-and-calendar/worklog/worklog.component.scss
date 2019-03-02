@@ -20,18 +20,24 @@
 
   .month {
     margin-top: 3*$s;
-    margin-bottom: $s;
+    margin-bottom: 0;
 
     &-title {
-      button {
-        margin-left: $s;
-      }
+      margin-bottom: $s;
     }
 
     &-time-spent {
       font-size: 18px;
       line-height: 22px;
       margin-bottom: $s*3;
+    }
+  }
+
+  .export-btns {
+    margin-bottom: $s*2;
+
+    button {
+      margin: 0 $s*0.5;
     }
   }
 

@@ -12,6 +12,7 @@ import { Router } from '@angular/router';
 import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confirm.component';
 import { EntityState } from '@ngrx/entity';
 import { dedupeByKey } from '../../../util/de-dupe-by-key';
+import { WeeksInMonth } from '../../../util/get-weeks-in-month';
 
 const EMPTY_ENTITY = {
   ids: [],
@@ -56,12 +57,21 @@ export class WorklogComponent implements OnInit, OnDestroy {
     this._subs.unsubscribe();
   }
 
-  exportData(type, monthData: WorklogMonth, year: number, month_: string | number) {
+  exportData(
+    type,
+    monthData: WorklogMonth,
+    year: number,
+    month_: string | number,
+    week?: WeeksInMonth
+  ) {
+    const month = +month_ - 1;
     if (type === 'MONTH') {
-      const month = +month_;
-      const firstDayOfMonth = new Date(year, month - 1, 1);
-      // using date: 0 would et the last day of the month
-      const firstDayOfNextMonth = new Date(year, month, 1);
+      const firstDayOfMonth = new Date(year, month, 1);
+      const lastDayOfMonth = new Date(year, month + 1, 0);
+      lastDayOfMonth.setHours(23);
+      lastDayOfMonth.setMinutes(59);
+      lastDayOfMonth.setSeconds(59);
+
       this._matDialog.open(DialogSimpleTaskSummaryComponent, {
         restoreFocus: true,
         panelClass: 'big',
@@ -69,7 +79,24 @@ export class WorklogComponent implements OnInit, OnDestroy {
           tasks: this._createTasksForMonth(monthData),
           isWorklogExport: true,
           dateStart: firstDayOfMonth,
-          dateEnd: firstDayOfNextMonth,
+          dateEnd: lastDayOfMonth,
+        }
+      });
+    }
+    if (type === 'WEEK') {
+      const startOfWeek = new Date(year, month, week.start);
+      const endOfWeek = new Date(year, month, week.end);
+      endOfWeek.setHours(23);
+      endOfWeek.setMinutes(59);
+      endOfWeek.setSeconds(59);
+      this._matDialog.open(DialogSimpleTaskSummaryComponent, {
+        restoreFocus: true,
+        panelClass: 'big',
+        data: {
+          tasks: this._createTasksForMonth(monthData),
+          isWorklogExport: true,
+          dateStart: startOfWeek,
+          dateEnd: endOfWeek,
         }
       });
     }
@@ -132,6 +159,7 @@ export class WorklogComponent implements OnInit, OnDestroy {
       this.totalTimeSpent = null;
       this._cd.detectChanges();
     }
+    console.log(this.worklog);
   }
 
   private _createTasksForDay(data: WorklogDay) {
