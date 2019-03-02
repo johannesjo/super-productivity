@@ -23,13 +23,13 @@
               (click)="exportData(month.value,year.key, month.key)">
         <mat-icon>call_made</mat-icon>
       </button>
-      <button *ngFor="let week of month.value.weeks; let i = index;"
-              [matTooltip]="week.start+'. - '+week.end+'.'"
+      <button *ngFor="let week of month.value.weeks;"
+              [matTooltip]="week.start+'.-'+week.end+'. Days: '+ week.daysWorked+', Time: '+(week.timeSpent|msToString)"
               mat-mini-fab=""
               color=""
               aria-label="export data"
               (click)="exportData(month.value,year.key, month.key, week)">
-        w{{i+1}}
+        w{{week.weekNr}}
       </button>
     </div>
 

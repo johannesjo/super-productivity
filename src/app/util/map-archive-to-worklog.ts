@@ -1,6 +1,7 @@
 import { EntityState } from '@ngrx/entity';
 import { Task } from '../features/tasks/task.model';
 import { getWeeksInMonth, WeeksInMonth } from './get-weeks-in-month';
+import { getWeekNumber } from './get-week-number';
 
 export interface WorklogDataForDay {
   timeSpent: number;
@@ -16,13 +17,19 @@ export interface WorklogDay {
   dateStr: string;
 }
 
+export interface WorklogWeek extends WeeksInMonth {
+  weekNr: number;
+  timeSpent: number;
+  daysWorked: number;
+}
+
 export interface WorklogMonth {
   timeSpent: number;
   daysWorked: number;
   ent: {
     [key: number]: WorklogDay;
   };
-  weeks: WeeksInMonth[];
+  weeks: WorklogWeek[];
 }
 
 export interface WorklogYear {
@@ -64,7 +71,7 @@ export const mapArchiveToWorklog = (taskState: EntityState<Task>, noRestoreIds =
           daysWorked: 0,
           timeSpent: 0,
           ent: {},
-          weeks: getWeeksInMonth(month - 1, year)
+          weeks: [],
         };
       }
       if (!worklog[year].ent[month].ent[day]) {
@@ -99,16 +106,36 @@ export const mapArchiveToWorklog = (taskState: EntityState<Task>, noRestoreIds =
     });
   });
 
-  Object.keys(worklog).forEach((year_) => {
+  Object.keys(worklog).forEach((year_: string) => {
     const year: WorklogYear = worklog[year_];
     const monthKeys = Object.keys(year.ent);
     year.monthWorked = monthKeys.length;
 
-    monthKeys.forEach((month_) => {
+    monthKeys.forEach((month_: string) => {
       const month: WorklogMonth = worklog[year_].ent[month_];
       const days = Object.keys(month.ent);
       month.daysWorked = days.length;
       year.daysWorked += days.length;
+
+      const weeks = getWeeksInMonth((+month_ - 1), year_);
+
+      month.weeks = weeks.map((week) => {
+        const weekForMonth: WorklogWeek = {
+          ...week,
+          timeSpent: 0,
+          daysWorked: 0,
+          weekNr: getWeekNumber(new Date(+year_, +month_ - 1, week.start)),
+        };
+
+        days.forEach((day_: string) => {
+          if (+day_ >= week.start && +day_ <= week.end) {
+            weekForMonth.timeSpent += month.ent[day_].timeSpent;
+            weekForMonth.daysWorked += 1;
+          }
+        });
+
+        return weekForMonth;
+      }).filter(week => week.daysWorked > 0);
     });
   });
 
