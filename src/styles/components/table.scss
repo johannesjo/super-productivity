@@ -19,3 +19,46 @@ table {
     }
   }
 }
+
+$this-table-min-height: $s*2;
+div.material-table {
+  box-shadow: $whiteframe-shadow-3dp;
+
+  table {
+    width: 100%;
+    box-shadow: none;
+  }
+}
+
+table.material-table,
+.material-table table {
+  box-shadow: $whiteframe-shadow-3dp;
+  border: 1px solid rgba(0, 0, 0, .12);
+  font-size: 13px;
+  border-collapse: collapse;
+  white-space: nowrap;
+
+  tr {
+    min-height: $this-table-min-height;
+  }
+
+  th,
+  td {
+    vertical-align: middle;
+    min-height: $this-table-min-height;
+    position: relative;
+    border-top: 1px solid rgba(0, 0, 0, .12);
+    border-bottom: 1px solid rgba(0, 0, 0, .12);
+    padding: $s $s*2.25;
+    box-sizing: border-box;
+
+    &:first-of-type {
+      padding-left: $s*3;
+    }
+
+
+    &:last-of-type {
+      padding-right: $s*3;
+    }
+  }
+}

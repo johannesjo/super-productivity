@@ -1,8 +1,8 @@
 <div class="dialog-content"
      mat-dialog-content="">
 
-        <textarea [(ngModel)]="tasksTxt"
-                  *ngIf="options.isShowAsText"
+        <textarea *ngIf="options.isShowAsText"
+                  [(ngModel)]="tasksTxt"
                   class="simple-textarea mat-elevation-z2"
                   id="task-textarea"
                   name="tasksTxt"
@@ -10,7 +10,7 @@
                   tabindex="-1"></textarea>
 
   <div *ngIf="!options.isShowAsText"
-       class="table-wrapper"
+       class="table-wrapper material-table"
        [innerHTML]="tasksHtml"></div>
 
 
