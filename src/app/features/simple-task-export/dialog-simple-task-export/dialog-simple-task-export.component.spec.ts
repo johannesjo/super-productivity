@@ -1,20 +1,20 @@
 // import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 //
-// import { SimpleTaskSummaryComponent } from './simple-task-summary.component';
+// import { DialogSimpleTaskSummaryComponent } from './dialog-simple-task-export.component';
 //
-// describe('SimpleTaskSummaryComponent', () => {
-//   let component: SimpleTaskSummaryComponent;
-//   let fixture: ComponentFixture<SimpleTaskSummaryComponent>;
+// describe('DialogSimpleTaskSummaryComponent', () => {
+//   let component: DialogSimpleTaskSummaryComponent;
+//   let fixture: ComponentFixture<DialogSimpleTaskSummaryComponent>;
 //
 //   beforeEach(async(() => {
 //     TestBed.configureTestingModule({
-//       declarations: [SimpleTaskSummaryComponent]
+//       declarations: [DialogSimpleTaskSummaryComponent]
 //     })
 //       .compileComponents();
 //   }));
 //
 //   beforeEach(() => {
-//     fixture = TestBed.createComponent(SimpleTaskSummaryComponent);
+//     fixture = TestBed.createComponent(DialogSimpleTaskSummaryComponent);
 //     component = fixture.componentInstance;
 //     fixture.detectChanges();
 //   });

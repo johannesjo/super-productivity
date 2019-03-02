@@ -5,7 +5,7 @@ import { TaskWithSubTasks } from '../../features/tasks/task.model';
 import { Router } from '@angular/router';
 import { IS_ELECTRON } from '../../app.constants';
 import { MatDialog } from '@angular/material';
-import { DialogSimpleTaskSummaryComponent } from '../../features/simple-task-summary/dialog-simple-task-summary/dialog-simple-task-summary.component';
+import { DialogSimpleTaskExportComponent } from '../../features/simple-task-export/dialog-simple-task-export/dialog-simple-task-export.component';
 import { Subscription } from 'rxjs';
 import { ElectronService } from 'ngx-electron';
 import { IPC_SHUTDOWN_NOW } from '../../../../electron/ipc-events.const';
@@ -98,7 +98,7 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
   }
 
   showExportModal() {
-    this._matDialog.open(DialogSimpleTaskSummaryComponent, {
+    this._matDialog.open(DialogSimpleTaskExportComponent, {
       restoreFocus: true,
       panelClass: 'big',
       data: {

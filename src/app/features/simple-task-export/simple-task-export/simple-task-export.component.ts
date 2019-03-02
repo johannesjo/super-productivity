@@ -30,12 +30,12 @@ const LINE_SEPARATOR = '\n';
 
 
 @Component({
-  selector: 'simple-task-summary',
-  templateUrl: './simple-task-summary.component.html',
-  styleUrls: ['./simple-task-summary.component.scss'],
+  selector: 'simple-task-export',
+  templateUrl: './simple-task-export.component.html',
+  styleUrls: ['./simple-task-export.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class SimpleTaskSummaryComponent implements OnInit, OnDestroy {
+export class SimpleTaskExportComponent implements OnInit, OnDestroy {
   @Input() tasks: any[];
   @Input() dateStart: Date;
   @Input() dateEnd: Date;

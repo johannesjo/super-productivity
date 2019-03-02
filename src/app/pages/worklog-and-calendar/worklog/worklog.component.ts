@@ -3,7 +3,7 @@ import { PersistenceService } from '../../../core/persistence/persistence.servic
 import { ProjectService } from '../../../features/project/project.service';
 import { expandFadeAnimation } from '../../../ui/animations/expand.ani';
 import { mapArchiveToWorklog, Worklog, WorklogDay, WorklogMonth } from '../../../util/map-archive-to-worklog';
-import { DialogSimpleTaskSummaryComponent } from '../../../features/simple-task-summary/dialog-simple-task-summary/dialog-simple-task-summary.component';
+import { DialogSimpleTaskExportComponent } from '../../../features/simple-task-export/dialog-simple-task-export/dialog-simple-task-export.component';
 import { MatDialog } from '@angular/material';
 import { Subscription } from 'rxjs';
 import { Task, TaskCopy } from '../../../features/tasks/task.model';
@@ -72,7 +72,7 @@ export class WorklogComponent implements OnInit, OnDestroy {
       lastDayOfMonth.setMinutes(59);
       lastDayOfMonth.setSeconds(59);
 
-      this._matDialog.open(DialogSimpleTaskSummaryComponent, {
+      this._matDialog.open(DialogSimpleTaskExportComponent, {
         restoreFocus: true,
         panelClass: 'big',
         data: {
@@ -89,7 +89,7 @@ export class WorklogComponent implements OnInit, OnDestroy {
       endOfWeek.setHours(23);
       endOfWeek.setMinutes(59);
       endOfWeek.setSeconds(59);
-      this._matDialog.open(DialogSimpleTaskSummaryComponent, {
+      this._matDialog.open(DialogSimpleTaskExportComponent, {
         restoreFocus: true,
         panelClass: 'big',
         data: {

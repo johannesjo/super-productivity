@@ -1,8 +1,8 @@
 <h2 mat-dialog-title="">Task List Export</h2>
 
-<simple-task-summary [isWorklogExport]="data.isWorklogExport"
+<simple-task-export [isWorklogExport]="data.isWorklogExport"
                      [isShowClose]="true"
                      [tasks]="data.tasks"
                      [dateStart]="data.dateStart"
                      [dateEnd]="data.dateEnd"
-                     (cancel)="close()"></simple-task-summary>
+                     (cancel)="close()"></simple-task-export>

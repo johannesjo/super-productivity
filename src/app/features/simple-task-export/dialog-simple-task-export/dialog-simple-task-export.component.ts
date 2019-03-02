@@ -4,16 +4,16 @@ import { SimpleSummarySettingsCopy } from '../../project/project.model';
 import { SIMPLE_SUMMARY_DEFAULTS } from '../../project/project.const';
 
 @Component({
-  selector: 'dialog-simple-task-summary',
-  templateUrl: './dialog-simple-task-summary.component.html',
-  styleUrls: ['./dialog-simple-task-summary.component.scss'],
+  selector: 'dialog-simple-task-export',
+  templateUrl: './dialog-simple-task-export.component.html',
+  styleUrls: ['./dialog-simple-task-export.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class DialogSimpleTaskSummaryComponent {
+export class DialogSimpleTaskExportComponent {
   options: SimpleSummarySettingsCopy = SIMPLE_SUMMARY_DEFAULTS;
 
   constructor(
-    private _matDialogRef: MatDialogRef<DialogSimpleTaskSummaryComponent>,
+    private _matDialogRef: MatDialogRef<DialogSimpleTaskExportComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,
   ) {
   }

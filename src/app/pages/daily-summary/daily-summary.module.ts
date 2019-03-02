@@ -4,7 +4,7 @@ import { DailySummaryComponent } from './daily-summary.component';
 import { FormsModule } from '@angular/forms';
 import { UiModule } from '../../ui/ui.module';
 import { GoogleModule } from '../../features/google/google.module';
-import { SimpleTaskSummaryModule } from '../../features/simple-task-summary/simple-task-summary.module';
+import { SimpleTaskExportModule } from '../../features/simple-task-export/simple-task-export.module';
 import { RouterModule } from '@angular/router';
 
 @NgModule({
@@ -14,7 +14,7 @@ import { RouterModule } from '@angular/router';
     UiModule,
     GoogleModule,
     RouterModule,
-    SimpleTaskSummaryModule,
+    SimpleTaskExportModule,
   ],
   declarations: [DailySummaryComponent]
 })
