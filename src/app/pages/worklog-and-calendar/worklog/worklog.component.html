@@ -20,7 +20,7 @@
       <button mat-mini-fab=""
               color="primary"
               aria-label="export data"
-              (click)="exportData('MONTH',month.value,year.key, month.key)">
+              (click)="exportData(month.value,year.key, month.key)">
         <mat-icon>call_made</mat-icon>
       </button>
       <button *ngFor="let week of month.value.weeks; let i = index;"
@@ -28,7 +28,7 @@
               mat-mini-fab=""
               color=""
               aria-label="export data"
-              (click)="exportData('WEEK',month.value,year.key, month.key, week)">
+              (click)="exportData(month.value,year.key, month.key, week)">
         w{{i+1}}
       </button>
     </div>

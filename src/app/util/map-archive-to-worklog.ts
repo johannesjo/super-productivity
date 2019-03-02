@@ -60,7 +60,6 @@ export const mapArchiveToWorklog = (taskState: EntityState<Task>, noRestoreIds =
         };
       }
       if (!worklog[year].ent[month]) {
-        console.log(month);
         worklog[year].ent[month] = {
           daysWorked: 0,
           timeSpent: 0,

@@ -57,49 +57,35 @@ export class WorklogComponent implements OnInit, OnDestroy {
     this._subs.unsubscribe();
   }
 
-  exportData(
-    type,
-    monthData: WorklogMonth,
-    year: number,
-    month_: string | number,
-    week?: WeeksInMonth
-  ) {
+  exportData(monthData: WorklogMonth, year: number, month_: string | number, week?: WeeksInMonth) {
+    let dateStart;
+    let dateEnd;
+    // denormalize to js month again
     const month = +month_ - 1;
-    if (type === 'MONTH') {
-      const firstDayOfMonth = new Date(year, month, 1);
-      const lastDayOfMonth = new Date(year, month + 1, 0);
-      lastDayOfMonth.setHours(23);
-      lastDayOfMonth.setMinutes(59);
-      lastDayOfMonth.setSeconds(59);
+    if (!week) {
+      // firstDayOfMonth
+      dateStart = new Date(year, month, 1);
+      // lastDayOfMonth
+      dateEnd = new Date(year, month + 1, 0);
+    } else {
+      // startOfWeek
+      dateStart = new Date(year, month, week.start);
+      // endOfWeek
+      dateEnd = new Date(year, month, week.end);
+    }
 
-      this._matDialog.open(DialogSimpleTaskExportComponent, {
-        restoreFocus: true,
-        panelClass: 'big',
-        data: {
-          tasks: this._createTasksForMonth(monthData),
-          isWorklogExport: true,
-          dateStart: firstDayOfMonth,
-          dateEnd: lastDayOfMonth,
-        }
-      });
-    }
-    if (type === 'WEEK') {
-      const startOfWeek = new Date(year, month, week.start);
-      const endOfWeek = new Date(year, month, week.end);
-      endOfWeek.setHours(23);
-      endOfWeek.setMinutes(59);
-      endOfWeek.setSeconds(59);
-      this._matDialog.open(DialogSimpleTaskExportComponent, {
-        restoreFocus: true,
-        panelClass: 'big',
-        data: {
-          tasks: this._createTasksForMonth(monthData),
-          isWorklogExport: true,
-          dateStart: startOfWeek,
-          dateEnd: endOfWeek,
-        }
-      });
-    }
+    dateEnd.setHours(23, 59, 59);
+
+    this._matDialog.open(DialogSimpleTaskExportComponent, {
+      restoreFocus: true,
+      panelClass: 'big',
+      data: {
+        tasks: this._createTasksForMonth(monthData),
+        isWorklogExport: true,
+        dateStart,
+        dateEnd,
+      }
+    });
   }
 
   restoreTask(yearKey, monthKey, dayKey, task: TaskCopy) {
