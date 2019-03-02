@@ -64,7 +64,7 @@ export class WorklogComponent implements OnInit, OnDestroy {
       const firstDayOfNextMonth = new Date(year, month, 1);
       this._matDialog.open(DialogSimpleTaskSummaryComponent, {
         restoreFocus: true,
-        panelClass: 'fullscreen',
+        panelClass: 'big',
         data: {
           tasks: this._createTasksForMonth(monthData),
           isWorklogExport: true,

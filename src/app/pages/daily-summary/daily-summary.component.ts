@@ -100,7 +100,7 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
   showExportModal() {
     this._matDialog.open(DialogSimpleTaskSummaryComponent, {
       restoreFocus: true,
-      panelClass: 'fullscreen',
+      panelClass: 'big',
       data: {
         tasks: this._todaysTasks,
       }

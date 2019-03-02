@@ -20,11 +20,15 @@ body .mat-form-field {
 }
 
 
-.fullscreen {
+.big {
   height: auto;
   max-height: 100vh!important;
-  width: 100vw !important;
+  width: 100% !important;
   max-width: none !important;
+  @include mq(xs){
+    margin: $s*2;
+    max-height: 95vh!important;
+  }
 
   .dialog-content,
   .mat-dialog-content {
