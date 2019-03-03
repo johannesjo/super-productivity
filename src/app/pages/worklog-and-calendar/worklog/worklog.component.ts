@@ -59,23 +59,23 @@ export class WorklogComponent implements OnInit, OnDestroy {
   }
 
   exportData(monthData: WorklogMonth, year: number, month_: string | number, week?: WeeksInMonth) {
-    let dateStart;
-    let dateEnd;
+    let rangeStart;
+    let rangeEnd;
     // denormalize to js month again
     const month = +month_ - 1;
     if (!week) {
       // firstDayOfMonth
-      dateStart = new Date(year, month, 1);
+      rangeStart = new Date(year, month, 1);
       // lastDayOfMonth
-      dateEnd = new Date(year, month + 1, 0);
+      rangeEnd = new Date(year, month + 1, 0);
     } else {
       // startOfWeek
-      dateStart = new Date(year, month, week.start);
+      rangeStart = new Date(year, month, week.start);
       // endOfWeek
-      dateEnd = new Date(year, month, week.end);
+      rangeEnd = new Date(year, month, week.end);
     }
 
-    dateEnd.setHours(23, 59, 59);
+    rangeEnd.setHours(23, 59, 59);
 
     this._matDialog.open(DialogWorklogExportComponent, {
       restoreFocus: true,
@@ -83,8 +83,8 @@ export class WorklogComponent implements OnInit, OnDestroy {
       data: {
         tasks: this._createTasksForMonth(monthData),
         isWorklogExport: true,
-        dateStart,
-        dateEnd,
+        rangeStart,
+        rangeEnd,
       }
     });
   }
@@ -147,7 +147,7 @@ export class WorklogComponent implements OnInit, OnDestroy {
       this._cd.detectChanges();
     }
     // console.log(this.worklog);
-    // this.exportData(this.worklog[2019].ent[3], 2019, 3);
+    this.exportData(this.worklog[2019].ent[3], 2019, 3);
   }
 
   private _createTasksForDay(data: WorklogDay) {

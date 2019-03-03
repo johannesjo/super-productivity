@@ -16,18 +16,10 @@ export const SIMPLE_SUMMARY_DEFAULTS: SimpleSummarySettings = {
   isShowDate: false,
 };
 export const WORKLOG_EXPORT_DEFAULTS: WorklogExportSettings = {
+  cols: ['DATE', 'START', 'END', 'TIME_STR', 'ESTIMATE_STR', 'TITLES_INCLUDING_SUB'],
   roundWorkTimeTo: null,
+  roundStartEndTimeTo: null,
   separateTasksBy: ' | ',
-  separateFieldsBy: ';',
-  isShowAsText: false,
-  isListSubTasks: true,
-  isListDoneOnly: false,
-  isWorkedOnTodayOnly: true,
-  isShowTitle: true,
-  isShowTimeSpent: true,
-  isShowTimeEstimate: true,
-  isTimesAsMilliseconds: false,
-  isShowDate: false,
 };
 
 export const GOOGLE_TIME_SHEET_EXPORT_DEFAULTS: GoogleTimeSheetExport = {

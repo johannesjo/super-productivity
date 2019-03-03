@@ -40,19 +40,26 @@ export interface SimpleSummarySettingsCopy {
 
 export type SimpleSummarySettings = Readonly<SimpleSummarySettingsCopy>;
 
+
+export type WorklogColTypes =
+  'DATE'
+  | 'START'
+  | 'END'
+  | 'TITLES'
+  | 'TITLES_INCLUDING_SUB'
+  | 'TIME_MS'
+  | 'TIME_STR'
+  | 'TIME_CLOCK'
+  | 'ESTIMATE_MS'
+  | 'ESTIMATE_STR'
+  | 'ESTIMATE_CLOCK'
+  ;
+
 export interface WorklogExportSettingsCopy {
   roundWorkTimeTo: RoundTimeOption;
+  roundStartEndTimeTo: RoundTimeOption;
   separateTasksBy: string;
-  separateFieldsBy: string;
-  isShowAsText: boolean;
-  isListSubTasks: boolean;
-  isListDoneOnly: boolean;
-  isWorkedOnTodayOnly: boolean;
-  isShowTitle: boolean;
-  isShowTimeSpent: boolean;
-  isShowTimeEstimate: boolean;
-  isTimesAsMilliseconds: boolean;
-  isShowDate: boolean;
+  cols: WorklogColTypes[];
 }
 
 export type WorklogExportSettings = Readonly<WorklogExportSettingsCopy>;

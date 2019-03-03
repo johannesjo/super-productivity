@@ -1,17 +1,17 @@
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
-import { msToString } from '../../../ui/duration/ms-to-string.pipe';
-import { TaskWithSubTasks } from '../../tasks/task.model';
+import { TaskCopy, TaskWithSubTasks } from '../../tasks/task.model';
 import { ProjectService } from '../../project/project.service';
 import { Subscription } from 'rxjs';
-import { WorklogExportSettingsCopy } from '../../project/project.model';
+import { WorklogExportSettingsCopy, WorkStartEnd } from '../../project/project.model';
 import { WORKLOG_EXPORT_DEFAULTS } from '../../project/project.const';
-import Clipboard from 'clipboard';
 import { SnackService } from '../../../core/snack/snack.service';
 import { getWorklogStr } from '../../../util/get-work-log-str';
-import { unqiue } from '../../../util/unique';
 import * as moment from 'moment-mini';
 import { Duration } from 'moment-mini';
 import 'moment-duration-format';
+import { unqiue } from '../../../util/unique';
+import { msToString } from '../../../ui/duration/ms-to-string.pipe';
+import { msToClockString } from '../../../ui/duration/ms-to-clock-string.pipe';
 
 const CSV_EXPORT_SETTINGS = {
   separateTasksBy: '',
@@ -28,6 +28,20 @@ const CSV_EXPORT_SETTINGS = {
 
 const LINE_SEPARATOR = '\n';
 
+interface TaskWithParentTitle extends TaskCopy {
+  parentTitle?: string;
+}
+
+interface RowItem {
+  date: string;
+  workStart: number;
+  workEnd: number;
+  timeSpent: number;
+  timeEstimate: number;
+  tasks: TaskWithParentTitle[];
+  titles?: string[];
+  titlesWithSub?: string[];
+}
 
 @Component({
   selector: 'worklog-export',
@@ -37,16 +51,19 @@ const LINE_SEPARATOR = '\n';
 })
 export class WorklogExportComponent implements OnInit, OnDestroy {
   @Input() tasks: any[];
-  @Input() dateStart: Date;
-  @Input() dateEnd: Date;
+  @Input() rangeStart: Date;
+  @Input() rangeEnd: Date;
   @Input() isWorklogExport: boolean;
   @Input() isShowClose: boolean;
 
   @Output() cancel = new EventEmitter();
 
+  isShowAsText = false;
+  headlineCols: string[] = [];
+  rows: RowItem[] = [];
+  formattedRows: (string | number)[][];
   options: WorklogExportSettingsCopy = WORKLOG_EXPORT_DEFAULTS;
   tasksTxt: string;
-  tasksHtml: string;
   fileName = 'tasks.csv';
   roundTimeOptions = [
     {id: 'QUARTER', title: 'full quarters'},
@@ -58,48 +75,58 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
 
   constructor(
     private _projectService: ProjectService,
-    private _snackService: SnackService,
   ) {
   }
 
   ngOnInit() {
-    if (this.dateStart && this.dateEnd) {
+    if (this.rangeStart && this.rangeEnd) {
       this.fileName
         = 'tasks'
-        + getWorklogStr(this.dateStart)
+        + getWorklogStr(this.rangeStart)
         + '-'
-        + getWorklogStr(this.dateEnd)
+        + getWorklogStr(this.rangeEnd)
         + '.csv'
       ;
     }
 
-    this._subs.add(this._projectService.advancedCfg$.subscribe((val) => {
-      if (val.worklogExportSettings) {
-        this.options = val.worklogExportSettings;
+    this._subs.add(this._projectService.currentProject$.subscribe((pr) => {
+      if (pr.advancedCfg.worklogExportSettings) {
+        this.options = pr.advancedCfg.worklogExportSettings;
       } else {
         this.options = WORKLOG_EXPORT_DEFAULTS;
       }
 
-      if (this.tasks) {
-        if (this.isWorklogExport) {
-          this.tasksTxt = this._createTasksTextMergedToDays(this.tasks);
-        } else {
-          this.tasksTxt = this._createTasksText(this.tasks);
-        }
+      this.options = WORKLOG_EXPORT_DEFAULTS;
 
-        this.tasksHtml = this._parseToTable(this.tasksTxt);
+      if (this.tasks) {
+        this.rows = this._createRows(this.tasks, pr.workStart, pr.workEnd);
+        this.formattedRows = this._formatRows(this.rows);
+        // TODO format to csv
+
+        this.headlineCols = this.options.cols.map(col => {
+          switch (col) {
+            case 'DATE':
+              return 'Date';
+            case 'START':
+              return 'Start';
+            case 'END':
+              return 'End';
+            case 'TITLES':
+              return 'Titles';
+            case 'TITLES_INCLUDING_SUB':
+              return 'Titles';
+            case 'TIME_MS':
+            case 'TIME_STR':
+            case 'TIME_CLOCK':
+              return 'Time Spent';
+            case 'ESTIMATE_MS':
+            case 'ESTIMATE_STR':
+            case 'ESTIMATE_CLOCK':
+              return 'Estimate';
+          }
+        });
       }
     }));
-
-    // dirty but good enough for now
-    const clipboard = new Clipboard('#clipboard-btn');
-    clipboard.on('success', (e: any) => {
-      this._snackService.open({
-        message: 'Copied to clipboard',
-        type: 'SUCCESS'
-      });
-      e.clearSelection();
-    });
   }
 
   ngOnDestroy() {
@@ -114,73 +141,39 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
     this._projectService.updateWorklogExportSettings(this._projectService.currentId, this.options);
   }
 
-  private _formatTask(task) {
-    let taskTxt = '';
-    if (this.options.isShowDate) {
-      taskTxt += task.dateStr || getWorklogStr();
-    }
-
-    if (this.options.isShowTimeSpent) {
-      taskTxt = this._addSeparator(taskTxt);
-      let timeSpent = task.timeSpent;
-      if (this.options.roundWorkTimeTo) {
-        const val = moment.duration(task.timeSpent);
-        timeSpent = this._roundDuration(val, this.options.roundWorkTimeTo, true).asMilliseconds();
-      }
-
-      taskTxt += this.options.isTimesAsMilliseconds
-        ? timeSpent
-        : msToString(timeSpent, false, true);
-    }
-
-    if (this.options.isShowTimeEstimate) {
-      taskTxt = this._addSeparator(taskTxt);
-
-      taskTxt += this.options.isTimesAsMilliseconds
-        ? task.timeEstimate
-        : msToString(task.timeEstimate, false, true);
-    }
-
-    if (this.options.isShowTitle) {
-      taskTxt = this._addSeparator(taskTxt);
-      taskTxt += task.title;
-    }
-
-    return taskTxt;
-  }
-
-  private _addSeparator(taskTxt) {
-    if (taskTxt.length > 0) {
-      taskTxt += (this.options.separateFieldsBy || WORKLOG_EXPORT_DEFAULTS.separateFieldsBy);
-    }
-    return taskTxt;
-  }
-
-  private _createTasksTextMergedToDays(tasks: TaskWithSubTasks[]) {
+  // TODO this can be optimized to a couple of mapping functions
+  private _createRows(tasks: TaskWithSubTasks[], startTimes: WorkStartEnd, endTimes: WorkStartEnd): RowItem[] {
+    const days: { [key: string]: RowItem } = {};
     const _mapTaskToDay = (task, dateStr, parentTitle?) => {
       const taskDate = new Date(dateStr);
-      let day = days[dateStr];
-      if (taskDate >= this.dateStart && taskDate < this.dateEnd) {
+      let day: RowItem = days[dateStr];
 
+      if (taskDate >= this.rangeStart && taskDate < this.rangeEnd) {
         if (!day) {
           day = days[dateStr] = {
+            date: dateStr,
             timeSpent: 0,
             timeEstimate: 0,
-            tasks: []
+            tasks: [],
+            titlesWithSub: [],
+            workStart: startTimes[dateStr],
+            workEnd: endTimes[dateStr],
           };
         }
         days[dateStr] = {
+          ...days[dateStr],
           timeSpent: day.timeSpent + task.timeSpentOnDay[dateStr],
-          timeEstimate: day.timeSpent + task.timeEstimate,
-          tasks: [...day.tasks, {...task, parentTitle}],
+          timeEstimate: day.timeEstimate + task.timeEstimate,
+          tasks: [...day.tasks, {
+            ...task,
+            parentTitle
+          }],
         };
       }
     };
 
-    const days = {};
-    let tasksTxt = '';
-
     tasks.forEach(task => {
+      // TODO find out why there are no sub tasks
       if (task.subTasks && task.subTasks.length > 0) {
         task.subTasks.forEach((subTask) => {
           if (subTask.timeSpentOnDay) {
@@ -197,65 +190,62 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
         }
       }
     });
+
+    const rows = [];
     Object.keys(days).sort().forEach(dateStr => {
-      days[dateStr].dateStr = dateStr;
-      days[dateStr].title = unqiue(days[dateStr].tasks.map(t => {
-        return (!this.options.isListSubTasks && t.parentTitle)
-          ? t.parentTitle
-          : t.title;
-      }))
-        .join(this.options.separateTasksBy || WORKLOG_EXPORT_DEFAULTS.separateTasksBy);
-
-      tasksTxt += this._formatTask(days[dateStr]);
-      tasksTxt += LINE_SEPARATOR;
+      days[dateStr].titles = unqiue(days[dateStr].tasks.map(t => t.parentTitle || t.title));
+      days[dateStr].titlesWithSub = unqiue(days[dateStr].tasks.map(t => t.title));
+      rows.push(days[dateStr]);
     });
-    return tasksTxt;
+    return rows;
   }
 
-  private _createTasksText(tasks: TaskWithSubTasks[]) {
-    let tasksTxt = '';
+  private _formatRows(rows: RowItem[]): (string | number)[][] {
+    return rows.map(row => {
+      return this.options.cols.map(col => {
+        let timeSpent = row.timeSpent;
+        const timeEstimate = row.timeEstimate;
 
-    if (tasks) {
-      for (let i = 0; i < tasks.length; i++) {
-        const task = tasks[i];
-        if (
-          (
-            (this.isWorklogExport)
-            || (!this.options.isListDoneOnly || task.isDone)
-            && (!this.options.isWorkedOnTodayOnly || this._checkIsWorkedOnToday(task))
-          )
-        ) {
-          tasksTxt += this._formatTask(task);
-          tasksTxt += LINE_SEPARATOR;
+        if (this.options.roundWorkTimeTo) {
+          timeSpent = this._roundDuration(timeSpent, this.options.roundWorkTimeTo, true).asMilliseconds();
         }
 
-        if (this.options.isListSubTasks && task.subTasks && task.subTasks.length > 0) {
-          for (let j = 0; j < task.subTasks.length; j++) {
-            const subTask = task.subTasks[j];
-            if (
-              (!this.options.isListDoneOnly || subTask.isDone)
-              && (!this.options.isWorkedOnTodayOnly || this._checkIsWorkedOnToday(subTask))) {
-              tasksTxt += this._formatTask(subTask);
-              tasksTxt += LINE_SEPARATOR;
-            }
-          }
+        // if (this.options.roundWorkTimeTo) {
+        //   timeEstimate = this._roundDuration(timeEstimate, this.options.roundWorkTimeTo, true).asMilliseconds();
+        // }
+
+        switch (col) {
+          case 'DATE':
+            return row.date;
+          case 'START':
+            return row.workStart;
+          case 'END':
+            return row.workEnd;
+          case 'TITLES':
+            return row.titles.join(this.options.separateTasksBy || ' | ');
+          case 'TITLES_INCLUDING_SUB':
+            return row.titlesWithSub.join(this.options.separateTasksBy || ' | ');
+          case 'TIME_MS':
+            return timeSpent;
+          case 'TIME_STR':
+            return msToString(timeSpent);
+          case 'TIME_CLOCK':
+            return msToClockString(timeSpent);
+          case 'ESTIMATE_MS':
+            return timeEstimate;
+          case 'ESTIMATE_STR':
+            return msToString(timeEstimate);
+          case 'ESTIMATE_CLOCK':
+            return msToClockString(timeEstimate);
         }
-      }
-    }
-
-    // remove last new line
-    tasksTxt = tasksTxt.substring(0, tasksTxt.length - LINE_SEPARATOR.length);
-
-    return tasksTxt;
+      });
+    });
   }
 
-  private _checkIsWorkedOnToday(task) {
-    const dateStr = getWorklogStr();
-    return !!task.timeSpentOnDay[dateStr];
-  }
 
-  private _roundDuration(value: Duration, roundTo, isRoundUp): Duration {
+  private _roundDuration(ms: number, roundTo, isRoundUp): Duration {
     let rounded;
+    const value = moment.duration(ms);
 
     switch (roundTo) {
       case 'QUARTER':
@@ -282,39 +272,5 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
       default:
         return value;
     }
-  }
-
-  private _parseToTable(tasksTxt) {
-    let rowsHtml = '';
-    const rows = tasksTxt.split(LINE_SEPARATOR).filter(row => row.length);
-
-    rows.forEach(row => {
-      const cols = row.split((this.options.separateFieldsBy || WORKLOG_EXPORT_DEFAULTS.separateFieldsBy));
-      rowsHtml += `<tr><td>${cols.join('</td><td>')}</td></tr>`;
-    });
-
-    const headerCols = [];
-    if (this.options.isShowDate) {
-      headerCols.push('Date');
-    }
-    if (this.options.isShowTimeSpent) {
-      headerCols.push('Time Spent');
-    }
-    if (this.options.isShowTimeEstimate) {
-      headerCols.push('Estimate');
-    }
-    if (this.options.isShowTitle) {
-      if (this.isWorklogExport) {
-        headerCols.push('Tasks');
-      } else {
-        headerCols.push('Title');
-      }
-    }
-    const headerColsHtml = `<tr><th>${headerCols.join('</th><th>')}</th></tr>`;
-    if (!rows.length) {
-      rowsHtml += `<tr><td>${Array(headerCols.length).fill('- No Data -').join('</td><td>')}</td></tr>`;
-    }
-
-    return `<table>${headerColsHtml}${rowsHtml}</table>`;
   }
 }
