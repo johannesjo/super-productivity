@@ -42,7 +42,8 @@ export type SimpleSummarySettings = Readonly<SimpleSummarySettingsCopy>;
 
 
 export type WorklogColTypes =
-  'DATE'
+  'EMPTY'
+  | 'DATE'
   | 'START'
   | 'END'
   | 'TITLES'

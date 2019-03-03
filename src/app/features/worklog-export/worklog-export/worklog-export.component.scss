@@ -21,9 +21,31 @@
   }
 }
 
+.wrapper-wrapper {
+  position: relative;
+}
+
+.add-col {
+  z-index: 2;
+  position: absolute;
+  top: 0;
+  right: -20px;
+
+  @include mq(xs) {
+    opacity: 0;
+    .wrapper-wrapper:hover & {
+      opacity: 1;
+    }
+  }
+}
+
+
 .table-wrapper {
   margin-bottom: $s;
   overflow: auto;
+  position: relative;
+  z-index: 1;
+
 
   ::ng-deep table {
     width: 100%;
@@ -31,6 +53,7 @@
 
   ::ng-deep td {
     white-space: normal;
+
     &:last-child {
       white-space: normal;
     }

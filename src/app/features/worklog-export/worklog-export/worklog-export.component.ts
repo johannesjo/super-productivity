@@ -74,7 +74,7 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
     {id: 'DATE', title: 'Date'},
     {id: 'START', title: 'Started Working'},
     {id: 'END', title: 'Ended Working'},
-    {id: 'TITLES', title: 'Main Task Titles'},
+    {id: 'TITLES', title: 'Parent Task Titles only'},
     {id: 'TITLES_INCLUDING_SUB', title: 'Titles and Sub Task Titles'},
     {id: 'TIME_MS', title: 'Time as milliseconds'},
     {id: 'TIME_STR', title: 'Time as string (e.g. 5h 23m)'},
@@ -151,7 +151,12 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
   }
 
   onOptionsChange() {
+    this.options.cols = this.options.cols.filter(col => !!col);
     this._projectService.updateWorklogExportSettings(this._projectService.currentId, this.options);
+  }
+
+  addCol() {
+    this.options.cols.push('EMPTY');
   }
 
   // TODO this can be optimized to a couple of mapping functions
