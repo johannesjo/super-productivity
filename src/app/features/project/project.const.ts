@@ -3,7 +3,7 @@ import { DEFAULT_ISSUE_PROVIDER_CFGS } from '../issue/issue.const';
 
 export const SIMPLE_SUMMARY_DEFAULTS: SimpleSummarySettings = {
   roundWorkTimeTo: null,
-  separateTasksBy: '|',
+  separateTasksBy: ' | ',
   separateFieldsBy: ';',
   isShowAsText: false,
   isListSubTasks: true,

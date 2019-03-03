@@ -147,7 +147,7 @@ export class SimpleTaskExportComponent implements OnInit, OnDestroy {
 
   private _addSeparator(taskTxt) {
     if (taskTxt.length > 0) {
-      taskTxt += this.options.separateFieldsBy;
+      taskTxt += (this.options.separateFieldsBy || SIMPLE_SUMMARY_DEFAULTS.separateFieldsBy);
     }
     return taskTxt;
   }
@@ -200,7 +200,7 @@ export class SimpleTaskExportComponent implements OnInit, OnDestroy {
           ? t.parentTitle
           : t.title;
       }))
-        .join(this.options.separateTasksBy || ' | ');
+        .join(this.options.separateTasksBy || SIMPLE_SUMMARY_DEFAULTS.separateTasksBy);
 
       tasksTxt += this._formatTask(days[dateStr]);
       tasksTxt += LINE_SEPARATOR;
@@ -283,7 +283,7 @@ export class SimpleTaskExportComponent implements OnInit, OnDestroy {
     const rows = tasksTxt.split(LINE_SEPARATOR).filter(row => row.length);
 
     rows.forEach(row => {
-      const cols = row.split(this.options.separateFieldsBy);
+      const cols = row.split((this.options.separateFieldsBy || SIMPLE_SUMMARY_DEFAULTS.separateFieldsBy));
       rowsHtml += `<tr><td>${cols.join('</td><td>')}</td></tr>`;
     });
 
