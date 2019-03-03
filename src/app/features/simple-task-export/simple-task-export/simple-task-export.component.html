@@ -60,7 +60,7 @@
             List done tasks only
           </mat-slide-toggle>
         </div>
-        <mat-form-field *ngIf="options.isMergeToDays"
+        <mat-form-field *ngIf="(options.isMergeToDays && isWorklogExport)"
                         class="md-block">
           <label>Separate tasks by</label>
           <input (change)="onOptionsChange()"
