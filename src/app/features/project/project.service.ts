@@ -5,7 +5,7 @@ import {
   Project,
   ProjectAdvancedCfg,
   ProjectAdvancedCfgKey,
-  SimpleSummarySettings
+  SimpleSummarySettings, WorklogExportSettings
 } from './project.model';
 import { PersistenceService } from '../../core/persistence/persistence.service';
 import { select, Store } from '@ngrx/store';
@@ -209,6 +209,12 @@ export class ProjectService {
   // HELPER
   updateSimpleSummarySettings(projectId: string, data: SimpleSummarySettings) {
     this.updateAdvancedCfg(projectId, 'simpleSummarySettings', {
+      ...data,
+    });
+  }
+
+  updateWorklogExportSettings(projectId: string, data: WorklogExportSettings) {
+    this.updateAdvancedCfg(projectId, 'worklogExportSettings', {
       ...data,
     });
   }

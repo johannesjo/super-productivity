@@ -3,8 +3,8 @@ import { msToString } from '../../../ui/duration/ms-to-string.pipe';
 import { TaskWithSubTasks } from '../../tasks/task.model';
 import { ProjectService } from '../../project/project.service';
 import { Subscription } from 'rxjs';
-import { SimpleSummarySettingsCopy } from '../../project/project.model';
-import { SIMPLE_SUMMARY_DEFAULTS } from '../../project/project.const';
+import { WorklogExportSettingsCopy } from '../../project/project.model';
+import { WORKLOG_EXPORT_DEFAULTS } from '../../project/project.const';
 import Clipboard from 'clipboard';
 import { SnackService } from '../../../core/snack/snack.service';
 import { getWorklogStr } from '../../../util/get-work-log-str';
@@ -44,7 +44,7 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
 
   @Output() cancel = new EventEmitter();
 
-  options: SimpleSummarySettingsCopy = SIMPLE_SUMMARY_DEFAULTS;
+  options: WorklogExportSettingsCopy = WORKLOG_EXPORT_DEFAULTS;
   tasksTxt: string;
   tasksHtml: string;
   fileName = 'tasks.csv';
@@ -74,7 +74,11 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
     }
 
     this._subs.add(this._projectService.advancedCfg$.subscribe((val) => {
-      this.options = val.simpleSummarySettings;
+      if (val.worklogExportSettings) {
+        this.options = val.worklogExportSettings;
+      } else {
+        this.options = WORKLOG_EXPORT_DEFAULTS;
+      }
 
       if (this.tasks) {
         if (this.isWorklogExport) {
@@ -107,7 +111,7 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
   }
 
   onOptionsChange() {
-    this._projectService.updateSimpleSummarySettings(this._projectService.currentId, this.options);
+    this._projectService.updateWorklogExportSettings(this._projectService.currentId, this.options);
   }
 
   private _formatTask(task) {
@@ -147,7 +151,7 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
 
   private _addSeparator(taskTxt) {
     if (taskTxt.length > 0) {
-      taskTxt += (this.options.separateFieldsBy || SIMPLE_SUMMARY_DEFAULTS.separateFieldsBy);
+      taskTxt += (this.options.separateFieldsBy || WORKLOG_EXPORT_DEFAULTS.separateFieldsBy);
     }
     return taskTxt;
   }
@@ -200,7 +204,7 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
           ? t.parentTitle
           : t.title;
       }))
-        .join(this.options.separateTasksBy || SIMPLE_SUMMARY_DEFAULTS.separateTasksBy);
+        .join(this.options.separateTasksBy || WORKLOG_EXPORT_DEFAULTS.separateTasksBy);
 
       tasksTxt += this._formatTask(days[dateStr]);
       tasksTxt += LINE_SEPARATOR;
@@ -285,7 +289,7 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
     const rows = tasksTxt.split(LINE_SEPARATOR).filter(row => row.length);
 
     rows.forEach(row => {
-      const cols = row.split((this.options.separateFieldsBy || SIMPLE_SUMMARY_DEFAULTS.separateFieldsBy));
+      const cols = row.split((this.options.separateFieldsBy || WORKLOG_EXPORT_DEFAULTS.separateFieldsBy));
       rowsHtml += `<tr><td>${cols.join('</td><td>')}</td></tr>`;
     });
 

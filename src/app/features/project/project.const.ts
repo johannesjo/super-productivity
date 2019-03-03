@@ -1,7 +1,21 @@
-import { GoogleTimeSheetExport, Project, SimpleSummarySettings } from './project.model';
+import { GoogleTimeSheetExport, Project, SimpleSummarySettings, WorklogExportSettings } from './project.model';
 import { DEFAULT_ISSUE_PROVIDER_CFGS } from '../issue/issue.const';
 
 export const SIMPLE_SUMMARY_DEFAULTS: SimpleSummarySettings = {
+  roundWorkTimeTo: null,
+  separateTasksBy: ' | ',
+  separateFieldsBy: ';',
+  isShowAsText: false,
+  isListSubTasks: true,
+  isListDoneOnly: false,
+  isWorkedOnTodayOnly: true,
+  isShowTitle: true,
+  isShowTimeSpent: true,
+  isShowTimeEstimate: true,
+  isTimesAsMilliseconds: false,
+  isShowDate: false,
+};
+export const WORKLOG_EXPORT_DEFAULTS: WorklogExportSettings = {
   roundWorkTimeTo: null,
   separateTasksBy: ' | ',
   separateFieldsBy: ';',
@@ -44,7 +58,8 @@ export const DEFAULT_PROJECT: Project = {
   issueIntegrationCfgs: DEFAULT_ISSUE_PROVIDER_CFGS,
   advancedCfg: {
     googleTimeSheetExport: GOOGLE_TIME_SHEET_EXPORT_DEFAULTS,
-    simpleSummarySettings: SIMPLE_SUMMARY_DEFAULTS
+    simpleSummarySettings: SIMPLE_SUMMARY_DEFAULTS,
+    worklogExportSettings: WORKLOG_EXPORT_DEFAULTS,
   },
   workStart: {},
   workEnd: {},

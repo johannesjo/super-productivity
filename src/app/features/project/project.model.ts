@@ -40,9 +40,27 @@ export interface SimpleSummarySettingsCopy {
 
 export type SimpleSummarySettings = Readonly<SimpleSummarySettingsCopy>;
 
+export interface WorklogExportSettingsCopy {
+  roundWorkTimeTo: RoundTimeOption;
+  separateTasksBy: string;
+  separateFieldsBy: string;
+  isShowAsText: boolean;
+  isListSubTasks: boolean;
+  isListDoneOnly: boolean;
+  isWorkedOnTodayOnly: boolean;
+  isShowTitle: boolean;
+  isShowTimeSpent: boolean;
+  isShowTimeEstimate: boolean;
+  isTimesAsMilliseconds: boolean;
+  isShowDate: boolean;
+}
+
+export type WorklogExportSettings = Readonly<WorklogExportSettingsCopy>;
+
 export type ProjectAdvancedCfg = Readonly<{
   googleTimeSheetExport: GoogleTimeSheetExport;
   simpleSummarySettings: SimpleSummarySettings;
+  worklogExportSettings: WorklogExportSettings;
 }>;
 
 export type ProjectAdvancedCfgKey = keyof ProjectAdvancedCfg;
