@@ -2,7 +2,6 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { UiModule } from '../../ui/ui.module';
-import { DialogGoogleExportTimeComponent } from './dialog-google-export-time/dialog-google-export-time.component';
 import { DialogConfirmDriveSyncLoadComponent } from './dialog-confirm-drive-sync-load/dialog-confirm-drive-sync-load.component';
 import { DialogConfirmDriveSyncSaveComponent } from './dialog-confirm-drive-sync-save/dialog-confirm-drive-sync-save.component';
 import { GoogleExportTimeComponent } from './google-export-time/google-export-time.component';
@@ -21,13 +20,11 @@ import { GOOGLE_DRIVE_FEATURE_NAME } from './store/google-drive-sync.reducer';
     StoreModule.forFeature(GOOGLE_DRIVE_FEATURE_NAME, fromGoogleDriveSync.reducer),
   ],
   declarations: [
-    DialogGoogleExportTimeComponent,
     DialogConfirmDriveSyncLoadComponent,
     DialogConfirmDriveSyncSaveComponent,
     GoogleExportTimeComponent,
   ],
   entryComponents: [
-    DialogGoogleExportTimeComponent,
     DialogConfirmDriveSyncLoadComponent,
     DialogConfirmDriveSyncSaveComponent,
   ],
