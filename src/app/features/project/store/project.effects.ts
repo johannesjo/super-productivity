@@ -1,15 +1,16 @@
 import { Injectable } from '@angular/core';
 import { Actions, Effect, ofType } from '@ngrx/effects';
 import { select, Store } from '@ngrx/store';
-import { delay, map, switchMap, tap, withLatestFrom } from 'rxjs/operators';
+import { filter, map, switchMap, tap, withLatestFrom } from 'rxjs/operators';
 import {
   AddProject,
   DeleteProject,
   LoadProjectRelatedDataSuccess,
-  ProjectActionTypes, UpdateProject,
+  ProjectActionTypes,
+  UpdateProject,
   UpdateProjectIssueProviderCfg
 } from './project.actions';
-import { selectCurrentProjectId, selectProjectFeatureState } from './project.reducer';
+import { selectCurrentProject, selectCurrentProjectId, selectProjectFeatureState } from './project.reducer';
 import { PersistenceService } from '../../../core/persistence/persistence.service';
 import { TaskService } from '../../tasks/task.service';
 import { BookmarkService } from '../../bookmark/bookmark.service';
@@ -18,6 +19,7 @@ import { NoteService } from '../../note/note.service';
 import { IssueService } from '../../issue/issue.service';
 import { SnackService } from '../../../core/snack/snack.service';
 import { SnackOpen } from '../../../core/snack/store/snack.actions';
+import { getWorklogStr } from '../../../util/get-work-log-str';
 
 // needed because we always want the check request to the jira api to finish first
 const ISSUE_REFRESH_DELAY = 10000;
@@ -51,6 +53,31 @@ export class ProjectEffects {
         ProjectActionTypes.UpdateProjectIssueProviderCfg,
       ),
       tap(this._persistenceService.saveLastActive.bind(this))
+    );
+
+  @Effect() updateWorkStart$: any = this._actions$
+    .pipe(
+      ofType(
+        ProjectActionTypes.LoadProjectState,
+        ProjectActionTypes.SetCurrentProject,
+      ),
+      withLatestFrom(
+        this._store$.pipe(select(selectCurrentProject))
+      ),
+      filter(([a, projectData]) => !projectData.workStart[getWorklogStr()]),
+      map(([a, projectData]) => {
+        return new UpdateProject({
+          project: {
+            id: projectData.id,
+            changes: {
+              workStart: {
+                ...projectData.workStart,
+                [getWorklogStr()]: Date.now()
+              }
+            }
+          }
+        });
+      })
     );
 
 

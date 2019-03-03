@@ -57,24 +57,6 @@ export const initialProjectState: ProjectState = projectAdapter.getInitialState(
   isDataLoaded: false,
 });
 
-const addStartedTimeToday = (state, currentProjectId): ProjectState => {
-  const curProject: Project = state.entities[currentProjectId];
-  const oldDate = new Date(curProject.startedTimeToday);
-  const now = new Date();
-
-  // if same day just keep the old string
-  if (curProject.startedTimeToday && oldDate.setHours(0, 0, 0, 0) === now.setHours(0, 0, 0, 0)) {
-    return state;
-  } else {
-    return projectAdapter.updateOne({
-      id: currentProjectId,
-      changes: {
-        startedTimeToday: Date.now()
-      }
-    }, state);
-  }
-
-};
 
 // REDUCER
 // -------
@@ -91,10 +73,7 @@ export function projectReducer(
     // Meta Actions
     // ------------
     case ProjectActionTypes.LoadProjectState: {
-      return addStartedTimeToday(
-        {...action.payload.state},
-        payload.state.currentId
-      );
+      return {...action.payload.state};
     }
 
     case ProjectActionTypes.LoadProjectRelatedDataSuccess: {
@@ -105,13 +84,10 @@ export function projectReducer(
     }
 
     case ProjectActionTypes.SetCurrentProject: {
-      return addStartedTimeToday(
-        {
-          ...state,
-          currentId: payload,
-        },
-        payload
-      );
+      return {
+        ...state,
+        currentId: payload,
+      };
     }
 
     // Project Actions

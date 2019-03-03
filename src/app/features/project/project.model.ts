@@ -3,6 +3,12 @@ import { IssueIntegrationCfgs, IssueProviderKey } from '../issue/issue';
 
 export type RoundTimeOption = 'QUARTER' | 'HALF' | 'HOUR';
 
+export interface WorkStartEndCopy {
+  [key: string]: number;
+}
+
+export type WorkStartEnd = Readonly<WorkStartEndCopy>;
+
 export interface GoogleTimeSheetExportCopy {
   spreadsheetId: string;
   isAutoLogin: boolean;
@@ -47,10 +53,11 @@ export type Project = Readonly<{
   themeColor: string;
   isDarkTheme: boolean;
   isReducedTheme: boolean;
-  startedTimeToday: number;
   timeWorkedWithoutBreak: number;
   issueIntegrationCfgs: IssueIntegrationCfgs;
   advancedCfg: ProjectAdvancedCfg;
+  workStart: WorkStartEnd;
+  workEnd: WorkStartEnd;
 }>;
 
 export type ProjectCfgFormKey = ProjectAdvancedCfgKey | IssueProviderKey | 'basic';

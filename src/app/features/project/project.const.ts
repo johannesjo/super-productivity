@@ -40,13 +40,14 @@ export const DEFAULT_PROJECT: Project = {
   themeColor: '',
   isDarkTheme: false,
   isReducedTheme: false,
-  startedTimeToday: null,
   timeWorkedWithoutBreak: null,
   issueIntegrationCfgs: DEFAULT_ISSUE_PROVIDER_CFGS,
   advancedCfg: {
     googleTimeSheetExport: GOOGLE_TIME_SHEET_EXPORT_DEFAULTS,
     simpleSummarySettings: SIMPLE_SUMMARY_DEFAULTS
   },
+  workStart: {},
+  workEnd: {},
 };
 
 
@@ -58,4 +59,6 @@ export const FIRST_PROJECT: Project = {
   title: 'Super Productivity',
   themeColor: 'light-blue',
   isDarkTheme: false,
+  workStart: {},
+  workEnd: {},
 };

@@ -22,6 +22,7 @@ import 'moment-duration-format';
 import { msToClockString } from '../../../ui/duration/ms-to-clock-string.pipe';
 import { loadFromSessionStorage, saveToSessionStorage } from '../../../core/persistence/local-storage';
 import { SS_GOOGLE_TIME_SUBMITTED } from '../../../core/persistence/ls-keys.const';
+import { getWorklogStr } from '../../../util/get-work-log-str';
 
 // TODO refactor to Observables
 @Component({
@@ -84,7 +85,7 @@ export class GoogleExportTimeComponent implements OnInit, OnDestroy {
       .subscribe((project: Project) => {
         this.opts = {...project.advancedCfg.googleTimeSheetExport};
         this._projectId = project.id;
-        this._startedTimeToday = project.startedTimeToday;
+        this._startedTimeToday = project.workStart[getWorklogStr(new Date())];
         this.isSpreadSheetConfigured = this.opts.spreadsheetId && this.opts.spreadsheetId.length > 5;
       });
     this._taskService.todaysTasks$

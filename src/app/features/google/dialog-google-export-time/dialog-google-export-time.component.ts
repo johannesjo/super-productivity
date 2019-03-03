@@ -10,6 +10,7 @@ import { GoogleTimeSheetExportCopy, Project } from '../../project/project.model'
 import { takeUntil } from 'rxjs/operators';
 import { TaskService } from '../../tasks/task.service';
 import { TaskWithSubTasks } from '../../tasks/task.model';
+import { getWorklogStr } from '../../../util/get-work-log-str';
 
 @Component({
   selector: 'dialog-google-export-time',
@@ -68,7 +69,7 @@ export class DialogGoogleExportTimeComponent implements OnInit, OnDestroy {
       .subscribe((project: Project) => {
         this.opts = {...project.advancedCfg.googleTimeSheetExport};
         this._projectId = project.id;
-        this._startedTimeToday = project.startedTimeToday;
+        this._startedTimeToday = project.workStart[getWorklogStr(new Date())];
       });
     this._taskService.todaysTasks$
       .pipe(takeUntil(this._destroy$))
