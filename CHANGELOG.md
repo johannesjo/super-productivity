@@ -1,3 +1,25 @@
+## [2.4.6](https://github.com/johannesjo/super-productivity/compare/v2.4.5...v2.4.6) (2019-03-03)
+
+
+### Bug Fixes
+
+* **worklogExport:** sub and parent task titles not being shown as intended ([d5f311f](https://github.com/johannesjo/super-productivity/commit/d5f311f))
+* typing error ([5e40a94](https://github.com/johannesjo/super-productivity/commit/5e40a94))
+
+
+### Features
+
+* **project:** properly save work start and end times ([2642f40](https://github.com/johannesjo/super-productivity/commit/2642f40))
+* **worklogExport:** add back in persistence ([0ad2029](https://github.com/johannesjo/super-productivity/commit/0ad2029))
+* **worklogExport:** add first outline of column controls ([6da77bb](https://github.com/johannesjo/super-productivity/commit/6da77bb))
+* **worklogExport:** add start and end time formatting ([c654c8a](https://github.com/johannesjo/super-productivity/commit/c654c8a))
+* **worklogExport:** make add and remove cols work ([f3e5ef8](https://github.com/johannesjo/super-productivity/commit/f3e5ef8))
+* **worklogExport:** make csv export and clipboard work ([4e9f14a](https://github.com/johannesjo/super-productivity/commit/4e9f14a))
+* **worklogExport:** make most simple variant of new worklog work ([72018f0](https://github.com/johannesjo/super-productivity/commit/72018f0))
+* **worklogExport:** wrap options into collapsible ([36074e0](https://github.com/johannesjo/super-productivity/commit/36074e0))
+
+
+
 ## [2.4.5](https://github.com/johannesjo/super-productivity/compare/v2.4.4...v2.4.5) (2019-03-03)
 
 
