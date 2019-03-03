@@ -16,9 +16,10 @@ export const SIMPLE_SUMMARY_DEFAULTS: SimpleSummarySettings = {
   isShowDate: false,
 };
 export const WORKLOG_EXPORT_DEFAULTS: WorklogExportSettings = {
-  cols: ['DATE', 'START', 'END', 'TIME_STR', 'ESTIMATE_STR', 'TITLES_INCLUDING_SUB'],
+  cols: ['DATE', 'START', 'END', 'TIME_CLOCK', 'TITLES_INCLUDING_SUB'],
   roundWorkTimeTo: null,
-  roundStartEndTimeTo: null,
+  roundStartTimeTo: null,
+  roundEndTimeTo: null,
   separateTasksBy: ' | ',
 };
 

@@ -106,12 +106,10 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
 
     this._subs.add(this._projectService.currentProject$.subscribe((pr) => {
       if (pr.advancedCfg.worklogExportSettings) {
-        this.options = pr.advancedCfg.worklogExportSettings;
+        this.options = Object.assign(WORKLOG_EXPORT_DEFAULTS, pr.advancedCfg.worklogExportSettings);
       } else {
         this.options = WORKLOG_EXPORT_DEFAULTS;
       }
-
-      this.options = WORKLOG_EXPORT_DEFAULTS;
 
       if (this.tasks) {
         this.rows = this._createRows(this.tasks, pr.workStart, pr.workEnd);
