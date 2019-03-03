@@ -1,8 +1,8 @@
 <div class="dialog-content"
      mat-dialog-content="">
 
-        <textarea *ngIf="options.isShowAsText"
-                  [(ngModel)]="tasksTxt"
+        <textarea [(ngModel)]="tasksTxt"
+                  [hidden]="!options.isShowAsText"
                   class="simple-textarea mat-elevation-z2"
                   id="task-textarea"
                   name="tasksTxt"
