@@ -12,6 +12,8 @@ import { msToString } from '../../../ui/duration/ms-to-string.pipe';
 import { msToClockString } from '../../../ui/duration/ms-to-clock-string.pipe';
 import { roundTime } from '../../../util/round-time';
 import { roundDuration } from '../../../util/round-duration';
+import Clipboard from 'clipboard';
+import { SnackService } from '../../../core/snack/snack.service';
 
 const CSV_EXPORT_SETTINGS = {
   separateTasksBy: '',
@@ -63,7 +65,7 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
   headlineCols: string[] = [];
   formattedRows: (string | number)[][];
   options: WorklogExportSettingsCopy = WORKLOG_EXPORT_DEFAULTS;
-  tasksTxt: string;
+  txt: string;
   fileName = 'tasks.csv';
   roundTimeOptions = [
     {id: 'QUARTER', title: 'full quarters'},
@@ -89,6 +91,7 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
 
   constructor(
     private _projectService: ProjectService,
+    private _snackService: SnackService,
   ) {
   }
 
@@ -137,8 +140,20 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
               return 'Estimate';
           }
         });
+
+        this.txt = this._formatText(this.headlineCols, this.formattedRows);
       }
     }));
+
+    // dirty but good enough for now
+    const clipboard = new Clipboard('#clipboard-btn');
+    clipboard.on('success', (e: any) => {
+      this._snackService.open({
+        message: 'Copied to clipboard',
+        type: 'SUCCESS'
+      });
+      e.clearSelection();
+    });
   }
 
   ngOnDestroy() {
@@ -262,5 +277,12 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
         }
       });
     });
+  }
+
+  private _formatText(headlineCols: string[], rows: (string | number)[][]): string {
+    let txt = '';
+    txt += headlineCols.join(';') + LINE_SEPARATOR;
+    txt += rows.map(cols => cols.join(';')).join(LINE_SEPARATOR);
+    return txt;
   }
 }

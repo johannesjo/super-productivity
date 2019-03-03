@@ -90,8 +90,6 @@ export class WorklogComponent implements OnInit, OnDestroy {
 
   restoreTask(yearKey, monthKey, dayKey, task: TaskCopy) {
     console.log(yearKey, monthKey, dayKey, task);
-
-
     this._matDialog.open(DialogConfirmComponent, {
       restoreFocus: true,
       data: {
@@ -146,7 +144,7 @@ export class WorklogComponent implements OnInit, OnDestroy {
       this._cd.detectChanges();
     }
     // console.log(this.worklog);
-    this.exportData(this.worklog[2019].ent[3], 2019, 3);
+    // this.exportData(this.worklog[2019].ent[3], 2019, 3);
   }
 
   private _createTasksForDay(data: WorklogDay) {

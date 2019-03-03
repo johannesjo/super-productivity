@@ -1,7 +1,7 @@
 <div class="dialog-content"
      mat-dialog-content="">
 
-  <textarea [(ngModel)]="tasksTxt"
+  <textarea [(ngModel)]="txt"
             [hidden]="!isShowAsText"
             class="simple-textarea mat-elevation-z2"
             id="task-textarea"
@@ -115,10 +115,19 @@
 
 <div mat-dialog-actions=""
      align="center">
+  <button *ngIf="isShowAsText"
+          mat-raised-button=""
+          color="primary"
+          id="clipboard-btn"
+          data-clipboard-action="copy"
+          data-clipboard-target="#task-textarea">
+    <mat-icon>content_paste</mat-icon>
+    Copy to clipboard
+  </button>
   <a mat-raised-button=""
      color="primary"
      [simpleDownload]="fileName"
-     [simpleDownloadData]="tasksTxt">
+     [simpleDownloadData]="txt">
     <mat-icon>file_download</mat-icon>
     Save to file
   </a>
