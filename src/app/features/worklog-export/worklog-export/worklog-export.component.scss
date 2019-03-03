@@ -7,9 +7,10 @@
   .row {
     display: flex;
     justify-content: space-between;
+    align-items: center;
   }
   .col {
-    width: 49%;
+    width: 32%;
   }
 }
 
@@ -29,6 +30,7 @@
   }
 
   ::ng-deep td {
+    white-space: normal;
     &:last-child {
       white-space: normal;
     }

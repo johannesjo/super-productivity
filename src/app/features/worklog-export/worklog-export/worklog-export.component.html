@@ -13,6 +13,18 @@
        class="table-wrapper material-table">
     <table>
       <tr>
+        <td *ngFor="let col of options.cols;let i = index;">
+          <mat-select (selectionChange)="onOptionsChange()"
+                      [(ngModel)]="options.cols[i]">
+            <mat-option><em>emty</em></mat-option>
+            <mat-option *ngFor="let colOpt of colOpts"
+                        [value]="colOpt.id">
+              {{colOpt.title}}
+            </mat-option>
+          </mat-select>
+        </td>
+      </tr>
+      <tr>
         <th *ngFor="let headlineCol of headlineCols;">{{headlineCol}}</th>
       </tr>
       <tr *ngFor="let row of formattedRows;">
@@ -33,31 +45,7 @@
             Show as text
           </mat-slide-toggle>
         </div>
-        <div>
-          <mat-slide-toggle (change)="onOptionsChange()"
-                            [(ngModel)]="options.isListSubTasks"
-                            aria-label="List sub tasks"
-                            name="isListSubTasks">
-            List sub tasks
-          </mat-slide-toggle>
-        </div>
 
-        <div *ngIf="!isWorklogExport">
-          <mat-slide-toggle (change)="onOptionsChange()"
-                            [(ngModel)]="options.isWorkedOnTodayOnly"
-                            aria-label="List worked on today tasks only"
-                            name="isWorkedOnTodayOnly">
-            List worked on today tasks only
-          </mat-slide-toggle>
-        </div>
-        <div *ngIf="!isWorklogExport">
-          <mat-slide-toggle (change)="onOptionsChange()"
-                            [(ngModel)]="options.isListDoneOnly"
-                            aria-label="List done tasks only"
-                            name="isListDoneOnly">
-            List done tasks only
-          </mat-slide-toggle>
-        </div>
       </div>
       <div class="col">
         <mat-form-field *ngIf="(isWorklogExport)"
@@ -69,7 +57,8 @@
                  name="separateTasksBy"
                  type="text">
         </mat-form-field>
-
+      </div>
+      <div class="col">
         <mat-form-field>
           <label>Round time worked to</label>
           <mat-select (selectionChange)="onOptionsChange()"

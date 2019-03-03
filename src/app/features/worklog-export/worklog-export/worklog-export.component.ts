@@ -4,7 +4,6 @@ import { ProjectService } from '../../project/project.service';
 import { Subscription } from 'rxjs';
 import { WorklogExportSettingsCopy, WorkStartEnd } from '../../project/project.model';
 import { WORKLOG_EXPORT_DEFAULTS } from '../../project/project.const';
-import { SnackService } from '../../../core/snack/snack.service';
 import { getWorklogStr } from '../../../util/get-work-log-str';
 import * as moment from 'moment-mini';
 import { Duration } from 'moment-mini';
@@ -69,6 +68,20 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
     {id: 'QUARTER', title: 'full quarters'},
     {id: 'HALF', title: 'full half hours'},
     {id: 'HOUR', title: 'full hours'},
+  ];
+
+  colOpts = [
+    {id: 'DATE', title: 'Date'},
+    {id: 'START', title: 'Started Working'},
+    {id: 'END', title: 'Ended Working'},
+    {id: 'TITLES', title: 'Main Task Titles'},
+    {id: 'TITLES_INCLUDING_SUB', title: 'Titles and Sub Task Titles'},
+    {id: 'TIME_MS', title: 'Time as milliseconds'},
+    {id: 'TIME_STR', title: 'Time as string (e.g. 5h 23m)'},
+    {id: 'TIME_CLOCK', title: 'Time as clock (e.g. 5:23)'},
+    {id: 'ESTIMATE_MS', title: 'Estimate as milliseconds'},
+    {id: 'ESTIMATE_STR', title: 'Estimate as string (e.g. 5h 23m)'},
+    {id: 'ESTIMATE_CLOCK', title: 'Estimate as clock (e.g. 5:23)'},
   ];
 
   private _subs: Subscription = new Subscription();
@@ -203,6 +216,10 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
   private _formatRows(rows: RowItem[]): (string | number)[][] {
     return rows.map(row => {
       return this.options.cols.map(col => {
+        if (!col) {
+          return;
+        }
+
         let timeSpent = row.timeSpent;
         const timeEstimate = row.timeEstimate;
 
