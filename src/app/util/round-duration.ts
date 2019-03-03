@@ -6,7 +6,7 @@ export const roundDuration = (val: Duration | number, roundTo: RoundTimeOption, 
   let rounded;
   const value = (typeof val === 'number')
     ? moment.duration({millisecond: val})
-    : val;
+    : val as Duration;
 
   switch (roundTo) {
     case 'QUARTER':
