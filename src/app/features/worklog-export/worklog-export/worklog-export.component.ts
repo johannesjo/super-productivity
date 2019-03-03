@@ -61,7 +61,6 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
 
   isShowAsText = false;
   headlineCols: string[] = [];
-  rows: RowItem[] = [];
   formattedRows: (string | number)[][];
   options: WorklogExportSettingsCopy = WORKLOG_EXPORT_DEFAULTS;
   tasksTxt: string;
@@ -112,8 +111,8 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
       }
 
       if (this.tasks) {
-        this.rows = this._createRows(this.tasks, pr.workStart, pr.workEnd);
-        this.formattedRows = this._formatRows(this.rows);
+        const rows = this._createRows(this.tasks, pr.workStart, pr.workEnd);
+        this.formattedRows = this._formatRows(rows);
         // TODO format to csv
 
         this.headlineCols = this.options.cols.map(col => {
@@ -162,7 +161,7 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
   // TODO this can be optimized to a couple of mapping functions
   private _createRows(tasks: TaskWithSubTasks[], startTimes: WorkStartEnd, endTimes: WorkStartEnd): RowItem[] {
     const days: { [key: string]: RowItem } = {};
-    const _mapTaskToDay = (task, dateStr, parentTitle?) => {
+    const _mapTaskToDay = (task, dateStr) => {
       const taskDate = new Date(dateStr);
       let day: RowItem = days[dateStr];
 
@@ -182,24 +181,14 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
           ...days[dateStr],
           timeSpent: day.timeSpent + task.timeSpentOnDay[dateStr],
           timeEstimate: day.timeEstimate + task.timeEstimate,
-          tasks: [...day.tasks, {
-            ...task,
-            parentTitle
-          }],
+          tasks: [...day.tasks, task],
         };
       }
     };
 
     tasks.forEach(task => {
       // TODO find out why there are no sub tasks
-      if (task.subTasks && task.subTasks.length > 0) {
-        task.subTasks.forEach((subTask) => {
-          if (subTask.timeSpentOnDay) {
-            Object.keys(subTask.timeSpentOnDay).forEach(dateStr => {
-              _mapTaskToDay(subTask, dateStr, task.title);
-            });
-          }
-        });
+      if (task.subTaskIds && task.subTaskIds.length > 0) {
       } else {
         if (task.timeSpentOnDay) {
           Object.keys(task.timeSpentOnDay).forEach(dateStr => {
@@ -209,12 +198,16 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
       }
     });
 
+
     const rows = [];
     Object.keys(days).sort().forEach(dateStr => {
-      days[dateStr].titles = unqiue(days[dateStr].tasks.map(t => t.parentTitle || t.title));
       days[dateStr].titlesWithSub = unqiue(days[dateStr].tasks.map(t => t.title));
+      days[dateStr].titles = unqiue(days[dateStr].tasks.map(
+        t => t.parentId && tasks.find(pt_ => pt_.id === t.parentId).title
+      )).filter(title => !!title);
       rows.push(days[dateStr]);
     });
+
     return rows;
   }
 

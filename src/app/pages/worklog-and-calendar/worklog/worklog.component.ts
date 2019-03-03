@@ -3,7 +3,6 @@ import { PersistenceService } from '../../../core/persistence/persistence.servic
 import { ProjectService } from '../../../features/project/project.service';
 import { expandFadeAnimation } from '../../../ui/animations/expand.ani';
 import { mapArchiveToWorklog, Worklog, WorklogDay, WorklogMonth } from '../../../util/map-archive-to-worklog';
-import { DialogSimpleTaskExportComponent } from '../../../features/simple-task-export/dialog-simple-task-export/dialog-simple-task-export.component';
 import { MatDialog } from '@angular/material';
 import { Subscription } from 'rxjs';
 import { Task, TaskCopy } from '../../../features/tasks/task.model';
@@ -156,11 +155,9 @@ export class WorklogComponent implements OnInit, OnDestroy {
 
     dayData.logEntries.forEach((entry) => {
       const task: any = {...entry.task};
-      if (!task.parentId) {
-        task.timeSpent = entry.timeSpent;
-        task.dateStr = dayData.dateStr;
-        tasks.push(task);
-      }
+      task.timeSpent = entry.timeSpent;
+      task.dateStr = dayData.dateStr;
+      tasks.push(task);
     });
 
     return dedupeByKey(tasks, 'id');
