@@ -13,6 +13,7 @@ import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confir
 import { EntityState } from '@ngrx/entity';
 import { dedupeByKey } from '../../../util/de-dupe-by-key';
 import { WeeksInMonth } from '../../../util/get-weeks-in-month';
+import { DialogWorklogExportComponent } from '../../../features/worklog-export/dialog-worklog-export/dialog-worklog-export.component';
 
 const EMPTY_ENTITY = {
   ids: [],
@@ -76,7 +77,7 @@ export class WorklogComponent implements OnInit, OnDestroy {
 
     dateEnd.setHours(23, 59, 59);
 
-    this._matDialog.open(DialogSimpleTaskExportComponent, {
+    this._matDialog.open(DialogWorklogExportComponent, {
       restoreFocus: true,
       panelClass: 'big',
       data: {
