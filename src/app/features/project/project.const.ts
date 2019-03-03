@@ -8,7 +8,6 @@ export const SIMPLE_SUMMARY_DEFAULTS: SimpleSummarySettings = {
   isShowAsText: false,
   isListSubTasks: true,
   isListDoneOnly: false,
-  isMergeToDays: true,
   isWorkedOnTodayOnly: true,
   isShowTitle: true,
   isShowTimeSpent: true,

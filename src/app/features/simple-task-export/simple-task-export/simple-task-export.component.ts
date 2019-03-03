@@ -77,7 +77,7 @@ export class SimpleTaskExportComponent implements OnInit, OnDestroy {
       this.options = val.simpleSummarySettings;
 
       if (this.tasks) {
-        if (this.options.isMergeToDays && this.isWorklogExport) {
+        if (this.isWorklogExport) {
           this.tasksTxt = this._createTasksTextMergedToDays(this.tasks);
         } else {
           this.tasksTxt = this._createTasksText(this.tasks);
@@ -215,9 +215,11 @@ export class SimpleTaskExportComponent implements OnInit, OnDestroy {
       for (let i = 0; i < tasks.length; i++) {
         const task = tasks[i];
         if (
-          (this.isWorklogExport)
-          || (!this.options.isListDoneOnly || task.isDone)
-          && (!this.options.isWorkedOnTodayOnly || this._checkIsWorkedOnToday(task))
+          (
+            (this.isWorklogExport)
+            || (!this.options.isListDoneOnly || task.isDone)
+            && (!this.options.isWorkedOnTodayOnly || this._checkIsWorkedOnToday(task))
+          )
         ) {
           tasksTxt += this._formatTask(task);
           tasksTxt += LINE_SEPARATOR;
@@ -298,7 +300,7 @@ export class SimpleTaskExportComponent implements OnInit, OnDestroy {
       headerCols.push('Estimate');
     }
     if (this.options.isShowTitle) {
-      if (this.options.isMergeToDays && this.isWorklogExport) {
+      if (this.isWorklogExport) {
         headerCols.push('Tasks');
       } else {
         headerCols.push('Title');

@@ -36,14 +36,7 @@
             List sub tasks
           </mat-slide-toggle>
         </div>
-        <div *ngIf="isWorklogExport">
-          <mat-slide-toggle (change)="onOptionsChange()"
-                            [(ngModel)]="options.isMergeToDays"
-                            aria-label="Merge into days"
-                            name="isMergeToDays">
-            Merge into days
-          </mat-slide-toggle>
-        </div>
+
         <div *ngIf="!isWorklogExport">
           <mat-slide-toggle (change)="onOptionsChange()"
                             [(ngModel)]="options.isWorkedOnTodayOnly"
@@ -60,7 +53,7 @@
             List done tasks only
           </mat-slide-toggle>
         </div>
-        <mat-form-field *ngIf="(options.isMergeToDays && isWorklogExport)"
+        <mat-form-field *ngIf="(isWorklogExport)"
                         class="md-block">
           <label>Separate tasks by</label>
           <input (change)="onOptionsChange()"
@@ -144,6 +137,7 @@
 <div mat-dialog-actions=""
      align="center">
   <button mat-raised-button=""
+          *ngIf="options.isShowAsText"
           color="primary"
           id="clipboard-btn"
           data-clipboard-action="copy"
