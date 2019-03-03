@@ -108,6 +108,33 @@ export function projectReducer(
       return projectAdapter.updateOne(payload.project, state);
     }
 
+    case ProjectActionTypes.UpdateProjectWorkStart: {
+      const {id, date, newVal} = action.payload;
+      const oldP = state.entities[id];
+      return projectAdapter.updateOne({
+        id,
+        changes: {
+          workStart: {
+            ...oldP.workStart,
+            [date]: newVal,
+          }
+        }
+      }, state);
+    }
+
+    case ProjectActionTypes.UpdateProjectWorkEnd: {
+      const {id, date, newVal} = action.payload;
+      const oldP = state.entities[id];
+      return projectAdapter.updateOne({
+        id,
+        changes: {
+          workEnd: {
+            ...oldP.workEnd,
+            [date]: newVal,
+          }
+        }
+      }, state);
+    }
 
     case ProjectActionTypes.DeleteProject: {
       return projectAdapter.removeOne(payload.id, state);

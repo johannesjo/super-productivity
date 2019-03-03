@@ -68,6 +68,7 @@ export class GoogleExportTimeComponent implements OnInit, OnDestroy {
   isSpreadSheetRead = false;
 
   private _startedTimeToday: number;
+  private _endTimeToday: number;
   private _totalTimeWorkedToday: number;
   private _todaysTasks: TaskWithSubTasks[];
   private _projectId: string;
@@ -86,6 +87,7 @@ export class GoogleExportTimeComponent implements OnInit, OnDestroy {
         this.opts = {...project.advancedCfg.googleTimeSheetExport};
         this._projectId = project.id;
         this._startedTimeToday = project.workStart[getWorklogStr(new Date())];
+        this._endTimeToday = project.workEnd[getWorklogStr(new Date())];
         this.isSpreadSheetConfigured = this.opts.spreadsheetId && this.opts.spreadsheetId.length > 5;
       });
     this._taskService.todaysTasks$
@@ -215,6 +217,8 @@ export class GoogleExportTimeComponent implements OnInit, OnDestroy {
         return this._getStartTime();
       case '{currentTime}':
         return this._getCurrentTime();
+      case '{endTime}':
+        return this._getEndTime();
       case '{date}':
         return moment().format('MM/DD/YYYY');
       case '{taskTitles}':
@@ -299,6 +303,13 @@ export class GoogleExportTimeComponent implements OnInit, OnDestroy {
   private _getStartTime() {
     const val = moment(this._startedTimeToday);
     const roundTo = this.opts.roundStartTimeTo;
+    return this._roundTime(val, roundTo)
+      .format('HH:mm');
+  }
+
+  private _getEndTime() {
+    const val = moment(this._endTimeToday);
+    const roundTo = this.opts.roundEndTimeTo;
     return this._roundTime(val, roundTo)
       .format('HH:mm');
   }

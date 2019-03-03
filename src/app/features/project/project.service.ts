@@ -141,6 +141,28 @@ export class ProjectService {
     });
   }
 
+  updateWorkStart(id, date: string, newVal) {
+    this._store.dispatch({
+      type: ProjectActionTypes.UpdateProject,
+      payload: {
+        id,
+        date,
+        newVal,
+      }
+    });
+  }
+
+  updateWorkEnd(id, date: string, newVal) {
+    this._store.dispatch({
+      type: ProjectActionTypes.UpdateProject,
+      payload: {
+        id,
+        date,
+        newVal,
+      }
+    });
+  }
+
   updateAdvancedCfg(projectId: string, sectionKey: ProjectAdvancedCfgKey, data: any) {
     this._store.dispatch({
       type: ProjectActionTypes.UpdateProjectAdvancedCfg,

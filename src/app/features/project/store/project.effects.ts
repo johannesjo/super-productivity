@@ -8,7 +8,8 @@ import {
   LoadProjectRelatedDataSuccess,
   ProjectActionTypes,
   UpdateProject,
-  UpdateProjectIssueProviderCfg
+  UpdateProjectIssueProviderCfg,
+  UpdateProjectWorkEnd
 } from './project.actions';
 import { selectCurrentProject, selectCurrentProjectId, selectProjectFeatureState } from './project.reducer';
 import { PersistenceService } from '../../../core/persistence/persistence.service';
@@ -20,6 +21,7 @@ import { IssueService } from '../../issue/issue.service';
 import { SnackService } from '../../../core/snack/snack.service';
 import { SnackOpen } from '../../../core/snack/store/snack.actions';
 import { getWorklogStr } from '../../../util/get-work-log-str';
+import { TaskActionTypes } from '../../tasks/store/task.actions';
 
 // needed because we always want the check request to the jira api to finish first
 const ISSUE_REFRESH_DELAY = 10000;
@@ -35,6 +37,8 @@ export class ProjectEffects {
         ProjectActionTypes.UpdateProject,
         ProjectActionTypes.UpdateProjectAdvancedCfg,
         ProjectActionTypes.UpdateProjectIssueProviderCfg,
+        ProjectActionTypes.UpdateProjectWorkStart,
+        ProjectActionTypes.UpdateProjectWorkEnd,
       ),
       withLatestFrom(
         this._store$.pipe(select(selectProjectFeatureState))
@@ -66,16 +70,27 @@ export class ProjectEffects {
       ),
       filter(([a, projectData]) => !projectData.workStart[getWorklogStr()]),
       map(([a, projectData]) => {
-        return new UpdateProject({
-          project: {
-            id: projectData.id,
-            changes: {
-              workStart: {
-                ...projectData.workStart,
-                [getWorklogStr()]: Date.now()
-              }
-            }
-          }
+        return new UpdateProjectWorkEnd({
+          id: projectData.id,
+          date: getWorklogStr(),
+          newVal: Date.now(),
+        });
+      })
+    );
+
+  @Effect() updateWorkEnd$: any = this._actions$
+    .pipe(
+      ofType(
+        TaskActionTypes.AddTimeSpent,
+      ),
+      withLatestFrom(
+        this._store$.pipe(select(selectCurrentProject))
+      ),
+      map(([a, projectData]) => {
+        return new UpdateProjectWorkEnd({
+          id: projectData.id,
+          date: getWorklogStr(),
+          newVal: Date.now(),
         });
       })
     );

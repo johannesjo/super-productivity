@@ -15,6 +15,8 @@ export enum ProjectActionTypes {
   AddProjects = '[Project] Add Projects',
   UpsertProject = '[Project] Upsert Project',
   UpdateProject = '[Project] Update Project',
+  UpdateProjectWorkStart = '[Project] Update Work Start',
+  UpdateProjectWorkEnd = '[Project] Update Work End',
   UpdateProjectAdvancedCfg = '[Project] Update Project Advanced Cfg',
   UpdateProjectIssueProviderCfg = '[Project] Update Project Issue Provider Cfg',
   DeleteProject = '[Project] Delete Project',
@@ -74,6 +76,21 @@ export class UpdateProject implements Action {
   }
 }
 
+export class UpdateProjectWorkStart implements Action {
+  readonly type = ProjectActionTypes.UpdateProjectWorkStart;
+
+  constructor(public payload: { id: string; date: string; newVal: number; }) {
+  }
+}
+
+
+export class UpdateProjectWorkEnd implements Action {
+  readonly type = ProjectActionTypes.UpdateProjectWorkEnd;
+
+  constructor(public payload: { id: string; date: string; newVal: number; }) {
+  }
+}
+
 export class UpdateProjectAdvancedCfg implements Action {
   readonly type = ProjectActionTypes.UpdateProjectAdvancedCfg;
 
@@ -117,6 +134,8 @@ export type ProjectActions
   | AddProjects
   | UpsertProject
   | UpdateProject
+  | UpdateProjectWorkStart
+  | UpdateProjectWorkEnd
   | UpdateProjectAdvancedCfg
   | UpdateProjectIssueProviderCfg
   | DeleteProject
