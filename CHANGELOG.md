@@ -1,3 +1,19 @@
+## [2.4.5](https://github.com/johannesjo/super-productivity/compare/v2.4.4...v2.4.5) (2019-03-03)
+
+
+### Bug Fixes
+
+* **timeExport:** always use defaults for separator strings ([a0edd2e](https://github.com/johannesjo/super-productivity/commit/a0edd2e))
+* **timeExport:** clipboard button not working ([2b2c1d5](https://github.com/johannesjo/super-productivity/commit/2b2c1d5))
+* **timeExport:** task list export for daily summary ([ac927db](https://github.com/johannesjo/super-productivity/commit/ac927db))
+
+
+### Features
+
+* **timeExport:** always use merge into days for worklog export ([98108ad](https://github.com/johannesjo/super-productivity/commit/98108ad))
+
+
+
 ## [2.4.4](https://github.com/johannesjo/super-productivity/compare/v2.4.3...v2.4.4) (2019-03-02)
 
 
