@@ -43,70 +43,73 @@
   </div>
 
 
-  <section class="options">
-    <div class="row">
-      <div class="col">
-        <div>
-          <mat-slide-toggle (change)="onOptionsChange()"
-                            [(ngModel)]="isShowAsText"
-                            aria-label="Show as text"
-                            name="isShowAsText">
-            Show as text
-          </mat-slide-toggle>
+  <collapsible title="Options"
+               class="options-collapsible">
+    <section class="options">
+      <div class="row">
+        <div class="col">
+          <div>
+            <mat-slide-toggle (change)="onOptionsChange()"
+                              [(ngModel)]="isShowAsText"
+                              aria-label="Show as text"
+                              name="isShowAsText">
+              Show as text
+            </mat-slide-toggle>
+          </div>
+        </div>
+        <div class="col">
+          <mat-form-field *ngIf="(isWorklogExport)"
+                          class="md-block">
+            <label>Separate tasks by</label>
+            <input (change)="onOptionsChange()"
+                   [(ngModel)]="options.separateTasksBy"
+                   matInput=""
+                   name="separateTasksBy"
+                   type="text">
+          </mat-form-field>
+        </div>
+        <div class="col">
+          <mat-form-field>
+            <label>Round time worked to</label>
+            <mat-select (selectionChange)="onOptionsChange()"
+                        [(ngModel)]="options.roundWorkTimeTo">
+              <mat-option><em>don't round</em></mat-option>
+              <mat-option *ngFor="let roundOption of roundTimeOptions"
+                          [value]="roundOption.id">
+                {{roundOption.title}}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+        <div class="col">
+          <mat-form-field>
+            <label>Round start time to</label>
+            <mat-select (selectionChange)="onOptionsChange()"
+                        [(ngModel)]="options.roundStartTimeTo">
+              <mat-option><em>don't round</em></mat-option>
+              <mat-option *ngFor="let roundOption of roundTimeOptions"
+                          [value]="roundOption.id">
+                {{roundOption.title}}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+        <div class="col">
+          <mat-form-field>
+            <label>Round end time to</label>
+            <mat-select (selectionChange)="onOptionsChange()"
+                        [(ngModel)]="options.roundEndTimeTo">
+              <mat-option><em>don't round</em></mat-option>
+              <mat-option *ngFor="let roundOption of roundTimeOptions"
+                          [value]="roundOption.id">
+                {{roundOption.title}}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
         </div>
       </div>
-      <div class="col">
-        <mat-form-field *ngIf="(isWorklogExport)"
-                        class="md-block">
-          <label>Separate tasks by</label>
-          <input (change)="onOptionsChange()"
-                 [(ngModel)]="options.separateTasksBy"
-                 matInput=""
-                 name="separateTasksBy"
-                 type="text">
-        </mat-form-field>
-      </div>
-      <div class="col">
-        <mat-form-field>
-          <label>Round time worked to</label>
-          <mat-select (selectionChange)="onOptionsChange()"
-                      [(ngModel)]="options.roundWorkTimeTo">
-            <mat-option><em>don't round</em></mat-option>
-            <mat-option *ngFor="let roundOption of roundTimeOptions"
-                        [value]="roundOption.id">
-              {{roundOption.title}}
-            </mat-option>
-          </mat-select>
-        </mat-form-field>
-      </div>
-      <div class="col">
-        <mat-form-field>
-          <label>Round start time to</label>
-          <mat-select (selectionChange)="onOptionsChange()"
-                      [(ngModel)]="options.roundStartTimeTo">
-            <mat-option><em>don't round</em></mat-option>
-            <mat-option *ngFor="let roundOption of roundTimeOptions"
-                        [value]="roundOption.id">
-              {{roundOption.title}}
-            </mat-option>
-          </mat-select>
-        </mat-form-field>
-      </div>
-      <div class="col">
-        <mat-form-field>
-          <label>Round end time to</label>
-          <mat-select (selectionChange)="onOptionsChange()"
-                      [(ngModel)]="options.roundEndTimeTo">
-            <mat-option><em>don't round</em></mat-option>
-            <mat-option *ngFor="let roundOption of roundTimeOptions"
-                        [value]="roundOption.id">
-              {{roundOption.title}}
-            </mat-option>
-          </mat-select>
-        </mat-form-field>
-      </div>
-    </div>
-  </section>
+    </section>
+  </collapsible>
 </div>
 
 
