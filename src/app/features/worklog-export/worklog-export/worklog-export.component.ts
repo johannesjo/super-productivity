@@ -6,11 +6,12 @@ import { WorklogExportSettingsCopy, WorkStartEnd } from '../../project/project.m
 import { WORKLOG_EXPORT_DEFAULTS } from '../../project/project.const';
 import { getWorklogStr } from '../../../util/get-work-log-str';
 import * as moment from 'moment-mini';
-import { Duration } from 'moment-mini';
 import 'moment-duration-format';
 import { unqiue } from '../../../util/unique';
 import { msToString } from '../../../ui/duration/ms-to-string.pipe';
 import { msToClockString } from '../../../ui/duration/ms-to-clock-string.pipe';
+import { roundTime } from '../../../util/round-time';
+import { roundDuration } from '../../../util/round-duration';
 
 const CSV_EXPORT_SETTINGS = {
   separateTasksBy: '',
@@ -26,6 +27,7 @@ const CSV_EXPORT_SETTINGS = {
 };
 
 const LINE_SEPARATOR = '\n';
+const EMPTY_VAL = ' - ';
 
 interface TaskWithParentTitle extends TaskCopy {
   parentTitle?: string;
@@ -224,25 +226,30 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
         if (!col) {
           return;
         }
+        const timeSpent = (this.options.roundWorkTimeTo)
+          ? roundDuration(row.timeSpent, this.options.roundWorkTimeTo, true).asMilliseconds()
+          : row.timeSpent;
 
-        let timeSpent = row.timeSpent;
-        const timeEstimate = row.timeEstimate;
-
-        if (this.options.roundWorkTimeTo) {
-          timeSpent = this._roundDuration(timeSpent, this.options.roundWorkTimeTo, true).asMilliseconds();
-        }
-
-        // if (this.options.roundWorkTimeTo) {
-        //   timeEstimate = this._roundDuration(timeEstimate, this.options.roundWorkTimeTo, true).asMilliseconds();
-        // }
 
         switch (col) {
           case 'DATE':
             return row.date;
           case 'START':
-            return row.workStart;
+            return (row.workStart)
+              ? moment(
+                (this.options.roundStartTimeTo)
+                  ? roundTime(row.workStart, this.options.roundStartTimeTo)
+                  : row.workStart
+              ).format('HH:mm')
+              : EMPTY_VAL;
           case 'END':
-            return row.workEnd;
+            return (row.workEnd)
+              ? moment(
+                (this.options.roundEndTimeTo && row.workEnd)
+                  ? roundTime(row.workEnd, this.options.roundEndTimeTo)
+                  : row.workEnd
+              ).format('HH:mm')
+              : EMPTY_VAL;
           case 'TITLES':
             return row.titles.join(this.options.separateTasksBy || ' | ');
           case 'TITLES_INCLUDING_SUB':
@@ -254,45 +261,15 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
           case 'TIME_CLOCK':
             return msToClockString(timeSpent);
           case 'ESTIMATE_MS':
-            return timeEstimate;
+            return row.timeEstimate;
           case 'ESTIMATE_STR':
-            return msToString(timeEstimate);
+            return msToString(row.timeEstimate);
           case 'ESTIMATE_CLOCK':
-            return msToClockString(timeEstimate);
+            return msToClockString(row.timeEstimate);
+          default:
+            return EMPTY_VAL;
         }
       });
     });
-  }
-
-
-  private _roundDuration(ms: number, roundTo, isRoundUp): Duration {
-    let rounded;
-    const value = moment.duration(ms);
-
-    switch (roundTo) {
-      case 'QUARTER':
-        rounded = Math.round(value.asMinutes() / 15) * 15;
-        if (isRoundUp) {
-          rounded = Math.ceil(value.asMinutes() / 15) * 15;
-        }
-        return moment.duration({minutes: rounded});
-
-      case 'HALF':
-        rounded = Math.round(value.asMinutes() / 30) * 30;
-        if (isRoundUp) {
-          rounded = Math.ceil(value.asMinutes() / 30) * 30;
-        }
-        return moment.duration({minutes: rounded});
-
-      case 'HOUR':
-        rounded = Math.round(value.asMinutes() / 60) * 60;
-        if (isRoundUp) {
-          rounded = Math.ceil(value.asMinutes() / 60) * 60;
-        }
-        return moment.duration({minutes: rounded});
-
-      default:
-        return value;
-    }
   }
 }

@@ -58,7 +58,8 @@ export type WorklogColTypes =
 
 export interface WorklogExportSettingsCopy {
   roundWorkTimeTo: RoundTimeOption;
-  roundStartEndTimeTo: RoundTimeOption;
+  roundStartTimeTo: RoundTimeOption;
+  roundEndTimeTo: RoundTimeOption;
   separateTasksBy: string;
   cols: WorklogColTypes[];
 }

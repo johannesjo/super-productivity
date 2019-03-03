@@ -79,6 +79,32 @@
           </mat-select>
         </mat-form-field>
       </div>
+      <div class="col">
+        <mat-form-field>
+          <label>Round start time to</label>
+          <mat-select (selectionChange)="onOptionsChange()"
+                      [(ngModel)]="options.roundStartTimeTo">
+            <mat-option><em>don't round</em></mat-option>
+            <mat-option *ngFor="let roundOption of roundTimeOptions"
+                        [value]="roundOption.id">
+              {{roundOption.title}}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+      <div class="col">
+        <mat-form-field>
+          <label>Round end time to</label>
+          <mat-select (selectionChange)="onOptionsChange()"
+                      [(ngModel)]="options.roundEndTimeTo">
+            <mat-option><em>don't round</em></mat-option>
+            <mat-option *ngFor="let roundOption of roundTimeOptions"
+                        [value]="roundOption.id">
+              {{roundOption.title}}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
     </div>
   </section>
 </div>

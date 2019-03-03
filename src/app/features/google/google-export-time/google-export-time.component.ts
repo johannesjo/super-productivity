@@ -7,7 +7,7 @@ import {
   OnInit,
   Output
 } from '@angular/core';
-import { GoogleTimeSheetExportCopy, Project } from '../../project/project.model';
+import { GoogleTimeSheetExportCopy, Project, RoundTimeOption } from '../../project/project.model';
 import { TaskWithSubTasks } from '../../tasks/task.model';
 import { Subject } from 'rxjs';
 import { GoogleApiService } from '../google-api.service';
@@ -232,7 +232,7 @@ export class GoogleExportTimeComponent implements OnInit, OnDestroy {
     }
   }
 
-  private _roundDuration(value: Duration, roundTo, isRoundUp): Duration {
+  private _roundDuration(value: Duration, roundTo: RoundTimeOption, isRoundUp): Duration {
     let rounded;
 
     switch (roundTo) {
@@ -262,7 +262,7 @@ export class GoogleExportTimeComponent implements OnInit, OnDestroy {
     }
   }
 
-  private _roundTime(value: Moment, roundTo, isRoundUp = false): Moment {
+  private _roundTime(value: Moment, roundTo: RoundTimeOption, isRoundUp = false): Moment {
     let rounded;
 
     switch (roundTo) {
