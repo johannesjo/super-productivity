@@ -9,6 +9,8 @@ import { IPC_SHOW_OR_FOCUS } from '../../../../electron/ipc-events.const';
 import { DialogViewNoteReminderComponent } from '../note/dialog-view-note-reminder/dialog-view-note-reminder.component';
 import { TasksModule } from '../tasks/tasks.module';
 import { DialogViewTaskReminderComponent } from '../tasks/dialog-view-task-reminder/dialog-view-task-reminder.component';
+import { filter } from 'rxjs/operators';
+import { Reminder } from './reminder.model';
 
 @NgModule({
   declarations: [],
@@ -25,40 +27,30 @@ export class ReminderModule {
     private readonly _electronService: ElectronService,
   ) {
     _reminderService.init();
-
-    let isDialogOpen = false;
-
-    this._reminderService.onReminderActive$.subscribe(reminder => {
+    this._reminderService.onReminderActive$.pipe(
+      // NOTE: we simply filter for open dialogs, as reminders are re-queried quite often
+      filter((reminder) => this._matDialog.openDialogs.length === 0 && !!reminder),
+    ).subscribe((reminder: Reminder) => {
       if (IS_ELECTRON) {
         this._electronService.ipcRenderer.send(IPC_SHOW_OR_FOCUS);
       }
 
-      if (!isDialogOpen && reminder) {
-        if (reminder.type === 'NOTE') {
-          isDialogOpen = true;
-          this._matDialog.open(DialogViewNoteReminderComponent, {
-            autoFocus: false,
-            restoreFocus: true,
-            data: {
-              reminder: reminder,
-            }
-          }).afterClosed()
-            .subscribe(() => {
-              isDialogOpen = false;
-            });
-        } else if (reminder.type === 'TASK') {
-          isDialogOpen = true;
-          this._matDialog.open(DialogViewTaskReminderComponent, {
-            autoFocus: false,
-            restoreFocus: true,
-            data: {
-              reminder: reminder,
-            }
-          }).afterClosed()
-            .subscribe(() => {
-              isDialogOpen = false;
-            });
-        }
+      if (reminder.type === 'NOTE') {
+        this._matDialog.open(DialogViewNoteReminderComponent, {
+          autoFocus: false,
+          restoreFocus: true,
+          data: {
+            reminder: reminder,
+          }
+        });
+      } else if (reminder.type === 'TASK') {
+        this._matDialog.open(DialogViewTaskReminderComponent, {
+          autoFocus: false,
+          restoreFocus: true,
+          data: {
+            reminder: reminder,
+          }
+        }).afterClosed();
       }
     });
   }
