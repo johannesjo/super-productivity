@@ -143,7 +143,7 @@ export class ProjectService {
 
   updateWorkStart(id, date: string, newVal) {
     this._store.dispatch({
-      type: ProjectActionTypes.UpdateProject,
+      type: ProjectActionTypes.UpdateProjectWorkStart,
       payload: {
         id,
         date,
@@ -154,7 +154,7 @@ export class ProjectService {
 
   updateWorkEnd(id, date: string, newVal) {
     this._store.dispatch({
-      type: ProjectActionTypes.UpdateProject,
+      type: ProjectActionTypes.UpdateProjectWorkEnd,
       payload: {
         id,
         date,

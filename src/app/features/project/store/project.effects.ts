@@ -9,7 +9,8 @@ import {
   ProjectActionTypes,
   UpdateProject,
   UpdateProjectIssueProviderCfg,
-  UpdateProjectWorkEnd
+  UpdateProjectWorkEnd,
+  UpdateProjectWorkStart
 } from './project.actions';
 import { selectCurrentProject, selectCurrentProjectId, selectProjectFeatureState } from './project.reducer';
 import { PersistenceService } from '../../../core/persistence/persistence.service';
@@ -63,14 +64,14 @@ export class ProjectEffects {
     .pipe(
       ofType(
         ProjectActionTypes.LoadProjectState,
-        ProjectActionTypes.SetCurrentProject,
+        ProjectActionTypes.LoadProjectRelatedDataSuccess,
       ),
       withLatestFrom(
         this._store$.pipe(select(selectCurrentProject))
       ),
       filter(([a, projectData]) => !projectData.workStart[getWorklogStr()]),
       map(([a, projectData]) => {
-        return new UpdateProjectWorkEnd({
+        return new UpdateProjectWorkStart({
           id: projectData.id,
           date: getWorklogStr(),
           newVal: Date.now(),
