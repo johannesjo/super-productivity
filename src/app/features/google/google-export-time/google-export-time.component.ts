@@ -7,7 +7,7 @@ import {
   OnInit,
   Output
 } from '@angular/core';
-import { GoogleTimeSheetExportCopy, Project, RoundTimeOption } from '../../project/project.model';
+import { GoogleTimeSheetExportCopy, Project } from '../../project/project.model';
 import { TaskWithSubTasks } from '../../tasks/task.model';
 import { Subject } from 'rxjs';
 import { GoogleApiService } from '../google-api.service';
@@ -16,13 +16,14 @@ import { TaskService } from '../../tasks/task.service';
 import { SnackService } from '../../../core/snack/snack.service';
 import { takeUntil } from 'rxjs/operators';
 import * as moment from 'moment-mini';
-import { Duration, Moment } from 'moment-mini';
 import { expandAnimation } from '../../../ui/animations/expand.ani';
 import 'moment-duration-format';
 import { msToClockString } from '../../../ui/duration/ms-to-clock-string.pipe';
 import { loadFromSessionStorage, saveToSessionStorage } from '../../../core/persistence/local-storage';
 import { SS_GOOGLE_TIME_SUBMITTED } from '../../../core/persistence/ls-keys.const';
 import { getWorklogStr } from '../../../util/get-work-log-str';
+import { momentRoundTime } from '../../../util/round-time';
+import { roundDuration } from '../../../util/round-duration';
 
 // TODO refactor to Observables
 @Component({
@@ -232,66 +233,6 @@ export class GoogleExportTimeComponent implements OnInit, OnDestroy {
     }
   }
 
-  private _roundDuration(value: Duration, roundTo: RoundTimeOption, isRoundUp): Duration {
-    let rounded;
-
-    switch (roundTo) {
-      case 'QUARTER':
-        rounded = Math.round(value.asMinutes() / 15) * 15;
-        if (isRoundUp) {
-          rounded = Math.ceil(value.asMinutes() / 15) * 15;
-        }
-        return moment.duration({minutes: rounded});
-
-      case 'HALF':
-        rounded = Math.round(value.asMinutes() / 30) * 30;
-        if (isRoundUp) {
-          rounded = Math.ceil(value.asMinutes() / 30) * 30;
-        }
-        return moment.duration({minutes: rounded});
-
-      case 'HOUR':
-        rounded = Math.round(value.asMinutes() / 60) * 60;
-        if (isRoundUp) {
-          rounded = Math.ceil(value.asMinutes() / 60) * 60;
-        }
-        return moment.duration({minutes: rounded});
-
-      default:
-        return value;
-    }
-  }
-
-  private _roundTime(value: Moment, roundTo: RoundTimeOption, isRoundUp = false): Moment {
-    let rounded;
-
-    switch (roundTo) {
-      case 'QUARTER':
-        rounded = Math.round(value.minute() / 15) * 15;
-        if (isRoundUp) {
-          rounded = Math.ceil(value.minute() / 15) * 15;
-        }
-        return value.minute(rounded).second(0);
-
-      case 'HALF':
-        rounded = Math.round(value.minute() / 30) * 30;
-        if (isRoundUp) {
-          rounded = Math.ceil(value.minute() / 30) * 30;
-        }
-        return value.minute(rounded).second(0);
-
-      case 'HOUR':
-        rounded = Math.round(value.minute() / 60) * 60;
-        if (isRoundUp) {
-          rounded = Math.ceil(value.minute() / 60) * 60;
-        }
-        return value.minute(rounded).second(0);
-
-      default:
-        return value;
-    }
-  }
-
   private _getCustomDate(dVal: string): string {
     const dateFormatStr = dVal
       .replace('{date:', '')
@@ -303,14 +244,14 @@ export class GoogleExportTimeComponent implements OnInit, OnDestroy {
   private _getStartTime() {
     const val = moment(this._startedTimeToday);
     const roundTo = this.opts.roundStartTimeTo;
-    return this._roundTime(val, roundTo)
+    return momentRoundTime(val, roundTo)
       .format('HH:mm');
   }
 
   private _getEndTime() {
     const val = moment(this._endTimeToday);
     const roundTo = this.opts.roundEndTimeTo;
-    return this._roundTime(val, roundTo)
+    return momentRoundTime(val, roundTo)
       .format('HH:mm');
   }
 
@@ -318,14 +259,14 @@ export class GoogleExportTimeComponent implements OnInit, OnDestroy {
     const val = moment();
     const roundTo = this.opts.roundEndTimeTo;
 
-    return this._roundTime(val, roundTo)
+    return momentRoundTime(val, roundTo)
       .format('HH:mm');
   }
 
   private _getTotalTimeWorked(): string {
     const val = moment.duration(this._totalTimeWorkedToday);
     const roundTo = this.opts.roundWorkTimeTo;
-    const dur = this._roundDuration(val, roundTo, this.opts.isRoundWorkTimeUp) as any;
+    const dur = roundDuration(val, roundTo, this.opts.isRoundWorkTimeUp);
     return msToClockString(dur.as('milliseconds'));
   }
 
