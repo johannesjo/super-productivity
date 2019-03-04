@@ -108,7 +108,6 @@ export class ReminderService {
   private _onReminderActivated(msg: MessageEvent) {
     const reminder = msg.data as Reminder;
     // TODO get related model here
-console.log('REMINDER ACTIVATED');
     // only show when not currently syncing
     if (!this._imexMetaService.isDataImportInProgress) {
       this.onReminderActive$.next(reminder);
