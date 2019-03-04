@@ -37,7 +37,7 @@
           </mat-slide-toggle>
         </div>
 
-        <div *ngIf="!isWorklogExport">
+        <div>
           <mat-slide-toggle (change)="onOptionsChange()"
                             [(ngModel)]="options.isWorkedOnTodayOnly"
                             aria-label="List worked on today tasks only"
@@ -45,7 +45,7 @@
             List worked on today tasks only
           </mat-slide-toggle>
         </div>
-        <div *ngIf="!isWorklogExport">
+        <div>
           <mat-slide-toggle (change)="onOptionsChange()"
                             [(ngModel)]="options.isListDoneOnly"
                             aria-label="List done tasks only"
@@ -53,15 +53,6 @@
             List done tasks only
           </mat-slide-toggle>
         </div>
-        <mat-form-field *ngIf="(isWorklogExport)"
-                        class="md-block">
-          <label>Separate tasks by</label>
-          <input (change)="onOptionsChange()"
-                 [(ngModel)]="options.separateTasksBy"
-                 matInput=""
-                 name="separateTasksBy"
-                 type="text">
-        </mat-form-field>
 
         <mat-form-field>
           <label>Round time worked to</label>
@@ -153,7 +144,6 @@
     Save to file
   </a>
   <button mat-raised-button=""
-          *ngIf="isShowClose"
           (click)="onCancelClick()"
           type="button">
     <mat-icon>close</mat-icon>
