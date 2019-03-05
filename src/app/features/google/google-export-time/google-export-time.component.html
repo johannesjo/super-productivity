@@ -30,8 +30,12 @@
             class="heading"></th>
       </tr>
       <tr>
-        <th>Last saved row</th>
-        <td *ngFor="let col of lastRow">{{col}}</td>
+        <th style="white-space: normal">Last saved row</th>
+        <td *ngFor="let col of lastRow">
+          <div class="inner-cell">
+            {{col}}
+          </div>
+        </td>
       </tr>
       <tr>
         <th>Default</th>

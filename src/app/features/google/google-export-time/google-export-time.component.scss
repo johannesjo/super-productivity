@@ -85,6 +85,8 @@ table {
   th,
   td {
     padding: 0 1px;
+    max-height: $s*10;
+    min-height: 50px;
   }
 
   th,
@@ -99,6 +101,12 @@ table {
     &:last-child {
       padding-right: 0;
     }
+  }
+
+  .inner-cell {
+    max-height: $s*14;
+    display: inline-block;
+    overflow-y: auto;
   }
 }
 
