@@ -129,6 +129,9 @@ export const selectTodaysDoneTasksWithSubTasks = createSelector(
 export const selectEstimateRemainingForToday = createSelector(selectTodaysTasksWithSubTasks, mapEstimateRemaining);
 export const selectEstimateRemainingForBacklog = createSelector(selectBacklogTasksWithSubTasks, mapEstimateRemaining);
 export const selectTotalTimeWorkedOnTodaysTasks = createSelector(selectTodaysTasksWithSubTasks, mapTotalTimeWorked);
+export const selectEstimatedOnTasksWorkedOnToday$ = createSelector(selectTodaysTasksWithSubTasks, mapTotalTimeWorked);
+
+
 
 export const selectFocusTaskId = createSelector(selectTaskFeatureState, state => state.focusTaskId);
 

@@ -46,6 +46,7 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
 
   // calc total time spent on todays tasks
   totalTimeSpentTasks$ = this._taskService.totalTimeWorkedOnTodaysTasks$;
+  estimatedOnTasksWorkedOnToday$ = this._taskService.estimatedOnTasksWorkedOnToday$;
   // use mysql date as it is sortable
   workingToday$ = this._taskService.workingToday$;
 

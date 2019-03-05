@@ -1,5 +1,5 @@
 import shortid from 'shortid';
-import { debounceTime, delay, distinctUntilChanged, first, map, shareReplay, take, withLatestFrom } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, first, map, shareReplay, take, withLatestFrom } from 'rxjs/operators';
 import { Injectable } from '@angular/core';
 import { combineLatest, Observable } from 'rxjs';
 import {
@@ -168,14 +168,15 @@ export class TaskService {
 
   // META FIELDS
   // -----------
-  estimateRemainingToday$: Observable<any> = this._store.pipe(
+  estimateRemainingToday$: Observable<number> = this._store.pipe(
     select(selectEstimateRemainingForToday),
     distinctUntilChanged(),
   );
-  estimateRemainingBacklog$: Observable<any> = this._store.pipe(
+  estimateRemainingBacklog$: Observable<number> = this._store.pipe(
     select(selectEstimateRemainingForBacklog),
     distinctUntilChanged(),
   );
+
   totalTimeWorkedOnTodaysTasks$: Observable<any> = this._store.pipe(
     select(selectTotalTimeWorkedOnTodaysTasks),
     distinctUntilChanged(),
@@ -184,20 +185,41 @@ export class TaskService {
     map((task) => task && task.timeEstimate > 0 && task.timeSpent / task.timeEstimate)
   );
 
-  // TODO could be more efficient than using combine latest
+  // TODO could be done as a dynamic selector
   workingToday$: Observable<any> = this.todaysTasks$.pipe(
     map((tasks) => {
       const date = getWorklogStr();
       return tasks && tasks.length && tasks.reduce((acc, task) => {
           return acc + (
             (task.timeSpentOnDay && +task.timeSpentOnDay[date])
-              ? +task.timeSpentOnDay[date] : 0
+              ? +task.timeSpentOnDay[date]
+              : 0
           );
         }, 0
       );
     }),
-    // throttleTime(50)
+    distinctUntilChanged(),
   );
+
+  // TODO could be done as a dynamic selector
+  estimatedOnTasksWorkedOnToday$: Observable<number> = this.todaysTasks$.pipe(
+    map((tasks) => {
+      const date = getWorklogStr();
+      return tasks && tasks.length && tasks.reduce((acc, task) => {
+          if (!task.timeSpentOnDay && !(task.timeSpentOnDay[date] > 0)) {
+            return acc;
+          }
+          const remainingEstimate = task.timeEstimate + (task.timeSpentOnDay[date]) - task.timeSpent;
+          return (remainingEstimate > 0)
+            ? acc + remainingEstimate
+            : acc;
+        }, 0
+      );
+    }),
+    distinctUntilChanged(),
+  );
+
+
   tasksWithMissingIssueData$: Observable<TaskWithIssueData[]> = this._store.pipe(
     // wait for issue model to be loaded
     debounceTime(1000),

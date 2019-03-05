@@ -1,9 +1,9 @@
 <div class="page-wrapper">
   <div style="text-align: center;">
     <a aria-label="Work View"
-            class="back-btn"
-            mat-raised-button=""
-            routerLink="/work-view">
+       class="back-btn"
+       mat-raised-button=""
+       routerLink="/work-view">
       <mat-icon>chevron_left</mat-icon>
       Wait I forgot something!
       <!--<mat-icon>playlist_play</mat-icon>-->
@@ -21,17 +21,19 @@
         </div>
       </div>
     </div>
-    <div class="summary-point">
+    <div class="summary-point"
+         title="Total time spent today. Archived tasks not included.">
       <mat-icon>timer</mat-icon>
       <div class="summary-text">Total time spent today:
         <div [innerHtml]="workingToday$|async|msToString"
              class="summary-val"></div>
       </div>
     </div>
-    <div class="summary-point">
+    <div class="summary-point"
+         title="Time estimated for tasks worked on today minus the time already spent with them on other days.">
       <mat-icon>timer</mat-icon>
-      <div class="summary-text">Total time spent on today's task:
-        <div [innerHtml]="totalTimeSpentTasks$|async|msToString"
+      <div class="summary-text">Time estimated:
+        <div [innerHtml]="estimatedOnTasksWorkedOnToday$|async|msToString"
              class="summary-val"></div>
       </div>
     </div>
@@ -40,7 +42,7 @@
   <mat-tab-group (selectedIndexChange)="onTabIndexChange($event)"
                  [selectedIndex]="selectedTabIndex"
                  dynamicHeight>
-    <mat-tab label="Note for tomorrow">
+    <mat-tab label="Note">
       <section class="tab-inner">
         <p>This is meant to be a takeaway to be even more productive and happy tomorrow. E.g.: What did you learn today?
           What do you want to do better/smarter tomorrow? What do you want to achieve and why?</p>
@@ -52,7 +54,7 @@
       </section>
     </mat-tab>
 
-    <mat-tab label="Task List">
+    <mat-tab label="Tasks">
       <section class="tab-inner">
         <table mat-table
                [dataSource]="todaysTasksFlat$|async"
@@ -128,7 +130,7 @@
       </section>
     </mat-tab>
 
-    <mat-tab label="Google Sheet Export">
+    <mat-tab label="Google Sheet">
       <section class="tab-inner">
         <google-export-time></google-export-time>
       </section>
@@ -138,13 +140,6 @@
 
   <section class="daily-summary-actions">
     <div class="bottom-buttons">
-      <!--<button mat-raised-button=""-->
-      <!--[color]="cfg.isBlockFinishDayUntilTimeTimeTracked && !isTimeSheetExported && 'accent' ||'primary'"-->
-      <!--(click)="showTimeSheetExportModal()">-->
-      <!--<mat-icon>call_made</mat-icon>-->
-      <!--<mat-icon>timer</mat-icon>-->
-      <!--Export To Time Sheet-->
-      <!--</button>-->
       <button (click)="finishDay()"
               [disabled]="cfg.isBlockFinishDayUntilTimeTimeTracked && !isTimeSheetExported"
               color="primary"
@@ -153,16 +148,6 @@
         Save and go home
       </button>
     </div>
-    <!--<div class="finish-day-opts">-->
-    <!--<mat-checkbox [(ngModel)]="clearDoneTasks"-->
-    <!--aria-label="Clear done tasks">-->
-    <!--Clear done tasks (Move to Done-Backlog)-->
-    <!--</mat-checkbox>-->
-    <!--<mat-checkbox [(ngModel)]="moveUnfinishedToBacklog"-->
-    <!--aria-label="Move unfinished tasks to backlog">-->
-    <!--Move unfinished tasks back to backlog-->
-    <!--</mat-checkbox>-->
-    <!--</div>-->
   </section>
 </div>
 
