@@ -1,4 +1,5 @@
 import { RoundTimeOption } from '../features/project/project.model';
+import { Moment } from 'moment-mini';
 
 export const roundTime = (val: number | Date, roundTo: RoundTimeOption, isRoundUp = false): Date => {
   const value = (typeof val === 'number')
@@ -29,6 +30,36 @@ export const roundTime = (val: number | Date, roundTo: RoundTimeOption, isRoundU
       }
       value.setMinutes(rounded, 0, 0);
       return value;
+    default:
+      return value;
+  }
+};
+
+export const momentRoundTime = (value: Moment, roundTo: RoundTimeOption, isRoundUp = false): Moment => {
+  let rounded;
+
+  switch (roundTo) {
+    case 'QUARTER':
+      rounded = Math.round(value.minute() / 15) * 15;
+      if (isRoundUp) {
+        rounded = Math.ceil(value.minute() / 15) * 15;
+      }
+      return value.minute(rounded).second(0);
+
+    case 'HALF':
+      rounded = Math.round(value.minute() / 30) * 30;
+      if (isRoundUp) {
+        rounded = Math.ceil(value.minute() / 30) * 30;
+      }
+      return value.minute(rounded).second(0);
+
+    case 'HOUR':
+      rounded = Math.round(value.minute() / 60) * 60;
+      if (isRoundUp) {
+        rounded = Math.ceil(value.minute() / 60) * 60;
+      }
+      return value.minute(rounded).second(0);
+
     default:
       return value;
   }

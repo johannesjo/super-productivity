@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Inject, OnDestroy } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material';
 import { Reminder } from '../../reminder/reminder.model';
 import { Note } from '../note.model';
@@ -14,7 +14,7 @@ import { Project } from '../../project/project.model';
   styleUrls: ['./dialog-view-note-reminder.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class DialogViewNoteReminderComponent {
+export class DialogViewNoteReminderComponent implements OnDestroy {
   note$: Observable<Note> = this._noteService.getById(this.data.reminder.relatedId);
   reminder: Reminder = this.data.reminder;
   isForCurrentProject = (this.reminder.projectId === this._projectService.currentId);
@@ -33,6 +33,10 @@ export class DialogViewNoteReminderComponent {
     this._subs.add(this._reminderService.onReloadModel$.subscribe(() => {
       this.close();
     }));
+  }
+
+  ngOnDestroy(): void {
+    this._subs.unsubscribe();
   }
 
   dismiss() {

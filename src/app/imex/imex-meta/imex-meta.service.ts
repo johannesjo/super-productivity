@@ -1,13 +1,13 @@
 import { Injectable } from '@angular/core';
-import { Observable, ReplaySubject } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ImexMetaService {
-  private _isDataImportInProgress$ = new ReplaySubject<boolean>();
+  private _isDataImportInProgress$ = new BehaviorSubject<boolean>(false);
   isDataImportInProgress$: Observable<boolean> = this._isDataImportInProgress$.asObservable();
-  isDataImportInProgress: boolean = false;
+  isDataImportInProgress = false;
 
   constructor() {
     this.isDataImportInProgress$.subscribe((val) => this.isDataImportInProgress = val);

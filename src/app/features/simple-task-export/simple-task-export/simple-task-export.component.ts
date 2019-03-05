@@ -8,26 +8,11 @@ import { SIMPLE_SUMMARY_DEFAULTS } from '../../project/project.const';
 import Clipboard from 'clipboard';
 import { SnackService } from '../../../core/snack/snack.service';
 import { getWorklogStr } from '../../../util/get-work-log-str';
-import { unqiue } from '../../../util/unique';
 import * as moment from 'moment-mini';
-import { Duration } from 'moment-mini';
 import 'moment-duration-format';
-
-const CSV_EXPORT_SETTINGS = {
-  separateTasksBy: '',
-  separateFieldsBy: ';',
-  isUseNewLine: true,
-  isListSubTasks: true,
-  isListDoneOnly: false,
-  isWorkedOnTodayOnly: true,
-  showTitle: true,
-  showTimeSpent: true,
-  isTimeSpentAsMilliseconds: true,
-  showDate: false
-};
+import { roundDuration } from '../../../util/round-duration';
 
 const LINE_SEPARATOR = '\n';
-
 
 @Component({
   selector: 'simple-task-export',
@@ -37,10 +22,6 @@ const LINE_SEPARATOR = '\n';
 })
 export class SimpleTaskExportComponent implements OnInit, OnDestroy {
   @Input() tasks: any[];
-  @Input() dateStart: Date;
-  @Input() dateEnd: Date;
-  @Input() isWorklogExport: boolean;
-  @Input() isShowClose: boolean;
 
   @Output() cancel = new EventEmitter();
 
@@ -63,26 +44,11 @@ export class SimpleTaskExportComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    if (this.dateStart && this.dateEnd) {
-      this.fileName
-        = 'tasks'
-        + getWorklogStr(this.dateStart)
-        + '-'
-        + getWorklogStr(this.dateEnd)
-        + '.csv'
-      ;
-    }
-
     this._subs.add(this._projectService.advancedCfg$.subscribe((val) => {
       this.options = val.simpleSummarySettings;
 
       if (this.tasks) {
-        if (this.isWorklogExport) {
-          this.tasksTxt = this._createTasksTextMergedToDays(this.tasks);
-        } else {
-          this.tasksTxt = this._createTasksText(this.tasks);
-        }
-
+        this.tasksTxt = this._createTasksText(this.tasks);
         this.tasksHtml = this._parseToTable(this.tasksTxt);
       }
     }));
@@ -121,7 +87,7 @@ export class SimpleTaskExportComponent implements OnInit, OnDestroy {
       let timeSpent = task.timeSpent;
       if (this.options.roundWorkTimeTo) {
         const val = moment.duration(task.timeSpent);
-        timeSpent = this._roundDuration(val, this.options.roundWorkTimeTo, true).asMilliseconds();
+        timeSpent = roundDuration(val, this.options.roundWorkTimeTo, true).asMilliseconds();
       }
 
       taskTxt += this.options.isTimesAsMilliseconds
@@ -152,62 +118,6 @@ export class SimpleTaskExportComponent implements OnInit, OnDestroy {
     return taskTxt;
   }
 
-  private _createTasksTextMergedToDays(tasks: TaskWithSubTasks[]) {
-    const _mapTaskToDay = (task, dateStr, parentTitle?) => {
-      const taskDate = new Date(dateStr);
-      let day = days[dateStr];
-      if (taskDate >= this.dateStart && taskDate < this.dateEnd) {
-
-        if (!day) {
-          day = days[dateStr] = {
-            timeSpent: 0,
-            timeEstimate: 0,
-            tasks: []
-          };
-        }
-        days[dateStr] = {
-          timeSpent: day.timeSpent + task.timeSpentOnDay[dateStr],
-          timeEstimate: day.timeSpent + task.timeEstimate,
-          tasks: [...day.tasks, {...task, parentTitle}],
-        };
-      }
-    };
-
-    const days = {};
-    let tasksTxt = '';
-
-    tasks.forEach(task => {
-      if (task.subTasks && task.subTasks.length > 0) {
-        task.subTasks.forEach((subTask) => {
-          if (subTask.timeSpentOnDay) {
-            Object.keys(subTask.timeSpentOnDay).forEach(dateStr => {
-              _mapTaskToDay(subTask, dateStr, task.title);
-            });
-          }
-        });
-      } else {
-        if (task.timeSpentOnDay) {
-          Object.keys(task.timeSpentOnDay).forEach(dateStr => {
-            _mapTaskToDay(task, dateStr);
-          });
-        }
-      }
-    });
-    Object.keys(days).sort().forEach(dateStr => {
-      days[dateStr].dateStr = dateStr;
-      days[dateStr].title = unqiue(days[dateStr].tasks.map(t => {
-        return (!this.options.isListSubTasks && t.parentTitle)
-          ? t.parentTitle
-          : t.title;
-      }))
-        .join(this.options.separateTasksBy || SIMPLE_SUMMARY_DEFAULTS.separateTasksBy);
-
-      tasksTxt += this._formatTask(days[dateStr]);
-      tasksTxt += LINE_SEPARATOR;
-    });
-    return tasksTxt;
-  }
-
   private _createTasksText(tasks: TaskWithSubTasks[]) {
     let tasksTxt = '';
 
@@ -215,11 +125,8 @@ export class SimpleTaskExportComponent implements OnInit, OnDestroy {
       for (let i = 0; i < tasks.length; i++) {
         const task = tasks[i];
         if (
-          (
-            (this.isWorklogExport)
-            || (!this.options.isListDoneOnly || task.isDone)
-            && (!this.options.isWorkedOnTodayOnly || this._checkIsWorkedOnToday(task))
-          )
+          (!this.options.isListDoneOnly || task.isDone)
+          && (!this.options.isWorkedOnTodayOnly || this._checkIsWorkedOnToday(task))
         ) {
           tasksTxt += this._formatTask(task);
           tasksTxt += LINE_SEPARATOR;
@@ -250,36 +157,6 @@ export class SimpleTaskExportComponent implements OnInit, OnDestroy {
     return !!task.timeSpentOnDay[dateStr];
   }
 
-  private _roundDuration(value: Duration, roundTo, isRoundUp): Duration {
-    let rounded;
-
-    switch (roundTo) {
-      case 'QUARTER':
-        rounded = Math.round(value.asMinutes() / 15) * 15;
-        if (isRoundUp) {
-          rounded = Math.ceil(value.asMinutes() / 15) * 15;
-        }
-        return moment.duration({minutes: rounded});
-
-      case 'HALF':
-        rounded = Math.round(value.asMinutes() / 30) * 30;
-        if (isRoundUp) {
-          rounded = Math.ceil(value.asMinutes() / 30) * 30;
-        }
-        return moment.duration({minutes: rounded});
-
-      case 'HOUR':
-        rounded = Math.round(value.asMinutes() / 60) * 60;
-        if (isRoundUp) {
-          rounded = Math.ceil(value.asMinutes() / 60) * 60;
-        }
-        return moment.duration({minutes: rounded});
-
-      default:
-        return value;
-    }
-  }
-
   private _parseToTable(tasksTxt) {
     let rowsHtml = '';
     const rows = tasksTxt.split(LINE_SEPARATOR).filter(row => row.length);
@@ -300,11 +177,7 @@ export class SimpleTaskExportComponent implements OnInit, OnDestroy {
       headerCols.push('Estimate');
     }
     if (this.options.isShowTitle) {
-      if (this.isWorklogExport) {
-        headerCols.push('Tasks');
-      } else {
-        headerCols.push('Title');
-      }
+      headerCols.push('Title');
     }
     const headerColsHtml = `<tr><th>${headerCols.join('</th><th>')}</th></tr>`;
     if (!rows.length) {
