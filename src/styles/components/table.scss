@@ -20,6 +20,10 @@ table {
   }
 }
 
+.table-wrapper {
+  overflow: auto;
+}
+
 $this-table-min-height: $s*2;
 div.material-table {
   box-shadow: $whiteframe-shadow-3dp;

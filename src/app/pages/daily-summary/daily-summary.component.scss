@@ -78,7 +78,7 @@ textarea {
   &:focus {
     outline: 1px solid $c-accent;
 
-    @include mobileTouchDevice{
+    @include mobileTouchDevice {
       outline: none;
     }
   }
@@ -128,8 +128,15 @@ textarea {
     text-align: center;
   }
 
+
+  th,
+  td {
+    min-width: 50px;
+  }
+
   td:first-child {
     text-align: left;
+    min-width: 220px;
   }
 }
 
