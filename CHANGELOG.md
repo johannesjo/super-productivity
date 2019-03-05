@@ -1,3 +1,22 @@
+## [2.4.7](https://github.com/johannesjo/super-productivity/compare/v2.4.6...v2.4.7) (2019-03-05)
+
+
+### Bug Fixes
+
+* **notes:** add missing unsubscribe ([83cbe57](https://github.com/johannesjo/super-productivity/commit/83cbe57))
+* **project:** not setting workStart correctly ([ae04f61](https://github.com/johannesjo/super-productivity/commit/ae04f61))
+
+
+### Features
+
+* **dailySummary:** add time estimated for tasks worked on today ([e18fb1b](https://github.com/johannesjo/super-productivity/commit/e18fb1b))
+* **dailySummary:** improve google export time styling ([b079311](https://github.com/johannesjo/super-productivity/commit/b079311))
+* **dailySummary:** improve google export time styling even more ([c772730](https://github.com/johannesjo/super-productivity/commit/c772730))
+* **dailySummary:** improve task table ([facd2fb](https://github.com/johannesjo/super-productivity/commit/facd2fb))
+* **reminder:** only open reminders if there are no other dialogs open ([507a713](https://github.com/johannesjo/super-productivity/commit/507a713))
+
+
+
 ## [2.4.6](https://github.com/johannesjo/super-productivity/compare/v2.4.5...v2.4.6) (2019-03-03)
 
 
