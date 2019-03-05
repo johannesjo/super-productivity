@@ -21,7 +21,7 @@
 
   <div *ngIf="headings && !isLoading && isSpreadSheetRead"
        @expand
-       class="table-wrapper">
+       class="table-wrapper material-table">
     <table class="export-input-table">
       <tr>
         <th></th>
@@ -44,6 +44,7 @@
           <input (change)="updateDefaults()"
                  [(ngModel)]="opts.defaultValues[i]"
                  [ngModelOptions]="{standalone: true}"
+                 class="mat-elevation-z3"
                  type="text">
         </td>
       </tr>
@@ -52,6 +53,7 @@
         <td *ngFor="let heading of headings; let i = index;"
             class="actual">
           <input [(ngModel)]="actualValues[i]"
+                 class="mat-elevation-z3"
                  name="actualValues"
                  type="text">
         </td>

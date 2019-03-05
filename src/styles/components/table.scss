@@ -41,6 +41,11 @@ table.material-table,
   font-size: 13px;
   border-collapse: collapse;
   white-space: nowrap;
+  background-color: #FFF;
+
+  .isDarkTheme & {
+    background: $dark-theme-bg-lighter;
+  }
 
   tr {
     min-height: $this-table-min-height;
