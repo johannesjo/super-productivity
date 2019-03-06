@@ -51,8 +51,9 @@
         <table>
           <tr>
             <th></th>
-            <th>Tasks</th>
-            <th>Time</th>
+            <td>Tasks</td>
+            <td>Worked</td>
+            <th></th>
           </tr>
           <tr *ngFor="let worklogForDay of week.ent|keyvalue:sortWorklogItemsReverse"
               class="day">
@@ -61,16 +62,11 @@
             </td>
             <td>{{worklogForDay.value.logEntries.length}}</td>
             <td>{{worklogForDay.value.timeSpent|msToClockString}}</td>
-
-            <!--<td>-->
-            <!--<button mat-icon-button-->
-            <!--color=""-->
-            <!--aria-label="export data"-->
-            <!--(click)="worklogForDay.value.isVisible=!worklogForDay.value.isVisible;">-->
-            <!--<mat-icon>list-->
-            <!--</mat-icon>-->
-            <!--</button>-->
-            <!--</td>-->
+            <td>
+              <button mat-icon-button>
+                <mat-icon>list</mat-icon>
+              </button>
+            </td>
           </tr>
         </table>
       </div>

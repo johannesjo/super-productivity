@@ -45,7 +45,7 @@
 }
 
 .week {
-  margin: 0 $s*4 $s*4;
+  margin: 0 $s*3 $s*4;
   display: flex;
   align-items: center;
   flex-direction: column;
@@ -65,21 +65,43 @@
     margin-bottom: 0;
   }
 
+  table {
+    border-collapse: collapse;
+  }
+
 
   tr:hover {
     cursor: pointer;
+    outline: 1px solid $c-accent;
+
+    &:first-child {
+      cursor: auto;
+      outline: none;
+    }
+
+    td {
+      background: #fff;
+      @include darkTheme {
+        background-color: $dark-theme-bg-darker;
+      }
+    }
   }
 
   td {
-    padding-top: $s/2;
-    padding-bottom: $s/2;
+    padding: $s/2 $s;
+
 
     &:first-child {
       text-align: left;
     }
 
     &:last-child {
-      text-align: right;
+      padding: 0;
+
+      button {
+        margin-top: -0.75* $s;
+        margin-bottom: -0.75* $s;
+      }
     }
   }
 
@@ -91,22 +113,22 @@
 
   span {
     &:first-child {
-      display: none;
       position: absolute;
       left: 50%;
       top: 50%;
       transform: translate(-50%, -50%);
+      visibility: visible;
 
       tr:hover & {
-        display: block;
+        visibility: hidden;
       }
     }
 
     &:last-child {
-      display: block;
+      visibility: hidden;
 
       tr:hover & {
-        visibility: hidden;
+        visibility: visible;
       }
     }
   }
