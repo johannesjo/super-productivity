@@ -5,14 +5,13 @@ import { expandFadeAnimation } from '../../ui/animations/expand.ani';
 import { mapArchiveToWorklog, Worklog, WorklogDay, WorklogMonth } from './map-archive-to-worklog';
 import { MatDialog } from '@angular/material';
 import { Subscription } from 'rxjs';
-import { Task, TaskCopy } from '../tasks/task.model';
+import { Task } from '../tasks/task.model';
 import { TaskService } from '../tasks/task.service';
-import { Router } from '@angular/router';
-import { DialogConfirmComponent } from '../../ui/dialog-confirm/dialog-confirm.component';
 import { EntityState } from '@ngrx/entity';
 import { dedupeByKey } from '../../util/de-dupe-by-key';
 import { WeeksInMonth } from '../../util/get-weeks-in-month';
 import { DialogWorklogExportComponent } from './dialog-worklog-export/dialog-worklog-export.component';
+import { DialogTaskSummaryComponent } from './dialog-task-summary/dialog-task-summary.component';
 
 const EMPTY_ENTITY = {
   ids: [],
@@ -40,7 +39,6 @@ export class WorklogComponent implements OnInit, OnDestroy {
     private readonly _taskService: TaskService,
     private readonly _matDialog: MatDialog,
     private readonly _cd: ChangeDetectorRef,
-    private readonly _router: Router,
   ) {
   }
 
@@ -88,30 +86,15 @@ export class WorklogComponent implements OnInit, OnDestroy {
     });
   }
 
-  restoreTask(yearKey, monthKey, dayKey, task: TaskCopy) {
-    console.log(yearKey, monthKey, dayKey, task);
-    this._matDialog.open(DialogConfirmComponent, {
+  openTaskSummaryForDay(worklogForDay: { key: string; value: WorklogDay }) {
+    this._matDialog.open(DialogTaskSummaryComponent, {
       restoreFocus: true,
       data: {
-        okTxt: 'Do it!',
-        message: `Are you sure you want to move the task <strong>"${task.title}"</strong> into your todays task list?`,
+        worklogForDay,
       }
-    }).afterClosed()
-      .subscribe((isConfirm: boolean) => {
-        if (isConfirm) {
-          const worklogDay: WorklogDay = this.worklog[yearKey].ent[monthKey].ent[dayKey];
-          const index = worklogDay.logEntries.findIndex(ent => ent.task === task);
-
-          if (index > -1) {
-            // TODO refactor to task action!!!
-            worklogDay.logEntries.splice(index, 1);
-            this.worklog = {...this.worklog};
-            this._taskService.restoreTask(task);
-            this._router.navigate(['/work-view']);
-          }
-        }
-      });
+    });
   }
+
 
   sortWorklogItems(a, b) {
     return b.key - a.key;
