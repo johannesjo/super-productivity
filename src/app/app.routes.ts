@@ -4,7 +4,7 @@ import { ConfigPageComponent } from './pages/config-page/config-page.component';
 import { ProjectPageComponent } from './pages/project-page/project-page.component';
 import { DailySummaryComponent } from './pages/daily-summary/daily-summary.component';
 import { WorklogAndCalendarComponent } from './pages/worklog-and-calendar/worklog-and-calendar.component';
-import { WorklogComponent } from './pages/worklog-and-calendar/worklog/worklog.component';
+import { WorklogComponent } from './features/worklog/worklog.component';
 import { CalendarComponent } from './pages/worklog-and-calendar/calendar/calendar.component';
 
 export const APP_ROUTES: Routes = [

@@ -1,7 +1,7 @@
 import { EntityState } from '@ngrx/entity';
-import { Task } from '../features/tasks/task.model';
-import { getWeeksInMonth, WeeksInMonth } from './get-weeks-in-month';
-import { getWeekNumber } from './get-week-number';
+import { Task } from '../tasks/task.model';
+import { getWeeksInMonth, WeeksInMonth } from '../../util/get-weeks-in-month';
+import { getWeekNumber } from '../../util/get-week-number';
 import * as moment from 'moment-mini';
 
 export interface WorklogDataForDay {
@@ -86,7 +86,7 @@ export const mapArchiveToWorklog = (taskState: EntityState<Task>, noRestoreIds =
           dateStr: dateStr,
           dayStr: moment(dateStr).format('ddd')
         };
-        console.log(dateStr, moment(dateStr));
+
       }
       if (task.subTaskIds.length === 0) {
         const timeSpentForTask = task.timeSpentOnDay[dateStr];

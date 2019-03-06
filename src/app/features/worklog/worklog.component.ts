@@ -1,18 +1,18 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
-import { PersistenceService } from '../../../core/persistence/persistence.service';
-import { ProjectService } from '../../../features/project/project.service';
-import { expandFadeAnimation } from '../../../ui/animations/expand.ani';
-import { mapArchiveToWorklog, Worklog, WorklogDay, WorklogMonth } from '../../../util/map-archive-to-worklog';
+import { PersistenceService } from '../../core/persistence/persistence.service';
+import { ProjectService } from '../project/project.service';
+import { expandFadeAnimation } from '../../ui/animations/expand.ani';
+import { mapArchiveToWorklog, Worklog, WorklogDay, WorklogMonth } from './map-archive-to-worklog';
 import { MatDialog } from '@angular/material';
 import { Subscription } from 'rxjs';
-import { Task, TaskCopy } from '../../../features/tasks/task.model';
-import { TaskService } from '../../../features/tasks/task.service';
+import { Task, TaskCopy } from '../tasks/task.model';
+import { TaskService } from '../tasks/task.service';
 import { Router } from '@angular/router';
-import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confirm.component';
+import { DialogConfirmComponent } from '../../ui/dialog-confirm/dialog-confirm.component';
 import { EntityState } from '@ngrx/entity';
-import { dedupeByKey } from '../../../util/de-dupe-by-key';
-import { WeeksInMonth } from '../../../util/get-weeks-in-month';
-import { DialogWorklogExportComponent } from '../../../features/worklog-export/dialog-worklog-export/dialog-worklog-export.component';
+import { dedupeByKey } from '../../util/de-dupe-by-key';
+import { WeeksInMonth } from '../../util/get-weeks-in-month';
+import { DialogWorklogExportComponent } from './dialog-worklog-export/dialog-worklog-export.component';
 
 const EMPTY_ENTITY = {
   ids: [],
