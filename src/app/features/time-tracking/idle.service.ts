@@ -119,6 +119,7 @@ export class IdleService {
             }
 
             this.cancelIdlePoll();
+            this._isIdle$.next(false);
             this.isIdleDialogOpen = false;
           });
       }
