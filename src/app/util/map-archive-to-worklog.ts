@@ -2,6 +2,7 @@ import { EntityState } from '@ngrx/entity';
 import { Task } from '../features/tasks/task.model';
 import { getWeeksInMonth, WeeksInMonth } from './get-weeks-in-month';
 import { getWeekNumber } from './get-week-number';
+import * as moment from 'moment-mini';
 
 export interface WorklogDataForDay {
   timeSpent: number;
@@ -15,12 +16,16 @@ export interface WorklogDay {
   timeSpent: number;
   logEntries: WorklogDataForDay[];
   dateStr: string;
+  dayStr: string;
 }
 
 export interface WorklogWeek extends WeeksInMonth {
   weekNr: number;
   timeSpent: number;
   daysWorked: number;
+  ent: {
+    [key: number]: WorklogDay;
+  };
 }
 
 export interface WorklogMonth {
@@ -79,8 +84,9 @@ export const mapArchiveToWorklog = (taskState: EntityState<Task>, noRestoreIds =
           timeSpent: 0,
           logEntries: [],
           dateStr: dateStr,
-          // id: this.Uid()
+          dayStr: moment(dateStr).format('ddd')
         };
+        console.log(dateStr, moment(dateStr));
       }
       if (task.subTaskIds.length === 0) {
         const timeSpentForTask = task.timeSpentOnDay[dateStr];
@@ -124,13 +130,16 @@ export const mapArchiveToWorklog = (taskState: EntityState<Task>, noRestoreIds =
           ...week,
           timeSpent: 0,
           daysWorked: 0,
+          ent: {},
           weekNr: getWeekNumber(new Date(+year_, +month_ - 1, week.start)),
         };
 
         days.forEach((day_: string) => {
+          const day: WorklogDay = month.ent[day_];
           if (+day_ >= week.start && +day_ <= week.end) {
             weekForMonth.timeSpent += month.ent[day_].timeSpent;
             weekForMonth.daysWorked += 1;
+            weekForMonth.ent[day_] = day;
           }
         });
 

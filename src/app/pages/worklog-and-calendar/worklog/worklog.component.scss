@@ -2,83 +2,142 @@
 
 :host {
   text-align: center;
+}
 
-  .total-time {
-    margin-top: $s*4;
-  }
+.total-time {
+  margin-top: $s*4;
+}
 
-  .year {
-    &-title {
-      margin-top: 3*$s;
-    }
-
-    &-time-spent {
-      font-size: 20px;
-      line-height: 26px;
-    }
-  }
-
-  .month {
+.year {
+  &-title {
     margin-top: 3*$s;
-    margin-bottom: 0;
-
-    &-title {
-      margin-bottom: $s;
-    }
-
-    &-time-spent {
-      font-size: 18px;
-      line-height: 22px;
-      margin-bottom: $s*3;
-    }
   }
 
-  .export-btns {
-    margin-bottom: $s*2;
-
-    button {
-      margin: 0 $s*0.5;
-    }
+  &-time-spent {
+    font-size: 20px;
+    line-height: 26px;
   }
+}
 
-  .day {
-    margin-top: 2*$s;
+.month {
+  margin-top: 3*$s;
+  margin-bottom: 0;
+
+  &-title {
     margin-bottom: $s;
 
-    &-title {
-
-      button {
-        margin-left: $s;
-      }
+    button {
+      margin-left: $s;
     }
   }
 
-  .summary-table-wrapper {
-    display: inline-block;
+  &-time-spent {
+    font-size: 18px;
+    line-height: 22px;
+    margin-bottom: $s*3;
+  }
+}
 
-    > table {
-      width: 100%;
+.weeks {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.week {
+  margin: 0 $s*4 $s*4;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+
+  &-header {
+    display: flex;
+    margin-bottom: $s*2;
+    align-self: center;
+
+    button {
+      margin-left: $s;
+    }
+  }
+
+  &-title {
+    white-space: nowrap;
+    margin-bottom: 0;
+  }
+
+
+  tr:hover {
+    cursor: pointer;
+  }
+
+  td {
+    padding-top: $s/2;
+    padding-bottom: $s/2;
+
+    &:first-child {
       text-align: left;
+    }
 
-      td:first-of-type {
-        padding-right: $s;
+    &:last-child {
+      text-align: right;
+    }
+  }
+
+
+}
+
+.day-date {
+  position: relative;
+
+  span {
+    &:first-child {
+      display: none;
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+
+      tr:hover & {
+        display: block;
       }
     }
 
-    td.isSubTask {
-      .task-title {
-        font-style: italic;
-        padding-left: $s*2;
-        position: relative;
-        display: inline-block;
+    &:last-child {
+      display: block;
 
-        &:before {
-          content: '–';
-          position: absolute;
-          top: 50%;
-          left: 0;
-          transform: translateY(-50%);
-        }
+      tr:hover & {
+        visibility: hidden;
+      }
+    }
+  }
+}
+
+
+.summary-table-wrapper {
+  display: inline-block;
+
+  > table {
+    width: 100%;
+    text-align: left;
+
+    td:first-of-type {
+      padding-right: $s;
+    }
+  }
+
+  td.isSubTask {
+    .task-title {
+      font-style: italic;
+      padding-left: $s*2;
+      position: relative;
+      display: inline-block;
+
+      &:before {
+        content: '–';
+        position: absolute;
+        top: 50%;
+        left: 0;
+        transform: translateY(-50%);
       }
     }
   }

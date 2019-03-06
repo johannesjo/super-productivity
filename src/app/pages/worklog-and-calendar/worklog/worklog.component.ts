@@ -117,6 +117,10 @@ export class WorklogComponent implements OnInit, OnDestroy {
     return b.key - a.key;
   }
 
+  sortWorklogItemsReverse(a, b) {
+    return a.key - b.key;
+  }
+
   private async _loadData(projectId): Promise<any> {
     const archive = await this._persistenceService.loadTaskArchiveForProject(projectId) || EMPTY_ENTITY;
     const taskState = await this._persistenceService.loadTasksForProject(projectId) || EMPTY_ENTITY;
