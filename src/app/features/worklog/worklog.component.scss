@@ -44,8 +44,11 @@
   flex-wrap: wrap;
 }
 
+$this-week-margin-left-right: $s*3;
+$this-table-width: 300px;
+$this-task-table-width: $this-table-width + $this-week-margin-left-right*2;
 .week {
-  margin: 0 $s*3 $s*4;
+  margin: 0 $this-week-margin-left-right $s*4;
   display: flex;
   align-items: center;
   flex-direction: column;
@@ -65,47 +68,51 @@
     margin-bottom: 0;
   }
 
-  table {
+  table.week-table {
+    width: $this-table-width;
     border-collapse: collapse;
-  }
 
+    > tbody {
+      > tr.week-row:hover {
+        cursor: pointer;
+        outline: 1px solid $c-accent;
 
-  tr:hover {
-    cursor: pointer;
-    outline: 1px solid $c-accent;
+        &:first-child {
+          cursor: auto;
+          outline: none;
+        }
 
-    &:first-child {
-      cursor: auto;
-      outline: none;
-    }
+        > td {
+          background: #fff;
+          @include darkTheme {
+            background-color: $dark-theme-bg-darker;
+          }
+        }
+      }
 
-    td {
-      background: #fff;
-      @include darkTheme {
-        background-color: $dark-theme-bg-darker;
+      > tr.week-row > td {
+        padding: $s/2 $s;
+        white-space: nowrap;
+
+        &:first-child {
+          text-align: left;
+        }
+
+        &:last-child {
+          padding: 0;
+
+          button {
+            margin-top: -0.75* $s;
+            margin-bottom: -0.75* $s;
+          }
+        }
+      }
+
+      > tr.isExpanded > td {
+        font-weight: bold;
       }
     }
   }
-
-  td {
-    padding: $s/2 $s;
-
-
-    &:first-child {
-      text-align: left;
-    }
-
-    &:last-child {
-      padding: 0;
-
-      button {
-        margin-top: -0.75* $s;
-        margin-bottom: -0.75* $s;
-      }
-    }
-  }
-
-
 }
 
 .day-date {
@@ -129,6 +136,53 @@
 
       tr:hover & {
         visibility: visible;
+      }
+    }
+  }
+}
+
+.summary-table-wrapper {
+  margin: 0 -1*($this-week-margin-left-right);
+  display: inline-block;
+
+  > table {
+    width: 100%;
+    text-align: left;
+
+    td:first-of-type {
+      padding-right: $s;
+    }
+  }
+
+  td {
+    text-align: left;
+    white-space: normal;
+
+    &:nth-child(2) {
+      text-align: center;
+    }
+
+    &:last-child {
+      padding-top: 0;
+      padding-bottom: 0;
+      padding-left: 0;
+      padding-right: $s;
+    }
+
+    &.isSubTask {
+      .task-title {
+        font-style: italic;
+        padding-left: $s*2;
+        position: relative;
+        display: inline-block;
+
+        &:before {
+          content: '–';
+          position: absolute;
+          top: 50%;
+          left: 0;
+          transform: translateY(-50%);
+        }
       }
     }
   }
