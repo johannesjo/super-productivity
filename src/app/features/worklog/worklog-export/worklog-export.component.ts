@@ -257,9 +257,10 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
               ).format('HH:mm')
               : EMPTY_VAL;
           case 'TITLES':
-            return row.titles.join(this.options.separateTasksBy || ' | ');
+            return row.titles.join(
+              this.options.separateTasksBy || '<br>');
           case 'TITLES_INCLUDING_SUB':
-            return row.titlesWithSub.join(this.options.separateTasksBy || ' | ');
+            return row.titlesWithSub.join(this.options.separateTasksBy || '<br>');
           case 'TIME_MS':
             return timeSpent;
           case 'TIME_STR':

@@ -36,7 +36,8 @@
           <th *ngFor="let headlineCol of headlineCols;">{{headlineCol}}</th>
         </tr>
         <tr *ngFor="let row of formattedRows;">
-          <td *ngFor="let col of row">{{col}}</td>
+          <td *ngFor="let col of row"
+              [innerHTML]="col"></td>
         </tr>
       </table>
     </div>
@@ -51,7 +52,6 @@
           <div>
             <mat-slide-toggle (change)="onOptionsChange()"
                               [(ngModel)]="isShowAsText"
-                              aria-label="Show as text"
                               name="isShowAsText">
               Show as text
             </mat-slide-toggle>
@@ -62,11 +62,21 @@
                           class="md-block">
             <label>Separate tasks by</label>
             <input (change)="onOptionsChange()"
+                   [disabled]="options.isSeparateByLineBreak"
                    [(ngModel)]="options.separateTasksBy"
                    matInput=""
                    name="separateTasksBy"
                    type="text">
           </mat-form-field>
+        </div>
+        <div class="col">
+          <div>
+            <mat-slide-toggle (change)="onOptionsChange()"
+                              [(ngModel)]="options.isSeparateByLineBreak"
+                              name="isShowAsText">
+              Separate tasks by line break
+            </mat-slide-toggle>
+          </div>
         </div>
         <div class="col">
           <mat-form-field>
