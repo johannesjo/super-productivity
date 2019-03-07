@@ -36,7 +36,8 @@
           <th *ngFor="let headlineCol of headlineCols;">{{headlineCol}}</th>
         </tr>
         <tr *ngFor="let row of formattedRows;">
-          <td *ngFor="let col of row"
+          <td *ngFor="let col of row; let i = index;"
+              [ngClass]="options.cols[i]"
               [innerHTML]="col"></td>
         </tr>
       </table>

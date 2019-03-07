@@ -59,6 +59,16 @@
       white-space: normal;
     }
   }
+
+  td {
+    text-align: center;
+
+    &.TITLES_INCLUDING_SUB,
+    &.TITLES {
+      text-align: left;
+      min-width: 250px;
+    }
+  }
 }
 
 .options-collapsible{

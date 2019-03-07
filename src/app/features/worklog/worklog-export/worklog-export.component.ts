@@ -133,7 +133,7 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
             case 'TIME_MS':
             case 'TIME_STR':
             case 'TIME_CLOCK':
-              return 'Time Spent';
+              return 'Worked';
             case 'ESTIMATE_MS':
             case 'ESTIMATE_STR':
             case 'ESTIMATE_CLOCK':
