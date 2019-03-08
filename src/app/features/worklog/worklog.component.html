@@ -1,119 +1,125 @@
 <h1 class="mat-headline total-time">Total time spent on project
   <br><strong>{{totalTimeSpent|msToString}}</strong></h1>
 
-<div *ngFor="let year of worklog|keyvalue:sortWorklogItems"
-     class="year">
-  <h1 class="year-title mat-headline"
-      [innerHtml]="year.key"></h1>
-  <div class="year-time-spent">Month worked:
-    <strong>{{year.value.monthWorked}}</strong><br>
-    Days worked:
-    <strong>{{year.value.daysWorked}}</strong><br>
-    Time spent total: <strong [innerHtml]="year.value.timeSpent|msToString"></strong></div>
+<div class="years"
+     *ngIf="totalTimeSpent"
+     [@standardList]="'ALWAYS'">
+  <div *ngFor="let year of (worklog|keyvalue:sortWorklogItems)"
+       class="year">
+    <h1 class="year-title mat-headline"
+        [innerHtml]="year.key"></h1>
+    <div class="year-time-spent">Month worked:
+      <strong>{{year.value.monthWorked}}</strong><br>
+      Days worked:
+      <strong>{{year.value.daysWorked}}</strong><br>
+      Time spent total: <strong [innerHtml]="year.value.timeSpent|msToString"></strong></div>
 
-  <div *ngFor="let month of year.value.ent|keyvalue:sortWorklogItems"
-       class="month">
-    <h2 class="month-title mat-headline">
-      <span [innerHtml]="month.key|numberToMonth"></span>
+    <div class="months"
+         [@standardList]="'ALWAYS'">
+      <div *ngFor="let month of year.value.ent|keyvalue:sortWorklogItems"
+           class="month">
+        <h2 class="month-title mat-headline">
+          <span [innerHtml]="month.key|numberToMonth"></span>
 
-      <button mat-mini-fab=""
-              color="primary"
-              aria-label="export data"
-              (click)="exportData(month.value,year.key, month.key)">
-        <mat-icon>call_made</mat-icon>
-      </button>
-    </h2>
-
-    <div class="month-time-spent">Days worked:
-      <strong>{{month.value.daysWorked}}</strong><br>
-      Time spent total:
-      <strong [innerHtml]="month.value.timeSpent|msToString"></strong>
-    </div>
-
-    <div class="weeks">
-      <div *ngFor="let week of month.value.weeks"
-           class="week">
-
-        <div class="week-header">
-          <div class="wrap">
-            <h3 class="week-title mat-h4">Week {{week.weekNr}}</h3>
-            <div> {{(week.timeSpent|msToString)}}</div>
-          </div>
-          <button [matTooltip]="week.start+'.-'+week.end+'. Days: '+ week.daysWorked+', Time: '+(week.timeSpent|msToString)"
-                  mat-mini-fab=""
-                  color=""
+          <button mat-mini-fab=""
+                  color="primary"
                   aria-label="export data"
-                  (click)="exportData(month.value,year.key, month.key, week)">
+                  (click)="exportData(month.value,year.key, month.key)">
             <mat-icon>call_made</mat-icon>
           </button>
+        </h2>
+
+        <div class="month-time-spent">Days worked:
+          <strong>{{month.value.daysWorked}}</strong><br>
+          Time spent total:
+          <strong [innerHtml]="month.value.timeSpent|msToString"></strong>
         </div>
 
-        <table class="week-table">
-          <tr>
-            <th></th>
-            <td>Tasks</td>
-            <td>Worked</td>
-            <th></th>
-          </tr>
-          <ng-container *ngFor="let worklogForDay of week.ent|keyvalue:sortWorklogItemsReverse"
-                        class="day">
-            <tr (click)="worklogForDay.value.isVisible=!worklogForDay.value.isVisible;"
-                class="week-row"
-                [class.isExpanded]="worklogForDay.value.isVisible">
-              <td>{{worklogForDay.value.dayStr}} {{worklogForDay.key}}.</td>
-              <td>{{worklogForDay.value.logEntries.length}}</td>
-              <td>{{worklogForDay.value.timeSpent|msToClockString}}</td>
-              <td>
-                <button mat-icon-button>
-                  <mat-icon *ngIf="!worklogForDay.value.isVisible">list</mat-icon>
-                  <mat-icon *ngIf="worklogForDay.value.isVisible">close</mat-icon>
-                </button>
-              </td>
-            </tr>
+        <div class="weeks"
+             [@standardList]="'ALWAYS'">
+          <div *ngFor="let week of month.value.weeks"
+               class="week">
+
+            <div class="week-header">
+              <div class="wrap">
+                <h3 class="week-title mat-h4">Week {{week.weekNr}}</h3>
+                <div> {{(week.timeSpent|msToString)}}</div>
+              </div>
+              <button [matTooltip]="week.start+'.-'+week.end+'. Days: '+ week.daysWorked+', Time: '+(week.timeSpent|msToString)"
+                      mat-mini-fab=""
+                      color=""
+                      aria-label="export data"
+                      (click)="exportData(month.value,year.key, month.key, week)">
+                <mat-icon>call_made</mat-icon>
+              </button>
+            </div>
+
+            <table class="week-table">
+              <tr>
+                <th></th>
+                <td>Tasks</td>
+                <td>Worked</td>
+                <th></th>
+              </tr>
+              <ng-container *ngFor="let worklogForDay of week.ent|keyvalue:sortWorklogItemsReverse"
+                            class="day">
+                <tr (click)="worklogForDay.value.isVisible=!worklogForDay.value.isVisible;"
+                    class="week-row"
+                    [class.isExpanded]="worklogForDay.value.isVisible">
+                  <td>{{worklogForDay.value.dayStr}} {{worklogForDay.key}}.</td>
+                  <td>{{worklogForDay.value.logEntries.length}}</td>
+                  <td>{{worklogForDay.value.timeSpent|msToClockString}}</td>
+                  <td>
+                    <button mat-icon-button>
+                      <mat-icon *ngIf="!worklogForDay.value.isVisible">list</mat-icon>
+                      <mat-icon *ngIf="worklogForDay.value.isVisible">close</mat-icon>
+                    </button>
+                  </td>
+                </tr>
 
 
-            <tr>
-              <td colspan="4">
-                <div [@expandFade]
-                     class="summary-table-wrapper material-table"
-                     *ngIf="worklogForDay.value.isVisible">
-                  <table class="task-summary-table">
-                    <!--<caption>Task list for {{worklogForDay.value.dayStr}} {{worklogForDay.key}}th</caption>-->
-                    <!--<tr>-->
-                      <!--<th>Title</th>-->
-                      <!--<th>Worked</th>-->
-                      <!--<th></th>-->
-                    <!--</tr>-->
-                    <tr *ngFor="let logEntry of worklogForDay.value.logEntries">
-                      <td class="title"
-                        [class.isSubTask]="logEntry.task.parentId">
-                        <span class="task-title">{{logEntry.task.title}}</span>
-                      </td>
-                      <td class="worked">
-                        <span *ngIf="logEntry.task.subTaskIds && logEntry.task.subTaskIds.length>0">∑</span>
-                        {{logEntry.task.timeSpentOnDay[worklogForDay.value.dateStr]|msToClockString}}</td>
-                      <td class="actions">
-                        <button mat-icon-button=""
-                                title="Restore Task From Archive"
-                                color=""
-                                *ngIf="!logEntry.task?.parentId && !logEntry.isNoRestore"
-                                aria-label="restore"
-                                (click)="restoreTask(year.key, month.key, worklogForDay.key,logEntry.task);">
-                          <!--<mat-icon>unarchive</mat-icon>-->
-                          <mat-icon>settings_backup_restore</mat-icon>
-                        </button>
-                      </td>
-                    </tr>
-                  </table>
-                </div>
-              </td>
-            </tr>
-          </ng-container>
-        </table>
+                <tr>
+                  <td colspan="4">
+                    <div [@expandFade]
+                         class="summary-table-wrapper material-table"
+                         *ngIf="worklogForDay.value.isVisible">
+                      <table class="task-summary-table">
+                        <!--<caption>Task list for {{worklogForDay.value.dayStr}} {{worklogForDay.key}}th</caption>-->
+                        <!--<tr>-->
+                        <!--<th>Title</th>-->
+                        <!--<th>Worked</th>-->
+                        <!--<th></th>-->
+                        <!--</tr>-->
+                        <tr *ngFor="let logEntry of worklogForDay.value.logEntries">
+                          <td class="title"
+                              [class.isSubTask]="logEntry.task.parentId">
+                            <span class="task-title">{{logEntry.task.title}}</span>
+                          </td>
+                          <td class="worked">
+                            <span *ngIf="logEntry.task.subTaskIds && logEntry.task.subTaskIds.length>0">∑</span>
+                            {{logEntry.task.timeSpentOnDay[worklogForDay.value.dateStr]|msToClockString}}</td>
+                          <td class="actions">
+                            <button mat-icon-button=""
+                                    title="Restore Task From Archive"
+                                    color=""
+                                    *ngIf="!logEntry.task?.parentId && !logEntry.isNoRestore"
+                                    aria-label="restore"
+                                    (click)="restoreTask(year.key, month.key, worklogForDay.key,logEntry.task);">
+                              <!--<mat-icon>unarchive</mat-icon>-->
+                              <mat-icon>settings_backup_restore</mat-icon>
+                            </button>
+                          </td>
+                        </tr>
+                      </table>
+                    </div>
+                  </td>
+                </tr>
+              </ng-container>
+            </table>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 </div>
-
-
 

@@ -13,6 +13,7 @@ import { WeeksInMonth } from '../../util/get-weeks-in-month';
 import { DialogWorklogExportComponent } from './dialog-worklog-export/dialog-worklog-export.component';
 import { DialogConfirmComponent } from '../../ui/dialog-confirm/dialog-confirm.component';
 import { Router } from '@angular/router';
+import { standardListAnimation } from '../../ui/animations/standard-list.ani';
 
 const EMPTY_ENTITY = {
   ids: [],
@@ -25,12 +26,11 @@ const EMPTY_ENTITY = {
   templateUrl: './worklog.component.html',
   styleUrls: ['./worklog.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  animations: [expandFadeAnimation]
+  animations: [expandFadeAnimation, standardListAnimation]
 })
 export class WorklogComponent implements OnInit, OnDestroy {
   worklog: Worklog = {};
   totalTimeSpent: number;
-  private _projectId: string;
   private _isUnloaded = false;
   private _subs = new Subscription();
 
@@ -45,9 +45,13 @@ export class WorklogComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    this._subs.add(this._projectService.currentId$.subscribe((id) => {
-      this._projectId = id;
-      this._loadData(id);
+    this._subs.add(this._projectService.currentId$.subscribe(async (id) => {
+      const {worklog, totalTimeSpent} = await this._loadData(id);
+      this.worklog = worklog;
+      this.totalTimeSpent = totalTimeSpent;
+      // console.log(this.worklog);
+      // this.exportData(this.worklog[2019].ent[3], 2019, 3);
+      this._cd.detectChanges();
     }));
   }
 
@@ -121,7 +125,7 @@ export class WorklogComponent implements OnInit, OnDestroy {
     return a.key - b.key;
   }
 
-  private async _loadData(projectId): Promise<any> {
+  private async _loadData(projectId): Promise<{ worklog: Worklog; totalTimeSpent: number }> {
     const archive = await this._persistenceService.loadTaskArchiveForProject(projectId) || EMPTY_ENTITY;
     const taskState = await this._persistenceService.loadTasksForProject(projectId) || EMPTY_ENTITY;
 
@@ -139,16 +143,16 @@ export class WorklogComponent implements OnInit, OnDestroy {
 
     if (completeState) {
       const {worklog, totalTimeSpent} = mapArchiveToWorklog(completeState, taskState.ids);
-      this.worklog = worklog;
-      this.totalTimeSpent = totalTimeSpent;
-      this._cd.detectChanges();
+      return {
+        worklog,
+        totalTimeSpent,
+      };
     } else {
-      this.worklog = {};
-      this.totalTimeSpent = null;
-      this._cd.detectChanges();
+      return {
+        worklog: {},
+        totalTimeSpent: null
+      };
     }
-    // console.log(this.worklog);
-    // this.exportData(this.worklog[2019].ent[3], 2019, 3);
   }
 
   private _createTasksForDay(data: WorklogDay) {
