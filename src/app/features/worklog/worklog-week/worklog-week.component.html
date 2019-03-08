@@ -6,7 +6,7 @@
          class="day">
       <div class="title">
         <h3 class="mat-h3">{{day.value.dayStr}} {{day.key}}.</h3>
-        <span>∑ {{day.value.timeSpent|msToClockString}}</span>
+        <strong>∑ {{day.value.timeSpent|msToClockString}}</strong>
       </div>
       <div class="material-table">
         <table class="task-summary-table">
@@ -41,7 +41,7 @@
             color=""
             aria-label="export data"
             (click)="exportData(currentWeek)">
-      Export Week
+      Export Week Data
       <mat-icon>call_made</mat-icon>
     </button>
   </div>
