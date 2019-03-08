@@ -52,7 +52,7 @@ export class WorklogService {
   ) {
   }
 
-  createTaskListForMonth(monthData: WorklogMonth, year: number, month_: string | number, week?: WeeksInMonth):
+  createTaskListForMonth(data: WorklogMonth | WorklogWeek, year: number, month_: string | number, week?: WeeksInMonth):
     { tasks: Task[], rangeStart: Date, rangeEnd: Date } {
     let rangeStart;
     let rangeEnd;
@@ -73,8 +73,8 @@ export class WorklogService {
     rangeEnd.setHours(23, 59, 59);
 
     let tasks = [];
-    Object.keys(monthData.ent).forEach(dayDateStr => {
-      const entry: WorklogDay = monthData.ent[dayDateStr];
+    Object.keys(data.ent).forEach(dayDateStr => {
+      const entry: WorklogDay = data.ent[dayDateStr];
       tasks = tasks.concat(this._createTasksForDay(entry));
     });
     return {

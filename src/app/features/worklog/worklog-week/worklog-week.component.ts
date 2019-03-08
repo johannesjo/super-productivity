@@ -1,5 +1,8 @@
 import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { WorklogService } from '../worklog.service';
+import { DialogWorklogExportComponent } from '../dialog-worklog-export/dialog-worklog-export.component';
+import { MatDialog } from '@angular/material';
+import { WorklogWeek } from '../map-archive-to-worklog';
 
 @Component({
   selector: 'worklog-week',
@@ -12,6 +15,7 @@ export class WorklogWeekComponent implements OnInit {
 
   constructor(
     public readonly worklogService: WorklogService,
+    private readonly _matDialog: MatDialog,
   ) {
   }
 
@@ -20,5 +24,23 @@ export class WorklogWeekComponent implements OnInit {
 
   sortDays(a, b) {
     return a.key - b.key;
+  }
+
+  exportData(data: WorklogWeek) {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = now.getMonth() + 1;
+
+    const {rangeStart, rangeEnd, tasks} = this.worklogService.createTaskListForMonth(data, year, month);
+
+    this._matDialog.open(DialogWorklogExportComponent, {
+      restoreFocus: true,
+      panelClass: 'big',
+      data: {
+        tasks,
+        rangeStart,
+        rangeEnd,
+      }
+    });
   }
 }

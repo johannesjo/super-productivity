@@ -1,35 +1,48 @@
 <!--<pre><code>{{(worklogService.currentWeek$|async|json)}}</code></pre>-->
 
-<div class="days">
-  <div *ngFor="let day of (worklogService.currentWeek$|async)?.ent|keyvalue:sortDays"
-       class="day">
-    <div class="title">
-      <h3 class="mat-h3">{{day.value.dayStr}} {{day.key}}.</h3>
-      <span>∑ {{day.value.timeSpent|msToClockString}}</span>
+<div *ngIf="(worklogService.currentWeek$|async) as currentWeek">
+  <div class="days">
+    <div *ngFor="let day of currentWeek?.ent|keyvalue:sortDays"
+         class="day">
+      <div class="title">
+        <h3 class="mat-h3">{{day.value.dayStr}} {{day.key}}.</h3>
+        <span>∑ {{day.value.timeSpent|msToClockString}}</span>
+      </div>
+      <div class="material-table">
+        <table class="task-summary-table">
+          <!--<caption>Task list for {{day.value.dayStr}} {{worklogForDay.key}}th</caption>-->
+          <!--<tr>-->
+          <!--<th>{{day.value.dayStr}} {{day.key}}.</th>-->
+          <!--<th>∑ {{day.value.timeSpent|msToClockString}}</th>-->
+          <!--</tr>-->
+          <tr>
+            <th>Title</th>
+            <th class="with-icon">
+              <mat-icon>timer</mat-icon>
+            </th>
+          </tr>
+          <tr *ngFor="let logEntry of day.value.logEntries">
+            <td class="title"
+                [class.isSubTask]="logEntry.task.parentId">
+              <span class="task-title">{{logEntry.task.title}}</span>
+            </td>
+            <td class="worked">
+              <span *ngIf="logEntry.task.subTaskIds && logEntry.task.subTaskIds.length>0">∑</span>
+              {{logEntry.task.timeSpentOnDay[day.value.dateStr]|msToClockString}}</td>
+          </tr>
+        </table>
+      </div>
     </div>
-    <div class="material-table">
-      <table class="task-summary-table">
-        <!--<caption>Task list for {{day.value.dayStr}} {{worklogForDay.key}}th</caption>-->
-        <!--<tr>-->
-        <!--<th>{{day.value.dayStr}} {{day.key}}.</th>-->
-        <!--<th>∑ {{day.value.timeSpent|msToClockString}}</th>-->
-        <!--</tr>-->
-        <tr>
-          <th>Title</th>
-          <th class="with-icon">
-            <mat-icon>timer</mat-icon>
-          </th>
-        </tr>
-        <tr *ngFor="let logEntry of day.value.logEntries">
-          <td class="title"
-              [class.isSubTask]="logEntry.task.parentId">
-            <span class="task-title">{{logEntry.task.title}}</span>
-          </td>
-          <td class="worked">
-            <span *ngIf="logEntry.task.subTaskIds && logEntry.task.subTaskIds.length>0">∑</span>
-            {{logEntry.task.timeSpentOnDay[day.value.dateStr]|msToClockString}}</td>
-        </tr>
-      </table>
-    </div>
+  </div>
+
+
+  <div style="text-align: center;">
+    <button mat-button
+            color=""
+            aria-label="export data"
+            (click)="exportData(currentWeek)">
+      Export Week
+      <mat-icon>call_made</mat-icon>
+    </button>
   </div>
 </div>
