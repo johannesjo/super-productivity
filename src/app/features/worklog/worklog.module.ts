@@ -5,6 +5,7 @@ import { UiModule } from '../../ui/ui.module';
 import { DialogWorklogExportComponent } from './dialog-worklog-export/dialog-worklog-export.component';
 import { WorklogExportComponent } from './worklog-export/worklog-export.component';
 import { FormsModule } from '@angular/forms';
+import { WorklogWeekComponent } from './worklog-week/worklog-week.component';
 
 @NgModule({
   imports: [
@@ -16,6 +17,7 @@ import { FormsModule } from '@angular/forms';
     WorklogComponent,
     DialogWorklogExportComponent,
     WorklogExportComponent,
+    WorklogWeekComponent,
   ],
   entryComponents: [
     DialogWorklogExportComponent,
@@ -24,6 +26,7 @@ import { FormsModule } from '@angular/forms';
     WorklogComponent,
     DialogWorklogExportComponent,
     WorklogExportComponent,
+    WorklogWeekComponent,
   ],
 })
 export class WorklogModule {

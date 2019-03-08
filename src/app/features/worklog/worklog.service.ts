@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { mapArchiveToWorklog, Worklog, WorklogDay, WorklogMonth } from './map-archive-to-worklog';
+import { mapArchiveToWorklog, Worklog, WorklogDay, WorklogMonth, WorklogWeek } from './map-archive-to-worklog';
 import { EntityState } from '@ngrx/entity';
 import { Task } from '../tasks/task.model';
 import { dedupeByKey } from '../../util/de-dupe-by-key';
@@ -8,6 +8,7 @@ import { WeeksInMonth } from '../../util/get-weeks-in-month';
 import { ProjectService } from '../project/project.service';
 import { Observable } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
+import { getWeekNumber } from '../../util/get-week-number';
 
 const EMPTY_ENTITY = {
   ids: [],
@@ -18,11 +19,7 @@ const EMPTY_ENTITY = {
   providedIn: 'root'
 })
 export class WorklogService {
-  // currentWeek$: Observable<WorklogWeek> = this._projectService.currentId$.pipe(
-  //   switchMap(id => {
-  //     return this.loadForProject(id);
-  //   }),
-  // );
+
 
   // NOTE: task updates are not reflected
   private _worklogData$: Observable<{ worklog: Worklog; totalTimeSpent: number }> = this._projectService.currentId$.pipe(
@@ -33,6 +30,21 @@ export class WorklogService {
 
   worklog$: Observable<Worklog> = this._worklogData$.pipe(map(data => data.worklog));
   totalTimeSpent$: Observable<number> = this._worklogData$.pipe(map(data => data.totalTimeSpent));
+  currentWeek$: Observable<WorklogWeek> = this.worklog$.pipe(
+    map(worklog => {
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = now.getMonth() + 1;
+      const weekNr = getWeekNumber(now);
+
+      // const month = now.getMonth();
+      // const weekNr = getWeekNumber(now)-3;
+      // console.log(month, weekNr);
+      if (worklog[year] && worklog[year].ent[month]) {
+        return worklog[year].ent[month].weeks.find(week => week.weekNr === weekNr);
+      }
+    }),
+  );
 
   constructor(
     private readonly _persistenceService: PersistenceService,

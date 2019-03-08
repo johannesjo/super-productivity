@@ -1,0 +1,93 @@
+@import "../../../../variables";
+
+:host {
+  display: block;
+}
+
+.days {
+  display: block;
+  white-space: nowrap;
+  overflow-x: auto;
+  text-align: center;
+
+  vertical-align: top;
+}
+
+.day {
+  vertical-align: top;
+  display: inline-block;
+  width: 300px;
+  margin: $s;
+
+
+  > .title {
+    margin-bottom: $s;
+    text-align: center;
+
+    h3 {
+      margin-bottom: 0;
+    }
+  }
+}
+
+.task-summary-table {
+  display: block;
+  width: 100%;
+  border: none;
+
+  > table {
+    width: 100%;
+    text-align: left;
+    border-collapse: collapse;
+
+    > tbody{
+      width: 100%;
+    }
+  }
+
+  caption {
+    font-weight: bold;
+  }
+
+  th,
+  td {
+    text-align: left;
+    white-space: normal;
+    line-height: 16px;
+    padding: $s $s*1.5;
+
+    &.with-icon {
+      padding-top: 0;
+      padding-bottom: 0;
+      text-align: center;
+    }
+
+    &.title {
+      padding-left: $s*2;
+      padding-right: 0;
+      width: 100%;
+    }
+
+    &.worked {
+      white-space: nowrap;
+      text-align: center;
+    }
+
+    &.isSubTask {
+      .task-title {
+        font-style: italic;
+        padding-left: $s*2;
+        position: relative;
+        display: inline-block;
+
+        &:before {
+          content: '•';
+          position: absolute;
+          top: 50%;
+          left: 0;
+          transform: translateY(-50%);
+        }
+      }
+    }
+  }
+}

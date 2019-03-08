@@ -19,8 +19,13 @@ $summary-point-inner-margin: $s;
 .tab-inner {
   padding: $s;
   margin: auto;
-  max-width: $component-max-width
+  max-width: $component-max-width;
+
+  &.full-width {
+    max-width: none;
+  }
 }
+
 
 .back-btn {
   margin-top: $s*2;
