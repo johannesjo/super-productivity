@@ -50,6 +50,9 @@
 
   ::ng-deep table {
     width: 100%;
+    @include darkTheme {
+      background: $dark-theme-bg-darker;
+    }
   }
 
   ::ng-deep td {
@@ -60,6 +63,7 @@
     }
   }
 
+  th,
   td {
     text-align: center;
 
@@ -68,10 +72,16 @@
       text-align: left;
       min-width: 250px;
     }
+
+    &.DATE {
+      @include mq(xs) {
+        white-space: nowrap;
+      }
+    }
   }
 }
 
-.options-collapsible{
+.options-collapsible {
   text-align: center;
 }
 

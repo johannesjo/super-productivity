@@ -33,7 +33,8 @@
           </td>
         </tr>
         <tr>
-          <th *ngFor="let headlineCol of headlineCols;">{{headlineCol}}</th>
+          <th *ngFor="let headlineCol of headlineCols; let i = index;"
+              [ngClass]="options.cols[i]">{{headlineCol}}</th>
         </tr>
         <tr *ngFor="let row of formattedRows;">
           <td *ngFor="let col of row; let i = index;"
