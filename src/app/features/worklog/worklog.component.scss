@@ -44,11 +44,10 @@
   flex-wrap: wrap;
 }
 
-$this-week-margin-left-right: $s*3;
+$this-table-outer-padding-left-right: $s*6;
 $this-table-width: 300px;
-$this-task-table-width: $this-table-width + $this-week-margin-left-right*2;
 .week {
-  margin: 0 $this-week-margin-left-right $s*4;
+  margin: $s*4 0;
   display: flex;
   align-items: center;
   flex-direction: column;
@@ -73,6 +72,10 @@ $this-task-table-width: $this-table-width + $this-week-margin-left-right*2;
     border-collapse: collapse;
 
     > tbody {
+      > tr {
+
+      }
+
       > tr.week-row:hover {
         cursor: pointer;
         outline: 1px solid $c-accent;
@@ -90,20 +93,25 @@ $this-task-table-width: $this-table-width + $this-week-margin-left-right*2;
         }
       }
 
-      > tr.week-row > td {
-        padding: $s/2 $s;
-        white-space: nowrap;
+      > tr.week-row > {
+        th,
+        td {
+          padding: $s/2 $s;
+          white-space: nowrap;
 
-        &:first-child {
-          text-align: left;
-        }
+          &:first-child {
+            padding-left: $this-table-outer-padding-left-right;
+            text-align: left;
+          }
 
-        &:last-child {
-          padding: 0;
+          &:last-child {
+            padding: 0;
+            padding-right: $this-table-outer-padding-left-right;
 
-          button {
-            margin-top: -0.75* $s;
-            margin-bottom: -0.75* $s;
+            button {
+              margin-top: -0.75* $s;
+              margin-bottom: -0.75* $s;
+            }
           }
         }
       }
@@ -142,16 +150,13 @@ $this-task-table-width: $this-table-width + $this-week-margin-left-right*2;
 }
 
 .summary-table-wrapper {
-  margin: 0 -1*($this-week-margin-left-right);
   display: inline-block;
+  width: 100%;
 
   > table {
     width: 100%;
     text-align: left;
-
-    td:first-of-type {
-      padding-right: $s;
-    }
+    border-collapse: collapse;
   }
 
   caption {
