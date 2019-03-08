@@ -4,25 +4,40 @@
   <div class="days">
     <div *ngFor="let day of currentWeek?.ent|keyvalue:sortDays"
          class="day">
-      <div class="title">
-        <h3 class="mat-h3">{{day.value.dayStr}} {{day.key}}.</h3>
-        <strong>∑ {{day.value.timeSpent|msToClockString}}</strong>
-      </div>
       <div class="material-table">
         <table class="task-summary-table">
+          <caption>
+            <div>Title</div>
+            <div>
+              <div class="title">
+                <h3 class="mat-h3">{{day.value.dayStr}} {{day.key}}.</h3>
+                <strong>∑ {{day.value.timeSpent|msToClockString}}</strong>
+              </div>
+            </div>
+            <div class="with-icon">
+              <mat-icon>timer</mat-icon>
+            </div>
+          </caption>
           <!--<caption>Task list for {{day.value.dayStr}} {{worklogForDay.key}}th</caption>-->
           <!--<tr>-->
           <!--<th>{{day.value.dayStr}} {{day.key}}.</th>-->
           <!--<th>∑ {{day.value.timeSpent|msToClockString}}</th>-->
           <!--</tr>-->
-          <tr>
-            <th>Title</th>
-            <th class="with-icon">
-              <mat-icon>timer</mat-icon>
-            </th>
-          </tr>
+          <!--<tr>-->
+          <!--<th>Title</th>-->
+          <!--<th>-->
+          <!--<div class="title">-->
+          <!--<h3 class="mat-h3">{{day.value.dayStr}} {{day.key}}.</h3>-->
+          <!--<strong>∑ {{day.value.timeSpent|msToClockString}}</strong>-->
+          <!--</div>-->
+          <!--</th>-->
+          <!--<th class="with-icon">-->
+          <!--<mat-icon>timer</mat-icon>-->
+          <!--</th>-->
+          <!--</tr>-->
           <tr *ngFor="let logEntry of day.value.logEntries">
             <td class="title"
+                colspan=""
                 [class.isSubTask]="logEntry.task.parentId">
               <span class="task-title">{{logEntry.task.title}}</span>
             </td>

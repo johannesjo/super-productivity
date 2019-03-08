@@ -18,36 +18,48 @@
   display: inline-block;
   width: 300px;
   margin: $s;
-
-
-  > .title {
-    margin-bottom: $s;
-    text-align: center;
-
-    h3 {
-      margin-bottom: 0;
-    }
-  }
 }
 
 .task-summary-table {
   display: block;
   width: 100%;
   border: none;
+  box-shadow: none;
 
   > table {
     width: 100%;
     text-align: left;
     border-collapse: collapse;
 
-    > tbody{
+    > tbody {
       width: 100%;
     }
   }
 
   caption {
-    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    > div {
+      padding: $s $s*2;
+      font-weight: bold;
+    }
+
+    > div.with-icon {
+
+    }
+
+    .title {
+      text-align: center;
+
+      h3 {
+        font-weight: normal;
+        margin-bottom: 0;
+      }
+    }
   }
+
 
   th,
   td {
@@ -55,10 +67,9 @@
     white-space: normal;
     line-height: 16px;
     padding: $s $s*1.5;
+    vertical-align: middle;
 
     &.with-icon {
-      padding-top: 0;
-      padding-bottom: 0;
       text-align: center;
     }
 
