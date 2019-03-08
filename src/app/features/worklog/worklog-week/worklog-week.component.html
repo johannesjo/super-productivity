@@ -18,8 +18,8 @@
                 &nbsp;
                 <mat-icon>list</mat-icon>
                 <strong>{{day.value.logEntries.length}}</strong>
-                &nbsp;
-                <em>9:00-18:00</em>
+                <em *ngIf="day.value.workStart"><span class="spacer"></span>{{day.value.workStart|momentFormat:'HH:mm'}}
+                  - {{day.value.workEnd|momentFormat:'HH:mm'}}</em>
               </div>
             </div>
           </div>
@@ -49,7 +49,7 @@
   </div>
 
 
-  <div style="text-align: center;">
+  <div style="text-align: center; margin-top: 12px;">
     <button mat-button
             color=""
             aria-label="export data"

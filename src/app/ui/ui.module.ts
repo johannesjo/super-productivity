@@ -60,6 +60,7 @@ import { MsToMinuteClockStringPipe } from './duration/ms-to-minute-clock-string.
 import { HumanizeTimestampPipe } from './pipes/humanize-timestamp.pipe';
 import { KeysPipe } from './pipes/keys.pipe';
 import { ToArrayPipe } from './pipes/to-array.pipe';
+import { MomentFormatPipe } from './pipes/moment-format.pipe';
 
 @NgModule({
   imports: [
@@ -137,6 +138,7 @@ import { ToArrayPipe } from './pipes/to-array.pipe';
     KeysPipe,
     ToArrayPipe,
     HumanizeTimestampPipe,
+    MomentFormatPipe,
   ],
   entryComponents: [
     DialogConfirmComponent,
@@ -168,6 +170,7 @@ import { ToArrayPipe } from './pipes/to-array.pipe';
     KeysPipe,
     ToArrayPipe,
     HumanizeTimestampPipe,
+    MomentFormatPipe,
 
     DragulaModule,
     Angular2PromiseButtonModule,

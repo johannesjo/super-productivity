@@ -9,6 +9,7 @@ import { ProjectService } from '../project/project.service';
 import { Observable } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 import { getWeekNumber } from '../../util/get-week-number';
+import { Project } from '../project/project.model';
 
 const EMPTY_ENTITY = {
   ids: [],
@@ -22,9 +23,9 @@ export class WorklogService {
 
 
   // NOTE: task updates are not reflected
-  private _worklogData$: Observable<{ worklog: Worklog; totalTimeSpent: number }> = this._projectService.currentId$.pipe(
-    switchMap(id => {
-      return this._loadForProject(id);
+  private _worklogData$: Observable<{ worklog: Worklog; totalTimeSpent: number }> = this._projectService.currentProject$.pipe(
+    switchMap(curProject => {
+      return this._loadForProject(curProject);
     }),
   );
 
@@ -34,12 +35,12 @@ export class WorklogService {
     map(worklog => {
       const now = new Date();
       const year = now.getFullYear();
-      // const month = now.getMonth() + 1;
-      // const weekNr = getWeekNumber(now);
+      const month = now.getMonth() + 1;
+      const weekNr = getWeekNumber(now);
 
-      const month = now.getMonth();
-      const weekNr = getWeekNumber(now)-2;
-      console.log(month, weekNr);
+      // const month = now.getMonth();
+      // const weekNr = getWeekNumber(now) - 2;
+      // console.log(month, weekNr);
       if (worklog[year] && worklog[year].ent[month]) {
         return worklog[year].ent[month].weeks.find(week => week.weekNr === weekNr);
       }
@@ -85,9 +86,13 @@ export class WorklogService {
   }
 
 
-  private async _loadForProject(projectId): Promise<{ worklog: Worklog; totalTimeSpent: number }> {
-    const archive = await this._persistenceService.loadTaskArchiveForProject(projectId) || EMPTY_ENTITY;
-    const taskState = await this._persistenceService.loadTasksForProject(projectId) || EMPTY_ENTITY;
+  private async _loadForProject(project: Project): Promise<{ worklog: Worklog; totalTimeSpent: number }> {
+    const archive = await this._persistenceService.loadTaskArchiveForProject(project.id) || EMPTY_ENTITY;
+    const taskState = await this._persistenceService.loadTasksForProject(project.id) || EMPTY_ENTITY;
+    const startEnd = {
+      workStart: project.workStart,
+      workEnd: project.workEnd,
+    };
 
     const completeState: EntityState<Task> = {
       ids: [...archive.ids, ...taskState.ids] as string[],
@@ -98,7 +103,7 @@ export class WorklogService {
     };
 
     if (completeState) {
-      const {worklog, totalTimeSpent} = mapArchiveToWorklog(completeState, taskState.ids);
+      const {worklog, totalTimeSpent} = mapArchiveToWorklog(completeState, taskState.ids, startEnd);
       return {
         worklog,
         totalTimeSpent,
