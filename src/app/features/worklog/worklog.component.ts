@@ -2,18 +2,17 @@ import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnIni
 import { PersistenceService } from '../../core/persistence/persistence.service';
 import { ProjectService } from '../project/project.service';
 import { expandFadeAnimation } from '../../ui/animations/expand.ani';
-import { mapArchiveToWorklog, Worklog, WorklogDay, WorklogMonth } from './map-archive-to-worklog';
+import { Worklog, WorklogDay, WorklogMonth } from './map-archive-to-worklog';
 import { MatDialog } from '@angular/material';
 import { Subscription } from 'rxjs';
-import { Task, TaskCopy } from '../tasks/task.model';
+import { TaskCopy } from '../tasks/task.model';
 import { TaskService } from '../tasks/task.service';
-import { EntityState } from '@ngrx/entity';
-import { dedupeByKey } from '../../util/de-dupe-by-key';
 import { WeeksInMonth } from '../../util/get-weeks-in-month';
 import { DialogWorklogExportComponent } from './dialog-worklog-export/dialog-worklog-export.component';
 import { DialogConfirmComponent } from '../../ui/dialog-confirm/dialog-confirm.component';
 import { Router } from '@angular/router';
 import { standardListAnimation } from '../../ui/animations/standard-list.ani';
+import { WorklogService } from './worklog.service';
 
 const EMPTY_ENTITY = {
   ids: [],
@@ -31,13 +30,13 @@ const EMPTY_ENTITY = {
 export class WorklogComponent implements OnInit, OnDestroy {
   worklog: Worklog = {};
   totalTimeSpent: number;
-  private _isUnloaded = false;
   private _subs = new Subscription();
 
   constructor(
     private readonly _persistenceService: PersistenceService,
     private readonly _projectService: ProjectService,
     private readonly _taskService: TaskService,
+    private readonly _worklogService: WorklogService,
     private readonly _matDialog: MatDialog,
     private readonly _cd: ChangeDetectorRef,
     private readonly _router: Router,
@@ -46,7 +45,7 @@ export class WorklogComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this._subs.add(this._projectService.currentId$.subscribe(async (id) => {
-      const {worklog, totalTimeSpent} = await this._loadData(id);
+      const {worklog, totalTimeSpent} = await this._worklogService.loadForProject(id);
       this.worklog = worklog;
       this.totalTimeSpent = totalTimeSpent;
       // console.log(this.worklog);
@@ -56,36 +55,17 @@ export class WorklogComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    // TODO better solution
-    this._isUnloaded = true;
     this._subs.unsubscribe();
   }
 
-  exportData(monthData: WorklogMonth, year: number, month_: string | number, week?: WeeksInMonth) {
-    let rangeStart;
-    let rangeEnd;
-    // denormalize to js month again
-    const month = +month_ - 1;
-    if (!week) {
-      // firstDayOfMonth
-      rangeStart = new Date(year, month, 1);
-      // lastDayOfMonth
-      rangeEnd = new Date(year, month + 1, 0);
-    } else {
-      // startOfWeek
-      rangeStart = new Date(year, month, week.start);
-      // endOfWeek
-      rangeEnd = new Date(year, month, week.end);
-    }
-
-    rangeEnd.setHours(23, 59, 59);
+  exportData(monthData: WorklogMonth, year: number, month: string | number, week?: WeeksInMonth) {
+    const {rangeStart, rangeEnd, tasks} = this._worklogService.createTaskListForMonth(monthData, year, month, week);
 
     this._matDialog.open(DialogWorklogExportComponent, {
       restoreFocus: true,
       panelClass: 'big',
       data: {
-        tasks: this._createTasksForMonth(monthData),
-        isWorklogExport: true,
+        tasks,
         rangeStart,
         rangeEnd,
       }
@@ -123,59 +103,5 @@ export class WorklogComponent implements OnInit, OnDestroy {
 
   sortWorklogItemsReverse(a, b) {
     return a.key - b.key;
-  }
-
-  private async _loadData(projectId): Promise<{ worklog: Worklog; totalTimeSpent: number }> {
-    const archive = await this._persistenceService.loadTaskArchiveForProject(projectId) || EMPTY_ENTITY;
-    const taskState = await this._persistenceService.loadTasksForProject(projectId) || EMPTY_ENTITY;
-
-    const completeState: EntityState<Task> = {
-      ids: [...archive.ids, ...taskState.ids] as string[],
-      entities: {
-        ...archive.entities,
-        ...taskState.entities
-      }
-    };
-
-    if (this._isUnloaded) {
-      return;
-    }
-
-    if (completeState) {
-      const {worklog, totalTimeSpent} = mapArchiveToWorklog(completeState, taskState.ids);
-      return {
-        worklog,
-        totalTimeSpent,
-      };
-    } else {
-      return {
-        worklog: {},
-        totalTimeSpent: null
-      };
-    }
-  }
-
-  private _createTasksForDay(data: WorklogDay) {
-    const tasks = [];
-    const dayData = {...data};
-
-    dayData.logEntries.forEach((entry) => {
-      const task: any = {...entry.task};
-      task.timeSpent = entry.timeSpent;
-      task.dateStr = dayData.dateStr;
-      tasks.push(task);
-    });
-
-    return dedupeByKey(tasks, 'id');
-  }
-
-  private _createTasksForMonth(data: WorklogMonth) {
-    let tasks = [];
-    const monthData = {...data};
-    Object.keys(monthData.ent).forEach(dayDateStr => {
-      const entry: WorklogDay = monthData.ent[dayDateStr];
-      tasks = tasks.concat(this._createTasksForDay(entry));
-    });
-    return dedupeByKey(tasks, 'id');
   }
 }
