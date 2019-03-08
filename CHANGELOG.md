@@ -1,3 +1,38 @@
+# [2.5.0](https://github.com/johannesjo/super-productivity/compare/v2.4.7...v2.5.0) (2019-03-08)
+
+
+### Bug Fixes
+
+* **idle:** isIdle not being reset after dialog is closed ([51d5813](https://github.com/johannesjo/super-productivity/commit/51d5813))
+* **worklog:** remove left over option ([f6e958c](https://github.com/johannesjo/super-productivity/commit/f6e958c))
+
+
+### Features
+
+* **dailySummary:** add week summary ([a88e93e](https://github.com/johannesjo/super-productivity/commit/a88e93e))
+* **dailySummary:** improve styling ([0bb5a03](https://github.com/johannesjo/super-productivity/commit/0bb5a03))
+* **dailySummary:** improve styling ([57a5ad2](https://github.com/johannesjo/super-productivity/commit/57a5ad2))
+* **worklog:** add animation to worklog ([36d8182](https://github.com/johannesjo/super-productivity/commit/36d8182))
+* **worklog:** add day start and end to worklog week ([aa4380f](https://github.com/johannesjo/super-productivity/commit/aa4380f))
+* **worklog:** add export button to worklog week ([b8c2018](https://github.com/johannesjo/super-productivity/commit/b8c2018))
+* **worklog:** add inline task tables again ([2532dbc](https://github.com/johannesjo/super-productivity/commit/2532dbc))
+* **worklog:** add modal for task summary ([78b8369](https://github.com/johannesjo/super-productivity/commit/78b8369))
+* **worklog:** add more info for worklog week days ([13f06d3](https://github.com/johannesjo/super-productivity/commit/13f06d3))
+* **worklog:** allow for html separator ([9419205](https://github.com/johannesjo/super-productivity/commit/9419205))
+* **worklog:** beautify ui ([960338d](https://github.com/johannesjo/super-productivity/commit/960338d))
+* **worklog:** improve export worklog styling for mobile ([0fe7ca2](https://github.com/johannesjo/super-productivity/commit/0fe7ca2))
+* **worklog:** improve hover and expanded styles for weeks ([73ce1d9](https://github.com/johannesjo/super-productivity/commit/73ce1d9))
+* **worklog:** improve styling for worklog export ([1ffc129](https://github.com/johannesjo/super-productivity/commit/1ffc129))
+* **worklog:** improve task table styles ([323ed35](https://github.com/johannesjo/super-productivity/commit/323ed35))
+* **worklog:** improve worklog week table styling ([97650fe](https://github.com/johannesjo/super-productivity/commit/97650fe))
+* **worklog:** make restore tasks work again ([ae787de](https://github.com/johannesjo/super-productivity/commit/ae787de))
+* **worklog:** make week table a little smaller ([5b61555](https://github.com/johannesjo/super-productivity/commit/5b61555))
+* **worklog:** make worklog week days collapsable ([716b60d](https://github.com/johannesjo/super-productivity/commit/716b60d))
+* **worklog:** minor styling improvement ([73a2158](https://github.com/johannesjo/super-productivity/commit/73a2158))
+* **worklog:** split up into weeks ([55eb690](https://github.com/johannesjo/super-productivity/commit/55eb690))
+
+
+
 ## [2.4.7](https://github.com/johannesjo/super-productivity/compare/v2.4.6...v2.4.7) (2019-03-05)
 
 
