@@ -154,19 +154,28 @@ $this-task-table-width: $this-table-width + $this-week-margin-left-right*2;
     }
   }
 
+  caption {
+    font-weight: bold;
+  }
+
   td {
     text-align: left;
     white-space: normal;
+    line-height: 16px;
+    padding: $s $s*1.5;
 
-    &:nth-child(2) {
+    &.title {
+      padding-left: $s*2;
+      padding-right: 0;
+    }
+
+    &.worked {
+      white-space: nowrap;
       text-align: center;
     }
 
-    &:last-child {
-      padding-top: 0;
-      padding-bottom: 0;
-      padding-left: 0;
-      padding-right: $s;
+    &.actions {
+      padding: 0 0 0 0;
     }
 
     &.isSubTask {
@@ -177,7 +186,7 @@ $this-task-table-width: $this-table-width + $this-week-margin-left-right*2;
         display: inline-block;
 
         &:before {
-          content: '–';
+          content: '•';
           position: absolute;
           top: 50%;
           left: 0;

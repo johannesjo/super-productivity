@@ -35,13 +35,17 @@ div.material-table {
 }
 
 table.material-table,
-.material-table table {
+div.material-table {
   box-shadow: $whiteframe-shadow-3dp;
   border: 1px solid rgba(0, 0, 0, .12);
   font-size: 13px;
-  border-collapse: collapse;
   white-space: nowrap;
   background-color: #FFF;
+
+  &,
+  table {
+    border-collapse: collapse;
+  }
 
   .isDarkTheme & {
     background: $dark-theme-bg-lighter;

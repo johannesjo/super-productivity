@@ -88,9 +88,13 @@
                       <td></td>
                     </tr>
                     <tr *ngFor="let logEntry of worklogForDay.value.logEntries">
-                      <td [innerHtml]="(logEntry.parentTitle ? logEntry.parentTitle +' / ': '') + logEntry.task.title"></td>
-                      <td [innerHtml]="logEntry.task.timeSpentOnDay[worklogForDay.value.dateStr]|msToString"></td>
-                      <td>
+                      <td class="title"
+                        [class.isSubTask]="logEntry.task.parentId">
+                        <span class="task-title">{{logEntry.task.title}}</span></td>
+                      <td class="worked">
+                        <span *ngIf="logEntry.task.subTaskIds && logEntry.task.subTaskIds.length>0">∑</span>
+                        {{logEntry.task.timeSpentOnDay[worklogForDay.value.dateStr]|msToClockString}}</td>
+                      <td class="actions">
                         <button mat-icon-button=""
                                 title="Restore Task From Archive"
                                 color=""
