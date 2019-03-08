@@ -1,8 +1,8 @@
 <h1 class="mat-headline total-time">Total time spent on project
-  <br><strong>{{totalTimeSpent|msToString}}</strong></h1>
+  <br><strong>{{worklogService.totalTimeSpent$|async|msToString}}</strong></h1>
 
 <div class="years"
-     *ngIf="totalTimeSpent"
+     *ngIf="worklogService.worklog$|async as worklog"
      [@standardList]="'ALWAYS'">
   <div *ngFor="let year of (worklog|keyvalue:sortWorklogItems)"
        class="year">
