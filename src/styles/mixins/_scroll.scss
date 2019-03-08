@@ -28,6 +28,8 @@
 
   .isNoMac &,
   :host-context(.isNoMac) & {
+    overflow-y: overlay;
+
     @supports (overflow: overlay) {
       @include mq(xs) {
         overflow-y: overlay;

@@ -5,19 +5,27 @@
     <div *ngFor="let day of currentWeek?.ent|keyvalue:sortDays"
          class="day">
       <div class="material-table">
-        <table class="task-summary-table">
-          <caption>
-            <div>Title</div>
-            <div>
-              <div class="title">
-                <h3 class="mat-h3">{{day.value.dayStr}} {{day.key}}.</h3>
-                <strong>∑ {{day.value.timeSpent|msToClockString}}</strong>
-              </div>
+        <div class="caption"
+             (click)="day.value.isVisible=!day.value.isVisible;">
+          <div><span [@fade]
+                     *ngIf="day.value.isVisible">Title</span></div>
+          <div>
+            <div class="title">
+              <h3 class="mat-h3">{{day.value.dayStr}} {{day.key}}.</h3>
+              <strong>∑ {{day.value.timeSpent|msToClockString}}</strong>
             </div>
-            <div class="with-icon">
-              <mat-icon>timer</mat-icon>
-            </div>
-          </caption>
+          </div>
+          <div class="with-icon">
+            <mat-icon [@fade]
+                      *ngIf="day.value.isVisible">timer
+            </mat-icon>
+          </div>
+        </div>
+
+        <table class="task-summary-table"
+               [@expandFade]
+               *ngIf="day.value.isVisible">
+
           <!--<caption>Task list for {{day.value.dayStr}} {{worklogForDay.key}}th</caption>-->
           <!--<tr>-->
           <!--<th>{{day.value.dayStr}} {{day.key}}.</th>-->
