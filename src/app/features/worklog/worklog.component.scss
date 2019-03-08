@@ -72,27 +72,6 @@ $this-table-width: 300px;
     border-collapse: collapse;
 
     > tbody {
-      > tr {
-
-      }
-
-      > tr.week-row:hover {
-        cursor: pointer;
-        outline: 1px solid $c-accent;
-
-        &:first-child {
-          cursor: auto;
-          outline: none;
-        }
-
-        > td {
-          background: #fff;
-          @include darkTheme {
-            background-color: $dark-theme-bg-darker;
-          }
-        }
-      }
-
       > tr.week-row > {
         th,
         td {
@@ -116,8 +95,22 @@ $this-table-width: 300px;
         }
       }
 
-      > tr.isExpanded > td {
-        font-weight: bold;
+      > tr.week-row {
+        &:hover,
+        &.isExpanded {
+          cursor: pointer;
+
+          > td {
+            // bold without respacing
+            text-shadow: .05px 0 .05px, -.05px 0 .05px;
+            background: #fff;
+            box-shadow: $whiteframe-shadow-2dp;
+
+            @include darkTheme {
+              background-color: $dark-theme-bg-darker;
+            }
+          }
+        }
       }
     }
   }
@@ -152,6 +145,8 @@ $this-table-width: 300px;
 .summary-table-wrapper {
   display: inline-block;
   width: 100%;
+  margin-bottom: $s;
+  border: none;
 
   > table {
     width: 100%;

@@ -60,10 +60,7 @@
             <tr (click)="worklogForDay.value.isVisible=!worklogForDay.value.isVisible;"
                 class="week-row"
                 [class.isExpanded]="worklogForDay.value.isVisible">
-              <td>
-                <div class="day-date"><span>{{worklogForDay.key}}. </span><span>{{worklogForDay.value.dayStr}}</span>
-                </div>
-              </td>
+              <td>{{worklogForDay.value.dayStr}} {{worklogForDay.key}}.</td>
               <td>{{worklogForDay.value.logEntries.length}}</td>
               <td>{{worklogForDay.value.timeSpent|msToClockString}}</td>
               <td>
@@ -78,19 +75,20 @@
             <tr>
               <td colspan="4">
                 <div [@expandFade]
-                     class="summary-table-wrapper mat-elevation-z2 material-table"
+                     class="summary-table-wrapper material-table"
                      *ngIf="worklogForDay.value.isVisible">
                   <table class="task-summary-table">
-                    <caption>Task list for {{worklogForDay.value.dayStr}} {{worklogForDay.key}}th</caption>
-                    <tr>
-                      <td>Title</td>
-                      <td>Worked</td>
-                      <td></td>
-                    </tr>
+                    <!--<caption>Task list for {{worklogForDay.value.dayStr}} {{worklogForDay.key}}th</caption>-->
+                    <!--<tr>-->
+                      <!--<th>Title</th>-->
+                      <!--<th>Worked</th>-->
+                      <!--<th></th>-->
+                    <!--</tr>-->
                     <tr *ngFor="let logEntry of worklogForDay.value.logEntries">
                       <td class="title"
                         [class.isSubTask]="logEntry.task.parentId">
-                        <span class="task-title">{{logEntry.task.title}}</span></td>
+                        <span class="task-title">{{logEntry.task.title}}</span>
+                      </td>
                       <td class="worked">
                         <span *ngIf="logEntry.task.subTaskIds && logEntry.task.subTaskIds.length>0">∑</span>
                         {{logEntry.task.timeSpentOnDay[worklogForDay.value.dateStr]|msToClockString}}</td>
