@@ -32,16 +32,36 @@
   align-items: center;
   justify-content: space-between;
   cursor: pointer;
+  user-select: none;
+
+  em,
+  strong,
+  span,
+  mat-icon {
+    vertical-align: middle;
+    display: inline-block;
+  }
 
   > div {
-    padding: $s $s*2;
+    padding: $s 0;
     font-weight: bold;
-    flex-basis: 25%;
+    flex-basis: 20%;
+
+    &:first-child {
+      padding-left: $s*2;
+      text-align: left;
+    }
+
+    &:last-child {
+      padding-right: $s*2;
+      text-align: right;
+    }
   }
 
   .title {
     text-align: center;
-    flex-basis: 50%;
+    flex-basis: 60%;
+    font-weight: normal;
 
     h3 {
       font-weight: normal;

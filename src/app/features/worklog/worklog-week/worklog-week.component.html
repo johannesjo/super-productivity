@@ -12,7 +12,15 @@
           <div>
             <div class="title">
               <h3 class="mat-h3">{{day.value.dayStr}} {{day.key}}.</h3>
-              <strong>∑ {{day.value.timeSpent|msToClockString}}</strong>
+              <div *ngIf="!day.value.isVisible"
+                   [@expandFade]>
+                <strong>∑ {{day.value.timeSpent|msToClockString}}</strong>
+                &nbsp;
+                <mat-icon>list</mat-icon>
+                <strong>{{day.value.logEntries.length}}</strong>
+                &nbsp;
+                <em>9:00-18:00</em>
+              </div>
             </div>
           </div>
           <div class="with-icon">
@@ -25,24 +33,6 @@
         <table class="task-summary-table"
                [@expandFade]
                *ngIf="day.value.isVisible">
-
-          <!--<caption>Task list for {{day.value.dayStr}} {{worklogForDay.key}}th</caption>-->
-          <!--<tr>-->
-          <!--<th>{{day.value.dayStr}} {{day.key}}.</th>-->
-          <!--<th>∑ {{day.value.timeSpent|msToClockString}}</th>-->
-          <!--</tr>-->
-          <!--<tr>-->
-          <!--<th>Title</th>-->
-          <!--<th>-->
-          <!--<div class="title">-->
-          <!--<h3 class="mat-h3">{{day.value.dayStr}} {{day.key}}.</h3>-->
-          <!--<strong>∑ {{day.value.timeSpent|msToClockString}}</strong>-->
-          <!--</div>-->
-          <!--</th>-->
-          <!--<th class="with-icon">-->
-          <!--<mat-icon>timer</mat-icon>-->
-          <!--</th>-->
-          <!--</tr>-->
           <tr *ngFor="let logEntry of day.value.logEntries">
             <td class="title"
                 colspan=""
