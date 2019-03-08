@@ -56,7 +56,7 @@
 
     <mat-tab label="Tasks">
       <section class="tab-inner">
-        <div class="table-wrapper">
+        <div class="table-wrapper mat-elevation-z3">
           <table mat-table
                  [dataSource]="todaysTasksFlat$|async"
                  class="mat-elevation-z2 summary-table">
@@ -79,7 +79,7 @@
                   *matHeaderCellDef> Spent Today
               </th>
               <td mat-cell
-                  *matCellDef="let task"> {{task.timeSpentOnDay[todayStr]|msToString}}
+                  *matCellDef="let task"> {{task.timeSpentOnDay[todayStr]|msToClockString}}
               </td>
             </ng-container>
 
@@ -89,7 +89,7 @@
               </th>
               <td mat-cell
                   *matCellDef="let task">
-                {{task.timeSpent|msToString}}
+                {{task.timeSpent|msToClockString}}
               </td>
             </ng-container>
 
@@ -99,7 +99,7 @@
               </th>
               <td mat-cell
                   *matCellDef="let task">
-                {{task.timeEstimate|msToString}}
+                {{task.timeEstimate|msToClockString}}
               </td>
             </ng-container>
 
