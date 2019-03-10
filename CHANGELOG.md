@@ -1,3 +1,13 @@
+## [2.5.1](https://github.com/johannesjo/super-productivity/compare/v2.5.0...v2.5.1) (2019-03-10)
+
+
+### Bug Fixes
+
+* **googleDriveSync:** don't open multiple dialogs of the same type ([c6811e4](https://github.com/johannesjo/super-productivity/commit/c6811e4))
+* **pomodoro:** break end sound not playing at break [#138](https://github.com/johannesjo/super-productivity/issues/138) ([4588fe7](https://github.com/johannesjo/super-productivity/commit/4588fe7))
+
+
+
 # [2.5.0](https://github.com/johannesjo/super-productivity/compare/v2.4.7...v2.5.0) (2019-03-08)
 
 
