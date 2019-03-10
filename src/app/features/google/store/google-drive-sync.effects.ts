@@ -35,7 +35,7 @@ import {
   SaveToGoogleDriveSuccess
 } from './google-drive-sync.actions';
 import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confirm.component';
-import { MatDialog } from '@angular/material';
+import { MatDialog, MatDialogRef } from '@angular/material';
 import { GoogleDriveSyncConfig } from '../../config/config.model';
 import { SyncService } from '../../../imex/sync/sync.service';
 import { SnackOpen } from '../../../core/snack/store/snack.actions';
@@ -384,32 +384,42 @@ export class GoogleDriveSyncEffects {
       );
   }
 
-  private _openConfirmSaveDialog(remoteModified): void {
-    const lastActiveLocal = this._syncService.getLastActive();
-    this._matDialog.open(DialogConfirmDriveSyncSaveComponent, {
-      restoreFocus: true,
-      data: {
-        loadFromRemote: () => this._store$.dispatch(new LoadFromGoogleDrive()),
-        saveToRemote: () => this._store$.dispatch(new SaveToGoogleDrive()),
-        remoteModified: this._formatDate(remoteModified),
-        lastActiveLocal: this._formatDate(lastActiveLocal),
-        lastSync: this._formatDate(this._config._lastSync),
-      }
-    });
+  private _openConfirmSaveDialog(remoteModified: string | Date): void {
+    // Don't open multiple at the same time
+    if (!this._matDialog.openDialogs.length || !this._matDialog.openDialogs.find((modal: MatDialogRef<any>) => {
+      return modal.componentInstance.constructor.name === DialogConfirmDriveSyncSaveComponent.name;
+    })) {
+      const lastActiveLocal = this._syncService.getLastActive();
+      this._matDialog.open(DialogConfirmDriveSyncSaveComponent, {
+        restoreFocus: true,
+        data: {
+          loadFromRemote: () => this._store$.dispatch(new LoadFromGoogleDrive()),
+          saveToRemote: () => this._store$.dispatch(new SaveToGoogleDrive()),
+          remoteModified: this._formatDate(remoteModified),
+          lastActiveLocal: this._formatDate(lastActiveLocal),
+          lastSync: this._formatDate(this._config._lastSync),
+        }
+      });
+    }
   }
 
-  private _openConfirmLoadDialog(remoteModified): void {
-    const lastActiveLocal = this._syncService.getLastActive();
-    this._matDialog.open(DialogConfirmDriveSyncLoadComponent, {
-      restoreFocus: true,
-      data: {
-        loadFromRemote: () => this._store$.dispatch(new LoadFromGoogleDrive()),
-        saveToRemote: () => this._store$.dispatch(new SaveToGoogleDrive()),
-        remoteModified: this._formatDate(remoteModified),
-        lastActiveLocal: this._formatDate(lastActiveLocal),
-        lastSync: this._formatDate(this._config._lastSync),
-      }
-    });
+  private _openConfirmLoadDialog(remoteModified: string | Date): void {
+    // Don't open multiple at the same time
+    if (!this._matDialog.openDialogs.length || !this._matDialog.openDialogs.find((modal: MatDialogRef<any>) => {
+      return modal.componentInstance.constructor.name === DialogConfirmDriveSyncLoadComponent.name;
+    })) {
+      const lastActiveLocal = this._syncService.getLastActive();
+      this._matDialog.open(DialogConfirmDriveSyncLoadComponent, {
+        restoreFocus: true,
+        data: {
+          loadFromRemote: () => this._store$.dispatch(new LoadFromGoogleDrive()),
+          saveToRemote: () => this._store$.dispatch(new SaveToGoogleDrive()),
+          remoteModified: this._formatDate(remoteModified),
+          lastActiveLocal: this._formatDate(lastActiveLocal),
+          lastSync: this._formatDate(this._config._lastSync),
+        }
+      });
+    }
   }
 
   private _showAsyncToast(showWhile$: Observable<any> = EMPTY, msg) {
@@ -483,7 +493,7 @@ If not please change the Sync file name.`,
     return (d1.getTime() === d2.getTime());
   }
 
-  private _formatDate(date) {
+  private _formatDate(date: Date | string) {
     return moment(date).format('DD-MM-YYYY --- hh:mm:ss');
   }
 }
