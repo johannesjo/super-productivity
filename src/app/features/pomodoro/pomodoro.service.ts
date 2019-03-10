@@ -5,7 +5,13 @@ import { distinctUntilChanged, filter, map, mapTo, scan, shareReplay, withLatest
 import { PomodoroConfig } from '../config/config.model';
 import { TimeTrackingService } from '../time-tracking/time-tracking.service';
 import { select, Store } from '@ngrx/store';
-import { FinishPomodoroSession, PausePomodoro, PomodoroActionTypes, StartPomodoro, StopPomodoro } from './store/pomodoro.actions';
+import {
+  FinishPomodoroSession,
+  PausePomodoro,
+  PomodoroActionTypes,
+  StartPomodoro,
+  StopPomodoro
+} from './store/pomodoro.actions';
 import { selectCurrentCycle, selectIsBreak, selectIsManualPause } from './store/pomodoro.reducer';
 import { DEFAULT_CFG } from '../config/default-config.const';
 import { Actions, ofType } from '@ngrx/effects';
@@ -61,7 +67,7 @@ export class PomodoroService {
       this.cfg$,
     ),
     map(([trigger, isLong, isShort, isBreak, cfg]) => {
-      // cfg.duration = 6000;
+      // cfg.duration = 3000;
       // cfg.breakDuration = 3000;
       // cfg.longerBreakDuration = 20000;
       if (!isBreak) {
@@ -109,7 +115,7 @@ export class PomodoroService {
       .subscribe(([val, cfg, isBreak]) => {
         console.log('currentSessionTime$', val, isBreak, cfg);
         if (cfg.isManualContinue && isBreak) {
-          this.pause();
+          this.pause(true);
         } else {
           this.finishPomodoroSession();
         }
@@ -129,8 +135,8 @@ export class PomodoroService {
     this._store$.dispatch(new StartPomodoro());
   }
 
-  pause() {
-    this._store$.dispatch(new PausePomodoro());
+  pause(isBreakEndPause = false) {
+    this._store$.dispatch(new PausePomodoro({isBreakEndPause}));
   }
 
   stop() {

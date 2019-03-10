@@ -43,7 +43,7 @@ export class PomodoroEffects {
       if (action['payload'] && action.type !== TaskActionTypes.UnsetCurrentTask) {
         return new StartPomodoro();
       } else {
-        return new PausePomodoro();
+        return new PausePomodoro({isBreakEndPause: false});
       }
     }),
   );
@@ -85,14 +85,20 @@ export class PomodoroEffects {
 
   @Effect({dispatch: false})
   playSessionDoneSoundIfEnabled$ = this._actions$.pipe(
-    ofType(PomodoroActionTypes.FinishPomodoroSession),
+    ofType(
+      PomodoroActionTypes.PausePomodoro,
+      PomodoroActionTypes.FinishPomodoroSession,
+    ),
     withLatestFrom(
       this._pomodoroService.cfg$,
       this._pomodoroService.isBreak$,
     ),
     filter(isEnabled),
-    filter(([action, cfg, isBreak]: [FinishPomodoroSession, PomodoroConfig, boolean]) =>
-      (cfg.isPlaySound && isBreak) || (cfg.isPlaySoundAfterBreak && !isBreak)),
+    filter(([action, cfg, isBreak]: [FinishPomodoroSession | PausePomodoro, PomodoroConfig, boolean]) => {
+      return (action.type === PomodoroActionTypes.FinishPomodoroSession
+        && (cfg.isPlaySound && isBreak) || (cfg.isPlaySoundAfterBreak && !cfg.isManualContinue && !isBreak))
+        || (action.type === PomodoroActionTypes.PausePomodoro && action.payload.isBreakEndPause);
+    }),
     tap(() => this._pomodoroService.playSessionDoneSound()),
   );
 
@@ -156,8 +162,5 @@ export class PomodoroEffects {
     private _matDialog: MatDialog,
     private _store$: Store<any>,
   ) {
-  }
-
-  private _sendUpdateToRemoteInterface() {
   }
 }
