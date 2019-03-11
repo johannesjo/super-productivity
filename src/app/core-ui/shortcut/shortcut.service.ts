@@ -3,7 +3,6 @@ import { IS_ELECTRON } from '../../app.constants';
 import { checkKeyCombo } from '../../util/check-key-combo';
 import { ConfigService } from '../../features/config/config.service';
 import { ActivatedRoute, Router } from '@angular/router';
-import { IPC_REGISTER_GLOBAL_SHORTCUT_EVENT } from '../../../../electron/ipc-events.const';
 import { ElectronService } from 'ngx-electron';
 import { LayoutService } from '../layout/layout.service';
 import { NoteService } from '../../features/note/note.service';
@@ -30,11 +29,6 @@ export class ShortcutService {
     private _activatedRoute: ActivatedRoute,
     private _bookmarkService: BookmarkService,
   ) {
-    //   // Register electron shortcut(s)
-    if (IS_ELECTRON && this._configService.cfg.keyboard.globalShowHide) {
-      _electronService.ipcRenderer.send(IPC_REGISTER_GLOBAL_SHORTCUT_EVENT, this._configService.cfg.keyboard.globalShowHide);
-    }
-
     this._activatedRoute.queryParams
       .subscribe((params) => {
         if (params && params.backlogPos) {

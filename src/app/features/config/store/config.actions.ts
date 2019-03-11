@@ -1,5 +1,5 @@
 import { Action } from '@ngrx/store';
-import { GlobalConfig, SectionConfig } from '../config.model';
+import { ConfigSectionKey, GlobalConfig, SectionConfig } from '../config.model';
 
 export enum ConfigActionTypes {
   LoadConfig = '[Config] Load Config',
@@ -17,7 +17,7 @@ export class UpdateConfigSection implements Action {
   readonly type = ConfigActionTypes.UpdateConfigSection;
 
   constructor(public payload: {
-    sectionKey: string
+    sectionKey: ConfigSectionKey
     sectionCfg: Partial<SectionConfig>,
     isSkipLastActive: boolean,
   }) {

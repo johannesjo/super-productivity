@@ -1,11 +1,15 @@
 import { Injectable } from '@angular/core';
 import { Actions, Effect, ofType } from '@ngrx/effects';
-import { tap, withLatestFrom } from 'rxjs/operators';
-import { ConfigActionTypes, UpdateConfigSection } from './config.actions';
+import { filter, tap, withLatestFrom } from 'rxjs/operators';
+import { ConfigActionTypes, LoadConfig, UpdateConfigSection } from './config.actions';
 import { Store } from '@ngrx/store';
 import { CONFIG_FEATURE_NAME } from './config.reducer';
 import { PersistenceService } from '../../../core/persistence/persistence.service';
 import { SnackOpen } from '../../../core/snack/store/snack.actions';
+import { ElectronService } from 'ngx-electron';
+import { KeyboardConfig } from '../config.model';
+import { IPC_REGISTER_GLOBAL_SHORTCUT_EVENT } from '../../../../../electron/ipc-events.const';
+import { IS_ELECTRON } from '../../../app.constants';
 
 @Injectable()
 export class ConfigEffects {
@@ -36,9 +40,36 @@ export class ConfigEffects {
       })
     );
 
+  @Effect({dispatch: false}) updateGlobalShortcut$: any = this._actions$
+    .pipe(
+      ofType(
+        ConfigActionTypes.UpdateConfigSection,
+      ),
+      filter((action: UpdateConfigSection) => IS_ELECTRON && action.payload.sectionKey === 'keyboard'),
+      tap((action: UpdateConfigSection) => {
+        const keyboardCfg: KeyboardConfig = action.payload.sectionCfg as KeyboardConfig;
+        const globalShowHideKey = keyboardCfg.globalShowHide;
+        this._electronService.ipcRenderer.send(IPC_REGISTER_GLOBAL_SHORTCUT_EVENT, globalShowHideKey);
+      }),
+    );
+
+  @Effect({dispatch: false}) registerGlobalShortcutInitially$: any = this._actions$
+    .pipe(
+      ofType(
+        ConfigActionTypes.LoadConfig,
+      ),
+      filter(() => IS_ELECTRON),
+      tap((action: LoadConfig) => {
+        const keyboardCfg: KeyboardConfig = action.payload.cfg.keyboard;
+        const globalShowHideKey = keyboardCfg.globalShowHide;
+        this._electronService.ipcRenderer.send(IPC_REGISTER_GLOBAL_SHORTCUT_EVENT, globalShowHideKey);
+      }),
+    );
+
   constructor(
     private _actions$: Actions,
     private _persistenceService: PersistenceService,
+    private _electronService: ElectronService,
     private _store: Store<any>
   ) {
   }

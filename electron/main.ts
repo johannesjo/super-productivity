@@ -100,7 +100,9 @@ app_.on('before-quit', () => {
   if (IS_MAC) {
     nestedWinParams.isDarwinForceQuit = true;
   }
+});
 
+app_.on('will-quit', () => {
   // un-register all shortcuts.
   globalShortcut.unregisterAll();
 });
@@ -188,7 +190,7 @@ function createMainWin() {
 
 function registerShowAppShortCut(shortcutPassed) {
   if (shortcutPassed) {
-    // unregister all previous
+    // unregister all previous, works because we only have one global shortcut
     globalShortcut.unregisterAll();
 
     // Register a shortcut listener.
