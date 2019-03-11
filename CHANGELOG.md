@@ -1,3 +1,12 @@
+## [2.5.2](https://github.com/johannesjo/super-productivity/compare/v2.5.1...v2.5.2) (2019-03-11)
+
+
+### Bug Fixes
+
+* global shortcut not registering [#152](https://github.com/johannesjo/super-productivity/issues/152) ([043bb44](https://github.com/johannesjo/super-productivity/commit/043bb44))
+
+
+
 ## [2.5.1](https://github.com/johannesjo/super-productivity/compare/v2.5.0...v2.5.1) (2019-03-10)
 
 
