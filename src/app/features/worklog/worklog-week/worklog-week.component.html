@@ -2,18 +2,18 @@
 
 <div *ngIf="(worklogService.currentWeek$|async) as currentWeek">
   <div class="days">
-    <div *ngFor="let day of currentWeek?.ent|keyvalue:sortDays"
+    <div *ngFor="let day of currentWeek?.ent|keyvalue:sortDays trackBy: trackByDay; let i = index;"
          class="day">
       <div class="material-table">
         <div class="caption"
              mat-ripple
-             (click)="day.value.isVisible=!day.value.isVisible;">
+             (click)="visibility[i]=!visibility[i];">
           <div><span [@fade]
-                     *ngIf="day.value.isVisible">Title</span></div>
+                     *ngIf="visibility[i]">Title</span></div>
           <div>
             <div class="title">
               <h3 class="mat-h3">{{day.value.dayStr}} {{day.key}}.</h3>
-              <div *ngIf="!day.value.isVisible"
+              <div *ngIf="!visibility[i]"
                    [@expandFade]>
                 <strong>∑ {{day.value.timeSpent|msToClockString}}</strong>
                 &nbsp;
@@ -26,15 +26,15 @@
           </div>
           <div class="with-icon">
             <mat-icon [@fade]
-                      *ngIf="day.value.isVisible">timer
+                      *ngIf="visibility[i]">timer
             </mat-icon>
           </div>
         </div>
 
         <table class="task-summary-table"
                [@expandFade]
-               *ngIf="day.value.isVisible">
-          <tr *ngFor="let logEntry of day.value.logEntries">
+               *ngIf="visibility[i]">
+          <tr *ngFor="let logEntry of day.value.logEntries; trackBy: trackByLogEntry;">
             <td class="title"
                 colspan=""
                 [class.isSubTask]="logEntry.task.parentId">

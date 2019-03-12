@@ -1,8 +1,8 @@
-import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { WorklogService } from '../worklog.service';
 import { DialogWorklogExportComponent } from '../dialog-worklog-export/dialog-worklog-export.component';
 import { MatDialog } from '@angular/material';
-import { WorklogWeek } from '../map-archive-to-worklog';
+import { WorklogDataForDay, WorklogWeek } from '../map-archive-to-worklog';
 import { expandAnimation, expandFadeAnimation } from '../../../ui/animations/expand.ani';
 import { fadeAnimation } from '../../../ui/animations/fade.ani';
 
@@ -13,16 +13,13 @@ import { fadeAnimation } from '../../../ui/animations/fade.ani';
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [expandAnimation, expandFadeAnimation, fadeAnimation]
 })
-export class WorklogWeekComponent implements OnInit {
-  // days$ = this._worklogService.currentWeek$;
+export class WorklogWeekComponent {
+  visibility: boolean[] = [];
 
   constructor(
     public readonly worklogService: WorklogService,
     private readonly _matDialog: MatDialog,
   ) {
-  }
-
-  ngOnInit() {
   }
 
   sortDays(a, b) {
@@ -45,5 +42,13 @@ export class WorklogWeekComponent implements OnInit {
         rangeEnd,
       }
     });
+  }
+
+  trackByDay(i, day) {
+    return day.key;
+  }
+
+  trackByLogEntry(i, logEntry: WorklogDataForDay) {
+    return logEntry.task.id;
   }
 }
