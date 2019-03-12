@@ -1,3 +1,22 @@
+## [2.5.3](https://github.com/johannesjo/super-productivity/compare/v2.5.2...v2.5.3) (2019-03-12)
+
+
+### Bug Fixes
+
+* **worklog:** prevent constant re-render of worklog ([db6c2af](https://github.com/johannesjo/super-productivity/commit/db6c2af))
+* **worklog:** prevent constant re-render of worklog week week ([ba3ecb2](https://github.com/johannesjo/super-productivity/commit/ba3ecb2))
+
+
+### Features
+
+* **bookmarks:** show bookmark target on hover ([985e522](https://github.com/johannesjo/super-productivity/commit/985e522))
+* **takeABreak:** prevent take a break from replopping ([4344647](https://github.com/johannesjo/super-productivity/commit/4344647))
+* **worklog:** add ripple for all heading table cols ([45e8556](https://github.com/johannesjo/super-productivity/commit/45e8556))
+* **worklog:** add ripple for worklog week header ([40727a2](https://github.com/johannesjo/super-productivity/commit/40727a2))
+* **worklog:** improve styling for worklog week ([19724ed](https://github.com/johannesjo/super-productivity/commit/19724ed))
+
+
+
 ## [2.5.2](https://github.com/johannesjo/super-productivity/compare/v2.5.1...v2.5.2) (2019-03-11)
 
 
