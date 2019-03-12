@@ -41,6 +41,7 @@
            draggable="false">
         <a [enlargeImg]="bookmark.type==='IMG'&& bookmark.path"
            [href]="bookmark.path"
+           [title]="bookmark.path"
            [style.background-image]="bookmark.type==='IMG'&& 'url('+bookmark.path+')'"
            aria-label="open global bookmark"
            bookmarkLink
