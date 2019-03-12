@@ -6,6 +6,7 @@
          class="day">
       <div class="material-table">
         <div class="caption"
+             mat-ripple
              (click)="day.value.isVisible=!day.value.isVisible;">
           <div><span [@fade]
                      *ngIf="day.value.isVisible">Title</span></div>
