@@ -4,7 +4,7 @@
 <div class="years"
      *ngIf="worklogService.worklog$|async as worklog"
      [@standardList]="'ALWAYS'">
-  <div *ngFor="let year of (worklog|keyvalue:sortWorklogItems)"
+  <div *ngFor="let year of (worklog|keyvalue:sortWorklogItems); trackBy: trackByKey;"
        class="year">
     <h1 class="year-title mat-headline"
         [innerHtml]="year.key"></h1>
@@ -16,7 +16,7 @@
 
     <div class="months"
          [@standardList]="'ALWAYS'">
-      <div *ngFor="let month of year.value.ent|keyvalue:sortWorklogItems"
+      <div *ngFor="let month of year.value.ent|keyvalue:sortWorklogItems; trackBy: trackByKey;"
            class="month">
         <h2 class="month-title mat-headline">
           <span [innerHtml]="month.key|numberToMonth"></span>
@@ -37,7 +37,7 @@
 
         <div class="weeks"
              [@standardList]="'ALWAYS'">
-          <div *ngFor="let week of month.value.weeks"
+          <div *ngFor="let week of month.value.weeks; trackBy: trackByForWeek"
                class="week">
 
             <div class="week-header">
@@ -61,17 +61,17 @@
                 <td>Worked</td>
                 <th></th>
               </tr>
-              <ng-container *ngFor="let worklogForDay of week.ent|keyvalue:sortWorklogItemsReverse"
+              <ng-container *ngFor="let worklogForDay of week.ent|keyvalue:sortWorklogItemsReverse; trackBy: trackByKey;"
                             class="day">
-                <tr (click)="worklogForDay.value.isVisible=!worklogForDay.value.isVisible;"
+                <tr (click)="expanded[worklogForDay.value.dateStr]=!expanded[worklogForDay.value.dateStr];"
                     class="week-row"
-                    [class.isExpanded]="worklogForDay.value.isVisible">
+                    [class.isExpanded]="expanded[worklogForDay.value.dateStr]">
                   <td mat-ripple>{{worklogForDay.value.dayStr}} {{worklogForDay.key}}.</td>
                   <td mat-ripple>{{worklogForDay.value.logEntries.length}}</td>
                   <td mat-ripple>{{worklogForDay.value.timeSpent|msToClockString}}</td>
                   <td mat-ripple>
-                    <mat-icon *ngIf="!worklogForDay.value.isVisible">list</mat-icon>
-                    <mat-icon *ngIf="worklogForDay.value.isVisible">close</mat-icon>
+                    <mat-icon *ngIf="!expanded[worklogForDay.value.dateStr]">list</mat-icon>
+                    <mat-icon *ngIf="expanded[worklogForDay.value.dateStr]">close</mat-icon>
                   </td>
                 </tr>
 
@@ -80,7 +80,7 @@
                   <td colspan="4">
                     <div [@expandFade]
                          class="summary-table-wrapper material-table"
-                         *ngIf="worklogForDay.value.isVisible">
+                         *ngIf="expanded[worklogForDay.value.dateStr]">
                       <table class="task-summary-table">
                         <!--<caption>Task list for {{worklogForDay.value.dayStr}} {{worklogForDay.key}}th</caption>-->
                         <!--<tr>-->
@@ -88,7 +88,7 @@
                         <!--<th>Worked</th>-->
                         <!--<th></th>-->
                         <!--</tr>-->
-                        <tr *ngFor="let logEntry of worklogForDay.value.logEntries">
+                        <tr *ngFor="let logEntry of worklogForDay.value.logEntries; trackBy: trackByForLogEntry;">
                           <td class="title"
                               [class.isSubTask]="logEntry.task.parentId">
                             <span class="task-title">{{logEntry.task.title}}</span>

@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, ChangeDetectorRef, Component } from '@angular/
 import { PersistenceService } from '../../core/persistence/persistence.service';
 import { ProjectService } from '../project/project.service';
 import { expandFadeAnimation } from '../../ui/animations/expand.ani';
-import { WorklogMonth } from './map-archive-to-worklog';
+import { WorklogDataForDay, WorklogMonth, WorklogWeek } from './map-archive-to-worklog';
 import { MatDialog } from '@angular/material';
 import { TaskCopy } from '../tasks/task.model';
 import { TaskService } from '../tasks/task.service';
@@ -21,6 +21,8 @@ import { WorklogService } from './worklog.service';
   animations: [expandFadeAnimation, standardListAnimation]
 })
 export class WorklogComponent {
+  expanded: { [key: string]: boolean } = {};
+
   constructor(
     public readonly worklogService: WorklogService,
     private readonly _persistenceService: PersistenceService,
@@ -70,5 +72,17 @@ export class WorklogComponent {
 
   sortWorklogItemsReverse(a, b) {
     return a.key - b.key;
+  }
+
+  trackByKey(i, val: { key: any; val: any }) {
+    return val.key;
+  }
+
+  trackByForLogEntry(i, val: WorklogDataForDay) {
+    return val.task.id;
+  }
+
+  trackByForWeek(i, val: WorklogWeek) {
+    return val.weekNr;
   }
 }

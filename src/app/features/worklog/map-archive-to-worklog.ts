@@ -9,7 +9,6 @@ export interface WorklogDataForDay {
   timeSpent: number;
   task: Task;
   parentId: string;
-  isVisible: boolean;
   isNoRestore?: boolean;
 }
 
@@ -116,7 +115,6 @@ export const mapArchiveToWorklog = (
       worklog[year].ent[month].ent[day].logEntries.push({
         task: task,
         parentId: task.parentId,
-        isVisible: true,
         isNoRestore: noRestoreIds.includes(task.id),
         timeSpent: task.timeSpentOnDay[dateStr]
       });
