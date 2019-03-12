@@ -66,14 +66,12 @@
                 <tr (click)="worklogForDay.value.isVisible=!worklogForDay.value.isVisible;"
                     class="week-row"
                     [class.isExpanded]="worklogForDay.value.isVisible">
-                  <td>{{worklogForDay.value.dayStr}} {{worklogForDay.key}}.</td>
-                  <td>{{worklogForDay.value.logEntries.length}}</td>
-                  <td>{{worklogForDay.value.timeSpent|msToClockString}}</td>
-                  <td>
-                    <button mat-icon-button>
-                      <mat-icon *ngIf="!worklogForDay.value.isVisible">list</mat-icon>
-                      <mat-icon *ngIf="worklogForDay.value.isVisible">close</mat-icon>
-                    </button>
+                  <td mat-ripple>{{worklogForDay.value.dayStr}} {{worklogForDay.key}}.</td>
+                  <td mat-ripple>{{worklogForDay.value.logEntries.length}}</td>
+                  <td mat-ripple>{{worklogForDay.value.timeSpent|msToClockString}}</td>
+                  <td mat-ripple>
+                    <mat-icon *ngIf="!worklogForDay.value.isVisible">list</mat-icon>
+                    <mat-icon *ngIf="worklogForDay.value.isVisible">close</mat-icon>
                   </td>
                 </tr>
 
