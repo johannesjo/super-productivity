@@ -17,16 +17,25 @@ export class BannerComponent {
   activeBanner$: Observable<Banner> = this.bannerService.activeBanner$.pipe(
     concatMap((activeBanner) => {
       if (activeBanner) {
+        if (!this._dirtyReference || this._dirtyReference === activeBanner.id) {
+          this._dirtyReference = activeBanner.id;
+          return of(activeBanner);
+        }
+
+        this._dirtyReference = activeBanner.id;
         return merge(
           of(null),
           timer(500).pipe(mapTo(activeBanner))
         );
       } else {
+        this._dirtyReference = null;
         return of(null);
       }
     })
   );
   height = 120;
+
+  private _dirtyReference: string;
 
   @ViewChild('wrapperEl') set wrapperEl(content: ElementRef) {
     if (content && content.nativeElement) {
