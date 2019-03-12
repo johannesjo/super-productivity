@@ -4,10 +4,9 @@
   display: block;
 }
 
+$this-border-radius: 8px;
+
 .days {
-  display: block;
-  //white-space: nowrap;
-  //overflow-x: auto;
   text-align: center;
   vertical-align: top;
   display: flex;
@@ -20,6 +19,10 @@
   display: inline-block;
   width: 280px;
   margin: $s;
+
+  .material-table {
+    border-radius: $this-border-radius;
+  }
 }
 
 .scroll-wrapper {
@@ -28,6 +31,8 @@
 }
 
 .caption {
+  border-top-left-radius: $this-border-radius;
+  border-top-right-radius: $this-border-radius;
   display: flex;
   align-items: center;
   justify-content: space-between;
