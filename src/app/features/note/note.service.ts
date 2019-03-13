@@ -97,7 +97,11 @@ export class NoteService {
   public async updateFromDifferentProject(projectId, id, updates: Partial<Note>) {
     const noteState = await this._persistenceService.loadNotesForProject(projectId);
     const noteToUpdate = noteState.entities[id];
-    Object.assign(noteToUpdate, updates);
+    if (noteToUpdate) {
+      Object.assign(noteToUpdate, updates);
+    } else {
+      console.warn('Note not found while trying to update for different project');
+    }
     return await this._persistenceService.saveNotesForProject(projectId, noteState);
   }
 
