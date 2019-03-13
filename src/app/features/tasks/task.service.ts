@@ -1,7 +1,7 @@
 import shortid from 'shortid';
 import { debounceTime, distinctUntilChanged, first, map, shareReplay, take, withLatestFrom } from 'rxjs/operators';
 import { Injectable } from '@angular/core';
-import { combineLatest, Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 import {
   DEFAULT_TASK,
   DropListModelSource,
@@ -9,13 +9,13 @@ import {
   SHOW_SUB_TASKS,
   Task,
   TaskWithIssueData,
-  TaskWithReminderData,
   TaskWithSubTasks
 } from './task.model';
 import { select, Store } from '@ngrx/store';
 import {
   AddSubTask,
   AddTask,
+  AddTaskReminder,
   AddTimeSpent,
   DeleteTask,
   FocusLastActiveTask,
@@ -27,6 +27,7 @@ import {
   MoveToBacklog,
   MoveToToday,
   MoveUp,
+  RemoveTaskReminder,
   RemoveTimeSpent,
   RestoreTask,
   SetCurrentTask,
@@ -36,6 +37,7 @@ import {
   ToggleTaskShowSubTasks,
   UnsetCurrentTask,
   UpdateTask,
+  UpdateTaskReminder,
   UpdateTaskUi
 } from './store/task.actions';
 import { initialTaskState, } from './store/task.reducer';
@@ -70,7 +72,6 @@ import { Actions, ofType } from '@ngrx/effects';
 import { IssueService } from '../issue/issue.service';
 import { ProjectService } from '../project/project.service';
 import { SnackService } from '../../core/snack/snack.service';
-import { ReminderService } from '../reminder/reminder.service';
 
 
 @Injectable({
@@ -142,26 +143,8 @@ export class TaskService {
     // NOTE: we can't use share here, as we need the last emitted value
   );
 
-  private _scheduledTasksWOData$ = this._store.pipe(
+  scheduledTasksWOData$ = this._store.pipe(
     select(selectScheduledTasks),
-    distinctUntilChanged(),
-  );
-
-  scheduledTasks$: Observable<TaskWithReminderData[]> = combineLatest(
-    this._scheduledTasksWOData$,
-    this._reminderService.reminders$,
-  ).pipe(
-    map(([tasks, reminders]) => tasks
-      .map((task) => {
-        return {
-          ...task,
-          reminderData: this._reminderService.getById(task.reminderId),
-        };
-      })
-      // models might not be in sync just yet :/
-      .filter(task => task.reminderData)
-      .sort((a, b) => a.reminderData.remindAt - b.reminderData.remindAt)
-    ),
     distinctUntilChanged(),
   );
 
@@ -246,7 +229,6 @@ export class TaskService {
     private readonly _issueService: IssueService,
     private readonly _projectService: ProjectService,
     private readonly _snackService: SnackService,
-    private readonly _reminderService: ReminderService,
     private readonly _timeTrackingService: TimeTrackingService,
     private readonly _actions$: Actions,
   ) {
@@ -411,46 +393,15 @@ export class TaskService {
   // REMINDER
   // --------
   addReminder(taskId: string, remindAt: number, title: string, isMoveToBacklog = false) {
-    const reminderId = this._reminderService.addReminder(
-      'TASK',
-      taskId,
-      title,
-      remindAt,
-    );
-    if (isMoveToBacklog) {
-      this.moveToBacklog(taskId);
-    }
-
-    this.update(taskId, {reminderId});
-    this._snackService.open({
-      type: 'SUCCESS',
-      // TODO add when
-      message: `Scheduled task "${title}"`,
-      icon: 'schedule',
-    });
+    this._store.dispatch(new AddTaskReminder({id: taskId, remindAt, title, isMoveToBacklog}));
   }
 
   updateReminder(taskId: string, reminderId: string, remindAt: number, title: string) {
-    this._reminderService.updateReminder(reminderId, {
-      remindAt,
-      title,
-    });
-    this._snackService.open({
-      type: 'SUCCESS',
-      // TODO add when
-      message: `Updated reminder for task "${title}"`,
-      icon: 'schedule',
-    });
+    this._store.dispatch(new UpdateTaskReminder({id: taskId, reminderId, remindAt, title}));
   }
 
   removeReminder(taskId: string, reminderId: string) {
-    this._reminderService.removeReminder(reminderId);
-    this.update(taskId, {reminderId: null});
-    this._snackService.open({
-      type: 'SUCCESS',
-      message: `Deleted reminder for task`,
-      icon: 'schedule',
-    });
+    this._store.dispatch(new RemoveTaskReminder({id: taskId, reminderId}));
   }
 
   // HELPER
@@ -458,6 +409,18 @@ export class TaskService {
   getById(id: string): Observable<Task> {
     return this._store.pipe(select(selectTaskById, {id}), take(1));
   }
+
+  async getByIdFromEverywhere(id: string, projectId: string = this._projectService.currentId): Promise<Task> {
+    const curProject = await this._persistenceService.loadTasksForProject(projectId);
+    if (curProject.entities[id]) {
+      return curProject.entities[id];
+    }
+    const archive = await this._persistenceService.loadTaskArchiveForProject(projectId);
+    if (archive.entities[id]) {
+      return archive.entities[id];
+    }
+  }
+
 
   setDone(id: string) {
     this.update(id, {isDone: true});

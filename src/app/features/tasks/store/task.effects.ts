@@ -1,6 +1,16 @@
 import { Injectable } from '@angular/core';
 import { Actions, Effect, ofType } from '@ngrx/effects';
-import { DeleteTask, Move, MoveToBacklog, SetCurrentTask, TaskActionTypes, UpdateTask } from './task.actions';
+import {
+  AddTaskReminder,
+  DeleteTask,
+  Move,
+  MoveToBacklog,
+  RemoveTaskReminder,
+  SetCurrentTask,
+  TaskActionTypes,
+  UpdateTask,
+  UpdateTaskReminder
+} from './task.actions';
 import { select, Store } from '@ngrx/store';
 import { filter, map, mergeMap, tap, throttleTime, withLatestFrom } from 'rxjs/operators';
 import { PersistenceService } from '../../../core/persistence/persistence.service';
@@ -43,6 +53,7 @@ export class TaskEffects {
         TaskActionTypes.AddTask,
         TaskActionTypes.RestoreTask,
         TaskActionTypes.AddTimeSpent,
+        TaskActionTypes.RemoveTaskReminder,
         TaskActionTypes.DeleteTask,
         TaskActionTypes.UndoDeleteTask,
         TaskActionTypes.AddSubTask,
@@ -80,6 +91,73 @@ export class TaskEffects {
       tap(this._saveToLs.bind(this))
     );
 
+  @Effect() addTaskReminder$: any = this._actions$
+    .pipe(
+      ofType(
+        TaskActionTypes.AddTaskReminder,
+      ),
+      mergeMap((a: AddTaskReminder) => {
+        const {id, title, remindAt, isMoveToBacklog} = a.payload;
+        const reminderId = this._reminderService.addReminder('TASK', id, title, remindAt);
+
+        return [
+          new UpdateTask({
+            task: {id, changes: {reminderId}}
+          }),
+          new SnackOpen({
+            type: 'SUCCESS',
+            message: `Scheduled task "${title}"`,
+            icon: 'schedule',
+          }),
+          ...(isMoveToBacklog ? [new MoveToBacklog({id})] : []),
+        ];
+      })
+    );
+
+  @Effect() updateTaskReminder$: any = this._actions$
+    .pipe(
+      ofType(
+        TaskActionTypes.UpdateTaskReminder,
+      ),
+      map((a: UpdateTaskReminder) => {
+        const {title, remindAt, reminderId} = a.payload;
+        this._reminderService.updateReminder(reminderId, {
+          remindAt,
+          title,
+        });
+        return new SnackOpen({
+          type: 'SUCCESS',
+          message: `Updated reminder for task "${title}"`,
+          icon: 'schedule',
+        });
+      })
+    );
+
+  @Effect() removeTaskReminder$: any = this._actions$
+    .pipe(
+      ofType(
+        TaskActionTypes.RemoveTaskReminder,
+      ),
+      mergeMap((a: RemoveTaskReminder) => {
+        const {id, reminderId} = a.payload;
+        this._reminderService.removeReminder(reminderId);
+
+        return [
+          new UpdateTask({
+            task: {
+              id,
+              changes: {reminderId: null}
+            }
+          }),
+          new SnackOpen({
+            type: 'SUCCESS',
+            message: `Deleted reminder for task`,
+            icon: 'schedule',
+          }),
+        ];
+      })
+    );
+
   @Effect() snackDelete$: any = this._actions$
     .pipe(
       ofType(
@@ -104,7 +182,7 @@ export class TaskEffects {
       withLatestFrom(
         this._store$.pipe(select(selectTaskFeatureState)),
       ),
-      map(([a, state]) => {
+      tap(([a, state]) => {
         const ids = state.ids as string[];
         const idsBefore = state.stateBefore.ids as string[];
         const deletedTaskIds = idsBefore.filter((id) => !ids.includes(id));

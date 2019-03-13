@@ -23,6 +23,11 @@ export enum TaskActionTypes {
   AddTimeSpent = '[Task] Add time spent',
   RemoveTimeSpent = '[Task] Remove time spent',
 
+  // Reminders
+  AddTaskReminder = '[Task] Add reminder',
+  UpdateTaskReminder = '[Task] Update reminder',
+  RemoveTaskReminder = '[Task] Remove reminder',
+
   // Sub Task Actions
   AddSubTask = '[Task] Add SubTask',
 
@@ -143,6 +148,29 @@ export class RemoveTimeSpent implements Action {
   }
 }
 
+// Reminder Actions
+export class AddTaskReminder implements Action {
+  readonly type = TaskActionTypes.AddTaskReminder;
+
+  constructor(public payload: { id: string, title: string, remindAt: number, isMoveToBacklog: boolean }) {
+  }
+}
+
+export class UpdateTaskReminder implements Action {
+  readonly type = TaskActionTypes.UpdateTaskReminder;
+
+  constructor(public payload: { id: string, title: string, reminderId: string, remindAt: number }) {
+  }
+}
+
+export class RemoveTaskReminder implements Action {
+  readonly type = TaskActionTypes.RemoveTaskReminder;
+
+  constructor(public payload: { id: string, reminderId: string }) {
+  }
+}
+
+
 export class StartFirstStartable implements Action {
   readonly type = TaskActionTypes.StartFirstStartable;
 }
@@ -213,6 +241,9 @@ export type TaskActions
   | MoveDown
   | AddTimeSpent
   | RemoveTimeSpent
+  | AddTaskReminder
+  | UpdateTaskReminder
+  | RemoveTaskReminder
   | StartFirstStartable
   | RestoreTask
   | FocusTask
