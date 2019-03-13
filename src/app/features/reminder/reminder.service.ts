@@ -13,6 +13,7 @@ import { ImexMetaService } from '../../imex/imex-meta/imex-meta.service';
 import { TaskService } from '../tasks/task.service';
 import { Note } from '../note/note.model';
 import { Task } from '../tasks/task.model';
+import { NoteService } from '../note/note.service';
 
 const WORKER_PATH = 'assets/web-workers/reminder.js';
 
@@ -36,6 +37,7 @@ export class ReminderService {
     private readonly _notifyService: NotifyService,
     private readonly _snackService: SnackService,
     private readonly _taskService: TaskService,
+    private readonly _noteService: NoteService,
     private readonly _imexMetaService: ImexMetaService,
   ) {
   }
@@ -159,8 +161,8 @@ export class ReminderService {
 
   private async _getRelatedDataForReminder(id: string, projectId: string, type: ReminderType): Promise<Task | Note> {
     switch (type) {
-      // case 'NOTE':
-      //   return await this._taskService.getByIdFromEverywhere(id, projectId);
+      case 'NOTE':
+        return await this._noteService.getByIdFromEverywhere(id, projectId);
       case 'TASK':
         return await this._taskService.getByIdFromEverywhere(id, projectId);
     }

@@ -2,11 +2,19 @@ import { Injectable } from '@angular/core';
 import { Actions, Effect, ofType } from '@ngrx/effects';
 import { PersistenceService } from '../../../core/persistence/persistence.service';
 import { select, Store } from '@ngrx/store';
-import { tap, withLatestFrom } from 'rxjs/operators';
+import { filter, map, mergeMap, tap, withLatestFrom } from 'rxjs/operators';
 import { selectCurrentProjectId } from '../../project/store/project.reducer';
-import { NoteActionTypes } from './note.actions';
+import {
+  AddNote,
+  AddNoteReminder,
+  NoteActionTypes,
+  RemoveNoteReminder,
+  UpdateNote,
+  UpdateNoteReminder
+} from './note.actions';
 import { selectNoteFeatureState } from './note.reducer';
 import { ReminderService } from '../../reminder/reminder.service';
+import { SnackOpen } from '../../../core/snack/store/snack.actions';
 
 @Injectable()
 export class NoteEffects {
@@ -50,6 +58,86 @@ export class NoteEffects {
       ),
       tap(this._removeRemindersIfAny.bind(this))
     );
+
+  @Effect() addReminderForNewNote$: any = this._actions$
+    .pipe(
+      ofType(
+        NoteActionTypes.AddNote,
+      ),
+      filter((a: AddNote) => a.payload.remindAt && a.payload.remindAt > 0),
+      map((a: AddNote) => new AddNoteReminder({
+        id: a.payload.note.id,
+        title: a.payload.note.content.substr(0, 40),
+        remindAt: a.payload.remindAt,
+      }))
+    );
+
+  @Effect() addNoteReminder$: any = this._actions$
+    .pipe(
+      ofType(
+        NoteActionTypes.AddNoteReminder,
+      ),
+      mergeMap((a: AddNoteReminder) => {
+        const {id, title, remindAt} = a.payload;
+        const reminderId = this._reminderService.addReminder('NOTE', id, title, remindAt);
+
+        return [
+          new UpdateNote({
+            note: {id, changes: {reminderId}}
+          }),
+          new SnackOpen({
+            type: 'SUCCESS',
+            message: `Added reminder for note`,
+            icon: 'schedule',
+          }),
+        ];
+      })
+    );
+
+  @Effect() updateNoteReminder$: any = this._actions$
+    .pipe(
+      ofType(
+        NoteActionTypes.UpdateNoteReminder,
+      ),
+      map((a: UpdateNoteReminder) => {
+        const {title, remindAt, reminderId} = a.payload;
+        this._reminderService.updateReminder(reminderId, {
+          remindAt,
+          title,
+        });
+        return new SnackOpen({
+          type: 'SUCCESS',
+          message: `Updated reminder for note`,
+          icon: 'schedule',
+        });
+      })
+    );
+
+  @Effect() removeNoteReminder$: any = this._actions$
+    .pipe(
+      ofType(
+        NoteActionTypes.RemoveNoteReminder,
+      ),
+      mergeMap((a: RemoveNoteReminder) => {
+        const {id, reminderId} = a.payload;
+        this._reminderService.removeReminder(reminderId);
+
+        return [
+          new UpdateNote({
+            note: {
+              id,
+              changes: {reminderId: null}
+            }
+          }),
+          new SnackOpen({
+            type: 'SUCCESS',
+            message: `Deleted reminder for note`,
+            icon: 'schedule',
+          }),
+        ];
+      })
+    );
+
 
   constructor(
     private _actions$: Actions,

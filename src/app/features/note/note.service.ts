@@ -4,20 +4,22 @@ import { Note } from './note.model';
 import { select, Store } from '@ngrx/store';
 import {
   AddNote,
+  AddNoteReminder,
   DeleteNote,
   HideNotes,
   LoadNoteState,
   NoteActionTypes,
+  RemoveNoteReminder,
   ToggleShowNotes,
   UpdateNote,
-  UpdateNoteOrder
+  UpdateNoteOrder,
+  UpdateNoteReminder
 } from './store/note.actions';
 import shortid from 'shortid';
 import { initialNoteState, NoteState, selectAllNotes, selectIsShowNotes, selectNoteById } from './store/note.reducer';
 import { PersistenceService } from '../../core/persistence/persistence.service';
 import { Actions, ofType } from '@ngrx/effects';
 import { take } from 'rxjs/operators';
-import { ReminderService } from '../reminder/reminder.service';
 import { SnackService } from '../../core/snack/snack.service';
 import { createFromDrop, DropPasteInput } from '../../core/drop-paste-input/drop-paste-input';
 import { isImageUrl, isImageUrlSimple } from '../../util/is-image-url';
@@ -33,7 +35,6 @@ export class NoteService {
   constructor(
     private _store$: Store<any>,
     private _persistenceService: PersistenceService,
-    private _reminderService: ReminderService,
     private _snackService: SnackService,
     private _actions$: Actions,
   ) {
@@ -41,6 +42,15 @@ export class NoteService {
 
   getById(id: string): Observable<Note> {
     return this._store$.pipe(select(selectNoteById, {id}), take(1));
+  }
+
+  async getByIdFromEverywhere(id: string, projectId: string): Promise<Note> {
+    const curProject = await this._persistenceService.loadNotesForProject(projectId);
+    if (curProject && curProject.entities[id]) {
+      return curProject.entities[id];
+    }
+
+    return null;
   }
 
   public toggleShow() {
@@ -60,13 +70,8 @@ export class NoteService {
     this._store$.dispatch(new LoadNoteState({state: state}));
   }
 
-  public add(note: Partial<Note> = {}, remindAt?: number, isPreventFocus = false) {
+  public add(note: Partial<Note> = {}, remindAt: number = null, isPreventFocus = false) {
     const id = shortid();
-
-    let reminderId = null;
-    if (remindAt) {
-      reminderId = this._addReminderForNewNote(id, remindAt, (note.content && note.content.substr(0, 40)));
-    }
 
     this._store$.dispatch(new AddNote({
       note: {
@@ -75,9 +80,9 @@ export class NoteService {
         created: Date.now(),
         modified: Date.now(),
         ...note,
-        reminderId,
       },
-      isPreventFocus
+      isPreventFocus,
+      remindAt,
     }));
   }
 
@@ -111,55 +116,20 @@ export class NoteService {
 
   // REMINDER
   // --------
-  public addReminder(noteId: string, remindAt: number, title: string) {
-    const reminderId = this._reminderService.addReminder(
-      'NOTE',
-      noteId,
-      title,
-      remindAt,
-    );
-    this.update(noteId, {reminderId});
-    this._snackService.open({
-      type: 'SUCCESS',
-      message: `Added reminder for note`,
-      icon: 'schedule',
-    });
+  addReminder(noteId: string, remindAt: number, title: string) {
+    this._store$.dispatch(new AddNoteReminder({id: noteId, remindAt, title}));
   }
 
-  public updateReminder(noteId: string, reminderId: string, remindAt: number, title: string) {
-    this._reminderService.updateReminder(reminderId, {
-      remindAt,
-      title,
-    });
-    this._snackService.open({
-      type: 'SUCCESS',
-      message: `Updated reminder for note`,
-      icon: 'schedule',
-    });
+  updateReminder(noteId: string, reminderId: string, remindAt: number, title: string) {
+    this._store$.dispatch(new UpdateNoteReminder({id: noteId, reminderId, remindAt, title}));
   }
 
-  public removeReminder(noteId: string, reminderId: string) {
-    this._reminderService.removeReminder(reminderId);
-    this.update(noteId, {reminderId: null});
-    this._snackService.open({
-      type: 'SUCCESS',
-      message: `Deleted reminder for note`,
-      icon: 'schedule',
-    });
+  removeReminder(noteId: string, reminderId: string) {
+    this._store$.dispatch(new RemoveNoteReminder({id: noteId, reminderId}));
   }
 
   createFromDrop(ev) {
     this._handleInput(createFromDrop(ev), ev);
-  }
-
-  private _addReminderForNewNote(noteId: string, remindAt: number, title: string): string {
-    const reminderId = this._reminderService.addReminder(
-      'NOTE',
-      noteId,
-      title,
-      remindAt,
-    );
-    return reminderId;
   }
 
   private async _handleInput(drop: DropPasteInput, ev) {

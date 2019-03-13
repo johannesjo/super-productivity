@@ -17,7 +17,13 @@ export enum NoteActionTypes {
   UpdateNotes = '[Note] Update Notes',
   DeleteNote = '[Note] Delete Note',
   DeleteNotes = '[Note] Delete Notes',
-  ClearNotes = '[Note] Clear Notes'
+  ClearNotes = '[Note] Clear Notes',
+
+  // Reminders
+  AddNoteReminder = '[Note] Add reminder',
+  UpdateNoteReminder = '[Note] Update reminder',
+  RemoveNoteReminder = '[Note] Remove reminder',
+
 }
 
 export class LoadNoteState implements Action {
@@ -45,7 +51,7 @@ export class UpdateNoteOrder implements Action {
 export class AddNote implements Action {
   readonly type = NoteActionTypes.AddNote;
 
-  constructor(public payload: { note: Note, isPreventFocus?: boolean }) {
+  constructor(public payload: { note: Note, isPreventFocus?: boolean, remindAt: number }) {
   }
 }
 
@@ -102,6 +108,28 @@ export class ClearNotes implements Action {
   readonly type = NoteActionTypes.ClearNotes;
 }
 
+// Reminder Actions
+export class AddNoteReminder implements Action {
+  readonly type = NoteActionTypes.AddNoteReminder;
+
+  constructor(public payload: { id: string, title: string, remindAt: number }) {
+  }
+}
+
+export class UpdateNoteReminder implements Action {
+  readonly type = NoteActionTypes.UpdateNoteReminder;
+
+  constructor(public payload: { id: string, title: string, reminderId: string, remindAt: number }) {
+  }
+}
+
+export class RemoveNoteReminder implements Action {
+  readonly type = NoteActionTypes.RemoveNoteReminder;
+
+  constructor(public payload: { id: string, reminderId: string }) {
+  }
+}
+
 export type NoteActions =
   LoadNoteState
   | ToggleShowNotes
@@ -115,4 +143,8 @@ export type NoteActions =
   | UpdateNotes
   | DeleteNote
   | DeleteNotes
-  | ClearNotes;
+  | ClearNotes
+  | AddNoteReminder
+  | UpdateNoteReminder
+  | RemoveNoteReminder
+  ;
