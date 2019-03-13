@@ -10,6 +10,9 @@ import { debounce, throttle } from 'throttle-debounce';
 import { promiseTimeout } from '../../util/promise-timeout';
 import { dirtyDeepCopy } from '../../util/dirtyDeepCopy';
 import { ImexMetaService } from '../../imex/imex-meta/imex-meta.service';
+import { TaskService } from '../tasks/task.service';
+import { Note } from '../note/note.model';
+import { Task } from '../tasks/task.model';
 
 const WORKER_PATH = 'assets/web-workers/reminder.js';
 
@@ -32,6 +35,7 @@ export class ReminderService {
     private readonly _persistenceService: PersistenceService,
     private readonly _notifyService: NotifyService,
     private readonly _snackService: SnackService,
+    private readonly _taskService: TaskService,
     private readonly _imexMetaService: ImexMetaService,
   ) {
   }
@@ -105,15 +109,21 @@ export class ReminderService {
     }
   }
 
-  private _onReminderActivated(msg: MessageEvent) {
+  private async _onReminderActivated(msg: MessageEvent) {
     const reminder = msg.data as Reminder;
-    // TODO get related model here and check if it is still present (there might be hick ups)
-    // only show when not currently syncing
-    if (!this._imexMetaService.isDataImportInProgress) {
+
+    const relatedModel = await this._getRelatedDataForReminder(reminder.relatedId, reminder.projectId, reminder.type);
+    console.log('RelatedModel for Reminder', relatedModel);
+
+    // only show when not currently syncing and related model still exists
+    if (!relatedModel) {
+      console.warn('No Reminder Related Data found, removing reminder...');
+      this.removeReminder(reminder.id);
+    } else if (this._imexMetaService.isDataImportInProgress) {
+      console.log('Reminder blocked because sync is in progress');
+    } else {
       this.onReminderActive$.next(reminder);
       this._throttledShowNotification(reminder);
-    } else {
-      console.log('Reminder blocked because sync is in progress');
     }
   }
 
@@ -145,5 +155,14 @@ export class ReminderService {
   private _handleError(err: any) {
     console.error(err);
     this._snackService.open({type: 'ERROR', message: 'Error for reminder interface'});
+  }
+
+  private async _getRelatedDataForReminder(id: string, projectId: string, type: ReminderType): Promise<Task | Note> {
+    switch (type) {
+      // case 'NOTE':
+      //   return await this._taskService.getByIdFromEverywhere(id, projectId);
+      case 'TASK':
+        return await this._taskService.getByIdFromEverywhere(id, projectId);
+    }
   }
 }

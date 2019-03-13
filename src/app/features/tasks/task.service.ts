@@ -412,13 +412,16 @@ export class TaskService {
 
   async getByIdFromEverywhere(id: string, projectId: string = this._projectService.currentId): Promise<Task> {
     const curProject = await this._persistenceService.loadTasksForProject(projectId);
-    if (curProject.entities[id]) {
+    if (curProject && curProject.entities[id]) {
       return curProject.entities[id];
     }
+
     const archive = await this._persistenceService.loadTaskArchiveForProject(projectId);
-    if (archive.entities[id]) {
+    if (archive && archive.entities[id]) {
       return archive.entities[id];
     }
+
+    return null;
   }
 
 
