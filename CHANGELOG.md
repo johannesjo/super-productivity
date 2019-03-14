@@ -1,3 +1,21 @@
+## [2.5.4](https://github.com/johannesjo/super-productivity/compare/v2.5.3...v2.5.4) (2019-03-14)
+
+
+### Bug Fixes
+
+* **reminders:** breaking app ([1a75044](https://github.com/johannesjo/super-productivity/commit/1a75044))
+* **reminders:** only show reminder when note data still exists otherwise remove ([4120813](https://github.com/johannesjo/super-productivity/commit/4120813))
+* **reminders:** only show reminder when task data still exists otherwise remove ([f6e30ae](https://github.com/johannesjo/super-productivity/commit/f6e30ae))
+* **worklog:** not exporting the right tasks and simplify ([5286a8b](https://github.com/johannesjo/super-productivity/commit/5286a8b))
+* typing ([2cbe056](https://github.com/johannesjo/super-productivity/commit/2cbe056))
+
+
+### Features
+
+* **progressBar:** improve styling ([becece7](https://github.com/johannesjo/super-productivity/commit/becece7))
+
+
+
 ## [2.5.3](https://github.com/johannesjo/super-productivity/compare/v2.5.2...v2.5.3) (2019-03-12)
 
 
