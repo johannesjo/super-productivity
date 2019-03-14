@@ -4,7 +4,7 @@ export interface WeeksInMonth {
 }
 
 // starting on monday
-export const getWeeksInMonth = (month, year): WeeksInMonth[] => {
+export const getWeeksInMonth = (month: number, year: number): WeeksInMonth[] => {
   const weeks = [];
   const firstDate = new Date(year, month, 1);
   const lastDate = new Date(year, month + 1, 0);

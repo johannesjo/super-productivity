@@ -1,10 +1,9 @@
 import { Injectable } from '@angular/core';
-import { mapArchiveToWorklog, Worklog, WorklogDay, WorklogMonth, WorklogWeek } from './map-archive-to-worklog';
+import { mapArchiveToWorklog, Worklog, WorklogDay, WorklogTask, WorklogWeek } from './map-archive-to-worklog';
 import { EntityState } from '@ngrx/entity';
 import { Task } from '../tasks/task.model';
 import { dedupeByKey } from '../../util/de-dupe-by-key';
 import { PersistenceService } from '../../core/persistence/persistence.service';
-import { WeeksInMonth } from '../../util/get-weeks-in-month';
 import { ProjectService } from '../project/project.service';
 import { Observable } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
@@ -29,6 +28,7 @@ export class WorklogService {
     }),
   );
 
+  worklog: Worklog;
   worklog$: Observable<Worklog> = this._worklogData$.pipe(map(data => data.worklog));
   totalTimeSpent$: Observable<number> = this._worklogData$.pipe(map(data => data.totalTimeSpent));
   currentWeek$: Observable<WorklogWeek> = this.worklog$.pipe(
@@ -51,38 +51,65 @@ export class WorklogService {
     private readonly _persistenceService: PersistenceService,
     private readonly _projectService: ProjectService,
   ) {
+    this.worklog$.subscribe(worklog => this.worklog = worklog);
   }
 
-  createTaskListForMonth(data: WorklogMonth | WorklogWeek, year: number, month_: string | number, week?: WeeksInMonth):
-    { tasks: Task[], rangeStart: Date, rangeEnd: Date } {
-    let rangeStart;
-    let rangeEnd;
-    // denormalize to js month again
-    const month = +month_ - 1;
-    if (!week) {
-      // firstDayOfMonth
-      rangeStart = new Date(year, month, 1);
-      // lastDayOfMonth
-      rangeEnd = new Date(year, month + 1, 0);
-    } else {
-      // startOfWeek
-      rangeStart = new Date(year, month, week.start);
-      // endOfWeek
-      rangeEnd = new Date(year, month, week.end);
+
+  getTaskListForRange(rangeStart: Date, rangeEnd: Date, isFilterOutTimeSpentOnOtherDays = false): WorklogTask[] {
+    let tasks = this._getAllWorklogTasks();
+
+    tasks = tasks.filter((task) => {
+      const taskDate = new Date(task.dateStr);
+      return (taskDate > rangeStart && taskDate < rangeEnd);
+    });
+
+    if (isFilterOutTimeSpentOnOtherDays) {
+      tasks = tasks.map((task): WorklogTask => {
+        const timeSpentOnDay = {};
+        Object.keys(task.timeSpentOnDay).forEach(dateStr => {
+          const date = new Date(dateStr);
+          if (date > rangeStart && date < rangeEnd) {
+            timeSpentOnDay[dateStr] = task.timeSpentOnDay[dateStr];
+          }
+        });
+
+        return {
+          ...task,
+          timeSpentOnDay
+        };
+      });
     }
 
-    rangeEnd.setHours(23, 59, 59);
+    return dedupeByKey(tasks, 'id');
+  }
 
-    let tasks = [];
-    Object.keys(data.ent).forEach(dayDateStr => {
-      const entry: WorklogDay = data.ent[dayDateStr];
-      tasks = tasks.concat(this._createTasksForDay(entry));
+  private _getAllWorklogTasks(): WorklogTask[] {
+    const worklog: Worklog = this.worklog;
+    let tasks: WorklogTask[] = [];
+
+    Object.keys(worklog).forEach((yearKey_) => {
+      const yearKey = +yearKey_;
+      const year = worklog[yearKey];
+
+      if (year && year.ent) {
+        Object.keys(year.ent).forEach(monthKey_ => {
+          // needs de-normalization
+          const monthKey = +monthKey_;
+          const month = year.ent[monthKey];
+
+          if (month && month.ent) {
+            Object.keys(month.ent).forEach(dayKey_ => {
+              const dayKey = +dayKey_;
+              const day: WorklogDay = month.ent[dayKey];
+              if (day) {
+                tasks = tasks.concat(this._createTasksForDay(day));
+              }
+            });
+          }
+        });
+      }
     });
-    return {
-      tasks: dedupeByKey(tasks, 'id'),
-      rangeStart,
-      rangeEnd
-    };
+    return tasks;
   }
 
 
@@ -116,17 +143,15 @@ export class WorklogService {
     }
   }
 
-  private _createTasksForDay(data: WorklogDay) {
-    const tasks = [];
+  private _createTasksForDay(data: WorklogDay): WorklogTask[] {
     const dayData = {...data};
 
-    dayData.logEntries.forEach((entry) => {
-      const task: any = {...entry.task};
-      task.timeSpent = entry.timeSpent;
-      task.dateStr = dayData.dateStr;
-      tasks.push(task);
+    return dayData.logEntries.map((entry) => {
+      return {
+        ...entry.task,
+        timeSpent: entry.timeSpent,
+        dateStr: dayData.dateStr,
+      };
     });
-
-    return dedupeByKey(tasks, 'id');
   }
 }

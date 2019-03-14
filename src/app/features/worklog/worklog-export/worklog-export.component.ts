@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
-import { TaskCopy, TaskWithSubTasks } from '../../tasks/task.model';
+import { TaskCopy } from '../../tasks/task.model';
 import { ProjectService } from '../../project/project.service';
 import { Subscription } from 'rxjs';
 import { WorklogExportSettingsCopy, WorkStartEnd } from '../../project/project.model';
@@ -14,19 +14,8 @@ import { roundTime } from '../../../util/round-time';
 import { roundDuration } from '../../../util/round-duration';
 import Clipboard from 'clipboard';
 import { SnackService } from '../../../core/snack/snack.service';
-
-const CSV_EXPORT_SETTINGS = {
-  separateTasksBy: '',
-  separateFieldsBy: ';',
-  isUseNewLine: true,
-  isListSubTasks: true,
-  isListDoneOnly: false,
-  isWorkedOnTodayOnly: true,
-  showTitle: true,
-  showTimeSpent: true,
-  isTimeSpentAsMilliseconds: true,
-  showDate: false
-};
+import { WorklogService } from '../worklog.service';
+import { WorklogTask } from '../map-archive-to-worklog';
 
 const LINE_SEPARATOR = '\n';
 const EMPTY_VAL = ' - ';
@@ -53,7 +42,6 @@ interface RowItem {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class WorklogExportComponent implements OnInit, OnDestroy {
-  @Input() tasks: any[];
   @Input() rangeStart: Date;
   @Input() rangeEnd: Date;
   @Input() isWorklogExport: boolean;
@@ -92,6 +80,7 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
   constructor(
     private _projectService: ProjectService,
     private _snackService: SnackService,
+    private _worklogService: WorklogService,
   ) {
   }
 
@@ -113,8 +102,10 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
         this.options = WORKLOG_EXPORT_DEFAULTS;
       }
 
-      if (this.tasks) {
-        const rows = this._createRows(this.tasks, pr.workStart, pr.workEnd);
+      const tasks: WorklogTask[] = this._worklogService.getTaskListForRange(this.rangeStart, this.rangeEnd, true);
+
+      if (tasks) {
+        const rows = this._createRows(tasks, pr.workStart, pr.workEnd);
         this.formattedRows = this._formatRows(rows);
         // TODO format to csv
 
@@ -174,35 +165,31 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
   }
 
   // TODO this can be optimized to a couple of mapping functions
-  private _createRows(tasks: TaskWithSubTasks[], startTimes: WorkStartEnd, endTimes: WorkStartEnd): RowItem[] {
+  private _createRows(tasks: WorklogTask[], startTimes: WorkStartEnd, endTimes: WorkStartEnd): RowItem[] {
     const days: { [key: string]: RowItem } = {};
     const _mapTaskToDay = (task, dateStr) => {
-      const taskDate = new Date(dateStr);
       let day: RowItem = days[dateStr];
 
-      if (taskDate >= this.rangeStart && taskDate < this.rangeEnd) {
-        if (!day) {
-          day = days[dateStr] = {
-            date: dateStr,
-            timeSpent: 0,
-            timeEstimate: 0,
-            tasks: [],
-            titlesWithSub: [],
-            workStart: startTimes[dateStr],
-            workEnd: endTimes[dateStr],
-          };
-        }
-        days[dateStr] = {
-          ...days[dateStr],
-          timeSpent: day.timeSpent + task.timeSpentOnDay[dateStr],
-          timeEstimate: day.timeEstimate + task.timeEstimate,
-          tasks: [...day.tasks, task],
+      if (!day) {
+        day = days[dateStr] = {
+          date: dateStr,
+          timeSpent: 0,
+          timeEstimate: 0,
+          tasks: [],
+          titlesWithSub: [],
+          workStart: startTimes[dateStr],
+          workEnd: endTimes[dateStr],
         };
       }
+      days[dateStr] = {
+        ...days[dateStr],
+        timeSpent: day.timeSpent + task.timeSpentOnDay[dateStr],
+        timeEstimate: day.timeEstimate + task.timeEstimate,
+        tasks: [...day.tasks, task],
+      };
     };
 
     tasks.forEach(task => {
-      // TODO find out why there are no sub tasks
       if (task.subTaskIds && task.subTaskIds.length > 0) {
       } else {
         if (task.timeSpentOnDay) {

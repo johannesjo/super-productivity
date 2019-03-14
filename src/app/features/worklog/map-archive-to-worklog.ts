@@ -5,9 +5,13 @@ import { getWeekNumber } from '../../util/get-week-number';
 import * as moment from 'moment-mini';
 import { WorkStartEnd } from '../project/project.model';
 
+export interface WorklogTask extends Task {
+  dateStr?: string;
+}
+
 export interface WorklogDataForDay {
   timeSpent: number;
-  task: Task;
+  task: WorklogTask;
   parentId: string;
   isNoRestore?: boolean;
 }
@@ -132,7 +136,7 @@ export const mapArchiveToWorklog = (
       month.daysWorked = days.length;
       year.daysWorked += days.length;
 
-      const weeks = getWeeksInMonth((+month_ - 1), year_);
+      const weeks = getWeeksInMonth((+month_ - 1), +year_);
 
       month.weeks = weeks.map((week) => {
         const weekForMonth: WorklogWeek = {

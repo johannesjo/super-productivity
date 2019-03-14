@@ -6,12 +6,13 @@ import { WorklogDataForDay, WorklogMonth, WorklogWeek } from './map-archive-to-w
 import { MatDialog } from '@angular/material';
 import { TaskCopy } from '../tasks/task.model';
 import { TaskService } from '../tasks/task.service';
-import { WeeksInMonth } from '../../util/get-weeks-in-month';
 import { DialogWorklogExportComponent } from './dialog-worklog-export/dialog-worklog-export.component';
 import { DialogConfirmComponent } from '../../ui/dialog-confirm/dialog-confirm.component';
 import { Router } from '@angular/router';
 import { standardListAnimation } from '../../ui/animations/standard-list.ani';
 import { WorklogService } from './worklog.service';
+import { getDateRangeForMonth } from '../../util/get-date-range-for-month';
+import { getDateRangeForWeek } from '../../util/get-date-range-for-week';
 
 @Component({
   selector: 'worklog',
@@ -34,14 +35,15 @@ export class WorklogComponent {
   ) {
   }
 
-  exportData(monthData: WorklogMonth, year: number, month: string | number, week?: WeeksInMonth) {
-    const {rangeStart, rangeEnd, tasks} = this.worklogService.createTaskListForMonth(monthData, year, month, week);
+  exportData(monthData: WorklogMonth, year: number, month: string | number, week?: number) {
+    const {rangeStart, rangeEnd} = (typeof week === 'number')
+      ? getDateRangeForWeek(year, week, +month)
+      : getDateRangeForMonth(year, +month);
 
     this._matDialog.open(DialogWorklogExportComponent, {
       restoreFocus: true,
       panelClass: 'big',
       data: {
-        tasks,
         rangeStart,
         rangeEnd,
       }
