@@ -7,6 +7,7 @@ import { selectCurrentProjectId } from '../../project/store/project.reducer';
 import {
   AddNote,
   AddNoteReminder,
+  DeleteNote,
   NoteActionTypes,
   RemoveNoteReminder,
   UpdateNote,
@@ -53,10 +54,7 @@ export class NoteEffects {
       ofType(
         NoteActionTypes.DeleteNote,
       ),
-      withLatestFrom(
-        this._store$.pipe(select(selectNoteFeatureState)),
-      ),
-      tap(this._removeRemindersIfAny.bind(this))
+      tap((a: DeleteNote) => this._reminderService.removeReminderByRelatedIdIfSet(a.payload.id))
     );
 
   @Effect() addReminderForNewNote$: any = this._actions$
@@ -156,13 +154,6 @@ export class NoteEffects {
       this._persistenceService.saveNotesForProject(currentProjectId, noteState);
     } else {
       throw new Error('No current project id');
-    }
-  }
-
-  private _removeRemindersIfAny([action, noteState]) {
-    const note = noteState.entities[action.payload.id];
-    if (note && note.reminderId) {
-      this._reminderService.removeReminder(note.reminderId);
     }
   }
 }

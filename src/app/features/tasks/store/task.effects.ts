@@ -186,10 +186,8 @@ export class TaskEffects {
         const ids = state.ids as string[];
         const idsBefore = state.stateBefore.ids as string[];
         const deletedTaskIds = idsBefore.filter((id) => !ids.includes(id));
-        const deletedTasks = deletedTaskIds.map(id => state.stateBefore.entities[id]);
-        const deletedReminderTasks = deletedTasks.filter(task => task.reminderId);
-        deletedReminderTasks.forEach((task) => {
-          this._reminderService.removeReminder(task.reminderId);
+        deletedTaskIds.forEach((id) => {
+          this._reminderService.removeReminderByRelatedIdIfSet(id);
         });
       })
     );

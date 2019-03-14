@@ -111,6 +111,13 @@ export class ReminderService {
     }
   }
 
+  removeReminderByRelatedIdIfSet(relatedId: string) {
+    const reminder = this._reminders.find(reminder_ => reminder_.relatedId === relatedId);
+    if (reminder) {
+      this.removeReminder(reminder.id);
+    }
+  }
+
   private async _onReminderActivated(msg: MessageEvent) {
     const reminder = msg.data as Reminder;
 
