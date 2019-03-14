@@ -47,7 +47,6 @@ export class IssueService {
       this.isGitSearchEnabled$,
     ).pipe(
       switchMap(([isSearchJira, isSearchGit]) => {
-        console.log(isSearchJira, isSearchGit);
         const obs = [];
         obs.push(from([[]]));
 

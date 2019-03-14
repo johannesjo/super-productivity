@@ -44,7 +44,6 @@ export class AttachmentLinkDirective {
   }
 
   private _openExternalUrl(rawUrl) {
-    console.log(rawUrl);
     if (!rawUrl) {
       return;
     }

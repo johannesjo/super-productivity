@@ -96,7 +96,6 @@ export class AddTaskBarComponent implements AfterViewInit {
       }
     } else {
       const res = await this._taskService.checkForTaskWithIssue(issueOrTitle.issueData);
-      console.log(res);
 
       if (!res) {
         this._taskService.addWithIssue(

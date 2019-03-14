@@ -43,7 +43,6 @@ export function gitIssueReducer(
   state: GitIssueState = initialGitIssueState,
   action: GitIssueActions | TaskActions
 ): GitIssueState {
-  // console.log(state.entities, state, action);
 
   switch (action.type) {
     // Meta Actions

@@ -98,8 +98,6 @@ export class GoogleDriveSyncEffects {
     concatMap(() => this._checkIfRemoteUpdate()),
     concatMap((isUpdate): any => {
       if (isUpdate) {
-        console.log('DriveSync', 'HAS CHANGED (modified Date comparision), TRYING TO UPDATE');
-
         this._snackService.open({
           message: `DriveSync: There is a remote update! Downloading...`,
           icon: 'file_download',
@@ -195,12 +193,9 @@ export class GoogleDriveSyncEffects {
         return this._googleApiService.getFileInfo(cfg._backupDocId).pipe(
           catchError(err => this._handleError(err)),
           concatMap((res: any): Observable<any> => {
-            // console.log('concat map response', res);
 
             const lastActiveLocal = this._syncService.getLastActive();
             const lastModifiedRemote = res.modifiedDate;
-
-            console.log('SaveTo Check', this._isEqual(lastActiveLocal, lastModifiedRemote), lastModifiedRemote, lastActiveLocal);
 
             if (this._isEqual(lastActiveLocal, lastModifiedRemote)) {
               if (!action.payload || !action.payload.isSkipSnack) {
@@ -293,7 +288,6 @@ export class GoogleDriveSyncEffects {
 
                   // update but ask if remote data is not newer than the last local update
                   const isSkipConfirm = (lastActiveRemote && this._isNewerThan(lastActiveRemote, lastActiveLocal));
-                  console.log('DriveSync', 'date comparision skipConfirm load', isSkipConfirm, lastActiveLocal, lastActiveRemote);
 
                   if (isSkipConfirm) {
                     return of(new LoadFromGoogleDrive({loadResponse}));
@@ -378,7 +372,6 @@ export class GoogleDriveSyncEffects {
       .pipe(
         tap((res: any) => {
           const lastModifiedRemote = res.modifiedDate;
-          console.log('CHECK_REMOTE_UPDATED', this._isNewerThan(lastModifiedRemote, lastSync), lastModifiedRemote, lastSync);
         }),
         map((res: any) => this._isNewerThan(res.modifiedDate, lastSync)),
       );

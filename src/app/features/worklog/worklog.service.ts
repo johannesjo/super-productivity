@@ -38,9 +38,6 @@ export class WorklogService {
       const month = now.getMonth() + 1;
       const weekNr = getWeekNumber(now);
 
-      // const month = now.getMonth();
-      // const weekNr = getWeekNumber(now) - 2;
-      // console.log(month, weekNr);
       if (worklog[year] && worklog[year].ent[month]) {
         return worklog[year].ent[month].weeks.find(week => week.weekNr === weekNr);
       }

@@ -64,10 +64,8 @@ export function projectReducer(
   state: ProjectState = initialProjectState,
   action: ProjectActions
 ): ProjectState {
-  // console.log(state.entities, state, action);
 
   const payload = action['payload'];
-
 
   switch (action.type) {
     // Meta Actions

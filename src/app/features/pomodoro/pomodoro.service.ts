@@ -113,7 +113,6 @@ export class PomodoroService {
         withLatestFrom(this.cfg$, this.isBreak$),
       )
       .subscribe(([val, cfg, isBreak]) => {
-        console.log('currentSessionTime$', val, isBreak, cfg);
         if (cfg.isManualContinue && isBreak) {
           this.pause(true);
         } else {

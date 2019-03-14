@@ -72,8 +72,6 @@ export class InputDurationDirective<D> implements ControlValueAccessor, Validato
     if (value !== this._value) {
       this._value = value;
       this._onChangeCallback(this._msValue);
-      // console.log(value);
-
     }
   }
 

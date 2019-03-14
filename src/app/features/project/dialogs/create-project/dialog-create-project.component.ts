@@ -122,7 +122,6 @@ export class DialogCreateProjectComponent implements OnInit, OnDestroy {
         jiraCfg: this.projectData.issueIntegrationCfgs.JIRA,
       }
     }).afterClosed().subscribe((jiraCfg: JiraCfg) => {
-      console.log('afterClosed', jiraCfg);
 
       if (jiraCfg) {
         this._saveJiraCfg(jiraCfg);
@@ -137,7 +136,6 @@ export class DialogCreateProjectComponent implements OnInit, OnDestroy {
         gitCfg: this.projectData.issueIntegrationCfgs.JIRA,
       }
     }).afterClosed().subscribe((gitCfg: GitCfg) => {
-      console.log('afterClosed', gitCfg);
 
       if (gitCfg) {
         this._saveGitCfg(gitCfg);
@@ -148,8 +146,6 @@ export class DialogCreateProjectComponent implements OnInit, OnDestroy {
   private _saveJiraCfg(jiraCfg: JiraCfg) {
     this.jiraCfg = jiraCfg;
 
-    console.log(this.projectData.id);
-
     // if we're editing save right away
     if (this.projectData.id) {
       this._projectService.updateIssueProviderConfig(this.projectData.id, 'JIRA', this.jiraCfg);
@@ -158,8 +154,6 @@ export class DialogCreateProjectComponent implements OnInit, OnDestroy {
 
   private _saveGitCfg(gitCfg: GitCfg) {
     this.gitCfg = gitCfg;
-
-    console.log(this.projectData.id);
 
     // if we're editing save right away
     if (this.projectData.id) {

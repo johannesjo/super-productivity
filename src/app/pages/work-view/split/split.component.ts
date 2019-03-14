@@ -56,9 +56,8 @@ export class SplitComponent {
     this.eventSubs.add(touchmove$);
   }
 
-  onMouseDown(ev) {
+  onMouseDown() {
     this._isDrag = false;
-    // console.log('onMouseDown', ev);
     const mouseup$ = fromEvent(document, 'mouseup');
     this.eventSubs = mouseup$.subscribe((e: MouseEvent) => this.onMoveEnd(e));
 
@@ -98,8 +97,6 @@ export class SplitComponent {
     if (percentage < 0) {
       percentage = 0;
     }
-    // console.log(percentage, h, ev.clientY);
-
     this._updatePos(percentage);
   }
 

@@ -50,7 +50,6 @@ export class JiraCfgComponent implements OnInit, OnDestroy {
         : [[]];
     }),
     tap((suggestions) => {
-      console.log(suggestions);
       this.isLoading$.next(false);
     }),
   );

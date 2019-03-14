@@ -234,7 +234,6 @@ export function taskReducer(
   state: TaskState = initialTaskState,
   action: TaskActions | AddAttachment | DeleteAttachment
 ): TaskState {
-  // console.log(state.entities, state, action);
 
   switch (action.type) {
     // Meta Actions

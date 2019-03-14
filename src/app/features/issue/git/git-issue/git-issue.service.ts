@@ -122,7 +122,6 @@ export class GitIssueService {
   }
 
   updateIssuesFromApi(oldIssues: GitIssue[], cfg: GitCfg, isNotify = true) {
-    console.log('UPDATE ISSUE FROM API');
     this._gitApiService.getCompleteIssueDataForRepo(cfg.repo)
       .pipe(
         take(1)

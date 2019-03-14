@@ -188,8 +188,6 @@ export class GoogleApiService {
   getSpreadsheetHeadingsAndLastRow(spreadsheetId): Observable<{ headings: any, lastRow: any } | Observable<never>> {
     return this.getSpreadsheetData(spreadsheetId, 'A1:Z99')
       .pipe(map((response: any) => {
-        console.log(response);
-
         const range = response.body || response;
 
         if (range && range.values && range.values[0]) {
@@ -258,7 +256,6 @@ export class GoogleApiService {
     return combineLatest(metaData, loadFile)
       .pipe(
         map((res) => {
-          console.log(res);
           return {
             backup: res[1],
             meta: res[0],
@@ -309,7 +306,6 @@ export class GoogleApiService {
   }
 
   private _updateSession(sessionData: Partial<GoogleSession>) {
-    console.log('GoogleApi: _updateSession', sessionData);
     if (!sessionData.accessToken) {
       console.warn('GoogleApiService: Logged out willingly???');
     }

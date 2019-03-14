@@ -3,7 +3,6 @@ import { getWeeksInMonth } from './get-weeks-in-month';
 describe('getWeeksInMonth', () => {
   it('should work for february 2019', () => {
     const result = getWeeksInMonth(1, 2019);
-    console.log(result);
 
     expect(result[0]).toEqual({start: 1, end: 3});
     expect(result[4]).toEqual({start: 25, end: 28});

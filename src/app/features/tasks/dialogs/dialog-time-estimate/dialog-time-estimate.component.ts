@@ -63,7 +63,6 @@ export class DialogTimeEstimateComponent {
   addNewEntry() {
     const strDate = getWorklogStr(this.newEntry.date);
     this.timeSpentOnDayCopy[strDate] = this.newEntry.timeSpent;
-    console.log(strDate, this.timeSpentOnDayCopy);
     this.isAddForAnotherDayFormVisible = false;
 
   }

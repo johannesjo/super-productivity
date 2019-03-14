@@ -36,12 +36,11 @@ export class GitIssueEffects {
         this._store$.pipe(select(selectProjectGitCfg)),
       ),
       switchMap(([a, gitCfg]) => {
-        console.log('CACHE REFRESH', isRepoConfigured_(gitCfg) && (gitCfg.isAutoAddToBacklog || gitCfg.isAutoPoll));
+        // console.log('CACHE REFRESH', isRepoConfigured_(gitCfg) && (gitCfg.isAutoAddToBacklog || gitCfg.isAutoPoll));
         return (isRepoConfigured_(gitCfg) && (gitCfg.isAutoAddToBacklog || gitCfg.isAutoPoll))
           ? timer(GIT_INITIAL_POLL_DELAY, GIT_POLL_INTERVAL)
             .pipe(
               tap(() => {
-                console.log('CACHE REFRESH TIMER');
                 this._gitApiService.refreshIssuesCacheIfOld();
                 // trigger fake refresh for when issues are deleted or cache is more up to date
                 // then the data
@@ -61,7 +60,6 @@ export class GitIssueEffects {
     ),
     filter(([a, gitCfg]) => gitCfg.isAutoPoll),
     tap(([x, gitCfg, issues]: [any, GitCfg, GitIssue[]]) => {
-      console.log('GIT POLL ISSUE CHANGES', x, issues);
       if (issues && issues.length > 0) {
         this._snackService.open({
           message: 'Git: Polling Changes for issues',
@@ -81,7 +79,6 @@ export class GitIssueEffects {
     ),
     filter(([a, gitCfg]) => gitCfg.isAutoAddToBacklog),
     tap(() => {
-      console.log('GIT POLL BACKLOG');
       this._gitIssueService.addOpenIssuesToBacklog();
     })
   );
@@ -159,8 +156,6 @@ export class GitIssueEffects {
   private _importNewIssuesToBacklog([action]: [Actions, Task[]]) {
     this._gitApiService.getCompleteIssueDataForRepo().subscribe(async issues => {
       const allTaskGitIssueIds = await this._taskService.getAllIssueIds(GIT_TYPE) as number[];
-      console.log('_importNewIssuesToBacklog Git', allTaskGitIssueIds, issues);
-
       const issuesToAdd = issues.filter(issue => !allTaskGitIssueIds.includes(issue.id));
       issuesToAdd.forEach((issue) => {
         this._taskService.addWithIssue(

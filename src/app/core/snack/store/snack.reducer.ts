@@ -11,8 +11,6 @@ export const initialState: SnackState = {
 };
 
 export function reducer(state: SnackState = initialState, action: SnackActions): SnackState {
-  // console.log(state, action);
-
   switch (action.type) {
     case SnackActionTypes.SnackOpen:
       return {...state, show: true};

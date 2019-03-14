@@ -156,7 +156,7 @@ export class PersistenceService {
   // -----------------------
   saveLastActive(date: string = new Date().toString()) {
     // TODO refactor to timestamp
-    console.log('Save LastAct', date);
+    // console.log('Save LastAct', date);
 
     saveToLs(LS_LAST_ACTIVE, date);
   }
@@ -263,7 +263,6 @@ export class PersistenceService {
   // DATA STORAGE INTERFACE
   // ---------------------
   private async _saveToDb(key: string, data: any, isForce = false): Promise<any> {
-    // console.log('save', key, this._isBlockSaving);
     if (!this._isBlockSaving || isForce === true) {
       return this._databaseService.save(key, data);
     } else {

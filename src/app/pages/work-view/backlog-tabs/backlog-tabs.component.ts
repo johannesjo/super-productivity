@@ -40,7 +40,6 @@ export class BacklogTabsComponent {
     private _reminderService: ReminderService,
     private _matDialog: MatDialog,
   ) {
-    // this.taskService.scheduledTasks$.subscribe((val) => console.log('taskService.scheduledTasks$', val));
   }
 
   indexChange(index) {

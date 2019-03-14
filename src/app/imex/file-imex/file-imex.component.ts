@@ -41,8 +41,6 @@ export class FileImexComponent {
   }
 
   async downloadBackup() {
-    console.log(this.exportDataBtn);
-
     const el = this.exportDataBtn.nativeElement;
     const data = await this._syncService.getCompleteSyncData();
     const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(data));

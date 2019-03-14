@@ -70,7 +70,7 @@ export class JiraIssueEffects {
       switchMap(([a, jiraCfg]) => {
         return (isEnabled([a, jiraCfg]) && jiraCfg.isAutoAddToBacklog)
           ? timer(JIRA_INITIAL_POLL_BACKLOG_DELAY, JIRA_POLL_INTERVAL).pipe(
-            tap(() => console.log('JIRA_POLL_BACKLOG_CHANGES')),
+            // tap(() => console.log('JIRA_POLL_BACKLOG_CHANGES')),
             map(() => new AddOpenJiraIssuesToBacklog())
           )
           : EMPTY;
@@ -266,7 +266,6 @@ export class JiraIssueEffects {
     ),
     tap(([x, issueIds_, entities]: [number, string[], Dictionary<JiraIssue>]) => {
       const issueIds = issueIds_ as string[];
-      console.log('JIRA POLL CHANGES', x, issueIds, entities);
       if (issueIds && issueIds.length > 0) {
         this._snackService.open({
           message: 'Jira: Polling Changes for issues',
@@ -361,7 +360,6 @@ export class JiraIssueEffects {
         return;
       }
       const allTaskJiraIssueIds = await this._taskService.getAllIssueIds(JIRA_TYPE) as string[];
-      console.log('_importNewIssuesToBacklog Jira', allTaskJiraIssueIds, issues);
 
       const issuesToAdd = issues.filter(issue => !allTaskJiraIssueIds.includes(issue.id));
       issuesToAdd.forEach((issue) => {

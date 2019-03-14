@@ -50,8 +50,8 @@ export class GitApiService {
     const cachedIssues: GitIssue[] = cached && cached.issues;
     const lastUpdate: number = cached && cached.lastUpdate;
 
-    console.log('getCompleteIssueDataForRepo isUseCached',
-      cachedIssues && Array.isArray(cachedIssues) && (lastUpdate + GIT_MAX_CACHE_AGE > Date.now()));
+    // console.log('getCompleteIssueDataForRepo isUseCached',
+    //   cachedIssues && Array.isArray(cachedIssues) && (lastUpdate + GIT_MAX_CACHE_AGE > Date.now()));
 
     if (
       !isForceRefresh &&

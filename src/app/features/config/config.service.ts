@@ -50,7 +50,7 @@ export class ConfigService {
       this.loadState(cfg, isOmitTokens);
     } else {
       // NOTE: this happens if there never have been any changes to the default cfg
-      console.log('ConfigService No config found in ls');
+      console.warn('ConfigService No config found in ls');
     }
   }
 
