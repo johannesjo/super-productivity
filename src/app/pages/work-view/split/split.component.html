@@ -2,7 +2,7 @@
      [class.isHideShadow]="pos>10">
   <button #buttonEl
           (dblclick)="toggle()"
-          (mousedown)="onMouseDown($event)"
+          (mousedown)="onMouseDown()"
           (touchstart)="onTouchStart($event)"
           [class.isAnimate]="isAnimateBtn"
           color="primary"
