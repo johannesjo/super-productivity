@@ -76,14 +76,15 @@ export class JiraIssueService {
   }
 
 
-  update(jiraIssueId: string, changedFields: Partial<JiraIssue>) {
+  update(jiraIssueId: string, changedFields: Partial<JiraIssue>, oldIssue?: JiraIssue) {
     this._store.dispatch({
       type: JiraIssueActionTypes.UpdateJiraIssue,
       payload: {
         jiraIssue: {
           id: jiraIssueId,
           changes: changedFields
-        }
+        },
+        oldIssue
       }
     });
   }
@@ -124,7 +125,7 @@ export class JiraIssueService {
           ...(isNoUpdateChangelog ? {} : {changelog}),
         };
 
-        this.update(issueId, changedFields);
+        this.update(issueId, changedFields, oldIssueData);
 
         if (wasUpdated && isNotifyOnUpdate) {
           this._snackService.open({message: `Jira: ${updatedIssue.key} was updated`, icon: 'cloud_download'});

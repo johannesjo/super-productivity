@@ -61,7 +61,7 @@ export class AddJiraIssues implements Action {
 export class UpdateJiraIssue implements Action {
   readonly type = JiraIssueActionTypes.UpdateJiraIssue;
 
-  constructor(public payload: { jiraIssue: Update<JiraIssue> }) {
+  constructor(public payload: { jiraIssue: Update<JiraIssue>, oldIssue: JiraIssue }) {
   }
 }
 

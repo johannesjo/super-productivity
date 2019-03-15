@@ -1,7 +1,8 @@
 import { createFeatureSelector, createSelector } from '@ngrx/store';
 import { filterStartableTasks, TASK_FEATURE_NAME, taskAdapter, TaskState } from './task.reducer';
 import { selectIssueEntityMap } from '../../issue/issue.selector';
-import { TaskWithSubTasks } from '../task.model';
+import { Task, TaskWithSubTasks } from '../task.model';
+import { IssueProviderKey } from '../../issue/issue';
 
 const mapIssueDataToTask = (tasks_, issueEntityMap) => {
   return tasks_ && tasks_.map((task) => {
@@ -132,7 +133,6 @@ export const selectTotalTimeWorkedOnTodaysTasks = createSelector(selectTodaysTas
 export const selectEstimatedOnTasksWorkedOnToday$ = createSelector(selectTodaysTasksWithSubTasks, mapTotalTimeWorked);
 
 
-
 export const selectFocusTaskId = createSelector(selectTaskFeatureState, state => state.focusTaskId);
 
 export const selectTasksWithMissingIssueData = createSelector(
@@ -159,4 +159,18 @@ export const selectHasTasksToWorkOn = createSelector(
 export const selectTaskById = createSelector(
   selectTaskFeatureState,
   (state, props: { id: string }) => state.entities[props.id]
+);
+
+
+export const selectTaskByIssueId = createSelector(
+  selectTaskFeatureState,
+  (state, props: { issueId: string, issueType: IssueProviderKey }): Task => {
+    const ids = state.ids as string[];
+    const taskId = ids.find(id_ => state.entities[id_]
+      && state.entities[id_].issueType === props.issueType && state.entities[id_].issueId === props.issueId);
+
+    return taskId
+      ? state.entities[taskId]
+      : null;
+  }
 );

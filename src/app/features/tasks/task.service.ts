@@ -59,6 +59,7 @@ import {
   selectStartableTaskIds,
   selectStartableTasks,
   selectTaskById,
+  selectTaskByIssueId,
   selectTasksWithMissingIssueData,
   selectTodaysDoneTasksWithSubTasks,
   selectTodaysTasksFlat,
@@ -408,6 +409,10 @@ export class TaskService {
   // ------
   getById(id: string): Observable<Task> {
     return this._store.pipe(select(selectTaskById, {id}), take(1));
+  }
+
+  getByIssueId(issueId: string|number, issueType: IssueProviderKey): Observable<Task> {
+    return this._store.pipe(select(selectTaskByIssueId, {issueId, issueType}), take(1));
   }
 
   async getByIdFromEverywhere(id: string, projectId: string = this._projectService.currentId): Promise<Task> {

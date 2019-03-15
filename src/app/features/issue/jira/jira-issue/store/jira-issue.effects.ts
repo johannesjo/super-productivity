@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { Actions, Effect, ofType } from '@ngrx/effects';
-import { AddOpenJiraIssuesToBacklog, JiraIssueActionTypes } from './jira-issue.actions';
+import { AddOpenJiraIssuesToBacklog, JiraIssueActionTypes, UpdateJiraIssue } from './jira-issue.actions';
 import { select, Store } from '@ngrx/store';
-import { concatMap, filter, map, switchMap, tap, throttleTime, withLatestFrom } from 'rxjs/operators';
+import { concatMap, filter, map, switchMap, take, tap, throttleTime, withLatestFrom } from 'rxjs/operators';
 import { TaskActionTypes, UpdateTask } from '../../../../tasks/store/task.actions';
 import { PersistenceService } from '../../../../../core/persistence/persistence.service';
 import { selectJiraIssueEntities, selectJiraIssueFeatureState, selectJiraIssueIds } from './jira-issue.reducer';
@@ -24,7 +24,7 @@ import {
   selectTaskFeatureState
 } from '../../../../tasks/store/task.selectors';
 import { TaskService } from '../../../../tasks/task.service';
-import { EMPTY, Observable, timer } from 'rxjs';
+import { EMPTY, Observable, of, timer } from 'rxjs';
 import { TaskState } from '../../../../tasks/store/task.reducer';
 import { MatDialog } from '@angular/material';
 import { DialogJiraTransitionComponent } from '../../dialog-jira-transition/dialog-jira-transition.component';
@@ -257,6 +257,32 @@ export class JiraIssueEffects {
         });
         tasks.forEach((task) => this._jiraIssueService.loadMissingIssueData(task.issueId));
       })
+    );
+
+  @Effect() updateTaskTitleIfChanged$: any = this._actions$
+    .pipe(
+      ofType(
+        JiraIssueActionTypes.UpdateJiraIssue,
+      ),
+      filter((a: UpdateJiraIssue) => {
+        const {jiraIssue, oldIssue} = a.payload;
+        return (jiraIssue.changes.summary && oldIssue && oldIssue.summary
+          && jiraIssue.changes.summary !== oldIssue.summary);
+      }),
+      concatMap((a: UpdateJiraIssue) => of(a).pipe(
+        withLatestFrom(
+          this._taskService.getByIssueId(a.payload.jiraIssue.id, JIRA_TYPE).pipe(take(1))
+        ),
+      )),
+      map(([a, task]: [UpdateJiraIssue, Task]) => new UpdateTask({
+          task: {
+            id: task.id,
+            changes: {
+              title: a.payload.jiraIssue.changes.summary,
+            }
+          }
+        })
+      ),
     );
 
   private _pollChangesForIssues$: Observable<any> = timer(JIRA_INITIAL_POLL_DELAY, JIRA_POLL_INTERVAL).pipe(
