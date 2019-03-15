@@ -41,7 +41,11 @@
 .weeks {
   display: flex;
   justify-content: center;
-  flex-wrap: wrap;
+  flex-wrap: wrap-reverse;
+
+  @include mq(xs) {
+    flex-wrap: wrap;
+  }
 }
 
 $this-table-outer-padding-left-right: $s*6;
