@@ -2,8 +2,7 @@
   <br><strong>{{worklogService.totalTimeSpent$|async|msToString}}</strong></h1>
 
 <div class="years"
-     *ngIf="worklogService.worklog$|async as worklog"
-     [@standardList]="'ALWAYS'">
+     *ngIf="worklogService.worklog$|async as worklog">
   <div *ngFor="let year of (worklog|keyvalue:sortWorklogItems); trackBy: trackByKey;"
        class="year">
     <h1 class="year-title mat-headline"
@@ -14,8 +13,7 @@
       <strong>{{year.value.daysWorked}}</strong><br>
       Time spent total: <strong [innerHtml]="year.value.timeSpent|msToString"></strong></div>
 
-    <div class="months"
-         [@standardList]="'ALWAYS'">
+    <div class="months">
       <div *ngFor="let month of year.value.ent|keyvalue:sortWorklogItems; trackBy: trackByKey;"
            class="month">
         <h2 class="month-title mat-headline">
@@ -35,8 +33,7 @@
           <strong [innerHtml]="month.value.timeSpent|msToString"></strong>
         </div>
 
-        <div class="weeks"
-             [@standardList]="'ALWAYS'">
+        <div class="weeks">
           <div *ngFor="let week of month.value.weeks; trackBy: trackByForWeek"
                class="week">
 
