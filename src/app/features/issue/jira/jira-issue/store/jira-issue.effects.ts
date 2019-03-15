@@ -3,7 +3,7 @@ import { Actions, Effect, ofType } from '@ngrx/effects';
 import { AddOpenJiraIssuesToBacklog, JiraIssueActionTypes, UpdateJiraIssue } from './jira-issue.actions';
 import { select, Store } from '@ngrx/store';
 import { concatMap, filter, map, switchMap, take, tap, throttleTime, withLatestFrom } from 'rxjs/operators';
-import { TaskActionTypes, UpdateTask } from '../../../../tasks/store/task.actions';
+import { AddTask, TaskActionTypes, UpdateTask } from '../../../../tasks/store/task.actions';
 import { PersistenceService } from '../../../../../core/persistence/persistence.service';
 import { selectJiraIssueEntities, selectJiraIssueFeatureState, selectJiraIssueIds } from './jira-issue.reducer';
 import { selectCurrentProjectId, selectProjectJiraCfg } from '../../../../project/store/project.reducer';
@@ -109,6 +109,21 @@ export class JiraIssueEffects {
       tap(this._importNewIssuesToBacklog.bind(this))
     );
 
+
+  @Effect({dispatch: false}) updateIssueRightAwayWithCompleteData$: any = this._actions$
+    .pipe(
+      ofType(
+        TaskActionTypes.AddTask,
+      ),
+      withLatestFrom(
+        this._store$.pipe(select(selectProjectJiraCfg)),
+      ),
+      filter(isEnabled),
+      filter(([a, jiraCfg]: [AddTask, JiraCfg]) => !!a.payload.issue && a.payload.task.issueType === JIRA_TYPE),
+      tap(([a, jiraCfg]: [AddTask, JiraCfg]) => this._jiraIssueService.updateIssueFromApi(
+        a.payload.issue.id, null, false, false
+      )),
+    );
 
   @Effect({dispatch: false}) addWorklog$: any = this._actions$
     .pipe(
