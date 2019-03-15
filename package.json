@@ -92,8 +92,7 @@
     "snap": {
       "grade": "stable",
       "stagePackages": [
-        "default",
-        "xprintidle"
+        "default"
       ]
     }
   },
@@ -109,7 +108,7 @@
   "devDependencies": {
     "@angular-devkit/build-angular": "~0.10.5",
     "@angular/animations": "^7.2.9",
-    "@angular/cdk": "^7.3.4",
+    "@angular/cdk": "^7.3.2",
     "@angular/cli": "~7.3.1",
     "@angular/common": "^7.2.9",
     "@angular/compiler": "^7.2.9",
@@ -118,7 +117,7 @@
     "@angular/forms": "^7.2.9",
     "@angular/http": "^7.2.9",
     "@angular/language-service": "^7.2.9",
-    "@angular/material": "^7.3.4",
+    "@angular/material": "^7.3.2",
     "@angular/platform-browser": "^7.2.9",
     "@angular/platform-browser-dynamic": "^7.2.9",
     "@angular/pwa": "^0.10.5",
