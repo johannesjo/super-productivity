@@ -44,7 +44,7 @@ export class GitIssueEffects {
                 this._gitApiService.refreshIssuesCacheIfOld();
                 // trigger fake refresh for when issues are deleted or cache is more up to date
                 // then the data
-                this._gitApiService.onCacheRefresh$.next(true);
+                // this._gitApiService.onCacheRefresh$.next(true);
               })
             )
           : EMPTY;
