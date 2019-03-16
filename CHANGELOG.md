@@ -1,3 +1,30 @@
+## [2.5.5](https://github.com/johannesjo/super-productivity/compare/v2.5.4...v2.5.5) (2019-03-16)
+
+
+### Bug Fixes
+
+* **electron:** default window settings being messy ([ba95be7](https://github.com/johannesjo/super-productivity/commit/ba95be7))
+* **git:** only poll to backlog when there was an update ([441f906](https://github.com/johannesjo/super-productivity/commit/441f906))
+* **task:** additional info styling for electron build ([55a833c](https://github.com/johannesjo/super-productivity/commit/55a833c))
+
+
+### Features
+
+* adjust icon positions ([9a0b1f7](https://github.com/johannesjo/super-productivity/commit/9a0b1f7))
+* **jira:** make attachments work for electron version ([2e35882](https://github.com/johannesjo/super-productivity/commit/2e35882))
+* **jira:** update issue right away from api when adding ([e692ca7](https://github.com/johannesjo/super-productivity/commit/e692ca7))
+* **jira:** update task title if it was updated for jira ([cc06151](https://github.com/johannesjo/super-productivity/commit/cc06151))
+* change wording ([84f79a3](https://github.com/johannesjo/super-productivity/commit/84f79a3))
+* **projects:** add project color to overview ([3c9dc36](https://github.com/johannesjo/super-productivity/commit/3c9dc36))
+* **projects:** add ui for sorting projects ([d3fef24](https://github.com/johannesjo/super-productivity/commit/d3fef24))
+* **projects:** improve add project dialog ([ef9edd2](https://github.com/johannesjo/super-productivity/commit/ef9edd2))
+* **projects:** improve styling for project overview ([9541bb2](https://github.com/johannesjo/super-productivity/commit/9541bb2))
+* **projects:** make projects sortable ([0fa3de8](https://github.com/johannesjo/super-productivity/commit/0fa3de8))
+* **worklog:** remove animation as it sucks ([ee965fa](https://github.com/johannesjo/super-productivity/commit/ee965fa))
+* **worklog:** reverse week order for mobile ([d685607](https://github.com/johannesjo/super-productivity/commit/d685607))
+
+
+
 ## [2.5.4](https://github.com/johannesjo/super-productivity/compare/v2.5.3...v2.5.4) (2019-03-14)
 
 
