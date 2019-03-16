@@ -1,62 +1,48 @@
 <div class="page-wrapper">
-  <h2 class="mat-h2">Projects</h2>
+  <div class="component-wrapper">
+    <h1 class="mat-h1" style="text-align: center;">Project Overview</h1>
 
-  <div class="project-list">
-    <mat-card *ngFor="let project of projectService.list$|async"
-              class="project">
-      <div class="project-color bg-400-el"
-           [ngClass]="project.themeColor"></div>
+    <div class="project-list">
+      <mat-card *ngFor="let project of projectService.list$|async"
+                class="project">
+        <div class="project-color bg-400-el"
+             [ngClass]="project.themeColor"></div>
 
-      <div [class.isCurrent]="project.id === (projectService.currentId$|async)"
-           class="title">{{project.title}}
-      </div>
+        <div [class.isCurrent]="project.id === (projectService.currentId$|async)"
+             class="title">{{project.title}}
+        </div>
 
-      <div class="issue-providers">
-        <mat-icon *ngIf="project.issueIntegrationCfgs?.JIRA?.isEnabled"
-                  svgIcon="jira"></mat-icon>
-        <mat-icon *ngIf="project.issueIntegrationCfgs?.GIT?.repo"
-                  svgIcon="github"></mat-icon>
-      </div>
+        <div class="issue-providers">
+          <mat-icon *ngIf="project.issueIntegrationCfgs?.JIRA?.isEnabled"
+                    svgIcon="jira"></mat-icon>
+          <mat-icon *ngIf="project.issueIntegrationCfgs?.GIT?.repo"
+                    svgIcon="github"></mat-icon>
+        </div>
 
-      <div class="controls hide-xs">
-        <button (click)="edit(project)"
-                color="primary"
-                mat-raised-button>
-          <mat-icon aria-label="Edit">edit</mat-icon>
-          Edit
-        </button>
-        <button (click)="remove(project.id)"
-                *ngIf="project.id !== (projectService.currentId$|async)"
-                color="warn"
-                mat-raised-button>
-          <mat-icon aria-label="Delete">delete</mat-icon>
-          Delete
-        </button>
-      </div>
+        <div class="controls">
+          <button (click)="edit(project)"
+                  color=""
+                  mat-mini-fab>
+            <mat-icon aria-label="Edit">edit</mat-icon>
+          </button>
+          <button (click)="remove(project.id)"
+                  *ngIf="project.id !== (projectService.currentId$|async)"
+                  color="warn"
+                  mat-mini-fab>
+            <mat-icon aria-label="Delete">delete</mat-icon>
+          </button>
+        </div>
 
-      <div class="controls show-xs-only">
-        <button (click)="edit(project)"
-                color="primary"
-                mat-mini-fab>
-          <mat-icon aria-label="Edit">edit</mat-icon>
-        </button>
-        <button (click)="remove(project.id)"
-                *ngIf="project.id !== (projectService.currentId$|async)"
-                color="warn"
-                mat-mini-fab>
-          <mat-icon aria-label="Delete">delete</mat-icon>
-        </button>
-      </div>
+      </mat-card>
+    </div>
 
-    </mat-card>
-  </div>
-
-  <div class="add-new-project-wrapper">
-    <button (click)="openCreateDialog()"
-            color="primary"
-            mat-raised-button>
-      <mat-icon aria-label="Add">add</mat-icon>
-      Create New
-    </button>
+    <div class="add-new-project-wrapper">
+      <button (click)="openCreateDialog()"
+              color="primary"
+              mat-raised-button>
+        <mat-icon aria-label="Add">add</mat-icon>
+        Create New
+      </button>
+    </div>
   </div>
 </div>

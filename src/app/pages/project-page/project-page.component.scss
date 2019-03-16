@@ -1,7 +1,6 @@
 @import '../../../_variables.scss';
 
 .controls {
-  margin-left: 2*$s;
   display: flex;
   justify-content: end;
   flex-direction: row;
@@ -22,16 +21,22 @@
 .project-list {
 }
 
+$project-color-width: $s*2;
+
 .project {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: $s/2 2*$s;
+  padding-left: 2*$s+$project-color-width;
   margin-bottom: $s;
   position: relative;
   overflow: hidden;
 
-  $project-color-width: $s*2;
+  > * {
+    flex-basis: 33.333%;
+  }
+
 
   .project-color {
     left: 0;
@@ -42,7 +47,6 @@
   }
 
   .title {
-    padding-left: $project-color-width;
     font-size: 16px;
     flex: 1;
 
@@ -56,7 +60,7 @@
     margin-right: 2*$s;
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: center;
   }
 }
 
