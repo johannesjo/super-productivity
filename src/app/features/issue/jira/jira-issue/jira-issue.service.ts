@@ -136,15 +136,7 @@ export class JiraIssueService {
   }
 
   getMappedAttachmentsFromIssue(issueData: JiraIssue): Attachment[] {
-    const attachments = issueData && issueData.attachments && issueData.attachments.map(mapJiraAttachmentToAttachment);
-    return (IS_ELECTRON && attachments)
-      ? attachments
-      // TODO remove once we have proper jira download files working
-        .map((attachment) => {
-          const link = 'LINK' as DropPasteInputType;
-          return {...attachment, type: link};
-        })
-      : attachments;
+    return issueData && issueData.attachments && issueData.attachments.map(mapJiraAttachmentToAttachment);
   }
 
   private _createChangelog(updatedIssue: JiraIssue, oldIssue: JiraIssue): JiraChangelogEntry[] {

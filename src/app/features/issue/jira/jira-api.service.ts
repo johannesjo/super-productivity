@@ -19,7 +19,11 @@ import {
 import { JiraOriginalStatus, JiraOriginalTransition, JiraOriginalUser } from './jira-api-responses';
 import { JiraCfg } from './jira';
 import { ElectronService } from 'ngx-electron';
-import { IPC_JIRA_CB_EVENT, IPC_JIRA_MAKE_REQUEST_EVENT } from '../../../../../electron/ipc-events.const';
+import {
+  IPC_JIRA_CB_EVENT,
+  IPC_JIRA_MAKE_REQUEST_EVENT,
+  IPC_JIRA_SETUP_IMG_HEADERS
+} from '../../../../../electron/ipc-events.const';
 import { SnackService } from '../../../core/snack/snack.service';
 import { IS_ELECTRON } from '../../../app.constants';
 import { loadFromSessionStorage, saveToSessionStorage } from '../../../core/persistence/local-storage';
@@ -54,6 +58,10 @@ export class JiraApiService {
   ) {
     this._projectService.currentJiraCfg$.subscribe((cfg: JiraCfg) => {
       this._cfg = cfg;
+
+      if (IS_ELECTRON && this._isMinimalSettings(cfg)) {
+        this._electronService.ipcRenderer.send(IPC_JIRA_SETUP_IMG_HEADERS, cfg);
+      }
     });
 
     // set up callback listener for electron
@@ -210,7 +218,7 @@ export class JiraApiService {
 
 
   // --------
-  private _isMinimalSettings(settings) {
+  private _isMinimalSettings(settings: JiraCfg) {
     return settings && settings.host && settings.userName && settings.password
       && (IS_ELECTRON || this._isExtension);
   }

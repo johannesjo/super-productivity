@@ -8,7 +8,7 @@ import { initIndicator } from './indicator';
 import { createWindow } from './main-window';
 
 import { getIdleTime } from './get-idle-time';
-import { sendJiraRequest } from './jira';
+import { sendJiraRequest, setupRequestHeadersForImages } from './jira';
 import { getGitLog } from './git-log';
 import { initGoogleAuth } from './google-auth';
 import { errorHandler } from './error-handler';
@@ -19,6 +19,7 @@ import {
   IPC_GIT_LOG,
   IPC_IDLE_TIME,
   IPC_JIRA_MAKE_REQUEST_EVENT,
+  IPC_JIRA_SETUP_IMG_HEADERS,
   IPC_NOTIFY,
   IPC_ON_BEFORE_QUIT,
   IPC_REGISTER_GLOBAL_SHORTCUT_EVENT,
@@ -28,6 +29,7 @@ import {
 } from './ipc-events.const';
 import { backupData } from './backup';
 import electronDl from 'electron-dl';
+import { JiraCfg } from '../src/app/features/issue/jira/jira';
 
 const ICONS_FOLDER = __dirname + '/assets/icons/';
 const IS_MAC = process.platform === 'darwin';
@@ -143,6 +145,9 @@ ipcMain.on(IPC_REGISTER_GLOBAL_SHORTCUT_EVENT, (ev, shortcutPassed) => {
   registerShowAppShortCut(shortcutPassed);
 });
 
+ipcMain.on(IPC_JIRA_SETUP_IMG_HEADERS, (ev, jiraCfg: JiraCfg) => {
+  setupRequestHeadersForImages(jiraCfg);
+});
 
 ipcMain.on(IPC_JIRA_MAKE_REQUEST_EVENT, (ev, request) => {
   sendJiraRequest(request);
