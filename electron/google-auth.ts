@@ -117,11 +117,9 @@ function openAuthWindow(url) {
 
 export const initGoogleAuth = function () {
   ipcMain.on(IPC_TRIGGER_GOOGLE_AUTH, (ev, refreshToken) => {
-    console.log('TRIGGER_GOOGLE_AUTH, rt', refreshToken);
+    console.log('refreshToken', (refreshToken && refreshToken.length));
     const mainWin = getWin();
     authenticate(refreshToken).then((res: any) => {
-      console.log('authenticate');
-
       mainWin.webContents.send(IPC_GOOGLE_AUTH_TOKEN, res);
     }).catch((err) => {
       mainWin.webContents.send(IPC_GOOGLE_AUTH_TOKEN_ERROR);
