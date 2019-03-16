@@ -21,6 +21,7 @@ export enum ProjectActionTypes {
   UpdateProjectIssueProviderCfg = '[Project] Update Project Issue Provider Cfg',
   DeleteProject = '[Project] Delete Project',
   DeleteProjects = '[Project] Delete Projects',
+  UpdateProjectOrder = '[Project] Update Project Order',
 }
 
 export class LoadProjectState implements Action {
@@ -124,6 +125,13 @@ export class DeleteProjects implements Action {
   }
 }
 
+export class UpdateProjectOrder implements Action {
+  readonly type = ProjectActionTypes.UpdateProjectOrder;
+
+  constructor(public payload: { ids: string[] }) {
+  }
+}
+
 
 export type ProjectActions
   = LoadProjects
@@ -140,5 +148,6 @@ export type ProjectActions
   | UpdateProjectIssueProviderCfg
   | DeleteProject
   | DeleteProjects
+  | UpdateProjectOrder
   ;
 

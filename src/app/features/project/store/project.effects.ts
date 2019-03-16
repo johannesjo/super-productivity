@@ -8,7 +8,7 @@ import {
   LoadProjectRelatedDataSuccess,
   ProjectActionTypes,
   UpdateProject,
-  UpdateProjectIssueProviderCfg,
+  UpdateProjectIssueProviderCfg, UpdateProjectOrder,
   UpdateProjectWorkEnd,
   UpdateProjectWorkStart
 } from './project.actions';
@@ -40,6 +40,7 @@ export class ProjectEffects {
         ProjectActionTypes.UpdateProjectIssueProviderCfg,
         ProjectActionTypes.UpdateProjectWorkStart,
         ProjectActionTypes.UpdateProjectWorkEnd,
+        ProjectActionTypes.UpdateProjectOrder,
       ),
       withLatestFrom(
         this._store$.pipe(select(selectProjectFeatureState))
@@ -56,6 +57,7 @@ export class ProjectEffects {
         ProjectActionTypes.UpdateProject,
         ProjectActionTypes.UpdateProjectAdvancedCfg,
         ProjectActionTypes.UpdateProjectIssueProviderCfg,
+        ProjectActionTypes.UpdateProjectOrder,
       ),
       tap(this._persistenceService.saveLastActive.bind(this))
     );

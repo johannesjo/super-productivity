@@ -3,7 +3,10 @@
     <h1 class="mat-h1"
         style="text-align: center;">Project Overview</h1>
 
-    <div class="project-list">
+    <div class="project-list"
+         dragula="PROJECTS"
+         [dragulaModel]="projectService.list$|async"
+         [@standardList]="(projectService.list$|async)?.length">
       <mat-card *ngFor="let project of projectService.list$|async"
                 class="project">
         <div class="project-color bg-400-el"
@@ -19,19 +22,23 @@
 
         <div class="issue-providers">
           <mat-icon *ngIf="project.issueIntegrationCfgs?.JIRA?.isEnabled"
+                    title="Jira Integration Configured"
                     svgIcon="jira"></mat-icon>
           <mat-icon *ngIf="project.issueIntegrationCfgs?.GIT?.repo"
+                    title="Git Integration Configured"
                     svgIcon="github"></mat-icon>
         </div>
 
         <div class="controls">
           <button (click)="edit(project)"
                   color=""
+                  title="Edit Project"
                   mat-mini-fab>
             <mat-icon aria-label="Edit">edit</mat-icon>
           </button>
           <button (click)="remove(project.id)"
                   *ngIf="project.id !== (projectService.currentId$|async)"
+                  title="Delete Project"
                   color="warn"
                   mat-mini-fab>
             <mat-icon aria-label="Delete">delete</mat-icon>

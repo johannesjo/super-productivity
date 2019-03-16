@@ -5,11 +5,12 @@ import {
   Project,
   ProjectAdvancedCfg,
   ProjectAdvancedCfgKey,
-  SimpleSummarySettings, WorklogExportSettings
+  SimpleSummarySettings,
+  WorklogExportSettings
 } from './project.model';
 import { PersistenceService } from '../../core/persistence/persistence.service';
 import { select, Store } from '@ngrx/store';
-import { ProjectActionTypes } from './store/project.actions';
+import { ProjectActionTypes, UpdateProjectOrder } from './store/project.actions';
 import shortid from 'shortid';
 import {
   initialProjectState,
@@ -36,25 +37,25 @@ import { take } from 'rxjs/operators';
   providedIn: 'root',
 })
 export class ProjectService {
-  list$: Observable<Project[]> = this._store.pipe(select(selectAllProjects));
-  currentProject$: Observable<Project> = this._store.pipe(
+  list$: Observable<Project[]> = this._store$.pipe(select(selectAllProjects));
+  currentProject$: Observable<Project> = this._store$.pipe(
     select(selectCurrentProject),
     // TODO investigate share replay issues
     // shareReplay(),
   );
-  currentJiraCfg$: Observable<JiraCfg> = this._store.pipe(
+  currentJiraCfg$: Observable<JiraCfg> = this._store$.pipe(
     select(selectProjectJiraCfg),
     // shareReplay(),
   );
-  currentGitCfg$: Observable<GitCfg> = this._store.pipe(
+  currentGitCfg$: Observable<GitCfg> = this._store$.pipe(
     select(selectProjectGitCfg),
     // shareReplay(),
   );
-  advancedCfg$: Observable<ProjectAdvancedCfg> = this._store.pipe(
+  advancedCfg$: Observable<ProjectAdvancedCfg> = this._store$.pipe(
     select(selectAdvancedProjectCfg),
     // shareReplay(),
   );
-  currentId$: Observable<string> = this._store.pipe(select(selectCurrentProjectId));
+  currentId$: Observable<string> = this._store$.pipe(select(selectCurrentProjectId));
   currentId: string;
 
   onProjectChange$: Observable<any> = this._actions$.pipe(ofType(ProjectActionTypes.SetCurrentProject));
@@ -65,7 +66,7 @@ export class ProjectService {
   constructor(
     private readonly _persistenceService: PersistenceService,
     // TODO correct type?
-    private readonly _store: Store<any>,
+    private readonly _store$: Store<any>,
     private readonly _actions$: Actions,
   ) {
     // dirty trick to make effect catch up :/
@@ -89,18 +90,18 @@ export class ProjectService {
   }
 
   loadState(projectState: ProjectState) {
-    this._store.dispatch({
+    this._store$.dispatch({
       type: ProjectActionTypes.LoadProjectState,
       payload: {state: projectState}
     });
   }
 
   getById(id: string): Observable<Project> {
-    return this._store.pipe(select(selectProjectById, {id}), take(1));
+    return this._store$.pipe(select(selectProjectById, {id}), take(1));
   }
 
   add(project: Partial<Project>) {
-    this._store.dispatch({
+    this._store$.dispatch({
       type: ProjectActionTypes.AddProject,
       payload: {
         project: Object.assign(project, {
@@ -111,7 +112,7 @@ export class ProjectService {
   }
 
   upsert(project: Partial<Project>) {
-    this._store.dispatch({
+    this._store$.dispatch({
       type: ProjectActionTypes.AddProject,
       payload: {
         project: {
@@ -123,14 +124,14 @@ export class ProjectService {
   }
 
   remove(projectId) {
-    this._store.dispatch({
+    this._store$.dispatch({
       type: ProjectActionTypes.DeleteProject,
       payload: {id: projectId}
     });
   }
 
   update(projectId: string, changedFields: Partial<Project>) {
-    this._store.dispatch({
+    this._store$.dispatch({
       type: ProjectActionTypes.UpdateProject,
       payload: {
         project: {
@@ -142,7 +143,7 @@ export class ProjectService {
   }
 
   updateWorkStart(id, date: string, newVal) {
-    this._store.dispatch({
+    this._store$.dispatch({
       type: ProjectActionTypes.UpdateProjectWorkStart,
       payload: {
         id,
@@ -153,7 +154,7 @@ export class ProjectService {
   }
 
   updateWorkEnd(id, date: string, newVal) {
-    this._store.dispatch({
+    this._store$.dispatch({
       type: ProjectActionTypes.UpdateProjectWorkEnd,
       payload: {
         id,
@@ -164,7 +165,7 @@ export class ProjectService {
   }
 
   updateAdvancedCfg(projectId: string, sectionKey: ProjectAdvancedCfgKey, data: any) {
-    this._store.dispatch({
+    this._store$.dispatch({
       type: ProjectActionTypes.UpdateProjectAdvancedCfg,
       payload: {
         projectId,
@@ -180,7 +181,7 @@ export class ProjectService {
     providerCfg: IssueIntegrationCfg,
     isOverwrite = false
   ) {
-    this._store.dispatch({
+    this._store$.dispatch({
       type: ProjectActionTypes.UpdateProjectIssueProviderCfg,
       payload: {
         projectId,
@@ -192,10 +193,14 @@ export class ProjectService {
   }
 
   setCurrentId(projectId: string) {
-    this._store.dispatch({
+    this._store$.dispatch({
       type: ProjectActionTypes.SetCurrentProject,
       payload: projectId,
     });
+  }
+
+  public updateOrder(ids: string[]) {
+    this._store$.dispatch(new UpdateProjectOrder({ids}));
   }
 
   // HELPER

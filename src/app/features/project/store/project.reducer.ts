@@ -17,7 +17,7 @@ const sortByTitle = (p1: Project, p2: Project) => {
 };
 
 export const projectAdapter: EntityAdapter<Project> = createEntityAdapter<Project>({
-  sortComparer: sortByTitle,
+  // sortComparer: sortByTitle,
 });
 
 // SELECTORS
@@ -179,6 +179,10 @@ export function projectReducer(
           }
         }
       }, state);
+    }
+
+    case ProjectActionTypes.UpdateProjectOrder: {
+      return {...state, ids: action.payload.ids};
     }
 
     default: {
