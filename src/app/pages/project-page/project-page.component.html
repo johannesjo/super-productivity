@@ -1,12 +1,17 @@
 <div class="page-wrapper">
   <div class="component-wrapper">
-    <h1 class="mat-h1" style="text-align: center;">Project Overview</h1>
+    <h1 class="mat-h1"
+        style="text-align: center;">Project Overview</h1>
 
     <div class="project-list">
       <mat-card *ngFor="let project of projectService.list$|async"
                 class="project">
         <div class="project-color bg-400-el"
-             [ngClass]="project.themeColor"></div>
+             [ngClass]="project.themeColor">
+          <mat-icon class="drag-handle color-contrast"
+                    svgIcon="drag_handle">
+          </mat-icon>
+        </div>
 
         <div [class.isCurrent]="project.id === (projectService.currentId$|async)"
              class="title">{{project.title}}

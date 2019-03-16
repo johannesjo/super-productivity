@@ -21,7 +21,7 @@
 .project-list {
 }
 
-$project-color-width: $s*2;
+$project-color-width: $s*3;
 
 .project {
   display: flex;
@@ -44,6 +44,18 @@ $project-color-width: $s*2;
     bottom: 0;
     width: $project-color-width;
     position: absolute;
+    cursor: grab;
+
+    > * {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    &:active {
+      cursor: grabbing;
+    }
   }
 
   .title {
