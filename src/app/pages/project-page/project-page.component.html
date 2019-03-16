@@ -4,6 +4,8 @@
   <div class="project-list">
     <mat-card *ngFor="let project of projectService.list$|async"
               class="project">
+      <div class="project-color bg-400-el"
+           [ngClass]="project.themeColor"></div>
 
       <div [class.isCurrent]="project.id === (projectService.currentId$|async)"
            class="title">{{project.title}}

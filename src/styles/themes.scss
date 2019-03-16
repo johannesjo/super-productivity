@@ -51,6 +51,11 @@
     background-color: mat-color($primary, 800);
   }
 
+  &.bg-400-el {
+    background-color: mat-color($primary, 400);
+
+  }
+
   .fg-standard {
     color: $fgStandard;
   }

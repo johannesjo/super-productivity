@@ -28,8 +28,21 @@
   justify-content: space-between;
   padding: $s/2 2*$s;
   margin-bottom: $s;
+  position: relative;
+  overflow: hidden;
+
+  $project-color-width: $s*2;
+
+  .project-color {
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: $project-color-width;
+    position: absolute;
+  }
 
   .title {
+    padding-left: $project-color-width;
     font-size: 16px;
     flex: 1;
 
