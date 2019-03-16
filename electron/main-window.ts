@@ -38,28 +38,23 @@ export const createWindow = function (params) {
   indicatorMod = params.indicatorMod;
   mainWin = new BrowserWindow({width: 800, height: 800, titleBarStyle: 'hiddenInset'});
 
-  if (IS_DEV) {
-    // TODO check
-    // require('electron-reload')(__dirname, {
-    //   electron: require(`${__dirname}/../node_modules/electron`)
-    // });
-    mainWin.loadURL('http://localhost:4200');
-  } else {
-    const url = format({
+  const url = (IS_DEV)
+    ? 'http://localhost:4200'
+    : format({
       pathname: normalize(join(__dirname, '../dist/index.html')),
       protocol: 'file:',
       slashes: true,
     });
-    mainWin.loadURL(url, {
-      show: false,
-      webPreferences: {
-        scrollBounce: true
-      },
-      titleBarStyle: 'hiddenInset',
-      icon: ICONS_FOLDER + '/icon_256x256.png'
-    });
-    // mainWin.webContents.openDevTools();
-  }
+
+  mainWin.loadURL(url, {
+    show: false,
+    webPreferences: {
+      scrollBounce: true,
+    },
+    titleBarStyle: 'hiddenInset',
+    icon: ICONS_FOLDER + '/icon_256x256.png'
+  });
+
   // show gracefully
   mainWin.once('ready-to-show', () => {
     mainWin.show();
