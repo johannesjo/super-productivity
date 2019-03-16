@@ -19,22 +19,22 @@
       <h3>Issue Provider Configs (optional)</h3>
       <div class="item">
         <button mat-raised-button=""
-                color="primary"
                 (click)="openJiraCfg()"
                 type="button">
-          <mat-icon *ngIf="!jiraCfg">explore</mat-icon>
-          <mat-icon *ngIf="jiraCfg">checkmark</mat-icon>
-          Setup Jira Integration
+          <mat-icon *ngIf="!jiraCfg?.isEnabled"
+                    svgIcon="jira"></mat-icon>
+          <mat-icon *ngIf="jiraCfg?.isEnabled">checkmark</mat-icon>
+          <span style="padding-left: 8px;">Setup Jira Integration</span>
         </button>
       </div>
       <div class="item">
         <button mat-raised-button=""
-                color="primary"
                 (click)="openGitCfg()"
                 type="button">
-          <mat-icon *ngIf="!gitCfg">card_giftcard</mat-icon>
-          <mat-icon *ngIf="gitCfg">checkmark</mat-icon>
-          Setup Git Integration
+          <mat-icon *ngIf="!gitCfg?.repo"
+                    svgIcon="github"></mat-icon>
+          <mat-icon *ngIf="gitCfg?.repo">checkmark</mat-icon>
+          <span style="padding-left: 8px;">Setup Git Integration</span>
         </button>
       </div>
       <!--<div class="item">-->
