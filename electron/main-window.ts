@@ -36,7 +36,18 @@ export const createWindow = function (params) {
   const app = params.app;
   const nestedWinParams = params.nestedWinParams;
   indicatorMod = params.indicatorMod;
-  mainWin = new BrowserWindow({width: 800, height: 800, titleBarStyle: 'hiddenInset'});
+
+  mainWin = new BrowserWindow({
+    width: 800,
+    height: 800,
+    titleBarStyle: 'hiddenInset',
+    show: false,
+    webPreferences: {
+      scrollBounce: true,
+      webSecurity: !IS_DEV
+    },
+    icon: ICONS_FOLDER + '/icon_256x256.png'
+  });
 
   const url = (IS_DEV)
     ? 'http://localhost:4200'
@@ -46,14 +57,7 @@ export const createWindow = function (params) {
       slashes: true,
     });
 
-  mainWin.loadURL(url, {
-    show: false,
-    webPreferences: {
-      scrollBounce: true,
-    },
-    titleBarStyle: 'hiddenInset',
-    icon: ICONS_FOLDER + '/icon_256x256.png'
-  });
+  mainWin.loadURL(url);
 
   // show gracefully
   mainWin.once('ready-to-show', () => {
