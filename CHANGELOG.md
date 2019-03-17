@@ -1,3 +1,28 @@
+## [2.5.6](https://github.com/johannesjo/super-productivity/compare/v2.5.5...v2.5.6) (2019-03-17)
+
+
+### Bug Fixes
+
+* **addTaskBar:** selecting by click not working ([9fcefe3](https://github.com/johannesjo/super-productivity/commit/9fcefe3))
+* **jira:** add missing reject for jira requests ([4ec6509](https://github.com/johannesjo/super-productivity/commit/4ec6509))
+* **jira:** extension error not showing up ([87a3397](https://github.com/johannesjo/super-productivity/commit/87a3397))
+* **jira:** typing error ([8a26f47](https://github.com/johannesjo/super-productivity/commit/8a26f47))
+* typing ([e6ddaf4](https://github.com/johannesjo/super-productivity/commit/e6ddaf4))
+
+
+### Features
+
+* **attachments:** add fallback when unable to load images ([57ce69d](https://github.com/johannesjo/super-productivity/commit/57ce69d))
+* **jira:** improve issue search ([8d1c51d](https://github.com/johannesjo/super-productivity/commit/8d1c51d))
+* **jira:** parse jira markdown for headings ([eefb1d9](https://github.com/johannesjo/super-productivity/commit/eefb1d9))
+* **jira:** show error message to the user when there are insufficient settings ([ffc51b4](https://github.com/johannesjo/super-productivity/commit/ffc51b4))
+* **projects:** improve project overview styling ([956c352](https://github.com/johannesjo/super-productivity/commit/956c352))
+* make markdown headings a little less intense ([8919d1f](https://github.com/johannesjo/super-productivity/commit/8919d1f))
+* show backdrop right away for enlarge image ([daf3344](https://github.com/johannesjo/super-productivity/commit/daf3344))
+* switch icons for imex ([b034382](https://github.com/johannesjo/super-productivity/commit/b034382))
+
+
+
 ## [2.5.5](https://github.com/johannesjo/super-productivity/compare/v2.5.4...v2.5.5) (2019-03-16)
 
 
