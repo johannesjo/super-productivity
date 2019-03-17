@@ -226,7 +226,15 @@ export class JiraApiService {
   // TODO refactor data madness of request and add types for everything
   private _sendRequest(request, cfg = this._cfg): Observable<any> {
     if (!this._isMinimalSettings(cfg)) {
-      console.error('Not enough Jira settings. This should not happen!!!');
+      const msg = (!IS_ELECTRON && this._isExtension)
+        ? 'Super Productivity Extension not loaded. Reloading the page might help'
+        : 'Insufficient Settings provided for Jira';
+      this._snackService.open({
+        message: msg,
+        type: 'ERROR',
+        svgIcon: 'jira',
+
+      });
       return throwError({handledError: 'Insufficient Settings for Jira'});
     }
 
