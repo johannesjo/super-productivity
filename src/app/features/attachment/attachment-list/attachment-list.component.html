@@ -1,26 +1,26 @@
 <ul [@standardList]="attachments?.length"
     class="attachments color-contrast">
-  <li *ngFor="let attachment of attachments; trackBy: trackByFn;"
+  <li *ngFor="let attachment of attachments; let i = index; trackBy: trackByFn;"
       class="attachment"
       draggable="false">
-    <!-- TODO check if bg-400i is needed-->
-    <a [class.isImage]="attachment?.type==='IMG'"
+    <a [class.isImage]="attachment?.type==='IMG' && !isError[i]"
        [href]="attachment?.path"
+       [type]="isError[i] ? 'LINK': attachment?.type"
        aria-label="open global attachment"
        attachmentLink
-       class="attachment-link mat-elevation-z3  bg-400i"
+       class="attachment-link mat-elevation-z3 bg-400"
        draggable="false"
        tabindex="1"
-       target="_blank"
-       type="{{attachment?.type}}">
-      <ng-container *ngIf="attachment?.type!=='IMG'">
+       target="_blank">
+      <ng-container *ngIf="attachment?.type!=='IMG' || isError[i]">
         <mat-icon *ngIf="attachment?.icon"
                   aria-label="Open">{{attachment?.icon}}
         </mat-icon>
         <div class="title">{{attachment?.title}}</div>
       </ng-container>
-      <ng-container *ngIf="attachment?.type==='IMG'">
+      <ng-container *ngIf="attachment?.type==='IMG' && !isError[i]">
         <img [enlargeImg]="attachment?.originalImgPath"
+             (error)="isError[i]=true"
              [src]="attachment?.path">
       </ng-container>
     </a>

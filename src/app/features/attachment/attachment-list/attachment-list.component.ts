@@ -16,6 +16,8 @@ export class AttachmentListComponent implements OnInit {
   @Input() attachments: Attachment[];
   @Input() isDisableControls = false;
 
+  isError: boolean[] = [];
+
   constructor(
     public readonly attachmentService: AttachmentService,
     private readonly _matDialog: MatDialog,

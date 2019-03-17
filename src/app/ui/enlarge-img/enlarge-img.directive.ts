@@ -64,6 +64,9 @@ export class EnlargeImgDirective {
         this._renderer.setStyle(this.newImageEl, 'transform', `translate3d(0, 0, 0) scale(1)`);
       });
     };
+    img.onerror = () => {
+      this._hideImg();
+    };
 
     this.enlargedImgWrapperEl = this._htmlToElement(`<div class="enlarged-image-wrapper"></div>`);
     this.newImageEl = this._htmlToElement(`<img src="${src}" class="enlarged-image" id=${LARGE_IMG_ID}>`);
