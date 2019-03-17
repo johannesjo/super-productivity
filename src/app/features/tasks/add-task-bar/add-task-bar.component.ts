@@ -4,6 +4,7 @@ import {
   Component,
   EventEmitter,
   Input,
+  OnDestroy,
   Output,
   ViewChild
 } from '@angular/core';
@@ -24,7 +25,7 @@ import { JIRA_TYPE } from '../../issue/issue.const';
   styleUrls: ['./add-task-bar.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AddTaskBarComponent implements AfterViewInit {
+export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
   @Input() isAddToBacklog = false;
   @Input() isAddToBottom;
   @Input() isAutoFocus: boolean;
@@ -53,6 +54,9 @@ export class AddTaskBarComponent implements AfterViewInit {
     }),
   );
 
+  private _isAddInProgress: boolean;
+  private _blurTimeout: number;
+
   constructor(
     private _taskService: TaskService,
     private _issueService: IssueService,
@@ -73,12 +77,24 @@ export class AddTaskBarComponent implements AfterViewInit {
         }
       });
     });
+  }
 
+  ngOnDestroy(): void {
+    if (this._blurTimeout) {
+      window.clearTimeout(this._blurTimeout);
+    }
   }
 
   onBlur(ev) {
+    console.log(ev);
     if (ev.relatedTarget && ev.relatedTarget.className.includes('switch-add-to-btn')) {
       this.inputEl.nativeElement.focus();
+    } else if (ev.relatedTarget && ev.relatedTarget.className.includes('mat-option')) {
+      this._blurTimeout = window.setTimeout(() => {
+        if (!this._isAddInProgress) {
+          this.blur.emit(ev);
+        }
+      }, 300);
     } else {
       this.blur.emit(ev);
     }
@@ -88,8 +104,9 @@ export class AddTaskBarComponent implements AfterViewInit {
     return issue && issue.summary;
   }
 
-  async addTask() {
-    const issueOrTitle = this.taskSuggestionsCtrl.value as string | SearchResultItem;
+  async addTask(issue_: SearchResultItem) {
+    this._isAddInProgress = true;
+    const issueOrTitle = issue_ || this.taskSuggestionsCtrl.value as string | SearchResultItem;
     if (typeof issueOrTitle === 'string') {
       if (issueOrTitle.length > 0) {
         this.doubleEnterCount = 0;
@@ -134,5 +151,6 @@ export class AddTaskBarComponent implements AfterViewInit {
     }
 
     this.taskSuggestionsCtrl.setValue('');
+    this._isAddInProgress = false;
   }
 }
