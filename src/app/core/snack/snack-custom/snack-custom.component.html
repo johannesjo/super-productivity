@@ -3,7 +3,7 @@
      class="wrapper"
      (click)="!data.actionStr && close()"
 >
-  <ng-container *ngIf="!data.icon">
+  <ng-container *ngIf="!data.ico">
     <mat-icon *ngIf="data.type==='SUCCESS'"
               class="snack-icon">check_circle
     </mat-icon>
@@ -11,13 +11,13 @@
               class="snack-icon">error
     </mat-icon>
   </ng-container>
-  <mat-icon *ngIf="data.icon"
-            class="snack-icon">{{data.icon}}</mat-icon>
-  <mat-icon *ngIf="data.svgIcon"
-            [svgIcon]="data.svgIcon"
+  <mat-icon *ngIf="data.ico"
+            class="snack-icon">{{data.ico}}</mat-icon>
+  <mat-icon *ngIf="data.svgIco"
+            [svgIcon]="data.svgIco"
             class="snack-icon"></mat-icon>
 
-  <span [innerHtml]="data.message"
+  <span [innerHtml]="data.msg"
         class="message"></span>
 
   <div class="button-wrapper">

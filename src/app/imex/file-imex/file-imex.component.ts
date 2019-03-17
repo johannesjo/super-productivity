@@ -29,7 +29,7 @@ export class FileImexComponent {
       try {
         data = oldData = JSON.parse(this.importDataString);
       } catch (e) {
-        this._snackService.open({type: 'ERROR', message: 'Import failed: Invalid JSON'});
+        this._snackService.open({type: 'ERROR', msg: 'Import failed: Invalid JSON'});
       }
 
       if (oldData.config && Array.isArray(oldData.tasks)) {

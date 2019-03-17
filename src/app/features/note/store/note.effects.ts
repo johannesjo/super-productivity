@@ -85,8 +85,8 @@ export class NoteEffects {
           }),
           new SnackOpen({
             type: 'SUCCESS',
-            message: `Added reminder for note`,
-            icon: 'schedule',
+            msg: `Added reminder for note`,
+            ico: 'schedule',
           }),
         ];
       })
@@ -105,8 +105,8 @@ export class NoteEffects {
         });
         return new SnackOpen({
           type: 'SUCCESS',
-          message: `Updated reminder for note`,
-          icon: 'schedule',
+          msg: `Updated reminder for note`,
+          ico: 'schedule',
         });
       })
     );
@@ -129,8 +129,8 @@ export class NoteEffects {
           }),
           new SnackOpen({
             type: 'SUCCESS',
-            message: `Deleted reminder for note`,
-            icon: 'schedule',
+            msg: `Deleted reminder for note`,
+            ico: 'schedule',
           }),
         ];
       })

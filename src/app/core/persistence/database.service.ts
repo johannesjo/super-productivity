@@ -17,7 +17,7 @@ export class DatabaseService {
     try {
       return localForage.ready().then(() => localForage.getItem(key));
     } catch (e) {
-      this._snackService.open({type: 'ERROR', message: 'Error while loading data'});
+      this._snackService.open({type: 'ERROR', msg: 'Error while loading data'});
     }
   }
 
@@ -25,7 +25,7 @@ export class DatabaseService {
     try {
       return localForage.ready().then(() => localForage.setItem(key, data));
     } catch (e) {
-      this._snackService.open({type: 'ERROR', message: 'Error while saving data'});
+      this._snackService.open({type: 'ERROR', msg: 'Error while saving data'});
     }
   }
 

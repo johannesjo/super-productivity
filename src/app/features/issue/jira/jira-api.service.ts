@@ -230,9 +230,9 @@ export class JiraApiService {
         ? 'Super Productivity Extension not loaded. Reloading the page might help'
         : 'Insufficient Settings provided for Jira';
       this._snackService.open({
-        message: msg,
+        msg: msg,
         type: 'ERROR',
-        svgIcon: 'jira',
+        svgIco: 'jira',
 
       });
       return throwError({handledError: 'Insufficient Settings for Jira'});
@@ -277,7 +277,7 @@ export class JiraApiService {
       timeout: setTimeout(() => {
         console.log('ERROR', 'Jira Request timed out for ' + request.apiMethod);
         // delete entry for promise
-        this._snackService.open({type: 'ERROR', message: 'Jira timed out'});
+        this._snackService.open({type: 'ERROR', msg: 'Jira timed out'});
         this._requestsLog[request.requestId].reject('Request timed out');
         delete this._requestsLog[request.requestId];
       }, JIRA_REQUEST_TIMEOUT_DURATION)
@@ -304,7 +304,7 @@ export class JiraApiService {
       .pipe(
         catchError((err) => {
           const errTxt = getJiraResponseErrorTxt(err);
-          this._snackService.open({type: 'ERROR', message: `Jira: ${errTxt}`});
+          this._snackService.open({type: 'ERROR', msg: `Jira: ${errTxt}`});
           return throwError({handledError: errTxt});
         }),
         first(),

@@ -183,8 +183,8 @@ export class JiraIssueEffects {
 
         if (isEmail(currentUserName)) {
           this._snackService.open({
-            svgIcon: 'jira',
-            message: 'Jira: Unable to reassign ticket to yourself, because you didn\'t specify a username. Please visit the settings.',
+            svgIco: 'jira',
+            msg: 'Jira: Unable to reassign ticket to yourself, because you didn\'t specify a username. Please visit the settings.',
           });
           return EMPTY;
         } else if (!issue.assignee || issue.assignee.name !== currentUserName) {
@@ -266,8 +266,8 @@ export class JiraIssueEffects {
       tap(tasks => {
         console.warn('TASKS WITH MISSING ISSUE DATA FOR JIRA', tasks);
         this._snackService.open({
-          message: 'Jira: Tasks with missing issue data found. Reloading',
-          svgIcon: 'jira',
+          msg: 'Jira: Tasks with missing issue data found. Reloading',
+          svgIco: 'jira',
           isSubtle: true,
         });
         tasks.forEach((task) => this._jiraIssueService.loadMissingIssueData(task.issueId));
@@ -309,8 +309,8 @@ export class JiraIssueEffects {
       const issueIds = issueIds_ as string[];
       if (issueIds && issueIds.length > 0) {
         this._snackService.open({
-          message: 'Jira: Polling Changes for issues',
-          svgIcon: 'jira',
+          msg: 'Jira: Polling Changes for issues',
+          svgIco: 'jira',
           isSubtle: true,
         });
         issueIds.forEach((id) => this._jiraIssueService.updateIssueFromApi(id, entities[id], true, false));
@@ -349,7 +349,7 @@ export class JiraIssueEffects {
         return this._openTransitionDialog(issue, localState);
       default:
         if (!chosenTransition || !chosenTransition.id) {
-          this._snackService.open({type: 'ERROR', message: 'Jira: No valid transition configured'});
+          this._snackService.open({type: 'ERROR', msg: 'Jira: No valid transition configured'});
           // NOTE: we would kill the whole effect chain if we do this
           // return throwError({handledError: 'Jira: No valid transition configured'});
           return timer(2000).pipe(concatMap(() => this._openTransitionDialog(issue, localState)));
@@ -361,7 +361,7 @@ export class JiraIssueEffects {
               tap(() => {
                 this._snackService.open({
                   type: 'SUCCESS',
-                  message: `Jira: Set issue ${issue.key} to <strong>${chosenTransition.name}</strong>`,
+                  msg: `Jira: Set issue ${issue.key} to <strong>${chosenTransition.name}</strong>`,
                   isSubtle: true,
                 });
                 this._jiraIssueService.updateIssueFromApi(issue.id, issue, false, false);
@@ -414,14 +414,14 @@ export class JiraIssueEffects {
 
       if (issuesToAdd.length === 1) {
         this._snackService.open({
-          message: `Jira: Imported issue "${issuesToAdd[0].key} ${issuesToAdd[0].summary}" from git to backlog`,
-          icon: 'cloud_download',
+          msg: `Jira: Imported issue "${issuesToAdd[0].key} ${issuesToAdd[0].summary}" from git to backlog`,
+          ico: 'cloud_download',
           isSubtle: true,
         });
       } else if (issuesToAdd.length > 1) {
         this._snackService.open({
-          message: `Jira: Imported ${issuesToAdd.length} new issues from Jira to backlog`,
-          icon: 'cloud_download',
+          msg: `Jira: Imported ${issuesToAdd.length} new issues from Jira to backlog`,
+          ico: 'cloud_download',
           isSubtle: true,
         });
       }

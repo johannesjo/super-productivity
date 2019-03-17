@@ -48,7 +48,7 @@ export class DialogJiraAddWorklogComponent {
       ).subscribe(res => {
         this._snackService.open({
           type: 'SUCCESS',
-          message: `Jira: Added worklog for ${this.issue.key}`,
+          msg: `Jira: Added worklog for ${this.issue.key}`,
         });
         // TODO not ideal...
         this._jiraIssueService.updateIssueFromApi(this.issue.id, this.issue, false, false);

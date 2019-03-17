@@ -62,8 +62,8 @@ export class GitIssueEffects {
     tap(([x, gitCfg, issues]: [any, GitCfg, GitIssue[]]) => {
       if (issues && issues.length > 0) {
         this._snackService.open({
-          message: 'Git: Polling Changes for issues',
-          svgIcon: 'github',
+          msg: 'Git: Polling Changes for issues',
+          svgIco: 'github',
           isSubtle: true,
         });
         this._gitIssueService.updateIssuesFromApi(issues, gitCfg, true);
@@ -125,8 +125,8 @@ export class GitIssueEffects {
       tap(tasks => {
         console.warn('TASKS WITH MISSING ISSUE DATA FOR GIT', tasks);
         this._snackService.open({
-          message: 'Git: Tasks with missing issue data found. Reloading.',
-          svgIcon: 'github',
+          msg: 'Git: Tasks with missing issue data found. Reloading.',
+          svgIco: 'github',
           isSubtle: true,
         });
         tasks.forEach((task) => this._gitIssueService.loadMissingIssueData(task.issueId));
@@ -168,14 +168,14 @@ export class GitIssueEffects {
 
       if (issuesToAdd.length === 1) {
         this._snackService.open({
-          message: `Git: Imported issue "#${issuesToAdd[0].number} ${issuesToAdd[0].title}" from git to backlog`,
-          icon: 'cloud_download',
+          msg: `Git: Imported issue "#${issuesToAdd[0].number} ${issuesToAdd[0].title}" from git to backlog`,
+          ico: 'cloud_download',
           isSubtle: true,
         });
       } else if (issuesToAdd.length > 1) {
         this._snackService.open({
-          message: `Git: Imported ${issuesToAdd.length} new issues from git to backlog`,
-          icon: 'cloud_download',
+          msg: `Git: Imported ${issuesToAdd.length} new issues from git to backlog`,
+          ico: 'cloud_download',
           isSubtle: true,
         });
       }

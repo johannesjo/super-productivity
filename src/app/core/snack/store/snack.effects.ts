@@ -43,7 +43,7 @@ export class SnackEffects {
       _destroy$.next(true);
       _destroy$.unsubscribe();
     };
-    const {message, actionStr, actionId, actionPayload, config, type, isSubtle} = action.payload;
+    const {msg, actionStr, actionId, actionPayload, config, type, isSubtle} = action.payload;
     const cfg = {
       ...DEFAULT_SNACK_CFG,
       ...config,

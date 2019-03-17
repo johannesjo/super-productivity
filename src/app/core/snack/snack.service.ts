@@ -12,7 +12,7 @@ export class SnackService {
 
   open(params: SnackParams | string) {
     if (typeof params === 'string') {
-      params = {message: params};
+      params = {msg: params};
     }
     this._store$.dispatch(new SnackOpen(params));
   }

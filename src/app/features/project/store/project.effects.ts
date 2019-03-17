@@ -129,9 +129,9 @@ export class ProjectEffects {
       ),
       map((action: AddProject) => {
         return new SnackOpen({
-          icon: 'add',
+          ico: 'add',
           type: 'SUCCESS',
-          message: `Created project <strong>${action.payload.project.title}</strong>. You can select it from the menu on the top left.`
+          msg: `Created project <strong>${action.payload.project.title}</strong>. You can select it from the menu on the top left.`
         });
       }),
     );
@@ -143,8 +143,8 @@ export class ProjectEffects {
       ),
       map((action: DeleteProject) => {
         return new SnackOpen({
-          icon: 'delete_forever',
-          message: `Deleted project <strong>${action.payload.id}</strong>`
+          ico: 'delete_forever',
+          msg: `Deleted project <strong>${action.payload.id}</strong>`
         });
       }),
     );
@@ -157,7 +157,7 @@ export class ProjectEffects {
       map((action: UpdateProjectIssueProviderCfg) => {
         return new SnackOpen({
           type: 'SUCCESS',
-          message: `Updated project settings for <strong>${action.payload.issueProviderKey}</strong>`,
+          msg: `Updated project settings for <strong>${action.payload.issueProviderKey}</strong>`,
         });
       })
     );
@@ -170,7 +170,7 @@ export class ProjectEffects {
       map((action: UpdateProject) => {
         return new SnackOpen({
           type: 'SUCCESS',
-          message: `Updated project settings`,
+          msg: `Updated project settings`,
         });
       })
     );

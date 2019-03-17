@@ -33,8 +33,8 @@ export class BookmarkLinkDirective {
         this._electronService.shell.openItem(this.href);
       } else if (this.type === 'COMMAND') {
         this._snackService.open({
-          message: `Running "${this.href}".`,
-          icon: 'laptop_windows',
+          msg: `Running "${this.href}".`,
+          ico: 'laptop_windows',
         });
         this._exec(this.href);
       }

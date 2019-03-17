@@ -107,14 +107,14 @@ export class AddTaskBarComponent implements AfterViewInit {
       } else if (res.isFromArchive) {
         this._taskService.restoreTask(res.task);
         this._snackService.open({
-          icon: 'info',
-          message: `Restored task <strong>${res.task.title}</strong> related to issue from archive`
+          ico: 'info',
+          msg: `Restored task <strong>${res.task.title}</strong> related to issue from archive`
         });
       } else {
         this._taskService.moveToToday(res.task.id);
         this._snackService.open({
-          icon: 'info',
-          message: `Moved existing task <strong>${res.task.title}</strong> to todays task list`
+          ico: 'info',
+          msg: `Moved existing task <strong>${res.task.title}</strong> to todays task list`
         });
       }
     }

@@ -34,7 +34,7 @@ export class ConfigEffects {
         if (isPublicPropUpdated && isPublicSection) {
           this._store.dispatch(new SnackOpen({
             type: 'SUCCESS',
-            message: `Updated settings for <strong>${sectionKey}</strong>`,
+            msg: `Updated settings for <strong>${sectionKey}</strong>`,
           }));
         }
       })

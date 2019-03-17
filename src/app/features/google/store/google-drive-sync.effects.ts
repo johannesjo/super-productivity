@@ -99,19 +99,19 @@ export class GoogleDriveSyncEffects {
     concatMap((isUpdate): any => {
       if (isUpdate) {
         this._snackService.open({
-          message: `DriveSync: There is a remote update! Downloading...`,
-          icon: 'file_download',
+          msg: `DriveSync: There is a remote update! Downloading...`,
+          ico: 'file_download',
         });
         return of(new LoadFromGoogleDriveFlow());
       } else {
         return of(new SnackOpen({
-          message: `DriveSync: No updated required`,
+          msg: `DriveSync: No updated required`,
         }));
       }
     }),
     catchError(() => of(new SnackOpen({
       type: 'ERROR',
-      message: `DriveSync: Error while trying to import data initially`,
+      msg: `DriveSync: Error while trying to import data initially`,
     }))),
   );
 
@@ -128,7 +128,7 @@ export class GoogleDriveSyncEffects {
           if (filesFound.length && filesFound.length > 1) {
             return of(new SnackOpen({
               type: 'ERROR',
-              message: `Multiple files with the name "${newFileName}" found. Please delete all but one or choose a different name.`
+              msg: `Multiple files with the name "${newFileName}" found. Please delete all but one or choose a different name.`
             }));
           } else if (!filesFound || filesFound.length === 0) {
             return this._confirmSaveNewFile(newFileName).pipe(
@@ -201,7 +201,7 @@ export class GoogleDriveSyncEffects {
               if (!action.payload || !action.payload.isSkipSnack) {
                 this._snackService.open({
                   type: 'SUCCESS',
-                  message: `DriveSync: Remote data already up to date`
+                  msg: `DriveSync: Remote data already up to date`
                 });
               }
               return of(new SaveToGoogleDriveCancel());
@@ -251,7 +251,7 @@ export class GoogleDriveSyncEffects {
       if (!p.isSkipSnack) {
         this._snackService.open({
           type: 'SUCCESS',
-          message: 'Google Drive: Successfully saved backup'
+          msg: 'Google Drive: Successfully saved backup'
         });
       }
     }),
@@ -303,7 +303,7 @@ export class GoogleDriveSyncEffects {
               // TODO refactor optional message to cancel
               this._snackService.open({
                 type: 'SUCCESS',
-                message: `DriveSync: Local data already up to date`
+                msg: `DriveSync: Local data already up to date`
               });
               return of(new LoadFromGoogleDriveCancel());
             }
@@ -361,7 +361,7 @@ export class GoogleDriveSyncEffects {
     const errTxt = (typeof err === 'string' && err) || (err.toString && err.toString()) || 'Unknown';
     this._snackService.open({
       type: 'ERROR',
-      message: 'Google Drive Sync Error: ' + errTxt
+      msg: 'Google Drive Sync Error: ' + errTxt
     });
     return of(new LoadFromGoogleDriveCancel());
   }
@@ -418,8 +418,8 @@ export class GoogleDriveSyncEffects {
   private _showAsyncToast(showWhile$: Observable<any> = EMPTY, msg) {
     this._snackService.open({
       type: 'CUSTOM',
-      icon: 'file_upload',
-      message: msg,
+      ico: 'file_upload',
+      msg: msg,
       isSubtle: true,
       config: {duration: 60000},
       showWhile$,

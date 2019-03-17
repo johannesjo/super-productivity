@@ -392,7 +392,7 @@ export class GoogleApiService {
 
   private _snackIt(snackType: SnackType, msg: string) {
     this._snackService.open({
-      message: msg,
+      msg: msg,
       type: snackType,
     });
   }

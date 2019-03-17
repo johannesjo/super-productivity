@@ -148,8 +148,8 @@ export class PomodoroEffects {
     map(([action, isBreak, isPause, currentCycle]: [FinishPomodoroSession, boolean, boolean, number]) => {
       const cycle = currentCycle + 1;
       return new SnackOpen({
-        icon: 'timer',
-        message: `Pomodoro: Session ${cycle} started!`,
+        ico: 'timer',
+        msg: `Pomodoro: Session ${cycle} started!`,
       });
     }),
   );

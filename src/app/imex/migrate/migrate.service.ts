@@ -76,7 +76,7 @@ export class MigrateService {
   }
 
   async migrateData(oldData: OldDataExport) {
-    this._snackService.open({message: 'Importing data', icon: 'cloud_download'});
+    this._snackService.open({msg: 'Importing data', ico: 'cloud_download'});
     await this._saveBackup();
     try {
       if (oldData.projects && oldData.projects.length > 0) {
@@ -88,11 +88,11 @@ export class MigrateService {
       } else {
         throw new Error('no valid data');
       }
-      this._snackService.open({type: 'SUCCESS', message: 'Data imported'});
+      this._snackService.open({type: 'SUCCESS', msg: 'Data imported'});
     } catch (e) {
       this._snackService.open({
         type: 'ERROR',
-        message: 'Something went wrong while importing the data. Falling back to local backup'
+        msg: 'Something went wrong while importing the data. Falling back to local backup'
       });
       console.error(e);
       return await this._loadBackup();

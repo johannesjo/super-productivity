@@ -235,7 +235,7 @@ export class AppComponent implements OnInit {
       stack: any,
     }) => {
       this._snackService.open({
-        message: data.error,
+        msg: data.error,
         type: 'ERROR'
       });
       console.error(data);

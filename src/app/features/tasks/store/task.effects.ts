@@ -106,8 +106,8 @@ export class TaskEffects {
           }),
           new SnackOpen({
             type: 'SUCCESS',
-            message: `Scheduled task "${title}"`,
-            icon: 'schedule',
+            msg: `Scheduled task "${title}"`,
+            ico: 'schedule',
           }),
           ...(isMoveToBacklog ? [new MoveToBacklog({id})] : []),
         ];
@@ -127,8 +127,8 @@ export class TaskEffects {
         });
         return new SnackOpen({
           type: 'SUCCESS',
-          message: `Updated reminder for task "${title}"`,
-          icon: 'schedule',
+          msg: `Updated reminder for task "${title}"`,
+          ico: 'schedule',
         });
       })
     );
@@ -151,8 +151,8 @@ export class TaskEffects {
           }),
           new SnackOpen({
             type: 'SUCCESS',
-            message: `Deleted reminder for task`,
-            icon: 'schedule',
+            msg: `Deleted reminder for task`,
+            ico: 'schedule',
           }),
         ];
       })
@@ -166,7 +166,7 @@ export class TaskEffects {
       map((action_: DeleteTask) => {
         const action = action_ as DeleteTask;
         return new SnackOpen({
-          message: `Deleted task "${action.payload.task.title}"`,
+          msg: `Deleted task "${action.payload.task.title}"`,
           config: {duration: 5000},
           actionStr: 'Undo',
           actionId: TaskActionTypes.UndoDeleteTask
@@ -383,7 +383,7 @@ export class TaskEffects {
       });
 
       this._store$.dispatch(new SnackOpen({
-        message: `You exceeded your estimated time for "${ct.title.substr(0, 50)}"`,
+        msg: `You exceeded your estimated time for "${ct.title.substr(0, 50)}"`,
         actionStr: 'Add 1/2 hour',
         config: {duration: 60 * 1000},
         actionId: TaskActionTypes.UpdateTask,

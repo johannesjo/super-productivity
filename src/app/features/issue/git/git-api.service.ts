@@ -164,7 +164,7 @@ export class GitApiService {
 
   private _checkSettings() {
     if (!this._isValidSettings()) {
-      this._snackService.open({type: 'ERROR', message: 'Git is not properly configured'});
+      this._snackService.open({type: 'ERROR', msg: 'Git is not properly configured'});
       throw new Error(`${HANDLED_ERROR} Not enough settings`);
     }
   }
@@ -175,13 +175,13 @@ export class GitApiService {
       // A client-side or network error occurred. Handle it accordingly.
       this._snackService.open({
         type: 'ERROR',
-        message: 'GitHub: Request failed because of a client side network error'
+        msg: 'GitHub: Request failed because of a client side network error'
       });
     } else {
       // The backend returned an unsuccessful response code.
       this._snackService.open({
         type: 'ERROR',
-        message: `GitHub: API returned ${error.status}. ${error.error && error.error.message}`
+        msg: `GitHub: API returned ${error.status}. ${error.error && error.error.message}`
       });
     }
     if (error && error.message) {

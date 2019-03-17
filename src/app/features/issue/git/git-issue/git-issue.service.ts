@@ -115,8 +115,8 @@ export class GitIssueService {
     ).subscribe((issue) => {
       this.upsert(issue);
       this._snackService.open({
-        icon: 'cloud_download',
-        message: `Git: Updated data for ${issue.number} "${issue.title}"`
+        ico: 'cloud_download',
+        msg: `Git: Updated data for ${issue.number} "${issue.title}"`
       });
     });
   }
@@ -134,13 +134,13 @@ export class GitIssueService {
           const wasUpdated = isNewComment || isIssueChanged;
           if (isNewComment && isNotify) {
             this._snackService.open({
-              icon: 'cloud_download',
-              message: `Git: New comment for ${matchingNewIssue.number} "${matchingNewIssue.title}"`
+              ico: 'cloud_download',
+              msg: `Git: New comment for ${matchingNewIssue.number} "${matchingNewIssue.title}"`
             });
           } else if (isIssueChanged && isNotify) {
             this._snackService.open({
-              icon: 'cloud_download',
-              message: `Git: Update for ${matchingNewIssue.number} "${matchingNewIssue.title}"`
+              ico: 'cloud_download',
+              msg: `Git: Update for ${matchingNewIssue.number} "${matchingNewIssue.title}"`
             });
           }
 
@@ -152,8 +152,8 @@ export class GitIssueService {
         if (!matchingNewIssue && isNotify && !this._fineWithDeletionIssueIds.includes(oldIssue.id)) {
           this._snackService.open({
             type: 'CUSTOM',
-            svgIcon: 'github',
-            message: `Git: Issue ${oldIssue.number} "${oldIssue.title}" seems to be deleted or closed on git`,
+            svgIco: 'github',
+            msg: `Git: Issue ${oldIssue.number} "${oldIssue.title}" seems to be deleted or closed on git`,
             actionStr: 'Show me',
             actionFn: () => {
               this._fineWithDeletionIssueIds.push(oldIssue.id);

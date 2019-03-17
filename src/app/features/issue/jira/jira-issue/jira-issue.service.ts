@@ -128,9 +128,9 @@ export class JiraIssueService {
         this.update(issueId, changedFields, oldIssueData);
 
         if (wasUpdated && isNotifyOnUpdate) {
-          this._snackService.open({message: `Jira: ${updatedIssue.key} was updated`, icon: 'cloud_download'});
+          this._snackService.open({msg: `Jira: ${updatedIssue.key} was updated`, ico: 'cloud_download'});
         } else if (isNotifyOnNoUpdateRequired) {
-          this._snackService.open({message: `Jira: ${updatedIssue.key} already up to date`, icon: 'cloud_download'});
+          this._snackService.open({msg: `Jira: ${updatedIssue.key} already up to date`, ico: 'cloud_download'});
         }
       });
   }

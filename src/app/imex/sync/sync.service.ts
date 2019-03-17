@@ -48,7 +48,7 @@ export class SyncService {
   async loadCompleteSyncData(data: AppDataComplete) {
     this._imexMetaService.setInProgress(true);
     await this._saveBackup();
-    this._snackService.open({message: 'Importing data', icon: 'cloud_download'});
+    this._snackService.open({msg: 'Importing data', ico: 'cloud_download'});
 
     if (this._checkData(data)) {
       const curId = data.project.currentId;
@@ -58,19 +58,19 @@ export class SyncService {
         await this._persistenceService.importComplete(data);
         await this._loadAllFromDatabaseToStore(curId);
         this._imexMetaService.setInProgress(false);
-        this._snackService.open({type: 'SUCCESS', message: 'Data imported'});
+        this._snackService.open({type: 'SUCCESS', msg: 'Data imported'});
 
       } catch (e) {
         this._snackService.open({
           type: 'ERROR',
-          message: 'Something went wrong while importing the data. Falling back to local backup'
+          msg: 'Something went wrong while importing the data. Falling back to local backup'
         });
         console.error(e);
         await this._loadBackup();
         this._imexMetaService.setInProgress(false);
       }
     } else {
-      this._snackService.open({type: 'ERROR', message: 'Error while syncing. Invalid data'});
+      this._snackService.open({type: 'ERROR', msg: 'Error while syncing. Invalid data'});
       console.error(data);
       this._imexMetaService.setInProgress(false);
     }

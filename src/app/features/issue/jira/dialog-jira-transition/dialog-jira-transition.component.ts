@@ -44,7 +44,7 @@ export class DialogJiraTransitionComponent {
           this._jiraIssueService.updateIssueFromApi(this.data.issue.id, this.data.issue, false, false);
           this._snackService.open({
             type: 'SUCCESS',
-            message: `Jira: Set issue ${this.data.issue.key} to <strong>${this.chosenTransition.name}</strong>`
+            msg: `Jira: Set issue ${this.data.issue.key} to <strong>${this.chosenTransition.name}</strong>`
           });
           this.close();
         });

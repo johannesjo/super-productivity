@@ -162,7 +162,7 @@ export class ReminderService {
 
   private _handleError(err: any) {
     console.error(err);
-    this._snackService.open({type: 'ERROR', message: 'Error for reminder interface'});
+    this._snackService.open({type: 'ERROR', msg: 'Error for reminder interface'});
   }
 
   private async _getRelatedDataForReminder(id: string, projectId: string, type: ReminderType): Promise<Task | Note> {

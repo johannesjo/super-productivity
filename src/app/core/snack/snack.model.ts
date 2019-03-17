@@ -4,11 +4,11 @@ import { Observable } from 'rxjs';
 export type SnackType = 'ERROR' | 'SUCCESS' | 'CUSTOM'  | 'JIRA_UNBLOCK';
 
 export interface SnackParams {
-  message: string;
+  msg: string;
   isSubtle?: boolean;
   type?: SnackType;
-  icon?: string;
-  svgIcon?: string;
+  ico?: string;
+  svgIco?: string;
   actionStr?: string;
   actionId?: string;
   actionFn?: Function;
