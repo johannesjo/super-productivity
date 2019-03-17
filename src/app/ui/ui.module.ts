@@ -216,5 +216,17 @@ export class UiModule {
       const html = linkRenderer.call(_markdownService.renderer, href, title, text);
       return html.replace(/^<a /, '<a target="_blank" ');
     };
+
+    _markdownService.renderer.paragraph = (text) => {
+      const split = text.split('\n');
+      return split.reduce((acc, p) => {
+        const result = /h(\d)\./.exec(p);
+        if (result) {
+          const h = `h${result[1]}`;
+          return acc + `<${h}>${p.replace(result[0], '')}</${h}>`;
+        }
+        return acc + `<p>${p}</p>`;
+      }, '');
+    };
   }
 }
