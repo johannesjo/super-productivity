@@ -104,9 +104,9 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
     return issue && issue.summary;
   }
 
-  async addTask(issue_?: SearchResultItem) {
+  async addTask() {
     this._isAddInProgress = true;
-    const issueOrTitle = issue_ || this.taskSuggestionsCtrl.value as string | SearchResultItem;
+    const issueOrTitle = this.taskSuggestionsCtrl.value as string | SearchResultItem;
     if (typeof issueOrTitle === 'string') {
       if (issueOrTitle.length > 0) {
         this.doubleEnterCount = 0;
