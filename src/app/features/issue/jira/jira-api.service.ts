@@ -243,7 +243,6 @@ export class JiraApiService {
       this._snackService.open({
         msg: msg,
         type: 'ERROR',
-        svgIco: 'jira',
 
       });
       return throwError({handledError: 'Insufficient Settings for Jira'});
@@ -332,8 +331,7 @@ export class JiraApiService {
       // resolve saved promise
       if (!res || res.error) {
         console.log('JIRA_RESPONSE_ERROR', res, currentRequest);
-        currentRequest.reject(res);
-
+        // let msg =
         if (res.error &&
           (res.error.statusCode && res.error.statusCode === 401)
           || (res.error && res.error === 401)
@@ -341,9 +339,9 @@ export class JiraApiService {
           this._blockAccess();
         }
 
+        currentRequest.reject(res);
       } else {
         console.log('JIRA_RESPONSE', res);
-
         if (currentRequest.transform) {
           currentRequest.resolve(currentRequest.transform(res, this._cfg));
         } else {
