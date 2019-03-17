@@ -28,7 +28,7 @@
     <mat-option *ngFor="let issue of (filteredIssueSuggestions$|async)"
                 [value]="issue">
       <mat-icon [svgIcon]="issue.issueType|issueIcon"></mat-icon>
-      <span>{{issue?.title}}</span>
+      <span [innerHTML]="issue?.titleHighlighted||issue?.title"></span>
     </mat-option>
 
   </mat-autocomplete>

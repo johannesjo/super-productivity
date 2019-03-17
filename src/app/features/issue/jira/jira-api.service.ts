@@ -120,6 +120,17 @@ export class JiraApiService {
     });
   }
 
+  issuePicker(searchTerm: string): Observable<SearchResultItem[]> {
+    const searchStr = `${searchTerm}`;
+    const jql = (this._cfg.searchJqlQuery ? `${encodeURI(this._cfg.searchJqlQuery)}` : '');
+
+    return this._sendRequest({
+      apiMethod: 'issuePicker',
+      arguments: [searchStr, jql],
+      transform: mapToSearchResults
+    });
+  }
+
   findAutoImportIssues(isFetchAdditional?: boolean, maxResults: number = JIRA_MAX_RESULTS): Observable<JiraIssue[]> {
     const options = {
       maxResults: maxResults,

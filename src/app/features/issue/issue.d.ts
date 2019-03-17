@@ -30,4 +30,5 @@ export interface SearchResultItem {
   title: string;
   issueType: IssueProviderKey;
   issueData: IssueData;
+  titleHighlighted?: string;
 }

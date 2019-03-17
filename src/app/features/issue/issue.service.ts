@@ -52,7 +52,7 @@ export class IssueService {
 
         if (isSearchJira) {
           obs.push(
-            this._jiraApiService.search(searchTerm, false, 50)
+            this._jiraApiService.issuePicker(searchTerm, false, 50)
               .pipe(
                 catchError(() => {
                   return [];

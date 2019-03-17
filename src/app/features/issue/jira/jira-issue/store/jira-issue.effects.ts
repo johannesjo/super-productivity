@@ -110,21 +110,6 @@ export class JiraIssueEffects {
     );
 
 
-  @Effect({dispatch: false}) updateIssueRightAwayWithCompleteData$: any = this._actions$
-    .pipe(
-      ofType(
-        TaskActionTypes.AddTask,
-      ),
-      withLatestFrom(
-        this._store$.pipe(select(selectProjectJiraCfg)),
-      ),
-      filter(isEnabled),
-      filter(([a, jiraCfg]: [AddTask, JiraCfg]) => !!a.payload.issue && a.payload.task.issueType === JIRA_TYPE),
-      tap(([a, jiraCfg]: [AddTask, JiraCfg]) => this._jiraIssueService.updateIssueFromApi(
-        a.payload.issue.id, null, false, false
-      )),
-    );
-
   @Effect({dispatch: false}) addWorklog$: any = this._actions$
     .pipe(
       ofType(

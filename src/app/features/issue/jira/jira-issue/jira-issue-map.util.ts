@@ -7,26 +7,35 @@ import {
   JiraOriginalComment
 } from '../jira-api-responses';
 import { JiraCfg } from '../jira';
-import { DropPasteIcons, DropPasteInput, DropPasteInputType } from '../../../../core/drop-paste-input/drop-paste-input';
+import { DropPasteIcons, DropPasteInputType } from '../../../../core/drop-paste-input/drop-paste-input';
 import { IssueProviderKey, SearchResultItem } from '../../issue';
 import { Attachment } from '../../../attachment/attachment.model';
+import { dedupeByKey } from '../../../../util/de-dupe-by-key';
 
 const matchProtocolRegEx = /(^[^:]+):\/\//;
 
-export const mapToSearchResults = (res, cfg: JiraCfg): SearchResultItem[] => {
-  const issues = mapIssuesResponse(res, cfg);
-  return issues.map(issue => {
-    return {
-      title: issue.key + ' ' + issue.summary,
-      issueType: 'JIRA' as IssueProviderKey,
-      issueData: issue,
-    };
-  });
+export const mapToSearchResults = (res): SearchResultItem[] => {
+  const issues = dedupeByKey(res.response.sections.map(sec => sec.issues).flat(), 'key')
+    .map(issue => {
+      return {
+        title: issue.key + ' ' + issue.summaryText,
+        titleHighlighted: issue.key + ' ' + issue.summary,
+        issueType: 'JIRA' as IssueProviderKey,
+        issueData: {
+          ...issue,
+          summary: issue.summaryText,
+          id: issue.key,
+        },
+      };
+    });
+  return issues;
 };
 
-export const mapIssuesResponse = (res, cfg: JiraCfg): JiraIssue[] => res.response.issues.map((issue) => {
-  return mapIssue(issue, cfg);
-});
+export const mapIssuesResponse = (res, cfg: JiraCfg): JiraIssue[] => {
+  return res.response.issues.map((issue) => {
+    return mapIssue(issue, cfg);
+  });
+};
 
 export const mapResponse = (res) => res.response;
 

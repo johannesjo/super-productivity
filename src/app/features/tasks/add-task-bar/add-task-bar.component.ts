@@ -1,4 +1,12 @@
-import { AfterViewInit, ChangeDetectionStrategy, Component, EventEmitter, Input, Output, ViewChild } from '@angular/core';
+import {
+  AfterViewInit,
+  ChangeDetectionStrategy,
+  Component,
+  EventEmitter,
+  Input,
+  Output,
+  ViewChild
+} from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { TaskService } from '../task.service';
 import { debounceTime, switchMap, tap } from 'rxjs/operators';
@@ -7,6 +15,8 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { IssueService } from '../../issue/issue.service';
 import { SearchResultItem } from '../../issue/issue';
 import { SnackService } from '../../../core/snack/snack.service';
+import { JiraApiService } from '../../issue/jira/jira-api.service';
+import { JIRA_TYPE } from '../../issue/issue.const';
 
 @Component({
   selector: 'add-task-bar',
@@ -46,6 +56,7 @@ export class AddTaskBarComponent implements AfterViewInit {
   constructor(
     private _taskService: TaskService,
     private _issueService: IssueService,
+    private _jiraApiService: JiraApiService,
     private _snackService: SnackService,
   ) {
   }
@@ -95,13 +106,16 @@ export class AddTaskBarComponent implements AfterViewInit {
         this.doubleEnterCount++;
       }
     } else {
-      const res = await this._taskService.checkForTaskWithIssue(issueOrTitle.issueData);
+      const issueData = (issueOrTitle.issueType === JIRA_TYPE)
+        ? await this._jiraApiService.getIssueById(issueOrTitle.issueData.id).toPromise()
+        : issueOrTitle.issueData;
 
+      const res = await this._taskService.checkForTaskWithIssue(issueData);
       if (!res) {
         this._taskService.addWithIssue(
           issueOrTitle.title,
           issueOrTitle.issueType,
-          issueOrTitle.issueData,
+          issueData,
           this.isAddToBacklog,
         );
       } else if (res.isFromArchive) {

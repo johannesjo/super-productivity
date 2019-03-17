@@ -131,7 +131,7 @@
   dependencies:
     tslib "^1.9.0"
 
-"@angular/cdk@^7.3.4":
+"@angular/cdk@^7.3.2":
   version "7.3.4"
   resolved "https://registry.yarnpkg.com/@angular/cdk/-/cdk-7.3.4.tgz#b9d8c62cdd24fa6517dd3ae68c78632b1525d35f"
   integrity sha512-cHl1o7obogCO3Nxf9n8MrXpfHa7AH1QNX2BY+bftYBTHW++YJe+qAwkwWLVqnJD9TQE2OpiR058zoJU20khM/g==
@@ -215,7 +215,7 @@
   resolved "https://registry.yarnpkg.com/@angular/language-service/-/language-service-7.2.9.tgz#50a74f80a42b069c6a3a0844ee6af3098f8bd48b"
   integrity sha512-+8P3yGqrCZy8PaoxUUlC6cowxPAIbuW4HwhvHvYV3G99LDQUC/bxUPSPhqbrAvDiFr3VeXqivzXgFCTo69S1WQ==
 
-"@angular/material@^7.3.4":
+"@angular/material@^7.3.2":
   version "7.3.4"
   resolved "https://registry.yarnpkg.com/@angular/material/-/material-7.3.4.tgz#a0d3fc14bf4c165944e3f1ddc71f7c685b8d4ef3"
   integrity sha512-UWS4Kd3AqJBtAJRds4hhPNez9k1rkWhd6/E17pfcH6KWxP3Pi7tcubaSqoDRGHVbr/QegDn1SOoRokJxLYDn2g==
@@ -4017,9 +4017,10 @@ jasminewd2@^2.1.0:
   version "2.2.0"
   resolved "https://registry.yarnpkg.com/jasminewd2/-/jasminewd2-2.2.0.tgz#e37cf0b17f199cce23bea71b2039395246b4ec4e"
 
-jira-client-fork@^4.2.0:
-  version "4.2.0"
-  resolved "https://registry.yarnpkg.com/jira-client-fork/-/jira-client-fork-4.2.0.tgz#e5ade1400a029480e94bf5a47132c82c6e4d627a"
+jira-client-fork@^4.2.1:
+  version "4.2.1"
+  resolved "https://registry.yarnpkg.com/jira-client-fork/-/jira-client-fork-4.2.1.tgz#ceb6f6be1c96d2c1989d1ac3a78292b6bd83f284"
+  integrity sha512-OnHUdAMB07MCbkbXJbNFIKjikY9HTNpRPuas2pninstHUQ8PT54tUFUQtFmNhwTFWQH6UYvnKJV+yDaY1PxVyA==
   dependencies:
     babel-runtime "^6.3.13"
     request-promise "^3.0.0"
