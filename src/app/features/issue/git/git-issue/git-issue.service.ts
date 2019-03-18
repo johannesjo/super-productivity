@@ -10,6 +10,7 @@ import { SnackService } from '../../../../core/snack/snack.service';
 import { GitCfg } from '../git';
 import { Observable } from 'rxjs';
 import { GIT_TYPE } from '../../issue.const';
+import { truncate } from '../../../../util/truncate';
 
 
 @Injectable({
@@ -153,7 +154,7 @@ export class GitIssueService {
           this._snackService.open({
             type: 'CUSTOM',
             svgIco: 'github',
-            msg: `Git: Issue ${oldIssue.number} "${oldIssue.title}" seems to be deleted or closed on git`,
+            msg: `Git: Issue ${oldIssue.number} "${truncate(oldIssue.title)}" seems to be deleted or closed on git`,
             actionStr: 'Show me',
             actionFn: () => {
               this._fineWithDeletionIssueIds.push(oldIssue.id);

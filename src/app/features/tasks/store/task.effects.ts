@@ -29,6 +29,7 @@ import { IPC_CURRENT_TASK_UPDATED } from '../../../../../electron/ipc-events.con
 import { IS_ELECTRON } from '../../../app.constants';
 import { ReminderService } from '../../reminder/reminder.service';
 import { MiscConfig } from '../../config/config.model';
+import { truncate } from '../../../util/truncate';
 
 // TODO send message to electron when current task changes here
 
@@ -106,7 +107,7 @@ export class TaskEffects {
           }),
           new SnackOpen({
             type: 'SUCCESS',
-            msg: `Scheduled task "${title}"`,
+            msg: `Scheduled task "${truncate(title)}"`,
             ico: 'schedule',
           }),
           ...(isMoveToBacklog ? [new MoveToBacklog({id})] : []),
@@ -127,7 +128,7 @@ export class TaskEffects {
         });
         return new SnackOpen({
           type: 'SUCCESS',
-          msg: `Updated reminder for task "${title}"`,
+          msg: `Updated reminder for task "${truncate(title)}"`,
           ico: 'schedule',
         });
       })
@@ -166,7 +167,7 @@ export class TaskEffects {
       map((action_: DeleteTask) => {
         const action = action_ as DeleteTask;
         return new SnackOpen({
-          msg: `Deleted task "${action.payload.task.title}"`,
+          msg: `Deleted task "${truncate(action.payload.task.title)}"`,
           config: {duration: 5000},
           actionStr: 'Undo',
           actionId: TaskActionTypes.UndoDeleteTask
@@ -379,11 +380,11 @@ export class TaskEffects {
       && ct.timeSpent > ct.timeEstimate) {
       this._notifyService.notify({
         title: 'Time estimate exceeded!',
-        body: `You exceeded your estimated time for "${ct.title}".`,
+        body: `You exceeded your estimated time for "${truncate(ct.title)}".`,
       });
 
       this._store$.dispatch(new SnackOpen({
-        msg: `You exceeded your estimated time for "${ct.title.substr(0, 50)}"`,
+        msg: `Time estimate exceeded for "${truncate(ct.title)}"`,
         actionStr: 'Add 1/2 hour',
         config: {duration: 60 * 1000},
         actionId: TaskActionTypes.UpdateTask,
