@@ -97,6 +97,8 @@ $z-time-btn-svg-wrapper: 5555;
     @include mq(xs) {
       border: 1px solid $c-accent !important;
       box-shadow: $whiteframe-shadow-5dp;
+      left: -3px;
+      right: -3px;
     }
   }
 
