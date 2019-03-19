@@ -285,7 +285,7 @@ export class JiraApiService {
       requestMethod: request.apiMethod,
       clientRequest: request,
       timeout: setTimeout(() => {
-        console.log('ERROR', 'Jira Request timed out for ' + request.apiMethod);
+        console.log('ERROR', 'Jira Request timed out for ' + request.apiMethod, request);
         // delete entry for promise
         this._snackService.open({type: 'ERROR', msg: 'Jira timed out'});
         this._requestsLog[request.requestId].reject('Request timed out');
