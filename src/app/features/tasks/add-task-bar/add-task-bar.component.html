@@ -23,7 +23,7 @@
 
   <mat-autocomplete #autoEl="matAutocomplete"
                     (optionSelected)="addTask()"
-                    [autoActiveFirstOption]="true"
+                    [autoActiveFirstOption]="taskSuggestionsCtrl.value?.length <= 3"
                     [displayWith]="displayWith">
     <mat-option *ngFor="let issue of (filteredIssueSuggestions$|async)"
                 [value]="issue">
