@@ -7,7 +7,7 @@
          dragula="PROJECTS"
          [dragulaModel]="projectService.list$|async"
          [@standardList]="(projectService.list$|async)?.length">
-      <mat-card *ngFor="let project of projectService.list$|async"
+      <mat-card *ngFor="let project of (projectService.list$|async); trackBy:trackById;"
                 class="project">
         <div class="project-color bg-400-el"
              [ngClass]="project.themeColor">

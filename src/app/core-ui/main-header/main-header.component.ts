@@ -8,6 +8,7 @@ import { NoteService } from '../../features/note/note.service';
 import { TaskService } from '../../features/tasks/task.service';
 import { ConfigService } from '../../features/config/config.service';
 import { PomodoroService } from '../../features/pomodoro/pomodoro.service';
+import { Project } from '../../features/project/project.model';
 
 @Component({
   selector: 'main-header',
@@ -44,6 +45,10 @@ export class MainHeaderComponent implements OnInit {
       const dashOffset = this.circumference * -1 * progress;
       this._renderer.setStyle(this.circleSvg.nativeElement, 'stroke-dashoffset', dashOffset);
     });
+  }
+
+  trackById(i: number, project: Project) {
+    return project.id;
   }
 
   switchProject(projectId) {

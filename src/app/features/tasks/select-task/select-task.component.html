@@ -15,7 +15,7 @@
   <mat-autocomplete #auto="matAutocomplete"
                     [autoActiveFirstOption]="true"
                     [displayWith]="displayWith">
-    <mat-option *ngFor="let task of filteredTasks"
+    <mat-option *ngFor="let task of filteredTasks; trackBy:trackById"
                 [value]="task">
       <span>{{ task?.title}}</span>
     </mat-option>

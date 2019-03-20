@@ -56,7 +56,7 @@
   </button>
   <mat-menu #projectMenu="matMenu">
     <button (click)="switchProject(project.id)"
-            *ngFor="let project of projectService.list$|async"
+            *ngFor="let project of (projectService.list$|async); trackBy:trackById;"
             mat-menu-item>
       <mat-icon *ngIf="project.id===(projectService.currentId$|async)">radio_button_checked</mat-icon>
       <mat-icon *ngIf="project.id!==(projectService.currentId$|async)">radio_button_unchecked</mat-icon>

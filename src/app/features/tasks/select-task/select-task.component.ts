@@ -55,4 +55,8 @@ export class SelectTaskComponent implements OnInit, OnDestroy {
   displayWith(task: Task) {
     return task && task.title;
   }
+
+  trackById(i: number, task: Task) {
+    return task.id;
+  }
 }

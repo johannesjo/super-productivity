@@ -6,6 +6,7 @@ import { DialogConfirmComponent } from '../../ui/dialog-confirm/dialog-confirm.c
 import { standardListAnimation } from '../../ui/animations/standard-list.ani';
 import { Subscription } from 'rxjs';
 import { DragulaService } from 'ng2-dragula';
+import { Project } from '../../features/project/project.model';
 
 @Component({
   selector: 'project-page',
@@ -65,5 +66,9 @@ export class ProjectPageComponent implements OnInit, OnDestroy {
           this.projectService.remove(projectId);
         }
       });
+  }
+
+  trackById(i: number, project: Project): string {
+    return project.id;
   }
 }

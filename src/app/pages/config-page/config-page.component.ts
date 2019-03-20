@@ -5,7 +5,10 @@ import { ProjectService } from '../../features/project/project.service';
 import { ConfigFormSection, ConfigSectionKey, GlobalConfig } from '../../features/config/config.model';
 import { Subscription } from 'rxjs';
 import { Project, ProjectAdvancedCfg, ProjectCfgFormKey } from '../../features/project/project.model';
-import { BASIC_PROJECT_CONFIG_FORM_CONFIG, PROJECT_CONFIG_FORM_CONFIG } from '../../features/project/project-form-cfg.const';
+import {
+  BASIC_PROJECT_CONFIG_FORM_CONFIG,
+  PROJECT_CONFIG_FORM_CONFIG
+} from '../../features/project/project-form-cfg.const';
 import { IssueIntegrationCfg, IssueIntegrationCfgs, IssueProviderKey } from '../../features/issue/issue';
 import { ISSUE_PROVIDER_FORM_CFGS } from '../../features/issue/issue.const';
 import { DEFAULT_JIRA_CFG } from '../../features/issue/jira/jira.const';
@@ -67,6 +70,10 @@ export class ConfigPageComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this._subs.unsubscribe();
+  }
+
+  trackBySectionKey(i: number, section: ConfigFormSection) {
+    return section.key;
   }
 
   saveProjectBasicCfg($event: { sectionKey: ConfigSectionKey | ProjectCfgFormKey, config: Partial<Project> }) {

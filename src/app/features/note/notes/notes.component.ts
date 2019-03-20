@@ -6,6 +6,7 @@ import { MatButton, MatDialog } from '@angular/material';
 import { DialogAddNoteComponent } from '../dialog-add-note/dialog-add-note.component';
 import { standardListAnimation } from '../../../ui/animations/standard-list.ani';
 import { fadeAnimation } from '../../../ui/animations/fade.ani';
+import { Note } from '../note.model';
 
 @Component({
   selector: 'notes',
@@ -78,6 +79,10 @@ export class NotesComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this._subs.unsubscribe();
+  }
+
+  trackById(i: number, note: Note): string {
+    return note.id;
   }
 
   addNote() {

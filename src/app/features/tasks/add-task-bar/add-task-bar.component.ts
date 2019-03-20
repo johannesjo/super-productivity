@@ -105,6 +105,10 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
     return issue && issue.summary;
   }
 
+  trackByFn(i: number, searchResultItem: SearchResultItem) {
+    return searchResultItem.issueData.id;
+  }
+
   async addTask() {
     this._isAddInProgress = true;
     const issueOrTitle = this.taskSuggestionsCtrl.value as string | SearchResultItem;

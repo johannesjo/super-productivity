@@ -99,6 +99,10 @@ export class JiraCfgComponent implements OnInit, OnDestroy {
     return issue && issue.summary;
   }
 
+  trackByIssueId(i: number, issue: JiraIssue) {
+    return issue.id;
+  }
+
   updateTransitionOptions() {
     const searchResultItem = this.issueSuggestionsCtrl.value as SearchResultItem;
     if (!searchResultItem || typeof searchResultItem === 'string') {

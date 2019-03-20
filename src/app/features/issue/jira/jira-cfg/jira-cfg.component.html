@@ -54,7 +54,7 @@
                       class="is-loading">
             <mat-spinner diameter="50"></mat-spinner>
           </mat-option>
-          <mat-option *ngFor="let issue of (filteredIssueSuggestions$|async)"
+          <mat-option *ngFor="let issue of (filteredIssueSuggestions$|async); trackBy:trackByIssueId;"
                       [value]="issue"><span>{{issue?.title}}</span>
           </mat-option>
         </mat-autocomplete>

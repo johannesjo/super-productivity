@@ -25,7 +25,7 @@
                     (optionSelected)="addTask()"
                     [autoActiveFirstOption]="taskSuggestionsCtrl.value?.length <= 3"
                     [displayWith]="displayWith">
-    <mat-option *ngFor="let issue of (filteredIssueSuggestions$|async)"
+    <mat-option *ngFor="let issue of (filteredIssueSuggestions$|async); trackBy:trackByFn"
                 [value]="issue">
       <mat-icon [svgIcon]="issue.issueType|issueIcon"></mat-icon>
       <span [innerHTML]="issue?.titleHighlighted||issue?.title"></span>
