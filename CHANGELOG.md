@@ -1,3 +1,16 @@
+## [2.5.7](https://github.com/johannesjo/super-productivity/compare/v2.5.6...v2.5.7) (2019-03-20)
+
+
+### Features
+
+* **jira:** improve error logging ([9c75e6e](https://github.com/johannesjo/super-productivity/commit/9c75e6e))
+* **performance:** add missing track by statements ([1771369](https://github.com/johannesjo/super-productivity/commit/1771369))
+* **snacks:** shorten snacks ([d7647a2](https://github.com/johannesjo/super-productivity/commit/d7647a2))
+* **tasks:** improve focus styles ([e1686af](https://github.com/johannesjo/super-productivity/commit/e1686af))
+* **tasks:** only auto select first value when very short search term ([5527ad6](https://github.com/johannesjo/super-productivity/commit/5527ad6))
+
+
+
 ## [2.5.6](https://github.com/johannesjo/super-productivity/compare/v2.5.5...v2.5.6) (2019-03-17)
 
 
