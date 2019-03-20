@@ -22,12 +22,17 @@
           "/assets/**"
         ]
       }
+    },
+    {
+      "name": "externalAssets",
+      "installMode": "lazy",
+      "updateMode": "prefetch",
+      "resources": {
+        "urls": [
+          "https://fonts.googleapis.com/**",
+          "https://fonts.gstatic.com/**"
+        ]
+      }
     }
-  ],
-  "external": {
-    "urls": [
-      "https://fonts.googleapis.com/**",
-      "https://fonts.gstatic.com/**"
-    ]
-  }
+  ]
 }
