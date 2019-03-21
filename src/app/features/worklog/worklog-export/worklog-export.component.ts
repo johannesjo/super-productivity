@@ -200,12 +200,13 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
       }
     });
 
-
     const rows = [];
     Object.keys(days).sort().forEach(dateStr => {
       days[dateStr].titlesWithSub = unqiue(days[dateStr].tasks.map(t => t.title));
       days[dateStr].titles = unqiue(days[dateStr].tasks.map(
-        t => t.parentId && tasks.find(pt_ => pt_.id === t.parentId).title
+        t =>
+          (t.parentId && tasks.find(pt_ => pt_.id === t.parentId).title)
+          || (!t.parentId && t.title)
       )).filter(title => !!title);
       rows.push(days[dateStr]);
     });
