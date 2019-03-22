@@ -31,4 +31,12 @@
     font-size: 18px;
     line-height: 22px;
   }
+
+  pre {
+    max-width: 100%;
+    overflow-x: auto;
+    overflow-x: overlay;
+    // we need this, otherwise it might break inside tables
+    white-space: pre-wrap;
+  }
 }
