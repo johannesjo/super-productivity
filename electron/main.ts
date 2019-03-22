@@ -1,5 +1,5 @@
 'use strict';
-import { App, app, globalShortcut, ipcMain, powerSaveBlocker } from 'electron';
+import { App, app, globalShortcut, ipcMain, powerMonitor, powerSaveBlocker } from 'electron';
 import * as notifier from 'node-notifier';
 import { info } from 'electron-log';
 import { CONFIG } from './CONFIG';
@@ -7,7 +7,6 @@ import { CONFIG } from './CONFIG';
 import { initIndicator } from './indicator';
 import { createWindow } from './main-window';
 
-import { getIdleTime } from './get-idle-time';
 import { sendJiraRequest, setupRequestHeadersForImages } from './jira';
 import { getGitLog } from './git-log';
 import { initGoogleAuth } from './google-auth';
@@ -251,10 +250,8 @@ function showOrFocus(passedWin) {
 }
 
 function idleChecker() {
-  getIdleTime((idleTime) => {
-    if (idleTime === 'NO_SUPPORT' && idleInterval) {
-      clearInterval(idleInterval);
-    }
+  powerMonitor['querySystemIdleTime']((idleTimeSeconds) => {
+    const idleTime = idleTimeSeconds * 1000;
 
     // sometimes when starting a second instance we get here although we don't want to
     if (!mainWin) {
@@ -263,7 +260,6 @@ function idleChecker() {
     }
 
     // don't update if the user is about to close
-    // tslint:disable-next-line
     if (!app_.isQuiting && idleTime > CONFIG.MIN_IDLE_TIME) {
       mainWin.webContents.send(IPC_IDLE_TIME, idleTime);
     }
