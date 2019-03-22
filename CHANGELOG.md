@@ -1,3 +1,13 @@
+## [2.5.8](https://github.com/johannesjo/super-productivity/compare/v2.5.7...v2.5.8) (2019-03-22)
+
+
+### Bug Fixes
+
+* **worklog:** export for parent titles not containing tasks without sub tasks ([b67b920](https://github.com/johannesjo/super-productivity/commit/b67b920))
+* idle time causing issues with snap package [#154](https://github.com/johannesjo/super-productivity/issues/154) ([bd0a514](https://github.com/johannesjo/super-productivity/commit/bd0a514))
+
+
+
 ## [2.5.7](https://github.com/johannesjo/super-productivity/compare/v2.5.6...v2.5.7) (2019-03-20)
 
 
