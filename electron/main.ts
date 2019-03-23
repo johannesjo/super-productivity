@@ -21,14 +21,16 @@ import {
   IPC_JIRA_SETUP_IMG_HEADERS,
   IPC_NOTIFY,
   IPC_ON_BEFORE_QUIT,
-  IPC_REGISTER_GLOBAL_SHORTCUT_EVENT,
+  IPC_REGISTER_GLOBAL_SHORTCUTS_EVENT,
   IPC_SHOW_OR_FOCUS,
   IPC_SHUTDOWN,
-  IPC_SHUTDOWN_NOW
+  IPC_SHUTDOWN_NOW,
+  IPC_TASK_TOGGLE_START
 } from './ipc-events.const';
 import { backupData } from './backup';
 import electronDl from 'electron-dl';
 import { JiraCfg } from '../src/app/features/issue/jira/jira';
+import { KeyboardConfig } from '../src/app/features/config/config.model';
 
 const ICONS_FOLDER = __dirname + '/assets/icons/';
 const IS_MAC = process.platform === 'darwin';
@@ -140,8 +142,8 @@ ipcMain.on(IPC_EXEC, exec);
 ipcMain.on(IPC_BACKUP, backupData);
 
 
-ipcMain.on(IPC_REGISTER_GLOBAL_SHORTCUT_EVENT, (ev, shortcutPassed) => {
-  registerShowAppShortCut(shortcutPassed);
+ipcMain.on(IPC_REGISTER_GLOBAL_SHORTCUTS_EVENT, (ev, cfg) => {
+  registerShowAppShortCuts(cfg);
 });
 
 ipcMain.on(IPC_JIRA_SETUP_IMG_HEADERS, (ev, jiraCfg: JiraCfg) => {
@@ -192,24 +194,43 @@ function createMainWin() {
   initGoogleAuth();
 }
 
-function registerShowAppShortCut(shortcutPassed) {
-  if (shortcutPassed) {
-    // unregister all previous, works because we only have one global shortcut
-    globalShortcut.unregisterAll();
+function registerShowAppShortCuts(cfg: KeyboardConfig) {
+  // unregister all previous
+  globalShortcut.unregisterAll();
+  const GLOBAL_KEY_CFG_KEYS: string[] = ['globalShowHide', 'globalToggleTaskStart'];
 
-    // Register a shortcut listener.
-    const ret = globalShortcut.register(shortcutPassed, () => {
-      if (mainWin.isFocused()) {
-        mainWin.hide();
-      } else {
-        showOrFocus(mainWin);
-      }
-      // circumvent wrong electron typing
-    }) as unknown;
+  if (cfg) {
+    Object.keys(cfg)
+      .filter(key => GLOBAL_KEY_CFG_KEYS.includes(key))
+      .forEach((key) => {
+        let actionFn: () => void;
+        const shortcut = cfg[key];
 
-    if (!ret) {
-      errorHandler('Global Shortcut registration failed: ' + shortcutPassed, shortcutPassed);
-    }
+        switch (key) {
+          case 'globalShowHide':
+            actionFn = () => {
+              if (mainWin.isFocused()) {
+                mainWin.hide();
+              } else {
+                showOrFocus(mainWin);
+              }
+            };
+            break;
+
+          case 'globalToggleTaskStart':
+            actionFn = () => {
+              mainWin.webContents.send(IPC_TASK_TOGGLE_START);
+            };
+            break;
+        }
+
+        if (shortcut && shortcut.length > 0) {
+          const ret = globalShortcut.register(shortcut, actionFn) as unknown;
+          if (!ret) {
+            errorHandler('Global Shortcut registration failed: ' + shortcut, shortcut);
+          }
+        }
+      });
   }
 }
 

@@ -33,6 +33,13 @@ export const KEYBOARD_SETTINGS_FORM_CFG: ConfigFormSection = {
         label: 'Show/Hide Super Productivity',
       },
     },
+    {
+      key: 'globalToggleTaskStart',
+      type: 'keyboard',
+      templateOptions: {
+        label: 'Toggle time tracking for last active task',
+      },
+    },
     // APP WIDE
     {
       className: 'tpl',
@@ -66,13 +73,13 @@ export const KEYBOARD_SETTINGS_FORM_CFG: ConfigFormSection = {
     //     label: 'Open Distraction Panel',
     //   },
     // },
-    {
-      key: 'showHelp',
-      type: 'keyboard',
-      templateOptions: {
-        label: 'Show Help',
-      },
-    },
+    // {
+    //   key: 'showHelp',
+    //   type: 'keyboard',
+    //   templateOptions: {
+    //     label: 'Show Help',
+    //   },
+    // },
     {
       key: 'toggleBookmarks',
       type: 'keyboard',

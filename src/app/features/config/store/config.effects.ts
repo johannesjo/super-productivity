@@ -8,7 +8,7 @@ import { PersistenceService } from '../../../core/persistence/persistence.servic
 import { SnackOpen } from '../../../core/snack/store/snack.actions';
 import { ElectronService } from 'ngx-electron';
 import { KeyboardConfig } from '../config.model';
-import { IPC_REGISTER_GLOBAL_SHORTCUT_EVENT } from '../../../../../electron/ipc-events.const';
+import { IPC_REGISTER_GLOBAL_SHORTCUTS_EVENT } from '../../../../../electron/ipc-events.const';
 import { IS_ELECTRON } from '../../../app.constants';
 
 @Injectable()
@@ -48,8 +48,7 @@ export class ConfigEffects {
       filter((action: UpdateConfigSection) => IS_ELECTRON && action.payload.sectionKey === 'keyboard'),
       tap((action: UpdateConfigSection) => {
         const keyboardCfg: KeyboardConfig = action.payload.sectionCfg as KeyboardConfig;
-        const globalShowHideKey = keyboardCfg.globalShowHide;
-        this._electronService.ipcRenderer.send(IPC_REGISTER_GLOBAL_SHORTCUT_EVENT, globalShowHideKey);
+        this._electronService.ipcRenderer.send(IPC_REGISTER_GLOBAL_SHORTCUTS_EVENT, keyboardCfg);
       }),
     );
 
@@ -61,8 +60,7 @@ export class ConfigEffects {
       filter(() => IS_ELECTRON),
       tap((action: LoadConfig) => {
         const keyboardCfg: KeyboardConfig = action.payload.cfg.keyboard;
-        const globalShowHideKey = keyboardCfg.globalShowHide;
-        this._electronService.ipcRenderer.send(IPC_REGISTER_GLOBAL_SHORTCUT_EVENT, globalShowHideKey);
+        this._electronService.ipcRenderer.send(IPC_REGISTER_GLOBAL_SHORTCUTS_EVENT, keyboardCfg);
       }),
     );
 

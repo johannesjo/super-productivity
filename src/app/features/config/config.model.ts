@@ -9,6 +9,7 @@ export type KeyboardConfig = Readonly<{
   goToDailyAgenda: string,
   goToSettings: string,
   addNewTask: string,
+  globalToggleTaskStart: string,
   showHelp: string,
   addNewNote: string,
   openProjectNotes: string,
