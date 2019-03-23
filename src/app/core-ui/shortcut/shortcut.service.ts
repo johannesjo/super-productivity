@@ -10,6 +10,7 @@ import { TaskService } from '../../features/tasks/task.service';
 import { MatDialog } from '@angular/material';
 import { DialogAddNoteComponent } from '../../features/note/dialog-add-note/dialog-add-note.component';
 import { BookmarkService } from '../../features/bookmark/bookmark.service';
+import { IPC_TASK_TOGGLE_START } from '../../../../electron/ipc-events.const';
 
 
 @Injectable({
@@ -35,6 +36,11 @@ export class ShortcutService {
           this.backlogPos = +params.backlogPos;
         }
       });
+
+    // GLOBAL SHORTCUTS
+    if (IS_ELECTRON) {
+      this._electronService.ipcRenderer.on(IPC_TASK_TOGGLE_START, () => this._taskService.toggleStartTask());
+    }
   }
 
   handleKeyDown(ev: KeyboardEvent) {
@@ -48,9 +54,6 @@ export class ShortcutService {
       return;
     }
 
-    // if (checkKeyCombo(ev, cfg.keyboard.openProjectNotes)) {
-    //   Dialogs('NOTES', undefined, true);
-    // }
     // if (checkKeyCombo(ev, cfg.keyboard.openDistractionPanel)) {
     //   Dialogs('DISTRACTIONS', undefined, true);
     // }
