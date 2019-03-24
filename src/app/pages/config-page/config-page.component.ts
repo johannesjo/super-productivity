@@ -12,7 +12,7 @@ import {
 import { IssueIntegrationCfg, IssueIntegrationCfgs, IssueProviderKey } from '../../features/issue/issue';
 import { ISSUE_PROVIDER_FORM_CFGS } from '../../features/issue/issue.const';
 import { DEFAULT_JIRA_CFG } from '../../features/issue/jira/jira.const';
-import { DEFAULT_GIT_CFG } from '../../features/issue/git/git.const';
+import { DEFAULT_GITHUB_CFG } from '../../features/issue/github/github.const';
 import { dirtyDeepCopy } from '../../util/dirtyDeepCopy';
 import { IS_ELECTRON } from '../../app.constants';
 
@@ -62,8 +62,8 @@ export class ConfigPageComponent implements OnInit, OnDestroy {
       if (!this.issueIntegrationCfgs.JIRA) {
         this.issueIntegrationCfgs.JIRA = DEFAULT_JIRA_CFG;
       }
-      if (!this.issueIntegrationCfgs.GIT) {
-        this.issueIntegrationCfgs.GIT = DEFAULT_GIT_CFG;
+      if (!this.issueIntegrationCfgs.GITHUB) {
+        this.issueIntegrationCfgs.GITHUB = DEFAULT_GITHUB_CFG;
       }
     }));
   }

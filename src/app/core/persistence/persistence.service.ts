@@ -113,7 +113,6 @@ export class PersistenceService {
     return this._saveToDb(this._makeProjectKey(projectId, LS_ISSUE_STATE, issueType), data, isForce);
   }
 
-  // TODO add correct type
   async loadIssuesForProject(projectId, issueType: IssueProviderKey): Promise<IssueState> {
     return this._loadFromDb(this._makeProjectKey(projectId, LS_ISSUE_STATE, issueType));
   }

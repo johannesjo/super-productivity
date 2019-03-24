@@ -12,9 +12,10 @@ import { DialogJiraInitialSetupComponent } from '../../../issue/jira/dialog-jira
 import { SS_PROJECT_TMP } from '../../../../core/persistence/ls-keys.const';
 import { Subscription } from 'rxjs';
 import { loadFromSessionStorage, saveToSessionStorage } from '../../../../core/persistence/local-storage';
-import { GitCfg } from '../../../issue/git/git';
-import { DialogGitInitialSetupComponent } from '../../../issue/git/dialog-git-initial-setup/dialog-git-initial-setup.component';
+import { GithubCfg } from '../../../issue/github/github';
+import { DialogGithubInitialSetupComponent } from '../../../issue/github/dialog-github-initial-setup/dialog-github-initial-setup.component';
 import { dirtyDeepCopy } from '../../../../util/dirtyDeepCopy';
+import { GITHUB_TYPE } from '../../../issue/issue.const';
 
 @Component({
   selector: 'dialog-create-project',
@@ -25,7 +26,7 @@ import { dirtyDeepCopy } from '../../../../util/dirtyDeepCopy';
 export class DialogCreateProjectComponent implements OnInit, OnDestroy {
   projectData: Project | Partial<Project> = DEFAULT_PROJECT;
   jiraCfg: JiraCfg;
-  gitCfg: GitCfg;
+  gitCfg: GithubCfg;
 
   form = new FormGroup({});
   formOptions: FormlyFormOptions = {
@@ -63,7 +64,7 @@ export class DialogCreateProjectComponent implements OnInit, OnDestroy {
       this._matDialogRef.afterClosed().subscribe(() => {
         const issueIntegrationCfgs: IssueIntegrationCfgs = Object.assign(this.projectData.issueIntegrationCfgs, {
           JIRA: this.jiraCfg,
-          GIT: this.gitCfg,
+          GITHUB: this.gitCfg,
         });
         const projectDataToSave: Project | Partial<Project> = {
           ...this.projectData,
@@ -79,8 +80,8 @@ export class DialogCreateProjectComponent implements OnInit, OnDestroy {
       if (this.projectData.issueIntegrationCfgs.JIRA) {
         this.jiraCfg = this.projectData.issueIntegrationCfgs.JIRA;
       }
-      if (this.projectData.issueIntegrationCfgs.GIT) {
-        this.gitCfg = this.projectData.issueIntegrationCfgs.GIT;
+      if (this.projectData.issueIntegrationCfgs.GITHUB) {
+        this.gitCfg = this.projectData.issueIntegrationCfgs.GITHUB;
       }
     }
   }
@@ -92,7 +93,7 @@ export class DialogCreateProjectComponent implements OnInit, OnDestroy {
   submit() {
     const issueIntegrationCfgs: IssueIntegrationCfgs = Object.assign(this.projectData.issueIntegrationCfgs, {
       JIRA: this.jiraCfg,
-      GIT: this.gitCfg,
+      GITHUB: this.gitCfg,
     });
 
     const projectDataToSave: Project | Partial<Project> = {
@@ -129,16 +130,16 @@ export class DialogCreateProjectComponent implements OnInit, OnDestroy {
     }));
   }
 
-  openGitCfg() {
-    this._subs.add(this._matDialog.open(DialogGitInitialSetupComponent, {
+  openGithubCfg() {
+    this._subs.add(this._matDialog.open(DialogGithubInitialSetupComponent, {
       restoreFocus: true,
       data: {
         gitCfg: this.projectData.issueIntegrationCfgs.JIRA,
       }
-    }).afterClosed().subscribe((gitCfg: GitCfg) => {
+    }).afterClosed().subscribe((gitCfg: GithubCfg) => {
 
       if (gitCfg) {
-        this._saveGitCfg(gitCfg);
+        this._saveGithubCfg(gitCfg);
       }
     }));
   }
@@ -152,12 +153,12 @@ export class DialogCreateProjectComponent implements OnInit, OnDestroy {
     }
   }
 
-  private _saveGitCfg(gitCfg: GitCfg) {
+  private _saveGithubCfg(gitCfg: GithubCfg) {
     this.gitCfg = gitCfg;
 
     // if we're editing save right away
     if (this.projectData.id) {
-      this._projectService.updateIssueProviderConfig(this.projectData.id, 'GIT', this.gitCfg);
+      this._projectService.updateIssueProviderConfig(this.projectData.id, GITHUB_TYPE, this.gitCfg);
     }
   }
 }

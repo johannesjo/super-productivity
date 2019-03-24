@@ -15,7 +15,7 @@ import { LS_IS_V1_MIGRATE } from '../../core/persistence/ls-keys.const';
 import { SnackService } from '../../core/snack/snack.service';
 import { PersistenceService } from '../../core/persistence/persistence.service';
 import { SyncService } from '../../imex/sync/sync.service';
-import { OldDataExport, OldGitSettings, OldJiraSettings, OldProject, OldTask } from './migrate.model';
+import { OldDataExport, OldGithubSettings, OldJiraSettings, OldProject, OldTask } from './migrate.model';
 import { ProjectService } from '../../features/project/project.service';
 import { JiraCfg } from '../../features/issue/jira/jira';
 import { DEFAULT_JIRA_CFG } from '../../features/issue/jira/jira.const';
@@ -24,15 +24,16 @@ import { EntityState } from '@ngrx/entity';
 import { DEFAULT_TASK, Task } from '../../features/tasks/task.model';
 import * as moment from 'moment-mini';
 import { JiraIssue } from '../../features/issue/jira/jira-issue/jira-issue.model';
-import { GitIssue } from '../../features/issue/git/git-issue/git-issue.model';
+import { GithubIssue } from '../../features/issue/github/github-issue/github-issue.model';
 import { IssueProviderKey } from '../../features/issue/issue';
-import { GitCfg } from '../../features/issue/git/git';
-import { DEFAULT_GIT_CFG } from '../../features/issue/git/git.const';
-import { GitApiService } from '../../features/issue/git/git-api.service';
+import { GithubCfg } from '../../features/issue/github/github';
+import { DEFAULT_GITHUB_CFG } from '../../features/issue/github/github.const';
+import { GithubApiService } from '../../features/issue/github/github-api.service';
 import { first } from 'rxjs/operators';
 import { DialogMigrateComponent } from './dialog-migrate/dialog-migrate.component';
 import { JiraIssueState } from '../../features/issue/jira/jira-issue/store/jira-issue.reducer';
-import { GitIssueState } from '../../features/issue/git/git-issue/store/git-issue.reducer';
+import { GithubIssueState } from '../../features/issue/github/github-issue/store/github-issue.reducer';
+import { GITHUB_TYPE } from '../../features/issue/issue.const';
 
 @Injectable({
   providedIn: 'root',
@@ -40,7 +41,7 @@ import { GitIssueState } from '../../features/issue/git/git-issue/store/git-issu
 export class MigrateService {
 
   private _issueTypeMap = {
-    'GITHUB': 'GIT',
+    'GITHUB': 'GITHUB',
     'JIRA': 'JIRA',
   };
 
@@ -50,7 +51,7 @@ export class MigrateService {
     private _persistenceService: PersistenceService,
     private _syncService: SyncService,
     private _projectService: ProjectService,
-    private _gitApiService: GitApiService,
+    private _gitApiService: GithubApiService,
   ) {
   }
 
@@ -139,8 +140,8 @@ export class MigrateService {
         JIRA: (op.data.jiraSettings && op.data.jiraSettings.isJiraEnabled)
           ? this._transformJiraCfg(op.data.jiraSettings)
           : null,
-        GIT: (op.data.git && op.data.git.repo)
-          ? this._transformGitCfg(op.data.git)
+        GITHUB: (op.data.git && op.data.git.repo)
+          ? this._transformGithubCfg(op.data.git)
           : null,
       }
     });
@@ -151,7 +152,7 @@ export class MigrateService {
     if (jiraIssueState) {
       await this._persistenceService.saveIssuesForProject(op.id, 'JIRA', jiraIssueState);
     }
-    let gitIssueState = this._getGitIssuesFromTasks(allTasks);
+    let gitIssueState = this._getGithubIssuesFromTasks(allTasks);
     let freshIssues;
 
     if (gitIssueState) {
@@ -164,17 +165,17 @@ export class MigrateService {
         } catch (e) {
           console.error('unable to refresh issue data', e);
         }
-        await this._persistenceService.saveIssuesForProject(op.id, 'GIT', gitIssueState);
+        await this._persistenceService.saveIssuesForProject(op.id, GITHUB_TYPE, gitIssueState);
       }
     }
 
     // TASKS
     const todayIds = op.data.tasks.map(t => t && t.id).filter(id => !!id);
     const backlogIds = op.data.backlogTasks.map(t => t && t.id).filter(id => !!id);
-    const doneBacklogIds = op.data.doneBacklogTasks.map(t => t && t.id).filter(id => !!id);
+    // const doneBacklogIds = op.data.doneBacklogTasks.map(t => t && t.id).filter(id => !!id);
 
     if (freshIssues) {
-      this._remapGitIssueIds(allTasks, freshIssues);
+      this._remapGithubIssueIds(allTasks, freshIssues);
     }
 
     const taskState = this._transformTasks(op.data.tasks.concat(op.data.backlogTasks));
@@ -189,7 +190,7 @@ export class MigrateService {
     await this._persistenceService.saveToTaskArchiveForProject(op.id, doneTaskState);
   }
 
-  private _remapGitIssueIds(tasks: OldTask[], freshIssues: GitIssue[]) {
+  private _remapGithubIssueIds(tasks: OldTask[], freshIssues: GithubIssue[]) {
     tasks.forEach((task) => {
       if (task && task.originalId && task.originalType === 'GITHUB') {
         task.originalId = freshIssues.find(issue => issue.number.toString() === task.originalId.toString()).id.toString();
@@ -197,7 +198,7 @@ export class MigrateService {
     });
   }
 
-  private async _getFreshIssueState(repo: string, issueNumbers: number[]): Promise<EntityState<GitIssue>> {
+  private async _getFreshIssueState(repo: string, issueNumbers: number[]): Promise<EntityState<GithubIssue>> {
     const refreshedIssues = await this._gitApiService.getCompleteIssueDataForRepo(repo, true).pipe(first()).toPromise();
     const freshMappedIssues = refreshedIssues.filter(issue => issueNumbers.includes(issue.number));
 
@@ -212,7 +213,7 @@ export class MigrateService {
     };
   }
 
-  private _getGitIssuesFromTasks(oldTasks: OldTask[]): GitIssueState | null {
+  private _getGithubIssuesFromTasks(oldTasks: OldTask[]): GithubIssueState | null {
     const flatTasks = oldTasks
       .filter(t => !!t)
       .reduce((acc, t) => acc.concat(t.subTasks, [t]), [])
@@ -221,7 +222,7 @@ export class MigrateService {
       .filter(t => {
         return t.originalId && t.originalType === 'GITHUB';
       })
-      .map(this._transformGitIssue);
+      .map(this._transformGithubIssue);
 
     if (!transformedIssues || !transformedIssues.length) {
       return null;
@@ -263,7 +264,7 @@ export class MigrateService {
   }
 
 
-  private _transformGitIssue(ot: OldTask): GitIssue {
+  private _transformGithubIssue(ot: OldTask): GithubIssue {
     return {
       // copied data
       id: +ot.originalId,
@@ -381,11 +382,11 @@ export class MigrateService {
     return moment.duration(momStr).asMilliseconds();
   }
 
-  private _transformGitCfg(oldCfg: OldGitSettings): GitCfg {
+  private _transformGithubCfg(oldCfg: OldGithubSettings): GithubCfg {
     return {
-      ...DEFAULT_GIT_CFG,
+      ...DEFAULT_GITHUB_CFG,
       repo: oldCfg.repo,
-      isSearchIssuesFromGit: oldCfg.isShowIssuesFromGit,
+      isSearchIssuesFromGithub: oldCfg.isShowIssuesFromGithub,
       isAutoPoll: oldCfg.isAutoImportToBacklog,
       isAutoAddToBacklog: oldCfg.isAutoImportToBacklog,
     };

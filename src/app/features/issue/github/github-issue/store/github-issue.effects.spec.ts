@@ -2,21 +2,21 @@
 // import { provideMockActions } from '@ngrx/effects/testing';
 // import { Observable } from 'rxjs';
 //
-// import { GitIssueEffects } from './git-issue.effects';
+// import { GithubIssueEffects } from './github-issue.effects';
 //
-// describe('GitIssueEffects', () => {
+// describe('GithubIssueEffects', () => {
 //   let actions$: Observable<any>;
-//   let effects: GitIssueEffects;
+//   let effects: GithubIssueEffects;
 //
 //   beforeEach(() => {
 //     TestBed.configureTestingModule({
 //       providers: [
-//         GitIssueEffects,
+//         GithubIssueEffects,
 //         provideMockActions(() => actions$)
 //       ]
 //     });
 //
-//     effects = TestBed.get(GitIssueEffects);
+//     effects = TestBed.get(GithubIssueEffects);
 //   });
 //
 //   it('should be created', () => {

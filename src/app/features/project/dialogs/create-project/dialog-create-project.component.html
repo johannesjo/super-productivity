@@ -29,19 +29,19 @@
       </div>
       <div class="item">
         <button mat-raised-button=""
-                (click)="openGitCfg()"
+                (click)="openGithubCfg()"
                 type="button">
           <mat-icon *ngIf="!gitCfg?.repo"
                     svgIcon="github"></mat-icon>
           <mat-icon *ngIf="gitCfg?.repo">checkmark</mat-icon>
-          <span style="padding-left: 8px;">Setup Git Integration</span>
+          <span style="padding-left: 8px;">Setup Github Integration</span>
         </button>
       </div>
       <!--<div class="item">-->
       <!--<button mat-raised-button="" color=primary-->
       <!--type="button">-->
-      <!--<mat-icon *ngIf="!projectData?.issueIntegrationCfgs?.GIT">card_giftcard</mat-icon>-->
-      <!--<mat-icon *ngIf="projectData?.issueIntegrationCfgs?.GIT">checkmark</mat-icon>-->
+      <!--<mat-icon *ngIf="!projectData?.issueIntegrationCfgs?.GITHUB">card_giftcard</mat-icon>-->
+      <!--<mat-icon *ngIf="projectData?.issueIntegrationCfgs?.GITHUB">checkmark</mat-icon>-->
       <!--Setup Github Issue Integration-->
       <!--</button>-->
       <!--</div>-->

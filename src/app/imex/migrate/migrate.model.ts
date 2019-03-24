@@ -42,8 +42,8 @@ export interface OldTask {
 }
 
 
-export interface OldGitSettings {
-  isShowIssuesFromGit: boolean;
+export interface OldGithubSettings {
+  isShowIssuesFromGithub: boolean;
   isAutoImportToBacklog: boolean;
   repo: string;
   projectDir: string;

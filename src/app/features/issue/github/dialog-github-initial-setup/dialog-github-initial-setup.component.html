@@ -1,12 +1,12 @@
 <h2 mat-dialog-title>
   <mat-icon svgIcon="github"></mat-icon>
-  Setup Git for Project
+  Setup Github for Project
 </h2>
 
 <form [formGroup]="formGroup"
-      (submit)="saveGitCfg(gitCfg)">
+      (submit)="saveGithubCfg(githubCfg)">
   <mat-dialog-content>
-    <formly-form [model]="gitCfg"
+    <formly-form [model]="githubCfg"
                  [fields]="formConfig"
                  [form]="formGroup">
     </formly-form>

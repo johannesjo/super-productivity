@@ -1,7 +1,7 @@
-<ng-container *ngIf="task.issueType==='JIRA'">
+<ng-container *ngIf="task.issueType===JIRA_TYPE">
   <jira-issue-header [task]="task"></jira-issue-header>
 </ng-container>
 
-<ng-container *ngIf="task.issueType==='GIT'">
-  <git-issue-header [task]="task"></git-issue-header>
+<ng-container *ngIf="task.issueType===GITHUB_TYPE">
+  <github-issue-header [task]="task"></github-issue-header>
 </ng-container>

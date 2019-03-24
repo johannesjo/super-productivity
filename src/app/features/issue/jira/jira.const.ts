@@ -1,7 +1,7 @@
 // TODO use as a checklist
 import { JiraCfg } from './jira';
 import { FormlyFieldConfig } from '@ngx-formly/core';
-import { GIT_INITIAL_POLL_DELAY } from '../git/git.const';
+import { GITHUB_INITIAL_POLL_DELAY } from '../github/github.const';
 
 export const JIRA_DATETIME_FORMAT = 'YYYY-MM-DDTHH:mm:ss.SSZZ';
 
@@ -44,7 +44,7 @@ export const DEFAULT_JIRA_CFG: JiraCfg = {
 // export const JIRA_INITIAL_POLL_DELAY = 5000;
 
 export const JIRA_POLL_INTERVAL = 5 * 60 * 1000;
-export const JIRA_INITIAL_POLL_DELAY = GIT_INITIAL_POLL_DELAY + 5000;
+export const JIRA_INITIAL_POLL_DELAY = GITHUB_INITIAL_POLL_DELAY + 5000;
 export const JIRA_INITIAL_POLL_BACKLOG_DELAY = JIRA_INITIAL_POLL_DELAY + 10 * 1000;
 
 // it's weird!!

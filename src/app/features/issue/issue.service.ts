@@ -3,13 +3,13 @@ import { IssueData, IssueProviderKey, SearchResultItem } from './issue';
 import { JiraIssue } from './jira/jira-issue/jira-issue.model';
 import { Attachment } from '../attachment/attachment.model';
 import { JiraApiService } from './jira/jira-api.service';
-import { GitApiService } from './git/git-api.service';
+import { GithubApiService } from './github/github-api.service';
 import { combineLatest, from, Observable, zip } from 'rxjs';
 import { ProjectService } from '../project/project.service';
 import { catchError, map, switchMap } from 'rxjs/operators';
 import { JiraIssueService } from './jira/jira-issue/jira-issue.service';
-import { GitIssueService } from './git/git-issue/git-issue.service';
-import { GIT_TYPE, JIRA_TYPE } from './issue.const';
+import { GithubIssueService } from './github/github-issue/github-issue.service';
+import { GITHUB_TYPE, JIRA_TYPE } from './issue.const';
 
 @Injectable({
   providedIn: 'root',
@@ -19,15 +19,15 @@ export class IssueService {
     map(jiraCfg => jiraCfg && jiraCfg.isEnabled)
   );
 
-  public isGitSearchEnabled$: Observable<boolean> = this._projectService.currentGitCfg$.pipe(
-    map(gitCfg => gitCfg && gitCfg.isSearchIssuesFromGit)
+  public isGithubSearchEnabled$: Observable<boolean> = this._projectService.currentGithubCfg$.pipe(
+    map(gitCfg => gitCfg && gitCfg.isSearchIssuesFromGithub)
   );
 
   constructor(
     private _jiraApiService: JiraApiService,
-    private _gitApiService: GitApiService,
+    private _gitApiService: GithubApiService,
     private _jiraIssueService: JiraIssueService,
-    private _gitIssueService: GitIssueService,
+    private _gitIssueService: GithubIssueService,
     private _projectService: ProjectService,
   ) {
   }
@@ -44,9 +44,9 @@ export class IssueService {
   public searchIssues(searchTerm: string): Observable<SearchResultItem[]> {
     return combineLatest(
       this.isJiraSearchEnabled$,
-      this.isGitSearchEnabled$,
+      this.isGithubSearchEnabled$,
     ).pipe(
-      switchMap(([isSearchJira, isSearchGit]) => {
+      switchMap(([isSearchJira, isSearchGithub]) => {
         const obs = [];
         obs.push(from([[]]));
 
@@ -61,7 +61,7 @@ export class IssueService {
           );
         }
 
-        if (isSearchGit) {
+        if (isSearchGithub) {
           obs.push(this._gitApiService.searchIssueForRepo(searchTerm));
         }
 
@@ -82,7 +82,7 @@ export class IssueService {
         this._jiraIssueService.updateIssueFromApi(issueId, issueData, isNotifySuccess, isNotifyNoUpdateRequired);
         break;
       }
-      case GIT_TYPE: {
+      case GITHUB_TYPE: {
         this._gitIssueService.updateIssueFromApi(issueId);
       }
     }

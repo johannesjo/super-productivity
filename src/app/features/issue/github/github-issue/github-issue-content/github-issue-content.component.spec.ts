@@ -1,20 +1,20 @@
 // import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 //
-// import { GitIssueContentComponent } from './git-issue-content.component';
+// import { GithubIssueContentComponent } from './github-issue-content.component';
 //
-// describe('GitIssueContentComponent', () => {
-//   let component: GitIssueContentComponent;
-//   let fixture: ComponentFixture<GitIssueContentComponent>;
+// describe('GithubIssueContentComponent', () => {
+//   let component: GithubIssueContentComponent;
+//   let fixture: ComponentFixture<GithubIssueContentComponent>;
 //
 //   beforeEach(async(() => {
 //     TestBed.configureTestingModule({
-//       declarations: [GitIssueContentComponent]
+//       declarations: [GithubIssueContentComponent]
 //     })
 //       .compileComponents();
 //   }));
 //
 //   beforeEach(() => {
-//     fixture = TestBed.createComponent(GitIssueContentComponent);
+//     fixture = TestBed.createComponent(GithubIssueContentComponent);
 //     component = fixture.componentInstance;
 //     fixture.detectChanges();
 //   });

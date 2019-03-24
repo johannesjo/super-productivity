@@ -20,7 +20,7 @@ import {
   selectCurrentProject,
   selectCurrentProjectId,
   selectProjectById,
-  selectProjectGitCfg,
+  selectProjectGithubCfg,
   selectProjectJiraCfg
 } from './store/project.reducer';
 import { IssueIntegrationCfg, IssueProviderKey } from '../issue/issue';
@@ -28,7 +28,7 @@ import { JiraCfg } from '../issue/jira/jira';
 import { DEFAULT_PROJECT } from './project.const';
 import { Dictionary } from '@ngrx/entity';
 import { getWorklogStr } from '../../util/get-work-log-str';
-import { GitCfg } from '../issue/git/git';
+import { GithubCfg } from '../issue/github/github';
 import { DEFAULT_ISSUE_PROVIDER_CFGS } from '../issue/issue.const';
 import { Actions, ofType } from '@ngrx/effects';
 import { take } from 'rxjs/operators';
@@ -47,8 +47,8 @@ export class ProjectService {
     select(selectProjectJiraCfg),
     // shareReplay(),
   );
-  currentGitCfg$: Observable<GitCfg> = this._store$.pipe(
-    select(selectProjectGitCfg),
+  currentGithubCfg$: Observable<GithubCfg> = this._store$.pipe(
+    select(selectProjectGithubCfg),
     // shareReplay(),
   );
   advancedCfg$: Observable<ProjectAdvancedCfg> = this._store$.pipe(

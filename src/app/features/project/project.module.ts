@@ -8,7 +8,7 @@ import { ProjectService } from './project.service';
 import { DialogCreateProjectComponent } from './dialogs/create-project/dialog-create-project.component';
 import { UiModule } from '../../ui/ui.module';
 import { JiraModule } from '../issue/jira/jira.module';
-import { GitModule } from '../issue/git/git.module';
+import { GithubModule } from '../issue/github/github.module';
 
 @NgModule({
   imports: [
@@ -17,7 +17,7 @@ import { GitModule } from '../issue/git/git.module';
     EffectsModule.forFeature([ProjectEffects]),
     UiModule,
     JiraModule,
-    GitModule,
+    GithubModule,
   ],
   declarations: [
     DialogCreateProjectComponent,

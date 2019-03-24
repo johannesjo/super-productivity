@@ -1,8 +1,8 @@
-import { GitIssue } from './git-issue.model';
-import { GitOriginalIssue } from '../git-api-responses';
+import { GithubIssue } from './github-issue.model';
+import { GithubOriginalIssue } from '../github-api-responses';
 import { IssueProviderKey, SearchResultItem } from '../../issue';
 
-export const mapGitIssue = (issue: GitOriginalIssue): GitIssue => {
+export const mapGithubIssue = (issue: GithubOriginalIssue): GithubIssue => {
   return {
     id: issue.number,
     _id: issue.id,
@@ -38,10 +38,10 @@ export const mapGitIssue = (issue: GitOriginalIssue): GitIssue => {
   };
 };
 
-export const mapGitIssueToSearchResult = (issue: GitIssue): SearchResultItem => {
+export const mapGithubIssueToSearchResult = (issue: GithubIssue): SearchResultItem => {
   return {
     title: '#' + issue.number + ' ' + issue.title,
-    issueType: 'GIT' as IssueProviderKey,
+    issueType: 'GITHUB' as IssueProviderKey,
     issueData: issue,
   };
 };

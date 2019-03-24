@@ -1,12 +1,12 @@
 // import { TestBed } from '@angular/core/testing';
 //
-// import { GitApiService } from './git-api.service';
+// import { GithubApiService } from './github-api.service';
 //
-// describe('GitApiService', () => {
+// describe('GithubApiService', () => {
 //   beforeEach(() => TestBed.configureTestingModule({}));
 //
 //   it('should be created', () => {
-//     const service: GitApiService = TestBed.get(GitApiService);
+//     const service: GithubApiService = TestBed.get(GithubApiService);
 //     expect(service).toBeTruthy();
 //   });
 // });

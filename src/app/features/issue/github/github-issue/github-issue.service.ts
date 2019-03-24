@@ -1,29 +1,29 @@
 import { Injectable } from '@angular/core';
-import { GitIssue } from './git-issue.model';
+import { GithubIssue } from './github-issue.model';
 import { select, Store } from '@ngrx/store';
-import { GitIssueActionTypes } from './store/git-issue.actions';
+import { GithubIssueActionTypes } from './store/github-issue.actions';
 import { PersistenceService } from '../../../../core/persistence/persistence.service';
-import { GitIssueState, selectGitIssueById } from './store/git-issue.reducer';
+import { GithubIssueState, selectGithubIssueById } from './store/github-issue.reducer';
 import { take } from 'rxjs/operators';
-import { GitApiService } from '../git-api.service';
+import { GithubApiService } from '../github-api.service';
 import { SnackService } from '../../../../core/snack/snack.service';
-import { GitCfg } from '../git';
+import { GithubCfg } from '../github';
 import { Observable } from 'rxjs';
-import { GIT_TYPE } from '../../issue.const';
+import { GITHUB_TYPE } from '../../issue.const';
 import { truncate } from '../../../../util/truncate';
 
 
 @Injectable({
   providedIn: 'root',
 })
-export class GitIssueService {
-  // gitIssues$: Observable<GitIssue[]> = this._store.pipe(select(selectAllGitIssues));
-  // gitIssuesEntities$: Observable<Dictionary<GitIssue>> = this._store.pipe(select(selectGitIssueEntities));
+export class GithubIssueService {
+  // githubIssues$: Observable<GithubIssue[]> = this._store.pipe(select(selectAllGithubIssues));
+  // githubIssuesEntities$: Observable<Dictionary<GithubIssue>> = this._store.pipe(select(selectGithubIssueEntities));
 
   constructor(
     private readonly _store: Store<any>,
     private readonly _persistenceService: PersistenceService,
-    private readonly _gitApiService: GitApiService,
+    private readonly _githubApiService: GithubApiService,
     private readonly _snackService: SnackService,
   ) {
   }
@@ -31,15 +31,15 @@ export class GitIssueService {
   // META
   // ----
   async loadStateForProject(projectId: string) {
-    const lsGitIssueState = await this._persistenceService.loadIssuesForProject(projectId, GIT_TYPE) as GitIssueState;
-    if (lsGitIssueState) {
-      this.loadState(lsGitIssueState);
+    const lsGithubIssueState = await this._persistenceService.loadIssuesForProject(projectId, GITHUB_TYPE) as GithubIssueState;
+    if (lsGithubIssueState) {
+      this.loadState(lsGithubIssueState);
     }
   }
 
-  loadState(state: GitIssueState) {
+  loadState(state: GithubIssueState) {
     this._store.dispatch({
-      type: GitIssueActionTypes.LoadState,
+      type: GithubIssueActionTypes.LoadState,
       payload: {
         state: state,
       }
@@ -48,38 +48,38 @@ export class GitIssueService {
 
   // CRUD
   // ----
-  add(gitIssue: GitIssue) {
+  add(githubIssue: GithubIssue) {
     this._store.dispatch({
-      type: GitIssueActionTypes.AddGitIssue,
+      type: GithubIssueActionTypes.AddGithubIssue,
       payload: {
-        gitIssue: gitIssue
+        githubIssue: githubIssue
       }
     });
   }
 
-  upsert(gitIssue: GitIssue) {
+  upsert(githubIssue: GithubIssue) {
     this._store.dispatch({
-      type: GitIssueActionTypes.UpsertGitIssue,
+      type: GithubIssueActionTypes.UpsertGithubIssue,
       payload: {
-        gitIssue: gitIssue
+        githubIssue: githubIssue
       }
     });
   }
 
-  remove(gitIssueId: number) {
+  remove(githubIssueId: number) {
     this._store.dispatch({
-      type: GitIssueActionTypes.DeleteGitIssue,
-      payload: {id: gitIssueId}
+      type: GithubIssueActionTypes.DeleteGithubIssue,
+      payload: {id: githubIssueId}
     });
   }
 
 
-  update(gitIssueId: number, changedFields: Partial<GitIssue>) {
+  update(githubIssueId: number, changedFields: Partial<GithubIssue>) {
     this._store.dispatch({
-      type: GitIssueActionTypes.UpdateGitIssue,
+      type: GithubIssueActionTypes.UpdateGithubIssue,
       payload: {
-        gitIssue: {
-          id: gitIssueId,
+        githubIssue: {
+          id: githubIssueId,
           changes: changedFields
         }
       }
@@ -88,19 +88,19 @@ export class GitIssueService {
 
   addOpenIssuesToBacklog() {
     this._store.dispatch({
-      type: GitIssueActionTypes.AddOpenGitIssuesToBacklog,
+      type: GithubIssueActionTypes.AddOpenGithubIssuesToBacklog,
     });
   }
 
 
   // NON ACTION CALLS
   // ----------------
-  getById(id: number): Observable<GitIssue> {
-    return this._store.pipe(select(selectGitIssueById, {id}), take(1));
+  getById(id: number): Observable<GithubIssue> {
+    return this._store.pipe(select(selectGithubIssueById, {id}), take(1));
   }
 
   loadMissingIssueData(issueId) {
-    return this._gitApiService.getById(issueId)
+    return this._githubApiService.getById(issueId)
       .pipe(take(1))
       .subscribe(issueData => {
         this.add(issueData);
@@ -111,24 +111,24 @@ export class GitIssueService {
 
   updateIssueFromApi(issueId_: number | string) {
     const issueNumber = issueId_ as number;
-    this._gitApiService.getIssueWithCommentsByIssueNumber(issueNumber).pipe(
+    this._githubApiService.getIssueWithCommentsByIssueNumber(issueNumber).pipe(
       take(1)
     ).subscribe((issue) => {
       this.upsert(issue);
       this._snackService.open({
         ico: 'cloud_download',
-        msg: `Git: Updated data for ${issue.number} "${issue.title}"`
+        msg: `Github: Updated data for ${issue.number} "${issue.title}"`
       });
     });
   }
 
-  updateIssuesFromApi(oldIssues: GitIssue[], cfg: GitCfg, isNotify = true) {
-    this._gitApiService.getCompleteIssueDataForRepo(cfg.repo)
+  updateIssuesFromApi(oldIssues: GithubIssue[], cfg: GithubCfg, isNotify = true) {
+    this._githubApiService.getCompleteIssueDataForRepo(cfg.repo)
       .pipe(
         take(1)
       ).subscribe(newIssues => {
-      oldIssues.forEach((oldIssue: GitIssue) => {
-        const matchingNewIssue: GitIssue = newIssues.find(newIssue => newIssue.id === oldIssue.id);
+      oldIssues.forEach((oldIssue: GithubIssue) => {
+        const matchingNewIssue: GithubIssue = newIssues.find(newIssue => newIssue.id === oldIssue.id);
         if (matchingNewIssue) {
           const isNewComment = matchingNewIssue.comments.length !== (oldIssue.comments && oldIssue.comments.length);
           const isIssueChanged = (matchingNewIssue.updated_at !== oldIssue.updated_at);
@@ -136,12 +136,12 @@ export class GitIssueService {
           if (isNewComment && isNotify) {
             this._snackService.open({
               ico: 'cloud_download',
-              msg: `Git: New comment for ${matchingNewIssue.number} "${matchingNewIssue.title}"`
+              msg: `Github: New comment for ${matchingNewIssue.number} "${matchingNewIssue.title}"`
             });
           } else if (isIssueChanged && isNotify) {
             this._snackService.open({
               ico: 'cloud_download',
-              msg: `Git: Update for ${matchingNewIssue.number} "${matchingNewIssue.title}"`
+              msg: `Github: Update for ${matchingNewIssue.number} "${matchingNewIssue.title}"`
             });
           }
 
@@ -154,7 +154,7 @@ export class GitIssueService {
           this._snackService.open({
             type: 'CUSTOM',
             svgIco: 'github',
-            msg: `Git: Issue ${oldIssue.number} "${truncate(oldIssue.title)}" seems to be deleted or closed on git`,
+            msg: `Github: Issue ${oldIssue.number} "${truncate(oldIssue.title)}" seems to be deleted or closed on git`,
             actionStr: 'Show me',
             actionFn: () => {
               this._fineWithDeletionIssueIds.push(oldIssue.id);

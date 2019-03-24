@@ -1,4 +1,4 @@
-// import { initialState, reducer } from './git-issue.reducer';
+// import { initialState, reducer } from './github-issue.reducer';
 //
 // describe('Issue Reducer', () => {
 //   describe('unknown action', () => {

@@ -1,61 +1,61 @@
 import { Injectable } from '@angular/core';
 import { ProjectService } from '../../project/project.service';
-import { GitCfg } from './git';
+import { GithubCfg } from './github';
 import { SnackService } from '../../../core/snack/snack.service';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { GIT_API_BASE_URL, GIT_MAX_CACHE_AGE } from './git.const';
+import { GITHUB_API_BASE_URL, GITHUB_MAX_CACHE_AGE } from './github.const';
 import { combineLatest, from, Observable, ObservableInput, Subject, throwError } from 'rxjs';
-import { GitOriginalComment, GitOriginalIssue } from './git-api-responses';
+import { GithubOriginalComment, GithubOriginalIssue } from './github-api-responses';
 import { catchError, map, share, switchMap, take, tap } from 'rxjs/operators';
-import { mapGitIssue, mapGitIssueToSearchResult } from './git-issue/git-issue-map.util';
-import { GitComment, GitIssue } from './git-issue/git-issue.model';
+import { mapGithubIssue, mapGithubIssueToSearchResult } from './github-issue/github-issue-map.util';
+import { GithubComment, GithubIssue } from './github-issue/github-issue.model';
 import { SearchResultItem } from '../issue';
 import { loadFromLs, saveToLs } from '../../../core/persistence/local-storage';
-import { LS_GIT_ISSUE_CACHE_PREFIX } from '../../../core/persistence/ls-keys.const';
+import { LS_GITHUB_ISSUE_CACHE_PREFIX } from '../../../core/persistence/ls-keys.const';
 import { HANDLED_ERROR } from '../../../app.constants';
 
-const BASE = GIT_API_BASE_URL;
+const BASE = GITHUB_API_BASE_URL;
 
 @Injectable({
   providedIn: 'root',
 })
-export class GitApiService {
+export class GithubApiService {
   public onCacheRefresh$ = new Subject<boolean>();
 
-  private _cfg: GitCfg;
+  private _cfg: GithubCfg;
 
   constructor(
     private _projectService: ProjectService,
     private _snackService: SnackService,
     private _http: HttpClient,
   ) {
-    this._projectService.currentGitCfg$.subscribe((cfg: GitCfg) => {
+    this._projectService.currentGithubCfg$.subscribe((cfg: GithubCfg) => {
       this._cfg = cfg;
     });
   }
 
-  getById(id: number): Observable<GitIssue> {
+  getById(id: number): Observable<GithubIssue> {
     this._checkSettings();
 
     return this.getCompleteIssueDataForRepo()
       .pipe(switchMap(issues => issues.filter(issue => issue.id === id)));
   }
 
-  getCompleteIssueDataForRepo(repo = this._cfg.repo, isSkipCheck = false, isForceRefresh = false): Observable<GitIssue[]> {
+  getCompleteIssueDataForRepo(repo = this._cfg.repo, isSkipCheck = false, isForceRefresh = false): Observable<GithubIssue[]> {
     if (!isSkipCheck) {
       this._checkSettings();
     }
 
-    const cached = loadFromLs(LS_GIT_ISSUE_CACHE_PREFIX + this._projectService.currentId);
-    const cachedIssues: GitIssue[] = cached && cached.issues;
+    const cached = loadFromLs(LS_GITHUB_ISSUE_CACHE_PREFIX + this._projectService.currentId);
+    const cachedIssues: GithubIssue[] = cached && cached.issues;
     const lastUpdate: number = cached && cached.lastUpdate;
 
     // console.log('getCompleteIssueDataForRepo isUseCached',
-    //   cachedIssues && Array.isArray(cachedIssues) && (lastUpdate + GIT_MAX_CACHE_AGE > Date.now()));
+    //   cachedIssues && Array.isArray(cachedIssues) && (lastUpdate + GITHUB_MAX_CACHE_AGE > Date.now()));
 
     if (
       !isForceRefresh &&
-      cachedIssues && Array.isArray(cachedIssues) && (lastUpdate + GIT_MAX_CACHE_AGE > Date.now())
+      cachedIssues && Array.isArray(cachedIssues) && (lastUpdate + GITHUB_MAX_CACHE_AGE > Date.now())
     ) {
       return from([cachedIssues]);
     } else {
@@ -87,9 +87,9 @@ export class GitApiService {
         catchError(this._handleRequestError.bind(this)),
         // a single request should suffice
         share(),
-        map((issues: GitIssue[]) =>
+        map((issues: GithubIssue[]) =>
           issues.filter(filterFn)
-            .map(mapGitIssueToSearchResult)
+            .map(mapGithubIssueToSearchResult)
         ),
       );
   }
@@ -98,42 +98,42 @@ export class GitApiService {
     this.getCompleteIssueDataForRepo().subscribe();
   }
 
-  getIssueWithCommentsByIssueNumber(issueNumber: number): Observable<GitIssue> {
+  getIssueWithCommentsByIssueNumber(issueNumber: number): Observable<GithubIssue> {
     this._checkSettings();
     return combineLatest(
       this._http.get(`${BASE}repos/${this._cfg.repo}/issues/${issueNumber}`),
       this._http.get(`${BASE}repos/${this._cfg.repo}/issues/${issueNumber}/comments`),
     ).pipe(
       catchError(this._handleRequestError.bind(this)),
-      map(([issue, comments]: [GitOriginalIssue, GitOriginalComment[]]) => {
+      map(([issue, comments]: [GithubOriginalIssue, GithubOriginalComment[]]) => {
         return {
-          ...mapGitIssue(issue),
+          ...mapGithubIssue(issue),
           comments: comments,
         };
       }),
     );
   }
 
-  private _updateIssueCache(issues: GitIssue[]) {
-    saveToLs(LS_GIT_ISSUE_CACHE_PREFIX + this._projectService.currentId, {
+  private _updateIssueCache(issues: GithubIssue[]) {
+    saveToLs(LS_GITHUB_ISSUE_CACHE_PREFIX + this._projectService.currentId, {
       issues,
       lastUpdate: Date.now(),
     });
     this.onCacheRefresh$.next(true);
   }
 
-  private _getAllIssuesForRepo(repo = this._cfg.repo, isSkipCheck = false): Observable<GitIssue[]> {
+  private _getAllIssuesForRepo(repo = this._cfg.repo, isSkipCheck = false): Observable<GithubIssue[]> {
     if (!isSkipCheck) {
       this._checkSettings();
     }
     return this._http.get(`${BASE}repos/${repo}/issues?per_page=100`)
       .pipe(
         catchError(this._handleRequestError.bind(this)),
-        map((issues: GitOriginalIssue[]) => issues ? issues.map(mapGitIssue) : []),
+        map((issues: GithubOriginalIssue[]) => issues ? issues.map(mapGithubIssue) : []),
       );
   }
 
-  private _getAllCommentsForRepo(repo = this._cfg.repo, isSkipCheck = false): Observable<GitComment[]> {
+  private _getAllCommentsForRepo(repo = this._cfg.repo, isSkipCheck = false): Observable<GithubComment[]> {
     if (!isSkipCheck) {
       this._checkSettings();
     }
@@ -151,20 +151,20 @@ export class GitApiService {
       );
   }
 
-  private _getCommentsPageForRepo(page = 1, repo = this._cfg.repo, isSkipCheck = false): Observable<GitComment[]> {
+  private _getCommentsPageForRepo(page = 1, repo = this._cfg.repo, isSkipCheck = false): Observable<GithubComment[]> {
     if (!isSkipCheck) {
       this._checkSettings();
     }
     return this._http.get(`${BASE}repos/${repo}/issues/comments?sort=created&direction=desc&per_page=100&page=${page}`)
       .pipe(
         catchError(this._handleRequestError.bind(this)),
-        map(res => res as GitComment[])
+        map(res => res as GithubComment[])
       );
   }
 
   private _checkSettings() {
     if (!this._isValidSettings()) {
-      this._snackService.open({type: 'ERROR', msg: 'Git is not properly configured'});
+      this._snackService.open({type: 'ERROR', msg: 'Github is not properly configured'});
       throw new Error(`${HANDLED_ERROR} Not enough settings`);
     }
   }
@@ -175,23 +175,23 @@ export class GitApiService {
       // A client-side or network error occurred. Handle it accordingly.
       this._snackService.open({
         type: 'ERROR',
-        msg: 'GitHub: Request failed because of a client side network error'
+        msg: 'Github: Request failed because of a client side network error'
       });
     } else {
       // The backend returned an unsuccessful response code.
       this._snackService.open({
         type: 'ERROR',
-        msg: `GitHub: API returned ${error.status}. ${error.error && error.error.message}`
+        msg: `Github: API returned ${error.status}. ${error.error && error.error.message}`
       });
     }
     if (error && error.message) {
-      return throwError({handledError: 'GitHub: ' + error.message});
+      return throwError({handledError: 'Github: ' + error.message});
     }
 
-    return throwError({handledError: 'GitHub: Api request failed.'});
+    return throwError({handledError: 'Github: Api request failed.'});
   }
 
-  private _mergeIssuesAndComments(issues: GitIssue[], comments: GitComment[]): GitIssue[] {
+  private _mergeIssuesAndComments(issues: GithubIssue[], comments: GithubComment[]): GithubIssue[] {
     return issues.map(issue => {
       return {
         ...issue,
@@ -214,9 +214,9 @@ export class GitApiService {
 // return this._http.get(`${BASE}search/issues?q=${encodeURI(searchText)}`)
 //   .pipe(
 //     catchError(this._handleRequestError.bind(this)),
-//     map((res: GitIssueSearchResult) => {
+//     map((res: GithubIssueSearchResult) => {
 //       if (res && res.items) {
-//         return res.items.map(mapGitIssue).map(mapGitIssueToSearchResult);
+//         return res.items.map(mapGithubIssue).map(mapGithubIssueToSearchResult);
 //       } else {
 //         return [];
 //       }

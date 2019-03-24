@@ -1,6 +1,6 @@
-export type GitOriginalState = 'open' | 'closed' | 'all';
+export type GithubOriginalState = 'open' | 'closed' | 'all';
 
-export type GitOriginalUser = Readonly<{
+export type GithubOriginalUser = Readonly<{
   login: string;
   id: number;
   node_id: string;
@@ -20,7 +20,7 @@ export type GitOriginalUser = Readonly<{
   type: 'User';
   site_admin: boolean
 }>;
-export type GitOriginalLabel = Readonly<{
+export type GithubOriginalLabel = Readonly<{
   id: number;
   node_id: string;
   url: string;
@@ -30,17 +30,17 @@ export type GitOriginalLabel = Readonly<{
   default: boolean
 }>;
 
-export type GitOriginalMileStone = Readonly<{
+export type GithubOriginalMileStone = Readonly<{
   url: string;
   html_url: string;
   labels_url: string;
   id: number;
   node_id: string;
   number: number;
-  state: GitOriginalState;
+  state: GithubOriginalState;
   title: string;
   description: string;
-  creator: GitOriginalUser;
+  creator: GithubOriginalUser;
   open_issues: number;
   closed_issues: number;
   created_at: string;
@@ -49,25 +49,25 @@ export type GitOriginalMileStone = Readonly<{
   due_on: string;
 }>;
 
-export type GitOriginalPullRequest = Readonly<{
+export type GithubOriginalPullRequest = Readonly<{
   url: string;
   html_url: string;
   diff_url: string;
   patch_url: string;
 }>;
 
-export type GitOriginalPermissions = Readonly<{
+export type GithubOriginalPermissions = Readonly<{
   admin: boolean;
   push: boolean;
   pull: boolean
 }>;
 
-export type GitOriginalRepository = Readonly<{
+export type GithubOriginalRepository = Readonly<{
   id: number;
   node_id: string;
   name: string;
   full_name: string;
-  owner: GitOriginalUser;
+  owner: GithubOriginalUser;
   private: boolean;
   html_url: string;
   description: string;
@@ -132,7 +132,7 @@ export type GitOriginalRepository = Readonly<{
   pushed_at: string;
   created_at: string;
   updated_at: string;
-  permissions: GitOriginalPermissions;
+  permissions: GithubOriginalPermissions;
   allow_rebase_merge: boolean;
   allow_squash_merge: boolean;
   allow_merge_commit: boolean;
@@ -140,7 +140,7 @@ export type GitOriginalRepository = Readonly<{
   network_count: number;
 }>;
 
-export type GitOriginalIssue = Readonly<{
+export type GithubOriginalIssue = Readonly<{
   id: number;
   node_id: string;
   url: string;
@@ -150,25 +150,25 @@ export type GitOriginalIssue = Readonly<{
   events_url: string;
   html_url: string;
   number: number;
-  state: GitOriginalState;
+  state: GithubOriginalState;
   title: string;
   body: string;
-  user: GitOriginalUser;
-  labels: GitOriginalLabel[];
-  assignee: GitOriginalUser;
-  assignees: GitOriginalUser[];
-  milestone: GitOriginalMileStone;
+  user: GithubOriginalUser;
+  labels: GithubOriginalLabel[];
+  assignee: GithubOriginalUser;
+  assignees: GithubOriginalUser[];
+  milestone: GithubOriginalMileStone;
   locked: boolean;
   active_lock_reason: string;
   comments: number;
-  pull_request: GitOriginalPullRequest;
+  pull_request: GithubOriginalPullRequest;
   closed_at: string;
   created_at: string;
   updated_at: string;
-  repository: GitOriginalRepository;
+  repository: GithubOriginalRepository;
 }>;
 
-export type GitOriginalComment = Readonly<{
+export type GithubOriginalComment = Readonly<{
   author_association: string;
   body: string;
   created_at: string;
@@ -178,12 +178,12 @@ export type GitOriginalComment = Readonly<{
   node_id: string;
   updated_at: string;
   url: string;
-  user: GitOriginalUser;
+  user: GithubOriginalUser;
 }>;
 
 
-export type GitIssueSearchResult = Readonly<{
+export type GithubIssueSearchResult = Readonly<{
   total_count: number;
   incomplete_results: boolean;
-  items: GitOriginalIssue[];
+  items: GithubOriginalIssue[];
 }>;

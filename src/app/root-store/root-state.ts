@@ -6,7 +6,7 @@
 // import { NOTE_FEATURE_NAME, NoteState } from '../note/store/note.reducer';
 // import { CONFIG_FEATURE_NAME } from '../core/config/store/config.reducer';
 // import { ATTACHMENT_FEATURE_NAME, AttachmentState } from '../attachment/store/attachment.reducer';
-// import { GIT_ISSUE_FEATURE_NAME, GitIssueState } from '../issue/git/git-issue/store/git-issue.reducer';
+// import { GITHUB_ISSUE_FEATURE_NAME, GithubIssueState } from '../issue/git/github-issue/store/github-issue.reducer';
 // import { GlobalConfig } from '../core/config/config.model';
 // import { SNACK_FEATURE_NAME, SnackState } from '../core/snack/store/snack.reducer';
 
@@ -20,6 +20,6 @@
 // [LAYOUT_FEATURE_NAME]: LayoutState;
 // [CONFIG_FEATURE_NAME]: GlobalConfig;
 // [ATTACHMENT_FEATURE_NAME]: AttachmentState;
-// [GIT_ISSUE_FEATURE_NAME]: GitIssueState;
+// [GITHUB_ISSUE_FEATURE_NAME]: GithubIssueState;
 // [SNACK_FEATURE_NAME]: SnackState;
 // }

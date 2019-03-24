@@ -1,29 +1,29 @@
 import { ConfigFormConfig } from '../config/config.model';
 import { DEFAULT_JIRA_CFG, JIRA_ADVANCED_FORM_CFG, JIRA_CREDENTIALS_FORM_CFG } from './jira/jira.const';
 import { IssueProviderKey } from './issue';
-import { DEFAULT_GIT_CFG, GIT_CONFIG_FORM } from './git/git.const';
+import { DEFAULT_GITHUB_CFG, GITHUB_CONFIG_FORM } from './github/github.const';
 
-export const GIT_TYPE: IssueProviderKey = 'GIT';
+export const GITHUB_TYPE: IssueProviderKey = 'GIT';
 export const JIRA_TYPE: IssueProviderKey = 'JIRA';
 
-export const issueProviderKeys: IssueProviderKey[] = [JIRA_TYPE, GIT_TYPE];
+export const issueProviderKeys: IssueProviderKey[] = [JIRA_TYPE, GITHUB_TYPE];
 
 export const issueProviderIconMap = {
   [JIRA_TYPE]: 'jira',
-  [GIT_TYPE]: 'github'
+  [GITHUB_TYPE]: 'github'
 };
 
 export const DEFAULT_ISSUE_PROVIDER_CFGS = {
   [JIRA_TYPE]: DEFAULT_JIRA_CFG,
-  [GIT_TYPE]: DEFAULT_GIT_CFG,
+  [GITHUB_TYPE]: DEFAULT_GITHUB_CFG,
 };
 
 export const ISSUE_PROVIDER_FORM_CFGS: ConfigFormConfig = [
-  // GIT
+  // GITHUB
   {
-    title: 'GitHub',
-    key: GIT_TYPE,
-    items: GIT_CONFIG_FORM,
+    title: 'Github',
+    key: GITHUB_TYPE,
+    items: GITHUB_CONFIG_FORM,
     /* tslint:disable */
     help: `<p>Here you can configure SuperProductivity to list open GithHub issues for a specific repository in the task creation panel in the daily planning view. They will be listed as suggestions and will provide a link to the issue as well as more information about it.</p>
   <p>In addition you can automatically add and sync all open issues to your task backlog.</p>`,

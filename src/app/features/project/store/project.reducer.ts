@@ -33,7 +33,7 @@ export const selectCurrentProject = createSelector(selectProjectFeatureState,
 );
 export const selectProjectIssueCfgs = createSelector(selectCurrentProject, (project) => project.issueIntegrationCfgs);
 export const selectProjectJiraCfg = createSelector(selectProjectIssueCfgs, (issueProviderCfgs) => issueProviderCfgs.JIRA);
-export const selectProjectGitCfg = createSelector(selectProjectIssueCfgs, (issueProviderCfgs) => issueProviderCfgs.GIT);
+export const selectProjectGithubCfg = createSelector(selectProjectIssueCfgs, (issueProviderCfgs) => issueProviderCfgs.GITHUB);
 export const selectAdvancedProjectCfg = createSelector(selectCurrentProject, (project) => project.advancedCfg);
 
 
