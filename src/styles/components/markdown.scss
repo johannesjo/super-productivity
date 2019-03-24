@@ -38,5 +38,9 @@
     overflow-x: overlay;
     // we need this, otherwise it might break inside tables
     white-space: pre-wrap;
+
+    code {
+      font-size: 12px;
+    }
   }
 }
