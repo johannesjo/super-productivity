@@ -40,6 +40,8 @@ input {
   color: $light-theme-text-color;
   padding: $s/2 $s/2;
   border: 1px solid black;
+  text-align: center;
+  font-size: 14px;
 
   @include darkTheme() {
     color: #fff;

@@ -1,13 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  ElementRef,
-  EventEmitter,
-  Input,
-  OnInit,
-  Output,
-  ViewChild
-} from '@angular/core';
+import {ChangeDetectionStrategy, Component, ElementRef, EventEmitter, Input, Output, ViewChild} from '@angular/core';
 
 @Component({
   selector: 'inline-input',
@@ -15,7 +6,7 @@ import {
   styleUrls: ['./inline-input.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class InlineInputComponent implements OnInit {
+export class InlineInputComponent {
   @Input() type = 'text';
   @Input() value: string | number;
   @Input() displayValue: string;
@@ -27,7 +18,9 @@ export class InlineInputComponent implements OnInit {
   }
 
 
-  ngOnInit() {
+  focusInput() {
+    this.inputEl.nativeElement.focus();
+    this.inputEl.nativeElement.setSelectionRange(0, this.inputEl.nativeElement.value.length);
   }
 
   blur() {
@@ -37,12 +30,17 @@ export class InlineInputComponent implements OnInit {
   }
 
   onChange(v) {
-    console.log(v);
-
     this.newValue = v;
   }
 
-  focusInput() {
-    this.inputEl.nativeElement.focus();
+  keypressHandler(ev) {
+    if (ev.key === 'Escape') {
+      this.newValue = null;
+      this.inputEl.nativeElement.blur();
+    }
+
+    if (ev.key === 'Enter') {
+      this.inputEl.nativeElement.blur();
+    }
   }
 }

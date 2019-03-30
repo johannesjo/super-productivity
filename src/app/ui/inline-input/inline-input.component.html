@@ -2,12 +2,18 @@
      class="inline-input-wrapper">
   <div>{{displayValue || value}}</div>
 
-  <input #inputEl
-         [attr.input-duration]="type==='duration'"
+  <input *ngIf="type==='duration'"
+         #inputEl
+         inputDuration
          [ngModel]="value"
-         [type]="type"
+         (keypress)="keypressHandler($event)"
          (blur)="blur()"
          (ngModelChange)="onChange($event)">
-
+  <input *ngIf="type!=='duration'"
+         #inputEl
+         [ngModel]="value"
+         (keypress)="keypressHandler($event)"
+         (blur)="blur()"
+         (ngModelChange)="onChange($event)">
   <mat-icon>edit</mat-icon>
 </div>
