@@ -1,7 +1,7 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit} from '@angular/core';
 import {TaskService} from '../../features/tasks/task.service';
 import {getTodayStr} from '../../features/tasks/util/get-today-str';
-import {TaskWithSubTasks} from '../../features/tasks/task.model';
+import {Task, TaskWithSubTasks} from '../../features/tasks/task.model';
 import {Router} from '@angular/router';
 import {IS_ELECTRON} from '../../app.constants';
 import {MatDialog} from '@angular/material';
@@ -146,6 +146,22 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
   editStartEnd() {
     this._matDialog.open(DialogEditStartEndComponent, {
       restoreFocus: true,
+    });
+  }
+
+  updateTimeSpentTodayForTask(task: Task, newVal: number | string) {
+    console.log({
+      timeSpentOnDay: {
+        ...task.timeSpentOnDay,
+        [getTodayStr()]: +newVal,
+      }
+    });
+
+    this._taskService.update(task.id, {
+      timeSpentOnDay: {
+        ...task.timeSpentOnDay,
+        [getTodayStr()]: +newVal,
+      }
     });
   }
 

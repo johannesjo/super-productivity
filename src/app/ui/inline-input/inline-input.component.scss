@@ -1,0 +1,58 @@
+@import '../../../_variables.scss';
+
+:host {
+  display: inline-block;
+}
+
+
+.inline-input-wrapper {
+  display: inline-block;
+  position: relative;
+  cursor: text;
+}
+
+mat-icon {
+  position: absolute;
+  top: 50%;
+  left: 100%;
+  transform: translate(0, -50%);
+  padding-left: $s/2;
+  display: none;
+
+  :host:hover & {
+    display: block;
+  }
+
+  input:focus + & {
+    display: none;
+  }
+}
+
+input {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%) scaleX(0);
+  opacity: 0;
+  transition: $transition-fast;
+  box-shadow: $shadow-edit-on-click;
+  background: #fff;
+  color: $light-theme-text-color;
+  padding: $s/2 $s/2;
+  border: 1px solid black;
+
+  @include darkTheme() {
+    color: #fff;
+    background: $dark-theme-bg-lighter;
+    border: 1px solid #ffffff;
+    box-shadow: 0 0 4px 0 rgba(255, 255, 255, 0.8), $whiteframe-shadow-13dp;
+  }
+
+  &:focus {
+    opacity: 1;
+    outline: none;
+    transform: translate(-50%, -50%) scaleX(1);
+    visibility: visible;
+  }
+
+}

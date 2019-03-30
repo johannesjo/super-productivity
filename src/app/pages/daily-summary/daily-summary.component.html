@@ -84,7 +84,12 @@
                   *matHeaderCellDef> Spent Today
               </th>
               <td mat-cell
-                  *matCellDef="let task"> {{task.timeSpentOnDay[todayStr]|msToClockString}}
+                  *matCellDef="let task">
+                <inline-input [value]="task.timeSpentOnDay[todayStr]"
+                              [displayValue]="task.timeSpentOnDay[todayStr]|msToClockString"
+                              [type]="'duration'"
+                              (changed)="updateTimeSpentTodayForTask(task, $event)">
+                </inline-input>
               </td>
             </ng-container>
 
@@ -122,7 +127,7 @@
             <tr mat-header-row
                 *matHeaderRowDef="['title','timeSpentToday', 'timeSpentTotal', 'timeEstimate', 'done']"></tr>
             <tr mat-row
-                *matRowDef="let row; columns: ['title','timeSpentToday', 'timeSpentToday','timeEstimate', 'done']"></tr>
+                *matRowDef="let row; columns: ['title','timeSpentToday', 'timeSpentTotal','timeEstimate', 'done']"></tr>
           </table>
         </div>
         <div style="text-align: center; margin-top: 8px; margin-bottom: 16px;">

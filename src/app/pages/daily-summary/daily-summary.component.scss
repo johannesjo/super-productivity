@@ -161,6 +161,14 @@ textarea {
     text-align: left;
     min-width: 220px;
   }
+
+  .cdk-column-timeSpentToday ::ng-deep .inline-input-wrapper {
+    padding: $s;
+
+    input {
+      width: 120px;
+    }
+  }
 }
 
 .daily-summary-actions {

@@ -61,6 +61,7 @@ import { HumanizeTimestampPipe } from './pipes/humanize-timestamp.pipe';
 import { KeysPipe } from './pipes/keys.pipe';
 import { ToArrayPipe } from './pipes/to-array.pipe';
 import { MomentFormatPipe } from './pipes/moment-format.pipe';
+import { InlineInputComponent } from './inline-input/inline-input.component';
 
 @NgModule({
   imports: [
@@ -139,6 +140,7 @@ import { MomentFormatPipe } from './pipes/moment-format.pipe';
     ToArrayPipe,
     HumanizeTimestampPipe,
     MomentFormatPipe,
+    InlineInputComponent,
   ],
   entryComponents: [
     DialogConfirmComponent,
@@ -160,6 +162,7 @@ import { MomentFormatPipe } from './pipes/moment-format.pipe';
     DialogConfirmComponent,
     EnlargeImgDirective,
     DatetimeInputComponent,
+    InlineInputComponent,
 
     MsToClockStringPipe,
     MsToMinuteClockStringPipe,

@@ -1,0 +1,13 @@
+<div (click)="focusInput()"
+     class="inline-input-wrapper">
+  <div>{{displayValue || value}}</div>
+
+  <input #inputEl
+         [attr.input-duration]="type==='duration'"
+         [ngModel]="value"
+         [type]="type"
+         (blur)="blur()"
+         (ngModelChange)="onChange($event)">
+
+  <mat-icon>edit</mat-icon>
+</div>
