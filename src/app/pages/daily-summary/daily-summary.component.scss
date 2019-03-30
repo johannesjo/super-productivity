@@ -55,6 +55,7 @@ $summary-point-inner-margin: $s;
   margin: $summary-point-inner-margin;
   //flex-grow: 1;
   flex-basis: 200px;
+  position: relative;
 }
 
 .summary-text {
@@ -63,6 +64,22 @@ $summary-point-inner-margin: $s;
 .summary-val {
   font-weight: bold;
 }
+
+.edit-start-end-btn {
+  position: absolute;
+  left: 50%;
+  top: -10px;
+  transform: translate(-50%, 0);
+  transition: $transition-standard;
+  opacity: 0;
+  visibility: hidden;
+
+  .summary-point:hover & {
+    opacity: 1;
+    visibility: visible;
+  }
+}
+
 
 ::ng-deep collapsible {
   text-align: center;

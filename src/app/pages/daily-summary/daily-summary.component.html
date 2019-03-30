@@ -12,11 +12,16 @@
 
   <h1 class="done-headline mat-headline">Take a moment to <i class="TODO-animate">celebrate!</i></h1>
   <div class="daily-summary-summary">
-    <div class="summary-point"
-         title="Time when started and time when ended working today.">
+    <div class="summary-point">
       <mat-icon>schedule</mat-icon>
       <div class="summary-text">Start – End
         <div class="summary-val">{{started$|async|momentFormat:'HH:mm'}} – {{end$|async|momentFormat:'HH:mm'}}</div>
+      </div>
+
+      <div class="edit-start-end-btn">
+        <button mat-mini-fab>
+          <mat-icon>edit</mat-icon>
+        </button>
       </div>
     </div>
     <div class="summary-point">
