@@ -12,29 +12,27 @@
 
   <h1 class="done-headline mat-headline">Take a moment to <i class="TODO-animate">celebrate!</i></h1>
   <div class="daily-summary-summary">
+    <div class="summary-point"
+         title="Time when started and time when ended working today.">
+      <mat-icon>schedule</mat-icon>
+      <div class="summary-text">Start – End
+        <div class="summary-val">{{started$|async|momentFormat:'HH:mm'}} – {{end$|async|momentFormat:'HH:mm'}}</div>
+      </div>
+    </div>
     <div class="summary-point">
       <mat-icon>check</mat-icon>
-      <div class="summary-text">Tasks completed:
+      <div class="summary-text">Tasks Completed
         <div class="summary-val">
-          <span [innerHtml]="(doneTasks$|async)?.length"></span>/<span
+          <span [innerHtml]="(doneTasks$|async)?.length"></span> / <span
           [innerHtml]="(todaysTasks$|async)?.length"></span>
         </div>
       </div>
     </div>
     <div class="summary-point"
-         title="Total time spent today. Archived tasks not included.">
+         title="Time Spent: Total time spent today. Archived tasks not included. – Time Estimated: Time estimated for tasks worked on today minus the time already spent with them on other days.">
       <mat-icon>timer</mat-icon>
-      <div class="summary-text">Total time spent today:
-        <div [innerHtml]="workingToday$|async|msToString"
-             class="summary-val"></div>
-      </div>
-    </div>
-    <div class="summary-point"
-         title="Time estimated for tasks worked on today minus the time already spent with them on other days.">
-      <mat-icon>timer</mat-icon>
-      <div class="summary-text">Time estimated:
-        <div [innerHtml]="estimatedOnTasksWorkedOnToday$|async|msToString"
-             class="summary-val"></div>
+      <div class="summary-text">Time Spent / Estimated
+        <div class="summary-val">{{workingToday$|async|msToClockString}} / {{estimatedOnTasksWorkedOnToday$|async|msToClockString}}</div>
       </div>
     </div>
   </div>

@@ -1,8 +1,8 @@
-import { createEntityAdapter, EntityAdapter, EntityState } from '@ngrx/entity';
-import { Project } from '../project.model';
-import { ProjectActions, ProjectActionTypes } from './project.actions';
-import { createFeatureSelector, createSelector } from '@ngrx/store';
-import { FIRST_PROJECT } from '../project.const';
+import {createEntityAdapter, EntityAdapter, EntityState} from '@ngrx/entity';
+import {Project, WorkStartEnd} from '../project.model';
+import {ProjectActions, ProjectActionTypes} from './project.actions';
+import {createFeatureSelector, createSelector} from '@ngrx/store';
+import {FIRST_PROJECT} from '../project.const';
 
 export const PROJECT_FEATURE_NAME = 'projects';
 
@@ -35,6 +35,8 @@ export const selectProjectIssueCfgs = createSelector(selectCurrentProject, (proj
 export const selectProjectJiraCfg = createSelector(selectProjectIssueCfgs, (issueProviderCfgs) => issueProviderCfgs.JIRA);
 export const selectProjectGithubCfg = createSelector(selectProjectIssueCfgs, (issueProviderCfgs) => issueProviderCfgs.GITHUB);
 export const selectAdvancedProjectCfg = createSelector(selectCurrentProject, (project) => project.advancedCfg);
+export const selectProjectWorkStart = createSelector(selectCurrentProject, (project) => project.workStart);
+export const selectProjectWorkEnd = createSelector(selectCurrentProject, (project) => project.workEnd);
 
 
 // DYNAMIC SELECTORS
@@ -43,6 +45,18 @@ export const selectProjectById = createSelector(
   selectProjectFeatureState,
   (state, props: { id: string }) => state.entities[props.id]
 );
+
+export const selectProjectWorkStartForDay = createSelector(
+  selectProjectWorkStart,
+  (workStart: WorkStartEnd, props: { day: string }) => workStart[props.day]
+);
+
+export const selectProjectWorkEndForDay = createSelector(
+  selectProjectWorkEnd,
+  (workEnd: WorkStartEnd, props: { day: string }) => workEnd[props.day]
+);
+
+
 
 // DEFAULT
 // -------

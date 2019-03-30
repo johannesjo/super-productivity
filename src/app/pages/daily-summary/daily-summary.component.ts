@@ -14,7 +14,7 @@ import { NoteService } from '../../features/note/note.service';
 import { ConfigService } from '../../features/config/config.service';
 import { GoogleDriveSyncService } from '../../features/google/google-drive-sync.service';
 import { SnackService } from '../../core/snack/snack.service';
-import { take, takeUntil } from 'rxjs/operators';
+import {map, take, takeUntil} from 'rxjs/operators';
 import { loadFromLs, saveToLs } from '../../core/persistence/local-storage';
 import { LS_DAILY_SUMMARY_TAB_INDEX } from '../../core/persistence/ls-keys.const';
 import { GoogleApiService } from '../../features/google/google-api.service';
@@ -49,6 +49,9 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
   estimatedOnTasksWorkedOnToday$ = this._taskService.estimatedOnTasksWorkedOnToday$;
   // use mysql date as it is sortable
   workingToday$ = this._taskService.workingToday$;
+
+  started$ = this._projectService.workStartToday$;
+  end$ = this._projectService.workEndToday$;
 
   private _successAnimationTimeout;
   private _doneTasks: TaskWithSubTasks[];

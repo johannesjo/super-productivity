@@ -39,6 +39,7 @@ $summary-point-inner-margin: $s;
 .daily-summary-summary {
   margin-bottom: $s*2;
   display: flex;
+  flex-wrap: wrap;
   justify-content: center;
 
   p {
