@@ -19,7 +19,6 @@ import {loadFromLs, saveToLs} from '../../core/persistence/local-storage';
 import {LS_DAILY_SUMMARY_TAB_INDEX} from '../../core/persistence/ls-keys.const';
 import {GoogleApiService} from '../../features/google/google-api.service';
 import {ProjectService} from '../../features/project/project.service';
-import {DialogEditStartEndComponent} from './dialog-edit-start-end/dialog-edit-start-end.component';
 import {getWorklogStr} from '../../util/get-work-log-str';
 import * as moment from 'moment-mini';
 
@@ -141,18 +140,13 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
     }
   }
 
-  editStartEnd() {
-    this._matDialog.open(DialogEditStartEndComponent, {
-      restoreFocus: true,
-    });
-  }
-
   updateWorkStart(ev) {
     const startTime = moment(getWorklogStr() + ' ' + ev).unix() * 1000;
     if (startTime) {
       this._projectService.updateWorkStart(this._projectService.currentId, getWorklogStr(), startTime);
     }
   }
+
   updateWorkEnd(ev) {
     const endTime = moment(getWorklogStr() + ' ' + ev).unix() * 1000;
     if (endTime) {

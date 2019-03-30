@@ -65,22 +65,6 @@ $summary-point-inner-margin: $s;
   font-weight: bold;
 }
 
-.edit-start-end-btn {
-  position: absolute;
-  left: 50%;
-  top: -10px;
-  transform: translate(-50%, 0);
-  transition: $transition-standard;
-  opacity: 0;
-  visibility: hidden;
-
-  .summary-point:hover & {
-    opacity: 1;
-    visibility: visible;
-  }
-}
-
-
 ::ng-deep collapsible {
   text-align: center;
 }
@@ -166,7 +150,7 @@ textarea {
     padding: $s;
 
     input {
-      width: 100 px;
+      width: 100px;
     }
   }
 }

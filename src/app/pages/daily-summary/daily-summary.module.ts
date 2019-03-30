@@ -7,7 +7,6 @@ import {GoogleModule} from '../../features/google/google.module';
 import {SimpleTaskExportModule} from '../../features/simple-task-export/simple-task-export.module';
 import {RouterModule} from '@angular/router';
 import {WorklogModule} from '../../features/worklog/worklog.module';
-import {DialogEditStartEndComponent} from './dialog-edit-start-end/dialog-edit-start-end.component';
 
 @NgModule({
   imports: [
@@ -21,10 +20,8 @@ import {DialogEditStartEndComponent} from './dialog-edit-start-end/dialog-edit-s
   ],
   declarations: [
     DailySummaryComponent,
-    DialogEditStartEndComponent,
   ],
   entryComponents: [
-    DialogEditStartEndComponent,
   ]
 
 })
