@@ -15,7 +15,18 @@
     <div class="summary-point">
       <mat-icon>schedule</mat-icon>
       <div class="summary-text">Start – End
-        <div class="summary-val">{{started$|async|momentFormat:'HH:mm'}} – {{end$|async|momentFormat:'HH:mm'}}</div>
+        <div class="summary-val">
+          <inline-input [value]="started$|async|momentFormat:'HH:mm'"
+                        [type]="'time'"
+                        [isIconPosLeft]="true"
+                        (changed)="updateWorkStart($event)">
+          </inline-input>
+          –
+          <inline-input [value]="end$|async|momentFormat:'HH:mm'"
+                        [type]="'time'"
+                        (changed)="updateWorkEnd($event)">
+          </inline-input>
+        </div>
       </div>
 
       <div class="edit-start-end-btn">
@@ -29,6 +40,7 @@
       <mat-icon>check</mat-icon>
       <div class="summary-text">Tasks Completed
         <div class="summary-val">
+
           <span [innerHtml]="(doneTasks$|async)?.length"></span> / <span
           [innerHtml]="(todaysTasks$|async)?.length"></span>
         </div>

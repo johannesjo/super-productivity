@@ -1,19 +1,22 @@
 <div (click)="focusInput()"
      class="inline-input-wrapper">
-  <div>{{displayValue || value}}</div>
+  <div class="value-wrapper">{{displayValue || value}}</div>
 
   <input *ngIf="type==='duration'"
-         #inputEl
+         #inputElDuration
          inputDuration
          [ngModel]="value"
          (keypress)="keypressHandler($event)"
          (blur)="blur()"
          (ngModelChange)="onChange($event)">
   <input *ngIf="type!=='duration'"
+         [type]="type"
          #inputEl
          [ngModel]="value"
          (keypress)="keypressHandler($event)"
          (blur)="blur()"
          (ngModelChange)="onChange($event)">
-  <mat-icon>edit</mat-icon>
+  <mat-icon [class.isIconPosBottom]="isIconPosBottom"
+            [class.isIconPosLeft]="isIconPosLeft">edit
+  </mat-icon>
 </div>

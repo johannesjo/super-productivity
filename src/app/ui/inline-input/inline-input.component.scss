@@ -2,13 +2,21 @@
 
 :host {
   display: inline-block;
-}
+  position: relative;
 
+  &.isFocused {
+    z-index: 11;
+  }
+}
 
 .inline-input-wrapper {
   display: inline-block;
   position: relative;
   cursor: text;
+}
+
+.value-wrapper {
+  user-select: none;
 }
 
 mat-icon {
@@ -21,6 +29,23 @@ mat-icon {
 
   :host:hover & {
     display: block;
+  }
+
+  &.isIconPosBottom {
+    left: 50%;
+    top: 100%;
+    transform: translate(-50%, 0);
+    padding-left: 0;
+    padding-top: $s/2;
+  }
+
+  &.isIconPosLeft {
+    top: 50%;
+    left: auto;
+    right: 100%;
+    padding-left: 0;
+    padding-right: $s/2;
+    transform: translate(0, -50%);
   }
 
   input:focus + & {

@@ -1,4 +1,13 @@
-import {ChangeDetectionStrategy, Component, ElementRef, EventEmitter, Input, Output, ViewChild} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  ElementRef,
+  EventEmitter,
+  HostBinding,
+  Input,
+  Output,
+  ViewChild
+} from '@angular/core';
 
 @Component({
   selector: 'inline-input',
@@ -11,19 +20,36 @@ export class InlineInputComponent {
   @Input() value: string | number;
   @Input() displayValue: string;
   @Input() newValue: string | number;
+  @Input() isIconPosBottom: boolean;
+  @Input() isIconPosLeft: boolean;
+
   @Output() changed = new EventEmitter<string | number>();
   @ViewChild('inputEl') inputEl: ElementRef;
+  @ViewChild('inputElDuration') inputElDuration: ElementRef;
+
+  @HostBinding('class.isFocused') isFocused = false;
+
+  activeInputEl: HTMLInputElement;
 
   constructor() {
   }
 
-
   focusInput() {
-    this.inputEl.nativeElement.focus();
-    this.inputEl.nativeElement.setSelectionRange(0, this.inputEl.nativeElement.value.length);
+    this.activeInputEl = (this.type === 'duration')
+      ? this.inputElDuration.nativeElement
+      : this.inputEl.nativeElement;
+
+
+    this.isFocused = true;
+    this.activeInputEl.focus();
+    if (this.type === 'text' || this.type === 'duration') {
+      this.activeInputEl.setSelectionRange(0, this.activeInputEl.value.length);
+    }
   }
 
   blur() {
+    this.isFocused = false;
+
     if (this.newValue || this.newValue === '' || this.newValue === 0) {
       this.changed.emit(this.newValue);
     }
@@ -36,11 +62,11 @@ export class InlineInputComponent {
   keypressHandler(ev) {
     if (ev.key === 'Escape') {
       this.newValue = null;
-      this.inputEl.nativeElement.blur();
+      this.activeInputEl.blur();
     }
 
     if (ev.key === 'Enter') {
-      this.inputEl.nativeElement.blur();
+      this.activeInputEl.blur();
     }
   }
 }

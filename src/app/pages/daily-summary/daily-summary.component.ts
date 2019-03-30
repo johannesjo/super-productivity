@@ -20,6 +20,8 @@ import {LS_DAILY_SUMMARY_TAB_INDEX} from '../../core/persistence/ls-keys.const';
 import {GoogleApiService} from '../../features/google/google-api.service';
 import {ProjectService} from '../../features/project/project.service';
 import {DialogEditStartEndComponent} from './dialog-edit-start-end/dialog-edit-start-end.component';
+import {getWorklogStr} from '../../util/get-work-log-str';
+import * as moment from 'moment-mini';
 
 const SUCCESS_ANIMATION_DURATION = 500;
 
@@ -38,15 +40,11 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
   todaysWorkedOnOrDoneTasksFlat$ = this._taskService.todaysWorkedOnOrDoneTasksFlat$;
   todayStr = getTodayStr();
   tomorrowsNote: string;
-  clearDoneTasks: boolean;
-  moveUnfinishedToBacklog: boolean;
-  commitLog;
   isTimeSheetExported = true;
   showSuccessAnimation;
   selectedTabIndex = loadFromLs(this.getLsKeyForSummaryTabIndex()) || 0;
 
   // calc total time spent on todays tasks
-  totalTimeSpentTasks$ = this._taskService.totalTimeWorkedOnTodaysTasks$;
   estimatedOnTasksWorkedOnToday$ = this._taskService.estimatedOnTasksWorkedOnToday$;
   // use mysql date as it is sortable
   workingToday$ = this._taskService.workingToday$;
@@ -147,6 +145,19 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
     this._matDialog.open(DialogEditStartEndComponent, {
       restoreFocus: true,
     });
+  }
+
+  updateWorkStart(ev) {
+    const startTime = moment(getWorklogStr() + ' ' + ev).unix() * 1000;
+    if (startTime) {
+      this._projectService.updateWorkStart(this._projectService.currentId, getWorklogStr(), startTime);
+    }
+  }
+  updateWorkEnd(ev) {
+    const endTime = moment(getWorklogStr() + ' ' + ev).unix() * 1000;
+    if (endTime) {
+      this._projectService.updateWorkEnd(this._projectService.currentId, getWorklogStr(), endTime);
+    }
   }
 
   updateTimeSpentTodayForTask(task: Task, newVal: number | string) {
