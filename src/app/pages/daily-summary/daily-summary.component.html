@@ -63,7 +63,7 @@
       <section class="tab-inner">
         <div class="table-wrapper mat-elevation-z3">
           <table mat-table
-                 [dataSource]="todaysTasksFlat$|async"
+                 [dataSource]="todaysWorkedOnOrDoneTasksFlat$|async"
                  class="mat-elevation-z2 summary-table">
             <ng-container matColumnDef="title">
               <th mat-header-cell

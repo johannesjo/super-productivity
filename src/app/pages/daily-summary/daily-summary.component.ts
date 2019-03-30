@@ -35,7 +35,7 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
   };
   doneTasks$ = this._taskService.doneTasks$;
   todaysTasks$ = this._taskService.todaysTasks$;
-  todaysTasksFlat$ = this._taskService.todaysTasksFlat$;
+  todaysWorkedOnOrDoneTasksFlat$ = this._taskService.todaysWorkedOnOrDoneTasksFlat$;
   todayStr = getTodayStr();
   tomorrowsNote: string;
   clearDoneTasks: boolean;

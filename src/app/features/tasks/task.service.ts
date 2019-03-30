@@ -1,7 +1,7 @@
 import shortid from 'shortid';
-import { debounceTime, distinctUntilChanged, first, map, shareReplay, take, withLatestFrom } from 'rxjs/operators';
-import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import {debounceTime, distinctUntilChanged, first, map, shareReplay, take, withLatestFrom} from 'rxjs/operators';
+import {Injectable} from '@angular/core';
+import {Observable} from 'rxjs';
 import {
   DEFAULT_TASK,
   DropListModelSource,
@@ -11,7 +11,7 @@ import {
   TaskWithIssueData,
   TaskWithSubTasks
 } from './task.model';
-import { select, Store } from '@ngrx/store';
+import {select, Store} from '@ngrx/store';
 import {
   AddSubTask,
   AddTask,
@@ -40,10 +40,10 @@ import {
   UpdateTaskReminder,
   UpdateTaskUi
 } from './store/task.actions';
-import { initialTaskState, } from './store/task.reducer';
-import { PersistenceService } from '../../core/persistence/persistence.service';
-import { IssueData, IssueProviderKey } from '../issue/issue';
-import { TimeTrackingService } from '../time-tracking/time-tracking.service';
+import {initialTaskState,} from './store/task.reducer';
+import {PersistenceService} from '../../core/persistence/persistence.service';
+import {IssueData, IssueProviderKey} from '../issue/issue';
+import {TimeTrackingService} from '../time-tracking/time-tracking.service';
 import {
   selectAllTasksWithIssueData,
   selectBacklogTasksWithSubTasks,
@@ -61,18 +61,19 @@ import {
   selectTaskById,
   selectTaskByIssueId,
   selectTasksWithMissingIssueData,
+  selectTasksWorkedOnOrDoneTodayFlat,
   selectTodaysDoneTasksWithSubTasks,
   selectTodaysTasksFlat,
   selectTodaysTasksWithSubTasks,
   selectTodaysUnDoneTasksWithSubTasks,
   selectTotalTimeWorkedOnTodaysTasks
 } from './store/task.selectors';
-import { stringToMs } from '../../ui/duration/string-to-ms.pipe';
-import { getWorklogStr } from '../../util/get-work-log-str';
-import { Actions, ofType } from '@ngrx/effects';
-import { IssueService } from '../issue/issue.service';
-import { ProjectService } from '../project/project.service';
-import { SnackService } from '../../core/snack/snack.service';
+import {stringToMs} from '../../ui/duration/string-to-ms.pipe';
+import {getWorklogStr} from '../../util/get-work-log-str';
+import {Actions, ofType} from '@ngrx/effects';
+import {IssueService} from '../issue/issue.service';
+import {ProjectService} from '../project/project.service';
+import {SnackService} from '../../core/snack/snack.service';
 
 
 @Injectable({
@@ -108,6 +109,10 @@ export class TaskService {
   // todays list flat + tasks worked on today
   todaysTasksFlat$: Observable<TaskWithSubTasks[]> = this._store.pipe(
     select(selectTodaysTasksFlat),
+  );
+
+  todaysWorkedOnOrDoneTasksFlat$: Observable<TaskWithSubTasks[]> = this._store.pipe(
+    select(selectTasksWorkedOnOrDoneTodayFlat),
   );
 
   // only todays list
@@ -411,7 +416,7 @@ export class TaskService {
     return this._store.pipe(select(selectTaskById, {id}), take(1));
   }
 
-  getByIssueId(issueId: string|number, issueType: IssueProviderKey): Observable<Task> {
+  getByIssueId(issueId: string | number, issueType: IssueProviderKey): Observable<Task> {
     return this._store.pipe(select(selectTaskByIssueId, {issueId, issueType}), take(1));
   }
 
