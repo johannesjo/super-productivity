@@ -66,8 +66,8 @@ export class ProjectService {
   onProjectRelatedDataLoaded$: Observable<any> = this._actions$.pipe(ofType(ProjectActionTypes.LoadProjectRelatedDataSuccess));
 
   // DYNAMIC
-  workStartToday$ = this._store$.pipe(select(selectProjectWorkStartForDay, {day: getWorklogStr()}), take(1));
-  workEndToday$ = this._store$.pipe(select(selectProjectWorkEndForDay, {day: getWorklogStr()}), take(1));
+  workStartToday$ = this._store$.pipe(select(selectProjectWorkStartForDay, {day: getWorklogStr()}));
+  workEndToday$ = this._store$.pipe(select(selectProjectWorkEndForDay, {day: getWorklogStr()}));
 
 
   constructor(
@@ -149,7 +149,7 @@ export class ProjectService {
     });
   }
 
-  updateWorkStart(id, date: string, newVal) {
+  updateWorkStart(id, date: string, newVal: number) {
     this._store$.dispatch({
       type: ProjectActionTypes.UpdateProjectWorkStart,
       payload: {
@@ -160,7 +160,7 @@ export class ProjectService {
     });
   }
 
-  updateWorkEnd(id, date: string, newVal) {
+  updateWorkEnd(id, date: string, newVal: number) {
     this._store$.dispatch({
       type: ProjectActionTypes.UpdateProjectWorkEnd,
       payload: {

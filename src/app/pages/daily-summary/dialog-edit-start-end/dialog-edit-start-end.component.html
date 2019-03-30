@@ -1,0 +1,37 @@
+<h2 mat-dialog-title=""
+    style="text-align: center;">Edit Start/End Today</h2>
+
+<div mat-dialog-content>
+  <mat-form-field class="mat-icon-float mat-block">
+    <mat-icon matPrefix>schedule</mat-icon>
+    <input matInput
+           placeholder="Started Working"
+           type="time"
+           [(ngModel)]="startTime">
+  </mat-form-field>
+  <mat-form-field class="mat-icon-float mat-block">
+    <mat-icon matPrefix>schedule</mat-icon>
+    <input matInput
+           placeholder="Ended Working"
+           type="time"
+           [(ngModel)]="endTime">
+  </mat-form-field>
+</div>
+
+<div align="center"
+     mat-dialog-actions>
+  <button (click)="save()"
+          mat-raised-button
+          color="primary"
+          type="button">
+    <mat-icon>save</mat-icon>
+    Save
+  </button>
+
+  <button (click)="close()"
+          mat-raised-button
+          type="button">
+    <mat-icon>close</mat-icon>
+    Cancel
+  </button>
+</div>
