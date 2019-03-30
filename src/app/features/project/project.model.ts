@@ -1,7 +1,7 @@
-import { IssueIntegrationCfgs, IssueProviderKey } from '../issue/issue';
+import {IssueIntegrationCfgs, IssueProviderKey} from '../issue/issue';
 
 
-export type RoundTimeOption = 'QUARTER' | 'HALF' | 'HOUR';
+export type RoundTimeOption = '5M' | 'QUARTER' | 'HALF' | 'HOUR';
 
 export interface WorkStartEndCopy {
   [key: string]: number;

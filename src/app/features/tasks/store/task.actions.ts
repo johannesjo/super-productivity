@@ -1,8 +1,9 @@
-import { Action } from '@ngrx/store';
-import { Update } from '@ngrx/entity';
-import { DropListModelSource, Task, TaskWithSubTasks } from '../task.model';
-import { TaskState } from './task.reducer';
-import { IssueData } from '../../issue/issue';
+import {Action} from '@ngrx/store';
+import {Update} from '@ngrx/entity';
+import {DropListModelSource, Task, TaskWithSubTasks} from '../task.model';
+import {TaskState} from './task.reducer';
+import {IssueData} from '../../issue/issue';
+import {RoundTimeOption} from '../../project/project.model';
 
 export enum TaskActionTypes {
   LoadTaskState = '[Task] Load Task State',
@@ -40,6 +41,7 @@ export enum TaskActionTypes {
   MoveToToday = '[Task] Move to today',
   MoveToArchive = '[Task] Move to archive',
   ToggleStart = '[Task] Toggle start',
+  RoundTimeSpentForDay = '[Task] RoundTimeSpentForDay',
 }
 
 export class LoadTaskState implements Action {
@@ -225,6 +227,13 @@ export class ToggleStart implements Action {
   readonly type = TaskActionTypes.ToggleStart;
 }
 
+export class RoundTimeSpentForDay implements Action {
+  readonly type = TaskActionTypes.RoundTimeSpentForDay;
+
+  constructor(public payload: { day: string, roundTo: RoundTimeOption, isRoundUp: boolean }) {
+  }
+}
+
 export type TaskActions
   = LoadTaskState
   | SetCurrentTask
@@ -252,5 +261,6 @@ export type TaskActions
   | MoveToBacklog
   | MoveToToday
   | ToggleStart
+  | RoundTimeSpentForDay
   | MoveToArchive;
 

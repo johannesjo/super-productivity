@@ -1,35 +1,37 @@
-import { Injectable } from '@angular/core';
-import { Actions, Effect, ofType } from '@ngrx/effects';
+import {Injectable} from '@angular/core';
+import {Actions, Effect, ofType} from '@ngrx/effects';
 import {
   AddTaskReminder,
   DeleteTask,
   Move,
   MoveToBacklog,
   RemoveTaskReminder,
+  RoundTimeSpentForDay,
   SetCurrentTask,
   TaskActionTypes,
   UpdateTask,
   UpdateTaskReminder
 } from './task.actions';
-import { select, Store } from '@ngrx/store';
-import { filter, map, mergeMap, tap, throttleTime, withLatestFrom } from 'rxjs/operators';
-import { PersistenceService } from '../../../core/persistence/persistence.service';
-import { selectCurrentTask, selectTaskFeatureState } from './task.selectors';
-import { selectCurrentProjectId } from '../../project/store/project.reducer';
-import { SnackOpen } from '../../../core/snack/store/snack.actions';
-import { NotifyService } from '../../../core/notify/notify.service';
-import { TaskService } from '../task.service';
-import { selectConfigFeatureState, selectMiscConfig } from '../../config/store/config.reducer';
-import { AttachmentActionTypes } from '../../attachment/store/attachment.actions';
-import { TaskWithSubTasks } from '../task.model';
-import { TaskState } from './task.reducer';
-import { EMPTY, of } from 'rxjs';
-import { ElectronService } from 'ngx-electron';
-import { IPC_CURRENT_TASK_UPDATED } from '../../../../../electron/ipc-events.const';
-import { IS_ELECTRON } from '../../../app.constants';
-import { ReminderService } from '../../reminder/reminder.service';
-import { MiscConfig } from '../../config/config.model';
-import { truncate } from '../../../util/truncate';
+import {select, Store} from '@ngrx/store';
+import {filter, map, mergeMap, tap, throttleTime, withLatestFrom} from 'rxjs/operators';
+import {PersistenceService} from '../../../core/persistence/persistence.service';
+import {selectCurrentTask, selectTaskFeatureState, selectTasksWorkedOnOrDoneTodayFlat} from './task.selectors';
+import {selectCurrentProjectId} from '../../project/store/project.reducer';
+import {SnackOpen} from '../../../core/snack/store/snack.actions';
+import {NotifyService} from '../../../core/notify/notify.service';
+import {TaskService} from '../task.service';
+import {selectConfigFeatureState, selectMiscConfig} from '../../config/store/config.reducer';
+import {AttachmentActionTypes} from '../../attachment/store/attachment.actions';
+import {TaskWithSubTasks} from '../task.model';
+import {TaskState} from './task.reducer';
+import {EMPTY, Observable, of} from 'rxjs';
+import {ElectronService} from 'ngx-electron';
+import {IPC_CURRENT_TASK_UPDATED} from '../../../../../electron/ipc-events.const';
+import {IS_ELECTRON} from '../../../app.constants';
+import {ReminderService} from '../../reminder/reminder.service';
+import {MiscConfig} from '../../config/config.model';
+import {truncate} from '../../../util/truncate';
+import {roundDurationVanilla} from '../../../util/round-duration';
 
 // TODO send message to electron when current task changes here
 
@@ -326,6 +328,36 @@ export class TaskEffects {
       })
     );
 
+  @Effect() roundTimesSpentForDay$: Observable<any> = this._actions$
+    .pipe(
+      ofType(
+        TaskActionTypes.RoundTimeSpentForDay,
+      ),
+      filter((a: RoundTimeSpentForDay) => a.payload && a.payload.day && !!a.payload.roundTo),
+      withLatestFrom(
+        this._store$.pipe(select(selectTasksWorkedOnOrDoneTodayFlat)),
+      ),
+      mergeMap(([act, tasks]): UpdateTask[] => {
+        const {day, roundTo, isRoundUp} = act.payload;
+        return Object.keys(tasks).filter(id => {
+          return !tasks[id].subTaskIds.length && tasks[id].timeSpentOnDay[day];
+        }).map(id => {
+          const task = tasks[id];
+          const updateTimeSpent = roundDurationVanilla(task.timeSpentOnDay[day], roundTo, isRoundUp);
+          return new UpdateTask({
+            task: {
+              id: task.id,
+              changes: {
+                timeSpentOnDay: {
+                  ...task.timeSpentOnDay,
+                  [day]: updateTimeSpent,
+                }
+              },
+            }
+          });
+        });
+      }),
+    );
 
   constructor(private _actions$: Actions,
               private _store$: Store<any>,

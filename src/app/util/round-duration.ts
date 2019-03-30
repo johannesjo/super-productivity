@@ -1,36 +1,43 @@
 import * as moment from 'moment-mini';
-import { Duration } from 'moment-mini';
-import { RoundTimeOption } from '../features/project/project.model';
+import {Duration} from 'moment-mini';
+import {RoundTimeOption} from '../features/project/project.model';
 
-export const roundDuration = (val: Duration | number, roundTo: RoundTimeOption, isRoundUp): Duration => {
-  let rounded;
+export const roundDuration = (val: Duration | number, roundTo: RoundTimeOption, isRoundUp = false): Duration => {
   const value = (typeof val === 'number')
-    ? moment.duration({millisecond: val})
-    : val as Duration;
+    ? val
+    : val.asMilliseconds();
+  const roundedMs = roundDurationVanilla(value, roundTo, isRoundUp);
+  return moment.duration({millisecond: roundedMs});
+};
+
+export const roundMinutes = (minutes, factor, isRoundUp) => {
+  return (isRoundUp)
+    ? Math.ceil(minutes / factor) * factor
+    : Math.round(minutes / factor) * factor;
+};
+
+export const roundDurationVanilla = (val: number, roundTo: RoundTimeOption, isRoundUp = false): number => {
+  const asMinutes = parseMsToMinutes(val);
+  const MSF = 60000;
 
   switch (roundTo) {
+    case '5M':
+      return roundMinutes(asMinutes, 5, isRoundUp) * MSF;
+
     case 'QUARTER':
-      rounded = Math.round(value.asMinutes() / 15) * 15;
-      if (isRoundUp) {
-        rounded = Math.ceil(value.asMinutes() / 15) * 15;
-      }
-      return moment.duration({minutes: rounded});
+      return roundMinutes(asMinutes, 15, isRoundUp) * MSF;
 
     case 'HALF':
-      rounded = Math.round(value.asMinutes() / 30) * 30;
-      if (isRoundUp) {
-        rounded = Math.ceil(value.asMinutes() / 30) * 30;
-      }
-      return moment.duration({minutes: rounded});
+      return roundMinutes(asMinutes, 30, isRoundUp) * MSF;
 
     case 'HOUR':
-      rounded = Math.round(value.asMinutes() / 60) * 60;
-      if (isRoundUp) {
-        rounded = Math.ceil(value.asMinutes() / 60) * 60;
-      }
-      return moment.duration({minutes: rounded});
+      return roundMinutes(asMinutes, 60, isRoundUp) * MSF;
 
     default:
-      return value;
+      return val;
   }
+};
+
+export const parseMsToMinutes = (ms: number): number => {
+  return Math.round(ms / 60000);
 };

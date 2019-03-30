@@ -30,6 +30,7 @@ import {
   RemoveTaskReminder,
   RemoveTimeSpent,
   RestoreTask,
+  RoundTimeSpentForDay,
   SetCurrentTask,
   StartFirstStartable,
   TaskActionTypes,
@@ -74,6 +75,7 @@ import {Actions, ofType} from '@ngrx/effects';
 import {IssueService} from '../issue/issue.service';
 import {ProjectService} from '../project/project.service';
 import {SnackService} from '../../core/snack/snack.service';
+import {RoundTimeOption} from '../project/project.model';
 
 
 @Injectable({
@@ -393,6 +395,10 @@ export class TaskService {
 
   restoreTask(task: TaskWithSubTasks) {
     this._store.dispatch(new RestoreTask({task}));
+  }
+
+  roundTimeSpentForDay(day: string, roundTo: RoundTimeOption, isRoundUp = false) {
+    this._store.dispatch(new RoundTimeSpentForDay({day, roundTo, isRoundUp}));
   }
 
 

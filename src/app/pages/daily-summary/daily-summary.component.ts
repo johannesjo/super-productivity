@@ -21,6 +21,7 @@ import {GoogleApiService} from '../../features/google/google-api.service';
 import {ProjectService} from '../../features/project/project.service';
 import {getWorklogStr} from '../../util/get-work-log-str';
 import * as moment from 'moment-mini';
+import {RoundTimeOption} from '../../features/project/project.model';
 
 const SUCCESS_ANIMATION_DURATION = 500;
 
@@ -155,19 +156,16 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
   }
 
   updateTimeSpentTodayForTask(task: Task, newVal: number | string) {
-    console.log({
-      timeSpentOnDay: {
-        ...task.timeSpentOnDay,
-        [getTodayStr()]: +newVal,
-      }
-    });
-
     this._taskService.update(task.id, {
       timeSpentOnDay: {
         ...task.timeSpentOnDay,
         [getTodayStr()]: +newVal,
       }
     });
+  }
+
+  roundTimeForTasks(roundTo: RoundTimeOption, isRoundUp = false) {
+    this._taskService.roundTimeSpentForDay(getWorklogStr(), roundTo, isRoundUp);
   }
 
   onTabIndexChange(i) {
