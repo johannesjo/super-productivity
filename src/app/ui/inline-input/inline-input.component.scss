@@ -9,22 +9,39 @@
   }
 }
 
+:host-context(td) {
+  display: block;
+
+  .inline-input-wrapper {
+    display: block;
+  }
+}
+
 .inline-input-wrapper {
   display: inline-block;
   position: relative;
-  cursor: text;
+  cursor: pointer;
+  width: 100%;
 }
 
 .value-wrapper {
+  display: inline-block;
   user-select: none;
+  position: relative;
+
+  :host:hover & {
+    mat-icon {
+    }
+  }
 }
 
+$this-ico-margin: $s/2;
 mat-icon {
   position: absolute;
   top: 50%;
   left: 100%;
   transform: translate(0, -50%);
-  padding-left: $s/2;
+  padding-left: $this-ico-margin;
   display: none;
 
   :host:hover & {
@@ -36,7 +53,7 @@ mat-icon {
     top: 100%;
     transform: translate(-50%, 0);
     padding-left: 0;
-    padding-top: $s/2;
+    padding-top: $this-ico-margin;
   }
 
   &.isIconPosLeft {
@@ -44,8 +61,15 @@ mat-icon {
     left: auto;
     right: 100%;
     padding-left: 0;
-    padding-right: $s/2;
+    padding-right: $this-ico-margin;
     transform: translate(0, -50%);
+  }
+
+  &.isIconPosBottomRight {
+    top: 100%;
+    left: 100%;
+    transform: translate(-33%, -33%);
+    padding: 0;
   }
 
   input:focus + & {
@@ -67,6 +91,12 @@ input {
   border: 1px solid black;
   text-align: center;
   font-size: 14px;
+  min-height: 100%;
+
+  &.duration-input {
+    width: 100%;
+    min-width: 70px;
+  }
 
   @include darkTheme() {
     color: #fff;

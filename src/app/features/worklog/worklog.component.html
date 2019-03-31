@@ -96,6 +96,7 @@
                                           [value]="logEntry.task.timeSpentOnDay[worklogForDay.value.dateStr]"
                                           [displayValue]="logEntry.task.timeSpentOnDay[worklogForDay.value.dateStr]|msToClockString"
                                           [type]="'duration'"
+                                          [isIconPosBottomRight]="true"
                                           (changed)="updateTimeSpentTodayForTask(logEntry.task,worklogForDay.value.dateStr, $event)">
                             </inline-input>
 

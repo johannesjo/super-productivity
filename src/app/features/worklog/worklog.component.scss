@@ -188,6 +188,11 @@ $this-table-width: 300px;
     &.worked {
       white-space: nowrap;
       text-align: center;
+      padding: 0;
+
+      ::ng-deep .inline-input-wrapper {
+        padding: $s $s*1.5;
+      }
     }
 
     &.actions {
