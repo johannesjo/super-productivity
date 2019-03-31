@@ -4,58 +4,8 @@ import { getWeeksInMonth, WeeksInMonth } from '../../util/get-weeks-in-month';
 import { getWeekNumber } from '../../util/get-week-number';
 import * as moment from 'moment-mini';
 import { WorkStartEnd } from '../project/project.model';
+import {Worklog, WorklogDay, WorklogMonth, WorklogWeek, WorklogYear} from './worklog.model';
 
-export interface WorklogTask extends Task {
-  dateStr?: string;
-}
-
-export interface WorklogDataForDay {
-  timeSpent: number;
-  task: WorklogTask;
-  parentId: string;
-  isNoRestore?: boolean;
-}
-
-export interface WorklogDay {
-  timeSpent: number;
-  logEntries: WorklogDataForDay[];
-  dateStr: string;
-  dayStr: string;
-  workStart: number;
-  workEnd: number;
-}
-
-export interface WorklogWeek extends WeeksInMonth {
-  weekNr: number;
-  timeSpent: number;
-  daysWorked: number;
-  ent: {
-    [key: number]: WorklogDay;
-  };
-}
-
-export interface WorklogMonth {
-  timeSpent: number;
-  daysWorked: number;
-  ent: {
-    [key: number]: WorklogDay;
-  };
-  weeks: WorklogWeek[];
-}
-
-export interface WorklogYear {
-  timeSpent: number;
-  monthWorked: number;
-  daysWorked: number;
-
-  ent: {
-    [key: number]: WorklogMonth;
-  };
-}
-
-export interface Worklog {
-  [key: number]: WorklogYear;
-}
 
 export const mapArchiveToWorklog = (
   taskState: EntityState<Task>,

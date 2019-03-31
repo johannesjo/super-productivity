@@ -2,7 +2,7 @@ import {ChangeDetectionStrategy, ChangeDetectorRef, Component} from '@angular/co
 import {PersistenceService} from '../../core/persistence/persistence.service';
 import {ProjectService} from '../project/project.service';
 import {expandFadeAnimation} from '../../ui/animations/expand.ani';
-import {WorklogDataForDay, WorklogMonth, WorklogWeek} from './map-archive-to-worklog';
+import {WorklogDataForDay, WorklogMonth, WorklogWeek} from './worklog.model';
 import {MatDialog} from '@angular/material';
 import {Task, TaskCopy} from '../tasks/task.model';
 import {TaskService} from '../tasks/task.service';

@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { WorklogService } from '../worklog.service';
 import { DialogWorklogExportComponent } from '../dialog-worklog-export/dialog-worklog-export.component';
 import { MatDialog } from '@angular/material';
-import { WorklogDataForDay } from '../map-archive-to-worklog';
+import { WorklogDataForDay } from '../worklog.model';
 import { expandAnimation, expandFadeAnimation } from '../../../ui/animations/expand.ani';
 import { fadeAnimation } from '../../../ui/animations/fade.ani';
 import { getDateRangeForWeek } from '../../../util/get-date-range-for-week';

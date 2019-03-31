@@ -1,5 +1,5 @@
 import {Injectable} from '@angular/core';
-import {mapArchiveToWorklog, Worklog, WorklogDay, WorklogTask, WorklogWeek} from './map-archive-to-worklog';
+import {Worklog, WorklogDay, WorklogTask, WorklogWeek} from './worklog.model';
 import {EntityState} from '@ngrx/entity';
 import {Task} from '../tasks/task.model';
 import {dedupeByKey} from '../../util/de-dupe-by-key';
@@ -9,6 +9,7 @@ import {BehaviorSubject, combineLatest, Observable} from 'rxjs';
 import {map, switchMap} from 'rxjs/operators';
 import {getWeekNumber} from '../../util/get-week-number';
 import {Project} from '../project/project.model';
+import {mapArchiveToWorklog} from './map-archive-to-worklog';
 
 const EMPTY_ENTITY = {
   ids: [],

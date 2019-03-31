@@ -15,7 +15,7 @@ import { roundDuration } from '../../../util/round-duration';
 import Clipboard from 'clipboard';
 import { SnackService } from '../../../core/snack/snack.service';
 import { WorklogService } from '../worklog.service';
-import { WorklogTask } from '../map-archive-to-worklog';
+import { WorklogTask } from '../worklog.model';
 
 const LINE_SEPARATOR = '\n';
 const EMPTY_VAL = ' - ';
