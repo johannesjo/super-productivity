@@ -18,7 +18,6 @@
         <div class="summary-val">
           <inline-input [value]="started$|async|momentFormat:'HH:mm'"
                         [type]="'time'"
-                        [isIconPosLeft]="true"
                         (changed)="updateWorkStart($event)">
           </inline-input>
           –

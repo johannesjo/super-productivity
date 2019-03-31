@@ -2,11 +2,6 @@
      class="inline-input-wrapper">
   <div class="value-wrapper">
     {{displayValue || value}}
-
-    <mat-icon [class.isIconPosBottom]="isIconPosBottom"
-              [class.isIconPosLeft]="isIconPosLeft"
-              [class.isIconPosBottomRight]="isIconPosBottomRight">edit
-    </mat-icon>
   </div>
 
   <input *ngIf="type==='duration'"

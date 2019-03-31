@@ -46,7 +46,6 @@
                             [value]="logEntry.task.timeSpentOnDay[day.value.dateStr]"
                             [displayValue]="logEntry.task.timeSpentOnDay[day.value.dateStr]|msToClockString"
                             [type]="'duration'"
-                            [isIconPosBottomRight]="true"
                             (changed)="updateTimeSpentTodayForTask(logEntry.task,day.value.dateStr, $event)">
               </inline-input>
             </td>

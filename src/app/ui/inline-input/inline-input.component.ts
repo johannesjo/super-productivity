@@ -20,9 +20,6 @@ export class InlineInputComponent {
   @Input() value: string | number;
   @Input() displayValue: string;
   @Input() newValue: string | number;
-  @Input() isIconPosBottom: boolean;
-  @Input() isIconPosLeft: boolean;
-  @Input() isIconPosBottomRight: boolean;
 
   @Output() changed = new EventEmitter<string | number>();
   @ViewChild('inputEl') inputEl: ElementRef;
