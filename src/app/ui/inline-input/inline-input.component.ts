@@ -40,15 +40,16 @@ export class InlineInputComponent {
 
     this.isFocused = true;
     this.activeInputEl.focus();
-    if (this.type === 'text' || this.type === 'duration') {
-      this.activeInputEl.setSelectionRange(0, this.activeInputEl.value.length);
-    }
+
+    // if (this.type === 'text' || this.type === 'duration') {
+    // this.activeInputEl.setSelectionRange(0, this.activeInputEl.value.length);
+    // }
   }
 
   blur() {
     this.isFocused = false;
 
-    if (this.newValue || this.newValue === '' || this.newValue === 0) {
+    if ((this.newValue || this.newValue === '' || this.newValue === 0) && this.newValue !== this.value) {
       this.changed.emit(this.newValue);
     }
   }
