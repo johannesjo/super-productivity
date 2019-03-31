@@ -7,6 +7,8 @@ import { expandAnimation, expandFadeAnimation } from '../../../ui/animations/exp
 import { fadeAnimation } from '../../../ui/animations/fade.ani';
 import { getDateRangeForWeek } from '../../../util/get-date-range-for-week';
 import { getWeekNumber } from '../../../util/get-week-number';
+import {Task} from '../../tasks/task.model';
+import {TaskService} from '../../tasks/task.service';
 
 @Component({
   selector: 'worklog-week',
@@ -21,6 +23,7 @@ export class WorklogWeekComponent {
   constructor(
     public readonly worklogService: WorklogService,
     private readonly _matDialog: MatDialog,
+    private readonly _taskService: TaskService,
   ) {
   }
 
@@ -44,6 +47,16 @@ export class WorklogWeekComponent {
         rangeEnd,
       }
     });
+  }
+
+  async updateTimeSpentTodayForTask(task: Task, dateStr: string, newVal: number | string) {
+    await this._taskService.updateEverywhere(task.id, {
+      timeSpentOnDay: {
+        ...task.timeSpentOnDay,
+        [dateStr]: +newVal,
+      }
+    });
+    this.worklogService.refreshWorklog();
   }
 
   trackByDay(i, day) {

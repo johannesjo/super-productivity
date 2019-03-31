@@ -117,6 +117,11 @@ $this-border-radius: 8px;
     &.worked {
       white-space: nowrap;
       text-align: center;
+      padding: 0;
+
+      ::ng-deep .inline-input-wrapper {
+        padding: $s $s*1.5;
+      }
     }
 
     &.isSubTask {

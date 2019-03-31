@@ -41,8 +41,15 @@
               <span class="task-title">{{logEntry.task.title}}</span>
             </td>
             <td class="worked">
-              <span *ngIf="logEntry.task.subTaskIds && logEntry.task.subTaskIds.length>0">∑</span>
-              {{logEntry.task.timeSpentOnDay[day.value.dateStr]|msToClockString}}</td>
+              <span *ngIf="logEntry.task.subTaskIds && logEntry.task.subTaskIds.length>0">∑ {{logEntry.task.timeSpentOnDay[day.value.dateStr]|msToClockString}}</span>
+              <inline-input *ngIf="!logEntry.task.subTaskIds || !logEntry.task.subTaskIds.length"
+                            [value]="logEntry.task.timeSpentOnDay[day.value.dateStr]"
+                            [displayValue]="logEntry.task.timeSpentOnDay[day.value.dateStr]|msToClockString"
+                            [type]="'duration'"
+                            [isIconPosBottomRight]="true"
+                            (changed)="updateTimeSpentTodayForTask(logEntry.task,day.value.dateStr, $event)">
+              </inline-input>
+            </td>
           </tr>
         </table>
       </div>
