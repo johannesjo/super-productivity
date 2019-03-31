@@ -1,14 +1,14 @@
-import { Injectable } from '@angular/core';
-import { mapArchiveToWorklog, Worklog, WorklogDay, WorklogTask, WorklogWeek } from './map-archive-to-worklog';
-import { EntityState } from '@ngrx/entity';
-import { Task } from '../tasks/task.model';
-import { dedupeByKey } from '../../util/de-dupe-by-key';
-import { PersistenceService } from '../../core/persistence/persistence.service';
-import { ProjectService } from '../project/project.service';
-import { Observable } from 'rxjs';
-import { map, switchMap } from 'rxjs/operators';
-import { getWeekNumber } from '../../util/get-week-number';
-import { Project } from '../project/project.model';
+import {Injectable} from '@angular/core';
+import {mapArchiveToWorklog, Worklog, WorklogDay, WorklogTask, WorklogWeek} from './map-archive-to-worklog';
+import {EntityState} from '@ngrx/entity';
+import {Task} from '../tasks/task.model';
+import {dedupeByKey} from '../../util/de-dupe-by-key';
+import {PersistenceService} from '../../core/persistence/persistence.service';
+import {ProjectService} from '../project/project.service';
+import {BehaviorSubject, combineLatest, Observable} from 'rxjs';
+import {map, switchMap} from 'rxjs/operators';
+import {getWeekNumber} from '../../util/get-week-number';
+import {Project} from '../project/project.model';
 
 const EMPTY_ENTITY = {
   ids: [],
@@ -19,11 +19,14 @@ const EMPTY_ENTITY = {
   providedIn: 'root'
 })
 export class WorklogService {
-
+  private _archiveUpdateTrigger$ = new BehaviorSubject(true);
 
   // NOTE: task updates are not reflected
-  private _worklogData$: Observable<{ worklog: Worklog; totalTimeSpent: number }> = this._projectService.currentProject$.pipe(
-    switchMap(curProject => {
+  private _worklogData$: Observable<{ worklog: Worklog; totalTimeSpent: number }> = combineLatest(
+    this._projectService.currentProject$,
+    this._archiveUpdateTrigger$,
+  ).pipe(
+    switchMap(([curProject]) => {
       return this._loadForProject(curProject);
     }),
   );
@@ -51,6 +54,10 @@ export class WorklogService {
     this.worklog$.subscribe(worklog => this.worklog = worklog);
   }
 
+
+  refreshWorklog() {
+    this._archiveUpdateTrigger$.next(true);
+  }
 
   getTaskListForRange(rangeStart: Date, rangeEnd: Date, isFilterOutTimeSpentOnOtherDays = false): WorklogTask[] {
     let tasks = this._getAllWorklogTasks();

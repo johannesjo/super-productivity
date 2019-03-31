@@ -87,7 +87,7 @@ export class PersistenceService {
     }
   }
 
-  async loadTaskArchiveForProject(projectId: string): Promise<EntityState<Task>> {
+  async loadTaskArchiveForProject(projectId: string): Promise<EntityState<TaskWithSubTasks>> {
     return this._loadFromDb(this._makeProjectKey(projectId, LS_TASK_ARCHIVE));
   }
 

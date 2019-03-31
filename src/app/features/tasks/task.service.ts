@@ -41,7 +41,7 @@ import {
   UpdateTaskReminder,
   UpdateTaskUi
 } from './store/task.actions';
-import {initialTaskState,} from './store/task.reducer';
+import {initialTaskState, taskReducer, TaskState,} from './store/task.reducer';
 import {PersistenceService} from '../../core/persistence/persistence.service';
 import {IssueData, IssueProviderKey} from '../issue/issue';
 import {TimeTrackingService} from '../time-tracking/time-tracking.service';
@@ -61,6 +61,7 @@ import {
   selectStartableTasks,
   selectTaskById,
   selectTaskByIssueId,
+  selectTaskEntities,
   selectTasksWithMissingIssueData,
   selectTasksWorkedOnOrDoneTodayFlat,
   selectTodaysDoneTasksWithSubTasks,
@@ -76,6 +77,7 @@ import {IssueService} from '../issue/issue.service';
 import {ProjectService} from '../project/project.service';
 import {SnackService} from '../../core/snack/snack.service';
 import {RoundTimeOption} from '../project/project.model';
+import {Dictionary} from '@ngrx/entity';
 
 
 @Injectable({
@@ -112,6 +114,12 @@ export class TaskService {
   todaysTasksFlat$: Observable<TaskWithSubTasks[]> = this._store.pipe(
     select(selectTodaysTasksFlat),
   );
+
+  // todays list flat + tasks worked on today
+  taskEntityState$: Observable<Dictionary<Task>> = this._store.pipe(
+    select(selectTaskEntities),
+  );
+
 
   todaysWorkedOnOrDoneTasksFlat$: Observable<TaskWithSubTasks[]> = this._store.pipe(
     select(selectTasksWorkedOnOrDoneTodayFlat),
@@ -319,6 +327,26 @@ export class TaskService {
     this._store.dispatch(new UpdateTask({
       task: {id, changes: this._shortSyntax(changedFields) as Partial<Task>}
     }));
+  }
+
+  // BEWARE: does only work for task model updates
+  async updateEverywhere(id: string, changedFields: Partial<Task>) {
+    const entities = await this.taskEntityState$.pipe(first()).toPromise();
+    if (entities[id]) {
+      this.update(id, changedFields);
+    } else {
+      await this.updateArchiveTask(id, changedFields);
+    }
+  }
+
+  // BEWARE: does only work for task model updates, but not the meta models
+  async updateArchiveTask(id: string, changedFields: Partial<Task>) {
+    const curProId = this._projectService.currentId;
+    const archiveTaskState = await this._persistenceService.loadTaskArchiveForProject(curProId) as TaskState;
+    const updatedState = taskReducer(archiveTaskState, new UpdateTask({
+      task: {id, changes: this._shortSyntax(changedFields) as Partial<Task>}
+    }));
+    await this._persistenceService.saveToTaskArchiveForProject(curProId, updatedState);
   }
 
   updateUi(id: string, changes: Partial<Task>) {

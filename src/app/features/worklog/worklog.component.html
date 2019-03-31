@@ -91,8 +91,15 @@
                             <span class="task-title">{{logEntry.task.title}}</span>
                           </td>
                           <td class="worked">
-                            <span *ngIf="logEntry.task.subTaskIds && logEntry.task.subTaskIds.length>0">∑</span>
-                            {{logEntry.task.timeSpentOnDay[worklogForDay.value.dateStr]|msToClockString}}</td>
+                            <span *ngIf="logEntry.task.subTaskIds && logEntry.task.subTaskIds.length>0">∑ {{logEntry.task.timeSpentOnDay[worklogForDay.value.dateStr]|msToClockString}}</span>
+                            <inline-input *ngIf="!logEntry.task.subTaskIds || !logEntry.task.subTaskIds.length"
+                                          [value]="logEntry.task.timeSpentOnDay[worklogForDay.value.dateStr]"
+                                          [displayValue]="logEntry.task.timeSpentOnDay[worklogForDay.value.dateStr]|msToClockString"
+                                          [type]="'duration'"
+                                          (changed)="updateTimeSpentTodayForTask(logEntry.task,worklogForDay.value.dateStr, $event)">
+                            </inline-input>
+
+                          </td>
                           <td class="actions">
                             <button mat-icon-button=""
                                     title="Restore Task From Archive"

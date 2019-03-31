@@ -1,18 +1,18 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component } from '@angular/core';
-import { PersistenceService } from '../../core/persistence/persistence.service';
-import { ProjectService } from '../project/project.service';
-import { expandFadeAnimation } from '../../ui/animations/expand.ani';
-import { WorklogDataForDay, WorklogMonth, WorklogWeek } from './map-archive-to-worklog';
-import { MatDialog } from '@angular/material';
-import { TaskCopy } from '../tasks/task.model';
-import { TaskService } from '../tasks/task.service';
-import { DialogWorklogExportComponent } from './dialog-worklog-export/dialog-worklog-export.component';
-import { DialogConfirmComponent } from '../../ui/dialog-confirm/dialog-confirm.component';
-import { Router } from '@angular/router';
-import { standardListAnimation } from '../../ui/animations/standard-list.ani';
-import { WorklogService } from './worklog.service';
-import { getDateRangeForMonth } from '../../util/get-date-range-for-month';
-import { getDateRangeForWeek } from '../../util/get-date-range-for-week';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component} from '@angular/core';
+import {PersistenceService} from '../../core/persistence/persistence.service';
+import {ProjectService} from '../project/project.service';
+import {expandFadeAnimation} from '../../ui/animations/expand.ani';
+import {WorklogDataForDay, WorklogMonth, WorklogWeek} from './map-archive-to-worklog';
+import {MatDialog} from '@angular/material';
+import {Task, TaskCopy} from '../tasks/task.model';
+import {TaskService} from '../tasks/task.service';
+import {DialogWorklogExportComponent} from './dialog-worklog-export/dialog-worklog-export.component';
+import {DialogConfirmComponent} from '../../ui/dialog-confirm/dialog-confirm.component';
+import {Router} from '@angular/router';
+import {standardListAnimation} from '../../ui/animations/standard-list.ani';
+import {WorklogService} from './worklog.service';
+import {getDateRangeForMonth} from '../../util/get-date-range-for-month';
+import {getDateRangeForWeek} from '../../util/get-date-range-for-week';
 
 @Component({
   selector: 'worklog',
@@ -86,5 +86,15 @@ export class WorklogComponent {
 
   trackByForWeek(i, val: WorklogWeek) {
     return val.weekNr;
+  }
+
+  async updateTimeSpentTodayForTask(task: Task, dateStr: string, newVal: number | string) {
+    await this._taskService.updateEverywhere(task.id, {
+      timeSpentOnDay: {
+        ...task.timeSpentOnDay,
+        [dateStr]: +newVal,
+      }
+    });
+    this.worklogService.refreshWorklog();
   }
 }
