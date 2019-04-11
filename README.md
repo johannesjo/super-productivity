@@ -51,6 +51,9 @@ Install via [homebrew cask](https://github.com/caskroom/homebrew-cask) (project 
 brew cask install superProductivity
 ```
 
+## Setup WebDAV Syncing
+When starting the app via the command line the path to where emergency backups are saved is printed out to the command line. Just take away the `/backup` sub folder from the path and use the remaining path to sync via the cloud.
+
 ## More Screenshots
 ![bookmarks](screens/screen_bookmarks.png)
 ![notes](screens/screen_notes.png)
