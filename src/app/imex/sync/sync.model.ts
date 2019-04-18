@@ -7,6 +7,7 @@ import { IssueStateMap } from '../../features/issue/issue';
 import { BookmarkState } from '../../features/bookmark/store/bookmark.reducer';
 import { NoteState } from '../../features/note/store/note.reducer';
 import { Reminder } from '../../features/reminder/reminder.model';
+import {Attachment} from '../../features/attachment/attachment.model';
 
 
 // NOTE: [key:string] always refers to projectId
@@ -27,7 +28,7 @@ export interface AppDataComplete {
     [key: string]: EntityState<Task>;
   };
   taskAttachment?: {
-    [key: string]: EntityState<Task>;
+    [key: string]: EntityState<Attachment>;
   };
   issue?: {
     [key: string]: IssueStateMap;

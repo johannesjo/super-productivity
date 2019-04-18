@@ -1,8 +1,8 @@
-import { Action } from '@ngrx/store';
-import { Update } from '@ngrx/entity';
-import { ProjectState } from './project.reducer';
-import { Project, ProjectAdvancedCfgKey } from '../project.model';
-import { IssueIntegrationCfg, IssueProviderKey } from '../../issue/issue';
+import {Action} from '@ngrx/store';
+import {Update} from '@ngrx/entity';
+import {ProjectState} from './project.reducer';
+import {Project, ProjectAdvancedCfgKey} from '../project.model';
+import {IssueIntegrationCfg, IssueProviderKey} from '../../issue/issue';
 
 export enum ProjectActionTypes {
   LoadProjectState = '[Project] Load Project State',
@@ -21,6 +21,8 @@ export enum ProjectActionTypes {
   UpdateProjectIssueProviderCfg = '[Project] Update Project Issue Provider Cfg',
   DeleteProject = '[Project] Delete Project',
   DeleteProjects = '[Project] Delete Projects',
+  ArchiveProject = '[Project] Archive Project',
+  UnarchiveProject = '[Project] Unarchive Project',
   UpdateProjectOrder = '[Project] Update Project Order',
 }
 
@@ -132,6 +134,20 @@ export class UpdateProjectOrder implements Action {
   }
 }
 
+export class ArchiveProject implements Action {
+  readonly type = ProjectActionTypes.ArchiveProject;
+
+  constructor(public payload: { id: string }) {
+  }
+}
+
+export class UnarchiveProject implements Action {
+  readonly type = ProjectActionTypes.UnarchiveProject;
+
+  constructor(public payload: { id: string }) {
+  }
+}
+
 
 export type ProjectActions
   = LoadProjects
@@ -149,5 +165,7 @@ export type ProjectActions
   | DeleteProject
   | DeleteProjects
   | UpdateProjectOrder
+  | ArchiveProject
+  | UnarchiveProject
   ;
 

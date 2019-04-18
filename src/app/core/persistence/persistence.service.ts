@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import {Injectable} from '@angular/core';
 import {
   LS_BACKUP,
   LS_BOOKMARK_STATE,
@@ -6,6 +6,7 @@ import {
   LS_ISSUE_STATE,
   LS_LAST_ACTIVE,
   LS_NOTE_STATE,
+  LS_PROJECT_ARCHIVE,
   LS_PROJECT_META_LIST,
   LS_PROJECT_PREFIX,
   LS_REMINDER,
@@ -13,22 +14,27 @@ import {
   LS_TASK_ATTACHMENT_STATE,
   LS_TASK_STATE
 } from './ls-keys.const';
-import { GlobalConfig } from '../../features/config/config.model';
-import { IssueProviderKey, IssueState } from '../../features/issue/issue';
-import { ProjectState } from '../../features/project/store/project.reducer';
-import { TaskState } from '../../features/tasks/store/task.reducer';
-import { EntityState } from '@ngrx/entity';
-import { Task, TaskWithSubTasks } from '../../features/tasks/task.model';
-import { AppDataComplete } from '../../imex/sync/sync.model';
-import { BookmarkState } from '../../features/bookmark/store/bookmark.reducer';
-import { AttachmentState } from '../../features/attachment/store/attachment.reducer';
-import { NoteState } from '../../features/note/store/note.reducer';
-import { Reminder } from '../../features/reminder/reminder.model';
-import { SnackService } from '../snack/snack.service';
-import { DatabaseService } from './database.service';
-import { loadFromLs, saveToLs } from './local-storage';
-import { issueProviderKeys } from '../../features/issue/issue.const';
-import { DEFAULT_PROJECT_ID } from '../../features/project/project.const';
+import {GlobalConfig} from '../../features/config/config.model';
+import {IssueProviderKey, IssueState, IssueStateMap} from '../../features/issue/issue';
+import {ProjectState} from '../../features/project/store/project.reducer';
+import {TaskState} from '../../features/tasks/store/task.reducer';
+import {EntityState} from '@ngrx/entity';
+import {Task, TaskWithSubTasks} from '../../features/tasks/task.model';
+import {AppDataComplete} from '../../imex/sync/sync.model';
+import {BookmarkState} from '../../features/bookmark/store/bookmark.reducer';
+import {AttachmentState} from '../../features/attachment/store/attachment.reducer';
+import {NoteState} from '../../features/note/store/note.reducer';
+import {Reminder} from '../../features/reminder/reminder.model';
+import {SnackService} from '../snack/snack.service';
+import {DatabaseService} from './database.service';
+import {loadFromLs, saveToLs} from './local-storage';
+import {GITHUB_TYPE, issueProviderKeys, JIRA_TYPE} from '../../features/issue/issue.const';
+import {DEFAULT_PROJECT_ID} from '../../features/project/project.const';
+import {ArchivedProject} from '../../features/project/project.model';
+import {JiraIssueState} from '../../features/issue/jira/jira-issue/store/jira-issue.reducer';
+import {GithubIssueState} from '../../features/issue/github/github-issue/store/github-issue.reducer';
+import * as lz from 'lz-string';
+
 
 @Injectable({
   providedIn: 'root',
@@ -150,6 +156,61 @@ export class PersistenceService {
   async saveGlobalConfig(globalConfig: GlobalConfig, isForce = false) {
     return this._saveToDb(LS_GLOBAL_CFG, globalConfig, isForce);
   }
+
+  // PROJECT ARCHIVING
+  // -----------------
+  async loadProjectArchive(): Promise<{ [key: string]: string }> {
+    return await this._loadFromDb(LS_PROJECT_ARCHIVE);
+  }
+
+  async saveProjectArchive(data: { [key: string]: string }): Promise<{ [key: string]: string }> {
+    return await this._saveToDb(LS_PROJECT_ARCHIVE, data);
+  }
+
+  async loadArchivedProject(projectId) {
+    const archive = await this._loadFromDb(LS_PROJECT_ARCHIVE);
+    return JSON.parse(lz.decompress(archive[projectId]));
+  }
+
+  async saveArchivedProject(projectId, archivedProject: ArchivedProject) {
+    const current = await this.loadProjectArchive() || {};
+    const jsonStr = JSON.stringify(archivedProject);
+    // TODO make async to prevent stutter
+    const compressedData = lz.compress(jsonStr);
+    console.log(`Compressed project, size before: ${jsonStr.length}, size after: ${compressedData.length}`);
+
+    return this.saveProjectArchive({
+      ...current,
+      [projectId]: compressedData,
+    });
+  }
+
+
+  async loadCompleteForProject(projectId: string): Promise<ArchivedProject> {
+    const issueStateMap: IssueStateMap = {
+      JIRA: await this.loadIssuesForProject(projectId, JIRA_TYPE) as JiraIssueState,
+      GITHUB: await this.loadIssuesForProject(projectId, GITHUB_TYPE) as GithubIssueState,
+    };
+
+    return {
+      note: await this.loadNotesForProject(projectId),
+      bookmark: await this.loadBookmarksForProject(projectId),
+      task: await this.loadTasksForProject(projectId),
+      taskArchive: await this.loadTaskArchiveForProject(projectId),
+      taskAttachment: await this.loadTaskAttachmentsForProject(projectId),
+      issue: issueStateMap,
+    };
+  }
+
+  async archiveProject(projectId: string): Promise<any> {
+    const projectData = await this.loadCompleteForProject(projectId);
+    await this.saveArchivedProject(projectId, projectData);
+    // TODO delete
+  }
+
+  async removeCompleteRelatedDataForProject(projectId: string): Promise<ArchivedProject> {
+  }
+
 
   // BACKUP AND SYNC RELATED
   // -----------------------

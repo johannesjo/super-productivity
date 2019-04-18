@@ -152,6 +152,7 @@
     "karma-jasmine": "~1.1.1",
     "karma-jasmine-html-reporter": "^0.2.2",
     "localforage": "^1.7.3",
+    "lz-string": "^1.4.4",
     "moment-duration-format": "^2.2.2",
     "ng2-dragula": "^2.1.1",
     "ngx-electron": "^2.1.1",

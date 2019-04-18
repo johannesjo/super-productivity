@@ -1,28 +1,29 @@
-import { Injectable } from '@angular/core';
-import { Actions, Effect, ofType } from '@ngrx/effects';
-import { select, Store } from '@ngrx/store';
-import { filter, map, switchMap, tap, withLatestFrom } from 'rxjs/operators';
+import {Injectable} from '@angular/core';
+import {Actions, Effect, ofType} from '@ngrx/effects';
+import {select, Store} from '@ngrx/store';
+import {filter, map, switchMap, tap, withLatestFrom} from 'rxjs/operators';
 import {
   AddProject,
+  ArchiveProject,
   DeleteProject,
   LoadProjectRelatedDataSuccess,
   ProjectActionTypes,
   UpdateProject,
-  UpdateProjectIssueProviderCfg, UpdateProjectOrder,
+  UpdateProjectIssueProviderCfg,
   UpdateProjectWorkEnd,
   UpdateProjectWorkStart
 } from './project.actions';
-import { selectCurrentProject, selectCurrentProjectId, selectProjectFeatureState } from './project.reducer';
-import { PersistenceService } from '../../../core/persistence/persistence.service';
-import { TaskService } from '../../tasks/task.service';
-import { BookmarkService } from '../../bookmark/bookmark.service';
-import { AttachmentService } from '../../attachment/attachment.service';
-import { NoteService } from '../../note/note.service';
-import { IssueService } from '../../issue/issue.service';
-import { SnackService } from '../../../core/snack/snack.service';
-import { SnackOpen } from '../../../core/snack/store/snack.actions';
-import { getWorklogStr } from '../../../util/get-work-log-str';
-import { TaskActionTypes } from '../../tasks/store/task.actions';
+import {selectCurrentProject, selectCurrentProjectId, selectProjectFeatureState} from './project.reducer';
+import {PersistenceService} from '../../../core/persistence/persistence.service';
+import {TaskService} from '../../tasks/task.service';
+import {BookmarkService} from '../../bookmark/bookmark.service';
+import {AttachmentService} from '../../attachment/attachment.service';
+import {NoteService} from '../../note/note.service';
+import {IssueService} from '../../issue/issue.service';
+import {SnackService} from '../../../core/snack/snack.service';
+import {SnackOpen} from '../../../core/snack/store/snack.actions';
+import {getWorklogStr} from '../../../util/get-work-log-str';
+import {TaskActionTypes} from '../../tasks/store/task.actions';
 
 // needed because we always want the check request to the jira api to finish first
 const ISSUE_REFRESH_DELAY = 10000;
@@ -41,6 +42,8 @@ export class ProjectEffects {
         ProjectActionTypes.UpdateProjectWorkStart,
         ProjectActionTypes.UpdateProjectWorkEnd,
         ProjectActionTypes.UpdateProjectOrder,
+        ProjectActionTypes.ArchiveProject,
+        ProjectActionTypes.UnarchiveProject,
       ),
       withLatestFrom(
         this._store$.pipe(select(selectProjectFeatureState))
@@ -58,6 +61,8 @@ export class ProjectEffects {
         ProjectActionTypes.UpdateProjectAdvancedCfg,
         ProjectActionTypes.UpdateProjectIssueProviderCfg,
         ProjectActionTypes.UpdateProjectOrder,
+        ProjectActionTypes.ArchiveProject,
+        ProjectActionTypes.UnarchiveProject,
       ),
       tap(this._persistenceService.saveLastActive.bind(this))
     );
@@ -145,6 +150,21 @@ export class ProjectEffects {
         return new SnackOpen({
           ico: 'delete_forever',
           msg: `Deleted project <strong>${action.payload.id}</strong>`
+        });
+      }),
+    );
+
+
+  @Effect({dispatch: false}) archiveProject: any = this._actions$
+    .pipe(
+      ofType(
+        ProjectActionTypes.ArchiveProject,
+      ),
+      tap(async (action: ArchiveProject) => {
+        await this._persistenceService.archiveProject(action.payload.id);
+        this._snackService.open({
+          ico: 'archive',
+          msg: `Archived project <strong>${action.payload.id}</strong>`
         });
       }),
     );

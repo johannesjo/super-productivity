@@ -16,14 +16,15 @@ import {
   initialProjectState,
   ProjectState,
   selectAdvancedProjectCfg,
-  selectAllProjects,
+  selectArchivedProjects,
   selectCurrentProject,
   selectCurrentProjectId,
   selectProjectById,
   selectProjectGithubCfg,
   selectProjectJiraCfg,
   selectProjectWorkEndForDay,
-  selectProjectWorkStartForDay
+  selectProjectWorkStartForDay,
+  selectUnarchivedProjects
 } from './store/project.reducer';
 import {IssueIntegrationCfg, IssueProviderKey} from '../issue/issue';
 import {JiraCfg} from '../issue/jira/jira';
@@ -39,7 +40,8 @@ import {take} from 'rxjs/operators';
   providedIn: 'root',
 })
 export class ProjectService {
-  list$: Observable<Project[]> = this._store$.pipe(select(selectAllProjects));
+  list$: Observable<Project[]> = this._store$.pipe(select(selectUnarchivedProjects));
+  archived$: Observable<Project[]> = this._store$.pipe(select(selectArchivedProjects));
   currentProject$: Observable<Project> = this._store$.pipe(
     select(selectCurrentProject),
     // TODO investigate share replay issues
@@ -102,6 +104,21 @@ export class ProjectService {
       payload: {state: projectState}
     });
   }
+
+  archive(projectId: string) {
+    this._store$.dispatch({
+      type: ProjectActionTypes.ArchiveProject,
+      payload: {id: projectId}
+    });
+  }
+
+  unarchive(projectId: string) {
+    this._store$.dispatch({
+      type: ProjectActionTypes.UnarchiveProject,
+      payload: {id: projectId}
+    });
+  }
+
 
   getById(id: string): Observable<Project> {
     return this._store$.pipe(select(selectProjectById, {id}), take(1));
