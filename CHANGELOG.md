@@ -1,3 +1,34 @@
+## [2.5.9](https://github.com/johannesjo/super-productivity/compare/v2.5.8...v2.5.9) (2019-04-18)
+
+
+### Bug Fixes
+
+* issue table being broken when using pre with log text ([435babd](https://github.com/johannesjo/super-productivity/commit/435babd))
+
+
+### Features
+
+* add button to edit start/end time ([7844da1](https://github.com/johannesjo/super-productivity/commit/7844da1))
+* add global keyboard shortcut to start/pause last task [#155](https://github.com/johannesjo/super-productivity/issues/155) ([2abf02e](https://github.com/johannesjo/super-productivity/commit/2abf02e))
+* add round time spent button to daily summary ([f969288](https://github.com/johannesjo/super-productivity/commit/f969288))
+* add start/end to daily summary ([50e2c52](https://github.com/johannesjo/super-productivity/commit/50e2c52))
+* allow inline edit for worklog week ([429fc31](https://github.com/johannesjo/super-productivity/commit/429fc31))
+* allow registration of multiple global shortcuts [#155](https://github.com/johannesjo/super-productivity/issues/155) ([230e0d3](https://github.com/johannesjo/super-productivity/commit/230e0d3))
+* allow to edit start and end work time from daily summary ([e1e827b](https://github.com/johannesjo/super-productivity/commit/e1e827b))
+* don't allow editing parent task time spent for daily summary ([0e8f159](https://github.com/johannesjo/super-productivity/commit/0e8f159))
+* get rid off edit icon for inline edit ([e98038a](https://github.com/johannesjo/super-productivity/commit/e98038a))
+* improve inline input ([27dd0dd](https://github.com/johannesjo/super-productivity/commit/27dd0dd))
+* make code smaller inside markdown ([f6efffa](https://github.com/johannesjo/super-productivity/commit/f6efffa))
+* make inline edit work as duration input ([5598592](https://github.com/johannesjo/super-productivity/commit/5598592))
+* **worklog:** make editing time spent for day work ([873f6a6](https://github.com/johannesjo/super-productivity/commit/873f6a6))
+* make inline edit work for start and end time ([64329e3](https://github.com/johannesjo/super-productivity/commit/64329e3))
+* make inline edit work for task time spent ([29d57f3](https://github.com/johannesjo/super-productivity/commit/29d57f3))
+* only show done tasks or those worked on today for daily summary today list ([9a34f0e](https://github.com/johannesjo/super-productivity/commit/9a34f0e))
+* remove auto selection of text for inline input ([8fcfa5b](https://github.com/johannesjo/super-productivity/commit/8fcfa5b))
+* remove modal for start/end time ([97a2af8](https://github.com/johannesjo/super-productivity/commit/97a2af8))
+
+
+
 ## [2.5.8](https://github.com/johannesjo/super-productivity/compare/v2.5.7...v2.5.8) (2019-03-22)
 
 
