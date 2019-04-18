@@ -1,19 +1,19 @@
-import { Injectable } from '@angular/core';
-import { ProjectService } from '../project/project.service';
-import { PersistenceService } from '../../core/persistence/persistence.service';
-import { RecurringConfig, Reminder, ReminderCopy, ReminderType } from './reminder.model';
-import { SnackService } from '../../core/snack/snack.service';
+import {Injectable} from '@angular/core';
+import {ProjectService} from '../project/project.service';
+import {PersistenceService} from '../../core/persistence/persistence.service';
+import {RecurringConfig, Reminder, ReminderCopy, ReminderType} from './reminder.model';
+import {SnackService} from '../../core/snack/snack.service';
 import shortid from 'shortid';
-import { NotifyService } from '../../core/notify/notify.service';
-import { ReplaySubject, Subject } from 'rxjs';
-import { debounce, throttle } from 'throttle-debounce';
-import { promiseTimeout } from '../../util/promise-timeout';
-import { dirtyDeepCopy } from '../../util/dirtyDeepCopy';
-import { ImexMetaService } from '../../imex/imex-meta/imex-meta.service';
-import { TaskService } from '../tasks/task.service';
-import { Note } from '../note/note.model';
-import { Task } from '../tasks/task.model';
-import { NoteService } from '../note/note.service';
+import {NotifyService} from '../../core/notify/notify.service';
+import {ReplaySubject, Subject} from 'rxjs';
+import {throttle} from 'throttle-debounce';
+import {promiseTimeout} from '../../util/promise-timeout';
+import {dirtyDeepCopy} from '../../util/dirtyDeepCopy';
+import {ImexMetaService} from '../../imex/imex-meta/imex-meta.service';
+import {TaskService} from '../tasks/task.service';
+import {Note} from '../note/note.model';
+import {Task} from '../tasks/task.model';
+import {NoteService} from '../note/note.service';
 
 const WORKER_PATH = 'assets/web-workers/reminder.js';
 
@@ -115,6 +115,15 @@ export class ReminderService {
     const reminder = this._reminders.find(reminder_ => reminder_.relatedId === relatedId);
     if (reminder) {
       this.removeReminder(reminder.id);
+    }
+  }
+
+  removeReminderByProjectId(projectId: string) {
+    const reminders = this._reminders.filter(reminder_ => reminder_.projectId === projectId);
+    if (reminders && reminders.length) {
+      reminders.forEach(reminder => {
+        this.removeReminder(reminder.id);
+      });
     }
   }
 

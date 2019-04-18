@@ -24,6 +24,7 @@ import {SnackService} from '../../../core/snack/snack.service';
 import {SnackOpen} from '../../../core/snack/store/snack.actions';
 import {getWorklogStr} from '../../../util/get-work-log-str';
 import {TaskActionTypes} from '../../tasks/store/task.actions';
+import {ReminderService} from '../../reminder/reminder.service';
 
 // needed because we always want the check request to the jira api to finish first
 const ISSUE_REFRESH_DELAY = 10000;
@@ -141,7 +142,7 @@ export class ProjectEffects {
       }),
     );
 
-  @Effect() onProjectDeleted: any = this._actions$
+  @Effect() showDeletionSnack: any = this._actions$
     .pipe(
       ofType(
         ProjectActionTypes.DeleteProject,
@@ -162,6 +163,7 @@ export class ProjectEffects {
       ),
       tap(async (action: ArchiveProject) => {
         await this._persistenceService.archiveProject(action.payload.id);
+        this._reminderService.removeReminderByProjectId(action.payload.id);
         this._snackService.open({
           ico: 'archive',
           msg: `Archived project <strong>${action.payload.id}</strong>`
@@ -176,6 +178,7 @@ export class ProjectEffects {
       ),
       tap(async (action: ArchiveProject) => {
         await this._persistenceService.unarchiveProject(action.payload.id);
+
         this._snackService.open({
           ico: 'unarchive',
           msg: `Unarchived project <strong>${action.payload.id}</strong>`
@@ -219,6 +222,7 @@ export class ProjectEffects {
     private _bookmarkService: BookmarkService,
     private _noteService: NoteService,
     private _attachmentService: AttachmentService,
+    private _reminderService: ReminderService,
   ) {
   }
 
