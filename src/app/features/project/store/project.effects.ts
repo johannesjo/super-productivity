@@ -156,6 +156,18 @@ export class ProjectEffects {
     );
 
 
+  @Effect({dispatch: false}) deleteProjectRelatedData: any = this._actions$
+    .pipe(
+      ofType(
+        ProjectActionTypes.DeleteProject,
+      ),
+      tap(async (action: ArchiveProject) => {
+        await this._persistenceService.removeCompleteRelatedDataForProject(action.payload.id);
+        this._reminderService.removeReminderByProjectId(action.payload.id);
+      }),
+    );
+
+
   @Effect({dispatch: false}) archiveProject: any = this._actions$
     .pipe(
       ofType(
