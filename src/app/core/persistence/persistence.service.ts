@@ -66,6 +66,7 @@ export class PersistenceService {
     return this._saveToDb(LS_REMINDER, reminders, isForce);
   }
 
+  // TASKS
   async saveTasksForProject(projectId, taskState: TaskState, isForce = false): Promise<any> {
     return this._saveToDb(this._makeProjectKey(projectId, LS_TASK_STATE), taskState, isForce);
   }
@@ -74,6 +75,11 @@ export class PersistenceService {
     return this._loadFromDb(this._makeProjectKey(projectId, LS_TASK_STATE));
   }
 
+  async removeTasksForProject(projectId): Promise<TaskState> {
+    return this._removeFromDb(this._makeProjectKey(projectId, LS_TASK_STATE));
+  }
+
+  // TASK ARCHIVE
   async saveToTaskArchiveForProject(projectId, tasksToArchive: EntityState<TaskWithSubTasks>, isForce = false) {
     const lsKey = this._makeProjectKey(projectId, LS_TASK_ARCHIVE);
     const currentArchive: EntityState<Task> = await this._loadFromDb(lsKey);
@@ -97,6 +103,10 @@ export class PersistenceService {
     return this._loadFromDb(this._makeProjectKey(projectId, LS_TASK_ARCHIVE));
   }
 
+  async removeTaskArchiveForProject(projectId: string): Promise<EntityState<TaskWithSubTasks>> {
+    return this._removeFromDb(this._makeProjectKey(projectId, LS_TASK_ARCHIVE));
+  }
+
   async removeTasksFromArchive(projectId: string, taskIds: string[]) {
     const lsKey = this._makeProjectKey(projectId, LS_TASK_ARCHIVE);
     const currentArchive: EntityState<Task> = await this._loadFromDb(lsKey);
@@ -115,6 +125,7 @@ export class PersistenceService {
     }, true);
   }
 
+  // ISSUES
   async saveIssuesForProject(projectId, issueType: IssueProviderKey, data: IssueState, isForce = false): Promise<any> {
     return this._saveToDb(this._makeProjectKey(projectId, LS_ISSUE_STATE, issueType), data, isForce);
   }
@@ -123,6 +134,11 @@ export class PersistenceService {
     return this._loadFromDb(this._makeProjectKey(projectId, LS_ISSUE_STATE, issueType));
   }
 
+  async removeIssuesForProject(projectId, issueType: IssueProviderKey): Promise<IssueState> {
+    return this._removeFromDb(this._makeProjectKey(projectId, LS_ISSUE_STATE, issueType));
+  }
+
+  // BOOKMARKS
   async saveBookmarksForProject(projectId, bookmarkState: BookmarkState, isForce = false) {
     return this._saveToDb(this._makeProjectKey(projectId, LS_BOOKMARK_STATE), bookmarkState, isForce);
   }
@@ -131,6 +147,11 @@ export class PersistenceService {
     return this._loadFromDb(this._makeProjectKey(projectId, LS_BOOKMARK_STATE));
   }
 
+  async removeBookmarksForProject(projectId): Promise<BookmarkState> {
+    return this._removeFromDb(this._makeProjectKey(projectId, LS_BOOKMARK_STATE));
+  }
+
+  // ATTACHMENTS
   async saveTaskAttachmentsForProject(projectId, attachmentState: AttachmentState, isForce = false) {
     return this._saveToDb(this._makeProjectKey(projectId, LS_TASK_ATTACHMENT_STATE), attachmentState, isForce);
   }
@@ -139,12 +160,21 @@ export class PersistenceService {
     return this._loadFromDb(this._makeProjectKey(projectId, LS_TASK_ATTACHMENT_STATE));
   }
 
+  async removeTaskAttachmentsForProject(projectId): Promise<AttachmentState> {
+    return this._removeFromDb(this._makeProjectKey(projectId, LS_TASK_ATTACHMENT_STATE));
+  }
+
+  // NOTES
   async saveNotesForProject(projectId, noteState: NoteState, isForce = false) {
     return this._saveToDb(this._makeProjectKey(projectId, LS_NOTE_STATE), noteState, isForce);
   }
 
   async loadNotesForProject(projectId): Promise<NoteState> {
     return this._loadFromDb(this._makeProjectKey(projectId, LS_NOTE_STATE));
+  }
+
+  async removeNotesForProject(projectId): Promise<NoteState> {
+    return this._removeFromDb(this._makeProjectKey(projectId, LS_NOTE_STATE));
   }
 
   // GLOBAL CONFIG
@@ -167,24 +197,33 @@ export class PersistenceService {
     return await this._saveToDb(LS_PROJECT_ARCHIVE, data);
   }
 
-  async loadArchivedProject(projectId) {
+  async loadArchivedProject(projectId): Promise<ArchivedProject> {
     const archive = await this._loadFromDb(LS_PROJECT_ARCHIVE);
-    return JSON.parse(lz.decompress(archive[projectId]));
+    const projectDataCompressed = archive[projectId];
+    // TODO make async to prevent stutter for large sets of data
+    const decompressed = lz.decompress(projectDataCompressed);
+    const parsed = JSON.parse(decompressed);
+    console.log(`Decompressed project, size before: ${projectDataCompressed.length}, size after: ${decompressed.length}`, parsed);
+    return parsed;
+  }
+
+  async removeArchivedProject(projectId): Promise<any> {
+    const archive = await this._loadFromDb(LS_PROJECT_ARCHIVE);
+    delete archive[projectId];
+    this.saveProjectArchive(archive);
   }
 
   async saveArchivedProject(projectId, archivedProject: ArchivedProject) {
     const current = await this.loadProjectArchive() || {};
     const jsonStr = JSON.stringify(archivedProject);
-    // TODO make async to prevent stutter
+    // TODO make async to prevent stutter for large sets of data
     const compressedData = lz.compress(jsonStr);
-    console.log(`Compressed project, size before: ${jsonStr.length}, size after: ${compressedData.length}`);
-
+    console.log(`Compressed project, size before: ${jsonStr.length}, size after: ${compressedData.length}`, archivedProject);
     return this.saveProjectArchive({
       ...current,
       [projectId]: compressedData,
     });
   }
-
 
   async loadCompleteForProject(projectId: string): Promise<ArchivedProject> {
     const issueStateMap: IssueStateMap = {
@@ -202,15 +241,39 @@ export class PersistenceService {
     };
   }
 
+  async removeCompleteRelatedDataForProject(projectId: string): Promise<any> {
+    await this.removeTasksForProject(projectId);
+    await this.removeTaskArchiveForProject(projectId);
+    await this.removeNotesForProject(projectId);
+    await this.removeTaskAttachmentsForProject(projectId);
+    await this.removeBookmarksForProject(projectId);
+    await issueProviderKeys.forEach(async (key) => {
+      await this.removeIssuesForProject(projectId, key);
+    });
+  }
+
+  async restoreCompleteRelatedDataForProject(projectId: string, data: ArchivedProject): Promise<any> {
+    await this.saveTasksForProject(projectId, data.task);
+    await this.saveToTaskArchiveForProject(projectId, data.taskArchive);
+    await this.saveNotesForProject(projectId, data.note);
+    await this.saveTaskAttachmentsForProject(projectId, data.taskAttachment as AttachmentState);
+    await this.saveBookmarksForProject(projectId, data.bookmark);
+    await issueProviderKeys.forEach(async (key) => {
+      await this.saveIssuesForProject(projectId, key, data.issue[key]);
+    });
+  }
+
   async archiveProject(projectId: string): Promise<any> {
     const projectData = await this.loadCompleteForProject(projectId);
     await this.saveArchivedProject(projectId, projectData);
-    // TODO delete
+    await this.removeCompleteRelatedDataForProject(projectId);
   }
 
-  async removeCompleteRelatedDataForProject(projectId: string): Promise<ArchivedProject> {
+  async unarchiveProject(projectId: string): Promise<any> {
+    const projectData = await this.loadArchivedProject(projectId);
+    await this.restoreCompleteRelatedDataForProject(projectId, projectData);
+    await this.removeArchivedProject(projectId);
   }
-
 
   // BACKUP AND SYNC RELATED
   // -----------------------
@@ -328,6 +391,15 @@ export class PersistenceService {
     } else {
       console.warn('BLOCKED SAVING for ', key);
       return Promise.reject('Data import currently in progress. Saving disabled');
+    }
+  }
+
+  private async _removeFromDb(key: string, isForce = false): Promise<any> {
+    if (!this._isBlockSaving || isForce === true) {
+      return this._databaseService.remove(key);
+    } else {
+      console.warn('BLOCKED SAVING for ', key);
+      return Promise.reject('Data import currently in progress. Removing disabled');
     }
   }
 

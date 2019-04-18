@@ -169,6 +169,20 @@ export class ProjectEffects {
       }),
     );
 
+  @Effect({dispatch: false}) unarchiveProject: any = this._actions$
+    .pipe(
+      ofType(
+        ProjectActionTypes.UnarchiveProject,
+      ),
+      tap(async (action: ArchiveProject) => {
+        await this._persistenceService.unarchiveProject(action.payload.id);
+        this._snackService.open({
+          ico: 'unarchive',
+          msg: `Unarchived project <strong>${action.payload.id}</strong>`
+        });
+      }),
+    );
+
   @Effect() snackUpdateIssueProvider$: any = this._actions$
     .pipe(
       ofType(
