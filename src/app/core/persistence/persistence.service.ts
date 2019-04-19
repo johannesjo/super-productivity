@@ -33,7 +33,7 @@ import {DEFAULT_PROJECT_ID} from '../../features/project/project.const';
 import {ArchivedProject, ProjectArchive} from '../../features/project/project.model';
 import {JiraIssueState} from '../../features/issue/jira/jira-issue/store/jira-issue.reducer';
 import {GithubIssueState} from '../../features/issue/github/github-issue/store/github-issue.reducer';
-import * as lz from 'lz-string';
+import {CompressionService} from '../compression/compression.service';
 
 
 @Injectable({
@@ -45,6 +45,7 @@ export class PersistenceService {
   constructor(
     private _snackService: SnackService,
     private _databaseService: DatabaseService,
+    private _compressionService: CompressionService,
   ) {
   }
 
@@ -201,7 +202,7 @@ export class PersistenceService {
     const archive = await this._loadFromDb(LS_PROJECT_ARCHIVE);
     const projectDataCompressed = archive[projectId];
     // TODO make async to prevent stutter for large sets of data
-    const decompressed = lz.decompress(projectDataCompressed);
+    const decompressed = this._compressionService.decompress(projectDataCompressed);
     const parsed = JSON.parse(decompressed);
     console.log(`Decompressed project, size before: ${projectDataCompressed.length}, size after: ${decompressed.length}`, parsed);
     return parsed;
@@ -217,7 +218,7 @@ export class PersistenceService {
     const current = await this.loadProjectArchive() || {};
     const jsonStr = JSON.stringify(archivedProject);
     // TODO make async to prevent stutter for large sets of data
-    const compressedData = lz.compress(jsonStr);
+    const compressedData = this._compressionService.compress(jsonStr);
     console.log(`Compressed project, size before: ${jsonStr.length}, size after: ${compressedData.length}`, archivedProject);
     return this.saveProjectArchive({
       ...current,
