@@ -320,7 +320,7 @@ export class PersistenceService {
 
         return {
           ...prevAcc,
-          [projectId]: issueStateMap
+          [projectId]: issueStateMap as IssueStateMap
         };
       }, Promise.resolve({})),
     };
