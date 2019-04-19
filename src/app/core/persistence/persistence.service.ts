@@ -201,8 +201,7 @@ export class PersistenceService {
   async loadArchivedProject(projectId): Promise<ArchivedProject> {
     const archive = await this._loadFromDb(LS_PROJECT_ARCHIVE);
     const projectDataCompressed = archive[projectId];
-    // TODO make async to prevent stutter for large sets of data
-    const decompressed = this._compressionService.decompress(projectDataCompressed);
+    const decompressed = await this._compressionService.decompress(projectDataCompressed);
     const parsed = JSON.parse(decompressed);
     console.log(`Decompressed project, size before: ${projectDataCompressed.length}, size after: ${decompressed.length}`, parsed);
     return parsed;
@@ -217,8 +216,7 @@ export class PersistenceService {
   async saveArchivedProject(projectId, archivedProject: ArchivedProject) {
     const current = await this.loadProjectArchive() || {};
     const jsonStr = JSON.stringify(archivedProject);
-    // TODO make async to prevent stutter for large sets of data
-    const compressedData = this._compressionService.compress(jsonStr);
+    const compressedData = await this._compressionService.compress(jsonStr);
     console.log(`Compressed project, size before: ${jsonStr.length}, size after: ${compressedData.length}`, archivedProject);
     return this.saveProjectArchive({
       ...current,
