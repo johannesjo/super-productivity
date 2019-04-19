@@ -229,7 +229,7 @@ export class GoogleDriveSyncEffects {
       from(this._getLocalAppData()).pipe(
         withLatestFrom(this.config$),
         concatMap(([completeData, cfg]) => {
-          const contentObs = (cfg.isCompressData)
+          const contentObs: Observable<string|AppDataComplete> = (cfg.isCompressData)
             ? from(this._compressionService.compressUTF16(JSON.stringify(completeData)))
             : of(completeData);
 
