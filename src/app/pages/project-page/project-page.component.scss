@@ -44,7 +44,6 @@ $project-color-width: $s*3;
     bottom: 0;
     width: $project-color-width;
     position: absolute;
-    cursor: grab;
 
     > * {
       position: absolute;
@@ -52,6 +51,11 @@ $project-color-width: $s*3;
       top: 50%;
       transform: translate(-50%, -50%);
     }
+
+  }
+
+  .drag-handle {
+    cursor: grab;
 
     &:active {
       cursor: grabbing;

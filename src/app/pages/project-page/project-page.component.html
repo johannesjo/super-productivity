@@ -9,9 +9,9 @@
          [@standardList]="(projectService.list$|async)?.length">
       <mat-card *ngFor="let project of (projectService.list$|async); trackBy:trackById;"
                 class="project">
-        <div class="project-color bg-400-el"
+        <div class="project-color bg-400-el drag-handle"
              [ngClass]="project.themeColor">
-          <mat-icon class="drag-handle color-contrast"
+          <mat-icon class="color-contrast"
                     svgIcon="drag_handle">
           </mat-icon>
         </div>
