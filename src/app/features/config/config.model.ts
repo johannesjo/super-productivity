@@ -77,6 +77,7 @@ export interface GoogleDriveSyncConfig {
   isAutoSyncToRemote: boolean;
   isNotifyOnSync: boolean;
   isLoadRemoteDataOnStartup: boolean;
+  isCompressData: boolean;
   syncInterval: number;
   syncFileName: string;
   _lastSync: string;

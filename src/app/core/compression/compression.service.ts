@@ -38,6 +38,20 @@ export class CompressionService {
     });
   }
 
+  async compressUTF16(strToHandle: string): Promise<string> {
+    return this._promisifyWorker({
+      type: 'COMPRESS_UTF16',
+      strToHandle
+    });
+  }
+
+  async decompressUTF16(strToHandle: string): Promise<string> {
+    return this._promisifyWorker({
+      type: 'DECOMPRESS_UTF16',
+      strToHandle
+    });
+  }
+
   private _promisifyWorker(strToHandle): Promise<string> {
     const id = shortid();
 

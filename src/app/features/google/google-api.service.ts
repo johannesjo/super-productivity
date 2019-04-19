@@ -236,6 +236,7 @@ export class GoogleApiService {
     });
   }
 
+  // NOTE: file will always be returned as text (makes sense)
   loadFile(fileId): Observable<any> {
     if (!fileId) {
       this._snackIt('ERROR', 'GoogleApi: No file id specified');
@@ -248,8 +249,9 @@ export class GoogleApiService {
       params: {
         'key': GOOGLE_SETTINGS.API_KEY,
         supportsTeamDrives: true,
-        alt: 'media'
+        alt: 'media',
       },
+      responseType: 'text',
     });
     const metaData = this.getFileInfo(fileId);
 
@@ -264,7 +266,7 @@ export class GoogleApiService {
       );
   }
 
-  saveFile(content, metadata: any = {}): Observable<{}> {
+  saveFile(content: any, metadata: any = {}): Observable<{}> {
     if ((typeof content !== 'string')) {
       content = JSON.stringify(content);
     }
@@ -421,12 +423,14 @@ export class GoogleApiService {
               'Authorization': `Bearer ${this._session.accessToken}`,
             }
           };
+
           const bodyArg = p.data ? [p.data] : [];
           const allArgs = [...bodyArg, {
             headers: new HttpHeaders(p.headers),
             params: new HttpParams({fromObject: p.params}),
             reportProgress: false,
             observe: 'response',
+            responseType: params_.responseType,
           }];
           const req = new HttpRequest(p.method, p.url, ...allArgs);
           return this._http.request(req);

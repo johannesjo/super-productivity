@@ -103,6 +103,11 @@
                           aria-label="Auto sync data TO remote">
           Auto sync data TO remote
         </mat-slide-toggle>
+        <mat-slide-toggle [(ngModel)]="cfg.isCompressData"
+                          name="isCompressData"
+                          aria-label="Compress Data">
+          Compress Data
+        </mat-slide-toggle>
         <mat-slide-toggle [(ngModel)]="cfg.isNotifyOnSync"
                           name="isNotifyOnSync"
                           aria-label="Notify when syncing">

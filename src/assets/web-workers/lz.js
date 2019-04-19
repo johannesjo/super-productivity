@@ -505,12 +505,23 @@ var LZString = (function () {
 })();
 
 
+function handleData(msgData) {
+  switch (msgData.type) {
+    case 'COMPRESS':
+      return LZString.compress(msgData.strToHandle);
+    case 'DECOMPRESS':
+      return LZString.decompress(msgData.strToHandle);
+    case 'COMPRESS_UTF16':
+      return LZString.compressToUTF16(msgData.strToHandle);
+    case 'DECOMPRESS_UTF16':
+      return LZString.decompressFromUTF16(msgData.strToHandle);
+  }
+}
+
 self.onmessage = function (msg) {
   const msgData = msg.data;
   try {
-    const strToHandle = (msgData.type === 'COMPRESS')
-      ? LZString.compress(msgData.strToHandle)
-      : LZString.decompress(msgData.strToHandle);
+    const strToHandle = handleData(msgData);
 
     self.postMessage({
       id: msgData.id,
@@ -522,6 +533,4 @@ self.onmessage = function (msg) {
       err: err,
     });
   }
-
-
 };
