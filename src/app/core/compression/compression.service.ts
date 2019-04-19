@@ -38,7 +38,7 @@ export class CompressionService {
     });
   }
 
-  private _promisifyWorker(strToHandle) {
+  private _promisifyWorker(strToHandle): Promise<string> {
     const id = shortid();
 
     const promise = new Promise(((resolve, reject) => {
@@ -46,7 +46,7 @@ export class CompressionService {
         resolve,
         reject,
       };
-    }));
+    })) as Promise<string>;
 
     this._w.postMessage({
       ...strToHandle,
