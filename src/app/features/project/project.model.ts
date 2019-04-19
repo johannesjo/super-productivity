@@ -103,6 +103,10 @@ export interface ArchivedProject {
   issue?: IssueStateMap;
 }
 
+export interface ProjectArchive {
+  [key: string]: string;
+}
+
 
 export type ProjectCfgFormKey = ProjectAdvancedCfgKey | IssueProviderKey | 'basic';
 

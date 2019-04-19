@@ -30,7 +30,7 @@ import {DatabaseService} from './database.service';
 import {loadFromLs, saveToLs} from './local-storage';
 import {GITHUB_TYPE, issueProviderKeys, JIRA_TYPE} from '../../features/issue/issue.const';
 import {DEFAULT_PROJECT_ID} from '../../features/project/project.const';
-import {ArchivedProject} from '../../features/project/project.model';
+import {ArchivedProject, ProjectArchive} from '../../features/project/project.model';
 import {JiraIssueState} from '../../features/issue/jira/jira-issue/store/jira-issue.reducer';
 import {GithubIssueState} from '../../features/issue/github/github-issue/store/github-issue.reducer';
 import * as lz from 'lz-string';
@@ -189,11 +189,11 @@ export class PersistenceService {
 
   // PROJECT ARCHIVING
   // -----------------
-  async loadProjectArchive(): Promise<{ [key: string]: string }> {
+  async loadProjectArchive(): Promise<ProjectArchive> {
     return await this._loadFromDb(LS_PROJECT_ARCHIVE);
   }
 
-  async saveProjectArchive(data: { [key: string]: string }): Promise<{ [key: string]: string }> {
+  async saveProjectArchive(data: ProjectArchive): Promise<any> {
     return await this._saveToDb(LS_PROJECT_ARCHIVE, data);
   }
 
@@ -306,6 +306,7 @@ export class PersistenceService {
       project: await this.loadProjectsMeta(),
       globalConfig: await this.loadGlobalConfig(),
       reminders: await this.loadReminders(),
+      archivedProjects: await this.loadProjectArchive(),
       bookmark: await this._loadForProjectIds(pids, this.loadBookmarksForProject.bind(this)),
       note: await this._loadForProjectIds(pids, this.loadNotesForProject.bind(this)),
       task: await this._loadForProjectIds(pids, this.loadTasksForProject.bind(this)),
@@ -343,6 +344,7 @@ export class PersistenceService {
       this.saveProjectsMeta(data.project, true),
       this.saveGlobalConfig(data.globalConfig, true),
       this.saveReminders(data.reminders, true),
+      this.saveProjectArchive(data.archivedProjects),
       this._saveForProjectIds(data.bookmark, this.saveBookmarksForProject.bind(this), true),
       this._saveForProjectIds(data.note, this.saveNotesForProject.bind(this), true),
       this._saveForProjectIds(data.task, this.saveTasksForProject.bind(this), true),
