@@ -56,13 +56,20 @@ export type WorklogColTypes =
   | 'ESTIMATE_CLOCK'
   ;
 
+export enum WorklogGrouping {
+  DATE = 'DATE',
+  PARENT = 'PARENT',
+  TASK = 'TASK',
+  WORKLOG = 'WORKLOG'
+}
+
 export interface WorklogExportSettingsCopy {
   roundWorkTimeTo: RoundTimeOption;
   roundStartTimeTo: RoundTimeOption;
   roundEndTimeTo: RoundTimeOption;
   separateTasksBy: string;
   cols: WorklogColTypes[];
-  groupBy: string;
+  groupBy: WorklogGrouping;
 }
 
 export type WorklogExportSettings = Readonly<WorklogExportSettingsCopy>;
