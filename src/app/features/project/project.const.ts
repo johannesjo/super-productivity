@@ -21,6 +21,7 @@ export const WORKLOG_EXPORT_DEFAULTS: WorklogExportSettings = {
   roundStartTimeTo: null,
   roundEndTimeTo: null,
   separateTasksBy: ' | ',
+  groupBy: 'DATE'
 };
 
 export const GOOGLE_TIME_SHEET_EXPORT_DEFAULTS: GoogleTimeSheetExport = {

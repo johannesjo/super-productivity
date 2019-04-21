@@ -62,6 +62,7 @@ export interface WorklogExportSettingsCopy {
   roundEndTimeTo: RoundTimeOption;
   separateTasksBy: string;
   cols: WorklogColTypes[];
+  groupBy: string;
 }
 
 export type WorklogExportSettings = Readonly<WorklogExportSettingsCopy>;
