@@ -2,7 +2,7 @@ import {ChangeDetectionStrategy, Component, EventEmitter, Input, OnDestroy, OnIn
 import {TaskCopy} from '../../tasks/task.model';
 import {ProjectService} from '../../project/project.service';
 import {Subscription} from 'rxjs';
-import {WorklogExportSettingsCopy, WorkStartEnd} from '../../project/project.model';
+import {WorklogExportSettingsCopy, WorklogGrouping, WorkStartEnd} from '../../project/project.model';
 import {WORKLOG_EXPORT_DEFAULTS} from '../../project/project.const';
 import {getWorklogStr} from '../../../util/get-work-log-str';
 import * as moment from 'moment-mini';
@@ -171,7 +171,7 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
     this.options.cols.push('EMPTY');
   }
 
-  private _createRows(tasks: WorklogTask[], startTimes: WorkStartEnd, endTimes: WorkStartEnd, groupBy: string): RowItem[] {
+  private _createRows(tasks: WorklogTask[], startTimes: WorkStartEnd, endTimes: WorkStartEnd, groupBy: WorklogGrouping): RowItem[] {
 
     const _mapToGroups = (task: WorklogTask) => {
       const taskGroups: {[key: string]: RowItem} = {};
@@ -186,7 +186,7 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
         workEnd: undefined,
       };
       switch (groupBy) {
-        case 'DATE':
+        case WorklogGrouping.DATE:
           taskGroups[task.dateStr] = emptyGroup;
           taskGroups[task.dateStr].tasks = [task];
           taskGroups[task.dateStr].dates = [task.dateStr];
@@ -195,7 +195,7 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
           taskGroups[task.dateStr].timeEstimate = task.timeEstimate / Object.keys(task.timeSpentOnDay).length;
           taskGroups[task.dateStr].timeSpent = task.timeSpentOnDay[task.dateStr];
           break;
-        case 'PARENT':
+        case WorklogGrouping.PARENT:
           let child = task;
           while (child.parentId) {
             child = tasks.find(parent => parent.id === task.parentId);
@@ -206,7 +206,7 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
           taskGroups[child.id].timeEstimate = task.timeEstimate;
           taskGroups[child.id].timeSpent = task.timeSpent;
           break;
-        case 'TASK':
+        case WorklogGrouping.TASK:
           taskGroups[task.id] = emptyGroup;
           taskGroups[task.id].tasks = [task];
           taskGroups[task.id].dates = Object.keys(task.timeSpentOnDay);
