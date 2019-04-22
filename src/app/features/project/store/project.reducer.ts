@@ -27,6 +27,9 @@ const {selectIds, selectEntities, selectAll, selectTotal} = projectAdapter.getSe
 export const selectCurrentProjectId = createSelector(selectProjectFeatureState, state => state.currentId);
 export const selectProjectEntities = createSelector(selectProjectFeatureState, selectEntities);
 export const selectAllProjects = createSelector(selectProjectFeatureState, selectAll);
+export const selectUnarchivedProjects = createSelector(selectAllProjects, (projects) => projects.filter(p => !p.isArchived));
+export const selectArchivedProjects = createSelector(selectAllProjects, (projects) => projects.filter(p => p.isArchived));
+
 export const selectIsAllProjectDataLoaded = createSelector(selectProjectFeatureState, state => state.isDataLoaded);
 export const selectCurrentProject = createSelector(selectProjectFeatureState,
   (state) => state.entities[state.currentId]
@@ -55,7 +58,6 @@ export const selectProjectWorkEndForDay = createSelector(
   selectProjectWorkEnd,
   (workEnd: WorkStartEnd, props: { day: string }) => workEnd[props.day]
 );
-
 
 
 // DEFAULT
@@ -197,6 +199,24 @@ export function projectReducer(
 
     case ProjectActionTypes.UpdateProjectOrder: {
       return {...state, ids: action.payload.ids};
+    }
+
+    case ProjectActionTypes.ArchiveProject: {
+      return projectAdapter.updateOne({
+        id: action.payload.id,
+        changes: {
+          isArchived: true,
+        }
+      }, state);
+    }
+
+    case ProjectActionTypes.UnarchiveProject: {
+      return projectAdapter.updateOne({
+        id: action.payload.id,
+        changes: {
+          isArchived: false,
+        }
+      }, state);
     }
 
     default: {

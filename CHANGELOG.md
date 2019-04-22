@@ -1,3 +1,15 @@
+# [2.6.0](https://github.com/johannesjo/super-productivity/compare/v2.5.9...v2.6.0) (2019-04-18)
+
+
+### Features
+
+* **archiveProjects:** enable unarchiving [#104](https://github.com/johannesjo/super-productivity/issues/104) ([73b98f6](https://github.com/johannesjo/super-productivity/commit/73b98f6))
+* **archiveProjects:** make basic archiving possible [#104](https://github.com/johannesjo/super-productivity/issues/104) ([4f01a3b](https://github.com/johannesjo/super-productivity/commit/4f01a3b))
+* **archiveProjects:** remove all reminders for archived project [#104](https://github.com/johannesjo/super-productivity/issues/104) ([6006483](https://github.com/johannesjo/super-productivity/commit/6006483))
+* **project:** remove all related data on deletion ([a60612b](https://github.com/johannesjo/super-productivity/commit/a60612b))
+
+
+
 ## [2.5.9](https://github.com/johannesjo/super-productivity/compare/v2.5.8...v2.5.9) (2019-04-18)
 
 

@@ -1,4 +1,10 @@
-import {IssueIntegrationCfgs, IssueProviderKey} from '../issue/issue';
+import {IssueIntegrationCfgs, IssueProviderKey, IssueStateMap} from '../issue/issue';
+import {NoteState} from '../note/store/note.reducer';
+import {BookmarkState} from '../bookmark/store/bookmark.reducer';
+import {TaskState} from '../tasks/store/task.reducer';
+import {EntityState} from '@ngrx/entity';
+import {Task} from '../tasks/task.model';
+import {Attachment} from '../attachment/attachment.model';
 
 
 export type RoundTimeOption = '5M' | 'QUARTER' | 'HALF' | 'HOUR';
@@ -88,12 +94,27 @@ export type Project = Readonly<{
   themeColor: string;
   isDarkTheme: boolean;
   isReducedTheme: boolean;
+  isArchived: boolean;
   timeWorkedWithoutBreak: number;
   issueIntegrationCfgs: IssueIntegrationCfgs;
   advancedCfg: ProjectAdvancedCfg;
   workStart: WorkStartEnd;
   workEnd: WorkStartEnd;
 }>;
+
+export interface ArchivedProject {
+  note?: NoteState;
+  bookmark?: BookmarkState;
+  task?: TaskState;
+  taskArchive?: EntityState<Task>;
+  taskAttachment?: EntityState<Attachment>;
+  issue?: IssueStateMap;
+}
+
+export interface ProjectArchive {
+  [key: string]: string;
+}
+
 
 export type ProjectCfgFormKey = ProjectAdvancedCfgKey | IssueProviderKey | 'basic';
 

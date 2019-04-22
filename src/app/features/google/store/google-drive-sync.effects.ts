@@ -1,7 +1,7 @@
-import { Injectable } from '@angular/core';
-import { Actions, Effect, ofType } from '@ngrx/effects';
-import { Store } from '@ngrx/store';
-import { ConfigActionTypes, UpdateConfigSection } from '../../config/store/config.actions';
+import {Injectable} from '@angular/core';
+import {Actions, Effect, ofType} from '@ngrx/effects';
+import {Store} from '@ngrx/store';
+import {ConfigActionTypes, UpdateConfigSection} from '../../config/store/config.actions';
 import {
   catchError,
   concatMap,
@@ -15,11 +15,11 @@ import {
   tap,
   withLatestFrom
 } from 'rxjs/operators';
-import { combineLatest, EMPTY, from, interval, Observable, of, throwError } from 'rxjs';
-import { GoogleDriveSyncService } from '../google-drive-sync.service';
-import { GoogleApiService } from '../google-api.service';
-import { ConfigService } from '../../config/config.service';
-import { SnackService } from '../../../core/snack/snack.service';
+import {combineLatest, EMPTY, from, interval, Observable, of, throwError} from 'rxjs';
+import {GoogleDriveSyncService} from '../google-drive-sync.service';
+import {GoogleApiService} from '../google-api.service';
+import {ConfigService} from '../../config/config.service';
+import {SnackService} from '../../../core/snack/snack.service';
 import {
   ChangeSyncFileName,
   CreateSyncFile,
@@ -34,17 +34,18 @@ import {
   SaveToGoogleDriveFlow,
   SaveToGoogleDriveSuccess
 } from './google-drive-sync.actions';
-import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confirm.component';
-import { MatDialog, MatDialogRef } from '@angular/material';
-import { GoogleDriveSyncConfig } from '../../config/config.model';
-import { SyncService } from '../../../imex/sync/sync.service';
-import { SnackOpen } from '../../../core/snack/store/snack.actions';
-import { DEFAULT_SYNC_FILE_NAME } from '../google.const';
-import { DialogConfirmDriveSyncSaveComponent } from '../dialog-confirm-drive-sync-save/dialog-confirm-drive-sync-save.component';
+import {DialogConfirmComponent} from '../../../ui/dialog-confirm/dialog-confirm.component';
+import {MatDialog, MatDialogRef} from '@angular/material';
+import {GoogleDriveSyncConfig} from '../../config/config.model';
+import {SyncService} from '../../../imex/sync/sync.service';
+import {SnackOpen} from '../../../core/snack/store/snack.actions';
+import {DEFAULT_SYNC_FILE_NAME} from '../google.const';
+import {DialogConfirmDriveSyncSaveComponent} from '../dialog-confirm-drive-sync-save/dialog-confirm-drive-sync-save.component';
 import * as moment from 'moment-mini';
-import { DialogConfirmDriveSyncLoadComponent } from '../dialog-confirm-drive-sync-load/dialog-confirm-drive-sync-load.component';
-import { AppDataComplete } from '../../../imex/sync/sync.model';
-import { selectIsGoogleDriveSaveInProgress } from './google-drive-sync.reducer';
+import {DialogConfirmDriveSyncLoadComponent} from '../dialog-confirm-drive-sync-load/dialog-confirm-drive-sync-load.component';
+import {AppDataComplete} from '../../../imex/sync/sync.model';
+import {selectIsGoogleDriveSaveInProgress} from './google-drive-sync.reducer';
+import {CompressionService} from '../../../core/compression/compression.service';
 
 @Injectable()
 export class GoogleDriveSyncEffects {
@@ -227,12 +228,22 @@ export class GoogleDriveSyncEffects {
     concatMap((action: SaveToGoogleDrive): any =>
       from(this._getLocalAppData()).pipe(
         withLatestFrom(this.config$),
-        concatMap(([completeData, cfg]) => this._googleApiService.saveFile(completeData, {
-            title: cfg.syncFileName,
-            id: cfg._backupDocId,
-            editable: true
-          })
-        ),
+        concatMap(([completeData, cfg]) => {
+          const contentObs: Observable<string|AppDataComplete> = (cfg.isCompressData)
+            ? from(this._compressionService.compressUTF16(JSON.stringify(completeData)))
+            : of(completeData);
+
+          return contentObs.pipe(
+            concatMap((content) => {
+              return this._googleApiService.saveFile(content, {
+                title: cfg.syncFileName,
+                id: cfg._backupDocId,
+                editable: true,
+                mimeType: cfg.isCompressData ? 'text/plain' : 'application/json',
+              });
+            }),
+          );
+        }),
         map((response: any) => new SaveToGoogleDriveSuccess({
           response,
           isSkipSnack: action.payload && action.payload.isSkipSnack
@@ -348,6 +359,7 @@ export class GoogleDriveSyncEffects {
     private _googleApiService: GoogleApiService,
     private _configService: ConfigService,
     private _snackService: SnackService,
+    private _compressionService: CompressionService,
     private _matDialog: MatDialog,
     private _syncService: SyncService,
   ) {
@@ -455,10 +467,27 @@ If not please change the Sync file name.`,
     return this._googleApiService.loadFile(this._config._backupDocId);
   }
 
-  private _import(loadRes): Observable<string> {
-    const backupData: AppDataComplete = loadRes.backup;
+  private async _import(loadRes): Promise<string> {
+    let backupData: AppDataComplete;
+
+    // we attempt this regardless of the option, because data might be compressed anyway
+    if (typeof loadRes.backup === 'string') {
+      try {
+        backupData = JSON.parse(loadRes.backup) as AppDataComplete;
+      } catch (e) {
+        try {
+          const decompressedData = await this._compressionService.decompressUTF16(loadRes.backup);
+          backupData = JSON.parse(decompressedData) as AppDataComplete;
+        } catch (e) {
+          console.error('Drive Sync, invalid data');
+          console.warn(e);
+        }
+      }
+    }
+
     return from(this._syncService.loadCompleteSyncData(backupData))
-      .pipe(mapTo(loadRes.meta.modifiedDate));
+      .pipe(mapTo(loadRes.meta.modifiedDate))
+      .toPromise();
   }
 
   private _updateConfig(data: Partial<GoogleDriveSyncConfig>, isSkipLastActive = false): UpdateConfigSection {
