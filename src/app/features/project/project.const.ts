@@ -1,4 +1,4 @@
-import { GoogleTimeSheetExport, Project, SimpleSummarySettings, WorklogExportSettings, WorklogGrouping } from './project.model';
+import { GoogleTimeSheetExport, Project, SimpleSummarySettings, WorklogExportSettings } from './project.model';
 import { DEFAULT_ISSUE_PROVIDER_CFGS } from '../issue/issue.const';
 
 export const SIMPLE_SUMMARY_DEFAULTS: SimpleSummarySettings = {
@@ -21,7 +21,6 @@ export const WORKLOG_EXPORT_DEFAULTS: WorklogExportSettings = {
   roundStartTimeTo: null,
   roundEndTimeTo: null,
   separateTasksBy: ' | ',
-  groupBy: WorklogGrouping.DATE
 };
 
 export const GOOGLE_TIME_SHEET_EXPORT_DEFAULTS: GoogleTimeSheetExport = {

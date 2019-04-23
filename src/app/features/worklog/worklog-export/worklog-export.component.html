@@ -109,18 +109,6 @@
             </mat-select>
           </mat-form-field>
         </div>
-        <div class="col">
-          <mat-form-field>
-            <label>Group by</label>
-            <mat-select (selectionChange)="onOptionsChange()"
-                        [(ngModel)]="options.groupBy">
-              <mat-option *ngFor="let groupByOption of groupByOptions"
-                          [value]="groupByOption.id">
-                {{groupByOption.title}}
-              </mat-option>
-            </mat-select>
-          </mat-form-field>
-        </div>
       </div>
     </section>
   </collapsible>
