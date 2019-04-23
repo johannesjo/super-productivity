@@ -175,7 +175,7 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
 
     const _mapToGroups = (task: WorklogTask) => {
       const taskGroups: {[key: string]: RowItem} = {};
-      const getEmptyGroup = () => {
+      const createEmptyGroup = () => {
         return {
           dates: [],
           timeSpent: 0,
@@ -189,7 +189,7 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
       };
       switch (groupBy) {
         case WorklogGrouping.DATE:
-          if (!task.timeSpentOnDay || (task.subTaskIds && task.subTaskIds.length > 0)) {
+          if (!task.timeSpentOnDay) {
             return {};
           }
           const numDays = Object.keys(task.timeSpentOnDay).length;
@@ -199,9 +199,13 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
               tasks: [task],
               workStart: startTimes[day],
               workEnd: endTimes[day],
-              timeSpent: task.timeSpentOnDay[day],
-              timeEstimate: task.timeEstimate / numDays
+              timeSpent: 0,
+              timeEstimate: 0
             };
+            if (!task.subTaskIds || task.subTaskIds.length === 0) {
+              taskGroups[day].timeSpent = task.timeSpentOnDay[day];
+              taskGroups[day].timeEstimate = task.timeEstimate / numDays;
+            }
           });
           break;
         case WorklogGrouping.PARENT:
@@ -209,14 +213,14 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
           while (child.parentId) {
             child = tasks.find(parent => parent.id === task.parentId);
           }
-          taskGroups[child.id] = getEmptyGroup();
+          taskGroups[child.id] = createEmptyGroup();
           taskGroups[child.id].tasks = [task];
           taskGroups[child.id].dates = Object.keys(task.timeSpentOnDay);
           taskGroups[child.id].timeEstimate = task.timeEstimate;
           taskGroups[child.id].timeSpent = task.timeSpent;
           break;
         case WorklogGrouping.TASK:
-          taskGroups[task.id] = getEmptyGroup();
+          taskGroups[task.id] = createEmptyGroup();
           taskGroups[task.id].tasks = [task];
           taskGroups[task.id].dates = Object.keys(task.timeSpentOnDay);
           taskGroups[task.id].timeEstimate = task.timeEstimate;
@@ -225,7 +229,7 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
         default: // group by work log (don't group at all)
           Object.keys(task.timeSpentOnDay).forEach(day => {
             const groupKey = task.id + '_' + day;
-            taskGroups[groupKey] = getEmptyGroup();
+            taskGroups[groupKey] = createEmptyGroup();
             taskGroups[groupKey].tasks = [task];
             taskGroups[groupKey].dates = [day];
             taskGroups[groupKey].workStart = startTimes[day];
