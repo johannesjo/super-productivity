@@ -175,39 +175,48 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
 
     const _mapToGroups = (task: WorklogTask) => {
       const taskGroups: {[key: string]: RowItem} = {};
-      const emptyGroup = {
-        dates: [],
-        timeSpent: 0,
-        timeEstimate: 0,
-        tasks: [],
-        titlesWithSub: [],
-        titles: [],
-        workStart: undefined,
-        workEnd: undefined,
+      const getEmptyGroup = () => {
+        return {
+          dates: [],
+          timeSpent: 0,
+          timeEstimate: 0,
+          tasks: [],
+          titlesWithSub: [],
+          titles: [],
+          workStart: undefined,
+          workEnd: undefined,
+        };
       };
       switch (groupBy) {
         case WorklogGrouping.DATE:
-          taskGroups[task.dateStr] = emptyGroup;
-          taskGroups[task.dateStr].tasks = [task];
-          taskGroups[task.dateStr].dates = [task.dateStr];
-          taskGroups[task.dateStr].workStart = startTimes[task.dateStr];
-          taskGroups[task.dateStr].workEnd = endTimes[task.dateStr];
-          taskGroups[task.dateStr].timeEstimate = task.timeEstimate / Object.keys(task.timeSpentOnDay).length;
-          taskGroups[task.dateStr].timeSpent = task.timeSpentOnDay[task.dateStr];
+          if (!task.timeSpentOnDay || (task.subTaskIds && task.subTaskIds.length > 0)) {
+            return {};
+          }
+          const numDays = Object.keys(task.timeSpentOnDay).length;
+          Object.keys(task.timeSpentOnDay).forEach(day => {
+            taskGroups[day] = {
+              dates: [day],
+              tasks: [task],
+              workStart: startTimes[day],
+              workEnd: endTimes[day],
+              timeSpent: task.timeSpentOnDay[day],
+              timeEstimate: task.timeEstimate / numDays
+            };
+          });
           break;
         case WorklogGrouping.PARENT:
           let child = task;
           while (child.parentId) {
             child = tasks.find(parent => parent.id === task.parentId);
           }
-          taskGroups[child.id] = emptyGroup;
+          taskGroups[child.id] = getEmptyGroup();
           taskGroups[child.id].tasks = [task];
           taskGroups[child.id].dates = Object.keys(task.timeSpentOnDay);
           taskGroups[child.id].timeEstimate = task.timeEstimate;
           taskGroups[child.id].timeSpent = task.timeSpent;
           break;
         case WorklogGrouping.TASK:
-          taskGroups[task.id] = emptyGroup;
+          taskGroups[task.id] = getEmptyGroup();
           taskGroups[task.id].tasks = [task];
           taskGroups[task.id].dates = Object.keys(task.timeSpentOnDay);
           taskGroups[task.id].timeEstimate = task.timeEstimate;
@@ -216,7 +225,7 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
         default: // group by work log (don't group at all)
           Object.keys(task.timeSpentOnDay).forEach(day => {
             const groupKey = task.id + '_' + day;
-            taskGroups[groupKey] = emptyGroup;
+            taskGroups[groupKey] = getEmptyGroup();
             taskGroups[groupKey].tasks = [task];
             taskGroups[groupKey].dates = [day];
             taskGroups[groupKey].workStart = startTimes[day];
@@ -236,8 +245,12 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
         if (groups[groupKey]) {
           groups[groupKey].tasks.push(...taskGroups[groupKey].tasks);
           groups[groupKey].dates.push(...taskGroups[groupKey].dates);
-          groups[groupKey].workStart = Math.min(groups[groupKey].workStart, taskGroups[groupKey].workStart);
-          groups[groupKey].workEnd = Math.min(groups[groupKey].workEnd, taskGroups[groupKey].workEnd);
+          if (taskGroups[groupKey].workStart !== undefined) {
+            groups[groupKey].workStart = Math.min(groups[groupKey].workStart, taskGroups[groupKey].workStart);
+          }
+          if (taskGroups[groupKey].workEnd !== undefined) {
+            groups[groupKey].workEnd = Math.min(groups[groupKey].workEnd, taskGroups[groupKey].workEnd);
+          }
           groups[groupKey].timeEstimate += taskGroups[groupKey].timeEstimate;
           groups[groupKey].timeSpent += taskGroups[groupKey].timeSpent;
         } else {
