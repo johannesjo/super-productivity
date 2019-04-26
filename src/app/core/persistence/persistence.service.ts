@@ -194,8 +194,8 @@ export class PersistenceService {
     return await this._loadFromDb(LS_PROJECT_ARCHIVE);
   }
 
-  async saveProjectArchive(data: ProjectArchive): Promise<any> {
-    return await this._saveToDb(LS_PROJECT_ARCHIVE, data);
+  async saveProjectArchive(data: ProjectArchive, isForce = false): Promise<any> {
+    return await this._saveToDb(LS_PROJECT_ARCHIVE, data, isForce);
   }
 
   async loadArchivedProject(projectId): Promise<ArchivedProject> {
@@ -343,7 +343,7 @@ export class PersistenceService {
       this.saveProjectsMeta(data.project, true),
       this.saveGlobalConfig(data.globalConfig, true),
       this.saveReminders(data.reminders, true),
-      this.saveProjectArchive(data.archivedProjects),
+      this.saveProjectArchive(data.archivedProjects, true),
       this._saveForProjectIds(data.bookmark, this.saveBookmarksForProject.bind(this), true),
       this._saveForProjectIds(data.note, this.saveNotesForProject.bind(this), true),
       this._saveForProjectIds(data.task, this.saveTasksForProject.bind(this), true),
