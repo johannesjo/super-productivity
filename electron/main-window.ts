@@ -88,7 +88,15 @@ function initWinEventListeners(app: any) {
   // open new window links in browser
   mainWin.webContents.on('new-window', function (event, url) {
     event.preventDefault();
-    shell.openItem(url);
+    // needed for mac; especially for jira urls we might have a host like this www.host.de//
+    const urlObj = new URL(url);
+    urlObj.pathname = urlObj.pathname
+      .replace('//', '/');
+    const wellFormedUrl = urlObj.toString();
+    const wasOpened = shell.openItem(wellFormedUrl);
+    if (!wasOpened) {
+      shell.openExternal(wellFormedUrl);
+    }
   });
 
   let isQuiting = false;
