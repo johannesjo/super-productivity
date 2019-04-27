@@ -22,7 +22,7 @@ export class FileImexComponent {
   ) {
   }
 
-  importData() {
+  async importData() {
     if (this.importDataString && this.importDataString.length > 0) {
       let data: AppDataComplete;
       let oldData: OldDataExport;
@@ -33,9 +33,9 @@ export class FileImexComponent {
       }
 
       if (oldData.config && Array.isArray(oldData.tasks)) {
-        this._migrateService.migrateData(oldData);
+        await this._migrateService.migrateData(oldData);
       } else {
-        this._syncService.loadCompleteSyncData(data);
+        await this._syncService.loadCompleteSyncData(data);
       }
     }
   }
@@ -43,6 +43,7 @@ export class FileImexComponent {
   async downloadBackup() {
     const el = this.exportDataBtn.nativeElement;
     const data = await this._syncService.getCompleteSyncData();
+    console.log(data);
     const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(data));
 
     el.setAttribute('href', dataStr);
