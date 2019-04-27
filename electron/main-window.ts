@@ -44,7 +44,8 @@ export const createWindow = function (params) {
     show: false,
     webPreferences: {
       scrollBounce: true,
-      webSecurity: !IS_DEV
+      webSecurity: !IS_DEV,
+      nodeIntegration: true,
     },
     icon: ICONS_FOLDER + '/icon_256x256.png'
   });

@@ -139,7 +139,7 @@
     "clipboard": "^2.0.1",
     "codelyzer": "^4.5.0",
     "core-js": "^2.5.4",
-    "electron": "4.1.1",
+    "electron": "5.0.0",
     "electron-builder": "^20.39.0",
     "electron-reload": "^1.2.5",
     "hammerjs": "^2.0.8",
