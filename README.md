@@ -1,6 +1,6 @@
 # Super Productivity
 
-This is a ToDo List / Time Tracker / Personal Jira Task Manager for Linux, MacOS and Windows to make you work super productively. 
+This is a ToDo List / Time Tracker / Personal Jira Task Manager for Linux, MacOS and Windows to make you work super productively. Organize yourself at one place while making time tracking a lot less annoying.
 
 ![Work View with global links](screens/screen_standard.png)
 
