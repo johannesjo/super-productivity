@@ -3,12 +3,11 @@
   flex-wrap: wrap;
   flex-direction: column;
 }
-
-@media(min-width: 600px) {
-  min-width: 500px;
-}
-
 .form-wrapper {
   display: flex;
   flex-direction: column;
+
+  @media(min-width: 600px) {
+    min-width: 500px;
+  }
 }
