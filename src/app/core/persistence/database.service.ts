@@ -47,7 +47,7 @@ export class DatabaseService {
 
   private _init() {
     localForage.config({
-      driver: localForage.INDEXEDDB, // Force WebSQL; same as using setDriver()
+      driver: [localForage.INDEXEDDB, localForage.WEBSQL, localForage.LOCALSTORAGE],
       name: 'SUP',
       // version: 1.0,
       storeName: 'SUP_STORE', // Should be alphanumeric, with underscores.
