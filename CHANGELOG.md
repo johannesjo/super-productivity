@@ -1,3 +1,29 @@
+## [2.6.1](https://github.com/johannesjo/super-productivity/compare/v2.6.0...v2.6.1) (2019-05-03)
+
+
+### Bug Fixes
+
+* **projectArchive:** data import not set up correctly ([16010ac](https://github.com/johannesjo/super-productivity/commit/16010ac))
+* **projectArchive:** typing ([f6f3a1f](https://github.com/johannesjo/super-productivity/commit/f6f3a1f))
+* external links not opening for mac ([291e7e2](https://github.com/johannesjo/super-productivity/commit/291e7e2))
+* typing issue ([fac656e](https://github.com/johannesjo/super-productivity/commit/fac656e))
+* typing issue ([7382ae3](https://github.com/johannesjo/super-productivity/commit/7382ae3))
+
+
+### Features
+
+* **googleDriveSync:** allow for compression ([dec7e1e](https://github.com/johannesjo/super-productivity/commit/dec7e1e))
+* **project:** improve overview styling ([518597e](https://github.com/johannesjo/super-productivity/commit/518597e))
+* **projectArchive:** add simple compression service ([ee67ec0](https://github.com/johannesjo/super-productivity/commit/ee67ec0))
+* **projectArchive:** add to sync model ([6f3b8be](https://github.com/johannesjo/super-productivity/commit/6f3b8be))
+* **projectArchive:** handle compression via web worker to improve speed ([715dc18](https://github.com/johannesjo/super-productivity/commit/715dc18))
+* add fallback driver for database ([58929c7](https://github.com/johannesjo/super-productivity/commit/58929c7))
+* clear database when syncing ([19610be](https://github.com/johannesjo/super-productivity/commit/19610be))
+* improve file imex ([2ee3dd0](https://github.com/johannesjo/super-productivity/commit/2ee3dd0))
+* improve issue content styling ([7eeb28f](https://github.com/johannesjo/super-productivity/commit/7eeb28f))
+
+
+
 # [2.6.0](https://github.com/johannesjo/super-productivity/compare/v2.5.9...v2.6.0) (2019-04-18)
 
 
