@@ -14,13 +14,13 @@
   <table class="issue-table">
     <tr>
       <th>Summary</th>
-      <th>{{issueData?.title}} #{{issueData?.number}}</th>
+      <td><strong>{{issueData?.title}} #{{issueData?.number}}</strong></td>
     </tr>
     <tr>
       <th>Status</th>
       <td>{{issueData?.state}}</td>
     </tr>
-    <tr>
+    <tr *ngIf="issueData?.assignee?.html_url">
       <th>Assignee</th>
       <td><a [href]="issueData?.assignee?.html_url">{{issueData?.assignee?.login}}</a></td>
     </tr>
@@ -34,42 +34,39 @@
         </mat-chip-list>
       </td>
     </tr>
-    <tr>
+    <tr *ngIf="issueData.body">
       <th>Description</th>
       <td>
-        <!--<inline-markdown [model]="issueData?.body"></inline-markdown>-->
         <div class="description markdown"
              markdown
-             [data]="issueData?.body"
-             *ngIf="issueData.body"></div>
-      </td>
-    </tr>
-
-    <tr *ngIf="issueData?.comments">
-      <th>Comments</th>
-      <td>
-        <div class="comment"
-             *ngFor="let comment of issueData?.comments">
-          <!--<img [src]="comment.author.avatarUrl"-->
-          <!--class="author-avatar">-->
-          <div class="name-and-comment-content">
-            <div><span class="author-name">{{comment.user?.login}}</span>
-              <span class="when">at {{comment.created_at|date:'short'}}</span>
-            </div>
-            <div [innerHTML]="comment?.body|markdown"
-                 *ngIf="comment.body"></div>
-          </div>
-        </div>
-
-        <a [href]="issueData?.url"
-           mat-raised-button=""
-           target="_blank">
-          <mat-icon>textsms</mat-icon>
-          Write a comment</a>
+             [data]="issueData?.body"></div>
       </td>
     </tr>
   </table>
 
+  <div *ngIf="issueData?.comments">
+    <div class="comment"
+         *ngFor="let comment of issueData?.comments">
+      <!--<img [src]="comment.author.avatarUrl"-->
+      <!--class="author-avatar">-->
+      <div class="name-and-comment-content">
+        <div><span class="author-name">{{comment.user?.login}}</span>
+          <span class="when">at {{comment.created_at|date:'short'}}</span>
+        </div>
+        <div [innerHTML]="comment?.body|markdown"
+             *ngIf="comment.body"></div>
+      </div>
+    </div>
+  </div>
+
+  <div style="text-align: center">
+    <a [href]="issueData?.url"
+       class="write-a-comment"
+       mat-raised-button=""
+       target="_blank">
+      <mat-icon>textsms</mat-icon>
+      Write a comment</a>
+  </div>
   <!--<pre><code>-->
   <!--{{issueData?|json}}-->
   <!--</code></pre>-->

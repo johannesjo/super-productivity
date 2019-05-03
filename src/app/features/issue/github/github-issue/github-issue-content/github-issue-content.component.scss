@@ -10,7 +10,13 @@
 
 .comment {
   display: flex;
-  margin-bottom: $s*2;
+  margin-bottom: $s*1;
+  padding-top: $s*1;
+  border-top: 1px dashed $light-theme-extra-border-color;
+
+  @include darkTheme {
+    border-color: $dark-theme-extra-border-color;
+  }
 
   .author-avatar {
     margin-right: $s;
@@ -30,5 +36,17 @@
   }
 
   .name-and-comment-content {
+    max-width: 100%;
   }
+
+  pre {
+    overflow: auto;
+    border: 1px dashed $light-theme-extra-border-color;
+    padding: $s;
+  }
+}
+
+.write-a-comment {
+  // needed for the box-shadow inside scrollable container
+  margin-bottom: $s;
 }

@@ -1,24 +1,43 @@
+@import "../../variables";
+
 .issue-table {
   width: 100%;
+  display: block;
+
+  pre {
+    overflow: auto;
+    border: 1px dashed $light-theme-extra-border-color;
+    padding: $s;
+  }
+
+  tr {
+    display: flex;
+    flex-wrap: wrap;
+  }
 
   td,
   th {
     vertical-align: top;
     padding-bottom: $s;
     padding-left: $s;
+    display: block;
 
     &:first-child {
       padding-left: 0;
     }
   }
 
+  th {
+    min-width: 90px;
+  }
+
   // to shrink the th col to a min
   td {
-    width: 100%;
     overflow-wrap: break-word;
     word-wrap: break-word;
     word-break: break-word;
     hyphens: auto;
+    padding-left: 0;
 
     ::ng-deep img,
     img {
