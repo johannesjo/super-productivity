@@ -1,6 +1,6 @@
-import {Injectable} from '@angular/core';
+import { Injectable } from '@angular/core';
 import * as localForage from 'localforage';
-import {SnackService} from '../snack/snack.service';
+import { SnackService } from '../snack/snack.service';
 
 @Injectable({
   providedIn: 'root',
@@ -37,9 +37,17 @@ export class DatabaseService {
     }
   }
 
+  async clearDatabase(): Promise<any> {
+    try {
+      return localForage.ready().then(() => localForage.clear());
+    } catch (e) {
+      this._snackService.open({type: 'ERROR', msg: 'Error while deleting data'});
+    }
+  }
+
   private _init() {
     localForage.config({
-      driver: localForage.INDEXEDDB, // Force WebSQL; same as using setDriver()
+      driver: [localForage.INDEXEDDB, localForage.WEBSQL, localForage.LOCALSTORAGE],
       name: 'SUP',
       // version: 1.0,
       storeName: 'SUP_STORE', // Should be alphanumeric, with underscores.
