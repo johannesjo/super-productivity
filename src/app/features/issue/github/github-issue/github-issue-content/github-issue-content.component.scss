@@ -1,5 +1,7 @@
 @import '../../../../../../variables';
 
+// table styled by ./src/styles/components/issue-table.scss
+
 .table-wrapper {
   margin: $s*2;
   margin-bottom: $s;
@@ -29,9 +31,4 @@
 
   .name-and-comment-content {
   }
-
-}
-
-.attachment {
-  //margin-bottom: $s;
 }
