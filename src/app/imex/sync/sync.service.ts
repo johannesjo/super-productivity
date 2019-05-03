@@ -1,16 +1,16 @@
-import { Injectable } from '@angular/core';
-import { AppDataComplete } from './sync.model';
-import { PersistenceService } from '../../core/persistence/persistence.service';
-import { SnackService } from '../../core/snack/snack.service';
-import { ProjectService } from '../../features/project/project.service';
-import { ConfigService } from '../../features/config/config.service';
-import { TaskService } from '../../features/tasks/task.service';
-import { BookmarkService } from '../../features/bookmark/bookmark.service';
-import { NoteService } from '../../features/note/note.service';
-import { JiraIssueService } from '../../features/issue/jira/jira-issue/jira-issue.service';
-import { AttachmentService } from '../../features/attachment/attachment.service';
-import { ReminderService } from '../../features/reminder/reminder.service';
-import { ImexMetaService } from '../imex-meta/imex-meta.service';
+import {Injectable} from '@angular/core';
+import {AppDataComplete} from './sync.model';
+import {PersistenceService} from '../../core/persistence/persistence.service';
+import {SnackService} from '../../core/snack/snack.service';
+import {ProjectService} from '../../features/project/project.service';
+import {ConfigService} from '../../features/config/config.service';
+import {TaskService} from '../../features/tasks/task.service';
+import {BookmarkService} from '../../features/bookmark/bookmark.service';
+import {NoteService} from '../../features/note/note.service';
+import {JiraIssueService} from '../../features/issue/jira/jira-issue/jira-issue.service';
+import {AttachmentService} from '../../features/attachment/attachment.service';
+import {ReminderService} from '../../features/reminder/reminder.service';
+import {ImexMetaService} from '../imex-meta/imex-meta.service';
 
 // TODO some of this can be done in a background script
 
@@ -46,9 +46,12 @@ export class SyncService {
   }
 
   async loadCompleteSyncData(data: AppDataComplete) {
-    this._imexMetaService.setInProgress(true);
-    await this._saveBackup();
     this._snackService.open({msg: 'Importing data', ico: 'cloud_download'});
+    this._imexMetaService.setInProgress(true);
+
+    // get rid of outdated project data
+    await this._persistenceService.saveBackup();
+    await this._persistenceService.clearDatabaseExceptBackup();
 
     if (this._checkData(data)) {
       const curId = data.project.currentId;
@@ -102,10 +105,6 @@ export class SyncService {
       this._jiraIssueService.loadStateForProject(curId),
       this._attachmentService.loadStateForProject(curId),
     ]);
-  }
-
-  private async _saveBackup(): Promise<any> {
-    return await this._persistenceService.saveBackup();
   }
 
   private async _loadBackup(): Promise<any> {

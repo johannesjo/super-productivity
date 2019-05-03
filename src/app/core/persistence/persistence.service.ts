@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import {Injectable} from '@angular/core';
 import {
   LS_BACKUP,
   LS_BOOKMARK_STATE,
@@ -14,26 +14,26 @@ import {
   LS_TASK_ATTACHMENT_STATE,
   LS_TASK_STATE
 } from './ls-keys.const';
-import { GlobalConfig } from '../../features/config/config.model';
-import { IssueProviderKey, IssueState, IssueStateMap } from '../../features/issue/issue';
-import { ProjectState } from '../../features/project/store/project.reducer';
-import { TaskState } from '../../features/tasks/store/task.reducer';
-import { EntityState } from '@ngrx/entity';
-import { Task, TaskWithSubTasks } from '../../features/tasks/task.model';
-import { AppDataComplete } from '../../imex/sync/sync.model';
-import { BookmarkState } from '../../features/bookmark/store/bookmark.reducer';
-import { AttachmentState } from '../../features/attachment/store/attachment.reducer';
-import { NoteState } from '../../features/note/store/note.reducer';
-import { Reminder } from '../../features/reminder/reminder.model';
-import { SnackService } from '../snack/snack.service';
-import { DatabaseService } from './database.service';
-import { loadFromLs, saveToLs } from './local-storage';
-import { GITHUB_TYPE, issueProviderKeys, JIRA_TYPE } from '../../features/issue/issue.const';
-import { DEFAULT_PROJECT_ID } from '../../features/project/project.const';
-import { ArchivedProject, ProjectArchive } from '../../features/project/project.model';
-import { JiraIssueState } from '../../features/issue/jira/jira-issue/store/jira-issue.reducer';
-import { GithubIssueState } from '../../features/issue/github/github-issue/store/github-issue.reducer';
-import { CompressionService } from '../compression/compression.service';
+import {GlobalConfig} from '../../features/config/config.model';
+import {IssueProviderKey, IssueState, IssueStateMap} from '../../features/issue/issue';
+import {ProjectState} from '../../features/project/store/project.reducer';
+import {TaskState} from '../../features/tasks/store/task.reducer';
+import {EntityState} from '@ngrx/entity';
+import {Task, TaskWithSubTasks} from '../../features/tasks/task.model';
+import {AppDataComplete} from '../../imex/sync/sync.model';
+import {BookmarkState} from '../../features/bookmark/store/bookmark.reducer';
+import {AttachmentState} from '../../features/attachment/store/attachment.reducer';
+import {NoteState} from '../../features/note/store/note.reducer';
+import {Reminder} from '../../features/reminder/reminder.model';
+import {SnackService} from '../snack/snack.service';
+import {DatabaseService} from './database.service';
+import {loadFromLs, saveToLs} from './local-storage';
+import {GITHUB_TYPE, issueProviderKeys, JIRA_TYPE} from '../../features/issue/issue.const';
+import {DEFAULT_PROJECT_ID} from '../../features/project/project.const';
+import {ArchivedProject, ProjectArchive} from '../../features/project/project.model';
+import {JiraIssueState} from '../../features/issue/jira/jira-issue/store/jira-issue.reducer';
+import {GithubIssueState} from '../../features/issue/github/github-issue/store/github-issue.reducer';
+import {CompressionService} from '../compression/compression.service';
 
 
 @Injectable({
@@ -297,6 +297,7 @@ export class PersistenceService {
     return this._saveToDb(LS_BACKUP, backupData, true);
   }
 
+  // NOTE: not including backup
   async loadComplete(): Promise<AppDataComplete> {
     const projectState = await this.loadProjectsMeta();
     const pids = projectState ? projectState.ids as string[] : [DEFAULT_PROJECT_ID];
@@ -331,11 +332,6 @@ export class PersistenceService {
     console.log('IMPORT--->', data);
     this._isBlockSaving = true;
 
-    // clear database completely before but make sure backup is not touched
-    const backup: AppDataComplete = await this.loadBackup();
-    await this._databaseService.clearDatabase();
-    await this.saveBackup(backup);
-
     const issuePromises = [];
     Object.keys(data.issue).forEach(projectId => {
       const issueData = data.issue[projectId];
@@ -362,6 +358,20 @@ export class PersistenceService {
       .catch(() => {
         this._isBlockSaving = false;
       });
+  }
+
+  async cleanDatabase() {
+    const completeData: AppDataComplete = await this.loadComplete();
+    await this._databaseService.clearDatabase();
+    await this.importComplete(completeData);
+  }
+
+  async clearDatabaseExceptBackup() {
+    const backup: AppDataComplete = await this.loadBackup();
+    await this._databaseService.clearDatabase();
+    if (backup) {
+      await this.saveBackup(backup);
+    }
   }
 
   private async _loadForProjectIds(pids, getDataFn: Function) {
