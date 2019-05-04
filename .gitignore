@@ -39,7 +39,9 @@ testem.log
 .DS_Store
 Thumbs.db
 
-
+# sometimes idea does compile ts files...
+src/app/**/*.js
+src/app/**/*.js.map
 # added
 build/hub
 electron/**/*.js
