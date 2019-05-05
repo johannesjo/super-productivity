@@ -31,6 +31,10 @@ import {MyHammerConfig} from '../hammer-config.class';
 import {ProcrastinationModule} from './features/procrastination/procrastination.module';
 import {TaskRepeatCfgModule} from './features/task-repeat-cfg/task-repeat-cfg.module';
 
+export function createTranslateLoader(http: HttpClient) {
+  return new TranslateHttpLoader(http, './assets/i18n/', '.json');
+}
+
 @NgModule({
   declarations: [
     AppComponent,
@@ -52,6 +56,7 @@ import {TaskRepeatCfgModule} from './features/task-repeat-cfg/task-repeat-cfg.mo
     ReminderModule,
     MigrateModule,
     CoreUiModule,
+    NoteModule,
 
     // External
     BrowserModule,
@@ -74,7 +79,13 @@ import {TaskRepeatCfgModule} from './features/task-repeat-cfg/task-repeat-cfg.mo
     }),
     FormlyMaterialModule,
     ServiceWorkerModule.register('ngsw-worker.js', {enabled: environment.production}),
-    NoteModule,
+    TranslateModule.forRoot({
+      loader: {
+        provide: TranslateLoader,
+        useFactory: (createTranslateLoader),
+        deps: [HttpClient]
+      }
+    }),
   ],
   bootstrap: [AppComponent],
   providers: [
