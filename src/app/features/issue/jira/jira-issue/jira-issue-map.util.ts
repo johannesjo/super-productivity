@@ -56,6 +56,7 @@ export const mapIssue = (issue: JiraIssueOriginal, cfg: JiraCfg): JiraIssue => {
     updated: fields.updated,
     lastUpdateFromRemote: Date.now(),
     status: fields.status,
+    storyPoints: cfg.storyPointFieldId && fields[cfg.storyPointFieldId],
     attachments: fields.attachment && fields.attachment.map(mapAttachment),
     comments: fields.comment && fields.comment.comments.map(mapComments),
     changelog: mapChangelog(issueCopy.changelog),

@@ -35,6 +35,10 @@
         <!--*ngIf="issueData?.status?.iconUrl">-->
         {{issueData.status?.name}}</td>
     </tr>
+    <tr *ngIf="issueData.storyPoints">
+      <th>Story Points</th>
+      <td>{{issueData.storyPoints}}</td>
+    </tr>
     <tr>
       <th>Assignee</th>
       <td>{{issueData.assignee?.displayName}}</td>

@@ -57,6 +57,7 @@ export type JiraIssue = Readonly<{
   components: JiraOriginalComponent[];
   timeestimate: number;
   timespent: number;
+  storyPoints?: number;
   description: string | null;
 
   updated: string;
