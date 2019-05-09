@@ -41,9 +41,9 @@
     </tr>
     <tr>
       <th>Assignee</th>
-      <td>{{issueData.assignee?.displayName}}</td>
+      <td>{{issueData.assignee?.displayName || '–'}}</td>
     </tr>
-    <tr>
+    <tr *ngIf="issueData.timespent || issueData.timeestimate">
       <th>Worklog</th>
       <td>{{(issueData.timespent * 1000)|msToString}} / {{(issueData.timeestimate * 1000)|msToString}}</td>
     </tr>
@@ -57,7 +57,8 @@
         </mat-chip-list>
       </td>
     </tr>
-    <tr class="description-row">
+    <tr class="description-row"
+        *ngIf="issueData?.description">
       <th (click)="isFocusDescription=!isFocusDescription">Description</th>
       <td>
         <!--<inline-markdown [model]="issueData.description"></inline-markdown>-->
@@ -67,7 +68,7 @@
              *ngIf="issueData.description"></div>
       </td>
     </tr>
-    <tr>
+    <tr *ngIf="attachments?.length">
       <th>Attachments</th>
       <td>
         <div [class.hasAttachments]="attachments?.length"
