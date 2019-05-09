@@ -131,6 +131,13 @@ export class JiraApiService {
     });
   }
 
+  listFields(): Observable<any> {
+    return this._sendRequest({
+      apiMethod: 'listFields',
+      arguments: [],
+    });
+  }
+
   findAutoImportIssues(isFetchAdditional?: boolean, maxResults: number = JIRA_MAX_RESULTS): Observable<JiraIssue[]> {
     const options = {
       maxResults: maxResults,

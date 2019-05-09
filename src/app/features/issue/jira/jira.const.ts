@@ -29,6 +29,8 @@ export const DEFAULT_JIRA_CFG: JiraCfg = {
   isCheckToReAssignTicketOnTaskStart: true,
   userAssigneeName: null,
 
+  storyPointFieldId: null,
+
   isTransitionIssuesEnabled: true,
 
   availableTransitions: [],

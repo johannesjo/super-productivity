@@ -7,7 +7,7 @@ import { JiraCfg } from '../jira';
 import { expandAnimation } from '../../../../ui/animations/expand.ani';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { SearchResultItem } from '../../issue';
-import { catchError, debounceTime, switchMap, tap } from 'rxjs/operators';
+import { catchError, debounceTime, map, switchMap, tap } from 'rxjs/operators';
 import { JiraApiService } from '../jira-api.service';
 import { DEFAULT_JIRA_CFG } from '../jira.const';
 import { JiraIssue } from '../jira-issue/jira-issue.model';
@@ -28,6 +28,9 @@ export class JiraCfgComponent implements OnInit, OnDestroy {
   @Output() save: EventEmitter<{ sectionKey: ConfigSectionKey | ProjectCfgFormKey, config: any }> = new EventEmitter();
 
   issueSuggestionsCtrl: FormControl = new FormControl();
+  customFieldSuggestionsCtrl: FormControl = new FormControl();
+  customFields: any [] = [];
+  customFieldsPromise: Promise<any>;
 
   isLoading$ = new BehaviorSubject(false);
 
@@ -52,6 +55,10 @@ export class JiraCfgComponent implements OnInit, OnDestroy {
     tap((suggestions) => {
       this.isLoading$.next(false);
     }),
+  );
+
+  filteredCustomFieldSuggestions$: Observable<any[]> = this.customFieldSuggestionsCtrl.valueChanges.pipe(
+    map(value => this._filterCustomFieldSuggestions(value)),
   );
 
   private _subs = new Subscription();
@@ -95,12 +102,25 @@ export class JiraCfgComponent implements OnInit, OnDestroy {
     }
   }
 
-  displayWith(issue: JiraIssue) {
+  trackByCustomFieldId(i: number, field: any) {
+    return field.id;
+  }
+
+  displayIssueWith(issue: JiraIssue) {
     return issue && issue.summary;
   }
 
   trackByIssueId(i: number, issue: JiraIssue) {
     return issue.id;
+  }
+
+  loadCustomFields() {
+    this.customFieldsPromise = this._jiraApiService.listFields().toPromise();
+    this.customFieldsPromise.then((v: any) => {
+      if (v && Array.isArray(v.response)) {
+        this.customFields = v.response;
+      }
+    });
   }
 
   updateTransitionOptions() {
@@ -121,5 +141,14 @@ export class JiraCfgComponent implements OnInit, OnDestroy {
           })
       );
     }
+  }
+
+  private _filterCustomFieldSuggestions(value: string): string[] {
+    const filterValue = value.toLowerCase();
+    return this.customFields.filter(field => field
+      && (
+        field.name.toLowerCase().includes(filterValue)
+        || field.id.includes(filterValue)
+      ));
   }
 }

@@ -23,7 +23,6 @@
                  [form]="form">
     </formly-form>
 
-
     <h3 class="sub-section-heading">Transition Handling</h3>
     <mat-slide-toggle [(ngModel)]="cfg.isTransitionIssuesEnabled"
                       style="margin-bottom: 8px;"
@@ -38,7 +37,6 @@
              @expand>
       <mat-form-field>
         <input matInput
-               #inputEl
                class="border-color-primary"
                placeholder="Select issue to load available transitions"
                aria-label="Select issue to load available transitions"
@@ -47,7 +45,7 @@
 
         <mat-autocomplete #autoEl="matAutocomplete"
                           (optionSelected)="updateTransitionOptions()"
-                          [displayWith]="displayWith"
+                          [displayWith]="displayIssueWith"
                           [autoActiveFirstOption]="true">
           <mat-option *ngIf="(isLoading$|async)"
                       [value]="issueSuggestionsCtrl.value"
@@ -78,6 +76,42 @@
       </div>
       <!--<pre><code>{{availableTransitionsForIssue|json}}</code></pre>-->
 
+    </section>
+
+    <section>
+      <h3 class="sub-section-heading">Map Custom Fields</h3>
+      <p>Unfortunately some of Jira's data is saved under custom fields which are different for every installation. If
+        you
+        want to include this data you need to select the proper custom field for it.</p>
+
+      <div>
+        <button type="button"
+                [promiseBtn]="customFieldsPromise"
+                mat-raised-button
+                (click)="loadCustomFields()">
+          Load Suggestions
+        </button>
+        <br>
+        <br>
+      </div>
+
+      <mat-form-field>
+        <input [(ngModel)]="cfg.storyPointFieldId"
+               matInput
+               class="border-color-primary"
+               placeholder="Story Points"
+               aria-label="Story Points"
+
+               [matAutocomplete]="storyPointAutoEl"
+               [formControl]="customFieldSuggestionsCtrl">
+
+        <mat-autocomplete #storyPointAutoEl="matAutocomplete"
+                          [autoActiveFirstOption]="true">
+          <mat-option *ngFor="let field of (filteredCustomFieldSuggestions$|async); trackBy:trackByCustomFieldId;"
+                      [value]="field.id"><span>{{field?.id}}: {{field?.name}}</span>
+          </mat-option>
+        </mat-autocomplete>
+      </mat-form-field>
     </section>
   </div>
 
