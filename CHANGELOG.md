@@ -1,3 +1,22 @@
+## [2.6.2](https://github.com/johannesjo/super-productivity/compare/v2.6.1...v2.6.2) (2019-05-09)
+
+
+### Bug Fixes
+
+* **git:** config not updating ([aa6ce51](https://github.com/johannesjo/super-productivity/commit/aa6ce51))
+
+
+### Features
+
+* **jira:** link issue summary to issue ([2ce3f3b](https://github.com/johannesjo/super-productivity/commit/2ce3f3b))
+* improve styling for issue data tables ([f18675b](https://github.com/johannesjo/super-productivity/commit/f18675b))
+* **attachments:** show path if there is no title for links ([b6beed9](https://github.com/johannesjo/super-productivity/commit/b6beed9))
+* **jira:** allow for saving story points custom field id ([f408e73](https://github.com/johannesjo/super-productivity/commit/f408e73))
+* **jira:** display story points ([109fb76](https://github.com/johannesjo/super-productivity/commit/109fb76))
+* **jira:** only display available data ([babb049](https://github.com/johannesjo/super-productivity/commit/babb049))
+
+
+
 ## [2.6.1](https://github.com/johannesjo/super-productivity/compare/v2.6.0...v2.6.1) (2019-05-03)
 
 
