@@ -4,7 +4,7 @@ import { GithubIssue } from '../github-issue.model';
 import { createFeatureSelector, createSelector } from '@ngrx/store';
 import { TaskActions, TaskActionTypes } from '../../../../tasks/store/task.actions';
 import { IssueProviderKey } from '../../../issue';
-import { GITHUB_TYPE } from '../../../issue.const';
+import { GITHUB_TYPE, LEGACY_GITHUB_TYPE } from '../../../issue.const';
 
 export const GITHUB_ISSUE_FEATURE_NAME: IssueProviderKey = GITHUB_TYPE;
 
@@ -110,7 +110,9 @@ export function githubIssueReducer(
     }
 
     case TaskActionTypes.RestoreTask: {
-      if (action.payload.task.issueType === GITHUB_TYPE) {
+      const issueType = action.payload.task.issueType;
+      const issueType_ = issueType as string;
+      if (issueType === GITHUB_TYPE || issueType_ === LEGACY_GITHUB_TYPE) {
         const issue = action.payload.task.issueData as GithubIssue;
         return githubIssueAdapter.upsertOne(issue, state);
         // TODO sub task case if we need it in the future

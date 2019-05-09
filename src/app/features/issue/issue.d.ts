@@ -6,7 +6,7 @@ import { JiraIssueState } from './jira/jira-issue/store/jira-issue.reducer';
 import { GithubIssueState } from './github/github-issue/store/github-issue.reducer';
 
 
-export type IssueProviderKey = 'JIRA' | 'GIT';
+export type IssueProviderKey = 'JIRA' | 'GITHUB';
 export type IssueIntegrationCfg = JiraCfg | GithubCfg;
 export type IssueLocalState = 'OPEN' | 'IN_PROGRESS' | 'DONE';
 

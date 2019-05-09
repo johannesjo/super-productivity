@@ -1,7 +1,7 @@
 import shortid from 'shortid';
-import {debounceTime, distinctUntilChanged, first, map, shareReplay, take, withLatestFrom} from 'rxjs/operators';
-import {Injectable} from '@angular/core';
-import {Observable} from 'rxjs';
+import { debounceTime, distinctUntilChanged, first, map, shareReplay, take, withLatestFrom } from 'rxjs/operators';
+import { Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
 import {
   DEFAULT_TASK,
   DropListModelSource,
@@ -11,7 +11,7 @@ import {
   TaskWithIssueData,
   TaskWithSubTasks
 } from './task.model';
-import {select, Store} from '@ngrx/store';
+import { select, Store } from '@ngrx/store';
 import {
   AddSubTask,
   AddTask,
@@ -41,10 +41,10 @@ import {
   UpdateTaskReminder,
   UpdateTaskUi
 } from './store/task.actions';
-import {initialTaskState, taskReducer, TaskState,} from './store/task.reducer';
-import {PersistenceService} from '../../core/persistence/persistence.service';
-import {IssueData, IssueProviderKey} from '../issue/issue';
-import {TimeTrackingService} from '../time-tracking/time-tracking.service';
+import { initialTaskState, taskReducer, TaskState, } from './store/task.reducer';
+import { PersistenceService } from '../../core/persistence/persistence.service';
+import { IssueData, IssueProviderKey } from '../issue/issue';
+import { TimeTrackingService } from '../time-tracking/time-tracking.service';
 import {
   selectAllTasksWithIssueData,
   selectBacklogTasksWithSubTasks,
@@ -70,14 +70,15 @@ import {
   selectTodaysUnDoneTasksWithSubTasks,
   selectTotalTimeWorkedOnTodaysTasks
 } from './store/task.selectors';
-import {stringToMs} from '../../ui/duration/string-to-ms.pipe';
-import {getWorklogStr} from '../../util/get-work-log-str';
-import {Actions, ofType} from '@ngrx/effects';
-import {IssueService} from '../issue/issue.service';
-import {ProjectService} from '../project/project.service';
-import {SnackService} from '../../core/snack/snack.service';
-import {RoundTimeOption} from '../project/project.model';
-import {Dictionary} from '@ngrx/entity';
+import { stringToMs } from '../../ui/duration/string-to-ms.pipe';
+import { getWorklogStr } from '../../util/get-work-log-str';
+import { Actions, ofType } from '@ngrx/effects';
+import { IssueService } from '../issue/issue.service';
+import { ProjectService } from '../project/project.service';
+import { SnackService } from '../../core/snack/snack.service';
+import { RoundTimeOption } from '../project/project.model';
+import { Dictionary } from '@ngrx/entity';
+import { GITHUB_TYPE, LEGACY_GITHUB_TYPE } from '../issue/issue.const';
 
 
 @Injectable({
@@ -274,8 +275,9 @@ export class TaskService {
     this._store.dispatch(new StartFirstStartable());
   }
 
-  public async loadStateForProject(projectId) {
+  async loadStateForProject(projectId) {
     const lsTaskState = await this._persistenceService.loadTasksForProject(projectId);
+    this._replaceLegacyGitType(lsTaskState);
     this.loadState(lsTaskState || initialTaskState);
   }
 
@@ -577,5 +579,17 @@ export class TaskService {
     } else {
       return task;
     }
+  }
+
+  // hacky but it should work
+  private _replaceLegacyGitType(state: TaskState) {
+    const ids = state.ids as string[];
+    ids.forEach(id => {
+      const task = state.entities[id] as any;
+      const issueType = task.issueType as string;
+      if (issueType === LEGACY_GITHUB_TYPE) {
+        task.issueType = GITHUB_TYPE;
+      }
+    });
   }
 }

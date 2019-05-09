@@ -82,6 +82,7 @@ export class ProjectService {
     // setTimeout(() => {
     //   this.load();
     // }, 50);
+    // this.currentProject$.subscribe((val) => console.log('currentProject$', val));
 
     this.currentId$.subscribe((id) => this.currentId = id);
   }
