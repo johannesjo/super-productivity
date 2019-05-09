@@ -26,7 +26,8 @@
          class="issue-table">
     <tr>
       <th>Summary</th>
-      <td><strong>{{issueData.key}} {{issueData.summary}}</strong></td>
+      <td class="summary"><strong><a [href]="issueData.url"
+                                     target="_blank">{{issueData.key}} {{issueData.summary}}</a></strong></td>
     </tr>
     <tr>
       <th>Status</th>
