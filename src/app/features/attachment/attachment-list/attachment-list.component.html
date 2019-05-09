@@ -16,7 +16,7 @@
         <mat-icon *ngIf="attachment?.icon"
                   aria-label="Open">{{attachment?.icon}}
         </mat-icon>
-        <div class="title">{{attachment?.title}}</div>
+        <div class="title">{{attachment?.title || attachment?.path}}</div>
       </ng-container>
       <ng-container *ngIf="attachment?.type==='IMG' && !isError[i]">
         <img [enlargeImg]="attachment?.originalImgPath"
