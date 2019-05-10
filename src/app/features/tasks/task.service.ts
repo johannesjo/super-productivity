@@ -277,7 +277,9 @@ export class TaskService {
 
   async loadStateForProject(projectId) {
     const lsTaskState = await this._persistenceService.loadTasksForProject(projectId);
-    this._replaceLegacyGitType(lsTaskState);
+    if (lsTaskState) {
+      this._replaceLegacyGitType(lsTaskState);
+    }
     this.loadState(lsTaskState || initialTaskState);
   }
 
