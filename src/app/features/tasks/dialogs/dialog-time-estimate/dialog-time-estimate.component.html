@@ -1,4 +1,5 @@
-<h2 mat-dialog-title style="text-align:center;">Time estimated/spent</h2>
+<h2 mat-dialog-title
+    style="text-align:center;">Time spent / Estimates</h2>
 <mat-dialog-content>
   <form (submit)="submit()"
         class="mat-body"
@@ -34,7 +35,8 @@
     <!--</mat-form-field>-->
 
     <div class="other-days">
-      <div *ngFor="let strDate of timeSpentOnDayCopy|keys:'reverse':todayStr">
+      <div *ngFor="let strDate of timeSpentOnDayCopy|keys:'reverse':todayStr"
+           class="other-day">
         <mat-form-field class="mat-icon-float mat-block">
           <input matInput
                  placeholder="Time Spent on {{strDate}}"
@@ -46,8 +48,10 @@
 
           <mat-icon matPrefix>timer</mat-icon>
         </mat-form-field>
-        <button mat-icon-button
+        <button mat-mini-fab
+                color=""
                 type="button"
+                title="Delete entry for day"
                 (click)="deleteValue(strDate)">
           <mat-icon>delete_forever</mat-icon>
         </button>
