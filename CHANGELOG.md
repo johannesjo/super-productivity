@@ -1,3 +1,15 @@
+## [2.6.3](https://github.com/johannesjo/super-productivity/compare/v2.6.2...v2.6.3) (2019-05-10)
+
+
+### Bug Fixes
+
+* broken linux by downgrading electron [#167](https://github.com/johannesjo/super-productivity/issues/167) ([dd395d9](https://github.com/johannesjo/super-productivity/commit/dd395d9))
+* **tasks:** avoid error for no project ([f8d546e](https://github.com/johannesjo/super-productivity/commit/f8d546e))
+* **worklog:** styling error ([8e19fdd](https://github.com/johannesjo/super-productivity/commit/8e19fdd))
+* styling for dialog time estimate ([a2d8028](https://github.com/johannesjo/super-productivity/commit/a2d8028))
+
+
+
 ## [2.6.2](https://github.com/johannesjo/super-productivity/compare/v2.6.1...v2.6.2) (2019-05-09)
 
 
