@@ -733,6 +733,22 @@ progress-bar {
   }
 }
 
+.complexity-points {
+  width: $s*2.5;
+  height: $s*2.5;
+  line-height: $s*2.5;
+  border-radius: 50%;
+  text-align: center;
+  display: inline-block;
+  margin-left: $s;
+
+
+  //top: 50%;
+  //left: 0;
+  //position: absolute;
+  //transform: translateY(-50%);
+}
+
 // ANIMATIONS ETC
 // --------------
 @keyframes success-btn-ani {
