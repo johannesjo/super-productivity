@@ -32,9 +32,16 @@
       <mat-icon>check</mat-icon>
       <div class="summary-text">Tasks Completed
         <div class="summary-val">
-
           <span [innerHtml]="(doneTasks$|async)?.length"></span> / <span
           [innerHtml]="(todaysTasks$|async)?.length"></span>
+        </div>
+      </div>
+    </div>
+    <div class="summary-point">
+      <mat-icon>filter_vintage</mat-icon>
+      <div class="summary-text">Complexity Points
+        <div class="summary-val">
+          8
         </div>
       </div>
     </div>

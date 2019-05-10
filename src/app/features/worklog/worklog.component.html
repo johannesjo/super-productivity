@@ -40,7 +40,7 @@
             <div class="week-header">
               <div class="wrap">
                 <h3 class="week-title mat-h4">Week {{week.weekNr}}</h3>
-                <div> {{(week.timeSpent|msToString)}}</div>
+                <div> {{(week.timeSpent|msToString)}}, 23</div>
               </div>
               <button [matTooltip]="week.start+'.-'+week.end+'. Days: '+ week.daysWorked+', Time: '+(week.timeSpent|msToString)"
                       mat-mini-fab=""
@@ -55,6 +55,7 @@
               <tr>
                 <th></th>
                 <td>Tasks</td>
+                <td>CP</td>
                 <td>Worked</td>
                 <th></th>
               </tr>
@@ -65,6 +66,7 @@
                     [class.isExpanded]="expanded[worklogForDay.value.dateStr]">
                   <td mat-ripple>{{worklogForDay.value.dayStr}} {{worklogForDay.key}}.</td>
                   <td mat-ripple>{{worklogForDay.value.logEntries.length}}</td>
+                  <td mat-ripple>{{worklogForDay.value.logEntries.length+9}}</td>
                   <td mat-ripple>{{worklogForDay.value.timeSpent|msToClockString}}</td>
                   <td mat-ripple>
                     <mat-icon *ngIf="!expanded[worklogForDay.value.dateStr]">list</mat-icon>
@@ -74,7 +76,7 @@
 
 
                 <tr>
-                  <td colspan="4">
+                  <td colspan="5">
                     <div [@expandFade]
                          class="summary-table-wrapper material-table"
                          *ngIf="expanded[worklogForDay.value.dateStr]">
