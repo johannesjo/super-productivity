@@ -75,6 +75,8 @@ $this-table-width: 300px;
     width: $this-table-width;
     border-collapse: collapse;
 
+    // tbody might or might not be there
+    &,
     > tbody {
       > tr.week-row > {
         th,
