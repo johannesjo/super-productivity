@@ -4,6 +4,7 @@ import { DEFAULT_TASK, HIDE_SUB_TASKS, SHOW_SUB_TASKS, Task, TaskWithSubTasks, T
 import { calcTotalTimeSpent } from '../util/calc-total-time-spent';
 import { arrayMoveLeft, arrayMoveRight } from '../../../util/array-move';
 import { AddAttachment, AttachmentActionTypes, DeleteAttachment } from '../../attachment/store/attachment.actions';
+import { getWorklogStr } from '../../../util/get-work-log-str';
 
 export const TASK_FEATURE_NAME = 'tasks';
 export const taskAdapter: EntityAdapter<Task> = createEntityAdapter<Task>();
@@ -53,6 +54,14 @@ const getTaskById = (taskId: string, state: TaskState) => {
   } else {
     return state.entities[taskId];
   }
+};
+
+const getLastWorkedDay = (timeSpentOnDay): string => {
+  if (!timeSpentOnDay) {
+    return;
+  }
+  const allDaysWorked = Object.keys(timeSpentOnDay).sort();
+  return allDaysWorked[allDaysWorked.length - 1];
 };
 
 const filterOutId = (idToFilterOut) => (id) => id !== idToFilterOut;
@@ -173,6 +182,19 @@ const updateTimeEstimateForTask = (
   return task.parentId
     ? reCalcTimeEstimateForParentIfParent(task.parentId, stateAfterUpdate)
     : stateAfterUpdate;
+};
+
+const updateCompletedDateForTask = (
+  taskId: string,
+  state: TaskState,
+): TaskState => {
+  const task = getTaskById(taskId, state);
+  return taskAdapter.updateOne({
+    id: taskId,
+    changes: {
+      completed: getLastWorkedDay(task.timeSpentOnDay) || getWorklogStr(),
+    }
+  }, state);
 };
 
 const deleteTask = (state: TaskState,
@@ -360,6 +382,9 @@ export function taskReducer(
       const {timeSpentOnDay, timeEstimate, isDone} = action.payload.task.changes;
       stateCopy = updateTimeSpentForTask(id, timeSpentOnDay, stateCopy);
       stateCopy = updateTimeEstimateForTask(id, timeEstimate, stateCopy);
+      if (isDone) {
+        stateCopy = updateCompletedDateForTask(id, stateCopy);
+      }
       return taskAdapter.updateOne(action.payload.task, stateCopy);
     }
 

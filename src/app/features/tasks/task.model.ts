@@ -20,7 +20,7 @@ export interface TaskCopy {
   complexityPoints: number;
 
   created: number;
-  completed: number;
+  completed: string;
   isDone: boolean;
 
   notes: string;
