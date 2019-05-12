@@ -15,6 +15,7 @@ import { DEFAULT_JIRA_CFG } from '../../features/issue/jira/jira.const';
 import { DEFAULT_GITHUB_CFG } from '../../features/issue/github/github.const';
 import { dirtyDeepCopy } from '../../util/dirtyDeepCopy';
 import { IS_ELECTRON } from '../../app.constants';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'config-page',
@@ -32,6 +33,8 @@ export class ConfigPageComponent implements OnInit, OnDestroy {
   projectCfg: ProjectAdvancedCfg;
   issueIntegrationCfgs: IssueIntegrationCfgs;
   globalCfg: GlobalConfig;
+
+  appVersion: string = environment.version;
 
   private _subs = new Subscription();
 

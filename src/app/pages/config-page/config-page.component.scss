@@ -14,9 +14,6 @@
       background-color: $dark-theme-bg-lighter;
     }
 
-    //@include darkTheme {
-    //  background-color: $dark-theme-bg-lighter;
-    //}
     .md-title {
       margin-top: 0;
     }
@@ -52,18 +49,12 @@
     .keyboard-settings {
       display: none;
     }
-
-    //.md-button,
-    //button {
-    //  &:not(.md-icon-button) {
-    //    width: 100%;
-    //    max-width: 100%;
-    //    overflow: hidden;
-    //    text-overflow: ellipsis;
-    //    margin-left: 0;
-    //    margin-right: 0;
-    //  }
-    //}
   }
 }
 
+.version-footer {
+  margin-top: auto;
+  text-align: center;
+  font-style: italic;
+  padding: $s*3;
+}
