@@ -40,7 +40,7 @@ export class DialogTimeEstimateComponent {
     const changedFields = {
       timeEstimate: this.taskCopy.timeEstimate,
       timeSpentOnDay: this.timeSpentOnDayCopy,
-      complexityPoints: this.taskCopy.complexityPoints,
+      complexityPoints: +this.taskCopy.complexityPoints,
     };
     this._taskService.update(this.taskCopy.id, changedFields);
     this._matDialogRef.close(changedFields);

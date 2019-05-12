@@ -48,6 +48,7 @@ import { TimeTrackingService } from '../time-tracking/time-tracking.service';
 import {
   selectAllTasksWithIssueData,
   selectBacklogTasksWithSubTasks,
+  selectComplexityPointsForDay,
   selectCurrentTask,
   selectCurrentTaskId,
   selectEstimateRemainingForBacklog,
@@ -174,6 +175,11 @@ export class TaskService {
   );
   estimateRemainingBacklog$: Observable<number> = this._store.pipe(
     select(selectEstimateRemainingForBacklog),
+    distinctUntilChanged(),
+  );
+
+  complexityPointsToday$: Observable<number> = this._store.pipe(
+    select(selectComplexityPointsForDay, {day: getWorklogStr()}),
     distinctUntilChanged(),
   );
 

@@ -1,9 +1,9 @@
-import {createFeatureSelector, createSelector} from '@ngrx/store';
-import {filterStartableTasks, TASK_FEATURE_NAME, taskAdapter, TaskState} from './task.reducer';
-import {selectIssueEntityMap} from '../../issue/issue.selector';
-import {Task, TaskWithSubTasks} from '../task.model';
-import {IssueProviderKey} from '../../issue/issue';
-import {getWorklogStr} from '../../../util/get-work-log-str';
+import { createFeatureSelector, createSelector } from '@ngrx/store';
+import { filterStartableTasks, TASK_FEATURE_NAME, taskAdapter, TaskState } from './task.reducer';
+import { selectIssueEntityMap } from '../../issue/issue.selector';
+import { Task, TaskWithSubTasks } from '../task.model';
+import { IssueProviderKey } from '../../issue/issue';
+import { getWorklogStr } from '../../../util/get-work-log-str';
 
 const mapIssueDataToTask = (tasks_, issueEntityMap) => {
   return tasks_ && tasks_.map((task) => {
@@ -179,5 +179,19 @@ export const selectTaskByIssueId = createSelector(
     return taskId
       ? state.entities[taskId]
       : null;
+  }
+);
+
+export const selectComplexityPointsForDay = createSelector(
+  selectTaskFeatureState,
+  (state, props: { day: string }): number => {
+    const ids = state.ids as string[];
+    return ids.reduce((acc, id) => {
+      const task = state.entities[id];
+      // NOTE: counting sub tasks is not required, as we count all here
+      return (task.isDone && task.completed === props.day)
+        ? acc + task.complexityPoints
+        : acc;
+    }, 0);
   }
 );

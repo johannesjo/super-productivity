@@ -38,6 +38,7 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
   doneTasks$ = this._taskService.doneTasks$;
   todaysTasks$ = this._taskService.todaysTasks$;
   todaysWorkedOnOrDoneTasksFlat$ = this._taskService.todaysWorkedOnOrDoneTasksFlat$;
+  complexityPointsToday$ = this._taskService.complexityPointsToday$;
   todayStr = getTodayStr();
   tomorrowsNote: string;
   isTimeSheetExported = true;
