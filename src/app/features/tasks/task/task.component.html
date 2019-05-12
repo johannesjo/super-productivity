@@ -96,7 +96,9 @@
           <div [innerHTML]="task.timeEstimate|msToString"
                class="time-val"></div>
         </div>
-        <div class="complexity-points bg-primary color-contrast">8</div>
+        <div *ngIf="task.complexityPoints"
+             class="complexity-points bg-primary color-contrast">{{task.complexityPoints}}
+        </div>
       </div>
 
       <div class="controls">
@@ -250,7 +252,7 @@
             Show/Hide additional info
           </button>
 
-          <button (click)="addSubTask($event);"
+          <button (click)="addSubTask();"
                   *ngIf="!task.parentId&&!task.isDone"
                   aria-label="add sub task"
                   mat-menu-item=""

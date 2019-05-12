@@ -17,8 +17,10 @@ export interface TaskCopy {
   timeSpentOnDay: TimeSpentOnDay;
   timeSpent: number;
   timeEstimate: number;
+  complexityPoints: number;
 
   created: number;
+  completed: number;
   isDone: boolean;
 
   notes: string;
@@ -60,6 +62,7 @@ export const DEFAULT_TASK: Task = {
   timeSpentOnDay: {},
   timeSpent: 0,
   timeEstimate: 0,
+  complexityPoints: 0,
   isDone: false,
   title: '',
   notes: '',
@@ -68,6 +71,7 @@ export const DEFAULT_TASK: Task = {
   issueType: null,
   reminderId: null,
   created: Date.now(),
+  completed: null,
   _isAdditionalInfoOpen: false,
   _showSubTasksMode: SHOW_SUB_TASKS,
   _currentTab: 0,
