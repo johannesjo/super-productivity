@@ -38,6 +38,7 @@ export const BASIC_PROJECT_CONFIG_FORM_CONFIG: ConfigFormSection = {
       type: 'checkbox',
       templateOptions: {
         label: 'Use Dark Theme',
+        description: 'Won`t be used if system supports global dark mode.'
       },
     },
     {
