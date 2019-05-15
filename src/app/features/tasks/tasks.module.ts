@@ -5,7 +5,7 @@ import { TaskListComponent } from './task-list/task-list.component';
 import { UiModule } from '../../ui/ui.module';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { AddTaskBarComponent } from './add-task-bar/add-task-bar.component';
-import { DialogTimeEstimateComponent } from './dialogs/dialog-time-estimate/dialog-time-estimate.component';
+import { DialogTimeEstimateComponent } from './dialog-time-estimate/dialog-time-estimate.component';
 import { StoreModule } from '@ngrx/store';
 import { TaskEffects } from './store/task.effects';
 import { EffectsModule } from '@ngrx/effects';

@@ -1,10 +1,10 @@
 import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material';
-import { Task, TaskCopy, TimeSpentOnDayCopy } from '../../task.model';
-import { TaskService } from '../../task.service';
-import { getTodayStr } from '../../util/get-today-str';
-import { getWorklogStr } from '../../../../util/get-work-log-str';
-import { createTaskCopy } from '../../util/create-task-copy';
+import { Task, TaskCopy, TimeSpentOnDayCopy } from '../task.model';
+import { TaskService } from '../task.service';
+import { getTodayStr } from '../util/get-today-str';
+import { getWorklogStr } from '../../../util/get-work-log-str';
+import { createTaskCopy } from '../util/create-task-copy';
 
 interface NewTimeEntry {
   timeSpent: number;
