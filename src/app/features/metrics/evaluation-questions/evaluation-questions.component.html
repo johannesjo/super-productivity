@@ -1,0 +1,99 @@
+<mat-card class="bg-m">
+  <mat-form-field>
+    <input matInput
+           placeholder="How do you feel?"
+           type="number"
+           min="1"
+           max="10"
+           name="productivity"
+           [(ngModel)]="productivity">
+    <mat-hint>1: Very bad – 10: Wonderful</mat-hint>
+  </mat-form-field>
+
+  <mat-form-field>
+    <input matInput
+           placeholder="How much did you get done today?"
+           type="number"
+           min="1"
+           max="10"
+           name="productivity"
+           [(ngModel)]="productivity">
+    <mat-hint>1: Much less than expected – 10: Much more than expected</mat-hint>
+  </mat-form-field>
+
+  <mat-form-field>
+    <mat-chip-list #chipList>
+      <mat-chip
+        *ngFor="let fruit of fruits"
+        [selectable]="selectable"
+        [removable]="removable"
+        (removed)="remove(fruit)">
+        {{fruit}}
+        <mat-icon matChipRemove
+                  *ngIf="removable">cancel
+        </mat-icon>
+      </mat-chip>
+      <input
+        placeholder="What hindered your productivity today?"
+        #fruitInput
+        [formControl]="fruitCtrl"
+        [matAutocomplete]="auto"
+        [matChipInputFor]="chipList"
+        [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+        [matChipInputAddOnBlur]="addOnBlur"
+        (matChipInputTokenEnd)="add($event)">
+    </mat-chip-list>
+    <mat-autocomplete #auto="matAutocomplete"
+                      (optionSelected)="selected($event)">
+      <mat-option *ngFor="let fruit of filteredFruits | async"
+                  [value]="fruit">
+        {{fruit}}
+      </mat-option>
+    </mat-autocomplete>
+  </mat-form-field>
+
+  <mat-form-field>
+    <mat-chip-list #chipList2>
+      <mat-chip
+        *ngFor="let fruit of fruits"
+        [selectable]="selectable"
+        [removable]="removable"
+        (removed)="remove(fruit)">
+        {{fruit}}
+        <mat-icon matChipRemove
+                  *ngIf="removable">cancel
+        </mat-icon>
+      </mat-chip>
+      <input
+        placeholder="What improved your productivity today?"
+        #fruitInput
+        [formControl]="fruitCtrl"
+        [matAutocomplete]="auto"
+        [matChipInputFor]="chipList2"
+        [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+        [matChipInputAddOnBlur]="addOnBlur"
+        (matChipInputTokenEnd)="add($event)">
+    </mat-chip-list>
+    <mat-autocomplete #auto="matAutocomplete"
+                      (optionSelected)="selected($event)">
+      <mat-option *ngFor="let fruit of filteredFruits | async"
+                  [value]="fruit">
+        {{fruit}}
+      </mat-option>
+    </mat-autocomplete>
+  </mat-form-field>
+
+  <!-- same model as other improvements -->
+  <mat-form-field>
+    <input matInput
+           placeholder="What can you do to improve tomorrow?"
+           type="text"
+           name="improveTomrrow"
+           [(ngModel)]="improveTomorrow">
+  </mat-form-field>
+
+  <collapsible class="help-collapsible"
+               title="Why should I care?">
+
+  </collapsible>
+</mat-card>

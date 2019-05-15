@@ -7,6 +7,7 @@ import {GoogleModule} from '../../features/google/google.module';
 import {SimpleTaskExportModule} from '../../features/simple-task-export/simple-task-export.module';
 import {RouterModule} from '@angular/router';
 import {WorklogModule} from '../../features/worklog/worklog.module';
+import { MetricsModule } from '../../features/metrics/metrics.module';
 
 @NgModule({
   imports: [
@@ -17,6 +18,7 @@ import {WorklogModule} from '../../features/worklog/worklog.module';
     RouterModule,
     SimpleTaskExportModule,
     WorklogModule,
+    MetricsModule,
   ],
   declarations: [
     DailySummaryComponent,
