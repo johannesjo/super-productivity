@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { EvaluationQuestionsComponent } from './evaluation-questions/evaluation-questions.component';
+import { EvaluationSheetComponent } from './evaluation-sheet/evaluation-sheet.component';
 import { MetricsComponent } from './metrics.component';
 import { DialogImprovementSuggestionsComponent } from './dialog-improvement-suggestions/dialog-improvement-suggestions.component';
 import { FormsModule } from '@angular/forms';
@@ -13,12 +13,12 @@ import { UiModule } from '../../ui/ui.module';
     UiModule,
   ],
   declarations: [
-    EvaluationQuestionsComponent,
+    EvaluationSheetComponent,
     MetricsComponent,
     DialogImprovementSuggestionsComponent,
   ],
   exports: [
-    EvaluationQuestionsComponent,
+    EvaluationSheetComponent,
     MetricsComponent,
     DialogImprovementSuggestionsComponent,
   ],

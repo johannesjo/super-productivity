@@ -6,12 +6,12 @@ import { Observable } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 
 @Component({
-  selector: 'evaluation-questions',
-  templateUrl: './evaluation-questions.component.html',
-  styleUrls: ['./evaluation-questions.component.scss'],
+  selector: 'evaluation-sheet',
+  templateUrl: './evaluation-sheet.component.html',
+  styleUrls: ['./evaluation-sheet.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class EvaluationQuestionsComponent {
+export class EvaluationSheetComponent {
 
   visible = true;
   selectable = true;
