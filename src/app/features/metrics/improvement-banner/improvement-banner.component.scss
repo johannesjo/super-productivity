@@ -3,10 +3,7 @@
 $weird-task-list-f: 5px;
 
 :host {
-  margin: 0 $s*2;
-
-  margin-top: $s + $weird-task-list-f;
-  margin-bottom: $s;
+  margin: ($s + $weird-task-list-f) $s*2 $s;
   display: block;
 
   @include mq(component) {

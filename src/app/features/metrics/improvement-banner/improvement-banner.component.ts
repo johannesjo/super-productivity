@@ -19,4 +19,8 @@ export class ImprovementBannerComponent implements OnInit {
   ngOnInit() {
   }
 
+  remove(suggestion: string) {
+    this.improvementSuggestions.splice(this.improvementSuggestions.indexOf(suggestion), 1);
+  }
+
 }
