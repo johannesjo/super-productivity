@@ -1,9 +1,9 @@
-import { ChangeDetectionStrategy, Component, ElementRef, ViewChild } from '@angular/core';
-import { MatAutocomplete, MatAutocompleteSelectedEvent, MatChipInputEvent } from '@angular/material';
-import { FormControl } from '@angular/forms';
-import { COMMA, ENTER } from '@angular/cdk/keycodes';
-import { Observable } from 'rxjs';
-import { map, startWith } from 'rxjs/operators';
+import {ChangeDetectionStrategy, Component, ElementRef, ViewChild} from '@angular/core';
+import {MatAutocomplete, MatAutocompleteSelectedEvent, MatChipInputEvent} from '@angular/material';
+import {FormControl} from '@angular/forms';
+import {COMMA, ENTER} from '@angular/cdk/keycodes';
+import {Observable} from 'rxjs';
+import {map, startWith} from 'rxjs/operators';
 
 @Component({
   selector: 'evaluation-sheet',
@@ -12,15 +12,23 @@ import { map, startWith } from 'rxjs/operators';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class EvaluationSheetComponent {
+  metrics = {
+    efficiency: null,
+    mood: null,
+    obstructingFactors: [],
+    improvingFactors: [],
+    improvingFactorsForTomorrow: [],
+  };
 
-  visible = true;
-  selectable = true;
-  removable = true;
-  addOnBlur = true;
+  removableChips = true;
   separatorKeysCodes: number[] = [ENTER, COMMA];
+
+
   fruitCtrl = new FormControl();
   filteredFruits: Observable<string[]>;
   fruits: string[] = ['Lemon'];
+
+
   allFruits: string[] = ['Apple', 'Lemon', 'Lime', 'Orange', 'Strawberry'];
 
   @ViewChild('fruitInput') fruitInput: ElementRef<HTMLInputElement>;
@@ -30,6 +38,10 @@ export class EvaluationSheetComponent {
     this.filteredFruits = this.fruitCtrl.valueChanges.pipe(
       startWith(null),
       map((fruit: string | null) => fruit ? this._filter(fruit) : this.allFruits.slice()));
+  }
+
+  submit() {
+    console.log('SUBMIT');
   }
 
   add(event: MatChipInputEvent): void {
