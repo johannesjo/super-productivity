@@ -11,12 +11,14 @@ import {Attachment} from '../../features/attachment/attachment.model';
 import {ProjectArchive} from '../../features/project/project.model';
 
 
-// NOTE: [key:string] always refers to projectId
-export interface AppDataComplete {
-  lastActiveTime: string;
+export interface AppBaseData {
   project: ProjectState;
   archivedProjects: ProjectArchive;
   globalConfig: GlobalConfig;
+  reminders?: Reminder[];
+}
+
+export interface AppDataForProjects {
   note?: {
     [key: string]: NoteState;
   };
@@ -35,5 +37,25 @@ export interface AppDataComplete {
   issue?: {
     [key: string]: IssueStateMap;
   };
-  reminders?: Reminder[];
 }
+
+// NOTE: [key:string] always refers to projectId
+export interface AppDataComplete extends AppBaseData, AppDataForProjects {
+  lastActiveTime: string;
+}
+
+
+export interface AppDataCompleteCfgBasicEntry {
+  appDataKey: keyof AppBaseData;
+  load: () => Promise<any>;
+  save: (state: any, isForce?: boolean) => Promise<any>;
+}
+
+
+export interface AppDataCompleteCfgForProjectEntry {
+  appDataKey: keyof AppDataForProjects;
+  load: (id: string) => Promise<EntityState<any>>;
+  save: (id: string, state: any, isForce?: boolean) => Promise<any>;
+  remove: (id: string) => Promise<any>;
+}
+

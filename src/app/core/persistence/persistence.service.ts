@@ -20,7 +20,13 @@ import {ProjectState} from '../../features/project/store/project.reducer';
 import {TaskState} from '../../features/tasks/store/task.reducer';
 import {EntityState} from '@ngrx/entity';
 import {Task, TaskWithSubTasks} from '../../features/tasks/task.model';
-import {AppDataComplete} from '../../imex/sync/sync.model';
+import {
+  AppBaseData,
+  AppDataComplete,
+  AppDataCompleteCfgBasicEntry,
+  AppDataCompleteCfgForProjectEntry,
+  AppDataForProjects
+} from '../../imex/sync/sync.model';
 import {BookmarkState} from '../../features/bookmark/store/bookmark.reducer';
 import {AttachmentState} from '../../features/attachment/store/attachment.reducer';
 import {NoteState} from '../../features/note/store/note.reducer';
@@ -42,15 +48,83 @@ import {CompressionService} from '../compression/compression.service';
 export class PersistenceService {
   private _isBlockSaving = false;
 
+
+  /*
+  TODO in the future we might be able to do something like this
+  and then generate all the functions we need
+  export interface NewDef {
+    [key: string]: {
+      isForProject: boolean;
+      stateModel: EntityState;
+      lsKey: string;
+    };
+  }
+   */
+
+  private _baseModel: AppDataCompleteCfgBasicEntry[] = [
+    {
+      appDataKey: 'project',
+      load: this.loadProjectsMeta.bind(this),
+      save: this.saveProjectsMeta.bind(this),
+    },
+    {
+      appDataKey: 'globalConfig',
+      load: this.loadGlobalConfig.bind(this),
+      save: this.saveGlobalConfig.bind(this),
+    },
+    {
+      appDataKey: 'reminders',
+      load: this.loadReminders.bind(this),
+      save: this.saveReminders.bind(this),
+    },
+    {
+      appDataKey: 'archivedProjects',
+      load: this.loadProjectArchive.bind(this),
+      save: this.saveProjectArchive.bind(this),
+    },
+  ];
+
+  private _forProjectModel: AppDataCompleteCfgForProjectEntry[] = [
+    {
+      appDataKey: 'bookmark',
+      load: this.loadBookmarksForProject.bind(this),
+      save: this.saveBookmarksForProject.bind(this),
+      remove: this.removeBookmarksForProject.bind(this),
+    },
+    {
+      appDataKey: 'note',
+      load: this.loadNotesForProject.bind(this),
+      save: this.saveNotesForProject.bind(this),
+      remove: this.removeNotesForProject.bind(this),
+    },
+    {
+      appDataKey: 'task',
+      load: this.loadTasksForProject.bind(this),
+      save: this.saveTasksForProject.bind(this),
+      remove: this.removeTasksForProject.bind(this),
+    },
+    {
+      appDataKey: 'taskArchive',
+      load: this.loadTaskArchiveForProject.bind(this),
+      save: this.saveToTaskArchiveForProject.bind(this),
+      remove: this.removeTaskArchiveForProject.bind(this),
+    },
+    {
+      appDataKey: 'taskAttachment',
+      load: this.loadTaskAttachmentsForProject.bind(this),
+      save: this.saveTaskAttachmentsForProject.bind(this),
+      remove: this.removeTaskAttachmentsForProject.bind(this),
+    },
+  ];
+
   constructor(
     private _snackService: SnackService,
     private _databaseService: DatabaseService,
     private _compressionService: CompressionService,
   ) {
+    // this.loadComplete().then(d => console.log(d));
   }
 
-  // PROJECT RELATED
-  // ---------------
   async loadProjectsMeta(): Promise<ProjectState> {
     return this._loadFromDb(LS_PROJECT_META_LIST);
   }
@@ -241,22 +315,18 @@ export class PersistenceService {
   }
 
   async removeCompleteRelatedDataForProject(projectId: string): Promise<any> {
-    await this.removeTasksForProject(projectId);
-    await this.removeTaskArchiveForProject(projectId);
-    await this.removeNotesForProject(projectId);
-    await this.removeTaskAttachmentsForProject(projectId);
-    await this.removeBookmarksForProject(projectId);
+    await Promise.all(this._forProjectModel.map((modelCfg) => {
+      return modelCfg.remove(projectId);
+    }));
     await issueProviderKeys.forEach(async (key) => {
       await this.removeIssuesForProject(projectId, key);
     });
   }
 
   async restoreCompleteRelatedDataForProject(projectId: string, data: ArchivedProject): Promise<any> {
-    await this.saveTasksForProject(projectId, data.task);
-    await this.saveToTaskArchiveForProject(projectId, data.taskArchive);
-    await this.saveNotesForProject(projectId, data.note);
-    await this.saveTaskAttachmentsForProject(projectId, data.taskAttachment as AttachmentState);
-    await this.saveBookmarksForProject(projectId, data.bookmark);
+    await Promise.all(this._forProjectModel.map((modelCfg) => {
+      return modelCfg.save(projectId, data[modelCfg.appDataKey]);
+    }));
     await issueProviderKeys.forEach(async (key) => {
       await this.saveIssuesForProject(projectId, key, data.issue[key]);
     });
@@ -297,6 +367,29 @@ export class PersistenceService {
     return this._saveToDb(LS_BACKUP, backupData, true);
   }
 
+  async loadAppBaseData(): Promise<AppBaseData> {
+    const promises = this._baseModel.map(async (modelCfg) => {
+      const modelState = await modelCfg.load();
+      return {
+        [modelCfg.appDataKey]: modelState,
+      };
+    });
+    const baseDataArray: Partial<AppBaseData>[] = await Promise.all(promises);
+    console.log(baseDataArray);
+
+    return Object.assign({}, ...baseDataArray);
+  }
+
+  async loadAppDataForProjects(projectIds: string[]): Promise<AppDataForProjects> {
+    const forProjectsData = await Promise.all(this._forProjectModel.map(async (modelCfg) => {
+      const modelState = await this._loadForProjectIds(projectIds, modelCfg.load);
+      return {
+        [modelCfg.appDataKey]: modelState,
+      };
+    }));
+    return Object.assign({}, ...forProjectsData);
+  }
+
   // NOTE: not including backup
   async loadComplete(): Promise<AppDataComplete> {
     const projectState = await this.loadProjectsMeta();
@@ -304,15 +397,10 @@ export class PersistenceService {
 
     return {
       lastActiveTime: this.getLastActive(),
-      project: await this.loadProjectsMeta(),
-      globalConfig: await this.loadGlobalConfig(),
-      reminders: await this.loadReminders(),
-      archivedProjects: await this.loadProjectArchive(),
-      bookmark: await this._loadForProjectIds(pids, this.loadBookmarksForProject.bind(this)),
-      note: await this._loadForProjectIds(pids, this.loadNotesForProject.bind(this)),
-      task: await this._loadForProjectIds(pids, this.loadTasksForProject.bind(this)),
-      taskArchive: await this._loadForProjectIds(pids, this.loadTaskArchiveForProject.bind(this)),
-      taskAttachment: await this._loadForProjectIds(pids, this.loadTaskAttachmentsForProject.bind(this)),
+
+      ...(await this.loadAppDataForProjects(pids)),
+      ...(await this.loadAppBaseData()),
+
       issue: await pids.reduce(async (acc, projectId) => {
         const prevAcc = await acc;
         const issueStateMap = {};
@@ -340,17 +428,17 @@ export class PersistenceService {
       });
     });
 
+    const forBase = Promise.all(this._baseModel.map(async (modelCfg) => {
+      return await modelCfg.save(data[modelCfg.appDataKey]);
+    }));
+    const forProject = Promise.all(this._forProjectModel.map(async (modelCfg) => {
+      return await this._saveForProjectIds(data[modelCfg.appDataKey], modelCfg.save);
+    }));
+
     return await Promise.all([
       ...issuePromises,
-      this.saveProjectsMeta(data.project, true),
-      this.saveGlobalConfig(data.globalConfig, true),
-      this.saveReminders(data.reminders, true),
-      this.saveProjectArchive(data.archivedProjects, true),
-      this._saveForProjectIds(data.bookmark, this.saveBookmarksForProject.bind(this), true),
-      this._saveForProjectIds(data.note, this.saveNotesForProject.bind(this), true),
-      this._saveForProjectIds(data.task, this.saveTasksForProject.bind(this), true),
-      this._saveForProjectIds(data.taskArchive, this.saveToTaskArchiveForProject.bind(this), true),
-      this._saveForProjectIds(data.taskAttachment, this.saveTaskAttachmentsForProject.bind(this), true),
+      forBase,
+      forProject
     ])
       .then(() => {
         this._isBlockSaving = false;
