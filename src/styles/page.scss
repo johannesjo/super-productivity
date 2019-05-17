@@ -44,6 +44,10 @@ body {
   @include mq(component) {
     padding: $s*2 3*$s $s*9;
   }
+
+  improvement-banner + & {
+    padding-top: 0;
+  }
 }
 
 

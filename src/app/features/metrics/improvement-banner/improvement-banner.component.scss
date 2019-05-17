@@ -1,0 +1,25 @@
+@import '../../../../variables';
+
+$weird-task-list-f: 5px;
+
+:host {
+  margin: 0 $s*2;
+
+  margin-top: $s + $weird-task-list-f;
+  margin-bottom: $s;
+  display: block;
+
+  @include mq(component) {
+    margin-top: 2*$s + $weird-task-list-f;
+    margin-bottom: 2*$s;
+  }
+}
+
+mat-chip-list {
+  display: block;
+
+}
+
+::ng-deep .mat-chip-list-wrapper {
+  justify-content: center;
+}

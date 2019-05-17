@@ -8,6 +8,7 @@ import { RouterModule } from '@angular/router';
 import { SplitModule } from './split/split.module';
 import { TimeTrackingModule } from '../../features/time-tracking/time-tracking.module';
 import { BacklogTabsComponent } from './backlog-tabs/backlog-tabs.component';
+import {MetricsModule} from '../../features/metrics/metrics.module';
 
 @NgModule({
   imports: [
@@ -19,6 +20,7 @@ import { BacklogTabsComponent } from './backlog-tabs/backlog-tabs.component';
     TasksModule,
     SplitModule,
     TimeTrackingModule,
+    MetricsModule,
   ],
   declarations: [WorkViewPageComponent, BacklogTabsComponent],
 })

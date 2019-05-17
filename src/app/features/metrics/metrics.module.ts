@@ -2,9 +2,9 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { EvaluationSheetComponent } from './evaluation-sheet/evaluation-sheet.component';
 import { MetricsComponent } from './metrics.component';
-import { DialogImprovementSuggestionsComponent } from './dialog-improvement-suggestions/dialog-improvement-suggestions.component';
 import { FormsModule } from '@angular/forms';
 import { UiModule } from '../../ui/ui.module';
+import { ImprovementBannerComponent } from './improvement-banner/improvement-banner.component';
 
 @NgModule({
   imports: [
@@ -15,15 +15,14 @@ import { UiModule } from '../../ui/ui.module';
   declarations: [
     EvaluationSheetComponent,
     MetricsComponent,
-    DialogImprovementSuggestionsComponent,
+    ImprovementBannerComponent,
   ],
   exports: [
     EvaluationSheetComponent,
     MetricsComponent,
-    DialogImprovementSuggestionsComponent,
+    ImprovementBannerComponent,
   ],
   entryComponents: [
-    DialogImprovementSuggestionsComponent,
   ],
 })
 export class MetricsModule {

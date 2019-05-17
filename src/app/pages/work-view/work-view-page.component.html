@@ -55,6 +55,8 @@
       </div>
     </header>
 
+    <improvement-banner></improvement-banner>
+
     <div class="task-list-wrapper">
       <div *ngIf="!(planningModeService.isPlanningMode$|async) && !(taskService.isHasTasksToWorkOn$|async)"
            class="add-more-or-finish"
