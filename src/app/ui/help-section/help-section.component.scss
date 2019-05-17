@@ -5,8 +5,10 @@
 
   .help-text {
     margin-bottom: 40px;
-    border-bottom: 2px solid $c-accent;
-    border-top: 2px solid $c-accent;
+    border-width: 2px;
+    border-left: 0;
+    border-right: 0;
+    border-style: solid;
     padding: 0 $s*2;
   }
 
@@ -14,12 +16,12 @@
     position: absolute;
     top: -8px;
     right: -8px;
+    z-index: 1;
   }
 
   .help-icon-wrapper {
     margin-top: 8px;
     margin-bottom: 8px;
-    color: $c-accent;
     text-align: center;
   }
 }
