@@ -11,7 +11,7 @@ import {PersistenceService} from '../../core/persistence/persistence.service';
   providedIn: 'root',
 })
 export class MetricService {
-  metricss$: Observable<Metric[]> = this._store$.pipe(select(selectAllMetrics));
+  metrics$: Observable<Metric[]> = this._store$.pipe(select(selectAllMetrics));
 
   constructor(
     private _store$: Store<MetricState>,

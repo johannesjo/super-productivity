@@ -1,0 +1,28 @@
+<mat-form-field>
+  <mat-chip-list #chipListElRef>
+    <mat-chip
+      *ngFor="let modelItem of modelItems"
+      (removed)="remove(modelItem.id)"
+      [removable]="true">
+      {{ modelItem.title}}
+      <mat-icon matChipRemove>cancel</mat-icon>
+    </mat-chip>
+
+    <input
+      #inputElRef
+      (matChipInputTokenEnd)="add($event)"
+      [formControl]="inputCtrl"
+      [matAutocomplete]="autoElRef"
+      [matChipInputAddOnBlur]="true"
+      [matChipInputFor]="chipListElRef"
+      [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+      [placeholder]="label">
+  </mat-chip-list>
+  <mat-autocomplete #autoElRef="matAutocomplete"
+                    (optionSelected)="selected($event)">
+    <mat-option *ngFor="let suggestion of filteredSuggestions | async"
+                [value]="suggestion.id">
+      {{suggestion.title}}
+    </mat-option>
+  </mat-autocomplete>
+</mat-form-field>

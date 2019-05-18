@@ -12,13 +12,18 @@ import {map, startWith} from 'rxjs/operators';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class EvaluationSheetComponent {
-  metrics = {
+  metricForDay = {
     efficiency: null,
     mood: null,
-    obstructingFactors: [],
+    obstructingFactors: ['XX'],
     improvingFactors: [],
     improvingFactorsForTomorrow: [],
   };
+
+  obstructionSuggestions = [
+    {id: 'XX', title: 'Some XXX'},
+    {id: 'DD', title: 'Some other DD'},
+  ];
 
   removableChips = true;
   separatorKeysCodes: number[] = [ENTER, COMMA];
@@ -38,6 +43,18 @@ export class EvaluationSheetComponent {
     this.filteredFruits = this.fruitCtrl.valueChanges.pipe(
       startWith(null),
       map((fruit: string | null) => fruit ? this._filter(fruit) : this.allFruits.slice()));
+  }
+
+  addObstruction(v: string) {
+    console.log('addObstruction', v);
+  }
+
+  addNewObstruction(v: string) {
+    console.log('addNewObstruction', v);
+  }
+
+  removeObstruction(id: string) {
+    console.log('removeObstruction', id);
   }
 
   submit() {
