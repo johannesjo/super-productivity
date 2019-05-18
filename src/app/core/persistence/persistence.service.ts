@@ -53,6 +53,7 @@ export class PersistenceService {
   private _baseModels = [];
   private _projectModels = [];
 
+  // TODO auto generate ls keys from appDataKey where possible
   project = this._cmBase<ProjectState>(LS_PROJECT_META_LIST, 'project');
   globalConfig = this._cmBase<GlobalConfig>(LS_GLOBAL_CFG, 'globalConfig');
   reminders = this._cmBase<Reminder[]>(LS_REMINDER, 'reminders');
