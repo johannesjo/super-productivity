@@ -1,21 +1,41 @@
-import {apply, mergeWith, Rule, SchematicContext, template, Tree, url} from '@angular-devkit/schematics';
+import {
+    apply,
+    mergeWith,
+    move,
+    Rule,
+    SchematicContext,
+    SchematicsException,
+    template,
+    Tree,
+    url
+} from '@angular-devkit/schematics';
 import {strings} from '@angular-devkit/core';
-import {strings} from 'underscore.string';
+import {buildDefaultPath} from '@schematics/angular/utility/project';
+import {parseName} from '@schematics/angular/utility/parse-name';
 
-// const TPL = './tpl/';
 
-// You don't have to export the function as default. You can also have more than one rule factory
-// per file.
-export function jo(_options: any, _context: SchematicContext): Rule {
+export default function jo(_options: any): Rule {
     return (tree: Tree, _context: SchematicContext) => {
-        console.log(tree, _context);
+        const workspaceConfigBuffer = tree.read('angular.json');
+        if (!workspaceConfigBuffer) {
+            throw new SchematicsException('Not an angular cli workspace');
+        }
+        const workspaceConfig = JSON.parse(workspaceConfigBuffer.toString());
+        const projectName = _options.project || workspaceConfig.defaultProject;
+        const project = workspaceConfig.projects[projectName];
+
+        const defaultProjectPath = buildDefaultPath(project);
+        const parsedPath = parseName(defaultProjectPath, _options.name);
+        const {name, path} = parsedPath;
 
         const sourceTemplates = url('./files');
         const sourceParameterizedTemplates = apply(sourceTemplates, [
             template({
                 ..._options,
-                ...strings
-            })
+                ...strings,
+                name
+            }),
+            move(path + '/' + strings.dasherize(name))
         ]);
         return mergeWith(sourceParameterizedTemplates);
     };
