@@ -58,4 +58,3 @@ export interface AppDataCompleteCfgForProjectEntry {
   save: (id: string, state: any, isForce?: boolean) => Promise<any>;
   remove: (id: string) => Promise<any>;
 }
-

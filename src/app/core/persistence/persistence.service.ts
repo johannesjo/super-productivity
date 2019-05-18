@@ -20,13 +20,7 @@ import {ProjectState} from '../../features/project/store/project.reducer';
 import {TaskState} from '../../features/tasks/store/task.reducer';
 import {EntityState} from '@ngrx/entity';
 import {Task, TaskWithSubTasks} from '../../features/tasks/task.model';
-import {
-  AppBaseData,
-  AppDataComplete,
-  AppDataCompleteCfgBasicEntry,
-  AppDataCompleteCfgForProjectEntry,
-  AppDataForProjects
-} from '../../imex/sync/sync.model';
+import {AppBaseData, AppDataComplete, AppDataForProjects} from '../../imex/sync/sync.model';
 import {BookmarkState} from '../../features/bookmark/store/bookmark.reducer';
 import {AttachmentState} from '../../features/attachment/store/attachment.reducer';
 import {NoteState} from '../../features/note/store/note.reducer';
@@ -40,6 +34,7 @@ import {ArchivedProject, ProjectArchive} from '../../features/project/project.mo
 import {JiraIssueState} from '../../features/issue/jira/jira-issue/store/jira-issue.reducer';
 import {GithubIssueState} from '../../features/issue/github/github-issue/store/github-issue.reducer';
 import {CompressionService} from '../compression/compression.service';
+import {PersistenceBaseModel, PersistenceForProjectModel} from './persistence';
 
 
 @Injectable({
@@ -48,81 +43,54 @@ import {CompressionService} from '../compression/compression.service';
 export class PersistenceService {
   private _isBlockSaving = false;
 
+  // needs to be assigned before the creations
+  private _baseModels = [];
+  private _forProjectModels = [];
 
-  /*
-  TODO in the future we might be able to do something like this
-  and then generate all the functions we need
-  export interface NewDef {
-    [key: string]: {
-      isForProject: boolean;
-      stateModel: EntityState;
-      lsKey: string;
-    };
-  }
-   */
+  project = this._cBase<ProjectState>(LS_TASK_STATE, 'project');
+  globalConfig = this._cBase<GlobalConfig>(LS_GLOBAL_CFG, 'globalConfig');
+  reminders = this._cBase<Reminder[]>(LS_REMINDER, 'reminders');
 
-  private _baseModel: AppDataCompleteCfgBasicEntry[] = [
-    {
-      appDataKey: 'project',
-      load: this.loadProjectsMeta.bind(this),
-      save: this.saveProjectsMeta.bind(this),
-    },
-    {
-      appDataKey: 'globalConfig',
-      load: this.loadGlobalConfig.bind(this),
-      save: this.saveGlobalConfig.bind(this),
-    },
-    {
-      appDataKey: 'reminders',
-      load: this.loadReminders.bind(this),
-      save: this.saveReminders.bind(this),
-    },
-    {
-      appDataKey: 'archivedProjects',
-      load: this.loadProjectArchive.bind(this),
-      save: this.saveProjectArchive.bind(this),
-    },
-  ];
+  task = this._cProject<TaskState>(LS_TASK_STATE, 'task');
+  taskArchive = this._cProject<EntityState<TaskWithSubTasks>>(LS_TASK_ARCHIVE, 'taskArchive');
+  taskAttachment = this._cProject<AttachmentState>(LS_TASK_ATTACHMENT_STATE, 'taskAttachment');
+  bookmark = this._cProject<BookmarkState>(LS_BOOKMARK_STATE, 'bookmark');
+  note = this._cProject<NoteState>(LS_NOTE_STATE, 'note');
 
-  private _forProjectModel: AppDataCompleteCfgForProjectEntry[] = [
-    {
-      appDataKey: 'bookmark',
-      load: this.loadBookmarksForProject.bind(this),
-      save: this.saveBookmarksForProject.bind(this),
-      remove: this.removeBookmarksForProject.bind(this),
-    },
-    {
-      appDataKey: 'note',
-      load: this.loadNotesForProject.bind(this),
-      save: this.saveNotesForProject.bind(this),
-      remove: this.removeNotesForProject.bind(this),
-    },
-    {
-      appDataKey: 'task',
-      load: this.loadTasksForProject.bind(this),
-      save: this.saveTasksForProject.bind(this),
-      remove: this.removeTasksForProject.bind(this),
-    },
-    {
-      appDataKey: 'taskArchive',
-      load: this.loadTaskArchiveForProject.bind(this),
-      save: this.saveToTaskArchiveForProject.bind(this),
-      remove: this.removeTaskArchiveForProject.bind(this),
-    },
-    {
-      appDataKey: 'taskAttachment',
-      load: this.loadTaskAttachmentsForProject.bind(this),
-      save: this.saveTaskAttachmentsForProject.bind(this),
-      remove: this.removeTaskAttachmentsForProject.bind(this),
-    },
-  ];
 
   constructor(
     private _snackService: SnackService,
     private _databaseService: DatabaseService,
     private _compressionService: CompressionService,
   ) {
-    // this.loadComplete().then(d => console.log(d));
+    // this.project.load().then(d => d.);
+    this.loadComplete().then(d => console.log(d));
+    this.loadCompleteForProject('DEFAULT').then(d => console.log(d));
+  }
+
+  // _createBaseModel
+
+  _cBase<T>(lsKey: string, appDataKey: keyof AppBaseData): PersistenceBaseModel<T> {
+    const model = {
+      appDataKey,
+      load: () => this._loadFromDb(lsKey),
+      save: (data, isForce) => this._saveToDb(lsKey, data, isForce),
+    };
+
+    this._baseModels.push(model);
+    return model;
+  }
+
+
+  _cProject<T>(lsKey: string, appDataKey: keyof AppDataForProjects): PersistenceForProjectModel<T> {
+    const model = {
+      appDataKey,
+      load: (projectId) => this._loadFromDb(this._makeProjectKey(projectId, lsKey)),
+      save: (projectId, data, isForce) => this._saveToDb(this._makeProjectKey(projectId, lsKey), data, isForce),
+      remove: (projectId) => this._removeFromDb(this._makeProjectKey(projectId, lsKey)),
+    };
+    this._forProjectModels.push(model);
+    return model;
   }
 
   async loadProjectsMeta(): Promise<ProjectState> {
@@ -298,24 +266,28 @@ export class PersistenceService {
     });
   }
 
+  // TODO can probably be combined with the one below
   async loadCompleteForProject(projectId: string): Promise<ArchivedProject> {
     const issueStateMap: IssueStateMap = {
       JIRA: await this.loadIssuesForProject(projectId, JIRA_TYPE) as JiraIssueState,
       GITHUB: await this.loadIssuesForProject(projectId, GITHUB_TYPE) as GithubIssueState,
     };
 
+    const forProjectsData = await Promise.all(this._forProjectModels.map(async (modelCfg) => {
+      return {
+        [modelCfg.appDataKey]: await modelCfg.load(projectId),
+      };
+    }));
+    const projectData = Object.assign({}, ...forProjectsData);
+
     return {
-      note: await this.loadNotesForProject(projectId),
-      bookmark: await this.loadBookmarksForProject(projectId),
-      task: await this.loadTasksForProject(projectId),
-      taskArchive: await this.loadTaskArchiveForProject(projectId),
-      taskAttachment: await this.loadTaskAttachmentsForProject(projectId),
+      ...projectData,
       issue: issueStateMap,
     };
   }
 
   async removeCompleteRelatedDataForProject(projectId: string): Promise<any> {
-    await Promise.all(this._forProjectModel.map((modelCfg) => {
+    await Promise.all(this._forProjectModels.map((modelCfg) => {
       return modelCfg.remove(projectId);
     }));
     await issueProviderKeys.forEach(async (key) => {
@@ -324,7 +296,7 @@ export class PersistenceService {
   }
 
   async restoreCompleteRelatedDataForProject(projectId: string, data: ArchivedProject): Promise<any> {
-    await Promise.all(this._forProjectModel.map((modelCfg) => {
+    await Promise.all(this._forProjectModels.map((modelCfg) => {
       return modelCfg.save(projectId, data[modelCfg.appDataKey]);
     }));
     await issueProviderKeys.forEach(async (key) => {
@@ -368,7 +340,7 @@ export class PersistenceService {
   }
 
   async loadAppBaseData(): Promise<AppBaseData> {
-    const promises = this._baseModel.map(async (modelCfg) => {
+    const promises = this._baseModels.map(async (modelCfg) => {
       const modelState = await modelCfg.load();
       return {
         [modelCfg.appDataKey]: modelState,
@@ -381,7 +353,7 @@ export class PersistenceService {
   }
 
   async loadAppDataForProjects(projectIds: string[]): Promise<AppDataForProjects> {
-    const forProjectsData = await Promise.all(this._forProjectModel.map(async (modelCfg) => {
+    const forProjectsData = await Promise.all(this._forProjectModels.map(async (modelCfg) => {
       const modelState = await this._loadForProjectIds(projectIds, modelCfg.load);
       return {
         [modelCfg.appDataKey]: modelState,
@@ -428,10 +400,10 @@ export class PersistenceService {
       });
     });
 
-    const forBase = Promise.all(this._baseModel.map(async (modelCfg) => {
+    const forBase = Promise.all(this._baseModels.map(async (modelCfg) => {
       return await modelCfg.save(data[modelCfg.appDataKey]);
     }));
-    const forProject = Promise.all(this._forProjectModel.map(async (modelCfg) => {
+    const forProject = Promise.all(this._forProjectModels.map(async (modelCfg) => {
       return await this._saveForProjectIds(data[modelCfg.appDataKey], modelCfg.save);
     }));
 
