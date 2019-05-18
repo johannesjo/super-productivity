@@ -3995,6 +3995,9 @@ jira-client-fork@^4.2.1:
     babel-runtime "^6.3.13"
     request-promise "^3.0.0"
 
+"jo@file:./tools/schematics":
+  version "0.0.0"
+
 "js-tokens@^3.0.0 || ^4.0.0", js-tokens@^4.0.0:
   version "4.0.0"
   resolved "https://registry.yarnpkg.com/js-tokens/-/js-tokens-4.0.0.tgz#19203fb59991df98e3a287050d4647cdeaf32499"

@@ -1,9 +1,9 @@
 {
-  "$schema": "../../node_modules/@angular-devkit/schematics/collection-schema.json",
+  "$schema": "../node_modules/@angular-devkit/schematics/collection-schema.json",
   "schematics": {
     "jo": {
-      "description": "feat main.",
-      "factory": "./jo/index#jo",
+      "description": "jo feat main",
+      "factory": "./jo/index",
       "schema": "./jo/schema.json"
     }
   }

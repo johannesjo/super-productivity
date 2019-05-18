@@ -10,7 +10,6 @@
     "type": "git",
     "url": "git://github.com/johannesjo/super-productivity.git"
   },
-  "schematics": "./tools/schematics/src/collection.json",
   "keywords": [
     "ToDo",
     "Task Management",
@@ -148,6 +147,7 @@
     "jasmine-core": "^3.4.0",
     "jasmine-marbles": "^0.4.1",
     "jasmine-spec-reporter": "^4.2.1",
+    "jo": "file:./tools/schematics",
     "karma": "^4.1.0",
     "karma-chrome-launcher": "^2.2.0",
     "karma-cli": "^2.0.0",
