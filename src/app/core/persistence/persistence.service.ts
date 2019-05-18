@@ -10,6 +10,7 @@ import {
   LS_NOTE_STATE,
   LS_OBSTRUCTION_STATE,
   LS_PROJECT_ARCHIVE,
+  LS_PROJECT_META_LIST,
   LS_PROJECT_PREFIX,
   LS_REMINDER,
   LS_TASK_ARCHIVE,
@@ -52,7 +53,7 @@ export class PersistenceService {
   private _baseModels = [];
   private _projectModels = [];
 
-  project = this._cmBase<ProjectState>(LS_TASK_STATE, 'project');
+  project = this._cmBase<ProjectState>(LS_PROJECT_META_LIST, 'project');
   globalConfig = this._cmBase<GlobalConfig>(LS_GLOBAL_CFG, 'globalConfig');
   reminders = this._cmBase<Reminder[]>(LS_REMINDER, 'reminders');
 
