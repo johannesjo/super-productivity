@@ -10,6 +10,7 @@
     "type": "git",
     "url": "git://github.com/johannesjo/super-productivity.git"
   },
+  "schematics": "./tools/schematics/src/collection.json",
   "keywords": [
     "ToDo",
     "Task Management",
