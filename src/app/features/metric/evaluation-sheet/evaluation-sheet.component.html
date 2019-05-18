@@ -11,46 +11,46 @@
 
   <form (submit)="submit()">
     <mat-form-field>
-      <input matInput
-             placeholder="How do you feel?"
-             type="number"
-             min="1"
+      <input [(ngModel)]="metrics.mood"
+             matInput
              max="10"
+             min="1"
              name="mood"
-             [(ngModel)]="metrics.mood">
+             placeholder="How do you feel?"
+             type="number">
       <mat-hint>1: Super bad – 10: Wonderful</mat-hint>
     </mat-form-field>
 
     <mat-form-field>
-      <input matInput
-             placeholder="How efficient did you work today?"
-             type="number"
-             min="1"
+      <input [(ngModel)]="metrics.efficiency"
+             matInput
              max="10"
+             min="1"
              name="efficiency"
-             [(ngModel)]="metrics.efficiency">
+             placeholder="How efficient did you work today?"
+             type="number">
       <mat-hint>1: Enormously efficient– 10: Got done nothing</mat-hint>
     </mat-form-field>
 
     <mat-form-field>
       <mat-chip-list #chipListObstructions>
         <mat-chip
+          (removed)="remove( obstructingFactor)"
           *ngFor="let  obstructingFactor of metrics.obstructingFactors"
-          [removable]="true"
-          (removed)="remove( obstructingFactor)">
+          [removable]="true">
           {{ obstructingFactor}}
           <mat-icon matChipRemove>cancel</mat-icon>
         </mat-chip>
 
         <input
-          placeholder="What hindered your productivity today?"
           #fruitInput
+          (matChipInputTokenEnd)="add($event)"
           [formControl]="fruitCtrl"
           [matAutocomplete]="auto"
+          [matChipInputAddOnBlur]="true"
           [matChipInputFor]="chipListObstructions"
           [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
-          [matChipInputAddOnBlur]="true"
-          (matChipInputTokenEnd)="add($event)">
+          placeholder="What hindered your productivity today?">
       </mat-chip-list>
       <mat-autocomplete #auto="matAutocomplete"
                         (optionSelected)="selected($event)">
@@ -64,21 +64,21 @@
     <mat-form-field>
       <mat-chip-list #chipListImprovingFactors>
         <mat-chip
+          (removed)="remove(improvingFactor)"
           *ngFor="let improvingFactor of metrics.improvingFactors"
-          [removable]="true"
-          (removed)="remove(improvingFactor)">
+          [removable]="true">
           {{improvingFactor}}
           <mat-icon matChipRemove>cancel</mat-icon>
         </mat-chip>
         <input
-          placeholder="What improved your productivity today?"
           #fruitInput
+          (matChipInputTokenEnd)="add($event)"
           [formControl]="fruitCtrl"
           [matAutocomplete]="auto"
+          [matChipInputAddOnBlur]="true"
           [matChipInputFor]="chipListImprovingFactors"
           [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
-          [matChipInputAddOnBlur]="true"
-          (matChipInputTokenEnd)="add($event)">
+          placeholder="What improved your productivity today?">
       </mat-chip-list>
       <mat-autocomplete #auto="matAutocomplete"
                         (optionSelected)="selected($event)">
@@ -94,21 +94,21 @@
     <mat-form-field>
       <mat-chip-list #chipListImprovingFactorsForTomorrow>
         <mat-chip
+          (removed)="remove(improvingFactor)"
           *ngFor="let improvingFactor of metrics.improvingFactorsForTomorrow"
-          [removable]="true"
-          (removed)="remove(improvingFactor)">
+          [removable]="true">
           {{improvingFactor}}
           <mat-icon matChipRemove>cancel</mat-icon>
         </mat-chip>
         <input
-          placeholder="What could you do to improve tomorrow?"
           #fruitInput
+          (matChipInputTokenEnd)="add($event)"
           [formControl]="fruitCtrl"
           [matAutocomplete]="auto"
+          [matChipInputAddOnBlur]="true"
           [matChipInputFor]="chipListImprovingFactorsForTomorrow"
           [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
-          [matChipInputAddOnBlur]="true"
-          (matChipInputTokenEnd)="add($event)">
+          placeholder="What could you do to improve tomorrow?">
       </mat-chip-list>
       <mat-autocomplete #auto="matAutocomplete"
                         (optionSelected)="selected($event)">
@@ -120,8 +120,8 @@
     </mat-form-field>
 
     <div style="text-align: center;">
-      <button mat-raised-button
-              color="primary"
+      <button color="primary"
+              mat-raised-button
               type="submit">
         <mat-icon>save</mat-icon>
         Save

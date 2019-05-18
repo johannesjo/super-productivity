@@ -3,9 +3,12 @@ import {
   LS_BACKUP,
   LS_BOOKMARK_STATE,
   LS_GLOBAL_CFG,
+  LS_IMPROVEMENT_STATE,
   LS_ISSUE_STATE,
   LS_LAST_ACTIVE,
+  LS_METRIC_STATE,
   LS_NOTE_STATE,
+  LS_OBSTRUCTION_STATE,
   LS_PROJECT_ARCHIVE,
   LS_PROJECT_PREFIX,
   LS_REMINDER,
@@ -34,6 +37,9 @@ import {JiraIssueState} from '../../features/issue/jira/jira-issue/store/jira-is
 import {GithubIssueState} from '../../features/issue/github/github-issue/store/github-issue.reducer';
 import {CompressionService} from '../compression/compression.service';
 import {PersistenceBaseModel, PersistenceForProjectModel} from './persistence';
+import {MetricState} from '../../features/metric/metric.model';
+import {ImprovementState} from '../../features/metric/improvement/improvement.model';
+import {ObstructionState} from '../../features/metric/obstruction/obstruction.model';
 
 
 @Injectable({
@@ -55,6 +61,9 @@ export class PersistenceService {
   taskAttachment = this._cmProject<AttachmentState>(LS_TASK_ATTACHMENT_STATE, 'taskAttachment');
   bookmark = this._cmProject<BookmarkState>(LS_BOOKMARK_STATE, 'bookmark');
   note = this._cmProject<NoteState>(LS_NOTE_STATE, 'note');
+  metric = this._cmProject<MetricState>(LS_METRIC_STATE, 'metric');
+  improvement = this._cmProject<ImprovementState>(LS_IMPROVEMENT_STATE, 'improvement');
+  obstruction = this._cmProject<ObstructionState>(LS_OBSTRUCTION_STATE, 'obstruction');
 
 
   constructor(

@@ -8,13 +8,11 @@ export type ProjectDataLsKey
   | 'ISSUE_STATE'
   | 'NOTE_STATE'
   | 'BOOKMARK_STATE'
+  | 'METRIC_STATE'
+  | 'IMPROVEMENT_STATE'
+  | 'OBSTRUCTION_STATE'
   ;
 
-
-export interface PersistenceModelConfig {
-  lsKey: string;
-  appDataKey: keyof AppDataForProjects;
-}
 
 export interface PersistenceBaseModel<T> {
   appDataKey: keyof AppBaseData;

@@ -1,0 +1,8 @@
+<mat-chip-list>
+  <mat-chip (removed)="remove(suggestion)"
+            *ngFor="let suggestion of improvementSuggestions"
+            [removable]="true">
+    {{suggestion}}
+    <mat-icon matChipRemove>check</mat-icon>
+  </mat-chip>
+</mat-chip-list>

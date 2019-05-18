@@ -18,6 +18,9 @@ export const LS_TASK_ATTACHMENT_STATE: ProjectDataLsKey = 'TASK_ATTACHMENT_STATE
 export const LS_ISSUE_STATE: ProjectDataLsKey = 'ISSUE_STATE';
 export const LS_NOTE_STATE: ProjectDataLsKey = 'NOTE_STATE';
 export const LS_BOOKMARK_STATE: ProjectDataLsKey = 'BOOKMARK_STATE';
+export const LS_METRIC_STATE: ProjectDataLsKey = 'METRIC_STATE';
+export const LS_IMPROVEMENT_STATE: ProjectDataLsKey = 'IMPROVEMENT_STATE';
+export const LS_OBSTRUCTION_STATE: ProjectDataLsKey = 'OBSTRUCTION_STATE';
 
 // REAL LS
 export const LS_GITHUB_ISSUE_CACHE_PREFIX = LS_PREFIX + 'GITHUB_ISSUE_CACHE_';

@@ -34,6 +34,15 @@ export interface AppDataForProjects {
   taskAttachment?: {
     [key: string]: EntityState<Attachment>;
   };
+  metric?: {
+    [key: string]: EntityState<Attachment>;
+  };
+  improvement?: {
+    [key: string]: EntityState<Attachment>;
+  };
+  obstruction?: {
+    [key: string]: EntityState<Attachment>;
+  };
   issue?: {
     [key: string]: IssueStateMap;
   };
