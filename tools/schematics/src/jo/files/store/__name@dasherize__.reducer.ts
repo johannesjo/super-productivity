@@ -10,7 +10,6 @@ export const adapter: EntityAdapter<<%= classify(name)%>> = createEntityAdapter<
 export const select<%= classify(name)%>FeatureState = createFeatureSelector<<%= classify(name)%>State>(<%= underscore(name).toUpperCase()%>_FEATURE_NAME);
 export const {selectIds, selectEntities, selectAll, selectTotal} = adapter.getSelectors();
 export const selectAll<%= classify(name)%>s = createSelector(select<%= classify(name)%>FeatureState, selectAll);
-export const selectIsShow<%= classify(name)%>Bar = createSelector(select<%= classify(name)%>FeatureState, state => state.isShow<%= classify(name)%>s);
 
 export const initial<%= classify(name)%>State: <%= classify(name)%>State = adapter.getInitialState({
     // additional entity state properties

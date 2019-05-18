@@ -3,7 +3,6 @@ import {select, Store} from '@ngrx/store';
 import {
     initial<%= classify(name)%>State,
     selectAll<%= classify(name)%>s,
-    selectIsShow<%= classify(name)%>Bar
 } from './store/<%= camelize(name)%>.reducer';
 import {Add<%= classify(name)%>, Delete<%= classify(name)%>, Load<%= classify(name)%>State, Update<%= classify(name)%>} from './store/<%= dasherize(name)%>.actions';
 import {Observable} from 'rxjs';
@@ -15,7 +14,6 @@ import shortid from 'shortid';
 })
 export class <%= classify(name)%>Service {
     <%= camelize(name)%>s$: Observable<<%= classify(name)%>[]> = this._store$.pipe(select(selectAll<%= classify(name)%>s));
-    isShow<%= classify(name)%>s$: Observable<boolean> = this._store$.pipe(select(selectIsShow<%= classify(name)%>Bar));
 
     constructor(
         private _store$: Store<<%= classify(name)%>State>,
