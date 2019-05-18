@@ -88,7 +88,7 @@ export class ProjectService {
   }
 
   async load() {
-    const projectState_ = await this._persistenceService.loadProjectsMeta() || initialProjectState;
+    const projectState_ = await this._persistenceService.project.load() || initialProjectState;
     const projectState = this._extendProjectDefaults(projectState_);
 
     if (projectState) {

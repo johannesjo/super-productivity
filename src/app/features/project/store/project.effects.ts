@@ -239,7 +239,7 @@ export class ProjectEffects {
   }
 
   private _saveToLs([action, projectFeatureState]) {
-    this._persistenceService.saveProjectsMeta(projectFeatureState);
+    this._persistenceService.project.save(projectFeatureState);
   }
 }
 

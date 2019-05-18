@@ -119,8 +119,8 @@ export class WorklogService {
 
 
   private async _loadForProject(project: Project): Promise<{ worklog: Worklog; totalTimeSpent: number }> {
-    const archive = await this._persistenceService.loadTaskArchiveForProject(project.id) || EMPTY_ENTITY;
-    const taskState = await this._persistenceService.loadTasksForProject(project.id) || EMPTY_ENTITY;
+    const archive = await this._persistenceService.taskArchive.load(project.id) || EMPTY_ENTITY;
+    const taskState = await this._persistenceService.task.load(project.id) || EMPTY_ENTITY;
     const startEnd = {
       workStart: project.workStart,
       workEnd: project.workEnd,

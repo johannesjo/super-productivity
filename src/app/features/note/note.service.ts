@@ -45,7 +45,7 @@ export class NoteService {
   }
 
   async getByIdFromEverywhere(id: string, projectId: string): Promise<Note> {
-    const curProject = await this._persistenceService.loadNotesForProject(projectId);
+    const curProject = await this._persistenceService.note.load(projectId);
     if (curProject && curProject.entities[id]) {
       return curProject.entities[id];
     }
@@ -62,7 +62,7 @@ export class NoteService {
   }
 
   public async loadStateForProject(projectId) {
-    const notes = await this._persistenceService.loadNotesForProject(projectId) || initialNoteState;
+    const notes = await this._persistenceService.note.load(projectId) || initialNoteState;
     this.loadState(notes);
   }
 
@@ -100,14 +100,14 @@ export class NoteService {
   }
 
   public async updateFromDifferentProject(projectId, id, updates: Partial<Note>) {
-    const noteState = await this._persistenceService.loadNotesForProject(projectId);
+    const noteState = await this._persistenceService.note.load(projectId);
     const noteToUpdate = noteState.entities[id];
     if (noteToUpdate) {
       Object.assign(noteToUpdate, updates);
     } else {
       console.warn('Note not found while trying to update for different project');
     }
-    return await this._persistenceService.saveNotesForProject(projectId, noteState);
+    return await this._persistenceService.note.save(projectId, noteState);
   }
 
   public updateOrder(ids: string[]) {

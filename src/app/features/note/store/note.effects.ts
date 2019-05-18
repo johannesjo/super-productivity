@@ -151,7 +151,7 @@ export class NoteEffects {
 
   private async _saveToLs([action, currentProjectId, noteState]) {
     if (currentProjectId) {
-      this._persistenceService.saveNotesForProject(currentProjectId, noteState);
+      this._persistenceService.note.save(currentProjectId, noteState);
     } else {
       throw new Error('No current project id');
     }

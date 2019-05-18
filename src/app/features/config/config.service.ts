@@ -45,7 +45,7 @@ export class ConfigService {
   }
 
   async load(isOmitTokens = false) {
-    const cfg = await this._persistenceService.loadGlobalConfig();
+    const cfg = await this._persistenceService.globalConfig.load();
     if (cfg && Object.keys(cfg).length > 0) {
       this.loadState(cfg, isOmitTokens);
     } else {

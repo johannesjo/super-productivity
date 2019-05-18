@@ -25,7 +25,7 @@ export class AttachmentService {
   }
 
   async loadStateForProject(projectId: string) {
-    const lsAttachmentState = await this._persistenceService.loadTaskAttachmentsForProject(projectId);
+    const lsAttachmentState = await this._persistenceService.taskAttachment.load(projectId);
     this.loadState(lsAttachmentState || initialAttachmentState);
   }
 

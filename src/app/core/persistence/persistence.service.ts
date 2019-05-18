@@ -7,7 +7,6 @@ import {
   LS_LAST_ACTIVE,
   LS_NOTE_STATE,
   LS_PROJECT_ARCHIVE,
-  LS_PROJECT_META_LIST,
   LS_PROJECT_PREFIX,
   LS_REMINDER,
   LS_TASK_ARCHIVE,
@@ -45,17 +44,17 @@ export class PersistenceService {
 
   // needs to be assigned before the creations
   private _baseModels = [];
-  private _forProjectModels = [];
+  private _projectModels = [];
 
-  project = this._cBase<ProjectState>(LS_TASK_STATE, 'project');
-  globalConfig = this._cBase<GlobalConfig>(LS_GLOBAL_CFG, 'globalConfig');
-  reminders = this._cBase<Reminder[]>(LS_REMINDER, 'reminders');
+  project = this._cmBase<ProjectState>(LS_TASK_STATE, 'project');
+  globalConfig = this._cmBase<GlobalConfig>(LS_GLOBAL_CFG, 'globalConfig');
+  reminders = this._cmBase<Reminder[]>(LS_REMINDER, 'reminders');
 
-  task = this._cProject<TaskState>(LS_TASK_STATE, 'task');
-  taskArchive = this._cProject<EntityState<TaskWithSubTasks>>(LS_TASK_ARCHIVE, 'taskArchive');
-  taskAttachment = this._cProject<AttachmentState>(LS_TASK_ATTACHMENT_STATE, 'taskAttachment');
-  bookmark = this._cProject<BookmarkState>(LS_BOOKMARK_STATE, 'bookmark');
-  note = this._cProject<NoteState>(LS_NOTE_STATE, 'note');
+  task = this._cmProject<TaskState>(LS_TASK_STATE, 'task');
+  taskArchive = this._cmProject<EntityState<TaskWithSubTasks>>(LS_TASK_ARCHIVE, 'taskArchive');
+  taskAttachment = this._cmProject<AttachmentState>(LS_TASK_ATTACHMENT_STATE, 'taskAttachment');
+  bookmark = this._cmProject<BookmarkState>(LS_BOOKMARK_STATE, 'bookmark');
+  note = this._cmProject<NoteState>(LS_NOTE_STATE, 'note');
 
 
   constructor(
@@ -63,69 +62,13 @@ export class PersistenceService {
     private _databaseService: DatabaseService,
     private _compressionService: CompressionService,
   ) {
-    // this.project.load().then(d => d.);
-    this.loadComplete().then(d => console.log(d));
-    this.loadCompleteForProject('DEFAULT').then(d => console.log(d));
-  }
-
-  // _createBaseModel
-
-  _cBase<T>(lsKey: string, appDataKey: keyof AppBaseData): PersistenceBaseModel<T> {
-    const model = {
-      appDataKey,
-      load: () => this._loadFromDb(lsKey),
-      save: (data, isForce) => this._saveToDb(lsKey, data, isForce),
-    };
-
-    this._baseModels.push(model);
-    return model;
-  }
-
-
-  _cProject<T>(lsKey: string, appDataKey: keyof AppDataForProjects): PersistenceForProjectModel<T> {
-    const model = {
-      appDataKey,
-      load: (projectId) => this._loadFromDb(this._makeProjectKey(projectId, lsKey)),
-      save: (projectId, data, isForce) => this._saveToDb(this._makeProjectKey(projectId, lsKey), data, isForce),
-      remove: (projectId) => this._removeFromDb(this._makeProjectKey(projectId, lsKey)),
-    };
-    this._forProjectModels.push(model);
-    return model;
-  }
-
-  async loadProjectsMeta(): Promise<ProjectState> {
-    return this._loadFromDb(LS_PROJECT_META_LIST);
-  }
-
-  async saveProjectsMeta(projectData: ProjectState, isForce = false): Promise<any> {
-    return this._saveToDb(LS_PROJECT_META_LIST, projectData, isForce);
-  }
-
-  async loadReminders(): Promise<Reminder[]> {
-    return this._loadFromDb(LS_REMINDER);
-  }
-
-  async saveReminders(reminders: Reminder[], isForce = false): Promise<any> {
-    return this._saveToDb(LS_REMINDER, reminders, isForce);
-  }
-
-  // TASKS
-  async saveTasksForProject(projectId, taskState: TaskState, isForce = false): Promise<any> {
-    return this._saveToDb(this._makeProjectKey(projectId, LS_TASK_STATE), taskState, isForce);
-  }
-
-  async loadTasksForProject(projectId): Promise<TaskState> {
-    return this._loadFromDb(this._makeProjectKey(projectId, LS_TASK_STATE));
-  }
-
-  async removeTasksForProject(projectId): Promise<TaskState> {
-    return this._removeFromDb(this._makeProjectKey(projectId, LS_TASK_STATE));
+    // this.loadComplete().then(d => console.log(d));
+    // this.loadCompleteForProject('DEFAULT').then(d => console.log(d));
   }
 
   // TASK ARCHIVE
   async saveToTaskArchiveForProject(projectId, tasksToArchive: EntityState<TaskWithSubTasks>, isForce = false) {
-    const lsKey = this._makeProjectKey(projectId, LS_TASK_ARCHIVE);
-    const currentArchive: EntityState<Task> = await this._loadFromDb(lsKey);
+    const currentArchive: EntityState<Task> = await this.taskArchive.load(projectId);
 
     if (currentArchive) {
       const entities = {
@@ -136,23 +79,14 @@ export class PersistenceService {
         ids: Object.keys(entities),
         entities,
       };
-      return this._saveToDb(lsKey, mergedEntities, isForce);
+      return this.taskArchive.save(projectId, mergedEntities, isForce);
     } else {
-      return this._saveToDb(lsKey, tasksToArchive, isForce);
+      return this.taskArchive.save(projectId, tasksToArchive, isForce);
     }
   }
 
-  async loadTaskArchiveForProject(projectId: string): Promise<EntityState<TaskWithSubTasks>> {
-    return this._loadFromDb(this._makeProjectKey(projectId, LS_TASK_ARCHIVE));
-  }
-
-  async removeTaskArchiveForProject(projectId: string): Promise<EntityState<TaskWithSubTasks>> {
-    return this._removeFromDb(this._makeProjectKey(projectId, LS_TASK_ARCHIVE));
-  }
-
   async removeTasksFromArchive(projectId: string, taskIds: string[]) {
-    const lsKey = this._makeProjectKey(projectId, LS_TASK_ARCHIVE);
-    const currentArchive: EntityState<Task> = await this._loadFromDb(lsKey);
+    const currentArchive: EntityState<Task> = await this.taskArchive.load(projectId);
     const allIds = currentArchive.ids as string[] || [];
     const idsToRemove = [];
     taskIds.forEach((taskId) => {
@@ -162,7 +96,7 @@ export class PersistenceService {
       }
     });
 
-    return this._saveToDb(lsKey, {
+    return this.taskArchive.save(projectId, {
       ...currentArchive,
       ids: allIds.filter((id) => !idsToRemove.includes(id)),
     }, true);
@@ -181,54 +115,6 @@ export class PersistenceService {
     return this._removeFromDb(this._makeProjectKey(projectId, LS_ISSUE_STATE, issueType));
   }
 
-  // BOOKMARKS
-  async saveBookmarksForProject(projectId, bookmarkState: BookmarkState, isForce = false) {
-    return this._saveToDb(this._makeProjectKey(projectId, LS_BOOKMARK_STATE), bookmarkState, isForce);
-  }
-
-  async loadBookmarksForProject(projectId): Promise<BookmarkState> {
-    return this._loadFromDb(this._makeProjectKey(projectId, LS_BOOKMARK_STATE));
-  }
-
-  async removeBookmarksForProject(projectId): Promise<BookmarkState> {
-    return this._removeFromDb(this._makeProjectKey(projectId, LS_BOOKMARK_STATE));
-  }
-
-  // ATTACHMENTS
-  async saveTaskAttachmentsForProject(projectId, attachmentState: AttachmentState, isForce = false) {
-    return this._saveToDb(this._makeProjectKey(projectId, LS_TASK_ATTACHMENT_STATE), attachmentState, isForce);
-  }
-
-  async loadTaskAttachmentsForProject(projectId): Promise<AttachmentState> {
-    return this._loadFromDb(this._makeProjectKey(projectId, LS_TASK_ATTACHMENT_STATE));
-  }
-
-  async removeTaskAttachmentsForProject(projectId): Promise<AttachmentState> {
-    return this._removeFromDb(this._makeProjectKey(projectId, LS_TASK_ATTACHMENT_STATE));
-  }
-
-  // NOTES
-  async saveNotesForProject(projectId, noteState: NoteState, isForce = false) {
-    return this._saveToDb(this._makeProjectKey(projectId, LS_NOTE_STATE), noteState, isForce);
-  }
-
-  async loadNotesForProject(projectId): Promise<NoteState> {
-    return this._loadFromDb(this._makeProjectKey(projectId, LS_NOTE_STATE));
-  }
-
-  async removeNotesForProject(projectId): Promise<NoteState> {
-    return this._removeFromDb(this._makeProjectKey(projectId, LS_NOTE_STATE));
-  }
-
-  // GLOBAL CONFIG
-  // -------------
-  async loadGlobalConfig(): Promise<GlobalConfig> {
-    return this._loadFromDb(LS_GLOBAL_CFG);
-  }
-
-  async saveGlobalConfig(globalConfig: GlobalConfig, isForce = false) {
-    return this._saveToDb(LS_GLOBAL_CFG, globalConfig, isForce);
-  }
 
   // PROJECT ARCHIVING
   // -----------------
@@ -252,7 +138,7 @@ export class PersistenceService {
   async removeArchivedProject(projectId): Promise<any> {
     const archive = await this._loadFromDb(LS_PROJECT_ARCHIVE);
     delete archive[projectId];
-    this.saveProjectArchive(archive);
+    await this.saveProjectArchive(archive);
   }
 
   async saveArchivedProject(projectId, archivedProject: ArchivedProject) {
@@ -273,7 +159,7 @@ export class PersistenceService {
       GITHUB: await this.loadIssuesForProject(projectId, GITHUB_TYPE) as GithubIssueState,
     };
 
-    const forProjectsData = await Promise.all(this._forProjectModels.map(async (modelCfg) => {
+    const forProjectsData = await Promise.all(this._projectModels.map(async (modelCfg) => {
       return {
         [modelCfg.appDataKey]: await modelCfg.load(projectId),
       };
@@ -287,7 +173,7 @@ export class PersistenceService {
   }
 
   async removeCompleteRelatedDataForProject(projectId: string): Promise<any> {
-    await Promise.all(this._forProjectModels.map((modelCfg) => {
+    await Promise.all(this._projectModels.map((modelCfg) => {
       return modelCfg.remove(projectId);
     }));
     await issueProviderKeys.forEach(async (key) => {
@@ -296,7 +182,7 @@ export class PersistenceService {
   }
 
   async restoreCompleteRelatedDataForProject(projectId: string, data: ArchivedProject): Promise<any> {
-    await Promise.all(this._forProjectModels.map((modelCfg) => {
+    await Promise.all(this._projectModels.map((modelCfg) => {
       return modelCfg.save(projectId, data[modelCfg.appDataKey]);
     }));
     await issueProviderKeys.forEach(async (key) => {
@@ -321,7 +207,6 @@ export class PersistenceService {
   saveLastActive(date: string = new Date().toString()) {
     // TODO refactor to timestamp
     // console.log('Save LastAct', date);
-
     saveToLs(LS_LAST_ACTIVE, date);
   }
 
@@ -347,13 +232,11 @@ export class PersistenceService {
       };
     });
     const baseDataArray: Partial<AppBaseData>[] = await Promise.all(promises);
-    console.log(baseDataArray);
-
     return Object.assign({}, ...baseDataArray);
   }
 
   async loadAppDataForProjects(projectIds: string[]): Promise<AppDataForProjects> {
-    const forProjectsData = await Promise.all(this._forProjectModels.map(async (modelCfg) => {
+    const forProjectsData = await Promise.all(this._projectModels.map(async (modelCfg) => {
       const modelState = await this._loadForProjectIds(projectIds, modelCfg.load);
       return {
         [modelCfg.appDataKey]: modelState,
@@ -364,7 +247,7 @@ export class PersistenceService {
 
   // NOTE: not including backup
   async loadComplete(): Promise<AppDataComplete> {
-    const projectState = await this.loadProjectsMeta();
+    const projectState = await this.project.load();
     const pids = projectState ? projectState.ids as string[] : [DEFAULT_PROJECT_ID];
 
     return {
@@ -401,10 +284,10 @@ export class PersistenceService {
     });
 
     const forBase = Promise.all(this._baseModels.map(async (modelCfg) => {
-      return await modelCfg.save(data[modelCfg.appDataKey]);
+      return await modelCfg.save(data[modelCfg.appDataKey], true);
     }));
-    const forProject = Promise.all(this._forProjectModels.map(async (modelCfg) => {
-      return await this._saveForProjectIds(data[modelCfg.appDataKey], modelCfg.save);
+    const forProject = Promise.all(this._projectModels.map(async (modelCfg) => {
+      return await this._saveForProjectIds(data[modelCfg.appDataKey], modelCfg.save, true);
     }));
 
     return await Promise.all([
@@ -432,6 +315,30 @@ export class PersistenceService {
     if (backup) {
       await this.saveBackup(backup);
     }
+  }
+
+
+  // ------------------
+  private _cmBase<T>(lsKey: string, appDataKey: keyof AppBaseData): PersistenceBaseModel<T> {
+    const model = {
+      appDataKey,
+      load: () => this._loadFromDb(lsKey),
+      save: (data, isForce) => this._saveToDb(lsKey, data, isForce),
+    };
+
+    this._baseModels.push(model);
+    return model;
+  }
+
+  private _cmProject<T>(lsKey: string, appDataKey: keyof AppDataForProjects): PersistenceForProjectModel<T> {
+    const model = {
+      appDataKey,
+      load: (projectId) => this._loadFromDb(this._makeProjectKey(projectId, lsKey)),
+      save: (projectId, data, isForce) => this._saveToDb(this._makeProjectKey(projectId, lsKey), data, isForce),
+      remove: (projectId) => this._removeFromDb(this._makeProjectKey(projectId, lsKey)),
+    };
+    this._projectModels.push(model);
+    return model;
   }
 
   private async _loadForProjectIds(pids, getDataFn: Function) {

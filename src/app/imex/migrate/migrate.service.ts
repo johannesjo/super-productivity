@@ -179,7 +179,7 @@ export class MigrateService {
     }
 
     const taskState = this._transformTasks(op.data.tasks.concat(op.data.backlogTasks));
-    await this._persistenceService.saveTasksForProject(op.id, {
+    await this._persistenceService.task.save(op.id, {
       ...initialTaskState,
       ...taskState,
       todaysTaskIds: todayIds,

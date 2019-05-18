@@ -39,7 +39,7 @@ export class AttachmentEffects {
   private _saveToLs([action, currentProjectId, attachmentState]) {
     if (currentProjectId) {
       this._persistenceService.saveLastActive();
-      this._persistenceService.saveTaskAttachmentsForProject(currentProjectId, attachmentState);
+      this._persistenceService.taskAttachment.save(currentProjectId, attachmentState);
     } else {
       throw new Error('No current project id');
     }

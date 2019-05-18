@@ -276,7 +276,7 @@ export class TaskService {
   }
 
   async loadStateForProject(projectId) {
-    const lsTaskState = await this._persistenceService.loadTasksForProject(projectId);
+    const lsTaskState = await this._persistenceService.task.load(projectId);
     if (lsTaskState) {
       this._replaceLegacyGitType(lsTaskState);
     }
@@ -346,7 +346,7 @@ export class TaskService {
   // BEWARE: does only work for task model updates, but not the meta models
   async updateArchiveTask(id: string, changedFields: Partial<Task>) {
     const curProId = this._projectService.currentId;
-    const archiveTaskState = await this._persistenceService.loadTaskArchiveForProject(curProId) as TaskState;
+    const archiveTaskState = await this._persistenceService.taskArchive.load(curProId) as TaskState;
     const updatedState = taskReducer(archiveTaskState, new UpdateTask({
       task: {id, changes: this._shortSyntax(changedFields) as Partial<Task>}
     }));
@@ -459,12 +459,12 @@ export class TaskService {
   }
 
   async getByIdFromEverywhere(id: string, projectId: string = this._projectService.currentId): Promise<Task> {
-    const curProject = await this._persistenceService.loadTasksForProject(projectId);
+    const curProject = await this._persistenceService.task.load(projectId);
     if (curProject && curProject.entities[id]) {
       return curProject.entities[id];
     }
 
-    const archive = await this._persistenceService.loadTaskArchiveForProject(projectId);
+    const archive = await this._persistenceService.taskArchive.load(projectId);
     if (archive && archive.entities[id]) {
       return archive.entities[id];
     }
@@ -503,7 +503,7 @@ export class TaskService {
 
   public async getAllTasks(): Promise<TaskWithIssueData[]> {
     const allTasks = await this._allTasksWithIssueData$.pipe(first()).toPromise();
-    const archiveTaskState = await this._persistenceService.loadTaskArchiveForProject(this._projectService.currentId);
+    const archiveTaskState = await this._persistenceService.taskArchive.load(this._projectService.currentId);
     const ids = archiveTaskState && archiveTaskState.ids as string[] || [];
     const archiveTasks = ids.map(id => archiveTaskState.entities[id]);
     return [...allTasks, ...archiveTasks];
@@ -526,7 +526,7 @@ export class TaskService {
     if (taskWithSameIssue) {
       return {task: taskWithSameIssue, isFromArchive: false};
     } else {
-      const archiveTaskState = await this._persistenceService.loadTaskArchiveForProject(this._projectService.currentId);
+      const archiveTaskState = await this._persistenceService.taskArchive.load(this._projectService.currentId);
       const ids = archiveTaskState && archiveTaskState.ids as string[];
       if (ids) {
         const archiveTaskWithSameIssue = ids.map(id => archiveTaskState.entities[id]).find(task => task.issueId === issue.id);

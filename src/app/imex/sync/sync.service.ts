@@ -45,13 +45,15 @@ export class SyncService {
     return await this._persistenceService.loadComplete();
   }
 
-  async loadCompleteSyncData(data: AppDataComplete) {
+  async loadCompleteSyncData(data: AppDataComplete, isBackupReload = false) {
     this._snackService.open({msg: 'Importing data', ico: 'cloud_download'});
     this._imexMetaService.setInProgress(true);
 
     // get rid of outdated project data
-    await this._persistenceService.saveBackup();
-    await this._persistenceService.clearDatabaseExceptBackup();
+    if (!isBackupReload) {
+      await this._persistenceService.saveBackup();
+      await this._persistenceService.clearDatabaseExceptBackup();
+    }
 
     if (this._checkData(data)) {
       const curId = data.project.currentId;
@@ -109,6 +111,6 @@ export class SyncService {
 
   private async _loadBackup(): Promise<any> {
     const data = await this._persistenceService.loadBackup();
-    return this.loadCompleteSyncData(data);
+    return this.loadCompleteSyncData(data, true);
   }
 }

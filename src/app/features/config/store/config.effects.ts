@@ -79,6 +79,6 @@ export class ConfigEffects {
     }
 
     const globalConfig = state[CONFIG_FEATURE_NAME];
-    await this._persistenceService.saveGlobalConfig(globalConfig);
+    await this._persistenceService.globalConfig.save(globalConfig);
   }
 }
