@@ -40,7 +40,8 @@
     "pub": "yarn buildAllElectron && electron-builder -p always",
     "release": "yarn release.changelog && yarn dist",
     "release.changelog": "conventional-changelog -i CHANGELOG.md -s -p angular",
-    "version": "yarn release.changelog && git add -A"
+    "version": "yarn release.changelog && git add -A",
+    "buildSchema": "cd tools/schematics && yarn build && cd ../../ && yarn add file:./tools/schematics"
   },
   "publish": [
     {
