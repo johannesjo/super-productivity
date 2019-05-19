@@ -57,6 +57,8 @@ export class PersistenceService {
   project = this._cmBase<ProjectState>(LS_PROJECT_META_LIST, 'project');
   globalConfig = this._cmBase<GlobalConfig>(LS_GLOBAL_CFG, 'globalConfig');
   reminders = this._cmBase<Reminder[]>(LS_REMINDER, 'reminders');
+  improvement = this._cmBase<ImprovementState>(LS_IMPROVEMENT_STATE, 'improvement');
+  obstruction = this._cmBase<ObstructionState>(LS_OBSTRUCTION_STATE, 'obstruction');
 
   task = this._cmProject<TaskState>(LS_TASK_STATE, 'task');
   taskArchive = this._cmProject<EntityState<TaskWithSubTasks>>(LS_TASK_ARCHIVE, 'taskArchive');
@@ -64,8 +66,6 @@ export class PersistenceService {
   bookmark = this._cmProject<BookmarkState>(LS_BOOKMARK_STATE, 'bookmark');
   note = this._cmProject<NoteState>(LS_NOTE_STATE, 'note');
   metric = this._cmProject<MetricState>(LS_METRIC_STATE, 'metric');
-  improvement = this._cmProject<ImprovementState>(LS_IMPROVEMENT_STATE, 'improvement');
-  obstruction = this._cmProject<ObstructionState>(LS_OBSTRUCTION_STATE, 'obstruction');
 
 
   constructor(

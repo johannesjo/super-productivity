@@ -126,8 +126,6 @@ export class ProjectEffects {
           this._issueService.loadStatesForProject(projectId),
           this._taskService.loadStateForProject(projectId),
           this._metricService.loadStateForProject(projectId),
-          this._improvementService.loadStateForProject(projectId),
-          this._obstructionService.loadStateForProject(projectId),
         ]);
       }),
       map(data => {
@@ -243,8 +241,6 @@ export class ProjectEffects {
     private _attachmentService: AttachmentService,
     private _reminderService: ReminderService,
     private _metricService: MetricService,
-    private _obstructionService: ObstructionService,
-    private _improvementService: ImprovementService,
   ) {
   }
 

@@ -7,8 +7,11 @@ import {IssueStateMap} from '../../features/issue/issue';
 import {BookmarkState} from '../../features/bookmark/store/bookmark.reducer';
 import {NoteState} from '../../features/note/store/note.reducer';
 import {Reminder} from '../../features/reminder/reminder.model';
-import {Attachment} from '../../features/attachment/attachment.model';
 import {ProjectArchive} from '../../features/project/project.model';
+import {Improvement} from '../../features/metric/improvement/improvement.model';
+import {Obstruction} from '../../features/metric/obstruction/obstruction.model';
+import {MetricState} from '../../features/metric/metric.model';
+import {AttachmentState} from '../../features/attachment/store/attachment.reducer';
 
 
 export interface AppBaseData {
@@ -16,6 +19,8 @@ export interface AppBaseData {
   archivedProjects: ProjectArchive;
   globalConfig: GlobalConfig;
   reminders?: Reminder[];
+  improvement: EntityState<Improvement>;
+  obstruction: EntityState<Obstruction>;
 }
 
 export interface AppDataForProjects {
@@ -32,17 +37,13 @@ export interface AppDataForProjects {
     [key: string]: EntityState<Task>;
   };
   taskAttachment?: {
-    [key: string]: EntityState<Attachment>;
+    [key: string]: AttachmentState;
   };
   metric?: {
-    [key: string]: EntityState<Attachment>;
+    [key: string]: MetricState;
   };
-  improvement?: {
-    [key: string]: EntityState<Attachment>;
-  };
-  obstruction?: {
-    [key: string]: EntityState<Attachment>;
-  };
+
+  // this is special
   issue?: {
     [key: string]: IssueStateMap;
   };

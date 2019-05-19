@@ -7,41 +7,43 @@ import {
   Inject,
   OnInit
 } from '@angular/core';
-import { MatIconRegistry } from '@angular/material';
-import { DomSanitizer } from '@angular/platform-browser';
-import { ProjectService } from './features/project/project.service';
-import { Project } from './features/project/project.model';
-import { ChromeExtensionInterfaceService } from './core/chrome-extension-interface/chrome-extension-interface.service';
-import { ShortcutService } from './core-ui/shortcut/shortcut.service';
-import { ConfigService } from './features/config/config.service';
-import { blendInOutAnimation } from './ui/animations/blend-in-out.ani';
-import { LayoutService } from './core-ui/layout/layout.service';
-import { ElectronService } from 'ngx-electron';
+import {MatIconRegistry} from '@angular/material';
+import {DomSanitizer} from '@angular/platform-browser';
+import {ProjectService} from './features/project/project.service';
+import {Project} from './features/project/project.model';
+import {ChromeExtensionInterfaceService} from './core/chrome-extension-interface/chrome-extension-interface.service';
+import {ShortcutService} from './core-ui/shortcut/shortcut.service';
+import {ConfigService} from './features/config/config.service';
+import {blendInOutAnimation} from './ui/animations/blend-in-out.ani';
+import {LayoutService} from './core-ui/layout/layout.service';
+import {ElectronService} from 'ngx-electron';
 import {
   IPC_APP_READY,
   IPC_ERROR,
   IPC_TRANSFER_SETTINGS_REQUESTED,
   IPC_TRANSFER_SETTINGS_TO_ELECTRON
 } from '../../electron/ipc-events.const';
-import { SnackService } from './core/snack/snack.service';
-import { IS_ELECTRON } from './app.constants';
-import { GoogleDriveSyncService } from './features/google/google-drive-sync.service';
-import { SwUpdate } from '@angular/service-worker';
-import { BookmarkService } from './features/bookmark/bookmark.service';
-import { expandAnimation } from './ui/animations/expand.ani';
-import { warpRouteAnimation } from './ui/animations/warp-route';
-import { NoteService } from './features/note/note.service';
-import { BreakpointObserver } from '@angular/cdk/layout';
-import { DOCUMENT } from '@angular/common';
-import { map, take } from 'rxjs/operators';
-import { MigrateService } from './imex/migrate/migrate.service';
-import { combineLatest, Observable } from 'rxjs';
-import { selectIsAllProjectDataLoaded } from './features/project/store/project.reducer';
-import { Store } from '@ngrx/store';
-import { fadeAnimation } from './ui/animations/fade.ani';
-import { IS_MAC } from './util/is-mac';
-import { selectIsTaskDataLoaded } from './features/tasks/store/task.selectors';
-import { isTouch } from './util/is-touch';
+import {SnackService} from './core/snack/snack.service';
+import {IS_ELECTRON} from './app.constants';
+import {GoogleDriveSyncService} from './features/google/google-drive-sync.service';
+import {SwUpdate} from '@angular/service-worker';
+import {BookmarkService} from './features/bookmark/bookmark.service';
+import {expandAnimation} from './ui/animations/expand.ani';
+import {warpRouteAnimation} from './ui/animations/warp-route';
+import {NoteService} from './features/note/note.service';
+import {BreakpointObserver} from '@angular/cdk/layout';
+import {DOCUMENT} from '@angular/common';
+import {map, take} from 'rxjs/operators';
+import {MigrateService} from './imex/migrate/migrate.service';
+import {combineLatest, Observable} from 'rxjs';
+import {selectIsAllProjectDataLoaded} from './features/project/store/project.reducer';
+import {Store} from '@ngrx/store';
+import {fadeAnimation} from './ui/animations/fade.ani';
+import {IS_MAC} from './util/is-mac';
+import {selectIsTaskDataLoaded} from './features/tasks/store/task.selectors';
+import {isTouch} from './util/is-touch';
+import {ImprovementService} from './features/metric/improvement/improvement.service';
+import {ObstructionService} from './features/metric/obstruction/obstruction.service';
 
 const SIDE_PANEL_BREAKPOINT = 900;
 
@@ -75,6 +77,8 @@ export class AppComponent implements OnInit {
     private _matIconRegistry: MatIconRegistry,
     private _domSanitizer: DomSanitizer,
     private _projectService: ProjectService,
+    private _improvementService: ImprovementService,
+    private _obstructionService: ObstructionService,
     private _electronService: ElectronService,
     private _googleDriveSyncService: GoogleDriveSyncService,
     private _snackService: SnackService,
@@ -89,6 +93,14 @@ export class AppComponent implements OnInit {
     public readonly bookmarkService: BookmarkService,
     public readonly noteService: NoteService,
   ) {
+    // TODO we are better than this
+    // LOAD GLOBAL MODELS
+    this._projectService.load();
+    this._configService.load();
+    this._improvementService.load();
+    this._obstructionService.load();
+
+
     this._matIconRegistry.addSvgIcon(
       `sp`,
       this._domSanitizer.bypassSecurityTrustResourceUrl(`assets/icons/sp.svg`)
@@ -109,8 +121,6 @@ export class AppComponent implements OnInit {
       `drag_handle`,
       this._domSanitizer.bypassSecurityTrustResourceUrl(`assets/icons/drag-handle.svg`)
     );
-
-    this._projectService.load();
 
     this._migrateService.checkForUpdate();
 

@@ -31,8 +31,8 @@ export class ImprovementService {
   ) {
   }
 
-  async loadStateForProject(projectId: string) {
-    const lsImprovementState = await this._persistenceService.improvement.load(projectId);
+  async load() {
+    const lsImprovementState = await this._persistenceService.improvement.load();
     this.loadState(lsImprovementState || initialImprovementState);
   }
 

@@ -41,7 +41,6 @@ export class ConfigService {
   ) {
     // this.cfg$.subscribe((val) => console.log(val));
     this.cfg$.subscribe((cfg) => this.cfg = cfg);
-    this.load();
   }
 
   async load(isOmitTokens = false) {

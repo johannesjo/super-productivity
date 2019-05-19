@@ -5,7 +5,6 @@ import {select, Store} from '@ngrx/store';
 import {ClearHiddenImprovements, ImprovementActionTypes} from './improvement.actions';
 import {selectImprovementFeatureState} from './improvement.reducer';
 import {PersistenceService} from '../../../../core/persistence/persistence.service';
-import {selectCurrentProjectId} from '../../../project/store/project.reducer';
 import {MetricActionTypes} from '../../store/metric.actions';
 
 @Injectable()
@@ -19,7 +18,6 @@ export class ImprovementEffects {
         ImprovementActionTypes.DeleteImprovement,
       ),
       withLatestFrom(
-        this._store$.pipe(select(selectCurrentProjectId)),
         this._store$.pipe(select(selectImprovementFeatureState)),
       ),
       tap(this._saveToLs.bind(this))
@@ -42,13 +40,8 @@ export class ImprovementEffects {
   ) {
   }
 
-  private _saveToLs([action, currentProjectId, improvementState]) {
-    if (currentProjectId) {
-      this._persistenceService.saveLastActive();
-      this._persistenceService.improvement.save(currentProjectId, improvementState);
-    } else {
-      throw new Error('No current project id');
-    }
+  private _saveToLs([action, improvementState]) {
+    this._persistenceService.saveLastActive();
+    this._persistenceService.improvement.save(improvementState);
   }
-
 }

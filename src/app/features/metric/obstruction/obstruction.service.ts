@@ -19,8 +19,8 @@ export class ObstructionService {
   ) {
   }
 
-  async loadStateForProject(projectId: string) {
-    const lsObstructionState = await this._persistenceService.obstruction.load(projectId);
+  async load() {
+    const lsObstructionState = await this._persistenceService.obstruction.load();
     this.loadState(lsObstructionState || initialObstructionState);
   }
 

@@ -4,7 +4,6 @@ import {tap, withLatestFrom} from 'rxjs/operators';
 import {select, Store} from '@ngrx/store';
 import {ObstructionActionTypes} from './obstruction.actions';
 import {selectObstructionFeatureState} from './obstruction.reducer';
-import {selectCurrentProjectId} from '../../../project/store/project.reducer';
 import {PersistenceService} from '../../../../core/persistence/persistence.service';
 
 @Injectable()
@@ -18,7 +17,6 @@ export class ObstructionEffects {
         ObstructionActionTypes.DeleteObstruction,
       ),
       withLatestFrom(
-        this._store$.pipe(select(selectCurrentProjectId)),
         this._store$.pipe(select(selectObstructionFeatureState)),
       ),
       tap(this._saveToLs.bind(this))
@@ -31,13 +29,8 @@ export class ObstructionEffects {
   ) {
   }
 
-  private _saveToLs([action, currentProjectId, obstructionState]) {
-    if (currentProjectId) {
-      this._persistenceService.saveLastActive();
-      this._persistenceService.obstruction.save(currentProjectId, obstructionState);
-    } else {
-      throw new Error('No current project id');
-    }
+  private _saveToLs([action, obstructionState]) {
+    this._persistenceService.saveLastActive();
+    this._persistenceService.obstruction.save(obstructionState);
   }
-
 }
