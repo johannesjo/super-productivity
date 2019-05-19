@@ -3,9 +3,9 @@ import {Actions, Effect, ofType} from '@ngrx/effects';
 import {tap, withLatestFrom} from 'rxjs/operators';
 import {select, Store} from '@ngrx/store';
 import {MetricActionTypes} from './metric.actions';
-import {selectMetricFeatureState} from './metric.reducer';
 import {selectCurrentProjectId} from '../../project/store/project.reducer';
 import {PersistenceService} from '../../../core/persistence/persistence.service';
+import {selectMetricFeatureState} from './metric.selectors';
 
 @Injectable()
 export class MetricEffects {

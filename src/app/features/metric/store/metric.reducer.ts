@@ -1,32 +1,11 @@
 import {createEntityAdapter, EntityAdapter} from '@ngrx/entity';
 import {MetricActions, MetricActionTypes} from './metric.actions';
 import {Metric, MetricState} from '../metric.model';
-import {createFeatureSelector, createSelector} from '@ngrx/store';
-import {sortStringDates} from '../../../util/sortStringDates';
-import {selectImprovementFeatureState} from '../improvement/store/improvement.reducer';
-import {ImprovementState} from '../improvement/improvement.model';
 
 export const METRIC_FEATURE_NAME = 'metric';
+export const metricAdapter: EntityAdapter<Metric> = createEntityAdapter<Metric>();
 
-
-export const adapter: EntityAdapter<Metric> = createEntityAdapter<Metric>();
-export const selectMetricFeatureState = createFeatureSelector<MetricState>(METRIC_FEATURE_NAME);
-export const {selectIds, selectEntities, selectAll, selectTotal} = adapter.getSelectors();
-export const selectAllMetrics = createSelector(selectMetricFeatureState, selectAll);
-export const selectLastTrackedMetric = createSelector(selectMetricFeatureState, (state: MetricState) => {
-  const ids = state.ids as string[];
-  const sorted = sortStringDates(ids);
-  const id = sorted[sorted.length - 1];
-  return state.entities[id];
-});
-
-export const selectMetricById = createSelector(
-  selectMetricFeatureState,
-  (state, props: { id: string }) => state.entities[props.id]
-);
-
-
-export const initialMetricState: MetricState = adapter.getInitialState({
+export const initialMetricState: MetricState = metricAdapter.getInitialState({
   // additional entity state properties
 });
 
@@ -37,19 +16,19 @@ export function metricReducer(
 
   switch (action.type) {
     case MetricActionTypes.AddMetric: {
-      return adapter.addOne(action.payload.metric, state);
+      return metricAdapter.addOne(action.payload.metric, state);
     }
 
     case MetricActionTypes.UpdateMetric: {
-      return adapter.updateOne(action.payload.metric, state);
+      return metricAdapter.updateOne(action.payload.metric, state);
     }
 
     case MetricActionTypes.UpsertMetric: {
-      return adapter.upsertOne(action.payload.metric, state);
+      return metricAdapter.upsertOne(action.payload.metric, state);
     }
 
     case MetricActionTypes.DeleteMetric: {
-      return adapter.removeOne(action.payload.id, state);
+      return metricAdapter.removeOne(action.payload.id, state);
     }
 
     case MetricActionTypes.LoadMetricState:

@@ -1,16 +1,12 @@
 import {Injectable} from '@angular/core';
 import {select, Store} from '@ngrx/store';
-import {
-  initialMetricState,
-  selectAllMetrics,
-  selectLastTrackedMetric,
-} from './store/metric.reducer';
+import {initialMetricState,} from './store/metric.reducer';
 import {AddMetric, DeleteMetric, LoadMetricState, UpdateMetric, UpsertMetric} from './store/metric.actions';
 import {Observable} from 'rxjs';
 import {Metric, MetricState} from './metric.model';
 import {PersistenceService} from '../../core/persistence/persistence.service';
 import {getWorklogStr} from '../../util/get-work-log-str';
-import {Improvement} from './improvement/improvement.model';
+import {selectAllMetrics, selectLastTrackedMetric} from './store/metric.selectors';
 
 @Injectable({
   providedIn: 'root',

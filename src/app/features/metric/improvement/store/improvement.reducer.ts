@@ -3,7 +3,7 @@ import {ImprovementActions, ImprovementActionTypes} from './improvement.actions'
 import {Improvement, ImprovementState} from '../improvement.model';
 import {createFeatureSelector, createSelector} from '@ngrx/store';
 import {Metric} from '../../metric.model';
-import {selectLastTrackedMetric} from '../../store/metric.reducer';
+import {selectLastTrackedMetric} from '../../store/metric.selectors';
 
 export const IMPROVEMENT_FEATURE_NAME = 'improvement';
 
