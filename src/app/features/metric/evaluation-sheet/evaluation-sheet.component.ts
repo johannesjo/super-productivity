@@ -1,10 +1,11 @@
-import {ChangeDetectionStrategy, Component} from '@angular/core';
+import {ChangeDetectionStrategy, Component, OnDestroy} from '@angular/core';
 import {DEFAULT_METRIC_FOR_DAY} from '../metric.const';
 import {MetricCopy} from '../metric.model';
 import {getWorklogStr} from '../../../util/get-work-log-str';
 import {MetricService} from '../metric.service';
 import {ObstructionService} from '../obstruction/obstruction.service';
 import {ImprovementService} from '../improvement/improvement.service';
+import {Subscription} from 'rxjs';
 
 @Component({
   selector: 'evaluation-sheet',
@@ -12,8 +13,9 @@ import {ImprovementService} from '../improvement/improvement.service';
   styleUrls: ['./evaluation-sheet.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class EvaluationSheetComponent {
+export class EvaluationSheetComponent implements OnDestroy {
   metricForDay: MetricCopy;
+  private _subs = new Subscription();
 
   constructor(
     private _metricService: MetricService,
@@ -24,6 +26,17 @@ export class EvaluationSheetComponent {
       id: getWorklogStr(),
       ...DEFAULT_METRIC_FOR_DAY,
     };
+
+    this._subs.add(this._metricService.getTodaysMetric().subscribe(metric => {
+      console.log(metric);
+      if (metric) {
+        this.metricForDay = metric;
+      }
+    }));
+  }
+
+  ngOnDestroy(): void {
+    this._subs.unsubscribe();
   }
 
   addObstruction(v: string) {

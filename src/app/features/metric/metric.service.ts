@@ -10,9 +10,11 @@ import {
   selectAllMetrics,
   selectImprovementCountsPieChartData,
   selectLastTrackedMetric,
+  selectMetricById,
   selectObstructionCountsPieChartData,
   selectProductivityHappinessLineChartData
 } from './store/metric.selectors';
+import {take} from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root',
@@ -64,6 +66,14 @@ export class MetricService {
 
   loadState(state: MetricState) {
     this._store$.dispatch(new LoadMetricState({state}));
+  }
+
+  getMetricById(id: string): Observable<Metric> {
+    return this._store$.pipe(select(selectMetricById, {id}), take(1));
+  }
+
+  getTodaysMetric(): Observable<Metric> {
+    return this.getMetricById(getWorklogStr());
   }
 
   addMetric(metric: Metric) {

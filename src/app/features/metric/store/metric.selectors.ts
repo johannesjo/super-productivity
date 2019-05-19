@@ -6,7 +6,6 @@ import {selectImprovementFeatureState} from '../improvement/store/improvement.re
 import {ImprovementState} from '../improvement/improvement.model';
 import {selectObstructionFeatureState} from '../obstruction/store/obstruction.reducer';
 import {ObstructionState} from '../obstruction/obstruction.model';
-import {ChartDataSets} from 'chart.js';
 
 export const selectMetricFeatureState = createFeatureSelector<MetricState>(METRIC_FEATURE_NAME);
 export const {selectIds, selectEntities, selectAll, selectTotal} = metricAdapter.getSelectors();
