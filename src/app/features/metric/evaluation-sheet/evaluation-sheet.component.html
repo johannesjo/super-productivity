@@ -1,12 +1,9 @@
 <div class="wrapper mat-elevation-z2">
   <help-section>
-    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. A aliquam animi error fuga maxime nihil, officia
-      possimus qui quis, quisquam reprehenderit rerum saepe sint temporibus voluptas! Ipsum itaque provident ullam?</p>
+    <p>Time for a little self evaluation! Your answers here are saved and provide you with a little bit of statistics on how you work in the <a href="">metrics section</a>. Furthermore the suggestions for tomorrow will appear above your task list the next day.</p>
 
-    <h3 class="mat-h3">Why should I care</h3>
-    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Accusantium consectetur inventore maiores non quo
-      reiciendis reprehenderit saepe, vero. Adipisci aliquid animi dolorum eligendi error fugit id itaque libero, modi
-      perferendis quia, quod saepe sequi similique sint sunt suscipit vitae voluptates!</p>
+    <h3 class="mat-h3">Why should I care?</h3>
+    <p>This is intended to be less about calculating exact metrics or becoming machine like efficient in all you do than it is about improving how you feel about your work. It can be helpful to evaluate pain points in your daily routine, as well as it is to find factors that help you out. Being just a little bit systematic about it hopefully helps to get a better grip on these and to improve what you can.</p>
   </help-section>
 
   <form (submit)="submit()">
@@ -18,7 +15,7 @@
              name="mood"
              placeholder="How do you feel?"
              type="number">
-      <mat-hint>1: Super bad – 10: Wonderful</mat-hint>
+      <mat-hint>1: Awful – 10: Splendid</mat-hint>
     </mat-form-field>
 
     <mat-form-field>
@@ -29,7 +26,7 @@
              name="efficiency"
              placeholder="How efficient did you work today?"
              type="number">
-      <mat-hint>1: Enormously efficient– 10: Got done nothing</mat-hint>
+      <mat-hint>1: Haven't even started – 10: Enormously efficient</mat-hint>
     </mat-form-field>
 
     <chip-list-input label="What hindered your productivity today?"
@@ -54,36 +51,6 @@
                      (addNewItem)="addNewImprovementTomorrow($event)"
                      (removeItem)="removeImprovementTomorrow($event)"></chip-list-input>
 
-
-    <!--    &lt;!&ndash; same model as other improvements &ndash;&gt;-->
-    <!--    <mat-form-field>-->
-    <!--      <mat-chip-list #chipListImprovingFactorsForTomorrow>-->
-    <!--        <mat-chip-->
-    <!--          (removed)="remove(improvingFactor)"-->
-    <!--          *ngFor="let improvingFactor of metricForDay.improvingFactorsForTomorrow"-->
-    <!--          [removable]="true">-->
-    <!--          {{improvingFactor}}-->
-    <!--          <mat-icon matChipRemove>cancel</mat-icon>-->
-    <!--        </mat-chip>-->
-    <!--        <input-->
-    <!--          #fruitInput-->
-    <!--          (matChipInputTokenEnd)="add($event)"-->
-    <!--          [formControl]="fruitCtrl"-->
-    <!--          [matAutocomplete]="auto"-->
-    <!--          [matChipInputAddOnBlur]="true"-->
-    <!--          [matChipInputFor]="chipListImprovingFactorsForTomorrow"-->
-    <!--          [matChipInputSeparatorKeyCodes]="separatorKeysCodes"-->
-    <!--          placeholder="What could you do to improve tomorrow?">-->
-    <!--      </mat-chip-list>-->
-    <!--      <mat-autocomplete #auto="matAutocomplete"-->
-    <!--                        (optionSelected)="selected($event)">-->
-    <!--        <mat-option *ngFor="let fruit of filteredFruits | async"-->
-    <!--                    [value]="fruit">-->
-    <!--          {{fruit}}-->
-    <!--        </mat-option>-->
-    <!--      </mat-autocomplete>-->
-    <!--    </mat-form-field>-->
-
     <div style="text-align: center;">
       <button color="lighter"
               mat-raised-button
@@ -93,9 +60,4 @@
       </button>
     </div>
   </form>
-
-
-  <!--  <collapsible class="help-collapsible"-->
-  <!--               title="Why should I care?">-->
-  <!--  </collapsible>-->
 </div>
