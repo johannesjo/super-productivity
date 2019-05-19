@@ -1,11 +1,12 @@
 import {Injectable} from '@angular/core';
 import {Actions, Effect, ofType} from '@ngrx/effects';
-import {tap, withLatestFrom} from 'rxjs/operators';
+import {map, tap, withLatestFrom} from 'rxjs/operators';
 import {select, Store} from '@ngrx/store';
-import {ImprovementActionTypes} from './improvement.actions';
+import {ClearHiddenImprovements, ImprovementActionTypes} from './improvement.actions';
 import {selectImprovementFeatureState} from './improvement.reducer';
 import {PersistenceService} from '../../../../core/persistence/persistence.service';
 import {selectCurrentProjectId} from '../../../project/store/project.reducer';
+import {MetricActionTypes} from '../../store/metric.actions';
 
 @Injectable()
 export class ImprovementEffects {
@@ -22,6 +23,16 @@ export class ImprovementEffects {
         this._store$.pipe(select(selectImprovementFeatureState)),
       ),
       tap(this._saveToLs.bind(this))
+    );
+
+  @Effect() clearImprovements$: any = this._actions$
+    .pipe(
+      ofType(
+        MetricActionTypes.AddMetric,
+        MetricActionTypes.UpsertMetric,
+        MetricActionTypes.UpdateMetric,
+      ),
+      map(() => new ClearHiddenImprovements()),
     );
 
   constructor(

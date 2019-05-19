@@ -8,5 +8,5 @@ export interface ImprovementCopy {
 export type Improvement = Readonly<ImprovementCopy>;
 
 export interface ImprovementState extends EntityState<Improvement> {
-  // additional entities state properties
+  hiddenImprovementBannerItems: string[];
 }

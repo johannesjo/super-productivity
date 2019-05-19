@@ -1,6 +1,7 @@
 import {ChangeDetectionStrategy, Component} from '@angular/core';
 import {MetricService} from '../metric.service';
 import {Improvement} from '../improvement/improvement.model';
+import {ImprovementService} from '../improvement/improvement.service';
 
 @Component({
   selector: 'improvement-banner',
@@ -12,13 +13,13 @@ export class ImprovementBannerComponent {
 
 
   constructor(
-    public metricService: MetricService,
+    public improvementService: ImprovementService,
   ) {
   }
 
   remove(improvement: Improvement) {
     // TODO simplify save hidden indexes to session storage
-    // this.improvementSuggestions.splice(this.improvementSuggestions.indexOf(suggestion), 1);
+    this.improvementService.hideImprovement(improvement.id);
   }
 
 }

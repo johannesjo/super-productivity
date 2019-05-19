@@ -1,3 +1,5 @@
+import {EntityState} from '@ngrx/entity';
+
 export interface MetricCopy {
   // string date of day
   id: string;
@@ -15,4 +17,3 @@ export type Metric = Readonly<MetricCopy>;
 export interface MetricState extends EntityState<Metric> {
 }
 
-import {EntityState} from '@ngrx/entity';

@@ -19,16 +19,6 @@ export const selectLastTrackedMetric = createSelector(selectMetricFeatureState, 
   const id = sorted[sorted.length - 1];
   return state.entities[id];
 });
-export const selectLastTrackedImprovementsTomorrow = createSelector(
-  selectLastTrackedMetric,
-  selectImprovementFeatureState,
-  (metric: Metric, improvementState: ImprovementState) => {
-    if (!metric || !improvementState.ids.length) {
-      return null;
-    }
-    return metric && metric.improvementsTomorrow.map(id => improvementState.entities[id]);
-  }
-);
 
 export const selectMetricById = createSelector(
   selectMetricFeatureState,

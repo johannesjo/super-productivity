@@ -1,7 +1,18 @@
 import {Injectable} from '@angular/core';
 import {select, Store} from '@ngrx/store';
-import {initialImprovementState, selectAllImprovements} from './store/improvement.reducer';
-import {AddImprovement, DeleteImprovement, LoadImprovementState, UpdateImprovement} from './store/improvement.actions';
+import {
+  initialImprovementState,
+  selectAllImprovements,
+  selectLastTrackedImprovementsTomorrow
+} from './store/improvement.reducer';
+import {
+  AddImprovement,
+  ClearHiddenImprovements,
+  DeleteImprovement,
+  HideImprovement,
+  LoadImprovementState,
+  UpdateImprovement
+} from './store/improvement.actions';
 import {Observable} from 'rxjs';
 import {Improvement, ImprovementState} from './improvement.model';
 import shortid from 'shortid';
@@ -12,6 +23,7 @@ import {PersistenceService} from '../../../core/persistence/persistence.service'
 })
 export class ImprovementService {
   improvements$: Observable<Improvement[]> = this._store$.pipe(select(selectAllImprovements));
+  lastTrackedImprovementsTomorrow$: Observable<Improvement[]> = this._store$.pipe(select(selectLastTrackedImprovementsTomorrow));
 
   constructor(
     private _store$: Store<ImprovementState>,
@@ -45,5 +57,13 @@ export class ImprovementService {
 
   updateImprovement(id: string, changes: Partial<Improvement>) {
     this._store$.dispatch(new UpdateImprovement({improvement: {id, changes}}));
+  }
+
+  hideImprovement(id: string) {
+    this._store$.dispatch(new HideImprovement({id}));
+  }
+
+  clearHiddenImprovements() {
+    this._store$.dispatch(new ClearHiddenImprovements());
   }
 }
