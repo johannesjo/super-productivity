@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, OnDestroy} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy} from '@angular/core';
 import {DEFAULT_METRIC_FOR_DAY} from '../metric.const';
 import {MetricCopy} from '../metric.model';
 import {getWorklogStr} from '../../../util/get-work-log-str';
@@ -18,9 +18,10 @@ export class EvaluationSheetComponent implements OnDestroy {
   private _subs = new Subscription();
 
   constructor(
-    private _metricService: MetricService,
     public obstructionService: ObstructionService,
     public improvementService: ImprovementService,
+    private _metricService: MetricService,
+    private _cd: ChangeDetectorRef,
   ) {
     this.metricForDay = {
       id: getWorklogStr(),
@@ -31,6 +32,7 @@ export class EvaluationSheetComponent implements OnDestroy {
       console.log(metric);
       if (metric) {
         this.metricForDay = metric;
+        this._cd.detectChanges();
       }
     }));
   }

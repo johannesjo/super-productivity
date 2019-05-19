@@ -73,7 +73,8 @@ export class MetricService {
   }
 
   getTodaysMetric(): Observable<Metric> {
-    return this.getMetricById(getWorklogStr());
+    const id = getWorklogStr();
+    return this._store$.pipe(select(selectMetricById, {id}));
   }
 
   addMetric(metric: Metric) {

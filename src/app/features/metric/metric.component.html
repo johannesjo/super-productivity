@@ -10,7 +10,6 @@
 <!--</section>-->
 
 
-
 <section class="pie-charts">
   <section *ngIf="(metricService.improvementCountsPieChartData$|async) as improvementCounts">
     <h3>Number of times an improvement factor was selected</h3>
@@ -43,10 +42,6 @@
     <div class="chart-wrapper">
       <div class="inner-chart-wrapper">
         <canvas baseChart
-                height="200"
-                [width]="(productivityHappiness.labels.length > 10)
-           ? (productivityHappiness.labels.length * 30 )
-           : 'auto'"
                 [datasets]="productivityHappiness.data"
                 [labels]="productivityHappiness.labels"
                 [options]="lineChartOptions"
