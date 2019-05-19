@@ -25,6 +25,9 @@ import {SnackOpen} from '../../../core/snack/store/snack.actions';
 import {getWorklogStr} from '../../../util/get-work-log-str';
 import {TaskActionTypes} from '../../tasks/store/task.actions';
 import {ReminderService} from '../../reminder/reminder.service';
+import {MetricService} from '../../metric/metric.service';
+import {ObstructionService} from '../../metric/obstruction/obstruction.service';
+import {ImprovementService} from '../../metric/improvement/improvement.service';
 
 // needed because we always want the check request to the jira api to finish first
 const ISSUE_REFRESH_DELAY = 10000;
@@ -116,11 +119,15 @@ export class ProjectEffects {
       ),
       switchMap(([action, projectId]) => {
         return Promise.all([
+          // TODO automatize
           this._noteService.loadStateForProject(projectId),
           this._bookmarkService.loadStateForProject(projectId),
           this._attachmentService.loadStateForProject(projectId),
           this._issueService.loadStatesForProject(projectId),
           this._taskService.loadStateForProject(projectId),
+          this._metricService.loadStateForProject(projectId),
+          this._improvementService.loadStateForProject(projectId),
+          this._obstructionService.loadStateForProject(projectId),
         ]);
       }),
       map(data => {
@@ -235,6 +242,9 @@ export class ProjectEffects {
     private _noteService: NoteService,
     private _attachmentService: AttachmentService,
     private _reminderService: ReminderService,
+    private _metricService: MetricService,
+    private _obstructionService: ObstructionService,
+    private _improvementService: ImprovementService,
   ) {
   }
 

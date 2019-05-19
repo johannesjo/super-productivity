@@ -3,6 +3,7 @@ import {DEFAULT_METRIC_FOR_DAY} from '../metric.const';
 import {MetricCopy} from '../metric.model';
 import {getWorklogStr} from '../../../util/get-work-log-str';
 import {MetricService} from '../metric.service';
+import {ObstructionService} from '../obstruction/obstruction.service';
 
 @Component({
   selector: 'evaluation-sheet',
@@ -18,7 +19,10 @@ export class EvaluationSheetComponent {
     {id: 'DD', title: 'Some other DD'},
   ];
 
-  constructor(private _metricService: MetricService) {
+  constructor(
+    private _metricService: MetricService,
+    public obstructionService: ObstructionService,
+  ) {
     this.metricForDay = {
       id: getWorklogStr(),
       ...DEFAULT_METRIC_FOR_DAY,
@@ -30,9 +34,8 @@ export class EvaluationSheetComponent {
   }
 
   addNewObstruction(v: string) {
-    // TODO wait for id here
-    // this.metricForDay.obstructions.push(v);
-    console.log('addNewObstruction', v);
+    const id = this.obstructionService.addObstruction(v);
+    this.metricForDay.obstructions = [...this.metricForDay.obstructions, id];
   }
 
   removeObstruction(idToRemove: string) {

@@ -22,14 +22,17 @@ interface Suggestion {
 })
 export class ChipListInputComponent {
   @Input() label: string;
-  @Input() suggestions: Suggestion[];
+
+  @Input() set suggestions(val) {
+    this.suggestions_ = val;
+    this._updateModelItems(this._modelIds);
+  }
+
+  suggestions_: Suggestion[];
 
   @Input() set model(v: string[]) {
-    console.log('SET MODEL', v);
     this._modelIds = v;
-    this.modelItems = (v)
-      ? v.map(id => this.suggestions.find(suggestion => suggestion.id === id))
-      : [];
+    this._updateModelItems(v);
   }
 
   @Output() addItem = new EventEmitter<string>();
@@ -45,7 +48,7 @@ export class ChipListInputComponent {
     startWith(null),
     map((val: string | null) => val
       ? this._filter(val)
-      : this.suggestions.filter(suggestion => !this._modelIds || !this._modelIds.includes(suggestion.id)))
+      : this.suggestions_.filter(suggestion => !this._modelIds || !this._modelIds.includes(suggestion.id)))
   );
 
   @ViewChild('inputElRef') fruitInput: ElementRef<HTMLInputElement>;
@@ -89,8 +92,14 @@ export class ChipListInputComponent {
     return item.id;
   }
 
+  private _updateModelItems(modelIds) {
+    this.modelItems = (modelIds)
+      ? modelIds.map(id => this.suggestions_.find(suggestion => suggestion.id === id))
+      : [];
+  }
+
   private _getExistingSuggestionByTitle(v: string) {
-    return this.suggestions.find(suggestion => suggestion.title === v);
+    return this.suggestions_.find(suggestion => suggestion.title === v);
   }
 
   private _add(id: string) {
@@ -108,7 +117,7 @@ export class ChipListInputComponent {
 
   private _filter(val: string): Suggestion[] {
     const filterValue = val.toLowerCase();
-    return this.suggestions.filter(
+    return this.suggestions_.filter(
       suggestion => suggestion.title.toLowerCase().indexOf(filterValue) === 0
         && !this._modelIds.includes(suggestion.id)
     );

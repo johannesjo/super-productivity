@@ -22,19 +22,23 @@ export class ObstructionService {
   async loadStateForProject(projectId: string) {
     const lsObstructionState = await this._persistenceService.obstruction.load(projectId);
     this.loadState(lsObstructionState || initialObstructionState);
+    console.log(lsObstructionState);
+
   }
 
   loadState(state: ObstructionState) {
     this._store$.dispatch(new LoadObstructionState({state}));
   }
 
-  addObstruction(obstruction: Obstruction) {
+  addObstruction(title: string): string {
+    const id = shortid();
     this._store$.dispatch(new AddObstruction({
       obstruction: {
-        ...obstruction,
-        id: shortid()
+        title,
+        id,
       }
     }));
+    return id;
   }
 
   deleteObstruction(id: string) {
