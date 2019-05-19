@@ -28,13 +28,15 @@ export class ImprovementService {
     this._store$.dispatch(new LoadImprovementState({state}));
   }
 
-  addImprovement(improvement: Improvement) {
+  addImprovement(title: string): string {
+    const id = shortid();
     this._store$.dispatch(new AddImprovement({
       improvement: {
-        ...improvement,
-        id: shortid()
+        title,
+        id,
       }
     }));
+    return id;
   }
 
   deleteImprovement(id: string) {
