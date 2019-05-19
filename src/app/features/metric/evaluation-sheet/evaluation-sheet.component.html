@@ -32,102 +32,74 @@
       <mat-hint>1: Enormously efficient– 10: Got done nothing</mat-hint>
     </mat-form-field>
 
-    <chip-list-input label="X What hindered your productivity today?"
-                     [model]="metricForDay.obstructingFactors"
+    <chip-list-input label="What hindered your productivity today?"
+                     [model]="metricForDay.obstructions"
                      [suggestions]="obstructionSuggestions"
                      (addItem)="addObstruction($event)"
                      (addNewItem)="addNewObstruction($event)"
                      (removeItem)="removeObstruction($event)"></chip-list-input>
 
-    <!--    <mat-form-field>-->
-    <!--      <mat-chip-list #chipListObstructions>-->
-    <!--        <mat-chip-->
-    <!--          (removed)="remove( obstructingFactor)"-->
-    <!--          *ngFor="let  obstructingFactor of metrics.obstructingFactors"-->
-    <!--          [removable]="true">-->
-    <!--          {{ obstructingFactor}}-->
-    <!--          <mat-icon matChipRemove>cancel</mat-icon>-->
-    <!--        </mat-chip>-->
 
-    <!--        <input-->
-    <!--          #fruitInput-->
-    <!--          (matChipInputTokenEnd)="add($event)"-->
-    <!--          [formControl]="fruitCtrl"-->
-    <!--          [matAutocomplete]="auto"-->
-    <!--          [matChipInputAddOnBlur]="true"-->
-    <!--          [matChipInputFor]="chipListObstructions"-->
-    <!--          [matChipInputSeparatorKeyCodes]="separatorKeysCodes"-->
-    <!--          placeholder="What hindered your productivity today?">-->
-    <!--      </mat-chip-list>-->
-    <!--      <mat-autocomplete #auto="matAutocomplete"-->
-    <!--                        (optionSelected)="selected($event)">-->
-    <!--        <mat-option *ngFor="let fruit of filteredFruits | async"-->
-    <!--                    [value]="fruit">-->
-    <!--          {{fruit}}-->
-    <!--        </mat-option>-->
-    <!--      </mat-autocomplete>-->
-    <!--    </mat-form-field>-->
-
-    <mat-form-field>
-      <mat-chip-list #chipListImprovingFactors>
-        <mat-chip
-          (removed)="remove(improvingFactor)"
-          *ngFor="let improvingFactor of metricForDay.improvingFactors"
-          [removable]="true">
-          {{improvingFactor}}
-          <mat-icon matChipRemove>cancel</mat-icon>
-        </mat-chip>
-        <input
-          #fruitInput
-          (matChipInputTokenEnd)="add($event)"
-          [formControl]="fruitCtrl"
-          [matAutocomplete]="auto"
-          [matChipInputAddOnBlur]="true"
-          [matChipInputFor]="chipListImprovingFactors"
-          [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
-          placeholder="What improved your productivity today?">
-      </mat-chip-list>
-      <mat-autocomplete #auto="matAutocomplete"
-                        (optionSelected)="selected($event)">
-        <mat-option *ngFor="let fruit of filteredFruits | async"
-                    [value]="fruit">
-          {{fruit}}
-        </mat-option>
-      </mat-autocomplete>
-    </mat-form-field>
+<!--    <mat-form-field>-->
+<!--      <mat-chip-list #chipListImprovingFactors>-->
+<!--        <mat-chip-->
+<!--          (removed)="remove(improvingFactor)"-->
+<!--          *ngFor="let improvingFactor of metricForDay.improvingFactors"-->
+<!--          [removable]="true">-->
+<!--          {{improvingFactor}}-->
+<!--          <mat-icon matChipRemove>cancel</mat-icon>-->
+<!--        </mat-chip>-->
+<!--        <input-->
+<!--          #fruitInput-->
+<!--          (matChipInputTokenEnd)="add($event)"-->
+<!--          [formControl]="fruitCtrl"-->
+<!--          [matAutocomplete]="auto"-->
+<!--          [matChipInputAddOnBlur]="true"-->
+<!--          [matChipInputFor]="chipListImprovingFactors"-->
+<!--          [matChipInputSeparatorKeyCodes]="separatorKeysCodes"-->
+<!--          placeholder="What improved your productivity today?">-->
+<!--      </mat-chip-list>-->
+<!--      <mat-autocomplete #auto="matAutocomplete"-->
+<!--                        (optionSelected)="selected($event)">-->
+<!--        <mat-option *ngFor="let fruit of filteredFruits | async"-->
+<!--                    [value]="fruit">-->
+<!--          {{fruit}}-->
+<!--        </mat-option>-->
+<!--      </mat-autocomplete>-->
+<!--    </mat-form-field>-->
 
 
-    <!-- same model as other improvements -->
-    <mat-form-field>
-      <mat-chip-list #chipListImprovingFactorsForTomorrow>
-        <mat-chip
-          (removed)="remove(improvingFactor)"
-          *ngFor="let improvingFactor of metricForDay.improvingFactorsForTomorrow"
-          [removable]="true">
-          {{improvingFactor}}
-          <mat-icon matChipRemove>cancel</mat-icon>
-        </mat-chip>
-        <input
-          #fruitInput
-          (matChipInputTokenEnd)="add($event)"
-          [formControl]="fruitCtrl"
-          [matAutocomplete]="auto"
-          [matChipInputAddOnBlur]="true"
-          [matChipInputFor]="chipListImprovingFactorsForTomorrow"
-          [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
-          placeholder="What could you do to improve tomorrow?">
-      </mat-chip-list>
-      <mat-autocomplete #auto="matAutocomplete"
-                        (optionSelected)="selected($event)">
-        <mat-option *ngFor="let fruit of filteredFruits | async"
-                    [value]="fruit">
-          {{fruit}}
-        </mat-option>
-      </mat-autocomplete>
-    </mat-form-field>
+<!--    &lt;!&ndash; same model as other improvements &ndash;&gt;-->
+<!--    <mat-form-field>-->
+<!--      <mat-chip-list #chipListImprovingFactorsForTomorrow>-->
+<!--        <mat-chip-->
+<!--          (removed)="remove(improvingFactor)"-->
+<!--          *ngFor="let improvingFactor of metricForDay.improvingFactorsForTomorrow"-->
+<!--          [removable]="true">-->
+<!--          {{improvingFactor}}-->
+<!--          <mat-icon matChipRemove>cancel</mat-icon>-->
+<!--        </mat-chip>-->
+<!--        <input-->
+<!--          #fruitInput-->
+<!--          (matChipInputTokenEnd)="add($event)"-->
+<!--          [formControl]="fruitCtrl"-->
+<!--          [matAutocomplete]="auto"-->
+<!--          [matChipInputAddOnBlur]="true"-->
+<!--          [matChipInputFor]="chipListImprovingFactorsForTomorrow"-->
+<!--          [matChipInputSeparatorKeyCodes]="separatorKeysCodes"-->
+<!--          placeholder="What could you do to improve tomorrow?">-->
+<!--      </mat-chip-list>-->
+<!--      <mat-autocomplete #auto="matAutocomplete"-->
+<!--                        (optionSelected)="selected($event)">-->
+<!--        <mat-option *ngFor="let fruit of filteredFruits | async"-->
+<!--                    [value]="fruit">-->
+<!--          {{fruit}}-->
+<!--        </mat-option>-->
+<!--      </mat-autocomplete>-->
+<!--    </mat-form-field>-->
 
     <div style="text-align: center;">
-      <button color="primary"
+      <button color="lighter"
               mat-raised-button
               type="submit">
         <mat-icon>save</mat-icon>

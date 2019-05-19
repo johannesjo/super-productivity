@@ -1,16 +1,16 @@
-export interface MetricForDayCopy {
+export interface MetricCopy {
+  // string date of day
   id: string;
 
   // used as id
-  // date: string;
-  // obstructions: string[];
-  // improvements: string[];
-  // improvementsTomorrow: string[];
-  // mood?: number;
-  // efficiency?: number;
+  obstructions: string[];
+  improvements: string[];
+  improvementsTomorrow: string[];
+  mood?: number;
+  efficiency?: number;
 }
 
-export type Metric = Readonly<MetricForDayCopy>;
+export type Metric = Readonly<MetricCopy>;
 
 export interface MetricState extends EntityState<Metric> {
 }

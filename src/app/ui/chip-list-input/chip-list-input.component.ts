@@ -25,6 +25,7 @@ export class ChipListInputComponent {
   @Input() suggestions: Suggestion[];
 
   @Input() set model(v: string[]) {
+    console.log('SET MODEL', v);
     this._modelIds = v;
     this.modelItems = (v)
       ? v.map(id => this.suggestions.find(suggestion => suggestion.id === id))
@@ -36,6 +37,7 @@ export class ChipListInputComponent {
   @Output() removeItem = new EventEmitter<string>();
 
   modelItems: Suggestion[];
+
   inputCtrl = new FormControl();
   separatorKeysCodes: number[] = [ENTER, COMMA];
 
@@ -43,13 +45,13 @@ export class ChipListInputComponent {
     startWith(null),
     map((val: string | null) => val
       ? this._filter(val)
-      : this.suggestions.filter(suggestion => !this._modelIds.includes(suggestion.id)))
+      : this.suggestions.filter(suggestion => !this._modelIds || !this._modelIds.includes(suggestion.id)))
   );
 
   @ViewChild('inputElRef') fruitInput: ElementRef<HTMLInputElement>;
   @ViewChild('autoElRef') matAutocomplete: MatAutocomplete;
 
-  private _modelIds: string[];
+  private _modelIds: string[] = [];
 
   constructor() {
   }
@@ -81,6 +83,10 @@ export class ChipListInputComponent {
     this._add(event.option.value);
     this.fruitInput.nativeElement.value = '';
     this.inputCtrl.setValue(null);
+  }
+
+  trackById(i: number, item: Suggestion) {
+    return item.id;
   }
 
   private _getExistingSuggestionByTitle(v: string) {

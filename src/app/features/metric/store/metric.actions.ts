@@ -6,6 +6,7 @@ export enum MetricActionTypes {
   LoadMetricState = '[Metric] Load Metric State',
   AddMetric = '[Metric] Add Metric',
   UpdateMetric = '[Metric] Update Metric',
+  UpsertMetric = '[Metric] Upsert Metric',
   DeleteMetric = '[Metric] Delete Metric',
 }
 
@@ -30,6 +31,13 @@ export class UpdateMetric implements Action {
   }
 }
 
+export class UpsertMetric implements Action {
+  readonly type = MetricActionTypes.UpsertMetric;
+
+  constructor(public payload: { metric: Metric }) {
+  }
+}
+
 export class DeleteMetric implements Action {
   readonly type = MetricActionTypes.DeleteMetric;
 
@@ -43,4 +51,5 @@ export type MetricActions =
   | AddMetric
   | UpdateMetric
   | DeleteMetric
+  | UpsertMetric
   ;

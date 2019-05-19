@@ -19,6 +19,7 @@ export function metricReducer(
   state = initialMetricState,
   action: MetricActions
 ): MetricState {
+
   switch (action.type) {
     case MetricActionTypes.AddMetric: {
       return adapter.addOne(action.payload.metric, state);
@@ -26,6 +27,10 @@ export function metricReducer(
 
     case MetricActionTypes.UpdateMetric: {
       return adapter.updateOne(action.payload.metric, state);
+    }
+
+    case MetricActionTypes.UpsertMetric: {
+      return adapter.upsertOne(action.payload.metric, state);
     }
 
     case MetricActionTypes.DeleteMetric: {

@@ -1,7 +1,7 @@
 <mat-form-field>
   <mat-chip-list #chipListElRef>
     <mat-chip
-      *ngFor="let modelItem of modelItems"
+      *ngFor="let modelItem of modelItems; trackBy:trackById"
       (removed)="remove(modelItem.id)"
       [removable]="true">
       {{ modelItem.title}}
@@ -20,7 +20,7 @@
   </mat-chip-list>
   <mat-autocomplete #autoElRef="matAutocomplete"
                     (optionSelected)="selected($event)">
-    <mat-option *ngFor="let suggestion of filteredSuggestions | async"
+    <mat-option *ngFor="let suggestion of (filteredSuggestions | async); trackBy:trackById"
                 [value]="suggestion.id">
       {{suggestion.title}}
     </mat-option>

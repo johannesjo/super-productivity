@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
 import {select, Store} from '@ngrx/store';
 import {initialMetricState, selectAllMetrics,} from './store/metric.reducer';
-import {AddMetric, DeleteMetric, LoadMetricState, UpdateMetric} from './store/metric.actions';
+import {AddMetric, DeleteMetric, LoadMetricState, UpdateMetric, UpsertMetric} from './store/metric.actions';
 import {Observable} from 'rxjs';
 import {Metric, MetricState} from './metric.model';
 import shortid from 'shortid';
@@ -44,5 +44,9 @@ export class MetricService {
 
   updateMetric(id: string, changes: Partial<Metric>) {
     this._store$.dispatch(new UpdateMetric({metric: {id, changes}}));
+  }
+
+  upsertMetric(metric: Metric) {
+    this._store$.dispatch(new UpsertMetric({metric}));
   }
 }
