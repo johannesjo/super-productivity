@@ -2,6 +2,7 @@ import {EntityState} from '@ngrx/entity';
 
 export interface ImprovementCopy {
   id: string;
+  title: string;
 }
 
 export type Improvement = Readonly<ImprovementCopy>;

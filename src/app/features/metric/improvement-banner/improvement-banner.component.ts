@@ -1,4 +1,6 @@
-import {ChangeDetectionStrategy, Component, OnInit} from '@angular/core';
+import {ChangeDetectionStrategy, Component} from '@angular/core';
+import {MetricService} from '../metric.service';
+import {Improvement} from '../improvement/improvement.model';
 
 @Component({
   selector: 'improvement-banner',
@@ -6,21 +8,17 @@ import {ChangeDetectionStrategy, Component, OnInit} from '@angular/core';
   styleUrls: ['./improvement-banner.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ImprovementBannerComponent implements OnInit {
-  improvementSuggestions = [
-    'Be less stressed out',
-    'Plan more ahead',
-    'Take more breaks',
-  ];
+export class ImprovementBannerComponent {
 
-  constructor() {
+
+  constructor(
+    public metricService: MetricService,
+  ) {
   }
 
-  ngOnInit() {
-  }
-
-  remove(suggestion: string) {
-    this.improvementSuggestions.splice(this.improvementSuggestions.indexOf(suggestion), 1);
+  remove(improvement: Improvement) {
+    // TODO simplify save hidden indexes to session storage
+    // this.improvementSuggestions.splice(this.improvementSuggestions.indexOf(suggestion), 1);
   }
 
 }

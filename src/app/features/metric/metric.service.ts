@@ -1,22 +1,33 @@
 import {Injectable} from '@angular/core';
 import {select, Store} from '@ngrx/store';
-import {initialMetricState, selectAllMetrics,} from './store/metric.reducer';
+import {
+  initialMetricState,
+  selectAllMetrics,
+  selectLastTrackedImprovementsTomorrow,
+  selectLastTrackedMetric,
+} from './store/metric.reducer';
 import {AddMetric, DeleteMetric, LoadMetricState, UpdateMetric, UpsertMetric} from './store/metric.actions';
 import {Observable} from 'rxjs';
 import {Metric, MetricState} from './metric.model';
-import shortid from 'shortid';
 import {PersistenceService} from '../../core/persistence/persistence.service';
+import {getWorklogStr} from '../../util/get-work-log-str';
+import {Improvement} from './improvement/improvement.model';
 
 @Injectable({
   providedIn: 'root',
 })
 export class MetricService {
   metrics$: Observable<Metric[]> = this._store$.pipe(select(selectAllMetrics));
+  lastTrackedMetric$: Observable<Metric> = this._store$.pipe(select(selectLastTrackedMetric));
+  lastTrackedImprovementsTomorrow$: Observable<Improvement[]> = this._store$.pipe(select(selectLastTrackedImprovementsTomorrow));
 
   constructor(
     private _store$: Store<MetricState>,
     private _persistenceService: PersistenceService,
   ) {
+    this.metrics$.subscribe((v) => console.log('metrics$', v));
+    this.lastTrackedMetric$.subscribe((v) => console.log('lastTrackedMetric$', v));
+    this.lastTrackedImprovementsTomorrow$.subscribe((v) => console.log('lastTrackedImprovementsTomorrow$', v));
   }
 
   async loadStateForProject(projectId: string) {
@@ -28,12 +39,11 @@ export class MetricService {
     this._store$.dispatch(new LoadMetricState({state}));
   }
 
-  // TODO use day
   addMetric(metric: Metric) {
     this._store$.dispatch(new AddMetric({
       metric: {
         ...metric,
-        id: shortid()
+        id: getWorklogStr()
       }
     }));
   }

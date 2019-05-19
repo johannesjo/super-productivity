@@ -16,6 +16,7 @@ export class MetricEffects {
         MetricActionTypes.AddMetric,
         MetricActionTypes.UpdateMetric,
         MetricActionTypes.DeleteMetric,
+        MetricActionTypes.UpsertMetric,
       ),
       withLatestFrom(
         this._store$.pipe(select(selectCurrentProjectId)),

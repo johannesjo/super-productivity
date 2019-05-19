@@ -1,8 +1,8 @@
 <mat-chip-list>
-  <mat-chip (removed)="remove(suggestion)"
-            *ngFor="let suggestion of improvementSuggestions"
+  <mat-chip (removed)="remove(improvement)"
+            *ngFor="let improvement of (metricService.lastTrackedImprovementsTomorrow$|async); "
             [removable]="true">
-    {{suggestion}}
+    {{improvement.title}}
     <mat-icon matChipRemove>check</mat-icon>
   </mat-chip>
 </mat-chip-list>
