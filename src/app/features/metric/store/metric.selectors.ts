@@ -116,7 +116,7 @@ export const selectProductivityHappinessLineChartData = createSelector(
       const metric = state.entities[id];
       v.labels.push(metric.id);
       v.data[0].data.push(metric.mood);
-      v.data[1].data.push(metric.efficiency);
+      v.data[1].data.push(metric.productivity);
     });
     return v;
   }

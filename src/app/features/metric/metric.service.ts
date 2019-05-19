@@ -28,7 +28,7 @@ export class MetricService {
     private _store$: Store<MetricState>,
     private _persistenceService: PersistenceService,
   ) {
-    // ADD RANDOM STUFF
+    // // ADD RANDOM STUFF
     // const rnd = (max = 10, min = 0) => Math.floor(Math.random() * (max - min) + min);
     // const rndRange = (max = 10, min = 0): [number, number] => {
     //   const start = rnd(max, min);
@@ -41,13 +41,13 @@ export class MetricService {
     //   for (let i = 0; i < 50; i++) {
     //     console.log(...(rndRange(5, 0)));
     //
-    //     const metric = {
+    //     const metric: Metric = {
     //       id: `${rnd(2020, 1989)}/${rnd(10, 12)}/${rnd(10, 28)}`,
     //       improvements: improvements.slice(...(rndRange(5, 0))),
     //       obstructions: obstructions.slice(...(rndRange(5, 0))),
     //       improvementsTomorrow: improvements.slice(...(rndRange(5, 0))),
+    //       productivity: rnd(10, 1),
     //       mood: rnd(10, 1),
-    //       efficiency: rnd(10, 1),
     //     };
     //     console.log(metric);
     //     this._store$.dispatch(new UpsertMetric({
