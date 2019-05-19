@@ -33,6 +33,10 @@ export function <%= camelize(name) %>Reducer(
             return adapter.updateOne(action.payload.<%= camelize(name) %>, state);
         }
 
+        case <%= classify(name)%>ActionTypes.Upsert<%= classify(name)%>: {
+            return adapter.upsertOne(action.payload.<%= camelize(name) %>, state);
+        }
+
         case <%= classify(name)%>ActionTypes.Delete<%= classify(name)%>: {
             return adapter.removeOne(action.payload.id, state);
         }

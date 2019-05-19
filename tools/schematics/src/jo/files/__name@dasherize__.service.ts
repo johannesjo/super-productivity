@@ -6,7 +6,13 @@ import {
     selectAll<%= classify(name)%>s,
     select<%= classify(name)%>ById,
 } from './store/<%= camelize(name)%>.reducer';
-import {Add<%= classify(name)%>, Delete<%= classify(name)%>, Load<%= classify(name)%>State, Update<%= classify(name)%>} from './store/<%= dasherize(name)%>.actions';
+import {
+  Add<%= classify(name)%>,
+  Delete<%= classify(name)%>,
+  Load<%= classify(name)%>State,
+  Update<%= classify(name)%>,
+  Upsert<%= classify(name)%>,
+} from './store/<%= dasherize(name)%>.actions';
 import {Observable} from 'rxjs';
 import {<%= classify(name)%>, <%= classify(name)%>State} from './<%= dasherize(name)%>.model';
 import shortid from 'shortid';
@@ -51,5 +57,9 @@ export class <%= classify(name)%>Service {
 
     update<%= classify(name)%>(id: string, changes: Partial<<%= classify(name)%>>) {
         this._store$.dispatch(new Update<%= classify(name)%>({<%= camelize(name)%>: {id, changes}}));
+    }
+
+    upsert<%= classify(name)%>(metric: <%= classify(name)%>) {
+      this._store$.dispatch(new Upsert<%= classify(name)%>({metric}));
     }
 }
