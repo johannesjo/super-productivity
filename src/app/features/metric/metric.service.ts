@@ -3,14 +3,15 @@ import {select, Store} from '@ngrx/store';
 import {initialMetricState,} from './store/metric.reducer';
 import {AddMetric, DeleteMetric, LoadMetricState, UpdateMetric, UpsertMetric} from './store/metric.actions';
 import {Observable} from 'rxjs';
-import {Metric, MetricState, PieChartData} from './metric.model';
+import {LineChartData, Metric, MetricState, PieChartData} from './metric.model';
 import {PersistenceService} from '../../core/persistence/persistence.service';
 import {getWorklogStr} from '../../util/get-work-log-str';
 import {
   selectAllMetrics,
   selectImprovementCountsPieChartData,
   selectLastTrackedMetric,
-  selectObstructionCountsPieChartData
+  selectObstructionCountsPieChartData,
+  selectProductivityHappinessLineChartData
 } from './store/metric.selectors';
 
 @Injectable({
@@ -21,6 +22,7 @@ export class MetricService {
   lastTrackedMetric$: Observable<Metric> = this._store$.pipe(select(selectLastTrackedMetric));
   improvementCountsPieChartData$: Observable<PieChartData> = this._store$.pipe(select(selectImprovementCountsPieChartData));
   obstructionCountsPieChartData$: Observable<PieChartData> = this._store$.pipe(select(selectObstructionCountsPieChartData));
+  productivityHappinessLineChartData$: Observable<LineChartData> = this._store$.pipe(select(selectProductivityHappinessLineChartData));
 
   constructor(
     private _store$: Store<MetricState>,
@@ -36,7 +38,7 @@ export class MetricService {
     // const obstructions = ['WkVwJhU0r', 'jiPdzVb_w', 'bNl7-0qnK', 'tayOw78q1', 'dWhY0749q'];
     //
     // setTimeout(() => {
-    //   for (let i = 0; i < 200; i++) {
+    //   for (let i = 0; i < 50; i++) {
     //     console.log(...(rndRange(5, 0)));
     //
     //     const metric = {

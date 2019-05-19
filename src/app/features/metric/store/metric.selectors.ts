@@ -1,11 +1,12 @@
 import {createFeatureSelector, createSelector} from '@ngrx/store';
-import {Metric, MetricState, PieChartData} from '../metric.model';
+import {LineChartData, Metric, MetricState, PieChartData} from '../metric.model';
 import {sortStringDates} from '../../../util/sortStringDates';
 import {METRIC_FEATURE_NAME, metricAdapter} from './metric.reducer';
 import {selectImprovementFeatureState} from '../improvement/store/improvement.reducer';
 import {ImprovementState} from '../improvement/improvement.model';
 import {selectObstructionFeatureState} from '../obstruction/store/obstruction.reducer';
 import {ObstructionState} from '../obstruction/obstruction.model';
+import {ChartDataSets} from 'chart.js';
 
 export const selectMetricFeatureState = createFeatureSelector<MetricState>(METRIC_FEATURE_NAME);
 export const {selectIds, selectEntities, selectAll, selectTotal} = metricAdapter.getSelectors();
@@ -95,5 +96,28 @@ export const selectObstructionCountsPieChartData = createSelector(
       chart.data.push(counts[id]);
     });
     return chart;
+  }
+);
+
+export const selectProductivityHappinessLineChartData = createSelector(
+  selectMetricFeatureState,
+  (state: MetricState): LineChartData => {
+    const ids = state.ids as string[];
+    const sorted = sortStringDates(ids);
+
+    const v = {
+      labels: [],
+      data: [
+        {data: [], label: 'Mood'},
+        {data: [], label: 'Productivity'},
+      ],
+    };
+    sorted.forEach(id => {
+      const metric = state.entities[id];
+      v.labels.push(metric.id);
+      v.data[0].data.push(metric.mood);
+      v.data[1].data.push(metric.efficiency);
+    });
+    return v;
   }
 );

@@ -12,6 +12,7 @@ import {MetricEffects} from './store/metric.effects';
 import {ObstructionModule} from './obstruction/obstruction.module';
 import {ImprovementModule} from './improvement/improvement.module';
 import {ChartsModule} from 'ng2-charts';
+import { MyLineChartComponent } from './my-line-chart/my-line-chart.component';
 
 @NgModule({
   imports: [
@@ -28,6 +29,7 @@ import {ChartsModule} from 'ng2-charts';
     EvaluationSheetComponent,
     MetricComponent,
     ImprovementBannerComponent,
+    MyLineChartComponent,
   ],
   exports: [
     EvaluationSheetComponent,

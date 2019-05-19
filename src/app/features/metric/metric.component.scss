@@ -7,3 +7,16 @@
 h3 {
   margin-top: $s*3;
 }
+
+.chart-wrapper {
+}
+
+.pie-charts {
+  @include mq(xs) {
+    display: flex;
+
+    > section {
+      width: 50%;
+    }
+  }
+}
