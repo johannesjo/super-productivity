@@ -160,6 +160,7 @@
     "lz-string": "^1.4.4",
     "moment-duration-format": "^2.2.2",
     "ng2-charts": "^2.2.3",
+    "ng2-charts-schematics": "^0.1.7",
     "ng2-dragula": "^2.1.1",
     "ngx-electron": "^2.1.1",
     "ngx-markdown": "^7.0.3",

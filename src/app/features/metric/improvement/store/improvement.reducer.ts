@@ -12,20 +12,6 @@ export const adapter: EntityAdapter<Improvement> = createEntityAdapter<Improveme
 export const selectImprovementFeatureState = createFeatureSelector<ImprovementState>(IMPROVEMENT_FEATURE_NAME);
 export const {selectIds, selectEntities, selectAll, selectTotal} = adapter.getSelectors();
 export const selectAllImprovements = createSelector(selectImprovementFeatureState, selectAll);
-export const selectLastTrackedImprovementsTomorrow = createSelector(
-  selectLastTrackedMetric,
-  selectImprovementFeatureState,
-  (metric: Metric, improvementState: ImprovementState) => {
-    if (!metric || !improvementState.ids.length) {
-      return null;
-    }
-    const hiddenIds = improvementState.hiddenImprovementBannerItems || [];
-
-    return metric && metric.improvementsTomorrow
-      .filter(id => !hiddenIds.includes(id))
-      .map(id => improvementState.entities[id]);
-  }
-);
 
 
 export const initialImprovementState: ImprovementState = adapter.getInitialState({

@@ -1,7 +1,11 @@
 import {createFeatureSelector, createSelector} from '@ngrx/store';
-import {MetricState} from '../metric.model';
+import {Metric, MetricState, PieChartData} from '../metric.model';
 import {sortStringDates} from '../../../util/sortStringDates';
 import {METRIC_FEATURE_NAME, metricAdapter} from './metric.reducer';
+import {selectImprovementFeatureState} from '../improvement/store/improvement.reducer';
+import {ImprovementState} from '../improvement/improvement.model';
+import {selectObstructionFeatureState} from '../obstruction/store/obstruction.reducer';
+import {ObstructionState} from '../obstruction/obstruction.model';
 
 export const selectMetricFeatureState = createFeatureSelector<MetricState>(METRIC_FEATURE_NAME);
 export const {selectIds, selectEntities, selectAll, selectTotal} = metricAdapter.getSelectors();
@@ -13,6 +17,21 @@ export const selectLastTrackedMetric = createSelector(selectMetricFeatureState, 
   return state.entities[id];
 });
 
+export const selectLastTrackedImprovementsTomorrow = createSelector(
+  selectLastTrackedMetric,
+  selectImprovementFeatureState,
+  (metric: Metric, improvementState: ImprovementState) => {
+    if (!metric || !improvementState.ids.length) {
+      return null;
+    }
+    const hiddenIds = improvementState.hiddenImprovementBannerItems || [];
+
+    return metric && metric.improvementsTomorrow
+      .filter(id => !hiddenIds.includes(id))
+      .map(id => improvementState.entities[id]);
+  }
+);
+
 // DYNAMIC
 // -------
 export const selectMetricById = createSelector(
@@ -23,3 +42,58 @@ export const selectMetricById = createSelector(
 
 // STATISTICS
 // ...
+export const selectImprovementCountsPieChartData = createSelector(
+  selectAllMetrics,
+  selectImprovementFeatureState,
+  (metrics: Metric[], improvementState: ImprovementState): PieChartData => {
+    if (!metrics.length || !improvementState.ids.length) {
+      return null;
+    }
+
+    const counts = {};
+    metrics.forEach((metric: Metric) => {
+      metric.improvements.forEach((improvementId: string) => {
+        counts[improvementId] = counts[improvementId]
+          ? counts[improvementId] + 1
+          : 1;
+      });
+    });
+    const chart: PieChartData = {
+      labels: [],
+      data: [],
+    };
+    Object.keys(counts).forEach(id => {
+      chart.labels.push(improvementState.entities[id].title);
+      chart.data.push(counts[id]);
+    });
+    return chart;
+  }
+);
+
+export const selectObstructionCountsPieChartData = createSelector(
+  selectAllMetrics,
+  selectObstructionFeatureState,
+  (metrics: Metric[], obstructionState: ObstructionState): PieChartData => {
+    if (!metrics.length || !obstructionState.ids.length) {
+      return null;
+    }
+
+    const counts = {};
+    metrics.forEach((metric: Metric) => {
+      metric.obstructions.forEach((obstructionId: string) => {
+        counts[obstructionId] = counts[obstructionId]
+          ? counts[obstructionId] + 1
+          : 1;
+      });
+    });
+    const chart: PieChartData = {
+      labels: [],
+      data: [],
+    };
+    Object.keys(counts).forEach(id => {
+      chart.labels.push(obstructionState.entities[id].title);
+      chart.data.push(counts[id]);
+    });
+    return chart;
+  }
+);

@@ -3,10 +3,15 @@ import {select, Store} from '@ngrx/store';
 import {initialMetricState,} from './store/metric.reducer';
 import {AddMetric, DeleteMetric, LoadMetricState, UpdateMetric, UpsertMetric} from './store/metric.actions';
 import {Observable} from 'rxjs';
-import {Metric, MetricState} from './metric.model';
+import {Metric, MetricState, PieChartData} from './metric.model';
 import {PersistenceService} from '../../core/persistence/persistence.service';
 import {getWorklogStr} from '../../util/get-work-log-str';
-import {selectAllMetrics, selectLastTrackedMetric} from './store/metric.selectors';
+import {
+  selectAllMetrics,
+  selectImprovementCountsPieChartData,
+  selectLastTrackedMetric,
+  selectMetricFeatureState, selectObstructionCountsPieChartData
+} from './store/metric.selectors';
 
 @Injectable({
   providedIn: 'root',
@@ -14,6 +19,8 @@ import {selectAllMetrics, selectLastTrackedMetric} from './store/metric.selector
 export class MetricService {
   metrics$: Observable<Metric[]> = this._store$.pipe(select(selectAllMetrics));
   lastTrackedMetric$: Observable<Metric> = this._store$.pipe(select(selectLastTrackedMetric));
+  improvementCountsPieChartData$: Observable<PieChartData> = this._store$.pipe(select(selectImprovementCountsPieChartData));
+  obstructionCountsPieChartData$: Observable<PieChartData> = this._store$.pipe(select(selectObstructionCountsPieChartData));
 
   constructor(
     private _store$: Store<MetricState>,

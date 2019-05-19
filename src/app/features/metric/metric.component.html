@@ -8,3 +8,33 @@
 <!--  </tr>-->
 <!--</table>-->
 <!--</section>-->
+
+<section class="pie-charts">
+  <section *ngIf="(metricService.improvementCountsPieChartData$|async) as improvementCounts">
+    <h3>Number of times an improvement was selected</h3>
+    <canvas baseChart
+            [data]="improvementCounts.data"
+            [labels]="improvementCounts.labels"
+            [chartType]="pieChartType"
+            [options]="pieChartOptions"
+            [plugins]="pieChartPlugins"
+            [legend]="pieChartLegend">
+    </canvas>
+  </section>
+
+  <section *ngIf="(metricService.obstructionCountsPieChartData$|async) as obstructionCounts">
+    <h3>Number of times an obstruction was selected</h3>
+    <canvas baseChart
+            [data]="obstructionCounts.data"
+            [labels]="obstructionCounts.labels"
+            [chartType]="pieChartType"
+            [options]="pieChartOptions"
+            [plugins]="pieChartPlugins"
+            [legend]="pieChartLegend">
+    </canvas>
+  </section>
+</section>
+
+
+<!--<my-pie-chart></my-pie-chart>-->
+<!--<my-line-chart></my-line-chart>-->

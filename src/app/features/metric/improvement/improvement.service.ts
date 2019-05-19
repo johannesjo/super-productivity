@@ -3,7 +3,6 @@ import {select, Store} from '@ngrx/store';
 import {
   initialImprovementState,
   selectAllImprovements,
-  selectLastTrackedImprovementsTomorrow
 } from './store/improvement.reducer';
 import {
   AddImprovement,
@@ -17,6 +16,7 @@ import {Observable} from 'rxjs';
 import {Improvement, ImprovementState} from './improvement.model';
 import shortid from 'shortid';
 import {PersistenceService} from '../../../core/persistence/persistence.service';
+import {selectLastTrackedImprovementsTomorrow} from '../store/metric.selectors';
 
 @Injectable({
   providedIn: 'root',

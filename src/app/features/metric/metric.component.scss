@@ -1,0 +1,9 @@
+@import '../../../variables';
+
+:host {
+  text-align: center;
+}
+
+h3 {
+  margin-top: $s*3;
+}
