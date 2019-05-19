@@ -1,4 +1,5 @@
-import {ChangeDetectionStrategy, Component, OnInit} from '@angular/core';
+import {ChangeDetectionStrategy, Component} from '@angular/core';
+import {WorklogService} from '../worklog/worklog.service';
 
 @Component({
   selector: 'metric',
@@ -6,12 +7,10 @@ import {ChangeDetectionStrategy, Component, OnInit} from '@angular/core';
   styleUrls: ['./metric.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class MetricComponent implements OnInit {
+export class MetricComponent {
 
-  constructor() {
+  constructor(
+    public worklogService: WorklogService,
+  ) {
   }
-
-  ngOnInit() {
-  }
-
 }
