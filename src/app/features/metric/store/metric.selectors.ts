@@ -17,6 +17,8 @@ export const selectLastTrackedMetric = createSelector(selectMetricFeatureState, 
   return state.entities[id];
 });
 
+export const selectMetricHasData = createSelector(selectMetricFeatureState, (state) => state && !!state.ids.length);
+
 export const selectLastTrackedImprovementsTomorrow = createSelector(
   selectLastTrackedMetric,
   selectImprovementFeatureState,

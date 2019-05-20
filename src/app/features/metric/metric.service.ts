@@ -10,7 +10,7 @@ import {
   selectAllMetrics,
   selectImprovementCountsPieChartData,
   selectLastTrackedMetric,
-  selectMetricById,
+  selectMetricById, selectMetricHasData,
   selectObstructionCountsPieChartData,
   selectProductivityHappinessLineChartData
 } from './store/metric.selectors';
@@ -21,6 +21,7 @@ import {take} from 'rxjs/operators';
 })
 export class MetricService {
   metrics$: Observable<Metric[]> = this._store$.pipe(select(selectAllMetrics));
+  hasData$: Observable<boolean> = this._store$.pipe(select(selectMetricHasData));
   lastTrackedMetric$: Observable<Metric> = this._store$.pipe(select(selectLastTrackedMetric));
   improvementCountsPieChartData$: Observable<PieChartData> = this._store$.pipe(select(selectImprovementCountsPieChartData));
   obstructionCountsPieChartData$: Observable<PieChartData> = this._store$.pipe(select(selectObstructionCountsPieChartData));
