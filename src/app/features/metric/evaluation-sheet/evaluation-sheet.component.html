@@ -11,12 +11,12 @@
       helps to get a better grip on these and to improve what you can.</p>
   </help-section>
 
-  <form (submit)="submit()">
+  <form (submit)="submit()"
+        [formGroup]="form">
     <mat-form-field>
       <input [(ngModel)]="metricForDay.mood"
-             required
+             formControlName="mood"
              matInput
-             [formControl]="moodFormCtrl"
              maxLength="2"
              placeholder="How do you feel?"
              type="number">
@@ -29,8 +29,7 @@
     <mat-form-field>
       <input [(ngModel)]="metricForDay.productivity"
              name="productivity"
-             [formControl]="productivityFormCtrl"
-             required
+             formControlName="productivity"
              matInput
              maxLength="2"
              placeholder="How efficient did you work today?"
@@ -65,6 +64,7 @@
 
     <div style="text-align: center;">
       <button color="lighter"
+              [disabled]="!form.valid"
               mat-raised-button
               type="submit">
         <mat-icon>save</mat-icon>

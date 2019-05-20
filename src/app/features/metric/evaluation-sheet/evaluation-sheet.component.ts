@@ -6,7 +6,7 @@ import { MetricService } from '../metric.service';
 import { ObstructionService } from '../obstruction/obstruction.service';
 import { ImprovementService } from '../improvement/improvement.service';
 import { Subscription } from 'rxjs';
-import { FormControl, Validators } from '@angular/forms';
+import { FormControl, FormGroup, Validators } from '@angular/forms';
 
 @Component({
   selector: 'evaluation-sheet',
@@ -16,9 +16,17 @@ import { FormControl, Validators } from '@angular/forms';
 })
 export class EvaluationSheetComponent implements OnDestroy, OnInit {
   metricForDay: MetricCopy;
-
-  moodFormCtrl = new FormControl('', [Validators.max(10), Validators.min(1)]);
-  productivityFormCtrl = new FormControl('', [Validators.max(10), Validators.min(1)]);
+  form: FormGroup;
+  moodFormCtrl = new FormControl('', [
+    Validators.required,
+    Validators.min(1),
+    Validators.max(10),
+  ]);
+  productivityFormCtrl = new FormControl('', [
+    Validators.required,
+    Validators.min(1),
+    Validators.max(10),
+  ]);
 
   private _subs = new Subscription();
 
@@ -28,13 +36,22 @@ export class EvaluationSheetComponent implements OnDestroy, OnInit {
     private _metricService: MetricService,
     private _cd: ChangeDetectorRef,
   ) {
+  }
+
+  ngOnInit(): void {
     this.metricForDay = {
       id: getWorklogStr(),
       ...DEFAULT_METRIC_FOR_DAY,
     };
-  }
 
-  ngOnInit(): void {
+    this.form = new FormGroup({
+      mood: this.moodFormCtrl,
+      productivity: this.productivityFormCtrl,
+      // obstructions: new FormControl(this.metricForDay.obstructions),
+      // improvements: new FormControl(this.metricForDay.improvements),
+      // improvementsTomorrow: new FormControl(this.metricForDay.improvementsTomorrow),
+    });
+
     this._subs.add(this._metricService.getTodaysMetric().subscribe(metric => {
       if (metric) {
         this.metricForDay = metric;
@@ -42,6 +59,7 @@ export class EvaluationSheetComponent implements OnDestroy, OnInit {
       }
     }));
   }
+
 
   ngOnDestroy(): void {
     this._subs.unsubscribe();
@@ -89,6 +107,8 @@ export class EvaluationSheetComponent implements OnDestroy, OnInit {
   }
 
   submit() {
-    this._metricService.upsertMetric(this.metricForDay);
+    if (this.form.valid) {
+      this._metricService.upsertMetric(this.metricForDay);
+    }
   }
 }
