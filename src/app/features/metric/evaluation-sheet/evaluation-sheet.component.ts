@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit} from '@angular/core';
 import {DEFAULT_METRIC_FOR_DAY} from '../metric.const';
 import {MetricCopy} from '../metric.model';
 import {getWorklogStr} from '../../../util/get-work-log-str';
@@ -13,7 +13,7 @@ import {Subscription} from 'rxjs';
   styleUrls: ['./evaluation-sheet.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class EvaluationSheetComponent implements OnDestroy {
+export class EvaluationSheetComponent implements OnDestroy, OnInit {
   metricForDay: MetricCopy;
   private _subs = new Subscription();
 
@@ -27,7 +27,9 @@ export class EvaluationSheetComponent implements OnDestroy {
       id: getWorklogStr(),
       ...DEFAULT_METRIC_FOR_DAY,
     };
+  }
 
+  ngOnInit(): void {
     this._subs.add(this._metricService.getTodaysMetric().subscribe(metric => {
       if (metric) {
         this.metricForDay = metric;
