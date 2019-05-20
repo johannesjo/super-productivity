@@ -1,11 +1,12 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit} from '@angular/core';
-import {DEFAULT_METRIC_FOR_DAY} from '../metric.const';
-import {MetricCopy} from '../metric.model';
-import {getWorklogStr} from '../../../util/get-work-log-str';
-import {MetricService} from '../metric.service';
-import {ObstructionService} from '../obstruction/obstruction.service';
-import {ImprovementService} from '../improvement/improvement.service';
-import {Subscription} from 'rxjs';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
+import { DEFAULT_METRIC_FOR_DAY } from '../metric.const';
+import { MetricCopy } from '../metric.model';
+import { getWorklogStr } from '../../../util/get-work-log-str';
+import { MetricService } from '../metric.service';
+import { ObstructionService } from '../obstruction/obstruction.service';
+import { ImprovementService } from '../improvement/improvement.service';
+import { Subscription } from 'rxjs';
+import { FormControl, Validators } from '@angular/forms';
 
 @Component({
   selector: 'evaluation-sheet',
@@ -15,6 +16,10 @@ import {Subscription} from 'rxjs';
 })
 export class EvaluationSheetComponent implements OnDestroy, OnInit {
   metricForDay: MetricCopy;
+
+  moodFormCtrl = new FormControl('', [Validators.max(10), Validators.min(1)]);
+  productivityFormCtrl = new FormControl('', [Validators.max(10), Validators.min(1)]);
+
   private _subs = new Subscription();
 
   constructor(

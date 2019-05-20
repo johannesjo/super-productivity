@@ -1,32 +1,44 @@
 <div class="wrapper mat-elevation-z2">
   <help-section>
-    <p>Time for a little self evaluation! Your answers here are saved and provide you with a little bit of statistics on how you work in the <a routerLink="/metrics">metrics section</a>. Furthermore the suggestions for tomorrow will appear above your task list the next day.</p>
+    <p>Time for a little self evaluation! Your answers here are saved and provide you with a little bit of statistics on
+      how you work in the <a routerLink="/metrics">metrics section</a>. Furthermore the suggestions for tomorrow will
+      appear above your task list the next day.</p>
 
     <h3 class="mat-h3">Why should I care?</h3>
-    <p>This is intended to be less about calculating exact metrics or becoming machine like efficient in all you do than it is about improving how you feel about your work. It can be helpful to evaluate pain points in your daily routine, as well as it is to find factors that help you out. Being just a little bit systematic about it hopefully helps to get a better grip on these and to improve what you can.</p>
+    <p>This is intended to be less about calculating exact metrics or becoming machine like efficient in all you do than
+      it is about improving how you feel about your work. It can be helpful to evaluate pain points in your daily
+      routine, as well as it is to find factors that help you out. Being just a little bit systematic about it hopefully
+      helps to get a better grip on these and to improve what you can.</p>
   </help-section>
 
   <form (submit)="submit()">
     <mat-form-field>
       <input [(ngModel)]="metricForDay.mood"
+             required
              matInput
-             max="10"
-             min="1"
-             name="mood"
+             [formControl]="moodFormCtrl"
+             maxLength="2"
              placeholder="How do you feel?"
              type="number">
       <mat-hint>1: Awful – 10: Splendid</mat-hint>
+      <mat-error *ngIf="moodFormCtrl.invalid && (moodFormCtrl.dirty || moodFormCtrl.touched)">
+        Please enter a value between 1 and 10
+      </mat-error>
     </mat-form-field>
 
     <mat-form-field>
       <input [(ngModel)]="metricForDay.productivity"
-             matInput
-             max="10"
-             min="1"
              name="productivity"
+             [formControl]="productivityFormCtrl"
+             required
+             matInput
+             maxLength="2"
              placeholder="How efficient did you work today?"
              type="number">
       <mat-hint>1: Haven't even started – 10: Enormously efficient</mat-hint>
+      <mat-error *ngIf="productivityFormCtrl.invalid && (productivityFormCtrl.dirty || productivityFormCtrl.touched)">
+        Please enter a value between 1 and 10
+      </mat-error>
     </mat-form-field>
 
     <chip-list-input label="What hindered your productivity today?"
