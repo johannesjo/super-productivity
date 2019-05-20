@@ -12,6 +12,7 @@ import {MetricEffects} from './store/metric.effects';
 import {ObstructionModule} from './obstruction/obstruction.module';
 import {ImprovementModule} from './improvement/improvement.module';
 import {ChartsModule} from 'ng2-charts';
+import {RouterModule} from '@angular/router';
 
 @NgModule({
   imports: [
@@ -22,7 +23,8 @@ import {ChartsModule} from 'ng2-charts';
     ImprovementModule,
     ChartsModule,
     StoreModule.forFeature(METRIC_FEATURE_NAME, metricReducer),
-    EffectsModule.forFeature([MetricEffects])
+    EffectsModule.forFeature([MetricEffects]),
+    RouterModule,
   ],
   declarations: [
     EvaluationSheetComponent,
