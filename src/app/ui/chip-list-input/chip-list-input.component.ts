@@ -24,7 +24,7 @@ export class ChipListInputComponent {
   @Input() label: string;
 
   @Input() set suggestions(val) {
-    this.suggestions_ = val;
+    this.suggestions_ = val.sort((a, b) => a.title.localeCompare(b.title));
     this._updateModelItems(this._modelIds);
   }
 
