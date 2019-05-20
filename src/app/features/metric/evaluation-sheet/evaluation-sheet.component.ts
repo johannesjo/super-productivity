@@ -29,7 +29,6 @@ export class EvaluationSheetComponent implements OnDestroy {
     };
 
     this._subs.add(this._metricService.getTodaysMetric().subscribe(metric => {
-      console.log(metric);
       if (metric) {
         this.metricForDay = metric;
         this._cd.detectChanges();
