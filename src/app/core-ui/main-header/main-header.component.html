@@ -32,13 +32,19 @@
       Worklog
     </button>
 
-    <button [routerLink]="'projects'"
+    <button routerLink="metrics"
             mat-menu-item>
-      <mat-icon>list</mat-icon>
-      Manage Projects
+      <mat-icon>insert_chart</mat-icon>
+      Metrics
     </button>
 
-    <button [routerLink]="'config'"
+    <button routerLink="projects"
+            mat-menu-item>
+      <mat-icon>list</mat-icon>
+      Projects
+    </button>
+
+    <button routerLink="config"
             mat-menu-item
             routerLinkActive>
       <mat-icon>settings</mat-icon>
@@ -62,7 +68,7 @@
       <mat-icon *ngIf="project.id!==(projectService.currentId$|async)">radio_button_unchecked</mat-icon>
       {{project.title}}
     </button>
-    <button [routerLink]="'projects'"
+    <button routerLink="projects"
             mat-menu-item>
       <mat-icon>list</mat-icon>
       Manage Projects
@@ -87,13 +93,13 @@
       <span class="text">Worklog</span>
     </button>
 
-    <button [routerLink]="'metrics'"
+    <button routerLink="metrics"
             mat-button
             routerLinkActive="isActive">
       <span class="text">Metrics</span>
     </button>
 
-    <button [routerLink]="'config'"
+    <button routerLink="config"
             mat-button
             routerLinkActive="isActive">
       <span class="text">Settings</span>
