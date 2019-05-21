@@ -1,9 +1,9 @@
-import {ChangeDetectionStrategy, Component, ElementRef, EventEmitter, Input, Output, ViewChild} from '@angular/core';
-import {FormControl} from '@angular/forms';
-import {Observable} from 'rxjs';
-import {MatAutocomplete, MatAutocompleteSelectedEvent, MatChipInputEvent} from '@angular/material';
-import {map, startWith} from 'rxjs/operators';
-import {COMMA, ENTER} from '@angular/cdk/keycodes';
+import { ChangeDetectionStrategy, Component, ElementRef, EventEmitter, Input, Output, ViewChild } from '@angular/core';
+import { FormControl } from '@angular/forms';
+import { Observable } from 'rxjs';
+import { MatAutocomplete, MatAutocompleteSelectedEvent, MatChipInputEvent } from '@angular/material';
+import { map, startWith } from 'rxjs/operators';
+import { COMMA, ENTER } from '@angular/cdk/keycodes';
 
 
 interface Suggestion {
@@ -103,7 +103,10 @@ export class ChipListInputComponent {
   }
 
   private _add(id: string) {
-    this.addItem.emit(id);
+    // prevent double items
+    if (!this._modelIds.includes(id)) {
+      this.addItem.emit(id);
+    }
   }
 
   private _addByTitle(v: string) {
