@@ -1,11 +1,13 @@
 import { Injectable } from '@angular/core';
 import { Actions, Effect, ofType } from '@ngrx/effects';
-import { tap, withLatestFrom } from 'rxjs/operators';
+import { map, tap, withLatestFrom } from 'rxjs/operators';
 import { select, Store } from '@ngrx/store';
-import { ObstructionActionTypes } from './obstruction.actions';
+import { DeleteObstructions, ObstructionActionTypes } from './obstruction.actions';
 import { selectObstructionFeatureState } from './obstruction.reducer';
 import { PersistenceService } from '../../../../core/persistence/persistence.service';
 import { selectCurrentProjectId } from '../../../project/store/project.reducer';
+import { MetricActionTypes } from '../../store/metric.actions';
+import { selectUnusedObstructionIds } from '../../store/metric.selectors';
 
 @Injectable()
 export class ObstructionEffects {
@@ -24,19 +26,18 @@ export class ObstructionEffects {
       tap(this._saveToLs.bind(this))
     );
 
-  // NOTE this doesn't work, because metrics are project lvl and obstructions global lvl
-  // @Effect() clearUnusedObstructions$: any = this._actions$
-  //   .pipe(
-  //     ofType(
-  //       MetricActionTypes.AddMetric,
-  //       MetricActionTypes.UpsertMetric,
-  //       MetricActionTypes.UpdateMetric,
-  //     ),
-  //     withLatestFrom(
-  //       this._store$.pipe(select(selectUnusedObstructionIds)),
-  //     ),
-  //     map(([a, unusedIds]) => new DeleteObstructions({ids: unusedIds})),
-  //   );
+  @Effect() clearUnusedObstructions$: any = this._actions$
+    .pipe(
+      ofType(
+        MetricActionTypes.AddMetric,
+        MetricActionTypes.UpsertMetric,
+        MetricActionTypes.UpdateMetric,
+      ),
+      withLatestFrom(
+        this._store$.pipe(select(selectUnusedObstructionIds)),
+      ),
+      map(([a, unusedIds]) => new DeleteObstructions({ids: unusedIds})),
+    );
 
   constructor(
     private _actions$: Actions,
