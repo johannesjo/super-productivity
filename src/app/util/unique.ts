@@ -1,1 +1,1 @@
-export const unqiue = (array) => array.filter((v, i, a) => a.indexOf(v) === i);
+export const unique = (array) => array.filter((v, i, a) => a.indexOf(v) === i);

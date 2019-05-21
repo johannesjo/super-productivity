@@ -10,6 +10,7 @@ export const adapter: EntityAdapter<Obstruction> = createEntityAdapter<Obstructi
 export const selectObstructionFeatureState = createFeatureSelector<ObstructionState>(OBSTRUCTION_FEATURE_NAME);
 export const {selectIds, selectEntities, selectAll, selectTotal} = adapter.getSelectors();
 export const selectAllObstructions = createSelector(selectObstructionFeatureState, selectAll);
+export const selectAllObstructionIds = createSelector(selectObstructionFeatureState, selectIds);
 
 export const initialObstructionState: ObstructionState = adapter.getInitialState({
   // additional entity state properties

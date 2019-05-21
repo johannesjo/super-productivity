@@ -1,11 +1,12 @@
-import {createFeatureSelector, createSelector} from '@ngrx/store';
-import {LineChartData, Metric, MetricState, PieChartData} from '../metric.model';
-import {sortStringDates} from '../../../util/sortStringDates';
-import {METRIC_FEATURE_NAME, metricAdapter} from './metric.reducer';
-import {selectImprovementFeatureState} from '../improvement/store/improvement.reducer';
-import {ImprovementState} from '../improvement/improvement.model';
-import {selectObstructionFeatureState} from '../obstruction/store/obstruction.reducer';
-import {ObstructionState} from '../obstruction/obstruction.model';
+import { createFeatureSelector, createSelector } from '@ngrx/store';
+import { LineChartData, Metric, MetricState, PieChartData } from '../metric.model';
+import { sortStringDates } from '../../../util/sortStringDates';
+import { METRIC_FEATURE_NAME, metricAdapter } from './metric.reducer';
+import { selectAllImprovementIds, selectImprovementFeatureState } from '../improvement/store/improvement.reducer';
+import { ImprovementState } from '../improvement/improvement.model';
+import { selectAllObstructionIds, selectObstructionFeatureState } from '../obstruction/store/obstruction.reducer';
+import { ObstructionState } from '../obstruction/obstruction.model';
+import { unique } from '../../../util/unique';
 
 export const selectMetricFeatureState = createFeatureSelector<MetricState>(METRIC_FEATURE_NAME);
 export const {selectIds, selectEntities, selectAll, selectTotal} = metricAdapter.getSelectors();
@@ -33,6 +34,48 @@ export const selectLastTrackedImprovementsTomorrow = createSelector(
       .map(id => improvementState.entities[id]);
   }
 );
+
+export const selectAllUsedImprovementIds = createSelector(
+  selectAllMetrics,
+  (metrics: Metric[]): string[] => {
+    return unique(
+      metrics.reduce((acc, metric) => [
+        ...acc,
+        ...metric.improvements,
+        ...metric.improvementsTomorrow,
+      ], [])
+    );
+  }
+);
+
+export const selectUnusedImprovementIds = createSelector(
+  selectAllUsedImprovementIds,
+  selectAllImprovementIds,
+  (usedIds: string[], allIds: string[]): string[] => {
+    return allIds.filter(id => !usedIds.includes(id));
+  }
+);
+
+export const selectAllUsedObstructionIds = createSelector(
+  selectAllMetrics,
+  (metrics: Metric[]): string[] => {
+    return unique(
+      metrics.reduce((acc, metric) => [
+        ...acc,
+        ...metric.obstructions,
+      ], [])
+    );
+  }
+);
+
+export const selectUnusedObstructionIds = createSelector(
+  selectAllUsedObstructionIds,
+  selectAllObstructionIds,
+  (usedIds: string[], allIds: string[]): string[] => {
+    return allIds.filter(id => !usedIds.includes(id));
+  }
+);
+
 
 // DYNAMIC
 // -------

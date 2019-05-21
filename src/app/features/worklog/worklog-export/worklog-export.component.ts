@@ -7,7 +7,7 @@ import { WORKLOG_EXPORT_DEFAULTS } from '../../project/project.const';
 import { getWorklogStr } from '../../../util/get-work-log-str';
 import * as moment from 'moment-mini';
 import 'moment-duration-format';
-import { unqiue } from '../../../util/unique';
+import { unique } from '../../../util/unique';
 import { msToString } from '../../../ui/duration/ms-to-string.pipe';
 import { msToClockString } from '../../../ui/duration/ms-to-clock-string.pipe';
 import { roundTime } from '../../../util/round-time';
@@ -202,8 +202,8 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
 
     const rows = [];
     Object.keys(days).sort().forEach(dateStr => {
-      days[dateStr].titlesWithSub = unqiue(days[dateStr].tasks.map(t => t.title));
-      days[dateStr].titles = unqiue(days[dateStr].tasks.map(
+      days[dateStr].titlesWithSub = unique(days[dateStr].tasks.map(t => t.title));
+      days[dateStr].titles = unique(days[dateStr].tasks.map(
         t =>
           (t.parentId && tasks.find(pt_ => pt_.id === t.parentId).title)
           || (!t.parentId && t.title)
