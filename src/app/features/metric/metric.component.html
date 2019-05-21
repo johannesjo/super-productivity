@@ -42,7 +42,7 @@
   </section>
 
   <section class="line-charts">
-    <section *ngIf="(metricService.productivityHappinessLineChartData$|async) as productivityHappiness">
+    <section *ngIf="(metricService.getProductivityHappinessChartData$()|async) as productivityHappiness">
       <h3>Mood and productivity over time</h3>
       <div class="chart-wrapper">
         <div class="inner-chart-wrapper">

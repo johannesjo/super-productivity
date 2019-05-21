@@ -1,20 +1,22 @@
-import {Injectable} from '@angular/core';
-import {select, Store} from '@ngrx/store';
-import {initialMetricState,} from './store/metric.reducer';
-import {AddMetric, DeleteMetric, LoadMetricState, UpdateMetric, UpsertMetric} from './store/metric.actions';
-import {Observable} from 'rxjs';
-import {LineChartData, Metric, MetricState, PieChartData} from './metric.model';
-import {PersistenceService} from '../../core/persistence/persistence.service';
-import {getWorklogStr} from '../../util/get-work-log-str';
+import { Injectable } from '@angular/core';
+import { select, Store } from '@ngrx/store';
+import { initialMetricState, } from './store/metric.reducer';
+import { AddMetric, DeleteMetric, LoadMetricState, UpdateMetric, UpsertMetric } from './store/metric.actions';
+import { Observable } from 'rxjs';
+import { LineChartData, Metric, MetricState, PieChartData } from './metric.model';
+import { PersistenceService } from '../../core/persistence/persistence.service';
+import { getWorklogStr } from '../../util/get-work-log-str';
 import {
   selectAllMetrics,
   selectImprovementCountsPieChartData,
   selectLastTrackedMetric,
-  selectMetricById, selectMetricHasData,
+  selectMetricById,
+  selectMetricHasData,
   selectObstructionCountsPieChartData,
-  selectProductivityHappinessLineChartData
+  selectProductivityHappinessLineChartData,
+  selectProductivityHappinessLineChartDataComplete
 } from './store/metric.selectors';
-import {take} from 'rxjs/operators';
+import { take } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root',
@@ -25,7 +27,7 @@ export class MetricService {
   lastTrackedMetric$: Observable<Metric> = this._store$.pipe(select(selectLastTrackedMetric));
   improvementCountsPieChartData$: Observable<PieChartData> = this._store$.pipe(select(selectImprovementCountsPieChartData));
   obstructionCountsPieChartData$: Observable<PieChartData> = this._store$.pipe(select(selectObstructionCountsPieChartData));
-  productivityHappinessLineChartData$: Observable<LineChartData> = this._store$.pipe(select(selectProductivityHappinessLineChartData));
+  productivityHappinessLineChartData$: Observable<LineChartData> = this._store$.pipe(select(selectProductivityHappinessLineChartDataComplete));
 
   constructor(
     private _store$: Store<MetricState>,
@@ -37,8 +39,8 @@ export class MetricService {
     //   const start = rnd(max, min);
     //   return [start, rnd(max, start)];
     // };
-    // const improvements = ['KKUFSANZn', 'XB5EobD64', 'nCIm6DC8c', '9H9OKF_Sv', 'vARlS3W0Z'];
-    // const obstructions = ['WkVwJhU0r', 'jiPdzVb_w', 'bNl7-0qnK', 'tayOw78q1', 'dWhY0749q'];
+    // const improvements = ["rS2wIaPDT", "6_FsrMPU_", "UdeHPW4Q5", "Sv0GOG7tb"];
+    // const obstructions = ["fF-ylX-4t", "_m1uJ98oM", "I63Nu5-cE"];
     //
     // setTimeout(() => {
     //   for (let i = 0; i < 50; i++) {
@@ -46,9 +48,9 @@ export class MetricService {
     //
     //     const metric: Metric = {
     //       id: `${rnd(2020, 1989)}/${rnd(10, 12)}/${rnd(10, 28)}`,
-    //       improvements: improvements.slice(...(rndRange(5, 0))),
-    //       obstructions: obstructions.slice(...(rndRange(5, 0))),
-    //       improvementsTomorrow: improvements.slice(...(rndRange(5, 0))),
+    //       improvements: improvements.slice(...(rndRange(improvements.length, 0))),
+    //       obstructions: obstructions.slice(...(rndRange(obstructions.length, 0))),
+    //       improvementsTomorrow: improvements.slice(...(rndRange(improvements.length, 0))),
     //       productivity: rnd(10, 1),
     //       mood: rnd(10, 1),
     //     };
@@ -97,5 +99,10 @@ export class MetricService {
 
   upsertMetric(metric: Metric) {
     this._store$.dispatch(new UpsertMetric({metric}));
+  }
+
+  // STATISTICS
+  getProductivityHappinessChartData$(howMany = 20): Observable<LineChartData> {
+    return this._store$.pipe(select(selectProductivityHappinessLineChartData, {howMany}));
   }
 }

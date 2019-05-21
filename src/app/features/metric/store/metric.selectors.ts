@@ -143,7 +143,7 @@ export const selectObstructionCountsPieChartData = createSelector(
   }
 );
 
-export const selectProductivityHappinessLineChartData = createSelector(
+export const selectProductivityHappinessLineChartDataComplete = createSelector(
   selectMetricFeatureState,
   (state: MetricState): LineChartData => {
     const ids = state.ids as string[];
@@ -163,5 +163,19 @@ export const selectProductivityHappinessLineChartData = createSelector(
       v.data[1].data.push(metric.productivity);
     });
     return v;
+  }
+);
+
+export const selectProductivityHappinessLineChartData = createSelector(
+  selectProductivityHappinessLineChartDataComplete,
+  (chart: LineChartData, props: { howMany: number }): LineChartData => {
+    const f = -1 * props.howMany;
+    return {
+      labels: chart.labels.slice(f),
+      data: [
+        {data: chart.data[0].data.slice(f), label: chart.data[0].label},
+        {data: chart.data[1].data.slice(f), label: chart.data[1].label},
+      ],
+    };
   }
 );
