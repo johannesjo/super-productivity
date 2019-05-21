@@ -9,6 +9,8 @@ export type ProjectDataLsKey
   | 'NOTE_STATE'
   | 'BOOKMARK_STATE'
   | 'METRIC_STATE'
+  | 'IMPROVEMENT_STATE'
+  | 'OBSTRUCTION_STATE'
   ;
 
 

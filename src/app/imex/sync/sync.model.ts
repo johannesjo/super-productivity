@@ -1,17 +1,17 @@
-import {ProjectState} from '../../features/project/store/project.reducer';
-import {TaskState} from '../../features/tasks/store/task.reducer';
-import {GlobalConfig} from '../../features/config/config.model';
-import {EntityState} from '@ngrx/entity';
-import {Task} from '../../features/tasks/task.model';
-import {IssueStateMap} from '../../features/issue/issue';
-import {BookmarkState} from '../../features/bookmark/store/bookmark.reducer';
-import {NoteState} from '../../features/note/store/note.reducer';
-import {Reminder} from '../../features/reminder/reminder.model';
-import {ProjectArchive} from '../../features/project/project.model';
-import {Improvement} from '../../features/metric/improvement/improvement.model';
-import {Obstruction} from '../../features/metric/obstruction/obstruction.model';
-import {MetricState} from '../../features/metric/metric.model';
-import {AttachmentState} from '../../features/attachment/store/attachment.reducer';
+import { ProjectState } from '../../features/project/store/project.reducer';
+import { TaskState } from '../../features/tasks/store/task.reducer';
+import { GlobalConfig } from '../../features/config/config.model';
+import { EntityState } from '@ngrx/entity';
+import { Task } from '../../features/tasks/task.model';
+import { IssueStateMap } from '../../features/issue/issue';
+import { BookmarkState } from '../../features/bookmark/store/bookmark.reducer';
+import { NoteState } from '../../features/note/store/note.reducer';
+import { Reminder } from '../../features/reminder/reminder.model';
+import { Attachment } from '../../features/attachment/attachment.model';
+import { ProjectArchive } from '../../features/project/project.model';
+import { MetricState } from '../../features/metric/metric.model';
+import { ImprovementState } from '../../features/metric/improvement/improvement.model';
+import { ObstructionState } from '../../features/metric/obstruction/obstruction.model';
 
 
 export interface AppBaseData {
@@ -19,8 +19,6 @@ export interface AppBaseData {
   archivedProjects: ProjectArchive;
   globalConfig: GlobalConfig;
   reminders?: Reminder[];
-  improvement: EntityState<Improvement>;
-  obstruction: EntityState<Obstruction>;
 }
 
 export interface AppDataForProjects {
@@ -37,13 +35,17 @@ export interface AppDataForProjects {
     [key: string]: EntityState<Task>;
   };
   taskAttachment?: {
-    [key: string]: AttachmentState;
+    [key: string]: EntityState<Attachment>;
   };
   metric?: {
-    [key: string]: MetricState;
+    [key: string]: EntityState<MetricState>;
   };
-
-  // this is special
+  improvement?: {
+    [key: string]: EntityState<ImprovementState>;
+  };
+  obstruction?: {
+    [key: string]: EntityState<ObstructionState>;
+  };
   issue?: {
     [key: string]: IssueStateMap;
   };
