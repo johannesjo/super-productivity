@@ -55,6 +55,10 @@ export class <%= classify(name)%>Service {
         this._store$.dispatch(new Delete<%= classify(name)%>({id}));
     }
 
+    delete<%= classify(name)%>s(ids: string[]) {
+        this._store$.dispatch(new Delete<%= classify(name)%>s({ids}));
+    }
+
     update<%= classify(name)%>(id: string, changes: Partial<<%= classify(name)%>>) {
         this._store$.dispatch(new Update<%= classify(name)%>({<%= camelize(name)%>: {id, changes}}));
     }

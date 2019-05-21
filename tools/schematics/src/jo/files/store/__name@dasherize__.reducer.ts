@@ -41,6 +41,10 @@ export function <%= camelize(name) %>Reducer(
             return adapter.removeOne(action.payload.id, state);
         }
 
+        case <%= classify(name)%>ActionTypes.Delete<%= classify(name)%>s: {
+            return adapter.removeMany(action.payload.ids, state);
+        }
+
         case <%= classify(name)%>ActionTypes.Load<%= classify(name)%>State:
             return {...action.payload.state};
 

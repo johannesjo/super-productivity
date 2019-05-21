@@ -8,6 +8,7 @@ export enum <%= classify(name)%>ActionTypes {
     Update<%= classify(name)%> = '[<%= classify(name)%>] Update <%= classify(name)%>',
     Upsert<%= classify(name)%> = '[<%= classify(name)%>] Upsert <%= classify(name)%>',
     Delete<%= classify(name)%> = '[<%= classify(name)%>] Delete <%= classify(name)%>',
+    Delete<%= classify(name)%>s = '[<%= classify(name)%>] Delete multiple <%= classify(name)%>s',
 }
 
 export class Load<%= classify(name)%>State implements Action {
@@ -45,6 +46,13 @@ export class Delete<%= classify(name)%> implements Action {
     }
 }
 
+export class Delete<%= classify(name)%>s implements Action {
+    readonly type = <%= classify(name)%>ActionTypes.Delete<%= classify(name)%>s;
+
+    constructor(public payload: { ids: string[] }) {
+    }
+}
+
 
 export type <%= classify(name)%>Actions =
     Load<%= classify(name)%>State
@@ -52,4 +60,5 @@ export type <%= classify(name)%>Actions =
     | Update<%= classify(name)%>
     | Upsert<%= classify(name)%>
     | Delete<%= classify(name)%>
+    | Delete<%= classify(name)%>s
     ;
