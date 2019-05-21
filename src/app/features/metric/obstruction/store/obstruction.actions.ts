@@ -7,6 +7,7 @@ export enum ObstructionActionTypes {
   AddObstruction = '[Obstruction] Add Obstruction',
   UpdateObstruction = '[Obstruction] Update Obstruction',
   DeleteObstruction = '[Obstruction] Delete Obstruction',
+  DeleteObstructions = '[Obstruction] Delete multiple Obstructions',
 }
 
 export class LoadObstructionState implements Action {
@@ -37,10 +38,18 @@ export class DeleteObstruction implements Action {
   }
 }
 
+export class DeleteObstructions implements Action {
+  readonly type = ObstructionActionTypes.DeleteObstructions;
+
+  constructor(public payload: { ids: string[] }) {
+  }
+}
+
 
 export type ObstructionActions =
   LoadObstructionState
   | AddObstruction
   | UpdateObstruction
   | DeleteObstruction
+  | DeleteObstructions
   ;

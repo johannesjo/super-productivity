@@ -1,22 +1,20 @@
-import {Injectable} from '@angular/core';
-import {select, Store} from '@ngrx/store';
-import {
-  initialImprovementState,
-  selectAllImprovements,
-} from './store/improvement.reducer';
+import { Injectable } from '@angular/core';
+import { select, Store } from '@ngrx/store';
+import { initialImprovementState, selectAllImprovements, } from './store/improvement.reducer';
 import {
   AddImprovement,
   ClearHiddenImprovements,
   DeleteImprovement,
+  DeleteImprovements,
   HideImprovement,
   LoadImprovementState,
   UpdateImprovement
 } from './store/improvement.actions';
-import {Observable} from 'rxjs';
-import {Improvement, ImprovementState} from './improvement.model';
+import { Observable } from 'rxjs';
+import { Improvement, ImprovementState } from './improvement.model';
 import shortid from 'shortid';
-import {PersistenceService} from '../../../core/persistence/persistence.service';
-import {selectLastTrackedImprovementsTomorrow} from '../store/metric.selectors';
+import { PersistenceService } from '../../../core/persistence/persistence.service';
+import { selectLastTrackedImprovementsTomorrow } from '../store/metric.selectors';
 
 @Injectable({
   providedIn: 'root',
@@ -53,6 +51,10 @@ export class ImprovementService {
 
   deleteImprovement(id: string) {
     this._store$.dispatch(new DeleteImprovement({id}));
+  }
+
+  deleteImprovements(ids: string[]) {
+    this._store$.dispatch(new DeleteImprovements({ids}));
   }
 
   updateImprovement(id: string, changes: Partial<Improvement>) {

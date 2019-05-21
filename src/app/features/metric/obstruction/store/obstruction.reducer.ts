@@ -32,6 +32,10 @@ export function obstructionReducer(
       return adapter.removeOne(action.payload.id, state);
     }
 
+    case ObstructionActionTypes.DeleteObstructions: {
+      return adapter.removeMany(action.payload.ids, state);
+    }
+
     case ObstructionActionTypes.LoadObstructionState:
       return {...action.payload.state};
 

@@ -1,9 +1,7 @@
-import {createEntityAdapter, EntityAdapter} from '@ngrx/entity';
-import {ImprovementActions, ImprovementActionTypes} from './improvement.actions';
-import {Improvement, ImprovementState} from '../improvement.model';
-import {createFeatureSelector, createSelector} from '@ngrx/store';
-import {Metric} from '../../metric.model';
-import {selectLastTrackedMetric} from '../../store/metric.selectors';
+import { createEntityAdapter, EntityAdapter } from '@ngrx/entity';
+import { ImprovementActions, ImprovementActionTypes } from './improvement.actions';
+import { Improvement, ImprovementState } from '../improvement.model';
+import { createFeatureSelector, createSelector } from '@ngrx/store';
 
 export const IMPROVEMENT_FEATURE_NAME = 'improvement';
 
@@ -34,6 +32,10 @@ export function improvementReducer(
 
     case ImprovementActionTypes.DeleteImprovement: {
       return adapter.removeOne(action.payload.id, state);
+    }
+
+    case ImprovementActionTypes.DeleteImprovements: {
+      return adapter.removeMany(action.payload.ids, state);
     }
 
     case ImprovementActionTypes.LoadImprovementState:
