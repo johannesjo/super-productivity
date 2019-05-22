@@ -5,6 +5,9 @@ import {TaskState} from '../tasks/store/task.reducer';
 import {EntityState} from '@ngrx/entity';
 import {Task} from '../tasks/task.model';
 import {Attachment} from '../attachment/attachment.model';
+import { MetricState } from '../metric/metric.model';
+import { ImprovementState } from '../metric/improvement/improvement.model';
+import { ObstructionState } from '../metric/obstruction/obstruction.model';
 
 
 export type RoundTimeOption = '5M' | 'QUARTER' | 'HALF' | 'HOUR';
@@ -101,6 +104,9 @@ export interface ArchivedProject {
   taskArchive?: EntityState<Task>;
   taskAttachment?: EntityState<Attachment>;
   issue?: IssueStateMap;
+  metric?: MetricState;
+  improvement?: ImprovementState;
+  obstruction?: ObstructionState;
 }
 
 export interface ProjectArchive {

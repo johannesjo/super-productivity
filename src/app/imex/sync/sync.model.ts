@@ -39,13 +39,13 @@ export interface AppDataForProjects {
     [key: string]: EntityState<Attachment>;
   };
   metric?: {
-    [key: string]: EntityState<MetricState>;
+    [key: string]: MetricState;
   };
   improvement?: {
-    [key: string]: EntityState<ImprovementState>;
+    [key: string]: ImprovementState;
   };
   obstruction?: {
-    [key: string]: EntityState<ObstructionState>;
+    [key: string]: ObstructionState;
   };
   issue?: {
     [key: string]: IssueStateMap;
