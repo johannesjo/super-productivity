@@ -4,6 +4,7 @@ import { SnackService } from '../../core/snack/snack.service';
 import { AppDataComplete } from '../sync/sync.model';
 import { OldDataExport } from '../migrate/migrate.model';
 import { MigrateService } from '../migrate/migrate.service';
+import { download } from '../../util/download';
 
 @Component({
   selector: 'file-imex',
@@ -12,7 +13,6 @@ import { MigrateService } from '../migrate/migrate.service';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class FileImexComponent {
-  @ViewChild('exportDataBtn', {read: ElementRef}) exportDataBtn: ElementRef;
   importDataString: string;
 
   constructor(
@@ -41,13 +41,10 @@ export class FileImexComponent {
   }
 
   async downloadBackup() {
-    const el = this.exportDataBtn.nativeElement;
     const data = await this._syncService.getCompleteSyncData();
     console.log(data);
     const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(data));
-
-    el.setAttribute('href', dataStr);
-    el.setAttribute('download', 'super-productivity-backup.json');
+    download('super-productivity-backup.json', dataStr);
   }
 
 }
