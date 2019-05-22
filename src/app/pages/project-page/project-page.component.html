@@ -43,6 +43,13 @@
                   mat-mini-fab>
             <mat-icon aria-label="Archive">archive</mat-icon>
           </button>
+          <button (click)="export(project.id, project.title)"
+                  class="hide-xs"
+                  color=""
+                  title="Export Project (click twice)"
+                  mat-mini-fab>
+            <mat-icon aria-label="Archive">flight</mat-icon>
+          </button>
           <button (click)="remove(project.id)"
                   *ngIf="project.id !== (projectService.currentId$|async)"
                   title="Delete Project"
