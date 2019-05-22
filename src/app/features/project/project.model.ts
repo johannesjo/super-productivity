@@ -1,10 +1,10 @@
-import {IssueIntegrationCfgs, IssueProviderKey, IssueStateMap} from '../issue/issue';
-import {NoteState} from '../note/store/note.reducer';
-import {BookmarkState} from '../bookmark/store/bookmark.reducer';
-import {TaskState} from '../tasks/store/task.reducer';
-import {EntityState} from '@ngrx/entity';
-import {Task} from '../tasks/task.model';
-import {Attachment} from '../attachment/attachment.model';
+import { IssueIntegrationCfgs, IssueProviderKey, IssueStateMap } from '../issue/issue';
+import { NoteState } from '../note/store/note.reducer';
+import { BookmarkState } from '../bookmark/store/bookmark.reducer';
+import { TaskState } from '../tasks/store/task.reducer';
+import { EntityState } from '@ngrx/entity';
+import { Task } from '../tasks/task.model';
+import { Attachment } from '../attachment/attachment.model';
 import { MetricState } from '../metric/metric.model';
 import { ImprovementState } from '../metric/improvement/improvement.model';
 import { ObstructionState } from '../metric/obstruction/obstruction.model';
@@ -107,6 +107,10 @@ export interface ArchivedProject {
   metric?: MetricState;
   improvement?: ImprovementState;
   obstruction?: ObstructionState;
+}
+
+export interface ExportedProject extends Project {
+  relatedModels: ArchivedProject;
 }
 
 export interface ProjectArchive {

@@ -1,6 +1,7 @@
-import {Injectable} from '@angular/core';
-import {Observable} from 'rxjs';
+import { Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
 import {
+  ExportedProject,
   GoogleTimeSheetExport,
   Project,
   ProjectAdvancedCfg,
@@ -8,9 +9,9 @@ import {
   SimpleSummarySettings,
   WorklogExportSettings
 } from './project.model';
-import {PersistenceService} from '../../core/persistence/persistence.service';
-import {select, Store} from '@ngrx/store';
-import {ProjectActionTypes, UpdateProjectOrder} from './store/project.actions';
+import { PersistenceService } from '../../core/persistence/persistence.service';
+import { select, Store } from '@ngrx/store';
+import { ProjectActionTypes, UpdateProjectOrder } from './store/project.actions';
 import shortid from 'shortid';
 import {
   initialProjectState,
@@ -26,15 +27,15 @@ import {
   selectProjectWorkStartForDay,
   selectUnarchivedProjects
 } from './store/project.reducer';
-import {IssueIntegrationCfg, IssueProviderKey} from '../issue/issue';
-import {JiraCfg} from '../issue/jira/jira';
-import {DEFAULT_PROJECT} from './project.const';
-import {Dictionary} from '@ngrx/entity';
-import {getWorklogStr} from '../../util/get-work-log-str';
-import {GithubCfg} from '../issue/github/github';
-import {DEFAULT_ISSUE_PROVIDER_CFGS} from '../issue/issue.const';
-import {Actions, ofType} from '@ngrx/effects';
-import {take} from 'rxjs/operators';
+import { IssueIntegrationCfg, IssueProviderKey } from '../issue/issue';
+import { JiraCfg } from '../issue/jira/jira';
+import { DEFAULT_PROJECT } from './project.const';
+import { Dictionary } from '@ngrx/entity';
+import { getWorklogStr } from '../../util/get-work-log-str';
+import { GithubCfg } from '../issue/github/github';
+import { DEFAULT_ISSUE_PROVIDER_CFGS } from '../issue/issue.const';
+import { Actions, ofType } from '@ngrx/effects';
+import { take } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root',
@@ -224,8 +225,16 @@ export class ProjectService {
     });
   }
 
-  public updateOrder(ids: string[]) {
+  updateOrder(ids: string[]) {
     this._store$.dispatch(new UpdateProjectOrder({ids}));
+  }
+
+  // DB INTERFACE
+  async importCompleteProject(data: ExportedProject): Promise<any> {
+    const {relatedModels, ...project} = data;
+    // TODO check for valid project
+    // TODO check if project exists already
+    // TODO check if valid related models
   }
 
   // HELPER

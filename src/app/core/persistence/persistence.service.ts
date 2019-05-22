@@ -33,7 +33,7 @@ import { DatabaseService } from './database.service';
 import { loadFromLs, saveToLs } from './local-storage';
 import { GITHUB_TYPE, issueProviderKeys, JIRA_TYPE } from '../../features/issue/issue.const';
 import { DEFAULT_PROJECT_ID } from '../../features/project/project.const';
-import { ArchivedProject, ProjectArchive } from '../../features/project/project.model';
+import { ArchivedProject, ExportedProject, ProjectArchive } from '../../features/project/project.model';
 import { JiraIssueState } from '../../features/issue/jira/jira-issue/store/jira-issue.reducer';
 import { GithubIssueState } from '../../features/issue/github/github-issue/store/github-issue.reducer';
 import { CompressionService } from '../compression/compression.service';
@@ -74,7 +74,7 @@ export class PersistenceService {
     private _compressionService: CompressionService,
   ) {
     // this.loadComplete().then(d => console.log('XXXXXXXXX', d, JSON.stringify(d).length));
-    // this.loadCompleteForProject('DEFAULT').then(d => console.log(d));
+    // this.loadAllRelatedModelDataForProject('DEFAULT').then(d => console.log(d));
   }
 
   // TASK ARCHIVE
@@ -163,7 +163,20 @@ export class PersistenceService {
     });
   }
 
-  async loadCompleteForProject(projectId: string): Promise<ArchivedProject> {
+  async loadCompleteProject(projectId: string): Promise<ExportedProject> {
+    const allProjects = await this.project.load();
+    return {
+      ...allProjects.entities[projectId],
+      relatedModels: await this.loadAllRelatedModelDataForProject(projectId),
+    };
+  }
+
+
+  async importCompleteProject(data: ExportedProject): Promise<any> {
+    const {relatedModels, ...project} = data;
+  }
+
+  async loadAllRelatedModelDataForProject(projectId: string): Promise<ArchivedProject> {
     const forProjectsData = await Promise.all(this._projectModels.map(async (modelCfg) => {
       return {
         [modelCfg.appDataKey]: await modelCfg.load(projectId),
@@ -195,7 +208,7 @@ export class PersistenceService {
   }
 
   async archiveProject(projectId: string): Promise<any> {
-    const projectData = await this.loadCompleteForProject(projectId);
+    const projectData = await this.loadAllRelatedModelDataForProject(projectId);
     await this.saveArchivedProject(projectId, projectData);
     await this.removeCompleteRelatedDataForProject(projectId);
   }

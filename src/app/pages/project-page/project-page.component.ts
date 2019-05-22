@@ -6,7 +6,7 @@ import { DialogConfirmComponent } from '../../ui/dialog-confirm/dialog-confirm.c
 import { standardListAnimation } from '../../ui/animations/standard-list.ani';
 import { Subscription } from 'rxjs';
 import { DragulaService } from 'ng2-dragula';
-import { Project } from '../../features/project/project.model';
+import { ExportedProject, Project } from '../../features/project/project.model';
 import { PersistenceService } from '../../core/persistence/persistence.service';
 import { download } from '../../util/download';
 
@@ -49,9 +49,22 @@ export class ProjectPageComponent implements OnInit, OnDestroy {
   }
 
   async export(projectId: string, projectTitle: string) {
-    const data = await this._persistenceService.loadCompleteForProject(projectId);
+    const data: ExportedProject = await this._persistenceService.loadCompleteProject(projectId);
+    console.log(data);
     const dataString = JSON.stringify(data);
     download(`${projectTitle}.json`, dataString);
+  }
+
+  handleFileInput(ev: any) {
+    console.log(ev);
+    const files = ev.target.files;
+    const file = files.item(0);
+    const reader = new FileReader();
+    reader.onload = () => {
+      const textData = reader.result;
+      console.log(textData);
+    };
+    reader.readAsText(file);
   }
 
   edit(project) {
