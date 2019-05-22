@@ -1,4 +1,4 @@
-import {Injectable} from '@angular/core';
+import { Injectable } from '@angular/core';
 import {
   LS_BACKUP,
   LS_BOOKMARK_STATE,
@@ -17,30 +17,30 @@ import {
   LS_TASK_ATTACHMENT_STATE,
   LS_TASK_STATE
 } from './ls-keys.const';
-import {GlobalConfig} from '../../features/config/config.model';
-import {IssueProviderKey, IssueState, IssueStateMap} from '../../features/issue/issue';
-import {ProjectState} from '../../features/project/store/project.reducer';
-import {TaskState} from '../../features/tasks/store/task.reducer';
-import {EntityState} from '@ngrx/entity';
-import {Task, TaskWithSubTasks} from '../../features/tasks/task.model';
-import {AppBaseData, AppDataComplete, AppDataForProjects} from '../../imex/sync/sync.model';
-import {BookmarkState} from '../../features/bookmark/store/bookmark.reducer';
-import {AttachmentState} from '../../features/attachment/store/attachment.reducer';
-import {NoteState} from '../../features/note/store/note.reducer';
-import {Reminder} from '../../features/reminder/reminder.model';
-import {SnackService} from '../snack/snack.service';
-import {DatabaseService} from './database.service';
-import {loadFromLs, saveToLs} from './local-storage';
-import {GITHUB_TYPE, issueProviderKeys, JIRA_TYPE} from '../../features/issue/issue.const';
-import {DEFAULT_PROJECT_ID} from '../../features/project/project.const';
-import {ArchivedProject, ProjectArchive} from '../../features/project/project.model';
-import {JiraIssueState} from '../../features/issue/jira/jira-issue/store/jira-issue.reducer';
-import {GithubIssueState} from '../../features/issue/github/github-issue/store/github-issue.reducer';
-import {CompressionService} from '../compression/compression.service';
-import {PersistenceBaseModel, PersistenceForProjectModel} from './persistence';
-import {MetricState} from '../../features/metric/metric.model';
-import {ImprovementState} from '../../features/metric/improvement/improvement.model';
-import {ObstructionState} from '../../features/metric/obstruction/obstruction.model';
+import { GlobalConfig } from '../../features/config/config.model';
+import { IssueProviderKey, IssueState, IssueStateMap } from '../../features/issue/issue';
+import { ProjectState } from '../../features/project/store/project.reducer';
+import { TaskState } from '../../features/tasks/store/task.reducer';
+import { EntityState } from '@ngrx/entity';
+import { Task, TaskWithSubTasks } from '../../features/tasks/task.model';
+import { AppBaseData, AppDataComplete, AppDataForProjects } from '../../imex/sync/sync.model';
+import { BookmarkState } from '../../features/bookmark/store/bookmark.reducer';
+import { AttachmentState } from '../../features/attachment/store/attachment.reducer';
+import { NoteState } from '../../features/note/store/note.reducer';
+import { Reminder } from '../../features/reminder/reminder.model';
+import { SnackService } from '../snack/snack.service';
+import { DatabaseService } from './database.service';
+import { loadFromLs, saveToLs } from './local-storage';
+import { GITHUB_TYPE, issueProviderKeys, JIRA_TYPE } from '../../features/issue/issue.const';
+import { DEFAULT_PROJECT_ID } from '../../features/project/project.const';
+import { ArchivedProject, ProjectArchive } from '../../features/project/project.model';
+import { JiraIssueState } from '../../features/issue/jira/jira-issue/store/jira-issue.reducer';
+import { GithubIssueState } from '../../features/issue/github/github-issue/store/github-issue.reducer';
+import { CompressionService } from '../compression/compression.service';
+import { PersistenceBaseModel, PersistenceForProjectModel } from './persistence';
+import { MetricState } from '../../features/metric/metric.model';
+import { ImprovementState } from '../../features/metric/improvement/improvement.model';
+import { ObstructionState } from '../../features/metric/obstruction/obstruction.model';
 
 
 @Injectable({
@@ -73,7 +73,7 @@ export class PersistenceService {
     private _databaseService: DatabaseService,
     private _compressionService: CompressionService,
   ) {
-    // this.loadComplete().then(d => console.log(d));
+    // this.loadComplete().then(d => console.log('XXXXXXXXX', d, JSON.stringify(d).length));
     // this.loadCompleteForProject('DEFAULT').then(d => console.log(d));
   }
 
@@ -163,23 +163,16 @@ export class PersistenceService {
     });
   }
 
-  // TODO can probably be combined with the one below
   async loadCompleteForProject(projectId: string): Promise<ArchivedProject> {
-    const issueStateMap: IssueStateMap = {
-      JIRA: await this.loadIssuesForProject(projectId, JIRA_TYPE) as JiraIssueState,
-      GITHUB: await this.loadIssuesForProject(projectId, GITHUB_TYPE) as GithubIssueState,
-    };
-
     const forProjectsData = await Promise.all(this._projectModels.map(async (modelCfg) => {
       return {
         [modelCfg.appDataKey]: await modelCfg.load(projectId),
       };
     }));
     const projectData = Object.assign({}, ...forProjectsData);
-
     return {
       ...projectData,
-      issue: issueStateMap,
+      issue: await this._loadIssueDataForProject(projectId),
     };
   }
 
@@ -235,27 +228,6 @@ export class PersistenceService {
     return this._saveToDb(LS_BACKUP, backupData, true);
   }
 
-  async loadAppBaseData(): Promise<AppBaseData> {
-    const promises = this._baseModels.map(async (modelCfg) => {
-      const modelState = await modelCfg.load();
-      return {
-        [modelCfg.appDataKey]: modelState,
-      };
-    });
-    const baseDataArray: Partial<AppBaseData>[] = await Promise.all(promises);
-    return Object.assign({}, ...baseDataArray);
-  }
-
-  async loadAppDataForProjects(projectIds: string[]): Promise<AppDataForProjects> {
-    const forProjectsData = await Promise.all(this._projectModels.map(async (modelCfg) => {
-      const modelState = await this._loadForProjectIds(projectIds, modelCfg.load);
-      return {
-        [modelCfg.appDataKey]: modelState,
-      };
-    }));
-    return Object.assign({}, ...forProjectsData);
-  }
-
   // NOTE: not including backup
   async loadComplete(): Promise<AppDataComplete> {
     const projectState = await this.project.load();
@@ -264,8 +236,8 @@ export class PersistenceService {
     return {
       lastActiveTime: this.getLastActive(),
 
-      ...(await this.loadAppDataForProjects(pids)),
-      ...(await this.loadAppBaseData()),
+      ...(await this._loadAppDataForProjects(pids)),
+      ...(await this._loadAppBaseData()),
 
       issue: await pids.reduce(async (acc, projectId) => {
         const prevAcc = await acc;
@@ -352,7 +324,35 @@ export class PersistenceService {
     return model;
   }
 
-  private async _loadForProjectIds(pids, getDataFn: Function) {
+  private async _loadIssueDataForProject(projectId: string): Promise<IssueStateMap> {
+    return {
+      JIRA: await this.loadIssuesForProject(projectId, JIRA_TYPE) as JiraIssueState,
+      GITHUB: await this.loadIssuesForProject(projectId, GITHUB_TYPE) as GithubIssueState,
+    };
+  }
+
+  async _loadAppBaseData(): Promise<AppBaseData> {
+    const promises = this._baseModels.map(async (modelCfg) => {
+      const modelState = await modelCfg.load();
+      return {
+        [modelCfg.appDataKey]: modelState,
+      };
+    });
+    const baseDataArray: Partial<AppBaseData>[] = await Promise.all(promises);
+    return Object.assign({}, ...baseDataArray);
+  }
+
+  private async _loadAppDataForProjects(projectIds: string[]): Promise<AppDataForProjects> {
+    const forProjectsData = await Promise.all(this._projectModels.map(async (modelCfg) => {
+      const modelState = await this._loadForProjectIds(projectIds, modelCfg.load);
+      return {
+        [modelCfg.appDataKey]: modelState,
+      };
+    }));
+    return Object.assign({}, ...forProjectsData);
+  }
+
+  private async _loadForProjectIds(pids, getDataFn: Function): Promise<any> {
     return await pids.reduce(async (acc, projectId) => {
       const prevAcc = await acc;
       const dataForProject = await getDataFn(projectId);

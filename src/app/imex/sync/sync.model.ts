@@ -21,6 +21,7 @@ export interface AppBaseData {
   reminders?: Reminder[];
 }
 
+// NOTE: [key:string] always refers to projectId
 export interface AppDataForProjects {
   note?: {
     [key: string]: NoteState;
@@ -51,22 +52,7 @@ export interface AppDataForProjects {
   };
 }
 
-// NOTE: [key:string] always refers to projectId
 export interface AppDataComplete extends AppBaseData, AppDataForProjects {
   lastActiveTime: string;
 }
 
-
-export interface AppDataCompleteCfgBasicEntry {
-  appDataKey: keyof AppBaseData;
-  load: () => Promise<any>;
-  save: (state: any, isForce?: boolean) => Promise<any>;
-}
-
-
-export interface AppDataCompleteCfgForProjectEntry {
-  appDataKey: keyof AppDataForProjects;
-  load: (id: string) => Promise<EntityState<any>>;
-  save: (id: string, state: any, isForce?: boolean) => Promise<any>;
-  remove: (id: string) => Promise<any>;
-}
