@@ -1,9 +1,9 @@
-import { ErrorHandler, Injectable } from '@angular/core';
-import { isObject } from '../../util/is-object';
-import { getJiraResponseErrorTxt } from '../../util/get-jira-response-error-text';
-import { HANDLED_ERROR, IS_ELECTRON } from '../../app.constants';
-import { ElectronService } from 'ngx-electron';
-import { BannerService } from '../banner/banner.service';
+import {ErrorHandler, Injectable} from '@angular/core';
+import {isObject} from '../../util/is-object';
+import {getJiraResponseErrorTxt} from '../../util/get-jira-response-error-text';
+import {HANDLED_ERROR, IS_ELECTRON} from '../../app.constants';
+import {ElectronService} from 'ngx-electron';
+import {BannerService} from '../banner/banner.service';
 
 const _createErrorAlert = (err: string) => {
   const errorAlert = document.createElement('div');
@@ -43,10 +43,13 @@ export class GlobalErrorHandler implements ErrorHandler {
     }
   }
 
+  // TODO Cleanup this mess
   handleError(err: any) {
+    const errStr = (typeof err === 'string') ? err : err.toString();
+
     // if not our custom error handler we have a critical error on our hands
-    if (!err || (!err.handledError && (typeof err === 'string' && !err.match(HANDLED_ERROR)))) {
-      const errorStr = this._getErrorStr(err);
+    if (!err || (!err.handledError && (errStr && !errStr.match(HANDLED_ERROR)))) {
+      const errorStr = this._getErrorStr(err) || errStr;
 
       // NOTE: snack won't work most of the time
       try {
