@@ -1,62 +1,93 @@
-<!--<section>-->
-<!--<h2>Basic Metrics</h2>-->
-<!--<pre><code>{{worklogService.worklog$|async|json}}</code></pre>-->
-<!--<table>-->
-<!--  <tr>-->
-<!--    <th>Time Spent Total</th>-->
-<!--    <td>83294h</td>-->
-<!--  </tr>-->
-<!--</table>-->
-<!--</section>-->
-
-
-<p *ngIf="!(metricService.hasData$|async)">No additional data collected yet. Use the form on the daily summary
-  "Evaluation" panel to do so.</p>
-
-<section class="metric-metrics"
-         *ngIf="(metricService.hasData$|async)">
-  <section class="pie-charts">
-    <section *ngIf="(metricService.improvementCountsPieChartData$|async) as improvementCounts">
-      <h3>Number of times an improvement factor was selected</h3>
-      <canvas baseChart
-              [data]="improvementCounts.data"
-              [labels]="improvementCounts.labels"
-              [chartType]="pieChartType"
-              [options]="pieChartOptions"
-              [plugins]="pieChartPlugins"
-              [legend]="pieChartLegend">
-      </canvas>
-    </section>
-
-    <section *ngIf="(metricService.obstructionCountsPieChartData$|async) as obstructionCounts">
-      <h3>Number of times an obstructing factor was selected</h3>
-      <canvas baseChart
-              [data]="obstructionCounts.data"
-              [labels]="obstructionCounts.labels"
-              [chartType]="pieChartType"
-              [options]="pieChartOptions"
-              [plugins]="pieChartPlugins"
-              [legend]="pieChartLegend">
-      </canvas>
-    </section>
+<div *ngIf="metricService.simpleMetrics$|async as sm"
+     class="wrapper">
+  <section style="text-align: center;">
+    <!--  <h2>Basic Metrics</h2>-->
+    <table style="margin: auto">
+      <!--    <tr>-->
+      <!--      <th>Time Spent Total (worklog)</th>-->
+      <!--      <td>{{sm.tt|msToString}}</td>-->
+      <!--    </tr>-->
+      <tr>
+        <th>Time Spent Total</th>
+        <td>{{sm.timeSpent|msToString}}</td>
+      </tr>
+      <tr>
+        <th>Time Estimated Total</th>
+        <td>{{sm.timeEstimate|msToString}}</td>
+      </tr>
+      <tr>
+        <th>Tasks (created/done)</th>
+        <td>{{sm.nrOfCompletedTasks}} / {{sm.nrOfAllTasks}}</td>
+      </tr>
+      <tr>
+        <th>Days worked</th>
+        <td>{{sm.daysWorked}}</td>
+      </tr>
+      <tr>
+        <th>Avg. time spent per day</th>
+        <td>{{sm.avgTimeSpentOnDay|msToString}}</td>
+      </tr>
+      <tr>
+        <th>Avg. time spent per task</th>
+        <td>{{sm.avgTimeSpentOnTask|msToString}}</td>
+      </tr>
+      <tr>
+        <th>Avg. time spent per task counting subtasks</th>
+        <td>{{sm.avgTimeSpentOnTaskIncludingSubTasks|msToString}}</td>
+      </tr>
+    </table>
   </section>
 
-  <section class="line-charts">
-    <section *ngIf="(metricService.getProductivityHappinessChartData$()|async) as productivityHappiness">
-      <h3>Mood and productivity over time</h3>
-      <div class="chart-wrapper">
-        <div class="inner-chart-wrapper">
-          <canvas baseChart
-                  [datasets]="productivityHappiness.data"
-                  [labels]="productivityHappiness.labels"
-                  [options]="lineChartOptions"
-                  [colors]="lineChartColors"
-                  [legend]="lineChartLegend"
-                  [chartType]="lineChartType"
-                  [plugins]="lineChartPlugins">
-          </canvas>
+
+  <p *ngIf="!(metricService.hasData$|async)"
+     style="margin-top: 32px;">No additional data collected yet. Use the form on the daily summary
+    "Evaluation" panel to do so.</p>
+
+  <section class="metric-metrics"
+           *ngIf="(metricService.hasData$|async)">
+    <section class="pie-charts">
+      <section *ngIf="(metricService.improvementCountsPieChartData$|async) as improvementCounts">
+        <h3>Number of times an improvement factor was selected</h3>
+        <canvas baseChart
+                [data]="improvementCounts.data"
+                [labels]="improvementCounts.labels"
+                [chartType]="pieChartType"
+                [options]="pieChartOptions"
+                [plugins]="pieChartPlugins"
+                [legend]="pieChartLegend">
+        </canvas>
+      </section>
+
+      <section *ngIf="(metricService.obstructionCountsPieChartData$|async) as obstructionCounts">
+        <h3>Number of times an obstructing factor was selected</h3>
+        <canvas baseChart
+                [data]="obstructionCounts.data"
+                [labels]="obstructionCounts.labels"
+                [chartType]="pieChartType"
+                [options]="pieChartOptions"
+                [plugins]="pieChartPlugins"
+                [legend]="pieChartLegend">
+        </canvas>
+      </section>
+    </section>
+
+    <section class="line-charts">
+      <section *ngIf="(metricService.getProductivityHappinessChartData$()|async) as productivityHappiness">
+        <h3>Mood and productivity over time</h3>
+        <div class="chart-wrapper">
+          <div class="inner-chart-wrapper">
+            <canvas baseChart
+                    [datasets]="productivityHappiness.data"
+                    [labels]="productivityHappiness.labels"
+                    [options]="lineChartOptions"
+                    [colors]="lineChartColors"
+                    [legend]="lineChartLegend"
+                    [chartType]="lineChartType"
+                    [plugins]="lineChartPlugins">
+            </canvas>
+          </div>
         </div>
-      </div>
+      </section>
     </section>
   </section>
-</section>
+</div>
