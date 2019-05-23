@@ -30,3 +30,16 @@ export interface LineChartData {
   labels: Label[];
   data: ChartDataSets[];
 }
+
+export interface SimpleMetrics {
+  start: string;
+  end: string;
+  timeSpent: number;
+  timeEstimate: number;
+  nrOfCompletedTasks: number;
+  nrOfAllTasks: number;
+  nrOfSubTasks: number;
+  nrOfMainTasks: number;
+  nrOfParentTasks: number;
+  daysWorked: number;
+}

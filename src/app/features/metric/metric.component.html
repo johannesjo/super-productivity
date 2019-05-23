@@ -1,41 +1,40 @@
 <div *ngIf="metricService.simpleMetrics$|async as sm"
      class="wrapper">
-  <section style="text-align: center;">
+  <section style="max-width: 400px; margin: auto; text-align: center;">
     <!--  <h2>Basic Metrics</h2>-->
-    <table style="margin: auto">
-      <!--    <tr>-->
-      <!--      <th>Time Spent Total (worklog)</th>-->
-      <!--      <td>{{sm.tt|msToString}}</td>-->
-      <!--    </tr>-->
-      <tr>
-        <th>Time Spent Total</th>
-        <td>{{sm.timeSpent|msToString}}</td>
-      </tr>
-      <tr>
-        <th>Time Estimated Total</th>
-        <td>{{sm.timeEstimate|msToString}}</td>
-      </tr>
-      <tr>
-        <th>Tasks (created/done)</th>
-        <td>{{sm.nrOfCompletedTasks}} / {{sm.nrOfAllTasks}}</td>
-      </tr>
-      <tr>
-        <th>Days worked</th>
-        <td>{{sm.daysWorked}}</td>
-      </tr>
-      <tr>
-        <th>Avg. time spent per day</th>
-        <td>{{sm.avgTimeSpentOnDay|msToString}}</td>
-      </tr>
-      <tr>
-        <th>Avg. time spent per task</th>
-        <td>{{sm.avgTimeSpentOnTask|msToString}}</td>
-      </tr>
-      <tr>
-        <th>Avg. time spent per task counting subtasks</th>
-        <td>{{sm.avgTimeSpentOnTaskIncludingSubTasks|msToString}}</td>
-      </tr>
-    </table>
+    <p><i>{{sm.start}} – {{sm.end}}</i></p>
+    <div class="material-table">
+      <table>
+        <tr>
+          <th>Time Spent</th>
+          <td>{{sm.timeSpent|msToString}}</td>
+        </tr>
+        <tr>
+          <th>Time Estimated</th>
+          <td>{{sm.timeEstimate|msToString}}</td>
+        </tr>
+        <tr>
+          <th>Tasks (done/created)</th>
+          <td>{{sm.nrOfCompletedTasks}} / {{sm.nrOfAllTasks}}</td>
+        </tr>
+        <tr>
+          <th>Days worked</th>
+          <td>{{sm.daysWorked}}</td>
+        </tr>
+        <tr>
+          <th>Avg. time spent per day</th>
+          <td>{{sm.avgTimeSpentOnDay|msToString}}</td>
+        </tr>
+        <tr>
+          <th>Avg. time spent per task</th>
+          <td>{{sm.avgTimeSpentOnTask|msToString}}</td>
+        </tr>
+        <tr>
+          <th>Avg. time spent per task<br>(counting subtasks)</th>
+          <td>{{sm.avgTimeSpentOnTaskIncludingSubTasks|msToString}}</td>
+        </tr>
+      </table>
+    </div>
   </section>
 
 
