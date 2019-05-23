@@ -52,40 +52,6 @@ export class MetricService {
     private _worklogService: WorklogService,
     private _persistenceService: PersistenceService,
   ) {
-
-    this.simpleMetrics$.subscribe((v) => console.log('simpleMetrics$', v));
-
-    // setTimeout(() => {
-    //   this.getSimpleMetrics().then(console.log);
-    // }, 2200);
-
-    // // ADD RANDOM STUFF
-    // const rnd = (max = 10, min = 0) => Math.floor(Math.random() * (max - min) + min);
-    // const rndRange = (max = 10, min = 0): [number, number] => {
-    //   const start = rnd(max, min);
-    //   return [start, rnd(max, start)];
-    // };
-    // const improvements = ["rS2wIaPDT", "6_FsrMPU_", "UdeHPW4Q5", "Sv0GOG7tb"];
-    // const obstructions = ["fF-ylX-4t", "_m1uJ98oM", "I63Nu5-cE"];
-    //
-    // setTimeout(() => {
-    //   for (let i = 0; i < 50; i++) {
-    //     console.log(...(rndRange(5, 0)));
-    //
-    //     const metric: Metric = {
-    //       id: `${rnd(2020, 1989)}/${rnd(10, 12)}/${rnd(10, 28)}`,
-    //       improvements: improvements.slice(...(rndRange(improvements.length, 0))),
-    //       obstructions: obstructions.slice(...(rndRange(obstructions.length, 0))),
-    //       improvementsTomorrow: improvements.slice(...(rndRange(improvements.length, 0))),
-    //       productivity: rnd(10, 1),
-    //       mood: rnd(10, 1),
-    //     };
-    //     console.log(metric);
-    //     this._store$.dispatch(new UpsertMetric({
-    //       metric
-    //     }));
-    //   }
-    // }, 300);
   }
 
   async loadStateForProject(projectId: string) {
@@ -110,7 +76,7 @@ export class MetricService {
     this._store$.dispatch(new AddMetric({
       metric: {
         ...metric,
-        id: getWorklogStr()
+        id: metric.id || getWorklogStr(),
       }
     }));
   }

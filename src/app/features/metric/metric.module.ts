@@ -39,4 +39,44 @@ import {RouterModule} from '@angular/router';
   entryComponents: [],
 })
 export class MetricModule {
+  // constructor(
+  //   private _metricsService: MetricService,
+  //   private _improvementService: ImprovementService,
+  //   private _obstructionService: ObstructionService,
+  // ) {
+  //   setTimeout(() => {
+  //     combineLatest([
+  //       _obstructionService.obstructions$,
+  //       _improvementService.improvements$,
+  //     ]).pipe(take(3)).subscribe(([ob, imp]) => {
+  //       console.log('I am here!', ob, imp);
+  //
+  //       if (ob && ob.length && imp && imp.length) {
+  //         const rnd = (max = 10, min = 0) => Math.floor(Math.random() * (max - min) + min);
+  //         const rndRange = (max = 10, min = 0): [number, number] => {
+  //           const start = rnd(max, min);
+  //           return [start, rnd(max, start)];
+  //         };
+  //         const improvements = imp.map(imp_ => imp_.id);
+  //         const obstructions = ob.map(ob_ => ob_.id);
+  //
+  //         for (let i = 0; i < 50; i++) {
+  //           console.log(...(rndRange(5, 0)));
+  //
+  //           const metric: Metric = {
+  //             id: `${rnd(2020, 1989)}/${rnd(10, 12)}/${rnd(10, 28)}`,
+  //             improvements: improvements.slice(...(rndRange(improvements.length, 0))),
+  //             obstructions: obstructions.slice(...(rndRange(obstructions.length, 0))),
+  //             improvementsTomorrow: improvements.slice(...(rndRange(improvements.length, 0))),
+  //             productivity: rnd(10, 1),
+  //             mood: rnd(10, 1),
+  //           };
+  //           console.log(metric);
+  //           this._metricsService.upsertMetric(metric);
+  //         }
+  //
+  //       }
+  //     });
+  //   }, 300);
+  // }
 }
