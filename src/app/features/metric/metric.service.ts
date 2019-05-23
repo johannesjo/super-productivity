@@ -35,11 +35,11 @@ export class MetricService {
 
   simpleMetrics$: Observable<SimpleMetrics> = this._projectService.currentId$.pipe(
     switchMap(() => {
-      return combineLatest(
+      return combineLatest([
         this._worklogService.worklog$,
         this._worklogService.totalTimeSpent$,
         from(this._taskService.getAllTasks()),
-      ).pipe(
+      ]).pipe(
         map(mapSimpleMetrics),
       );
     }),

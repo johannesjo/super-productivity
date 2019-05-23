@@ -43,6 +43,7 @@ export const mapSimpleMetrics = ([w, tt, allTasks]: [Worklog, number, TaskWithIs
   return {
     ...s,
     start: getWorklogStr(s.start),
+    avgTasksPerDay: s.nrOfMainTasks / s.daysWorked,
     avgTimeSpentOnDay: s.timeSpent / s.daysWorked,
     avgTimeSpentOnTask: s.timeSpent / s.nrOfMainTasks,
     avgTimeSpentOnTaskIncludingSubTasks: s.timeSpent / (s.nrOfAllTasks - s.nrOfParentTasks),

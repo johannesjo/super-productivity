@@ -42,4 +42,8 @@ export interface SimpleMetrics {
   nrOfMainTasks: number;
   nrOfParentTasks: number;
   daysWorked: number;
+  avgTasksPerDay: number;
+  avgTimeSpentOnDay: number;
+  avgTimeSpentOnTask: number;
+  avgTimeSpentOnTaskIncludingSubTasks: number;
 }
