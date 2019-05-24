@@ -1,5 +1,5 @@
-import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import {Injectable} from '@angular/core';
+import {Observable} from 'rxjs';
 import {
   ExportedProject,
   GoogleTimeSheetExport,
@@ -9,9 +9,9 @@ import {
   SimpleSummarySettings,
   WorklogExportSettings
 } from './project.model';
-import { PersistenceService } from '../../core/persistence/persistence.service';
-import { select, Store } from '@ngrx/store';
-import { ProjectActionTypes, UpdateProjectOrder } from './store/project.actions';
+import {PersistenceService} from '../../core/persistence/persistence.service';
+import {select, Store} from '@ngrx/store';
+import {ProjectActionTypes, UpdateProjectOrder} from './store/project.actions';
 import shortid from 'shortid';
 import {
   initialProjectState,
@@ -20,6 +20,7 @@ import {
   selectArchivedProjects,
   selectCurrentProject,
   selectCurrentProjectId,
+  selectProjectBreakTimeForDay,
   selectProjectById,
   selectProjectGithubCfg,
   selectProjectJiraCfg,
@@ -27,15 +28,15 @@ import {
   selectProjectWorkStartForDay,
   selectUnarchivedProjects
 } from './store/project.reducer';
-import { IssueIntegrationCfg, IssueProviderKey } from '../issue/issue';
-import { JiraCfg } from '../issue/jira/jira';
-import { DEFAULT_PROJECT } from './project.const';
-import { Dictionary } from '@ngrx/entity';
-import { getWorklogStr } from '../../util/get-work-log-str';
-import { GithubCfg } from '../issue/github/github';
-import { DEFAULT_ISSUE_PROVIDER_CFGS } from '../issue/issue.const';
-import { Actions, ofType } from '@ngrx/effects';
-import { take } from 'rxjs/operators';
+import {IssueIntegrationCfg, IssueProviderKey} from '../issue/issue';
+import {JiraCfg} from '../issue/jira/jira';
+import {DEFAULT_PROJECT} from './project.const';
+import {Dictionary} from '@ngrx/entity';
+import {getWorklogStr} from '../../util/get-work-log-str';
+import {GithubCfg} from '../issue/github/github';
+import {DEFAULT_ISSUE_PROVIDER_CFGS} from '../issue/issue.const';
+import {Actions, ofType} from '@ngrx/effects';
+import {take} from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root',
@@ -71,6 +72,7 @@ export class ProjectService {
   // DYNAMIC
   workStartToday$ = this._store$.pipe(select(selectProjectWorkStartForDay, {day: getWorklogStr()}));
   workEndToday$ = this._store$.pipe(select(selectProjectWorkEndForDay, {day: getWorklogStr()}));
+  breakTimeToday$ = this._store$.pipe(select(selectProjectBreakTimeForDay, {day: getWorklogStr()}));
 
 
   constructor(
@@ -79,6 +81,8 @@ export class ProjectService {
     private readonly _store$: Store<any>,
     private readonly _actions$: Actions,
   ) {
+    this.breakTimeToday$.subscribe((v) => console.log('breakTimeToday$', v));
+
     // dirty trick to make effect catch up :/
     // setTimeout(() => {
     //   this.load();
@@ -90,6 +94,7 @@ export class ProjectService {
 
   async load() {
     const projectState_ = await this._persistenceService.project.load() || initialProjectState;
+    // we need to do this to migrate to the latest model if new fields are added
     const projectState = this._extendProjectDefaults(projectState_);
 
     if (projectState) {
@@ -186,6 +191,17 @@ export class ProjectService {
         id,
         date,
         newVal,
+      }
+    });
+  }
+
+  addToBreakTime(id = this.currentId, date: string = getWorklogStr(), val: number) {
+    this._store$.dispatch({
+      type: ProjectActionTypes.AddToProjectBreakTime,
+      payload: {
+        id,
+        date,
+        val,
       }
     });
   }

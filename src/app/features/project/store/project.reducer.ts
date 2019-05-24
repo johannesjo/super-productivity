@@ -1,5 +1,5 @@
 import {createEntityAdapter, EntityAdapter, EntityState} from '@ngrx/entity';
-import {Project, WorkStartEnd} from '../project.model';
+import {BreakTime, Project, WorkStartEnd} from '../project.model';
 import {ProjectActions, ProjectActionTypes} from './project.actions';
 import {createFeatureSelector, createSelector} from '@ngrx/store';
 import {FIRST_PROJECT} from '../project.const';
@@ -40,6 +40,7 @@ export const selectProjectGithubCfg = createSelector(selectProjectIssueCfgs, (is
 export const selectAdvancedProjectCfg = createSelector(selectCurrentProject, (project) => project.advancedCfg);
 export const selectProjectWorkStart = createSelector(selectCurrentProject, (project) => project.workStart);
 export const selectProjectWorkEnd = createSelector(selectCurrentProject, (project) => project.workEnd);
+export const selectProjectBreakTime = createSelector(selectCurrentProject, (project) => project.breakTime);
 
 
 // DYNAMIC SELECTORS
@@ -57,6 +58,11 @@ export const selectProjectWorkStartForDay = createSelector(
 export const selectProjectWorkEndForDay = createSelector(
   selectProjectWorkEnd,
   (workEnd: WorkStartEnd, props: { day: string }) => workEnd[props.day]
+);
+
+export const selectProjectBreakTimeForDay = createSelector(
+  selectProjectBreakTime,
+  (breakTime: BreakTime, props: { day: string }) => breakTime[props.day]
 );
 
 
@@ -145,6 +151,22 @@ export function projectReducer(
           workEnd: {
             ...oldP.workEnd,
             [date]: newVal,
+          }
+        }
+      }, state);
+    }
+
+    case ProjectActionTypes.AddToProjectBreakTime: {
+      const {id, date, val} = action.payload;
+      const oldP = state.entities[id];
+      const oldVal = oldP.breakTime[date] || 0;
+
+      return projectAdapter.updateOne({
+        id,
+        changes: {
+          breakTime: {
+            ...oldP.workEnd,
+            [date]: oldVal + val,
           }
         }
       }, state);

@@ -21,6 +21,7 @@
        mat-dialog-actions>
     <button color="primary"
             mat-raised-button
+            [disabled]="!(selectedTask||newTaskTitle)"
             type="submit">
       <mat-icon *ngIf="!isCreate">track_changes</mat-icon>
       <mat-icon *ngIf="isCreate">add</mat-icon>
@@ -28,6 +29,7 @@
     </button>
 
     <button *ngIf="(configService.misc$|async)?.isUnTrackedIdleResetsBreakTimer"
+            [disabled]="!(selectedTask||newTaskTitle)"
             (click)="track(true)"
             color="primary"
             mat-raised-button
@@ -35,7 +37,14 @@
       <mat-icon *ngIf="!isCreate">track_changes</mat-icon>
       <mat-icon *ngIf="isCreate">add</mat-icon>
       <!--      <mat-icon>free_breakfast</mat-icon>-->
-      Task & Break
+      Task& Break
+    </button>
+
+    <button (click)="trackAsBreak()"
+            mat-raised-button
+            type="button">
+      <mat-icon>free_breakfast</mat-icon>
+      Break
     </button>
 
     <button (click)="skipTrack()"

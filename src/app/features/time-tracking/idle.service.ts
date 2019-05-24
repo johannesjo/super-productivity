@@ -1,17 +1,17 @@
-import { Injectable } from '@angular/core';
-import { IS_ELECTRON } from '../../app.constants';
-import { ChromeExtensionInterfaceService } from '../../core/chrome-extension-interface/chrome-extension-interface.service';
-import { ProjectService } from '../project/project.service';
-import { ElectronService } from 'ngx-electron';
-import { TaskService } from '../tasks/task.service';
-import { IPC_IDLE_TIME } from '../../../../electron/ipc-events.const';
-import { MatDialog } from '@angular/material';
-import { BehaviorSubject, Observable, Subject } from 'rxjs';
-import { DialogIdleComponent } from './dialog-idle/dialog-idle.component';
-import { ConfigService } from '../config/config.service';
-import { Task } from '../tasks/task.model';
-import { getWorklogStr } from '../../util/get-work-log-str';
-import { distinctUntilChanged, shareReplay } from 'rxjs/operators';
+import {Injectable} from '@angular/core';
+import {IS_ELECTRON} from '../../app.constants';
+import {ChromeExtensionInterfaceService} from '../../core/chrome-extension-interface/chrome-extension-interface.service';
+import {ProjectService} from '../project/project.service';
+import {ElectronService} from 'ngx-electron';
+import {TaskService} from '../tasks/task.service';
+import {IPC_IDLE_TIME} from '../../../../electron/ipc-events.const';
+import {MatDialog} from '@angular/material';
+import {BehaviorSubject, Observable, Subject} from 'rxjs';
+import {DialogIdleComponent} from './dialog-idle/dialog-idle.component';
+import {ConfigService} from '../config/config.service';
+import {Task} from '../tasks/task.model';
+import {getWorklogStr} from '../../util/get-work-log-str';
+import {distinctUntilChanged, shareReplay} from 'rxjs/operators';
 
 const DEFAULT_MIN_IDLE_TIME = 60000;
 const IDLE_POLL_INTERVAL = 1000;
@@ -95,16 +95,20 @@ export class IdleService {
             idleTime$: this.idleTime$,
           }
         }).afterClosed()
-          .subscribe((res: { task: Task | string, isResetBreakTimer: boolean }) => {
-            const {task, isResetBreakTimer} = res;
-            // console.log('isResetBreakTimer', isResetBreakTimer);
+          .subscribe((res: { task: Task | string, isResetBreakTimer: boolean, isTrackAsBreak: boolean }) => {
+            const {task, isResetBreakTimer, isTrackAsBreak} = res;
+            const timeSpent = this._idleTime$.getValue();
 
-            if (isResetBreakTimer) {
+            if (isResetBreakTimer || isTrackAsBreak) {
               this._triggerResetBreakTimer$.next(true);
             }
 
+            if (isTrackAsBreak) {
+              // TODO
+              this._projectService.addToBreakTime(undefined, undefined, timeSpent);
+            }
+
             if (task) {
-              const timeSpent = this._idleTime$.getValue();
               if (typeof task === 'string') {
                 this._taskService.add(task, false, {
                   timeSpent: timeSpent,

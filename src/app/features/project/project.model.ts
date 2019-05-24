@@ -12,6 +12,11 @@ import { ObstructionState } from '../metric/obstruction/obstruction.model';
 
 export type RoundTimeOption = '5M' | 'QUARTER' | 'HALF' | 'HOUR';
 
+export interface BreakTimeCopy {
+  [key: string]: number;
+}
+export type BreakTime = Readonly<BreakTimeCopy>;
+
 export interface WorkStartEndCopy {
   [key: string]: number;
 }
@@ -95,6 +100,7 @@ export type Project = Readonly<{
   advancedCfg: ProjectAdvancedCfg;
   workStart: WorkStartEnd;
   workEnd: WorkStartEnd;
+  breakTime: BreakTime;
 }>;
 
 export interface ArchivedProject {

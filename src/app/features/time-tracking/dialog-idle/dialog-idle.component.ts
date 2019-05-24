@@ -53,10 +53,19 @@ export class DialogIdleComponent implements OnInit {
     });
   }
 
-  track(isResetBreakTimer = false) {
+  trackAsBreak() {
+    this._matDialogRef.close({
+      task: null,
+      isResetBreakTimer: true,
+      isTrackAsBreak: true,
+    });
+  }
+
+  track(isTrackAsBreak = false) {
     this._matDialogRef.close({
       task: this.selectedTask || this.newTaskTitle,
-      isResetBreakTimer,
+      isTrackAsBreak,
+      isResetBreakTimer: isTrackAsBreak,
     });
   }
 }
