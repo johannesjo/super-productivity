@@ -1,9 +1,9 @@
-import { ChangeDetectionStrategy, Component, ElementRef, EventEmitter, Input, Output, ViewChild } from '@angular/core';
-import { FormControl } from '@angular/forms';
-import { Observable } from 'rxjs';
-import { MatAutocomplete, MatAutocompleteSelectedEvent, MatChipInputEvent } from '@angular/material';
-import { map, startWith } from 'rxjs/operators';
-import { COMMA, ENTER } from '@angular/cdk/keycodes';
+import {ChangeDetectionStrategy, Component, ElementRef, EventEmitter, Input, Output, ViewChild} from '@angular/core';
+import {FormControl} from '@angular/forms';
+import {Observable} from 'rxjs';
+import {MatAutocomplete, MatAutocompleteSelectedEvent, MatChipInputEvent} from '@angular/material';
+import {map, startWith} from 'rxjs/operators';
+import {COMMA, ENTER} from '@angular/cdk/keycodes';
 
 
 interface Suggestion {
@@ -93,7 +93,7 @@ export class ChipListInputComponent {
   }
 
   private _updateModelItems(modelIds) {
-    this.modelItems = (modelIds)
+    this.modelItems = (modelIds && this.suggestions_ && this.suggestions_.length)
       ? modelIds.map(id => this.suggestions_.find(suggestion => suggestion.id === id))
       : [];
   }
