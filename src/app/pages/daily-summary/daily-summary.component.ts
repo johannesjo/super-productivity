@@ -51,6 +51,7 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
 
   started$ = this._projectService.workStartToday$;
   end$ = this._projectService.workEndToday$;
+  breakTime$ = this._projectService.breakTimeToday$;
 
   private _successAnimationTimeout;
   private _doneTasks: TaskWithSubTasks[];

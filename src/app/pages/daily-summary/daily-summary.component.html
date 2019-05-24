@@ -46,6 +46,13 @@
           / {{estimatedOnTasksWorkedOnToday$|async|msToClockString}}</div>
       </div>
     </div>
+
+    <div class="summary-point">
+      <mat-icon>free_breakfast</mat-icon>
+      <div class="summary-text">Break Time
+        <div class="summary-val">{{breakTime$|async|msToClockString}}</div>
+      </div>
+    </div>
   </div>
 
   <mat-tab-group (selectedIndexChange)="onTabIndexChange($event)"
@@ -146,7 +153,7 @@
           <mat-menu #roundTimeActions="matMenu">
             <button mat-menu-item
                     style="color: red;">
-                !!! Be careful this cannot be undone !!!
+              !!! Be careful this cannot be undone !!!
             </button>
             <button mat-menu-item
                     (click)="roundTimeForTasks('5M')">
