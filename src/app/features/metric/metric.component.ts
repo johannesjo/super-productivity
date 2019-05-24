@@ -1,5 +1,4 @@
 import {ChangeDetectionStrategy, Component} from '@angular/core';
-import {WorklogService} from '../worklog/worklog.service';
 import {ChartOptions, ChartType} from 'chart.js';
 import {MetricService} from './metric.service';
 import {Color} from 'ng2-charts';
@@ -18,7 +17,6 @@ export class MetricComponent {
     },
   };
   public pieChartType: ChartType = 'pie';
-  public pieChartLegend = true;
   public pieChartPlugins = [];
 
   public lineChartOptions: ChartOptions = {
@@ -30,7 +28,6 @@ export class MetricComponent {
   public lineChartPlugins = [];
 
   constructor(
-    public worklogService: WorklogService,
     public metricService: MetricService,
   ) {
   }

@@ -57,7 +57,7 @@
                 [chartType]="pieChartType"
                 [options]="pieChartOptions"
                 [plugins]="pieChartPlugins"
-                [legend]="pieChartLegend">
+                [legend]="(improvementCounts.data.length < 12)">
         </canvas>
       </section>
 
@@ -69,7 +69,7 @@
                 [chartType]="pieChartType"
                 [options]="pieChartOptions"
                 [plugins]="pieChartPlugins"
-                [legend]="pieChartLegend">
+                [legend]="(obstructionCounts.data.length < 12)">
         </canvas>
       </section>
     </section>

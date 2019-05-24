@@ -12,7 +12,7 @@ h3 {
 }
 
 .pie-charts {
-  @include mq(xs) {
+  @include mq(sm) {
     display: flex;
 
     > section {
