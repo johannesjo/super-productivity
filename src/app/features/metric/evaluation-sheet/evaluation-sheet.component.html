@@ -12,30 +12,39 @@
   </help-section>
 
   <form (submit)="submit()"
-        [formGroup]="form">
+        name="form"
+        #f="ngForm"
+        novalidate>
     <mat-form-field>
       <input [(ngModel)]="metricForDay.mood"
-             formControlName="mood"
+             required
+             min="1"
+             max="10"
+             name="mood"
+             #mood="ngModel"
              matInput
              maxLength="2"
              placeholder="How do you feel?"
              type="number">
       <mat-hint>1: Awful – 10: Splendid</mat-hint>
-      <mat-error *ngIf="moodFormCtrl.invalid && (moodFormCtrl.dirty || moodFormCtrl.touched)">
+      <mat-error *ngIf="mood.invalid && (mood.dirty || mood.touched)">
         Please enter a value between 1 and 10
       </mat-error>
     </mat-form-field>
 
     <mat-form-field>
       <input [(ngModel)]="metricForDay.productivity"
+             required
+             min="1"
+             max="10"
              name="productivity"
-             formControlName="productivity"
+             #productivity="ngModel"
              matInput
              maxLength="2"
              placeholder="How efficient did you work today?"
              type="number">
       <mat-hint>1: Haven't even started – 10: Enormously efficient</mat-hint>
-      <mat-error *ngIf="productivityFormCtrl.invalid && (productivityFormCtrl.dirty || productivityFormCtrl.touched)">
+      <mat-error *ngIf="productivity.invalid && (productivity.dirty || productivity.touched)">
         Please enter a value between 1 and 10
       </mat-error>
     </mat-form-field>
@@ -63,14 +72,15 @@
                      (removeItem)="removeImprovementTomorrow($event)"></chip-list-input>
     <mat-form-field>
       <textarea matInput
-                formControlName="notes"
+                name="notes"
+                #notes="ngModel"
                 placeholder="Notes for tomorrow"
                 [(ngModel)]="tomorrowsNote"></textarea>
     </mat-form-field>
 
     <div style="text-align: center;">
       <button color="lighter"
-              [disabled]="!form.valid"
+              [disabled]="!f.valid"
               mat-raised-button
               type="submit">
         <mat-icon>save</mat-icon>

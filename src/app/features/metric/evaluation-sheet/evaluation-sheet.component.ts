@@ -6,7 +6,6 @@ import {MetricService} from '../metric.service';
 import {ObstructionService} from '../obstruction/obstruction.service';
 import {ImprovementService} from '../improvement/improvement.service';
 import {Subscription} from 'rxjs';
-import {FormControl, FormGroup, Validators} from '@angular/forms';
 import {NoteService} from '../../note/note.service';
 
 @Component({
@@ -17,18 +16,7 @@ import {NoteService} from '../../note/note.service';
 })
 export class EvaluationSheetComponent implements OnDestroy, OnInit {
   metricForDay: MetricCopy;
-  form: FormGroup;
-  moodFormCtrl = new FormControl('', [
-    Validators.required,
-    Validators.min(1),
-    Validators.max(10),
-  ]);
-  productivityFormCtrl = new FormControl('', [
-    Validators.required,
-    Validators.min(1),
-    Validators.max(10),
-  ]);
-  notesCtrl = new FormControl('', []);
+
   tomorrowsNote: string;
 
   private _subs = new Subscription();
@@ -47,15 +35,6 @@ export class EvaluationSheetComponent implements OnDestroy, OnInit {
       id: getWorklogStr(),
       ...DEFAULT_METRIC_FOR_DAY,
     };
-
-    this.form = new FormGroup({
-      mood: this.moodFormCtrl,
-      productivity: this.productivityFormCtrl,
-      notes: this.notesCtrl,
-      // obstructions: new FormControl(this.metricForDay.obstructions),
-      // improvements: new FormControl(this.metricForDay.improvements),
-      // improvementsTomorrow: new FormControl(this.metricForDay.improvementsTomorrow),
-    });
 
     this._subs.add(this._metricService.getTodaysMetric().subscribe(metric => {
       if (metric) {
@@ -122,8 +101,6 @@ export class EvaluationSheetComponent implements OnDestroy, OnInit {
       }, date.getTime());
     }
 
-    if (this.form.valid) {
-      this._metricService.upsertMetric(this.metricForDay);
-    }
+    this._metricService.upsertMetric(this.metricForDay);
   }
 }

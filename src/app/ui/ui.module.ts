@@ -63,6 +63,7 @@ import {ToArrayPipe} from './pipes/to-array.pipe';
 import {MomentFormatPipe} from './pipes/moment-format.pipe';
 import {InlineInputComponent} from './inline-input/inline-input.component';
 import {ChipListInputComponent} from './chip-list-input/chip-list-input.component';
+import {ValidationModule} from './validation/validation.module';
 
 @NgModule({
   imports: [
@@ -114,6 +115,7 @@ import {ChipListInputComponent} from './chip-list-input/chip-list-input.componen
     MatChipsModule,
     MatSlideToggleModule,
     MatBadgeModule,
+    ValidationModule,
   ],
   declarations: [
     DurationFromStringPipe,
@@ -213,6 +215,7 @@ import {ChipListInputComponent} from './chip-list-input/chip-list-input.componen
     FormlyModule,
     FormlyMaterialModule,
     MarkdownModule,
+    ValidationModule,
   ]
 })
 export class UiModule {
