@@ -47,10 +47,11 @@
       </div>
     </div>
 
-    <div class="summary-point">
+    <div class="summary-point"
+         *ngIf="(isBreakSupport$|async)">
       <mat-icon>free_breakfast</mat-icon>
-      <div class="summary-text">Break Time
-        <div class="summary-val">{{breakTime$|async|msToClockString}}</div>
+      <div class="summary-text">Breaks (nr / time)
+        <div class="summary-val">{{breakNr$|async}} / {{breakTime$|async|msToClockString}}</div>
       </div>
     </div>
   </div>

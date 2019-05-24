@@ -20,6 +20,7 @@ import {
   selectArchivedProjects,
   selectCurrentProject,
   selectCurrentProjectId,
+  selectProjectBreakNrForDay,
   selectProjectBreakTimeForDay,
   selectProjectById,
   selectProjectGithubCfg,
@@ -70,9 +71,10 @@ export class ProjectService {
   onProjectRelatedDataLoaded$: Observable<any> = this._actions$.pipe(ofType(ProjectActionTypes.LoadProjectRelatedDataSuccess));
 
   // DYNAMIC
-  workStartToday$ = this._store$.pipe(select(selectProjectWorkStartForDay, {day: getWorklogStr()}));
-  workEndToday$ = this._store$.pipe(select(selectProjectWorkEndForDay, {day: getWorklogStr()}));
-  breakTimeToday$ = this._store$.pipe(select(selectProjectBreakTimeForDay, {day: getWorklogStr()}));
+  workStartToday$: Observable<number> = this._store$.pipe(select(selectProjectWorkStartForDay, {day: getWorklogStr()}));
+  workEndToday$: Observable<number> = this._store$.pipe(select(selectProjectWorkEndForDay, {day: getWorklogStr()}));
+  breakTimeToday$: Observable<number> = this._store$.pipe(select(selectProjectBreakTimeForDay, {day: getWorklogStr()}));
+  breakNrToday$: Observable<number> = this._store$.pipe(select(selectProjectBreakNrForDay, {day: getWorklogStr()}));
 
 
   constructor(

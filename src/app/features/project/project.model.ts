@@ -1,13 +1,13 @@
-import { IssueIntegrationCfgs, IssueProviderKey, IssueStateMap } from '../issue/issue';
-import { NoteState } from '../note/store/note.reducer';
-import { BookmarkState } from '../bookmark/store/bookmark.reducer';
-import { TaskState } from '../tasks/store/task.reducer';
-import { EntityState } from '@ngrx/entity';
-import { Task } from '../tasks/task.model';
-import { Attachment } from '../attachment/attachment.model';
-import { MetricState } from '../metric/metric.model';
-import { ImprovementState } from '../metric/improvement/improvement.model';
-import { ObstructionState } from '../metric/obstruction/obstruction.model';
+import {IssueIntegrationCfgs, IssueProviderKey, IssueStateMap} from '../issue/issue';
+import {NoteState} from '../note/store/note.reducer';
+import {BookmarkState} from '../bookmark/store/bookmark.reducer';
+import {TaskState} from '../tasks/store/task.reducer';
+import {EntityState} from '@ngrx/entity';
+import {Task} from '../tasks/task.model';
+import {Attachment} from '../attachment/attachment.model';
+import {MetricState} from '../metric/metric.model';
+import {ImprovementState} from '../metric/improvement/improvement.model';
+import {ObstructionState} from '../metric/obstruction/obstruction.model';
 
 
 export type RoundTimeOption = '5M' | 'QUARTER' | 'HALF' | 'HOUR';
@@ -15,7 +15,14 @@ export type RoundTimeOption = '5M' | 'QUARTER' | 'HALF' | 'HOUR';
 export interface BreakTimeCopy {
   [key: string]: number;
 }
+
 export type BreakTime = Readonly<BreakTimeCopy>;
+
+export interface BreakNrCopy {
+  [key: string]: number;
+}
+
+export type BreakNr = Readonly<BreakNrCopy>;
 
 export interface WorkStartEndCopy {
   [key: string]: number;
@@ -101,6 +108,7 @@ export type Project = Readonly<{
   workStart: WorkStartEnd;
   workEnd: WorkStartEnd;
   breakTime: BreakTime;
+  breakNr: BreakNr;
 }>;
 
 export interface ArchivedProject {

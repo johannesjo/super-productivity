@@ -58,6 +58,7 @@ export const DEFAULT_PROJECT: Project = {
   workStart: {},
   workEnd: {},
   breakTime: {},
+  breakNr: {},
 };
 
 

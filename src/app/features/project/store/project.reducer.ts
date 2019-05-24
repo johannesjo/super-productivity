@@ -1,5 +1,5 @@
 import {createEntityAdapter, EntityAdapter, EntityState} from '@ngrx/entity';
-import {BreakTime, Project, WorkStartEnd} from '../project.model';
+import {BreakNrCopy, BreakNr, Project, WorkStartEnd} from '../project.model';
 import {ProjectActions, ProjectActionTypes} from './project.actions';
 import {createFeatureSelector, createSelector} from '@ngrx/store';
 import {FIRST_PROJECT} from '../project.const';
@@ -41,6 +41,7 @@ export const selectAdvancedProjectCfg = createSelector(selectCurrentProject, (pr
 export const selectProjectWorkStart = createSelector(selectCurrentProject, (project) => project.workStart);
 export const selectProjectWorkEnd = createSelector(selectCurrentProject, (project) => project.workEnd);
 export const selectProjectBreakTime = createSelector(selectCurrentProject, (project) => project.breakTime);
+export const selectProjectBreaks = createSelector(selectCurrentProject, (project) => project.breakNr);
 
 
 // DYNAMIC SELECTORS
@@ -62,7 +63,12 @@ export const selectProjectWorkEndForDay = createSelector(
 
 export const selectProjectBreakTimeForDay = createSelector(
   selectProjectBreakTime,
-  (breakTime: BreakTime, props: { day: string }) => breakTime[props.day]
+  (breakTime: BreakNr, props: { day: string }) => breakTime[props.day]
+);
+
+export const selectProjectBreakNrForDay = createSelector(
+  selectProjectBreaks,
+  (breaks: BreakNrCopy, props: { day: string }) => breaks[props.day]
 );
 
 
@@ -159,14 +165,19 @@ export function projectReducer(
     case ProjectActionTypes.AddToProjectBreakTime: {
       const {id, date, val} = action.payload;
       const oldP = state.entities[id];
-      const oldVal = oldP.breakTime[date] || 0;
+      const oldBreakTime = oldP.breakTime[date] || 0;
+      const oldBreakNr = oldP.breakNr[date] || 0;
 
       return projectAdapter.updateOne({
         id,
         changes: {
+          breakNr: {
+            ...oldP.breakNr,
+            [date]: oldBreakNr + 1,
+          },
           breakTime: {
-            ...oldP.workEnd,
-            [date]: oldVal + val,
+            ...oldP.breakTime,
+            [date]: oldBreakTime + val,
           }
         }
       }, state);

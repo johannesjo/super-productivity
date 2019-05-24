@@ -6,7 +6,7 @@ import {Router} from '@angular/router';
 import {IS_ELECTRON} from '../../app.constants';
 import {MatDialog} from '@angular/material';
 import {DialogSimpleTaskExportComponent} from '../../features/simple-task-export/dialog-simple-task-export/dialog-simple-task-export.component';
-import {Subscription} from 'rxjs';
+import {Observable, Subscription} from 'rxjs';
 import {ElectronService} from 'ngx-electron';
 import {IPC_SHUTDOWN_NOW} from '../../../../electron/ipc-events.const';
 import {DialogConfirmComponent} from '../../ui/dialog-confirm/dialog-confirm.component';
@@ -14,7 +14,7 @@ import {NoteService} from '../../features/note/note.service';
 import {ConfigService} from '../../features/config/config.service';
 import {GoogleDriveSyncService} from '../../features/google/google-drive-sync.service';
 import {SnackService} from '../../core/snack/snack.service';
-import {take, takeUntil} from 'rxjs/operators';
+import {map, take, takeUntil} from 'rxjs/operators';
 import {loadFromLs, saveToLs} from '../../core/persistence/local-storage';
 import {LS_DAILY_SUMMARY_TAB_INDEX} from '../../core/persistence/ls-keys.const';
 import {GoogleApiService} from '../../features/google/google-api.service';
@@ -39,7 +39,6 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
   todaysTasks$ = this._taskService.todaysTasks$;
   todaysWorkedOnOrDoneTasksFlat$ = this._taskService.todaysWorkedOnOrDoneTasksFlat$;
   todayStr = getTodayStr();
-  tomorrowsNote: string;
   isTimeSheetExported = true;
   showSuccessAnimation;
   selectedTabIndex = loadFromLs(this.getLsKeyForSummaryTabIndex()) || 0;
@@ -52,6 +51,8 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
   started$ = this._projectService.workStartToday$;
   end$ = this._projectService.workEndToday$;
   breakTime$ = this._projectService.breakTimeToday$;
+  breakNr$ = this._projectService.breakNrToday$;
+  isBreakSupport$: Observable<boolean> = this._configService.cfg$.pipe(map(cfg => cfg && cfg.misc.isEnableIdleTimeTracking));
 
   private _successAnimationTimeout;
   private _doneTasks: TaskWithSubTasks[];
