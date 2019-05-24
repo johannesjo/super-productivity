@@ -13,6 +13,12 @@ import {ObstructionModule} from './obstruction/obstruction.module';
 import {ImprovementModule} from './improvement/improvement.module';
 import {ChartsModule} from 'ng2-charts';
 import {RouterModule} from '@angular/router';
+import {MetricService} from './metric.service';
+import {ImprovementService} from './improvement/improvement.service';
+import {ObstructionService} from './obstruction/obstruction.service';
+import {combineLatest} from 'rxjs';
+import {Metric} from './metric.model';
+import {take} from 'rxjs/operators';
 
 @NgModule({
   imports: [
@@ -39,6 +45,7 @@ import {RouterModule} from '@angular/router';
   entryComponents: [],
 })
 export class MetricModule {
+
   // constructor(
   //   private _metricsService: MetricService,
   //   private _improvementService: ImprovementService,
@@ -64,7 +71,7 @@ export class MetricModule {
   //           console.log(...(rndRange(5, 0)));
   //
   //           const metric: Metric = {
-  //             id: `${rnd(2020, 1989)}/${rnd(10, 12)}/${rnd(10, 28)}`,
+  //             id: `${rnd(2018, 1989)}-${rnd(10, 12)}-${rnd(10, 28)}`,
   //             improvements: improvements.slice(...(rndRange(improvements.length, 0))),
   //             obstructions: obstructions.slice(...(rndRange(obstructions.length, 0))),
   //             improvementsTomorrow: improvements.slice(...(rndRange(improvements.length, 0))),
@@ -79,4 +86,5 @@ export class MetricModule {
   //     });
   //   }, 300);
   // }
+
 }
