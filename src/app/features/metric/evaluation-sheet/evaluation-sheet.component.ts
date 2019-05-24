@@ -1,12 +1,13 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
-import { DEFAULT_METRIC_FOR_DAY } from '../metric.const';
-import { MetricCopy } from '../metric.model';
-import { getWorklogStr } from '../../../util/get-work-log-str';
-import { MetricService } from '../metric.service';
-import { ObstructionService } from '../obstruction/obstruction.service';
-import { ImprovementService } from '../improvement/improvement.service';
-import { Subscription } from 'rxjs';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit} from '@angular/core';
+import {DEFAULT_METRIC_FOR_DAY} from '../metric.const';
+import {MetricCopy} from '../metric.model';
+import {getWorklogStr} from '../../../util/get-work-log-str';
+import {MetricService} from '../metric.service';
+import {ObstructionService} from '../obstruction/obstruction.service';
+import {ImprovementService} from '../improvement/improvement.service';
+import {Subscription} from 'rxjs';
+import {FormControl, FormGroup, Validators} from '@angular/forms';
+import {NoteService} from '../../note/note.service';
 
 @Component({
   selector: 'evaluation-sheet',
@@ -27,6 +28,8 @@ export class EvaluationSheetComponent implements OnDestroy, OnInit {
     Validators.min(1),
     Validators.max(10),
   ]);
+  notesCtrl = new FormControl('', []);
+  tomorrowsNote: string;
 
   private _subs = new Subscription();
 
@@ -34,6 +37,7 @@ export class EvaluationSheetComponent implements OnDestroy, OnInit {
     public obstructionService: ObstructionService,
     public improvementService: ImprovementService,
     private _metricService: MetricService,
+    private _noteService: NoteService,
     private _cd: ChangeDetectorRef,
   ) {
   }
@@ -47,6 +51,7 @@ export class EvaluationSheetComponent implements OnDestroy, OnInit {
     this.form = new FormGroup({
       mood: this.moodFormCtrl,
       productivity: this.productivityFormCtrl,
+      notes: this.notesCtrl,
       // obstructions: new FormControl(this.metricForDay.obstructions),
       // improvements: new FormControl(this.metricForDay.improvements),
       // improvementsTomorrow: new FormControl(this.metricForDay.improvementsTomorrow),
@@ -107,6 +112,16 @@ export class EvaluationSheetComponent implements OnDestroy, OnInit {
   }
 
   submit() {
+    if (this.tomorrowsNote && this.tomorrowsNote.trim().length > 0) {
+      const date = new Date();
+      // tomorrow at 10 o'clock
+      date.setHours(10, 0, 0, 0);
+      date.setDate(date.getDate() + 1);
+      this._noteService.add({
+        content: this.tomorrowsNote,
+      }, date.getTime());
+    }
+
     if (this.form.valid) {
       this._metricService.upsertMetric(this.metricForDay);
     }

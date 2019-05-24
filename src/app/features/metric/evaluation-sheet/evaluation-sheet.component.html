@@ -61,6 +61,12 @@
                      (addItem)="addImprovementTomorrow($event)"
                      (addNewItem)="addNewImprovementTomorrow($event)"
                      (removeItem)="removeImprovementTomorrow($event)"></chip-list-input>
+    <mat-form-field>
+      <textarea matInput
+                formControlName="notes"
+                placeholder="Notes for tomorrow"
+                [(ngModel)]="tomorrowsNote"></textarea>
+    </mat-form-field>
 
     <div style="text-align: center;">
       <button color="lighter"

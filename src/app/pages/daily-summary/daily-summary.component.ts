@@ -177,18 +177,6 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
   }
 
   private _finishDayForGood(cb?) {
-    if (this.tomorrowsNote && this.tomorrowsNote.trim().length > 0) {
-      this._noteService.add({
-        content: this.tomorrowsNote,
-      });
-    }
-
-    // TODO refactor to better solution with error handling
-
-    //   this._snackService.open({
-    //     type: 'ERROR',
-    //     message: 'GoogleSync: Unable to finish day, because syncing throw an error',
-    //   });
     if (this._configService.cfg
       && this._configService.cfg.googleDriveSync.isEnabled
       && this._configService.cfg.googleDriveSync.isAutoSyncToRemote) {
