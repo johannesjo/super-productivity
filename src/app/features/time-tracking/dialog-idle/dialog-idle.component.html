@@ -9,22 +9,22 @@
 
     <select-task (taskChange)="onTaskChange($event)"
                  [initialTask]="selectedTask"></select-task>
-    <p>
+
+    <div class="track-to-label">
       <span *ngIf="!isCreate">Track to:</span>
-      <span *ngIf="isCreate">Create and track to:</span>
-      <br><strong>{{selectedTask?.title || newTaskTitle || 'No task selected'}} </strong>
-    </p>
+      <span *ngIf="isCreate"><em>Create</em> and track to:</span>
+    </div>
   </div>
 
 
-  <div align="end"
+  <div align="center"
        mat-dialog-actions>
     <button color="primary"
             mat-raised-button
             type="submit">
       <mat-icon *ngIf="!isCreate">track_changes</mat-icon>
       <mat-icon *ngIf="isCreate">add</mat-icon>
-      Track time
+      Task
     </button>
 
     <button *ngIf="(configService.misc$|async)?.isUnTrackedIdleResetsBreakTimer"
@@ -34,14 +34,15 @@
             type="button">
       <mat-icon *ngIf="!isCreate">track_changes</mat-icon>
       <mat-icon *ngIf="isCreate">add</mat-icon>
-      Track and reset Break Timer
+      <!--      <mat-icon>free_breakfast</mat-icon>-->
+      Task & Break
     </button>
 
     <button (click)="skipTrack()"
             mat-raised-button
             type="button">
       <mat-icon>skip_next</mat-icon>
-      Skip track
+      Skip
     </button>
   </div>
 </form>

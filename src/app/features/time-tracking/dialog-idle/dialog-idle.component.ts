@@ -1,9 +1,10 @@
-import { ChangeDetectionStrategy, Component, Inject, OnInit } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material';
-import { TaskService } from '../../tasks/task.service';
-import { Observable } from 'rxjs';
-import { Task } from '../../tasks/task.model';
-import { ConfigService } from '../../config/config.service';
+import {ChangeDetectionStrategy, Component, Inject, OnInit} from '@angular/core';
+import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material';
+import {TaskService} from '../../tasks/task.service';
+import {Observable} from 'rxjs';
+import {Task} from '../../tasks/task.model';
+import {ConfigService} from '../../config/config.service';
+import {MetricService} from '../../metric/metric.service';
 
 @Component({
   selector: 'dialog-idle',
@@ -20,6 +21,7 @@ export class DialogIdleComponent implements OnInit {
   constructor(
     public configService: ConfigService,
     private _taskService: TaskService,
+    private _metricService: MetricService,
     private _matDialogRef: MatDialogRef<DialogIdleComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,
   ) {

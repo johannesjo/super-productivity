@@ -1,4 +1,6 @@
-.dialog-content{
+@import "../../../../variables";
+
+.dialog-content {
   display: flex;
   justify-content: center;
   flex-direction: column;
@@ -8,5 +10,11 @@
 .time {
   font-size: 20px;
   font-weight: bold;
-  margin-bottom: 8px;
+  margin-bottom: $s;
+}
+
+.track-to-label {
+  margin-bottom: $s;
+  font-size: $s*2;
+  font-weight: bold;
 }
