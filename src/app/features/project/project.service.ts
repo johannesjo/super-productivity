@@ -1,6 +1,8 @@
 import {Injectable} from '@angular/core';
 import {Observable} from 'rxjs';
 import {
+  BreakNr,
+  BreakTime,
   ExportedProject,
   GoogleTimeSheetExport,
   Project,
@@ -20,7 +22,9 @@ import {
   selectArchivedProjects,
   selectCurrentProject,
   selectCurrentProjectId,
+  selectProjectBreakNr,
   selectProjectBreakNrForDay,
+  selectProjectBreakTime,
   selectProjectBreakTimeForDay,
   selectProjectById,
   selectProjectGithubCfg,
@@ -69,6 +73,9 @@ export class ProjectService {
   onProjectChange$: Observable<any> = this._actions$.pipe(ofType(ProjectActionTypes.SetCurrentProject));
 
   onProjectRelatedDataLoaded$: Observable<any> = this._actions$.pipe(ofType(ProjectActionTypes.LoadProjectRelatedDataSuccess));
+
+  breakTime$: Observable<BreakTime> = this._store$.pipe(select(selectProjectBreakTime));
+  breakNr$: Observable<BreakNr> = this._store$.pipe(select(selectProjectBreakNr));
 
   // DYNAMIC
   workStartToday$: Observable<number> = this._store$.pipe(select(selectProjectWorkStartForDay, {day: getWorklogStr()}));

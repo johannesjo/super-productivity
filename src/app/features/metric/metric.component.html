@@ -26,6 +26,10 @@
           <td>{{sm.avgTasksPerDay|number:'1.0-1'}}</td>
         </tr>
         <tr>
+          <th>Avg. breaks per day</th>
+          <td>{{sm.avgBreakNr|number:'1.0-1'}}</td>
+        </tr>
+        <tr>
           <th>Avg. time spent per day</th>
           <td>{{sm.avgTimeSpentOnDay|msToString}}</td>
         </tr>
@@ -36,6 +40,10 @@
         <tr>
           <th>Avg. time spent per task<br>(counting subtasks)</th>
           <td>{{sm.avgTimeSpentOnTaskIncludingSubTasks|msToString}}</td>
+        </tr>
+        <tr>
+          <th>Avg. time spent on breaks</th>
+          <td>{{sm.avgBreakTime|msToString}}</td>
         </tr>
       </table>
     </div>

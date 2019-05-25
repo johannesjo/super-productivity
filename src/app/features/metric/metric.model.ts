@@ -36,6 +36,8 @@ export interface SimpleMetrics {
   end: string;
   timeSpent: number;
   timeEstimate: number;
+  breakTime: number;
+  breakNr: number;
   nrOfCompletedTasks: number;
   nrOfAllTasks: number;
   nrOfSubTasks: number;
@@ -46,4 +48,6 @@ export interface SimpleMetrics {
   avgTimeSpentOnDay: number;
   avgTimeSpentOnTask: number;
   avgTimeSpentOnTaskIncludingSubTasks: number;
+  avgBreakNr: number;
+  avgBreakTime: number;
 }

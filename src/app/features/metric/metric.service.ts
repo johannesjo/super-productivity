@@ -36,6 +36,8 @@ export class MetricService {
   simpleMetrics$: Observable<SimpleMetrics> = this._projectService.currentId$.pipe(
     switchMap(() => {
       return combineLatest([
+        this._projectService.breakNr$,
+        this._projectService.breakTime$,
         this._worklogService.worklog$,
         this._worklogService.totalTimeSpent$,
         from(this._taskService.getAllTasks()),

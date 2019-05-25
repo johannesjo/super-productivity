@@ -41,7 +41,7 @@ export const selectAdvancedProjectCfg = createSelector(selectCurrentProject, (pr
 export const selectProjectWorkStart = createSelector(selectCurrentProject, (project) => project.workStart);
 export const selectProjectWorkEnd = createSelector(selectCurrentProject, (project) => project.workEnd);
 export const selectProjectBreakTime = createSelector(selectCurrentProject, (project) => project.breakTime);
-export const selectProjectBreaks = createSelector(selectCurrentProject, (project) => project.breakNr);
+export const selectProjectBreakNr = createSelector(selectCurrentProject, (project) => project.breakNr);
 
 
 // DYNAMIC SELECTORS
@@ -67,7 +67,7 @@ export const selectProjectBreakTimeForDay = createSelector(
 );
 
 export const selectProjectBreakNrForDay = createSelector(
-  selectProjectBreaks,
+  selectProjectBreakNr,
   (breaks: BreakNrCopy, props: { day: string }) => breaks[props.day]
 );
 
