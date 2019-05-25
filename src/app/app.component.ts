@@ -7,41 +7,42 @@ import {
   Inject,
   OnInit
 } from '@angular/core';
-import { MatIconRegistry } from '@angular/material';
-import { DomSanitizer } from '@angular/platform-browser';
-import { ProjectService } from './features/project/project.service';
-import { Project } from './features/project/project.model';
-import { ChromeExtensionInterfaceService } from './core/chrome-extension-interface/chrome-extension-interface.service';
-import { ShortcutService } from './core-ui/shortcut/shortcut.service';
-import { ConfigService } from './features/config/config.service';
-import { blendInOutAnimation } from './ui/animations/blend-in-out.ani';
-import { LayoutService } from './core-ui/layout/layout.service';
-import { ElectronService } from 'ngx-electron';
+import {MatIconRegistry} from '@angular/material';
+import {DomSanitizer} from '@angular/platform-browser';
+import {ProjectService} from './features/project/project.service';
+import {Project} from './features/project/project.model';
+import {ChromeExtensionInterfaceService} from './core/chrome-extension-interface/chrome-extension-interface.service';
+import {ShortcutService} from './core-ui/shortcut/shortcut.service';
+import {ConfigService} from './features/config/config.service';
+import {blendInOutAnimation} from './ui/animations/blend-in-out.ani';
+import {LayoutService} from './core-ui/layout/layout.service';
+import {ElectronService} from 'ngx-electron';
 import {
   IPC_APP_READY,
   IPC_ERROR,
   IPC_TRANSFER_SETTINGS_REQUESTED,
   IPC_TRANSFER_SETTINGS_TO_ELECTRON
 } from '../../electron/ipc-events.const';
-import { SnackService } from './core/snack/snack.service';
-import { IS_ELECTRON } from './app.constants';
-import { GoogleDriveSyncService } from './features/google/google-drive-sync.service';
-import { SwUpdate } from '@angular/service-worker';
-import { BookmarkService } from './features/bookmark/bookmark.service';
-import { expandAnimation } from './ui/animations/expand.ani';
-import { warpRouteAnimation } from './ui/animations/warp-route';
-import { NoteService } from './features/note/note.service';
-import { BreakpointObserver } from '@angular/cdk/layout';
-import { DOCUMENT } from '@angular/common';
-import { map, take } from 'rxjs/operators';
-import { MigrateService } from './imex/migrate/migrate.service';
-import { combineLatest, Observable } from 'rxjs';
-import { selectIsAllProjectDataLoaded } from './features/project/store/project.reducer';
-import { Store } from '@ngrx/store';
-import { fadeAnimation } from './ui/animations/fade.ani';
-import { IS_MAC } from './util/is-mac';
-import { selectIsTaskDataLoaded } from './features/tasks/store/task.selectors';
-import { isTouch } from './util/is-touch';
+import {SnackService} from './core/snack/snack.service';
+import {IS_ELECTRON} from './app.constants';
+import {GoogleDriveSyncService} from './features/google/google-drive-sync.service';
+import {SwUpdate} from '@angular/service-worker';
+import {BookmarkService} from './features/bookmark/bookmark.service';
+import {expandAnimation} from './ui/animations/expand.ani';
+import {warpRouteAnimation} from './ui/animations/warp-route';
+import {NoteService} from './features/note/note.service';
+import {BreakpointObserver} from '@angular/cdk/layout';
+import {DOCUMENT} from '@angular/common';
+import {map, take} from 'rxjs/operators';
+import {MigrateService} from './imex/migrate/migrate.service';
+import {combineLatest, Observable} from 'rxjs';
+import {selectIsAllProjectDataLoaded} from './features/project/store/project.reducer';
+import {Store} from '@ngrx/store';
+import {fadeAnimation} from './ui/animations/fade.ani';
+import {IS_MAC} from './util/is-mac';
+import {selectIsTaskDataLoaded} from './features/tasks/store/task.selectors';
+import {isTouch} from './util/is-touch';
+import {ThemeService} from 'ng2-charts';
 
 const SIDE_PANEL_BREAKPOINT = 900;
 
@@ -83,6 +84,7 @@ export class AppComponent implements OnInit {
     private _swUpdate: SwUpdate,
     private _el: ElementRef,
     private _cd: ChangeDetectorRef,
+    private _themeService: ThemeService,
     private _breakPointObserver: BreakpointObserver,
     private _store: Store<any>,
     public readonly layoutService: LayoutService,
@@ -231,6 +233,28 @@ export class AppComponent implements OnInit {
     }
 
     this._currentTheme = theme;
+    this._setChartTheme(isDarkTheme);
+  }
+
+  private _setChartTheme(isDarkTheme: boolean) {
+    const overrides = (isDarkTheme)
+      ? {
+        legend: {
+          labels: {fontColor: 'white'}
+        },
+        scales: {
+          xAxes: [{
+            ticks: {fontColor: 'white'},
+            gridLines: {color: 'rgba(255,255,255,0.1)'}
+          }],
+          yAxes: [{
+            ticks: {fontColor: 'white'},
+            gridLines: {color: 'rgba(255,255,255,0.1)'}
+          }]
+        }
+      }
+      : {};
+    this._themeService.setColorschemesOptions(overrides);
   }
 
   private _initElectronErrorHandler() {
