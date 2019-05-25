@@ -1,10 +1,10 @@
-import { ChangeDetectionStrategy, Component, ElementRef, ViewChild } from '@angular/core';
-import { SyncService } from '../sync/sync.service';
-import { SnackService } from '../../core/snack/snack.service';
-import { AppDataComplete } from '../sync/sync.model';
-import { OldDataExport } from '../migrate/migrate.model';
-import { MigrateService } from '../migrate/migrate.service';
-import { download } from '../../util/download';
+import {ChangeDetectionStrategy, Component, ElementRef, ViewChild} from '@angular/core';
+import {SyncService} from '../sync/sync.service';
+import {SnackService} from '../../core/snack/snack.service';
+import {AppDataComplete} from '../sync/sync.model';
+import {OldDataExport} from '../migrate/migrate.model';
+import {MigrateService} from '../migrate/migrate.service';
+import {download} from '../../util/download';
 
 @Component({
   selector: 'file-imex',
@@ -13,7 +13,7 @@ import { download } from '../../util/download';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class FileImexComponent {
-  importDataString: string;
+  @ViewChild('fileInput') fileInputRef: ElementRef;
 
   constructor(
     private _syncService: SyncService,
@@ -22,12 +22,17 @@ export class FileImexComponent {
   ) {
   }
 
-  async importData() {
-    if (this.importDataString && this.importDataString.length > 0) {
+  async handleFileInput(ev: any) {
+    const files = ev.target.files;
+    const file = files.item(0);
+    const reader = new FileReader();
+    reader.onload = async () => {
+      const textData = reader.result;
+      console.log(textData);
       let data: AppDataComplete;
       let oldData: OldDataExport;
       try {
-        data = oldData = JSON.parse(this.importDataString);
+        data = oldData = JSON.parse(textData.toString());
       } catch (e) {
         this._snackService.open({type: 'ERROR', msg: 'Import failed: Invalid JSON'});
       }
@@ -37,14 +42,17 @@ export class FileImexComponent {
       } else {
         await this._syncService.loadCompleteSyncData(data);
       }
-    }
+
+      // clear input
+      this.fileInputRef.nativeElement.value = '';
+      this.fileInputRef.nativeElement.type = 'text';
+      this.fileInputRef.nativeElement.type = 'file';
+    };
+    reader.readAsText(file);
   }
 
   async downloadBackup() {
     const data = await this._syncService.getCompleteSyncData();
-    console.log(data);
-    const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(data));
-    download('super-productivity-backup.json', dataStr);
+    download('super-productivity-backup.json', JSON.stringify(data));
   }
-
 }
