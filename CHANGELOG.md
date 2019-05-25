@@ -1,3 +1,73 @@
+# [2.7.0](https://github.com/johannesjo/super-productivity/compare/v2.6.3...v2.7.0) (2019-05-25)
+
+
+### Bug Fixes
+
+* **metrics:** broken reference ([c37ba5a](https://github.com/johannesjo/super-productivity/commit/c37ba5a))
+* **metrics:** don't add improvements/obstructions with the same name ([62ac09c](https://github.com/johannesjo/super-productivity/commit/62ac09c))
+* **metrics:** error when navigation to evaluation sheet ([4f7599d](https://github.com/johannesjo/super-productivity/commit/4f7599d))
+* **metrics:** last metric selection being wrong ([a2a6df2](https://github.com/johannesjo/super-productivity/commit/a2a6df2))
+* **metrics:** not loading data when starting on route ([263ff7b](https://github.com/johannesjo/super-productivity/commit/263ff7b))
+* chip list input throwing errors when suggestions are not ready ([b9ec9fc](https://github.com/johannesjo/super-productivity/commit/b9ec9fc))
+* form fields being to small ([afda5e2](https://github.com/johannesjo/super-productivity/commit/afda5e2))
+* global error handler ([e119055](https://github.com/johannesjo/super-productivity/commit/e119055))
+* projects not being saved to the right model ([d955ce4](https://github.com/johannesjo/super-productivity/commit/d955ce4))
+
+
+### Features
+
+* **metrics:** sort chip suggestions alphabetically ([97dff1e](https://github.com/johannesjo/super-productivity/commit/97dff1e))
+* display version number on settings page [#170](https://github.com/johannesjo/super-productivity/issues/170) ([30120ef](https://github.com/johannesjo/super-productivity/commit/30120ef))
+* **idle:** add break number to daily summary ([495a1b2](https://github.com/johannesjo/super-productivity/commit/495a1b2))
+* **idle:** add break time to daily planner ([69471b6](https://github.com/johannesjo/super-productivity/commit/69471b6))
+* **idle:** improve dialog ([94a6e4e](https://github.com/johannesjo/super-productivity/commit/94a6e4e))
+* **idle:** track break time too ([cd94c91](https://github.com/johannesjo/super-productivity/commit/cd94c91))
+* **metric:** add break time and break nr ([cd088d8](https://github.com/johannesjo/super-productivity/commit/cd088d8))
+* **metrics:** add all the boilerplate ([91c41b9](https://github.com/johannesjo/super-productivity/commit/91c41b9))
+* **metrics:** add average tasks per day worked ([fa2fd9f](https://github.com/johannesjo/super-productivity/commit/fa2fd9f))
+* **metrics:** add basic metrics ([6cc3cc1](https://github.com/johannesjo/super-productivity/commit/6cc3cc1))
+* **metrics:** add boilerplate and outline evaluation questions ([fc2f2a8](https://github.com/johannesjo/super-productivity/commit/fc2f2a8))
+* **metrics:** add boilerplate for project metrics ([9dbfd8e](https://github.com/johannesjo/super-productivity/commit/9dbfd8e))
+* **metrics:** add chip list input component ([373ff78](https://github.com/johannesjo/super-productivity/commit/373ff78))
+* **metrics:** add correct link to evaluation sheet ([3fea8a0](https://github.com/johannesjo/super-productivity/commit/3fea8a0))
+* **metrics:** add delete multiple for obstructions and improvements ([06291e0](https://github.com/johannesjo/super-productivity/commit/06291e0))
+* **metrics:** add line chart for mood and productivity over time ([b131c23](https://github.com/johannesjo/super-productivity/commit/b131c23))
+* **metrics:** add note input for evaluation form ([97b028b](https://github.com/johannesjo/super-productivity/commit/97b028b))
+* **metrics:** add outline for basic model ([5365c09](https://github.com/johannesjo/super-productivity/commit/5365c09))
+* **metrics:** add remove for improvement bar ([bbc993e](https://github.com/johannesjo/super-productivity/commit/bbc993e))
+* **metrics:** add saving improvements ([7d28262](https://github.com/johannesjo/super-productivity/commit/7d28262))
+* **metrics:** add saving metrics ([55e760d](https://github.com/johannesjo/super-productivity/commit/55e760d))
+* **metrics:** add saving obstructions ([3e4bc8f](https://github.com/johannesjo/super-productivity/commit/3e4bc8f))
+* **metrics:** add simple charts for improvements and obstructions ([c84ff05](https://github.com/johannesjo/super-productivity/commit/c84ff05))
+* **metrics:** add to mobile menu ([6d91e6e](https://github.com/johannesjo/super-productivity/commit/6d91e6e))
+* **metrics:** add toast for saving metric ([53fca8c](https://github.com/johannesjo/super-productivity/commit/53fca8c))
+* **metrics:** add ui for improvement bar ([76dc04f](https://github.com/johannesjo/super-productivity/commit/76dc04f))
+* **metrics:** add validation to evaluation form ([6dd5e51](https://github.com/johannesjo/super-productivity/commit/6dd5e51))
+* **metrics:** allow hiding improvements ([d80c696](https://github.com/johannesjo/super-productivity/commit/d80c696))
+* **metrics:** change help section color to primary ([9f8d95c](https://github.com/johannesjo/super-productivity/commit/9f8d95c))
+* **metrics:** display improvements from yesterday ([87dc75d](https://github.com/johannesjo/super-productivity/commit/87dc75d))
+* **metrics:** dummy data generator ([46302d4](https://github.com/johannesjo/super-productivity/commit/46302d4))
+* **metrics:** improve dummy metric generation ([3a79ab4](https://github.com/johannesjo/super-productivity/commit/3a79ab4))
+* **metrics:** improve evaluation form ([5e13c2f](https://github.com/johannesjo/super-productivity/commit/5e13c2f))
+* **metrics:** improve evaluation sheet ([4e13133](https://github.com/johannesjo/super-productivity/commit/4e13133))
+* **metrics:** improve evaluation sheet ([6675978](https://github.com/johannesjo/super-productivity/commit/6675978))
+* **metrics:** improve pie charts ([8ab1a74](https://github.com/johannesjo/super-productivity/commit/8ab1a74))
+* **metrics:** load evaluation sheet data for today if already saved ([8cb3a11](https://github.com/johannesjo/super-productivity/commit/8cb3a11))
+* **metrics:** make form completely template driven ([f0cb22c](https://github.com/johannesjo/super-productivity/commit/f0cb22c))
+* **metrics:** make obstructions and improvements a global model ([c4311e6](https://github.com/johannesjo/super-productivity/commit/c4311e6))
+* **metrics:** remove unused obstructions and improvements on metric save ([0fdaf8d](https://github.com/johannesjo/super-productivity/commit/0fdaf8d))
+* **metrics:** show only 20 days for productivity happiness ([23fe4a3](https://github.com/johannesjo/super-productivity/commit/23fe4a3))
+* **metrics:** show placeholder when there is no metrics data available ([ef76a1d](https://github.com/johannesjo/super-productivity/commit/ef76a1d))
+* **project:** add export of single project ([faabf3b](https://github.com/johannesjo/super-productivity/commit/faabf3b))
+* **project:** add import of exported projects ([0f03f4a](https://github.com/johannesjo/super-productivity/commit/0f03f4a))
+* **project:** add missing fields to model ([29cc5c8](https://github.com/johannesjo/super-productivity/commit/29cc5c8))
+* improve export data ([6ee2611](https://github.com/johannesjo/super-productivity/commit/6ee2611))
+* link to changelog [#170](https://github.com/johannesjo/super-productivity/issues/170) ([d297931](https://github.com/johannesjo/super-productivity/commit/d297931))
+* use mac osx dark mode for theming [#169](https://github.com/johannesjo/super-productivity/issues/169) ([8b49f37](https://github.com/johannesjo/super-productivity/commit/8b49f37))
+* **project:** prepare import of project ([ad6f25a](https://github.com/johannesjo/super-productivity/commit/ad6f25a))
+
+
+
 ## [2.6.3](https://github.com/johannesjo/super-productivity/compare/v2.6.2...v2.6.3) (2019-05-10)
 
 
