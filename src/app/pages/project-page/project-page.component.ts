@@ -1,14 +1,15 @@
-import { ChangeDetectionStrategy, Component, OnDestroy, OnInit } from '@angular/core';
-import { ProjectService } from '../../features/project/project.service';
-import { MatDialog } from '@angular/material';
-import { DialogCreateProjectComponent } from '../../features/project/dialogs/create-project/dialog-create-project.component';
-import { DialogConfirmComponent } from '../../ui/dialog-confirm/dialog-confirm.component';
-import { standardListAnimation } from '../../ui/animations/standard-list.ani';
-import { Subscription } from 'rxjs';
-import { DragulaService } from 'ng2-dragula';
-import { ExportedProject, Project } from '../../features/project/project.model';
-import { PersistenceService } from '../../core/persistence/persistence.service';
-import { download } from '../../util/download';
+import {ChangeDetectionStrategy, Component, OnDestroy, OnInit} from '@angular/core';
+import {ProjectService} from '../../features/project/project.service';
+import {MatDialog} from '@angular/material';
+import {DialogCreateProjectComponent} from '../../features/project/dialogs/create-project/dialog-create-project.component';
+import {DialogConfirmComponent} from '../../ui/dialog-confirm/dialog-confirm.component';
+import {standardListAnimation} from '../../ui/animations/standard-list.ani';
+import {Subscription} from 'rxjs';
+import {DragulaService} from 'ng2-dragula';
+import {ExportedProject, Project} from '../../features/project/project.model';
+import {PersistenceService} from '../../core/persistence/persistence.service';
+import {download} from '../../util/download';
+import {SnackService} from '../../core/snack/snack.service';
 
 @Component({
   selector: 'project-page',
@@ -24,6 +25,7 @@ export class ProjectPageComponent implements OnInit, OnDestroy {
     public readonly projectService: ProjectService,
     public readonly _matDialog: MatDialog,
     private readonly _dragulaService: DragulaService,
+    private readonly _snackService: SnackService,
     private readonly _persistenceService: PersistenceService,
   ) {
   }
@@ -56,13 +58,20 @@ export class ProjectPageComponent implements OnInit, OnDestroy {
   }
 
   handleFileInput(ev: any) {
-    console.log(ev);
     const files = ev.target.files;
     const file = files.item(0);
     const reader = new FileReader();
     reader.onload = () => {
       const textData = reader.result;
       console.log(textData);
+
+      let project: ExportedProject;
+      try {
+        project = JSON.parse(textData.toString());
+        this.projectService.importCompleteProject(project);
+      } catch (e) {
+        this._snackService.open({type: 'ERROR', msg: 'Invalid json for project file'});
+      }
     };
     reader.readAsText(file);
   }

@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import {Injectable} from '@angular/core';
 import {
   LS_BACKUP,
   LS_BOOKMARK_STATE,
@@ -17,30 +17,30 @@ import {
   LS_TASK_ATTACHMENT_STATE,
   LS_TASK_STATE
 } from './ls-keys.const';
-import { GlobalConfig } from '../../features/config/config.model';
-import { IssueProviderKey, IssueState, IssueStateMap } from '../../features/issue/issue';
-import { ProjectState } from '../../features/project/store/project.reducer';
-import { TaskState } from '../../features/tasks/store/task.reducer';
-import { EntityState } from '@ngrx/entity';
-import { Task, TaskWithSubTasks } from '../../features/tasks/task.model';
-import { AppBaseData, AppDataComplete, AppDataForProjects } from '../../imex/sync/sync.model';
-import { BookmarkState } from '../../features/bookmark/store/bookmark.reducer';
-import { AttachmentState } from '../../features/attachment/store/attachment.reducer';
-import { NoteState } from '../../features/note/store/note.reducer';
-import { Reminder } from '../../features/reminder/reminder.model';
-import { SnackService } from '../snack/snack.service';
-import { DatabaseService } from './database.service';
-import { loadFromLs, saveToLs } from './local-storage';
-import { GITHUB_TYPE, issueProviderKeys, JIRA_TYPE } from '../../features/issue/issue.const';
-import { DEFAULT_PROJECT_ID } from '../../features/project/project.const';
-import { ArchivedProject, ExportedProject, ProjectArchive } from '../../features/project/project.model';
-import { JiraIssueState } from '../../features/issue/jira/jira-issue/store/jira-issue.reducer';
-import { GithubIssueState } from '../../features/issue/github/github-issue/store/github-issue.reducer';
-import { CompressionService } from '../compression/compression.service';
-import { PersistenceBaseModel, PersistenceForProjectModel } from './persistence';
-import { MetricState } from '../../features/metric/metric.model';
-import { ImprovementState } from '../../features/metric/improvement/improvement.model';
-import { ObstructionState } from '../../features/metric/obstruction/obstruction.model';
+import {GlobalConfig} from '../../features/config/config.model';
+import {IssueProviderKey, IssueState, IssueStateMap} from '../../features/issue/issue';
+import {ProjectState} from '../../features/project/store/project.reducer';
+import {TaskState} from '../../features/tasks/store/task.reducer';
+import {EntityState} from '@ngrx/entity';
+import {Task, TaskWithSubTasks} from '../../features/tasks/task.model';
+import {AppBaseData, AppDataComplete, AppDataForProjects} from '../../imex/sync/sync.model';
+import {BookmarkState} from '../../features/bookmark/store/bookmark.reducer';
+import {AttachmentState} from '../../features/attachment/store/attachment.reducer';
+import {NoteState} from '../../features/note/store/note.reducer';
+import {Reminder} from '../../features/reminder/reminder.model';
+import {SnackService} from '../snack/snack.service';
+import {DatabaseService} from './database.service';
+import {loadFromLs, saveToLs} from './local-storage';
+import {GITHUB_TYPE, issueProviderKeys, JIRA_TYPE} from '../../features/issue/issue.const';
+import {DEFAULT_PROJECT_ID} from '../../features/project/project.const';
+import {ExportedProject, ProjectArchive, ProjectArchivedRelatedData} from '../../features/project/project.model';
+import {JiraIssueState} from '../../features/issue/jira/jira-issue/store/jira-issue.reducer';
+import {GithubIssueState} from '../../features/issue/github/github-issue/store/github-issue.reducer';
+import {CompressionService} from '../compression/compression.service';
+import {PersistenceBaseModel, PersistenceForProjectModel} from './persistence';
+import {MetricState} from '../../features/metric/metric.model';
+import {ImprovementState} from '../../features/metric/improvement/improvement.model';
+import {ObstructionState} from '../../features/metric/obstruction/obstruction.model';
 
 
 @Injectable({
@@ -137,7 +137,7 @@ export class PersistenceService {
     return await this._saveToDb(LS_PROJECT_ARCHIVE, data, isForce);
   }
 
-  async loadArchivedProject(projectId): Promise<ArchivedProject> {
+  async loadArchivedProject(projectId): Promise<ProjectArchivedRelatedData> {
     const archive = await this._loadFromDb(LS_PROJECT_ARCHIVE);
     const projectDataCompressed = archive[projectId];
     const decompressed = await this._compressionService.decompress(projectDataCompressed);
@@ -152,7 +152,7 @@ export class PersistenceService {
     await this.saveProjectArchive(archive);
   }
 
-  async saveArchivedProject(projectId, archivedProject: ArchivedProject) {
+  async saveArchivedProject(projectId, archivedProject: ProjectArchivedRelatedData) {
     const current = await this.loadProjectArchive() || {};
     const jsonStr = JSON.stringify(archivedProject);
     const compressedData = await this._compressionService.compress(jsonStr);
@@ -171,12 +171,7 @@ export class PersistenceService {
     };
   }
 
-
-  async importCompleteProject(data: ExportedProject): Promise<any> {
-    const {relatedModels, ...project} = data;
-  }
-
-  async loadAllRelatedModelDataForProject(projectId: string): Promise<ArchivedProject> {
+  async loadAllRelatedModelDataForProject(projectId: string): Promise<ProjectArchivedRelatedData> {
     const forProjectsData = await Promise.all(this._projectModels.map(async (modelCfg) => {
       return {
         [modelCfg.appDataKey]: await modelCfg.load(projectId),
@@ -198,7 +193,7 @@ export class PersistenceService {
     });
   }
 
-  async restoreCompleteRelatedDataForProject(projectId: string, data: ArchivedProject): Promise<any> {
+  async restoreCompleteRelatedDataForProject(projectId: string, data: ProjectArchivedRelatedData): Promise<any> {
     await Promise.all(this._projectModels.map((modelCfg) => {
       return modelCfg.save(projectId, data[modelCfg.appDataKey]);
     }));

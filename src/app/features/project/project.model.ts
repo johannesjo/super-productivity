@@ -111,7 +111,7 @@ export type Project = Readonly<{
   breakNr: BreakNr;
 }>;
 
-export interface ArchivedProject {
+export interface ProjectArchivedRelatedData {
   note?: NoteState;
   bookmark?: BookmarkState;
   task?: TaskState;
@@ -124,7 +124,7 @@ export interface ArchivedProject {
 }
 
 export interface ExportedProject extends Project {
-  relatedModels: ArchivedProject;
+  relatedModels: ProjectArchivedRelatedData;
 }
 
 export interface ProjectArchive {

@@ -70,15 +70,15 @@
         Create New
       </button>
 
-<!--      <input type="file"-->
-<!--             id="file"-->
-<!--             (change)="handleFileInput($event)">-->
-
-<!--      <button (click)="openCreateDialog()"-->
-<!--              color=""-->
-<!--              mat-raised-button>-->
-<!--        Import from file-->
-<!--      </button>-->
+      <button type="button"
+              mat-raised-button
+              (click)="fileInput.click()">Import from file
+      </button>
+      <input hidden
+             (change)="handleFileInput($event)"
+             #fileInput
+             type="file"
+             id="file">
     </div>
   </div>
 
