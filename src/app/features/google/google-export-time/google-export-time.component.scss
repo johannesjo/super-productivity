@@ -3,6 +3,14 @@
 :host {
   position: relative;
   display: block;
+  padding: $s*2;
+  background: #fff;
+  border-radius: $card-border-radius;
+  box-shadow: $shadow-card-shadow;
+}
+
+:host-context(.isDarkTheme) {
+  background: $dark-theme-bg-lighter;
 }
 
 .help-collapsible {
