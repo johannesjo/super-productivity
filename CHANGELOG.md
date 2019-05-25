@@ -1,3 +1,15 @@
+## [2.7.1](https://github.com/johannesjo/super-productivity/compare/v2.7.0...v2.7.1) (2019-05-25)
+
+
+### Features
+
+* add new file import button to file imex ([fb722f8](https://github.com/johannesjo/super-productivity/commit/fb722f8))
+* make help button a little bit more subtle ([bba943f](https://github.com/johannesjo/super-productivity/commit/bba943f))
+* use help section for google export time too ([c126fef](https://github.com/johannesjo/super-productivity/commit/c126fef))
+* **metrics:** make theme work better for chartjs ([92a6ad3](https://github.com/johannesjo/super-productivity/commit/92a6ad3))
+
+
+
 # [2.7.0](https://github.com/johannesjo/super-productivity/compare/v2.6.3...v2.7.0) (2019-05-25)
 
 
