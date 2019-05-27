@@ -102,6 +102,10 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
     }
   }
 
+  onEvaluationSave() {
+    this.selectedTabIndex = 1;
+  }
+
   showExportModal() {
     this._matDialog.open(DialogSimpleTaskExportComponent, {
       restoreFocus: true,

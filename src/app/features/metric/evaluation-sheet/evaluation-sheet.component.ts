@@ -1,4 +1,12 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  EventEmitter,
+  OnDestroy,
+  OnInit,
+  Output
+} from '@angular/core';
 import {DEFAULT_METRIC_FOR_DAY} from '../metric.const';
 import {MetricCopy} from '../metric.model';
 import {getWorklogStr} from '../../../util/get-work-log-str';
@@ -15,6 +23,8 @@ import {NoteService} from '../../note/note.service';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class EvaluationSheetComponent implements OnDestroy, OnInit {
+  @Output() onSave = new EventEmitter<any>();
+
   metricForDay: MetricCopy;
 
   tomorrowsNote: string;
@@ -102,5 +112,6 @@ export class EvaluationSheetComponent implements OnDestroy, OnInit {
     }
 
     this._metricService.upsertMetric(this.metricForDay);
+    this.onSave.emit();
   }
 }
