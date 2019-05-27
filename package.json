@@ -3,7 +3,7 @@
   "version": "2.7.1",
   "description": "Personal Task Management App to help you with your daily struggle with JIRA etc.",
   "main": "./electron/main.js",
-  "author": "Johannes Millan <contact@super-productivity.com> (http://super-productivity.com)",
+  "author": "johannesjo <contact@super-productivity.com> (http://super-productivity.com)",
   "license": "MIT",
   "homepage": "http://super-productivity.com",
   "repository": {
@@ -36,7 +36,9 @@
     "localInstall": "sudo echo 'Starting local install' && rm -Rf ./dist/ && rm -Rf ./app-builds/ && yarn buildAllElectron && electron-builder --linux && sudo dpkg -i app-builds/superProductivity*.deb",
     "localInstall:mac": "sudo echo 'Starting local install' && yarn buildAllElectron && sudo echo '' && electron-builder && sudo cp -rf app-builds/mac/superProductivity.app/ /Applications/superProductivity.app",
     "dist": "yarn buildAllElectron && electron-builder",
-    "distLinuxAndWindows": "yarn buildAllElectron && electron-builder --linux --win",
+    "distLinuxAndWin": "yarn buildAllElectron && electron-builder --linux --win",
+    "distWin": "yarn buildAllElectron && electron-builder --win",
+    "distWinEl": "electron-builder --win",
     "pub": "yarn buildAllElectron && electron-builder -p always",
     "release": "yarn release.changelog && yarn dist",
     "release.changelog": "conventional-changelog -i CHANGELOG.md -s -p angular",
@@ -69,12 +71,20 @@
     },
     "win": {
       "target": [
+        "appx",
         "nsis",
         "portable"
       ],
       "publish": [
         "github"
       ]
+    },
+    "appx": {
+      "applicationId": "SuperProductivity",
+      "displayName": "Super Productivity",
+      "publisherDisplayName": "johannesjo",
+      "publisher": "CN=___-___",
+      "identityName": "___johannesjo.SuperProductivity"
     },
     "linux": {
       "category": "Utility",
