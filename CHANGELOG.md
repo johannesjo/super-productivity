@@ -1,3 +1,18 @@
+## [2.7.2](https://github.com/johannesjo/super-productivity/compare/v2.7.1...v2.7.2) (2019-05-27)
+
+
+### Bug Fixes
+
+* **metrics:** charts not all showing up ([ef88971](https://github.com/johannesjo/super-productivity/commit/ef88971))
+
+
+### Features
+
+* go to next tab on evaluation save ([5128e8c](https://github.com/johannesjo/super-productivity/commit/5128e8c))
+* make header just a little smaller ([b06643a](https://github.com/johannesjo/super-productivity/commit/b06643a))
+
+
+
 ## [2.7.1](https://github.com/johannesjo/super-productivity/compare/v2.7.0...v2.7.1) (2019-05-25)
 
 
