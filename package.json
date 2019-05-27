@@ -71,7 +71,6 @@
     },
     "win": {
       "target": [
-        "appx",
         "nsis",
         "portable"
       ],
