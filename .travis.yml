@@ -60,7 +60,7 @@ script:
         -v ~/.cache/electron:/root/.cache/electron \
         -v ~/.cache/electron-builder:/root/.cache/electron-builder \
         electronuserland/builder:wine-chrome \
-        /bin/bash -c "echo '____DOCKER_INNER_START____' && ls -l &&  yarn --link-duplicates --pure-lockfile && yarn run distLinuxAndWindows -p ${PUB} && ls -l ./dist"
+        /bin/bash -c "echo '____DOCKER_INNER_START____' && ls -l &&  yarn --link-duplicates --pure-lockfile && yarn run distLinuxAndWin -p ${PUB} && ls -l ./dist"
     else
       yarn install && yarn add 7zip-bin-mac
       yarn run dist -p $PUB
