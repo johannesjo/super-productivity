@@ -2,6 +2,8 @@ import {ChangeDetectionStrategy, Component} from '@angular/core';
 import {ChartOptions, ChartType} from 'chart.js';
 import {MetricService} from './metric.service';
 import {Color} from 'ng2-charts';
+import {Observable} from 'rxjs';
+import {LineChartData} from './metric.model';
 
 @Component({
   selector: 'metric',
@@ -10,6 +12,8 @@ import {Color} from 'ng2-charts';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class MetricComponent {
+  public productivityHappiness$: Observable<LineChartData> = this.metricService.getProductivityHappinessChartData$();
+
   public pieChartOptions: ChartOptions = {
     responsive: true,
     legend: {

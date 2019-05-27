@@ -108,8 +108,12 @@ export const selectImprovementCountsPieChartData = createSelector(
       data: [],
     };
     Object.keys(counts).forEach(id => {
-      chart.labels.push(improvementState.entities[id].title);
-      chart.data.push(counts[id]);
+      if (improvementState.entities[id]) {
+        chart.labels.push(improvementState.entities[id].title);
+        chart.data.push(counts[id]);
+      } else {
+        console.warn('No improvement entity found');
+      }
     });
     return chart;
   }
@@ -136,8 +140,12 @@ export const selectObstructionCountsPieChartData = createSelector(
       data: [],
     };
     Object.keys(counts).forEach(id => {
-      chart.labels.push(obstructionState.entities[id].title);
-      chart.data.push(counts[id]);
+      if (obstructionState.entities[id]) {
+        chart.labels.push(obstructionState.entities[id].title);
+        chart.data.push(counts[id]);
+      } else {
+        console.warn('No obstruction entity found');
+      }
     });
     return chart;
   }
