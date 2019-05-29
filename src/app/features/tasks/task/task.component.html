@@ -72,6 +72,8 @@
          mat-icon-button
          tabindex="2"
          target="_blank">
+        <div *ngIf="task.issueData?.storyPoints"
+             class="mini-badge bg-primary color-contrast">{{task.issueData?.storyPoints}}</div>
         <mat-icon [svgIcon]="task.issueType|issueIcon"></mat-icon>
       </a>
 

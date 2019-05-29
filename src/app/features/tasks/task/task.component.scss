@@ -754,3 +754,16 @@ progress-bar {
     transition: none !important;
   }
 }
+
+$min-badge-size: $s*2.25;
+.mini-badge {
+  line-height: $min-badge-size;
+  width: $min-badge-size;
+  height: $min-badge-size;
+  font-size: 12px;
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  border-radius: 50%;
+  text-align: center;
+}
