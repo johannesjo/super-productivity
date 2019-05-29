@@ -19,7 +19,7 @@
   ],
   "scripts": {
     "ng": "ng",
-    "start": "yarn electron:build && NODE_ENV=DEV electron .",
+    "start": "yarn electron:build && set NODE_ENV=DEV&& electron .",
     "startFrontend": "ng serve",
     "buildFrontend": "ng build --aot --prod",
     "buildFrontendElectron": "ng build --aot --prod --base-href=''",
