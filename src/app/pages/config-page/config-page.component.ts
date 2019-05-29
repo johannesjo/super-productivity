@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnDestroy, OnInit } from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit} from '@angular/core';
 import { ConfigService } from '../../features/config/config.service';
 import { GLOBAL_CONFIG_FORM_CONFIG } from '../../features/config/config-form-config.const';
 import { ProjectService } from '../../features/project/project.service';
@@ -41,6 +41,7 @@ export class ConfigPageComponent implements OnInit, OnDestroy {
   constructor(
     public readonly configService: ConfigService,
     public readonly projectService: ProjectService,
+    private _cd: ChangeDetectorRef,
   ) {
     // somehow they are only unproblematic if assigned here,
     // not even sure how this is possible. ngrx formly sucks :/
@@ -68,6 +69,7 @@ export class ConfigPageComponent implements OnInit, OnDestroy {
       if (!this.issueIntegrationCfgs.GITHUB) {
         this.issueIntegrationCfgs.GITHUB = DEFAULT_GITHUB_CFG;
       }
+      this._cd.detectChanges();
     }));
   }
 
