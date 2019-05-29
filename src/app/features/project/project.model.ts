@@ -93,23 +93,28 @@ export type ProjectAdvancedCfg = Readonly<{
   worklogExportSettings: WorklogExportSettings;
 }>;
 
-export type ProjectAdvancedCfgKey = keyof ProjectAdvancedCfg;
-
-export type Project = Readonly<{
-  id: string;
+export interface ProjectBasicCfg {
   title: string;
   themeColor: string;
   isDarkTheme: boolean;
   isReducedTheme: boolean;
   isArchived: boolean;
   timeWorkedWithoutBreak: number;
+}
+
+export type ProjectAdvancedCfgKey = keyof ProjectAdvancedCfg;
+
+export interface ProjectCopy extends ProjectBasicCfg {
+  id: string;
   issueIntegrationCfgs: IssueIntegrationCfgs;
   advancedCfg: ProjectAdvancedCfg;
   workStart: WorkStartEnd;
   workEnd: WorkStartEnd;
   breakTime: BreakTime;
   breakNr: BreakNr;
-}>;
+}
+
+export type Project = Readonly<ProjectCopy>;
 
 export interface ProjectArchivedRelatedData {
   note?: NoteState;

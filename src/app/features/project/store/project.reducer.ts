@@ -1,5 +1,5 @@
 import {createEntityAdapter, EntityAdapter, EntityState} from '@ngrx/entity';
-import {BreakNrCopy, BreakNr, Project, WorkStartEnd} from '../project.model';
+import {BreakNrCopy, BreakNr, Project, WorkStartEnd, ProjectBasicCfg} from '../project.model';
 import {ProjectActions, ProjectActionTypes} from './project.actions';
 import {createFeatureSelector, createSelector} from '@ngrx/store';
 import {FIRST_PROJECT} from '../project.const';
@@ -42,6 +42,10 @@ export const selectProjectWorkStart = createSelector(selectCurrentProject, (proj
 export const selectProjectWorkEnd = createSelector(selectCurrentProject, (project) => project.workEnd);
 export const selectProjectBreakTime = createSelector(selectCurrentProject, (project) => project.breakTime);
 export const selectProjectBreakNr = createSelector(selectCurrentProject, (project) => project.breakNr);
+export const selectProjectBasicCfg = createSelector(selectCurrentProject, (project): ProjectBasicCfg => {
+  const {advancedCfg, id, breakTime, workStart, workEnd, breakNr, ...basic} = project;
+  return basic;
+});
 
 
 // DYNAMIC SELECTORS

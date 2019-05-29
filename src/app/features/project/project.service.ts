@@ -8,6 +8,7 @@ import {
   Project,
   ProjectAdvancedCfg,
   ProjectAdvancedCfgKey,
+  ProjectBasicCfg,
   SimpleSummarySettings,
   WorklogExportSettings
 } from './project.model';
@@ -31,6 +32,7 @@ import {
   selectProjectJiraCfg,
   selectProjectWorkEndForDay,
   selectProjectWorkStartForDay,
+  selectProjectBasicCfg,
   selectUnarchivedProjects
 } from './store/project.reducer';
 import {IssueIntegrationCfg, IssueProviderKey} from '../issue/issue';
@@ -41,7 +43,7 @@ import {getWorklogStr} from '../../util/get-work-log-str';
 import {GithubCfg} from '../issue/github/github';
 import {DEFAULT_ISSUE_PROVIDER_CFGS} from '../issue/issue.const';
 import {Actions, ofType} from '@ngrx/effects';
-import {take} from 'rxjs/operators';
+import {distinctUntilChanged, take} from 'rxjs/operators';
 import {isValidProjectExport} from './util/is-valid-project-export';
 import {SnackService} from '../../core/snack/snack.service';
 
@@ -69,6 +71,11 @@ export class ProjectService {
     // shareReplay(),
   );
 
+  basicCfg$: Observable<ProjectBasicCfg> = this._store$.pipe(
+    select(selectProjectBasicCfg),
+    distinctUntilChanged((a, b) => !a || !b || (JSON.stringify(a) === JSON.stringify(b))),
+  );
+
   currentId$: Observable<string> = this._store$.pipe(select(selectCurrentProjectId));
   currentId: string;
 
@@ -94,6 +101,7 @@ export class ProjectService {
     private readonly _actions$: Actions,
   ) {
     this.currentId$.subscribe((id) => this.currentId = id);
+    this.basicCfg$.subscribe((v) => console.log('basicCfg$', v));
   }
 
   async load() {

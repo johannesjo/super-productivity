@@ -7,7 +7,7 @@
       <div>
         <section class="config-section mat-elevation-z2">
           <config-section (save)="saveProjectBasicCfg($event)"
-                          [cfg]="currentProject"
+                          [cfg]="projectService.basicCfg$|async"
                           [section]="basicProjectSettingsFormCfg"></config-section>
         </section>
       </div>
