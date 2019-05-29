@@ -56,26 +56,20 @@ const nestedWinParams = {isDarwinForceQuit: false};
 // keep app active to keep time tracking running
 powerSaveBlocker.start('prevent-app-suspension');
 
-// make it a single instance by closing other instances
-app_.requestSingleInstanceLock();
 app_.on('second-instance', () => {
-  // the callback: only called only for first instance
-  // we want to show it, when the other starts to try another
   if (mainWin) {
     showApp();
-
     if (mainWin.isMinimized()) {
       mainWin.restore();
     }
-
     mainWin.focus();
   }
 });
 
-// if (shouldQuitBecauseAppIsAnotherInstance) {
-//  quitAppNow();
-//  return;
-// }
+// make it a single instance by closing other instances but allow for dev mode
+if (!app_.requestSingleInstanceLock() && !IS_DEV) {
+  quitAppNow();
+}
 
 // Allow invalid certificates for jira requests
 app_.on('certificate-error', (event, webContents, url, error, certificate, callback) => {
