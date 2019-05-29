@@ -1,17 +1,17 @@
 'use strict';
-import { App, app, globalShortcut, ipcMain, powerMonitor, powerSaveBlocker } from 'electron';
+import {App, app, protocol, globalShortcut, ipcMain, powerMonitor, powerSaveBlocker} from 'electron';
 import * as notifier from 'node-notifier';
-import { info } from 'electron-log';
-import { CONFIG } from './CONFIG';
+import {info} from 'electron-log';
+import {CONFIG} from './CONFIG';
 
-import { initIndicator } from './indicator';
-import { createWindow } from './main-window';
+import {initIndicator} from './indicator';
+import {createWindow} from './main-window';
 
-import { sendJiraRequest, setupRequestHeadersForImages } from './jira';
-import { getGitLog } from './git-log';
-import { initGoogleAuth } from './google-auth';
-import { errorHandler } from './error-handler';
-import { initDebug } from './debug';
+import {sendJiraRequest, setupRequestHeadersForImages} from './jira';
+import {getGitLog} from './git-log';
+import {initGoogleAuth} from './google-auth';
+import {errorHandler} from './error-handler';
+import {initDebug} from './debug';
 import {
   IPC_BACKUP,
   IPC_EXEC,
@@ -27,10 +27,10 @@ import {
   IPC_SHUTDOWN_NOW,
   IPC_TASK_TOGGLE_START
 } from './ipc-events.const';
-import { backupData } from './backup';
+import {backupData} from './backup';
 import electronDl from 'electron-dl';
-import { JiraCfg } from '../src/app/features/issue/jira/jira';
-import { KeyboardConfig } from '../src/app/features/config/config.model';
+import {JiraCfg} from '../src/app/features/issue/jira/jira';
+import {KeyboardConfig} from '../src/app/features/config/config.model';
 
 const ICONS_FOLDER = __dirname + '/assets/icons/';
 const IS_MAC = process.platform === 'darwin';
@@ -76,6 +76,13 @@ app_.on('second-instance', () => {
 //  quitAppNow();
 //  return;
 // }
+
+// Allow invalid certificates for jira requests
+app_.on('certificate-error', (event, webContents, url, error, certificate, callback) => {
+  console.log(error);
+  event.preventDefault();
+  callback(true);
+});
 
 // APP EVENT LISTENERS
 // -------------------
