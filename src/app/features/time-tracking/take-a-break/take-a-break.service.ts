@@ -1,7 +1,7 @@
-import { Injectable } from '@angular/core';
-import { TaskService } from '../../tasks/task.service';
-import { TimeTrackingService } from '../time-tracking.service';
-import { from, merge, Observable, Subject, timer } from 'rxjs';
+import {Injectable} from '@angular/core';
+import {TaskService} from '../../tasks/task.service';
+import {TimeTrackingService} from '../time-tracking.service';
+import {from, merge, Observable, Subject, timer} from 'rxjs';
 import {
   distinctUntilChanged,
   filter,
@@ -14,13 +14,14 @@ import {
   throttleTime,
   withLatestFrom
 } from 'rxjs/operators';
-import { ConfigService } from '../../config/config.service';
-import { msToString } from '../../../ui/duration/ms-to-string.pipe';
-import { ChromeExtensionInterfaceService } from '../../../core/chrome-extension-interface/chrome-extension-interface.service';
-import { IdleService } from '../idle.service';
-import { IS_ELECTRON } from '../../../app.constants';
-import { BannerService } from '../../../core/banner/banner.service';
-import { BannerId } from '../../../core/banner/banner.model';
+import {ConfigService} from '../../config/config.service';
+import {msToString} from '../../../ui/duration/ms-to-string.pipe';
+import {ChromeExtensionInterfaceService} from '../../../core/chrome-extension-interface/chrome-extension-interface.service';
+import {IdleService} from '../idle.service';
+import {IS_ELECTRON} from '../../../app.constants';
+import {BannerService} from '../../../core/banner/banner.service';
+import {BannerId} from '../../../core/banner/banner.model';
+import {ProjectService} from '../../project/project.service';
 
 const BREAK_TRIGGER_DURATION = 10 * 60 * 1000;
 
@@ -119,6 +120,7 @@ export class TakeABreakService {
     private _timeTrackingService: TimeTrackingService,
     private _idleService: IdleService,
     private _configService: ConfigService,
+    private _projectService: ProjectService,
     private _bannerService: BannerService,
     private _chromeExtensionInterfaceService: ChromeExtensionInterfaceService,
   ) {
@@ -153,7 +155,7 @@ export class TakeABreakService {
         msg,
         action: {
           label: 'I already did',
-          fn: () => this.resetTimer()
+          fn: () => this.resetTimerAndCountAsBreak()
         },
         action2: {
           label: 'Snooze 15m',
@@ -169,6 +171,12 @@ export class TakeABreakService {
 
   resetTimer() {
     this._triggerManualReset$.next(0);
+  }
+
+  resetTimerAndCountAsBreak() {
+    const min5 = 1000 * 60 * 5;
+    this._projectService.addToBreakTime(undefined, undefined, min5);
+    this.resetTimer();
   }
 
   private _createMessage(duration, cfg) {
