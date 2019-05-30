@@ -45,6 +45,12 @@
     "version": "yarn release.changelog && git add -A",
     "buildSchema": "cd tools/schematics && yarn build && cd ../../ && yarn add file:./tools/schematics"
   },
+  "browserslist": [
+    "last 1 version",
+    "> 1%",
+    "maintained node versions",
+    "not dead"
+  ],
   "publish": [
     {
       "provider": "github",
