@@ -372,12 +372,6 @@
     lodash "^4.17.10"
     to-fast-properties "^2.0.0"
 
-"@ecodev/fab-speed-dial@^3.0.0":
-  version "3.1.0"
-  resolved "https://registry.yarnpkg.com/@ecodev/fab-speed-dial/-/fab-speed-dial-3.1.0.tgz#2455d40d65d415ba8f3dbb79132e5af899e76ec0"
-  dependencies:
-    tslib "^1.9.0"
-
 "@ngrx/effects@^7.2.0":
   version "7.2.0"
   resolved "https://registry.yarnpkg.com/@ngrx/effects/-/effects-7.2.0.tgz#8aa318ac247d8e9a428625562a124a6463e3ee2f"

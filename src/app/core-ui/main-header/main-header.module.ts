@@ -4,7 +4,6 @@ import { MainHeaderComponent } from './main-header.component';
 import { UiModule } from '../../ui/ui.module';
 import { ProjectModule } from '../../features/project/project.module';
 import { RouterModule } from '@angular/router';
-import { EcoFabSpeedDialModule } from '@ecodev/fab-speed-dial';
 import { BookmarkModule } from '../../features/bookmark/bookmark.module';
 import { PomodoroModule } from '../../features/pomodoro/pomodoro.module';
 
@@ -14,7 +13,6 @@ import { PomodoroModule } from '../../features/pomodoro/pomodoro.module';
     UiModule,
     ProjectModule,
     RouterModule,
-    EcoFabSpeedDialModule,
     BookmarkModule,
     PomodoroModule
   ],

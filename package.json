@@ -134,7 +134,6 @@
     "@angular/pwa": "^0.10.5",
     "@angular/router": "^8.0.0-rc.4",
     "@angular/service-worker": "^7.2.14",
-    "@ecodev/fab-speed-dial": "^3.0.0",
     "@ngrx/effects": "^7.2.0",
     "@ngrx/entity": "^7.2.0",
     "@ngrx/schematics": "^7.2.0",
