@@ -1,4 +1,11 @@
 # Super Productivity
+[![Open Source Love svg1](https://badges.frapsoft.com/os/v1/open-source.svg?v=103)](https://github.com/ellerbrock/open-source-badges/)
+<a href="https://snapcraft.io/superproductivity">
+  <img alt="Get it from the Snap Store" src="https://snapcraft.io/static/images/badges/en/snap-store-black.svg" height="36" />
+</a>
+<a href='//www.microsoft.com/store/apps/9nhfvg8361tw?cid=storebadge&ocid=badge'><img src='https://assets.windowsphone.com/13484911-a6ab-4170-8b7e-795c1e8b4165/English_get_L_InvariantCulture_Default.png' alt='English badge' height="36"/></a>
+[![MIT license](https://img.shields.io/badge/License-MIT-blue.svg)](https://lbesson.mit-license.org/)
+![GitHub commit activity](https://img.shields.io/github/commit-activity/y/johannesjo/super-productivity.svg)
 
 This is a ToDo List / Time Tracker / Personal Jira Task Manager for Linux, MacOS and Windows to make you work super productively. Organize yourself at one place while making time tracking a lot less annoying.
 
@@ -36,6 +43,9 @@ If you want the Jira Integration to work you have also to download and install t
 ### All Platforms
 [Install from the releases page](https://github.com/johannesjo/super-productivity/releases).
 
+### Windows
+<a href='//www.microsoft.com/store/apps/9nhfvg8361tw?cid=storebadge&ocid=badge'><img src='https://assets.windowsphone.com/13484911-a6ab-4170-8b7e-795c1e8b4165/English_get_L_InvariantCulture_Default.png' alt='English badge' width="127" height="52"/></a>
+
 ### Linux
 ```
 # stable
@@ -44,6 +54,9 @@ sudo snap install superproductivity
 # edge channel releases
  sudo snap install --channel=beta superproductivity
 ```
+<a href="https://snapcraft.io/superproductivity">
+  <img alt="Get it from the Snap Store" src="https://snapcraft.io/static/images/badges/en/snap-store-black.svg" />
+</a>
 
 ### MacOS
 Install via [homebrew cask](https://github.com/caskroom/homebrew-cask) (project might not always be up to date):
