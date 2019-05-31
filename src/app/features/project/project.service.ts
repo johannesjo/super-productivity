@@ -101,7 +101,6 @@ export class ProjectService {
     private readonly _actions$: Actions,
   ) {
     this.currentId$.subscribe((id) => this.currentId = id);
-    this.basicCfg$.subscribe((v) => console.log('basicCfg$', v));
   }
 
   async load() {

@@ -17,7 +17,8 @@
       (ngSubmit)="submit()">
 
   <div *ngIf="cfg.isEnabled">
-    <formly-form [model]="cfg"
+    <formly-form immutable
+                 [model]="cfg"
                  [fields]="section.items"
                  [options]="options"
                  [form]="form">

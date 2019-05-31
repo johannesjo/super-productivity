@@ -8,7 +8,8 @@
       (ngSubmit)="submit()">
   <mat-dialog-content>
 
-    <formly-form [model]="projectData"
+    <formly-form immutable
+                 [model]="projectData"
                  [fields]="formCfg"
                  [options]="formOptions"
                  [form]="form">

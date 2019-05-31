@@ -6,7 +6,8 @@
 <form [formGroup]="formGroup"
       (submit)="saveGithubCfg(githubCfg)">
   <mat-dialog-content>
-    <formly-form [model]="githubCfg"
+    <formly-form immutable
+                 [model]="githubCfg"
                  [fields]="formConfig"
                  [form]="formGroup">
     </formly-form>

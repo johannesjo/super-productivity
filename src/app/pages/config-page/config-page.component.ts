@@ -1,21 +1,20 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit} from '@angular/core';
-import { ConfigService } from '../../features/config/config.service';
-import { GLOBAL_CONFIG_FORM_CONFIG } from '../../features/config/config-form-config.const';
-import { ProjectService } from '../../features/project/project.service';
-import { ConfigFormSection, ConfigSectionKey, GlobalConfig } from '../../features/config/config.model';
-import { Subscription } from 'rxjs';
-import { Project, ProjectAdvancedCfg, ProjectCfgFormKey } from '../../features/project/project.model';
+import {ConfigService} from '../../features/config/config.service';
+import {GLOBAL_CONFIG_FORM_CONFIG} from '../../features/config/config-form-config.const';
+import {ProjectService} from '../../features/project/project.service';
+import {ConfigFormConfig, ConfigFormSection, ConfigSectionKey, GlobalConfig} from '../../features/config/config.model';
+import {Subscription} from 'rxjs';
+import {Project, ProjectAdvancedCfg, ProjectCfgFormKey} from '../../features/project/project.model';
 import {
   BASIC_PROJECT_CONFIG_FORM_CONFIG,
   PROJECT_CONFIG_FORM_CONFIG
 } from '../../features/project/project-form-cfg.const';
-import { IssueIntegrationCfg, IssueIntegrationCfgs, IssueProviderKey } from '../../features/issue/issue';
-import { ISSUE_PROVIDER_FORM_CFGS } from '../../features/issue/issue.const';
-import { DEFAULT_JIRA_CFG } from '../../features/issue/jira/jira.const';
-import { DEFAULT_GITHUB_CFG } from '../../features/issue/github/github.const';
-import { dirtyDeepCopy } from '../../util/dirtyDeepCopy';
-import { IS_ELECTRON } from '../../app.constants';
-import { environment } from '../../../environments/environment';
+import {IssueIntegrationCfg, IssueIntegrationCfgs, IssueProviderKey} from '../../features/issue/issue';
+import {ISSUE_PROVIDER_FORM_CFGS} from '../../features/issue/issue.const';
+import {DEFAULT_JIRA_CFG} from '../../features/issue/jira/jira.const';
+import {DEFAULT_GITHUB_CFG} from '../../features/issue/github/github.const';
+import {IS_ELECTRON} from '../../app.constants';
+import {environment} from '../../../environments/environment';
 
 @Component({
   selector: 'config-page',
@@ -25,9 +24,9 @@ import { environment } from '../../../environments/environment';
 })
 export class ConfigPageComponent implements OnInit, OnDestroy {
   basicProjectSettingsFormCfg: ConfigFormSection;
-  projectConfigFormCfg: ConfigFormSection;
-  issueIntegrationFormCfg: ConfigFormSection;
-  globalConfigFormCfg: ConfigFormSection[];
+  projectConfigFormCfg: ConfigFormConfig;
+  issueIntegrationFormCfg: ConfigFormConfig;
+  globalConfigFormCfg: ConfigFormConfig;
 
   currentProject: Project;
   projectCfg: ProjectAdvancedCfg;
@@ -43,13 +42,11 @@ export class ConfigPageComponent implements OnInit, OnDestroy {
     public readonly projectService: ProjectService,
     private _cd: ChangeDetectorRef,
   ) {
-    // somehow they are only unproblematic if assigned here,
-    // not even sure how this is possible. ngrx formly sucks :/
-    this.basicProjectSettingsFormCfg = dirtyDeepCopy(BASIC_PROJECT_CONFIG_FORM_CONFIG);
-    this.projectConfigFormCfg = dirtyDeepCopy(PROJECT_CONFIG_FORM_CONFIG);
-    this.issueIntegrationFormCfg = dirtyDeepCopy(ISSUE_PROVIDER_FORM_CFGS);
-    this.globalConfigFormCfg = dirtyDeepCopy(GLOBAL_CONFIG_FORM_CONFIG);
-    this.globalConfigFormCfg = this.globalConfigFormCfg.filter((cfg) => IS_ELECTRON || !cfg.isElectronOnly);
+    // somehow they are only unproblematic if assigned here
+    this.basicProjectSettingsFormCfg = BASIC_PROJECT_CONFIG_FORM_CONFIG;
+    this.projectConfigFormCfg = PROJECT_CONFIG_FORM_CONFIG;
+    this.issueIntegrationFormCfg = ISSUE_PROVIDER_FORM_CFGS;
+    this.globalConfigFormCfg = GLOBAL_CONFIG_FORM_CONFIG.filter((cfg) => IS_ELECTRON || !cfg.isElectronOnly);
   }
 
   ngOnInit() {

@@ -1,21 +1,20 @@
-import { ChangeDetectionStrategy, Component, Inject, OnDestroy, OnInit } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material';
-import { Project } from '../../project.model';
-import { FormGroup } from '@angular/forms';
-import { FormlyFieldConfig, FormlyFormOptions } from '@ngx-formly/core';
-import { ProjectService } from '../../project.service';
-import { DEFAULT_PROJECT } from '../../project.const';
-import { JiraCfg } from '../../../issue/jira/jira';
-import { BASIC_PROJECT_CONFIG_FORM_CONFIG } from '../../project-form-cfg.const';
-import { IssueIntegrationCfgs } from '../../../issue/issue';
-import { DialogJiraInitialSetupComponent } from '../../../issue/jira/dialog-jira-initial-setup/dialog-jira-initial-setup.component';
-import { SS_PROJECT_TMP } from '../../../../core/persistence/ls-keys.const';
-import { Subscription } from 'rxjs';
-import { loadFromSessionStorage, saveToSessionStorage } from '../../../../core/persistence/local-storage';
-import { GithubCfg } from '../../../issue/github/github';
-import { DialogGithubInitialSetupComponent } from '../../../issue/github/dialog-github-initial-setup/dialog-github-initial-setup.component';
-import { dirtyDeepCopy } from '../../../../util/dirtyDeepCopy';
-import { GITHUB_TYPE } from '../../../issue/issue.const';
+import {ChangeDetectionStrategy, Component, Inject, OnDestroy, OnInit} from '@angular/core';
+import {MAT_DIALOG_DATA, MatDialog, MatDialogRef} from '@angular/material';
+import {Project} from '../../project.model';
+import {FormGroup} from '@angular/forms';
+import {FormlyFieldConfig, FormlyFormOptions} from '@ngx-formly/core';
+import {ProjectService} from '../../project.service';
+import {DEFAULT_PROJECT} from '../../project.const';
+import {JiraCfg} from '../../../issue/jira/jira';
+import {BASIC_PROJECT_CONFIG_FORM_CONFIG} from '../../project-form-cfg.const';
+import {IssueIntegrationCfgs} from '../../../issue/issue';
+import {DialogJiraInitialSetupComponent} from '../../../issue/jira/dialog-jira-initial-setup/dialog-jira-initial-setup.component';
+import {SS_PROJECT_TMP} from '../../../../core/persistence/ls-keys.const';
+import {Subscription} from 'rxjs';
+import {loadFromSessionStorage, saveToSessionStorage} from '../../../../core/persistence/local-storage';
+import {GithubCfg} from '../../../issue/github/github';
+import {DialogGithubInitialSetupComponent} from '../../../issue/github/dialog-github-initial-setup/dialog-github-initial-setup.component';
+import {GITHUB_TYPE} from '../../../issue/issue.const';
 
 @Component({
   selector: 'dialog-create-project',
@@ -46,8 +45,7 @@ export class DialogCreateProjectComponent implements OnInit, OnDestroy {
     private _matDialogRef: MatDialogRef<DialogCreateProjectComponent>,
   ) {
     // somehow they are only unproblematic if assigned here,
-    // not even sure how this is possible. ngrx formly sucks :/
-    this.formCfg = dirtyDeepCopy(BASIC_PROJECT_CONFIG_FORM_CONFIG.items);
+    this.formCfg = BASIC_PROJECT_CONFIG_FORM_CONFIG.items;
   }
 
   ngOnInit() {
