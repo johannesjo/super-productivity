@@ -1,36 +1,30 @@
-<div class="wrapper">
-  <mat-form-field class="no-touch">
-    <input
-      [(ngModel)]="model"
-      [name]="name"
-      [placeholder]="placeholder"
-      [required]="required"
-      [owlDateTime]="dt1"
-      matInput
-      type="text">
-    <owl-date-time #dt1></owl-date-time>
+<div class="wrapper"
+     style="position: relative;">
+  <mat-form-field>
+    <input [ngModel]="strValue"
+           [name]="name"
+           (ngModelChange)="updateFromInput($event)"
+           [placeholder]="placeholder"
+           [required]="required"
+           matInput
+           type="datetime-local">
+    <input class="fake"
+           [ngModel]="strValue"
+           (ngModelChange)="updateFromInput($event)"
+           [owlDateTime]="dt1">
     <mat-error>The entered value is not a datetime!</mat-error>
     <mat-icon matSuffix=""
               style="cursor: pointer;"
-              [owlDateTimeTrigger]="dt1">alarm</mat-icon>
+              [owlDateTimeTrigger]="dt1">alarm
+    </mat-icon>
   </mat-form-field>
-  <mat-form-field class="touch">
-    <input
-      [(ngModel)]="model"
-      [name]="name"
-      [placeholder]="placeholder"
-      [required]="required"
-      matInput
-      type="datetime-local">
-    <mat-error>The entered value is not a datetime!</mat-error>
-    <mat-icon matSuffix="">alarm</mat-icon>
-  </mat-form-field>
+  <owl-date-time #dt1></owl-date-time>
 
   <mat-chip-list>
-    <mat-chip (click)="setVal('15M')">in 15m</mat-chip>
-    <mat-chip (click)="setVal('1H')">in 1h</mat-chip>
-    <mat-chip (click)="setVal('2H')">in 2h</mat-chip>
-    <mat-chip (click)="setVal('5H')">in 5h</mat-chip>
-    <mat-chip (click)="setVal('TOMORROW_11')">tomorrow 11:00</mat-chip>
+    <mat-chip (click)="setCommonVal('15M')">in 15m</mat-chip>
+    <mat-chip (click)="setCommonVal('1H')">in 1h</mat-chip>
+    <mat-chip (click)="setCommonVal('2H')">in 2h</mat-chip>
+    <mat-chip (click)="setCommonVal('5H')">in 5h</mat-chip>
+    <mat-chip (click)="setCommonVal('TOMORROW_11')">tomorrow 11:00</mat-chip>
   </mat-chip-list>
 </div>

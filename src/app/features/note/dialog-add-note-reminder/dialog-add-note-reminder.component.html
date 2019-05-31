@@ -14,8 +14,8 @@
         <mat-error>You need to enter a title</mat-error>
       </mat-form-field>
 
-      <datetime-input (modelChange)="date=$event"
-                      [model]="date"
+      <datetime-input (modelChange)="dateTime=$event"
+                      [model]="dateTime"
                       [required]="true"
                       name="reminderDate"
                       placeholder="Datetime for reminder"></datetime-input>

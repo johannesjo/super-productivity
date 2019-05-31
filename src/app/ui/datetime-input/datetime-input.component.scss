@@ -16,13 +16,15 @@ mat-chip {
   margin-bottom: $s;
 }
 
-.no-touch {
-  @include touchDevice {
-    display: none;
-  }
-}
-.touch {
-  @include noTouchDevice {
-    display: none;
-  }
+.fake {
+  opacity: 0;
+  pointer-events: none;
+  display: block;
+  height: 0;
+  max-height: 0;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  overflow: hidden;
+  visibility: hidden;
 }

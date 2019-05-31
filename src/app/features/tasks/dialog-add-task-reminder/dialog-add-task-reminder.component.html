@@ -5,8 +5,8 @@
     <h3 class="mat-h3">"{{task.title}}"</h3>
 
     <div class="form-wrapper">
-      <datetime-input (modelChange)="date=$event"
-                      [model]="date"
+      <datetime-input (modelChange)="dateTime=$event"
+                      [model]="dateTime"
                       [required]="true"
                       name="reminderDate"
                       placeholder="Datetime for reminder"></datetime-input>

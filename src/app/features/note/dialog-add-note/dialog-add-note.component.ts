@@ -1,8 +1,8 @@
-import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material';
-import { NoteService } from '../note.service';
-import { Reminder } from '../../reminder/reminder.model';
-import { SS_NOTE_TMP } from '../../../core/persistence/ls-keys.const';
+import {ChangeDetectionStrategy, Component, Inject} from '@angular/core';
+import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material';
+import {NoteService} from '../note.service';
+import {Reminder} from '../../reminder/reminder.model';
+import {SS_NOTE_TMP} from '../../../core/persistence/ls-keys.const';
 
 
 @Component({
@@ -13,7 +13,7 @@ import { SS_NOTE_TMP } from '../../../core/persistence/ls-keys.const';
 })
 export class DialogAddNoteComponent {
   noteContent: string;
-  reminderDate: string;
+  reminderDate: number;
   isSubmitted = false;
 
   constructor(
@@ -31,7 +31,7 @@ export class DialogAddNoteComponent {
   }
 
   submit() {
-    const remindAt = this.reminderDate && new Date(this.reminderDate).getTime();
+    const remindAt = this.reminderDate;
 
     if (!this.isSubmitted
       && (this.noteContent && this.noteContent.trim().length > 0

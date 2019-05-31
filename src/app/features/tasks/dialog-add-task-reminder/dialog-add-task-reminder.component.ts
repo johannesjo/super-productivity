@@ -17,7 +17,7 @@ export class DialogAddTaskReminderComponent {
   title: string = this.task.title;
   reminder: ReminderCopy = this.task.reminderId && this._reminderService.getById(this.data.task.reminderId);
   isEdit: boolean = !!(this.reminder && this.reminder.id);
-  date: string = this.reminder && this._convertDate(new Date(this.reminder.remindAt));
+  dateTime: number = this.reminder && this.reminder.remindAt;
   isMoveToBacklogPossible: boolean = (!this.isEdit && !this.task.parentId);
   isMoveToBacklog: boolean = (this.isMoveToBacklogPossible);
 
@@ -31,7 +31,7 @@ export class DialogAddTaskReminderComponent {
   }
 
   save() {
-    const timestamp = this.date && new Date(this.date).getTime();
+    const timestamp = this.dateTime;
 
     if (!timestamp || !this.title) {
       return;

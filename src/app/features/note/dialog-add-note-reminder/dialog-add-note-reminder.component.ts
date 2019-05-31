@@ -1,10 +1,10 @@
-import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material';
-import { Note } from '../note.model';
-import { NoteService } from '../note.service';
-import { ReminderCopy } from '../../reminder/reminder.model';
-import { ReminderService } from '../../reminder/reminder.service';
-import { SnackService } from '../../../core/snack/snack.service';
+import {ChangeDetectionStrategy, Component, Inject} from '@angular/core';
+import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material';
+import {Note} from '../note.model';
+import {NoteService} from '../note.service';
+import {ReminderCopy} from '../../reminder/reminder.model';
+import {ReminderService} from '../../reminder/reminder.service';
+import {SnackService} from '../../../core/snack/snack.service';
 
 @Component({
   selector: 'dialog-add-note-reminder',
@@ -13,7 +13,7 @@ import { SnackService } from '../../../core/snack/snack.service';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DialogAddNoteReminderComponent {
-  public date: string;
+  public dateTime: number;
   public title: string;
   public isEdit: boolean;
   public reminder: ReminderCopy;
@@ -32,7 +32,7 @@ export class DialogAddNoteReminderComponent {
     };
     this.isEdit = !!(this.reminder && this.reminder.id);
     if (this.isEdit) {
-      this.date = this._convertDate(new Date(this.reminder.remindAt));
+      this.dateTime = this.reminder.remindAt;
       this.title = this.reminder.title;
     } else {
       this.title = this.note.content.substr(0, 40);
@@ -40,7 +40,7 @@ export class DialogAddNoteReminderComponent {
   }
 
   save() {
-    const timestamp = this.date && new Date(this.date).getTime();
+    const timestamp = this.dateTime;
 
     if (!timestamp || !this.title) {
       return;
@@ -71,11 +71,5 @@ export class DialogAddNoteReminderComponent {
 
   close() {
     this._matDialogRef.close();
-  }
-
-  // TODO check why we're off by one hour
-  private _convertDate(date: Date): string {
-    const isoStr = date.toISOString();
-    return isoStr.substring(0, isoStr.length - 1);
   }
 }
