@@ -1,7 +1,7 @@
 // TODO use as a checklist
-import { JiraCfg } from './jira';
-import { FormlyFieldConfig } from '@ngx-formly/core';
-import { GITHUB_INITIAL_POLL_DELAY } from '../github/github.const';
+import {JiraCfg} from './jira';
+import {FormlyFieldConfig} from '@ngx-formly/core';
+import {GITHUB_INITIAL_POLL_DELAY} from '../github/github.const';
 
 export const JIRA_DATETIME_FORMAT = 'YYYY-MM-DDTHH:mm:ss.SSZZ';
 
@@ -81,8 +81,11 @@ export const JIRA_CREDENTIALS_FORM_CFG: FormlyFieldConfig[] = [
     key: 'host',
     type: 'input',
     templateOptions: {
+      type: 'url',
+      /* tslint:disable-next-line */
+      pattern: /^(https?):\/\/(-\.)?([^\s\/?\.#-]+\.?)+(\/[^\s]*)?$/i,
       required: true,
-      label: 'Host',
+      label: 'Host (e.g.: http://my-host.de:1234)',
     },
   },
   {
