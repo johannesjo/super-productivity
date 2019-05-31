@@ -9,6 +9,7 @@
 
   .config-section {
     margin-bottom: 10px;
+    border-radius: $card-border-radius;
     background: #ffffff;
     @include darkTheme {
       background-color: $dark-theme-bg-lighter;
@@ -16,6 +17,19 @@
 
     .md-title {
       margin-top: 0;
+    }
+
+    ::ng-deep .collapsible-title {
+      border-bottom: 1px solid transparent;
+    }
+
+    ::ng-deep .isExpanded .collapsible-title {
+      font-weight: bold;
+      border-color: $light-theme-extra-border-color;
+
+      @include darkTheme {
+        border-color: $dark-theme-extra-border-color;
+      }
     }
   }
 

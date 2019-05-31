@@ -2,6 +2,11 @@
 
 .form-wrapper {
   overflow: hidden;
+  padding: $s*2 $s*2 $s;
+
+  config-form {
+    display: block;
+  }
 
   &.keyboard {
     ::ng-deep formly-field {
