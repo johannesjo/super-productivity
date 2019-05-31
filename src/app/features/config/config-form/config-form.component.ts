@@ -32,6 +32,8 @@ export class ConfigFormComponent {
   }
 
   submit() {
+    console.log(this.config);
+
     if (!this.config) {
       throw new Error('No config for ' + this.sectionKey);
     } else {
