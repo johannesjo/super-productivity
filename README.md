@@ -7,7 +7,7 @@
 [![MIT license](https://img.shields.io/badge/License-MIT-blue.svg)](https://lbesson.mit-license.org/)
 ![GitHub commit activity](https://img.shields.io/github/commit-activity/y/johannesjo/super-productivity.svg)
 
-This is a ToDo List / Time Tracker / Personal Jira Task Manager for Linux, MacOS and Windows to make you work super productively. Organize yourself at one place while making time tracking a lot less annoying.
+Organize your daily tasks at one place while making time tracking a lot less annoying. Super Productivity is a ToDo List / Time Tracker / Personal Jira Task Manager for Linux, MacOS and Windows aimed at reducing the time you spend with repetive tasks and to provide you with a place to collect all the information you need to do your job.
 
 ![Work View with global links](screens/screen_standard.png)
 
