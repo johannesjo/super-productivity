@@ -4,7 +4,7 @@ import {getTodayStr} from '../../features/tasks/util/get-today-str';
 import {Task, TaskWithSubTasks} from '../../features/tasks/task.model';
 import {Router} from '@angular/router';
 import {IS_ELECTRON} from '../../app.constants';
-import {MatDialog} from '@angular/material';
+import { MatDialog } from '@angular/material/dialog';
 import {DialogSimpleTaskExportComponent} from '../../features/simple-task-export/dialog-simple-task-export/dialog-simple-task-export.component';
 import {Observable, Subscription} from 'rxjs';
 import {ElectronService} from 'ngx-electron';

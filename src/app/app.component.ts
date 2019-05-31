@@ -7,7 +7,7 @@ import {
   Inject,
   OnInit
 } from '@angular/core';
-import {MatIconRegistry} from '@angular/material';
+import { MatIconRegistry } from '@angular/material/icon';
 import {DomSanitizer} from '@angular/platform-browser';
 import {ProjectService} from './features/project/project.service';
 import {Project} from './features/project/project.model';

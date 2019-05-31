@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, Input, ViewChild } from '@angular/core';
 import { Note } from '../note.model';
 import { NoteService } from '../note.service';
-import { MatDialog } from '@angular/material';
+import { MatDialog } from '@angular/material/dialog';
 import { DialogAddNoteReminderComponent } from '../dialog-add-note-reminder/dialog-add-note-reminder.component';
 
 @Component({
@@ -14,7 +14,7 @@ export class NoteComponent {
   @Input() note: Note;
   @Input() isFocus: boolean;
 
-  @ViewChild('markdownEl') markdownEl: HTMLElement;
+  @ViewChild('markdownEl', { static: false }) markdownEl: HTMLElement;
 
   constructor(
     private readonly _matDialog: MatDialog,

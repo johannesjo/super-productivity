@@ -10,7 +10,7 @@ import {
   STORAGE_TASKS,
   STORAGE_THEME
 } from './migrate.const';
-import { MatDialog } from '@angular/material';
+import { MatDialog } from '@angular/material/dialog';
 import { LS_IS_V1_MIGRATE } from '../../core/persistence/ls-keys.const';
 import { SnackService } from '../../core/snack/snack.service';
 import { PersistenceService } from '../../core/persistence/persistence.service';

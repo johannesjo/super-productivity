@@ -35,7 +35,7 @@ export class TaskListComponent implements OnDestroy, OnInit {
   @Input() listId: string;
   @Input() listModelId: string;
   @Input() noTasksMsg: string;
-  @ViewChild('listEl') listEl;
+  @ViewChild('listEl', { static: true }) listEl;
   isBlockAni = true;
   doneTasksLength = 0;
   undoneTasksLength = 0;

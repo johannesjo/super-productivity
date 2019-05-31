@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, ElementRef, HostListener, OnDestroy, ViewChild } from '@angular/core';
 import { BookmarkService } from '../bookmark.service';
-import { MatDialog } from '@angular/material';
+import { MatDialog } from '@angular/material/dialog';
 import { DialogEditBookmarkComponent } from '../dialog-edit-bookmark/dialog-edit-bookmark.component';
 import { Bookmark } from '../bookmark.model';
 import { fadeAnimation } from '../../../ui/animations/fade.ani';
@@ -26,7 +26,7 @@ export class BookmarkBarComponent implements OnDestroy {
 
   bookmarkBarHeight = 50;
 
-  @ViewChild('bookmarkBar', {read: ElementRef}) set bookmarkBarEl(content: ElementRef) {
+  @ViewChild('bookmarkBar', { read: ElementRef, static: false }) set bookmarkBarEl(content: ElementRef) {
     if (content && content.nativeElement) {
       this.bookmarkBarHeight = content.nativeElement.offsetHeight;
     }

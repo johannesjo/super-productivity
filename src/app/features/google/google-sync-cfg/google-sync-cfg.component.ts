@@ -20,7 +20,7 @@ export class GoogleSyncCfgComponent implements OnInit, OnDestroy {
   cfg: GoogleDriveSyncConfig;
   loginPromise: Promise<any>;
 
-  @ViewChild('formRef') formRef: FormGroup;
+  @ViewChild('formRef', { static: true }) formRef: FormGroup;
 
   @Output() save = new EventEmitter<any>();
 

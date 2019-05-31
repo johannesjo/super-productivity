@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, Inject, OnInit } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { IS_ELECTRON } from '../../../app.constants';
 import { MATERIAL_ICONS } from '../../../ui/material-icons.const';
 import { BookmarkCopy, BookmarkType } from '../bookmark.model';

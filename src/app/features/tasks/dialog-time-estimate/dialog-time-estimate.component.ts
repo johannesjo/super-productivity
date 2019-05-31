@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { Task, TaskCopy, TimeSpentOnDayCopy } from '../task.model';
 import { TaskService } from '../task.service';
 import { getTodayStr } from '../util/get-today-str';

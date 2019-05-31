@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { SimpleSummarySettingsCopy } from '../../project/project.model';
 import { SIMPLE_SUMMARY_DEFAULTS } from '../../project/project.const';
 

@@ -1,7 +1,8 @@
 import { ChangeDetectionStrategy, Component, ElementRef, Input, OnInit, Renderer2, ViewChild } from '@angular/core';
 import { ProjectService } from '../../features/project/project.service';
 import { DialogCreateProjectComponent } from '../../features/project/dialogs/create-project/dialog-create-project.component';
-import { MatDialog, MatDrawer } from '@angular/material';
+import { MatDialog } from '@angular/material/dialog';
+import { MatDrawer } from '@angular/material/sidenav';
 import { LayoutService } from '../layout/layout.service';
 import { BookmarkService } from '../../features/bookmark/bookmark.service';
 import { NoteService } from '../../features/note/note.service';
@@ -21,7 +22,7 @@ export class MainHeaderComponent implements OnInit {
   circumference = this.progressCircleRadius * Math.PI * 2;
 
   @Input() drawer: MatDrawer;
-  @ViewChild('circleSvg') circleSvg: ElementRef;
+  @ViewChild('circleSvg', { static: true }) circleSvg: ElementRef;
 
   constructor(
     public readonly projectService: ProjectService,

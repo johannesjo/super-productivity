@@ -2,7 +2,7 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReminderService } from './reminder.service';
 import { NoteModule } from '../note/note.module';
-import { MatDialog } from '@angular/material';
+import { MatDialog } from '@angular/material/dialog';
 import { ElectronService } from 'ngx-electron';
 import { IS_ELECTRON } from '../../app.constants';
 import { IPC_SHOW_OR_FOCUS } from '../../../../electron/ipc-events.const';

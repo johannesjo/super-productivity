@@ -35,7 +35,7 @@ import {
   SaveToGoogleDriveSuccess
 } from './google-drive-sync.actions';
 import {DialogConfirmComponent} from '../../../ui/dialog-confirm/dialog-confirm.component';
-import {MatDialog, MatDialogRef} from '@angular/material';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import {GoogleDriveSyncConfig} from '../../config/config.model';
 import {SyncService} from '../../../imex/sync/sync.service';
 import {SnackOpen} from '../../../core/snack/store/snack.actions';
