@@ -7,6 +7,7 @@
       (submit)="saveGithubCfg(githubCfg)">
   <mat-dialog-content>
     <formly-form [model]="githubCfg"
+                 (modelChange)="githubCfg=$event"
                  [fields]="formConfig"
                  [form]="formGroup">
     </formly-form>
