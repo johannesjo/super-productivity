@@ -18,6 +18,7 @@
 
   <div *ngIf="cfg.isEnabled">
     <formly-form [model]="cfg"
+                 (modelChange)="cfg=$event"
                  [fields]="section.items"
                  [options]="options"
                  [form]="form">

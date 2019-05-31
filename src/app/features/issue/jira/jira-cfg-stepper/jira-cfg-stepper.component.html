@@ -17,7 +17,8 @@
 
         <formly-form [fields]="credentialsFormConfig"
                      [form]="credentialsFormGroup"
-                     [model]="jiraCfg">
+                     [model]="jiraCfg"
+                     (modelChange)="jiraCfg=$event">
 
           <div *ngIf="user"
                [@expand]
@@ -57,7 +58,8 @@
         <ng-template matStepLabel>Advanced</ng-template>
         <formly-form [fields]="advancedSettingsFormConfig"
                      [form]="advancedSettingsFormGroup"
-                     [model]="jiraCfg">
+                     [model]="jiraCfg"
+                     (modelChange)="jiraCfg=$event">
 
           <div class="center-wrapper">
             <button mat-raised-button=""
