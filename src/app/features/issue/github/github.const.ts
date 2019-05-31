@@ -24,6 +24,7 @@ export const GITHUB_CONFIG_FORM: FormlyFieldConfig[] = [
     templateOptions: {
       label: '"username/repositoryName" for the git repository you want to track',
       type: 'text',
+      pattern: /^.+\/.+?$/i,
     },
   },
   {
