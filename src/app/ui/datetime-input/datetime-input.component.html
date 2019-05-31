@@ -1,5 +1,20 @@
 <div class="wrapper">
-  <mat-form-field>
+  <mat-form-field class="no-touch">
+    <input
+      [(ngModel)]="model"
+      [name]="name"
+      [placeholder]="placeholder"
+      [required]="required"
+      [owlDateTime]="dt1"
+      matInput
+      type="text">
+    <owl-date-time #dt1></owl-date-time>
+    <mat-error>The entered value is not a datetime!</mat-error>
+    <mat-icon matSuffix=""
+              style="cursor: pointer;"
+              [owlDateTimeTrigger]="dt1">alarm</mat-icon>
+  </mat-form-field>
+  <mat-form-field class="touch">
     <input
       [(ngModel)]="model"
       [name]="name"
@@ -8,7 +23,7 @@
       matInput
       type="datetime-local">
     <mat-error>The entered value is not a datetime!</mat-error>
-    <mat-icon matPrefix="">alarm</mat-icon>
+    <mat-icon matSuffix="">alarm</mat-icon>
   </mat-form-field>
 
   <mat-chip-list>

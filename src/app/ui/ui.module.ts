@@ -64,6 +64,7 @@ import {MomentFormatPipe} from './pipes/moment-format.pipe';
 import {InlineInputComponent} from './inline-input/inline-input.component';
 import {ChipListInputComponent} from './chip-list-input/chip-list-input.component';
 import {ValidationModule} from './validation/validation.module';
+import {OwlDateTimeModule, OwlNativeDateTimeModule} from 'ng-pick-datetime';
 
 @NgModule({
   imports: [
@@ -116,6 +117,8 @@ import {ValidationModule} from './validation/validation.module';
     MatSlideToggleModule,
     MatBadgeModule,
     ValidationModule,
+    OwlDateTimeModule,
+    OwlNativeDateTimeModule,
   ],
   declarations: [
     DurationFromStringPipe,
@@ -182,6 +185,8 @@ import {ValidationModule} from './validation/validation.module';
 
     DragulaModule,
     Angular2PromiseButtonModule,
+    OwlDateTimeModule,
+    OwlNativeDateTimeModule,
 
     // material2
     MatAutocompleteModule,

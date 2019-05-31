@@ -15,3 +15,14 @@ mat-chip {
   flex-wrap: wrap;
   margin-bottom: $s;
 }
+
+.no-touch {
+  @include touchDevice {
+    display: none;
+  }
+}
+.touch {
+  @include noTouchDevice {
+    display: none;
+  }
+}
