@@ -9,7 +9,7 @@
   <mat-dialog-content>
 
     <formly-form [model]="projectData"
-                 (modelChange)="projectData=$event"
+                 (modelChange)="onProjectDataChange($event)"
                  [fields]="formCfg"
                  [options]="formOptions"
                  [form]="form">

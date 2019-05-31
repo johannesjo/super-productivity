@@ -24,6 +24,7 @@ import {GITHUB_TYPE} from '../../../issue/issue.const';
 })
 export class DialogCreateProjectComponent implements OnInit, OnDestroy {
   projectData: Project | Partial<Project> = DEFAULT_PROJECT;
+  newProjectData: Project | Partial<Project> = this.projectData;
   jiraCfg: JiraCfg;
   gitCfg: GithubCfg;
 
@@ -88,14 +89,18 @@ export class DialogCreateProjectComponent implements OnInit, OnDestroy {
     this._subs.unsubscribe();
   }
 
+  onProjectDataChange(data) {
+    this.newProjectData = data;
+  }
+
   submit() {
-    const issueIntegrationCfgs: IssueIntegrationCfgs = Object.assign(this.projectData.issueIntegrationCfgs, {
+    const issueIntegrationCfgs: IssueIntegrationCfgs = Object.assign(this.newProjectData.issueIntegrationCfgs, {
       JIRA: this.jiraCfg,
       GITHUB: this.gitCfg,
     });
 
     const projectDataToSave: Project | Partial<Project> = {
-      ...this.projectData,
+      ...this.newProjectData,
       issueIntegrationCfgs,
     };
 
@@ -118,7 +123,7 @@ export class DialogCreateProjectComponent implements OnInit, OnDestroy {
     this._subs.add(this._matDialog.open(DialogJiraInitialSetupComponent, {
       restoreFocus: true,
       data: {
-        jiraCfg: this.projectData.issueIntegrationCfgs.JIRA,
+        jiraCfg: this.newProjectData.issueIntegrationCfgs.JIRA,
       }
     }).afterClosed().subscribe((jiraCfg: JiraCfg) => {
 
@@ -132,7 +137,7 @@ export class DialogCreateProjectComponent implements OnInit, OnDestroy {
     this._subs.add(this._matDialog.open(DialogGithubInitialSetupComponent, {
       restoreFocus: true,
       data: {
-        gitCfg: this.projectData.issueIntegrationCfgs.JIRA,
+        gitCfg: this.newProjectData.issueIntegrationCfgs.JIRA,
       }
     }).afterClosed().subscribe((gitCfg: GithubCfg) => {
 
@@ -146,8 +151,8 @@ export class DialogCreateProjectComponent implements OnInit, OnDestroy {
     this.jiraCfg = jiraCfg;
 
     // if we're editing save right away
-    if (this.projectData.id) {
-      this._projectService.updateIssueProviderConfig(this.projectData.id, 'JIRA', this.jiraCfg);
+    if (this.newProjectData.id) {
+      this._projectService.updateIssueProviderConfig(this.newProjectData.id, 'JIRA', this.jiraCfg);
     }
   }
 
@@ -155,8 +160,8 @@ export class DialogCreateProjectComponent implements OnInit, OnDestroy {
     this.gitCfg = gitCfg;
 
     // if we're editing save right away
-    if (this.projectData.id) {
-      this._projectService.updateIssueProviderConfig(this.projectData.id, GITHUB_TYPE, this.gitCfg);
+    if (this.newProjectData.id) {
+      this._projectService.updateIssueProviderConfig(this.newProjectData.id, GITHUB_TYPE, this.gitCfg);
     }
   }
 }
