@@ -1,8 +1,7 @@
 <form (ngSubmit)="submit()"
       [formGroup]="form">
 
-  <formly-form immutable
-               [fields]="fields"
+  <formly-form [fields]="fields"
                [form]="form"
                [model]="config"
                [options]="options">

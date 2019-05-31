@@ -60,6 +60,9 @@ import {MyHammerConfig} from '../hammer-config.class';
     !environment.production ? StoreDevtoolsModule.instrument() : [],
     ReactiveFormsModule,
     FormlyModule.forRoot({
+      extras: {
+        immutable: true
+      },
       validationMessages: [
         {name: 'required', message: 'This field is required'},
         {name: 'pattern', message: 'Invalid input'},

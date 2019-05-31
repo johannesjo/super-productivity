@@ -15,8 +15,7 @@
           work for mobile.
         </p>
 
-        <formly-form immutable
-                     [fields]="credentialsFormConfig"
+        <formly-form [fields]="credentialsFormConfig"
                      [form]="credentialsFormGroup"
                      [model]="jiraCfg">
 
@@ -56,8 +55,7 @@
       <form (submit)="saveStepForm(jiraCfg)"
             [formGroup]="advancedSettingsFormGroup">
         <ng-template matStepLabel>Advanced</ng-template>
-        <formly-form immutable
-                     [fields]="advancedSettingsFormConfig"
+        <formly-form [fields]="advancedSettingsFormConfig"
                      [form]="advancedSettingsFormGroup"
                      [model]="jiraCfg">
 
