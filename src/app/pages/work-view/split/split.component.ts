@@ -20,7 +20,7 @@ export class SplitComponent {
 
   pos: number;
   eventSubs: Subscription;
-  @ViewChild('buttonEl') buttonEl;
+  @ViewChild('buttonEl', { static: true }) buttonEl;
   private _isDrag = false;
 
   constructor(private _renderer: Renderer2) {

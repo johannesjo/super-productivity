@@ -7,7 +7,7 @@ import { ElectronService } from 'ngx-electron';
 import { LayoutService } from '../layout/layout.service';
 import { NoteService } from '../../features/note/note.service';
 import { TaskService } from '../../features/tasks/task.service';
-import { MatDialog } from '@angular/material';
+import { MatDialog } from '@angular/material/dialog';
 import { DialogAddNoteComponent } from '../../features/note/dialog-add-note/dialog-add-note.component';
 import { BookmarkService } from '../../features/bookmark/bookmark.service';
 import { IPC_TASK_TOGGLE_START } from '../../../../electron/ipc-events.const';

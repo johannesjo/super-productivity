@@ -1,4 +1,4 @@
-import { MatSnackBarConfig } from '@angular/material';
+import { MatSnackBarConfig } from '@angular/material/snack-bar';
 import { Observable } from 'rxjs';
 
 export type SnackType = 'ERROR' | 'SUCCESS' | 'CUSTOM'  | 'JIRA_UNBLOCK';

@@ -5,7 +5,7 @@ import {ProjectService} from '../project/project.service';
 import {ElectronService} from 'ngx-electron';
 import {TaskService} from '../tasks/task.service';
 import {IPC_IDLE_TIME} from '../../../../electron/ipc-events.const';
-import {MatDialog} from '@angular/material';
+import { MatDialog } from '@angular/material/dialog';
 import {BehaviorSubject, Observable, Subject} from 'rxjs';
 import {DialogIdleComponent} from './dialog-idle/dialog-idle.component';
 import {ConfigService} from '../config/config.service';

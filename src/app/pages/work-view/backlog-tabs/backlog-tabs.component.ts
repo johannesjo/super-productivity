@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { TaskService } from '../../../features/tasks/task.service';
 import { ReminderService } from '../../../features/reminder/reminder.service';
 import { DialogAddTaskReminderComponent } from '../../../features/tasks/dialog-add-task-reminder/dialog-add-task-reminder.component';
-import { MatDialog } from '@angular/material';
+import { MatDialog } from '@angular/material/dialog';
 import { TaskWithReminderData } from '../../../features/tasks/task.model';
 import { standardListAnimation } from '../../../ui/animations/standard-list.ani';
 import { combineLatest, Observable } from 'rxjs';

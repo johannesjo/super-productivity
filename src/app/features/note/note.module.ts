@@ -11,7 +11,7 @@ import { UiModule } from '../../ui/ui.module';
 import { DialogAddNoteReminderComponent } from './dialog-add-note-reminder/dialog-add-note-reminder.component';
 import { FormsModule } from '@angular/forms';
 import { ReminderService } from '../reminder/reminder.service';
-import { MatDialog } from '@angular/material';
+import { MatDialog } from '@angular/material/dialog';
 import { DialogViewNoteReminderComponent } from './dialog-view-note-reminder/dialog-view-note-reminder.component';
 import { ElectronService } from 'ngx-electron';
 import { IPC_SHOW_OR_FOCUS } from '../../../../electron/ipc-events.const';

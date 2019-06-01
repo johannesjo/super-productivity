@@ -5,7 +5,7 @@ import * as fromSnack from './store/snack.reducer';
 import { SNACK_FEATURE_NAME } from './store/snack.reducer';
 import { EffectsModule } from '@ngrx/effects';
 import { SnackEffects } from './store/snack.effects';
-import { MatSnackBarModule } from '@angular/material';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { SnackCustomComponent } from './snack-custom/snack-custom.component';
 import { UiModule } from '../../ui/ui.module';
 

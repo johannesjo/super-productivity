@@ -26,7 +26,7 @@ import {
 import { TaskService } from '../../../../tasks/task.service';
 import { EMPTY, Observable, of, timer } from 'rxjs';
 import { TaskState } from '../../../../tasks/store/task.reducer';
-import { MatDialog } from '@angular/material';
+import { MatDialog } from '@angular/material/dialog';
 import { DialogJiraTransitionComponent } from '../../dialog-jira-transition/dialog-jira-transition.component';
 import { IssueLocalState } from '../../../issue';
 import { DialogConfirmComponent } from '../../../../../ui/dialog-confirm/dialog-confirm.component';

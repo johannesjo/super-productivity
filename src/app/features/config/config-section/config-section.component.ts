@@ -33,7 +33,7 @@ export class ConfigSectionComponent implements OnInit, OnDestroy {
   @Input() cfg: any;
   @Output() save: EventEmitter<{ sectionKey: ConfigSectionKey | ProjectCfgFormKey, config: any }> = new EventEmitter();
 
-  @ViewChild('customForm', {read: ViewContainerRef}) customFormRef: ViewContainerRef;
+  @ViewChild('customForm', { read: ViewContainerRef, static: true }) customFormRef: ViewContainerRef;
 
   isExpanded = false;
 

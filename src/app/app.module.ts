@@ -18,7 +18,7 @@ import {FormlyMaterialModule} from '@ngx-formly/material';
 import {PagesModule} from './pages/pages.module';
 import {MainHeaderModule} from './core-ui/main-header/main-header.module';
 import {HttpClientModule} from '@angular/common/http';
-import {MatSidenavModule} from '@angular/material';
+import { MatSidenavModule } from '@angular/material/sidenav';
 import {TasksModule} from './features/tasks/tasks.module';
 import {TimeTrackingModule} from './features/time-tracking/time-tracking.module';
 import {BookmarkModule} from './features/bookmark/bookmark.module';

@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, ViewChild } from '@angular/core';
 import { FieldType } from '@ngx-formly/material/form-field';
-import { MatInput } from '@angular/material';
+import { MatInput } from '@angular/material/input';
 
 @Component({
   selector: 'keyboard-input',
@@ -9,7 +9,7 @@ import { MatInput } from '@angular/material';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class KeyboardInputComponent extends FieldType {
-  @ViewChild(MatInput) formFieldControl: MatInput;
+  @ViewChild(MatInput, { static: true }) formFieldControl: MatInput;
 
   get type() {
     return this.to.type || 'text';

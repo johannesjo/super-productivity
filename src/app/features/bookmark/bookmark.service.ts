@@ -20,7 +20,7 @@ import { Observable } from 'rxjs';
 import { Bookmark } from './bookmark.model';
 import shortid from 'shortid';
 import { DialogEditBookmarkComponent } from './dialog-edit-bookmark/dialog-edit-bookmark.component';
-import { MatDialog } from '@angular/material';
+import { MatDialog } from '@angular/material/dialog';
 import { PersistenceService } from '../../core/persistence/persistence.service';
 import { createFromDrop, createFromPaste, DropPasteInput } from '../../core/drop-paste-input/drop-paste-input';
 

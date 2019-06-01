@@ -31,7 +31,7 @@ export class InputDurationSliderComponent implements OnInit, OnDestroy {
   endHandler: () => void;
   moveHandler: (ev: any) => void;
 
-  @ViewChild('circleEl') circleEl: ElementRef;
+  @ViewChild('circleEl', { static: true }) circleEl: ElementRef;
 
   @Input() label: string;
   @Output() modelChange: EventEmitter<number> = new EventEmitter();

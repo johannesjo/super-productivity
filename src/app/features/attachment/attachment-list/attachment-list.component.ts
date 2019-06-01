@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, Input, OnInit } from '@angular/core';
 import { Attachment } from '../attachment.model';
 import { AttachmentService } from '../attachment.service';
-import { MatDialog } from '@angular/material';
+import { MatDialog } from '@angular/material/dialog';
 import { DialogEditAttachmentComponent } from '../dialog-edit-attachment/dialog-edit-attachment.component';
 import { standardListAnimation } from '../../../ui/animations/standard-list.ani';
 

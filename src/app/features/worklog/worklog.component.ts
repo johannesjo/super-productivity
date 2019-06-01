@@ -3,7 +3,7 @@ import {PersistenceService} from '../../core/persistence/persistence.service';
 import {ProjectService} from '../project/project.service';
 import {expandFadeAnimation} from '../../ui/animations/expand.ani';
 import {WorklogDataForDay, WorklogMonth, WorklogWeek} from './worklog.model';
-import {MatDialog} from '@angular/material';
+import { MatDialog } from '@angular/material/dialog';
 import {Task, TaskCopy} from '../tasks/task.model';
 import {TaskService} from '../tasks/task.service';
 import {DialogWorklogExportComponent} from './dialog-worklog-export/dialog-worklog-export.component';

@@ -15,7 +15,7 @@ import {
 import { TaskService } from '../task.service';
 import { Subject } from 'rxjs';
 import { HIDE_SUB_TASKS, SHOW_SUB_TASKS, TaskWithSubTasks } from '../task.model';
-import { MatDialog } from '@angular/material';
+import { MatDialog } from '@angular/material/dialog';
 import { DialogTimeEstimateComponent } from '../dialog-time-estimate/dialog-time-estimate.component';
 import { expandAnimation } from '../../../ui/animations/expand.ani';
 import { ConfigService } from '../../config/config.service';
@@ -47,9 +47,9 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   isPreventPointerEventsWhilePanning = false;
   isActionTriggered = false;
 
-  @ViewChild('editOnClickEl') editOnClickEl: ElementRef;
-  @ViewChild('blockLeft') blockLeftEl: ElementRef;
-  @ViewChild('blockRight') blockRightEl: ElementRef;
+  @ViewChild('editOnClickEl', { static: true }) editOnClickEl: ElementRef;
+  @ViewChild('blockLeft', { static: false }) blockLeftEl: ElementRef;
+  @ViewChild('blockRight', { static: false }) blockRightEl: ElementRef;
   @HostBinding('tabindex') tabIndex = 1;
 
   // TODO do via observable

@@ -33,7 +33,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
   @Output() blur: EventEmitter<any> = new EventEmitter();
   @Output() done: EventEmitter<any> = new EventEmitter();
 
-  @ViewChild('inputEl') inputEl;
+  @ViewChild('inputEl', { static: true }) inputEl;
 
   isLoading$ = new BehaviorSubject(false);
   doubleEnterCount = 0;
