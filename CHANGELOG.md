@@ -1,3 +1,34 @@
+## [2.7.3](https://github.com/johannesjo/super-productivity/compare/v2.7.2...v2.7.3) (2019-06-01)
+
+
+### Bug Fixes
+
+* **config:** add missing detect changes ([38dd406](https://github.com/johannesjo/super-productivity/commit/38dd406))
+* **electron:** make single instance work again ([4075ff7](https://github.com/johannesjo/super-productivity/commit/4075ff7))
+* **project:** updating theme not working while tracking time ([7d405ee](https://github.com/johannesjo/super-productivity/commit/7d405ee))
+* formly model not updating ([69021d9](https://github.com/johannesjo/super-productivity/commit/69021d9))
+* formly model not updating ([e222b2b](https://github.com/johannesjo/super-productivity/commit/e222b2b))
+* formly model still messing up ([0710fc1](https://github.com/johannesjo/super-productivity/commit/0710fc1))
+* improvement banner throwing an error ([0be197e](https://github.com/johannesjo/super-productivity/commit/0be197e))
+
+
+### Features
+
+* **git:** add validation for repository string ([d6c5d13](https://github.com/johannesjo/super-productivity/commit/d6c5d13))
+* **jira:** add validation for host [#174](https://github.com/johannesjo/super-productivity/issues/174) ([8202d25](https://github.com/johannesjo/super-productivity/commit/8202d25))
+* **jira:** allow invalid certificates for jira requests ([23649b5](https://github.com/johannesjo/super-productivity/commit/23649b5))
+* add better date time input ([5bbdef3](https://github.com/johannesjo/super-productivity/commit/5bbdef3))
+* **takeABreak:** count "I already did" as 5 minute break ([018f611](https://github.com/johannesjo/super-productivity/commit/018f611))
+* add little animation for metrics ([6935713](https://github.com/johannesjo/super-productivity/commit/6935713))
+* **tasks:** add story point badge for jira tasks ([6b83546](https://github.com/johannesjo/super-productivity/commit/6b83546))
+* improve config page styling ([ad599d2](https://github.com/johannesjo/super-productivity/commit/ad599d2))
+* improve full page spinner ([cb9c011](https://github.com/johannesjo/super-productivity/commit/cb9c011))
+* improve page transition to worklog ([cb884cf](https://github.com/johannesjo/super-productivity/commit/cb884cf))
+* turn on global immutability for ngx formly ([e23cd2d](https://github.com/johannesjo/super-productivity/commit/e23cd2d))
+* **ui:** improve datetime picker ([0872f99](https://github.com/johannesjo/super-productivity/commit/0872f99))
+
+
+
 ## [2.7.2](https://github.com/johannesjo/super-productivity/compare/v2.7.1...v2.7.2) (2019-05-27)
 
 
