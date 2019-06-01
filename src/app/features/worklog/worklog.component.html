@@ -1,4 +1,4 @@
-<full-page-spinner [show]="!(worklogService.worklogData$|async)"></full-page-spinner>
+<full-page-spinner *ngIf="!(worklogService.worklogData$|async)"></full-page-spinner>
 
 <div *ngIf="worklogService.worklogData$|async as wData"
      [@fade]>
