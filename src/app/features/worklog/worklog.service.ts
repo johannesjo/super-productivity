@@ -23,7 +23,7 @@ export class WorklogService {
   private _archiveUpdateTrigger$ = new BehaviorSubject(true);
 
   // NOTE: task updates are not reflected
-  private _worklogData$: Observable<{ worklog: Worklog; totalTimeSpent: number }> = combineLatest(
+  worklogData$: Observable<{ worklog: Worklog; totalTimeSpent: number }> = combineLatest(
     this._projectService.currentProject$,
     this._archiveUpdateTrigger$,
   ).pipe(
@@ -33,8 +33,8 @@ export class WorklogService {
   );
 
   worklog: Worklog;
-  worklog$: Observable<Worklog> = this._worklogData$.pipe(map(data => data.worklog));
-  totalTimeSpent$: Observable<number> = this._worklogData$.pipe(map(data => data.totalTimeSpent));
+  worklog$: Observable<Worklog> = this.worklogData$.pipe(map(data => data.worklog));
+  totalTimeSpent$: Observable<number> = this.worklogData$.pipe(map(data => data.totalTimeSpent));
   currentWeek$: Observable<WorklogWeek> = this.worklog$.pipe(
     map(worklog => {
       const now = new Date();

@@ -3,7 +3,7 @@ import {PersistenceService} from '../../core/persistence/persistence.service';
 import {ProjectService} from '../project/project.service';
 import {expandFadeAnimation} from '../../ui/animations/expand.ani';
 import {WorklogDataForDay, WorklogMonth, WorklogWeek} from './worklog.model';
-import { MatDialog } from '@angular/material/dialog';
+import {MatDialog} from '@angular/material/dialog';
 import {Task, TaskCopy} from '../tasks/task.model';
 import {TaskService} from '../tasks/task.service';
 import {DialogWorklogExportComponent} from './dialog-worklog-export/dialog-worklog-export.component';
@@ -13,13 +13,14 @@ import {standardListAnimation} from '../../ui/animations/standard-list.ani';
 import {WorklogService} from './worklog.service';
 import {getDateRangeForMonth} from '../../util/get-date-range-for-month';
 import {getDateRangeForWeek} from '../../util/get-date-range-for-week';
+import {fadeAnimation} from '../../ui/animations/fade.ani';
 
 @Component({
   selector: 'worklog',
   templateUrl: './worklog.component.html',
   styleUrls: ['./worklog.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  animations: [expandFadeAnimation, standardListAnimation]
+  animations: [expandFadeAnimation, standardListAnimation, fadeAnimation]
 })
 export class WorklogComponent {
   expanded: { [key: string]: boolean } = {};

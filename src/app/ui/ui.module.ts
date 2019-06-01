@@ -61,6 +61,7 @@ import {InlineInputComponent} from './inline-input/inline-input.component';
 import {ChipListInputComponent} from './chip-list-input/chip-list-input.component';
 import {ValidationModule} from './validation/validation.module';
 import {OwlDateTimeModule, OwlNativeDateTimeModule} from 'ng-pick-datetime';
+import { FullPageSpinnerComponent } from './full-page-spinner/full-page-spinner.component';
 
 @NgModule({
   imports: [
@@ -144,6 +145,7 @@ import {OwlDateTimeModule, OwlNativeDateTimeModule} from 'ng-pick-datetime';
     MomentFormatPipe,
     InlineInputComponent,
     ChipListInputComponent,
+    FullPageSpinnerComponent,
   ],
   entryComponents: [
     DialogConfirmComponent,
@@ -167,6 +169,7 @@ import {OwlDateTimeModule, OwlNativeDateTimeModule} from 'ng-pick-datetime';
     DatetimeInputComponent,
     InlineInputComponent,
     ChipListInputComponent,
+    FullPageSpinnerComponent,
 
     MsToClockStringPipe,
     MsToMinuteClockStringPipe,
