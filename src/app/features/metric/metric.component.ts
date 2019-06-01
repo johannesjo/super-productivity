@@ -4,12 +4,14 @@ import {MetricService} from './metric.service';
 import {Color} from 'ng2-charts';
 import {Observable} from 'rxjs';
 import {LineChartData} from './metric.model';
+import {fadeAnimation} from '../../ui/animations/fade.ani';
 
 @Component({
   selector: 'metric',
   templateUrl: './metric.component.html',
   styleUrls: ['./metric.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  animations: [fadeAnimation],
 })
 export class MetricComponent {
   public productivityHappiness$: Observable<LineChartData> = this.metricService.getProductivityHappinessChartData$();
