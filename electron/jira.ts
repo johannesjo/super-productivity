@@ -1,8 +1,8 @@
 import * as JiraApi from 'jira-client-fork';
-import { getWin } from './main-window';
-import { IPC_JIRA_CB_EVENT } from './ipc-events.const';
-import { session } from 'electron';
-import { JiraCfg } from '../src/app/features/issue/jira/jira';
+import {getWin} from './main-window';
+import {IPC_JIRA_CB_EVENT} from './ipc-events.const';
+import {session} from 'electron';
+import {JiraCfg} from '../src/app/features/issue/jira/jira';
 
 export const sendJiraRequest = (request) => {
   const mainWin = getWin();
@@ -90,7 +90,9 @@ const parseHostAndPort = (config: JiraCfg) => {
     protocol = match[1];
   } else {
     protocol = 'https';
+    host = host || config.host;
   }
 
+  // console.log({host, protocol, port});
   return {host, protocol, port};
 };
