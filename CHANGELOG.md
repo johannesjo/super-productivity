@@ -1,3 +1,20 @@
+## [2.7.4](https://github.com/johannesjo/super-productivity/compare/v2.7.3...v2.7.4) (2019-06-02)
+
+
+### Bug Fixes
+
+* **jira:** change default config ([1ae4464](https://github.com/johannesjo/super-productivity/commit/1ae4464))
+* **jira:** not parsing host without protocol correctly ([240a943](https://github.com/johannesjo/super-productivity/commit/240a943))
+* **jira:** wrong regex ([5e2262a](https://github.com/johannesjo/super-productivity/commit/5e2262a))
+* **project:** git config dialog ([d965809](https://github.com/johannesjo/super-productivity/commit/d965809))
+
+
+### Features
+
+* **jira:** ignore shutout when testing connection ([58b1a94](https://github.com/johannesjo/super-productivity/commit/58b1a94))
+
+
+
 ## [2.7.3](https://github.com/johannesjo/super-productivity/compare/v2.7.2...v2.7.3) (2019-06-01)
 
 
