@@ -41,7 +41,7 @@ export const ISSUE_PROVIDER_FORM_CFGS: ConfigFormConfig = [
     help: `<div class="mat-caption">Basic configuration</div>
   <p>Please provide a login name (can be found on your profile page) and an
     <a href="https://confluence.atlassian.com/cloud/api-tokens-938839638.html"
-       target="_blank">API token</a> or password if you can't generate one for some reason.
+       target="_blank">API token</a> or password if you can't generate one for some reason. Please not that newer versions of jira sometimes only work with the token.
   </p>
   <p>You also need to specify a JQL query which is used for the suggestions to add tasks from Jira. If you need help check out this link
     <a href="https://confluence.atlassian.com/jirasoftwarecloud/advanced-searching-764478330.html"
