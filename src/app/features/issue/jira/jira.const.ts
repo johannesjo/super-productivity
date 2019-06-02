@@ -83,7 +83,7 @@ export const JIRA_CREDENTIALS_FORM_CFG: FormlyFieldConfig[] = [
     templateOptions: {
       type: 'url',
       /* tslint:disable-next-line */
-      pattern: /^(https?):\/\/(-\.)?([^\s\/?\.#-]+\.?)+(\/[^\s]*)?$/i,
+      pattern: /^(?:http(s)?:\/\/)?[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:/?#[\]@!\$&'\(\)\*\+,;=.]+$/i,
       required: true,
       label: 'Host (e.g.: http://my-host.de:1234)',
     },
