@@ -1,6 +1,6 @@
-import { Injectable } from '@angular/core';
+import {Injectable} from '@angular/core';
 import shortid from 'shortid';
-import { ChromeExtensionInterfaceService } from '../../../core/chrome-extension-interface/chrome-extension-interface.service';
+import {ChromeExtensionInterfaceService} from '../../../core/chrome-extension-interface/chrome-extension-interface.service';
 import {
   JIRA_ADDITIONAL_ISSUE_FIELDS,
   JIRA_DATETIME_FORMAT,
@@ -8,7 +8,7 @@ import {
   JIRA_REDUCED_ISSUE_FIELDS,
   JIRA_REQUEST_TIMEOUT_DURATION
 } from './jira.const';
-import { ProjectService } from '../../project/project.service';
+import {ProjectService} from '../../project/project.service';
 import {
   mapIssueResponse,
   mapIssuesResponse,
@@ -16,25 +16,25 @@ import {
   mapToSearchResults,
   mapTransitionResponse
 } from './jira-issue/jira-issue-map.util';
-import { JiraOriginalStatus, JiraOriginalTransition, JiraOriginalUser } from './jira-api-responses';
-import { JiraCfg } from './jira';
-import { ElectronService } from 'ngx-electron';
+import {JiraOriginalStatus, JiraOriginalTransition, JiraOriginalUser} from './jira-api-responses';
+import {JiraCfg} from './jira';
+import {ElectronService} from 'ngx-electron';
 import {
   IPC_JIRA_CB_EVENT,
   IPC_JIRA_MAKE_REQUEST_EVENT,
   IPC_JIRA_SETUP_IMG_HEADERS
 } from '../../../../../electron/ipc-events.const';
-import { SnackService } from '../../../core/snack/snack.service';
-import { IS_ELECTRON } from '../../../app.constants';
-import { loadFromSessionStorage, saveToSessionStorage } from '../../../core/persistence/local-storage';
-import { combineLatest, Observable, throwError } from 'rxjs';
-import { SearchResultItem } from '../issue';
-import { fromPromise } from 'rxjs/internal-compatibility';
-import { catchError, first } from 'rxjs/operators';
-import { JiraIssue } from './jira-issue/jira-issue.model';
+import {SnackService} from '../../../core/snack/snack.service';
+import {IS_ELECTRON} from '../../../app.constants';
+import {loadFromSessionStorage, saveToSessionStorage} from '../../../core/persistence/local-storage';
+import {combineLatest, Observable, throwError} from 'rxjs';
+import {SearchResultItem} from '../issue';
+import {fromPromise} from 'rxjs/internal-compatibility';
+import {catchError, first} from 'rxjs/operators';
+import {JiraIssue} from './jira-issue/jira-issue.model';
 import * as moment from 'moment-mini';
-import { getJiraResponseErrorTxt } from '../../../util/get-jira-response-error-text';
-import { BannerService } from '../../../core/banner/banner.service';
+import {getJiraResponseErrorTxt} from '../../../util/get-jira-response-error-text';
+import {BannerService} from '../../../core/banner/banner.service';
 
 const BLOCK_ACCESS_KEY = 'SUP_BLOCK_JIRA_ACCESS';
 
@@ -164,11 +164,11 @@ export class JiraApiService {
     });
   }
 
-  getCurrentUser(cfg?: JiraCfg): Observable<JiraOriginalUser> {
+  getCurrentUser(cfg?: JiraCfg, isForce = false): Observable<JiraOriginalUser> {
     return this._sendRequest({
       apiMethod: 'getCurrentUser',
       transform: mapResponse,
-    }, cfg);
+    }, cfg, isForce);
   }
 
   listStatus(): Observable<JiraOriginalStatus[]> {
@@ -242,7 +242,7 @@ export class JiraApiService {
   }
 
   // TODO refactor data madness of request and add types for everything
-  private _sendRequest(request, cfg = this._cfg): Observable<any> {
+  private _sendRequest(request, cfg = this._cfg, isForce = false): Observable<any> {
     if (!this._isMinimalSettings(cfg)) {
       const msg = (!IS_ELECTRON && !this._isExtension)
         ? 'Super Productivity Extension not loaded. Reloading the page might help'
@@ -255,7 +255,7 @@ export class JiraApiService {
       return throwError({handledError: 'Insufficient Settings for Jira'});
     }
 
-    if (this._isBlockAccess) {
+    if (this._isBlockAccess && !isForce) {
       console.error('Blocked Jira Access to prevent being shut out');
       this._bannerService.open({
         id: 'JIRA_UNBLOCK',

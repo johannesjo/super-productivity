@@ -7,16 +7,15 @@ import {
   OnDestroy,
   Output
 } from '@angular/core';
-import { FormGroup } from '@angular/forms';
-import { JiraCfg } from '../jira';
-import { DEFAULT_JIRA_CFG, JIRA_ADVANCED_FORM_CFG, JIRA_CREDENTIALS_FORM_CFG } from '../jira.const';
-import { FormlyFieldConfig } from '@ngx-formly/core';
-import { JiraApiService } from '../jira-api.service';
-import { JiraOriginalUser } from '../jira-api-responses';
-import { expandAnimation } from '../../../../ui/animations/expand.ani';
-import { catchError } from 'rxjs/operators';
-import { Subscription, throwError } from 'rxjs';
-import { dirtyDeepCopy } from '../../../../util/dirtyDeepCopy';
+import {FormGroup} from '@angular/forms';
+import {JiraCfg} from '../jira';
+import {DEFAULT_JIRA_CFG, JIRA_ADVANCED_FORM_CFG, JIRA_CREDENTIALS_FORM_CFG} from '../jira.const';
+import {FormlyFieldConfig} from '@ngx-formly/core';
+import {JiraApiService} from '../jira-api.service';
+import {JiraOriginalUser} from '../jira-api-responses';
+import {expandAnimation} from '../../../../ui/animations/expand.ani';
+import {catchError} from 'rxjs/operators';
+import {Subscription, throwError} from 'rxjs';
 
 @Component({
   selector: 'jira-cfg-stepper',
@@ -34,7 +33,7 @@ export class JiraCfgStepperComponent implements OnDestroy {
 
   public isTestCredentialsSuccess = false;
   public user: JiraOriginalUser;
-  public jiraCfg: JiraCfg;
+  public jiraCfg: JiraCfg = Object.assign({}, DEFAULT_JIRA_CFG, {isEnabled: true});
   @Output() saveCfg: EventEmitter<JiraCfg> = new EventEmitter();
 
   private _subs = new Subscription();
@@ -43,15 +42,13 @@ export class JiraCfgStepperComponent implements OnDestroy {
     private _jiraApiService: JiraApiService,
     private _changeDetectorRef: ChangeDetectorRef,
   ) {
-    this.credentialsFormConfig = dirtyDeepCopy(JIRA_CREDENTIALS_FORM_CFG);
-    this.advancedSettingsFormConfig = dirtyDeepCopy(JIRA_ADVANCED_FORM_CFG);
+    this.credentialsFormConfig = JIRA_CREDENTIALS_FORM_CFG;
+    this.advancedSettingsFormConfig = JIRA_ADVANCED_FORM_CFG;
   }
 
   @Input() set cfg(cfg: JiraCfg) {
     if (cfg) {
       this.jiraCfg = cfg;
-    } else {
-      this.jiraCfg = Object.assign({}, DEFAULT_JIRA_CFG, {isEnabled: true});
     }
   }
 
@@ -70,7 +67,7 @@ export class JiraCfgStepperComponent implements OnDestroy {
   testCredentials() {
     this.isTestCredentialsSuccess = false;
     this._subs.add(
-      this._jiraApiService.getCurrentUser(this.jiraCfg)
+      this._jiraApiService.getCurrentUser(this.jiraCfg, true)
         .pipe(catchError((err) => {
           this.isTestCredentialsSuccess = false;
           this.user = null;

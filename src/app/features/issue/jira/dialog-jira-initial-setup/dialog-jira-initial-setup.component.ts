@@ -1,6 +1,6 @@
-import { ChangeDetectionStrategy, Component, Inject, OnInit } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { JiraCfg } from '../jira';
+import {ChangeDetectionStrategy, Component, Inject, OnInit} from '@angular/core';
+import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
+import {JiraCfg} from '../jira';
 
 @Component({
   selector: 'dialog-jira-initial-setup',
@@ -8,7 +8,7 @@ import { JiraCfg } from '../jira';
   styleUrls: ['./dialog-jira-initial-setup.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class DialogJiraInitialSetupComponent implements OnInit {
+export class DialogJiraInitialSetupComponent {
   jiraCfg: JiraCfg;
 
   constructor(
@@ -16,9 +16,6 @@ export class DialogJiraInitialSetupComponent implements OnInit {
     private _matDialogRef: MatDialogRef<DialogJiraInitialSetupComponent>,
   ) {
     this.jiraCfg = this.data.jiraCfg;
-  }
-
-  ngOnInit() {
   }
 
   saveJiraCfg($event) {
