@@ -8,6 +8,7 @@
 
 Organize your daily tasks at one place while making time tracking a lot less annoying. Super Productivity is a ToDo List / Time Tracker / Personal Jira Task Manager for Linux, MacOS and Windows aimed at reducing the time you spend with repetive tasks and to provide you with a place to collect all the information you need to do your job.
 
+
 ![Work View with global links](screens/screen_standard.png)
 
 ## Features
@@ -67,9 +68,11 @@ brew cask install superProductivity
 When starting the app via the command line the path to where emergency backups are saved is printed out to the command line. Just take away the `/backup` sub folder from the path and use the remaining path to sync via the cloud.
 
 ## More Screenshots
-![bookmarks](screens/screen_bookmarks.png)
-![notes](screens/screen_notes.png)
 ![issue](screens/screen_issue.png)
+![reduced](screens/screen_reduced.png)
+![idle](screens/screen_idle.png)
+![take-a-break](screens/screen_take-a-break.png)
+![daily-summary](screens/screen_daily-summary.png)
 ![backlog](screens/screen_backlog.png)
 ![mobile](screens/screen_mobile.png)
 ![worklog](screens/screen_worklog.png)

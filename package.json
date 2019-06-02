@@ -77,8 +77,7 @@
     },
     "win": {
       "target": [
-        "nsis",
-        "portable"
+        "appx"
       ],
       "publish": [
         "github"
@@ -88,8 +87,8 @@
       "applicationId": "SuperProductivity",
       "displayName": "Super Productivity",
       "publisherDisplayName": "johannesjo",
-      "publisher": "CN=___-___",
-      "identityName": "___johannesjo.SuperProductivity"
+      "publisher": "CN=AC30A249-AFE7-4B23-AE54-A95B4FDF8928",
+      "identityName": "53707johannesjo.SuperProductivity"
     },
     "linux": {
       "category": "Utility",
