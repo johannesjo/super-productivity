@@ -26,7 +26,7 @@ export const DEFAULT_JIRA_CFG: JiraCfg = {
 
   isShowComponents: true,
 
-  isCheckToReAssignTicketOnTaskStart: true,
+  isCheckToReAssignTicketOnTaskStart: false,
   userAssigneeName: null,
 
   storyPointFieldId: null,
