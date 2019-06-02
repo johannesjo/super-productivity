@@ -1,5 +1,5 @@
-import {ChangeDetectionStrategy, Component, Inject, OnDestroy, OnInit} from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, Inject, OnDestroy, OnInit} from '@angular/core';
+import {MAT_DIALOG_DATA, MatDialog, MatDialogRef} from '@angular/material/dialog';
 import {Project} from '../../project.model';
 import {FormGroup} from '@angular/forms';
 import {FormlyFieldConfig, FormlyFormOptions} from '@ngx-formly/core';
@@ -24,9 +24,8 @@ import {GITHUB_TYPE} from '../../../issue/issue.const';
 })
 export class DialogCreateProjectComponent implements OnInit, OnDestroy {
   projectData: Project | Partial<Project> = DEFAULT_PROJECT;
-  newProjectData: Project | Partial<Project> = this.projectData;
   jiraCfg: JiraCfg;
-  gitCfg: GithubCfg;
+  githubCfg: GithubCfg;
 
   form = new FormGroup({});
   formOptions: FormlyFormOptions = {
@@ -44,6 +43,7 @@ export class DialogCreateProjectComponent implements OnInit, OnDestroy {
     private _projectService: ProjectService,
     private _matDialog: MatDialog,
     private _matDialogRef: MatDialogRef<DialogCreateProjectComponent>,
+    private _cd: ChangeDetectorRef,
   ) {
     // somehow they are only unproblematic if assigned here,
     this.formCfg = BASIC_PROJECT_CONFIG_FORM_CONFIG.items;
@@ -63,7 +63,7 @@ export class DialogCreateProjectComponent implements OnInit, OnDestroy {
       this._matDialogRef.afterClosed().subscribe(() => {
         const issueIntegrationCfgs: IssueIntegrationCfgs = Object.assign(this.projectData.issueIntegrationCfgs, {
           JIRA: this.jiraCfg,
-          GITHUB: this.gitCfg,
+          GITHUB: this.githubCfg,
         });
         const projectDataToSave: Project | Partial<Project> = {
           ...this.projectData,
@@ -80,7 +80,7 @@ export class DialogCreateProjectComponent implements OnInit, OnDestroy {
         this.jiraCfg = this.projectData.issueIntegrationCfgs.JIRA;
       }
       if (this.projectData.issueIntegrationCfgs.GITHUB) {
-        this.gitCfg = this.projectData.issueIntegrationCfgs.GITHUB;
+        this.githubCfg = this.projectData.issueIntegrationCfgs.GITHUB;
       }
     }
   }
@@ -89,18 +89,14 @@ export class DialogCreateProjectComponent implements OnInit, OnDestroy {
     this._subs.unsubscribe();
   }
 
-  onProjectDataChange(data) {
-    this.newProjectData = data;
-  }
-
   submit() {
-    const issueIntegrationCfgs: IssueIntegrationCfgs = Object.assign(this.newProjectData.issueIntegrationCfgs, {
+    const issueIntegrationCfgs: IssueIntegrationCfgs = Object.assign(this.projectData.issueIntegrationCfgs, {
       JIRA: this.jiraCfg,
-      GITHUB: this.gitCfg,
+      GITHUB: this.githubCfg,
     });
 
     const projectDataToSave: Project | Partial<Project> = {
-      ...this.newProjectData,
+      ...this.projectData,
       issueIntegrationCfgs,
     };
 
@@ -123,7 +119,7 @@ export class DialogCreateProjectComponent implements OnInit, OnDestroy {
     this._subs.add(this._matDialog.open(DialogJiraInitialSetupComponent, {
       restoreFocus: true,
       data: {
-        jiraCfg: this.newProjectData.issueIntegrationCfgs.JIRA,
+        jiraCfg: this.jiraCfg,
       }
     }).afterClosed().subscribe((jiraCfg: JiraCfg) => {
 
@@ -137,7 +133,7 @@ export class DialogCreateProjectComponent implements OnInit, OnDestroy {
     this._subs.add(this._matDialog.open(DialogGithubInitialSetupComponent, {
       restoreFocus: true,
       data: {
-        gitCfg: this.newProjectData.issueIntegrationCfgs.JIRA,
+        githubCfg: this.githubCfg,
       }
     }).afterClosed().subscribe((gitCfg: GithubCfg) => {
 
@@ -149,19 +145,21 @@ export class DialogCreateProjectComponent implements OnInit, OnDestroy {
 
   private _saveJiraCfg(jiraCfg: JiraCfg) {
     this.jiraCfg = jiraCfg;
+    this._cd.markForCheck();
 
     // if we're editing save right away
-    if (this.newProjectData.id) {
-      this._projectService.updateIssueProviderConfig(this.newProjectData.id, 'JIRA', this.jiraCfg);
+    if (this.projectData.id) {
+      this._projectService.updateIssueProviderConfig(this.projectData.id, 'JIRA', this.jiraCfg);
     }
   }
 
-  private _saveGithubCfg(gitCfg: GithubCfg) {
-    this.gitCfg = gitCfg;
+  private _saveGithubCfg(githubCfg: GithubCfg) {
+    this.githubCfg = githubCfg;
+    this._cd.markForCheck();
 
     // if we're editing save right away
-    if (this.newProjectData.id) {
-      this._projectService.updateIssueProviderConfig(this.newProjectData.id, GITHUB_TYPE, this.gitCfg);
+    if (this.projectData.id) {
+      this._projectService.updateIssueProviderConfig(this.projectData.id, GITHUB_TYPE, this.githubCfg);
     }
   }
 }

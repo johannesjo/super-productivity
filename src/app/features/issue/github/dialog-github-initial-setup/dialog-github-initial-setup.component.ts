@@ -4,6 +4,7 @@ import { GithubCfg } from '../github';
 import { FormGroup } from '@angular/forms';
 import { FormlyFieldConfig } from '@ngx-formly/core';
 import { DEFAULT_GITHUB_CFG, GITHUB_CONFIG_FORM } from '../github.const';
+import {dirtyDeepCopy} from '../../../../util/dirtyDeepCopy';
 
 @Component({
   selector: 'dialog-github-initial-setup',

@@ -9,7 +9,7 @@
   <mat-dialog-content>
 
     <formly-form [model]="projectData"
-                 (modelChange)="onProjectDataChange($event)"
+                 (modelChange)="projectData = $event"
                  [fields]="formCfg"
                  [options]="formOptions"
                  [form]="form">
@@ -32,9 +32,9 @@
         <button mat-raised-button=""
                 (click)="openGithubCfg()"
                 type="button">
-          <mat-icon *ngIf="!gitCfg?.repo"
+          <mat-icon *ngIf="!githubCfg?.repo"
                     svgIcon="github"></mat-icon>
-          <mat-icon *ngIf="gitCfg?.repo">checkmark</mat-icon>
+          <mat-icon *ngIf="githubCfg?.repo">checkmark</mat-icon>
           <span style="padding-left: 8px;">Setup Github Integration</span>
         </button>
       </div>
