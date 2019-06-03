@@ -28,6 +28,7 @@ import {CoreUiModule} from './core-ui/core-ui.module';
 import {MigrateModule} from './imex/migrate/migrate.module';
 import {GlobalErrorHandler} from './core/error-handler/global-error-handler.class';
 import {MyHammerConfig} from '../hammer-config.class';
+import {ProcrastinationModule} from './features/procrastination/procrastination.module';
 
 @NgModule({
   declarations: [
@@ -43,6 +44,7 @@ import {MyHammerConfig} from '../hammer-config.class';
     BookmarkModule,
     MatSidenavModule,
     TasksModule,
+    ProcrastinationModule,
     TimeTrackingModule,
     NoteModule,
     ReminderModule,

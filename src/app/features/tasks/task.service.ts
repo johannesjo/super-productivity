@@ -50,6 +50,7 @@ import {
   selectBacklogTasksWithSubTasks,
   selectCurrentTask,
   selectCurrentTaskId,
+  selectCurrentTaskOrParentWithData,
   selectEstimateRemainingForBacklog,
   selectEstimateRemainingForToday,
   selectFocusTaskId,
@@ -100,6 +101,12 @@ export class TaskService {
     select(selectCurrentTask),
     // NOTE: we can't use share here, as we need the last emitted value
   );
+
+  currentTaskOrCurrentParent$: Observable<Task> = this._store.pipe(
+    select(selectCurrentTaskOrParentWithData),
+    // NOTE: we can't use share here, as we need the last emitted value
+  );
+
 
   startableTaskIds$: Observable<string[]> = this._store.pipe(
     select(selectStartableTaskIds),

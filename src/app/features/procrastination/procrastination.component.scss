@@ -1,0 +1,15 @@
+@import "../../../variables";
+
+.page-wrapper {
+  //text-align: center;
+}
+
+.tab-inner {
+  padding: $s;
+  margin: auto;
+  max-width: $component-max-width;
+
+  &.full-width {
+    max-width: none;
+  }
+}

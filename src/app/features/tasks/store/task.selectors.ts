@@ -1,7 +1,7 @@
 import {createFeatureSelector, createSelector} from '@ngrx/store';
 import {filterStartableTasks, TASK_FEATURE_NAME, taskAdapter, TaskState} from './task.reducer';
 import {selectIssueEntityMap} from '../../issue/issue.selector';
-import {Task, TaskWithSubTasks} from '../task.model';
+import {Task, TaskWithIssueData, TaskWithSubTasks} from '../task.model';
 import {IssueProviderKey} from '../../issue/issue';
 import {getWorklogStr} from '../../../util/get-work-log-str';
 
@@ -85,6 +85,22 @@ export const selectCurrentTaskParent = createSelector(selectTaskFeatureState, s 
   && s.entities[s.currentTaskId] && s.entities[s.currentTaskId].parentId
   && s.entities[s.entities[s.currentTaskId].parentId]
 );
+export const selectCurrentTaskOrParentWithData = createSelector(
+  selectTaskFeatureState,
+  selectIssueEntityMap,
+  (s, issueEntityMap): TaskWithSubTasks => {
+    const t = s.currentTaskId
+      && s.entities[s.currentTaskId] && s.entities[s.currentTaskId].parentId
+      && s.entities[s.entities[s.currentTaskId].parentId] || s.entities[s.currentTaskId];
+    if (!t) {
+      return;
+    }
+    const twi: TaskWithIssueData = mapIssueDataToTask([t], issueEntityMap)[0];
+    return {
+      ...twi,
+      subTasks: twi.subTaskIds.map(id => s.entities[id]),
+    };
+  });
 
 export const selectCurrentTaskParentOrCurrent = createSelector(selectTaskFeatureState, s =>
   s.currentTaskId
