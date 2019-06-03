@@ -1,3 +1,15 @@
+## [2.7.5](https://github.com/johannesjo/super-productivity/compare/v2.7.4...v2.7.5) (2019-06-03)
+
+
+### Features
+
+* add new productivity tip ([a8c84f2](https://github.com/johannesjo/super-productivity/commit/a8c84f2))
+* **procrastination:** add first most simple text based version ([783e714](https://github.com/johannesjo/super-productivity/commit/783e714))
+* **procrastination:** add inputs ([842cdbe](https://github.com/johannesjo/super-productivity/commit/842cdbe))
+* **procrastination:** polish ([e36b937](https://github.com/johannesjo/super-productivity/commit/e36b937))
+
+
+
 ## [2.7.4](https://github.com/johannesjo/super-productivity/compare/v2.7.3...v2.7.4) (2019-06-02)
 
 

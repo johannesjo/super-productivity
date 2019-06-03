@@ -138,6 +138,9 @@ h2 {
   text-align: center;
   margin: $s 0;
   white-space: nowrap;
+  button {
+    margin: 0 $s;
+  }
 }
 
 .backlog,

@@ -8,8 +8,7 @@
 
 Organize your daily tasks at one place while making time tracking a lot less annoying. Super Productivity is a ToDo List / Time Tracker / Personal Jira Task Manager for Linux, MacOS and Windows aimed at reducing the time you spend with repetive tasks and to provide you with a place to collect all the information you need to do your job.
 
-
-![Work View with global links](screens/screen_standard.png)
+<img alt="Work View with global links" src="screens/screen_standard.png" width="100%">
 
 ## Features
 * **Full control over your data**, no tracking, no user accounts, no cloud
@@ -68,14 +67,14 @@ brew cask install superProductivity
 When starting the app via the command line the path to where emergency backups are saved is printed out to the command line. Just take away the `/backup` sub folder from the path and use the remaining path to sync via the cloud.
 
 ## More Screenshots
-![issue](screens/screen_issue.png)
-![reduced](screens/screen_reduced.png)
-![idle](screens/screen_idle.png)
-![take-a-break](screens/screen_take-a-break.png)
-![daily-summary](screens/screen_daily-summary.png)
-![backlog](screens/screen_backlog.png)
-![mobile](screens/screen_mobile.png)
-![worklog](screens/screen_worklog.png)
+<img alt="issue" src="screens/screen_issue.png" width="100%">
+<img alt="reduced" src="screens/screen_reduced.png" width="100%">
+<img alt="idle" src="screens/screen_idle.png" width="100%">
+<img alt="take" src="screens/screen_take-a-break.png" width="100%">
+<img alt="daily" src="screens/screen_daily-summary.png" width="100%">
+<img alt="backlog" src="screens/screen_backlog.png" width="100%">
+<img alt="worklog" src="screens/screen_worklog.png" width="100%">
+<img alt="mobile" src="screens/screen_mobile.png">
 
 ## Build and run for yourself
 ```

@@ -1,0 +1,25 @@
+@import "../../../variables";
+
+.page-wrapper {
+  //text-align: center;
+}
+
+
+.tab-inner {
+  padding: $s;
+  margin: $s;
+  max-width: $component-max-width;
+  position: relative;
+  padding: $s*2;
+  background: #fff;
+  border-radius: $card-border-radius;
+  box-shadow: $shadow-card-shadow;
+
+  @include darkTheme {
+    background: $dark-theme-bg-lighter;
+  }
+
+  &.full-width {
+    max-width: none;
+  }
+}
