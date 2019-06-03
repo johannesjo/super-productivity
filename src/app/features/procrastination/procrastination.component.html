@@ -6,10 +6,12 @@
     <a href="https://www.nytimes.com/2019/03/25/smarter-living/why-you-procrastinate-it-has-nothing-to-do-with-self-control.html"
        target="_blank">this article</a>.</p>
 
+
   <mat-tab-group dynamicHeight>
     <mat-tab label="Curiosity">
       <section class="tab-inner">
-        <p>Procrastination is interesting, isn't it? It doesn't make sense to do it. Not in your long term interest at all. But still everybody does it. Enjoy and explore!</p>
+        <p>Procrastination is interesting, isn't it? It doesn't make sense to do it. Not in your long term interest at
+          all. But still everybody does it. Enjoy and explore!</p>
         <ul>
           <li>What feelings are eliciting your temptation to procrastinate?</li>
           <li>Where do you feel them in your body?</li>
@@ -21,6 +23,31 @@
           </li>
           <li>How are the sensations in your body shifting as you continue to rest your awareness on them?</li>
         </ul>
+
+        <!--        <mat-form-field>-->
+        <!--          <textarea matInput-->
+        <!--                    placeholder="What feelings are eliciting your temptation to procrastinate?"></textarea>-->
+        <!--        </mat-form-field>-->
+        <!--        <mat-form-field>-->
+        <!--          <textarea matInput-->
+        <!--                    placeholder="Where do you feel them in your body?"></textarea>-->
+        <!--        </mat-form-field>-->
+        <!--        <mat-form-field>-->
+        <!--          <textarea matInput-->
+        <!--                    placeholder="What do they remind you of?"></textarea>-->
+        <!--        </mat-form-field>-->
+        <!--        <mat-form-field>-->
+        <!--          <textarea matInput-->
+        <!--                    placeholder="What happens to the thought of procrastinating as you observe it?"></textarea>-->
+        <!--          <mat-hint>Does it intensify?-->
+        <!--            Dissipate?-->
+        <!--            Cause other emotions to arise?-->
+        <!--          </mat-hint>-->
+        <!--        </mat-form-field>-->
+        <!--        <mat-form-field>-->
+        <!--          <textarea matInput-->
+        <!--                    placeholder="How are the sensations in your body shifting as you continue to rest your awareness on them?"></textarea>-->
+        <!--        </mat-form-field>-->
       </section>
     </mat-tab>
 
@@ -39,18 +66,29 @@
         </ul>
 
         <p>More exercises <a href="https://drsoph.com/blog/2018/9/17/3-exercises-in-self-compassion"
-                             target="_blank">can be found here</a> or on <a href="https://www.google.com/search?q=self+compassion+exercises&oq=self+compassion+excers&aqs=chrome.1.69i57j0l5.4303j0j7&sourceid=chrome&ie=UTF-8" target="_blank">google</a>.</p>
+                             target="_blank">can be found here</a> or on
+          <a href="https://www.google.com/search?q=self+compassion+exercises&oq=self+compassion+excers&aqs=chrome.1.69i57j0l5.4303j0j7&sourceid=chrome&ie=UTF-8"
+             target="_blank">google</a>.</p>
       </section>
     </mat-tab>
 
 
     <mat-tab label="Reframe">
       <section class="tab-inner">
-        <p>Think about what might be positive about the task.</p>
-        <ul>
-          <li>What might interesting about it, despite its flaws?</li>
-          <li>What is to gain if you complete it?</li>
-        </ul>
+        <p>Think about what might be positive about the task despite its flaws?.</p>
+
+        <mat-form-field>
+          <textarea matInput
+                    placeholder="What might be interesting about it?"></textarea>
+        </mat-form-field>
+        <mat-form-field>
+          <textarea matInput
+                    placeholder="What is to gain if you complete it?"></textarea>
+        </mat-form-field>
+        <mat-form-field>
+          <textarea matInput
+                    placeholder="How will you feel about it if you complete it?"></textarea>
+        </mat-form-field>
       </section>
     </mat-tab>
 
@@ -62,11 +100,18 @@
 
         <task [task]="currentTask"></task>
 
-        <p style="margin-top: 16px;">Done? Then think about it. What would be – strictly theoretical – the first thing you would do <i>if</i> you
+        <p style="margin-top: 16px;">Done? Then think about it. What would be – strictly theoretical – the first thing
+          you would do <i>if</i> you
           were to start working on the task? Just think about it...</p>
       </section>
     </mat-tab>
-
-
   </mat-tab-group>
+
+  <div style="text-align: center; margin-top: 32px;">
+    <button mat-raised-button=""
+            color="primary"
+            routerLink="/work-view">
+      Back to work!
+    </button>
+  </div>
 </div>
