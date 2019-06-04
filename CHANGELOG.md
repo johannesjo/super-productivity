@@ -1,3 +1,24 @@
+## [2.7.6](https://github.com/johannesjo/super-productivity/compare/v2.7.4...v2.7.6) (2019-06-03)
+
+
+### Bug Fixes
+
+* **procrastination:** typo ([a8db6fe](https://github.com/johannesjo/super-productivity/commit/a8db6fe))
+* build ([bd43079](https://github.com/johannesjo/super-productivity/commit/bd43079))
+
+
+### Features
+
+* add new productivity tip ([a8c84f2](https://github.com/johannesjo/super-productivity/commit/a8c84f2))
+* **procrastination:** add first most simple text based version ([783e714](https://github.com/johannesjo/super-productivity/commit/783e714))
+* **procrastination:** add inputs ([842cdbe](https://github.com/johannesjo/super-productivity/commit/842cdbe))
+* **procrastination:** add to main nav for mobile ([4bbcee0](https://github.com/johannesjo/super-productivity/commit/4bbcee0))
+* **procrastination:** hide for mobile ([3e5f829](https://github.com/johannesjo/super-productivity/commit/3e5f829))
+* **procrastination:** improve text ([582b350](https://github.com/johannesjo/super-productivity/commit/582b350))
+* **procrastination:** polish ([e36b937](https://github.com/johannesjo/super-productivity/commit/e36b937))
+
+
+
 ## [2.7.5](https://github.com/johannesjo/super-productivity/compare/v2.7.4...v2.7.5) (2019-06-03)
 
 
