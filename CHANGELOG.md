@@ -1,3 +1,18 @@
+## [2.7.7](https://github.com/johannesjo/super-productivity/compare/v2.7.6...v2.7.7) (2019-06-04)
+
+
+### Bug Fixes
+
+* **metrics:** graphs continuously being redrawn if task is active ([f6d54c7](https://github.com/johannesjo/super-productivity/commit/f6d54c7))
+* **procrastination:** work view throwing an error when navigating back to it ([04c7734](https://github.com/johannesjo/super-productivity/commit/04c7734))
+
+
+### Features
+
+* **procrastination:** improve styling for split it up ([b65e924](https://github.com/johannesjo/super-productivity/commit/b65e924))
+
+
+
 ## [2.7.6](https://github.com/johannesjo/super-productivity/compare/v2.7.4...v2.7.6) (2019-06-03)
 
 
