@@ -1,15 +1,18 @@
-import { ChangeDetectionStrategy, Component, OnDestroy, OnInit } from '@angular/core';
-import { TaskService } from '../../features/tasks/task.service';
-import { expandAnimation, expandFadeAnimation } from '../../ui/animations/expand.ani';
-import { LayoutService } from '../../core-ui/layout/layout.service';
-import { DragulaService } from 'ng2-dragula';
-import { TakeABreakService } from '../../features/time-tracking/take-a-break/take-a-break.service';
-import { ActivatedRoute } from '@angular/router';
-import { from, Subscription, timer, zip } from 'rxjs';
-import { TaskWithSubTasks } from '../../features/tasks/task.model';
-import { map, switchMap } from 'rxjs/operators';
-import { fadeAnimation } from '../../ui/animations/fade.ani';
-import { PlanningModeService } from '../../features/planning-mode/planning-mode.service';
+import {ChangeDetectionStrategy, Component, OnDestroy, OnInit} from '@angular/core';
+import {TaskService} from '../../features/tasks/task.service';
+import {expandAnimation, expandFadeAnimation} from '../../ui/animations/expand.ani';
+import {LayoutService} from '../../core-ui/layout/layout.service';
+import {DragulaService} from 'ng2-dragula';
+import {TakeABreakService} from '../../features/time-tracking/take-a-break/take-a-break.service';
+import {ActivatedRoute} from '@angular/router';
+import {from, Subscription, timer, zip} from 'rxjs';
+import {TaskWithSubTasks} from '../../features/tasks/task.model';
+import {map, switchMap} from 'rxjs/operators';
+import {fadeAnimation} from '../../ui/animations/fade.ani';
+import {PlanningModeService} from '../../features/planning-mode/planning-mode.service';
+
+const SUB = 'SUB';
+const PARENT = 'PARENT';
 
 @Component({
   selector: 'work-view',
@@ -52,19 +55,25 @@ export class WorkViewPageComponent implements OnInit, OnDestroy {
 
 
   ngOnInit() {
-    this._dragulaService.createGroup('PARENT', {
-      direction: 'vertical',
-      moves: function (el, container, handle) {
-        return handle.className.indexOf && handle.className.indexOf('handle-par') > -1;
-      }
-    });
+    const sub = this._dragulaService.find(SUB);
+    const par = this._dragulaService.find(PARENT);
 
-    this._dragulaService.createGroup('SUB', {
-      direction: 'vertical',
-      moves: function (el, container, handle) {
-        return handle.className.indexOf && handle.className.indexOf('handle-sub') > -1;
-      }
-    });
+    if (!sub) {
+      this._dragulaService.createGroup(SUB, {
+        direction: 'vertical',
+        moves: function (el, container, handle) {
+          return handle.className.indexOf && handle.className.indexOf('handle-sub') > -1;
+        }
+      });
+    }
+    if (!par) {
+      this._dragulaService.createGroup(PARENT, {
+        direction: 'vertical',
+        moves: function (el, container, handle) {
+          return handle.className.indexOf && handle.className.indexOf('handle-par') > -1;
+        }
+      });
+    }
 
     this._subs.add(this.taskService.backlogTasks$.subscribe(tasks => this.backlogTasks = tasks));
 
@@ -78,8 +87,6 @@ export class WorkViewPageComponent implements OnInit, OnDestroy {
 
 
   ngOnDestroy() {
-    this._dragulaService.destroy('PARENT');
-    this._dragulaService.destroy('SUB');
     if (this._switchListAnimationTimeout) {
       window.clearTimeout(this._switchListAnimationTimeout);
     }
