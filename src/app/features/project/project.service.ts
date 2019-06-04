@@ -23,6 +23,7 @@ import {
   selectArchivedProjects,
   selectCurrentProject,
   selectCurrentProjectId,
+  selectProjectBasicCfg,
   selectProjectBreakNr,
   selectProjectBreakNrForDay,
   selectProjectBreakTime,
@@ -32,7 +33,6 @@ import {
   selectProjectJiraCfg,
   selectProjectWorkEndForDay,
   selectProjectWorkStartForDay,
-  selectProjectBasicCfg,
   selectUnarchivedProjects
 } from './store/project.reducer';
 import {IssueIntegrationCfg, IssueProviderKey} from '../issue/issue';
@@ -76,7 +76,10 @@ export class ProjectService {
     distinctUntilChanged((a, b) => !a || !b || (JSON.stringify(a) === JSON.stringify(b))),
   );
 
-  currentId$: Observable<string> = this._store$.pipe(select(selectCurrentProjectId));
+  currentId$: Observable<string> = this._store$.pipe(
+    select(selectCurrentProjectId),
+    distinctUntilChanged(),
+  );
   currentId: string;
 
   onProjectChange$: Observable<any> = this._actions$.pipe(ofType(ProjectActionTypes.SetCurrentProject));

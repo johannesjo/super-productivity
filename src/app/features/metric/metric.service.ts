@@ -43,6 +43,8 @@ export class MetricService {
         from(this._taskService.getAllTasks()),
       ]).pipe(
         map(mapSimpleMetrics),
+        // because otherwise the page is always redrawn if a task is active
+        take(1),
       );
     }),
   );
