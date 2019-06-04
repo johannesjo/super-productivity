@@ -22,4 +22,9 @@
   &.full-width {
     max-width: none;
   }
+
+  &.no-box {
+    background: transparent !important;
+    box-shadow: none !important;;
+  }
 }

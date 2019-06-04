@@ -96,7 +96,7 @@
 
     <mat-tab label="Split it up!"
              *ngIf="(taskService.currentTaskOrCurrentParent$|async) as currentTask">
-      <section class="tab-inner">
+      <section class="tab-inner no-box">
         <p>Split up the task into as many small chunks as you can.</p>
 
         <task [task]="currentTask"></task>
