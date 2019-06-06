@@ -1,10 +1,10 @@
-import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
-import { JiraIssueService } from '../jira-issue/jira-issue.service';
-import { JiraApiService } from '../jira-api.service';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { SnackService } from '../../../../core/snack/snack.service';
-import { JiraIssue } from '../jira-issue/jira-issue.model';
-import { Task } from '../../../tasks/task.model';
+import {ChangeDetectionStrategy, Component, Inject} from '@angular/core';
+import {JiraIssueService} from '../jira-issue/jira-issue.service';
+import {JiraApiService} from '../jira-api.service';
+import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
+import {SnackService} from '../../../../core/snack/snack.service';
+import {JiraIssue} from '../jira-issue/jira-issue.model';
+import {Task} from '../../../tasks/task.model';
 
 @Component({
   selector: 'dialog-jira-add-worklog',
