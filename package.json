@@ -181,7 +181,7 @@
     "ngx-electron": "^2.1.1",
     "ngx-markdown": "^7.1.5",
     "protractor": "^5.4.2",
-    "rxjs": "^6.5.1",
+    "rxjs": "^6.5.2",
     "rxjs-tslint": "^0.1.7",
     "shortid": "^2.2.14",
     "throttle-debounce": "^2.0.1",
