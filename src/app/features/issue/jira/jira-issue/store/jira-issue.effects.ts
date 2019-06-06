@@ -1,38 +1,38 @@
-import { Injectable } from '@angular/core';
-import { Actions, Effect, ofType } from '@ngrx/effects';
-import { AddOpenJiraIssuesToBacklog, JiraIssueActionTypes, UpdateJiraIssue } from './jira-issue.actions';
-import { select, Store } from '@ngrx/store';
-import { concatMap, filter, map, switchMap, take, tap, throttleTime, withLatestFrom } from 'rxjs/operators';
-import { AddTask, TaskActionTypes, UpdateTask } from '../../../../tasks/store/task.actions';
-import { PersistenceService } from '../../../../../core/persistence/persistence.service';
-import { selectJiraIssueEntities, selectJiraIssueFeatureState, selectJiraIssueIds } from './jira-issue.reducer';
-import { selectCurrentProjectId, selectProjectJiraCfg } from '../../../../project/store/project.reducer';
-import { JiraApiService } from '../../jira-api.service';
-import { JiraIssueService } from '../jira-issue.service';
-import { ConfigService } from '../../../../config/config.service';
-import { Dictionary } from '@ngrx/entity';
-import { JiraIssue } from '../jira-issue.model';
-import { JiraCfg, JiraTransitionOption } from '../../jira';
-import { SnackService } from '../../../../../core/snack/snack.service';
-import { ProjectActionTypes } from '../../../../project/store/project.actions';
-import { Task } from '../../../../tasks/task.model';
-import { JIRA_TYPE } from '../../../issue.const';
+import {Injectable} from '@angular/core';
+import {Actions, Effect, ofType} from '@ngrx/effects';
+import {AddOpenJiraIssuesToBacklog, JiraIssueActionTypes, UpdateJiraIssue} from './jira-issue.actions';
+import {select, Store} from '@ngrx/store';
+import {concatMap, filter, map, switchMap, take, tap, throttleTime, withLatestFrom} from 'rxjs/operators';
+import {TaskActionTypes, UpdateTask} from '../../../../tasks/store/task.actions';
+import {PersistenceService} from '../../../../../core/persistence/persistence.service';
+import {selectJiraIssueEntities, selectJiraIssueFeatureState, selectJiraIssueIds} from './jira-issue.reducer';
+import {selectCurrentProjectId, selectProjectJiraCfg} from '../../../../project/store/project.reducer';
+import {JiraApiService} from '../../jira-api.service';
+import {JiraIssueService} from '../jira-issue.service';
+import {ConfigService} from '../../../../config/config.service';
+import {Dictionary} from '@ngrx/entity';
+import {JiraIssue} from '../jira-issue.model';
+import {JiraCfg, JiraTransitionOption} from '../../jira';
+import {SnackService} from '../../../../../core/snack/snack.service';
+import {ProjectActionTypes} from '../../../../project/store/project.actions';
+import {Task} from '../../../../tasks/task.model';
+import {JIRA_TYPE} from '../../../issue.const';
 import {
   selectAllTasks,
   selectCurrentTaskParentOrCurrent,
   selectTaskEntities,
   selectTaskFeatureState
 } from '../../../../tasks/store/task.selectors';
-import { TaskService } from '../../../../tasks/task.service';
-import { EMPTY, Observable, of, timer } from 'rxjs';
-import { TaskState } from '../../../../tasks/store/task.reducer';
-import { MatDialog } from '@angular/material/dialog';
-import { DialogJiraTransitionComponent } from '../../dialog-jira-transition/dialog-jira-transition.component';
-import { IssueLocalState } from '../../../issue';
-import { DialogConfirmComponent } from '../../../../../ui/dialog-confirm/dialog-confirm.component';
-import { DialogJiraAddWorklogComponent } from '../../dialog-jira-add-worklog/dialog-jira-add-worklog.component';
-import { JIRA_INITIAL_POLL_BACKLOG_DELAY, JIRA_INITIAL_POLL_DELAY, JIRA_POLL_INTERVAL } from '../../jira.const';
-import { isEmail } from '../../../../../util/is-email';
+import {TaskService} from '../../../../tasks/task.service';
+import {EMPTY, Observable, of, throwError, timer} from 'rxjs';
+import {TaskState} from '../../../../tasks/store/task.reducer';
+import {MatDialog} from '@angular/material/dialog';
+import {DialogJiraTransitionComponent} from '../../dialog-jira-transition/dialog-jira-transition.component';
+import {IssueLocalState} from '../../../issue';
+import {DialogConfirmComponent} from '../../../../../ui/dialog-confirm/dialog-confirm.component';
+import {DialogJiraAddWorklogComponent} from '../../dialog-jira-add-worklog/dialog-jira-add-worklog.component';
+import {JIRA_INITIAL_POLL_BACKLOG_DELAY, JIRA_INITIAL_POLL_DELAY, JIRA_POLL_INTERVAL} from '../../jira.const';
+import {isEmail} from '../../../../../util/is-email';
 
 const isEnabled_ = (jiraCfg) => jiraCfg && jiraCfg.isEnabled;
 const isEnabled = ([a, jiraCfg]: [any, JiraCfg, any?, any?, any?, any?]) => isEnabled_(jiraCfg);
@@ -172,6 +172,8 @@ export class JiraIssueEffects {
             msg: 'Jira: Unable to reassign ticket to yourself, because you didn\'t specify a username. Please visit the settings.',
           });
           return EMPTY;
+        } else if (!issue) {
+          return throwError({handledError: 'Jira: Issue Data not found'});
         } else if (!issue.assignee || issue.assignee.name !== currentUserName) {
           return this._matDialog.open(DialogConfirmComponent, {
             restoreFocus: true,
