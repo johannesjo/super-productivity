@@ -53,7 +53,7 @@ export const mapArchiveToWorklog = (
 
       }
       if (task.subTaskIds.length === 0) {
-        const timeSpentForTask = task.timeSpentOnDay[dateStr];
+        const timeSpentForTask = +task.timeSpentOnDay[dateStr];
         worklog[year].ent[month].ent[day].timeSpent
           = worklog[year].ent[month].ent[day].timeSpent
           + timeSpentForTask;
