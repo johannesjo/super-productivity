@@ -423,7 +423,7 @@
     "@angular-devkit/schematics" "7.0.7"
     typescript "3.1.6"
 
-"@schematics/angular@8.0.1":
+"@schematics/angular@8.0.1", "@schematics/angular@^8.0.1":
   version "8.0.1"
   resolved "https://registry.yarnpkg.com/@schematics/angular/-/angular-8.0.1.tgz#8d5bfb00c0ba79cc248c6d17b4782b00b6453d79"
   integrity sha512-/FyFJbHuxWfvVgTBSnEa0fiDgeLhAmfK7NeT8Owj2xDAqvVMxfSxupfdr7a9cDr82WImW09SX7PUlv2EomcGLA==
