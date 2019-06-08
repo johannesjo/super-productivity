@@ -5337,10 +5337,10 @@ ng2-charts-schematics@^0.1.7:
     jasmine "^3.0.0"
     typescript "~3.2.2"
 
-ng2-charts@^2.2.3:
-  version "2.2.3"
-  resolved "https://registry.yarnpkg.com/ng2-charts/-/ng2-charts-2.2.3.tgz#ca2b9fc1f2bd908b48e826bb6cca2161830afa44"
-  integrity sha512-Kxj2bewn537xGFVkR7AgDmfqV+YH4hIL4R36EjlUI9WCWnphzY+VKZGX+D+usXd8e+znuqly+sbGHjddLxupUA==
+ng2-charts@^2.3.0:
+  version "2.3.0"
+  resolved "https://registry.yarnpkg.com/ng2-charts/-/ng2-charts-2.3.0.tgz#e4dd1f7fe12dc2635d5e8c4f101a8d4c4f433754"
+  integrity sha512-D5K7OqF0m5lOBYvNOsraoEo4OPHja9zfGNj+HWy2nUcP0LP2s+Y/QaQlkG/1rHlwXq9HPm8rLxzSutA0eLHxGQ==
   dependencies:
     "@types/chart.js" "^2.7.48"
     lodash "^4.17.11"
@@ -5360,10 +5360,10 @@ ngx-electron@^2.1.1:
   dependencies:
     tslib "^1.9.0"
 
-ngx-markdown@^7.1.5:
-  version "7.1.5"
-  resolved "https://registry.yarnpkg.com/ngx-markdown/-/ngx-markdown-7.1.5.tgz#27fe3b88e3e3494c0ad778123b959c189e76452f"
-  integrity sha512-boL1eQkdHHwVQuLsRF4eaIxuBx2PoJidO/YStLU2a0u6Q7VCjaZI09oSPgsAmsDjJ/Hu7ZWGPv475H7BGJ8iCw==
+ngx-markdown@^8.0.2:
+  version "8.0.2"
+  resolved "https://registry.yarnpkg.com/ngx-markdown/-/ngx-markdown-8.0.2.tgz#060257801686fa58adb21d69c264e1c1cff54a84"
+  integrity sha512-dLF205/JrSI7pOIgsrikhf9KYF6yiP797FuHGjVEw51KhHfuhCoR+3pl7Ky2vxuQBJjmkNGbgH75+Qy2SAnFEg==
   dependencies:
     "@types/marked" "^0.6.0"
     marked "^0.6.0"
@@ -6675,16 +6675,15 @@ run-queue@^1.0.0, run-queue@^1.0.3:
   dependencies:
     aproba "^1.1.1"
 
-rxjs-tslint@^0.1.7:
-  version "0.1.7"
-  resolved "https://registry.yarnpkg.com/rxjs-tslint/-/rxjs-tslint-0.1.7.tgz#5ed841d1837cc0dc2187e5b57a2d45aa2af337e4"
-  integrity sha512-NnOfqutNfdT7VQnQm32JLYh2gDZjc0gdWZFtrxf/czNGkLKJ1nOO6jbKAFI09W0f9lCtv6P2ozxjbQH8TSPPFQ==
+rxjs-tslint@0.1.5:
+  version "0.1.5"
+  resolved "https://registry.yarnpkg.com/rxjs-tslint/-/rxjs-tslint-0.1.5.tgz#9cddba80633e155fb47f7f0a25a6e33971f7dbf9"
+  integrity sha512-odvEAx6VoZSJs5o9gWZ7SxgTuS8ldq0mr4qnprbr6flNtIt4DtNJSYJpBK0WEy0o+f1oe92XVHrmgco1e7Cpdw==
   dependencies:
     chalk "^2.4.0"
     optimist "^0.6.1"
     tslint "^5.9.1"
     tsutils "^2.25.0"
-    typescript ">=2.8.3"
 
 rxjs@6.3.3:
   version "6.3.3"
@@ -7791,7 +7790,7 @@ typescript@3.4.4:
   resolved "https://registry.yarnpkg.com/typescript/-/typescript-3.4.4.tgz#aac4a08abecab8091a75f10842ffa0631818f785"
   integrity sha512-xt5RsIRCEaf6+j9AyOBgvVuAec0i92rgCaS3S+UVf5Z/vF2Hvtsw08wtUTJqp4djwznoAgjSxeCcU4r+CcDBJA==
 
-typescript@>=2.8.3, typescript@~3.4.5:
+typescript@~3.4.5:
   version "3.4.5"
   resolved "https://registry.yarnpkg.com/typescript/-/typescript-3.4.5.tgz#2d2618d10bb566572b8d7aad5180d84257d70a99"
   integrity sha512-YycBxUb49UUhdNMU5aJ7z5Ej2XGmaIBL0x34vZ82fn3hGvD+bgrMrVDpatgz2f7YxUMJxMkbWxJZeAvDxVe7Vw==
