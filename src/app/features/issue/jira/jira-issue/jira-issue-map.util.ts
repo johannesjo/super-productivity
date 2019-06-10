@@ -1,4 +1,4 @@
-import { JiraAttachment, JiraAuthor, JiraChangelogEntry, JiraComment, JiraIssue, } from './jira-issue.model';
+import {JiraAttachment, JiraAuthor, JiraChangelogEntry, JiraComment, JiraIssue,} from './jira-issue.model';
 import {
   JiraIssueOriginal,
   JiraOriginalAttachment,
@@ -6,11 +6,11 @@ import {
   JiraOriginalChangelog,
   JiraOriginalComment
 } from '../jira-api-responses';
-import { JiraCfg } from '../jira';
-import { DropPasteIcons, DropPasteInputType } from '../../../../core/drop-paste-input/drop-paste-input';
-import { IssueProviderKey, SearchResultItem } from '../../issue';
-import { Attachment } from '../../../attachment/attachment.model';
-import { dedupeByKey } from '../../../../util/de-dupe-by-key';
+import {JiraCfg} from '../jira';
+import {DropPasteIcons, DropPasteInputType} from '../../../../core/drop-paste-input/drop-paste-input';
+import {IssueProviderKey, SearchResultItem} from '../../issue';
+import {Attachment} from '../../../attachment/attachment.model';
+import {dedupeByKey} from '../../../../util/de-dupe-by-key';
 
 const matchProtocolRegEx = /(^[^:]+):\/\//;
 

@@ -43,7 +43,7 @@ export class JiraCfgComponent implements OnInit, OnDestroy {
     tap(() => this.isLoading$.next(true)),
     switchMap((searchTerm) => {
       return (searchTerm && searchTerm.length > 1)
-        ? this._jiraApiService.search(searchTerm, false, 50)
+        ? this._jiraApiService.issuePicker(searchTerm)
           .pipe(
             catchError(() => {
               return [];
