@@ -7,7 +7,7 @@ import {
   Inject,
   OnInit
 } from '@angular/core';
-import { MatIconRegistry } from '@angular/material/icon';
+import {MatIconRegistry} from '@angular/material/icon';
 import {DomSanitizer} from '@angular/platform-browser';
 import {ProjectService} from './features/project/project.service';
 import {Project} from './features/project/project.model';
@@ -176,6 +176,19 @@ export class AppComponent implements OnInit {
 
       this._setTheme(cp.themeColor, isDarkTheme, cp.isReducedTheme);
     });
+
+    // TODO beautify code here
+    if (IS_ELECTRON && this._electronService.isMacOS) {
+      this._electronService.remote.systemPreferences.subscribeNotification('AppleInterfaceThemeChangedNotification', () => {
+        this._projectService.currentProject$.pipe(take(1)).subscribe(cp => {
+          const isDarkTheme = (IS_ELECTRON && this._electronService.isMacOS)
+            ? this._electronService.remote.systemPreferences.isDarkMode()
+            : cp.isDarkTheme;
+
+          this._setTheme(cp.themeColor, isDarkTheme, cp.isReducedTheme);
+        });
+      });
+    }
   }
 
   getPage(outlet) {
