@@ -1,3 +1,16 @@
+## [2.7.8](https://github.com/johannesjo/super-productivity/compare/v2.7.7...v2.7.8) (2019-06-10)
+
+
+### Bug Fixes
+
+* **jira:** cannot read property assignee of undefined ([0bee15a](https://github.com/johannesjo/super-productivity/commit/0bee15a))
+* **jira:** duplicate worklog submission [#176](https://github.com/johannesjo/super-productivity/issues/176) ([a53c7c5](https://github.com/johannesjo/super-productivity/commit/a53c7c5))
+* potential error for worklog ([df5e55f](https://github.com/johannesjo/super-productivity/commit/df5e55f))
+* quick fix live update for global dark mode on mac os [#179](https://github.com/johannesjo/super-productivity/issues/179) ([d15b5ef](https://github.com/johannesjo/super-productivity/commit/d15b5ef))
+* **jira:** issue selection for transition selection not working ([c21c4a1](https://github.com/johannesjo/super-productivity/commit/c21c4a1))
+
+
+
 ## [2.7.7](https://github.com/johannesjo/super-productivity/compare/v2.7.6...v2.7.7) (2019-06-04)
 
 
