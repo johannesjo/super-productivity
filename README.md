@@ -76,14 +76,6 @@ When starting the app via the command line the path to where emergency backups a
 <img alt="worklog" src="screens/screen_worklog.png" width="100%">
 <img alt="mobile" src="screens/screen_mobile.png">
 
-## Build and run for yourself
-```
-git clone https://github.com/johannesjo/sp2.git
-cd super-productivity
-yarn # or npm install
-ng serve
-```
-
 ## Contributing
 There are several ways to help. Publishing a bug or a feature request is a good first step. Also making it more popular by posting it on social media etc. is great, because it means more users, which in turn leads to more people testing the app and also more people contributing code.
 
@@ -106,6 +98,33 @@ There are several ways to help. Publishing a bug or a feature request is a good 
 
 
 **Pull requests** are of course also very welcome. Please make sure that you're following the [angular commit guidelines](https://github.com/angular/angular.js/blob/master/DEVELOPERS.md#commits) and to also include the issue number in your commit message, if you're fixing a particular issue (e.g.: `feat: add nice feature with the number #31`).
+
+### Running the development server
+To run the development server you need to have node installed at least in the version 10. Go to https://nodejs.org for installation instructions.
+
+**Clone repo**
+```
+git clone https://github.com/johannesjo/super-productivity.git
+```
+**Install dependencies**
+```
+cd super-productivity
+npm install
+npm install -g @angular/cli
+```
+**Run the dev server**
+```
+ng serve
+```
+Afterwards you can open http://localhost:4200 in your browser. For most adjustments this should be enough and also enables you to use the [redux dev tools](https://chrome.google.com/webstore/detail/redux-devtools/lmhkpmbekcpmknklioeibfkpmmfibljd?hl=de). 
+
+If you want to run the app standalone do the following:
+```
+ng serve
+
+# in a new console tab
+npm start
+```
 
 ### Packaging the app
 Packaging the app is done via [electron-builder](https://github.com/electron-userland/electron-builder). To start packaging run `yarn dist`. If you want to add new platforms and experiment with the build options the easiest way to do so is manipulating the `build` property in the [package.json](https://github.com/johannesjo/super-productivity/blob/develop/package.json), but you can also use the [command line interface of electron builder](https://www.electron.build/cli).
