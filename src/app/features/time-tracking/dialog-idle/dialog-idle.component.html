@@ -36,11 +36,13 @@
             type="button">
       <mat-icon *ngIf="!isCreate">track_changes</mat-icon>
       <mat-icon *ngIf="isCreate">add</mat-icon>
-      <!--      <mat-icon>free_breakfast</mat-icon>-->
-      Task& Break
+<!--      <mat-icon style="margin-left: -4px;">free_breakfast</mat-icon>-->
+      Task+Break
+      <mat-icon >free_breakfast</mat-icon>
     </button>
 
     <button (click)="trackAsBreak()"
+            color="primary"
             mat-raised-button
             type="button">
       <mat-icon>free_breakfast</mat-icon>
@@ -48,7 +50,8 @@
     </button>
 
     <button (click)="skipTrack()"
-            mat-raised-button
+            color=""
+            mat-button
             type="button">
       <mat-icon>skip_next</mat-icon>
       Skip

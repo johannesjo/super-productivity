@@ -57,6 +57,8 @@ export class IdleService {
     });
 
     // window.setTimeout(() => {
+    //   console.log('I am here!');
+    //
     //   this.handleIdle(800000);
     // }, 700);
   }
