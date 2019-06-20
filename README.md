@@ -99,26 +99,55 @@ There are several ways to help. Publishing a bug or a feature request is a good 
 
 **Pull requests** are of course also very welcome. Please make sure that you're following the [angular commit guidelines](https://github.com/angular/angular.js/blob/master/DEVELOPERS.md#commits) and to also include the issue number in your commit message, if you're fixing a particular issue (e.g.: `feat: add nice feature with the number #31`).
 
-### Running the development server
-To run the development server you need to have node installed at least in the version 10. Go to https://nodejs.org for installation instructions.
+### How to contribute 
+#### Setup
+Follow these steps if you want to contribute to the project. These instructions are made for Windows but Mac or Linux could be easily extrapolated.
+1. Install latest LTS nodejs version 10 from https://nodejs.org. Chose the right version for your OS
+2. Fork the original Super Productivity repo into your space
+    <img alt="worklog" src="screens/Forking.png" width="100%">
+3. Clone new Forked repo from your space
+    * Usually first create a directory for all your projects (for example c:\source)
+    * Open bash or cmd.exe
+    * cd c:\source
+    * git clone https://github.com/[your-user-name]/super-productivity.git
+    * cd super-prodactivity
+4. Install dependencies
+    * npm install
+    * npm install -g @angular/cli
 
-**Clone repo**
-```
-git clone https://github.com/johannesjo/super-productivity.git
-```
-**Install dependencies**
-```
-cd super-productivity
-npm install
-npm install -g @angular/cli
-```
-**Run the dev server**
-```
-ng serve
-```
-Afterwards you can open http://localhost:4200 in your browser. For most adjustments this should be enough and also enables you to use the [redux dev tools](https://chrome.google.com/webstore/detail/redux-devtools/lmhkpmbekcpmknklioeibfkpmmfibljd?hl=de). 
+5. Setup remote that points at the original repo, that way you can always integrate all hte latest changes from the original repo
 
-If you want to run the app standalone do the following:
+    * git remote add upstream https://github.com/johannesjo/super-productivity
+
+    You now have two remotes for this project on disk: 
+    * origin which points to your GitHub fork of the project. You can read and write to this remote.*
+    * upstream which points to the main project’s GitHub repository. You can only read from this remote.
+6. Update your repo with latest code
+    * git checkout master
+    * git pull upstream master && git push origin master
+7. Do some work in a new branch!!!!
+    
+      Checkout a new branch for example
+    * git checkout -b hotfix/readme-update
+8. Do you normal developement checkin code (git add, git commit -am "My Cool checkin" etc.)
+9. Create a pull request
+    * git push -u origin hotfix/readme-update
+    * This will create the branch on your GitHub project. The -u flag links this branch with the remote one, so that in the future, you can simply type git push origin
+10. Go to your Fork in the browser https://github.com/[your-user-name]/super-productivity
+    * You will see your recently pushed branches
+    * Now you can press the button "Compare & pull request"
+11. Respond to a code review (https://lornajane.net/posts/2015/code-reviews-before-you-even-run-the-code)
+
+
+#### Developement
+Branch! **Always branch for each feature you do** refer to previous section
+1. You can run and develop in Chrome with  [redux dev tools](https://chrome.google.com/webstore/detail/redux-devtools/lmhkpmbekcpmknklioeibfkpmmfibljd?hl=de). 
+    * Install the extention into Chrome
+    * run "ng serve" command from the command promt
+    * Afterwards you can open http://localhost:4200 in your browser. 
+    * Do some fun developent
+
+2. If you want to run the app standalone do the following:
 ```
 ng serve
 
