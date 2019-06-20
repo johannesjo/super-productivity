@@ -159,6 +159,7 @@
     "core-js": "^3.1.3",
     "electron": "4.2.3",
     "electron-builder": "^20.39.0",
+    "electron-prebuilt": "^1.4.13",
     "electron-reload": "^1.2.5",
     "hammerjs": "^2.0.8",
     "husky": "^2.3.0",

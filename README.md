@@ -103,43 +103,43 @@ There are several ways to help. Publishing a bug or a feature request is a good 
 #### Setup
 Follow these steps if you want to contribute to the project. These instructions are made for Windows but Mac or Linux could be easily extrapolated.
 1. Install latest LTS nodejs version 10 from https://nodejs.org. Chose the right version for your OS
-2. Fork the original Super Productivity repo into your space
+2. Install yarn https://yarnpkg.com/en/docs/install#windows-stable
+3. Fork the original Super Productivity repo into your space
     <img alt="worklog" src="screens/Forking.png" width="100%">
-3. Clone new Forked repo from your space
+4. Clone new Forked repo from your space
     * Usually first create a directory for all your projects (for example c:\source)
     * Open bash or cmd.exe
     * cd c:\source
     * git clone https://github.com/[your-user-name]/super-productivity.git
     * cd super-prodactivity
-4. Install dependencies
+5. Install dependencies
     * npm install
     * npm install -g @angular/cli
 
-5. Setup remote that points at the original repo, that way you can always integrate all hte latest changes from the original repo
+6. Setup remote that points at the original repo, that way you can always integrate all hte latest changes from the original repo
 
     * git remote add upstream https://github.com/johannesjo/super-productivity
 
     You now have two remotes for this project on disk: 
     * origin which points to your GitHub fork of the project. You can read and write to this remote.*
     * upstream which points to the main project’s GitHub repository. You can only read from this remote.
-6. Update your repo with latest code
+7. Update your repo with latest code
     * git checkout master
     * git pull upstream master && git push origin master
-7. Do some work in a new branch!!!!
+8. Do some work in a new branch!!!!
     
       Checkout a new branch for example
     * git checkout -b hotfix/readme-update
-8. Do you normal developement checkin code (git add, git commit -am "My Cool checkin" etc.)
-9. Create a pull request
+9. Do you normal developement checkin code (git add, git commit -am "My Cool checkin" etc.)
+10. Create a pull request
     * git push -u origin hotfix/readme-update
     * This will create the branch on your GitHub project. The -u flag links this branch with the remote one, so that in the future, you can simply type git push origin
-10. Go to your Fork in the browser https://github.com/[your-user-name]/super-productivity
+11. Go to your Fork in the browser https://github.com/[your-user-name]/super-productivity
     * You will see your recently pushed branches
     * Now you can press the button "Compare & pull request"
-11. Respond to a code review (https://lornajane.net/posts/2015/code-reviews-before-you-even-run-the-code)
+12. Respond to a code review (https://lornajane.net/posts/2015/code-reviews-before-you-even-run-the-code)
 
-
-#### Developement
+#### Developement Tips
 Branch! **Always branch for each feature you do** refer to previous section
 1. You can run and develop in Chrome with  [redux dev tools](https://chrome.google.com/webstore/detail/redux-devtools/lmhkpmbekcpmknklioeibfkpmmfibljd?hl=de). 
     * Install the extention into Chrome
@@ -154,6 +154,14 @@ ng serve
 # in a new console tab
 npm start
 ```
+3. If you want to use Visual Studio Code for ease of developent
+    * Downlaod the latest version of [Visual Studio Code](https://code.visualstudio.com/Download).
+    * Install [Chrome Debugger Extension](https://marketplace.visualstudio.com/items?itemName=msjsdiag.debugger-for-chrome)
+    * Install [NPM Extension](https://marketplace.visualstudio.com/items?itemName=eg2.vscode-npm-script)
+    * In the new command prompt go to super-productivity directory (ex:c:\source\super-productivyty)
+    * Type "code ."
+    * Type "ng serve"
+    * When VSCode opens and "ng serve" finishes you should be able to Press F5 and start debugging
 
 ### Packaging the app
 Packaging the app is done via [electron-builder](https://github.com/electron-userland/electron-builder). To start packaging run `yarn dist`. If you want to add new platforms and experiment with the build options the easiest way to do so is manipulating the `build` property in the [package.json](https://github.com/johannesjo/super-productivity/blob/develop/package.json), but you can also use the [command line interface of electron builder](https://www.electron.build/cli).
