@@ -1,16 +1,7 @@
 import shortid from 'shortid';
-import {
-  debounceTime,
-  distinctUntilChanged,
-  first,
-  map,
-  shareReplay,
-  switchMap,
-  take,
-  withLatestFrom
-} from 'rxjs/operators';
-import { Injectable } from '@angular/core';
-import {combineLatest, forkJoin, from, Observable} from 'rxjs';
+import {debounceTime, distinctUntilChanged, first, map, shareReplay, take, withLatestFrom} from 'rxjs/operators';
+import {Injectable} from '@angular/core';
+import {Observable} from 'rxjs';
 import {
   DEFAULT_TASK,
   DropListModelSource,
@@ -20,7 +11,7 @@ import {
   TaskWithIssueData,
   TaskWithSubTasks
 } from './task.model';
-import { select, Store } from '@ngrx/store';
+import {select, Store} from '@ngrx/store';
 import {
   AddSubTask,
   AddTask,
@@ -50,10 +41,10 @@ import {
   UpdateTaskReminder,
   UpdateTaskUi
 } from './store/task.actions';
-import { initialTaskState, taskReducer, TaskState, } from './store/task.reducer';
-import { PersistenceService } from '../../core/persistence/persistence.service';
-import { IssueData, IssueProviderKey } from '../issue/issue';
-import { TimeTrackingService } from '../time-tracking/time-tracking.service';
+import {initialTaskState, taskReducer, TaskState,} from './store/task.reducer';
+import {PersistenceService} from '../../core/persistence/persistence.service';
+import {IssueData, IssueProviderKey} from '../issue/issue';
+import {TimeTrackingService} from '../time-tracking/time-tracking.service';
 import {
   selectAllTasksWithIssueData,
   selectBacklogTasksWithSubTasks,
@@ -80,15 +71,15 @@ import {
   selectTodaysUnDoneTasksWithSubTasks,
   selectTotalTimeWorkedOnTodaysTasks
 } from './store/task.selectors';
-import { stringToMs } from '../../ui/duration/string-to-ms.pipe';
-import { getWorklogStr } from '../../util/get-work-log-str';
-import { Actions, ofType } from '@ngrx/effects';
-import { IssueService } from '../issue/issue.service';
-import { ProjectService } from '../project/project.service';
-import { SnackService } from '../../core/snack/snack.service';
-import { RoundTimeOption } from '../project/project.model';
-import { Dictionary } from '@ngrx/entity';
-import { GITHUB_TYPE, LEGACY_GITHUB_TYPE } from '../issue/issue.const';
+import {stringToMs} from '../../ui/duration/string-to-ms.pipe';
+import {getWorklogStr} from '../../util/get-work-log-str';
+import {Actions, ofType} from '@ngrx/effects';
+import {IssueService} from '../issue/issue.service';
+import {ProjectService} from '../project/project.service';
+import {SnackService} from '../../core/snack/snack.service';
+import {RoundTimeOption} from '../project/project.model';
+import {Dictionary} from '@ngrx/entity';
+import {GITHUB_TYPE, LEGACY_GITHUB_TYPE} from '../issue/issue.const';
 
 
 @Injectable({
@@ -489,19 +480,29 @@ export class TaskService {
     return null;
   }
 
-  // async getByIdsFromEverywhere(id: string, projectId: string = this._projectService.currentId): Promise<Task> {
-  //   const curProject = await this._persistenceService.task.load(projectId);
-  //   if (curProject && curProject.entities[id]) {
-  //     return curProject.entities[id];
-  //   }
-  //
-  //   const archive = await this._persistenceService.taskArchive.load(projectId);
-  //   if (archive && archive.entities[id]) {
-  //     return archive.entities[id];
-  //   }
-  //
-  //   return null;
-  // }
+  // NOTE: archived tasks not included
+  async getByIdsForProject(taskIds: string[], projectId: string): Promise<Task[]> {
+    const taskState = await this._persistenceService.task.load(projectId);
+    if (taskState && taskState.entities) {
+      return taskIds
+        .map(taskId => taskState.entities[taskId])
+        .filter(task => !!task);
+    }
+    return null;
+  }
+
+  // NOTE: archived tasks not included
+  async getByIdsFromAllProjects(projectIdTaskMap: { [key: string]: string[] }): Promise<Task[]> {
+    const projectIds = Object.keys(projectIdTaskMap);
+    const taskData = await Promise.all(projectIds.map(async (projectId) => {
+      return this.getByIdsForProject(projectIdTaskMap[projectId], projectId);
+    }));
+
+    if (taskData) {
+      return taskData.reduce((acc, val) => acc.concat(val), []);
+    }
+    return null;
+  }
 
 
   setDone(id: string) {
