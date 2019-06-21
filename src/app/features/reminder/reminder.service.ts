@@ -174,7 +174,7 @@ export class ReminderService {
     this._snackService.open({type: 'ERROR', msg: 'Error for reminder interface'});
   }
 
-  private async _getRelatedDataForReminder(id: string, projectId: string, type: ReminderType): Promise<Task | Note> {
+   async _getRelatedDataForReminder(id: string, projectId: string, type: ReminderType): Promise<Task | Note> {
     switch (type) {
       case 'NOTE':
         return await this._noteService.getByIdFromEverywhere(id, projectId);

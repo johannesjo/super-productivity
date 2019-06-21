@@ -1,7 +1,16 @@
 import shortid from 'shortid';
-import { debounceTime, distinctUntilChanged, first, map, shareReplay, take, withLatestFrom } from 'rxjs/operators';
+import {
+  debounceTime,
+  distinctUntilChanged,
+  first,
+  map,
+  shareReplay,
+  switchMap,
+  take,
+  withLatestFrom
+} from 'rxjs/operators';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import {combineLatest, forkJoin, from, Observable} from 'rxjs';
 import {
   DEFAULT_TASK,
   DropListModelSource,
@@ -244,6 +253,7 @@ export class TaskService {
     distinctUntilChanged(),
   );
 
+
   private _allTasksWithIssueData$: Observable<TaskWithIssueData[]> = this._store.pipe(select(selectAllTasksWithIssueData));
 
 
@@ -478,6 +488,20 @@ export class TaskService {
 
     return null;
   }
+
+  // async getByIdsFromEverywhere(id: string, projectId: string = this._projectService.currentId): Promise<Task> {
+  //   const curProject = await this._persistenceService.task.load(projectId);
+  //   if (curProject && curProject.entities[id]) {
+  //     return curProject.entities[id];
+  //   }
+  //
+  //   const archive = await this._persistenceService.taskArchive.load(projectId);
+  //   if (archive && archive.entities[id]) {
+  //     return archive.entities[id];
+  //   }
+  //
+  //   return null;
+  // }
 
 
   setDone(id: string) {

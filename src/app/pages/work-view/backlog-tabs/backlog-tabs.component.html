@@ -23,12 +23,13 @@
   <mat-tab>
     <ng-template mat-tab-label>
       <mat-icon class="color-contrast">alarm</mat-icon>
-      <span class="tab-label-text color-contrast">Scheduled ({{(scheduledTasks$|async)?.length}})</span>
+      <span class="tab-label-text color-contrast">Scheduled ({{(scheduledTaskService.scheduledTasksForCurrentProject$|async)?.length}}
+        )</span>
     </ng-template>
 
     <div class="tab-wrapper bg-400">
       <div class="component-wrapper page-wrapper">
-        <p *ngIf="!(scheduledTasks$|async)?.length"
+        <p *ngIf="!(scheduledTaskService.scheduledTasksForCurrentProject$|async)?.length"
            class="no-scheduled-tasks">
           There are currently no scheduled tasks. You can schedule a task by choosing "Schedule Task" in the task
           context menu. To open it click on the 3 little dots on the right of a task.
@@ -36,8 +37,8 @@
 
 
         <div class="tasks"
-             [@standardList]="(scheduledTasks$|async)?.length">
-          <mat-card *ngFor="let task of (scheduledTasks$|async); trackBy: trackByFn;"
+             [@standardList]="(scheduledTaskService.scheduledTasksForCurrentProject$|async)?.length">
+          <mat-card *ngFor="let task of (scheduledTaskService.scheduledTasksForCurrentProject$|async); trackBy: trackByFn;"
                     class="scheduled-task">
             <mat-card-content>
               <div class="content">
@@ -66,6 +67,42 @@
             </mat-card-content>
           </mat-card>
         </div>
+
+        <h2 class="mat-h2" style="text-align: center;">For other Projects</h2>
+
+        <div class="tasks"
+             [@standardList]="(scheduledTaskService.scheduledTasksForOtherProjects$|async)?.length">
+          <mat-card *ngFor="let task of (scheduledTaskService.scheduledTasksForOtherProjects$|async); trackBy: trackByFn;"
+                    class="scheduled-task">
+            <mat-card-content>
+              <div class="content">
+                <div class="title-and-due-date">
+                  <div class="title">{{task.title}}</div>
+                  <div class="due-date">{{task.reminderData.remindAt|humanizeTimestamp}}</div>
+                </div>
+                <div class="controls">
+                  <button mat-mini-fab
+                          color="primary"
+                          (click)="startTask(task)">
+                    <mat-icon>play_arrow</mat-icon>
+                  </button>
+                  <button mat-mini-fab
+                          color=""
+                          (click)="editReminder(task)">
+                    <mat-icon>alarm</mat-icon>
+                  </button>
+                  <button mat-mini-fab
+                          color="warn"
+                          (click)="removeReminder(task)">
+                    <mat-icon>alarm_off</mat-icon>
+                  </button>
+                </div>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+
+
       </div>
     </div>
   </mat-tab>

@@ -1,12 +1,14 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { TaskService } from '../../../features/tasks/task.service';
-import { ReminderService } from '../../../features/reminder/reminder.service';
-import { DialogAddTaskReminderComponent } from '../../../features/tasks/dialog-add-task-reminder/dialog-add-task-reminder.component';
-import { MatDialog } from '@angular/material/dialog';
-import { TaskWithReminderData } from '../../../features/tasks/task.model';
-import { standardListAnimation } from '../../../ui/animations/standard-list.ani';
-import { combineLatest, Observable } from 'rxjs';
-import { distinctUntilChanged, map } from 'rxjs/operators';
+import {ChangeDetectionStrategy, Component} from '@angular/core';
+import {TaskService} from '../../../features/tasks/task.service';
+import {ReminderService} from '../../../features/reminder/reminder.service';
+import {DialogAddTaskReminderComponent} from '../../../features/tasks/dialog-add-task-reminder/dialog-add-task-reminder.component';
+import {MatDialog} from '@angular/material/dialog';
+import {TaskWithReminderData} from '../../../features/tasks/task.model';
+import {standardListAnimation} from '../../../ui/animations/standard-list.ani';
+import {combineLatest, forkJoin, from, Observable} from 'rxjs';
+import {map, shareReplay, switchMap} from 'rxjs/operators';
+import {ProjectService} from '../../../features/project/project.service';
+import {ScheduledTaskService} from '../../../features/tasks/scheduled-task.service';
 
 @Component({
   selector: 'backlog-tabs',
@@ -16,33 +18,19 @@ import { distinctUntilChanged, map } from 'rxjs/operators';
   animations: [standardListAnimation]
 })
 export class BacklogTabsComponent {
-  selectedIndex = 0;
-  scheduledTasks$: Observable<TaskWithReminderData[]> = combineLatest(
-    this.taskService.scheduledTasksWOData$,
-    this._reminderService.reminders$,
-  ).pipe(
-    map(([tasks, reminders]) => tasks
-      .map((task) => {
-        return {
-          ...task,
-          reminderData: this._reminderService.getById(task.reminderId),
-        };
-      })
-      // models might not be in sync just yet :/
-      .filter(task => task.reminderData)
-      .sort((a, b) => a.reminderData.remindAt - b.reminderData.remindAt)
-    ),
-    distinctUntilChanged(),
-  );
+  // TODO switch back to 0
+  selectedIndex = 1;
 
   constructor(
     public taskService: TaskService,
+    public scheduledTaskService: ScheduledTaskService,
     private _reminderService: ReminderService,
     private _matDialog: MatDialog,
   ) {
   }
 
   indexChange(index) {
+    this.selectedIndex = index;
   }
 
   trackByFn(i: number, task: TaskWithReminderData) {
