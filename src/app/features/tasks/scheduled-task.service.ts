@@ -26,13 +26,14 @@ export class ScheduledTaskService {
           map((tasks) => tasks.map(task => {
               return {
                 ...task,
-                reminderData: this._reminderService.getById(task.reminderId),
+                reminderData: reminders.find(reminder => reminder.relatedId === task.id)
               };
             }),
           ));
       },
     ),
-    map(tasks => tasks.sort((a, b) => a.reminderData.remindAt - b.reminderData.remindAt)),
+    map(tasks => tasks
+      .sort((a, b) => a.reminderData.remindAt - b.reminderData.remindAt)),
     shareReplay(),
   );
 
@@ -55,7 +56,6 @@ export class ScheduledTaskService {
     private _reminderService: ReminderService,
     private _projectService: ProjectService,
   ) {
-    this.allScheduledTasks$.subscribe((v) => console.log('allScheduledTasks$', v));
-
+    // this.allScheduledTasks$.subscribe((v) => console.log('allScheduledTasks$', v));
   }
 }

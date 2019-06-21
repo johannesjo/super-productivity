@@ -1,13 +1,10 @@
-import {ChangeDetectionStrategy, Component} from '@angular/core';
+import {ChangeDetectionStrategy, Component, EventEmitter, Output} from '@angular/core';
 import {TaskService} from '../../../features/tasks/task.service';
 import {ReminderService} from '../../../features/reminder/reminder.service';
 import {DialogAddTaskReminderComponent} from '../../../features/tasks/dialog-add-task-reminder/dialog-add-task-reminder.component';
 import {MatDialog} from '@angular/material/dialog';
 import {TaskWithReminderData} from '../../../features/tasks/task.model';
 import {standardListAnimation} from '../../../ui/animations/standard-list.ani';
-import {combineLatest, forkJoin, from, Observable} from 'rxjs';
-import {map, shareReplay, switchMap} from 'rxjs/operators';
-import {ProjectService} from '../../../features/project/project.service';
 import {ScheduledTaskService} from '../../../features/tasks/scheduled-task.service';
 
 @Component({
@@ -18,8 +15,9 @@ import {ScheduledTaskService} from '../../../features/tasks/scheduled-task.servi
   animations: [standardListAnimation]
 })
 export class BacklogTabsComponent {
-  // TODO switch back to 0
-  selectedIndex = 1;
+  selectedIndex = 0;
+
+  @Output() closeBacklog = new EventEmitter<any>();
 
   constructor(
     public taskService: TaskService,
@@ -45,6 +43,11 @@ export class BacklogTabsComponent {
     }
     this.taskService.removeReminder(task.id, task.reminderId);
     this.taskService.setCurrentId(task.id);
+  }
+
+  startTaskFromOtherProject(task: TaskWithReminderData) {
+    this.taskService.startTaskFromOtherProject(task.id, task.reminderData.projectId);
+    this.closeBacklog.emit();
   }
 
   removeReminder(task: TaskWithReminderData) {

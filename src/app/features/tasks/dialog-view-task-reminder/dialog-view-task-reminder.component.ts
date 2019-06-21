@@ -1,13 +1,14 @@
-import { ChangeDetectionStrategy, Component, Inject, OnDestroy } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { Reminder } from '../../reminder/reminder.model';
-import { Task } from '../task.model';
-import { TaskService } from '../task.service';
-import { Observable, Subscription } from 'rxjs';
-import { ReminderService } from '../../reminder/reminder.service';
-import { switchMap, take } from 'rxjs/operators';
-import { ProjectService } from '../../project/project.service';
-import { Project } from '../../project/project.model';
+import {ChangeDetectionStrategy, Component, Inject, OnDestroy} from '@angular/core';
+import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
+import {Reminder} from '../../reminder/reminder.model';
+import {Task} from '../task.model';
+import {TaskService} from '../task.service';
+import {Observable, Subscription} from 'rxjs';
+import {ReminderService} from '../../reminder/reminder.service';
+import {take} from 'rxjs/operators';
+import {ProjectService} from '../../project/project.service';
+import {Project} from '../../project/project.model';
+import {ScheduledTaskService} from '../scheduled-task.service';
 
 @Component({
   selector: 'dialog-view-task-reminder',
@@ -27,6 +28,7 @@ export class DialogViewTaskReminderComponent implements OnDestroy {
   constructor(
     private _matDialogRef: MatDialogRef<DialogViewTaskReminderComponent>,
     private _taskService: TaskService,
+    private _scheduledTaskService: ScheduledTaskService,
     private _projectService: ProjectService,
     private _reminderService: ReminderService,
     @Inject(MAT_DIALOG_DATA) public data: { reminder: Reminder },
@@ -53,17 +55,8 @@ export class DialogViewTaskReminderComponent implements OnDestroy {
       this._startTask();
       this.dismiss();
     } else {
-      this._subs.add(
-        this._projectService.onProjectRelatedDataLoaded$.pipe(
-          switchMap(() => this.task$.pipe(take(1))),
-          take(1),
-        ).subscribe(task => {
-          this.task = task;
-          this.isForCurrentProject = true;
-          this._startTask();
-          this.dismiss();
-        }));
-      this._projectService.setCurrentId(this.reminder.projectId);
+      this._taskService.startTaskFromOtherProject(this.task.id, this.reminder.projectId);
+      this.dismiss();
     }
   }
 

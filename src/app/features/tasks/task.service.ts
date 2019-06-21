@@ -1,5 +1,14 @@
 import shortid from 'shortid';
-import {debounceTime, distinctUntilChanged, first, map, shareReplay, take, withLatestFrom} from 'rxjs/operators';
+import {
+  debounceTime,
+  distinctUntilChanged,
+  first,
+  map,
+  shareReplay,
+  switchMap,
+  take,
+  withLatestFrom
+} from 'rxjs/operators';
 import {Injectable} from '@angular/core';
 import {Observable} from 'rxjs';
 import {
@@ -441,6 +450,23 @@ export class TaskService {
     this._store.dispatch(new RoundTimeSpentForDay({day, roundTo, isRoundUp}));
   }
 
+  // TODO this should be done via action and effects
+  startTaskFromOtherProject(taskId: string, projectId: string) {
+    this._projectService.onProjectRelatedDataLoaded$.pipe(
+      switchMap(() => this.getById(taskId).pipe(
+        take(1))
+      ),
+      take(1),
+    ).subscribe(task => {
+      if (task.parentId) {
+        this.moveToToday(task.parentId, true);
+      } else {
+        this.moveToToday(task.id, true);
+      }
+      this.setCurrentId(task.id);
+    });
+    this._projectService.setCurrentId(projectId);
+  }
 
   // REMINDER
   // --------

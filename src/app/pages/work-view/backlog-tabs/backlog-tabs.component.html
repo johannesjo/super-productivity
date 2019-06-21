@@ -23,8 +23,9 @@
   <mat-tab>
     <ng-template mat-tab-label>
       <mat-icon class="color-contrast">alarm</mat-icon>
-      <span class="tab-label-text color-contrast">Scheduled ({{(scheduledTaskService.scheduledTasksForCurrentProject$|async)?.length}}
-        )</span>
+      <span
+        class="tab-label-text color-contrast">Scheduled
+        ({{(scheduledTaskService.scheduledTasksForCurrentProject$|async)?.length}})</span>
     </ng-template>
 
     <div class="tab-wrapper bg-400">
@@ -35,11 +36,11 @@
           context menu. To open it click on the 3 little dots on the right of a task.
         </p>
 
-
         <div class="tasks"
              [@standardList]="(scheduledTaskService.scheduledTasksForCurrentProject$|async)?.length">
-          <mat-card *ngFor="let task of (scheduledTaskService.scheduledTasksForCurrentProject$|async); trackBy: trackByFn;"
-                    class="scheduled-task">
+          <mat-card
+            *ngFor="let task of (scheduledTaskService.scheduledTasksForCurrentProject$|async); trackBy: trackByFn;"
+            class="scheduled-task">
             <mat-card-content>
               <div class="content">
                 <div class="title-and-due-date">
@@ -68,12 +69,19 @@
           </mat-card>
         </div>
 
-        <h2 class="mat-h2" style="text-align: center;">For other Projects</h2>
+
+        <h2 class="mat-h2" style="text-align: center; margin-top: 16px;">From other Projects</h2>
 
         <div class="tasks"
              [@standardList]="(scheduledTaskService.scheduledTasksForOtherProjects$|async)?.length">
-          <mat-card *ngFor="let task of (scheduledTaskService.scheduledTasksForOtherProjects$|async); trackBy: trackByFn;"
-                    class="scheduled-task">
+          <mat-card
+            *ngFor="let task of (scheduledTaskService.scheduledTasksForOtherProjects$|async); trackBy: trackByFn;"
+            class="scheduled-task">
+
+<!--            <div class="project-color bg-400-el"-->
+<!--                 [ngClass]="project.themeColor">-->
+<!--            </div>-->
+
             <mat-card-content>
               <div class="content">
                 <div class="title-and-due-date">
@@ -83,7 +91,7 @@
                 <div class="controls">
                   <button mat-mini-fab
                           color="primary"
-                          (click)="startTask(task)">
+                          (click)="startTaskFromOtherProject(task)">
                     <mat-icon>play_arrow</mat-icon>
                   </button>
                   <button mat-mini-fab
