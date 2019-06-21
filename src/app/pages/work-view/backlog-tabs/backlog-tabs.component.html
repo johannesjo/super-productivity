@@ -70,46 +70,46 @@
         </div>
 
 
-        <h2 class="mat-h2" style="text-align: center; margin-top: 16px;">From other Projects</h2>
+        <section *ngIf="(scheduledTaskService.scheduledTasksForOtherProjects$|async)?.length">
+          <h2 class="mat-h2" style="text-align: center; margin-top: 16px;">From other Projects</h2>
+          <div class="tasks"
+               [@standardList]="(scheduledTaskService.scheduledTasksForOtherProjects$|async)?.length">
+            <mat-card
+              *ngFor="let task of (scheduledTaskService.scheduledTasksForOtherProjects$|async); trackBy: trackByFn;"
+              class="scheduled-task">
 
-        <div class="tasks"
-             [@standardList]="(scheduledTaskService.scheduledTasksForOtherProjects$|async)?.length">
-          <mat-card
-            *ngFor="let task of (scheduledTaskService.scheduledTasksForOtherProjects$|async); trackBy: trackByFn;"
-            class="scheduled-task">
+              <!--            <div class="project-color bg-400-el"-->
+              <!--                 [ngClass]="project.themeColor">-->
+              <!--            </div>-->
 
-<!--            <div class="project-color bg-400-el"-->
-<!--                 [ngClass]="project.themeColor">-->
-<!--            </div>-->
-
-            <mat-card-content>
-              <div class="content">
-                <div class="title-and-due-date">
-                  <div class="title">{{task.title}}</div>
-                  <div class="due-date">{{task.reminderData.remindAt|humanizeTimestamp}}</div>
+              <mat-card-content>
+                <div class="content">
+                  <div class="title-and-due-date">
+                    <div class="title">{{task.title}}</div>
+                    <div class="due-date">{{task.reminderData.remindAt|humanizeTimestamp}}</div>
+                  </div>
+                  <div class="controls">
+                    <button mat-mini-fab
+                            color="primary"
+                            (click)="startTaskFromOtherProject(task)">
+                      <mat-icon>play_arrow</mat-icon>
+                    </button>
+                    <button mat-mini-fab
+                            color=""
+                            (click)="editReminder(task)">
+                      <mat-icon>alarm</mat-icon>
+                    </button>
+                    <button mat-mini-fab
+                            color="warn"
+                            (click)="removeReminder(task)">
+                      <mat-icon>alarm_off</mat-icon>
+                    </button>
+                  </div>
                 </div>
-                <div class="controls">
-                  <button mat-mini-fab
-                          color="primary"
-                          (click)="startTaskFromOtherProject(task)">
-                    <mat-icon>play_arrow</mat-icon>
-                  </button>
-                  <button mat-mini-fab
-                          color=""
-                          (click)="editReminder(task)">
-                    <mat-icon>alarm</mat-icon>
-                  </button>
-                  <button mat-mini-fab
-                          color="warn"
-                          (click)="removeReminder(task)">
-                    <mat-icon>alarm_off</mat-icon>
-                  </button>
-                </div>
-              </div>
-            </mat-card-content>
-          </mat-card>
-        </div>
-
+              </mat-card-content>
+            </mat-card>
+          </div>
+        </section>
 
       </div>
     </div>
