@@ -127,14 +127,18 @@ export class JiraIssueEffects {
         const isDone = act.payload.task.changes.isDone;
         const task = taskEntities[taskId];
 
-        if (isDone && jiraCfg && jiraCfg.isWorklogEnabled
+        if (!isDone || !jiraCfg) {
+          return;
+        }
+
+        if (jiraCfg.isWorklogEnabled
           && task && task.issueType === JIRA_TYPE
           && !(jiraCfg.isAddWorklogOnSubTaskDone && task.subTaskIds.length > 0)) {
           this._openWorklogDialog(task, jiraEntities[task.issueId]);
 
         } else {
           const parent = task.parentId && taskEntities[task.parentId];
-          if (isDone && parent && jiraCfg.isAddWorklogOnSubTaskDone && parent.issueType === JIRA_TYPE) {
+          if (parent && jiraCfg.isAddWorklogOnSubTaskDone && parent.issueType === JIRA_TYPE) {
             // NOTE we're still sending the sub task for the meta data we need
             this._openWorklogDialog(task, jiraEntities[parent.issueId]);
           }
