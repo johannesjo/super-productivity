@@ -9,6 +9,9 @@ export const TASK_FEATURE_NAME = 'tasks';
 export const taskAdapter: EntityAdapter<Task> = createEntityAdapter<Task>();
 
 export interface TaskState extends EntityState<Task> {
+  // overwrite entity model to avoid problems with typing
+  ids: string[];
+
   // additional entities state properties
   currentTaskId: string | null;
   lastCurrentTaskId: string | null;
@@ -35,6 +38,9 @@ export interface TaskState extends EntityState<Task> {
 // REDUCER
 // -------
 export const initialTaskState: TaskState = taskAdapter.getInitialState({
+  // overwrite entity model to avoid problems with typing
+  ids: [],
+
   currentTaskId: null,
   lastCurrentTaskId: null,
   todaysTaskIds: [],
@@ -65,8 +71,7 @@ const mapTaskWithSubTasksToTask = (task: TaskWithSubTasks): Task => {
 };
 
 export const filterStartableTasks = (s: TaskState): string[] => {
-  const ids = s.ids as string[];
-  return ids.filter((id) => {
+  return s.ids.filter((id) => {
     const t = s.entities[id];
     return !t.isDone && (
       (t.parentId)
