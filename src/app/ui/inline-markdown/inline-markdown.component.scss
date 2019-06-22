@@ -50,10 +50,20 @@
     padding-top: 0;
   }
 
+
   h1,
   h2,
   h3 {
-    margin-bottom: $s;
+    &,
+    .mat-typography & {
+      margin-bottom: $s;
+      margin-top: $s*2;
+
+      &:first-child {
+        margin-top: 0;
+        padding-top: 0;
+      }
+    }
   }
 
   ul {
