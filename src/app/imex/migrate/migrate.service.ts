@@ -179,9 +179,12 @@ export class MigrateService {
     }
 
     const taskState = this._transformTasks(op.data.tasks.concat(op.data.backlogTasks));
+    const taskStateIds = taskState.ids as string [];
+
     await this._persistenceService.task.save(op.id, {
       ...initialTaskState,
       ...taskState,
+      ids: taskStateIds,
       todaysTaskIds: todayIds,
       backlogTaskIds: backlogIds,
     });
