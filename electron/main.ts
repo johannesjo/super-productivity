@@ -1,17 +1,17 @@
 'use strict';
-import {App, app, protocol, globalShortcut, ipcMain, powerMonitor, powerSaveBlocker} from 'electron';
+import { App, app, globalShortcut, ipcMain, powerMonitor, powerSaveBlocker } from 'electron';
 import * as notifier from 'node-notifier';
-import {info} from 'electron-log';
-import {CONFIG} from './CONFIG';
+import { info } from 'electron-log';
+import { CONFIG } from './CONFIG';
 
-import {initIndicator} from './indicator';
-import {createWindow} from './main-window';
+import { initIndicator } from './indicator';
+import { createWindow } from './main-window';
 
-import {sendJiraRequest, setupRequestHeadersForImages} from './jira';
-import {getGitLog} from './git-log';
-import {initGoogleAuth} from './google-auth';
-import {errorHandler} from './error-handler';
-import {initDebug} from './debug';
+import { sendJiraRequest, setupRequestHeadersForImages } from './jira';
+import { getGitLog } from './git-log';
+import { initGoogleAuth } from './google-auth';
+import { errorHandler } from './error-handler';
+import { initDebug } from './debug';
 import {
   IPC_BACKUP,
   IPC_EXEC,
@@ -27,10 +27,10 @@ import {
   IPC_SHUTDOWN_NOW,
   IPC_TASK_TOGGLE_START
 } from './ipc-events.const';
-import {backupData} from './backup';
+import { backupData } from './backup';
 import electronDl from 'electron-dl';
-import {JiraCfg} from '../src/app/features/issue/jira/jira';
-import {KeyboardConfig} from '../src/app/features/config/config.model';
+import { JiraCfg } from '../src/app/features/issue/jira/jira';
+import { KeyboardConfig } from '../src/app/features/config/config.model';
 
 const ICONS_FOLDER = __dirname + '/assets/icons/';
 const IS_MAC = process.platform === 'darwin';
@@ -93,11 +93,46 @@ app_.on('activate', function () {
   }
 });
 
-let idleInterval;
+
 app_.on('ready', () => {
+  let suspendStart;
+  const sendIdleMsgIfOverMin = (idleTime) => {
+    // sometimes when starting a second instance we get here although we don't want to
+    if (!mainWin) {
+      info('special case occurred when trackTimeFn is called even though, this is a second instance of the app');
+      return;
+    }
+
+    // don't update if the user is about to close
+    if (!app_.isQuiting && idleTime > CONFIG.MIN_IDLE_TIME) {
+      mainWin.webContents.send(IPC_IDLE_TIME, idleTime);
+    }
+  };
+
+  const checkIdle = () => powerMonitor['querySystemIdleTime']((idleTimeSeconds) => {
+    sendIdleMsgIfOverMin(idleTimeSeconds * 1000);
+  });
+
   // init time tracking interval
-  idleInterval = setInterval(idleChecker, CONFIG.IDLE_PING_INTERVAL);
+  setInterval(checkIdle, CONFIG.IDLE_PING_INTERVAL);
+
+  powerMonitor.on('suspend', () => {
+    suspendStart = Date.now();
+  });
+
+  powerMonitor.on('lock-screen', () => {
+    suspendStart = Date.now();
+  });
+
+  powerMonitor.on('resume', () => {
+    sendIdleMsgIfOverMin(Date.now() - suspendStart);
+  });
+
+  powerMonitor.on('unlock-screen', () => {
+    sendIdleMsgIfOverMin(Date.now() - suspendStart);
+  });
 });
+
 
 app_.on('before-quit', () => {
   // handle darwin
@@ -269,23 +304,6 @@ function showOrFocus(passedWin) {
   setTimeout(() => {
     win.focus();
   }, 60);
-}
-
-function idleChecker() {
-  powerMonitor['querySystemIdleTime']((idleTimeSeconds) => {
-    const idleTime = idleTimeSeconds * 1000;
-
-    // sometimes when starting a second instance we get here although we don't want to
-    if (!mainWin) {
-      info('special case occurred when trackTimeFn is called even though, this is a second instance of the app');
-      return;
-    }
-
-    // don't update if the user is about to close
-    if (!app_.isQuiting && idleTime > CONFIG.MIN_IDLE_TIME) {
-      mainWin.webContents.send(IPC_IDLE_TIME, idleTime);
-    }
-  });
 }
 
 function exec(ev, command) {
