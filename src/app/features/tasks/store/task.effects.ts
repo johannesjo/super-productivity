@@ -186,9 +186,8 @@ export class TaskEffects {
         this._store$.pipe(select(selectTaskFeatureState)),
       ),
       tap(([a, state]) => {
-        const ids = state.ids as string[];
         const idsBefore = state.stateBefore.ids as string[];
-        const deletedTaskIds = idsBefore.filter((id) => !ids.includes(id));
+        const deletedTaskIds = idsBefore.filter((id) => !state.ids.includes(id));
         deletedTaskIds.forEach((id) => {
           this._reminderService.removeReminderByRelatedIdIfSet(id);
         });
