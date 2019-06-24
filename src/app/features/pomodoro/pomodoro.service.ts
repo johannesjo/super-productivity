@@ -1,10 +1,10 @@
-import { Injectable } from '@angular/core';
-import { combineLatest, merge, Observable } from 'rxjs';
-import { ConfigService } from '../config/config.service';
-import { distinctUntilChanged, filter, map, mapTo, scan, shareReplay, withLatestFrom } from 'rxjs/operators';
-import { PomodoroConfig } from '../config/config.model';
-import { TimeTrackingService } from '../time-tracking/time-tracking.service';
-import { select, Store } from '@ngrx/store';
+import {Injectable} from '@angular/core';
+import {combineLatest, merge, Observable} from 'rxjs';
+import {ConfigService} from '../config/config.service';
+import {distinctUntilChanged, filter, map, mapTo, scan, shareReplay, withLatestFrom} from 'rxjs/operators';
+import {PomodoroConfig} from '../config/config.model';
+import {TimeTrackingService} from '../time-tracking/time-tracking.service';
+import {select, Store} from '@ngrx/store';
 import {
   FinishPomodoroSession,
   PausePomodoro,
@@ -12,9 +12,9 @@ import {
   StartPomodoro,
   StopPomodoro
 } from './store/pomodoro.actions';
-import { selectCurrentCycle, selectIsBreak, selectIsManualPause } from './store/pomodoro.reducer';
-import { DEFAULT_CFG } from '../config/default-config.const';
-import { Actions, ofType } from '@ngrx/effects';
+import {selectCurrentCycle, selectIsBreak, selectIsManualPause} from './store/pomodoro.reducer';
+import {DEFAULT_CFG} from '../config/default-config.const';
+import {Actions, ofType} from '@ngrx/effects';
 
 // Tick Duration
 const TD = -1000;
@@ -93,10 +93,11 @@ export class PomodoroService {
     shareReplay(),
   );
 
+  // 0 to 1
   sessionProgress$: Observable<number> = this.currentSessionTime$.pipe(
     withLatestFrom(this.nextSession$),
     map(([currentTime, initialTime]) => {
-      return (initialTime - currentTime) / initialTime * 100;
+      return (initialTime - currentTime) / initialTime;
     })
   );
 

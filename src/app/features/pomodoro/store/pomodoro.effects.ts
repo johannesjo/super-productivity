@@ -1,9 +1,9 @@
-import { Injectable } from '@angular/core';
-import { Actions, Effect, ofType } from '@ngrx/effects';
-import { SetCurrentTask, TaskActionTypes, ToggleStart, UnsetCurrentTask } from '../../tasks/store/task.actions';
-import { filter, map, mapTo, tap, withLatestFrom } from 'rxjs/operators';
-import { PomodoroService } from '../pomodoro.service';
-import { PomodoroConfig } from '../../config/config.model';
+import {Injectable} from '@angular/core';
+import {Actions, Effect, ofType} from '@ngrx/effects';
+import {SetCurrentTask, TaskActionTypes, ToggleStart, UnsetCurrentTask} from '../../tasks/store/task.actions';
+import {filter, map, mapTo, tap, withLatestFrom} from 'rxjs/operators';
+import {PomodoroService} from '../pomodoro.service';
+import {PomodoroConfig} from '../../config/config.model';
 import {
   FinishPomodoroSession,
   PausePomodoro,
@@ -11,13 +11,16 @@ import {
   PomodoroActionTypes,
   StartPomodoro
 } from './pomodoro.actions';
-import { MatDialog } from '@angular/material/dialog';
-import { DialogPomodoroBreakComponent } from '../dialog-pomodoro-break/dialog-pomodoro-break.component';
-import { select, Store } from '@ngrx/store';
-import { selectCurrentTaskId } from '../../tasks/store/task.selectors';
-import { Observable } from 'rxjs';
-import { SnackOpen } from '../../../core/snack/store/snack.actions';
-import { NotifyService } from '../../../core/notify/notify.service';
+import {MatDialog} from '@angular/material/dialog';
+import {DialogPomodoroBreakComponent} from '../dialog-pomodoro-break/dialog-pomodoro-break.component';
+import {select, Store} from '@ngrx/store';
+import {selectCurrentTaskId} from '../../tasks/store/task.selectors';
+import {Observable} from 'rxjs';
+import {SnackOpen} from '../../../core/snack/store/snack.actions';
+import {NotifyService} from '../../../core/notify/notify.service';
+import {IS_ELECTRON} from '../../../app.constants';
+import {IPC_SET_PROGRESS_BAR} from '../../../../../electron/ipc-events.const';
+import {ElectronService} from 'ngx-electron';
 
 const isEnabled = ([action, cfg, ...v]) => cfg && cfg.isEnabled;
 
@@ -154,12 +157,24 @@ export class PomodoroEffects {
     }),
   );
 
+  @Effect({dispatch: false})
+  setTaskBarIconProgress$: any = this._pomodoroService.sessionProgress$.pipe(
+    filter(() => IS_ELECTRON),
+    withLatestFrom(this._pomodoroService.cfg$),
+    // we display pomodoro progress for pomodoro
+    filter(([progress, cfg]: [number, PomodoroConfig]) => cfg && cfg.isEnabled),
+    tap(([progress, cfg]) => {
+      this._electronService.ipcRenderer.send(IPC_SET_PROGRESS_BAR, {progress});
+    }),
+  );
+
 
   constructor(
     private _pomodoroService: PomodoroService,
     private _actions$: Actions,
     private _notifyService: NotifyService,
     private _matDialog: MatDialog,
+    private _electronService: ElectronService,
     private _store$: Store<any>,
   ) {
   }
