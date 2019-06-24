@@ -2,6 +2,7 @@ import {Injectable} from '@angular/core';
 import {Actions, Effect, ofType} from '@ngrx/effects';
 import {
   AddTaskReminder,
+  AddTimeSpent,
   DeleteTask,
   Move,
   MoveToBacklog,
@@ -13,7 +14,7 @@ import {
   UpdateTaskReminder
 } from './task.actions';
 import {select, Store} from '@ngrx/store';
-import {filter, map, mergeMap, tap, throttleTime, withLatestFrom} from 'rxjs/operators';
+import {filter, map, mergeMap, switchMap, tap, throttleTime, withLatestFrom} from 'rxjs/operators';
 import {PersistenceService} from '../../../core/persistence/persistence.service';
 import {selectCurrentTask, selectTaskFeatureState, selectTasksWorkedOnOrDoneTodayFlat} from './task.selectors';
 import {selectCurrentProjectId} from '../../project/store/project.reducer';
@@ -22,16 +23,17 @@ import {NotifyService} from '../../../core/notify/notify.service';
 import {TaskService} from '../task.service';
 import {selectConfigFeatureState, selectMiscConfig} from '../../config/store/config.reducer';
 import {AttachmentActionTypes} from '../../attachment/store/attachment.actions';
-import {TaskWithSubTasks} from '../task.model';
+import {Task, TaskWithSubTasks} from '../task.model';
 import {TaskState} from './task.reducer';
 import {EMPTY, Observable, of} from 'rxjs';
 import {ElectronService} from 'ngx-electron';
-import {IPC_CURRENT_TASK_UPDATED} from '../../../../../electron/ipc-events.const';
+import {IPC_CURRENT_TASK_UPDATED, IPC_SET_PROGRESS_BAR} from '../../../../../electron/ipc-events.const';
 import {IS_ELECTRON} from '../../../app.constants';
 import {ReminderService} from '../../reminder/reminder.service';
-import {MiscConfig} from '../../config/config.model';
+import {GlobalConfig, MiscConfig} from '../../config/config.model';
 import {truncate} from '../../../util/truncate';
 import {roundDurationVanilla} from '../../../util/round-duration';
+import {ConfigService} from '../../config/config.service';
 
 // TODO send message to electron when current task changes here
 
@@ -358,10 +360,40 @@ export class TaskEffects {
       }),
     );
 
+  @Effect({dispatch: false}) setTaskBarNoProgress$: Observable<any> = this._actions$
+    .pipe(
+      ofType(
+        TaskActionTypes.SetCurrentTask,
+      ),
+      filter(() => IS_ELECTRON),
+      tap((act: SetCurrentTask) => {
+        if (!act.payload) {
+          this._electronService.ipcRenderer.send(IPC_SET_PROGRESS_BAR, {progress: 0});
+        }
+      }),
+    );
+
+  @Effect({dispatch: false}) setTaskBarProgress$: Observable<any> = this._actions$
+    .pipe(
+      ofType(
+        TaskActionTypes.AddTimeSpent,
+      ),
+      filter(() => IS_ELECTRON),
+      withLatestFrom(this._configService.cfg$),
+      // we display pomodoro progress for pomodoro
+      filter(([a, cfg]: [AddTimeSpent, GlobalConfig]) => !cfg || !cfg.pomodoro.isEnabled),
+      switchMap(([act]) => this._taskService.getById(act.payload.id)),
+      tap((task: Task) => {
+        const progress = task.timeSpent / task.timeEstimate;
+        this._electronService.ipcRenderer.send(IPC_SET_PROGRESS_BAR, {progress});
+      }),
+    );
+
   constructor(private _actions$: Actions,
               private _store$: Store<any>,
               private _notifyService: NotifyService,
               private _taskService: TaskService,
+              private _configService: ConfigService,
               private _reminderService: ReminderService,
               private _electronService: ElectronService,
               private _persistenceService: PersistenceService) {

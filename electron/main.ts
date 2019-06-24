@@ -1,17 +1,17 @@
 'use strict';
-import { App, app, globalShortcut, ipcMain, powerMonitor, powerSaveBlocker } from 'electron';
+import {App, app, globalShortcut, ipcMain, powerMonitor, powerSaveBlocker} from 'electron';
 import * as notifier from 'node-notifier';
-import { info } from 'electron-log';
-import { CONFIG } from './CONFIG';
+import {info} from 'electron-log';
+import {CONFIG} from './CONFIG';
 
-import { initIndicator } from './indicator';
-import { createWindow } from './main-window';
+import {initIndicator} from './indicator';
+import {createWindow} from './main-window';
 
-import { sendJiraRequest, setupRequestHeadersForImages } from './jira';
-import { getGitLog } from './git-log';
-import { initGoogleAuth } from './google-auth';
-import { errorHandler } from './error-handler';
-import { initDebug } from './debug';
+import {sendJiraRequest, setupRequestHeadersForImages} from './jira';
+import {getGitLog} from './git-log';
+import {initGoogleAuth} from './google-auth';
+import {errorHandler} from './error-handler';
+import {initDebug} from './debug';
 import {
   IPC_BACKUP,
   IPC_EXEC,
@@ -22,15 +22,17 @@ import {
   IPC_NOTIFY,
   IPC_ON_BEFORE_QUIT,
   IPC_REGISTER_GLOBAL_SHORTCUTS_EVENT,
+  IPC_SET_PROGRESS_BAR,
   IPC_SHOW_OR_FOCUS,
   IPC_SHUTDOWN,
   IPC_SHUTDOWN_NOW,
   IPC_TASK_TOGGLE_START
 } from './ipc-events.const';
-import { backupData } from './backup';
+import {backupData} from './backup';
 import electronDl from 'electron-dl';
-import { JiraCfg } from '../src/app/features/issue/jira/jira';
-import { KeyboardConfig } from '../src/app/features/config/config.model';
+import {JiraCfg} from '../src/app/features/issue/jira/jira';
+import {KeyboardConfig} from '../src/app/features/config/config.model';
+import BrowserWindow = Electron.BrowserWindow;
 
 const ICONS_FOLDER = __dirname + '/assets/icons/';
 const IS_MAC = process.platform === 'darwin';
@@ -51,7 +53,7 @@ const app_: MyApp = app;
 initDebug({showDevTools: IS_DEV}, IS_DEV);
 electronDl({openFolderWhenDone: true});
 
-let mainWin;
+let mainWin: BrowserWindow;
 const nestedWinParams = {isDarwinForceQuit: false};
 // keep app active to keep time tracking running
 powerSaveBlocker.start('prevent-app-suspension');
@@ -176,6 +178,12 @@ ipcMain.on(IPC_SHUTDOWN, quitApp);
 ipcMain.on(IPC_EXEC, exec);
 
 ipcMain.on(IPC_BACKUP, backupData);
+
+ipcMain.on(IPC_SET_PROGRESS_BAR, (ev, {progress, mode}) => {
+  if (mainWin) {
+    mainWin.setProgressBar(Math.min(Math.max(progress, 0), 1), {mode});
+  }
+});
 
 
 ipcMain.on(IPC_REGISTER_GLOBAL_SHORTCUTS_EVENT, (ev, cfg) => {
