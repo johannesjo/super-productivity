@@ -4,7 +4,7 @@ import {getTodayStr} from '../../features/tasks/util/get-today-str';
 import {Task, TaskWithSubTasks} from '../../features/tasks/task.model';
 import {Router} from '@angular/router';
 import {IS_ELECTRON} from '../../app.constants';
-import { MatDialog } from '@angular/material/dialog';
+import {MatDialog} from '@angular/material/dialog';
 import {DialogSimpleTaskExportComponent} from '../../features/simple-task-export/dialog-simple-task-export/dialog-simple-task-export.component';
 import {Observable, Subscription} from 'rxjs';
 import {ElectronService} from 'ngx-electron';
@@ -14,7 +14,7 @@ import {NoteService} from '../../features/note/note.service';
 import {ConfigService} from '../../features/config/config.service';
 import {GoogleDriveSyncService} from '../../features/google/google-drive-sync.service';
 import {SnackService} from '../../core/snack/snack.service';
-import {map, take, takeUntil} from 'rxjs/operators';
+import {filter, map, take} from 'rxjs/operators';
 import {loadFromLs, saveToLs} from '../../core/persistence/local-storage';
 import {LS_DAILY_SUMMARY_TAB_INDEX} from '../../core/persistence/ls-keys.const';
 import {GoogleApiService} from '../../features/google/google-api.service';
@@ -87,8 +87,9 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
     }));
 
     // we need to wait, otherwise data would get overwritten
-    this._subs.add(this._taskService.isDataLoaded$.pipe(
-      takeUntil(this._taskService.isDataLoaded$)
+    this._subs.add(this._taskService.currentTaskId$.pipe(
+      filter(id => !!id),
+      take(1),
     ).subscribe(() => {
       this._taskService.setCurrentId(null);
     }));
