@@ -15,6 +15,7 @@ export const APP_ROUTES: Routes = [
   {path: 'projects', component: ProjectPageComponent, data: {page: 'projects'}},
   {path: 'metrics', component: MetricPageComponent, data: {page: 'metrics'}},
   {path: 'procrastination', component: ProcrastinationComponent, data: {page: 'procrastination'}},
+  {path: 'daily-summary/:dayStr', component: DailySummaryComponent, data: {page: 'daily-summary'}},
   {path: 'daily-summary', component: DailySummaryComponent, data: {page: 'daily-summary'}},
   {
     path: 'worklog-and-calendar',

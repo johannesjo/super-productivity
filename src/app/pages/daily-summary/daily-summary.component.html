@@ -1,5 +1,6 @@
 <div class="page-wrapper">
-  <div style="text-align: center;">
+  <div *ngIf="isForToday"
+       style="text-align: center;">
     <a aria-label="Work View"
        class="back-btn"
        mat-button=""
@@ -10,7 +11,10 @@
     </a>
   </div>
 
-  <h1 class="done-headline mat-headline">Take a moment to <i class="TODO-animate">celebrate!</i></h1>
+  <h1 class="done-headline mat-headline">
+    <span *ngIf="isForToday">Take a moment to <i class="TODO-animate">celebrate!</i></span>
+    <span *ngIf="!isForToday">Daily Summary for {{day}}</span>
+  </h1>
   <div class="daily-summary-summary">
     <div class="summary-point">
       <mat-icon>schedule</mat-icon>
@@ -184,7 +188,8 @@
         </div>
       </section>
     </mat-tab>
-    <mat-tab label="Week">
+    <mat-tab *ngIf="isForToday"
+             label="Week">
       <section class="tab-inner full-width">
         <worklog-week></worklog-week>
       </section>
@@ -199,12 +204,21 @@
 
   <section class="daily-summary-actions">
     <div class="bottom-buttons">
-      <button (click)="finishDay()"
+      <button *ngIf="isForToday"
+              (click)="finishDay()"
               [disabled]="cfg.isBlockFinishDayUntilTimeTimeTracked && !isTimeSheetExported"
               color="primary"
               mat-raised-button="">
         <mat-icon>wb_sunny</mat-icon>
         Save and go home
+      </button>
+      <button *ngIf="!isForToday"
+              (click)="finishDay()"
+              [disabled]="cfg.isBlockFinishDayUntilTimeTimeTracked && !isTimeSheetExported"
+              color="primary"
+              mat-raised-button="">
+        <mat-icon>wb_sunny</mat-icon>
+        Clear done and continue
       </button>
     </div>
   </section>

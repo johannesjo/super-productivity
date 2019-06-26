@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
 import {Actions, Effect, ofType} from '@ngrx/effects';
 import {select, Store} from '@ngrx/store';
-import {filter, map, switchMap, tap, withLatestFrom} from 'rxjs/operators';
+import {filter, map, switchMap, take, tap, withLatestFrom} from 'rxjs/operators';
 import {
   AddProject,
   ArchiveProject,
@@ -30,6 +30,7 @@ import {ObstructionService} from '../../metric/obstruction/obstruction.service';
 import {ImprovementService} from '../../metric/improvement/improvement.service';
 import {ProjectService} from '../project.service';
 import {BannerService} from '../../../core/banner/banner.service';
+import {Router} from '@angular/router';
 
 // needed because we always want the check request to the jira api to finish first
 const ISSUE_REFRESH_DELAY = 10000;
@@ -113,13 +114,15 @@ export class ProjectEffects {
         return workEndDate < today && !dayCompleted[getWorklogStr(workEndDate)];
       }),
       tap(([a, workEnd, dayCompleted]) => {
+        const dayStr = getWorklogStr(workEnd);
         this._bannerService.open({
           id: 'FORGOT_TO_FINISH_DAY',
           ico: 'info',
-          msg: `You forgot to finish your day on ${getWorklogStr(workEnd)}`,
+          msg: `You forgot to finish your day on ${dayStr}`,
           action: {
-            label: 'Finish now',
+            label: 'Finish Day',
             fn: () => {
+              this._router.navigate(['/daily-summary', dayStr]);
             }
           },
         });
@@ -283,6 +286,7 @@ export class ProjectEffects {
     private _metricService: MetricService,
     private _obstructionService: ObstructionService,
     private _improvementService: ImprovementService,
+    private _router: Router,
   ) {
   }
 

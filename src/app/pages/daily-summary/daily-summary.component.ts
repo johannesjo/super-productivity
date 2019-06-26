@@ -1,27 +1,27 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
-import { TaskService } from '../../features/tasks/task.service';
-import { getTodayStr } from '../../features/tasks/util/get-today-str';
-import { Task, TaskWithSubTasks } from '../../features/tasks/task.model';
-import { Router } from '@angular/router';
-import { IS_ELECTRON } from '../../app.constants';
-import { MatDialog } from '@angular/material/dialog';
-import { DialogSimpleTaskExportComponent } from '../../features/simple-task-export/dialog-simple-task-export/dialog-simple-task-export.component';
-import { Observable, Subscription } from 'rxjs';
-import { ElectronService } from 'ngx-electron';
-import { IPC_SHUTDOWN_NOW } from '../../../../electron/ipc-events.const';
-import { DialogConfirmComponent } from '../../ui/dialog-confirm/dialog-confirm.component';
-import { NoteService } from '../../features/note/note.service';
-import { ConfigService } from '../../features/config/config.service';
-import { GoogleDriveSyncService } from '../../features/google/google-drive-sync.service';
-import { SnackService } from '../../core/snack/snack.service';
-import { filter, map, take } from 'rxjs/operators';
-import { loadFromLs, saveToLs } from '../../core/persistence/local-storage';
-import { LS_DAILY_SUMMARY_TAB_INDEX } from '../../core/persistence/ls-keys.const';
-import { GoogleApiService } from '../../features/google/google-api.service';
-import { ProjectService } from '../../features/project/project.service';
-import { getWorklogStr } from '../../util/get-work-log-str';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit} from '@angular/core';
+import {TaskService} from '../../features/tasks/task.service';
+import {getTodayStr} from '../../features/tasks/util/get-today-str';
+import {Task, TaskWithSubTasks} from '../../features/tasks/task.model';
+import {ActivatedRoute, Router} from '@angular/router';
+import {IS_ELECTRON} from '../../app.constants';
+import {MatDialog} from '@angular/material/dialog';
+import {DialogSimpleTaskExportComponent} from '../../features/simple-task-export/dialog-simple-task-export/dialog-simple-task-export.component';
+import {Observable, Subscription} from 'rxjs';
+import {ElectronService} from 'ngx-electron';
+import {IPC_SHUTDOWN_NOW} from '../../../../electron/ipc-events.const';
+import {DialogConfirmComponent} from '../../ui/dialog-confirm/dialog-confirm.component';
+import {NoteService} from '../../features/note/note.service';
+import {ConfigService} from '../../features/config/config.service';
+import {GoogleDriveSyncService} from '../../features/google/google-drive-sync.service';
+import {SnackService} from '../../core/snack/snack.service';
+import {filter, map, take} from 'rxjs/operators';
+import {loadFromLs, saveToLs} from '../../core/persistence/local-storage';
+import {LS_DAILY_SUMMARY_TAB_INDEX} from '../../core/persistence/ls-keys.const';
+import {GoogleApiService} from '../../features/google/google-api.service';
+import {ProjectService} from '../../features/project/project.service';
+import {getWorklogStr} from '../../util/get-work-log-str';
 import * as moment from 'moment-mini';
-import { RoundTimeOption } from '../../features/project/project.model';
+import {RoundTimeOption} from '../../features/project/project.model';
 
 const SUCCESS_ANIMATION_DURATION = 500;
 
@@ -42,6 +42,8 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
   isTimeSheetExported = true;
   showSuccessAnimation;
   selectedTabIndex = loadFromLs(this.getLsKeyForSummaryTabIndex()) || 0;
+  isForToday = true;
+  day: string;
 
   // calc total time spent on todays tasks
   estimatedOnTasksWorkedOnToday$ = this._taskService.estimatedOnTasksWorkedOnToday$;
@@ -73,6 +75,7 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
     private readonly _googleApiService: GoogleApiService,
     private readonly _electronService: ElectronService,
     private readonly _cd: ChangeDetectorRef,
+    private readonly _activatedRoute: ActivatedRoute,
   ) {
 
   }
@@ -93,6 +96,14 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
     ).subscribe(() => {
       this._taskService.setCurrentId(null);
     }));
+
+    this._subs.add(this._activatedRoute.paramMap.subscribe((s: any) => {
+        if (s && s.params.dayStr) {
+          this.isForToday = false;
+          this.day = s.params.dayStr;
+        }
+      })
+    );
   }
 
   ngOnDestroy() {
@@ -119,9 +130,10 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
 
   finishDay() {
     this._taskService.moveToArchive(this._doneTasks);
-    this._projectService.setDayCompleted(null, getWorklogStr());
+    const dayToComplete = this.day || getWorklogStr();
+    this._projectService.setDayCompleted(null, dayToComplete);
 
-    if (IS_ELECTRON) {
+    if (IS_ELECTRON && this.isForToday) {
       this._matDialog.open(DialogConfirmComponent, {
         restoreFocus: true,
         data: {
