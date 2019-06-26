@@ -60,6 +60,7 @@ export class WorklogService {
     this._archiveUpdateTrigger$.next(true);
   }
 
+  // TODO this is not waiting for worklog data
   getTaskListForRange(rangeStart: Date, rangeEnd: Date, isFilterOutTimeSpentOnOtherDays = false): WorklogTask[] {
     let tasks = this._getAllWorklogTasks();
 

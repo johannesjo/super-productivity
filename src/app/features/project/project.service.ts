@@ -1,5 +1,5 @@
-import {Injectable} from '@angular/core';
-import {Observable} from 'rxjs';
+import { Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
 import {
   BreakNr,
   BreakTime,
@@ -12,9 +12,9 @@ import {
   SimpleSummarySettings,
   WorklogExportSettings
 } from './project.model';
-import {PersistenceService} from '../../core/persistence/persistence.service';
-import {select, Store} from '@ngrx/store';
-import {ProjectActionTypes, UpdateProjectOrder} from './store/project.actions';
+import { PersistenceService } from '../../core/persistence/persistence.service';
+import { select, Store } from '@ngrx/store';
+import { ProjectActionTypes, UpdateProjectOrder } from './store/project.actions';
 import shortid from 'shortid';
 import {
   initialProjectState,
@@ -31,21 +31,22 @@ import {
   selectProjectById,
   selectProjectGithubCfg,
   selectProjectJiraCfg,
+  selectProjectLastWorkEnd,
   selectProjectWorkEndForDay,
   selectProjectWorkStartForDay,
   selectUnarchivedProjects
 } from './store/project.reducer';
-import {IssueIntegrationCfg, IssueProviderKey} from '../issue/issue';
-import {JiraCfg} from '../issue/jira/jira';
-import {DEFAULT_PROJECT} from './project.const';
-import {Dictionary} from '@ngrx/entity';
-import {getWorklogStr} from '../../util/get-work-log-str';
-import {GithubCfg} from '../issue/github/github';
-import {DEFAULT_ISSUE_PROVIDER_CFGS} from '../issue/issue.const';
-import {Actions, ofType} from '@ngrx/effects';
-import {distinctUntilChanged, take} from 'rxjs/operators';
-import {isValidProjectExport} from './util/is-valid-project-export';
-import {SnackService} from '../../core/snack/snack.service';
+import { IssueIntegrationCfg, IssueProviderKey } from '../issue/issue';
+import { JiraCfg } from '../issue/jira/jira';
+import { DEFAULT_PROJECT } from './project.const';
+import { Dictionary } from '@ngrx/entity';
+import { getWorklogStr } from '../../util/get-work-log-str';
+import { GithubCfg } from '../issue/github/github';
+import { DEFAULT_ISSUE_PROVIDER_CFGS } from '../issue/issue.const';
+import { Actions, ofType } from '@ngrx/effects';
+import { distinctUntilChanged, take } from 'rxjs/operators';
+import { isValidProjectExport } from './util/is-valid-project-export';
+import { SnackService } from '../../core/snack/snack.service';
 
 @Injectable({
   providedIn: 'root',
@@ -89,6 +90,8 @@ export class ProjectService {
   breakTime$: Observable<BreakTime> = this._store$.pipe(select(selectProjectBreakTime));
   breakNr$: Observable<BreakNr> = this._store$.pipe(select(selectProjectBreakNr));
 
+  lastWorkEnd$: Observable<number> = this._store$.pipe(select(selectProjectLastWorkEnd));
+
   // DYNAMIC
   workStartToday$: Observable<number> = this._store$.pipe(select(selectProjectWorkStartForDay, {day: getWorklogStr()}));
   workEndToday$: Observable<number> = this._store$.pipe(select(selectProjectWorkEndForDay, {day: getWorklogStr()}));
@@ -104,6 +107,7 @@ export class ProjectService {
     private readonly _actions$: Actions,
   ) {
     this.currentId$.subscribe((id) => this.currentId = id);
+    this.lastWorkEnd$.subscribe((val) => console.log('lastWorkEnd$', val));
   }
 
   async load() {

@@ -1,8 +1,9 @@
-import {createEntityAdapter, EntityAdapter, EntityState} from '@ngrx/entity';
-import {BreakNrCopy, BreakNr, Project, WorkStartEnd, ProjectBasicCfg} from '../project.model';
-import {ProjectActions, ProjectActionTypes} from './project.actions';
-import {createFeatureSelector, createSelector} from '@ngrx/store';
-import {FIRST_PROJECT} from '../project.const';
+import { createEntityAdapter, EntityAdapter, EntityState } from '@ngrx/entity';
+import { BreakNr, BreakNrCopy, Project, ProjectBasicCfg, WorkStartEnd } from '../project.model';
+import { ProjectActions, ProjectActionTypes } from './project.actions';
+import { createFeatureSelector, createSelector } from '@ngrx/store';
+import { FIRST_PROJECT } from '../project.const';
+import { sortStringDates } from '../../../util/sortStringDates';
 
 export const PROJECT_FEATURE_NAME = 'projects';
 
@@ -46,6 +47,18 @@ export const selectProjectBasicCfg = createSelector(selectCurrentProject, (proje
   const {advancedCfg, id, breakTime, workStart, workEnd, breakNr, ...basic} = project;
   return basic;
 });
+
+export const selectProjectLastWorkEnd = createSelector(
+  selectProjectWorkEnd,
+  (workEnd: WorkStartEnd): number => {
+    if (!workEnd) {
+      return;
+    }
+    const allDates = Object.keys(workEnd);
+    const lastDate = sortStringDates(allDates)[allDates.length - 1];
+    return workEnd[lastDate];
+  }
+);
 
 
 // DYNAMIC SELECTORS
