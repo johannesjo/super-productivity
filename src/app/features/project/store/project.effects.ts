@@ -1,7 +1,7 @@
-import {Injectable} from '@angular/core';
-import {Actions, Effect, ofType} from '@ngrx/effects';
-import {select, Store} from '@ngrx/store';
-import {filter, map, switchMap, tap, withLatestFrom} from 'rxjs/operators';
+import { Injectable } from '@angular/core';
+import { Actions, Effect, ofType } from '@ngrx/effects';
+import { select, Store } from '@ngrx/store';
+import { filter, map, switchMap, tap, withLatestFrom } from 'rxjs/operators';
 import {
   AddProject,
   ArchiveProject,
@@ -13,21 +13,23 @@ import {
   UpdateProjectWorkEnd,
   UpdateProjectWorkStart
 } from './project.actions';
-import {selectCurrentProject, selectCurrentProjectId, selectProjectFeatureState} from './project.reducer';
-import {PersistenceService} from '../../../core/persistence/persistence.service';
-import {TaskService} from '../../tasks/task.service';
-import {BookmarkService} from '../../bookmark/bookmark.service';
-import {AttachmentService} from '../../attachment/attachment.service';
-import {NoteService} from '../../note/note.service';
-import {IssueService} from '../../issue/issue.service';
-import {SnackService} from '../../../core/snack/snack.service';
-import {SnackOpen} from '../../../core/snack/store/snack.actions';
-import {getWorklogStr} from '../../../util/get-work-log-str';
-import {TaskActionTypes} from '../../tasks/store/task.actions';
-import {ReminderService} from '../../reminder/reminder.service';
-import {MetricService} from '../../metric/metric.service';
-import {ObstructionService} from '../../metric/obstruction/obstruction.service';
-import {ImprovementService} from '../../metric/improvement/improvement.service';
+import { selectCurrentProject, selectCurrentProjectId, selectProjectFeatureState } from './project.reducer';
+import { PersistenceService } from '../../../core/persistence/persistence.service';
+import { TaskService } from '../../tasks/task.service';
+import { BookmarkService } from '../../bookmark/bookmark.service';
+import { AttachmentService } from '../../attachment/attachment.service';
+import { NoteService } from '../../note/note.service';
+import { IssueService } from '../../issue/issue.service';
+import { SnackService } from '../../../core/snack/snack.service';
+import { SnackOpen } from '../../../core/snack/store/snack.actions';
+import { getWorklogStr } from '../../../util/get-work-log-str';
+import { TaskActionTypes } from '../../tasks/store/task.actions';
+import { ReminderService } from '../../reminder/reminder.service';
+import { MetricService } from '../../metric/metric.service';
+import { ObstructionService } from '../../metric/obstruction/obstruction.service';
+import { ImprovementService } from '../../metric/improvement/improvement.service';
+import { ProjectService } from '../project.service';
+import { BannerService } from '../../../core/banner/banner.service';
 
 // needed because we always want the check request to the jira api to finish first
 const ISSUE_REFRESH_DELAY = 10000;
@@ -90,6 +92,38 @@ export class ProjectEffects {
           newVal: Date.now(),
         });
       })
+    );
+
+  @Effect({dispatch: false}) checkIfDayWasFinished$: any = this._actions$
+    .pipe(
+      ofType(
+        ProjectActionTypes.LoadProjectRelatedDataSuccess,
+      ),
+      withLatestFrom(
+        this._projectService.lastWorkEnd$,
+        this._projectService.dayCompleted,
+      ),
+      filter(([a, workEnd, dayCompleted]) => {
+        const workEndDate = new Date(workEnd);
+        const today = new Date();
+        workEndDate.setHours(0, 0, 0, 0);
+        today.setHours(0, 0, 0, 0);
+        console.log('dayCompleted', dayCompleted[getWorklogStr(workEndDate)], dayCompleted,
+          'workEndDate', workEndDate, 'today', today);
+        return workEndDate < today && !dayCompleted[getWorklogStr(workEndDate)];
+      }),
+      tap(([a, workEnd, dayCompleted]) => {
+        this._bannerService.open({
+          id: 'FORGOT_TO_FINISH_DAY',
+          ico: 'info',
+          msg: `You forgot to finish your day on ${getWorklogStr(workEnd)}`,
+          action: {
+            label: 'Finish now',
+            fn: () => {
+            }
+          },
+        });
+      }),
     );
 
   @Effect() updateWorkEnd$: any = this._actions$
@@ -237,11 +271,13 @@ export class ProjectEffects {
     private _actions$: Actions,
     private _store$: Store<any>,
     private _snackService: SnackService,
+    private _projectService: ProjectService,
     private _persistenceService: PersistenceService,
     private _taskService: TaskService,
     private _issueService: IssueService,
     private _bookmarkService: BookmarkService,
     private _noteService: NoteService,
+    private _bannerService: BannerService,
     private _attachmentService: AttachmentService,
     private _reminderService: ReminderService,
     private _metricService: MetricService,

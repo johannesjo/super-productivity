@@ -41,6 +41,7 @@ export const selectProjectGithubCfg = createSelector(selectProjectIssueCfgs, (is
 export const selectAdvancedProjectCfg = createSelector(selectCurrentProject, (project) => project.advancedCfg);
 export const selectProjectWorkStart = createSelector(selectCurrentProject, (project) => project.workStart);
 export const selectProjectWorkEnd = createSelector(selectCurrentProject, (project) => project.workEnd);
+export const selectProjectDayCompleted = createSelector(selectCurrentProject, (project) => project.dayCompleted);
 export const selectProjectBreakTime = createSelector(selectCurrentProject, (project) => project.breakTime);
 export const selectProjectBreakNr = createSelector(selectCurrentProject, (project) => project.breakNr);
 export const selectProjectBasicCfg = createSelector(selectCurrentProject, (project): ProjectBasicCfg => {

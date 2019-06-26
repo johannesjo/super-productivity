@@ -3,6 +3,7 @@ import { Observable } from 'rxjs';
 import {
   BreakNr,
   BreakTime,
+  DayCompleted,
   ExportedProject,
   GoogleTimeSheetExport,
   Project,
@@ -28,7 +29,7 @@ import {
   selectProjectBreakNrForDay,
   selectProjectBreakTime,
   selectProjectBreakTimeForDay,
-  selectProjectById,
+  selectProjectById, selectProjectDayCompleted,
   selectProjectGithubCfg,
   selectProjectJiraCfg,
   selectProjectLastWorkEnd,
@@ -91,6 +92,8 @@ export class ProjectService {
   breakNr$: Observable<BreakNr> = this._store$.pipe(select(selectProjectBreakNr));
 
   lastWorkEnd$: Observable<number> = this._store$.pipe(select(selectProjectLastWorkEnd));
+
+  dayCompleted: Observable<DayCompleted> = this._store$.pipe(select(selectProjectDayCompleted));
 
   // DYNAMIC
   workStartToday$: Observable<number> = this._store$.pipe(select(selectProjectWorkStartForDay, {day: getWorklogStr()}));
