@@ -213,6 +213,16 @@ export class ProjectService {
     });
   }
 
+  setDayCompleted(id = this.currentId, date: string) {
+    this._store$.dispatch({
+      type: ProjectActionTypes.SetDayCompleted,
+      payload: {
+        id,
+        date,
+      }
+    });
+  }
+
   addToBreakTime(id = this.currentId, date: string = getWorklogStr(), val: number) {
     this._store$.dispatch({
       type: ProjectActionTypes.AddToProjectBreakTime,

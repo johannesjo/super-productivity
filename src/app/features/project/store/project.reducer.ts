@@ -179,6 +179,20 @@ export function projectReducer(
       }, state);
     }
 
+    case ProjectActionTypes.SetDayCompleted: {
+      const {id, date} = action.payload;
+      const oldP = state.entities[id];
+      return projectAdapter.updateOne({
+        id,
+        changes: {
+          dayCompleted: {
+            ...oldP.dayCompleted,
+            [date]: true,
+          }
+        }
+      }, state);
+    }
+
     case ProjectActionTypes.AddToProjectBreakTime: {
       const {id, date, val} = action.payload;
       const oldP = state.entities[id];
