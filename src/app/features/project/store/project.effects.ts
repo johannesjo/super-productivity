@@ -1,7 +1,7 @@
-import { Injectable } from '@angular/core';
-import { Actions, Effect, ofType } from '@ngrx/effects';
-import { select, Store } from '@ngrx/store';
-import { filter, map, switchMap, tap, withLatestFrom } from 'rxjs/operators';
+import {Injectable} from '@angular/core';
+import {Actions, Effect, ofType} from '@ngrx/effects';
+import {select, Store} from '@ngrx/store';
+import {filter, map, switchMap, tap, withLatestFrom} from 'rxjs/operators';
 import {
   AddProject,
   ArchiveProject,
@@ -13,23 +13,23 @@ import {
   UpdateProjectWorkEnd,
   UpdateProjectWorkStart
 } from './project.actions';
-import { selectCurrentProject, selectCurrentProjectId, selectProjectFeatureState } from './project.reducer';
-import { PersistenceService } from '../../../core/persistence/persistence.service';
-import { TaskService } from '../../tasks/task.service';
-import { BookmarkService } from '../../bookmark/bookmark.service';
-import { AttachmentService } from '../../attachment/attachment.service';
-import { NoteService } from '../../note/note.service';
-import { IssueService } from '../../issue/issue.service';
-import { SnackService } from '../../../core/snack/snack.service';
-import { SnackOpen } from '../../../core/snack/store/snack.actions';
-import { getWorklogStr } from '../../../util/get-work-log-str';
-import { TaskActionTypes } from '../../tasks/store/task.actions';
-import { ReminderService } from '../../reminder/reminder.service';
-import { MetricService } from '../../metric/metric.service';
-import { ObstructionService } from '../../metric/obstruction/obstruction.service';
-import { ImprovementService } from '../../metric/improvement/improvement.service';
-import { ProjectService } from '../project.service';
-import { BannerService } from '../../../core/banner/banner.service';
+import {selectCurrentProject, selectCurrentProjectId, selectProjectFeatureState} from './project.reducer';
+import {PersistenceService} from '../../../core/persistence/persistence.service';
+import {TaskService} from '../../tasks/task.service';
+import {BookmarkService} from '../../bookmark/bookmark.service';
+import {AttachmentService} from '../../attachment/attachment.service';
+import {NoteService} from '../../note/note.service';
+import {IssueService} from '../../issue/issue.service';
+import {SnackService} from '../../../core/snack/snack.service';
+import {SnackOpen} from '../../../core/snack/store/snack.actions';
+import {getWorklogStr} from '../../../util/get-work-log-str';
+import {TaskActionTypes} from '../../tasks/store/task.actions';
+import {ReminderService} from '../../reminder/reminder.service';
+import {MetricService} from '../../metric/metric.service';
+import {ObstructionService} from '../../metric/obstruction/obstruction.service';
+import {ImprovementService} from '../../metric/improvement/improvement.service';
+import {ProjectService} from '../project.service';
+import {BannerService} from '../../../core/banner/banner.service';
 
 // needed because we always want the check request to the jira api to finish first
 const ISSUE_REFRESH_DELAY = 10000;
@@ -101,7 +101,7 @@ export class ProjectEffects {
       ),
       withLatestFrom(
         this._projectService.lastWorkEnd$,
-        this._projectService.dayCompleted,
+        this._projectService.dayCompleted$,
       ),
       filter(([a, workEnd, dayCompleted]) => {
         const workEndDate = new Date(workEnd);

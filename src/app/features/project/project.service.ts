@@ -93,7 +93,7 @@ export class ProjectService {
 
   lastWorkEnd$: Observable<number> = this._store$.pipe(select(selectProjectLastWorkEnd));
 
-  dayCompleted: Observable<DayCompleted> = this._store$.pipe(select(selectProjectDayCompleted));
+  dayCompleted$: Observable<DayCompleted> = this._store$.pipe(select(selectProjectDayCompleted));
 
   // DYNAMIC
   workStartToday$: Observable<number> = this._store$.pipe(select(selectProjectWorkStartForDay, {day: getWorklogStr()}));
