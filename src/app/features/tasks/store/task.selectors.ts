@@ -3,7 +3,6 @@ import {filterStartableTasks, TASK_FEATURE_NAME, taskAdapter, TaskState} from '.
 import {selectIssueEntityMap} from '../../issue/issue.selector';
 import {Task, TaskWithIssueData, TaskWithSubTasks} from '../task.model';
 import {IssueProviderKey} from '../../issue/issue';
-import {getWorklogStr} from '../../../util/get-work-log-str';
 
 const mapIssueDataToTask = (tasks_, issueEntityMap) => {
   return tasks_ && tasks_.map((task) => {
@@ -133,12 +132,6 @@ export const selectIsTaskForTodayPlanned = createSelector(
 export const selectTodaysTasksWithSubTasks = createSelector(selectAllTasksWithSubTasks, selectTodaysTaskIds, mapTasksFromIds);
 export const selectBacklogTasksWithSubTasks = createSelector(selectAllTasksWithSubTasks, selectBacklogTaskIds, mapTasksFromIds);
 export const selectTodaysTasksFlat = createSelector(selectTodaysTasksWithSubTasks, flattenTasks);
-export const selectTasksWorkedOnOrDoneTodayFlat = createSelector(selectTodaysTasksFlat, (tasks) => {
-  const todayStr = getWorklogStr();
-  return tasks.filter(
-    (t: Task) => t.isDone || (t.timeSpentOnDay && t.timeSpentOnDay[todayStr] && t.timeSpentOnDay[todayStr] > 0)
-  );
-});
 
 
 export const selectTodaysUnDoneTasksWithSubTasks = createSelector(
@@ -197,3 +190,15 @@ export const selectTaskByIssueId = createSelector(
       : null;
   }
 );
+
+export const selectTasksWorkedOnOrDoneFlat = createSelector(selectTodaysTasksFlat, (tasks, props: { day: string }) => {
+  if (!props) {
+    return null;
+  }
+
+  const todayStr = props.day;
+  return tasks.filter(
+    (t: Task) => t.isDone || (t.timeSpentOnDay && t.timeSpentOnDay[todayStr] && t.timeSpentOnDay[todayStr] > 0)
+  );
+});
+

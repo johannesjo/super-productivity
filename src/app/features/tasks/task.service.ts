@@ -73,9 +73,8 @@ import {
   selectTaskByIssueId,
   selectTaskEntities,
   selectTasksWithMissingIssueData,
-  selectTasksWorkedOnOrDoneTodayFlat,
+  selectTasksWorkedOnOrDoneFlat,
   selectTodaysDoneTasksWithSubTasks,
-  selectTodaysTasksFlat,
   selectTodaysTasksWithSubTasks,
   selectTodaysUnDoneTasksWithSubTasks,
   selectTotalTimeWorkedOnTodaysTasks
@@ -128,18 +127,8 @@ export class TaskService {
   );
 
   // todays list flat + tasks worked on today
-  todaysTasksFlat$: Observable<TaskWithSubTasks[]> = this._store.pipe(
-    select(selectTodaysTasksFlat),
-  );
-
-  // todays list flat + tasks worked on today
   taskEntityState$: Observable<Dictionary<Task>> = this._store.pipe(
     select(selectTaskEntities),
-  );
-
-
-  todaysWorkedOnOrDoneTasksFlat$: Observable<TaskWithSubTasks[]> = this._store.pipe(
-    select(selectTasksWorkedOnOrDoneTodayFlat),
   );
 
   // only todays list
@@ -202,20 +191,7 @@ export class TaskService {
   );
 
   // TODO could be done as a dynamic selector
-  workingToday$: Observable<any> = this.todaysTasks$.pipe(
-    map((tasks) => {
-      const date = getWorklogStr();
-      return tasks && tasks.length && tasks.reduce((acc, task) => {
-          return acc + (
-            (task.timeSpentOnDay && +task.timeSpentOnDay[date])
-              ? +task.timeSpentOnDay[date]
-              : 0
-          );
-        }, 0
-      );
-    }),
-    distinctUntilChanged(),
-  );
+  workingToday$: Observable<any> = this.getTimeWorkedForDay$(getWorklogStr());
 
   // TODO could be done as a dynamic selector
   estimatedOnTasksWorkedOnToday$: Observable<number> = this.todaysTasks$.pipe(
@@ -487,6 +463,47 @@ export class TaskService {
   getById(id: string): Observable<Task> {
     return this._store.pipe(select(selectTaskById, {id}), take(1));
   }
+
+  getTasksWorkedOnOrDoneFlat$(day: string = getWorklogStr()): Observable<TaskWithSubTasks[]> {
+    return this._store.pipe(select(selectTasksWorkedOnOrDoneFlat, {day}));
+  }
+
+  // TODO could be done better
+  getTimeWorkedForDay$(day: string = getWorklogStr()): Observable<number> {
+    return this.todaysTasks$.pipe(
+      map((tasks) => {
+        return tasks && tasks.length && tasks.reduce((acc, task) => {
+            return acc + (
+              (task.timeSpentOnDay && +task.timeSpentOnDay[day])
+                ? +task.timeSpentOnDay[day]
+                : 0
+            );
+          }, 0
+        );
+      }),
+      distinctUntilChanged(),
+    );
+  }
+
+  // TODO could be done better
+  getTimeEstimateForDay$(day: string = getWorklogStr()): Observable<number> {
+    return this.todaysTasks$.pipe(
+      map((tasks) => {
+        return tasks && tasks.length && tasks.reduce((acc, task) => {
+            if (!task.timeSpentOnDay && !(task.timeSpentOnDay[day] > 0)) {
+              return acc;
+            }
+            const remainingEstimate = task.timeEstimate + (task.timeSpentOnDay[day]) - task.timeSpent;
+            return (remainingEstimate > 0)
+              ? acc + remainingEstimate
+              : acc;
+          }, 0
+        );
+      }),
+      distinctUntilChanged(),
+    );
+  }
+
 
   getByIssueId(issueId: string | number, issueType: IssueProviderKey): Observable<Task> {
     return this._store.pipe(select(selectTaskByIssueId, {issueId, issueType}), take(1));

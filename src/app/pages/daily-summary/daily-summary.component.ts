@@ -1,6 +1,5 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit} from '@angular/core';
 import {TaskService} from '../../features/tasks/task.service';
-import {getTodayStr} from '../../features/tasks/util/get-today-str';
 import {Task, TaskWithSubTasks} from '../../features/tasks/task.model';
 import {ActivatedRoute, Router} from '@angular/router';
 import {IS_ELECTRON} from '../../app.constants';
@@ -14,7 +13,7 @@ import {NoteService} from '../../features/note/note.service';
 import {ConfigService} from '../../features/config/config.service';
 import {GoogleDriveSyncService} from '../../features/google/google-drive-sync.service';
 import {SnackService} from '../../core/snack/snack.service';
-import {filter, map, take} from 'rxjs/operators';
+import {filter, map, shareReplay, startWith, switchMap, take} from 'rxjs/operators';
 import {loadFromLs, saveToLs} from '../../core/persistence/local-storage';
 import {LS_DAILY_SUMMARY_TAB_INDEX} from '../../core/persistence/ls-keys.const';
 import {GoogleApiService} from '../../features/google/google-api.service';
@@ -37,23 +36,45 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
   };
   doneTasks$ = this._taskService.doneTasks$;
   todaysTasks$ = this._taskService.todaysTasks$;
-  todaysWorkedOnOrDoneTasksFlat$ = this._taskService.todaysWorkedOnOrDoneTasksFlat$;
-  todayStr = getTodayStr();
+
   isTimeSheetExported = true;
   showSuccessAnimation;
   selectedTabIndex = loadFromLs(this.getLsKeyForSummaryTabIndex()) || 0;
   isForToday = true;
-  day: string;
 
-  // calc total time spent on todays tasks
-  estimatedOnTasksWorkedOnToday$ = this._taskService.estimatedOnTasksWorkedOnToday$;
-  // use mysql date as it is sortable
-  workingToday$ = this._taskService.workingToday$;
+  dayStr = getWorklogStr();
 
-  started$ = this._projectService.workStartToday$;
-  end$ = this._projectService.workEndToday$;
-  breakTime$ = this._projectService.breakTimeToday$;
-  breakNr$ = this._projectService.breakNrToday$;
+  dayStr$ = this._activatedRoute.paramMap.pipe(
+    startWith({params: {dayStr: getWorklogStr()}}),
+    map((s: any) => {
+      if (s && s.params.dayStr) {
+        return s.params.dayStr;
+      } else {
+        return getWorklogStr();
+      }
+    }),
+    shareReplay()
+  );
+
+  tasksWorkedOnOrDoneFlat$ = this.dayStr$.pipe(switchMap((dayStr) => this._taskService.getTasksWorkedOnOrDoneFlat$(dayStr)));
+
+  nrOfDoneTasks$: Observable<number> = this.tasksWorkedOnOrDoneFlat$.pipe(
+    map(tasks => tasks && tasks.filter(task => !!task.isDone).length),
+  );
+
+  totalNrOfTasks$: Observable<number> = this.tasksWorkedOnOrDoneFlat$.pipe(
+    map(tasks => tasks && tasks.length),
+  );
+
+  estimatedOnTasksWorkedOn$ = this.dayStr$.pipe(switchMap((dayStr) => this._taskService.getTimeEstimateForDay$(dayStr)));
+
+  timeWorked$ = this.dayStr$.pipe(switchMap((dayStr) => this._taskService.getTimeWorkedForDay$(dayStr)));
+
+  started$ = this.dayStr$.pipe(switchMap((dayStr) => this._projectService.getWorkStart$(dayStr)));
+  end$ = this.dayStr$.pipe(switchMap((dayStr) => this._projectService.getWorkEnd$(dayStr)));
+  breakTime$ = this.dayStr$.pipe(switchMap((dayStr) => this._projectService.getBreakTime$(dayStr)));
+  breakNr$ = this.dayStr$.pipe(switchMap((dayStr) => this._projectService.getBreakNr$(dayStr)));
+
   isBreakSupport$: Observable<boolean> = this._configService.cfg$.pipe(map(cfg => cfg && cfg.misc.isEnableIdleTimeTracking));
 
   private _successAnimationTimeout;
@@ -81,6 +102,7 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
+    // TODO fix
     this._subs.add(this.doneTasks$.subscribe((val) => {
       this._doneTasks = val;
     }));
@@ -100,7 +122,7 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
     this._subs.add(this._activatedRoute.paramMap.subscribe((s: any) => {
         if (s && s.params.dayStr) {
           this.isForToday = false;
-          this.day = s.params.dayStr;
+          this.dayStr = s.params.dayStr;
         }
       })
     );
@@ -130,8 +152,7 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
 
   finishDay() {
     this._taskService.moveToArchive(this._doneTasks);
-    const dayToComplete = this.day || getWorklogStr();
-    this._projectService.setDayCompleted(null, dayToComplete);
+    // this._projectService.setDayCompleted(null, this.dayStr);
 
     if (IS_ELECTRON && this.isForToday) {
       this._matDialog.open(DialogConfirmComponent, {
@@ -163,16 +184,16 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
   }
 
   updateWorkStart(ev) {
-    const startTime = moment(getWorklogStr() + ' ' + ev).unix() * 1000;
+    const startTime = moment(this.dayStr + ' ' + ev).unix() * 1000;
     if (startTime) {
-      this._projectService.updateWorkStart(this._projectService.currentId, getWorklogStr(), startTime);
+      this._projectService.updateWorkStart(this._projectService.currentId, this.dayStr, startTime);
     }
   }
 
   updateWorkEnd(ev) {
-    const endTime = moment(getWorklogStr() + ' ' + ev).unix() * 1000;
+    const endTime = moment(this.dayStr + ' ' + ev).unix() * 1000;
     if (endTime) {
-      this._projectService.updateWorkEnd(this._projectService.currentId, getWorklogStr(), endTime);
+      this._projectService.updateWorkEnd(this._projectService.currentId, this.dayStr, endTime);
     }
   }
 
@@ -180,13 +201,13 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
     this._taskService.update(task.id, {
       timeSpentOnDay: {
         ...task.timeSpentOnDay,
-        [getTodayStr()]: +newVal,
+        [this.dayStr]: +newVal,
       }
     });
   }
 
   roundTimeForTasks(roundTo: RoundTimeOption, isRoundUp = false) {
-    this._taskService.roundTimeSpentForDay(getWorklogStr(), roundTo, isRoundUp);
+    this._taskService.roundTimeSpentForDay(this.dayStr, roundTo, isRoundUp);
   }
 
   onTabIndexChange(i) {

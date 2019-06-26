@@ -1,5 +1,5 @@
-import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import {Injectable} from '@angular/core';
+import {Observable} from 'rxjs';
 import {
   BreakNr,
   BreakTime,
@@ -13,9 +13,9 @@ import {
   SimpleSummarySettings,
   WorklogExportSettings
 } from './project.model';
-import { PersistenceService } from '../../core/persistence/persistence.service';
-import { select, Store } from '@ngrx/store';
-import { ProjectActionTypes, UpdateProjectOrder } from './store/project.actions';
+import {PersistenceService} from '../../core/persistence/persistence.service';
+import {select, Store} from '@ngrx/store';
+import {ProjectActionTypes, UpdateProjectOrder} from './store/project.actions';
 import shortid from 'shortid';
 import {
   initialProjectState,
@@ -29,7 +29,8 @@ import {
   selectProjectBreakNrForDay,
   selectProjectBreakTime,
   selectProjectBreakTimeForDay,
-  selectProjectById, selectProjectDayCompleted,
+  selectProjectById,
+  selectProjectDayCompleted,
   selectProjectGithubCfg,
   selectProjectJiraCfg,
   selectProjectLastWorkEnd,
@@ -37,17 +38,17 @@ import {
   selectProjectWorkStartForDay,
   selectUnarchivedProjects
 } from './store/project.reducer';
-import { IssueIntegrationCfg, IssueProviderKey } from '../issue/issue';
-import { JiraCfg } from '../issue/jira/jira';
-import { DEFAULT_PROJECT } from './project.const';
-import { Dictionary } from '@ngrx/entity';
-import { getWorklogStr } from '../../util/get-work-log-str';
-import { GithubCfg } from '../issue/github/github';
-import { DEFAULT_ISSUE_PROVIDER_CFGS } from '../issue/issue.const';
-import { Actions, ofType } from '@ngrx/effects';
-import { distinctUntilChanged, take } from 'rxjs/operators';
-import { isValidProjectExport } from './util/is-valid-project-export';
-import { SnackService } from '../../core/snack/snack.service';
+import {IssueIntegrationCfg, IssueProviderKey} from '../issue/issue';
+import {JiraCfg} from '../issue/jira/jira';
+import {DEFAULT_PROJECT} from './project.const';
+import {Dictionary} from '@ngrx/entity';
+import {getWorklogStr} from '../../util/get-work-log-str';
+import {GithubCfg} from '../issue/github/github';
+import {DEFAULT_ISSUE_PROVIDER_CFGS} from '../issue/issue.const';
+import {Actions, ofType} from '@ngrx/effects';
+import {distinctUntilChanged, take} from 'rxjs/operators';
+import {isValidProjectExport} from './util/is-valid-project-export';
+import {SnackService} from '../../core/snack/snack.service';
 
 @Injectable({
   providedIn: 'root',
@@ -95,12 +96,6 @@ export class ProjectService {
 
   dayCompleted$: Observable<DayCompleted> = this._store$.pipe(select(selectProjectDayCompleted));
 
-  // DYNAMIC
-  workStartToday$: Observable<number> = this._store$.pipe(select(selectProjectWorkStartForDay, {day: getWorklogStr()}));
-  workEndToday$: Observable<number> = this._store$.pipe(select(selectProjectWorkEndForDay, {day: getWorklogStr()}));
-  breakTimeToday$: Observable<number> = this._store$.pipe(select(selectProjectBreakTimeForDay, {day: getWorklogStr()}));
-  breakNrToday$: Observable<number> = this._store$.pipe(select(selectProjectBreakNrForDay, {day: getWorklogStr()}));
-
 
   constructor(
     private readonly _persistenceService: PersistenceService,
@@ -147,9 +142,26 @@ export class ProjectService {
     });
   }
 
-
+  // TODO add $
   getById(id: string): Observable<Project> {
     return this._store$.pipe(select(selectProjectById, {id}), take(1));
+  }
+
+  // TODO consistent naming
+  getWorkStart$(day: string = getWorklogStr()): Observable<number> {
+    return this._store$.pipe(select(selectProjectWorkStartForDay, {day}));
+  }
+
+  getWorkEnd$(day: string = getWorklogStr()): Observable<number> {
+    return this._store$.pipe(select(selectProjectWorkEndForDay, {day}));
+  }
+
+  getBreakTime$(day: string = getWorklogStr()): Observable<number> {
+    return this._store$.pipe(select(selectProjectBreakTimeForDay, {day}));
+  }
+
+  getBreakNr$(day: string = getWorklogStr()): Observable<number> {
+    return this._store$.pipe(select(selectProjectBreakNrForDay, {day}));
   }
 
   add(project: Partial<Project>) {
