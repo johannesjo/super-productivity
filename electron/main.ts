@@ -1,6 +1,5 @@
 'use strict';
 import {App, app, globalShortcut, ipcMain, powerMonitor, powerSaveBlocker} from 'electron';
-import * as notifier from 'node-notifier';
 import {info} from 'electron-log';
 import {CONFIG} from './CONFIG';
 
@@ -19,7 +18,6 @@ import {
   IPC_IDLE_TIME,
   IPC_JIRA_MAKE_REQUEST_EVENT,
   IPC_JIRA_SETUP_IMG_HEADERS,
-  IPC_NOTIFY,
   IPC_ON_BEFORE_QUIT,
   IPC_REGISTER_GLOBAL_SHORTCUTS_EVENT,
   IPC_SET_PROGRESS_BAR,
@@ -200,10 +198,6 @@ ipcMain.on(IPC_JIRA_MAKE_REQUEST_EVENT, (ev, request) => {
 
 ipcMain.on(IPC_GIT_LOG, (ev, cwd) => {
   getGitLog(cwd);
-});
-
-ipcMain.on(IPC_NOTIFY, (ev, notification) => {
-  notifier.notify({...notification, message: notification.body});
 });
 
 ipcMain.on(IPC_SHOW_OR_FOCUS, () => {
