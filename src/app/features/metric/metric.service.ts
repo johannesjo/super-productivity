@@ -67,14 +67,14 @@ export class MetricService {
     this._store$.dispatch(new LoadMetricState({state}));
   }
 
-  getMetricById(id: string): Observable<Metric> {
+  getMetricForDay$(id: string = getWorklogStr()): Observable<Metric> {
+    if (!id) {
+      throw new Error('No valid id provided');
+    }
+
     return this._store$.pipe(select(selectMetricById, {id}), take(1));
   }
 
-  getTodaysMetric(): Observable<Metric> {
-    const id = getWorklogStr();
-    return this._store$.pipe(select(selectMetricById, {id}));
-  }
 
   addMetric(metric: Metric) {
     this._store$.dispatch(new AddMetric({

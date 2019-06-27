@@ -5,7 +5,7 @@ import {ActivatedRoute, Router} from '@angular/router';
 import {IS_ELECTRON} from '../../app.constants';
 import {MatDialog} from '@angular/material/dialog';
 import {DialogSimpleTaskExportComponent} from '../../features/simple-task-export/dialog-simple-task-export/dialog-simple-task-export.component';
-import {Observable, Subscription} from 'rxjs';
+import {combineLatest, Observable, Subscription} from 'rxjs';
 import {ElectronService} from 'ngx-electron';
 import {IPC_SHUTDOWN_NOW} from '../../../../electron/ipc-events.const';
 import {DialogConfirmComponent} from '../../ui/dialog-confirm/dialog-confirm.component';
@@ -44,7 +44,12 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
 
   dayStr = getWorklogStr();
 
-  dayStr$ = this._activatedRoute.paramMap.pipe(
+  dayStr$ = combineLatest(
+    this._activatedRoute.paramMap,
+    this._projectService.isRelatedDataLoadedForCurrentProject$,
+  ).pipe(
+    filter(([route, isLoaded]) => isLoaded),
+    map(([route]) => route),
     startWith({params: {dayStr: getWorklogStr()}}),
     map((s: any) => {
       if (s && s.params.dayStr) {
@@ -98,7 +103,7 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
     private readonly _cd: ChangeDetectorRef,
     private readonly _activatedRoute: ActivatedRoute,
   ) {
-
+    this.dayStr$.subscribe((v) => console.log('dayStr$', v));
   }
 
   ngOnInit() {

@@ -65,7 +65,8 @@
                  dynamicHeight>
     <mat-tab label="Evaluation">
       <section class="tab-inner">
-        <evaluation-sheet (onSave)="onEvaluationSave()"></evaluation-sheet>
+        <evaluation-sheet (save)="onEvaluationSave()"
+                          [day]="(dayStr$|async)"></evaluation-sheet>
       </section>
     </mat-tab>
 

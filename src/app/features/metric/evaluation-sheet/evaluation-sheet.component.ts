@@ -3,18 +3,21 @@ import {
   ChangeDetectorRef,
   Component,
   EventEmitter,
+  Input,
   OnDestroy,
   OnInit,
   Output
 } from '@angular/core';
 import {DEFAULT_METRIC_FOR_DAY} from '../metric.const';
 import {MetricCopy} from '../metric.model';
-import {getWorklogStr} from '../../../util/get-work-log-str';
 import {MetricService} from '../metric.service';
 import {ObstructionService} from '../obstruction/obstruction.service';
 import {ImprovementService} from '../improvement/improvement.service';
-import {Subscription} from 'rxjs';
+import {BehaviorSubject, combineLatest, Observable, Subscription} from 'rxjs';
 import {NoteService} from '../../note/note.service';
+import {getWorklogStr} from '../../../util/get-work-log-str';
+import {filter, map, switchMap, withLatestFrom} from 'rxjs/operators';
+import {ProjectService} from '../../project/project.service';
 
 @Component({
   selector: 'evaluation-sheet',
@@ -23,35 +26,52 @@ import {NoteService} from '../../note/note.service';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class EvaluationSheetComponent implements OnDestroy, OnInit {
-  @Output() onSave = new EventEmitter<any>();
+  @Input() set day(val: string) {
+    this.day$.next(val);
+  }
 
-  metricForDay: MetricCopy;
+  @Output() save = new EventEmitter<any>();
 
   tomorrowsNote: string;
+  metricForDay: MetricCopy;
 
+  day$ = new BehaviorSubject<string>(getWorklogStr());
+  isForToday$: Observable<boolean> = this.day$.pipe(map(day => day === getWorklogStr()));
+
+  private _metricForDay$ = combineLatest(
+    this.day$,
+    this._projectService.isRelatedDataLoadedForCurrentProject$,
+  ).pipe(
+    filter(([day, isLoaded]) => isLoaded),
+    switchMap(([day]) => this._metricService.getMetricForDay$(day)),
+    withLatestFrom(this.day$),
+    map(([metric, day]) => {
+      return metric || {
+        id: day,
+        ...DEFAULT_METRIC_FOR_DAY,
+      };
+    })
+  );
   private _subs = new Subscription();
+
 
   constructor(
     public obstructionService: ObstructionService,
     public improvementService: ImprovementService,
     private _metricService: MetricService,
+    private _projectService: ProjectService,
     private _noteService: NoteService,
     private _cd: ChangeDetectorRef,
   ) {
   }
 
   ngOnInit(): void {
-    this.metricForDay = {
-      id: getWorklogStr(),
-      ...DEFAULT_METRIC_FOR_DAY,
-    };
-
-    this._subs.add(this._metricService.getTodaysMetric().subscribe(metric => {
-      if (metric) {
-        this.metricForDay = metric;
-        this._cd.detectChanges();
-      }
+    this._subs.add(this._metricForDay$.subscribe(metric => {
+      this.metricForDay = metric;
+      this._cd.detectChanges();
     }));
+    this._metricForDay$.subscribe((v) => console.log('_metricForDay$', v));
+    this.day$.subscribe((v) => console.log('_day$', v));
   }
 
 
@@ -112,6 +132,6 @@ export class EvaluationSheetComponent implements OnDestroy, OnInit {
     }
 
     this._metricService.upsertMetric(this.metricForDay);
-    this.onSave.emit();
+    this.save.emit();
   }
 }

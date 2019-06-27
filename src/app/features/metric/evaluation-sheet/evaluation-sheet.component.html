@@ -41,7 +41,7 @@
              #productivity="ngModel"
              matInput
              maxLength="2"
-             placeholder="How efficient did you work today?"
+             placeholder="How efficient did you work?"
              type="number">
       <mat-hint>1: Haven't even started – 10: Enormously efficient</mat-hint>
       <mat-error *ngIf="productivity.invalid && (productivity.dirty || productivity.touched)">
@@ -49,14 +49,14 @@
       </mat-error>
     </mat-form-field>
 
-    <chip-list-input label="What hindered your productivity today?"
+    <chip-list-input label="What hindered your productivity?"
                      [model]="metricForDay.obstructions"
                      [suggestions]="(obstructionService.obstructions$|async)"
                      (addItem)="addObstruction($event)"
                      (addNewItem)="addNewObstruction($event)"
                      (removeItem)="removeObstruction($event)"></chip-list-input>
 
-    <chip-list-input label="What improved your productivity today?"
+    <chip-list-input label="What improved your productivity?"
                      [model]="metricForDay.improvements"
                      [suggestions]="(improvementService.improvements$|async)"
                      (addItem)="addImprovement($event)"
