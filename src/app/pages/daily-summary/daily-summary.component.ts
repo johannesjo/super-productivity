@@ -103,7 +103,6 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
     private readonly _cd: ChangeDetectorRef,
     private readonly _activatedRoute: ActivatedRoute,
   ) {
-    this.dayStr$.subscribe((v) => console.log('dayStr$', v));
   }
 
   ngOnInit() {

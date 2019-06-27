@@ -36,7 +36,7 @@ export class EvaluationSheetComponent implements OnDestroy, OnInit {
   metricForDay: MetricCopy;
 
   day$ = new BehaviorSubject<string>(getWorklogStr());
-  isForToday$: Observable<boolean> = this.day$.pipe(map(day => day === getWorklogStr()));
+  // isForToday$: Observable<boolean> = this.day$.pipe(map(day => day === getWorklogStr()));
 
   private _metricForDay$ = combineLatest(
     this.day$,
@@ -70,8 +70,6 @@ export class EvaluationSheetComponent implements OnDestroy, OnInit {
       this.metricForDay = metric;
       this._cd.detectChanges();
     }));
-    this._metricForDay$.subscribe((v) => console.log('_metricForDay$', v));
-    this.day$.subscribe((v) => console.log('_day$', v));
   }
 
 
