@@ -34,8 +34,9 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
   cfg = {
     isBlockFinishDayUntilTimeTimeTracked: false
   };
-  doneTasks$ = this._taskService.doneTasks$;
-  todaysTasks$ = this._taskService.todaysTasks$;
+
+  doneTasks$: Observable<TaskWithSubTasks[]> = this._taskService.doneTasks$;
+  todaysTasks$: Observable<TaskWithSubTasks[]> = this._taskService.todaysTasks$;
 
   isTimeSheetExported = true;
   showSuccessAnimation;
@@ -103,6 +104,9 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
     private readonly _cd: ChangeDetectorRef,
     private readonly _activatedRoute: ActivatedRoute,
   ) {
+    this.doneTasks$.subscribe((v) => console.log('doneTasks$', v));
+    this._taskService.doneTasks$.subscribe((v) => console.log('_taskService.doneTasks$', v));
+
   }
 
   ngOnInit() {
@@ -156,6 +160,8 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
 
   finishDay() {
     this._taskService.moveToArchive(this._doneTasks);
+
+    // TODO comment in again
     // this._projectService.setDayCompleted(null, this.dayStr);
 
     if (IS_ELECTRON && this.isForToday) {
