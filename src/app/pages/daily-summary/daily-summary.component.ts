@@ -14,8 +14,6 @@ import {ConfigService} from '../../features/config/config.service';
 import {GoogleDriveSyncService} from '../../features/google/google-drive-sync.service';
 import {SnackService} from '../../core/snack/snack.service';
 import {filter, map, shareReplay, startWith, switchMap, take} from 'rxjs/operators';
-import {loadFromLs, saveToLs} from '../../core/persistence/local-storage';
-import {LS_DAILY_SUMMARY_TAB_INDEX} from '../../core/persistence/ls-keys.const';
 import {GoogleApiService} from '../../features/google/google-api.service';
 import {ProjectService} from '../../features/project/project.service';
 import {getWorklogStr} from '../../util/get-work-log-str';
@@ -40,7 +38,7 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
 
   isTimeSheetExported = true;
   showSuccessAnimation;
-  selectedTabIndex = loadFromLs(this.getLsKeyForSummaryTabIndex()) || 0;
+  selectedTabIndex = 0;
   isForToday = true;
 
   dayStr = getWorklogStr();
@@ -211,12 +209,9 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
   }
 
   onTabIndexChange(i) {
-    saveToLs(this.getLsKeyForSummaryTabIndex(), i);
+    this.selectedTabIndex = i;
   }
 
-  private getLsKeyForSummaryTabIndex() {
-    return LS_DAILY_SUMMARY_TAB_INDEX + this._projectService.currentId;
-  }
 
   private _finishDayForGood(cb?) {
     if (this._configService.cfg
