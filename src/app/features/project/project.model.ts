@@ -30,11 +30,7 @@ export interface WorkStartEndCopy {
 
 export type WorkStartEnd = Readonly<WorkStartEndCopy>;
 
-export interface DayCompletedCopy {
-  [key: string]: boolean;
-}
-
-export type DayCompleted = Readonly<DayCompletedCopy>;
+export type DayCompletedCopy = string[];
 
 export interface GoogleTimeSheetExportCopy {
   spreadsheetId: string;
@@ -116,7 +112,7 @@ export interface ProjectCopy extends ProjectBasicCfg {
   advancedCfg: ProjectAdvancedCfg;
   workStart: WorkStartEnd;
   workEnd: WorkStartEnd;
-  dayCompleted: DayCompleted;
+  lastCompletedDay: string;
   breakTime: BreakTime;
   breakNr: BreakNr;
 }

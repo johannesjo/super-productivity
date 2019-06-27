@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
 import {Actions, Effect, ofType} from '@ngrx/effects';
 import {select, Store} from '@ngrx/store';
-import {concatMap, filter, map, switchMap, tap, withLatestFrom} from 'rxjs/operators';
+import {filter, map, switchMap, tap, withLatestFrom} from 'rxjs/operators';
 import {
   AddProject,
   ArchiveProject,
@@ -53,6 +53,7 @@ export class ProjectEffects {
         ProjectActionTypes.UpdateProjectOrder,
         ProjectActionTypes.ArchiveProject,
         ProjectActionTypes.UnarchiveProject,
+        ProjectActionTypes.UpdateLastCompletedDay,
       ),
       withLatestFrom(
         this._store$.pipe(select(selectProjectFeatureState))
@@ -73,6 +74,7 @@ export class ProjectEffects {
         ProjectActionTypes.AddToProjectBreakTime,
         ProjectActionTypes.ArchiveProject,
         ProjectActionTypes.UnarchiveProject,
+        ProjectActionTypes.UpdateLastCompletedDay,
       ),
       tap(this._persistenceService.saveLastActive.bind(this))
     );
@@ -103,15 +105,23 @@ export class ProjectEffects {
       ),
       withLatestFrom(
         this._projectService.lastWorkEnd$,
-        this._projectService.dayCompleted$,
+        this._projectService.lastCompletedDay$,
       ),
-      filter(([a, workEnd, dayCompleted]) => {
-        const workEndDate = new Date(workEnd);
+      filter(([a, lastWorkEndStr, lastCompletedDayStr]) => {
         const today = new Date();
-        workEndDate.setHours(0, 0, 0, 0);
+        const lastWorkEnd = new Date(lastWorkEndStr);
+        const lastCompletedDay = new Date(lastCompletedDayStr);
+
         today.setHours(0, 0, 0, 0);
-        // console.log('dayCompleted', dayCompleted[getWorklogStr(workEndDate)], dayCompleted, 'workEndDate', workEndDate, 'today', today);
-        return workEndDate < today && !dayCompleted[getWorklogStr(workEndDate)];
+        lastWorkEnd.setHours(0, 0, 0, 0);
+        lastCompletedDay.setHours(0, 0, 0, 0);
+
+        // console.log('lastCompletedDay', lastCompletedDay[getWorklogStr(lastWorkEnd)],
+        //   lastCompletedDay, 'lastWorkEnd', lastWorkEnd, 'today', today);
+        // NOTE: ignore projects without any completed day
+        return !!(lastCompletedDay)
+          && (lastWorkEnd < today)
+          && (lastWorkEnd > lastCompletedDay);
       }),
       tap(([a, workEnd, dayCompleted]) => {
         const dayStr = getWorklogStr(workEnd);

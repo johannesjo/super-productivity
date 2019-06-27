@@ -157,9 +157,7 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
 
   finishDay() {
     this._taskService.moveToArchive(this._doneTasks);
-
-    // TODO comment in again
-    // this._projectService.setDayCompleted(null, this.dayStr);
+    this._projectService.updateLastCompletedDay(this._projectService.currentId, this.dayStr);
 
     if (IS_ELECTRON && this.isForToday) {
       this._matDialog.open(DialogConfirmComponent, {

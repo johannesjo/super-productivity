@@ -45,7 +45,7 @@ export const selectProjectGithubCfg = createSelector(selectProjectIssueCfgs, (is
 export const selectAdvancedProjectCfg = createSelector(selectCurrentProject, (project) => project.advancedCfg);
 export const selectProjectWorkStart = createSelector(selectCurrentProject, (project) => project.workStart);
 export const selectProjectWorkEnd = createSelector(selectCurrentProject, (project) => project.workEnd);
-export const selectProjectDayCompleted = createSelector(selectCurrentProject, (project) => project.dayCompleted);
+export const selectProjectLastCompletedDay = createSelector(selectCurrentProject, (project): string => project.lastCompletedDay);
 export const selectProjectBreakTime = createSelector(selectCurrentProject, (project) => project.breakTime);
 export const selectProjectBreakNr = createSelector(selectCurrentProject, (project) => project.breakNr);
 export const selectProjectBasicCfg = createSelector(selectCurrentProject, (project): ProjectBasicCfg => {
@@ -184,16 +184,13 @@ export function projectReducer(
       }, state);
     }
 
-    case ProjectActionTypes.SetDayCompleted: {
+    case ProjectActionTypes.UpdateLastCompletedDay: {
       const {id, date} = action.payload;
-      const oldP = state.entities[id];
+      console.log(id,date);
       return projectAdapter.updateOne({
         id,
         changes: {
-          dayCompleted: {
-            ...oldP.dayCompleted,
-            [date]: true,
-          }
+          lastCompletedDay: date
         }
       }, state);
     }

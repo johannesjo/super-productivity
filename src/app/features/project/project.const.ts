@@ -1,5 +1,7 @@
-import { GoogleTimeSheetExport, Project, SimpleSummarySettings, WorklogExportSettings } from './project.model';
-import { DEFAULT_ISSUE_PROVIDER_CFGS } from '../issue/issue.const';
+import {GoogleTimeSheetExport, Project, SimpleSummarySettings, WorklogExportSettings} from './project.model';
+import {DEFAULT_ISSUE_PROVIDER_CFGS} from '../issue/issue.const';
+import {getYesterdaysDate} from '../../util/get-yesterdays-date';
+import {getWorklogStr} from '../../util/get-work-log-str';
 
 export const SIMPLE_SUMMARY_DEFAULTS: SimpleSummarySettings = {
   roundWorkTimeTo: null,
@@ -57,7 +59,7 @@ export const DEFAULT_PROJECT: Project = {
   },
   workStart: {},
   workEnd: {},
-  dayCompleted: {},
+  lastCompletedDay: getWorklogStr(getYesterdaysDate()),
   breakTime: {},
   breakNr: {},
 };

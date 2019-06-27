@@ -17,7 +17,7 @@ export enum ProjectActionTypes {
   UpdateProject = '[Project] Update Project',
   UpdateProjectWorkStart = '[Project] Update Work Start',
   UpdateProjectWorkEnd = '[Project] Update Work End',
-  SetDayCompleted = '[Project] Set Day Completed',
+  UpdateLastCompletedDay = '[Project] Update Last Completed Day',
   AddToProjectBreakTime = '[Project] Add to Break Time',
   UpdateProjectAdvancedCfg = '[Project] Update Project Advanced Cfg',
   UpdateProjectIssueProviderCfg = '[Project] Update Project Issue Provider Cfg',
@@ -94,8 +94,8 @@ export class UpdateProjectWorkEnd implements Action {
   constructor(public payload: { id: string; date: string; newVal: number; }) {
   }
 }
-export class SetDayCompleted implements Action {
-  readonly type = ProjectActionTypes.SetDayCompleted;
+export class UpdateLastCompletedDay implements Action {
+  readonly type = ProjectActionTypes.UpdateLastCompletedDay;
 
   constructor(public payload: { id: string; date: string; }) {
   }
@@ -174,7 +174,7 @@ export type ProjectActions
   | UpdateProject
   | UpdateProjectWorkStart
   | UpdateProjectWorkEnd
-  | SetDayCompleted
+  | UpdateLastCompletedDay
   | AddToProjectBreakTime
   | UpdateProjectAdvancedCfg
   | UpdateProjectIssueProviderCfg

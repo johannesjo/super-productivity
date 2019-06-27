@@ -3,7 +3,6 @@ import {Observable} from 'rxjs';
 import {
   BreakNr,
   BreakTime,
-  DayCompleted,
   ExportedProject,
   GoogleTimeSheetExport,
   Project,
@@ -31,7 +30,7 @@ import {
   selectProjectBreakTime,
   selectProjectBreakTimeForDay,
   selectProjectById,
-  selectProjectDayCompleted,
+  selectProjectLastCompletedDay,
   selectProjectGithubCfg,
   selectProjectJiraCfg,
   selectProjectLastWorkEnd,
@@ -95,7 +94,7 @@ export class ProjectService {
 
   lastWorkEnd$: Observable<number> = this._store$.pipe(select(selectProjectLastWorkEnd));
 
-  dayCompleted$: Observable<DayCompleted> = this._store$.pipe(select(selectProjectDayCompleted));
+  lastCompletedDay$: Observable<string> = this._store$.pipe(select(selectProjectLastCompletedDay));
 
 
   constructor(
@@ -228,9 +227,9 @@ export class ProjectService {
     });
   }
 
-  setDayCompleted(id = this.currentId, date: string) {
+  updateLastCompletedDay(id = this.currentId, date: string) {
     this._store$.dispatch({
-      type: ProjectActionTypes.SetDayCompleted,
+      type: ProjectActionTypes.UpdateLastCompletedDay,
       payload: {
         id,
         date,
