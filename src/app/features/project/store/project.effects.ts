@@ -130,13 +130,14 @@ export class ProjectEffects {
       }),
     );
 
-  @Effect({dispatch: false}) dismissForgotToFinishDayBannerOnProjectChange: any = this._actions$
+  @Effect({dispatch: false}) dismissProjectScopeBannersOnProjectChange: any = this._actions$
     .pipe(
       ofType(
         ProjectActionTypes.SetCurrentProject,
       ),
       tap(() => {
         this._bannerService.dismissIfExisting(BannerId.ForgotToFinishDay);
+        this._bannerService.dismissIfExisting(BannerId.JiraUnblock);
       }),
     );
 
