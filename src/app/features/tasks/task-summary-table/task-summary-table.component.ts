@@ -7,7 +7,7 @@ import {TaskService} from '../task.service';
   selector: 'task-summary-table',
   templateUrl: './task-summary-table.component.html',
   styleUrls: ['./task-summary-table.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TaskSummaryTableComponent {
   @Input() flatTasks: TaskWithIssueData[];
@@ -25,5 +25,11 @@ export class TaskSummaryTableComponent {
         [this.day]: +newVal,
       }
     });
+  }
+
+  toggleTaskDone(task: Task) {
+    task.isDone
+      ? this._taskService.setUnDone(task.id)
+      : this._taskService.setDone(task.id);
   }
 }

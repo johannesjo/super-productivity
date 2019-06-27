@@ -40,3 +40,47 @@
     }
   }
 }
+
+.check-done {
+  opacity: 0.5;
+
+  &:hover {
+    opacity: 1 !important;
+  }
+
+  .check,
+  .undo {
+    opacity: 0;
+  }
+
+  .undo {
+    margin-right: -24px;
+  }
+
+
+  &:hover {
+    mat-icon {
+      animation: $transition-duration-m success-btn-ani linear;
+    }
+
+    .check {
+      opacity: 1;
+    }
+  }
+
+  &.isDone {
+    .check {
+      opacity: 1;
+    }
+
+    &:hover {
+      .check {
+        opacity: 0;
+      }
+
+      .undo {
+        opacity: 1;
+      }
+    }
+  }
+}

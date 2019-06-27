@@ -58,8 +58,19 @@
       </th>
       <td mat-cell
           *matCellDef="let task">
-        <mat-icon *ngIf="task.isDone">check
-        </mat-icon>
+        <button (click)="toggleTaskDone(task)"
+                [class.isDone]="task.isDone"
+                title="un-/mark as done"
+                class="check-done"
+                mat-icon-button=""
+                tabindex="2">
+          <mat-icon aria-label="Mark as undone"
+                    class="undo">undo
+          </mat-icon>
+          <mat-icon aria-label="Mark as done"
+                    class="check">check
+          </mat-icon>
+        </button>
       </td>
     </ng-container>
 
