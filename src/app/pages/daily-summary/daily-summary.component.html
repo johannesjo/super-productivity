@@ -82,7 +82,8 @@
             <mat-icon>restore</mat-icon>
             Round Time Spent
           </button>
-          <button (click)="showExportModal()"
+          <button *ngIf="isForToday"
+                  (click)="showExportModal()"
                   mat-button="">
             <mat-icon>call_made</mat-icon>
             Export Task List
