@@ -33,9 +33,6 @@ import {BannerService} from '../../../core/banner/banner.service';
 import {Router} from '@angular/router';
 import {BannerId} from '../../../core/banner/banner.model';
 
-// needed because we always want the check request to the jira api to finish first
-const ISSUE_REFRESH_DELAY = 10000;
-
 @Injectable()
 export class ProjectEffects {
   @Effect({dispatch: false}) syncProjectToLs$: any = this._actions$

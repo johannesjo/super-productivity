@@ -62,7 +62,11 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
     shareReplay()
   );
 
-  tasksWorkedOnOrDoneFlat$ = this.dayStr$.pipe(switchMap((dayStr) => this._taskService.getTasksWorkedOnOrDoneFlat$(dayStr)));
+  tasksWorkedOnOrDoneFlat$ = this.dayStr$.pipe(
+    switchMap((dayStr) => this._taskService.getTasksWorkedOnOrDoneFlat$(dayStr)),
+    shareReplay(),
+  );
+  hasTasksForToday$: Observable<boolean> = this.tasksWorkedOnOrDoneFlat$.pipe(map(tasks => tasks && !!tasks.length));
 
   nrOfDoneTasks$: Observable<number> = this.tasksWorkedOnOrDoneFlat$.pipe(
     map(tasks => tasks && tasks.filter(task => !!task.isDone).length),

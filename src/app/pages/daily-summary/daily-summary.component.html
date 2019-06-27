@@ -36,7 +36,6 @@
       <mat-icon>check</mat-icon>
       <div class="summary-text">Tasks Completed
         <div class="summary-val">
-
           <span [innerHtml]="(nrOfDoneTasks$|async)"></span> / <span
           [innerHtml]="(totalNrOfTasks$|async)"></span>
         </div>
@@ -72,54 +71,63 @@
 
     <mat-tab label="Today">
       <section class="tab-inner">
-        <task-summary-table [day]="(dayStr$|async)"
-                            [flatTasks]="tasksWorkedOnOrDoneFlat$|async"></task-summary-table>
 
-        <div style="text-align: center; margin-top: 8px; margin-bottom: 16px;">
-          <button [matMenuTriggerFor]="roundTimeActions"
-                  title="Round time spent on all tasks. Be careful! You cannot undo this!"
-                  mat-button="">
-            <mat-icon>restore</mat-icon>
-            Round Time Spent
-          </button>
-          <button *ngIf="isForToday"
-                  (click)="showExportModal()"
-                  mat-button="">
-            <mat-icon>call_made</mat-icon>
-            Export Task List
-          </button>
+        <ng-template #noTasks>
+          <p>There are for this day</p>
+        </ng-template>
 
-          <mat-menu #roundTimeActions="matMenu">
-            <button mat-menu-item
-                    style="color: red;">
-              !!! Be careful this cannot be undone !!!
+        <ng-container *ngIf="(hasTasksForToday$|async); else noTasks">
+          <task-summary-table [day]="(dayStr$|async)"
+                              [flatTasks]="(tasksWorkedOnOrDoneFlat$|async)"></task-summary-table>
+          <div style="text-align: center; margin-top: 8px; margin-bottom: 16px;">
+            <button [matMenuTriggerFor]="roundTimeActions"
+                    title="Round time spent on all tasks. Be careful! You cannot undo this!"
+                    mat-button="">
+              <mat-icon>restore</mat-icon>
+              Round Time Spent
             </button>
-            <button mat-menu-item
-                    (click)="roundTimeForTasks('5M')">
-              Round all tasks to 5 minutes
+            <button *ngIf="isForToday"
+                    (click)="showExportModal()"
+                    mat-button="">
+              <mat-icon>call_made</mat-icon>
+              Export Task List
             </button>
-            <button mat-menu-item
-                    (click)="roundTimeForTasks('5M', true)">
-              Round UP all tasks to 5 minutes
-            </button>
-            <button mat-menu-item
-                    (click)="roundTimeForTasks('QUARTER')">
-              Round all tasks to 15 minutes
-            </button>
-            <button mat-menu-item
-                    (click)="roundTimeForTasks('QUARTER', true)">
-              Round UP all tasks to 15 minutes
-            </button>
-            <button mat-menu-item
-                    (click)="roundTimeForTasks('HALF')">
-              Round all tasks to 30 minutes
-            </button>
-            <button mat-menu-item
-                    (click)="roundTimeForTasks('HALF', true)">
-              Round UP all tasks to 30 minutes
-            </button>
-          </mat-menu>
-        </div>
+
+            <mat-menu #roundTimeActions="matMenu">
+              <button mat-menu-item
+                      style="color: red;">
+                !!! Be careful this cannot be undone !!!
+              </button>
+              <button mat-menu-item
+                      (click)="roundTimeForTasks('5M')">
+                Round all tasks to 5 minutes
+              </button>
+              <button mat-menu-item
+                      (click)="roundTimeForTasks('5M', true)">
+                Round UP all tasks to 5 minutes
+              </button>
+              <button mat-menu-item
+                      (click)="roundTimeForTasks('QUARTER')">
+                Round all tasks to 15 minutes
+              </button>
+              <button mat-menu-item
+                      (click)="roundTimeForTasks('QUARTER', true)">
+                Round UP all tasks to 15 minutes
+              </button>
+              <button mat-menu-item
+                      (click)="roundTimeForTasks('HALF')">
+                Round all tasks to 30 minutes
+              </button>
+              <button mat-menu-item
+                      (click)="roundTimeForTasks('HALF', true)">
+                Round UP all tasks to 30 minutes
+              </button>
+            </mat-menu>
+          </div>
+
+        </ng-container>
+
+
       </section>
     </mat-tab>
     <mat-tab *ngIf="isForToday"
