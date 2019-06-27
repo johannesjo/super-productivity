@@ -1,0 +1,71 @@
+<div class="table-wrapper mat-elevation-z3">
+  <table mat-table
+         [dataSource]="flatTasks"
+         class="mat-elevation-z2 summary-table">
+    <ng-container matColumnDef="title">
+      <th mat-header-cell
+          *matHeaderCellDef> Task
+      </th>
+      <td mat-cell
+          *matCellDef="let task">
+        <div class="task-title"
+             [class.isSubTask]="task.parentId"
+             [class.isDone]="task.isDone">
+          <span *ngIf="task.parentId">–</span> {{task.title}}
+        </div>
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="timeSpentToday">
+      <th mat-header-cell
+          *matHeaderCellDef> Spent Today
+      </th>
+      <td mat-cell
+          *matCellDef="let task">
+        <inline-input *ngIf="!task.subTaskIds?.length"
+                      [value]="task.timeSpentOnDay[day]"
+                      [displayValue]="task.timeSpentOnDay[day]|msToClockString"
+                      [type]="'duration'"
+                      (changed)="updateTimeSpentTodayForTask(task, $event)">
+        </inline-input>
+        <span *ngIf="task.subTaskIds?.length">{{task.timeSpentOnDay[day]|msToClockString}}</span>
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="timeSpentTotal">
+      <th mat-header-cell
+          *matHeaderCellDef> Spent Total
+      </th>
+      <td mat-cell
+          *matCellDef="let task">
+        {{task.timeSpent|msToClockString}}
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="timeEstimate">
+      <th mat-header-cell
+          *matHeaderCellDef> Estimate
+      </th>
+      <td mat-cell
+          *matCellDef="let task">
+        {{task.timeEstimate|msToClockString}}
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="done">
+      <th mat-header-cell
+          *matHeaderCellDef>
+      </th>
+      <td mat-cell
+          *matCellDef="let task">
+        <mat-icon *ngIf="task.isDone">check
+        </mat-icon>
+      </td>
+    </ng-container>
+
+    <tr mat-header-row
+        *matHeaderRowDef="['title','timeSpentToday', 'timeSpentTotal', 'timeEstimate', 'done']"></tr>
+    <tr mat-row
+        *matRowDef="let row; columns: ['title','timeSpentToday', 'timeSpentTotal','timeEstimate', 'done']"></tr>
+  </table>
+</div>

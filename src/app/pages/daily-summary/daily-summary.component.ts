@@ -1,6 +1,6 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit} from '@angular/core';
 import {TaskService} from '../../features/tasks/task.service';
-import {Task, TaskWithSubTasks} from '../../features/tasks/task.model';
+import {TaskWithSubTasks} from '../../features/tasks/task.model';
 import {ActivatedRoute, Router} from '@angular/router';
 import {IS_ELECTRON} from '../../app.constants';
 import {MatDialog} from '@angular/material/dialog';
@@ -104,9 +104,6 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
     private readonly _cd: ChangeDetectorRef,
     private readonly _activatedRoute: ActivatedRoute,
   ) {
-    this.doneTasks$.subscribe((v) => console.log('doneTasks$', v));
-    this._taskService.doneTasks$.subscribe((v) => console.log('_taskService.doneTasks$', v));
-
   }
 
   ngOnInit() {
@@ -205,15 +202,6 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
     if (endTime) {
       this._projectService.updateWorkEnd(this._projectService.currentId, this.dayStr, endTime);
     }
-  }
-
-  updateTimeSpentTodayForTask(task: Task, newVal: number | string) {
-    this._taskService.update(task.id, {
-      timeSpentOnDay: {
-        ...task.timeSpentOnDay,
-        [this.dayStr]: +newVal,
-      }
-    });
   }
 
   roundTimeForTasks(roundTo: RoundTimeOption, isRoundUp = false) {

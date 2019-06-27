@@ -114,47 +114,6 @@ textarea {
   }
 }
 
-.summary-table {
-  width: 100%;
-
-  tr {
-    height: 36px !important;
-  }
-
-  td {
-    .isDone {
-      text-decoration: line-through;
-    }
-
-    .isSubTask {
-      font-style: italic;
-    }
-  }
-
-  th {
-    text-align: center;
-  }
-
-
-  th,
-  td {
-    min-width: 50px;
-  }
-
-  td:first-child {
-    text-align: left;
-    min-width: 220px;
-  }
-
-  .cdk-column-timeSpentToday ::ng-deep .inline-input-wrapper {
-    padding: $s;
-
-    input {
-      width: 100px;
-    }
-  }
-}
-
 .daily-summary-actions {
   margin-top: 30px;
 

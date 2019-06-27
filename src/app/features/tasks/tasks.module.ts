@@ -17,6 +17,7 @@ import { IssueModule } from '../issue/issue.module';
 import { FilterDoneTasksPipe } from './filter-done-tasks.pipe';
 import { DialogViewTaskReminderComponent } from './dialog-view-task-reminder/dialog-view-task-reminder.component';
 import { DialogAddTaskReminderComponent } from './dialog-add-task-reminder/dialog-add-task-reminder.component';
+import { TaskSummaryTableComponent } from './task-summary-table/task-summary-table.component';
 
 @NgModule({
   imports: [
@@ -39,12 +40,14 @@ import { DialogAddTaskReminderComponent } from './dialog-add-task-reminder/dialo
     TaskAdditionalInfoComponent,
     SelectTaskComponent,
     FilterDoneTasksPipe,
+    TaskSummaryTableComponent,
   ],
   exports: [
     TaskComponent,
     TaskListComponent,
     AddTaskBarComponent,
     SelectTaskComponent,
+    TaskSummaryTableComponent,
   ],
   entryComponents: [
     DialogTimeEstimateComponent,
