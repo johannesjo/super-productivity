@@ -69,7 +69,9 @@
       </section>
     </mat-tab>
 
-    <mat-tab label="Today">
+    <mat-tab [label]="(isForToday)
+      ? 'Today'
+      : 'Task List'">
       <section class="tab-inner">
 
         <ng-template #noTasks>
