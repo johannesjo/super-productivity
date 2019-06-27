@@ -108,7 +108,6 @@ export class ProjectService {
     private readonly _actions$: Actions,
   ) {
     this.currentId$.subscribe((id) => this.currentId = id);
-    this.lastWorkEnd$.subscribe((val) => console.log('lastWorkEnd$', val));
   }
 
   async load() {
