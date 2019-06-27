@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
 import {Actions, Effect, ofType} from '@ngrx/effects';
 import {select, Store} from '@ngrx/store';
-import {filter, map, switchMap, take, tap, withLatestFrom} from 'rxjs/operators';
+import {filter, map, switchMap, tap, withLatestFrom} from 'rxjs/operators';
 import {
   AddProject,
   ArchiveProject,
@@ -31,6 +31,7 @@ import {ImprovementService} from '../../metric/improvement/improvement.service';
 import {ProjectService} from '../project.service';
 import {BannerService} from '../../../core/banner/banner.service';
 import {Router} from '@angular/router';
+import {BannerId} from '../../../core/banner/banner.model';
 
 // needed because we always want the check request to the jira api to finish first
 const ISSUE_REFRESH_DELAY = 10000;
@@ -116,7 +117,7 @@ export class ProjectEffects {
       tap(([a, workEnd, dayCompleted]) => {
         const dayStr = getWorklogStr(workEnd);
         this._bannerService.open({
-          id: 'FORGOT_TO_FINISH_DAY',
+          id: BannerId.ForgotToFinishDay,
           ico: 'info',
           msg: `You forgot to finish your day on ${dayStr}`,
           action: {

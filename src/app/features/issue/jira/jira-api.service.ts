@@ -35,6 +35,7 @@ import {JiraIssue} from './jira-issue/jira-issue.model';
 import * as moment from 'moment-mini';
 import {getJiraResponseErrorTxt} from '../../../util/get-jira-response-error-text';
 import {BannerService} from '../../../core/banner/banner.service';
+import {BannerId} from '../../../core/banner/banner.model';
 
 const BLOCK_ACCESS_KEY = 'SUP_BLOCK_JIRA_ACCESS';
 
@@ -258,7 +259,7 @@ export class JiraApiService {
     if (this._isBlockAccess && !isForce) {
       console.error('Blocked Jira Access to prevent being shut out');
       this._bannerService.open({
-        id: 'JIRA_UNBLOCK',
+        id: BannerId.JiraUnblock,
         msg: 'Jira: To prevent shut out from api, access has been blocked by Super Productivity. You probably should check your jira settings!',
         svgIco: 'jira',
         action: {

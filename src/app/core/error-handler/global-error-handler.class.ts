@@ -4,6 +4,7 @@ import {getJiraResponseErrorTxt} from '../../util/get-jira-response-error-text';
 import {HANDLED_ERROR, IS_ELECTRON} from '../../app.constants';
 import {ElectronService} from 'ngx-electron';
 import {BannerService} from '../banner/banner.service';
+import {BannerId} from '../banner/banner.model';
 
 const _createErrorAlert = (err: string) => {
   const errorAlert = document.createElement('div');
@@ -54,7 +55,7 @@ export class GlobalErrorHandler implements ErrorHandler {
       // NOTE: snack won't work most of the time
       try {
         this._bannerService.open({
-          id: 'GLOBAL_ERROR',
+          id: BannerId.GlobalError,
           type: 'ERROR',
           ico: 'error',
           msg: 'ERROR: ' + errorStr.substring(0, 300),

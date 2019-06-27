@@ -17,6 +17,7 @@ import {
 } from '../../../../electron/ipc-events.const';
 import {ElectronService} from 'ngx-electron';
 import {BannerService} from '../../core/banner/banner.service';
+import {BannerId} from '../../core/banner/banner.model';
 
 const EXPIRES_SAFETY_MARGIN = 5 * 60 * 1000;
 
@@ -362,7 +363,7 @@ export class GoogleApiService {
     this._bannerService.open({
       msg: 'GoogleApi: Failed to authenticate please try logging in again!',
       ico: 'cloud_off',
-      id: 'GOOGLE_LOGIN',
+      id: BannerId.GoogleLogin,
       action: {
         label: 'Login',
         fn: () => this.login()

@@ -30,7 +30,7 @@ const reduceBreak = (acc, tick) => {
   return acc + tick.duration;
 };
 
-const BANNER_ID: BannerId = 'TAKE_A_BREAK';
+const BANNER_ID: BannerId = BannerId.TakeABreak;
 
 @Injectable({
   providedIn: 'root',
