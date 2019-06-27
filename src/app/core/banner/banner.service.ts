@@ -1,7 +1,7 @@
-import { Injectable } from '@angular/core';
-import { Banner } from './banner.model';
-import { Observable, ReplaySubject } from 'rxjs';
-import { map } from 'rxjs/operators';
+import {Injectable} from '@angular/core';
+import {Banner, BannerId} from './banner.model';
+import {Observable, ReplaySubject} from 'rxjs';
+import {map} from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
@@ -84,7 +84,14 @@ export class BannerService {
     this._banners$.next(this._banners);
   }
 
-  dismiss(bannerId) {
+  dismiss(bannerId: BannerId) {
+    if (this._banners.find(banner_ => banner_.id === bannerId)) {
+      this._banners.shift();
+      this._banners$.next(this._banners);
+    }
+  }
+
+  dismissIfExisting(bannerId: BannerId) {
     if (this._banners.find(banner_ => banner_.id === bannerId)) {
       this._banners.shift();
       this._banners$.next(this._banners);

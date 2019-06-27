@@ -130,6 +130,17 @@ export class ProjectEffects {
       }),
     );
 
+  @Effect({dispatch: false}) dismissForgotToFinishDayBannerOnProjectChange: any = this._actions$
+    .pipe(
+      ofType(
+        ProjectActionTypes.SetCurrentProject,
+      ),
+      tap(() => {
+        this._bannerService.dismissIfExisting(BannerId.ForgotToFinishDay);
+      }),
+    );
+
+
   @Effect() updateWorkEnd$: any = this._actions$
     .pipe(
       ofType(
