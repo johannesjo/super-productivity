@@ -3,27 +3,28 @@ import {
   ChangeDetectorRef,
   Component,
   EventEmitter,
+  Input,
   OnDestroy,
   OnInit,
   Output
 } from '@angular/core';
-import { GoogleTimeSheetExportCopy, Project } from '../../project/project.model';
-import { TaskWithSubTasks } from '../../tasks/task.model';
-import { Subject } from 'rxjs';
-import { GoogleApiService } from '../google-api.service';
-import { ProjectService } from '../../project/project.service';
-import { TaskService } from '../../tasks/task.service';
-import { SnackService } from '../../../core/snack/snack.service';
-import { takeUntil } from 'rxjs/operators';
+import {GoogleTimeSheetExportCopy, Project} from '../../project/project.model';
+import {TaskWithSubTasks} from '../../tasks/task.model';
+import {Subject} from 'rxjs';
+import {GoogleApiService} from '../google-api.service';
+import {ProjectService} from '../../project/project.service';
+import {TaskService} from '../../tasks/task.service';
+import {SnackService} from '../../../core/snack/snack.service';
+import {takeUntil} from 'rxjs/operators';
 import * as moment from 'moment-mini';
-import { expandAnimation } from '../../../ui/animations/expand.ani';
+import {expandAnimation} from '../../../ui/animations/expand.ani';
 import 'moment-duration-format';
-import { msToClockString } from '../../../ui/duration/ms-to-clock-string.pipe';
-import { loadFromSessionStorage, saveToSessionStorage } from '../../../core/persistence/local-storage';
-import { SS_GOOGLE_TIME_SUBMITTED } from '../../../core/persistence/ls-keys.const';
-import { getWorklogStr } from '../../../util/get-work-log-str';
-import { momentRoundTime } from '../../../util/round-time';
-import { roundDuration } from '../../../util/round-duration';
+import {msToClockString} from '../../../ui/duration/ms-to-clock-string.pipe';
+import {loadFromSessionStorage, saveToSessionStorage} from '../../../core/persistence/local-storage';
+import {SS_GOOGLE_TIME_SUBMITTED} from '../../../core/persistence/ls-keys.const';
+import {getWorklogStr} from '../../../util/get-work-log-str';
+import {momentRoundTime} from '../../../util/round-time';
+import {roundDuration} from '../../../util/round-duration';
 
 // TODO refactor to Observables
 @Component({
@@ -34,6 +35,7 @@ import { roundDuration } from '../../../util/round-duration';
   animations: [expandAnimation]
 })
 export class GoogleExportTimeComponent implements OnInit, OnDestroy {
+  @Input() day: string = getWorklogStr();
   @Output() saveData = new EventEmitter();
 
   opts: GoogleTimeSheetExportCopy = {
@@ -82,13 +84,16 @@ export class GoogleExportTimeComponent implements OnInit, OnDestroy {
     private _snackService: SnackService,
     private _cd: ChangeDetectorRef,
   ) {
+  }
+
+  ngOnInit() {
     this._projectService.currentProject$
       .pipe(takeUntil(this._destroy$))
       .subscribe((project: Project) => {
         this.opts = {...project.advancedCfg.googleTimeSheetExport};
         this._projectId = project.id;
-        this._startedTimeToday = project.workStart[getWorklogStr(new Date())];
-        this._endTimeToday = project.workEnd[getWorklogStr(new Date())];
+        this._startedTimeToday = project.workStart[this.day];
+        this._endTimeToday = project.workEnd[this.day];
         this.isSpreadSheetConfigured = this.opts.spreadsheetId && this.opts.spreadsheetId.length > 5;
       });
     this._taskService.todaysTasks$
@@ -101,9 +106,7 @@ export class GoogleExportTimeComponent implements OnInit, OnDestroy {
       .subscribe((timeWorked) => {
         this._totalTimeWorkedToday = timeWorked;
       });
-  }
 
-  ngOnInit() {
     if (this.opts.isAutoLogin) {
       this.login()
         .then(() => {
@@ -221,7 +224,7 @@ export class GoogleExportTimeComponent implements OnInit, OnDestroy {
       case '{endTime}':
         return this._getEndTime();
       case '{date}':
-        return moment().format('MM/DD/YYYY');
+        return moment(this.day).format('MM/DD/YYYY');
       case '{taskTitles}':
         return this._getTaskTitles();
       case '{subTaskTitles}':
