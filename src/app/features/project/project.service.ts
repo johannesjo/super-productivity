@@ -24,6 +24,7 @@ import {
   selectArchivedProjects,
   selectCurrentProject,
   selectCurrentProjectId,
+  selectIsRelatedDataLoadedForCurrentProject,
   selectProjectBasicCfg,
   selectProjectBreakNr,
   selectProjectBreakNrForDay,
@@ -54,6 +55,8 @@ import {SnackService} from '../../core/snack/snack.service';
   providedIn: 'root',
 })
 export class ProjectService {
+  isRelatedDataLoadedForCurrentProject$: Observable<boolean> = this._store$.pipe(select(selectIsRelatedDataLoadedForCurrentProject));
+
   list$: Observable<Project[]> = this._store$.pipe(select(selectUnarchivedProjects));
   archived$: Observable<Project[]> = this._store$.pipe(select(selectArchivedProjects));
   currentProject$: Observable<Project> = this._store$.pipe(

@@ -33,10 +33,10 @@ import {warpRouteAnimation} from './ui/animations/warp-route';
 import {NoteService} from './features/note/note.service';
 import {BreakpointObserver} from '@angular/cdk/layout';
 import {DOCUMENT} from '@angular/common';
-import {map, take} from 'rxjs/operators';
+import {filter, map, take} from 'rxjs/operators';
 import {MigrateService} from './imex/migrate/migrate.service';
 import {combineLatest, Observable} from 'rxjs';
-import {selectIsAllProjectDataLoaded} from './features/project/store/project.reducer';
+import {selectIsRelatedDataLoadedForCurrentProject} from './features/project/store/project.reducer';
 import {Store} from '@ngrx/store';
 import {fadeAnimation} from './ui/animations/fade.ani';
 import {IS_MAC} from './util/is-mac';
@@ -59,10 +59,14 @@ const SIDE_PANEL_BREAKPOINT = 900;
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AppComponent implements OnInit {
-  isAllDataLoaded$: Observable<boolean> = combineLatest(
-    this._store.select(selectIsAllProjectDataLoaded),
+  isAllDataLoadedInitially$: Observable<boolean> = combineLatest(
+    this._store.select(selectIsRelatedDataLoadedForCurrentProject),
     this._store.select(selectIsTaskDataLoaded),
-  ).pipe(map(([isProjectDataLoaded, isTaskDataLoaded]) => isProjectDataLoaded && isTaskDataLoaded));
+  ).pipe(
+    map(([isProjectDataLoaded, isTaskDataLoaded]) => isProjectDataLoaded && isTaskDataLoaded),
+    filter(isLoaded => isLoaded),
+    take(1),
+  );
   isSidePanelBp$: Observable<boolean> = this._breakPointObserver.observe([
     `(max-width: ${SIDE_PANEL_BREAKPOINT}px)`,
   ]).pipe(map(result => result.matches));

@@ -1,16 +1,16 @@
-import { createEntityAdapter, EntityAdapter, EntityState } from '@ngrx/entity';
-import { BreakNr, BreakNrCopy, Project, ProjectBasicCfg, WorkStartEnd } from '../project.model';
-import { ProjectActions, ProjectActionTypes } from './project.actions';
-import { createFeatureSelector, createSelector } from '@ngrx/store';
-import { FIRST_PROJECT } from '../project.const';
-import { sortStringDates } from '../../../util/sortStringDates';
+import {createEntityAdapter, EntityAdapter, EntityState} from '@ngrx/entity';
+import {BreakNr, BreakNrCopy, Project, ProjectBasicCfg, WorkStartEnd} from '../project.model';
+import {ProjectActions, ProjectActionTypes} from './project.actions';
+import {createFeatureSelector, createSelector} from '@ngrx/store';
+import {FIRST_PROJECT} from '../project.const';
+import {sortStringDates} from '../../../util/sortStringDates';
 
 export const PROJECT_FEATURE_NAME = 'projects';
 
 export interface ProjectState extends EntityState<Project> {
   // additional entities state properties
   currentId: string | null;
-  isDataLoaded: boolean;
+  projectIdForLoadedRelatedData: string;
 }
 
 const sortByTitle = (p1: Project, p2: Project) => {
@@ -31,7 +31,11 @@ export const selectAllProjects = createSelector(selectProjectFeatureState, selec
 export const selectUnarchivedProjects = createSelector(selectAllProjects, (projects) => projects.filter(p => !p.isArchived));
 export const selectArchivedProjects = createSelector(selectAllProjects, (projects) => projects.filter(p => p.isArchived));
 
-export const selectIsAllProjectDataLoaded = createSelector(selectProjectFeatureState, state => state.isDataLoaded);
+export const selectIsRelatedDataLoadedForCurrentProject = createSelector(
+  selectProjectFeatureState,
+  (state): boolean => state.currentId === state.projectIdForLoadedRelatedData
+);
+
 export const selectCurrentProject = createSelector(selectProjectFeatureState,
   (state) => state.entities[state.currentId]
 );
@@ -100,7 +104,7 @@ export const initialProjectState: ProjectState = projectAdapter.getInitialState(
   entities: {
     [FIRST_PROJECT.id]: FIRST_PROJECT
   },
-  isDataLoaded: false,
+  projectIdForLoadedRelatedData: null,
 });
 
 
@@ -123,7 +127,7 @@ export function projectReducer(
     case ProjectActionTypes.LoadProjectRelatedDataSuccess: {
       return {
         ...state,
-        isDataLoaded: true,
+        projectIdForLoadedRelatedData: state.currentId,
       };
     }
 
