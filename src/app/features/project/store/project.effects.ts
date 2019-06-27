@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
 import {Actions, Effect, ofType} from '@ngrx/effects';
 import {select, Store} from '@ngrx/store';
-import {filter, map, switchMap, tap, withLatestFrom} from 'rxjs/operators';
+import {concatMap, filter, map, switchMap, tap, withLatestFrom} from 'rxjs/operators';
 import {
   AddProject,
   ArchiveProject,
@@ -110,8 +110,7 @@ export class ProjectEffects {
         const today = new Date();
         workEndDate.setHours(0, 0, 0, 0);
         today.setHours(0, 0, 0, 0);
-        console.log('dayCompleted', dayCompleted[getWorklogStr(workEndDate)], dayCompleted,
-          'workEndDate', workEndDate, 'today', today);
+        // console.log('dayCompleted', dayCompleted[getWorklogStr(workEndDate)], dayCompleted, 'workEndDate', workEndDate, 'today', today);
         return workEndDate < today && !dayCompleted[getWorklogStr(workEndDate)];
       }),
       tap(([a, workEnd, dayCompleted]) => {

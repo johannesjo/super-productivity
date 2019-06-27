@@ -41,15 +41,13 @@ import {
 } from './store/project.reducer';
 import {IssueIntegrationCfg, IssueProviderKey} from '../issue/issue';
 import {JiraCfg} from '../issue/jira/jira';
-import {DEFAULT_PROJECT} from './project.const';
-import {Dictionary} from '@ngrx/entity';
 import {getWorklogStr} from '../../util/get-work-log-str';
 import {GithubCfg} from '../issue/github/github';
-import {DEFAULT_ISSUE_PROVIDER_CFGS} from '../issue/issue.const';
 import {Actions, ofType} from '@ngrx/effects';
 import {distinctUntilChanged, take} from 'rxjs/operators';
 import {isValidProjectExport} from './util/is-valid-project-export';
 import {SnackService} from '../../core/snack/snack.service';
+import {migrateProjectState} from './migrate-projects-state.util';
 
 @Injectable({
   providedIn: 'root',
@@ -113,7 +111,7 @@ export class ProjectService {
   async load() {
     const projectState_ = await this._persistenceService.project.load() || initialProjectState;
     // we need to do this to migrate to the latest model if new fields are added
-    const projectState = this._extendProjectDefaultsForState(projectState_);
+    const projectState = migrateProjectState(projectState_);
 
     if (projectState) {
       if (!projectState.currentId) {
@@ -326,29 +324,5 @@ export class ProjectService {
     this.updateAdvancedCfg(projectId, 'worklogExportSettings', {
       ...data,
     });
-  }
-
-
-  // we need to make sure our model stays compatible with new props added
-  private _extendProjectDefaultsForState(projectState: ProjectState): ProjectState {
-    const projectEntities: Dictionary<Project> = {...projectState.entities};
-    Object.keys(projectEntities).forEach((key) => {
-      // we possibly need to extend this
-      // NOTE: check if we need a deep copy
-      projectEntities[key] = this._extendProjectDefaults(projectEntities[key]);
-    });
-    return {...projectState, entities: projectEntities};
-  }
-
-  private _extendProjectDefaults(project: Project): Project {
-    return {
-      ...DEFAULT_PROJECT,
-      ...project,
-      // also add missing issue integration cfgs
-      issueIntegrationCfgs: {
-        ...DEFAULT_ISSUE_PROVIDER_CFGS,
-        ...project.issueIntegrationCfgs,
-      }
-    };
   }
 }
