@@ -18,11 +18,11 @@ import {Router} from '@angular/router';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DialogViewTaskReminderComponent implements OnDestroy {
-  task$: Observable<Task> = this._taskService.getById(this.data.reminder.relatedId);
+  task$: Observable<Task> = this._taskService.getById$(this.data.reminder.relatedId);
   task: Task;
   reminder: Reminder = this.data.reminder;
   isForCurrentProject = (this.reminder.projectId === this._projectService.currentId);
-  targetProject$: Observable<Project> = this._projectService.getById(this.reminder.projectId);
+  targetProject$: Observable<Project> = this._projectService.getById$(this.reminder.projectId);
   isDisableControls = false;
   private _subs = new Subscription();
 

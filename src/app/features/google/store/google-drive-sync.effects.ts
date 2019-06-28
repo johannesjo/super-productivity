@@ -123,7 +123,7 @@ export class GoogleDriveSyncEffects {
     // only deal with one change at a time
     exhaustMap((action: ChangeSyncFileName) => {
       const {newFileName} = action.payload;
-      return this._googleApiService.findFile(newFileName).pipe(
+      return this._googleApiService.findFile$(newFileName).pipe(
         concatMap((res: any): any => {
           const filesFound = res.items;
           if (filesFound.length && filesFound.length > 1) {
@@ -163,7 +163,7 @@ export class GoogleDriveSyncEffects {
     ),
     map((action: ChangeSyncFileName) => action.payload.newFileName),
     concatMap(newFileName =>
-      this._googleApiService.saveFile('', {
+      this._googleApiService.saveFile$('', {
         title: newFileName,
         editable: true
       }),
@@ -191,7 +191,7 @@ export class GoogleDriveSyncEffects {
         );
       } else {
         // otherwise update
-        return this._googleApiService.getFileInfo(cfg._backupDocId).pipe(
+        return this._googleApiService.getFileInfo$(cfg._backupDocId).pipe(
           catchError(err => this._handleError(err)),
           concatMap((res: any): Observable<any> => {
 
@@ -235,7 +235,7 @@ export class GoogleDriveSyncEffects {
 
           return contentObs.pipe(
             concatMap((content) => {
-              return this._googleApiService.saveFile(content, {
+              return this._googleApiService.saveFile$(content, {
                 title: cfg.syncFileName,
                 id: cfg._backupDocId,
                 editable: true,
@@ -334,7 +334,7 @@ export class GoogleDriveSyncEffects {
     concatMap(([act, cfg]: [LoadFromGoogleDrive, GoogleDriveSyncConfig]) => {
       return (act.payload && act.payload.loadResponse)
         ? of(act.payload.loadResponse)
-        : this._googleApiService.loadFile(cfg._backupDocId);
+        : this._googleApiService.loadFile$(cfg._backupDocId);
     }),
     concatMap((loadRes) => this._import(loadRes)),
     map((modifiedDate) => new LoadFromGoogleDriveSuccess({modifiedDate})),
@@ -380,7 +380,7 @@ export class GoogleDriveSyncEffects {
 
   private _checkIfRemoteUpdate(): Observable<any> {
     const lastSync = this._config._lastSync;
-    return this._googleApiService.getFileInfo(this._config._backupDocId)
+    return this._googleApiService.getFileInfo$(this._config._backupDocId)
       .pipe(
         tap((res: any) => {
           const lastModifiedRemote = res.modifiedDate;
@@ -464,7 +464,7 @@ If not please change the Sync file name.`,
     if (!this._config.syncFileName) {
       return throwError({handledError: 'No file name specified'});
     }
-    return this._googleApiService.loadFile(this._config._backupDocId);
+    return this._googleApiService.loadFile$(this._config._backupDocId);
   }
 
   private async _import(loadRes): Promise<string> {

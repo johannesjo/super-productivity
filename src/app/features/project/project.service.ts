@@ -142,7 +142,7 @@ export class ProjectService {
   }
 
   // TODO add $
-  getById(id: string): Observable<Project> {
+  getById$(id: string): Observable<Project> {
     return this._store$.pipe(select(selectProjectById, {id}), take(1));
   }
 

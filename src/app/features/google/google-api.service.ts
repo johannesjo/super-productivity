@@ -160,10 +160,10 @@ export class GoogleApiService {
   }
 
   // -----------------
-  appendRow(spreadsheetId, row): Observable<any> {
+  appendRow$(spreadsheetId, row): Observable<any> {
     // @see: https://developers.google.com/sheets/api/reference/rest/
     const range = 'A1:Z99';
-    return this._mapHttp({
+    return this._mapHttp$({
       method: 'POST',
       url: `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${range}:append`,
       params: {
@@ -175,9 +175,9 @@ export class GoogleApiService {
     });
   }
 
-  getSpreadsheetData(spreadsheetId, range): Observable<any> {
+  getSpreadsheetData$(spreadsheetId, range): Observable<any> {
     // @see: https://developers.google.com/sheets/api/reference/rest/
-    return this._mapHttp({
+    return this._mapHttp$({
       method: 'GET',
       url: `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${range}`,
       params: {
@@ -186,8 +186,8 @@ export class GoogleApiService {
     });
   }
 
-  getSpreadsheetHeadingsAndLastRow(spreadsheetId): Observable<{ headings: any, lastRow: any } | Observable<never>> {
-    return this.getSpreadsheetData(spreadsheetId, 'A1:Z99')
+  getSpreadsheetHeadingsAndLastRow$(spreadsheetId): Observable<{ headings: any, lastRow: any } | Observable<never>> {
+    return this.getSpreadsheetData$(spreadsheetId, 'A1:Z99')
       .pipe(map((response: any) => {
         const range = response.body || response;
 
@@ -203,13 +203,13 @@ export class GoogleApiService {
       }));
   }
 
-  getFileInfo(fileId): Observable<any> {
+  getFileInfo$(fileId): Observable<any> {
     if (!fileId) {
       this._snackIt('ERROR', 'GoogleApi: No file id specified');
       throwError({handledError: 'No file id given'});
     }
 
-    return this._mapHttp({
+    return this._mapHttp$({
       method: 'GET',
       url: `https://content.googleapis.com/drive/v2/files/${encodeURIComponent(fileId)}`,
       params: {
@@ -220,13 +220,13 @@ export class GoogleApiService {
     });
   }
 
-  findFile(fileName): Observable<any> {
+  findFile$(fileName): Observable<any> {
     if (!fileName) {
       this._snackIt('ERROR', 'GoogleApi: No file name specified');
       return throwError({handledError: 'No file name given'});
     }
 
-    return this._mapHttp({
+    return this._mapHttp$({
       method: 'GET',
       url: `https://content.googleapis.com/drive/v2/files`,
       params: {
@@ -238,13 +238,13 @@ export class GoogleApiService {
   }
 
   // NOTE: file will always be returned as text (makes sense)
-  loadFile(fileId): Observable<any> {
+  loadFile$(fileId): Observable<any> {
     if (!fileId) {
       this._snackIt('ERROR', 'GoogleApi: No file id specified');
       throwError({handledError: 'No file id given'});
     }
 
-    const loadFile = this._mapHttp({
+    const loadFile = this._mapHttp$({
       method: 'GET',
       url: `https://content.googleapis.com/drive/v2/files/${encodeURIComponent(fileId)}`,
       params: {
@@ -254,7 +254,7 @@ export class GoogleApiService {
       },
       responseType: 'text',
     });
-    const metaData = this.getFileInfo(fileId);
+    const metaData = this.getFileInfo$(fileId);
 
     return combineLatest(metaData, loadFile)
       .pipe(
@@ -267,7 +267,7 @@ export class GoogleApiService {
       );
   }
 
-  saveFile(content: any, metadata: any = {}): Observable<{}> {
+  saveFile$(content: any, metadata: any = {}): Observable<{}> {
     if ((typeof content !== 'string')) {
       content = JSON.stringify(content);
     }
@@ -292,7 +292,7 @@ export class GoogleApiService {
       .append(metadata.mimeType, content)
       .finish();
 
-    return this._mapHttp({
+    return this._mapHttp$({
       method: method,
       url: `https://content.googleapis.com${path}`,
       params: {
@@ -400,7 +400,7 @@ export class GoogleApiService {
     });
   }
 
-  private _mapHttp(params_: HttpRequest<string> | any): Observable<any> {
+  private _mapHttp$(params_: HttpRequest<string> | any): Observable<any> {
     const loginObs = this._session$.pipe(
       take(1),
       concatMap((session) => {

@@ -202,7 +202,7 @@ export class MigrateService {
   }
 
   private async _getFreshIssueState(repo: string, issueNumbers: number[]): Promise<EntityState<GithubIssue>> {
-    const refreshedIssues = await this._gitApiService.getCompleteIssueDataForRepo(repo, true).pipe(first()).toPromise();
+    const refreshedIssues = await this._gitApiService.getCompleteIssueDataForRepo$(repo, true).pipe(first()).toPromise();
     const freshMappedIssues = refreshedIssues.filter(issue => issueNumbers.includes(issue.number));
 
     return {

@@ -13,7 +13,7 @@ import {MetricService} from '../../metric/metric.service';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DialogIdleComponent implements OnInit {
-  public lastCurrentTask$: Observable<Task> = this._taskService.getById(this.data.lastCurrentTaskId);
+  public lastCurrentTask$: Observable<Task> = this._taskService.getById$(this.data.lastCurrentTaskId);
   public selectedTask: Task;
   public newTaskTitle: string;
   public isCreate: boolean;

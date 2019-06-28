@@ -87,7 +87,7 @@ export class JiraApiService {
     ).subscribe(([isExtensionReady, cfg]) => {
 
       if (!this._isHasCheckedConnection && this._isMinimalSettings(cfg) && cfg.isEnabled) {
-        this.getCurrentUser()
+        this.getCurrentUser$()
           .pipe(catchError((err) => {
             this._blockAccess();
             checkConnectionSub.unsubscribe();
@@ -106,7 +106,7 @@ export class JiraApiService {
     saveToSessionStorage(BLOCK_ACCESS_KEY, false);
   }
 
-  search(searchTerm: string, isFetchAdditional?: boolean, maxResults: number = JIRA_MAX_RESULTS): Observable<SearchResultItem[]> {
+  search$(searchTerm: string, isFetchAdditional?: boolean, maxResults: number = JIRA_MAX_RESULTS): Observable<SearchResultItem[]> {
     const options = {
       maxResults: maxResults,
       fields: isFetchAdditional ? JIRA_ADDITIONAL_ISSUE_FIELDS : JIRA_REDUCED_ISSUE_FIELDS,
@@ -114,32 +114,32 @@ export class JiraApiService {
     const searchQuery = `text ~ "${searchTerm}"`
       + ' ' + (this._cfg.searchJqlQuery ? ` AND ${this._cfg.searchJqlQuery}` : '');
 
-    return this._sendRequest({
+    return this._sendRequest$({
       apiMethod: 'searchJira',
       arguments: [searchQuery, options],
       transform: mapToSearchResults
     });
   }
 
-  issuePicker(searchTerm: string): Observable<SearchResultItem[]> {
+  issuePicker$(searchTerm: string): Observable<SearchResultItem[]> {
     const searchStr = `${searchTerm}`;
     const jql = (this._cfg.searchJqlQuery ? `${encodeURI(this._cfg.searchJqlQuery)}` : '');
 
-    return this._sendRequest({
+    return this._sendRequest$({
       apiMethod: 'issuePicker',
       arguments: [searchStr, jql],
       transform: mapToSearchResults
     });
   }
 
-  listFields(): Observable<any> {
-    return this._sendRequest({
+  listFields$(): Observable<any> {
+    return this._sendRequest$({
       apiMethod: 'listFields',
       arguments: [],
     });
   }
 
-  findAutoImportIssues(isFetchAdditional?: boolean, maxResults: number = JIRA_MAX_RESULTS): Observable<JiraIssue[]> {
+  findAutoImportIssues$(isFetchAdditional?: boolean, maxResults: number = JIRA_MAX_RESULTS): Observable<JiraIssue[]> {
     const options = {
       maxResults: maxResults,
       fields: JIRA_ADDITIONAL_ISSUE_FIELDS,
@@ -150,46 +150,46 @@ export class JiraApiService {
       return throwError({handledError: 'JiraApi: No search query for auto import'});
     }
 
-    return this._sendRequest({
+    return this._sendRequest$({
       apiMethod: 'searchJira',
       arguments: [searchQuery, options],
       transform: mapIssuesResponse
     });
   }
 
-  getIssueById(issueId, isGetChangelog = false): Observable<JiraIssue> {
-    return this._sendRequest({
+  getIssueById$(issueId, isGetChangelog = false): Observable<JiraIssue> {
+    return this._sendRequest$({
       apiMethod: 'findIssue',
       transform: mapIssueResponse,
       arguments: [issueId, ...(isGetChangelog ? ['changelog'] : [])]
     });
   }
 
-  getCurrentUser(cfg?: JiraCfg, isForce = false): Observable<JiraOriginalUser> {
-    return this._sendRequest({
+  getCurrentUser$(cfg?: JiraCfg, isForce = false): Observable<JiraOriginalUser> {
+    return this._sendRequest$({
       apiMethod: 'getCurrentUser',
       transform: mapResponse,
     }, cfg, isForce);
   }
 
-  listStatus(): Observable<JiraOriginalStatus[]> {
-    return this._sendRequest({
+  listStatus$(): Observable<JiraOriginalStatus[]> {
+    return this._sendRequest$({
       apiMethod: 'listStatus',
       transform: mapResponse,
     });
   }
 
 
-  getTransitionsForIssue(issueId: string): Observable<JiraOriginalTransition[]> {
-    return this._sendRequest({
+  getTransitionsForIssue$(issueId: string): Observable<JiraOriginalTransition[]> {
+    return this._sendRequest$({
       apiMethod: 'listTransitions',
       transform: mapTransitionResponse,
       arguments: [issueId]
     });
   }
 
-  transitionIssue(issueId, transitionId): Observable<any> {
-    return this._sendRequest({
+  transitionIssue$(issueId, transitionId): Observable<any> {
+    return this._sendRequest$({
       apiMethod: 'transitionIssue',
       transform: mapResponse,
       arguments: [issueId, {
@@ -200,8 +200,8 @@ export class JiraApiService {
     });
   }
 
-  updateAssignee(issueId, assignee) {
-    return this._sendRequest({
+  updateAssignee$(issueId, assignee): Observable<any> {
+    return this._sendRequest$({
       apiMethod: 'updateIssue',
       arguments: [issueId, {
         fields: {
@@ -213,8 +213,8 @@ export class JiraApiService {
     });
   }
 
-  addWorklog(issueId: string, started: string, timeSpent: number, comment: string) {
-    return this._sendRequest({
+  addWorklog$(issueId: string, started: string, timeSpent: number, comment: string): Observable<any> {
+    return this._sendRequest$({
       apiMethod: 'addWorklog',
       transform: mapResponse,
       arguments: [
@@ -228,11 +228,6 @@ export class JiraApiService {
     });
   }
 
-  // -----------------
-  updateIssueDescription(task) {
-  }
-
-
   // Complex Functions
 
 
@@ -243,7 +238,7 @@ export class JiraApiService {
   }
 
   // TODO refactor data madness of request and add types for everything
-  private _sendRequest(request, cfg = this._cfg, isForce = false): Observable<any> {
+  private _sendRequest$(request, cfg = this._cfg, isForce = false): Observable<any> {
     if (!this._isMinimalSettings(cfg)) {
       const msg = (!IS_ELECTRON && !this._isExtension)
         ? 'Super Productivity Extension not loaded. Reloading the page might help'

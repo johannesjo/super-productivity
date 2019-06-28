@@ -34,14 +34,14 @@ export class GithubApiService {
     });
   }
 
-  getById(id: number): Observable<GithubIssue> {
+  getById$(id: number): Observable<GithubIssue> {
     this._checkSettings();
 
-    return this.getCompleteIssueDataForRepo()
+    return this.getCompleteIssueDataForRepo$()
       .pipe(switchMap(issues => issues.filter(issue => issue.id === id)));
   }
 
-  getCompleteIssueDataForRepo(repo = this._cfg.repo, isSkipCheck = false, isForceRefresh = false): Observable<GithubIssue[]> {
+  getCompleteIssueDataForRepo$(repo = this._cfg.repo, isSkipCheck = false, isForceRefresh = false): Observable<GithubIssue[]> {
     if (!isSkipCheck) {
       this._checkSettings();
     }
@@ -60,8 +60,8 @@ export class GithubApiService {
       return from([cachedIssues]);
     } else {
       return combineLatest(
-        this._getAllIssuesForRepo(repo, isSkipCheck),
-        this._getAllCommentsForRepo(repo, isSkipCheck),
+        this._getAllIssuesForRepo$(repo, isSkipCheck),
+        this._getAllCommentsForRepo$(repo, isSkipCheck),
       ).pipe(
         take(1),
         map(([issues, comments]) => this._mergeIssuesAndComments(issues, comments)),
@@ -75,16 +75,16 @@ export class GithubApiService {
   }
 
 
-  searchIssueForRepo(searchText: string, repo = this._cfg.repo): Observable<SearchResultItem[]> {
+  searchIssueForRepo$(searchText: string, repo = this._cfg.repo): Observable<SearchResultItem[]> {
     const filterFn = issue =>
       issue.title.toLowerCase().match(searchText.toLowerCase())
       || issue.body.toLowerCase().match(searchText.toLowerCase());
 
     this._checkSettings();
 
-    return this.getCompleteIssueDataForRepo(repo)
+    return this.getCompleteIssueDataForRepo$(repo)
       .pipe(
-        catchError(this._handleRequestError.bind(this)),
+        catchError(this._handleRequestError$.bind(this)),
         // a single request should suffice
         share(),
         map((issues: GithubIssue[]) =>
@@ -95,16 +95,16 @@ export class GithubApiService {
   }
 
   refreshIssuesCacheIfOld(): void {
-    this.getCompleteIssueDataForRepo().subscribe();
+    this.getCompleteIssueDataForRepo$().subscribe();
   }
 
-  getIssueWithCommentsByIssueNumber(issueNumber: number): Observable<GithubIssue> {
+  getIssueWithCommentsByIssueNumber$(issueNumber: number): Observable<GithubIssue> {
     this._checkSettings();
     return combineLatest(
       this._http.get(`${BASE}repos/${this._cfg.repo}/issues/${issueNumber}`),
       this._http.get(`${BASE}repos/${this._cfg.repo}/issues/${issueNumber}/comments`),
     ).pipe(
-      catchError(this._handleRequestError.bind(this)),
+      catchError(this._handleRequestError$.bind(this)),
       map(([issue, comments]: [GithubOriginalIssue, GithubOriginalComment[]]) => {
         return {
           ...mapGithubIssue(issue),
@@ -122,42 +122,42 @@ export class GithubApiService {
     this.onCacheRefresh$.next(true);
   }
 
-  private _getAllIssuesForRepo(repo = this._cfg.repo, isSkipCheck = false): Observable<GithubIssue[]> {
+  private _getAllIssuesForRepo$(repo = this._cfg.repo, isSkipCheck = false): Observable<GithubIssue[]> {
     if (!isSkipCheck) {
       this._checkSettings();
     }
     return this._http.get(`${BASE}repos/${repo}/issues?per_page=100`)
       .pipe(
-        catchError(this._handleRequestError.bind(this)),
+        catchError(this._handleRequestError$.bind(this)),
         map((issues: GithubOriginalIssue[]) => issues ? issues.map(mapGithubIssue) : []),
       );
   }
 
-  private _getAllCommentsForRepo(repo = this._cfg.repo, isSkipCheck = false): Observable<GithubComment[]> {
+  private _getAllCommentsForRepo$(repo = this._cfg.repo, isSkipCheck = false): Observable<GithubComment[]> {
     if (!isSkipCheck) {
       this._checkSettings();
     }
     return combineLatest(
       // the last 500 should hopefully be enough
-      this._getCommentsPageForRepo(1, repo, isSkipCheck),
-      this._getCommentsPageForRepo(2, repo, isSkipCheck),
-      this._getCommentsPageForRepo(3, repo, isSkipCheck),
-      this._getCommentsPageForRepo(4, repo, isSkipCheck),
-      this._getCommentsPageForRepo(5, repo, isSkipCheck),
+      this._getCommentsPageForRepo$(1, repo, isSkipCheck),
+      this._getCommentsPageForRepo$(2, repo, isSkipCheck),
+      this._getCommentsPageForRepo$(3, repo, isSkipCheck),
+      this._getCommentsPageForRepo$(4, repo, isSkipCheck),
+      this._getCommentsPageForRepo$(5, repo, isSkipCheck),
     )
       .pipe(
-        catchError(this._handleRequestError.bind(this)),
+        catchError(this._handleRequestError$.bind(this)),
         map(([p1, p2, p3, p4, p5]) => [].concat(p1, p2, p3, p4, p5))
       );
   }
 
-  private _getCommentsPageForRepo(page = 1, repo = this._cfg.repo, isSkipCheck = false): Observable<GithubComment[]> {
+  private _getCommentsPageForRepo$(page = 1, repo = this._cfg.repo, isSkipCheck = false): Observable<GithubComment[]> {
     if (!isSkipCheck) {
       this._checkSettings();
     }
     return this._http.get(`${BASE}repos/${repo}/issues/comments?sort=created&direction=desc&per_page=100&page=${page}`)
       .pipe(
-        catchError(this._handleRequestError.bind(this)),
+        catchError(this._handleRequestError$.bind(this)),
         map(res => res as GithubComment[])
       );
   }
@@ -169,7 +169,7 @@ export class GithubApiService {
     }
   }
 
-  private _handleRequestError(error: HttpErrorResponse, caught: Observable<Object>): ObservableInput<{}> {
+  private _handleRequestError$(error: HttpErrorResponse, caught: Observable<Object>): ObservableInput<{}> {
     console.error(error);
     if (error.error instanceof ErrorEvent) {
       // A client-side or network error occurred. Handle it accordingly.

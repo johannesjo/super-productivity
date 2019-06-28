@@ -59,7 +59,7 @@ export class AttachmentService {
     this._store$.dispatch(new UpdateAttachment({attachment: {id, changes}}));
   }
 
-  getByIds(ids: string[]): Observable<Attachment[]> {
+  getByIds$(ids: string[]): Observable<Attachment[]> {
     return this._store$.pipe(select(selectAttachmentByIds, {ids}));
   }
 

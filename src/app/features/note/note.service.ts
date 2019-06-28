@@ -40,7 +40,7 @@ export class NoteService {
   ) {
   }
 
-  getById(id: string): Observable<Note> {
+  getById$(id: string): Observable<Note> {
     return this._store$.pipe(select(selectNoteById, {id}), take(1));
   }
 

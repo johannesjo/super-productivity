@@ -44,7 +44,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
     tap(() => this.isLoading$.next(true)),
     switchMap((searchTerm) => {
       if (searchTerm && searchTerm.length > 0) {
-        return this._issueService.searchIssues(searchTerm);
+        return this._issueService.searchIssues$(searchTerm);
       } else {
         // Note: the outer array signifies the observable stream the other is the value
         return [[]];
@@ -129,7 +129,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
       }
     } else {
       const issueData = (issueOrTitle.issueType === JIRA_TYPE)
-        ? await this._jiraApiService.getIssueById(issueOrTitle.issueData.id).toPromise()
+        ? await this._jiraApiService.getIssueById$(issueOrTitle.issueData.id).toPromise()
         : issueOrTitle.issueData;
 
       const res = await this._taskService.checkForTaskWithIssue(issueData);

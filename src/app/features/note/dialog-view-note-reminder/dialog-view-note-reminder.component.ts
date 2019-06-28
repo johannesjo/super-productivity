@@ -15,10 +15,10 @@ import { Project } from '../../project/project.model';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DialogViewNoteReminderComponent implements OnDestroy {
-  note$: Observable<Note> = this._noteService.getById(this.data.reminder.relatedId);
+  note$: Observable<Note> = this._noteService.getById$(this.data.reminder.relatedId);
   reminder: Reminder = this.data.reminder;
   isForCurrentProject = (this.reminder.projectId === this._projectService.currentId);
-  targetProject$: Observable<Project> = this._projectService.getById(this.reminder.projectId);
+  targetProject$: Observable<Project> = this._projectService.getById$(this.reminder.projectId);
 
   private _subs = new Subscription();
 

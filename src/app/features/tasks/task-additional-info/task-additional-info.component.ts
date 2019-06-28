@@ -21,7 +21,7 @@ export class TaskAdditionalInfoComponent {
 
   private _attachmentIds$ = new BehaviorSubject([]);
   localAttachments$: Observable<Attachment[]> = this._attachmentIds$.pipe(
-    switchMap((ids) => this.attachmentService.getByIds(ids))
+    switchMap((ids) => this.attachmentService.getByIds$(ids))
   );
 
   constructor(

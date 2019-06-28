@@ -41,7 +41,7 @@ export class IssueService {
   }
 
 
-  public searchIssues(searchTerm: string): Observable<SearchResultItem[]> {
+  public searchIssues$(searchTerm: string): Observable<SearchResultItem[]> {
     return combineLatest(
       this.isJiraSearchEnabled$,
       this.isGithubSearchEnabled$,
@@ -52,7 +52,7 @@ export class IssueService {
 
         if (isSearchJira) {
           obs.push(
-            this._jiraApiService.issuePicker(searchTerm)
+            this._jiraApiService.issuePicker$(searchTerm)
               .pipe(
                 catchError(() => {
                   return [];
@@ -62,7 +62,7 @@ export class IssueService {
         }
 
         if (isSearchGithub) {
-          obs.push(this._gitApiService.searchIssueForRepo(searchTerm));
+          obs.push(this._gitApiService.searchIssueForRepo$(searchTerm));
         }
 
         return zip(...obs, (...allResults) => [].concat(...allResults)) as Observable<SearchResultItem[]>;

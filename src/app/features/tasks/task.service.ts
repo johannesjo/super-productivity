@@ -433,7 +433,7 @@ export class TaskService {
 
     const taskInOtherProject$ = this._projectService.isRelatedDataLoadedForCurrentProject$.pipe(
       filter(isLoaded => !!isLoaded),
-      switchMap(() => this.getById(taskId).pipe(
+      switchMap(() => this.getById$(taskId).pipe(
         take(1))
       ),
       take(1),
@@ -466,7 +466,7 @@ export class TaskService {
 
   // HELPER
   // ------
-  getById(id: string): Observable<Task> {
+  getById$(id: string): Observable<Task> {
     return this._store.pipe(select(selectTaskById, {id}), take(1));
   }
 
@@ -511,7 +511,7 @@ export class TaskService {
   }
 
 
-  getByIssueId(issueId: string | number, issueType: IssueProviderKey): Observable<Task> {
+  getByIssueId$(issueId: string | number, issueType: IssueProviderKey): Observable<Task> {
     return this._store.pipe(select(selectTaskByIssueId, {issueId, issueType}), take(1));
   }
 

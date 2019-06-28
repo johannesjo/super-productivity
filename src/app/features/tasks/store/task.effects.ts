@@ -382,7 +382,7 @@ export class TaskEffects {
       withLatestFrom(this._configService.cfg$),
       // we display pomodoro progress for pomodoro
       filter(([a, cfg]: [AddTimeSpent, GlobalConfigState]) => !cfg || !cfg.pomodoro.isEnabled),
-      switchMap(([act]) => this._taskService.getById(act.payload.id)),
+      switchMap(([act]) => this._taskService.getById$(act.payload.id)),
       tap((task: Task) => {
         const progress = task.timeSpent / task.timeEstimate;
         this._electronService.ipcRenderer.send(IPC_SET_PROGRESS_BAR, {progress});

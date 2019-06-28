@@ -43,7 +43,7 @@ export class JiraCfgComponent implements OnInit, OnDestroy {
     tap(() => this.isLoading$.next(true)),
     switchMap((searchTerm) => {
       return (searchTerm && searchTerm.length > 1)
-        ? this._jiraApiService.issuePicker(searchTerm)
+        ? this._jiraApiService.issuePicker$(searchTerm)
           .pipe(
             catchError(() => {
               return [];
@@ -115,7 +115,7 @@ export class JiraCfgComponent implements OnInit, OnDestroy {
   }
 
   loadCustomFields() {
-    this.customFieldsPromise = this._jiraApiService.listFields().toPromise();
+    this.customFieldsPromise = this._jiraApiService.listFields$().toPromise();
     this.customFieldsPromise.then((v: any) => {
       if (v && Array.isArray(v.response)) {
         this.customFields = v.response;
@@ -131,7 +131,7 @@ export class JiraCfgComponent implements OnInit, OnDestroy {
     } else {
       const issueId = searchResultItem.issueData.id as string;
       this._subs.add(
-        this._jiraApiService.getTransitionsForIssue(issueId)
+        this._jiraApiService.getTransitionsForIssue$(issueId)
           .subscribe((val) => {
             this.cfg.availableTransitions = val;
             this._snackService.open({

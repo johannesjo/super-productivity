@@ -95,12 +95,12 @@ export class GithubIssueService {
 
   // NON ACTION CALLS
   // ----------------
-  getById(id: number): Observable<GithubIssue> {
+  getById$(id: number): Observable<GithubIssue> {
     return this._store.pipe(select(selectGithubIssueById, {id}), take(1));
   }
 
   loadMissingIssueData(issueId) {
-    return this._githubApiService.getById(issueId)
+    return this._githubApiService.getById$(issueId)
       .pipe(take(1))
       .subscribe(issueData => {
         this.add(issueData);
@@ -111,7 +111,7 @@ export class GithubIssueService {
 
   updateIssueFromApi(issueId_: number | string) {
     const issueNumber = issueId_ as number;
-    this._githubApiService.getIssueWithCommentsByIssueNumber(issueNumber).pipe(
+    this._githubApiService.getIssueWithCommentsByIssueNumber$(issueNumber).pipe(
       take(1)
     ).subscribe((issue) => {
       this.upsert(issue);
@@ -123,7 +123,7 @@ export class GithubIssueService {
   }
 
   updateIssuesFromApi(oldIssues: GithubIssue[], cfg: GithubCfg, isNotify = true) {
-    this._githubApiService.getCompleteIssueDataForRepo(cfg.repo)
+    this._githubApiService.getCompleteIssueDataForRepo$(cfg.repo)
       .pipe(
         take(1)
       ).subscribe(newIssues => {

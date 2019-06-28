@@ -190,7 +190,7 @@ export class JiraIssueEffects {
             .pipe(
               switchMap((isConfirm) => {
                 return isConfirm
-                  ? this._jiraApiService.updateAssignee(issue.id, currentUserName)
+                  ? this._jiraApiService.updateAssignee$(issue.id, currentUserName)
                   : EMPTY;
               }),
               tap(() => {
@@ -277,7 +277,7 @@ export class JiraIssueEffects {
       }),
       concatMap((a: UpdateJiraIssue) => of(a).pipe(
         withLatestFrom(
-          this._taskService.getByIssueId(a.payload.jiraIssue.id, JIRA_TYPE).pipe(take(1))
+          this._taskService.getByIssueId$(a.payload.jiraIssue.id, JIRA_TYPE).pipe(take(1))
         ),
       )),
       map(([a, task]: [UpdateJiraIssue, Task]) => new UpdateTask({
@@ -347,7 +347,7 @@ export class JiraIssueEffects {
         }
 
         if (!issue.status || issue.status.name !== chosenTransition.name) {
-          return this._jiraApiService.transitionIssue(issue.id, chosenTransition.id)
+          return this._jiraApiService.transitionIssue$(issue.id, chosenTransition.id)
             .pipe(
               tap(() => {
                 this._snackService.open({
@@ -387,7 +387,7 @@ export class JiraIssueEffects {
   }
 
   private _importNewIssuesToBacklog([action, allTasks]: [Actions, Task[]]) {
-    this._jiraApiService.findAutoImportIssues().subscribe(async (issues: JiraIssue[]) => {
+    this._jiraApiService.findAutoImportIssues$().subscribe(async (issues: JiraIssue[]) => {
       if (!Array.isArray(issues)) {
         return;
       }

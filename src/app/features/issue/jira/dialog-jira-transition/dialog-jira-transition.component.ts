@@ -16,7 +16,7 @@ import { take } from 'rxjs/operators';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DialogJiraTransitionComponent {
-  availableTransitions$: Observable<JiraOriginalTransition[]> = this._jiraApiService.getTransitionsForIssue(this.data.issue.id);
+  availableTransitions$: Observable<JiraOriginalTransition[]> = this._jiraApiService.getTransitionsForIssue$(this.data.issue.id);
 
   chosenTransition: JiraOriginalTransition;
 
@@ -38,7 +38,7 @@ export class DialogJiraTransitionComponent {
 
   transitionIssue() {
     if (this.chosenTransition && this.chosenTransition.id) {
-      this._jiraApiService.transitionIssue(this.data.issue.id, this.chosenTransition.id)
+      this._jiraApiService.transitionIssue$(this.data.issue.id, this.chosenTransition.id)
         .pipe(take(1))
         .subscribe(() => {
           this._jiraIssueService.updateIssueFromApi(this.data.issue.id, this.data.issue, false, false);

@@ -10,7 +10,7 @@ import { JiraApiService } from '../jira-api.service';
 import { SnackService } from '../../../../core/snack/snack.service';
 import { IssueData } from '../../issue';
 import { take } from 'rxjs/operators';
-import { Observable } from 'rxjs';
+import {Observable, Subscription} from 'rxjs';
 import { DropPasteInputType } from '../../../../core/drop-paste-input/drop-paste-input';
 import { IS_ELECTRON } from '../../../../app.constants';
 
@@ -90,12 +90,13 @@ export class JiraIssueService {
   }
 
   // HELPER
-  getById(id: string): Observable<JiraIssue> {
+  getById$(id: string): Observable<JiraIssue> {
     return this._store.pipe(select(selectJiraIssueById, {id}), take(1));
   }
 
-  loadMissingIssueData(issueId) {
-    return this._jiraApiService.getIssueById(issueId, true)
+  // TODO improve
+  loadMissingIssueData(issueId): Subscription {
+    return this._jiraApiService.getIssueById$(issueId, true)
       .pipe(take(1))
       .subscribe(issueData => {
         this.add(issueData);
@@ -108,7 +109,7 @@ export class JiraIssueService {
   updateIssueFromApi(issueId, oldIssueData_?: IssueData, isNotifyOnUpdate = true, isNotifyOnNoUpdateRequired = false) {
     const oldIssueData = oldIssueData_ as JiraIssue;
 
-    return this._jiraApiService.getIssueById(issueId, true)
+    return this._jiraApiService.getIssueById$(issueId, true)
       .subscribe((updatedIssue) => {
         const changelog = oldIssueData_
           ? this._createChangelog(updatedIssue, oldIssueData)

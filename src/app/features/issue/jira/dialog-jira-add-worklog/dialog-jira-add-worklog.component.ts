@@ -40,7 +40,7 @@ export class DialogJiraAddWorklogComponent {
 
   submitWorklog() {
     if (this.issue.id && this.started && this.timeSpent) {
-      this._jiraApiService.addWorklog(
+      this._jiraApiService.addWorklog$(
         this.issue.id,
         this.started,
         this.timeSpent,

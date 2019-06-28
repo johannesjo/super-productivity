@@ -67,7 +67,7 @@ export class JiraCfgStepperComponent implements OnDestroy {
   testCredentials() {
     this.isTestCredentialsSuccess = false;
     this._subs.add(
-      this._jiraApiService.getCurrentUser(this.jiraCfg, true)
+      this._jiraApiService.getCurrentUser$(this.jiraCfg, true)
         .pipe(catchError((err) => {
           this.isTestCredentialsSuccess = false;
           this.user = null;
