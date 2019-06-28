@@ -4,8 +4,8 @@ import {ChromeExtensionInterfaceService} from '../../core/chrome-extension-inter
 import {ProjectService} from '../project/project.service';
 import {ElectronService} from 'ngx-electron';
 import {TaskService} from '../tasks/task.service';
-import {IPC_IDLE_TIME} from '../../../../electron/ipc-events.const';
-import { MatDialog } from '@angular/material/dialog';
+import {IPC_IDLE_TIME, IPC_SHOW_OR_FOCUS} from '../../../../electron/ipc-events.const';
+import {MatDialog} from '@angular/material/dialog';
 import {BehaviorSubject, Observable, Subject} from 'rxjs';
 import {DialogIdleComponent} from './dialog-idle/dialog-idle.component';
 import {GlobalConfigService} from '../config/global-config.service';
@@ -57,8 +57,6 @@ export class IdleService {
     });
 
     // window.setTimeout(() => {
-    //   console.log('I am here!');
-    //
     //   this.handleIdle(800000);
     // }, 700);
   }
@@ -79,6 +77,10 @@ export class IdleService {
       this._isIdle$.next(true);
 
       if (!this.isIdleDialogOpen) {
+        if (IS_ELECTRON) {
+          this._electronService.ipcRenderer.send(IPC_SHOW_OR_FOCUS);
+        }
+
         if (this._taskService.currentTaskId) {
           // remove idle time already tracked
           this._taskService.removeTimeSpent(this._taskService.currentTaskId, idleTime);
