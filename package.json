@@ -19,7 +19,7 @@
   ],
   "scripts": {
     "ng": "ng",
-    "start": "yarn electron:build && set NODE_ENV=DEV&& electron .",
+    "start": "yarn electron:build && cross-env NODE_ENV=DEV electron .",
     "startFrontend": "ng serve",
     "buildFrontend": "ng build --aot --prod",
     "buildFrontendElectron": "ng build --aot --prod --base-href=''",
@@ -156,6 +156,7 @@
     "codelyzer": "^5.0.1",
     "conventional-changelog-cli": "^2.0.21",
     "core-js": "^3.1.3",
+    "cross-env": "^5.2.0",
     "electron": "4.2.3",
     "electron-builder": "^20.39.0",
     "electron-reload": "^1.2.5",
