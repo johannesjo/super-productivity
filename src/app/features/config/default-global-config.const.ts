@@ -1,4 +1,4 @@
-import { GlobalConfigState } from './global-config.model';
+import {GlobalConfigState} from './global-config.model';
 
 const minute = 60 * 1000;
 export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
@@ -6,15 +6,19 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     isConfirmBeforeExit: false,
     isNotifyWhenTimeEstimateExceeded: false,
     isHideNav: false,
+    isAutMarkParentAsDone: false,
+  },
+  idle: {
     isOnlyOpenIdleWhenCurrentTask: false,
     isEnableIdleTimeTracking: true,
     minIdleTime: 5 * minute,
     isUnTrackedIdleResetsBreakTimer: true,
+  },
+  takeABreak: {
     isTakeABreakEnabled: false,
     /* tslint:disable-next-line */
     takeABreakMessage: 'Take a break! You have been working for ${duration} without one. Go away from the computer! Take a short walk! Makes you more productive in the long run!',
     takeABreakMinWorkingTime: 60 * minute,
-    isAutMarkParentAsDone: false,
   },
   pomodoro: {
     isEnabled: false,

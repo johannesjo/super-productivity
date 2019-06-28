@@ -1,11 +1,13 @@
-import { GlobalConfigActions, GlobalConfigActionTypes } from './global-config.actions';
-import { createFeatureSelector, createSelector } from '@ngrx/store';
-import { GlobalConfigState } from '../global-config.model';
-import { DEFAULT_GLOBAL_CONFIG } from '../default-global-config.const';
+import {GlobalConfigActions, GlobalConfigActionTypes} from './global-config.actions';
+import {createFeatureSelector, createSelector} from '@ngrx/store';
+import {GlobalConfigState, IdleConfig, MiscConfig, TakeABreakConfig} from '../global-config.model';
+import {DEFAULT_GLOBAL_CONFIG} from '../default-global-config.const';
 
 export const CONFIG_FEATURE_NAME = 'globalConfig';
 export const selectConfigFeatureState = createFeatureSelector<GlobalConfigState>(CONFIG_FEATURE_NAME);
-export const selectMiscConfig = createSelector(selectConfigFeatureState, (cfg) => cfg.misc);
+export const selectMiscConfig = createSelector(selectConfigFeatureState, (cfg): MiscConfig => cfg.misc);
+export const selectIdleConfig = createSelector(selectConfigFeatureState, (cfg): IdleConfig => cfg.idle);
+export const selectTakeABreakConfig = createSelector(selectConfigFeatureState, (cfg): TakeABreakConfig => cfg.takeABreak);
 export const selectGoogleSession = createSelector(selectConfigFeatureState, (cfg) => cfg._googleSession);
 
 export const initialState: GlobalConfigState = DEFAULT_GLOBAL_CONFIG;

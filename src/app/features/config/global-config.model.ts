@@ -39,15 +39,20 @@ export type KeyboardConfig = Readonly<{
 
 
 export type MiscConfig = Readonly<{
-  isEnableIdleTimeTracking: boolean;
-  isUnTrackedIdleResetsBreakTimer: boolean;
   isHideNav: boolean;
-  minIdleTime: number;
-  isOnlyOpenIdleWhenCurrentTask: boolean;
-
   isAutMarkParentAsDone: boolean;
   isConfirmBeforeExit: boolean;
   isNotifyWhenTimeEstimateExceeded: boolean;
+}>;
+
+export type IdleConfig = Readonly<{
+  isEnableIdleTimeTracking: boolean;
+  isUnTrackedIdleResetsBreakTimer: boolean;
+  minIdleTime: number;
+  isOnlyOpenIdleWhenCurrentTask: boolean;
+}>;
+
+export type TakeABreakConfig = Readonly<{
   isTakeABreakEnabled: boolean;
   takeABreakMessage: string;
   takeABreakMinWorkingTime: number;
@@ -103,6 +108,8 @@ export type LocalBackupConfig = Readonly<{
 
 export type GlobalConfigState = Readonly<{
   misc: MiscConfig;
+  idle: IdleConfig;
+  takeABreak: TakeABreakConfig;
   pomodoro: PomodoroConfig;
   googleDriveSync: GoogleDriveSyncConfig;
   keyboard: KeyboardConfig;

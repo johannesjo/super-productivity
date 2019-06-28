@@ -1,13 +1,25 @@
-import { Injectable } from '@angular/core';
-import { select, Store } from '@ngrx/store';
-import { GlobalConfigActionTypes } from './store/global-config.actions';
-import { Observable } from 'rxjs';
-import { GlobalConfigSectionKey, GlobalConfigState, GoogleSession, MiscConfig, GlobalSectionConfig } from './global-config.model';
-import { selectConfigFeatureState, selectGoogleSession, selectMiscConfig } from './store/global-config.reducer';
-import { PersistenceService } from '../../core/persistence/persistence.service';
-import { DEFAULT_GLOBAL_CONFIG } from './default-global-config.const';
-import { Actions, ofType } from '@ngrx/effects';
-import { distinctUntilChanged, shareReplay, skip } from 'rxjs/operators';
+import {Injectable} from '@angular/core';
+import {select, Store} from '@ngrx/store';
+import {GlobalConfigActionTypes} from './store/global-config.actions';
+import {Observable} from 'rxjs';
+import {
+  GlobalConfigSectionKey,
+  GlobalConfigState,
+  GlobalSectionConfig,
+  GoogleSession,
+  IdleConfig,
+  MiscConfig, TakeABreakConfig
+} from './global-config.model';
+import {
+  selectConfigFeatureState,
+  selectGoogleSession,
+  selectIdleConfig,
+  selectMiscConfig, selectTakeABreakConfig
+} from './store/global-config.reducer';
+import {PersistenceService} from '../../core/persistence/persistence.service';
+import {Actions, ofType} from '@ngrx/effects';
+import {distinctUntilChanged, shareReplay} from 'rxjs/operators';
+import {migrateGlobalConfigState} from './migrate-global-config.util';
 
 @Injectable({
   providedIn: 'root',
@@ -21,6 +33,18 @@ export class GlobalConfigService {
 
   misc$: Observable<MiscConfig> = this._store.pipe(
     select(selectMiscConfig),
+    distinctUntilChanged(),
+    shareReplay(),
+  );
+
+  idle$: Observable<IdleConfig> = this._store.pipe(
+    select(selectIdleConfig),
+    distinctUntilChanged(),
+    shareReplay(),
+  );
+
+  takeABreak$: Observable<TakeABreakConfig> = this._store.pipe(
+    select(selectTakeABreakConfig),
     distinctUntilChanged(),
     shareReplay(),
   );
@@ -58,7 +82,7 @@ export class GlobalConfigService {
       type: GlobalConfigActionTypes.LoadGlobalConfig,
       // always extend default config
       payload: {
-        cfg: {...DEFAULT_GLOBAL_CONFIG, ...state},
+        cfg: migrateGlobalConfigState(state),
         isOmitTokens
       },
     });

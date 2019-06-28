@@ -51,7 +51,7 @@
     </div>
 
     <div class="summary-point"
-         *ngIf="(isBreakSupport$|async)">
+         *ngIf="(isBreakTrackingSupport$|async)">
       <mat-icon>free_breakfast</mat-icon>
       <div class="summary-text">Breaks (nr / time)
         <div class="summary-val">{{breakNr$|async}} / {{breakTime$|async|msToClockString}}</div>

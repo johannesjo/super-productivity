@@ -22,6 +22,7 @@ import {IS_ELECTRON} from '../../../app.constants';
 import {BannerService} from '../../../core/banner/banner.service';
 import {BannerId} from '../../../core/banner/banner.model';
 import {ProjectService} from '../../project/project.service';
+import {GlobalConfigState, TakeABreakConfig} from '../../config/global-config.model';
 
 const BREAK_TRIGGER_DURATION = 10 * 60 * 1000;
 
@@ -45,9 +46,9 @@ export class TakeABreakService {
     shareReplay(),
   );
 
-  private _isIdleResetEnabled$ = this._configService.misc$.pipe(
-    switchMap((cfg) => {
-        const isConfigured = (cfg.isEnableIdleTimeTracking && cfg.isUnTrackedIdleResetsBreakTimer);
+  private _isIdleResetEnabled$ = this._configService.idle$.pipe(
+    switchMap((idleCfg) => {
+        const isConfigured = (idleCfg.isEnableIdleTimeTracking && idleCfg.isUnTrackedIdleResetsBreakTimer);
         if (IS_ELECTRON) {
           return [isConfigured];
         } else if (isConfigured) {
@@ -125,7 +126,7 @@ export class TakeABreakService {
     private _chromeExtensionInterfaceService: ChromeExtensionInterfaceService,
   ) {
     this._triggerReset$.pipe(
-      withLatestFrom(this._configService.misc$),
+      withLatestFrom(this._configService.takeABreak$),
       filter(([reset, cfg]) => cfg && cfg.isTakeABreakEnabled),
     ).subscribe(() => {
       this._bannerService.dismiss(BANNER_ID);
@@ -134,21 +135,22 @@ export class TakeABreakService {
     const PING_UPDATE_BANNER_INTERVAL = 60 * 1000;
     this.timeWorkingWithoutABreak$.pipe(
       withLatestFrom(
-        this._configService.misc$,
+        this._configService.cfg$,
         this._idleService.isIdle$,
         this._snoozeActive$,
       ),
-      filter(([timeWithoutBreak, cfg, isIdle, isSnoozeActive]) =>
-        cfg && cfg.isTakeABreakEnabled
+      filter(([timeWithoutBreak, cfg, isIdle, isSnoozeActive]:
+                [number, GlobalConfigState, boolean, boolean]): boolean =>
+        cfg && cfg.takeABreak && cfg.takeABreak.isTakeABreakEnabled
         && !isSnoozeActive
-        && (timeWithoutBreak > cfg.takeABreakMinWorkingTime)
+        && (timeWithoutBreak > cfg.takeABreak.takeABreakMinWorkingTime)
         // we don't wanna show if idle to avoid conflicts with the idle modal
-        && (!isIdle || !cfg.isEnableIdleTimeTracking)
+        && (!isIdle || !cfg.idle.isEnableIdleTimeTracking)
       ),
       // throttleTime(5 * 1000),
       throttleTime(PING_UPDATE_BANNER_INTERVAL),
     ).subscribe(([timeWithoutBreak, cfg, isIdle]) => {
-      const msg = this._createMessage(timeWithoutBreak, cfg);
+      const msg = this._createMessage(timeWithoutBreak, cfg.takeABreak);
       this._bannerService.open({
         id: BANNER_ID,
         ico: 'free_breakfast',
@@ -179,7 +181,7 @@ export class TakeABreakService {
     this.resetTimer();
   }
 
-  private _createMessage(duration, cfg) {
+  private _createMessage(duration: number, cfg: TakeABreakConfig) {
     if (cfg && cfg.takeABreakMessage) {
       const durationStr = msToString(duration);
       return cfg.takeABreakMessage

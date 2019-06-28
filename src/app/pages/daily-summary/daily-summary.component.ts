@@ -83,7 +83,7 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
   breakTime$ = this.dayStr$.pipe(switchMap((dayStr) => this._projectService.getBreakTime$(dayStr)));
   breakNr$ = this.dayStr$.pipe(switchMap((dayStr) => this._projectService.getBreakNr$(dayStr)));
 
-  isBreakSupport$: Observable<boolean> = this._configService.cfg$.pipe(map(cfg => cfg && cfg.misc.isEnableIdleTimeTracking));
+  isBreakTrackingSupport$: Observable<boolean> = this._configService.idle$.pipe(map(cfg => cfg && cfg.isEnableIdleTimeTracking));
 
   private _successAnimationTimeout;
   private _doneTasks: TaskWithSubTasks[];
