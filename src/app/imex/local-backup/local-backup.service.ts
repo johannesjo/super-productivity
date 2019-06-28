@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import { ConfigService } from '../../features/config/config.service';
+import { GlobalConfigService } from '../../features/config/global-config.service';
 import { interval, Observable } from 'rxjs';
-import { LocalBackupConfig } from '../../features/config/config.model';
+import { LocalBackupConfig } from '../../features/config/global-config.model';
 import { filter, map, switchMap, tap } from 'rxjs/operators';
 import { SyncService } from '../sync/sync.service';
 import { ElectronService } from 'ngx-electron';
@@ -21,7 +21,7 @@ export class LocalBackupService {
   );
 
   constructor(
-    private _configService: ConfigService,
+    private _configService: GlobalConfigService,
     private _syncService: SyncService,
     private _electronService: ElectronService,
   ) {

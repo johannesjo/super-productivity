@@ -13,7 +13,7 @@ import {
   ViewContainerRef
 } from '@angular/core';
 import { expandAnimation } from '../../../ui/animations/expand.ani';
-import { ConfigFormSection, ConfigSectionKey } from '../config.model';
+import { ConfigFormSection, GlobalConfigSectionKey } from '../global-config.model';
 import { ProjectCfgFormKey } from '../../project/project.model';
 import { GoogleSyncCfgComponent } from '../../google/google-sync-cfg/google-sync-cfg.component';
 import { JiraCfgComponent } from '../../issue/jira/jira-cfg/jira-cfg.component';
@@ -31,7 +31,7 @@ import { Subscription } from 'rxjs';
 export class ConfigSectionComponent implements OnInit, OnDestroy {
   @Input() section: ConfigFormSection;
   @Input() cfg: any;
-  @Output() save: EventEmitter<{ sectionKey: ConfigSectionKey | ProjectCfgFormKey, config: any }> = new EventEmitter();
+  @Output() save: EventEmitter<{ sectionKey: GlobalConfigSectionKey | ProjectCfgFormKey, config: any }> = new EventEmitter();
 
   @ViewChild('customForm', { read: ViewContainerRef, static: true }) customFormRef: ViewContainerRef;
 

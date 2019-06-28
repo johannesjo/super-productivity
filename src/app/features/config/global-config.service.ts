@@ -1,19 +1,19 @@
 import { Injectable } from '@angular/core';
 import { select, Store } from '@ngrx/store';
-import { ConfigActionTypes } from './store/config.actions';
+import { GlobalConfigActionTypes } from './store/global-config.actions';
 import { Observable } from 'rxjs';
-import { ConfigSectionKey, GlobalConfig, GoogleSession, MiscConfig, SectionConfig } from './config.model';
-import { selectConfigFeatureState, selectGoogleSession, selectMiscConfig } from './store/config.reducer';
+import { GlobalConfigSectionKey, GlobalConfigState, GoogleSession, MiscConfig, GlobalSectionConfig } from './global-config.model';
+import { selectConfigFeatureState, selectGoogleSession, selectMiscConfig } from './store/global-config.reducer';
 import { PersistenceService } from '../../core/persistence/persistence.service';
-import { DEFAULT_CFG } from './default-config.const';
+import { DEFAULT_GLOBAL_CONFIG } from './default-global-config.const';
 import { Actions, ofType } from '@ngrx/effects';
 import { distinctUntilChanged, shareReplay, skip } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root',
 })
-export class ConfigService {
-  cfg$: Observable<GlobalConfig> = this._store.pipe(
+export class GlobalConfigService {
+  cfg$: Observable<GlobalConfigState> = this._store.pipe(
     select(selectConfigFeatureState),
     distinctUntilChanged(),
     shareReplay(),
@@ -30,9 +30,9 @@ export class ConfigService {
     distinctUntilChanged(),
   );
 
-  cfg: GlobalConfig;
+  cfg: GlobalConfigState;
 
-  onCfgLoaded$: Observable<any> = this._actions$.pipe(ofType(ConfigActionTypes.LoadConfig));
+  onCfgLoaded$: Observable<any> = this._actions$.pipe(ofType(GlobalConfigActionTypes.LoadGlobalConfig));
 
   constructor(
     private readonly _store: Store<any>,
@@ -53,20 +53,20 @@ export class ConfigService {
     }
   }
 
-  loadState(state: GlobalConfig, isOmitTokens = false) {
+  loadState(state: GlobalConfigState, isOmitTokens = false) {
     this._store.dispatch({
-      type: ConfigActionTypes.LoadConfig,
+      type: GlobalConfigActionTypes.LoadGlobalConfig,
       // always extend default config
       payload: {
-        cfg: {...DEFAULT_CFG, ...state},
+        cfg: {...DEFAULT_GLOBAL_CONFIG, ...state},
         isOmitTokens
       },
     });
   }
 
-  updateSection(sectionKey: ConfigSectionKey, sectionCfg: Partial<SectionConfig>, isSkipLastActive = false) {
+  updateSection(sectionKey: GlobalConfigSectionKey, sectionCfg: Partial<GlobalSectionConfig>, isSkipLastActive = false) {
     this._store.dispatch({
-      type: ConfigActionTypes.UpdateConfigSection,
+      type: GlobalConfigActionTypes.UpdateGlobalConfigSection,
       payload: {
         sectionKey,
         sectionCfg,

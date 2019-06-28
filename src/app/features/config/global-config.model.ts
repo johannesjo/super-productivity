@@ -101,7 +101,7 @@ export type LocalBackupConfig = Readonly<{
 }>;
 
 
-export type GlobalConfig = Readonly<{
+export type GlobalConfigState = Readonly<{
   misc: MiscConfig;
   pomodoro: PomodoroConfig;
   googleDriveSync: GoogleDriveSyncConfig;
@@ -112,9 +112,9 @@ export type GlobalConfig = Readonly<{
 }>;
 
 
-export type ConfigSectionKey = keyof GlobalConfig | 'EMPTY';
+export type GlobalConfigSectionKey = keyof GlobalConfigState | 'EMPTY';
 
-export type SectionConfig
+export type GlobalSectionConfig
   = MiscConfig
   | PomodoroConfig
   | KeyboardConfig
@@ -125,7 +125,7 @@ export type SectionConfig
 // Intermediate model
 export interface ConfigFormSection {
   title: string;
-  key: ConfigSectionKey | ProjectCfgFormKey;
+  key: GlobalConfigSectionKey | ProjectCfgFormKey;
   help?: string;
   customSection?: string;
   items?: FormlyFieldConfig[];

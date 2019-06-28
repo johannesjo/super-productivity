@@ -1,6 +1,6 @@
 import { MISC_SETTINGS_FORM_CFG } from './form-cfgs/misc-settings-form.const';
 import { KEYBOARD_SETTINGS_FORM_CFG } from './form-cfgs/keyboard-form.const';
-import { ConfigFormConfig } from './config.model';
+import { ConfigFormConfig } from './global-config.model';
 import { POMODORO_FORM_CFG } from './form-cfgs/pomodoro-form.const';
 
 // TODO typing

@@ -3,7 +3,7 @@ import {AppDataComplete} from './sync.model';
 import {PersistenceService} from '../../core/persistence/persistence.service';
 import {SnackService} from '../../core/snack/snack.service';
 import {ProjectService} from '../../features/project/project.service';
-import {ConfigService} from '../../features/config/config.service';
+import {GlobalConfigService} from '../../features/config/global-config.service';
 import {TaskService} from '../../features/tasks/task.service';
 import {BookmarkService} from '../../features/bookmark/bookmark.service';
 import {NoteService} from '../../features/note/note.service';
@@ -22,7 +22,7 @@ export class SyncService {
     private _persistenceService: PersistenceService,
     private _snackService: SnackService,
     private _projectService: ProjectService,
-    private _configService: ConfigService,
+    private _configService: GlobalConfigService,
     private _taskService: TaskService,
     private _attachmentService: AttachmentService,
     private _bookmarkService: BookmarkService,

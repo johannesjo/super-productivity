@@ -1,9 +1,9 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
 import { GoogleApiService } from '../google-api.service';
-import { ConfigService } from '../../config/config.service';
+import { GlobalConfigService } from '../../config/global-config.service';
 import { GoogleDriveSyncService } from '../google-drive-sync.service';
 import { SnackService } from '../../../core/snack/snack.service';
-import { GoogleDriveSyncConfig } from '../../config/config.model';
+import { GoogleDriveSyncConfig } from '../../config/global-config.model';
 import { Subscription } from 'rxjs';
 import { expandFadeAnimation } from '../../../ui/animations/expand.ani';
 import { FormGroup } from '@angular/forms';
@@ -29,7 +29,7 @@ export class GoogleSyncCfgComponent implements OnInit, OnDestroy {
   constructor(
     public readonly googleApiService: GoogleApiService,
     private readonly googleDriveSyncService: GoogleDriveSyncService,
-    private readonly _configService: ConfigService,
+    private readonly _configService: GlobalConfigService,
     private readonly _snackService: SnackService,
     private readonly _cd: ChangeDetectorRef,
   ) {

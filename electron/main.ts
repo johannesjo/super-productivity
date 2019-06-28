@@ -29,7 +29,7 @@ import {
 import {backupData} from './backup';
 import electronDl from 'electron-dl';
 import {JiraCfg} from '../src/app/features/issue/jira/jira';
-import {KeyboardConfig} from '../src/app/features/config/config.model';
+import {KeyboardConfig} from '../src/app/features/config/global-config.model';
 import BrowserWindow = Electron.BrowserWindow;
 
 const ICONS_FOLDER = __dirname + '/assets/icons/';

@@ -9,7 +9,7 @@ import {selectJiraIssueEntities, selectJiraIssueFeatureState, selectJiraIssueIds
 import {selectCurrentProjectId, selectProjectJiraCfg} from '../../../../project/store/project.reducer';
 import {JiraApiService} from '../../jira-api.service';
 import {JiraIssueService} from '../jira-issue.service';
-import {ConfigService} from '../../../../config/config.service';
+import {GlobalConfigService} from '../../../../config/global-config.service';
 import {Dictionary} from '@ngrx/entity';
 import {JiraIssue} from '../jira-issue.model';
 import {JiraCfg, JiraTransitionOption} from '../../jira';
@@ -311,7 +311,7 @@ export class JiraIssueEffects {
 
   constructor(private readonly _actions$: Actions,
               private readonly _store$: Store<any>,
-              private readonly _configService: ConfigService,
+              private readonly _configService: GlobalConfigService,
               private readonly _snackService: SnackService,
               private readonly _taskService: TaskService,
               private readonly _jiraApiService: JiraApiService,

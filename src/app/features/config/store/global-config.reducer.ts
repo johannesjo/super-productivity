@@ -1,23 +1,23 @@
-import { ConfigActions, ConfigActionTypes } from './config.actions';
+import { GlobalConfigActions, GlobalConfigActionTypes } from './global-config.actions';
 import { createFeatureSelector, createSelector } from '@ngrx/store';
-import { GlobalConfig } from '../config.model';
-import { DEFAULT_CFG } from '../default-config.const';
+import { GlobalConfigState } from '../global-config.model';
+import { DEFAULT_GLOBAL_CONFIG } from '../default-global-config.const';
 
 export const CONFIG_FEATURE_NAME = 'globalConfig';
-export const selectConfigFeatureState = createFeatureSelector<GlobalConfig>(CONFIG_FEATURE_NAME);
+export const selectConfigFeatureState = createFeatureSelector<GlobalConfigState>(CONFIG_FEATURE_NAME);
 export const selectMiscConfig = createSelector(selectConfigFeatureState, (cfg) => cfg.misc);
 export const selectGoogleSession = createSelector(selectConfigFeatureState, (cfg) => cfg._googleSession);
 
-export const initialState: GlobalConfig = DEFAULT_CFG;
+export const initialState: GlobalConfigState = DEFAULT_GLOBAL_CONFIG;
 
-export function configReducer(
+export function globalConfigReducer(
   state = initialState,
-  action: ConfigActions
-): GlobalConfig {
+  action: GlobalConfigActions
+): GlobalConfigState {
   // console.log(action, state);
 
   switch (action.type) {
-    case ConfigActionTypes.LoadConfig: {
+    case GlobalConfigActionTypes.LoadGlobalConfig: {
       const {cfg, isOmitTokens} = action.payload;
       if (isOmitTokens) {
         const currentGoogleSession = state._googleSession
@@ -38,7 +38,7 @@ export function configReducer(
       }
     }
 
-    case ConfigActionTypes.UpdateConfigSection:
+    case GlobalConfigActionTypes.UpdateGlobalConfigSection:
       const {sectionKey, sectionCfg} = action.payload;
       return {
         ...state,

@@ -14,7 +14,7 @@ import {
   throttleTime,
   withLatestFrom
 } from 'rxjs/operators';
-import {ConfigService} from '../../config/config.service';
+import {GlobalConfigService} from '../../config/global-config.service';
 import {msToString} from '../../../ui/duration/ms-to-string.pipe';
 import {ChromeExtensionInterfaceService} from '../../../core/chrome-extension-interface/chrome-extension-interface.service';
 import {IdleService} from '../idle.service';
@@ -119,7 +119,7 @@ export class TakeABreakService {
     private _taskService: TaskService,
     private _timeTrackingService: TimeTrackingService,
     private _idleService: IdleService,
-    private _configService: ConfigService,
+    private _configService: GlobalConfigService,
     private _projectService: ProjectService,
     private _bannerService: BannerService,
     private _chromeExtensionInterfaceService: ChromeExtensionInterfaceService,

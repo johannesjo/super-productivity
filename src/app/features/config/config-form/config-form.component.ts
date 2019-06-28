@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormlyFieldConfig, FormlyFormOptions } from '@ngx-formly/core';
 import { FormGroup } from '@angular/forms';
-import { ConfigSectionKey } from '../config.model';
+import { GlobalConfigSectionKey } from '../global-config.model';
 import { ProjectCfgFormKey } from '../../project/project.model';
 
 @Component({
@@ -14,7 +14,7 @@ export class ConfigFormComponent {
 
   config: any;
   @Input() sectionKey;
-  @Output() save: EventEmitter<{ sectionKey: ConfigSectionKey | ProjectCfgFormKey, config: any }> = new EventEmitter();
+  @Output() save: EventEmitter<{ sectionKey: GlobalConfigSectionKey | ProjectCfgFormKey, config: any }> = new EventEmitter();
   fields: FormlyFieldConfig[];
   form = new FormGroup({});
   options: FormlyFormOptions = {};

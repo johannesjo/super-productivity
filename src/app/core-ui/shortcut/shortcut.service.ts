@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { IS_ELECTRON } from '../../app.constants';
 import { checkKeyCombo } from '../../util/check-key-combo';
-import { ConfigService } from '../../features/config/config.service';
+import { GlobalConfigService } from '../../features/config/global-config.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ElectronService } from 'ngx-electron';
 import { LayoutService } from '../layout/layout.service';
@@ -20,7 +20,7 @@ export class ShortcutService {
   backlogPos: number;
 
   constructor(
-    private _configService: ConfigService,
+    private _configService: GlobalConfigService,
     private _router: Router,
     private _electronService: ElectronService,
     private _layoutService: LayoutService,

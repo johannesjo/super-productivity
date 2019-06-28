@@ -13,7 +13,7 @@ import {ProjectService} from './features/project/project.service';
 import {Project} from './features/project/project.model';
 import {ChromeExtensionInterfaceService} from './core/chrome-extension-interface/chrome-extension-interface.service';
 import {ShortcutService} from './core-ui/shortcut/shortcut.service';
-import {ConfigService} from './features/config/config.service';
+import {GlobalConfigService} from './features/config/global-config.service';
 import {blendInOutAnimation} from './ui/animations/blend-in-out.ani';
 import {LayoutService} from './core-ui/layout/layout.service';
 import {ElectronService} from 'ngx-electron';
@@ -75,7 +75,7 @@ export class AppComponent implements OnInit {
 
   constructor(
     @Inject(DOCUMENT) private document: Document,
-    private _configService: ConfigService,
+    private _configService: GlobalConfigService,
     private _shortcutService: ShortcutService,
     private _matIconRegistry: MatIconRegistry,
     private _domSanitizer: DomSanitizer,

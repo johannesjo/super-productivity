@@ -1,8 +1,8 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit} from '@angular/core';
-import {ConfigService} from '../../features/config/config.service';
-import {GLOBAL_CONFIG_FORM_CONFIG} from '../../features/config/config-form-config.const';
+import {GlobalConfigService} from '../../features/config/global-config.service';
+import {GLOBAL_CONFIG_FORM_CONFIG} from '../../features/config/global-config-form-config.const';
 import {ProjectService} from '../../features/project/project.service';
-import {ConfigFormConfig, ConfigFormSection, ConfigSectionKey, GlobalConfig} from '../../features/config/config.model';
+import {ConfigFormConfig, ConfigFormSection, GlobalConfigSectionKey, GlobalConfigState} from '../../features/config/global-config.model';
 import {Subscription} from 'rxjs';
 import {Project, ProjectAdvancedCfg, ProjectCfgFormKey} from '../../features/project/project.model';
 import {
@@ -31,14 +31,14 @@ export class ConfigPageComponent implements OnInit, OnDestroy {
   currentProject: Project;
   projectCfg: ProjectAdvancedCfg;
   issueIntegrationCfgs: IssueIntegrationCfgs;
-  globalCfg: GlobalConfig;
+  globalCfg: GlobalConfigState;
 
   appVersion: string = environment.version;
 
   private _subs = new Subscription();
 
   constructor(
-    public readonly configService: ConfigService,
+    public readonly configService: GlobalConfigService,
     public readonly projectService: ProjectService,
     private _cd: ChangeDetectorRef,
   ) {
@@ -78,7 +78,7 @@ export class ConfigPageComponent implements OnInit, OnDestroy {
     return section.key;
   }
 
-  saveProjectBasicCfg($event: { sectionKey: ConfigSectionKey | ProjectCfgFormKey, config: Partial<Project> }) {
+  saveProjectBasicCfg($event: { sectionKey: GlobalConfigSectionKey | ProjectCfgFormKey, config: Partial<Project> }) {
     if (!$event.config) {
       throw new Error('Not enough data');
     } else {
@@ -88,7 +88,7 @@ export class ConfigPageComponent implements OnInit, OnDestroy {
     }
   }
 
-  saveIssueProviderCfg($event: { sectionKey: ConfigSectionKey | ProjectCfgFormKey, config: IssueIntegrationCfg }) {
+  saveIssueProviderCfg($event: { sectionKey: GlobalConfigSectionKey | ProjectCfgFormKey, config: IssueIntegrationCfg }) {
     const {sectionKey, config} = $event;
     const sectionKey_ = sectionKey as IssueProviderKey;
     this.projectService.updateIssueProviderConfig(this.currentProject.id, sectionKey_, {
@@ -96,9 +96,9 @@ export class ConfigPageComponent implements OnInit, OnDestroy {
     }, true);
   }
 
-  saveGlobalCfg($event: { sectionKey: ConfigSectionKey | ProjectCfgFormKey, config: any }) {
+  saveGlobalCfg($event: { sectionKey: GlobalConfigSectionKey | ProjectCfgFormKey, config: any }) {
     const config = $event.config;
-    const sectionKey = $event.sectionKey as ConfigSectionKey;
+    const sectionKey = $event.sectionKey as GlobalConfigSectionKey;
 
     if (!sectionKey || !config) {
       throw new Error('Not enough data');

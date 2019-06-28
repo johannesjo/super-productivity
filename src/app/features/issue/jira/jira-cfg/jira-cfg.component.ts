@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
-import { ConfigFormSection, ConfigSectionKey } from '../../../config/config.model';
+import { ConfigFormSection, GlobalConfigSectionKey } from '../../../config/global-config.model';
 import { ProjectCfgFormKey } from '../../../project/project.model';
 import { FormlyFieldConfig, FormlyFormOptions } from '@ngx-formly/core';
 import { FormControl, FormGroup } from '@angular/forms';
@@ -25,7 +25,7 @@ export class JiraCfgComponent implements OnInit, OnDestroy {
   // NOTE: this is legit because it might be that there is no issue provider cfg yet
   @Input() cfg: JiraCfg = DEFAULT_JIRA_CFG;
 
-  @Output() save: EventEmitter<{ sectionKey: ConfigSectionKey | ProjectCfgFormKey, config: any }> = new EventEmitter();
+  @Output() save: EventEmitter<{ sectionKey: GlobalConfigSectionKey | ProjectCfgFormKey, config: any }> = new EventEmitter();
 
   issueSuggestionsCtrl: FormControl = new FormControl();
   customFieldSuggestionsCtrl: FormControl = new FormControl();

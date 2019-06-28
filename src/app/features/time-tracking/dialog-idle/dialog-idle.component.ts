@@ -3,7 +3,7 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import {TaskService} from '../../tasks/task.service';
 import {Observable} from 'rxjs';
 import {Task} from '../../tasks/task.model';
-import {ConfigService} from '../../config/config.service';
+import {GlobalConfigService} from '../../config/global-config.service';
 import {MetricService} from '../../metric/metric.service';
 
 @Component({
@@ -19,7 +19,7 @@ export class DialogIdleComponent implements OnInit {
   public isCreate: boolean;
 
   constructor(
-    public configService: ConfigService,
+    public configService: GlobalConfigService,
     private _taskService: TaskService,
     private _metricService: MetricService,
     private _matDialogRef: MatDialogRef<DialogIdleComponent>,

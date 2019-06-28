@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
 import {Actions, Effect, ofType} from '@ngrx/effects';
 import {Store} from '@ngrx/store';
-import {ConfigActionTypes, UpdateConfigSection} from '../../config/store/config.actions';
+import {GlobalConfigActionTypes, UpdateGlobalConfigSection} from '../../config/store/global-config.actions';
 import {
   catchError,
   concatMap,
@@ -18,7 +18,7 @@ import {
 import {combineLatest, EMPTY, from, interval, Observable, of, throwError} from 'rxjs';
 import {GoogleDriveSyncService} from '../google-drive-sync.service';
 import {GoogleApiService} from '../google-api.service';
-import {ConfigService} from '../../config/config.service';
+import {GlobalConfigService} from '../../config/global-config.service';
 import {SnackService} from '../../../core/snack/snack.service';
 import {
   ChangeSyncFileName,
@@ -36,7 +36,7 @@ import {
 } from './google-drive-sync.actions';
 import {DialogConfirmComponent} from '../../../ui/dialog-confirm/dialog-confirm.component';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
-import {GoogleDriveSyncConfig} from '../../config/config.model';
+import {GoogleDriveSyncConfig} from '../../config/global-config.model';
 import {SyncService} from '../../../imex/sync/sync.service';
 import {SnackOpen} from '../../../core/snack/store/snack.actions';
 import {DEFAULT_SYNC_FILE_NAME} from '../google.const';
@@ -56,8 +56,8 @@ export class GoogleDriveSyncEffects {
 
   @Effect() triggerSync$: any = this._actions$.pipe(
     ofType(
-      ConfigActionTypes.LoadConfig,
-      ConfigActionTypes.UpdateConfigSection,
+      GlobalConfigActionTypes.LoadGlobalConfig,
+      GlobalConfigActionTypes.UpdateGlobalConfigSection,
     ),
     switchMap(() => combineLatest(
       this._googleApiService.isLoggedIn$,
@@ -90,7 +90,7 @@ export class GoogleDriveSyncEffects {
 
   @Effect() initialImport$: any = this._actions$.pipe(
     ofType(
-      ConfigActionTypes.LoadConfig,
+      GlobalConfigActionTypes.LoadGlobalConfig,
     ),
     take(1),
     withLatestFrom(this.config$),
@@ -357,7 +357,7 @@ export class GoogleDriveSyncEffects {
     private _store$: Store<any>,
     private _googleDriveSyncService: GoogleDriveSyncService,
     private _googleApiService: GoogleApiService,
-    private _configService: ConfigService,
+    private _configService: GlobalConfigService,
     private _snackService: SnackService,
     private _compressionService: CompressionService,
     private _matDialog: MatDialog,
@@ -490,8 +490,8 @@ If not please change the Sync file name.`,
       .toPromise();
   }
 
-  private _updateConfig(data: Partial<GoogleDriveSyncConfig>, isSkipLastActive = false): UpdateConfigSection {
-    return new UpdateConfigSection({
+  private _updateConfig(data: Partial<GoogleDriveSyncConfig>, isSkipLastActive = false): UpdateGlobalConfigSection {
+    return new UpdateGlobalConfigSection({
       sectionKey: 'googleDriveSync',
       sectionCfg: data,
       isSkipLastActive,

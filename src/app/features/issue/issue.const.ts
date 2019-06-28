@@ -1,4 +1,4 @@
-import { ConfigFormConfig } from '../config/config.model';
+import { ConfigFormConfig } from '../config/global-config.model';
 import { DEFAULT_JIRA_CFG, JIRA_ADVANCED_FORM_CFG, JIRA_CREDENTIALS_FORM_CFG } from './jira/jira.const';
 import { IssueProviderKey } from './issue';
 import { DEFAULT_GITHUB_CFG, GITHUB_CONFIG_FORM } from './github/github.const';

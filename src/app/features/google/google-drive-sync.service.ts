@@ -10,10 +10,10 @@ import {
 } from './store/google-drive-sync.actions';
 import { selectIsGoogleDriveLoadInProgress, selectIsGoogleDriveSaveInProgress } from './store/google-drive-sync.reducer';
 import { distinctUntilChanged, map } from 'rxjs/operators';
-import { ConfigService } from '../config/config.service';
+import { GlobalConfigService } from '../config/global-config.service';
 import { SyncService } from '../../imex/sync/sync.service';
 import { Actions, ofType } from '@ngrx/effects';
-import { GoogleDriveSyncConfig } from '../config/config.model';
+import { GoogleDriveSyncConfig } from '../config/global-config.model';
 
 @Injectable({
   providedIn: 'root',
@@ -40,7 +40,7 @@ export class GoogleDriveSyncService {
 
   constructor(
     private _store$: Store<any>,
-    private _configService: ConfigService,
+    private _configService: GlobalConfigService,
     private _syncService: SyncService,
     private _actions$: Actions,
   ) {

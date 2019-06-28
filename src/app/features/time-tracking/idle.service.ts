@@ -8,7 +8,7 @@ import {IPC_IDLE_TIME} from '../../../../electron/ipc-events.const';
 import { MatDialog } from '@angular/material/dialog';
 import {BehaviorSubject, Observable, Subject} from 'rxjs';
 import {DialogIdleComponent} from './dialog-idle/dialog-idle.component';
-import {ConfigService} from '../config/config.service';
+import {GlobalConfigService} from '../config/global-config.service';
 import {Task} from '../tasks/task.model';
 import {getWorklogStr} from '../../util/get-work-log-str';
 import {distinctUntilChanged, shareReplay} from 'rxjs/operators';
@@ -39,7 +39,7 @@ export class IdleService {
     private _projectService: ProjectService,
     private _electronService: ElectronService,
     private _taskService: TaskService,
-    private _configService: ConfigService,
+    private _configService: GlobalConfigService,
     private _matDialog: MatDialog,
   ) {
   }

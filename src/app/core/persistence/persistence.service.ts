@@ -17,7 +17,7 @@ import {
   LS_TASK_ATTACHMENT_STATE,
   LS_TASK_STATE
 } from './ls-keys.const';
-import {GlobalConfig} from '../../features/config/config.model';
+import {GlobalConfigState} from '../../features/config/global-config.model';
 import {IssueProviderKey, IssueState, IssueStateMap} from '../../features/issue/issue';
 import {ProjectState} from '../../features/project/store/project.reducer';
 import {TaskState} from '../../features/tasks/store/task.reducer';
@@ -55,7 +55,7 @@ export class PersistenceService {
 
   // TODO auto generate ls keys from appDataKey where possible
   project = this._cmBase<ProjectState>(LS_PROJECT_META_LIST, 'project');
-  globalConfig = this._cmBase<GlobalConfig>(LS_GLOBAL_CFG, 'globalConfig');
+  globalConfig = this._cmBase<GlobalConfigState>(LS_GLOBAL_CFG, 'globalConfig');
   reminders = this._cmBase<Reminder[]>(LS_REMINDER, 'reminders');
 
   task = this._cmProject<TaskState>(LS_TASK_STATE, 'task');

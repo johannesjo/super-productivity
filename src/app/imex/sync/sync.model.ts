@@ -1,6 +1,6 @@
 import { ProjectState } from '../../features/project/store/project.reducer';
 import { TaskState } from '../../features/tasks/store/task.reducer';
-import { GlobalConfig } from '../../features/config/config.model';
+import { GlobalConfigState } from '../../features/config/global-config.model';
 import { EntityState } from '@ngrx/entity';
 import { Task } from '../../features/tasks/task.model';
 import { IssueStateMap } from '../../features/issue/issue';
@@ -17,7 +17,7 @@ import { ObstructionState } from '../../features/metric/obstruction/obstruction.
 export interface AppBaseData {
   project: ProjectState;
   archivedProjects: ProjectArchive;
-  globalConfig: GlobalConfig;
+  globalConfig: GlobalConfigState;
   reminders?: Reminder[];
 }
 

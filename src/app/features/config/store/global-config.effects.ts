@@ -1,22 +1,22 @@
 import { Injectable } from '@angular/core';
 import { Actions, Effect, ofType } from '@ngrx/effects';
 import { filter, tap, withLatestFrom } from 'rxjs/operators';
-import { ConfigActionTypes, LoadConfig, UpdateConfigSection } from './config.actions';
+import { GlobalConfigActionTypes, LoadGlobalConfig, UpdateGlobalConfigSection } from './global-config.actions';
 import { Store } from '@ngrx/store';
-import { CONFIG_FEATURE_NAME } from './config.reducer';
+import { CONFIG_FEATURE_NAME } from './global-config.reducer';
 import { PersistenceService } from '../../../core/persistence/persistence.service';
 import { SnackOpen } from '../../../core/snack/store/snack.actions';
 import { ElectronService } from 'ngx-electron';
-import { KeyboardConfig } from '../config.model';
+import { KeyboardConfig } from '../global-config.model';
 import { IPC_REGISTER_GLOBAL_SHORTCUTS_EVENT } from '../../../../../electron/ipc-events.const';
 import { IS_ELECTRON } from '../../../app.constants';
 
 @Injectable()
-export class ConfigEffects {
+export class GlobalConfigEffects {
   @Effect({dispatch: false}) updateConfig$: any = this._actions$
     .pipe(
       ofType(
-        ConfigActionTypes.UpdateConfigSection,
+        GlobalConfigActionTypes.UpdateGlobalConfigSection,
       ),
       withLatestFrom(this._store),
       tap(this._saveToLs.bind(this))
@@ -25,9 +25,9 @@ export class ConfigEffects {
   @Effect({dispatch: false}) snackUpdate$: any = this._actions$
     .pipe(
       ofType(
-        ConfigActionTypes.UpdateConfigSection,
+        GlobalConfigActionTypes.UpdateGlobalConfigSection,
       ),
-      tap((action: UpdateConfigSection) => {
+      tap((action: UpdateGlobalConfigSection) => {
         const {sectionKey, sectionCfg} = action.payload;
         const isPublicSection = sectionKey.charAt(0) !== '_';
         const isPublicPropUpdated = Object.keys(sectionCfg).find((key) => key.charAt(0) !== '_');
@@ -43,10 +43,10 @@ export class ConfigEffects {
   @Effect({dispatch: false}) updateGlobalShortcut$: any = this._actions$
     .pipe(
       ofType(
-        ConfigActionTypes.UpdateConfigSection,
+        GlobalConfigActionTypes.UpdateGlobalConfigSection,
       ),
-      filter((action: UpdateConfigSection) => IS_ELECTRON && action.payload.sectionKey === 'keyboard'),
-      tap((action: UpdateConfigSection) => {
+      filter((action: UpdateGlobalConfigSection) => IS_ELECTRON && action.payload.sectionKey === 'keyboard'),
+      tap((action: UpdateGlobalConfigSection) => {
         const keyboardCfg: KeyboardConfig = action.payload.sectionCfg as KeyboardConfig;
         this._electronService.ipcRenderer.send(IPC_REGISTER_GLOBAL_SHORTCUTS_EVENT, keyboardCfg);
       }),
@@ -55,10 +55,10 @@ export class ConfigEffects {
   @Effect({dispatch: false}) registerGlobalShortcutInitially$: any = this._actions$
     .pipe(
       ofType(
-        ConfigActionTypes.LoadConfig,
+        GlobalConfigActionTypes.LoadGlobalConfig,
       ),
       filter(() => IS_ELECTRON),
-      tap((action: LoadConfig) => {
+      tap((action: LoadGlobalConfig) => {
         const keyboardCfg: KeyboardConfig = action.payload.cfg.keyboard;
         this._electronService.ipcRenderer.send(IPC_REGISTER_GLOBAL_SHORTCUTS_EVENT, keyboardCfg);
       }),

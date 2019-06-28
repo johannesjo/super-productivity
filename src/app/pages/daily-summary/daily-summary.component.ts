@@ -10,7 +10,7 @@ import {ElectronService} from 'ngx-electron';
 import {IPC_SHUTDOWN_NOW} from '../../../../electron/ipc-events.const';
 import {DialogConfirmComponent} from '../../ui/dialog-confirm/dialog-confirm.component';
 import {NoteService} from '../../features/note/note.service';
-import {ConfigService} from '../../features/config/config.service';
+import {GlobalConfigService} from '../../features/config/global-config.service';
 import {GoogleDriveSyncService} from '../../features/google/google-drive-sync.service';
 import {SnackService} from '../../core/snack/snack.service';
 import {filter, map, shareReplay, startWith, switchMap, take} from 'rxjs/operators';
@@ -94,7 +94,7 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
 
   constructor(
     private readonly _taskService: TaskService,
-    private readonly _configService: ConfigService,
+    private readonly _configService: GlobalConfigService,
     private readonly _googleDriveSync: GoogleDriveSyncService,
     private readonly _router: Router,
     private readonly _noteService: NoteService,

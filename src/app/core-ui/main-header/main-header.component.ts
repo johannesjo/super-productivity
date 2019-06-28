@@ -7,7 +7,7 @@ import { LayoutService } from '../layout/layout.service';
 import { BookmarkService } from '../../features/bookmark/bookmark.service';
 import { NoteService } from '../../features/note/note.service';
 import { TaskService } from '../../features/tasks/task.service';
-import { ConfigService } from '../../features/config/config.service';
+import { GlobalConfigService } from '../../features/config/global-config.service';
 import { PomodoroService } from '../../features/pomodoro/pomodoro.service';
 import { Project } from '../../features/project/project.model';
 
@@ -29,7 +29,7 @@ export class MainHeaderComponent implements OnInit {
     public readonly bookmarkService: BookmarkService,
     public readonly noteService: NoteService,
     public readonly taskService: TaskService,
-    public readonly configService: ConfigService,
+    public readonly configService: GlobalConfigService,
     public readonly pomodoroService: PomodoroService,
     private readonly _matDialog: MatDialog,
     private readonly _layoutService: LayoutService,

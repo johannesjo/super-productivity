@@ -18,7 +18,7 @@ import { HIDE_SUB_TASKS, SHOW_SUB_TASKS, TaskWithSubTasks } from '../task.model'
 import { MatDialog } from '@angular/material/dialog';
 import { DialogTimeEstimateComponent } from '../dialog-time-estimate/dialog-time-estimate.component';
 import { expandAnimation } from '../../../ui/animations/expand.ani';
-import { ConfigService } from '../../config/config.service';
+import { GlobalConfigService } from '../../config/global-config.service';
 import { checkKeyCombo } from '../../../util/check-key-combo';
 import { takeUntil } from 'rxjs/operators';
 import { fadeAnimation } from '../../../ui/animations/fade.ani';
@@ -65,7 +65,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   constructor(
     private readonly _taskService: TaskService,
     private readonly _matDialog: MatDialog,
-    private readonly _configService: ConfigService,
+    private readonly _configService: GlobalConfigService,
     private readonly _issueService: IssueService,
     private readonly _attachmentService: AttachmentService,
     private readonly _elementRef: ElementRef,

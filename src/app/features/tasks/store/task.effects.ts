@@ -21,7 +21,7 @@ import {selectCurrentProjectId} from '../../project/store/project.reducer';
 import {SnackOpen} from '../../../core/snack/store/snack.actions';
 import {NotifyService} from '../../../core/notify/notify.service';
 import {TaskService} from '../task.service';
-import {selectConfigFeatureState, selectMiscConfig} from '../../config/store/config.reducer';
+import {selectConfigFeatureState, selectMiscConfig} from '../../config/store/global-config.reducer';
 import {AttachmentActionTypes} from '../../attachment/store/attachment.actions';
 import {Task, TaskWithSubTasks} from '../task.model';
 import {TaskState} from './task.reducer';
@@ -30,10 +30,10 @@ import {ElectronService} from 'ngx-electron';
 import {IPC_CURRENT_TASK_UPDATED, IPC_SET_PROGRESS_BAR} from '../../../../../electron/ipc-events.const';
 import {IS_ELECTRON} from '../../../app.constants';
 import {ReminderService} from '../../reminder/reminder.service';
-import {GlobalConfig, MiscConfig} from '../../config/config.model';
+import {GlobalConfigState, MiscConfig} from '../../config/global-config.model';
 import {truncate} from '../../../util/truncate';
 import {roundDurationVanilla} from '../../../util/round-duration';
-import {ConfigService} from '../../config/config.service';
+import {GlobalConfigService} from '../../config/global-config.service';
 
 // TODO send message to electron when current task changes here
 
@@ -381,7 +381,7 @@ export class TaskEffects {
       filter(() => IS_ELECTRON),
       withLatestFrom(this._configService.cfg$),
       // we display pomodoro progress for pomodoro
-      filter(([a, cfg]: [AddTimeSpent, GlobalConfig]) => !cfg || !cfg.pomodoro.isEnabled),
+      filter(([a, cfg]: [AddTimeSpent, GlobalConfigState]) => !cfg || !cfg.pomodoro.isEnabled),
       switchMap(([act]) => this._taskService.getById(act.payload.id)),
       tap((task: Task) => {
         const progress = task.timeSpent / task.timeEstimate;
@@ -393,7 +393,7 @@ export class TaskEffects {
               private _store$: Store<any>,
               private _notifyService: NotifyService,
               private _taskService: TaskService,
-              private _configService: ConfigService,
+              private _configService: GlobalConfigService,
               private _reminderService: ReminderService,
               private _electronService: ElectronService,
               private _persistenceService: PersistenceService) {

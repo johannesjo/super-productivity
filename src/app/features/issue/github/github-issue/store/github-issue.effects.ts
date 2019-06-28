@@ -9,7 +9,7 @@ import { selectAllGithubIssues, selectGithubIssueFeatureState } from './github-i
 import { selectCurrentProjectId, selectProjectGithubCfg } from '../../../../project/store/project.reducer';
 import { GithubApiService } from '../../github-api.service';
 import { GithubIssueService } from '../github-issue.service';
-import { ConfigService } from '../../../../config/config.service';
+import { GlobalConfigService } from '../../../../config/global-config.service';
 import { SnackService } from '../../../../../core/snack/snack.service';
 import { TaskService } from '../../../../tasks/task.service';
 import { Task } from '../../../../tasks/task.model';
@@ -135,7 +135,7 @@ export class GithubIssueEffects {
 
   constructor(private readonly _actions$: Actions,
               private readonly _store$: Store<any>,
-              private readonly _configService: ConfigService,
+              private readonly _configService: GlobalConfigService,
               private readonly _snackService: SnackService,
               private readonly _githubApiService: GithubApiService,
               private readonly _taskService: TaskService,

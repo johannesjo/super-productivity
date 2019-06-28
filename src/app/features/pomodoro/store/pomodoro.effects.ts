@@ -3,7 +3,7 @@ import {Actions, Effect, ofType} from '@ngrx/effects';
 import {SetCurrentTask, TaskActionTypes, ToggleStart, UnsetCurrentTask} from '../../tasks/store/task.actions';
 import {filter, map, mapTo, tap, withLatestFrom} from 'rxjs/operators';
 import {PomodoroService} from '../pomodoro.service';
-import {PomodoroConfig} from '../../config/config.model';
+import {PomodoroConfig} from '../../config/global-config.model';
 import {
   FinishPomodoroSession,
   PausePomodoro,

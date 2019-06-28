@@ -1,8 +1,8 @@
 import {Injectable} from '@angular/core';
 import {combineLatest, merge, Observable} from 'rxjs';
-import {ConfigService} from '../config/config.service';
+import {GlobalConfigService} from '../config/global-config.service';
 import {distinctUntilChanged, filter, map, mapTo, scan, shareReplay, withLatestFrom} from 'rxjs/operators';
-import {PomodoroConfig} from '../config/config.model';
+import {PomodoroConfig} from '../config/global-config.model';
 import {TimeTrackingService} from '../time-tracking/time-tracking.service';
 import {select, Store} from '@ngrx/store';
 import {
@@ -13,7 +13,7 @@ import {
   StopPomodoro
 } from './store/pomodoro.actions';
 import {selectCurrentCycle, selectIsBreak, selectIsManualPause} from './store/pomodoro.reducer';
-import {DEFAULT_CFG} from '../config/default-config.const';
+import {DEFAULT_GLOBAL_CONFIG} from '../config/default-global-config.const';
 import {Actions, ofType} from '@ngrx/effects';
 
 // Tick Duration
@@ -71,11 +71,11 @@ export class PomodoroService {
       // cfg.breakDuration = 3000;
       // cfg.longerBreakDuration = 20000;
       if (!isBreak) {
-        return cfg.duration || DEFAULT_CFG.pomodoro.duration;
+        return cfg.duration || DEFAULT_GLOBAL_CONFIG.pomodoro.duration;
       } else if (isShort) {
-        return cfg.breakDuration || DEFAULT_CFG.pomodoro.breakDuration;
+        return cfg.breakDuration || DEFAULT_GLOBAL_CONFIG.pomodoro.breakDuration;
       } else if (isLong) {
-        return cfg.longerBreakDuration || DEFAULT_CFG.pomodoro.longerBreakDuration;
+        return cfg.longerBreakDuration || DEFAULT_GLOBAL_CONFIG.pomodoro.longerBreakDuration;
       }
     }),
     shareReplay(),
@@ -102,7 +102,7 @@ export class PomodoroService {
   );
 
   constructor(
-    private _configService: ConfigService,
+    private _configService: GlobalConfigService,
     private _store$: Store<any>,
     private _actions$: Actions,
     private _timeTrackingService: TimeTrackingService,
