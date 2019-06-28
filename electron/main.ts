@@ -27,7 +27,6 @@ import {
   IPC_TASK_TOGGLE_START
 } from './ipc-events.const';
 import {backupData} from './backup';
-import electronDl from 'electron-dl';
 import {JiraCfg} from '../src/app/features/issue/jira/jira';
 import {KeyboardConfig} from '../src/app/features/config/global-config.model';
 import BrowserWindow = Electron.BrowserWindow;
@@ -49,7 +48,9 @@ interface MyApp extends App {
 const app_: MyApp = app;
 
 initDebug({showDevTools: IS_DEV}, IS_DEV);
-electronDl({openFolderWhenDone: true});
+
+// TODO maybe reimplement when fixed
+// electronDl({openFolderWhenDone: true});
 
 let mainWin: BrowserWindow;
 const nestedWinParams = {isDarwinForceQuit: false};
