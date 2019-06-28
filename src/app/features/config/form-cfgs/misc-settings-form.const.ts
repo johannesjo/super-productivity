@@ -1,12 +1,13 @@
 // tslint:disable:max-line-length
-import { ConfigFormSection } from '../global-config.model';
+import {ConfigFormSection} from '../global-config.model';
 
 export const MISC_SETTINGS_FORM_CFG: ConfigFormSection = {
   title: 'Misc Settings',
   key: 'misc',
   help: `
   <div>
-      <p>Hopefully self explanatory.</p>
+      <p><strong>Not seeing Desktop Notifications?</strong> For windows you might want to check System > Notifications & actions and check if the required notifications have been enabled.
+</p>
   </div>`,
   items: [
     {
