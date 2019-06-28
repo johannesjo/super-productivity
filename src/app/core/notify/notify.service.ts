@@ -1,13 +1,20 @@
-import { Injectable } from '@angular/core';
-import { NotifyModel } from './notify.model';
-import { environment } from '../../../environments/environment';
-import { IS_ELECTRON } from '../../app.constants';
-import { IS_MOBILE } from '../../util/is-mobile';
+import {Injectable} from '@angular/core';
+import {NotifyModel} from './notify.model';
+import {environment} from '../../../environments/environment';
+import {IS_ELECTRON} from '../../app.constants';
+import {IS_MOBILE} from '../../util/is-mobile';
+import {ElectronService} from 'ngx-electron';
+import {IPC_SHOW_OR_FOCUS} from '../../../../electron/ipc-events.const';
 
 @Injectable({
   providedIn: 'root',
 })
 export class NotifyService {
+  constructor(
+    private _electronService: ElectronService,
+  ) {
+  }
+
   async notifyDesktop(options: NotifyModel) {
     if (!IS_MOBILE) {
       return this.notify(options);
@@ -20,6 +27,7 @@ export class NotifyService {
       reg.showNotification(options.title, {
         icon: 'assets/icons/icon-128x128.png',
         vibrate: [100, 50, 100],
+        silent: false,
         data: {
           dateOfArrival: Date.now(),
           primaryKey: 1
@@ -43,6 +51,9 @@ export class NotifyService {
         });
         instance.onclick = () => {
           instance.close();
+          if (IS_ELECTRON) {
+            this._electronService.ipcRenderer.send(IPC_SHOW_OR_FOCUS);
+          }
         };
         setTimeout(() => {
           instance.close();
