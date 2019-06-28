@@ -37,5 +37,12 @@ export const MISC_SETTINGS_FORM_CFG: ConfigFormSection = {
         label: 'Mark parent task as done, when all sub tasks are done',
       },
     },
+    {
+      key: 'isDisableRemindWhenForgotToFinishDay',
+      type: 'checkbox',
+      templateOptions: {
+        label: 'Disable reminder about forgotten finish day',
+      },
+    },
   ]
 };

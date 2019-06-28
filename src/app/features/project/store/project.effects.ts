@@ -32,6 +32,7 @@ import {ProjectService} from '../project.service';
 import {BannerService} from '../../../core/banner/banner.service';
 import {Router} from '@angular/router';
 import {BannerId} from '../../../core/banner/banner.model';
+import {GlobalConfigService} from '../../config/global-config.service';
 
 @Injectable()
 export class ProjectEffects {
@@ -103,8 +104,11 @@ export class ProjectEffects {
       withLatestFrom(
         this._projectService.lastWorkEnd$,
         this._projectService.lastCompletedDay$,
+        this._globalConfigService.misc$,
       ),
-      filter(([a, lastWorkEndStr, lastCompletedDayStr]) => {
+      filter(([a, lastWorkEndStr, lastCompletedDayStr, miscCfg]) =>
+        miscCfg && !miscCfg.isDisableRemindWhenForgotToFinishDay),
+      filter(([a, lastWorkEndStr, lastCompletedDayStr, miscCfg]) => {
         const today = new Date();
         const lastWorkEnd = new Date(lastWorkEndStr);
         const lastCompletedDay = new Date(lastCompletedDayStr);
@@ -300,6 +304,7 @@ export class ProjectEffects {
     private _bookmarkService: BookmarkService,
     private _noteService: NoteService,
     private _bannerService: BannerService,
+    private _globalConfigService: GlobalConfigService,
     private _attachmentService: AttachmentService,
     private _reminderService: ReminderService,
     private _metricService: MetricService,

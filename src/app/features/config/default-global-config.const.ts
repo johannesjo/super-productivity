@@ -7,6 +7,7 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     isNotifyWhenTimeEstimateExceeded: false,
     isHideNav: false,
     isAutMarkParentAsDone: false,
+    isDisableRemindWhenForgotToFinishDay: false,
   },
   idle: {
     isOnlyOpenIdleWhenCurrentTask: false,

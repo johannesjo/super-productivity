@@ -43,6 +43,7 @@ export type MiscConfig = Readonly<{
   isAutMarkParentAsDone: boolean;
   isConfirmBeforeExit: boolean;
   isNotifyWhenTimeEstimateExceeded: boolean;
+  isDisableRemindWhenForgotToFinishDay: boolean;
 }>;
 
 export type IdleConfig = Readonly<{
