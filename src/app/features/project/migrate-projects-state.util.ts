@@ -24,9 +24,3 @@ const _extendProjectDefaults = (project: Project): Project => {
     }
   };
 };
-
-
-const today = new Date();
-const yesterday = new Date(today);
-yesterday.setDate(today.getDate() - 1);
-
