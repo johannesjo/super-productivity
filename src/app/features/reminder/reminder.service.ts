@@ -68,7 +68,7 @@ export class ReminderService {
 
   // TODO maybe refactor to observable, because models can differ to sync value for yet unknown reasons
   getById(reminderId: string): ReminderCopy {
-    const _foundReminder = this._reminders.find(reminder => reminder.id === reminderId);
+    const _foundReminder = this._reminders && this._reminders.find(reminder => reminder.id === reminderId);
     return _foundReminder && dirtyDeepCopy(_foundReminder);
   }
 

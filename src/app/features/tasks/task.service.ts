@@ -2,6 +2,7 @@ import shortid from 'shortid';
 import {
   debounceTime,
   distinctUntilChanged,
+  filter,
   first,
   map,
   shareReplay,
@@ -427,13 +428,18 @@ export class TaskService {
   }
 
   // TODO this should be done via action and effects
-  startTaskFromOtherProject(taskId: string, projectId: string) {
-    this._projectService.onProjectRelatedDataLoaded$.pipe(
+  startTaskFromOtherProject$(taskId: string, projectId: string): Observable<Task> {
+    this._projectService.setCurrentId(projectId);
+
+    const taskInOtherProject$ = this._projectService.isRelatedDataLoadedForCurrentProject$.pipe(
+      filter(isLoaded => !!isLoaded),
       switchMap(() => this.getById(taskId).pipe(
         take(1))
       ),
       take(1),
-    ).subscribe(task => {
+    );
+
+    taskInOtherProject$.subscribe(task => {
       if (task.parentId) {
         this.moveToToday(task.parentId, true);
       } else {
@@ -441,7 +447,7 @@ export class TaskService {
       }
       this.setCurrentId(task.id);
     });
-    this._projectService.setCurrentId(projectId);
+    return taskInOtherProject$;
   }
 
   // REMINDER

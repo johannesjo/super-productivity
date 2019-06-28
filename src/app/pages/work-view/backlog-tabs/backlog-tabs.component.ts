@@ -46,7 +46,7 @@ export class BacklogTabsComponent {
   }
 
   startTaskFromOtherProject(task: TaskWithReminderData) {
-    this.taskService.startTaskFromOtherProject(task.id, task.reminderData.projectId);
+    this.taskService.startTaskFromOtherProject$(task.id, task.reminderData.projectId);
     this.closeBacklog.emit();
   }
 
