@@ -54,7 +54,7 @@ export class TaskRepeatCfgService {
 
     deleteTaskRepeatCfg(id: string) {
         this._store$.dispatch(new DeleteTaskRepeatCfg({id}));
-    }
+    }K
 
     deleteTaskRepeatCfgs(ids: string[]) {
         this._store$.dispatch(new DeleteTaskRepeatCfgs({ids}));
@@ -64,7 +64,7 @@ export class TaskRepeatCfgService {
         this._store$.dispatch(new UpdateTaskRepeatCfg({taskRepeatCfg: {id, changes}}));
     }
 
-    upsertTaskRepeatCfg(metric: TaskRepeatCfg) {
-      this._store$.dispatch(new UpsertTaskRepeatCfg({metric}));
+    upsertTaskRepeatCfg(taskRepeatCfg: TaskRepeatCfg) {
+      this._store$.dispatch(new UpsertTaskRepeatCfg({taskRepeatCfg}));
     }
 }
