@@ -5,10 +5,11 @@ import {
     initial<%= classify(name)%>State,
     selectAll<%= classify(name)%>s,
     select<%= classify(name)%>ById,
-} from './store/<%= camelize(name)%>.reducer';
+} from './store/<%= dasherize(name)%>.reducer';
 import {
   Add<%= classify(name)%>,
   Delete<%= classify(name)%>,
+  Delete<%= classify(name)%>s,
   Load<%= classify(name)%>State,
   Update<%= classify(name)%>,
   Upsert<%= classify(name)%>,
@@ -34,7 +35,7 @@ export class <%= classify(name)%>Service {
         this.loadState(ls<%= classify(name)%>State || initial<%= classify(name)%>State);
     }
 
-    get<%= classify(name)%>ById(id: string): Observable<<%= classify(name)%>> {
+    get<%= classify(name)%>ById$(id: string): Observable<<%= classify(name)%>> {
       return this._store$.pipe(select(select<%= classify(name)%>ById, {id}), take(1));
     }
 
