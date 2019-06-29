@@ -282,6 +282,16 @@
             Update issue data
           </button>
 
+          <button (click)="editTaskRepeatCfg()"
+                  *ngIf="!task.parentId && !task.issueId"
+                  mat-menu-item=""
+                  tabindex="2">
+            <mat-icon>replay</mat-icon>
+            <span *ngIf="!task.repeatCfgId">Repeat task</span>
+            <span *ngIf="task.repeatCfgId">Edit repeat task config</span>
+          </button>
+
+
           <button (click)="deleteTask()"
                   aria-label="delete"
                   mat-menu-item=""

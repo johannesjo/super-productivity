@@ -28,6 +28,7 @@ import { DialogEditAttachmentComponent } from '../../attachment/dialog-edit-atta
 import { swirlAnimation } from '../../../ui/animations/swirl-in-out.ani';
 import { IS_TOUCH, isTouch } from '../../../util/is-touch';
 import { DialogAddTaskReminderComponent } from '../dialog-add-task-reminder/dialog-add-task-reminder.component';
+import {DialogEditTaskRepeatCfgComponent} from '../../task-repeat-cfg/dialog-edit-task-repeat-cfg/dialog-edit-task-repeat-cfg.component';
 
 @Component({
   selector: 'task',
@@ -174,6 +175,15 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
 
   updateIssueData() {
     this._issueService.refreshIssue(this.task.issueType, this.task.issueId, this.task.issueData);
+  }
+
+  editTaskRepeatCfg() {
+    this._matDialog.open(DialogEditTaskRepeatCfgComponent, {
+      restoreFocus: true,
+      data: {
+        task: this.task,
+      }
+    });
   }
 
   handleUpdateBtnClick() {

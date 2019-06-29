@@ -1,0 +1,38 @@
+<form (submit)="save()">
+  <mat-dialog-content>
+    <h2 class="mat-h2"
+        style="margin-bottom: 0;">{{(isEdit$|async) ? 'Edit Repeat Task Config' : 'Add Repeat Task Config'}}</h2>
+    <h3 class="mat-h3">"{{task.title}}"</h3>
+
+    <div class="form-wrapper">
+
+    </div>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="center">
+    <div class="wrap-buttons">
+      <button color="primary"
+              mat-raised-button
+              type="submit">
+        <mat-icon>save</mat-icon>
+        Save
+      </button>
+
+      <button (click)="remove()"
+              *ngIf="(isEdit$|async)"
+              color="warn"
+              mat-raised-button
+              type="button">
+        <mat-icon>trash</mat-icon>
+        Remove
+      </button>
+
+      <button (click)="close()"
+              mat-raised-button
+              type="button">
+        <mat-icon>close</mat-icon>
+        Cancel
+      </button>
+    </div>
+  </mat-dialog-actions>
+</form>
