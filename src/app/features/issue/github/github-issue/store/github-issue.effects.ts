@@ -155,7 +155,7 @@ export class GithubIssueEffects {
 
   private _importNewIssuesToBacklog([action]: [Actions, Task[]]) {
     this._githubApiService.getCompleteIssueDataForRepo$().subscribe(async issues => {
-      const allTaskGithubIssueIds = await this._taskService.getAllIssueIds(GITHUB_TYPE) as number[];
+      const allTaskGithubIssueIds = await this._taskService.getAllIssueIdsForCurrentProject(GITHUB_TYPE) as number[];
       const issuesToAdd = issues.filter(issue => !allTaskGithubIssueIds.includes(issue.id));
       issuesToAdd.forEach((issue) => {
         this._taskService.addWithIssue(

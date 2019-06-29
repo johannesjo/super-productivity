@@ -391,7 +391,7 @@ export class JiraIssueEffects {
       if (!Array.isArray(issues)) {
         return;
       }
-      const allTaskJiraIssueIds = await this._taskService.getAllIssueIds(JIRA_TYPE) as string[];
+      const allTaskJiraIssueIds = await this._taskService.getAllIssueIdsForCurrentProject(JIRA_TYPE) as string[];
 
       const issuesToAdd = issues.filter(issue => !allTaskJiraIssueIds.includes(issue.id));
       issuesToAdd.forEach((issue) => {

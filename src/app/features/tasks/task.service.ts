@@ -327,25 +327,6 @@ export class TaskService {
     }));
   }
 
-  // BEWARE: does only work for task model updates
-  async updateEverywhere(id: string, changedFields: Partial<Task>) {
-    const entities = await this.taskEntityState$.pipe(first()).toPromise();
-    if (entities[id]) {
-      this.update(id, changedFields);
-    } else {
-      await this.updateArchiveTask(id, changedFields);
-    }
-  }
-
-  // BEWARE: does only work for task model updates, but not the meta models
-  async updateArchiveTask(id: string, changedFields: Partial<Task>) {
-    const curProId = this._projectService.currentId;
-    const archiveTaskState = await this._persistenceService.taskArchive.load(curProId) as TaskState;
-    const updatedState = taskReducer(archiveTaskState, new UpdateTask({
-      task: {id, changes: this._shortSyntax(changedFields) as Partial<Task>}
-    }));
-    await this._persistenceService.saveToTaskArchiveForProject(curProId, updatedState);
-  }
 
   updateUi(id: string, changes: Partial<Task>) {
     this._store.dispatch(new UpdateTaskUi({
@@ -513,6 +494,59 @@ export class TaskService {
 
   getByIssueId$(issueId: string | number, issueType: IssueProviderKey): Observable<Task> {
     return this._store.pipe(select(selectTaskByIssueId, {issueId, issueType}), take(1));
+
+  }
+
+
+  setDone(id: string) {
+    this.update(id, {isDone: true});
+  }
+
+  setUnDone(id: string) {
+    this.update(id, {isDone: false});
+  }
+
+  showAdditionalInfoOpen(id: string) {
+    this.updateUi(id, {_isAdditionalInfoOpen: true, _currentTab: 0});
+  }
+
+  hideAdditionalInfoOpen(id: string) {
+    this.updateUi(id, {_isAdditionalInfoOpen: false});
+  }
+
+  showSubTasks(id: string) {
+    this.updateUi(id, {_showSubTasksMode: SHOW_SUB_TASKS});
+  }
+
+  toggleSubTaskMode(taskId: string, isShowLess = true, isEndless = false) {
+    this._store.dispatch(new ToggleTaskShowSubTasks({taskId, isShowLess, isEndless}));
+  }
+
+  hideSubTasks(id: string) {
+    this.updateUi(id, {_showSubTasksMode: HIDE_SUB_TASKS});
+  }
+
+  // GLOBAL TASK MODEL STUFF
+  // -----------------------
+
+  // BEWARE: does only work for task model updates
+  async updateEverywhereForCurrentProject(id: string, changedFields: Partial<Task>) {
+    const entities = await this.taskEntityState$.pipe(first()).toPromise();
+    if (entities[id]) {
+      this.update(id, changedFields);
+    } else {
+      await this.updateArchiveTaskForCurrentProject(id, changedFields);
+    }
+  }
+
+  // BEWARE: does only work for task model updates, but not the meta models
+  async updateArchiveTaskForCurrentProject(id: string, changedFields: Partial<Task>) {
+    const curProId = this._projectService.currentId;
+    const archiveTaskState = await this._persistenceService.taskArchive.load(curProId) as TaskState;
+    const updatedState = taskReducer(archiveTaskState, new UpdateTask({
+      task: {id, changes: this._shortSyntax(changedFields) as Partial<Task>}
+    }));
+    await this._persistenceService.saveToTaskArchiveForProject(curProId, updatedState);
   }
 
   async getByIdFromEverywhere(id: string, projectId: string = this._projectService.currentId): Promise<Task> {
@@ -553,36 +587,7 @@ export class TaskService {
     return null;
   }
 
-
-  setDone(id: string) {
-    this.update(id, {isDone: true});
-  }
-
-  setUnDone(id: string) {
-    this.update(id, {isDone: false});
-  }
-
-  showAdditionalInfoOpen(id: string) {
-    this.updateUi(id, {_isAdditionalInfoOpen: true, _currentTab: 0});
-  }
-
-  hideAdditionalInfoOpen(id: string) {
-    this.updateUi(id, {_isAdditionalInfoOpen: false});
-  }
-
-  showSubTasks(id: string) {
-    this.updateUi(id, {_showSubTasksMode: SHOW_SUB_TASKS});
-  }
-
-  toggleSubTaskMode(taskId: string, isShowLess = true, isEndless = false) {
-    this._store.dispatch(new ToggleTaskShowSubTasks({taskId, isShowLess, isEndless}));
-  }
-
-  hideSubTasks(id: string) {
-    this.updateUi(id, {_showSubTasksMode: HIDE_SUB_TASKS});
-  }
-
-  public async getAllTasks(): Promise<TaskWithIssueData[]> {
+  async getAllTasksForCurrentProject(): Promise<TaskWithIssueData[]> {
     const allTasks = await this._allTasksWithIssueData$.pipe(first()).toPromise();
     const archiveTaskState = await this._persistenceService.taskArchive.load(this._projectService.currentId);
     const ids = archiveTaskState && archiveTaskState.ids as string[] || [];
@@ -590,14 +595,14 @@ export class TaskService {
     return [...allTasks, ...archiveTasks];
   }
 
-  public async getAllIssueIds(issueProviderKey: IssueProviderKey): Promise<string[] | number[]> {
-    const allTasks = await this.getAllTasks();
+  async getAllIssueIdsForCurrentProject(issueProviderKey: IssueProviderKey): Promise<string[] | number[]> {
+    const allTasks = await this.getAllTasksForCurrentProject();
     return allTasks
       .filter(task => task.issueType === issueProviderKey)
       .map(task => task.issueId);
   }
 
-  public async checkForTaskWithIssue(issue: IssueData): Promise<{
+  async checkForTaskWithIssue(issue: IssueData): Promise<{
     task: TaskWithIssueData | TaskWithSubTasks,
     isFromArchive: boolean,
   }> {
@@ -615,6 +620,7 @@ export class TaskService {
       }
     }
   }
+
 
   private _createNewTask(title: string, additional: Partial<Task> = {}): Task {
     return this._shortSyntax({
