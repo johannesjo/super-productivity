@@ -33,6 +33,7 @@ import {BannerService} from '../../../core/banner/banner.service';
 import {Router} from '@angular/router';
 import {BannerId} from '../../../core/banner/banner.model';
 import {GlobalConfigService} from '../../config/global-config.service';
+import {TaskRepeatCfgService} from '../../task-repeat-cfg/task-repeat-cfg.service';
 
 @Injectable()
 export class ProjectEffects {
@@ -190,6 +191,7 @@ export class ProjectEffects {
           this._metricService.loadStateForProject(projectId),
           this._improvementService.loadStateForProject(projectId),
           this._obstructionService.loadStateForProject(projectId),
+          this._taskRepeatCfgService.loadStateForProject(projectId),
         ]);
       }),
       map(data => {
@@ -300,6 +302,7 @@ export class ProjectEffects {
     private _projectService: ProjectService,
     private _persistenceService: PersistenceService,
     private _taskService: TaskService,
+    private _taskRepeatCfgService: TaskRepeatCfgService,
     private _issueService: IssueService,
     private _bookmarkService: BookmarkService,
     private _noteService: NoteService,

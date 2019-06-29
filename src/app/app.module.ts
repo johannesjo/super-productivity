@@ -29,6 +29,7 @@ import {MigrateModule} from './imex/migrate/migrate.module';
 import {GlobalErrorHandler} from './core/error-handler/global-error-handler.class';
 import {MyHammerConfig} from '../hammer-config.class';
 import {ProcrastinationModule} from './features/procrastination/procrastination.module';
+import {TaskRepeatCfgModule} from './features/task-repeat-cfg/task-repeat-cfg.module';
 
 @NgModule({
   declarations: [
@@ -44,6 +45,7 @@ import {ProcrastinationModule} from './features/procrastination/procrastination.
     BookmarkModule,
     MatSidenavModule,
     TasksModule,
+    TaskRepeatCfgModule,
     ProcrastinationModule,
     TimeTrackingModule,
     NoteModule,

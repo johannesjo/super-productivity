@@ -15,6 +15,7 @@ import {
   LS_REMINDER,
   LS_TASK_ARCHIVE,
   LS_TASK_ATTACHMENT_STATE,
+  LS_TASK_REPEAT_CFG_STATE,
   LS_TASK_STATE
 } from './ls-keys.const';
 import {GlobalConfigState} from '../../features/config/global-config.model';
@@ -41,6 +42,7 @@ import {PersistenceBaseModel, PersistenceForProjectModel} from './persistence';
 import {MetricState} from '../../features/metric/metric.model';
 import {ImprovementState} from '../../features/metric/improvement/improvement.model';
 import {ObstructionState} from '../../features/metric/obstruction/obstruction.model';
+import {TaskRepeatCfgState} from '../../features/task-repeat-cfg/task-repeat-cfg.model';
 
 
 @Injectable({
@@ -59,6 +61,7 @@ export class PersistenceService {
   reminders = this._cmBase<Reminder[]>(LS_REMINDER, 'reminders');
 
   task = this._cmProject<TaskState>(LS_TASK_STATE, 'task');
+  taskRepeatCfg = this._cmProject<TaskRepeatCfgState>(LS_TASK_REPEAT_CFG_STATE, 'taskRepeatCfg');
   taskArchive = this._cmProject<EntityState<TaskWithSubTasks>>(LS_TASK_ARCHIVE, 'taskArchive');
   taskAttachment = this._cmProject<AttachmentState>(LS_TASK_ATTACHMENT_STATE, 'taskAttachment');
   bookmark = this._cmProject<BookmarkState>(LS_BOOKMARK_STATE, 'bookmark');
