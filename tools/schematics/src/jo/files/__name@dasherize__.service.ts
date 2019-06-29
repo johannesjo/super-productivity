@@ -64,7 +64,7 @@ export class <%= classify(name)%>Service {
         this._store$.dispatch(new Update<%= classify(name)%>({<%= camelize(name)%>: {id, changes}}));
     }
 
-    upsert<%= classify(name)%>(metric: <%= classify(name)%>) {
-      this._store$.dispatch(new Upsert<%= classify(name)%>({metric}));
+    upsert<%= classify(name)%>(<%= camelize(name)%>: <%= classify(name)%>) {
+      this._store$.dispatch(new Upsert<%= classify(name)%>({<%= camelize(name)%>}));
     }
 }
