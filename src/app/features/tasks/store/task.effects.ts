@@ -34,6 +34,7 @@ import {GlobalConfigState, MiscConfig} from '../../config/global-config.model';
 import {truncate} from '../../../util/truncate';
 import {roundDurationVanilla} from '../../../util/round-duration';
 import {GlobalConfigService} from '../../config/global-config.service';
+import {TaskRepeatCfgActionTypes} from '../../task-repeat-cfg/store/task-repeat-cfg.actions';
 
 // TODO send message to electron when current task changes here
 
@@ -74,6 +75,8 @@ export class TaskEffects {
 
         AttachmentActionTypes.DeleteAttachment,
         AttachmentActionTypes.AddAttachment,
+
+        TaskRepeatCfgActionTypes.AddTaskRepeatCfgToTask,
       ),
       withLatestFrom(
         this._store$.pipe(select(selectCurrentProjectId)),

@@ -1,5 +1,5 @@
 <form (submit)="save()">
-  <h1 mat-dialog-title>{{(isEdit$|async) ? 'Edit Repeat Task Config' : 'Add Repeat Task Config'}}</h1>
+  <h1 mat-dialog-title>{{isEdit ? 'Edit Repeat Task Config' : 'Add Repeat Task Config'}}</h1>
 
   <mat-dialog-content>
     <!--    <h3 class="mat-h3">{{task.title}}</h3>-->
@@ -24,11 +24,11 @@
       </button>
 
       <button (click)="remove()"
-              *ngIf="(isEdit$|async)"
+              *ngIf="isEdit"
               color="warn"
               mat-button
               type="button">
-        <mat-icon>trash</mat-icon>
+        <mat-icon>delete_forever</mat-icon>
         Remove
       </button>
 

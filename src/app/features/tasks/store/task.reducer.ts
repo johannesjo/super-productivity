@@ -1,9 +1,10 @@
-import { createEntityAdapter, EntityAdapter, EntityState } from '@ngrx/entity';
-import { TaskActions, TaskActionTypes } from './task.actions';
-import { DEFAULT_TASK, HIDE_SUB_TASKS, SHOW_SUB_TASKS, Task, TaskWithSubTasks, TimeSpentOnDay } from '../task.model';
-import { calcTotalTimeSpent } from '../util/calc-total-time-spent';
-import { arrayMoveLeft, arrayMoveRight } from '../../../util/array-move';
-import { AddAttachment, AttachmentActionTypes, DeleteAttachment } from '../../attachment/store/attachment.actions';
+import {createEntityAdapter, EntityAdapter, EntityState} from '@ngrx/entity';
+import {TaskActions, TaskActionTypes} from './task.actions';
+import {DEFAULT_TASK, HIDE_SUB_TASKS, SHOW_SUB_TASKS, Task, TaskWithSubTasks, TimeSpentOnDay} from '../task.model';
+import {calcTotalTimeSpent} from '../util/calc-total-time-spent';
+import {arrayMoveLeft, arrayMoveRight} from '../../../util/array-move';
+import {AddAttachment, AttachmentActionTypes, DeleteAttachment} from '../../attachment/store/attachment.actions';
+import {AddTaskRepeatCfgToTask, TaskRepeatCfgActionTypes} from '../../task-repeat-cfg/store/task-repeat-cfg.actions';
 
 export const TASK_FEATURE_NAME = 'tasks';
 export const taskAdapter: EntityAdapter<Task> = createEntityAdapter<Task>();
@@ -237,7 +238,7 @@ const deleteTask = (state: TaskState,
 // TODO unit test the shit out of this once the model is settled
 export function taskReducer(
   state: TaskState = initialTaskState,
-  action: TaskActions | AddAttachment | DeleteAttachment
+  action: TaskActions | AddAttachment | DeleteAttachment | AddTaskRepeatCfgToTask
 ): TaskState {
 
   switch (action.type) {
@@ -738,6 +739,15 @@ export function taskReducer(
         };
       }
       return state;
+    }
+
+    case TaskRepeatCfgActionTypes.AddTaskRepeatCfgToTask: {
+      return taskAdapter.updateOne({
+        id: action.payload.taskId,
+        changes: {
+          repeatCfgId: action.payload.taskRepeatCfg.id
+        }
+      }, state);
     }
 
     default: {

@@ -3,62 +3,62 @@ import {Update} from '@ngrx/entity';
 import {TaskRepeatCfg, TaskRepeatCfgState} from '../task-repeat-cfg.model';
 
 export enum TaskRepeatCfgActionTypes {
-    LoadTaskRepeatCfgState = '[TaskRepeatCfg] Load TaskRepeatCfg State',
-    AddTaskRepeatCfg = '[TaskRepeatCfg] Add TaskRepeatCfg',
-    UpdateTaskRepeatCfg = '[TaskRepeatCfg] Update TaskRepeatCfg',
-    UpsertTaskRepeatCfg = '[TaskRepeatCfg] Upsert TaskRepeatCfg',
-    DeleteTaskRepeatCfg = '[TaskRepeatCfg] Delete TaskRepeatCfg',
-    DeleteTaskRepeatCfgs = '[TaskRepeatCfg] Delete multiple TaskRepeatCfgs',
+  LoadTaskRepeatCfgState = '[TaskRepeatCfg] Load TaskRepeatCfg State',
+  AddTaskRepeatCfgToTask = '[TaskRepeatCfg][Task] Add TaskRepeatCfg to Task',
+  UpdateTaskRepeatCfg = '[TaskRepeatCfg] Update TaskRepeatCfg',
+  UpsertTaskRepeatCfg = '[TaskRepeatCfg] Upsert TaskRepeatCfg',
+  DeleteTaskRepeatCfg = '[TaskRepeatCfg] Delete TaskRepeatCfg',
+  DeleteTaskRepeatCfgs = '[TaskRepeatCfg] Delete multiple TaskRepeatCfgs',
 }
 
 export class LoadTaskRepeatCfgState implements Action {
-    readonly type = TaskRepeatCfgActionTypes.LoadTaskRepeatCfgState;
+  readonly type = TaskRepeatCfgActionTypes.LoadTaskRepeatCfgState;
 
-    constructor(public payload: { state: TaskRepeatCfgState }) {
-    }
+  constructor(public payload: { state: TaskRepeatCfgState }) {
+  }
 }
 
-export class AddTaskRepeatCfg implements Action {
-    readonly type = TaskRepeatCfgActionTypes.AddTaskRepeatCfg;
+export class AddTaskRepeatCfgToTask implements Action {
+  readonly type = TaskRepeatCfgActionTypes.AddTaskRepeatCfgToTask;
 
-    constructor(public payload: { taskRepeatCfg: TaskRepeatCfg }) {
-    }
+  constructor(public payload: { taskId: string, taskRepeatCfg: TaskRepeatCfg }) {
+  }
 }
 
 export class UpdateTaskRepeatCfg implements Action {
-    readonly type = TaskRepeatCfgActionTypes.UpdateTaskRepeatCfg;
+  readonly type = TaskRepeatCfgActionTypes.UpdateTaskRepeatCfg;
 
-    constructor(public payload: { taskRepeatCfg: Update<TaskRepeatCfg> }) {
-    }
+  constructor(public payload: { taskRepeatCfg: Update<TaskRepeatCfg> }) {
+  }
 }
 
 export class UpsertTaskRepeatCfg implements Action {
   readonly type = TaskRepeatCfgActionTypes.UpsertTaskRepeatCfg;
 
-  constructor(public payload: {  taskRepeatCfg: TaskRepeatCfg }) {
+  constructor(public payload: { taskRepeatCfg: TaskRepeatCfg }) {
   }
 }
 
 export class DeleteTaskRepeatCfg implements Action {
-    readonly type = TaskRepeatCfgActionTypes.DeleteTaskRepeatCfg;
+  readonly type = TaskRepeatCfgActionTypes.DeleteTaskRepeatCfg;
 
-    constructor(public payload: { id: string }) {
-    }
+  constructor(public payload: { id: string }) {
+  }
 }
 
 export class DeleteTaskRepeatCfgs implements Action {
-    readonly type = TaskRepeatCfgActionTypes.DeleteTaskRepeatCfgs;
+  readonly type = TaskRepeatCfgActionTypes.DeleteTaskRepeatCfgs;
 
-    constructor(public payload: { ids: string[] }) {
-    }
+  constructor(public payload: { ids: string[] }) {
+  }
 }
 
 
 export type TaskRepeatCfgActions =
-    LoadTaskRepeatCfgState
-    | AddTaskRepeatCfg
-    | UpdateTaskRepeatCfg
-    | UpsertTaskRepeatCfg
-    | DeleteTaskRepeatCfg
-    | DeleteTaskRepeatCfgs
-    ;
+  LoadTaskRepeatCfgState
+  | AddTaskRepeatCfgToTask
+  | UpdateTaskRepeatCfg
+  | UpsertTaskRepeatCfg
+  | DeleteTaskRepeatCfg
+  | DeleteTaskRepeatCfgs
+  ;

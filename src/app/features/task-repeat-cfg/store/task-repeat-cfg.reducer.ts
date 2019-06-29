@@ -25,7 +25,7 @@ export function taskRepeatCfgReducer(
     action: TaskRepeatCfgActions
 ): TaskRepeatCfgState {
     switch (action.type) {
-        case TaskRepeatCfgActionTypes.AddTaskRepeatCfg: {
+        case TaskRepeatCfgActionTypes.AddTaskRepeatCfgToTask: {
             return adapter.addOne(action.payload.taskRepeatCfg, state);
         }
 

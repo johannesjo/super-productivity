@@ -13,7 +13,7 @@ export class TaskRepeatCfgEffects {
     @Effect({dispatch: false}) updateTaskRepeatCfgs$: any = this._actions$
         .pipe(
             ofType(
-                TaskRepeatCfgActionTypes.AddTaskRepeatCfg,
+                TaskRepeatCfgActionTypes.AddTaskRepeatCfgToTask,
                 TaskRepeatCfgActionTypes.UpdateTaskRepeatCfg,
                 TaskRepeatCfgActionTypes.DeleteTaskRepeatCfg,
             ),

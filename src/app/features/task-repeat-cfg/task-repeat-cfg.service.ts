@@ -2,13 +2,14 @@ import {Injectable} from '@angular/core';
 import {select, Store} from '@ngrx/store';
 import {take} from 'rxjs/operators';
 import {
-    initialTaskRepeatCfgState,
-    selectAllTaskRepeatCfgs,
-    selectTaskRepeatCfgById,
+  initialTaskRepeatCfgState,
+  selectAllTaskRepeatCfgs,
+  selectTaskRepeatCfgById,
 } from './store/task-repeat-cfg.reducer';
 import {
-  AddTaskRepeatCfg,
-  DeleteTaskRepeatCfg, DeleteTaskRepeatCfgs,
+  AddTaskRepeatCfgToTask,
+  DeleteTaskRepeatCfg,
+  DeleteTaskRepeatCfgs,
   LoadTaskRepeatCfgState,
   UpdateTaskRepeatCfg,
   UpsertTaskRepeatCfg,
@@ -19,52 +20,53 @@ import shortid from 'shortid';
 import {PersistenceService} from '../../core/persistence/persistence.service';
 
 @Injectable({
-    providedIn: 'root',
+  providedIn: 'root',
 })
 export class TaskRepeatCfgService {
-    taskRepeatCfgs$: Observable<TaskRepeatCfg[]> = this._store$.pipe(select(selectAllTaskRepeatCfgs));
+  taskRepeatCfgs$: Observable<TaskRepeatCfg[]> = this._store$.pipe(select(selectAllTaskRepeatCfgs));
 
-    constructor(
-        private _store$: Store<TaskRepeatCfgState>,
-        private _persistenceService: PersistenceService,
-    ) {
-    }
+  constructor(
+    private _store$: Store<TaskRepeatCfgState>,
+    private _persistenceService: PersistenceService,
+  ) {
+  }
 
-    async loadStateForProject(projectId: string) {
-        const lsTaskRepeatCfgState = await this._persistenceService.taskRepeatCfg.load(projectId);
-        this.loadState(lsTaskRepeatCfgState || initialTaskRepeatCfgState);
-    }
+  async loadStateForProject(projectId: string) {
+    const lsTaskRepeatCfgState = await this._persistenceService.taskRepeatCfg.load(projectId);
+    this.loadState(lsTaskRepeatCfgState || initialTaskRepeatCfgState);
+  }
 
-    getTaskRepeatCfgById(id: string): Observable<TaskRepeatCfg> {
-      return this._store$.pipe(select(selectTaskRepeatCfgById, {id}), take(1));
-    }
+  getTaskRepeatCfgById(id: string): Observable<TaskRepeatCfg> {
+    return this._store$.pipe(select(selectTaskRepeatCfgById, {id}), take(1));
+  }
 
-    loadState(state: TaskRepeatCfgState) {
-        this._store$.dispatch(new LoadTaskRepeatCfgState({state}));
-    }
+  loadState(state: TaskRepeatCfgState) {
+    this._store$.dispatch(new LoadTaskRepeatCfgState({state}));
+  }
 
-    addTaskRepeatCfg(taskRepeatCfg: TaskRepeatCfg) {
-        this._store$.dispatch(new AddTaskRepeatCfg({
-            taskRepeatCfg: {
-                ...taskRepeatCfg,
-                id: shortid()
-            }
-        }));
-    }
+  addTaskRepeatCfgToTask(taskId: string, taskRepeatCfg: TaskRepeatCfg) {
+    this._store$.dispatch(new AddTaskRepeatCfgToTask({
+      taskRepeatCfg: {
+        ...taskRepeatCfg,
+        id: shortid()
+      },
+      taskId,
+    }));
+  }
 
-    deleteTaskRepeatCfg(id: string) {
-        this._store$.dispatch(new DeleteTaskRepeatCfg({id}));
-    }K
+  deleteTaskRepeatCfg(id: string) {
+    this._store$.dispatch(new DeleteTaskRepeatCfg({id}));
+  }
 
-    deleteTaskRepeatCfgs(ids: string[]) {
-        this._store$.dispatch(new DeleteTaskRepeatCfgs({ids}));
-    }
+  deleteTaskRepeatCfgs(ids: string[]) {
+    this._store$.dispatch(new DeleteTaskRepeatCfgs({ids}));
+  }
 
-    updateTaskRepeatCfg(id: string, changes: Partial<TaskRepeatCfg>) {
-        this._store$.dispatch(new UpdateTaskRepeatCfg({taskRepeatCfg: {id, changes}}));
-    }
+  updateTaskRepeatCfg(id: string, changes: Partial<TaskRepeatCfg>) {
+    this._store$.dispatch(new UpdateTaskRepeatCfg({taskRepeatCfg: {id, changes}}));
+  }
 
-    upsertTaskRepeatCfg(taskRepeatCfg: TaskRepeatCfg) {
-      this._store$.dispatch(new UpsertTaskRepeatCfg({taskRepeatCfg}));
-    }
+  upsertTaskRepeatCfg(taskRepeatCfg: TaskRepeatCfg) {
+    this._store$.dispatch(new UpsertTaskRepeatCfg({taskRepeatCfg}));
+  }
 }
