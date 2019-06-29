@@ -4,10 +4,14 @@ import {TaskService} from '../../tasks/task.service';
 import {SnackService} from '../../../core/snack/snack.service';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material';
 import {TaskRepeatCfgService} from '../task-repeat-cfg.service';
-import {TaskRepeatCfgCopy} from '../task-repeat-cfg.model';
+import {DEFAULT_TASK_REPEAT_CFG, TaskRepeatCfgCopy} from '../task-repeat-cfg.model';
 import {Observable} from 'rxjs';
 import {map} from 'rxjs/operators';
+import {FormlyFieldConfig, FormlyFormOptions} from '@ngx-formly/core';
+import {FormGroup} from '@angular/forms';
+import {TASK_REPEAT_CFG_FORM_CFG} from './task-repeat-cfg-form.const';
 
+// TASK_REPEAT_CFG_FORM_CFG
 @Component({
   selector: 'dialog-edit-task-repeat-cfg',
   templateUrl: './dialog-edit-task-repeat-cfg.component.html',
@@ -18,7 +22,13 @@ export class DialogEditTaskRepeatCfgComponent {
   task: Task = this.data.task;
   title: string = this.task.title;
   taskRepeatCfg$: Observable<TaskRepeatCfgCopy> = this._taskRepeatCfgService.getTaskRepeatCfgById(this.data.task.repeatCfgId);
+
+  taskRepeatCfg: TaskRepeatCfgCopy = DEFAULT_TASK_REPEAT_CFG;
   isEdit$: Observable<boolean> = this.taskRepeatCfg$.pipe(map(cfg => !!cfg));
+  fields: FormlyFieldConfig[] = TASK_REPEAT_CFG_FORM_CFG;
+  form = new FormGroup({});
+  options: FormlyFormOptions = {};
+
 
   constructor(
     private _taskService: TaskService,

@@ -1,0 +1,9 @@
+:host {
+  ::ng-deep .mat-form-field-wrapper {
+    padding-bottom: 0;
+  }
+
+  ::ng-deep .mat-form-field-appearance-legacy .mat-form-field-infix {
+    padding: 0;
+  }
+}

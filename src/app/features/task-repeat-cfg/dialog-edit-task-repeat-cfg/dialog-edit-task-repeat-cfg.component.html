@@ -1,18 +1,23 @@
 <form (submit)="save()">
+  <h1 mat-dialog-title>{{(isEdit$|async) ? 'Edit Repeat Task Config' : 'Add Repeat Task Config'}}</h1>
+
   <mat-dialog-content>
-    <h2 class="mat-h2"
-        style="margin-bottom: 0;">{{(isEdit$|async) ? 'Edit Repeat Task Config' : 'Add Repeat Task Config'}}</h2>
-    <h3 class="mat-h3">"{{task.title}}"</h3>
+    <!--    <h3 class="mat-h3">{{task.title}}</h3>-->
 
     <div class="form-wrapper">
-
+      <p style="margin-bottom: 0;"><strong>Repeat task on</strong></p>
+      <formly-form [model]="taskRepeatCfg"
+                   (modelChange)="taskRepeatCfg=$event"
+                   [fields]="fields"
+                   [options]="options"
+                   [form]="form">
+      </formly-form>
     </div>
   </mat-dialog-content>
 
-  <mat-dialog-actions align="center">
+  <mat-dialog-actions>
     <div class="wrap-buttons">
-      <button color="primary"
-              mat-raised-button
+      <button mat-button
               type="submit">
         <mat-icon>save</mat-icon>
         Save
@@ -21,14 +26,14 @@
       <button (click)="remove()"
               *ngIf="(isEdit$|async)"
               color="warn"
-              mat-raised-button
+              mat-button
               type="button">
         <mat-icon>trash</mat-icon>
         Remove
       </button>
 
       <button (click)="close()"
-              mat-raised-button
+              mat-button
               type="button">
         <mat-icon>close</mat-icon>
         Cancel

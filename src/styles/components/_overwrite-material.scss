@@ -22,12 +22,12 @@ body .mat-form-field {
 
 .big {
   height: auto;
-  max-height: 100vh!important;
+  max-height: 100vh !important;
   width: 100% !important;
   max-width: none !important;
-  @include mq(xs){
+  @include mq(xs) {
     margin: $s*2;
-    max-height: 95vh!important;
+    max-height: 95vh !important;
   }
 
   .dialog-content,
@@ -38,4 +38,9 @@ body .mat-form-field {
 
 .mat-form-field {
   font-size: 16px;
+}
+
+// overwrite mat typography
+.mat-dialog-title.mat-dialog-title {
+  font: 500 20px/32px Roboto, "Helvetica Neue", sans-serif;
 }
