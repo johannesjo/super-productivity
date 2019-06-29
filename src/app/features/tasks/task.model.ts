@@ -27,6 +27,7 @@ export interface TaskCopy {
   parentId: string;
   attachmentIds: string[];
   reminderId?: string;
+  repeatCfgId: string;
 
   // ui model
   _isAdditionalInfoOpen: boolean;
@@ -68,6 +69,7 @@ export const DEFAULT_TASK: Task = {
   issueType: null,
   reminderId: null,
   created: Date.now(),
+  repeatCfgId: null,
   _isAdditionalInfoOpen: false,
   _showSubTasksMode: SHOW_SUB_TASKS,
   _currentTab: 0,

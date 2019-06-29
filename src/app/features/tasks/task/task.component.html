@@ -67,7 +67,7 @@
       <a *ngIf="task.issueData?.url"
          [href]="task.issueData?.url"
          title="Open issue in a new browser tab"
-         class="ico-btn original-link-btn"
+         class="ico-btn"
          color=""
          mat-icon-button
          tabindex="2"
@@ -76,6 +76,11 @@
              class="mini-badge bg-primary color-contrast">{{task.issueData?.storyPoints}}</div>
         <mat-icon [svgIcon]="task.issueType|issueIcon"></mat-icon>
       </a>
+
+      <button *ngIf="task.repeatCfgId"
+              mat-icon-button>
+        <mat-icon class="ico-btn">replay</mat-icon>
+      </button>
 
       <div #editOnClickEl
            (editFinished)="updateTaskTitleIfChanged($event.isChanged, $event.newVal)"
