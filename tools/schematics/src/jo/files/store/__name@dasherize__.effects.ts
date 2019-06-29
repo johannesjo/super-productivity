@@ -13,7 +13,9 @@ export class <%= classify(name)%>Effects {
             ofType(
                 <%= classify(name)%>ActionTypes.Add<%= classify(name)%>,
                 <%= classify(name)%>ActionTypes.Update<%= classify(name)%>,
+                <%= classify(name)%>ActionTypes.Upsert<%= classify(name)%>,
                 <%= classify(name)%>ActionTypes.Delete<%= classify(name)%>,
+                <%= classify(name)%>ActionTypes.Delete<%= classify(name)%>s,
             ),
             withLatestFrom(
                 this._store$.pipe(select(selectCurrentProjectId)),
