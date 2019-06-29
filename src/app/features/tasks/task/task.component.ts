@@ -61,7 +61,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
 
   private _dragEnterTarget: HTMLElement;
   private _destroy$: Subject<boolean> = new Subject<boolean>();
-  private _currentPantimeout: number;
+  private _currentPanTimeout: number;
 
   constructor(
     private readonly _taskService: TaskService,
@@ -159,8 +159,8 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     this._destroy$.next(true);
     this._destroy$.unsubscribe();
 
-    if (this._currentPantimeout) {
-      window.clearTimeout(this._currentPantimeout);
+    if (this._currentPanTimeout) {
+      window.clearTimeout(this._currentPanTimeout);
     }
   }
 
@@ -384,14 +384,14 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     this._renderer.removeStyle(this.blockLeftEl.nativeElement, 'transition');
     this._renderer.removeStyle(this.blockRightEl.nativeElement, 'transition');
 
-    if (this._currentPantimeout) {
-      window.clearTimeout(this._currentPantimeout);
+    if (this._currentPanTimeout) {
+      window.clearTimeout(this._currentPanTimeout);
     }
 
     if (this.isActionTriggered) {
       if (this.isLockPanLeft) {
         this._renderer.setStyle(this.blockRightEl.nativeElement, 'transform', `scaleX(1)`);
-        this._currentPantimeout = window.setTimeout(() => {
+        this._currentPanTimeout = window.setTimeout(() => {
           if (this.task.isDone) {
             this.toggleTaskDone();
           } else {
@@ -401,7 +401,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
         }, 100);
       } else if (this.isLockPanRight) {
         this._renderer.setStyle(this.blockLeftEl.nativeElement, 'transform', `scaleX(1)`);
-        this._currentPantimeout = window.setTimeout(() => {
+        this._currentPanTimeout = window.setTimeout(() => {
           this.toggleTaskDone();
           this._resetAfterPan();
         }, 100);
