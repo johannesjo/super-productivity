@@ -20,8 +20,6 @@ import {TASK_REPEAT_CFG_FORM_CFG} from './task-repeat-cfg-form.const';
 export class DialogEditTaskRepeatCfgComponent implements OnInit, OnDestroy {
   task: Task = this.data.task;
 
-  taskRepeatCfg$: Observable<TaskRepeatCfgCopy> = this._taskRepeatCfgService.getTaskRepeatCfgById(this.data.task.repeatCfgId);
-
   taskRepeatCfg: TaskRepeatCfgCopy = DEFAULT_TASK_REPEAT_CFG;
 
   taskRepeatCfgId: string = this.task.repeatCfgId;
@@ -45,7 +43,7 @@ export class DialogEditTaskRepeatCfgComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     if (this.isEdit) {
-      this._subs.add(this.taskRepeatCfg$.subscribe((cfg) => {
+      this._subs.add(this._taskRepeatCfgService.getTaskRepeatCfgById$(this.task.repeatCfgId).subscribe((cfg) => {
         this.taskRepeatCfg = cfg;
       }));
     }
@@ -66,7 +64,7 @@ export class DialogEditTaskRepeatCfgComponent implements OnInit, OnDestroy {
   }
 
   remove() {
-    this._taskRepeatCfgService.deleteTaskRepeatCfg(this.taskRepeatCfg.id);
+    this._taskRepeatCfgService.deleteTaskRepeatCfgWithDialog(this.task.repeatCfgId);
     this.close();
   }
 

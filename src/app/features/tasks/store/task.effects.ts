@@ -16,7 +16,12 @@ import {
 import {select, Store} from '@ngrx/store';
 import {filter, map, mergeMap, switchMap, tap, throttleTime, withLatestFrom} from 'rxjs/operators';
 import {PersistenceService} from '../../../core/persistence/persistence.service';
-import {selectCurrentTask, selectTaskFeatureState, selectTasksWorkedOnOrDoneFlat} from './task.selectors';
+import {
+  selectCurrentTask,
+  selectTaskFeatureState,
+  selectTasksByRepeatConfigId,
+  selectTasksWorkedOnOrDoneFlat
+} from './task.selectors';
 import {selectCurrentProjectId} from '../../project/store/project.reducer';
 import {SnackOpen} from '../../../core/snack/store/snack.actions';
 import {NotifyService} from '../../../core/notify/notify.service';

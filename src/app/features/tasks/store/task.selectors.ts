@@ -191,6 +191,19 @@ export const selectTaskByIssueId = createSelector(
   }
 );
 
+export const selectTasksByRepeatConfigId = createSelector(
+  selectTaskFeatureState,
+  (state, props: { repeatCfgId: string }): Task[] => {
+    const ids = state.ids as string[];
+    const taskIds = ids.filter(id_ => state.entities[id_]
+      && state.entities[id_].repeatCfgId === props.repeatCfgId);
+
+    return (taskIds && taskIds.length)
+      ? taskIds.map(id => state.entities[id])
+      : null;
+  }
+);
+
 export const selectTasksWorkedOnOrDoneFlat = createSelector(selectTodaysTasksFlat, (tasks, props: { day: string }) => {
   if (!props) {
     return null;

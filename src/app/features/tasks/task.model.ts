@@ -1,11 +1,14 @@
 import { IssueData, IssueProviderKey } from '../issue/issue';
 import { Reminder, ReminderCopy } from '../reminder/reminder.model';
+import {EntityState} from '@ngrx/entity';
 
 export type DropListModelSource = 'UNDONE' | 'DONE' | 'BACKLOG';
 
 export interface TimeSpentOnDayCopy {
   [key: string]: number;
 }
+
+export type TaskArchive = EntityState<TaskWithSubTasks>;
 
 export type TimeSpentOnDay = Readonly<TimeSpentOnDayCopy>;
 

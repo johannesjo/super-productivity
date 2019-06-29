@@ -1,6 +1,5 @@
 import {Injectable} from '@angular/core';
 import {select, Store} from '@ngrx/store';
-import {take} from 'rxjs/operators';
 import {
   initialTaskRepeatCfgState,
   selectAllTaskRepeatCfgs,
@@ -18,6 +17,8 @@ import {Observable} from 'rxjs';
 import {TaskRepeatCfg, TaskRepeatCfgState} from './task-repeat-cfg.model';
 import shortid from 'shortid';
 import {PersistenceService} from '../../core/persistence/persistence.service';
+import {DialogConfirmComponent} from '../../ui/dialog-confirm/dialog-confirm.component';
+import {MatDialog} from '@angular/material';
 
 @Injectable({
   providedIn: 'root',
@@ -28,6 +29,7 @@ export class TaskRepeatCfgService {
   constructor(
     private _store$: Store<TaskRepeatCfgState>,
     private _persistenceService: PersistenceService,
+    private _matDialog: MatDialog,
   ) {
   }
 
@@ -36,8 +38,8 @@ export class TaskRepeatCfgService {
     this.loadState(lsTaskRepeatCfgState || initialTaskRepeatCfgState);
   }
 
-  getTaskRepeatCfgById(id: string): Observable<TaskRepeatCfg> {
-    return this._store$.pipe(select(selectTaskRepeatCfgById, {id}), take(1));
+  getTaskRepeatCfgById$(id: string): Observable<TaskRepeatCfg> {
+    return this._store$.pipe(select(selectTaskRepeatCfgById, {id}));
   }
 
   loadState(state: TaskRepeatCfgState) {
@@ -68,5 +70,22 @@ export class TaskRepeatCfgService {
 
   upsertTaskRepeatCfg(taskRepeatCfg: TaskRepeatCfg) {
     this._store$.dispatch(new UpsertTaskRepeatCfg({taskRepeatCfg}));
+  }
+
+  deleteTaskRepeatCfgWithDialog(id: string) {
+    this._matDialog.open(DialogConfirmComponent, {
+      restoreFocus: true,
+      data: {
+        // tslint:disable-next-line
+        message: `Removing the repeat config will convert all previous instances of this task to just regular tasks. Are you sure you want to proceed`,
+        okTxt: 'Remove completely',
+        cancelTxt: 'Abort!',
+      }
+    }).afterClosed()
+      .subscribe((isConfirm: boolean) => {
+        if (isConfirm) {
+          this.deleteTaskRepeatCfg(id);
+        }
+      });
   }
 }

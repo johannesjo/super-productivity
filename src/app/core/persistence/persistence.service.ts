@@ -23,7 +23,7 @@ import {IssueProviderKey, IssueState, IssueStateMap} from '../../features/issue/
 import {ProjectState} from '../../features/project/store/project.reducer';
 import {TaskState} from '../../features/tasks/store/task.reducer';
 import {EntityState} from '@ngrx/entity';
-import {Task, TaskWithSubTasks} from '../../features/tasks/task.model';
+import {Task, TaskArchive, TaskWithSubTasks} from '../../features/tasks/task.model';
 import {AppBaseData, AppDataComplete, AppDataForProjects} from '../../imex/sync/sync.model';
 import {BookmarkState} from '../../features/bookmark/store/bookmark.reducer';
 import {AttachmentState} from '../../features/attachment/store/attachment.reducer';
@@ -62,7 +62,7 @@ export class PersistenceService {
 
   task = this._cmProject<TaskState>(LS_TASK_STATE, 'task');
   taskRepeatCfg = this._cmProject<TaskRepeatCfgState>(LS_TASK_REPEAT_CFG_STATE, 'taskRepeatCfg');
-  taskArchive = this._cmProject<EntityState<TaskWithSubTasks>>(LS_TASK_ARCHIVE, 'taskArchive');
+  taskArchive = this._cmProject<TaskArchive>(LS_TASK_ARCHIVE, 'taskArchive');
   taskAttachment = this._cmProject<AttachmentState>(LS_TASK_ATTACHMENT_STATE, 'taskAttachment');
   bookmark = this._cmProject<BookmarkState>(LS_BOOKMARK_STATE, 'bookmark');
   note = this._cmProject<NoteState>(LS_NOTE_STATE, 'note');
