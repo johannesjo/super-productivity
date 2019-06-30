@@ -12,6 +12,7 @@ export const TASK_REPEAT_WEEKDAY_MAP: (keyof TaskRepeatCfg)[] = [
 
 export interface TaskRepeatCfgCopy {
   id: string;
+  lastTaskCreation: number;
   title: string;
   defaultEstimate: number;
   monday: boolean;
@@ -31,6 +32,8 @@ export interface TaskRepeatCfgState extends EntityState<TaskRepeatCfg> {
 
 export const DEFAULT_TASK_REPEAT_CFG: TaskRepeatCfgCopy = {
   id: undefined,
+  // lastTaskCreation: Date.now(),
+  lastTaskCreation: Date.now() - 24 * 60 * 60 * 1000,
   title: undefined,
   defaultEstimate: undefined,
   monday: true,

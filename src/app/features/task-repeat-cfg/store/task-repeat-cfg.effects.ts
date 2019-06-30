@@ -2,7 +2,7 @@ import {Injectable} from '@angular/core';
 import {Actions, Effect, ofType} from '@ngrx/effects';
 import {concatMap, filter, flatMap, map, take, tap, withLatestFrom} from 'rxjs/operators';
 import {select, Store} from '@ngrx/store';
-import {DeleteTaskRepeatCfg, TaskRepeatCfgActionTypes} from './task-repeat-cfg.actions';
+import {DeleteTaskRepeatCfg, TaskRepeatCfgActionTypes, UpdateTaskRepeatCfg} from './task-repeat-cfg.actions';
 import {selectTaskRepeatCfgFeatureState} from './task-repeat-cfg.reducer';
 import {selectCurrentProjectId} from '../../project/store/project.reducer';
 import {PersistenceService} from '../../../core/persistence/persistence.service';
@@ -14,6 +14,7 @@ import {ProjectActionTypes} from '../../project/store/project.actions';
 import {TaskRepeatCfgService} from '../task-repeat-cfg.service';
 import {TASK_REPEAT_WEEKDAY_MAP, TaskRepeatCfg} from '../task-repeat-cfg.model';
 import {from} from 'rxjs';
+import {isToday} from './is-created-today.util';
 
 @Injectable()
 export class TaskRepeatCfgEffects {
@@ -46,7 +47,10 @@ export class TaskRepeatCfgEffects {
       map(([a, taskRepeatCfgs]): TaskRepeatCfg[] => {
         const day = new Date().getDay();
         const dayStr: keyof TaskRepeatCfg = TASK_REPEAT_WEEKDAY_MAP[day];
-        return taskRepeatCfgs && taskRepeatCfgs.filter((cfg: TaskRepeatCfg) => cfg[dayStr]);
+        return taskRepeatCfgs && taskRepeatCfgs.filter(
+          (taskRepeatCfg: TaskRepeatCfg) =>
+            (taskRepeatCfg[dayStr] && !isToday(taskRepeatCfg.lastTaskCreation))
+        );
       }),
       filter((taskRepeatCfgs) => taskRepeatCfgs && !!taskRepeatCfgs.length),
       flatMap(taskRepeatCfgs => from(taskRepeatCfgs).pipe(
@@ -59,23 +63,17 @@ export class TaskRepeatCfgEffects {
         )
       )),
       concatMap(([taskRepeatCfg, tasks]) => {
-        const actions = [];
         let isCreateNew = true;
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
+        const actions = [];
 
         tasks.forEach(task => {
-          const taskCreated = new Date(task.created);
-          taskCreated.setHours(0, 0, 0, 0);
-          if (taskCreated < today) {
+          if (isToday(task.created)) {
             actions.push(new MoveToArchive({tasks: [task]}));
           } else {
             isCreateNew = false;
           }
         });
 
-        // TODO also check for archived task
-        // TODO a better approach might be to add a intermediate model on taskRepeatCfg
         if (isCreateNew) {
           actions.push(new AddTask({
             task: this._taskService.createNewTaskWithDefaults(taskRepeatCfg.title, {
@@ -85,11 +83,19 @@ export class TaskRepeatCfgEffects {
             isAddToBacklog: false,
             isAddToBottom: false,
           }));
+          actions.push(new UpdateTaskRepeatCfg({
+            taskRepeatCfg: {
+              id: taskRepeatCfg.id,
+              changes: {
+                lastTaskCreation: Date.now(),
+              }
+            }
+          }));
         }
 
         return from(actions);
       }),
-      tap(a => console.log(a)),
+      // tap(a => console.log(a)),
     );
 
 
@@ -150,7 +156,6 @@ export class TaskRepeatCfgEffects {
       const ids = newState.ids as string[];
       const tasksWithRepeatCfgId = ids.map(id => newState.entities[id])
         .filter((task: TaskWithSubTasks) => task.repeatCfgId === repeatConfigId);
-      console.log(tasksWithRepeatCfgId);
 
       if (tasksWithRepeatCfgId && tasksWithRepeatCfgId.length) {
         tasksWithRepeatCfgId.forEach((task: any) => task.repeatCfgId = null);
