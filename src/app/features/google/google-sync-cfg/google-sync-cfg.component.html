@@ -11,9 +11,8 @@
   <div *ngIf="cfg.isEnabled">
     <section class="btns">
       <button type="button"
-              mat-raised-button=""
-              color="lighter"
-              class="md-raised"
+              mat-stroked-button=""
+              color="primary"
               [promiseBtn]="loginPromise"
               *ngIf="!(googleApiService.isLoggedIn$|async)"
               (click)="login()">
@@ -21,9 +20,8 @@
         Login
       </button>
       <button type="button"
-              mat-raised-button=""
-              color="lighter"
-              class="md-raised"
+              mat-stroked-button=""
+              color="primary"
               *ngIf="(googleApiService.isLoggedIn$|async)"
               (click)="logout()">
         <mat-icon>clear</mat-icon>
@@ -31,9 +29,8 @@
       </button>
 
       <button type="button"
-              mat-raised-button=""
-              color="lighter"
-              class="md-raised"
+              mat-stroked-button=""
+              color="primary"
               [disabled]="googleDriveSyncService.isLoadInProgress$|async"
               [promiseBtn]="googleDriveSyncService.isSaveInProgress$|async"
               *ngIf="(googleApiService.isLoggedIn$|async)"
@@ -42,9 +39,8 @@
         Backup now
       </button>
       <button type="button"
-              mat-raised-button=""
-              color="lighter"
-              class="md-raised sync-from-btn"
+              mat-stroked-button=""
+              color="primary"
               [disabled]="googleDriveSyncService.isSaveInProgress$|async"
               [promiseBtn]="googleDriveSyncService.isLoadInProgress$|async"
               *ngIf="(googleApiService.isLoggedIn$|async)"
@@ -53,8 +49,8 @@
         Load From GDrive
       </button>
       <!--<button type="button"-->
-      <!--mat-raised-button=""color=lighter-->
-      <!--class="md-raised"-->
+      <!--mat-stroked-button=""color=primary-->
+      <!--class="md-stroked"-->
       <!--*ngIf="(googleApiService.isLoggedIn$|async)"-->
       <!--external-link-->
       <!--target="_blank"-->
@@ -76,43 +72,41 @@
       </mat-form-field>
 
       <button type="button"
-              mat-raised-button=""
-              color="lighter"
-              class="md-raised md-primary md-icon-button"
-              aria-label="Save changed sync file name"
+              mat-stroked-button=""
+              color="primary"
               (click)="changeSyncFileName(tmpSyncFile)">
         <mat-icon>save</mat-icon>
         Update sync file
       </button>
       <br>
-      <mat-slide-toggle [(ngModel)]="cfg.isAutoLogin"
+      <mat-checkbox [(ngModel)]="cfg.isAutoLogin"
                         name="isAutoLogin"
                         aria-label="Auto login at when starting app">
         Auto login at when starting app
-      </mat-slide-toggle>
+      </mat-checkbox>
 
       <section *ngIf="cfg.isAutoLogin"
                class="auto-sync-settings">
-        <mat-slide-toggle [(ngModel)]="cfg.isLoadRemoteDataOnStartup"
+        <mat-checkbox [(ngModel)]="cfg.isLoadRemoteDataOnStartup"
                           name="isLoadRemoteDataOnStartup"
                           aria-label="Load remote data on startup">
           Load remote data on startup
-        </mat-slide-toggle>
-        <mat-slide-toggle [(ngModel)]="cfg.isAutoSyncToRemote"
+        </mat-checkbox>
+        <mat-checkbox [(ngModel)]="cfg.isAutoSyncToRemote"
                           name="isAutoSyncToRemote"
                           aria-label="Auto sync data TO remote">
           Auto sync data TO remote
-        </mat-slide-toggle>
-        <mat-slide-toggle [(ngModel)]="cfg.isCompressData"
+        </mat-checkbox>
+        <mat-checkbox [(ngModel)]="cfg.isCompressData"
                           name="isCompressData"
                           aria-label="Compress Data">
           Compress Data
-        </mat-slide-toggle>
-        <mat-slide-toggle [(ngModel)]="cfg.isNotifyOnSync"
+        </mat-checkbox>
+        <mat-checkbox [(ngModel)]="cfg.isNotifyOnSync"
                           name="isNotifyOnSync"
                           aria-label="Notify when syncing">
           Notify when syncing
-        </mat-slide-toggle>
+        </mat-checkbox>
 
         <mat-form-field *ngIf="cfg.isAutoLogin && cfg.isAutoSyncToRemote">
           <input type="text"

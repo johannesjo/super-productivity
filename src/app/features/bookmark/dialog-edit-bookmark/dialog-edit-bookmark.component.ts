@@ -59,7 +59,7 @@ export class DialogEditBookmarkComponent implements OnInit {
   }
 
   submit() {
-    if (!this.bookmarkCopy.path || this.bookmarkCopy.type) {
+    if (!this.bookmarkCopy.path) {
       return;
     }
 

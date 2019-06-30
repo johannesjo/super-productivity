@@ -118,7 +118,7 @@
 </section>
 
 <div class="controls">
-  <button mat-raised-button=""
+  <button mat-stroked-button=""
           color=""
           type="button"
           [promiseBtn]="loginPromise"
@@ -127,7 +127,7 @@
     <mat-icon>exit_to_app</mat-icon>
     Login to Google
   </button>
-  <button mat-raised-button=""
+  <button mat-stroked-button=""
           color=""
           type="button"
           *ngIf="(googleApiService.isLoggedIn$|async)"
@@ -136,7 +136,7 @@
     <!--<mat-icon>logout</mat-icon>-->
     Logout
   </button>
-  <button mat-raised-button=""
+  <button mat-stroked-button=""
           color=""
           type="button"
           [promiseBtn]="readPromise"
@@ -146,7 +146,7 @@
     <mat-icon>chrome_reader_mode</mat-icon>
     Read spreadsheet
   </button>
-  <a mat-raised-button=""
+  <a mat-stroked-button=""
      color=""
      target="_blank"
      *ngIf="(googleApiService.isLoggedIn$|async) && opts.spreadsheetId"
@@ -157,14 +157,14 @@
   <button (click)="save()"
           *ngIf="actualValues.length > 0 &&  (googleApiService.isLoggedIn$|async)"
           type="button"
-          mat-raised-button=""
+          mat-stroked-button=""
           color="primary"
           [promiseBtn]="savePromise">
     <mat-icon>save</mat-icon>
     Save row
   </button>
 
-  <!--<a mat-raised-button=""-->
+  <!--<a mat-stroked-button=""-->
   <!--color="primary"-->
   <!--*ngIf="(googleApiService.isLoggedIn$|async)"-->
   <!--target="_blank"-->

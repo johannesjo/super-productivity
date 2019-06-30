@@ -19,8 +19,24 @@
 
   <div align="center"
        mat-dialog-actions>
+    <button (click)="skipTrack()"
+            color=""
+            mat-button
+            type="button">
+      <mat-icon>skip_next</mat-icon>
+      Skip
+    </button>
+
+    <button (click)="trackAsBreak()"
+            color="primary"
+            mat-stroked-button
+            type="button">
+      <mat-icon>free_breakfast</mat-icon>
+      Break
+    </button>
+
     <button color="primary"
-            mat-raised-button
+            mat-stroked-button
             [disabled]="!(selectedTask||newTaskTitle)"
             type="submit">
       <mat-icon *ngIf="!isCreate">track_changes</mat-icon>
@@ -28,33 +44,17 @@
       Task
     </button>
 
-    <button *ngIf="(configService.misc$|async)?.isUnTrackedIdleResetsBreakTimer"
+    <button *ngIf="(configService.idle$|async)?.isUnTrackedIdleResetsBreakTimer"
             [disabled]="!(selectedTask||newTaskTitle)"
             (click)="track(true)"
             color="primary"
-            mat-raised-button
+            mat-stroked-button
             type="button">
       <mat-icon *ngIf="!isCreate">track_changes</mat-icon>
       <mat-icon *ngIf="isCreate">add</mat-icon>
 <!--      <mat-icon style="margin-left: -4px;">free_breakfast</mat-icon>-->
       Task+Break
       <mat-icon >free_breakfast</mat-icon>
-    </button>
-
-    <button (click)="trackAsBreak()"
-            color="primary"
-            mat-raised-button
-            type="button">
-      <mat-icon>free_breakfast</mat-icon>
-      Break
-    </button>
-
-    <button (click)="skipTrack()"
-            color=""
-            mat-button
-            type="button">
-      <mat-icon>skip_next</mat-icon>
-      Skip
     </button>
   </div>
 </form>
