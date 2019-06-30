@@ -11,6 +11,9 @@
         <div class="task-title"
              [class.isSubTask]="task.parentId"
              [class.isDone]="task.isDone">
+          <mat-icon *ngIf="task.repeatCfgId"
+                    class="repeat-task-icon">repeat
+          </mat-icon>
           <span *ngIf="task.parentId">–</span> {{task.title}}
         </div>
       </td>
