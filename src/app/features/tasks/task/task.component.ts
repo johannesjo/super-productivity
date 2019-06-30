@@ -12,22 +12,22 @@ import {
   Renderer2,
   ViewChild
 } from '@angular/core';
-import { TaskService } from '../task.service';
-import { Subject } from 'rxjs';
-import { HIDE_SUB_TASKS, SHOW_SUB_TASKS, TaskWithSubTasks } from '../task.model';
-import { MatDialog } from '@angular/material/dialog';
-import { DialogTimeEstimateComponent } from '../dialog-time-estimate/dialog-time-estimate.component';
-import { expandAnimation } from '../../../ui/animations/expand.ani';
-import { GlobalConfigService } from '../../config/global-config.service';
-import { checkKeyCombo } from '../../../util/check-key-combo';
-import { takeUntil } from 'rxjs/operators';
-import { fadeAnimation } from '../../../ui/animations/fade.ani';
-import { AttachmentService } from '../../attachment/attachment.service';
-import { IssueService } from '../../issue/issue.service';
-import { DialogEditAttachmentComponent } from '../../attachment/dialog-edit-attachment/dialog-edit-attachment.component';
-import { swirlAnimation } from '../../../ui/animations/swirl-in-out.ani';
-import { IS_TOUCH, isTouch } from '../../../util/is-touch';
-import { DialogAddTaskReminderComponent } from '../dialog-add-task-reminder/dialog-add-task-reminder.component';
+import {TaskService} from '../task.service';
+import {Subject} from 'rxjs';
+import {HIDE_SUB_TASKS, SHOW_SUB_TASKS, TaskWithSubTasks} from '../task.model';
+import {MatDialog} from '@angular/material/dialog';
+import {DialogTimeEstimateComponent} from '../dialog-time-estimate/dialog-time-estimate.component';
+import {expandAnimation} from '../../../ui/animations/expand.ani';
+import {GlobalConfigService} from '../../config/global-config.service';
+import {checkKeyCombo} from '../../../util/check-key-combo';
+import {takeUntil} from 'rxjs/operators';
+import {fadeAnimation} from '../../../ui/animations/fade.ani';
+import {AttachmentService} from '../../attachment/attachment.service';
+import {IssueService} from '../../issue/issue.service';
+import {DialogEditAttachmentComponent} from '../../attachment/dialog-edit-attachment/dialog-edit-attachment.component';
+import {swirlAnimation} from '../../../ui/animations/swirl-in-out.ani';
+import {IS_TOUCH, isTouch} from '../../../util/is-touch';
+import {DialogAddTaskReminderComponent} from '../dialog-add-task-reminder/dialog-add-task-reminder.component';
 import {DialogEditTaskRepeatCfgComponent} from '../../task-repeat-cfg/dialog-edit-task-repeat-cfg/dialog-edit-task-repeat-cfg.component';
 
 @Component({
@@ -48,9 +48,9 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   isPreventPointerEventsWhilePanning = false;
   isActionTriggered = false;
 
-  @ViewChild('editOnClickEl', { static: true }) editOnClickEl: ElementRef;
-  @ViewChild('blockLeft', { static: false }) blockLeftEl: ElementRef;
-  @ViewChild('blockRight', { static: false }) blockRightEl: ElementRef;
+  @ViewChild('editOnClickEl', {static: true}) editOnClickEl: ElementRef;
+  @ViewChild('blockLeft', {static: false}) blockLeftEl: ElementRef;
+  @ViewChild('blockRight', {static: false}) blockRightEl: ElementRef;
   @HostBinding('tabindex') tabIndex = 1;
 
   // TODO do via observable
@@ -191,6 +191,10 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   deleteTask() {
+    if (this.task.repeatCfgId) {
+      return;
+    }
+
     this._taskService.remove(this.task);
     this.focusNext(true);
   }

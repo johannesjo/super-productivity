@@ -237,7 +237,8 @@
           </button>
 
           <!-- Reminders -->
-          <button (click)="editReminder()"
+          <button *ngIf="!task.repeatCfgId"
+                  (click)="editReminder()"
                   mat-menu-item>
             <ng-container *ngIf="!task.reminderId">
               <mat-icon>alarm_add</mat-icon>
@@ -305,7 +306,8 @@
           </button>
 
 
-          <button (click)="deleteTask()"
+          <button *ngIf="!task.repeatCfgId"
+                  (click)="deleteTask()"
                   aria-label="delete"
                   mat-menu-item=""
                   tabindex="2">
