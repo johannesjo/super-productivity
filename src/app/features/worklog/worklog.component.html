@@ -93,6 +93,10 @@
                           <tr *ngFor="let logEntry of worklogForDay.value.logEntries; trackBy: trackByForLogEntry;">
                             <td class="title"
                                 [class.isSubTask]="logEntry.task.parentId">
+                              <mat-icon *ngIf="logEntry.task.repeatCfgId"
+                                        title="Repeating task"
+                                        class="repeat-task-icon">repeat
+                              </mat-icon>
                               <span class="task-title">{{logEntry.task.title}}</span>
                             </td>
                             <td class="worked">
