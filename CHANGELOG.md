@@ -1,3 +1,12 @@
+## [2.8.3](https://github.com/johannesjo/super-productivity/compare/v2.8.2...v2.8.3) (2019-06-30)
+
+
+### Bug Fixes
+
+* help section inside dialog ([830598f](https://github.com/johannesjo/super-productivity/commit/830598f))
+
+
+
 ## [2.8.2](https://github.com/johannesjo/super-productivity/compare/v2.8.1...v2.8.2) (2019-06-30)
 
 
