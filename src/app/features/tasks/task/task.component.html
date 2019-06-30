@@ -181,17 +181,6 @@
           <mat-icon>attach_file</mat-icon>
         </button>
 
-        <button (click)="toggleShowAttachments()"
-                *ngIf="task.attachmentIds?.length || (task.issueType==='JIRA' && task.issueData && task.issueData['attachments']?.length)"
-                [class.isActive]="task._isAdditionalInfoOpen"
-                title="Show/Hide attachments"
-                class="ico-btn attachment-btn hide-xs"
-                color=""
-                mat-icon-button
-                tabindex="2">
-          <mat-icon>attach_file</mat-icon>
-        </button>
-
         <button [matMenuTriggerFor]="menu"
                 class="ico-btn menu-trigger"
                 title="Open task menu"
