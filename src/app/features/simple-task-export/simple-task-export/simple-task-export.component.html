@@ -126,8 +126,14 @@
 
 
 <div mat-dialog-actions=""
-     align="center">
-  <button mat-raised-button=""
+     align="end">
+  <button mat-button=""
+          color="primary"
+          (click)="onCancelClick()"
+          type="button">
+    Close
+  </button>
+  <button mat-stroked-button=""
           *ngIf="options.isShowAsText"
           color="primary"
           id="clipboard-btn"
@@ -136,17 +142,11 @@
     <mat-icon>content_paste</mat-icon>
     Copy to clipboard
   </button>
-  <a mat-raised-button=""
+  <a mat-stroked-button=""
      color="primary"
      [simpleDownload]="fileName"
      [simpleDownloadData]="tasksTxt">
     <mat-icon>file_download</mat-icon>
     Save to file
   </a>
-  <button mat-raised-button=""
-          (click)="onCancelClick()"
-          type="button">
-    <mat-icon>close</mat-icon>
-    Close
-  </button>
 </div>

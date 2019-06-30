@@ -45,7 +45,20 @@ body .mat-form-field {
   font: 500 20px/32px Roboto, "Helvetica Neue", sans-serif;
 }
 
+.mat-flat-button,
+.mat-stroked-button,
 .mat-raised-button,
 .mat-button {
   text-transform: uppercase;
+}
+
+// NOTE: not really an overwrite but helpful
+.dialog-header-icon {
+  vertical-align: middle;
+  margin-right: 8px;
+
+  + span {
+    vertical-align: middle;
+    display: inline-block;
+  }
 }

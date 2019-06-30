@@ -15,26 +15,26 @@
 
 <div mat-dialog-actions
      align="center">
-  <button mat-raised-button
+  <button mat-button
+          color="primary"
+          (click)="nextSession(true)">
+    Close
+  </button>
+
+  <button mat-stroked-button
           color="primary"
           *ngIf="!(isBreakDone$|async)"
           (click)="nextSession()">
     <mat-icon>skip_next</mat-icon>
-    <span>But I want to work (skip break)!!</span>
+    <span>Skip break</span>
   </button>
 
   <ng-container *ngIf="(isBreakDone$|async)">
-    <button mat-raised-button
+    <button mat-stroked-button
             color="primary"
             (click)="nextSession()">
       <mat-icon>play_arrow</mat-icon>
-      Go back to work!
-    </button>
-
-    <button mat-raised-button
-            color="warn"
-            (click)="nextSession(true)">
-      Cancel
+      Back to work!
     </button>
 
   </ng-container>

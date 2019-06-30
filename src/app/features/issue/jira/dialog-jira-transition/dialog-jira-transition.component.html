@@ -1,8 +1,10 @@
+<h1 mat-dialog-title>
+  <mat-icon svgIcon="jira"
+  class="dialog-header-icon"></mat-icon>
+  <span>Update Status on Jira</span>
+</h1>
+
 <mat-dialog-content>
-  <h2>
-    <mat-icon svgIcon="jira"></mat-icon>
-    Update Status on Jira
-  </h2>
   <table>
     <tr>
       <th>Current Status:</th>
@@ -31,15 +33,16 @@
 
 <mat-dialog-actions align="end">
   <div class="wrap-buttons">
+    <button type="button"
+            color="primary"
+            (click)="close()"
+            class="btn btn-primary submit-button"
+            mat-button>Cancel
+    </button>
     <button color="primary"
             (click)="transitionIssue()"
             class="btn btn-primary submit-button"
-            mat-raised-button>Update Status
-    </button>
-    <button type="button"
-            (click)="close()"
-            class="btn btn-primary submit-button"
-            mat-raised-button>Cancel
+            mat-stroked-button>Update Status
     </button>
   </div>
 </mat-dialog-actions>

@@ -1,7 +1,8 @@
-<form (submit)="submit()">
-  <mat-dialog-content>
-    <h2 class="mat-title">{{ bookmarkCopy.id ? 'Edit' : 'Add' }} Bookmark</h2>
+<form (submit)="submit()"
+      #form="ngForm">
+  <h2 mat-dialog-title>{{ bookmarkCopy.id ? 'Edit' : 'Add' }} Bookmark</h2>
 
+  <mat-dialog-content>
     <div class="form-wrapper">
       <mat-form-field>
         <input [(ngModel)]="bookmarkCopy.title"
@@ -60,17 +61,19 @@
   </mat-dialog-content>
 
   <mat-dialog-actions align="end">
-    <button color="primary"
-            mat-raised-button=""
-            type="submit">
-      Save
-    </button>
-
     <button (click)="close()"
-            color="warn"
-            mat-raised-button=""
+            color="primary"
+            mat-button=""
             type="button">
       Cancel
+    </button>
+
+    <button [disabled]="!form.valid"
+            color="primary"
+            mat-stroked-button=""
+            type="submit">
+      <mat-icon>save</mat-icon>
+      Save
     </button>
   </mat-dialog-actions>
 </form>

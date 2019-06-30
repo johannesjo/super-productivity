@@ -1,7 +1,8 @@
+<h1 mat-dialog-title>Overwrite unsaved data on Google Drive?</h1>
+
 <mat-dialog-content>
-  <h2 class="mat-title"
-      style="margin-top: 0">Overwrite unsaved data on Google Drive?</h2>
-  <p>There seem to be some changes on Google Drive, that you don't have locally. Do you want to overwrite them anyway?</p>
+  <p>There seem to be some changes on Google Drive, that you don't have locally. Do you want to overwrite them
+    anyway?</p>
   <table>
     <tr>
       <td>remote</td>
@@ -22,20 +23,21 @@
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">
-  <button mat-raised-button=""
-          (click)="data.saveToRemote();close()"
-          color="primary">
+  <button mat-button=""
+          color="primary"
+          (click)="close()">
+    Cancel
+  </button>
+  <button mat-stroked-button=""
+          color="primary"
+          (click)="data.saveToRemote();close()">
     <mat-icon>file_upload</mat-icon>
     Overwrite remote data
   </button>
-  <button mat-raised-button=""
+  <button mat-stroked-button=""
+          color="primary"
           (click)="data.loadFromRemote();close()">
     <mat-icon>file_download</mat-icon>
     Overwrite local data
-  </button>
-  <button mat-raised-button=""
-          (click)="close()"
-          color="warn">
-    Cancel
   </button>
 </mat-dialog-actions>

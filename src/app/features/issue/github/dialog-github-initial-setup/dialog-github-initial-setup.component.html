@@ -1,7 +1,8 @@
-<h2 mat-dialog-title>
-  <mat-icon svgIcon="github"></mat-icon>
-  Setup Github for Project
-</h2>
+<h1 mat-dialog-title>
+  <mat-icon svgIcon="github"
+            class="dialog-header-icon"></mat-icon>
+  <span>Setup Github for Project</span>
+</h1>
 
 <form [formGroup]="formGroup"
       (submit)="saveGithubCfg(githubCfg)">
@@ -12,20 +13,21 @@
                  [form]="formGroup">
     </formly-form>
   </mat-dialog-content>
-  <mat-dialog-actions align="center">
-    <button mat-raised-button=""
+
+  <mat-dialog-actions align="end">
+    <button mat-button=""
+            type="button"
+            (click)="close()"
+            color="primary">
+      Cancel
+    </button>
+
+    <button [disabled]="!formGroup.valid"
+            mat-stroked-button=""
             type="submit"
             color="primary">
       <mat-icon>save</mat-icon>
       Save
-    </button>
-
-    <button mat-raised-button=""
-            type="button"
-            (click)="close()"
-            color="warn">
-      <mat-icon>cancel</mat-icon>
-      Cancel
     </button>
   </mat-dialog-actions>
 </form>

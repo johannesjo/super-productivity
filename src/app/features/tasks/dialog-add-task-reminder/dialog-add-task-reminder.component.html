@@ -1,7 +1,7 @@
 <form (submit)="save()">
+  <h1 mat-dialog-title>{{isEdit ? 'Edit Reminder' : 'Schedule Task'}}</h1>
+
   <mat-dialog-content>
-    <h2 class="mat-h2"
-        style="margin-bottom: 0;">{{isEdit ? 'Edit Reminder' : 'Schedule Task'}}</h2>
     <h3 class="mat-h3">"{{task.title}}"</h3>
 
     <div class="form-wrapper">
@@ -12,21 +12,38 @@
                       placeholder="Datetime for reminder"></datetime-input>
 
       <div *ngIf="isMoveToBacklogPossible"
-           style="margin: 16px;">
-        <mat-slide-toggle [(ngModel)]="isMoveToBacklog"
-                          name="isListSubTasks">
+           style="margin: 16px 0;">
+        <mat-checkbox [(ngModel)]="isMoveToBacklog"
+                      name="isListSubTasks">
           Move task to backlog until scheduled
-        </mat-slide-toggle>
+        </mat-checkbox>
       </div>
     </div>
   </mat-dialog-content>
 
-  <mat-dialog-actions align="center">
+  <mat-dialog-actions align="end">
     <div class="wrap-buttons">
-      <button class="btn btn-primary submit-button"
+      <button (click)="close()"
               color="primary"
-              mat-raised-button
-              type="submit">
+              mat-button
+              type="button">
+        <mat-icon>close</mat-icon>
+        Cancel
+      </button>
+
+      <button (click)="remove()"
+              *ngIf="isEdit"
+              color="primary"
+              mat-stroked-button
+              type="button">
+        <mat-icon>alarm_off</mat-icon>
+        Unschedule
+      </button>
+
+      <button color="primary"
+              mat-stroked-button
+              type="submit"
+              [disabled]="!dateTime">
         <ng-container *ngIf="!task.reminderId">
           <mat-icon>alarm_add</mat-icon>
           Schedule
@@ -35,24 +52,6 @@
           <mat-icon>alarm</mat-icon>
           Update
         </ng-container>
-      </button>
-
-      <button (click)="remove()"
-              *ngIf="isEdit"
-              class="btn btn-primary submit-button"
-              color="warn"
-              mat-raised-button
-              type="button">
-        <mat-icon>alarm_off</mat-icon>
-        Unschedule
-      </button>
-
-      <button (click)="close()"
-              class="btn btn-primary submit-button"
-              mat-raised-button
-              type="button">
-        <mat-icon>close</mat-icon>
-        Cancel
       </button>
     </div>
   </mat-dialog-actions>
