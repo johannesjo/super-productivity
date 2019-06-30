@@ -4,14 +4,14 @@ import {selectIssueEntityMap} from '../../issue/issue.selector';
 import {Task, TaskWithIssueData, TaskWithSubTasks} from '../task.model';
 import {IssueProviderKey} from '../../issue/issue';
 
-const mapIssueDataToTask = (tasks_, issueEntityMap) => {
+const mapIssueDataToTask = (tasks_, issueEntityMap): TaskWithIssueData[] => {
   return tasks_ && tasks_.map((task) => {
     const issueData = (task.issueId && task.issueType) && issueEntityMap[task.issueType] && issueEntityMap[task.issueType][task.issueId];
     return issueData ? {...task, issueData: issueData} : task;
   });
 };
 
-const mapSubTasksToTasks = (tasks__) => {
+const mapSubTasksToTasks = (tasks__): TaskWithSubTasks[] => {
   return tasks__.filter((task) => !task.parentId)
     .map((task) => {
       if (task.subTaskIds && task.subTaskIds.length > 0) {
@@ -26,7 +26,7 @@ const mapSubTasksToTasks = (tasks__) => {
     });
 };
 
-const mapEstimateRemaining = (tasks) => tasks && tasks.length && tasks.reduce((acc, task) => {
+const mapEstimateRemaining = (tasks): number => tasks && tasks.length && tasks.reduce((acc, task) => {
   let isTrackVal;
   let estimateRemaining;
   if (task.subTasks && task.subTasks.length > 0) {
@@ -153,10 +153,9 @@ export const selectFocusTaskId = createSelector(selectTaskFeatureState, state =>
 
 export const selectTasksWithMissingIssueData = createSelector(
   selectAllTasksWithIssueData,
-  (tasks) => tasks && tasks
-    .filter(
-      (task: TaskWithSubTasks) => (!task.issueData && (task.issueType || task.issueId))
-    )
+  (tasks: TaskWithIssueData[]) => tasks && tasks.filter(
+    (task: TaskWithSubTasks) => (!task.issueData && (task.issueType || task.issueId))
+  )
 );
 export const selectHasTasksToWorkOn = createSelector(
   selectIsTasksLoaded,
@@ -201,6 +200,22 @@ export const selectTasksByRepeatConfigId = createSelector(
     return (taskIds && taskIds.length)
       ? taskIds.map(id => state.entities[id])
       : null;
+  }
+);
+
+export const selectTaskIdsByRepeatConfigId = createSelector(
+  selectTaskFeatureState,
+  (state, props: { repeatCfgId: string }): string[] => {
+    const ids = state.ids as string[];
+    return ids.filter(id_ => state.entities[id_]
+      && state.entities[id_].repeatCfgId === props.repeatCfgId);
+  }
+);
+
+export const selectTaskWithSubTasksByRepeatConfigId = createSelector(
+  selectAllTasksWithSubTasks,
+  (tasks: TaskWithSubTasks[], props: { repeatCfgId: string }) => {
+    return tasks.filter(task => task.repeatCfgId === props.repeatCfgId);
   }
 );
 
