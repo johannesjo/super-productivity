@@ -1,3 +1,12 @@
+## [2.8.2](https://github.com/johannesjo/super-productivity/compare/v2.8.1...v2.8.2) (2019-06-30)
+
+
+### Bug Fixes
+
+* remove double attachment button ([0953608](https://github.com/johannesjo/super-productivity/commit/0953608))
+
+
+
 ## [2.8.1](https://github.com/johannesjo/super-productivity/compare/v2.8.0...v2.8.1) (2019-06-30)
 
 
