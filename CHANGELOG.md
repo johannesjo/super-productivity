@@ -1,3 +1,22 @@
+## [2.8.1](https://github.com/johannesjo/super-productivity/compare/v2.8.0...v2.8.1) (2019-06-30)
+
+
+### Bug Fixes
+
+* dialog edit bookmark invalid form submit ([924dd1f](https://github.com/johannesjo/super-productivity/commit/924dd1f))
+
+
+### Features
+
+* make all buttons uppercase ([54a6aee](https://github.com/johannesjo/super-productivity/commit/54a6aee))
+* **ui:** add also italic font ([48ff060](https://github.com/johannesjo/super-productivity/commit/48ff060))
+* **ui:** add roboto in all sizes ([8a26e8d](https://github.com/johannesjo/super-productivity/commit/8a26e8d))
+* **ui:** give banners some love ([005c204](https://github.com/johannesjo/super-productivity/commit/005c204))
+* **ui:** give buttons some love ([87a5123](https://github.com/johannesjo/super-productivity/commit/87a5123))
+* **ui:** give dialogs some love ([1a26c87](https://github.com/johannesjo/super-productivity/commit/1a26c87))
+
+
+
 # [2.8.0](https://github.com/johannesjo/super-productivity/compare/v2.7.8...v2.8.0) (2019-06-30)
 
 
