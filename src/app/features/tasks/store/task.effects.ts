@@ -430,6 +430,7 @@ export class TaskEffects {
       archive.entities[task.id] = {
         ...task,
         reminderId: undefined,
+        isDone: true,
       };
       if (task.reminderId) {
         this._reminderService.removeReminder(task.reminderId);
@@ -441,6 +442,7 @@ export class TaskEffects {
           archive.entities[subTask.id] = {
             ...subTask,
             reminderId: undefined,
+            isDone: true,
           };
           archive.ids.push(subTask.id);
           if (subTask.reminderId) {
