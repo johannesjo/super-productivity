@@ -16,12 +16,7 @@ import {
 import {select, Store} from '@ngrx/store';
 import {filter, map, mergeMap, switchMap, tap, throttleTime, withLatestFrom} from 'rxjs/operators';
 import {PersistenceService} from '../../../core/persistence/persistence.service';
-import {
-  selectCurrentTask,
-  selectTaskFeatureState,
-  selectTasksByRepeatConfigId,
-  selectTasksWorkedOnOrDoneFlat
-} from './task.selectors';
+import {selectCurrentTask, selectTaskFeatureState, selectTasksWorkedOnOrDoneFlat} from './task.selectors';
 import {selectCurrentProjectId} from '../../project/store/project.reducer';
 import {SnackOpen} from '../../../core/snack/store/snack.actions';
 import {NotifyService} from '../../../core/notify/notify.service';
@@ -432,12 +427,25 @@ export class TaskEffects {
       ids: []
     };
     mainTasks.forEach((task: TaskWithSubTasks) => {
-      archive.entities[task.id] = task;
+      archive.entities[task.id] = {
+        ...task,
+        reminderId: undefined,
+      };
+      if (task.reminderId) {
+        this._reminderService.removeReminder(task.reminderId);
+      }
+
       archive.ids.push(task.id);
       if (task.subTasks) {
         task.subTasks.forEach((subTask) => {
-          archive.entities[subTask.id] = subTask;
+          archive.entities[subTask.id] = {
+            ...subTask,
+            reminderId: undefined,
+          };
           archive.ids.push(subTask.id);
+          if (subTask.reminderId) {
+            this._reminderService.removeReminder(subTask.reminderId);
+          }
         });
       }
     });
