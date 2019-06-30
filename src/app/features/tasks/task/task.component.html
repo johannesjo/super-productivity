@@ -300,7 +300,7 @@
                   *ngIf="!task.parentId && !task.issueId"
                   mat-menu-item=""
                   tabindex="2">
-            <mat-icon>repeat</mat-icon>
+            <mat-icon style="transform: rotate(45deg);">repeat</mat-icon>
             <span *ngIf="!task.repeatCfgId">Repeat task</span>
             <span *ngIf="task.repeatCfgId">Edit repeat task config</span>
           </button>
