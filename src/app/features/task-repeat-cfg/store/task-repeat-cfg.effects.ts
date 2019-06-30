@@ -2,13 +2,18 @@ import {Injectable} from '@angular/core';
 import {Actions, Effect, ofType} from '@ngrx/effects';
 import {concatMap, filter, flatMap, map, take, tap, withLatestFrom} from 'rxjs/operators';
 import {select, Store} from '@ngrx/store';
-import {DeleteTaskRepeatCfg, TaskRepeatCfgActionTypes, UpdateTaskRepeatCfg} from './task-repeat-cfg.actions';
+import {
+  AddTaskRepeatCfgToTask,
+  DeleteTaskRepeatCfg,
+  TaskRepeatCfgActionTypes,
+  UpdateTaskRepeatCfg
+} from './task-repeat-cfg.actions';
 import {selectTaskRepeatCfgFeatureState} from './task-repeat-cfg.reducer';
 import {selectCurrentProjectId} from '../../project/store/project.reducer';
 import {PersistenceService} from '../../../core/persistence/persistence.service';
 import {selectTasksByRepeatConfigId, selectTaskWithSubTasksByRepeatConfigId} from '../../tasks/store/task.selectors';
 import {Task, TaskArchive, TaskWithSubTasks} from '../../tasks/task.model';
-import {AddTask, MoveToArchive, UpdateTask} from '../../tasks/store/task.actions';
+import {AddTask, MoveToArchive, RemoveTaskReminder, UpdateTask} from '../../tasks/store/task.actions';
 import {TaskService} from '../../tasks/task.service';
 import {ProjectActionTypes} from '../../project/store/project.actions';
 import {TaskRepeatCfgService} from '../task-repeat-cfg.service';
@@ -129,6 +134,19 @@ export class TaskRepeatCfgEffects {
       tap(([a, projectId]: [DeleteTaskRepeatCfg, string]) => {
         this._removeRepeatCfgFromArchiveTasks.bind(this)(a.payload.id, projectId);
       }),
+    );
+
+  @Effect() removeRemindersOnCreation$: any = this._actions$
+    .pipe(
+      ofType(
+        TaskRepeatCfgActionTypes.AddTaskRepeatCfgToTask,
+      ),
+      concatMap((a: AddTaskRepeatCfgToTask) => this._taskService.getById$(a.payload.taskId).pipe(take(1))),
+      filter((task: TaskWithSubTasks) => typeof task.reminderId === 'string'),
+      map((task: TaskWithSubTasks) => new RemoveTaskReminder({
+        id: task.id,
+        reminderId: task.reminderId
+      })),
     );
 
 
