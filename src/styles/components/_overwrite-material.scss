@@ -62,3 +62,11 @@ body .mat-form-field {
     display: inline-block;
   }
 }
+
+.dialog-help-wrapper {
+  position: relative;
+
+  .help-btn {
+    margin-top: 3px;
+  }
+}
