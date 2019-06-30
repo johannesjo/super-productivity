@@ -1,11 +1,11 @@
-import { ChangeDetectionStrategy, Component, Inject, OnInit } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { IS_ELECTRON } from '../../../app.constants';
-import { MATERIAL_ICONS } from '../../../ui/material-icons.const';
-import { BookmarkCopy, BookmarkType } from '../bookmark.model';
-import { FormControl } from '@angular/forms';
-import { Observable } from 'rxjs';
-import { map, startWith } from 'rxjs/operators';
+import {ChangeDetectionStrategy, Component, Inject, OnInit} from '@angular/core';
+import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
+import {IS_ELECTRON} from '../../../app.constants';
+import {MATERIAL_ICONS} from '../../../ui/material-icons.const';
+import {BookmarkCopy, BookmarkType} from '../bookmark.model';
+import {FormControl} from '@angular/forms';
+import {Observable} from 'rxjs';
+import {map, startWith} from 'rxjs/operators';
 
 interface BookmarkSelectType {
   type: BookmarkType;
@@ -59,6 +59,10 @@ export class DialogEditBookmarkComponent implements OnInit {
   }
 
   submit() {
+    if (!this.bookmarkCopy.path || this.bookmarkCopy.type) {
+      return;
+    }
+
     if (this.bookmarkCopy.type === 'LINK' && !this.bookmarkCopy.path.match(/(https?|ftp|file):\/\//)) {
       this.bookmarkCopy.path = 'http://' + this.bookmarkCopy.path;
     }
