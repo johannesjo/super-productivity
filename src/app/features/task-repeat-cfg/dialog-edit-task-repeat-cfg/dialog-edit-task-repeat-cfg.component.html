@@ -4,13 +4,16 @@
   <mat-dialog-content>
     <!--    <h3 class="mat-h3">{{task.title}}</h3>-->
     <help-section>
-      <p>Repeating tasks are meant for daily chores, e.g.: "Organization", "Daily Meeting", "Code Review", "Checking emails" or similar tasks which are likely to occur again and again.</p>
-      <p>Once configured a repeating task will be recreated on every day selected below as soon as you open your project and will be automatically marked as completed at the end of the day. They will be handled as different instances. So you can freely add sub tasks etc.</p>
-      <p>Tasks imported from Jira or Git Issues cannot be repeated. All reminders will also be deleted on a repeating task.</p>
+      <p>Repeating tasks are meant for daily chores, e.g.: "Organization", "Daily Meeting", "Code Review", "Checking
+        emails" or similar tasks which are likely to occur again and again.</p>
+      <p>Once configured a repeating task will be recreated on every day selected below as soon as you open your project
+        and will be automatically marked as completed at the end of the day. They will be handled as different
+        instances. So you can freely add sub tasks etc.</p>
+      <p>Tasks imported from Jira or Git Issues cannot be repeated. All reminders will also be deleted on a repeating
+        task.</p>
     </help-section>
 
     <div class="form-wrapper">
-      <p style="margin-bottom: 0;"><strong>Repeat task on</strong></p>
       <formly-form [model]="taskRepeatCfg"
                    (modelChange)="taskRepeatCfg=$event"
                    [fields]="fields"
@@ -20,7 +23,7 @@
     </div>
   </mat-dialog-content>
 
-  <mat-dialog-actions>
+  <mat-dialog-actions align="end">
     <div class="wrap-buttons">
       <button mat-button
               type="submit">

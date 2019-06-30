@@ -1,7 +1,19 @@
 import {EntityState} from '@ngrx/entity';
 
+export const TASK_REPEAT_WEEKDAY_MAP: (keyof TaskRepeatCfg)[] = [
+  'sunday',
+  'monday',
+  'tuesday',
+  'wednesday',
+  'thursday',
+  'friday',
+  'saturday',
+];
+
 export interface TaskRepeatCfgCopy {
   id: string;
+  title: string;
+  defaultEstimate: number;
   monday: boolean;
   tuesday: boolean;
   wednesday: boolean;
@@ -19,6 +31,8 @@ export interface TaskRepeatCfgState extends EntityState<TaskRepeatCfg> {
 
 export const DEFAULT_TASK_REPEAT_CFG: TaskRepeatCfgCopy = {
   id: undefined,
+  title: undefined,
+  defaultEstimate: undefined,
   monday: true,
   tuesday: true,
   wednesday: true,

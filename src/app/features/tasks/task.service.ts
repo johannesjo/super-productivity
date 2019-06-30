@@ -293,7 +293,7 @@ export class TaskService {
       isAddToBottom = false,
   ) {
     this._store.dispatch(new AddTask({
-      task: this._createNewTask(title, additionalFields),
+      task: this.createNewTaskWithDefaults(title, additionalFields),
       isAddToBacklog,
       isAddToBottom
     }));
@@ -306,7 +306,7 @@ export class TaskService {
                isAddToBottom = false,
   ) {
     this._store.dispatch(new AddTask({
-      task: this._createNewTask(title, {
+      task: this.createNewTaskWithDefaults(title, {
         issueId: issue && issue.id as string,
         issueType: issueType,
       }),
@@ -356,7 +356,7 @@ export class TaskService {
 
   addSubTaskTo(parentId) {
     this._store.dispatch(new AddSubTask({
-      task: this._createNewTask(''),
+      task: this.createNewTaskWithDefaults(''),
       parentId: parentId
     }));
   }
@@ -622,7 +622,7 @@ export class TaskService {
   }
 
 
-  private _createNewTask(title: string, additional: Partial<Task> = {}): Task {
+   createNewTaskWithDefaults(title: string, additional: Partial<Task> = {}): Task {
     return this._shortSyntax({
       // NOTE needs to be created every time
       ...DEFAULT_TASK,

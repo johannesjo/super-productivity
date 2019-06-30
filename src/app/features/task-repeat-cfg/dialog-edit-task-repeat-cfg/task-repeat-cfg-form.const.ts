@@ -2,6 +2,20 @@ import {FormlyFieldConfig} from '@ngx-formly/core';
 
 export const TASK_REPEAT_CFG_FORM_CFG: FormlyFieldConfig[] = [
   {
+    key: 'title',
+    type: 'input',
+    templateOptions: {
+      label: 'Title for task',
+    },
+  },
+  {
+    key: 'defaultEstimate',
+    type: 'duration',
+    templateOptions: {
+      label: 'Default Estimate',
+    },
+  },
+  {
     key: 'monday',
     type: 'checkbox',
     templateOptions: {

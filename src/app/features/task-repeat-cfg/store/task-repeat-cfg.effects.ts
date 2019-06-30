@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
 import {Actions, Effect, ofType} from '@ngrx/effects';
-import {concatMap, filter, flatMap, take, tap, withLatestFrom} from 'rxjs/operators';
+import {concatMap, filter, flatMap, map, take, tap, withLatestFrom} from 'rxjs/operators';
 import {select, Store} from '@ngrx/store';
 import {DeleteTaskRepeatCfg, TaskRepeatCfgActionTypes} from './task-repeat-cfg.actions';
 import {selectTaskRepeatCfgFeatureState} from './task-repeat-cfg.reducer';
@@ -8,8 +8,11 @@ import {selectCurrentProjectId} from '../../project/store/project.reducer';
 import {PersistenceService} from '../../../core/persistence/persistence.service';
 import {selectTasksByRepeatConfigId} from '../../tasks/store/task.selectors';
 import {Task, TaskArchive, TaskWithSubTasks} from '../../tasks/task.model';
-import {UpdateTask} from '../../tasks/store/task.actions';
+import {AddTask, UpdateTask} from '../../tasks/store/task.actions';
 import {TaskService} from '../../tasks/task.service';
+import {ProjectActionTypes} from '../../project/store/project.actions';
+import {TaskRepeatCfgService} from '../task-repeat-cfg.service';
+import {TASK_REPEAT_WEEKDAY_MAP, TaskRepeatCfg} from '../task-repeat-cfg.model';
 
 @Injectable()
 export class TaskRepeatCfgEffects {
@@ -30,6 +33,31 @@ export class TaskRepeatCfgEffects {
       tap(this._saveToLs.bind(this))
     );
 
+
+  @Effect() createRepeatableTasks: any = this._actions$
+    .pipe(
+      ofType(
+        ProjectActionTypes.LoadProjectRelatedDataSuccess,
+      ),
+      withLatestFrom(
+        this._taskRepeatCfgService.taskRepeatCfgs$,
+      ),
+      tap(a => console.log(a)),
+      map(([a, taskRepeatCfgs]): TaskRepeatCfg[] => {
+        const day = new Date().getDay();
+        const dayStr: keyof TaskRepeatCfg = TASK_REPEAT_WEEKDAY_MAP[day];
+        return taskRepeatCfgs && taskRepeatCfgs.filter((cfg: TaskRepeatCfg) => cfg[dayStr]);
+      }),
+      filter((taskRepeatCfgs) => taskRepeatCfgs && !!taskRepeatCfgs.length),
+      flatMap((taskRepeatCfgs => taskRepeatCfgs.map(taskRepeatCfg => new AddTask({
+          task: this._taskService.createNewTaskWithDefaults(taskRepeatCfg.title, {
+            repeatCfgId: taskRepeatCfg.id,
+          }),
+          isAddToBacklog: false,
+          isAddToBottom: false,
+        }))),
+      )
+    );
 
   @Effect() removeConfigIdFromTaskStateTasks$: any = this._actions$
     .pipe(
@@ -68,7 +96,8 @@ export class TaskRepeatCfgEffects {
     private _actions$: Actions,
     private _taskService: TaskService,
     private _store$: Store<any>,
-    private _persistenceService: PersistenceService
+    private _persistenceService: PersistenceService,
+    private _taskRepeatCfgService: TaskRepeatCfgService,
   ) {
   }
 

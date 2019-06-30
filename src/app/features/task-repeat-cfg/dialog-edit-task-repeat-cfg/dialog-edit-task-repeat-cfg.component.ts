@@ -20,7 +20,10 @@ import {TASK_REPEAT_CFG_FORM_CFG} from './task-repeat-cfg-form.const';
 export class DialogEditTaskRepeatCfgComponent implements OnInit, OnDestroy {
   task: Task = this.data.task;
 
-  taskRepeatCfg: TaskRepeatCfgCopy = DEFAULT_TASK_REPEAT_CFG;
+  taskRepeatCfg: TaskRepeatCfgCopy = {
+    ...DEFAULT_TASK_REPEAT_CFG,
+    title: this.task.title,
+  };
 
   taskRepeatCfgId: string = this.task.repeatCfgId;
   isEdit: boolean = !!this.taskRepeatCfgId;
