@@ -78,6 +78,11 @@ button {
   display: flex;
   flex: 1;
 
+
+  .mat-button {
+    text-transform: none;
+  }
+
   button.isActive {
     font-weight: bold;
   }

@@ -44,3 +44,8 @@ body .mat-form-field {
 .mat-dialog-title.mat-dialog-title {
   font: 500 20px/32px Roboto, "Helvetica Neue", sans-serif;
 }
+
+.mat-raised-button,
+.mat-button {
+  text-transform: uppercase;
+}
