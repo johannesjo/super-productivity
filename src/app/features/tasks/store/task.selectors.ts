@@ -42,20 +42,12 @@ const mapEstimateRemaining = (tasks): number => tasks && tasks.length && tasks.r
   return acc + ((isTrackVal) ? estimateRemaining : 0);
 }, 0);
 
-export const getFlatIdList = (arr) => {
-  let ids = [];
-  arr.forEach(task => {
-    ids.push(task.id);
-    ids = ids.concat(task.subTaskIds);
-  });
-  return ids;
-};
 
 const mapTasksFromIds = (tasks__, ids) => {
   return ids.map(id => tasks__.find(task => task.id === id));
 };
 
-const flattenTasks = (tasks___) => {
+const flattenTasks = (tasks___): TaskWithIssueData[] => {
   let flatTasks = [];
   tasks___.forEach(task => {
     flatTasks.push(task);
@@ -66,7 +58,7 @@ const flattenTasks = (tasks___) => {
   return flatTasks;
 };
 
-const mapTotalTimeWorked = (tasks) => tasks.reduce((acc, task) => acc + task.timeSpent, 0);
+const mapTotalTimeWorked = (tasks): number => tasks.reduce((acc, task) => acc + task.timeSpent, 0);
 
 // SELECTORS
 // ---------
@@ -101,7 +93,7 @@ export const selectCurrentTaskOrParentWithData = createSelector(
     };
   });
 
-export const selectCurrentTaskParentOrCurrent = createSelector(selectTaskFeatureState, s =>
+export const selectCurrentTaskParentOrCurrent = createSelector(selectTaskFeatureState, (s): Task =>
   s.currentTaskId
   && s.entities[s.currentTaskId] && s.entities[s.currentTaskId].parentId
   && s.entities[s.entities[s.currentTaskId].parentId]
@@ -127,7 +119,7 @@ export const selectAllTasksWithSubTasks = createSelector(selectAllTasksWithIssue
 
 export const selectIsTaskForTodayPlanned = createSelector(
   selectTaskFeatureState,
-  (state) => !!state.todaysTaskIds && state.todaysTaskIds.length > 0,
+  (state): boolean => !!state.todaysTaskIds && state.todaysTaskIds.length > 0,
 );
 export const selectTodaysTasksWithSubTasks = createSelector(selectAllTasksWithSubTasks, selectTodaysTaskIds, mapTasksFromIds);
 export const selectBacklogTasksWithSubTasks = createSelector(selectAllTasksWithSubTasks, selectBacklogTaskIds, mapTasksFromIds);
@@ -136,11 +128,11 @@ export const selectTodaysTasksFlat = createSelector(selectTodaysTasksWithSubTask
 
 export const selectTodaysUnDoneTasksWithSubTasks = createSelector(
   selectTodaysTasksWithSubTasks,
-  (tasks) => tasks.filter(task => !task.isDone)
+  (tasks): TaskWithSubTasks[] => tasks.filter(task => !task.isDone)
 );
 export const selectTodaysDoneTasksWithSubTasks = createSelector(
   selectTodaysTasksWithSubTasks,
-  (tasks) => tasks.filter(task => task.isDone)
+  (tasks): TaskWithSubTasks[] => tasks.filter(task => task.isDone)
 );
 
 export const selectEstimateRemainingForToday = createSelector(selectTodaysTasksWithSubTasks, mapEstimateRemaining);
@@ -153,7 +145,7 @@ export const selectFocusTaskId = createSelector(selectTaskFeatureState, state =>
 
 export const selectTasksWithMissingIssueData = createSelector(
   selectAllTasksWithIssueData,
-  (tasks: TaskWithIssueData[]) => tasks && tasks.filter(
+  (tasks: TaskWithIssueData[]): TaskWithSubTasks[] => tasks && tasks.filter(
     (task: TaskWithSubTasks) => (!task.issueData && (task.issueType || task.issueId))
   )
 );
@@ -173,7 +165,7 @@ export const selectHasTasksToWorkOn = createSelector(
 // -----------------
 export const selectTaskById = createSelector(
   selectTaskFeatureState,
-  (state, props: { id: string }) => state.entities[props.id]
+  (state, props: { id: string }): Task => state.entities[props.id]
 );
 
 
@@ -188,6 +180,30 @@ export const selectTaskByIssueId = createSelector(
       ? state.entities[taskId]
       : null;
   }
+);
+export const selectTasksWorkedOnOrDoneFlat = createSelector(selectTodaysTasksFlat, (tasks, props: { day: string }) => {
+  if (!props) {
+    return null;
+  }
+
+  const todayStr = props.day;
+  return tasks.filter(
+    (t: Task) => t.isDone || (t.timeSpentOnDay && t.timeSpentOnDay[todayStr] && t.timeSpentOnDay[todayStr] > 0)
+  );
+});
+
+
+// REPEATABLE TASKS
+// ----------------
+export const selectAllRepeatableTaskWithSubTasks = createSelector(
+  selectAllTasksWithSubTasks,
+  (tasks: TaskWithSubTasks[]) => {
+    return tasks.filter(task => !!task.repeatCfgId && task.repeatCfgId !== null);
+  }
+);
+export const selectAllRepeatableTaskWithSubTasksFlat = createSelector(
+  selectAllRepeatableTaskWithSubTasks,
+  flattenTasks,
 );
 
 export const selectTasksByRepeatConfigId = createSelector(
@@ -218,15 +234,4 @@ export const selectTaskWithSubTasksByRepeatConfigId = createSelector(
     return tasks.filter(task => task.repeatCfgId === props.repeatCfgId);
   }
 );
-
-export const selectTasksWorkedOnOrDoneFlat = createSelector(selectTodaysTasksFlat, (tasks, props: { day: string }) => {
-  if (!props) {
-    return null;
-  }
-
-  const todayStr = props.day;
-  return tasks.filter(
-    (t: Task) => t.isDone || (t.timeSpentOnDay && t.timeSpentOnDay[todayStr] && t.timeSpentOnDay[todayStr] > 0)
-  );
-});
 

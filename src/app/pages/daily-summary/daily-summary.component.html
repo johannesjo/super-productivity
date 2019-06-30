@@ -80,7 +80,7 @@
 
         <ng-container *ngIf="(hasTasksForToday$|async); else noTasks">
           <task-summary-table [day]="(dayStr$|async)"
-                              [flatTasks]="(tasksWorkedOnOrDoneFlat$|async)"></task-summary-table>
+                              [flatTasks]="(tasksWorkedOnOrDoneOrRepeatableFlat$|async)"></task-summary-table>
           <div style="text-align: center; margin-top: 8px; margin-bottom: 16px;">
             <button [matMenuTriggerFor]="roundTimeActions"
                     title="Round time spent on all tasks. Be careful! You cannot undo this!"

@@ -56,6 +56,8 @@ import {PersistenceService} from '../../core/persistence/persistence.service';
 import {IssueData, IssueProviderKey} from '../issue/issue';
 import {TimeTrackingService} from '../time-tracking/time-tracking.service';
 import {
+  selectAllRepeatableTaskWithSubTasks,
+  selectAllRepeatableTaskWithSubTasksFlat,
   selectAllTasksWithIssueData,
   selectBacklogTasksWithSubTasks,
   selectCurrentTask,
@@ -160,6 +162,14 @@ export class TaskService {
     select(selectTodaysDoneTasksWithSubTasks),
     distinctUntilChanged(),
     shareReplay(),
+  );
+
+  allRepeatableTasks$: Observable<TaskWithSubTasks[]> = this._store.pipe(
+    select(selectAllRepeatableTaskWithSubTasks),
+  );
+
+  allRepeatableTasksFlat$: Observable<TaskWithSubTasks[]> = this._store.pipe(
+    select(selectAllRepeatableTaskWithSubTasksFlat),
   );
 
   focusTaskId$: Observable<string> = this._store.pipe(

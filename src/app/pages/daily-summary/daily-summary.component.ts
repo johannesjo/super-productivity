@@ -33,7 +33,15 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
     isBlockFinishDayUntilTimeTimeTracked: false
   };
 
-  doneTasks$: Observable<TaskWithSubTasks[]> = this._taskService.doneTasks$;
+  doneAndRepeatingTasks$: Observable<TaskWithSubTasks[]> = combineLatest(
+    this._taskService.allRepeatableTasks$,
+    this._taskService.doneTasks$,
+  ).pipe(
+    map(([repeatableTasks, doneTasks]) => [
+      ...repeatableTasks,
+      ...doneTasks.filter(task => !task.repeatCfgId || task.repeatCfgId === null),
+    ]),
+  );
   todaysTasks$: Observable<TaskWithSubTasks[]> = this._taskService.todaysTasks$;
 
   isTimeSheetExported = true;
@@ -60,17 +68,27 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
     shareReplay()
   );
 
-  tasksWorkedOnOrDoneFlat$ = this.dayStr$.pipe(
-    switchMap((dayStr) => this._taskService.getTasksWorkedOnOrDoneFlat$(dayStr)),
+  tasksWorkedOnOrDoneOrRepeatableFlat$ = this.dayStr$.pipe(
+    switchMap((dayStr) => combineLatest(
+      this._taskService.allRepeatableTasksFlat$,
+      this._taskService.getTasksWorkedOnOrDoneFlat$(dayStr)
+    )),
+    map(([repeatableTasks, workedOnOrDoneTasks]) => [
+      ...repeatableTasks,
+      ...workedOnOrDoneTasks.filter(
+        (task => !task.repeatCfgId || task.repeatCfgId === null)
+      ),
+    ]),
     shareReplay(),
   );
-  hasTasksForToday$: Observable<boolean> = this.tasksWorkedOnOrDoneFlat$.pipe(map(tasks => tasks && !!tasks.length));
 
-  nrOfDoneTasks$: Observable<number> = this.tasksWorkedOnOrDoneFlat$.pipe(
+  hasTasksForToday$: Observable<boolean> = this.tasksWorkedOnOrDoneOrRepeatableFlat$.pipe(map(tasks => tasks && !!tasks.length));
+
+  nrOfDoneTasks$: Observable<number> = this.tasksWorkedOnOrDoneOrRepeatableFlat$.pipe(
     map(tasks => tasks && tasks.filter(task => !!task.isDone).length),
   );
 
-  totalNrOfTasks$: Observable<number> = this.tasksWorkedOnOrDoneFlat$.pipe(
+  totalNrOfTasks$: Observable<number> = this.tasksWorkedOnOrDoneOrRepeatableFlat$.pipe(
     map(tasks => tasks && tasks.length),
   );
 
@@ -86,7 +104,7 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
   isBreakTrackingSupport$: Observable<boolean> = this._configService.idle$.pipe(map(cfg => cfg && cfg.isEnableIdleTimeTracking));
 
   private _successAnimationTimeout;
-  private _doneTasks: TaskWithSubTasks[];
+  private _doneAndRepeatingTasks: TaskWithSubTasks[];
   private _todaysTasks: TaskWithSubTasks[];
 
   // calc time spent on todays tasks today
@@ -110,8 +128,8 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     // TODO fix
-    this._subs.add(this.doneTasks$.subscribe((val) => {
-      this._doneTasks = val;
+    this._subs.add(this.doneAndRepeatingTasks$.subscribe((val) => {
+      this._doneAndRepeatingTasks = val;
     }));
 
     this._subs.add(this.todaysTasks$.subscribe((val) => {
@@ -158,7 +176,7 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
   }
 
   finishDay() {
-    this._taskService.moveToArchive(this._doneTasks);
+    this._taskService.moveToArchive(this._doneAndRepeatingTasks);
     this._projectService.updateLastCompletedDay(this._projectService.currentId, this.dayStr);
 
     if (IS_ELECTRON && this.isForToday) {
