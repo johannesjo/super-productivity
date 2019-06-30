@@ -14,19 +14,23 @@
 
   <div class="buttons">
     <button mat-button
+            color="primary"
             (click)="dismiss(banner.id)"
             *ngIf="!banner.action2">Dismiss
     </button>
 
     <button mat-button
+            color="primary"
             (click)="action(banner.id, banner.action)"
             *ngIf="banner.action">{{banner.action.label}}
     </button>
     <button mat-button
+            color="primary"
             (click)="action(banner.id, banner.action2)"
             *ngIf="banner.action2">{{banner.action2.label}}
     </button>
     <button mat-button
+            color="primary"
             (click)="action(banner.id, banner.action3)"
             *ngIf="banner.action3">{{banner.action3.label}}
     </button>
