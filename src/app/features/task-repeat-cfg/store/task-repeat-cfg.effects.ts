@@ -11,7 +11,6 @@ import {
 import {selectTaskRepeatCfgFeatureState} from './task-repeat-cfg.reducer';
 import {selectCurrentProjectId} from '../../project/store/project.reducer';
 import {PersistenceService} from '../../../core/persistence/persistence.service';
-import {selectTasksByRepeatConfigId, selectTaskWithSubTasksByRepeatConfigId} from '../../tasks/store/task.selectors';
 import {Task, TaskArchive, TaskWithSubTasks} from '../../tasks/task.model';
 import {AddTask, MoveToArchive, RemoveTaskReminder, UpdateTask} from '../../tasks/store/task.actions';
 import {TaskService} from '../../tasks/task.service';
@@ -20,6 +19,7 @@ import {TaskRepeatCfgService} from '../task-repeat-cfg.service';
 import {TASK_REPEAT_WEEKDAY_MAP, TaskRepeatCfg} from '../task-repeat-cfg.model';
 import {from} from 'rxjs';
 import {isToday} from './is-created-today.util';
+import {ProjectService} from '../../project/project.service';
 
 @Injectable()
 export class TaskRepeatCfgEffects {
@@ -34,7 +34,7 @@ export class TaskRepeatCfgEffects {
         TaskRepeatCfgActionTypes.DeleteTaskRepeatCfgs,
       ),
       withLatestFrom(
-        this._store$.pipe(select(selectCurrentProjectId)),
+        this._projectService.currentId$,
         this._store$.pipe(select(selectTaskRepeatCfgFeatureState)),
       ),
       tap(this._saveToLs.bind(this))
@@ -60,8 +60,7 @@ export class TaskRepeatCfgEffects {
       filter((taskRepeatCfgs) => taskRepeatCfgs && !!taskRepeatCfgs.length),
       flatMap(taskRepeatCfgs => from(taskRepeatCfgs).pipe(
         flatMap((taskRepeatCfg: TaskRepeatCfg) =>
-          this._store$.pipe(
-            select(selectTaskWithSubTasksByRepeatConfigId, {repeatCfgId: taskRepeatCfg.id}),
+          this._taskService.getTasksWithSubTasksByRepeatCfgId$(taskRepeatCfg.id).pipe(
             take(1),
             map((tasks): [TaskRepeatCfg, TaskWithSubTasks[]] => [taskRepeatCfg, tasks]),
           )
@@ -110,9 +109,9 @@ export class TaskRepeatCfgEffects {
         TaskRepeatCfgActionTypes.DeleteTaskRepeatCfg,
       ),
       concatMap((action: DeleteTaskRepeatCfg) =>
-        this._store$.pipe(
-          select(selectTasksByRepeatConfigId, {repeatCfgId: action.payload.id}),
-          take(1)),
+        this._taskService.getTasksByRepeatCfgId$(action.payload.id).pipe(
+          take(1)
+        ),
       ),
       filter(tasks => tasks && !!tasks.length),
       flatMap((tasks: Task[]) => tasks.map(task => new UpdateTask({
@@ -129,7 +128,7 @@ export class TaskRepeatCfgEffects {
         TaskRepeatCfgActionTypes.DeleteTaskRepeatCfg,
       ),
       withLatestFrom(
-        this._store$.pipe(select(selectCurrentProjectId)),
+       this._projectService.currentId$,
       ),
       tap(([a, projectId]: [DeleteTaskRepeatCfg, string]) => {
         this._removeRepeatCfgFromArchiveTasks.bind(this)(a.payload.id, projectId);
@@ -153,6 +152,7 @@ export class TaskRepeatCfgEffects {
   constructor(
     private _actions$: Actions,
     private _taskService: TaskService,
+    private _projectService: ProjectService,
     private _store$: Store<any>,
     private _persistenceService: PersistenceService,
     private _taskRepeatCfgService: TaskRepeatCfgService,

@@ -73,8 +73,10 @@ import {
   selectTaskById,
   selectTaskByIssueId,
   selectTaskEntities,
+  selectTasksByRepeatConfigId,
   selectTasksWithMissingIssueData,
   selectTasksWorkedOnOrDoneFlat,
+  selectTaskWithSubTasksByRepeatConfigId,
   selectTodaysDoneTasksWithSubTasks,
   selectTodaysTasksWithSubTasks,
   selectTodaysUnDoneTasksWithSubTasks,
@@ -451,6 +453,14 @@ export class TaskService {
     return this._store.pipe(select(selectTaskById, {id}), take(1));
   }
 
+  getTasksByRepeatCfgId$(repeatCfgId: string): Observable<Task[]> {
+    return this._store.pipe(select(selectTasksByRepeatConfigId, {repeatCfgId}), take(1));
+  }
+
+  getTasksWithSubTasksByRepeatCfgId$(repeatCfgId: string): Observable<TaskWithSubTasks[]> {
+    return this._store.pipe(select(selectTaskWithSubTasksByRepeatConfigId, {repeatCfgId}));
+  }
+
   getTasksWorkedOnOrDoneFlat$(day: string = getWorklogStr()): Observable<TaskWithSubTasks[]> {
     return this._store.pipe(select(selectTasksWorkedOnOrDoneFlat, {day}));
   }
@@ -622,7 +632,7 @@ export class TaskService {
   }
 
 
-   createNewTaskWithDefaults(title: string, additional: Partial<Task> = {}): Task {
+  createNewTaskWithDefaults(title: string, additional: Partial<Task> = {}): Task {
     return this._shortSyntax({
       // NOTE needs to be created every time
       ...DEFAULT_TASK,
