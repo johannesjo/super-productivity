@@ -1,3 +1,18 @@
+## [2.8.4](https://github.com/johannesjo/super-productivity/compare/v2.8.3...v2.8.4) (2019-07-01)
+
+
+### Bug Fixes
+
+* error when addTaskBar is empty and enter is pressed ([c21f814](https://github.com/johannesjo/super-productivity/commit/c21f814))
+* fix adding reminders not working when scheduled task panel is open ([f931e68](https://github.com/johannesjo/super-productivity/commit/f931e68))
+
+
+### Features
+
+* improve more buttons ([c207f00](https://github.com/johannesjo/super-productivity/commit/c207f00))
+
+
+
 ## [2.8.3](https://github.com/johannesjo/super-productivity/compare/v2.8.2...v2.8.3) (2019-06-30)
 
 
