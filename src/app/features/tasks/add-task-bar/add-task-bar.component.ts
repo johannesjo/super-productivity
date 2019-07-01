@@ -87,7 +87,6 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
   }
 
   onBlur(ev) {
-    console.log(ev);
     if (ev.relatedTarget && ev.relatedTarget.className.includes('switch-add-to-btn')) {
       this.inputEl.nativeElement.focus();
     } else if (ev.relatedTarget && ev.relatedTarget.className.includes('mat-option')) {
@@ -111,7 +110,8 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
 
   async addTask() {
     this._isAddInProgress = true;
-    const issueOrTitle = this.taskSuggestionsCtrl.value as string | SearchResultItem;
+    const issueOrTitle = this.taskSuggestionsCtrl.value || '' as (string | SearchResultItem);
+
     if (typeof issueOrTitle === 'string') {
       if (issueOrTitle.length > 0) {
         this.doubleEnterCount = 0;
