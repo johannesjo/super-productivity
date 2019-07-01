@@ -1,8 +1,7 @@
 import {ProjectState} from '../../features/project/store/project.reducer';
 import {TaskState} from '../../features/tasks/store/task.reducer';
 import {GlobalConfigState} from '../../features/config/global-config.model';
-import {EntityState} from '@ngrx/entity';
-import {Task, TaskArchive} from '../../features/tasks/task.model';
+import {TaskArchive} from '../../features/tasks/task.model';
 import {IssueStateMap} from '../../features/issue/issue';
 import {BookmarkState} from '../../features/bookmark/store/bookmark.reducer';
 import {NoteState} from '../../features/note/store/note.reducer';

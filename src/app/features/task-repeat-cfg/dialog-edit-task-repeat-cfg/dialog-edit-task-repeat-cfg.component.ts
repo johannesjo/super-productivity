@@ -5,7 +5,7 @@ import {SnackService} from '../../../core/snack/snack.service';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material';
 import {TaskRepeatCfgService} from '../task-repeat-cfg.service';
 import {DEFAULT_TASK_REPEAT_CFG, TaskRepeatCfgCopy} from '../task-repeat-cfg.model';
-import {Observable, Subscription} from 'rxjs';
+import {Subscription} from 'rxjs';
 import {FormlyFieldConfig, FormlyFormOptions} from '@ngx-formly/core';
 import {FormGroup} from '@angular/forms';
 import {TASK_REPEAT_CFG_FORM_CFG} from './task-repeat-cfg-form.const';

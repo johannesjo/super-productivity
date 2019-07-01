@@ -1,7 +1,7 @@
-import { createEntityAdapter, EntityAdapter, EntityState } from '@ngrx/entity';
-import { BookmarkActions, BookmarkActionTypes } from './bookmark.actions';
-import { Bookmark } from '../bookmark.model';
-import { createFeatureSelector, createSelector } from '@ngrx/store';
+import {createEntityAdapter, EntityAdapter, EntityState} from '@ngrx/entity';
+import {BookmarkActions, BookmarkActionTypes} from './bookmark.actions';
+import {Bookmark} from '../bookmark.model';
+import {createFeatureSelector, createSelector} from '@ngrx/store';
 
 export const BOOKMARK_FEATURE_NAME = 'bookmark';
 

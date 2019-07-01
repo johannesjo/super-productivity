@@ -1,6 +1,5 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { ALL_THEMES } from '../../app.constants';
-
+import {ChangeDetectionStrategy, Component} from '@angular/core';
+import {ALL_THEMES} from '../../app.constants';
 
 
 @Component({

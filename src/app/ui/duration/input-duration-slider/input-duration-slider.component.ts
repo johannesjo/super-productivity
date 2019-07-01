@@ -12,7 +12,7 @@ import {
 } from '@angular/core';
 import shortid from 'shortid';
 import * as moment from 'moment-mini';
-import { dotAnimation } from './dot.ani';
+import {dotAnimation} from './dot.ani';
 
 @Component({
   selector: 'input-duration-slider',
@@ -31,7 +31,7 @@ export class InputDurationSliderComponent implements OnInit, OnDestroy {
   endHandler: () => void;
   moveHandler: (ev: any) => void;
 
-  @ViewChild('circleEl', { static: true }) circleEl: ElementRef;
+  @ViewChild('circleEl', {static: true}) circleEl: ElementRef;
 
   @Input() label: string;
   @Output() modelChange: EventEmitter<number> = new EventEmitter();

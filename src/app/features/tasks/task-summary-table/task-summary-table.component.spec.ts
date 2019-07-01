@@ -1,6 +1,6 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import {async, ComponentFixture, TestBed} from '@angular/core/testing';
 
-import { TaskSummaryTableComponent } from './task-summary-table.component';
+import {TaskSummaryTableComponent} from './task-summary-table.component';
 
 describe('TaskSummaryTableComponent', () => {
   let component: TaskSummaryTableComponent;
@@ -8,9 +8,9 @@ describe('TaskSummaryTableComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ TaskSummaryTableComponent ]
+      declarations: [TaskSummaryTableComponent]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

@@ -1,6 +1,6 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import {async, ComponentFixture, TestBed} from '@angular/core/testing';
 
-import { DialogEditTaskRepeatCfgComponent } from './dialog-edit-task-repeat-cfg.component';
+import {DialogEditTaskRepeatCfgComponent} from './dialog-edit-task-repeat-cfg.component';
 
 describe('DialogEditTaskRepeatCfgComponent', () => {
   let component: DialogEditTaskRepeatCfgComponent;
@@ -8,9 +8,9 @@ describe('DialogEditTaskRepeatCfgComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ DialogEditTaskRepeatCfgComponent ]
+      declarations: [DialogEditTaskRepeatCfgComponent]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

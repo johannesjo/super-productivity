@@ -186,7 +186,7 @@ export function projectReducer(
 
     case ProjectActionTypes.UpdateLastCompletedDay: {
       const {id, date} = action.payload;
-      console.log(id,date);
+      console.log(id, date);
       return projectAdapter.updateOne({
         id,
         changes: {

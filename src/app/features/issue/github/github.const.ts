@@ -1,6 +1,6 @@
 // TODO use as a checklist
-import { GithubCfg } from './github';
-import { FormlyFieldConfig } from '@ngx-formly/core';
+import {GithubCfg} from './github';
+import {FormlyFieldConfig} from '@ngx-formly/core';
 
 export const DEFAULT_GITHUB_CFG: GithubCfg = {
   repo: null,

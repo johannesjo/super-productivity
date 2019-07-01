@@ -13,12 +13,6 @@ import {ObstructionModule} from './obstruction/obstruction.module';
 import {ImprovementModule} from './improvement/improvement.module';
 import {ChartsModule} from 'ng2-charts';
 import {RouterModule} from '@angular/router';
-import {MetricService} from './metric.service';
-import {ImprovementService} from './improvement/improvement.service';
-import {ObstructionService} from './obstruction/obstruction.service';
-import {combineLatest} from 'rxjs';
-import {Metric} from './metric.model';
-import {take} from 'rxjs/operators';
 
 @NgModule({
   imports: [

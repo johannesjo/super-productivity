@@ -71,7 +71,8 @@
 
 
         <section *ngIf="(scheduledTaskService.scheduledTasksForOtherProjects$|async)?.length">
-          <h2 class="mat-h2" style="text-align: center; margin-top: 16px;">From other Projects</h2>
+          <h2 class="mat-h2"
+              style="text-align: center; margin-top: 16px;">From other Projects</h2>
           <div class="tasks"
                [@standardList]="(scheduledTaskService.scheduledTasksForOtherProjects$|async)?.length">
             <mat-card

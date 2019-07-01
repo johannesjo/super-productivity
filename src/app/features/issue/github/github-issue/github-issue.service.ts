@@ -1,16 +1,16 @@
-import { Injectable } from '@angular/core';
-import { GithubIssue } from './github-issue.model';
-import { select, Store } from '@ngrx/store';
-import { GithubIssueActionTypes } from './store/github-issue.actions';
-import { PersistenceService } from '../../../../core/persistence/persistence.service';
-import { GithubIssueState, selectGithubIssueById } from './store/github-issue.reducer';
-import { take } from 'rxjs/operators';
-import { GithubApiService } from '../github-api.service';
-import { SnackService } from '../../../../core/snack/snack.service';
-import { GithubCfg } from '../github';
-import { Observable } from 'rxjs';
-import { GITHUB_TYPE } from '../../issue.const';
-import { truncate } from '../../../../util/truncate';
+import {Injectable} from '@angular/core';
+import {GithubIssue} from './github-issue.model';
+import {select, Store} from '@ngrx/store';
+import {GithubIssueActionTypes} from './store/github-issue.actions';
+import {PersistenceService} from '../../../../core/persistence/persistence.service';
+import {GithubIssueState, selectGithubIssueById} from './store/github-issue.reducer';
+import {take} from 'rxjs/operators';
+import {GithubApiService} from '../github-api.service';
+import {SnackService} from '../../../../core/snack/snack.service';
+import {GithubCfg} from '../github';
+import {Observable} from 'rxjs';
+import {GITHUB_TYPE} from '../../issue.const';
+import {truncate} from '../../../../util/truncate';
 
 
 @Injectable({

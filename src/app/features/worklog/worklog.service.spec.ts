@@ -1,6 +1,6 @@
-import { TestBed } from '@angular/core/testing';
+import {TestBed} from '@angular/core/testing';
 
-import { WorklogService } from './worklog.service';
+import {WorklogService} from './worklog.service';
 
 describe('WorklogService', () => {
   beforeEach(() => TestBed.configureTestingModule({}));

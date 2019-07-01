@@ -1,6 +1,6 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import {async, ComponentFixture, TestBed} from '@angular/core/testing';
 
-import { InlineInputComponent } from './inline-input.component';
+import {InlineInputComponent} from './inline-input.component';
 
 describe('InlineInputComponent', () => {
   let component: InlineInputComponent;
@@ -8,9 +8,9 @@ describe('InlineInputComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ InlineInputComponent ]
+      declarations: [InlineInputComponent]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

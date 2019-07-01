@@ -1,5 +1,5 @@
-import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import {NgModule} from '@angular/core';
+import {CommonModule} from '@angular/common';
 
 @NgModule({
   declarations: [],
@@ -7,4 +7,5 @@ import { CommonModule } from '@angular/common';
     CommonModule
   ]
 })
-export class ImexMetaModule { }
+export class ImexMetaModule {
+}

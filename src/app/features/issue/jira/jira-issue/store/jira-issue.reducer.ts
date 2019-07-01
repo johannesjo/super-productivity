@@ -1,10 +1,10 @@
-import { createEntityAdapter, EntityAdapter, EntityState } from '@ngrx/entity';
-import { JiraIssueActions, JiraIssueActionTypes } from './jira-issue.actions';
-import { JiraIssue } from '../jira-issue.model';
-import { createFeatureSelector, createSelector } from '@ngrx/store';
-import { TaskActions, TaskActionTypes } from '../../../../tasks/store/task.actions';
-import { IssueProviderKey } from '../../../issue';
-import { JIRA_TYPE } from '../../../issue.const';
+import {createEntityAdapter, EntityAdapter, EntityState} from '@ngrx/entity';
+import {JiraIssueActions, JiraIssueActionTypes} from './jira-issue.actions';
+import {JiraIssue} from '../jira-issue.model';
+import {createFeatureSelector, createSelector} from '@ngrx/store';
+import {TaskActions, TaskActionTypes} from '../../../../tasks/store/task.actions';
+import {IssueProviderKey} from '../../../issue';
+import {JIRA_TYPE} from '../../../issue.const';
 
 export const JIRA_ISSUE_FEATURE_NAME: IssueProviderKey = JIRA_TYPE;
 

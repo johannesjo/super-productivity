@@ -1,4 +1,4 @@
-import { DropPasteInput, DropPasteInputType } from '../../core/drop-paste-input/drop-paste-input';
+import {DropPasteInput, DropPasteInputType} from '../../core/drop-paste-input/drop-paste-input';
 
 export type BookmarkType = DropPasteInputType;
 

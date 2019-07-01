@@ -1,5 +1,5 @@
-import { Action } from '@ngrx/store';
-import { SnackParams } from '../snack.model';
+import {Action} from '@ngrx/store';
+import {SnackParams} from '../snack.model';
 
 export enum SnackActionTypes {
   SnackOpen = '[Snack] SnackOpen',

@@ -9,7 +9,6 @@ import {
   UpdateTaskRepeatCfg
 } from './task-repeat-cfg.actions';
 import {selectTaskRepeatCfgFeatureState} from './task-repeat-cfg.reducer';
-import {selectCurrentProjectId} from '../../project/store/project.reducer';
 import {PersistenceService} from '../../../core/persistence/persistence.service';
 import {Task, TaskArchive, TaskWithSubTasks} from '../../tasks/task.model';
 import {AddTask, MoveToArchive, RemoveTaskReminder, UpdateTask} from '../../tasks/store/task.actions';
@@ -128,7 +127,7 @@ export class TaskRepeatCfgEffects {
         TaskRepeatCfgActionTypes.DeleteTaskRepeatCfg,
       ),
       withLatestFrom(
-       this._projectService.currentId$,
+        this._projectService.currentId$,
       ),
       tap(([a, projectId]: [DeleteTaskRepeatCfg, string]) => {
         this._removeRepeatCfgFromArchiveTasks.bind(this)(a.payload.id, projectId);

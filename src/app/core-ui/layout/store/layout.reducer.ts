@@ -1,5 +1,5 @@
-import { LayoutActions, LayoutActionTypes } from './layout.actions';
-import { createFeatureSelector, createSelector } from '@ngrx/store';
+import {LayoutActions, LayoutActionTypes} from './layout.actions';
+import {createFeatureSelector, createSelector} from '@ngrx/store';
 
 export const LAYOUT_FEATURE_NAME = 'layout';
 

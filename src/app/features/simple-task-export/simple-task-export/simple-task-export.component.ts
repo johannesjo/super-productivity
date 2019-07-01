@@ -1,16 +1,16 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
-import { msToString } from '../../../ui/duration/ms-to-string.pipe';
-import { TaskWithSubTasks } from '../../tasks/task.model';
-import { ProjectService } from '../../project/project.service';
-import { Subscription } from 'rxjs';
-import { SimpleSummarySettingsCopy } from '../../project/project.model';
-import { SIMPLE_SUMMARY_DEFAULTS } from '../../project/project.const';
+import {ChangeDetectionStrategy, Component, EventEmitter, Input, OnDestroy, OnInit, Output} from '@angular/core';
+import {msToString} from '../../../ui/duration/ms-to-string.pipe';
+import {TaskWithSubTasks} from '../../tasks/task.model';
+import {ProjectService} from '../../project/project.service';
+import {Subscription} from 'rxjs';
+import {SimpleSummarySettingsCopy} from '../../project/project.model';
+import {SIMPLE_SUMMARY_DEFAULTS} from '../../project/project.const';
 import Clipboard from 'clipboard';
-import { SnackService } from '../../../core/snack/snack.service';
-import { getWorklogStr } from '../../../util/get-work-log-str';
+import {SnackService} from '../../../core/snack/snack.service';
+import {getWorklogStr} from '../../../util/get-work-log-str';
 import * as moment from 'moment-mini';
 import 'moment-duration-format';
-import { roundDuration } from '../../../util/round-duration';
+import {roundDuration} from '../../../util/round-duration';
 
 const LINE_SEPARATOR = '\n';
 

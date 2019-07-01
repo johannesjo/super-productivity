@@ -1,9 +1,9 @@
-import { ChangeDetectionStrategy, Component, Input, OnInit } from '@angular/core';
-import { TaskWithSubTasks } from '../../../../tasks/task.model';
-import { GithubIssueService } from '../github-issue.service';
-import { GithubApiService } from '../../github-api.service';
-import { GithubIssue } from '../github-issue.model';
-import { expandAnimation } from '../../../../../ui/animations/expand.ani';
+import {ChangeDetectionStrategy, Component, Input, OnInit} from '@angular/core';
+import {TaskWithSubTasks} from '../../../../tasks/task.model';
+import {GithubIssueService} from '../github-issue.service';
+import {GithubApiService} from '../../github-api.service';
+import {GithubIssue} from '../github-issue.model';
+import {expandAnimation} from '../../../../../ui/animations/expand.ani';
 
 @Component({
   selector: 'github-issue-content',

@@ -1,7 +1,7 @@
-import { ChangeDetectionStrategy, Component, Inject, OnInit } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { IS_ELECTRON } from '../../../app.constants';
-import { AttachmentCopy, AttachmentType } from '../attachment.model';
+import {ChangeDetectionStrategy, Component, Inject, OnInit} from '@angular/core';
+import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
+import {IS_ELECTRON} from '../../../app.constants';
+import {AttachmentCopy, AttachmentType} from '../attachment.model';
 
 interface AttachmentSelectType {
   type: AttachmentType;

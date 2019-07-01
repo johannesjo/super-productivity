@@ -1,13 +1,13 @@
-import { ChangeDetectionStrategy, Component, HostListener, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { NoteService } from '../note.service';
-import { DragulaService } from 'ng2-dragula';
-import { Subscription } from 'rxjs';
-import { MatButton } from '@angular/material/button';
-import { MatDialog } from '@angular/material/dialog';
-import { DialogAddNoteComponent } from '../dialog-add-note/dialog-add-note.component';
-import { standardListAnimation } from '../../../ui/animations/standard-list.ani';
-import { fadeAnimation } from '../../../ui/animations/fade.ani';
-import { Note } from '../note.model';
+import {ChangeDetectionStrategy, Component, HostListener, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {NoteService} from '../note.service';
+import {DragulaService} from 'ng2-dragula';
+import {Subscription} from 'rxjs';
+import {MatButton} from '@angular/material/button';
+import {MatDialog} from '@angular/material/dialog';
+import {DialogAddNoteComponent} from '../dialog-add-note/dialog-add-note.component';
+import {standardListAnimation} from '../../../ui/animations/standard-list.ani';
+import {fadeAnimation} from '../../../ui/animations/fade.ani';
+import {Note} from '../note.model';
 
 @Component({
   selector: 'notes',
@@ -22,7 +22,7 @@ export class NotesComponent implements OnInit, OnDestroy {
   isDragOver = false;
   dragEnterTarget: HTMLElement;
 
-  @ViewChild('buttonEl', { static: true }) buttonEl: MatButton;
+  @ViewChild('buttonEl', {static: true}) buttonEl: MatButton;
   private _subs = new Subscription();
 
   constructor(

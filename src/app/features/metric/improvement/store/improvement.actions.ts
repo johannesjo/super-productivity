@@ -1,6 +1,6 @@
-import { Action } from '@ngrx/store';
-import { Update } from '@ngrx/entity';
-import { Improvement, ImprovementState } from '../improvement.model';
+import {Action} from '@ngrx/store';
+import {Update} from '@ngrx/entity';
+import {Improvement, ImprovementState} from '../improvement.model';
 
 export enum ImprovementActionTypes {
   LoadImprovementState = '[Improvement] Load Improvement State',

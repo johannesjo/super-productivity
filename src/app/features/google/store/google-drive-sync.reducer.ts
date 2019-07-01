@@ -1,5 +1,5 @@
-import { Action, createFeatureSelector, createSelector } from '@ngrx/store';
-import { GoogleDriveSyncActionTypes } from './google-drive-sync.actions';
+import {Action, createFeatureSelector, createSelector} from '@ngrx/store';
+import {GoogleDriveSyncActionTypes} from './google-drive-sync.actions';
 
 export const GOOGLE_DRIVE_FEATURE_NAME = 'googleDrive';
 

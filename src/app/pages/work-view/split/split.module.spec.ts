@@ -1,4 +1,4 @@
-import { SplitModule } from './split.module';
+import {SplitModule} from './split.module';
 
 describe('SplitModule', () => {
   let splitModule: SplitModule;

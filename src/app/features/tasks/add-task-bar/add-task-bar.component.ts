@@ -8,17 +8,17 @@ import {
   Output,
   ViewChild
 } from '@angular/core';
-import { FormControl } from '@angular/forms';
-import { TaskService } from '../task.service';
-import { debounceTime, switchMap, tap } from 'rxjs/operators';
-import { JiraIssue } from '../../issue/jira/jira-issue/jira-issue.model';
-import { BehaviorSubject, Observable } from 'rxjs';
-import { IssueService } from '../../issue/issue.service';
-import { SearchResultItem } from '../../issue/issue';
-import { SnackService } from '../../../core/snack/snack.service';
-import { JiraApiService } from '../../issue/jira/jira-api.service';
-import { JIRA_TYPE } from '../../issue/issue.const';
-import { truncate } from '../../../util/truncate';
+import {FormControl} from '@angular/forms';
+import {TaskService} from '../task.service';
+import {debounceTime, switchMap, tap} from 'rxjs/operators';
+import {JiraIssue} from '../../issue/jira/jira-issue/jira-issue.model';
+import {BehaviorSubject, Observable} from 'rxjs';
+import {IssueService} from '../../issue/issue.service';
+import {SearchResultItem} from '../../issue/issue';
+import {SnackService} from '../../../core/snack/snack.service';
+import {JiraApiService} from '../../issue/jira/jira-api.service';
+import {JIRA_TYPE} from '../../issue/issue.const';
+import {truncate} from '../../../util/truncate';
 
 @Component({
   selector: 'add-task-bar',
@@ -33,7 +33,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
   @Output() blur: EventEmitter<any> = new EventEmitter();
   @Output() done: EventEmitter<any> = new EventEmitter();
 
-  @ViewChild('inputEl', { static: true }) inputEl;
+  @ViewChild('inputEl', {static: true}) inputEl;
 
   isLoading$ = new BehaviorSubject(false);
   doubleEnterCount = 0;

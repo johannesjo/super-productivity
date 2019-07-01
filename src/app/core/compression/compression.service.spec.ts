@@ -1,6 +1,6 @@
-import { TestBed } from '@angular/core/testing';
+import {TestBed} from '@angular/core/testing';
 
-import { CompressionService } from './compression.service';
+import {CompressionService} from './compression.service';
 
 describe('CompressionService', () => {
   beforeEach(() => TestBed.configureTestingModule({}));

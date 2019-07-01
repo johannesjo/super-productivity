@@ -1,4 +1,4 @@
-import {Component, OnInit, ChangeDetectionStrategy, Input, HostBinding} from '@angular/core';
+import {ChangeDetectionStrategy, Component, HostBinding} from '@angular/core';
 import {fadeAnimation} from '../animations/fade.ani';
 
 @Component({

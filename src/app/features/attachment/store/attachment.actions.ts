@@ -1,7 +1,7 @@
-import { Action } from '@ngrx/store';
-import { Update } from '@ngrx/entity';
-import { Attachment } from '../attachment.model';
-import { AttachmentState } from './attachment.reducer';
+import {Action} from '@ngrx/store';
+import {Update} from '@ngrx/entity';
+import {Attachment} from '../attachment.model';
+import {AttachmentState} from './attachment.reducer';
 
 export enum AttachmentActionTypes {
   LoadAttachmentState = '[Attachment] Load Attachment State',

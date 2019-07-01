@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import {ChangeDetectionStrategy, Component, OnInit} from '@angular/core';
 import {TaskService} from '../tasks/task.service';
 
 @Component({
@@ -11,7 +11,8 @@ export class ProcrastinationComponent implements OnInit {
 
   constructor(
     public taskService: TaskService,
-  ) { }
+  ) {
+  }
 
   ngOnInit() {
   }

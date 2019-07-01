@@ -1,5 +1,5 @@
-import { Injectable } from '@angular/core';
-import { loadFromLs, saveToLs } from '../../core/persistence/local-storage';
+import {Injectable} from '@angular/core';
+import {loadFromLs, saveToLs} from '../../core/persistence/local-storage';
 import {
   STORAGE_BACKLOG_TASKS,
   STORAGE_CONFIG,
@@ -10,30 +10,30 @@ import {
   STORAGE_TASKS,
   STORAGE_THEME
 } from './migrate.const';
-import { MatDialog } from '@angular/material/dialog';
-import { LS_IS_V1_MIGRATE } from '../../core/persistence/ls-keys.const';
-import { SnackService } from '../../core/snack/snack.service';
-import { PersistenceService } from '../../core/persistence/persistence.service';
-import { SyncService } from '../../imex/sync/sync.service';
-import { OldDataExport, OldGithubSettings, OldJiraSettings, OldProject, OldTask } from './migrate.model';
-import { ProjectService } from '../../features/project/project.service';
-import { JiraCfg } from '../../features/issue/jira/jira';
-import { DEFAULT_JIRA_CFG } from '../../features/issue/jira/jira.const';
-import { initialTaskState } from '../../features/tasks/store/task.reducer';
-import { EntityState } from '@ngrx/entity';
-import { DEFAULT_TASK, Task } from '../../features/tasks/task.model';
+import {MatDialog} from '@angular/material/dialog';
+import {LS_IS_V1_MIGRATE} from '../../core/persistence/ls-keys.const';
+import {SnackService} from '../../core/snack/snack.service';
+import {PersistenceService} from '../../core/persistence/persistence.service';
+import {SyncService} from '../../imex/sync/sync.service';
+import {OldDataExport, OldGithubSettings, OldJiraSettings, OldProject, OldTask} from './migrate.model';
+import {ProjectService} from '../../features/project/project.service';
+import {JiraCfg} from '../../features/issue/jira/jira';
+import {DEFAULT_JIRA_CFG} from '../../features/issue/jira/jira.const';
+import {initialTaskState} from '../../features/tasks/store/task.reducer';
+import {EntityState} from '@ngrx/entity';
+import {DEFAULT_TASK, Task} from '../../features/tasks/task.model';
 import * as moment from 'moment-mini';
-import { JiraIssue } from '../../features/issue/jira/jira-issue/jira-issue.model';
-import { GithubIssue } from '../../features/issue/github/github-issue/github-issue.model';
-import { IssueProviderKey } from '../../features/issue/issue';
-import { GithubCfg } from '../../features/issue/github/github';
-import { DEFAULT_GITHUB_CFG } from '../../features/issue/github/github.const';
-import { GithubApiService } from '../../features/issue/github/github-api.service';
-import { first } from 'rxjs/operators';
-import { DialogMigrateComponent } from './dialog-migrate/dialog-migrate.component';
-import { JiraIssueState } from '../../features/issue/jira/jira-issue/store/jira-issue.reducer';
-import { GithubIssueState } from '../../features/issue/github/github-issue/store/github-issue.reducer';
-import { GITHUB_TYPE } from '../../features/issue/issue.const';
+import {JiraIssue} from '../../features/issue/jira/jira-issue/jira-issue.model';
+import {GithubIssue} from '../../features/issue/github/github-issue/github-issue.model';
+import {IssueProviderKey} from '../../features/issue/issue';
+import {GithubCfg} from '../../features/issue/github/github';
+import {DEFAULT_GITHUB_CFG} from '../../features/issue/github/github.const';
+import {GithubApiService} from '../../features/issue/github/github-api.service';
+import {first} from 'rxjs/operators';
+import {DialogMigrateComponent} from './dialog-migrate/dialog-migrate.component';
+import {JiraIssueState} from '../../features/issue/jira/jira-issue/store/jira-issue.reducer';
+import {GithubIssueState} from '../../features/issue/github/github-issue/store/github-issue.reducer';
+import {GITHUB_TYPE} from '../../features/issue/issue.const';
 
 @Injectable({
   providedIn: 'root',

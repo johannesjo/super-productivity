@@ -1,6 +1,6 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import {async, ComponentFixture, TestBed} from '@angular/core/testing';
 
-import { MetricPageComponent } from './metric-page.component';
+import {MetricPageComponent} from './metric-page.component';
 
 describe('MetricPageComponent', () => {
   let component: MetricPageComponent;
@@ -8,9 +8,9 @@ describe('MetricPageComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ MetricPageComponent ]
+      declarations: [MetricPageComponent]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

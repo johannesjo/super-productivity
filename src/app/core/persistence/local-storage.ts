@@ -1,4 +1,4 @@
-import { LS_LAST_ACTIVE } from './ls-keys.const';
+import {LS_LAST_ACTIVE} from './ls-keys.const';
 
 export const loadFromLs = (key) => {
   const serializedState = localStorage.getItem(key);

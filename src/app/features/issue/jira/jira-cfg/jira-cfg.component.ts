@@ -1,17 +1,17 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
-import { ConfigFormSection, GlobalConfigSectionKey } from '../../../config/global-config.model';
-import { ProjectCfgFormKey } from '../../../project/project.model';
-import { FormlyFieldConfig, FormlyFormOptions } from '@ngx-formly/core';
-import { FormControl, FormGroup } from '@angular/forms';
-import { JiraCfg } from '../jira';
-import { expandAnimation } from '../../../../ui/animations/expand.ani';
-import { BehaviorSubject, Observable, Subscription } from 'rxjs';
-import { SearchResultItem } from '../../issue';
-import { catchError, debounceTime, map, switchMap, tap } from 'rxjs/operators';
-import { JiraApiService } from '../jira-api.service';
-import { DEFAULT_JIRA_CFG } from '../jira.const';
-import { JiraIssue } from '../jira-issue/jira-issue.model';
-import { SnackService } from '../../../../core/snack/snack.service';
+import {ChangeDetectionStrategy, Component, EventEmitter, Input, OnDestroy, OnInit, Output} from '@angular/core';
+import {ConfigFormSection, GlobalConfigSectionKey} from '../../../config/global-config.model';
+import {ProjectCfgFormKey} from '../../../project/project.model';
+import {FormlyFieldConfig, FormlyFormOptions} from '@ngx-formly/core';
+import {FormControl, FormGroup} from '@angular/forms';
+import {JiraCfg} from '../jira';
+import {expandAnimation} from '../../../../ui/animations/expand.ani';
+import {BehaviorSubject, Observable, Subscription} from 'rxjs';
+import {SearchResultItem} from '../../issue';
+import {catchError, debounceTime, map, switchMap, tap} from 'rxjs/operators';
+import {JiraApiService} from '../jira-api.service';
+import {DEFAULT_JIRA_CFG} from '../jira.const';
+import {JiraIssue} from '../jira-issue/jira-issue.model';
+import {SnackService} from '../../../../core/snack/snack.service';
 
 @Component({
   selector: 'jira-cfg',

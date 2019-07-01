@@ -1,6 +1,6 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import {async, ComponentFixture, TestBed} from '@angular/core/testing';
 
-import { ChipListInputComponent } from './chip-list-input.component';
+import {ChipListInputComponent} from './chip-list-input.component';
 
 describe('ChipListInputComponent', () => {
   let component: ChipListInputComponent;
@@ -8,9 +8,9 @@ describe('ChipListInputComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ ChipListInputComponent ]
+      declarations: [ChipListInputComponent]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

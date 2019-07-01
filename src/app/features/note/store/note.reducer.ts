@@ -1,7 +1,7 @@
-import { createEntityAdapter, EntityAdapter, EntityState } from '@ngrx/entity';
-import { Note } from '../note.model';
-import { NoteActions, NoteActionTypes } from './note.actions';
-import { createFeatureSelector, createSelector } from '@ngrx/store';
+import {createEntityAdapter, EntityAdapter, EntityState} from '@ngrx/entity';
+import {Note} from '../note.model';
+import {NoteActions, NoteActionTypes} from './note.actions';
+import {createFeatureSelector, createSelector} from '@ngrx/store';
 
 export interface NoteState extends EntityState<Note> {
   // additional entities state properties

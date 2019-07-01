@@ -1,5 +1,5 @@
-import { Directive, ElementRef, HostListener, Input, Renderer2 } from '@angular/core';
-import { getCoords } from './get-coords';
+import {Directive, ElementRef, HostListener, Input, Renderer2} from '@angular/core';
+import {getCoords} from './get-coords';
 
 const LARGE_IMG_ID = 'enlarged-img';
 

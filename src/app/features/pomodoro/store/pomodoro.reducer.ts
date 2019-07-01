@@ -1,5 +1,5 @@
-import { PomodoroActions, PomodoroActionTypes } from './pomodoro.actions';
-import { createFeatureSelector, createSelector } from '@ngrx/store';
+import {PomodoroActions, PomodoroActionTypes} from './pomodoro.actions';
+import {createFeatureSelector, createSelector} from '@ngrx/store';
 
 export const POMODORO_FEATURE_NAME = 'pomodoro';
 

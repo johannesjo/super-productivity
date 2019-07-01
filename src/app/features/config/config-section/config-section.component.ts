@@ -12,14 +12,14 @@ import {
   ViewChild,
   ViewContainerRef
 } from '@angular/core';
-import { expandAnimation } from '../../../ui/animations/expand.ani';
-import { ConfigFormSection, GlobalConfigSectionKey } from '../global-config.model';
-import { ProjectCfgFormKey } from '../../project/project.model';
-import { GoogleSyncCfgComponent } from '../../google/google-sync-cfg/google-sync-cfg.component';
-import { JiraCfgComponent } from '../../issue/jira/jira-cfg/jira-cfg.component';
-import { FileImexComponent } from '../../../imex/file-imex/file-imex.component';
-import { ProjectService } from '../../project/project.service';
-import { Subscription } from 'rxjs';
+import {expandAnimation} from '../../../ui/animations/expand.ani';
+import {ConfigFormSection, GlobalConfigSectionKey} from '../global-config.model';
+import {ProjectCfgFormKey} from '../../project/project.model';
+import {GoogleSyncCfgComponent} from '../../google/google-sync-cfg/google-sync-cfg.component';
+import {JiraCfgComponent} from '../../issue/jira/jira-cfg/jira-cfg.component';
+import {FileImexComponent} from '../../../imex/file-imex/file-imex.component';
+import {ProjectService} from '../../project/project.service';
+import {Subscription} from 'rxjs';
 
 @Component({
   selector: 'config-section',
@@ -33,7 +33,7 @@ export class ConfigSectionComponent implements OnInit, OnDestroy {
   @Input() cfg: any;
   @Output() save: EventEmitter<{ sectionKey: GlobalConfigSectionKey | ProjectCfgFormKey, config: any }> = new EventEmitter();
 
-  @ViewChild('customForm', { read: ViewContainerRef, static: true }) customFormRef: ViewContainerRef;
+  @ViewChild('customForm', {read: ViewContainerRef, static: true}) customFormRef: ViewContainerRef;
 
   isExpanded = false;
 

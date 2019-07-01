@@ -1,5 +1,5 @@
-import { bookmarkReducer, initialBookmarkState } from './bookmark.reducer';
-import { ToggleBookmarks } from './bookmark.actions';
+import {bookmarkReducer, initialBookmarkState} from './bookmark.reducer';
+import {ToggleBookmarks} from './bookmark.actions';
 
 describe('Bookmark Reducer', () => {
   describe('unknown action', () => {

@@ -1,5 +1,5 @@
 // tslint:disable:max-line-length
-import { ConfigFormSection } from '../global-config.model';
+import {ConfigFormSection} from '../global-config.model';
 
 export const TAKE_A_BREAK_FORM_CFG: ConfigFormSection = {
   title: 'Break Reminder',

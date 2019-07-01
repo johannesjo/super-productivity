@@ -1,13 +1,13 @@
-import { Injectable } from '@angular/core';
-import { Actions, Effect, ofType } from '@ngrx/effects';
-import { map, tap, withLatestFrom } from 'rxjs/operators';
-import { select, Store } from '@ngrx/store';
-import { DeleteObstructions, ObstructionActionTypes } from './obstruction.actions';
-import { selectObstructionFeatureState } from './obstruction.reducer';
-import { PersistenceService } from '../../../../core/persistence/persistence.service';
-import { selectCurrentProjectId } from '../../../project/store/project.reducer';
-import { MetricActionTypes } from '../../store/metric.actions';
-import { selectUnusedObstructionIds } from '../../store/metric.selectors';
+import {Injectable} from '@angular/core';
+import {Actions, Effect, ofType} from '@ngrx/effects';
+import {map, tap, withLatestFrom} from 'rxjs/operators';
+import {select, Store} from '@ngrx/store';
+import {DeleteObstructions, ObstructionActionTypes} from './obstruction.actions';
+import {selectObstructionFeatureState} from './obstruction.reducer';
+import {PersistenceService} from '../../../../core/persistence/persistence.service';
+import {selectCurrentProjectId} from '../../../project/store/project.reducer';
+import {MetricActionTypes} from '../../store/metric.actions';
+import {selectUnusedObstructionIds} from '../../store/metric.selectors';
 
 @Injectable()
 export class ObstructionEffects {

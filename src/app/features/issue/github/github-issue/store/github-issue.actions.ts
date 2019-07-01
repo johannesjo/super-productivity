@@ -1,8 +1,7 @@
-import { Action } from '@ngrx/store';
-import { Update } from '@ngrx/entity';
-import { GithubIssue } from '../github-issue.model';
-import { GithubIssueState } from './github-issue.reducer';
-import { AddTask, DeleteTask, MoveToArchive, RestoreTask } from '../../../../tasks/store/task.actions';
+import {Action} from '@ngrx/store';
+import {Update} from '@ngrx/entity';
+import {GithubIssue} from '../github-issue.model';
+import {GithubIssueState} from './github-issue.reducer';
 
 export enum GithubIssueActionTypes {
   LoadState = '[GithubIssue] Load GithubIssue State',

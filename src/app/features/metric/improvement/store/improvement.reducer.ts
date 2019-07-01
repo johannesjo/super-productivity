@@ -1,7 +1,7 @@
-import { createEntityAdapter, EntityAdapter } from '@ngrx/entity';
-import { ImprovementActions, ImprovementActionTypes } from './improvement.actions';
-import { Improvement, ImprovementState } from '../improvement.model';
-import { createFeatureSelector, createSelector } from '@ngrx/store';
+import {createEntityAdapter, EntityAdapter} from '@ngrx/entity';
+import {ImprovementActions, ImprovementActionTypes} from './improvement.actions';
+import {Improvement, ImprovementState} from '../improvement.model';
+import {createFeatureSelector, createSelector} from '@ngrx/store';
 
 export const IMPROVEMENT_FEATURE_NAME = 'improvement';
 

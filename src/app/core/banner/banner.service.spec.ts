@@ -1,6 +1,6 @@
-import { TestBed } from '@angular/core/testing';
+import {TestBed} from '@angular/core/testing';
 
-import { BannerService } from './banner.service';
+import {BannerService} from './banner.service';
 
 describe('BannerService', () => {
   beforeEach(() => TestBed.configureTestingModule({}));

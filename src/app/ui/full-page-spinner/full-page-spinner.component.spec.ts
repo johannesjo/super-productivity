@@ -1,6 +1,6 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import {async, ComponentFixture, TestBed} from '@angular/core/testing';
 
-import { FullPageSpinnerComponent } from './full-page-spinner.component';
+import {FullPageSpinnerComponent} from './full-page-spinner.component';
 
 describe('FullPageSpinnerComponent', () => {
   let component: FullPageSpinnerComponent;
@@ -8,9 +8,9 @@ describe('FullPageSpinnerComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ FullPageSpinnerComponent ]
+      declarations: [FullPageSpinnerComponent]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

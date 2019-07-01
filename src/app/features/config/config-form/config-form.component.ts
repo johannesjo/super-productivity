@@ -1,8 +1,8 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
-import { FormlyFieldConfig, FormlyFormOptions } from '@ngx-formly/core';
-import { FormGroup } from '@angular/forms';
-import { GlobalConfigSectionKey } from '../global-config.model';
-import { ProjectCfgFormKey } from '../../project/project.model';
+import {ChangeDetectionStrategy, Component, EventEmitter, Input, Output} from '@angular/core';
+import {FormlyFieldConfig, FormlyFormOptions} from '@ngx-formly/core';
+import {FormGroup} from '@angular/forms';
+import {GlobalConfigSectionKey} from '../global-config.model';
+import {ProjectCfgFormKey} from '../../project/project.model';
 
 @Component({
   selector: 'config-form',

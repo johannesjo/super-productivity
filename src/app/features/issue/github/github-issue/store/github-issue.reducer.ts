@@ -1,10 +1,10 @@
-import { createEntityAdapter, EntityAdapter, EntityState } from '@ngrx/entity';
-import { GithubIssueActions, GithubIssueActionTypes } from './github-issue.actions';
-import { GithubIssue } from '../github-issue.model';
-import { createFeatureSelector, createSelector } from '@ngrx/store';
-import { TaskActions, TaskActionTypes } from '../../../../tasks/store/task.actions';
-import { IssueProviderKey } from '../../../issue';
-import { GITHUB_TYPE, LEGACY_GITHUB_TYPE } from '../../../issue.const';
+import {createEntityAdapter, EntityAdapter, EntityState} from '@ngrx/entity';
+import {GithubIssueActions, GithubIssueActionTypes} from './github-issue.actions';
+import {GithubIssue} from '../github-issue.model';
+import {createFeatureSelector, createSelector} from '@ngrx/store';
+import {TaskActions, TaskActionTypes} from '../../../../tasks/store/task.actions';
+import {IssueProviderKey} from '../../../issue';
+import {GITHUB_TYPE, LEGACY_GITHUB_TYPE} from '../../../issue.const';
 
 export const GITHUB_ISSUE_FEATURE_NAME: IssueProviderKey = GITHUB_TYPE;
 

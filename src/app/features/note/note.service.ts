@@ -1,7 +1,7 @@
-import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
-import { Note } from './note.model';
-import { select, Store } from '@ngrx/store';
+import {Injectable} from '@angular/core';
+import {Observable} from 'rxjs';
+import {Note} from './note.model';
+import {select, Store} from '@ngrx/store';
 import {
   AddNote,
   AddNoteReminder,
@@ -16,13 +16,13 @@ import {
   UpdateNoteReminder
 } from './store/note.actions';
 import shortid from 'shortid';
-import { initialNoteState, NoteState, selectAllNotes, selectIsShowNotes, selectNoteById } from './store/note.reducer';
-import { PersistenceService } from '../../core/persistence/persistence.service';
-import { Actions, ofType } from '@ngrx/effects';
-import { take } from 'rxjs/operators';
-import { SnackService } from '../../core/snack/snack.service';
-import { createFromDrop, DropPasteInput } from '../../core/drop-paste-input/drop-paste-input';
-import { isImageUrl, isImageUrlSimple } from '../../util/is-image-url';
+import {initialNoteState, NoteState, selectAllNotes, selectIsShowNotes, selectNoteById} from './store/note.reducer';
+import {PersistenceService} from '../../core/persistence/persistence.service';
+import {Actions, ofType} from '@ngrx/effects';
+import {take} from 'rxjs/operators';
+import {SnackService} from '../../core/snack/snack.service';
+import {createFromDrop, DropPasteInput} from '../../core/drop-paste-input/drop-paste-input';
+import {isImageUrl, isImageUrlSimple} from '../../util/is-image-url';
 
 @Injectable({
   providedIn: 'root',

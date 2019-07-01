@@ -13,7 +13,7 @@ import {download} from '../../util/download';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class FileImexComponent {
-  @ViewChild('fileInput', { static: true }) fileInputRef: ElementRef;
+  @ViewChild('fileInput', {static: true}) fileInputRef: ElementRef;
 
   constructor(
     private _syncService: SyncService,

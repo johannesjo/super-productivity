@@ -7,7 +7,7 @@ import {GoogleModule} from '../../features/google/google.module';
 import {SimpleTaskExportModule} from '../../features/simple-task-export/simple-task-export.module';
 import {RouterModule} from '@angular/router';
 import {WorklogModule} from '../../features/worklog/worklog.module';
-import { MetricModule } from '../../features/metric/metric.module';
+import {MetricModule} from '../../features/metric/metric.module';
 import {TasksModule} from '../../features/tasks/tasks.module';
 
 @NgModule({
@@ -25,8 +25,7 @@ import {TasksModule} from '../../features/tasks/tasks.module';
   declarations: [
     DailySummaryComponent,
   ],
-  entryComponents: [
-  ]
+  entryComponents: []
 
 })
 export class DailySummaryModule {

@@ -1,9 +1,9 @@
-import { Directive, HostListener, Input } from '@angular/core';
-import { IS_ELECTRON } from '../../../app.constants';
-import { BookmarkType } from '../bookmark.model';
-import { ElectronService } from 'ngx-electron';
-import { SnackService } from '../../../core/snack/snack.service';
-import { IPC_EXEC } from '../../../../../electron/ipc-events.const';
+import {Directive, HostListener, Input} from '@angular/core';
+import {IS_ELECTRON} from '../../../app.constants';
+import {BookmarkType} from '../bookmark.model';
+import {ElectronService} from 'ngx-electron';
+import {SnackService} from '../../../core/snack/snack.service';
+import {IPC_EXEC} from '../../../../../electron/ipc-events.const';
 
 
 @Directive({

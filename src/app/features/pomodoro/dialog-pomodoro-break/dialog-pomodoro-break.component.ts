@@ -1,8 +1,8 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { MatDialogRef } from '@angular/material/dialog';
-import { PomodoroService } from '../pomodoro.service';
-import { filter, mapTo, takeUntil, withLatestFrom } from 'rxjs/operators';
-import { Observable, Subject, Subscription } from 'rxjs';
+import {ChangeDetectionStrategy, Component} from '@angular/core';
+import {MatDialogRef} from '@angular/material/dialog';
+import {PomodoroService} from '../pomodoro.service';
+import {filter, mapTo, takeUntil, withLatestFrom} from 'rxjs/operators';
+import {Observable, Subject, Subscription} from 'rxjs';
 
 @Component({
   selector: 'dialog-pomodoro-break',

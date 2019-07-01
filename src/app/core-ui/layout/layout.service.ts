@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import {Injectable} from '@angular/core';
 import {
   HideAddTaskBar,
   HideBookmarkBar,
@@ -7,9 +7,9 @@ import {
   ToggleAddTaskBar,
   ToggleBookmarkBar
 } from './store/layout.actions';
-import { Observable } from 'rxjs';
-import { select, Store } from '@ngrx/store';
-import { LayoutState, selectIsShowAddTaskBar, selectIsShowBookmarkBar } from './store/layout.reducer';
+import {Observable} from 'rxjs';
+import {select, Store} from '@ngrx/store';
+import {LayoutState, selectIsShowAddTaskBar, selectIsShowBookmarkBar} from './store/layout.reducer';
 
 @Injectable({
   providedIn: 'root',

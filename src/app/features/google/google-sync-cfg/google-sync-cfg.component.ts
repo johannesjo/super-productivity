@@ -1,12 +1,21 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
-import { GoogleApiService } from '../google-api.service';
-import { GlobalConfigService } from '../../config/global-config.service';
-import { GoogleDriveSyncService } from '../google-drive-sync.service';
-import { SnackService } from '../../../core/snack/snack.service';
-import { GoogleDriveSyncConfig } from '../../config/global-config.model';
-import { Subscription } from 'rxjs';
-import { expandFadeAnimation } from '../../../ui/animations/expand.ani';
-import { FormGroup } from '@angular/forms';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  EventEmitter,
+  OnDestroy,
+  OnInit,
+  Output,
+  ViewChild
+} from '@angular/core';
+import {GoogleApiService} from '../google-api.service';
+import {GlobalConfigService} from '../../config/global-config.service';
+import {GoogleDriveSyncService} from '../google-drive-sync.service';
+import {SnackService} from '../../../core/snack/snack.service';
+import {GoogleDriveSyncConfig} from '../../config/global-config.model';
+import {Subscription} from 'rxjs';
+import {expandFadeAnimation} from '../../../ui/animations/expand.ani';
+import {FormGroup} from '@angular/forms';
 
 @Component({
   selector: 'google-sync-cfg',
@@ -20,7 +29,7 @@ export class GoogleSyncCfgComponent implements OnInit, OnDestroy {
   cfg: GoogleDriveSyncConfig;
   loginPromise: Promise<any>;
 
-  @ViewChild('formRef', { static: true }) formRef: FormGroup;
+  @ViewChild('formRef', {static: true}) formRef: FormGroup;
 
   @Output() save = new EventEmitter<any>();
 

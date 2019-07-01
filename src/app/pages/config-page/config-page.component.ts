@@ -2,7 +2,12 @@ import {ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit
 import {GlobalConfigService} from '../../features/config/global-config.service';
 import {GLOBAL_CONFIG_FORM_CONFIG} from '../../features/config/global-config-form-config.const';
 import {ProjectService} from '../../features/project/project.service';
-import {ConfigFormConfig, ConfigFormSection, GlobalConfigSectionKey, GlobalConfigState} from '../../features/config/global-config.model';
+import {
+  ConfigFormConfig,
+  ConfigFormSection,
+  GlobalConfigSectionKey,
+  GlobalConfigState
+} from '../../features/config/global-config.model';
 import {Subscription} from 'rxjs';
 import {Project, ProjectAdvancedCfg, ProjectCfgFormKey} from '../../features/project/project.model';
 import {

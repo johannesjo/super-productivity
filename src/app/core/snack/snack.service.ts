@@ -1,7 +1,7 @@
-import { Injectable } from '@angular/core';
-import { Store } from '@ngrx/store';
-import { SnackClose, SnackOpen } from './store/snack.actions';
-import { SnackParams } from './snack.model';
+import {Injectable} from '@angular/core';
+import {Store} from '@ngrx/store';
+import {SnackClose, SnackOpen} from './store/snack.actions';
+import {SnackParams} from './snack.model';
 
 @Injectable({
   providedIn: 'root',

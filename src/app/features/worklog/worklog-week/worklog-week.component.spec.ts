@@ -1,6 +1,6 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import {async, ComponentFixture, TestBed} from '@angular/core/testing';
 
-import { WorklogWeekComponent } from './worklog-week.component';
+import {WorklogWeekComponent} from './worklog-week.component';
 
 describe('WorklogWeekComponent', () => {
   let component: WorklogWeekComponent;
@@ -8,9 +8,9 @@ describe('WorklogWeekComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ WorklogWeekComponent ]
+      declarations: [WorklogWeekComponent]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

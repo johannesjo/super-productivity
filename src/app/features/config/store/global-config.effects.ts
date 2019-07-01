@@ -1,15 +1,15 @@
-import { Injectable } from '@angular/core';
-import { Actions, Effect, ofType } from '@ngrx/effects';
-import { filter, tap, withLatestFrom } from 'rxjs/operators';
-import { GlobalConfigActionTypes, LoadGlobalConfig, UpdateGlobalConfigSection } from './global-config.actions';
-import { Store } from '@ngrx/store';
-import { CONFIG_FEATURE_NAME } from './global-config.reducer';
-import { PersistenceService } from '../../../core/persistence/persistence.service';
-import { SnackOpen } from '../../../core/snack/store/snack.actions';
-import { ElectronService } from 'ngx-electron';
-import { KeyboardConfig } from '../global-config.model';
-import { IPC_REGISTER_GLOBAL_SHORTCUTS_EVENT } from '../../../../../electron/ipc-events.const';
-import { IS_ELECTRON } from '../../../app.constants';
+import {Injectable} from '@angular/core';
+import {Actions, Effect, ofType} from '@ngrx/effects';
+import {filter, tap, withLatestFrom} from 'rxjs/operators';
+import {GlobalConfigActionTypes, LoadGlobalConfig, UpdateGlobalConfigSection} from './global-config.actions';
+import {Store} from '@ngrx/store';
+import {CONFIG_FEATURE_NAME} from './global-config.reducer';
+import {PersistenceService} from '../../../core/persistence/persistence.service';
+import {SnackOpen} from '../../../core/snack/store/snack.actions';
+import {ElectronService} from 'ngx-electron';
+import {KeyboardConfig} from '../global-config.model';
+import {IPC_REGISTER_GLOBAL_SHORTCUTS_EVENT} from '../../../../../electron/ipc-events.const';
+import {IS_ELECTRON} from '../../../app.constants';
 
 @Injectable()
 export class GlobalConfigEffects {

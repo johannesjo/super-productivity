@@ -13,7 +13,7 @@ import {MetricCopy} from '../metric.model';
 import {MetricService} from '../metric.service';
 import {ObstructionService} from '../obstruction/obstruction.service';
 import {ImprovementService} from '../improvement/improvement.service';
-import {BehaviorSubject, combineLatest, Observable, Subscription} from 'rxjs';
+import {BehaviorSubject, combineLatest, Subscription} from 'rxjs';
 import {NoteService} from '../../note/note.service';
 import {getWorklogStr} from '../../../util/get-work-log-str';
 import {filter, map, switchMap, withLatestFrom} from 'rxjs/operators';

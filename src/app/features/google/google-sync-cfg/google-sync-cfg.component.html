@@ -80,31 +80,31 @@
       </button>
       <br>
       <mat-checkbox [(ngModel)]="cfg.isAutoLogin"
-                        name="isAutoLogin"
-                        aria-label="Auto login at when starting app">
+                    name="isAutoLogin"
+                    aria-label="Auto login at when starting app">
         Auto login at when starting app
       </mat-checkbox>
 
       <section *ngIf="cfg.isAutoLogin"
                class="auto-sync-settings">
         <mat-checkbox [(ngModel)]="cfg.isLoadRemoteDataOnStartup"
-                          name="isLoadRemoteDataOnStartup"
-                          aria-label="Load remote data on startup">
+                      name="isLoadRemoteDataOnStartup"
+                      aria-label="Load remote data on startup">
           Load remote data on startup
         </mat-checkbox>
         <mat-checkbox [(ngModel)]="cfg.isAutoSyncToRemote"
-                          name="isAutoSyncToRemote"
-                          aria-label="Auto sync data TO remote">
+                      name="isAutoSyncToRemote"
+                      aria-label="Auto sync data TO remote">
           Auto sync data TO remote
         </mat-checkbox>
         <mat-checkbox [(ngModel)]="cfg.isCompressData"
-                          name="isCompressData"
-                          aria-label="Compress Data">
+                      name="isCompressData"
+                      aria-label="Compress Data">
           Compress Data
         </mat-checkbox>
         <mat-checkbox [(ngModel)]="cfg.isNotifyOnSync"
-                          name="isNotifyOnSync"
-                          aria-label="Notify when syncing">
+                      name="isNotifyOnSync"
+                      aria-label="Notify when syncing">
           Notify when syncing
         </mat-checkbox>
 

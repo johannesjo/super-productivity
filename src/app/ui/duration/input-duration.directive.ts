@@ -1,4 +1,13 @@
-import { AfterViewChecked, Attribute, Directive, ElementRef, forwardRef, HostListener, Input, Renderer2 } from '@angular/core';
+import {
+  AfterViewChecked,
+  Attribute,
+  Directive,
+  ElementRef,
+  forwardRef,
+  HostListener,
+  Input,
+  Renderer2
+} from '@angular/core';
 import {
   AbstractControl,
   ControlValueAccessor,
@@ -9,8 +18,8 @@ import {
   ValidatorFn,
   Validators,
 } from '@angular/forms';
-import { StringToMsPipe } from './string-to-ms.pipe';
-import { MsToStringPipe } from './ms-to-string.pipe';
+import {StringToMsPipe} from './string-to-ms.pipe';
+import {MsToStringPipe} from './ms-to-string.pipe';
 
 const noop = () => {
 };
@@ -26,6 +35,7 @@ export const INPUT_DURATION_VALIDATORS: any = {
   useExisting: forwardRef(() => InputDurationDirective),
   multi: true
 };
+
 /* tslint:enable */
 
 @Directive({

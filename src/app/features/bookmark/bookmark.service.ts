@@ -1,5 +1,5 @@
-import { Injectable } from '@angular/core';
-import { select, Store } from '@ngrx/store';
+import {Injectable} from '@angular/core';
+import {select, Store} from '@ngrx/store';
 import {
   BookmarkState,
   initialBookmarkState,
@@ -16,13 +16,13 @@ import {
   ToggleBookmarks,
   UpdateBookmark
 } from './store/bookmark.actions';
-import { Observable } from 'rxjs';
-import { Bookmark } from './bookmark.model';
+import {Observable} from 'rxjs';
+import {Bookmark} from './bookmark.model';
 import shortid from 'shortid';
-import { DialogEditBookmarkComponent } from './dialog-edit-bookmark/dialog-edit-bookmark.component';
-import { MatDialog } from '@angular/material/dialog';
-import { PersistenceService } from '../../core/persistence/persistence.service';
-import { createFromDrop, createFromPaste, DropPasteInput } from '../../core/drop-paste-input/drop-paste-input';
+import {DialogEditBookmarkComponent} from './dialog-edit-bookmark/dialog-edit-bookmark.component';
+import {MatDialog} from '@angular/material/dialog';
+import {PersistenceService} from '../../core/persistence/persistence.service';
+import {createFromDrop, createFromPaste, DropPasteInput} from '../../core/drop-paste-input/drop-paste-input';
 
 @Injectable({
   providedIn: 'root',

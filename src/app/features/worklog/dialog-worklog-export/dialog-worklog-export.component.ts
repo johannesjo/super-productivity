@@ -1,7 +1,7 @@
-import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { WorklogExportSettingsCopy } from '../../project/project.model';
-import { WORKLOG_EXPORT_DEFAULTS } from '../../project/project.const';
+import {ChangeDetectionStrategy, Component, Inject} from '@angular/core';
+import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
+import {WorklogExportSettingsCopy} from '../../project/project.model';
+import {WORKLOG_EXPORT_DEFAULTS} from '../../project/project.const';
 
 @Component({
   selector: 'dialog-worklog-export',

@@ -1,4 +1,4 @@
-import { transition, trigger } from '@angular/animations';
+import {transition, trigger} from '@angular/animations';
 
 export const noopAnimation = trigger(
   'noop',

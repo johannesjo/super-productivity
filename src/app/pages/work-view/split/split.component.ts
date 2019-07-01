@@ -1,6 +1,6 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output, Renderer2, ViewChild } from '@angular/core';
-import { fromEvent, Subscription } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import {ChangeDetectionStrategy, Component, EventEmitter, Input, Output, Renderer2, ViewChild} from '@angular/core';
+import {fromEvent, Subscription} from 'rxjs';
+import {takeUntil} from 'rxjs/operators';
 
 const ANIMATABLE_CLASS = 'isAnimatable';
 
@@ -20,7 +20,7 @@ export class SplitComponent {
 
   pos: number;
   eventSubs: Subscription;
-  @ViewChild('buttonEl', { static: true }) buttonEl;
+  @ViewChild('buttonEl', {static: true}) buttonEl;
   private _isDrag = false;
 
   constructor(private _renderer: Renderer2) {

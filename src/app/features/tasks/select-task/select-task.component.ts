@@ -1,9 +1,9 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
-import { FormControl } from '@angular/forms';
-import { Task } from '../task.model';
-import { map, startWith, takeUntil, withLatestFrom } from 'rxjs/operators';
-import { TaskService } from '../task.service';
-import { Subject } from 'rxjs';
+import {ChangeDetectionStrategy, Component, EventEmitter, Input, OnDestroy, OnInit, Output} from '@angular/core';
+import {FormControl} from '@angular/forms';
+import {Task} from '../task.model';
+import {map, startWith, takeUntil, withLatestFrom} from 'rxjs/operators';
+import {TaskService} from '../task.service';
+import {Subject} from 'rxjs';
 
 @Component({
   selector: 'select-task',

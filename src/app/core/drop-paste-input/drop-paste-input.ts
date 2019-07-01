@@ -1,4 +1,4 @@
-import { isImageUrlSimple } from '../../util/is-image-url';
+import {isImageUrlSimple} from '../../util/is-image-url';
 
 export type DropPasteInputType = 'FILE' | 'LINK' | 'IMG' | 'COMMAND' | 'NOTE';
 

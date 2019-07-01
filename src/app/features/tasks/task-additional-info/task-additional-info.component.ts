@@ -1,10 +1,10 @@
-import { ChangeDetectionStrategy, Component, ComponentFactoryResolver, EventEmitter, Input, Output } from '@angular/core';
-import { TaskWithSubTasks } from '../task.model';
-import { IssueService } from '../../issue/issue.service';
-import { AttachmentService } from '../../attachment/attachment.service';
-import { BehaviorSubject, Observable } from 'rxjs';
-import { Attachment } from '../../attachment/attachment.model';
-import { switchMap } from 'rxjs/operators';
+import {ChangeDetectionStrategy, Component, ComponentFactoryResolver, EventEmitter, Input, Output} from '@angular/core';
+import {TaskWithSubTasks} from '../task.model';
+import {IssueService} from '../../issue/issue.service';
+import {AttachmentService} from '../../attachment/attachment.service';
+import {BehaviorSubject, Observable} from 'rxjs';
+import {Attachment} from '../../attachment/attachment.model';
+import {switchMap} from 'rxjs/operators';
 
 @Component({
   selector: 'task-additional-info',

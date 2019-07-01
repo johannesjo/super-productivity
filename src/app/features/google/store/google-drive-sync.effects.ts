@@ -35,7 +35,7 @@ import {
   SaveToGoogleDriveSuccess
 } from './google-drive-sync.actions';
 import {DialogConfirmComponent} from '../../../ui/dialog-confirm/dialog-confirm.component';
-import { MatDialog, MatDialogRef } from '@angular/material/dialog';
+import {MatDialog, MatDialogRef} from '@angular/material/dialog';
 import {GoogleDriveSyncConfig} from '../../config/global-config.model';
 import {SyncService} from '../../../imex/sync/sync.service';
 import {SnackOpen} from '../../../core/snack/store/snack.actions';
@@ -229,7 +229,7 @@ export class GoogleDriveSyncEffects {
       from(this._getLocalAppData()).pipe(
         withLatestFrom(this.config$),
         concatMap(([completeData, cfg]) => {
-          const contentObs: Observable<string|AppDataComplete> = (cfg.isCompressData)
+          const contentObs: Observable<string | AppDataComplete> = (cfg.isCompressData)
             ? from(this._compressionService.compressUTF16(JSON.stringify(completeData)))
             : of(completeData);
 

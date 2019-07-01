@@ -10,10 +10,10 @@ import {
   Output,
   ViewChild
 } from '@angular/core';
-import { fadeAnimation } from '../animations/fade.ani';
-import { MarkdownComponent } from 'ngx-markdown';
-import { IS_ELECTRON } from '../../app.constants';
-import { ElectronService } from 'ngx-electron';
+import {fadeAnimation} from '../animations/fade.ani';
+import {MarkdownComponent} from 'ngx-markdown';
+import {IS_ELECTRON} from '../../app.constants';
+import {ElectronService} from 'ngx-electron';
 
 const HIDE_OVERFLOW_TIMEOUT_DURATION = 300;
 
@@ -30,9 +30,9 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
   @Output() changed: EventEmitter<any> = new EventEmitter();
   @Output() focus: EventEmitter<Event> = new EventEmitter();
   @Output() blur: EventEmitter<Event> = new EventEmitter();
-  @ViewChild('wrapperEl', { static: true }) wrapperEl: ElementRef;
-  @ViewChild('textareaEl', { static: false }) textareaEl: ElementRef;
-  @ViewChild('previewEl', { static: true }) previewEl: MarkdownComponent;
+  @ViewChild('wrapperEl', {static: true}) wrapperEl: ElementRef;
+  @ViewChild('textareaEl', {static: false}) textareaEl: ElementRef;
+  @ViewChild('previewEl', {static: true}) previewEl: MarkdownComponent;
 
   isHideOverflow = false;
   isShowEdit = false;

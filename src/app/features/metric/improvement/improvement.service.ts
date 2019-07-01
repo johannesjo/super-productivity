@@ -1,6 +1,6 @@
-import { Injectable } from '@angular/core';
-import { select, Store } from '@ngrx/store';
-import { initialImprovementState, selectAllImprovements, } from './store/improvement.reducer';
+import {Injectable} from '@angular/core';
+import {select, Store} from '@ngrx/store';
+import {initialImprovementState, selectAllImprovements,} from './store/improvement.reducer';
 import {
   AddImprovement,
   ClearHiddenImprovements,
@@ -10,11 +10,11 @@ import {
   LoadImprovementState,
   UpdateImprovement
 } from './store/improvement.actions';
-import { Observable } from 'rxjs';
-import { Improvement, ImprovementState } from './improvement.model';
+import {Observable} from 'rxjs';
+import {Improvement, ImprovementState} from './improvement.model';
 import shortid from 'shortid';
-import { PersistenceService } from '../../../core/persistence/persistence.service';
-import { selectLastTrackedImprovementsTomorrow } from '../store/metric.selectors';
+import {PersistenceService} from '../../../core/persistence/persistence.service';
+import {selectLastTrackedImprovementsTomorrow} from '../store/metric.selectors';
 
 @Injectable({
   providedIn: 'root',

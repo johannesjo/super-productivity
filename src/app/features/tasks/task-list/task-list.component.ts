@@ -1,12 +1,20 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { Task, TaskWithSubTasks } from '../task.model';
-import { TaskService } from '../task.service';
-import { DragulaService } from 'ng2-dragula';
-import { BehaviorSubject, combineLatest, Observable, Subscription } from 'rxjs';
-import { standardListAnimation } from '../../../ui/animations/standard-list.ani';
-import { expandFadeFastAnimation } from '../../../ui/animations/expand.ani';
-import { map } from 'rxjs/operators';
-import { filterDoneTasks } from '../filter-done-tasks.pipe';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  Input,
+  OnDestroy,
+  OnInit,
+  ViewChild
+} from '@angular/core';
+import {Task, TaskWithSubTasks} from '../task.model';
+import {TaskService} from '../task.service';
+import {DragulaService} from 'ng2-dragula';
+import {BehaviorSubject, combineLatest, Observable, Subscription} from 'rxjs';
+import {standardListAnimation} from '../../../ui/animations/standard-list.ani';
+import {expandFadeFastAnimation} from '../../../ui/animations/expand.ani';
+import {map} from 'rxjs/operators';
+import {filterDoneTasks} from '../filter-done-tasks.pipe';
 
 @Component({
   selector: 'task-list',
@@ -35,7 +43,7 @@ export class TaskListComponent implements OnDestroy, OnInit {
   @Input() listId: string;
   @Input() listModelId: string;
   @Input() noTasksMsg: string;
-  @ViewChild('listEl', { static: true }) listEl;
+  @ViewChild('listEl', {static: true}) listEl;
   isBlockAni = true;
   doneTasksLength = 0;
   undoneTasksLength = 0;

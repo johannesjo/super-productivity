@@ -1,12 +1,12 @@
-import { ChangeDetectionStrategy, Component, ElementRef, HostListener, OnDestroy, ViewChild } from '@angular/core';
-import { BookmarkService } from '../bookmark.service';
-import { MatDialog } from '@angular/material/dialog';
-import { DialogEditBookmarkComponent } from '../dialog-edit-bookmark/dialog-edit-bookmark.component';
-import { Bookmark } from '../bookmark.model';
-import { fadeAnimation } from '../../../ui/animations/fade.ani';
-import { DragulaService } from 'ng2-dragula';
-import { Subscription } from 'rxjs';
-import { slideAnimation } from '../../../ui/animations/slide.ani';
+import {ChangeDetectionStrategy, Component, ElementRef, HostListener, OnDestroy, ViewChild} from '@angular/core';
+import {BookmarkService} from '../bookmark.service';
+import {MatDialog} from '@angular/material/dialog';
+import {DialogEditBookmarkComponent} from '../dialog-edit-bookmark/dialog-edit-bookmark.component';
+import {Bookmark} from '../bookmark.model';
+import {fadeAnimation} from '../../../ui/animations/fade.ani';
+import {DragulaService} from 'ng2-dragula';
+import {Subscription} from 'rxjs';
+import {slideAnimation} from '../../../ui/animations/slide.ani';
 
 @Component({
   selector: 'bookmark-bar',
@@ -26,7 +26,7 @@ export class BookmarkBarComponent implements OnDestroy {
 
   bookmarkBarHeight = 50;
 
-  @ViewChild('bookmarkBar', { read: ElementRef, static: false }) set bookmarkBarEl(content: ElementRef) {
+  @ViewChild('bookmarkBar', {read: ElementRef, static: false}) set bookmarkBarEl(content: ElementRef) {
     if (content && content.nativeElement) {
       this.bookmarkBarHeight = content.nativeElement.offsetHeight;
     }

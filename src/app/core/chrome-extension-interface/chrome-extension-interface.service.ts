@@ -1,7 +1,7 @@
-import { Injectable } from '@angular/core';
-import { ExtensionInterfaceEventName } from './chrome-extension-interface';
-import { ReplaySubject } from 'rxjs';
-import { first, startWith } from 'rxjs/operators';
+import {Injectable} from '@angular/core';
+import {ExtensionInterfaceEventName} from './chrome-extension-interface';
+import {ReplaySubject} from 'rxjs';
+import {first, startWith} from 'rxjs/operators';
 
 const interfaceEl = window;
 

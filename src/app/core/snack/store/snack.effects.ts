@@ -1,12 +1,12 @@
-import { Injectable } from '@angular/core';
-import { Actions, Effect, ofType } from '@ngrx/effects';
-import { SnackActionTypes, SnackOpen } from './snack.actions';
-import { Observable, Subject } from 'rxjs';
-import { takeUntil, tap } from 'rxjs/operators';
-import { MatSnackBar, MatSnackBarRef, SimpleSnackBar } from '@angular/material/snack-bar';
-import { Store } from '@ngrx/store';
-import { SnackCustomComponent } from '../snack-custom/snack-custom.component';
-import { DEFAULT_SNACK_CFG } from '../snack.const';
+import {Injectable} from '@angular/core';
+import {Actions, Effect, ofType} from '@ngrx/effects';
+import {SnackActionTypes, SnackOpen} from './snack.actions';
+import {Observable, Subject} from 'rxjs';
+import {takeUntil, tap} from 'rxjs/operators';
+import {MatSnackBar, MatSnackBarRef, SimpleSnackBar} from '@angular/material/snack-bar';
+import {Store} from '@ngrx/store';
+import {SnackCustomComponent} from '../snack-custom/snack-custom.component';
+import {DEFAULT_SNACK_CFG} from '../snack.const';
 
 @Injectable()
 export class SnackEffects {

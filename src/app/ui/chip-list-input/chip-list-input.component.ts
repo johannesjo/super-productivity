@@ -1,8 +1,8 @@
 import {ChangeDetectionStrategy, Component, ElementRef, EventEmitter, Input, Output, ViewChild} from '@angular/core';
 import {FormControl} from '@angular/forms';
 import {Observable} from 'rxjs';
-import { MatAutocomplete, MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
-import { MatChipInputEvent } from '@angular/material/chips';
+import {MatAutocomplete, MatAutocompleteSelectedEvent} from '@angular/material/autocomplete';
+import {MatChipInputEvent} from '@angular/material/chips';
 import {map, startWith} from 'rxjs/operators';
 import {COMMA, ENTER} from '@angular/cdk/keycodes';
 
@@ -52,8 +52,8 @@ export class ChipListInputComponent {
       : this.suggestions_.filter(suggestion => !this._modelIds || !this._modelIds.includes(suggestion.id)))
   );
 
-  @ViewChild('inputElRef', { static: true }) fruitInput: ElementRef<HTMLInputElement>;
-  @ViewChild('autoElRef', { static: true }) matAutocomplete: MatAutocomplete;
+  @ViewChild('inputElRef', {static: true}) fruitInput: ElementRef<HTMLInputElement>;
+  @ViewChild('autoElRef', {static: true}) matAutocomplete: MatAutocomplete;
 
   private _modelIds: string[] = [];
 

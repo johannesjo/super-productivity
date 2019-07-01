@@ -1,4 +1,4 @@
-import { SnackActions, SnackActionTypes } from './snack.actions';
+import {SnackActions, SnackActionTypes} from './snack.actions';
 
 export const SNACK_FEATURE_NAME = 'snack';
 

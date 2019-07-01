@@ -1,7 +1,7 @@
-import { createEntityAdapter, EntityAdapter, EntityState } from '@ngrx/entity';
-import { TaskRepeatCfgActions, TaskRepeatCfgActionTypes } from './task-repeat-cfg.actions';
-import { TaskRepeatCfg, TaskRepeatCfgState } from '../task-repeat-cfg.model';
-import { createFeatureSelector, createSelector } from '@ngrx/store';
+import {createEntityAdapter, EntityAdapter} from '@ngrx/entity';
+import {TaskRepeatCfgActions, TaskRepeatCfgActionTypes} from './task-repeat-cfg.actions';
+import {TaskRepeatCfg, TaskRepeatCfgState} from '../task-repeat-cfg.model';
+import {createFeatureSelector, createSelector} from '@ngrx/store';
 
 export const TASK_REPEAT_CFG_FEATURE_NAME = 'taskRepeatCfg';
 
@@ -17,41 +17,41 @@ export const selectTaskRepeatCfgById = createSelector(
 
 
 export const initialTaskRepeatCfgState: TaskRepeatCfgState = adapter.getInitialState({
-    // additional entity state properties
+  // additional entity state properties
 });
 
 export function taskRepeatCfgReducer(
-    state = initialTaskRepeatCfgState,
-    action: TaskRepeatCfgActions
+  state = initialTaskRepeatCfgState,
+  action: TaskRepeatCfgActions
 ): TaskRepeatCfgState {
-    switch (action.type) {
-        case TaskRepeatCfgActionTypes.AddTaskRepeatCfgToTask: {
-            return adapter.addOne(action.payload.taskRepeatCfg, state);
-        }
-
-        case TaskRepeatCfgActionTypes.UpdateTaskRepeatCfg: {
-            return adapter.updateOne(action.payload.taskRepeatCfg, state);
-        }
-
-        case TaskRepeatCfgActionTypes.UpsertTaskRepeatCfg: {
-            return adapter.upsertOne(action.payload.taskRepeatCfg, state);
-        }
-
-        case TaskRepeatCfgActionTypes.DeleteTaskRepeatCfg: {
-            return adapter.removeOne(action.payload.id, state);
-        }
-
-        case TaskRepeatCfgActionTypes.DeleteTaskRepeatCfgs: {
-            return adapter.removeMany(action.payload.ids, state);
-        }
-
-        case TaskRepeatCfgActionTypes.LoadTaskRepeatCfgState:
-            return {...action.payload.state};
-
-        default: {
-            return state;
-        }
+  switch (action.type) {
+    case TaskRepeatCfgActionTypes.AddTaskRepeatCfgToTask: {
+      return adapter.addOne(action.payload.taskRepeatCfg, state);
     }
+
+    case TaskRepeatCfgActionTypes.UpdateTaskRepeatCfg: {
+      return adapter.updateOne(action.payload.taskRepeatCfg, state);
+    }
+
+    case TaskRepeatCfgActionTypes.UpsertTaskRepeatCfg: {
+      return adapter.upsertOne(action.payload.taskRepeatCfg, state);
+    }
+
+    case TaskRepeatCfgActionTypes.DeleteTaskRepeatCfg: {
+      return adapter.removeOne(action.payload.id, state);
+    }
+
+    case TaskRepeatCfgActionTypes.DeleteTaskRepeatCfgs: {
+      return adapter.removeMany(action.payload.ids, state);
+    }
+
+    case TaskRepeatCfgActionTypes.LoadTaskRepeatCfgState:
+      return {...action.payload.state};
+
+    default: {
+      return state;
+    }
+  }
 }
 
 

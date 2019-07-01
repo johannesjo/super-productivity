@@ -1,12 +1,12 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { WorklogService } from '../worklog.service';
-import { DialogWorklogExportComponent } from '../dialog-worklog-export/dialog-worklog-export.component';
-import { MatDialog } from '@angular/material/dialog';
-import { WorklogDataForDay } from '../worklog.model';
-import { expandAnimation, expandFadeAnimation } from '../../../ui/animations/expand.ani';
-import { fadeAnimation } from '../../../ui/animations/fade.ani';
-import { getDateRangeForWeek } from '../../../util/get-date-range-for-week';
-import { getWeekNumber } from '../../../util/get-week-number';
+import {ChangeDetectionStrategy, Component} from '@angular/core';
+import {WorklogService} from '../worklog.service';
+import {DialogWorklogExportComponent} from '../dialog-worklog-export/dialog-worklog-export.component';
+import {MatDialog} from '@angular/material/dialog';
+import {WorklogDataForDay} from '../worklog.model';
+import {expandAnimation, expandFadeAnimation} from '../../../ui/animations/expand.ani';
+import {fadeAnimation} from '../../../ui/animations/fade.ani';
+import {getDateRangeForWeek} from '../../../util/get-date-range-for-week';
+import {getWeekNumber} from '../../../util/get-week-number';
 import {Task} from '../../tasks/task.model';
 import {TaskService} from '../../tasks/task.service';
 

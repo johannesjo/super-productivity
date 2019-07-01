@@ -3,7 +3,7 @@ const MESSAGE_INTERVAL_DURATION = 10000;
 let currentMessageTimerVal = 0;
 let checkInterval;
 
-self.onmessage = function(msg) {
+self.onmessage = function (msg) {
   reInitCheckInterval(msg.data);
 };
 

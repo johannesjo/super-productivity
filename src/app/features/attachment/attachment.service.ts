@@ -1,15 +1,25 @@
-import { Injectable } from '@angular/core';
-import { select, Store } from '@ngrx/store';
-import { AttachmentState, initialAttachmentState, selectAllAttachments, selectAttachmentByIds } from './store/attachment.reducer';
-import { AddAttachment, DeleteAttachment, DeleteAttachments, LoadAttachmentState, UpdateAttachment } from './store/attachment.actions';
-import { Observable } from 'rxjs';
-import { Attachment } from './attachment.model';
+import {Injectable} from '@angular/core';
+import {select, Store} from '@ngrx/store';
+import {
+  AttachmentState,
+  initialAttachmentState,
+  selectAllAttachments,
+  selectAttachmentByIds
+} from './store/attachment.reducer';
+import {
+  AddAttachment,
+  DeleteAttachment,
+  DeleteAttachments,
+  LoadAttachmentState,
+  UpdateAttachment
+} from './store/attachment.actions';
+import {Observable} from 'rxjs';
+import {Attachment} from './attachment.model';
 import shortid from 'shortid';
-import { DialogEditAttachmentComponent } from './dialog-edit-attachment/dialog-edit-attachment.component';
-import { MatDialog } from '@angular/material/dialog';
-import { createFromDrop, createFromPaste, DropPasteInput } from '../../core/drop-paste-input/drop-paste-input';
-import { PersistenceService } from '../../core/persistence/persistence.service';
-import { take } from 'rxjs/operators';
+import {DialogEditAttachmentComponent} from './dialog-edit-attachment/dialog-edit-attachment.component';
+import {MatDialog} from '@angular/material/dialog';
+import {createFromDrop, createFromPaste, DropPasteInput} from '../../core/drop-paste-input/drop-paste-input';
+import {PersistenceService} from '../../core/persistence/persistence.service';
 
 @Injectable({
   providedIn: 'root',

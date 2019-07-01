@@ -1,5 +1,4 @@
 import {ChangeDetectionStrategy, Component} from '@angular/core';
-import {MetricService} from '../metric.service';
 import {Improvement} from '../improvement/improvement.model';
 import {ImprovementService} from '../improvement/improvement.service';
 

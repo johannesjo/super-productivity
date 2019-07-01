@@ -1,12 +1,12 @@
-import { ChangeDetectionStrategy, Component, Inject, OnDestroy } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { Reminder } from '../../reminder/reminder.model';
-import { Note } from '../note.model';
-import { NoteService } from '../note.service';
-import { Observable, Subscription } from 'rxjs';
-import { ReminderService } from '../../reminder/reminder.service';
-import { ProjectService } from '../../project/project.service';
-import { Project } from '../../project/project.model';
+import {ChangeDetectionStrategy, Component, Inject, OnDestroy} from '@angular/core';
+import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
+import {Reminder} from '../../reminder/reminder.model';
+import {Note} from '../note.model';
+import {NoteService} from '../note.service';
+import {Observable, Subscription} from 'rxjs';
+import {ReminderService} from '../../reminder/reminder.service';
+import {ProjectService} from '../../project/project.service';
+import {Project} from '../../project/project.model';
 
 @Component({
   selector: 'dialog-view-note-reminder',

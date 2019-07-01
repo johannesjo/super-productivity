@@ -1,10 +1,9 @@
-import { ChangeDetectionStrategy, Component, Inject, OnInit } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { GithubCfg } from '../github';
-import { FormGroup } from '@angular/forms';
-import { FormlyFieldConfig } from '@ngx-formly/core';
-import { DEFAULT_GITHUB_CFG, GITHUB_CONFIG_FORM } from '../github.const';
-import {dirtyDeepCopy} from '../../../../util/dirtyDeepCopy';
+import {ChangeDetectionStrategy, Component, Inject, OnInit} from '@angular/core';
+import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
+import {GithubCfg} from '../github';
+import {FormGroup} from '@angular/forms';
+import {FormlyFieldConfig} from '@ngx-formly/core';
+import {DEFAULT_GITHUB_CFG, GITHUB_CONFIG_FORM} from '../github.const';
 
 @Component({
   selector: 'dialog-github-initial-setup',

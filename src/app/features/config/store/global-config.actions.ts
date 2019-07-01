@@ -1,5 +1,5 @@
-import { Action } from '@ngrx/store';
-import { GlobalConfigSectionKey, GlobalConfigState, GlobalSectionConfig } from '../global-config.model';
+import {Action} from '@ngrx/store';
+import {GlobalConfigSectionKey, GlobalConfigState, GlobalSectionConfig} from '../global-config.model';
 
 export enum GlobalConfigActionTypes {
   LoadGlobalConfig = '[Global Config] Load Global Config',

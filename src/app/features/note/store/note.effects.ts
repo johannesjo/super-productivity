@@ -1,9 +1,9 @@
-import { Injectable } from '@angular/core';
-import { Actions, Effect, ofType } from '@ngrx/effects';
-import { PersistenceService } from '../../../core/persistence/persistence.service';
-import { select, Store } from '@ngrx/store';
-import { filter, map, mergeMap, tap, withLatestFrom } from 'rxjs/operators';
-import { selectCurrentProjectId } from '../../project/store/project.reducer';
+import {Injectable} from '@angular/core';
+import {Actions, Effect, ofType} from '@ngrx/effects';
+import {PersistenceService} from '../../../core/persistence/persistence.service';
+import {select, Store} from '@ngrx/store';
+import {filter, map, mergeMap, tap, withLatestFrom} from 'rxjs/operators';
+import {selectCurrentProjectId} from '../../project/store/project.reducer';
 import {
   AddNote,
   AddNoteReminder,
@@ -13,9 +13,9 @@ import {
   UpdateNote,
   UpdateNoteReminder
 } from './note.actions';
-import { selectNoteFeatureState } from './note.reducer';
-import { ReminderService } from '../../reminder/reminder.service';
-import { SnackOpen } from '../../../core/snack/store/snack.actions';
+import {selectNoteFeatureState} from './note.reducer';
+import {ReminderService} from '../../reminder/reminder.service';
+import {SnackOpen} from '../../../core/snack/store/snack.actions';
 
 @Injectable()
 export class NoteEffects {

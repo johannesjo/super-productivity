@@ -1,5 +1,5 @@
-import { ChangeDetectionStrategy, Component, Input, OnInit } from '@angular/core';
-import { TaskWithSubTasks } from '../../../../tasks/task.model';
+import {ChangeDetectionStrategy, Component, Input, OnInit} from '@angular/core';
+import {TaskWithSubTasks} from '../../../../tasks/task.model';
 
 @Component({
   selector: 'jira-issue-header',

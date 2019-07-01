@@ -1,10 +1,10 @@
-import { ChangeDetectionStrategy, Component, Input, OnInit } from '@angular/core';
-import { TaskWithSubTasks } from '../../../../tasks/task.model';
-import { JiraIssueService } from '../jira-issue.service';
-import { JiraApiService } from '../../jira-api.service';
-import { JiraIssue } from '../jira-issue.model';
-import { expandAnimation } from '../../../../../ui/animations/expand.ani';
-import { Attachment } from '../../../../attachment/attachment.model';
+import {ChangeDetectionStrategy, Component, Input, OnInit} from '@angular/core';
+import {TaskWithSubTasks} from '../../../../tasks/task.model';
+import {JiraIssueService} from '../jira-issue.service';
+import {JiraApiService} from '../../jira-api.service';
+import {JiraIssue} from '../jira-issue.model';
+import {expandAnimation} from '../../../../../ui/animations/expand.ani';
+import {Attachment} from '../../../../attachment/attachment.model';
 
 @Component({
   selector: 'jira-issue-content',

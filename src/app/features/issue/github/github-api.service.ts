@@ -1,18 +1,18 @@
-import { Injectable } from '@angular/core';
-import { ProjectService } from '../../project/project.service';
-import { GithubCfg } from './github';
-import { SnackService } from '../../../core/snack/snack.service';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { GITHUB_API_BASE_URL, GITHUB_MAX_CACHE_AGE } from './github.const';
-import { combineLatest, from, Observable, ObservableInput, Subject, throwError } from 'rxjs';
-import { GithubOriginalComment, GithubOriginalIssue } from './github-api-responses';
-import { catchError, map, share, switchMap, take, tap } from 'rxjs/operators';
-import { mapGithubIssue, mapGithubIssueToSearchResult } from './github-issue/github-issue-map.util';
-import { GithubComment, GithubIssue } from './github-issue/github-issue.model';
-import { SearchResultItem } from '../issue';
-import { loadFromLs, saveToLs } from '../../../core/persistence/local-storage';
-import { LS_GITHUB_ISSUE_CACHE_PREFIX } from '../../../core/persistence/ls-keys.const';
-import { HANDLED_ERROR } from '../../../app.constants';
+import {Injectable} from '@angular/core';
+import {ProjectService} from '../../project/project.service';
+import {GithubCfg} from './github';
+import {SnackService} from '../../../core/snack/snack.service';
+import {HttpClient, HttpErrorResponse} from '@angular/common/http';
+import {GITHUB_API_BASE_URL, GITHUB_MAX_CACHE_AGE} from './github.const';
+import {combineLatest, from, Observable, ObservableInput, Subject, throwError} from 'rxjs';
+import {GithubOriginalComment, GithubOriginalIssue} from './github-api-responses';
+import {catchError, map, share, switchMap, take, tap} from 'rxjs/operators';
+import {mapGithubIssue, mapGithubIssueToSearchResult} from './github-issue/github-issue-map.util';
+import {GithubComment, GithubIssue} from './github-issue/github-issue.model';
+import {SearchResultItem} from '../issue';
+import {loadFromLs, saveToLs} from '../../../core/persistence/local-storage';
+import {LS_GITHUB_ISSUE_CACHE_PREFIX} from '../../../core/persistence/ls-keys.const';
+import {HANDLED_ERROR} from '../../../app.constants';
 
 const BASE = GITHUB_API_BASE_URL;
 

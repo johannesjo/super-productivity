@@ -94,6 +94,7 @@ export class UpdateProjectWorkEnd implements Action {
   constructor(public payload: { id: string; date: string; newVal: number; }) {
   }
 }
+
 export class UpdateLastCompletedDay implements Action {
   readonly type = ProjectActionTypes.UpdateLastCompletedDay;
 

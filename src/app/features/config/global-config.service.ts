@@ -8,13 +8,15 @@ import {
   GlobalSectionConfig,
   GoogleSession,
   IdleConfig,
-  MiscConfig, TakeABreakConfig
+  MiscConfig,
+  TakeABreakConfig
 } from './global-config.model';
 import {
   selectConfigFeatureState,
   selectGoogleSession,
   selectIdleConfig,
-  selectMiscConfig, selectTakeABreakConfig
+  selectMiscConfig,
+  selectTakeABreakConfig
 } from './store/global-config.reducer';
 import {PersistenceService} from '../../core/persistence/persistence.service';
 import {Actions, ofType} from '@ngrx/effects';

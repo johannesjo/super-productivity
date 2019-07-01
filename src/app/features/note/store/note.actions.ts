@@ -1,7 +1,7 @@
-import { Action } from '@ngrx/store';
-import { Update } from '@ngrx/entity';
-import { Note } from '../note.model';
-import { NoteState } from './note.reducer';
+import {Action} from '@ngrx/store';
+import {Update} from '@ngrx/entity';
+import {Note} from '../note.model';
+import {NoteState} from './note.reducer';
 
 export enum NoteActionTypes {
   LoadNoteState = '[Note] Load Note State',

@@ -1,10 +1,10 @@
-import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { Task } from '../task.model';
-import { TaskService } from '../task.service';
-import { ReminderCopy } from '../../reminder/reminder.model';
-import { ReminderService } from '../../reminder/reminder.service';
-import { SnackService } from '../../../core/snack/snack.service';
+import {ChangeDetectionStrategy, Component, Inject} from '@angular/core';
+import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
+import {Task} from '../task.model';
+import {TaskService} from '../task.service';
+import {ReminderCopy} from '../../reminder/reminder.model';
+import {ReminderService} from '../../reminder/reminder.service';
+import {SnackService} from '../../../core/snack/snack.service';
 
 @Component({
   selector: 'dialog-add-task-reminder',

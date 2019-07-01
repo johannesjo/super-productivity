@@ -1,5 +1,5 @@
-import { IssueData, IssueProviderKey } from '../issue/issue';
-import { Reminder, ReminderCopy } from '../reminder/reminder.model';
+import {IssueData, IssueProviderKey} from '../issue/issue';
+import {Reminder} from '../reminder/reminder.model';
 import {EntityState} from '@ngrx/entity';
 
 export type DropListModelSource = 'UNDONE' | 'DONE' | 'BACKLOG';

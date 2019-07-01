@@ -1,9 +1,9 @@
-import { ChangeDetectionStrategy, Component, ElementRef, ViewChild } from '@angular/core';
-import { BannerService } from '../banner.service';
-import { Banner, BannerAction } from '../banner.model';
-import { concatMap, mapTo } from 'rxjs/operators';
-import { merge, Observable, of, timer } from 'rxjs';
-import { slideAnimation } from '../../../ui/animations/slide.ani';
+import {ChangeDetectionStrategy, Component, ElementRef, ViewChild} from '@angular/core';
+import {BannerService} from '../banner.service';
+import {Banner, BannerAction} from '../banner.model';
+import {concatMap, mapTo} from 'rxjs/operators';
+import {merge, Observable, of, timer} from 'rxjs';
+import {slideAnimation} from '../../../ui/animations/slide.ani';
 
 @Component({
   selector: 'banner',
@@ -37,7 +37,7 @@ export class BannerComponent {
 
   private _dirtyReference: string;
 
-  @ViewChild('wrapperEl', { static: false }) set wrapperEl(content: ElementRef) {
+  @ViewChild('wrapperEl', {static: false}) set wrapperEl(content: ElementRef) {
     if (content && content.nativeElement) {
       this.height = content.nativeElement.offsetHeight;
     }

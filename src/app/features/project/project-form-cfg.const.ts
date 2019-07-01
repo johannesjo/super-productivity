@@ -1,5 +1,5 @@
-import { ConfigFormConfig, ConfigFormSection } from '../config/global-config.model';
-import { ALL_THEMES } from '../../app.constants';
+import {ConfigFormConfig, ConfigFormSection} from '../config/global-config.model';
+import {ALL_THEMES} from '../../app.constants';
 
 const themeOpts = ALL_THEMES.map((theme) => {
   return {label: theme, value: theme};
