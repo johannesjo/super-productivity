@@ -595,6 +595,7 @@ export class TaskService {
   }
 
   // NOTE: archived tasks not included
+  // TODO think about getting data from current project directly from store
   async getByIdsFromAllProjects(projectIdTaskMap: { [key: string]: string[] }): Promise<Task[]> {
     const projectIds = Object.keys(projectIdTaskMap);
     const taskData = await Promise.all(projectIds.map(async (projectId) => {

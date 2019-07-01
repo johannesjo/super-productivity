@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
 import {combineLatest, from, Observable} from 'rxjs';
-import {map, shareReplay, switchMap} from 'rxjs/operators';
+import {delay, map, shareReplay, switchMap} from 'rxjs/operators';
 import {TaskService} from './task.service';
 import {ReminderService} from '../reminder/reminder.service';
 import {ProjectService} from '../project/project.service';
@@ -9,9 +9,15 @@ import {ProjectService} from '../project/project.service';
   providedIn: 'root'
 })
 export class ScheduledTaskService {
-  // TODO think about adding tasks here as well as trigger
-  allScheduledTasks$: Observable<any> = this._reminderService.reminders$.pipe(
-    map((reminders) => reminders
+  allScheduledTasks$: Observable<any> = combineLatest(
+    this._reminderService.reminders$,
+    this._taskService.scheduledTasksWOData$,
+  ).pipe(
+    // because we read the tasks from th database rather than from the store
+    // we need to wait a little bit :/
+    // TODO better solution
+    delay(100),
+    map(([reminders]) => reminders
       .filter(reminder => reminder.type === 'TASK')
     ),
     switchMap((reminders) => {
@@ -57,5 +63,6 @@ export class ScheduledTaskService {
     private _projectService: ProjectService,
   ) {
     // this.allScheduledTasks$.subscribe((v) => console.log('allScheduledTasks$', v));
+    // this.scheduledTasksForCurrentProject$.subscribe((v) => console.log('scheduledTasksForCurrentProject$', v));
   }
 }
