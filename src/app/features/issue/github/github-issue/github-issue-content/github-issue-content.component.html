@@ -2,7 +2,6 @@
      @expand
      style="text-align: center;">
   <button (click)="hideUpdates()"
-
           color="accent"
           mat-raised-button>
     Mark updates as checked
@@ -62,7 +61,8 @@
   <div style="text-align: center">
     <a [href]="issueData?.url"
        class="write-a-comment"
-       mat-raised-button=""
+       color="primary"
+       mat-stroked-button=""
        target="_blank">
       <mat-icon>textsms</mat-icon>
       Write a comment</a>
