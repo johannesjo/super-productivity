@@ -11,17 +11,17 @@
 
 <mat-dialog-actions align="end">
   <div class="wrap-buttons">
-    <button color="primary"
-            (click)="close(1)"
+    <button (click)="close(1)"
+            color="primary"
             mat-raised-button>Do it!
     </button>
-    <button color="warn"
-            (click)="close(2)"
+    <button (click)="close(2)"
+            color="warn"
             mat-raised-button>Never!
     </button>
-    <button type="button"
-            (click)="close()"
-            mat-raised-button>Cancel
+    <button (click)="close()"
+            mat-raised-button
+            type="button">Cancel
     </button>
   </div>
 </mat-dialog-actions>

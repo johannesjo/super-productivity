@@ -1,6 +1,6 @@
 <h1 mat-dialog-title>
-  <mat-icon svgIcon="jira"
-            class="dialog-header-icon"></mat-icon>
+  <mat-icon class="dialog-header-icon"
+            svgIcon="jira"></mat-icon>
   <span>Update Status on Jira</span>
 </h1>
 
@@ -33,15 +33,15 @@
 
 <mat-dialog-actions align="end">
   <div class="wrap-buttons">
-    <button type="button"
+    <button (click)="close()"
+            class="btn btn-primary submit-button"
             color="primary"
-            (click)="close()"
-            class="btn btn-primary submit-button"
-            mat-button>Cancel
+            mat-button
+            type="button">Cancel
     </button>
-    <button color="primary"
-            (click)="transitionIssue()"
+    <button (click)="transitionIssue()"
             class="btn btn-primary submit-button"
+            color="primary"
             mat-stroked-button>Update Status
     </button>
   </div>

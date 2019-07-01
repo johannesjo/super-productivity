@@ -27,41 +27,41 @@
 
 <mat-dialog-actions align="end">
   <div class="wrap-buttons">
-    <button color="warn"
+    <button (click)="dismissReminderOnly()"
             *ngIf="isError"
             [disabled]="isDisableControls"
-            (click)="dismissReminderOnly()"
-            type="button"
-            mat-stroked-button>
+            color="warn"
+            mat-stroked-button
+            type="button">
       <mat-icon>clear</mat-icon>
       Dismiss Reminder
     </button>
 
     <ng-container *ngIf="!isError">
-      <button color="primary"
+      <button (click)="snooze()"
               [disabled]="isDisableControls"
-              (click)="snooze()"
-              type="button"
-              mat-button>
+              color="primary"
+              mat-button
+              type="button">
         <mat-icon>snooze</mat-icon>
         Snooze 10m
       </button>
 
-      <button *ngIf="isForCurrentProject"
-              color="primary"
+      <button (click)="dismiss()"
+              *ngIf="isForCurrentProject"
               [disabled]="isDisableControls"
-              (click)="dismiss()"
-              type="button"
-              mat-stroked-button>
+              color="primary"
+              mat-stroked-button
+              type="button">
         <mat-icon>clear</mat-icon>
         Dismiss
       </button>
 
-      <button color="primary"
+      <button (click)="play()"
               [disabled]="isDisableControls"
-              (click)="play()"
-              type="button"
-              mat-stroked-button>
+              color="primary"
+              mat-stroked-button
+              type="button">
         <mat-icon>play_arrow</mat-icon>
         {{!isForCurrentProject ? 'Switch Project &' : ''}} Start Task
       </button>

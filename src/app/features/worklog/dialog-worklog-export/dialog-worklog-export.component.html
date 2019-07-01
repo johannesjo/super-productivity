@@ -1,7 +1,7 @@
 <h1 mat-dialog-title>Worklog Export</h1>
 
-<worklog-export [isWorklogExport]="data.isWorklogExport"
+<worklog-export (cancel)="close()"
                 [isShowClose]="true"
-                [rangeStart]="data.rangeStart"
+                [isWorklogExport]="data.isWorklogExport"
                 [rangeEnd]="data.rangeEnd"
-                (cancel)="close()"></worklog-export>
+                [rangeStart]="data.rangeStart"></worklog-export>

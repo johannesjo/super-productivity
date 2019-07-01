@@ -4,19 +4,19 @@
     {{displayValue || value}}
   </div>
 
-  <input *ngIf="type==='duration'"
+  <input #inputElDuration
+         (blur)="blur()"
+         (keypress)="keypressHandler($event)"
+         (ngModelChange)="onChange($event)"
+         *ngIf="type==='duration'"
+         [ngModel]="value"
          class="duration-input"
-         #inputElDuration
-         inputDuration
-         [ngModel]="value"
-         (keypress)="keypressHandler($event)"
+         inputDuration>
+  <input #inputEl
          (blur)="blur()"
-         (ngModelChange)="onChange($event)">
-  <input *ngIf="type!=='duration'"
-         [type]="type"
-         #inputEl
-         [ngModel]="value"
          (keypress)="keypressHandler($event)"
-         (blur)="blur()"
-         (ngModelChange)="onChange($event)">
+         (ngModelChange)="onChange($event)"
+         *ngIf="type!=='duration'"
+         [ngModel]="value"
+         [type]="type">
 </div>

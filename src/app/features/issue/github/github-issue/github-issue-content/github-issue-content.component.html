@@ -37,24 +37,24 @@
     <tr *ngIf="issueData.body">
       <th>Description</th>
       <td>
-        <div class="description markdown"
-             markdown
-             [data]="issueData?.body"></div>
+        <div [data]="issueData?.body"
+             class="description markdown"
+             markdown></div>
       </td>
     </tr>
   </table>
 
   <div *ngIf="issueData?.comments">
-    <div class="comment"
-         *ngFor="let comment of issueData?.comments">
+    <div *ngFor="let comment of issueData?.comments"
+         class="comment">
       <!--<img [src]="comment.author.avatarUrl"-->
       <!--class="author-avatar">-->
       <div class="name-and-comment-content">
         <div><span class="author-name">{{comment.user?.login}}</span>
           <span class="when">at {{comment.created_at|date:'short'}}</span>
         </div>
-        <div [innerHTML]="comment?.body|markdown"
-             *ngIf="comment.body"></div>
+        <div *ngIf="comment.body"
+             [innerHTML]="comment?.body|markdown"></div>
       </div>
     </div>
   </div>

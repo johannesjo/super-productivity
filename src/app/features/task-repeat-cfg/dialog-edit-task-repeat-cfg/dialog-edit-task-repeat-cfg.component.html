@@ -15,11 +15,11 @@
     </help-section>
 
     <div class="form-wrapper">
-      <formly-form [model]="taskRepeatCfg"
-                   (modelChange)="taskRepeatCfg=$event"
+      <formly-form (modelChange)="taskRepeatCfg=$event"
                    [fields]="fields"
-                   [options]="options"
-                   [form]="form">
+                   [form]="form"
+                   [model]="taskRepeatCfg"
+                   [options]="options">
       </formly-form>
     </div>
   </mat-dialog-content>
@@ -41,10 +41,10 @@
       Remove
     </button>
 
-    <button mat-stroked-button
+    <button [disabled]="!form.valid"
             color="primary"
-            type="submit"
-            [disabled]="!form.valid">
+            mat-stroked-button
+            type="submit">
       <mat-icon>save</mat-icon>
       Save
     </button>

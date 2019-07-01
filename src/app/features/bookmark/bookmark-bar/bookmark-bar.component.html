@@ -1,7 +1,7 @@
-<div class="global-bookmark-list-outer"
-     #bookmarkBar
+<div #bookmarkBar
      *ngIf="bookmarkService.isShowBookmarks$|async"
-     [@slide]="{value:'*',params:{elHeight:(bookmarkBarHeight)}}">
+     [@slide]="{value:'*',params:{elHeight:(bookmarkBarHeight)}}"
+     class="global-bookmark-list-outer">
   <div *ngIf="isDragOver"
        @fade
        class="bg-accent drag-over-msg">
@@ -26,10 +26,10 @@
       </button>
     </div>
 
-    <div class="global-bookmark-list-inner"
-         [dragula]="LIST_ID"
+    <div [class.isEditMode]="isEditMode"
          [dragulaModel]="(bookmarkService.bookmarks$|async)"
-         [class.isEditMode]="isEditMode">
+         [dragula]="LIST_ID"
+         class="global-bookmark-list-inner">
 
       <div *ngIf="!(bookmarkService.bookmarks$|async)?.length"
            class="msg color-contrast">You have no project bookmarks. Add one via drag and drop or by clicking on the '+'
@@ -41,8 +41,8 @@
            draggable="false">
         <a [enlargeImg]="bookmark.type==='IMG'&& bookmark.path"
            [href]="bookmark.path"
-           [title]="bookmark.path"
            [style.background-image]="bookmark.type==='IMG'&& 'url('+bookmark.path+')'"
+           [title]="bookmark.path"
            aria-label="open global bookmark"
            bookmarkLink
            color="darker"
@@ -52,18 +52,18 @@
            target="_blank"
            type="{{bookmark.type}}">
           <mat-icon *ngIf="bookmark.icon"
-                    class="color-contrast"
-                    aria-label="Open">{{bookmark.icon}}
+                    aria-label="Open"
+                    class="color-contrast">{{bookmark.icon}}
           </mat-icon>
           {{bookmark.title}}
         </a>
 
-        <div class="controls"
-             *ngIf="isEditMode">
+        <div *ngIf="isEditMode"
+             class="controls">
           <mat-icon *ngIf="isEditMode"
                     @fade
-                    svgIcon="drag_handle"
-                    class="drag-handle bg-400 color-contrast"></mat-icon>
+                    class="drag-handle bg-400 color-contrast"
+                    svgIcon="drag_handle"></mat-icon>
 
           <button (click)="openEditDialog(bookmark)"
                   aria-label="open edit dialog"

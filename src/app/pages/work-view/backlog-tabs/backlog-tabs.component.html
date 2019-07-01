@@ -1,7 +1,7 @@
 <mat-tab-group (selectedIndexChange)="indexChange($event)"
                [selectedIndex]="selectedIndex"
-               color="darker"
-               class="tab-group">
+               class="tab-group"
+               color="darker">
   <mat-tab>
     <ng-template mat-tab-label>
       <mat-icon class="color-contrast">library_books</mat-icon>
@@ -11,10 +11,10 @@
 
     <div class="tab-wrapper bg-400">
       <div class="task-list-wrapper">
-        <task-list [tasks]="taskService.backlogTasks$|async"
-                   [noTasksMsg]="'There are currently no tasks in your backlog'"
-                   listId="PARENT"
+        <task-list [noTasksMsg]="'There are currently no tasks in your backlog'"
+                   [tasks]="taskService.backlogTasks$|async"
                    class="isHidePlayBtn"
+                   listId="PARENT"
                    listModelId="BACKLOG"></task-list>
       </div>
     </div>
@@ -36,8 +36,8 @@
           context menu. To open it click on the 3 little dots on the right of a task.
         </p>
 
-        <div class="tasks"
-             [@standardList]="(scheduledTaskService.scheduledTasksForCurrentProject$|async)?.length">
+        <div [@standardList]="(scheduledTaskService.scheduledTasksForCurrentProject$|async)?.length"
+             class="tasks">
           <mat-card
             *ngFor="let task of (scheduledTaskService.scheduledTasksForCurrentProject$|async); trackBy: trackByFn;"
             class="scheduled-task">
@@ -48,19 +48,19 @@
                   <div class="due-date">{{task.reminderData.remindAt|humanizeTimestamp}}</div>
                 </div>
                 <div class="controls">
-                  <button mat-mini-fab
+                  <button (click)="startTask(task)"
                           color="primary"
-                          (click)="startTask(task)">
+                          mat-mini-fab>
                     <mat-icon>play_arrow</mat-icon>
                   </button>
-                  <button mat-mini-fab
+                  <button (click)="editReminder(task)"
                           color=""
-                          (click)="editReminder(task)">
+                          mat-mini-fab>
                     <mat-icon>alarm</mat-icon>
                   </button>
-                  <button mat-mini-fab
+                  <button (click)="removeReminder(task)"
                           color="warn"
-                          (click)="removeReminder(task)">
+                          mat-mini-fab>
                     <mat-icon>alarm_off</mat-icon>
                   </button>
                 </div>
@@ -73,8 +73,8 @@
         <section *ngIf="(scheduledTaskService.scheduledTasksForOtherProjects$|async)?.length">
           <h2 class="mat-h2"
               style="text-align: center; margin-top: 16px;">From other Projects</h2>
-          <div class="tasks"
-               [@standardList]="(scheduledTaskService.scheduledTasksForOtherProjects$|async)?.length">
+          <div [@standardList]="(scheduledTaskService.scheduledTasksForOtherProjects$|async)?.length"
+               class="tasks">
             <mat-card
               *ngFor="let task of (scheduledTaskService.scheduledTasksForOtherProjects$|async); trackBy: trackByFn;"
               class="scheduled-task">
@@ -90,19 +90,19 @@
                     <div class="due-date">{{task.reminderData.remindAt|humanizeTimestamp}}</div>
                   </div>
                   <div class="controls">
-                    <button mat-mini-fab
+                    <button (click)="startTaskFromOtherProject(task)"
                             color="primary"
-                            (click)="startTaskFromOtherProject(task)">
+                            mat-mini-fab>
                       <mat-icon>play_arrow</mat-icon>
                     </button>
-                    <button mat-mini-fab
+                    <button (click)="editReminder(task)"
                             color=""
-                            (click)="editReminder(task)">
+                            mat-mini-fab>
                       <mat-icon>alarm</mat-icon>
                     </button>
-                    <button mat-mini-fab
+                    <button (click)="removeReminder(task)"
                             color="warn"
-                            (click)="removeReminder(task)">
+                            mat-mini-fab>
                       <mat-icon>alarm_off</mat-icon>
                     </button>
                   </div>

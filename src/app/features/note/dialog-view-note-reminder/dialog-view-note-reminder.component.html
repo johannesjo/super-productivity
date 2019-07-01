@@ -4,8 +4,8 @@
 </h1>
 
 <mat-dialog-content>
-  <div class="note"
-       *ngIf="isForCurrentProject">
+  <div *ngIf="isForCurrentProject"
+       class="note">
     {{(note$|async)?.content }}
   </div>
 
@@ -20,18 +20,18 @@
 
 <mat-dialog-actions align="end">
   <div class="wrap-buttons">
-    <button color="primary"
-            (click)="snooze()"
-            type="button"
-            mat-stroked-button>
+    <button (click)="snooze()"
+            color="primary"
+            mat-stroked-button
+            type="button">
       <mat-icon>snooze</mat-icon>
       Snooze for 10m
     </button>
 
-    <button color="primary"
-            (click)="dismiss()"
-            type="button"
-            mat-stroked-button>
+    <button (click)="dismiss()"
+            color="primary"
+            mat-stroked-button
+            type="button">
       <mat-icon>clear</mat-icon>
       Dismiss
     </button>

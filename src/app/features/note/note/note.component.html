@@ -3,8 +3,8 @@
      [class.isImg]="note.imgUrl"
      class="note">
   <img *ngIf="note.imgUrl"
-       [src]="note.imgUrl"
        [enlargeImg]="note.imgUrl"
+       [src]="note.imgUrl"
        class="note-img">
 
   <div *ngIf="!note.imgUrl"
@@ -49,8 +49,8 @@
         <mat-icon style="color:#e15d63;">alarm_off</mat-icon>
         Remove reminder
       </button>
-      <button *ngIf="!note.imgUrl"
-              (click)="toggleLock()"
+      <button (click)="toggleLock()"
+              *ngIf="!note.imgUrl"
               mat-menu-item>
         <mat-icon *ngIf="note.isLock">lock</mat-icon>
         <mat-icon *ngIf="!note.isLock">lock_open</mat-icon>

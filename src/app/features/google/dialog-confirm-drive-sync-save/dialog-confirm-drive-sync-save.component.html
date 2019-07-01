@@ -23,20 +23,20 @@
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">
-  <button mat-button=""
+  <button (click)="close()"
           color="primary"
-          (click)="close()">
+          mat-button="">
     Cancel
   </button>
-  <button mat-stroked-button=""
+  <button (click)="data.saveToRemote();close()"
           color="primary"
-          (click)="data.saveToRemote();close()">
+          mat-stroked-button="">
     <mat-icon>file_upload</mat-icon>
     Overwrite remote data
   </button>
-  <button mat-stroked-button=""
+  <button (click)="data.loadFromRemote();close()"
           color="primary"
-          (click)="data.loadFromRemote();close()">
+          mat-stroked-button="">
     <mat-icon>file_download</mat-icon>
     Overwrite local data
   </button>

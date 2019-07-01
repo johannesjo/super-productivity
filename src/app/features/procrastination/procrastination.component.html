@@ -94,8 +94,8 @@
     </mat-tab>
 
 
-    <mat-tab label="Split it up!"
-             *ngIf="(taskService.currentTaskOrCurrentParent$|async) as currentTask">
+    <mat-tab *ngIf="(taskService.currentTaskOrCurrentParent$|async) as currentTask"
+             label="Split it up!">
       <section class="tab-inner no-box">
         <p>Split up the task into as many small chunks as you can.</p>
 
@@ -109,8 +109,8 @@
   </mat-tab-group>
 
   <div style="text-align: center; margin-top: 32px;">
-    <button mat-raised-button=""
-            color="primary"
+    <button color="primary"
+            mat-raised-button=""
             routerLink="/work-view">
       Back to work!
     </button>

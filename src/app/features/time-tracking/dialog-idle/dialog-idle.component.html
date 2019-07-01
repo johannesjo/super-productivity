@@ -35,18 +35,18 @@
       Break
     </button>
 
-    <button color="primary"
+    <button [disabled]="!(selectedTask||newTaskTitle)"
+            color="primary"
             mat-stroked-button
-            [disabled]="!(selectedTask||newTaskTitle)"
             type="submit">
       <mat-icon *ngIf="!isCreate">track_changes</mat-icon>
       <mat-icon *ngIf="isCreate">add</mat-icon>
       Task
     </button>
 
-    <button *ngIf="(configService.idle$|async)?.isUnTrackedIdleResetsBreakTimer"
+    <button (click)="track(true)"
+            *ngIf="(configService.idle$|async)?.isUnTrackedIdleResetsBreakTimer"
             [disabled]="!(selectedTask||newTaskTitle)"
-            (click)="track(true)"
             color="primary"
             mat-stroked-button
             type="button">

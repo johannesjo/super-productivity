@@ -11,20 +11,20 @@
       helps to get a better grip on these and to improve what you can.</p>
   </help-section>
 
-  <form (submit)="submit()"
+  <form #f="ngForm"
+        (submit)="submit()"
         name="form"
-        #f="ngForm"
         novalidate>
     <mat-form-field>
-      <input [(ngModel)]="metricForDay.mood"
-             required
-             min="1"
-             max="10"
-             name="mood"
-             #mood="ngModel"
+      <input #mood="ngModel"
+             [(ngModel)]="metricForDay.mood"
              matInput
+             max="10"
              maxLength="2"
+             min="1"
+             name="mood"
              placeholder="How do you feel?"
+             required
              type="number">
       <mat-hint>1: Awful – 10: Splendid</mat-hint>
       <mat-error *ngIf="mood.invalid && (mood.dirty || mood.touched)">
@@ -33,15 +33,15 @@
     </mat-form-field>
 
     <mat-form-field>
-      <input [(ngModel)]="metricForDay.productivity"
-             required
-             min="1"
-             max="10"
-             name="productivity"
-             #productivity="ngModel"
+      <input #productivity="ngModel"
+             [(ngModel)]="metricForDay.productivity"
              matInput
+             max="10"
              maxLength="2"
+             min="1"
+             name="productivity"
              placeholder="How efficient did you work?"
+             required
              type="number">
       <mat-hint>1: Haven't even started – 10: Enormously efficient</mat-hint>
       <mat-error *ngIf="productivity.invalid && (productivity.dirty || productivity.touched)">
@@ -49,38 +49,38 @@
       </mat-error>
     </mat-form-field>
 
-    <chip-list-input label="What hindered your productivity?"
+    <chip-list-input (addItem)="addObstruction($event)"
+                     (addNewItem)="addNewObstruction($event)"
+                     (removeItem)="removeObstruction($event)"
                      [model]="metricForDay.obstructions"
                      [suggestions]="(obstructionService.obstructions$|async)"
-                     (addItem)="addObstruction($event)"
-                     (addNewItem)="addNewObstruction($event)"
-                     (removeItem)="removeObstruction($event)"></chip-list-input>
+                     label="What hindered your productivity?"></chip-list-input>
 
-    <chip-list-input label="What improved your productivity?"
+    <chip-list-input (addItem)="addImprovement($event)"
+                     (addNewItem)="addNewImprovement($event)"
+                     (removeItem)="removeImprovement($event)"
                      [model]="metricForDay.improvements"
                      [suggestions]="(improvementService.improvements$|async)"
-                     (addItem)="addImprovement($event)"
-                     (addNewItem)="addNewImprovement($event)"
-                     (removeItem)="removeImprovement($event)"></chip-list-input>
+                     label="What improved your productivity?"></chip-list-input>
 
 
-    <chip-list-input label="What could you do to improve tomorrow?"
+    <chip-list-input (addItem)="addImprovementTomorrow($event)"
+                     (addNewItem)="addNewImprovementTomorrow($event)"
+                     (removeItem)="removeImprovementTomorrow($event)"
                      [model]="metricForDay.improvementsTomorrow"
                      [suggestions]="(improvementService.improvements$|async)"
-                     (addItem)="addImprovementTomorrow($event)"
-                     (addNewItem)="addNewImprovementTomorrow($event)"
-                     (removeItem)="removeImprovementTomorrow($event)"></chip-list-input>
+                     label="What could you do to improve tomorrow?"></chip-list-input>
     <mat-form-field>
-      <textarea matInput
+      <textarea #notes="ngModel"
+                [(ngModel)]="tomorrowsNote"
+                matInput
                 name="notes"
-                #notes="ngModel"
-                placeholder="Notes for tomorrow"
-                [(ngModel)]="tomorrowsNote"></textarea>
+                placeholder="Notes for tomorrow"></textarea>
     </mat-form-field>
 
     <div style="text-align: right;">
-      <button color="primary"
-              [disabled]="!f.valid"
+      <button [disabled]="!f.valid"
+              color="primary"
               mat-stroked-button
               type="submit">
         <mat-icon>save</mat-icon>

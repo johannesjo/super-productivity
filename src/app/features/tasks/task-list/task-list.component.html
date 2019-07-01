@@ -8,12 +8,12 @@
   </button>
 </div>
 
-<div class="task-list-inner"
-     [dragula]="listId"
-     [dragulaModel]="tasks_"
-     [attr.data-id]="listModelId"
+<div #listEl
      [@standardList]="isBlockAni ? 'BLOCK' : (filteredTasks$|async)?.length"
-     #listEl>
+     [attr.data-id]="listModelId"
+     [dragulaModel]="tasks_"
+     [dragula]="listId"
+     class="task-list-inner">
   <task *ngFor="let task of (filteredTasks$|async); trackBy: trackByFn; let i = index;"
         [task]="task">
   </task>

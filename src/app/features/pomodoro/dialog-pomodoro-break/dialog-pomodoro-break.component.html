@@ -13,26 +13,26 @@
 </div>
 
 
-<div mat-dialog-actions
-     align="center">
-  <button mat-button
+<div align="center"
+     mat-dialog-actions>
+  <button (click)="nextSession(true)"
           color="primary"
-          (click)="nextSession(true)">
+          mat-button>
     Close
   </button>
 
-  <button mat-stroked-button
-          color="primary"
+  <button (click)="nextSession()"
           *ngIf="!(isBreakDone$|async)"
-          (click)="nextSession()">
+          color="primary"
+          mat-stroked-button>
     <mat-icon>skip_next</mat-icon>
     <span>Skip break</span>
   </button>
 
   <ng-container *ngIf="(isBreakDone$|async)">
-    <button mat-stroked-button
+    <button (click)="nextSession()"
             color="primary"
-            (click)="nextSession()">
+            mat-stroked-button>
       <mat-icon>play_arrow</mat-icon>
       Back to work!
     </button>

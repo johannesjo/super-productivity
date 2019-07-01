@@ -1,7 +1,7 @@
 <form (submit)="addTask()"
       class="add-task-form mat-elevation-z3">
-  <div class="spinner"
-       *ngIf="(isLoading$|async)">
+  <div *ngIf="(isLoading$|async)"
+       class="spinner">
     <mat-spinner diameter="50"></mat-spinner>
   </div>
   <button (click)="isAddToBacklog=!isAddToBacklog"

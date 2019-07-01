@@ -1,50 +1,50 @@
 <!--<h3 class="md-subtitle">Sync via Google Drive</h3>-->
 
-<form (submit)="submit()"
-      #formRef="ngForm">
+<form #formRef="ngForm"
+      (submit)="submit()">
   <mat-slide-toggle [(ngModel)]="cfg.isEnabled"
-                    name="isEnabled"
-                    aria-label="Enable syncing via Google Drive">
+                    aria-label="Enable syncing via Google Drive"
+                    name="isEnabled">
     Enable syncing via Google Drive
   </mat-slide-toggle>
   <!--NOTE: [@expandFade] not working nicely here -->
   <div *ngIf="cfg.isEnabled">
     <section class="btns">
-      <button type="button"
-              mat-stroked-button=""
-              color="primary"
-              [promiseBtn]="loginPromise"
+      <button (click)="login()"
               *ngIf="!(googleApiService.isLoggedIn$|async)"
-              (click)="login()">
+              [promiseBtn]="loginPromise"
+              color="primary"
+              mat-stroked-button=""
+              type="button">
         <mat-icon>exit_to_app</mat-icon>
         Login
       </button>
-      <button type="button"
-              mat-stroked-button=""
-              color="primary"
+      <button (click)="logout()"
               *ngIf="(googleApiService.isLoggedIn$|async)"
-              (click)="logout()">
+              color="primary"
+              mat-stroked-button=""
+              type="button">
         <mat-icon>clear</mat-icon>
         Logout
       </button>
 
-      <button type="button"
-              mat-stroked-button=""
-              color="primary"
+      <button (click)="saveToGoogleDrive()"
+              *ngIf="(googleApiService.isLoggedIn$|async)"
               [disabled]="googleDriveSyncService.isLoadInProgress$|async"
               [promiseBtn]="googleDriveSyncService.isSaveInProgress$|async"
-              *ngIf="(googleApiService.isLoggedIn$|async)"
-              (click)="saveToGoogleDrive()">
+              color="primary"
+              mat-stroked-button=""
+              type="button">
         <mat-icon>arrow_upward</mat-icon>
         Backup now
       </button>
-      <button type="button"
-              mat-stroked-button=""
-              color="primary"
+      <button (click)="loadFromGoogleDrive()"
+              *ngIf="(googleApiService.isLoggedIn$|async)"
               [disabled]="googleDriveSyncService.isSaveInProgress$|async"
               [promiseBtn]="googleDriveSyncService.isLoadInProgress$|async"
-              *ngIf="(googleApiService.isLoggedIn$|async)"
-              (click)="loadFromGoogleDrive()">
+              color="primary"
+              mat-stroked-button=""
+              type="button">
         <mat-icon>arrow_downward</mat-icon>
         Load From GDrive
       </button>
@@ -63,59 +63,59 @@
     <section *ngIf="(googleApiService.isLoggedIn$|async)"
              class="form-inputs">
       <mat-form-field>
-        <input type="text"
+        <input [(ngModel)]="tmpSyncFile"
                matInput=""
-               placeholder="Sync file name"
                name="tmpSyncFile"
-               [(ngModel)]="tmpSyncFile">
+               placeholder="Sync file name"
+               type="text">
         <mat-icon matSuffix="">file_upload</mat-icon>
       </mat-form-field>
 
-      <button type="button"
-              mat-stroked-button=""
+      <button (click)="changeSyncFileName(tmpSyncFile)"
               color="primary"
-              (click)="changeSyncFileName(tmpSyncFile)">
+              mat-stroked-button=""
+              type="button">
         <mat-icon>save</mat-icon>
         Update sync file
       </button>
       <br>
       <mat-checkbox [(ngModel)]="cfg.isAutoLogin"
-                    name="isAutoLogin"
-                    aria-label="Auto login at when starting app">
+                    aria-label="Auto login at when starting app"
+                    name="isAutoLogin">
         Auto login at when starting app
       </mat-checkbox>
 
       <section *ngIf="cfg.isAutoLogin"
                class="auto-sync-settings">
         <mat-checkbox [(ngModel)]="cfg.isLoadRemoteDataOnStartup"
-                      name="isLoadRemoteDataOnStartup"
-                      aria-label="Load remote data on startup">
+                      aria-label="Load remote data on startup"
+                      name="isLoadRemoteDataOnStartup">
           Load remote data on startup
         </mat-checkbox>
         <mat-checkbox [(ngModel)]="cfg.isAutoSyncToRemote"
-                      name="isAutoSyncToRemote"
-                      aria-label="Auto sync data TO remote">
+                      aria-label="Auto sync data TO remote"
+                      name="isAutoSyncToRemote">
           Auto sync data TO remote
         </mat-checkbox>
         <mat-checkbox [(ngModel)]="cfg.isCompressData"
-                      name="isCompressData"
-                      aria-label="Compress Data">
+                      aria-label="Compress Data"
+                      name="isCompressData">
           Compress Data
         </mat-checkbox>
         <mat-checkbox [(ngModel)]="cfg.isNotifyOnSync"
-                      name="isNotifyOnSync"
-                      aria-label="Notify when syncing">
+                      aria-label="Notify when syncing"
+                      name="isNotifyOnSync">
           Notify when syncing
         </mat-checkbox>
 
         <mat-form-field *ngIf="cfg.isAutoLogin && cfg.isAutoSyncToRemote">
-          <input type="text"
-                 matInput=""
-                 inputDuration=""
+          <input [(ngModel)]="cfg.syncInterval"
                  [isAllowSeconds]="true"
-                 placeholder="Sync interval"
+                 inputDuration=""
+                 matInput=""
                  name="syncInterval"
-                 [(ngModel)]="cfg.syncInterval">
+                 placeholder="Sync interval"
+                 type="text">
           <mat-icon matSuffix="">timer</mat-icon>
         </mat-form-field>
       </section>
@@ -124,10 +124,10 @@
 
 
   <div class="controls">
-    <button type="submit"
+    <button class="btn btn-primary submit-button"
             color="primary"
-            class="btn btn-primary submit-button"
-            mat-raised-button>
+            mat-raised-button
+            type="submit">
       <mat-icon>save</mat-icon>
       Save
     </button>

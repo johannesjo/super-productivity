@@ -1,8 +1,8 @@
 <mat-form-field>
   <mat-chip-list #chipListElRef>
     <mat-chip
-      *ngFor="let modelItem of modelItems; trackBy:trackById"
       (removed)="remove(modelItem.id)"
+      *ngFor="let modelItem of modelItems; trackBy:trackById"
       [removable]="true">
       {{ modelItem.title}}
       <mat-icon matChipRemove>cancel</mat-icon>

@@ -20,14 +20,14 @@
       <mat-icon>schedule</mat-icon>
       <div class="summary-text">Start – End
         <div class="summary-val">
-          <inline-input [value]="started$|async|momentFormat:'HH:mm'"
+          <inline-input (changed)="updateWorkStart($event)"
                         [type]="'time'"
-                        (changed)="updateWorkStart($event)">
+                        [value]="started$|async|momentFormat:'HH:mm'">
           </inline-input>
           –
-          <inline-input [value]="end$|async|momentFormat:'HH:mm'"
+          <inline-input (changed)="updateWorkEnd($event)"
                         [type]="'time'"
-                        (changed)="updateWorkEnd($event)">
+                        [value]="end$|async|momentFormat:'HH:mm'">
           </inline-input>
         </div>
       </div>
@@ -50,8 +50,8 @@
       </div>
     </div>
 
-    <div class="summary-point"
-         *ngIf="(isBreakTrackingSupport$|async)">
+    <div *ngIf="(isBreakTrackingSupport$|async)"
+         class="summary-point">
       <mat-icon>free_breakfast</mat-icon>
       <div class="summary-text">Breaks (nr / time)
         <div class="summary-val">{{breakNr$|async}} / {{breakTime$|async|msToClockString}}</div>
@@ -83,13 +83,13 @@
                               [flatTasks]="(tasksWorkedOnOrDoneOrRepeatableFlat$|async)"></task-summary-table>
           <div style="text-align: center; margin-top: 8px; margin-bottom: 16px;">
             <button [matMenuTriggerFor]="roundTimeActions"
-                    title="Round time spent on all tasks. Be careful! You cannot undo this!"
-                    mat-button="">
+                    mat-button=""
+                    title="Round time spent on all tasks. Be careful! You cannot undo this!">
               <mat-icon>restore</mat-icon>
               Round Time Spent
             </button>
-            <button *ngIf="isForToday"
-                    (click)="showExportModal()"
+            <button (click)="showExportModal()"
+                    *ngIf="isForToday"
                     mat-button="">
               <mat-icon>call_made</mat-icon>
               Export Task List
@@ -100,28 +100,28 @@
                       style="color: red;">
                 !!! Be careful this cannot be undone !!!
               </button>
-              <button mat-menu-item
-                      (click)="roundTimeForTasks('5M')">
+              <button (click)="roundTimeForTasks('5M')"
+                      mat-menu-item>
                 Round all tasks to 5 minutes
               </button>
-              <button mat-menu-item
-                      (click)="roundTimeForTasks('5M', true)">
+              <button (click)="roundTimeForTasks('5M', true)"
+                      mat-menu-item>
                 Round UP all tasks to 5 minutes
               </button>
-              <button mat-menu-item
-                      (click)="roundTimeForTasks('QUARTER')">
+              <button (click)="roundTimeForTasks('QUARTER')"
+                      mat-menu-item>
                 Round all tasks to 15 minutes
               </button>
-              <button mat-menu-item
-                      (click)="roundTimeForTasks('QUARTER', true)">
+              <button (click)="roundTimeForTasks('QUARTER', true)"
+                      mat-menu-item>
                 Round UP all tasks to 15 minutes
               </button>
-              <button mat-menu-item
-                      (click)="roundTimeForTasks('HALF')">
+              <button (click)="roundTimeForTasks('HALF')"
+                      mat-menu-item>
                 Round all tasks to 30 minutes
               </button>
-              <button mat-menu-item
-                      (click)="roundTimeForTasks('HALF', true)">
+              <button (click)="roundTimeForTasks('HALF', true)"
+                      mat-menu-item>
                 Round UP all tasks to 30 minutes
               </button>
             </mat-menu>
@@ -148,16 +148,16 @@
 
   <section class="daily-summary-actions">
     <div class="bottom-buttons">
-      <button *ngIf="isForToday"
-              (click)="finishDay()"
+      <button (click)="finishDay()"
+              *ngIf="isForToday"
               [disabled]="cfg.isBlockFinishDayUntilTimeTimeTracked && !isTimeSheetExported"
               color="primary"
               mat-raised-button="">
         <mat-icon>wb_sunny</mat-icon>
         Save and go home
       </button>
-      <button *ngIf="!isForToday"
-              (click)="finishDay()"
+      <button (click)="finishDay()"
+              *ngIf="!isForToday"
               [disabled]="cfg.isBlockFinishDayUntilTimeTimeTracked && !isTimeSheetExported"
               color="primary"
               mat-raised-button="">
@@ -169,11 +169,11 @@
 </div>
 
 
-<div class="success-animation-wrapper"
-     *ngIf="showSuccessAnimation">
+<div *ngIf="showSuccessAnimation"
+     class="success-animation-wrapper">
   <mat-icon>wb_sunny</mat-icon>
   <div class="unicorn-wrapper">
-    <img src="assets/unicorn.png"
-         class="unicorn">
+    <img class="unicorn"
+         src="assets/unicorn.png">
   </div>
 </div>

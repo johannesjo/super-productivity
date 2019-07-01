@@ -20,8 +20,8 @@
     <!--<mat-icon>search</mat-icon>-->
     <!--</button>-->
   </header>
-  <div [dragulaModel]="(noteService.notes$|async)"
-       [@standardList]="(noteService.notes$|async)?.length"
+  <div [@standardList]="(noteService.notes$|async)?.length"
+       [dragulaModel]="(noteService.notes$|async)"
        class="notes"
        dragula="NOTES">
     <note *ngFor="let note of (noteService.notes$|async); trackBy:trackById; let i = index;"

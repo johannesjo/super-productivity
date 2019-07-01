@@ -19,8 +19,8 @@
         <div class="title">{{attachment?.title || attachment?.path}}</div>
       </ng-container>
       <ng-container *ngIf="attachment?.type==='IMG' && !isError[i]">
-        <img [enlargeImg]="attachment?.originalImgPath"
-             (error)="isError[i]=true"
+        <img (error)="isError[i]=true"
+             [enlargeImg]="attachment?.originalImgPath"
              [src]="attachment?.path">
       </ng-container>
     </a>

@@ -10,12 +10,12 @@
             tabindex="-1"></textarea>
 
 
-  <div class="wrapper-wrapper"
-       *ngIf="!isShowAsText">
-    <button mat-mini-fab
-            color=""
+  <div *ngIf="!isShowAsText"
+       class="wrapper-wrapper">
+    <button (click)="addCol()"
             class="add-col"
-            (click)="addCol()">
+            color=""
+            mat-mini-fab>
       <mat-icon>add</mat-icon>
     </button>
     <div class="table-wrapper material-table">
@@ -38,16 +38,16 @@
         </tr>
         <tr *ngFor="let row of formattedRows;">
           <td *ngFor="let col of row; let i = index;"
-              [ngClass]="options.cols[i]"
-              [innerHTML]="col"></td>
+              [innerHTML]="col"
+              [ngClass]="options.cols[i]"></td>
         </tr>
       </table>
     </div>
   </div>
 
 
-  <collapsible title="Options"
-               class="options-collapsible">
+  <collapsible class="options-collapsible"
+               title="Options">
     <section class="options">
       <div class="row">
         <div class="col">
@@ -115,30 +115,30 @@
 </div>
 
 
-<div mat-dialog-actions=""
-     align="end">
-  <button mat-button=""
-          color="primary"
+<div align="end"
+     mat-dialog-actions="">
+  <button (click)="onCancelClick()"
           *ngIf="isShowClose"
-          (click)="onCancelClick()"
+          color="primary"
+          mat-button=""
           type="button">
     Cancel
   </button>
 
   <button *ngIf="isShowAsText"
-          mat-stroked-button=""
           color="primary"
-          id="clipboard-btn"
           data-clipboard-action="copy"
-          data-clipboard-target="#task-textarea">
+          data-clipboard-target="#task-textarea"
+          id="clipboard-btn"
+          mat-stroked-button="">
     <mat-icon>content_paste</mat-icon>
     Copy to clipboard
   </button>
 
-  <a mat-stroked-button=""
-     color="primary"
+  <a [simpleDownloadData]="txt"
      [simpleDownload]="fileName"
-     [simpleDownloadData]="txt">
+     color="primary"
+     mat-stroked-button="">
     <mat-icon>file_download</mat-icon>
     Save to file
   </a>

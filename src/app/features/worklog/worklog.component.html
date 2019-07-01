@@ -8,8 +8,8 @@
   <div class="years">
     <div *ngFor="let year of (wData.worklog|keyvalue:sortWorklogItems); trackBy: trackByKey;"
          class="year">
-      <h1 class="year-title mat-headline"
-          [innerHtml]="year.key"></h1>
+      <h1 [innerHtml]="year.key"
+          class="year-title mat-headline"></h1>
       <div class="year-time-spent">Month worked:
         <strong>{{year.value.monthWorked}}</strong><br>
         Days worked:
@@ -22,10 +22,10 @@
           <h2 class="month-title mat-headline">
             <span [innerHtml]="month.key|numberToMonth"></span>
 
-            <button mat-mini-fab=""
-                    color="primary"
+            <button (click)="exportData(month.value,year.key, month.key)"
                     aria-label="export data"
-                    (click)="exportData(month.value,year.key, month.key)">
+                    color="primary"
+                    mat-mini-fab="">
               <mat-icon>call_made</mat-icon>
             </button>
           </h2>
@@ -46,11 +46,11 @@
                   <div> {{(week.timeSpent|msToString)}}</div>
                 </div>
                 <button
+                  (click)="exportData(month.value,year.key, month.key, week.weekNr)"
                   [matTooltip]="week.start+'.-'+week.end+'. Days: '+ week.daysWorked+', Time: '+(week.timeSpent|msToString)"
-                  mat-mini-fab=""
-                  color=""
                   aria-label="export data"
-                  (click)="exportData(month.value,year.key, month.key, week.weekNr)">
+                  color=""
+                  mat-mini-fab="">
                   <mat-icon>call_made</mat-icon>
                 </button>
               </div>
@@ -66,8 +66,8 @@
                   *ngFor="let worklogForDay of week.ent|keyvalue:sortWorklogItemsReverse; trackBy: trackByKey;"
                   class="day">
                   <tr (click)="expanded[worklogForDay.value.dateStr]=!expanded[worklogForDay.value.dateStr];"
-                      class="week-row"
-                      [class.isExpanded]="expanded[worklogForDay.value.dateStr]">
+                      [class.isExpanded]="expanded[worklogForDay.value.dateStr]"
+                      class="week-row">
                     <td mat-ripple>{{worklogForDay.value.dayStr}} {{worklogForDay.key}}.</td>
                     <td mat-ripple>{{worklogForDay.value.logEntries.length}}</td>
                     <td mat-ripple>{{worklogForDay.value.timeSpent|msToClockString}}</td>
@@ -80,9 +80,9 @@
 
                   <tr>
                     <td colspan="4">
-                      <div [@expandFade]
-                           class="summary-table-wrapper material-table"
-                           *ngIf="expanded[worklogForDay.value.dateStr]">
+                      <div *ngIf="expanded[worklogForDay.value.dateStr]"
+                           [@expandFade]
+                           class="summary-table-wrapper material-table">
                         <table class="task-summary-table">
                           <!--<caption>Task list for {{worklogForDay.value.dayStr}} {{worklogForDay.key}}th</caption>-->
                           <!--<tr>-->
@@ -91,32 +91,32 @@
                           <!--<th></th>-->
                           <!--</tr>-->
                           <tr *ngFor="let logEntry of worklogForDay.value.logEntries; trackBy: trackByForLogEntry;">
-                            <td class="title"
-                                [class.isSubTask]="logEntry.task.parentId">
+                            <td [class.isSubTask]="logEntry.task.parentId"
+                                class="title">
                               <mat-icon *ngIf="logEntry.task.repeatCfgId"
-                                        title="Repeating task"
-                                        class="repeat-task-icon">repeat
+                                        class="repeat-task-icon"
+                                        title="Repeating task">repeat
                               </mat-icon>
                               <span class="task-title">{{logEntry.task.title}}</span>
                             </td>
                             <td class="worked">
                               <span
                                 *ngIf="logEntry.task.subTaskIds && logEntry.task.subTaskIds.length>0">∑ {{logEntry.task.timeSpentOnDay[worklogForDay.value.dateStr]|msToClockString}}</span>
-                              <inline-input *ngIf="!logEntry.task.subTaskIds || !logEntry.task.subTaskIds.length"
-                                            [value]="logEntry.task.timeSpentOnDay[worklogForDay.value.dateStr]"
+                              <inline-input (changed)="updateTimeSpentTodayForTask(logEntry.task,worklogForDay.value.dateStr, $event)"
+                                            *ngIf="!logEntry.task.subTaskIds || !logEntry.task.subTaskIds.length"
                                             [displayValue]="logEntry.task.timeSpentOnDay[worklogForDay.value.dateStr]|msToClockString"
                                             [type]="'duration'"
-                                            (changed)="updateTimeSpentTodayForTask(logEntry.task,worklogForDay.value.dateStr, $event)">
+                                            [value]="logEntry.task.timeSpentOnDay[worklogForDay.value.dateStr]">
                               </inline-input>
 
                             </td>
                             <td class="actions">
-                              <button mat-icon-button=""
-                                      title="Restore Task From Archive"
-                                      color=""
+                              <button (click)="restoreTask(year.key, month.key, worklogForDay.key,logEntry.task);"
                                       *ngIf="!logEntry.task?.parentId && !logEntry.isNoRestore"
                                       aria-label="restore"
-                                      (click)="restoreTask(year.key, month.key, worklogForDay.key,logEntry.task);">
+                                      color=""
+                                      mat-icon-button=""
+                                      title="Restore Task From Archive">
                                 <!--<mat-icon>unarchive</mat-icon>-->
                                 <mat-icon>settings_backup_restore</mat-icon>
                               </button>

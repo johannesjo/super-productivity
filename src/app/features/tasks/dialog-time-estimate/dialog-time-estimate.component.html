@@ -16,11 +16,11 @@
           name="time-estimate-form">
 
       <div class="wrap-time">
-        <input-duration-slider label="Time Spent"
-                               [(model)]="timeSpentOnDayCopy[todayStr]">
+        <input-duration-slider [(model)]="timeSpentOnDayCopy[todayStr]"
+                               label="Time Spent">
         </input-duration-slider>
-        <input-duration-slider label="Estimate"
-                               [(model)]="taskCopy.timeEstimate">
+        <input-duration-slider [(model)]="taskCopy.timeEstimate"
+                               label="Estimate">
         </input-duration-slider>
       </div>
 
@@ -48,70 +48,70 @@
         <div *ngFor="let strDate of timeSpentOnDayCopy|keys:'reverse':todayStr"
              class="other-day">
           <mat-form-field class="mat-icon-float mat-block">
-            <input matInput
-                   placeholder="{{strDate}} Time Spent"
+            <input [(ngModel)]="timeSpentOnDayCopy[strDate]"
+                   aria-label="Time Spent"
                    inputDuration="optional"
-                   type="text"
+                   matInput
                    name="timeSpentOnDay{{strDate}}"
-                   [(ngModel)]="timeSpentOnDayCopy[strDate]"
-                   aria-label="Time Spent">
+                   placeholder="{{strDate}} Time Spent"
+                   type="text">
 
             <mat-icon matPrefix>timer</mat-icon>
           </mat-form-field>
-          <button mat-icon-button
+          <button (click)="deleteValue(strDate)"
                   color=""
-                  type="button"
+                  mat-icon-button
                   title="Delete entry for day"
-                  (click)="deleteValue(strDate)">
+                  type="button">
             <mat-icon>delete_forever</mat-icon>
           </button>
         </div>
 
-        <button type="button"
-                mat-button=""
-                color="primary"
-                aria-label="add for another day"
+        <button (click)="showAddForAnotherDayForm()"
                 [hidden]="isAddForAnotherDayFormVisible"
-                (click)="showAddForAnotherDayForm()">
+                aria-label="add for another day"
+                color="primary"
+                mat-button=""
+                type="button">
           <mat-icon>add</mat-icon>
           Add time spent for other day
         </button>
-        <button type="submit"
-                style="width: 0;height: 0; font-size: 0;border: 0;background: transparent;"
-                tabindex="-1"></button>
+        <button style="width: 0;height: 0; font-size: 0;border: 0;background: transparent;"
+                tabindex="-1"
+                type="submit"></button>
       </div>
     </form>
 
 
     <!--TODO move to other dialog -->
-    <form name="addForAnotherDayForm"
+    <form (submit)="addNewEntry()"
           *ngIf="isAddForAnotherDayFormVisible"
-          (submit)="addNewEntry()">
+          name="addForAnotherDayForm">
       <h3 class="mat-caption">Add new entry for <span [innerHtml]="newEntry.date|date:'dd-MM-yyyy'"></span></h3>
       <mat-form-field>
-        <input [matDatepicker]="myDatepicker"
+        <input [(ngModel)]="newEntry.date"
+               [matDatepicker]="myDatepicker"
                matInput
+               name="date"
                placeholder="Date for new entry"
-               type="text"
-               [(ngModel)]="newEntry.date"
                required
-               name="date">
+               type="text">
         <mat-error>The entered value is not a date!</mat-error>
-        <mat-datepicker-toggle matPrefix
-                               [for]="myDatepicker"></mat-datepicker-toggle>
+        <mat-datepicker-toggle [for]="myDatepicker"
+                               matPrefix></mat-datepicker-toggle>
         <mat-datepicker #myDatepicker></mat-datepicker>
       </mat-form-field>
 
 
       <mat-form-field>
-        <input matInput
-               placeholder="Time Spent on {{newEntry.date|date:'dd-MM-yyyy'}}"
-               type="text"
-               name="timeSpentNew"
-               required
+        <input [(ngModel)]="newEntry.timeSpent"
+               aria-label="Time Spent for new entry"
                inputDuration
-               [(ngModel)]="newEntry.timeSpent"
-               aria-label="Time Spent for new entry">
+               matInput
+               name="timeSpentNew"
+               placeholder="Time Spent on {{newEntry.date|date:'dd-MM-yyyy'}}"
+               required
+               type="text">
         <mat-icon matPrefix>timer</mat-icon>
       </mat-form-field>
 
@@ -126,14 +126,14 @@
 
   <mat-dialog-actions align="end">
     <!-- Can optionally provide a result for the closing dialog. -->
-    <button mat-button
+    <button [mat-dialog-close]="true"
             color="primary"
-            [mat-dialog-close]="true">Cancel
+            mat-button>Cancel
     </button>
 
-    <button mat-stroked-button
+    <button (click)="submit()"
             color="primary"
-            (click)="submit()">
+            mat-stroked-button>
       <mat-icon>save</mat-icon>
       Save
     </button>

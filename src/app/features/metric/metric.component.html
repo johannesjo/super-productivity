@@ -55,30 +55,30 @@
      style="margin-top: 32px;">No additional data collected yet. Use the form on the daily summary
     "Evaluation" panel to do so.</p>
 
-  <section class="metric-metrics"
-           *ngIf="(metricService.hasData$|async)">
+  <section *ngIf="(metricService.hasData$|async)"
+           class="metric-metrics">
     <section class="pie-charts">
       <section *ngIf="(metricService.improvementCountsPieChartData$|async) as improvementCounts">
         <h3>Number of times an improvement factor was selected</h3>
-        <canvas baseChart
+        <canvas [chartType]="pieChartType"
                 [data]="improvementCounts.data"
                 [labels]="improvementCounts.labels"
-                [chartType]="pieChartType"
+                [legend]="(improvementCounts.data.length < 12)"
                 [options]="pieChartOptions"
                 [plugins]="pieChartPlugins"
-                [legend]="(improvementCounts.data.length < 12)">
+                baseChart>
         </canvas>
       </section>
 
       <section *ngIf="(metricService.obstructionCountsPieChartData$|async) as obstructionCounts">
         <h3>Number of times an obstructing factor was selected</h3>
-        <canvas baseChart
+        <canvas [chartType]="pieChartType"
                 [data]="obstructionCounts.data"
                 [labels]="obstructionCounts.labels"
-                [chartType]="pieChartType"
+                [legend]="(obstructionCounts.data.length < 12)"
                 [options]="pieChartOptions"
                 [plugins]="pieChartPlugins"
-                [legend]="(obstructionCounts.data.length < 12)">
+                baseChart>
         </canvas>
       </section>
     </section>
@@ -88,14 +88,14 @@
         <h3>Mood and productivity over time</h3>
         <div class="chart-wrapper">
           <div class="inner-chart-wrapper">
-            <canvas baseChart
+            <canvas [chartType]="lineChartType"
+                    [colors]="lineChartColors"
                     [datasets]="productivityHappiness.data"
                     [labels]="productivityHappiness.labels"
-                    [options]="lineChartOptions"
-                    [colors]="lineChartColors"
                     [legend]="lineChartLegend"
-                    [chartType]="lineChartType"
-                    [plugins]="lineChartPlugins">
+                    [options]="lineChartOptions"
+                    [plugins]="lineChartPlugins"
+                    baseChart>
             </canvas>
           </div>
         </div>

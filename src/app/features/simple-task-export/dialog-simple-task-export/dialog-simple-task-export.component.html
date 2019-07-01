@@ -1,4 +1,4 @@
 <h1 mat-dialog-title="">Task List Export</h1>
 
-<simple-task-export [tasks]="data.tasks"
-                    (cancel)="close()"></simple-task-export>
+<simple-task-export (cancel)="close()"
+                    [tasks]="data.tasks"></simple-task-export>

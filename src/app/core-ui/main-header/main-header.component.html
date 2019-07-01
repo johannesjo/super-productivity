@@ -1,8 +1,8 @@
 <div class="wrapper bg-primary color-contrast mat-elevation-z3">
-  <button mat-icon-button
-          title="Go to task list"
-          class="app-icon hide-xs"
-          routerLink="work-view">
+  <button class="app-icon hide-xs"
+          mat-icon-button
+          routerLink="work-view"
+          title="Go to task list">
     <mat-icon svgIcon="sp">sp</mat-icon>
   </button>
 
@@ -32,26 +32,26 @@
       Worklog
     </button>
 
-    <button routerLink="metrics"
-            mat-menu-item>
+    <button mat-menu-item
+            routerLink="metrics">
       <mat-icon>insert_chart</mat-icon>
       Metrics
     </button>
 
-    <button routerLink="projects"
-            mat-menu-item>
+    <button mat-menu-item
+            routerLink="projects">
       <mat-icon>list</mat-icon>
       Projects
     </button>
 
-    <button routerLink="config"
-            mat-menu-item
+    <button mat-menu-item
+            routerLink="config"
             routerLinkActive>
       <mat-icon>settings</mat-icon>
       Settings
     </button>
-    <button routerLink="procrastination"
-            mat-menu-item
+    <button mat-menu-item
+            routerLink="procrastination"
             routerLinkActive>
       <mat-icon>verified_user</mat-icon>
       Procrastinate
@@ -60,9 +60,9 @@
   </mat-menu>
 
   <button [matMenuTriggerFor]="projectMenu"
-          title="Project Menu"
           class="project-btn"
-          mat-button>
+          mat-button
+          title="Project Menu">
     <span class="current-project-title">{{(projectService.currentProject$|async).title}}</span>
     <mat-icon aria-hidden="true">arrow_drop_down</mat-icon>
   </button>
@@ -74,8 +74,8 @@
       <mat-icon *ngIf="project.id!==(projectService.currentId$|async)">radio_button_unchecked</mat-icon>
       {{project.title}}
     </button>
-    <button routerLink="projects"
-            mat-menu-item>
+    <button mat-menu-item
+            routerLink="projects">
       <mat-icon>list</mat-icon>
       Manage Projects
     </button>
@@ -99,14 +99,14 @@
       <span class="text">Worklog</span>
     </button>
 
-    <button routerLink="metrics"
-            mat-button
+    <button mat-button
+            routerLink="metrics"
             routerLinkActive="isActive">
       <span class="text">Metrics</span>
     </button>
 
-    <button routerLink="config"
-            mat-button
+    <button mat-button
+            routerLink="config"
             routerLinkActive="isActive">
       <span class="text">Settings</span>
     </button>
@@ -114,25 +114,25 @@
 
   <nav class="action-nav">
     <button (click)="showAddTaskBar()"
-            title="Add new Task"
             class="bg-200"
             color="lighter"
-            mat-mini-fab>
+            mat-mini-fab
+            title="Add new Task">
       <mat-icon>add</mat-icon>
     </button>
 
     <button (click)="bookmarkService.toggleBookmarks()"
-            title="Show/Hide Bookmarks"
             class="bg-200 show-xs-only"
             color="lighter"
-            mat-mini-fab>
+            mat-mini-fab
+            title="Show/Hide Bookmarks">
       <mat-icon>bookmark</mat-icon>
     </button>
 
     <button (click)="toggleShowNotes()"
-            title="Show/Hide Project Notes"
             color="lighter"
-            mat-mini-fab>
+            mat-mini-fab
+            title="Show/Hide Project Notes">
       <mat-icon [class.rotate]="(noteService.isShowNotes$|async)"
                 class="note-ico">note
       </mat-icon>
@@ -141,9 +141,9 @@
     <div class="play-btn-wrapper">
       <button (click)="togglePlay()"
               [color]="(taskService.currentTaskId$|async)? 'accent': 'lighter'"
-              title="Start/Stop tracking time"
               class="play-btn"
-              mat-fab>
+              mat-fab
+              title="Start/Stop tracking time">
         <mat-icon *ngIf="!(taskService.currentTaskId$|async)">play_arrow</mat-icon>
         <mat-icon *ngIf="(taskService.currentTaskId$|async)">pause</mat-icon>
         <svg class="circle-svg"
@@ -167,16 +167,16 @@
         <div class="pomodoro-label">{{(pomodoroService.currentSessionTime$|async|msToMinuteClockString)}}
         </div>
         <div class="pomodoro-controls">
-          <button mat-mini-fab
+          <button (click)="skipToNextPomodoroSession()"
+                  class="pomodoro-btn"
                   color=""
-                  (click)="skipToNextPomodoroSession()"
-                  class="pomodoro-btn">
+                  mat-mini-fab>
             <mat-icon>skip_next</mat-icon>
           </button>
-          <button mat-mini-fab
+          <button (click)="stopPomodoro()"
+                  class="pomodoro-btn"
                   color=""
-                  (click)="stopPomodoro()"
-                  class="pomodoro-btn">
+                  mat-mini-fab>
             <mat-icon>stop</mat-icon>
           </button>
         </div>
@@ -186,11 +186,11 @@
 
   <button (click)="bookmarkService.toggleBookmarks()"
           [class.is-open]="bookmarkService.isShowBookmarks$|async"
-          title="Show/Hide Bookmarks"
           aria-label="Show Help for section"
           class="show-bookmarks-btn hide-xs"
           color="primary"
-          mat-mini-fab="">
+          mat-mini-fab=""
+          title="Show/Hide Bookmarks">
     <mat-icon>bookmark</mat-icon>
   </button>
 </div>

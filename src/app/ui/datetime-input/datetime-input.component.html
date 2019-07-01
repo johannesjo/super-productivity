@@ -1,21 +1,21 @@
 <div class="wrapper"
      style="position: relative;">
   <mat-form-field>
-    <input [ngModel]="strValue"
+    <input (ngModelChange)="updateFromInput($event)"
            [name]="name"
-           (ngModelChange)="updateFromInput($event)"
+           [ngModel]="strValue"
            [placeholder]="placeholder"
            [required]="required"
            matInput
            type="datetime-local">
-    <input class="fake"
+    <input (ngModelChange)="updateFromInput($event)"
            [ngModel]="strValue"
-           (ngModelChange)="updateFromInput($event)"
-           [owlDateTime]="dt1">
+           [owlDateTime]="dt1"
+           class="fake">
     <mat-error>The entered value is not a datetime!</mat-error>
-    <mat-icon matSuffix=""
-              style="cursor: pointer;"
-              [owlDateTimeTrigger]="dt1">alarm
+    <mat-icon [owlDateTimeTrigger]="dt1"
+              matSuffix=""
+              style="cursor: pointer;">alarm
     </mat-icon>
   </mat-form-field>
   <owl-date-time #dt1></owl-date-time>

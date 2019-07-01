@@ -6,30 +6,30 @@
 </div>
 
 <mat-slide-toggle [(ngModel)]="cfg.isEnabled"
-                  style="margin-bottom: 8px;"
+                  aria-label="Enable Jira integration"
                   name="isEnabled"
-                  aria-label="Enable Jira integration">
+                  style="margin-bottom: 8px;">
   Enable Jira integration
 </mat-slide-toggle>
 
-<form [formGroup]="form"
-      class="isShowWhenJiraSupport"
-      (ngSubmit)="submit()">
+<form (ngSubmit)="submit()"
+      [formGroup]="form"
+      class="isShowWhenJiraSupport">
 
   <div *ngIf="cfg.isEnabled">
-    <formly-form [model]="cfg"
-                 (modelChange)="cfg=$event"
+    <formly-form (modelChange)="cfg=$event"
                  [fields]="section.items"
-                 [options]="options"
-                 [form]="form">
+                 [form]="form"
+                 [model]="cfg"
+                 [options]="options">
     </formly-form>
 
     <h3 class="sub-section-heading">Transition Handling</h3>
     <mat-slide-toggle [(ngModel)]="cfg.isTransitionIssuesEnabled"
-                      style="margin-bottom: 8px;"
-                      name="isTransitionIssuesEnabled"
                       [ngModelOptions]="{standalone: true}"
-                      aria-label="Enable Transition Handling">
+                      aria-label="Enable Transition Handling"
+                      name="isTransitionIssuesEnabled"
+                      style="margin-bottom: 8px;">
       Enable Transition Handling
     </mat-slide-toggle>
 
@@ -37,17 +37,17 @@
     <section *ngIf="cfg.isTransitionIssuesEnabled"
              @expand>
       <mat-form-field>
-        <input matInput
-               class="border-color-primary"
-               placeholder="Select issue to load available transitions"
-               aria-label="Select issue to load available transitions"
+        <input [formControl]="issueSuggestionsCtrl"
                [matAutocomplete]="autoEl"
-               [formControl]="issueSuggestionsCtrl">
+               aria-label="Select issue to load available transitions"
+               class="border-color-primary"
+               matInput
+               placeholder="Select issue to load available transitions">
 
         <mat-autocomplete #autoEl="matAutocomplete"
                           (optionSelected)="updateTransitionOptions()"
-                          [displayWith]="displayIssueWith"
-                          [autoActiveFirstOption]="true">
+                          [autoActiveFirstOption]="true"
+                          [displayWith]="displayIssueWith">
           <mat-option *ngIf="(isLoading$|async)"
                       [value]="issueSuggestionsCtrl.value"
                       class="is-loading">
@@ -86,10 +86,10 @@
         want to include this data you need to select the proper custom field for it.</p>
 
       <div>
-        <button type="button"
+        <button (click)="loadCustomFields()"
                 [promiseBtn]="customFieldsPromise"
                 mat-raised-button
-                (click)="loadCustomFields()">
+                type="button">
           Load Suggestions
         </button>
         <br>
@@ -98,13 +98,13 @@
 
       <mat-form-field>
         <input [(ngModel)]="cfg.storyPointFieldId"
-               matInput
-               class="border-color-primary"
-               placeholder="Story Points"
-               aria-label="Story Points"
-
+               [formControl]="customFieldSuggestionsCtrl"
                [matAutocomplete]="storyPointAutoEl"
-               [formControl]="customFieldSuggestionsCtrl">
+               aria-label="Story Points"
+               class="border-color-primary"
+
+               matInput
+               placeholder="Story Points">
 
         <mat-autocomplete #storyPointAutoEl="matAutocomplete"
                           [autoActiveFirstOption]="true">
@@ -117,11 +117,11 @@
   </div>
 
   <div class="controls">
-    <button type="submit"
-            color="primary"
+    <button [disabled]="!form.valid && cfg.isEnabled"
             class="btn btn-primary submit-button"
+            color="primary"
             mat-raised-button
-            [disabled]="!form.valid && cfg.isEnabled">
+            type="submit">
       <mat-icon>save</mat-icon>
       Save
     </button>

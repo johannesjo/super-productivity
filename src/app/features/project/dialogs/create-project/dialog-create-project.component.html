@@ -4,24 +4,24 @@
 </h1>
 
 
-<form [formGroup]="form"
-      (ngSubmit)="submit()">
+<form (ngSubmit)="submit()"
+      [formGroup]="form">
   <mat-dialog-content>
 
-    <formly-form [model]="projectData"
-                 (modelChange)="projectData = $event"
+    <formly-form (modelChange)="projectData = $event"
                  [fields]="formCfg"
-                 [options]="formOptions"
-                 [form]="form">
+                 [form]="form"
+                 [model]="projectData"
+                 [options]="formOptions">
     </formly-form>
 
 
     <div class="issue-provider-cfg">
       <h3>Issue Provider Configs (optional)</h3>
       <div class="item">
-        <button mat-button=""
+        <button (click)="openJiraCfg()"
                 color="primary"
-                (click)="openJiraCfg()"
+                mat-button=""
                 type="button">
           <mat-icon *ngIf="!jiraCfg?.isEnabled"
                     svgIcon="jira"></mat-icon>
@@ -30,9 +30,9 @@
         </button>
       </div>
       <div class="item">
-        <button mat-button=""
+        <button (click)="openGithubCfg()"
                 color="primary"
-                (click)="openGithubCfg()"
+                mat-button=""
                 type="button">
           <mat-icon *ngIf="!githubCfg?.repo"
                     svgIcon="github"></mat-icon>
@@ -54,17 +54,17 @@
 
   <mat-dialog-actions align="end">
     <div class="wrap-buttons">
-      <button type="button"
-              color="primary"
-              (click)="cancelEdit()"
+      <button (click)="cancelEdit()"
               class="btn btn-primary submit-button"
-              mat-button>Cancel
+              color="primary"
+              mat-button
+              type="button">Cancel
       </button>
-      <button type="submit"
-              color="primary"
+      <button [disabled]="!form.valid"
               class="btn btn-primary submit-button"
+              color="primary"
               mat-stroked-button
-              [disabled]="!form.valid">Save
+              type="submit">Save
       </button>
     </div>
   </mat-dialog-actions>

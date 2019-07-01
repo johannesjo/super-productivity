@@ -40,10 +40,10 @@
         Unschedule
       </button>
 
-      <button color="primary"
+      <button [disabled]="!dateTime"
+              color="primary"
               mat-stroked-button
-              type="submit"
-              [disabled]="!dateTime">
+              type="submit">
         <ng-container *ngIf="!task.reminderId">
           <mat-icon>alarm_add</mat-icon>
           Schedule

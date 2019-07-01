@@ -5,15 +5,15 @@
   Export Data
 </a>
 
-<button type="button"
+<button (click)="fileInput.click()"
         color="primary"
         mat-stroked-button
-        (click)="fileInput.click()">
+        type="button">
   <mat-icon>file_download</mat-icon>
   Import from file
 </button>
-<input hidden
+<input #fileInput
        (change)="handleFileInput($event)"
-       #fileInput
-       type="file"
-       id="file">
+       hidden
+       id="file"
+       type="file">

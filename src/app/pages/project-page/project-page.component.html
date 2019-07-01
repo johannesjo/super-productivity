@@ -3,14 +3,14 @@
     <h1 class="mat-h1"
         style="text-align: center; margin-top: 12px;">Project Overview</h1>
 
-    <div class="project-list"
-         dragula="PROJECTS"
+    <div [@standardList]="(projectService.list$|async)?.length"
          [dragulaModel]="projectService.list$|async"
-         [@standardList]="(projectService.list$|async)?.length">
+         class="project-list"
+         dragula="PROJECTS">
       <mat-card *ngFor="let project of (projectService.list$|async); trackBy:trackById;"
                 class="project">
-        <div class="project-color bg-400-el drag-handle"
-             [ngClass]="project.themeColor">
+        <div [ngClass]="project.themeColor"
+             class="project-color bg-400-el drag-handle">
           <mat-icon class="color-contrast"
                     svgIcon="drag_handle">
           </mat-icon>
@@ -22,39 +22,39 @@
 
         <div class="issue-providers">
           <mat-icon *ngIf="project.issueIntegrationCfgs?.JIRA?.isEnabled"
-                    title="Jira Integration Configured"
-                    svgIcon="jira"></mat-icon>
+                    svgIcon="jira"
+                    title="Jira Integration Configured"></mat-icon>
           <mat-icon *ngIf="project.issueIntegrationCfgs?.GITHUB?.repo"
-                    title="Github Integration Configured"
-                    svgIcon="github"></mat-icon>
+                    svgIcon="github"
+                    title="Github Integration Configured"></mat-icon>
         </div>
 
         <div class="controls">
           <button (click)="edit(project)"
                   color=""
-                  title="Edit Project"
-                  mat-mini-fab>
+                  mat-mini-fab
+                  title="Edit Project">
             <mat-icon aria-label="Edit">edit</mat-icon>
           </button>
           <button (click)="archive(project.id)"
                   *ngIf="project.id !== (projectService.currentId$|async)"
                   color=""
-                  title="Archive Project"
-                  mat-mini-fab>
+                  mat-mini-fab
+                  title="Archive Project">
             <mat-icon aria-label="Archive">archive</mat-icon>
           </button>
           <button (click)="export(project.id, project.title)"
                   class="hide-xs"
                   color=""
-                  title="Export Project"
-                  mat-mini-fab>
+                  mat-mini-fab
+                  title="Export Project">
             <mat-icon aria-label="Archive">flight</mat-icon>
           </button>
           <button (click)="remove(project.id)"
                   *ngIf="project.id !== (projectService.currentId$|async)"
-                  title="Delete Project"
                   color="warn"
-                  mat-mini-fab>
+                  mat-mini-fab
+                  title="Delete Project">
             <mat-icon aria-label="Delete">delete</mat-icon>
           </button>
         </div>
@@ -70,52 +70,52 @@
         Create New
       </button>
 
-      <button type="button"
+      <button (click)="fileInput.click()"
               mat-raised-button
-              (click)="fileInput.click()">Import from file
+              type="button">Import from file
       </button>
-      <input hidden
+      <input #fileInput
              (change)="handleFileInput($event)"
-             #fileInput
-             type="file"
-             id="file">
+             hidden
+             id="file"
+             type="file">
     </div>
   </div>
 
-  <div class="component-wrapper"
-       *ngIf="(projectService.archived$|async)?.length">
+  <div *ngIf="(projectService.archived$|async)?.length"
+       class="component-wrapper">
     <h2 class="mat-h2"
         style="text-align: center; margin-top: 32px;">Archived Projects</h2>
 
     <mat-card *ngFor="let project of (projectService.archived$|async); trackBy:trackById;"
               class="project">
-      <div class="project-color bg-400-el"
-           [ngClass]="project.themeColor">
+      <div [ngClass]="project.themeColor"
+           class="project-color bg-400-el">
       </div>
 
       <div class="title">{{project.title}}</div>
 
       <div class="issue-providers">
         <mat-icon *ngIf="project.issueIntegrationCfgs?.JIRA?.isEnabled"
-                  title="Jira Integration Configured"
-                  svgIcon="jira"></mat-icon>
+                  svgIcon="jira"
+                  title="Jira Integration Configured"></mat-icon>
         <mat-icon *ngIf="project.issueIntegrationCfgs?.GITHUB?.repo"
-                  title="Github Integration Configured"
-                  svgIcon="github"></mat-icon>
+                  svgIcon="github"
+                  title="Github Integration Configured"></mat-icon>
       </div>
 
       <div class="controls">
         <button (click)="unarchive(project.id)"
                 color=""
-                title="Unarchive Project"
-                mat-mini-fab>
+                mat-mini-fab
+                title="Unarchive Project">
           <mat-icon aria-label="Unarchive">unarchive</mat-icon>
         </button>
         <button (click)="remove(project.id)"
                 *ngIf="project.id !== (projectService.currentId$|async)"
-                title="Delete Project"
                 color="warn"
-                mat-mini-fab>
+                mat-mini-fab
+                title="Delete Project">
           <mat-icon aria-label="Delete">delete</mat-icon>
         </button>
       </div>

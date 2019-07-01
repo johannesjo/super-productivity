@@ -1,38 +1,38 @@
-<div class="content-wrapper"
-     #wrapperEl
-     [@slide]="{value:'*',params:{elHeight:height}}"
+<div #wrapperEl
      *ngIf="(activeBanner$|async) as banner"
-     [class.isError]="banner.type==='ERROR'">
+     [@slide]="{value:'*',params:{elHeight:height}}"
+     [class.isError]="banner.type==='ERROR'"
+     class="content-wrapper">
   <div class="message-wrapper">
     <mat-icon *ngIf="banner.ico">{{banner.ico}}</mat-icon>
     <mat-icon *ngIf="banner.svgIco"
               [svgIcon]="banner.svgIco"></mat-icon>
 
-    <div class="message"
-         [innerHTML]="banner.msg"></div>
+    <div [innerHTML]="banner.msg"
+         class="message"></div>
   </div>
 
   <div class="buttons">
-    <button mat-button
+    <button (click)="dismiss(banner.id)"
+            *ngIf="!banner.action2"
             color="primary"
-            (click)="dismiss(banner.id)"
-            *ngIf="!banner.action2">Dismiss
+            mat-button>Dismiss
     </button>
 
-    <button mat-button
+    <button (click)="action(banner.id, banner.action)"
+            *ngIf="banner.action"
             color="primary"
-            (click)="action(banner.id, banner.action)"
-            *ngIf="banner.action">{{banner.action.label}}
+            mat-button>{{banner.action.label}}
     </button>
-    <button mat-button
+    <button (click)="action(banner.id, banner.action2)"
+            *ngIf="banner.action2"
             color="primary"
-            (click)="action(banner.id, banner.action2)"
-            *ngIf="banner.action2">{{banner.action2.label}}
+            mat-button>{{banner.action2.label}}
     </button>
-    <button mat-button
+    <button (click)="action(banner.id, banner.action3)"
+            *ngIf="banner.action3"
             color="primary"
-            (click)="action(banner.id, banner.action3)"
-            *ngIf="banner.action3">{{banner.action3.label}}
+            mat-button>{{banner.action3.label}}
     </button>
   </div>
 </div>

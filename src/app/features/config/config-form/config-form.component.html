@@ -1,10 +1,10 @@
 <form (ngSubmit)="submit()"
       [formGroup]="form">
 
-  <formly-form [fields]="fields"
+  <formly-form (modelChange)="config=$event"
+               [fields]="fields"
                [form]="form"
                [model]="config"
-               (modelChange)="config=$event"
                [options]="options">
   </formly-form>
 

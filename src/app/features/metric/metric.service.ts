@@ -60,7 +60,10 @@ export class MetricService {
 
   async loadStateForProject(projectId: string) {
     const lsMetricState = await this._persistenceService.metric.load(projectId);
-    this.loadState(lsMetricState || initialMetricState);
+    this.loadState({
+      ...initialMetricState,
+      ...lsMetricState
+    } || initialMetricState);
   }
 
   loadState(state: MetricState) {

@@ -10,8 +10,8 @@
                   tabindex="-1"></textarea>
 
   <div *ngIf="!options.isShowAsText"
-       class="table-wrapper material-table"
-       [innerHTML]="tasksHtml"></div>
+       [innerHTML]="tasksHtml"
+       class="table-wrapper material-table"></div>
 
 
   <section class="options">
@@ -125,27 +125,27 @@
 </div>
 
 
-<div mat-dialog-actions=""
-     align="end">
-  <button mat-button=""
+<div align="end"
+     mat-dialog-actions="">
+  <button (click)="onCancelClick()"
           color="primary"
-          (click)="onCancelClick()"
+          mat-button=""
           type="button">
     Close
   </button>
-  <button mat-stroked-button=""
-          *ngIf="options.isShowAsText"
+  <button *ngIf="options.isShowAsText"
           color="primary"
-          id="clipboard-btn"
           data-clipboard-action="copy"
-          data-clipboard-target="#task-textarea">
+          data-clipboard-target="#task-textarea"
+          id="clipboard-btn"
+          mat-stroked-button="">
     <mat-icon>content_paste</mat-icon>
     Copy to clipboard
   </button>
-  <a mat-stroked-button=""
-     color="primary"
+  <a [simpleDownloadData]="tasksTxt"
      [simpleDownload]="fileName"
-     [simpleDownloadData]="tasksTxt">
+     color="primary"
+     mat-stroked-button="">
     <mat-icon>file_download</mat-icon>
     Save to file
   </a>

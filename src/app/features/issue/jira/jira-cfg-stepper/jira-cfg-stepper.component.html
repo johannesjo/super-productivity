@@ -15,10 +15,10 @@
           work for mobile.
         </p>
 
-        <formly-form [fields]="credentialsFormConfig"
+        <formly-form (modelChange)="jiraCfg=$event"
+                     [fields]="credentialsFormConfig"
                      [form]="credentialsFormGroup"
-                     [model]="jiraCfg"
-                     (modelChange)="jiraCfg=$event">
+                     [model]="jiraCfg">
 
           <div *ngIf="user"
                [@expand]
@@ -56,10 +56,10 @@
       <form (submit)="saveStepForm(jiraCfg)"
             [formGroup]="advancedSettingsFormGroup">
         <ng-template matStepLabel>Advanced</ng-template>
-        <formly-form [fields]="advancedSettingsFormConfig"
+        <formly-form (modelChange)="jiraCfg=$event"
+                     [fields]="advancedSettingsFormConfig"
                      [form]="advancedSettingsFormGroup"
-                     [model]="jiraCfg"
-                     (modelChange)="jiraCfg=$event">
+                     [model]="jiraCfg">
 
           <div class="center-wrapper">
             <button mat-raised-button=""

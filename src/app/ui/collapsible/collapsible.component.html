@@ -13,8 +13,8 @@
     <mat-icon>{{btnIcon}}</mat-icon>
   </button>
 </div>
-<div class="collapsible-panel ani-expand-collapse"
-     *ngIf="isExpanded"
-     [@expand]>
+<div *ngIf="isExpanded"
+     [@expand]
+     class="collapsible-panel ani-expand-collapse">
   <ng-content></ng-content>
 </div>

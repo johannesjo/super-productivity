@@ -1,5 +1,5 @@
-<form (submit)="submit()"
-      #form="ngForm">
+<form #form="ngForm"
+      (submit)="submit()">
   <h2 mat-dialog-title>{{ bookmarkCopy.id ? 'Edit' : 'Add' }} Bookmark</h2>
 
   <mat-dialog-content>
