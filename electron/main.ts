@@ -41,6 +41,15 @@ if (IS_DEV) {
   console.log('Starting in DEV Mode!!!');
 }
 
+// NOTE: needs to be executed before everything else
+process.argv.forEach((val) => {
+  if (val && val.includes('--user-data-dir=')) {
+    const customUserDir = val.replace('--user-data-dir=', '').trim();
+    console.log('Using custom directory for user data', customUserDir);
+    app.setPath('userData', customUserDir);
+  }
+});
+
 interface MyApp extends App {
   isQuiting?: boolean;
 }
