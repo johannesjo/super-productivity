@@ -38,11 +38,9 @@
             tabindex="2"
             title="un-/mark as done">
       <mat-icon @swirl
-                aria-label="Mark as undone"
                 class="undo">undo
       </mat-icon>
       <mat-icon @swirl
-                aria-label="Mark as done"
                 class="check">check
       </mat-icon>
     </button>
@@ -146,7 +144,7 @@
                   mat-icon-button
                   tabindex="2"
                   title="Estimate time/Add time spent">
-            <mat-icon aria-label="time estimation">access_time</mat-icon>
+            <mat-icon>access_time</mat-icon>
           </button>
         </div>
 
@@ -191,7 +189,6 @@
         <mat-menu #menu="matMenu">
           <button (click)="startTask()"
                   *ngIf="!task.isDone && !isCurrent && !task.subTasks"
-                  aria-label="mark as current"
                   class="show-touch-only"
                   mat-menu-item
                   tabindex="2">
@@ -209,17 +206,16 @@
           </button>
 
           <button (click)="toggleTaskDone()"
-                  aria-label="un-/mark as done"
                   class="show-touch-only"
                   mat-menu-item=""
                   tabindex="2">
             <ng-container *ngIf="task.isDone">
-              <mat-icon aria-label="Mark as undone">undo
+              <mat-icon>undo
               </mat-icon>
               Mark as undone
             </ng-container>
             <ng-container *ngIf="!task.isDone">
-              <mat-icon aria-label="Mark as done">check
+              <mat-icon>check
               </mat-icon>
               Mark as done
             </ng-container>
@@ -248,12 +244,10 @@
 
           <button (click)="toggleShowAdditionalInfoOpen()"
                   [class.isActive]="task._isAdditionalInfoOpen"
-                  aria-label="additional-info"
                   mat-menu-item
                   tabindex="2">
 
-            <mat-icon *ngIf="task.notes||task.issueData"
-                      aria-label="notes">chat
+            <mat-icon *ngIf="task.notes||task.issueData">chat
             </mat-icon>
             <mat-icon *ngIf="!task.notes&&!task.issueData">chat_bubble_outline</mat-icon>
             Show/Hide additional info
@@ -261,24 +255,21 @@
 
           <button (click)="addSubTask();"
                   *ngIf="!task.parentId&&!task.isDone"
-                  aria-label="add sub task"
                   mat-menu-item=""
                   tabindex="2">
-            <mat-icon aria-label="add sub task">playlist_add</mat-icon>
+            <mat-icon>playlist_add</mat-icon>
             Add sub task
           </button>
 
           <button (click)="addAttachment();"
-                  aria-label="add attachment"
                   mat-menu-item=""
                   tabindex="2">
-            <mat-icon aria-label="add sub task">attachment</mat-icon>
+            <mat-icon>attachment</mat-icon>
             Attach file or link
           </button>
 
           <button (click)="updateIssueData()"
                   *ngIf="task.issueId"
-                  aria-label="update issue data"
                   mat-menu-item=""
                   tabindex="2">
             <mat-icon>cloud_download</mat-icon>
@@ -297,12 +288,10 @@
 
           <button (click)="deleteTask()"
                   *ngIf="!task.repeatCfgId"
-                  aria-label="delete"
                   mat-menu-item=""
                   tabindex="2">
 
-            <mat-icon aria-label="delete"
-                      style="color:#e15d63;">delete_forever
+            <mat-icon style="color:#e15d63;">delete_forever
             </mat-icon>
             Delete Task
           </button>
