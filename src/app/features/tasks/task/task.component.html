@@ -324,16 +324,16 @@
             mat-mini-fab=""
             tabindex="2"
             title="Toggle sub task visibility">
-      <mat-icon *ngIf="task._showSubTasksMode===0">add
+      <mat-icon *ngIf="(task._showSubTasksMode===ShowSubTasksMode.HideAll)">add
       </mat-icon>
-      <mat-icon *ngIf="task._showSubTasksMode!==0"
-                [class.isHideDoneTasks]="task._showSubTasksMode===1">remove
+      <mat-icon *ngIf="(task._showSubTasksMode!==ShowSubTasksMode.HideAll)"
+                [class.isHideDoneTasks]="(task._showSubTasksMode===ShowSubTasksMode.HideDone)">remove
       </mat-icon>
     </button>
     <task-list *ngIf="task.subTasks?.length"
                [@expand]
-               [isHideAll]="task._showSubTasksMode!==2"
-               [isHideDone]="task._showSubTasksMode===1"
+               [isHideAll]="(task._showSubTasksMode!==ShowSubTasksMode.Show)"
+               [isHideDone]="(task._showSubTasksMode===ShowSubTasksMode.HideDone)"
                [listModelId]="task.id"
                [parentId]="task.id"
                [tasks]="task.subTasks"

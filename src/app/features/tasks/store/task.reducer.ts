@@ -1,6 +1,6 @@
 import {createEntityAdapter, EntityAdapter, EntityState} from '@ngrx/entity';
 import {TaskActions, TaskActionTypes} from './task.actions';
-import {DEFAULT_TASK, HIDE_SUB_TASKS, SHOW_SUB_TASKS, Task, TaskWithSubTasks, TimeSpentOnDay} from '../task.model';
+import {DEFAULT_TASK, ShowSubTasksMode, Task, TaskWithSubTasks, TimeSpentOnDay} from '../task.model';
 import {calcTotalTimeSpent} from '../util/calc-total-time-spent';
 import {arrayMoveLeft, arrayMoveRight} from '../../../util/array-move';
 import {AddAttachment, AttachmentActionTypes, DeleteAttachment} from '../../attachment/store/attachment.actions';
@@ -386,37 +386,37 @@ export function taskReducer(
       if (isDoneTaskCaseNeeded) {
         newVal = oldVal + (isShowLess ? -1 : 1);
         if (isEndless) {
-          if (newVal > SHOW_SUB_TASKS) {
-            newVal = HIDE_SUB_TASKS;
-          } else if (newVal < HIDE_SUB_TASKS) {
-            newVal = SHOW_SUB_TASKS;
+          if (newVal > ShowSubTasksMode.Show) {
+            newVal = ShowSubTasksMode.HideAll;
+          } else if (newVal < ShowSubTasksMode.HideAll) {
+            newVal = ShowSubTasksMode.Show;
           }
         } else {
-          if (newVal > SHOW_SUB_TASKS) {
-            newVal = SHOW_SUB_TASKS;
+          if (newVal > ShowSubTasksMode.Show) {
+            newVal = ShowSubTasksMode.Show;
           }
-          if (newVal < HIDE_SUB_TASKS) {
-            newVal = HIDE_SUB_TASKS;
+          if (newVal < ShowSubTasksMode.HideAll) {
+            newVal = ShowSubTasksMode.HideAll;
           }
         }
 
       } else {
         if (isEndless) {
-          if (oldVal === SHOW_SUB_TASKS) {
-            newVal = HIDE_SUB_TASKS;
+          if (oldVal === ShowSubTasksMode.Show) {
+            newVal = ShowSubTasksMode.HideAll;
           }
-          if (oldVal !== SHOW_SUB_TASKS) {
-            newVal = SHOW_SUB_TASKS;
+          if (oldVal !== ShowSubTasksMode.Show) {
+            newVal = ShowSubTasksMode.Show;
           }
         } else {
           newVal = (isShowLess)
-            ? HIDE_SUB_TASKS
-            : SHOW_SUB_TASKS;
+            ? ShowSubTasksMode.HideAll
+            : ShowSubTasksMode.Show;
         }
       }
 
       // failsafe
-      newVal = (isNaN(newVal)) ? HIDE_SUB_TASKS : newVal;
+      newVal = (isNaN(newVal)) ? ShowSubTasksMode.HideAll : newVal;
 
       return taskAdapter.updateOne({
         id: taskId,

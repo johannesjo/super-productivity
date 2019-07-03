@@ -14,7 +14,7 @@ import {
 } from '@angular/core';
 import {TaskService} from '../task.service';
 import {Subject} from 'rxjs';
-import {HIDE_SUB_TASKS, SHOW_SUB_TASKS, TaskWithSubTasks} from '../task.model';
+import {ShowSubTasksMode, TaskWithSubTasks} from '../task.model';
 import {MatDialog} from '@angular/material/dialog';
 import {DialogTimeEstimateComponent} from '../dialog-time-estimate/dialog-time-estimate.component';
 import {expandAnimation} from '../../../ui/animations/expand.ani';
@@ -48,6 +48,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   isPreventPointerEventsWhilePanning = false;
   isActionTriggered = false;
   isContextMenuDisabled = false;
+  ShowSubTasksMode = ShowSubTasksMode;
 
   @ViewChild('editOnClickEl', {static: true}) editOnClickEl: ElementRef;
   @ViewChild('blockLeft', {static: false}) blockLeftEl: ElementRef;
@@ -539,7 +540,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
       const hasSubTasks = this.task.subTasks && this.task.subTasks.length > 0;
       if (this.task._isAdditionalInfoOpen) {
         this.hideAdditionalInfos();
-      } else if (hasSubTasks && this.task._showSubTasksMode !== HIDE_SUB_TASKS) {
+      } else if (hasSubTasks && this.task._showSubTasksMode !== ShowSubTasksMode.HideAll) {
         this._taskService.toggleSubTaskMode(this.task.id, true, false);
         // TODO find a solution
         // } else if (this.task.parentId) {
@@ -552,7 +553,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     // expand sub tasks
     if ((ev.key === 'ArrowRight') || checkKeyCombo(ev, keys.expandSubTasks)) {
       const hasSubTasks = this.task.subTasks && this.task.subTasks.length > 0;
-      if (hasSubTasks && this.task._showSubTasksMode !== SHOW_SUB_TASKS) {
+      if (hasSubTasks && this.task._showSubTasksMode !== ShowSubTasksMode.Show) {
         this._taskService.toggleSubTaskMode(this.task.id, false, false);
       } else if (!this.task._isAdditionalInfoOpen) {
         this.showAdditionalInfos();

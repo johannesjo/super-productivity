@@ -15,8 +15,7 @@ import {Observable} from 'rxjs';
 import {
   DEFAULT_TASK,
   DropListModelSource,
-  HIDE_SUB_TASKS,
-  SHOW_SUB_TASKS,
+  ShowSubTasksMode,
   Task,
   TaskWithIssueData,
   TaskWithSubTasks
@@ -535,7 +534,7 @@ export class TaskService {
   }
 
   showSubTasks(id: string) {
-    this.updateUi(id, {_showSubTasksMode: SHOW_SUB_TASKS});
+    this.updateUi(id, {_showSubTasksMode: ShowSubTasksMode.Show});
   }
 
   toggleSubTaskMode(taskId: string, isShowLess = true, isEndless = false) {
@@ -543,7 +542,7 @@ export class TaskService {
   }
 
   hideSubTasks(id: string) {
-    this.updateUi(id, {_showSubTasksMode: HIDE_SUB_TASKS});
+    this.updateUi(id, {_showSubTasksMode: ShowSubTasksMode.HideAll});
   }
 
   // GLOBAL TASK MODEL STUFF

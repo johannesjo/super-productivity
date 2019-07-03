@@ -2,6 +2,12 @@ import {IssueData, IssueProviderKey} from '../issue/issue';
 import {Reminder} from '../reminder/reminder.model';
 import {EntityState} from '@ngrx/entity';
 
+export enum ShowSubTasksMode {
+  HideAll = 0,
+  HideDone = 1,
+  Show = 2,
+}
+
 export type DropListModelSource = 'UNDONE' | 'DONE' | 'BACKLOG';
 
 export interface TimeSpentOnDayCopy {
@@ -35,7 +41,7 @@ export interface TaskCopy {
   // ui model
   _isAdditionalInfoOpen: boolean;
   // 0: show, 1: hide-done tasks, 2: hide all sub tasks
-  _showSubTasksMode: number;
+  _showSubTasksMode: ShowSubTasksMode;
   _currentTab: number;
 }
 
@@ -53,9 +59,6 @@ export interface TaskWithSubTasks extends TaskWithIssueData {
   readonly subTasks?: TaskWithIssueData[];
 }
 
-export const HIDE_SUB_TASKS = 0;
-export const HIDE_DONE_SUB_TASKS = 1;
-export const SHOW_SUB_TASKS = 2;
 
 export const DEFAULT_TASK: Task = {
   id: null,
@@ -74,7 +77,7 @@ export const DEFAULT_TASK: Task = {
   created: Date.now(),
   repeatCfgId: null,
   _isAdditionalInfoOpen: false,
-  _showSubTasksMode: SHOW_SUB_TASKS,
+  _showSubTasksMode: ShowSubTasksMode.Show,
   _currentTab: 0,
 };
 
