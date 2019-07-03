@@ -1,3 +1,19 @@
+## [2.8.5](https://github.com/johannesjo/super-productivity/compare/v2.8.4...v2.8.5) (2019-07-03)
+
+
+### Bug Fixes
+
+* possible matMenuTriggerFor error when clicking fast ([810b261](https://github.com/johannesjo/super-productivity/commit/810b261))
+
+
+### Features
+
+* add command line flag for pen drive usage [#192](https://github.com/johannesjo/super-productivity/issues/192) ([d9d51e6](https://github.com/johannesjo/super-productivity/commit/d9d51e6))
+* disable error banner in favor of error modal ([386fb4b](https://github.com/johannesjo/super-productivity/commit/386fb4b))
+* improve error handling ([c744857](https://github.com/johannesjo/super-productivity/commit/c744857))
+
+
+
 ## [2.8.4](https://github.com/johannesjo/super-productivity/compare/v2.8.3...v2.8.4) (2019-07-01)
 
 
