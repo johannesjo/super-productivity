@@ -20,6 +20,8 @@ import {Project} from '../../features/project/project.model';
 export class MainHeaderComponent implements OnInit {
   progressCircleRadius = 13;
   circumference = this.progressCircleRadius * Math.PI * 2;
+  isProjectMenuDisabled = false;
+  isMainMenuDisabled = false;
 
   @Input() drawer: MatDrawer;
   @ViewChild('circleSvg', {static: true}) circleSvg: ElementRef;

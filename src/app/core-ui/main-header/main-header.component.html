@@ -7,12 +7,18 @@
   </button>
 
   <button [matMenuTriggerFor]="mainMenu"
+          [style.pointer-events]="isMainMenuDisabled ? 'none' : 'all'"
+          (menuOpened)="isMainMenuDisabled = true"
+          (menuClosed)="isMainMenuDisabled = false"
           class="burger-trigger hide-xs"
           mat-icon-button>
     <mat-icon>menu</mat-icon>
   </button>
 
   <button [matMenuTriggerFor]="mainMenu"
+          [style.pointer-events]="isMainMenuDisabled ? 'none' : 'all'"
+          (menuOpened)="isMainMenuDisabled = true"
+          (menuClosed)="isMainMenuDisabled = false"
           class="burger-trigger bg-200 show-xs-only"
           color="lighter"
           mat-mini-fab>
@@ -60,6 +66,9 @@
   </mat-menu>
 
   <button [matMenuTriggerFor]="projectMenu"
+          [style.pointer-events]="isProjectMenuDisabled ? 'none' : 'all'"
+          (menuOpened)="isProjectMenuDisabled = true"
+          (menuClosed)="isProjectMenuDisabled = false"
           class="project-btn"
           mat-button
           title="Project Menu">

@@ -47,6 +47,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   isLockPanRight = false;
   isPreventPointerEventsWhilePanning = false;
   isActionTriggered = false;
+  isContextMenuDisabled = false;
 
   @ViewChild('editOnClickEl', {static: true}) editOnClickEl: ElementRef;
   @ViewChild('blockLeft', {static: false}) blockLeftEl: ElementRef;

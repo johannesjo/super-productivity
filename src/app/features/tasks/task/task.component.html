@@ -180,6 +180,9 @@
         </button>
 
         <button [matMenuTriggerFor]="menu"
+                [style.pointer-events]="isContextMenuDisabled ? 'none' : 'all'"
+                (menuOpened)="isContextMenuDisabled = true"
+                (menuClosed)="isContextMenuDisabled = false"
                 class="ico-btn menu-trigger"
                 color=""
                 mat-icon-button
