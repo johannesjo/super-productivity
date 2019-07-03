@@ -12,7 +12,7 @@ const _createErrorAlert = (err: string) => {
   errorAlert.innerHTML = `
     <h2>An error occurred<h2>
     <p><a href="https://github.com/johannesjo/super-productivity/issues/new" target="_blank">Please Report</a></p>
-    <pre>${err}</pre>
+    <pre style="line-height: 1.3;">${err}</pre>
     `;
   const btnReload = document.createElement('BUTTON');
   btnReload.innerText = 'Reload App';
@@ -52,31 +52,36 @@ export class GlobalErrorHandler implements ErrorHandler {
     if (!err || (!err.handledError && (errStr && !errStr.match(HANDLED_ERROR)))) {
       const errorStr = this._getErrorStr(err) || errStr;
 
-      // NOTE: snack won't work most of the time
-      try {
-        this._bannerService.open({
-          id: BannerId.GlobalError,
-          type: 'ERROR',
-          ico: 'error',
-          msg: 'ERROR: ' + errorStr.substring(0, 300),
-          action: {
-            label: 'Report',
-            fn: () => window.open('https://github.com/johannesjo/super-productivity/issues/new'),
-          },
-          action2: {
-            label: 'Reload App',
-            fn: () => window.location.reload()
-          },
-          action3: {
-            label: 'Dismiss',
-            fn: () => {
+      // NOTE: dom exceptions will break all rendering that's why
+      if (err.constructor && err.constructor === DOMException) {
+        _createErrorAlert('DOMException: ' + errorStr);
+      } else {
+        try {
+          this._bannerService.open({
+            id: BannerId.GlobalError,
+            type: 'ERROR',
+            ico: 'error',
+            msg: 'ERROR: ' + errorStr.substring(0, 300),
+            action: {
+              label: 'Report',
+              fn: () => window.open('https://github.com/johannesjo/super-productivity/issues/new'),
+            },
+            action2: {
+              label: 'Reload App',
+              fn: () => window.location.reload()
+            },
+            action3: {
+              label: 'Dismiss',
+              fn: () => {
+              }
             }
-          }
-        });
-      } catch (e) {
-        _createErrorAlert(errorStr);
+          });
+        } catch (e) {
+          _createErrorAlert(errorStr);
+        }
       }
     }
+
     console.error('GLOBAL_ERROR_HANDLER', err);
     if (IS_ELECTRON) {
       let stackTrace;
