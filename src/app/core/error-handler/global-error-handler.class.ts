@@ -4,7 +4,6 @@ import {getJiraResponseErrorTxt} from '../../util/get-jira-response-error-text';
 import {HANDLED_ERROR, IS_ELECTRON} from '../../app.constants';
 import {ElectronService} from 'ngx-electron';
 import {BannerService} from '../banner/banner.service';
-import {BannerId} from '../banner/banner.model';
 
 const _createErrorAlert = (err: string) => {
   const errorAlert = document.createElement('div');
@@ -56,29 +55,30 @@ export class GlobalErrorHandler implements ErrorHandler {
       if (err.constructor && err.constructor === DOMException) {
         _createErrorAlert('DOMException: ' + errorStr);
       } else {
-        try {
-          this._bannerService.open({
-            id: BannerId.GlobalError,
-            type: 'ERROR',
-            ico: 'error',
-            msg: 'ERROR: ' + errorStr.substring(0, 300),
-            action: {
-              label: 'Report',
-              fn: () => window.open('https://github.com/johannesjo/super-productivity/issues/new'),
-            },
-            action2: {
-              label: 'Reload App',
-              fn: () => window.location.reload()
-            },
-            action3: {
-              label: 'Dismiss',
-              fn: () => {
-              }
-            }
-          });
-        } catch (e) {
-          _createErrorAlert(errorStr);
-        }
+        _createErrorAlert(errorStr);
+        // try {
+        //   this._bannerService.open({
+        //     id: BannerId.GlobalError,
+        //     type: 'ERROR',
+        //     ico: 'error',
+        //     msg: 'ERROR: ' + errorStr.substring(0, 300),
+        //     action: {
+        //       label: 'Report',
+        //       fn: () => window.open('https://github.com/johannesjo/super-productivity/issues/new'),
+        //     },
+        //     action2: {
+        //       label: 'Reload App',
+        //       fn: () => window.location.reload()
+        //     },
+        //     action3: {
+        //       label: 'Dismiss',
+        //       fn: () => {
+        //       }
+        //     }
+        //   });
+        // } catch (e) {
+        //   _createErrorAlert(errorStr);
+        // }
       }
     }
 
