@@ -4,6 +4,7 @@ export enum BannerId {
   GoogleLogin = 'GoogleLogin',
   GlobalError = 'GlobalError',
   JiraUnblock = 'JiraUnblock',
+  InstallWebApp = 'InstallWebApp',
 }
 
 export type BannerType = 'ERROR';

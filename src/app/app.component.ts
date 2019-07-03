@@ -43,6 +43,10 @@ import {IS_MAC} from './util/is-mac';
 import {selectIsTaskDataLoaded} from './features/tasks/store/task.selectors';
 import {isTouch} from './util/is-touch';
 import {ThemeService} from 'ng2-charts';
+import {BannerService} from './core/banner/banner.service';
+import {loadFromLs, saveToLs} from './core/persistence/local-storage';
+import {LS_WEB_APP_INSTALL} from './core/persistence/ls-keys.const';
+import {BannerId} from './core/banner/banner.model';
 
 const SIDE_PANEL_BREAKPOINT = 900;
 
@@ -78,6 +82,7 @@ export class AppComponent implements OnInit {
     private _configService: GlobalConfigService,
     private _shortcutService: ShortcutService,
     private _matIconRegistry: MatIconRegistry,
+    private _bannerService: BannerService,
     private _domSanitizer: DomSanitizer,
     private _projectService: ProjectService,
     private _electronService: ElectronService,
@@ -171,6 +176,35 @@ export class AppComponent implements OnInit {
   @HostListener('document:paste', ['$event']) onPaste(ev: Event) {
     this.bookmarkService.createFromPaste(ev);
   }
+
+  @HostListener('window:beforeinstallprompt', ['$event']) onBeforeInstallPrompt(e: any) {
+    console.log('onBeforeInstallPrompt');
+
+    if (IS_ELECTRON || loadFromLs(LS_WEB_APP_INSTALL)) {
+      return;
+    }
+
+    // Prevent Chrome 67 and earlier from automatically showing the prompt
+    e.preventDefault();
+
+    this._bannerService.open({
+      id: BannerId.InstallWebApp,
+      msg: 'Do you want to install Super Productivity as a PWA?',
+      action: {
+        label: 'Install',
+        fn: () => {
+          e.prompt();
+        }
+      },
+      action2: {
+        label: 'Ignore',
+        fn: () => {
+          saveToLs(LS_WEB_APP_INSTALL, true);
+        }
+      }
+    });
+  }
+
 
   ngOnInit() {
     this._projectService.currentProject$.subscribe((cp: Project) => {
