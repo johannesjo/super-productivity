@@ -187,6 +187,15 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
           workEnd: undefined,
         };
       };
+
+      // If we're grouping by parent task ignore subtasks
+      // If we're grouping by task ignore parent tasks
+      if ( (groupBy === WorklogGrouping.PARENT && task.parentId !== null)
+        || ( groupBy === WorklogGrouping.TASK && task.subTaskIds.length > 0 )
+      ) {
+          return taskGroups;
+      }
+
       switch (groupBy) {
         case WorklogGrouping.DATE:
           if (!task.timeSpentOnDay) {
@@ -209,22 +218,12 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
           });
           break;
         case WorklogGrouping.PARENT:
-          let child = task;
-          while (child.parentId) {
-            child = tasks.find(parent => parent.id === task.parentId);
-          }
-          taskGroups[child.id] = createEmptyGroup();
-          taskGroups[child.id].tasks = [task];
-          taskGroups[child.id].dates = Object.keys(task.timeSpentOnDay);
-          taskGroups[child.id].timeEstimate = task.timeEstimate;
-          taskGroups[child.id].timeSpent = task.timeSpent;
-          break;
         case WorklogGrouping.TASK:
           taskGroups[task.id] = createEmptyGroup();
           taskGroups[task.id].tasks = [task];
           taskGroups[task.id].dates = Object.keys(task.timeSpentOnDay);
           taskGroups[task.id].timeEstimate = task.timeEstimate;
-          taskGroups[task.id].timeSpent = task.timeSpent;
+          taskGroups[task.id].timeSpent = Object.values(task.timeSpentOnDay).reduce((acc, curr) => acc + curr, 0);
           break;
         default: // group by work log (don't group at all)
           Object.keys(task.timeSpentOnDay).forEach(day => {
