@@ -8,6 +8,7 @@ import {Attachment} from '../attachment/attachment.model';
 import {MetricState} from '../metric/metric.model';
 import {ImprovementState} from '../metric/improvement/improvement.model';
 import {ObstructionState} from '../metric/obstruction/obstruction.model';
+import {WorklogExportSettings} from '../worklog/worklog.model';
 
 
 export type RoundTimeOption = '5M' | 'QUARTER' | 'HALF' | 'HOUR';
@@ -63,39 +64,6 @@ export interface SimpleSummarySettingsCopy {
 
 export type SimpleSummarySettings = Readonly<SimpleSummarySettingsCopy>;
 
-
-export type WorklogColTypes =
-  'EMPTY'
-  | 'DATE'
-  | 'START'
-  | 'END'
-  | 'TITLES'
-  | 'TITLES_INCLUDING_SUB'
-  | 'TIME_MS'
-  | 'TIME_STR'
-  | 'TIME_CLOCK'
-  | 'ESTIMATE_MS'
-  | 'ESTIMATE_STR'
-  | 'ESTIMATE_CLOCK'
-  ;
-
-export enum WorklogGrouping {
-  DATE = 'DATE',
-  PARENT = 'PARENT',
-  TASK = 'TASK',
-  WORKLOG = 'WORKLOG'
-}
-
-export interface WorklogExportSettingsCopy {
-  roundWorkTimeTo: RoundTimeOption;
-  roundStartTimeTo: RoundTimeOption;
-  roundEndTimeTo: RoundTimeOption;
-  separateTasksBy: string;
-  cols: WorklogColTypes[];
-  groupBy: WorklogGrouping;
-}
-
-export type WorklogExportSettings = Readonly<WorklogExportSettingsCopy>;
 
 export type ProjectAdvancedCfg = Readonly<{
   googleTimeSheetExport: GoogleTimeSheetExport;

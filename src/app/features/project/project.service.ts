@@ -10,7 +10,6 @@ import {
   ProjectAdvancedCfgKey,
   ProjectBasicCfg,
   SimpleSummarySettings,
-  WorklogExportSettings
 } from './project.model';
 import {PersistenceService} from '../../core/persistence/persistence.service';
 import {select, Store} from '@ngrx/store';
@@ -47,6 +46,7 @@ import {distinctUntilChanged, take} from 'rxjs/operators';
 import {isValidProjectExport} from './util/is-valid-project-export';
 import {SnackService} from '../../core/snack/snack.service';
 import {migrateProjectState} from './migrate-projects-state.util';
+import {WorklogExportSettings} from '../worklog/worklog.model';
 
 @Injectable({
   providedIn: 'root',

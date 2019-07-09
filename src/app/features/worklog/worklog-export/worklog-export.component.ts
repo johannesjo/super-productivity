@@ -2,7 +2,7 @@ import {ChangeDetectionStrategy, Component, EventEmitter, Input, OnDestroy, OnIn
 import {TaskCopy} from '../../tasks/task.model';
 import {ProjectService} from '../../project/project.service';
 import {Subscription} from 'rxjs';
-import {WorklogExportSettingsCopy, WorklogGrouping, WorkStartEnd} from '../../project/project.model';
+import {WorkStartEnd} from '../../project/project.model';
 import {WORKLOG_EXPORT_DEFAULTS} from '../../project/project.const';
 import {getWorklogStr} from '../../../util/get-work-log-str';
 import * as moment from 'moment-mini';
@@ -15,7 +15,7 @@ import {roundDuration} from '../../../util/round-duration';
 import Clipboard from 'clipboard';
 import {SnackService} from '../../../core/snack/snack.service';
 import {WorklogService} from '../worklog.service';
-import {WorklogTask} from '../worklog.model';
+import {WorklogExportSettingsCopy, WorklogGrouping, WorklogTask} from '../worklog.model';
 
 const LINE_SEPARATOR = '\n';
 const EMPTY_VAL = ' - ';
@@ -76,10 +76,10 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
   ];
 
   groupByOptions = [
-    {id: 'DATE', title: 'Date'},
-    {id: 'TASK', title: 'Task/Subtask'},
-    {id: 'PARENT', title: 'Parent Task'},
-    {id: 'WORKLOG', title: 'Work Log'}
+    {id: WorklogGrouping.DATE, title: 'Date'},
+    {id: WorklogGrouping.TASK, title: 'Task/Subtask'},
+    {id: WorklogGrouping.PARENT, title: 'Parent Task'},
+    {id: WorklogGrouping.WORKLOG, title: 'Work Log'}
   ];
 
   private _subs: Subscription = new Subscription();
@@ -174,7 +174,7 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
   private _createRows(tasks: WorklogTask[], startTimes: WorkStartEnd, endTimes: WorkStartEnd, groupBy: WorklogGrouping): RowItem[] {
 
     const _mapToGroups = (task: WorklogTask) => {
-      const taskGroups: {[key: string]: RowItem} = {};
+      const taskGroups: { [key: string]: RowItem } = {};
       const createEmptyGroup = () => {
         return {
           dates: [],
@@ -190,10 +190,10 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
 
       // If we're grouping by parent task ignore subtasks
       // If we're grouping by task ignore parent tasks
-      if ( (groupBy === WorklogGrouping.PARENT && task.parentId !== null)
-        || ( groupBy === WorklogGrouping.TASK && task.subTaskIds.length > 0 )
+      if ((groupBy === WorklogGrouping.PARENT && task.parentId !== null)
+        || (groupBy === WorklogGrouping.TASK && task.subTaskIds.length > 0)
       ) {
-          return taskGroups;
+        return taskGroups;
       }
 
       switch (groupBy) {
@@ -275,9 +275,9 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
       group.dates = unique(group.dates).sort((a: string, b: string) => {
         const dateA: number = new Date(a).getTime();
         const dateB: number = new Date(b).getTime();
-        if ( dateA === dateB ) {
+        if (dateA === dateB) {
           return 0;
-        } else if ( dateA < dateB ) {
+        } else if (dateA < dateB) {
           return -1;
         }
         return 1;
