@@ -2,7 +2,7 @@ import {ChangeDetectionStrategy, Component, EventEmitter, Input, OnDestroy, OnIn
 import {TaskCopy} from '../../tasks/task.model';
 import {ProjectService} from '../../project/project.service';
 import {Subscription} from 'rxjs';
-import {WorklogExportSettingsCopy, WorkStartEnd} from '../../project/project.model';
+import {WorklogExportSettingsCopy, WorklogGrouping, WorkStartEnd} from '../../project/project.model';
 import {WORKLOG_EXPORT_DEFAULTS} from '../../project/project.const';
 import {getWorklogStr} from '../../../util/get-work-log-str';
 import * as moment from 'moment-mini';
@@ -25,7 +25,7 @@ interface TaskWithParentTitle extends TaskCopy {
 }
 
 interface RowItem {
-  date: string;
+  dates: string[];
   workStart: number;
   workEnd: number;
   timeSpent: number;
@@ -75,6 +75,13 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
     {id: 'ESTIMATE_CLOCK', title: 'Estimate as clock (e.g. 5:23)'},
   ];
 
+  groupByOptions = [
+    {id: 'DATE', title: 'Date'},
+    {id: 'TASK', title: 'Task/Subtask'},
+    {id: 'PARENT', title: 'Parent Task'},
+    {id: 'WORKLOG', title: 'Work Log'}
+  ];
+
   private _subs: Subscription = new Subscription();
 
   constructor(
@@ -105,7 +112,7 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
       const tasks: WorklogTask[] = this._worklogService.getTaskListForRange(this.rangeStart, this.rangeEnd, true);
 
       if (tasks) {
-        const rows = this._createRows(tasks, pr.workStart, pr.workEnd);
+        const rows = this._createRows(tasks, pr.workStart, pr.workEnd, this.options.groupBy);
         this.formattedRows = this._formatRows(rows);
         // TODO format to csv
 
@@ -164,54 +171,123 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
     this.options.cols.push('EMPTY');
   }
 
-  // TODO this can be optimized to a couple of mapping functions
-  private _createRows(tasks: WorklogTask[], startTimes: WorkStartEnd, endTimes: WorkStartEnd): RowItem[] {
-    const days: { [key: string]: RowItem } = {};
-    const _mapTaskToDay = (task, dateStr) => {
-      let day: RowItem = days[dateStr];
+  private _createRows(tasks: WorklogTask[], startTimes: WorkStartEnd, endTimes: WorkStartEnd, groupBy: WorklogGrouping): RowItem[] {
 
-      if (!day) {
-        day = days[dateStr] = {
-          date: dateStr,
+    const _mapToGroups = (task: WorklogTask) => {
+      const taskGroups: {[key: string]: RowItem} = {};
+      const createEmptyGroup = () => {
+        return {
+          dates: [],
           timeSpent: 0,
           timeEstimate: 0,
           tasks: [],
           titlesWithSub: [],
-          workStart: startTimes[dateStr],
-          workEnd: endTimes[dateStr],
+          titles: [],
+          workStart: undefined,
+          workEnd: undefined,
         };
-      }
-      days[dateStr] = {
-        ...days[dateStr],
-        timeSpent: day.timeSpent + task.timeSpentOnDay[dateStr],
-        timeEstimate: day.timeEstimate + task.timeEstimate,
-        tasks: [...day.tasks, task],
       };
+
+      // If we're grouping by parent task ignore subtasks
+      // If we're grouping by task ignore parent tasks
+      if ( (groupBy === WorklogGrouping.PARENT && task.parentId !== null)
+        || ( groupBy === WorklogGrouping.TASK && task.subTaskIds.length > 0 )
+      ) {
+          return taskGroups;
+      }
+
+      switch (groupBy) {
+        case WorklogGrouping.DATE:
+          if (!task.timeSpentOnDay) {
+            return {};
+          }
+          const numDays = Object.keys(task.timeSpentOnDay).length;
+          Object.keys(task.timeSpentOnDay).forEach(day => {
+            taskGroups[day] = {
+              dates: [day],
+              tasks: [task],
+              workStart: startTimes[day],
+              workEnd: endTimes[day],
+              timeSpent: 0,
+              timeEstimate: 0
+            };
+            if (!task.subTaskIds || task.subTaskIds.length === 0) {
+              taskGroups[day].timeSpent = task.timeSpentOnDay[day];
+              taskGroups[day].timeEstimate = task.timeEstimate / numDays;
+            }
+          });
+          break;
+        case WorklogGrouping.PARENT:
+        case WorklogGrouping.TASK:
+          taskGroups[task.id] = createEmptyGroup();
+          taskGroups[task.id].tasks = [task];
+          taskGroups[task.id].dates = Object.keys(task.timeSpentOnDay);
+          taskGroups[task.id].timeEstimate = task.timeEstimate;
+          taskGroups[task.id].timeSpent = Object.values(task.timeSpentOnDay).reduce((acc, curr) => acc + curr, 0);
+          break;
+        default: // group by work log (don't group at all)
+          Object.keys(task.timeSpentOnDay).forEach(day => {
+            const groupKey = task.id + '_' + day;
+            taskGroups[groupKey] = createEmptyGroup();
+            taskGroups[groupKey].tasks = [task];
+            taskGroups[groupKey].dates = [day];
+            taskGroups[groupKey].workStart = startTimes[day];
+            taskGroups[groupKey].workEnd = endTimes[day];
+            taskGroups[groupKey].timeEstimate = task.timeEstimate / Object.keys(task.timeSpentOnDay).length;
+            taskGroups[groupKey].timeSpent = task.timeSpentOnDay[day];
+          });
+      }
+      return taskGroups;
     };
 
-    tasks.forEach(task => {
-      if (task.subTaskIds && task.subTaskIds.length > 0) {
-      } else {
-        if (task.timeSpentOnDay) {
-          Object.keys(task.timeSpentOnDay).forEach(dateStr => {
-            _mapTaskToDay(task, dateStr);
-          });
+    const groups: { [key: string]: RowItem } = {};
+
+    tasks.forEach((task: WorklogTask) => {
+      const taskGroups = _mapToGroups(task);
+      Object.keys(taskGroups).forEach(groupKey => {
+        if (groups[groupKey]) {
+          groups[groupKey].tasks.push(...taskGroups[groupKey].tasks);
+          groups[groupKey].dates.push(...taskGroups[groupKey].dates);
+          if (taskGroups[groupKey].workStart !== undefined) {
+            groups[groupKey].workStart = Math.min(groups[groupKey].workStart, taskGroups[groupKey].workStart);
+          }
+          if (taskGroups[groupKey].workEnd !== undefined) {
+            groups[groupKey].workEnd = Math.min(groups[groupKey].workEnd, taskGroups[groupKey].workEnd);
+          }
+          groups[groupKey].timeEstimate += taskGroups[groupKey].timeEstimate;
+          groups[groupKey].timeSpent += taskGroups[groupKey].timeSpent;
+        } else {
+          groups[groupKey] = taskGroups[groupKey];
         }
-      }
+      });
+
     });
 
-    const rows = [];
-    Object.keys(days).sort().forEach(dateStr => {
-      days[dateStr].titlesWithSub = unique(days[dateStr].tasks.map(t => t.title));
-      days[dateStr].titles = unique(days[dateStr].tasks.map(
-        t =>
-          (t.parentId && tasks.find(pt_ => pt_.id === t.parentId).title)
-          || (!t.parentId && t.title)
+    const rows: RowItem[] = [];
+    Object.keys(groups).sort().forEach((key => {
+      const group = groups[key];
+
+      group.titlesWithSub = unique(group.tasks.map(t => t.title));
+      group.titles = unique(group.tasks.map(t => (
+          t.parentId && tasks.find(pt_ => pt_.id === t.parentId).title
+        ) || (!t.parentId && t.title)
       )).filter(title => !!title);
-      rows.push(days[dateStr]);
-    });
+      group.dates = unique(group.dates).sort((a: string, b: string) => {
+        const dateA: number = new Date(a).getTime();
+        const dateB: number = new Date(b).getTime();
+        if ( dateA === dateB ) {
+          return 0;
+        } else if ( dateA < dateB ) {
+          return -1;
+        }
+        return 1;
+      });
+
+      rows.push(group);
+    }));
 
     return rows;
+
   }
 
   private _formatRows(rows: RowItem[]): (string | number)[][] {
@@ -227,13 +303,17 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
 
         switch (col) {
           case 'DATE':
-            return row.date;
+            if (row.dates.length > 1) {
+              return row.dates[0] + ' - ' + row.dates[row.dates.length - 1];
+            }
+            return row.dates[0];
           case 'START':
-            return (row.workStart)
+            const workStart = !row.workStart ? 0 : row.workStart;
+            return (workStart)
               ? moment(
                 (this.options.roundStartTimeTo)
-                  ? roundTime(row.workStart, this.options.roundStartTimeTo)
-                  : row.workStart
+                  ? roundTime(workStart, this.options.roundStartTimeTo)
+                  : workStart
               ).format('HH:mm')
               : EMPTY_VAL;
           case 'END':
