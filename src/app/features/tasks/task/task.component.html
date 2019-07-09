@@ -279,16 +279,6 @@
             Update issue data
           </button>
 
-          <button (click)="editTaskRepeatCfg()"
-                  *ngIf="!task.parentId && !task.issueId"
-                  mat-menu-item=""
-                  tabindex="2">
-            <mat-icon style="transform: rotate(45deg);">repeat</mat-icon>
-            <span *ngIf="!task.repeatCfgId">Repeat task</span>
-            <span *ngIf="task.repeatCfgId">Edit repeat task config</span>
-          </button>
-
-
           <button (click)="deleteTask()"
                   *ngIf="!task.repeatCfgId"
                   mat-menu-item=""
@@ -297,6 +287,44 @@
             <mat-icon style="color:#e15d63;">delete_forever
             </mat-icon>
             Delete Task
+          </button>
+
+          <button mat-menu-item=""
+                  tabindex="2"
+                  *ngIf="!task.parentId && !task.issueId"
+                  [matMenuTriggerFor]="advMenu">
+            Advanced
+          </button>
+        </mat-menu>
+
+        <mat-menu #advMenu="matMenu">
+          <button mat-menu-item
+                  [matMenuTriggerFor]="projectMenu"
+                  *ngIf="!task.parentId && !task.issueId">
+            <mat-icon>forward</mat-icon>
+            Move to other Project
+          </button>
+
+          <button mat-menu-item
+                  *ngIf="task.parentId">
+            <mat-icon>low_priority</mat-icon>
+            Convert to parent Task
+          </button>
+
+          <button (click)="editTaskRepeatCfg()"
+                  *ngIf="!task.parentId && !task.issueId"
+                  mat-menu-item="">
+            <mat-icon style="transform: rotate(45deg);">repeat</mat-icon>
+            <span *ngIf="!task.repeatCfgId">Repeat task</span>
+            <span *ngIf="task.repeatCfgId">Edit repeat task config</span>
+          </button>
+        </mat-menu>
+
+        <mat-menu #projectMenu="matMenu">
+          <button (click)="moveTaskToProject(project.id)"
+                  *ngFor="let project of (projectService.listWithoutCurrent$|async); trackBy:trackByProjectId;"
+                  mat-menu-item>
+            {{project.title}}
           </button>
         </mat-menu>
       </div>

@@ -29,6 +29,8 @@ import {swirlAnimation} from '../../../ui/animations/swirl-in-out.ani';
 import {IS_TOUCH, isTouch} from '../../../util/is-touch';
 import {DialogAddTaskReminderComponent} from '../dialog-add-task-reminder/dialog-add-task-reminder.component';
 import {DialogEditTaskRepeatCfgComponent} from '../../task-repeat-cfg/dialog-edit-task-repeat-cfg/dialog-edit-task-repeat-cfg.component';
+import {ProjectService} from '../../project/project.service';
+import {Project} from '../../project/project.model';
 
 @Component({
   selector: 'task',
@@ -74,6 +76,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
     private readonly _elementRef: ElementRef,
     private readonly _renderer: Renderer2,
     private readonly _cd: ChangeDetectorRef,
+    public readonly projectService: ProjectService,
   ) {
   }
 
@@ -427,6 +430,14 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
 
   onPanRight(ev) {
     this._handlePan(ev);
+  }
+
+  moveTaskToProject(projectId: string) {
+
+  }
+
+  trackByProjectId(i: number, project: Project) {
+    return project.id;
   }
 
   private _handlePan(ev) {

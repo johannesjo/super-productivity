@@ -35,7 +35,8 @@ import {
   selectProjectLastWorkEnd,
   selectProjectWorkEndForDay,
   selectProjectWorkStartForDay,
-  selectUnarchivedProjects
+  selectUnarchivedProjects,
+  selectUnarchivedProjectsWithoutCurrent
 } from './store/project.reducer';
 import {IssueIntegrationCfg, IssueProviderKey} from '../issue/issue';
 import {JiraCfg} from '../issue/jira/jira';
@@ -55,6 +56,9 @@ export class ProjectService {
   isRelatedDataLoadedForCurrentProject$: Observable<boolean> = this._store$.pipe(select(selectIsRelatedDataLoadedForCurrentProject));
 
   list$: Observable<Project[]> = this._store$.pipe(select(selectUnarchivedProjects));
+
+  listWithoutCurrent$: Observable<Project[]> = this._store$.pipe(select(selectUnarchivedProjectsWithoutCurrent));
+
   archived$: Observable<Project[]> = this._store$.pipe(select(selectArchivedProjects));
   currentProject$: Observable<Project> = this._store$.pipe(
     select(selectCurrentProject),
