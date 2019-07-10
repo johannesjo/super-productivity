@@ -1,3 +1,23 @@
+# [2.9.0](https://github.com/johannesjo/super-productivity/compare/v2.8.5...v2.9.0) (2019-07-10)
+
+
+### Bug Fixes
+
+* Issues regarding calculation of time spent per date ([e5ac323](https://github.com/johannesjo/super-productivity/commit/e5ac323))
+* Use sum over task.timeSpentOnDay instead of task.timeSpent, because the latter is incorrect (intentionally?) ([1581136](https://github.com/johannesjo/super-productivity/commit/1581136))
+
+
+### Features
+
+* **task:** add menu for advanced actions ([8c6ff76](https://github.com/johannesjo/super-productivity/commit/8c6ff76))
+* **task:** add move to other project [#184](https://github.com/johannesjo/super-productivity/issues/184) ([dcb546c](https://github.com/johannesjo/super-productivity/commit/dcb546c))
+* **task:** add show notes button to hover controls ([ef29e9c](https://github.com/johannesjo/super-productivity/commit/ef29e9c))
+* **task:** improve time estimate dialog by splitting up for other day ([cbf13ca](https://github.com/johannesjo/super-productivity/commit/cbf13ca))
+* add webapp install prompt ([9b661dc](https://github.com/johannesjo/super-productivity/commit/9b661dc))
+* implement configurable grouping of worklogs when exporting to csv ([4e8857d](https://github.com/johannesjo/super-productivity/commit/4e8857d))
+
+
+
 ## [2.8.5](https://github.com/johannesjo/super-productivity/compare/v2.8.4...v2.8.5) (2019-07-03)
 
 
