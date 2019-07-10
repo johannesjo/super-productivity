@@ -4,11 +4,6 @@ import {PersistenceService} from '../../core/persistence/persistence.service';
 import {SnackService} from '../../core/snack/snack.service';
 import {ProjectService} from '../../features/project/project.service';
 import {GlobalConfigService} from '../../features/config/global-config.service';
-import {TaskService} from '../../features/tasks/task.service';
-import {BookmarkService} from '../../features/bookmark/bookmark.service';
-import {NoteService} from '../../features/note/note.service';
-import {JiraIssueService} from '../../features/issue/jira/jira-issue/jira-issue.service';
-import {AttachmentService} from '../../features/attachment/attachment.service';
 import {ReminderService} from '../../features/reminder/reminder.service';
 import {ImexMetaService} from '../imex-meta/imex-meta.service';
 
@@ -23,11 +18,6 @@ export class SyncService {
     private _snackService: SnackService,
     private _projectService: ProjectService,
     private _configService: GlobalConfigService,
-    private _taskService: TaskService,
-    private _attachmentService: AttachmentService,
-    private _bookmarkService: BookmarkService,
-    private _jiraIssueService: JiraIssueService,
-    private _noteService: NoteService,
     private _reminderService: ReminderService,
     private _imexMetaService: ImexMetaService,
   ) {
@@ -68,7 +58,7 @@ export class SyncService {
       } catch (e) {
         this._snackService.open({
           type: 'ERROR',
-          msg: 'Something went wrong while importing the data. Falling back to local backup'
+          msg: 'Something went wrong while importing the data. Falling back to local backup.'
         });
         console.error(e);
         await this._loadBackup();
@@ -99,13 +89,9 @@ export class SyncService {
     return await Promise.all([
       // reload view model from ls
       this._configService.load(true),
+      // NOTE: loading the project state should deal with reloading the for project states via effect
       this._projectService.load(),
       this._reminderService.reloadFromLs(),
-      this._taskService.loadStateForProject(curId),
-      this._bookmarkService.loadStateForProject(curId),
-      this._noteService.loadStateForProject(curId),
-      this._jiraIssueService.loadStateForProject(curId),
-      this._attachmentService.loadStateForProject(curId),
     ]);
   }
 
