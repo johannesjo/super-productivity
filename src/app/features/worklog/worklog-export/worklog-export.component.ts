@@ -16,6 +16,7 @@ import Clipboard from 'clipboard';
 import {SnackService} from '../../../core/snack/snack.service';
 import {WorklogService} from '../worklog.service';
 import {WorklogExportSettingsCopy, WorklogGrouping, WorklogTask} from '../worklog.model';
+import {spread} from 'q';
 
 const LINE_SEPARATOR = '\n';
 const EMPTY_VAL = ' - ';
@@ -233,8 +234,8 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
             taskGroups[groupKey].dates = [day];
             taskGroups[groupKey].workStart = startTimes[day];
             taskGroups[groupKey].workEnd = endTimes[day];
-            taskGroups[groupKey].timeEstimate = task.timeEstimate / Object.keys(task.timeSpentOnDay).length;
-            taskGroups[groupKey].timeSpent = task.timeSpentOnDay[day];
+            taskGroups[groupKey].timeEstimate = task.subTaskIds.length > 0 ? 0 : task.timeEstimate;
+            taskGroups[groupKey].timeSpent = task.subTaskIds.length > 0 ? 0 : task.timeSpentOnDay[day];
           });
       }
       return taskGroups;
@@ -300,6 +301,17 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
           ? roundDuration(row.timeSpent, this.options.roundWorkTimeTo, true).asMilliseconds()
           : row.timeSpent;
 
+        // If we're exporting raw worklogs, spread estimated time over worklogs belonging to a task based on
+        // its share in time spent on the task
+        let timeEstimate = row.timeEstimate;
+        if (this.options.groupBy === WorklogGrouping.WORKLOG
+          && (col === 'ESTIMATE_MS' || col === 'ESTIMATE_STR' || col === 'ESTIMATE_CLOCK')) {
+          const timeSpentTotal = Object.values(row.tasks[0].timeSpentOnDay).reduce((acc, curr) => acc + curr, 0);
+          const timeSpentPart = row.timeSpent / timeSpentTotal;
+          console.log(`${row.timeSpent} / ${timeSpentTotal} = ${timeSpentPart}`);
+          timeEstimate = timeEstimate * timeSpentPart;
+        }
+
 
         switch (col) {
           case 'DATE':
@@ -336,11 +348,11 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
           case 'TIME_CLOCK':
             return msToClockString(timeSpent);
           case 'ESTIMATE_MS':
-            return row.timeEstimate;
+            return timeEstimate;
           case 'ESTIMATE_STR':
-            return msToString(row.timeEstimate);
+            return msToString(timeEstimate);
           case 'ESTIMATE_CLOCK':
-            return msToClockString(row.timeEstimate);
+            return msToClockString(timeEstimate);
           default:
             return EMPTY_VAL;
         }
