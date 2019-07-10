@@ -1,19 +1,20 @@
 <div class="dialog-help-wrapper">
   <h1 mat-dialog-title>Time spent / Estimates</h1>
 
-  <mat-dialog-content>
-    <help-section>
-      <div class="side-info">
-        Examples:<br>
-        30m => 30 minutes<br>
-        2h => 2 hours<br>
-        2h 30m => 2 hours and 30 minutes
-      </div>
-    </help-section>
+  <form (submit)="submit()"
+        class="mat-body"
+        name="time-estimate-form">
 
-    <form (submit)="submit()"
-          class="mat-body"
-          name="time-estimate-form">
+    <mat-dialog-content>
+      <help-section>
+        <div class="side-info">
+          Examples:<br>
+          30m => 30 minutes<br>
+          2h => 2 hours<br>
+          2h 30m => 2 hours and 30 minutes
+        </div>
+      </help-section>
+
 
       <div class="wrap-time">
         <input-duration-slider [(model)]="timeSpentOnDayCopy[todayStr]"
@@ -23,26 +24,6 @@
                                label="Estimate">
         </input-duration-slider>
       </div>
-
-      <!--<mat-form-field>-->
-      <!--<input matInput-->
-      <!--placeholder="Estimated Duration"-->
-      <!--inputDuration-->
-      <!--name="estimate"-->
-      <!--[(ngModel)]="taskCopy.timeEstimate">-->
-      <!--<mat-icon matPrefix>timer</mat-icon>-->
-      <!--</mat-form-field>-->
-      <!--<h3 class="mat-caption">Time Spent</h3>-->
-
-      <!--<mat-form-field>-->
-      <!--<input matInput-->
-      <!--placeholder="Time Spent Today"-->
-      <!--type="text"-->
-      <!--inputDuration="optional"-->
-      <!--name="timeSpendToday"-->
-      <!--[(ngModel)]="timeSpentOnDayCopy[todayStr]">-->
-      <!--<mat-icon matPrefix>timer</mat-icon>-->
-      <!--</mat-form-field>-->
 
       <div class="other-days">
         <div *ngFor="let strDate of timeSpentOnDayCopy|keys:'reverse':todayStr"
@@ -68,7 +49,6 @@
         </div>
 
         <button (click)="showAddForAnotherDayForm()"
-                [hidden]="isAddForAnotherDayFormVisible"
                 aria-label="add for another day"
                 color="primary"
                 mat-button=""
@@ -76,66 +56,28 @@
           <mat-icon>add</mat-icon>
           Add time spent for other day
         </button>
-        <button style="width: 0;height: 0; font-size: 0;border: 0;background: transparent;"
-                tabindex="-1"
-                type="submit"></button>
       </div>
-    </form>
 
 
-    <!--TODO move to other dialog -->
-    <form (submit)="addNewEntry()"
-          *ngIf="isAddForAnotherDayFormVisible"
-          name="addForAnotherDayForm">
-      <h3 class="mat-caption">Add new entry for <span [innerHtml]="newEntry.date|date:'dd-MM-yyyy'"></span></h3>
-      <mat-form-field>
-        <input [(ngModel)]="newEntry.date"
-               [matDatepicker]="myDatepicker"
-               matInput
-               name="date"
-               placeholder="Date for new entry"
-               required
-               type="text">
-        <mat-error>The entered value is not a date!</mat-error>
-        <mat-datepicker-toggle [for]="myDatepicker"
-                               matPrefix></mat-datepicker-toggle>
-        <mat-datepicker #myDatepicker></mat-datepicker>
-      </mat-form-field>
+    </mat-dialog-content>
 
+    <mat-dialog-actions align="end">
+      <!-- Can optionally provide a result for the closing dialog. -->
+      <button [mat-dialog-close]="true"
+              color="primary"
+              type="button"
+              mat-button>Cancel
+      </button>
 
-      <mat-form-field>
-        <input [(ngModel)]="newEntry.timeSpent"
-               aria-label="Time Spent for new entry"
-               inputDuration
-               matInput
-               name="timeSpentNew"
-               placeholder="Time Spent on {{newEntry.date|date:'dd-MM-yyyy'}}"
-               required
-               type="text">
-        <mat-icon matPrefix>timer</mat-icon>
-      </mat-form-field>
-
-      <button mat-stroked-button
-              type="submit">
+      <button (click)="submit()"
+              type="submit"
+              color="primary"
+              mat-stroked-button>
         <mat-icon>save</mat-icon>
         Save
       </button>
-    </form>
+    </mat-dialog-actions>
 
-  </mat-dialog-content>
+  </form>
 
-  <mat-dialog-actions align="end">
-    <!-- Can optionally provide a result for the closing dialog. -->
-    <button [mat-dialog-close]="true"
-            color="primary"
-            mat-button>Cancel
-    </button>
-
-    <button (click)="submit()"
-            color="primary"
-            mat-stroked-button>
-      <mat-icon>save</mat-icon>
-      Save
-    </button>
-  </mat-dialog-actions>
 </div>
