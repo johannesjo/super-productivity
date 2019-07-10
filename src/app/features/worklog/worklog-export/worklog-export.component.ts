@@ -16,7 +16,6 @@ import Clipboard from 'clipboard';
 import {SnackService} from '../../../core/snack/snack.service';
 import {WorklogService} from '../worklog.service';
 import {WorklogExportSettingsCopy, WorklogGrouping, WorklogTask} from '../worklog.model';
-import {spread} from 'q';
 
 const LINE_SEPARATOR = '\n';
 const EMPTY_VAL = ' - ';
