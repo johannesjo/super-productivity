@@ -34,6 +34,7 @@ import {
   MoveDown,
   MoveToArchive,
   MoveToBacklog,
+  MoveToOtherProject,
   MoveToToday,
   MoveUp,
   RemoveTaskReminder,
@@ -405,6 +406,17 @@ export class TaskService {
       tasks = [tasks];
     }
     this._store.dispatch(new MoveToArchive({tasks}));
+  }
+
+  moveToProject(tasks: TaskWithSubTasks | TaskWithSubTasks[], projectId: string) {
+    if (!Array.isArray(tasks)) {
+      tasks = [tasks];
+    }
+    if (tasks.find((task) => !!task.parentId || !!task.issueId)) {
+      console.error('Wrong task model');
+      return;
+    }
+    this._store.dispatch(new MoveToOtherProject({tasks, projectId}));
   }
 
   toggleStartTask() {

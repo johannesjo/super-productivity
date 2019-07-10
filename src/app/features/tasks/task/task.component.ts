@@ -433,7 +433,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   moveTaskToProject(projectId: string) {
-
+    this._taskService.moveToProject(this.task, projectId);
   }
 
   trackByProjectId(i: number, project: Project) {

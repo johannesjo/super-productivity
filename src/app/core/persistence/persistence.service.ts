@@ -21,7 +21,7 @@ import {
 import {GlobalConfigState} from '../../features/config/global-config.model';
 import {IssueProviderKey, IssueState, IssueStateMap} from '../../features/issue/issue';
 import {ProjectState} from '../../features/project/store/project.reducer';
-import {TaskState} from '../../features/tasks/store/task.reducer';
+import {initialTaskState, TaskState} from '../../features/tasks/store/task.reducer';
 import {EntityState} from '@ngrx/entity';
 import {Task, TaskArchive, TaskWithSubTasks} from '../../features/tasks/task.model';
 import {AppBaseData, AppDataComplete, AppDataForProjects} from '../../imex/sync/sync.model';
@@ -78,6 +78,43 @@ export class PersistenceService {
   ) {
     // this.loadComplete().then(d => console.log('XXXXXXXXX', d, JSON.stringify(d).length));
     // this.loadAllRelatedModelDataForProject('DEFAULT').then(d => console.log(d));
+  }
+
+  async saveTasksToProject(projectId, tasksToSave: TaskWithSubTasks[], isForce = false) {
+    let currentTaskState: TaskState = await this.task.load(projectId);
+    const mainTaskIds = tasksToSave.map(task => task.id);
+    if (!currentTaskState) {
+      console.warn('No valid task state found for project');
+      currentTaskState = initialTaskState;
+    }
+
+    const entities = {
+      ...currentTaskState.entities,
+      ...tasksToSave.reduce((acc, task) => {
+        const newAcc = {
+          ...acc,
+          [task.id]: {
+            ...task,
+            subTasks: null,
+          },
+        };
+        if (task.subTasks) {
+          task.subTasks.forEach((subTask) => {
+            newAcc[subTask.id] = subTask;
+          });
+        }
+
+        return newAcc;
+      }, {})
+    };
+
+    const mergedEntities: TaskState = {
+      ...currentTaskState,
+      ids: Object.keys(entities),
+      todaysTaskIds: [...currentTaskState.todaysTaskIds, ...mainTaskIds],
+      entities,
+    };
+    return this.task.save(projectId, mergedEntities, isForce);
   }
 
   // TASK ARCHIVE

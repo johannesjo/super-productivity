@@ -6,6 +6,7 @@ import {
   DeleteTask,
   Move,
   MoveToBacklog,
+  MoveToOtherProject,
   RemoveTaskReminder,
   RoundTimeSpentForDay,
   SetCurrentTask,
@@ -52,6 +53,15 @@ export class TaskEffects {
       tap(this._updateLastActive.bind(this)),
     );
 
+  @Effect({dispatch: false}) moveToOtherProject: any = this._actions$
+    .pipe(
+      ofType(
+        TaskActionTypes.MoveToOtherProject,
+      ),
+      tap(this._moveToOtherProject.bind(this)),
+      tap(this._updateLastActive.bind(this)),
+    );
+
 
   @Effect({dispatch: false}) updateTask$: any = this._actions$
     .pipe(
@@ -69,6 +79,7 @@ export class TaskEffects {
         TaskActionTypes.UpdateTask,
         TaskActionTypes.Move,
         TaskActionTypes.MoveToArchive,
+        TaskActionTypes.MoveToOtherProject,
         TaskActionTypes.MoveToBacklog,
         TaskActionTypes.MoveToToday,
         TaskActionTypes.ToggleStart,
@@ -275,6 +286,7 @@ export class TaskEffects {
         TaskActionTypes.DeleteTask,
         TaskActionTypes.MoveToBacklog,
         TaskActionTypes.MoveToArchive,
+        TaskActionTypes.MoveToOtherProject,
         TaskActionTypes.Move,
       ),
       withLatestFrom(
@@ -454,6 +466,27 @@ export class TaskEffects {
 
     this._persistenceService.saveToTaskArchiveForProject(currentProjectId, archive);
   }
+
+  private _moveToOtherProject(action: MoveToOtherProject) {
+    const mainTasks = action.payload.tasks as TaskWithSubTasks[];
+    const projectId = action.payload.projectId;
+    mainTasks.forEach((task: TaskWithSubTasks) => {
+      if (task.reminderId) {
+        this._reminderService.updateReminder(task.reminderId, {projectId});
+      }
+
+      if (task.subTasks) {
+        task.subTasks.forEach((subTask) => {
+          if (subTask.reminderId) {
+            this._reminderService.updateReminder(subTask.reminderId, {projectId});
+          }
+        });
+      }
+    });
+
+    this._persistenceService.saveTasksToProject(projectId, mainTasks);
+  }
+
 
   private async _notifyAboutTimeEstimateExceeded([action, ct, globalCfg]) {
     if (globalCfg && globalCfg.misc.isNotifyWhenTimeEstimateExceeded

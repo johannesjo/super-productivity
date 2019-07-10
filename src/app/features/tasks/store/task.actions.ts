@@ -40,6 +40,7 @@ export enum TaskActionTypes {
   MoveToBacklog = '[Task] Move to backlog',
   MoveToToday = '[Task] Move to today',
   MoveToArchive = '[Task] Move to archive',
+  MoveToOtherProject = '[Task] Move tasks to other project',
   ToggleStart = '[Task] Toggle start',
   RoundTimeSpentForDay = '[Task] RoundTimeSpentForDay',
 }
@@ -223,6 +224,13 @@ export class MoveToArchive implements Action {
   }
 }
 
+export class MoveToOtherProject implements Action {
+  readonly type = TaskActionTypes.MoveToOtherProject;
+
+  constructor(public payload: { tasks: TaskWithSubTasks[]; projectId: string; }) {
+  }
+}
+
 export class ToggleStart implements Action {
   readonly type = TaskActionTypes.ToggleStart;
 }
@@ -262,5 +270,6 @@ export type TaskActions
   | MoveToToday
   | ToggleStart
   | RoundTimeSpentForDay
+  | MoveToOtherProject
   | MoveToArchive;
 

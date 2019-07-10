@@ -721,6 +721,7 @@ export function taskReducer(
       };
     }
 
+    case TaskActionTypes.MoveToOtherProject:
     case TaskActionTypes.MoveToArchive: {
       let copyState = state;
       action.payload.tasks.forEach((task) => {
