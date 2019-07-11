@@ -1,3 +1,7 @@
+## [2.9.3](https://github.com/johannesjo/super-productivity/compare/v2.9.1...v2.9.3) (2019-07-11)
+
+
+
 ## [2.9.1](https://github.com/johannesjo/super-productivity/compare/v2.9.0...v2.9.1) (2019-07-11)
 
 
