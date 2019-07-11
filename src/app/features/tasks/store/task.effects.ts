@@ -138,18 +138,18 @@ export class TaskEffects {
       ofType(
         TaskActionTypes.UpdateTaskReminder,
       ),
-      map((a: UpdateTaskReminder) => {
+      tap((a: UpdateTaskReminder) => {
         const {title, remindAt, reminderId} = a.payload;
         this._reminderService.updateReminder(reminderId, {
           remindAt,
           title,
         });
-        return new SnackOpen({
-          type: 'SUCCESS',
-          msg: `Updated reminder for task "${truncate(title)}"`,
-          ico: 'schedule',
-        });
-      })
+      }),
+      map((a: UpdateTaskReminder) => new SnackOpen({
+        type: 'SUCCESS',
+        msg: `Updated reminder for task "${truncate(a.payload.title)}"`,
+        ico: 'schedule',
+      })),
     );
 
   @Effect() removeTaskReminder$: any = this._actions$
