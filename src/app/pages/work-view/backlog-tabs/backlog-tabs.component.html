@@ -13,6 +13,7 @@
       <div class="task-list-wrapper">
         <task-list [noTasksMsg]="'There are currently no tasks in your backlog'"
                    [tasks]="taskService.backlogTasks$|async"
+                   [isBacklog]="true"
                    class="isHidePlayBtn"
                    listId="PARENT"
                    listModelId="BACKLOG"></task-list>

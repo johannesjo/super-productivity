@@ -15,6 +15,7 @@
      [dragula]="listId"
      class="task-list-inner">
   <task *ngFor="let task of (filteredTasks$|async); trackBy: trackByFn; let i = index;"
+        [isBacklog]="isBacklog"
         [task]="task">
   </task>
 </div>

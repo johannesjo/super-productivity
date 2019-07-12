@@ -282,6 +282,22 @@
             Update issue data
           </button>
 
+          <button (click)="moveToBacklog();"
+                  *ngIf="!task.parentId && !isBacklog"
+                  mat-menu-item=""
+                  tabindex="2">
+            <mat-icon>arrow_downward</mat-icon>
+            Move to backlog
+          </button>
+
+          <button (click)="moveToToday();"
+                  *ngIf="!task.parentId && isBacklog"
+                  mat-menu-item=""
+                  tabindex="2">
+            <mat-icon>arrow_upward</mat-icon>
+            Move to today's list
+          </button>
+
           <button (click)="deleteTask()"
                   *ngIf="!task.repeatCfgId"
                   mat-menu-item=""

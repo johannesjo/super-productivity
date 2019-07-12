@@ -41,6 +41,8 @@ import {Project} from '../../project/project.model';
 })
 export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   @Input() task: TaskWithSubTasks;
+  @Input() isBacklog: boolean;
+
   isDragOver: boolean;
   isCurrent: boolean;
   isTouch: boolean = IS_TOUCH;
@@ -434,6 +436,14 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
 
   moveTaskToProject(projectId: string) {
     this._taskService.moveToProject(this.task, projectId);
+  }
+
+  moveToBacklog() {
+    this._taskService.moveToBacklog(this.task.id);
+  }
+
+  moveToToday() {
+    this._taskService.moveToToday(this.task.id);
   }
 
   trackByProjectId(i: number, project: Project) {
