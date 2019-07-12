@@ -1,22 +1,36 @@
 {
-	"fMisc": {
-		"help": "<p><strong>Not seeing Desktop Notifications?</strong> For windows you might want to check System > Notifications & actions and check if the required notifications have been enabled.</p>",
-		"isAutMarkParentAsDone": "Mark parent task as done, when all sub tasks are done",
-		"isConfirmBeforeExit": "Confirm before exiting the app",
-		"isDisableRemindWhenForgotToFinishDay": "Disable reminder about forgotten finish day",
-		"isHideNav": "Hide navigation until main header is hovered (desktop only)",
-		"isNotifyWhenTimeEstimateExceeded": "Notify when time estimate was exceeded"
-	},
-	"ww": {
-		"addMore": "Add more",
-		"addSomeTasks": "Add some tasks to plan your day!",
-		"estimateRemaining": "Estimate remaining:",
-		"finishDay": "Finish Day",
-		"helpProcrastination": "Help I'm procrastinating!",
-		"noPlannedTasks": "No planned tasks",
-		"readyToWork": "Ready to work!",
-		"timeEstimated": "Time Estimated:",
-		"withoutBreak": "Without break:",
-		"workingToday": "Working today:"
-	}
+  "g": {
+    "save": "Save"
+  },
+  "fLang": {
+    "label": "Please select a language",
+    "en": "English",
+    "de": "German",
+    "tr": "Turkish",
+    "fr": "French",
+    "ar": "Arabic",
+    "zh": "Chinese",
+    "ru": "Russian",
+    "ja": "Japanese"
+  },
+  "fMisc": {
+    "help": "<p><strong>Not seeing Desktop Notifications?</strong> For windows you might want to check System > Notifications & actions and check if the required notifications have been enabled.</p>",
+    "isAutMarkParentAsDone": "Mark parent task as done, when all sub tasks are done",
+    "isConfirmBeforeExit": "Confirm before exiting the app",
+    "isDisableRemindWhenForgotToFinishDay": "Disable reminder about forgotten finish day",
+    "isHideNav": "Hide navigation until main header is hovered (desktop only)",
+    "isNotifyWhenTimeEstimateExceeded": "Notify when time estimate was exceeded"
+  },
+  "ww": {
+    "addMore": "Add more",
+    "addSomeTasks": "Add some tasks to plan your day!",
+    "estimateRemaining": "Estimate remaining:",
+    "finishDay": "Finish Day",
+    "helpProcrastination": "Help I'm procrastinating!",
+    "noPlannedTasks": "No planned tasks",
+    "readyToWork": "Ready to work!",
+    "timeEstimated": "Time Estimated:",
+    "withoutBreak": "Without break:",
+    "workingToday": "Working today:"
+  }
 }

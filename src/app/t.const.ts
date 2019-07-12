@@ -1,4 +1,18 @@
 export const T = {
+  'g': {
+    'save': 'save'
+  },
+  'fLang': {
+    'label': 'Select Language',
+    'en': 'en',
+    'de': 'de',
+    'tr': 'tr',
+    'fr': 'fr',
+    'ar': 'ar',
+    'zh': 'zh',
+    'ru': 'ru',
+    'ja': 'ja'
+  },
   'fMisc': {
     'help': 'help',
     'isAutMarkParentAsDone': 'isAutMarkParentAsDone',

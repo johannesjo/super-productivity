@@ -21,3 +21,14 @@ export const ALL_THEMES = [
 ];
 
 export const HANDLED_ERROR = '--HANDLED_ERROR--';
+
+export enum LanguageCodes {
+  en = 'en',
+  de = 'de',
+  ar = 'ar',
+  fr = 'fr',
+  ja = 'ja',
+  ru = 'ru',
+  tr = 'tr',
+  zh = 'zh',
+}

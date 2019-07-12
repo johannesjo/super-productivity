@@ -1,47 +1,46 @@
 // tslint:disable:max-line-length
 import {ConfigFormSection} from '../global-config.model';
-import {_} from '@biesbjerg/ngx-translate-extract/dist/utils/utils';
 import {T} from '../../../t.const';
 
 
 export const MISC_SETTINGS_FORM_CFG: ConfigFormSection = {
   title: 'Misc Settings',
   key: 'misc',
-  help: _(T.fMisc.help) as string,
+  help: T.fMisc.help,
   items: [
     {
       key: 'isConfirmBeforeExit',
       type: 'checkbox',
       templateOptions: {
-        label: _(T.fMisc.isConfirmBeforeExit) as string,
+        label: T.fMisc.isConfirmBeforeExit,
       },
     },
     {
       key: 'isNotifyWhenTimeEstimateExceeded',
       type: 'checkbox',
       templateOptions: {
-        label: _(T.fMisc.isNotifyWhenTimeEstimateExceeded) as string,
+        label: T.fMisc.isNotifyWhenTimeEstimateExceeded,
       },
     },
     {
       key: 'isHideNav',
       type: 'checkbox',
       templateOptions: {
-        label: _(T.fMisc.isHideNav) as string,
+        label: T.fMisc.isHideNav,
       },
     },
     {
       key: 'isAutMarkParentAsDone',
       type: 'checkbox',
       templateOptions: {
-        label: _(T.fMisc.isAutMarkParentAsDone) as string,
+        label: T.fMisc.isAutMarkParentAsDone,
       },
     },
     {
       key: 'isDisableRemindWhenForgotToFinishDay',
       type: 'checkbox',
       templateOptions: {
-        label: _(T.fMisc.isDisableRemindWhenForgotToFinishDay) as string,
+        label: T.fMisc.isDisableRemindWhenForgotToFinishDay,
       },
     },
   ]
