@@ -63,7 +63,7 @@ export class ReminderService {
   async reloadFromLs() {
     this._reminders = await this._loadFromLs() || [];
     this._onReloadModel$.next(this._reminders);
-    this._saveModel(this._reminders);
+    this._saveModel(this._reminders, true);
   }
 
   // TODO maybe refactor to observable, because models can differ to sync value for yet unknown reasons
@@ -159,8 +159,10 @@ export class ReminderService {
     return await this._persistenceService.reminders.load() || [];
   }
 
-  private _saveModel(reminders: Reminder[]) {
-    this._persistenceService.saveLastActive();
+  private _saveModel(reminders: Reminder[], isSkipLastActive = false) {
+    if (!isSkipLastActive) {
+      this._persistenceService.saveLastActive();
+    }
     this._persistenceService.reminders.save(reminders);
     this._updateRemindersInWorker(this._reminders);
     this._reminders$.next(this._reminders);

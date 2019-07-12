@@ -382,9 +382,6 @@ export class GoogleDriveSyncEffects {
     const lastSync = this._config._lastSync;
     return this._googleApiService.getFileInfo$(this._config._backupDocId)
       .pipe(
-        tap((res: any) => {
-          const lastModifiedRemote = res.modifiedDate;
-        }),
         map((res: any) => this._isNewerThan(res.modifiedDate, lastSync)),
       );
   }
