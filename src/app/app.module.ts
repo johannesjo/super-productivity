@@ -14,7 +14,6 @@ import {reducers} from './root-store';
 import {CoreModule} from './core/core.module';
 import {ReactiveFormsModule} from '@angular/forms';
 import {FormlyModule} from '@ngx-formly/core';
-import {FormlyMaterialModule} from '@ngx-formly/material';
 import {PagesModule} from './pages/pages.module';
 import {MainHeaderModule} from './core-ui/main-header/main-header.module';
 import {HttpClient, HttpClientModule} from '@angular/common/http';
@@ -80,7 +79,6 @@ export function createTranslateLoader(http: HttpClient) {
         {name: 'pattern', message: 'Invalid input'},
       ],
     }),
-    FormlyMaterialModule,
     ServiceWorkerModule.register('ngsw-worker.js', {enabled: environment.production}),
     TranslateModule.forRoot({
       loader: {

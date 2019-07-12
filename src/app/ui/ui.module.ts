@@ -31,7 +31,6 @@ import {MatToolbarModule} from '@angular/material/toolbar';
 import {MatTooltipModule} from '@angular/material/tooltip';
 import {MarkdownModule, MarkdownService} from 'ngx-markdown';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
-import {FormlyMaterialModule} from '@ngx-formly/material';
 import {FormlyModule} from '@ngx-formly/core';
 import {ThemeSelectComponent} from './theme-select/theme-select.component';
 import {MsToStringPipe} from './duration/ms-to-string.pipe';
@@ -63,6 +62,8 @@ import {ValidationModule} from './validation/validation.module';
 import {OwlDateTimeModule, OwlNativeDateTimeModule} from 'ng-pick-datetime';
 import {FullPageSpinnerComponent} from './full-page-spinner/full-page-spinner.component';
 import {TranslateModule} from '@ngx-translate/core';
+import {FormlyMaterialModule} from './formly-material-components/src/lib/ui-material';
+
 
 @NgModule({
   imports: [
