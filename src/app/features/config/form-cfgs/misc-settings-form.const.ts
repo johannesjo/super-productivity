@@ -4,45 +4,41 @@ import {ConfigFormSection} from '../global-config.model';
 export const MISC_SETTINGS_FORM_CFG: ConfigFormSection = {
   title: 'Misc Settings',
   key: 'misc',
-  help: `
-  <div>
-      <p><strong>Not seeing Desktop Notifications?</strong> For windows you might want to check System > Notifications & actions and check if the required notifications have been enabled.
-</p>
-  </div>`,
+  help: 'fMisc.help',
   items: [
     {
       key: 'isConfirmBeforeExit',
       type: 'checkbox',
       templateOptions: {
-        label: 'Confirm before exiting the app',
+        label: 'fMisc.isConfirmBeforeExit',
       },
     },
     {
       key: 'isNotifyWhenTimeEstimateExceeded',
       type: 'checkbox',
       templateOptions: {
-        label: 'Notify when time estimate was exceeded',
+        label: 'fMisc.isNotifyWhenTimeEstimateExceeded',
       },
     },
     {
       key: 'isHideNav',
       type: 'checkbox',
       templateOptions: {
-        label: 'Hide navigation until main header is hovered (desktop only)',
+        label: 'fMisc.isHideNav',
       },
     },
     {
       key: 'isAutMarkParentAsDone',
       type: 'checkbox',
       templateOptions: {
-        label: 'Mark parent task as done, when all sub tasks are done',
+        label: 'fMisc.isAutMarkParentAsDone',
       },
     },
     {
       key: 'isDisableRemindWhenForgotToFinishDay',
       type: 'checkbox',
       templateOptions: {
-        label: 'Disable reminder about forgotten finish day',
+        label: 'fMisc.isDisableRemindWhenForgotToFinishDay',
       },
     },
   ]

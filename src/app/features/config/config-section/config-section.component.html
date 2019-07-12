@@ -3,7 +3,7 @@
   <!--[icon]="section.icon"-->
 
   <help-section>
-    <div [innerHtml]="section.help"></div>
+    <div [innerHtml]="section.help|translate"></div>
   </help-section>
   <div class="form-wrapper {{section.key}}">
     <config-form
