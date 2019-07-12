@@ -1,32 +1,38 @@
 import {Injectable} from '@angular/core';
 import {Actions, Effect, ofType} from '@ngrx/effects';
-import {SnackActionTypes, SnackOpen} from './snack.actions';
+import {SnackActionTypes, SnackClose, SnackOpen} from './snack.actions';
 import {Observable, Subject} from 'rxjs';
-import {takeUntil, tap} from 'rxjs/operators';
+import {mapTo, takeUntil, tap} from 'rxjs/operators';
 import {MatSnackBar, MatSnackBarRef, SimpleSnackBar} from '@angular/material/snack-bar';
 import {Store} from '@ngrx/store';
 import {SnackCustomComponent} from '../snack-custom/snack-custom.component';
 import {DEFAULT_SNACK_CFG} from '../snack.const';
+import {ProjectActionTypes} from '../../../features/project/store/project.actions';
 
 @Injectable()
 export class SnackEffects {
-  // TODO implement this way
-  // @Effect({
-  //   dispatch: false
-  // })
-  // closeSnack: Observable<any> = this.actions$
-  //   .pipe(
-  //     ofType(SnackActionTypes.SnackClose),
-  //     tap(() => this.matSnackBar.dismiss())
-  //   );
-
-  @Effect({
-    dispatch: false
-  })
-  showSnack: Observable<any> = this.actions$
+  @Effect({dispatch: false}) showSnack$: Observable<any> = this.actions$
     .pipe(
       ofType(SnackActionTypes.SnackOpen),
       tap(this._openSnack.bind(this)),
+    );
+
+
+  @Effect() hideOnProjectChange$: Observable<any> = this.actions$
+    .pipe(
+      ofType(ProjectActionTypes.SetCurrentProject),
+      mapTo(new SnackClose()),
+    );
+
+
+  @Effect({dispatch: false}) hideSnack$: Observable<any> = this.actions$
+    .pipe(
+      ofType(SnackActionTypes.SnackClose),
+      tap(() => {
+        if (this._ref) {
+          this._ref.dismiss();
+        }
+      }),
     );
 
 

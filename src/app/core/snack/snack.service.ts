@@ -7,7 +7,9 @@ import {SnackParams} from './snack.model';
   providedIn: 'root',
 })
 export class SnackService {
-  constructor(private _store$: Store<any>) {
+  constructor(
+    private _store$: Store<any>,
+  ) {
   }
 
   open(params: SnackParams | string) {
