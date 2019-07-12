@@ -8,14 +8,14 @@
            @fade
            class="status-bar">
         <div class="item">
-          <span class="label">{{'ww.estimateRemaining'|translate}}</span>
+          <span class="label">{{T.ww.estimateRemaining|translate}}</span>
           <span class="no-wrap">
       ~<strong class="time-val">{{taskService.estimateRemainingToday$|async|msToString}}</strong>
       <mat-icon>timer</mat-icon>
       </span>
         </div>
 
-        <div class="item"><span class="label">{{'ww.workingToday'|translate}}</span>
+        <div class="item"><span class="label">{{T.ww.workingToday|translate}}</span>
           <span class="no-wrap">
       <strong class="time-val">{{taskService.workingToday$|async|msToString}}</strong>
       <mat-icon>timer</mat-icon>
@@ -24,7 +24,7 @@
 
         <div *ngIf="isShowTimeWorkedWithoutBreak"
              class="item">
-          <span class="label">{{'ww.withoutBreak'|translate}} </span>
+          <span class="label">{{T.ww.withoutBreak|translate}} </span>
           <span class="no-wrap">
         <strong class="time-val">{{takeABreakService.timeWorkingWithoutABreak$|async|msToString}}</strong><mat-icon>timer</mat-icon>
       </span>
@@ -41,11 +41,11 @@
       <div *ngIf="(planningModeService.isPlanningMode$|async)"
            class="planning-mode-header">
         <h2 *ngIf="!(taskService.undoneTasks$|async)?.length"
-            class="planning-mode-header mat-h2">{{'ww.addSomeTasks'|translate}}</h2>
+            class="planning-mode-header mat-h2">{{T.ww.addSomeTasks|translate}}</h2>
         <div *ngIf="(taskService.undoneTasks$|async)?.length"
              class="status-bar">
           <div class="item">
-            <span class="label">{{'ww.timeEstimated'|translate}}</span>
+            <span class="label">{{T.ww.timeEstimated|translate}}</span>
             <span class="no-wrap">
       <strong class="time-val">~{{taskService.estimateRemainingToday$|async|msToString}}</strong>
       <mat-icon>timer</mat-icon>
@@ -61,21 +61,21 @@
       <div *ngIf="!(planningModeService.isPlanningMode$|async) && !(taskService.isHasTasksToWorkOn$|async)"
            @expandFade
            class="add-more-or-finish">
-        <h2>{{'ww.noPlannedTasks'|translate}}</h2>
+        <h2>{{T.ww.noPlannedTasks|translate}}</h2>
 
         <div class="btn-wrapper">
           <button (click)="planMore()"
                   color=""
                   mat-raised-button="">
             <mat-icon>playlist_add</mat-icon>
-            {{'ww.addMore'|translate}}
+            {{T.ww.addMore|translate}}
           </button>
 
           <button color="primary"
                   mat-raised-button=""
                   routerLink="/daily-summary">
             <mat-icon>done_all</mat-icon>
-            {{'ww.finishDay'|translate}}
+            {{T.ww.finishDay|translate}}
           </button>
         </div>
       </div>
@@ -90,7 +90,7 @@
                 color="primary"
                 mat-raised-button="">
           <mat-icon>check</mat-icon>
-          {{'ww.readyToWork'|translate}}
+          {{T.ww.readyToWork|translate}}
         </button>
       </div>
       <task-list [tasks]="taskService.undoneTasks$|async"
@@ -109,14 +109,14 @@
                   color="primary"
                   mat-button=""
                   routerLink="/procrastination">
-            {{'ww.helpProcrastination'|translate}}
+            {{T.ww.helpProcrastination|translate}}
           </button>
 
           <button color="primary"
                   mat-raised-button=""
                   routerLink="/daily-summary">
             <mat-icon>done_all</mat-icon>
-            {{'ww.finishDay'|translate}}
+            {{T.ww.finishDay|translate}}
           </button>
         </div>
       </div>

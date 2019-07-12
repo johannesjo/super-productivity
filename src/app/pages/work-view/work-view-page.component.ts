@@ -10,6 +10,7 @@ import {TaskWithSubTasks} from '../../features/tasks/task.model';
 import {map, switchMap} from 'rxjs/operators';
 import {fadeAnimation} from '../../ui/animations/fade.ani';
 import {PlanningModeService} from '../../features/planning-mode/planning-mode.service';
+import {T} from '../../t.const';
 
 const SUB = 'SUB';
 const PARENT = 'PARENT';
@@ -25,6 +26,7 @@ export class WorkViewPageComponent implements OnInit, OnDestroy {
   isShowTimeWorkedWithoutBreak = true;
   splitInputPos = 100;
   isPreloadBacklog = false;
+  T = T;
 
   // we do it here to have the tasks in memory all the time
   backlogTasks: TaskWithSubTasks[];

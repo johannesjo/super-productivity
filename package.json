@@ -43,7 +43,10 @@
     "release": "yarn release.changelog && yarn dist",
     "release.changelog": "conventional-changelog -i CHANGELOG.md -s -p angular",
     "version": "yarn release.changelog && git add -A",
-    "buildSchema": "cd tools/schematics && yarn build && cd ../../ && yarn add file:./tools/schematics"
+    "buildSchema": "cd tools/schematics && yarn build && cd ../../ && yarn add file:./tools/schematics",
+    "int": "node ./tools/extract-i18n.js",
+    "intFind": "ngx-translate-extract --input ./src --output ./src/assets/i18n/*.json  --sort --format namespaced-json --marker _",
+    "intClean": "ngx-translate-extract --input ./src --output ./src/assets/i18n/*.json --clean --sort --format namespaced-json --marker _"
   },
   "browserslist": [
     "last 1 version",
@@ -135,6 +138,7 @@
     "@angular/pwa": "^0.10.5",
     "@angular/router": "^8.1.0",
     "@angular/service-worker": "^8.1.0",
+    "@biesbjerg/ngx-translate-extract": "^2.3.4",
     "@ngrx/effects": "^8.1.0",
     "@ngrx/entity": "^8.1.0",
     "@ngrx/schematics": "^8.1.0",
