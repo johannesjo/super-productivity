@@ -1,0 +1,22 @@
+{
+	"fMisc": {
+		"help": "",
+		"isAutMarkParentAsDone": "",
+		"isConfirmBeforeExit": "",
+		"isDisableRemindWhenForgotToFinishDay": "",
+		"isHideNav": "",
+		"isNotifyWhenTimeEstimateExceeded": ""
+	},
+	"ww": {
+		"addMore": "添加更多",
+		"addSomeTasks": "添加一些任务来计划你的一天！",
+		"estimateRemaining": "美东时间。其余：",
+		"finishDay": "完成日",
+		"helpProcrastination": "帮助我拖延！",
+		"noPlannedTasks": "没有计划的任务",
+		"readyToWork": "",
+		"timeEstimated": "",
+		"withoutBreak": "",
+		"workingToday": ""
+	}
+}

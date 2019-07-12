@@ -1,0 +1,22 @@
+{
+	"fMisc": {
+		"help": "",
+		"isAutMarkParentAsDone": "",
+		"isConfirmBeforeExit": "",
+		"isDisableRemindWhenForgotToFinishDay": "",
+		"isHideNav": "",
+		"isNotifyWhenTimeEstimateExceeded": ""
+	},
+	"ww": {
+		"addMore": "さらに追加",
+		"addSomeTasks": "あなたの一日を計画するためにいくつかのタスクを追加してください！",
+		"estimateRemaining": "EST（東部基準時。残り：",
+		"finishDay": "終了日",
+		"helpProcrastination": "先延ばしにしてください！",
+		"noPlannedTasks": "計画タスクなし",
+		"readyToWork": "",
+		"timeEstimated": "",
+		"withoutBreak": "",
+		"workingToday": ""
+	}
+}

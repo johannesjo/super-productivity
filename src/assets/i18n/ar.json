@@ -1,0 +1,22 @@
+{
+	"fMisc": {
+		"help": "",
+		"isAutMarkParentAsDone": "",
+		"isConfirmBeforeExit": "",
+		"isDisableRemindWhenForgotToFinishDay": "",
+		"isHideNav": "",
+		"isNotifyWhenTimeEstimateExceeded": ""
+	},
+	"ww": {
+		"addMore": "",
+		"addSomeTasks": "",
+		"estimateRemaining": "",
+		"finishDay": "",
+		"helpProcrastination": "",
+		"noPlannedTasks": "",
+		"readyToWork": "",
+		"timeEstimated": "",
+		"withoutBreak": "",
+		"workingToday": ""
+	}
+}

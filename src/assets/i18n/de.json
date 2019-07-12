@@ -1,0 +1,22 @@
+{
+	"fMisc": {
+		"help": "",
+		"isAutMarkParentAsDone": "",
+		"isConfirmBeforeExit": "",
+		"isDisableRemindWhenForgotToFinishDay": "",
+		"isHideNav": "",
+		"isNotifyWhenTimeEstimateExceeded": ""
+	},
+	"ww": {
+		"addMore": "Weitere hinzufügen",
+		"addSomeTasks": "Füge einige Aufgaben hinzu, um deinen Tag zu planen!",
+		"estimateRemaining": "Europäische Sommerzeit. verbleibend:",
+		"finishDay": "Tag beenden",
+		"helpProcrastination": "Hilfe, ich zögere!",
+		"noPlannedTasks": "Keine geplanten Aufgaben",
+		"readyToWork": "",
+		"timeEstimated": "",
+		"withoutBreak": "",
+		"workingToday": ""
+	}
+}

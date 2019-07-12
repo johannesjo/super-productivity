@@ -1,0 +1,22 @@
+{
+	"fMisc": {
+		"help": "",
+		"isAutMarkParentAsDone": "",
+		"isConfirmBeforeExit": "",
+		"isDisableRemindWhenForgotToFinishDay": "",
+		"isHideNav": "",
+		"isNotifyWhenTimeEstimateExceeded": ""
+	},
+	"ww": {
+		"addMore": "Добавить больше",
+		"addSomeTasks": "Добавьте несколько задач, чтобы спланировать свой день!",
+		"estimateRemaining": "Стандартное восточное время. остальной:",
+		"finishDay": "День окончания",
+		"helpProcrastination": "Помогите откладывать!",
+		"noPlannedTasks": "Нет запланированных задач",
+		"readyToWork": "",
+		"timeEstimated": "",
+		"withoutBreak": "",
+		"workingToday": ""
+	}
+}
