@@ -10,6 +10,7 @@ import {ExportedProject, Project} from '../../features/project/project.model';
 import {PersistenceService} from '../../core/persistence/persistence.service';
 import {download} from '../../util/download';
 import {SnackService} from '../../core/snack/snack.service';
+import {T} from '../../t.const';
 
 @Component({
   selector: 'project-page',
@@ -19,6 +20,7 @@ import {SnackService} from '../../core/snack/snack.service';
   animations: [standardListAnimation],
 })
 export class ProjectPageComponent implements OnInit, OnDestroy {
+  T = T;
   private _subs = new Subscription();
 
   constructor(

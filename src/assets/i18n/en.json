@@ -68,5 +68,21 @@
     "SAVE_AND_GO_HOME": "Save and go home",
     "CLEAR_ALL_CONTINUE": "Clear all done and continue"
   },
+  "PM": {
+    "TITLE": "Project Metrics"
+  },
+  "PP": {
+    "TITLE": "Project Overview",
+    "JIRA_CONFIGURED": "Jira Integration Configured",
+    "GITHUB_CONFIGURED": "Github Integration Configured",
+    "EDIT_PROJECT": "Edit Project",
+    "ARCHIVE_PROJECT": "Archive Project",
+    "UN_ARCHIVE_PROJECT": "Unarchive Project",
+    "EXPORT_PROJECT": "Export Project",
+    "DELETE_PROJECT": "Delete Project",
+    "CREATE_NEW": "Create New",
+    "IMPORT_FROM_FILE": "Import from file",
+    "ARCHIVED_PROJECTS": "Archived Projects"
+  },
   "AAA": "AAA"
 }

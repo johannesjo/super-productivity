@@ -1,7 +1,7 @@
 <div class="page-wrapper">
   <div class="component-wrapper">
     <h1 class="mat-h1"
-        style="text-align: center; margin-top: 12px;">Project Overview</h1>
+        style="text-align: center; margin-top: 12px;">{{T.PP.TITLE|translate}}</h1>
 
     <div [@standardList]="(projectService.list$|async)?.length"
          [dragulaModel]="projectService.list$|async"
@@ -23,39 +23,39 @@
         <div class="issue-providers">
           <mat-icon *ngIf="project.issueIntegrationCfgs?.JIRA?.isEnabled"
                     svgIcon="jira"
-                    title="Jira Integration Configured"></mat-icon>
+                    [title]="T.PP.JIRA_CONFIGURED|translate"></mat-icon>
           <mat-icon *ngIf="project.issueIntegrationCfgs?.GITHUB?.repo"
                     svgIcon="github"
-                    title="Github Integration Configured"></mat-icon>
+                    [title]="T.PP.GITHUB_CONFIGURED|translate"></mat-icon>
         </div>
 
         <div class="controls">
           <button (click)="edit(project)"
                   color=""
                   mat-mini-fab
-                  title="Edit Project">
-            <mat-icon aria-label="Edit">edit</mat-icon>
+                  [title]="T.PP.EDIT_PROJECT|translate">
+            <mat-icon>edit</mat-icon>
           </button>
           <button (click)="archive(project.id)"
                   *ngIf="project.id !== (projectService.currentId$|async)"
                   color=""
                   mat-mini-fab
-                  title="Archive Project">
-            <mat-icon aria-label="Archive">archive</mat-icon>
+                  [title]="T.PP.ARCHIVE_PROJECT|translate">
+            <mat-icon>archive</mat-icon>
           </button>
           <button (click)="export(project.id, project.title)"
                   class="hide-xs"
                   color=""
                   mat-mini-fab
-                  title="Export Project">
-            <mat-icon aria-label="Archive">flight</mat-icon>
+                  [title]="T.PP.EXPORT_PROJECT|translate">
+            <mat-icon>flight</mat-icon>
           </button>
           <button (click)="remove(project.id)"
                   *ngIf="project.id !== (projectService.currentId$|async)"
                   color="warn"
                   mat-mini-fab
-                  title="Delete Project">
-            <mat-icon aria-label="Delete">delete</mat-icon>
+                  [title]="T.PP.DELETE_PROJECT|translate">
+            <mat-icon>delete</mat-icon>
           </button>
         </div>
 
@@ -66,13 +66,14 @@
       <button (click)="openCreateDialog()"
               color="primary"
               mat-raised-button>
-        <mat-icon aria-label="Add">add</mat-icon>
-        Create New
+        <mat-icon>add</mat-icon>
+        {{T.PP.CREATE_NEW|translate}}
       </button>
 
       <button (click)="fileInput.click()"
               mat-raised-button
-              type="button">Import from file
+              type="button">
+        {{T.PP.IMPORT_FROM_FILE|translate}}
       </button>
       <input #fileInput
              (change)="handleFileInput($event)"
@@ -85,7 +86,7 @@
   <div *ngIf="(projectService.archived$|async)?.length"
        class="component-wrapper">
     <h2 class="mat-h2"
-        style="text-align: center; margin-top: 32px;">Archived Projects</h2>
+        style="text-align: center; margin-top: 32px;">{{T.PP.ARCHIVED_PROJECTS|translate}}</h2>
 
     <mat-card *ngFor="let project of (projectService.archived$|async); trackBy:trackById;"
               class="project">
@@ -98,25 +99,25 @@
       <div class="issue-providers">
         <mat-icon *ngIf="project.issueIntegrationCfgs?.JIRA?.isEnabled"
                   svgIcon="jira"
-                  title="Jira Integration Configured"></mat-icon>
+                  [title]="T.PP.JIRA_CONFIGURED|translate"></mat-icon>
         <mat-icon *ngIf="project.issueIntegrationCfgs?.GITHUB?.repo"
                   svgIcon="github"
-                  title="Github Integration Configured"></mat-icon>
+                  [title]="T.PP.GITHUB_CONFIGURED|translate"></mat-icon>
       </div>
 
       <div class="controls">
         <button (click)="unarchive(project.id)"
                 color=""
                 mat-mini-fab
-                title="Unarchive Project">
-          <mat-icon aria-label="Unarchive">unarchive</mat-icon>
+                [title]="T.PP.UN_ARCHIVE_PROJECT|translate">
+          <mat-icon>unarchive</mat-icon>
         </button>
         <button (click)="remove(project.id)"
                 *ngIf="project.id !== (projectService.currentId$|async)"
                 color="warn"
                 mat-mini-fab
-                title="Delete Project">
-          <mat-icon aria-label="Delete">delete</mat-icon>
+                [title]="T.PP.DELETE_PROJECT|translate">
+          <mat-icon>delete</mat-icon>
         </button>
       </div>
 
