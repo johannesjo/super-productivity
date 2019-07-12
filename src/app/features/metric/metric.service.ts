@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
 import {select, Store} from '@ngrx/store';
-import {initialMetricState,} from './store/metric.reducer';
+import {initialMetricState} from './store/metric.reducer';
 import {AddMetric, DeleteMetric, LoadMetricState, UpdateMetric, UpsertMetric} from './store/metric.actions';
 import {combineLatest, from, Observable} from 'rxjs';
 import {LineChartData, Metric, MetricState, PieChartData, SimpleMetrics} from './metric.model';

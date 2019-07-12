@@ -16,7 +16,7 @@ import {Task} from '../../../../tasks/task.model';
 import {ProjectActionTypes} from '../../../../project/store/project.actions';
 import {GITHUB_TYPE} from '../../../issue.const';
 import {EMPTY, timer} from 'rxjs';
-import {GITHUB_INITIAL_POLL_DELAY, GITHUB_POLL_INTERVAL,} from '../../github.const';
+import {GITHUB_INITIAL_POLL_DELAY, GITHUB_POLL_INTERVAL} from '../../github.const';
 import {GithubCfg} from '../../github';
 import {GithubIssue} from '../github-issue.model';
 

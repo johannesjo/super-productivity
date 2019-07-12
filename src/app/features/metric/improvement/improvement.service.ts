@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
 import {select, Store} from '@ngrx/store';
-import {initialImprovementState, selectAllImprovements,} from './store/improvement.reducer';
+import {initialImprovementState, selectAllImprovements} from './store/improvement.reducer';
 import {
   AddImprovement,
   ClearHiddenImprovements,

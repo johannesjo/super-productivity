@@ -28,6 +28,8 @@ export class GithubIssueService {
   ) {
   }
 
+  private _fineWithDeletionIssueIds = [];
+
   // META
   // ----
   async loadStateForProject(projectId: string) {
@@ -165,6 +167,4 @@ export class GithubIssueService {
       });
     });
   }
-
-  private _fineWithDeletionIssueIds = [];
 }

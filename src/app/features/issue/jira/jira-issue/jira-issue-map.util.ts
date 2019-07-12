@@ -1,4 +1,4 @@
-import {JiraAttachment, JiraAuthor, JiraChangelogEntry, JiraComment, JiraIssue,} from './jira-issue.model';
+import {JiraAttachment, JiraAuthor, JiraChangelogEntry, JiraComment, JiraIssue, } from './jira-issue.model';
 import {
   JiraIssueOriginal,
   JiraOriginalAttachment,

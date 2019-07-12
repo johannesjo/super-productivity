@@ -51,7 +51,7 @@ import {
   UpdateTaskReminder,
   UpdateTaskUi
 } from './store/task.actions';
-import {initialTaskState, taskReducer, TaskState,} from './store/task.reducer';
+import {initialTaskState, taskReducer, TaskState} from './store/task.reducer';
 import {PersistenceService} from '../../core/persistence/persistence.service';
 import {IssueData, IssueProviderKey} from '../issue/issue';
 import {TimeTrackingService} from '../time-tracking/time-tracking.service';
