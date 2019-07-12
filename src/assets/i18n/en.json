@@ -36,6 +36,13 @@
     "WITHOUT_BREAK": "Without break:",
     "WORKING_TODAY": "Working today:"
   },
+  "BL": {
+    "TITLE": "Backlog",
+    "NO_TASKS": "There are currently no tasks in your backlog",
+    "SCHEDULED": "Scheduled",
+    "NO_SCHEDULED": "There are currently no scheduled tasks. You can schedule a task by choosing \"Schedule Task\" in the task context menu. To open it click on the 3 little dots on the right of a task.",
+    "FROM_OTHER_PROJECTS": "From other Projects"
+  },
   "PS": {
     "PROJECT_SETTINGS": "Project Specific Settings",
     "GLOBAL_SETTINGS": "Global Settings"
