@@ -7,6 +7,7 @@ import {FormlyMatFormFieldModule} from '@ngx-formly/material/form-field';
 import {MatInputModule} from '@angular/material/input';
 
 import {FormlyFieldTextArea} from './textarea.type';
+import {TranslateModule} from '@ngx-translate/core';
 
 @NgModule({
   declarations: [FormlyFieldTextArea],
@@ -14,6 +15,7 @@ import {FormlyFieldTextArea} from './textarea.type';
     CommonModule,
     ReactiveFormsModule,
     MatInputModule,
+    TranslateModule,
 
     FormlyMatFormFieldModule,
     FormlyModule.forChild({

@@ -8,6 +8,7 @@ import {FormlyMatFormFieldModule} from '@ngx-formly/material/form-field';
 import {MatRadioModule} from '@angular/material/radio';
 
 import {FormlyFieldRadio} from './radio.type';
+import {TranslateModule} from '@ngx-translate/core';
 
 @NgModule({
   declarations: [FormlyFieldRadio],
@@ -15,6 +16,7 @@ import {FormlyFieldRadio} from './radio.type';
     CommonModule,
     ReactiveFormsModule,
     MatRadioModule,
+    TranslateModule,
 
     FormlyMatFormFieldModule,
     FormlySelectModule,

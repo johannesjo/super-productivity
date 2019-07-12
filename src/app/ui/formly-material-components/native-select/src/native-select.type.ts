@@ -15,7 +15,7 @@ import {MatInput} from '@angular/material/input';
               [ngValue]="null">{{ to.placeholder }}</option>
       <ng-container *ngFor="let item of to.options | formlySelectOptions:field | async">
         <optgroup *ngIf="item.group"
-                  label="{{item.label}}">
+                  label="{{item.label|translate}}">
           <option *ngFor="let child of item.group"
                   [ngValue]="child.value"
                   [disabled]="child.disabled">
@@ -24,7 +24,7 @@ import {MatInput} from '@angular/material/input';
         </optgroup>
         <option *ngIf="!item.group"
                 [ngValue]="item.value"
-                [disabled]="item.disabled">{{ item.label }}</option>
+                [disabled]="item.disabled">{{ item.label|translate }}</option>
       </ng-container>
     </select>
   `,

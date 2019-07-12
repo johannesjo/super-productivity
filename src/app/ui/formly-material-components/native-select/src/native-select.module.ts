@@ -8,6 +8,7 @@ import {FormlyMatFormFieldModule} from '@ngx-formly/material/form-field';
 import {MatInputModule} from '@angular/material/input';
 
 import {FormlyFieldNativeSelect} from './native-select.type';
+import {TranslateModule} from '@ngx-translate/core';
 
 @NgModule({
   declarations: [FormlyFieldNativeSelect],
@@ -15,6 +16,7 @@ import {FormlyFieldNativeSelect} from './native-select.type';
     CommonModule,
     ReactiveFormsModule,
     MatInputModule,
+    TranslateModule,
 
     FormlyMatFormFieldModule,
     FormlySelectModule,

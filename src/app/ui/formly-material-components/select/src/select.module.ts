@@ -9,6 +9,7 @@ import {MatSelectModule} from '@angular/material/select';
 
 import {FormlyFieldSelect} from './select.type';
 import {MatPseudoCheckboxModule} from '@angular/material/core';
+import {TranslateModule} from '@ngx-translate/core';
 
 @NgModule({
   declarations: [FormlyFieldSelect],
@@ -17,6 +18,7 @@ import {MatPseudoCheckboxModule} from '@angular/material/core';
     ReactiveFormsModule,
     MatSelectModule,
     MatPseudoCheckboxModule,
+    TranslateModule.forChild(),
 
     FormlyMatFormFieldModule,
     FormlySelectModule,

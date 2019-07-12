@@ -6,6 +6,7 @@ import {MatSliderModule} from '@angular/material/slider';
 import {FormlyMatFormFieldModule} from '@ngx-formly/material/form-field';
 
 import {FormlySliderTypeComponent} from './slider.type';
+import {TranslateModule} from '@ngx-translate/core';
 
 @NgModule({
   declarations: [FormlySliderTypeComponent],
@@ -13,6 +14,7 @@ import {FormlySliderTypeComponent} from './slider.type';
     CommonModule,
     ReactiveFormsModule,
     MatSliderModule,
+    TranslateModule,
     FormlyMatFormFieldModule,
     FormlyModule.forChild({
       types: [{

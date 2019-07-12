@@ -14,7 +14,7 @@ import {MatRadioGroup} from '@angular/material/radio';
                         [color]="to.color"
                         [labelPosition]="to.labelPosition"
                         [value]="option.value">
-        {{ option.label }}
+        {{ option.label|translate }}
       </mat-radio-button>
     </mat-radio-group>
   `,

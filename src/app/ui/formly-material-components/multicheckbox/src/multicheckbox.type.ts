@@ -13,7 +13,7 @@ import {FieldType} from '@ngx-formly/material/form-field';
         [labelPosition]="to.labelPosition"
         [checked]="formControl.value && (this.to.type === 'array' ? formControl.value.includes(option.value) : formControl.value[option.value])"
         (change)="onChange(option.value, $event.checked)">
-        {{ option.label }}
+        {{ option.label|translate }}
       </mat-checkbox>
     </ng-container>
   `,

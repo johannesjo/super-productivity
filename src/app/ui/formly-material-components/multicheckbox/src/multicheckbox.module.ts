@@ -7,12 +7,14 @@ import {FormlyMatFormFieldModule} from '@ngx-formly/material/form-field';
 import {MatCheckboxModule} from '@angular/material/checkbox';
 
 import {FormlyFieldMultiCheckbox} from './multicheckbox.type';
+import {TranslateModule} from '@ngx-translate/core';
 
 @NgModule({
   declarations: [FormlyFieldMultiCheckbox],
   imports: [
     CommonModule,
     ReactiveFormsModule,
+    TranslateModule,
 
     MatCheckboxModule,
 

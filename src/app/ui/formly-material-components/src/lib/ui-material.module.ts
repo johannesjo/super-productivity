@@ -7,6 +7,7 @@ import {FormlyMatRadioModule} from '../../radio';
 import {FormlyMatCheckboxModule} from '../../checkbox';
 import {FormlyMatMultiCheckboxModule} from '../../multicheckbox';
 import {FormlyMatSelectModule} from '../../select';
+import {TranslateModule} from '@ngx-translate/core';
 
 @NgModule({
   imports: [
@@ -17,6 +18,7 @@ import {FormlyMatSelectModule} from '../../select';
     FormlyMatCheckboxModule,
     FormlyMatMultiCheckboxModule,
     FormlyMatSelectModule,
+    TranslateModule,
   ],
 })
 export class FormlyMaterialModule {

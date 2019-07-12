@@ -39,12 +39,12 @@ import {FieldType} from '@ngx-formly/material/form-field';
             <mat-option *ngFor="let child of item.group"
                         [value]="child.value"
                         [disabled]="child.disabled">
-              {{ child.label }}
+              {{ child.label|translate }}
             </mat-option>
           </mat-optgroup>
           <mat-option *ngIf="!item.group"
                       [value]="item.value"
-                      [disabled]="item.disabled">{{ item.label }}</mat-option>
+                      [disabled]="item.disabled">{{ item.label|translate }}</mat-option>
         </ng-container>
       </ng-container>
     </mat-select>

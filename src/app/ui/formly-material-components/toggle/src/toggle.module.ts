@@ -6,11 +6,13 @@ import {MatSlideToggleModule} from '@angular/material/slide-toggle';
 import {FormlyMatFormFieldModule} from '@ngx-formly/material/form-field';
 
 import {FormlyToggleTypeComponent} from './toggle.type';
+import {TranslateModule} from '@ngx-translate/core';
 
 @NgModule({
   declarations: [FormlyToggleTypeComponent],
   imports: [
     CommonModule,
+    TranslateModule,
     ReactiveFormsModule,
     MatSlideToggleModule,
     FormlyMatFormFieldModule,

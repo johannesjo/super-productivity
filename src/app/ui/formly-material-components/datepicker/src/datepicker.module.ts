@@ -8,6 +8,7 @@ import {MatInputModule} from '@angular/material/input';
 import {MatDatepickerModule} from '@angular/material/datepicker';
 
 import {FormlyDatepickerTypeComponent} from './datepicker.type';
+import {TranslateModule} from '@ngx-translate/core';
 
 @NgModule({
   declarations: [FormlyDatepickerTypeComponent],
@@ -16,6 +17,7 @@ import {FormlyDatepickerTypeComponent} from './datepicker.type';
     ReactiveFormsModule,
     MatInputModule,
     MatDatepickerModule,
+    TranslateModule,
 
     FormlyMatFormFieldModule,
     FormlyModule.forChild({

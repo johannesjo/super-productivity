@@ -13,7 +13,7 @@ import {FieldType} from '@ngx-formly/material/form-field';
               [cols]="to.cols"
               [rows]="to.rows"
               [formlyAttributes]="field"
-              [placeholder]="to.placeholder"
+              [placeholder]="to.placeholder|translate"
               [tabindex]="to.tabindex || 0"
               [readonly]="to.readonly">
     </textarea>
