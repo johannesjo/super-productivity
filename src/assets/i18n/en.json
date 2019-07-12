@@ -1,72 +1,72 @@
 {
-  "g": {
-    "save": "Save",
-    "dismiss": "Dismiss"
+  "G": {
+    "SAVE": "Save",
+    "DISMISS": "Dismiss"
   },
-  "fLang": {
-    "label": "Please select a language",
-    "en": "English",
-    "de": "German",
-    "tr": "Turkish",
-    "fr": "French",
-    "ar": "Arabic",
-    "zh": "Chinese",
-    "ru": "Russian",
-    "ja": "Japanese"
+  "F_LANG": {
+    "LABEL": "Please select a language",
+    "EN": "English",
+    "DE": "German",
+    "TR": "Turkish",
+    "FR": "French",
+    "AR": "Arabic",
+    "ZH": "Chinese",
+    "RU": "Russian",
+    "JA": "Japanese"
   },
-  "fMisc": {
-    "help": "<p><strong>Not seeing Desktop Notifications?</strong> For windows you might want to check System > Notifications & actions and check if the required notifications have been enabled.</p>",
-    "isAutMarkParentAsDone": "Mark parent task as done, when all sub tasks are done",
-    "isConfirmBeforeExit": "Confirm before exiting the app",
+  "F_MISC": {
+    "HELP": "<p><strong>Not seeing Desktop Notifications?</strong> For windows you might want to check System > Notifications & actions and check if the required notifications have been enabled.</p>",
+    "IS_AUTO_MARK_PARENT_AS_DONE": "Mark parent task as done, when all sub tasks are done",
+    "IS_CONFIRM_BEFORE_EXIT": "Confirm before exiting the app",
     "isDisableRemindWhenForgotToFinishDay": "Disable reminder about forgotten finish day",
-    "isHideNav": "Hide navigation until main header is hovered (desktop only)",
-    "isNotifyWhenTimeEstimateExceeded": "Notify when time estimate was exceeded"
+    "IS_HIDE_NAV": "Hide navigation until main header is hovered (desktop only)",
+    "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Notify when time estimate was exceeded"
   },
-  "ww": {
-    "addMore": "Add more",
-    "addSomeTasks": "Add some tasks to plan your day!",
-    "estimateRemaining": "Estimate remaining:",
-    "finishDay": "Finish Day",
-    "helpProcrastination": "Help I'm procrastinating!",
-    "noPlannedTasks": "No planned tasks",
-    "completedTasks": "Completed Tasks",
-    "noCompletedTasks": "There are currently no completed tasks",
-    "readyToWork": "Ready to work!",
-    "timeEstimated": "Time Estimated:",
-    "withoutBreak": "Without break:",
-    "workingToday": "Working today:"
+  "WW": {
+    "ADD_MORE": "Add more",
+    "ADD_SOME_TASKS": "Add some tasks to plan your day!",
+    "ESTIMATE_REMAINING": "Estimate remaining:",
+    "FINISH_DAY": "Finish Day",
+    "HELP_PROCRASTINATION": "Help I'm procrastinating!",
+    "NO_PLANNED_TASKS": "No planned tasks",
+    "COMPLETED_TASKS": "Completed Tasks",
+    "NO_COMPLETED_TASKS": "There are currently no completed tasks",
+    "READY_TO_WORK": "Ready to work!",
+    "TIME_ESTIMATED": "Time Estimated:",
+    "WITHOUT_BREAK": "Without break:",
+    "WORKING_TODAY": "Working today:"
   },
-  "ps": {
-    "projectSettings": "Project Specific Settings",
-    "globalSettings": "Global Settings"
+  "PS": {
+    "PROJECT_SETTINGS": "Project Specific Settings",
+    "GLOBAL_SETTINGS": "Global Settings"
   },
-  "pds": {
-    "back": "Wait I forgot something!",
-    "celebrate": "Take a moment to <i>celebrate!</i>",
-    "summaryFor": "Daily Summary for {{dayStr}}",
-    "startEnd": "Start – End",
-    "tasksCompleted": "Tasks Completed",
-    "timeSpentAndEstimateLabel": "Time Spent / Estimated",
-    "timeSpentEstimateTitle": "Time Spent: Total time spent today. Archived tasks not included. – Time Estimated: Time estimated for tasks worked on today minus the time already spent with them on other days.",
-    "breakLabel": "Breaks (nr / time)",
-    "evaluation": "Evaluation",
-    "week": "Week",
-    "googleSheet": "Google Sheet",
-    "today": "Today",
-    "taskList": "Task List",
-    "noTasks": "There are no tasks for this day",
-    "roundTimeSpent": "Round Time Spent",
-    "roundTimeSpentTitle": "Round time spent on all tasks. Be careful! You cannot undo this!",
-    "exportTaskList": "Export Task List",
-    "roundTimeWarning": "!!! Be careful this cannot be undone !!!",
-    "round5m": "Round all tasks to 5 minutes",
-    "roundUp5m": "Round UP all tasks to 5 minutes",
-    "round15m": "Round all tasks to 15 minutes",
-    "roundUp15m": "Round UP all tasks to 15 minutes",
-    "round30m": "Round all tasks to 30 minutes",
-    "roundUp30m": "Round UP all tasks to 30 minutes",
-    "saveAndGoHome": "Save and go home",
-    "clearAllContinue": "Clear all done and continue"
+  "PDS": {
+    "BACK": "Wait I forgot something!",
+    "CELEBRATE": "Take a moment to <i>celebrate!</i>",
+    "SUMMARY_FOR": "Daily Summary for {{dayStr}}",
+    "START_END": "Start – End",
+    "TASKS_COMPLETED": "Tasks Completed",
+    "TIME_SPENT_AND_ESTIMATE_LABEL": "Time Spent / Estimated",
+    "TIME_SPENT_ESTIMATE_TITLE": "Time Spent: Total time spent today. Archived tasks not included. – Time Estimated: Time estimated for tasks worked on today minus the time already spent with them on other days.",
+    "BREAK_LABEL": "Breaks (nr / time)",
+    "EVALUATION": "Evaluation",
+    "WEEK": "Week",
+    "GOOGLE_SHEET": "Google Sheet",
+    "TODAY": "Today",
+    "TASK_LIST": "Task List",
+    "NO_TASKS": "There are no tasks for this day",
+    "ROUND_TIME_SPENT": "Round Time Spent",
+    "ROUND_TIME_SPENT_TITLE": "Round time spent on all tasks. Be careful! You cannot undo this!",
+    "EXPORT_TASK_LIST": "Export Task List",
+    "ROUND_TIME_WARNING": "!!! Be careful this cannot be undone !!!",
+    "ROUND_5M": "Round all tasks to 5 minutes",
+    "ROUND_UP_5M": "Round UP all tasks to 5 minutes",
+    "ROUND_15M": "Round all tasks to 15 minutes",
+    "ROUND_UP_15M": "Round UP all tasks to 15 minutes",
+    "ROUND_30M": "Round all tasks to 30 minutes",
+    "ROUND_UP_30M": "Round UP all tasks to 30 minutes",
+    "SAVE_AND_GO_HOME": "Save and go home",
+    "CLEAR_ALL_CONTINUE": "Clear all done and continue"
   },
   "AAA": "AAA"
 }

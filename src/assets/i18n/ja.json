@@ -1,22 +1,22 @@
 {
-	"fMisc": {
-		"help": "",
-		"isAutMarkParentAsDone": "",
-		"isConfirmBeforeExit": "",
+	"F_MISC": {
+		"HELP": "",
+		"IS_AUTO_MARK_PARENT_AS_DONE": "",
+		"IS_CONFIRM_BEFORE_EXIT": "",
 		"isDisableRemindWhenForgotToFinishDay": "",
 		"isHideNav": "",
 		"isNotifyWhenTimeEstimateExceeded": ""
 	},
-	"ww": {
-		"addMore": "さらに追加",
-		"addSomeTasks": "あなたの一日を計画するためにいくつかのタスクを追加してください！",
-		"estimateRemaining": "EST（東部基準時。残り：",
-		"finishDay": "終了日",
-		"helpProcrastination": "先延ばしにしてください！",
-		"noPlannedTasks": "計画タスクなし",
-		"readyToWork": "",
-		"timeEstimated": "",
-		"withoutBreak": "",
-		"workingToday": ""
+	"WW": {
+		"ADD_MORE": "さらに追加",
+		"ADD_SOME_TASKS": "あなたの一日を計画するためにいくつかのタスクを追加してください！",
+		"ESTIMATE_REMAINING": "EST（東部基準時。残り：",
+		"FINISH_DAY": "終了日",
+		"HELP_PROCRASTINATION": "先延ばしにしてください！",
+		"NO_PLANNED_TASKS": "計画タスクなし",
+		"READY_TO_WORK": "",
+		"TIME_ESTIMATED": "",
+		"WITHOUT_BREAK": "",
+		"WORKING_TODAY": ""
 	}
 }

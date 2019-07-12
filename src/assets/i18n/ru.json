@@ -1,22 +1,22 @@
 {
-	"fMisc": {
-		"help": "",
-		"isAutMarkParentAsDone": "",
-		"isConfirmBeforeExit": "",
+	"F_MISC": {
+		"HELP": "",
+		"IS_AUTO_MARK_PARENT_AS_DONE": "",
+		"IS_CONFIRM_BEFORE_EXIT": "",
 		"isDisableRemindWhenForgotToFinishDay": "",
 		"isHideNav": "",
 		"isNotifyWhenTimeEstimateExceeded": ""
 	},
-	"ww": {
-		"addMore": "Добавить больше",
-		"addSomeTasks": "Добавьте несколько задач, чтобы спланировать свой день!",
-		"estimateRemaining": "Стандартное восточное время. остальной:",
-		"finishDay": "День окончания",
-		"helpProcrastination": "Помогите откладывать!",
-		"noPlannedTasks": "Нет запланированных задач",
-		"readyToWork": "",
-		"timeEstimated": "",
-		"withoutBreak": "",
-		"workingToday": ""
+	"WW": {
+		"ADD_MORE": "Добавить больше",
+		"ADD_SOME_TASKS": "Добавьте несколько задач, чтобы спланировать свой день!",
+		"ESTIMATE_REMAINING": "Стандартное восточное время. остальной:",
+		"FINISH_DAY": "День окончания",
+		"HELP_PROCRASTINATION": "Помогите откладывать!",
+		"NO_PLANNED_TASKS": "Нет запланированных задач",
+		"READY_TO_WORK": "",
+		"TIME_ESTIMATED": "",
+		"WITHOUT_BREAK": "",
+		"WORKING_TODAY": ""
 	}
 }

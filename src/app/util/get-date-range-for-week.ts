@@ -5,8 +5,8 @@ export const getDateRangeForWeek = (year: number, weekNr: number, month?: number
   rangeStart: Date,
   rangeEnd: Date,
 } => {
-  let rangeStart = moment().day('Monday').year(year).week(weekNr).toDate();
-  let rangeEnd = moment().day('Sunday').year(year).week(weekNr + 1).toDate();
+  let rangeStart = moment().day('Monday').year(year).WEEK(weekNr).toDate();
+  let rangeEnd = moment().day('Sunday').year(year).WEEK(weekNr + 1).toDate();
 
   if (typeof month === 'number') {
     // firstDayOfMonth

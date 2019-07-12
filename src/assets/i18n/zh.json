@@ -1,22 +1,22 @@
 {
-	"fMisc": {
-		"help": "",
-		"isAutMarkParentAsDone": "",
-		"isConfirmBeforeExit": "",
+	"F_MISC": {
+		"HELP": "",
+		"IS_AUTO_MARK_PARENT_AS_DONE": "",
+		"IS_CONFIRM_BEFORE_EXIT": "",
 		"isDisableRemindWhenForgotToFinishDay": "",
 		"isHideNav": "",
 		"isNotifyWhenTimeEstimateExceeded": ""
 	},
-	"ww": {
-		"addMore": "添加更多",
-		"addSomeTasks": "添加一些任务来计划你的一天！",
-		"estimateRemaining": "美东时间。其余：",
-		"finishDay": "完成日",
-		"helpProcrastination": "帮助我拖延！",
-		"noPlannedTasks": "没有计划的任务",
-		"readyToWork": "",
-		"timeEstimated": "",
-		"withoutBreak": "",
-		"workingToday": ""
+	"WW": {
+		"ADD_MORE": "添加更多",
+		"ADD_SOME_TASKS": "添加一些任务来计划你的一天！",
+		"ESTIMATE_REMAINING": "美东时间。其余：",
+		"FINISH_DAY": "完成日",
+		"HELP_PROCRASTINATION": "帮助我拖延！",
+		"NO_PLANNED_TASKS": "没有计划的任务",
+		"READY_TO_WORK": "",
+		"TIME_ESTIMATED": "",
+		"WITHOUT_BREAK": "",
+		"WORKING_TODAY": ""
 	}
 }
