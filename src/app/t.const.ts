@@ -28,6 +28,8 @@ export const T = {
     'finishDay': 'ww.finishDay',
     'helpProcrastination': 'ww.helpProcrastination',
     'noPlannedTasks': 'ww.noPlannedTasks',
+    'completedTasks': 'ww.completedTasks',
+    'noCompletedTasks': 'ww.noCompletedTasks',
     'readyToWork': 'ww.readyToWork',
     'timeEstimated': 'ww.timeEstimated',
     'withoutBreak': 'ww.withoutBreak',

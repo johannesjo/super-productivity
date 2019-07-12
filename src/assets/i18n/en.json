@@ -28,6 +28,8 @@
     "finishDay": "Finish Day",
     "helpProcrastination": "Help I'm procrastinating!",
     "noPlannedTasks": "No planned tasks",
+    "completedTasks": "Completed Tasks",
+    "noCompletedTasks": "There are currently no completed tasks",
     "readyToWork": "Ready to work!",
     "timeEstimated": "Time Estimated:",
     "withoutBreak": "Without break:",

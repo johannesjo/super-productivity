@@ -99,8 +99,8 @@
 
       <div *ngIf="!(planningModeService.isPlanningMode$|async) || (taskService.doneTasks$|async)?.length"
            @expand>
-        <h2 class="mat-h2 completed-tasks-heading">Completed Tasks</h2>
-        <task-list [noTasksMsg]="'There are currently no completed tasks'"
+        <h2 class="mat-h2 completed-tasks-heading">{{T.ww.completedTasks|translate}}</h2>
+        <task-list [noTasksMsg]="T.ww.noCompletedTasks|translate"
                    [tasks]="taskService.doneTasks$|async"
                    listId="PARENT"
                    listModelId="DONE"></task-list>
