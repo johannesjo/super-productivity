@@ -142,6 +142,8 @@
     "@ngrx/store-devtools": "^8.1.0",
     "@ngx-formly/core": "^5.1.9",
     "@ngx-formly/material": "^5.1.9",
+    "@ngx-translate/core": "^11.0.1",
+    "@ngx-translate/http-loader": "^4.0.0",
     "@schematics/angular": "^8.0.1",
     "@types/jasmine": "^3.3.12",
     "@types/jasminewd2": "~2.0.3",

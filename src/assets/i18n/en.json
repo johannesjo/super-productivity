@@ -1,3 +1,14 @@
 {
-  "TEST": "xxxxaaa"
+  "ww": {
+    "estimateRemaining": "Est. remaining:",
+    "workingToday": "Working today:",
+    "withoutBreak": "Without break:",
+    "addSomeTasks": "Add some tasks to plan your day!",
+    "timeEstimated": "Time Estimated:",
+    "noPlannedTasks": "No planned tasks",
+    "addMore": "Add more",
+    "finishDay": "Finish Day",
+    "readyToWork": "Ready to work!",
+    "helpProcrastination": "Help I'm procrastinating!"
+  }
 }

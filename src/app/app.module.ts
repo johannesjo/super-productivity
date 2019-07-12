@@ -17,7 +17,7 @@ import {FormlyModule} from '@ngx-formly/core';
 import {FormlyMaterialModule} from '@ngx-formly/material';
 import {PagesModule} from './pages/pages.module';
 import {MainHeaderModule} from './core-ui/main-header/main-header.module';
-import {HttpClientModule} from '@angular/common/http';
+import {HttpClient, HttpClientModule} from '@angular/common/http';
 import {MatSidenavModule} from '@angular/material/sidenav';
 import {TasksModule} from './features/tasks/tasks.module';
 import {TimeTrackingModule} from './features/time-tracking/time-tracking.module';
@@ -30,7 +30,10 @@ import {GlobalErrorHandler} from './core/error-handler/global-error-handler.clas
 import {MyHammerConfig} from '../hammer-config.class';
 import {ProcrastinationModule} from './features/procrastination/procrastination.module';
 import {TaskRepeatCfgModule} from './features/task-repeat-cfg/task-repeat-cfg.module';
+import {TranslateLoader, TranslateModule, TranslateService} from '@ngx-translate/core';
+import {TranslateHttpLoader} from '@ngx-translate/http-loader';
 
+// NOTE: export required for aot to work
 export function createTranslateLoader(http: HttpClient) {
   return new TranslateHttpLoader(http, './assets/i18n/', '.json');
 }
@@ -82,10 +85,10 @@ export function createTranslateLoader(http: HttpClient) {
     TranslateModule.forRoot({
       loader: {
         provide: TranslateLoader,
-        useFactory: (createTranslateLoader),
+        useFactory: createTranslateLoader,
         deps: [HttpClient]
       }
-    }),
+    })
   ],
   bootstrap: [AppComponent],
   providers: [
@@ -94,4 +97,10 @@ export function createTranslateLoader(http: HttpClient) {
   ],
 })
 export class AppModule {
+  constructor(
+    private _translateService: TranslateService,
+  ) {
+    this._translateService.setDefaultLang('en');
+    this._translateService.use('en');
+  }
 }

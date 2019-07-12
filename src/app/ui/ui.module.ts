@@ -62,6 +62,7 @@ import {ChipListInputComponent} from './chip-list-input/chip-list-input.componen
 import {ValidationModule} from './validation/validation.module';
 import {OwlDateTimeModule, OwlNativeDateTimeModule} from 'ng-pick-datetime';
 import {FullPageSpinnerComponent} from './full-page-spinner/full-page-spinner.component';
+import {TranslateModule} from '@ngx-translate/core';
 
 @NgModule({
   imports: [
@@ -116,6 +117,7 @@ import {FullPageSpinnerComponent} from './full-page-spinner/full-page-spinner.co
     ValidationModule,
     OwlDateTimeModule,
     OwlNativeDateTimeModule,
+    TranslateModule,
   ],
   declarations: [
     DurationFromStringPipe,
@@ -220,6 +222,7 @@ import {FullPageSpinnerComponent} from './full-page-spinner/full-page-spinner.co
     FormlyMaterialModule,
     MarkdownModule,
     ValidationModule,
+    TranslateModule,
   ]
 })
 export class UiModule {
