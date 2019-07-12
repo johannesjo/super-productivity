@@ -1,36 +1,36 @@
 export const T = {
   'g': {
-    'save': 'save'
+    'save': 'g.save'
   },
   'fLang': {
-    'label': 'Select Language',
-    'en': 'en',
-    'de': 'de',
-    'tr': 'tr',
-    'fr': 'fr',
-    'ar': 'ar',
-    'zh': 'zh',
-    'ru': 'ru',
-    'ja': 'ja'
+    'label': 'fLang.label',
+    'en': 'fLang.en',
+    'de': 'fLang.de',
+    'tr': 'fLang.tr',
+    'fr': 'fLang.fr',
+    'ar': 'fLang.ar',
+    'zh': 'fLang.zh',
+    'ru': 'fLang.ru',
+    'ja': 'fLang.ja'
   },
   'fMisc': {
-    'help': 'help',
-    'isAutMarkParentAsDone': 'isAutMarkParentAsDone',
-    'isConfirmBeforeExit': 'isConfirmBeforeExit',
-    'isDisableRemindWhenForgotToFinishDay': 'isDisableRemindWhenForgotToFinishDay',
-    'isHideNav': 'isHideNav',
-    'isNotifyWhenTimeEstimateExceeded': 'isNotifyWhenTimeEstimateExceeded'
+    'help': 'fMisc.help',
+    'isAutMarkParentAsDone': 'fMisc.isAutMarkParentAsDone',
+    'isConfirmBeforeExit': 'fMisc.isConfirmBeforeExit',
+    'isDisableRemindWhenForgotToFinishDay': 'fMisc.isDisableRemindWhenForgotToFinishDay',
+    'isHideNav': 'fMisc.isHideNav',
+    'isNotifyWhenTimeEstimateExceeded': 'fMisc.isNotifyWhenTimeEstimateExceeded'
   },
   'ww': {
-    'addMore': 'addMore',
-    'addSomeTasks': 'addSomeTasks',
-    'estimateRemaining': 'estimateRemaining',
-    'finishDay': 'finishDay',
-    'helpProcrastination': 'helpProcrastination',
-    'noPlannedTasks': 'noPlannedTasks',
-    'readyToWork': 'readyToWork',
-    'timeEstimated': 'timeEstimated',
-    'withoutBreak': 'withoutBreak',
-    'workingToday': 'workingToday'
+    'addMore': 'ww.addMore',
+    'addSomeTasks': 'ww.addSomeTasks',
+    'estimateRemaining': 'ww.estimateRemaining',
+    'finishDay': 'ww.finishDay',
+    'helpProcrastination': 'ww.helpProcrastination',
+    'noPlannedTasks': 'ww.noPlannedTasks',
+    'readyToWork': 'ww.readyToWork',
+    'timeEstimated': 'ww.timeEstimated',
+    'withoutBreak': 'ww.withoutBreak',
+    'workingToday': 'ww.workingToday'
   }
 };

@@ -5,19 +5,19 @@ console.log(path);
 const _tr = fs.readFileSync(path);
 const tr = JSON.parse(_tr);
 
-const parse = (o) => {
+const parse = (o, pref = '') => {
   return Object.keys(o).reduce((acc, key) => {
     console.log(key);
 
     if (typeof o[key] === 'object') {
       return {
         ...acc,
-        [key]: parse(o[key]),
+        [key]: parse(o[key], key + '.'),
       };
     } else if (typeof o[key] === 'string') {
       return {
         ...acc,
-        [key]: key,
+        [key]: pref + key,
       };
     } else {
       throw 'Invalid Data';
