@@ -34,7 +34,7 @@ interface MatFormlyFieldConfig extends FormlyFieldConfig {
       [style.width]="'100%'">
       <ng-container #fieldComponent></ng-container>
       <mat-label *ngIf="to.label && to.hideLabel !== true">
-        {{ to.label }}
+        {{ to.label|translate }}
         <span *ngIf="to.required && to.hideRequiredMarker !== true"
               class="mat-form-field-required-marker">*</span>
       </mat-label>

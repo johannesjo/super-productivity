@@ -35,7 +35,7 @@ import {FieldType} from '../../form-field';
         </ng-container>
         <ng-container *ngFor="let item of selectOptions">
           <mat-optgroup *ngIf="item.group"
-                        [label]="item.label">
+                        [label]="item.label|translate">
             <mat-option *ngFor="let child of item.group"
                         [value]="child.value"
                         [disabled]="child.disabled">

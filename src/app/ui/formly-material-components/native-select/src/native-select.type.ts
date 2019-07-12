@@ -19,7 +19,7 @@ import {MatInput} from '@angular/material/input';
           <option *ngFor="let child of item.group"
                   [ngValue]="child.value"
                   [disabled]="child.disabled">
-            {{ child.label }}
+            {{ child.label|translate }}
           </option>
         </optgroup>
         <option *ngIf="!item.group"
