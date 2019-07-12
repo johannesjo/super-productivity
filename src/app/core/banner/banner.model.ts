@@ -5,6 +5,7 @@ export enum BannerId {
   GlobalError = 'GlobalError',
   JiraUnblock = 'JiraUnblock',
   InstallWebApp = 'InstallWebApp',
+  TimeEstimateExceeded = 'TimeEstimateExceeded',
 }
 
 export type BannerType = 'ERROR';

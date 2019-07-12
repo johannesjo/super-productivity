@@ -36,6 +36,8 @@ import {truncate} from '../../../util/truncate';
 import {roundDurationVanilla} from '../../../util/round-duration';
 import {GlobalConfigService} from '../../config/global-config.service';
 import {TaskRepeatCfgActionTypes} from '../../task-repeat-cfg/store/task-repeat-cfg.actions';
+import {BannerService} from '../../../core/banner/banner.service';
+import {BannerId} from '../../../core/banner/banner.model';
 
 // TODO send message to electron when current task changes here
 
@@ -215,8 +217,8 @@ export class TaskEffects {
       ofType(
         TaskActionTypes.AddTimeSpent,
       ),
-      // show every 1 minute max
-      throttleTime(60000),
+      // refresh every 10 minute max
+      throttleTime(10 * 60 * 1000),
       withLatestFrom(
         this._store$.pipe(select(selectCurrentTask)),
         this._store$.pipe(select(selectConfigFeatureState)),
@@ -409,6 +411,7 @@ export class TaskEffects {
               private _notifyService: NotifyService,
               private _taskService: TaskService,
               private _configService: GlobalConfigService,
+              private _bannerService: BannerService,
               private _reminderService: ReminderService,
               private _electronService: ElectronService,
               private _persistenceService: PersistenceService) {
@@ -497,20 +500,17 @@ export class TaskEffects {
         body: `You exceeded your estimated time for "${truncate(ct.title)}".`,
       });
 
-      this._store$.dispatch(new SnackOpen({
+      this._bannerService.open({
         msg: `Time estimate exceeded for "${truncate(ct.title)}"`,
-        actionStr: 'Add 1/2 hour',
-        config: {duration: 60 * 1000},
-        actionId: TaskActionTypes.UpdateTask,
-        actionPayload: {
-          task: {
-            id: ct.id,
-            changes: {
-              timeEstimate: (ct.timeSpent + 30 * 60000)
-            }
-          }
+        id: BannerId.TimeEstimateExceeded,
+        ico: 'timer',
+        action: {
+          label: 'Add 1/2 hour',
+          fn: () => this._taskService.update(ct.id, {
+            timeEstimate: (ct.timeSpent + 30 * 60000)
+          })
         }
-      }));
+      });
     }
   }
 
