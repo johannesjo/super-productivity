@@ -10,6 +10,7 @@ import {TaskService} from '../../features/tasks/task.service';
 import {GlobalConfigService} from '../../features/config/global-config.service';
 import {PomodoroService} from '../../features/pomodoro/pomodoro.service';
 import {Project} from '../../features/project/project.model';
+import {T} from '../../t.const';
 
 @Component({
   selector: 'main-header',
@@ -18,6 +19,7 @@ import {Project} from '../../features/project/project.model';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MainHeaderComponent implements OnInit {
+  T = T;
   progressCircleRadius = 13;
   circumference = this.progressCircleRadius * Math.PI * 2;
   isProjectMenuDisabled = false;

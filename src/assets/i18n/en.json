@@ -3,6 +3,23 @@
     "SAVE": "Save",
     "DISMISS": "Dismiss"
   },
+  "MH": {
+    "GO_TO_TASK_LIST": "Go to task list",
+    "TASK_LIST": "Task List",
+    "WORKLOG": "Worklog",
+    "METRICS": "Metrics",
+    "PROJECTS": "Projects",
+    "SETTINGS": "Settings",
+    "PROCRASTINATE": "Procrastinate",
+    "PROJECT_MENU": "Project Menu",
+    "MANAGE_PROJECTS": "Manage Projects",
+    "CREATE_PROJECT": "Create Project",
+    "TASKS": "Tasks",
+    "ADD_NEW_TASK": "Add new Task",
+    "TOGGLE_SHOW_BOOKMARKS": "Show/Hide Bookmarks",
+    "TOGGLE_SHOW_NOTES": "Show/Hide Project Notes",
+    "TOGGLE_TRACK_TIME": "Start/Stop tracking time"
+  },
   "F_LANG": {
     "LABEL": "Please select a language",
     "EN": "English",
