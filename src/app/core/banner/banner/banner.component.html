@@ -16,7 +16,7 @@
     <button (click)="dismiss(banner.id)"
             *ngIf="!banner.action2"
             color="primary"
-            mat-button>Dismiss
+            mat-button>{{T.G.DISMISS|translate}}
     </button>
 
     <button (click)="action(banner.id, banner.action)"
