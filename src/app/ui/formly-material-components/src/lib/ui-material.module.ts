@@ -8,6 +8,7 @@ import {FormlyMatCheckboxModule} from '../../checkbox';
 import {FormlyMatMultiCheckboxModule} from '../../multicheckbox';
 import {FormlyMatSelectModule} from '../../select';
 import {TranslateModule} from '@ngx-translate/core';
+import {FormlyMatToggleModule} from '../../toggle';
 
 @NgModule({
   imports: [
@@ -18,6 +19,7 @@ import {TranslateModule} from '@ngx-translate/core';
     FormlyMatCheckboxModule,
     FormlyMatMultiCheckboxModule,
     FormlyMatSelectModule,
+    FormlyMatToggleModule,
     TranslateModule,
   ],
 })

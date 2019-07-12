@@ -1,5 +1,5 @@
 import {Component, ViewChild} from '@angular/core';
-import {FieldType} from '@ngx-formly/material/form-field';
+import {FieldType} from '../../form-field';
 import {MatSlideToggle} from '@angular/material/slide-toggle';
 
 @Component({

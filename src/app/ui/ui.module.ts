@@ -44,7 +44,6 @@ import {SplitModule} from '../pages/work-view/split/split.module';
 import {SimpleDownloadDirective} from './simple-download/simple-download.directive';
 import {Angular2PromiseButtonModule} from 'angular2-promise-buttons';
 import {DialogConfirmComponent} from './dialog-confirm/dialog-confirm.component';
-import {FormlyMatToggleModule} from '@ngx-formly/material/toggle';
 import {InputDurationFormlyComponent} from './duration/input-duration-formly/input-duration-formly.component';
 import {EnlargeImgDirective} from './enlarge-img/enlarge-img.directive';
 import {DragulaModule} from 'ng2-dragula';
@@ -80,7 +79,6 @@ import {FormlyMaterialModule} from './formly-material-components/src/lib/ui-mate
       }]
     }),
     FormlyMaterialModule,
-    FormlyMatToggleModule,
 
     Angular2PromiseButtonModule.forRoot({
       // handleCurrentBtnOnly: true,

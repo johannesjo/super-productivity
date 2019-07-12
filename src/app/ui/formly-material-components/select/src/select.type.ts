@@ -1,6 +1,6 @@
 import {Component} from '@angular/core';
 import {MatSelectChange} from '@angular/material/select';
-import {FieldType} from '@ngx-formly/material/form-field';
+import {FieldType} from '../../form-field';
 
 @Component({
   selector: 'formly-field-mat-select',

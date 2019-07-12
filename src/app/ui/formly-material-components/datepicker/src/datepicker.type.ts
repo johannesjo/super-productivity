@@ -1,6 +1,6 @@
 import {AfterViewInit, Component, TemplateRef, ViewChild} from '@angular/core';
 import {ɵdefineHiddenProp as defineHiddenProp} from '@ngx-formly/core';
-import {FieldType} from '@ngx-formly/material/form-field';
+import {FieldType} from '../../form-field';
 import {MatInput} from '@angular/material/input';
 import {MatDatepickerInput} from '@angular/material/datepicker';
 

@@ -3,7 +3,7 @@ import {CommonModule} from '@angular/common';
 import {FormlyModule} from '@ngx-formly/core';
 import {ReactiveFormsModule} from '@angular/forms';
 
-import {FormlyMatFormFieldModule} from '@ngx-formly/material/form-field';
+import {FormlyMatFormFieldModule} from '../../form-field';
 import {MatCheckboxModule} from '@angular/material/checkbox';
 
 import {FormlyFieldCheckbox} from './checkbox.type';

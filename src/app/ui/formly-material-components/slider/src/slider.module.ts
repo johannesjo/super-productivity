@@ -3,7 +3,7 @@ import {CommonModule} from '@angular/common';
 import {FormlyModule} from '@ngx-formly/core';
 import {ReactiveFormsModule} from '@angular/forms';
 import {MatSliderModule} from '@angular/material/slider';
-import {FormlyMatFormFieldModule} from '@ngx-formly/material/form-field';
+import {FormlyMatFormFieldModule} from '../../form-field';
 
 import {FormlySliderTypeComponent} from './slider.type';
 import {TranslateModule} from '@ngx-translate/core';

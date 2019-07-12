@@ -1,5 +1,5 @@
 import {AfterViewInit, Component, OnDestroy, ViewChild} from '@angular/core';
-import {FieldType} from '@ngx-formly/material/form-field';
+import {FieldType} from '../../form-field';
 import {MatCheckbox} from '@angular/material/checkbox';
 import {FocusMonitor} from '@angular/cdk/a11y';
 
