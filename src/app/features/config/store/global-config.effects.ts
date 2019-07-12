@@ -10,6 +10,7 @@ import {ElectronService} from 'ngx-electron';
 import {KeyboardConfig} from '../global-config.model';
 import {IPC_REGISTER_GLOBAL_SHORTCUTS_EVENT} from '../../../../../electron/ipc-events.const';
 import {IS_ELECTRON} from '../../../app.constants';
+import {TranslateService} from '@ngx-translate/core';
 
 @Injectable()
 export class GlobalConfigEffects {
@@ -64,10 +65,36 @@ export class GlobalConfigEffects {
       }),
     );
 
+  @Effect({dispatch: false}) selectLanguageOnChange: any = this._actions$
+    .pipe(
+      ofType(
+        GlobalConfigActionTypes.UpdateGlobalConfigSection,
+      ),
+      filter((action: UpdateGlobalConfigSection) => action.payload.sectionKey === 'lang'),
+      filter((action: UpdateGlobalConfigSection) => action.payload.sectionCfg && action.payload.sectionCfg['lng']),
+      tap((action: UpdateGlobalConfigSection) => {
+        const lng = action.payload.sectionCfg['lng'];
+        this._translationService.use(lng);
+      })
+    );
+
+  @Effect({dispatch: false}) selectLanguageOnLoad: any = this._actions$
+    .pipe(
+      ofType(
+        GlobalConfigActionTypes.LoadGlobalConfig,
+      ),
+      filter((action: LoadGlobalConfig) => action.payload.cfg && action.payload.cfg.lang && !!action.payload.cfg.lang.lng),
+      tap((action: LoadGlobalConfig) => {
+        const lng = action.payload.cfg.lang.lng;
+        this._translationService.use(lng);
+      })
+    );
+
   constructor(
     private _actions$: Actions,
     private _persistenceService: PersistenceService,
     private _electronService: ElectronService,
+    private _translationService: TranslateService,
     private _store: Store<any>
   ) {
   }

@@ -98,7 +98,8 @@ export class AppModule {
   constructor(
     private _translateService: TranslateService,
   ) {
+    const lng = this._translateService.getBrowserLang();
     this._translateService.setDefaultLang('en');
-    this._translateService.use('en');
+    this._translateService.use(lng);
   }
 }
