@@ -1,24 +1,24 @@
 <div class="page-wrapper">
   <div *ngIf="isForToday"
        style="text-align: center;">
-    <a aria-label="Work View"
-       class="back-btn"
+    <a class="back-btn"
        mat-button=""
        routerLink="/work-view">
       <mat-icon>chevron_left</mat-icon>
-      Wait I forgot something!
+      {{T.pds.back|translate}}
       <!--<mat-icon>playlist_play</mat-icon>-->
     </a>
   </div>
 
   <h1 class="done-headline mat-headline">
-    <span *ngIf="isForToday">Take a moment to <i class="TODO-animate">celebrate!</i></span>
-    <span *ngIf="!isForToday">Daily Summary for {{dayStr}}</span>
+    <span *ngIf="isForToday"
+          [innerHTML]="T.pds.celebrate|translate"></span>
+    <span *ngIf="!isForToday">{{T.pds.summaryFor|translate:{dayStr:dayStr} }}</span>
   </h1>
   <div class="daily-summary-summary">
     <div class="summary-point">
       <mat-icon>schedule</mat-icon>
-      <div class="summary-text">Start – End
+      <div class="summary-text">{{T.pds.startEnd|translate}}
         <div class="summary-val">
           <inline-input (changed)="updateWorkStart($event)"
                         [type]="'time'"
@@ -34,7 +34,7 @@
     </div>
     <div class="summary-point">
       <mat-icon>check</mat-icon>
-      <div class="summary-text">Tasks Completed
+      <div class="summary-text">{{T.pds.tasksCompleted|translate}}
         <div class="summary-val">
           <span [innerHtml]="(nrOfDoneTasks$|async)"></span> / <span
           [innerHtml]="(totalNrOfTasks$|async)"></span>
@@ -42,9 +42,9 @@
       </div>
     </div>
     <div class="summary-point"
-         title="Time Spent: Total time spent today. Archived tasks not included. – Time Estimated: Time estimated for tasks worked on today minus the time already spent with them on other days.">
+         [title]="T.pds.timeSpentEstimateTitle|translate">
       <mat-icon>timer</mat-icon>
-      <div class="summary-text">Time Spent / Estimated
+      <div class="summary-text">{{T.pds.timeSpentAndEstimateLabel|translate}}
         <div class="summary-val">{{timeWorked$|async|msToClockString}}
           / {{estimatedOnTasksWorkedOn$|async|msToClockString}}</div>
       </div>
@@ -53,7 +53,7 @@
     <div *ngIf="(isBreakTrackingSupport$|async)"
          class="summary-point">
       <mat-icon>free_breakfast</mat-icon>
-      <div class="summary-text">Breaks (nr / time)
+      <div class="summary-text">{{T.pds.breakLabel|translate}}
         <div class="summary-val">{{breakNr$|async}} / {{breakTime$|async|msToClockString}}</div>
       </div>
     </div>
@@ -62,7 +62,7 @@
   <mat-tab-group (selectedIndexChange)="onTabIndexChange($event)"
                  [selectedIndex]="selectedTabIndex"
                  dynamicHeight>
-    <mat-tab label="Evaluation">
+    <mat-tab [label]="T.pds.evaluation|translate">
       <section class="tab-inner">
         <evaluation-sheet (save)="onEvaluationSave()"
                           [day]="(dayStr$|async)"></evaluation-sheet>
@@ -70,12 +70,12 @@
     </mat-tab>
 
     <mat-tab [label]="(isForToday)
-      ? 'Today'
-      : 'Task List'">
+      ? (T.pds.today|translate)
+      : (T.pds.taskList|translate)">
       <section class="tab-inner">
 
         <ng-template #noTasks>
-          <p>There are for this day</p>
+          <p>{{T.pds.noTasks|translate}}</p>
         </ng-template>
 
         <ng-container *ngIf="(hasTasksForToday$|async); else noTasks">
@@ -84,45 +84,45 @@
           <div style="text-align: center; margin-top: 8px; margin-bottom: 16px;">
             <button [matMenuTriggerFor]="roundTimeActions"
                     mat-button=""
-                    title="Round time spent on all tasks. Be careful! You cannot undo this!">
+                    [title]="T.pds.roundTimeSpentTitle|translate">
               <mat-icon>restore</mat-icon>
-              Round Time Spent
+              {{T.pds.roundTimeSpent|translate}}
             </button>
             <button (click)="showExportModal()"
                     *ngIf="isForToday"
                     mat-button="">
               <mat-icon>call_made</mat-icon>
-              Export Task List
+              {{T.pds.exportTaskList|translate}}
             </button>
 
             <mat-menu #roundTimeActions="matMenu">
               <button mat-menu-item
                       style="color: red;">
-                !!! Be careful this cannot be undone !!!
+                {{T.pds.roundTimeWarning|translate}}
               </button>
               <button (click)="roundTimeForTasks('5M')"
                       mat-menu-item>
-                Round all tasks to 5 minutes
+                {{T.pds.round5m|translate}}
               </button>
               <button (click)="roundTimeForTasks('5M', true)"
                       mat-menu-item>
-                Round UP all tasks to 5 minutes
+                {{T.pds.roundUp5m|translate}}
               </button>
               <button (click)="roundTimeForTasks('QUARTER')"
                       mat-menu-item>
-                Round all tasks to 15 minutes
+                {{T.pds.round15m|translate}}
               </button>
               <button (click)="roundTimeForTasks('QUARTER', true)"
                       mat-menu-item>
-                Round UP all tasks to 15 minutes
+                {{T.pds.roundUp15m|translate}}
               </button>
               <button (click)="roundTimeForTasks('HALF')"
                       mat-menu-item>
-                Round all tasks to 30 minutes
+                {{T.pds.round30m|translate}}
               </button>
               <button (click)="roundTimeForTasks('HALF', true)"
                       mat-menu-item>
-                Round UP all tasks to 30 minutes
+                {{T.pds.roundUp30m|translate}}
               </button>
             </mat-menu>
           </div>
@@ -133,12 +133,12 @@
       </section>
     </mat-tab>
     <mat-tab *ngIf="isForToday"
-             label="Week">
+             [label]="T.pds.week|translate">
       <section class="tab-inner full-width">
         <worklog-week></worklog-week>
       </section>
     </mat-tab>
-    <mat-tab label="Google Sheet">
+    <mat-tab [label]="T.pds.googleSheet|translate">
       <section class="tab-inner">
         <google-export-time [day]="(dayStr$|async)"></google-export-time>
       </section>
@@ -154,7 +154,7 @@
               color="primary"
               mat-raised-button="">
         <mat-icon>wb_sunny</mat-icon>
-        Save and go home
+        {{T.pds.saveAndGoHome|translate}}
       </button>
       <button (click)="finishDay()"
               *ngIf="!isForToday"
@@ -162,7 +162,7 @@
               color="primary"
               mat-raised-button="">
         <mat-icon>wb_sunny</mat-icon>
-        Clear all done and continue
+        {{T.pds.clearAllContinue|translate}}Clear all done and continue
       </button>
     </div>
   </section>

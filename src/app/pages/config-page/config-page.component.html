@@ -2,7 +2,7 @@
 
   <div class="row">
     <div class="settings-col">
-      <h1 class="md-subhead">Project Specific Settings</h1>
+      <h1 class="md-subhead">{{T.ps.projectSettings|translate}}</h1>
 
       <div>
         <section class="config-section mat-elevation-z2">
@@ -31,7 +31,7 @@
 
     <div *ngIf="globalCfg"
          class="settings-col">
-      <h1 class="md-subhead">Global Config</h1>
+      <h1 class="md-subhead">{{T.ps.globalSettings|translate}}</h1>
       <div *ngFor="let section of globalConfigFormCfg; trackBy:trackBySectionKey;">
         <section class="config-section mat-elevation-z2">
           <config-section (save)="saveGlobalCfg($event)"

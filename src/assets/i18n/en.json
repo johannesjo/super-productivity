@@ -1,6 +1,7 @@
 {
   "g": {
-    "save": "Save"
+    "save": "Save",
+    "dismiss": "Dismiss"
   },
   "fLang": {
     "label": "Please select a language",
@@ -34,5 +35,38 @@
     "timeEstimated": "Time Estimated:",
     "withoutBreak": "Without break:",
     "workingToday": "Working today:"
-  }
+  },
+  "ps": {
+    "projectSettings": "Project Specific Settings",
+    "globalSettings": "Global Settings"
+  },
+  "pds": {
+    "back": "Wait I forgot something!",
+    "celebrate": "Take a moment to <i>celebrate!</i>",
+    "summaryFor": "Daily Summary for {{dayStr}}",
+    "startEnd": "Start – End",
+    "tasksCompleted": "Tasks Completed",
+    "timeSpentAndEstimateLabel": "Time Spent / Estimated",
+    "timeSpentEstimateTitle": "Time Spent: Total time spent today. Archived tasks not included. – Time Estimated: Time estimated for tasks worked on today minus the time already spent with them on other days.",
+    "breakLabel": "Breaks (nr / time)",
+    "evaluation": "Evaluation",
+    "week": "Week",
+    "googleSheet": "Google Sheet",
+    "today": "Today",
+    "taskList": "Task List",
+    "noTasks": "There are no tasks for this day",
+    "roundTimeSpent": "Round Time Spent",
+    "roundTimeSpentTitle": "Round time spent on all tasks. Be careful! You cannot undo this!",
+    "exportTaskList": "Export Task List",
+    "roundTimeWarning": "!!! Be careful this cannot be undone !!!",
+    "round5m": "Round all tasks to 5 minutes",
+    "roundUp5m": "Round UP all tasks to 5 minutes",
+    "round15m": "Round all tasks to 15 minutes",
+    "roundUp15m": "Round UP all tasks to 15 minutes",
+    "round30m": "Round all tasks to 30 minutes",
+    "roundUp30m": "Round UP all tasks to 30 minutes",
+    "saveAndGoHome": "Save and go home",
+    "clearAllContinue": "Clear all done and continue"
+  },
+  "AAA": "AAA"
 }

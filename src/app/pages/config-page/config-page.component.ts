@@ -20,6 +20,7 @@ import {DEFAULT_JIRA_CFG} from '../../features/issue/jira/jira.const';
 import {DEFAULT_GITHUB_CFG} from '../../features/issue/github/github.const';
 import {IS_ELECTRON} from '../../app.constants';
 import {environment} from '../../../environments/environment';
+import {T} from '../../t.const';
 
 @Component({
   selector: 'config-page',
@@ -28,6 +29,7 @@ import {environment} from '../../../environments/environment';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ConfigPageComponent implements OnInit, OnDestroy {
+  T = T;
   basicProjectSettingsFormCfg: ConfigFormSection;
   projectConfigFormCfg: ConfigFormConfig;
   issueIntegrationFormCfg: ConfigFormConfig;

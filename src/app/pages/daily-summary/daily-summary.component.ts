@@ -19,6 +19,7 @@ import {ProjectService} from '../../features/project/project.service';
 import {getWorklogStr} from '../../util/get-work-log-str';
 import * as moment from 'moment-mini';
 import {RoundTimeOption} from '../../features/project/project.model';
+import {T} from '../../t.const';
 
 const SUCCESS_ANIMATION_DURATION = 500;
 
@@ -29,6 +30,8 @@ const SUCCESS_ANIMATION_DURATION = 500;
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DailySummaryComponent implements OnInit, OnDestroy {
+  T = T;
+
   cfg = {
     isBlockFinishDayUntilTimeTimeTracked: false
   };
