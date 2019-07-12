@@ -13,8 +13,7 @@
        tabindex="1"
        target="_blank">
       <ng-container *ngIf="attachment?.type!=='IMG' || isError[i]">
-        <mat-icon *ngIf="attachment?.icon"
-                  aria-label="Open">{{attachment?.icon}}
+        <mat-icon *ngIf="attachment?.icon">{{attachment?.icon}}
         </mat-icon>
         <div class="title">{{attachment?.title || attachment?.path}}</div>
       </ng-container>
@@ -44,4 +43,4 @@
     </div>
   </li>
 </ul>
-<div *ngIf="!attachments?.length">There are currently no attachments</div>
+<div *ngIf="!attachments?.length">{{T.ATTACHMENT_LIST.NO_ATTACHMENTS|translate}}</div>
