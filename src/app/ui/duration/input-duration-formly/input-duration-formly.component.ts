@@ -1,6 +1,6 @@
 import {ChangeDetectionStrategy, Component, ViewChild} from '@angular/core';
 import {MatInput} from '@angular/material/input';
-import {FieldType} from '../../formly-material-components/form-field';
+import {FieldType} from '@ngx-formly/material';
 
 @Component({
   selector: 'input-duration-formly',

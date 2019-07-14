@@ -1,4 +1,4 @@
-import {NgModule} from '@angular/core';
+import {ErrorHandler, NgModule} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {InputDurationDirective} from './duration/input-duration.directive';
 import {DurationFromStringPipe} from './duration/duration-from-string.pipe';
@@ -31,7 +31,7 @@ import {MatToolbarModule} from '@angular/material/toolbar';
 import {MatTooltipModule} from '@angular/material/tooltip';
 import {MarkdownModule, MarkdownService} from 'ngx-markdown';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
-import {FormlyModule} from '@ngx-formly/core';
+import {FORMLY_CONFIG, FormlyModule} from '@ngx-formly/core';
 import {ThemeSelectComponent} from './theme-select/theme-select.component';
 import {MsToStringPipe} from './duration/ms-to-string.pipe';
 import {StringToMsPipe} from './duration/string-to-ms.pipe';
@@ -60,8 +60,12 @@ import {ChipListInputComponent} from './chip-list-input/chip-list-input.componen
 import {ValidationModule} from './validation/validation.module';
 import {OwlDateTimeModule, OwlNativeDateTimeModule} from 'ng-pick-datetime';
 import {FullPageSpinnerComponent} from './full-page-spinner/full-page-spinner.component';
-import {TranslateModule} from '@ngx-translate/core';
-import {FormlyMaterialModule} from './formly-material-components/src/lib/ui-material';
+import {TranslateModule, TranslateService} from '@ngx-translate/core';
+import {FormlyMaterialModule} from '@ngx-formly/material';
+import {GlobalErrorHandler} from '../core/error-handler/global-error-handler.class';
+import {HAMMER_GESTURE_CONFIG} from '@angular/platform-browser';
+import {MyHammerConfig} from '../../hammer-config.class';
+import {registerTranslateExtension} from './formly-translate-extension/formly-translate-extension';
 
 
 @NgModule({
@@ -222,7 +226,17 @@ import {FormlyMaterialModule} from './formly-material-components/src/lib/ui-mate
     MarkdownModule,
     ValidationModule,
     TranslateModule,
-  ]
+  ],
+  providers: [
+    {provide: ErrorHandler, useClass: GlobalErrorHandler},
+    {provide: HAMMER_GESTURE_CONFIG, useClass: MyHammerConfig},
+    {
+      provide: FORMLY_CONFIG,
+      multi: true,
+      useFactory: registerTranslateExtension,
+      deps: [TranslateService],
+    },
+  ],
 })
 export class UiModule {
   constructor(private _markdownService: MarkdownService) {

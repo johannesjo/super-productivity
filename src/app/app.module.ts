@@ -13,7 +13,7 @@ import {UiModule} from './ui/ui.module';
 import {reducers} from './root-store';
 import {CoreModule} from './core/core.module';
 import {ReactiveFormsModule} from '@angular/forms';
-import {FormlyModule} from '@ngx-formly/core';
+import {FORMLY_CONFIG, FormlyModule} from '@ngx-formly/core';
 import {PagesModule} from './pages/pages.module';
 import {MainHeaderModule} from './core-ui/main-header/main-header.module';
 import {HttpClient, HttpClientModule} from '@angular/common/http';
@@ -31,6 +31,7 @@ import {ProcrastinationModule} from './features/procrastination/procrastination.
 import {TaskRepeatCfgModule} from './features/task-repeat-cfg/task-repeat-cfg.module';
 import {TranslateLoader, TranslateModule, TranslateService} from '@ngx-translate/core';
 import {TranslateHttpLoader} from '@ngx-translate/http-loader';
+import {registerTranslateExtension} from './ui/formly-translate-extension/formly-translate-extension';
 
 // NOTE: export required for aot to work
 export function createTranslateLoader(http: HttpClient) {
@@ -91,7 +92,13 @@ export function createTranslateLoader(http: HttpClient) {
   bootstrap: [AppComponent],
   providers: [
     {provide: ErrorHandler, useClass: GlobalErrorHandler},
-    {provide: HAMMER_GESTURE_CONFIG, useClass: MyHammerConfig}
+    {provide: HAMMER_GESTURE_CONFIG, useClass: MyHammerConfig},
+    {
+      provide: FORMLY_CONFIG,
+      multi: true,
+      useFactory: registerTranslateExtension,
+      deps: [TranslateService],
+    },
   ],
 })
 export class AppModule {
