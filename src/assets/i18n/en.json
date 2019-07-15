@@ -98,6 +98,21 @@
         "ROUND_HOUR": "full hours",
         "SNACK_EQUAL_VALUES": "Current values and the last saved row have equal values, that is probably not what you want.",
         "SNACK_ROW_APPENDED": "Row successfully appended"
+      },
+      "SNACKS": {
+        "SYNCING": "Google Drive: Syncing",
+        "DOWNLOADING_UPDATE": "Google Drive: There is a remote update! Downloading...",
+        "NO_UPDATE_REQUIRED": "Google Drive: No updated required",
+        "ERROR_INITIAL_IMPORT": "Google Drive: Error while trying to import data initially",
+        "MULTIPLE_SYNC_FILES_WITH_SAME_NAME": "Multiple files with the name \"{{newFileName}}\" found. Please delete all but one or choose a different name.",
+        "REMOTE_UP_TO_DATE": "Google Drive: Remote data already up to date",
+        "SUCCESS": "Google Drive: Successfully saved backup",
+        "LOCAL_UP_TO_DATE": "Google Drive: Local data already up to date",
+        "ERROR": "Google Drive – Error:"
+      },
+      "DIALOG": {
+        "CREATE_SYNC_FILE": "Google Drive: No file with the name <strong>\"{{fileName}}\"</strong> was found. <strong>Create</strong> it as sync file on Google Drive?",
+        "USE_EXISTING_SYNC_FILE": "Google Drive: Use <strong>existing</strong> file <strong>\"{{fileName}}\"</strong> as sync file? If not please change the Sync file name."
       }
     }
   },
