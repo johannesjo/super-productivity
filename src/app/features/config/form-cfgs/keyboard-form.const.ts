@@ -1,43 +1,32 @@
 // tslint:disable:max-line-length
 import {ConfigFormSection} from '../global-config.model';
+import {T} from '../../../t.const';
 
 export const KEYBOARD_SETTINGS_FORM_CFG: ConfigFormSection = {
-  title: 'Keyboard Shortcuts',
+  title: T.F_KEYBOARD.TITLE,
   key: 'keyboard',
   /* tslint:disable */
-  help: `<p>Here you can configure all keyboard shortcuts.</p>
-  <p>Click on the text input and enter the desired keyboard combination. Hit enter to save and Escape to abort.</p>
-  <p>There are three types of shortcuts:</p>
-  <ul>
-    <li>
-      <strong>Global shortcuts:</strong> When the app is running it will trigger the action from every other application.
-    </li>
-    <li>
-      <strong>Application level shortcuts:</strong> Will trigger from every screen of the application, but not if you're currently editing a text field.
-    </li>
-    <li>
-      <strong>Task level shortcuts:</strong> They will only trigger if you have selected a task via mouse or keyboard and usually trigger an action specifically related to that one task.
-    </li>
-  </ul>`,
+  help: T.F_KEYBOARD.HELP,
   /* tslint:enable */
   items: [
     // SYSTEM WIDE
     {
       className: 'tpl',
+      // TODO FIND a solution to translate
       template: ' <h3 class="sub-section-heading">Global Shortcuts (system wide)</h3>',
     },
     {
       key: 'globalShowHide',
       type: 'keyboard',
       templateOptions: {
-        label: 'Show/Hide Super Productivity',
+        label: T.F_KEYBOARD.GLOBAL_SHOW_HIDE
       },
     },
     {
       key: 'globalToggleTaskStart',
       type: 'keyboard',
       templateOptions: {
-        label: 'Toggle time tracking for last active task',
+        label: T.F_KEYBOARD.GLOBAL_TOGGLE_TASK_START
       },
     },
     // APP WIDE
@@ -49,105 +38,105 @@ export const KEYBOARD_SETTINGS_FORM_CFG: ConfigFormSection = {
       key: 'addNewTask',
       type: 'keyboard',
       templateOptions: {
-        label: 'Add New Task',
+        label: T.F_KEYBOARD.ADD_NEW_TASK
       },
     },
     {
       key: 'addNewNote',
       type: 'keyboard',
       templateOptions: {
-        label: 'Add new note',
+        label: T.F_KEYBOARD.ADD_NEW_NOTE
       },
     },
     {
       key: 'openProjectNotes',
       type: 'keyboard',
       templateOptions: {
-        label: 'Show/Hide Project Notes',
+        label: T.F_KEYBOARD.OPEN_PROJECT_NOTES
       },
     },
     // {
     //   key: 'openDistractionPanel',
     //   type: 'keyboard',
     //   templateOptions: {
-    //     label: 'Open Distraction Panel',
+    //     label: T.F_KEYBOARD.OPEN_DISTRACTION_PANEL
     //   },
     // },
     // {
     //   key: 'showHelp',
     //   type: 'keyboard',
     //   templateOptions: {
-    //     label: 'Show Help',
+    //     label: T.F_KEYBOARD.SHOW_HELP
     //   },
     // },
     {
       key: 'toggleBookmarks',
       type: 'keyboard',
       templateOptions: {
-        label: 'Show/Hide Bookmark Bar',
+        label: T.F_KEYBOARD.TOGGLE_BOOKMARKS
       },
     },
     {
       key: 'toggleBacklog',
       type: 'keyboard',
       templateOptions: {
-        label: 'Show/Hide Task Backlog',
+        label: T.F_KEYBOARD.TOGGLE_BACKLOG
       },
     },
     {
       key: 'goToWorkView',
       type: 'keyboard',
       templateOptions: {
-        label: 'Go to Work View',
+        label: T.F_KEYBOARD.GO_TO_WORK_VIEW
       },
     },
     {
       key: 'goToFocusMode',
       type: 'keyboard',
       templateOptions: {
-        label: 'Go to Focus Mode',
+        label: T.F_KEYBOARD.GO_TO_FOCUS_MODE
       },
     },
     {
       key: 'goToDailyAgenda',
       type: 'keyboard',
       templateOptions: {
-        label: 'Go to Agenda',
+        label: T.F_KEYBOARD.GO_TO_DAILY_AGENDA
       },
     },
     {
       key: 'goToSettings',
       type: 'keyboard',
       templateOptions: {
-        label: 'Go to Settings',
+        label: T.F_KEYBOARD.GO_TO_SETTINGS
       },
     },
     {
       key: 'focusLastActiveTask',
       type: 'keyboard',
       templateOptions: {
-        label: 'Focus last active task',
+        label: T.F_KEYBOARD.FOCUS_LAST_ACTIVE_TASK
       },
     },
     {
       key: 'zoomIn',
       type: 'keyboard',
       templateOptions: {
-        label: 'Zoom in (Desktop only)',
+        label: T.F_KEYBOARD.ZOOM_IN
       },
     },
     {
       key: 'zoomOut',
       type: 'keyboard',
       templateOptions: {
-        label: 'Zoom out (Desktop only)',
+        label: T.F_KEYBOARD.ZOOM_OUT
       },
     },
     {
       key: 'zoomDefault',
       type: 'keyboard',
       templateOptions: {
-        label: 'Zoom default (Desktop only)',
+        label: T.F_KEYBOARD.ZOOM_DEFAULT
       },
     },
     // TASKS
@@ -161,112 +150,112 @@ export const KEYBOARD_SETTINGS_FORM_CFG: ConfigFormSection = {
       key: 'taskEditTitle',
       type: 'keyboard',
       templateOptions: {
-        label: 'Edit Title',
+        label: T.F_KEYBOARD.TASK_EDIT_TITLE
       },
     },
     {
       key: 'taskToggleAdditionalInfoOpen',
       type: 'keyboard',
       templateOptions: {
-        label: 'Show/Hide additional task info',
+        label: T.F_KEYBOARD.TASK_TOGGLE_ADDITIONAL_INFO_OPEN
       },
     },
     {
       key: 'taskOpenEstimationDialog',
       type: 'keyboard',
       templateOptions: {
-        label: 'Edit estimation / time spent',
+        label: T.F_KEYBOARD.TASK_OPEN_ESTIMATION_DIALOG
       },
     },
     {
       key: 'taskSchedule',
       type: 'keyboard',
       templateOptions: {
-        label: 'Schedule Task',
+        label: T.F_KEYBOARD.TASK_SCHEDULE
       },
     },
     {
       key: 'taskToggleDone',
       type: 'keyboard',
       templateOptions: {
-        label: 'Toggle Done',
+        label: T.F_KEYBOARD.TASK_TOGGLE_DONE
       },
     },
     {
       key: 'taskAddSubTask',
       type: 'keyboard',
       templateOptions: {
-        label: 'Add sub Task',
+        label: T.F_KEYBOARD.TASK_ADD_SUB_TASK
       },
     },
     {
       key: 'taskDelete',
       type: 'keyboard',
       templateOptions: {
-        label: 'Delete Task',
+        label: T.F_KEYBOARD.TASK_DELETE
       },
     },
     {
       key: 'selectPreviousTask',
       type: 'keyboard',
       templateOptions: {
-        label: 'Select previous Task',
+        label: T.F_KEYBOARD.SELECT_PREVIOUS_TASK
       },
     },
     {
       key: 'selectNextTask',
       type: 'keyboard',
       templateOptions: {
-        label: 'Select next Task',
+        label: T.F_KEYBOARD.SELECT_NEXT_TASK
       },
     },
     {
       key: 'moveTaskUp',
       type: 'keyboard',
       templateOptions: {
-        label: 'Move Task up in List',
+        label: T.F_KEYBOARD.MOVE_TASK_UP
       },
     },
     {
       key: 'moveTaskDown',
       type: 'keyboard',
       templateOptions: {
-        label: 'Move Task down in List',
+        label: T.F_KEYBOARD.MOVE_TASK_DOWN
       },
     },
     {
       key: 'moveToBacklog',
       type: 'keyboard',
       templateOptions: {
-        label: 'Move Task to Task Backlog',
+        label: T.F_KEYBOARD.MOVE_TO_BACKLOG
       },
     },
     {
       key: 'moveToTodaysTasks',
       type: 'keyboard',
       templateOptions: {
-        label: 'Move Task to Today\'s Task List',
+        label: T.F_KEYBOARD.MOVE_TO_TODAYS_TASKS
       },
     },
     {
       key: 'expandSubTasks',
       type: 'keyboard',
       templateOptions: {
-        label: 'Expand Sub Tasks',
+        label: T.F_KEYBOARD.EXPAND_SUB_TASKS
       },
     },
     {
       key: 'collapseSubTasks',
       type: 'keyboard',
       templateOptions: {
-        label: 'Collapse Sub Tasks',
+        label: T.F_KEYBOARD.COLLAPSE_SUB_TASKS
       },
     },
     {
       key: 'togglePlay',
       type: 'keyboard',
       templateOptions: {
-        label: 'Start/Stop Task',
+        label: T.F_KEYBOARD.TOGGLE_PLAY
       },
     },
   ]

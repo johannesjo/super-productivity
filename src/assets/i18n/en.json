@@ -121,6 +121,7 @@
     "IMPORT_FROM_FILE": "Import from file"
   },
   "F_LANG": {
+    "TITLE": "Language",
     "AR": "Arabic",
     "DE": "German",
     "EN": "English",
@@ -142,6 +143,83 @@
     "isDisableRemindWhenForgotToFinishDay": "",
     "isHideNav": "",
     "isNotifyWhenTimeEstimateExceeded": ""
+  },
+  "F_AUTO_BACKUPS": {
+    "TITLE": "Automatic Backups",
+    "HELP": "Auto save all data to your app folder in order to have it ready in case something goes wrong.",
+    "LABEL_IS_ENABLED": "Enable automatic backups"
+  },
+  "F_GOOGLE_DRIVE_SYNC": {
+    "TITLE": "Sync via Google Drive",
+    "HELP": "Here you can configure your app to automatically sync to and from a single google drive file. All data will be saved unencrypted, so make sure you don't accidentally share this file with someone."
+  },
+  "F_IDLE": {
+    "TITLE": "Idle Handling",
+    "HELP": "<div><p>When idle time handling is enabled a dialog will open after a specified amount of time to check if and on which task you want to track your time, when you have been idle.</p></div>`",
+    "IS_ENABLE_IDLE_TIME_TRACKING": "Enable idle time handling",
+    "MIN_IDLE_TIME": "Trigger idle after X",
+    "IS_ONLY_OPEN_IDLE_WHEN_CURRENT_TASK": "Only trigger idle time dialog when a current task is selected",
+    "IS_UN_TRACKED_IDLE_RESETS_BREAK_TIMER": "Untracked idle time resets take a break timer"
+  },
+  "F_IMEX": {
+    "TITLE": "Import/Export",
+    "HELP": "<p>Here you can export all your data as a <strong>JSON</strong> for backups, but also to use it in a different context (e.g. you might want to export your projects in the browser and import them into the desktop version). </p> <p>The import expects valid JSON to be copied into the text area. <strong>NOTE: Once you hit the import button all your current settings and data will be overwritten!</strong></p>"
+  },
+  "F_KEYBOARD": {
+    "TITLE": "Keyboard Shortcuts",
+    "HELP": "<p>Here you can configure all keyboard shortcuts.</p> <p>Click on the text input and enter the desired keyboard combination. Hit enter to save and Escape to abort.</p> <p>There are three types of shortcuts:</p> <ul> <li> <strong>Global shortcuts:</strong> When the app is running it will trigger the action from every other application. </li> <li> <strong>Application level shortcuts:</strong> Will trigger from every screen of the application, but not if you're currently editing a text field. </li> <li> <strong>Task level shortcuts:</strong> They will only trigger if you have selected a task via mouse or keyboard and usually trigger an action specifically related to that one task. </li> </ul>",
+    "GLOBAL_SHOW_HIDE": "Show/Hide Super Productivity",
+    "GLOBAL_TOGGLE_TASK_START": "Toggle time tracking for last active task",
+    "ADD_NEW_TASK": "Add New Task",
+    "ADD_NEW_NOTE": "Add new note",
+    "OPEN_PROJECT_NOTES": "Show/Hide Project Notes",
+    "TOGGLE_BOOKMARKS": "Show/Hide Bookmark Bar",
+    "TOGGLE_BACKLOG": "Show/Hide Task Backlog",
+    "GO_TO_WORK_VIEW": "Go to Work View",
+    "GO_TO_FOCUS_MODE": "Go to Focus Mode",
+    "GO_TO_DAILY_AGENDA": "Go to Agenda",
+    "GO_TO_SETTINGS": "Go to Settings",
+    "FOCUS_LAST_ACTIVE_TASK": "Focus last active task",
+    "ZOOM_IN": "Zoom in (Desktop only)",
+    "ZOOM_OUT": "Zoom out (Desktop only)",
+    "ZOOM_DEFAULT": "Zoom default (Desktop only)",
+    "TASK_EDIT_TITLE": "Edit Title",
+    "TASK_TOGGLE_ADDITIONAL_INFO_OPEN": "Show/Hide additional task info",
+    "TASK_OPEN_ESTIMATION_DIALOG": "Edit estimation / time spent",
+    "TASK_SCHEDULE": "Schedule Task",
+    "TASK_TOGGLE_DONE": "Toggle Done",
+    "TASK_ADD_SUB_TASK": "Add sub Task",
+    "TASK_DELETE": "Delete Task",
+    "SELECT_PREVIOUS_TASK": "Select previous Task",
+    "SELECT_NEXT_TASK": "Select next Task",
+    "MOVE_TASK_UP": "Move Task up in List",
+    "MOVE_TASK_DOWN": "Move Task down in List",
+    "MOVE_TO_BACKLOG": "Move Task to Task Backlog",
+    "MOVE_TO_TODAYS_TASKS": "Move Task to Today\"s Task List",
+    "EXPAND_SUB_TASKS": "Expand Sub Tasks",
+    "COLLAPSE_SUB_TASKS": "Collapse Sub Tasks",
+    "TOGGLE_PLAY": "Start/Stop Task"
+  },
+  "F_POMODORO": {
+    "TITLE": "Pomodoro Settings",
+    "HELP": "<p>The pomodoro timer can be configured via a couple of settings. The duration of every work session, the duration of normal breaks, the number of work sessions to run before a longer break is started and the duration of this longer break.</p> <p>You can also set if you want to display your distractions during your pomodoro breaks.</p> <p>Setting \"Pause time tracking on pomodoro break\" will also track your breaks as work time spent on a task. </p> <p>Enabling \"Pause pomodoro session when no active task\" will also pause the pomodoro session, when you pause a task.</p>",
+    "IS_ENABLED": "Enable pomodoro timer",
+    "IS_STOP_TRACKING_ON_BREAK": "Stop time tracking for task on break",
+    "IS_MANUAL_CONTINUE": "Manually confirm starting next pomodoro session",
+    "IS_PLAY_SOUND": "Play sound when session is done",
+    "IS_PLAY_SOUND_AFTER_BREAK": "Play sound when break is done",
+    "IS_PLAY_TICK": "Play tick sound every second",
+    "DURATION": "Duration of work sessions",
+    "BREAK_DURATION": "Duration of short breaks",
+    "LONGER_BREAK_DURATION": "Duration of longer breaks",
+    "CYCLES_BEFORE_LONGER_BREAK": "Start longer break after X work sessions"
+  },
+  "F_TAKE_A_BREAK": {
+    "TITLE": "Break Reminder",
+    "HELP": "<div> <p>Allows you to configure a reoccurring reminder when you have worked for a specified amount of time without taking a break.</p> <p>You can modify the message displayed. ${duration} will be replaced with the time spent without a break.</p> </div>",
+    "IS_ENABLED": "Enable take a break reminder",
+    "MIN_WORKING_TIME": "Trigger take a break notification after X working without one",
+    "MESSAGE": "Take a break message"
   },
   "G": {
     "CANCEL": "Cancel",

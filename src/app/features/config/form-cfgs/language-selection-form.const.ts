@@ -4,7 +4,7 @@ import {LanguageCodes} from '../../../app.constants';
 import {T} from '../../../t.const';
 
 export const LANGUAGE_SELECTION_FORM_FORM: ConfigFormSection = {
-  title: 'Language',
+  title: T.F_LANG.TITLE,
   key: 'lang',
   items: [
     {

@@ -1,20 +1,17 @@
 // tslint:disable:max-line-length
 import {ConfigFormSection} from '../global-config.model';
+import {T} from '../../../t.const';
 
 export const IDLE_FORM_CFG: ConfigFormSection = {
-  title: 'Idle Handling',
+  title: T.F_IDLE.TITLE,
   key: 'idle',
-  help: `
-  <div>
-    <p>When idle time handling is enabled a dialog will open after a specified amount of time to check if and on which task you want to track your time, when
-      you have been idle.</p>
-  </div>`,
+  help: T.F_IDLE.HELP,
   items: [
     {
       key: 'isEnableIdleTimeTracking',
       type: 'checkbox',
       templateOptions: {
-        label: 'Enable idle time handling',
+        label: T.F_IDLE.IS_ENABLE_IDLE_TIME_TRACKING,
       },
     },
     {
@@ -22,7 +19,7 @@ export const IDLE_FORM_CFG: ConfigFormSection = {
       type: 'duration',
       hideExpression: '!model.isEnableIdleTimeTracking',
       templateOptions: {
-        label: 'Trigger idle after X',
+        label: T.F_IDLE.MIN_IDLE_TIME,
       },
     },
     {
@@ -30,7 +27,7 @@ export const IDLE_FORM_CFG: ConfigFormSection = {
       type: 'checkbox',
       hideExpression: '!model.isEnableIdleTimeTracking',
       templateOptions: {
-        label: 'Only trigger idle time dialog when a current task is selected',
+        label: T.F_IDLE.IS_ONLY_OPEN_IDLE_WHEN_CURRENT_TASK,
       },
     },
     {
@@ -38,7 +35,7 @@ export const IDLE_FORM_CFG: ConfigFormSection = {
       type: 'checkbox',
       hideExpression: '!model.isEnableIdleTimeTracking',
       templateOptions: {
-        label: 'Untracked idle time resets take a break timer',
+        label: T.F_IDLE.IS_UN_TRACKED_IDLE_RESETS_BREAK_TIMER,
       },
     },
   ]
