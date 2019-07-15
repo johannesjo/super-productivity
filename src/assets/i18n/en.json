@@ -113,7 +113,20 @@
     "NO_ATTACHMENTS": "There are currently no attachments"
   },
   "ATTACHMENT_DIALOG": {
-
+  },
+  "FILE_IMEX": {
+    "EXPORT_DATA": "Export Data",
+    "IMPORT_FROM_FILE": "Import from file"
+  },
+  "D": {
+  },
+  "S": {
+    "SYNC": {
+      "IMPORTING": "Importing data",
+      "SUCCESS": "Data imported",
+      "ERROR_FALLBACK_TO_BACKUP": "Something went wrong while importing the data. Falling back to local backup.",
+      "ERROR_INVALID_DATA": "Error while syncing. Invalid data"
+    }
   },
   "AAA": "AAA"
 }
