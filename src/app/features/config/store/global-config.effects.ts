@@ -11,6 +11,7 @@ import {KeyboardConfig} from '../global-config.model';
 import {IPC_REGISTER_GLOBAL_SHORTCUTS_EVENT} from '../../../../../electron/ipc-events.const';
 import {IS_ELECTRON} from '../../../app.constants';
 import {TranslateService} from '@ngx-translate/core';
+import {T} from '../../../t.const';
 
 @Injectable()
 export class GlobalConfigEffects {
@@ -35,7 +36,7 @@ export class GlobalConfigEffects {
         if (isPublicPropUpdated && isPublicSection) {
           this._store.dispatch(new SnackOpen({
             type: 'SUCCESS',
-            msg: `Updated settings for <strong>${sectionKey}</strong>`,
+            msg: this._translateService.instant(T.F.CONFIG.SNACK.UPDATE_SECTION, {sectionKey}),
           }));
         }
       })
@@ -74,7 +75,7 @@ export class GlobalConfigEffects {
       filter((action: UpdateGlobalConfigSection) => action.payload.sectionCfg && action.payload.sectionCfg['lng']),
       tap((action: UpdateGlobalConfigSection) => {
         const lng = action.payload.sectionCfg['lng'];
-        this._translationService.use(lng);
+        this._translateService.use(lng);
       })
     );
 
@@ -86,7 +87,7 @@ export class GlobalConfigEffects {
       filter((action: LoadGlobalConfig) => action.payload.cfg && action.payload.cfg.lang && !!action.payload.cfg.lang.lng),
       tap((action: LoadGlobalConfig) => {
         const lng = action.payload.cfg.lang.lng;
-        this._translationService.use(lng);
+        this._translateService.use(lng);
       })
     );
 
@@ -94,7 +95,7 @@ export class GlobalConfigEffects {
     private _actions$: Actions,
     private _persistenceService: PersistenceService,
     private _electronService: ElectronService,
-    private _translationService: TranslateService,
+    private _translateService: TranslateService,
     private _store: Store<any>
   ) {
   }

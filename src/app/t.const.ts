@@ -50,6 +50,11 @@ export const T = {
           'LINK': 'F.BOOKMARK.DIALOG_EDIT.TYPES.LINK'
         }
       }
+    },
+    'CONFIG': {
+      'SNACK': {
+        'UPDATE_SECTION': 'F.CONFIG.SNACK.UPDATE_SECTION'
+      }
     }
   },
   'FILE_IMEX': {
@@ -68,6 +73,7 @@ export const T = {
     'ZH': 'F_LANG.ZH'
   },
   'F_MISC': {
+    'TITLE': 'F_MISC.TITLE',
     'HELP': 'F_MISC.HELP',
     'IS_AUTO_MARK_PARENT_AS_DONE': 'F_MISC.IS_AUTO_MARK_PARENT_AS_DONE',
     'IS_CONFIRM_BEFORE_EXIT': 'F_MISC.IS_CONFIRM_BEFORE_EXIT',

@@ -1,174 +1,180 @@
 {
-	"BL": {
-		"FROM_OTHER_PROJECTS": "From other Projects",
-		"NO_SCHEDULED": "There are currently no scheduled tasks. You can schedule a task by choosing \"Schedule Task\" in the task context menu. To open it click on the 3 little dots on the right of a task.",
-		"NO_TASKS": "There are currently no tasks in your backlog",
-		"SCHEDULED": "Scheduled",
-		"TITLE": "Backlog"
-	},
-	"F": {
-		"ATTACHMENT": {
-			"DIALOG_EDIT": {
-				"ADD_ATTACHMENT": "Add Attachment",
-				"EDIT_ATTACHMENT": "Edit Attachment",
-				"LABELS": {
-					"FILE": "File Path",
-					"IMG": "Image",
-					"LINK": "Url"
-				},
-				"SELECT_TYPE": "Select a type",
-				"TYPES": {
-					"FILE": "File (opened by default system app)",
-					"IMG": "Image (shown as thumbnail)",
-					"LINK": "Link (opens in browser)"
-				}
-			},
-			"LIST": {
-				"NO_ATTACHMENTS": "There are currently no attachments"
-			}
-		},
-		"BOOKMARK": {
-			"BAR": {
-				"DROP": "Drop here to add a bookmark",
-				"NO_BOOKMARKS": "You have no project bookmarks. Add one via drag and drop or by clicking on the 'plus' button."
-			},
-			"DIALOG_EDIT": {
-				"ADD_BOOKMARK": "Add Bookmark",
-				"EDIT_BOOKMARK": "Edit Bookmark",
-				"LABELS": {
-					"COMMAND": "Command",
-					"FILE": "File Path",
-					"IMG": "Image",
-					"LINK": "Url"
-				},
-				"SELECT_ICON": "Select an icon",
-				"SELECT_TYPE": "Select a type",
-				"TYPES": {
-					"COMMAND": "Command (custom shell command)",
-					"FILE": "File (opened by default system app)",
-					"IMG": "Image (shown as thumbnail)",
-					"LINK": "Link (opens in browser)"
-				}
-			}
-		}
-	},
-	"FILE_IMEX": {
-		"EXPORT_DATA": "Export Data",
-		"IMPORT_FROM_FILE": "Import from file"
-	},
-	"F_LANG": {
-		"AR": "Arabic",
-		"DE": "German",
-		"EN": "English",
-		"FR": "French",
-		"JA": "Japanese",
-		"LABEL": "Please select a language",
-		"RU": "Russian",
-		"TR": "Turkish",
-		"ZH": "Chinese"
-	},
-	"F_MISC": {
-		"HELP": "<p><strong>Not seeing Desktop Notifications?</strong> For windows you might want to check System > Notifications & actions and check if the required notifications have been enabled.</p>",
-		"IS_AUTO_MARK_PARENT_AS_DONE": "Mark parent task as done, when all sub tasks are done",
-		"IS_CONFIRM_BEFORE_EXIT": "Confirm before exiting the app",
-		"IS_DISABLE_REMIND_WHEN_FORGOT_TO_FINISH_DAY": "Disable reminder about forgotten finish day",
-		"IS_HIDE_NAV": "Hide navigation until main header is hovered (desktop only)",
-		"IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Notify when time estimate was exceeded",
-		"isDisableRemindWhenForgotToFinishDay": "",
-		"isHideNav": "",
-		"isNotifyWhenTimeEstimateExceeded": ""
-	},
-	"G": {
-		"CANCEL": "Cancel",
-		"DISMISS": "Dismiss",
-		"SAVE": "Save",
-		"TITLE": "Title"
-	},
-	"MH": {
-		"ADD_NEW_TASK": "Add new Task",
-		"CREATE_PROJECT": "Create Project",
-		"GO_TO_TASK_LIST": "Go to task list",
-		"MANAGE_PROJECTS": "Manage Projects",
-		"METRICS": "Metrics",
-		"PROCRASTINATE": "Procrastinate",
-		"PROJECTS": "Projects",
-		"PROJECT_MENU": "Project Menu",
-		"SETTINGS": "Settings",
-		"TASKS": "Tasks",
-		"TASK_LIST": "Task List",
-		"TOGGLE_SHOW_BOOKMARKS": "Show/Hide Bookmarks",
-		"TOGGLE_SHOW_NOTES": "Show/Hide Project Notes",
-		"TOGGLE_TRACK_TIME": "Start/Stop tracking time",
-		"WORKLOG": "Worklog"
-	},
-	"PDS": {
-		"BACK": "Wait I forgot something!",
-		"BREAK_LABEL": "Breaks (nr / time)",
-		"CELEBRATE": "Take a moment to <i>celebrate!</i>",
-		"CLEAR_ALL_CONTINUE": "Clear all done and continue",
-		"EVALUATION": "Evaluation",
-		"EXPORT_TASK_LIST": "Export Task List",
-		"GOOGLE_SHEET": "Google Sheet",
-		"NO_TASKS": "There are no tasks for this day",
-		"ROUND_15M": "Round all tasks to 15 minutes",
-		"ROUND_30M": "Round all tasks to 30 minutes",
-		"ROUND_5M": "Round all tasks to 5 minutes",
-		"ROUND_TIME_SPENT": "Round Time Spent",
-		"ROUND_TIME_SPENT_TITLE": "Round time spent on all tasks. Be careful! You cannot undo this!",
-		"ROUND_TIME_WARNING": "!!! Be careful this cannot be undone !!!",
-		"ROUND_UP_15M": "Round UP all tasks to 15 minutes",
-		"ROUND_UP_30M": "Round UP all tasks to 30 minutes",
-		"ROUND_UP_5M": "Round UP all tasks to 5 minutes",
-		"SAVE_AND_GO_HOME": "Save and go home",
-		"START_END": "Start – End",
-		"SUMMARY_FOR": "Daily Summary for {{dayStr}}",
-		"TASKS_COMPLETED": "Tasks Completed",
-		"TASK_LIST": "Task List",
-		"TIME_SPENT_AND_ESTIMATE_LABEL": "Time Spent / Estimated",
-		"TIME_SPENT_ESTIMATE_TITLE": "Time Spent: Total time spent today. Archived tasks not included. – Time Estimated: Time estimated for tasks worked on today minus the time already spent with them on other days.",
-		"TODAY": "Today",
-		"WEEK": "Week"
-	},
-	"PM": {
-		"TITLE": "Project Metrics"
-	},
-	"PP": {
-		"ARCHIVED_PROJECTS": "Archived Projects",
-		"ARCHIVE_PROJECT": "Archive Project",
-		"CREATE_NEW": "Create New",
-		"DELETE_PROJECT": "Delete Project",
-		"EDIT_PROJECT": "Edit Project",
-		"EXPORT_PROJECT": "Export Project",
-		"GITHUB_CONFIGURED": "Github Integration Configured",
-		"IMPORT_FROM_FILE": "Import from file",
-		"JIRA_CONFIGURED": "Jira Integration Configured",
-		"TITLE": "Project Overview",
-		"UN_ARCHIVE_PROJECT": "Unarchive Project"
-	},
-	"PS": {
-		"GLOBAL_SETTINGS": "Global Settings",
-		"PROJECT_SETTINGS": "Project Specific Settings"
-	},
-	"S": {
-		"SYNC": {
-			"ERROR_FALLBACK_TO_BACKUP": "Something went wrong while importing the data. Falling back to local backup.",
-			"ERROR_INVALID_DATA": "Error while syncing. Invalid data",
-			"IMPORTING": "Importing data",
-			"SUCCESS": "Data imported"
-		}
-	},
-	"WW": {
-		"ADD_MORE": "Add more",
-		"ADD_SOME_TASKS": "Add some tasks to plan your day!",
-		"COMPLETED_TASKS": "Completed Tasks",
-		"ESTIMATE_REMAINING": "Estimate remaining:",
-		"FINISH_DAY": "Finish Day",
-		"HELP_PROCRASTINATION": "Help I'm procrastinating!",
-		"NO_COMPLETED_TASKS": "There are currently no completed tasks",
-		"NO_PLANNED_TASKS": "No planned tasks",
-		"READY_TO_WORK": "Ready to work!",
-		"TIME_ESTIMATED": "Time Estimated:",
-		"WITHOUT_BREAK": "Without break:",
-		"WORKING_TODAY": "Working today:"
-	}
+  "BL": {
+    "FROM_OTHER_PROJECTS": "From other Projects",
+    "NO_SCHEDULED": "There are currently no scheduled tasks. You can schedule a task by choosing \"Schedule Task\" in the task context menu. To open it click on the 3 little dots on the right of a task.",
+    "NO_TASKS": "There are currently no tasks in your backlog",
+    "SCHEDULED": "Scheduled",
+    "TITLE": "Backlog"
+  },
+  "F": {
+    "ATTACHMENT": {
+      "DIALOG_EDIT": {
+        "ADD_ATTACHMENT": "Add Attachment",
+        "EDIT_ATTACHMENT": "Edit Attachment",
+        "LABELS": {
+          "FILE": "File Path",
+          "IMG": "Image",
+          "LINK": "Url"
+        },
+        "SELECT_TYPE": "Select a type",
+        "TYPES": {
+          "FILE": "File (opened by default system app)",
+          "IMG": "Image (shown as thumbnail)",
+          "LINK": "Link (opens in browser)"
+        }
+      },
+      "LIST": {
+        "NO_ATTACHMENTS": "There are currently no attachments"
+      }
+    },
+    "BOOKMARK": {
+      "BAR": {
+        "DROP": "Drop here to add a bookmark",
+        "NO_BOOKMARKS": "You have no project bookmarks. Add one via drag and drop or by clicking on the 'plus' button."
+      },
+      "DIALOG_EDIT": {
+        "ADD_BOOKMARK": "Add Bookmark",
+        "EDIT_BOOKMARK": "Edit Bookmark",
+        "LABELS": {
+          "COMMAND": "Command",
+          "FILE": "File Path",
+          "IMG": "Image",
+          "LINK": "Url"
+        },
+        "SELECT_ICON": "Select an icon",
+        "SELECT_TYPE": "Select a type",
+        "TYPES": {
+          "COMMAND": "Command (custom shell command)",
+          "FILE": "File (opened by default system app)",
+          "IMG": "Image (shown as thumbnail)",
+          "LINK": "Link (opens in browser)"
+        }
+      }
+    },
+    "CONFIG": {
+      "SNACK": {
+        "UPDATE_SECTION": "Updated settings for <strong>{{sectionKey}}</strong>"
+      }
+    }
+  },
+  "FILE_IMEX": {
+    "EXPORT_DATA": "Export Data",
+    "IMPORT_FROM_FILE": "Import from file"
+  },
+  "F_LANG": {
+    "AR": "Arabic",
+    "DE": "German",
+    "EN": "English",
+    "FR": "French",
+    "JA": "Japanese",
+    "LABEL": "Please select a language",
+    "RU": "Russian",
+    "TR": "Turkish",
+    "ZH": "Chinese"
+  },
+  "F_MISC": {
+    "TITLE": "Misc Settings",
+    "HELP": "<p><strong>Not seeing Desktop Notifications?</strong> For windows you might want to check System > Notifications & actions and check if the required notifications have been enabled.</p>",
+    "IS_AUTO_MARK_PARENT_AS_DONE": "Mark parent task as done, when all sub tasks are done",
+    "IS_CONFIRM_BEFORE_EXIT": "Confirm before exiting the app",
+    "IS_DISABLE_REMIND_WHEN_FORGOT_TO_FINISH_DAY": "Disable reminder about forgotten finish day",
+    "IS_HIDE_NAV": "Hide navigation until main header is hovered (desktop only)",
+    "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Notify when time estimate was exceeded",
+    "isDisableRemindWhenForgotToFinishDay": "",
+    "isHideNav": "",
+    "isNotifyWhenTimeEstimateExceeded": ""
+  },
+  "G": {
+    "CANCEL": "Cancel",
+    "DISMISS": "Dismiss",
+    "SAVE": "Save",
+    "TITLE": "Title"
+  },
+  "MH": {
+    "ADD_NEW_TASK": "Add new Task",
+    "CREATE_PROJECT": "Create Project",
+    "GO_TO_TASK_LIST": "Go to task list",
+    "MANAGE_PROJECTS": "Manage Projects",
+    "METRICS": "Metrics",
+    "PROCRASTINATE": "Procrastinate",
+    "PROJECTS": "Projects",
+    "PROJECT_MENU": "Project Menu",
+    "SETTINGS": "Settings",
+    "TASKS": "Tasks",
+    "TASK_LIST": "Task List",
+    "TOGGLE_SHOW_BOOKMARKS": "Show/Hide Bookmarks",
+    "TOGGLE_SHOW_NOTES": "Show/Hide Project Notes",
+    "TOGGLE_TRACK_TIME": "Start/Stop tracking time",
+    "WORKLOG": "Worklog"
+  },
+  "PDS": {
+    "BACK": "Wait I forgot something!",
+    "BREAK_LABEL": "Breaks (nr / time)",
+    "CELEBRATE": "Take a moment to <i>celebrate!</i>",
+    "CLEAR_ALL_CONTINUE": "Clear all done and continue",
+    "EVALUATION": "Evaluation",
+    "EXPORT_TASK_LIST": "Export Task List",
+    "GOOGLE_SHEET": "Google Sheet",
+    "NO_TASKS": "There are no tasks for this day",
+    "ROUND_15M": "Round all tasks to 15 minutes",
+    "ROUND_30M": "Round all tasks to 30 minutes",
+    "ROUND_5M": "Round all tasks to 5 minutes",
+    "ROUND_TIME_SPENT": "Round Time Spent",
+    "ROUND_TIME_SPENT_TITLE": "Round time spent on all tasks. Be careful! You cannot undo this!",
+    "ROUND_TIME_WARNING": "!!! Be careful this cannot be undone !!!",
+    "ROUND_UP_15M": "Round UP all tasks to 15 minutes",
+    "ROUND_UP_30M": "Round UP all tasks to 30 minutes",
+    "ROUND_UP_5M": "Round UP all tasks to 5 minutes",
+    "SAVE_AND_GO_HOME": "Save and go home",
+    "START_END": "Start – End",
+    "SUMMARY_FOR": "Daily Summary for {{dayStr}}",
+    "TASKS_COMPLETED": "Tasks Completed",
+    "TASK_LIST": "Task List",
+    "TIME_SPENT_AND_ESTIMATE_LABEL": "Time Spent / Estimated",
+    "TIME_SPENT_ESTIMATE_TITLE": "Time Spent: Total time spent today. Archived tasks not included. – Time Estimated: Time estimated for tasks worked on today minus the time already spent with them on other days.",
+    "TODAY": "Today",
+    "WEEK": "Week"
+  },
+  "PM": {
+    "TITLE": "Project Metrics"
+  },
+  "PP": {
+    "ARCHIVED_PROJECTS": "Archived Projects",
+    "ARCHIVE_PROJECT": "Archive Project",
+    "CREATE_NEW": "Create New",
+    "DELETE_PROJECT": "Delete Project",
+    "EDIT_PROJECT": "Edit Project",
+    "EXPORT_PROJECT": "Export Project",
+    "GITHUB_CONFIGURED": "Github Integration Configured",
+    "IMPORT_FROM_FILE": "Import from file",
+    "JIRA_CONFIGURED": "Jira Integration Configured",
+    "TITLE": "Project Overview",
+    "UN_ARCHIVE_PROJECT": "Unarchive Project"
+  },
+  "PS": {
+    "GLOBAL_SETTINGS": "Global Settings",
+    "PROJECT_SETTINGS": "Project Specific Settings"
+  },
+  "S": {
+    "SYNC": {
+      "ERROR_FALLBACK_TO_BACKUP": "Something went wrong while importing the data. Falling back to local backup.",
+      "ERROR_INVALID_DATA": "Error while syncing. Invalid data",
+      "IMPORTING": "Importing data",
+      "SUCCESS": "Data imported"
+    }
+  },
+  "WW": {
+    "ADD_MORE": "Add more",
+    "ADD_SOME_TASKS": "Add some tasks to plan your day!",
+    "COMPLETED_TASKS": "Completed Tasks",
+    "ESTIMATE_REMAINING": "Estimate remaining:",
+    "FINISH_DAY": "Finish Day",
+    "HELP_PROCRASTINATION": "Help I'm procrastinating!",
+    "NO_COMPLETED_TASKS": "There are currently no completed tasks",
+    "NO_PLANNED_TASKS": "No planned tasks",
+    "READY_TO_WORK": "Ready to work!",
+    "TIME_ESTIMATED": "Time Estimated:",
+    "WITHOUT_BREAK": "Without break:",
+    "WORKING_TODAY": "Working today:"
+  }
 }

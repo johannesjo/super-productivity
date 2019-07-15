@@ -79,9 +79,9 @@
 		"isNotifyWhenTimeEstimateExceeded": ""
 	},
 	"G": {
-		"CANCEL": "Stornieren",
-		"DISMISS": "entlassen",
-		"SAVE": "sparen",
+		"CANCEL": "Abbrechen",
+		"DISMISS": "Verwerfen",
+		"SAVE": "Speichern",
 		"TITLE": "Titel"
 	},
 	"MH": {

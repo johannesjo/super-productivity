@@ -4,7 +4,7 @@ import {T} from '../../../t.const';
 
 
 export const MISC_SETTINGS_FORM_CFG: ConfigFormSection = {
-  title: 'Misc Settings',
+  title: T.F_MISC.TITLE,
   key: 'misc',
   help: T.F_MISC.HELP,
   items: [
