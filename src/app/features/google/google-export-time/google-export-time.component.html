@@ -1,49 +1,15 @@
+<!-- TODO translate -->
+
 <help-section>
-  <div class="info">
-    <p>This view allows you to export your worked time to a google sheet. You need to allow for your Google
-      Spreadsheets to be accessed by Super Productivity. You also need to create a spreadsheet with a headings in the
-      first row nad specify it's ID in the input field (<a
-        href="https://stackoverflow.com/questions/36061433/how-to-do-i-locate-a-google-spreadsheet-id"
-        target="_blank">Ho to find the
-        id of a spreadsheet?</a>).
-    </p>
-    <p>After successfully loading your spreadsheet a table will show up with 4 rows. The first row shows the heading
-      you specified in the spreadsheet itself.</p>
-    <p>The second row is for informational purposes and shows the last row from the spreadsheet.</p>
-    <p>The forth row is a list of values you can directly enter save to the spreadsheet.</p>
-    <p>The third row is there to automatically define some values for the forth row. There are several special strings
-      you can enter into the cells:</p>
-  </div>
+  <div class="info"
+       [innerHTML]="(T.F.GOOGLE.EXPORT_TIME.HELP_INFO|translate)"></div>
 
-  <dl class="possible-properties">
-    <dt>{{ '{' }}startTime}</dt>
-    <dd>The time when you first used this app today. It's possible to round this via the options.</dd>
+  <dl class="possible-properties"
+      [innerHTML]="(T.F.GOOGLE.EXPORT_TIME.HELP_POSSIBLE_PROPERTIES|translate)">
 
-    <dt>{{ '{' }}currentTime}</dt>
-    <dd>The current time. Could be used for the for the end time of todays working day It's possible to round this via
-      the options.
-    </dd>
-
-    <dt>{{ '{' }}endTime}</dt>
-    <dd>The last time time was tracked to a task in current project.</dd>
-
-    <dt>{{ '{' }}date}</dt>
-    <dd>Todays date in standard format (mm/dd/yyyy)</dd>
-
-    <dt>{{ '{' }}date:DD/MM/YYYY} (example)</dt>
-    <dd>Date with a custom date format string.</dd>
-
-    <dt>{{ '{' }}taskTitles}</dt>
-    <dd>Comma separated (parent) task titles</dd>
-
-    <dt>{{ '{' }}subTaskTitles}</dt>
-    <dd>Comma separated sub task titles</dd>
-
-    <dt>{{ '{' }}totalTime}</dt>
-    <dd>The total time you spend working on your todays tasks.</dd>
   </dl>
 
-  <p>In addition to this there are several options you can use to modify the calculation of those values.</p>
+  <p>{{T.F.GOOGLE.EXPORT_TIME.HELP_ADDITIONAL|translate}}</p>
 </help-section>
 
 <section *ngIf="(googleApiService.isLoggedIn$|async)"
@@ -125,7 +91,7 @@
           mat-stroked-button=""
           type="button">
     <mat-icon>exit_to_app</mat-icon>
-    Login to Google
+    {{T.F.GOOGLE.EXPORT_TIME.LOGIN|translate}}
   </button>
   <button (click)="logout()"
           *ngIf="(googleApiService.isLoggedIn$|async)"
@@ -134,7 +100,7 @@
           type="button">
     <mat-icon>clear</mat-icon>
     <!--<mat-icon>logout</mat-icon>-->
-    Logout
+    {{T.F.GOOGLE.EXPORT_TIME.LOGOUT|translate}}
   </button>
   <button (click)="readSpreadsheet()"
           *ngIf="(googleApiService.isLoggedIn$|async)"
@@ -144,7 +110,7 @@
           mat-stroked-button=""
           type="button">
     <mat-icon>chrome_reader_mode</mat-icon>
-    Read spreadsheet
+    {{T.F.GOOGLE.EXPORT_TIME.READ_SPREADSHEET|translate}}
   </button>
   <a *ngIf="(googleApiService.isLoggedIn$|async) && opts.spreadsheetId"
      color=""
@@ -152,7 +118,7 @@
      mat-stroked-button=""
      target="_blank">
     <mat-icon>link</mat-icon>
-    Open spreadsheet
+    {{T.F.GOOGLE.EXPORT_TIME.OPEN_SPREADSHEET|translate}}
   </a>
   <button (click)="save()"
           *ngIf="actualValues.length > 0 &&  (googleApiService.isLoggedIn$|async)"
@@ -161,7 +127,7 @@
           mat-stroked-button=""
           type="button">
     <mat-icon>save</mat-icon>
-    Save row
+    {{T.F.GOOGLE.EXPORT_TIME.SAVE_ROW|translate}}
   </button>
 
   <!--<a mat-stroked-button=""-->
@@ -191,51 +157,51 @@
       <div class="toggle-wrapper">
         <mat-slide-toggle
           [(ngModel)]="opts.isAutoLogin"
-          [ngModelOptions]="{standalone: true}">Auto-login and load data next time
+          [ngModelOptions]="{standalone: true}">{{T.F.GOOGLE.EXPORT_TIME.AUTO_LOGIN|translate}}
         </mat-slide-toggle>
         <!--<mat-slide-toggle [(ngModel)]="optsname="".is.isAutoFocusEmpty">Auto-focus first empty field after loading table headings</mat-slide-toggle>-->
         <mat-slide-toggle
           (change)="updateDefaults()"
           [(ngModel)]="opts.isRoundWorkTimeUp"
-          [ngModelOptions]="{standalone: true}">Always round work time up
+          [ngModelOptions]="{standalone: true}">{{T.F.GOOGLE.EXPORT_TIME.ALWAYS_ROUND_UP|translate}}
         </mat-slide-toggle>
       </div>
 
       <mat-form-field>
-        <label>Round start time to</label>
+        <label>{{T.F.GOOGLE.EXPORT_TIME.ROUND_START_TIME_TO|translate}}</label>
         <mat-select (selectionChange)="updateDefaults()"
                     [(ngModel)]="opts.roundStartTimeTo"
                     [ngModelOptions]="{standalone: true}">
           <mat-option><em>don't round</em></mat-option>
           <mat-option *ngFor="let roundOption of roundTimeOptions"
                       [value]="roundOption.id">
-            {{roundOption.title}}
+            {{roundOption.title|translate}}
           </mat-option>
         </mat-select>
       </mat-form-field>
 
       <mat-form-field>
-        <label>Round end time to</label>
+        <label>{{T.F.GOOGLE.EXPORT_TIME.ROUND_END_TIME_TO|translate}}</label>
         <mat-select (selectionChange)="updateDefaults()"
                     [(ngModel)]="opts.roundEndTimeTo"
                     [ngModelOptions]="{standalone: true}">
           <mat-option><em>don't round</em></mat-option>
           <mat-option *ngFor="let roundOption of roundTimeOptions"
                       [value]="roundOption.id">
-            {{roundOption.title}}
+            {{roundOption.title|translate}}
           </mat-option>
         </mat-select>
       </mat-form-field>
 
       <mat-form-field>
-        <label>Round time worked to</label>
+        <label>{{T.F.GOOGLE.EXPORT_TIME.ROUND_TIME_WORKED_TO|translate}}</label>
         <mat-select (selectionChange)="updateDefaults()"
                     [(ngModel)]="opts.roundWorkTimeTo"
                     [ngModelOptions]="{standalone: true}">
           <mat-option><em>don't round</em></mat-option>
           <mat-option *ngFor="let roundOption of roundTimeOptions"
                       [value]="roundOption.id">
-            {{roundOption.title}}
+            {{roundOption.title|translate}}
           </mat-option>
         </mat-select>
       </mat-form-field>

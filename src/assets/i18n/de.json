@@ -1,174 +1,174 @@
 {
-	"BL": {
-		"FROM_OTHER_PROJECTS": "Aus anderen Projekten",
-		"NO_SCHEDULED": "Derzeit sind keine Aufgaben geplant. Sie können eine Aufgabe planen, indem Sie im Kontextmenü der Aufgabe \"Aufgabe planen\" auswählen. Zum Öffnen klicken Sie auf die 3 kleinen Punkte rechts neben einer Aufgabe.",
-		"NO_TASKS": "Derzeit befinden sich keine Aufgaben in Ihrem Backlog",
-		"SCHEDULED": "Geplant",
-		"TITLE": "Rückstand"
-	},
-	"F": {
-		"ATTACHMENT": {
-			"DIALOG_EDIT": {
-				"ADD_ATTACHMENT": "Anhang hinzufügen",
-				"EDIT_ATTACHMENT": "Anhang bearbeiten",
-				"LABELS": {
-					"FILE": "Dateipfad",
-					"IMG": "Bild",
-					"LINK": "Url"
-				},
-				"SELECT_TYPE": "Wählen Sie einen Typ",
-				"TYPES": {
-					"FILE": "Datei (standardmäßig geöffnete System-App)",
-					"IMG": "Bild (als Thumbnail angezeigt)",
-					"LINK": "Link (öffnet im Browser)"
-				}
-			},
-			"LIST": {
-				"NO_ATTACHMENTS": "Derzeit sind keine Anhänge vorhanden"
-			}
-		},
-		"BOOKMARK": {
-			"BAR": {
-				"DROP": "Fügen Sie hier ein Lesezeichen hinzu",
-				"NO_BOOKMARKS": "Sie haben keine Projektlesezeichen. Fügen Sie eine per Drag & Drop oder durch Klicken auf das den plus button hinzu."
-			},
-			"DIALOG_EDIT": {
-				"ADD_BOOKMARK": "Lesezeichen hinzufügen",
-				"EDIT_BOOKMARK": "Lesezeichen bearbeiten",
-				"LABELS": {
-					"COMMAND": "Befehl",
-					"FILE": "Dateipfad",
-					"IMG": "Bild",
-					"LINK": "Url"
-				},
-				"SELECT_ICON": "Wählen Sie ein Symbol",
-				"SELECT_TYPE": "Wählen Sie einen Typ",
-				"TYPES": {
-					"COMMAND": "Befehl (benutzerdefinierter Shell-Befehl)",
-					"FILE": "Datei (standardmäßig geöffnete System-App)",
-					"IMG": "Bild (als Thumbnail angezeigt)",
-					"LINK": "Link (öffnet im Browser)"
-				}
-			}
-		}
-	},
-	"FILE_IMEX": {
-		"EXPORT_DATA": "Daten exportieren",
-		"IMPORT_FROM_FILE": "Aus Datei importieren"
-	},
-	"F_LANG": {
-		"AR": "Arabisch",
-		"DE": "Deutsch",
-		"EN": "Englisch",
-		"FR": "Französisch",
-		"JA": "Japanisch",
-		"LABEL": "Bitte wähle eine Sprache",
-		"RU": "Russisch",
-		"TR": "Türkisch",
-		"ZH": "Chinesisch"
-	},
-	"F_MISC": {
-		"HELP": "<p><strong>Desktop-Benachrichtigungen werden nicht angezeigt?</strong> Unter Windows sollten Sie unter System> Benachrichtigungen und Aktionen prüfen, ob die erforderlichen Benachrichtigungen aktiviert wurden.</p>",
-		"IS_AUTO_MARK_PARENT_AS_DONE": "Übergeordnete Aufgabe als erledigt markieren, wenn alle Unteraufgaben erledigt sind",
-		"IS_CONFIRM_BEFORE_EXIT": "Bestätigen Sie, bevor Sie die App beenden",
-		"IS_DISABLE_REMIND_WHEN_FORGOT_TO_FINISH_DAY": "Erinnerung an vergessenen Zieltag deaktivieren",
-		"IS_HIDE_NAV": "Navigation verbergen, bis die Hauptüberschrift angezeigt wird (nur Desktop)",
-		"IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Benachrichtigen, wenn die geschätzte Zeit überschritten wurde",
-		"isDisableRemindWhenForgotToFinishDay": "",
-		"isHideNav": "",
-		"isNotifyWhenTimeEstimateExceeded": ""
-	},
-	"G": {
-		"CANCEL": "Abbrechen",
-		"DISMISS": "Verwerfen",
-		"SAVE": "Speichern",
-		"TITLE": "Titel"
-	},
-	"MH": {
-		"ADD_NEW_TASK": "Neue Aufgabe hinzufügen",
-		"CREATE_PROJECT": "Projekt erstellen",
-		"GO_TO_TASK_LIST": "Gehe zur Aufgabenliste",
-		"MANAGE_PROJECTS": "Projekte verwalten",
-		"METRICS": "Metriken",
-		"PROCRASTINATE": "Prokrastination",
-		"PROJECTS": "Projekte",
-		"PROJECT_MENU": "Projektmenü",
-		"SETTINGS": "Einstellungen",
-		"TASKS": "Aufgaben",
-		"TASK_LIST": "Aufgabenliste",
-		"TOGGLE_SHOW_BOOKMARKS": "Lesezeichen ein- / ausblenden",
-		"TOGGLE_SHOW_NOTES": "Projektnotizen ein- / ausblenden",
-		"TOGGLE_TRACK_TIME": "Tracking-Zeit starten / stoppen",
-		"WORKLOG": "Worklog"
-	},
-	"PDS": {
-		"BACK": "Warten Sie, ich habe etwas vergessen!",
-		"BREAK_LABEL": "Pausen (Anzahl / Zeit)",
-		"CELEBRATE": "Nehmen Sie sich einen Moment Zeit, um <i>zu feiern!</i>",
-		"CLEAR_ALL_CONTINUE": "Alles löschen und fortfahren",
-		"EVALUATION": "Auswertung",
-		"EXPORT_TASK_LIST": "Aufgabenliste exportieren",
-		"GOOGLE_SHEET": "Google Sheet",
-		"NO_TASKS": "Für diesen Tag gibt es keine Aufgaben",
-		"ROUND_15M": "Runden Sie alle Aufgaben auf 15 Minuten",
-		"ROUND_30M": "Runden Sie alle Aufgaben auf 30 Minuten",
-		"ROUND_5M": "Runden Sie alle Aufgaben auf 5 Minuten",
-		"ROUND_TIME_SPENT": "Runde Zeit ausgegeben",
-		"ROUND_TIME_SPENT_TITLE": "Rundenzeit für alle Aufgaben. Achtung! Sie können dies nicht rückgängig machen!",
-		"ROUND_TIME_WARNING": "!!! Achtung, dies kann nicht rückgängig gemacht werden !!!",
-		"ROUND_UP_15M": "Runden Sie alle Aufgaben auf 15 Minuten auf",
-		"ROUND_UP_30M": "Runden Sie alle Aufgaben auf 30 Minuten auf",
-		"ROUND_UP_5M": "Runden Sie alle Aufgaben auf 5 Minuten auf",
-		"SAVE_AND_GO_HOME": "Speichern und nach Hause gehen",
-		"START_END": "Start Ende",
-		"SUMMARY_FOR": "Tägliche Zusammenfassung für {{dayStr}}",
-		"TASKS_COMPLETED": "Aufgaben erledigt",
-		"TASK_LIST": "Aufgabenliste",
-		"TIME_SPENT_AND_ESTIMATE_LABEL": "Zeitaufwand / Geschätzt",
-		"TIME_SPENT_ESTIMATE_TITLE": "Verbrauchte Zeit: Gesamtzeit, die heute verbracht wurde. Archivierte Aufgaben nicht enthalten. - Geschätzte Zeit: Geschätzte Zeit für Aufgaben, die heute bearbeitet wurden, abzüglich der Zeit, die bereits an anderen Tagen mit ihnen verbracht wurde.",
-		"TODAY": "Heute",
-		"WEEK": "Woche"
-	},
-	"PM": {
-		"TITLE": "Projektmetriken"
-	},
-	"PP": {
-		"ARCHIVED_PROJECTS": "Archivierte Projekte",
-		"ARCHIVE_PROJECT": "Projekt archivieren",
-		"CREATE_NEW": "Erstelle neu",
-		"DELETE_PROJECT": "Projekt löschen",
-		"EDIT_PROJECT": "Projekt bearbeiten",
-		"EXPORT_PROJECT": "Projekt exportieren",
-		"GITHUB_CONFIGURED": "Github-Integration konfiguriert",
-		"IMPORT_FROM_FILE": "Aus Datei importieren",
-		"JIRA_CONFIGURED": "Jira-Integration konfiguriert",
-		"TITLE": "Projektübersicht",
-		"UN_ARCHIVE_PROJECT": "Projekt aus dem Archiv entfernen"
-	},
-	"PS": {
-		"GLOBAL_SETTINGS": "Globale Einstellungen",
-		"PROJECT_SETTINGS": "Projektspezifische Einstellungen"
-	},
-	"S": {
-		"SYNC": {
-			"ERROR_FALLBACK_TO_BACKUP": "Beim Importieren der Daten ist ein Fehler aufgetreten. Zurückgreifen auf lokales Backup.",
-			"ERROR_INVALID_DATA": "Fehler beim Synchronisieren. Ungültige Daten",
-			"IMPORTING": "Daten importieren",
-			"SUCCESS": "Daten importiert"
-		}
-	},
-	"WW": {
-		"ADD_MORE": "Weitere hinzufügen",
-		"ADD_SOME_TASKS": "Füge einige Aufgaben hinzu, um deinen Tag zu planen!",
-		"COMPLETED_TASKS": "Abgeschlossene Aufgaben",
-		"ESTIMATE_REMAINING": "Schätzung verbleibend:",
-		"FINISH_DAY": "Tag beenden",
-		"HELP_PROCRASTINATION": "Hilfe, ich prokrastiniere!",
-		"NO_COMPLETED_TASKS": "Derzeit sind keine Aufgaben erledigt",
-		"NO_PLANNED_TASKS": "Keine geplanten Aufgaben",
-		"READY_TO_WORK": "Bereit zu arbeiten!",
-		"TIME_ESTIMATED": "Geschätzte Zeit:",
-		"WITHOUT_BREAK": "Ohne Pause:",
-		"WORKING_TODAY": "Arbeit heute:"
-	}
+  "BL": {
+    "FROM_OTHER_PROJECTS": "Aus anderen Projekten",
+    "NO_SCHEDULED": "Derzeit sind keine Aufgaben geplant. Sie können eine Aufgabe planen, indem Sie im Kontextmenü der Aufgabe \"Aufgabe planen\" auswählen. Zum Öffnen klicken Sie auf die 3 kleinen Punkte rechts neben einer Aufgabe.",
+    "NO_TASKS": "Derzeit befinden sich keine Aufgaben in Ihrem Backlog",
+    "SCHEDULED": "Geplant",
+    "TITLE": "Rückstand"
+  },
+  "F": {
+    "ATTACHMENT": {
+      "DIALOG_EDIT": {
+        "ADD_ATTACHMENT": "Anhang hinzufügen",
+        "EDIT_ATTACHMENT": "Anhang bearbeiten",
+        "LABELS": {
+          "FILE": "Dateipfad",
+          "IMG": "Bild",
+          "LINK": "Url"
+        },
+        "SELECT_TYPE": "Wählen Sie einen Typ",
+        "TYPES": {
+          "FILE": "Datei (standardmäßig geöffnete System-App)",
+          "IMG": "Bild (als Thumbnail angezeigt)",
+          "LINK": "Link (öffnet im Browser)"
+        }
+      },
+      "LIST": {
+        "NO_ATTACHMENTS": "Derzeit sind keine Anhänge vorhanden"
+      }
+    },
+    "BOOKMARK": {
+      "BAR": {
+        "DROP": "Fügen Sie hier ein Lesezeichen hinzu",
+        "NO_BOOKMARKS": "Sie haben keine Projektlesezeichen. Fügen Sie eine per Drag & Drop oder durch Klicken auf das den plus button hinzu."
+      },
+      "DIALOG_EDIT": {
+        "ADD_BOOKMARK": "Lesezeichen hinzufügen",
+        "EDIT_BOOKMARK": "Lesezeichen bearbeiten",
+        "LABELS": {
+          "COMMAND": "Befehl",
+          "FILE": "Dateipfad",
+          "IMG": "Bild",
+          "LINK": "Url"
+        },
+        "SELECT_ICON": "Wählen Sie ein Symbol",
+        "SELECT_TYPE": "Wählen Sie einen Typ",
+        "TYPES": {
+          "COMMAND": "Befehl (benutzerdefinierter Shell-Befehl)",
+          "FILE": "Datei (standardmäßig geöffnete System-App)",
+          "IMG": "Bild (als Thumbnail angezeigt)",
+          "LINK": "Link (öffnet im Browser)"
+        }
+      }
+    }
+  },
+  "FILE_IMEX": {
+    "EXPORT_DATA": "Daten exportieren",
+    "IMPORT_FROM_FILE": "Aus Datei importieren"
+  },
+  "F_LANG": {
+    "AR": "Arabisch",
+    "DE": "Deutsch",
+    "EN": "Englisch",
+    "FR": "Französisch",
+    "JA": "Japanisch",
+    "LABEL": "Bitte wähle eine Sprache",
+    "RU": "Russisch",
+    "TR": "Türkisch",
+    "ZH": "Chinesisch"
+  },
+  "F_MISC": {
+    "HELP": "<p><strong>Desktop-Benachrichtigungen werden nicht angezeigt?</strong> Unter Windows sollten Sie unter System> Benachrichtigungen und Aktionen prüfen, ob die erforderlichen Benachrichtigungen aktiviert wurden.</p>",
+    "IS_AUTO_MARK_PARENT_AS_DONE": "Übergeordnete Aufgabe als erledigt markieren, wenn alle Unteraufgaben erledigt sind",
+    "IS_CONFIRM_BEFORE_EXIT": "Bestätigen Sie, bevor Sie die App beenden",
+    "IS_DISABLE_REMIND_WHEN_FORGOT_TO_FINISH_DAY": "Erinnerung an vergessenen Zieltag deaktivieren",
+    "IS_HIDE_NAV": "Navigation verbergen, bis die Hauptüberschrift angezeigt wird (nur Desktop)",
+    "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Benachrichtigen, wenn die geschätzte Zeit überschritten wurde",
+    "isDisableRemindWhenForgotToFinishDay": "",
+    "isHideNav": "",
+    "isNotifyWhenTimeEstimateExceeded": ""
+  },
+  "G": {
+    "CANCEL": "Abbrechen",
+    "DISMISS": "Verwerfen",
+    "SAVE": "Speichern",
+    "TITLE": "Titel"
+  },
+  "MH": {
+    "ADD_NEW_TASK": "Neue Aufgabe hinzufügen",
+    "CREATE_PROJECT": "Projekt erstellen",
+    "GO_TO_TASK_LIST": "Gehe zur Aufgabenliste",
+    "MANAGE_PROJECTS": "Projekte verwalten",
+    "METRICS": "Metriken",
+    "PROCRASTINATE": "Prokrastination",
+    "PROJECTS": "Projekte",
+    "PROJECT_MENU": "Projektmenü",
+    "SETTINGS": "Einstellungen",
+    "TASKS": "Aufgaben",
+    "TASK_LIST": "Aufgabenliste",
+    "TOGGLE_SHOW_BOOKMARKS": "Lesezeichen ein- / ausblenden",
+    "TOGGLE_SHOW_NOTES": "Projektnotizen ein- / ausblenden",
+    "TOGGLE_TRACK_TIME": "Tracking-Zeit starten / stoppen",
+    "WORKLOG": "Worklog"
+  },
+  "PDS": {
+    "BACK": "Warten Sie, ich habe etwas vergessen!",
+    "BREAK_LABEL": "Pausen (Anzahl / Zeit)",
+    "CELEBRATE": "Nehmen Sie sich einen Moment Zeit, um <i>zu feiern!</i>",
+    "CLEAR_ALL_CONTINUE": "Alles löschen und fortfahren",
+    "EVALUATION": "Auswertung",
+    "EXPORT_TASK_LIST": "Aufgabenliste exportieren",
+    "GOOGLE_SHEET": "Google Sheet",
+    "NO_TASKS": "Für diesen Tag gibt es keine Aufgaben",
+    "ROUND_15M": "Runden Sie alle Aufgaben auf 15 Minuten",
+    "ROUND_30M": "Runden Sie alle Aufgaben auf 30 Minuten",
+    "ROUND_5M": "Runden Sie alle Aufgaben auf 5 Minuten",
+    "ROUND_TIME_SPENT": "Runde Zeit ausgegeben",
+    "ROUND_TIME_SPENT_TITLE": "Rundenzeit für alle Aufgaben. Achtung! Sie können dies nicht rückgängig machen!",
+    "ROUND_TIME_WARNING": "!!! Achtung, dies kann nicht rückgängig gemacht werden !!!",
+    "ROUND_UP_15M": "Runden Sie alle Aufgaben auf 15 Minuten auf",
+    "ROUND_UP_30M": "Runden Sie alle Aufgaben auf 30 Minuten auf",
+    "ROUND_UP_5M": "Runden Sie alle Aufgaben auf 5 Minuten auf",
+    "SAVE_AND_GO_HOME": "Speichern und nach Hause gehen",
+    "START_END": "Start Ende",
+    "SUMMARY_FOR": "Tägliche Zusammenfassung für {{dayStr}}",
+    "TASKS_COMPLETED": "Aufgaben erledigt",
+    "TASK_LIST": "Aufgabenliste",
+    "TIME_SPENT_AND_ESTIMATE_LABEL": "Zeitaufwand / Geschätzt",
+    "TIME_SPENT_ESTIMATE_TITLE": "Verbrauchte Zeit: Gesamtzeit, die heute verbracht wurde. Archivierte Aufgaben nicht enthalten. - Geschätzte Zeit: Geschätzte Zeit für Aufgaben, die heute bearbeitet wurden, abzüglich der Zeit, die bereits an anderen Tagen mit ihnen verbracht wurde.",
+    "TODAY": "Heute",
+    "WEEK": "Woche"
+  },
+  "PM": {
+    "TITLE": "Projektmetriken"
+  },
+  "PP": {
+    "ARCHIVED_PROJECTS": "Archivierte Projekte",
+    "ARCHIVE_PROJECT": "Projekt archivieren",
+    "CREATE_NEW": "Erstelle neu",
+    "DELETE_PROJECT": "Projekt löschen",
+    "EDIT_PROJECT": "Projekt bearbeiten",
+    "EXPORT_PROJECT": "Projekt exportieren",
+    "GITHUB_CONFIGURED": "Github-Integration konfiguriert",
+    "IMPORT_FROM_FILE": "Aus Datei importieren",
+    "JIRA_CONFIGURED": "Jira-Integration konfiguriert",
+    "TITLE": "Projektübersicht",
+    "UN_ARCHIVE_PROJECT": "Projekt aus dem Archiv entfernen"
+  },
+  "PS": {
+    "GLOBAL_SETTINGS": "Globale Einstellungen",
+    "PROJECT_SETTINGS": "Projektspezifische Einstellungen"
+  },
+  "S": {
+    "SYNC": {
+      "ERROR_FALLBACK_TO_BACKUP": "Beim Importieren der Daten ist ein Fehler aufgetreten. Zurückgreifen auf lokales Backup.",
+      "ERROR_INVALID_DATA": "Fehler beim Synchronisieren. Ungültige Daten",
+      "IMPORTING": "Daten importieren",
+      "SUCCESS": "Daten importiert"
+    }
+  },
+  "WW": {
+    "ADD_MORE": "Weitere hinzufügen",
+    "ADD_SOME_TASKS": "Füge einige Aufgaben hinzu, um deinen Tag zu planen!",
+    "COMPLETED_TASKS": "Abgeschlossene Aufgaben",
+    "ESTIMATE_REMAINING": "Schätzung verbleibend:",
+    "FINISH_DAY": "Tag beenden",
+    "HELP_PROCRASTINATION": "Hilfe, ich prokrastiniere!",
+    "NO_COMPLETED_TASKS": "Derzeit sind keine Aufgaben erledigt",
+    "NO_PLANNED_TASKS": "Keine geplanten Aufgaben",
+    "READY_TO_WORK": "Bereit zu arbeiten!",
+    "TIME_ESTIMATED": "Geschätzte Zeit:",
+    "WITHOUT_BREAK": "Ohne Pause:",
+    "WORKING_TODAY": "Arbeit heute:"
+  }
 }

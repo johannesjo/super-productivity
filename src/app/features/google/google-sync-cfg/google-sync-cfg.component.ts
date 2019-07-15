@@ -16,6 +16,7 @@ import {GoogleDriveSyncConfig} from '../../config/global-config.model';
 import {Subscription} from 'rxjs';
 import {expandFadeAnimation} from '../../../ui/animations/expand.ani';
 import {FormGroup} from '@angular/forms';
+import {T} from '../../../t.const';
 
 @Component({
   selector: 'google-sync-cfg',
@@ -25,6 +26,7 @@ import {FormGroup} from '@angular/forms';
   animations: [expandFadeAnimation]
 })
 export class GoogleSyncCfgComponent implements OnInit, OnDestroy {
+  T = T;
   tmpSyncFile: any;
   cfg: GoogleDriveSyncConfig;
   loginPromise: Promise<any>;
