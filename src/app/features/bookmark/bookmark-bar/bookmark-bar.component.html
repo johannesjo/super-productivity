@@ -6,7 +6,7 @@
        @fade
        class="bg-accent drag-over-msg">
     <mat-icon>add</mat-icon>
-    Drop here to add a bookmark
+    {{T.F.BOOKMARK.BAR.DROP|translate}}
   </div>
 
   <div class="controls-and-list-wrapper">
@@ -32,8 +32,8 @@
          class="global-bookmark-list-inner">
 
       <div *ngIf="!(bookmarkService.bookmarks$|async)?.length"
-           class="msg color-contrast">You have no project bookmarks. Add one via drag and drop or by clicking on the '+'
-        icon.
+           class="msg color-contrast">
+        {{T.F.BOOKMARK.BAR.NO_BOOKMARKS|translate}}
       </div>
 
       <div *ngFor="let bookmark of (bookmarkService.bookmarks$|async); trackBy: trackByFn"

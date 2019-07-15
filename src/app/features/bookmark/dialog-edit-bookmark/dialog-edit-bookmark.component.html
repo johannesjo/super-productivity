@@ -1,6 +1,9 @@
 <form #form="ngForm"
       (submit)="submit()">
-  <h2 mat-dialog-title>{{ bookmarkCopy.id ? 'Edit' : 'Add' }} Bookmark</h2>
+  <h1 mat-dialog-title>{{ (bookmarkCopy.id ?
+    (T.F.BOOKMARK.DIALOG_EDIT.EDIT_BOOKMARK) :
+    (T.F.BOOKMARK.DIALOG_EDIT.ADD_BOOKMARK))
+    |translate }}</h1>
 
   <mat-dialog-content>
     <div class="form-wrapper">
@@ -10,7 +13,7 @@
                autofocus="autofocus"
                matInput=""
                name="title"
-               placeholder="Title"
+               [placeholder]="(T.G.TITLE|translate)"
                tabindex="1"
                type="text">
       </mat-form-field>
@@ -27,11 +30,11 @@
       <mat-form-field>
         <mat-select [(ngModel)]="bookmarkCopy.type"
                     name="type"
-                    placeholder="Select a type"
+                    [placeholder]="(T.F.BOOKMARK.DIALOG_EDIT.SELECT_TYPE|translate)"
                     required="true"
                     tabindex="1">
           <mat-option *ngFor="let type of types"
-                      [innerHtml]="type.title"
+                      [innerHtml]="(type.title|translate)"
                       [value]="type.type">
           </mat-option>
         </mat-select>
@@ -44,7 +47,7 @@
                  [matAutocomplete]="auto"
                  aria-label="Number"
                  matInput
-                 placeholder="Select an icon"
+                 [placeholder]="(T.F.BOOKMARK.DIALOG_EDIT.SELECT_ICON|translate)"
                  type="text">
           <mat-icon matPrefix="">{{bookmarkCopy.icon}}</mat-icon>
           <mat-autocomplete #auto="matAutocomplete"
@@ -65,7 +68,7 @@
             color="primary"
             mat-button=""
             type="button">
-      Cancel
+      {{T.G.CANCEL|translate}}
     </button>
 
     <button [disabled]="!form.valid"
@@ -73,7 +76,7 @@
             mat-stroked-button=""
             type="submit">
       <mat-icon>save</mat-icon>
-      Save
+      {{T.G.SAVE|translate}}
     </button>
   </mat-dialog-actions>
 </form>

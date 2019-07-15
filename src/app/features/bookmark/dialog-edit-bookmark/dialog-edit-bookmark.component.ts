@@ -6,6 +6,8 @@ import {BookmarkCopy, BookmarkType} from '../bookmark.model';
 import {FormControl} from '@angular/forms';
 import {Observable} from 'rxjs';
 import {map, startWith} from 'rxjs/operators';
+import {T} from '../../../t.const';
+import {TranslateService} from '@ngx-translate/core';
 
 interface BookmarkSelectType {
   type: BookmarkType;
@@ -19,6 +21,7 @@ interface BookmarkSelectType {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DialogEditBookmarkComponent implements OnInit {
+  T = T;
   types: BookmarkSelectType[];
   bookmarkCopy: BookmarkCopy;
   customIcons: string[] = MATERIAL_ICONS;
@@ -35,6 +38,7 @@ export class DialogEditBookmarkComponent implements OnInit {
 
   constructor(
     private _matDialogRef: MatDialogRef<DialogEditBookmarkComponent>,
+    private _translateService: TranslateService,
     @Inject(MAT_DIALOG_DATA) public data: any
   ) {
   }
@@ -45,12 +49,12 @@ export class DialogEditBookmarkComponent implements OnInit {
       this.bookmarkCopy.type = 'LINK';
     }
     this.types = [
-      {type: 'LINK', title: 'Link (opens in browser)'},
-      {type: 'IMG', title: 'Image (shown as thumbnail)'},
+      {type: 'LINK', title: T.F.BOOKMARK.DIALOG_EDIT.TYPES.LINK},
+      {type: 'IMG', title: T.F.BOOKMARK.DIALOG_EDIT.TYPES.IMG},
     ];
     if (IS_ELECTRON) {
-      this.types.push({type: 'FILE', title: 'File (opened by default system app)'});
-      this.types.push({type: 'COMMAND', title: 'Command (custom shell command)'});
+      this.types.push({type: 'FILE', title: T.F.BOOKMARK.DIALOG_EDIT.TYPES.FILE});
+      this.types.push({type: 'COMMAND', title: T.F.BOOKMARK.DIALOG_EDIT.TYPES.COMMAND});
     }
   }
 
@@ -72,14 +76,14 @@ export class DialogEditBookmarkComponent implements OnInit {
   mapTypeToLabel(type: BookmarkType) {
     switch (type) {
       case 'FILE':
-        return 'File Path';
+        return T.F.BOOKMARK.DIALOG_EDIT.LABELS.LINK;
       case 'IMG':
-        return 'Image';
+        return T.F.BOOKMARK.DIALOG_EDIT.LABELS.IMG;
       case 'COMMAND':
-        return 'Command';
+        return T.F.BOOKMARK.DIALOG_EDIT.LABELS.COMMAND;
       case 'LINK':
       default:
-        return 'Url';
+        return T.F.BOOKMARK.DIALOG_EDIT.LABELS.LINK;
     }
   }
 }
