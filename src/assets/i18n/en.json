@@ -2,7 +2,8 @@
   "G": {
     "SAVE": "Save",
     "DISMISS": "Dismiss",
-    "CANCEL": "Cancel"
+    "CANCEL": "Cancel",
+    "TITLE": "Title"
   },
   "MH": {
     "GO_TO_TASK_LIST": "Go to task list",
@@ -109,16 +110,31 @@
     "IMPORT_FROM_FILE": "Import from file",
     "ARCHIVED_PROJECTS": "Archived Projects"
   },
-  "ATTACHMENT_LIST": {
-    "NO_ATTACHMENTS": "There are currently no attachments"
-  },
-  "ATTACHMENT_DIALOG": {
-  },
   "FILE_IMEX": {
     "EXPORT_DATA": "Export Data",
     "IMPORT_FROM_FILE": "Import from file"
   },
-  "D": {
+  "F": {
+    "ATTACHMENT": {
+      "LIST": {
+        "NO_ATTACHMENTS": "There are currently no attachments"
+      },
+      "DIALOG_EDIT": {
+        "ADD_ATTACHMENT": "Add Attachment",
+        "EDIT_ATTACHMENT": "Edit Attachment",
+        "SELECT_TYPE": "Select a type",
+        "TYPES": {
+          "LINK": "Link (opens in browser)",
+          "FILE": "File (opened by default system app)",
+          "IMG": "Image (shown as thumbnail)"
+        },
+        "LABELS": {
+          "LINK": "Url",
+          "FILE": "File Path",
+          "IMG": "Image"
+        }
+      }
+    }
   },
   "S": {
     "SYNC": {
