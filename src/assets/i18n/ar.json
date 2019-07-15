@@ -1,22 +1,174 @@
 {
+	"BL": {
+		"FROM_OTHER_PROJECTS": "من المشاريع الأخرى",
+		"NO_SCHEDULED": "لا توجد مهام مجدولة حاليًا. يمكنك جدولة مهمة عن طريق اختيار \"جدولة مهمة\" في قائمة سياق المهمة. لفتحه ، انقر على النقاط الثلاثة الصغيرة الموجودة على يمين المهمة.",
+		"NO_TASKS": "لا توجد حاليًا أية مهام في تراكمك",
+		"SCHEDULED": "المقرر",
+		"TITLE": "تراكم"
+	},
+	"F": {
+		"ATTACHMENT": {
+			"DIALOG_EDIT": {
+				"ADD_ATTACHMENT": "إضافة مرفق",
+				"EDIT_ATTACHMENT": "تحرير المرفق",
+				"LABELS": {
+					"FILE": "مسار الملف",
+					"IMG": "صورة",
+					"LINK": "رابط"
+				},
+				"SELECT_TYPE": "اختر نوع",
+				"TYPES": {
+					"FILE": "ملف (يتم فتحه بواسطة تطبيق النظام الافتراضي)",
+					"IMG": "صورة (تظهر كصورة مصغرة)",
+					"LINK": "الرابط (يفتح في المتصفح)"
+				}
+			},
+			"LIST": {
+				"NO_ATTACHMENTS": "لا يوجد حاليا أي مرفقات"
+			}
+		},
+		"BOOKMARK": {
+			"BAR": {
+				"DROP": "إسقاط هنا لإضافة إشارة مرجعية",
+				"NO_BOOKMARKS": "ليس لديك أي إشارات مرجعية للمشروع. أضف واحدة عبر السحب والإفلات أو بالنقر على أيقونة ''."
+			},
+			"DIALOG_EDIT": {
+				"ADD_BOOKMARK": "اضافة للمفضلة",
+				"EDIT_BOOKMARK": "تحرير إشارة مرجعية",
+				"LABELS": {
+					"COMMAND": "أمر",
+					"FILE": "مسار الملف",
+					"IMG": "صورة",
+					"LINK": "رابط"
+				},
+				"SELECT_ICON": "اختر أيقونة",
+				"SELECT_TYPE": "اختر نوع",
+				"TYPES": {
+					"COMMAND": "Command (أمر shell مخصص)",
+					"FILE": "ملف (يتم فتحه بواسطة تطبيق النظام الافتراضي)",
+					"IMG": "صورة (تظهر كصورة مصغرة)",
+					"LINK": "الرابط (يفتح في المتصفح)"
+				}
+			}
+		}
+	},
+	"FILE_IMEX": {
+		"EXPORT_DATA": "تصدير البيانات",
+		"IMPORT_FROM_FILE": "استيراد من الملف"
+	},
+	"F_LANG": {
+		"AR": "عربى",
+		"DE": "ألمانية",
+		"EN": "الإنجليزية",
+		"FR": "الفرنسية",
+		"JA": "اليابانية",
+		"LABEL": "يرجى تحديد لغة",
+		"RU": "الروسية",
+		"TR": "اللغة التركية",
+		"ZH": "صينى"
+	},
 	"F_MISC": {
-		"HELP": "",
-		"IS_AUTO_MARK_PARENT_AS_DONE": "",
-		"IS_CONFIRM_BEFORE_EXIT": "",
+		"HELP": "<p><strong>ألا ترى إعلامات سطح المكتب؟</strong> بالنسبة للنوافذ ، قد ترغب في التحقق من النظام> الإشعارات والإجراءات والتحقق من تمكين الإشعارات المطلوبة.</p>",
+		"IS_AUTO_MARK_PARENT_AS_DONE": "حدد المهمة الرئيسية كما فعلت ، عند الانتهاء من جميع المهام الفرعية",
+		"IS_CONFIRM_BEFORE_EXIT": "تأكيد قبل الخروج من التطبيق",
+		"IS_DISABLE_REMIND_WHEN_FORGOT_TO_FINISH_DAY": "تعطيل تذكير حول نسيان يوم الانتهاء",
+		"IS_HIDE_NAV": "إخفاء التنقل حتى يتم تمرير الرأس الرئيسي (سطح المكتب فقط)",
+		"IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "يخطر عند تجاوز تقدير الوقت",
 		"isDisableRemindWhenForgotToFinishDay": "",
 		"isHideNav": "",
 		"isNotifyWhenTimeEstimateExceeded": ""
 	},
+	"G": {
+		"CANCEL": "إلغاء",
+		"DISMISS": "رفض",
+		"SAVE": "حفظ",
+		"TITLE": "عنوان"
+	},
+	"MH": {
+		"ADD_NEW_TASK": "إضافة مهمة جديدة",
+		"CREATE_PROJECT": "إنشاء مشروع",
+		"GO_TO_TASK_LIST": "انتقل إلى قائمة المهام",
+		"MANAGE_PROJECTS": "إدارة المشاريع",
+		"METRICS": "المقاييس",
+		"PROCRASTINATE": "ماطل",
+		"PROJECTS": "مشاريع",
+		"PROJECT_MENU": "قائمة المشروع",
+		"SETTINGS": "الإعدادات",
+		"TASKS": "مهام",
+		"TASK_LIST": "قائمة المهام",
+		"TOGGLE_SHOW_BOOKMARKS": "إظهار / إخفاء الإشارات المرجعية",
+		"TOGGLE_SHOW_NOTES": "إظهار / إخفاء ملاحظات المشروع",
+		"TOGGLE_TRACK_TIME": "بدء / إيقاف تتبع الوقت",
+		"WORKLOG": "سجل العمل"
+	},
+	"PDS": {
+		"BACK": "انتظر نسيت شيئا!",
+		"BREAK_LABEL": "فترات الراحة (عدد / وقت)",
+		"CELEBRATE": "توقف لحظة للاحتفال <i>!</i>",
+		"CLEAR_ALL_CONTINUE": "مسح جميع القيام به والمتابعة",
+		"EVALUATION": "تقييم",
+		"EXPORT_TASK_LIST": "تصدير قائمة المهام",
+		"GOOGLE_SHEET": "ورقة جوجل",
+		"NO_TASKS": "لا توجد مهام لهذا اليوم",
+		"ROUND_15M": "تقريب جميع المهام إلى 15 دقيقة",
+		"ROUND_30M": "تقريب جميع المهام إلى 30 دقيقة",
+		"ROUND_5M": "تقريب جميع المهام إلى 5 دقائق",
+		"ROUND_TIME_SPENT": "جولة الوقت المستغرق",
+		"ROUND_TIME_SPENT_TITLE": "الوقت المستغرق في جميع المهام كن حذرا! لا يمكنك التراجع عن هذا!",
+		"ROUND_TIME_WARNING": "!!! كن حذرا لا يمكن التراجع عن هذا !!!",
+		"ROUND_UP_15M": "تقريب جميع المهام إلى 15 دقيقة",
+		"ROUND_UP_30M": "تقريب جميع المهام إلى 30 دقيقة",
+		"ROUND_UP_5M": "تقريب جميع المهام إلى 5 دقائق",
+		"SAVE_AND_GO_HOME": "حفظ والذهاب إلى المنزل",
+		"START_END": "بداية النهاية",
+		"SUMMARY_FOR": "ملخص يومي لـ {{dayStr}}",
+		"TASKS_COMPLETED": "المهام المكتملة",
+		"TASK_LIST": "قائمة المهام",
+		"TIME_SPENT_AND_ESTIMATE_LABEL": "الوقت المستغرق / المقدر",
+		"TIME_SPENT_ESTIMATE_TITLE": "الوقت المستغرق: إجمالي الوقت الذي يقضيه اليوم. المهام المؤرشفة غير المدرجة. - الوقت المقدر: الوقت المقدر للمهام التي عملت عليها اليوم مطروحًا منها الوقت الذي تقضيه بالفعل معهم في أيام أخرى.",
+		"TODAY": "اليوم",
+		"WEEK": "أسبوع"
+	},
+	"PM": {
+		"TITLE": "مقاييس المشروع"
+	},
+	"PP": {
+		"ARCHIVED_PROJECTS": "المشاريع المؤرشفة",
+		"ARCHIVE_PROJECT": "مشروع الأرشيف",
+		"CREATE_NEW": "خلق جديد إبداع جديد",
+		"DELETE_PROJECT": "حذف المشروع",
+		"EDIT_PROJECT": "تحرير المشروع",
+		"EXPORT_PROJECT": "مشروع التصدير",
+		"GITHUB_CONFIGURED": "جيثب التكامل تكوين",
+		"IMPORT_FROM_FILE": "استيراد من الملف",
+		"JIRA_CONFIGURED": "جيرا تكامل التكوين",
+		"TITLE": "ملخص المشروع",
+		"UN_ARCHIVE_PROJECT": "مشروع غير جذري"
+	},
+	"PS": {
+		"GLOBAL_SETTINGS": "الاعدادات العامة",
+		"PROJECT_SETTINGS": "إعدادات المشروع المحددة"
+	},
+	"S": {
+		"SYNC": {
+			"ERROR_FALLBACK_TO_BACKUP": "حدث خطأ ما أثناء استيراد البيانات. العودة إلى النسخ الاحتياطي المحلي.",
+			"ERROR_INVALID_DATA": "خطأ أثناء المزامنة. بيانات غير صالحة",
+			"IMPORTING": "استيراد البيانات",
+			"SUCCESS": "البيانات المستوردة"
+		}
+	},
 	"WW": {
-		"ADD_MORE": "",
-		"ADD_SOME_TASKS": "",
-		"ESTIMATE_REMAINING": "",
-		"FINISH_DAY": "",
-		"HELP_PROCRASTINATION": "",
-		"NO_PLANNED_TASKS": "",
-		"READY_TO_WORK": "",
-		"TIME_ESTIMATED": "",
-		"WITHOUT_BREAK": "",
-		"WORKING_TODAY": ""
+		"ADD_MORE": "أضف المزيد",
+		"ADD_SOME_TASKS": "أضف بعض المهام للتخطيط ليومك!",
+		"COMPLETED_TASKS": "المهام المنجزة",
+		"ESTIMATE_REMAINING": "تقدير المتبقي:",
+		"FINISH_DAY": "يوم النهاية",
+		"HELP_PROCRASTINATION": "مساعدة أنا المماطلة!",
+		"NO_COMPLETED_TASKS": "لا توجد مهام مكتملة حاليًا",
+		"NO_PLANNED_TASKS": "لا توجد مهام مخطط لها",
+		"READY_TO_WORK": "على استعداد للعمل!",
+		"TIME_ESTIMATED": "الوقت المقدر:",
+		"WITHOUT_BREAK": "بدون انقطاع:",
+		"WORKING_TODAY": "اعمل اليوم:"
 	}
 }

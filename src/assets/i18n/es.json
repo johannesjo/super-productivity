@@ -1,0 +1,174 @@
+{
+	"BL": {
+		"FROM_OTHER_PROJECTS": "De otros proyectos",
+		"NO_SCHEDULED": "Actualmente no hay tareas programadas. Puede programar una tarea seleccionando \"Programar tarea\" en el menú de contexto de la tarea. Para abrirlo, haga clic en los 3 puntos pequeños a la derecha de una tarea.",
+		"NO_TASKS": "Actualmente no hay tareas en tu backlog",
+		"SCHEDULED": "Programado",
+		"TITLE": "RESERVA"
+	},
+	"F": {
+		"ATTACHMENT": {
+			"DIALOG_EDIT": {
+				"ADD_ATTACHMENT": "Añadir un adjunto",
+				"EDIT_ATTACHMENT": "Editar adjunto",
+				"LABELS": {
+					"FILE": "Ruta de archivo",
+					"IMG": "Imagen",
+					"LINK": "Url"
+				},
+				"SELECT_TYPE": "Seleccione un tipo",
+				"TYPES": {
+					"FILE": "Archivo (abierto por la aplicación predeterminada del sistema)",
+					"IMG": "Imagen (mostrada como miniatura)",
+					"LINK": "Enlace (se abre en el navegador)"
+				}
+			},
+			"LIST": {
+				"NO_ATTACHMENTS": "Actualmente no hay adjuntos."
+			}
+		},
+		"BOOKMARK": {
+			"BAR": {
+				"DROP": "Suelta aquí para agregar un marcador",
+				"NO_BOOKMARKS": "No tienes marcadores de proyectos. Agregue una a través de arrastrar y soltar o haciendo clic en el ícono ''."
+			},
+			"DIALOG_EDIT": {
+				"ADD_BOOKMARK": "Añadir marcador",
+				"EDIT_BOOKMARK": "Editar marcador",
+				"LABELS": {
+					"COMMAND": "Mando",
+					"FILE": "Ruta de archivo",
+					"IMG": "Imagen",
+					"LINK": "Url"
+				},
+				"SELECT_ICON": "Seleccione un icono",
+				"SELECT_TYPE": "Seleccione un tipo",
+				"TYPES": {
+					"COMMAND": "Comando (comando shell personalizado)",
+					"FILE": "Archivo (abierto por la aplicación predeterminada del sistema)",
+					"IMG": "Imagen (mostrada como miniatura)",
+					"LINK": "Enlace (se abre en el navegador)"
+				}
+			}
+		}
+	},
+	"FILE_IMEX": {
+		"EXPORT_DATA": "Exportar datos",
+		"IMPORT_FROM_FILE": "Importar desde archivo"
+	},
+	"F_LANG": {
+		"AR": "Arábica",
+		"DE": "alemán",
+		"EN": "Inglés",
+		"FR": "francés",
+		"JA": "japonés",
+		"LABEL": "Por favor, seleccione un idioma",
+		"RU": "ruso",
+		"TR": "turco",
+		"ZH": "chino"
+	},
+	"F_MISC": {
+		"HELP": "<p><strong>¿No ve las notificaciones de escritorio?</strong> Para Windows, es posible que desee revisar Sistema> Notificaciones y acciones y verificar si se han habilitado las notificaciones requeridas.</p>",
+		"IS_AUTO_MARK_PARENT_AS_DONE": "Marque la tarea principal como hecha, cuando todas las sub tareas estén listas",
+		"IS_CONFIRM_BEFORE_EXIT": "Confirmar antes de salir de la aplicación.",
+		"IS_DISABLE_REMIND_WHEN_FORGOT_TO_FINISH_DAY": "Deshabilitar el recordatorio sobre el día de finalización olvidado",
+		"IS_HIDE_NAV": "Ocultar la navegación hasta que se desplace el encabezado principal (solo en el escritorio)",
+		"IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Notificar cuando se excedió el tiempo estimado",
+		"isDisableRemindWhenForgotToFinishDay": "",
+		"isHideNav": "",
+		"isNotifyWhenTimeEstimateExceeded": ""
+	},
+	"G": {
+		"CANCEL": "Cancelar",
+		"DISMISS": "Despedir",
+		"SAVE": "Salvar",
+		"TITLE": "Título"
+	},
+	"MH": {
+		"ADD_NEW_TASK": "Agregar nueva tarea",
+		"CREATE_PROJECT": "Crear proyecto",
+		"GO_TO_TASK_LIST": "Ir a la lista de tareas",
+		"MANAGE_PROJECTS": "Administrar proyectos",
+		"METRICS": "Métrica",
+		"PROCRASTINATE": "Aplazar",
+		"PROJECTS": "Proyectos",
+		"PROJECT_MENU": "Menú de proyecto",
+		"SETTINGS": "Ajustes",
+		"TASKS": "Tareas",
+		"TASK_LIST": "Lista de tareas",
+		"TOGGLE_SHOW_BOOKMARKS": "Mostrar / Ocultar Marcadores",
+		"TOGGLE_SHOW_NOTES": "Mostrar / Ocultar Notas del Proyecto",
+		"TOGGLE_TRACK_TIME": "Iniciar / detener el tiempo de seguimiento",
+		"WORKLOG": "Registro de trabajo"
+	},
+	"PDS": {
+		"BACK": "Espera me olvidé de algo!",
+		"BREAK_LABEL": "Descansos (nr / tiempo)",
+		"CELEBRATE": "¡Tómate un momento para celebrar <i>!</i>",
+		"CLEAR_ALL_CONTINUE": "Borrar todo listo y continuar",
+		"EVALUATION": "Evaluación",
+		"EXPORT_TASK_LIST": "Lista de tareas de exportación",
+		"GOOGLE_SHEET": "Hoja de Google",
+		"NO_TASKS": "No hay tareas para este día.",
+		"ROUND_15M": "Redondear todas las tareas a 15 minutos.",
+		"ROUND_30M": "Redondear todas las tareas a 30 minutos.",
+		"ROUND_5M": "Redondear todas las tareas a 5 minutos.",
+		"ROUND_TIME_SPENT": "Tiempo Redondo Pasado",
+		"ROUND_TIME_SPENT_TITLE": "Tiempo redondo dedicado a todas las tareas. ¡Ten cuidado! ¡No puedes deshacer esto!",
+		"ROUND_TIME_WARNING": "!!! ¡Cuidado, esto no se puede deshacer!",
+		"ROUND_UP_15M": "Redondea todas las tareas a 15 minutos",
+		"ROUND_UP_30M": "Redondea todas las tareas a 30 minutos",
+		"ROUND_UP_5M": "Redondea todas las tareas a 5 minutos.",
+		"SAVE_AND_GO_HOME": "Ahorra y vete a casa",
+		"START_END": "Inicio fin",
+		"SUMMARY_FOR": "Resumen diario de {{dayStr}}",
+		"TASKS_COMPLETED": "Tareas completadas",
+		"TASK_LIST": "Lista de tareas",
+		"TIME_SPENT_AND_ESTIMATE_LABEL": "Tiempo empleado / estimado",
+		"TIME_SPENT_ESTIMATE_TITLE": "Tiempo empleado: Tiempo total empleado hoy. Tareas archivadas no incluidas. - Tiempo estimado: tiempo estimado para las tareas en las que se trabajó hoy, menos el tiempo que ya pasó con ellas en otros días.",
+		"TODAY": "Hoy",
+		"WEEK": "semana"
+	},
+	"PM": {
+		"TITLE": "Métricas del proyecto"
+	},
+	"PP": {
+		"ARCHIVED_PROJECTS": "Proyectos archivados",
+		"ARCHIVE_PROJECT": "Proyecto de archivo",
+		"CREATE_NEW": "Crear nuevo",
+		"DELETE_PROJECT": "Eliminar proyecto",
+		"EDIT_PROJECT": "Editar proyecto",
+		"EXPORT_PROJECT": "Proyecto de exportación",
+		"GITHUB_CONFIGURED": "Integración de Github configurada",
+		"IMPORT_FROM_FILE": "Importar desde archivo",
+		"JIRA_CONFIGURED": "Integración de Jira Configurada",
+		"TITLE": "Descripción del proyecto",
+		"UN_ARCHIVE_PROJECT": "Proyecto Unarchive"
+	},
+	"PS": {
+		"GLOBAL_SETTINGS": "Ajustes globales",
+		"PROJECT_SETTINGS": "Configuraciones Específicas del Proyecto"
+	},
+	"S": {
+		"SYNC": {
+			"ERROR_FALLBACK_TO_BACKUP": "Algo salió mal al importar los datos. Volviendo a la copia de seguridad local.",
+			"ERROR_INVALID_DATA": "Error al sincronizar. Datos inválidos",
+			"IMPORTING": "Importando datos",
+			"SUCCESS": "Datos importados"
+		}
+	},
+	"WW": {
+		"ADD_MORE": "Añadir más",
+		"ADD_SOME_TASKS": "¡Agrega algunas tareas para planificar tu día!",
+		"COMPLETED_TASKS": "Tareas completadas",
+		"ESTIMATE_REMAINING": "Estimación restante:",
+		"FINISH_DAY": "Fin de dia",
+		"HELP_PROCRASTINATION": "Ayuda, estoy postergando!",
+		"NO_COMPLETED_TASKS": "Actualmente no hay tareas completadas.",
+		"NO_PLANNED_TASKS": "No hay tareas planificadas",
+		"READY_TO_WORK": "¡Listo para trabajar!",
+		"TIME_ESTIMATED": "Tiempo estimado:",
+		"WITHOUT_BREAK": "Sin descanso:",
+		"WORKING_TODAY": "Trabajando hoy:"
+	}
+}

@@ -1,22 +1,174 @@
 {
+	"BL": {
+		"FROM_OTHER_PROJECTS": "他のプロジェクトから",
+		"NO_SCHEDULED": "現在スケジュールされているタスクはありません。タスクのコンテキストメニューで[タスクのスケジュール]を選択してタスクをスケジュールできます。開くには、タスクの右側にある3つの小さな点をクリックします。",
+		"NO_TASKS": "現在、バックログにタスクはありません",
+		"SCHEDULED": "予定",
+		"TITLE": "バックログ"
+	},
+	"F": {
+		"ATTACHMENT": {
+			"DIALOG_EDIT": {
+				"ADD_ATTACHMENT": "添付ファイルを追加する",
+				"EDIT_ATTACHMENT": "添付ファイルを編集",
+				"LABELS": {
+					"FILE": "ファイルパス",
+					"IMG": "画像",
+					"LINK": "URL"
+				},
+				"SELECT_TYPE": "タイプを選択",
+				"TYPES": {
+					"FILE": "ファイル（デフォルトのシステムアプリで開かれる）",
+					"IMG": "画像（サムネイル表示）",
+					"LINK": "リンク（ブラウザで開きます）"
+				}
+			},
+			"LIST": {
+				"NO_ATTACHMENTS": "現在添付ファイルはありません"
+			}
+		},
+		"BOOKMARK": {
+			"BAR": {
+				"DROP": "ブックマークを追加するには、ここにドロップしてください",
+				"NO_BOOKMARKS": "プロジェクトのブックマークがありません。ドラッグアンドドロップ、またはアイコンをクリックして追加してください。"
+			},
+			"DIALOG_EDIT": {
+				"ADD_BOOKMARK": "ブックマークを追加",
+				"EDIT_BOOKMARK": "ブックマークを編集",
+				"LABELS": {
+					"COMMAND": "コマンド",
+					"FILE": "ファイルパス",
+					"IMG": "画像",
+					"LINK": "URL"
+				},
+				"SELECT_ICON": "アイコンを選択",
+				"SELECT_TYPE": "タイプを選択",
+				"TYPES": {
+					"COMMAND": "コマンド（カスタムシェルコマンド）",
+					"FILE": "ファイル（デフォルトのシステムアプリで開かれる）",
+					"IMG": "画像（サムネイル表示）",
+					"LINK": "リンク（ブラウザで開きます）"
+				}
+			}
+		}
+	},
+	"FILE_IMEX": {
+		"EXPORT_DATA": "データのエクスポート",
+		"IMPORT_FROM_FILE": "ファイルからインポート"
+	},
+	"F_LANG": {
+		"AR": "アラビア語",
+		"DE": "ドイツ人",
+		"EN": "英語",
+		"FR": "フランス語",
+		"JA": "日本人",
+		"LABEL": "言語を選択してください",
+		"RU": "ロシア",
+		"TR": "トルコ語",
+		"ZH": "中国語"
+	},
 	"F_MISC": {
-		"HELP": "",
-		"IS_AUTO_MARK_PARENT_AS_DONE": "",
-		"IS_CONFIRM_BEFORE_EXIT": "",
+		"HELP": "<p><strong>デスクトップ通知が表示されませんか？</strong> Windowsの場合は、[システム]> [通知とアクション]を確認し、必要な通知が有効になっているかどうかを確認します。</p>",
+		"IS_AUTO_MARK_PARENT_AS_DONE": "すべてのサブタスクが完了したら、親タスクを完了としてマークする",
+		"IS_CONFIRM_BEFORE_EXIT": "アプリを終了する前に確認してください",
+		"IS_DISABLE_REMIND_WHEN_FORGOT_TO_FINISH_DAY": "終了日を忘れた場合の通知を無効にする",
+		"IS_HIDE_NAV": "メインヘッダーが表示されるまでナビゲーションを非表示にする（デスクトップのみ）",
+		"IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "見積もり時間を超えたときに通知する",
 		"isDisableRemindWhenForgotToFinishDay": "",
 		"isHideNav": "",
 		"isNotifyWhenTimeEstimateExceeded": ""
 	},
+	"G": {
+		"CANCEL": "キャンセル",
+		"DISMISS": "やめる",
+		"SAVE": "保存する",
+		"TITLE": "タイトル"
+	},
+	"MH": {
+		"ADD_NEW_TASK": "新しいタスクを追加する",
+		"CREATE_PROJECT": "プロジェクトを作成",
+		"GO_TO_TASK_LIST": "タスクリストへ",
+		"MANAGE_PROJECTS": "プロジェクトを管理する",
+		"METRICS": "メトリック",
+		"PROCRASTINATE": "先延ばし",
+		"PROJECTS": "プロジェクト",
+		"PROJECT_MENU": "プロジェクトメニュー",
+		"SETTINGS": "設定",
+		"TASKS": "タスク",
+		"TASK_LIST": "タスクリスト",
+		"TOGGLE_SHOW_BOOKMARKS": "ブックマークの表示/非表示",
+		"TOGGLE_SHOW_NOTES": "プロジェクトノートの表示/非表示",
+		"TOGGLE_TRACK_TIME": "追跡時間の開始/停止",
+		"WORKLOG": "作業記録"
+	},
+	"PDS": {
+		"BACK": "私が何かを忘れたのを待つ！",
+		"BREAK_LABEL": "休憩（年/月）",
+		"CELEBRATE": " <i>を祝いましょう。</i>",
+		"CLEAR_ALL_CONTINUE": "完了したすべてをクリアして続行",
+		"EVALUATION": "評価",
+		"EXPORT_TASK_LIST": "タスクリストのエクスポート",
+		"GOOGLE_SHEET": "グーグルシート",
+		"NO_TASKS": "この日は何もしていません",
+		"ROUND_15M": "すべてのタスクを15分に丸める",
+		"ROUND_30M": "すべてのタスクを30分に丸める",
+		"ROUND_5M": "すべてのタスクを5分に丸める",
+		"ROUND_TIME_SPENT": "ラウンド時間",
+		"ROUND_TIME_SPENT_TITLE": "すべてのタスクにかかったラウンド時間。注意してください！これを元に戻すことはできません。",
+		"ROUND_TIME_WARNING": "!!!これを元に戻すことはできません注意してください！",
+		"ROUND_UP_15M": "すべてのタスクを15分に切り上げます",
+		"ROUND_UP_30M": "すべてのタスクを30分に切り上げます",
+		"ROUND_UP_5M": "すべてのタスクを5分に切り上げ",
+		"SAVE_AND_GO_HOME": "保存して家に帰る",
+		"START_END": "始まりと終わり",
+		"SUMMARY_FOR": " {{dayStr}}の日別サマリー",
+		"TASKS_COMPLETED": "完了したタスク",
+		"TASK_LIST": "タスクリスト",
+		"TIME_SPENT_AND_ESTIMATE_LABEL": "経過時間/推定",
+		"TIME_SPENT_ESTIMATE_TITLE": "過ごした時間：今日過ごした合計時間。アーカイブされたタスクは含まれていません。 - 推定時間：今日作業したタスクについて推定された時間から、他の日にすでにそれらに費やした時間を差し引いたもの。",
+		"TODAY": "今日",
+		"WEEK": "週間"
+	},
+	"PM": {
+		"TITLE": "プロジェクトメトリクス"
+	},
+	"PP": {
+		"ARCHIVED_PROJECTS": "アーカイブプロジェクト",
+		"ARCHIVE_PROJECT": "アーカイブプロジェクト",
+		"CREATE_NEW": "新しく作る",
+		"DELETE_PROJECT": "プロジェクトを削除",
+		"EDIT_PROJECT": "プロジェクトを編集",
+		"EXPORT_PROJECT": "プロジェクトをエクスポート",
+		"GITHUB_CONFIGURED": "Github統合を設定済み",
+		"IMPORT_FROM_FILE": "ファイルからインポート",
+		"JIRA_CONFIGURED": "Jira統合が設定されました",
+		"TITLE": "プロジェクト概要",
+		"UN_ARCHIVE_PROJECT": "アンアーカイブプロジェクト"
+	},
+	"PS": {
+		"GLOBAL_SETTINGS": "全体設定",
+		"PROJECT_SETTINGS": "プロジェクト固有の設定"
+	},
+	"S": {
+		"SYNC": {
+			"ERROR_FALLBACK_TO_BACKUP": "データのインポート中に問題が発生しました。ローカルバックアップにフォールバックします。",
+			"ERROR_INVALID_DATA": "同期中にエラーが発生しました。無効なデータ",
+			"IMPORTING": "データをインポートする",
+			"SUCCESS": "インポートされたデータ"
+		}
+	},
 	"WW": {
 		"ADD_MORE": "さらに追加",
 		"ADD_SOME_TASKS": "あなたの一日を計画するためにいくつかのタスクを追加してください！",
+		"COMPLETED_TASKS": "完了したタスク",
 		"ESTIMATE_REMAINING": "EST（東部基準時。残り：",
 		"FINISH_DAY": "終了日",
 		"HELP_PROCRASTINATION": "先延ばしにしてください！",
+		"NO_COMPLETED_TASKS": "現在完了したタスクはありません",
 		"NO_PLANNED_TASKS": "計画タスクなし",
-		"READY_TO_WORK": "",
-		"TIME_ESTIMATED": "",
-		"WITHOUT_BREAK": "",
-		"WORKING_TODAY": ""
+		"READY_TO_WORK": "準備オーケー！",
+		"TIME_ESTIMATED": "推定所要時間：",
+		"WITHOUT_BREAK": "休むことなく：",
+		"WORKING_TODAY": "今日働く"
 	}
 }

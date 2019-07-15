@@ -1,22 +1,174 @@
 {
+	"BL": {
+		"FROM_OTHER_PROJECTS": "Diğer Projelerden",
+		"NO_SCHEDULED": "Şu anda zamanlanmış görev yok. Görev bağlamı menüsünde \"Görevi Zamanla\" seçeneğini seçerek bir görevi zamanlayabilirsiniz. Açmak için görevin sağındaki 3 küçük noktaya tıklayın.",
+		"NO_TASKS": "İş günlüğünüzde şu anda görev yok",
+		"SCHEDULED": "tarifeli",
+		"TITLE": "birikim"
+	},
+	"F": {
+		"ATTACHMENT": {
+			"DIALOG_EDIT": {
+				"ADD_ATTACHMENT": "Eklenti ekle",
+				"EDIT_ATTACHMENT": "Eki Düzenle",
+				"LABELS": {
+					"FILE": "Dosya yolu",
+					"IMG": "görüntü",
+					"LINK": "Url"
+				},
+				"SELECT_TYPE": "Bir tür seçin",
+				"TYPES": {
+					"FILE": "Dosya (varsayılan sistem uygulaması tarafından açıldı)",
+					"IMG": "Resim (küçük resim olarak gösterilir)",
+					"LINK": "Bağlantı (tarayıcıda açılır)"
+				}
+			},
+			"LIST": {
+				"NO_ATTACHMENTS": "Şu anda hiçbir ek yok"
+			}
+		},
+		"BOOKMARK": {
+			"BAR": {
+				"DROP": "Yer imi eklemek için buraya bırakın",
+				"NO_BOOKMARKS": "Proje yer imleriniz yok. Sürükle ve bırak yöntemiyle veya '' simgesini tıklatarak ekleyin."
+			},
+			"DIALOG_EDIT": {
+				"ADD_BOOKMARK": "İmi eklemek",
+				"EDIT_BOOKMARK": "Yer İşaretini Düzenle",
+				"LABELS": {
+					"COMMAND": "komuta",
+					"FILE": "Dosya yolu",
+					"IMG": "görüntü",
+					"LINK": "Url"
+				},
+				"SELECT_ICON": "Bir simge seçin",
+				"SELECT_TYPE": "Bir tür seçin",
+				"TYPES": {
+					"COMMAND": "Komut (özel kabuk komutu)",
+					"FILE": "Dosya (varsayılan sistem uygulaması tarafından açıldı)",
+					"IMG": "Resim (küçük resim olarak gösterilir)",
+					"LINK": "Bağlantı (tarayıcıda açılır)"
+				}
+			}
+		}
+	},
+	"FILE_IMEX": {
+		"EXPORT_DATA": "Verileri Dışa Aktar",
+		"IMPORT_FROM_FILE": "Dosyadan içe aktar"
+	},
+	"F_LANG": {
+		"AR": "Arapça",
+		"DE": "Almanca",
+		"EN": "ingilizce",
+		"FR": "Fransızca",
+		"JA": "Japonca",
+		"LABEL": "Lütfen bir dil seçin",
+		"RU": "Rusça",
+		"TR": "Türk",
+		"ZH": "Çince"
+	},
 	"F_MISC": {
-		"HELP": "",
-		"IS_AUTO_MARK_PARENT_AS_DONE": "",
-		"IS_CONFIRM_BEFORE_EXIT": "",
+		"HELP": "<p><strong>Masaüstü Bildirimleri'ni göremiyor musunuz?</strong> Pencereler için Sistem> Bildirimler ve eylemleri kontrol etmek ve gerekli bildirimlerin etkin olup olmadığını kontrol etmek isteyebilirsiniz.</p>",
+		"IS_AUTO_MARK_PARENT_AS_DONE": "Tüm alt görevler tamamlandığında ana görevi yapıldığı gibi işaretle",
+		"IS_CONFIRM_BEFORE_EXIT": "Uygulamadan çıkmadan önce onayla",
+		"IS_DISABLE_REMIND_WHEN_FORGOT_TO_FINISH_DAY": "Unutulmuş bitiş günü hakkında hatırlatıcıyı devre dışı bırakın",
+		"IS_HIDE_NAV": "Ana başlık yönlendirilene kadar gezinmeyi gizle (yalnızca masaüstü)",
+		"IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Zaman hesaplamasının ne zaman aşıldığını bildir",
 		"isDisableRemindWhenForgotToFinishDay": "",
 		"isHideNav": "",
 		"isNotifyWhenTimeEstimateExceeded": ""
 	},
+	"G": {
+		"CANCEL": "İptal etmek",
+		"DISMISS": "Reddet",
+		"SAVE": "Kayıt etmek",
+		"TITLE": "Başlık"
+	},
+	"MH": {
+		"ADD_NEW_TASK": "Yeni Görev ekle",
+		"CREATE_PROJECT": "Proje Yarat",
+		"GO_TO_TASK_LIST": "Görev listesine git",
+		"MANAGE_PROJECTS": "Projeleri Yönet",
+		"METRICS": "Metrik",
+		"PROCRASTINATE": "ertelemek",
+		"PROJECTS": "Projeler",
+		"PROJECT_MENU": "Proje Menüsü",
+		"SETTINGS": "ayarlar",
+		"TASKS": "Görevler",
+		"TASK_LIST": "Görev listesi",
+		"TOGGLE_SHOW_BOOKMARKS": "Yer İşaretlerini Göster / Gizle",
+		"TOGGLE_SHOW_NOTES": "Proje Notlarını Göster / Gizle",
+		"TOGGLE_TRACK_TIME": "Başlat / Durdur takip süresi",
+		"WORKLOG": "worklog"
+	},
+	"PDS": {
+		"BACK": "Bekle bir şey unuttum!",
+		"BREAK_LABEL": "Sonları (saat / saat)",
+		"CELEBRATE": " <i>kutlamak için bir dakikanızı ayırın!</i>",
+		"CLEAR_ALL_CONTINUE": "Hepsini temizle ve devam et",
+		"EVALUATION": "Değerlendirme",
+		"EXPORT_TASK_LIST": "Görev Listesini Dışa Aktar",
+		"GOOGLE_SHEET": "Google Sayfası",
+		"NO_TASKS": "Bu gün için görev yok",
+		"ROUND_15M": "Tüm görevleri 15 dakikaya yuvarlayın",
+		"ROUND_30M": "Tüm görevleri 30 dakikaya yuvarlayın",
+		"ROUND_5M": "Tüm görevleri 5 dakikaya yuvarlayın",
+		"ROUND_TIME_SPENT": "Geçen Zaman Harcandı",
+		"ROUND_TIME_SPENT_TITLE": "Tüm görevlere zaman ayırdı. Dikkatli ol! Bunu geri alamazsınız!",
+		"ROUND_TIME_WARNING": "!!! Dikkatli olun bu geri alınamaz !!!",
+		"ROUND_UP_15M": "Tüm görevleri 15 dakikaya tamamlayın",
+		"ROUND_UP_30M": "Tüm görevleri 30 dakikaya tamamlayın",
+		"ROUND_UP_5M": "Tüm görevleri 5 dakikaya tamamlayın",
+		"SAVE_AND_GO_HOME": "Kaydet ve eve git",
+		"START_END": "Başlangıç - Bitiş",
+		"SUMMARY_FOR": " {{dayStr}}Günlük Özeti",
+		"TASKS_COMPLETED": "Tamamlanan Görevler",
+		"TASK_LIST": "Görev listesi",
+		"TIME_SPENT_AND_ESTIMATE_LABEL": "Harcanan Zaman / Tahmini",
+		"TIME_SPENT_ESTIMATE_TITLE": "Harcanan Zaman: Bugün harcanan toplam süre. Arşivlenmiş görevler dahil değildir. - Tahmini Süre: Günümüzde çalışılan görevler için tahmini süre eksi diğer günlerde onlarla harcanan zaman.",
+		"TODAY": "Bugün",
+		"WEEK": "Hafta"
+	},
+	"PM": {
+		"TITLE": "Proje Metrikleri"
+	},
+	"PP": {
+		"ARCHIVED_PROJECTS": "Arşivlenmiş Projeler",
+		"ARCHIVE_PROJECT": "Arşiv Projesi",
+		"CREATE_NEW": "Yeni oluşturmak",
+		"DELETE_PROJECT": "Projeyi Sil",
+		"EDIT_PROJECT": "Projeyi Düzenle",
+		"EXPORT_PROJECT": "İhracat Projesi",
+		"GITHUB_CONFIGURED": "Github Entegrasyonu Yapılandırıldı",
+		"IMPORT_FROM_FILE": "Dosyadan içe aktar",
+		"JIRA_CONFIGURED": "Jira Entegrasyonu Yapılandırıldı",
+		"TITLE": "Projeye Genel Bakış",
+		"UN_ARCHIVE_PROJECT": "Silahsız Proje"
+	},
+	"PS": {
+		"GLOBAL_SETTINGS": "Genel Ayarlar",
+		"PROJECT_SETTINGS": "Projeye Özel Ayarlar"
+	},
+	"S": {
+		"SYNC": {
+			"ERROR_FALLBACK_TO_BACKUP": "Veriler alınırken bir şeyler ters gitti. Yerel yedeklemeye geri dönüyorum.",
+			"ERROR_INVALID_DATA": "Senkronizasyon sırasında hata oluştu. Geçersiz veri",
+			"IMPORTING": "Veri alınıyor",
+			"SUCCESS": "Alınan veri"
+		}
+	},
 	"WW": {
-		"ADD_MORE": "",
-		"ADD_SOME_TASKS": "",
-		"ESTIMATE_REMAINING": "",
-		"FINISH_DAY": "",
-		"HELP_PROCRASTINATION": "",
-		"NO_PLANNED_TASKS": "",
-		"READY_TO_WORK": "",
-		"TIME_ESTIMATED": "",
-		"WITHOUT_BREAK": "",
-		"WORKING_TODAY": ""
+		"ADD_MORE": "Daha ekle",
+		"ADD_SOME_TASKS": "Gününüzü planlamak için bazı görevler ekleyin!",
+		"COMPLETED_TASKS": "Tamamlanan Görevler",
+		"ESTIMATE_REMAINING": "Kalan tahmini:",
+		"FINISH_DAY": "Bitiş günü",
+		"HELP_PROCRASTINATION": "Erteliyorum yardım ediyorum!",
+		"NO_COMPLETED_TASKS": "Şu anda tamamlanmış bir görev yok.",
+		"NO_PLANNED_TASKS": "Planlanmış görev yok",
+		"READY_TO_WORK": "Çalışmaya hazır!",
+		"TIME_ESTIMATED": "Tahmini Süre:",
+		"WITHOUT_BREAK": "Ara vermeden:",
+		"WORKING_TODAY": "Bugün çalışıyorum:"
 	}
 }

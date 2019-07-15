@@ -1,22 +1,174 @@
 {
+	"BL": {
+		"FROM_OTHER_PROJECTS": "来自其他项目",
+		"NO_SCHEDULED": "目前没有计划任务。您可以通过在任务上下文菜单中选择“计划任务”来计划任务。要打开它，请单击任务右侧的3个小点。",
+		"NO_TASKS": "您的待办事项中目前没有任务",
+		"SCHEDULED": "计划",
+		"TITLE": "积压"
+	},
+	"F": {
+		"ATTACHMENT": {
+			"DIALOG_EDIT": {
+				"ADD_ATTACHMENT": "添加附件",
+				"EDIT_ATTACHMENT": "编辑附件",
+				"LABELS": {
+					"FILE": "文件路径",
+					"IMG": "图片",
+					"LINK": "网址"
+				},
+				"SELECT_TYPE": "选择一种类型",
+				"TYPES": {
+					"FILE": "文件（默认打开系统应用程序）",
+					"IMG": "图像（显示为缩略图）",
+					"LINK": "链接（在浏览器中打开）"
+				}
+			},
+			"LIST": {
+				"NO_ATTACHMENTS": "目前没有附件"
+			}
+		},
+		"BOOKMARK": {
+			"BAR": {
+				"DROP": "点击此处添加书签",
+				"NO_BOOKMARKS": "您没有项目书签。通过拖放或单击“图标”添加一个。"
+			},
+			"DIALOG_EDIT": {
+				"ADD_BOOKMARK": "添加书签",
+				"EDIT_BOOKMARK": "编辑书签",
+				"LABELS": {
+					"COMMAND": "命令",
+					"FILE": "文件路径",
+					"IMG": "图片",
+					"LINK": "网址"
+				},
+				"SELECT_ICON": "选择一个图标",
+				"SELECT_TYPE": "选择一种类型",
+				"TYPES": {
+					"COMMAND": "命令（自定义shell命令）",
+					"FILE": "文件（默认打开系统应用程序）",
+					"IMG": "图像（显示为缩略图）",
+					"LINK": "链接（在浏览器中打开）"
+				}
+			}
+		}
+	},
+	"FILE_IMEX": {
+		"EXPORT_DATA": "导出数据",
+		"IMPORT_FROM_FILE": "从文件导入"
+	},
+	"F_LANG": {
+		"AR": "阿拉伯",
+		"DE": "德语",
+		"EN": "英语",
+		"FR": "法国",
+		"JA": "日本",
+		"LABEL": "请选择一种语言",
+		"RU": "俄语",
+		"TR": "土耳其",
+		"ZH": "中文"
+	},
 	"F_MISC": {
-		"HELP": "",
-		"IS_AUTO_MARK_PARENT_AS_DONE": "",
-		"IS_CONFIRM_BEFORE_EXIT": "",
+		"HELP": "<p><strong>没有看到桌面通知？</strong> 对于Windows，您可能需要检查系统>通知和操作，并检查是否已启用所需的通知。</p>",
+		"IS_AUTO_MARK_PARENT_AS_DONE": "完成所有子任务后，将父任务标记为已完成",
+		"IS_CONFIRM_BEFORE_EXIT": "退出应用前确认",
+		"IS_DISABLE_REMIND_WHEN_FORGOT_TO_FINISH_DAY": "禁用有关遗忘完成日的提醒",
+		"IS_HIDE_NAV": "隐藏导航，直到主标题悬停（仅限桌面）",
+		"IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "超出时间估算时通知",
 		"isDisableRemindWhenForgotToFinishDay": "",
 		"isHideNav": "",
 		"isNotifyWhenTimeEstimateExceeded": ""
 	},
+	"G": {
+		"CANCEL": "取消",
+		"DISMISS": "解雇",
+		"SAVE": "保存",
+		"TITLE": "标题"
+	},
+	"MH": {
+		"ADD_NEW_TASK": "添加新任务",
+		"CREATE_PROJECT": "创建项目",
+		"GO_TO_TASK_LIST": "转到任务列表",
+		"MANAGE_PROJECTS": "管理项目",
+		"METRICS": "度量",
+		"PROCRASTINATE": "拖延",
+		"PROJECTS": "项目",
+		"PROJECT_MENU": "项目菜单",
+		"SETTINGS": "设置",
+		"TASKS": "任务",
+		"TASK_LIST": "任务列表",
+		"TOGGLE_SHOW_BOOKMARKS": "显示/隐藏书签",
+		"TOGGLE_SHOW_NOTES": "显示/隐藏项目备注",
+		"TOGGLE_TRACK_TIME": "开始/停止跟踪时间",
+		"WORKLOG": "工作日志"
+	},
+	"PDS": {
+		"BACK": "等等我忘记了什么！",
+		"BREAK_LABEL": "休息（nr /时间）",
+		"CELEBRATE": "花一点时间来庆祝 <i>！</i>",
+		"CLEAR_ALL_CONTINUE": "清除所有完成并继续",
+		"EVALUATION": "评估",
+		"EXPORT_TASK_LIST": "导出任务列表",
+		"GOOGLE_SHEET": "Google表格",
+		"NO_TASKS": "今天没有任务",
+		"ROUND_15M": "将所有任务舍入到15分钟",
+		"ROUND_30M": "将所有任务舍入到30分钟",
+		"ROUND_5M": "将所有任务舍入到5分钟",
+		"ROUND_TIME_SPENT": "花了很长时间",
+		"ROUND_TIME_SPENT_TITLE": "花在所有任务上的时间。小心！你不能撤消这个！",
+		"ROUND_TIME_WARNING": "！小心这不能撤消！",
+		"ROUND_UP_15M": "将所有任务完成为15分钟",
+		"ROUND_UP_30M": "将所有任务完成30分钟",
+		"ROUND_UP_5M": "将所有任务完成为5分钟",
+		"SAVE_AND_GO_HOME": "保存并回家",
+		"START_END": "开始 - 结束",
+		"SUMMARY_FOR": " {{dayStr}}的每日摘要",
+		"TASKS_COMPLETED": "任务已完成",
+		"TASK_LIST": "任务列表",
+		"TIME_SPENT_AND_ESTIMATE_LABEL": "花费的时间/估计",
+		"TIME_SPENT_ESTIMATE_TITLE": "花费的时间：今天花费的总时间。存档的任务不包括在内。 - 估计时间：今天工作的任务估计时间减去其他日子已经花费的时间。",
+		"TODAY": "今天",
+		"WEEK": "周"
+	},
+	"PM": {
+		"TITLE": "项目指标"
+	},
+	"PP": {
+		"ARCHIVED_PROJECTS": "存档的项目",
+		"ARCHIVE_PROJECT": "存档项目",
+		"CREATE_NEW": "创建新的",
+		"DELETE_PROJECT": "删除项目",
+		"EDIT_PROJECT": "编辑项目",
+		"EXPORT_PROJECT": "出口项目",
+		"GITHUB_CONFIGURED": "配置Github集成",
+		"IMPORT_FROM_FILE": "从文件导入",
+		"JIRA_CONFIGURED": "配置Jira集成",
+		"TITLE": "项目概况",
+		"UN_ARCHIVE_PROJECT": "Unarchive项目"
+	},
+	"PS": {
+		"GLOBAL_SETTINGS": "全局设置",
+		"PROJECT_SETTINGS": "项目特定设置"
+	},
+	"S": {
+		"SYNC": {
+			"ERROR_FALLBACK_TO_BACKUP": "导入数据时出错了。回到本地备份。",
+			"ERROR_INVALID_DATA": "同步时出错。无效数据",
+			"IMPORTING": "导入数据",
+			"SUCCESS": "数据已导入"
+		}
+	},
 	"WW": {
 		"ADD_MORE": "添加更多",
 		"ADD_SOME_TASKS": "添加一些任务来计划你的一天！",
+		"COMPLETED_TASKS": "完成的任务",
 		"ESTIMATE_REMAINING": "美东时间。其余：",
 		"FINISH_DAY": "完成日",
 		"HELP_PROCRASTINATION": "帮助我拖延！",
+		"NO_COMPLETED_TASKS": "目前还没有完成的任务",
 		"NO_PLANNED_TASKS": "没有计划的任务",
-		"READY_TO_WORK": "",
-		"TIME_ESTIMATED": "",
-		"WITHOUT_BREAK": "",
-		"WORKING_TODAY": ""
+		"READY_TO_WORK": "准备好工作了！",
+		"TIME_ESTIMATED": "估计时间：",
+		"WITHOUT_BREAK": "没有休息：",
+		"WORKING_TODAY": "今天工作："
 	}
 }
