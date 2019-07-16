@@ -13,7 +13,7 @@ import {UiModule} from './ui/ui.module';
 import {reducers} from './root-store';
 import {CoreModule} from './core/core.module';
 import {ReactiveFormsModule} from '@angular/forms';
-import {FORMLY_CONFIG, FormlyModule} from '@ngx-formly/core';
+import {FormlyModule} from '@ngx-formly/core';
 import {PagesModule} from './pages/pages.module';
 import {MainHeaderModule} from './core-ui/main-header/main-header.module';
 import {HttpClient, HttpClientModule} from '@angular/common/http';
@@ -31,8 +31,7 @@ import {ProcrastinationModule} from './features/procrastination/procrastination.
 import {TaskRepeatCfgModule} from './features/task-repeat-cfg/task-repeat-cfg.module';
 import {TranslateLoader, TranslateModule, TranslateService} from '@ngx-translate/core';
 import {TranslateHttpLoader} from '@ngx-translate/http-loader';
-import {registerTranslateExtension} from './ui/formly-translate-extension/formly-translate-extension';
-import {LanguageCodes} from './app.constants';
+import {AUTO_SWITCH_LNGS, LanguageCode} from './app.constants';
 
 // NOTE: export required for aot to work
 export function createTranslateLoader(http: HttpClient) {
@@ -100,10 +99,10 @@ export class AppModule {
   constructor(
     private _translateService: TranslateService,
   ) {
-    const lng = this._translateService.getBrowserLang();
+    const lng = this._translateService.getBrowserLang() as LanguageCode;
     this._translateService.setDefaultLang('en');
 
-    if (LanguageCodes[lng]) {
+    if (AUTO_SWITCH_LNGS.includes(lng)) {
       this._translateService.use(lng);
     }
   }

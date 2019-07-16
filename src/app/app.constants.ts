@@ -22,7 +22,7 @@ export const ALL_THEMES = [
 
 export const HANDLED_ERROR = '--HANDLED_ERROR--';
 
-export enum LanguageCodes {
+export enum LanguageCode {
   en = 'en',
   es = 'es',
   de = 'de',
@@ -33,3 +33,13 @@ export enum LanguageCodes {
   tr = 'tr',
   zh = 'zh',
 }
+
+// we're assuming that the other language speakers are likely to speak english
+// and as english offers most likely the best experience, we use it as default
+export const AUTO_SWITCH_LNGS: LanguageCode[] = [
+  LanguageCode.zh,
+  LanguageCode.ar,
+  LanguageCode.ja,
+  LanguageCode.ru,
+  LanguageCode.tr,
+];

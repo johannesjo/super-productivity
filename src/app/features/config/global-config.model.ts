@@ -1,6 +1,6 @@
 import {FormlyFieldConfig} from '@ngx-formly/core';
 import {ProjectCfgFormKey} from '../project/project.model';
-import {LanguageCodes} from '../../app.constants';
+import {LanguageCode} from '../../app.constants';
 
 export type KeyboardConfig = Readonly<{
   globalShowHide: string,
@@ -108,7 +108,7 @@ export type LocalBackupConfig = Readonly<{
 }>;
 
 export type LanguageConfig = Readonly<{
-  lng: LanguageCodes,
+  lng: LanguageCode,
 }>;
 
 
