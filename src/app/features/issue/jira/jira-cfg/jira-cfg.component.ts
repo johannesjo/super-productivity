@@ -12,6 +12,7 @@ import {JiraApiService} from '../jira-api.service';
 import {DEFAULT_JIRA_CFG} from '../jira.const';
 import {JiraIssue} from '../jira-issue/jira-issue.model';
 import {SnackService} from '../../../../core/snack/snack.service';
+import {T} from '../../../../t.const';
 
 @Component({
   selector: 'jira-cfg',
@@ -26,6 +27,8 @@ export class JiraCfgComponent implements OnInit, OnDestroy {
   @Input() cfg: JiraCfg = DEFAULT_JIRA_CFG;
 
   @Output() save: EventEmitter<{ sectionKey: GlobalConfigSectionKey | ProjectCfgFormKey, config: any }> = new EventEmitter();
+
+  T = T;
 
   issueSuggestionsCtrl: FormControl = new FormControl();
   customFieldSuggestionsCtrl: FormControl = new FormControl();

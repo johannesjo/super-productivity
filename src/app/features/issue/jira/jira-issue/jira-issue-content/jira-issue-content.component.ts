@@ -5,6 +5,7 @@ import {JiraApiService} from '../../jira-api.service';
 import {JiraIssue} from '../jira-issue.model';
 import {expandAnimation} from '../../../../../ui/animations/expand.ani';
 import {Attachment} from '../../../../attachment/attachment.model';
+import {T} from '../../../../../t.const';
 
 @Component({
   selector: 'jira-issue-content',
@@ -18,6 +19,7 @@ export class JiraIssueContentComponent implements OnInit {
   issueData: JiraIssue;
   attachments: Attachment[];
   isFocusDescription = false;
+  T = T;
 
   constructor(
     private readonly  _jiraIssueService: JiraIssueService,

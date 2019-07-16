@@ -5,6 +5,7 @@ import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {SnackService} from '../../../../core/snack/snack.service';
 import {JiraIssue} from '../jira-issue/jira-issue.model';
 import {Task} from '../../../tasks/task.model';
+import {T} from '../../../../t.const';
 
 @Component({
   selector: 'dialog-jira-add-worklog',
@@ -13,6 +14,7 @@ import {Task} from '../../../tasks/task.model';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DialogJiraAddWorklogComponent {
+  T = T;
   timeSpent: number;
   started: string;
   comment: string;

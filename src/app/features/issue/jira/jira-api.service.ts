@@ -36,6 +36,7 @@ import * as moment from 'moment-mini';
 import {getJiraResponseErrorTxt} from '../../../util/get-jira-response-error-text';
 import {BannerService} from '../../../core/banner/banner.service';
 import {BannerId} from '../../../core/banner/banner.model';
+import {T} from '../../../t.const';
 
 const BLOCK_ACCESS_KEY = 'SUP_BLOCK_JIRA_ACCESS';
 

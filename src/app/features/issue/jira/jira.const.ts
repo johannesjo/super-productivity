@@ -2,6 +2,7 @@
 import {JiraCfg} from './jira';
 import {FormlyFieldConfig} from '@ngx-formly/core';
 import {GITHUB_INITIAL_POLL_DELAY} from '../github/github.const';
+import {T} from '../../../t.const';
 
 export const JIRA_DATETIME_FORMAT = 'YYYY-MM-DDTHH:mm:ss.SSZZ';
 
@@ -107,6 +108,7 @@ export const JIRA_CREDENTIALS_FORM_CFG: FormlyFieldConfig[] = [
     },
   },
 ];
+
 
 export const JIRA_ADVANCED_FORM_CFG: FormlyFieldConfig[] = [
   {

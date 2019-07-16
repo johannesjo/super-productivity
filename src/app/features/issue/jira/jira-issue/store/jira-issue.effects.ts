@@ -33,12 +33,14 @@ import {DialogConfirmComponent} from '../../../../../ui/dialog-confirm/dialog-co
 import {DialogJiraAddWorklogComponent} from '../../dialog-jira-add-worklog/dialog-jira-add-worklog.component';
 import {JIRA_INITIAL_POLL_BACKLOG_DELAY, JIRA_INITIAL_POLL_DELAY, JIRA_POLL_INTERVAL} from '../../jira.const';
 import {isEmail} from '../../../../../util/is-email';
+import {T} from '../../../../../t.const';
 
 const isEnabled_ = (jiraCfg) => jiraCfg && jiraCfg.isEnabled;
 const isEnabled = ([a, jiraCfg]: [any, JiraCfg, any?, any?, any?, any?]) => isEnabled_(jiraCfg);
 
 @Injectable()
 export class JiraIssueEffects {
+
   @Effect({dispatch: false}) pollIssueChangesAndBacklogUpdates: any = this._actions$
     .pipe(
       ofType(

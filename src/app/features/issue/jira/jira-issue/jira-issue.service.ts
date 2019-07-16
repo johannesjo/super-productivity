@@ -11,6 +11,7 @@ import {SnackService} from '../../../../core/snack/snack.service';
 import {IssueData} from '../../issue';
 import {take} from 'rxjs/operators';
 import {Observable, Subscription} from 'rxjs';
+import {T} from '../../../../t.const';
 
 
 @Injectable({
@@ -27,6 +28,7 @@ export class JiraIssueService {
     private readonly _snackService: SnackService,
   ) {
   }
+
 
   // META
   // ----

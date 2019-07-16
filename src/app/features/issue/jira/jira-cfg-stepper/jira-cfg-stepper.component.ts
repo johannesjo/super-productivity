@@ -16,6 +16,7 @@ import {JiraOriginalUser} from '../jira-api-responses';
 import {expandAnimation} from '../../../../ui/animations/expand.ani';
 import {catchError} from 'rxjs/operators';
 import {Subscription, throwError} from 'rxjs';
+import {T} from '../../../../t.const';
 
 @Component({
   selector: 'jira-cfg-stepper',
@@ -25,15 +26,16 @@ import {Subscription, throwError} from 'rxjs';
   animations: [expandAnimation]
 })
 export class JiraCfgStepperComponent implements OnDestroy {
-  public credentialsFormGroup: FormGroup = new FormGroup({});
-  public credentialsFormConfig: FormlyFieldConfig[] = [];
+  T = T;
+  credentialsFormGroup: FormGroup = new FormGroup({});
+  credentialsFormConfig: FormlyFieldConfig[] = [];
 
-  public advancedSettingsFormGroup: FormGroup = new FormGroup({});
-  public advancedSettingsFormConfig: FormlyFieldConfig[] = [];
+  advancedSettingsFormGroup: FormGroup = new FormGroup({});
+  advancedSettingsFormConfig: FormlyFieldConfig[] = [];
 
-  public isTestCredentialsSuccess = false;
-  public user: JiraOriginalUser;
-  public jiraCfg: JiraCfg = Object.assign({}, DEFAULT_JIRA_CFG, {isEnabled: true});
+  isTestCredentialsSuccess = false;
+  user: JiraOriginalUser;
+  jiraCfg: JiraCfg = Object.assign({}, DEFAULT_JIRA_CFG, {isEnabled: true});
   @Output() saveCfg: EventEmitter<JiraCfg> = new EventEmitter();
 
   private _subs = new Subscription();
