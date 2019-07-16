@@ -133,10 +133,17 @@
         "REPO": "\"username/repositoryName\" for the git repository you want to track"
       },
       "ISSUE_CONTENT": {
+        "LIST_OF_CHANGES": "List of changes",
+        "CHANGED": "changed",
+        "ON": "on",
         "ASSIGNEE": "Assignee",
         "AT": "at",
         "DESCRIPTION": "Description",
-        "LABELS": "Labels",
+        "STORY_POINTS": "Story Points",
+        "WORKLOG": "Worklog",
+        "ATTACHMENTS": "Attachments",
+        "COMPONENTS": "Components",
+        "COMMENTS": "Comments",
         "MARK_AS_CHECKED": "Mark updates as checked",
         "STATUS": "Status",
         "SUMMARY": "Summary",
