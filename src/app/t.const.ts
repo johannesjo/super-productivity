@@ -122,12 +122,13 @@ export const T = {
   },
   'F_LANG': {
     'TITLE': 'F_LANG.TITLE',
+    'LABEL': 'F_LANG.LABEL',
     'AR': 'F_LANG.AR',
     'DE': 'F_LANG.DE',
     'EN': 'F_LANG.EN',
+    'ES': 'F_LANG.ES',
     'FR': 'F_LANG.FR',
     'JA': 'F_LANG.JA',
-    'LABEL': 'F_LANG.LABEL',
     'RU': 'F_LANG.RU',
     'TR': 'F_LANG.TR',
     'ZH': 'F_LANG.ZH'

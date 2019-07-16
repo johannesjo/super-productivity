@@ -122,12 +122,13 @@
   },
   "F_LANG": {
     "TITLE": "Language",
+    "LABEL": "Please select a language",
     "AR": "Arabic",
     "DE": "German",
     "EN": "English",
+    "ES": "Spanish",
     "FR": "French",
     "JA": "Japanese",
-    "LABEL": "Please select a language",
     "RU": "Russian",
     "TR": "Turkish",
     "ZH": "Chinese"

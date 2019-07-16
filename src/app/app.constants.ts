@@ -24,6 +24,7 @@ export const HANDLED_ERROR = '--HANDLED_ERROR--';
 
 export enum LanguageCodes {
   en = 'en',
+  es = 'es',
   de = 'de',
   ar = 'ar',
   fr = 'fr',
