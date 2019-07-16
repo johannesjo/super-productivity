@@ -90,6 +90,7 @@
     },
     "JIRA": {
       "EXTENSION_INFO": "Please <a href=\"{{url}}\"> download the chrome extension</a> in order to allow communication with the Jira Api. Note that this doesn\\'t work for mobile.",
+      "FORM_HELP": "",
       "CFG_CMP": {
         "ENABLE": "Enable Jira integration",
         "ENABLE_TRANSITIONS": "Enable Transition Handling",
