@@ -166,6 +166,10 @@
         "SUMMARY": "Summary",
         "WRITE_A_COMMENT": "Write a comment"
       },
+      "BANNER": {
+        "BLOCK_ACCESS_MSG": "Jira: To prevent shut out from api, access has been blocked by Super Productivity. You probably should check your jira settings!",
+        "BLOCK_ACCESS_UNBLOCK": "Unblock"
+      },
       "SNACK": {
         "IMPORTED_MULTIPLE_ISSUES": "Jira: Imported {{issuesLength}} new issues from jira to backlog",
         "IMPORTED_SINGLE_ISSUE": "Jira: Imported issue \"{{issueText}}\" from jira to backlog",
@@ -176,7 +180,10 @@
         "POLLING": "Jira: Polling Changes for issues",
         "UNABLE_TO_REASSIGN": "Jira: Unable to reassign ticket to yourself, because you didn't specify a username. Please visit the settings.",
         "NO_VALID_TRANSITION": "Jira: No valid transition configured",
-        "TRANSITION_SUCCESS": "Jira: Set issue {{issueKey}} to <strong>{{chosenTransition}}</strong>"
+        "TRANSITION_SUCCESS": "Jira: Set issue {{issueKey}} to <strong>{{chosenTransition}}</strong>",
+        "EXTENSION_NOT_LOADED": "Super Productivity Extension not loaded. Reloading the page might help",
+        "INSUFFICIENT_SETTINGS": "Insufficient Settings provided for Jira",
+        "TIMED_OUT": "Jira: Request timed out"
       },
       "STEPPER": {
         "CREDENTIALS": "Credentials",

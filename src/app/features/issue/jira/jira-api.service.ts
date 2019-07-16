@@ -241,13 +241,12 @@ export class JiraApiService {
   // TODO refactor data madness of request and add types for everything
   private _sendRequest$(request, cfg = this._cfg, isForce = false): Observable<any> {
     if (!this._isMinimalSettings(cfg)) {
-      const msg = (!IS_ELECTRON && !this._isExtension)
-        ? 'Super Productivity Extension not loaded. Reloading the page might help'
-        : 'Insufficient Settings provided for Jira';
       this._snackService.open({
-        msg: msg,
+        isTranslate: true,
         type: 'ERROR',
-
+        msg: (!IS_ELECTRON && !this._isExtension)
+          ? T.F.JIRA.SNACK.EXTENSION_NOT_LOADED
+          : T.F.JIRA.SNACK.INSUFFICIENT_SETTINGS,
       });
       return throwError({handledError: 'Insufficient Settings for Jira'});
     }
@@ -256,10 +255,10 @@ export class JiraApiService {
       console.error('Blocked Jira Access to prevent being shut out');
       this._bannerService.open({
         id: BannerId.JiraUnblock,
-        msg: 'Jira: To prevent shut out from api, access has been blocked by Super Productivity. You probably should check your jira settings!',
+        msg: T.F.JIRA.BANNER.BLOCK_ACCESS_MSG,
         svgIco: 'jira',
         action: {
-          label: 'Unblock',
+          label: T.F.JIRA.BANNER.BLOCK_ACCESS_UNBLOCK,
           fn: () => this.unblockAccess()
         }
       });
@@ -291,7 +290,11 @@ export class JiraApiService {
       timeout: setTimeout(() => {
         console.log('ERROR', 'Jira Request timed out for ' + request.apiMethod, request);
         // delete entry for promise
-        this._snackService.open({type: 'ERROR', msg: 'Jira timed out'});
+        this._snackService.open({
+          isTranslate: true,
+          msg: T.F.JIRA.SNACK.TIMED_OUT,
+          type: 'ERROR',
+        });
         this._requestsLog[request.requestId].reject('Request timed out');
         delete this._requestsLog[request.requestId];
       }, JIRA_REQUEST_TIMEOUT_DURATION)
