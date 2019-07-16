@@ -124,7 +124,6 @@
         "UPDATE_STATUS": "Update Status"
       },
       "DIALOG_CONFIRM_ASSIGNMENT": {
-
       },
       "DIALOG_WORKdLOG": {
         "TITLE": "AAA"
@@ -136,10 +135,19 @@
         "REPO": "\"username/repositoryName\" for the git repository you want to track"
       },
       "FORM_CRED": {
-
+        "HOST": "Host (e.g.: http://my-host.de:1234)",
+        "USER_NAME": "Email / Username",
+        "PASSWORD": "Token / Password"
       },
       "FORM_ADV": {
-
+        "IS_AUTO_POLL_TICKETS": "Check imported issues for changes automatically and notify",
+        "IS_CHECK_TO_RE_ASSIGN_TICKET_ON_TASK_START": "Check if the currently worked on issue is assigned to current user",
+        "USER_ASSIGNEE_NAME": "Assignee name to check for",
+        "IS_AUTO_ADD_TO_BACKLOG": "Automatically add issues to Jira backlog",
+        "AUTO_ADD_BACKLOG_JQL_QUERY": "JQL used for adding tasks automatically to backlog",
+        "SEARCH_JQL_QUERY": "JQL Query for to limit the searcher tasks",
+        "IS_WORKLOG_ENABLED": "Open dialog to submit worklog to jira when task is done",
+        "IS_ADD_WORKLOG_ON_SUB_TASK_DONE": "Open dialog to submit worklog to jira when sub task is done"
       },
       "ISSUE_CONTENT": {
         "LIST_OF_CHANGES": "List of changes",
