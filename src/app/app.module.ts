@@ -32,6 +32,7 @@ import {TaskRepeatCfgModule} from './features/task-repeat-cfg/task-repeat-cfg.mo
 import {TranslateLoader, TranslateModule, TranslateService} from '@ngx-translate/core';
 import {TranslateHttpLoader} from '@ngx-translate/http-loader';
 import {registerTranslateExtension} from './ui/formly-translate-extension/formly-translate-extension';
+import {LanguageCodes} from './app.constants';
 
 // NOTE: export required for aot to work
 export function createTranslateLoader(http: HttpClient) {
@@ -107,6 +108,9 @@ export class AppModule {
   ) {
     const lng = this._translateService.getBrowserLang();
     this._translateService.setDefaultLang('en');
-    this._translateService.use(lng);
+
+    if (LanguageCodes[lng]) {
+      this._translateService.use(lng);
+    }
   }
 }
