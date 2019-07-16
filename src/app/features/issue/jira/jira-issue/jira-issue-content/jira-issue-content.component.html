@@ -26,7 +26,7 @@
   <table [class.isFocusDescription]="isFocusDescription"
          class="issue-table">
     <tr>
-      <th>Summary</th>
+      <th>{{T.F.JIRA.ISSUE_CONTENT.SUMMARY|translate}}</th>
       <td class="summary"><strong><a [href]="issueData.url"
                                      target="_blank">{{issueData.key}} {{issueData.summary}}</a></strong></td>
     </tr>

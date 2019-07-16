@@ -1,5 +1,9 @@
 <mat-dialog-content>
   <div [innerHtml]="data.message"
+       *ngIf="!data.isTranslate"
+       class="content"></div>
+  <div [innerHtml]="data.message"
+       *ngIf="data.isTranslate|translate:data.translateParams"
        class="content"></div>
 </mat-dialog-content>
 

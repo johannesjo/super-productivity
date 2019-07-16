@@ -123,6 +123,9 @@
         "CHOOSE_STATUS": "Choose status to assign",
         "UPDATE_STATUS": "Update Status"
       },
+      "DIALOG_CONFIRM_ASSIGNMENT": {
+
+      },
       "DIALOG_WORKdLOG": {
         "TITLE": "AAA"
       },
@@ -131,6 +134,12 @@
         "IS_AUTO_POLL": "Automatically poll imported git issues for changes",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "Show issues from git as suggestions when adding new tasks",
         "REPO": "\"username/repositoryName\" for the git repository you want to track"
+      },
+      "FORM_CRED": {
+
+      },
+      "FORM_ADV": {
+
       },
       "ISSUE_CONTENT": {
         "LIST_OF_CHANGES": "List of changes",
@@ -150,15 +159,16 @@
         "WRITE_A_COMMENT": "Write a comment"
       },
       "SNACK": {
-        "IMPORTED_MULTIPLE_ISSUES": "Github: Imported {{issuesLength}} new issues from git to backlog",
-        "IMPORTED_SINGLE_ISSUE": "Github: Imported issue \"{{issueText}}\" from git to backlog",
-        "ISSUE_DELETED_OR_CLOSED": "Github: Issue \"{{issueText}}\" seems to be deleted or closed on git",
-        "ISSUE_UPDATE": "Github: Updated data for \"{{issueText}}\"",
-        "MANUAL_UPDATE_ISSUE_SUCCESS": "Github: Updated data for \"{{issueText}}\"",
-        "MISSING_ISSUE_DATA": "Github: Tasks with missing issue data found. Reloading.",
-        "NEW_COMMENT": "Github: New comment for \"{{issueText}}\"",
-        "POLLING": "Github: Polling Changes for issues",
-        "SHOW_ISSUE_BTN": "Show me"
+        "IMPORTED_MULTIPLE_ISSUES": "Jira: Imported {{issuesLength}} new issues from jira to backlog",
+        "IMPORTED_SINGLE_ISSUE": "Jira: Imported issue \"{{issueText}}\" from jira to backlog",
+        "ISSUE_UPDATE": "Jira: Updated data for \"{{issueText}}\"",
+        "ISSUE_NO_UPDATE_REQUIRED": "Jira: \"{{issueText}}\" already up to date",
+        "MANUAL_UPDATE_ISSUE_SUCCESS": "Jira: Updated data for \"{{issueText}}\"",
+        "MISSING_ISSUE_DATA": "Jira: Tasks with missing issue data found. Reloading.",
+        "POLLING": "Jira: Polling Changes for issues",
+        "UNABLE_TO_REASSIGN": "Jira: Unable to reassign ticket to yourself, because you didn't specify a username. Please visit the settings.",
+        "NO_VALID_TRANSITION": "Jira: No valid transition configured",
+        "TRANSITION_SUCCESS": "Jira: Set issue {{issueKey}} to <strong>{{chosenTransition}}</strong>"
       },
       "STEPPER": {
         "CREDENTIALS": "Credentials",
@@ -338,6 +348,7 @@
   "G": {
     "CANCEL": "Cancel",
     "DISMISS": "Dismiss",
+    "DO_IT": "Do it!",
     "OK": "Ok",
     "SAVE": "Save",
     "TITLE": "Title",

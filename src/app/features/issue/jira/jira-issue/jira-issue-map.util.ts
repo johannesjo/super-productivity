@@ -11,6 +11,7 @@ import {DropPasteIcons, DropPasteInputType} from '../../../../core/drop-paste-in
 import {IssueProviderKey, SearchResultItem} from '../../issue';
 import {Attachment} from '../../../attachment/attachment.model';
 import {dedupeByKey} from '../../../../util/de-dupe-by-key';
+import {JIRA_TYPE} from '../../issue.const';
 
 const matchProtocolRegEx = /(^[^:]+):\/\//;
 
@@ -20,7 +21,7 @@ export const mapToSearchResults = (res): SearchResultItem[] => {
       return {
         title: issue.key + ' ' + issue.summaryText,
         titleHighlighted: issue.key + ' ' + issue.summary,
-        issueType: 'JIRA' as IssueProviderKey,
+        issueType: JIRA_TYPE as IssueProviderKey,
         issueData: {
           ...issue,
           summary: issue.summaryText,

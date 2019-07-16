@@ -57,7 +57,7 @@ export class SnackEffects {
       ...config,
       data: {
         ...action.payload,
-        msg: (isTranslate)
+        msg: (isTranslate || translateParams)
           ? this._translateService.instant(msg, translateParams)
           : msg,
       },

@@ -34,6 +34,7 @@ import {DialogJiraAddWorklogComponent} from '../../dialog-jira-add-worklog/dialo
 import {JIRA_INITIAL_POLL_BACKLOG_DELAY, JIRA_INITIAL_POLL_DELAY, JIRA_POLL_INTERVAL} from '../../jira.const';
 import {isEmail} from '../../../../../util/is-email';
 import {T} from '../../../../../t.const';
+import {truncate} from '../../../../../util/truncate';
 
 const isEnabled_ = (jiraCfg) => jiraCfg && jiraCfg.isEnabled;
 const isEnabled = ([a, jiraCfg]: [any, JiraCfg, any?, any?, any?, any?]) => isEnabled_(jiraCfg);
@@ -175,7 +176,8 @@ export class JiraIssueEffects {
         if (isEmail(currentUserName)) {
           this._snackService.open({
             svgIco: 'jira',
-            msg: 'Jira: Unable to reassign ticket to yourself, because you didn\'t specify a username. Please visit the settings.',
+            isTranslate: true,
+            msg: T.F.JIRA.SNACK.UNABLE_TO_REASSIGN,
           });
           return EMPTY;
         } else if (!issue) {
@@ -259,9 +261,9 @@ export class JiraIssueEffects {
       tap(tasks => {
         console.warn('TASKS WITH MISSING ISSUE DATA FOR JIRA', tasks);
         this._snackService.open({
-          msg: 'Jira: Tasks with missing issue data found. Reloading',
+          isTranslate: true,
+          msg: T.F.JIRA.SNACK.MISSING_ISSUE_DATA,
           svgIco: 'jira',
-          isSubtle: true,
         });
         tasks.forEach((task) => this._jiraIssueService.loadMissingIssueData(task.issueId));
       })
@@ -302,7 +304,8 @@ export class JiraIssueEffects {
       const issueIds = issueIds_ as string[];
       if (issueIds && issueIds.length > 0) {
         this._snackService.open({
-          msg: 'Jira: Polling Changes for issues',
+          isTranslate: true,
+          msg: T.F.JIRA.SNACK.POLLING,
           svgIco: 'jira',
           isSubtle: true,
         });
@@ -342,7 +345,11 @@ export class JiraIssueEffects {
         return this._openTransitionDialog(issue, localState);
       default:
         if (!chosenTransition || !chosenTransition.id) {
-          this._snackService.open({type: 'ERROR', msg: 'Jira: No valid transition configured'});
+          this._snackService.open({
+            isTranslate: true,
+            msg: T.F.JIRA.SNACK.NO_VALID_TRANSITION,
+            type: 'ERROR',
+          });
           // NOTE: we would kill the whole effect chain if we do this
           // return throwError({handledError: 'Jira: No valid transition configured'});
           return timer(2000).pipe(concatMap(() => this._openTransitionDialog(issue, localState)));
@@ -354,7 +361,11 @@ export class JiraIssueEffects {
               tap(() => {
                 this._snackService.open({
                   type: 'SUCCESS',
-                  msg: `Jira: Set issue ${issue.key} to <strong>${chosenTransition.name}</strong>`,
+                  msg: T.F.JIRA.SNACK.TRANSITION_SUCCESS,
+                  translateParams: {
+                    issueKey: `${issue.key}`,
+                    chosenTransition: `${chosenTransition.name}`,
+                  },
                   isSubtle: true,
                 });
                 this._jiraIssueService.updateIssueFromApi(issue.id, issue, false, false);
@@ -407,13 +418,19 @@ export class JiraIssueEffects {
 
       if (issuesToAdd.length === 1) {
         this._snackService.open({
-          msg: `Jira: Imported issue "${issuesToAdd[0].key} ${issuesToAdd[0].summary}" from git to backlog`,
+          translateParams: {
+            issueText: truncate(`${issuesToAdd[0].key} ${issuesToAdd[0].summary}`),
+          },
+          msg: T.F.JIRA.SNACK.IMPORTED_SINGLE_ISSUE,
           ico: 'cloud_download',
           isSubtle: true,
         });
       } else if (issuesToAdd.length > 1) {
         this._snackService.open({
-          msg: `Jira: Imported ${issuesToAdd.length} new issues from Jira to backlog`,
+          translateParams: {
+            issuesLength: issuesToAdd.length
+          },
+          msg: T.F.JIRA.SNACK.IMPORTED_MULTIPLE_ISSUES,
           ico: 'cloud_download',
           isSubtle: true,
         });
