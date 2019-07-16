@@ -5,15 +5,17 @@ import {T} from '../../../t.const';
 export const KEYBOARD_SETTINGS_FORM_CFG: ConfigFormSection = {
   title: T.F_KEYBOARD.TITLE,
   key: 'keyboard',
-  /* tslint:disable */
   help: T.F_KEYBOARD.HELP,
-  /* tslint:enable */
   items: [
     // SYSTEM WIDE
     {
+      type: 'tpl',
       className: 'tpl',
-      // TODO FIND a solution to translate
-      template: ' <h3 class="sub-section-heading">Global Shortcuts (system wide)</h3>',
+      templateOptions: {
+        tag: 'h3',
+        class: 'sub-section-heading',
+        text: T.F_KEYBOARD.SYSTEM_SHORTCUTS,
+      },
     },
     {
       key: 'globalShowHide',
@@ -31,8 +33,13 @@ export const KEYBOARD_SETTINGS_FORM_CFG: ConfigFormSection = {
     },
     // APP WIDE
     {
+      type: 'tpl',
       className: 'tpl',
-      template: `<h3 class="sub-section-heading">Global Shortcuts (application wide)</h3>`,
+      templateOptions: {
+        tag: 'h3',
+        class: 'sub-section-heading',
+        text: T.F_KEYBOARD.APP_WIDE_SHORTCUTS
+      },
     },
     {
       key: 'addNewTask',
@@ -141,10 +148,21 @@ export const KEYBOARD_SETTINGS_FORM_CFG: ConfigFormSection = {
     },
     // TASKS
     {
+      type: 'tpl',
       className: 'tpl',
-      /* tslint:disable */
-      template: '<h3 class="sub-section-heading">Tasks</h3>\n<p>The following shortcuts apply for the currently selected task (selected via tab or mouse).</p>',
-      /* tslint:enable */
+      templateOptions: {
+        tag: 'h3',
+        class: 'sub-section-heading',
+        text: T.F_KEYBOARD.TASK_SHORTCUTS
+      },
+    },
+    {
+      type: 'tpl',
+      className: 'tpl',
+      templateOptions: {
+        tag: 'p',
+        text: T.F_KEYBOARD.TASK_SHORTCUTS_INFO
+      },
     },
     {
       key: 'taskEditTitle',

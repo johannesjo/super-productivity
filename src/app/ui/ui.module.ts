@@ -66,6 +66,7 @@ import {GlobalErrorHandler} from '../core/error-handler/global-error-handler.cla
 import {HAMMER_GESTURE_CONFIG} from '@angular/platform-browser';
 import {MyHammerConfig} from '../../hammer-config.class';
 import {registerTranslateExtension} from './formly-translate-extension/formly-translate-extension';
+import {FormlyTranslatedTemplateComponent} from './formly-translated-template/formly-translated-template.component';
 
 
 @NgModule({
@@ -80,7 +81,17 @@ import {registerTranslateExtension} from './formly-translate-extension/formly-tr
         component: InputDurationFormlyComponent,
         extends: 'input',
         wrappers: ['form-field'],
-      }]
+      }, {
+        name: 'tpl',
+        component: FormlyTranslatedTemplateComponent,
+      }],
+      extras: {
+        immutable: true
+      },
+      validationMessages: [
+        {name: 'required', message: 'This field is required'},
+        {name: 'pattern', message: 'Invalid input'},
+      ],
     }),
     FormlyMaterialModule,
 
@@ -151,6 +162,7 @@ import {registerTranslateExtension} from './formly-translate-extension/formly-tr
     InlineInputComponent,
     ChipListInputComponent,
     FullPageSpinnerComponent,
+    FormlyTranslatedTemplateComponent,
   ],
   entryComponents: [
     DialogConfirmComponent,

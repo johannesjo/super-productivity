@@ -94,12 +94,6 @@ export function createTranslateLoader(http: HttpClient) {
   providers: [
     {provide: ErrorHandler, useClass: GlobalErrorHandler},
     {provide: HAMMER_GESTURE_CONFIG, useClass: MyHammerConfig},
-    {
-      provide: FORMLY_CONFIG,
-      multi: true,
-      useFactory: registerTranslateExtension,
-      deps: [TranslateService],
-    },
   ],
 })
 export class AppModule {
