@@ -2,7 +2,7 @@
              [title]="(section.title|translate)">
   <!--[icon]="section.icon"-->
 
-  <help-section>
+  <help-section *ngIf="section.help">
     <div [innerHtml]="section.help|translate"></div>
   </help-section>
   <div class="form-wrapper {{section.key}}">
