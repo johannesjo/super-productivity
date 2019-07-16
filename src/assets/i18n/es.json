@@ -60,6 +60,12 @@
       "DIALOG_INITIAL": {
         "TITLE": "Configurar Github para Proyecto"
       },
+      "FORM": {
+        "IS_AUTO_ADD_TO_BACKLOG": "Agregar automáticamente problemas sin resolver desde Github a la acumulación",
+        "IS_AUTO_POLL": "Encuestar automáticamente los problemas de git importados para los cambios",
+        "IS_SEARCH_ISSUES_FROM_GITHUB": "Mostrar problemas de git como sugerencias al agregar nuevas tareas",
+        "REPO": "\"username / repositoryName\" para el repositorio de git que desea rastrear"
+      },
       "ISSUE_CONTENT": {
         "ASSIGNEE": "Cesionario",
         "AT": "a",
@@ -226,10 +232,7 @@
     "IS_DISABLE_REMIND_WHEN_FORGOT_TO_FINISH_DAY": "Deshabilitar el recordatorio sobre el día de finalización olvidado",
     "IS_HIDE_NAV": "Ocultar la navegación hasta que se desplace el encabezado principal (solo en el escritorio)",
     "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Notificar cuando se excedió el tiempo estimado",
-    "TITLE": "Configuraciones Misc",
-    "isDisableRemindWhenForgotToFinishDay": "",
-    "isHideNav": "",
-    "isNotifyWhenTimeEstimateExceeded": ""
+    "TITLE": "Configuraciones Misc"
   },
   "F_POMODORO": {
     "BREAK_DURATION": "Duración de las pausas breves",

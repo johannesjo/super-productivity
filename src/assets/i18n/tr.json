@@ -60,6 +60,12 @@
       "DIALOG_INITIAL": {
         "TITLE": "Project için Github Kurulumu"
       },
+      "FORM": {
+        "IS_AUTO_ADD_TO_BACKLOG": "Çözülmeyen sorunları otomatik olarak Github'dan backlog'a ekle",
+        "IS_AUTO_POLL": "İçe aktarılan git sorunlarını değişiklikler için otomatik olarak yokla",
+        "IS_SEARCH_ISSUES_FROM_GITHUB": "Yeni görevler eklerken git'in önerilerini öneri olarak göster",
+        "REPO": "İzlemek istediğiniz git deposu için \"username / repositoryName\""
+      },
       "ISSUE_CONTENT": {
         "ASSIGNEE": "vekil",
         "AT": "en",
@@ -226,10 +232,7 @@
     "IS_DISABLE_REMIND_WHEN_FORGOT_TO_FINISH_DAY": "Unutulmuş bitiş günü hakkında hatırlatıcıyı devre dışı bırakın",
     "IS_HIDE_NAV": "Ana başlık yönlendirilene kadar gezinmeyi gizle (yalnızca masaüstü)",
     "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Zaman hesaplamasının ne zaman aşıldığını bildir",
-    "TITLE": "Diğer ayarlar",
-    "isDisableRemindWhenForgotToFinishDay": "",
-    "isHideNav": "",
-    "isNotifyWhenTimeEstimateExceeded": ""
+    "TITLE": "Diğer ayarlar"
   },
   "F_POMODORO": {
     "BREAK_DURATION": "Kısa molaların süresi",

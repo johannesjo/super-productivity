@@ -1,6 +1,7 @@
 // TODO use as a checklist
 import {GithubCfg} from './github';
 import {FormlyFieldConfig} from '@ngx-formly/core';
+import {T} from '../../../t.const';
 
 export const DEFAULT_GITHUB_CFG: GithubCfg = {
   repo: null,
@@ -22,7 +23,7 @@ export const GITHUB_CONFIG_FORM: FormlyFieldConfig[] = [
     key: 'repo',
     type: 'input',
     templateOptions: {
-      label: '"username/repositoryName" for the git repository you want to track',
+      label:  T.F.GITHUB.FORM.REPO,
       type: 'text',
       pattern: /^.+\/.+?$/i,
     },
@@ -31,21 +32,21 @@ export const GITHUB_CONFIG_FORM: FormlyFieldConfig[] = [
     key: 'isSearchIssuesFromGithub',
     type: 'checkbox',
     templateOptions: {
-      label: 'Show issues from git as suggestions when adding new tasks',
+      label:  T.F.GITHUB.FORM.IS_SEARCH_ISSUES_FROM_GITHUB
     },
   },
   {
     key: 'isAutoPoll',
     type: 'checkbox',
     templateOptions: {
-      label: 'Automatically poll imported git issues for changes',
+      label:  T.F.GITHUB.FORM.IS_AUTO_POLL
     },
   },
   {
     key: 'isAutoAddToBacklog',
     type: 'checkbox',
     templateOptions: {
-      label: 'Automatically add unresolved issues from Github to backlog',
+      label:  T.F.GITHUB.FORM.IS_AUTO_ADD_TO_BACKLOG
     },
   },
 ];

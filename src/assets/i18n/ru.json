@@ -60,6 +60,12 @@
       "DIALOG_INITIAL": {
         "TITLE": "Настройка Github для проекта"
       },
+      "FORM": {
+        "IS_AUTO_ADD_TO_BACKLOG": "Автоматически добавлять нерешенные проблемы из Github в отставание",
+        "IS_AUTO_POLL": "Автоматически опрашивать импортированные проблемы git на предмет изменений",
+        "IS_SEARCH_ISSUES_FROM_GITHUB": "Показывать проблемы из git в качестве подсказок при добавлении новых задач",
+        "REPO": "\"username / repositoryName\" для репозитория git, который вы хотите отслеживать"
+      },
       "ISSUE_CONTENT": {
         "ASSIGNEE": "правопреемник",
         "AT": "В",
@@ -226,10 +232,7 @@
     "IS_DISABLE_REMIND_WHEN_FORGOT_TO_FINISH_DAY": "Отключить напоминание о забытом финишном дне",
     "IS_HIDE_NAV": "Скрыть навигацию, пока основной заголовок не наведен (только на рабочем столе)",
     "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Уведомить, когда оценка времени была превышена",
-    "TITLE": "Разные настройки",
-    "isDisableRemindWhenForgotToFinishDay": "",
-    "isHideNav": "",
-    "isNotifyWhenTimeEstimateExceeded": ""
+    "TITLE": "Разные настройки"
   },
   "F_POMODORO": {
     "BREAK_DURATION": "Продолжительность коротких перерывов",
