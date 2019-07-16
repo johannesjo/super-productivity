@@ -1,174 +1,322 @@
 {
-	"BL": {
-		"FROM_OTHER_PROJECTS": "他のプロジェクトから",
-		"NO_SCHEDULED": "現在スケジュールされているタスクはありません。タスクのコンテキストメニューで[タスクのスケジュール]を選択してタスクをスケジュールできます。開くには、タスクの右側にある3つの小さな点をクリックします。",
-		"NO_TASKS": "現在、バックログにタスクはありません",
-		"SCHEDULED": "予定",
-		"TITLE": "バックログ"
-	},
-	"F": {
-		"ATTACHMENT": {
-			"DIALOG_EDIT": {
-				"ADD_ATTACHMENT": "添付ファイルを追加する",
-				"EDIT_ATTACHMENT": "添付ファイルを編集",
-				"LABELS": {
-					"FILE": "ファイルパス",
-					"IMG": "画像",
-					"LINK": "URL"
-				},
-				"SELECT_TYPE": "タイプを選択",
-				"TYPES": {
-					"FILE": "ファイル（デフォルトのシステムアプリで開かれる）",
-					"IMG": "画像（サムネイル表示）",
-					"LINK": "リンク（ブラウザで開きます）"
-				}
-			},
-			"LIST": {
-				"NO_ATTACHMENTS": "現在添付ファイルはありません"
-			}
-		},
-		"BOOKMARK": {
-			"BAR": {
-				"DROP": "ブックマークを追加するには、ここにドロップしてください",
-				"NO_BOOKMARKS": "プロジェクトのブックマークがありません。ドラッグアンドドロップ、またはアイコンをクリックして追加してください。"
-			},
-			"DIALOG_EDIT": {
-				"ADD_BOOKMARK": "ブックマークを追加",
-				"EDIT_BOOKMARK": "ブックマークを編集",
-				"LABELS": {
-					"COMMAND": "コマンド",
-					"FILE": "ファイルパス",
-					"IMG": "画像",
-					"LINK": "URL"
-				},
-				"SELECT_ICON": "アイコンを選択",
-				"SELECT_TYPE": "タイプを選択",
-				"TYPES": {
-					"COMMAND": "コマンド（カスタムシェルコマンド）",
-					"FILE": "ファイル（デフォルトのシステムアプリで開かれる）",
-					"IMG": "画像（サムネイル表示）",
-					"LINK": "リンク（ブラウザで開きます）"
-				}
-			}
-		}
-	},
-	"FILE_IMEX": {
-		"EXPORT_DATA": "データのエクスポート",
-		"IMPORT_FROM_FILE": "ファイルからインポート"
-	},
-	"F_LANG": {
-		"AR": "アラビア語",
-		"DE": "ドイツ人",
-		"EN": "英語",
-		"FR": "フランス語",
-		"JA": "日本人",
-		"LABEL": "言語を選択してください",
-		"RU": "ロシア",
-		"TR": "トルコ語",
-		"ZH": "中国語"
-	},
-	"F_MISC": {
-		"HELP": "<p><strong>デスクトップ通知が表示されませんか？</strong> Windowsの場合は、[システム]> [通知とアクション]を確認し、必要な通知が有効になっているかどうかを確認します。</p>",
-		"IS_AUTO_MARK_PARENT_AS_DONE": "すべてのサブタスクが完了したら、親タスクを完了としてマークする",
-		"IS_CONFIRM_BEFORE_EXIT": "アプリを終了する前に確認してください",
-		"IS_DISABLE_REMIND_WHEN_FORGOT_TO_FINISH_DAY": "終了日を忘れた場合の通知を無効にする",
-		"IS_HIDE_NAV": "メインヘッダーが表示されるまでナビゲーションを非表示にする（デスクトップのみ）",
-		"IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "見積もり時間を超えたときに通知する",
-		"isDisableRemindWhenForgotToFinishDay": "",
-		"isHideNav": "",
-		"isNotifyWhenTimeEstimateExceeded": ""
-	},
-	"G": {
-		"CANCEL": "キャンセル",
-		"DISMISS": "やめる",
-		"SAVE": "保存する",
-		"TITLE": "タイトル"
-	},
-	"MH": {
-		"ADD_NEW_TASK": "新しいタスクを追加する",
-		"CREATE_PROJECT": "プロジェクトを作成",
-		"GO_TO_TASK_LIST": "タスクリストへ",
-		"MANAGE_PROJECTS": "プロジェクトを管理する",
-		"METRICS": "メトリック",
-		"PROCRASTINATE": "先延ばし",
-		"PROJECTS": "プロジェクト",
-		"PROJECT_MENU": "プロジェクトメニュー",
-		"SETTINGS": "設定",
-		"TASKS": "タスク",
-		"TASK_LIST": "タスクリスト",
-		"TOGGLE_SHOW_BOOKMARKS": "ブックマークの表示/非表示",
-		"TOGGLE_SHOW_NOTES": "プロジェクトノートの表示/非表示",
-		"TOGGLE_TRACK_TIME": "追跡時間の開始/停止",
-		"WORKLOG": "作業記録"
-	},
-	"PDS": {
-		"BACK": "私が何かを忘れたのを待つ！",
-		"BREAK_LABEL": "休憩（年/月）",
-		"CELEBRATE": " <i>を祝いましょう。</i>",
-		"CLEAR_ALL_CONTINUE": "完了したすべてをクリアして続行",
-		"EVALUATION": "評価",
-		"EXPORT_TASK_LIST": "タスクリストのエクスポート",
-		"GOOGLE_SHEET": "グーグルシート",
-		"NO_TASKS": "この日は何もしていません",
-		"ROUND_15M": "すべてのタスクを15分に丸める",
-		"ROUND_30M": "すべてのタスクを30分に丸める",
-		"ROUND_5M": "すべてのタスクを5分に丸める",
-		"ROUND_TIME_SPENT": "ラウンド時間",
-		"ROUND_TIME_SPENT_TITLE": "すべてのタスクにかかったラウンド時間。注意してください！これを元に戻すことはできません。",
-		"ROUND_TIME_WARNING": "!!!これを元に戻すことはできません注意してください！",
-		"ROUND_UP_15M": "すべてのタスクを15分に切り上げます",
-		"ROUND_UP_30M": "すべてのタスクを30分に切り上げます",
-		"ROUND_UP_5M": "すべてのタスクを5分に切り上げ",
-		"SAVE_AND_GO_HOME": "保存して家に帰る",
-		"START_END": "始まりと終わり",
-		"SUMMARY_FOR": " {{dayStr}}の日別サマリー",
-		"TASKS_COMPLETED": "完了したタスク",
-		"TASK_LIST": "タスクリスト",
-		"TIME_SPENT_AND_ESTIMATE_LABEL": "経過時間/推定",
-		"TIME_SPENT_ESTIMATE_TITLE": "過ごした時間：今日過ごした合計時間。アーカイブされたタスクは含まれていません。 - 推定時間：今日作業したタスクについて推定された時間から、他の日にすでにそれらに費やした時間を差し引いたもの。",
-		"TODAY": "今日",
-		"WEEK": "週間"
-	},
-	"PM": {
-		"TITLE": "プロジェクトメトリクス"
-	},
-	"PP": {
-		"ARCHIVED_PROJECTS": "アーカイブプロジェクト",
-		"ARCHIVE_PROJECT": "アーカイブプロジェクト",
-		"CREATE_NEW": "新しく作る",
-		"DELETE_PROJECT": "プロジェクトを削除",
-		"EDIT_PROJECT": "プロジェクトを編集",
-		"EXPORT_PROJECT": "プロジェクトをエクスポート",
-		"GITHUB_CONFIGURED": "Github統合を設定済み",
-		"IMPORT_FROM_FILE": "ファイルからインポート",
-		"JIRA_CONFIGURED": "Jira統合が設定されました",
-		"TITLE": "プロジェクト概要",
-		"UN_ARCHIVE_PROJECT": "アンアーカイブプロジェクト"
-	},
-	"PS": {
-		"GLOBAL_SETTINGS": "全体設定",
-		"PROJECT_SETTINGS": "プロジェクト固有の設定"
-	},
-	"S": {
-		"SYNC": {
-			"ERROR_FALLBACK_TO_BACKUP": "データのインポート中に問題が発生しました。ローカルバックアップにフォールバックします。",
-			"ERROR_INVALID_DATA": "同期中にエラーが発生しました。無効なデータ",
-			"IMPORTING": "データをインポートする",
-			"SUCCESS": "インポートされたデータ"
-		}
-	},
-	"WW": {
-		"ADD_MORE": "さらに追加",
-		"ADD_SOME_TASKS": "あなたの一日を計画するためにいくつかのタスクを追加してください！",
-		"COMPLETED_TASKS": "完了したタスク",
-		"ESTIMATE_REMAINING": "EST（東部基準時。残り：",
-		"FINISH_DAY": "終了日",
-		"HELP_PROCRASTINATION": "先延ばしにしてください！",
-		"NO_COMPLETED_TASKS": "現在完了したタスクはありません",
-		"NO_PLANNED_TASKS": "計画タスクなし",
-		"READY_TO_WORK": "準備オーケー！",
-		"TIME_ESTIMATED": "推定所要時間：",
-		"WITHOUT_BREAK": "休むことなく：",
-		"WORKING_TODAY": "今日働く"
-	}
+  "BL": {
+    "FROM_OTHER_PROJECTS": "他のプロジェクトから",
+    "NO_SCHEDULED": "現在スケジュールされているタスクはありません。タスクのコンテキストメニューで[タスクのスケジュール]を選択してタスクをスケジュールできます。開くには、タスクの右側にある3つの小さな点をクリックします。",
+    "NO_TASKS": "現在、バックログにタスクはありません",
+    "SCHEDULED": "予定",
+    "TITLE": "バックログ"
+  },
+  "F": {
+    "ATTACHMENT": {
+      "DIALOG_EDIT": {
+        "ADD_ATTACHMENT": "添付ファイルを追加する",
+        "EDIT_ATTACHMENT": "添付ファイルを編集",
+        "LABELS": {
+          "FILE": "ファイルパス",
+          "IMG": "画像",
+          "LINK": "URL"
+        },
+        "SELECT_TYPE": "タイプを選択",
+        "TYPES": {
+          "FILE": "ファイル（デフォルトのシステムアプリで開かれる）",
+          "IMG": "画像（サムネイル表示）",
+          "LINK": "リンク（ブラウザで開きます）"
+        }
+      },
+      "LIST": {
+        "NO_ATTACHMENTS": "現在添付ファイルはありません"
+      }
+    },
+    "BOOKMARK": {
+      "BAR": {
+        "DROP": "ブックマークを追加するには、ここにドロップしてください",
+        "NO_BOOKMARKS": "プロジェクトのブックマークがありません。ドラッグアンドドロップ、またはアイコンをクリックして追加してください。"
+      },
+      "DIALOG_EDIT": {
+        "ADD_BOOKMARK": "ブックマークを追加",
+        "EDIT_BOOKMARK": "ブックマークを編集",
+        "LABELS": {
+          "COMMAND": "コマンド",
+          "FILE": "ファイルパス",
+          "IMG": "画像",
+          "LINK": "URL"
+        },
+        "SELECT_ICON": "アイコンを選択",
+        "SELECT_TYPE": "タイプを選択",
+        "TYPES": {
+          "COMMAND": "コマンド（カスタムシェルコマンド）",
+          "FILE": "ファイル（デフォルトのシステムアプリで開かれる）",
+          "IMG": "画像（サムネイル表示）",
+          "LINK": "リンク（ブラウザで開きます）"
+        }
+      }
+    },
+    "CONFIG": {
+      "SNACK": {
+        "UPDATE_SECTION": " <strong>{{sectionKey}}</strong>の設定を更新しました"
+      }
+    },
+    "GOOGLE": {
+      "DIALOG": {
+        "CREATE_SYNC_FILE": "Googleドライブ： <strong>\"{{fileName}}\"</strong> という名前のファイルが見つかりませんでした。 <strong>Googleドライブに同期ファイルとして</strong> を作成しますか？",
+        "USE_EXISTING_SYNC_FILE": "Googleドライブ：同期ファイルとして <strong>既存の</strong> ファイル <strong>\"{{fileName}}\"</strong> を使用しますか？そうでない場合は、同期ファイル名を変更してください。"
+      },
+      "D_CONFIRM_LOAD": {
+        "LAST_MOD": "最後の修正：",
+        "LAST_SYNC": "最後の同期",
+        "LOCAL": "地元",
+        "LOCAL_REMOTE": "ローカル <=> リモート",
+        "OVERWRITE_LOCAL": "ローカルデータを上書きする",
+        "OVERWRITE_REMOTE": "リモートデータを上書きする",
+        "REMOTE": "遠い",
+        "TEXT": "<p>Googleドライブバックアップから更新してください。 <strong>ローカルデータはリモートデータよりも新しい</strong> のようです。保存していないローカルの変更を上書きしますか？ <strong>すべてのデータが永久に失われます</strong>。</p>",
+        "TITLE": "GDriveアップデートでローカルデータを上書きしますか？"
+      },
+      "D_CONFIRM_SAVE": {
+        "LAST_MOD": "最後の修正：",
+        "LAST_SYNC": "最後の同期",
+        "LOCAL": "地元",
+        "LOCAL_REMOTE": "ローカル <=> リモート",
+        "OVERWRITE_LOCAL": "ローカルデータを上書きする",
+        "OVERWRITE_REMOTE": "リモートデータを上書きする",
+        "REMOTE": "遠い",
+        "TEXT": "  <p>Googleドライブにいくつかの変更があるようですが、ローカルにはありません。上書きしますか？</p>",
+        "TITLE": "Googleドライブに保存されていないデータを上書きしますか？"
+      },
+      "EXPORT_TIME": {
+        "ALWAYS_ROUND_UP": "常に作業時間を切り上げる",
+        "AUTO_LOGIN": "次回の自動ログインとデータのロード",
+        "HELP_ADDITIONAL": "これに加えて、これらの値の計算を変更するために使用できるいくつかのオプションがあります。",
+        "HELP_INFO": "<p>このビューでは、勤務時間をグーグルシートにエクスポートできます。あなたはあなたのGoogle SpreadsheetsがSuper Productivityによってアクセスされることを可能にする必要があります。また、最初の行に見出しを付けてスプレッドシートを作成し、入力フィールドにIDを指定する必要があります（スプレッドシートのIDを見つけるには<a href=\"https://stackoverflow.com/questions/36061433/how-to-do-i-locate-a-google-spreadsheet-id\" target=\"_blank\">Ho？</a>）。</p><p>スプレッドシートを正常にロードすると、表が4行で表示されます。最初の行は、スプレッドシート自体で指定した見出しを示しています。</p><p>2行目は情報提供を目的としており、スプレッドシートの最後の行を示しています。</p><p>4行目は直接入力できる値の一覧で、スプレッドシートに保存されます。</p><p>3行目は、4行目の値を自動的に定義するためのものです。セルに入力できる特殊な文字列がいくつかあります。</p>",
+        "HELP_POSSIBLE_PROPERTIES": "",
+        "LOGIN": "Googleにログイン",
+        "LOGOUT": "ログアウト",
+        "OPEN_SPREADSHEET": "スプレッドシートを開く",
+        "READ_SPREADSHEET": "スプレッドシートを読む",
+        "ROUND_END_TIME_TO": "ラウンド終了時間",
+        "ROUND_HALF": "半時間",
+        "ROUND_HOUR": "全時間",
+        "ROUND_QUARTER": "全四半期",
+        "ROUND_START_TIME_TO": "ラウンド開始時間",
+        "ROUND_TIME_WORKED_TO": "ラウンドタイム",
+        "SAVE_ROW": "行を保存",
+        "SNACK_EQUAL_VALUES": "現在の値と最後に保存された行は等しい値を持っています、それはおそらくあなたが望むものではありません。",
+        "SNACK_ROW_APPENDED": "行が正常に追加されました"
+      },
+      "SNACKS": {
+        "DOWNLOADING_UPDATE": "Googleドライブ：リモートアップデートがあります。ダウンロードしています...",
+        "ERROR": "Googleドライブ - エラー：",
+        "ERROR_INITIAL_IMPORT": "Googleドライブ：最初にデータをインポートしようとしたときにエラーが発生しました",
+        "LOCAL_UP_TO_DATE": "Googleドライブ：ローカルデータは既に最新の状態になっています",
+        "MULTIPLE_SYNC_FILES_WITH_SAME_NAME": "\"{{newFileName}}\"という名前のファイルが複数見つかりました。 1つを除いてすべて削除するか、別の名前を選択してください。",
+        "NO_UPDATE_REQUIRED": "Googleドライブ：アップデート不要",
+        "REMOTE_UP_TO_DATE": "Googleドライブ：リモートデータは既に最新の状態になっています",
+        "SUCCESS": "Googleドライブ：バックアップを保存しました",
+        "SYNCING": "Googleドライブ：同期"
+      }
+    }
+  },
+  "FILE_IMEX": {
+    "EXPORT_DATA": "データのエクスポート",
+    "IMPORT_FROM_FILE": "ファイルからインポート"
+  },
+  "F_AUTO_BACKUPS": {
+    "HELP": "問題が発生した場合に備えて、すべてのデータをアプリフォルダに自動保存して準備します。",
+    "LABEL_IS_ENABLED": "自動バックアップを有効にする",
+    "TITLE": "自動バックアップ"
+  },
+  "F_GOOGLE_DRIVE_SYNC": {
+    "HELP": "ここでは、単一のGoogleドライブファイルとの間で自動的に同期するようにアプリを設定できます。すべてのデータは暗号化されずに保存されるため、誤ってこのファイルを他のユーザーと共有しないように注意してください。",
+    "TITLE": "Googleドライブで同期"
+  },
+  "F_IDLE": {
+    "HELP": "<div><p>アイドル時間処理が有効になっていると、アイドル時間が経過したときに、どのタスクで時間を追跡するかを確認するために、指定した時間が経過した後にダイアログが開きます。</p></div>",
+    "IS_ENABLE_IDLE_TIME_TRACKING": "アイドル時間処理を有効にする",
+    "IS_ONLY_OPEN_IDLE_WHEN_CURRENT_TASK": "現在のタスクが選択されている場合にのみアイドル時間ダイアログを起動する",
+    "IS_UN_TRACKED_IDLE_RESETS_BREAK_TIMER": "追跡されていないアイドル時間のリセットは中断タイマーを取る",
+    "MIN_IDLE_TIME": "Xの後にアイドル状態になる",
+    "TITLE": "アイドル処理"
+  },
+  "F_IMEX": {
+    "HELP": "<p>ここでは、すべてのデータをバックアップ用の <strong>JSON</strong> としてエクスポートできますが、それを別のコンテキストで使用することもできます（たとえば、プロジェクトをブラウザにエクスポートしてデスクトップバージョンにインポートすることができます） </p> <p>インポートは、有効なJSONがテキスト領域にコピーされることを期待しています。 <strong>注：インポートボタンを押すと、現在の設定とデータがすべて上書きされます。</strong></p>",
+    "TITLE": "インポート・エクスポート"
+  },
+  "F_KEYBOARD": {
+    "ADD_NEW_NOTE": "新しいメモを追加",
+    "ADD_NEW_TASK": "新しいタスクを追加する",
+    "APP_WIDE_SHORTCUTS": "グローバルショートカット（アプリケーション全体）",
+    "COLLAPSE_SUB_TASKS": "サブタスクを折りたたむ",
+    "EXPAND_SUB_TASKS": "サブタスクを展開",
+    "FOCUS_LAST_ACTIVE_TASK": "最後のアクティブタスクに焦点を当てる",
+    "GLOBAL_SHOW_HIDE": "スーパー生産性の表示/非表示",
+    "GLOBAL_TOGGLE_TASK_START": "最後のアクティブタスクのタイムトラッキングを切り替えます",
+    "GO_TO_DAILY_AGENDA": "議題に行く",
+    "GO_TO_FOCUS_MODE": "フォーカスモードへ",
+    "GO_TO_SETTINGS": "設定に移動",
+    "GO_TO_WORK_VIEW": "作業ビューに移動",
+    "HELP": "<p>ここですべてのキーボードショートカットを設定できます。</p> <p>テキスト入力をクリックして、希望のキーボードの組み合わせを入力してください。保存するにはEnterキーを押し、中止するにはEscapeキーを押してください。</p> <p>3種類のショートカットがあります。</p> <ul> <li> <strong>グローバルショートカット：</strong> アプリが実行されているとき、他のすべてのアプリケーションからアクションが起動されます。 </li> <li> <strong>アプリケーションレベルのショートカット：</strong> アプリケーションのすべての画面から起動しますが、現在テキストフィールドを編集している場合はそうではありません。 </li> <li> <strong>タスクレベルのショートカット：</strong> マウスまたはキーボードでタスクを選択した場合にのみ起動され、通常そのタスクに関連したアクションを起動します。 </li> </ul>",
+    "MOVE_TASK_DOWN": "リスト内でタスクを下に移動",
+    "MOVE_TASK_UP": "リスト内でタスクを上に移動",
+    "MOVE_TO_BACKLOG": "タスクをタスクバックログに移動",
+    "MOVE_TO_TODAYS_TASKS": "今日のタスクリストにタスクを移動する",
+    "OPEN_PROJECT_NOTES": "プロジェクトノートの表示/非表示",
+    "SELECT_NEXT_TASK": "次のタスクを選択",
+    "SELECT_PREVIOUS_TASK": "前のタスクを選択",
+    "SYSTEM_SHORTCUTS": "グローバルショートカット（システム全体）",
+    "TASK_ADD_SUB_TASK": "サブタスクを追加",
+    "TASK_DELETE": "タスクを削除",
+    "TASK_EDIT_TITLE": "タイトルを編集",
+    "TASK_OPEN_ESTIMATION_DIALOG": "見積もりを編集/費やした時間",
+    "TASK_SCHEDULE": "スケジュールタスク",
+    "TASK_SHORTCUTS": "タスク",
+    "TASK_SHORTCUTS_INFO": "次のショートカットは、現在選択されているタスク（タブまたはマウスで選択）に適用されます。",
+    "TASK_TOGGLE_ADDITIONAL_INFO_OPEN": "追加の仕事情報を表示/隠す",
+    "TASK_TOGGLE_DONE": "完了を切り替える",
+    "TITLE": "キーボードショートカット",
+    "TOGGLE_BACKLOG": "タスクバックログの表示/非表示",
+    "TOGGLE_BOOKMARKS": "ブックマークバーの表示/非表示",
+    "TOGGLE_PLAY": "開始/停止タスク",
+    "ZOOM_DEFAULT": "ズームのデフォルト（デスクトップのみ）",
+    "ZOOM_IN": "ズームイン（デスクトップのみ）",
+    "ZOOM_OUT": "ズームアウト（デスクトップのみ）"
+  },
+  "F_LANG": {
+    "AR": "アラビア語",
+    "DE": "ドイツ人",
+    "EN": "英語",
+    "ES": "スペイン語",
+    "FR": "フランス語",
+    "JA": "日本人",
+    "LABEL": "言語を選択してください",
+    "RU": "ロシア",
+    "TITLE": "言語",
+    "TR": "トルコ語",
+    "ZH": "中国語"
+  },
+  "F_MISC": {
+    "HELP": "<p><strong>デスクトップ通知が表示されませんか？</strong> Windowsの場合は、[システム]> [通知とアクション]を確認し、必要な通知が有効になっているかどうかを確認します。</p>",
+    "IS_AUTO_MARK_PARENT_AS_DONE": "すべてのサブタスクが完了したら、親タスクを完了としてマークする",
+    "IS_CONFIRM_BEFORE_EXIT": "アプリを終了する前に確認してください",
+    "IS_DISABLE_REMIND_WHEN_FORGOT_TO_FINISH_DAY": "終了日を忘れた場合の通知を無効にする",
+    "IS_HIDE_NAV": "メインヘッダーが表示されるまでナビゲーションを非表示にする（デスクトップのみ）",
+    "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "見積もり時間を超えたときに通知する",
+    "TITLE": "その他の設定",
+    "isDisableRemindWhenForgotToFinishDay": "",
+    "isHideNav": "",
+    "isNotifyWhenTimeEstimateExceeded": ""
+  },
+  "F_POMODORO": {
+    "BREAK_DURATION": "短い休憩の期間",
+    "CYCLES_BEFORE_LONGER_BREAK": "X作業セッションの後により長い休憩を開始",
+    "DURATION": "作業期間",
+    "HELP": "<p>pomodoroタイマーはいくつかの設定で設定できます。各作業セッションの期間、通常の休憩の期間、長い休憩が開始される前に実行される作業セッションの数、およびこの長い休憩の期間。</p> <p>ポモドーロが中断している間に気を散らすものを表示するかどうかも設定できます。</p> <p>「ポモドーロ休憩時間追跡の一時停止」を設定すると、作業時間がタスクに費やされたときに休憩時間も追跡されます。 </p> <p>「アクティブなタスクがないときにpomodoroセッションを一時停止」を有効にすると、タスクを一時停止したときにpomodoroセッションも一時停止します。</p>",
+    "IS_ENABLED": "ポモドーロタイマーを有効にする",
+    "IS_MANUAL_CONTINUE": "次のpomodoroセッションの開始を手動で確認してください",
+    "IS_PLAY_SOUND": "セッション終了時に音を鳴らす",
+    "IS_PLAY_SOUND_AFTER_BREAK": "休憩したときに音を鳴らす",
+    "IS_PLAY_TICK": "1秒ごとにダニ音を鳴らす",
+    "IS_STOP_TRACKING_ON_BREAK": "休憩中のタスクのタイムトラッキングを停止する",
+    "LONGER_BREAK_DURATION": "長い休憩時間",
+    "TITLE": "ポモドーロ設定"
+  },
+  "F_TAKE_A_BREAK": {
+    "HELP": "<div> <p>休憩せずに指定した時間作業したときに繰り返し発生するアラームを設定できます。</p> <p>表示されたメッセージを変更できます。 ${duration} は中断せずに費やした時間に置き換えられます。</p> </div>",
+    "IS_ENABLED": "休憩のお知らせを有効にする",
+    "MESSAGE": "休憩メッセージを取る",
+    "MIN_WORKING_TIME": "Xが動作していないのにトリガーがブレーク通知を受け取る",
+    "TITLE": "リマインダーを破る"
+  },
+  "G": {
+    "CANCEL": "キャンセル",
+    "DISMISS": "やめる",
+    "SAVE": "保存する",
+    "TITLE": "タイトル"
+  },
+  "MH": {
+    "ADD_NEW_TASK": "新しいタスクを追加する",
+    "CREATE_PROJECT": "プロジェクトを作成",
+    "GO_TO_TASK_LIST": "タスクリストへ",
+    "MANAGE_PROJECTS": "プロジェクトを管理する",
+    "METRICS": "メトリック",
+    "PROCRASTINATE": "先延ばし",
+    "PROJECTS": "プロジェクト",
+    "PROJECT_MENU": "プロジェクトメニュー",
+    "SETTINGS": "設定",
+    "TASKS": "タスク",
+    "TASK_LIST": "タスクリスト",
+    "TOGGLE_SHOW_BOOKMARKS": "ブックマークの表示/非表示",
+    "TOGGLE_SHOW_NOTES": "プロジェクトノートの表示/非表示",
+    "TOGGLE_TRACK_TIME": "追跡時間の開始/停止",
+    "WORKLOG": "作業記録"
+  },
+  "PDS": {
+    "BACK": "私が何かを忘れたのを待つ！",
+    "BREAK_LABEL": "休憩（年/月）",
+    "CELEBRATE": " <i>を祝いましょう。</i>",
+    "CLEAR_ALL_CONTINUE": "完了したすべてをクリアして続行",
+    "EVALUATION": "評価",
+    "EXPORT_TASK_LIST": "タスクリストのエクスポート",
+    "GOOGLE_SHEET": "グーグルシート",
+    "NO_TASKS": "この日は何もしていません",
+    "ROUND_15M": "すべてのタスクを15分に丸める",
+    "ROUND_30M": "すべてのタスクを30分に丸める",
+    "ROUND_5M": "すべてのタスクを5分に丸める",
+    "ROUND_TIME_SPENT": "ラウンド時間",
+    "ROUND_TIME_SPENT_TITLE": "すべてのタスクにかかったラウンド時間。注意してください！これを元に戻すことはできません。",
+    "ROUND_TIME_WARNING": "!!!これを元に戻すことはできません注意してください！",
+    "ROUND_UP_15M": "すべてのタスクを15分に切り上げます",
+    "ROUND_UP_30M": "すべてのタスクを30分に切り上げます",
+    "ROUND_UP_5M": "すべてのタスクを5分に切り上げ",
+    "SAVE_AND_GO_HOME": "保存して家に帰る",
+    "START_END": "始まりと終わり",
+    "SUMMARY_FOR": " {{dayStr}}の日別サマリー",
+    "TASKS_COMPLETED": "完了したタスク",
+    "TASK_LIST": "タスクリスト",
+    "TIME_SPENT_AND_ESTIMATE_LABEL": "経過時間/推定",
+    "TIME_SPENT_ESTIMATE_TITLE": "過ごした時間：今日過ごした合計時間。アーカイブされたタスクは含まれていません。 - 推定時間：今日作業したタスクについて推定された時間から、他の日にすでにそれらに費やした時間を差し引いたもの。",
+    "TODAY": "今日",
+    "WEEK": "週間"
+  },
+  "PM": {
+    "TITLE": "プロジェクトメトリクス"
+  },
+  "PP": {
+    "ARCHIVED_PROJECTS": "アーカイブプロジェクト",
+    "ARCHIVE_PROJECT": "アーカイブプロジェクト",
+    "CREATE_NEW": "新しく作る",
+    "DELETE_PROJECT": "プロジェクトを削除",
+    "EDIT_PROJECT": "プロジェクトを編集",
+    "EXPORT_PROJECT": "プロジェクトをエクスポート",
+    "GITHUB_CONFIGURED": "Github統合を設定済み",
+    "IMPORT_FROM_FILE": "ファイルからインポート",
+    "JIRA_CONFIGURED": "Jira統合が設定されました",
+    "TITLE": "プロジェクト概要",
+    "UN_ARCHIVE_PROJECT": "アンアーカイブプロジェクト"
+  },
+  "PS": {
+    "GLOBAL_SETTINGS": "全体設定",
+    "PROJECT_SETTINGS": "プロジェクト固有の設定"
+  },
+  "S": {
+    "SYNC": {
+      "ERROR_FALLBACK_TO_BACKUP": "データのインポート中に問題が発生しました。ローカルバックアップにフォールバックします。",
+      "ERROR_INVALID_DATA": "同期中にエラーが発生しました。無効なデータ",
+      "IMPORTING": "データをインポートする",
+      "SUCCESS": "インポートされたデータ"
+    }
+  },
+  "WW": {
+    "ADD_MORE": "さらに追加",
+    "ADD_SOME_TASKS": "あなたの一日を計画するためにいくつかのタスクを追加してください！",
+    "COMPLETED_TASKS": "完了したタスク",
+    "ESTIMATE_REMAINING": "EST（東部基準時。残り：",
+    "FINISH_DAY": "終了日",
+    "HELP_PROCRASTINATION": "先延ばしにしてください！",
+    "NO_COMPLETED_TASKS": "現在完了したタスクはありません",
+    "NO_PLANNED_TASKS": "計画タスクなし",
+    "READY_TO_WORK": "準備オーケー！",
+    "TIME_ESTIMATED": "推定所要時間：",
+    "WITHOUT_BREAK": "休むことなく：",
+    "WORKING_TODAY": "今日働く"
+  }
 }

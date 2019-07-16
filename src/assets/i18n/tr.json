@@ -1,174 +1,322 @@
 {
-	"BL": {
-		"FROM_OTHER_PROJECTS": "Diğer Projelerden",
-		"NO_SCHEDULED": "Şu anda zamanlanmış görev yok. Görev bağlamı menüsünde \"Görevi Zamanla\" seçeneğini seçerek bir görevi zamanlayabilirsiniz. Açmak için görevin sağındaki 3 küçük noktaya tıklayın.",
-		"NO_TASKS": "İş günlüğünüzde şu anda görev yok",
-		"SCHEDULED": "tarifeli",
-		"TITLE": "birikim"
-	},
-	"F": {
-		"ATTACHMENT": {
-			"DIALOG_EDIT": {
-				"ADD_ATTACHMENT": "Eklenti ekle",
-				"EDIT_ATTACHMENT": "Eki Düzenle",
-				"LABELS": {
-					"FILE": "Dosya yolu",
-					"IMG": "görüntü",
-					"LINK": "Url"
-				},
-				"SELECT_TYPE": "Bir tür seçin",
-				"TYPES": {
-					"FILE": "Dosya (varsayılan sistem uygulaması tarafından açıldı)",
-					"IMG": "Resim (küçük resim olarak gösterilir)",
-					"LINK": "Bağlantı (tarayıcıda açılır)"
-				}
-			},
-			"LIST": {
-				"NO_ATTACHMENTS": "Şu anda hiçbir ek yok"
-			}
-		},
-		"BOOKMARK": {
-			"BAR": {
-				"DROP": "Yer imi eklemek için buraya bırakın",
-				"NO_BOOKMARKS": "Proje yer imleriniz yok. Sürükle ve bırak yöntemiyle veya '' simgesini tıklatarak ekleyin."
-			},
-			"DIALOG_EDIT": {
-				"ADD_BOOKMARK": "İmi eklemek",
-				"EDIT_BOOKMARK": "Yer İşaretini Düzenle",
-				"LABELS": {
-					"COMMAND": "komuta",
-					"FILE": "Dosya yolu",
-					"IMG": "görüntü",
-					"LINK": "Url"
-				},
-				"SELECT_ICON": "Bir simge seçin",
-				"SELECT_TYPE": "Bir tür seçin",
-				"TYPES": {
-					"COMMAND": "Komut (özel kabuk komutu)",
-					"FILE": "Dosya (varsayılan sistem uygulaması tarafından açıldı)",
-					"IMG": "Resim (küçük resim olarak gösterilir)",
-					"LINK": "Bağlantı (tarayıcıda açılır)"
-				}
-			}
-		}
-	},
-	"FILE_IMEX": {
-		"EXPORT_DATA": "Verileri Dışa Aktar",
-		"IMPORT_FROM_FILE": "Dosyadan içe aktar"
-	},
-	"F_LANG": {
-		"AR": "Arapça",
-		"DE": "Almanca",
-		"EN": "ingilizce",
-		"FR": "Fransızca",
-		"JA": "Japonca",
-		"LABEL": "Lütfen bir dil seçin",
-		"RU": "Rusça",
-		"TR": "Türk",
-		"ZH": "Çince"
-	},
-	"F_MISC": {
-		"HELP": "<p><strong>Masaüstü Bildirimleri'ni göremiyor musunuz?</strong> Pencereler için Sistem> Bildirimler ve eylemleri kontrol etmek ve gerekli bildirimlerin etkin olup olmadığını kontrol etmek isteyebilirsiniz.</p>",
-		"IS_AUTO_MARK_PARENT_AS_DONE": "Tüm alt görevler tamamlandığında ana görevi yapıldığı gibi işaretle",
-		"IS_CONFIRM_BEFORE_EXIT": "Uygulamadan çıkmadan önce onayla",
-		"IS_DISABLE_REMIND_WHEN_FORGOT_TO_FINISH_DAY": "Unutulmuş bitiş günü hakkında hatırlatıcıyı devre dışı bırakın",
-		"IS_HIDE_NAV": "Ana başlık yönlendirilene kadar gezinmeyi gizle (yalnızca masaüstü)",
-		"IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Zaman hesaplamasının ne zaman aşıldığını bildir",
-		"isDisableRemindWhenForgotToFinishDay": "",
-		"isHideNav": "",
-		"isNotifyWhenTimeEstimateExceeded": ""
-	},
-	"G": {
-		"CANCEL": "İptal etmek",
-		"DISMISS": "Reddet",
-		"SAVE": "Kayıt etmek",
-		"TITLE": "Başlık"
-	},
-	"MH": {
-		"ADD_NEW_TASK": "Yeni Görev ekle",
-		"CREATE_PROJECT": "Proje Yarat",
-		"GO_TO_TASK_LIST": "Görev listesine git",
-		"MANAGE_PROJECTS": "Projeleri Yönet",
-		"METRICS": "Metrik",
-		"PROCRASTINATE": "ertelemek",
-		"PROJECTS": "Projeler",
-		"PROJECT_MENU": "Proje Menüsü",
-		"SETTINGS": "ayarlar",
-		"TASKS": "Görevler",
-		"TASK_LIST": "Görev listesi",
-		"TOGGLE_SHOW_BOOKMARKS": "Yer İşaretlerini Göster / Gizle",
-		"TOGGLE_SHOW_NOTES": "Proje Notlarını Göster / Gizle",
-		"TOGGLE_TRACK_TIME": "Başlat / Durdur takip süresi",
-		"WORKLOG": "worklog"
-	},
-	"PDS": {
-		"BACK": "Bekle bir şey unuttum!",
-		"BREAK_LABEL": "Sonları (saat / saat)",
-		"CELEBRATE": " <i>kutlamak için bir dakikanızı ayırın!</i>",
-		"CLEAR_ALL_CONTINUE": "Hepsini temizle ve devam et",
-		"EVALUATION": "Değerlendirme",
-		"EXPORT_TASK_LIST": "Görev Listesini Dışa Aktar",
-		"GOOGLE_SHEET": "Google Sayfası",
-		"NO_TASKS": "Bu gün için görev yok",
-		"ROUND_15M": "Tüm görevleri 15 dakikaya yuvarlayın",
-		"ROUND_30M": "Tüm görevleri 30 dakikaya yuvarlayın",
-		"ROUND_5M": "Tüm görevleri 5 dakikaya yuvarlayın",
-		"ROUND_TIME_SPENT": "Geçen Zaman Harcandı",
-		"ROUND_TIME_SPENT_TITLE": "Tüm görevlere zaman ayırdı. Dikkatli ol! Bunu geri alamazsınız!",
-		"ROUND_TIME_WARNING": "!!! Dikkatli olun bu geri alınamaz !!!",
-		"ROUND_UP_15M": "Tüm görevleri 15 dakikaya tamamlayın",
-		"ROUND_UP_30M": "Tüm görevleri 30 dakikaya tamamlayın",
-		"ROUND_UP_5M": "Tüm görevleri 5 dakikaya tamamlayın",
-		"SAVE_AND_GO_HOME": "Kaydet ve eve git",
-		"START_END": "Başlangıç - Bitiş",
-		"SUMMARY_FOR": " {{dayStr}}Günlük Özeti",
-		"TASKS_COMPLETED": "Tamamlanan Görevler",
-		"TASK_LIST": "Görev listesi",
-		"TIME_SPENT_AND_ESTIMATE_LABEL": "Harcanan Zaman / Tahmini",
-		"TIME_SPENT_ESTIMATE_TITLE": "Harcanan Zaman: Bugün harcanan toplam süre. Arşivlenmiş görevler dahil değildir. - Tahmini Süre: Günümüzde çalışılan görevler için tahmini süre eksi diğer günlerde onlarla harcanan zaman.",
-		"TODAY": "Bugün",
-		"WEEK": "Hafta"
-	},
-	"PM": {
-		"TITLE": "Proje Metrikleri"
-	},
-	"PP": {
-		"ARCHIVED_PROJECTS": "Arşivlenmiş Projeler",
-		"ARCHIVE_PROJECT": "Arşiv Projesi",
-		"CREATE_NEW": "Yeni oluşturmak",
-		"DELETE_PROJECT": "Projeyi Sil",
-		"EDIT_PROJECT": "Projeyi Düzenle",
-		"EXPORT_PROJECT": "İhracat Projesi",
-		"GITHUB_CONFIGURED": "Github Entegrasyonu Yapılandırıldı",
-		"IMPORT_FROM_FILE": "Dosyadan içe aktar",
-		"JIRA_CONFIGURED": "Jira Entegrasyonu Yapılandırıldı",
-		"TITLE": "Projeye Genel Bakış",
-		"UN_ARCHIVE_PROJECT": "Silahsız Proje"
-	},
-	"PS": {
-		"GLOBAL_SETTINGS": "Genel Ayarlar",
-		"PROJECT_SETTINGS": "Projeye Özel Ayarlar"
-	},
-	"S": {
-		"SYNC": {
-			"ERROR_FALLBACK_TO_BACKUP": "Veriler alınırken bir şeyler ters gitti. Yerel yedeklemeye geri dönüyorum.",
-			"ERROR_INVALID_DATA": "Senkronizasyon sırasında hata oluştu. Geçersiz veri",
-			"IMPORTING": "Veri alınıyor",
-			"SUCCESS": "Alınan veri"
-		}
-	},
-	"WW": {
-		"ADD_MORE": "Daha ekle",
-		"ADD_SOME_TASKS": "Gününüzü planlamak için bazı görevler ekleyin!",
-		"COMPLETED_TASKS": "Tamamlanan Görevler",
-		"ESTIMATE_REMAINING": "Kalan tahmini:",
-		"FINISH_DAY": "Bitiş günü",
-		"HELP_PROCRASTINATION": "Erteliyorum yardım ediyorum!",
-		"NO_COMPLETED_TASKS": "Şu anda tamamlanmış bir görev yok.",
-		"NO_PLANNED_TASKS": "Planlanmış görev yok",
-		"READY_TO_WORK": "Çalışmaya hazır!",
-		"TIME_ESTIMATED": "Tahmini Süre:",
-		"WITHOUT_BREAK": "Ara vermeden:",
-		"WORKING_TODAY": "Bugün çalışıyorum:"
-	}
+  "BL": {
+    "FROM_OTHER_PROJECTS": "Diğer Projelerden",
+    "NO_SCHEDULED": "Şu anda zamanlanmış görev yok. Görev bağlamı menüsünde \"Görevi Zamanla\" seçeneğini seçerek bir görevi zamanlayabilirsiniz. Açmak için görevin sağındaki 3 küçük noktaya tıklayın.",
+    "NO_TASKS": "İş günlüğünüzde şu anda görev yok",
+    "SCHEDULED": "tarifeli",
+    "TITLE": "birikim"
+  },
+  "F": {
+    "ATTACHMENT": {
+      "DIALOG_EDIT": {
+        "ADD_ATTACHMENT": "Eklenti ekle",
+        "EDIT_ATTACHMENT": "Eki Düzenle",
+        "LABELS": {
+          "FILE": "Dosya yolu",
+          "IMG": "görüntü",
+          "LINK": "Url"
+        },
+        "SELECT_TYPE": "Bir tür seçin",
+        "TYPES": {
+          "FILE": "Dosya (varsayılan sistem uygulaması tarafından açıldı)",
+          "IMG": "Resim (küçük resim olarak gösterilir)",
+          "LINK": "Bağlantı (tarayıcıda açılır)"
+        }
+      },
+      "LIST": {
+        "NO_ATTACHMENTS": "Şu anda hiçbir ek yok"
+      }
+    },
+    "BOOKMARK": {
+      "BAR": {
+        "DROP": "Yer imi eklemek için buraya bırakın",
+        "NO_BOOKMARKS": "Proje yer imleriniz yok. Sürükle ve bırak yöntemiyle veya '' simgesini tıklatarak ekleyin."
+      },
+      "DIALOG_EDIT": {
+        "ADD_BOOKMARK": "İmi eklemek",
+        "EDIT_BOOKMARK": "Yer İşaretini Düzenle",
+        "LABELS": {
+          "COMMAND": "komuta",
+          "FILE": "Dosya yolu",
+          "IMG": "görüntü",
+          "LINK": "Url"
+        },
+        "SELECT_ICON": "Bir simge seçin",
+        "SELECT_TYPE": "Bir tür seçin",
+        "TYPES": {
+          "COMMAND": "Komut (özel kabuk komutu)",
+          "FILE": "Dosya (varsayılan sistem uygulaması tarafından açıldı)",
+          "IMG": "Resim (küçük resim olarak gösterilir)",
+          "LINK": "Bağlantı (tarayıcıda açılır)"
+        }
+      }
+    },
+    "CONFIG": {
+      "SNACK": {
+        "UPDATE_SECTION": " <strong>{{sectionKey}}</strong>için güncellenmiş ayarlar"
+      }
+    },
+    "GOOGLE": {
+      "DIALOG": {
+        "CREATE_SYNC_FILE": "Google Drive: <strong>\"{{fileName}}\"</strong> adında bir dosya bulunamadı. <strong>Oluştur</strong> Google Drive’da senkronizasyon dosyası olarak?",
+        "USE_EXISTING_SYNC_FILE": "Google Drive: Senkronizasyon dosyası olarak <strong>var olan</strong> dosyayı <strong>\"{{fileName}}\"</strong> kullanıyor musunuz? Değilse, lütfen Eşitleme dosya adını değiştirin."
+      },
+      "D_CONFIRM_LOAD": {
+        "LAST_MOD": "son değişiklik:",
+        "LAST_SYNC": "son senkronizasyon",
+        "LOCAL": "yerel",
+        "LOCAL_REMOTE": "yerel <=> uzak",
+        "OVERWRITE_LOCAL": "Yerel verilerin üzerine yaz",
+        "OVERWRITE_REMOTE": "Uzak verilerin üzerine yaz",
+        "REMOTE": "uzak",
+        "TEXT": " Google Drive Yedekleme'den<p>Güncelleme. <strong>Yerel veri, uzak veriden</strong> daha yeni görünüyor. Kaydedilmemiş yerel değişikliklerin üzerine yazılsın mı? <strong>Bütün veriler sonsuza dek kaybedilecek</strong>.</p>",
+        "TITLE": "GDrive Update ile yerel verilerin üzerine yazılsın mı?"
+      },
+      "D_CONFIRM_SAVE": {
+        "LAST_MOD": "son değişiklik:",
+        "LAST_SYNC": "son senkronizasyon",
+        "LOCAL": "yerel",
+        "LOCAL_REMOTE": "yerel <=> uzak",
+        "OVERWRITE_LOCAL": "Yerel verilerin üzerine yaz",
+        "OVERWRITE_REMOTE": "Uzak verilerin üzerine yaz",
+        "REMOTE": "uzak",
+        "TEXT": "  <p>Google Drive’da yerel olarak sahip olmadığınız bazı değişiklikler var. Yine de üzerine yazmak ister misiniz?</p>",
+        "TITLE": "Google Drive'da kaydedilmemiş verilerin üzerine yazılsın mı?"
+      },
+      "EXPORT_TIME": {
+        "ALWAYS_ROUND_UP": "Daima çalışma süresi doluyor",
+        "AUTO_LOGIN": "Otomatik oturum açma ve bir dahaki sefere veri yükleme",
+        "HELP_ADDITIONAL": "Buna ek olarak, bu değerlerin hesaplamasını değiştirmek için kullanabileceğiniz çeşitli seçenekler vardır.",
+        "HELP_INFO": "",
+        "HELP_POSSIBLE_PROPERTIES": "",
+        "LOGIN": "Google’a giriş yapın",
+        "LOGOUT": "Çıkış Yap",
+        "OPEN_SPREADSHEET": "Elektronik tabloyu aç",
+        "READ_SPREADSHEET": "Elektronik tabloyu oku",
+        "ROUND_END_TIME_TO": "Gidiş zamanı",
+        "ROUND_HALF": "tam yarım saat",
+        "ROUND_HOUR": "tam saatler",
+        "ROUND_QUARTER": "tam çeyrek",
+        "ROUND_START_TIME_TO": "Yuvarlak başlangıç zamanı",
+        "ROUND_TIME_WORKED_TO": "Yuvarlak zaman çalıştı",
+        "SAVE_ROW": "Satırı kaydet",
+        "SNACK_EQUAL_VALUES": "Geçerli değerler ve son kaydedilen satır eşit değerlere sahip, muhtemelen istediğiniz şey bu değil.",
+        "SNACK_ROW_APPENDED": "Satır başarıyla eklendi"
+      },
+      "SNACKS": {
+        "DOWNLOADING_UPDATE": "Google Drive: Uzaktan güncelleme var! İndiriliyor ...",
+        "ERROR": "Google Drive - Hata:",
+        "ERROR_INITIAL_IMPORT": "Google Drive: Başlangıçta veri almaya çalışırken hata",
+        "LOCAL_UP_TO_DATE": "Google Drive: Yerel veriler zaten güncel",
+        "MULTIPLE_SYNC_FILES_WITH_SAME_NAME": "\"{{newFileName}}\" adında birden fazla dosya bulundu. Lütfen birini hariç tümünü silin veya farklı bir ad seçin.",
+        "NO_UPDATE_REQUIRED": "Google Drive: Güncelleme gerekmez",
+        "REMOTE_UP_TO_DATE": "Google Drive: Uzak veriler zaten güncel",
+        "SUCCESS": "Google Drive: Yedekleme başarıyla kaydedildi",
+        "SYNCING": "Google Drive: Senkronizasyon"
+      }
+    }
+  },
+  "FILE_IMEX": {
+    "EXPORT_DATA": "Verileri Dışa Aktar",
+    "IMPORT_FROM_FILE": "Dosyadan içe aktar"
+  },
+  "F_AUTO_BACKUPS": {
+    "HELP": "Bir şeyler ters gittiğinde, hazır olması için tüm verileri otomatik olarak uygulama klasörünüze kaydedin.",
+    "LABEL_IS_ENABLED": "Otomatik yedeklemeyi etkinleştir",
+    "TITLE": "Otomatik Yedeklemeler"
+  },
+  "F_GOOGLE_DRIVE_SYNC": {
+    "HELP": "Burada, uygulamanızı tek bir google sürücü dosyasına otomatik olarak senkronize edecek şekilde yapılandırabilirsiniz. Tüm veriler şifrelenmemiş olarak kaydedilir, bu nedenle bu dosyayı yanlışlıkla birisiyle paylaşmadığınızdan emin olun.",
+    "TITLE": "Google Drive ile senkronize et"
+  },
+  "F_IDLE": {
+    "HELP": "<div><p>Boşta kalma süresi işleme etkinleştirildiğinde, boşta olduğunuzda, hangi görevi ve zamanınızı izlemek istediğinizi kontrol etmek için belirli bir süre sonra bir iletişim kutusu açılır.</p></div>",
+    "IS_ENABLE_IDLE_TIME_TRACKING": "Boşta kalma süresini işlemeyi etkinleştir",
+    "IS_ONLY_OPEN_IDLE_WHEN_CURRENT_TASK": "Yalnızca geçerli bir görev seçildiğinde boşta kalma zamanını tetikle",
+    "IS_UN_TRACKED_IDLE_RESETS_BREAK_TIMER": "İzlenmeyen rölanti süresi sıfırlama zamanlayıcısı",
+    "MIN_IDLE_TIME": "X'ten sonra boşta tetikleme",
+    "TITLE": "Boşta Taşıma"
+  },
+  "F_IMEX": {
+    "HELP": "<p>Burada tüm verilerinizi yedeklemeler için <strong>JSON</strong> olarak dışa aktarabilirsiniz, ancak farklı bir bağlamda da kullanabilirsiniz (örneğin, projelerinizi tarayıcıda dışa aktarabilir ve bunları masaüstü sürümüne alabilirsiniz. ). </p> <p>Alma, geçerli JSON'un metin alanına kopyalanmasını bekler. <strong>NOT: İçe aktar düğmesine bastığınızda mevcut ayarların ve verilerin üzerine yazılır!</strong></p>",
+    "TITLE": "İthalat ihracat"
+  },
+  "F_KEYBOARD": {
+    "ADD_NEW_NOTE": "Yeni not ekle",
+    "ADD_NEW_TASK": "Yeni Görev ekle",
+    "APP_WIDE_SHORTCUTS": "Genel Kısayollar (uygulama genelinde)",
+    "COLLAPSE_SUB_TASKS": "Alt Görevleri Daralt",
+    "EXPAND_SUB_TASKS": "Alt Görevler'i genişletin",
+    "FOCUS_LAST_ACTIVE_TASK": "Son etkin görevi odakla",
+    "GLOBAL_SHOW_HIDE": "Süper Verimliliği Göster / Gizle",
+    "GLOBAL_TOGGLE_TASK_START": "Son etkin görev için zaman izlemesini değiştir",
+    "GO_TO_DAILY_AGENDA": "Gündeme Git",
+    "GO_TO_FOCUS_MODE": "Odak Moduna Git",
+    "GO_TO_SETTINGS": "Ayarlara git",
+    "GO_TO_WORK_VIEW": "İş Görünümüne Git",
+    "HELP": "<p>Burada tüm klavye kısayollarını yapılandırabilirsiniz.</p> <p>Metin girişine tıklayın ve istediğiniz klavye kombinasyonunu girin. Kaydetmek için Enter'a, iptal etmek için Escape'e basın.</p> <p>Üç tür kısayol vardır:</p> <ul> <li> <strong>Genel kısayollar:</strong> Uygulama çalışırken, uygulama diğer tüm uygulamalardan eylemi tetikler. </li> <li> <strong>Uygulama düzeyinde kısayollar:</strong> Uygulamanın her ekranından tetiklenir, ancak şu anda bir metin alanı düzenliyorsanız değil. </li> <li> <strong>Görev seviyesi kısayolları:</strong> Yalnızca fare veya klavye yoluyla bir görev seçtiyseniz tetiklenirler ve genellikle bu görevle ilgili bir eylemi tetiklerler. </li> </ul>",
+    "MOVE_TASK_DOWN": "Görevi Listede Aşağı Taşı",
+    "MOVE_TASK_UP": "Listede Görevi Yukarı Taşı",
+    "MOVE_TO_BACKLOG": "Görevi Görev Listesine Taşı",
+    "MOVE_TO_TODAYS_TASKS": "Görevi Bugünün Görev Listesine Taşı",
+    "OPEN_PROJECT_NOTES": "Proje Notlarını Göster / Gizle",
+    "SELECT_NEXT_TASK": "Sonraki görevi seç",
+    "SELECT_PREVIOUS_TASK": "Önceki Görevi Seç",
+    "SYSTEM_SHORTCUTS": "Global Kısayollar (sistem genelinde)",
+    "TASK_ADD_SUB_TASK": "Alt Görev ekle",
+    "TASK_DELETE": "Görevi Sil",
+    "TASK_EDIT_TITLE": "Başlığı Düzenle",
+    "TASK_OPEN_ESTIMATION_DIALOG": "Tahmini / harcanan zamanı düzenle",
+    "TASK_SCHEDULE": "Görev Takvimi",
+    "TASK_SHORTCUTS": "Görevler",
+    "TASK_SHORTCUTS_INFO": "Seçili görev için aşağıdaki kısayollar geçerlidir (sekme veya fare ile seçilir).",
+    "TASK_TOGGLE_ADDITIONAL_INFO_OPEN": "Ek görev bilgilerini göster / gizle",
+    "TASK_TOGGLE_DONE": "Geçiş Yapıldı",
+    "TITLE": "Klavye kısayolları",
+    "TOGGLE_BACKLOG": "Görev Listesini Göster / Gizle",
+    "TOGGLE_BOOKMARKS": "Yer İşareti Çubuğunu Göster / Gizle",
+    "TOGGLE_PLAY": "Görevi Başlat / Durdur",
+    "ZOOM_DEFAULT": "Varsayılan yakınlaştırma (Yalnızca masaüstü)",
+    "ZOOM_IN": "Yakınlaştır (Yalnızca masaüstü)",
+    "ZOOM_OUT": "Uzaklaştır (Yalnızca masaüstü)"
+  },
+  "F_LANG": {
+    "AR": "Arapça",
+    "DE": "Almanca",
+    "EN": "ingilizce",
+    "ES": "İspanyol",
+    "FR": "Fransızca",
+    "JA": "Japonca",
+    "LABEL": "Lütfen bir dil seçin",
+    "RU": "Rusça",
+    "TITLE": "dil",
+    "TR": "Türk",
+    "ZH": "Çince"
+  },
+  "F_MISC": {
+    "HELP": "<p><strong>Masaüstü Bildirimleri'ni göremiyor musunuz?</strong> Pencereler için Sistem> Bildirimler ve eylemleri kontrol etmek ve gerekli bildirimlerin etkin olup olmadığını kontrol etmek isteyebilirsiniz.</p>",
+    "IS_AUTO_MARK_PARENT_AS_DONE": "Tüm alt görevler tamamlandığında ana görevi yapıldığı gibi işaretle",
+    "IS_CONFIRM_BEFORE_EXIT": "Uygulamadan çıkmadan önce onayla",
+    "IS_DISABLE_REMIND_WHEN_FORGOT_TO_FINISH_DAY": "Unutulmuş bitiş günü hakkında hatırlatıcıyı devre dışı bırakın",
+    "IS_HIDE_NAV": "Ana başlık yönlendirilene kadar gezinmeyi gizle (yalnızca masaüstü)",
+    "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Zaman hesaplamasının ne zaman aşıldığını bildir",
+    "TITLE": "Diğer ayarlar",
+    "isDisableRemindWhenForgotToFinishDay": "",
+    "isHideNav": "",
+    "isNotifyWhenTimeEstimateExceeded": ""
+  },
+  "F_POMODORO": {
+    "BREAK_DURATION": "Kısa molaların süresi",
+    "CYCLES_BEFORE_LONGER_BREAK": "X iş oturumundan sonra daha uzun ara vermeye başlayın",
+    "DURATION": "İş seanslarının süresi",
+    "HELP": "<p>Pomodoro zamanlayıcı birkaç ayar yoluyla yapılandırılabilir. Her iş oturumunun süresi, normal araların süresi, daha uzun bir ara başlamadan önce çalıştırılacak iş oturumlarının sayısı ve bu uzun aralığın süresi.</p> <p>Ayrıca pomodoro molalarınız sırasında dikkatinizi dağıtmak isteyip istemediğinizi de ayarlayabilirsiniz.</p> <p>\"Pomodoro molasında zaman izlemesini duraklat\" ayarı aynı zamanda molalarınızı bir görev için harcanan iş zamanı olarak izleyecektir. </p> <p>\"Etkin görev olmadığında pomodoro oturumunu duraklat\" seçeneğinin etkinleştirilmesi, bir görevi duraklattığınızda pomodoro oturumunu duraklatır.</p>",
+    "IS_ENABLED": "Pomodoro zamanlayıcıyı etkinleştir",
+    "IS_MANUAL_CONTINUE": "Bir sonraki pomodoro oturumunun başladığını elle onayla",
+    "IS_PLAY_SOUND": "Oturum bittiğinde ses çal",
+    "IS_PLAY_SOUND_AFTER_BREAK": "Mola bittiğinde ses çal",
+    "IS_PLAY_TICK": "Her saniye kene sesini çal",
+    "IS_STOP_TRACKING_ON_BREAK": "Arada görev için zaman izlemeyi durdur",
+    "LONGER_BREAK_DURATION": "Uzun molaların süresi",
+    "TITLE": "Pomodoro Ayarları"
+  },
+  "F_TAKE_A_BREAK": {
+    "HELP": "<div> <p>Mola vermeden belirli bir süre çalıştığınızda tekrar eden bir hatırlatıcı yapılandırmanıza izin verir.</p> <p>Görüntülenen mesajı değiştirebilirsiniz. ${duration} , ara vermeden harcadığınız zamanla değiştirilecektir.</p> </div>",
+    "IS_ENABLED": "Ara ver hatırlatma yapmayı etkinleştir",
+    "MESSAGE": "Bir ara mesajı al",
+    "MIN_WORKING_TIME": "Tetiksiz, X'in bir olmadan çalıştıktan sonra bir mola bildirimi almasını sağlar",
+    "TITLE": "Hatırlatma Arası"
+  },
+  "G": {
+    "CANCEL": "İptal etmek",
+    "DISMISS": "Reddet",
+    "SAVE": "Kayıt etmek",
+    "TITLE": "Başlık"
+  },
+  "MH": {
+    "ADD_NEW_TASK": "Yeni Görev ekle",
+    "CREATE_PROJECT": "Proje Yarat",
+    "GO_TO_TASK_LIST": "Görev listesine git",
+    "MANAGE_PROJECTS": "Projeleri Yönet",
+    "METRICS": "Metrik",
+    "PROCRASTINATE": "ertelemek",
+    "PROJECTS": "Projeler",
+    "PROJECT_MENU": "Proje Menüsü",
+    "SETTINGS": "ayarlar",
+    "TASKS": "Görevler",
+    "TASK_LIST": "Görev listesi",
+    "TOGGLE_SHOW_BOOKMARKS": "Yer İşaretlerini Göster / Gizle",
+    "TOGGLE_SHOW_NOTES": "Proje Notlarını Göster / Gizle",
+    "TOGGLE_TRACK_TIME": "Başlat / Durdur takip süresi",
+    "WORKLOG": "worklog"
+  },
+  "PDS": {
+    "BACK": "Bekle bir şey unuttum!",
+    "BREAK_LABEL": "Sonları (saat / saat)",
+    "CELEBRATE": " <i>kutlamak için bir dakikanızı ayırın!</i>",
+    "CLEAR_ALL_CONTINUE": "Hepsini temizle ve devam et",
+    "EVALUATION": "Değerlendirme",
+    "EXPORT_TASK_LIST": "Görev Listesini Dışa Aktar",
+    "GOOGLE_SHEET": "Google Sayfası",
+    "NO_TASKS": "Bu gün için görev yok",
+    "ROUND_15M": "Tüm görevleri 15 dakikaya yuvarlayın",
+    "ROUND_30M": "Tüm görevleri 30 dakikaya yuvarlayın",
+    "ROUND_5M": "Tüm görevleri 5 dakikaya yuvarlayın",
+    "ROUND_TIME_SPENT": "Geçen Zaman Harcandı",
+    "ROUND_TIME_SPENT_TITLE": "Tüm görevlere zaman ayırdı. Dikkatli ol! Bunu geri alamazsınız!",
+    "ROUND_TIME_WARNING": "!!! Dikkatli olun bu geri alınamaz !!!",
+    "ROUND_UP_15M": "Tüm görevleri 15 dakikaya tamamlayın",
+    "ROUND_UP_30M": "Tüm görevleri 30 dakikaya tamamlayın",
+    "ROUND_UP_5M": "Tüm görevleri 5 dakikaya tamamlayın",
+    "SAVE_AND_GO_HOME": "Kaydet ve eve git",
+    "START_END": "Başlangıç - Bitiş",
+    "SUMMARY_FOR": " {{dayStr}}Günlük Özeti",
+    "TASKS_COMPLETED": "Tamamlanan Görevler",
+    "TASK_LIST": "Görev listesi",
+    "TIME_SPENT_AND_ESTIMATE_LABEL": "Harcanan Zaman / Tahmini",
+    "TIME_SPENT_ESTIMATE_TITLE": "Harcanan Zaman: Bugün harcanan toplam süre. Arşivlenmiş görevler dahil değildir. - Tahmini Süre: Günümüzde çalışılan görevler için tahmini süre eksi diğer günlerde onlarla harcanan zaman.",
+    "TODAY": "Bugün",
+    "WEEK": "Hafta"
+  },
+  "PM": {
+    "TITLE": "Proje Metrikleri"
+  },
+  "PP": {
+    "ARCHIVED_PROJECTS": "Arşivlenmiş Projeler",
+    "ARCHIVE_PROJECT": "Arşiv Projesi",
+    "CREATE_NEW": "Yeni oluşturmak",
+    "DELETE_PROJECT": "Projeyi Sil",
+    "EDIT_PROJECT": "Projeyi Düzenle",
+    "EXPORT_PROJECT": "İhracat Projesi",
+    "GITHUB_CONFIGURED": "Github Entegrasyonu Yapılandırıldı",
+    "IMPORT_FROM_FILE": "Dosyadan içe aktar",
+    "JIRA_CONFIGURED": "Jira Entegrasyonu Yapılandırıldı",
+    "TITLE": "Projeye Genel Bakış",
+    "UN_ARCHIVE_PROJECT": "Silahsız Proje"
+  },
+  "PS": {
+    "GLOBAL_SETTINGS": "Genel Ayarlar",
+    "PROJECT_SETTINGS": "Projeye Özel Ayarlar"
+  },
+  "S": {
+    "SYNC": {
+      "ERROR_FALLBACK_TO_BACKUP": "Veriler alınırken bir şeyler ters gitti. Yerel yedeklemeye geri dönüyorum.",
+      "ERROR_INVALID_DATA": "Senkronizasyon sırasında hata oluştu. Geçersiz veri",
+      "IMPORTING": "Veri alınıyor",
+      "SUCCESS": "Alınan veri"
+    }
+  },
+  "WW": {
+    "ADD_MORE": "Daha ekle",
+    "ADD_SOME_TASKS": "Gününüzü planlamak için bazı görevler ekleyin!",
+    "COMPLETED_TASKS": "Tamamlanan Görevler",
+    "ESTIMATE_REMAINING": "Kalan tahmini:",
+    "FINISH_DAY": "Bitiş günü",
+    "HELP_PROCRASTINATION": "Erteliyorum yardım ediyorum!",
+    "NO_COMPLETED_TASKS": "Şu anda tamamlanmış bir görev yok.",
+    "NO_PLANNED_TASKS": "Planlanmış görev yok",
+    "READY_TO_WORK": "Çalışmaya hazır!",
+    "TIME_ESTIMATED": "Tahmini Süre:",
+    "WITHOUT_BREAK": "Ara vermeden:",
+    "WORKING_TODAY": "Bugün çalışıyorum:"
+  }
 }

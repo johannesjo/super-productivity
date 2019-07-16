@@ -50,20 +50,146 @@
           "LINK": "Link (öffnet im Browser)"
         }
       }
+    },
+    "CONFIG": {
+      "SNACK": {
+        "UPDATE_SECTION": "Aktualisierte Einstellungen für <strong>{{sectionKey}}</strong>"
+      }
+    },
+    "GOOGLE": {
+      "DIALOG": {
+        "CREATE_SYNC_FILE": "Google Drive: Es wurde keine Datei mit dem Namen <strong>\"{{fileName}}\"</strong> gefunden. <strong>Erstelle</strong> es als Synchronisierungsdatei auf Google Drive?",
+        "USE_EXISTING_SYNC_FILE": "Google Drive: <strong>vorhandene</strong> Datei <strong>\"{{fileName}}\"</strong> als Synchronisierungsdatei verwenden? Wenn nicht, ändern Sie bitte den Namen der Sync-Datei."
+      },
+      "D_CONFIRM_LOAD": {
+        "LAST_MOD": "Letzte Änderung:",
+        "LAST_SYNC": "Letzte Synchronisierung",
+        "LOCAL": "Lokal",
+        "LOCAL_REMOTE": "lokal <=> entfernt",
+        "OVERWRITE_LOCAL": "Lokale Daten überschreiben",
+        "OVERWRITE_REMOTE": "Remote-Daten überschreiben",
+        "REMOTE": "Remote",
+        "TEXT": "<p>Update von Google Drive Backup. <strong>Lokale Daten scheinen neuer zu sein</strong> als die Remote-Daten. Nicht gespeicherte lokale Änderungen überschreiben? <strong>Alle Daten gehen für immer verloren</strong>.</p>",
+        "TITLE": "Lokale Daten mit GDrive Update überschreiben?"
+      },
+      "D_CONFIRM_SAVE": {
+        "LAST_MOD": "Letzte Änderung:",
+        "LAST_SYNC": "Letzte Synchronisierung",
+        "LOCAL": "Lokal",
+        "LOCAL_REMOTE": "lokal <=> entfernt",
+        "OVERWRITE_LOCAL": "Lokale Daten überschreiben",
+        "OVERWRITE_REMOTE": "Remote-Daten überschreiben",
+        "REMOTE": "Remote",
+        "TEXT": "  <p>In Google Drive scheinen sich einige Änderungen ergeben zu haben, die lokal nicht vorliegen. Möchten Sie sie trotzdem überschreiben?</p>",
+        "TITLE": "Nicht gespeicherte Daten in Google Drive überschreiben?"
+      },
+      "EXPORT_TIME": {
+        "ALWAYS_ROUND_UP": "Arbeitszeit immer aufrunden",
+        "AUTO_LOGIN": "Beim nächsten Mal automatisch anmelden und Daten laden",
+        "HELP_ADDITIONAL": "Darüber hinaus gibt es mehrere Optionen, mit denen Sie die Berechnung dieser Werte ändern können.",
+        "HELP_INFO": "<p>In dieser Ansicht können Sie Ihre Arbeitszeit in ein Google Sheet exportieren. Sie müssen zulassen, dass Super Productivity auf Ihre Google Spreadsheets zugreifen kann. Sie müssen auch eine Tabelle mit Überschriften in der ersten Zeile erstellen und deren ID im Eingabefeld angeben (<a href=\"https://stackoverflow.com/questions/36061433/how-to-do-i-locate-a-google-spreadsheet-id\" target=\"_blank\">Um die ID einer Tabelle zu ermitteln?</a>).</p><p>Nach dem erfolgreichen Laden Ihrer Tabelle wird eine Tabelle mit 4 Zeilen angezeigt. In der ersten Zeile wird die Überschrift angezeigt, die Sie in der Tabelle selbst angegeben haben.</p><p>Die zweite Zeile dient zu Informationszwecken und zeigt die letzte Zeile der Tabelle.</p><p>Die vierte Zeile enthält eine Liste von Werten, die Sie direkt eingeben können, um sie in der Tabelle zu speichern.</p><p>In der dritten Zeile werden automatisch einige Werte für die vierte Zeile definiert. Es gibt verschiedene Sonderzeichenfolgen, die Sie in die Zellen eingeben können:</p>",
+        "HELP_POSSIBLE_PROPERTIES": "",
+        "LOGIN": "Melden Sie sich bei Google an",
+        "LOGOUT": "Ausloggen",
+        "OPEN_SPREADSHEET": "Öffnen Sie die Tabelle",
+        "READ_SPREADSHEET": "Tabellenkalkulation lesen",
+        "ROUND_END_TIME_TO": "Runde Endzeit bis",
+        "ROUND_HALF": "volle halbe stunden",
+        "ROUND_HOUR": "volle Stunden",
+        "ROUND_QUARTER": "volle viertel",
+        "ROUND_START_TIME_TO": "Rundenstartzeit bis",
+        "ROUND_TIME_WORKED_TO": "Rundenzeit arbeitete bis",
+        "SAVE_ROW": "Zeile speichern",
+        "SNACK_EQUAL_VALUES": "Aktuelle Werte und die zuletzt gespeicherte Zeile haben gleiche Werte, das ist wahrscheinlich nicht das, was Sie wollen.",
+        "SNACK_ROW_APPENDED": "Zeile erfolgreich angehängt"
+      },
+      "SNACKS": {
+        "DOWNLOADING_UPDATE": "Google Drive: Es gibt ein Remote-Update! Wird heruntergeladen...",
+        "ERROR": "Google Drive - Fehler:",
+        "ERROR_INITIAL_IMPORT": "Google Drive: Fehler beim ersten Versuch, Daten zu importieren",
+        "LOCAL_UP_TO_DATE": "Google Drive: Lokale Daten bereits aktuell",
+        "MULTIPLE_SYNC_FILES_WITH_SAME_NAME": "Mehrere Dateien mit dem Namen \"{{newFileName}}\" gefunden. Bitte löschen Sie alle bis auf einen oder wählen Sie einen anderen Namen.",
+        "NO_UPDATE_REQUIRED": "Google Drive: Keine Aktualisierung erforderlich",
+        "REMOTE_UP_TO_DATE": "Google Drive: Remote-Daten bereits aktuell",
+        "SUCCESS": "Google Drive: Backup erfolgreich gespeichert",
+        "SYNCING": "Google Drive: Synchronisieren"
+      }
     }
   },
   "FILE_IMEX": {
     "EXPORT_DATA": "Daten exportieren",
     "IMPORT_FROM_FILE": "Aus Datei importieren"
   },
+  "F_AUTO_BACKUPS": {
+    "HELP": "Speichern Sie alle Daten automatisch in Ihrem App-Ordner, um sie für den Fall, dass ein Fehler auftritt, bereit zu halten.",
+    "LABEL_IS_ENABLED": "Aktivieren Sie automatische Sicherungen",
+    "TITLE": "Automatische Backups"
+  },
+  "F_GOOGLE_DRIVE_SYNC": {
+    "HELP": "Hier können Sie Ihre App so konfigurieren, dass sie automatisch mit und von einer einzelnen Google Drive-Datei synchronisiert wird. Alle Daten werden unverschlüsselt gespeichert, stellen Sie also sicher, dass Sie diese Datei nicht versehentlich mit jemandem teilen.",
+    "TITLE": "Über Google Drive synchronisieren"
+  },
+  "F_IDLE": {
+    "HELP": "<div><p>Wenn die Behandlung von Leerlaufzeiten aktiviert ist, wird nach einer festgelegten Zeit ein Dialogfeld geöffnet, in dem überprüft wird, ob und für welche Aufgabe Sie Ihre Zeit nachverfolgen möchten, wenn Sie im Leerlauf waren.</p></div>",
+    "IS_ENABLE_IDLE_TIME_TRACKING": "Aktivieren Sie das Leerlaufzeithandling",
+    "IS_ONLY_OPEN_IDLE_WHEN_CURRENT_TASK": "Triggern Sie den Leerlaufdialog nur, wenn eine aktuelle Aufgabe ausgewählt ist",
+    "IS_UN_TRACKED_IDLE_RESETS_BREAK_TIMER": "Durch Zurücksetzen der nicht verfolgten Leerlaufzeit wird ein Pausen-Timer ausgelöst",
+    "MIN_IDLE_TIME": "Leerlauf nach X auslösen",
+    "TITLE": "Idle Handling"
+  },
+  "F_IMEX": {
+    "HELP": "<p>Hier können Sie alle Ihre Daten als <strong>JSON</strong> für Backups exportieren, aber auch in einem anderen Kontext verwenden (z. B. möchten Sie Ihre Projekte möglicherweise im Browser exportieren und in die Desktop-Version importieren ). </p> <p>Der Import erwartet, dass gültiges JSON in den Textbereich kopiert wird. <strong>HINWEIS: Sobald Sie auf die Schaltfläche \"Importieren\" klicken, werden alle Ihre aktuellen Einstellungen und Daten überschrieben.</strong></p>",
+    "TITLE": "Import Export"
+  },
+  "F_KEYBOARD": {
+    "ADD_NEW_NOTE": "Neue Notiz hinzufügen",
+    "ADD_NEW_TASK": "Neue Aufgabe hinzufügen",
+    "APP_WIDE_SHORTCUTS": "Globale Verknüpfungen (anwendungsweit)",
+    "COLLAPSE_SUB_TASKS": "Unteraufgaben reduzieren",
+    "EXPAND_SUB_TASKS": "Erweitern Sie Unteraufgaben",
+    "FOCUS_LAST_ACTIVE_TASK": "Letzte aktive Aufgabe fokussieren",
+    "GLOBAL_SHOW_HIDE": "Superproduktivität ein- / ausblenden",
+    "GLOBAL_TOGGLE_TASK_START": "Schaltet die Zeiterfassung für die zuletzt aktive Aufgabe um",
+    "GO_TO_DAILY_AGENDA": "Gehe zur Agenda",
+    "GO_TO_FOCUS_MODE": "Wechseln Sie in den Fokusmodus",
+    "GO_TO_SETTINGS": "Gehe zu den Einstellungen",
+    "GO_TO_WORK_VIEW": "Gehen Sie zur Arbeitsansicht",
+    "HELP": "<p>Hier können Sie alle Tastaturkürzel konfigurieren.</p> <p>Klicken Sie auf die Texteingabe und geben Sie die gewünschte Tastaturkombination ein. Drücken Sie die Eingabetaste, um zu speichern, und die Escape-Taste, um den Vorgang abzubrechen.</p> <p>Es gibt drei Arten von Verknüpfungen:</p> <ul> <li> <strong>Globale Verknüpfungen:</strong> Wenn die App ausgeführt wird, wird die Aktion von jeder anderen Anwendung ausgelöst. </li> <li> <strong>Verknüpfungen auf Anwendungsebene:</strong> Wird von jedem Bildschirm der Anwendung ausgelöst, jedoch nicht, wenn Sie gerade ein Textfeld bearbeiten. </li> <li> <strong>Schnellzugriffe auf Aufgabenebene:</strong> Sie werden nur ausgelöst, wenn Sie eine Aufgabe mit der Maus oder der Tastatur ausgewählt haben und normalerweise eine Aktion auslösen, die sich speziell auf diese eine Aufgabe bezieht. </li> </ul>",
+    "MOVE_TASK_DOWN": "Aufgabe in Liste nach unten verschieben",
+    "MOVE_TASK_UP": "Aufgabe in Liste nach oben verschieben",
+    "MOVE_TO_BACKLOG": "Task in Task-Backlog verschieben",
+    "MOVE_TO_TODAYS_TASKS": "Aufgabe in die Aufgabenliste von heute verschieben",
+    "OPEN_PROJECT_NOTES": "Projektnotizen ein- / ausblenden",
+    "SELECT_NEXT_TASK": "Nächste Aufgabe auswählen",
+    "SELECT_PREVIOUS_TASK": "Vorherige Aufgabe auswählen",
+    "SYSTEM_SHORTCUTS": "Globale Verknüpfungen (systemweit)",
+    "TASK_ADD_SUB_TASK": "Unteraufgabe hinzufügen",
+    "TASK_DELETE": "Aufgabe löschen",
+    "TASK_EDIT_TITLE": "Titel bearbeiten",
+    "TASK_OPEN_ESTIMATION_DIALOG": "Schätzung / Zeitaufwand bearbeiten",
+    "TASK_SCHEDULE": "Task planen",
+    "TASK_SHORTCUTS": "Aufgaben",
+    "TASK_SHORTCUTS_INFO": "Die folgenden Verknüpfungen gelten für die aktuell ausgewählte Aufgabe (Auswahl über Tab oder Maus).",
+    "TASK_TOGGLE_ADDITIONAL_INFO_OPEN": "Zusätzliche Aufgabeninfo ein- / ausblenden",
+    "TASK_TOGGLE_DONE": "Fertig umschalten",
+    "TITLE": "Tastatürkürzel",
+    "TOGGLE_BACKLOG": "Task-Backlog anzeigen / ausblenden",
+    "TOGGLE_BOOKMARKS": "Lesezeichenleiste ein- / ausblenden",
+    "TOGGLE_PLAY": "Task starten / stoppen",
+    "ZOOM_DEFAULT": "Zoom Standard (nur Desktop)",
+    "ZOOM_IN": "Vergrößern (nur Desktop)",
+    "ZOOM_OUT": "Verkleinern (nur Desktop)"
+  },
   "F_LANG": {
     "AR": "Arabisch",
     "DE": "Deutsch",
     "EN": "Englisch",
+    "ES": "Spanisch",
     "FR": "Französisch",
     "JA": "Japanisch",
     "LABEL": "Bitte wähle eine Sprache",
     "RU": "Russisch",
+    "TITLE": "Sprache",
     "TR": "Türkisch",
     "ZH": "Chinesisch"
   },
@@ -74,9 +200,31 @@
     "IS_DISABLE_REMIND_WHEN_FORGOT_TO_FINISH_DAY": "Erinnerung an vergessenen Zieltag deaktivieren",
     "IS_HIDE_NAV": "Navigation verbergen, bis die Hauptüberschrift angezeigt wird (nur Desktop)",
     "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Benachrichtigen, wenn die geschätzte Zeit überschritten wurde",
+    "TITLE": "Verschiedene Einstellungen",
     "isDisableRemindWhenForgotToFinishDay": "",
     "isHideNav": "",
     "isNotifyWhenTimeEstimateExceeded": ""
+  },
+  "F_POMODORO": {
+    "BREAK_DURATION": "Dauer der kurzen Pausen",
+    "CYCLES_BEFORE_LONGER_BREAK": "Beginnen Sie eine längere Pause nach X Arbeitssitzungen",
+    "DURATION": "Dauer der Arbeitssitzungen",
+    "HELP": "<p>Der Pomodoro-Timer kann über einige Einstellungen konfiguriert werden. Die Dauer jeder Arbeitssitzung, die Dauer der normalen Pausen, die Anzahl der Arbeitssitzungen, die ausgeführt werden müssen, bevor eine längere Pause gestartet wird, und die Dauer dieser längeren Pause.</p> <p>Sie können auch festlegen, ob Ihre Ablenkungen während der Pomodoro-Pausen angezeigt werden sollen.</p> <p>Mit der Einstellung \"Pausenzeiterfassung bei Pomodoro-Pause\" werden Ihre Pausen auch als Arbeitszeit für eine Aufgabe erfasst. </p> <p>Wenn Sie \"Pomodoro-Sitzung anhalten, wenn keine aktive Aufgabe vorhanden ist\" aktivieren, wird die Pomodoro-Sitzung auch angehalten, wenn Sie eine Aufgabe anhalten.</p>",
+    "IS_ENABLED": "Aktivieren Sie den Pomodoro-Timer",
+    "IS_MANUAL_CONTINUE": "Bestätigen Sie den Start der nächsten Pomodoro-Sitzung manuell",
+    "IS_PLAY_SOUND": "Spielen Sie den Ton ab, wenn die Sitzung beendet ist",
+    "IS_PLAY_SOUND_AFTER_BREAK": "Sound abspielen, wenn die Pause beendet ist",
+    "IS_PLAY_TICK": "Spielen Sie jede Sekunde einen Tick-Sound",
+    "IS_STOP_TRACKING_ON_BREAK": "Stoppen Sie die Zeiterfassung für die Aufgabe in der Pause",
+    "LONGER_BREAK_DURATION": "Dauer längerer Pausen",
+    "TITLE": "Pomodoro-Einstellungen"
+  },
+  "F_TAKE_A_BREAK": {
+    "HELP": "<div> <p>Ermöglicht die Konfiguration einer wiederkehrenden Erinnerung, wenn Sie eine bestimmte Zeit ohne Pause gearbeitet haben.</p> <p>Sie können die angezeigte Nachricht ändern. ${duration} wird durch die ohne Unterbrechung verbrachte Zeit ersetzt.</p> </div>",
+    "IS_ENABLED": "Aktivieren Sie die Erinnerungsfunktion für eine Pause",
+    "MESSAGE": "Mach eine Pause Nachricht",
+    "MIN_WORKING_TIME": "Trigger mach eine Pausenbenachrichtigung, nachdem X ohne eine gearbeitet hat",
+    "TITLE": "Pausenerinnerung"
   },
   "G": {
     "CANCEL": "Abbrechen",

@@ -25,7 +25,7 @@ export class TranslateExtension {
           'templateOptions.options': of(to.options.map((opt) => {
             return {
               ...opt,
-              label: this.translate.instant(opt.label),
+              label: opt.label && this.translate.instant(opt.label),
             };
           })),
         }

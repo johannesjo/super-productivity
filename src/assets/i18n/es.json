@@ -1,174 +1,322 @@
 {
-	"BL": {
-		"FROM_OTHER_PROJECTS": "De otros proyectos",
-		"NO_SCHEDULED": "Actualmente no hay tareas programadas. Puede programar una tarea seleccionando \"Programar tarea\" en el menú de contexto de la tarea. Para abrirlo, haga clic en los 3 puntos pequeños a la derecha de una tarea.",
-		"NO_TASKS": "Actualmente no hay tareas en tu backlog",
-		"SCHEDULED": "Programado",
-		"TITLE": "RESERVA"
-	},
-	"F": {
-		"ATTACHMENT": {
-			"DIALOG_EDIT": {
-				"ADD_ATTACHMENT": "Añadir un adjunto",
-				"EDIT_ATTACHMENT": "Editar adjunto",
-				"LABELS": {
-					"FILE": "Ruta de archivo",
-					"IMG": "Imagen",
-					"LINK": "Url"
-				},
-				"SELECT_TYPE": "Seleccione un tipo",
-				"TYPES": {
-					"FILE": "Archivo (abierto por la aplicación predeterminada del sistema)",
-					"IMG": "Imagen (mostrada como miniatura)",
-					"LINK": "Enlace (se abre en el navegador)"
-				}
-			},
-			"LIST": {
-				"NO_ATTACHMENTS": "Actualmente no hay adjuntos."
-			}
-		},
-		"BOOKMARK": {
-			"BAR": {
-				"DROP": "Suelta aquí para agregar un marcador",
-				"NO_BOOKMARKS": "No tienes marcadores de proyectos. Agregue una a través de arrastrar y soltar o haciendo clic en el ícono ''."
-			},
-			"DIALOG_EDIT": {
-				"ADD_BOOKMARK": "Añadir marcador",
-				"EDIT_BOOKMARK": "Editar marcador",
-				"LABELS": {
-					"COMMAND": "Mando",
-					"FILE": "Ruta de archivo",
-					"IMG": "Imagen",
-					"LINK": "Url"
-				},
-				"SELECT_ICON": "Seleccione un icono",
-				"SELECT_TYPE": "Seleccione un tipo",
-				"TYPES": {
-					"COMMAND": "Comando (comando shell personalizado)",
-					"FILE": "Archivo (abierto por la aplicación predeterminada del sistema)",
-					"IMG": "Imagen (mostrada como miniatura)",
-					"LINK": "Enlace (se abre en el navegador)"
-				}
-			}
-		}
-	},
-	"FILE_IMEX": {
-		"EXPORT_DATA": "Exportar datos",
-		"IMPORT_FROM_FILE": "Importar desde archivo"
-	},
-	"F_LANG": {
-		"AR": "Arábica",
-		"DE": "alemán",
-		"EN": "Inglés",
-		"FR": "francés",
-		"JA": "japonés",
-		"LABEL": "Por favor, seleccione un idioma",
-		"RU": "ruso",
-		"TR": "turco",
-		"ZH": "chino"
-	},
-	"F_MISC": {
-		"HELP": "<p><strong>¿No ve las notificaciones de escritorio?</strong> Para Windows, es posible que desee revisar Sistema> Notificaciones y acciones y verificar si se han habilitado las notificaciones requeridas.</p>",
-		"IS_AUTO_MARK_PARENT_AS_DONE": "Marque la tarea principal como hecha, cuando todas las sub tareas estén listas",
-		"IS_CONFIRM_BEFORE_EXIT": "Confirmar antes de salir de la aplicación.",
-		"IS_DISABLE_REMIND_WHEN_FORGOT_TO_FINISH_DAY": "Deshabilitar el recordatorio sobre el día de finalización olvidado",
-		"IS_HIDE_NAV": "Ocultar la navegación hasta que se desplace el encabezado principal (solo en el escritorio)",
-		"IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Notificar cuando se excedió el tiempo estimado",
-		"isDisableRemindWhenForgotToFinishDay": "",
-		"isHideNav": "",
-		"isNotifyWhenTimeEstimateExceeded": ""
-	},
-	"G": {
-		"CANCEL": "Cancelar",
-		"DISMISS": "Despedir",
-		"SAVE": "Salvar",
-		"TITLE": "Título"
-	},
-	"MH": {
-		"ADD_NEW_TASK": "Agregar nueva tarea",
-		"CREATE_PROJECT": "Crear proyecto",
-		"GO_TO_TASK_LIST": "Ir a la lista de tareas",
-		"MANAGE_PROJECTS": "Administrar proyectos",
-		"METRICS": "Métrica",
-		"PROCRASTINATE": "Aplazar",
-		"PROJECTS": "Proyectos",
-		"PROJECT_MENU": "Menú de proyecto",
-		"SETTINGS": "Ajustes",
-		"TASKS": "Tareas",
-		"TASK_LIST": "Lista de tareas",
-		"TOGGLE_SHOW_BOOKMARKS": "Mostrar / Ocultar Marcadores",
-		"TOGGLE_SHOW_NOTES": "Mostrar / Ocultar Notas del Proyecto",
-		"TOGGLE_TRACK_TIME": "Iniciar / detener el tiempo de seguimiento",
-		"WORKLOG": "Registro de trabajo"
-	},
-	"PDS": {
-		"BACK": "Espera me olvidé de algo!",
-		"BREAK_LABEL": "Descansos (nr / tiempo)",
-		"CELEBRATE": "¡Tómate un momento para celebrar <i>!</i>",
-		"CLEAR_ALL_CONTINUE": "Borrar todo listo y continuar",
-		"EVALUATION": "Evaluación",
-		"EXPORT_TASK_LIST": "Lista de tareas de exportación",
-		"GOOGLE_SHEET": "Hoja de Google",
-		"NO_TASKS": "No hay tareas para este día.",
-		"ROUND_15M": "Redondear todas las tareas a 15 minutos.",
-		"ROUND_30M": "Redondear todas las tareas a 30 minutos.",
-		"ROUND_5M": "Redondear todas las tareas a 5 minutos.",
-		"ROUND_TIME_SPENT": "Tiempo Redondo Pasado",
-		"ROUND_TIME_SPENT_TITLE": "Tiempo redondo dedicado a todas las tareas. ¡Ten cuidado! ¡No puedes deshacer esto!",
-		"ROUND_TIME_WARNING": "!!! ¡Cuidado, esto no se puede deshacer!",
-		"ROUND_UP_15M": "Redondea todas las tareas a 15 minutos",
-		"ROUND_UP_30M": "Redondea todas las tareas a 30 minutos",
-		"ROUND_UP_5M": "Redondea todas las tareas a 5 minutos.",
-		"SAVE_AND_GO_HOME": "Ahorra y vete a casa",
-		"START_END": "Inicio fin",
-		"SUMMARY_FOR": "Resumen diario de {{dayStr}}",
-		"TASKS_COMPLETED": "Tareas completadas",
-		"TASK_LIST": "Lista de tareas",
-		"TIME_SPENT_AND_ESTIMATE_LABEL": "Tiempo empleado / estimado",
-		"TIME_SPENT_ESTIMATE_TITLE": "Tiempo empleado: Tiempo total empleado hoy. Tareas archivadas no incluidas. - Tiempo estimado: tiempo estimado para las tareas en las que se trabajó hoy, menos el tiempo que ya pasó con ellas en otros días.",
-		"TODAY": "Hoy",
-		"WEEK": "semana"
-	},
-	"PM": {
-		"TITLE": "Métricas del proyecto"
-	},
-	"PP": {
-		"ARCHIVED_PROJECTS": "Proyectos archivados",
-		"ARCHIVE_PROJECT": "Proyecto de archivo",
-		"CREATE_NEW": "Crear nuevo",
-		"DELETE_PROJECT": "Eliminar proyecto",
-		"EDIT_PROJECT": "Editar proyecto",
-		"EXPORT_PROJECT": "Proyecto de exportación",
-		"GITHUB_CONFIGURED": "Integración de Github configurada",
-		"IMPORT_FROM_FILE": "Importar desde archivo",
-		"JIRA_CONFIGURED": "Integración de Jira Configurada",
-		"TITLE": "Descripción del proyecto",
-		"UN_ARCHIVE_PROJECT": "Proyecto Unarchive"
-	},
-	"PS": {
-		"GLOBAL_SETTINGS": "Ajustes globales",
-		"PROJECT_SETTINGS": "Configuraciones Específicas del Proyecto"
-	},
-	"S": {
-		"SYNC": {
-			"ERROR_FALLBACK_TO_BACKUP": "Algo salió mal al importar los datos. Volviendo a la copia de seguridad local.",
-			"ERROR_INVALID_DATA": "Error al sincronizar. Datos inválidos",
-			"IMPORTING": "Importando datos",
-			"SUCCESS": "Datos importados"
-		}
-	},
-	"WW": {
-		"ADD_MORE": "Añadir más",
-		"ADD_SOME_TASKS": "¡Agrega algunas tareas para planificar tu día!",
-		"COMPLETED_TASKS": "Tareas completadas",
-		"ESTIMATE_REMAINING": "Estimación restante:",
-		"FINISH_DAY": "Fin de dia",
-		"HELP_PROCRASTINATION": "Ayuda, estoy postergando!",
-		"NO_COMPLETED_TASKS": "Actualmente no hay tareas completadas.",
-		"NO_PLANNED_TASKS": "No hay tareas planificadas",
-		"READY_TO_WORK": "¡Listo para trabajar!",
-		"TIME_ESTIMATED": "Tiempo estimado:",
-		"WITHOUT_BREAK": "Sin descanso:",
-		"WORKING_TODAY": "Trabajando hoy:"
-	}
+  "BL": {
+    "FROM_OTHER_PROJECTS": "De otros proyectos",
+    "NO_SCHEDULED": "Actualmente no hay tareas programadas. Puede programar una tarea seleccionando \"Programar tarea\" en el menú de contexto de la tarea. Para abrirlo, haga clic en los 3 puntos pequeños a la derecha de una tarea.",
+    "NO_TASKS": "Actualmente no hay tareas en tu backlog",
+    "SCHEDULED": "Programado",
+    "TITLE": "RESERVA"
+  },
+  "F": {
+    "ATTACHMENT": {
+      "DIALOG_EDIT": {
+        "ADD_ATTACHMENT": "Añadir un adjunto",
+        "EDIT_ATTACHMENT": "Editar adjunto",
+        "LABELS": {
+          "FILE": "Ruta de archivo",
+          "IMG": "Imagen",
+          "LINK": "Url"
+        },
+        "SELECT_TYPE": "Seleccione un tipo",
+        "TYPES": {
+          "FILE": "Archivo (abierto por la aplicación predeterminada del sistema)",
+          "IMG": "Imagen (mostrada como miniatura)",
+          "LINK": "Enlace (se abre en el navegador)"
+        }
+      },
+      "LIST": {
+        "NO_ATTACHMENTS": "Actualmente no hay adjuntos."
+      }
+    },
+    "BOOKMARK": {
+      "BAR": {
+        "DROP": "Suelta aquí para agregar un marcador",
+        "NO_BOOKMARKS": "No tienes marcadores de proyectos. Agregue una a través de arrastrar y soltar o haciendo clic en el ícono ''."
+      },
+      "DIALOG_EDIT": {
+        "ADD_BOOKMARK": "Añadir marcador",
+        "EDIT_BOOKMARK": "Editar marcador",
+        "LABELS": {
+          "COMMAND": "Mando",
+          "FILE": "Ruta de archivo",
+          "IMG": "Imagen",
+          "LINK": "Url"
+        },
+        "SELECT_ICON": "Seleccione un icono",
+        "SELECT_TYPE": "Seleccione un tipo",
+        "TYPES": {
+          "COMMAND": "Comando (comando shell personalizado)",
+          "FILE": "Archivo (abierto por la aplicación predeterminada del sistema)",
+          "IMG": "Imagen (mostrada como miniatura)",
+          "LINK": "Enlace (se abre en el navegador)"
+        }
+      }
+    },
+    "CONFIG": {
+      "SNACK": {
+        "UPDATE_SECTION": "Configuraciones actualizadas para <strong>{{sectionKey}}</strong>"
+      }
+    },
+    "GOOGLE": {
+      "DIALOG": {
+        "CREATE_SYNC_FILE": "Google Drive: no se encontró ningún archivo con el nombre <strong>\"{{fileName}}\"</strong> . <strong>¿Crear</strong> como archivo de sincronización en Google Drive?",
+        "USE_EXISTING_SYNC_FILE": "Google Drive: usar <strong>archivo</strong> existente <strong>\"{{fileName}}\"</strong> como archivo de sincronización? Si no es así, cambie el nombre del archivo de sincronización."
+      },
+      "D_CONFIRM_LOAD": {
+        "LAST_MOD": "Última modificación:",
+        "LAST_SYNC": "última sincronización",
+        "LOCAL": "Local",
+        "LOCAL_REMOTE": "local <=> remoto",
+        "OVERWRITE_LOCAL": "Sobrescribir datos locales",
+        "OVERWRITE_REMOTE": "Sobrescribir datos remotos",
+        "REMOTE": "remoto",
+        "TEXT": "<p>Actualizar desde Google Drive Backup. <strong>Los datos locales parecen ser más nuevos</strong> que los datos remotos. ¿Sobrescribir cambios locales no guardados? <strong>Todos los datos se perderán para siempre</strong>.</p>",
+        "TITLE": "¿Sobrescribir los datos locales con la actualización de GDrive?"
+      },
+      "D_CONFIRM_SAVE": {
+        "LAST_MOD": "Última modificación:",
+        "LAST_SYNC": "última sincronización",
+        "LOCAL": "Local",
+        "LOCAL_REMOTE": "local <=> remoto",
+        "OVERWRITE_LOCAL": "Sobrescribir datos locales",
+        "OVERWRITE_REMOTE": "Sobrescribir datos remotos",
+        "REMOTE": "remoto",
+        "TEXT": "  <p>Parece que hay algunos cambios en Google Drive, que no tiene localmente. ¿Quieres sobrescribirlos de todos modos?</p>",
+        "TITLE": "¿Sobrescribir los datos no guardados en Google Drive?"
+      },
+      "EXPORT_TIME": {
+        "ALWAYS_ROUND_UP": "Siempre redondeando el tiempo de trabajo.",
+        "AUTO_LOGIN": "Iniciar sesión automáticamente y cargar datos la próxima vez",
+        "HELP_ADDITIONAL": "Además de esto, hay varias opciones que puede utilizar para modificar el cálculo de esos valores.",
+        "HELP_INFO": "<p>Esta vista le permite exportar su tiempo trabajado a una hoja de Google. Debe permitir que Super Productivity acceda a sus Hojas de cálculo de Google. También debe crear una hoja de cálculo con encabezados en la primera fila y especificar su ID en el campo de entrada (<a href=\"https://stackoverflow.com/questions/36061433/how-to-do-i-locate-a-google-spreadsheet-id\" target=\"_blank\">Ho para encontrar el ID de una hoja de cálculo?</a>).</p><p>Después de cargar con éxito su hoja de cálculo, aparecerá una tabla con 4 filas. La primera fila muestra el encabezado que especificó en la hoja de cálculo.</p><p>La segunda fila es para fines informativos y muestra la última fila de la hoja de cálculo.</p><p>La cuarta fila es una lista de valores que puede ingresar directamente y guardar en la hoja de cálculo.</p><p>La tercera fila está ahí para definir automáticamente algunos valores para la cuarta fila. Hay varias cadenas especiales que puedes ingresar en las celdas:</p>",
+        "HELP_POSSIBLE_PROPERTIES": "",
+        "LOGIN": "Inicia sesión en Google",
+        "LOGOUT": "Cerrar sesión",
+        "OPEN_SPREADSHEET": "Abrir hoja de cálculo",
+        "READ_SPREADSHEET": "Leer hoja de calculo",
+        "ROUND_END_TIME_TO": "Tiempo de finalización de ronda a",
+        "ROUND_HALF": "media horas completas",
+        "ROUND_HOUR": "horas completas",
+        "ROUND_QUARTER": "cuartos completos",
+        "ROUND_START_TIME_TO": "Hora de inicio de ronda para",
+        "ROUND_TIME_WORKED_TO": "Tiempo de ronda trabajado para",
+        "SAVE_ROW": "Guardar fila",
+        "SNACK_EQUAL_VALUES": "Los valores actuales y la última fila guardada tienen valores iguales, probablemente no es lo que desea.",
+        "SNACK_ROW_APPENDED": "Fila anexada correctamente"
+      },
+      "SNACKS": {
+        "DOWNLOADING_UPDATE": "Google Drive: ¡Hay una actualización remota! Descargando ...",
+        "ERROR": "Google Drive - Error:",
+        "ERROR_INITIAL_IMPORT": "Google Drive: error al intentar importar datos inicialmente",
+        "LOCAL_UP_TO_DATE": "Google Drive: datos locales ya actualizados",
+        "MULTIPLE_SYNC_FILES_WITH_SAME_NAME": "Se encontraron varios archivos con el nombre \"{{newFileName}}\". Por favor, elimine todos menos uno o elija un nombre diferente.",
+        "NO_UPDATE_REQUIRED": "Google Drive: No se requiere actualización",
+        "REMOTE_UP_TO_DATE": "Google Drive: datos remotos ya actualizados",
+        "SUCCESS": "Google Drive: Copia de seguridad guardada con éxito",
+        "SYNCING": "Google Drive: sincronizando"
+      }
+    }
+  },
+  "FILE_IMEX": {
+    "EXPORT_DATA": "Exportar datos",
+    "IMPORT_FROM_FILE": "Importar desde archivo"
+  },
+  "F_AUTO_BACKUPS": {
+    "HELP": "Guarde automáticamente todos los datos en la carpeta de su aplicación para tenerlos listos en caso de que algo salga mal.",
+    "LABEL_IS_ENABLED": "Habilitar copias de seguridad automáticas",
+    "TITLE": "Copias de seguridad automáticas"
+  },
+  "F_GOOGLE_DRIVE_SYNC": {
+    "HELP": "Aquí puede configurar su aplicación para que se sincronice automáticamente hacia y desde un único archivo de Google Drive. Todos los datos se guardarán sin cifrar, así que asegúrese de no compartir accidentalmente este archivo con alguien.",
+    "TITLE": "Sincronización a través de Google Drive"
+  },
+  "F_IDLE": {
+    "HELP": "<div><p>Cuando se habilita el manejo del tiempo de inactividad, se abrirá un cuadro de diálogo después de un período de tiempo específico para verificar si y en qué tarea desea realizar un seguimiento de su tiempo, cuando ha estado inactivo.</p></div>",
+    "IS_ENABLE_IDLE_TIME_TRACKING": "Habilitar el manejo del tiempo de inactividad",
+    "IS_ONLY_OPEN_IDLE_WHEN_CURRENT_TASK": "Solo se activa el diálogo de tiempo de inactividad cuando se selecciona una tarea actual",
+    "IS_UN_TRACKED_IDLE_RESETS_BREAK_TIMER": "El tiempo de inactividad no rastreado se restablece, toma un temporizador de interrupción",
+    "MIN_IDLE_TIME": "Disparador inactivo después de X",
+    "TITLE": "Manejo de ralentí"
+  },
+  "F_IMEX": {
+    "HELP": "<p>Aquí puede exportar todos sus datos como <strong>JSON</strong> para copias de seguridad, pero también para usarlos en un contexto diferente (por ejemplo, es posible que desee exportar sus proyectos en el navegador e importarlos a la versión de escritorio) ). </p> <p>La importación espera que JSON válido se copie en el área de texto. <strong>NOTA: Una vez que presiona el botón de importación, se sobrescribirán todos sus ajustes y datos actuales.</strong></p>",
+    "TITLE": "Importación y exportación"
+  },
+  "F_KEYBOARD": {
+    "ADD_NEW_NOTE": "Añadir nueva nota",
+    "ADD_NEW_TASK": "Agregar nueva tarea",
+    "APP_WIDE_SHORTCUTS": "Accesos directos globales (en toda la aplicación)",
+    "COLLAPSE_SUB_TASKS": "Contraer sub tareas",
+    "EXPAND_SUB_TASKS": "Expandir sub tareas",
+    "FOCUS_LAST_ACTIVE_TASK": "Enfoque última tarea activa",
+    "GLOBAL_SHOW_HIDE": "Mostrar / Ocultar Super Productividad",
+    "GLOBAL_TOGGLE_TASK_START": "Alternar el seguimiento de tiempo para la última tarea activa",
+    "GO_TO_DAILY_AGENDA": "Ir a agenda",
+    "GO_TO_FOCUS_MODE": "Ir al modo de enfoque",
+    "GO_TO_SETTINGS": "Ir a la configuración",
+    "GO_TO_WORK_VIEW": "Ir a la vista de trabajo",
+    "HELP": "<p>Aquí puedes configurar todos los atajos de teclado.</p> <p>Haga clic en la entrada de texto e ingrese la combinación de teclas deseada. Pulsa enter para guardar y Escape para abortar.</p> <p>Hay tres tipos de accesos directos:</p> <ul> <li> <strong>Accesos directos globales:</strong> Cuando la aplicación se está ejecutando, se activará la acción desde cualquier otra aplicación. </li> <li> <strong>Atajos de nivel de aplicación:</strong> Se activará desde todas las pantallas de la aplicación, pero no si está editando un campo de texto. </li> <li> <strong>Accesos directos de nivel de tarea:</strong> Solo se activarán si ha seleccionado una tarea mediante el mouse o el teclado y, por lo general, activará una acción relacionada específicamente con esa tarea. </li> </ul>",
+    "MOVE_TASK_DOWN": "Mueve la tarea hacia abajo en la lista",
+    "MOVE_TASK_UP": "Mover la tarea arriba en la lista",
+    "MOVE_TO_BACKLOG": "Mover la tarea a la tarea",
+    "MOVE_TO_TODAYS_TASKS": "Mueve la tarea a la lista de tareas de hoy",
+    "OPEN_PROJECT_NOTES": "Mostrar / Ocultar Notas del Proyecto",
+    "SELECT_NEXT_TASK": "Seleccione la siguiente tarea",
+    "SELECT_PREVIOUS_TASK": "Seleccionar tarea anterior",
+    "SYSTEM_SHORTCUTS": "Atajos globales (en todo el sistema)",
+    "TASK_ADD_SUB_TASK": "Añadir sub tarea",
+    "TASK_DELETE": "Eliminar tarea",
+    "TASK_EDIT_TITLE": "Editar Título",
+    "TASK_OPEN_ESTIMATION_DIALOG": "Editar estimación / tiempo empleado",
+    "TASK_SCHEDULE": "Tarea programada",
+    "TASK_SHORTCUTS": "Tareas",
+    "TASK_SHORTCUTS_INFO": "Los siguientes accesos directos se aplican a la tarea seleccionada actualmente (seleccionada mediante una pestaña o un mouse).",
+    "TASK_TOGGLE_ADDITIONAL_INFO_OPEN": "Mostrar / Ocultar información adicional de la tarea",
+    "TASK_TOGGLE_DONE": "Toggle Done",
+    "TITLE": "Atajos de teclado",
+    "TOGGLE_BACKLOG": "Mostrar / Ocultar la tarea pendiente",
+    "TOGGLE_BOOKMARKS": "Mostrar / Ocultar barra de marcadores",
+    "TOGGLE_PLAY": "Iniciar / detener tarea",
+    "ZOOM_DEFAULT": "Valor predeterminado de zoom (solo escritorio)",
+    "ZOOM_IN": "Acercar (Escritorio solamente)",
+    "ZOOM_OUT": "Alejar (solo en el escritorio)"
+  },
+  "F_LANG": {
+    "AR": "Arábica",
+    "DE": "alemán",
+    "EN": "Inglés",
+    "ES": "español",
+    "FR": "francés",
+    "JA": "japonés",
+    "LABEL": "Por favor, seleccione un idioma",
+    "RU": "ruso",
+    "TITLE": "idioma",
+    "TR": "turco",
+    "ZH": "chino"
+  },
+  "F_MISC": {
+    "HELP": "<p><strong>¿No ve las notificaciones de escritorio?</strong> Para Windows, es posible que desee revisar Sistema> Notificaciones y acciones y verificar si se han habilitado las notificaciones requeridas.</p>",
+    "IS_AUTO_MARK_PARENT_AS_DONE": "Marque la tarea principal como hecha, cuando todas las sub tareas estén listas",
+    "IS_CONFIRM_BEFORE_EXIT": "Confirmar antes de salir de la aplicación.",
+    "IS_DISABLE_REMIND_WHEN_FORGOT_TO_FINISH_DAY": "Deshabilitar el recordatorio sobre el día de finalización olvidado",
+    "IS_HIDE_NAV": "Ocultar la navegación hasta que se desplace el encabezado principal (solo en el escritorio)",
+    "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Notificar cuando se excedió el tiempo estimado",
+    "TITLE": "Configuraciones Misc",
+    "isDisableRemindWhenForgotToFinishDay": "",
+    "isHideNav": "",
+    "isNotifyWhenTimeEstimateExceeded": ""
+  },
+  "F_POMODORO": {
+    "BREAK_DURATION": "Duración de las pausas breves",
+    "CYCLES_BEFORE_LONGER_BREAK": "Comienza un descanso más largo después de X sesiones de trabajo",
+    "DURATION": "Duración de las sesiones de trabajo.",
+    "HELP": "<p>El temporizador pomodoro se puede configurar a través de un par de ajustes. La duración de cada sesión de trabajo, la duración de las pausas normales, el número de sesiones de trabajo que se deben ejecutar antes de que comience una pausa más larga y la duración de esta pausa más larga.</p> <p>También puede establecer si desea mostrar sus distracciones durante las pausas de pomodoro.</p> <p>La configuración de \"Pausa el seguimiento de tiempo en el descanso de pomodoro\" también hará un seguimiento de sus descansos como tiempo de trabajo dedicado a una tarea. </p> <p>Habilitar \"Pausa sesión de pomodoro cuando no hay tarea activa\" también hará una pausa en la sesión de pomodoro, cuando se pausa una tarea.</p>",
+    "IS_ENABLED": "Habilitar el temporizador pomodoro",
+    "IS_MANUAL_CONTINUE": "Confirmar manualmente comenzando la siguiente sesión de pomodoro",
+    "IS_PLAY_SOUND": "Reproducir sonido cuando la sesión haya terminado",
+    "IS_PLAY_SOUND_AFTER_BREAK": "Reproducir sonido cuando se realiza la pausa",
+    "IS_PLAY_TICK": "Reproduce el sonido de tick cada segundo",
+    "IS_STOP_TRACKING_ON_BREAK": "Detener el tiempo de seguimiento para la tarea en descanso",
+    "LONGER_BREAK_DURATION": "Duración de los descansos más largos",
+    "TITLE": "Configuraciones de pomodoro"
+  },
+  "F_TAKE_A_BREAK": {
+    "HELP": "<div> <p>Le permite configurar un recordatorio recurrente cuando ha trabajado durante un período de tiempo específico sin tomar un descanso.</p> <p>Puede modificar el mensaje que se muestra. ${duration} será reemplazado con el tiempo dedicado sin interrupción.</p> </div>",
+    "IS_ENABLED": "Habilitar tomar un recordatorio de ruptura",
+    "MESSAGE": "Tomar un mensaje de descanso",
+    "MIN_WORKING_TIME": "Desencadenar una notificación de interrupción después de que X funcione sin una",
+    "TITLE": "Recordatorio de descanso"
+  },
+  "G": {
+    "CANCEL": "Cancelar",
+    "DISMISS": "Despedir",
+    "SAVE": "Salvar",
+    "TITLE": "Título"
+  },
+  "MH": {
+    "ADD_NEW_TASK": "Agregar nueva tarea",
+    "CREATE_PROJECT": "Crear proyecto",
+    "GO_TO_TASK_LIST": "Ir a la lista de tareas",
+    "MANAGE_PROJECTS": "Administrar proyectos",
+    "METRICS": "Métrica",
+    "PROCRASTINATE": "Aplazar",
+    "PROJECTS": "Proyectos",
+    "PROJECT_MENU": "Menú de proyecto",
+    "SETTINGS": "Ajustes",
+    "TASKS": "Tareas",
+    "TASK_LIST": "Lista de tareas",
+    "TOGGLE_SHOW_BOOKMARKS": "Mostrar / Ocultar Marcadores",
+    "TOGGLE_SHOW_NOTES": "Mostrar / Ocultar Notas del Proyecto",
+    "TOGGLE_TRACK_TIME": "Iniciar / detener el tiempo de seguimiento",
+    "WORKLOG": "Registro de trabajo"
+  },
+  "PDS": {
+    "BACK": "Espera me olvidé de algo!",
+    "BREAK_LABEL": "Descansos (nr / tiempo)",
+    "CELEBRATE": "¡Tómate un momento para celebrar <i>!</i>",
+    "CLEAR_ALL_CONTINUE": "Borrar todo listo y continuar",
+    "EVALUATION": "Evaluación",
+    "EXPORT_TASK_LIST": "Lista de tareas de exportación",
+    "GOOGLE_SHEET": "Hoja de Google",
+    "NO_TASKS": "No hay tareas para este día.",
+    "ROUND_15M": "Redondear todas las tareas a 15 minutos.",
+    "ROUND_30M": "Redondear todas las tareas a 30 minutos.",
+    "ROUND_5M": "Redondear todas las tareas a 5 minutos.",
+    "ROUND_TIME_SPENT": "Tiempo Redondo Pasado",
+    "ROUND_TIME_SPENT_TITLE": "Tiempo redondo dedicado a todas las tareas. ¡Ten cuidado! ¡No puedes deshacer esto!",
+    "ROUND_TIME_WARNING": "!!! ¡Cuidado, esto no se puede deshacer!",
+    "ROUND_UP_15M": "Redondea todas las tareas a 15 minutos",
+    "ROUND_UP_30M": "Redondea todas las tareas a 30 minutos",
+    "ROUND_UP_5M": "Redondea todas las tareas a 5 minutos.",
+    "SAVE_AND_GO_HOME": "Ahorra y vete a casa",
+    "START_END": "Inicio fin",
+    "SUMMARY_FOR": "Resumen diario de {{dayStr}}",
+    "TASKS_COMPLETED": "Tareas completadas",
+    "TASK_LIST": "Lista de tareas",
+    "TIME_SPENT_AND_ESTIMATE_LABEL": "Tiempo empleado / estimado",
+    "TIME_SPENT_ESTIMATE_TITLE": "Tiempo empleado: Tiempo total empleado hoy. Tareas archivadas no incluidas. - Tiempo estimado: tiempo estimado para las tareas en las que se trabajó hoy, menos el tiempo que ya pasó con ellas en otros días.",
+    "TODAY": "Hoy",
+    "WEEK": "semana"
+  },
+  "PM": {
+    "TITLE": "Métricas del proyecto"
+  },
+  "PP": {
+    "ARCHIVED_PROJECTS": "Proyectos archivados",
+    "ARCHIVE_PROJECT": "Proyecto de archivo",
+    "CREATE_NEW": "Crear nuevo",
+    "DELETE_PROJECT": "Eliminar proyecto",
+    "EDIT_PROJECT": "Editar proyecto",
+    "EXPORT_PROJECT": "Proyecto de exportación",
+    "GITHUB_CONFIGURED": "Integración de Github configurada",
+    "IMPORT_FROM_FILE": "Importar desde archivo",
+    "JIRA_CONFIGURED": "Integración de Jira Configurada",
+    "TITLE": "Descripción del proyecto",
+    "UN_ARCHIVE_PROJECT": "Proyecto Unarchive"
+  },
+  "PS": {
+    "GLOBAL_SETTINGS": "Ajustes globales",
+    "PROJECT_SETTINGS": "Configuraciones Específicas del Proyecto"
+  },
+  "S": {
+    "SYNC": {
+      "ERROR_FALLBACK_TO_BACKUP": "Algo salió mal al importar los datos. Volviendo a la copia de seguridad local.",
+      "ERROR_INVALID_DATA": "Error al sincronizar. Datos inválidos",
+      "IMPORTING": "Importando datos",
+      "SUCCESS": "Datos importados"
+    }
+  },
+  "WW": {
+    "ADD_MORE": "Añadir más",
+    "ADD_SOME_TASKS": "¡Agrega algunas tareas para planificar tu día!",
+    "COMPLETED_TASKS": "Tareas completadas",
+    "ESTIMATE_REMAINING": "Estimación restante:",
+    "FINISH_DAY": "Fin de dia",
+    "HELP_PROCRASTINATION": "Ayuda, estoy postergando!",
+    "NO_COMPLETED_TASKS": "Actualmente no hay tareas completadas.",
+    "NO_PLANNED_TASKS": "No hay tareas planificadas",
+    "READY_TO_WORK": "¡Listo para trabajar!",
+    "TIME_ESTIMATED": "Tiempo estimado:",
+    "WITHOUT_BREAK": "Sin descanso:",
+    "WORKING_TODAY": "Trabajando hoy:"
+  }
 }
