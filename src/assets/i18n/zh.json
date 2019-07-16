@@ -56,6 +56,32 @@
         "UPDATE_SECTION": "已更新 <strong>{{sectionKey}}</strong>的设置"
       }
     },
+    "GITHUB": {
+      "DIALOG_INITIAL": {
+        "TITLE": "为项目设置Github"
+      },
+      "ISSUE_CONTENT": {
+        "ASSIGNEE": "代理人",
+        "AT": "在",
+        "DESCRIPTION": "描述",
+        "LABELS": "标签",
+        "MARK_AS_CHECKED": "将更新标记为已选中",
+        "STATUS": "状态",
+        "SUMMARY": "摘要",
+        "WRITE_A_COMMENT": "留个评论"
+      },
+      "SNACK": {
+        "IMPORTED_MULTIPLE_ISSUES": "Github：从git到backlog导入 {{issuesLength}} 个新问题",
+        "IMPORTED_SINGLE_ISSUE": "Github：从git导入问题“{{issueText}}”到积压",
+        "ISSUE_DELETED_OR_CLOSED": "Github：问题“{{issueText}}”似乎在git上被删除或关闭",
+        "ISSUE_UPDATE": "Github：更新了“{{issueText}}”的数据",
+        "MANUAL_UPDATE_ISSUE_SUCCESS": "Github：更新了“{{issueText}}”的数据",
+        "MISSING_ISSUE_DATA": "Github：发现缺少问题数据的任务。重装。",
+        "NEW_COMMENT": "Github：对“{{issueText}}”的新评论",
+        "POLLING": "Github：轮询问题的变化",
+        "SHOW_ISSUE_BTN": "给我看看"
+      }
+    },
     "GOOGLE": {
       "DIALOG": {
         "CREATE_SYNC_FILE": "Google云端硬盘：找不到名称为 <strong>“{{fileName}}”</strong> 的文件。 <strong>在Google云端硬盘上将其</strong> 创建为同步文件？",
@@ -229,6 +255,7 @@
   "G": {
     "CANCEL": "取消",
     "DISMISS": "解雇",
+    "OK": "",
     "SAVE": "保存",
     "TITLE": "标题"
   },

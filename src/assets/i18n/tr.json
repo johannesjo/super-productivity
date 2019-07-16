@@ -56,6 +56,32 @@
         "UPDATE_SECTION": " <strong>{{sectionKey}}</strong>için güncellenmiş ayarlar"
       }
     },
+    "GITHUB": {
+      "DIALOG_INITIAL": {
+        "TITLE": "Project için Github Kurulumu"
+      },
+      "ISSUE_CONTENT": {
+        "ASSIGNEE": "vekil",
+        "AT": "en",
+        "DESCRIPTION": "Açıklama",
+        "LABELS": "Etiketler",
+        "MARK_AS_CHECKED": "Güncellemeleri işaretli olarak işaretle",
+        "STATUS": "durum",
+        "SUMMARY": "özet",
+        "WRITE_A_COMMENT": "Bir yorum Yaz"
+      },
+      "SNACK": {
+        "IMPORTED_MULTIPLE_ISSUES": "Github: Git'ten backlog'a {{issuesLength}} yeni sayı alındı",
+        "IMPORTED_SINGLE_ISSUE": "Github: Git'ten backlog'a \"{{issueText}}\" sorunu alındı",
+        "ISSUE_DELETED_OR_CLOSED": "Github: Sorun \"{{issueText}}\", halindeyken silinmiş veya kapatılmış görünüyor",
+        "ISSUE_UPDATE": "Github: \"{{issueText}}\" için güncellenmiş veriler",
+        "MANUAL_UPDATE_ISSUE_SUCCESS": "Github: \"{{issueText}}\" için güncellenmiş veriler",
+        "MISSING_ISSUE_DATA": "Github: Eksik sayı verisi olan görevler bulundu. Yeniden yükleniyor.",
+        "NEW_COMMENT": "Github: \"{{issueText}}\" için yeni yorum",
+        "POLLING": "Github: Sorunların Sorgulanması Değişiklikleri",
+        "SHOW_ISSUE_BTN": "Göster bana"
+      }
+    },
     "GOOGLE": {
       "DIALOG": {
         "CREATE_SYNC_FILE": "Google Drive: <strong>\"{{fileName}}\"</strong> adında bir dosya bulunamadı. <strong>Oluştur</strong> Google Drive’da senkronizasyon dosyası olarak?",
@@ -229,6 +255,7 @@
   "G": {
     "CANCEL": "İptal etmek",
     "DISMISS": "Reddet",
+    "OK": "",
     "SAVE": "Kayıt etmek",
     "TITLE": "Başlık"
   },

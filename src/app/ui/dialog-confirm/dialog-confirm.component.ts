@@ -1,5 +1,6 @@
 import {ChangeDetectionStrategy, Component, Inject} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
+import {T} from '../../t.const';
 
 @Component({
   selector: 'dialog-confirm',
@@ -8,6 +9,8 @@ import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DialogConfirmComponent {
+  T = T;
+
   constructor(
     private _matDialogRef: MatDialogRef<DialogConfirmComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any

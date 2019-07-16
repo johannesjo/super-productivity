@@ -11,6 +11,7 @@ import {GithubCfg} from '../github';
 import {Observable} from 'rxjs';
 import {GITHUB_TYPE} from '../../issue.const';
 import {truncate} from '../../../../util/truncate';
+import {T} from '../../../../t.const';
 
 
 @Injectable({
@@ -119,7 +120,11 @@ export class GithubIssueService {
       this.upsert(issue);
       this._snackService.open({
         ico: 'cloud_download',
-        msg: `Github: Updated data for ${issue.number} "${issue.title}"`
+        isTranslate: true,
+        translateParams: {
+          issueText: this._formatIssueTitle(issue.number, issue.title)
+        },
+        msg: T.F.GITHUB.SNACK.MANUAL_UPDATE_ISSUE_SUCCESS,
       });
     });
   }
@@ -138,12 +143,20 @@ export class GithubIssueService {
           if (isNewComment && isNotify) {
             this._snackService.open({
               ico: 'cloud_download',
-              msg: `Github: New comment for ${matchingNewIssue.number} "${matchingNewIssue.title}"`
+              isTranslate: true,
+              translateParams: {
+                issueText: this._formatIssueTitle(matchingNewIssue.number, matchingNewIssue.title)
+              },
+              msg: T.F.GITHUB.SNACK.ISSUE_UPDATE,
             });
           } else if (isIssueChanged && isNotify) {
             this._snackService.open({
               ico: 'cloud_download',
-              msg: `Github: Update for ${matchingNewIssue.number} "${matchingNewIssue.title}"`
+              isTranslate: true,
+              translateParams: {
+                issueText: this._formatIssueTitle(matchingNewIssue.number, matchingNewIssue.title)
+              },
+              msg: T.F.GITHUB.SNACK.IMPORTED_SINGLE_ISSUE,
             });
           }
 
@@ -156,8 +169,12 @@ export class GithubIssueService {
           this._snackService.open({
             type: 'CUSTOM',
             svgIco: 'github',
-            msg: `Github: Issue ${oldIssue.number} "${truncate(oldIssue.title)}" seems to be deleted or closed on git`,
-            actionStr: 'Show me',
+            isTranslate: true,
+            translateParams: {
+              issueText: this._formatIssueTitle(oldIssue.number, oldIssue.title)
+            },
+            msg: T.F.GITHUB.SNACK.ISSUE_DELETED_OR_CLOSED,
+            actionStr: T.F.GITHUB.SNACK.SHOW_ISSUE_BTN,
             actionFn: () => {
               this._fineWithDeletionIssueIds.push(oldIssue.id);
               window.open(oldIssue.url, '_blank');
@@ -166,5 +183,9 @@ export class GithubIssueService {
         }
       });
     });
+  }
+
+  private _formatIssueTitle(id: number, title: string): string {
+    return `#${id} ${truncate(title)}`;
   }
 }

@@ -56,6 +56,32 @@
         "UPDATE_SECTION": "Обновлены настройки для <strong>{{sectionKey}}</strong>"
       }
     },
+    "GITHUB": {
+      "DIALOG_INITIAL": {
+        "TITLE": "Настройка Github для проекта"
+      },
+      "ISSUE_CONTENT": {
+        "ASSIGNEE": "правопреемник",
+        "AT": "В",
+        "DESCRIPTION": "Описание",
+        "LABELS": "этикетки",
+        "MARK_AS_CHECKED": "Отметить обновления как отмеченные",
+        "STATUS": "Статус",
+        "SUMMARY": "Резюме",
+        "WRITE_A_COMMENT": "Написать комментарий"
+      },
+      "SNACK": {
+        "IMPORTED_MULTIPLE_ISSUES": "Github: импортировано {{issuesLength}} новых проблем из git в backlog",
+        "IMPORTED_SINGLE_ISSUE": "Github: импортированная проблема \"{{issueText}}\" из git в backlog",
+        "ISSUE_DELETED_OR_CLOSED": "Github: проблема \"{{issueText}}\", кажется, удалена или закрыта на git",
+        "ISSUE_UPDATE": "Github: обновлены данные для \"{{issueText}}\"",
+        "MANUAL_UPDATE_ISSUE_SUCCESS": "Github: обновлены данные для \"{{issueText}}\"",
+        "MISSING_ISSUE_DATA": "Github: найдены задачи с отсутствующими данными о проблеме. Перегрузочный.",
+        "NEW_COMMENT": "Github: новый комментарий для \"{{issueText}}\"",
+        "POLLING": "Github: Опрос Изменения для проблем",
+        "SHOW_ISSUE_BTN": "Покажи мне"
+      }
+    },
     "GOOGLE": {
       "DIALOG": {
         "CREATE_SYNC_FILE": "Диск Google: не найден файл с именем <strong>\"{{fileName}}\"</strong> . <strong>Создать</strong> как файл синхронизации на Google Диске?",
@@ -229,6 +255,7 @@
   "G": {
     "CANCEL": "отменить",
     "DISMISS": "отклонять",
+    "OK": "",
     "SAVE": "Сохранить",
     "TITLE": "заглавие"
   },

@@ -56,6 +56,32 @@
         "UPDATE_SECTION": "الإعدادات المحدثة لـ <strong>{{sectionKey}}</strong>"
       }
     },
+    "GITHUB": {
+      "DIALOG_INITIAL": {
+        "TITLE": "إعداد جيثب للمشروع"
+      },
+      "ISSUE_CONTENT": {
+        "ASSIGNEE": "المحال",
+        "AT": "ملخص",
+        "DESCRIPTION": "وصف",
+        "LABELS": "ملصقات",
+        "MARK_AS_CHECKED": "وضع علامة على التحديثات على أنها محددة",
+        "STATUS": "الحالة",
+        "SUMMARY": "ملخص",
+        "WRITE_A_COMMENT": "أكتب تعليقا"
+      },
+      "SNACK": {
+        "IMPORTED_MULTIPLE_ISSUES": "جيثب: {{issuesLength}} قضايا جديدة مستوردة من بوابة إلى تراكم",
+        "IMPORTED_SINGLE_ISSUE": "Github: المشكلة المستوردة \"{{issueText}}\" من بوابة إلى تراكم",
+        "ISSUE_DELETED_OR_CLOSED": "Github: يبدو أن المشكلة \"{{issueText}}\" يتم حذفها أو إغلاقها على بوابة",
+        "ISSUE_UPDATE": "جيثب: بيانات محدثة لـ \"{{issueText}}\"",
+        "MANUAL_UPDATE_ISSUE_SUCCESS": "جيثب: بيانات محدثة لـ \"{{issueText}}\"",
+        "MISSING_ISSUE_DATA": "جيثب: المهام مع بيانات القضية المفقودة وجدت. إعادة شحن.",
+        "NEW_COMMENT": "جيثب: تعليق جديد لـ \"{{issueText}}\"",
+        "POLLING": "جيثب: تغييرات الاقتراع للقضايا",
+        "SHOW_ISSUE_BTN": "أرني"
+      }
+    },
     "GOOGLE": {
       "DIALOG": {
         "CREATE_SYNC_FILE": "Google Drive: لم يتم العثور على ملف يحمل الاسم <strong>\"{{fileName}}\"</strong> . <strong>إنشاء</strong> كملف مزامنة على Google Drive؟",
@@ -229,6 +255,7 @@
   "G": {
     "CANCEL": "إلغاء",
     "DISMISS": "رفض",
+    "OK": "",
     "SAVE": "حفظ",
     "TITLE": "عنوان"
   },

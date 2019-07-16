@@ -4,6 +4,7 @@ import {GithubCfg} from '../github';
 import {FormGroup} from '@angular/forms';
 import {FormlyFieldConfig} from '@ngx-formly/core';
 import {DEFAULT_GITHUB_CFG, GITHUB_CONFIG_FORM} from '../github.const';
+import {T} from '../../../../t.const';
 
 @Component({
   selector: 'dialog-github-initial-setup',
@@ -12,6 +13,7 @@ import {DEFAULT_GITHUB_CFG, GITHUB_CONFIG_FORM} from '../github.const';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DialogGithubInitialSetupComponent implements OnInit {
+  T = T;
   githubCfg: GithubCfg;
   formGroup: FormGroup = new FormGroup({});
   formConfig: FormlyFieldConfig[] = GITHUB_CONFIG_FORM;

@@ -56,6 +56,32 @@
         "UPDATE_SECTION": "Paramètres mis à jour pour <strong>{{sectionKey}}</strong>"
       }
     },
+    "GITHUB": {
+      "DIALOG_INITIAL": {
+        "TITLE": "Configurer le github pour le projet"
+      },
+      "ISSUE_CONTENT": {
+        "ASSIGNEE": "Cessionnaire",
+        "AT": "à",
+        "DESCRIPTION": "La description",
+        "LABELS": "Étiquettes",
+        "MARK_AS_CHECKED": "Marquer les mises à jour comme cochées",
+        "STATUS": "Statut",
+        "SUMMARY": "Résumé",
+        "WRITE_A_COMMENT": "Écrire un commentaire"
+      },
+      "SNACK": {
+        "IMPORTED_MULTIPLE_ISSUES": "Github: {{issuesLength}} nouvelles importations importées de git à l'arriéré",
+        "IMPORTED_SINGLE_ISSUE": "Github: numéro d'importation \"{{issueText}}\" de git à l'arriéré",
+        "ISSUE_DELETED_OR_CLOSED": "Github: le problème \"{{issueText}}\" semble être supprimé ou fermé sur git",
+        "ISSUE_UPDATE": "Github: données mises à jour pour \"{{issueText}}\"",
+        "MANUAL_UPDATE_ISSUE_SUCCESS": "Github: données mises à jour pour \"{{issueText}}\"",
+        "MISSING_ISSUE_DATA": "Github: Tâches avec les données de problème manquantes trouvées. Rechargement.",
+        "NEW_COMMENT": "Github: Nouveau commentaire pour \"{{issueText}}\"",
+        "POLLING": "Github: Polling Changes for issues",
+        "SHOW_ISSUE_BTN": "Montre moi"
+      }
+    },
     "GOOGLE": {
       "DIALOG": {
         "CREATE_SYNC_FILE": "Google Drive: Aucun fichier portant le nom <strong>\"{{fileName}}\"</strong> n'a été trouvé. <strong>créer</strong> un fichier de synchronisation sur Google Drive?",
@@ -229,6 +255,7 @@
   "G": {
     "CANCEL": "annuler",
     "DISMISS": "Rejeter",
+    "OK": "",
     "SAVE": "sauvegarder",
     "TITLE": "Titre"
   },

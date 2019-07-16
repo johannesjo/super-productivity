@@ -4,6 +4,7 @@ import {GithubIssueService} from '../github-issue.service';
 import {GithubApiService} from '../../github-api.service';
 import {GithubIssue} from '../github-issue.model';
 import {expandAnimation} from '../../../../../ui/animations/expand.ani';
+import {T} from '../../../../../t.const';
 
 @Component({
   selector: 'github-issue-content',
@@ -13,6 +14,7 @@ import {expandAnimation} from '../../../../../ui/animations/expand.ani';
   animations: [expandAnimation]
 })
 export class GithubIssueContentComponent implements OnInit {
+  T = T;
   taskData: TaskWithSubTasks;
   issueData: GithubIssue;
 

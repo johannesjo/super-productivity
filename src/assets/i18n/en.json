@@ -56,6 +56,32 @@
         "UPDATE_SECTION": "Updated settings for <strong>{{sectionKey}}</strong>"
       }
     },
+    "GITHUB": {
+      "DIALOG_INITIAL": {
+        "TITLE": "Setup Github for Project"
+      },
+      "ISSUE_CONTENT": {
+        "ASSIGNEE": "Assignee",
+        "AT": "at",
+        "DESCRIPTION": "Description",
+        "LABELS": "Labels",
+        "MARK_AS_CHECKED": "Mark updates as checked",
+        "STATUS": "Status",
+        "SUMMARY": "Summary",
+        "WRITE_A_COMMENT": "Write a comment"
+      },
+      "SNACK": {
+        "IMPORTED_MULTIPLE_ISSUES": "Github: Imported {{issuesLength}} new issues from git to backlog",
+        "IMPORTED_SINGLE_ISSUE": "Github: Imported issue \"{{issueText}}\" from git to backlog",
+        "ISSUE_DELETED_OR_CLOSED": "Github: Issue \"{{issueText}}\" seems to be deleted or closed on git",
+        "ISSUE_UPDATE": "Github: Updated data for \"{{issueText}}\"",
+        "MANUAL_UPDATE_ISSUE_SUCCESS": "Github: Updated data for \"{{issueText}}\"",
+        "MISSING_ISSUE_DATA": "Github: Tasks with missing issue data found. Reloading.",
+        "NEW_COMMENT": "Github: New comment for \"{{issueText}}\"",
+        "POLLING": "Github: Polling Changes for issues",
+        "SHOW_ISSUE_BTN": "Show me"
+      }
+    },
     "GOOGLE": {
       "DIALOG": {
         "CREATE_SYNC_FILE": "Google Drive: No file with the name <strong>\"{{fileName}}\"</strong> was found. <strong>Create</strong> it as sync file on Google Drive?",
@@ -229,6 +255,7 @@
   "G": {
     "CANCEL": "Cancel",
     "DISMISS": "Dismiss",
+    "OK": "Ok",
     "SAVE": "Save",
     "TITLE": "Title"
   },

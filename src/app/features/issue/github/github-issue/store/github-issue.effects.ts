@@ -19,6 +19,7 @@ import {EMPTY, timer} from 'rxjs';
 import {GITHUB_INITIAL_POLL_DELAY, GITHUB_POLL_INTERVAL} from '../../github.const';
 import {GithubCfg} from '../../github';
 import {GithubIssue} from '../github-issue.model';
+import {T} from '../../../../../t.const';
 
 const isRepoConfigured_ = (githubCfg) => githubCfg && githubCfg.repo && githubCfg.repo.length > 2;
 const isRepoConfigured = ([a, githubCfg]) => isRepoConfigured_(githubCfg);
@@ -62,7 +63,8 @@ export class GithubIssueEffects {
     tap(([x, githubCfg, issues]: [any, GithubCfg, GithubIssue[]]) => {
       if (issues && issues.length > 0) {
         this._snackService.open({
-          msg: 'Github: Polling Changes for issues',
+          isTranslate: true,
+          msg: T.F.GITHUB.SNACK.POLLING,
           svgIco: 'github',
           isSubtle: true,
         });
@@ -125,7 +127,8 @@ export class GithubIssueEffects {
       tap(tasks => {
         console.warn('TASKS WITH MISSING ISSUE DATA FOR GITHUB', tasks);
         this._snackService.open({
-          msg: 'Github: Tasks with missing issue data found. Reloading.',
+          isTranslate: true,
+          msg: T.F.GITHUB.SNACK.MISSING_ISSUE_DATA,
           svgIco: 'github',
           isSubtle: true,
         });
@@ -168,14 +171,22 @@ export class GithubIssueEffects {
 
       if (issuesToAdd.length === 1) {
         this._snackService.open({
-          msg: `Github: Imported issue "#${issuesToAdd[0].number} ${issuesToAdd[0].title}" from git to backlog`,
           ico: 'cloud_download',
+          isTranslate: true,
+          translateParams: {
+            issueText: `#${issuesToAdd[0].number} ${issuesToAdd[0].title}`
+          },
+          msg: T.F.GITHUB.SNACK.IMPORTED_SINGLE_ISSUE,
           isSubtle: true,
         });
       } else if (issuesToAdd.length > 1) {
         this._snackService.open({
-          msg: `Github: Imported ${issuesToAdd.length} new issues from git to backlog`,
           ico: 'cloud_download',
+          isTranslate: true,
+          translateParams: {
+            issueLength: issuesToAdd.length
+          },
+          msg: T.F.GITHUB.SNACK.IMPORTED_MULTIPLE_ISSUES,
           isSubtle: true,
         });
       }

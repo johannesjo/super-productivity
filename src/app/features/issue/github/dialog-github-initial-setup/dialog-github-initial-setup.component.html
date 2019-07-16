@@ -1,7 +1,7 @@
 <h1 mat-dialog-title>
   <mat-icon class="dialog-header-icon"
             svgIcon="github"></mat-icon>
-  <span>Setup Github for Project</span>
+  <span>{{T.F.GITHUB.DIALOG_INITIAL.TITLE|translate}}</span>
 </h1>
 
 <form (submit)="saveGithubCfg(githubCfg)"
@@ -19,7 +19,7 @@
             color="primary"
             mat-button=""
             type="button">
-      Cancel
+      {{T.G.CANCEL|translate}}
     </button>
 
     <button [disabled]="!formGroup.valid"
@@ -27,7 +27,7 @@
             mat-stroked-button=""
             type="submit">
       <mat-icon>save</mat-icon>
-      Save
+      {{T.G.SAVE|translate}}
     </button>
   </mat-dialog-actions>
 </form>

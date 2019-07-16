@@ -56,6 +56,32 @@
         "UPDATE_SECTION": "Aktualisierte Einstellungen für <strong>{{sectionKey}}</strong>"
       }
     },
+    "GITHUB": {
+      "DIALOG_INITIAL": {
+        "TITLE": "Richten Sie Github für Project ein"
+      },
+      "ISSUE_CONTENT": {
+        "ASSIGNEE": "Zugewiesen",
+        "AT": "am",
+        "DESCRIPTION": "Beschreibung",
+        "LABELS": "Etiketten",
+        "MARK_AS_CHECKED": "Markiere Updates als markiert",
+        "STATUS": "Status",
+        "SUMMARY": "Zusammenfassung",
+        "WRITE_A_COMMENT": "Schreibe einen Kommentar"
+      },
+      "SNACK": {
+        "IMPORTED_MULTIPLE_ISSUES": "Github: {{issuesLength}} neue Probleme von Git in das Backlog importiert",
+        "IMPORTED_SINGLE_ISSUE": "Github: Importiertes Problem \"{{issueText}}\" von Git zu Backlog",
+        "ISSUE_DELETED_OR_CLOSED": "Github: Das Problem \"{{issueText}}\" scheint auf git gelöscht oder geschlossen zu sein",
+        "ISSUE_UPDATE": "Github: Aktualisierte Daten für \"{{issueText}}\"",
+        "MANUAL_UPDATE_ISSUE_SUCCESS": "Github: Aktualisierte Daten für \"{{issueText}}\"",
+        "MISSING_ISSUE_DATA": "Github: Aufgaben mit fehlenden Issue-Daten gefunden. Neuladen.",
+        "NEW_COMMENT": "Github: Neuer Kommentar für \"{{issueText}}\"",
+        "POLLING": "Github: Änderungen für Probleme abrufen",
+        "SHOW_ISSUE_BTN": "Zeige mir"
+      }
+    },
     "GOOGLE": {
       "DIALOG": {
         "CREATE_SYNC_FILE": "Google Drive: Es wurde keine Datei mit dem Namen <strong>\"{{fileName}}\"</strong> gefunden. <strong>Erstelle</strong> es als Synchronisierungsdatei auf Google Drive?",
@@ -229,6 +255,7 @@
   "G": {
     "CANCEL": "Abbrechen",
     "DISMISS": "Verwerfen",
+    "OK": "",
     "SAVE": "Speichern",
     "TITLE": "Titel"
   },

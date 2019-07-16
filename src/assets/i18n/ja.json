@@ -56,6 +56,32 @@
         "UPDATE_SECTION": " <strong>{{sectionKey}}</strong>の設定を更新しました"
       }
     },
+    "GITHUB": {
+      "DIALOG_INITIAL": {
+        "TITLE": "プロジェクト用Githubのセットアップ"
+      },
+      "ISSUE_CONTENT": {
+        "ASSIGNEE": "譲受人",
+        "AT": "で",
+        "DESCRIPTION": "説明",
+        "LABELS": "ラベル",
+        "MARK_AS_CHECKED": "更新をチェック済みとしてマーク",
+        "STATUS": "状態",
+        "SUMMARY": "概要",
+        "WRITE_A_COMMENT": "コメントを書く"
+      },
+      "SNACK": {
+        "IMPORTED_MULTIPLE_ISSUES": "Github：gitからバックログに {{issuesLength}} 件の新しい問題をインポートしました",
+        "IMPORTED_SINGLE_ISSUE": "Github：gitからバックログへの問題 \"{{issueText}}\"のインポート",
+        "ISSUE_DELETED_OR_CLOSED": "Github：課題 \"{{issueText}}\"がgitで削除されたか終了したようです",
+        "ISSUE_UPDATE": "Github： \"{{issueText}}\"のデータを更新しました",
+        "MANUAL_UPDATE_ISSUE_SUCCESS": "Github： \"{{issueText}}\"のデータを更新しました",
+        "MISSING_ISSUE_DATA": "Github：課題データが見つからないタスクが見つかりました。再読み込みしています。",
+        "NEW_COMMENT": "Github： \"{{issueText}}\"への新しいコメント",
+        "POLLING": "Github：問題に対する投票の変更",
+        "SHOW_ISSUE_BTN": "見せて"
+      }
+    },
     "GOOGLE": {
       "DIALOG": {
         "CREATE_SYNC_FILE": "Googleドライブ： <strong>\"{{fileName}}\"</strong> という名前のファイルが見つかりませんでした。 <strong>Googleドライブに同期ファイルとして</strong> を作成しますか？",
@@ -229,6 +255,7 @@
   "G": {
     "CANCEL": "キャンセル",
     "DISMISS": "やめる",
+    "OK": "",
     "SAVE": "保存する",
     "TITLE": "タイトル"
   },
