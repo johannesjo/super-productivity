@@ -1,5 +1,3 @@
-<!-- TODO list changes -->
-
 <div class="wrapper">
 
   <div *ngIf="issueData.wasUpdated"
@@ -62,7 +60,6 @@
         class="description-row">
       <th (click)="isFocusDescription=!isFocusDescription">Description</th>
       <td>
-        <!--<inline-markdown [model]="issueData.description"></inline-markdown>-->
         <div *ngIf="issueData.description"
              [data]="issueData?.description"
              class="description markdown"
@@ -76,13 +73,6 @@
              class="attachments">
           <attachment-list [attachments]="attachments"
                            [isDisableControls]="true"></attachment-list>
-          <!--<div class="attachment"-->
-          <!--*ngFor="let attachment of issueData.attachments">-->
-          <!--<div class="file-name">-->
-          <!--<a [href]="attachment.content"-->
-          <!--target="_blank">{{attachment.filename}}</a>-->
-          <!--</div>-->
-          <!--</div>-->
         </div>
       </td>
     </tr>
@@ -111,9 +101,4 @@
       </td>
     </tr>
   </table>
-
-  <!--<pre><code>-->
-  <!--{{issueData|json}}-->
-  <!--</code></pre>-->
-
 </div>

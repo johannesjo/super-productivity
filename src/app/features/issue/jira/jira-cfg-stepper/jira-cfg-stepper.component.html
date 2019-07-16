@@ -1,18 +1,13 @@
-<!--<pre><code>{{jiraCfg|json}}</code></pre>-->
-
 <div class="wrapper">
-  <mat-horizontal-stepper #stepper
-                          [linear]="true"
+  <mat-horizontal-stepper [linear]="true"
                           dynamicHeight>
     <mat-step [stepControl]="credentialsFormGroup">
       <form (submit)="saveStepForm(jiraCfg)"
             [formGroup]="credentialsFormGroup">
-        <ng-template matStepLabel>Credentials</ng-template>
+        <ng-template matStepLabel>{{T.F.JIRA.STEPPER.CREDENTIALS|translate}}</ng-template>
 
-        <p class="isHideWhenJiraSupport">Please
-          <a href="https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb">
-            download the chrome extension</a> in order to allow communication with the Jira Api. Note that this doesn't
-          work for mobile.
+        <p class="isHideWhenJiraSupport"
+           [innerHTML]="T.F.JIRA.EXTENSION_INFO|translate:{url:'https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb'}">
         </p>
 
         <formly-form (modelChange)="jiraCfg=$event"
@@ -26,7 +21,10 @@
             <img [src]="user.avatarUrls['48x48']"
                  alt="User Avatar"
                  class="user-avatar">
-            <div class="welcome-txt">Login successful!<br>Welcome {{user.displayName}}!</div>
+            <div class="welcome-txt">
+              {{T.F.JIRA.STEPPER.LOGIN_SUCCESS|translate}}<br>
+              {{T.F.JIRA.STEPPER.WELCOME_USER|translate:{user:user.displayName} }}<br>
+            </div>
           </div>
 
           <div class="center-wrapper">
@@ -35,14 +33,14 @@
                     mat-raised-button>
               <mat-icon *ngIf="!isTestCredentialsSuccess">import_export</mat-icon>
               <mat-icon *ngIf="isTestCredentialsSuccess">checkmark</mat-icon>
-              Test Credentials
+              {{T.F.JIRA.STEPPER.TEST_CREDENTIALS|translate}}
             </button>
             <button [disabled]="!credentialsFormGroup.valid"
                     color="primary"
                     mat-raised-button
                     matStepperNext
                     type="submit">
-              Next
+              {{T.G.NEXT|translate}}
               <mat-icon>arrow_forward</mat-icon>
             </button>
           </div>
@@ -65,7 +63,7 @@
             <button mat-raised-button=""
                     matStepperPrevious>
               <mat-icon>arrow_backward</mat-icon>
-              Back
+              {{T.G.PREVIOUS|translate}}
             </button>
             <button [disabled]="!advancedSettingsFormGroup.valid"
                     color="primary"
@@ -73,48 +71,28 @@
                     matStepperNext
                     type="submit">
               <mat-icon>arrow_forward</mat-icon>
-              Next
+              {{T.G.NEXT|translate}}
             </button>
           </div>
         </formly-form>
       </form>
     </mat-step>
 
-    <!--<mat-step [stepControl]="thirdFormGroup">-->
-    <!--<form [formGroup]="thirdFormGroup">-->
-    <!--<ng-template matStepLabel>Advanced</ng-template>-->
-    <!--<mat-form-field>-->
-    <!--&lt;!&ndash;<input matInput&ndash;&gt;-->
-    <!--&lt;!&ndash;placeholder="Address"&ndash;&gt;-->
-    <!--&lt;!&ndash;formControlName="secondCtrl"&ndash;&gt;-->
-    <!--&lt;!&ndash;required>&ndash;&gt;-->
-    <!--</mat-form-field>-->
-    <!--<div class="center-wrapper">-->
-    <!--<button mat-raised-button=""-->
-    <!--matStepperPrevious>Back-->
-    <!--</button>-->
-    <!--<button mat-raised-button=""-->
-    <!--matStepperNext>Save-->
-    <!--</button>-->
-    <!--</div>-->
-    <!--</form>-->
-    <!--</mat-step>
-  -->
     <mat-step>
       <ng-template matStepLabel>Done</ng-template>
-      You are now done.
+      {{T.F.JIRA.STEPPER.DONE|translate}}
       <div class="center-wrapper">
         <button mat-raised-button=""
                 matStepperPrevious>
           <mat-icon>arrow_backward</mat-icon>
-          Back
+          {{T.G.PREVIOUS|translate}}
         </button>
         <button (click)="saveConfig()"
                 color="primary"
                 mat-raised-button=""
                 type="button">
           <mat-icon>save</mat-icon>
-          Save
+          {{T.G.SAVE|translate}}
         </button>
       </div>
     </mat-step>

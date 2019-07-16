@@ -1,14 +1,12 @@
 <div class="isHideWhenJiraSupport">
-  <p>Please <a href="https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb">
-    download the chrome extension</a> in order to allow communication with the Jira Api. Note that this doesn\'t work
-    for mobile.
+  <p [innerHTML]="T.F.JIRA.EXTENSION_INFO|translate:{url:'https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb'}">
   </p>
 </div>
 
 <mat-slide-toggle [(ngModel)]="cfg.isEnabled"
                   name="isEnabled"
                   style="margin-bottom: 8px;">
-  Enable Jira integration
+  {{T.F.JIRA.CFG_CMP.ENABLE|translate}}
 </mat-slide-toggle>
 
 <form (ngSubmit)="submit()"
@@ -26,10 +24,9 @@
     <h3 class="sub-section-heading">Transition Handling</h3>
     <mat-slide-toggle [(ngModel)]="cfg.isTransitionIssuesEnabled"
                       [ngModelOptions]="{standalone: true}"
-                      aria-label="Enable Transition Handling"
                       name="isTransitionIssuesEnabled"
                       style="margin-bottom: 8px;">
-      Enable Transition Handling
+      {{T.F.JIRA.CFG_CMP.ENABLE_TRANSITIONS|translate}}
     </mat-slide-toggle>
 
 
@@ -38,10 +35,9 @@
       <mat-form-field>
         <input [formControl]="issueSuggestionsCtrl"
                [matAutocomplete]="autoEl"
-               aria-label="Select issue to load available transitions"
                class="border-color-primary"
                matInput
-               placeholder="Select issue to load available transitions">
+               [placeholder]="T.F.JIRA.CFG_CMP.SELECT_ISSUE_FOR_TRANSITIONS|translate">
 
         <mat-autocomplete #autoEl="matAutocomplete"
                           (optionSelected)="updateTransitionOptions()"
@@ -60,13 +56,13 @@
 
       <div *ngFor="let opt of cfg.transitionConfig|keyvalue">
         <mat-form-field>
-          <label *ngIf="opt.key==='OPEN'">Status for pausing task</label>
-          <label *ngIf="opt.key==='IN_PROGRESS'">Status for starting task</label>
-          <label *ngIf="opt.key==='DONE'">Status for completing task</label>
+          <label *ngIf="opt.key==='OPEN'">{{T.F.JIRA.CFG_CMP.OPEN|translate}}</label>
+          <label *ngIf="opt.key==='IN_PROGRESS'">{{T.F.JIRA.CFG_CMP.IN_PROGRESS|translate}}</label>
+          <label *ngIf="opt.key==='DONE'">{{T.F.JIRA.CFG_CMP.DONE|translate}}</label>
           <mat-select [(ngModel)]="cfg.transitionConfig[opt.key]"
                       [ngModelOptions]="{standalone: true}">
-            <mat-option value="DO_NOT">Don't transition</mat-option>
-            <mat-option value="ALWAYS_ASK">Always open dialog</mat-option>
+            <mat-option value="DO_NOT">{{T.F.JIRA.CFG_CMP.DO_NOT|translate}}</mat-option>
+            <mat-option value="ALWAYS_ASK">{{T.F.JIRA.CFG_CMP.ALWAYS_ASK|translate}}</mat-option>
             <mat-option *ngFor="let transition of cfg.availableTransitions"
                         [value]="transition">
               {{transition.name}}
@@ -74,22 +70,18 @@
           </mat-select>
         </mat-form-field>
       </div>
-      <!--<pre><code>{{availableTransitionsForIssue|json}}</code></pre>-->
-
     </section>
 
     <section>
-      <h3 class="sub-section-heading">Map Custom Fields</h3>
-      <p>Unfortunately some of Jira's data is saved under custom fields which are different for every installation. If
-        you
-        want to include this data you need to select the proper custom field for it.</p>
+      <h3 class="sub-section-heading">{{T.F.JIRA.CFG_CMP.MAP_CUSTOM_FIELDS|translate}}</h3>
+      <p>{{T.F.JIRA.CFG_CMP.MAP_CUSTOM_FIELDS_INFO|translate}}</p>
 
       <div>
         <button (click)="loadCustomFields()"
                 [promiseBtn]="customFieldsPromise"
                 mat-raised-button
                 type="button">
-          Load Suggestions
+          {{T.F.JIRA.CFG_CMP.LOAD_SUGGESTIONS|translate}}
         </button>
         <br>
         <br>
@@ -99,11 +91,9 @@
         <input [(ngModel)]="cfg.storyPointFieldId"
                [formControl]="customFieldSuggestionsCtrl"
                [matAutocomplete]="storyPointAutoEl"
-               aria-label="Story Points"
                class="border-color-primary"
-
                matInput
-               placeholder="Story Points">
+               [placeholder]="T.F.JIRA.CFG_CMP.STORY_POINTS|translate">
 
         <mat-autocomplete #storyPointAutoEl="matAutocomplete"
                           [autoActiveFirstOption]="true">
@@ -122,9 +112,7 @@
             mat-raised-button
             type="submit">
       <mat-icon>save</mat-icon>
-      Save
+      {{T.G.SAVE|translate}}
     </button>
   </div>
 </form>
-
-<!--<pre><code>{{cfg|json}}</code></pre>-->

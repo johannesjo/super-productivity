@@ -89,6 +89,21 @@
       }
     },
     "JIRA": {
+      "EXTENSION_INFO": "Please <a href=\"{{url}}\"> download the chrome extension</a> in order to allow communication with the Jira Api. Note that this doesn\\'t work for mobile.",
+      "CFG_CMP": {
+        "ENABLE": "Enable Jira integration",
+        "ENABLE_TRANSITIONS": "Enable Transition Handling",
+        "SELECT_ISSUE_FOR_TRANSITIONS": "Select issue to load available transitions",
+        "OPEN": "Status for pausing task",
+        "IN_PROGRESS": "Status for starting task",
+        "DONE": "Status for completing task",
+        "DO_NOT": "Don't transition",
+        "ALWAYS_ASK": "Always open dialog",
+        "MAP_CUSTOM_FIELDS": "Map Custom Fields",
+        "MAP_CUSTOM_FIELDS_INFO": "Unfortunately some of Jira's data is saved under custom fields which are different for every installation. If you want to include this data you need to select the proper custom field for it.",
+        "LOAD_SUGGESTIONS": "Load Suggestions",
+        "STORY_POINTS": "Story Points"
+      },
       "DIALOG_INITIAL": {
         "TITLE": "Setup Jira for Project"
       },
@@ -137,6 +152,13 @@
         "NEW_COMMENT": "Github: New comment for \"{{issueText}}\"",
         "POLLING": "Github: Polling Changes for issues",
         "SHOW_ISSUE_BTN": "Show me"
+      },
+      "STEPPER": {
+        "CREDENTIALS": "Credentials",
+        "LOGIN_SUCCESS": "Login successful!",
+        "WELCOME_USER": "Welcome {{user}}!",
+        "TEST_CREDENTIALS": "Test Credentials",
+        "DONE": "You are now done."
       }
     },
     "GOOGLE": {
@@ -311,7 +333,9 @@
     "DISMISS": "Dismiss",
     "OK": "Ok",
     "SAVE": "Save",
-    "TITLE": "Title"
+    "TITLE": "Title",
+    "NEXT": "Next",
+    "PREVIOUS": "Previous"
   },
   "MH": {
     "ADD_NEW_TASK": "Add new Task",
