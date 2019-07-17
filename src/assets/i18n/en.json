@@ -14,6 +14,15 @@
         "ISSUE_PROVIDER_CFGS": "Issue Provider Configs (optional)",
         "SETUP_JIRA": "Setup Jira Integration",
         "SETUP_GIT": "Setup Github Integration"
+      },
+      "FORM": {
+        "TITLE": "Project Settings & Theme",
+        "HELP": "Very basic settings for your project.",
+        "L_TITLE": "Title",
+        "L_THEME_COLOR": "Theme Color",
+        "L_IS_DARK_THEME": "Use Dark Theme",
+        "D_IS_DARK_THEME": "Won`t be used if system supports global dark mode.",
+        "L_IS_REDUCED_THEME": "Use reduced UI (no boxes around tasks)"
       }
     },
     "NOTE": {

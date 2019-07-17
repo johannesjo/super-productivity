@@ -16,6 +16,9 @@ export class TranslateExtension {
       ...(to.label
         ? {'templateOptions.label': this.translate.stream(to.label)}
         : {}),
+      ...(to.description
+        ? {'templateOptions.description': this.translate.stream(to.description)}
+        : {}),
       ...(to.placeholder
         ? {'templateOptions.placeholder': this.translate.stream(to.placeholder)}
         : {}),
