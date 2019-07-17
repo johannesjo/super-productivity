@@ -547,8 +547,6 @@
         "REMINDER_DELETED": "Deleted reminder for task",
         "DELETED": "Deleted task \"{{title}}\""
       },
-      "TASK_LIST": {
-      },
       "CMP": {
         "TOGGLE_DONE": "Mark as done/undone",
         "SHOW_UPDATES": "Show updates",
@@ -578,6 +576,11 @@
         "DROP_ATTACHMENT": "Drop here to attach to \"{{task.title}}\""
       },
       "SUMMARY_TABLE": {
+        "TASK": "Task",
+        "SPENT_TODAY": "",
+        "SPENT_TOTAL": "Spent Total",
+        "ESTIMATE": "Estimate",
+        "TOGGLE_DONE": "un-/mark as done"
       }
     },
     "TASK_REPEAT": {
