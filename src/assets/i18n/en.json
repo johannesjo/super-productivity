@@ -489,9 +489,9 @@
       "TITLE": "Title"
     },
     "TASK": {
+      "SELECT_OR_CREATE": "Select or create task",
       "ADD_TASK_BAR": {
-        "START": "Press enter one more time to start",
-        "SELECT_OR_CREATE": "Select or create task"
+        "START": "Press enter one more time to start"
       },
       "ADDITIONAL_INFO": {
       },
@@ -515,6 +515,12 @@
         "START": "Start Task"
       },
       "D_TIME": {
+        "TITLE": "Time spent / Estimates",
+        "TIME_SPENT": "Time Spent",
+        "ESTIMATE": "Estimate",
+        "TIME_SPENT_ON": "Time Spent {{date}}",
+        "DELETE_FOR": "Delete entry for day",
+        "ADD_FOR_OTHER_DAY": "Add time spent for other day"
       },
       "D_TIME_FOR_DAY": {
         "TITLE": "Add for Day",
@@ -522,8 +528,6 @@
         "ADD_ENTRY_FOR": "Add new entry for {{date}}",
         "DATE": "Date for new entry",
         "TINE_SPENT": "Time Spent"
-      },
-      "SELECT_TASK": {
       },
       "SNACK": {
       },

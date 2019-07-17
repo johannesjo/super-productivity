@@ -489,9 +489,9 @@ export const T = {
       'TITLE': 'F.SIMPLE_TASK_EXPORT.TITLE'
     },
     'TASK': {
+      'SELECT_OR_CREATE': 'F.TASK.SELECT_OR_CREATE',
       'ADD_TASK_BAR': {
-        'START': 'F.TASK.ADD_TASK_BAR.START',
-        'SELECT_OR_CREATE': 'F.TASK.ADD_TASK_BAR.SELECT_OR_CREATE'
+        'START': 'F.TASK.ADD_TASK_BAR.START'
       },
       'ADDITIONAL_INFO': {},
       'D_REMINDER_ADD': {
@@ -513,7 +513,14 @@ export const T = {
         'SWITCH_PROJECT_START': 'F.TASK.D_REMINDER_VIEW.SWITCH_PROJECT_START',
         'START': 'F.TASK.D_REMINDER_VIEW.START'
       },
-      'D_TIME': {},
+      'D_TIME': {
+        'TITLE': 'F.TASK.D_TIME.TITLE',
+        'TIME_SPENT': 'F.TASK.D_TIME.TIME_SPENT',
+        'ESTIMATE': 'F.TASK.D_TIME.ESTIMATE',
+        'TIME_SPENT_ON': 'F.TASK.D_TIME.TIME_SPENT_ON',
+        'DELETE_FOR': 'F.TASK.D_TIME.DELETE_FOR',
+        'ADD_FOR_OTHER_DAY': 'F.TASK.D_TIME.ADD_FOR_OTHER_DAY'
+      },
       'D_TIME_FOR_DAY': {
         'TITLE': 'F.TASK.D_TIME_FOR_DAY.TITLE',
         'HELP': 'F.TASK.D_TIME_FOR_DAY.HELP',
@@ -521,7 +528,6 @@ export const T = {
         'DATE': 'F.TASK.D_TIME_FOR_DAY.DATE',
         'TINE_SPENT': 'F.TASK.D_TIME_FOR_DAY.TINE_SPENT'
       },
-      'SELECT_TASK': {},
       'SNACK': {},
       'TASK_LIST': {},
       'TASK': {},

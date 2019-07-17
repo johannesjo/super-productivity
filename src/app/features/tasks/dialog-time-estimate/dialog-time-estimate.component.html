@@ -1,5 +1,5 @@
 <div class="dialog-help-wrapper">
-  <h1 mat-dialog-title>Time spent / Estimates</h1>
+  <h1 mat-dialog-title>{{T.F.TASK.D_TIME.TITLE|translate}}</h1>
 
   <form (submit)="submit()"
         class="mat-body"
@@ -7,21 +7,18 @@
 
     <mat-dialog-content>
       <help-section>
-        <div class="side-info">
-          Examples:<br>
-          30m => 30 minutes<br>
-          2h => 2 hours<br>
-          2h 30m => 2 hours and 30 minutes
+        <div class="side-info"
+             [innerHTML]="T.F.TASK.D_TIME_FOR_DAY.HELP|translate">
         </div>
       </help-section>
 
 
       <div class="wrap-time">
         <input-duration-slider [(model)]="timeSpentOnDayCopy[todayStr]"
-                               label="Time Spent">
+                               [label]="T.F.TASK.D_TIME.TIME_SPENT|translate">
         </input-duration-slider>
         <input-duration-slider [(model)]="taskCopy.timeEstimate"
-                               label="Estimate">
+                               [label]="T.F.TASK.D_TIME.ESTIMATE|translate">
         </input-duration-slider>
       </div>
 
@@ -30,11 +27,10 @@
              class="other-day">
           <mat-form-field class="mat-icon-float mat-block">
             <input [(ngModel)]="timeSpentOnDayCopy[strDate]"
-                   aria-label="Time Spent"
                    inputDuration="optional"
                    matInput
                    name="timeSpentOnDay{{strDate}}"
-                   placeholder="{{strDate}} Time Spent"
+                   [placeholder]="T.F.TASK.D_TIME.TIME_SPENT_ON|translate:{date:strDate}"
                    type="text">
 
             <mat-icon matPrefix>timer</mat-icon>
@@ -42,19 +38,18 @@
           <button (click)="deleteValue(strDate)"
                   color=""
                   mat-icon-button
-                  title="Delete entry for day"
+                  [title]="T.F.TASK.D_TIME.DELETE_FOR|translate"
                   type="button">
             <mat-icon>delete_forever</mat-icon>
           </button>
         </div>
 
         <button (click)="showAddForAnotherDayForm()"
-                aria-label="add for another day"
                 color="primary"
                 mat-button=""
                 type="button">
           <mat-icon>add</mat-icon>
-          Add time spent for other day
+          {{T.F.TASK.D_TIME.ADD_FOR_OTHER_DAY|translate}}
         </button>
       </div>
 
@@ -62,7 +57,6 @@
     </mat-dialog-content>
 
     <mat-dialog-actions align="end">
-      <!-- Can optionally provide a result for the closing dialog. -->
       <button [mat-dialog-close]="true"
               color="primary"
               type="button"
