@@ -13,6 +13,7 @@ import {
 import shortid from 'shortid';
 import * as moment from 'moment';
 import {dotAnimation} from './dot.ani';
+import {T} from '../../../t.const';
 
 @Component({
   selector: 'input-duration-slider',
@@ -22,6 +23,7 @@ import {dotAnimation} from './dot.ani';
   animations: [dotAnimation],
 })
 export class InputDurationSliderComponent implements OnInit, OnDestroy {
+  T = T;
   minutesBefore = 0;
   dots: any[];
   uid: string = 'duration-input-slider' + shortid();

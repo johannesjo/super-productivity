@@ -504,7 +504,13 @@ export const T = {
       },
       'D_REMINDER_VIEW': {},
       'D_TIME': {},
-      'D_TIME_FOR_DAY': {},
+      'D_TIME_FOR_DAY': {
+        'TITLE': 'F.TASK.D_TIME_FOR_DAY.TITLE',
+        'HELP': 'F.TASK.D_TIME_FOR_DAY.HELP',
+        'ADD_ENTRY_FOR': 'F.TASK.D_TIME_FOR_DAY.ADD_ENTRY_FOR',
+        'DATE': 'F.TASK.D_TIME_FOR_DAY.DATE',
+        'TINE_SPENT': 'F.TASK.D_TIME_FOR_DAY.TINE_SPENT'
+      },
       'SELECT_TASK': {},
       'SNACK': {},
       'TASK_LIST': {},
@@ -647,6 +653,7 @@ export const T = {
     'TITLE': 'F_TAKE_A_BREAK.TITLE'
   },
   'G': {
+    'CLICK_TO_EDIT': 'G.CLICK_TO_EDIT',
     'CANCEL': 'G.CANCEL',
     'CLOSE': 'G.CLOSE',
     'DELETE': 'G.DELETE',

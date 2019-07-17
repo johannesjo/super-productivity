@@ -1,27 +1,24 @@
 <div class="dialog-help-wrapper">
-  <h1 mat-dialog-title>Add for Day</h1>
+  <h1 mat-dialog-title>{{T.F.TASK.D_TIME_FOR_DAY.TITLE|translate}}</h1>
 
   <form (submit)="submit()"
         name="addForAnotherDayForm">
 
     <mat-dialog-content>
       <help-section>
-        <div class="side-info">
-          Examples:<br>
-          30m => 30 minutes<br>
-          2h => 2 hours<br>
-          2h 30m => 2 hours and 30 minutes
+        <div class="side-info"
+             [innerHTML]="T.F.TASK.D_TIME_FOR_DAY.HELP|translate">
         </div>
       </help-section>
 
 
-      <h3 class="mat-caption">Add new entry for <span [innerHtml]="newEntry.date|date:'dd-MM-yyyy'"></span></h3>
+      <h3 class="mat-caption">{{T.F.TASK.D_TIME_FOR_DAY.ADD_ENTRY_FOR|translate:{date: newEntry.date|date:'dd-MM-yyyy'} }} </h3>
       <mat-form-field>
         <input [(ngModel)]="newEntry.date"
                [matDatepicker]="myDatepicker"
                matInput
                name="date"
-               placeholder="Date for new entry"
+               [placeholder]="T.F.TASK.D_TIME_FOR_DAY.DATE|translate"
                required
                type="text">
         <mat-error>The entered value is not a date!</mat-error>
@@ -32,7 +29,7 @@
 
       <div class="wrap-time">
         <input-duration-slider [(model)]="newEntry.timeSpent"
-                               label="Time Spent">
+                               [label]="T.F.TASK.D_TIME_FOR_DAY.TINE_SPENT|translate">
         </input-duration-slider>
       </div>
 
@@ -40,7 +37,6 @@
     </mat-dialog-content>
 
     <mat-dialog-actions align="end">
-      <!-- Can optionally provide a result for the closing dialog. -->
       <button [mat-dialog-close]="true"
               color="primary"
               type="button"

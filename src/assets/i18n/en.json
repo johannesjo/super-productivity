@@ -508,6 +508,11 @@
       "D_TIME": {
       },
       "D_TIME_FOR_DAY": {
+        "TITLE": "Add for Day",
+        "HELP": "Examples:<br> 30m => 30 minutes<br> 2h => 2 hours<br> 2h 30m => 2 hours and 30 minutes",
+        "ADD_ENTRY_FOR": "Add new entry for {{date}}",
+        "DATE": "Date for new entry",
+        "TINE_SPENT": "Time Spent"
       },
       "SELECT_TASK": {
       },
@@ -656,6 +661,7 @@
     "TITLE": "Break Reminder"
   },
   "G": {
+    "CLICK_TO_EDIT": "click to edit",
     "CANCEL": "Cancel",
     "CLOSE": "Close",
     "DELETE": "Delete",
