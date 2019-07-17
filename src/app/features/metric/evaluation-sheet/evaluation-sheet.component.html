@@ -1,14 +1,10 @@
 <div class="wrapper mat-elevation-z2">
   <help-section>
-    <p>Time for a little self evaluation! Your answers here are saved and provide you with a little bit of statistics on
-      how you work in the <a routerLink="/metrics">metrics section</a>. Furthermore the suggestions for tomorrow will
-      appear above your task list the next day.</p>
+    <p>{{T.F.METRIC.EVAL_FORM.HELP_P1|translate}}</p>
+    <p><a routerLink="/metrics">{{T.F.METRIC.EVAL_FORM.HELP_LINK_TXT|translate}}</a></p>
 
-    <h3 class="mat-h3">Why should I care?</h3>
-    <p>This is intended to be less about calculating exact metrics or becoming machine like efficient in all you do than
-      it is about improving how you feel about your work. It can be helpful to evaluate pain points in your daily
-      routine, as well as it is to find factors that help you out. Being just a little bit systematic about it hopefully
-      helps to get a better grip on these and to improve what you can.</p>
+    <h3 class="mat-h3">{{T.F.METRIC.EVAL_FORM.HELP_H1|translate}}</h3>
+    <p>{{T.F.METRIC.EVAL_FORM.HELP_P2|translate}}</p>
   </help-section>
 
   <form #f="ngForm"
@@ -23,12 +19,12 @@
              maxLength="2"
              min="1"
              name="mood"
-             placeholder="How do you feel?"
+             [placeholder]="T.F.METRIC.EVAL_FORM.MOOD|translate"
              required
              type="number">
-      <mat-hint>1: Awful – 10: Splendid</mat-hint>
+      <mat-hint>{{T.F.METRIC.EVAL_FORM.MOOD_HINT|translate}}</mat-hint>
       <mat-error *ngIf="mood.invalid && (mood.dirty || mood.touched)">
-        Please enter a value between 1 and 10
+        {{T.V.E_1TO10|translate}}
       </mat-error>
     </mat-form-field>
 
@@ -40,12 +36,12 @@
              maxLength="2"
              min="1"
              name="productivity"
-             placeholder="How efficient did you work?"
+             [placeholder]="T.F.METRIC.EVAL_FORM.PRODUCTIVITY|translate"
              required
              type="number">
-      <mat-hint>1: Haven't even started – 10: Enormously efficient</mat-hint>
+      <mat-hint>{{T.F.METRIC.EVAL_FORM.PRODUCTIVITY_HINT|translate}}</mat-hint>
       <mat-error *ngIf="productivity.invalid && (productivity.dirty || productivity.touched)">
-        Please enter a value between 1 and 10
+        {{T.V.E_1TO10|translate}}
       </mat-error>
     </mat-form-field>
 
@@ -54,14 +50,14 @@
                      (removeItem)="removeObstruction($event)"
                      [model]="metricForDay.obstructions"
                      [suggestions]="(obstructionService.obstructions$|async)"
-                     label="What hindered your productivity?"></chip-list-input>
+                     [label]="T.F.METRIC.EVAL_FORM.OBSTRUCTIONS|translate"></chip-list-input>
 
     <chip-list-input (addItem)="addImprovement($event)"
                      (addNewItem)="addNewImprovement($event)"
                      (removeItem)="removeImprovement($event)"
                      [model]="metricForDay.improvements"
                      [suggestions]="(improvementService.improvements$|async)"
-                     label="What improved your productivity?"></chip-list-input>
+                     [label]="T.F.METRIC.EVAL_FORM.IMPROVEMENTS|translate"></chip-list-input>
 
 
     <chip-list-input (addItem)="addImprovementTomorrow($event)"
@@ -69,13 +65,12 @@
                      (removeItem)="removeImprovementTomorrow($event)"
                      [model]="metricForDay.improvementsTomorrow"
                      [suggestions]="(improvementService.improvements$|async)"
-                     label="What could you do to improve tomorrow?"></chip-list-input>
+                     [label]="T.F.METRIC.EVAL_FORM.IMPROVEMENTS_TOMORROW|translate"></chip-list-input>
     <mat-form-field>
-      <textarea #notes="ngModel"
-                [(ngModel)]="tomorrowsNote"
+      <textarea [(ngModel)]="tomorrowsNote"
                 matInput
                 name="notes"
-                placeholder="Notes for tomorrow"></textarea>
+                [placeholder]="T.F.METRIC.EVAL_FORM.NOTES|translate"></textarea>
     </mat-form-field>
 
     <div style="text-align: right;">
@@ -84,7 +79,7 @@
               mat-stroked-button
               type="submit">
         <mat-icon>save</mat-icon>
-        Save
+        {{T.G.SAVE|translate}}
       </button>
     </div>
   </form>

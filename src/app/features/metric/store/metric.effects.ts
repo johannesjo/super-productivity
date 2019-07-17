@@ -7,6 +7,7 @@ import {selectCurrentProjectId} from '../../project/store/project.reducer';
 import {PersistenceService} from '../../../core/persistence/persistence.service';
 import {selectMetricFeatureState} from './metric.selectors';
 import {SnackOpen} from '../../../core/snack/store/snack.actions';
+import {T} from '../../../t.const';
 
 @Injectable()
 export class MetricEffects {
@@ -35,7 +36,7 @@ export class MetricEffects {
       ),
       mapTo(new SnackOpen({
         type: 'SUCCESS',
-        msg: 'Metric successfully saved'
+        msg: T.F.METRIC.SNACK.SAVE_METRIC
       })),
     );
 
