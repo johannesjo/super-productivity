@@ -1,5 +1,6 @@
 import {ChangeDetectionStrategy, Component, OnInit} from '@angular/core';
 import {TaskService} from '../tasks/task.service';
+import {T} from '../../t.const';
 
 @Component({
   selector: 'procrastination',
@@ -8,6 +9,7 @@ import {TaskService} from '../tasks/task.service';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ProcrastinationComponent implements OnInit {
+  T = T;
 
   constructor(
     public taskService: TaskService,
