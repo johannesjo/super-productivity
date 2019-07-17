@@ -15,8 +15,9 @@
          (blur)="onBlur($event)"
          [formControl]="taskSuggestionsCtrl"
          [matAutocomplete]="autoEl"
-         [placeholder]="(doubleEnterCount > 0) ? 'Press enter one more time to start':'Select or create task'"
-         aria-label="Select or create task"
+         [placeholder]="(doubleEnterCount > 0)
+         ? (T.F.TASK.PRESS_ENTER|translate)
+         :(T.F.TASK.PRESS_ENTER|translate)"
          autofocus="autofocus"
          class="border-color-primary"
          matInput>

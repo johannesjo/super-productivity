@@ -5,6 +5,7 @@ import {TaskService} from '../task.service';
 import {ReminderCopy} from '../../reminder/reminder.model';
 import {ReminderService} from '../../reminder/reminder.service';
 import {SnackService} from '../../../core/snack/snack.service';
+import {T} from '../../../t.const';
 
 @Component({
   selector: 'dialog-add-task-reminder',
@@ -13,6 +14,7 @@ import {SnackService} from '../../../core/snack/snack.service';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DialogAddTaskReminderComponent {
+  T = T;
   task: Task = this.data.task;
   title: string = this.task.title;
   reminder: ReminderCopy = this.task.reminderId && this._reminderService.getById(this.data.task.reminderId);

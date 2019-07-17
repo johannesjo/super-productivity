@@ -488,6 +488,12 @@
       "TIME_SPENT": "Time Spent",
       "TITLE": "Title"
     },
+    "TASK": {
+      "ADD_TASK_BAR": {
+        "PRESS_ENTER": "Press enter one more time to start",
+        "SELECT_OR_CREATE": "Select or create task"
+      }
+    },
     "TASK_REPEAT": {
       "D_CONFIRM_REMOVE": {
         "MSG": "Removing the repeat config will convert all previous instances of this task to just regular tasks. Are you sure you want to proceed",

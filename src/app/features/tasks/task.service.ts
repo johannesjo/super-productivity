@@ -93,6 +93,7 @@ import {SnackService} from '../../core/snack/snack.service';
 import {RoundTimeOption} from '../project/project.model';
 import {Dictionary} from '@ngrx/entity';
 import {GITHUB_TYPE, LEGACY_GITHUB_TYPE} from '../issue/issue.const';
+import {T} from '../../t.const';
 
 
 @Injectable({

@@ -5,6 +5,7 @@ import {AttachmentService} from '../../attachment/attachment.service';
 import {BehaviorSubject, Observable} from 'rxjs';
 import {Attachment} from '../../attachment/attachment.model';
 import {switchMap} from 'rxjs/operators';
+import {T} from '../../../t.const';
 
 @Component({
   selector: 'task-additional-info',
@@ -13,6 +14,7 @@ import {switchMap} from 'rxjs/operators';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TaskAdditionalInfoComponent {
+  T = T;
   issueAttachments: Attachment[];
   taskData: TaskWithSubTasks;
   @Input() selectedIndex = 0;

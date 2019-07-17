@@ -38,6 +38,7 @@ import {GlobalConfigService} from '../../config/global-config.service';
 import {TaskRepeatCfgActionTypes} from '../../task-repeat-cfg/store/task-repeat-cfg.actions';
 import {BannerService} from '../../../core/banner/banner.service';
 import {BannerId} from '../../../core/banner/banner.model';
+import {T} from '../../../t.const';
 
 // TODO send message to electron when current task changes here
 

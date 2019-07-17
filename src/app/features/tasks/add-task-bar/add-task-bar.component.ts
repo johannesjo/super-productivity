@@ -19,6 +19,7 @@ import {SnackService} from '../../../core/snack/snack.service';
 import {JiraApiService} from '../../issue/jira/jira-api.service';
 import {JIRA_TYPE} from '../../issue/issue.const';
 import {truncate} from '../../../util/truncate';
+import {T} from '../../../t.const';
 
 @Component({
   selector: 'add-task-bar',
@@ -35,6 +36,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
 
   @ViewChild('inputEl', {static: true}) inputEl;
 
+  T = T;
   isLoading$ = new BehaviorSubject(false);
   doubleEnterCount = 0;
 

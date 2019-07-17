@@ -10,6 +10,7 @@ import {ProjectService} from '../../project/project.service';
 import {Project} from '../../project/project.model';
 import {ScheduledTaskService} from '../scheduled-task.service';
 import {Router} from '@angular/router';
+import {T} from '../../../t.const';
 
 @Component({
   selector: 'dialog-view-task-reminder',
@@ -18,6 +19,7 @@ import {Router} from '@angular/router';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DialogViewTaskReminderComponent implements OnDestroy {
+  T = T;
   task$: Observable<Task> = this._taskService.getById$(this.data.reminder.relatedId);
   task: Task;
   reminder: Reminder = this.data.reminder;

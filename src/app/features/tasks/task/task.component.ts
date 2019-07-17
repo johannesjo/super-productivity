@@ -31,6 +31,7 @@ import {DialogAddTaskReminderComponent} from '../dialog-add-task-reminder/dialog
 import {DialogEditTaskRepeatCfgComponent} from '../../task-repeat-cfg/dialog-edit-task-repeat-cfg/dialog-edit-task-repeat-cfg.component';
 import {ProjectService} from '../../project/project.service';
 import {Project} from '../../project/project.model';
+import {T} from '../../../t.const';
 
 @Component({
   selector: 'task',
@@ -43,6 +44,7 @@ export class TaskComponent implements OnInit, OnDestroy, AfterViewInit {
   @Input() task: TaskWithSubTasks;
   @Input() isBacklog: boolean;
 
+  T = T;
   isDragOver: boolean;
   isCurrent: boolean;
   isTouch: boolean = IS_TOUCH;

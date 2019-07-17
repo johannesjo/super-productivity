@@ -15,6 +15,7 @@ import {standardListAnimation} from '../../../ui/animations/standard-list.ani';
 import {expandFadeFastAnimation} from '../../../ui/animations/expand.ani';
 import {map} from 'rxjs/operators';
 import {filterDoneTasks} from '../filter-done-tasks.pipe';
+import {T} from '../../../t.const';
 
 @Component({
   selector: 'task-list',
@@ -25,6 +26,7 @@ import {filterDoneTasks} from '../filter-done-tasks.pipe';
 
 })
 export class TaskListComponent implements OnDestroy, OnInit {
+  T = T;
   tasks_: TaskWithSubTasks[];
   tasks$: BehaviorSubject<TaskWithSubTasks[]> = new BehaviorSubject([]);
   isHideDone_: boolean;

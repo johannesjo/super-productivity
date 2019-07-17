@@ -2,6 +2,7 @@ import {ChangeDetectionStrategy, Component, Input} from '@angular/core';
 import {Task, TaskWithIssueData} from '../task.model';
 import {getWorklogStr} from '../../../util/get-work-log-str';
 import {TaskService} from '../task.service';
+import {T} from '../../../t.const';
 
 @Component({
   selector: 'task-summary-table',
@@ -12,6 +13,8 @@ import {TaskService} from '../task.service';
 export class TaskSummaryTableComponent {
   @Input() flatTasks: TaskWithIssueData[];
   @Input() day: string = getWorklogStr();
+
+  T = T;
 
   constructor(
     private _taskService: TaskService,
