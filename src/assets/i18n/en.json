@@ -66,6 +66,10 @@
         "IS_SEARCH_ISSUES_FROM_GITHUB": "Show issues from git as suggestions when adding new tasks",
         "REPO": "\"username/repositoryName\" for the git repository you want to track"
       },
+      "FORM_SECTION": {
+        "TITLE": "Github",
+        "HELP": "<p>Here you can configure SuperProductivity to list open GithHub issues for a specific repository in the task creation panel in the daily planning view. They will be listed as suggestions and will provide a link to the issue as well as more information about it.</p> <p>In addition you can automatically add and sync all open issues to your task backlog.</p>"
+      },
       "ISSUE_CONTENT": {
         "ASSIGNEE": "Assignee",
         "AT": "at",

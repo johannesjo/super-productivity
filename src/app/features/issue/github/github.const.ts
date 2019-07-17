@@ -2,8 +2,7 @@
 import {GithubCfg} from './github';
 import {FormlyFieldConfig} from '@ngx-formly/core';
 import {T} from '../../../t.const';
-import {ConfigFormConfig, ConfigFormSection} from '../../config/global-config.model';
-import {GITHUB_TYPE} from '../issue.const';
+import {ConfigFormSection} from '../../config/global-config.model';
 
 export const DEFAULT_GITHUB_CFG: GithubCfg = {
   repo: null,
@@ -55,10 +54,7 @@ export const GITHUB_CONFIG_FORM: FormlyFieldConfig[] = [
 
 export const GITHUB_CONFIG_FORM_SECTION: ConfigFormSection = {
   title: 'Github',
-  key: GITHUB_TYPE,
+  key: 'GITHUB',
   items: GITHUB_CONFIG_FORM,
-  /* tslint:disable */
-  help: `<p>Here you can configure SuperProductivity to list open GithHub issues for a specific repository in the task creation panel in the daily planning view. They will be listed as suggestions and will provide a link to the issue as well as more information about it.</p>
-  <p>In addition you can automatically add and sync all open issues to your task backlog.</p>`,
-  /* tslint:enable */
+  help: T.F.GITHUB.FORM_SECTION.HELP,
 };
