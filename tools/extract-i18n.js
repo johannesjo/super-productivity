@@ -1,8 +1,8 @@
 const fs = require('fs');
-const path = __dirname + '/../src/assets/i18n/en.json';
+const TRANSLATION_SRC = __dirname + '/../src/assets/i18n/en.json';
 
 module.exports = () => {
-  const _tr = fs.readFileSync(path);
+  const _tr = fs.readFileSync(TRANSLATION_SRC);
   const tr = JSON.parse(_tr);
 
   const parse = (o, pref = '') => {
