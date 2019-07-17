@@ -504,6 +504,15 @@
         "SCHEDULE": "Schedule"
       },
       "D_REMINDER_VIEW": {
+        "TITLE": "Scheduled Task",
+        "FOR_CURRENT": "Task is due. Do you want to start working on it?",
+        "FROM_PROJECT": "From Project",
+        "FOR_OTHER": "Task is due. Do you want to start working on it?",
+        "ERR_LOST": "There was a reminder scheduled for the task {{title}}, but it seems to be lost.",
+        "DISMISS": "Dismiss Reminder",
+        "SNOOZE": "Snooze {{time}}",
+        "SWITCH_PROJECT_START": "Switch Project & Start Task",
+        "START": "Start Task"
       },
       "D_TIME": {
       },
