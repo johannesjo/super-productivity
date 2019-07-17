@@ -13,6 +13,7 @@ import {SearchResultItem} from '../issue';
 import {loadFromLs, saveToLs} from '../../../core/persistence/local-storage';
 import {LS_GITHUB_ISSUE_CACHE_PREFIX} from '../../../core/persistence/ls-keys.const';
 import {HANDLED_ERROR} from '../../../app.constants';
+import {T} from '../../../t.const';
 
 const BASE = GITHUB_API_BASE_URL;
 
@@ -164,7 +165,11 @@ export class GithubApiService {
 
   private _checkSettings() {
     if (!this._isValidSettings()) {
-      this._snackService.open({type: 'ERROR', msg: 'Github is not properly configured'});
+      this._snackService.open({
+        type: 'ERROR',
+        isTranslate: true,
+        msg: T.F.GITHUB.SNACK.ERR_NOT_CONFIGURED
+      });
       throw new Error(`${HANDLED_ERROR} Not enough settings`);
     }
   }
@@ -175,13 +180,18 @@ export class GithubApiService {
       // A client-side or network error occurred. Handle it accordingly.
       this._snackService.open({
         type: 'ERROR',
-        msg: 'Github: Request failed because of a client side network error'
+        isTranslate: true,
+        msg: T.F.GITHUB.SNACK.ERR_NETWORK,
       });
     } else {
       // The backend returned an unsuccessful response code.
       this._snackService.open({
         type: 'ERROR',
-        msg: `Github: API returned ${error.status}. ${error.error && error.error.message}`
+        translateParams: {
+          statusCode: error.status,
+          errorMsg: error.error && error.error.message,
+        },
+        msg: T.F.GITHUB.SNACK.ERR_NOT_CONFIGURED,
       });
     }
     if (error && error.message) {
