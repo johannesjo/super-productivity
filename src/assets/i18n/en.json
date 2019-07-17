@@ -262,6 +262,16 @@
         "REMOTE_UP_TO_DATE": "Google Drive: Remote data already up to date",
         "SUCCESS": "Google Drive: Successfully saved backup",
         "SYNCING": "Google Drive: Syncing"
+      },
+      "SNACK_API": {
+        "SUCCESS_LOGIN": "GoogleApi: Login successful",
+        "ERR_NO_FILE_ID": "GoogleApi: No file id specified",
+        "ERR_NO_FILE_NAME": "GoogleApi: No file name specified",
+        "ERR": "GoogleApi Error: {{errStr}}"
+      },
+      "BANNER": {
+        "AUTH_FAIL": "GoogleApi: Failed to authenticate please try logging in again!",
+        "LOGIN": "Login"
       }
     }
   },

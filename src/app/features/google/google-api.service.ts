@@ -18,6 +18,7 @@ import {
 import {ElectronService} from 'ngx-electron';
 import {BannerService} from '../../core/banner/banner.service';
 import {BannerId} from '../../core/banner/banner.model';
+import {T} from '../../t.const';
 
 const EXPIRES_SAFETY_MARGIN = 5 * 60 * 1000;
 
@@ -78,7 +79,7 @@ export class GoogleApiService {
   login(isSkipSuccessMsg = false): Promise<any> {
     const showSuccessMsg = () => {
       if (!(isSkipSuccessMsg)) {
-        this._snackIt('SUCCESS', 'GoogleApi: Login successful');
+        this._snackIt('SUCCESS', T.F.GOOGLE.SNACK_API.SUCCESS_LOGIN);
       }
     };
 
@@ -202,7 +203,7 @@ export class GoogleApiService {
 
   getFileInfo$(fileId): Observable<any> {
     if (!fileId) {
-      this._snackIt('ERROR', 'GoogleApi: No file id specified');
+      this._snackIt('ERROR', T.F.GOOGLE.SNACK_API.ERR_NO_FILE_ID);
       throwError({handledError: 'No file id given'});
     }
 
@@ -219,7 +220,7 @@ export class GoogleApiService {
 
   findFile$(fileName): Observable<any> {
     if (!fileName) {
-      this._snackIt('ERROR', 'GoogleApi: No file name specified');
+      this._snackIt('ERROR', T.F.GOOGLE.SNACK_API.ERR_NO_FILE_NAME);
       return throwError({handledError: 'No file name given'});
     }
 
@@ -237,7 +238,7 @@ export class GoogleApiService {
   // NOTE: file will always be returned as text (makes sense)
   loadFile$(fileId): Observable<any> {
     if (!fileId) {
-      this._snackIt('ERROR', 'GoogleApi: No file id specified');
+      this._snackIt('ERROR', T.F.GOOGLE.SNACK_API.ERR_NO_FILE_ID);
       throwError({handledError: 'No file id given'});
     }
 
@@ -358,11 +359,11 @@ export class GoogleApiService {
   private _handleUnAuthenticated(err) {
     this.logout();
     this._bannerService.open({
-      msg: 'GoogleApi: Failed to authenticate please try logging in again!',
+      msg: T.F.GOOGLE.BANNER.AUTH_FAIL,
       ico: 'cloud_off',
       id: BannerId.GoogleLogin,
       action: {
-        label: 'Login',
+        label: T.F.GOOGLE.BANNER.LOGIN,
         fn: () => this.login()
       }
     });
@@ -386,14 +387,16 @@ export class GoogleApiService {
       this._handleUnAuthenticated(err);
     } else {
       console.warn(err);
-      this._snackIt('ERROR', 'GoogleApi Error' + errStr);
+      this._snackIt('ERROR', T.F.GOOGLE.SNACK_API.ERR, {errStr});
     }
   }
 
-  private _snackIt(snackType: SnackType, msg: string) {
+  private _snackIt(type: SnackType, msg: string, translateParams = null) {
     this._snackService.open({
-      msg: msg,
-      type: snackType,
+      isTranslate: true,
+      msg,
+      type,
+      translateParams,
     });
   }
 
