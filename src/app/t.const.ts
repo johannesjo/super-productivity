@@ -34,6 +34,11 @@ export const T = {
       'NOTES_CMP': {
         'DROP_TO_ADD': 'F.NOTE.NOTES_CMP.DROP_TO_ADD',
         'ADD_BTN': 'F.NOTE.NOTES_CMP.ADD_BTN'
+      },
+      'SNACK': {
+        'ADDED_REMINDER': 'F.NOTE.SNACK.ADDED_REMINDER',
+        'UPDATED_REMINDER': 'F.NOTE.SNACK.UPDATED_REMINDER',
+        'DELETED_REMINDER': 'F.NOTE.SNACK.DELETED_REMINDER'
       }
     },
     'METRIC': {

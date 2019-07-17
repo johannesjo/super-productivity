@@ -4,7 +4,6 @@ import {Note} from '../note.model';
 import {NoteService} from '../note.service';
 import {ReminderCopy} from '../../reminder/reminder.model';
 import {ReminderService} from '../../reminder/reminder.service';
-import {SnackService} from '../../../core/snack/snack.service';
 import {T} from '../../../t.const';
 
 @Component({
@@ -24,7 +23,6 @@ export class DialogAddNoteReminderComponent {
 
   constructor(
     private _noteService: NoteService,
-    private _snackService: SnackService,
     private _reminderService: ReminderService,
     private _matDialogRef: MatDialogRef<DialogAddNoteReminderComponent>,
     @Inject(MAT_DIALOG_DATA) public data: { note: Note },
