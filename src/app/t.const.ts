@@ -492,6 +492,24 @@ export const T = {
       'D_CONFIRM_REMOVE': {
         'MSG': 'F.TASK_REPEAT.D_CONFIRM_REMOVE.MSG',
         'OK': 'F.TASK_REPEAT.D_CONFIRM_REMOVE.OK'
+      },
+      'D_EDIT': {
+        'ADD': 'F.TASK_REPEAT.D_EDIT.ADD',
+        'EDIT': 'F.TASK_REPEAT.D_EDIT.EDIT',
+        'HELP1': 'F.TASK_REPEAT.D_EDIT.HELP1',
+        'HELP2': 'F.TASK_REPEAT.D_EDIT.HELP2',
+        'HELP3': 'F.TASK_REPEAT.D_EDIT.HELP3'
+      },
+      'F': {
+        'TITLE': 'F.TASK_REPEAT.F.TITLE',
+        'DEFAULT_ESTIMATE': 'F.TASK_REPEAT.F.DEFAULT_ESTIMATE',
+        'MONDAY': 'F.TASK_REPEAT.F.MONDAY',
+        'TUESDAY': 'F.TASK_REPEAT.F.TUESDAY',
+        'WEDNESDAY': 'F.TASK_REPEAT.F.WEDNESDAY',
+        'THURSDAY': 'F.TASK_REPEAT.F.THURSDAY',
+        'FRIDAY': 'F.TASK_REPEAT.F.FRIDAY',
+        'SATURDAY': 'F.TASK_REPEAT.F.SATURDAY',
+        'SUNDAY': 'F.TASK_REPEAT.F.SUNDAY'
       }
     },
     'WORKLOG': {
@@ -609,6 +627,7 @@ export const T = {
     'CANCEL': 'G.CANCEL',
     'CLOSE': 'G.CLOSE',
     'DELETE': 'G.DELETE',
+    'REMOVE': 'G.REMOVE',
     'DISMISS': 'G.DISMISS',
     'DO_IT': 'G.DO_IT',
     'LOGIN': 'G.LOGIN',

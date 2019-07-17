@@ -492,6 +492,24 @@
       "D_CONFIRM_REMOVE": {
         "MSG": "Removing the repeat config will convert all previous instances of this task to just regular tasks. Are you sure you want to proceed",
         "OK": "Remove completely"
+      },
+      "D_EDIT": {
+        "ADD": "Add Repeat Task Config",
+        "EDIT": "Edit Repeat Task Config",
+        "HELP1": "Repeating tasks are meant for daily chores, e.g.: \"Organization\", \"Daily Meeting\", \"Code Review\", \"Checking emails\" or similar tasks which are likely to occur again and again.",
+        "HELP2": "Once configured a repeating task will be recreated on every day selected below as soon as you open your project and will be automatically marked as completed at the end of the day. They will be handled as different instances. So you can freely add sub tasks etc.",
+        "HELP3": "Tasks imported from Jira or Git Issues cannot be repeated. All reminders will also be deleted on a repeating task."
+      },
+      "F": {
+        "TITLE": "Title for task",
+        "DEFAULT_ESTIMATE": "Default Estimate",
+        "MONDAY": "Monday",
+        "TUESDAY": "Tuesday",
+        "WEDNESDAY": "Wednesday",
+        "THURSDAY": "Thursday",
+        "FRIDAY": "Friday",
+        "SATURDAY": "Saturday",
+        "SUNDAY": "Sunday"
       }
     },
     "WORKLOG": {
@@ -609,6 +627,7 @@
     "CANCEL": "Cancel",
     "CLOSE": "Close",
     "DELETE": "Delete",
+    "REMOVE": "Remove",
     "DISMISS": "Dismiss",
     "DO_IT": "Do it!",
     "LOGIN": "Login",
