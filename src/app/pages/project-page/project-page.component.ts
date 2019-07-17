@@ -72,7 +72,7 @@ export class ProjectPageComponent implements OnInit, OnDestroy {
         project = JSON.parse(textData.toString());
         this.projectService.importCompleteProject(project);
       } catch (e) {
-        this._snackService.open({type: 'ERROR', msg: 'Invalid json for project file'});
+        this._snackService.open({type: 'ERROR', msg: T.PP.SNACK_INVALID_JSON});
       }
     };
     reader.readAsText(file);
@@ -89,11 +89,8 @@ export class ProjectPageComponent implements OnInit, OnDestroy {
     this._matDialog.open(DialogConfirmComponent, {
       restoreFocus: true,
       data: {
-        okTxt: 'Archive',
-        cancelTxt: 'Cancel',
-        message: `Are you sure you want to archive this project?
-        Archived Projects will not be shown in the menu any more and you can't access any of their data without restoring them.
-        It's recommended that you backup your data before you do this.`,
+        okTxt: T.PP.D_CONFIRM_ARCHIVE.OK,
+        message: T.PP.D_CONFIRM_ARCHIVE.MSG,
       }
     }).afterClosed()
       .subscribe((isConfirm: boolean) => {
@@ -107,9 +104,8 @@ export class ProjectPageComponent implements OnInit, OnDestroy {
     this._matDialog.open(DialogConfirmComponent, {
       restoreFocus: true,
       data: {
-        okTxt: 'Unarchive',
-        cancelTxt: 'Cancel',
-        message: `Are you sure you want to unarchive this project?`,
+        okTxt: T.PP.D_CONFIRM_UNARCHIVE.OK,
+        message: T.PP.D_CONFIRM_UNARCHIVE.MSG,
       }
     }).afterClosed()
       .subscribe((isConfirm: boolean) => {
@@ -123,9 +119,8 @@ export class ProjectPageComponent implements OnInit, OnDestroy {
     this._matDialog.open(DialogConfirmComponent, {
       restoreFocus: true,
       data: {
-        okTxt: 'Delete',
-        cancelTxt: 'Cancel',
-        message: `Are you sure you want to delete this project? It's recommended to backup your data before you do this.`,
+        okTxt: T.PP.D_CONFIRM_DELETE.OK,
+        message: T.PP.D_CONFIRM_DELETE.MSG,
       }
     }).afterClosed()
       .subscribe((isConfirm: boolean) => {

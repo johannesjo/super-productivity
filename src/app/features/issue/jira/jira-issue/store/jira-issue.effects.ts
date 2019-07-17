@@ -185,9 +185,12 @@ export class JiraIssueEffects {
           return this._matDialog.open(DialogConfirmComponent, {
             restoreFocus: true,
             data: {
-              okTxt: 'Do it!',
-              // tslint:disable-next-line
-              message: `<strong>${issue.summary}</strong> is currently assigned to <strong>${assignee ? assignee.displayName : 'nobody'}</strong>. Do you want to assign it to yourself?`,
+              okTxt: T.F.JIRA.DIALOG_CONFIRM_ASSIGNMENT.OK,
+              translateParams:{
+                summary: issue.summary,
+                assignee: assignee ? assignee.displayName : 'nobody'
+              },
+              message: T.F.JIRA.DIALOG_CONFIRM_ASSIGNMENT,
             }
           }).afterClosed()
             .pipe(

@@ -186,9 +186,9 @@ export class DailySummaryComponent implements OnInit, OnDestroy {
       this._matDialog.open(DialogConfirmComponent, {
         restoreFocus: true,
         data: {
-          okTxt: 'Aye aye! Shutdown!',
-          cancelTxt: 'No, just clear the tasks',
-          message: `You work is done. Time to go home!`,
+          okTxt: T.PDS.D_CONFIRM_APP_CLOSE.OK,
+          cancelTxt: T.PDS.D_CONFIRM_APP_CLOSE.CANCEL,
+          message: T.PDS.D_CONFIRM_APP_CLOSE.MSG,
         }
       }).afterClosed()
         .subscribe((isConfirm: boolean) => {

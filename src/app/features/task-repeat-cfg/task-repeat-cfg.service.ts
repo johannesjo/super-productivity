@@ -19,6 +19,7 @@ import shortid from 'shortid';
 import {PersistenceService} from '../../core/persistence/persistence.service';
 import {DialogConfirmComponent} from '../../ui/dialog-confirm/dialog-confirm.component';
 import {MatDialog} from '@angular/material';
+import {T} from '../../t.const';
 
 @Injectable({
   providedIn: 'root',
@@ -76,10 +77,8 @@ export class TaskRepeatCfgService {
     this._matDialog.open(DialogConfirmComponent, {
       restoreFocus: true,
       data: {
-        // tslint:disable-next-line
-        message: `Removing the repeat config will convert all previous instances of this task to just regular tasks. Are you sure you want to proceed`,
-        okTxt: 'Remove completely',
-        cancelTxt: 'Abort!',
+        message: T.F.TASK_REPEAT.D_CONFIRM_REMOVE.MSG,
+        okTxt: T.F.TASK_REPEAT.D_CONFIRM_REMOVE.OK,
       }
     }).afterClosed()
       .subscribe((isConfirm: boolean) => {

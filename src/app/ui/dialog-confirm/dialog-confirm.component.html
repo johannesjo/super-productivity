@@ -1,9 +1,5 @@
 <mat-dialog-content>
-  <div [innerHtml]="data.message"
-       *ngIf="!data.isTranslate"
-       class="content"></div>
-  <div [innerHtml]="data.message"
-       *ngIf="data.isTranslate|translate:data.translateParams"
+  <div [innerHtml]="data.message|translate:data.translateParams"
        class="content"></div>
 </mat-dialog-content>
 
@@ -14,7 +10,7 @@
             mat-button
             type="button">
       <mat-icon>close</mat-icon>
-      {{T.G.CANCEL|translate}}
+      {{(data.cancelTxt || T.G.CANCEL)|translate}}
     </button>
 
     <button (click)="close(true)"
@@ -22,7 +18,7 @@
             color="primary"
             mat-stroked-button>
       <mat-icon>check</mat-icon>
-      {{T.G.OK|translate}}
+      {{(data.okTxt || T.G.OK)|translate}}
     </button>
   </div>
 </mat-dialog-actions>

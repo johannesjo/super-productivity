@@ -446,7 +446,8 @@ export class GoogleDriveSyncEffects {
     return this._matDialog.open(DialogConfirmComponent, {
       restoreFocus: true,
       data: {
-        message: this._translateService.instant(T.F.GOOGLE.DIALOG.CREATE_SYNC_FILE, {fileName}),
+        message: T.F.GOOGLE.DIALOG.CREATE_SYNC_FILE,
+        translateParams: {fileName},
       }
     }).afterClosed();
   }
@@ -455,7 +456,8 @@ export class GoogleDriveSyncEffects {
     return this._matDialog.open(DialogConfirmComponent, {
       restoreFocus: true,
       data: {
-        message: this._translateService.instant(T.F.GOOGLE.DIALOG.USE_EXISTING_SYNC_FILE, {fileName}),
+        message: T.F.GOOGLE.DIALOG.USE_EXISTING_SYNC_FILE,
+        translateParams: {fileName},
       }
     }).afterClosed();
   }
