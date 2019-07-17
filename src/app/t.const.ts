@@ -26,6 +26,14 @@ export const T = {
       'D_VIEW_REMINDER': {
         'TITLE': 'F.NOTE.D_VIEW_REMINDER.TITLE',
         'SNOOZE': 'F.NOTE.D_VIEW_REMINDER.SNOOZE'
+      },
+      'NOTE_CMP': {
+        'ENABLE_PARSE': 'F.NOTE.NOTE_CMP.ENABLE_PARSE',
+        'DISABLE_PARSE': 'F.NOTE.NOTE_CMP.DISABLE_PARSE'
+      },
+      'NOTES_CMP': {
+        'DROP_TO_ADD': 'F.NOTE.NOTES_CMP.DROP_TO_ADD',
+        'ADD_BTN': 'F.NOTE.NOTES_CMP.ADD_BTN'
       }
     },
     'METRIC': {

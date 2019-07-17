@@ -26,9 +26,16 @@
       "D_VIEW_REMINDER": {
         "TITLE": "Note",
         "SNOOZE": "Snooze for {{time}}"
+      },
+      "NOTE_CMP": {
+        "ENABLE_PARSE": "Enable markdown parse",
+        "DISABLE_PARSE": "Disable markdown parsing"
+      },
+      "NOTES_CMP": {
+        "DROP_TO_ADD": "Drop here to add new note",
+        "ADD_BTN": "Add new Note"
       }
     },
-
     "METRIC": {
       "EVAL_FORM": {
         "HELP_P1": "Time for a little self evaluation! Your answers here are saved and provide you with a little bit of statistics on how you work in the metrics section. Furthermore the suggestions for tomorrow will appear above your task list the next day.",

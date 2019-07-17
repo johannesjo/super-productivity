@@ -20,7 +20,6 @@ import {initialNoteState, NoteState, selectAllNotes, selectIsShowNotes, selectNo
 import {PersistenceService} from '../../core/persistence/persistence.service';
 import {Actions, ofType} from '@ngrx/effects';
 import {take} from 'rxjs/operators';
-import {SnackService} from '../../core/snack/snack.service';
 import {createFromDrop, DropPasteInput} from '../../core/drop-paste-input/drop-paste-input';
 import {isImageUrl, isImageUrlSimple} from '../../util/is-image-url';
 
@@ -35,7 +34,6 @@ export class NoteService {
   constructor(
     private _store$: Store<any>,
     private _persistenceService: PersistenceService,
-    private _snackService: SnackService,
     private _actions$: Actions,
   ) {
   }

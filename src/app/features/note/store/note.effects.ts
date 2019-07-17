@@ -16,6 +16,7 @@ import {
 import {selectNoteFeatureState} from './note.reducer';
 import {ReminderService} from '../../reminder/reminder.service';
 import {SnackOpen} from '../../../core/snack/store/snack.actions';
+import {T} from '../../../t.const';
 
 @Injectable()
 export class NoteEffects {

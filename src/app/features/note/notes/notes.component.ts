@@ -8,6 +8,7 @@ import {DialogAddNoteComponent} from '../dialog-add-note/dialog-add-note.compone
 import {standardListAnimation} from '../../../ui/animations/standard-list.ani';
 import {fadeAnimation} from '../../../ui/animations/fade.ani';
 import {Note} from '../note.model';
+import {T} from '../../../t.const';
 
 @Component({
   selector: 'notes',
@@ -18,6 +19,7 @@ import {Note} from '../note.model';
 
 })
 export class NotesComponent implements OnInit, OnDestroy {
+  T = T;
   isElementWasAdded = false;
   isDragOver = false;
   dragEnterTarget: HTMLElement;
