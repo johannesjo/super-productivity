@@ -21,6 +21,7 @@ import {NotifyService} from '../../../core/notify/notify.service';
 import {IS_ELECTRON} from '../../../app.constants';
 import {IPC_SET_PROGRESS_BAR} from '../../../../../electron/ipc-events.const';
 import {ElectronService} from 'ngx-electron';
+import {T} from '../../../t.const';
 
 const isEnabled = ([action, cfg, ...v]) => cfg && cfg.isEnabled;
 
@@ -142,17 +143,18 @@ export class PomodoroEffects {
       // TODO only notify if window is not currently focused
       this._notifyService.notifyDesktop({
         title: isBreak
-          ? `Pomodoro: Break ${currentCycle + 1} started!`
-          : `Pomodoro: Session ${currentCycle + 1} started!`
+          ? T.F.POMODORO.NOTIFICATION.BREAK_X_START
+          : T.F.POMODORO.NOTIFICATION.SESSION_X_START,
+        translateParams: {nr: `${currentCycle + 1}`}
       })),
     filter(([action, isBreak, isPause, currentCycle]: [FinishPomodoroSession, boolean, boolean, number]) =>
       !isBreak && !isPause
     ),
     map(([action, isBreak, isPause, currentCycle]: [FinishPomodoroSession, boolean, boolean, number]) => {
-      const cycle = currentCycle + 1;
       return new SnackOpen({
         ico: 'timer',
-        msg: `Pomodoro: Session ${cycle} started!`,
+        msg: T.F.POMODORO.NOTIFICATION.SESSION_X_START,
+        translateParams: {nr: `${currentCycle + 1}`}
       });
     }),
   );

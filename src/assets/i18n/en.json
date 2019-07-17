@@ -41,6 +41,20 @@
         "DELETED_REMINDER": "Deleted reminder for note"
       }
     },
+    "POMODORO": {
+      "FINISH_SESSION_X": "You successfully finished session <strong>{{nr}}</strong>!",
+      "BACK_TO_WORK": "Back to work!",
+      "SKIP_BREAK": "Skip break",
+      "ENJOY_YOURSELF": "Enjoy yourself, get yourself moving, come back in:",
+      "BREAK_IS_DONE": "Your break is done!",
+      "NOTIFICATION": {
+        "BREAK_X_START": "Pomodoro: Break {{nr}} started!",
+        "SESSION_X_START": "Pomodoro: Session {{nr}} started!"
+      },
+      "SNACK": {
+        "SESSION_X_START": "Pomodoro: Session {{nr}} started!"
+      }
+    },
     "METRIC": {
       "EVAL_FORM": {
         "HELP_P1": "Time for a little self evaluation! Your answers here are saved and provide you with a little bit of statistics on how you work in the metrics section. Furthermore the suggestions for tomorrow will appear above your task list the next day.",
@@ -466,6 +480,7 @@
   },
   "G": {
     "CANCEL": "Cancel",
+    "CLOSE": "Close",
     "DISMISS": "Dismiss",
     "DO_IT": "Do it!",
     "OK": "Ok",

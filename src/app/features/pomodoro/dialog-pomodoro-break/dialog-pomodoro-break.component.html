@@ -1,12 +1,11 @@
 <div mat-dialog-content>
   <div *ngIf="!(isBreakDone$|async)">
-    <p>You successfully finished session
-      <strong>{{(currentCycle$|async) + 1}}</strong>!</p>
-    <p>Enjoy yourself, get yourself moving, come back in:</p>
+    <p [innerHTML]="T.F.POMODORO.FINISH_SESSION_X|translate:{nr: (currentCycle$|async) + 1}"></p>
+    <p>{{T.F.POMODORO.ENJOY_YOURSELF|translate}}</p>
   </div>
 
   <div *ngIf="(isBreakDone$|async)">
-    <p>Your break is done!</p>
+    <p>{{T.F.POMODORO.BREAK_IS_DONE|translate}}</p>
   </div>
 
   <div class="timer">{{currentTime$|async|msToMinuteClockString}}</div>
@@ -18,7 +17,7 @@
   <button (click)="nextSession(true)"
           color="primary"
           mat-button>
-    Close
+    {{T.G.CLOSE|translate}}
   </button>
 
   <button (click)="nextSession()"
@@ -26,7 +25,7 @@
           color="primary"
           mat-stroked-button>
     <mat-icon>skip_next</mat-icon>
-    <span>Skip break</span>
+    <span>{{T.F.POMODORO.SKIP_BREAK|translate}}</span>
   </button>
 
   <ng-container *ngIf="(isBreakDone$|async)">
@@ -34,7 +33,7 @@
             color="primary"
             mat-stroked-button>
       <mat-icon>play_arrow</mat-icon>
-      Back to work!
+      {{T.F.POMODORO.BACK_TO_WORK|translate}}
     </button>
 
   </ng-container>

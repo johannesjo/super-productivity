@@ -3,6 +3,7 @@ import {MatDialogRef} from '@angular/material/dialog';
 import {PomodoroService} from '../pomodoro.service';
 import {filter, mapTo, takeUntil, withLatestFrom} from 'rxjs/operators';
 import {Observable, Subject, Subscription} from 'rxjs';
+import {T} from '../../../t.const';
 
 @Component({
   selector: 'dialog-pomodoro-break',
@@ -11,6 +12,7 @@ import {Observable, Subject, Subscription} from 'rxjs';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DialogPomodoroBreakComponent {
+  T = T;
   isStopCurrentTime$ = new Subject();
   currentTime$: Observable<number> = this.pomodoroService.currentSessionTime$.pipe(
     takeUntil(this.isStopCurrentTime$),

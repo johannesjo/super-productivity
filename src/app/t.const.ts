@@ -41,6 +41,20 @@ export const T = {
         'DELETED_REMINDER': 'F.NOTE.SNACK.DELETED_REMINDER'
       }
     },
+    'POMODORO': {
+      'FINISH_SESSION_X': 'F.POMODORO.FINISH_SESSION_X',
+      'BACK_TO_WORK': 'F.POMODORO.BACK_TO_WORK',
+      'SKIP_BREAK': 'F.POMODORO.SKIP_BREAK',
+      'ENJOY_YOURSELF': 'F.POMODORO.ENJOY_YOURSELF',
+      'BREAK_IS_DONE': 'F.POMODORO.BREAK_IS_DONE',
+      'NOTIFICATION': {
+        'BREAK_X_START': 'F.POMODORO.NOTIFICATION.BREAK_X_START',
+        'SESSION_X_START': 'F.POMODORO.NOTIFICATION.SESSION_X_START'
+      },
+      'SNACK': {
+        'SESSION_X_START': 'F.POMODORO.SNACK.SESSION_X_START'
+      }
+    },
     'METRIC': {
       'EVAL_FORM': {
         'HELP_P1': 'F.METRIC.EVAL_FORM.HELP_P1',
@@ -465,6 +479,7 @@ export const T = {
   },
   'G': {
     'CANCEL': 'G.CANCEL',
+    'CLOSE': 'G.CLOSE',
     'DISMISS': 'G.DISMISS',
     'DO_IT': 'G.DO_IT',
     'OK': 'G.OK',
