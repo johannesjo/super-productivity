@@ -66,7 +66,8 @@
       <button [mat-dialog-close]="true"
               color="primary"
               type="button"
-              mat-button>Cancel
+              mat-button>
+        {{T.G.CANCEL|translate}}
       </button>
 
       <button (click)="submit()"
@@ -74,7 +75,7 @@
               color="primary"
               mat-stroked-button>
         <mat-icon>save</mat-icon>
-        Save
+        {{T.G.SAVE|translate}}
       </button>
     </mat-dialog-actions>
 

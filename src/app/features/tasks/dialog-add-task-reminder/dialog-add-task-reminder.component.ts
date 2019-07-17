@@ -66,10 +66,4 @@ export class DialogAddTaskReminderComponent {
   close() {
     this._matDialogRef.close();
   }
-
-  // TODO check why we're off by one hour
-  private _convertDate(date: Date): string {
-    const isoStr = date.toISOString();
-    return isoStr.substring(0, isoStr.length - 1);
-  }
 }

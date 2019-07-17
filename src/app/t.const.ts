@@ -488,6 +488,29 @@ export const T = {
       'TIME_SPENT': 'F.SIMPLE_TASK_EXPORT.TIME_SPENT',
       'TITLE': 'F.SIMPLE_TASK_EXPORT.TITLE'
     },
+    'TASK': {
+      'ADD_TASK_BAR': {
+        'START': 'F.TASK.ADD_TASK_BAR.START',
+        'SELECT_OR_CREATE': 'F.TASK.ADD_TASK_BAR.SELECT_OR_CREATE'
+      },
+      'ADDITIONAL_INFO': {},
+      'D_REMINDER_ADD': {
+        'EDIT': 'F.TASK.D_REMINDER_ADD.EDIT',
+        'ADD': 'F.TASK.D_REMINDER_ADD.ADD',
+        'DATETIME_FOR': 'F.TASK.D_REMINDER_ADD.DATETIME_FOR',
+        'MOVE_TO_BACKLOG': 'F.TASK.D_REMINDER_ADD.MOVE_TO_BACKLOG',
+        'UNSCHEDULE': 'F.TASK.D_REMINDER_ADD.UNSCHEDULE',
+        'SCHEDULE': 'F.TASK.D_REMINDER_ADD.SCHEDULE'
+      },
+      'D_REMINDER_VIEW': {},
+      'D_TIME': {},
+      'D_TIME_FOR_DAY': {},
+      'SELECT_TASK': {},
+      'SNACK': {},
+      'TASK_LIST': {},
+      'TASK': {},
+      'SUMMARY_TABLE': {}
+    },
     'TASK_REPEAT': {
       'D_CONFIRM_REMOVE': {
         'MSG': 'F.TASK_REPEAT.D_CONFIRM_REMOVE.MSG',
@@ -636,6 +659,7 @@ export const T = {
     'OK': 'G.OK',
     'PREVIOUS': 'G.PREVIOUS',
     'SAVE': 'G.SAVE',
+    'UPDATE': 'G.UPDATE',
     'TITLE': 'G.TITLE'
   },
   'MH': {

@@ -490,8 +490,34 @@
     },
     "TASK": {
       "ADD_TASK_BAR": {
-        "PRESS_ENTER": "Press enter one more time to start",
+        "START": "Press enter one more time to start",
         "SELECT_OR_CREATE": "Select or create task"
+      },
+      "ADDITIONAL_INFO": {
+      },
+      "D_REMINDER_ADD": {
+        "EDIT": "Edit Reminder",
+        "ADD": "Schedule Task",
+        "DATETIME_FOR": "Datetime for reminder",
+        "MOVE_TO_BACKLOG": "Move task to backlog until scheduled",
+        "UNSCHEDULE": "Unschedule",
+        "SCHEDULE": "Schedule"
+      },
+      "D_REMINDER_VIEW": {
+      },
+      "D_TIME": {
+      },
+      "D_TIME_FOR_DAY": {
+      },
+      "SELECT_TASK": {
+      },
+      "SNACK": {
+      },
+      "TASK_LIST": {
+      },
+      "TASK": {
+      },
+      "SUMMARY_TABLE": {
       }
     },
     "TASK_REPEAT": {
@@ -642,6 +668,7 @@
     "OK": "Ok",
     "PREVIOUS": "Previous",
     "SAVE": "Save",
+    "UPDATE": "UPDATE",
     "TITLE": "Title"
   },
   "MH": {

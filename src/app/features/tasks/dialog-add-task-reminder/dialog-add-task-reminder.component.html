@@ -1,5 +1,7 @@
 <form (submit)="save()">
-  <h1 mat-dialog-title>{{isEdit ? 'Edit Reminder' : 'Schedule Task'}}</h1>
+  <h1 mat-dialog-title>{{isEdit
+    ? (T.F.TASK.D_REMINDER_ADD.EDIT|translate)
+    : (T.F.TASK.D_REMINDER_ADD.ADD|translate)}}</h1>
 
   <mat-dialog-content>
     <h3 class="mat-h3">"{{task.title}}"</h3>
@@ -9,13 +11,13 @@
                       [model]="dateTime"
                       [required]="true"
                       name="reminderDate"
-                      placeholder="Datetime for reminder"></datetime-input>
+                      [placeholder]="T.F.TASK.D_REMINDER_ADD.DATETIME_FOR|translate"></datetime-input>
 
       <div *ngIf="isMoveToBacklogPossible"
            style="margin: 16px 0;">
         <mat-checkbox [(ngModel)]="isMoveToBacklog"
                       name="isListSubTasks">
-          Move task to backlog until scheduled
+          {{T.F.TASK.D_REMINDER_ADD.MOVE_TO_BACKLOG|translate}}
         </mat-checkbox>
       </div>
     </div>
@@ -28,7 +30,7 @@
               mat-button
               type="button">
         <mat-icon>close</mat-icon>
-        Cancel
+        {{T.G.CANCEL|translate}}
       </button>
 
       <button (click)="remove()"
@@ -37,7 +39,7 @@
               mat-stroked-button
               type="button">
         <mat-icon>alarm_off</mat-icon>
-        Unschedule
+        {{T.F.TASK.D_REMINDER_ADD.UNSCHEDULE|translate}}
       </button>
 
       <button [disabled]="!dateTime"
@@ -46,11 +48,11 @@
               type="submit">
         <ng-container *ngIf="!task.reminderId">
           <mat-icon>alarm_add</mat-icon>
-          Schedule
+          {{T.F.TASK.D_REMINDER_ADD.SCHEDULE|translate}}
         </ng-container>
         <ng-container *ngIf="task.reminderId">
           <mat-icon>alarm</mat-icon>
-          Update
+          {{T.G.UPDATE|translate}}
         </ng-container>
       </button>
     </div>
