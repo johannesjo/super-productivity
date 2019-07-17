@@ -100,9 +100,6 @@
       ],
       "publish": [
         "github"
-      ],
-      "depends": [
-        "xprintidle"
       ]
     },
     "snap": {
