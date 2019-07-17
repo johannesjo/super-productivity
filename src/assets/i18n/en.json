@@ -494,6 +494,10 @@
         "START": "Press enter one more time to start"
       },
       "ADDITIONAL_INFO": {
+        "NOTES": "Notes",
+        "ATTACHMENTS": "Attachments {{nr}}",
+        "ISSUE_TYPE_ATTACHMENTS": "{{issueType}} Attachments",
+        "LOCAL_ATTACHMENTS": "Local Attachments"
       },
       "D_REMINDER_ADD": {
         "EDIT": "Edit Reminder",
