@@ -6,6 +6,10 @@
     "SCHEDULED": "予定",
     "TITLE": "バックログ"
   },
+  "DATETIME_INPUT": {
+    "IN": " {{time}}に",
+    "TOMORROW": "明日 {{time}}"
+  },
   "F": {
     "ATTACHMENT": {
       "DIALOG_EDIT": {
@@ -66,6 +70,10 @@
         "IS_SEARCH_ISSUES_FROM_GITHUB": "新しいタスクを追加するときにgitからの問題を提案として表示する",
         "REPO": "追跡したいgitリポジトリの \"username / repositoryName\""
       },
+      "FORM_SECTION": {
+        "HELP": "<p>ここでは、毎日の計画ビューのタスク作成パネルに、特定のリポジトリの未解決のGithHub issueを一覧表示するようにSuperProductivityを設定できます。それらは提案としてリストされ、問題へのリンクとそれに関する詳細情報を提供します。</p> <p>さらに、未解決の課題をすべて自動的にタスクバックログに追加して同期することができます。</p>",
+        "TITLE": "Github"
+      },
       "ISSUE_CONTENT": {
         "ASSIGNEE": "譲受人",
         "AT": "で",
@@ -77,6 +85,9 @@
         "WRITE_A_COMMENT": "コメントを書く"
       },
       "SNACK": {
+        "ERR_NETWORK": "Github：クライアント側のネットワークエラーが原因で要求が失敗しました",
+        "ERR_NOT_CONFIGURED": "Github：正しく設定されていません",
+        "ERR_REQUEST": "Github：APIが {{statusCode}}を返しました。 {{errorMsg}}",
         "IMPORTED_MULTIPLE_ISSUES": "Github：gitからバックログに {{issuesLength}} 件の新しい問題をインポートしました",
         "IMPORTED_SINGLE_ISSUE": "Github：gitからバックログへの問題 \"{{issueText}}\"のインポート",
         "ISSUE_DELETED_OR_CLOSED": "Github：課題 \"{{issueText}}\"がgitで削除されたか終了したようです",
@@ -89,6 +100,9 @@
       }
     },
     "GOOGLE": {
+      "BANNER": {
+        "AUTH_FAIL": "GoogleApi：認証に失敗しましたもう一度ログインしてください。"
+      },
       "DIALOG": {
         "CREATE_SYNC_FILE": "Googleドライブ： <strong>\"{{fileName}}\"</strong> という名前のファイルが見つかりませんでした。 <strong>Googleドライブに同期ファイルとして</strong> を作成しますか？",
         "USE_EXISTING_SYNC_FILE": "Googleドライブ：同期ファイルとして <strong>既存の</strong> ファイル <strong>\"{{fileName}}\"</strong> を使用しますか？そうでない場合は、同期ファイル名を変更してください。"
@@ -124,6 +138,7 @@
         "LOGIN": "Googleにログイン",
         "LOGOUT": "ログアウト",
         "OPEN_SPREADSHEET": "スプレッドシートを開く",
+        "OPTIONS": "オプション",
         "READ_SPREADSHEET": "スプレッドシートを読む",
         "ROUND_END_TIME_TO": "ラウンド終了時間",
         "ROUND_HALF": "半時間",
@@ -145,7 +160,342 @@
         "REMOTE_UP_TO_DATE": "Googleドライブ：リモートデータは既に最新の状態になっています",
         "SUCCESS": "Googleドライブ：バックアップを保存しました",
         "SYNCING": "Googleドライブ：同期"
+      },
+      "SNACK_API": {
+        "ERR": "GoogleApiエラー： {{errStr}}",
+        "ERR_NO_FILE_ID": "GoogleApi：ファイルIDが指定されていません",
+        "ERR_NO_FILE_NAME": "GoogleApi：ファイル名が指定されていません",
+        "SUCCESS_LOGIN": "GoogleApi：ログイン成功"
+      },
+      "SYNC_CFG": {
+        "AUTO_LOGIN": "アプリ起動時の自動ログイン",
+        "AUTO_SYNC": "リモートへのデータの自動同期",
+        "BACKUP_NOW": "今すぐバックアップ",
+        "COMPRESS": "データを圧縮する",
+        "ENABLE": "Googleドライブを介した同期を有効にする",
+        "LOAD_FROM": "GDriveからロード",
+        "LOAD_ON_STARTUP": "起動時にリモートデータを読み込む",
+        "NOTIFY": "同期時に通知する",
+        "SYNC_FILE_NAME": "同期ファイル名",
+        "SYNC_INTERVAL": "同期間隔",
+        "UPDATE_SYNC_FILE": "同期ファイルを更新する"
       }
+    },
+    "JIRA": {
+      "BANNER": {
+        "BLOCK_ACCESS_MSG": "Jira：APIからの締め出しを防ぐために、アクセスはSuper Productivityによってブロックされています。あなたはおそらくあなたのjira設定をチェックするべきです！",
+        "BLOCK_ACCESS_UNBLOCK": "ブロック解除"
+      },
+      "CFG_CMP": {
+        "ALWAYS_ASK": "常にダイアログを開く",
+        "DONE": "タスク完了の状況",
+        "DO_NOT": "移行しない",
+        "ENABLE": "Jira統合を有効にする",
+        "ENABLE_TRANSITIONS": "遷移処理を有効にする",
+        "IN_PROGRESS": "開始タスクの状況",
+        "LOAD_SUGGESTIONS": "候補を読み込む",
+        "MAP_CUSTOM_FIELDS": "カスタムフィールドのマッピング",
+        "MAP_CUSTOM_FIELDS_INFO": "残念ながら、Jiraのデータの中には、インストールごとに異なるカスタムフィールドの下に保存されているものがあります。このデータを含める場合は、適切なカスタムフィールドを選択する必要があります。",
+        "OPEN": "一時停止中のタスクのステータス",
+        "SELECT_ISSUE_FOR_TRANSITIONS": "利用可能なトランジションをロードするために課題を選択",
+        "STORY_POINTS": "ストーリーポイント"
+      },
+      "DIALOG_CONFIRM_ASSIGNMENT": {
+        "MSG": "<strong>{{summary}}</strong> は現在 <strong>{{assignee}}</strong>に割り当てられています。自分に割り当てますか？",
+        "OK": "やれ！"
+      },
+      "DIALOG_INITIAL": {
+        "TITLE": "プロジェクトのセットアップJira"
+      },
+      "DIALOG_TRANSITION": {
+        "CHOOSE_STATUS": "割り当てるステータスを選択",
+        "CURRENT_ASSIGNEE": "現在の譲受人：",
+        "CURRENT_STATUS": "現在の状態：",
+        "TITLE": "Jira：ステータス更新",
+        "UPDATE_STATUS": "最新状況"
+      },
+      "DIALOG_WORKLOG": {
+        "CURRENTLY_LOGGED": "現在記録されている時間：",
+        "INVALID_DATE": "入力された値は日付ではありません。",
+        "SAVE_WORKLOG": "作業ログを保存",
+        "STARTED": "始めました",
+        "SUBMIT_WORKLOG_FOR": "の仕事ログをJiraに提出する",
+        "TIME_SPENT": "使った時間",
+        "TITLE": "ジラ：作業記録を提出する"
+      },
+      "DIALOG_WORKdLOG": {
+        "TITLE": "AAA"
+      },
+      "EXTENSION_INFO": "Jira Apiとの通信を可能にするために <a href=\"{{url}}\"> クロム拡張機能</a> をダウンロードしてください。これはモバイルでは機能しないことに注意してください。",
+      "FORM": {
+        "IS_AUTO_ADD_TO_BACKLOG": "未解決の問題をGithubからバックログに自動的に追加",
+        "IS_AUTO_POLL": "変更についてインポートされたGitの問題を自動的にポーリングします",
+        "IS_SEARCH_ISSUES_FROM_GITHUB": "新しいタスクを追加するときにgitからの問題を提案として表示する",
+        "REPO": "追跡したいgitリポジトリの \"username / repositoryName\""
+      },
+      "FORM_ADV": {
+        "AUTO_ADD_BACKLOG_JQL_QUERY": "バックログにタスクを自動的に追加するために使用されるJQL",
+        "IS_ADD_WORKLOG_ON_SUB_TASK_DONE": "サブタスクが完了したときに作業ログをjiraに送信するためのダイアログを開く",
+        "IS_AUTO_ADD_TO_BACKLOG": "Jiraバックログに自動的に問題を追加する",
+        "IS_AUTO_POLL_TICKETS": "インポートされたissueに変更がないか自動的に確認して通知する",
+        "IS_CHECK_TO_RE_ASSIGN_TICKET_ON_TASK_START": "現在作業中の問題が現在のユーザーに割り当てられているかどうかを確認してください",
+        "IS_WORKLOG_ENABLED": "タスクが完了したら作業ログをjiraに送信するためのダイアログを開く",
+        "SEARCH_JQL_QUERY": "検索者のタスクを制限するためのJQLクエリ",
+        "USER_ASSIGNEE_NAME": "確認する担当者の名前"
+      },
+      "FORM_CRED": {
+        "HOST": "ホスト（例：http://my-host.de:1234）",
+        "PASSWORD": "トークン/パスワード",
+        "USER_NAME": "電子メール/ユーザー名"
+      },
+      "FORM_SECTION": {
+        "ADV_CFG": "詳細設定",
+        "CREDENTIALS": "資格情報",
+        "HELP_ARR": {
+          "H1": "基本構成",
+          "H2": "作業ログ設定",
+          "H3": "デフォルト遷移",
+          "P1_1": "ログイン名（プロフィールページにあります）と <a href=\"https://confluence.atlassian.com/cloud/api-tokens-938839638.html\" target=\"_blank\">APIトークン</a> 、または何らかの理由でパスワードを生成できない場合はパスワードを入力してください。新しいバージョンのjiraがトークンでしか動作しないことがあります。",
+          "P1_2": "また、Jiraからタスクを追加するための提案に使用されるJQLクエリを指定する必要もあります。このリンクを確認する必要がある場合は、 <a href=\"https://confluence.atlassian.com/jirasoftwarecloud/advanced-searching-764478330.html\" target=\"_blank\">https://confluence.atlassian.com/jirasoftwarecloud/advanced-searching-764478330.html</a>をご覧ください。",
+          "P1_3": "自動的に（たとえば、計画ビューにアクセスするたびに）したい場合は、カスタムJQLクエリで指定されたすべての新しいタスクをバックログに追加するように設定することもできます。",
+          "P1_4": "別の選択肢は「現在のチケットが現在のユーザに割り当てられているかどうかを確認する」です。有効にして開始すると、現在Jiraでそのチケットに割り当てられているかどうかがチェックされます。そうでない場合は、チケットを自分に割り当てることを選択できるダイアログが表示されます。",
+          "P2_1": "いつ、どのように作業ログを送信するかを決定するためのいくつかのオプションがあります。タスクが完了したときに作業ログをJiraに追加するための <em>'作業ログダイアログを開く'</em> を有効にすると、Jiraタスクに完了のマークを付けるたびに作業ログを追加するダイアログが開きます。そのため、これまで追跡してきたすべてのものの上に作業ログが追加されることに注意してください。そのため、タスクを2回目の完了としてマークした場合、そのタスクの全作業時間を再度送信することは望ましくないかもしれません。",
+          "P2_2": "",
+          "P2_3": "<em>'ダイアログなしで作業ログに更新を自動的に送信'</em> はそれが言うことをします。タスクを複数回行われたものとしてマークすると、全体の作業時間が2回追跡されることになるため、これはお勧めできません。",
+          "P3_1": "ここでデフォルトのトランジションを再設定できます。 JiraはあなたのJiraアジャイルボード上の異なるコラムとして通常実行される移行の幅広い設定を可能にします。タスクをいつどこに移行するかについて仮定することはできず、手動で設定する必要があります。"
+        }
+      },
+      "ISSUE_CONTENT": {
+        "ASSIGNEE": "譲受人",
+        "AT": "で",
+        "ATTACHMENTS": "添付ファイル",
+        "CHANGED": "かわった",
+        "COMMENTS": "コメント",
+        "COMPONENTS": "コンポーネント",
+        "DESCRIPTION": "説明",
+        "LIST_OF_CHANGES": "変更リスト",
+        "MARK_AS_CHECKED": "更新をチェック済みとしてマーク",
+        "ON": "に",
+        "STATUS": "状態",
+        "STORY_POINTS": "ストーリーポイント",
+        "SUMMARY": "概要",
+        "WORKLOG": "作業記録",
+        "WRITE_A_COMMENT": "コメントを書く"
+      },
+      "SNACK": {
+        "EXTENSION_NOT_LOADED": "Super Productivity Extensionがロードされていません。ページをリロードすると役に立つかもしれません",
+        "IMPORTED_MULTIPLE_ISSUES": "Jira：jiraからバックログに {{issuesLength}} 件の新しい問題をインポートしました",
+        "IMPORTED_SINGLE_ISSUE": "Jira：jiraからバックログにissue \"{{issueText}}\"をインポートしました",
+        "INSUFFICIENT_SETTINGS": "Jiraの設定が不十分",
+        "ISSUE_NO_UPDATE_REQUIRED": "ジラ： \"{{issueText}}\"はすでに最新です",
+        "ISSUE_UPDATE": "ジラ： \"{{issueText}}\"のデータを更新しました",
+        "MANUAL_UPDATE_ISSUE_SUCCESS": "ジラ： \"{{issueText}}\"のデータを更新しました",
+        "MISSING_ISSUE_DATA": "Jira：課題データが欠けているタスクが見つかりました。再読み込みしています。",
+        "NO_VALID_TRANSITION": "Jira：有効な遷移が設定されていません",
+        "POLLING": "Jira：問題に対する投票の変更",
+        "TIMED_OUT": "ジラ：リクエストがタイムアウトしました",
+        "TRANSITION_SUCCESS": "ジラ：問題 {{issueKey}} を <strong>に設定してください{{chosenTransition}}</strong>",
+        "UNABLE_TO_REASSIGN": "Jira：ユーザー名を指定しなかったので、自分にチケットを再割り当てすることができません。設定をご覧ください。"
+      },
+      "STEPPER": {
+        "CREDENTIALS": "資格情報",
+        "DONE": "これで終わりです。",
+        "LOGIN_SUCCESS": "ログイン成功！",
+        "TEST_CREDENTIALS": "テスト資格情報",
+        "WELCOME_USER": " {{user}}さん、ようこそ！"
+      }
+    },
+    "METRIC": {
+      "CMP": {
+        "AVG_BREAKS_PER_DAY": "平均一日あたりの休憩",
+        "AVG_TASKS_PER_DAY_WORKED": "平均一日あたりの仕事",
+        "AVG_TIME_SPENT_ON_BREAKS": "平均休憩時間",
+        "AVG_TIME_SPENT_PER_DAY": "平均1日に費やす時間",
+        "AVG_TIME_SPENT_PER_TASK": "平均タスクあたりの時間",
+        "COUNTING_SUBTASKS": "（サブタスクのカウント）",
+        "DAYS_WORKED": "働いた日数",
+        "IMPROVEMENT_SELECTION_COUNT": "改善要因が選択された回数",
+        "MOOD_PRODUCTIVITY_OVER_TIME": "時間とともに気分と生産性",
+        "NO_ADDITIONAL_DATA_YET": "追加データはまだ収集されていません。そのためには、日次要約の「評価」パネルのフォームを使用してください。",
+        "OBSTRUCTION_SELECTION_COUNT": "妨害要因が選択された回数",
+        "TASKS_DONE_CREATED": "タスク（完了/作成済み）",
+        "TIME_ESTIMATED": "推定時間",
+        "TIME_SPENT": "使った時間"
+      },
+      "EVAL_FORM": {
+        "HELP_H1": "なぜ私は気にする必要がありますか？",
+        "HELP_LINK_TXT": "評価指標セクションに移動します",
+        "HELP_P1": "ちょっとした自己評価の時間です！ここでのあなたの答えは保存されており、メトリックのセクションであなたがどのように働いているかに関する少しの統計をあなたに提供します。さらに明日のための提案は翌日あなたのタスクリストの上に現れるでしょう。",
+        "HELP_P2": "これは、正確な測定基準を計算することや、自分の仕事について感じていることを改善することよりも、機械のように効率的になることを減らすことを意図しています。それはあなたを助ける要因を見つけることであるだけでなく、あなたの毎日の日常生活の中で痛みのポイントを評価するのに役立ちます。ほんの少し体系的であることはうまくいけばこれらをよりよく把握し、あなたができることを改善するのに役立ちます。",
+        "IMPROVEMENTS": "生産性が向上した理由は何ですか？",
+        "IMPROVEMENTS_TOMORROW": "明日を改善するために何ができるでしょうか。",
+        "MOOD": "気分はどうですか？",
+        "MOOD_HINT": "1：ひどい -  10：素晴らしい",
+        "NOTES": "明日のメモ",
+        "OBSTRUCTIONS": "あなたの生産性を妨げたものは何ですか？",
+        "PRODUCTIVITY": "どのくらい効率的でしたか？",
+        "PRODUCTIVITY_HINT": "1：まだ始まっていない -  10：非常に効率的"
+      },
+      "SNACK": {
+        "SAVE_METRIC": "メトリックを保存しました"
+      }
+    },
+    "NOTE": {
+      "ADD_REMINDER": "通知を追加",
+      "D_ADD": {
+        "DATETIME_LABEL": "リマインダーの日時（オプション）",
+        "NOTE_LABEL": "メモとして保存するテキストを入力してください..."
+      },
+      "D_ADD_REMINDER": {
+        "E_ENTER_TITLE": "タイトルを入力してください",
+        "L_DATETIME": "リマインダーの日時",
+        "L_TITLE": "通知のタイトル",
+        "TITLE_ADD": "メモのメモを追加",
+        "TITLE_EDIT": "メモのメモを編集"
+      },
+      "D_VIEW_REMINDER": {
+        "SNOOZE": " {{time}}のスヌーズ",
+        "TITLE": "注意"
+      },
+      "EDIT_REMINDER": "リマインダーを編集",
+      "NOTES_CMP": {
+        "ADD_BTN": "新しいメモを追加",
+        "DROP_TO_ADD": "新しいメモを追加するには、ここにドロップしてください"
+      },
+      "NOTE_CMP": {
+        "DISABLE_PARSE": "マークダウン解析を無効にする",
+        "ENABLE_PARSE": "マークダウン解析を有効にする"
+      },
+      "REMOVE_REMINDER": "リマインダーを削除",
+      "SNACK": {
+        "ADDED_REMINDER": "メモのメモを追加",
+        "DELETED_REMINDER": "メモの削除されたメモ",
+        "UPDATED_REMINDER": "メモの更新されたメモ"
+      },
+      "UPDATE_REMINDER": "お知らせを更新"
+    },
+    "POMODORO": {
+      "BACK_TO_WORK": "仕事に戻る！",
+      "BREAK_IS_DONE": "あなたの休憩は終わった！",
+      "ENJOY_YOURSELF": "楽しんでください、動き始めてください。",
+      "FINISH_SESSION_X": "セッション <strong>{{nr}}</strong>が正常に終了しました。",
+      "NOTIFICATION": {
+        "BREAK_X_START": "ポモドーロ：休憩 {{nr}} が始まりました！",
+        "SESSION_X_START": "ポモドーロ：セッション {{nr}} が始まりました！"
+      },
+      "SKIP_BREAK": "スキップブレーク",
+      "SNACK": {
+        "SESSION_X_START": "ポモドーロ：セッション {{nr}} が始まりました！"
+      }
+    },
+    "PROCRASTINATION": {
+      "BACK_TO_WORK": "仕事に戻る！",
+      "COMP": {
+        "INTRO": "思いやりを自分自身に示すことは常に素晴らしいアイデアです。それはあなたの自己価値感を向上させ、前向きな感情を助長し、そしてもちろんあなたが先延ばしを克服するのを助けることができます。少し運動してみてください。",
+        "L1": "少し座って、体を伸ばします。必要に応じて、少し落ち着いてください。",
+        "L2": "生じる考えや感情に耳を傾けるようにしてください",
+        "L3": "あなたはあなたが友達に返答するような方法で自分自身に返答していますか？",
+        "L4": "答えが「いいえ」の場合、あなたの状況であなたの友人を想像してください。あなたは彼らに何を言うでしょうか？あなたは彼らのために何をしますか？",
+        "OUTRO": "その他の演習 <a href=\"https://drsoph.com/blog/2018/9/17/3-exercises-in-self-compassion\" target=\"_blank\">はこちら</a> または <a href=\"https://www.google.com/search?q=self+compassion+exercises&oq=self+compassion+excers&aqs=chrome.1.69i57j0l5.4303j0j7&sourceid=chrome&ie=UTF-8\" target=\"_blank\">Google</a>にあります。",
+        "TITLE": "自己慈悲"
+      },
+      "CUR": {
+        "INTRO": "先延ばしは面白いですね。意味がありません。あなたの長期的な利益に全く関係ありません。それでも、みんながやります。楽しみにして探検！",
+        "L1": "先延ばしにしたいという誘惑を引き出すのはどのような感情ですか？",
+        "L2": "あなたはあなたの体のどこでそれらを感じますか？",
+        "L3": "彼らはあなたに何を思い出させるのですか？",
+        "L4": "観察すると先延ばしになるという考えはどうなりますか？それは激化しますか？放散？他の感情を引き起こしますか？",
+        "L5": "あなたが彼らの上にあなたの意識を置いて休み続けるにつれてあなたの体の中の感覚はどのように変化していますか？",
+        "TITLE": "好奇心"
+      },
+      "H1": "たるみを減らしましょう。",
+      "P1": "まずはリラックス！みんながたまにやっています。あなたがあなたがするべきであることをしていないのであれば、あなたは少なくともそれを楽しむべきです！それでは、以下のセクションをチェックしてください。",
+      "P2": "あなたがここですべての背後にある科学についてもっと知りたいのであれば、私は <a href=\"https://www.nytimes.com/2019/03/25/smarter-living/why-you-procrastinate-it-has-nothing-to-do-with-self-control.html\" target=\"_blank\">この記事</a> を推奨することができます。そこからいくつかの演習があります。",
+      "P3": "覚えておいてください：先延ばしは感情管理問題であり、時間管理問題ではありません。",
+      "REFRAME": {
+        "INTRO": "そのタスクにもかかわらず、そのタスクについて前向きになる可能性があるものについて考えます。",
+        "TITLE": "リフレーミング",
+        "TL1": "それについて何が面白いのでしょうか？",
+        "TL2": "あなたがそれを完了した場合に何が得られるのですか？",
+        "TL3": "あなたがそれを完成するなら、あなたはそれについてどう思いますか？"
+      },
+      "SPLIT_UP": {
+        "INTRO": "できるだけ多くの小さな塊にタスクを分割してください。",
+        "OUTRO": "行った？それについて考えてみましょう。厳密には理論的には、</i> がタスクの作業を開始することになっていれば、 <i>が最初に実行されるのは何か考えてみてください。",
+        "TITLE": "それを分割する！"
+      }
+    },
+    "PROJECT": {
+      "BANNER": {
+        "FINISH_DAY": {
+          "FINISH_DAY": "終了日",
+          "MSG": "あなたは {{dayStr}}に一日を終えるのを忘れました"
+        }
+      },
+      "D_CREATE": {
+        "CREATE": "プロジェクトを作成",
+        "EDIT": "プロジェクトを編集",
+        "ISSUE_PROVIDER_CFGS": "発行プロバイダ設定（オプション）",
+        "SETUP_GIT": "Githubとの統合のセットアップ",
+        "SETUP_JIRA": "セットアップJira統合"
+      },
+      "FORM": {
+        "D_IS_DARK_THEME": "システムがグローバルダークモードをサポートしている場合は使用しないでください。",
+        "HELP": "プロジェクトの非常に基本的な設定",
+        "L_IS_DARK_THEME": "ダークテーマを使う",
+        "L_IS_REDUCED_THEME": "縮小されたUIを使用する（タスクを囲むボックスはありません）",
+        "L_THEME_COLOR": "テーマカラー",
+        "L_TITLE": "タイトル",
+        "TITLE": "プロジェクト設定とテーマ"
+      },
+      "SNACK": {
+        "ARCHIVED": "アーカイブプロジェクト",
+        "CREATED": "プロジェクト <strong>{{title}}</strong>を作成しました。あなたはそれを左上のメニューから選ぶことができます。",
+        "DELETED": "削除されたプロジェクト",
+        "E_EXISTS": "プロジェクト \"{{title}}\"は既に存在します",
+        "E_INVALID_FILE": "プロジェクトファイルのデータが無効です",
+        "ISSUE_PROVIDER_UPDATED": " <strong>{{issueProviderKey}}</strong>のプロジェクト設定を更新しました",
+        "UNARCHIVED": "未アーカイブプロジェクト",
+        "UPDATED": "更新されたプロジェクト設定"
+      }
+    },
+    "REMINDER": {
+      "SNACK_REMINDER_ERR": "リマインダーインターフェースのエラー"
+    },
+    "SIMPLE_TASK_EXPORT": {
+      "CLOSE": "閉じる",
+      "COPY_TO_CLIPBOARD": "クリップボードにコピー",
+      "DATE": "日付",
+      "ESTIMATE": "見積もり",
+      "FIELDS_TO_DISPLAY": "表示するフィールド",
+      "LIST_DONE_TASKS_ONLY": "完了タスクのみをリストする",
+      "LIST_SUB_TASKS": "サブタスクの一覧表示",
+      "LIST_WORKED_ON_TODAY_TASKS_ONLY": "リストは今日の仕事だけに取り組んだ",
+      "M_TITLE": "タスクリストのエクスポート",
+      "NO_DATA": "- データなし -",
+      "OPTIONS": "オプション",
+      "R": {
+        "HALF": "半時間",
+        "HOUR": "全時間",
+        "QUARTER": "全四半期"
+      },
+      "SAVE_TO_FILE": "ファイルに保存",
+      "SEPARATE_FIELDS_BY": "でフィールドを区切る",
+      "SHOW_AS_TEXT": "テキストとして表示",
+      "SNACK_TO_CLIPPBOARD": "クリップボードにコピー",
+      "TIME_AS_MILLISECONDS": "ミリ秒単位の時間",
+      "TIME_ESTIMATE": "時間見積もり",
+      "TIME_SPENT": "使った時間",
+      "TITLE": "タイトル"
+    },
+    "TASK_REPEAT": {
+      "D_CONFIRM_REMOVE": {
+        "MSG": "繰り返し設定を削除すると、このタスクの以前のインスタンスはすべて通常のタスクに変換されます。続行しますか？",
+        "OK": "完全に削除"
+      }
+    },
+    "WORKLOG": {
+      "D_CONFIRM_RESTORE": "タスク <strong>\"{{title}}\"</strong> を今日のタスクリストに移動しますか？"
     }
   },
   "FILE_IMEX": {
@@ -257,8 +607,15 @@
   },
   "G": {
     "CANCEL": "キャンセル",
+    "CLOSE": "閉じる",
+    "DELETE": "削除",
     "DISMISS": "やめる",
-    "OK": "",
+    "DO_IT": "やれ！",
+    "LOGIN": "ログイン",
+    "LOGOUT": "ログアウト",
+    "NEXT": "次",
+    "OK": "OK",
+    "PREVIOUS": "前",
     "SAVE": "保存する",
     "TITLE": "タイトル"
   },
@@ -284,6 +641,11 @@
     "BREAK_LABEL": "休憩（年/月）",
     "CELEBRATE": " <i>を祝いましょう。</i>",
     "CLEAR_ALL_CONTINUE": "完了したすべてをクリアして続行",
+    "D_CONFIRM_APP_CLOSE": {
+      "CANCEL": "いいえ、タスクをクリアするだけです",
+      "MSG": "あなたの仕事は終わりました。家に帰る時間！",
+      "OK": "ああああ！シャットダウン！"
+    },
     "EVALUATION": "評価",
     "EXPORT_TASK_LIST": "タスクリストのエクスポート",
     "GOOGLE_SHEET": "グーグルシート",
@@ -315,11 +677,24 @@
     "ARCHIVE_PROJECT": "アーカイブプロジェクト",
     "CREATE_NEW": "新しく作る",
     "DELETE_PROJECT": "プロジェクトを削除",
+    "D_CONFIRM_ARCHIVE": {
+      "MSG": "このプロジェクトをアーカイブしますか？アーカイブされたプロジェクトはメニューに表示されなくなり、復元しないとデータにアクセスできなくなります。これを行う前にデータをバックアップすることをお勧めします。",
+      "OK": "アーカイブ"
+    },
+    "D_CONFIRM_DELETE": {
+      "MSG": "このプロジェクトを削除してもよろしいですか？これを行う前にデータをバックアップすることをお勧めします。",
+      "OK": "削除"
+    },
+    "D_CONFIRM_UNARCHIVE": {
+      "MSG": "このプロジェクトをアーカイブ解除してよろしいですか？",
+      "OK": "アーカイブ解除"
+    },
     "EDIT_PROJECT": "プロジェクトを編集",
     "EXPORT_PROJECT": "プロジェクトをエクスポート",
     "GITHUB_CONFIGURED": "Github統合を設定済み",
     "IMPORT_FROM_FILE": "ファイルからインポート",
     "JIRA_CONFIGURED": "Jira統合が設定されました",
+    "SNACK_INVALID_JSON": "プロジェクトファイルのjsonが無効です",
     "TITLE": "プロジェクト概要",
     "UN_ARCHIVE_PROJECT": "アンアーカイブプロジェクト"
   },
@@ -334,6 +709,10 @@
       "IMPORTING": "データをインポートする",
       "SUCCESS": "インポートされたデータ"
     }
+  },
+  "V": {
+    "E_1TO10": "1から10までの値を入力してください",
+    "E_DATETIME": "入力された値は日時ではありません。"
   },
   "WW": {
     "ADD_MORE": "さらに追加",

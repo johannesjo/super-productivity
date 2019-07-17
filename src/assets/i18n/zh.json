@@ -6,6 +6,10 @@
     "SCHEDULED": "计划",
     "TITLE": "积压"
   },
+  "DATETIME_INPUT": {
+    "IN": "在 {{time}}",
+    "TOMORROW": "明天 {{time}}"
+  },
   "F": {
     "ATTACHMENT": {
       "DIALOG_EDIT": {
@@ -66,6 +70,10 @@
         "IS_SEARCH_ISSUES_FROM_GITHUB": "在添加新任务时，将git中的问题显示为建议",
         "REPO": "您要跟踪的git存储库的“username / repositoryName”"
       },
+      "FORM_SECTION": {
+        "HELP": "<p>您可以在此处配置SuperProductivity，以在日常计划视图的任务创建面板中列出特定存储库的打开GithHub问题。它们将被列为建议，并将提供该问题的链接以及有关该问题的更多信息。</p> <p>此外，您还可以自动将所有未解决的问题添加并同步到任务待办事项中。</p>",
+        "TITLE": "Github上"
+      },
       "ISSUE_CONTENT": {
         "ASSIGNEE": "代理人",
         "AT": "在",
@@ -77,6 +85,9 @@
         "WRITE_A_COMMENT": "留个评论"
       },
       "SNACK": {
+        "ERR_NETWORK": "Github：由于客户端网络错误，请求失败",
+        "ERR_NOT_CONFIGURED": "Github：没有正确配置",
+        "ERR_REQUEST": "Github：API返回 {{statusCode}}。 {{errorMsg}}",
         "IMPORTED_MULTIPLE_ISSUES": "Github：从git到backlog导入 {{issuesLength}} 个新问题",
         "IMPORTED_SINGLE_ISSUE": "Github：从git导入问题“{{issueText}}”到积压",
         "ISSUE_DELETED_OR_CLOSED": "Github：问题“{{issueText}}”似乎在git上被删除或关闭",
@@ -89,6 +100,9 @@
       }
     },
     "GOOGLE": {
+      "BANNER": {
+        "AUTH_FAIL": "GoogleApi：无法验证，请尝试重新登录！"
+      },
       "DIALOG": {
         "CREATE_SYNC_FILE": "Google云端硬盘：找不到名称为 <strong>“{{fileName}}”</strong> 的文件。 <strong>在Google云端硬盘上将其</strong> 创建为同步文件？",
         "USE_EXISTING_SYNC_FILE": "Google云端硬盘：使用 <strong>现有</strong> 文件 <strong>“{{fileName}}”</strong> 作为同步文件？如果没有，请更改同步文件名。"
@@ -124,6 +138,7 @@
         "LOGIN": "登录Google",
         "LOGOUT": "登出",
         "OPEN_SPREADSHEET": "打开电子表格",
+        "OPTIONS": "选项",
         "READ_SPREADSHEET": "阅读电子表格",
         "ROUND_END_TIME_TO": "结束时间到",
         "ROUND_HALF": "整整半个小时",
@@ -145,7 +160,342 @@
         "REMOTE_UP_TO_DATE": "Google云端硬盘：远程数据已经是最新的",
         "SUCCESS": "Google云端硬盘：已成功保存备份",
         "SYNCING": "Google云端硬盘：同步"
+      },
+      "SNACK_API": {
+        "ERR": "GoogleApi错误： {{errStr}}",
+        "ERR_NO_FILE_ID": "GoogleApi：未指定文件ID",
+        "ERR_NO_FILE_NAME": "GoogleApi：未指定文件名",
+        "SUCCESS_LOGIN": "GoogleApi：登录成功"
+      },
+      "SYNC_CFG": {
+        "AUTO_LOGIN": "启动应用时自动登录",
+        "AUTO_SYNC": "自动将数据同步到远程",
+        "BACKUP_NOW": "立即备份",
+        "COMPRESS": "压缩数据",
+        "ENABLE": "通过Google云端硬盘启用同步功能",
+        "LOAD_FROM": "从GDrive加载",
+        "LOAD_ON_STARTUP": "启动时加载远程数据",
+        "NOTIFY": "同步时通知",
+        "SYNC_FILE_NAME": "同步文件名",
+        "SYNC_INTERVAL": "同步间隔",
+        "UPDATE_SYNC_FILE": "更新同步文件"
       }
+    },
+    "JIRA": {
+      "BANNER": {
+        "BLOCK_ACCESS_MSG": "Jira：为了防止api被拒绝，Super Productivity阻止了访问。您可能应该检查您的jira设置！",
+        "BLOCK_ACCESS_UNBLOCK": "解除封锁"
+      },
+      "CFG_CMP": {
+        "ALWAYS_ASK": "始终打开对话框",
+        "DONE": "完成任务的状态",
+        "DO_NOT": "不要过渡",
+        "ENABLE": "启用Jira集成",
+        "ENABLE_TRANSITIONS": "启用过渡处理",
+        "IN_PROGRESS": "启动任务的状态",
+        "LOAD_SUGGESTIONS": "加载建议",
+        "MAP_CUSTOM_FIELDS": "映射自定义字段",
+        "MAP_CUSTOM_FIELDS_INFO": "不幸的是，Jira的一些数据保存在自定义字段下，每个安装都有不同的字段。如果要包含此数据，则需要为其选择适当的自定义字段。",
+        "OPEN": "暂停任务的状态",
+        "SELECT_ISSUE_FOR_TRANSITIONS": "选择问题以加载可用的转换",
+        "STORY_POINTS": "故事点"
+      },
+      "DIALOG_CONFIRM_ASSIGNMENT": {
+        "MSG": "<strong>{{summary}}</strong> 目前已分配给 <strong>{{assignee}}</strong>。你想把它分配给自己吗？",
+        "OK": "做吧！"
+      },
+      "DIALOG_INITIAL": {
+        "TITLE": "为项目设置Jira"
+      },
+      "DIALOG_TRANSITION": {
+        "CHOOSE_STATUS": "选择要分配的状态",
+        "CURRENT_ASSIGNEE": "现任受让人：",
+        "CURRENT_STATUS": "当前状态：",
+        "TITLE": "Jira：更新状态",
+        "UPDATE_STATUS": "更新状态"
+      },
+      "DIALOG_WORKLOG": {
+        "CURRENTLY_LOGGED": "目前记录的时间：",
+        "INVALID_DATE": "输入的值不是日期！",
+        "SAVE_WORKLOG": "保存工作日志",
+        "STARTED": "入门",
+        "SUBMIT_WORKLOG_FOR": "将工作日志提交给Jira for",
+        "TIME_SPENT": "所花费的时间",
+        "TITLE": "Jira：提交Worklog"
+      },
+      "DIALOG_WORKdLOG": {
+        "TITLE": "AAA"
+      },
+      "EXTENSION_INFO": "请 <a href=\"{{url}}\"> 下载Chrome扩展程序</a> ，以便与Jira Api进行通信。请注意，这不适用于移动设备。",
+      "FORM": {
+        "IS_AUTO_ADD_TO_BACKLOG": "自动将未解决的问题从Github添加到待办事项",
+        "IS_AUTO_POLL": "自动轮询导入的git问题以进行更改",
+        "IS_SEARCH_ISSUES_FROM_GITHUB": "在添加新任务时，将git中的问题显示为建议",
+        "REPO": "您要跟踪的git存储库的“username / repositoryName”"
+      },
+      "FORM_ADV": {
+        "AUTO_ADD_BACKLOG_JQL_QUERY": "JQL用于自动向待办事项添加任务",
+        "IS_ADD_WORKLOG_ON_SUB_TASK_DONE": "子任务完成后，打开对话框将工作日志提交给jira",
+        "IS_AUTO_ADD_TO_BACKLOG": "自动向Jira积压添加问题",
+        "IS_AUTO_POLL_TICKETS": "自动检查导入的问题以进行更改并通知",
+        "IS_CHECK_TO_RE_ASSIGN_TICKET_ON_TASK_START": "检查当前处理的问题是否已分配给当前用户",
+        "IS_WORKLOG_ENABLED": "打开对话框，在任务完成时将工作日志提交给jira",
+        "SEARCH_JQL_QUERY": "JQL Query用于限制搜索器任务",
+        "USER_ASSIGNEE_NAME": "要检查的受让人姓名"
+      },
+      "FORM_CRED": {
+        "HOST": "主持人（例如：http：//my-host.de：1234）",
+        "PASSWORD": "令牌/密码",
+        "USER_NAME": "电子邮件/用户名"
+      },
+      "FORM_SECTION": {
+        "ADV_CFG": "高级配置",
+        "CREDENTIALS": "证书",
+        "HELP_ARR": {
+          "H1": "基本配置",
+          "H2": "工作日志设置",
+          "H3": "默认转换",
+          "P1_1": "如果由于某种原因无法生成登录名，请提供登录名（可在您的个人资料页面上找到）和 <a href=\"https://confluence.atlassian.com/cloud/api-tokens-938839638.html\" target=\"_blank\">API令牌</a> 或密码。请注意，较新版本的jira有时只能使用令牌。",
+          "P1_2": "您还需要指定一个JQL查询，该查询用于从Jira添加任务的建议。如果您需要帮助，请查看此链接 <a href=\"https://confluence.atlassian.com/jirasoftwarecloud/advanced-searching-764478330.html\" target=\"_blank\">https://confluence.atlassian.com/jirasoftwarecloud/advanced-searching-764478330.html</a>。",
+          "P1_3": "如果要自动配置（例如，每次访问计划视图时），还可以配置将自定义JQL查询指定的所有新任务添加到待办事项。",
+          "P1_4": "另一个选项是“检查当前票证是否分配给当前用户”。如果启用并且您正在启动，那么如果您当前已在Jira上分配了该票证，则会进行检查，如果没有出现可以选择将票证分配给您自己的对话框。",
+          "P2_1": "有几个选项可以确定您何时以及如何提交工作日志。启用 <em>'打开工作日志对话框，在任务完成时向Jira添加工作日志'</em> 打开一个对话框，每次将Jira任务标记为已完成时添加工作日志。所以请记住，工作日志将添加到目前为止所跟踪的所有内容之上。因此，如果您将任务标记为第二次完成，则可能不希望再次为该任务提交完整的工作时间。",
+          "P2_2": "<em>'当子任务完成时打开工作日志对话框而不是子任务本身的任务'</em> 每次将Jira问题的子任务标记为已完成时打开工作日志对话框。因为您已经通过子任务跟踪了时间，所以一旦将Jira任务标记为已完成，就不会打开任何对话框。",
+          "P2_3": "<em>'在没有对话框的情况下自动向工作日志发送更新'</em> 完成了它所说的内容。由于将任务标记为已完成多次会导致整个工作时间被跟踪两次，因此不建议这样做。",
+          "P3_1": "在这里，您可以重新配置默认转换。 Jira支持广泛的转换配置，通常会在Jira Agile板上的不同列中生效，我们无法对转换任务的位置和时间做出假设，您需要手动设置它。"
+        }
+      },
+      "ISSUE_CONTENT": {
+        "ASSIGNEE": "代理人",
+        "AT": "在",
+        "ATTACHMENTS": "附件",
+        "CHANGED": "变",
+        "COMMENTS": "评论",
+        "COMPONENTS": "组件",
+        "DESCRIPTION": "描述",
+        "LIST_OF_CHANGES": "变更清单",
+        "MARK_AS_CHECKED": "将更新标记为已选中",
+        "ON": "上",
+        "STATUS": "状态",
+        "STORY_POINTS": "故事点",
+        "SUMMARY": "摘要",
+        "WORKLOG": "工作日志",
+        "WRITE_A_COMMENT": "留个评论"
+      },
+      "SNACK": {
+        "EXTENSION_NOT_LOADED": "超级生产力扩展未加载。重新加载页面可能会有所帮助",
+        "IMPORTED_MULTIPLE_ISSUES": "Jira：从jira到backlog导入 {{issuesLength}} 个新问题",
+        "IMPORTED_SINGLE_ISSUE": "Jira：从jira导入问题“{{issueText}}”到积压",
+        "INSUFFICIENT_SETTINGS": "为Jira提供的设置不足",
+        "ISSUE_NO_UPDATE_REQUIRED": "Jira：“{{issueText}}”已经是最新的",
+        "ISSUE_UPDATE": "Jira：更新了“{{issueText}}”的数据",
+        "MANUAL_UPDATE_ISSUE_SUCCESS": "Jira：更新了“{{issueText}}”的数据",
+        "MISSING_ISSUE_DATA": "Jira：发现缺少问题数据的任务。重装。",
+        "NO_VALID_TRANSITION": "Jira：未配置有效转换",
+        "POLLING": "Jira：轮询问题的变化",
+        "TIMED_OUT": "Jira：请求超时",
+        "TRANSITION_SUCCESS": "Jira：将问题 {{issueKey}} 设置为 <strong>{{chosenTransition}}</strong>",
+        "UNABLE_TO_REASSIGN": "Jira：无法为自己重新分配票证，因为您没有指定用户名。请访问设置。"
+      },
+      "STEPPER": {
+        "CREDENTIALS": "证书",
+        "DONE": "你现在完成了。",
+        "LOGIN_SUCCESS": "登陆成功！",
+        "TEST_CREDENTIALS": "测试凭证",
+        "WELCOME_USER": "欢迎 {{user}}！"
+      }
+    },
+    "METRIC": {
+      "CMP": {
+        "AVG_BREAKS_PER_DAY": "平均。每天休息",
+        "AVG_TASKS_PER_DAY_WORKED": "平均。每天工作的任务",
+        "AVG_TIME_SPENT_ON_BREAKS": "平均。花在休息上的时间",
+        "AVG_TIME_SPENT_PER_DAY": "平均。每天花费的时间",
+        "AVG_TIME_SPENT_PER_TASK": "平均。每个任务花费的时间",
+        "COUNTING_SUBTASKS": "（计算子任务）",
+        "DAYS_WORKED": "工作日",
+        "IMPROVEMENT_SELECTION_COUNT": "选择改进因子的次数",
+        "MOOD_PRODUCTIVITY_OVER_TIME": "随着时间的推移情绪和生产力",
+        "NO_ADDITIONAL_DATA_YET": "尚未收集其他数据。使用每日摘要“评估”面板上的表单来执行此操作。",
+        "OBSTRUCTION_SELECTION_COUNT": "选择阻碍因子的次数",
+        "TASKS_DONE_CREATED": "任务（完成/创建）",
+        "TIME_ESTIMATED": "估计时间",
+        "TIME_SPENT": "所花费的时间"
+      },
+      "EVAL_FORM": {
+        "HELP_H1": "我为什么要在乎？",
+        "HELP_LINK_TXT": "转到指标部分",
+        "HELP_P1": "时间进行一点自我评估！此处的答案已保存，并为您提供有关如何在指标部分工作的一些统计信息。此外，明天的建议将在第二天出现在您的任务列表上方。",
+        "HELP_P2": "这不仅仅是为了计算精确的指标，也不是为了提高机器效率，而是为了改善您对工作的看法。评估日常生活中的痛点可能会有所帮助，也就是找到可以帮助你的因素。对它有点系统性希望有助于更好地掌握这些并改善你的能力。",
+        "IMPROVEMENTS": "什么提高了你的生产力",
+        "IMPROVEMENTS_TOMORROW": "你能做些什么来明天改善？",
+        "MOOD": "你觉得怎么样？",
+        "MOOD_HINT": "1：太可怕了 -  10：太棒了",
+        "NOTES": "明天的注意事项",
+        "OBSTRUCTIONS": "是什么阻碍了你的生产力？",
+        "PRODUCTIVITY": "你的工作效率如何？",
+        "PRODUCTIVITY_HINT": "1：还没开始 -  10：非常有效率"
+      },
+      "SNACK": {
+        "SAVE_METRIC": "公制成功保存"
+      }
+    },
+    "NOTE": {
+      "ADD_REMINDER": "添加提醒",
+      "D_ADD": {
+        "DATETIME_LABEL": "提醒日期时间（可选）",
+        "NOTE_LABEL": "输入一些文本以保存为注释..."
+      },
+      "D_ADD_REMINDER": {
+        "E_ENTER_TITLE": "你需要输入一个标题",
+        "L_DATETIME": "提醒的日期时间",
+        "L_TITLE": "通知标题",
+        "TITLE_ADD": "添加提醒以备注",
+        "TITLE_EDIT": "编辑备注提醒"
+      },
+      "D_VIEW_REMINDER": {
+        "SNOOZE": "暂停 {{time}}",
+        "TITLE": "注意"
+      },
+      "EDIT_REMINDER": "编辑提醒",
+      "NOTES_CMP": {
+        "ADD_BTN": "添加新笔记",
+        "DROP_TO_ADD": "放在这里添加新笔记"
+      },
+      "NOTE_CMP": {
+        "DISABLE_PARSE": "禁用降价解析",
+        "ENABLE_PARSE": "启用降价解析"
+      },
+      "REMOVE_REMINDER": "删除提醒",
+      "SNACK": {
+        "ADDED_REMINDER": "添加提醒备注",
+        "DELETED_REMINDER": "已删除备注提醒",
+        "UPDATED_REMINDER": "更新了提醒注意事项"
+      },
+      "UPDATE_REMINDER": "更新提醒"
+    },
+    "POMODORO": {
+      "BACK_TO_WORK": "回去工作！",
+      "BREAK_IS_DONE": "你的休息完成了！",
+      "ENJOY_YOURSELF": "享受自己，让自己感动，回来：",
+      "FINISH_SESSION_X": "您已成功完成会话 <strong>{{nr}}</strong>！",
+      "NOTIFICATION": {
+        "BREAK_X_START": "番茄钟：休息 {{nr}} 开始了！",
+        "SESSION_X_START": "番茄钟：会话 {{nr}} 开始了！"
+      },
+      "SKIP_BREAK": "跳过休息",
+      "SNACK": {
+        "SESSION_X_START": "番茄钟：会话 {{nr}} 开始了！"
+      }
+    },
+    "PROCRASTINATION": {
+      "BACK_TO_WORK": "回去工作！",
+      "COMP": {
+        "INTRO": "向自己展示一些同情心总是一个好主意。当然，它可以提高你的自我价值感，培养积极的情绪，并可以帮助你克服拖延。尝试一点运动：",
+        "L1": "如果你愿意的话，坐下来伸展自己，伸展一下",
+        "L2": "尽量倾听所产生的想法和感受",
+        "L3": "你是否以回应朋友的方式回应自己？",
+        "L4": "如果答案是否定的，那就想象一下你朋友的情况。你会对他们说什么？你会为他们做什么？",
+        "OUTRO": "可以在此处</a> 或 <a href=\"https://www.google.com/search?q=self+compassion+exercises&oq=self+compassion+excers&aqs=chrome.1.69i57j0l5.4303j0j7&sourceid=chrome&ie=UTF-8\" target=\"_blank\">Google</a>找到更多练习 <a href=\"https://drsoph.com/blog/2018/9/17/3-exercises-in-self-compassion\" target=\"_blank\">。",
+        "TITLE": "自我同情"
+      },
+      "CUR": {
+        "INTRO": "拖延很有意思，不是吗？这样做没有意义。根本不符合您的长期利益。但是仍然每个人都这样做。享受和探索！",
+        "L1": "什么样的感觉引起你拖延的诱惑？",
+        "L2": "你觉得它们在你体内的哪个部位？",
+        "L3": "他们提醒你什么？",
+        "L4": "当你观察它时，拖延的想法会发生什么？它会加剧吗？消散？导致其他情绪出现？",
+        "L5": "当你继续保持对它们的认识时，你身体的感觉如何变化？",
+        "TITLE": "好奇心"
+      },
+      "H1": "减少一些自己的松懈！",
+      "P1": "首先放松一下！每个人都会偶尔做一次。如果你没有做你应该做的事，你至少应该享受它！然后查看以下部分以获取有用的信息。",
+      "P2": "如果你想了解更多有关背后的科学知识，我可以推荐 <a href=\"https://www.nytimes.com/2019/03/25/smarter-living/why-you-procrastinate-it-has-nothing-to-do-with-self-control.html\" target=\"_blank\">这篇文章</a> ，其中有一些练习。",
+      "P3": "记住：拖延是一种情绪调节问题，而不是时间管理问题。",
+      "REFRAME": {
+        "INTRO": "考虑一下尽管有这个任务可能会有什么积极意义。",
+        "TITLE": "重新定义",
+        "TL1": "它可能有趣吗？",
+        "TL2": "如果你完成它会得到什么？",
+        "TL3": "如果你完成它，你会怎么想？"
+      },
+      "SPLIT_UP": {
+        "INTRO": "将任务分成尽可能多的小块。",
+        "OUTRO": "完成了吗？然后考虑一下。什么是 - 严格的理论 - 如果</i> 你开始从事这项任务，你会做 <i>的第一件事？考虑一下...",
+        "TITLE": "分开吧！"
+      }
+    },
+    "PROJECT": {
+      "BANNER": {
+        "FINISH_DAY": {
+          "FINISH_DAY": "完成日",
+          "MSG": "你忘了在 {{dayStr}}完成一天"
+        }
+      },
+      "D_CREATE": {
+        "CREATE": "创建项目",
+        "EDIT": "编辑项目",
+        "ISSUE_PROVIDER_CFGS": "发行提供商配置（可选）",
+        "SETUP_GIT": "设置Github集成",
+        "SETUP_JIRA": "设置Jira集成"
+      },
+      "FORM": {
+        "D_IS_DARK_THEME": "如果系统支持全局暗模式，则不会使用。",
+        "HELP": "您项目的非常基本的设置。",
+        "L_IS_DARK_THEME": "使用黑暗主题",
+        "L_IS_REDUCED_THEME": "使用缩减的UI（任务周围没有框）",
+        "L_THEME_COLOR": "主题色",
+        "L_TITLE": "标题",
+        "TITLE": "项目设置和主题"
+      },
+      "SNACK": {
+        "ARCHIVED": "存档项目",
+        "CREATED": "创建项目 <strong>{{title}}</strong>。您可以从左上角的菜单中选择它。",
+        "DELETED": "删除项目",
+        "E_EXISTS": "项目“{{title}}”已存在",
+        "E_INVALID_FILE": "项目文件的数据无效",
+        "ISSUE_PROVIDER_UPDATED": "更新了 <strong>{{issueProviderKey}}</strong>的项目设置",
+        "UNARCHIVED": "未归档的项目",
+        "UPDATED": "更新了项目设置"
+      }
+    },
+    "REMINDER": {
+      "SNACK_REMINDER_ERR": "提醒界面出错"
+    },
+    "SIMPLE_TASK_EXPORT": {
+      "CLOSE": "关",
+      "COPY_TO_CLIPBOARD": "复制到剪贴板",
+      "DATE": "日期",
+      "ESTIMATE": "估计",
+      "FIELDS_TO_DISPLAY": "要显示的字段",
+      "LIST_DONE_TASKS_ONLY": "仅列出已完成的任务",
+      "LIST_SUB_TASKS": "列出子任务",
+      "LIST_WORKED_ON_TODAY_TASKS_ONLY": "列表仅适用于今天的任务",
+      "M_TITLE": "任务列表导出",
+      "NO_DATA": "- 没有数据 -",
+      "OPTIONS": "选项",
+      "R": {
+        "HALF": "整整半个小时",
+        "HOUR": "整整一个小时",
+        "QUARTER": "整个季度"
+      },
+      "SAVE_TO_FILE": "保存到文件",
+      "SEPARATE_FIELDS_BY": "单独的字段",
+      "SHOW_AS_TEXT": "显示为文字",
+      "SNACK_TO_CLIPPBOARD": "复制到剪贴板",
+      "TIME_AS_MILLISECONDS": "时间为毫秒",
+      "TIME_ESTIMATE": "时间估计",
+      "TIME_SPENT": "所花费的时间",
+      "TITLE": "标题"
+    },
+    "TASK_REPEAT": {
+      "D_CONFIRM_REMOVE": {
+        "MSG": "删除重复配置会将此任务的所有先前实例转换为常规任务。你确定要继续吗？",
+        "OK": "完全删除"
+      }
+    },
+    "WORKLOG": {
+      "D_CONFIRM_RESTORE": "您确定要将任务 <strong>“{{title}}”</strong> 移动到今天的任务列表中吗？"
     }
   },
   "FILE_IMEX": {
@@ -257,8 +607,15 @@
   },
   "G": {
     "CANCEL": "取消",
+    "CLOSE": "关",
+    "DELETE": "删除",
     "DISMISS": "解雇",
-    "OK": "",
+    "DO_IT": "做吧！",
+    "LOGIN": "登录",
+    "LOGOUT": "登出",
+    "NEXT": "下一个",
+    "OK": "好",
+    "PREVIOUS": "以前",
     "SAVE": "保存",
     "TITLE": "标题"
   },
@@ -284,6 +641,11 @@
     "BREAK_LABEL": "休息（nr /时间）",
     "CELEBRATE": "花一点时间来庆祝 <i>！</i>",
     "CLEAR_ALL_CONTINUE": "清除所有完成并继续",
+    "D_CONFIRM_APP_CLOSE": {
+      "CANCEL": "不，只是清除任务",
+      "MSG": "你的工作已经完成。该回家了！",
+      "OK": "好的好的！关掉！"
+    },
     "EVALUATION": "评估",
     "EXPORT_TASK_LIST": "导出任务列表",
     "GOOGLE_SHEET": "Google表格",
@@ -315,11 +677,24 @@
     "ARCHIVE_PROJECT": "存档项目",
     "CREATE_NEW": "创建新的",
     "DELETE_PROJECT": "删除项目",
+    "D_CONFIRM_ARCHIVE": {
+      "MSG": "您确定要存档此项目吗？存档的项目将不再显示在菜单中，如果不恢复它们，您将无法访问任何数据。建议您在执行此操作之前备份数据。",
+      "OK": "档案"
+    },
+    "D_CONFIRM_DELETE": {
+      "MSG": "您确定要删除此项目吗？建议您在执行此操作之前备份数据。",
+      "OK": "删除"
+    },
+    "D_CONFIRM_UNARCHIVE": {
+      "MSG": "您确定要取消归档此项目吗？",
+      "OK": "取消封存"
+    },
     "EDIT_PROJECT": "编辑项目",
     "EXPORT_PROJECT": "出口项目",
     "GITHUB_CONFIGURED": "配置Github集成",
     "IMPORT_FROM_FILE": "从文件导入",
     "JIRA_CONFIGURED": "配置Jira集成",
+    "SNACK_INVALID_JSON": "项目文件的json无效",
     "TITLE": "项目概况",
     "UN_ARCHIVE_PROJECT": "Unarchive项目"
   },
@@ -334,6 +709,10 @@
       "IMPORTING": "导入数据",
       "SUCCESS": "数据已导入"
     }
+  },
+  "V": {
+    "E_1TO10": "请输入1到10之间的值",
+    "E_DATETIME": "输入的值不是日期时间！"
   },
   "WW": {
     "ADD_MORE": "添加更多",

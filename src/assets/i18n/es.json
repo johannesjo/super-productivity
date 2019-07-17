@@ -6,6 +6,10 @@
     "SCHEDULED": "Programado",
     "TITLE": "RESERVA"
   },
+  "DATETIME_INPUT": {
+    "IN": "en {{time}}",
+    "TOMORROW": "mañana {{time}}"
+  },
   "F": {
     "ATTACHMENT": {
       "DIALOG_EDIT": {
@@ -66,6 +70,10 @@
         "IS_SEARCH_ISSUES_FROM_GITHUB": "Mostrar problemas de git como sugerencias al agregar nuevas tareas",
         "REPO": "\"username / repositoryName\" para el repositorio de git que desea rastrear"
       },
+      "FORM_SECTION": {
+        "HELP": "<p>Aquí puede configurar SuperProductivity para listar los problemas abiertos de GithHub para un repositorio específico en el panel de creación de tareas en la vista de planificación diaria. Se enumerarán como sugerencias y proporcionarán un enlace al problema, así como más información al respecto.</p> <p>Además, puede agregar y sincronizar automáticamente todos los problemas abiertos a su registro de tareas.</p>",
+        "TITLE": "gitHub"
+      },
       "ISSUE_CONTENT": {
         "ASSIGNEE": "Cesionario",
         "AT": "a",
@@ -77,6 +85,9 @@
         "WRITE_A_COMMENT": "Escribir un comentario"
       },
       "SNACK": {
+        "ERR_NETWORK": "Github: error en la solicitud debido a un error en la red del lado del cliente",
+        "ERR_NOT_CONFIGURED": "Github: no está correctamente configurado",
+        "ERR_REQUEST": "Github: API devuelto {{statusCode}}. {{errorMsg}}",
         "IMPORTED_MULTIPLE_ISSUES": "Github: Importado {{issuesLength}} nuevos problemas de git a backlog",
         "IMPORTED_SINGLE_ISSUE": "Github: problema importado \"{{issueText}}\" de git a backlog",
         "ISSUE_DELETED_OR_CLOSED": "Github: el problema \"{{issueText}}\" parece ser eliminado o cerrado en git",
@@ -89,6 +100,9 @@
       }
     },
     "GOOGLE": {
+      "BANNER": {
+        "AUTH_FAIL": "GoogleApi: no se pudo autenticar, por favor intente iniciar sesión nuevamente."
+      },
       "DIALOG": {
         "CREATE_SYNC_FILE": "Google Drive: no se encontró ningún archivo con el nombre <strong>\"{{fileName}}\"</strong> . <strong>¿Crear</strong> como archivo de sincronización en Google Drive?",
         "USE_EXISTING_SYNC_FILE": "Google Drive: usar <strong>archivo</strong> existente <strong>\"{{fileName}}\"</strong> como archivo de sincronización? Si no es así, cambie el nombre del archivo de sincronización."
@@ -124,6 +138,7 @@
         "LOGIN": "Inicia sesión en Google",
         "LOGOUT": "Cerrar sesión",
         "OPEN_SPREADSHEET": "Abrir hoja de cálculo",
+        "OPTIONS": "Opciones",
         "READ_SPREADSHEET": "Leer hoja de calculo",
         "ROUND_END_TIME_TO": "Tiempo de finalización de ronda a",
         "ROUND_HALF": "media horas completas",
@@ -145,7 +160,342 @@
         "REMOTE_UP_TO_DATE": "Google Drive: datos remotos ya actualizados",
         "SUCCESS": "Google Drive: Copia de seguridad guardada con éxito",
         "SYNCING": "Google Drive: sincronizando"
+      },
+      "SNACK_API": {
+        "ERR": "Error de GoogleApi: {{errStr}}",
+        "ERR_NO_FILE_ID": "GoogleApi: no se ha especificado ningún ID de archivo",
+        "ERR_NO_FILE_NAME": "GoogleApi: no se ha especificado ningún nombre de archivo",
+        "SUCCESS_LOGIN": "GoogleApi: Inicio de sesión exitoso"
+      },
+      "SYNC_CFG": {
+        "AUTO_LOGIN": "Inicio de sesión automático al iniciar la aplicación",
+        "AUTO_SYNC": "Sincronización automática de datos a control remoto",
+        "BACKUP_NOW": "Copia ahora",
+        "COMPRESS": "Comprimir datos",
+        "ENABLE": "Habilitar la sincronización a través de Google Drive",
+        "LOAD_FROM": "Cargar desde GDrive",
+        "LOAD_ON_STARTUP": "Cargar datos remotos en el inicio",
+        "NOTIFY": "Notificar cuando se sincroniza",
+        "SYNC_FILE_NAME": "Sincronizar nombre de archivo",
+        "SYNC_INTERVAL": "Intervalo de sincronización",
+        "UPDATE_SYNC_FILE": "Actualizar archivo de sincronización"
       }
+    },
+    "JIRA": {
+      "BANNER": {
+        "BLOCK_ACCESS_MSG": "Jira: Para evitar el cierre de api, Super Productivity ha bloqueado el acceso. ¡Probablemente deberías revisar tu configuración de jira!",
+        "BLOCK_ACCESS_UNBLOCK": "Desatascar"
+      },
+      "CFG_CMP": {
+        "ALWAYS_ASK": "Abrir siempre el diálogo",
+        "DONE": "Estado para completar la tarea",
+        "DO_NOT": "No transición",
+        "ENABLE": "Habilitar la integración de Jira",
+        "ENABLE_TRANSITIONS": "Habilitar manejo de transición",
+        "IN_PROGRESS": "Estado para comenzar la tarea",
+        "LOAD_SUGGESTIONS": "Sugerencias de carga",
+        "MAP_CUSTOM_FIELDS": "Mapa de campos personalizados",
+        "MAP_CUSTOM_FIELDS_INFO": "Desafortunadamente, algunos de los datos de Jira se guardan en campos personalizados que son diferentes para cada instalación. Si desea incluir estos datos, debe seleccionar el campo personalizado adecuado para ellos.",
+        "OPEN": "Estado de pausa de tarea",
+        "SELECT_ISSUE_FOR_TRANSITIONS": "Seleccione el problema para cargar las transiciones disponibles",
+        "STORY_POINTS": "Puntos de historia"
+      },
+      "DIALOG_CONFIRM_ASSIGNMENT": {
+        "MSG": "<strong>{{summary}}</strong> actualmente está asignado a <strong>{{assignee}}</strong>. ¿Quieres asignártela a ti mismo?",
+        "OK": "¡Hazlo!"
+      },
+      "DIALOG_INITIAL": {
+        "TITLE": "Configurar Jira para Proyecto"
+      },
+      "DIALOG_TRANSITION": {
+        "CHOOSE_STATUS": "Elija estado para asignar",
+        "CURRENT_ASSIGNEE": "Asignado actual:",
+        "CURRENT_STATUS": "Estado actual:",
+        "TITLE": "Jira: Estado de actualización",
+        "UPDATE_STATUS": "Estado de actualización"
+      },
+      "DIALOG_WORKLOG": {
+        "CURRENTLY_LOGGED": "Tiempo registrado actualmente:",
+        "INVALID_DATE": "El valor introducido no es una fecha!",
+        "SAVE_WORKLOG": "Guardar registro de trabajo",
+        "STARTED": "Empezado",
+        "SUBMIT_WORKLOG_FOR": "Enviar un registro de trabajo a Jira para",
+        "TIME_SPENT": "Tiempo usado",
+        "TITLE": "Jira: enviar registro de trabajo"
+      },
+      "DIALOG_WORKdLOG": {
+        "TITLE": "AAA"
+      },
+      "EXTENSION_INFO": "Por favor, <a href=\"{{url}}\"> descargue la extensión de chrome</a> para permitir la comunicación con Jira Api. Tenga en cuenta que esto no funciona para móviles.",
+      "FORM": {
+        "IS_AUTO_ADD_TO_BACKLOG": "Agregar automáticamente problemas sin resolver desde Github a la acumulación",
+        "IS_AUTO_POLL": "Encuestar automáticamente los problemas de git importados para los cambios",
+        "IS_SEARCH_ISSUES_FROM_GITHUB": "Mostrar problemas de git como sugerencias al agregar nuevas tareas",
+        "REPO": "\"username / repositoryName\" para el repositorio de git que desea rastrear"
+      },
+      "FORM_ADV": {
+        "AUTO_ADD_BACKLOG_JQL_QUERY": "JQL usado para agregar tareas automáticamente al backlog",
+        "IS_ADD_WORKLOG_ON_SUB_TASK_DONE": "Abrir el cuadro de diálogo para enviar el registro de trabajo a jira cuando se realiza la subtarea",
+        "IS_AUTO_ADD_TO_BACKLOG": "Añadir automáticamente problemas a la cartera de Jira",
+        "IS_AUTO_POLL_TICKETS": "Verifica los problemas importados para cambios automáticamente y notifica",
+        "IS_CHECK_TO_RE_ASSIGN_TICKET_ON_TASK_START": "Compruebe si el problema actualmente trabajado está asignado al usuario actual",
+        "IS_WORKLOG_ENABLED": "Abrir el cuadro de diálogo para enviar el registro de trabajo a jira cuando se realiza la tarea",
+        "SEARCH_JQL_QUERY": "Consulta JQL para limitar las tareas del buscador.",
+        "USER_ASSIGNEE_NAME": "Nombre del asignatario para verificar"
+      },
+      "FORM_CRED": {
+        "HOST": "Anfitrión (por ejemplo, http://my-host.de:1234)",
+        "PASSWORD": "Token / Contraseña",
+        "USER_NAME": "Email / Nombre de usuario"
+      },
+      "FORM_SECTION": {
+        "ADV_CFG": "Configuración avanzada",
+        "CREDENTIALS": "cartas credenciales",
+        "HELP_ARR": {
+          "H1": "Configuracion basica",
+          "H2": "Configuraciones de registro de trabajo",
+          "H3": "Transiciones por defecto",
+          "P1_1": "Proporcione un nombre de inicio de sesión (se puede encontrar en su página de perfil) y un <a href=\"https://confluence.atlassian.com/cloud/api-tokens-938839638.html\" target=\"_blank\">token de API</a> o contraseña si no puede generar uno por algún motivo. Tenga en cuenta que las versiones más recientes de jira a veces solo funcionan con el token.",
+          "P1_2": "También debe especificar una consulta JQL que se utiliza para las sugerencias para agregar tareas desde Jira. Si necesita ayuda, consulte este enlace <a href=\"https://confluence.atlassian.com/jirasoftwarecloud/advanced-searching-764478330.html\" target=\"_blank\">https://confluence.atlassian.com/jirasoftwarecloud/advanced-searching-764478330.html</a>.",
+          "P1_3": "También puede configurar, si lo desea automáticamente (por ejemplo, cada vez que visite la vista de planificación), para agregar todas las nuevas tareas especificadas por una consulta JQL personalizada a la cartera.",
+          "P1_4": "Otra opción es \"Comprobar si el ticket actual está asignado al usuario actual\". Si está habilitado y está comenzando, se realizará una verificación si actualmente está asignado a ese boleto en Jira, si no aparece un diálogo en el que puede elegir asignarse el boleto a usted mismo.",
+          "P2_1": "Hay varias opciones para determinar cuándo y cómo desea enviar un registro de trabajo. Habilitando <em>'Abrir el cuadro de diálogo de registro de trabajo para agregar un registro de trabajo a Jira cuando la tarea se haya completado'</em> abre un cuadro de diálogo para agregar un registro de trabajo cada vez que marque una tarea de Jira como hecho. Así que tenga en cuenta que los registros de trabajo se agregarán a todo lo que se haya rastreado hasta ahora. Por lo tanto, si marca una tarea como realizada por segunda vez, es posible que no desee volver a enviar el tiempo completo trabajado para la tarea.",
+          "P2_2": "<em>'Abrir el cuadro de diálogo de registro de trabajo cuando se realiza la subtarea y no para las tareas con tareas secundarias'</em> abre un cuadro de diálogo de registro de trabajo cada vez que marca una subtarea de un problema de Jira como hecho. Debido a que ya realiza un seguimiento de su tiempo a través de las sub tareas, no se abre ningún cuadro de diálogo una vez que marca la tarea Jira como realizada.",
+          "P2_3": "<em>'Enviar actualizaciones al registro de trabajo automáticamente sin diálogo'</em> hace lo que dice. Debido a que marcar una tarea como realizada varias veces conduce a que todo el tiempo trabajado se rastree dos veces, no se recomienda.",
+          "P3_1": "Aquí puede reconfigurar sus transiciones por defecto. Jira permite una configuración amplia de las transiciones que generalmente entran en acción como diferentes columnas en su tablero ágil de Jira. No podemos hacer suposiciones acerca de dónde y cuándo hacer la transición de sus tareas y usted necesita configurarlas manualmente."
+        }
+      },
+      "ISSUE_CONTENT": {
+        "ASSIGNEE": "Cesionario",
+        "AT": "a",
+        "ATTACHMENTS": "Archivos adjuntos",
+        "CHANGED": "cambiado",
+        "COMMENTS": "Comentarios",
+        "COMPONENTS": "componentes",
+        "DESCRIPTION": "Descripción",
+        "LIST_OF_CHANGES": "Lista de cambios",
+        "MARK_AS_CHECKED": "Marcar actualizaciones como verificadas",
+        "ON": "en",
+        "STATUS": "Estado",
+        "STORY_POINTS": "Puntos de historia",
+        "SUMMARY": "Resumen",
+        "WORKLOG": "Registro de trabajo",
+        "WRITE_A_COMMENT": "Escribir un comentario"
+      },
+      "SNACK": {
+        "EXTENSION_NOT_LOADED": "Extensión de Super Productividad no cargada. Recargar la página puede ayudar",
+        "IMPORTED_MULTIPLE_ISSUES": "Jira: Importó {{issuesLength}} problemas nuevos de jira a la acumulación",
+        "IMPORTED_SINGLE_ISSUE": "Jira: problema importado \"{{issueText}}\" de jira a la acumulación",
+        "INSUFFICIENT_SETTINGS": "Ajustes insuficientes proporcionados para Jira",
+        "ISSUE_NO_UPDATE_REQUIRED": "Jira: \"{{issueText}}\" ya actualizado",
+        "ISSUE_UPDATE": "Jira: Datos actualizados para \"{{issueText}}\"",
+        "MANUAL_UPDATE_ISSUE_SUCCESS": "Jira: Datos actualizados para \"{{issueText}}\"",
+        "MISSING_ISSUE_DATA": "Jira: Tareas con datos de problemas faltantes encontrados. Recarga",
+        "NO_VALID_TRANSITION": "Jira: No hay una transición válida configurada",
+        "POLLING": "Jira: cambios de sondeo para problemas",
+        "TIMED_OUT": "Jira: Tiempo de espera agotado",
+        "TRANSITION_SUCCESS": "Jira: establece el problema {{issueKey}} a <strong>{{chosenTransition}}</strong>",
+        "UNABLE_TO_REASSIGN": "Jira: No se puede reasignar el ticket a ti mismo, porque no especificaste un nombre de usuario. Por favor, visite la configuración."
+      },
+      "STEPPER": {
+        "CREDENTIALS": "cartas credenciales",
+        "DONE": "Ya has terminado.",
+        "LOGIN_SUCCESS": "¡Inicio de sesión correcto!",
+        "TEST_CREDENTIALS": "Credenciales de prueba",
+        "WELCOME_USER": "Bienvenido {{user}}!"
+      }
+    },
+    "METRIC": {
+      "CMP": {
+        "AVG_BREAKS_PER_DAY": "Avg. descansos por día",
+        "AVG_TASKS_PER_DAY_WORKED": "Avg. tareas por dia trabajadas",
+        "AVG_TIME_SPENT_ON_BREAKS": "Avg. tiempo dedicado a los descansos",
+        "AVG_TIME_SPENT_PER_DAY": "Avg. tiempo empleado por día",
+        "AVG_TIME_SPENT_PER_TASK": "Avg. tiempo empleado por tarea",
+        "COUNTING_SUBTASKS": "(contando subtareas)",
+        "DAYS_WORKED": "Dias trabajados",
+        "IMPROVEMENT_SELECTION_COUNT": "Número de veces que se seleccionó un factor de mejora",
+        "MOOD_PRODUCTIVITY_OVER_TIME": "Estado de ánimo y productividad a lo largo del tiempo.",
+        "NO_ADDITIONAL_DATA_YET": "No se han recopilado datos adicionales todavía. Use el formulario en el resumen diario \"Evaluación\" del panel para hacerlo.",
+        "OBSTRUCTION_SELECTION_COUNT": "Número de veces que se seleccionó un factor de obstrucción",
+        "TASKS_DONE_CREATED": "Tareas (hecho / creado)",
+        "TIME_ESTIMATED": "Tiempo estimado",
+        "TIME_SPENT": "Tiempo usado"
+      },
+      "EVAL_FORM": {
+        "HELP_H1": "¿Por qué debería importarme?",
+        "HELP_LINK_TXT": "Ir a la sección de métricas.",
+        "HELP_P1": "¡Hora de una pequeña autoevaluación! Sus respuestas aquí se guardan y le proporcionan un poco de estadísticas sobre cómo trabaja en la sección de métricas. Además, las sugerencias para mañana aparecerán sobre su lista de tareas al día siguiente.",
+        "HELP_P2": "La intención es que no se trate de calcular métricas exactas o de ser tan eficiente como una máquina en todo lo que haga, sino de mejorar cómo se siente con respecto a su trabajo. Puede ser útil evaluar los puntos de dolor en su rutina diaria, así como también encontrar factores que lo ayuden. Esperando que sea un poco sistemático al respecto, ayudará a tener un mejor control de estos y a mejorar lo que pueda.",
+        "IMPROVEMENTS": "¿Qué mejoró tu productividad?",
+        "IMPROVEMENTS_TOMORROW": "¿Qué podrías hacer para mejorar mañana?",
+        "MOOD": "¿Cómo te sientes?",
+        "MOOD_HINT": "1: horrible - 10: espléndido",
+        "NOTES": "Notas para mañana",
+        "OBSTRUCTIONS": "¿Qué obstaculizó tu productividad?",
+        "PRODUCTIVITY": "¿Qué tan eficiente trabajaste?",
+        "PRODUCTIVITY_HINT": "1: Ni siquiera he comenzado - 10: Enormemente eficiente"
+      },
+      "SNACK": {
+        "SAVE_METRIC": "Métrica guardada exitosamente"
+      }
+    },
+    "NOTE": {
+      "ADD_REMINDER": "Agregar recordatorio",
+      "D_ADD": {
+        "DATETIME_LABEL": "Fecha y hora para recordatorio (opcional)",
+        "NOTE_LABEL": "Introduzca algún texto para guardar como nota ..."
+      },
+      "D_ADD_REMINDER": {
+        "E_ENTER_TITLE": "Necesitas ingresar un título",
+        "L_DATETIME": "Fecha y hora para recordatorio",
+        "L_TITLE": "Título para la notificación",
+        "TITLE_ADD": "Añadir recordatorio para la nota",
+        "TITLE_EDIT": "Editar recordatorio para nota"
+      },
+      "D_VIEW_REMINDER": {
+        "SNOOZE": "Posponer para {{time}}",
+        "TITLE": "Nota"
+      },
+      "EDIT_REMINDER": "Editar recordatorio",
+      "NOTES_CMP": {
+        "ADD_BTN": "Añadir nueva nota",
+        "DROP_TO_ADD": "Suelta aquí para agregar una nueva nota"
+      },
+      "NOTE_CMP": {
+        "DISABLE_PARSE": "Deshabilitar el análisis de rebajas",
+        "ENABLE_PARSE": "Habilitar el análisis de rebajas"
+      },
+      "REMOVE_REMINDER": "Quitar recordatorio",
+      "SNACK": {
+        "ADDED_REMINDER": "Añadido recordatorio para la nota",
+        "DELETED_REMINDER": "Recordatorio eliminado para nota",
+        "UPDATED_REMINDER": "Recordatorio actualizado para nota"
+      },
+      "UPDATE_REMINDER": "Recordatorio de actualización"
+    },
+    "POMODORO": {
+      "BACK_TO_WORK": "¡Volver al trabajo!",
+      "BREAK_IS_DONE": "Tu descanso está hecho!",
+      "ENJOY_YOURSELF": "Diviértete, muévete, vuelve en:",
+      "FINISH_SESSION_X": "¡Has completado exitosamente la sesión <strong>{{nr}}</strong>!",
+      "NOTIFICATION": {
+        "BREAK_X_START": "Pomodoro: ¡Comenzó el descanso {{nr}} !",
+        "SESSION_X_START": "Pomodoro: Sesión {{nr}} comenzó!"
+      },
+      "SKIP_BREAK": "Skip break",
+      "SNACK": {
+        "SESSION_X_START": "Pomodoro: Sesión {{nr}} comenzó!"
+      }
+    },
+    "PROCRASTINATION": {
+      "BACK_TO_WORK": "¡Volver al trabajo!",
+      "COMP": {
+        "INTRO": "Mostrarse algo de compasión es siempre una gran idea. Mejora su sentimiento de autoestima, fomenta las emociones positivas y puede ayudarlo a superar la postergación, por supuesto. Prueba un poco de ejercicio:",
+        "L1": "Siéntate un poco y estírate, si quieres, cálmate un poco.",
+        "L2": "Intenta escuchar los pensamientos y sentimientos que surgen.",
+        "L3": "¿Te estás respondiendo a ti mismo de la misma manera que responderías a un amigo?",
+        "L4": "Si la respuesta es no, imagina a tu amigo en tu situación. ¿Qué les dirías a ellos? ¿Qué harías por ellos?",
+        "OUTRO": "Más ejercicios <a href=\"https://drsoph.com/blog/2018/9/17/3-exercises-in-self-compassion\" target=\"_blank\">se pueden encontrar aquí</a> o en <a href=\"https://www.google.com/search?q=self+compassion+exercises&oq=self+compassion+excers&aqs=chrome.1.69i57j0l5.4303j0j7&sourceid=chrome&ie=UTF-8\" target=\"_blank\">google</a>.",
+        "TITLE": "Auto compasión"
+      },
+      "CUR": {
+        "INTRO": "La dilación es interesante, ¿no? No tiene sentido hacerlo. No en su interés a largo plazo en absoluto. Pero todavía todo el mundo lo hace. Disfruta y explora!",
+        "L1": "¿Qué sentimientos están provocando tu tentación de dilatar?",
+        "L2": "¿Dónde los sientes en tu cuerpo?",
+        "L3": "¿A qué te recuerdan?",
+        "L4": "¿Qué sucede con el pensamiento de postergarlo mientras lo observas? ¿Se intensifica? ¿Disipar? ¿Porque surgen otras emociones?",
+        "L5": "¿Cómo están cambiando las sensaciones en tu cuerpo a medida que continúas descansando tu conciencia en ellas?",
+        "TITLE": "Curiosidad"
+      },
+      "H1": "¡Cállate un poco!",
+      "P1": "En primer lugar relajarse! Todo el mundo lo hace de vez en cuando. Y si no estás haciendo lo que debes, ¡al menos deberías disfrutarlo! Entonces revisa las secciones de abajo para algo útil.",
+      "P2": "Si desea saber más sobre la ciencia detrás de todo esto, puedo recomendar <a href=\"https://www.nytimes.com/2019/03/25/smarter-living/why-you-procrastinate-it-has-nothing-to-do-with-self-control.html\" target=\"_blank\">este artículo</a> , de los cuales se encuentran algunos de los ejercicios.",
+      "P3": "Recuerde: la dilación es un problema de regulación emocional, no un problema de gestión del tiempo.",
+      "REFRAME": {
+        "INTRO": "Piense en lo que podría ser positivo acerca de la tarea a pesar de su.",
+        "TITLE": "Reencuadre",
+        "TL1": "¿Qué podría ser interesante al respecto?",
+        "TL2": "¿Qué es ganar si lo completas?",
+        "TL3": "¿Cómo te sentirás si lo completas?"
+      },
+      "SPLIT_UP": {
+        "INTRO": "Divide la tarea en tantos trozos pequeños como puedas.",
+        "OUTRO": "¿Hecho? Entonces piensa en ello. ¿Qué sería, estrictamente teórico, lo primero que haría <i>si</i> comenzara a trabajar en la tarea? Solo piensa en ello...",
+        "TITLE": "¡Dividelo!"
+      }
+    },
+    "PROJECT": {
+      "BANNER": {
+        "FINISH_DAY": {
+          "FINISH_DAY": "Fin de dia",
+          "MSG": "Olvidaste terminar tu día en {{dayStr}}"
+        }
+      },
+      "D_CREATE": {
+        "CREATE": "Crear proyecto",
+        "EDIT": "Editar proyecto",
+        "ISSUE_PROVIDER_CFGS": "Configuración del proveedor de problemas (opcional)",
+        "SETUP_GIT": "Configurar la integración de Github",
+        "SETUP_JIRA": "Configurar Jira Integration"
+      },
+      "FORM": {
+        "D_IS_DARK_THEME": "No se utilizará si el sistema admite el modo oscuro global.",
+        "HELP": "Configuraciones muy básicas para tu proyecto.",
+        "L_IS_DARK_THEME": "Usa el tema oscuro",
+        "L_IS_REDUCED_THEME": "Usar IU reducida (sin cuadros alrededor de las tareas)",
+        "L_THEME_COLOR": "Color del tema",
+        "L_TITLE": "Título",
+        "TITLE": "Configuración del proyecto y tema"
+      },
+      "SNACK": {
+        "ARCHIVED": "Proyecto Archivado",
+        "CREATED": "Proyecto creado <strong>{{title}}</strong>. Puedes seleccionarlo desde el menú en la parte superior izquierda.",
+        "DELETED": "Proyecto eliminado",
+        "E_EXISTS": "El proyecto \"{{title}}\" ya existe",
+        "E_INVALID_FILE": "Datos inválidos para archivo de proyecto",
+        "ISSUE_PROVIDER_UPDATED": "Configuraciones actualizadas del proyecto para <strong>{{issueProviderKey}}</strong>",
+        "UNARCHIVED": "Proyecto no archivado",
+        "UPDATED": "Configuraciones actualizadas del proyecto"
+      }
+    },
+    "REMINDER": {
+      "SNACK_REMINDER_ERR": "Error para la interfaz de recordatorio"
+    },
+    "SIMPLE_TASK_EXPORT": {
+      "CLOSE": "Cerrar",
+      "COPY_TO_CLIPBOARD": "Copiar al portapapeles",
+      "DATE": "Fecha",
+      "ESTIMATE": "ESTIMAR",
+      "FIELDS_TO_DISPLAY": "Campos para mostrar",
+      "LIST_DONE_TASKS_ONLY": "Listar solo las tareas realizadas",
+      "LIST_SUB_TASKS": "Listar sub tareas",
+      "LIST_WORKED_ON_TODAY_TASKS_ONLY": "Lista trabajada en tareas de hoy solamente",
+      "M_TITLE": "Exportar lista de tareas",
+      "NO_DATA": "- Sin datos -",
+      "OPTIONS": "Opciones",
+      "R": {
+        "HALF": "media horas completas",
+        "HOUR": "horas completas",
+        "QUARTER": "cuartos completos"
+      },
+      "SAVE_TO_FILE": "Guardar en archivo",
+      "SEPARATE_FIELDS_BY": "Campos separados por",
+      "SHOW_AS_TEXT": "Mostrar como texto",
+      "SNACK_TO_CLIPPBOARD": "Copiado al portapapeles",
+      "TIME_AS_MILLISECONDS": "El tiempo como milisegundos.",
+      "TIME_ESTIMATE": "Tiempo estimado",
+      "TIME_SPENT": "Tiempo usado",
+      "TITLE": "Título"
+    },
+    "TASK_REPEAT": {
+      "D_CONFIRM_REMOVE": {
+        "MSG": "La eliminación de la configuración de repetición convertirá todas las instancias anteriores de esta tarea a tareas normales. Estas seguro que deseas continuar",
+        "OK": "Quitar completamente"
+      }
+    },
+    "WORKLOG": {
+      "D_CONFIRM_RESTORE": "¿Está seguro de que desea mover la tarea <strong>\"{{title}}\"</strong> a su lista de tareas de hoy?"
     }
   },
   "FILE_IMEX": {
@@ -257,8 +607,15 @@
   },
   "G": {
     "CANCEL": "Cancelar",
+    "CLOSE": "Cerrar",
+    "DELETE": "Borrar",
     "DISMISS": "Despedir",
-    "OK": "",
+    "DO_IT": "¡Hazlo!",
+    "LOGIN": "Iniciar sesión",
+    "LOGOUT": "Cerrar sesión",
+    "NEXT": "Siguiente",
+    "OK": "De acuerdo",
+    "PREVIOUS": "Anterior",
     "SAVE": "Salvar",
     "TITLE": "Título"
   },
@@ -284,6 +641,11 @@
     "BREAK_LABEL": "Descansos (nr / tiempo)",
     "CELEBRATE": "¡Tómate un momento para celebrar <i>!</i>",
     "CLEAR_ALL_CONTINUE": "Borrar todo listo y continuar",
+    "D_CONFIRM_APP_CLOSE": {
+      "CANCEL": "No, solo limpia las tareas",
+      "MSG": "Tu trabajo está hecho. ¡Tiempo de ir a casa!",
+      "OK": "¡Ey ey! ¡Apagar!"
+    },
     "EVALUATION": "Evaluación",
     "EXPORT_TASK_LIST": "Lista de tareas de exportación",
     "GOOGLE_SHEET": "Hoja de Google",
@@ -315,11 +677,24 @@
     "ARCHIVE_PROJECT": "Proyecto de archivo",
     "CREATE_NEW": "Crear nuevo",
     "DELETE_PROJECT": "Eliminar proyecto",
+    "D_CONFIRM_ARCHIVE": {
+      "MSG": "¿Seguro que quieres archivar este proyecto? Los proyectos archivados ya no se mostrarán en el menú y no podrá acceder a ninguno de sus datos sin restaurarlos. Se recomienda que haga una copia de seguridad de sus datos antes de hacer esto.",
+      "OK": "archivo"
+    },
+    "D_CONFIRM_DELETE": {
+      "MSG": "¿Estás seguro de que quieres eliminar este proyecto? Se recomienda hacer una copia de seguridad de sus datos antes de hacer esto.",
+      "OK": "Borrar"
+    },
+    "D_CONFIRM_UNARCHIVE": {
+      "MSG": "¿Estás seguro de que quieres desarchivar este proyecto?",
+      "OK": "Desarchivar"
+    },
     "EDIT_PROJECT": "Editar proyecto",
     "EXPORT_PROJECT": "Proyecto de exportación",
     "GITHUB_CONFIGURED": "Integración de Github configurada",
     "IMPORT_FROM_FILE": "Importar desde archivo",
     "JIRA_CONFIGURED": "Integración de Jira Configurada",
+    "SNACK_INVALID_JSON": "Json no válido para el archivo de proyecto",
     "TITLE": "Descripción del proyecto",
     "UN_ARCHIVE_PROJECT": "Proyecto Unarchive"
   },
@@ -334,6 +709,10 @@
       "IMPORTING": "Importando datos",
       "SUCCESS": "Datos importados"
     }
+  },
+  "V": {
+    "E_1TO10": "Por favor, introduzca un valor entre 1 y 10",
+    "E_DATETIME": "El valor ingresado no es una fecha y hora!"
   },
   "WW": {
     "ADD_MORE": "Añadir más",

@@ -6,6 +6,10 @@
     "SCHEDULED": "Geplant",
     "TITLE": "Rückstand"
   },
+  "DATETIME_INPUT": {
+    "IN": "in {{time}}",
+    "TOMORROW": "morgen {{time}}"
+  },
   "F": {
     "ATTACHMENT": {
       "DIALOG_EDIT": {
@@ -66,6 +70,10 @@
         "IS_SEARCH_ISSUES_FROM_GITHUB": "Zeigen Sie Probleme von Git als Vorschläge an, wenn Sie neue Aufgaben hinzufügen",
         "REPO": "\"Benutzername / Repositoryname\" für das Git-Repository, das Sie verfolgen möchten"
       },
+      "FORM_SECTION": {
+        "HELP": "<p>Hier können Sie SuperProductivity so konfigurieren, dass offene GithHub-Probleme für ein bestimmtes Repository im Aufgabenerstellungsbereich in der Tagesplanungsansicht aufgelistet werden. Sie werden als Vorschläge aufgeführt und enthalten einen Link zum Thema sowie weitere Informationen dazu.</p> <p>Außerdem können Sie alle offenen Probleme automatisch zu Ihrem Aufgaben-Backlog hinzufügen und synchronisieren.</p>",
+        "TITLE": "github"
+      },
       "ISSUE_CONTENT": {
         "ASSIGNEE": "Zugewiesen",
         "AT": "am",
@@ -77,6 +85,9 @@
         "WRITE_A_COMMENT": "Schreibe einen Kommentar"
       },
       "SNACK": {
+        "ERR_NETWORK": "Github: Anforderung aufgrund eines clientseitigen Netzwerkfehlers fehlgeschlagen",
+        "ERR_NOT_CONFIGURED": "Github: Ist nicht richtig konfiguriert",
+        "ERR_REQUEST": "Github: API hat {{statusCode}}zurückgegeben. {{errorMsg}}",
         "IMPORTED_MULTIPLE_ISSUES": "Github: {{issuesLength}} neue Probleme von Git in das Backlog importiert",
         "IMPORTED_SINGLE_ISSUE": "Github: Importiertes Problem \"{{issueText}}\" von Git zu Backlog",
         "ISSUE_DELETED_OR_CLOSED": "Github: Das Problem \"{{issueText}}\" scheint auf git gelöscht oder geschlossen zu sein",
@@ -89,6 +100,9 @@
       }
     },
     "GOOGLE": {
+      "BANNER": {
+        "AUTH_FAIL": "GoogleApi: Authentifizierung fehlgeschlagen. Bitte versuchen Sie erneut, sich anzumelden."
+      },
       "DIALOG": {
         "CREATE_SYNC_FILE": "Google Drive: Es wurde keine Datei mit dem Namen <strong>\"{{fileName}}\"</strong> gefunden. <strong>Erstelle</strong> es als Synchronisierungsdatei auf Google Drive?",
         "USE_EXISTING_SYNC_FILE": "Google Drive: <strong>vorhandene</strong> Datei <strong>\"{{fileName}}\"</strong> als Synchronisierungsdatei verwenden? Wenn nicht, ändern Sie bitte den Namen der Sync-Datei."
@@ -124,6 +138,7 @@
         "LOGIN": "Melden Sie sich bei Google an",
         "LOGOUT": "Ausloggen",
         "OPEN_SPREADSHEET": "Öffnen Sie die Tabelle",
+        "OPTIONS": "Optionen",
         "READ_SPREADSHEET": "Tabellenkalkulation lesen",
         "ROUND_END_TIME_TO": "Runde Endzeit bis",
         "ROUND_HALF": "volle halbe stunden",
@@ -145,7 +160,342 @@
         "REMOTE_UP_TO_DATE": "Google Drive: Remote-Daten bereits aktuell",
         "SUCCESS": "Google Drive: Backup erfolgreich gespeichert",
         "SYNCING": "Google Drive: Synchronisieren"
+      },
+      "SNACK_API": {
+        "ERR": "GoogleApi-Fehler: {{errStr}}",
+        "ERR_NO_FILE_ID": "GoogleApi: Keine Datei-ID angegeben",
+        "ERR_NO_FILE_NAME": "GoogleApi: Es wurde kein Dateiname angegeben",
+        "SUCCESS_LOGIN": "GoogleApi: Anmeldung erfolgreich"
+      },
+      "SYNC_CFG": {
+        "AUTO_LOGIN": "Automatische Anmeldung beim Start der App",
+        "AUTO_SYNC": "Daten automatisch mit der Fernbedienung synchronisieren",
+        "BACKUP_NOW": "Jetzt sichern",
+        "COMPRESS": "Daten komprimieren",
+        "ENABLE": "Aktivieren Sie die Synchronisierung über Google Drive",
+        "LOAD_FROM": "Laden von GDrive",
+        "LOAD_ON_STARTUP": "Laden Sie entfernte Daten beim Start",
+        "NOTIFY": "Benachrichtigen Sie beim Synchronisieren",
+        "SYNC_FILE_NAME": "Dateiname synchronisieren",
+        "SYNC_INTERVAL": "Synchronisierungsintervall",
+        "UPDATE_SYNC_FILE": "Synchronisierungsdatei aktualisieren"
       }
+    },
+    "JIRA": {
+      "BANNER": {
+        "BLOCK_ACCESS_MSG": "Jira: Um zu verhindern, dass das API geschlossen wird, wurde der Zugriff von Super Productivity blockiert. Sie sollten wahrscheinlich Ihre Jira-Einstellungen überprüfen!",
+        "BLOCK_ACCESS_UNBLOCK": "Entsperren"
+      },
+      "CFG_CMP": {
+        "ALWAYS_ASK": "Immer offener Dialog",
+        "DONE": "Status zum Abschließen der Aufgabe",
+        "DO_NOT": "Übergang nicht",
+        "ENABLE": "Aktivieren Sie die Jira-Integration",
+        "ENABLE_TRANSITIONS": "Aktivieren Sie das Transition Handling",
+        "IN_PROGRESS": "Status für Startaufgabe",
+        "LOAD_SUGGESTIONS": "Vorschläge laden",
+        "MAP_CUSTOM_FIELDS": "Benutzerdefinierte Felder zuordnen",
+        "MAP_CUSTOM_FIELDS_INFO": "Leider werden einige Daten von Jira in benutzerdefinierten Feldern gespeichert, die für jede Installation unterschiedlich sind. Wenn Sie diese Daten einschließen möchten, müssen Sie das entsprechende benutzerdefinierte Feld auswählen.",
+        "OPEN": "Status für pausierende Aufgabe",
+        "SELECT_ISSUE_FOR_TRANSITIONS": "Wählen Sie Problem, um verfügbare Übergänge zu laden",
+        "STORY_POINTS": "Story-Punkte"
+      },
+      "DIALOG_CONFIRM_ASSIGNMENT": {
+        "MSG": "<strong>{{summary}}</strong> ist derzeit <strong>{{assignee}}</strong>zugewiesen. Möchten Sie es sich selbst zuweisen?",
+        "OK": "TU es!"
+      },
+      "DIALOG_INITIAL": {
+        "TITLE": "Richten Sie Jira für Project ein"
+      },
+      "DIALOG_TRANSITION": {
+        "CHOOSE_STATUS": "Wählen Sie den zuzuweisenden Status",
+        "CURRENT_ASSIGNEE": "Derzeitiger Bevollmächtigter:",
+        "CURRENT_STATUS": "Aktueller Status:",
+        "TITLE": "Jira: Update Status",
+        "UPDATE_STATUS": "Update Status"
+      },
+      "DIALOG_WORKLOG": {
+        "CURRENTLY_LOGGED": "Derzeit geloggte Zeit:",
+        "INVALID_DATE": "Der eingegebene Wert ist kein Datum!",
+        "SAVE_WORKLOG": "Speichern Sie das Worklog",
+        "STARTED": "gestartet",
+        "SUBMIT_WORKLOG_FOR": "Senden Sie ein Arbeitsprotokoll an Jira für",
+        "TIME_SPENT": "Zeitaufwand",
+        "TITLE": "Jira: Worklog einreichen"
+      },
+      "DIALOG_WORKdLOG": {
+        "TITLE": "AAA"
+      },
+      "EXTENSION_INFO": "Bitte <a href=\"{{url}}\"> laden Sie die Chrome-Erweiterung</a> herunter, um die Kommunikation mit dem Jira Api zu ermöglichen. Beachten Sie, dass dies für Handys nicht funktioniert.",
+      "FORM": {
+        "IS_AUTO_ADD_TO_BACKLOG": "Fügen Sie ungelöste Probleme aus Github automatisch zum Rückstand hinzu",
+        "IS_AUTO_POLL": "Importierte Git-Probleme automatisch nach Änderungen abfragen",
+        "IS_SEARCH_ISSUES_FROM_GITHUB": "Zeigen Sie Probleme von Git als Vorschläge an, wenn Sie neue Aufgaben hinzufügen",
+        "REPO": "\"Benutzername / Repositoryname\" für das Git-Repository, das Sie verfolgen möchten"
+      },
+      "FORM_ADV": {
+        "AUTO_ADD_BACKLOG_JQL_QUERY": "JQL wird zum automatischen Hinzufügen von Aufgaben zum Backlog verwendet",
+        "IS_ADD_WORKLOG_ON_SUB_TASK_DONE": "Öffnen Sie das Dialogfeld, um das Worklog an jira zu senden, wenn die Unteraufgabe abgeschlossen ist",
+        "IS_AUTO_ADD_TO_BACKLOG": "Fügen Sie dem Jira-Backlog automatisch Probleme hinzu",
+        "IS_AUTO_POLL_TICKETS": "Überprüfen Sie importierte Probleme automatisch auf Änderungen und benachrichtigen Sie",
+        "IS_CHECK_TO_RE_ASSIGN_TICKET_ON_TASK_START": "Prüfen Sie, ob das aktuell bearbeitete Problem dem aktuellen Benutzer zugeordnet ist",
+        "IS_WORKLOG_ENABLED": "Öffnen Sie das Dialogfeld, um das Arbeitsprotokoll an jira zu senden, wenn die Aufgabe erledigt ist",
+        "SEARCH_JQL_QUERY": "JQL-Abfrage für, um die Sucheraufgaben einzuschränken",
+        "USER_ASSIGNEE_NAME": "Name des zu überprüfenden Empfängers"
+      },
+      "FORM_CRED": {
+        "HOST": "Host (z. B .: http://my-host.de:1234)",
+        "PASSWORD": "Token / Passwort",
+        "USER_NAME": "E-Mail / Benutzername"
+      },
+      "FORM_SECTION": {
+        "ADV_CFG": "Erweiterte Konfig",
+        "CREDENTIALS": "REFERENZEN",
+        "HELP_ARR": {
+          "H1": "Grundlegende Einstellung",
+          "H2": "Worklog-Einstellungen",
+          "H3": "Standardübergänge",
+          "P1_1": "Bitte geben Sie einen Anmeldenamen (auf Ihrer Profilseite) und ein <a href=\"https://confluence.atlassian.com/cloud/api-tokens-938839638.html\" target=\"_blank\">API-Token</a> oder Passwort an, falls Sie aus irgendeinem Grund keinen generieren können. Bitte nicht, dass neuere Versionen von jira manchmal nur mit dem Token funktionieren.",
+          "P1_2": "Sie müssen auch eine JQL-Abfrage angeben, die für die Vorschläge zum Hinzufügen von Aufgaben aus Jira verwendet wird. Wenn Sie Hilfe benötigen, besuchen Sie diesen Link <a href=\"https://confluence.atlassian.com/jirasoftwarecloud/advanced-searching-764478330.html\" target=\"_blank\">https://confluence.atlassian.com/jirasoftwarecloud/advanced-searching-764478330.html</a>.",
+          "P1_3": "Sie können auch konfigurieren, ob Sie automatisch (z. B. jedes Mal, wenn Sie die Planungsansicht aufrufen) alle neuen Aufgaben, die durch eine benutzerdefinierte JQL-Abfrage angegeben wurden, zum Backlog hinzufügen möchten.",
+          "P1_4": "Eine weitere Option ist \"Überprüfen, ob das aktuelle Ticket dem aktuellen Benutzer zugewiesen ist\". Wenn aktiviert und Sie starten, wird geprüft, ob Sie diesem Ticket in Jira zugewiesen sind. Wenn dies nicht der Fall ist, wird ein Dialogfeld angezeigt, in dem Sie das Ticket selbst zuweisen können.",
+          "P2_1": "Es gibt verschiedene Möglichkeiten, um festzulegen, wann und wie Sie ein Arbeitsprotokoll senden möchten. Durch Aktivieren von <em>'Dialogfeld \"Arbeitsprotokoll öffnen\" zum Hinzufügen eines Arbeitsprotokolls zu Jira nach Abschluss der Aufgabe'</em> wird ein Dialogfeld zum Hinzufügen eines Arbeitsprotokolls jedes Mal geöffnet, wenn Sie eine Jira-Aufgabe als erledigt markieren. Denken Sie also daran, dass Worklogs zu allen bisher erfassten Daten hinzugefügt werden. Wenn Sie also eine Aufgabe zum zweiten Mal als erledigt markieren, möchten Sie möglicherweise nicht die gesamte Arbeitszeit für die Aufgabe erneut senden.",
+          "P2_2": "<em>'Arbeitsprotokolldialog öffnen, wenn eine Unteraufgabe erledigt ist und nicht für Aufgaben mit Unteraufgaben selbst'</em> öffnet jedes Mal ein Arbeitsprotokolldialogfeld, wenn Sie eine Unteraufgabe eines Jira-Problems als erledigt markieren. Da Sie Ihre Zeit bereits über die Unteraufgaben nachverfolgen, wird kein Dialogfeld geöffnet, sobald Sie die Jira-Aufgabe selbst als erledigt markieren.",
+          "P2_3": "<em>'Aktualisierungen automatisch ohne Dialog an das Worklog senden'</em> macht, was es sagt. Da das mehrmalige Markieren einer Aufgabe dazu führt, dass die gesamte Arbeitszeit zweimal erfasst wird, wird dies nicht empfohlen.",
+          "P3_1": "Hier können Sie Ihre Standardübergänge neu konfigurieren. Jira ermöglicht eine umfassende Konfiguration von Übergängen, die normalerweise als unterschiedliche Spalten auf Ihrem Jira Agile Board wirksam werden. Wir können nicht davon ausgehen, wo und wann Sie Ihre Aufgaben übertragen müssen und müssen sie manuell einstellen."
+        }
+      },
+      "ISSUE_CONTENT": {
+        "ASSIGNEE": "Bevollmächtigter",
+        "AT": "beim",
+        "ATTACHMENTS": "Anlagen",
+        "CHANGED": "Geändert",
+        "COMMENTS": "Bemerkungen",
+        "COMPONENTS": "Komponenten",
+        "DESCRIPTION": "Beschreibung",
+        "LIST_OF_CHANGES": "Liste der Änderungen",
+        "MARK_AS_CHECKED": "Markiere Updates als markiert",
+        "ON": "auf",
+        "STATUS": "Status",
+        "STORY_POINTS": "Story-Punkte",
+        "SUMMARY": "Zusammenfassung",
+        "WORKLOG": "Arbeitsprotokoll",
+        "WRITE_A_COMMENT": "Schreibe einen Kommentar"
+      },
+      "SNACK": {
+        "EXTENSION_NOT_LOADED": "Super Productivity Extension nicht geladen. Das Neuladen der Seite könnte helfen",
+        "IMPORTED_MULTIPLE_ISSUES": "Jira: {{issuesLength}} neue Probleme von Jira in den Rückstand importiert",
+        "IMPORTED_SINGLE_ISSUE": "Jira: Importierte Ausgabe \"{{issueText}}\" von Jira in den Rückstand",
+        "INSUFFICIENT_SETTINGS": "Unzureichende Einstellungen für Jira",
+        "ISSUE_NO_UPDATE_REQUIRED": "Jira: \"{{issueText}}\" ist bereits aktuell",
+        "ISSUE_UPDATE": "Jira: Aktualisierte Daten für \"{{issueText}}\"",
+        "MANUAL_UPDATE_ISSUE_SUCCESS": "Jira: Aktualisierte Daten für \"{{issueText}}\"",
+        "MISSING_ISSUE_DATA": "Jira: Aufgaben mit fehlenden Issue-Daten gefunden. Neuladen.",
+        "NO_VALID_TRANSITION": "Jira: Kein gültiger Übergang konfiguriert",
+        "POLLING": "Jira: Änderungen für Probleme abrufen",
+        "TIMED_OUT": "Jira: Zeitüberschreitung bei der Anforderung",
+        "TRANSITION_SUCCESS": "Jira: Setzen Sie das Problem {{issueKey}} auf <strong>{{chosenTransition}}</strong>.",
+        "UNABLE_TO_REASSIGN": "Jira: Ticket kann nicht neu zugewiesen werden, da Sie keinen Benutzernamen angegeben haben. Bitte besuchen Sie die Einstellungen."
+      },
+      "STEPPER": {
+        "CREDENTIALS": "REFERENZEN",
+        "DONE": "Sie sind jetzt fertig.",
+        "LOGIN_SUCCESS": "Anmeldung erfolgreich!",
+        "TEST_CREDENTIALS": "Anmeldeinformationen testen",
+        "WELCOME_USER": "Willkommen {{user}}!"
+      }
+    },
+    "METRIC": {
+      "CMP": {
+        "AVG_BREAKS_PER_DAY": "Durchschn. Pausen pro Tag",
+        "AVG_TASKS_PER_DAY_WORKED": "Durchschn. Aufgaben pro Tag gearbeitet",
+        "AVG_TIME_SPENT_ON_BREAKS": "Durchschn. Zeit für Pausen",
+        "AVG_TIME_SPENT_PER_DAY": "Durchschn. Zeitaufwand pro Tag",
+        "AVG_TIME_SPENT_PER_TASK": "Durchschn. Zeitaufwand pro Aufgabe",
+        "COUNTING_SUBTASKS": "(Zählen von Unteraufgaben)",
+        "DAYS_WORKED": "Tage gearbeitet",
+        "IMPROVEMENT_SELECTION_COUNT": "Häufigkeit, mit der ein Verbesserungsfaktor ausgewählt wurde",
+        "MOOD_PRODUCTIVITY_OVER_TIME": "Stimmung und Produktivität im Laufe der Zeit",
+        "NO_ADDITIONAL_DATA_YET": "Es wurden noch keine zusätzlichen Daten gesammelt. Verwenden Sie dazu das Formular in der täglichen Zusammenfassung \"Bewertung\".",
+        "OBSTRUCTION_SELECTION_COUNT": "Häufigkeit, mit der ein Hindernisfaktor ausgewählt wurde",
+        "TASKS_DONE_CREATED": "Aufgaben (erledigt / erstellt)",
+        "TIME_ESTIMATED": "Geschätzte Zeit",
+        "TIME_SPENT": "Zeitaufwand"
+      },
+      "EVAL_FORM": {
+        "HELP_H1": "Warum sollte es mich kümmern?",
+        "HELP_LINK_TXT": "Gehen Sie zum Abschnitt \"Kennzahlen\"",
+        "HELP_P1": "Zeit für eine kleine Selbsteinschätzung! Ihre Antworten hier werden gespeichert und liefern Ihnen ein bisschen Statistik darüber, wie Sie im Abschnitt \"Metriken\" arbeiten. Darüber hinaus erscheinen die Vorschläge für morgen am nächsten Tag über Ihrer Aufgabenliste.",
+        "HELP_P2": "Hier geht es weniger darum, exakte Messdaten zu berechnen oder maschinell so effizient zu werden, wie Sie es tun, als vielmehr darum, Ihre Einstellung zu Ihrer Arbeit zu verbessern. Es kann hilfreich sein, die Schmerzpunkte in Ihrem Tagesablauf zu bewerten und Faktoren zu finden, die Ihnen helfen. Ein bisschen systematisch zu sein, hilft hoffentlich dabei, diese besser in den Griff zu bekommen und zu verbessern, was Sie können.",
+        "IMPROVEMENTS": "Was hat Ihre Produktivität verbessert?",
+        "IMPROVEMENTS_TOMORROW": "Was könnten Sie morgen tun, um sich zu verbessern?",
+        "MOOD": "Wie fühlst du dich?",
+        "MOOD_HINT": "1: Schrecklich - 10: Großartig",
+        "NOTES": "Notizen für morgen",
+        "OBSTRUCTIONS": "Was hat Ihre Produktivität beeinträchtigt?",
+        "PRODUCTIVITY": "Wie effizient haben Sie gearbeitet?",
+        "PRODUCTIVITY_HINT": "1: Noch nicht einmal angefangen - 10: Enorm effizient"
+      },
+      "SNACK": {
+        "SAVE_METRIC": "Metrik erfolgreich gespeichert"
+      }
+    },
+    "NOTE": {
+      "ADD_REMINDER": "Erinnerung hinzufügen",
+      "D_ADD": {
+        "DATETIME_LABEL": "Datum und Uhrzeit zur Erinnerung (optional)",
+        "NOTE_LABEL": "Geben Sie einen Text ein, um ihn als Notiz zu speichern ..."
+      },
+      "D_ADD_REMINDER": {
+        "E_ENTER_TITLE": "Sie müssen einen Titel eingeben",
+        "L_DATETIME": "Datum und Uhrzeit zur Erinnerung",
+        "L_TITLE": "Titel zur Benachrichtigung",
+        "TITLE_ADD": "Erinnerung für Notiz hinzufügen",
+        "TITLE_EDIT": "Erinnerung für Notiz bearbeiten"
+      },
+      "D_VIEW_REMINDER": {
+        "SNOOZE": "Snooze für {{time}}",
+        "TITLE": "Hinweis"
+      },
+      "EDIT_REMINDER": "Erinnerung bearbeiten",
+      "NOTES_CMP": {
+        "ADD_BTN": "Neue Notiz hinzufügen",
+        "DROP_TO_ADD": "Klicken Sie hier, um eine neue Notiz hinzuzufügen"
+      },
+      "NOTE_CMP": {
+        "DISABLE_PARSE": "Deaktivieren Sie die Abschriftenanalyse",
+        "ENABLE_PARSE": "Markdown-Analyse aktivieren"
+      },
+      "REMOVE_REMINDER": "Erinnerung entfernen",
+      "SNACK": {
+        "ADDED_REMINDER": "Erinnerung für Notiz hinzugefügt",
+        "DELETED_REMINDER": "Erinnerung für Notiz gelöscht",
+        "UPDATED_REMINDER": "Erinnerung für Notiz aktualisiert"
+      },
+      "UPDATE_REMINDER": "Erinnerung aktualisieren"
+    },
+    "POMODORO": {
+      "BACK_TO_WORK": "Zurück an die Arbeit!",
+      "BREAK_IS_DONE": "Deine Pause ist geschafft!",
+      "ENJOY_YOURSELF": "Amüsieren Sie sich, bewegen Sie sich, kommen Sie zurück in:",
+      "FINISH_SESSION_X": "Sie haben die Sitzung <strong>{{nr}}</strong>erfolgreich beendet!",
+      "NOTIFICATION": {
+        "BREAK_X_START": "Pomodoro: Pause {{nr}} gestartet!",
+        "SESSION_X_START": "Pomodoro: Sitzung {{nr}} gestartet!"
+      },
+      "SKIP_BREAK": "Pause überspringen",
+      "SNACK": {
+        "SESSION_X_START": "Pomodoro: Sitzung {{nr}} gestartet!"
+      }
+    },
+    "PROCRASTINATION": {
+      "BACK_TO_WORK": "Zurück an die Arbeit!",
+      "COMP": {
+        "INTRO": "Es ist immer eine großartige Idee, sich selbst Mitgefühl zu zeigen. Es verbessert Ihr Selbstwertgefühl, fördert positive Emotionen und kann Ihnen natürlich dabei helfen, den Aufschub zu überwinden. Probieren Sie eine kleine Übung aus:",
+        "L1": "Setzen Sie sich etwas hin und strecken Sie sich, wenn Sie möchten, beruhigen Sie sich ein wenig",
+        "L2": "Versuchen Sie, auf die aufkommenden Gedanken und Gefühle zu hören",
+        "L3": "Reagieren Sie auf sich selbst so, wie Sie auf einen Freund reagieren würden?",
+        "L4": "Wenn die Antwort nein lautet, stellen Sie sich Ihren Freund in Ihrer Situation vor. Was würdest du ihnen sagen? Was würdest du für sie tun?",
+        "OUTRO": "Weitere Übungen <a href=\"https://drsoph.com/blog/2018/9/17/3-exercises-in-self-compassion\" target=\"_blank\">finden Sie hier</a> oder auf <a href=\"https://www.google.com/search?q=self+compassion+exercises&oq=self+compassion+excers&aqs=chrome.1.69i57j0l5.4303j0j7&sourceid=chrome&ie=UTF-8\" target=\"_blank\">Google</a>.",
+        "TITLE": "Selbstmitleid"
+      },
+      "CUR": {
+        "INTRO": "Aufschub ist interessant, nicht wahr? Es macht keinen Sinn, es zu tun. Überhaupt nicht in Ihrem langfristigen Interesse. Aber immer noch macht es jeder. Viel Spaß beim Erkunden!",
+        "L1": "Welche Gefühle erregen Ihre Versuchung, etwas hinauszuschieben?",
+        "L2": "Wo fühlst du sie in deinem Körper?",
+        "L3": "Woran erinnern sie dich?",
+        "L4": "Was passiert mit dem Gedanken des Aufschiebens, wenn Sie es beobachten? Wird es intensiver? Zerstreuen? Andere Emotionen aufkommen lassen?",
+        "L5": "Wie verändern sich die Empfindungen in Ihrem Körper, während Sie sich weiterhin darauf konzentrieren?",
+        "TITLE": "Neugierde"
+      },
+      "H1": "Schneiden Sie sich etwas lockerer!",
+      "P1": "Zunächst einmal entspannen! Jeder tut es ab und zu. Und wenn Sie nicht das tun, was Sie sollten, sollten Sie es zumindest genießen! In den folgenden Abschnitten finden Sie hilfreiche Informationen.",
+      "P2": "Wenn Sie hier mehr über die Wissenschaft erfahren möchten, kann ich Ihnen <a href=\"https://www.nytimes.com/2019/03/25/smarter-living/why-you-procrastinate-it-has-nothing-to-do-with-self-control.html\" target=\"_blank\">diesen Artikel</a> empfehlen, aus dem einige der Übungen stammen.",
+      "P3": "Denken Sie daran: Aufschub ist ein Problem der Emotionsregulation, kein Problem des Zeitmanagements.",
+      "REFRAME": {
+        "INTRO": "Überlegen Sie, was trotz allem an der Aufgabe positiv sein könnte.",
+        "TITLE": "Aktualisieren",
+        "TL1": "Was könnte daran interessant sein?",
+        "TL2": "Was ist zu gewinnen, wenn Sie es abschließen?",
+        "TL3": "Wie wirst du dich dabei fühlen, wenn du es vervollständigst?"
+      },
+      "SPLIT_UP": {
+        "INTRO": "Teilen Sie die Aufgabe in so viele kleine Teile wie möglich auf.",
+        "OUTRO": "Erledigt? Dann denke darüber nach. Was wäre - rein theoretisch - das erste, was Sie <i>tun würden, wenn Sie</i> mit der Arbeit an der Aufgabe beginnen würden? Denken Sie nur darüber nach ...",
+        "TITLE": "Teile es auf!"
+      }
+    },
+    "PROJECT": {
+      "BANNER": {
+        "FINISH_DAY": {
+          "FINISH_DAY": "Tag beenden",
+          "MSG": "Sie haben vergessen, Ihren Tag am {{dayStr}}zu beenden."
+        }
+      },
+      "D_CREATE": {
+        "CREATE": "Projekt erstellen",
+        "EDIT": "Projekt bearbeiten",
+        "ISSUE_PROVIDER_CFGS": "Providerkonfigurationen ausgeben (optional)",
+        "SETUP_GIT": "Einrichten der Github-Integration",
+        "SETUP_JIRA": "Jira-Integration einrichten"
+      },
+      "FORM": {
+        "D_IS_DARK_THEME": "Wird nicht verwendet, wenn das System den globalen Dunkelmodus unterstützt.",
+        "HELP": "Sehr grundlegende Einstellungen für Ihr Projekt.",
+        "L_IS_DARK_THEME": "Verwenden Sie dunkles Design",
+        "L_IS_REDUCED_THEME": "Reduzierte Benutzeroberfläche verwenden (keine Kästchen um Aufgaben)",
+        "L_THEME_COLOR": "Farbe des Themas",
+        "L_TITLE": "Titel",
+        "TITLE": "Projekteinstellungen & Thema"
+      },
+      "SNACK": {
+        "ARCHIVED": "Archiviertes Projekt",
+        "CREATED": "Erstelltes Projekt <strong>{{title}}</strong>. Sie können es aus dem Menü oben links auswählen.",
+        "DELETED": "Gelöschtes Projekt",
+        "E_EXISTS": "Projekt \"{{title}}\" existiert bereits",
+        "E_INVALID_FILE": "Ungültige Daten für Projektdatei",
+        "ISSUE_PROVIDER_UPDATED": "Aktualisierte Projekteinstellungen für <strong>{{issueProviderKey}}</strong>",
+        "UNARCHIVED": "Nicht archiviertes Projekt",
+        "UPDATED": "Aktualisierte Projekteinstellungen"
+      }
+    },
+    "REMINDER": {
+      "SNACK_REMINDER_ERR": "Fehler bei der Erinnerungsschnittstelle"
+    },
+    "SIMPLE_TASK_EXPORT": {
+      "CLOSE": "Schließen",
+      "COPY_TO_CLIPBOARD": "In die Zwischenablage kopieren",
+      "DATE": "Datum",
+      "ESTIMATE": "Schätzen",
+      "FIELDS_TO_DISPLAY": "Felder, die angezeigt werden sollen",
+      "LIST_DONE_TASKS_ONLY": "Nur erledigte Aufgaben auflisten",
+      "LIST_SUB_TASKS": "Auflisten von Unteraufgaben",
+      "LIST_WORKED_ON_TODAY_TASKS_ONLY": "Liste hat nur an heutigen Aufgaben gearbeitet",
+      "M_TITLE": "Aufgabenlistenexport",
+      "NO_DATA": "- Keine Daten -",
+      "OPTIONS": "Optionen",
+      "R": {
+        "HALF": "volle halbe stunden",
+        "HOUR": "volle Stunden",
+        "QUARTER": "volle viertel"
+      },
+      "SAVE_TO_FILE": "Speichern unter",
+      "SEPARATE_FIELDS_BY": "Trennen Sie die Felder durch",
+      "SHOW_AS_TEXT": "Als Text anzeigen",
+      "SNACK_TO_CLIPPBOARD": "In die Zwischenablage kopiert",
+      "TIME_AS_MILLISECONDS": "Zeit in Millisekunden",
+      "TIME_ESTIMATE": "Zeitschätzung",
+      "TIME_SPENT": "Zeitaufwand",
+      "TITLE": "Titel"
+    },
+    "TASK_REPEAT": {
+      "D_CONFIRM_REMOVE": {
+        "MSG": "Durch das Entfernen der Wiederholungskonfiguration werden alle vorherigen Instanzen dieser Aufgabe in normale Aufgaben konvertiert. Sind Sie sicher, dass Sie fortfahren möchten",
+        "OK": "Vollständig entfernen"
+      }
+    },
+    "WORKLOG": {
+      "D_CONFIRM_RESTORE": "Möchten Sie die Aufgabe <strong>\"{{title}}\"</strong> wirklich in Ihre heutige Aufgabenliste verschieben?"
     }
   },
   "FILE_IMEX": {
@@ -257,8 +607,15 @@
   },
   "G": {
     "CANCEL": "Abbrechen",
+    "CLOSE": "Schließen",
+    "DELETE": "Löschen",
     "DISMISS": "Verwerfen",
-    "OK": "",
+    "DO_IT": "TU es!",
+    "LOGIN": "Anmeldung",
+    "LOGOUT": "Ausloggen",
+    "NEXT": "Nächster",
+    "OK": "OK",
+    "PREVIOUS": "Bisherige",
     "SAVE": "Speichern",
     "TITLE": "Titel"
   },
@@ -284,6 +641,11 @@
     "BREAK_LABEL": "Pausen (Anzahl / Zeit)",
     "CELEBRATE": "Nehmen Sie sich einen Moment Zeit, um <i>zu feiern!</i>",
     "CLEAR_ALL_CONTINUE": "Alles löschen und fortfahren",
+    "D_CONFIRM_APP_CLOSE": {
+      "CANCEL": "Nein, nur die Aufgaben klären",
+      "MSG": "Ihre Arbeit ist erledigt. Zeit nach Hause zu gehen!",
+      "OK": "Aye Aye! Ausschalten!"
+    },
     "EVALUATION": "Auswertung",
     "EXPORT_TASK_LIST": "Aufgabenliste exportieren",
     "GOOGLE_SHEET": "Google Sheet",
@@ -315,11 +677,24 @@
     "ARCHIVE_PROJECT": "Projekt archivieren",
     "CREATE_NEW": "Erstelle neu",
     "DELETE_PROJECT": "Projekt löschen",
+    "D_CONFIRM_ARCHIVE": {
+      "MSG": "Möchten Sie dieses Projekt wirklich archivieren? Archivierte Projekte werden nicht mehr im Menü angezeigt und Sie können auf keine ihrer Daten mehr zugreifen, ohne sie wiederherzustellen. Es wird empfohlen, dass Sie Ihre Daten sichern, bevor Sie dies tun.",
+      "OK": "Archiv"
+    },
+    "D_CONFIRM_DELETE": {
+      "MSG": "Möchten Sie dieses Projekt wirklich löschen? Es wird empfohlen, Ihre Daten zu sichern, bevor Sie dies tun.",
+      "OK": "Löschen"
+    },
+    "D_CONFIRM_UNARCHIVE": {
+      "MSG": "Möchten Sie dieses Projekt wirklich deinstallieren?",
+      "OK": "Archiv aufheben"
+    },
     "EDIT_PROJECT": "Projekt bearbeiten",
     "EXPORT_PROJECT": "Projekt exportieren",
     "GITHUB_CONFIGURED": "Github-Integration konfiguriert",
     "IMPORT_FROM_FILE": "Aus Datei importieren",
     "JIRA_CONFIGURED": "Jira-Integration konfiguriert",
+    "SNACK_INVALID_JSON": "Ungültiger JSON für Projektdatei",
     "TITLE": "Projektübersicht",
     "UN_ARCHIVE_PROJECT": "Projekt aus dem Archiv entfernen"
   },
@@ -334,6 +709,10 @@
       "IMPORTING": "Daten importieren",
       "SUCCESS": "Daten importiert"
     }
+  },
+  "V": {
+    "E_1TO10": "Bitte geben Sie einen Wert zwischen 1 und 10 ein",
+    "E_DATETIME": "Der eingegebene Wert ist keine Datums- / Uhrzeitangabe!"
   },
   "WW": {
     "ADD_MORE": "Weitere hinzufügen",
