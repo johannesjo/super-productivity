@@ -23,6 +23,22 @@
         "L_IS_DARK_THEME": "Use Dark Theme",
         "D_IS_DARK_THEME": "Won`t be used if system supports global dark mode.",
         "L_IS_REDUCED_THEME": "Use reduced UI (no boxes around tasks)"
+      },
+      "SNACK": {
+        "E_EXISTS": "Project \"{{title}}\" already exists",
+        "E_INVALID_FILE": "Invalid data for project file",
+        "CREATED": "Created project <strong>{{title}}</strong>. You can select it from the menu on the top left.",
+        "DELETED": "Deleted Project",
+        "ARCHIVED": "Archived Project",
+        "UNARCHIVED": "Unarchived project",
+        "ISSUE_PROVIDER_UPDATED":"Updated project settings for <strong>{{issueProviderKey}}</strong>",
+        "UPDATED": "Updated project settings"
+      },
+      "BANNER": {
+        "FINISH_DAY": {
+          "MSG": "You forgot to finish your day on {{dayStr}}",
+          "FINISH_DAY": "Finish Day"
+        }
       }
     },
     "NOTE": {

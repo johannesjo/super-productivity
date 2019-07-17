@@ -299,13 +299,17 @@ export class ProjectService {
     if (isValidProjectExport(data)) {
       const state = await this._persistenceService.project.load();
       if (state.entities[project.id]) {
-        this._snackService.open({type: 'ERROR', msg: `Project "${project.title}" already exists`});
+        this._snackService.open({
+          type: 'ERROR',
+          msg: T.F.PROJECT.SNACK.E_EXISTS,
+          translateParams: {title: project.title}
+        });
       } else {
         await this._persistenceService.restoreCompleteRelatedDataForProject(project.id, relatedModels);
         this.upsert(project);
       }
     } else {
-      this._snackService.open({type: 'ERROR', msg: 'Invalid data for project file'});
+      this._snackService.open({type: 'ERROR', msg: T.F.PROJECT.SNACK.E_INVALID_FILE});
     }
   }
 

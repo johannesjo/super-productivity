@@ -8,7 +8,7 @@
     <mat-icon *ngIf="banner.svgIco"
               [svgIcon]="banner.svgIco"></mat-icon>
 
-    <div [innerHTML]="banner.msg|translate"
+    <div [innerHTML]="banner.msg|translate:banner.translateParams"
          class="message"></div>
   </div>
 
