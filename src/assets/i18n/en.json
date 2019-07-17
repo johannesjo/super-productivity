@@ -545,7 +545,33 @@
       },
       "TASK_LIST": {
       },
-      "TASK": {
+      "CMP": {
+        "TOGGLE_DONE": "Mark as done/undone",
+        "SHOW_UPDATES": "Show updates",
+        "OPEN_ISSUE": "Open issue in a new browser tab",
+        "TRACK_TIME": "Start tracking time",
+        "TRACK_TIME_STOP": "Pause tracking time",
+        "OPEN_TIME": "Estimate time/Add time spent",
+        "TOGGLE_ADDITIONAL": "Show/Hide additional info",
+        "EDIT_REMINDER": "Edit reminder",
+        "TOGGLE_ATTACHMENTS": "Show/Hide attachments",
+        "OPEN_TASK_MENU": "Open task menu",
+        "MARK_DONE": "Mark as done",
+        "MARK_UNDONE": "Mark as undone",
+        "SCHEDULE": "Schedule task",
+        "ADD_SUB_TASK": "Add sub task",
+        "OPEN_ATTACH": "Attach file or link",
+        "UPDATE_ISSUE_DATA": "Update issue data",
+        "MOVE_TO_BACKLOG": "Move to backlog",
+        "MOVE_TO_TODAY": "Move to today's list",
+        "DELETE": "Delete Task",
+        "ADVANCED": "Advanced",
+        "MOVE_TO_OTHER_PROJECT": "Move to other Project",
+        "CONVERT_TO_PARENT_TASK": "Convert to parent Task",
+        "REPEAT_TASK": "Repeat task",
+        "REPEAT_EDIT": "Edit repeat task config",
+        "TOGGLE_SUB_TASK_VISIBILITY": "Toggle sub task visibility",
+        "DROP_ATTACHMENT": "Drop here to attach to \"{{task.title}}\""
       },
       "SUMMARY_TABLE": {
       }
