@@ -15,6 +15,13 @@
       "D_ADD": {
         "NOTE_LABEL": "Enter some text to save as note...",
         "DATETIME_LABEL": "Datetime for reminder (optional)"
+      },
+      "D_ADD_REMINDER": {
+        "TITLE_ADD": "Add reminder for note",
+        "TITLE_EDIT": "Edit reminder for note",
+        "L_TITLE": "Title for notification",
+        "E_ENTER_TITLE": "You need to enter a title",
+        "L_DATETIME": "Datetime for reminder"
       }
     },
     "METRIC": {

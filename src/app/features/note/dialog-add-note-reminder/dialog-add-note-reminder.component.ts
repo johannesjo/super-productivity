@@ -5,6 +5,7 @@ import {NoteService} from '../note.service';
 import {ReminderCopy} from '../../reminder/reminder.model';
 import {ReminderService} from '../../reminder/reminder.service';
 import {SnackService} from '../../../core/snack/snack.service';
+import {T} from '../../../t.const';
 
 @Component({
   selector: 'dialog-add-note-reminder',
@@ -13,11 +14,13 @@ import {SnackService} from '../../../core/snack/snack.service';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DialogAddNoteReminderComponent {
-  public dateTime: number;
-  public title: string;
-  public isEdit: boolean;
-  public reminder: ReminderCopy;
-  public note: Note;
+  T = T;
+  dateTime: number;
+  title: string;
+  isEdit: boolean;
+  reminder: ReminderCopy;
+  note: Note;
+
 
   constructor(
     private _noteService: NoteService,

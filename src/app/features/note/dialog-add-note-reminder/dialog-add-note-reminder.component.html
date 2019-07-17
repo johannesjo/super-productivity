@@ -1,5 +1,7 @@
 <form (submit)="save()">
-  <h1 mat-dialog-title>{{isEdit ? 'Edit' : 'Add'}} reminder for note</h1>
+  <h1 mat-dialog-title>{{isEdit
+    ? (T.F.NOTE.D_ADD_REMINDER.TITLE_EDIT|translate)
+    : (T.F.NOTE.D_ADD_REMINDER.TITLE_ADD|translate)}}</h1>
 
   <mat-dialog-content>
     <div class="form-wrapper">
@@ -9,17 +11,17 @@
           [(ngModel)]="title"
           matInput
           name="title"
-          placeholder="Title for notification"
+          [placeholder]="T.F.NOTE.D_ADD_REMINDER.L_TITLE|translate"
           required
           type="text">
-        <mat-error>You need to enter a title</mat-error>
+        <mat-error>{{T.F.NOTE.D_ADD_REMINDER.E_ENTER_TITLE|translate}}</mat-error>
       </mat-form-field>
 
       <datetime-input (modelChange)="dateTime=$event"
                       [model]="dateTime"
                       [required]="true"
                       name="reminderDate"
-                      placeholder="Datetime for reminder"></datetime-input>
+                      [placeholder]="T.F.NOTE.D_ADD_REMINDER.L_DATETIME|translate"></datetime-input>
     </div>
   </mat-dialog-content>
 
@@ -30,7 +32,7 @@
               color="primary"
               mat-button
               type="button">
-        Cancel
+        {{T.G.CANCEL|translate}}
       </button>
 
       <button (click)="remove()"
@@ -40,7 +42,7 @@
               mat-stroked-button
               type="button">
         <mat-icon>alarm_off</mat-icon>
-        Remove Reminder
+        {{T.F.NOTE.REMOVE_REMINDER|translate}}
       </button>
 
       <button class="btn btn-primary submit-button"
@@ -49,11 +51,11 @@
               type="submit">
         <ng-container *ngIf="!note.reminderId">
           <mat-icon>alarm_add</mat-icon>
-          Add reminder
+          {{T.F.NOTE.ADD_REMINDER|translate}}
         </ng-container>
         <ng-container *ngIf="note.reminderId">
           <mat-icon>alarm</mat-icon>
-          Update reminder
+          {{T.F.NOTE.UPDATE_REMINDER|translate}}
         </ng-container>
       </button>
     </div>

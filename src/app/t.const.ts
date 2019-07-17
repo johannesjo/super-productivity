@@ -15,6 +15,13 @@ export const T = {
       'D_ADD': {
         'NOTE_LABEL': 'F.NOTE.D_ADD.NOTE_LABEL',
         'DATETIME_LABEL': 'F.NOTE.D_ADD.DATETIME_LABEL'
+      },
+      'D_ADD_REMINDER': {
+        'TITLE_ADD': 'F.NOTE.D_ADD_REMINDER.TITLE_ADD',
+        'TITLE_EDIT': 'F.NOTE.D_ADD_REMINDER.TITLE_EDIT',
+        'L_TITLE': 'F.NOTE.D_ADD_REMINDER.L_TITLE',
+        'E_ENTER_TITLE': 'F.NOTE.D_ADD_REMINDER.E_ENTER_TITLE',
+        'L_DATETIME': 'F.NOTE.D_ADD_REMINDER.L_DATETIME'
       }
     },
     'METRIC': {
