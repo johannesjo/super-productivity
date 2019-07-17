@@ -14,6 +14,7 @@ import {TaskService} from '../tasks/task.service';
 import {Note} from '../note/note.model';
 import {Task} from '../tasks/task.model';
 import {NoteService} from '../note/note.service';
+import {T} from '../../t.const';
 
 const WORKER_PATH = 'assets/web-workers/reminder.js';
 
@@ -174,7 +175,7 @@ export class ReminderService {
 
   private _handleError(err: any) {
     console.error(err);
-    this._snackService.open({type: 'ERROR', msg: 'Error for reminder interface'});
+    this._snackService.open({type: 'ERROR', msg: T.F.REMINDER.SNACK_REMINDER_ERR});
   }
 
   private async _getRelatedDataForReminder(id: string, projectId: string, type: ReminderType): Promise<Task | Note> {

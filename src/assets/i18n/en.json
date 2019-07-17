@@ -7,6 +7,9 @@
     "TITLE": "Backlog"
   },
   "F": {
+    "REMINDER": {
+      "SNACK_REMINDER_ERR": "Error for reminder interface"
+    },
     "PROJECT": {
       "D_CREATE": {
         "EDIT": "Edit Project",
