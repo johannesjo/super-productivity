@@ -5,7 +5,7 @@ import {Subscription} from 'rxjs';
 import {WorkStartEnd} from '../../project/project.model';
 import {WORKLOG_EXPORT_DEFAULTS} from '../../project/project.const';
 import {getWorklogStr} from '../../../util/get-work-log-str';
-import * as moment from 'moment-mini';
+import * as moment from 'moment';
 import 'moment-duration-format';
 import {unique} from '../../../util/unique';
 import {msToString} from '../../../ui/duration/ms-to-string.pipe';

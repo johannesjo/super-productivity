@@ -22,7 +22,7 @@ import {DEFAULT_JIRA_CFG} from '../../features/issue/jira/jira.const';
 import {initialTaskState} from '../../features/tasks/store/task.reducer';
 import {EntityState} from '@ngrx/entity';
 import {DEFAULT_TASK, Task} from '../../features/tasks/task.model';
-import * as moment from 'moment-mini';
+import * as moment from 'moment';
 import {JiraIssue} from '../../features/issue/jira/jira-issue/jira-issue.model';
 import {GithubIssue} from '../../features/issue/github/github-issue/github-issue.model';
 import {IssueProviderKey} from '../../features/issue/issue';

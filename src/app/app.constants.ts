@@ -34,6 +34,18 @@ export enum LanguageCode {
   zh = 'zh',
 }
 
+export enum LanguageCodeMomentMap {
+  en = 'en',
+  es = 'es',
+  de = 'de',
+  ar = 'ar',
+  fr = 'fr',
+  ja = 'ja',
+  ru = 'ru',
+  tr = 'tr',
+  zh = 'zh-cn',
+}
+
 // we're assuming that the other language speakers are likely to speak english
 // and as english offers most likely the best experience, we use it as default
 export const AUTO_SWITCH_LNGS: LanguageCode[] = [

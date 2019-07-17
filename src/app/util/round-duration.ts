@@ -1,4 +1,4 @@
-import * as moment from 'moment-mini';
+import * as moment from 'moment';
 import {Duration} from 'moment-mini';
 import {RoundTimeOption} from '../features/project/project.model';
 

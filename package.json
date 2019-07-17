@@ -119,7 +119,7 @@
     "electron-log": "^3.0.1",
     "googleapis": "^40.0.0",
     "jira-client-fork": "^4.2.1",
-    "moment-mini": "^2.22.1"
+    "moment": "^2.24.0"
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "0.800.2",

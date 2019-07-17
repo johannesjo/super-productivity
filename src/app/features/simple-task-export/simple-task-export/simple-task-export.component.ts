@@ -8,7 +8,7 @@ import {SIMPLE_SUMMARY_DEFAULTS} from '../../project/project.const';
 import Clipboard from 'clipboard';
 import {SnackService} from '../../../core/snack/snack.service';
 import {getWorklogStr} from '../../../util/get-work-log-str';
-import * as moment from 'moment-mini';
+import * as moment from 'moment';
 import 'moment-duration-format';
 import {roundDuration} from '../../../util/round-duration';
 

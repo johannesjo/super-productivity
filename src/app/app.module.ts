@@ -31,7 +31,8 @@ import {ProcrastinationModule} from './features/procrastination/procrastination.
 import {TaskRepeatCfgModule} from './features/task-repeat-cfg/task-repeat-cfg.module';
 import {TranslateLoader, TranslateModule, TranslateService} from '@ngx-translate/core';
 import {TranslateHttpLoader} from '@ngx-translate/http-loader';
-import {AUTO_SWITCH_LNGS, LanguageCode} from './app.constants';
+import {AUTO_SWITCH_LNGS, LanguageCode, LanguageCodeMomentMap} from './app.constants';
+import * as moment from 'moment';
 
 // NOTE: export required for aot to work
 export function createTranslateLoader(http: HttpClient) {
@@ -101,9 +102,11 @@ export class AppModule {
   ) {
     const lng = this._translateService.getBrowserLang() as LanguageCode;
     this._translateService.setDefaultLang('en');
+    moment.locale('en');
 
     if (AUTO_SWITCH_LNGS.includes(lng)) {
       this._translateService.use(lng);
+      moment.locale(LanguageCodeMomentMap[lng]);
     }
   }
 }

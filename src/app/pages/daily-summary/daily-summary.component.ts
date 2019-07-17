@@ -17,7 +17,7 @@ import {filter, map, shareReplay, startWith, switchMap, take} from 'rxjs/operato
 import {GoogleApiService} from '../../features/google/google-api.service';
 import {ProjectService} from '../../features/project/project.service';
 import {getWorklogStr} from '../../util/get-work-log-str';
-import * as moment from 'moment-mini';
+import * as moment from 'moment';
 import {RoundTimeOption} from '../../features/project/project.model';
 import {T} from '../../t.const';
 

@@ -1,5 +1,5 @@
 // NOTE: cuts off at month start and end per default
-import * as moment from 'moment-mini';
+import * as moment from 'moment';
 
 export const getDateRangeForWeek = (year: number, weekNr: number, month?: number): {
   rangeStart: Date,

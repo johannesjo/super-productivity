@@ -1,7 +1,7 @@
 import { ipcMain, Menu, systemPreferences, Tray } from 'electron';
 import { existsSync, readFileSync } from 'fs';
 // const dbus = require('./dbus');
-import * as moment from 'moment-mini';
+import * as moment from 'moment';
 import { errorHandler } from './error-handler';
 import { IPC_CURRENT_TASK_UPDATED, IPC_POMODORO_UPDATE } from './ipc-events.const';
 

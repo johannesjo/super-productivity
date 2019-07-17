@@ -32,7 +32,7 @@ import {SearchResultItem} from '../issue';
 import {fromPromise} from 'rxjs/internal-compatibility';
 import {catchError, first} from 'rxjs/operators';
 import {JiraIssue} from './jira-issue/jira-issue.model';
-import * as moment from 'moment-mini';
+import * as moment from 'moment';
 import {getJiraResponseErrorTxt} from '../../../util/get-jira-response-error-text';
 import {BannerService} from '../../../core/banner/banner.service';
 import {BannerId} from '../../../core/banner/banner.model';

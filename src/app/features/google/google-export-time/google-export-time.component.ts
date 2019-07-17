@@ -16,7 +16,7 @@ import {ProjectService} from '../../project/project.service';
 import {TaskService} from '../../tasks/task.service';
 import {SnackService} from '../../../core/snack/snack.service';
 import {takeUntil} from 'rxjs/operators';
-import * as moment from 'moment-mini';
+import * as moment from 'moment';
 import {expandAnimation} from '../../../ui/animations/expand.ani';
 import 'moment-duration-format';
 import {msToClockString} from '../../../ui/duration/ms-to-clock-string.pipe';

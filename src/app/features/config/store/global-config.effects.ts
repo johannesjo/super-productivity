@@ -9,9 +9,10 @@ import {SnackOpen} from '../../../core/snack/store/snack.actions';
 import {ElectronService} from 'ngx-electron';
 import {KeyboardConfig} from '../global-config.model';
 import {IPC_REGISTER_GLOBAL_SHORTCUTS_EVENT} from '../../../../../electron/ipc-events.const';
-import {IS_ELECTRON} from '../../../app.constants';
+import {IS_ELECTRON, LanguageCodeMomentMap} from '../../../app.constants';
 import {TranslateService} from '@ngx-translate/core';
 import {T} from '../../../t.const';
+import * as moment from 'moment';
 
 @Injectable()
 export class GlobalConfigEffects {
@@ -76,6 +77,7 @@ export class GlobalConfigEffects {
       tap((action: UpdateGlobalConfigSection) => {
         const lng = action.payload.sectionCfg['lng'];
         this._translateService.use(lng);
+        moment.locale(LanguageCodeMomentMap[lng]);
       })
     );
 
@@ -88,6 +90,7 @@ export class GlobalConfigEffects {
       tap((action: LoadGlobalConfig) => {
         const lng = action.payload.cfg.lang.lng;
         this._translateService.use(lng);
+        moment.locale(LanguageCodeMomentMap[lng]);
       })
     );
 
