@@ -24,6 +24,7 @@ import {T} from '../../t.const';
   animations: [expandFadeAnimation, standardListAnimation, fadeAnimation]
 })
 export class WorklogComponent {
+  T = T;
   expanded: { [key: string]: boolean } = {};
 
   constructor(

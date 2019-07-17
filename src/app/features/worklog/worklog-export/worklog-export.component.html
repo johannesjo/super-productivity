@@ -27,7 +27,7 @@
               <mat-option><em>remove</em></mat-option>
               <mat-option *ngFor="let colOpt of colOpts"
                           [value]="colOpt.id">
-                {{colOpt.title}}
+                {{colOpt.title|translate}}
               </mat-option>
             </mat-select>
           </td>
@@ -55,14 +55,14 @@
             <mat-slide-toggle (change)="onOptionsChange()"
                               [(ngModel)]="isShowAsText"
                               name="isShowAsText">
-              Show as text
+              {{T.F.WORKLOG.EXPORT.SHOW_AS_TEXT|translate}}
             </mat-slide-toggle>
           </div>
         </div>
         <div class="col">
           <mat-form-field *ngIf="(isWorklogExport)"
                           class="md-block">
-            <label>Separate tasks by</label>
+            <label>{{T.F.WORKLOG.EXPORT.SEPARATE_TASKS_BY|translate}}</label>
             <input (change)="onOptionsChange()"
                    [(ngModel)]="options.separateTasksBy"
                    matInput=""
@@ -72,51 +72,51 @@
         </div>
         <div class="col">
           <mat-form-field>
-            <label>Round time worked to</label>
+            <label>{{T.F.WORKLOG.EXPORT.ROUND_TIME_WORKED_TO|translate}}</label>
             <mat-select (selectionChange)="onOptionsChange()"
                         [(ngModel)]="options.roundWorkTimeTo">
-              <mat-option><em>don't round</em></mat-option>
+              <mat-option><em>{{T.F.WORKLOG.EXPORT.DONT_ROUND|translate}}</em></mat-option>
               <mat-option *ngFor="let roundOption of roundTimeOptions"
                           [value]="roundOption.id">
-                {{roundOption.title}}
+                {{roundOption.title|translate}}
               </mat-option>
             </mat-select>
           </mat-form-field>
         </div>
         <div class="col">
           <mat-form-field>
-            <label>Round start time to</label>
+            <label>{{T.F.WORKLOG.EXPORT.ROUND_START_TIME_TO|translate}}</label>
             <mat-select (selectionChange)="onOptionsChange()"
                         [(ngModel)]="options.roundStartTimeTo">
-              <mat-option><em>don't round</em></mat-option>
+              <mat-option><em>{{T.F.WORKLOG.EXPORT.DONT_ROUND|translate}}</em></mat-option>
               <mat-option *ngFor="let roundOption of roundTimeOptions"
                           [value]="roundOption.id">
-                {{roundOption.title}}
+                {{roundOption.title|translate}}
               </mat-option>
             </mat-select>
           </mat-form-field>
         </div>
         <div class="col">
           <mat-form-field>
-            <label>Round end time to</label>
+            <label>{{T.F.WORKLOG.EXPORT.ROUND_END_TIME_TO|translate}}</label>
             <mat-select (selectionChange)="onOptionsChange()"
                         [(ngModel)]="options.roundEndTimeTo">
-              <mat-option><em>don't round</em></mat-option>
+              <mat-option><em>{{T.F.WORKLOG.EXPORT.DONT_ROUND|translate}}</em></mat-option>
               <mat-option *ngFor="let roundOption of roundTimeOptions"
                           [value]="roundOption.id">
-                {{roundOption.title}}
+                {{roundOption.title|translate}}
               </mat-option>
             </mat-select>
           </mat-form-field>
         </div>
         <div class="col">
           <mat-form-field>
-            <label>Group by</label>
+            <label>{{T.F.WORKLOG.EXPORT.GROUP_BY|translate}}</label>
             <mat-select (selectionChange)="onOptionsChange()"
                         [(ngModel)]="options.groupBy">
               <mat-option *ngFor="let groupByOption of groupByOptions"
                           [value]="groupByOption.id">
-                {{groupByOption.title}}
+                {{groupByOption.title|translate}}
               </mat-option>
             </mat-select>
           </mat-form-field>
@@ -134,7 +134,7 @@
           color="primary"
           mat-button=""
           type="button">
-    Cancel
+    {{T.G.CANCEL|translate}}
   </button>
 
   <button *ngIf="isShowAsText"
@@ -144,7 +144,7 @@
           id="clipboard-btn"
           mat-stroked-button="">
     <mat-icon>content_paste</mat-icon>
-    Copy to clipboard
+    {{T.F.WORKLOG.EXPORT.COPY_TO_CLIPBOARD|translate}}
   </button>
 
   <a [simpleDownloadData]="txt"
@@ -152,6 +152,6 @@
      color="primary"
      mat-stroked-button="">
     <mat-icon>file_download</mat-icon>
-    Save to file
+    {{T.F.WORKLOG.EXPORT.SAVE_TO_FILE|translate}}
   </a>
 </div>

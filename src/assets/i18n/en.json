@@ -608,7 +608,38 @@
       }
     },
     "WORKLOG": {
-      "D_CONFIRM_RESTORE": "Are you sure you want to move the task <strong>\"{{title}}\"</strong> into your todays task list?"
+      "D_EXPORT_TITLE": "Worklog Export",
+      "D_CONFIRM_RESTORE": "Are you sure you want to move the task <strong>\"{{title}}\"</strong> into your todays task list?",
+      "EXPORT": {
+        "SHOW_AS_TEXT": "Show as text",
+        "SEPARATE_TASKS_BY": "Separate tasks by",
+        "ROUND_TIME_WORKED_TO": "Round time worked to",
+        "ROUND_START_TIME_TO": "Round start time to",
+        "ROUND_END_TIME_TO": "Round end time to",
+        "DONT_ROUND": "don't round",
+        "GROUP_BY": "Group by",
+        "COPY_TO_CLIPBOARD": "Copy to clipboard",
+        "SAVE_TO_FILE": "Save to file",
+        "O": {
+          "FULL_QUARTERS": "full quarters",
+          "FULL_HALF_HOURS": "full half hours",
+          "FULL_HOURS": "full hours",
+          "DATE": "Date",
+          "STARTED_WORKING": "Started Working",
+          "ENDED_WORKING": "Ended Working",
+          "PARENT_TASK_TITLES_ONLY": "Parent Task Titles only",
+          "TITLES_AND_SUB_TASK_TITLES": "Titles and Sub Task Titles",
+          "TIME_AS_MILLISECONDS": "Time as milliseconds",
+          "TIME_AS_STRING": "Time as string (e.g. 5h 23m)",
+          "TIME_AS_CLOCK": "Time as clock (e.g. 5:23)",
+          "ESTIMATE_AS_MILLISECONDS": "Estimate as milliseconds",
+          "ESTIMATE_AS_STRING": "Estimate as string (e.g. 5h 23m)",
+          "ESTIMATE_AS_CLOCK": "Estimate as clock (e.g. 5:23)",
+          "TASK_SUBTASK": "Task/Subtask",
+          "PARENT_TASK": "Parent Task",
+          "WORKLOG": "Worklog"
+        }
+      }
     }
   },
   "FILE_IMEX": {
