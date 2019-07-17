@@ -24,6 +24,22 @@
       },
       "SNACK": {
         "SAVE_METRIC": "Metric successfully saved"
+      },
+      "CMP": {
+        "TIME_SPENT": "Time Spent",
+        "TIME_ESTIMATED": "Time Estimated",
+        "TASKS_DONE_CREATED": "Tasks (done/created)",
+        "DAYS_WORKED": "Days worked",
+        "AVG_TASKS_PER_DAY_WORKED": "Avg. tasks per day worked",
+        "AVG_BREAKS_PER_DAY": "Avg. breaks per day",
+        "AVG_TIME_SPENT_PER_DAY": "Avg. time spent per day",
+        "AVG_TIME_SPENT_PER_TASK": "Avg. time spent per task",
+        "COUNTING_SUBTASKS": "(counting subtasks)",
+        "AVG_TIME_SPENT_ON_BREAKS": "Avg. time spent on breaks",
+        "NO_ADDITIONAL_DATA_YET": "No additional data collected yet. Use the form on the daily summary \"Evaluation\" panel to do so.",
+        "IMPROVEMENT_SELECTION_COUNT": "Number of times an improvement factor was selected",
+        "OBSTRUCTION_SELECTION_COUNT": "Number of times an obstructing factor was selected",
+        "MOOD_PRODUCTIVITY_OVER_TIME": "Mood and productivity over time"
       }
     },
     "ATTACHMENT": {
