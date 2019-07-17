@@ -11,6 +11,8 @@ import {getWorklogStr} from '../../../util/get-work-log-str';
 import * as moment from 'moment';
 import 'moment-duration-format';
 import {roundDuration} from '../../../util/round-duration';
+import {T} from '../../../t.const';
+import {TranslateService} from '@ngx-translate/core';
 
 const LINE_SEPARATOR = '\n';
 
@@ -25,14 +27,15 @@ export class SimpleTaskExportComponent implements OnInit, OnDestroy {
 
   @Output() cancel = new EventEmitter();
 
+  T = T;
   options: SimpleSummarySettingsCopy = SIMPLE_SUMMARY_DEFAULTS;
   tasksTxt: string;
   tasksHtml: string;
   fileName = 'tasks.csv';
   roundTimeOptions = [
-    {id: 'QUARTER', title: 'full quarters'},
-    {id: 'HALF', title: 'full half hours'},
-    {id: 'HOUR', title: 'full hours'},
+    {id: 'QUARTER', title: T.F.SIMPLE_TASK_EXPORT.R.QUARTER},
+    {id: 'HALF', title: T.F.SIMPLE_TASK_EXPORT.R.HALF},
+    {id: 'HOUR', title: T.F.SIMPLE_TASK_EXPORT.R.HOUR},
   ];
 
   private _subs: Subscription = new Subscription();
@@ -40,6 +43,7 @@ export class SimpleTaskExportComponent implements OnInit, OnDestroy {
   constructor(
     private _projectService: ProjectService,
     private _snackService: SnackService,
+    private _translateService: TranslateService,
   ) {
   }
 
@@ -57,7 +61,7 @@ export class SimpleTaskExportComponent implements OnInit, OnDestroy {
     const clipboard = new Clipboard('#clipboard-btn');
     clipboard.on('success', (e: any) => {
       this._snackService.open({
-        msg: 'Copied to clipboard',
+        msg: T.F.SIMPLE_TASK_EXPORT.SNACK_TO_CLIPPBOARD,
         type: 'SUCCESS'
       });
       e.clearSelection();
@@ -168,20 +172,21 @@ export class SimpleTaskExportComponent implements OnInit, OnDestroy {
 
     const headerCols = [];
     if (this.options.isShowDate) {
-      headerCols.push('Date');
+      headerCols.push(this._translateService.instant(T.F.SIMPLE_TASK_EXPORT.DATE));
     }
     if (this.options.isShowTimeSpent) {
-      headerCols.push('Time Spent');
+      headerCols.push(this._translateService.instant(T.F.SIMPLE_TASK_EXPORT.TIME_SPENT));
     }
     if (this.options.isShowTimeEstimate) {
-      headerCols.push('Estimate');
+      headerCols.push(this._translateService.instant(T.F.SIMPLE_TASK_EXPORT.ESTIMATE));
     }
     if (this.options.isShowTitle) {
-      headerCols.push('Title');
+      headerCols.push(this._translateService.instant(T.F.SIMPLE_TASK_EXPORT.TITLE));
     }
     const headerColsHtml = `<tr><th>${headerCols.join('</th><th>')}</th></tr>`;
     if (!rows.length) {
-      rowsHtml += `<tr><td>${Array(headerCols.length).fill('- No Data -').join('</td><td>')}</td></tr>`;
+      const noDataStr = this._translateService.instant(T.F.SIMPLE_TASK_EXPORT.NO_DATA);
+      rowsHtml += `<tr><td>${Array(headerCols.length).fill(noDataStr).join('</td><td>')}</td></tr>`;
     }
 
     return `<table>${headerColsHtml}${rowsHtml}</table>`;

@@ -10,6 +10,32 @@
     "REMINDER": {
       "SNACK_REMINDER_ERR": "Error for reminder interface"
     },
+    "SIMPLE_TASK_EXPORT": {
+      "M_TITLE": "Task List Export",
+      "OPTIONS": "Options",
+      "SHOW_AS_TEXT": "Show as text",
+      "LIST_SUB_TASKS": "List sub tasks",
+      "LIST_WORKED_ON_TODAY_TASKS_ONLY": "List worked on today tasks only",
+      "LIST_DONE_TASKS_ONLY": "List done tasks only",
+      "FIELDS_TO_DISPLAY": "Fields to display",
+      "DATE": "Date",
+      "TIME_SPENT": "Time Spent",
+      "TIME_ESTIMATE": "Time Estimate",
+      "ESTIMATE": "Estimate",
+      "TITLE": "Title",
+      "TIME_AS_MILLISECONDS": "Time as milliseconds",
+      "SEPARATE_FIELDS_BY": "Separate fields by",
+      "CLOSE": "Close",
+      "COPY_TO_CLIPBOARD": "Copy to clipboard",
+      "SAVE_TO_FILE": "Save to file",
+      "R": {
+        "QUARTER": "full quarters",
+        "HALF": "full half hours",
+        "HOUR": "full hours"
+      },
+      "SNACK_TO_CLIPPBOARD": "Copied to clipboard",
+      "NO_DATA": "- No Data -"
+    },
     "PROJECT": {
       "D_CREATE": {
         "EDIT": "Edit Project",
