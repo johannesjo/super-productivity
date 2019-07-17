@@ -252,6 +252,19 @@
         "SNACK_EQUAL_VALUES": "Current values and the last saved row have equal values, that is probably not what you want.",
         "SNACK_ROW_APPENDED": "Row successfully appended"
       },
+      "SYNC_CFG": {
+        "ENABLE": "Enable syncing via Google Drive",
+        "BACKUP_NOW": "Backup now",
+        "LOAD_FROM": "Load From GDrive",
+        "SYNC_FILE_NAME": "Sync file name",
+        "UPDATE_SYNC_FILE": "Update sync file",
+        "AUTO_LOGIN": "Auto login at when starting app",
+        "LOAD_ON_STARTUP": "Load remote data on startup",
+        "AUTO_SYNC": "Auto sync data to remote",
+        "COMPRESS": "Compress Data",
+        "NOTIFY": "Notify when syncing",
+        "SYNC_INTERVAL": "Sync interval"
+      },
       "SNACKS": {
         "DOWNLOADING_UPDATE": "Google Drive: There is a remote update! Downloading...",
         "ERROR": "Google Drive – Error:",
@@ -270,8 +283,7 @@
         "ERR": "GoogleApi Error: {{errStr}}"
       },
       "BANNER": {
-        "AUTH_FAIL": "GoogleApi: Failed to authenticate please try logging in again!",
-        "LOGIN": "Login"
+        "AUTH_FAIL": "GoogleApi: Failed to authenticate please try logging in again!"
       }
     }
   },
@@ -390,7 +402,9 @@
     "SAVE": "Save",
     "TITLE": "Title",
     "NEXT": "Next",
-    "PREVIOUS": "Previous"
+    "PREVIOUS": "Previous",
+    "LOGIN": "Login",
+    "LOGOUT": "Logout"
   },
   "MH": {
     "ADD_NEW_TASK": "Add new Task",

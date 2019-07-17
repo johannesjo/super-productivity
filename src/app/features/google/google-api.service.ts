@@ -363,7 +363,7 @@ export class GoogleApiService {
       ico: 'cloud_off',
       id: BannerId.GoogleLogin,
       action: {
-        label: T.F.GOOGLE.BANNER.LOGIN,
+        label: T.G.LOGIN,
         fn: () => this.login()
       }
     });
