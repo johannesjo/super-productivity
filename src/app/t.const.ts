@@ -22,6 +22,10 @@ export const T = {
         'L_TITLE': 'F.NOTE.D_ADD_REMINDER.L_TITLE',
         'E_ENTER_TITLE': 'F.NOTE.D_ADD_REMINDER.E_ENTER_TITLE',
         'L_DATETIME': 'F.NOTE.D_ADD_REMINDER.L_DATETIME'
+      },
+      'D_VIEW_REMINDER': {
+        'TITLE': 'F.NOTE.D_VIEW_REMINDER.TITLE',
+        'SNOOZE': 'F.NOTE.D_VIEW_REMINDER.SNOOZE'
       }
     },
     'METRIC': {

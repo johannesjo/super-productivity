@@ -1,6 +1,6 @@
 <h1 mat-dialog-title>
   <mat-icon class="dialog-header-icon">alarm</mat-icon>
-  <span>Note</span>
+  <span>{{T.F.NOTE.D_VIEW_REMINDER.TITLE|translate}}</span>
 </h1>
 
 <mat-dialog-content>
@@ -25,7 +25,7 @@
             mat-stroked-button
             type="button">
       <mat-icon>snooze</mat-icon>
-      Snooze for 10m
+      {{T.F.NOTE.D_VIEW_REMINDER.SNOOZE|translate:{time: '10m'} }}
     </button>
 
     <button (click)="dismiss()"
@@ -33,7 +33,7 @@
             mat-stroked-button
             type="button">
       <mat-icon>clear</mat-icon>
-      Dismiss
+      {{T.G.DISMISS|translate}}
     </button>
   </div>
 </mat-dialog-actions>

@@ -22,8 +22,13 @@
         "L_TITLE": "Title for notification",
         "E_ENTER_TITLE": "You need to enter a title",
         "L_DATETIME": "Datetime for reminder"
+      },
+      "D_VIEW_REMINDER": {
+        "TITLE": "Note",
+        "SNOOZE": "Snooze for {{time}}"
       }
     },
+
     "METRIC": {
       "EVAL_FORM": {
         "HELP_P1": "Time for a little self evaluation! Your answers here are saved and provide you with a little bit of statistics on how you work in the metrics section. Furthermore the suggestions for tomorrow will appear above your task list the next day.",
