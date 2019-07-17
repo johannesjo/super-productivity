@@ -176,7 +176,25 @@ export const JIRA_CONFIG_FORM_SECTION: ConfigFormSection = {
   title: 'Jira',
   key: 'JIRA',
   customSection: 'JIRA_CFG',
-  help: T.F.JIRA.FORM_SECTION.HELP,
+  helpArr: [
+    {
+      h: T.F.JIRA.FORM_SECTION.HELP_ARR.H1,
+      p: T.F.JIRA.FORM_SECTION.HELP_ARR.P1_1,
+      p2: T.F.JIRA.FORM_SECTION.HELP_ARR.P1_2,
+      p3: T.F.JIRA.FORM_SECTION.HELP_ARR.P1_3,
+      p4: T.F.JIRA.FORM_SECTION.HELP_ARR.P1_4,
+    },
+    {
+      h: T.F.JIRA.FORM_SECTION.HELP_ARR.H2,
+      p: T.F.JIRA.FORM_SECTION.HELP_ARR.P2_1,
+      p2: T.F.JIRA.FORM_SECTION.HELP_ARR.P2_2,
+      p3: T.F.JIRA.FORM_SECTION.HELP_ARR.P2_3,
+    },
+    {
+      h: T.F.JIRA.FORM_SECTION.HELP_ARR.H3,
+      p: T.F.JIRA.FORM_SECTION.HELP_ARR.P3_1,
+    },
+  ],
   items: [
     {
       type: 'tpl',

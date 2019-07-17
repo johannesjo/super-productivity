@@ -292,7 +292,19 @@ export const T = {
       'FORM_SECTION': {
         'CREDENTIALS': 'F.JIRA.FORM_SECTION.CREDENTIALS',
         'ADV_CFG': 'F.JIRA.FORM_SECTION.ADV_CFG',
-        'HELP': 'F.JIRA.FORM_SECTION.HELP'
+        'HELP_ARR': {
+          'H1': 'F.JIRA.FORM_SECTION.HELP_ARR.H1',
+          'P1_1': 'F.JIRA.FORM_SECTION.HELP_ARR.P1_1',
+          'P1_2': 'F.JIRA.FORM_SECTION.HELP_ARR.P1_2',
+          'P1_3': 'F.JIRA.FORM_SECTION.HELP_ARR.P1_3',
+          'P1_4': 'F.JIRA.FORM_SECTION.HELP_ARR.P1_4',
+          'H2': 'F.JIRA.FORM_SECTION.HELP_ARR.H2',
+          'P2_1': 'F.JIRA.FORM_SECTION.HELP_ARR.P2_1',
+          'P2_2': 'F.JIRA.FORM_SECTION.HELP_ARR.P2_2',
+          'P2_3': 'F.JIRA.FORM_SECTION.HELP_ARR.P2_3',
+          'H3': 'F.JIRA.FORM_SECTION.HELP_ARR.H3',
+          'P3_1': 'F.JIRA.FORM_SECTION.HELP_ARR.P3_1'
+        }
       },
       'CFG_CMP': {
         'ENABLE': 'F.JIRA.CFG_CMP.ENABLE',

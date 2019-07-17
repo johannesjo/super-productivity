@@ -141,6 +141,7 @@ export interface ConfigFormSection {
   title: string;
   key: GlobalConfigSectionKey | ProjectCfgFormKey;
   help?: string;
+  helpArr?: { h?: string; p: string; p2?: string; p3?: string; p4?: string; }[];
   customSection?: string;
   items?: FormlyFieldConfig[];
   isElectronOnly?: boolean;
