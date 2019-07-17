@@ -84,7 +84,7 @@ export class GoogleDriveSyncEffects {
     ),
     tap(() => this._showAsyncToast(
       this._store$.select(selectIsGoogleDriveSaveInProgress),
-      this._translateService.instant(T.F.GOOGLE.SNACKS.SYNCING)
+      T.F.GOOGLE.SNACKS.SYNCING
       )
     ),
     map(() => new SaveToGoogleDriveFlow({isSkipSnack: true})),
@@ -102,19 +102,19 @@ export class GoogleDriveSyncEffects {
     concatMap((isUpdate): any => {
       if (isUpdate) {
         this._snackService.open({
-          msg: this._translateService.instant(T.F.GOOGLE.SNACKS.DOWNLOADING_UPDATE),
+          msg: T.F.GOOGLE.SNACKS.DOWNLOADING_UPDATE,
           ico: 'file_download',
         });
         return of(new LoadFromGoogleDriveFlow());
       } else {
         return of(new SnackOpen({
-          msg: this._translateService.instant(T.F.GOOGLE.SNACKS.NO_UPDATE_REQUIRED),
+          msg: T.F.GOOGLE.SNACKS.NO_UPDATE_REQUIRED,
         }));
       }
     }),
     catchError(() => of(new SnackOpen({
       type: 'ERROR',
-      msg: this._translateService.instant(T.F.GOOGLE.SNACKS.ERROR_INITIAL_IMPORT),
+      msg: T.F.GOOGLE.SNACKS.ERROR_INITIAL_IMPORT,
     }))),
   );
 
@@ -131,7 +131,8 @@ export class GoogleDriveSyncEffects {
           if (filesFound.length && filesFound.length > 1) {
             return of(new SnackOpen({
               type: 'ERROR',
-              msg: this._translateService.instant(T.F.GOOGLE.SNACKS.MULTIPLE_SYNC_FILES_WITH_SAME_NAME, {newFileName})
+              msg: T.F.GOOGLE.SNACKS.MULTIPLE_SYNC_FILES_WITH_SAME_NAME,
+              translateParams: {newFileName},
             }));
           } else if (!filesFound || filesFound.length === 0) {
             return this._confirmSaveNewFile(newFileName).pipe(
@@ -204,7 +205,7 @@ export class GoogleDriveSyncEffects {
               if (!action.payload || !action.payload.isSkipSnack) {
                 this._snackService.open({
                   type: 'SUCCESS',
-                  msg: this._translateService.instant(T.F.GOOGLE.SNACKS.REMOTE_UP_TO_DATE)
+                  msg: T.F.GOOGLE.SNACKS.REMOTE_UP_TO_DATE,
                 });
               }
               return of(new SaveToGoogleDriveCancel());
@@ -264,7 +265,7 @@ export class GoogleDriveSyncEffects {
       if (!p.isSkipSnack) {
         this._snackService.open({
           type: 'SUCCESS',
-          msg: this._translateService.instant(T.F.GOOGLE.SNACKS.SUCCESS)
+          msg: T.F.GOOGLE.SNACKS.SUCCESS,
         });
       }
     }),
@@ -316,7 +317,7 @@ export class GoogleDriveSyncEffects {
               // TODO refactor optional message to cancel
               this._snackService.open({
                 type: 'SUCCESS',
-                msg: this._translateService.instant(T.F.GOOGLE.SNACKS.LOCAL_UP_TO_DATE)
+                msg: T.F.GOOGLE.SNACKS.LOCAL_UP_TO_DATE,
               });
               return of(new LoadFromGoogleDriveCancel());
             }
@@ -376,7 +377,9 @@ export class GoogleDriveSyncEffects {
     const errTxt = (typeof err === 'string' && err) || (err.toString && err.toString()) || 'Unknown';
     this._snackService.open({
       type: 'ERROR',
-      msg: this._translateService.instant(T.F.GOOGLE.SNACKS.ERROR) + errTxt
+      msg: T.F.GOOGLE.SNACKS.ERROR,
+      translateParams: {errTxt}
+
     });
     return of(new LoadFromGoogleDriveCancel());
   }
@@ -437,6 +440,7 @@ export class GoogleDriveSyncEffects {
       showWhile$,
     });
   }
+
 
   private _confirmSaveNewFile(fileName): Observable<boolean> {
     return this._matDialog.open(DialogConfirmComponent, {

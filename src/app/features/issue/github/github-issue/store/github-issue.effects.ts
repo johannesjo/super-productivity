@@ -63,7 +63,6 @@ export class GithubIssueEffects {
     tap(([x, githubCfg, issues]: [any, GithubCfg, GithubIssue[]]) => {
       if (issues && issues.length > 0) {
         this._snackService.open({
-          isTranslate: true,
           msg: T.F.GITHUB.SNACK.POLLING,
           svgIco: 'github',
           isSubtle: true,
@@ -127,7 +126,6 @@ export class GithubIssueEffects {
       tap(tasks => {
         console.warn('TASKS WITH MISSING ISSUE DATA FOR GITHUB', tasks);
         this._snackService.open({
-          isTranslate: true,
           msg: T.F.GITHUB.SNACK.MISSING_ISSUE_DATA,
           svgIco: 'github',
           isSubtle: true,
@@ -172,7 +170,6 @@ export class GithubIssueEffects {
       if (issuesToAdd.length === 1) {
         this._snackService.open({
           ico: 'cloud_download',
-          isTranslate: true,
           translateParams: {
             issueText: `#${issuesToAdd[0].number} ${issuesToAdd[0].title}`
           },
@@ -182,7 +179,6 @@ export class GithubIssueEffects {
       } else if (issuesToAdd.length > 1) {
         this._snackService.open({
           ico: 'cloud_download',
-          isTranslate: true,
           translateParams: {
             issueLength: issuesToAdd.length
           },

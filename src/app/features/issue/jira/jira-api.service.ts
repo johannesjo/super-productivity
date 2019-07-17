@@ -242,7 +242,6 @@ export class JiraApiService {
   private _sendRequest$(request, cfg = this._cfg, isForce = false): Observable<any> {
     if (!this._isMinimalSettings(cfg)) {
       this._snackService.open({
-        isTranslate: true,
         type: 'ERROR',
         msg: (!IS_ELECTRON && !this._isExtension)
           ? T.F.JIRA.SNACK.EXTENSION_NOT_LOADED
@@ -291,7 +290,6 @@ export class JiraApiService {
         console.log('ERROR', 'Jira Request timed out for ' + request.apiMethod, request);
         // delete entry for promise
         this._snackService.open({
-          isTranslate: true,
           msg: T.F.JIRA.SNACK.TIMED_OUT,
           type: 'ERROR',
         });

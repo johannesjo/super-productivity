@@ -393,7 +393,6 @@ export class GoogleApiService {
 
   private _snackIt(type: SnackType, msg: string, translateParams = null) {
     this._snackService.open({
-      isTranslate: true,
       msg,
       type,
       translateParams,

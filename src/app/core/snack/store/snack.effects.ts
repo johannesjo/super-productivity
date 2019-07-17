@@ -51,15 +51,15 @@ export class SnackEffects {
       _destroy$.next(true);
       _destroy$.unsubscribe();
     };
-    const {msg, actionStr, actionId, actionPayload, config, type, isSubtle, isTranslate, translateParams} = action.payload;
+    const {msg, actionStr, actionId, actionPayload, config, type, isSubtle, isSkipTranslate, translateParams} = action.payload;
     const cfg = {
       ...DEFAULT_SNACK_CFG,
       ...config,
       data: {
         ...action.payload,
-        msg: (isTranslate || translateParams)
-          ? this._translateService.instant(msg, translateParams)
-          : msg,
+        msg: (isSkipTranslate)
+          ? msg
+          : this._translateService.instant(msg, translateParams),
       },
     };
     if (isSubtle) {

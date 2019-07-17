@@ -176,7 +176,6 @@ export class JiraIssueEffects {
         if (isEmail(currentUserName)) {
           this._snackService.open({
             svgIco: 'jira',
-            isTranslate: true,
             msg: T.F.JIRA.SNACK.UNABLE_TO_REASSIGN,
           });
           return EMPTY;
@@ -261,7 +260,6 @@ export class JiraIssueEffects {
       tap(tasks => {
         console.warn('TASKS WITH MISSING ISSUE DATA FOR JIRA', tasks);
         this._snackService.open({
-          isTranslate: true,
           msg: T.F.JIRA.SNACK.MISSING_ISSUE_DATA,
           svgIco: 'jira',
         });
@@ -304,7 +302,6 @@ export class JiraIssueEffects {
       const issueIds = issueIds_ as string[];
       if (issueIds && issueIds.length > 0) {
         this._snackService.open({
-          isTranslate: true,
           msg: T.F.JIRA.SNACK.POLLING,
           svgIco: 'jira',
           isSubtle: true,
@@ -346,7 +343,6 @@ export class JiraIssueEffects {
       default:
         if (!chosenTransition || !chosenTransition.id) {
           this._snackService.open({
-            isTranslate: true,
             msg: T.F.JIRA.SNACK.NO_VALID_TRANSITION,
             type: 'ERROR',
           });

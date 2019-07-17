@@ -233,6 +233,7 @@
         "TITLE": "Overwrite unsaved data on Google Drive?"
       },
       "EXPORT_TIME": {
+        "OPTIONS": "Options",
         "ALWAYS_ROUND_UP": "Always round work time up",
         "AUTO_LOGIN": "Auto-login and load data next time",
         "HELP_ADDITIONAL": "In addition to this there are several options you can use to modify the calculation of those values.",
@@ -267,7 +268,7 @@
       },
       "SNACKS": {
         "DOWNLOADING_UPDATE": "Google Drive: There is a remote update! Downloading...",
-        "ERROR": "Google Drive – Error:",
+        "ERROR": "Google Drive – Error: {{errTxt}}",
         "ERROR_INITIAL_IMPORT": "Google Drive: Error while trying to import data initially",
         "LOCAL_UP_TO_DATE": "Google Drive: Local data already up to date",
         "MULTIPLE_SYNC_FILES_WITH_SAME_NAME": "Multiple files with the name \"{{newFileName}}\" found. Please delete all but one or choose a different name.",

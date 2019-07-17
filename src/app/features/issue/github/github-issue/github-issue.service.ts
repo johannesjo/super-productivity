@@ -120,7 +120,6 @@ export class GithubIssueService {
       this.upsert(issue);
       this._snackService.open({
         ico: 'cloud_download',
-        isTranslate: true,
         translateParams: {
           issueText: this._formatIssueTitle(issue.number, issue.title)
         },
@@ -143,7 +142,6 @@ export class GithubIssueService {
           if (isNewComment && isNotify) {
             this._snackService.open({
               ico: 'cloud_download',
-              isTranslate: true,
               translateParams: {
                 issueText: this._formatIssueTitle(matchingNewIssue.number, matchingNewIssue.title)
               },
@@ -152,7 +150,6 @@ export class GithubIssueService {
           } else if (isIssueChanged && isNotify) {
             this._snackService.open({
               ico: 'cloud_download',
-              isTranslate: true,
               translateParams: {
                 issueText: this._formatIssueTitle(matchingNewIssue.number, matchingNewIssue.title)
               },
@@ -169,7 +166,6 @@ export class GithubIssueService {
           this._snackService.open({
             type: 'CUSTOM',
             svgIco: 'github',
-            isTranslate: true,
             translateParams: {
               issueText: this._formatIssueTitle(oldIssue.number, oldIssue.title)
             },
