@@ -25,6 +25,7 @@ export class NotifyService {
 
   async notify(options: NotifyModel): Promise<Notification> {
     const title = this._translateService.instant(options.title, options.translateParams);
+    const body = options.body && this._translateService.instant(options.body, options.translateParams);
 
     if (this._isServiceWorkerAvailable()) {
       const reg = await navigator.serviceWorker.getRegistration('ngsw-worker.js');
@@ -37,6 +38,7 @@ export class NotifyService {
           primaryKey: 1
         },
         ...options,
+        body,
       });
 
     } else if (this._isBasicNotificationSupport()) {
@@ -52,6 +54,7 @@ export class NotifyService {
             primaryKey: 1
           },
           ...options,
+          body,
         });
         instance.onclick = () => {
           instance.close();

@@ -89,11 +89,9 @@ import {getWorklogStr} from '../../util/get-work-log-str';
 import {Actions, ofType} from '@ngrx/effects';
 import {IssueService} from '../issue/issue.service';
 import {ProjectService} from '../project/project.service';
-import {SnackService} from '../../core/snack/snack.service';
 import {RoundTimeOption} from '../project/project.model';
 import {Dictionary} from '@ngrx/entity';
 import {GITHUB_TYPE, LEGACY_GITHUB_TYPE} from '../issue/issue.const';
-import {T} from '../../t.const';
 
 
 @Injectable({
@@ -252,7 +250,6 @@ export class TaskService {
     private readonly _persistenceService: PersistenceService,
     private readonly _issueService: IssueService,
     private readonly _projectService: ProjectService,
-    private readonly _snackService: SnackService,
     private readonly _timeTrackingService: TimeTrackingService,
     private readonly _actions$: Actions,
   ) {

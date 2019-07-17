@@ -528,7 +528,20 @@ export const T = {
         'DATE': 'F.TASK.D_TIME_FOR_DAY.DATE',
         'TINE_SPENT': 'F.TASK.D_TIME_FOR_DAY.TINE_SPENT'
       },
-      'SNACK': {},
+      'N': {
+        'ESTIMATE_EXCEEDED': 'F.TASK.N.ESTIMATE_EXCEEDED',
+        'ESTIMATE_EXCEEDED_BODY': 'F.TASK.N.ESTIMATE_EXCEEDED_BODY'
+      },
+      'B': {
+        'ESTIMATE_EXCEEDED': 'F.TASK.B.ESTIMATE_EXCEEDED',
+        'ADD_HALF_HOUR': 'F.TASK.B.ADD_HALF_HOUR'
+      },
+      'S': {
+        'REMINDER_ADDED': 'F.TASK.S.REMINDER_ADDED',
+        'REMINDER_UPDATED': 'F.TASK.S.REMINDER_UPDATED',
+        'REMINDER_DELETED': 'F.TASK.S.REMINDER_DELETED',
+        'DELETED': 'F.TASK.S.DELETED'
+      },
       'TASK_LIST': {},
       'TASK': {},
       'SUMMARY_TABLE': {}
@@ -682,6 +695,7 @@ export const T = {
     'OK': 'G.OK',
     'PREVIOUS': 'G.PREVIOUS',
     'SAVE': 'G.SAVE',
+    'UNDO': 'G.UNDO',
     'UPDATE': 'G.UPDATE',
     'TITLE': 'G.TITLE'
   },

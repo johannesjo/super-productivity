@@ -529,7 +529,19 @@
         "DATE": "Date for new entry",
         "TINE_SPENT": "Time Spent"
       },
-      "SNACK": {
+      "N": {
+        "ESTIMATE_EXCEEDED": "Time estimate exceeded!",
+        "ESTIMATE_EXCEEDED_BODY": "You exceeded your estimated time for \"{{title}}\"."
+      },
+      "B": {
+        "ESTIMATE_EXCEEDED": "Time estimate exceeded for  \"{{title}}\"",
+        "ADD_HALF_HOUR": "Add 1/2 hou"
+      },
+      "S": {
+        "REMINDER_ADDED": "Scheduled task \"{{title}}\"",
+        "REMINDER_UPDATED": "Updated reminder for task \"{{title}}\"",
+        "REMINDER_DELETED": "Deleted reminder for task",
+        "DELETED": "Deleted task \"{{title}}\""
       },
       "TASK_LIST": {
       },
@@ -687,6 +699,7 @@
     "OK": "Ok",
     "PREVIOUS": "Previous",
     "SAVE": "Save",
+    "UNDO": "Undo",
     "UPDATE": "UPDATE",
     "TITLE": "Title"
   },
