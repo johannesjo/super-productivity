@@ -15,6 +15,7 @@ import {loadFromSessionStorage, saveToSessionStorage} from '../../../../core/per
 import {GithubCfg} from '../../../issue/github/github';
 import {DialogGithubInitialSetupComponent} from '../../../issue/github/dialog-github-initial-setup/dialog-github-initial-setup.component';
 import {GITHUB_TYPE} from '../../../issue/issue.const';
+import {T} from '../../../../t.const';
 
 @Component({
   selector: 'dialog-create-project',
@@ -23,6 +24,7 @@ import {GITHUB_TYPE} from '../../../issue/issue.const';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DialogCreateProjectComponent implements OnInit, OnDestroy {
+  T = T;
   projectData: Project | Partial<Project> = DEFAULT_PROJECT;
   jiraCfg: JiraCfg;
   githubCfg: GithubCfg;

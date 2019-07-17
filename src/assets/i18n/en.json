@@ -7,6 +7,15 @@
     "TITLE": "Backlog"
   },
   "F": {
+    "PROJECT": {
+      "D_CREATE": {
+        "EDIT": "Edit Project",
+        "CREATE": "Create Project",
+        "ISSUE_PROVIDER_CFGS": "Issue Provider Configs (optional)",
+        "SETUP_JIRA": "Setup Jira Integration",
+        "SETUP_GIT": "Setup Github Integration"
+      }
+    },
     "NOTE": {
       "ADD_REMINDER": "Add reminder",
       "EDIT_REMINDER": "Edit reminder",

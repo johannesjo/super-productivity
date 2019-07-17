@@ -7,6 +7,15 @@ export const T = {
     'TITLE': 'BL.TITLE'
   },
   'F': {
+    'PROJECT': {
+      'D_CREATE': {
+        'EDIT': 'F.PROJECT.D_CREATE.EDIT',
+        'CREATE': 'F.PROJECT.D_CREATE.CREATE',
+        'ISSUE_PROVIDER_CFGS': 'F.PROJECT.D_CREATE.ISSUE_PROVIDER_CFGS',
+        'SETUP_JIRA': 'F.PROJECT.D_CREATE.SETUP_JIRA',
+        'SETUP_GIT': 'F.PROJECT.D_CREATE.SETUP_GIT'
+      }
+    },
     'NOTE': {
       'ADD_REMINDER': 'F.NOTE.ADD_REMINDER',
       'EDIT_REMINDER': 'F.NOTE.EDIT_REMINDER',

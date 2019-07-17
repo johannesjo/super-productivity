@@ -48,6 +48,7 @@ import {isValidProjectExport} from './util/is-valid-project-export';
 import {SnackService} from '../../core/snack/snack.service';
 import {migrateProjectState} from './migrate-projects-state.util';
 import {WorklogExportSettings} from '../worklog/worklog.model';
+import {T} from '../../t.const';
 
 @Injectable({
   providedIn: 'root',
