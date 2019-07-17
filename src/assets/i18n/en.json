@@ -7,6 +7,16 @@
     "TITLE": "Backlog"
   },
   "F": {
+    "NOTE": {
+      "ADD_REMINDER": "Add reminder",
+      "EDIT_REMINDER": "Edit reminder",
+      "UPDATE_REMINDER": "Update reminder",
+      "REMOVE_REMINDER": "Remove reminder",
+      "D_ADD": {
+        "NOTE_LABEL": "Enter some text to save as note...",
+        "DATETIME_LABEL": "Datetime for reminder (optional)"
+      }
+    },
     "METRIC": {
       "EVAL_FORM": {
         "HELP_P1": "Time for a little self evaluation! Your answers here are saved and provide you with a little bit of statistics on how you work in the metrics section. Furthermore the suggestions for tomorrow will appear above your task list the next day.",
@@ -440,7 +450,8 @@
     "NEXT": "Next",
     "PREVIOUS": "Previous",
     "LOGIN": "Login",
-    "LOGOUT": "Logout"
+    "LOGOUT": "Logout",
+    "DELETE": "Delete"
   },
   "MH": {
     "ADD_NEW_TASK": "Add new Task",
@@ -516,7 +527,8 @@
     }
   },
   "V": {
-    "E_1TO10": "Please enter a value between 1 and 10"
+    "E_1TO10": "Please enter a value between 1 and 10",
+    "E_DATETIME": "The entered value is not a datetime!"
   },
   "WW": {
     "ADD_MORE": "Add more",
@@ -531,5 +543,9 @@
     "TIME_ESTIMATED": "Time Estimated:",
     "WITHOUT_BREAK": "Without break:",
     "WORKING_TODAY": "Working today:"
+  },
+  "DATETIME_INPUT": {
+    "IN": "in {{time}}",
+    "TOMORROW": "tomorrow {{time}}"
   }
 }

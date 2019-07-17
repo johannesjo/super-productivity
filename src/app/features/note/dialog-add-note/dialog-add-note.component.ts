@@ -3,6 +3,7 @@ import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {NoteService} from '../note.service';
 import {Reminder} from '../../reminder/reminder.model';
 import {SS_NOTE_TMP} from '../../../core/persistence/ls-keys.const';
+import {T} from '../../../t.const';
 
 
 @Component({
@@ -12,9 +13,11 @@ import {SS_NOTE_TMP} from '../../../core/persistence/ls-keys.const';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DialogAddNoteComponent {
+  T = T;
   noteContent: string;
   reminderDate: number;
   isSubmitted = false;
+
 
   constructor(
     private _matDialogRef: MatDialogRef<DialogAddNoteComponent>,

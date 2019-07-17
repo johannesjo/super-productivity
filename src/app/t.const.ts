@@ -7,6 +7,16 @@ export const T = {
     'TITLE': 'BL.TITLE'
   },
   'F': {
+    'NOTE': {
+      'ADD_REMINDER': 'F.NOTE.ADD_REMINDER',
+      'EDIT_REMINDER': 'F.NOTE.EDIT_REMINDER',
+      'UPDATE_REMINDER': 'F.NOTE.UPDATE_REMINDER',
+      'REMOVE_REMINDER': 'F.NOTE.REMOVE_REMINDER',
+      'D_ADD': {
+        'NOTE_LABEL': 'F.NOTE.D_ADD.NOTE_LABEL',
+        'DATETIME_LABEL': 'F.NOTE.D_ADD.DATETIME_LABEL'
+      }
+    },
     'METRIC': {
       'EVAL_FORM': {
         'HELP_P1': 'F.METRIC.EVAL_FORM.HELP_P1',
@@ -439,7 +449,8 @@ export const T = {
     'NEXT': 'G.NEXT',
     'PREVIOUS': 'G.PREVIOUS',
     'LOGIN': 'G.LOGIN',
-    'LOGOUT': 'G.LOGOUT'
+    'LOGOUT': 'G.LOGOUT',
+    'DELETE': 'G.DELETE'
   },
   'MH': {
     'ADD_NEW_TASK': 'MH.ADD_NEW_TASK',
@@ -515,7 +526,8 @@ export const T = {
     }
   },
   'V': {
-    'E_1TO10': 'V.E_1TO10'
+    'E_1TO10': 'V.E_1TO10',
+    'E_DATETIME': 'V.E_DATETIME'
   },
   'WW': {
     'ADD_MORE': 'WW.ADD_MORE',
@@ -530,5 +542,9 @@ export const T = {
     'TIME_ESTIMATED': 'WW.TIME_ESTIMATED',
     'WITHOUT_BREAK': 'WW.WITHOUT_BREAK',
     'WORKING_TODAY': 'WW.WORKING_TODAY'
+  },
+  'DATETIME_INPUT': {
+    'IN': 'DATETIME_INPUT.IN',
+    'TOMORROW': 'DATETIME_INPUT.TOMORROW'
   }
 };
