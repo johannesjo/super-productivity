@@ -1,4 +1,12 @@
 {
+  "APP": {
+    "B_INSTALL": {
+      "IGNORE": "Ignore",
+      "INSTALL": "Install",
+      "MSG": "Do you want to install Super Productivity as a PWA?"
+    },
+    "UPDATE_WEB_APP": "New version available. Load New Version?"
+  },
   "BL": {
     "FROM_OTHER_PROJECTS": "From other Projects",
     "NO_SCHEDULED": "There are currently no scheduled tasks. You can schedule a task by choosing \"Schedule Task\" in the task context menu. To open it click on the 3 little dots on the right of a task.",
@@ -489,97 +497,97 @@
       "TITLE": "Title"
     },
     "TASK": {
-      "SELECT_OR_CREATE": "Select or create task",
+      "ADDITIONAL_INFO": {
+        "ATTACHMENTS": "Attachments {{nr}}",
+        "ISSUE_TYPE_ATTACHMENTS": "{{issueType}} Attachments",
+        "LOCAL_ATTACHMENTS": "Local Attachments",
+        "NOTES": "Notes"
+      },
       "ADD_TASK_BAR": {
         "START": "Press enter one more time to start"
       },
-      "ADDITIONAL_INFO": {
-        "NOTES": "Notes",
-        "ATTACHMENTS": "Attachments {{nr}}",
-        "ISSUE_TYPE_ATTACHMENTS": "{{issueType}} Attachments",
-        "LOCAL_ATTACHMENTS": "Local Attachments"
+      "B": {
+        "ADD_HALF_HOUR": "Add 1/2 hou",
+        "ESTIMATE_EXCEEDED": "Time estimate exceeded for  \"{{title}}\""
+      },
+      "CMP": {
+        "ADD_SUB_TASK": "Add sub task",
+        "ADVANCED": "Advanced",
+        "CONVERT_TO_PARENT_TASK": "Convert to parent Task",
+        "DELETE": "Delete Task",
+        "DROP_ATTACHMENT": "Drop here to attach to \"{{task.title}}\"",
+        "EDIT_REMINDER": "Edit reminder",
+        "MARK_DONE": "Mark as done",
+        "MARK_UNDONE": "Mark as undone",
+        "MOVE_TO_BACKLOG": "Move to backlog",
+        "MOVE_TO_OTHER_PROJECT": "Move to other Project",
+        "MOVE_TO_TODAY": "Move to today's list",
+        "OPEN_ATTACH": "Attach file or link",
+        "OPEN_ISSUE": "Open issue in a new browser tab",
+        "OPEN_TASK_MENU": "Open task menu",
+        "OPEN_TIME": "Estimate time/Add time spent",
+        "REPEAT_EDIT": "Edit repeat task config",
+        "REPEAT_TASK": "Repeat task",
+        "SCHEDULE": "Schedule task",
+        "SHOW_UPDATES": "Show updates",
+        "TOGGLE_ADDITIONAL": "Show/Hide additional info",
+        "TOGGLE_ATTACHMENTS": "Show/Hide attachments",
+        "TOGGLE_DONE": "Mark as done/undone",
+        "TOGGLE_SUB_TASK_VISIBILITY": "Toggle sub task visibility",
+        "TRACK_TIME": "Start tracking time",
+        "TRACK_TIME_STOP": "Pause tracking time",
+        "UPDATE_ISSUE_DATA": "Update issue data"
       },
       "D_REMINDER_ADD": {
-        "EDIT": "Edit Reminder",
         "ADD": "Schedule Task",
         "DATETIME_FOR": "Datetime for reminder",
+        "EDIT": "Edit Reminder",
         "MOVE_TO_BACKLOG": "Move task to backlog until scheduled",
-        "UNSCHEDULE": "Unschedule",
-        "SCHEDULE": "Schedule"
+        "SCHEDULE": "Schedule",
+        "UNSCHEDULE": "Unschedule"
       },
       "D_REMINDER_VIEW": {
-        "TITLE": "Scheduled Task",
-        "FOR_CURRENT": "Task is due. Do you want to start working on it?",
-        "FROM_PROJECT": "From Project",
-        "FOR_OTHER": "Task is due. Do you want to start working on it?",
-        "ERR_LOST": "There was a reminder scheduled for the task {{title}}, but it seems to be lost.",
         "DISMISS": "Dismiss Reminder",
+        "ERR_LOST": "There was a reminder scheduled for the task {{title}}, but it seems to be lost.",
+        "FOR_CURRENT": "Task is due. Do you want to start working on it?",
+        "FOR_OTHER": "Task is due. Do you want to start working on it?",
+        "FROM_PROJECT": "From Project",
         "SNOOZE": "Snooze {{time}}",
+        "START": "Start Task",
         "SWITCH_PROJECT_START": "Switch Project & Start Task",
-        "START": "Start Task"
+        "TITLE": "Scheduled Task"
       },
       "D_TIME": {
-        "TITLE": "Time spent / Estimates",
-        "TIME_SPENT": "Time Spent",
-        "ESTIMATE": "Estimate",
-        "TIME_SPENT_ON": "Time Spent {{date}}",
+        "ADD_FOR_OTHER_DAY": "Add time spent for other day",
         "DELETE_FOR": "Delete entry for day",
-        "ADD_FOR_OTHER_DAY": "Add time spent for other day"
+        "ESTIMATE": "Estimate",
+        "TIME_SPENT": "Time Spent",
+        "TIME_SPENT_ON": "Time Spent {{date}}",
+        "TITLE": "Time spent / Estimates"
       },
       "D_TIME_FOR_DAY": {
-        "TITLE": "Add for Day",
-        "HELP": "Examples:<br> 30m => 30 minutes<br> 2h => 2 hours<br> 2h 30m => 2 hours and 30 minutes",
         "ADD_ENTRY_FOR": "Add new entry for {{date}}",
         "DATE": "Date for new entry",
-        "TINE_SPENT": "Time Spent"
+        "HELP": "Examples:<br> 30m => 30 minutes<br> 2h => 2 hours<br> 2h 30m => 2 hours and 30 minutes",
+        "TINE_SPENT": "Time Spent",
+        "TITLE": "Add for Day"
       },
       "N": {
         "ESTIMATE_EXCEEDED": "Time estimate exceeded!",
         "ESTIMATE_EXCEEDED_BODY": "You exceeded your estimated time for \"{{title}}\"."
       },
-      "B": {
-        "ESTIMATE_EXCEEDED": "Time estimate exceeded for  \"{{title}}\"",
-        "ADD_HALF_HOUR": "Add 1/2 hou"
-      },
       "S": {
+        "DELETED": "Deleted task \"{{title}}\"",
         "REMINDER_ADDED": "Scheduled task \"{{title}}\"",
-        "REMINDER_UPDATED": "Updated reminder for task \"{{title}}\"",
         "REMINDER_DELETED": "Deleted reminder for task",
-        "DELETED": "Deleted task \"{{title}}\""
+        "REMINDER_UPDATED": "Updated reminder for task \"{{title}}\""
       },
-      "CMP": {
-        "TOGGLE_DONE": "Mark as done/undone",
-        "SHOW_UPDATES": "Show updates",
-        "OPEN_ISSUE": "Open issue in a new browser tab",
-        "TRACK_TIME": "Start tracking time",
-        "TRACK_TIME_STOP": "Pause tracking time",
-        "OPEN_TIME": "Estimate time/Add time spent",
-        "TOGGLE_ADDITIONAL": "Show/Hide additional info",
-        "EDIT_REMINDER": "Edit reminder",
-        "TOGGLE_ATTACHMENTS": "Show/Hide attachments",
-        "OPEN_TASK_MENU": "Open task menu",
-        "MARK_DONE": "Mark as done",
-        "MARK_UNDONE": "Mark as undone",
-        "SCHEDULE": "Schedule task",
-        "ADD_SUB_TASK": "Add sub task",
-        "OPEN_ATTACH": "Attach file or link",
-        "UPDATE_ISSUE_DATA": "Update issue data",
-        "MOVE_TO_BACKLOG": "Move to backlog",
-        "MOVE_TO_TODAY": "Move to today's list",
-        "DELETE": "Delete Task",
-        "ADVANCED": "Advanced",
-        "MOVE_TO_OTHER_PROJECT": "Move to other Project",
-        "CONVERT_TO_PARENT_TASK": "Convert to parent Task",
-        "REPEAT_TASK": "Repeat task",
-        "REPEAT_EDIT": "Edit repeat task config",
-        "TOGGLE_SUB_TASK_VISIBILITY": "Toggle sub task visibility",
-        "DROP_ATTACHMENT": "Drop here to attach to \"{{task.title}}\""
-      },
+      "SELECT_OR_CREATE": "Select or create task",
       "SUMMARY_TABLE": {
-        "TASK": "Task",
+        "ESTIMATE": "Estimate",
         "SPENT_TODAY": "",
         "SPENT_TOTAL": "Spent Total",
-        "ESTIMATE": "Estimate",
+        "TASK": "Task",
         "TOGGLE_DONE": "un-/mark as done"
       }
     },
@@ -596,78 +604,78 @@
         "HELP3": "Tasks imported from Jira or Git Issues cannot be repeated. All reminders will also be deleted on a repeating task."
       },
       "F": {
-        "TITLE": "Title for task",
         "DEFAULT_ESTIMATE": "Default Estimate",
-        "MONDAY": "Monday",
-        "TUESDAY": "Tuesday",
-        "WEDNESDAY": "Wednesday",
-        "THURSDAY": "Thursday",
         "FRIDAY": "Friday",
+        "MONDAY": "Monday",
         "SATURDAY": "Saturday",
-        "SUNDAY": "Sunday"
+        "SUNDAY": "Sunday",
+        "THURSDAY": "Thursday",
+        "TITLE": "Title for task",
+        "TUESDAY": "Tuesday",
+        "WEDNESDAY": "Wednesday"
       }
     },
     "TIME_TRACKING": {
-      "D_IDLE": {
-        "IDLE_FOR": "You have been idle for:",
-        "TRACK_TO": "Track to:",
-        "CREATE_AND_TRACK": "<em>Create</em> and track to:",
-        "SKIP": "Skip",
-        "BREAK": "Break",
-        "TASK": "Task",
-        "TASK_BREAK": "Task+Break"
-      },
       "B": {
         "ALREADY_DID": "I already did",
         "SNOOZE": "Snooze {{time}}"
+      },
+      "D_IDLE": {
+        "BREAK": "Break",
+        "CREATE_AND_TRACK": "<em>Create</em> and track to:",
+        "IDLE_FOR": "You have been idle for:",
+        "SKIP": "Skip",
+        "TASK": "Task",
+        "TASK_BREAK": "Task+Break",
+        "TRACK_TO": "Track to:"
       }
     },
     "WORKLOG": {
-      "D_EXPORT_TITLE": "Worklog Export",
+      "CMP": {
+        "DAYS_WORKED": "Days, worked:",
+        "MONTH_WORKED": "Month worked:",
+        "REPEATING_TASK": "Repeating task",
+        "RESTORE_TASK_FROM_ARCHIVE": "Restore Task From Archive",
+        "TASKS": "Tasks",
+        "TOTAL_TIME": "Time spent total:",
+        "TOTAL_TIME_PROJECT": "Total time spent on project",
+        "WORKED": "Worked"
+      },
       "D_CONFIRM_RESTORE": "Are you sure you want to move the task <strong>\"{{title}}\"</strong> into your todays task list?",
+      "D_EXPORT_TITLE": "Worklog Export",
       "EXPORT": {
-        "SHOW_AS_TEXT": "Show as text",
-        "SEPARATE_TASKS_BY": "Separate tasks by",
-        "ROUND_TIME_WORKED_TO": "Round time worked to",
-        "ROUND_START_TIME_TO": "Round start time to",
-        "ROUND_END_TIME_TO": "Round end time to",
+        "COPY_TO_CLIPBOARD": "Copy to clipboard",
         "DONT_ROUND": "don't round",
         "GROUP_BY": "Group by",
-        "COPY_TO_CLIPBOARD": "Copy to clipboard",
-        "SAVE_TO_FILE": "Save to file",
         "O": {
-          "FULL_QUARTERS": "full quarters",
-          "FULL_HALF_HOURS": "full half hours",
-          "FULL_HOURS": "full hours",
           "DATE": "Date",
-          "STARTED_WORKING": "Started Working",
           "ENDED_WORKING": "Ended Working",
-          "PARENT_TASK_TITLES_ONLY": "Parent Task Titles only",
-          "TITLES_AND_SUB_TASK_TITLES": "Titles and Sub Task Titles",
-          "TIME_AS_MILLISECONDS": "Time as milliseconds",
-          "TIME_AS_STRING": "Time as string (e.g. 5h 23m)",
-          "TIME_AS_CLOCK": "Time as clock (e.g. 5:23)",
+          "ESTIMATE_AS_CLOCK": "Estimate as clock (e.g. 5:23)",
           "ESTIMATE_AS_MILLISECONDS": "Estimate as milliseconds",
           "ESTIMATE_AS_STRING": "Estimate as string (e.g. 5h 23m)",
-          "ESTIMATE_AS_CLOCK": "Estimate as clock (e.g. 5:23)",
-          "TASK_SUBTASK": "Task/Subtask",
+          "FULL_HALF_HOURS": "full half hours",
+          "FULL_HOURS": "full hours",
+          "FULL_QUARTERS": "full quarters",
           "PARENT_TASK": "Parent Task",
+          "PARENT_TASK_TITLES_ONLY": "Parent Task Titles only",
+          "STARTED_WORKING": "Started Working",
+          "TASK_SUBTASK": "Task/Subtask",
+          "TIME_AS_CLOCK": "Time as clock (e.g. 5:23)",
+          "TIME_AS_MILLISECONDS": "Time as milliseconds",
+          "TIME_AS_STRING": "Time as string (e.g. 5h 23m)",
+          "TITLES_AND_SUB_TASK_TITLES": "Titles and Sub Task Titles",
           "WORKLOG": "Worklog"
-        }
+        },
+        "ROUND_END_TIME_TO": "Round end time to",
+        "ROUND_START_TIME_TO": "Round start time to",
+        "ROUND_TIME_WORKED_TO": "Round time worked to",
+        "SAVE_TO_FILE": "Save to file",
+        "SEPARATE_TASKS_BY": "Separate tasks by",
+        "SHOW_AS_TEXT": "Show as text"
       },
       "WEEK": {
-        "TITLE": "Title",
-        "EXPORT": "Export Week Data"
-      },
-      "CMP": {
-        "TOTAL_TIME_PROJECT": "Total time spent on project",
-        "MONTH_WORKED": "Month worked:",
-        "DAYS_WORKED": "Days, worked:",
-        "TOTAL_TIME": "Time spent total:",
-        "TASKS": "Tasks",
-        "WORKED": "Worked",
-        "REPEATING_TASK": "Repeating task",
-        "RESTORE_TASK_FROM_ARCHIVE": "Restore Task From Archive"
+        "EXPORT": "Export Week Data",
+        "TITLE": "Title"
       }
     }
   },
@@ -742,6 +750,7 @@
     "ES": "Spanish",
     "FR": "French",
     "JA": "Japanese",
+    "KO": "Korean",
     "LABEL": "Please select a language",
     "RU": "Russian",
     "TITLE": "Language",
@@ -779,11 +788,10 @@
     "TITLE": "Break Reminder"
   },
   "G": {
-    "CLICK_TO_EDIT": "click to edit",
     "CANCEL": "Cancel",
+    "CLICK_TO_EDIT": "click to edit",
     "CLOSE": "Close",
     "DELETE": "Delete",
-    "REMOVE": "Remove",
     "DISMISS": "Dismiss",
     "DO_IT": "Do it!",
     "LOGIN": "Login",
@@ -791,10 +799,11 @@
     "NEXT": "Next",
     "OK": "Ok",
     "PREVIOUS": "Previous",
+    "REMOVE": "Remove",
     "SAVE": "Save",
+    "TITLE": "Title",
     "UNDO": "Undo",
-    "UPDATE": "UPDATE",
-    "TITLE": "Title"
+    "UPDATE": "UPDATE"
   },
   "MH": {
     "ADD_NEW_TASK": "Add new Task",
@@ -904,13 +913,5 @@
     "TIME_ESTIMATED": "Time Estimated:",
     "WITHOUT_BREAK": "Without break:",
     "WORKING_TODAY": "Working today:"
-  },
-  "APP": {
-    "B_INSTALL": {
-      "MSG": "Do you want to install Super Productivity as a PWA?",
-      "INSTALL": "Install",
-      "IGNORE": "Ignore"
-    },
-    "UPDATE_WEB_APP": "New version available. Load New Version?"
   }
 }

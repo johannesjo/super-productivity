@@ -29,6 +29,7 @@ export enum LanguageCode {
   ar = 'ar',
   fr = 'fr',
   ja = 'ja',
+  ko = 'ko',
   ru = 'ru',
   tr = 'tr',
   zh = 'zh',
@@ -41,6 +42,7 @@ export enum LanguageCodeMomentMap {
   ar = 'ar',
   fr = 'fr',
   ja = 'ja',
+  ko = 'ko',
   ru = 'ru',
   tr = 'tr',
   zh = 'zh-cn',
@@ -52,6 +54,7 @@ export const AUTO_SWITCH_LNGS: LanguageCode[] = [
   LanguageCode.zh,
   LanguageCode.ar,
   LanguageCode.ja,
+  LanguageCode.ko,
   LanguageCode.ru,
   LanguageCode.tr,
 ];

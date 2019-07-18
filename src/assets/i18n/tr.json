@@ -1,4 +1,12 @@
 {
+  "APP": {
+    "B_INSTALL": {
+      "IGNORE": "Aldırmamak",
+      "INSTALL": "kurmak",
+      "MSG": "Süper Verimliliği PWA olarak kurmak ister misiniz?"
+    },
+    "UPDATE_WEB_APP": "Yeni sürüm mevcut. Yeni Sürüm Yükle?"
+  },
   "BL": {
     "FROM_OTHER_PROJECTS": "Diğer Projelerden",
     "NO_SCHEDULED": "Şu anda zamanlanmış görev yok. Görev bağlamı menüsünde \"Görevi Zamanla\" seçeneğini seçerek bir görevi zamanlayabilirsiniz. Açmak için görevin sağındaki 3 küçük noktaya tıklayın.",
@@ -488,14 +496,187 @@
       "TIME_SPENT": "Harcanan zaman",
       "TITLE": "Başlık"
     },
+    "TASK": {
+      "ADDITIONAL_INFO": {
+        "ATTACHMENTS": "Ekler {{nr}}",
+        "ISSUE_TYPE_ATTACHMENTS": "{{issueType}} Ekler",
+        "LOCAL_ATTACHMENTS": "Yerel Ekler",
+        "NOTES": "Notlar"
+      },
+      "ADD_TASK_BAR": {
+        "START": "Başlamak için bir kez daha enter tuşuna basın"
+      },
+      "B": {
+        "ADD_HALF_HOUR": "1/2 hou ekle",
+        "ESTIMATE_EXCEEDED": "\"{{title}}\" için zaman tahmini aşıldı"
+      },
+      "CMP": {
+        "ADD_SUB_TASK": "Alt Görev ekle",
+        "ADVANCED": "İleri",
+        "CONVERT_TO_PARENT_TASK": "Üst Göreve Dönüştür",
+        "DELETE": "Görevi Sil",
+        "DROP_ATTACHMENT": "\"{{task.title}}\" öğesine eklemek için buraya bırakın",
+        "EDIT_REMINDER": "Hatırlatıcıyı düzenle",
+        "MARK_DONE": "tamamlandı olarak işaretle",
+        "MARK_UNDONE": "Bitti olarak işaretle",
+        "MOVE_TO_BACKLOG": "Backlog'a taşı",
+        "MOVE_TO_OTHER_PROJECT": "Diğer Projeye Taşı",
+        "MOVE_TO_TODAY": "Bugünün listesine git",
+        "OPEN_ATTACH": "Dosya veya bağlantı ekle",
+        "OPEN_ISSUE": "Sorunu yeni bir tarayıcı sekmesinde aç",
+        "OPEN_TASK_MENU": "Görev menüsünü aç",
+        "OPEN_TIME": "Tahmini süre / Harcanan zamanı ekle",
+        "REPEAT_EDIT": "Yinelenen Görev Yapılandırmasını Düzenle",
+        "REPEAT_TASK": "Görevi tekrarla",
+        "SCHEDULE": "Görev Takvimi",
+        "SHOW_UPDATES": "Güncellemeleri göster",
+        "TOGGLE_ADDITIONAL": "Ek bilgileri göster / gizle",
+        "TOGGLE_ATTACHMENTS": "Ekleri Göster / Gizle",
+        "TOGGLE_DONE": "Yapıldı / tamamlandı olarak işaretle",
+        "TOGGLE_SUB_TASK_VISIBILITY": "Alt görev görünürlüğünü değiştir",
+        "TRACK_TIME": "İzlemeye başla",
+        "TRACK_TIME_STOP": "İzleme zamanını duraklat",
+        "UPDATE_ISSUE_DATA": "Sorun verilerini güncelle"
+      },
+      "D_REMINDER_ADD": {
+        "ADD": "Görev Takvimi",
+        "DATETIME_FOR": "Hatırlatıcı için Datetime",
+        "EDIT": "Hatırlatıcıyı düzenle",
+        "MOVE_TO_BACKLOG": "Zamanlanana kadar görevi günlüğe kaydetme",
+        "SCHEDULE": "program",
+        "UNSCHEDULE": "Unschedule"
+      },
+      "D_REMINDER_VIEW": {
+        "DISMISS": "Hatırlatmayı Sil",
+        "ERR_LOST": " {{title}}görevi için zamanlanmış bir hatırlatıcı vardı, ancak kaybolmuş gibi görünüyor.",
+        "FOR_CURRENT": "Görev kaynaklanmaktadır. Üzerinde çalışmaya başlamak ister misiniz?",
+        "FOR_OTHER": "Görev kaynaklanmaktadır. Üzerinde çalışmaya başlamak ister misiniz?",
+        "FROM_PROJECT": "Projeden",
+        "SNOOZE": "Erteleme {{time}}",
+        "START": "Görevi Başlat",
+        "SWITCH_PROJECT_START": "Proje Değiştir ve Görevi Başlat",
+        "TITLE": "Planli gorev"
+      },
+      "D_TIME": {
+        "ADD_FOR_OTHER_DAY": "Diğer gün için harcanan zamanı ekle",
+        "DELETE_FOR": "Günün girişini sil",
+        "ESTIMATE": "Tahmin",
+        "TIME_SPENT": "Harcanan zaman",
+        "TIME_SPENT_ON": "Harcanan Zaman {{date}}",
+        "TITLE": "Harcanan Zaman / Tahminler"
+      },
+      "D_TIME_FOR_DAY": {
+        "ADD_ENTRY_FOR": " {{date}}için yeni giriş ekle",
+        "DATE": "Yeni giriş tarihi",
+        "HELP": "Örnekler:<br> 30m => 30 dakika<br> 2h => 2 saat<br> 2h 30m => 2 saat ve 30 dakika",
+        "TINE_SPENT": "Harcanan zaman",
+        "TITLE": "Güne Ekle"
+      },
+      "N": {
+        "ESTIMATE_EXCEEDED": "Zaman tahmini aşıldı!",
+        "ESTIMATE_EXCEEDED_BODY": "\"{{title}}\" için tahmini sürenizi aştınız."
+      },
+      "S": {
+        "DELETED": "\"{{title}}\" görevi silindi",
+        "REMINDER_ADDED": "Zamanlanmış görev \"{{title}}\"",
+        "REMINDER_DELETED": "Görev için silinen hatırlatıcı",
+        "REMINDER_UPDATED": "\"{{title}}\" görevi için güncellenmiş hatırlatıcı"
+      },
+      "SELECT_OR_CREATE": "Görev seç veya oluştur",
+      "SUMMARY_TABLE": {
+        "ESTIMATE": "Tahmin",
+        "SPENT_TODAY": "",
+        "SPENT_TOTAL": "Harcanan Toplam",
+        "TASK": "görev",
+        "TOGGLE_DONE": "yapılan / işaretini kaldır"
+      }
+    },
     "TASK_REPEAT": {
       "D_CONFIRM_REMOVE": {
         "MSG": "Yineleme yapılandırmasını kaldırmak, bu görevin tüm eski örneklerini yalnızca normal görevlere dönüştürür. Devam etmek istediğinden emin misin?",
         "OK": "Tamamen kaldırmak"
+      },
+      "D_EDIT": {
+        "ADD": "Tekrar Görev Yapısı Ekle",
+        "EDIT": "Yinelenen Görev Yapılandırmasını Düzenle",
+        "HELP1": "Tekrarlanan görevler günlük işler, örneğin: \"Organizasyon\", \"Günlük Toplantı\", \"Kod İnceleme\", \"E-postaları Kontrol Etme\" veya tekrar tekrar gerçekleşmesi muhtemel benzer işler içindir.",
+        "HELP2": "Yapılandırıldıktan sonra, projenizi açar açmaz aşağıda seçilen her gün tekrarlanan bir görev yeniden oluşturulur ve günün sonunda otomatik olarak tamamlanır olarak işaretlenir. Farklı örnekler olarak ele alınacaklar. Böylece serbestçe alt görevler vb ekleyebilirsiniz.",
+        "HELP3": "Jira veya Git'den alınan görevler tekrarlanamaz. Tüm hatırlatıcılar, tekrar eden bir görevde silinecektir."
+      },
+      "F": {
+        "DEFAULT_ESTIMATE": "Varsayılan Tahmini",
+        "FRIDAY": "Cuma",
+        "MONDAY": "Pazartesi",
+        "SATURDAY": "Cumartesi",
+        "SUNDAY": "Pazar",
+        "THURSDAY": "Perşembe",
+        "TITLE": "Görev Başlığı",
+        "TUESDAY": "Salı",
+        "WEDNESDAY": "Çarşamba"
+      }
+    },
+    "TIME_TRACKING": {
+      "B": {
+        "ALREADY_DID": "zaten yaptım",
+        "SNOOZE": "Erteleme {{time}}"
+      },
+      "D_IDLE": {
+        "BREAK": "mola",
+        "CREATE_AND_TRACK": "<em></em> oluşturun ve takip edin:",
+        "IDLE_FOR": "Boşta kaldınız:",
+        "SKIP": "atlamak",
+        "TASK": "görev",
+        "TASK_BREAK": "Görev Arası",
+        "TRACK_TO": "Takip et:"
       }
     },
     "WORKLOG": {
-      "D_CONFIRM_RESTORE": " <strong>\"{{title}}\"</strong> görevini bugünün görev listenize taşımak istediğinizden emin misiniz?"
+      "CMP": {
+        "DAYS_WORKED": "Günler çalıştı:",
+        "MONTH_WORKED": "Ay çalıştı:",
+        "REPEATING_TASK": "Tekrar eden görev",
+        "RESTORE_TASK_FROM_ARCHIVE": "Görevi Arşivden Geri Yükle",
+        "TASKS": "Görevler",
+        "TOTAL_TIME": "Toplam harcanan zaman:",
+        "TOTAL_TIME_PROJECT": "Projeye harcanan toplam süre",
+        "WORKED": "işlenmiş"
+      },
+      "D_CONFIRM_RESTORE": " <strong>\"{{title}}\"</strong> görevini bugünün görev listenize taşımak istediğinizden emin misiniz?",
+      "D_EXPORT_TITLE": "Worklog Export",
+      "EXPORT": {
+        "COPY_TO_CLIPBOARD": "Panoya kopyala",
+        "DONT_ROUND": "yuvarlama",
+        "GROUP_BY": "Grupla",
+        "O": {
+          "DATE": "tarih",
+          "ENDED_WORKING": "Çalışmaya Son Verildi",
+          "ESTIMATE_AS_CLOCK": "Saat olarak tahmin et (ör. 5:23)",
+          "ESTIMATE_AS_MILLISECONDS": "Milisaniye olarak tahmin et",
+          "ESTIMATE_AS_STRING": "Dize olarak tahmin et (ör. 5sa 23m)",
+          "FULL_HALF_HOURS": "tam yarım saat",
+          "FULL_HOURS": "tam saatler",
+          "FULL_QUARTERS": "tam çeyrek",
+          "PARENT_TASK": "Ana Görev",
+          "PARENT_TASK_TITLES_ONLY": "Yalnızca üst Görev Başlıkları",
+          "STARTED_WORKING": "Çalışmaya başladım",
+          "TASK_SUBTASK": "Görev / alt görev",
+          "TIME_AS_CLOCK": "Saat olarak zaman (ör. 5:23)",
+          "TIME_AS_MILLISECONDS": "Milisaniye olarak zaman",
+          "TIME_AS_STRING": "Dize olarak geçen süre (örneğin, 5sa 23m)",
+          "TITLES_AND_SUB_TASK_TITLES": "Başlıklar ve Alt Görev Başlıkları",
+          "WORKLOG": "worklog"
+        },
+        "ROUND_END_TIME_TO": "Gidiş zamanı",
+        "ROUND_START_TIME_TO": "Yuvarlak başlangıç zamanı",
+        "ROUND_TIME_WORKED_TO": "Yuvarlak zaman çalıştı",
+        "SAVE_TO_FILE": "Dosyaya kaydet",
+        "SEPARATE_TASKS_BY": "Görevleri ile ayır",
+        "SHOW_AS_TEXT": "Metin olarak göster"
+      },
+      "WEEK": {
+        "EXPORT": "İhracat Haftası Verileri",
+        "TITLE": "Başlık"
+      }
     }
   },
   "FILE_IMEX": {
@@ -569,6 +750,7 @@
     "ES": "İspanyol",
     "FR": "Fransızca",
     "JA": "Japonca",
+    "KO": "Koreli",
     "LABEL": "Lütfen bir dil seçin",
     "RU": "Rusça",
     "TITLE": "dil",
@@ -607,6 +789,7 @@
   },
   "G": {
     "CANCEL": "İptal etmek",
+    "CLICK_TO_EDIT": "düzenlemek için tıkla",
     "CLOSE": "Kapat",
     "DELETE": "silmek",
     "DISMISS": "Reddet",
@@ -616,8 +799,11 @@
     "NEXT": "Sonraki",
     "OK": "tamam",
     "PREVIOUS": "Önceki",
+    "REMOVE": "Kaldır",
     "SAVE": "Kayıt etmek",
-    "TITLE": "Başlık"
+    "TITLE": "Başlık",
+    "UNDO": "Geri alma",
+    "UPDATE": "Güncelleştirme"
   },
   "MH": {
     "ADD_NEW_TASK": "Yeni Görev ekle",

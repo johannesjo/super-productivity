@@ -1,4 +1,12 @@
 {
+  "APP": {
+    "B_INSTALL": {
+      "IGNORE": "Ignorar",
+      "INSTALL": "instalar",
+      "MSG": "¿Desea instalar Super Productividad como PWA?"
+    },
+    "UPDATE_WEB_APP": "Nueva versión disponible. ¿Cargar nueva versión?"
+  },
   "BL": {
     "FROM_OTHER_PROJECTS": "De otros proyectos",
     "NO_SCHEDULED": "Actualmente no hay tareas programadas. Puede programar una tarea seleccionando \"Programar tarea\" en el menú de contexto de la tarea. Para abrirlo, haga clic en los 3 puntos pequeños a la derecha de una tarea.",
@@ -488,14 +496,187 @@
       "TIME_SPENT": "Tiempo usado",
       "TITLE": "Título"
     },
+    "TASK": {
+      "ADDITIONAL_INFO": {
+        "ATTACHMENTS": "Adjuntos {{nr}}",
+        "ISSUE_TYPE_ATTACHMENTS": "{{issueType}} Adjuntos",
+        "LOCAL_ATTACHMENTS": "Adjuntos locales",
+        "NOTES": "Notas"
+      },
+      "ADD_TASK_BAR": {
+        "START": "Presiona entrar una vez más para comenzar"
+      },
+      "B": {
+        "ADD_HALF_HOUR": "Añadir 1/2 hou",
+        "ESTIMATE_EXCEEDED": "Tiempo estimado superado para \"{{title}}\""
+      },
+      "CMP": {
+        "ADD_SUB_TASK": "Añadir sub tarea",
+        "ADVANCED": "Avanzado",
+        "CONVERT_TO_PARENT_TASK": "Convertir a tarea principal",
+        "DELETE": "Eliminar tarea",
+        "DROP_ATTACHMENT": "Suelta aquí para adjuntar a \"{{task.title}}\"",
+        "EDIT_REMINDER": "Editar recordatorio",
+        "MARK_DONE": "marcar como hecho",
+        "MARK_UNDONE": "Marcar como deshecho",
+        "MOVE_TO_BACKLOG": "Mover al backlog",
+        "MOVE_TO_OTHER_PROJECT": "Mover a otro proyecto",
+        "MOVE_TO_TODAY": "Mover a la lista de hoy",
+        "OPEN_ATTACH": "Adjuntar archivo o enlace",
+        "OPEN_ISSUE": "Abrir problema en una nueva pestaña del navegador",
+        "OPEN_TASK_MENU": "Abrir menú de tareas",
+        "OPEN_TIME": "Estimar el tiempo / Agregar tiempo dedicado",
+        "REPEAT_EDIT": "Editar Repetir Tarea Config.",
+        "REPEAT_TASK": "Repetir la tarea",
+        "SCHEDULE": "Tarea programada",
+        "SHOW_UPDATES": "Mostrar actualizaciones",
+        "TOGGLE_ADDITIONAL": "Mostrar / Ocultar información adicional",
+        "TOGGLE_ATTACHMENTS": "Mostrar / Ocultar archivos adjuntos",
+        "TOGGLE_DONE": "Marcar como hecho / deshecho",
+        "TOGGLE_SUB_TASK_VISIBILITY": "Alternar visibilidad de sub tareas",
+        "TRACK_TIME": "Comenzar el tiempo de seguimiento",
+        "TRACK_TIME_STOP": "Tiempo de seguimiento de pausa",
+        "UPDATE_ISSUE_DATA": "Actualizar datos de problemas"
+      },
+      "D_REMINDER_ADD": {
+        "ADD": "Tarea programada",
+        "DATETIME_FOR": "Fecha y hora para recordatorio",
+        "EDIT": "Editar recordatorio",
+        "MOVE_TO_BACKLOG": "Mover la tarea a la acumulación hasta que sea programado",
+        "SCHEDULE": "Programar",
+        "UNSCHEDULE": "No programado"
+      },
+      "D_REMINDER_VIEW": {
+        "DISMISS": "Descartar recordatorio",
+        "ERR_LOST": "Hubo un recordatorio programado para la tarea {{title}}, pero parece estar perdido.",
+        "FOR_CURRENT": "Tarea es debido. ¿Quieres empezar a trabajar en ello?",
+        "FOR_OTHER": "Tarea es debido. ¿Quieres empezar a trabajar en ello?",
+        "FROM_PROJECT": "Del proyecto",
+        "SNOOZE": "Posponer {{time}}",
+        "START": "Iniciar tarea",
+        "SWITCH_PROJECT_START": "Cambiar Proyecto y Iniciar Tarea",
+        "TITLE": "Tarea programada"
+      },
+      "D_TIME": {
+        "ADD_FOR_OTHER_DAY": "Añadir tiempo dedicado para otro día",
+        "DELETE_FOR": "Borrar entrada por dia",
+        "ESTIMATE": "ESTIMAR",
+        "TIME_SPENT": "Tiempo usado",
+        "TIME_SPENT_ON": "Tiempo transcurrido {{date}}",
+        "TITLE": "Tiempo empleado / Estimaciones"
+      },
+      "D_TIME_FOR_DAY": {
+        "ADD_ENTRY_FOR": "Añadir nueva entrada para {{date}}",
+        "DATE": "Fecha para la nueva entrada",
+        "HELP": "Ejemplos:<br> 30m => 30 minutos<br> 2h => 2 horas<br> 2h 30m => 2 horas y 30 minutos",
+        "TINE_SPENT": "Tiempo usado",
+        "TITLE": "Añadir para el día"
+      },
+      "N": {
+        "ESTIMATE_EXCEEDED": "Tiempo estimado superado!",
+        "ESTIMATE_EXCEEDED_BODY": "Has excedido tu tiempo estimado para \"{{title}}\"."
+      },
+      "S": {
+        "DELETED": "Tarea eliminada \"{{title}}\"",
+        "REMINDER_ADDED": "Tarea programada \"{{title}}\"",
+        "REMINDER_DELETED": "Recordatorio eliminado para la tarea",
+        "REMINDER_UPDATED": "Recordatorio actualizado para la tarea \"{{title}}\""
+      },
+      "SELECT_OR_CREATE": "Seleccionar o crear tarea",
+      "SUMMARY_TABLE": {
+        "ESTIMATE": "ESTIMAR",
+        "SPENT_TODAY": "",
+        "SPENT_TOTAL": "Gastado total",
+        "TASK": "Tarea",
+        "TOGGLE_DONE": "un- / mark como hecho"
+      }
+    },
     "TASK_REPEAT": {
       "D_CONFIRM_REMOVE": {
         "MSG": "La eliminación de la configuración de repetición convertirá todas las instancias anteriores de esta tarea a tareas normales. Estas seguro que deseas continuar",
         "OK": "Quitar completamente"
+      },
+      "D_EDIT": {
+        "ADD": "Añadir Repetir configuración de tarea",
+        "EDIT": "Editar Repetir Tarea Config.",
+        "HELP1": "Las tareas repetitivas están destinadas a las tareas diarias, por ejemplo, \"Organización\", \"Reunión diaria\", \"Revisión de código\", \"Comprobación de correos electrónicos\" o tareas similares que pueden ocurrir una y otra vez.",
+        "HELP2": "Una vez configurada, se volverá a crear una tarea repetitiva en cada día seleccionado a continuación tan pronto como abra su proyecto y se marcará automáticamente como finalizada al final del día. Serán manejados como diferentes instancias. Así que puedes agregar libremente sub tareas, etc.",
+        "HELP3": "Las tareas importadas desde Jira o Git Issues no se pueden repetir. Todos los recordatorios también se eliminarán en una tarea repetitiva."
+      },
+      "F": {
+        "DEFAULT_ESTIMATE": "Estimación por defecto",
+        "FRIDAY": "viernes",
+        "MONDAY": "lunes",
+        "SATURDAY": "sábado",
+        "SUNDAY": "domingo",
+        "THURSDAY": "jueves",
+        "TITLE": "Título para la tarea",
+        "TUESDAY": "martes",
+        "WEDNESDAY": "miércoles"
+      }
+    },
+    "TIME_TRACKING": {
+      "B": {
+        "ALREADY_DID": "Ya lo hice",
+        "SNOOZE": "Posponer {{time}}"
+      },
+      "D_IDLE": {
+        "BREAK": "Descanso",
+        "CREATE_AND_TRACK": "<em>Crea</em> y sigue a:",
+        "IDLE_FOR": "Has estado inactivo por:",
+        "SKIP": "Omitir",
+        "TASK": "Tarea",
+        "TASK_BREAK": "Pausa de tarea",
+        "TRACK_TO": "Seguimiento a:"
       }
     },
     "WORKLOG": {
-      "D_CONFIRM_RESTORE": "¿Está seguro de que desea mover la tarea <strong>\"{{title}}\"</strong> a su lista de tareas de hoy?"
+      "CMP": {
+        "DAYS_WORKED": "Días, trabajados:",
+        "MONTH_WORKED": "Mes trabajado",
+        "REPEATING_TASK": "Repitiendo la tarea",
+        "RESTORE_TASK_FROM_ARCHIVE": "Restaurar tarea desde archivo",
+        "TASKS": "Tareas",
+        "TOTAL_TIME": "Tiempo total empleado:",
+        "TOTAL_TIME_PROJECT": "Tiempo total dedicado al proyecto",
+        "WORKED": "Trabajo"
+      },
+      "D_CONFIRM_RESTORE": "¿Está seguro de que desea mover la tarea <strong>\"{{title}}\"</strong> a su lista de tareas de hoy?",
+      "D_EXPORT_TITLE": "Exportación de trabajo",
+      "EXPORT": {
+        "COPY_TO_CLIPBOARD": "Copiar al portapapeles",
+        "DONT_ROUND": "no redondear",
+        "GROUP_BY": "Agrupar por",
+        "O": {
+          "DATE": "Fecha",
+          "ENDED_WORKING": "Terminado de trabajar",
+          "ESTIMATE_AS_CLOCK": "Estimar como reloj (por ejemplo, 5:23)",
+          "ESTIMATE_AS_MILLISECONDS": "Estimar en milisegundos",
+          "ESTIMATE_AS_STRING": "Estimar como cadena (por ejemplo, 5h 23m)",
+          "FULL_HALF_HOURS": "media horas completas",
+          "FULL_HOURS": "horas completas",
+          "FULL_QUARTERS": "cuartos completos",
+          "PARENT_TASK": "Tarea de los padres",
+          "PARENT_TASK_TITLES_ONLY": "Sólo títulos de tareas principales",
+          "STARTED_WORKING": "Empezo a trabajar",
+          "TASK_SUBTASK": "Tarea / Subtarea",
+          "TIME_AS_CLOCK": "Tiempo como reloj (por ejemplo, 5:23)",
+          "TIME_AS_MILLISECONDS": "El tiempo como milisegundos.",
+          "TIME_AS_STRING": "Tiempo como cadena (por ejemplo, 5h 23m)",
+          "TITLES_AND_SUB_TASK_TITLES": "Títulos y títulos de subtarea",
+          "WORKLOG": "Registro de trabajo"
+        },
+        "ROUND_END_TIME_TO": "Tiempo de finalización de ronda a",
+        "ROUND_START_TIME_TO": "Hora de inicio de ronda para",
+        "ROUND_TIME_WORKED_TO": "Tiempo de ronda trabajado para",
+        "SAVE_TO_FILE": "Guardar en archivo",
+        "SEPARATE_TASKS_BY": "Tareas separadas por",
+        "SHOW_AS_TEXT": "Mostrar como texto"
+      },
+      "WEEK": {
+        "EXPORT": "Exportar datos de la semana",
+        "TITLE": "Título"
+      }
     }
   },
   "FILE_IMEX": {
@@ -569,6 +750,7 @@
     "ES": "español",
     "FR": "francés",
     "JA": "japonés",
+    "KO": "coreano",
     "LABEL": "Por favor, seleccione un idioma",
     "RU": "ruso",
     "TITLE": "idioma",
@@ -607,6 +789,7 @@
   },
   "G": {
     "CANCEL": "Cancelar",
+    "CLICK_TO_EDIT": "Haz click para editar",
     "CLOSE": "Cerrar",
     "DELETE": "Borrar",
     "DISMISS": "Despedir",
@@ -616,8 +799,11 @@
     "NEXT": "Siguiente",
     "OK": "De acuerdo",
     "PREVIOUS": "Anterior",
+    "REMOVE": "retirar",
     "SAVE": "Salvar",
-    "TITLE": "Título"
+    "TITLE": "Título",
+    "UNDO": "Deshacer",
+    "UPDATE": "Actualizar"
   },
   "MH": {
     "ADD_NEW_TASK": "Agregar nueva tarea",

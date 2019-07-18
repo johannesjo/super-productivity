@@ -1,4 +1,12 @@
 {
+  "APP": {
+    "B_INSTALL": {
+      "IGNORE": "無視する",
+      "INSTALL": "インストール",
+      "MSG": "あなたはPWAとしてSuper Productivityをインストールしますか？"
+    },
+    "UPDATE_WEB_APP": "新しいバージョンがあります。新しいバージョンをロードしますか？"
+  },
   "BL": {
     "FROM_OTHER_PROJECTS": "他のプロジェクトから",
     "NO_SCHEDULED": "現在スケジュールされているタスクはありません。タスクのコンテキストメニューで[タスクのスケジュール]を選択してタスクをスケジュールできます。開くには、タスクの右側にある3つの小さな点をクリックします。",
@@ -488,14 +496,187 @@
       "TIME_SPENT": "使った時間",
       "TITLE": "タイトル"
     },
+    "TASK": {
+      "ADDITIONAL_INFO": {
+        "ATTACHMENTS": "添付ファイル {{nr}}",
+        "ISSUE_TYPE_ATTACHMENTS": "{{issueType}} 件の添付ファイル",
+        "LOCAL_ATTACHMENTS": "ローカル添付",
+        "NOTES": "ノート"
+      },
+      "ADD_TASK_BAR": {
+        "START": "もう一度Enterキーを押して開始します"
+      },
+      "B": {
+        "ADD_HALF_HOUR": "1/2時間を追加",
+        "ESTIMATE_EXCEEDED": "\"{{title}}\"の所要時間を超えました"
+      },
+      "CMP": {
+        "ADD_SUB_TASK": "サブタスクを追加",
+        "ADVANCED": "高度な",
+        "CONVERT_TO_PARENT_TASK": "親タスクに変換",
+        "DELETE": "タスクを削除",
+        "DROP_ATTACHMENT": "ここにドロップして \"{{task.title}}\"に添付します",
+        "EDIT_REMINDER": "リマインダーを編集",
+        "MARK_DONE": "完了としてマークする",
+        "MARK_UNDONE": "元に戻すとしてマーク",
+        "MOVE_TO_BACKLOG": "バックログに移動",
+        "MOVE_TO_OTHER_PROJECT": "他のプロジェクトに移動する",
+        "MOVE_TO_TODAY": "今日のリストに移動する",
+        "OPEN_ATTACH": "ファイルまたはリンクを添付する",
+        "OPEN_ISSUE": "新しいブラウザタブで課題を開く",
+        "OPEN_TASK_MENU": "タスクメニューを開く",
+        "OPEN_TIME": "見積もり時間/追加に費やした時間",
+        "REPEAT_EDIT": "繰り返しタスク設定の編集",
+        "REPEAT_TASK": "繰り返し作業",
+        "SCHEDULE": "スケジュールタスク",
+        "SHOW_UPDATES": "更新を表示",
+        "TOGGLE_ADDITIONAL": "追加情報を表示/隠す",
+        "TOGGLE_ATTACHMENTS": "添付ファイルの表示/非表示",
+        "TOGGLE_DONE": "完了/未完了としてマーク",
+        "TOGGLE_SUB_TASK_VISIBILITY": "サブタスクの表示/非表示を切り替えます",
+        "TRACK_TIME": "追跡時間の開始",
+        "TRACK_TIME_STOP": "追跡時間を一時停止する",
+        "UPDATE_ISSUE_DATA": "課題データを更新する"
+      },
+      "D_REMINDER_ADD": {
+        "ADD": "スケジュールタスク",
+        "DATETIME_FOR": "リマインダーの日時",
+        "EDIT": "リマインダーを編集",
+        "MOVE_TO_BACKLOG": "スケジュールされるまでタスクをバックログに移動",
+        "SCHEDULE": "スケジュール",
+        "UNSCHEDULE": "予定外"
+      },
+      "D_REMINDER_VIEW": {
+        "DISMISS": "リマインダーを却下",
+        "ERR_LOST": "タスク {{title}}に予定されている通知がありましたが、失われたようです。",
+        "FOR_CURRENT": "タスクは期限が来ています。あなたはそれに取り組み始めますか？",
+        "FOR_OTHER": "タスクは期限が来ています。あなたはそれに取り組み始めますか？",
+        "FROM_PROJECT": "プロジェクトから",
+        "SNOOZE": "スヌーズ {{time}}",
+        "START": "開始タスク",
+        "SWITCH_PROJECT_START": "プロジェクト切り替えとタスク開始",
+        "TITLE": "スケジュールされたタスク"
+      },
+      "D_TIME": {
+        "ADD_FOR_OTHER_DAY": "他の日に費やした時間を追加",
+        "DELETE_FOR": "その日のエントリを削除",
+        "ESTIMATE": "見積もり",
+        "TIME_SPENT": "使った時間",
+        "TIME_SPENT_ON": "費やした時間 {{date}}",
+        "TITLE": "費やした時間/見積もり"
+      },
+      "D_TIME_FOR_DAY": {
+        "ADD_ENTRY_FOR": " {{date}}の新しいエントリを追加します",
+        "DATE": "新規エントリー日",
+        "HELP": "例：<br> 30分=> 30分<br> 2時間=> 2時間<br> 2時間30分=> 2時間30分",
+        "TINE_SPENT": "使った時間",
+        "TITLE": "日中に追加"
+      },
+      "N": {
+        "ESTIMATE_EXCEEDED": "時間見積もりを超えました！",
+        "ESTIMATE_EXCEEDED_BODY": "\"{{title}}\"の予想時間を超えました。"
+      },
+      "S": {
+        "DELETED": "削除されたタスク \"{{title}}\"",
+        "REMINDER_ADDED": "スケジュール済みタスク \"{{title}}\"",
+        "REMINDER_DELETED": "タスクの通知を削除しました",
+        "REMINDER_UPDATED": "タスク \"{{title}}\"の通知を更新しました"
+      },
+      "SELECT_OR_CREATE": "タスクを選択または作成する",
+      "SUMMARY_TABLE": {
+        "ESTIMATE": "見積もり",
+        "SPENT_TODAY": "",
+        "SPENT_TOTAL": "使用済み合計",
+        "TASK": "仕事",
+        "TOGGLE_DONE": "完了のマークを外します"
+      }
+    },
     "TASK_REPEAT": {
       "D_CONFIRM_REMOVE": {
         "MSG": "繰り返し設定を削除すると、このタスクの以前のインスタンスはすべて通常のタスクに変換されます。続行しますか？",
         "OK": "完全に削除"
+      },
+      "D_EDIT": {
+        "ADD": "繰り返しタスク構成の追加",
+        "EDIT": "繰り返しタスク設定の編集",
+        "HELP1": "繰り返しの作業は、日々の雑用、たとえば「組織」、「毎日の会議」、「コードレビュー」、「Eメールの確認」、または何度も繰り返し発生する可能性がある同様の作業を対象としています。",
+        "HELP2": "一度設定すると、プロジェクトを開くとすぐに以下で選択した毎日に繰り返しタスクが再作成され、1日の終わりに自動的に完了としてマークされます。それらは異なるインスタンスとして扱われます。だから、あなたは自由にサブタスクなどを追加することができます",
+        "HELP3": "JiraまたはGit Issueからインポートしたタスクを繰り返すことはできません。繰り返しのタスクでは、すべてのアラームも削除されます。"
+      },
+      "F": {
+        "DEFAULT_ESTIMATE": "デフォルト見積もり",
+        "FRIDAY": "金曜日",
+        "MONDAY": "月曜",
+        "SATURDAY": "土曜日",
+        "SUNDAY": "日曜日",
+        "THURSDAY": "木曜日",
+        "TITLE": "タスクのタイトル",
+        "TUESDAY": "火曜日",
+        "WEDNESDAY": "水曜日"
+      }
+    },
+    "TIME_TRACKING": {
+      "B": {
+        "ALREADY_DID": "私はすでにやった",
+        "SNOOZE": "スヌーズ {{time}}"
+      },
+      "D_IDLE": {
+        "BREAK": "ブレーク",
+        "CREATE_AND_TRACK": "<em></em> を作成し、以下に移動します。",
+        "IDLE_FOR": "あなたはアイドル状態になっています。",
+        "SKIP": "スキップ",
+        "TASK": "仕事",
+        "TASK_BREAK": "タスクブレーク",
+        "TRACK_TO": "追跡する："
       }
     },
     "WORKLOG": {
-      "D_CONFIRM_RESTORE": "タスク <strong>\"{{title}}\"</strong> を今日のタスクリストに移動しますか？"
+      "CMP": {
+        "DAYS_WORKED": "働いていた日数：",
+        "MONTH_WORKED": "働いた月：",
+        "REPEATING_TASK": "繰り返し作業",
+        "RESTORE_TASK_FROM_ARCHIVE": "アーカイブからタスクを復元",
+        "TASKS": "タスク",
+        "TOTAL_TIME": "合計時間：",
+        "TOTAL_TIME_PROJECT": "プロジェクトに費やした合計時間",
+        "WORKED": "働いた"
+      },
+      "D_CONFIRM_RESTORE": "タスク <strong>\"{{title}}\"</strong> を今日のタスクリストに移動しますか？",
+      "D_EXPORT_TITLE": "作業ログのエクスポート",
+      "EXPORT": {
+        "COPY_TO_CLIPBOARD": "クリップボードにコピー",
+        "DONT_ROUND": "丸めない",
+        "GROUP_BY": "グループ化",
+        "O": {
+          "DATE": "日付",
+          "ENDED_WORKING": "作業終了",
+          "ESTIMATE_AS_CLOCK": "時計として見積もる（例5:23）",
+          "ESTIMATE_AS_MILLISECONDS": "ミリ秒として推定",
+          "ESTIMATE_AS_STRING": "文字列として推定する（例：5時間23分）",
+          "FULL_HALF_HOURS": "半時間",
+          "FULL_HOURS": "全時間",
+          "FULL_QUARTERS": "全四半期",
+          "PARENT_TASK": "親タスク",
+          "PARENT_TASK_TITLES_ONLY": "親タスクタイトルのみ",
+          "STARTED_WORKING": "働き始めた",
+          "TASK_SUBTASK": "タスク/サブタスク",
+          "TIME_AS_CLOCK": "時計としての時間（例5:23）",
+          "TIME_AS_MILLISECONDS": "ミリ秒単位の時間",
+          "TIME_AS_STRING": "文字列としての時間（例：5時間23分）",
+          "TITLES_AND_SUB_TASK_TITLES": "タイトルとサブタスクのタイトル",
+          "WORKLOG": "作業記録"
+        },
+        "ROUND_END_TIME_TO": "ラウンド終了時間",
+        "ROUND_START_TIME_TO": "ラウンド開始時間",
+        "ROUND_TIME_WORKED_TO": "ラウンドタイム",
+        "SAVE_TO_FILE": "ファイルに保存",
+        "SEPARATE_TASKS_BY": "でタスクを分ける",
+        "SHOW_AS_TEXT": "テキストとして表示"
+      },
+      "WEEK": {
+        "EXPORT": "週データのエクスポート",
+        "TITLE": "タイトル"
+      }
     }
   },
   "FILE_IMEX": {
@@ -569,6 +750,7 @@
     "ES": "スペイン語",
     "FR": "フランス語",
     "JA": "日本人",
+    "KO": "韓国語",
     "LABEL": "言語を選択してください",
     "RU": "ロシア",
     "TITLE": "言語",
@@ -607,6 +789,7 @@
   },
   "G": {
     "CANCEL": "キャンセル",
+    "CLICK_TO_EDIT": "クリックして編集する",
     "CLOSE": "閉じる",
     "DELETE": "削除",
     "DISMISS": "やめる",
@@ -616,8 +799,11 @@
     "NEXT": "次",
     "OK": "OK",
     "PREVIOUS": "前",
+    "REMOVE": "削除する",
     "SAVE": "保存する",
-    "TITLE": "タイトル"
+    "TITLE": "タイトル",
+    "UNDO": "元に戻す",
+    "UPDATE": "更新"
   },
   "MH": {
     "ADD_NEW_TASK": "新しいタスクを追加する",

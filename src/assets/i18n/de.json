@@ -1,4 +1,12 @@
 {
+  "APP": {
+    "B_INSTALL": {
+      "IGNORE": "Ignorieren",
+      "INSTALL": "Installieren",
+      "MSG": "Möchten Sie Super Productivity als PWA installieren?"
+    },
+    "UPDATE_WEB_APP": "Neue Version verfügbar. Neue Version laden?"
+  },
   "BL": {
     "FROM_OTHER_PROJECTS": "Aus anderen Projekten",
     "NO_SCHEDULED": "Derzeit sind keine Aufgaben geplant. Sie können eine Aufgabe planen, indem Sie im Kontextmenü der Aufgabe \"Aufgabe planen\" auswählen. Zum Öffnen klicken Sie auf die 3 kleinen Punkte rechts neben einer Aufgabe.",
@@ -488,14 +496,187 @@
       "TIME_SPENT": "Zeitaufwand",
       "TITLE": "Titel"
     },
+    "TASK": {
+      "ADDITIONAL_INFO": {
+        "ATTACHMENTS": "Anhänge {{nr}}",
+        "ISSUE_TYPE_ATTACHMENTS": "{{issueType}} Anhänge",
+        "LOCAL_ATTACHMENTS": "Lokale Anhänge",
+        "NOTES": "Anmerkungen"
+      },
+      "ADD_TASK_BAR": {
+        "START": "Drücken Sie die Eingabetaste noch einmal, um zu beginnen"
+      },
+      "B": {
+        "ADD_HALF_HOUR": "Fügen Sie 1/2 hou hinzu",
+        "ESTIMATE_EXCEEDED": "Zeitschätzung für \"{{title}}\" überschritten"
+      },
+      "CMP": {
+        "ADD_SUB_TASK": "Unteraufgabe hinzufügen",
+        "ADVANCED": "Erweitert",
+        "CONVERT_TO_PARENT_TASK": "In übergeordnete Aufgabe konvertieren",
+        "DELETE": "Aufgabe löschen",
+        "DROP_ATTACHMENT": "Hier ablegen und an \"{{task.title}}\" anhängen",
+        "EDIT_REMINDER": "Erinnerung bearbeiten",
+        "MARK_DONE": "Als erledigt markieren",
+        "MARK_UNDONE": "Als rückgängig machen markieren",
+        "MOVE_TO_BACKLOG": "In den Rückstand verschieben",
+        "MOVE_TO_OTHER_PROJECT": "In ein anderes Projekt verschieben",
+        "MOVE_TO_TODAY": "Zur heutigen Liste wechseln",
+        "OPEN_ATTACH": "Datei oder Link anhängen",
+        "OPEN_ISSUE": "Öffnen Sie das Problem in einem neuen Browser-Tab",
+        "OPEN_TASK_MENU": "Aufgabenmenü öffnen",
+        "OPEN_TIME": "Zeit schätzen / Zeit hinzufügen",
+        "REPEAT_EDIT": "Bearbeiten Task wiederholen Konfig",
+        "REPEAT_TASK": "Aufgabe wiederholen",
+        "SCHEDULE": "Task planen",
+        "SHOW_UPDATES": "Updates anzeigen",
+        "TOGGLE_ADDITIONAL": "Zusätzliche Informationen ein- / ausblenden",
+        "TOGGLE_ATTACHMENTS": "Anhänge ein- / ausblenden",
+        "TOGGLE_DONE": "Als erledigt / rückgängig machen markieren",
+        "TOGGLE_SUB_TASK_VISIBILITY": "Schaltet die Sichtbarkeit von Unteraufgaben um",
+        "TRACK_TIME": "Starten Sie die Verfolgung der Zeit",
+        "TRACK_TIME_STOP": "Verfolgungszeit anhalten",
+        "UPDATE_ISSUE_DATA": "Problemdaten aktualisieren"
+      },
+      "D_REMINDER_ADD": {
+        "ADD": "Task planen",
+        "DATETIME_FOR": "Datum und Uhrzeit zur Erinnerung",
+        "EDIT": "Erinnerung bearbeiten",
+        "MOVE_TO_BACKLOG": "Verschieben Sie die Aufgabe in den Rückstand, bis sie geplant ist",
+        "SCHEDULE": "Zeitplan",
+        "UNSCHEDULE": "Nicht terminieren"
+      },
+      "D_REMINDER_VIEW": {
+        "DISMISS": "Erinnerung verwerfen",
+        "ERR_LOST": "Für die Aufgabe {{title}}ist eine Erinnerung geplant, die jedoch verloren zu gehen scheint.",
+        "FOR_CURRENT": "Aufgabe ist fällig. Möchten Sie anfangen, daran zu arbeiten?",
+        "FOR_OTHER": "Aufgabe ist fällig. Möchten Sie anfangen, daran zu arbeiten?",
+        "FROM_PROJECT": "Aus dem Projekt",
+        "SNOOZE": "Snooze {{time}}",
+        "START": "Task starten",
+        "SWITCH_PROJECT_START": "Projekt wechseln & Task starten",
+        "TITLE": "Geplante Aufgabe"
+      },
+      "D_TIME": {
+        "ADD_FOR_OTHER_DAY": "Fügen Sie die für den anderen Tag aufgewendete Zeit hinzu",
+        "DELETE_FOR": "Eintrag für Tag löschen",
+        "ESTIMATE": "Schätzen",
+        "TIME_SPENT": "Zeitaufwand",
+        "TIME_SPENT_ON": "Zeitaufwand {{date}}",
+        "TITLE": "Zeitaufwand / Schätzungen"
+      },
+      "D_TIME_FOR_DAY": {
+        "ADD_ENTRY_FOR": "Neuen Eintrag für {{date}}hinzufügen",
+        "DATE": "Datum für neuen Eintrag",
+        "HELP": "Beispiele:<br> 30 m => 30 Minuten<br> 2 h => 2 Stunden<br> 2 h 30 m => 2 Stunden und 30 Minuten",
+        "TINE_SPENT": "Zeitaufwand",
+        "TITLE": "Für Tag hinzufügen"
+      },
+      "N": {
+        "ESTIMATE_EXCEEDED": "Zeitschätzung überschritten!",
+        "ESTIMATE_EXCEEDED_BODY": "Sie haben Ihre geschätzte Zeit für \"{{title}}\" überschritten."
+      },
+      "S": {
+        "DELETED": "Gelöschte Aufgabe \"{{title}}\"",
+        "REMINDER_ADDED": "Geplante Aufgabe \"{{title}}\"",
+        "REMINDER_DELETED": "Erinnerung für Aufgabe gelöscht",
+        "REMINDER_UPDATED": "Erinnerung für Aufgabe \"{{title}}\" aktualisiert"
+      },
+      "SELECT_OR_CREATE": "Aufgabe auswählen oder erstellen",
+      "SUMMARY_TABLE": {
+        "ESTIMATE": "Schätzen",
+        "SPENT_TODAY": "",
+        "SPENT_TOTAL": "Insgesamt ausgegeben",
+        "TASK": "Aufgabe",
+        "TOGGLE_DONE": "ab- / als erledigt markieren"
+      }
+    },
     "TASK_REPEAT": {
       "D_CONFIRM_REMOVE": {
         "MSG": "Durch das Entfernen der Wiederholungskonfiguration werden alle vorherigen Instanzen dieser Aufgabe in normale Aufgaben konvertiert. Sind Sie sicher, dass Sie fortfahren möchten",
         "OK": "Vollständig entfernen"
+      },
+      "D_EDIT": {
+        "ADD": "Hinzufügen der Konfiguration für Wiederholungstask",
+        "EDIT": "Bearbeiten Task wiederholen Konfig",
+        "HELP1": "Sich wiederholende Aufgaben sind für tägliche Aufgaben gedacht, z. B .: \"Organisation\", \"Tägliche Besprechung\", \"Codeüberprüfung\", \"Überprüfen von E-Mails\" oder ähnliche Aufgaben, die wahrscheinlich immer wieder auftreten.",
+        "HELP2": "Einmal konfiguriert, wird eine sich wiederholende Aufgabe an jedem unten ausgewählten Tag neu erstellt, sobald Sie Ihr Projekt öffnen, und wird am Ende des Tages automatisch als erledigt markiert. Sie werden als unterschiedliche Instanzen behandelt. So können Sie Unteraufgaben usw. frei hinzufügen.",
+        "HELP3": "Aus Jira oder Git importierte Aufgaben können nicht wiederholt werden. Alle Erinnerungen werden auch bei einer sich wiederholenden Aufgabe gelöscht."
+      },
+      "F": {
+        "DEFAULT_ESTIMATE": "Standardschätzung",
+        "FRIDAY": "Freitag",
+        "MONDAY": "Montag",
+        "SATURDAY": "Samstag",
+        "SUNDAY": "Sonntag",
+        "THURSDAY": "Donnerstag",
+        "TITLE": "Titel für die Aufgabe",
+        "TUESDAY": "Dienstag",
+        "WEDNESDAY": "Mittwoch"
+      }
+    },
+    "TIME_TRACKING": {
+      "B": {
+        "ALREADY_DID": "Ich habe es bereits getan",
+        "SNOOZE": "Snooze {{time}}"
+      },
+      "D_IDLE": {
+        "BREAK": "Brechen",
+        "CREATE_AND_TRACK": "<em>Erstellen Sie</em> und verfolgen Sie Folgendes:",
+        "IDLE_FOR": "Sie waren untätig wegen:",
+        "SKIP": "Überspringen",
+        "TASK": "Aufgabe",
+        "TASK_BREAK": "Task Break",
+        "TRACK_TO": "Verfolgen nach:"
       }
     },
     "WORKLOG": {
-      "D_CONFIRM_RESTORE": "Möchten Sie die Aufgabe <strong>\"{{title}}\"</strong> wirklich in Ihre heutige Aufgabenliste verschieben?"
+      "CMP": {
+        "DAYS_WORKED": "Arbeitstage:",
+        "MONTH_WORKED": "Monat gearbeitet:",
+        "REPEATING_TASK": "Aufgabe wiederholen",
+        "RESTORE_TASK_FROM_ARCHIVE": "Task aus Archiv wiederherstellen",
+        "TASKS": "Aufgaben",
+        "TOTAL_TIME": "Insgesamt aufgewendete Zeit:",
+        "TOTAL_TIME_PROJECT": "Gesamtdauer des Projekts",
+        "WORKED": "Hat funktioniert"
+      },
+      "D_CONFIRM_RESTORE": "Möchten Sie die Aufgabe <strong>\"{{title}}\"</strong> wirklich in Ihre heutige Aufgabenliste verschieben?",
+      "D_EXPORT_TITLE": "Worklog-Export",
+      "EXPORT": {
+        "COPY_TO_CLIPBOARD": "In die Zwischenablage kopieren",
+        "DONT_ROUND": "runde nicht",
+        "GROUP_BY": "Gruppiere nach",
+        "O": {
+          "DATE": "Datum",
+          "ENDED_WORKING": "Arbeit beendet",
+          "ESTIMATE_AS_CLOCK": "Als Uhr schätzen (z. B. 5:23)",
+          "ESTIMATE_AS_MILLISECONDS": "Schätzung in Millisekunden",
+          "ESTIMATE_AS_STRING": "Als Zeichenfolge schätzen (z. B. 5 Std. 23 Min.)",
+          "FULL_HALF_HOURS": "volle halbe stunden",
+          "FULL_HOURS": "volle Stunden",
+          "FULL_QUARTERS": "volle viertel",
+          "PARENT_TASK": "Übergeordnete Aufgabe",
+          "PARENT_TASK_TITLES_ONLY": "Nur übergeordnete Aufgabentitel",
+          "STARTED_WORKING": "Angefangen zu arbeiten",
+          "TASK_SUBTASK": "Aufgabe / Unteraufgabe",
+          "TIME_AS_CLOCK": "Zeit als Uhr (z. B. 5:23)",
+          "TIME_AS_MILLISECONDS": "Zeit in Millisekunden",
+          "TIME_AS_STRING": "Zeit als Zeichenfolge (z. B. 5h 23m)",
+          "TITLES_AND_SUB_TASK_TITLES": "Titel und Untertitel",
+          "WORKLOG": "Arbeitsprotokoll"
+        },
+        "ROUND_END_TIME_TO": "Runde Endzeit bis",
+        "ROUND_START_TIME_TO": "Rundenstartzeit bis",
+        "ROUND_TIME_WORKED_TO": "Rundenzeit arbeitete bis",
+        "SAVE_TO_FILE": "Speichern unter",
+        "SEPARATE_TASKS_BY": "Aufgaben trennen durch",
+        "SHOW_AS_TEXT": "Als Text anzeigen"
+      },
+      "WEEK": {
+        "EXPORT": "Wochendaten exportieren",
+        "TITLE": "Titel"
+      }
     }
   },
   "FILE_IMEX": {
@@ -569,6 +750,7 @@
     "ES": "Spanisch",
     "FR": "Französisch",
     "JA": "Japanisch",
+    "KO": "Koreanisch",
     "LABEL": "Bitte wähle eine Sprache",
     "RU": "Russisch",
     "TITLE": "Sprache",
@@ -607,6 +789,7 @@
   },
   "G": {
     "CANCEL": "Abbrechen",
+    "CLICK_TO_EDIT": "zum Bearbeiten anklicken",
     "CLOSE": "Schließen",
     "DELETE": "Löschen",
     "DISMISS": "Verwerfen",
@@ -616,8 +799,11 @@
     "NEXT": "Nächster",
     "OK": "OK",
     "PREVIOUS": "Bisherige",
+    "REMOVE": "Löschen",
     "SAVE": "Speichern",
-    "TITLE": "Titel"
+    "TITLE": "Titel",
+    "UNDO": "Rückgängig machen",
+    "UPDATE": "Aktualisieren"
   },
   "MH": {
     "ADD_NEW_TASK": "Neue Aufgabe hinzufügen",

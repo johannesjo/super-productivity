@@ -19,6 +19,7 @@ export const LANGUAGE_SELECTION_FORM_FORM: ConfigFormSection = {
           {label: T.F_LANG.DE, value: LanguageCode.de},
           {label: T.F_LANG.FR, value: LanguageCode.fr},
           {label: T.F_LANG.JA, value: LanguageCode.ja},
+          {label: T.F_LANG.KO, value: LanguageCode.ko},
           {label: T.F_LANG.RU, value: LanguageCode.ru},
           {label: T.F_LANG.ES, value: LanguageCode.es},
           {label: T.F_LANG.TR, value: LanguageCode.tr},

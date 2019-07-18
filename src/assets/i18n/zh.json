@@ -1,4 +1,12 @@
 {
+  "APP": {
+    "B_INSTALL": {
+      "IGNORE": "忽视",
+      "INSTALL": "安装",
+      "MSG": "您想将Super Productivity安装为PWA吗？"
+    },
+    "UPDATE_WEB_APP": "新版本可用。加载新版本？"
+  },
   "BL": {
     "FROM_OTHER_PROJECTS": "来自其他项目",
     "NO_SCHEDULED": "目前没有计划任务。您可以通过在任务上下文菜单中选择“计划任务”来计划任务。要打开它，请单击任务右侧的3个小点。",
@@ -488,14 +496,187 @@
       "TIME_SPENT": "所花费的时间",
       "TITLE": "标题"
     },
+    "TASK": {
+      "ADDITIONAL_INFO": {
+        "ATTACHMENTS": "附件 {{nr}}",
+        "ISSUE_TYPE_ATTACHMENTS": "{{issueType}} 附件",
+        "LOCAL_ATTACHMENTS": "本地附件",
+        "NOTES": "笔记"
+      },
+      "ADD_TASK_BAR": {
+        "START": "再次按回车键开始"
+      },
+      "B": {
+        "ADD_HALF_HOUR": "加1/2小时",
+        "ESTIMATE_EXCEEDED": "超过“{{title}}”的时间估计"
+      },
+      "CMP": {
+        "ADD_SUB_TASK": "添加子任务",
+        "ADVANCED": "高级",
+        "CONVERT_TO_PARENT_TASK": "转换为父任务",
+        "DELETE": "删除任务",
+        "DROP_ATTACHMENT": "放在此处以附加到“{{task.title}}”",
+        "EDIT_REMINDER": "编辑提醒",
+        "MARK_DONE": "标为已完成",
+        "MARK_UNDONE": "标记为撤消",
+        "MOVE_TO_BACKLOG": "转到积压",
+        "MOVE_TO_OTHER_PROJECT": "转到其他项目",
+        "MOVE_TO_TODAY": "转到今天的列表",
+        "OPEN_ATTACH": "附加文件或链接",
+        "OPEN_ISSUE": "在新的浏览器选项卡中打开问题",
+        "OPEN_TASK_MENU": "打开任务菜单",
+        "OPEN_TIME": "估计时间/增加花费的时间",
+        "REPEAT_EDIT": "编辑重复任务配置",
+        "REPEAT_TASK": "重复任务",
+        "SCHEDULE": "安排任务",
+        "SHOW_UPDATES": "显示更新",
+        "TOGGLE_ADDITIONAL": "显示/隐藏其他信息",
+        "TOGGLE_ATTACHMENTS": "显示/隐藏附件",
+        "TOGGLE_DONE": "标记为已完成/未完成",
+        "TOGGLE_SUB_TASK_VISIBILITY": "切换子任务可见性",
+        "TRACK_TIME": "开始跟踪时间",
+        "TRACK_TIME_STOP": "暂停跟踪时间",
+        "UPDATE_ISSUE_DATA": "更新问题数据"
+      },
+      "D_REMINDER_ADD": {
+        "ADD": "安排任务",
+        "DATETIME_FOR": "提醒的日期时间",
+        "EDIT": "编辑提醒",
+        "MOVE_TO_BACKLOG": "将任务移至待办事项直到计划",
+        "SCHEDULE": "时间表",
+        "UNSCHEDULE": "取消调度"
+      },
+      "D_REMINDER_VIEW": {
+        "DISMISS": "解雇提醒",
+        "ERR_LOST": "有一个提醒安排任务 {{title}}，但它似乎丢失了。",
+        "FOR_CURRENT": "任务到期了。你想开始工作吗？",
+        "FOR_OTHER": "任务到期了。你想开始工作吗？",
+        "FROM_PROJECT": "来自项目",
+        "SNOOZE": "暂停 {{time}}",
+        "START": "开始任务",
+        "SWITCH_PROJECT_START": "切换项目和启动任务",
+        "TITLE": "预定任务"
+      },
+      "D_TIME": {
+        "ADD_FOR_OTHER_DAY": "添加其他时间花费的时间",
+        "DELETE_FOR": "删除当天的条目",
+        "ESTIMATE": "估计",
+        "TIME_SPENT": "所花费的时间",
+        "TIME_SPENT_ON": "花费的时间 {{date}}",
+        "TITLE": "花费的时间/估计"
+      },
+      "D_TIME_FOR_DAY": {
+        "ADD_ENTRY_FOR": "为 {{date}}添加新条目",
+        "DATE": "新条目的日期",
+        "HELP": "示例：<br> 30m => 30分钟<br> 2h => 2小时<br> 2h 30m => 2小时30分钟",
+        "TINE_SPENT": "所花费的时间",
+        "TITLE": "添加一天"
+      },
+      "N": {
+        "ESTIMATE_EXCEEDED": "超出时间估计！",
+        "ESTIMATE_EXCEEDED_BODY": "您超出了“{{title}}”的预计时间。"
+      },
+      "S": {
+        "DELETED": "已删除任务“{{title}}”",
+        "REMINDER_ADDED": "计划任务“{{title}}”",
+        "REMINDER_DELETED": "已删除任务提醒",
+        "REMINDER_UPDATED": "更新了任务“{{title}}”的提醒"
+      },
+      "SELECT_OR_CREATE": "选择或创建任务",
+      "SUMMARY_TABLE": {
+        "ESTIMATE": "估计",
+        "SPENT_TODAY": "",
+        "SPENT_TOTAL": "花费总计",
+        "TASK": "任务",
+        "TOGGLE_DONE": "un- /标记为已完成"
+      }
+    },
     "TASK_REPEAT": {
       "D_CONFIRM_REMOVE": {
         "MSG": "删除重复配置会将此任务的所有先前实例转换为常规任务。你确定要继续吗？",
         "OK": "完全删除"
+      },
+      "D_EDIT": {
+        "ADD": "添加重复任务配置",
+        "EDIT": "编辑重复任务配置",
+        "HELP1": "重复任务适用于日常琐事，例如：“组织”，“每日会议”，“代码审查”，“检查电子邮件”或可能一次又一次发生的类似任务。",
+        "HELP2": "配置完成后，一旦打开项目，将在下面选择的每一天重新创建重复任务，并在一天结束时自动标记为已完成。它们将作为不同的实例处理。所以你可以自由添加子任务等。",
+        "HELP3": "从Jira或Git问题导入的任务不能重复。所有提醒也将在重复任务中删除。"
+      },
+      "F": {
+        "DEFAULT_ESTIMATE": "默认估计",
+        "FRIDAY": "星期️五",
+        "MONDAY": "星期一",
+        "SATURDAY": "星期️六",
+        "SUNDAY": "星期️日",
+        "THURSDAY": "星期️四",
+        "TITLE": "任务标题",
+        "TUESDAY": "星期二",
+        "WEDNESDAY": "星期三"
+      }
+    },
+    "TIME_TRACKING": {
+      "B": {
+        "ALREADY_DID": "我已经做了",
+        "SNOOZE": "暂停 {{time}}"
+      },
+      "D_IDLE": {
+        "BREAK": "打破",
+        "CREATE_AND_TRACK": "<em>创建</em> 并跟踪到：",
+        "IDLE_FOR": "你一直闲着：",
+        "SKIP": "跳跃",
+        "TASK": "任务",
+        "TASK_BREAK": "任务中断",
+        "TRACK_TO": "追踪到："
       }
     },
     "WORKLOG": {
-      "D_CONFIRM_RESTORE": "您确定要将任务 <strong>“{{title}}”</strong> 移动到今天的任务列表中吗？"
+      "CMP": {
+        "DAYS_WORKED": "工作日：",
+        "MONTH_WORKED": "工作月份：",
+        "REPEATING_TASK": "重复任务",
+        "RESTORE_TASK_FROM_ARCHIVE": "从存档还原任务",
+        "TASKS": "任务",
+        "TOTAL_TIME": "花费的时间总计：",
+        "TOTAL_TIME_PROJECT": "花在项目上的总时间",
+        "WORKED": "工作"
+      },
+      "D_CONFIRM_RESTORE": "您确定要将任务 <strong>“{{title}}”</strong> 移动到今天的任务列表中吗？",
+      "D_EXPORT_TITLE": "工作日志导出",
+      "EXPORT": {
+        "COPY_TO_CLIPBOARD": "复制到剪贴板",
+        "DONT_ROUND": "不圆",
+        "GROUP_BY": "通过...分组",
+        "O": {
+          "DATE": "日期",
+          "ENDED_WORKING": "结束工作",
+          "ESTIMATE_AS_CLOCK": "估计为时钟（例如5:23）",
+          "ESTIMATE_AS_MILLISECONDS": "估计为毫秒",
+          "ESTIMATE_AS_STRING": "估计为字符串（例如5小时23分钟）",
+          "FULL_HALF_HOURS": "整整半个小时",
+          "FULL_HOURS": "整整一个小时",
+          "FULL_QUARTERS": "整个季度",
+          "PARENT_TASK": "父任务",
+          "PARENT_TASK_TITLES_ONLY": "仅限父任务标题",
+          "STARTED_WORKING": "开始工作了",
+          "TASK_SUBTASK": "任务/子任务",
+          "TIME_AS_CLOCK": "时间作为时钟（例如5:23）",
+          "TIME_AS_MILLISECONDS": "时间为毫秒",
+          "TIME_AS_STRING": "时间为字符串（例如5小时23分钟）",
+          "TITLES_AND_SUB_TASK_TITLES": "标题和子任务标题",
+          "WORKLOG": "工作日志"
+        },
+        "ROUND_END_TIME_TO": "结束时间到",
+        "ROUND_START_TIME_TO": "回合开始时间",
+        "ROUND_TIME_WORKED_TO": "回合时间适用于",
+        "SAVE_TO_FILE": "保存到文件",
+        "SEPARATE_TASKS_BY": "分开任务",
+        "SHOW_AS_TEXT": "显示为文字"
+      },
+      "WEEK": {
+        "EXPORT": "出口周数据",
+        "TITLE": "标题"
+      }
     }
   },
   "FILE_IMEX": {
@@ -569,6 +750,7 @@
     "ES": "西班牙语",
     "FR": "法国",
     "JA": "日本",
+    "KO": "朝鲜的",
     "LABEL": "请选择一种语言",
     "RU": "俄语",
     "TITLE": "语言",
@@ -607,6 +789,7 @@
   },
   "G": {
     "CANCEL": "取消",
+    "CLICK_TO_EDIT": "点击编辑",
     "CLOSE": "关",
     "DELETE": "删除",
     "DISMISS": "解雇",
@@ -616,8 +799,11 @@
     "NEXT": "下一个",
     "OK": "好",
     "PREVIOUS": "以前",
+    "REMOVE": "去掉",
     "SAVE": "保存",
-    "TITLE": "标题"
+    "TITLE": "标题",
+    "UNDO": "解开",
+    "UPDATE": "更新"
   },
   "MH": {
     "ADD_NEW_TASK": "添加新任务",
