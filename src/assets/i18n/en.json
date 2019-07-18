@@ -169,12 +169,6 @@
         "SUCCESS": "Google Drive: Successfully saved backup",
         "SYNCING": "Google Drive: Syncing"
       },
-      "S_API": {
-        "ERR": "GoogleApi Error: {{errStr}}",
-        "ERR_NO_FILE_ID": "GoogleApi: No file id specified",
-        "ERR_NO_FILE_NAME": "GoogleApi: No file name specified",
-        "SUCCESS_LOGIN": "GoogleApi: Login successful"
-      },
       "SYNC_CFG": {
         "AUTO_LOGIN": "Auto login at when starting app",
         "AUTO_SYNC": "Auto sync data to remote",
@@ -187,6 +181,12 @@
         "SYNC_FILE_NAME": "Sync file name",
         "SYNC_INTERVAL": "Sync interval",
         "UPDATE_SYNC_FILE": "Update sync file"
+      },
+      "S_API": {
+        "ERR": "GoogleApi Error: {{errStr}}",
+        "ERR_NO_FILE_ID": "GoogleApi: No file id specified",
+        "ERR_NO_FILE_NAME": "GoogleApi: No file name specified",
+        "SUCCESS_LOGIN": "GoogleApi: Login successful"
       }
     },
     "JIRA": {
@@ -304,8 +304,8 @@
         "POLLING": "Jira: Polling Changes for issues",
         "TIMED_OUT": "Jira: Request timed out",
         "TRANSITION": "Jira: Set issue \"{{issueKey}}\" to \"{{name}}\"",
-        "TRANSITION_SUCCESS": "Jira: Set issue {{issueKey}} to <strong>{{chosenTransition}}</strong>",
         "TRANSITIONS_LOADED": "Jira: Transitions loaded. Use the selects below to assign them",
+        "TRANSITION_SUCCESS": "Jira: Set issue {{issueKey}} to <strong>{{chosenTransition}}</strong>",
         "UNABLE_TO_REASSIGN": "Jira: Unable to reassign ticket to yourself, because you didn't specify a username. Please visit the settings."
       },
       "STEPPER": {
@@ -394,10 +394,10 @@
         "BREAK_X_START": "Pomodoro: Break {{nr}} started!",
         "SESSION_X_START": "Pomodoro: Session {{nr}} started!"
       },
-      "SKIP_BREAK": "Skip break",
       "S": {
         "SESSION_X_START": "Pomodoro: Session {{nr}} started!"
-      }
+      },
+      "SKIP_BREAK": "Skip break"
     },
     "PROCRASTINATION": {
       "BACK_TO_WORK": "Back to work!",
@@ -475,6 +475,7 @@
     },
     "SIMPLE_TASK_EXPORT": {
       "CLOSE": "Close",
+      "COPY_TO_CLIPBOARD": "",
       "DATE": "Date",
       "ESTIMATE": "Estimate",
       "FIELDS_TO_DISPLAY": "Fields to display",
@@ -492,6 +493,7 @@
       "SAVE_TO_FILE": "Save to file",
       "SEPARATE_FIELDS_BY": "Separate fields by",
       "SHOW_AS_TEXT": "Show as text",
+      "SNACK_TO_CLIPPBOARD": "",
       "TIME_AS_MILLISECONDS": "Time as milliseconds",
       "TIME_ESTIMATE": "Time Estimate",
       "TIME_SPENT": "Time Spent",
@@ -579,11 +581,11 @@
       },
       "S": {
         "DELETED": "Deleted task \"{{title}}\"",
+        "FOUND_MOVE_FROM_BACKLOG": "Moved existing task <strong>{{title}}</strong> to todays task list",
+        "FOUND_RESTORE_FROM_ARCHIVE": "Restored task <strong>{{title}}</strong> related to issue from archive",
         "REMINDER_ADDED": "Scheduled task \"{{title}}\"",
         "REMINDER_DELETED": "Deleted reminder for task",
-        "REMINDER_UPDATED": "Updated reminder for task \"{{title}}\"",
-        "FOUND_RESTORE_FROM_ARCHIVE": "Restored task <strong>{{title}}</strong> related to issue from archive",
-        "FOUND_MOVE_FROM_BACKLOG": "Moved existing task <strong>{{title}}</strong> to todays task list"
+        "REMINDER_UPDATED": "Updated reminder for task \"{{title}}\""
       },
       "SELECT_OR_CREATE": "Select or create task",
       "SUMMARY_TABLE": {
@@ -647,9 +649,9 @@
       "D_CONFIRM_RESTORE": "Are you sure you want to move the task <strong>\"{{title}}\"</strong> into your todays task list?",
       "D_EXPORT_TITLE": "Worklog Export",
       "EXPORT": {
+        "COPY_TO_CLIPBOARD": "",
         "DONT_ROUND": "don't round",
         "GROUP_BY": "Group by",
-        "OPTIONS": "Options",
         "O": {
           "DATE": "Date",
           "ENDED_WORKING": "Ended Working",
@@ -669,6 +671,7 @@
           "TITLES_AND_SUB_TASK_TITLES": "Titles and Sub Task Titles",
           "WORKLOG": "Worklog"
         },
+        "OPTIONS": "Options",
         "ROUND_END_TIME_TO": "Round end time to",
         "ROUND_START_TIME_TO": "Round start time to",
         "ROUND_TIME_WORKED_TO": "Round time worked to",
@@ -686,110 +689,6 @@
     "EXPORT_DATA": "Export Data",
     "IMPORT_FROM_FILE": "Import from file",
     "S_ERR_INVALID_DATA": "Import failed: Invalid JSON"
-  },
-  "F_AUTO_BACKUPS": {
-    "HELP": "Auto save all data to your app folder in order to have it ready in case something goes wrong.",
-    "LABEL_IS_ENABLED": "Enable automatic backups",
-    "TITLE": "Automatic Backups"
-  },
-  "F_GOOGLE_DRIVE_SYNC": {
-    "HELP": "Here you can configure your app to automatically sync to and from a single google drive file. All data will be saved unencrypted, so make sure you don't accidentally share this file with someone.",
-    "TITLE": "Sync via Google Drive"
-  },
-  "F_IDLE": {
-    "HELP": "<div><p>When idle time handling is enabled a dialog will open after a specified amount of time to check if and on which task you want to track your time, when you have been idle.</p></div>",
-    "IS_ENABLE_IDLE_TIME_TRACKING": "Enable idle time handling",
-    "IS_ONLY_OPEN_IDLE_WHEN_CURRENT_TASK": "Only trigger idle time dialog when a current task is selected",
-    "IS_UN_TRACKED_IDLE_RESETS_BREAK_TIMER": "Untracked idle time resets take a break timer",
-    "MIN_IDLE_TIME": "Trigger idle after X",
-    "TITLE": "Idle Handling"
-  },
-  "F_IMEX": {
-    "HELP": "<p>Here you can export all your data as a <strong>JSON</strong> for backups, but also to use it in a different context (e.g. you might want to export your projects in the browser and import them into the desktop version). </p> <p>The import expects valid JSON to be copied into the text area. <strong>NOTE: Once you hit the import button all your current settings and data will be overwritten!</strong></p>",
-    "TITLE": "Import/Export"
-  },
-  "F_KEYBOARD": {
-    "ADD_NEW_NOTE": "Add new note",
-    "ADD_NEW_TASK": "Add New Task",
-    "APP_WIDE_SHORTCUTS": "Global Shortcuts (application wide)",
-    "COLLAPSE_SUB_TASKS": "Collapse Sub Tasks",
-    "EXPAND_SUB_TASKS": "Expand Sub Tasks",
-    "FOCUS_LAST_ACTIVE_TASK": "Focus last active task",
-    "GLOBAL_SHOW_HIDE": "Show/Hide Super Productivity",
-    "GLOBAL_TOGGLE_TASK_START": "Toggle time tracking for last active task",
-    "GO_TO_DAILY_AGENDA": "Go to Agenda",
-    "GO_TO_FOCUS_MODE": "Go to Focus Mode",
-    "GO_TO_SETTINGS": "Go to Settings",
-    "GO_TO_WORK_VIEW": "Go to Work View",
-    "HELP": "<p>Here you can configure all keyboard shortcuts.</p> <p>Click on the text input and enter the desired keyboard combination. Hit enter to save and Escape to abort.</p> <p>There are three types of shortcuts:</p> <ul> <li> <strong>Global shortcuts:</strong> When the app is running it will trigger the action from every other application. </li> <li> <strong>Application level shortcuts:</strong> Will trigger from every screen of the application, but not if you're currently editing a text field. </li> <li> <strong>Task level shortcuts:</strong> They will only trigger if you have selected a task via mouse or keyboard and usually trigger an action specifically related to that one task. </li> </ul>",
-    "MOVE_TASK_DOWN": "Move Task down in List",
-    "MOVE_TASK_UP": "Move Task up in List",
-    "MOVE_TO_BACKLOG": "Move Task to Task Backlog",
-    "MOVE_TO_TODAYS_TASKS": "Move Task to Today\"s Task List",
-    "OPEN_PROJECT_NOTES": "Show/Hide Project Notes",
-    "SELECT_NEXT_TASK": "Select next Task",
-    "SELECT_PREVIOUS_TASK": "Select previous Task",
-    "SYSTEM_SHORTCUTS": "Global Shortcuts (system wide)",
-    "TASK_ADD_SUB_TASK": "Add sub Task",
-    "TASK_DELETE": "Delete Task",
-    "TASK_EDIT_TITLE": "Edit Title",
-    "TASK_OPEN_ESTIMATION_DIALOG": "Edit estimation / time spent",
-    "TASK_SCHEDULE": "Schedule Task",
-    "TASK_SHORTCUTS": "Tasks",
-    "TASK_SHORTCUTS_INFO": "The following shortcuts apply for the currently selected task (selected via tab or mouse).",
-    "TASK_TOGGLE_ADDITIONAL_INFO_OPEN": "Show/Hide additional task info",
-    "TASK_TOGGLE_DONE": "Toggle Done",
-    "TITLE": "Keyboard Shortcuts",
-    "TOGGLE_BACKLOG": "Show/Hide Task Backlog",
-    "TOGGLE_BOOKMARKS": "Show/Hide Bookmark Bar",
-    "TOGGLE_PLAY": "Start/Stop Task",
-    "ZOOM_DEFAULT": "Zoom default (Desktop only)",
-    "ZOOM_IN": "Zoom in (Desktop only)",
-    "ZOOM_OUT": "Zoom out (Desktop only)"
-  },
-  "F_LANG": {
-    "AR": "Arabic",
-    "DE": "German",
-    "EN": "English",
-    "ES": "Spanish",
-    "FR": "French",
-    "JA": "Japanese",
-    "KO": "Korean",
-    "LABEL": "Please select a language",
-    "RU": "Russian",
-    "TITLE": "Language",
-    "TR": "Turkish",
-    "ZH": "Chinese"
-  },
-  "F_MISC": {
-    "HELP": "<p><strong>Not seeing Desktop Notifications?</strong> For windows you might want to check System > Notifications & actions and check if the required notifications have been enabled.</p>",
-    "IS_AUTO_MARK_PARENT_AS_DONE": "Mark parent task as done, when all sub tasks are done",
-    "IS_CONFIRM_BEFORE_EXIT": "Confirm before exiting the app",
-    "IS_DISABLE_REMIND_WHEN_FORGOT_TO_FINISH_DAY": "Disable reminder about forgotten finish day",
-    "IS_HIDE_NAV": "Hide navigation until main header is hovered (desktop only)",
-    "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Notify when time estimate was exceeded",
-    "TITLE": "Misc Settings"
-  },
-  "F_POMODORO": {
-    "BREAK_DURATION": "Duration of short breaks",
-    "CYCLES_BEFORE_LONGER_BREAK": "Start longer break after X work sessions",
-    "DURATION": "Duration of work sessions",
-    "HELP": "<p>The pomodoro timer can be configured via a couple of settings. The duration of every work session, the duration of normal breaks, the number of work sessions to run before a longer break is started and the duration of this longer break.</p> <p>You can also set if you want to display your distractions during your pomodoro breaks.</p> <p>Setting \"Pause time tracking on pomodoro break\" will also track your breaks as work time spent on a task. </p> <p>Enabling \"Pause pomodoro session when no active task\" will also pause the pomodoro session, when you pause a task.</p>",
-    "IS_ENABLED": "Enable pomodoro timer",
-    "IS_MANUAL_CONTINUE": "Manually confirm starting next pomodoro session",
-    "IS_PLAY_SOUND": "Play sound when session is done",
-    "IS_PLAY_SOUND_AFTER_BREAK": "Play sound when break is done",
-    "IS_PLAY_TICK": "Play tick sound every second",
-    "IS_STOP_TRACKING_ON_BREAK": "Stop time tracking for task on break",
-    "LONGER_BREAK_DURATION": "Duration of longer breaks",
-    "TITLE": "Pomodoro Settings"
-  },
-  "F_TAKE_A_BREAK": {
-    "HELP": "<div> <p>Allows you to configure a reoccurring reminder when you have worked for a specified amount of time without taking a break.</p> <p>You can modify the message displayed. ${duration} will be replaced with the time spent without a break.</p> </div>",
-    "IS_ENABLED": "Enable take a break reminder",
-    "MESSAGE": "Take a break message",
-    "MIN_WORKING_TIME": "Trigger take a break notification after X working without one",
-    "TITLE": "Break Reminder"
   },
   "G": {
     "CANCEL": "Cancel",
@@ -809,23 +708,120 @@
     "UNDO": "Undo",
     "UPDATE": "Update"
   },
-  "THEMES": {
-    "SELECT_THEME": "Select Theme",
-    "blue": "blue",
-    "blue-grey": "blue-grey",
-    "light-blue": "light-blue",
-    "indigo": "indigo",
-    "pink": "pink",
-    "purple": "purple",
-    "deep-purple": "deep-purple",
-    "cyan": "cyan",
-    "teal": "teal",
-    "green": "green",
-    "light-green": "light-green",
-    "lime": "lime",
-    "yellow": "yellow",
-    "amber": "amber",
-    "deep-orange": "deep-orange"
+  "GCF": {
+    "AUTO_BACKUPS": {
+      "HELP": "Auto save all data to your app folder in order to have it ready in case something goes wrong.",
+      "LABEL_IS_ENABLED": "Enable automatic backups",
+      "TITLE": "Automatic Backups"
+    },
+    "GOOGLE_DRIVE_SYNC": {
+      "HELP": "Here you can configure your app to automatically sync to and from a single google drive file. All data will be saved unencrypted, so make sure you don't accidentally share this file with someone.",
+      "TITLE": "Sync via Google Drive"
+    },
+    "IDLE": {
+      "HELP": "<div><p>When idle time handling is enabled a dialog will open after a specified amount of time to check if and on which task you want to track your time, when you have been idle.</p></div>",
+      "IS_ENABLE_IDLE_TIME_TRACKING": "Enable idle time handling",
+      "IS_ONLY_OPEN_IDLE_WHEN_CURRENT_TASK": "Only trigger idle time dialog when a current task is selected",
+      "IS_UN_TRACKED_IDLE_RESETS_BREAK_TIMER": "Untracked idle time resets take a break timer",
+      "MIN_IDLE_TIME": "Trigger idle after X",
+      "TITLE": "Idle Handling"
+    },
+    "IMEX": {
+      "HELP": "<p>Here you can export all your data as a <strong>JSON</strong> for backups, but also to use it in a different context (e.g. you might want to export your projects in the browser and import them into the desktop version). </p> <p>The import expects valid JSON to be copied into the text area. <strong>NOTE: Once you hit the import button all your current settings and data will be overwritten!</strong></p>",
+      "TITLE": "Import/Export"
+    },
+    "KEYBOARD": {
+      "ADD_NEW_NOTE": "Add new note",
+      "ADD_NEW_TASK": "Add New Task",
+      "APP_WIDE_SHORTCUTS": "Global Shortcuts (application wide)",
+      "COLLAPSE_SUB_TASKS": "Collapse Sub Tasks",
+      "EXPAND_SUB_TASKS": "Expand Sub Tasks",
+      "FOCUS_LAST_ACTIVE_TASK": "Focus last active task",
+      "GLOBAL_SHOW_HIDE": "Show/Hide Super Productivity",
+      "GLOBAL_TOGGLE_TASK_START": "Toggle time tracking for last active task",
+      "GO_TO_DAILY_AGENDA": "Go to Agenda",
+      "GO_TO_FOCUS_MODE": "Go to Focus Mode",
+      "GO_TO_SETTINGS": "Go to Settings",
+      "GO_TO_WORK_VIEW": "Go to Work View",
+      "HELP": "<p>Here you can configure all keyboard shortcuts.</p> <p>Click on the text input and enter the desired keyboard combination. Hit enter to save and Escape to abort.</p> <p>There are three types of shortcuts:</p> <ul> <li> <strong>Global shortcuts:</strong> When the app is running it will trigger the action from every other application. </li> <li> <strong>Application level shortcuts:</strong> Will trigger from every screen of the application, but not if you're currently editing a text field. </li> <li> <strong>Task level shortcuts:</strong> They will only trigger if you have selected a task via mouse or keyboard and usually trigger an action specifically related to that one task. </li> </ul>",
+      "MOVE_TASK_DOWN": "Move Task down in List",
+      "MOVE_TASK_UP": "Move Task up in List",
+      "MOVE_TO_BACKLOG": "Move Task to Task Backlog",
+      "MOVE_TO_TODAYS_TASKS": "Move Task to Today\"s Task List",
+      "OPEN_PROJECT_NOTES": "Show/Hide Project Notes",
+      "SELECT_NEXT_TASK": "Select next Task",
+      "SELECT_PREVIOUS_TASK": "Select previous Task",
+      "SYSTEM_SHORTCUTS": "Global Shortcuts (system wide)",
+      "TASK_ADD_SUB_TASK": "Add sub Task",
+      "TASK_DELETE": "Delete Task",
+      "TASK_EDIT_TITLE": "Edit Title",
+      "TASK_OPEN_ESTIMATION_DIALOG": "Edit estimation / time spent",
+      "TASK_SCHEDULE": "Schedule Task",
+      "TASK_SHORTCUTS": "Tasks",
+      "TASK_SHORTCUTS_INFO": "The following shortcuts apply for the currently selected task (selected via tab or mouse).",
+      "TASK_TOGGLE_ADDITIONAL_INFO_OPEN": "Show/Hide additional task info",
+      "TASK_TOGGLE_DONE": "Toggle Done",
+      "TITLE": "Keyboard Shortcuts",
+      "TOGGLE_BACKLOG": "Show/Hide Task Backlog",
+      "TOGGLE_BOOKMARKS": "Show/Hide Bookmark Bar",
+      "TOGGLE_PLAY": "Start/Stop Task",
+      "ZOOM_DEFAULT": "Zoom default (Desktop only)",
+      "ZOOM_IN": "Zoom in (Desktop only)",
+      "ZOOM_OUT": "Zoom out (Desktop only)"
+    },
+    "LANG": {
+      "AR": "Arabic",
+      "DE": "German",
+      "EN": "English",
+      "ES": "Spanish",
+      "FR": "French",
+      "JA": "Japanese",
+      "KO": "Korean",
+      "LABEL": "Please select a language",
+      "RU": "Russian",
+      "TITLE": "Language",
+      "TR": "Turkish",
+      "ZH": "Chinese"
+    },
+    "MISC": {
+      "HELP": "<p><strong>Not seeing Desktop Notifications?</strong> For windows you might want to check System > Notifications & actions and check if the required notifications have been enabled.</p>",
+      "IS_AUTO_MARK_PARENT_AS_DONE": "Mark parent task as done, when all sub tasks are done",
+      "IS_CONFIRM_BEFORE_EXIT": "Confirm before exiting the app",
+      "IS_DISABLE_REMIND_WHEN_FORGOT_TO_FINISH_DAY": "Disable reminder about forgotten finish day",
+      "IS_HIDE_NAV": "Hide navigation until main header is hovered (desktop only)",
+      "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Notify when time estimate was exceeded",
+      "TITLE": "Misc Settings"
+    },
+    "POMODORO": {
+      "BREAK_DURATION": "Duration of short breaks",
+      "CYCLES_BEFORE_LONGER_BREAK": "Start longer break after X work sessions",
+      "DURATION": "Duration of work sessions",
+      "HELP": "<p>The pomodoro timer can be configured via a couple of settings. The duration of every work session, the duration of normal breaks, the number of work sessions to run before a longer break is started and the duration of this longer break.</p> <p>You can also set if you want to display your distractions during your pomodoro breaks.</p> <p>Setting \"Pause time tracking on pomodoro break\" will also track your breaks as work time spent on a task. </p> <p>Enabling \"Pause pomodoro session when no active task\" will also pause the pomodoro session, when you pause a task.</p>",
+      "IS_ENABLED": "Enable pomodoro timer",
+      "IS_MANUAL_CONTINUE": "Manually confirm starting next pomodoro session",
+      "IS_PLAY_SOUND": "Play sound when session is done",
+      "IS_PLAY_SOUND_AFTER_BREAK": "Play sound when break is done",
+      "IS_PLAY_TICK": "Play tick sound every second",
+      "IS_STOP_TRACKING_ON_BREAK": "Stop time tracking for task on break",
+      "LONGER_BREAK_DURATION": "Duration of longer breaks",
+      "TITLE": "Pomodoro Settings"
+    },
+    "TAKE_A_BREAK": {
+      "HELP": "<div> <p>Allows you to configure a reoccurring reminder when you have worked for a specified amount of time without taking a break.</p> <p>You can modify the message displayed. ${duration} will be replaced with the time spent without a break.</p> </div>",
+      "IS_ENABLED": "Enable take a break reminder",
+      "MESSAGE": "Take a break message",
+      "MIN_WORKING_TIME": "Trigger take a break notification after X working without one",
+      "TITLE": "Break Reminder"
+    }
+  },
+  "GLOBAL_SNACK": {
+    "COPY_TO_CLIPPBOARD": "Copied to clipboard",
+    "ERR_COMPRESSION": "Error for compression interface",
+    "ERR_DB_CLEAR": "Error while clearing the database",
+    "ERR_DB_DELETE": "Error while deleting data",
+    "ERR_DB_LOAD": "Error while loading data",
+    "ERR_DB_SAVE": "Error while saving data",
+    "RUNNING_X": "Running \"{{str}}\"."
   },
   "MH": {
     "ADD_NEW_TASK": "Add new Task",
@@ -918,6 +914,24 @@
       "SUCCESS": "Data imported"
     }
   },
+  "THEMES": {
+    "SELECT_THEME": "Select Theme",
+    "amber": "amber",
+    "blue": "blue",
+    "blue-grey": "blue-grey",
+    "cyan": "cyan",
+    "deep-orange": "deep-orange",
+    "deep-purple": "deep-purple",
+    "green": "green",
+    "indigo": "indigo",
+    "light-blue": "light-blue",
+    "light-green": "light-green",
+    "lime": "lime",
+    "pink": "pink",
+    "purple": "purple",
+    "teal": "teal",
+    "yellow": "yellow"
+  },
   "V": {
     "E_1TO10": "Please enter a value between 1 and 10",
     "E_DATETIME": "The entered value is not a datetime!"
@@ -935,14 +949,5 @@
     "TIME_ESTIMATED": "Time Estimated:",
     "WITHOUT_BREAK": "Without break:",
     "WORKING_TODAY": "Working today:"
-  },
-  "GLOBAL_SNACK": {
-    "ERR_COMPRESSION": "Error for compression interface",
-    "ERR_DB_LOAD": "Error while loading data",
-    "ERR_DB_SAVE": "Error while saving data",
-    "ERR_DB_DELETE": "Error while deleting data",
-    "ERR_DB_CLEAR": "Error while clearing the database",
-    "RUNNING_X": "Running \"{{str}}\".",
-    "COPY_TO_CLIPPBOARD": "Copied to clipboard"
   }
 }

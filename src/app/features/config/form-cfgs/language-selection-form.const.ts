@@ -4,25 +4,25 @@ import {LanguageCode} from '../../../app.constants';
 import {T} from '../../../t.const';
 
 export const LANGUAGE_SELECTION_FORM_FORM: ConfigFormSection = {
-  title: T.F_LANG.TITLE,
+  title: T.GCF.LANG.TITLE,
   key: 'lang',
   items: [
     {
       key: 'lng',
       type: 'select',
       templateOptions: {
-        label: T.F_LANG.LABEL,
+        label: T.GCF.LANG.LABEL,
         options: [
-          {label: T.F_LANG.AR, value: LanguageCode.ar},
-          {label: T.F_LANG.ZH, value: LanguageCode.zh},
-          {label: T.F_LANG.EN, value: LanguageCode.en},
-          {label: T.F_LANG.DE, value: LanguageCode.de},
-          {label: T.F_LANG.FR, value: LanguageCode.fr},
-          {label: T.F_LANG.JA, value: LanguageCode.ja},
-          {label: T.F_LANG.KO, value: LanguageCode.ko},
-          {label: T.F_LANG.RU, value: LanguageCode.ru},
-          {label: T.F_LANG.ES, value: LanguageCode.es},
-          {label: T.F_LANG.TR, value: LanguageCode.tr},
+          {label: T.GCF.LANG.AR, value: LanguageCode.ar},
+          {label: T.GCF.LANG.ZH, value: LanguageCode.zh},
+          {label: T.GCF.LANG.EN, value: LanguageCode.en},
+          {label: T.GCF.LANG.DE, value: LanguageCode.de},
+          {label: T.GCF.LANG.FR, value: LanguageCode.fr},
+          {label: T.GCF.LANG.JA, value: LanguageCode.ja},
+          {label: T.GCF.LANG.KO, value: LanguageCode.ko},
+          {label: T.GCF.LANG.RU, value: LanguageCode.ru},
+          {label: T.GCF.LANG.ES, value: LanguageCode.es},
+          {label: T.GCF.LANG.TR, value: LanguageCode.tr},
         ],
       },
     },

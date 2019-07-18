@@ -4,43 +4,43 @@ import {T} from '../../../t.const';
 
 
 export const MISC_SETTINGS_FORM_CFG: ConfigFormSection = {
-  title: T.F_MISC.TITLE,
+  title: T.GCF.MISC.TITLE,
   key: 'misc',
-  help: T.F_MISC.HELP,
+  help: T.GCF.MISC.HELP,
   items: [
     {
       key: 'isConfirmBeforeExit',
       type: 'checkbox',
       templateOptions: {
-        label: T.F_MISC.IS_CONFIRM_BEFORE_EXIT,
+        label: T.GCF.MISC.IS_CONFIRM_BEFORE_EXIT,
       },
     },
     {
       key: 'isNotifyWhenTimeEstimateExceeded',
       type: 'checkbox',
       templateOptions: {
-        label: T.F_MISC.IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED,
+        label: T.GCF.MISC.IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED,
       },
     },
     {
       key: 'isHideNav',
       type: 'checkbox',
       templateOptions: {
-        label: T.F_MISC.IS_HIDE_NAV,
+        label: T.GCF.MISC.IS_HIDE_NAV,
       },
     },
     {
       key: 'isAutMarkParentAsDone',
       type: 'checkbox',
       templateOptions: {
-        label: T.F_MISC.IS_AUTO_MARK_PARENT_AS_DONE,
+        label: T.GCF.MISC.IS_AUTO_MARK_PARENT_AS_DONE,
       },
     },
     {
       key: 'isDisableRemindWhenForgotToFinishDay',
       type: 'checkbox',
       templateOptions: {
-        label: T.F_MISC.IS_DISABLE_REMIND_WHEN_FORGOT_TO_FINISH_DAY,
+        label: T.GCF.MISC.IS_DISABLE_REMIND_WHEN_FORGOT_TO_FINISH_DAY,
       },
     },
   ]

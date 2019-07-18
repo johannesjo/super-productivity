@@ -3,15 +3,15 @@ import {ConfigFormSection} from '../global-config.model';
 import {T} from '../../../t.const';
 
 export const IDLE_FORM_CFG: ConfigFormSection = {
-  title: T.F_IDLE.TITLE,
+  title: T.GCF.IDLE.TITLE,
   key: 'idle',
-  help: T.F_IDLE.HELP,
+  help: T.GCF.IDLE.HELP,
   items: [
     {
       key: 'isEnableIdleTimeTracking',
       type: 'checkbox',
       templateOptions: {
-        label: T.F_IDLE.IS_ENABLE_IDLE_TIME_TRACKING,
+        label: T.GCF.IDLE.IS_ENABLE_IDLE_TIME_TRACKING,
       },
     },
     {
@@ -19,7 +19,7 @@ export const IDLE_FORM_CFG: ConfigFormSection = {
       type: 'duration',
       hideExpression: '!model.isEnableIdleTimeTracking',
       templateOptions: {
-        label: T.F_IDLE.MIN_IDLE_TIME,
+        label: T.GCF.IDLE.MIN_IDLE_TIME,
       },
     },
     {
@@ -27,7 +27,7 @@ export const IDLE_FORM_CFG: ConfigFormSection = {
       type: 'checkbox',
       hideExpression: '!model.isEnableIdleTimeTracking',
       templateOptions: {
-        label: T.F_IDLE.IS_ONLY_OPEN_IDLE_WHEN_CURRENT_TASK,
+        label: T.GCF.IDLE.IS_ONLY_OPEN_IDLE_WHEN_CURRENT_TASK,
       },
     },
     {
@@ -35,7 +35,7 @@ export const IDLE_FORM_CFG: ConfigFormSection = {
       type: 'checkbox',
       hideExpression: '!model.isEnableIdleTimeTracking',
       templateOptions: {
-        label: T.F_IDLE.IS_UN_TRACKED_IDLE_RESETS_BREAK_TIMER,
+        label: T.GCF.IDLE.IS_UN_TRACKED_IDLE_RESETS_BREAK_TIMER,
       },
     },
   ]

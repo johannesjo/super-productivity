@@ -169,12 +169,6 @@
         "SUCCESS": "Googleドライブ：バックアップを保存しました",
         "SYNCING": "Googleドライブ：同期"
       },
-      "S_API": {
-        "ERR": "GoogleApiエラー： {{errStr}}",
-        "ERR_NO_FILE_ID": "GoogleApi：ファイルIDが指定されていません",
-        "ERR_NO_FILE_NAME": "GoogleApi：ファイル名が指定されていません",
-        "SUCCESS_LOGIN": "GoogleApi：ログイン成功"
-      },
       "SYNC_CFG": {
         "AUTO_LOGIN": "アプリ起動時の自動ログイン",
         "AUTO_SYNC": "リモートへのデータの自動同期",
@@ -187,6 +181,12 @@
         "SYNC_FILE_NAME": "同期ファイル名",
         "SYNC_INTERVAL": "同期間隔",
         "UPDATE_SYNC_FILE": "同期ファイルを更新する"
+      },
+      "S_API": {
+        "ERR": "GoogleApiエラー： {{errStr}}",
+        "ERR_NO_FILE_ID": "GoogleApi：ファイルIDが指定されていません",
+        "ERR_NO_FILE_NAME": "GoogleApi：ファイル名が指定されていません",
+        "SUCCESS_LOGIN": "GoogleApi：ログイン成功"
       }
     },
     "JIRA": {
@@ -291,6 +291,7 @@
         "WRITE_A_COMMENT": "コメントを書く"
       },
       "S": {
+        "ADDED_WORKLOG_FOR": "",
         "EXTENSION_NOT_LOADED": "Super Productivity Extensionがロードされていません。ページをリロードすると役に立つかもしれません",
         "IMPORTED_MULTIPLE_ISSUES": "Jira：jiraからバックログに {{issuesLength}} 件の新しい問題をインポートしました",
         "IMPORTED_SINGLE_ISSUE": "Jira：jiraからバックログにissue \"{{issueText}}\"をインポートしました",
@@ -302,6 +303,8 @@
         "NO_VALID_TRANSITION": "Jira：有効な遷移が設定されていません",
         "POLLING": "Jira：問題に対する投票の変更",
         "TIMED_OUT": "ジラ：リクエストがタイムアウトしました",
+        "TRANSITION": "",
+        "TRANSITIONS_LOADED": "",
         "TRANSITION_SUCCESS": "ジラ：問題 {{issueKey}} を <strong>に設定してください{{chosenTransition}}</strong>",
         "UNABLE_TO_REASSIGN": "Jira：ユーザー名を指定しなかったので、自分にチケットを再割り当てすることができません。設定をご覧ください。"
       },
@@ -391,10 +394,10 @@
         "BREAK_X_START": "ポモドーロ：休憩 {{nr}} が始まりました！",
         "SESSION_X_START": "ポモドーロ：セッション {{nr}} が始まりました！"
       },
-      "SKIP_BREAK": "スキップブレーク",
       "S": {
         "SESSION_X_START": "ポモドーロ：セッション {{nr}} が始まりました！"
-      }
+      },
+      "SKIP_BREAK": "スキップブレーク"
     },
     "PROCRASTINATION": {
       "BACK_TO_WORK": "仕事に戻る！",
@@ -578,6 +581,8 @@
       },
       "S": {
         "DELETED": "削除されたタスク \"{{title}}\"",
+        "FOUND_MOVE_FROM_BACKLOG": "",
+        "FOUND_RESTORE_FROM_ARCHIVE": "",
         "REMINDER_ADDED": "スケジュール済みタスク \"{{title}}\"",
         "REMINDER_DELETED": "タスクの通知を削除しました",
         "REMINDER_UPDATED": "タスク \"{{title}}\"の通知を更新しました"
@@ -666,6 +671,7 @@
           "TITLES_AND_SUB_TASK_TITLES": "タイトルとサブタスクのタイトル",
           "WORKLOG": "作業記録"
         },
+        "OPTIONS": "",
         "ROUND_END_TIME_TO": "ラウンド終了時間",
         "ROUND_START_TIME_TO": "ラウンド開始時間",
         "ROUND_TIME_WORKED_TO": "ラウンドタイム",
@@ -681,111 +687,8 @@
   },
   "FILE_IMEX": {
     "EXPORT_DATA": "データのエクスポート",
-    "IMPORT_FROM_FILE": "ファイルからインポート"
-  },
-  "F_AUTO_BACKUPS": {
-    "HELP": "問題が発生した場合に備えて、すべてのデータをアプリフォルダに自動保存して準備します。",
-    "LABEL_IS_ENABLED": "自動バックアップを有効にする",
-    "TITLE": "自動バックアップ"
-  },
-  "F_GOOGLE_DRIVE_SYNC": {
-    "HELP": "ここでは、単一のGoogleドライブファイルとの間で自動的に同期するようにアプリを設定できます。すべてのデータは暗号化されずに保存されるため、誤ってこのファイルを他のユーザーと共有しないように注意してください。",
-    "TITLE": "Googleドライブで同期"
-  },
-  "F_IDLE": {
-    "HELP": "<div><p>アイドル時間処理が有効になっていると、アイドル時間が経過したときに、どのタスクで時間を追跡するかを確認するために、指定した時間が経過した後にダイアログが開きます。</p></div>",
-    "IS_ENABLE_IDLE_TIME_TRACKING": "アイドル時間処理を有効にする",
-    "IS_ONLY_OPEN_IDLE_WHEN_CURRENT_TASK": "現在のタスクが選択されている場合にのみアイドル時間ダイアログを起動する",
-    "IS_UN_TRACKED_IDLE_RESETS_BREAK_TIMER": "追跡されていないアイドル時間のリセットは中断タイマーを取る",
-    "MIN_IDLE_TIME": "Xの後にアイドル状態になる",
-    "TITLE": "アイドル処理"
-  },
-  "F_IMEX": {
-    "HELP": "<p>ここでは、すべてのデータをバックアップ用の <strong>JSON</strong> としてエクスポートできますが、それを別のコンテキストで使用することもできます（たとえば、プロジェクトをブラウザにエクスポートしてデスクトップバージョンにインポートすることができます） </p> <p>インポートは、有効なJSONがテキスト領域にコピーされることを期待しています。 <strong>注：インポートボタンを押すと、現在の設定とデータがすべて上書きされます。</strong></p>",
-    "TITLE": "インポート・エクスポート"
-  },
-  "F_KEYBOARD": {
-    "ADD_NEW_NOTE": "新しいメモを追加",
-    "ADD_NEW_TASK": "新しいタスクを追加する",
-    "APP_WIDE_SHORTCUTS": "グローバルショートカット（アプリケーション全体）",
-    "COLLAPSE_SUB_TASKS": "サブタスクを折りたたむ",
-    "EXPAND_SUB_TASKS": "サブタスクを展開",
-    "FOCUS_LAST_ACTIVE_TASK": "最後のアクティブタスクに焦点を当てる",
-    "GLOBAL_SHOW_HIDE": "スーパー生産性の表示/非表示",
-    "GLOBAL_TOGGLE_TASK_START": "最後のアクティブタスクのタイムトラッキングを切り替えます",
-    "GO_TO_DAILY_AGENDA": "議題に行く",
-    "GO_TO_FOCUS_MODE": "フォーカスモードへ",
-    "GO_TO_SETTINGS": "設定に移動",
-    "GO_TO_WORK_VIEW": "作業ビューに移動",
-    "HELP": "<p>ここですべてのキーボードショートカットを設定できます。</p> <p>テキスト入力をクリックして、希望のキーボードの組み合わせを入力してください。保存するにはEnterキーを押し、中止するにはEscapeキーを押してください。</p> <p>3種類のショートカットがあります。</p> <ul> <li> <strong>グローバルショートカット：</strong> アプリが実行されているとき、他のすべてのアプリケーションからアクションが起動されます。 </li> <li> <strong>アプリケーションレベルのショートカット：</strong> アプリケーションのすべての画面から起動しますが、現在テキストフィールドを編集している場合はそうではありません。 </li> <li> <strong>タスクレベルのショートカット：</strong> マウスまたはキーボードでタスクを選択した場合にのみ起動され、通常そのタスクに関連したアクションを起動します。 </li> </ul>",
-    "MOVE_TASK_DOWN": "リスト内でタスクを下に移動",
-    "MOVE_TASK_UP": "リスト内でタスクを上に移動",
-    "MOVE_TO_BACKLOG": "タスクをタスクバックログに移動",
-    "MOVE_TO_TODAYS_TASKS": "今日のタスクリストにタスクを移動する",
-    "OPEN_PROJECT_NOTES": "プロジェクトノートの表示/非表示",
-    "SELECT_NEXT_TASK": "次のタスクを選択",
-    "SELECT_PREVIOUS_TASK": "前のタスクを選択",
-    "SYSTEM_SHORTCUTS": "グローバルショートカット（システム全体）",
-    "TASK_ADD_SUB_TASK": "サブタスクを追加",
-    "TASK_DELETE": "タスクを削除",
-    "TASK_EDIT_TITLE": "タイトルを編集",
-    "TASK_OPEN_ESTIMATION_DIALOG": "見積もりを編集/費やした時間",
-    "TASK_SCHEDULE": "スケジュールタスク",
-    "TASK_SHORTCUTS": "タスク",
-    "TASK_SHORTCUTS_INFO": "次のショートカットは、現在選択されているタスク（タブまたはマウスで選択）に適用されます。",
-    "TASK_TOGGLE_ADDITIONAL_INFO_OPEN": "追加の仕事情報を表示/隠す",
-    "TASK_TOGGLE_DONE": "完了を切り替える",
-    "TITLE": "キーボードショートカット",
-    "TOGGLE_BACKLOG": "タスクバックログの表示/非表示",
-    "TOGGLE_BOOKMARKS": "ブックマークバーの表示/非表示",
-    "TOGGLE_PLAY": "開始/停止タスク",
-    "ZOOM_DEFAULT": "ズームのデフォルト（デスクトップのみ）",
-    "ZOOM_IN": "ズームイン（デスクトップのみ）",
-    "ZOOM_OUT": "ズームアウト（デスクトップのみ）"
-  },
-  "F_LANG": {
-    "AR": "アラビア語",
-    "DE": "ドイツ人",
-    "EN": "英語",
-    "ES": "スペイン語",
-    "FR": "フランス語",
-    "JA": "日本人",
-    "KO": "韓国語",
-    "LABEL": "言語を選択してください",
-    "RU": "ロシア",
-    "TITLE": "言語",
-    "TR": "トルコ語",
-    "ZH": "中国語"
-  },
-  "F_MISC": {
-    "HELP": "<p><strong>デスクトップ通知が表示されませんか？</strong> Windowsの場合は、[システム]> [通知とアクション]を確認し、必要な通知が有効になっているかどうかを確認します。</p>",
-    "IS_AUTO_MARK_PARENT_AS_DONE": "すべてのサブタスクが完了したら、親タスクを完了としてマークする",
-    "IS_CONFIRM_BEFORE_EXIT": "アプリを終了する前に確認してください",
-    "IS_DISABLE_REMIND_WHEN_FORGOT_TO_FINISH_DAY": "終了日を忘れた場合の通知を無効にする",
-    "IS_HIDE_NAV": "メインヘッダーが表示されるまでナビゲーションを非表示にする（デスクトップのみ）",
-    "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "見積もり時間を超えたときに通知する",
-    "TITLE": "その他の設定"
-  },
-  "F_POMODORO": {
-    "BREAK_DURATION": "短い休憩の期間",
-    "CYCLES_BEFORE_LONGER_BREAK": "X作業セッションの後により長い休憩を開始",
-    "DURATION": "作業期間",
-    "HELP": "<p>pomodoroタイマーはいくつかの設定で設定できます。各作業セッションの期間、通常の休憩の期間、長い休憩が開始される前に実行される作業セッションの数、およびこの長い休憩の期間。</p> <p>ポモドーロが中断している間に気を散らすものを表示するかどうかも設定できます。</p> <p>「ポモドーロ休憩時間追跡の一時停止」を設定すると、作業時間がタスクに費やされたときに休憩時間も追跡されます。 </p> <p>「アクティブなタスクがないときにpomodoroセッションを一時停止」を有効にすると、タスクを一時停止したときにpomodoroセッションも一時停止します。</p>",
-    "IS_ENABLED": "ポモドーロタイマーを有効にする",
-    "IS_MANUAL_CONTINUE": "次のpomodoroセッションの開始を手動で確認してください",
-    "IS_PLAY_SOUND": "セッション終了時に音を鳴らす",
-    "IS_PLAY_SOUND_AFTER_BREAK": "休憩したときに音を鳴らす",
-    "IS_PLAY_TICK": "1秒ごとにダニ音を鳴らす",
-    "IS_STOP_TRACKING_ON_BREAK": "休憩中のタスクのタイムトラッキングを停止する",
-    "LONGER_BREAK_DURATION": "長い休憩時間",
-    "TITLE": "ポモドーロ設定"
-  },
-  "F_TAKE_A_BREAK": {
-    "HELP": "<div> <p>休憩せずに指定した時間作業したときに繰り返し発生するアラームを設定できます。</p> <p>表示されたメッセージを変更できます。 ${duration} は中断せずに費やした時間に置き換えられます。</p> </div>",
-    "IS_ENABLED": "休憩のお知らせを有効にする",
-    "MESSAGE": "休憩メッセージを取る",
-    "MIN_WORKING_TIME": "Xが動作していないのにトリガーがブレーク通知を受け取る",
-    "TITLE": "リマインダーを破る"
+    "IMPORT_FROM_FILE": "ファイルからインポート",
+    "S_ERR_INVALID_DATA": ""
   },
   "G": {
     "CANCEL": "キャンセル",
@@ -804,6 +707,121 @@
     "TITLE": "タイトル",
     "UNDO": "元に戻す",
     "UPDATE": "更新"
+  },
+  "GCF": {
+    "AUTO_BACKUPS": {
+      "HELP": "",
+      "LABEL_IS_ENABLED": "",
+      "TITLE": ""
+    },
+    "GOOGLE_DRIVE_SYNC": {
+      "HELP": "",
+      "TITLE": ""
+    },
+    "IDLE": {
+      "HELP": "",
+      "IS_ENABLE_IDLE_TIME_TRACKING": "",
+      "IS_ONLY_OPEN_IDLE_WHEN_CURRENT_TASK": "",
+      "IS_UN_TRACKED_IDLE_RESETS_BREAK_TIMER": "",
+      "MIN_IDLE_TIME": "",
+      "TITLE": ""
+    },
+    "IMEX": {
+      "HELP": "",
+      "TITLE": ""
+    },
+    "KEYBOARD": {
+      "ADD_NEW_NOTE": "",
+      "ADD_NEW_TASK": "",
+      "APP_WIDE_SHORTCUTS": "",
+      "COLLAPSE_SUB_TASKS": "",
+      "EXPAND_SUB_TASKS": "",
+      "FOCUS_LAST_ACTIVE_TASK": "",
+      "GLOBAL_SHOW_HIDE": "",
+      "GLOBAL_TOGGLE_TASK_START": "",
+      "GO_TO_DAILY_AGENDA": "",
+      "GO_TO_FOCUS_MODE": "",
+      "GO_TO_SETTINGS": "",
+      "GO_TO_WORK_VIEW": "",
+      "HELP": "",
+      "MOVE_TASK_DOWN": "",
+      "MOVE_TASK_UP": "",
+      "MOVE_TO_BACKLOG": "",
+      "MOVE_TO_TODAYS_TASKS": "",
+      "OPEN_PROJECT_NOTES": "",
+      "SELECT_NEXT_TASK": "",
+      "SELECT_PREVIOUS_TASK": "",
+      "SYSTEM_SHORTCUTS": "",
+      "TASK_ADD_SUB_TASK": "",
+      "TASK_DELETE": "",
+      "TASK_EDIT_TITLE": "",
+      "TASK_OPEN_ESTIMATION_DIALOG": "",
+      "TASK_SCHEDULE": "",
+      "TASK_SHORTCUTS": "",
+      "TASK_SHORTCUTS_INFO": "",
+      "TASK_TOGGLE_ADDITIONAL_INFO_OPEN": "",
+      "TASK_TOGGLE_DONE": "",
+      "TITLE": "",
+      "TOGGLE_BACKLOG": "",
+      "TOGGLE_BOOKMARKS": "",
+      "TOGGLE_PLAY": "",
+      "ZOOM_DEFAULT": "",
+      "ZOOM_IN": "",
+      "ZOOM_OUT": ""
+    },
+    "LANG": {
+      "AR": "",
+      "DE": "",
+      "EN": "",
+      "ES": "",
+      "FR": "",
+      "JA": "",
+      "KO": "",
+      "LABEL": "",
+      "RU": "",
+      "TITLE": "",
+      "TR": "",
+      "ZH": ""
+    },
+    "MISC": {
+      "HELP": "",
+      "IS_AUTO_MARK_PARENT_AS_DONE": "",
+      "IS_CONFIRM_BEFORE_EXIT": "",
+      "IS_DISABLE_REMIND_WHEN_FORGOT_TO_FINISH_DAY": "",
+      "IS_HIDE_NAV": "",
+      "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "",
+      "TITLE": ""
+    },
+    "POMODORO": {
+      "BREAK_DURATION": "",
+      "CYCLES_BEFORE_LONGER_BREAK": "",
+      "DURATION": "",
+      "HELP": "",
+      "IS_ENABLED": "",
+      "IS_MANUAL_CONTINUE": "",
+      "IS_PLAY_SOUND": "",
+      "IS_PLAY_SOUND_AFTER_BREAK": "",
+      "IS_PLAY_TICK": "",
+      "IS_STOP_TRACKING_ON_BREAK": "",
+      "LONGER_BREAK_DURATION": "",
+      "TITLE": ""
+    },
+    "TAKE_A_BREAK": {
+      "HELP": "",
+      "IS_ENABLED": "",
+      "MESSAGE": "",
+      "MIN_WORKING_TIME": "",
+      "TITLE": ""
+    }
+  },
+  "GLOBAL_SNACK": {
+    "COPY_TO_CLIPPBOARD": "",
+    "ERR_COMPRESSION": "",
+    "ERR_DB_CLEAR": "",
+    "ERR_DB_DELETE": "",
+    "ERR_DB_LOAD": "",
+    "ERR_DB_SAVE": "",
+    "RUNNING_X": ""
   },
   "MH": {
     "ADD_NEW_TASK": "新しいタスクを追加する",
@@ -895,6 +913,24 @@
       "IMPORTING": "データをインポートする",
       "SUCCESS": "インポートされたデータ"
     }
+  },
+  "THEMES": {
+    "SELECT_THEME": "",
+    "amber": "",
+    "blue": "",
+    "blue-grey": "",
+    "cyan": "",
+    "deep-orange": "",
+    "deep-purple": "",
+    "green": "",
+    "indigo": "",
+    "light-blue": "",
+    "light-green": "",
+    "lime": "",
+    "pink": "",
+    "purple": "",
+    "teal": "",
+    "yellow": ""
   },
   "V": {
     "E_1TO10": "1から10までの値を入力してください",

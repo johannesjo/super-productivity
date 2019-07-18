@@ -169,12 +169,6 @@
         "SUCCESS": "Google Drive: Sauvegarde sauvegardée avec succès",
         "SYNCING": "Google Drive: Synchronisation"
       },
-      "S_API": {
-        "ERR": "Erreur GoogleApi: {{errStr}}",
-        "ERR_NO_FILE_ID": "GoogleApi: aucun identifiant de fichier spécifié",
-        "ERR_NO_FILE_NAME": "GoogleApi: aucun nom de fichier spécifié",
-        "SUCCESS_LOGIN": "GoogleApi: connexion réussie"
-      },
       "SYNC_CFG": {
         "AUTO_LOGIN": "Connexion automatique au démarrage de l'application",
         "AUTO_SYNC": "Synchronisation automatique des données avec la télécommande",
@@ -187,6 +181,12 @@
         "SYNC_FILE_NAME": "Nom du fichier de synchronisation",
         "SYNC_INTERVAL": "Intervalle de synchronisation",
         "UPDATE_SYNC_FILE": "Mettre à jour le fichier de synchronisation"
+      },
+      "S_API": {
+        "ERR": "Erreur GoogleApi: {{errStr}}",
+        "ERR_NO_FILE_ID": "GoogleApi: aucun identifiant de fichier spécifié",
+        "ERR_NO_FILE_NAME": "GoogleApi: aucun nom de fichier spécifié",
+        "SUCCESS_LOGIN": "GoogleApi: connexion réussie"
       }
     },
     "JIRA": {
@@ -291,6 +291,7 @@
         "WRITE_A_COMMENT": "Écrire un commentaire"
       },
       "S": {
+        "ADDED_WORKLOG_FOR": "",
         "EXTENSION_NOT_LOADED": "Super Productivity Extension non chargé. Recharger la page peut aider",
         "IMPORTED_MULTIPLE_ISSUES": "Jira: {{issuesLength}} nouvelles importations importées de jira dans le carnet de commandes",
         "IMPORTED_SINGLE_ISSUE": "Jira: le numéro importé \"{{issueText}}\" de jira dans le carnet de commandes",
@@ -302,6 +303,8 @@
         "NO_VALID_TRANSITION": "Jira: Aucune transition valide configurée",
         "POLLING": "Jira: Polling Changes for issues",
         "TIMED_OUT": "Jira: la demande a expiré",
+        "TRANSITION": "",
+        "TRANSITIONS_LOADED": "",
         "TRANSITION_SUCCESS": "Jira: définissez le problème {{issueKey}} sur <strong>{{chosenTransition}}</strong>.",
         "UNABLE_TO_REASSIGN": "Jira: Impossible de réaffecter le ticket à vous-même, car vous n'avez pas spécifié de nom d'utilisateur. S'il vous plaît visitez les paramètres."
       },
@@ -391,10 +394,10 @@
         "BREAK_X_START": "Pomodoro: La pause {{nr}} a commencé!",
         "SESSION_X_START": "Pomodoro: La session {{nr}} a commencé!"
       },
-      "SKIP_BREAK": "Passer la pause",
       "S": {
         "SESSION_X_START": "Pomodoro: La session {{nr}} a commencé!"
-      }
+      },
+      "SKIP_BREAK": "Passer la pause"
     },
     "PROCRASTINATION": {
       "BACK_TO_WORK": "Retour au travail!",
@@ -578,6 +581,8 @@
       },
       "S": {
         "DELETED": "Tâche supprimée \"{{title}}\"",
+        "FOUND_MOVE_FROM_BACKLOG": "",
+        "FOUND_RESTORE_FROM_ARCHIVE": "",
         "REMINDER_ADDED": "Tâche planifiée \"{{title}}\"",
         "REMINDER_DELETED": "Rappel supprimé pour la tâche",
         "REMINDER_UPDATED": "Rappel mis à jour pour la tâche \"{{title}}\""
@@ -666,6 +671,7 @@
           "TITLES_AND_SUB_TASK_TITLES": "Titres et sous-titres de tâches",
           "WORKLOG": "Journal de travail"
         },
+        "OPTIONS": "",
         "ROUND_END_TIME_TO": "Fin du tour à",
         "ROUND_START_TIME_TO": "Heure de début du tour à",
         "ROUND_TIME_WORKED_TO": "Temps rond travaillé à",
@@ -681,111 +687,8 @@
   },
   "FILE_IMEX": {
     "EXPORT_DATA": "Exporter des données",
-    "IMPORT_FROM_FILE": "Importer depuis un fichier"
-  },
-  "F_AUTO_BACKUPS": {
-    "HELP": "Sauvegardez automatiquement toutes les données dans votre dossier d'applications afin de pouvoir les préparer en cas de problème.",
-    "LABEL_IS_ENABLED": "Activer les sauvegardes automatiques",
-    "TITLE": "Sauvegardes automatiques"
-  },
-  "F_GOOGLE_DRIVE_SYNC": {
-    "HELP": "Ici, vous pouvez configurer votre application pour qu'elle se synchronise automatiquement vers et depuis un seul fichier de lecteur Google. Toutes les données seront enregistrées non cryptées, alors assurez-vous de ne pas partager accidentellement ce fichier avec quelqu'un.",
-    "TITLE": "Synchroniser via Google Drive"
-  },
-  "F_IDLE": {
-    "HELP": "<div><p>Lorsque la gestion de la durée d'inactivité est activée, une boîte de dialogue s'ouvre après un délai spécifié pour vérifier si et sur quelle tâche vous souhaitez suivre votre heure, lorsque vous êtes inactif.</p></div>",
-    "IS_ENABLE_IDLE_TIME_TRACKING": "Activer la gestion du temps d'inactivité",
-    "IS_ONLY_OPEN_IDLE_WHEN_CURRENT_TASK": "Déclenchez uniquement la boîte de dialogue d'inactivité lorsqu'une tâche en cours est sélectionnée",
-    "IS_UN_TRACKED_IDLE_RESETS_BREAK_TIMER": "Les réinitialisations du temps d'inactivité non suivi prennent une pause",
-    "MIN_IDLE_TIME": "Déclencheur inactif après X",
-    "TITLE": "Ralenti"
-  },
-  "F_IMEX": {
-    "HELP": "<p>Ici, vous pouvez exporter toutes vos données sous forme de <strong>JSON</strong> pour les sauvegardes, mais également pour les utiliser dans un contexte différent (vous pouvez par exemple vouloir exporter vos projets dans le navigateur et les importer dans la version de bureau). ). </p> <p>L'importation nécessite la copie d'un fichier JSON valide dans la zone de texte. <strong>REMARQUE: une fois que vous avez cliqué sur le bouton d'importation, tous vos paramètres et données actuels seront écrasés!</strong></p>",
-    "TITLE": "Import / Export"
-  },
-  "F_KEYBOARD": {
-    "ADD_NEW_NOTE": "Ajouter une nouvelle note",
-    "ADD_NEW_TASK": "Ajouter une nouvelle tâche",
-    "APP_WIDE_SHORTCUTS": "Raccourcis globaux (à l'échelle de l'application)",
-    "COLLAPSE_SUB_TASKS": "Réduire les sous-tâches",
-    "EXPAND_SUB_TASKS": "Développer les sous-tâches",
-    "FOCUS_LAST_ACTIVE_TASK": "Mettre au point la dernière tâche active",
-    "GLOBAL_SHOW_HIDE": "Afficher / masquer la super productivité",
-    "GLOBAL_TOGGLE_TASK_START": "Basculer le suivi du temps pour la dernière tâche active",
-    "GO_TO_DAILY_AGENDA": "Aller à l'agenda",
-    "GO_TO_FOCUS_MODE": "Aller au mode de mise au point",
-    "GO_TO_SETTINGS": "Aller aux paramètres",
-    "GO_TO_WORK_VIEW": "Aller au travail Voir",
-    "HELP": "<p>Vous pouvez configurer ici tous les raccourcis clavier.</p> <p>Cliquez sur l'entrée de texte et entrez la combinaison de clavier souhaitée. Appuyez sur Entrée pour enregistrer et sur Échap pour annuler.</p> <p>Il existe trois types de raccourcis:</p> <ul> <li> <strong>Raccourcis globaux:</strong> lorsque l'application est en cours d'exécution, elle déclenche l'action de toutes les autres applications. </li> <li> <strong>Raccourcis au niveau de l'application:</strong> se déclenchera à partir de chaque écran de l'application, mais pas si vous modifiez actuellement un champ de texte. </li> <li> <strong>Raccourcis au niveau des tâches:</strong> ils ne se déclenchent que si vous avez sélectionné une tâche à l'aide de la souris ou du clavier et déclenchent généralement une action spécifiquement liée à cette tâche. </li> </ul>",
-    "MOVE_TASK_DOWN": "Déplacer la tâche vers le bas de la liste",
-    "MOVE_TASK_UP": "Déplacer la tâche en haut de la liste",
-    "MOVE_TO_BACKLOG": "Déplacer une tâche en arriéré",
-    "MOVE_TO_TODAYS_TASKS": "Déplacer la tâche vers la liste des tâches de ce jour",
-    "OPEN_PROJECT_NOTES": "Afficher / masquer les notes de projet",
-    "SELECT_NEXT_TASK": "Sélectionner la tâche suivante",
-    "SELECT_PREVIOUS_TASK": "Sélectionner la tâche précédente",
-    "SYSTEM_SHORTCUTS": "Raccourcis globaux (à l'échelle du système)",
-    "TASK_ADD_SUB_TASK": "Ajouter une sous-tâche",
-    "TASK_DELETE": "Supprimer la tâche",
-    "TASK_EDIT_TITLE": "Editer le titre",
-    "TASK_OPEN_ESTIMATION_DIALOG": "Modifier l'estimation / le temps passé",
-    "TASK_SCHEDULE": "Planifier une tâche",
-    "TASK_SHORTCUTS": "les tâches",
-    "TASK_SHORTCUTS_INFO": "Les raccourcis suivants s'appliquent à la tâche actuellement sélectionnée (sélectionnée via l'onglet ou la souris).",
-    "TASK_TOGGLE_ADDITIONAL_INFO_OPEN": "Afficher / masquer les informations de tâches supplémentaires",
-    "TASK_TOGGLE_DONE": "Basculer Terminé",
-    "TITLE": "Raccourcis clavier",
-    "TOGGLE_BACKLOG": "Afficher / masquer le carnet de commandes",
-    "TOGGLE_BOOKMARKS": "Afficher / masquer la barre de favoris",
-    "TOGGLE_PLAY": "Démarrer / Arrêter la tâche",
-    "ZOOM_DEFAULT": "Zoom par défaut (bureau uniquement)",
-    "ZOOM_IN": "Zoom avant (bureau uniquement)",
-    "ZOOM_OUT": "Zoom arrière (bureau uniquement)"
-  },
-  "F_LANG": {
-    "AR": "Arabe",
-    "DE": "Allemand",
-    "EN": "Anglais",
-    "ES": "Espanol",
-    "FR": "français",
-    "JA": "japonais",
-    "KO": "coréen",
-    "LABEL": "S'il vous plaît sélectionner une langue",
-    "RU": "russe",
-    "TITLE": "La langue",
-    "TR": "Turc",
-    "ZH": "chinois"
-  },
-  "F_MISC": {
-    "HELP": "<p><strong>Vous ne voyez pas les notifications du bureau?</strong> Pour les fenêtres, vous pouvez vérifier Système> Notifications et actions et vérifier si les notifications requises ont été activées.</p>",
-    "IS_AUTO_MARK_PARENT_AS_DONE": "Marquer la tâche parent comme terminée lorsque toutes les sous-tâches sont terminées",
-    "IS_CONFIRM_BEFORE_EXIT": "Confirmez avant de quitter l'application",
-    "IS_DISABLE_REMIND_WHEN_FORGOT_TO_FINISH_DAY": "Désactiver le rappel du jour d'arrivée oublié",
-    "IS_HIDE_NAV": "Masquer la navigation jusqu'à ce que l'en-tête principal soit survolé (bureau uniquement)",
-    "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Notifier quand le temps estimé a été dépassé",
-    "TITLE": "Réglages divers"
-  },
-  "F_POMODORO": {
-    "BREAK_DURATION": "Durée des courts séjours",
-    "CYCLES_BEFORE_LONGER_BREAK": "Commencez une pause plus longue après X sessions de travail",
-    "DURATION": "Durée des séances de travail",
-    "HELP": "<p>La minuterie pomodoro peut être configurée via deux paramètres. La durée de chaque session de travail, la durée des pauses normales, le nombre de sessions de travail à exécuter avant le début d'une pause plus longue et la durée de cette pause plus longue.</p> <p>Vous pouvez également définir si vous souhaitez afficher vos distractions pendant vos pomodo.</p> <p>Le paramètre \"Suivi du temps de pause sur une pause pomodoro\" suit également vos pauses en tant que temps de travail consacré à une tâche. </p> <p>L'activation de \"Suspendre la session pomodoro en l'absence de tâche active\" suspend également la session pomodoro, lorsque vous suspendez une tâche.</p>",
-    "IS_ENABLED": "Activer le minuteur pomodoro",
-    "IS_MANUAL_CONTINUE": "Confirmez manuellement à partir de la prochaine session pomodoro",
-    "IS_PLAY_SOUND": "Jouer le son quand la session est terminée",
-    "IS_PLAY_SOUND_AFTER_BREAK": "Jouer du son quand la pause est faite",
-    "IS_PLAY_TICK": "Joue la tique toutes les secondes",
-    "IS_STOP_TRACKING_ON_BREAK": "Arrêter le suivi du temps pour la tâche en pause",
-    "LONGER_BREAK_DURATION": "Durée des pauses plus longues",
-    "TITLE": "Paramètres Pomodoro"
-  },
-  "F_TAKE_A_BREAK": {
-    "HELP": "<div> <p>vous permet de configurer un rappel récurrent lorsque vous avez travaillé pendant une durée déterminée sans prendre de pause.</p> <p>Vous pouvez modifier le message affiché. ${duration} sera remplacé par le temps passé sans pause.</p> </div>",
-    "IS_ENABLED": "Activer le rappel de pause",
-    "MESSAGE": "Prendre un message de pause",
-    "MIN_WORKING_TIME": "Déclencheur prend une notification de pause après que X ait travaillé sans une",
-    "TITLE": "Rappel de pause"
+    "IMPORT_FROM_FILE": "Importer depuis un fichier",
+    "S_ERR_INVALID_DATA": ""
   },
   "G": {
     "CANCEL": "annuler",
@@ -804,6 +707,121 @@
     "TITLE": "Titre",
     "UNDO": "annuler",
     "UPDATE": "Mettre à jour"
+  },
+  "GCF": {
+    "AUTO_BACKUPS": {
+      "HELP": "",
+      "LABEL_IS_ENABLED": "",
+      "TITLE": ""
+    },
+    "GOOGLE_DRIVE_SYNC": {
+      "HELP": "",
+      "TITLE": ""
+    },
+    "IDLE": {
+      "HELP": "",
+      "IS_ENABLE_IDLE_TIME_TRACKING": "",
+      "IS_ONLY_OPEN_IDLE_WHEN_CURRENT_TASK": "",
+      "IS_UN_TRACKED_IDLE_RESETS_BREAK_TIMER": "",
+      "MIN_IDLE_TIME": "",
+      "TITLE": ""
+    },
+    "IMEX": {
+      "HELP": "",
+      "TITLE": ""
+    },
+    "KEYBOARD": {
+      "ADD_NEW_NOTE": "",
+      "ADD_NEW_TASK": "",
+      "APP_WIDE_SHORTCUTS": "",
+      "COLLAPSE_SUB_TASKS": "",
+      "EXPAND_SUB_TASKS": "",
+      "FOCUS_LAST_ACTIVE_TASK": "",
+      "GLOBAL_SHOW_HIDE": "",
+      "GLOBAL_TOGGLE_TASK_START": "",
+      "GO_TO_DAILY_AGENDA": "",
+      "GO_TO_FOCUS_MODE": "",
+      "GO_TO_SETTINGS": "",
+      "GO_TO_WORK_VIEW": "",
+      "HELP": "",
+      "MOVE_TASK_DOWN": "",
+      "MOVE_TASK_UP": "",
+      "MOVE_TO_BACKLOG": "",
+      "MOVE_TO_TODAYS_TASKS": "",
+      "OPEN_PROJECT_NOTES": "",
+      "SELECT_NEXT_TASK": "",
+      "SELECT_PREVIOUS_TASK": "",
+      "SYSTEM_SHORTCUTS": "",
+      "TASK_ADD_SUB_TASK": "",
+      "TASK_DELETE": "",
+      "TASK_EDIT_TITLE": "",
+      "TASK_OPEN_ESTIMATION_DIALOG": "",
+      "TASK_SCHEDULE": "",
+      "TASK_SHORTCUTS": "",
+      "TASK_SHORTCUTS_INFO": "",
+      "TASK_TOGGLE_ADDITIONAL_INFO_OPEN": "",
+      "TASK_TOGGLE_DONE": "",
+      "TITLE": "",
+      "TOGGLE_BACKLOG": "",
+      "TOGGLE_BOOKMARKS": "",
+      "TOGGLE_PLAY": "",
+      "ZOOM_DEFAULT": "",
+      "ZOOM_IN": "",
+      "ZOOM_OUT": ""
+    },
+    "LANG": {
+      "AR": "",
+      "DE": "",
+      "EN": "",
+      "ES": "",
+      "FR": "",
+      "JA": "",
+      "KO": "",
+      "LABEL": "",
+      "RU": "",
+      "TITLE": "",
+      "TR": "",
+      "ZH": ""
+    },
+    "MISC": {
+      "HELP": "",
+      "IS_AUTO_MARK_PARENT_AS_DONE": "",
+      "IS_CONFIRM_BEFORE_EXIT": "",
+      "IS_DISABLE_REMIND_WHEN_FORGOT_TO_FINISH_DAY": "",
+      "IS_HIDE_NAV": "",
+      "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "",
+      "TITLE": ""
+    },
+    "POMODORO": {
+      "BREAK_DURATION": "",
+      "CYCLES_BEFORE_LONGER_BREAK": "",
+      "DURATION": "",
+      "HELP": "",
+      "IS_ENABLED": "",
+      "IS_MANUAL_CONTINUE": "",
+      "IS_PLAY_SOUND": "",
+      "IS_PLAY_SOUND_AFTER_BREAK": "",
+      "IS_PLAY_TICK": "",
+      "IS_STOP_TRACKING_ON_BREAK": "",
+      "LONGER_BREAK_DURATION": "",
+      "TITLE": ""
+    },
+    "TAKE_A_BREAK": {
+      "HELP": "",
+      "IS_ENABLED": "",
+      "MESSAGE": "",
+      "MIN_WORKING_TIME": "",
+      "TITLE": ""
+    }
+  },
+  "GLOBAL_SNACK": {
+    "COPY_TO_CLIPPBOARD": "",
+    "ERR_COMPRESSION": "",
+    "ERR_DB_CLEAR": "",
+    "ERR_DB_DELETE": "",
+    "ERR_DB_LOAD": "",
+    "ERR_DB_SAVE": "",
+    "RUNNING_X": ""
   },
   "MH": {
     "ADD_NEW_TASK": "Ajouter une nouvelle tâche",
@@ -895,6 +913,24 @@
       "IMPORTING": "Importer des données",
       "SUCCESS": "Données importées"
     }
+  },
+  "THEMES": {
+    "SELECT_THEME": "",
+    "amber": "",
+    "blue": "",
+    "blue-grey": "",
+    "cyan": "",
+    "deep-orange": "",
+    "deep-purple": "",
+    "green": "",
+    "indigo": "",
+    "light-blue": "",
+    "light-green": "",
+    "lime": "",
+    "pink": "",
+    "purple": "",
+    "teal": "",
+    "yellow": ""
   },
   "V": {
     "E_1TO10": "Veuillez entrer une valeur entre 1 et 10",

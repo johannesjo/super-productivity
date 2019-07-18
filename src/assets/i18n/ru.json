@@ -169,12 +169,6 @@
         "SUCCESS": "Google Drive: успешно сохраненная резервная копия",
         "SYNCING": "Google Диск: Синхронизация"
       },
-      "S_API": {
-        "ERR": "Ошибка GoogleApi: {{errStr}}",
-        "ERR_NO_FILE_ID": "GoogleApi: идентификатор файла не указан",
-        "ERR_NO_FILE_NAME": "GoogleApi: имя файла не указано",
-        "SUCCESS_LOGIN": "GoogleApi: вход выполнен успешно"
-      },
       "SYNC_CFG": {
         "AUTO_LOGIN": "Автоматический вход при запуске приложения",
         "AUTO_SYNC": "Автоматическая синхронизация данных с удаленным",
@@ -187,6 +181,12 @@
         "SYNC_FILE_NAME": "Синхронизировать имя файла",
         "SYNC_INTERVAL": "Интервал синхронизации",
         "UPDATE_SYNC_FILE": "Обновить файл синхронизации"
+      },
+      "S_API": {
+        "ERR": "Ошибка GoogleApi: {{errStr}}",
+        "ERR_NO_FILE_ID": "GoogleApi: идентификатор файла не указан",
+        "ERR_NO_FILE_NAME": "GoogleApi: имя файла не указано",
+        "SUCCESS_LOGIN": "GoogleApi: вход выполнен успешно"
       }
     },
     "JIRA": {
@@ -291,6 +291,7 @@
         "WRITE_A_COMMENT": "Написать комментарий"
       },
       "S": {
+        "ADDED_WORKLOG_FOR": "",
         "EXTENSION_NOT_LOADED": "Расширение Super Productivity Extension не загружено. Перезагрузка страницы может помочь",
         "IMPORTED_MULTIPLE_ISSUES": "Jira: импортировано {{issuesLength}} новых проблем из jira в отставание",
         "IMPORTED_SINGLE_ISSUE": "Jira: импортированная проблема \"{{issueText}}\" из jira в отставание",
@@ -302,6 +303,8 @@
         "NO_VALID_TRANSITION": "Jira: Не настроен правильный переход",
         "POLLING": "Jira: опрос изменений для вопросов",
         "TIMED_OUT": "Jira: время запроса истекло",
+        "TRANSITION": "",
+        "TRANSITIONS_LOADED": "",
         "TRANSITION_SUCCESS": "Jira: Задайте вопрос {{issueKey}} в <strong>{{chosenTransition}}</strong>",
         "UNABLE_TO_REASSIGN": "Jira: Невозможно переназначить билет самому себе, потому что вы не указали имя пользователя. Пожалуйста, посетите настройки."
       },
@@ -391,10 +394,10 @@
         "BREAK_X_START": "Помодоро: Перерыв {{nr}} начался!",
         "SESSION_X_START": "Помодоро: Сессия {{nr}} началась!"
       },
-      "SKIP_BREAK": "Пропустить перерыв",
       "S": {
         "SESSION_X_START": "Помодоро: Сессия {{nr}} началась!"
-      }
+      },
+      "SKIP_BREAK": "Пропустить перерыв"
     },
     "PROCRASTINATION": {
       "BACK_TO_WORK": "Вернуться к работе!",
@@ -578,6 +581,8 @@
       },
       "S": {
         "DELETED": "Удаленное задание \"{{title}}\"",
+        "FOUND_MOVE_FROM_BACKLOG": "",
+        "FOUND_RESTORE_FROM_ARCHIVE": "",
         "REMINDER_ADDED": "Запланированное задание \"{{title}}\"",
         "REMINDER_DELETED": "Удалено напоминание для задания",
         "REMINDER_UPDATED": "Обновленное напоминание для задачи \"{{title}}\""
@@ -666,6 +671,7 @@
           "TITLES_AND_SUB_TASK_TITLES": "Названия и названия подзадач",
           "WORKLOG": "Журнал событий"
         },
+        "OPTIONS": "",
         "ROUND_END_TIME_TO": "Время окончания раунда до",
         "ROUND_START_TIME_TO": "Время начала раунда до",
         "ROUND_TIME_WORKED_TO": "Время раунда работало на",
@@ -681,111 +687,8 @@
   },
   "FILE_IMEX": {
     "EXPORT_DATA": "Экспорт данных",
-    "IMPORT_FROM_FILE": "Импорт из файла"
-  },
-  "F_AUTO_BACKUPS": {
-    "HELP": "Автоматически сохраните все данные в папке вашего приложения, чтобы они были готовы на случай, если что-то пойдет не так",
-    "LABEL_IS_ENABLED": "Включить автоматическое резервное копирование",
-    "TITLE": "Автоматическое резервное копирование"
-  },
-  "F_GOOGLE_DRIVE_SYNC": {
-    "HELP": "Здесь вы можете настроить свое приложение на автоматическую синхронизацию с файлом на диске Google. Все данные будут сохранены в незашифрованном виде, поэтому убедитесь, что вы случайно не передали этот файл кому-либо.",
-    "TITLE": "Синхронизация через Google Drive"
-  },
-  "F_IDLE": {
-    "HELP": "<div><p>Когда обработка простоя включена, через определенное время откроется диалоговое окно, чтобы проверить, выполняет ли и какое задание вы хотите отслеживать, когда вы простаивали.</p></div>",
-    "IS_ENABLE_IDLE_TIME_TRACKING": "Включить простую обработку",
-    "IS_ONLY_OPEN_IDLE_WHEN_CURRENT_TASK": "Вызывать диалог простоя только тогда, когда выбрана текущая задача",
-    "IS_UN_TRACKED_IDLE_RESETS_BREAK_TIMER": "Неотслеживаемый простой сбрасывает таймер перерыва",
-    "MIN_IDLE_TIME": "Триггер холостого хода после X",
-    "TITLE": "Обработка холостого хода"
-  },
-  "F_IMEX": {
-    "HELP": "<p>Здесь вы можете экспортировать все свои данные как <strong>JSON</strong> для резервных копий, а также использовать их в другом контексте (например, вы можете экспортировать свои проекты в браузер и импортировать их в настольную версию). ). </p> <p>При импорте ожидается, что допустимый JSON будет скопирован в текстовую область. <strong>ПРИМЕЧАНИЕ. После нажатия кнопки импорта все ваши текущие настройки и данные будут перезаписаны!</strong></p>",
-    "TITLE": "Импорт Экспорт"
-  },
-  "F_KEYBOARD": {
-    "ADD_NEW_NOTE": "Добавить новую заметку",
-    "ADD_NEW_TASK": "Добавить новую задачу",
-    "APP_WIDE_SHORTCUTS": "Глобальные ярлыки (широкое применение)",
-    "COLLAPSE_SUB_TASKS": "Свернуть подзадачи",
-    "EXPAND_SUB_TASKS": "Развернуть подзадачи",
-    "FOCUS_LAST_ACTIVE_TASK": "Фокус последней активной задачи",
-    "GLOBAL_SHOW_HIDE": "Показать / Скрыть Супер Производительность",
-    "GLOBAL_TOGGLE_TASK_START": "Переключить отслеживание времени для последней активной задачи",
-    "GO_TO_DAILY_AGENDA": "Перейти к повестке дня",
-    "GO_TO_FOCUS_MODE": "Перейти в режим фокусировки",
-    "GO_TO_SETTINGS": "Перейдите в настройки",
-    "GO_TO_WORK_VIEW": "Перейти к рабочему виду",
-    "HELP": "<p>Здесь вы можете настроить все сочетания клавиш.</p> <p>Нажмите на ввод текста и введите нужную комбинацию клавиш. Нажмите Enter, чтобы сохранить, и Escape, чтобы прервать.</p> <p>Существует три типа сочетаний клавиш:</p> <ul> <li> <strong>Глобальные сочетания клавиш:</strong> Когда приложение запущено, оно будет запускать действие из любого другого приложения. </li> <li> <strong>Ярлыки уровня приложения:</strong> Срабатывает со всех экранов приложения, но не при редактировании текстового поля. </li> <li> <strong>Ярлыки на уровне задач:</strong> Они сработают только в том случае, если вы выбрали задачу с помощью мыши или клавиатуры, и, как правило, запускают действие, связанное именно с этой задачей. </li> </ul>",
-    "MOVE_TASK_DOWN": "Переместить задачу вниз в списке",
-    "MOVE_TASK_UP": "Переместить задачу вверх в списке",
-    "MOVE_TO_BACKLOG": "Переместить задачу в список задач",
-    "MOVE_TO_TODAYS_TASKS": "Переместить задачу в список задач на сегодня",
-    "OPEN_PROJECT_NOTES": "Показать / Скрыть заметки проекта",
-    "SELECT_NEXT_TASK": "Выберите следующую задачу",
-    "SELECT_PREVIOUS_TASK": "Выберите предыдущее задание",
-    "SYSTEM_SHORTCUTS": "Глобальные ярлыки (общесистемные)",
-    "TASK_ADD_SUB_TASK": "Добавить подзадачу",
-    "TASK_DELETE": "Удалить задачу",
-    "TASK_EDIT_TITLE": "Изменить заголовок",
-    "TASK_OPEN_ESTIMATION_DIALOG": "Изменить оценку / затраченное время",
-    "TASK_SCHEDULE": "Расписание задачи",
-    "TASK_SHORTCUTS": "задачи",
-    "TASK_SHORTCUTS_INFO": "Следующие сочетания клавиш применяются для текущей выбранной задачи (выбирается с помощью вкладки или мыши).",
-    "TASK_TOGGLE_ADDITIONAL_INFO_OPEN": "Показать / Скрыть дополнительную информацию о задании",
-    "TASK_TOGGLE_DONE": "Переключить Готово",
-    "TITLE": "Горячие клавиши",
-    "TOGGLE_BACKLOG": "Показать / скрыть задание",
-    "TOGGLE_BOOKMARKS": "Показать / Скрыть панель закладок",
-    "TOGGLE_PLAY": "Запустить / остановить задачу",
-    "ZOOM_DEFAULT": "Масштаб по умолчанию (только для рабочего стола)",
-    "ZOOM_IN": "Увеличить (только для рабочего стола)",
-    "ZOOM_OUT": "Уменьшить (только для рабочего стола)"
-  },
-  "F_LANG": {
-    "AR": "арабский",
-    "DE": "Немецкий",
-    "EN": "английский",
-    "ES": "испанский",
-    "FR": "французский",
-    "JA": "японский язык",
-    "KO": "корейский язык",
-    "LABEL": "Пожалуйста, выберите язык",
-    "RU": "русский",
-    "TITLE": "язык",
-    "TR": "турецкий",
-    "ZH": "китайский язык"
-  },
-  "F_MISC": {
-    "HELP": "<p><strong>Не видите уведомления на рабочем столе?</strong> Для окон вы можете проверить Система> Уведомления и действия и проверить, включены ли необходимые уведомления.</p>",
-    "IS_AUTO_MARK_PARENT_AS_DONE": "Отметить родительскую задачу как выполненную, когда все подзадачи выполнены",
-    "IS_CONFIRM_BEFORE_EXIT": "Подтвердите перед выходом из приложения",
-    "IS_DISABLE_REMIND_WHEN_FORGOT_TO_FINISH_DAY": "Отключить напоминание о забытом финишном дне",
-    "IS_HIDE_NAV": "Скрыть навигацию, пока основной заголовок не наведен (только на рабочем столе)",
-    "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Уведомить, когда оценка времени была превышена",
-    "TITLE": "Разные настройки"
-  },
-  "F_POMODORO": {
-    "BREAK_DURATION": "Продолжительность коротких перерывов",
-    "CYCLES_BEFORE_LONGER_BREAK": "Начните более длительный перерыв после X рабочих сессий",
-    "DURATION": "Продолжительность рабочих сессий",
-    "HELP": "<p>Таймер Pomodoro можно настроить с помощью нескольких настроек. Продолжительность каждого рабочего сеанса, продолжительность обычных перерывов, количество рабочих сессий, которые должны быть выполнены до запуска более длительного перерыва, и продолжительность этого более длительного перерыва.</p> <p>Вы также можете установить, хотите ли вы отображать ваши отвлекающие моменты во время перерывов на помодоро.</p> <p>Параметр «Отслеживание времени паузы при pomodoro break» также будет отслеживать ваши перерывы как рабочее время, затраченное на задачу. </p> <p>Включение «Приостановить сессию pomodoro, когда нет активной задачи» также приостановит сессию pomodoro, когда вы приостановите задачу.</p>",
-    "IS_ENABLED": "Включить таймер pomodoro",
-    "IS_MANUAL_CONTINUE": "Вручную подтвердить начало следующей сессии pomodoro",
-    "IS_PLAY_SOUND": "Воспроизвести звук, когда сессия завершена",
-    "IS_PLAY_SOUND_AFTER_BREAK": "Воспроизвести звук, когда перерыв сделан",
-    "IS_PLAY_TICK": "Слушать тик звук каждую секунду",
-    "IS_STOP_TRACKING_ON_BREAK": "Остановить время отслеживания для задачи на перерыв",
-    "LONGER_BREAK_DURATION": "Продолжительность более длительных перерывов",
-    "TITLE": "Настройки Помодоро"
-  },
-  "F_TAKE_A_BREAK": {
-    "HELP": "<div> <p>Позволяет настроить повторяющееся напоминание, если вы работали в течение определенного времени без перерыва.</p> <p>Вы можете изменить отображаемое сообщение. ${duration} будет заменено временем, проведенным без перерыва.</p> </div>",
-    "IS_ENABLED": "Включить напоминание о перерыве",
-    "MESSAGE": "Сделать перерыв сообщение",
-    "MIN_WORKING_TIME": "Триггер уведомление о перерыве после X работает без",
-    "TITLE": "Перерыв Напоминание"
+    "IMPORT_FROM_FILE": "Импорт из файла",
+    "S_ERR_INVALID_DATA": ""
   },
   "G": {
     "CANCEL": "отменить",
@@ -804,6 +707,121 @@
     "TITLE": "заглавие",
     "UNDO": "расстегивать",
     "UPDATE": "Обновить"
+  },
+  "GCF": {
+    "AUTO_BACKUPS": {
+      "HELP": "",
+      "LABEL_IS_ENABLED": "",
+      "TITLE": ""
+    },
+    "GOOGLE_DRIVE_SYNC": {
+      "HELP": "",
+      "TITLE": ""
+    },
+    "IDLE": {
+      "HELP": "",
+      "IS_ENABLE_IDLE_TIME_TRACKING": "",
+      "IS_ONLY_OPEN_IDLE_WHEN_CURRENT_TASK": "",
+      "IS_UN_TRACKED_IDLE_RESETS_BREAK_TIMER": "",
+      "MIN_IDLE_TIME": "",
+      "TITLE": ""
+    },
+    "IMEX": {
+      "HELP": "",
+      "TITLE": ""
+    },
+    "KEYBOARD": {
+      "ADD_NEW_NOTE": "",
+      "ADD_NEW_TASK": "",
+      "APP_WIDE_SHORTCUTS": "",
+      "COLLAPSE_SUB_TASKS": "",
+      "EXPAND_SUB_TASKS": "",
+      "FOCUS_LAST_ACTIVE_TASK": "",
+      "GLOBAL_SHOW_HIDE": "",
+      "GLOBAL_TOGGLE_TASK_START": "",
+      "GO_TO_DAILY_AGENDA": "",
+      "GO_TO_FOCUS_MODE": "",
+      "GO_TO_SETTINGS": "",
+      "GO_TO_WORK_VIEW": "",
+      "HELP": "",
+      "MOVE_TASK_DOWN": "",
+      "MOVE_TASK_UP": "",
+      "MOVE_TO_BACKLOG": "",
+      "MOVE_TO_TODAYS_TASKS": "",
+      "OPEN_PROJECT_NOTES": "",
+      "SELECT_NEXT_TASK": "",
+      "SELECT_PREVIOUS_TASK": "",
+      "SYSTEM_SHORTCUTS": "",
+      "TASK_ADD_SUB_TASK": "",
+      "TASK_DELETE": "",
+      "TASK_EDIT_TITLE": "",
+      "TASK_OPEN_ESTIMATION_DIALOG": "",
+      "TASK_SCHEDULE": "",
+      "TASK_SHORTCUTS": "",
+      "TASK_SHORTCUTS_INFO": "",
+      "TASK_TOGGLE_ADDITIONAL_INFO_OPEN": "",
+      "TASK_TOGGLE_DONE": "",
+      "TITLE": "",
+      "TOGGLE_BACKLOG": "",
+      "TOGGLE_BOOKMARKS": "",
+      "TOGGLE_PLAY": "",
+      "ZOOM_DEFAULT": "",
+      "ZOOM_IN": "",
+      "ZOOM_OUT": ""
+    },
+    "LANG": {
+      "AR": "",
+      "DE": "",
+      "EN": "",
+      "ES": "",
+      "FR": "",
+      "JA": "",
+      "KO": "",
+      "LABEL": "",
+      "RU": "",
+      "TITLE": "",
+      "TR": "",
+      "ZH": ""
+    },
+    "MISC": {
+      "HELP": "",
+      "IS_AUTO_MARK_PARENT_AS_DONE": "",
+      "IS_CONFIRM_BEFORE_EXIT": "",
+      "IS_DISABLE_REMIND_WHEN_FORGOT_TO_FINISH_DAY": "",
+      "IS_HIDE_NAV": "",
+      "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "",
+      "TITLE": ""
+    },
+    "POMODORO": {
+      "BREAK_DURATION": "",
+      "CYCLES_BEFORE_LONGER_BREAK": "",
+      "DURATION": "",
+      "HELP": "",
+      "IS_ENABLED": "",
+      "IS_MANUAL_CONTINUE": "",
+      "IS_PLAY_SOUND": "",
+      "IS_PLAY_SOUND_AFTER_BREAK": "",
+      "IS_PLAY_TICK": "",
+      "IS_STOP_TRACKING_ON_BREAK": "",
+      "LONGER_BREAK_DURATION": "",
+      "TITLE": ""
+    },
+    "TAKE_A_BREAK": {
+      "HELP": "",
+      "IS_ENABLED": "",
+      "MESSAGE": "",
+      "MIN_WORKING_TIME": "",
+      "TITLE": ""
+    }
+  },
+  "GLOBAL_SNACK": {
+    "COPY_TO_CLIPPBOARD": "",
+    "ERR_COMPRESSION": "",
+    "ERR_DB_CLEAR": "",
+    "ERR_DB_DELETE": "",
+    "ERR_DB_LOAD": "",
+    "ERR_DB_SAVE": "",
+    "RUNNING_X": ""
   },
   "MH": {
     "ADD_NEW_TASK": "Добавить новую задачу",
@@ -895,6 +913,24 @@
       "IMPORTING": "импорт данных",
       "SUCCESS": "Данные импортированы"
     }
+  },
+  "THEMES": {
+    "SELECT_THEME": "",
+    "amber": "",
+    "blue": "",
+    "blue-grey": "",
+    "cyan": "",
+    "deep-orange": "",
+    "deep-purple": "",
+    "green": "",
+    "indigo": "",
+    "light-blue": "",
+    "light-green": "",
+    "lime": "",
+    "pink": "",
+    "purple": "",
+    "teal": "",
+    "yellow": ""
   },
   "V": {
     "E_1TO10": "Пожалуйста, введите значение от 1 до 10",
