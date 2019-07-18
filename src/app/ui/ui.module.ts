@@ -68,6 +68,7 @@ import {MyHammerConfig} from '../../hammer-config.class';
 import {registerTranslateExtension} from './formly-translate-extension/formly-translate-extension';
 import {FormlyTranslatedTemplateComponent} from './formly-translated-template/formly-translated-template.component';
 import {MatMomentDateModule} from '@angular/material-moment-adapter';
+import {FormlyValidationService} from './formly-translate-extension/formly-validation.service';
 
 
 @NgModule({
@@ -89,10 +90,6 @@ import {MatMomentDateModule} from '@angular/material-moment-adapter';
       extras: {
         immutable: true
       },
-      validationMessages: [
-        {name: 'required', message: 'This field is required'},
-        {name: 'pattern', message: 'Invalid input'},
-      ],
     }),
     FormlyMaterialModule,
 
@@ -254,7 +251,12 @@ import {MatMomentDateModule} from '@angular/material-moment-adapter';
   ],
 })
 export class UiModule {
-  constructor(private _markdownService: MarkdownService) {
+  constructor(
+    private _markdownService: MarkdownService,
+    private _formlyValidationService: FormlyValidationService,
+  ) {
+    this._formlyValidationService.init();
+
     const linkRenderer = _markdownService.renderer.link;
     _markdownService.renderer.link = (href, title, text) => {
       const html = linkRenderer.call(_markdownService.renderer, href, title, text);
