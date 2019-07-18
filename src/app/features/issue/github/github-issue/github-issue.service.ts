@@ -123,7 +123,7 @@ export class GithubIssueService {
         translateParams: {
           issueText: this._formatIssueTitle(issue.number, issue.title)
         },
-        msg: T.F.GITHUB.SNACK.MANUAL_UPDATE_ISSUE_SUCCESS,
+        msg: T.F.GITHUB.S.MANUAL_UPDATE_ISSUE_SUCCESS,
       });
     });
   }
@@ -145,7 +145,7 @@ export class GithubIssueService {
               translateParams: {
                 issueText: this._formatIssueTitle(matchingNewIssue.number, matchingNewIssue.title)
               },
-              msg: T.F.GITHUB.SNACK.ISSUE_UPDATE,
+              msg: T.F.GITHUB.S.ISSUE_UPDATE,
             });
           } else if (isIssueChanged && isNotify) {
             this._snackService.open({
@@ -153,7 +153,7 @@ export class GithubIssueService {
               translateParams: {
                 issueText: this._formatIssueTitle(matchingNewIssue.number, matchingNewIssue.title)
               },
-              msg: T.F.GITHUB.SNACK.IMPORTED_SINGLE_ISSUE,
+              msg: T.F.GITHUB.S.IMPORTED_SINGLE_ISSUE,
             });
           }
 
@@ -169,8 +169,8 @@ export class GithubIssueService {
             translateParams: {
               issueText: this._formatIssueTitle(oldIssue.number, oldIssue.title)
             },
-            msg: T.F.GITHUB.SNACK.ISSUE_DELETED_OR_CLOSED,
-            actionStr: T.F.GITHUB.SNACK.SHOW_ISSUE_BTN,
+            msg: T.F.GITHUB.S.ISSUE_DELETED_OR_CLOSED,
+            actionStr: T.F.GITHUB.S.SHOW_ISSUE_BTN,
             actionFn: () => {
               this._fineWithDeletionIssueIds.push(oldIssue.id);
               window.open(oldIssue.url, '_blank');

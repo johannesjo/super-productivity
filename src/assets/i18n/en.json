@@ -64,7 +64,7 @@
       }
     },
     "CONFIG": {
-      "SNACK": {
+      "S": {
         "UPDATE_SECTION": "Updated settings for <strong>{{sectionKey}}</strong>"
       }
     },
@@ -92,7 +92,7 @@
         "SUMMARY": "Summary",
         "WRITE_A_COMMENT": "Write a comment"
       },
-      "SNACK": {
+      "S": {
         "ERR_NETWORK": "Github: Request failed because of a client side network error",
         "ERR_NOT_CONFIGURED": "Github: Is not properly configured",
         "ERR_REQUEST": "Github: API returned {{statusCode}}. {{errorMsg}}",
@@ -155,10 +155,10 @@
         "ROUND_START_TIME_TO": "Round start time to",
         "ROUND_TIME_WORKED_TO": "Round time worked to",
         "SAVE_ROW": "Save row",
-        "SNACK_EQUAL_VALUES": "Current values and the last saved row have equal values, that is probably not what you want.",
-        "SNACK_ROW_APPENDED": "Row successfully appended"
+        "S_EQUAL_VALUES": "Current values and the last saved row have equal values, that is probably not what you want.",
+        "S_ROW_APPENDED": "Row successfully appended"
       },
-      "SNACKS": {
+      "S": {
         "DOWNLOADING_UPDATE": "Google Drive: There is a remote update! Downloading...",
         "ERROR": "Google Drive – Error: {{errTxt}}",
         "ERROR_INITIAL_IMPORT": "Google Drive: Error while trying to import data initially",
@@ -169,7 +169,7 @@
         "SUCCESS": "Google Drive: Successfully saved backup",
         "SYNCING": "Google Drive: Syncing"
       },
-      "SNACK_API": {
+      "S_API": {
         "ERR": "GoogleApi Error: {{errStr}}",
         "ERR_NO_FILE_ID": "GoogleApi: No file id specified",
         "ERR_NO_FILE_NAME": "GoogleApi: No file name specified",
@@ -290,7 +290,7 @@
         "WORKLOG": "Worklog",
         "WRITE_A_COMMENT": "Write a comment"
       },
-      "SNACK": {
+      "S": {
         "ADDED_WORKLOG_FOR": "Jira: Added worklog for {{issueKey}}",
         "EXTENSION_NOT_LOADED": "Super Productivity Extension not loaded. Reloading the page might help",
         "IMPORTED_MULTIPLE_ISSUES": "Jira: Imported {{issuesLength}} new issues from jira to backlog",
@@ -347,7 +347,7 @@
         "PRODUCTIVITY": "How efficient did you work?",
         "PRODUCTIVITY_HINT": "1: Haven't even started – 10: Enormously efficient"
       },
-      "SNACK": {
+      "S": {
         "SAVE_METRIC": "Metric successfully saved"
       }
     },
@@ -378,7 +378,7 @@
         "ENABLE_PARSE": "Enable markdown parse"
       },
       "REMOVE_REMINDER": "Remove reminder",
-      "SNACK": {
+      "S": {
         "ADDED_REMINDER": "Added reminder for note",
         "DELETED_REMINDER": "Deleted reminder for note",
         "UPDATED_REMINDER": "Updated reminder for note"
@@ -395,7 +395,7 @@
         "SESSION_X_START": "Pomodoro: Session {{nr}} started!"
       },
       "SKIP_BREAK": "Skip break",
-      "SNACK": {
+      "S": {
         "SESSION_X_START": "Pomodoro: Session {{nr}} started!"
       }
     },
@@ -459,7 +459,7 @@
         "L_TITLE": "Title",
         "TITLE": "Project Settings & Theme"
       },
-      "SNACK": {
+      "S": {
         "ARCHIVED": "Archived Project",
         "CREATED": "Created project <strong>{{title}}</strong>. You can select it from the menu on the top left.",
         "DELETED": "Deleted Project",
@@ -471,7 +471,7 @@
       }
     },
     "REMINDER": {
-      "SNACK_REMINDER_ERR": "Error for reminder interface"
+      "S_REMINDER_ERR": "Error for reminder interface"
     },
     "SIMPLE_TASK_EXPORT": {
       "CLOSE": "Close",
@@ -685,7 +685,7 @@
   "FILE_IMEX": {
     "EXPORT_DATA": "Export Data",
     "IMPORT_FROM_FILE": "Import from file",
-    "SNACK_ERR_INVALID_DATA": "Import failed: Invalid JSON"
+    "S_ERR_INVALID_DATA": "Import failed: Invalid JSON"
   },
   "F_AUTO_BACKUPS": {
     "HELP": "Auto save all data to your app folder in order to have it ready in case something goes wrong.",
@@ -902,7 +902,7 @@
     "GITHUB_CONFIGURED": "Github Integration Configured",
     "IMPORT_FROM_FILE": "Import from file",
     "JIRA_CONFIGURED": "Jira Integration Configured",
-    "SNACK_INVALID_JSON": "Invalid json for project file",
+    "S_INVALID_JSON": "Invalid json for project file",
     "TITLE": "Project Overview",
     "UN_ARCHIVE_PROJECT": "Unarchive Project"
   },

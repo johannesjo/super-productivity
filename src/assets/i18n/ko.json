@@ -1,0 +1,917 @@
+{
+  "APP": {
+    "B_INSTALL": {
+      "IGNORE": "무시",
+      "INSTALL": "설치",
+      "MSG": "PWA로 Super Productivity를 설치 하시겠습니까?"
+    },
+    "UPDATE_WEB_APP": "새 버전을 사용할 수 있습니다. 새 버전을로드 하시겠습니까?"
+  },
+  "BL": {
+    "FROM_OTHER_PROJECTS": "다른 프로젝트에서",
+    "NO_SCHEDULED": "현재 예약 된 작업이 없습니다. 작업 컨텍스트 메뉴에서 \"작업 예약\"을 선택하여 작업을 예약 할 수 있습니다. 그것을 열려면 작업 오른쪽의 작은 점 3 개를 클릭하십시오.",
+    "NO_TASKS": "현재 백 로그에 작업이 없습니다.",
+    "SCHEDULED": "예정",
+    "TITLE": "백 로그"
+  },
+  "DATETIME_INPUT": {
+    "IN": " {{time}}에",
+    "TOMORROW": "내일 {{time}}"
+  },
+  "F": {
+    "ATTACHMENT": {
+      "DIALOG_EDIT": {
+        "ADD_ATTACHMENT": "첨부 파일 추가",
+        "EDIT_ATTACHMENT": "첨부 파일 편집",
+        "LABELS": {
+          "FILE": "파일 경로",
+          "IMG": "영상",
+          "LINK": "URL"
+        },
+        "SELECT_TYPE": "유형 선택",
+        "TYPES": {
+          "FILE": "파일 (기본 시스템 앱에서 열림)",
+          "IMG": "이미지 (미리보기 이미지로 표시)",
+          "LINK": "링크 (브라우저에서 열림)"
+        }
+      },
+      "LIST": {
+        "NO_ATTACHMENTS": "현재 첨부 파일이 없습니다."
+      }
+    },
+    "BOOKMARK": {
+      "BAR": {
+        "DROP": "책갈피를 추가하려면 여기로 끌어다 놓으십시오.",
+        "NO_BOOKMARKS": "프로젝트 북마크가 없습니다. 끌어서 놓기 또는 '더하기'버튼을 클릭하여 추가하십시오."
+      },
+      "DIALOG_EDIT": {
+        "ADD_BOOKMARK": "북마크에 추가하다",
+        "EDIT_BOOKMARK": "북마크 편집",
+        "LABELS": {
+          "COMMAND": "명령",
+          "FILE": "파일 경로",
+          "IMG": "영상",
+          "LINK": "URL"
+        },
+        "SELECT_ICON": "아이콘 선택",
+        "SELECT_TYPE": "유형 선택",
+        "TYPES": {
+          "COMMAND": "명령 (사용자 지정 셸 명령)",
+          "FILE": "파일 (기본 시스템 앱에서 열림)",
+          "IMG": "이미지 (미리보기 이미지로 표시)",
+          "LINK": "링크 (브라우저에서 열림)"
+        }
+      }
+    },
+    "CONFIG": {
+      "S": {
+        "UPDATE_SECTION": " <strong>{{sectionKey}}의 업데이트 된 설정</strong>"
+      }
+    },
+    "GITHUB": {
+      "DIALOG_INITIAL": {
+        "TITLE": "프로젝트를위한 Github 설정"
+      },
+      "FORM": {
+        "IS_AUTO_ADD_TO_BACKLOG": "Github의 미해결 문제를 백 로그에 자동으로 추가합니다.",
+        "IS_AUTO_POLL": "변경 사항에 대해 가져온 git 문제를 자동으로 폴링합니다.",
+        "IS_SEARCH_ISSUES_FROM_GITHUB": "새 작업을 추가 할 때 git의 제안 사항을 제안으로 표시합니다.",
+        "REPO": "추적하고자하는 git 저장소의 \"username / repositoryName\""
+      },
+      "FORM_SECTION": {
+        "HELP": "",
+        "TITLE": "기둥"
+      },
+      "ISSUE_CONTENT": {
+        "ASSIGNEE": "양수인",
+        "AT": "...에서",
+        "DESCRIPTION": "기술",
+        "LABELS": "레이블",
+        "MARK_AS_CHECKED": "체크 된대로 업데이트 표시",
+        "STATUS": "지위",
+        "SUMMARY": "개요",
+        "WRITE_A_COMMENT": "의견 쓰기"
+      },
+      "S": {
+        "ERR_NETWORK": "Github : 클라이언트 측 네트워크 오류 때문에 요청하지 못했습니다.",
+        "ERR_NOT_CONFIGURED": "Github : 제대로 구성되지 않았습니다.",
+        "ERR_REQUEST": "Github : API가 {{statusCode}}을 (를) 반환했습니다. {{errorMsg}}",
+        "IMPORTED_MULTIPLE_ISSUES": "Github : git에서 새 백 로그로 {{issuesLength}} 개의 새 발행물을 가져 왔습니다.",
+        "IMPORTED_SINGLE_ISSUE": "Github : git에서 백 로그로 가져온 문제 \"{{issueText}}\"",
+        "ISSUE_DELETED_OR_CLOSED": "Github : git에서 \"{{issueText}}\"이 삭제되거나 닫힌 것 같습니다.",
+        "ISSUE_UPDATE": "Github : \"{{issueText}}\"에 대한 데이터가 업데이트되었습니다.",
+        "MANUAL_UPDATE_ISSUE_SUCCESS": "Github : \"{{issueText}}\"에 대한 데이터가 업데이트되었습니다.",
+        "MISSING_ISSUE_DATA": "Github : 누락 된 문제 데이터가있는 작업이 발견되었습니다. 다시로드 중입니다.",
+        "NEW_COMMENT": "Github : \"{{issueText}}\"에 대한 새로운 설명",
+        "POLLING": "Github : 문제에 대한 폴링 변경 사항",
+        "SHOW_ISSUE_BTN": "보여줘"
+      }
+    },
+    "GOOGLE": {
+      "BANNER": {
+        "AUTH_FAIL": "GoogleApi : 인증에 실패하여 다시 로그인하십시오!"
+      },
+      "DIALOG": {
+        "CREATE_SYNC_FILE": "Google 드라이브 : <strong>\"{{fileName}}\"</strong> 이름의 파일이 없습니다. <strong>Google 드라이브의 동기화 파일로</strong> 파일을 만드시겠습니까?",
+        "USE_EXISTING_SYNC_FILE": "Google 드라이브 : <strong>기존</strong> 파일 <strong>\"{{fileName}}\"</strong> 을 동기화 파일로 사용 하시겠습니까? 그렇지 않은 경우 동기화 파일 이름을 변경하십시오."
+      },
+      "D_CONFIRM_LOAD": {
+        "LAST_MOD": "마지막 수정 :",
+        "LAST_SYNC": "마지막 동기화",
+        "LOCAL": "노동 조합 지부",
+        "LOCAL_REMOTE": "로컬 <=> 원격",
+        "OVERWRITE_LOCAL": "로컬 데이터 덮어 쓰기",
+        "OVERWRITE_REMOTE": "원격 데이터 덮어 쓰기",
+        "REMOTE": "먼",
+        "TEXT": "",
+        "TITLE": "GDrive Update로 로컬 데이터 덮어 쓰기?"
+      },
+      "D_CONFIRM_SAVE": {
+        "LAST_MOD": "마지막 수정 :",
+        "LAST_SYNC": "마지막 동기화",
+        "LOCAL": "노동 조합 지부",
+        "LOCAL_REMOTE": "로컬 <=> 원격",
+        "OVERWRITE_LOCAL": "로컬 데이터 덮어 쓰기",
+        "OVERWRITE_REMOTE": "원격 데이터 덮어 쓰기",
+        "REMOTE": "먼",
+        "TEXT": "  <p>Google 드라이브에 로컬로 설치하지 않은 일부 변경 사항이있는 것 같습니다. 어쨌든 덮어 쓰시겠습니까?</p>",
+        "TITLE": "저장되지 않은 데이터를 Google 드라이브에 덮어 쓰시겠습니까?"
+      },
+      "EXPORT_TIME": {
+        "ALWAYS_ROUND_UP": "항상 작업 시간을 반올림합니다.",
+        "AUTO_LOGIN": "다음 번에 자동 로그인 및 데이터로드",
+        "HELP_ADDITIONAL": "이 외에도 이러한 값의 계산을 수정하는 데 사용할 수있는 몇 가지 옵션이 있습니다.",
+        "HELP_INFO": "<p>이보기를 사용하면 근무 시간을 Google 시트로 내보낼 수 있습니다. Super Productivity에서 Google 스프레드 시트에 액세스 할 수 있도록 허용해야합니다. 또한 첫 번째 행에 표제가있는 스프레드 시트를 작성해야합니다. 입력 필드에 ID를 지정하지 마십시오 (<a href=\"https://stackoverflow.com/questions/36061433/how-to-do-i-locate-a-google-spreadsheet-id\" target=\"_blank\">Ho로 스프레드 시트의 ID를 찾으십니까?</a>).</p><p>스프레드 시트를 성공적으로로드하면 테이블에 4 개의 행이 표시됩니다. 첫 번째 행에는 스프레드 시트에서 지정한 제목이 표시됩니다.</p><p>두 번째 행은 정보 용이며 스프레드 시트의 마지막 행을 표시합니다.</p><p>네 번째 행은 스프레드 시트에 직접 저장할 수있는 값의 목록입니다.</p><p>세 번째 행은 네 번째 행에 대한 일부 값을 자동으로 정의합니다. 셀에 입력 할 수있는 몇 가지 특수 문자열이 있습니다 :</p>",
+        "HELP_POSSIBLE_PROPERTIES": "",
+        "LOGIN": "Google에 로그인",
+        "LOGOUT": "로그 아웃",
+        "OPEN_SPREADSHEET": "열린 스프레드 시트",
+        "OPTIONS": "옵션",
+        "READ_SPREADSHEET": "스프레드 시트 읽기",
+        "ROUND_END_TIME_TO": "라운드 종료 시간 :",
+        "ROUND_HALF": "반 시간 반",
+        "ROUND_HOUR": "1 시간 내내",
+        "ROUND_QUARTER": "전체 분기",
+        "ROUND_START_TIME_TO": "라운드 시작 시간 :",
+        "ROUND_TIME_WORKED_TO": "왕복 근무 시간",
+        "SAVE_ROW": "행 저장",
+        "S_EQUAL_VALUES": "현재 값과 마지막으로 저장 한 행의 값은 같기 때문에 원하는 값과 다를 수 있습니다.",
+        "S_ROW_APPENDED": "성공적으로 추가 된 행"
+      },
+      "S": {
+        "DOWNLOADING_UPDATE": "Google 드라이브 : 원격 업데이트가 있습니다! 다운로드 중 ...",
+        "ERROR": "Google 드라이브 - 오류 : {{errTxt}}",
+        "ERROR_INITIAL_IMPORT": "Google 드라이브 : 처음 데이터를 가져 오는 중에 오류가 발생했습니다.",
+        "LOCAL_UP_TO_DATE": "Google 드라이브 : 로컬 데이터가 이미 최신 상태입니다.",
+        "MULTIPLE_SYNC_FILES_WITH_SAME_NAME": "이름이 \"{{newFileName}}\"인 파일이 여러 개 있습니다. 하나만 제외하고 모두 삭제하거나 다른 이름을 선택하십시오.",
+        "NO_UPDATE_REQUIRED": "Google 드라이브 : 업데이트 필요 없음",
+        "REMOTE_UP_TO_DATE": "Google 드라이브 : 원격 데이터가 이미 최신 상태입니다.",
+        "SUCCESS": "Google 드라이브 : 백업을 저장했습니다.",
+        "SYNCING": "Google 드라이브 : 동기화 중"
+      },
+      "S_API": {
+        "ERR": "GoogleApi 오류 : {{errStr}}",
+        "ERR_NO_FILE_ID": "GoogleApi : 지정된 파일 ID가 없습니다.",
+        "ERR_NO_FILE_NAME": "GoogleApi : 파일 이름이 지정되지 않았습니다.",
+        "SUCCESS_LOGIN": "GoogleApi : 로그인 성공"
+      },
+      "SYNC_CFG": {
+        "AUTO_LOGIN": "앱 시작시 자동 로그인",
+        "AUTO_SYNC": "데이터를 원격으로 자동 동기화",
+        "BACKUP_NOW": "백업 지금",
+        "COMPRESS": "데이터 압축",
+        "ENABLE": "Google 드라이브를 통한 동기화 사용",
+        "LOAD_FROM": "GDrive에서로드",
+        "LOAD_ON_STARTUP": "시작시 원격 데이터로드",
+        "NOTIFY": "동기화 할 때 알림",
+        "SYNC_FILE_NAME": "파일 이름 동기화",
+        "SYNC_INTERVAL": "동기화 간격",
+        "UPDATE_SYNC_FILE": "동기화 파일 업데이트"
+      }
+    },
+    "JIRA": {
+      "BANNER": {
+        "BLOCK_ACCESS_MSG": "Jira : API에서 종료되는 것을 막기 위해 Super Productivity가 액세스를 차단했습니다. 아마도 jira 설정을 확인해야합니다!",
+        "BLOCK_ACCESS_UNBLOCK": "차단 해제"
+      },
+      "CFG_CMP": {
+        "ALWAYS_ASK": "항상 대화 상자를 엽니 다.",
+        "DONE": "작업 완료 상태",
+        "DO_NOT": "전환하지 마라.",
+        "ENABLE": "Jira 통합 사용",
+        "ENABLE_TRANSITIONS": "전환 처리 사용",
+        "IN_PROGRESS": "작업 시작 상태",
+        "LOAD_SUGGESTIONS": "로드 제안",
+        "MAP_CUSTOM_FIELDS": "사용자 정의 필드 매핑",
+        "MAP_CUSTOM_FIELDS_INFO": "유감스럽게도 Jira의 데이터 중 일부는 모든 설치마다 다른 사용자 정의 필드 아래에 저장됩니다. 이 데이터를 포함 시키려면 적절한 사용자 정의 필드를 선택해야합니다.",
+        "OPEN": "작업 일시 중지 상태",
+        "SELECT_ISSUE_FOR_TRANSITIONS": "사용 가능한 전환을로드하려면 문제를 선택하십시오.",
+        "STORY_POINTS": "스토리 포인트"
+      },
+      "DIALOG_CONFIRM_ASSIGNMENT": {
+        "MSG": "<strong>{{summary}}</strong> 이 (가) 현재 <strong>{{assignee}}</strong>에게 할당되었습니다. 그것을 당신 자신에게 할당하고 싶습니까?",
+        "OK": "해!"
+      },
+      "DIALOG_INITIAL": {
+        "TITLE": "프로젝트 용 Jira 설치"
+      },
+      "DIALOG_TRANSITION": {
+        "CHOOSE_STATUS": "할당 할 상태 선택",
+        "CURRENT_ASSIGNEE": "현재 양수인 :",
+        "CURRENT_STATUS": "현재 상태:",
+        "TITLE": "Jira : 업데이트 상태",
+        "UPDATE_STATUS": "업데이트 상태"
+      },
+      "DIALOG_WORKLOG": {
+        "CURRENTLY_LOGGED": "현재 기록 된 시간 :",
+        "INVALID_DATE": "입력 한 값이 날짜가 아닙니다!",
+        "SAVE_WORKLOG": "작업 기록 저장",
+        "STARTED": "시작됨",
+        "SUBMIT_WORKLOG_FOR": "Jira에게 작업 로그 제출",
+        "TIME_SPENT": "지출 된 시간",
+        "TITLE": "Jira : 작업 로그 제출"
+      },
+      "DIALOG_WORKdLOG": {
+        "TITLE": "AAA"
+      },
+      "EXTENSION_INFO": "Jira Api와의 통신을 허용하려면 <a href=\"{{url}}\"> 크롬 확장</a> 을 다운로드하십시오. 이 기능은 모바일에서 작동하지 않습니다.",
+      "FORM": {
+        "IS_AUTO_ADD_TO_BACKLOG": "Github의 미해결 문제를 백 로그에 자동으로 추가합니다.",
+        "IS_AUTO_POLL": "변경 사항에 대해 가져온 git 문제를 자동으로 폴링합니다.",
+        "IS_SEARCH_ISSUES_FROM_GITHUB": "새 작업을 추가 할 때 git의 제안 사항을 제안으로 표시합니다.",
+        "REPO": "추적하고자하는 git 저장소의 \"username / repositoryName\""
+      },
+      "FORM_ADV": {
+        "AUTO_ADD_BACKLOG_JQL_QUERY": "백 로그에 작업을 자동으로 추가하는 데 사용되는 JQL",
+        "IS_ADD_WORKLOG_ON_SUB_TASK_DONE": "하위 작업이 완료되면 작업 로그를 jira에 제출하기위한 열기 대화 상자",
+        "IS_AUTO_ADD_TO_BACKLOG": "Jira 백 로그에 자동으로 이슈 추가",
+        "IS_AUTO_POLL_TICKETS": "가져온 변경 사항을 자동으로 확인하고 알립니다.",
+        "IS_CHECK_TO_RE_ASSIGN_TICKET_ON_TASK_START": "현재 발행 된 문제가 현재 사용자에게 할당되었는지 확인",
+        "IS_WORKLOG_ENABLED": "작업이 완료되면 작업 로그를 jira로 제출하기위한 열기 대화 상자",
+        "SEARCH_JQL_QUERY": "검색 자 작업을 제한하기위한 JQL 쿼리",
+        "USER_ASSIGNEE_NAME": "확인 대상자 이름"
+      },
+      "FORM_CRED": {
+        "HOST": "호스트 (예 : http://my-host.de:1234)",
+        "PASSWORD": "토큰 / 비밀번호",
+        "USER_NAME": "이메일 / 사용자 이름"
+      },
+      "FORM_SECTION": {
+        "ADV_CFG": "고급 구성",
+        "CREDENTIALS": "신임장",
+        "HELP_ARR": {
+          "H1": "기본 구성",
+          "H2": "작업 로그 설정",
+          "H3": "기본 전환",
+          "P1_1": "어떤 이유로 든 생성 할 수없는 경우 로그인 이름 (프로필 페이지에서 찾을 수 있음)과 <a href=\"https://confluence.atlassian.com/cloud/api-tokens-938839638.html\" target=\"_blank\">API 토큰</a> 또는 비밀번호를 제공하십시오. 최신 버전의 jira가 토큰과 만 작동하는 경우도 있습니다.",
+          "P1_2": "또한 Jira에서 작업을 추가하는 제안에 사용되는 JQL 쿼리를 지정해야합니다. 도움이 필요한 경우 <a href=\"https://confluence.atlassian.com/jirasoftwarecloud/advanced-searching-764478330.html\" target=\"_blank\">https://confluence.atlassian.com/jirasoftwarecloud/advanced-searching-764478330.html</a>링크를 확인하십시오.",
+          "P1_3": "또한 자동으로 (예 : 계획보기를 방문 할 때마다) 사용자 정의 JQL 쿼리에 지정된 새 작업을 모두 백 로그에 추가하도록 구성 할 수 있습니다.",
+          "P1_4": "또 다른 옵션은 \"현재 티켓이 현재 사용자에게 지정되었는지 확인\"입니다. 활성화되어 있고 시작 중이면 현재 Jira에서 해당 티켓에 할당 된 경우 확인이 수행됩니다. 대화 상자가 나타나지 않으면 티켓을 직접 할당 할 수 있습니다.",
+          "P2_1": "작업 로그를 제출할시기와 방법을 결정할 수있는 몇 가지 옵션이 있습니다. 작업 완료시 작업 로그를 추가하는 <em>'작업 로그 열기'대화 상자 사용 '</em> 은 Jira 작업을 완료로 표시 할 때마다 작업 로그를 추가하는 대화 상자를 엽니 다. 지금까지 추적 된 모든 항목 위에 작업 로그가 추가 될 것입니다. 따라서 두 번째로 작업을 완료로 표시하면 작업의 전체 작업 시간을 다시 제출하지 않을 수 있습니다.",
+          "P2_2": "<em>'Jira 문제의 하위 작업을 완료로 표시 할 때마다'</em> 은 작업 로그 대화 상자를 열 때마다 하위 작업이 완료되면 작업 로그 열기 대화 상자가 열립니다. 하위 작업을 통해 시간을 이미 추적 했으므로 Jira 작업 자체를 완료로 표시하면 대화 상자가 열리지 않습니다.",
+          "P2_3": "<em>'대화 상자없이 작업 로그에 자동으로 업데이트를 보냄'{</em> 은 (는) 말하는 것을 않습니다. 여러 번 완료된 작업을 표시하면 전체 작업 시간이 두 번 추적되기 때문에 권장하지 않습니다.",
+          "P3_1": "여기서 기본 전환을 재구성 할 수 있습니다. Jira는 일반적으로 Jira 애자일 보드의 다른 컬럼으로 동작하는 다양한 전환을 가능하게합니다. 우리는 어디에서 언제 작업을 전환 할 것인지를 가정 할 수 없으며 수동으로 설정해야합니다."
+        }
+      },
+      "ISSUE_CONTENT": {
+        "ASSIGNEE": "양수인",
+        "AT": "...에서",
+        "ATTACHMENTS": "첨부 파일",
+        "CHANGED": "변경된",
+        "COMMENTS": "코멘트",
+        "COMPONENTS": "구성 요소",
+        "DESCRIPTION": "기술",
+        "LIST_OF_CHANGES": "변경 목록",
+        "MARK_AS_CHECKED": "체크 된대로 업데이트 표시",
+        "ON": "에",
+        "STATUS": "지위",
+        "STORY_POINTS": "스토리 포인트",
+        "SUMMARY": "개요",
+        "WORKLOG": "작업 로그",
+        "WRITE_A_COMMENT": "의견 쓰기"
+      },
+      "S": {
+        "EXTENSION_NOT_LOADED": "Super Productivity Extension이로드되지 않았습니다. 페이지를 새로 고침하면 도움이 될 수 있습니다.",
+        "IMPORTED_MULTIPLE_ISSUES": "Jira : jira에서 백 로그로 새 { {{issuesLength}} 개의 이슈를 가져 왔습니다.",
+        "IMPORTED_SINGLE_ISSUE": "Jira : jira에서 백 로그로 가져온 문제 \"{{issueText}}\"",
+        "INSUFFICIENT_SETTINGS": "Jira에 대한 설정이 충분하지 않음",
+        "ISSUE_NO_UPDATE_REQUIRED": "Jira : \"{{issueText}}\"이 (가) 이미 업데이트되었습니다.",
+        "ISSUE_UPDATE": "Jira : \"{{issueText}}\"에 대한 데이터가 업데이트되었습니다.",
+        "MANUAL_UPDATE_ISSUE_SUCCESS": "Jira : \"{{issueText}}\"에 대한 데이터가 업데이트되었습니다.",
+        "MISSING_ISSUE_DATA": "Jira : 누락 된 문제 데이터가있는 작업이 발견되었습니다. 다시로드 중입니다.",
+        "NO_VALID_TRANSITION": "Jira : 유효한 전환이 설정되지 않았습니다.",
+        "POLLING": "Jira : 문제에 대한 폴링 변경 사항",
+        "TIMED_OUT": "Jira : 요청 시간이 초과되었습니다.",
+        "TRANSITION_SUCCESS": "Jira : {{issueKey}} 문제를 <strong>{{chosenTransition}}</strong>(으)로 설정하십시오.",
+        "UNABLE_TO_REASSIGN": "Jira : 사용자 이름을 지정하지 않았기 때문에 자신에게 티켓을 재 할당 할 수 없습니다. 설정을 방문하십시오."
+      },
+      "STEPPER": {
+        "CREDENTIALS": "신임장",
+        "DONE": "이제 끝났어.",
+        "LOGIN_SUCCESS": "성공적 로그인!",
+        "TEST_CREDENTIALS": "자격증 명 테스트",
+        "WELCOME_USER": " {{user}}에 오신 것을 환영합니다!"
+      }
+    },
+    "METRIC": {
+      "CMP": {
+        "AVG_BREAKS_PER_DAY": "평균 하루에 휴식",
+        "AVG_TASKS_PER_DAY_WORKED": "평균 일일 작업 수",
+        "AVG_TIME_SPENT_ON_BREAKS": "평균 휴식 시간",
+        "AVG_TIME_SPENT_PER_DAY": "평균 하루에 보낸 시간",
+        "AVG_TIME_SPENT_PER_TASK": "평균 과제 당 소비 된 시간",
+        "COUNTING_SUBTASKS": "(하위 작업 수 계산)",
+        "DAYS_WORKED": "근무일",
+        "IMPROVEMENT_SELECTION_COUNT": "개선 계수가 선택된 횟수",
+        "MOOD_PRODUCTIVITY_OVER_TIME": "시간 경과에 따른 기분과 생산성",
+        "NO_ADDITIONAL_DATA_YET": "추가로 수집 된 데이터가 없습니다. 일일 요약 '평가'패널에있는 양식을 사용하십시오.",
+        "OBSTRUCTION_SELECTION_COUNT": "장애 요소가 선택 된 횟수",
+        "TASKS_DONE_CREATED": "할 일 목록 (완료 / 생성)",
+        "TIME_ESTIMATED": "예상 시간",
+        "TIME_SPENT": "지출 된 시간"
+      },
+      "EVAL_FORM": {
+        "HELP_H1": "왜 내가 신경 써야하니?",
+        "HELP_LINK_TXT": "통계 섹션으로 이동",
+        "HELP_P1": "조금 자기 평가 시간! 여기에 귀하의 답변이 저장되어 메트릭 섹션에서 어떻게 작업하는지에 대한 통계를 제공합니다. 또한 내일을위한 제안은 다음날 작업 목록 위에 나타납니다.",
+        "HELP_P2": "이는 정확한 측정 항목을 계산하거나 작업에 대한 사용자의 감각을 향상시키는 것보다 효율적이기는하지만 효율적인 작업이되도록하기위한 것입니다. 매일의 일상 생활에서 고통 점을 평가하는 것은 도움이 될뿐만 아니라 당신을 도울 요인을 찾는 것입니다. 그것에 대해 조금 체계적으로 다루기 만하면 이들에 대해 더 잘 이해하고 가능한 한 향상시키는 데 도움이되기를 바랍니다.",
+        "IMPROVEMENTS": "무엇이 당신의 생산성을 향상 시켰습니까?",
+        "IMPROVEMENTS_TOMORROW": "내일 개선하기 위해 당신은 무엇을 할 수 있습니까?",
+        "MOOD": "기분 어때?",
+        "MOOD_HINT": "1 : 끔찍 - 10 : 훌륭함",
+        "NOTES": "내일위한주의 사항",
+        "OBSTRUCTIONS": "당신의 생산성을 방해 한 것은 무엇입니까?",
+        "PRODUCTIVITY": "얼마나 효율적으로 일 했습니까?",
+        "PRODUCTIVITY_HINT": "1 : 시작조차하지 마라 - 10 : 매우 효율적이다."
+      },
+      "S": {
+        "SAVE_METRIC": "측정 항목이 성공적으로 저장되었습니다."
+      }
+    },
+    "NOTE": {
+      "ADD_REMINDER": "알림 추가",
+      "D_ADD": {
+        "DATETIME_LABEL": "알림 시간 (선택 사항)",
+        "NOTE_LABEL": "메모로 저장할 텍스트를 입력하십시오 ..."
+      },
+      "D_ADD_REMINDER": {
+        "E_ENTER_TITLE": "제목을 입력해야합니다.",
+        "L_DATETIME": "알림 시간",
+        "L_TITLE": "알림 제목",
+        "TITLE_ADD": "메모에 알림 추가",
+        "TITLE_EDIT": "메모 알림 수정"
+      },
+      "D_VIEW_REMINDER": {
+        "SNOOZE": " {{time}}에 대한 일시 중지",
+        "TITLE": "노트"
+      },
+      "EDIT_REMINDER": "알림 수정",
+      "NOTES_CMP": {
+        "ADD_BTN": "새 메모 추가",
+        "DROP_TO_ADD": "새 메모를 추가하려면 여기로 드래그하십시오."
+      },
+      "NOTE_CMP": {
+        "DISABLE_PARSE": "마크 다운 구문 분석 사용 중지",
+        "ENABLE_PARSE": "markdown 구문 분석 사용"
+      },
+      "REMOVE_REMINDER": "알림 삭제",
+      "S": {
+        "ADDED_REMINDER": "메모에 알림 추가됨",
+        "DELETED_REMINDER": "메모를 위해 삭제 된 알림",
+        "UPDATED_REMINDER": "메모에 대한 업데이트 알림"
+      },
+      "UPDATE_REMINDER": "리마인더 업데이트"
+    },
+    "POMODORO": {
+      "BACK_TO_WORK": "다시 일!",
+      "BREAK_IS_DONE": "너의 휴식은 끝났어!",
+      "ENJOY_YOURSELF": "자신을 즐기고, 스스로 움직여서 다시 들어가십시오.",
+      "FINISH_SESSION_X": " <strong>{{nr}}</strong>세션을 성공적으로 마쳤습니다!",
+      "NOTIFICATION": {
+        "BREAK_X_START": "Pomodoro : 휴식 {{nr}} 시작!",
+        "SESSION_X_START": "Pomodoro : 세션 {{nr}} 이 시작되었습니다."
+      },
+      "SKIP_BREAK": "휴식 시간 건너 뛰기",
+      "S": {
+        "SESSION_X_START": "Pomodoro : 세션 {{nr}} 이 시작되었습니다."
+      }
+    },
+    "PROCRASTINATION": {
+      "BACK_TO_WORK": "다시 일!",
+      "COMP": {
+        "INTRO": "연민을 보여주는 것은 언제나 좋은 생각입니다. 그것은 자기 가치 감을 향상시키고, 긍정적 인 감정을 키우며, 지연을 극복하는 데 도움을 줄 수 있습니다. 조금 연습 해보십시오.",
+        "L1": "조금 앉아서 스트레칭을하고 싶다면, 조금이라도 진정하십시오.",
+        "L2": "발생하는 생각과 느낌을 경청하십시오.",
+        "L3": "친구에게 응답 할 수있는 방식으로 자신에게 응답하고 있습니까?",
+        "L4": "대답이 '아니오'인 경우 친구의 상황을 상상해보십시오. 당신이 그들에게 뭐라고 말하겠습니까? 당신이 그들을 위해 무엇을 할 것입니까?",
+        "OUTRO": "더 많은 연습 <a href=\"https://drsoph.com/blog/2018/9/17/3-exercises-in-self-compassion\" target=\"_blank\">은</a> 또는 <a href=\"https://www.google.com/search?q=self+compassion+exercises&oq=self+compassion+excers&aqs=chrome.1.69i57j0l5.4303j0j7&sourceid=chrome&ie=UTF-8\" target=\"_blank\">google</a>에 있습니다.",
+        "TITLE": "자기 동정"
+      },
+      "CUR": {
+        "INTRO": "지연은 흥미 롭, 안 그래? 그것을하는 것이 이치에 맞지 않습니다. 장기적으로는 관심이 없습니다. 그러나 여전히 모든 사람들이 그것을합니다. 즐기고 탐험 해보세요!",
+        "L1": "어떤 감정이 당신의 유혹을 이끌어 내고 있습니까?",
+        "L2": "당신의 몸에서 그들을 어디에서 느낄 수 있습니까?",
+        "L3": "그들이 당신에게 무엇을 생각 나게 하죠?",
+        "L4": "당신이 그것을 관찰 할 때 미루는 생각은 어떻게됩니까? 그것이 강화됩니까? 소산? 다른 감정이 발생합니까?",
+        "L5": "당신이 그들에 대한 인식을 계속해서 쉬면서 몸의 감각은 어떻게 움직입니까?",
+        "TITLE": "호기심"
+      },
+      "H1": "자신을 자르십시오!",
+      "P1": "우선 긴장을 풀어 라! 모두가 한 번씩 그렇게합니다. 그리고 네가해야 할 일을하지 않는다면, 적어도 그것을 즐겨라! 그런 다음 아래 섹션에서 유용한 정보를 확인하십시오.",
+      "P2": "",
+      "P3": "기억하십시오 : 지연은 시간 관리 문제가 아닌 감정 조절 문제입니다.",
+      "REFRAME": {
+        "INTRO": "그 임무에도 불구하고 무엇이 긍정적인지를 생각해보십시오.",
+        "TITLE": "재구성",
+        "TL1": "그것에 대해 흥미로운 것은 무엇입니까?",
+        "TL2": "당신이 그것을 완성한다면 무엇을 얻을 것입니까?",
+        "TL3": "당신이 그것을 완성한다면 어떻게 느낄 것인가?"
+      },
+      "SPLIT_UP": {
+        "INTRO": "가능한 한 많은 작은 덩어리로 작업을 분할하십시오.",
+        "OUTRO": "끝난? 그런 다음 그것에 대해 생각해보십시오. - 엄격하게 이론적 인 것은 무엇입니까? - 당신이 작업에 착수하기 시작한 경우</i> 당신이 <i>할 첫 번째 일은 무엇입니까? 생각 해봐...",
+        "TITLE": "그것을 나눠 라!"
+      }
+    },
+    "PROJECT": {
+      "BANNER": {
+        "FINISH_DAY": {
+          "FINISH_DAY": "피니시 데이",
+          "MSG": "오늘 {{dayStr}}일을 끝내는 걸 잊었 네."
+        }
+      },
+      "D_CREATE": {
+        "CREATE": "프로젝트 만들기",
+        "EDIT": "프로젝트 수정",
+        "ISSUE_PROVIDER_CFGS": "이슈 공급자 구성 (선택 사항)",
+        "SETUP_GIT": "Github 통합 설치",
+        "SETUP_JIRA": "Jira 통합 설정"
+      },
+      "FORM": {
+        "D_IS_DARK_THEME": "시스템이 글로벌 암 모드를 지원하면 사용되지 않습니다.",
+        "HELP": "프로젝트의 매우 기본적인 설정.",
+        "L_IS_DARK_THEME": "다크 테마 사용",
+        "L_IS_REDUCED_THEME": "축소 된 UI 사용 (작업 주위의 상자 없음)",
+        "L_THEME_COLOR": "테마 색",
+        "L_TITLE": "표제",
+        "TITLE": "프로젝트 설정 및 테마"
+      },
+      "S": {
+        "ARCHIVED": "보관 된 프로젝트",
+        "CREATED": "생성 된 프로젝트 <strong>{{title}}</strong>. 왼쪽 상단의 메뉴에서 선택할 수 있습니다.",
+        "DELETED": "삭제 된 프로젝트",
+        "E_EXISTS": "프로젝트 \"{{title}}\"이 (가) 이미 있습니다.",
+        "E_INVALID_FILE": "프로젝트 파일의 데이터가 잘못되었습니다.",
+        "ISSUE_PROVIDER_UPDATED": " <strong>{{issueProviderKey}}</strong>에 대한 업데이트 된 프로젝트 설정",
+        "UNARCHIVED": "아카이브되지 않은 프로젝트",
+        "UPDATED": "프로젝트 설정 업데이트"
+      }
+    },
+    "REMINDER": {
+      "S_REMINDER_ERR": "알림 인터페이스 오류"
+    },
+    "SIMPLE_TASK_EXPORT": {
+      "CLOSE": "닫기",
+      "COPY_TO_CLIPBOARD": "클립 보드에 복사",
+      "DATE": "날짜",
+      "ESTIMATE": "견적",
+      "FIELDS_TO_DISPLAY": "표시 할 필드",
+      "LIST_DONE_TASKS_ONLY": "완료된 작업 만 표시",
+      "LIST_SUB_TASKS": "하위 작업 나열",
+      "LIST_WORKED_ON_TODAY_TASKS_ONLY": "목록은 오늘 작업에만 적용되었습니다.",
+      "M_TITLE": "작업 목록 내보내기",
+      "NO_DATA": "- 데이터 없음 -",
+      "OPTIONS": "옵션",
+      "R": {
+        "HALF": "반 시간 반",
+        "HOUR": "1 시간 내내",
+        "QUARTER": "전체 분기"
+      },
+      "SAVE_TO_FILE": "파일에 저장",
+      "SEPARATE_FIELDS_BY": "필드 구분",
+      "SHOW_AS_TEXT": "텍스트로 표시",
+      "SNACK_TO_CLIPPBOARD": "클립 보드에 복사 됨",
+      "TIME_AS_MILLISECONDS": "시간 (밀리 초)",
+      "TIME_ESTIMATE": "예상 시간",
+      "TIME_SPENT": "지출 된 시간",
+      "TITLE": "표제"
+    },
+    "TASK": {
+      "ADDITIONAL_INFO": {
+        "ATTACHMENTS": "첨부 파일 {{nr}}",
+        "ISSUE_TYPE_ATTACHMENTS": "{{issueType}} 첨부 파일",
+        "LOCAL_ATTACHMENTS": "로컬 첨부 파일",
+        "NOTES": "노트"
+      },
+      "ADD_TASK_BAR": {
+        "START": "시작하려면 한 번 더 입력하십시오."
+      },
+      "B": {
+        "ADD_HALF_HOUR": "1/2hou 추가",
+        "ESTIMATE_EXCEEDED": "\"{{title}}\"에 대한 예상 시간을 초과했습니다."
+      },
+      "CMP": {
+        "ADD_SUB_TASK": "하위 작업 추가",
+        "ADVANCED": "많은",
+        "CONVERT_TO_PARENT_TASK": "상위 작업으로 변환 작업",
+        "DELETE": "작업 삭제",
+        "DROP_ATTACHMENT": "'{{task.title}}'에 연결하려면 여기로 드래그하십시오.",
+        "EDIT_REMINDER": "알림 수정",
+        "MARK_DONE": "완료로 표시",
+        "MARK_UNDONE": "실행 취소로 표시",
+        "MOVE_TO_BACKLOG": "백 로그로 이동",
+        "MOVE_TO_OTHER_PROJECT": "다른 프로젝트로 이동",
+        "MOVE_TO_TODAY": "오늘의 목록으로 이동",
+        "OPEN_ATTACH": "파일 또는 링크 첨부",
+        "OPEN_ISSUE": "새 브라우저 탭에서 문제 열기",
+        "OPEN_TASK_MENU": "작업 메뉴 열기",
+        "OPEN_TIME": "시간 예측 / 소요 시간 추가",
+        "REPEAT_EDIT": "반복 작업 구성 편집",
+        "REPEAT_TASK": "작업 반복",
+        "SCHEDULE": "작업 예약",
+        "SHOW_UPDATES": "업데이트 표시",
+        "TOGGLE_ADDITIONAL": "추가 정보 표시 / 숨기기",
+        "TOGGLE_ATTACHMENTS": "첨부 파일 표시 / 숨기기",
+        "TOGGLE_DONE": "완료 / 실행 취소로 표시",
+        "TOGGLE_SUB_TASK_VISIBILITY": "하위 작업 가시성 토글",
+        "TRACK_TIME": "추적 시작 시간",
+        "TRACK_TIME_STOP": "추적 시간 일시 중지",
+        "UPDATE_ISSUE_DATA": "문제 데이터 업데이트"
+      },
+      "D_REMINDER_ADD": {
+        "ADD": "작업 예약",
+        "DATETIME_FOR": "알림 시간",
+        "EDIT": "알림 수정",
+        "MOVE_TO_BACKLOG": "예약 될 때까지 작업을 백 로그로 이동하십시오.",
+        "SCHEDULE": "시간표",
+        "UNSCHEDULE": "일정 잡기"
+      },
+      "D_REMINDER_VIEW": {
+        "DISMISS": "알림 일시 중지",
+        "ERR_LOST": "작업 {{title}}에 대한 미리 알림이 있었지만 손실 된 것으로 보입니다.",
+        "FOR_CURRENT": "작업이 완료되었습니다. 그것에 착수하고 싶니?",
+        "FOR_OTHER": "작업이 완료되었습니다. 그것에 착수하고 싶니?",
+        "FROM_PROJECT": "프로젝트에서",
+        "SNOOZE": "다시 알림 {{time}}",
+        "START": "작업 시작",
+        "SWITCH_PROJECT_START": "프로젝트 전환 및 시작 작업",
+        "TITLE": "예정된 작업"
+      },
+      "D_TIME": {
+        "ADD_FOR_OTHER_DAY": "다른 날에 보낸 시간을 추가하십시오.",
+        "DELETE_FOR": "일일 항목 삭제",
+        "ESTIMATE": "견적",
+        "TIME_SPENT": "지출 된 시간",
+        "TIME_SPENT_ON": "경과 시간 {{date}}",
+        "TITLE": "소요 시간 / 견적"
+      },
+      "D_TIME_FOR_DAY": {
+        "ADD_ENTRY_FOR": " {{date}}에 대한 새 항목 추가",
+        "DATE": "신규 등록 날짜",
+        "HELP": "예 :<br> 30m => 30 분<br> 2 시간 => 2 시간<br> 2 시간 30 분 => 2 시간 30 분",
+        "TINE_SPENT": "지출 된 시간",
+        "TITLE": "오늘 추가"
+      },
+      "N": {
+        "ESTIMATE_EXCEEDED": "예상 시간을 초과했습니다!",
+        "ESTIMATE_EXCEEDED_BODY": "\"{{title}}\"에 대한 예상 시간을 초과했습니다."
+      },
+      "S": {
+        "DELETED": "\"{{title}}\"작업을 삭제했습니다.",
+        "REMINDER_ADDED": "예약 된 작업 \"{{title}}\"",
+        "REMINDER_DELETED": "할 일 목록 삭제",
+        "REMINDER_UPDATED": "\"{{title}}\"작업에 대한 알림이 업데이트되었습니다."
+      },
+      "SELECT_OR_CREATE": "작업 선택 또는 생성",
+      "SUMMARY_TABLE": {
+        "ESTIMATE": "견적",
+        "SPENT_TODAY": "",
+        "SPENT_TOTAL": "사용한 총액",
+        "TASK": "태스크",
+        "TOGGLE_DONE": "완료로 표시 취소 / 표시"
+      }
+    },
+    "TASK_REPEAT": {
+      "D_CONFIRM_REMOVE": {
+        "MSG": "반복 구성을 제거하면이 작업의 모든 이전 인스턴스가 일반 작업으로 변환됩니다. 계속 하시겠습니까?",
+        "OK": "완전히 제거하십시오."
+      },
+      "D_EDIT": {
+        "ADD": "반복 작업 구성 추가",
+        "EDIT": "반복 작업 구성 편집",
+        "HELP1": "반복 작업은 일별 잡일을 의미합니다 (예 : \"조직\", \"일일 모임\", \"코드 검토\", \"이메일 확인\"또는 여러 번 반복 될 수있는 유사한 작업).",
+        "HELP2": "일단 구성되면 반복 작업은 프로젝트를 여는 즉시 아래에서 선택한 매일에 다시 작성되며 하루가 끝날 때 자동 완성으로 표시됩니다. 그들은 다른 인스턴스로 처리됩니다. 따라서 하위 작업 등을 자유롭게 추가 할 수 있습니다.",
+        "HELP3": "Jira 또는 Git Issues에서 가져온 작업은 반복 할 수 없습니다. 모든 미리 알림은 반복 작업에서 삭제됩니다."
+      },
+      "F": {
+        "DEFAULT_ESTIMATE": "기본 견적",
+        "FRIDAY": "금요일",
+        "MONDAY": "월요일",
+        "SATURDAY": "토요일",
+        "SUNDAY": "일요일",
+        "THURSDAY": "목요일",
+        "TITLE": "작업 제목",
+        "TUESDAY": "화요일",
+        "WEDNESDAY": "수요일"
+      }
+    },
+    "TIME_TRACKING": {
+      "B": {
+        "ALREADY_DID": "벌써 했어.",
+        "SNOOZE": "다시 알림 {{time}}"
+      },
+      "D_IDLE": {
+        "BREAK": "단절",
+        "CREATE_AND_TRACK": "<em></em> 만들기 및 추적 :",
+        "IDLE_FOR": "당신은 유휴 상태였습니다.",
+        "SKIP": "버킷",
+        "TASK": "태스크",
+        "TASK_BREAK": "작업 나누기",
+        "TRACK_TO": "추적 대상 :"
+      }
+    },
+    "WORKLOG": {
+      "CMP": {
+        "DAYS_WORKED": "일한 날짜 :",
+        "MONTH_WORKED": "월 근무일 :",
+        "REPEATING_TASK": "반복 과제",
+        "RESTORE_TASK_FROM_ARCHIVE": "아카이브에서 작업 복원",
+        "TASKS": "할 일 목록",
+        "TOTAL_TIME": "총 소요 시간 :",
+        "TOTAL_TIME_PROJECT": "프로젝트에 소요 된 총 시간",
+        "WORKED": "근무한"
+      },
+      "D_CONFIRM_RESTORE": " <strong>\"{{title}}\"</strong> 작업을 현재 작업 목록으로 이동 하시겠습니까?",
+      "D_EXPORT_TITLE": "작업 로그 내보내기",
+      "EXPORT": {
+        "COPY_TO_CLIPBOARD": "클립 보드에 복사",
+        "DONT_ROUND": "돌지 마라.",
+        "GROUP_BY": "그룹화 기준",
+        "O": {
+          "DATE": "날짜",
+          "ENDED_WORKING": "종료 된 작업",
+          "ESTIMATE_AS_CLOCK": "예상 시간 (예 : 5:23)",
+          "ESTIMATE_AS_MILLISECONDS": "밀리 초로 예상",
+          "ESTIMATE_AS_STRING": "문자열로 예상 (예 : 5 시간 23 분)",
+          "FULL_HALF_HOURS": "반 시간 반",
+          "FULL_HOURS": "1 시간 내내",
+          "FULL_QUARTERS": "전체 분기",
+          "PARENT_TASK": "학부모 과제",
+          "PARENT_TASK_TITLES_ONLY": "상위 작업 제목 만",
+          "STARTED_WORKING": "작업 시작",
+          "TASK_SUBTASK": "작업 / 하위 작업",
+          "TIME_AS_CLOCK": "시계와 시간 (예 : 5:23)",
+          "TIME_AS_MILLISECONDS": "시간 (밀리 초)",
+          "TIME_AS_STRING": "문자열을 나타내는 시간 (예 : 5h 23m)",
+          "TITLES_AND_SUB_TASK_TITLES": "제목 및 하위 작업 제목",
+          "WORKLOG": "작업 로그"
+        },
+        "ROUND_END_TIME_TO": "라운드 종료 시간 :",
+        "ROUND_START_TIME_TO": "라운드 시작 시간 :",
+        "ROUND_TIME_WORKED_TO": "왕복 근무 시간",
+        "SAVE_TO_FILE": "파일에 저장",
+        "SEPARATE_TASKS_BY": "작업 분리",
+        "SHOW_AS_TEXT": "텍스트로 표시"
+      },
+      "WEEK": {
+        "EXPORT": "주 데이터 내보내기",
+        "TITLE": "표제"
+      }
+    }
+  },
+  "FILE_IMEX": {
+    "EXPORT_DATA": "데이터 내보내기",
+    "IMPORT_FROM_FILE": "파일에서 가져 오기"
+  },
+  "F_AUTO_BACKUPS": {
+    "HELP": "뭔가 잘못되었을 때를 대비하여 모든 데이터를 앱 폴더에 자동 저장하십시오.",
+    "LABEL_IS_ENABLED": "자동 백업 사용",
+    "TITLE": "자동 백업"
+  },
+  "F_GOOGLE_DRIVE_SYNC": {
+    "HELP": "여기에서 하나의 Google 드라이브 파일간에 자동 동기화되도록 앱을 구성 할 수 있습니다. 모든 데이터는 암호화되지 않은 상태로 저장되므로 실수로이 파일을 누군가와 공유하지 않도록하십시오.",
+    "TITLE": "Google 드라이브를 통해 동기화"
+  },
+  "F_IDLE": {
+    "HELP": "<div><p>유휴 시간 처리가 활성화되면 유휴 상태 일 때 지정된 시간 후에 대화 상자가 열리고 시간을 추적하려는 작업이 있는지 여부를 확인합니다.</p></div>",
+    "IS_ENABLE_IDLE_TIME_TRACKING": "유휴 시간 처리 사용",
+    "IS_ONLY_OPEN_IDLE_WHEN_CURRENT_TASK": "현재 작업이 선택되면 유휴 시간 대화 상자 만 트리거합니다.",
+    "IS_UN_TRACKED_IDLE_RESETS_BREAK_TIMER": "방해받지 않는 유휴 시간 재설정은 휴식 타이머를 취합니다.",
+    "MIN_IDLE_TIME": "X 후에 유휴 트리거",
+    "TITLE": "유휴 처리"
+  },
+  "F_IMEX": {
+    "HELP": "<p>여기서 모든 데이터를 백업용 <strong>JSON</strong> 로 내보낼 수 있지만 다른 컨텍스트에서 사용할 수도 있습니다 (예 : 브라우저에서 프로젝트를 내보내고 데스크탑 버전으로 가져 오기를 원할 수 있습니다 ). </p> <p>가져 오기에서는 유효한 JSON이 텍스트 영역에 복사 될 것으로 예상합니다. <strong>참고 : 가져 오기 버튼을 누르면 모든 현재 설정과 데이터를 덮어 씁니다!</strong></p>",
+    "TITLE": "수입 수출"
+  },
+  "F_KEYBOARD": {
+    "ADD_NEW_NOTE": "새 메모 추가",
+    "ADD_NEW_TASK": "새 작업 추가",
+    "APP_WIDE_SHORTCUTS": "글로벌 단축키 (응용 프로그램 전체)",
+    "COLLAPSE_SUB_TASKS": "하위 작업 축소",
+    "EXPAND_SUB_TASKS": "하위 작업 확장",
+    "FOCUS_LAST_ACTIVE_TASK": "마지막 활성 작업 집중",
+    "GLOBAL_SHOW_HIDE": "최고 생산성 표시 / 숨기기",
+    "GLOBAL_TOGGLE_TASK_START": "마지막 활성 작업에 대한 시간 추적 토글",
+    "GO_TO_DAILY_AGENDA": "일정 목록으로 이동",
+    "GO_TO_FOCUS_MODE": "초점 모드로 이동",
+    "GO_TO_SETTINGS": "설정으로 바로 가기",
+    "GO_TO_WORK_VIEW": "작업보기로 이동",
+    "HELP": "<p>여기에서 모든 키보드 단축키를 구성 할 수 있습니다.</p> <p>텍스트 입력을 클릭하고 원하는 키보드 조합을 입력하십시오. 저장하려면 Enter 키를 누르고 중단하려면 Esc 키를 누르십시오.</p> <p>바로 가기에는 세 가지 유형이 있습니다.</p> <ul> <li> <strong>전역 바로 가기 :</strong> 앱이 실행 중일 때 다른 모든 애플리케이션에서 동작을 트리거합니다. </li> <li> <strong>응용 프로그램 수준 바로 가기 :</strong> 응용 프로그램의 모든 화면에서 트리거하지만 현재 텍스트 필드를 편집하는 경우에는 트리거하지 않습니다. </li> <li> <strong>작업 수준 바로 가기 :</strong> 마우스 또는 키보드를 통해 작업을 선택하고 일반적으로 해당 작업과 관련된 작업을 트리거하는 경우에만 트리거됩니다. </li> </ul>",
+    "MOVE_TASK_DOWN": "목록에서 작업 이동",
+    "MOVE_TASK_UP": "목록에서 작업 이동",
+    "MOVE_TO_BACKLOG": "작업을 작업 백 로그로 이동",
+    "MOVE_TO_TODAYS_TASKS": "오늘의 작업 목록으로 작업 이동",
+    "OPEN_PROJECT_NOTES": "프로젝트 노트 표시 / 숨기기",
+    "SELECT_NEXT_TASK": "다음 작업 선택",
+    "SELECT_PREVIOUS_TASK": "이전 작업 선택",
+    "SYSTEM_SHORTCUTS": "글로벌 단축키 (시스템 전체)",
+    "TASK_ADD_SUB_TASK": "하위 작업 추가",
+    "TASK_DELETE": "작업 삭제",
+    "TASK_EDIT_TITLE": "제목 수정",
+    "TASK_OPEN_ESTIMATION_DIALOG": "견적 / 소요 시간 수정",
+    "TASK_SCHEDULE": "작업 예약",
+    "TASK_SHORTCUTS": "할 일 목록",
+    "TASK_SHORTCUTS_INFO": "다음 바로 가기가 현재 선택된 작업 (탭 또는 마우스를 통해 선택)에 적용됩니다.",
+    "TASK_TOGGLE_ADDITIONAL_INFO_OPEN": "추가 작업 정보 표시 / 숨기기",
+    "TASK_TOGGLE_DONE": "완료 여부 토글",
+    "TITLE": "키보드 단축키",
+    "TOGGLE_BACKLOG": "작업 백 로그 표시 / 숨기기",
+    "TOGGLE_BOOKMARKS": "북마크 바 표시 / 숨기기",
+    "TOGGLE_PLAY": "작업 시작 / 중지",
+    "ZOOM_DEFAULT": "확대 / 축소 기본값 (데스크톱 만 해당)",
+    "ZOOM_IN": "확대 (데스크톱에만 해당)",
+    "ZOOM_OUT": "축소 (데스크톱에만 해당)"
+  },
+  "F_LANG": {
+    "AR": "아라비아 말",
+    "DE": "독일 사람",
+    "EN": "영어",
+    "ES": "스페인 사람",
+    "FR": "프랑스 국민",
+    "JA": "일본어",
+    "KO": "한국어",
+    "LABEL": "언어를 선택하십시오.",
+    "RU": "러시아인",
+    "TITLE": "언어",
+    "TR": "터키어",
+    "ZH": "중국말"
+  },
+  "F_MISC": {
+    "HELP": "",
+    "IS_AUTO_MARK_PARENT_AS_DONE": "모든 하위 작업이 완료되면 상위 작업을 완료로 표시합니다.",
+    "IS_CONFIRM_BEFORE_EXIT": "앱을 종료하기 전에 확인",
+    "IS_DISABLE_REMIND_WHEN_FORGOT_TO_FINISH_DAY": "잊혀진 종료일에 대한 알림 사용 중지",
+    "IS_HIDE_NAV": "기본 헤더가 올라갈 때까지 탐색을 숨 깁니다 (데스크톱 만 해당).",
+    "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "예상 시간을 초과했을 때 알림",
+    "TITLE": "기타 설정"
+  },
+  "F_POMODORO": {
+    "BREAK_DURATION": "짧은 휴식 시간",
+    "CYCLES_BEFORE_LONGER_BREAK": "X 작업 세션 후에 더 긴 휴식을 시작하십시오.",
+    "DURATION": "작업 세션의 지속 기간",
+    "HELP": "<p>포모도로 타이머는 몇 가지 설정을 통해 구성 할 수 있습니다. 모든 작업 세션의 지속 시간, 정상 휴식 기간, 긴 휴식 시간이 시작되기 전에 실행할 작업 세션 수 및이 긴 휴식 기간.</p> <p>당신은 당신의 pomodoro 휴식 시간 동안 산만을 표시하고 싶다면 설정할 수 있습니다.</p> <p>\"Pomodoro break on pomodoro break\"설정은 작업에 소요되는 작업 시간으로 휴식 시간을 추적합니다. </p> <p>활성 작업이 없을 때 pomodoro 세션을 일시 중지하면 작업을 일시 중지 할 때 pomodoro 세션도 일시 중지됩니다.</p>",
+    "IS_ENABLED": "포모도로 타이머 사용",
+    "IS_MANUAL_CONTINUE": "수동으로 다음 pomodoro 세션 시작 확인",
+    "IS_PLAY_SOUND": "세션이 끝나면 소리를냅니다.",
+    "IS_PLAY_SOUND_AFTER_BREAK": "휴식이 끝나면 소리를 내십시오.",
+    "IS_PLAY_TICK": "매초마다 틱 소리 재생",
+    "IS_STOP_TRACKING_ON_BREAK": "휴식 시간에 작업 중지 시간 추적",
+    "LONGER_BREAK_DURATION": "긴 휴식 시간",
+    "TITLE": "Pomodoro 설정"
+  },
+  "F_TAKE_A_BREAK": {
+    "HELP": "<div> <p>중단하지 않고 지정된 시간 동안 작업 한 경우 다시 알림을 구성 할 수 있습니다.</p> <p>표시된 메시지를 수정할 수 있습니다. ${duration} 은 휴식 시간없이 바뀝니다.</p> </div>",
+    "IS_ENABLED": "휴식 알림을 사용하도록 설정",
+    "MESSAGE": "휴식 메시지 받기",
+    "MIN_WORKING_TIME": "트리거가없는 X 작업 후 휴식 알림을받습니다.",
+    "TITLE": "휴식 알림"
+  },
+  "G": {
+    "CANCEL": "취소",
+    "CLICK_TO_EDIT": "편집하려면 클릭하십시오.",
+    "CLOSE": "닫기",
+    "DELETE": "지우다",
+    "DISMISS": "버리다",
+    "DO_IT": "해!",
+    "LOGIN": "로그인",
+    "LOGOUT": "로그 아웃",
+    "NEXT": "다음 것",
+    "OK": "승인",
+    "PREVIOUS": "너무 이른",
+    "REMOVE": "풀다",
+    "SAVE": "구하다",
+    "TITLE": "표제",
+    "UNDO": "끄르다",
+    "UPDATE": "최신 정보"
+  },
+  "MH": {
+    "ADD_NEW_TASK": "새 작업 추가",
+    "CREATE_PROJECT": "프로젝트 만들기",
+    "GO_TO_TASK_LIST": "작업 목록으로 이동",
+    "MANAGE_PROJECTS": "프로젝트 관리",
+    "METRICS": "측정 항목",
+    "PROCRASTINATE": "미루다",
+    "PROJECTS": "프로젝트",
+    "PROJECT_MENU": "프로젝트 메뉴",
+    "SETTINGS": "설정",
+    "TASKS": "할 일 목록",
+    "TASK_LIST": "작업 목록",
+    "TOGGLE_SHOW_BOOKMARKS": "북마크 표시 / 숨기기",
+    "TOGGLE_SHOW_NOTES": "프로젝트 노트 표시 / 숨기기",
+    "TOGGLE_TRACK_TIME": "추적 시작 / 중지 시간",
+    "WORKLOG": "작업 로그"
+  },
+  "PDS": {
+    "BACK": "잠깐 내가 뭔가를 잊었 어!",
+    "BREAK_LABEL": "휴식 (nr / 시간)",
+    "CELEBRATE": "축하해 <i>기념일을 가져 가세요!</i>",
+    "CLEAR_ALL_CONTINUE": "모두 완료하고 계속하기",
+    "D_CONFIRM_APP_CLOSE": {
+      "CANCEL": "아니요, 작업을 취소하십시오.",
+      "MSG": "당신은 일을 끝냈습니다. 집에 갈 시간!",
+      "OK": "네 네! 일시 휴업!"
+    },
+    "EVALUATION": "평가",
+    "EXPORT_TASK_LIST": "작업 목록 내보내기",
+    "GOOGLE_SHEET": "Google 시트",
+    "NO_TASKS": "오늘은 아무 작업도 없습니다.",
+    "ROUND_15M": "모든 작업을 15 분으로 반올림",
+    "ROUND_30M": "모든 작업을 30 분으로 반올림",
+    "ROUND_5M": "모든 작업을 5 분으로 반올림",
+    "ROUND_TIME_SPENT": "소요 시간",
+    "ROUND_TIME_SPENT_TITLE": "모든 작업에 소요 된 시간. 조심해! 이 작업을 실행 취소 할 수 없습니다!",
+    "ROUND_TIME_WARNING": "!!! 이것이 취소 할 수 없다는 것을주의하십시오 !!!",
+    "ROUND_UP_15M": "모든 작업을 15 분으로 올림",
+    "ROUND_UP_30M": "모든 작업을 30 분으로 올림",
+    "ROUND_UP_5M": "모든 작업을 5 분으로 올림",
+    "SAVE_AND_GO_HOME": "저장하고 집에 가라.",
+    "START_END": "시작 - 끝",
+    "SUMMARY_FOR": " {{dayStr}}의 일일 요약",
+    "TASKS_COMPLETED": "완료된 작업",
+    "TASK_LIST": "작업 목록",
+    "TIME_SPENT_AND_ESTIMATE_LABEL": "소요 시간 / 예상",
+    "TIME_SPENT_ESTIMATE_TITLE": "소요 시간 : 오늘 보낸 총 시간. 아카이브 된 태스크는 포함되지 않습니다. - 예상 시간 : 오늘 작업 한 작업에 대한 예상 시간에서 다른 날에 이미 소비 한 시간을 뺀 시간입니다.",
+    "TODAY": "오늘",
+    "WEEK": "주"
+  },
+  "PM": {
+    "TITLE": "프로젝트 측정 항목"
+  },
+  "PP": {
+    "ARCHIVED_PROJECTS": "보관 된 프로젝트",
+    "ARCHIVE_PROJECT": "프로젝트 아카이브",
+    "CREATE_NEW": "새로 만들기",
+    "DELETE_PROJECT": "프로젝트 삭제",
+    "D_CONFIRM_ARCHIVE": {
+      "MSG": "이 프로젝트를 보관 하시겠습니까? 보관 된 프로젝트는 더 이상 메뉴에 표시되지 않으며 복원하지 않으면 데이터에 액세스 할 수 없습니다. 이렇게하기 전에 데이터를 백업하는 것이 좋습니다.",
+      "OK": "아카이브"
+    },
+    "D_CONFIRM_DELETE": {
+      "MSG": "이 프로젝트를 삭제 하시겠습니까? 이렇게하기 전에 데이터를 백업하는 것이 좋습니다.",
+      "OK": "지우다"
+    },
+    "D_CONFIRM_UNARCHIVE": {
+      "MSG": "이 프로젝트를 보관 취소 하시겠습니까?",
+      "OK": "보관 취소"
+    },
+    "EDIT_PROJECT": "프로젝트 수정",
+    "EXPORT_PROJECT": "프로젝트 내보내기",
+    "GITHUB_CONFIGURED": "Github 통합 구성",
+    "IMPORT_FROM_FILE": "파일에서 가져 오기",
+    "JIRA_CONFIGURED": "Jira 통합 구성",
+    "S_INVALID_JSON": "프로젝트 파일에 잘못된 json이 있습니다.",
+    "TITLE": "프로젝트 개요",
+    "UN_ARCHIVE_PROJECT": "프로젝트 보관 취소"
+  },
+  "PS": {
+    "GLOBAL_SETTINGS": "전체 설정",
+    "PROJECT_SETTINGS": "프로젝트 별 설정"
+  },
+  "S": {
+    "SYNC": {
+      "ERROR_FALLBACK_TO_BACKUP": "데이터를 가져 오는 중에 문제가 발생했습니다. 로컬 백업으로 되돌아갑니다.",
+      "ERROR_INVALID_DATA": "동기화하는 동안 오류가 발생했습니다. 유효하지 않은 데이터",
+      "IMPORTING": "데이터 가져 오기",
+      "SUCCESS": "가져온 데이터"
+    }
+  },
+  "V": {
+    "E_1TO10": "1에서 10 사이의 값을 입력하십시오.",
+    "E_DATETIME": "입력 된 값은 datetime이 아닙니다!"
+  },
+  "WW": {
+    "ADD_MORE": "더 추가하기",
+    "ADD_SOME_TASKS": "하루 계획을 세우십시오!",
+    "COMPLETED_TASKS": "완료된 작업",
+    "ESTIMATE_REMAINING": "예상 남은 시간 :",
+    "FINISH_DAY": "피니시 데이",
+    "HELP_PROCRASTINATION": "내가 미루는 걸 도와주세요!",
+    "NO_COMPLETED_TASKS": "현재 완료된 작업이 없습니다.",
+    "NO_PLANNED_TASKS": "계획된 작업 없음",
+    "READY_TO_WORK": "준비 완료!",
+    "TIME_ESTIMATED": "예상 시간 :",
+    "WITHOUT_BREAK": "휴식없이 :",
+    "WORKING_TODAY": "오늘은 일한다:"
+  }
+}

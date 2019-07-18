@@ -36,7 +36,7 @@ export class GlobalConfigEffects {
         if (isPublicPropUpdated && isPublicSection) {
           this._store.dispatch(new SnackOpen({
             type: 'SUCCESS',
-            msg: T.F.CONFIG.SNACK.UPDATE_SECTION,
+            msg: T.F.CONFIG.S.UPDATE_SECTION,
             translateParams: {sectionKey}
           }));
         }

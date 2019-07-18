@@ -176,7 +176,7 @@ export class JiraIssueEffects {
         if (isEmail(currentUserName)) {
           this._snackService.open({
             svgIco: 'jira',
-            msg: T.F.JIRA.SNACK.UNABLE_TO_REASSIGN,
+            msg: T.F.JIRA.S.UNABLE_TO_REASSIGN,
           });
           return EMPTY;
         } else if (!issue) {
@@ -263,7 +263,7 @@ export class JiraIssueEffects {
       tap(tasks => {
         console.warn('TASKS WITH MISSING ISSUE DATA FOR JIRA', tasks);
         this._snackService.open({
-          msg: T.F.JIRA.SNACK.MISSING_ISSUE_DATA,
+          msg: T.F.JIRA.S.MISSING_ISSUE_DATA,
           svgIco: 'jira',
         });
         tasks.forEach((task) => this._jiraIssueService.loadMissingIssueData(task.issueId));
@@ -305,7 +305,7 @@ export class JiraIssueEffects {
       const issueIds = issueIds_ as string[];
       if (issueIds && issueIds.length > 0) {
         this._snackService.open({
-          msg: T.F.JIRA.SNACK.POLLING,
+          msg: T.F.JIRA.S.POLLING,
           svgIco: 'jira',
           isSubtle: true,
         });
@@ -346,7 +346,7 @@ export class JiraIssueEffects {
       default:
         if (!chosenTransition || !chosenTransition.id) {
           this._snackService.open({
-            msg: T.F.JIRA.SNACK.NO_VALID_TRANSITION,
+            msg: T.F.JIRA.S.NO_VALID_TRANSITION,
             type: 'ERROR',
           });
           // NOTE: we would kill the whole effect chain if we do this
@@ -360,7 +360,7 @@ export class JiraIssueEffects {
               tap(() => {
                 this._snackService.open({
                   type: 'SUCCESS',
-                  msg: T.F.JIRA.SNACK.TRANSITION_SUCCESS,
+                  msg: T.F.JIRA.S.TRANSITION_SUCCESS,
                   translateParams: {
                     issueKey: `${issue.key}`,
                     chosenTransition: `${chosenTransition.name}`,
@@ -420,7 +420,7 @@ export class JiraIssueEffects {
           translateParams: {
             issueText: truncate(`${issuesToAdd[0].key} ${issuesToAdd[0].summary}`),
           },
-          msg: T.F.JIRA.SNACK.IMPORTED_SINGLE_ISSUE,
+          msg: T.F.JIRA.S.IMPORTED_SINGLE_ISSUE,
           ico: 'cloud_download',
           isSubtle: true,
         });
@@ -429,7 +429,7 @@ export class JiraIssueEffects {
           translateParams: {
             issuesLength: issuesToAdd.length
           },
-          msg: T.F.JIRA.SNACK.IMPORTED_MULTIPLE_ISSUES,
+          msg: T.F.JIRA.S.IMPORTED_MULTIPLE_ISSUES,
           ico: 'cloud_download',
           isSubtle: true,
         });

@@ -63,7 +63,7 @@ export class GithubIssueEffects {
     tap(([x, githubCfg, issues]: [any, GithubCfg, GithubIssue[]]) => {
       if (issues && issues.length > 0) {
         this._snackService.open({
-          msg: T.F.GITHUB.SNACK.POLLING,
+          msg: T.F.GITHUB.S.POLLING,
           svgIco: 'github',
           isSubtle: true,
         });
@@ -126,7 +126,7 @@ export class GithubIssueEffects {
       tap(tasks => {
         console.warn('TASKS WITH MISSING ISSUE DATA FOR GITHUB', tasks);
         this._snackService.open({
-          msg: T.F.GITHUB.SNACK.MISSING_ISSUE_DATA,
+          msg: T.F.GITHUB.S.MISSING_ISSUE_DATA,
           svgIco: 'github',
           isSubtle: true,
         });
@@ -173,7 +173,7 @@ export class GithubIssueEffects {
           translateParams: {
             issueText: `#${issuesToAdd[0].number} ${issuesToAdd[0].title}`
           },
-          msg: T.F.GITHUB.SNACK.IMPORTED_SINGLE_ISSUE,
+          msg: T.F.GITHUB.S.IMPORTED_SINGLE_ISSUE,
           isSubtle: true,
         });
       } else if (issuesToAdd.length > 1) {
@@ -182,7 +182,7 @@ export class GithubIssueEffects {
           translateParams: {
             issueLength: issuesToAdd.length
           },
-          msg: T.F.GITHUB.SNACK.IMPORTED_MULTIPLE_ISSUES,
+          msg: T.F.GITHUB.S.IMPORTED_MULTIPLE_ISSUES,
           isSubtle: true,
         });
       }

@@ -167,7 +167,7 @@ export class GithubApiService {
     if (!this._isValidSettings()) {
       this._snackService.open({
         type: 'ERROR',
-        msg: T.F.GITHUB.SNACK.ERR_NOT_CONFIGURED
+        msg: T.F.GITHUB.S.ERR_NOT_CONFIGURED
       });
       throw new Error(`${HANDLED_ERROR} Not enough settings`);
     }
@@ -179,7 +179,7 @@ export class GithubApiService {
       // A client-side or network error occurred. Handle it accordingly.
       this._snackService.open({
         type: 'ERROR',
-        msg: T.F.GITHUB.SNACK.ERR_NETWORK,
+        msg: T.F.GITHUB.S.ERR_NETWORK,
       });
     } else {
       // The backend returned an unsuccessful response code.
@@ -189,7 +189,7 @@ export class GithubApiService {
           statusCode: error.status,
           errorMsg: error.error && error.error.message,
         },
-        msg: T.F.GITHUB.SNACK.ERR_NOT_CONFIGURED,
+        msg: T.F.GITHUB.S.ERR_NOT_CONFIGURED,
       });
     }
     if (error && error.message) {

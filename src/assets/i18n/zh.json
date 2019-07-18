@@ -64,7 +64,7 @@
       }
     },
     "CONFIG": {
-      "SNACK": {
+      "S": {
         "UPDATE_SECTION": "已更新 <strong>{{sectionKey}}</strong>的设置"
       }
     },
@@ -92,7 +92,7 @@
         "SUMMARY": "摘要",
         "WRITE_A_COMMENT": "留个评论"
       },
-      "SNACK": {
+      "S": {
         "ERR_NETWORK": "Github：由于客户端网络错误，请求失败",
         "ERR_NOT_CONFIGURED": "Github：没有正确配置",
         "ERR_REQUEST": "Github：API返回 {{statusCode}}。 {{errorMsg}}",
@@ -155,10 +155,10 @@
         "ROUND_START_TIME_TO": "回合开始时间",
         "ROUND_TIME_WORKED_TO": "回合时间适用于",
         "SAVE_ROW": "保存行",
-        "SNACK_EQUAL_VALUES": "当前值和上次保存的行具有相同的值，这可能不是您想要的。",
-        "SNACK_ROW_APPENDED": "行已成功附加"
+        "S_EQUAL_VALUES": "当前值和上次保存的行具有相同的值，这可能不是您想要的。",
+        "S_ROW_APPENDED": "行已成功附加"
       },
-      "SNACKS": {
+      "S": {
         "DOWNLOADING_UPDATE": "Google云端硬盘：有远程更新！下载...",
         "ERROR": "Google云端硬盘 - 错误：",
         "ERROR_INITIAL_IMPORT": "Google云端硬盘：尝试最初导入数据时出错",
@@ -169,7 +169,7 @@
         "SUCCESS": "Google云端硬盘：已成功保存备份",
         "SYNCING": "Google云端硬盘：同步"
       },
-      "SNACK_API": {
+      "S_API": {
         "ERR": "GoogleApi错误： {{errStr}}",
         "ERR_NO_FILE_ID": "GoogleApi：未指定文件ID",
         "ERR_NO_FILE_NAME": "GoogleApi：未指定文件名",
@@ -290,7 +290,7 @@
         "WORKLOG": "工作日志",
         "WRITE_A_COMMENT": "留个评论"
       },
-      "SNACK": {
+      "S": {
         "EXTENSION_NOT_LOADED": "超级生产力扩展未加载。重新加载页面可能会有所帮助",
         "IMPORTED_MULTIPLE_ISSUES": "Jira：从jira到backlog导入 {{issuesLength}} 个新问题",
         "IMPORTED_SINGLE_ISSUE": "Jira：从jira导入问题“{{issueText}}”到积压",
@@ -344,7 +344,7 @@
         "PRODUCTIVITY": "你的工作效率如何？",
         "PRODUCTIVITY_HINT": "1：还没开始 -  10：非常有效率"
       },
-      "SNACK": {
+      "S": {
         "SAVE_METRIC": "公制成功保存"
       }
     },
@@ -375,7 +375,7 @@
         "ENABLE_PARSE": "启用降价解析"
       },
       "REMOVE_REMINDER": "删除提醒",
-      "SNACK": {
+      "S": {
         "ADDED_REMINDER": "添加提醒备注",
         "DELETED_REMINDER": "已删除备注提醒",
         "UPDATED_REMINDER": "更新了提醒注意事项"
@@ -392,7 +392,7 @@
         "SESSION_X_START": "番茄钟：会话 {{nr}} 开始了！"
       },
       "SKIP_BREAK": "跳过休息",
-      "SNACK": {
+      "S": {
         "SESSION_X_START": "番茄钟：会话 {{nr}} 开始了！"
       }
     },
@@ -456,7 +456,7 @@
         "L_TITLE": "标题",
         "TITLE": "项目设置和主题"
       },
-      "SNACK": {
+      "S": {
         "ARCHIVED": "存档项目",
         "CREATED": "创建项目 <strong>{{title}}</strong>。您可以从左上角的菜单中选择它。",
         "DELETED": "删除项目",
@@ -468,7 +468,7 @@
       }
     },
     "REMINDER": {
-      "SNACK_REMINDER_ERR": "提醒界面出错"
+      "S_REMINDER_ERR": "提醒界面出错"
     },
     "SIMPLE_TASK_EXPORT": {
       "CLOSE": "关",
@@ -880,7 +880,7 @@
     "GITHUB_CONFIGURED": "配置Github集成",
     "IMPORT_FROM_FILE": "从文件导入",
     "JIRA_CONFIGURED": "配置Jira集成",
-    "SNACK_INVALID_JSON": "项目文件的json无效",
+    "S_INVALID_JSON": "项目文件的json无效",
     "TITLE": "项目概况",
     "UN_ARCHIVE_PROJECT": "Unarchive项目"
   },

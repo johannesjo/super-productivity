@@ -72,7 +72,7 @@ export class ProjectPageComponent implements OnInit, OnDestroy {
         project = JSON.parse(textData.toString());
         this.projectService.importCompleteProject(project);
       } catch (e) {
-        this._snackService.open({type: 'ERROR', msg: T.PP.SNACK_INVALID_JSON});
+        this._snackService.open({type: 'ERROR', msg: T.PP.S_INVALID_JSON});
       }
     };
     reader.readAsText(file);

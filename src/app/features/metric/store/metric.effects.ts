@@ -36,7 +36,7 @@ export class MetricEffects {
       ),
       mapTo(new SnackOpen({
         type: 'SUCCESS',
-        msg: T.F.METRIC.SNACK.SAVE_METRIC
+        msg: T.F.METRIC.S.SAVE_METRIC
       })),
     );
 

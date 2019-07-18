@@ -301,7 +301,7 @@ export class ProjectService {
       if (state.entities[project.id]) {
         this._snackService.open({
           type: 'ERROR',
-          msg: T.F.PROJECT.SNACK.E_EXISTS,
+          msg: T.F.PROJECT.S.E_EXISTS,
           translateParams: {title: project.title}
         });
       } else {
@@ -309,7 +309,7 @@ export class ProjectService {
         this.upsert(project);
       }
     } else {
-      this._snackService.open({type: 'ERROR', msg: T.F.PROJECT.SNACK.E_INVALID_FILE});
+      this._snackService.open({type: 'ERROR', msg: T.F.PROJECT.S.E_INVALID_FILE});
     }
   }
 

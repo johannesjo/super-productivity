@@ -86,7 +86,7 @@ export class NoteEffects {
           }),
           new SnackOpen({
             type: 'SUCCESS',
-            msg: T.F.NOTE.SNACK.ADDED_REMINDER,
+            msg: T.F.NOTE.S.ADDED_REMINDER,
             ico: 'schedule',
           }),
         ];
@@ -106,7 +106,7 @@ export class NoteEffects {
         });
         return new SnackOpen({
           type: 'SUCCESS',
-          msg: T.F.NOTE.SNACK.UPDATED_REMINDER,
+          msg: T.F.NOTE.S.UPDATED_REMINDER,
           ico: 'schedule',
         });
       })
@@ -130,7 +130,7 @@ export class NoteEffects {
           }),
           new SnackOpen({
             type: 'SUCCESS',
-            msg: T.F.NOTE.SNACK.DELETED_REMINDER,
+            msg: T.F.NOTE.S.DELETED_REMINDER,
             ico: 'schedule',
           }),
         ];

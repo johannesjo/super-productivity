@@ -244,8 +244,8 @@ export class JiraApiService {
       this._snackService.open({
         type: 'ERROR',
         msg: (!IS_ELECTRON && !this._isExtension)
-          ? T.F.JIRA.SNACK.EXTENSION_NOT_LOADED
-          : T.F.JIRA.SNACK.INSUFFICIENT_SETTINGS,
+          ? T.F.JIRA.S.EXTENSION_NOT_LOADED
+          : T.F.JIRA.S.INSUFFICIENT_SETTINGS,
       });
       return throwError({handledError: 'Insufficient Settings for Jira'});
     }
@@ -290,7 +290,7 @@ export class JiraApiService {
         console.log('ERROR', 'Jira Request timed out for ' + request.apiMethod, request);
         // delete entry for promise
         this._snackService.open({
-          msg: T.F.JIRA.SNACK.TIMED_OUT,
+          msg: T.F.JIRA.S.TIMED_OUT,
           type: 'ERROR',
         });
         this._requestsLog[request.requestId].reject('Request timed out');

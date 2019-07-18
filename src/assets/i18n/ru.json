@@ -64,7 +64,7 @@
       }
     },
     "CONFIG": {
-      "SNACK": {
+      "S": {
         "UPDATE_SECTION": "Обновлены настройки для <strong>{{sectionKey}}</strong>"
       }
     },
@@ -92,7 +92,7 @@
         "SUMMARY": "Резюме",
         "WRITE_A_COMMENT": "Написать комментарий"
       },
-      "SNACK": {
+      "S": {
         "ERR_NETWORK": "Github: запрос не выполнен из-за ошибки сети на стороне клиента",
         "ERR_NOT_CONFIGURED": "Github: неправильно настроен",
         "ERR_REQUEST": "Github: API возвратил {{statusCode}}. {{errorMsg}}",
@@ -155,10 +155,10 @@
         "ROUND_START_TIME_TO": "Время начала раунда до",
         "ROUND_TIME_WORKED_TO": "Время раунда работало на",
         "SAVE_ROW": "Сохранить строку",
-        "SNACK_EQUAL_VALUES": "Текущие значения и последняя сохраненная строка имеют одинаковые значения, это, вероятно, не то, что вы хотите.",
-        "SNACK_ROW_APPENDED": "Строка успешно добавлена"
+        "S_EQUAL_VALUES": "Текущие значения и последняя сохраненная строка имеют одинаковые значения, это, вероятно, не то, что вы хотите.",
+        "S_ROW_APPENDED": "Строка успешно добавлена"
       },
-      "SNACKS": {
+      "S": {
         "DOWNLOADING_UPDATE": "Google Drive: есть удаленное обновление! Загрузка ...",
         "ERROR": "Google Диск - Ошибка:",
         "ERROR_INITIAL_IMPORT": "Google Диск: Ошибка при попытке импортировать данные изначально",
@@ -169,7 +169,7 @@
         "SUCCESS": "Google Drive: успешно сохраненная резервная копия",
         "SYNCING": "Google Диск: Синхронизация"
       },
-      "SNACK_API": {
+      "S_API": {
         "ERR": "Ошибка GoogleApi: {{errStr}}",
         "ERR_NO_FILE_ID": "GoogleApi: идентификатор файла не указан",
         "ERR_NO_FILE_NAME": "GoogleApi: имя файла не указано",
@@ -290,7 +290,7 @@
         "WORKLOG": "Журнал событий",
         "WRITE_A_COMMENT": "Написать комментарий"
       },
-      "SNACK": {
+      "S": {
         "EXTENSION_NOT_LOADED": "Расширение Super Productivity Extension не загружено. Перезагрузка страницы может помочь",
         "IMPORTED_MULTIPLE_ISSUES": "Jira: импортировано {{issuesLength}} новых проблем из jira в отставание",
         "IMPORTED_SINGLE_ISSUE": "Jira: импортированная проблема \"{{issueText}}\" из jira в отставание",
@@ -344,7 +344,7 @@
         "PRODUCTIVITY": "Насколько эффективно вы работали?",
         "PRODUCTIVITY_HINT": "1: еще даже не начал - 10: чрезвычайно эффективный"
       },
-      "SNACK": {
+      "S": {
         "SAVE_METRIC": "Метрика успешно сохранена"
       }
     },
@@ -375,7 +375,7 @@
         "ENABLE_PARSE": "Включить анализ уценки"
       },
       "REMOVE_REMINDER": "Удалить напоминание",
-      "SNACK": {
+      "S": {
         "ADDED_REMINDER": "Добавлено напоминание для заметки",
         "DELETED_REMINDER": "Удалено напоминание для заметки",
         "UPDATED_REMINDER": "Обновленное напоминание для заметки"
@@ -392,7 +392,7 @@
         "SESSION_X_START": "Помодоро: Сессия {{nr}} началась!"
       },
       "SKIP_BREAK": "Пропустить перерыв",
-      "SNACK": {
+      "S": {
         "SESSION_X_START": "Помодоро: Сессия {{nr}} началась!"
       }
     },
@@ -456,7 +456,7 @@
         "L_TITLE": "заглавие",
         "TITLE": "Настройки проекта и тема"
       },
-      "SNACK": {
+      "S": {
         "ARCHIVED": "Архивный проект",
         "CREATED": "Создан проект <strong>{{title}}</strong>. Вы можете выбрать его из меню в левом верхнем углу.",
         "DELETED": "Удаленный проект",
@@ -468,7 +468,7 @@
       }
     },
     "REMINDER": {
-      "SNACK_REMINDER_ERR": "Ошибка интерфейса напоминания"
+      "S_REMINDER_ERR": "Ошибка интерфейса напоминания"
     },
     "SIMPLE_TASK_EXPORT": {
       "CLOSE": "близко",
@@ -880,7 +880,7 @@
     "GITHUB_CONFIGURED": "Интеграция Github настроена",
     "IMPORT_FROM_FILE": "Импорт из файла",
     "JIRA_CONFIGURED": "Интеграция Jira настроена",
-    "SNACK_INVALID_JSON": "Неверный JSON для файла проекта",
+    "S_INVALID_JSON": "Неверный JSON для файла проекта",
     "TITLE": "Обзор проекта",
     "UN_ARCHIVE_PROJECT": "Разархивировать проект"
   },

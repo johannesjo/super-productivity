@@ -64,7 +64,7 @@
       }
     },
     "CONFIG": {
-      "SNACK": {
+      "S": {
         "UPDATE_SECTION": " <strong>{{sectionKey}}</strong>の設定を更新しました"
       }
     },
@@ -92,7 +92,7 @@
         "SUMMARY": "概要",
         "WRITE_A_COMMENT": "コメントを書く"
       },
-      "SNACK": {
+      "S": {
         "ERR_NETWORK": "Github：クライアント側のネットワークエラーが原因で要求が失敗しました",
         "ERR_NOT_CONFIGURED": "Github：正しく設定されていません",
         "ERR_REQUEST": "Github：APIが {{statusCode}}を返しました。 {{errorMsg}}",
@@ -155,10 +155,10 @@
         "ROUND_START_TIME_TO": "ラウンド開始時間",
         "ROUND_TIME_WORKED_TO": "ラウンドタイム",
         "SAVE_ROW": "行を保存",
-        "SNACK_EQUAL_VALUES": "現在の値と最後に保存された行は等しい値を持っています、それはおそらくあなたが望むものではありません。",
-        "SNACK_ROW_APPENDED": "行が正常に追加されました"
+        "S_EQUAL_VALUES": "現在の値と最後に保存された行は等しい値を持っています、それはおそらくあなたが望むものではありません。",
+        "S_ROW_APPENDED": "行が正常に追加されました"
       },
-      "SNACKS": {
+      "S": {
         "DOWNLOADING_UPDATE": "Googleドライブ：リモートアップデートがあります。ダウンロードしています...",
         "ERROR": "Googleドライブ - エラー：",
         "ERROR_INITIAL_IMPORT": "Googleドライブ：最初にデータをインポートしようとしたときにエラーが発生しました",
@@ -169,7 +169,7 @@
         "SUCCESS": "Googleドライブ：バックアップを保存しました",
         "SYNCING": "Googleドライブ：同期"
       },
-      "SNACK_API": {
+      "S_API": {
         "ERR": "GoogleApiエラー： {{errStr}}",
         "ERR_NO_FILE_ID": "GoogleApi：ファイルIDが指定されていません",
         "ERR_NO_FILE_NAME": "GoogleApi：ファイル名が指定されていません",
@@ -290,7 +290,7 @@
         "WORKLOG": "作業記録",
         "WRITE_A_COMMENT": "コメントを書く"
       },
-      "SNACK": {
+      "S": {
         "EXTENSION_NOT_LOADED": "Super Productivity Extensionがロードされていません。ページをリロードすると役に立つかもしれません",
         "IMPORTED_MULTIPLE_ISSUES": "Jira：jiraからバックログに {{issuesLength}} 件の新しい問題をインポートしました",
         "IMPORTED_SINGLE_ISSUE": "Jira：jiraからバックログにissue \"{{issueText}}\"をインポートしました",
@@ -344,7 +344,7 @@
         "PRODUCTIVITY": "どのくらい効率的でしたか？",
         "PRODUCTIVITY_HINT": "1：まだ始まっていない -  10：非常に効率的"
       },
-      "SNACK": {
+      "S": {
         "SAVE_METRIC": "メトリックを保存しました"
       }
     },
@@ -375,7 +375,7 @@
         "ENABLE_PARSE": "マークダウン解析を有効にする"
       },
       "REMOVE_REMINDER": "リマインダーを削除",
-      "SNACK": {
+      "S": {
         "ADDED_REMINDER": "メモのメモを追加",
         "DELETED_REMINDER": "メモの削除されたメモ",
         "UPDATED_REMINDER": "メモの更新されたメモ"
@@ -392,7 +392,7 @@
         "SESSION_X_START": "ポモドーロ：セッション {{nr}} が始まりました！"
       },
       "SKIP_BREAK": "スキップブレーク",
-      "SNACK": {
+      "S": {
         "SESSION_X_START": "ポモドーロ：セッション {{nr}} が始まりました！"
       }
     },
@@ -456,7 +456,7 @@
         "L_TITLE": "タイトル",
         "TITLE": "プロジェクト設定とテーマ"
       },
-      "SNACK": {
+      "S": {
         "ARCHIVED": "アーカイブプロジェクト",
         "CREATED": "プロジェクト <strong>{{title}}</strong>を作成しました。あなたはそれを左上のメニューから選ぶことができます。",
         "DELETED": "削除されたプロジェクト",
@@ -468,7 +468,7 @@
       }
     },
     "REMINDER": {
-      "SNACK_REMINDER_ERR": "リマインダーインターフェースのエラー"
+      "S_REMINDER_ERR": "リマインダーインターフェースのエラー"
     },
     "SIMPLE_TASK_EXPORT": {
       "CLOSE": "閉じる",
@@ -880,7 +880,7 @@
     "GITHUB_CONFIGURED": "Github統合を設定済み",
     "IMPORT_FROM_FILE": "ファイルからインポート",
     "JIRA_CONFIGURED": "Jira統合が設定されました",
-    "SNACK_INVALID_JSON": "プロジェクトファイルのjsonが無効です",
+    "S_INVALID_JSON": "プロジェクトファイルのjsonが無効です",
     "TITLE": "プロジェクト概要",
     "UN_ARCHIVE_PROJECT": "アンアーカイブプロジェクト"
   },

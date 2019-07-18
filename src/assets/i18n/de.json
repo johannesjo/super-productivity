@@ -64,7 +64,7 @@
       }
     },
     "CONFIG": {
-      "SNACK": {
+      "S": {
         "UPDATE_SECTION": "Aktualisierte Einstellungen für <strong>{{sectionKey}}</strong>"
       }
     },
@@ -92,7 +92,7 @@
         "SUMMARY": "Zusammenfassung",
         "WRITE_A_COMMENT": "Schreibe einen Kommentar"
       },
-      "SNACK": {
+      "S": {
         "ERR_NETWORK": "Github: Anforderung aufgrund eines clientseitigen Netzwerkfehlers fehlgeschlagen",
         "ERR_NOT_CONFIGURED": "Github: Ist nicht richtig konfiguriert",
         "ERR_REQUEST": "Github: API hat {{statusCode}}zurückgegeben. {{errorMsg}}",
@@ -155,10 +155,10 @@
         "ROUND_START_TIME_TO": "Rundenstartzeit bis",
         "ROUND_TIME_WORKED_TO": "Rundenzeit arbeitete bis",
         "SAVE_ROW": "Zeile speichern",
-        "SNACK_EQUAL_VALUES": "Aktuelle Werte und die zuletzt gespeicherte Zeile haben gleiche Werte, das ist wahrscheinlich nicht das, was Sie wollen.",
-        "SNACK_ROW_APPENDED": "Zeile erfolgreich angehängt"
+        "S_EQUAL_VALUES": "Aktuelle Werte und die zuletzt gespeicherte Zeile haben gleiche Werte, das ist wahrscheinlich nicht das, was Sie wollen.",
+        "S_ROW_APPENDED": "Zeile erfolgreich angehängt"
       },
-      "SNACKS": {
+      "S": {
         "DOWNLOADING_UPDATE": "Google Drive: Es gibt ein Remote-Update! Wird heruntergeladen...",
         "ERROR": "Google Drive - Fehler:",
         "ERROR_INITIAL_IMPORT": "Google Drive: Fehler beim ersten Versuch, Daten zu importieren",
@@ -169,7 +169,7 @@
         "SUCCESS": "Google Drive: Backup erfolgreich gespeichert",
         "SYNCING": "Google Drive: Synchronisieren"
       },
-      "SNACK_API": {
+      "S_API": {
         "ERR": "GoogleApi-Fehler: {{errStr}}",
         "ERR_NO_FILE_ID": "GoogleApi: Keine Datei-ID angegeben",
         "ERR_NO_FILE_NAME": "GoogleApi: Es wurde kein Dateiname angegeben",
@@ -290,7 +290,7 @@
         "WORKLOG": "Arbeitsprotokoll",
         "WRITE_A_COMMENT": "Schreibe einen Kommentar"
       },
-      "SNACK": {
+      "S": {
         "EXTENSION_NOT_LOADED": "Super Productivity Extension nicht geladen. Das Neuladen der Seite könnte helfen",
         "IMPORTED_MULTIPLE_ISSUES": "Jira: {{issuesLength}} neue Probleme von Jira in den Rückstand importiert",
         "IMPORTED_SINGLE_ISSUE": "Jira: Importierte Ausgabe \"{{issueText}}\" von Jira in den Rückstand",
@@ -344,7 +344,7 @@
         "PRODUCTIVITY": "Wie effizient haben Sie gearbeitet?",
         "PRODUCTIVITY_HINT": "1: Noch nicht einmal angefangen - 10: Enorm effizient"
       },
-      "SNACK": {
+      "S": {
         "SAVE_METRIC": "Metrik erfolgreich gespeichert"
       }
     },
@@ -375,7 +375,7 @@
         "ENABLE_PARSE": "Markdown-Analyse aktivieren"
       },
       "REMOVE_REMINDER": "Erinnerung entfernen",
-      "SNACK": {
+      "S": {
         "ADDED_REMINDER": "Erinnerung für Notiz hinzugefügt",
         "DELETED_REMINDER": "Erinnerung für Notiz gelöscht",
         "UPDATED_REMINDER": "Erinnerung für Notiz aktualisiert"
@@ -392,7 +392,7 @@
         "SESSION_X_START": "Pomodoro: Sitzung {{nr}} gestartet!"
       },
       "SKIP_BREAK": "Pause überspringen",
-      "SNACK": {
+      "S": {
         "SESSION_X_START": "Pomodoro: Sitzung {{nr}} gestartet!"
       }
     },
@@ -456,7 +456,7 @@
         "L_TITLE": "Titel",
         "TITLE": "Projekteinstellungen & Thema"
       },
-      "SNACK": {
+      "S": {
         "ARCHIVED": "Archiviertes Projekt",
         "CREATED": "Erstelltes Projekt <strong>{{title}}</strong>. Sie können es aus dem Menü oben links auswählen.",
         "DELETED": "Gelöschtes Projekt",
@@ -468,7 +468,7 @@
       }
     },
     "REMINDER": {
-      "SNACK_REMINDER_ERR": "Fehler bei der Erinnerungsschnittstelle"
+      "S_REMINDER_ERR": "Fehler bei der Erinnerungsschnittstelle"
     },
     "SIMPLE_TASK_EXPORT": {
       "CLOSE": "Schließen",
@@ -880,7 +880,7 @@
     "GITHUB_CONFIGURED": "Github-Integration konfiguriert",
     "IMPORT_FROM_FILE": "Aus Datei importieren",
     "JIRA_CONFIGURED": "Jira-Integration konfiguriert",
-    "SNACK_INVALID_JSON": "Ungültiger JSON für Projektdatei",
+    "S_INVALID_JSON": "Ungültiger JSON für Projektdatei",
     "TITLE": "Projektübersicht",
     "UN_ARCHIVE_PROJECT": "Projekt aus dem Archiv entfernen"
   },

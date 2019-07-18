@@ -50,7 +50,7 @@ export class DialogJiraAddWorklogComponent {
       ).subscribe(res => {
         this._snackService.open({
           type: 'SUCCESS',
-          msg: T.F.JIRA.SNACK.ADDED_WORKLOG_FOR,
+          msg: T.F.JIRA.S.ADDED_WORKLOG_FOR,
           translateParams: {issueKey: this.issue.key}
         });
         // TODO not ideal...

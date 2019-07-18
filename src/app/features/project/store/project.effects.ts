@@ -212,7 +212,7 @@ export class ProjectEffects {
         return new SnackOpen({
           ico: 'add',
           type: 'SUCCESS',
-          msg: T.F.PROJECT.SNACK.CREATED,
+          msg: T.F.PROJECT.S.CREATED,
           translateParams: {title: action.payload.project.title}
         });
       }),
@@ -226,7 +226,7 @@ export class ProjectEffects {
       map((action: DeleteProject) => {
         return new SnackOpen({
           ico: 'delete_forever',
-          msg: T.F.PROJECT.SNACK.DELETED
+          msg: T.F.PROJECT.S.DELETED
         });
       }),
     );
@@ -254,7 +254,7 @@ export class ProjectEffects {
         this._reminderService.removeReminderByProjectId(action.payload.id);
         this._snackService.open({
           ico: 'archive',
-          msg: T.F.PROJECT.SNACK.ARCHIVED,
+          msg: T.F.PROJECT.S.ARCHIVED,
         });
       }),
     );
@@ -269,7 +269,7 @@ export class ProjectEffects {
 
         this._snackService.open({
           ico: 'unarchive',
-          msg: T.F.PROJECT.SNACK.UNARCHIVED
+          msg: T.F.PROJECT.S.UNARCHIVED
         });
       }),
     );
@@ -282,7 +282,7 @@ export class ProjectEffects {
       map((action: UpdateProjectIssueProviderCfg) => {
         return new SnackOpen({
           type: 'SUCCESS',
-          msg: T.F.PROJECT.SNACK.ISSUE_PROVIDER_UPDATED,
+          msg: T.F.PROJECT.S.ISSUE_PROVIDER_UPDATED,
           translateParams: {
             issueProviderKey: action.payload.issueProviderKey
           }
@@ -298,7 +298,7 @@ export class ProjectEffects {
       map((action: UpdateProject) => {
         return new SnackOpen({
           type: 'SUCCESS',
-          msg: T.F.PROJECT.SNACK.UPDATED,
+          msg: T.F.PROJECT.S.UPDATED,
         });
       })
     );

@@ -46,7 +46,7 @@ export class DialogJiraTransitionComponent {
           this._jiraIssueService.updateIssueFromApi(this.data.issue.id, this.data.issue, false, false);
           this._snackService.open({
             type: 'SUCCESS',
-            msg: T.F.JIRA.SNACK.TRANSITION,
+            msg: T.F.JIRA.S.TRANSITION,
             translateParams: {issueKey: this.data.issue.key, name: this.chosenTransition.name}
           });
           this.close();

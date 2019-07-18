@@ -79,7 +79,7 @@ export class GoogleApiService {
   login(isSkipSuccessMsg = false): Promise<any> {
     const showSuccessMsg = () => {
       if (!(isSkipSuccessMsg)) {
-        this._snackIt('SUCCESS', T.F.GOOGLE.SNACK_API.SUCCESS_LOGIN);
+        this._snackIt('SUCCESS', T.F.GOOGLE.S_API.SUCCESS_LOGIN);
       }
     };
 
@@ -203,7 +203,7 @@ export class GoogleApiService {
 
   getFileInfo$(fileId): Observable<any> {
     if (!fileId) {
-      this._snackIt('ERROR', T.F.GOOGLE.SNACK_API.ERR_NO_FILE_ID);
+      this._snackIt('ERROR', T.F.GOOGLE.S_API.ERR_NO_FILE_ID);
       throwError({handledError: 'No file id given'});
     }
 
@@ -220,7 +220,7 @@ export class GoogleApiService {
 
   findFile$(fileName): Observable<any> {
     if (!fileName) {
-      this._snackIt('ERROR', T.F.GOOGLE.SNACK_API.ERR_NO_FILE_NAME);
+      this._snackIt('ERROR', T.F.GOOGLE.S_API.ERR_NO_FILE_NAME);
       return throwError({handledError: 'No file name given'});
     }
 
@@ -238,7 +238,7 @@ export class GoogleApiService {
   // NOTE: file will always be returned as text (makes sense)
   loadFile$(fileId): Observable<any> {
     if (!fileId) {
-      this._snackIt('ERROR', T.F.GOOGLE.SNACK_API.ERR_NO_FILE_ID);
+      this._snackIt('ERROR', T.F.GOOGLE.S_API.ERR_NO_FILE_ID);
       throwError({handledError: 'No file id given'});
     }
 
@@ -387,7 +387,7 @@ export class GoogleApiService {
       this._handleUnAuthenticated(err);
     } else {
       console.warn(err);
-      this._snackIt('ERROR', T.F.GOOGLE.SNACK_API.ERR, {errStr});
+      this._snackIt('ERROR', T.F.GOOGLE.S_API.ERR, {errStr});
     }
   }
 

@@ -64,7 +64,7 @@
       }
     },
     "CONFIG": {
-      "SNACK": {
+      "S": {
         "UPDATE_SECTION": " <strong>{{sectionKey}}</strong>için güncellenmiş ayarlar"
       }
     },
@@ -92,7 +92,7 @@
         "SUMMARY": "özet",
         "WRITE_A_COMMENT": "Bir yorum Yaz"
       },
-      "SNACK": {
+      "S": {
         "ERR_NETWORK": "Github: İstemci tarafı ağ hatası nedeniyle istek başarısız oldu",
         "ERR_NOT_CONFIGURED": "Github: Düzgün yapılandırılmamış",
         "ERR_REQUEST": "Github: API, {{statusCode}}değerini döndürdü. {{errorMsg}}",
@@ -155,10 +155,10 @@
         "ROUND_START_TIME_TO": "Yuvarlak başlangıç zamanı",
         "ROUND_TIME_WORKED_TO": "Yuvarlak zaman çalıştı",
         "SAVE_ROW": "Satırı kaydet",
-        "SNACK_EQUAL_VALUES": "Geçerli değerler ve son kaydedilen satır eşit değerlere sahip, muhtemelen istediğiniz şey bu değil.",
-        "SNACK_ROW_APPENDED": "Satır başarıyla eklendi"
+        "S_EQUAL_VALUES": "Geçerli değerler ve son kaydedilen satır eşit değerlere sahip, muhtemelen istediğiniz şey bu değil.",
+        "S_ROW_APPENDED": "Satır başarıyla eklendi"
       },
-      "SNACKS": {
+      "S": {
         "DOWNLOADING_UPDATE": "Google Drive: Uzaktan güncelleme var! İndiriliyor ...",
         "ERROR": "Google Drive - Hata:",
         "ERROR_INITIAL_IMPORT": "Google Drive: Başlangıçta veri almaya çalışırken hata",
@@ -169,7 +169,7 @@
         "SUCCESS": "Google Drive: Yedekleme başarıyla kaydedildi",
         "SYNCING": "Google Drive: Senkronizasyon"
       },
-      "SNACK_API": {
+      "S_API": {
         "ERR": "GoogleApi Hatası: {{errStr}}",
         "ERR_NO_FILE_ID": "GoogleApi: Belirtilen dosya kimliği yok",
         "ERR_NO_FILE_NAME": "GoogleApi: Belirtilen dosya adı yok",
@@ -290,7 +290,7 @@
         "WORKLOG": "worklog",
         "WRITE_A_COMMENT": "Bir yorum Yaz"
       },
-      "SNACK": {
+      "S": {
         "EXTENSION_NOT_LOADED": "Süper Verimlilik Uzantısı yüklenmedi. Sayfayı yeniden yüklemek yardımcı olabilir",
         "IMPORTED_MULTIPLE_ISSUES": "Jira: {{issuesLength}} 'a jira'dan backlog'a yeni sayı aktarıldı",
         "IMPORTED_SINGLE_ISSUE": "Jira: Jira'dan backlog'a ithal edilen \"{{issueText}}\" sayısı",
@@ -344,7 +344,7 @@
         "PRODUCTIVITY": "Ne kadar verimli çalıştınız?",
         "PRODUCTIVITY_HINT": "1: Başlamadım bile - 10: Son derece verimli"
       },
-      "SNACK": {
+      "S": {
         "SAVE_METRIC": "Metrik başarıyla kaydedildi"
       }
     },
@@ -375,7 +375,7 @@
         "ENABLE_PARSE": "Markdown ayrıştırmayı etkinleştir"
       },
       "REMOVE_REMINDER": "Hatırlatıcıyı kaldır",
-      "SNACK": {
+      "S": {
         "ADDED_REMINDER": "Not için hatırlatıcı eklendi",
         "DELETED_REMINDER": "Not için silinen hatırlatıcı",
         "UPDATED_REMINDER": "Not için güncellenmiş hatırlatıcı"
@@ -392,7 +392,7 @@
         "SESSION_X_START": "Pomodoro: {{nr}} oturumu başladı!"
       },
       "SKIP_BREAK": "Arayı atla",
-      "SNACK": {
+      "S": {
         "SESSION_X_START": "Pomodoro: {{nr}} oturumu başladı!"
       }
     },
@@ -456,7 +456,7 @@
         "L_TITLE": "Başlık",
         "TITLE": "Proje Ayarları ve Tema"
       },
-      "SNACK": {
+      "S": {
         "ARCHIVED": "Arşivlenmiş Proje",
         "CREATED": " <strong>{{title}}</strong>adlı proje oluşturuldu. Sol üstteki menüden seçebilirsiniz.",
         "DELETED": "Silinmiş Proje",
@@ -468,7 +468,7 @@
       }
     },
     "REMINDER": {
-      "SNACK_REMINDER_ERR": "Hatırlatma arayüzü hatası"
+      "S_REMINDER_ERR": "Hatırlatma arayüzü hatası"
     },
     "SIMPLE_TASK_EXPORT": {
       "CLOSE": "Kapat",
@@ -880,7 +880,7 @@
     "GITHUB_CONFIGURED": "Github Entegrasyonu Yapılandırıldı",
     "IMPORT_FROM_FILE": "Dosyadan içe aktar",
     "JIRA_CONFIGURED": "Jira Entegrasyonu Yapılandırıldı",
-    "SNACK_INVALID_JSON": "Proje dosyası için geçersiz json",
+    "S_INVALID_JSON": "Proje dosyası için geçersiz json",
     "TITLE": "Projeye Genel Bakış",
     "UN_ARCHIVE_PROJECT": "Silahsız Proje"
   },

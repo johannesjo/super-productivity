@@ -131,7 +131,7 @@ export class JiraIssueService {
 
         if (wasUpdated && isNotifyOnUpdate) {
           this._snackService.open({
-            msg: T.F.JIRA.SNACK.ISSUE_UPDATE,
+            msg: T.F.JIRA.S.ISSUE_UPDATE,
             translateParams: {
               issueText: `${updatedIssue.key}`
             },
@@ -139,7 +139,7 @@ export class JiraIssueService {
           });
         } else if (isNotifyOnNoUpdateRequired) {
           this._snackService.open({
-            msg: T.F.JIRA.SNACK.ISSUE_NO_UPDATE_REQUIRED,
+            msg: T.F.JIRA.S.ISSUE_NO_UPDATE_REQUIRED,
             translateParams: {
               issueText: `${updatedIssue.key}`
             },

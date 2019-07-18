@@ -139,7 +139,7 @@ export class JiraCfgComponent implements OnInit, OnDestroy {
             this.cfg.availableTransitions = val;
             this._snackService.open({
               type: 'SUCCESS',
-              msg: T.F.JIRA.SNACK.TRANSITIONS_LOADED,
+              msg: T.F.JIRA.S.TRANSITIONS_LOADED,
             });
           })
       );

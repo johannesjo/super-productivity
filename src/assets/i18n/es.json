@@ -64,7 +64,7 @@
       }
     },
     "CONFIG": {
-      "SNACK": {
+      "S": {
         "UPDATE_SECTION": "Configuraciones actualizadas para <strong>{{sectionKey}}</strong>"
       }
     },
@@ -92,7 +92,7 @@
         "SUMMARY": "Resumen",
         "WRITE_A_COMMENT": "Escribir un comentario"
       },
-      "SNACK": {
+      "S": {
         "ERR_NETWORK": "Github: error en la solicitud debido a un error en la red del lado del cliente",
         "ERR_NOT_CONFIGURED": "Github: no está correctamente configurado",
         "ERR_REQUEST": "Github: API devuelto {{statusCode}}. {{errorMsg}}",
@@ -155,10 +155,10 @@
         "ROUND_START_TIME_TO": "Hora de inicio de ronda para",
         "ROUND_TIME_WORKED_TO": "Tiempo de ronda trabajado para",
         "SAVE_ROW": "Guardar fila",
-        "SNACK_EQUAL_VALUES": "Los valores actuales y la última fila guardada tienen valores iguales, probablemente no es lo que desea.",
-        "SNACK_ROW_APPENDED": "Fila anexada correctamente"
+        "S_EQUAL_VALUES": "Los valores actuales y la última fila guardada tienen valores iguales, probablemente no es lo que desea.",
+        "S_ROW_APPENDED": "Fila anexada correctamente"
       },
-      "SNACKS": {
+      "S": {
         "DOWNLOADING_UPDATE": "Google Drive: ¡Hay una actualización remota! Descargando ...",
         "ERROR": "Google Drive - Error:",
         "ERROR_INITIAL_IMPORT": "Google Drive: error al intentar importar datos inicialmente",
@@ -169,7 +169,7 @@
         "SUCCESS": "Google Drive: Copia de seguridad guardada con éxito",
         "SYNCING": "Google Drive: sincronizando"
       },
-      "SNACK_API": {
+      "S_API": {
         "ERR": "Error de GoogleApi: {{errStr}}",
         "ERR_NO_FILE_ID": "GoogleApi: no se ha especificado ningún ID de archivo",
         "ERR_NO_FILE_NAME": "GoogleApi: no se ha especificado ningún nombre de archivo",
@@ -290,7 +290,7 @@
         "WORKLOG": "Registro de trabajo",
         "WRITE_A_COMMENT": "Escribir un comentario"
       },
-      "SNACK": {
+      "S": {
         "EXTENSION_NOT_LOADED": "Extensión de Super Productividad no cargada. Recargar la página puede ayudar",
         "IMPORTED_MULTIPLE_ISSUES": "Jira: Importó {{issuesLength}} problemas nuevos de jira a la acumulación",
         "IMPORTED_SINGLE_ISSUE": "Jira: problema importado \"{{issueText}}\" de jira a la acumulación",
@@ -344,7 +344,7 @@
         "PRODUCTIVITY": "¿Qué tan eficiente trabajaste?",
         "PRODUCTIVITY_HINT": "1: Ni siquiera he comenzado - 10: Enormemente eficiente"
       },
-      "SNACK": {
+      "S": {
         "SAVE_METRIC": "Métrica guardada exitosamente"
       }
     },
@@ -375,7 +375,7 @@
         "ENABLE_PARSE": "Habilitar el análisis de rebajas"
       },
       "REMOVE_REMINDER": "Quitar recordatorio",
-      "SNACK": {
+      "S": {
         "ADDED_REMINDER": "Añadido recordatorio para la nota",
         "DELETED_REMINDER": "Recordatorio eliminado para nota",
         "UPDATED_REMINDER": "Recordatorio actualizado para nota"
@@ -392,7 +392,7 @@
         "SESSION_X_START": "Pomodoro: Sesión {{nr}} comenzó!"
       },
       "SKIP_BREAK": "Skip break",
-      "SNACK": {
+      "S": {
         "SESSION_X_START": "Pomodoro: Sesión {{nr}} comenzó!"
       }
     },
@@ -456,7 +456,7 @@
         "L_TITLE": "Título",
         "TITLE": "Configuración del proyecto y tema"
       },
-      "SNACK": {
+      "S": {
         "ARCHIVED": "Proyecto Archivado",
         "CREATED": "Proyecto creado <strong>{{title}}</strong>. Puedes seleccionarlo desde el menú en la parte superior izquierda.",
         "DELETED": "Proyecto eliminado",
@@ -468,7 +468,7 @@
       }
     },
     "REMINDER": {
-      "SNACK_REMINDER_ERR": "Error para la interfaz de recordatorio"
+      "S_REMINDER_ERR": "Error para la interfaz de recordatorio"
     },
     "SIMPLE_TASK_EXPORT": {
       "CLOSE": "Cerrar",
@@ -880,7 +880,7 @@
     "GITHUB_CONFIGURED": "Integración de Github configurada",
     "IMPORT_FROM_FILE": "Importar desde archivo",
     "JIRA_CONFIGURED": "Integración de Jira Configurada",
-    "SNACK_INVALID_JSON": "Json no válido para el archivo de proyecto",
+    "S_INVALID_JSON": "Json no válido para el archivo de proyecto",
     "TITLE": "Descripción del proyecto",
     "UN_ARCHIVE_PROJECT": "Proyecto Unarchive"
   },

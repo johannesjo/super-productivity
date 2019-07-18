@@ -64,7 +64,7 @@
       }
     },
     "CONFIG": {
-      "SNACK": {
+      "S": {
         "UPDATE_SECTION": "الإعدادات المحدثة لـ <strong>{{sectionKey}}</strong>"
       }
     },
@@ -92,7 +92,7 @@
         "SUMMARY": "ملخص",
         "WRITE_A_COMMENT": "أكتب تعليقا"
       },
-      "SNACK": {
+      "S": {
         "ERR_NETWORK": "Github: فشل الطلب بسبب خطأ في شبكة جانب العميل",
         "ERR_NOT_CONFIGURED": "جيثب: لم يتم تكوينه بشكل صحيح",
         "ERR_REQUEST": "Github: API ارجع {{statusCode}}. {{errorMsg}}",
@@ -155,10 +155,10 @@
         "ROUND_START_TIME_TO": "جولة وقت البدء ل",
         "ROUND_TIME_WORKED_TO": "عملت جولة الوقت ل",
         "SAVE_ROW": "حفظ الصف",
-        "SNACK_EQUAL_VALUES": "تحتوي القيم الحالية والصف الأخير المحفوظ على قيم متساوية ، وربما لا يكون هذا ما تريده.",
-        "SNACK_ROW_APPENDED": "تم إلحاق الصف بنجاح"
+        "S_EQUAL_VALUES": "تحتوي القيم الحالية والصف الأخير المحفوظ على قيم متساوية ، وربما لا يكون هذا ما تريده.",
+        "S_ROW_APPENDED": "تم إلحاق الصف بنجاح"
       },
-      "SNACKS": {
+      "S": {
         "DOWNLOADING_UPDATE": "Google Drive: هناك تحديث عن بعد! جارى التحميل...",
         "ERROR": "Google Drive - خطأ:",
         "ERROR_INITIAL_IMPORT": "Google Drive: خطأ أثناء محاولة استيراد البيانات في البداية",
@@ -169,7 +169,7 @@
         "SUCCESS": "Google Drive: تم حفظ النسخة الاحتياطية بنجاح",
         "SYNCING": "Google Drive: المزامنة"
       },
-      "SNACK_API": {
+      "S_API": {
         "ERR": "خطأ GoogleApi: {{errStr}}",
         "ERR_NO_FILE_ID": "GoogleApi: لم يتم تحديد معرف الملف",
         "ERR_NO_FILE_NAME": "GoogleApi: لم يتم تحديد اسم ملف",
@@ -290,7 +290,7 @@
         "WORKLOG": "سجل العمل",
         "WRITE_A_COMMENT": "أكتب تعليقا"
       },
-      "SNACK": {
+      "S": {
         "EXTENSION_NOT_LOADED": "سوبر الإنتاجية تمديد لم يتم تحميل. قد تساعد إعادة تحميل الصفحة",
         "IMPORTED_MULTIPLE_ISSUES": "Jira: تم استيراد {{issuesLength}} مشكلات جديدة من jira إلى backlog",
         "IMPORTED_SINGLE_ISSUE": "Jira: المشكلة المستوردة \"{{issueText}}\" من jira إلى backlog",
@@ -344,7 +344,7 @@
         "PRODUCTIVITY": "ما مدى كفاءة عملك؟",
         "PRODUCTIVITY_HINT": "1: لم تبدأ بعد - 10: كفاءة هائلة"
       },
-      "SNACK": {
+      "S": {
         "SAVE_METRIC": "متري حفظ بنجاح"
       }
     },
@@ -375,7 +375,7 @@
         "ENABLE_PARSE": "تمكين تحليل تخفيض السعر"
       },
       "REMOVE_REMINDER": "إزالة تذكير",
-      "SNACK": {
+      "S": {
         "ADDED_REMINDER": "وأضاف تذكير للمذكرة",
         "DELETED_REMINDER": "تذكير محذوف للمذكرة",
         "UPDATED_REMINDER": "تم تحديث التذكير للمذكرة"
@@ -392,7 +392,7 @@
         "SESSION_X_START": "بومودورو: بدأت الجلسة {{nr}} !"
       },
       "SKIP_BREAK": "تخطي استراحة",
-      "SNACK": {
+      "S": {
         "SESSION_X_START": "بومودورو: بدأت الجلسة {{nr}} !"
       }
     },
@@ -456,7 +456,7 @@
         "L_TITLE": "عنوان",
         "TITLE": "إعدادات المشروع والموضوع"
       },
-      "SNACK": {
+      "S": {
         "ARCHIVED": "المشروع المؤرشفة",
         "CREATED": "مشروع تم إنشاؤه <strong>{{title}}</strong>. يمكنك تحديده من القائمة في أعلى اليسار.",
         "DELETED": "مشروع محذوف",
@@ -468,7 +468,7 @@
       }
     },
     "REMINDER": {
-      "SNACK_REMINDER_ERR": "خطأ في واجهة التذكير"
+      "S_REMINDER_ERR": "خطأ في واجهة التذكير"
     },
     "SIMPLE_TASK_EXPORT": {
       "CLOSE": "قريب",
@@ -880,7 +880,7 @@
     "GITHUB_CONFIGURED": "جيثب التكامل تكوين",
     "IMPORT_FROM_FILE": "استيراد من الملف",
     "JIRA_CONFIGURED": "جيرا تكامل التكوين",
-    "SNACK_INVALID_JSON": "ملف json غير صالح لملف المشروع",
+    "S_INVALID_JSON": "ملف json غير صالح لملف المشروع",
     "TITLE": "ملخص المشروع",
     "UN_ARCHIVE_PROJECT": "مشروع غير جذري"
   },
