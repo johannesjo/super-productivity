@@ -2,7 +2,7 @@
 
 .form-wrapper {
   overflow: hidden;
-  padding: $s*2 $s*2 $s;
+  padding: $s*2 $s*2 $s !important;
 
   config-form {
     display: block;
