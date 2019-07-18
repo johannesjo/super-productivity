@@ -191,7 +191,7 @@ export class GoogleExportTimeComponent implements OnInit, OnDestroy {
       this.savePromise = this.googleApiService.appendRow$(this.opts.spreadsheetId, this.actualValues).toPromise();
       this.savePromise.then(() => {
         this._snackService.open({
-          msg: this._translateService.instant(T.F.GOOGLE.EXPORT_TIME.SNACK_ROW_APPENDED),
+          msg: T.F.GOOGLE.EXPORT_TIME.SNACK_ROW_APPENDED,
           type: 'SUCCESS'
         });
 

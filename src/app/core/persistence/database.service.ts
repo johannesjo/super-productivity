@@ -1,6 +1,7 @@
 import {Injectable} from '@angular/core';
 import * as localForage from 'localforage';
 import {SnackService} from '../snack/snack.service';
+import {T} from '../../t.const';
 
 @Injectable({
   providedIn: 'root',
@@ -17,7 +18,7 @@ export class DatabaseService {
     try {
       return localForage.ready().then(() => localForage.getItem(key));
     } catch (e) {
-      this._snackService.open({type: 'ERROR', msg: 'Error while loading data'});
+      this._snackService.open({type: 'ERROR', msg: T.GLOBAL_SNACK.ERR_DB_LOAD});
     }
   }
 
@@ -25,7 +26,7 @@ export class DatabaseService {
     try {
       return localForage.ready().then(() => localForage.setItem(key, data));
     } catch (e) {
-      this._snackService.open({type: 'ERROR', msg: 'Error while saving data'});
+      this._snackService.open({type: 'ERROR', msg: T.GLOBAL_SNACK.ERR_DB_SAVE});
     }
   }
 
@@ -33,7 +34,7 @@ export class DatabaseService {
     try {
       return localForage.ready().then(() => localForage.removeItem(key));
     } catch (e) {
-      this._snackService.open({type: 'ERROR', msg: 'Error while deleting data'});
+      this._snackService.open({type: 'ERROR', msg: T.GLOBAL_SNACK.ERR_DB_DELETE});
     }
   }
 
@@ -41,7 +42,7 @@ export class DatabaseService {
     try {
       return localForage.ready().then(() => localForage.clear());
     } catch (e) {
-      this._snackService.open({type: 'ERROR', msg: 'Error while deleting data'});
+      this._snackService.open({type: 'ERROR', msg: T.GLOBAL_SNACK.ERR_DB_CLEAR});
     }
   }
 

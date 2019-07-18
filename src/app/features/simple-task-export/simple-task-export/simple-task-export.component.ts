@@ -61,7 +61,7 @@ export class SimpleTaskExportComponent implements OnInit, OnDestroy {
     const clipboard = new Clipboard('#clipboard-btn');
     clipboard.on('success', (e: any) => {
       this._snackService.open({
-        msg: T.F.SIMPLE_TASK_EXPORT.SNACK_TO_CLIPPBOARD,
+        msg: T.GLOBAL_SNACK.COPY_TO_CLIPPBOARD,
         type: 'SUCCESS'
       });
       e.clearSelection();

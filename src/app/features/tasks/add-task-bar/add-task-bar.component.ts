@@ -18,7 +18,6 @@ import {SearchResultItem} from '../../issue/issue';
 import {SnackService} from '../../../core/snack/snack.service';
 import {JiraApiService} from '../../issue/jira/jira-api.service';
 import {JIRA_TYPE} from '../../issue/issue.const';
-import {truncate} from '../../../util/truncate';
 import {T} from '../../../t.const';
 
 @Component({
@@ -146,13 +145,15 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
         this._taskService.restoreTask(res.task);
         this._snackService.open({
           ico: 'info',
-          msg: `Restored task <strong>${truncate(res.task.title)}</strong> related to issue from archive`
+          msg: T.F.TASK.S.FOUND_RESTORE_FROM_ARCHIVE,
+          translateParams: {title: res.task.title},
         });
       } else {
         this._taskService.moveToToday(res.task.id);
         this._snackService.open({
           ico: 'info',
-          msg: `Moved existing task <strong>${truncate(res.task.title)}</strong> to todays task list`
+          msg: T.F.TASK.S.FOUND_MOVE_FROM_BACKLOG,
+          translateParams: {title: res.task.title},
         });
       }
     }

@@ -4,6 +4,7 @@ import {AttachmentType} from '../attachment.model';
 import {ElectronService} from 'ngx-electron';
 import {SnackService} from '../../../core/snack/snack.service';
 import {IPC_EXEC} from '../../../../../electron/ipc-events.const';
+import {T} from '../../../t.const';
 
 
 @Directive({
@@ -33,7 +34,8 @@ export class AttachmentLinkDirective {
         this._electronService.shell.openItem(this.href);
       } else if (this.type === 'COMMAND') {
         this._snackService.open({
-          msg: `Running "${this.href}".`,
+          msg: T.GLOBAL_SNACK.RUNNING_X,
+          translateParams: {str: this.href},
           ico: 'laptop_windows',
         });
         this._exec(this.href);

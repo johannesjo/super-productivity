@@ -291,6 +291,7 @@
         "WRITE_A_COMMENT": "Write a comment"
       },
       "SNACK": {
+        "ADDED_WORKLOG_FOR": "Jira: Added worklog for {{issueKey}}",
         "EXTENSION_NOT_LOADED": "Super Productivity Extension not loaded. Reloading the page might help",
         "IMPORTED_MULTIPLE_ISSUES": "Jira: Imported {{issuesLength}} new issues from jira to backlog",
         "IMPORTED_SINGLE_ISSUE": "Jira: Imported issue \"{{issueText}}\" from jira to backlog",
@@ -302,7 +303,9 @@
         "NO_VALID_TRANSITION": "Jira: No valid transition configured",
         "POLLING": "Jira: Polling Changes for issues",
         "TIMED_OUT": "Jira: Request timed out",
+        "TRANSITION": "Jira: Set issue \"{{issueKey}}\" to \"{{name}}\"",
         "TRANSITION_SUCCESS": "Jira: Set issue {{issueKey}} to <strong>{{chosenTransition}}</strong>",
+        "TRANSITIONS_LOADED": "Jira: Transitions loaded. Use the selects below to assign them",
         "UNABLE_TO_REASSIGN": "Jira: Unable to reassign ticket to yourself, because you didn't specify a username. Please visit the settings."
       },
       "STEPPER": {
@@ -472,7 +475,6 @@
     },
     "SIMPLE_TASK_EXPORT": {
       "CLOSE": "Close",
-      "COPY_TO_CLIPBOARD": "Copy to clipboard",
       "DATE": "Date",
       "ESTIMATE": "Estimate",
       "FIELDS_TO_DISPLAY": "Fields to display",
@@ -490,7 +492,6 @@
       "SAVE_TO_FILE": "Save to file",
       "SEPARATE_FIELDS_BY": "Separate fields by",
       "SHOW_AS_TEXT": "Show as text",
-      "SNACK_TO_CLIPPBOARD": "Copied to clipboard",
       "TIME_AS_MILLISECONDS": "Time as milliseconds",
       "TIME_ESTIMATE": "Time Estimate",
       "TIME_SPENT": "Time Spent",
@@ -580,7 +581,9 @@
         "DELETED": "Deleted task \"{{title}}\"",
         "REMINDER_ADDED": "Scheduled task \"{{title}}\"",
         "REMINDER_DELETED": "Deleted reminder for task",
-        "REMINDER_UPDATED": "Updated reminder for task \"{{title}}\""
+        "REMINDER_UPDATED": "Updated reminder for task \"{{title}}\"",
+        "FOUND_RESTORE_FROM_ARCHIVE": "Restored task <strong>{{title}}</strong> related to issue from archive",
+        "FOUND_MOVE_FROM_BACKLOG": "Moved existing task <strong>{{title}}</strong> to todays task list"
       },
       "SELECT_OR_CREATE": "Select or create task",
       "SUMMARY_TABLE": {
@@ -644,7 +647,6 @@
       "D_CONFIRM_RESTORE": "Are you sure you want to move the task <strong>\"{{title}}\"</strong> into your todays task list?",
       "D_EXPORT_TITLE": "Worklog Export",
       "EXPORT": {
-        "COPY_TO_CLIPBOARD": "Copy to clipboard",
         "DONT_ROUND": "don't round",
         "GROUP_BY": "Group by",
         "OPTIONS": "Options",
@@ -682,7 +684,8 @@
   },
   "FILE_IMEX": {
     "EXPORT_DATA": "Export Data",
-    "IMPORT_FROM_FILE": "Import from file"
+    "IMPORT_FROM_FILE": "Import from file",
+    "SNACK_ERR_INVALID_DATA": "Import failed: Invalid JSON"
   },
   "F_AUTO_BACKUPS": {
     "HELP": "Auto save all data to your app folder in order to have it ready in case something goes wrong.",
@@ -932,5 +935,14 @@
     "TIME_ESTIMATED": "Time Estimated:",
     "WITHOUT_BREAK": "Without break:",
     "WORKING_TODAY": "Working today:"
+  },
+  "GLOBAL_SNACK": {
+    "ERR_COMPRESSION": "Error for compression interface",
+    "ERR_DB_LOAD": "Error while loading data",
+    "ERR_DB_SAVE": "Error while saving data",
+    "ERR_DB_DELETE": "Error while deleting data",
+    "ERR_DB_CLEAR": "Error while clearing the database",
+    "RUNNING_X": "Running \"{{str}}\".",
+    "COPY_TO_CLIPPBOARD": "Copied to clipboard"
   }
 }
