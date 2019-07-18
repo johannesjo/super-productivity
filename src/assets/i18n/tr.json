@@ -231,6 +231,9 @@
         "TIME_SPENT": "Harcanan zaman",
         "TITLE": "Jira: Worklog Gönder"
       },
+      "DIALOG_WORKdLOG": {
+        "TITLE": ""
+      },
       "EXTENSION_INFO": "Jira Api ile iletişime izin vermek için lütfen <a href=\"{{url}}\"> krom uzantısını</a> indirin. Bunun mobil cihazlar için işe yaramadığını unutmayın.",
       "FORM": {
         "IS_AUTO_ADD_TO_BACKLOG": "Çözülmeyen sorunları otomatik olarak Github'dan backlog'a ekle",
@@ -641,6 +644,7 @@
         "TASKS": "Görevler",
         "TOTAL_TIME": "Toplam harcanan zaman:",
         "TOTAL_TIME_PROJECT": "Projeye harcanan toplam süre",
+        "WEEK_NR": "{{nr}} haftası",
         "WORKED": "işlenmiş"
       },
       "D_CONFIRM_RESTORE": " <strong>\"{{title}}\"</strong> görevini bugünün görev listenize taşımak istediğinizden emin misiniz?",

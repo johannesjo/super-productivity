@@ -231,6 +231,9 @@
         "TIME_SPENT": "Zeitaufwand",
         "TITLE": "Jira: Worklog einreichen"
       },
+      "DIALOG_WORKdLOG": {
+        "TITLE": ""
+      },
       "EXTENSION_INFO": "Bitte <a href=\"{{url}}\"> laden Sie die Chrome-Erweiterung</a> herunter, um die Kommunikation mit dem Jira Api zu ermöglichen. Beachten Sie, dass dies für Handys nicht funktioniert.",
       "FORM": {
         "IS_AUTO_ADD_TO_BACKLOG": "Fügen Sie ungelöste Probleme aus Github automatisch zum Rückstand hinzu",
@@ -641,6 +644,7 @@
         "TASKS": "Aufgaben",
         "TOTAL_TIME": "Insgesamt aufgewendete Zeit:",
         "TOTAL_TIME_PROJECT": "Gesamtdauer des Projekts",
+        "WEEK_NR": "Woche {{nr}}",
         "WORKED": "Hat funktioniert"
       },
       "D_CONFIRM_RESTORE": "Möchten Sie die Aufgabe <strong>\"{{title}}\"</strong> wirklich in Ihre heutige Aufgabenliste verschieben?",

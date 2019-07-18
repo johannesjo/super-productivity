@@ -231,6 +231,9 @@
         "TIME_SPENT": "Tiempo usado",
         "TITLE": "Jira: enviar registro de trabajo"
       },
+      "DIALOG_WORKdLOG": {
+        "TITLE": ""
+      },
       "EXTENSION_INFO": "Por favor, <a href=\"{{url}}\"> descargue la extensión de chrome</a> para permitir la comunicación con Jira Api. Tenga en cuenta que esto no funciona para móviles.",
       "FORM": {
         "IS_AUTO_ADD_TO_BACKLOG": "Agregar automáticamente problemas sin resolver desde Github a la acumulación",
@@ -641,6 +644,7 @@
         "TASKS": "Tareas",
         "TOTAL_TIME": "Tiempo total empleado:",
         "TOTAL_TIME_PROJECT": "Tiempo total dedicado al proyecto",
+        "WEEK_NR": "Semana {{nr}}",
         "WORKED": "Trabajo"
       },
       "D_CONFIRM_RESTORE": "¿Está seguro de que desea mover la tarea <strong>\"{{title}}\"</strong> a su lista de tareas de hoy?",

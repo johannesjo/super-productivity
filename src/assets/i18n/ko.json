@@ -231,6 +231,9 @@
         "TIME_SPENT": "지출 된 시간",
         "TITLE": "Jira : 작업 로그 제출"
       },
+      "DIALOG_WORKdLOG": {
+        "TITLE": ""
+      },
       "EXTENSION_INFO": "Jira Api와의 통신을 허용하려면 <a href=\"{{url}}\"> 크롬 확장</a> 을 다운로드하십시오. 이 기능은 모바일에서 작동하지 않습니다.",
       "FORM": {
         "IS_AUTO_ADD_TO_BACKLOG": "Github의 미해결 문제를 백 로그에 자동으로 추가합니다.",
@@ -641,6 +644,7 @@
         "TASKS": "할 일 목록",
         "TOTAL_TIME": "총 소요 시간 :",
         "TOTAL_TIME_PROJECT": "프로젝트에 소요 된 총 시간",
+        "WEEK_NR": "주 {{nr}}",
         "WORKED": "근무한"
       },
       "D_CONFIRM_RESTORE": " <strong>\"{{title}}\"</strong> 작업을 현재 작업 목록으로 이동 하시겠습니까?",

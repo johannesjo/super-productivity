@@ -45,7 +45,7 @@
 
               <div class="week-header">
                 <div class="wrap">
-                  <h3 class="week-title mat-h4">Week {{week.weekNr}}</h3>
+                  <h3 class="week-title mat-h4">{{T.F.WORKLOG.CMP.WEEK_NR|translate:{nr: week.weekNr} }}</h3>
                   <div> {{(week.timeSpent|msToString)}}</div>
                 </div>
                 <button

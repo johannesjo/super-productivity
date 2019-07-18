@@ -231,6 +231,9 @@
         "TIME_SPENT": "使った時間",
         "TITLE": "ジラ：作業記録を提出する"
       },
+      "DIALOG_WORKdLOG": {
+        "TITLE": ""
+      },
       "EXTENSION_INFO": "Jira Apiとの通信を可能にするために <a href=\"{{url}}\"> クロム拡張機能</a> をダウンロードしてください。これはモバイルでは機能しないことに注意してください。",
       "FORM": {
         "IS_AUTO_ADD_TO_BACKLOG": "未解決の問題をGithubからバックログに自動的に追加",
@@ -641,6 +644,7 @@
         "TASKS": "タスク",
         "TOTAL_TIME": "合計時間：",
         "TOTAL_TIME_PROJECT": "プロジェクトに費やした合計時間",
+        "WEEK_NR": "週 {{nr}}",
         "WORKED": "働いた"
       },
       "D_CONFIRM_RESTORE": "タスク <strong>\"{{title}}\"</strong> を今日のタスクリストに移動しますか？",

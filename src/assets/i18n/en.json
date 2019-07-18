@@ -231,6 +231,9 @@
         "TIME_SPENT": "Time Spent",
         "TITLE": "Jira: Submit Worklog"
       },
+      "DIALOG_WORKdLOG": {
+        "TITLE": ""
+      },
       "EXTENSION_INFO": "Please <a href=\"{{url}}\"> download the chrome extension</a> in order to allow communication with the Jira Api. Note that this doesn't work for mobile.",
       "FORM": {
         "IS_AUTO_ADD_TO_BACKLOG": "Automatically add unresolved issues from Github to backlog",
@@ -641,6 +644,7 @@
         "TASKS": "Tasks",
         "TOTAL_TIME": "Time spent total:",
         "TOTAL_TIME_PROJECT": "Total time spent on project",
+        "WEEK_NR": "Week {{nr}}",
         "WORKED": "Worked"
       },
       "D_CONFIRM_RESTORE": "Are you sure you want to move the task <strong>\"{{title}}\"</strong> into your todays task list?",

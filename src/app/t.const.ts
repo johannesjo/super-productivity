@@ -169,12 +169,6 @@ export const T = {
         'SUCCESS': 'F.GOOGLE.S.SUCCESS',
         'SYNCING': 'F.GOOGLE.S.SYNCING'
       },
-      'S_API': {
-        'ERR': 'F.GOOGLE.S_API.ERR',
-        'ERR_NO_FILE_ID': 'F.GOOGLE.S_API.ERR_NO_FILE_ID',
-        'ERR_NO_FILE_NAME': 'F.GOOGLE.S_API.ERR_NO_FILE_NAME',
-        'SUCCESS_LOGIN': 'F.GOOGLE.S_API.SUCCESS_LOGIN'
-      },
       'SYNC_CFG': {
         'AUTO_LOGIN': 'F.GOOGLE.SYNC_CFG.AUTO_LOGIN',
         'AUTO_SYNC': 'F.GOOGLE.SYNC_CFG.AUTO_SYNC',
@@ -187,6 +181,12 @@ export const T = {
         'SYNC_FILE_NAME': 'F.GOOGLE.SYNC_CFG.SYNC_FILE_NAME',
         'SYNC_INTERVAL': 'F.GOOGLE.SYNC_CFG.SYNC_INTERVAL',
         'UPDATE_SYNC_FILE': 'F.GOOGLE.SYNC_CFG.UPDATE_SYNC_FILE'
+      },
+      'S_API': {
+        'ERR': 'F.GOOGLE.S_API.ERR',
+        'ERR_NO_FILE_ID': 'F.GOOGLE.S_API.ERR_NO_FILE_ID',
+        'ERR_NO_FILE_NAME': 'F.GOOGLE.S_API.ERR_NO_FILE_NAME',
+        'SUCCESS_LOGIN': 'F.GOOGLE.S_API.SUCCESS_LOGIN'
       }
     },
     'JIRA': {
@@ -301,8 +301,8 @@ export const T = {
         'POLLING': 'F.JIRA.S.POLLING',
         'TIMED_OUT': 'F.JIRA.S.TIMED_OUT',
         'TRANSITION': 'F.JIRA.S.TRANSITION',
-        'TRANSITION_SUCCESS': 'F.JIRA.S.TRANSITION_SUCCESS',
         'TRANSITIONS_LOADED': 'F.JIRA.S.TRANSITIONS_LOADED',
+        'TRANSITION_SUCCESS': 'F.JIRA.S.TRANSITION_SUCCESS',
         'UNABLE_TO_REASSIGN': 'F.JIRA.S.UNABLE_TO_REASSIGN'
       },
       'STEPPER': {
@@ -391,10 +391,10 @@ export const T = {
         'BREAK_X_START': 'F.POMODORO.NOTIFICATION.BREAK_X_START',
         'SESSION_X_START': 'F.POMODORO.NOTIFICATION.SESSION_X_START'
       },
-      'SKIP_BREAK': 'F.POMODORO.SKIP_BREAK',
       'S': {
         'SESSION_X_START': 'F.POMODORO.S.SESSION_X_START'
-      }
+      },
+      'SKIP_BREAK': 'F.POMODORO.SKIP_BREAK'
     },
     'PROCRASTINATION': {
       'BACK_TO_WORK': 'F.PROCRASTINATION.BACK_TO_WORK',
@@ -472,6 +472,7 @@ export const T = {
     },
     'SIMPLE_TASK_EXPORT': {
       'CLOSE': 'F.SIMPLE_TASK_EXPORT.CLOSE',
+      'COPY_TO_CLIPBOARD': 'F.SIMPLE_TASK_EXPORT.COPY_TO_CLIPBOARD',
       'DATE': 'F.SIMPLE_TASK_EXPORT.DATE',
       'ESTIMATE': 'F.SIMPLE_TASK_EXPORT.ESTIMATE',
       'FIELDS_TO_DISPLAY': 'F.SIMPLE_TASK_EXPORT.FIELDS_TO_DISPLAY',
@@ -489,6 +490,7 @@ export const T = {
       'SAVE_TO_FILE': 'F.SIMPLE_TASK_EXPORT.SAVE_TO_FILE',
       'SEPARATE_FIELDS_BY': 'F.SIMPLE_TASK_EXPORT.SEPARATE_FIELDS_BY',
       'SHOW_AS_TEXT': 'F.SIMPLE_TASK_EXPORT.SHOW_AS_TEXT',
+      'SNACK_TO_CLIPPBOARD': 'F.SIMPLE_TASK_EXPORT.SNACK_TO_CLIPPBOARD',
       'TIME_AS_MILLISECONDS': 'F.SIMPLE_TASK_EXPORT.TIME_AS_MILLISECONDS',
       'TIME_ESTIMATE': 'F.SIMPLE_TASK_EXPORT.TIME_ESTIMATE',
       'TIME_SPENT': 'F.SIMPLE_TASK_EXPORT.TIME_SPENT',
@@ -576,11 +578,11 @@ export const T = {
       },
       'S': {
         'DELETED': 'F.TASK.S.DELETED',
+        'FOUND_MOVE_FROM_BACKLOG': 'F.TASK.S.FOUND_MOVE_FROM_BACKLOG',
+        'FOUND_RESTORE_FROM_ARCHIVE': 'F.TASK.S.FOUND_RESTORE_FROM_ARCHIVE',
         'REMINDER_ADDED': 'F.TASK.S.REMINDER_ADDED',
         'REMINDER_DELETED': 'F.TASK.S.REMINDER_DELETED',
-        'REMINDER_UPDATED': 'F.TASK.S.REMINDER_UPDATED',
-        'FOUND_RESTORE_FROM_ARCHIVE': 'F.TASK.S.FOUND_RESTORE_FROM_ARCHIVE',
-        'FOUND_MOVE_FROM_BACKLOG': 'F.TASK.S.FOUND_MOVE_FROM_BACKLOG'
+        'REMINDER_UPDATED': 'F.TASK.S.REMINDER_UPDATED'
       },
       'SELECT_OR_CREATE': 'F.TASK.SELECT_OR_CREATE',
       'SUMMARY_TABLE': {
@@ -634,6 +636,7 @@ export const T = {
       'CMP': {
         'DAYS_WORKED': 'F.WORKLOG.CMP.DAYS_WORKED',
         'MONTH_WORKED': 'F.WORKLOG.CMP.MONTH_WORKED',
+        'WEEK_NR': 'F.WORKLOG.CMP.WEEK_NR',
         'REPEATING_TASK': 'F.WORKLOG.CMP.REPEATING_TASK',
         'RESTORE_TASK_FROM_ARCHIVE': 'F.WORKLOG.CMP.RESTORE_TASK_FROM_ARCHIVE',
         'TASKS': 'F.WORKLOG.CMP.TASKS',
@@ -644,9 +647,9 @@ export const T = {
       'D_CONFIRM_RESTORE': 'F.WORKLOG.D_CONFIRM_RESTORE',
       'D_EXPORT_TITLE': 'F.WORKLOG.D_EXPORT_TITLE',
       'EXPORT': {
+        'COPY_TO_CLIPBOARD': 'F.WORKLOG.EXPORT.COPY_TO_CLIPBOARD',
         'DONT_ROUND': 'F.WORKLOG.EXPORT.DONT_ROUND',
         'GROUP_BY': 'F.WORKLOG.EXPORT.GROUP_BY',
-        'OPTIONS': 'F.WORKLOG.EXPORT.OPTIONS',
         'O': {
           'DATE': 'F.WORKLOG.EXPORT.O.DATE',
           'ENDED_WORKING': 'F.WORKLOG.EXPORT.O.ENDED_WORKING',
@@ -666,6 +669,7 @@ export const T = {
           'TITLES_AND_SUB_TASK_TITLES': 'F.WORKLOG.EXPORT.O.TITLES_AND_SUB_TASK_TITLES',
           'WORKLOG': 'F.WORKLOG.EXPORT.O.WORKLOG'
         },
+        'OPTIONS': 'F.WORKLOG.EXPORT.OPTIONS',
         'ROUND_END_TIME_TO': 'F.WORKLOG.EXPORT.ROUND_END_TIME_TO',
         'ROUND_START_TIME_TO': 'F.WORKLOG.EXPORT.ROUND_START_TIME_TO',
         'ROUND_TIME_WORKED_TO': 'F.WORKLOG.EXPORT.ROUND_TIME_WORKED_TO',
@@ -683,6 +687,24 @@ export const T = {
     'EXPORT_DATA': 'FILE_IMEX.EXPORT_DATA',
     'IMPORT_FROM_FILE': 'FILE_IMEX.IMPORT_FROM_FILE',
     'S_ERR_INVALID_DATA': 'FILE_IMEX.S_ERR_INVALID_DATA'
+  },
+  'G': {
+    'CANCEL': 'G.CANCEL',
+    'CLICK_TO_EDIT': 'G.CLICK_TO_EDIT',
+    'CLOSE': 'G.CLOSE',
+    'DELETE': 'G.DELETE',
+    'DISMISS': 'G.DISMISS',
+    'DO_IT': 'G.DO_IT',
+    'LOGIN': 'G.LOGIN',
+    'LOGOUT': 'G.LOGOUT',
+    'NEXT': 'G.NEXT',
+    'OK': 'G.OK',
+    'PREVIOUS': 'G.PREVIOUS',
+    'REMOVE': 'G.REMOVE',
+    'SAVE': 'G.SAVE',
+    'TITLE': 'G.TITLE',
+    'UNDO': 'G.UNDO',
+    'UPDATE': 'G.UPDATE'
   },
   'GCF': {
     'AUTO_BACKUPS': {
@@ -790,41 +812,14 @@ export const T = {
       'TITLE': 'GCF.TAKE_A_BREAK.TITLE'
     }
   },
-  'G': {
-    'CANCEL': 'G.CANCEL',
-    'CLICK_TO_EDIT': 'G.CLICK_TO_EDIT',
-    'CLOSE': 'G.CLOSE',
-    'DELETE': 'G.DELETE',
-    'DISMISS': 'G.DISMISS',
-    'DO_IT': 'G.DO_IT',
-    'LOGIN': 'G.LOGIN',
-    'LOGOUT': 'G.LOGOUT',
-    'NEXT': 'G.NEXT',
-    'OK': 'G.OK',
-    'PREVIOUS': 'G.PREVIOUS',
-    'REMOVE': 'G.REMOVE',
-    'SAVE': 'G.SAVE',
-    'TITLE': 'G.TITLE',
-    'UNDO': 'G.UNDO',
-    'UPDATE': 'G.UPDATE'
-  },
-  'THEMES': {
-    'SELECT_THEME': 'THEMES.SELECT_THEME',
-    'blue': 'THEMES.blue',
-    'blue-grey': 'THEMES.blue-grey',
-    'light-blue': 'THEMES.light-blue',
-    'indigo': 'THEMES.indigo',
-    'pink': 'THEMES.pink',
-    'purple': 'THEMES.purple',
-    'deep-purple': 'THEMES.deep-purple',
-    'cyan': 'THEMES.cyan',
-    'teal': 'THEMES.teal',
-    'green': 'THEMES.green',
-    'light-green': 'THEMES.light-green',
-    'lime': 'THEMES.lime',
-    'yellow': 'THEMES.yellow',
-    'amber': 'THEMES.amber',
-    'deep-orange': 'THEMES.deep-orange'
+  'GLOBAL_SNACK': {
+    'COPY_TO_CLIPPBOARD': 'GLOBAL_SNACK.COPY_TO_CLIPPBOARD',
+    'ERR_COMPRESSION': 'GLOBAL_SNACK.ERR_COMPRESSION',
+    'ERR_DB_CLEAR': 'GLOBAL_SNACK.ERR_DB_CLEAR',
+    'ERR_DB_DELETE': 'GLOBAL_SNACK.ERR_DB_DELETE',
+    'ERR_DB_LOAD': 'GLOBAL_SNACK.ERR_DB_LOAD',
+    'ERR_DB_SAVE': 'GLOBAL_SNACK.ERR_DB_SAVE',
+    'RUNNING_X': 'GLOBAL_SNACK.RUNNING_X'
   },
   'MH': {
     'ADD_NEW_TASK': 'MH.ADD_NEW_TASK',
@@ -917,6 +912,24 @@ export const T = {
       'SUCCESS': 'S.SYNC.SUCCESS'
     }
   },
+  'THEMES': {
+    'SELECT_THEME': 'THEMES.SELECT_THEME',
+    'amber': 'THEMES.amber',
+    'blue': 'THEMES.blue',
+    'blue-grey': 'THEMES.blue-grey',
+    'cyan': 'THEMES.cyan',
+    'deep-orange': 'THEMES.deep-orange',
+    'deep-purple': 'THEMES.deep-purple',
+    'green': 'THEMES.green',
+    'indigo': 'THEMES.indigo',
+    'light-blue': 'THEMES.light-blue',
+    'light-green': 'THEMES.light-green',
+    'lime': 'THEMES.lime',
+    'pink': 'THEMES.pink',
+    'purple': 'THEMES.purple',
+    'teal': 'THEMES.teal',
+    'yellow': 'THEMES.yellow'
+  },
   'V': {
     'E_1TO10': 'V.E_1TO10',
     'E_DATETIME': 'V.E_DATETIME'
@@ -934,14 +947,5 @@ export const T = {
     'TIME_ESTIMATED': 'WW.TIME_ESTIMATED',
     'WITHOUT_BREAK': 'WW.WITHOUT_BREAK',
     'WORKING_TODAY': 'WW.WORKING_TODAY'
-  },
-  'GLOBAL_SNACK': {
-    'ERR_COMPRESSION': 'GLOBAL_SNACK.ERR_COMPRESSION',
-    'ERR_DB_LOAD': 'GLOBAL_SNACK.ERR_DB_LOAD',
-    'ERR_DB_SAVE': 'GLOBAL_SNACK.ERR_DB_SAVE',
-    'ERR_DB_DELETE': 'GLOBAL_SNACK.ERR_DB_DELETE',
-    'ERR_DB_CLEAR': 'GLOBAL_SNACK.ERR_DB_CLEAR',
-    'RUNNING_X': 'GLOBAL_SNACK.RUNNING_X',
-    'COPY_TO_CLIPPBOARD': 'GLOBAL_SNACK.COPY_TO_CLIPPBOARD'
   }
 };

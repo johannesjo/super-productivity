@@ -231,6 +231,9 @@
         "TIME_SPENT": "Temps passé",
         "TITLE": "Jira: Soumettre le journal de travail"
       },
+      "DIALOG_WORKdLOG": {
+        "TITLE": ""
+      },
       "EXTENSION_INFO": "Veuillez <a href=\"{{url}}\"> télécharger l'extension chromée</a> afin de permettre la communication avec Jira Api. Notez que cela ne fonctionne pas pour mobile.",
       "FORM": {
         "IS_AUTO_ADD_TO_BACKLOG": "Ajouter automatiquement les problèmes non résolus de Github à l'arriéré",
@@ -641,6 +644,7 @@
         "TASKS": "les tâches",
         "TOTAL_TIME": "Temps total passé:",
         "TOTAL_TIME_PROJECT": "Temps total consacré au projet",
+        "WEEK_NR": "Semaine {{nr}}",
         "WORKED": "Travaille"
       },
       "D_CONFIRM_RESTORE": "Êtes-vous sûr de vouloir déplacer la tâche <strong>\"{{title}}\"</strong> dans votre liste de tâches actuelle?",

@@ -231,6 +231,9 @@
         "TIME_SPENT": "قضاء الوقت",
         "TITLE": "جيرا: إرسال العمل"
       },
+      "DIALOG_WORKdLOG": {
+        "TITLE": ""
+      },
       "EXTENSION_INFO": "يرجى <a href=\"{{url}}\"> تنزيل ملحق chrome</a> للسماح بالتواصل مع Jira Api. لاحظ أن هذا لا يعمل للجوال.",
       "FORM": {
         "IS_AUTO_ADD_TO_BACKLOG": "إضافة المشكلات التي لم يتم حلها تلقائيًا من Github إلى العمل المتراكم",
@@ -641,6 +644,7 @@
         "TASKS": "مهام",
         "TOTAL_TIME": "إجمالي الوقت المستغرق:",
         "TOTAL_TIME_PROJECT": "إجمالي الوقت المستغرق في المشروع",
+        "WEEK_NR": "الأسبوع {{nr}}",
         "WORKED": "عمل"
       },
       "D_CONFIRM_RESTORE": "هل أنت متأكد من رغبتك في نقل المهمة <strong>\"{{title}}\"</strong> إلى قائمة مهام اليوم؟",
