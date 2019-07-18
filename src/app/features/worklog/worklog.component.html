@@ -2,7 +2,7 @@
 
 <div *ngIf="worklogService.worklogData$|async as wData"
      [@fade]>
-  <h1 class="mat-headline total-time">Total time spent on project
+  <h1 class="mat-headline total-time">{{T.F.WORKLOG.CMP.TOTAL_TIME_PROJECT|translate}}
     <br><strong>{{wData.totalTimeSpent|msToString}}</strong></h1>
 
   <div class="years">
@@ -10,11 +10,13 @@
          class="year">
       <h1 [innerHtml]="year.key"
           class="year-title mat-headline"></h1>
-      <div class="year-time-spent">Month worked:
+      <div class="year-time-spent">
+        {{T.F.WORKLOG.CMP.MONTH_WORKED|translate}}
         <strong>{{year.value.monthWorked}}</strong><br>
-        Days worked:
+        {{T.F.WORKLOG.CMP.DAYS_WORKED|translate}}
         <strong>{{year.value.daysWorked}}</strong><br>
-        Time spent total: <strong [innerHtml]="year.value.timeSpent|msToString"></strong></div>
+        {{T.F.WORKLOG.CMP.TOTAL_TIME|translate}}
+        <strong [innerHtml]="year.value.timeSpent|msToString"></strong></div>
 
       <div class="months">
         <div *ngFor="let month of year.value.ent|keyvalue:sortWorklogItems; trackBy: trackByKey;"
@@ -30,10 +32,11 @@
             </button>
           </h2>
 
-          <div class="month-time-spent">Days worked:
+          <div class="month-time-spent">{{T.F.WORKLOG.CMP.DAYS_WORKED|translate}}
             <strong>{{month.value.daysWorked}}</strong><br>
-            Time spent total:
+            {{T.F.WORKLOG.CMP.TOTAL_TIME|translate}}
             <strong [innerHtml]="month.value.timeSpent|msToString"></strong>
+
           </div>
 
           <div class="weeks">
@@ -58,8 +61,8 @@
               <table class="week-table">
                 <tr>
                   <th></th>
-                  <td>Tasks</td>
-                  <td>Worked</td>
+                  <td>{{T.F.WORKLOG.CMP.TASKS|translate}}</td>
+                  <td>{{T.F.WORKLOG.CMP.WORKED|translate}}</td>
                   <th></th>
                 </tr>
                 <ng-container
@@ -84,18 +87,12 @@
                            [@expandFade]
                            class="summary-table-wrapper material-table">
                         <table class="task-summary-table">
-                          <!--<caption>Task list for {{worklogForDay.value.dayStr}} {{worklogForDay.key}}th</caption>-->
-                          <!--<tr>-->
-                          <!--<th>Title</th>-->
-                          <!--<th>Worked</th>-->
-                          <!--<th></th>-->
-                          <!--</tr>-->
                           <tr *ngFor="let logEntry of worklogForDay.value.logEntries; trackBy: trackByForLogEntry;">
                             <td [class.isSubTask]="logEntry.task.parentId"
                                 class="title">
                               <mat-icon *ngIf="logEntry.task.repeatCfgId"
                                         class="repeat-task-icon"
-                                        title="Repeating task">repeat
+                                        [title]="T.F.WORKLOG.CMP.REPEATING_TASK|translate">repeat
                               </mat-icon>
                               <span class="task-title">{{logEntry.task.title}}</span>
                             </td>
@@ -116,8 +113,7 @@
                                       aria-label="restore"
                                       color=""
                                       mat-icon-button=""
-                                      title="Restore Task From Archive">
-                                <!--<mat-icon>unarchive</mat-icon>-->
+                                      [title]="T.F.WORKLOG.CMP.RESTORE_TASK_FROM_ARCHIVE|translate">
                                 <mat-icon>settings_backup_restore</mat-icon>
                               </button>
                             </td>

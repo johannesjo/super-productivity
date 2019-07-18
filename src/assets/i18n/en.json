@@ -639,6 +639,20 @@
           "PARENT_TASK": "Parent Task",
           "WORKLOG": "Worklog"
         }
+      },
+      "WEEK": {
+        "TITLE": "Title",
+        "EXPORT": "Export Week Data"
+      },
+      "CMP": {
+        "TOTAL_TIME_PROJECT": "Total time spent on project",
+        "MONTH_WORKED": "Month worked:",
+        "DAYS_WORKED":"Days, worked:",
+        "TOTAL_TIME": "Time spent total:",
+        "TASKS": "Tasks",
+        "WORKED": "Worked",
+        "REPEATING_TASK": "Repeating task",
+        "RESTORE_TASK_FROM_ARCHIVE": "Restore Task From Archive"
       }
     }
   },
