@@ -141,6 +141,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
 <table>
   <tr>
     <td align="center"><a href="https://github.com/theCalcaholic"><img src="https://avatars1.githubusercontent.com/u/6317548?v=4" width="100px;" alt="Tobias K"/><br /><sub><b>Tobias K</b></sub></a><br /><a href="#content-theCalcaholic" title="Content">🖋</a></td>
+    <td align="center"><a href="https://github.com/KonTy"><img src="https://avatars0.githubusercontent.com/u/9524513?v=4" width="100px;" alt="KonTy"/><br /><sub><b>KonTy</b></sub></a><br /><a href="#ideas-KonTy" title="Ideas, Planning, & Feedback">🤔</a></td>
   </tr>
 </table>
 
