@@ -662,7 +662,7 @@
       "CMP": {
         "TOTAL_TIME_PROJECT": "Total time spent on project",
         "MONTH_WORKED": "Month worked:",
-        "DAYS_WORKED":"Days, worked:",
+        "DAYS_WORKED": "Days, worked:",
         "TOTAL_TIME": "Time spent total:",
         "TASKS": "Tasks",
         "WORKED": "Worked",
@@ -904,5 +904,13 @@
     "TIME_ESTIMATED": "Time Estimated:",
     "WITHOUT_BREAK": "Without break:",
     "WORKING_TODAY": "Working today:"
+  },
+  "APP": {
+    "B_INSTALL": {
+      "MSG": "Do you want to install Super Productivity as a PWA?",
+      "INSTALL": "Install",
+      "IGNORE": "Ignore"
+    },
+    "UPDATE_WEB_APP": "New version available. Load New Version?"
   }
 }

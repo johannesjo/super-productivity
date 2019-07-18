@@ -47,6 +47,8 @@ import {BannerService} from './core/banner/banner.service';
 import {loadFromLs, saveToLs} from './core/persistence/local-storage';
 import {LS_WEB_APP_INSTALL} from './core/persistence/ls-keys.const';
 import {BannerId} from './core/banner/banner.model';
+import {T} from './t.const';
+import {TranslateService} from '@ngx-translate/core';
 
 const SIDE_PANEL_BREAKPOINT = 900;
 
@@ -91,6 +93,7 @@ export class AppComponent implements OnInit {
     private _chromeExtensionInterface: ChromeExtensionInterfaceService,
     private _migrateService: MigrateService,
     private _swUpdate: SwUpdate,
+    private _translateService: TranslateService,
     private _el: ElementRef,
     private _cd: ChangeDetectorRef,
     private _themeService: ThemeService,
@@ -145,7 +148,7 @@ export class AppComponent implements OnInit {
       this._chromeExtensionInterface.init();
       if (this._swUpdate.isEnabled) {
         this._swUpdate.available.subscribe(() => {
-          if (confirm('New version available. Load New Version?')) {
+          if (confirm(this._translateService.instant(T.APP.UPDATE_WEB_APP))) {
             window.location.reload();
           }
         });
@@ -189,15 +192,15 @@ export class AppComponent implements OnInit {
 
     this._bannerService.open({
       id: BannerId.InstallWebApp,
-      msg: 'Do you want to install Super Productivity as a PWA?',
+      msg: T.APP.B_INSTALL.MSG,
       action: {
-        label: 'Install',
+        label: T.APP.B_INSTALL.INSTALL,
         fn: () => {
           e.prompt();
         }
       },
       action2: {
-        label: 'Ignore',
+        label: T.APP.B_INSTALL.IGNORE,
         fn: () => {
           saveToLs(LS_WEB_APP_INSTALL, true);
         }
