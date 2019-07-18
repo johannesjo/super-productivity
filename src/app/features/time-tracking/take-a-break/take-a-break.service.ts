@@ -23,6 +23,7 @@ import {BannerService} from '../../../core/banner/banner.service';
 import {BannerId} from '../../../core/banner/banner.model';
 import {ProjectService} from '../../project/project.service';
 import {GlobalConfigState, TakeABreakConfig} from '../../config/global-config.model';
+import {T} from '../../../t.const';
 
 const BREAK_TRIGGER_DURATION = 10 * 60 * 1000;
 
@@ -155,12 +156,15 @@ export class TakeABreakService {
         id: BANNER_ID,
         ico: 'free_breakfast',
         msg,
+        translateParams: {
+          time: '15m'
+        },
         action: {
-          label: 'I already did',
+          label: T.F.TIME_TRACKING.B.ALREADY_DID,
           fn: () => this.resetTimerAndCountAsBreak()
         },
         action2: {
-          label: 'Snooze 15m',
+          label: T.F.TIME_TRACKING.B.SNOOZE,
           fn: () => this.snooze()
         },
       });

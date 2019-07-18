@@ -12,6 +12,7 @@ import {GlobalConfigService} from '../config/global-config.service';
 import {Task} from '../tasks/task.model';
 import {getWorklogStr} from '../../util/get-work-log-str';
 import {distinctUntilChanged, shareReplay} from 'rxjs/operators';
+import {T} from '../../t.const';
 
 const DEFAULT_MIN_IDLE_TIME = 60000;
 const IDLE_POLL_INTERVAL = 1000;
@@ -20,14 +21,14 @@ const IDLE_POLL_INTERVAL = 1000;
   providedIn: 'root',
 })
 export class IdleService {
-  public isIdle = false;
+  isIdle = false;
   private _isIdle$: BehaviorSubject<boolean> = new BehaviorSubject(false);
-  public isIdle$: Observable<boolean> = this._isIdle$.asObservable().pipe(distinctUntilChanged(), shareReplay());
+  isIdle$: Observable<boolean> = this._isIdle$.asObservable().pipe(distinctUntilChanged(), shareReplay());
 
   private _idleTime$: BehaviorSubject<number> = new BehaviorSubject(0);
-  public idleTime$: Observable<number> = this._idleTime$.asObservable();
+  idleTime$: Observable<number> = this._idleTime$.asObservable();
   private _triggerResetBreakTimer$ = new Subject<boolean>();
-  public triggerResetBreakTimer$: Observable<boolean> = this._triggerResetBreakTimer$.asObservable();
+  triggerResetBreakTimer$: Observable<boolean> = this._triggerResetBreakTimer$.asObservable();
 
 
   private lastCurrentTaskId: string;

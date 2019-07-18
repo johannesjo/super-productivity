@@ -607,6 +607,21 @@
         "SUNDAY": "Sunday"
       }
     },
+    "TIME_TRACKING": {
+      "D_IDLE": {
+        "IDLE_FOR": "You have been idle for:",
+        "TRACK_TO": "Track to:",
+        "CREATE_AND_TRACK": "<em>Create</em> and track to:",
+        "SKIP": "Skip",
+        "BREAK": "Break",
+        "TASK": "Task",
+        "TASK_BREAK": "Task+Break"
+      },
+      "B": {
+        "ALREADY_DID": "I already did",
+        "SNOOZE": "Snooze {{time}}"
+      }
+    },
     "WORKLOG": {
       "D_EXPORT_TITLE": "Worklog Export",
       "D_CONFIRM_RESTORE": "Are you sure you want to move the task <strong>\"{{title}}\"</strong> into your todays task list?",

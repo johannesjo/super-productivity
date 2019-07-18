@@ -5,6 +5,7 @@ import {Observable} from 'rxjs';
 import {Task} from '../../tasks/task.model';
 import {GlobalConfigService} from '../../config/global-config.service';
 import {MetricService} from '../../metric/metric.service';
+import {T} from '../../../t.const';
 
 @Component({
   selector: 'dialog-idle',
@@ -13,10 +14,11 @@ import {MetricService} from '../../metric/metric.service';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DialogIdleComponent implements OnInit {
-  public lastCurrentTask$: Observable<Task> = this._taskService.getById$(this.data.lastCurrentTaskId);
-  public selectedTask: Task;
-  public newTaskTitle: string;
-  public isCreate: boolean;
+  T = T;
+  lastCurrentTask$: Observable<Task> = this._taskService.getById$(this.data.lastCurrentTaskId);
+  selectedTask: Task;
+  newTaskTitle: string;
+  isCreate: boolean;
 
   constructor(
     public configService: GlobalConfigService,

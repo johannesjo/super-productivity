@@ -22,17 +22,17 @@
     <button (click)="action(banner.id, banner.action)"
             *ngIf="banner.action"
             color="primary"
-            mat-button>{{banner.action.label|translate}}
+            mat-button>{{banner.action.label|translate:banner.translateParams}}
     </button>
     <button (click)="action(banner.id, banner.action2)"
             *ngIf="banner.action2"
             color="primary"
-            mat-button>{{banner.action2.label|translate}}
+            mat-button>{{banner.action2.label|translate:banner.translateParams}}
     </button>
     <button (click)="action(banner.id, banner.action3)"
             *ngIf="banner.action3"
             color="primary"
-            mat-button>{{banner.action3.label|translate}}
+            mat-button>{{banner.action3.label|translate:banner.translateParams}}
     </button>
   </div>
 </div>
