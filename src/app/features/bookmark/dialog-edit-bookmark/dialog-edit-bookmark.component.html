@@ -9,7 +9,6 @@
     <div class="form-wrapper">
       <mat-form-field>
         <input [(ngModel)]="bookmarkCopy.title"
-               aria-label="Title"
                autofocus="autofocus"
                matInput=""
                name="title"
@@ -45,7 +44,6 @@
           <input [(ngModel)]="bookmarkCopy.icon"
                  [formControl]="iconControl"
                  [matAutocomplete]="auto"
-                 aria-label="Number"
                  matInput
                  [placeholder]="(T.F.BOOKMARK.DIALOG_EDIT.SELECT_ICON|translate)"
                  type="text">

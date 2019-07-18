@@ -54,7 +54,7 @@
       <td>
         <mat-chip-list>
           <mat-chip *ngFor="let component of issueData.components"
-                    title="{{component.description}}">{{component.name}}
+                    [title]="component.description">{{component.name}}
           </mat-chip>
         </mat-chip-list>
       </td>

@@ -1,5 +1,6 @@
 import {ChangeDetectionStrategy, Component} from '@angular/core';
 import {ALL_THEMES} from '../../app.constants';
+import {T} from '../../t.const';
 
 
 @Component({
@@ -9,5 +10,6 @@ import {ALL_THEMES} from '../../app.constants';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ThemeSelectComponent {
-  public themes = ALL_THEMES;
+  T = T;
+  themes = ALL_THEMES;
 }

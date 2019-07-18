@@ -647,6 +647,7 @@ export const T = {
         'COPY_TO_CLIPBOARD': 'F.WORKLOG.EXPORT.COPY_TO_CLIPBOARD',
         'DONT_ROUND': 'F.WORKLOG.EXPORT.DONT_ROUND',
         'GROUP_BY': 'F.WORKLOG.EXPORT.GROUP_BY',
+        'OPTIONS': 'F.WORKLOG.EXPORT.OPTIONS',
         'O': {
           'DATE': 'F.WORKLOG.EXPORT.O.DATE',
           'ENDED_WORKING': 'F.WORKLOG.EXPORT.O.ENDED_WORKING',
@@ -804,6 +805,24 @@ export const T = {
     'TITLE': 'G.TITLE',
     'UNDO': 'G.UNDO',
     'UPDATE': 'G.UPDATE'
+  },
+  'THEMES': {
+    'SELECT_THEME': 'THEMES.SELECT_THEME',
+    'blue': 'THEMES.blue',
+    'blue-grey': 'THEMES.blue-grey',
+    'light-blue': 'THEMES.light-blue',
+    'indigo': 'THEMES.indigo',
+    'pink': 'THEMES.pink',
+    'purple': 'THEMES.purple',
+    'deep-purple': 'THEMES.deep-purple',
+    'cyan': 'THEMES.cyan',
+    'teal': 'THEMES.teal',
+    'green': 'THEMES.green',
+    'light-green': 'THEMES.light-green',
+    'lime': 'THEMES.lime',
+    'yellow': 'THEMES.yellow',
+    'amber': 'THEMES.amber',
+    'deep-orange': 'THEMES.deep-orange'
   },
   'MH': {
     'ADD_NEW_TASK': 'MH.ADD_NEW_TASK',

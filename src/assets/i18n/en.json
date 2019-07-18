@@ -647,6 +647,7 @@
         "COPY_TO_CLIPBOARD": "Copy to clipboard",
         "DONT_ROUND": "don't round",
         "GROUP_BY": "Group by",
+        "OPTIONS": "Options",
         "O": {
           "DATE": "Date",
           "ENDED_WORKING": "Ended Working",
@@ -803,7 +804,25 @@
     "SAVE": "Save",
     "TITLE": "Title",
     "UNDO": "Undo",
-    "UPDATE": "UPDATE"
+    "UPDATE": "Update"
+  },
+  "THEMES": {
+    "SELECT_THEME": "Select Theme",
+    "blue": "blue",
+    "blue-grey": "blue-grey",
+    "light-blue": "light-blue",
+    "indigo": "indigo",
+    "pink": "pink",
+    "purple": "purple",
+    "deep-purple": "deep-purple",
+    "cyan": "cyan",
+    "teal": "teal",
+    "green": "green",
+    "light-green": "light-green",
+    "lime": "lime",
+    "yellow": "yellow",
+    "amber": "amber",
+    "deep-orange": "deep-orange"
   },
   "MH": {
     "ADD_NEW_TASK": "Add new Task",

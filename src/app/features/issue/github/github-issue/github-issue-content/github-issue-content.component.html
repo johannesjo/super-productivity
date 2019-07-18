@@ -28,7 +28,7 @@
       <td>
         <mat-chip-list>
           <mat-chip *ngFor="let label of issueData?.labels"
-                    title="{{label.description}}">{{label.name}}
+                    [title]="label.description">{{label.name}}
           </mat-chip>
         </mat-chip-list>
       </td>
