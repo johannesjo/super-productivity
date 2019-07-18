@@ -10,7 +10,7 @@ export const AUTOMATIC_BACKUPS_FORM: ConfigFormSection = {
   items: [
     {
       key: 'isEnabled',
-      type: 'toggle',
+      type: 'checkbox',
       templateOptions: {
         label: T.GCF.AUTO_BACKUPS.LABEL_IS_ENABLED,
       },
