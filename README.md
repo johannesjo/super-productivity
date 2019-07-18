@@ -144,6 +144,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     <td align="center"><a href="https://github.com/KonTy"><img src="https://avatars0.githubusercontent.com/u/9524513?v=4" width="100px;" alt="KonTy"/><br /><sub><b>KonTy</b></sub></a><br /><a href="#ideas-KonTy" title="Ideas, Planning, & Feedback">🤔</a></td>
     <td align="center"><a href="https://github.com/aitboudad"><img src="https://avatars2.githubusercontent.com/u/1753742?v=4" width="100px;" alt="Abdellatif Ait boudad"/><br /><sub><b>Abdellatif Ait boudad</b></sub></a><br /><a href="#content-aitboudad" title="Content">🖋</a></td>
     <td align="center"><a href="https://github.com/Morganamilo"><img src="https://avatars2.githubusercontent.com/u/16593899?v=4" width="100px;" alt="Anna"/><br /><sub><b>Anna</b></sub></a><br /><a href="#content-Morganamilo" title="Content">🖋</a></td>
+    <td align="center"><a href="https://github.com/johannesjo"><img src="https://avatars1.githubusercontent.com/u/1456265?v=4" width="100px;" alt="Johannes Millan"/><br /><sub><b>Johannes Millan</b></sub></a><br /><a href="#content-johannesjo" title="Content">🖋</a></td>
   </tr>
 </table>
 
