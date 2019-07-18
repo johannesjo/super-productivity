@@ -29,10 +29,10 @@ import {GlobalErrorHandler} from './core/error-handler/global-error-handler.clas
 import {MyHammerConfig} from '../hammer-config.class';
 import {ProcrastinationModule} from './features/procrastination/procrastination.module';
 import {TaskRepeatCfgModule} from './features/task-repeat-cfg/task-repeat-cfg.module';
-import {TranslateLoader, TranslateModule, TranslateService} from '@ngx-translate/core';
+import {TranslateLoader, TranslateModule} from '@ngx-translate/core';
 import {TranslateHttpLoader} from '@ngx-translate/http-loader';
-import {AUTO_SWITCH_LNGS, LanguageCode, LanguageCodeMomentMap} from './app.constants';
-import * as moment from 'moment';
+import {LanguageCode} from './app.constants';
+import {LanguageService} from './core/language/language.service';
 
 // NOTE: export required for aot to work
 export function createTranslateLoader(http: HttpClient) {
@@ -98,15 +98,9 @@ export function createTranslateLoader(http: HttpClient) {
 })
 export class AppModule {
   constructor(
-    private _translateService: TranslateService,
+    private _languageService: LanguageService,
   ) {
-    const lng = this._translateService.getBrowserLang() as LanguageCode;
-    this._translateService.setDefaultLang('en');
-    moment.locale('en');
-
-    if (AUTO_SWITCH_LNGS.includes(lng)) {
-      this._translateService.use(lng);
-      moment.locale(LanguageCodeMomentMap[lng]);
-    }
+    this._languageService.setDefault(LanguageCode.en);
+    this._languageService.setFromBrowserLngIfAutoSwitchLng();
   }
 }

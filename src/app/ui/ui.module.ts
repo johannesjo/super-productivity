@@ -67,6 +67,7 @@ import {HAMMER_GESTURE_CONFIG} from '@angular/platform-browser';
 import {MyHammerConfig} from '../../hammer-config.class';
 import {registerTranslateExtension} from './formly-translate-extension/formly-translate-extension';
 import {FormlyTranslatedTemplateComponent} from './formly-translated-template/formly-translated-template.component';
+import {MatMomentDateModule} from '@angular/material-moment-adapter';
 
 
 @NgModule({
@@ -128,6 +129,7 @@ import {FormlyTranslatedTemplateComponent} from './formly-translated-template/fo
     MatChipsModule,
     MatSlideToggleModule,
     MatBadgeModule,
+    MatMomentDateModule,
     ValidationModule,
     OwlDateTimeModule,
     OwlNativeDateTimeModule,
@@ -231,6 +233,7 @@ import {FormlyTranslatedTemplateComponent} from './formly-translated-template/fo
     MatChipsModule,
     MatSlideToggleModule,
     MatBadgeModule,
+    MatMomentDateModule,
 
     ReactiveFormsModule,
     FormlyModule,

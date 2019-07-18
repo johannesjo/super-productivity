@@ -256,6 +256,13 @@
   resolved "https://registry.yarnpkg.com/@angular/language-service/-/language-service-8.1.1.tgz#5940b764fa395b75acd50777721c0aa2914e58c9"
   integrity sha512-72ILJBDGhmXUsufxjDT1dzt0oOV7EHWUePgk4xv2s9/gg/xeB0XEDv+AH4LNcYKrbUWyZj7/z7wPzJe+K5PfKQ==
 
+"@angular/material-moment-adapter@^8.1.1":
+  version "8.1.1"
+  resolved "https://registry.yarnpkg.com/@angular/material-moment-adapter/-/material-moment-adapter-8.1.1.tgz#1bb42191781ec20f2907f7e3ec2d785af833ea7e"
+  integrity sha512-tptfSOypLX39C2bXNdhrM9L2V5F8swG2dUQrh6Jb0HZUs0qDsXE5Kq+TB31IzG0XLobvViuImQj8TXbcoKyQmw==
+  dependencies:
+    tslib "^1.7.1"
+
 "@angular/material@^8.0.2":
   version "8.0.2"
   resolved "https://registry.yarnpkg.com/@angular/material/-/material-8.0.2.tgz#c648e0f52d94b37e3dddfd879223202aa0d11587"

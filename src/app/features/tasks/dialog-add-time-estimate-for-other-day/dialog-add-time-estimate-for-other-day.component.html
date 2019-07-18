@@ -12,7 +12,7 @@
       </help-section>
 
 
-      <h3 class="mat-caption">{{T.F.TASK.D_TIME_FOR_DAY.ADD_ENTRY_FOR|translate:{date: newEntry.date|date:'dd-MM-yyyy'} }} </h3>
+      <h3 class="mat-caption">{{T.F.TASK.D_TIME_FOR_DAY.ADD_ENTRY_FOR|translate:{date: (newEntry.date|date:'dd-MM-yyyy') || ''} }} </h3>
       <mat-form-field>
         <input [(ngModel)]="newEntry.date"
                [matDatepicker]="myDatepicker"
@@ -21,7 +21,7 @@
                [placeholder]="T.F.TASK.D_TIME_FOR_DAY.DATE|translate"
                required
                type="text">
-        <mat-error>The entered value is not a date!</mat-error>
+        <mat-error>{{T.V.E_DATETIME|translate}}</mat-error>
         <mat-datepicker-toggle [for]="myDatepicker"
                                matPrefix></mat-datepicker-toggle>
         <mat-datepicker #myDatepicker></mat-datepicker>

@@ -9,10 +9,9 @@ import {SnackOpen} from '../../../core/snack/store/snack.actions';
 import {ElectronService} from 'ngx-electron';
 import {KeyboardConfig} from '../global-config.model';
 import {IPC_REGISTER_GLOBAL_SHORTCUTS_EVENT} from '../../../../../electron/ipc-events.const';
-import {IS_ELECTRON, LanguageCodeMomentMap} from '../../../app.constants';
-import {TranslateService} from '@ngx-translate/core';
+import {IS_ELECTRON} from '../../../app.constants';
 import {T} from '../../../t.const';
-import * as moment from 'moment';
+import {LanguageService} from '../../../core/language/language.service';
 
 @Injectable()
 export class GlobalConfigEffects {
@@ -37,7 +36,8 @@ export class GlobalConfigEffects {
         if (isPublicPropUpdated && isPublicSection) {
           this._store.dispatch(new SnackOpen({
             type: 'SUCCESS',
-            msg: this._translateService.instant(T.F.CONFIG.SNACK.UPDATE_SECTION, {sectionKey}),
+            msg: T.F.CONFIG.SNACK.UPDATE_SECTION,
+            translateParams: {sectionKey}
           }));
         }
       })
@@ -75,9 +75,8 @@ export class GlobalConfigEffects {
       filter((action: UpdateGlobalConfigSection) => action.payload.sectionKey === 'lang'),
       filter((action: UpdateGlobalConfigSection) => action.payload.sectionCfg && action.payload.sectionCfg['lng']),
       tap((action: UpdateGlobalConfigSection) => {
-        const lng = action.payload.sectionCfg['lng'];
-        this._translateService.use(lng);
-        moment.locale(LanguageCodeMomentMap[lng]);
+        this._languageService.setLng(action.payload.sectionCfg['lng']);
+
       })
     );
 
@@ -86,11 +85,9 @@ export class GlobalConfigEffects {
       ofType(
         GlobalConfigActionTypes.LoadGlobalConfig,
       ),
-      filter((action: LoadGlobalConfig) => action.payload.cfg && action.payload.cfg.lang && !!action.payload.cfg.lang.lng),
       tap((action: LoadGlobalConfig) => {
-        const lng = action.payload.cfg.lang.lng;
-        this._translateService.use(lng);
-        moment.locale(LanguageCodeMomentMap[lng]);
+        const lng = action.payload.cfg && action.payload.cfg.lang && action.payload.cfg.lang.lng;
+        this._languageService.setLng(lng);
       })
     );
 
@@ -98,7 +95,7 @@ export class GlobalConfigEffects {
     private _actions$: Actions,
     private _persistenceService: PersistenceService,
     private _electronService: ElectronService,
-    private _translateService: TranslateService,
+    private _languageService: LanguageService,
     private _store: Store<any>
   ) {
   }
