@@ -31,4 +31,10 @@ export interface PersistenceForProjectModel<T> {
   save(projectId: string, state: T, isForce?: boolean): Promise<any>;
 
   remove(projectId: string): Promise<any>;
+
+  getItemById(projectId: string, id: string): Promise<any>;
+
+  // updateItemById(projectId: string, id: string, changes: Object): Promise<any>;
+
+  // deleteItemById(projectId: string, id: string): Promise<any>;
 }

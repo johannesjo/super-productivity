@@ -367,6 +367,10 @@ export class PersistenceService {
       load: (projectId) => this._loadFromDb(this._makeProjectKey(projectId, lsKey)),
       save: (projectId, data, isForce) => this._saveToDb(this._makeProjectKey(projectId, lsKey), data, isForce),
       remove: (projectId) => this._removeFromDb(this._makeProjectKey(projectId, lsKey)),
+      getItemById: async (projectId: string, id: string) => {
+        const state = await model.load(projectId);
+        return state && state.entities && state.entities[id] || null;
+      }
     };
     this._projectModels.push(model);
     return model;
