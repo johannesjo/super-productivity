@@ -1,0 +1,24 @@
+{
+  "projectName": "super-productivity",
+  "projectOwner": "johannesjo",
+  "repoType": "github",
+  "repoHost": "https://github.com",
+  "files": [
+    "README.md"
+  ],
+  "imageSize": 100,
+  "commit": true,
+  "commitConvention": "angular",
+  "contributors": [
+    {
+      "login": "theCalcaholic",
+      "name": "Tobias K",
+      "avatar_url": "https://avatars1.githubusercontent.com/u/6317548?v=4",
+      "profile": "https://github.com/theCalcaholic",
+      "contributions": [
+        "content"
+      ]
+    }
+  ],
+  "contributorsPerLine": 7
+}
