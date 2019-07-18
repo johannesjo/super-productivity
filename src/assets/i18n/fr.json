@@ -141,7 +141,7 @@
         "ALWAYS_ROUND_UP": "Toujours autour du temps de travail",
         "AUTO_LOGIN": "Connexion automatique et chargement des données la prochaine fois",
         "HELP_ADDITIONAL": "En plus de cela, vous pouvez utiliser plusieurs options pour modifier le calcul de ces valeurs.",
-        "HELP_INFO": "<p>Cette vue vous permet d'exporter votre temps de travail dans une feuille Google. Vous devez autoriser l'accès à Superproductivité à vos feuilles de calcul Google. Vous devez également créer une feuille de calcul avec un en-tête dans la première ligne et spécifier son ID dans le champ de saisie (<a href=\"https://stackoverflow.com/questions/36061433/how-to-do-i-locate-a-google-spreadsheet-id\" target=\"_blank\">Ho pour rechercher l'ID d'une feuille de calcul?</a>).</p><p>Après avoir chargé votre feuille de calcul, un tableau contenant 4 lignes s'affiche. La première ligne affiche l'en-tête que vous avez spécifié dans la feuille de calcul elle-même.</p><p>La deuxième ligne est à titre informatif et affiche la dernière ligne de la feuille de calcul.</p><p>La quatrième ligne est une liste de valeurs que vous pouvez directement saisir dans la feuille de calcul.</p><p>La troisième ligne permet de définir automatiquement certaines valeurs pour la quatrième ligne. Vous pouvez entrer plusieurs chaînes spéciales dans les cellules:</p>",
+        "HELP_INFO": "<p>Cette vue vous permet d'exporter votre temps de travail dans une feuille Google. Vous devez autoriser l'accès à Superproductivité à vos feuilles de calcul Google. Vous devez également créer une feuille de calcul avec un en-tête dans la première ligne et spécifier son ID dans le champ de saisie (<a target=\"_blank\" href=\"https://stackoverflow.com/questions/36061433/how-to-do-i-locate-a-google-spreadsheet-id\" target=\"_blank\">Ho pour rechercher l'ID d'une feuille de calcul?</a>).</p><p>Après avoir chargé votre feuille de calcul, un tableau contenant 4 lignes s'affiche. La première ligne affiche l'en-tête que vous avez spécifié dans la feuille de calcul elle-même.</p><p>La deuxième ligne est à titre informatif et affiche la dernière ligne de la feuille de calcul.</p><p>La quatrième ligne est une liste de valeurs que vous pouvez directement saisir dans la feuille de calcul.</p><p>La troisième ligne permet de définir automatiquement certaines valeurs pour la quatrième ligne. Vous pouvez entrer plusieurs chaînes spéciales dans les cellules:</p>",
         "HELP_POSSIBLE_PROPERTIES": "",
         "LOGIN": "Connectez-vous à Google",
         "LOGOUT": "Connectez - Out",
@@ -234,7 +234,7 @@
       "DIALOG_WORKdLOG": {
         "TITLE": ""
       },
-      "EXTENSION_INFO": "Veuillez <a href=\"{{url}}\"> télécharger l'extension chromée</a> afin de permettre la communication avec Jira Api. Notez que cela ne fonctionne pas pour mobile.",
+      "EXTENSION_INFO": "Veuillez <a target=\"_blank\" href=\"{{url}}\"> télécharger l'extension chromée</a> afin de permettre la communication avec Jira Api. Notez que cela ne fonctionne pas pour mobile.",
       "FORM": {
         "IS_AUTO_ADD_TO_BACKLOG": "Ajouter automatiquement les problèmes non résolus de Github à l'arriéré",
         "IS_AUTO_POLL": "Interroger automatiquement les problèmes git importés pour connaître les modifications",
@@ -263,8 +263,8 @@
           "H1": "configuration de base",
           "H2": "Paramètres du journal de travail",
           "H3": "Transitions par défaut",
-          "P1_1": "Veuillez fournir un nom de connexion (qui se trouve sur votre page de profil) et un <a href=\"https://confluence.atlassian.com/cloud/api-tokens-938839638.html\" target=\"_blank\">jeton d'API</a> ou un mot de passe si vous ne pouvez pas en générer un pour une raison quelconque. Veuillez ne pas noter que les versions les plus récentes de jira ne fonctionnent parfois qu'avec le jeton.",
-          "P1_2": "Vous devez également spécifier une requête JQL utilisée pour les suggestions permettant d'ajouter des tâches à partir de Jira. Si vous avez besoin d’aide, consultez ce lien <a href=\"https://confluence.atlassian.com/jirasoftwarecloud/advanced-searching-764478330.html\" target=\"_blank\">https://confluence.atlassian.com/jirasoftwarecloud/advanced-searching-764478330.html</a>.",
+          "P1_1": "Veuillez fournir un nom de connexion (qui se trouve sur votre page de profil) et un <a target=\"_blank\" href=\"https://confluence.atlassian.com/cloud/api-tokens-938839638.html\" target=\"_blank\">jeton d'API</a> ou un mot de passe si vous ne pouvez pas en générer un pour une raison quelconque. Veuillez ne pas noter que les versions les plus récentes de jira ne fonctionnent parfois qu'avec le jeton.",
+          "P1_2": "Vous devez également spécifier une requête JQL utilisée pour les suggestions permettant d'ajouter des tâches à partir de Jira. Si vous avez besoin d’aide, consultez ce lien <a target=\"_blank\" href=\"https://confluence.atlassian.com/jirasoftwarecloud/advanced-searching-764478330.html\" target=\"_blank\">https://confluence.atlassian.com/jirasoftwarecloud/advanced-searching-764478330.html</a>.",
           "P1_3": "Vous pouvez également configurer, si vous souhaitez automatiquement (par exemple, chaque fois que vous consultez la vue Planification), ajouter toutes les nouvelles tâches spécifiées par une requête JQL personnalisée au backlog.",
           "P1_4": "Une autre option est \"Vérifier si le ticket actuel est attribué à l'utilisateur actuel\". Si activé et que vous démarrez, une vérification sera effectuée si vous êtes actuellement affecté à ce ticket sur Jira. Sinon, un dialogue apparaît dans lequel vous pouvez choisir de vous attribuer le ticket.",
           "P2_1": "Plusieurs options permettent de déterminer quand et comment vous souhaitez soumettre un journal de travail. L'activation de la <em>'boîte de dialogue Ouvrir un journal de travail pour l'ajout d'un journal de travail à Jira lorsque la tâche est terminée'</em> ouvre une boîte de dialogue permettant d'ajouter un journal de travail chaque fois que vous marquez une tâche Jira comme terminée. Gardez donc à l'esprit que des journaux de travail s'ajouteront à tout ce qui a été suivi jusqu'à présent. Ainsi, si vous marquez une tâche comme terminée pour une seconde fois, vous ne voudrez peut-être pas soumettre à nouveau le temps complet travaillé pour la tâche.",
@@ -407,7 +407,7 @@
         "L2": "Essayez d'écouter les pensées et les sentiments qui se dégagent",
         "L3": "Êtes-vous répondre à vous-même d'une manière que vous répondriez à un ami?",
         "L4": "Si la réponse est non, imaginez votre ami dans votre situation. Que leur diriez-vous? Que feriez-vous pour eux?",
-        "OUTRO": "Vous trouverez plus d'exercices <a href=\"https://drsoph.com/blog/2018/9/17/3-exercises-in-self-compassion\" target=\"_blank\">ici</a> ou sur <a href=\"https://www.google.com/search?q=self+compassion+exercises&oq=self+compassion+excers&aqs=chrome.1.69i57j0l5.4303j0j7&sourceid=chrome&ie=UTF-8\" target=\"_blank\">google</a>.",
+        "OUTRO": "Vous trouverez plus d'exercices <a target=\"_blank\" href=\"https://drsoph.com/blog/2018/9/17/3-exercises-in-self-compassion\" target=\"_blank\">ici</a> ou sur <a target=\"_blank\" href=\"https://www.google.com/search?q=self+compassion+exercises&oq=self+compassion+excers&aqs=chrome.1.69i57j0l5.4303j0j7&sourceid=chrome&ie=UTF-8\" target=\"_blank\">google</a>.",
         "TITLE": "Compassion personnelle"
       },
       "CUR": {
@@ -421,7 +421,7 @@
       },
       "H1": "Coupez-vous du mou!",
       "P1": "Tout d'abord se détendre! Tout le monde le fait de temps en temps. Et si vous ne faites pas ce que vous devriez, vous devriez au moins en profiter! Ensuite, consultez les sections ci-dessous pour quelque chose d'utile.",
-      "P2": "Si vous voulez en savoir plus sur la science qui se cache derrière tout cela, je peux recommander <a href=\"https://www.nytimes.com/2019/03/25/smarter-living/why-you-procrastinate-it-has-nothing-to-do-with-self-control.html\" target=\"_blank\">cet article</a> à partir duquel figurent certains des exercices.",
+      "P2": "Si vous voulez en savoir plus sur la science qui se cache derrière tout cela, je peux recommander <a target=\"_blank\" href=\"https://www.nytimes.com/2019/03/25/smarter-living/why-you-procrastinate-it-has-nothing-to-do-with-self-control.html\" target=\"_blank\">cet article</a> à partir duquel figurent certains des exercices.",
       "P3": "Rappelez-vous: la procrastination est un problème de régulation des émotions, pas un problème de gestion du temps.",
       "REFRAME": {
         "INTRO": "Pensez à ce qui pourrait être positif à propos de la tâche malgré ses.",

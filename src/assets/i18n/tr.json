@@ -234,7 +234,7 @@
       "DIALOG_WORKdLOG": {
         "TITLE": ""
       },
-      "EXTENSION_INFO": "Jira Api ile iletişime izin vermek için lütfen <a href=\"{{url}}\"> krom uzantısını</a> indirin. Bunun mobil cihazlar için işe yaramadığını unutmayın.",
+      "EXTENSION_INFO": "Jira Api ile iletişime izin vermek için lütfen <a target=\"_blank\" href=\"{{url}}\"> krom uzantısını</a> indirin. Bunun mobil cihazlar için işe yaramadığını unutmayın.",
       "FORM": {
         "IS_AUTO_ADD_TO_BACKLOG": "Çözülmeyen sorunları otomatik olarak Github'dan backlog'a ekle",
         "IS_AUTO_POLL": "İçe aktarılan git sorunlarını değişiklikler için otomatik olarak yokla",
@@ -263,8 +263,8 @@
           "H1": "Temel yapılandırma",
           "H2": "Worklog ayarları",
           "H3": "Varsayılan geçişler",
-          "P1_1": "Herhangi bir nedenden bir tane oluşturamazsanız lütfen bir giriş adı (profil sayfanızda bulunabilir) ve bir <a href=\"https://confluence.atlassian.com/cloud/api-tokens-938839638.html\" target=\"_blank\">API belirteci</a> veya şifre belirtin. Lütfen jira'nın yeni sürümlerinin bazen yalnızca belirteçle çalıştığını unutmayın.",
-          "P1_2": "Ayrıca, Jira'dan görev eklemek için önerilerde kullanılacak bir JQL sorgusu belirtmeniz gerekir. Yardıma ihtiyacınız varsa bu bağlantıyı <a href=\"https://confluence.atlassian.com/jirasoftwarecloud/advanced-searching-764478330.html\" target=\"_blank\">kontrol edin https://confluence.atlassian.com/jirasoftwarecloud/advanced-searching-764478330.html</a>",
+          "P1_1": "Herhangi bir nedenden bir tane oluşturamazsanız lütfen bir giriş adı (profil sayfanızda bulunabilir) ve bir <a target=\"_blank\" href=\"https://confluence.atlassian.com/cloud/api-tokens-938839638.html\" target=\"_blank\">API belirteci</a> veya şifre belirtin. Lütfen jira'nın yeni sürümlerinin bazen yalnızca belirteçle çalıştığını unutmayın.",
+          "P1_2": "Ayrıca, Jira'dan görev eklemek için önerilerde kullanılacak bir JQL sorgusu belirtmeniz gerekir. Yardıma ihtiyacınız varsa bu bağlantıyı <a target=\"_blank\" href=\"https://confluence.atlassian.com/jirasoftwarecloud/advanced-searching-764478330.html\" target=\"_blank\">kontrol edin https://confluence.atlassian.com/jirasoftwarecloud/advanced-searching-764478330.html</a>",
           "P1_3": "Ayrıca, otomatik olarak (örneğin planlama görünümünü her ziyaret ettiğinizde), özel bir JQL sorgusu tarafından belirtilen tüm yeni görevleri biriktirmek için eklemek üzere yapılandırabilirsiniz.",
           "P1_4": "Diğer bir seçenek ise \"Geçerli biletin mevcut kullanıcıya atanmış olup olmadığını kontrol et\" dir. Etkinleştirilirse ve başlıyorsanız, şu anda Jira'daki o bilete atanıp atanmadığınızı, kendinize bileti atamayı seçebileceğiniz bir İletişim Kutusu görünmüyorsa bir kontrol yapılır.",
           "P2_1": "Bir çalışma günlüğünü ne zaman ve nasıl göndermek istediğinizi belirlemek için çeşitli seçenekler vardır. <em>'Görev tamamlandığında Jira'ya bir çalışma grubu eklemek için çalışma iletişim kutusunu aç' seçeneğinin etkinleştirilmesi '</em> , bir Jira Görevini her şekilde yaptığınızda bir çalışma grubu eklemek için bir iletişim kutusu açar. Bu nedenle, bugüne kadar izlenen her şeyin üstüne çalışma günlükleri ekleneceğini unutmayın. Bu nedenle, bir görevi ikinci kez yapılan şekilde işaretlerseniz, görev için çalışılan tam zamanı tekrar göndermek istemeyebilirsiniz.",
@@ -407,7 +407,7 @@
         "L2": "Ortaya çıkan düşünce ve duyguları dinlemeye çalışın",
         "L3": "Bir arkadaşınıza cevap verecek şekilde kendinize cevap mı veriyorsunuz?",
         "L4": "Cevabınız hayır ise, durumunuzu arkadaşınızı düşünün. Onlara ne söyleyeceksin? Onlar için ne yapardın?",
-        "OUTRO": "Daha fazla <a href=\"https://drsoph.com/blog/2018/9/17/3-exercises-in-self-compassion\" target=\"_blank\">alıştırması burada</a> veya <a href=\"https://www.google.com/search?q=self+compassion+exercises&oq=self+compassion+excers&aqs=chrome.1.69i57j0l5.4303j0j7&sourceid=chrome&ie=UTF-8\" target=\"_blank\">google</a>sitesinde bulunabilir.",
+        "OUTRO": "Daha fazla <a target=\"_blank\" href=\"https://drsoph.com/blog/2018/9/17/3-exercises-in-self-compassion\" target=\"_blank\">alıştırması burada</a> veya <a target=\"_blank\" href=\"https://www.google.com/search?q=self+compassion+exercises&oq=self+compassion+excers&aqs=chrome.1.69i57j0l5.4303j0j7&sourceid=chrome&ie=UTF-8\" target=\"_blank\">google</a>sitesinde bulunabilir.",
         "TITLE": "Kendinden Şefkat"
       },
       "CUR": {
@@ -421,7 +421,7 @@
       },
       "H1": "Kendine biraz gevşek ol!",
       "P1": "Her şeyden önce rahatla! Herkes arada bir yapar. Yapmanız gerekeni yapmıyorsanız, en azından tadını çıkarmalısınız! Sonra yararlı bir şey için aşağıdaki bölümleri kontrol edin.",
-      "P2": "Tüm bunların arkasındaki bilim hakkında daha fazla bilgi edinmek istiyorsanız, bazı alıştırmalar olan <a href=\"https://www.nytimes.com/2019/03/25/smarter-living/why-you-procrastinate-it-has-nothing-to-do-with-self-control.html\" target=\"_blank\">bu makaleyi</a> önerebilirim.",
+      "P2": "Tüm bunların arkasındaki bilim hakkında daha fazla bilgi edinmek istiyorsanız, bazı alıştırmalar olan <a target=\"_blank\" href=\"https://www.nytimes.com/2019/03/25/smarter-living/why-you-procrastinate-it-has-nothing-to-do-with-self-control.html\" target=\"_blank\">bu makaleyi</a> önerebilirim.",
       "P3": "Unutmayın: Erteleme bir zaman yönetimi problemi değil bir duygu düzenleme sorunudur.",
       "REFRAME": {
         "INTRO": "Göreve rağmen görevde neyin olumlu olabileceğini düşünün.",

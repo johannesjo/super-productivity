@@ -141,7 +141,7 @@
         "ALWAYS_ROUND_UP": "Arbeitszeit immer aufrunden",
         "AUTO_LOGIN": "Beim nächsten Mal automatisch anmelden und Daten laden",
         "HELP_ADDITIONAL": "Darüber hinaus gibt es mehrere Optionen, mit denen Sie die Berechnung dieser Werte ändern können.",
-        "HELP_INFO": "<p>In dieser Ansicht können Sie Ihre Arbeitszeit in ein Google Sheet exportieren. Sie müssen zulassen, dass Super Productivity auf Ihre Google Spreadsheets zugreifen kann. Sie müssen auch eine Tabelle mit Überschriften in der ersten Zeile erstellen und deren ID im Eingabefeld angeben (<a href=\"https://stackoverflow.com/questions/36061433/how-to-do-i-locate-a-google-spreadsheet-id\" target=\"_blank\">Um die ID einer Tabelle zu ermitteln?</a>).</p><p>Nach dem erfolgreichen Laden Ihrer Tabelle wird eine Tabelle mit 4 Zeilen angezeigt. In der ersten Zeile wird die Überschrift angezeigt, die Sie in der Tabelle selbst angegeben haben.</p><p>Die zweite Zeile dient zu Informationszwecken und zeigt die letzte Zeile der Tabelle.</p><p>Die vierte Zeile enthält eine Liste von Werten, die Sie direkt eingeben können, um sie in der Tabelle zu speichern.</p><p>In der dritten Zeile werden automatisch einige Werte für die vierte Zeile definiert. Es gibt verschiedene Sonderzeichenfolgen, die Sie in die Zellen eingeben können:</p>",
+        "HELP_INFO": "<p>In dieser Ansicht können Sie Ihre Arbeitszeit in ein Google Sheet exportieren. Sie müssen zulassen, dass Super Productivity auf Ihre Google Spreadsheets zugreifen kann. Sie müssen auch eine Tabelle mit Überschriften in der ersten Zeile erstellen und deren ID im Eingabefeld angeben (<a target=\"_blank\" href=\"https://stackoverflow.com/questions/36061433/how-to-do-i-locate-a-google-spreadsheet-id\" target=\"_blank\">Um die ID einer Tabelle zu ermitteln?</a>).</p><p>Nach dem erfolgreichen Laden Ihrer Tabelle wird eine Tabelle mit 4 Zeilen angezeigt. In der ersten Zeile wird die Überschrift angezeigt, die Sie in der Tabelle selbst angegeben haben.</p><p>Die zweite Zeile dient zu Informationszwecken und zeigt die letzte Zeile der Tabelle.</p><p>Die vierte Zeile enthält eine Liste von Werten, die Sie direkt eingeben können, um sie in der Tabelle zu speichern.</p><p>In der dritten Zeile werden automatisch einige Werte für die vierte Zeile definiert. Es gibt verschiedene Sonderzeichenfolgen, die Sie in die Zellen eingeben können:</p>",
         "HELP_POSSIBLE_PROPERTIES": "",
         "LOGIN": "Melden Sie sich bei Google an",
         "LOGOUT": "Ausloggen",
@@ -234,7 +234,7 @@
       "DIALOG_WORKdLOG": {
         "TITLE": ""
       },
-      "EXTENSION_INFO": "Bitte <a href=\"{{url}}\"> laden Sie die Chrome-Erweiterung</a> herunter, um die Kommunikation mit dem Jira Api zu ermöglichen. Beachten Sie, dass dies für Handys nicht funktioniert.",
+      "EXTENSION_INFO": "Bitte <a target=\"_blank\" href=\"{{url}}\"> laden Sie die Chrome-Erweiterung</a> herunter, um die Kommunikation mit dem Jira Api zu ermöglichen. Beachten Sie, dass dies für Handys nicht funktioniert.",
       "FORM": {
         "IS_AUTO_ADD_TO_BACKLOG": "Fügen Sie ungelöste Probleme aus Github automatisch zum Rückstand hinzu",
         "IS_AUTO_POLL": "Importierte Git-Probleme automatisch nach Änderungen abfragen",
@@ -263,8 +263,8 @@
           "H1": "Grundlegende Einstellung",
           "H2": "Worklog-Einstellungen",
           "H3": "Standardübergänge",
-          "P1_1": "Bitte geben Sie einen Anmeldenamen (auf Ihrer Profilseite) und ein <a href=\"https://confluence.atlassian.com/cloud/api-tokens-938839638.html\" target=\"_blank\">API-Token</a> oder Passwort an, falls Sie aus irgendeinem Grund keinen generieren können. Bitte nicht, dass neuere Versionen von jira manchmal nur mit dem Token funktionieren.",
-          "P1_2": "Sie müssen auch eine JQL-Abfrage angeben, die für die Vorschläge zum Hinzufügen von Aufgaben aus Jira verwendet wird. Wenn Sie Hilfe benötigen, besuchen Sie diesen Link <a href=\"https://confluence.atlassian.com/jirasoftwarecloud/advanced-searching-764478330.html\" target=\"_blank\">https://confluence.atlassian.com/jirasoftwarecloud/advanced-searching-764478330.html</a>.",
+          "P1_1": "Bitte geben Sie einen Anmeldenamen (auf Ihrer Profilseite) und ein <a target=\"_blank\" href=\"https://confluence.atlassian.com/cloud/api-tokens-938839638.html\" target=\"_blank\">API-Token</a> oder Passwort an, falls Sie aus irgendeinem Grund keinen generieren können. Bitte nicht, dass neuere Versionen von jira manchmal nur mit dem Token funktionieren.",
+          "P1_2": "Sie müssen auch eine JQL-Abfrage angeben, die für die Vorschläge zum Hinzufügen von Aufgaben aus Jira verwendet wird. Wenn Sie Hilfe benötigen, besuchen Sie diesen Link <a target=\"_blank\" href=\"https://confluence.atlassian.com/jirasoftwarecloud/advanced-searching-764478330.html\" target=\"_blank\">https://confluence.atlassian.com/jirasoftwarecloud/advanced-searching-764478330.html</a>.",
           "P1_3": "Sie können auch konfigurieren, ob Sie automatisch (z. B. jedes Mal, wenn Sie die Planungsansicht aufrufen) alle neuen Aufgaben, die durch eine benutzerdefinierte JQL-Abfrage angegeben wurden, zum Backlog hinzufügen möchten.",
           "P1_4": "Eine weitere Option ist \"Überprüfen, ob das aktuelle Ticket dem aktuellen Benutzer zugewiesen ist\". Wenn aktiviert und Sie starten, wird geprüft, ob Sie diesem Ticket in Jira zugewiesen sind. Wenn dies nicht der Fall ist, wird ein Dialogfeld angezeigt, in dem Sie das Ticket selbst zuweisen können.",
           "P2_1": "Es gibt verschiedene Möglichkeiten, um festzulegen, wann und wie Sie ein Arbeitsprotokoll senden möchten. Durch Aktivieren von <em>'Dialogfeld \"Arbeitsprotokoll öffnen\" zum Hinzufügen eines Arbeitsprotokolls zu Jira nach Abschluss der Aufgabe'</em> wird ein Dialogfeld zum Hinzufügen eines Arbeitsprotokolls jedes Mal geöffnet, wenn Sie eine Jira-Aufgabe als erledigt markieren. Denken Sie also daran, dass Worklogs zu allen bisher erfassten Daten hinzugefügt werden. Wenn Sie also eine Aufgabe zum zweiten Mal als erledigt markieren, möchten Sie möglicherweise nicht die gesamte Arbeitszeit für die Aufgabe erneut senden.",
@@ -407,7 +407,7 @@
         "L2": "Versuchen Sie, auf die aufkommenden Gedanken und Gefühle zu hören",
         "L3": "Reagieren Sie auf sich selbst so, wie Sie auf einen Freund reagieren würden?",
         "L4": "Wenn die Antwort nein lautet, stellen Sie sich Ihren Freund in Ihrer Situation vor. Was würdest du ihnen sagen? Was würdest du für sie tun?",
-        "OUTRO": "Weitere Übungen <a href=\"https://drsoph.com/blog/2018/9/17/3-exercises-in-self-compassion\" target=\"_blank\">finden Sie hier</a> oder auf <a href=\"https://www.google.com/search?q=self+compassion+exercises&oq=self+compassion+excers&aqs=chrome.1.69i57j0l5.4303j0j7&sourceid=chrome&ie=UTF-8\" target=\"_blank\">Google</a>.",
+        "OUTRO": "Weitere Übungen <a target=\"_blank\" href=\"https://drsoph.com/blog/2018/9/17/3-exercises-in-self-compassion\" target=\"_blank\">finden Sie hier</a> oder auf <a target=\"_blank\" href=\"https://www.google.com/search?q=self+compassion+exercises&oq=self+compassion+excers&aqs=chrome.1.69i57j0l5.4303j0j7&sourceid=chrome&ie=UTF-8\" target=\"_blank\">Google</a>.",
         "TITLE": "Selbstmitleid"
       },
       "CUR": {
@@ -421,7 +421,7 @@
       },
       "H1": "Schneiden Sie sich etwas lockerer!",
       "P1": "Zunächst einmal entspannen! Jeder tut es ab und zu. Und wenn Sie nicht das tun, was Sie sollten, sollten Sie es zumindest genießen! In den folgenden Abschnitten finden Sie hilfreiche Informationen.",
-      "P2": "Wenn Sie hier mehr über die Wissenschaft erfahren möchten, kann ich Ihnen <a href=\"https://www.nytimes.com/2019/03/25/smarter-living/why-you-procrastinate-it-has-nothing-to-do-with-self-control.html\" target=\"_blank\">diesen Artikel</a> empfehlen, aus dem einige der Übungen stammen.",
+      "P2": "Wenn Sie hier mehr über die Wissenschaft erfahren möchten, kann ich Ihnen <a target=\"_blank\" href=\"https://www.nytimes.com/2019/03/25/smarter-living/why-you-procrastinate-it-has-nothing-to-do-with-self-control.html\" target=\"_blank\">diesen Artikel</a> empfehlen, aus dem einige der Übungen stammen.",
       "P3": "Denken Sie daran: Aufschub ist ein Problem der Emotionsregulation, kein Problem des Zeitmanagements.",
       "REFRAME": {
         "INTRO": "Überlegen Sie, was trotz allem an der Aufgabe positiv sein könnte.",

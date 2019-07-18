@@ -141,7 +141,7 @@
         "ALWAYS_ROUND_UP": "항상 작업 시간을 반올림합니다.",
         "AUTO_LOGIN": "다음 번에 자동 로그인 및 데이터로드",
         "HELP_ADDITIONAL": "이 외에도 이러한 값의 계산을 수정하는 데 사용할 수있는 몇 가지 옵션이 있습니다.",
-        "HELP_INFO": "<p>이보기를 사용하면 근무 시간을 Google 시트로 내보낼 수 있습니다. Super Productivity에서 Google 스프레드 시트에 액세스 할 수 있도록 허용해야합니다. 또한 첫 번째 행에 표제가있는 스프레드 시트를 작성해야합니다. 입력 필드에 ID를 지정하지 마십시오 (<a href=\"https://stackoverflow.com/questions/36061433/how-to-do-i-locate-a-google-spreadsheet-id\" target=\"_blank\">Ho로 스프레드 시트의 ID를 찾으십니까?</a>).</p><p>스프레드 시트를 성공적으로로드하면 테이블에 4 개의 행이 표시됩니다. 첫 번째 행에는 스프레드 시트에서 지정한 제목이 표시됩니다.</p><p>두 번째 행은 정보 용이며 스프레드 시트의 마지막 행을 표시합니다.</p><p>네 번째 행은 스프레드 시트에 직접 저장할 수있는 값의 목록입니다.</p><p>세 번째 행은 네 번째 행에 대한 일부 값을 자동으로 정의합니다. 셀에 입력 할 수있는 몇 가지 특수 문자열이 있습니다 :</p>",
+        "HELP_INFO": "<p>이보기를 사용하면 근무 시간을 Google 시트로 내보낼 수 있습니다. Super Productivity에서 Google 스프레드 시트에 액세스 할 수 있도록 허용해야합니다. 또한 첫 번째 행에 표제가있는 스프레드 시트를 작성해야합니다. 입력 필드에 ID를 지정하지 마십시오 (<a target=\"_blank\" href=\"https://stackoverflow.com/questions/36061433/how-to-do-i-locate-a-google-spreadsheet-id\" target=\"_blank\">Ho로 스프레드 시트의 ID를 찾으십니까?</a>).</p><p>스프레드 시트를 성공적으로로드하면 테이블에 4 개의 행이 표시됩니다. 첫 번째 행에는 스프레드 시트에서 지정한 제목이 표시됩니다.</p><p>두 번째 행은 정보 용이며 스프레드 시트의 마지막 행을 표시합니다.</p><p>네 번째 행은 스프레드 시트에 직접 저장할 수있는 값의 목록입니다.</p><p>세 번째 행은 네 번째 행에 대한 일부 값을 자동으로 정의합니다. 셀에 입력 할 수있는 몇 가지 특수 문자열이 있습니다 :</p>",
         "HELP_POSSIBLE_PROPERTIES": "",
         "LOGIN": "Google에 로그인",
         "LOGOUT": "로그 아웃",
@@ -234,7 +234,7 @@
       "DIALOG_WORKdLOG": {
         "TITLE": ""
       },
-      "EXTENSION_INFO": "Jira Api와의 통신을 허용하려면 <a href=\"{{url}}\"> 크롬 확장</a> 을 다운로드하십시오. 이 기능은 모바일에서 작동하지 않습니다.",
+      "EXTENSION_INFO": "Jira Api와의 통신을 허용하려면 <a target=\"_blank\" href=\"{{url}}\"> 크롬 확장</a> 을 다운로드하십시오. 이 기능은 모바일에서 작동하지 않습니다.",
       "FORM": {
         "IS_AUTO_ADD_TO_BACKLOG": "Github의 미해결 문제를 백 로그에 자동으로 추가합니다.",
         "IS_AUTO_POLL": "변경 사항에 대해 가져온 git 문제를 자동으로 폴링합니다.",
@@ -263,8 +263,8 @@
           "H1": "기본 구성",
           "H2": "작업 로그 설정",
           "H3": "기본 전환",
-          "P1_1": "어떤 이유로 든 생성 할 수없는 경우 로그인 이름 (프로필 페이지에서 찾을 수 있음)과 <a href=\"https://confluence.atlassian.com/cloud/api-tokens-938839638.html\" target=\"_blank\">API 토큰</a> 또는 비밀번호를 제공하십시오. 최신 버전의 jira가 토큰과 만 작동하는 경우도 있습니다.",
-          "P1_2": "또한 Jira에서 작업을 추가하는 제안에 사용되는 JQL 쿼리를 지정해야합니다. 도움이 필요한 경우 <a href=\"https://confluence.atlassian.com/jirasoftwarecloud/advanced-searching-764478330.html\" target=\"_blank\">https://confluence.atlassian.com/jirasoftwarecloud/advanced-searching-764478330.html</a>링크를 확인하십시오.",
+          "P1_1": "어떤 이유로 든 생성 할 수없는 경우 로그인 이름 (프로필 페이지에서 찾을 수 있음)과 <a target=\"_blank\" href=\"https://confluence.atlassian.com/cloud/api-tokens-938839638.html\" target=\"_blank\">API 토큰</a> 또는 비밀번호를 제공하십시오. 최신 버전의 jira가 토큰과 만 작동하는 경우도 있습니다.",
+          "P1_2": "또한 Jira에서 작업을 추가하는 제안에 사용되는 JQL 쿼리를 지정해야합니다. 도움이 필요한 경우 <a target=\"_blank\" href=\"https://confluence.atlassian.com/jirasoftwarecloud/advanced-searching-764478330.html\" target=\"_blank\">https://confluence.atlassian.com/jirasoftwarecloud/advanced-searching-764478330.html</a>링크를 확인하십시오.",
           "P1_3": "또한 자동으로 (예 : 계획보기를 방문 할 때마다) 사용자 정의 JQL 쿼리에 지정된 새 작업을 모두 백 로그에 추가하도록 구성 할 수 있습니다.",
           "P1_4": "또 다른 옵션은 \"현재 티켓이 현재 사용자에게 지정되었는지 확인\"입니다. 활성화되어 있고 시작 중이면 현재 Jira에서 해당 티켓에 할당 된 경우 확인이 수행됩니다. 대화 상자가 나타나지 않으면 티켓을 직접 할당 할 수 있습니다.",
           "P2_1": "작업 로그를 제출할시기와 방법을 결정할 수있는 몇 가지 옵션이 있습니다. 작업 완료시 작업 로그를 추가하는 <em>'작업 로그 열기'대화 상자 사용 '</em> 은 Jira 작업을 완료로 표시 할 때마다 작업 로그를 추가하는 대화 상자를 엽니 다. 지금까지 추적 된 모든 항목 위에 작업 로그가 추가 될 것입니다. 따라서 두 번째로 작업을 완료로 표시하면 작업의 전체 작업 시간을 다시 제출하지 않을 수 있습니다.",
@@ -407,7 +407,7 @@
         "L2": "발생하는 생각과 느낌을 경청하십시오.",
         "L3": "친구에게 응답 할 수있는 방식으로 자신에게 응답하고 있습니까?",
         "L4": "대답이 '아니오'인 경우 친구의 상황을 상상해보십시오. 당신이 그들에게 뭐라고 말하겠습니까? 당신이 그들을 위해 무엇을 할 것입니까?",
-        "OUTRO": "더 많은 연습 <a href=\"https://drsoph.com/blog/2018/9/17/3-exercises-in-self-compassion\" target=\"_blank\">은</a> 또는 <a href=\"https://www.google.com/search?q=self+compassion+exercises&oq=self+compassion+excers&aqs=chrome.1.69i57j0l5.4303j0j7&sourceid=chrome&ie=UTF-8\" target=\"_blank\">google</a>에 있습니다.",
+        "OUTRO": "더 많은 연습 <a target=\"_blank\" href=\"https://drsoph.com/blog/2018/9/17/3-exercises-in-self-compassion\" target=\"_blank\">은</a> 또는 <a target=\"_blank\" href=\"https://www.google.com/search?q=self+compassion+exercises&oq=self+compassion+excers&aqs=chrome.1.69i57j0l5.4303j0j7&sourceid=chrome&ie=UTF-8\" target=\"_blank\">google</a>에 있습니다.",
         "TITLE": "자기 동정"
       },
       "CUR": {

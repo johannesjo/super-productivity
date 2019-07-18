@@ -21,7 +21,8 @@
     </tr>
     <tr *ngIf="issueData?.assignee?.html_url">
       <th>{{T.F.GITHUB.ISSUE_CONTENT.ASSIGNEE|translate}}</th>
-      <td><a [href]="issueData?.assignee?.html_url">{{issueData?.assignee?.login}}</a></td>
+      <td><a [href]="issueData?.assignee?.html_url"
+             target="_blank">{{issueData?.assignee?.login}}</a></td>
     </tr>
     <tr *ngIf="issueData?.labels?.length">
       <th>{{T.F.GITHUB.ISSUE_CONTENT.LABELS|translate}}</th>

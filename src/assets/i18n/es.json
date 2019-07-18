@@ -141,7 +141,7 @@
         "ALWAYS_ROUND_UP": "Siempre redondeando el tiempo de trabajo.",
         "AUTO_LOGIN": "Iniciar sesión automáticamente y cargar datos la próxima vez",
         "HELP_ADDITIONAL": "Además de esto, hay varias opciones que puede utilizar para modificar el cálculo de esos valores.",
-        "HELP_INFO": "<p>Esta vista le permite exportar su tiempo trabajado a una hoja de Google. Debe permitir que Super Productivity acceda a sus Hojas de cálculo de Google. También debe crear una hoja de cálculo con encabezados en la primera fila y especificar su ID en el campo de entrada (<a href=\"https://stackoverflow.com/questions/36061433/how-to-do-i-locate-a-google-spreadsheet-id\" target=\"_blank\">Ho para encontrar el ID de una hoja de cálculo?</a>).</p><p>Después de cargar con éxito su hoja de cálculo, aparecerá una tabla con 4 filas. La primera fila muestra el encabezado que especificó en la hoja de cálculo.</p><p>La segunda fila es para fines informativos y muestra la última fila de la hoja de cálculo.</p><p>La cuarta fila es una lista de valores que puede ingresar directamente y guardar en la hoja de cálculo.</p><p>La tercera fila está ahí para definir automáticamente algunos valores para la cuarta fila. Hay varias cadenas especiales que puedes ingresar en las celdas:</p>",
+        "HELP_INFO": "<p>Esta vista le permite exportar su tiempo trabajado a una hoja de Google. Debe permitir que Super Productivity acceda a sus Hojas de cálculo de Google. También debe crear una hoja de cálculo con encabezados en la primera fila y especificar su ID en el campo de entrada (<a target=\"_blank\" href=\"https://stackoverflow.com/questions/36061433/how-to-do-i-locate-a-google-spreadsheet-id\" target=\"_blank\">Ho para encontrar el ID de una hoja de cálculo?</a>).</p><p>Después de cargar con éxito su hoja de cálculo, aparecerá una tabla con 4 filas. La primera fila muestra el encabezado que especificó en la hoja de cálculo.</p><p>La segunda fila es para fines informativos y muestra la última fila de la hoja de cálculo.</p><p>La cuarta fila es una lista de valores que puede ingresar directamente y guardar en la hoja de cálculo.</p><p>La tercera fila está ahí para definir automáticamente algunos valores para la cuarta fila. Hay varias cadenas especiales que puedes ingresar en las celdas:</p>",
         "HELP_POSSIBLE_PROPERTIES": "",
         "LOGIN": "Inicia sesión en Google",
         "LOGOUT": "Cerrar sesión",
@@ -234,7 +234,7 @@
       "DIALOG_WORKdLOG": {
         "TITLE": ""
       },
-      "EXTENSION_INFO": "Por favor, <a href=\"{{url}}\"> descargue la extensión de chrome</a> para permitir la comunicación con Jira Api. Tenga en cuenta que esto no funciona para móviles.",
+      "EXTENSION_INFO": "Por favor, <a target=\"_blank\" href=\"{{url}}\"> descargue la extensión de chrome</a> para permitir la comunicación con Jira Api. Tenga en cuenta que esto no funciona para móviles.",
       "FORM": {
         "IS_AUTO_ADD_TO_BACKLOG": "Agregar automáticamente problemas sin resolver desde Github a la acumulación",
         "IS_AUTO_POLL": "Encuestar automáticamente los problemas de git importados para los cambios",
@@ -263,8 +263,8 @@
           "H1": "Configuracion basica",
           "H2": "Configuraciones de registro de trabajo",
           "H3": "Transiciones por defecto",
-          "P1_1": "Proporcione un nombre de inicio de sesión (se puede encontrar en su página de perfil) y un <a href=\"https://confluence.atlassian.com/cloud/api-tokens-938839638.html\" target=\"_blank\">token de API</a> o contraseña si no puede generar uno por algún motivo. Tenga en cuenta que las versiones más recientes de jira a veces solo funcionan con el token.",
-          "P1_2": "También debe especificar una consulta JQL que se utiliza para las sugerencias para agregar tareas desde Jira. Si necesita ayuda, consulte este enlace <a href=\"https://confluence.atlassian.com/jirasoftwarecloud/advanced-searching-764478330.html\" target=\"_blank\">https://confluence.atlassian.com/jirasoftwarecloud/advanced-searching-764478330.html</a>.",
+          "P1_1": "Proporcione un nombre de inicio de sesión (se puede encontrar en su página de perfil) y un <a target=\"_blank\" href=\"https://confluence.atlassian.com/cloud/api-tokens-938839638.html\" target=\"_blank\">token de API</a> o contraseña si no puede generar uno por algún motivo. Tenga en cuenta que las versiones más recientes de jira a veces solo funcionan con el token.",
+          "P1_2": "También debe especificar una consulta JQL que se utiliza para las sugerencias para agregar tareas desde Jira. Si necesita ayuda, consulte este enlace <a target=\"_blank\" href=\"https://confluence.atlassian.com/jirasoftwarecloud/advanced-searching-764478330.html\" target=\"_blank\">https://confluence.atlassian.com/jirasoftwarecloud/advanced-searching-764478330.html</a>.",
           "P1_3": "También puede configurar, si lo desea automáticamente (por ejemplo, cada vez que visite la vista de planificación), para agregar todas las nuevas tareas especificadas por una consulta JQL personalizada a la cartera.",
           "P1_4": "Otra opción es \"Comprobar si el ticket actual está asignado al usuario actual\". Si está habilitado y está comenzando, se realizará una verificación si actualmente está asignado a ese boleto en Jira, si no aparece un diálogo en el que puede elegir asignarse el boleto a usted mismo.",
           "P2_1": "Hay varias opciones para determinar cuándo y cómo desea enviar un registro de trabajo. Habilitando <em>'Abrir el cuadro de diálogo de registro de trabajo para agregar un registro de trabajo a Jira cuando la tarea se haya completado'</em> abre un cuadro de diálogo para agregar un registro de trabajo cada vez que marque una tarea de Jira como hecho. Así que tenga en cuenta que los registros de trabajo se agregarán a todo lo que se haya rastreado hasta ahora. Por lo tanto, si marca una tarea como realizada por segunda vez, es posible que no desee volver a enviar el tiempo completo trabajado para la tarea.",
@@ -407,7 +407,7 @@
         "L2": "Intenta escuchar los pensamientos y sentimientos que surgen.",
         "L3": "¿Te estás respondiendo a ti mismo de la misma manera que responderías a un amigo?",
         "L4": "Si la respuesta es no, imagina a tu amigo en tu situación. ¿Qué les dirías a ellos? ¿Qué harías por ellos?",
-        "OUTRO": "Más ejercicios <a href=\"https://drsoph.com/blog/2018/9/17/3-exercises-in-self-compassion\" target=\"_blank\">se pueden encontrar aquí</a> o en <a href=\"https://www.google.com/search?q=self+compassion+exercises&oq=self+compassion+excers&aqs=chrome.1.69i57j0l5.4303j0j7&sourceid=chrome&ie=UTF-8\" target=\"_blank\">google</a>.",
+        "OUTRO": "Más ejercicios <a target=\"_blank\" href=\"https://drsoph.com/blog/2018/9/17/3-exercises-in-self-compassion\" target=\"_blank\">se pueden encontrar aquí</a> o en <a target=\"_blank\" href=\"https://www.google.com/search?q=self+compassion+exercises&oq=self+compassion+excers&aqs=chrome.1.69i57j0l5.4303j0j7&sourceid=chrome&ie=UTF-8\" target=\"_blank\">google</a>.",
         "TITLE": "Auto compasión"
       },
       "CUR": {
@@ -421,7 +421,7 @@
       },
       "H1": "¡Cállate un poco!",
       "P1": "En primer lugar relajarse! Todo el mundo lo hace de vez en cuando. Y si no estás haciendo lo que debes, ¡al menos deberías disfrutarlo! Entonces revisa las secciones de abajo para algo útil.",
-      "P2": "Si desea saber más sobre la ciencia detrás de todo esto, puedo recomendar <a href=\"https://www.nytimes.com/2019/03/25/smarter-living/why-you-procrastinate-it-has-nothing-to-do-with-self-control.html\" target=\"_blank\">este artículo</a> , de los cuales se encuentran algunos de los ejercicios.",
+      "P2": "Si desea saber más sobre la ciencia detrás de todo esto, puedo recomendar <a target=\"_blank\" href=\"https://www.nytimes.com/2019/03/25/smarter-living/why-you-procrastinate-it-has-nothing-to-do-with-self-control.html\" target=\"_blank\">este artículo</a> , de los cuales se encuentran algunos de los ejercicios.",
       "P3": "Recuerde: la dilación es un problema de regulación emocional, no un problema de gestión del tiempo.",
       "REFRAME": {
         "INTRO": "Piense en lo que podría ser positivo acerca de la tarea a pesar de su.",

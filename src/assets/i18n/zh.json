@@ -141,7 +141,7 @@
         "ALWAYS_ROUND_UP": "始终围绕工作时间",
         "AUTO_LOGIN": "下次自动登录并加载数据",
         "HELP_ADDITIONAL": "除此之外，您还可以使用几个选项来修改这些值的计算。",
-        "HELP_INFO": "<p>此视图允许您将工作时间导出到Google工作表。您需要允许Super Productivity访问您的Google Spreadsheets。您还需要在第一行创建一个标题的电子表格，并在输入字段中指定它的ID（<a href=\"https://stackoverflow.com/questions/36061433/how-to-do-i-locate-a-google-spreadsheet-id\" target=\"_blank\">何以查找电子表格的ID？</a>）。</p><p>成功加载电子表格后，表格将显示4行。第一行显示您在电子表格中指定的标题。</p><p>第二行用于提供信息，显示电子表格的最后一行。</p><p>第四行是您可以直接输入保存到电子表格的值列表。</p><p>第三行是为第四行自动定义一些值。您可以在单元格中输入几个特殊字符串：</p>",
+        "HELP_INFO": "<p>此视图允许您将工作时间导出到Google工作表。您需要允许Super Productivity访问您的Google Spreadsheets。您还需要在第一行创建一个标题的电子表格，并在输入字段中指定它的ID（<a target=\"_blank\" href=\"https://stackoverflow.com/questions/36061433/how-to-do-i-locate-a-google-spreadsheet-id\" target=\"_blank\">何以查找电子表格的ID？</a>）。</p><p>成功加载电子表格后，表格将显示4行。第一行显示您在电子表格中指定的标题。</p><p>第二行用于提供信息，显示电子表格的最后一行。</p><p>第四行是您可以直接输入保存到电子表格的值列表。</p><p>第三行是为第四行自动定义一些值。您可以在单元格中输入几个特殊字符串：</p>",
         "HELP_POSSIBLE_PROPERTIES": "<dt>{startTime}</dt><dd>您今天第一次使用此应用的时间。可以通过选项对此进行舍入。</dd><dt>{currentTime}</dt><dd>当前时间。可用于今天工作日的结束时间可以通过选项对此进行舍入。</dd><dt>{endTime}</dt><dd>上次跟踪当前项目中的任务时间。</dd><dt>{date}</dt><dd>今天日期的标准格式（mm / dd / yyyy）</dd><dt>{date:DD/MM/YYYY} （示例）</dt><dd>日期与自定义日期格式字符串。</dd><dt>{taskTitles}</dt><dd>逗号分隔（父）任务标题</dd><dt>{subTaskTitles}</dt><dd>以逗号分隔的子任务标题</dd><dt>{totalTime}}</dt><dd>你花在完成今天任务上的总时间。</dd>",
         "LOGIN": "登录Google",
         "LOGOUT": "登出",
@@ -234,7 +234,7 @@
       "DIALOG_WORKdLOG": {
         "TITLE": ""
       },
-      "EXTENSION_INFO": "请 <a href=\"{{url}}\"> 下载Chrome扩展程序</a> ，以便与Jira Api进行通信。请注意，这不适用于移动设备。",
+      "EXTENSION_INFO": "请 <a target=\"_blank\" href=\"{{url}}\"> 下载Chrome扩展程序</a> ，以便与Jira Api进行通信。请注意，这不适用于移动设备。",
       "FORM": {
         "IS_AUTO_ADD_TO_BACKLOG": "自动将未解决的问题从Github添加到待办事项",
         "IS_AUTO_POLL": "自动轮询导入的git问题以进行更改",
@@ -263,8 +263,8 @@
           "H1": "基本配置",
           "H2": "工作日志设置",
           "H3": "默认转换",
-          "P1_1": "如果由于某种原因无法生成登录名，请提供登录名（可在您的个人资料页面上找到）和 <a href=\"https://confluence.atlassian.com/cloud/api-tokens-938839638.html\" target=\"_blank\">API令牌</a> 或密码。请注意，较新版本的jira有时只能使用令牌。",
-          "P1_2": "您还需要指定一个JQL查询，该查询用于从Jira添加任务的建议。如果您需要帮助，请查看此链接 <a href=\"https://confluence.atlassian.com/jirasoftwarecloud/advanced-searching-764478330.html\" target=\"_blank\">https://confluence.atlassian.com/jirasoftwarecloud/advanced-searching-764478330.html</a>。",
+          "P1_1": "如果由于某种原因无法生成登录名，请提供登录名（可在您的个人资料页面上找到）和 <a target=\"_blank\" href=\"https://confluence.atlassian.com/cloud/api-tokens-938839638.html\" target=\"_blank\">API令牌</a> 或密码。请注意，较新版本的jira有时只能使用令牌。",
+          "P1_2": "您还需要指定一个JQL查询，该查询用于从Jira添加任务的建议。如果您需要帮助，请查看此链接 <a target=\"_blank\" href=\"https://confluence.atlassian.com/jirasoftwarecloud/advanced-searching-764478330.html\" target=\"_blank\">https://confluence.atlassian.com/jirasoftwarecloud/advanced-searching-764478330.html</a>。",
           "P1_3": "如果要自动配置（例如，每次访问计划视图时），还可以配置将自定义JQL查询指定的所有新任务添加到待办事项。",
           "P1_4": "另一个选项是“检查当前票证是否分配给当前用户”。如果启用并且您正在启动，那么如果您当前已在Jira上分配了该票证，则会进行检查，如果没有出现可以选择将票证分配给您自己的对话框。",
           "P2_1": "有几个选项可以确定您何时以及如何提交工作日志。启用 <em>'打开工作日志对话框，在任务完成时向Jira添加工作日志'</em> 打开一个对话框，每次将Jira任务标记为已完成时添加工作日志。所以请记住，工作日志将添加到目前为止所跟踪的所有内容之上。因此，如果您将任务标记为第二次完成，则可能不希望再次为该任务提交完整的工作时间。",
@@ -407,7 +407,7 @@
         "L2": "尽量倾听所产生的想法和感受",
         "L3": "你是否以回应朋友的方式回应自己？",
         "L4": "如果答案是否定的，那就想象一下你朋友的情况。你会对他们说什么？你会为他们做什么？",
-        "OUTRO": "可以在此处</a> 或 <a href=\"https://www.google.com/search?q=self+compassion+exercises&oq=self+compassion+excers&aqs=chrome.1.69i57j0l5.4303j0j7&sourceid=chrome&ie=UTF-8\" target=\"_blank\">Google</a>找到更多练习 <a href=\"https://drsoph.com/blog/2018/9/17/3-exercises-in-self-compassion\" target=\"_blank\">。",
+        "OUTRO": "可以在此处</a> 或 <a target=\"_blank\" href=\"https://www.google.com/search?q=self+compassion+exercises&oq=self+compassion+excers&aqs=chrome.1.69i57j0l5.4303j0j7&sourceid=chrome&ie=UTF-8\" target=\"_blank\">Google</a>找到更多练习 <a target=\"_blank\" href=\"https://drsoph.com/blog/2018/9/17/3-exercises-in-self-compassion\" target=\"_blank\">。",
         "TITLE": "自我同情"
       },
       "CUR": {
@@ -421,7 +421,7 @@
       },
       "H1": "减少一些自己的松懈！",
       "P1": "首先放松一下！每个人都会偶尔做一次。如果你没有做你应该做的事，你至少应该享受它！然后查看以下部分以获取有用的信息。",
-      "P2": "如果你想了解更多有关背后的科学知识，我可以推荐 <a href=\"https://www.nytimes.com/2019/03/25/smarter-living/why-you-procrastinate-it-has-nothing-to-do-with-self-control.html\" target=\"_blank\">这篇文章</a> ，其中有一些练习。",
+      "P2": "如果你想了解更多有关背后的科学知识，我可以推荐 <a target=\"_blank\" href=\"https://www.nytimes.com/2019/03/25/smarter-living/why-you-procrastinate-it-has-nothing-to-do-with-self-control.html\" target=\"_blank\">这篇文章</a> ，其中有一些练习。",
       "P3": "记住：拖延是一种情绪调节问题，而不是时间管理问题。",
       "REFRAME": {
         "INTRO": "考虑一下尽管有这个任务可能会有什么积极意义。",
