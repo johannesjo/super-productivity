@@ -1,3 +1,15 @@
+## [2.10.1](https://github.com/johannesjo/super-productivity/compare/v2.10.0...v2.10.1) (2019-07-18)
+
+
+### Bug Fixes
+
+* electron app broken ([86925ef](https://github.com/johannesjo/super-productivity/commit/86925ef))
+* **i18n:** make all links open externally [#33](https://github.com/johannesjo/super-productivity/issues/33) ([860b860](https://github.com/johannesjo/super-productivity/commit/860b860))
+* config section styling ([287afd3](https://github.com/johannesjo/super-productivity/commit/287afd3))
+* long text for material checkboxes ([7c911e3](https://github.com/johannesjo/super-productivity/commit/7c911e3))
+
+
+
 # [2.10.0](https://github.com/johannesjo/super-productivity/compare/v2.9.3...v2.10.0) (2019-07-18)
 
 
