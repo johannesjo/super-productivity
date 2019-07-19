@@ -39,10 +39,13 @@ import {JiraIssueState} from '../../features/issue/jira/jira-issue/store/jira-is
 import {GithubIssueState} from '../../features/issue/github/github-issue/store/github-issue.reducer';
 import {CompressionService} from '../compression/compression.service';
 import {PersistenceBaseModel, PersistenceForProjectModel} from './persistence';
-import {MetricState} from '../../features/metric/metric.model';
-import {ImprovementState} from '../../features/metric/improvement/improvement.model';
-import {ObstructionState} from '../../features/metric/obstruction/obstruction.model';
+import {Metric, MetricState} from '../../features/metric/metric.model';
+import {Improvement, ImprovementState} from '../../features/metric/improvement/improvement.model';
+import {Obstruction, ObstructionState} from '../../features/metric/obstruction/obstruction.model';
 import {TaskRepeatCfgState} from '../../features/task-repeat-cfg/task-repeat-cfg.model';
+import {Attachment} from '../../features/attachment/attachment.model';
+import {Bookmark} from '../../features/bookmark/bookmark.model';
+import {Note} from '../../features/note/note.model';
 
 
 @Injectable({
@@ -60,15 +63,15 @@ export class PersistenceService {
   globalConfig = this._cmBase<GlobalConfigState>(LS_GLOBAL_CFG, 'globalConfig');
   reminders = this._cmBase<Reminder[]>(LS_REMINDER, 'reminders');
 
-  task = this._cmProject<TaskState>(LS_TASK_STATE, 'task');
-  taskRepeatCfg = this._cmProject<TaskRepeatCfgState>(LS_TASK_REPEAT_CFG_STATE, 'taskRepeatCfg');
-  taskArchive = this._cmProject<TaskArchive>(LS_TASK_ARCHIVE, 'taskArchive');
-  taskAttachment = this._cmProject<AttachmentState>(LS_TASK_ATTACHMENT_STATE, 'taskAttachment');
-  bookmark = this._cmProject<BookmarkState>(LS_BOOKMARK_STATE, 'bookmark');
-  note = this._cmProject<NoteState>(LS_NOTE_STATE, 'note');
-  metric = this._cmProject<MetricState>(LS_METRIC_STATE, 'metric');
-  improvement = this._cmProject<ImprovementState>(LS_IMPROVEMENT_STATE, 'improvement');
-  obstruction = this._cmProject<ObstructionState>(LS_OBSTRUCTION_STATE, 'obstruction');
+  task = this._cmProject<TaskState, Task>(LS_TASK_STATE, 'task');
+  taskRepeatCfg = this._cmProject<TaskRepeatCfgState, Task>(LS_TASK_REPEAT_CFG_STATE, 'taskRepeatCfg');
+  taskArchive = this._cmProject<TaskArchive, Task>(LS_TASK_ARCHIVE, 'taskArchive');
+  taskAttachment = this._cmProject<AttachmentState, Attachment>(LS_TASK_ATTACHMENT_STATE, 'taskAttachment');
+  bookmark = this._cmProject<BookmarkState, Bookmark>(LS_BOOKMARK_STATE, 'bookmark');
+  note = this._cmProject<NoteState, Note>(LS_NOTE_STATE, 'note');
+  metric = this._cmProject<MetricState, Metric>(LS_METRIC_STATE, 'metric');
+  improvement = this._cmProject<ImprovementState, Improvement>(LS_IMPROVEMENT_STATE, 'improvement');
+  obstruction = this._cmProject<ObstructionState, Obstruction>(LS_OBSTRUCTION_STATE, 'obstruction');
 
 
   constructor(
@@ -361,16 +364,20 @@ export class PersistenceService {
     return model;
   }
 
-  private _cmProject<T>(lsKey: string, appDataKey: keyof AppDataForProjects): PersistenceForProjectModel<T> {
+  // TODO maybe refactor to class?
+  private _cmProject<T, M>(lsKey: string, appDataKey: keyof AppDataForProjects): PersistenceForProjectModel<T, M> {
     const model = {
       appDataKey,
       load: (projectId) => this._loadFromDb(this._makeProjectKey(projectId, lsKey)),
       save: (projectId, data, isForce) => this._saveToDb(this._makeProjectKey(projectId, lsKey), data, isForce),
       remove: (projectId) => this._removeFromDb(this._makeProjectKey(projectId, lsKey)),
-      getItemById: async (projectId: string, id: string) => {
-        const state = await model.load(projectId);
-        return state && state.entities && state.entities[id] || null;
-      }
+      ent: {
+        getById: async (projectId: string, id: string): Promise<M> => {
+          const state = await model.load(projectId);
+          return state && state.entities && state.entities[id] || null;
+        },
+      },
+
     };
     this._projectModels.push(model);
     return model;

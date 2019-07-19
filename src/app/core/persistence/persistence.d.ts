@@ -23,18 +23,22 @@ export interface PersistenceBaseModel<T> {
   save(state: T, isForce?: boolean): Promise<any>;
 }
 
-export interface PersistenceForProjectModel<T> {
+export interface EntityModelHelpers<M> {
+  getById(projectId: string, id: string): Promise<M>;
+
+  // updateItemById(projectId: string, id: string, changes: Object): Promise<any>;
+
+  // deleteItemById(projectId: string, id: string): Promise<any>;
+}
+
+export interface PersistenceForProjectModel<T, M> {
   appDataKey: keyof AppDataForProjects;
+
+  ent: EntityModelHelpers<M>;
 
   load(projectId: string): Promise<T>;
 
   save(projectId: string, state: T, isForce?: boolean): Promise<any>;
 
   remove(projectId: string): Promise<any>;
-
-  getItemById(projectId: string, id: string): Promise<any>;
-
-  // updateItemById(projectId: string, id: string, changes: Object): Promise<any>;
-
-  // deleteItemById(projectId: string, id: string): Promise<any>;
 }

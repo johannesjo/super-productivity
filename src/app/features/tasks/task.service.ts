@@ -579,8 +579,8 @@ export class TaskService {
   }
 
   async getByIdFromEverywhere(id: string, projectId: string = this._projectService.currentId): Promise<Task> {
-    return await this._persistenceService.task.getItemById(projectId, id)
-      || await this._persistenceService.taskArchive.getItemById(projectId, id);
+    return await this._persistenceService.task.ent.getById(projectId, id)
+      || await this._persistenceService.taskArchive.ent.getById(projectId, id);
   }
 
   // NOTE: archived tasks not included

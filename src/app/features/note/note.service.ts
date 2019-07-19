@@ -43,7 +43,7 @@ export class NoteService {
   }
 
   async getByIdFromEverywhere(id: string, projectId: string): Promise<Note> {
-    return await this._persistenceService.note.getItemById(projectId, id);
+    return await this._persistenceService.note.ent.getById(projectId, id);
   }
 
   public toggleShow() {
