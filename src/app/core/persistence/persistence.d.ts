@@ -27,6 +27,8 @@ export interface PersistenceBaseModel<T> {
 export interface EntityModelHelpers<S, M> {
   getById(projectId: string, id: string): Promise<M>;
 
+  getByIds(projectId: string, id: string[]): Promise<M[]>;
+
   // NOTE: side effects are not executed!!!
   bulkUpdate(projectId: string, adjustFn: (model: M) => M): Promise<S>;
 

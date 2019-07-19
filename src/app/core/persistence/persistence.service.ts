@@ -433,6 +433,17 @@ export class PersistenceService {
           const state = await model.load(projectId);
           return state && state.entities && state.entities[id] || null;
         },
+        getByIds: async (projectId: string, ids: string[]): Promise<M[]> => {
+          const state = await model.load(projectId);
+          if (state && state.entities) {
+            return ids
+              .map(id => state.entities[id])
+              // filter out broken entries
+              .filter((model_: M) => !!model_);
+          }
+          return null;
+        },
+
         // NOTE: side effects are not executed!!!
         execAction: async (projectId: string, action: Action): Promise<S> => {
           const state = await model.load(projectId);

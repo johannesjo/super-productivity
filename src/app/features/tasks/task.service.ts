@@ -51,7 +51,7 @@ import {
   UpdateTaskReminder,
   UpdateTaskUi
 } from './store/task.actions';
-import {initialTaskState, taskReducer, TaskState} from './store/task.reducer';
+import {initialTaskState, TaskState} from './store/task.reducer';
 import {PersistenceService} from '../../core/persistence/persistence.service';
 import {IssueData, IssueProviderKey} from '../issue/issue';
 import {TimeTrackingService} from '../time-tracking/time-tracking.service';
@@ -569,13 +569,11 @@ export class TaskService {
   }
 
   // BEWARE: does only work for task model updates, but not the meta models
-  async updateArchiveTaskForCurrentProject(id: string, changedFields: Partial<Task>) {
+  async updateArchiveTaskForCurrentProject(id: string, changedFields: Partial<Task>): Promise<any> {
     const curProId = this._projectService.currentId;
-    const archiveTaskState = await this._persistenceService.taskArchive.load(curProId) as TaskState;
-    const updatedState = taskReducer(archiveTaskState, new UpdateTask({
+    return await this._persistenceService.taskArchive.ent.execAction(curProId, new UpdateTask({
       task: {id, changes: this._shortSyntax(changedFields) as Partial<Task>}
     }));
-    await this._persistenceService.saveToTaskArchiveForProject(curProId, updatedState);
   }
 
   async getByIdFromEverywhere(id: string, projectId: string = this._projectService.currentId): Promise<Task> {
@@ -585,13 +583,7 @@ export class TaskService {
 
   // NOTE: archived tasks not included
   async getByIdsForProject(taskIds: string[], projectId: string): Promise<Task[]> {
-    const taskState = await this._persistenceService.task.load(projectId);
-    if (taskState && taskState.entities) {
-      return taskIds
-        .map(taskId => taskState.entities[taskId])
-        .filter(task => !!task);
-    }
-    return null;
+    return await this._persistenceService.task.ent.getByIds(projectId, taskIds);
   }
 
   // NOTE: archived tasks not included
@@ -627,7 +619,7 @@ export class TaskService {
     task: TaskWithIssueData | TaskWithSubTasks,
     isFromArchive: boolean,
   }> {
-    const allTasks = await this._allTasksWithIssueData$.pipe(first()).toPromise();
+    const allTasks = await this._allTasksWithIssueData$.pipe(first()).toPromise() as TaskWithIssueData[];
     const taskWithSameIssue: TaskWithIssueData = allTasks.find(task => task.issueId === issue.id);
 
     if (taskWithSameIssue) {
