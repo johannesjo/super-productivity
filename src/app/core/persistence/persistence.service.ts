@@ -42,7 +42,7 @@ import {PersistenceBaseModel, PersistenceForProjectModel} from './persistence';
 import {Metric, MetricState} from '../../features/metric/metric.model';
 import {Improvement, ImprovementState} from '../../features/metric/improvement/improvement.model';
 import {Obstruction, ObstructionState} from '../../features/metric/obstruction/obstruction.model';
-import {TaskRepeatCfgState} from '../../features/task-repeat-cfg/task-repeat-cfg.model';
+import {TaskRepeatCfg, TaskRepeatCfgState} from '../../features/task-repeat-cfg/task-repeat-cfg.model';
 import {Attachment} from '../../features/attachment/attachment.model';
 import {Bookmark} from '../../features/bookmark/bookmark.model';
 import {Note} from '../../features/note/note.model';
@@ -64,7 +64,7 @@ export class PersistenceService {
   reminders = this._cmBase<Reminder[]>(LS_REMINDER, 'reminders');
 
   task = this._cmProject<TaskState, Task>(LS_TASK_STATE, 'task');
-  taskRepeatCfg = this._cmProject<TaskRepeatCfgState, Task>(LS_TASK_REPEAT_CFG_STATE, 'taskRepeatCfg');
+  taskRepeatCfg = this._cmProject<TaskRepeatCfgState, TaskRepeatCfg>(LS_TASK_REPEAT_CFG_STATE, 'taskRepeatCfg');
   taskArchive = this._cmProject<TaskArchive, Task>(LS_TASK_ARCHIVE, 'taskArchive');
   taskAttachment = this._cmProject<AttachmentState, Attachment>(LS_TASK_ATTACHMENT_STATE, 'taskAttachment');
   bookmark = this._cmProject<BookmarkState, Bookmark>(LS_BOOKMARK_STATE, 'bookmark');
@@ -365,7 +365,8 @@ export class PersistenceService {
   }
 
   // TODO maybe refactor to class?
-  private _cmProject<T, M>(lsKey: string, appDataKey: keyof AppDataForProjects): PersistenceForProjectModel<T, M> {
+  // TODO maybe find a way to use reducers here directly
+  private _cmProject<S, M>(lsKey: string, appDataKey: keyof AppDataForProjects): PersistenceForProjectModel<S, M> {
     const model = {
       appDataKey,
       load: (projectId) => this._loadFromDb(this._makeProjectKey(projectId, lsKey)),
@@ -376,6 +377,48 @@ export class PersistenceService {
           const state = await model.load(projectId);
           return state && state.entities && state.entities[id] || null;
         },
+        removeById: async (projectId: string, idToDelete: string): Promise<any> => {
+          const state = await model.load(projectId);
+          const ids = state.ids as string[];
+          delete state[idToDelete];
+          const newState = {
+            ...state,
+            ids: ids.filter(id => id !== idToDelete),
+          };
+          await model.save(projectId, newState, false);
+        },
+        updateById: async (projectId: string, id: string, changes: Partial<M>): Promise<M> => {
+          const state = await model.load(projectId);
+          const updateEntity = {
+            ...state.entities[id],
+            ...changes,
+          };
+          const newState = {
+            ...state,
+            entities: {
+              ...state.entities,
+              [id]: updateEntity,
+            }
+          };
+          await model.save(projectId, newState, false);
+          return updateEntity;
+        },
+        bulkUpdate: async (projectId: string, adjustFn: (model: M) => M): Promise<S> => {
+          const state = await model.load(projectId);
+          const ids = state.ids as string[];
+          const newState = {
+            ...state,
+            entities: ids.reduce((acc, key) => {
+              return {
+                ...acc,
+                [key]: adjustFn(state.entity[key]),
+              };
+            }, {})
+          };
+          await model.save(projectId, newState, false);
+          return newState;
+        },
+
       },
 
     };

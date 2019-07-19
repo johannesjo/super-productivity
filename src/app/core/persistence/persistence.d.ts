@@ -23,22 +23,28 @@ export interface PersistenceBaseModel<T> {
   save(state: T, isForce?: boolean): Promise<any>;
 }
 
-export interface EntityModelHelpers<M> {
+export interface EntityModelHelpers<S, M> {
   getById(projectId: string, id: string): Promise<M>;
 
-  // updateItemById(projectId: string, id: string, changes: Object): Promise<any>;
+  // NOTE: side effects are not executed!!!
+  updateById(projectId: string, id: string, changes: Partial<M>): Promise<M>;
 
-  // deleteItemById(projectId: string, id: string): Promise<any>;
+  // NOTE: not all id instances might be considered (e.g. todaysTaskIds for task state)
+  // NOTE: side effects are not executed!!!
+  removeById(projectId: string, id: string): Promise<any>;
+
+  // NOTE: side effects are not executed!!!
+  bulkUpdate(projectId: string, adjustFn: (model: M) => M): Promise<S>;
 }
 
-export interface PersistenceForProjectModel<T, M> {
+export interface PersistenceForProjectModel<S, M> {
   appDataKey: keyof AppDataForProjects;
 
-  ent: EntityModelHelpers<M>;
+  ent: EntityModelHelpers<S, M>;
 
-  load(projectId: string): Promise<T>;
+  load(projectId: string): Promise<S>;
 
-  save(projectId: string, state: T, isForce?: boolean): Promise<any>;
+  save(projectId: string, state: S, isForce?: boolean): Promise<any>;
 
   remove(projectId: string): Promise<any>;
 }
