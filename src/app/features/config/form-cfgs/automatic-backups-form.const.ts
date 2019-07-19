@@ -1,8 +1,8 @@
 // tslint:disable:max-line-length
-import {ConfigFormSection} from '../global-config.model';
+import {ConfigFormSection, LocalBackupConfig} from '../global-config.model';
 import {T} from '../../../t.const';
 
-export const AUTOMATIC_BACKUPS_FORM: ConfigFormSection = {
+export const AUTOMATIC_BACKUPS_FORM: ConfigFormSection<LocalBackupConfig> = {
   isElectronOnly: true,
   title: T.GCF.AUTO_BACKUPS.TITLE,
   key: 'localBackup',

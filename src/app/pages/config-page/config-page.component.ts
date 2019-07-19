@@ -9,7 +9,7 @@ import {
   GlobalConfigState
 } from '../../features/config/global-config.model';
 import {Subscription} from 'rxjs';
-import {Project, ProjectAdvancedCfg, ProjectCfgFormKey} from '../../features/project/project.model';
+import {Project, ProjectAdvancedCfg, ProjectBasicCfg, ProjectCfgFormKey} from '../../features/project/project.model';
 import {
   BASIC_PROJECT_CONFIG_FORM_CONFIG,
   PROJECT_CONFIG_FORM_CONFIG
@@ -30,7 +30,7 @@ import {T} from '../../t.const';
 })
 export class ConfigPageComponent implements OnInit, OnDestroy {
   T = T;
-  basicProjectSettingsFormCfg: ConfigFormSection;
+  basicProjectSettingsFormCfg: ConfigFormSection<ProjectBasicCfg>;
   projectConfigFormCfg: ConfigFormConfig;
   issueIntegrationFormCfg: ConfigFormConfig;
   globalConfigFormCfg: ConfigFormConfig;
@@ -81,7 +81,7 @@ export class ConfigPageComponent implements OnInit, OnDestroy {
     this._subs.unsubscribe();
   }
 
-  trackBySectionKey(i: number, section: ConfigFormSection) {
+  trackBySectionKey(i: number, section: ConfigFormSection<{ [key: string]: any }>) {
     return section.key;
   }
 

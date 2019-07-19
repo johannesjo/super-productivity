@@ -1,8 +1,8 @@
 // tslint:disable:max-line-length
-import {ConfigFormSection} from '../global-config.model';
+import {ConfigFormSection, KeyboardConfig} from '../global-config.model';
 import {T} from '../../../t.const';
 
-export const KEYBOARD_SETTINGS_FORM_CFG: ConfigFormSection = {
+export const KEYBOARD_SETTINGS_FORM_CFG: ConfigFormSection<KeyboardConfig> = {
   title: T.GCF.KEYBOARD.TITLE,
   key: 'keyboard',
   help: T.GCF.KEYBOARD.HELP,

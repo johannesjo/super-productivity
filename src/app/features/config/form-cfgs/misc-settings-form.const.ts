@@ -1,9 +1,9 @@
 // tslint:disable:max-line-length
-import {ConfigFormSection} from '../global-config.model';
+import {ConfigFormSection, MiscConfig} from '../global-config.model';
 import {T} from '../../../t.const';
 
 
-export const MISC_SETTINGS_FORM_CFG: ConfigFormSection = {
+export const MISC_SETTINGS_FORM_CFG: ConfigFormSection<MiscConfig> = {
   title: T.GCF.MISC.TITLE,
   key: 'misc',
   help: T.GCF.MISC.HELP,

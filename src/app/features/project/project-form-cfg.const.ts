@@ -1,13 +1,14 @@
 import {ConfigFormConfig, ConfigFormSection} from '../config/global-config.model';
 import {ALL_THEMES} from '../../app.constants';
 import {T} from '../../t.const';
+import {ProjectBasicCfg} from './project.model';
 
 const themeOpts = ALL_THEMES.map((theme) => {
   return {label: theme, value: theme};
 });
 
 
-export const BASIC_PROJECT_CONFIG_FORM_CONFIG: ConfigFormSection = {
+export const BASIC_PROJECT_CONFIG_FORM_CONFIG: ConfigFormSection<ProjectBasicCfg> = {
   title: T.F.PROJECT.FORM.TITLE,
   key: 'basic',
   help: T.F.PROJECT.FORM.HELP,

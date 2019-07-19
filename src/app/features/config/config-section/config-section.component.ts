@@ -30,7 +30,7 @@ import {TranslateService} from '@ngx-translate/core';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ConfigSectionComponent implements OnInit, OnDestroy {
-  @Input() section: ConfigFormSection;
+  @Input() section: ConfigFormSection<{ [key: string]: any }>;
   @Input() cfg: any;
   @Output() save: EventEmitter<{ sectionKey: GlobalConfigSectionKey | ProjectCfgFormKey, config: any }> = new EventEmitter();
 

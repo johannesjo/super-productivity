@@ -3,7 +3,7 @@ import {JiraCfg} from './jira';
 import {FormlyFieldConfig} from '@ngx-formly/core';
 import {GITHUB_INITIAL_POLL_DELAY} from '../github/github.const';
 import {T} from '../../../t.const';
-import {ConfigFormSection} from '../../config/global-config.model';
+import {ConfigFormSection, LimitedFormlyFieldConfig} from '../../config/global-config.model';
 
 export const JIRA_DATETIME_FORMAT = 'YYYY-MM-DDTHH:mm:ss.SSZZ';
 
@@ -78,7 +78,7 @@ export const JIRA_REDUCED_ISSUE_FIELDS = [
   'timespent',
 ];
 
-export const JIRA_CREDENTIALS_FORM_CFG: FormlyFieldConfig[] = [
+export const JIRA_CREDENTIALS_FORM_CFG: LimitedFormlyFieldConfig<JiraCfg>[] = [
   {
     key: 'host',
     type: 'input',
@@ -111,7 +111,7 @@ export const JIRA_CREDENTIALS_FORM_CFG: FormlyFieldConfig[] = [
 ];
 
 
-export const JIRA_ADVANCED_FORM_CFG: FormlyFieldConfig[] = [
+export const JIRA_ADVANCED_FORM_CFG: LimitedFormlyFieldConfig<JiraCfg>[] = [
   {
     key: 'isAutoPollTickets',
     type: 'checkbox',
@@ -172,7 +172,7 @@ export const JIRA_ADVANCED_FORM_CFG: FormlyFieldConfig[] = [
   },
 ];
 
-export const JIRA_CONFIG_FORM_SECTION: ConfigFormSection = {
+export const JIRA_CONFIG_FORM_SECTION: ConfigFormSection<JiraCfg> = {
   title: 'Jira',
   key: 'JIRA',
   customSection: 'JIRA_CFG',

@@ -2,7 +2,7 @@
 import {GithubCfg} from './github';
 import {FormlyFieldConfig} from '@ngx-formly/core';
 import {T} from '../../../t.const';
-import {ConfigFormSection} from '../../config/global-config.model';
+import {ConfigFormSection, LimitedFormlyFieldConfig} from '../../config/global-config.model';
 
 export const DEFAULT_GITHUB_CFG: GithubCfg = {
   repo: null,
@@ -19,7 +19,7 @@ export const GITHUB_INITIAL_POLL_DELAY = 8 * 1000;
 // export const GITHUB_POLL_INTERVAL = 15 * 1000;
 export const GITHUB_API_BASE_URL = 'https://api.github.com/';
 
-export const GITHUB_CONFIG_FORM: FormlyFieldConfig[] = [
+export const GITHUB_CONFIG_FORM: LimitedFormlyFieldConfig<GithubCfg>[] = [
   {
     key: 'repo',
     type: 'input',
@@ -52,7 +52,7 @@ export const GITHUB_CONFIG_FORM: FormlyFieldConfig[] = [
   },
 ];
 
-export const GITHUB_CONFIG_FORM_SECTION: ConfigFormSection = {
+export const GITHUB_CONFIG_FORM_SECTION: ConfigFormSection<GithubCfg> = {
   title: 'Github',
   key: 'GITHUB',
   items: GITHUB_CONFIG_FORM,

@@ -2,7 +2,7 @@
 import {ConfigFormSection} from '../global-config.model';
 import {T} from '../../../t.const';
 
-export const IMEX_FORM: ConfigFormSection =   {
+export const IMEX_FORM: ConfigFormSection<{ [key: string]: any }> = {
   title: T.GCF.IMEX.TITLE,
   key: 'EMPTY',
   help: T.GCF.IMEX.HELP,

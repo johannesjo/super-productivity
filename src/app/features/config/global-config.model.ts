@@ -135,18 +135,23 @@ export type GlobalSectionConfig
   | GoogleSession
   | UiHelperSettings
   ;
+type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
+
+export interface LimitedFormlyFieldConfig<FormModel> extends Omit<FormlyFieldConfig, 'key'> {
+  key?: keyof FormModel;
+}
 
 // Intermediate model
-export interface ConfigFormSection {
+export interface ConfigFormSection<FormModel> {
   title: string;
   key: GlobalConfigSectionKey | ProjectCfgFormKey;
   help?: string;
   helpArr?: { h?: string; p: string; p2?: string; p3?: string; p4?: string; }[];
   customSection?: string;
-  items?: FormlyFieldConfig[];
+  items?: LimitedFormlyFieldConfig<FormModel>[];
   isElectronOnly?: boolean;
 }
 
-export type ConfigFormConfig = Readonly<ConfigFormSection[]>;
+export type ConfigFormConfig = Readonly<ConfigFormSection<{ [key: string]: any }>[]>;
 
 

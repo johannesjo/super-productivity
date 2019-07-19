@@ -22,7 +22,7 @@ import {T} from '../../../../t.const';
   animations: [expandAnimation]
 })
 export class JiraCfgComponent implements OnInit, OnDestroy {
-  @Input() section: ConfigFormSection;
+  @Input() section: ConfigFormSection<JiraCfg>;
   // NOTE: this is legit because it might be that there is no issue provider cfg yet
   @Input() cfg: JiraCfg = DEFAULT_JIRA_CFG;
 
