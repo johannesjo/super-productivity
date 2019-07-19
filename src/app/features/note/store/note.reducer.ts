@@ -32,7 +32,7 @@ export const selectNoteById = createSelector(
 );
 
 
-export function reducer(
+export function noteReducer(
   state = initialNoteState,
   action: NoteActions
 ): NoteState {
