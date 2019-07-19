@@ -810,6 +810,8 @@
     "TAKE_A_BREAK": {
       "HELP": "<div> <p>Ermöglicht die Konfiguration einer wiederkehrenden Erinnerung, wenn Sie eine bestimmte Zeit ohne Pause gearbeitet haben.</p> <p>Sie können die angezeigte Nachricht ändern. ${duration} wird durch die ohne Unterbrechung verbrachte Zeit ersetzt.</p> </div>",
       "IS_ENABLED": "Aktivieren Sie die Erinnerungsfunktion für eine Pause",
+      "IS_FOCUS_WINDOW": "App-Fenster fokussieren, wenn Erinnerung aktiv ist (nur Desktop)",
+      "IS_LOCK_SCREEN": "Bildschirm sperren, wenn eine Pause fällig ist (nur Desktop)",
       "MESSAGE": "Mach eine Pause Nachricht",
       "MIN_WORKING_TIME": "Trigger mach eine Pausenbenachrichtigung, nachdem X ohne eine gearbeitet hat",
       "TITLE": "Pausenerinnerung"
@@ -935,7 +937,13 @@
   },
   "V": {
     "E_1TO10": "Bitte geben Sie einen Wert zwischen 1 und 10 ein",
-    "E_DATETIME": "Der eingegebene Wert ist keine Datums- / Uhrzeitangabe!"
+    "E_DATETIME": "Der eingegebene Wert ist keine Datums- / Uhrzeitangabe!",
+    "E_MAX": "Sollte nicht größer als {{val}}sein",
+    "E_MAX_LENGTH": "Darf maximal {{val}} Zeichen lang sein",
+    "E_MIN": "Sollte kleiner als {{val}}sein",
+    "E_MIN_LENGTH": "Sollte mindestens {{val}} Zeichen lang sein",
+    "E_PATTERN": "Ungültige Eingabe",
+    "E_REQUIRED": "Dieses Feld wird benötigt"
   },
   "WW": {
     "ADD_MORE": "Weitere hinzufügen",

@@ -810,6 +810,8 @@
     "TAKE_A_BREAK": {
       "HELP": "<div> <p>Le permite configurar un recordatorio recurrente cuando ha trabajado durante un período de tiempo específico sin tomar un descanso.</p> <p>Puede modificar el mensaje que se muestra. ${duration} será reemplazado con el tiempo dedicado sin interrupción.</p> </div>",
       "IS_ENABLED": "Habilitar tomar un recordatorio de ruptura",
+      "IS_FOCUS_WINDOW": "Ventana de la aplicación Focus cuando el recordatorio está activo (solo en el escritorio)",
+      "IS_LOCK_SCREEN": "Bloquear la pantalla cuando se debe un corte (solo en el escritorio)",
       "MESSAGE": "Tomar un mensaje de descanso",
       "MIN_WORKING_TIME": "Desencadenar una notificación de interrupción después de que X funcione sin una",
       "TITLE": "Recordatorio de descanso"
@@ -935,7 +937,13 @@
   },
   "V": {
     "E_1TO10": "Por favor, introduzca un valor entre 1 y 10",
-    "E_DATETIME": "El valor ingresado no es una fecha y hora!"
+    "E_DATETIME": "El valor ingresado no es una fecha y hora!",
+    "E_MAX": "No debe ser más grande que {{val}}",
+    "E_MAX_LENGTH": "Debe tener una longitud máxima de {{val}} caracteres",
+    "E_MIN": "Debería ser menor que {{val}}",
+    "E_MIN_LENGTH": "Debe tener al menos {{val}} caracteres de largo",
+    "E_PATTERN": "Entrada inválida",
+    "E_REQUIRED": "este campo es requerido"
   },
   "WW": {
     "ADD_MORE": "Añadir más",

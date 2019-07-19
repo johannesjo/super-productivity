@@ -810,6 +810,8 @@
     "TAKE_A_BREAK": {
       "HELP": "<div> <p>vous permet de configurer un rappel récurrent lorsque vous avez travaillé pendant une durée déterminée sans prendre de pause.</p> <p>Vous pouvez modifier le message affiché. ${duration} sera remplacé par le temps passé sans pause.</p> </div>",
       "IS_ENABLED": "Activer le rappel de pause",
+      "IS_FOCUS_WINDOW": "Fenêtre de l'application Focus lorsque le rappel est actif (bureau uniquement)",
+      "IS_LOCK_SCREEN": "Verrouiller l'écran lorsqu'une pause est due (bureau uniquement)",
       "MESSAGE": "Prendre un message de pause",
       "MIN_WORKING_TIME": "Déclencheur prend une notification de pause après que X ait travaillé sans une",
       "TITLE": "Rappel de pause"
@@ -935,7 +937,13 @@
   },
   "V": {
     "E_1TO10": "Veuillez entrer une valeur entre 1 et 10",
-    "E_DATETIME": "La valeur entrée n'est pas un datetime!"
+    "E_DATETIME": "La valeur entrée n'est pas un datetime!",
+    "E_MAX": "Ne devrait pas être plus grand que {{val}}",
+    "E_MAX_LENGTH": "Doit comporter au maximum {{val}} caractères",
+    "E_MIN": "Devrait être plus petit que {{val}}",
+    "E_MIN_LENGTH": "Doit contenir au moins {{val}} caractères",
+    "E_PATTERN": "Entrée invalide",
+    "E_REQUIRED": "Ce champ est requis"
   },
   "WW": {
     "ADD_MORE": "Ajouter plus",
