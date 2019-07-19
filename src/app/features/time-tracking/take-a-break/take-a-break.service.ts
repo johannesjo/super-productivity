@@ -3,6 +3,7 @@ import {TaskService} from '../../tasks/task.service';
 import {TimeTrackingService} from '../time-tracking.service';
 import {from, merge, Observable, Subject, timer} from 'rxjs';
 import {
+  delay,
   distinctUntilChanged,
   filter,
   map,
@@ -24,8 +25,13 @@ import {BannerId} from '../../../core/banner/banner.model';
 import {ProjectService} from '../../project/project.service';
 import {GlobalConfigState, TakeABreakConfig} from '../../config/global-config.model';
 import {T} from '../../../t.const';
+import {ElectronService} from 'ngx-electron';
+import {IPC_LOCK_SCREEN} from '../../../../../electron/ipc-events.const';
 
 const BREAK_TRIGGER_DURATION = 10 * 60 * 1000;
+const PING_UPDATE_BANNER_INTERVAL = 60 * 1000;
+const LOCK_SCREEN_THROTTLE = 5 * 60 * 1000;
+const LOCK_SCREEN_DELAY = 30 * 1000;
 
 // required because typescript freaks out
 const reduceBreak = (acc, tick) => {
@@ -116,6 +122,12 @@ export class TakeABreakService {
     shareReplay(),
   );
 
+  private _triggerLockScreen$ = new Subject<number>();
+  private _triggerLockScreenThrottledAndDelayed$ = this._triggerLockScreen$.pipe(
+    throttleTime(LOCK_SCREEN_THROTTLE),
+    delay(LOCK_SCREEN_DELAY),
+  );
+
 
   constructor(
     private _taskService: TaskService,
@@ -123,6 +135,7 @@ export class TakeABreakService {
     private _idleService: IdleService,
     private _configService: GlobalConfigService,
     private _projectService: ProjectService,
+    private _electronService: ElectronService,
     private _bannerService: BannerService,
     private _chromeExtensionInterfaceService: ChromeExtensionInterfaceService,
   ) {
@@ -133,7 +146,12 @@ export class TakeABreakService {
       this._bannerService.dismiss(BANNER_ID);
     });
 
-    const PING_UPDATE_BANNER_INTERVAL = 60 * 1000;
+    this._triggerLockScreenThrottledAndDelayed$.subscribe(() => {
+      if (IS_ELECTRON) {
+        this._electronService.ipcRenderer.send(IPC_LOCK_SCREEN);
+      }
+    });
+
     this.timeWorkingWithoutABreak$.pipe(
       withLatestFrom(
         this._configService.cfg$,
@@ -152,6 +170,10 @@ export class TakeABreakService {
       throttleTime(PING_UPDATE_BANNER_INTERVAL),
     ).subscribe(([timeWithoutBreak, cfg, isIdle]) => {
       const msg = this._createMessage(timeWithoutBreak, cfg.takeABreak);
+      if (IS_ELECTRON && cfg.takeABreak.isLockScreen) {
+        this._triggerLockScreen$.next();
+      }
+
       this._bannerService.open({
         id: BANNER_ID,
         ico: 'free_breakfast',
@@ -168,6 +190,7 @@ export class TakeABreakService {
           fn: () => this.snooze()
         },
       });
+
     });
   }
 

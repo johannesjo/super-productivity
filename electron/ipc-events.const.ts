@@ -1,3 +1,5 @@
+// TODO refactor to enum
+
 export const IPC_SHUTDOWN = 'SHUTDOWN';
 export const IPC_SHUTDOWN_NOW = 'SHUTDOWN_NOW';
 export const IPC_ON_BEFORE_QUIT = 'ON_BEFORE_QUIT';
@@ -9,6 +11,7 @@ export const IPC_REGISTER_GLOBAL_SHORTCUTS_EVENT = 'REGISTER_GLOBAL_SHORTCUTS';
 export const IPC_IDLE_TIME = 'IDLE_TIME';
 
 export const IPC_SHOW_OR_FOCUS = 'SHOW_OR_FOCUS';
+export const IPC_LOCK_SCREEN = 'LOCK_SCREEN';
 
 export const IPC_APP_READY = 'APP_READY';
 export const IPC_ERROR = 'ELECTRON_ERROR';

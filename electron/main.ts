@@ -18,6 +18,7 @@ import {
   IPC_IDLE_TIME,
   IPC_JIRA_MAKE_REQUEST_EVENT,
   IPC_JIRA_SETUP_IMG_HEADERS,
+  IPC_LOCK_SCREEN,
   IPC_ON_BEFORE_QUIT,
   IPC_REGISTER_GLOBAL_SHORTCUTS_EVENT,
   IPC_SET_PROGRESS_BAR,
@@ -29,6 +30,7 @@ import {
 import {backupData} from './backup';
 import {JiraCfg} from '../src/app/features/issue/jira/jira';
 import {KeyboardConfig} from '../src/app/features/config/global-config.model';
+import lockscreen from './lockscreen';
 import BrowserWindow = Electron.BrowserWindow;
 
 const ICONS_FOLDER = __dirname + '/assets/icons/';
@@ -103,6 +105,7 @@ app_.on('activate', function () {
   }
 });
 
+let isLocked = false;
 
 app_.on('ready', () => {
   let suspendStart;
@@ -127,18 +130,22 @@ app_.on('ready', () => {
   setInterval(checkIdle, CONFIG.IDLE_PING_INTERVAL);
 
   powerMonitor.on('suspend', () => {
+    isLocked = true;
     suspendStart = Date.now();
   });
 
   powerMonitor.on('lock-screen', () => {
+    isLocked = true;
     suspendStart = Date.now();
   });
 
   powerMonitor.on('resume', () => {
+    isLocked = false;
     sendIdleMsgIfOverMin(Date.now() - suspendStart);
   });
 
   powerMonitor.on('unlock-screen', () => {
+    isLocked = false;
     sendIdleMsgIfOverMin(Date.now() - suspendStart);
   });
 });
@@ -186,6 +193,18 @@ ipcMain.on(IPC_SHUTDOWN, quitApp);
 ipcMain.on(IPC_EXEC, exec);
 
 ipcMain.on(IPC_BACKUP, backupData);
+
+ipcMain.on(IPC_LOCK_SCREEN, () => {
+  if (isLocked) {
+    return;
+  }
+
+  try {
+    lockscreen();
+  } catch (e) {
+    errorHandler(e);
+  }
+});
 
 ipcMain.on(IPC_SET_PROGRESS_BAR, (ev, {progress, mode}) => {
   if (mainWin) {
