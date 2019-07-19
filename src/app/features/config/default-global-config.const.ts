@@ -20,6 +20,7 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
   },
   takeABreak: {
     isTakeABreakEnabled: false,
+    isLockScreen: false,
     /* tslint:disable-next-line */
     takeABreakMessage: 'Take a break! You have been working for ${duration} without one. Go away from the computer! Take a short walk! Makes you more productive in the long run!',
     takeABreakMinWorkingTime: 60 * minute,

@@ -15,6 +15,13 @@ export const TAKE_A_BREAK_FORM_CFG: ConfigFormSection<TakeABreakConfig> = {
       },
     },
     {
+      key: 'isLockScreen',
+      type: 'checkbox',
+      templateOptions: {
+        label: T.GCF.TAKE_A_BREAK.IS_LOCK_SCREEN
+      },
+    },
+    {
       key: 'takeABreakMinWorkingTime',
       type: 'duration',
       hideExpression: '!model.isTakeABreakEnabled',

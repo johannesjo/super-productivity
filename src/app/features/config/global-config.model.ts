@@ -56,6 +56,7 @@ export type IdleConfig = Readonly<{
 
 export type TakeABreakConfig = Readonly<{
   isTakeABreakEnabled: boolean;
+  isLockScreen: boolean;
   takeABreakMessage: string;
   takeABreakMinWorkingTime: number;
 }>;
