@@ -409,7 +409,7 @@ export class PersistenceService {
   }
 
   // TODO maybe refactor to class?
-  // TODO maybe find a way to use reducers here directly
+  // TODO maybe find a way to exec effects here as well
   private _cmProject<S, M>(
     lsKey: string,
     appDataKey: keyof AppDataForProjects,
@@ -468,10 +468,24 @@ export class PersistenceService {
           return newState;
         },
       },
-
+      entAllProjects: {
+        // NOTE: side effects are not executed!!!
+        bulkUpdate: async (adjustFn: (model: M) => M): Promise<any> => {
+          const projectIds = await this._getProjectIds();
+          return Promise.all(projectIds.map(async (projectId) => {
+            return model.ent.bulkUpdate(projectId, adjustFn);
+          }));
+        }
+      }
     };
+
     this._projectModels.push(model);
     return model;
+  }
+
+  private async _getProjectIds(): Promise<string[]> {
+    const projectState = await this.project.load();
+    return projectState.ids as string[];
   }
 
   private async _loadIssueDataForProject(projectId: string): Promise<IssueStateMap> {

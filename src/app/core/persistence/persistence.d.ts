@@ -36,10 +36,17 @@ export interface EntityModelHelpers<S, M> {
   execAction(projectId: string, action: Action): Promise<S>;
 }
 
+export interface EntityModelHelpersForAllProjects<S, M> {
+  // NOTE: side effects are not executed!!!
+  bulkUpdate(adjustFn: (model: M) => M): Promise<any>;
+}
+
 export interface PersistenceForProjectModel<S, M> {
   appDataKey: keyof AppDataForProjects;
 
   ent: EntityModelHelpers<S, M>;
+
+  entAllProjects: EntityModelHelpersForAllProjects<S, M>;
 
   load(projectId: string): Promise<S>;
 
