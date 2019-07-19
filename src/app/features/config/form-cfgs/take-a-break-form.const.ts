@@ -22,6 +22,13 @@ export const TAKE_A_BREAK_FORM_CFG: ConfigFormSection<TakeABreakConfig> = {
       },
     },
     {
+      key: 'isFocusWindow',
+      type: 'checkbox',
+      templateOptions: {
+        label: T.GCF.TAKE_A_BREAK.IS_FOCUS_WINDOW
+      },
+    },
+    {
       key: 'takeABreakMinWorkingTime',
       type: 'duration',
       hideExpression: '!model.isTakeABreakEnabled',

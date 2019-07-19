@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
 import {TaskService} from '../../tasks/task.service';
 import {TimeTrackingService} from '../time-tracking.service';
-import {from, merge, Observable, Subject, timer} from 'rxjs';
+import {EMPTY, from, merge, Observable, of, Subject, timer} from 'rxjs';
 import {
   delay,
   distinctUntilChanged,
@@ -26,7 +26,7 @@ import {ProjectService} from '../../project/project.service';
 import {GlobalConfigState, TakeABreakConfig} from '../../config/global-config.model';
 import {T} from '../../../t.const';
 import {ElectronService} from 'ngx-electron';
-import {IPC_LOCK_SCREEN} from '../../../../../electron/ipc-events.const';
+import {IPC_LOCK_SCREEN, IPC_SHOW_OR_FOCUS} from '../../../../../electron/ipc-events.const';
 
 const BREAK_TRIGGER_DURATION = 10 * 60 * 1000;
 const PING_UPDATE_BANNER_INTERVAL = 60 * 1000;
@@ -122,10 +122,17 @@ export class TakeABreakService {
     shareReplay(),
   );
 
-  private _triggerLockScreen$ = new Subject<number>();
-  private _triggerLockScreenThrottledAndDelayed$ = this._triggerLockScreen$.pipe(
-    throttleTime(LOCK_SCREEN_THROTTLE),
-    delay(LOCK_SCREEN_DELAY),
+  private _triggerLockScreenCounter$ = new Subject<boolean>();
+  private _triggerLockScreenThrottledAndDelayed$ = this._triggerLockScreenCounter$.pipe(
+    filter(() => IS_ELECTRON),
+    distinctUntilChanged(),
+    switchMap((v) => !!(v)
+      ? of(v).pipe(
+        throttleTime(LOCK_SCREEN_THROTTLE),
+        delay(LOCK_SCREEN_DELAY),
+      )
+      : EMPTY,
+    ),
   );
 
 
@@ -171,7 +178,10 @@ export class TakeABreakService {
     ).subscribe(([timeWithoutBreak, cfg, isIdle]) => {
       const msg = this._createMessage(timeWithoutBreak, cfg.takeABreak);
       if (IS_ELECTRON && cfg.takeABreak.isLockScreen) {
-        this._triggerLockScreen$.next();
+        this._triggerLockScreenCounter$.next(true);
+      }
+      if (IS_ELECTRON && cfg.takeABreak.isFocusWindow) {
+        this._electronService.ipcRenderer.send(IPC_SHOW_OR_FOCUS);
       }
 
       this._bannerService.open({
@@ -196,6 +206,7 @@ export class TakeABreakService {
 
   snooze(snoozeTime = 15 * 60 * 1000) {
     this._triggerSnooze$.next(snoozeTime);
+    this._triggerLockScreenCounter$.next(false);
   }
 
   resetTimer() {
@@ -206,6 +217,8 @@ export class TakeABreakService {
     const min5 = 1000 * 60 * 5;
     this._projectService.addToBreakTime(undefined, undefined, min5);
     this.resetTimer();
+
+    this._triggerLockScreenCounter$.next(false);
   }
 
   private _createMessage(duration: number, cfg: TakeABreakConfig) {
