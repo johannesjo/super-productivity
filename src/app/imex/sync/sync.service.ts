@@ -38,7 +38,7 @@ export class SyncService {
   }
 
   async loadCompleteSyncData(data: AppDataComplete, isBackupReload = false) {
-    this._snackService.open({msg: T.S.SYNC.ERROR_INVALID_DATA, ico: 'cloud_download'});
+    this._snackService.open({msg: T.S.SYNC.IMPORTING, ico: 'cloud_download'});
     this._imexMetaService.setInProgress(true);
 
     // get rid of outdated project data
