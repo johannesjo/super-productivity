@@ -199,6 +199,7 @@
                 [title]="T.F.TASK.CMP.OPEN_TASK_MENU|translate">
           <mat-icon>more_vert</mat-icon>
         </button>
+
         <mat-menu #menu="matMenu">
           <button (click)="startTask()"
                   *ngIf="!task.isDone && !isCurrent && !task.subTasks"
@@ -249,12 +250,11 @@
           </button>
 
           <button (click)="toggleShowAdditionalInfoOpen()"
+                  class="show-touch-only"
                   [class.isActive]="task._isAdditionalInfoOpen"
                   mat-menu-item
                   tabindex="2">
-
-            <mat-icon *ngIf="task.notes||task.issueData">chat
-            </mat-icon>
+            <mat-icon *ngIf="task.notes||task.issueData">chat</mat-icon>
             <mat-icon *ngIf="!task.notes&&!task.issueData">chat_bubble_outline</mat-icon>
             {{T.F.TASK.CMP.TOGGLE_ADDITIONAL|translate}}
           </button>
@@ -324,11 +324,11 @@
             {{T.F.TASK.CMP.MOVE_TO_OTHER_PROJECT|translate}}
           </button>
 
-<!--          <button mat-menu-item-->
-<!--                  *ngIf="task.parentId">-->
-<!--            <mat-icon>low_priority</mat-icon>-->
-<!--            {{T.F.TASK.CMP.CONVERT_TO_PARENT_TASK|translate}}-->
-<!--          </button>-->
+          <!--          <button mat-menu-item-->
+          <!--                  *ngIf="task.parentId">-->
+          <!--            <mat-icon>low_priority</mat-icon>-->
+          <!--            {{T.F.TASK.CMP.CONVERT_TO_PARENT_TASK|translate}}-->
+          <!--          </button>-->
 
           <button (click)="editTaskRepeatCfg()"
                   *ngIf="!task.parentId && !task.issueId"
@@ -390,6 +390,6 @@
   <div *ngIf="isDragOver"
        class="bg-accent color-contrast drag-over-msg">
     <mat-icon>add</mat-icon>
-    {{T.F.TASK.CMP.DROP_ATTACHMENT|translate:{title:task.title} }}
+    {{T.F.TASK.CMP.DROP_ATTACHMENT|translate:{title: task.title} }}
   </div>
 </div>
