@@ -12,7 +12,7 @@
     "NO_SCHEDULED": "Derzeit sind keine Aufgaben geplant. Sie können eine Aufgabe planen, indem Sie im Kontextmenü der Aufgabe \"Aufgabe planen\" auswählen. Zum Öffnen klicken Sie auf die 3 kleinen Punkte rechts neben einer Aufgabe.",
     "NO_TASKS": "Derzeit befinden sich keine Aufgaben in Ihrem Backlog",
     "SCHEDULED": "Geplant",
-    "TITLE": "Rückstand"
+    "TITLE": "Backlog"
   },
   "DATETIME_INPUT": {
     "IN": "in {{time}}",
@@ -73,7 +73,7 @@
         "TITLE": "Richten Sie Github für Project ein"
       },
       "FORM": {
-        "IS_AUTO_ADD_TO_BACKLOG": "Fügen Sie ungelöste Probleme aus Github automatisch zum Rückstand hinzu",
+        "IS_AUTO_ADD_TO_BACKLOG": "Fügen Sie ungelöste Probleme aus Github automatisch zum Backlog hinzu",
         "IS_AUTO_POLL": "Importierte Git-Probleme automatisch nach Änderungen abfragen",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "Zeigen Sie Probleme von Git als Vorschläge an, wenn Sie neue Aufgaben hinzufügen",
         "REPO": "\"Benutzername / Repositoryname\" für das Git-Repository, das Sie verfolgen möchten"
@@ -225,7 +225,7 @@
       "DIALOG_WORKLOG": {
         "CURRENTLY_LOGGED": "Derzeit geloggte Zeit:",
         "INVALID_DATE": "Der eingegebene Wert ist kein Datum!",
-        "SAVE_WORKLOG": "Speichern Sie das Worklog",
+        "SAVE_WORKLOG": "Speichern",
         "STARTED": "gestartet",
         "SUBMIT_WORKLOG_FOR": "Senden Sie ein Arbeitsprotokoll an Jira für",
         "TIME_SPENT": "Zeitaufwand",
@@ -236,7 +236,7 @@
       },
       "EXTENSION_INFO": "Bitte <a target=\"_blank\" href=\"{{url}}\"> laden Sie die Chrome-Erweiterung</a> herunter, um die Kommunikation mit dem Jira Api zu ermöglichen. Beachten Sie, dass dies für Handys nicht funktioniert.",
       "FORM": {
-        "IS_AUTO_ADD_TO_BACKLOG": "Fügen Sie ungelöste Probleme aus Github automatisch zum Rückstand hinzu",
+        "IS_AUTO_ADD_TO_BACKLOG": "Fügen Sie ungelöste Probleme aus Github automatisch zum Backlog hinzu",
         "IS_AUTO_POLL": "Importierte Git-Probleme automatisch nach Änderungen abfragen",
         "IS_SEARCH_ISSUES_FROM_GITHUB": "Zeigen Sie Probleme von Git als Vorschläge an, wenn Sie neue Aufgaben hinzufügen",
         "REPO": "\"Benutzername / Repositoryname\" für das Git-Repository, das Sie verfolgen möchten"
@@ -293,8 +293,8 @@
       "S": {
         "ADDED_WORKLOG_FOR": "Jira: Worklog für {{issueKey}}hinzugefügt",
         "EXTENSION_NOT_LOADED": "Super Productivity Extension nicht geladen. Das Neuladen der Seite könnte helfen",
-        "IMPORTED_MULTIPLE_ISSUES": "Jira: {{issuesLength}} neue Probleme von Jira in den Rückstand importiert",
-        "IMPORTED_SINGLE_ISSUE": "Jira: Importierte Ausgabe \"{{issueText}}\" von Jira in den Rückstand",
+        "IMPORTED_MULTIPLE_ISSUES": "Jira: {{issuesLength}} neue Probleme von Jira in das Backlog importiert",
+        "IMPORTED_SINGLE_ISSUE": "Jira: Importierte Ausgabe \"{{issueText}}\" von Jira in das Backlog",
         "INSUFFICIENT_SETTINGS": "Unzureichende Einstellungen für Jira",
         "ISSUE_NO_UPDATE_REQUIRED": "Jira: \"{{issueText}}\" ist bereits aktuell",
         "ISSUE_UPDATE": "Jira: Aktualisierte Daten für \"{{issueText}}\"",
@@ -522,7 +522,7 @@
         "EDIT_REMINDER": "Erinnerung bearbeiten",
         "MARK_DONE": "Als erledigt markieren",
         "MARK_UNDONE": "Als rückgängig machen markieren",
-        "MOVE_TO_BACKLOG": "In den Rückstand verschieben",
+        "MOVE_TO_BACKLOG": "In das Backlog verschieben",
         "MOVE_TO_OTHER_PROJECT": "In ein anderes Projekt verschieben",
         "MOVE_TO_TODAY": "Zur heutigen Liste wechseln",
         "OPEN_ATTACH": "Datei oder Link anhängen",
@@ -545,7 +545,7 @@
         "ADD": "Task planen",
         "DATETIME_FOR": "Datum und Uhrzeit zur Erinnerung",
         "EDIT": "Erinnerung bearbeiten",
-        "MOVE_TO_BACKLOG": "Verschieben Sie die Aufgabe in den Rückstand, bis sie geplant ist",
+        "MOVE_TO_BACKLOG": "Verschieben Sie die Aufgabe in das Backlog, bis sie geplant ist",
         "SCHEDULE": "Zeitplan",
         "UNSCHEDULE": "Nicht terminieren"
       },
@@ -580,9 +580,9 @@
         "ESTIMATE_EXCEEDED_BODY": "Sie haben Ihre geschätzte Zeit für \"{{title}}\" überschritten."
       },
       "S": {
-        "DELETED": "Gelöschte Aufgabe \"{{title}}\"",
+        "DELETED": "\"{{title}}\" wurde gelöscht",
         "FOUND_MOVE_FROM_BACKLOG": "Die vorhandene Aufgabe <strong>{{title}}</strong> wurde in die Aufgabenliste von heute verschoben",
-        "FOUND_RESTORE_FROM_ARCHIVE": "Wiederhergestellte Aufgabe <strong>{{title}}</strong> im Zusammenhang mit einem Problem aus dem Archiv",
+        "FOUND_RESTORE_FROM_ARCHIVE": "Zum Issue zugehörige Aufgabe <strong>{{title}}</strong> wurde aus dem Archiv wiederhergestellt",
         "REMINDER_ADDED": "Geplante Aufgabe \"{{title}}\"",
         "REMINDER_DELETED": "Erinnerung für Aufgabe gelöscht",
         "REMINDER_UPDATED": "Erinnerung für Aufgabe \"{{title}}\" aktualisiert"
@@ -656,20 +656,20 @@
         "O": {
           "DATE": "Datum",
           "ENDED_WORKING": "Arbeit beendet",
-          "ESTIMATE_AS_CLOCK": "Als Uhr schätzen (z. B. 5:23)",
-          "ESTIMATE_AS_MILLISECONDS": "Schätzung in Millisekunden",
-          "ESTIMATE_AS_STRING": "Als Zeichenfolge schätzen (z. B. 5 Std. 23 Min.)",
-          "FULL_HALF_HOURS": "volle halbe stunden",
-          "FULL_HOURS": "volle Stunden",
-          "FULL_QUARTERS": "volle viertel",
+          "ESTIMATE_AS_CLOCK": "Schätzungen im Uhrzeit Format (z. B. 5:23)",
+          "ESTIMATE_AS_MILLISECONDS": "Schätzungen als Millisekunden",
+          "ESTIMATE_AS_STRING": "Schätzungen als Zeichenfolge (z. B. 5 Std. 23 Min.)",
+          "FULL_HALF_HOURS": "Volle halbe Stunden",
+          "FULL_HOURS": "Volle Stunden",
+          "FULL_QUARTERS": "Volle viertel Stunde",
           "PARENT_TASK": "Übergeordnete Aufgabe",
           "PARENT_TASK_TITLES_ONLY": "Nur übergeordnete Aufgabentitel",
           "STARTED_WORKING": "Angefangen zu arbeiten",
           "TASK_SUBTASK": "Aufgabe / Unteraufgabe",
-          "TIME_AS_CLOCK": "Zeit als Uhr (z. B. 5:23)",
-          "TIME_AS_MILLISECONDS": "Zeit in Millisekunden",
-          "TIME_AS_STRING": "Zeit als Zeichenfolge (z. B. 5h 23m)",
-          "TITLES_AND_SUB_TASK_TITLES": "Titel und Untertitel",
+          "TIME_AS_CLOCK": "Aufgewandte Zeit im Uhrzeit Format (z. B. 5:23)",
+          "TIME_AS_MILLISECONDS": "Aufgewandte Zeit in Millisekunden",
+          "TIME_AS_STRING": "Aufgewandte Zeit als Zeichenfolge (z. B. 5h 23m)",
+          "TITLES_AND_SUB_TASK_TITLES": "Aufgaben und Unteraufgaben",
           "WORKLOG": "Arbeitsprotokoll"
         },
         "OPTIONS": "Optionen",
@@ -819,12 +819,12 @@
   },
   "GLOBAL_SNACK": {
     "COPY_TO_CLIPPBOARD": "In die Zwischenablage kopiert",
-    "ERR_COMPRESSION": "Fehler bei der Komprimierungsschnittstelle",
+    "ERR_COMPRESSION": "Fehler bei der Komprimierung",
     "ERR_DB_CLEAR": "Fehler beim Löschen der Datenbank",
     "ERR_DB_DELETE": "Fehler beim Löschen der Daten",
     "ERR_DB_LOAD": "Fehler beim Laden der Daten",
     "ERR_DB_SAVE": "Fehler beim Speichern der Daten",
-    "RUNNING_X": "Läuft \"{{str}}\"."
+    "RUNNING_X": "Wird gestartet: \"{{str}}\"."
   },
   "MH": {
     "ADD_NEW_TASK": "Neue Aufgabe hinzufügen",
@@ -841,10 +841,10 @@
     "TOGGLE_SHOW_BOOKMARKS": "Lesezeichen ein- / ausblenden",
     "TOGGLE_SHOW_NOTES": "Projektnotizen ein- / ausblenden",
     "TOGGLE_TRACK_TIME": "Tracking-Zeit starten / stoppen",
-    "WORKLOG": "Worklog"
+    "WORKLOG": "Arbeitsprotokoll"
   },
   "PDS": {
-    "BACK": "Warten Sie, ich habe etwas vergessen!",
+    "BACK": "Ich habe etwas vergessen!",
     "BREAK_LABEL": "Pausen (Anzahl / Zeit)",
     "CELEBRATE": "Nehmen Sie sich einen Moment Zeit, um <i>zu feiern!</i>",
     "CLEAR_ALL_CONTINUE": "Alles löschen und fortfahren",
@@ -857,22 +857,22 @@
     "EXPORT_TASK_LIST": "Aufgabenliste exportieren",
     "GOOGLE_SHEET": "Google Sheet",
     "NO_TASKS": "Für diesen Tag gibt es keine Aufgaben",
-    "ROUND_15M": "Runden Sie alle Aufgaben auf 15 Minuten",
-    "ROUND_30M": "Runden Sie alle Aufgaben auf 30 Minuten",
-    "ROUND_5M": "Runden Sie alle Aufgaben auf 5 Minuten",
-    "ROUND_TIME_SPENT": "Runde Zeit ausgegeben",
-    "ROUND_TIME_SPENT_TITLE": "Rundenzeit für alle Aufgaben. Achtung! Sie können dies nicht rückgängig machen!",
-    "ROUND_TIME_WARNING": "!!! Achtung, dies kann nicht rückgängig gemacht werden !!!",
-    "ROUND_UP_15M": "Runden Sie alle Aufgaben auf 15 Minuten auf",
-    "ROUND_UP_30M": "Runden Sie alle Aufgaben auf 30 Minuten auf",
-    "ROUND_UP_5M": "Runden Sie alle Aufgaben auf 5 Minuten auf",
+    "ROUND_15M": "Runden auf 15 Minuten",
+    "ROUND_30M": "Runden auf 30 Minuten",
+    "ROUND_5M": "Runden auf 5 Minuten",
+    "ROUND_TIME_SPENT": "Zeiten Runden",
+    "ROUND_TIME_SPENT_TITLE": "Aufgewandte Zeit für alle Aufgaben runden. Achtung! Sie können dies nicht rückgängig machen!",
+    "ROUND_TIME_WARNING": "!!! Achtung, kann nicht rückgängig gemacht werden !!!",
+    "ROUND_UP_15M": "Aufrunden auf 15 Minuten",
+    "ROUND_UP_30M": "Aufrunden auf 30 Minuten",
+    "ROUND_UP_5M": "Aufrunden auf 5 Minuten",
     "SAVE_AND_GO_HOME": "Speichern und nach Hause gehen",
     "START_END": "Start Ende",
-    "SUMMARY_FOR": "Tägliche Zusammenfassung für {{dayStr}}",
+    "SUMMARY_FOR": "Zusammenfassung für {{dayStr}}",
     "TASKS_COMPLETED": "Aufgaben erledigt",
     "TASK_LIST": "Aufgabenliste",
     "TIME_SPENT_AND_ESTIMATE_LABEL": "Zeitaufwand / Geschätzt",
-    "TIME_SPENT_ESTIMATE_TITLE": "Verbrauchte Zeit: Gesamtzeit, die heute verbracht wurde. Archivierte Aufgaben nicht enthalten. - Geschätzte Zeit: Geschätzte Zeit für Aufgaben, die heute bearbeitet wurden, abzüglich der Zeit, die bereits an anderen Tagen mit ihnen verbracht wurde.",
+    "TIME_SPENT_ESTIMATE_TITLE": "Aufgewandte Zeit: Gesamtzeit, die heute verbracht wurde. Archivierte Aufgaben nicht enthalten. - Geschätzte Zeit: Geschätzte Zeit für Aufgaben, die heute bearbeitet wurden, abzüglich der Zeit, die bereits an anderen Tagen mit ihnen verbracht wurde.",
     "TODAY": "Heute",
     "WEEK": "Woche"
   },
@@ -886,15 +886,15 @@
     "DELETE_PROJECT": "Projekt löschen",
     "D_CONFIRM_ARCHIVE": {
       "MSG": "Möchten Sie dieses Projekt wirklich archivieren? Archivierte Projekte werden nicht mehr im Menü angezeigt und Sie können auf keine ihrer Daten mehr zugreifen, ohne sie wiederherzustellen. Es wird empfohlen, dass Sie Ihre Daten sichern, bevor Sie dies tun.",
-      "OK": "Archiv"
+      "OK": "Archivieren"
     },
     "D_CONFIRM_DELETE": {
       "MSG": "Möchten Sie dieses Projekt wirklich löschen? Es wird empfohlen, Ihre Daten zu sichern, bevor Sie dies tun.",
       "OK": "Löschen"
     },
     "D_CONFIRM_UNARCHIVE": {
-      "MSG": "Möchten Sie dieses Projekt wirklich deinstallieren?",
-      "OK": "Archiv aufheben"
+      "MSG": "Möchten Sie dieses Projekt wirklich wiederherstellen?",
+      "OK": "Wiederherstellen"
     },
     "EDIT_PROJECT": "Projekt bearbeiten",
     "EXPORT_PROJECT": "Projekt exportieren",
@@ -903,7 +903,7 @@
     "JIRA_CONFIGURED": "Jira-Integration konfiguriert",
     "S_INVALID_JSON": "Ungültiger JSON für Projektdatei",
     "TITLE": "Projektübersicht",
-    "UN_ARCHIVE_PROJECT": "Projekt aus dem Archiv entfernen"
+    "UN_ARCHIVE_PROJECT": "Projekt aus dem Archiv wiederherstellen"
   },
   "PS": {
     "GLOBAL_SETTINGS": "Globale Einstellungen",
@@ -911,14 +911,14 @@
   },
   "S": {
     "SYNC": {
-      "ERROR_FALLBACK_TO_BACKUP": "Beim Importieren der Daten ist ein Fehler aufgetreten. Zurückgreifen auf lokales Backup.",
+      "ERROR_FALLBACK_TO_BACKUP": "Beim Importieren der Daten ist ein Fehler aufgetreten. Lokales Backup wird wiederhergestellt.",
       "ERROR_INVALID_DATA": "Fehler beim Synchronisieren. Ungültige Daten",
       "IMPORTING": "Daten importieren",
       "SUCCESS": "Daten importiert"
     }
   },
   "THEMES": {
-    "SELECT_THEME": "Thema wählen",
+    "SELECT_THEME": "Farbschema wählen",
     "amber": "Bernstein",
     "blue": "Blau",
     "blue-grey": "Blau grau",
