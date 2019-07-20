@@ -561,7 +561,7 @@
         "TITLE": "Geplante Aufgabe"
       },
       "D_TIME": {
-        "ADD_FOR_OTHER_DAY": "Fügen Sie die für den anderen Tag aufgewendete Zeit hinzu",
+        "ADD_FOR_OTHER_DAY": "Für anderen Tag",
         "DELETE_FOR": "Eintrag für Tag löschen",
         "ESTIMATE": "Schätzen",
         "TIME_SPENT": "Zeitaufwand",
