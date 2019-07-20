@@ -622,17 +622,17 @@
     },
     "TIME_TRACKING": {
       "B": {
-        "ALREADY_DID": "Ich habe es bereits getan",
-        "SNOOZE": "Snooze {{time}}"
+        "ALREADY_DID": "Schon gemacht",
+        "SNOOZE": "Schlummern {{time}}"
       },
       "D_IDLE": {
-        "BREAK": "Brechen",
-        "CREATE_AND_TRACK": "<em>Erstellen Sie</em> und verfolgen Sie Folgendes:",
-        "IDLE_FOR": "Sie waren untätig wegen:",
+        "BREAK": "Pause",
+        "CREATE_AND_TRACK": "<em>Erstellen Sie</em> und erfassen Sie Folgendes:",
+        "IDLE_FOR": "Sie waren untätig für:",
         "SKIP": "Überspringen",
         "TASK": "Aufgabe",
-        "TASK_BREAK": "Task Break",
-        "TRACK_TO": "Verfolgen nach:"
+        "TASK_BREAK": "Aufgabe+Pause",
+        "TRACK_TO": "Erfassen als:"
       }
     },
     "WORKLOG": {
